@@ -3,6 +3,7 @@ This is a summary of ChangeLog basically.
 1.2.1
 
 * No longer reading in /etc/hosts, still reading .hosts though
+* Disabled all the DEBUG emailing and context shit, it was utterly pointless
 
 1.2
 * No longer displaying SALTS on ./bin -v
