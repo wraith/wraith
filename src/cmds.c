@@ -1545,13 +1545,13 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
 static void cmd_botcmd(struct userrec *u, int idx, char *par)
 {
   tand_t *tbot;
-  int cnt = 0;
+  int cnt = 0, rleaf = (-1), tbots = 0;
   char *botm = NULL, *cmd = NULL;
   
   botm = newsplit(&par);
   cmd = newsplit(&par);
   if (!botm[0] || !cmd[0]) {
-    dprintf(idx, STR("Usage: botcmd bot cmd params\n"));
+    dprintf(idx, STR("Usage: botcmd <bot> <cmd> [params]\n"));
     return;
   }
 
@@ -1561,13 +1561,20 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("Not a good idea.\n"));
     return;
   }
+  if (!strcmp(botm, "?")) {
+    for (tbot = tandbot; tbot; tbot = tbot->next)
+      if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)))
+      tbots++;
+    rleaf = random() % tbots;
+  }
+  
   for (tbot = tandbot; tbot; tbot = tbot->next) {
-    if (wild_match(botm, tbot->bot)) {
-      cnt++;
+    if ((rleaf != (-1) && cnt == rleaf) || ((rleaf == (-1) && wild_match(botm, tbot->bot)))) {
       send_remote_simul(idx, tbot->bot, cmd, par ? par : "");
     }
+    cnt++;
   }
-   
+
   if (!cnt) {
     dprintf(idx, STR("No bot matching '%s' linked\n"), botm);
     return;
