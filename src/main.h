@@ -6,6 +6,7 @@
 extern int		localhub, role, loading, default_flags, default_uflags,
 			backgrd, term_z, updating, use_stderr;
 extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[];
+extern char		*mymd5;
 extern time_t		online_since, now;
 extern uid_t		myuid;
 extern const time_t	buildts;
