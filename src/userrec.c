@@ -233,7 +233,7 @@ void correct_handle(char *handle)
   struct userrec *u;
 
   u = get_user_by_handle(userlist, handle);
-  if (u == NULL)
+  if (u == NULL || handle == u->handle)
     return;
   strcpy(handle, u->handle);
 }

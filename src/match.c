@@ -144,6 +144,17 @@ int _wild_match(register unsigned char *m, register unsigned char *n)
   n--;
 
   while (n >= na) {
+    /* If the mask runs out of chars before the string, fall back on
+     * a wildcard or fail. */
+    if (m < ma) {
+      if (lsm) {
+        n = --lsn;
+        m = lsm;
+        if (n < na) lsm = 0;
+        sofar = 0;
+      }
+      else return NOMATCH;
+    }
     switch (*m) {
     case WILDS:                /* Matches anything */
       do
@@ -153,6 +164,7 @@ int _wild_match(register unsigned char *m, register unsigned char *n)
       lsn = n;
       match += sofar;
       sofar = 0;                /* Update fallback pos */
+      if (m < ma) return MATCH;
       continue;                 /* Next char, please */
     case WILDQ:
       m--;

@@ -1477,9 +1477,10 @@ static void check_expired_tbufs()
 	}
 	/* If it's a share bot that hasnt been sharing, ask again */
       } else if (!(dcc[i].status & STAT_SHARE)) {
-	if (dcc[i].user && bot_aggressive_to(dcc[i].user))
+	if (dcc[i].user && bot_aggressive_to(dcc[i].user)) {
 	  dprintf(i, "s u?\n");
-	dcc[i].status |= STAT_OFFERED;
+          dcc[i].status |= STAT_OFFERED;
+        }
       }
     }
 }

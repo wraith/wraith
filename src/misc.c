@@ -213,6 +213,18 @@ char *splitnick(char **blah)
   return "";
 }
 
+void remove_crlf(char **line)
+{
+  char *p;
+
+  p = strchr(*line, '\n');
+  if (p != NULL)
+    *p = 0;
+  p = strchr(*line, '\r');
+  if (p != NULL)
+    *p = 0;
+}
+
 char *newsplit(char **rest)
 {
   register char *o, *r;

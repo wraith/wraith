@@ -264,6 +264,7 @@ void maskhost(const char *, char *);
 char *stristr(char *, char *);
 void splitc(char *, char *, char);
 void splitcn(char *, char *, char, size_t);
+void remove_crlf(char **);
 char *newsplit(char **);
 char *splitnick(char **);
 void stridx(char *, char *, int);

@@ -281,7 +281,7 @@ void write_debug()
     strncpyz(s, ctime(&now), sizeof s);
     dprintf(-x, "Debug (%s) written %s\n", ver, s);
 
-    egg_stftime(date, sizeof date, "%c %Z", gmtime(&buildts));
+    egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
     dprintf(-x, "Build: %s (%lu)\n", date, buildts);
     /* info library */
     dprintf(-x, "Tcl library: %s\n",

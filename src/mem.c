@@ -419,10 +419,13 @@ void n_free(void *ptr, const char *file, int line)
     }
     memused -= memtbl[i].size;
     lastused--;
-    memtbl[i].ptr = memtbl[lastused].ptr;
-    memtbl[i].size = memtbl[lastused].size;
-    memtbl[i].line = memtbl[lastused].line;
-    strcpy(memtbl[i].file, memtbl[lastused].file);
+    /* We don't want any holes, so if this wasn't the last entry, swap it. */
+    if (i != lastused) {
+      memtbl[i].ptr = memtbl[lastused].ptr;
+      memtbl[i].size = memtbl[lastused].size;
+      memtbl[i].line = memtbl[lastused].line;
+      strcpy(memtbl[i].file, memtbl[lastused].file);
+    }
   }
 #endif
   free(ptr);

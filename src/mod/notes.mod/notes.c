@@ -267,7 +267,7 @@ static void notes_read(char *hand, char *nick, char *srd, int idx)
   while (!feof(f)) {
     fgets(s, 600, f);
     i = strlen(s);
-    if (i && s[i - 1] == '\n')
+    if (i > 0 && s[i - 1] == '\n')
       s[i - 1] = 0;
     if (!feof(f)) {
       rmspace(s);

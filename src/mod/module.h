@@ -136,7 +136,7 @@
 /* 28 - 31 */
 #define botnet_send_chat ((void(*)(int,char*,char*))global[28])
 #define server_lag (*(int *)global[29])
-/* UNUSED 30 */
+#define remove_crlf ((void (*)(char **))global[30])
 /* UNUSED 31 */
 /* 32 - 35 */
 #define botnet_send_join_idx ((void(*)(int,int))global[32])

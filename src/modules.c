@@ -192,7 +192,7 @@ Function global_table[] =
   /* 28 - 31 */
   (Function) botnet_send_chat,
   (Function) & server_lag, /* int					*/
-  (Function) 0,
+  (Function) remove_crlf,
   (Function) 0,
   /* 32 - 35 */
   (Function) botnet_send_join_idx,
