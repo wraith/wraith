@@ -661,8 +661,9 @@ void werr(int errnum)
 /* [1]+  Done                    ls --color=auto -A -CF
    [1]+  Killed                  bash
 */
+/*
   int x = 0;
-  /* unsigned long job = randint(2) + 1; */
+  unsigned long job = randint(2) + 1; */
 
 /*  printf("[%lu] %lu%lu%lu%lu%lu\n", job, randint(2) + 1, randint(8) + 1, randint(8) + 1, errnum); */
 
