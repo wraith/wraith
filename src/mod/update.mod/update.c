@@ -134,9 +134,9 @@ static void update_ufsend(int idx, char *par)
 
 static void update_version(int idx, char *par)
 {
-return;
+  return;
   /* Cleanup any share flags */
-#ifdef HUB
+#ifdef HUBNO
   tand_t *bot = NULL;
 
   if (bupdating) return;

@@ -58,7 +58,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
 {
   struct chanset_t *chan = NULL;
   char *pass = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
@@ -155,7 +155,7 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 {
   char *pass = NULL;
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
@@ -502,7 +502,7 @@ static int msgc_test(char *nick, char *host, struct userrec *u, char *chname, ch
 static int msgc_op(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int force = 0;
   memberlist *m = NULL;
 
@@ -552,7 +552,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *chname, char
 static int msgc_voice(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int force = 0;
   memberlist *m = NULL;
 
@@ -599,7 +599,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *chname, c
 static int msgc_channels(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   char list[1024] = "";
 
   LOGC("CHANNELS");
@@ -624,7 +624,7 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *chname
 static int msgc_getkey(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   if (chname && chname[0]) 
     return 0;
@@ -683,7 +683,7 @@ static int msgc_sha1(char *nick, char *host, struct userrec *u, char *chname, ch
 static int msgc_invite(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int force = 0;
 
   if (chname && chname[0])

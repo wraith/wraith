@@ -31,7 +31,7 @@
 #  include "src/mod/irc.mod/irc.h"
 #endif /* LEAF */
 
-static struct flag_record fr = { 0, 0, 0 };
+static struct flag_record fr = { 0, 0, 0, 0 };
 
 #ifdef LEAF
 struct delay_mode {

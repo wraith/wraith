@@ -342,7 +342,7 @@ void tell_verbose_status(int idx)
 void tell_settings(int idx)
 {
   char s[1024] = "";
-  struct flag_record fr = {FR_GLOBAL, 0, 0};
+  struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
 
   dprintf(idx, "Botnet Nickname: %s\n", conf.bot->nick);
   if (firewall[0])
@@ -712,7 +712,7 @@ int shouldjoin(struct chanset_t *chan)
   else if (!strncmp(conf.bot->nick, "wtest", 4)) /* use 5 for all */
     return 0; 
 #ifdef G_BACKUP
-  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0};
+  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0 };
   struct userrec *u = NULL;
  
   if (!chan || !chan->dname || !chan->dname[0])

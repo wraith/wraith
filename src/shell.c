@@ -508,7 +508,7 @@ void detected(int code, char *msg)
 {
   char *p = NULL, tmp[512] = "";
   struct userrec *u = NULL;
-  struct flag_record fr = { FR_GLOBAL, 0, 0};
+  struct flag_record fr = { FR_GLOBAL, 0, 0, 0 };
   int act;
 
   u = get_user_by_handle(userlist, conf.bot->nick);

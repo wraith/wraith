@@ -828,7 +828,7 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
 {
   char *action = NULL, *param = NULL, *ip = NULL, *prt = NULL;
   int i, ok;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
   
   if (!ischanhub())
     return BIND_RET_LOG;
@@ -904,7 +904,7 @@ static void dcc_chat_hostresolved(int i)
 {
   char buf[512] = "", ip[512] = "";
   int ok;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   egg_snprintf(buf, sizeof buf, "%d", dcc[i].port);
 #ifdef USE_IPV6

@@ -18,8 +18,8 @@ static int reversing = 0;
 #define EXEMPT  BIT5
 #define INVITE  BIT6
 
-static struct flag_record user   = {FR_GLOBAL | FR_CHAN, 0, 0};
-static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0};
+static struct flag_record user   = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
 static int do_op(char *nick, struct chanset_t *chan, int delay, int force)
 {

@@ -38,7 +38,7 @@ void core_binds_init()
 
 void check_bind_dcc(const char *cmd, int idx, const char *text)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int x, hits;
 #ifdef S_DCCPASS
   bind_entry_t *entry = NULL;
@@ -108,7 +108,7 @@ void check_bind_bot(const char *nick, const char *code, const char *param)
 
 void check_bind_chon(char *hand, int idx)
 {
-  struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   struct userrec        *u = NULL;
 
   u = get_user_by_handle(userlist, hand);

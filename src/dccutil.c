@@ -224,7 +224,7 @@ void chanout_but(int x, int chan, const char *format, ...)
 void dcc_chatter(int idx)
 {
   int i, j;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   strcpy(dcc[idx].u.chat->con_chan, "***");
   check_bind_chon(dcc[idx].nick, idx);

@@ -1208,7 +1208,7 @@ static time_t lasttelnettime;
  */
 static int detect_telnet_flood(char *floodhost)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   get_user_flagrec(get_user_by_host(floodhost), &fr, NULL);
   if (!flood_telnet_thr || glob_noflood(fr))
@@ -1489,7 +1489,7 @@ void dupwait_notify(const char *who)
 static void dcc_telnet_id(int idx, char *buf, int atr)
 {
   int ok = 0;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   strip_telnet(dcc[idx].sock, buf, &atr);
   buf[HANDLEN] = 0;
@@ -1551,7 +1551,7 @@ static void dcc_telnet_id(int idx, char *buf, int atr)
 static void dcc_telnet_pass(int idx, int atr)
 {
   int ok = 0, i, ok2;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
   /* No password set? */
