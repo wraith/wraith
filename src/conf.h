@@ -54,9 +54,10 @@ enum {
 };
 
 
+void spawnbot(const char *);
 #ifdef LEAF
 void spawnbots();
-int killbot(char *);
+int killbot(char *, int);
 #endif /* LEAF */
 void confedit() __attribute__((noreturn));
 #ifdef LEAF

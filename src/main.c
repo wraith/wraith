@@ -95,6 +95,7 @@ static bool do_confedit = 0;		/* show conf menu if -C */
 #ifdef LEAF
 static char do_killbot[21] = "";
 #endif /* LEAF */
+static int kill_sig;
 static char *update_bin = NULL;
 static bool checktrace = 1;		/* Check for trace when starting up? */
 
@@ -259,8 +260,9 @@ static void show_help()
   printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
 */
   printf(format, "-h", "Display this help listing");
-  printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9"));
+  printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9 (see also: -r)"));
   printf(format, STR("-n"), STR("Disables backgrounding bot (requires -B)"));
+  printf(format, STR("-r <botname>"), STR("Restarts the specified bot (see also: -k)"));
   printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -nB)"));
   printf(format, STR("-u <binary>"), STR("Update binary, Automatically kill/respawn bots"));
@@ -270,11 +272,11 @@ static void show_help()
 }
 
 #ifdef LEAF
-# define PARSE_FLAGS "0234:B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
+# define PARSE_FLAGS "0234:B:Cd:De:Eg:G:k:L:P:hnr:stu:U:v"
 #else /* !LEAF */
-# define PARSE_FLAGS "0234:Cd:De:Eg:G:hnstu:U:v"
+# define PARSE_FLAGS "0234:Cd:De:Eg:G:hnr:stu:U:v"
 #endif /* HUB */
-#define FLAGS_CHECKPASS "CdDeEgGhkntuUv"
+#define FLAGS_CHECKPASS "CdDeEgGhknrtuUv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;
@@ -313,8 +315,14 @@ static void dtx_arg(int argc, char *argv[])
         show_help();
 #ifdef LEAF
       case 'k':		/* kill bot */
+        kill_sig = SIGKILL;
         strlcpy(do_killbot, optarg, sizeof do_killbot);
+        break;
 #endif /* LEAF */
+      case 'r':
+        kill_sig = SIGHUP;
+        strlcpy(do_killbot, optarg, sizeof do_killbot);
+        break;
       case 'n':
 	backgrd = 0;
 	break;
@@ -617,10 +625,15 @@ static void startup_checks(int hack) {
 #ifdef LEAF
   if (localhub && !used_B) {
     if (do_killbot[0]) {
-      if (killbot(do_killbot) == 0)
-        printf("'%s' successfully killed.\n", do_killbot);
-      else
-        printf("Error killing '%s'\n", do_killbot);
+      const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
+
+      if (killbot(do_killbot, kill_sig) == 0)
+        printf("'%s' successfully %sed.\n", do_killbot, what);
+      else {
+        printf("Error %sing '%s'\n", what, do_killbot);
+        if (kill_sig == SIGHUP)
+          spawnbot(do_killbot);
+      }
       exit(0);
     } else {
 #endif /* LEAF */
