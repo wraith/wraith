@@ -706,7 +706,7 @@ int updatebin(int idx, char *par, int secs)
     putlog(LOG_MISC, "*", "Couldn't restart new binary (error %d)", i);
     return i;
   }
-#endif /* CYGWIN_HACKS */
+#endif /* !CYGWIN_HACKS */
 #ifdef CYGWIN_HACKS
   {
     size_t binsize = strlen(tmpdir) + 7 + 1;
@@ -718,12 +718,13 @@ int updatebin(int idx, char *par, int secs)
     free(tmpbuf);
   }
 #endif /* CYGWIN_HACKS */  
-  
   if (movefile(path, binname)) {
     logidx(idx, "Can't rename %s to %s", path, binname);
     free(path);
     return 1;
   }
+  if (updating == 2)
+    printf("* Moved binary to: %s\n", binname);
 
   /* safe to run new binary.. */
   
