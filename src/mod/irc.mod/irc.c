@@ -444,7 +444,7 @@ static void request_op(struct chanset_t *chan)
   memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
   char s[100] = "", *l = NULL, myserv[SERVLEN] = "";
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan))))
     return;
@@ -479,15 +479,14 @@ static void request_op(struct chanset_t *chan)
   }
   if (!checked_hostmask)
     check_hostmask();		/* check, and update hostmask */
-  ml = chan->channel.member;
-  myserv[0] = 0;
-  for (i = 0; ((i < MAX_BOTS) && (ml) && (ml->nick[0])); ml = ml->next) {
+
+  for (i = 0, ml = chan->channel.member; (i < MAX_BOTS) && ml && ml->nick[0]; ml = ml->next) {
     /* If bot, linked, global op & !split & chanop & (chan is reserver | bot isn't +a) -> 
        add to temp list */
-    if ((i < MAX_BOTS) && (ml->user)) {
+    if ((i < MAX_BOTS) && ml->user && ml->user->bot && 
+        (nextbot(ml->user->handle) >= 0) && chan_hasop(ml) && !chan_issplit(ml)) {
       get_user_flagrec(ml->user, &fr, NULL);
-      if (bot_hublevel(ml->user) == 999 && glob_bot(fr) && chk_op(fr, chan) &&
-          chan_hasop(ml) && !chan_issplit(ml) && nextbot(ml->user->handle) >= 0)
+      if (chk_op(fr, chan))
 	botops[i++] = ml;
     }
     if (!strcmp(ml->nick, botname))
@@ -495,7 +494,6 @@ static void request_op(struct chanset_t *chan)
 	strcpy(myserv, ml->server);
   }
   if (!i) {
-    /* FIXME: This notice floods when bots arent in chans..*/
     if (channel_active(chan) && !channel_pending(chan))
       putlog(LOG_GETIN, "*", "No one to ask for ops on %s", chan->dname);
     return;
