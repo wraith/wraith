@@ -1,0 +1,20 @@
+#These lines MUST be correctly syntaxed or the bot will not work properly.
+#A conf can be only a hub conf or only a leaf conf. (see README for locations)
+#The first line must contain UID (use "id" in shell to get uid)
+#- 1113
+#The second must be the output from uname -nv (-nr on FBSD)
+#+ somebox #1 SMP Thu May 29 06:55:05 EDT 2003
+#any lines after should be in this format:
+#botnick [!]ip4 [+]hostname (the + means ipv6) (the ! means internal NAT ip address, IE: 10.10.0.3, Hostname ignored.)
+#Full example:
+#- 101 
+#+ somebox 5.1-RELEASE
+#wraith 66.34.23.123 66-34-23-123.roc.mn.charter.com
+#leetbot 66.34.23.123 +ipv6.uber.leet.la
+#modem 66.34.23.124 some.ipv4.vhost.at.wraith.net
+- 501
++ veritas #1 SMP Thu May 29 06:55:05 EDT 2003
+sbptest 66.188.213.191 66-188-213-191.roc.mn.charter.com
+updated 66.188.213.191 66-188-213-191.roc.mn.charter.com
+elinked 66.188.213.191 66-188-213-191.roc.mn.charter.com
+

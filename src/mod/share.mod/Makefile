@@ -1,5 +1,4 @@
 # Makefile for src/mod/share.mod/
-# $Id: Makefile,v 1.12 2000/09/12 15:26:54 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../share.$(MOD_EXT)
 	mv share.o ../
 
 ../../../share.$(MOD_EXT): ../share.o
-	$(LD) -o ../../../share.$(MOD_EXT) ../share.o
+	$(LD) -static -o ../../../share.$(MOD_EXT) ../share.o
 	$(STRIP) ../../../share.$(MOD_EXT)
 
 depend:

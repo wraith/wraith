@@ -1,6 +1,5 @@
 dnl Eggdrop compile-time configuration file for src/mod/dns.mod
 dnl
-dnl $Id: configure.in,v 1.7 2001/07/24 15:08:22 guppy Exp $
 
 dnl This file is based on the autoconf m4 macros. Special eggdrop
 dnl macros are used to optimise the size of the resulting configure

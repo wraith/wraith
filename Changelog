@@ -1,0 +1,20 @@
+1.0.0
+ First private release
+
+1.0.01
+ Fixed a bug with the last checker which caused too many files open errors..
+ Fixed a few bugs here and there
+ Made limit system maginal, don't ask, just makes less +l modes..
+
+1.0.02
+ Update system is now compressed
+ Several bug fixes
+ Chan limit is now working as intended, the bot will not change limit if the limit is within a dynamic range.
+
+
+1.0.03
+ Fixed a bug in last checker which caused segfault
+ Fixed a bug in cmd_pls_user
+ Fixed FreeBSD compile errors 
+ Improved last checker functions
+ 

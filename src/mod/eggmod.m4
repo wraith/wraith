@@ -2,7 +2,6 @@ dnl eggmod.m4
 dnl   macros eggdrop modules should use instead of the original autoconf
 dnl   versions.
 dnl
-dnl $Id: eggmod.m4,v 1.5 2000/03/23 23:17:56 fabian Exp $
 
 dnl
 dnl EGG_REMOVE_MOD(MODULE-NAME)

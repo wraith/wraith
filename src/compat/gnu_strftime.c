@@ -72,7 +72,7 @@ extern char *tzname[];
 #  define mbrlen(s, n, ps) mblen (s, n)
 #  define mbsinit(ps) (*(ps) == 0)
 # endif
-  static const mbstate_t mbstate_zero;
+static const mbstate_t mbstate_zero;
 #endif
 
 #if HAVE_LIMITS_H
@@ -102,8 +102,8 @@ extern char *tzname[];
 #  define __P(args) args
 # else
 #  define __P(args) ()
-# endif  /* GCC.  */
-#endif  /* Not __P.  */
+# endif	/* GCC.  */
+#endif /* Not __P.  */
 
 #ifndef PTR
 # ifdef __STDC__
@@ -160,12 +160,12 @@ my_strftime_gmtime_r (t, tp)
      struct tm *tp;
 {
   struct tm *l = gmtime (t);
-  if (! l)
+  if (!l)
     return 0;
   *tp = *l;
   return tp;
 }
-# endif /* ! HAVE_TM_GMTOFF */
+# endif	/* ! HAVE_TM_GMTOFF */
 
 static struct tm *my_strftime_localtime_r __P ((const time_t *, struct tm *));
 static struct tm *
@@ -174,7 +174,7 @@ my_strftime_localtime_r (t, tp)
      struct tm *tp;
 {
   struct tm *l = localtime (t);
-  if (! l)
+  if (!l)
     return 0;
   *tp = *l;
   return tp;
@@ -187,10 +187,12 @@ my_strftime_localtime_r (t, tp)
    introduce additional dependencies.  */
 /* The SGI compiler reportedly barfs on the trailing null
    if we use a string constant as the initializer.  28 June 1997, rms.  */
-static const char spaces[16] = /* "                " */
-  { ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' };
-static const char zeroes[16] = /* "0000000000000000" */
-  { '0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0' };
+static const char spaces[16] =	/* "                " */
+{ ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+    ' ' };
+static const char zeroes[16] =	/* "0000000000000000" */
+{ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+    '0' };
 
 # define memset_space(P, Len) \
   do {									      \
@@ -309,8 +311,8 @@ tm_diff (a, b)
   /* Compute intervening leap days correctly even if year is negative.
      Take care to avoid int overflow in leap day calculations,
      but it's OK to assume that A and B are close to each other.  */
-  int a4 = (a->tm_year >> 2) + (TM_YEAR_BASE >> 2) - ! (a->tm_year & 3);
-  int b4 = (b->tm_year >> 2) + (TM_YEAR_BASE >> 2) - ! (b->tm_year & 3);
+  int a4 = (a->tm_year >> 2) + (TM_YEAR_BASE >> 2) - !(a->tm_year & 3);
+  int b4 = (b->tm_year >> 2) + (TM_YEAR_BASE >> 2) - !(b->tm_year & 3);
   int a100 = a4 / 25 - (a4 % 25 < 0);
   int b100 = b4 / 25 - (b4 % 25 < 0);
   int a400 = a100 >> 2;
@@ -320,8 +322,7 @@ tm_diff (a, b)
   int days = (365 * years + intervening_leap_days
 	      + (a->tm_yday - b->tm_yday));
   return (60 * (60 * (24 * days + (a->tm_hour - b->tm_hour))
-		+ (a->tm_min - b->tm_min))
-	  + (a->tm_sec - b->tm_sec));
+		+ (a->tm_min - b->tm_min)) + (a->tm_sec - b->tm_sec));
 }
 #endif /* ! HAVE_TM_GMTOFF */
 
@@ -331,14 +332,14 @@ tm_diff (a, b)
    year to the year day YDAY with week day WDAY.  ISO weeks start on
    Monday; the first ISO week has the year's first Thursday.  YDAY may
    be as small as YDAY_MINIMUM.  */
-#define ISO_WEEK_START_WDAY 1 /* Monday */
-#define ISO_WEEK1_WDAY 4 /* Thursday */
+#define ISO_WEEK_START_WDAY 1	/* Monday */
+#define ISO_WEEK1_WDAY 4	/* Thursday */
 #define YDAY_MINIMUM (-366)
 static int iso_week_days __P ((int, int));
 #ifdef __GNUC__
 __inline__
 #endif
-static int
+  static int
 iso_week_days (yday, wday)
      int yday;
      int wday;
@@ -352,16 +353,14 @@ iso_week_days (yday, wday)
 
 
 #if !(defined _NL_CURRENT || HAVE_STRFTIME)
-static char const weekday_name[][10] =
-  {
-    "Sunday", "Monday", "Tuesday", "Wednesday",
-    "Thursday", "Friday", "Saturday"
-  };
-static char const month_name[][10] =
-  {
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  };
+static char const weekday_name[][10] = {
+  "Sunday", "Monday", "Tuesday", "Wednesday",
+  "Thursday", "Friday", "Saturday"
+};
+static char const month_name[][10] = {
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+};
 #endif
 
 
@@ -382,20 +381,21 @@ static char const month_name[][10] =
 #if !defined _LIBC && HAVE_TZNAME && HAVE_TZSET
   /* Solaris 2.5 tzset sometimes modifies the storage returned by localtime.
      Work around this bug by copying *tp before it might be munged.  */
-  size_t _strftime_copytm __P ((char *, size_t, const char *,
-			        const struct tm * ut_argument_spec_iso));
-  size_t
-  my_strftime (s, maxsize, format, tp ut_argument)
-      char *s;
-      size_t maxsize;
-      const char *format;
-      const struct tm *tp;
-      ut_argument_spec
-  {
-    struct tm tmcopy;
-    tmcopy = *tp;
-    return _strftime_copytm (s, maxsize, format, &tmcopy ut_argument);
-  }
+size_t _strftime_copytm __P ((char *, size_t, const char *,
+			      const struct tm * ut_argument_spec_iso));
+size_t
+my_strftime (s, maxsize, format, tp ut_argument)
+     char *s;
+     size_t maxsize;
+     const char *format;
+     const struct tm *tp;
+ut_argument_spec
+{
+  struct tm tmcopy;
+  tmcopy = *tp;
+  return _strftime_copytm (s, maxsize, format, &tmcopy ut_argument);
+}
+
 # undef my_strftime
 # define my_strftime(S, Maxsize, Format, Tp) \
   _strftime_copytm (S, Maxsize, Format, Tp)
@@ -410,11 +410,11 @@ static char const month_name[][10] =
    written, use NULL for S and (size_t) UINT_MAX for MAXSIZE.  */
 size_t
 my_strftime (s, maxsize, format, tp ut_argument)
-      char *s;
-      size_t maxsize;
-      const char *format;
-      const struct tm *tp;
-      ut_argument_spec
+     char *s;
+     size_t maxsize;
+     const char *format;
+     const struct tm *tp;
+ut_argument_spec
 {
   int hour12 = tp->tm_hour;
 #ifdef _NL_CURRENT
@@ -464,14 +464,14 @@ my_strftime (s, maxsize, format, tp ut_argument)
 #if HAVE_TZNAME
   if (ut)
     {
-      if (! (zone && *zone))
+      if (!(zone && *zone))
 	zone = "GMT";
     }
   else
     {
       /* POSIX.1 8.1.1 requires that whenever strftime() is called, the
-	 time zone names contained in the external variable `tzname' shall
-	 be set as if the tzset() function had been called.  */
+         time zone names contained in the external variable `tzname' shall
+         be set as if the tzset() function had been called.  */
 # if HAVE_TZSET
       tzset ();
 # endif
@@ -480,22 +480,20 @@ my_strftime (s, maxsize, format, tp ut_argument)
 
   if (hour12 > 12)
     hour12 -= 12;
-  else
-    if (hour12 == 0)
-      hour12 = 12;
+  else if (hour12 == 0)
+    hour12 = 12;
 
   for (f = format; *f != '\0'; ++f)
     {
       int pad = 0;		/* Padding for number ('-', '_', or 0).  */
       int modifier;		/* Field modifier ('E', 'O', or 0).  */
       int digits;		/* Max digits for numeric format.  */
-      int number_value; 	/* Numeric value to be printed.  */
+      int number_value;		/* Numeric value to be printed.  */
       int negative_number;	/* 1 if the number is negative.  */
       const char *subfmt;
       char *bufp;
       char buf[1 + (sizeof (int) < sizeof (time_t)
-		    ? INT_STRLEN_BOUND (time_t)
-		    : INT_STRLEN_BOUND (int))];
+		    ? INT_STRLEN_BOUND (time_t) : INT_STRLEN_BOUND (int))];
       int width = -1;
       int to_lowcase = 0;
       int to_uppcase = 0;
@@ -504,28 +502,108 @@ my_strftime (s, maxsize, format, tp ut_argument)
 
 #if DO_MULTIBYTE
 
-       switch (*f)
+      switch (*f)
 	{
 	case '%':
 	  break;
 
-	case '\a': case '\b': case '\t': case '\n':
-	case '\v': case '\f': case '\r':
-	case ' ': case '!': case '"': case '#': case '&': case'\'':
-	case '(': case ')': case '*': case '+': case ',': case '-':
-	case '.': case '/': case '0': case '1': case '2': case '3':
-	case '4': case '5': case '6': case '7': case '8': case '9':
-	case ':': case ';': case '<': case '=': case '>': case '?':
-	case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-	case 'G': case 'H': case 'I': case 'J': case 'K': case 'L':
-	case 'M': case 'N': case 'O': case 'P': case 'Q': case 'R':
-	case 'S': case 'T': case 'U': case 'V': case 'W': case 'X':
-	case 'Y': case 'Z': case '[': case'\\': case ']': case '^':
-	case '_': case 'a': case 'b': case 'c': case 'd': case 'e':
-	case 'f': case 'g': case 'h': case 'i': case 'j': case 'k':
-	case 'l': case 'm': case 'n': case 'o': case 'p': case 'q':
-	case 'r': case 's': case 't': case 'u': case 'v': case 'w':
-	case 'x': case 'y': case 'z': case '{': case '|': case '}':
+	case '\a':
+	case '\b':
+	case '\t':
+	case '\n':
+	case '\v':
+	case '\f':
+	case '\r':
+	case ' ':
+	case '!':
+	case '"':
+	case '#':
+	case '&':
+	case '\'':
+	case '(':
+	case ')':
+	case '*':
+	case '+':
+	case ',':
+	case '-':
+	case '.':
+	case '/':
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	case ':':
+	case ';':
+	case '<':
+	case '=':
+	case '>':
+	case '?':
+	case 'A':
+	case 'B':
+	case 'C':
+	case 'D':
+	case 'E':
+	case 'F':
+	case 'G':
+	case 'H':
+	case 'I':
+	case 'J':
+	case 'K':
+	case 'L':
+	case 'M':
+	case 'N':
+	case 'O':
+	case 'P':
+	case 'Q':
+	case 'R':
+	case 'S':
+	case 'T':
+	case 'U':
+	case 'V':
+	case 'W':
+	case 'X':
+	case 'Y':
+	case 'Z':
+	case '[':
+	case '\\':
+	case ']':
+	case '^':
+	case '_':
+	case 'a':
+	case 'b':
+	case 'c':
+	case 'd':
+	case 'e':
+	case 'f':
+	case 'g':
+	case 'h':
+	case 'i':
+	case 'j':
+	case 'k':
+	case 'l':
+	case 'm':
+	case 'n':
+	case 'o':
+	case 'p':
+	case 'q':
+	case 'r':
+	case 's':
+	case 't':
+	case 'u':
+	case 'v':
+	case 'w':
+	case 'x':
+	case 'y':
+	case 'z':
+	case '{':
+	case '|':
+	case '}':
 	case '~':
 	  /* The C Standard requires these 98 characters (plus '%') to
 	     be in the basic execution character set.  None of these
@@ -543,18 +621,18 @@ my_strftime (s, maxsize, format, tp ut_argument)
 
 	    do
 	      {
-		size_t bytes = mbrlen (f + len, (size_t) -1, &mbstate);
+		size_t bytes = mbrlen (f + len, (size_t) - 1, &mbstate);
 
 		if (bytes == 0)
 		  break;
 
-		if (bytes == (size_t) -2)
+		if (bytes == (size_t) - 2)
 		  {
 		    len += strlen (f + len);
 		    break;
 		  }
 
-		if (bytes == (size_t) -1)
+		if (bytes == (size_t) - 1)
 		  {
 		    len++;
 		    break;
@@ -562,7 +640,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 
 		len += bytes;
 	      }
-	    while (! mbsinit (&mbstate));
+	    while (!mbsinit (&mbstate));
 
 	    cpy (len, f);
 	    f += len - 1;
@@ -573,7 +651,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 #else /* ! DO_MULTIBYTE */
 
       /* Either multibyte encodings are not supported, or they are
-	 safe for formats, so any non-'%' byte can be copied through.  */
+         safe for formats, so any non-'%' byte can be copied through.  */
       if (*f != '%')
 	{
 	  add (1, *p = *f);
@@ -711,8 +789,8 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	  if (modifier == 'O')
 	    goto bad_format;
 #ifdef _NL_CURRENT
-	  if (! (modifier == 'E'
-		 && *(subfmt = _NL_CURRENT (LC_TIME, ERA_D_T_FMT)) != '\0'))
+	  if (!(modifier == 'E'
+		&& *(subfmt = _NL_CURRENT (LC_TIME, ERA_D_T_FMT)) != '\0'))
 	    subfmt = _NL_CURRENT (LC_TIME, D_T_FMT);
 #else
 # if HAVE_STRFTIME
@@ -725,7 +803,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	subformat:
 	  {
 	    char *old_start = p;
-	    size_t len = my_strftime (NULL, (size_t) -1, subfmt, tp);
+	    size_t len = my_strftime (NULL, (size_t) - 1, subfmt, tp);
 	    add (len, my_strftime (p, maxsize - i, subfmt, tp));
 
 	    if (to_uppcase)
@@ -744,7 +822,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	       underlying strftime implementation, so use that.  */
 	    char ufmt[4];
 	    char *u = ufmt;
-	    char ubuf[1024]; /* enough for any single format in practice */
+	    char ubuf[1024];	/* enough for any single format in practice */
 	    size_t len;
 	    *u++ = '%';
 	    if (modifier != 0)
@@ -788,8 +866,8 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	  if (modifier == 'O')
 	    goto bad_format;
 #ifdef _NL_CURRENT
-	  if (! (modifier == 'E'
-		 && *(subfmt = _NL_CURRENT (LC_TIME, ERA_D_FMT)) != '\0'))
+	  if (!(modifier == 'E'
+		&& *(subfmt = _NL_CURRENT (LC_TIME, ERA_D_FMT)) != '\0'))
 	    subfmt = _NL_CURRENT (LC_TIME, D_FMT);
 	  goto subformat;
 #else
@@ -832,7 +910,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	    {
 #ifdef _NL_CURRENT
 	      /* Get the locale specific alternate representation of
-		 the number NUMBER_VALUE.  If none exist NULL is returned.  */
+	         the number NUMBER_VALUE.  If none exist NULL is returned.  */
 	      const char *cp = _nl_get_alt_digit (number_value);
 
 	      if (cp != NULL)
@@ -862,7 +940,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	    do
 	      *--bufp = u % 10 + '0';
 	    while ((u /= 10) != 0);
-  	  }
+	  }
 
 	do_number_sign_and_padding:
 	  if (negative_number)
@@ -980,7 +1058,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	  DO_NUMBER (2, tp->tm_sec);
 
 	case 's':		/* GNU extension.  */
-  	  {
+	  {
 	    struct tm ltm;
 	    time_t t;
 
@@ -1022,8 +1100,8 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	  if (modifier == 'O')
 	    goto bad_format;
 #ifdef _NL_CURRENT
-	  if (! (modifier == 'E'
-		 && *(subfmt = _NL_CURRENT (LC_TIME, ERA_T_FMT)) != '\0'))
+	  if (!(modifier == 'E'
+		&& *(subfmt = _NL_CURRENT (LC_TIME, ERA_T_FMT)) != '\0'))
 	    subfmt = _NL_CURRENT (LC_TIME, T_FMT);
 	  goto subformat;
 #else
@@ -1155,7 +1233,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	  if (!(zone && *zone) && tp->tm_isdst >= 0)
 	    zone = tzname[tp->tm_isdst];
 #endif
-	  if (! zone)
+	  if (!zone)
 	    zone = "";		/* POSIX.2 requires the empty string here.  */
 
 	  cpy (strlen (zone), zone);
@@ -1181,14 +1259,14 @@ my_strftime (s, maxsize, format, tp ut_argument)
 		ltm = *tp;
 		lt = mktime (&ltm);
 
-		if (lt == (time_t) -1)
+		if (lt == (time_t) - 1)
 		  {
 		    /* mktime returns -1 for errors, but -1 is also a
 		       valid time_t value.  Check whether an error really
 		       occurred.  */
 		    struct tm tm;
 
-		    if (! my_strftime_localtime_r (&lt, &tm)
+		    if (!my_strftime_localtime_r (&lt, &tm)
 			|| ((ltm.tm_sec ^ tm.tm_sec)
 			    | (ltm.tm_min ^ tm.tm_min)
 			    | (ltm.tm_hour ^ tm.tm_hour)
@@ -1198,7 +1276,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
 		      break;
 		  }
 
-		if (! my_strftime_gmtime_r (&lt, &gtm))
+		if (!my_strftime_gmtime_r (&lt, &gtm))
 		  break;
 
 		diff = tm_diff (&ltm, &gtm);
@@ -1218,8 +1296,8 @@ my_strftime (s, maxsize, format, tp ut_argument)
 	  }
 
 	case '\0':		/* GNU extension: % at end of format.  */
-	    --f;
-	    /* Fall through.  */
+	  --f;
+	  /* Fall through.  */
 	default:
 	  /* Unknown format; output the format, including the '%',
 	     since this is most likely the right thing to do if a
@@ -1247,10 +1325,10 @@ my_strftime (s, maxsize, format, tp ut_argument)
    TP arguments comes from a `gmtime' call or not.  */
 size_t
 emacs_strftime (s, maxsize, format, tp)
-      char *s;
-      size_t maxsize;
-      const char *format;
-      const struct tm *tp;
+     char *s;
+     size_t maxsize;
+     const char *format;
+     const struct tm *tp;
 {
   return my_strftime (s, maxsize, format, tp, 0);
 }

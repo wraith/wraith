@@ -1,7 +1,6 @@
 dnl aclocal.m4
 dnl   macros autoconf uses when building configure from configure.in
 dnl
-dnl $Id: aclocal.m4,v 1.57 2002/03/12 19:11:32 guppy Exp $
 dnl
 
 

@@ -1,5 +1,4 @@
 # Makefile for src/mod/
-# $Id: Makefile.in,v 1.13 2000/12/21 20:20:03 guppy Exp $
 
 SHELL = @SHELL@
 top_srcdir = @top_srcdir@
@@ -117,56 +116,6 @@ distclean:
 		fi; \
 	done
 
-install: install-help install-language
-
-install-help:
-	@echo "Copying module help files."
-	@if test ! -d $(DEST)/help; then \
-		echo "Creating 'help' subdirectory."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/help; \
-	fi; \
-	for i in $(mods); do \
-		if test ! "x`echo $(srcdir)/$$i/help/*.help`" = "x$(srcdir)/$$i/help/*.help"; then \
-			for h in $(srcdir)/$$i/help/*.help; do \
-				$(INSTALL_DATA) $$h $(DEST)/help/; \
-			done; \
-		fi; \
-	done;
-	@if test ! -d $(DEST)/help/msg; then \
-		echo "Creating 'help/msg' subdirectory."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/help/msg; \
-	fi; \
-	for i in $(mods); do \
-		if test ! "x`echo $(srcdir)/$$i/help/msg/*.help`" = "x$(srcdir)/$$i/help/msg/*.help"; then \
-			for h in $(srcdir)/$$i/help/msg/*.help; do \
-				$(INSTALL_DATA) $$h $(DEST)/help/msg/; \
-			done; \
-		fi; \
-	done;
-	@if test ! -d $(DEST)/help/set; then \
-		echo "Creating 'help/set' subdirectory."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/help/set; \
-	fi; \
-	for i in $(mods); do \
-		if test ! "x`echo $(srcdir)/$$i/help/set/*.help`" = "x$(srcdir)/$$i/help/set/*.help"; then \
-			for h in $(srcdir)/$$i/help/set/*.help; do \
-				$(INSTALL_DATA) $$h $(DEST)/help/set/; \
-			done; \
-		fi; \
-	done;
-
-install-language:
-	@echo "Copying module language files."
-	@if test ! -d $(DEST)/language; then \
-		echo "Creating 'language' subdirectory."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/language; \
-	fi; \
-	for i in $(mods); do \
-		if test ! "x`echo $(srcdir)/$$i/language/*.lang`" = "x$(srcdir)/$$i/language/*.lang"; then \
-			for h in $(srcdir)/$$i/language/*.lang; do \
-				$(INSTALL_DATA) $$h $(DEST)/language/; \
-			done; \
-		fi; \
-	done;
+install:
 
 #safety hash
