@@ -20,8 +20,6 @@ AC_AIX
 AC_ISC_POSIX
 AC_MINIX
 
-DO_PACK_CFG
-
 #checkpoint
 AC_CACHE_SAVE 
 
@@ -199,6 +197,7 @@ AC_CACHE_SAVE
 # ---------- end of (what used to be) robey's Tcl thingies
 
 EGG_SUBST_VERSION
+DO_PACK_CFG
 EGG_SUBST_MOD_UPDIR
 EGG_CATCH_MAKEFILE_REBUILD
 DO_DEPS

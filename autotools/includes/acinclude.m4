@@ -1077,7 +1077,7 @@ AC_DEFUN(EGG_SUBST_VERSION, [dnl
 VERSION=`grep "char" $srcdir/src/main.c | $AWK '/egg_version/ {print [$]5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 NUMVER=`grep "int" $srcdir/src/main.c | $AWK '/egg_numver =/ {print [$]5}' |  sed -e 's/\;//g'`
 if ! test -f $srcdir/pack/pack.cfg; then
- cat << 'EOF' >&2
+ cat << EOF >&2
 configure: error:
 
   Your pack cfg is missing, please copy it to $srcdir/pack/pack.cfg
