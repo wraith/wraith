@@ -390,6 +390,8 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top, char *to
 inline void putallbots(char *par)
 { 
   botnet_send_zapf_broad(-1, conf.bot->nick, NULL, par);
+
+  return;
 }
 
 void putbot(char *bot, char *par)

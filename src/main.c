@@ -830,18 +830,23 @@ int main(int argc, char **argv)
     pid_t pid = do_fork();
 
     writepid(conf.bot->pid_file, pid);
+#ifdef lame
     printf("%s%s%c%s%s%s l%sA%su%sN%sc%sH%se%sD%s %s(%s%d%s)%s\n",
             RED(-1), BOLD(-1), conf.bot->nick[0], BOLD_END(-1), &conf.bot->nick[1],
             COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
             BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), pid, YELLOW(-1), COLOR_END(-1));
-  
-    printf("%s launched into the background  (pid: %d)\n\n", conf.bot->nick, pid);
+#endif
+    printf("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n",
+           BOLD(-1), BOLD_END(-1), packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
+           BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1));
   } else {
 #endif /* !CYGWIN_HACKS */
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif /* CYGWIN_HACKS */
-    printf("%s launched (not backgrounding)\n\n", conf.bot->nick);
+    printf("%s[%s%s%s]%s -%s- initiated %s(%sNot backgrounding%s)%s\n",
+           BOLD(-1), BOLD_END(-1), packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
+           BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1));
   }
 
   /* Terminal emulating dcc chat */

@@ -638,6 +638,8 @@ char *strchr_unescape(char *str, const char divc, register const char esc_char)
 inline void str_unescape(char *str, register const char esc_char)
 {
   (void) strchr_unescape(str, 0, esc_char);
+
+  return;
 }
 
 /* Kills the bot. s1 is the reason shown to other bots, 

@@ -34,7 +34,7 @@ dirname(const char *path)
                 } while (endp > path && *endp == '/');
         }
 
-        if (endp - path + 2 > sizeof(bname)) {
+        if (endp - path + 2 > (signed) sizeof(bname)) {
                 errno = ENAMETOOLONG;
                 return(NULL);
         }
