@@ -27,7 +27,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <signal.h>
-#include <sys/utaname.h>
+#include <sys/utsname.h>
 #include "stat.h"
 #include "bg.h"
 
