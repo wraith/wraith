@@ -75,13 +75,16 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
           return 1;
         }
       } else {
+        int stats = 0;
         for (chan = chanset; chan; chan = chan->next) {
           get_user_flagrec(u, &fr, chan->dname);
           if (chk_op(fr, chan)) {
             if (do_op(nick, chan, 1))
-              stats_add(u, 0, 1);
+              stats++;
           }
         }
+        if (stats)
+          stats_add(u, 0, 1);
         putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host, u->handle);
         return 1;
       }
