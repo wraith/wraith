@@ -28,17 +28,17 @@ doofus:
 	@echo ""
 	@cd .. && $(MAKE)
 
-../stringfix:
+stringfix:
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) stringfix.c -o ../stringfix
 	@$(STRIP) ../stringfix
 
-../makesalt:
+makesalt:
 	@echo -e "Compiling: \033[1mmakesalt\033[0m"
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) makesalt.c -o ../makesalt
 	@$(STRIP) ../makesalt
 
-../makesettings:
+makesettings:
 	@echo -e "Compiling: \033[1mmakesettings\033[0m"
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) makesettings.c -o ../makesettings
 	@$(STRIP) ../makesettings

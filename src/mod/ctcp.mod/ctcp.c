@@ -262,7 +262,6 @@ void scriptchanged()
     case 5:
       p = replace(cloak_osver, ".", "\037.\037");
       sprintf(tmp, STR("%s %s"), cloak_os, p);
-      nfree(p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("\037.\037.cypress\037.\03701i%s %s\037(\037%s\037)\037 bitchx\037/\037%s"),theme, p, cloak_host, cloak_bxver);
       nfree(p);
@@ -270,7 +269,6 @@ void scriptchanged()
     case 6:
       p = replace(cloak_osver, ".", "\037.\037");
       sprintf(tmp, STR("%s %s"), cloak_os, p);
-      nfree(p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("cypress\002.\00201i%s\037(\037bitchx\002.\002%s\037)\037\002.\002. %s\037(\037%s\037)\037"),theme, cloak_bxver, p, cloak_host);
       nfree(p);
@@ -278,7 +276,6 @@ void scriptchanged()
     case 7:
       p = replace(cloak_osver, ".", "\037.\037");
       sprintf(tmp, STR("%s %s"), cloak_os, p);
-      nfree(p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("\037.\037.cypress\037.\03701i%s - bitchx\037.\037%s\002/\002%s"), theme, cloak_bxver, p);
       nfree(p);

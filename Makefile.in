@@ -31,6 +31,7 @@ modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM
 CFLGS = 
+MAKEFLAGS = -s -j4
 
 MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DLEAF' \
@@ -102,9 +103,9 @@ distro: distrib
 
 depend:
 #	@cat /dev/null > lush.h
-	@cd src && $(MAKE_DEPEND) depend
-	@cd src/mod && $(MAKE_DEPEND) depend
-	@cd src/compat && $(MAKE_DEPEND) depend
+	@cd src && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depend
+	@cd src/mod && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depend
+	@cd src/compat && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depend
 
 eggautoconf:
 	@$(modconf) eggautoconf
@@ -124,7 +125,7 @@ config:
 	@$(modconf) detect-modules
 	@$(modconf) update-depends
 	@$(modconf) Makefile
-	@cd src/mod && $(MAKE_CONFIG) config
+	@cd src/mod && $(MAKE_CONFIG) 'MAKE=$(MAKE)' config
 	@$(modconf) Makefile
 
 clean-modconfig:
@@ -133,20 +134,20 @@ clean-modconfig:
 reconfig: clean-modconfig config
 
 utils:  
-	@cd src && $(MAKE_UTILS) ../stringfix
+	@cd src && $(MAKE_UTILS) 'MAKE=$(MAKE)' stringfix
 	@misc/dostrings
-	@cd src && $(MAKE_UTILS) ../makesalt
-	@cd src && $(MAKE_UTILS) ../makesettings
+	@cd src && $(MAKE_UTILS) 'MAKE=$(MAKE)' makesalt
+	@cd src && $(MAKE_UTILS) 'MAKE=$(MAKE)' makesettings
 
 depleaf:
-	@cd src && $(MAKE_DEPEND) depleaf
-	@cd src/mod && $(MAKE_DEPEND) depleaf
-	@cd src/compat && $(MAKE_DEPEND) depleaf
+	@cd src && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depleaf
+	@cd src/mod && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depleaf
+	@cd src/compat && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depleaf
 
 dephub:
-	@cd src && $(MAKE_DEPEND) dephub
-	@cd src/mod && $(MAKE_DEPEND) dephub
-	@cd src/compat && $(MAKE_DEPEND) dephub
+	@cd src && $(MAKE_DEPEND) 'MAKE=$(MAKE)' dephub
+	@cd src/mod && $(MAKE_DEPEND) 'MAKE=$(MAKE)' dephub
+	@cd src/compat && $(MAKE_DEPEND) 'MAKE=$(MAKE)' dephub
 
 
 leaf:	utils salt config packconf
@@ -156,9 +157,9 @@ leaf:	utils salt config packconf
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype leaf
 	@echo ""
-	@cd src/mod && $(MAKE_LEAF) static
+	@cd src/mod && $(MAKE_LEAF) 'MAKE=$(MAKE)' static
 	@echo ""
-	@cd src && $(MAKE_LEAF) $(LEAFEXEC)
+	@cd src && $(MAKE_LEAF) 'MAKE=$(MAKE)' $(LEAFEXEC)
 	@echo ""
 
 dleaf:  utils salt config packconf
@@ -168,9 +169,9 @@ dleaf:  utils salt config packconf
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype leaf
 	@echo ""
-	@cd src/mod && $(MAKE_DLEAF) static
+	@cd src/mod && $(MAKE_DLEAF) 'MAKE=$(MAKE)' static
 	@echo ""
-	@cd src && $(MAKE_DLEAF) $(LEAFEXEC)
+	@cd src && $(MAKE_DLEAF) 'MAKE=$(MAKE)' $(LEAFEXEC)
 	@echo ""
 
 hub:	utils salt config packconf
@@ -181,9 +182,9 @@ hub:	utils salt config packconf
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype hub
 	@echo ""
-	@cd src/mod && $(MAKE_HUB) static
+	@cd src/mod && $(MAKE_HUB) 'MAKE=$(MAKE)' static
 	@echo ""
-	@cd src && $(MAKE_HUB) $(HUBEXEC)
+	@cd src && $(MAKE_HUB) 'MAKE=$(MAKE)' $(HUBEXEC)
 	@echo ""
 
 dhub:   utils salt config packconf
@@ -193,9 +194,9 @@ dhub:   utils salt config packconf
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype hub
 	@echo ""
-	@cd src/mod && $(MAKE_DHUB) static
+	@cd src/mod && $(MAKE_DHUB) 'MAKE=$(MAKE)' static
 	@echo ""
-	@cd src && $(MAKE_DHUB) $(HUBEXEC)
+	@cd src && $(MAKE_DHUB) 'MAKE=$(MAKE)' $(HUBEXEC)
 	@echo ""
 
 #safety hash

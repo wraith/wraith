@@ -585,7 +585,7 @@ void tell_bots(int idx)
   }
   if (s[0])
     dprintf(idx, STR("Bots: %s\n"), s);
-  dprintf(idx, STR("(Total: %d)\n"), tands + 1);
+  dprintf(idx, STR("(Total up: %d)\n"), tands + 1);
 
 }
 

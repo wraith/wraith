@@ -414,7 +414,7 @@ static void cmd_op(struct userrec *u, int idx, char *par)
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
   if (!nick[0] && !(nick = getnick(u->handle, chan))) {
     if (all) goto next;
-    dprintf(idx, "Usage: op <nick> [channel/*]\n");
+    dprintf(idx, "Usage: op <nick> [channel/*]\n"); /*nano fix*/
     return;
   }
 
@@ -726,7 +726,7 @@ Context;
     bots--;
     bpos++;
   }
-  if (bitch) {
+  if (bitch && !simul) {
     char buf2[1024];
     chan->status |= CHAN_BITCH;
     sprintf(buf2, "cset %s +bitch", chan->dname);

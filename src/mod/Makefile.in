@@ -42,14 +42,7 @@ static: $(mod_objs)
 	@$(modconfig) static.h
 
 .SUFFIXES:
-.SUFFIXES: .mod .mod_so .mod_o
-
-.mod.mod_so:
-	@if test ! -d $*.mod; then mkdir $*.mod; fi; \
-	if test ! -r $*.mod/Makefile; then \
-		cp $(srcdir)/$*.mod/Makefile $*.mod/Makefile; \
-	fi; \
-	cd $*.mod && $(MAKE_MOD) 'VPATH=$(MOD_UPDIR)$(srcdir)/$*.mod' 'srcdir=$(MOD_UPDIR)$(srcdir)/$*.mod' 'MAKE=$(MAKE)' modules;
+.SUFFIXES: .mod .mod_o
 
 .mod.mod_o:
 	@if test ! -d $*.mod; then mkdir $*.mod; fi; \
