@@ -1266,7 +1266,8 @@ Context;
 	if (ROLE_KICK_MDOP) {
 	  m=ismember(chan, nfrom);
 	  if (!m || !chan_sentkick(m)) {
-	    
+/* FIXME: POSSIBLE EXCESS FLOOD IS HERE. */
+putlog(LOG_MISC, "*", "DEBUG: kicking %s in %s for mdop (possible excess flood)", nfrom, chan->dname);
 	    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
 	    tputs(serv, tmp, strlen(tmp));
 	    if (m)
