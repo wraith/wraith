@@ -34,9 +34,9 @@
 #include "core_binds.h"
 
 extern struct dcc_t	*dcc;
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
 extern struct auth_t    *auth;
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 
 #include "users.h"
 
@@ -46,14 +46,14 @@ extern char		 tempdir[], botnetnick[], botname[], natip[], cmdprefix[],
 			 hostname[], origbotname[], botuser[], admin[],
 			 userfile[], ver[], notify_new[], kickprefix[], bankickprefix[],
 			 version[], quit_msg[], hostname6[], bdhash[], dcc_prefix[],
-#ifdef S_AUTH
+#ifdef S_AUTHHASH
                          authkey[], 
-#endif /* S_AUTH */
+#endif /* S_AUTHHASH */
 			 myip[], myip6[];
 extern int	 	 noshare, loading, role, server_lag, 
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
 			 auth_total, 
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
  			 dcc_total, egg_numver, userfile_perm,
 			 use_console_r, ignore_time, must_be_owner,
 			 debug_output, default_flags,  
@@ -572,25 +572,27 @@ Function global_table[] =
   (Function) deflag_user,
   (Function) dcc_prefix,
   (Function) goodpass,
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
   (Function) & auth, /* struct auth_t *auth */
   (Function) & auth_total,
   (Function) new_auth,
   (Function) findauth,
   (Function) removeauth,
-  (Function) makehash,
-  (Function) & USERENTRY_SECPASS,
-  (Function) authkey,
 #else
   (Function) 0,
   (Function) 0,
   (Function) 0,
   (Function) 0,
   (Function) 0,
+#endif /* S_AUTHCMDS */
+#ifdef S_AUTHHASH
+  (Function) makehash,
+  (Function) authkey,
+#else /* !S_AUTHHASH */
   (Function) 0,
+  (Function) 0,
+#endif /* S_AUTHHASH */
   (Function) & USERENTRY_SECPASS,
-  (Function) 0,
-#endif /* S_AUTH */
   (Function) myip,
   (Function) myip6,
   (Function) cmdprefix,

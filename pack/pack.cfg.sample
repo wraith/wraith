@@ -54,9 +54,11 @@ HUB <God god.net 666 god ~God ~george>
  */
 
 + ANTITRACE		This will quit the bot if tracing is detected
-+ AUTH			Authorization system requiring script for DCC (HIGHLY RECOMMENDED)
++ AUTHCMDS              Enable a special list of cmds to be used after Authing.
++ AUTHHASH              Require a script to AUTH (using hashes)
 + AUTOAWAY		Random autoaway/return on IRC
 - AUTOLOCK		Will lock channels upon certain conditions
++ DCCAUTH               Require Auth hashing with scripts for dcc party line.
 + DCCPASS		DCC command passwords
 + GARBLESTRINGS		Encrypt strings in binary
 + HIJACKCHECK		Checks for a common process hijacker method

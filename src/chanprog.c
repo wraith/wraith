@@ -703,10 +703,10 @@ int isowner(char *name)
 
 int shouldjoin(struct chanset_t *chan)
 {
-/*  if (!strcmp(chan->dname, "#wtest2"))
+  if (!strcmp(chan->dname, "#wtest2"))
     return 1;
   else
-    return 0; */
+    return 0; 
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
 

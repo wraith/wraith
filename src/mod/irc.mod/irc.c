@@ -45,9 +45,9 @@ struct cfg_entry CFG_OPBOTS,
 
 /* Import some bind tables from the server module. */
 static bind_table_t *BT_ctcp, *BT_ctcr;
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
 static bind_table_t *BT_msgc;
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 
 
 static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL;
@@ -1268,7 +1268,7 @@ static void check_expired_chanstuff()
   }
 }
 
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
 static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u, char *args, char *chan)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
@@ -1279,7 +1279,7 @@ static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u,
   if (x & BIND_RET_BREAK) return(1);
   return(0);
 }
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 
 /* Flush the modes for EVERY channel.
  */
@@ -1603,16 +1603,18 @@ char *irc_start(Function * global_funcs)
 
   BT_ctcp = bind_table_lookup("ctcp");
   BT_ctcr = bind_table_lookup("ctcr");
+#ifdef S_AUTHCMDS
   BT_msgc = bind_table_lookup("msgc");
+#endif /* S_AUTHCMDS */
 
   /* Add our commands to the imported tables. */
   add_builtins("dcc", irc_dcc);
   add_builtins("bot", irc_bot);
   add_builtins("raw", irc_raw);
   add_builtins("msg", C_msg);
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
   add_builtins("msgc", C_msgc);
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 
   do_nettype();
   return NULL;

@@ -368,9 +368,11 @@
 
 /* Defines for pack features */
 #undef S_ANTITRACE
-#undef S_AUTH
+#undef S_AUTHCMDS
+#undef S_AUTHHASH
 #undef S_AUTOAWAY
 #undef S_AUTOLOCK
+#undef S_DCCAUTH
 #undef S_DCCPASS
 #undef S_GARBLESTRINGS
 #undef S_HIJACKCHECK

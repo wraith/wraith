@@ -29,5 +29,4 @@ clean:
 	@rm -f .depend *.o *~
 
 distclean: clean
-	@rm -f Makefile config.cache config.log config.status
 

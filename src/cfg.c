@@ -29,9 +29,9 @@ extern time_t		 	now;
 int 				cfg_count = 0, cfg_noshare = 0;
 struct cfg_entry 		**cfg = NULL;
 
-#ifdef S_AUTH
+#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 char 				authkey[121];		/* This is one of the keys used in the auth hash */
-#endif /* S_AUTH */
+#endif /* S_AUTHHASH || S_DCCAUTH */
 
 char 				cmdprefix[1] = "+";	/* This is the prefix for msg/channel cmds */
 
@@ -40,7 +40,7 @@ struct cfg_entry CFG_MOTD = {
   NULL, NULL, NULL
 };
 
-#ifdef S_AUTH
+#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 void authkey_describe(struct cfg_entry * entry, int idx) {
   dprintf(idx, STR("authkey is used for authing, give to your users if they are to use DCC chat or IRC cmds. (can be bot specific)\n"));
 }
@@ -57,7 +57,7 @@ struct cfg_entry CFG_AUTHKEY = {
   "authkey", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
   authkey_changed, authkey_changed, authkey_describe
 };
-#endif /* S_AUTH */
+#endif /* S_AUTHHASH || S_DCCAUTH */
 
 #ifdef S_MSGCMDS
 struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE, CFG_MSGIDENT;
@@ -659,9 +659,9 @@ void set_cfg_str(char *target, char *entryname, char *data)
 
 void init_config()
 {
-#ifdef S_AUTH
+#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
   add_cfg(&CFG_AUTHKEY);
-#endif /* S_AUTH */
+#endif /* S_AUTHHASH || S_DCCAUTH */
   add_cfg(&CFG_MOTD);
   add_cfg(&CFG_FORKINTERVAL);
 #ifdef S_LASTCHECK

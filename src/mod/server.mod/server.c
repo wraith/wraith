@@ -92,9 +92,9 @@ static int stack_limit;
 
 /* New bind tables. */
 static bind_table_t *BT_raw, *BT_msg, *BT_ctcr, *BT_ctcp;
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
 static bind_table_t *BT_msgc;
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 
 #include "servmsg.c"
 
@@ -1596,9 +1596,9 @@ char *server_start(Function *global_funcs)
   module_register(MODULE_NAME, server_table, 1, 2);
 
 
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
   BT_msgc = bind_table_add("msgc", 5, "ssUss", 0, BIND_USE_ATTR); 
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
   BT_msg = bind_table_add("msg", 4, "ssUs", 0, BIND_USE_ATTR);
   BT_raw = bind_table_add("raw", 2, "ss", MATCH_MASK, BIND_STACKABLE);
   BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);

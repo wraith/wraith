@@ -598,7 +598,7 @@ struct dcc_table DCC_FORK_BOT =
 
 static void dcc_chat_secpass(int idx, char *buf, int atr)
 {
-#ifdef S_AUTH
+#ifdef S_DCCAUTH
   char check[MD5_HASH_LENGTH + 7];
 
   if (!atr)
@@ -611,7 +611,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
 
   if (!strcmp(check, buf)) {
 //+secpass
-#endif /* S_AUTH */
+#endif /* S_DCCAUTH */
       putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick,
 	     dcc[idx].host, dcc[idx].port);
       if (dcc[idx].u.chat->away) {
@@ -642,7 +642,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
                     BOLD(idx), BOLD_END(idx));
       }
       dcc_chatter(idx);
-#ifdef S_AUTH
+#ifdef S_DCCAUTH
   } else {		/* bad auth */
     dprintf(idx, "%s", rand_dccrespbye());
     putlog(LOG_MISC, "*", DCC_BADAUTH, dcc[idx].nick,
@@ -666,7 +666,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
       lostdcc(idx);
     }
   }
-#endif /* S_AUTH */
+#endif /* S_DCCAUTH */
 }
 struct dcc_table DCC_CHAT_SECPASS;
 
@@ -694,7 +694,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     return;
   }
   if (u_pass_match(dcc[idx].user, buf)) {
-#ifdef S_AUTH
+#ifdef S_DCCAUTH
     char rand[51];
 
     make_rand_str(rand, 50);
@@ -702,9 +702,9 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     dcc[idx].type = &DCC_CHAT_SECPASS;
     dcc[idx].timeval = now;
     dprintf(idx, "-Auth %s %s\n", rand, botnetnick);
-#else /* !S_AUTH */
+#else /* !S_DCCAUTH */
     dcc_chat_secpass(idx, buf, atr);
-#endif /* S_AUTH */
+#endif /* S_DCCAUTH */
   } else {
     dprintf(idx, "%s", rand_dccrespbye());
     putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);

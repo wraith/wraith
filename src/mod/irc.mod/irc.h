@@ -18,9 +18,9 @@
 #define QUICK           1
 
 #ifdef MAKING_IRC
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 static void makeopline(struct chanset_t *, char *, char *);
 static int me_op(struct chanset_t *);
 static int me_voice(struct chanset_t *);

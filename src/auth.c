@@ -34,14 +34,17 @@ extern struct dcc_t		*dcc;
 extern struct chanset_t		*chanset;
 extern time_t			 now;
 
-#ifdef S_AUTH
+
+#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 extern char 			authkey[];
+#endif /* S_AUTHHASH || S_DCCAUTH */
+#ifdef S_AUTHCMDS
 int 				auth_total = 0;
 int 				max_auth = 100;
 struct auth_t 			*auth = 0;
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
 void init_auth_max()
 {
   if (max_auth < 1)
@@ -65,17 +68,17 @@ static void expire_auths()
     }
   }
 }
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 
 void init_auth()
 {
-#ifdef S_AUTH
+#ifdef S_AUTHCMDS
   init_auth_max();
   add_hook(HOOK_MINUTELY, (Function) expire_auths);
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
 }
 
-#ifdef S_AUTH
+#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 char *makehash(struct userrec *u, char *rand)
 {
   char hash[256], *secpass = NULL;
@@ -89,7 +92,9 @@ char *makehash(struct userrec *u, char *rand)
 
   return md5(hash);
 }
+#endif /* S_AUTHHASH || S_DCCAUTH */
 
+#ifdef S_AUTHCMDS
 int new_auth(void)
 {
   int i = auth_total;
@@ -130,4 +135,4 @@ void removeauth(int n)
   else
     egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
 }
-#endif /* S_AUTH */
+#endif /* S_AUTHCMDS */
