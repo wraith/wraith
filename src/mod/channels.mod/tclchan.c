@@ -286,7 +286,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
  */
 int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 {
-  bool error = 0;
+  bool error = 0, fastop_hack = 0;
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
@@ -529,7 +529,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       chan->status |= CHAN_TAKE;
     else if (!strcmp(item[i], "-take")) {
       chan->status &= ~CHAN_TAKE;
-      chan->status |= CHAN_FASTOP;		// to avoid bots still mass opping from +take from not using cookies
+      fastop_hack = 1;
     }
     else if (!strcmp(item[i], "+voice"))
       chan->status |= CHAN_VOICE;
@@ -631,6 +631,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       error = 1;
     }
   }
+
+  if (fastop_hack)
+    chan->status |= CHAN_FASTOP;		// to avoid bots still mass opping from +take from not using cookies
+
   if (!conf.bot->hub) {
     if ((old_status ^ chan->status) & CHAN_INACTIVE) {
       if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
