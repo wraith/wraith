@@ -1583,26 +1583,26 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
   int ok = 0;
 
   if ((f = fopen(fn, "wb"))) {
+    time_t tt;
+    char s1[81] = "";
+
     chmod(fn, 0600);		/* make it -rw------- */
-    lfprintf(f, "#4v: %s -- %s -- transmit\n", ver, conf.bot->nick);
+    tt = now;
+    strcpy(s1, ctime(&tt));
+    lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
+
     ok = 1;
     if (!write_chans(f, idx))
      ok = 0;
-    if (!write_bans(f, idx))
-     ok = 0;
     if (!write_config(f, idx))
       ok = 0;
-    /* Only share with bots which support exempts and invites.
-     *
-     * If UFF is supported, we also check the UFF flags before sharing. If
-     * UFF isn't supported, but +I/+e is supported, we just share.
-     */
-    if ((dcc[idx].u.bot->uff_flags & UFF_EXEMPT)) {
-      if (!write_exempts(f, idx)) ok = 0;
-    }
-    if ((dcc[idx].u.bot->uff_flags & UFF_INVITE)) {
-      if (!write_invites(f,idx)) ok = 0;
-    }
+    if (!write_bans(f, idx))
+     ok = 0;
+    if (!write_exempts(f, idx)) 
+      ok = 0;
+    if (!write_invites(f,idx)) 
+      ok = 0;
+
     for (u = bu; u && ok; u = u->next) {
       if (!write_user(u, f, idx)) {
        ok = 0;
