@@ -321,7 +321,6 @@ void rebalance_roles()
 }
 #endif /* HUB */
 
-/* FIXME: needs more testing */
 static void channels_10secondly() {
   struct chanset_t *chan = NULL;
 

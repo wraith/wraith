@@ -732,9 +732,7 @@ void clear_channel(struct chanset_t *chan, int reset)
 int channel_add(char *result, char *newname, char *options)
 {
   struct chanset_t *chan = NULL;
-  int items = 0;
-  int ret = OK;
-  int join = 0;
+  int items = 0, ret = OK, join = 0;
   char buf[3001] = "";
   const char **item = NULL;
 
@@ -749,7 +747,7 @@ int channel_add(char *result, char *newname, char *options)
       sprintf(result, "invalid channel name");
     return ERROR;
   }
-  simple_sprintf(buf, "chanmode %s ", glob_chanmode);
+  simple_sprintf(buf, "chanmode { %s } ", glob_chanmode);
   strcat(buf, glob_chanset);
   strcat(buf, options);
   buf[strlen(buf)] = 0;
@@ -763,9 +761,6 @@ int channel_add(char *result, char *newname, char *options)
     chan->status &= ~CHAN_FLAGGED;	/* don't delete me! :) */
   } else {
     chan = (struct chanset_t *) calloc(1, sizeof(struct chanset_t));
-
-    /* Hells bells, const set *every* variable to 0 when we have bzero? */
-/* not needed..    egg_bzero(chan, sizeof(struct chanset_t)); */
 
     /* These are defaults, bzero already set them 0, but we set them for future reference */
     chan->limit_prot = 0;

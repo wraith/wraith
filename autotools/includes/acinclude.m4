@@ -5,8 +5,6 @@ dnl
 
 dnl  EGG_CHECK_CC()
 dnl
-dnl  FIXME: make a better test
-dnl
 AC_DEFUN(EGG_CHECK_CC, [dnl
 if test "${cross_compiling-x}" = "x"
 then
@@ -212,9 +210,6 @@ fi
 
 dnl  EGG_CHECK_OS()
 dnl
-dnl  FIXME/NOTICE:
-dnl    This function is obsolete. Any NEW code/checks should be written
-dnl    as individual tests that will be checked on ALL operating systems.
 dnl
 AC_DEFUN(EGG_CHECK_OS, [dnl
 LINUX=no
@@ -278,8 +273,6 @@ case "$egg_cv_var_system_type" in
   OSF1)
     case "`echo $egg_cv_var_system_release | cut -d . -f 1`" in
       V*)
-        # FIXME: we should check this in a separate test
-        # Digital OSF uses an ancient version of gawk
         if test "$AWK" = "gawk"
         then
           AWK=awk
@@ -333,11 +326,6 @@ esac
 dnl  EGG_CHECK_LIBS()
 dnl
 AC_DEFUN(EGG_CHECK_LIBS, [dnl
-# FIXME: this needs to be fixed so that it works on IRIX
-if test "$IRIX" = "yes"
-then
-  AC_MSG_WARN(Skipping library tests because they CONFUSE Irix.)
-else
   AC_CHECK_LIB(socket, socket)
 #  AC_CHECK_LIB(nsl, connect)
   AC_CHECK_LIB(dns, gethostbyname)
@@ -358,7 +346,6 @@ else
 #        ac_cv_lib_pthread_pthread_mutex_init=yes
 #        ac_cv_lib_pthread=""],
 #        ac_cv_lib_pthread_pthread_mutex_init=no)])])])
-fi
 ])dnl
 
 dnl  EGG_CHECK_FUNC_VSPRINTF()

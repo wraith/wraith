@@ -809,10 +809,11 @@ int readuserfile(char *file, struct userrec **ret)
            newsplit(&options);
            newsplit(&options);
            chan = newsplit(&options);
-/* FIXME: THIS HACK FOR { } REMOVAL SHOULD JUST NOT WRITE THEM? */
+
+           /* hack to remove { } */
            newsplit(&options);
            options[strlen(options) - 1] = 0;
-/* Above is a hack to remove { } */
+
            if (channel_add(resultbuf, chan, options) != OK) {
              putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
              free(my_ptr);
