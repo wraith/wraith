@@ -684,7 +684,7 @@ See also: echo, page, strip
    be seen via 'whois' or 'match'. Non-masters cannot see the comment field.
    Using the comment 'none' will clear a user's comment.
 ::conf:
-###  $bconf$b <add|del|list|set> [options]
+###  $bconf$b <add|del|change|list|set> [options]
  
    This command is used to modify the bot's local shell config. Only
    the first bot listed will be able to perform this command. Using the cmd
@@ -704,6 +704,8 @@ See also: echo, page, strip
       del <bot>
     Deleted bots that are running will be killed.
   
+    'change' syntax is the same as 'add'
+
     'list' shows all the bots currently in the config.
  
     'set' allows changing some variables in the config.

@@ -1833,7 +1833,7 @@ static void cmd_conf(int idx, char *par)
 
   if (!cmd) {
 #ifdef LEAF
-    dprintf(idx, "Usage: conf <add|del|list|set> [options]\n");
+    dprintf(idx, "Usage: conf <add|del|change|list|set> [options]\n");
 #endif /* LEAF */
 #ifdef HUB
     dprintf(idx, "Usage: conf <set> [options]\n");
@@ -1843,12 +1843,12 @@ static void cmd_conf(int idx, char *par)
   
   putlog(LOG_CMDS, "*", "#%s# conf %s %s", dcc[idx].nick, cmd, par[0] ? par : "");
 #ifdef LEAF
-  if (!egg_strcasecmp(cmd, "add")) {
+  if (!egg_strcasecmp(cmd, "add") || !egg_strcasecmp(cmd, "change")) {
     char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
 
     nick = newsplit(&par);
     if (!nick || (nick && !nick[0])) {
-      dprintf(idx, "Usage: conf add <bot> [<ip|.> <[+]host|.> [ipv6-ip]]\n");
+      dprintf(idx, "Usage: conf %s <bot> [<ip|.> <[+]host|.> [ipv6-ip]]\n", cmd);
       return;
     }
 
@@ -1860,7 +1860,10 @@ static void cmd_conf(int idx, char *par)
       ipsix = newsplit(&par);
 
     conf_addbot(nick, ip, host, ipsix);
-    dprintf(idx, "Added bot: %s\n", nick);
+    if (cmd[0] == 'a' || cmd[0] == 'A')
+      dprintf(idx, "Added bot: %s\n", nick);
+    else
+      dprintf(idx, "Changed bot: %s\n", nick);
     listbot = strdup(nick);
     save++;
   } else if (!egg_strcasecmp(cmd, "del")) {
