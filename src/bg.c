@@ -11,8 +11,8 @@
 #include "main.h"
 #include <signal.h>
 #ifndef CYGWIN_HACKS
-#include <sys/ptrace.h>
-#include <sys/wait.h>
+#  include <sys/ptrace.h>
+#  include <sys/wait.h>
 #endif /* !CYGWIN_HACKS */
 #include <sys/types.h>
 #include <errno.h>
@@ -20,6 +20,7 @@
 #include <string.h>
 
 time_t lastfork = 0;
+
 #ifndef CYGWIN_HACKS
 pid_t watcher;                  /* my child/watcher */
 
