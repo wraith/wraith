@@ -1056,7 +1056,12 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
 static void cmd_channels(struct userrec *u, int idx, char *par) {
   putlog(LOG_CMDS, "*", STR("#%s# channels %s"), dcc[idx].nick, par);
   if (par[0] && (u->flags & USER_MASTER)) {
+    struct userrec *user;
+    user = get_user_by_handle(userlist, par);
+    if (user)
       show_channels(idx, par);
+    else 
+      dprintf(idx, STR("There is no user by that name.\n"));
   } else
       show_channels(idx, NULL);
 
