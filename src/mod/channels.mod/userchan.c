@@ -387,7 +387,9 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
   }
   if (mask->flags & MASKREC_STICKY)
     strcat(s, " (sticky)");
-  if (!chan || ischanmask(type, chan, mask->mask)) {
+
+  /* always show mask on hubs */
+  if (!chan || ischanmask(type, chan, mask->mask) || conf.bot->hub) {
     if (number >= 0) {
       dprintf(idx, "  [%3d] %s %s\n", number, mask->mask, s);
     } else {
