@@ -47,7 +47,8 @@ static void doban(struct chanset_t *, memberlist *);
 static char *quickban(struct chanset_t *, char *);
 static void got_op(struct chanset_t *chan, char *nick, char *from, char *who,
  		   struct userrec *opu, struct flag_record *opper);
-static int killmember(struct chanset_t *chan, char *nick);
+static int real_killmember(struct chanset_t *chan, char *nick, const char *file, int line);
+#define killmember(chan, nick)        real_killmember((chan), (nick), __FILE__,__LINE__)
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
 void raise_limit(struct chanset_t *);

@@ -304,6 +304,7 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 	int i, cmp, retval;
 	va_list ap;
 
+	Assert(table);
 	check_bind_executing++;
 
 	va_start(ap, flags);

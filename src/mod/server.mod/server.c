@@ -76,7 +76,7 @@ static int optimize_kicks;
 
 static void empty_msgq(void);
 static void next_server(int *, char *, unsigned int *, char *);
-static void disconnect_server();
+static void disconnect_server(int);
 static int calc_penalty(char *);
 static int fast_deq(int);
 static char *splitnicks(char **);
@@ -1371,7 +1371,7 @@ static void server_5minutely()
       /* Uh oh!  Never got pong from last time, five minutes ago!
        * Server is probably stoned.
        */
-      disconnect_server();
+      disconnect_server(1);
       putlog(LOG_SERV, "*", IRC_SERVERSTONED);
     } else if (!trying_server) {
       /* Check for server being stoned. */
