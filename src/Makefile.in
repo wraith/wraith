@@ -28,21 +28,6 @@ doofus:
 	@echo ""
 	@cd .. && $(MAKE)
 
-stringfix:
-	@echo -e "Compiling: \033[1mstringfix\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) stringfix.c -o ../stringfix
-	@$(STRIP) ../stringfix
-
-makesalt:
-	@echo -e "Compiling: \033[1mmakesalt\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) makesalt.c -o ../makesalt
-	@$(STRIP) ../makesalt
-
-makesettings:
-	@echo -e "Compiling: \033[1mmakesettings\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) makesettings.c -o ../makesettings
-	@$(STRIP) ../makesettings
-
 ../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compatability
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
@@ -77,7 +62,7 @@ main.o: ../stringfix
 	'-DLDFLAGS="$(LD)"' '-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/xmain.c -o main.o
 
 compatability:
-	@cd compat && $(MAKE_GENERIC) compat
+	+@cd compat && $(MAKE_GENERIC) compat
 	@echo "---------- Yeah! that's the compiling, now the linking! ----------"
 
 eggdrop.h:

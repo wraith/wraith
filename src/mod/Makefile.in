@@ -45,11 +45,11 @@ static: $(mod_objs)
 .SUFFIXES: .mod .mod_o
 
 .mod.mod_o:
-	@if test ! -d $*.mod; then mkdir $*.mod; fi; \
+	+@if test ! -d $*.mod; then mkdir $*.mod; fi; \
 	if test ! -r $*.mod/Makefile; then \
 		cp $(srcdir)/$*.mod/Makefile $*.mod/Makefile; \
 	fi; \
-	cd $*.mod && $(MAKE_MOD) 'VPATH=$(MOD_UPDIR)$(srcdir)/$*.mod' 'srcdir=$(MOD_UPDIR)$(srcdir)/$*.mod' 'MAKE=$(MAKE)' static;
+	cd $*.mod && $(MAKE_MOD) 'VPATH=$(MOD_UPDIR)$(srcdir)/$*.mod' 'srcdir=$(MOD_UPDIR)$(srcdir)/$*.mod' static;
 
 depleaf:
 	@for i in $(mods); do \

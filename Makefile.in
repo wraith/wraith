@@ -29,7 +29,7 @@ TCLLIBFN = @TCLLIBFN@
 
 modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
 
-DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM
+DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
 CFLGS = 
 MAKEFLAGS = -s -j4
 
@@ -40,7 +40,7 @@ MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'MODOBJS=mod/*.o' 
 
 MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
-'STRIP=touch' 'CFLGS=-g3 $(DEBCFLAGS) -DLEAF $(CFLGS)' \
+'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DLEAF $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 'MODOBJS=mod/*.o'
 
@@ -51,7 +51,7 @@ MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'MODOBJS=mod/*.o'
 
 MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
-'STRIP=touch' 'CFLGS=-g3 $(DEBCFLAGS) -DHUB $(CFLGS)' \
+'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DHUB $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'MODOBJS=mod/*.o'
 
@@ -74,13 +74,13 @@ cleanutils:
 	@misc/dostrings l
 
 clean:  cleanutils
-	@cd src && $(MAKE) clean
-	@cd src/compat && $(MAKE) clean
+	+@cd src && $(MAKE) clean
+	+@cd src/compat && $(MAKE) clean
+	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp makesalt makesettings
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/makesalt src/makesettings src/settings.c src/settings.tmp
 
 distclean: clean clean-modconfig
-	@cd src/mod && $(MAKE) distclean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h stamp.*
 	@rm -rf autom4te.cache
@@ -103,21 +103,21 @@ distro: distrib
 
 depend:
 #	@cat /dev/null > lush.h
-	@cd src && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depend
-	@cd src/mod && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depend
-	@cd src/compat && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depend
+	@cd src && $(MAKE_DEPEND) depend
+	@cd src/mod && $(MAKE_DEPEND) depend
+	@cd src/compat && $(MAKE_DEPEND) depend
 
 eggautoconf:
 	@$(modconf) eggautoconf
 
-packconf: utils
+packconf: makesettings
 	@./makesettings pack/pack.cfg src/settings.tmp
 	@(touch src/settings.c; \
 	if test "x`diff -qurN src/settings.tmp src/settings.c`" != "x"; then \
 	cp -f src/settings.tmp src/settings.c; \
 	fi)
 
-salt:	utils
+salt:	makesalt
 	@./makesalt
 
 config:
@@ -125,7 +125,7 @@ config:
 	@$(modconf) detect-modules
 	@$(modconf) update-depends
 	@$(modconf) Makefile
-	@cd src/mod && $(MAKE_CONFIG) 'MAKE=$(MAKE)' config
+	+@cd src/mod && $(MAKE_CONFIG) config
 	@$(modconf) Makefile
 
 clean-modconfig:
@@ -133,48 +133,63 @@ clean-modconfig:
 
 reconfig: clean-modconfig config
 
-utils:  
-	@cd src && $(MAKE_UTILS) 'MAKE=$(MAKE)' stringfix
+stringfix:
+	@echo -e "Compiling: \033[1mstringfix\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) src/stringfix.c -o stringfix
+	@$(STRIP) stringfix
+
+makesalt:
+	@echo -e "Compiling: \033[1mmakesalt\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) src/makesalt.c -o makesalt
+	@$(STRIP) makesalt
+
+makesettings:
+	@echo -e "Compiling: \033[1mmakesettings\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) src/makesettings.c -o makesettings
+	@$(STRIP) makesettings
+
+utils:  stringfix makesalt makesettings
+
+dostrings: stringfix
 	@misc/dostrings
-	@cd src && $(MAKE_UTILS) 'MAKE=$(MAKE)' makesalt
-	@cd src && $(MAKE_UTILS) 'MAKE=$(MAKE)' makesettings
 
 depleaf:
-	@cd src && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depleaf
-	@cd src/mod && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depleaf
-	@cd src/compat && $(MAKE_DEPEND) 'MAKE=$(MAKE)' depleaf
+	+@cd src && $(MAKE_DEPEND) depleaf
+	+@cd src/mod && $(MAKE_DEPEND) depleaf
+	+@cd src/compat && $(MAKE_DEPEND) depleaf
 
 dephub:
-	@cd src && $(MAKE_DEPEND) 'MAKE=$(MAKE)' dephub
-	@cd src/mod && $(MAKE_DEPEND) 'MAKE=$(MAKE)' dephub
-	@cd src/compat && $(MAKE_DEPEND) 'MAKE=$(MAKE)' dephub
+	+@cd src && $(MAKE_DEPEND) dephub
+	+@cd src/mod && $(MAKE_DEPEND) dephub
+	+@cd src/compat && $(MAKE_DEPEND) dephub
 
+general: dostrings salt config packconf
 
-leaf:	utils salt config packconf
+leaf:	general
 	@echo ""
 	@echo "Making leaf"
 	@echo ""
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype leaf
 	@echo ""
-	@cd src/mod && $(MAKE_LEAF) 'MAKE=$(MAKE)' static
+	+@cd src/mod && $(MAKE_LEAF) static
 	@echo ""
-	@cd src && $(MAKE_LEAF) 'MAKE=$(MAKE)' $(LEAFEXEC)
+	+@cd src && $(MAKE_LEAF) $(LEAFEXEC)
 	@echo ""
 
-dleaf:  utils salt config packconf
+dleaf:  general
 	@echo ""
 	@echo "Making debug leaf"
 	@echo ""
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype leaf
 	@echo ""
-	@cd src/mod && $(MAKE_DLEAF) 'MAKE=$(MAKE)' static
+	+@cd src/mod && $(MAKE_DLEAF) static
 	@echo ""
-	@cd src && $(MAKE_DLEAF) 'MAKE=$(MAKE)' $(LEAFEXEC)
+	+@cd src && $(MAKE_DLEAF) $(LEAFEXEC)
 	@echo ""
 
-hub:	utils salt config packconf
+hub:	general
 	@echo ""
 	@echo "Making hub"
 	@echo ""
@@ -182,21 +197,21 @@ hub:	utils salt config packconf
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype hub
 	@echo ""
-	@cd src/mod && $(MAKE_HUB) 'MAKE=$(MAKE)' static
+	+@cd src/mod && $(MAKE_HUB) static
 	@echo ""
-	@cd src && $(MAKE_HUB) 'MAKE=$(MAKE)' $(HUBEXEC)
+	+@cd src && $(MAKE_HUB) $(HUBEXEC)
 	@echo ""
 
-dhub:   utils salt config packconf
+dhub:   general
 	@echo ""
 	@echo "Making debug hub"
 	@echo ""
 	@rm -f src/mod/mod.xlibs
 	@./misc/maketype hub
 	@echo ""
-	@cd src/mod && $(MAKE_DHUB) 'MAKE=$(MAKE)' static
+	+@cd src/mod && $(MAKE_DHUB) static
 	@echo ""
-	@cd src && $(MAKE_DHUB) 'MAKE=$(MAKE)' $(HUBEXEC)
+	+@cd src && $(MAKE_DHUB) $(HUBEXEC)
 	@echo ""
 
 #safety hash
