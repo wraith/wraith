@@ -1036,7 +1036,7 @@ share_userfileq(int idx, char *par)
 static void
 share_ufsend(int idx, char *par)
 {
-  char *ip = NULL, *port = NULL;
+  char *port = NULL, *ip = NULL;
   char s[1024] = "";
   int i, sock;
   FILE *f = NULL;
@@ -1057,7 +1057,8 @@ share_ufsend(int idx, char *par)
     ip = newsplit(&par);
     port = newsplit(&par);
 #ifdef USE_IPV6
-    sock = getsock(SOCK_BINARY, hostprotocol(ip));      /* Don't buffer this -> mark binary. */
+//    sock = getsock(SOCK_BINARY, hostprotocol(ip));      /* Don't buffer this -> mark binary. */
+    sock = getsock(SOCK_BINARY, AF_INET);
 #else
     sock = getsock(SOCK_BINARY);        /* Don't buffer this -> mark binary. */
 #endif /* USE_IPV6 */

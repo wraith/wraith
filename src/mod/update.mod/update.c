@@ -105,7 +105,8 @@ static void update_ufsend(int idx, char *par)
     ip = newsplit(&par);
     port = newsplit(&par);
 #ifdef USE_IPV6
-    sock = getsock(SOCK_BINARY, hostprotocol(ip)); /* Don't buffer this -> mark binary. */
+//    sock = getsock(SOCK_BINARY, hostprotocol(ip)); /* Don't buffer this -> mark binary. */
+    sock = getsock(SOCK_BINARY, AF_INET);
 #else
     sock = getsock(SOCK_BINARY); /* Don't buffer this -> mark binary. */
 #endif /* USE_IPV6 */
