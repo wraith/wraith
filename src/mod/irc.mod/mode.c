@@ -876,9 +876,10 @@ gotmode(char *from, char *msg)
     /* let's pre-emptively check for mass op/deop, manual ops and cookieops */
 
     if ((channel_active(chan) || channel_pending(chan))) {
-
-      bool isserver = 0;
-      char *nick = NULL, *op = NULL, *chg = NULL, s[UHOSTLEN] = "", ms2[3] = "";
+      int i = 0, modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
+      bool isserver = 0, me_opped = 0;
+      char **modes = (char **) calloc(modesperline + 1, sizeof(char *));
+      char *nick = NULL, *chg = NULL, s[UHOSTLEN] = "", sign = '+', *mp = NULL;
       size_t z = strlen(msg);
       struct userrec *u = NULL;
       memberlist *m = NULL;
@@ -898,59 +899,53 @@ gotmode(char *from, char *msg)
           m->user = u;
       }
 
-      if (!isserver) {
-        char **modes = (char **) calloc(modesperline + 1, sizeof(char *));
-        char *p = NULL, work[1024] = "", *wptr = work, sign = '+', *mp;
-        int modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
-        bool me_opped = 0;
 
-        /* Split up the mode: #chan modes param param param param */
-        strncpyz(work, msg, sizeof(work));
-        p = newsplit(&wptr);
-        while (*p) {            /* +MODES PARAM PARAM PARAM ... */
-          mp = NULL;
+      chg = newsplit(&msg);
+      reversing = 0;
 
-          if (*p == '+')
-            sign = '+';
-          else if (*p == '-')
-            sign = '-';
-          else if (strchr("oblkvIe", p[0])) {
-            mp = newsplit(&wptr);       /* PARAM as noted above */
-            if (strchr("ob", p[0])) {
-              /* Just want o's and b's */
-              modes[modecnt] = (char *) calloc(1, strlen(mp) + 4);
-              sprintf(modes[modecnt], "%c%c %s", sign, p[0], mp);
-              modecnt++;
-              if (p[0] == 'o') {
-                if (sign == '+') {
-                  ops++;
-                  if (match_my_nick(mp))
-                    me_opped = 1;
-                } else {
-                  deops++;
-                  if (match_my_nick(mp))
-                    me_opped = 0;
-                }
-              }
-              if (p[0] == 'b') {
-                if (sign == '+')
-                  bans++;
-                else
-                  unbans++;
-              }
+      irc_log(chan, "%s!%s sets mode: %s %s", nick, from, chg, msg);
+      get_user_flagrec(u, &user, ch);
+
+
+      /* Split up the mode: #chan modes param param param param */
+      while (*chg) {            /* +MODES PARAM PARAM PARAM ... */
+        if (chg[0] == '+')
+          sign = '+';
+        else if (chg[0] == '-')
+          sign = '-';
+        else {
+          mp = newsplit(&msg);       /* PARAM as noted above */
+          fixcolon(mp);
+
+          /* Just want o's and b's */
+          modes[modecnt] = (char *) calloc(1, strlen(mp) + 4);
+          sprintf(modes[modecnt], "%c%c %s", sign, chg[0], mp ? mp : "");
+          modecnt++;
+          if (chg[0] == 'o') {
+            if (sign == '+') {
+              ops++;
+              if (match_my_nick(mp))
+                me_opped = 1;
+            } else {
+              deops++;
+              if (match_my_nick(mp))
+                me_opped = 0;
             }
-          } else if (strchr("pstnmi", p[0])) {
-          } else {
-            /* hrmm... what modechar did i forget? */
-            putlog(LOG_ERRORS, "*", "Forgotten modechar in irc:gotmode: %c", p[0]);
+          } else if (chg[0] == 'b') {
+            if (sign == '+')
+              bans++;
+            else
+              unbans++;
           }
-          p++;
         }
+        chg++;
+      }
 
-        /* take ASAP */
-        if (me_opped && !me_op(chan) && channel_take(chan))
-          do_take(chan);
+      /* take ASAP */
+      if (me_opped && !me_op(chan) && channel_take(chan))
+        do_take(chan);
 
+      if (!isserver) {
         /* Now we got modes[], chan, u, nick, and count of each relevant mode */
 
         /* check for mdop */
@@ -983,7 +978,7 @@ gotmode(char *from, char *msg)
             }
           }
           if (ops && u) {
-            int i = 0, n = 0;
+            int n = 0;
 
             if (u->bot && !channel_fastop(chan) && !channel_take(chan)) {
               int isbadop = 0;
@@ -1102,17 +1097,8 @@ gotmode(char *from, char *msg)
             }
           }
         }
-        for (int i = 0; i < modecnt; i++)
-          if (modes[i])
-            free(modes[i]);
-        free(modes);
       }
       /* Now do the modes again, this time throughly... */
-      chg = newsplit(&msg);
-      reversing = 0;
-
-      irc_log(chan, "%s!%s sets mode: %s %s", nick, from, chg, msg);
-      get_user_flagrec(u, &user, ch);
 
       if (channel_active(chan) && m && me_op(chan)) {
         if (chan_fakeop(m)) {
@@ -1128,18 +1114,13 @@ gotmode(char *from, char *msg)
           reversing = 1;
         }
       }
-      ms2[0] = '+';
-      ms2[2] = 0;
-      while ((ms2[1] = *chg)) {
+#define msign	modes[i][0]
+#define mmode	modes[i][1]
+#define mparam	&modes[i][3]
+      for (i = 0; i < modecnt; i++) {
         int todo = 0;
 
-        switch (*chg) {
-          case '+':
-            ms2[0] = '+';
-            break;
-          case '-':
-            ms2[0] = '-';
-            break;
+        switch (mmode) {		/* parse mode */
           case 'i':
             todo = CHANINV;
             if ((!nick[0]) && (bounce_modes))
@@ -1208,7 +1189,7 @@ gotmode(char *from, char *msg)
           case 'l':
             if ((!nick[0]) && (bounce_modes))
               reversing = 1;
-            if (ms2[0] == '-') {
+            if (msign == '-') {
               if (channel_active(chan)) {
                 if ((reversing) && (chan->channel.maxmembers != 0)) {
                   simple_sprintf(s, "%d", chan->channel.maxmembers);
@@ -1227,11 +1208,9 @@ gotmode(char *from, char *msg)
               }
               chan->channel.maxmembers = 0;
             } else {
-              op = newsplit(&msg);
-              fixcolon(op);
-              if (op == '\0')
+              if (mparam == '\0')
                 break;
-              chan->channel.maxmembers = atoi(op);
+              chan->channel.maxmembers = atoi(mparam);
               if (channel_pending(chan))
                 break;
               if (((reversing) &&
@@ -1251,25 +1230,22 @@ gotmode(char *from, char *msg)
             }
             break;
           case 'k':
-            if (ms2[0] == '+')
+            if (msign == '+')
               chan->channel.mode |= CHANKEY;
             else
               chan->channel.mode &= ~CHANKEY;
-            op = newsplit(&msg);
-            fixcolon(op);
-            if (op == '\0') {
+            if (mparam == '\0') 
               break;
-            }
-            if (ms2[0] == '+') {
-              my_setkey(chan, op);
+
+            if (msign == '+') {
+              my_setkey(chan, mparam);
               if (channel_active(chan))
-                got_key(chan, nick, from, op);
+                got_key(chan, nick, from, mparam);
             } else {
               if (channel_active(chan)) {
                 if ((reversing) && (chan->channel.key[0]))
                   add_mode(chan, '+', 'k', chan->channel.key);
-                else if ((chan->key_prot[0]) && !glob_master(user)
-                         && !chan_master(user))
+                else if ((chan->key_prot[0]) && !glob_master(user) && !chan_master(user))
                   add_mode(chan, '+', 'k', chan->key_prot);
               }
               my_setkey(chan, NULL);
@@ -1277,29 +1253,25 @@ gotmode(char *from, char *msg)
             break;
           case 'o':
             chan->channel.fighting++;
-            op = newsplit(&msg);
-            fixcolon(op);
-            if (ms2[0] == '+')
-              got_op(chan, nick, from, op, u, &user);
+            if (msign == '+')
+              got_op(chan, nick, from, mparam, u, &user);
             else
-              got_deop(chan, nick, from, op, u);
+              got_deop(chan, nick, from, mparam, u);
             break;
           case 'v':
-            op = newsplit(&msg);
-            fixcolon(op);
-            m = ismember(chan, op);
+            m = ismember(chan, mparam);
             if (!m) {
               if (channel_pending(chan))
                 break;
-              putlog(LOG_MISC, chan->dname, CHAN_BADCHANMODE, chan->dname, op);
-              dprintf(DP_MODE, "WHO %s\n", op);
+              putlog(LOG_MISC, chan->dname, CHAN_BADCHANMODE, chan->dname, mparam);
+              dprintf(DP_MODE, "WHO %s\n", mparam);
             } else {
               bool dv = 0;
 
               simple_sprintf(s, "%s!%s", m->nick, m->userhost);
               get_user_flagrec(m->user ? m->user : get_user_by_host(s), &victim, chan->dname);
 
-              if (ms2[0] == '+') {
+              if (msign == '+') {
                 if (m->flags & EVOICE) {
 /* FIXME: This is a lame check, we need to expand on this more */
                   if (!chan_master(user) && !glob_master(user)) {
@@ -1312,25 +1284,24 @@ gotmode(char *from, char *msg)
                 m->flags |= CHANVOICE;
                 if (channel_active(chan) && dovoice(chan)) {
                   if (dv || chk_devoice(victim)) {
-                    add_mode(chan, '-', 'v', op);
+                    add_mode(chan, '-', 'v', mparam);
                   } else if (reversing) {
-                    add_mode(chan, '-', 'v', op);
+                    add_mode(chan, '-', 'v', mparam);
                   }
                 }
-              } else if (ms2[0] == '-') {
+              } else if (msign == '-') {
                 m->flags &= ~SENTDEVOICE;
                 m->flags &= ~CHANVOICE;
                 if (channel_active(chan) && dovoice(chan)) {
                   /* revoice +v users */
                   if (chk_voice(victim, chan)) {
-                    add_mode(chan, '+', 'v', op);
+                    add_mode(chan, '+', 'v', mparam);
                   } else if (reversing) {
-                    add_mode(chan, '+', 'v', op);
+                    add_mode(chan, '+', 'v', mparam);
                     /* if they arent +v|v and VOICER is m+ then EVOICE them */
                   } else {
 /* FIXME: same thing here */
-                    if (!match_my_nick(nick) && channel_voice(chan) &&
-                        (glob_master(user) || chan_master(user) || glob_bot(user))) {
+                    if (!match_my_nick(nick) && channel_voice(chan) && (glob_master(user) || chan_master(user) || glob_bot(user))) {
                       /* if the user is not +q set them norEVOICE. */
                       if (!chan_quiet(victim) && !(m->flags & EVOICE)) {
                         putlog(LOG_DEBUG, "@", "Giving EVOICE flag to: %s (%s)", m->nick, chan->dname);
@@ -1344,50 +1315,48 @@ gotmode(char *from, char *msg)
             break;
           case 'b':
             chan->channel.fighting++;
-            op = newsplit(&msg);
-            fixcolon(op);
-            if (ms2[0] == '+')
-              got_ban(chan, nick, from, op);
+            if (msign == '+')
+              got_ban(chan, nick, from, mparam);
             else
-              got_unban(chan, nick, from, op, u);
+              got_unban(chan, nick, from, mparam, u);
             break;
           case 'e':
             chan->channel.fighting++;
-            op = newsplit(&msg);
-            fixcolon(op);
-            if (ms2[0] == '+')
-              got_exempt(chan, nick, from, op);
+            if (msign == '+')
+              got_exempt(chan, nick, from, mparam);
             else
-              got_unexempt(chan, nick, from, op, u);
+              got_unexempt(chan, nick, from, mparam, u);
             break;
           case 'I':
             chan->channel.fighting++;
-            op = newsplit(&msg);
-            fixcolon(op);
-            if (ms2[0] == '+')
-              got_invite(chan, nick, from, op);
+            if (msign == '+')
+              got_invite(chan, nick, from, mparam);
             else
-              got_uninvite(chan, nick, from, op, u);
+              got_uninvite(chan, nick, from, mparam, u);
             break;
         }
         if (todo) {
-          if (ms2[0] == '+')
+          if (msign == '+')
             chan->channel.mode |= todo;
           else
             chan->channel.mode &= ~todo;
           if (channel_active(chan)) {
-            if ((((ms2[0] == '+') && (chan->mode_mns_prot & todo)) ||
-                 ((ms2[0] == '-') && (chan->mode_pls_prot & todo))) &&
+            if ((((msign == '+') && (chan->mode_mns_prot & todo)) ||
+                 ((msign == '-') && (chan->mode_pls_prot & todo))) &&
                 !glob_master(user) && !chan_master(user))
-              add_mode(chan, ms2[0] == '+' ? '-' : '+', *chg, "");
+              add_mode(chan, msign == '+' ? '-' : '+', mmode, "");
             else if (reversing &&
-                     ((ms2[0] == '+') || (chan->mode_pls_prot & todo)) &&
-                     ((ms2[0] == '-') || (chan->mode_mns_prot & todo)))
-              add_mode(chan, ms2[0] == '+' ? '-' : '+', *chg, "");
+                     ((msign == '+') || (chan->mode_pls_prot & todo)) &&
+                     ((msign == '-') || (chan->mode_mns_prot & todo)))
+              add_mode(chan, msign == '+' ? '-' : '+', mmode, "");
           }
         }
-        chg++;
       }
+      for (i = 0; i < modecnt; i++)
+        if (modes[i])
+          free(modes[i]);
+      free(modes);
+
       if (chan->channel.do_opreq)
         request_op(chan);
       if (!me_op(chan) && !nick[0])
