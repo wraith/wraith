@@ -430,7 +430,7 @@ clear_settings(void)
   memset(&settings.bots, 0, sizeof(settings_t) - 3467);
 }
 
-void conf_to_bin(conf_t *in, bool move)
+void conf_to_bin(conf_t *in, bool move, int die)
 {
   conf_bot *bot = NULL;
   char *newbin = NULL;
@@ -465,5 +465,5 @@ void conf_to_bin(conf_t *in, bool move)
   else
     newbin = binname;
   /* tellconfig(&settings); */
-  write_settings(newbin, 1, 1);
+  write_settings(newbin, 1, die);
 }
