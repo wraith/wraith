@@ -27,6 +27,7 @@ This is a summary of ChangeLog basically.
 23.Fixed many bugs with color system, including color over relay/botcmd.
 24.Recoded some of the AES core, fixed several outstanding bugs.
 25.Now dumping the stack on SIGSEGV.
+26.FreeBSD packages now have release # again, ie: FreeBSD4.
 
 1.1.7
 
