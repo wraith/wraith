@@ -17,7 +17,7 @@ banner
 
 usage() 
 {
-    echo "Usage: $0 [-b] [-c] [-d] [-n] [-t dir] [-T] [all|hub|leaf]"
+    echo "Usage: $0 [-bcdn] [-t dir] [-T] [all|hub|leaf]"
     echo
     echo "    The options are as follows:"
     echo "    -b        Use bzip2 instead of gzip when packaging."
