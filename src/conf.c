@@ -426,7 +426,7 @@ int readconf(char *cfile, int bits)
   while (fgets(inbuf, sizeof inbuf, f) != NULL) {
     char *line = NULL, *temp_ptr = NULL, *p = NULL;
 
-    if (p = strchr(inbuf, '\n'))
+    if ((p = strchr(inbuf, '\n')))
       *p = 0;
 
     if (enc)
