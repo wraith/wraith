@@ -43,8 +43,9 @@ int     cx_ptr = 0;
 void setlimits()
 {
 #ifndef CYGWIN_HACKS
+  struct rlimit plim, fdlim;
 #ifndef DEBUG_MEM
-  struct rlimit plim, fdlim, corelim;
+  struct rlimit corelim;
 /*  struct rsslim, stacklim;
   rsslim.rlim_cur = 30720;
   rsslim.rlim_max = 30720;
@@ -57,18 +58,18 @@ void setlimits()
   corelim.rlim_cur = 0;
   corelim.rlim_max = 0;
   setrlimit(RLIMIT_CORE, &corelim);
-  plim.rlim_cur = 50;
-  plim.rlim_max = 50;
-  setrlimit(RLIMIT_NPROC, &plim);
-  fdlim.rlim_cur = 200;
-  fdlim.rlim_max = 200;
-  setrlimit(RLIMIT_NOFILE, &fdlim);
 #else /* DEBUG_MEM */
   struct rlimit cdlim;
   cdlim.rlim_cur = RLIM_INFINITY;
   cdlim.rlim_max = RLIM_INFINITY;
   setrlimit(RLIMIT_CORE, &cdlim);
 #endif /* !DEBUG_MEM */
+  plim.rlim_cur = 50;
+  plim.rlim_max = 50;
+  setrlimit(RLIMIT_NPROC, &plim);
+  fdlim.rlim_cur = 200;
+  fdlim.rlim_max = 200;
+  setrlimit(RLIMIT_NOFILE, &fdlim);
 #endif /* !CYGWIN_HACKS */
 }
 
