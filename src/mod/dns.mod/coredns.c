@@ -64,10 +64,11 @@ static char *responsecodes[RESPONSECODES_COUNT + 1] = {
 #endif /* DEBUG_DNS */
 
 #ifdef DEBUG_DNS
-#  define RESOURCETYPES_COUNT 17
+#  define RESOURCETYPES_COUNT 18
 static const char *resourcetypes[RESOURCETYPES_COUNT + 1] = {
     "unknown type",
     "A: host address",
+    "AAAA: host address v6",
     "NS: authoritative name server",
     "MD: mail destination (OBSOLETE)",
     "MF: mail forwarder (OBSOLETE)",
@@ -1090,9 +1091,14 @@ static int init_dns_core(void)
 	putlog(LOG_MISC, "*", "No nameservers defined.");
 	return 0;
     }
-    _res.options |= RES_RECURSE | RES_DEFNAMES | RES_DNSRCH;
-    for (i = 0; i < _res.nscount; i++)
-	_res.nsaddr_list[i].sin_family = AF_INET;
+
+    for (i = 0; i < _res.nscount; i++) {
+      char s[102] = "";
+      egg_inet_ntop(AF_INET, &_res.nsaddr_list[i].sin_addr, s, 101);
+      sdprintf("added ns: %s", s);
+      _res.nsaddr_list[i].sin_family = AF_INET;
+    }
+
 
     if (!init_dns_network())
 	return 0;

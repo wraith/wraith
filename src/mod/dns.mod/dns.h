@@ -49,19 +49,13 @@ enum resolve_states {
 #define IS_PTR(x) (x->state == STATE_PTRREQ)
 #define IS_A(x)   (x->state == STATE_AREQ)
 
-#ifdef DEBUG_DNS
-# define ddebug0		debug0
-# define ddebug1		debug1
-# define ddebug2		debug2
-# define ddebug3		debug3
-# define ddebug4		debug4
-#else	/* !DEBUG_DNS */
-# define ddebug0(x)
-# define ddebug1(x, x1)
-# define ddebug2(x, x1, x2)
-# define ddebug3(x, x1, x2, x3)
-# define ddebug4(x, x1, x2, x3, x4)
-#endif	/* !DEBUG_DNS */
+#define DEBUG_DNS 1
+
+#define ddebug0(x) sdprintf(x)
+#define ddebug1(x, x1) sdprintf(x, x1)
+#define ddebug2(x, x1, x2) sdprintf(x, x1, x2)
+#define ddebug3(x, x1, x2, x3) sdprintf(x, x1, x2, x3)
+#define ddebug4(x, x1, x2, x3, x4) sdprintf(x, x1, x2, x3, x4)
 
 int dns_report(int, int);
 void dns_hostbyip(IP);
