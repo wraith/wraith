@@ -1063,7 +1063,7 @@ void check_trace(int n)
 #ifdef S_ANTITRACE
   int x, parent, i;
   struct sigaction sv, *oldsv = NULL;
-return;
+
   if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
     return;
   parent = getpid();

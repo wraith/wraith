@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include "main.h"
 #include "proto.h"
+#include "traffic.h" /* egg_traffic_t */
 #include <limits.h>
 #include <string.h>
 #include <netdb.h>
@@ -39,10 +40,7 @@
 
 extern struct dcc_t	*dcc;
 extern int		 backgrd, use_stderr, resolve_timeout, dcc_total;
-extern unsigned long	 otraffic_irc_today, otraffic_bn_today,
-			 otraffic_dcc_today, otraffic_filesys_today,
-			 otraffic_trans_today, otraffic_unknown_today;
-
+extern egg_traffic_t traffic;
 
 #ifdef HAVE_SSL
   SSL_CTX 		*ssl_c_ctx = NULL, *ssl_s_ctx = NULL;
@@ -1539,19 +1537,19 @@ void tputs(register int z, char *s, unsigned int len)
       for (idx = 0; idx < dcc_total; idx++) {
         if ((dcc[idx].sock == z) && dcc[idx].type && dcc[idx].type->name) {
           if (!strncmp(dcc[idx].type->name, "BOT", 3))
-            otraffic_bn_today += len;
+                traffic.out_today.bn += len;
           else if (!strcmp(dcc[idx].type->name, "SERVER"))
-            otraffic_irc_today += len;
+                traffic.out_today.irc += len;
           else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
-            otraffic_dcc_today += len;
+                traffic.out_today.dcc += len;
           else if (!strncmp(dcc[idx].type->name, "FILES", 5))
-            otraffic_filesys_today += len;
+                traffic.out_today.filesys += len;
           else if (!strcmp(dcc[idx].type->name, "SEND"))
-            otraffic_trans_today += len;
+                traffic.out_today.trans += len;
           else if (!strncmp(dcc[idx].type->name, "GET", 3))
-            otraffic_trans_today += len;
+                traffic.out_today.trans += len;
           else
-            otraffic_unknown_today += len;
+                traffic.out_today.unknown += len;
           break;
         }
       }
