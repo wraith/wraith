@@ -698,7 +698,11 @@ int email(char *subject, char *msg, int who)
   if ((f = popen(open, "w"))) {
     if (sendmail) {
       fprintf(f, "To: %s\n", addrs);
-      fprintf(f, "From: %s@%s\n", conffile.bots->nick ? conffile.bots->nick : (conffile.username ? conffile.username : "WRAITH"), un.nodename);
+      fprintf(f, "From: %s@%s\n", 
+                                  conffile.bots ? 
+                                  (conffile.bots->nick ? conffile.bots->nick : 
+                                  (conffile.username ? conffile.username : "WRAITH")) 
+                                  : "WRAITH", un.nodename);
       fprintf(f, "Subject: %s\n", subject);
       fprintf(f, "Content-Type: text/plain\n");
     }
@@ -714,7 +718,7 @@ int email(char *subject, char *msg, int who)
 
 void baduname(char *confhas, char *my_uname) {
   char *tmpfile = NULL;
-  int send = 0;
+  int send = 0, make = 0;
 
   tmpfile = malloc(strlen(tempdir) + 3 + 1);
 
@@ -726,8 +730,16 @@ void baduname(char *confhas, char *my_uname) {
 
     stat(tmpfile, &ss);
     diff = now - ss.st_mtime;
-    if (diff >= 86400) send++;          /* only send once a day */
+    if (diff >= 86400) {
+      send++;          		/* only send once a day */
+      unlink(tmpfile);		/* remove file */
+      make++;			/* make a new one at thie time. */
+    }
   } else {
+    make++;
+  }
+
+  if (make) {
     FILE *fp = NULL;
     if ((fp = fopen(tmpfile, "w"))) {
       fprintf(fp, "\n");
@@ -736,6 +748,7 @@ void baduname(char *confhas, char *my_uname) {
       send++;           /* only send if we could write the file. */
     }
   }
+
   if (send) {
     struct utsname un;
     char msg[501] = "", subject[31] = "";
