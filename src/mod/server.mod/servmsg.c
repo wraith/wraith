@@ -707,8 +707,6 @@ static int gotwall(char *from, char *msg)
 
 static void server_10secondly()
 {
-  char *alt;
-
   if (!server_online)
     return;
   if (keepnick) {
@@ -717,11 +715,7 @@ static void server_10secondly()
      */
     if (strncmp(botname, origbotname, strlen(botname))) {
       /* See if my nickname is in use and if if my nick is right.  */
-	alt = get_altbotnick();
-	if (alt[0] && egg_strcasecmp (botname, alt))
-	  dprintf(DP_SERVER, "ISON :%s %s %s\n", botname, origbotname, alt);
-	else
-          dprintf(DP_SERVER, "ISON :%s %s\n", botname, origbotname);
+      dprintf(DP_SERVER, "ISON :%s %s\n", botname, origbotname);
     }
   }
 }
@@ -771,8 +765,8 @@ static int gotpong(char *from, char *msg)
  */
 static void got303(char *from, char *msg)
 {
-  char *tmp, *alt;
-  int ison_orig = 0, ison_alt = 0;
+  char *tmp;
+  int ison_orig = 0;
 
   if (!keepnick ||
       !strncmp(botname, origbotname, strlen(botname))) {
@@ -780,22 +774,16 @@ static void got303(char *from, char *msg)
   }
   newsplit(&msg);
   fixcolon(msg);
-  alt = get_altbotnick();
   tmp = newsplit(&msg);
   if (tmp[0] && !rfc_casecmp(botname, tmp)) {
     while ((tmp = newsplit(&msg))[0]) { /* no, it's NOT == */
       if (!rfc_casecmp(tmp, origbotname))
         ison_orig = 1;
-      else if (alt[0] && !rfc_casecmp(tmp, alt))
-        ison_alt = 1;
     }
     if (!ison_orig) {
       if (!nick_juped)
         putlog(LOG_MISC, "*", IRC_GETORIGNICK, origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
-    } else if (alt[0] && !ison_alt && rfc_casecmp(botname, alt)) {
-      putlog(LOG_MISC, "*", IRC_GETALTNICK, alt);
-      dprintf(DP_SERVER, "NICK %s\n", alt);
     }
   }
 }
@@ -921,7 +909,7 @@ static int goterror(char *from, char *msg)
  */
 static int gotnick(char *from, char *msg)
 {
-  char *nick, *alt = get_altbotnick();
+  char *nick;
   struct userrec *u;
 
   u = get_user_by_host(from);
@@ -935,18 +923,11 @@ static int gotnick(char *from, char *msg)
     if (!strcmp(msg, origbotname)) {
       putlog(LOG_SERV | LOG_MISC, "*", "Regained nickname '%s'.", msg);
       nick_juped = 0;
-    } else if (alt[0] && !strcmp(msg, alt))
-      putlog(LOG_SERV | LOG_MISC, "*", "Regained alternate nickname '%s'.",
-	     msg);
-    else if (keepnick && strcmp(nick, msg)) {
+    } else if (keepnick && strcmp(nick, msg)) {
       putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
       if (!rfc_casecmp(nick, origbotname)) {
         putlog(LOG_MISC, "*", IRC_GETORIGNICK, origbotname);
         dprintf(DP_SERVER, "NICK %s\n", origbotname);
-      } else if (alt[0] && !rfc_casecmp(nick, alt)
-		 && egg_strcasecmp(botname, origbotname)) {
-        putlog(LOG_MISC, "*", IRC_GETALTNICK, alt);
-        dprintf(DP_SERVER, "NICK %s\n", alt);
       }
     } else
       putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
@@ -955,10 +936,6 @@ static int gotnick(char *from, char *msg)
     if (!rfc_casecmp(nick, origbotname)) {
       putlog(LOG_MISC, "*", IRC_GETORIGNICK, origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
-    } else if (alt[0] && !rfc_casecmp(nick, alt) &&
-	    egg_strcasecmp(botname, origbotname)) {
-      putlog(LOG_MISC, "*", IRC_GETALTNICK, altnick);
-      dprintf(DP_SERVER, "NICK %s\n", altnick);
     }
   }
   return 0;
@@ -988,8 +965,6 @@ static int gotmode(char *from, char *msg)
 
 static void disconnect_server(int idx)
 {
-  if (server_online > 0)
-    check_tcl_event("disconnect-server");
   server_online = 0;
   if (dcc[idx].sock >= 0)
     killsock(dcc[idx].sock);
@@ -1294,9 +1269,6 @@ static void connect_server(void)
       return;
     }
 
-    if (connectserver[0])	/* drummer */
-      do_tcl("connect-server", connectserver);
-    check_tcl_event("connect-server");
     next_server(&curserv, botserver, &botserverport, pass);
     putlog(LOG_SERV, "*", "%s %s:%d", IRC_SERVERTRY, botserver, botserverport);
 

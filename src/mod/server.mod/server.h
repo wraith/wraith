@@ -48,7 +48,7 @@
 #define H_ctcr (*(p_tcl_bind_list *)(server_funcs[34]))
 /* 35 - 38 */
 #define ctcp_reply ((char *)(server_funcs[35]))
-#define get_altbotnick ((char *(*)(void))(server_funcs[36]))
+/* 36 UNUSED */
 #define nick_len (*(int *)(server_funcs[37]))
 #define server_lag (*(int *)(server_funcs[39]))
 #define curserv (*(int *)(server_funcs[40))

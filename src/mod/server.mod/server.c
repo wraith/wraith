@@ -20,8 +20,6 @@ static int newserverport;	/* new server port? */
 static char newserverpass[121];	/* new server password? */
 static time_t trying_server;	/* trying to connect to a server right now? */
 static int server_lag;		/* how lagged (in seconds) is the server? */
-static char altnick[NICKLEN];	/* possible alternate nickname to use */
-static char raltnick[NICKLEN];	/* random nick created from altnick */
 static int curserv;		/* current position in server list: */
 static int flud_thr;		/* msg flood threshold */
 static int flud_time;		/* msg flood time */
@@ -59,8 +57,6 @@ static int answer_ctcp;		/* answer how many stacked ctcp's ? */
 static int lowercase_ctcp;	/* answer lowercase CTCP's (non-standard) */
 static int check_mode_r;	/* check for IRCNET +r modes */
 static int net_type;
-static char connectserver[121];	/* what, if anything, to do before connect
-				   to the server */
 static int resolvserv;		/* in the process of resolving a server host */
 static int double_mode;		/* allow a msgs to be twice in a queue? */
 static int double_server;
@@ -87,7 +83,6 @@ static p_tcl_bind_list H_msgc;
 static void empty_msgq(void);
 static void next_server(int *, char *, unsigned int *, char *);
 static void disconnect_server(int);
-static char *get_altbotnick(void);
 static int calc_penalty(char *);
 static int fast_deq(int);
 static char *splitnicks(char **);
@@ -1352,46 +1347,6 @@ static char *nick_change(ClientData cdata, Tcl_Interp *irp, char *name1,
   return NULL;
 }
 
-/* Replace all '?'s in s with a random number.
- */
-static void rand_nick(char *nick)
-{
-  register char *p = nick;
-
-  while ((p = strchr(p, '?')) != NULL) {
-    *p = '0' + random() % 10;
-    p++;
-  }
-}
-
-/* Return the alternative bot nick.
- */
-static char *get_altbotnick(void)
-{
-  /* A random-number nick? */
-  if (strchr(altnick, '?')) {
-    if (!raltnick[0]) {
-      strncpyz(raltnick, altnick, NICKLEN);
-      rand_nick(raltnick);
-    }
-    return raltnick;
-  } else
-    return altnick;
-}
-
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *altnick_change(ClientData cdata, Tcl_Interp *irp,
-                            CONST char *name1, CONST char *name2, int flags)
-#else
-static char *altnick_change(ClientData cdata, Tcl_Interp *irp, char *name1,
-                            char *name2, int flags)
-#endif
-{
-  /* Always unset raltnick. Will be regenerated when needed. */
-  raltnick[0] = 0;
-  return NULL;
-}
-
 #if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
 static char *traced_server(ClientData cdata, Tcl_Interp *irp,
                            CONST char *name1, CONST char *name2, int flags)
@@ -1519,9 +1474,7 @@ Context;
 static tcl_strings my_tcl_strings[] =
 {
   {"botnick",			NULL,		0,		STR_PROTECT},
-  {"altnick",			altnick,	NICKMAX,	0},
   {"realname",			botrealname,	80,		0},
-  {"connect-server",		connectserver,	120,		0},
   {"stackable-commands",	stackablecmds,	510,		0},
   {"stackable2-commands",	stackable2cmds,	510,		0},
   {NULL,			NULL,		0,		0}
@@ -1768,12 +1721,7 @@ static void server_prerehash()
 static void server_postrehash()
 {
   strncpyz(botname, origbotname, NICKLEN);
-//  if (!botname[0])
-//    fatal("NO BOT NAME.", 0);
-//  if (serverlist == NULL)
-//    fatal("NO SERVER.", 0);
-    if (oldnick[0] && !rfc_casecmp(oldnick, botname)
-       && !rfc_casecmp(oldnick, get_altbotnick())) {
+  if (oldnick[0] && !rfc_casecmp(oldnick, botname)) {
     /* Change botname back, don't be premature. */
     strcpy(botname, oldnick);
     dprintf(DP_SERVER, "NICK %s\n", origbotname);
@@ -1837,8 +1785,6 @@ static void server_report(int idx, int details)
   if (details) {
     if (min_servs)
       dprintf(idx, "    Requiring a net of at least %d server(s)\n", min_servs);
-    if (connectserver[0])
-      dprintf(idx, "    Before connect, I do: %s\n", connectserver);
     dprintf(idx, "    Flood is: %d msg/%ds, %d ctcp/%ds\n",
 	    flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time);
   }
@@ -1944,7 +1890,7 @@ static Function server_table[] =
   (Function) & H_ctcr,		/* p_tcl_bind_list			*/
   (Function) ctcp_reply,
   /* 36 - 38 */
-  (Function) get_altbotnick,	/* char *				*/
+  (Function) 0,	
   (Function) & nick_len,	/* int					*/
   (Function) 0,
   (Function) & server_lag, /* int */
@@ -1977,14 +1923,11 @@ char *server_start(Function *global_funcs)
   botname[0] = 0;
   trying_server = 0L;
   server_lag = 0;
-  altnick[0] = 0;
-  raltnick[0] = 0;
   curserv = 0;
   flud_thr = 5;
   flud_time = 60;
   flud_ctcp_thr = 3;
   flud_ctcp_time = 60;
-  connectserver[0] = 0;		/* drummer */
   botuserhost[0] = 0;
   keepnick = 1;
   check_stoned = 1;
@@ -2039,8 +1982,6 @@ char *server_start(Function *global_funcs)
   Tcl_TraceVar(interp, "nick",
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       nick_change, NULL);
-  Tcl_TraceVar(interp, "altnick",
-	       TCL_TRACE_WRITES | TCL_TRACE_UNSETS, altnick_change, NULL);
   Tcl_TraceVar(interp, "botname",
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_botname, NULL);
