@@ -532,7 +532,9 @@ static void request_op(struct chanset_t *chan)
 	strcpy(myserv, ml->server);
   }
   if (!i) {
-    putlog(LOG_GETIN, "*", STR("No one to ask for ops on %s"), chan->dname);
+    /* FIXME: This notice floods when bots arent in chans..*/
+    if (channel_active(chan) && !channel_pending(chan)
+      putlog(LOG_GETIN, "*", STR("No one to ask for ops on %s"), chan->dname);
     return;
   }
 

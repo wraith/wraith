@@ -17,7 +17,6 @@ static int reversing = 0;
 #define VOICE   0x10
 #define EXEMPT  0x20
 #define INVITE  0x40
-#define CHHOP   0x80
 
 static struct flag_record user   = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
@@ -42,7 +41,9 @@ static int do_op(char *nick, struct chanset_t *chan, int force)
   return 1;
 }
 
-#define NEW_ADDMODE 1
+/* #define NEW_ADDMODE 1 */
+#undef NEW_ADDMODE
+
 #ifdef NEW_ADDMODE
 void dequeue_op_deop(struct chanset_t * chan);
 
@@ -126,9 +127,8 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
       *p++ = ((chan->cmode[i].type & BAN) ? 'b' :
               ((chan->cmode[i].type & CHOP) ? 'o' :
-               ((chan->cmode[i].type & CHHOP) ? 'h' :
-                ((chan->cmode[i].type & EXEMPT) ? 'e' :
-                 ((chan->cmode[i].type & INVITE) ? 'I' : 'v')))));
+               ((chan->cmode[i].type & EXEMPT) ? 'e' :
+                ((chan->cmode[i].type & INVITE) ? 'I' : 'v'))));
 
       postsize -= egg_strcatn(post, chan->cmode[i].op, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
@@ -148,9 +148,8 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
       *p++ = ((chan->cmode[i].type & BAN) ? 'b' :
               ((chan->cmode[i].type & CHOP) ? 'o' :
-               ((chan->cmode[i].type & CHHOP) ? 'h' :
-                ((chan->cmode[i].type & EXEMPT) ? 'e' :
-                 ((chan->cmode[i].type & INVITE) ? 'I' : 'v')))));
+               ((chan->cmode[i].type & EXEMPT) ? 'e' :
+                ((chan->cmode[i].type & INVITE) ? 'I' : 'v'))));
 
       postsize -= egg_strcatn(post, chan->cmode[i].op, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
@@ -173,8 +172,13 @@ static void flush_mode(struct chanset_t *chan, int pri)
     egg_strcatn(out, post, sizeof(out));
   }
   if (out[0]) {
-    if (pri == QUICK)
-      dprintf(DP_MODE, "MODE %s %s\n", chan->name, out);
+    if (pri == QUICK) {
+      char outbuf[201] = "";
+ 
+      sprintf(outbuf, "MODE %s %s\n", chan->name, out);
+      tputs(serv, outbuf, strlen(outbuf));
+      /* dprintf(DP_MODE, "MODE %s %s\n", chan->name, out); */
+    }
     else
       dprintf(DP_SERVER, "MODE %s %s\n", chan->name, out);
   }
@@ -241,6 +245,7 @@ void dequeue_op_deop(struct chanset_t * chan) {
   if (lines[0])
     dprintf(DP_SERVER, lines);
 }
+
 void queue_op(struct chanset_t *chan, char *op) {
   int n;
   memberlist *m = NULL;
@@ -323,13 +328,12 @@ void add_mode(struct chanset_t *chan, char plus, char mode, char *op)
   } else if (prevent_mixing && chan->compat == 2)
     flush_mode(chan, NORMAL);
 
-  if (mode == 'o' || mode == 'h' || mode == 'b' || mode == 'v' || mode == 'e' || mode == 'I') {
+  if (mode == 'o' || mode == 'b' || mode == 'v' || mode == 'e' || mode == 'I') {
     type = (plus == '+' ? PLUS : MINUS) |
 	   (mode == 'o' ? CHOP :
-	    (mode == 'h' ? CHHOP :
-	     (mode == 'b' ? BAN :
-	      (mode == 'v' ? VOICE :
-	       (mode == 'e' ? EXEMPT : INVITE)))));
+           (mode == 'b' ? BAN :
+	   (mode == 'v' ? VOICE :
+	   (mode == 'e' ? EXEMPT : INVITE))));
 
     /*
      * FIXME: Some networks remove overlapped bans, IrcNet does not
@@ -449,9 +453,12 @@ static void flush_mode(struct chanset_t *chan, int pri)
   char *p = NULL, out[512] = "", post[512] = "";
   size_t postsize = sizeof(post);
   int i, plus = 2;              /* 0 = '-', 1 = '+', 2 = none */
+
+/* dequeue_op_deop(chan); */
   p = out;
   post[0] = 0, postsize--;
 
+/* new does +o first.. */
   if (chan->mns[0]) {
     *p++ = '-', plus = 0;
     for (i = 0; i < strlen(chan->mns); i++)
@@ -493,8 +500,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
     *p++ = 'l';
 
     /* 'sizeof(post) - 1' is used because we want to overwrite the old null */
-    postsize -=
-      sprintf(&post[(sizeof(post) - 1) - postsize], "%d ", chan->limit);
+    postsize -= sprintf(&post[(sizeof(post) - 1) - postsize], "%d ", chan->limit);
 
     chan->limit = 0;
   }
@@ -514,7 +520,8 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
   /* Do -{b,e,I} before +{b,e,I} to avoid the server ignoring overlaps */
   for (i = 0; i < modesperline; i++) {
-    if ((chan->cmode[i].type & MINUS) && postsize > strlen(chan->cmode[i].op)) {
+    if ((chan->cmode[i].type & MINUS) && 
+        postsize > strlen(chan->cmode[i].op)) {
       if (plus) {
         *p++ = '-', plus = 0;
       }
@@ -534,7 +541,8 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
   /* now do all the + modes... */
   for (i = 0; i < modesperline; i++) {
-    if ((chan->cmode[i].type & PLUS) && postsize > strlen(chan->cmode[i].op)) {
+    if ((chan->cmode[i].type & PLUS) && 
+        postsize > strlen(chan->cmode[i].op)) {
       if (plus != 1) {
         *p++ = '+', plus = 1;
       }
@@ -566,8 +574,13 @@ static void flush_mode(struct chanset_t *chan, int pri)
     egg_strcatn(out, post, sizeof(out));
   }
   if (out[0]) {
-    if (pri == QUICK)
-      dprintf(DP_MODE, "MODE %s %s\n", chan->name, out);
+    if (pri == QUICK) {
+      char outbuf[201] = "";
+ 
+      sprintf(outbuf, "MODE %s %s\n", chan->name, out);
+      tputs(serv, outbuf, strlen(outbuf));
+      /* dprintf(DP_MODE, "MODE %s %s\n", chan->name, out); */
+    }
     else
       dprintf(DP_SERVER, "MODE %s %s\n", chan->name, out);
   }
@@ -582,12 +595,10 @@ void add_mode(struct chanset_t *chan, char plus, char mode, char *op)
   memberlist *mx = NULL;
   char s[21] = "";
 
-  /* Some IRCds do not allow halfops to set certian modes. The modes halfops
-   * are not allowed to set can be changed in chan.h. */
   if (!me_op(chan))
     return;
 
-  if (mode == 'o' || mode == 'h' || mode == 'v') {
+  if (mode == 'o' || mode == 'v') {
     mx = ismember(chan, op);
     if (!mx)
       return;
@@ -625,8 +636,12 @@ void add_mode(struct chanset_t *chan, char plus, char mode, char *op)
     flush_mode(chan, NORMAL);
 
   if (mode == 'o' || mode == 'b' || mode == 'v' || mode == 'e' || mode == 'I') {
-    type = (plus == '+' ? PLUS : MINUS) | (mode == 'o' ? CHOP : (mode == 'b' ? 
-            BAN : (mode == 'v' ? VOICE : (mode == 'e' ? EXEMPT : INVITE))));
+    type = (plus == '+' ? PLUS : MINUS) | 
+           (mode == 'o' ? CHOP : 
+           (mode == 'b' ? BAN : 
+           (mode == 'v' ? VOICE : 
+           (mode == 'e' ? EXEMPT : INVITE))));
+
     /*
      * FIXME: Some networks remove overlapped bans,
      *        IRCnet does not (poptix/drummer)
@@ -691,7 +706,6 @@ void add_mode(struct chanset_t *chan, char plus, char mode, char *op)
       free(chan->key);
     chan->key = (char *) calloc(1, strlen(op) + 1);
     strcpy(chan->key, op);
-
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
@@ -811,10 +825,14 @@ static void got_op(struct chanset_t *chan, char *nick, char *from,
     /* deop if they are +d or it is +bitch */
     if ( chk_deop(victim, chan) ||
         (!loading && userlist && channel_bitch(chan) && !chk_op(victim, chan)) ) {	/* chk_op covers +private */
+//      char outbuf[101] = "";
+
       /* if (target_priority(chan, m, 1)) */
-/*        dprintf(DP_MODE, "MODE %s -o %s\n", chan->dname, who); */
-        add_mode(chan, '-', 'o', who);
+/*        dprintf(DP_MODE, "MODE %s -o %s\n", chan->name, who); */
+add_mode(chan, '-', 'o', who);
 flush_mode(chan, QUICK);
+//      sprintf(outbuf, "MODE %s -o %s\n", chan->name, who);
+//      tputs(serv, outbuf, strlen(outbuf));
     } else if (reversing) {
       add_mode(chan, '-', 'o', who);
     }
