@@ -51,9 +51,9 @@ int    			 cmdi = 0;
 static char		 *btos(unsigned long);
 
 #ifdef HUB
-static void tell_who(struct userrec *u, int idx, int chan)
+static void tell_who(int idx, int chan)
 {
-  int i, k, ok = 0, atr = u ? u->flags : 0;
+  int i, k, ok = 0, atr = dcc[idx].user ? dcc[idx].user->flags : 0;
   int nicklen;
   char format[81] = "";
 #ifdef HUB
@@ -856,7 +856,7 @@ static void cmd_who(int idx, char *par)
     }
     putlog(LOG_CMDS, "*", "#%s# who %s", dcc[idx].nick, par);
     if (!egg_strcasecmp(par, conf.bot->nick))
-      tell_who(dcc[idx].user, idx, dcc[idx].u.chat->channel);
+      tell_who(idx, dcc[idx].u.chat->channel);
     else {
       i = nextbot(par);
       if (i < 0) {
@@ -873,9 +873,9 @@ static void cmd_who(int idx, char *par)
   } else {
     putlog(LOG_CMDS, "*", "#%s# who", dcc[idx].nick);
     if (dcc[idx].u.chat->channel < 0)
-      tell_who(dcc[idx].user, idx, 0);
+      tell_who(idx, 0);
     else
-      tell_who(dcc[idx].user, idx, dcc[idx].u.chat->channel);
+      tell_who(idx, dcc[idx].u.chat->channel);
   }
 }
 #endif /* HUB */
@@ -890,7 +890,7 @@ static void cmd_whois(int idx, char *par)
   tell_user_ident(idx, par);
 }
 
-static void match(struct userrec *u, int idx, char *par, int isbot)
+static void match(int idx, char *par, int isbot)
 {
   int start = 1, limit = 20;
   char *s = NULL, *s1 = NULL, *chname = NULL;
@@ -920,12 +920,12 @@ static void match(struct userrec *u, int idx, char *par, int isbot)
 
 static void cmd_matchbot(int idx, char *par)
 {
-  match(dcc[idx].user, idx, par, 1);
+  match(idx, par, 1);
 }
 
 static void cmd_match(int idx, char *par)
 {
-  match(dcc[idx].user, idx, par, 0);
+  match(idx, par, 0);
 }
 
 static void cmd_update(int idx, char *par)
