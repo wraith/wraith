@@ -322,7 +322,7 @@ static void cmd_config(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("Usage: config [name [value|-]]\n"));
     dprintf(idx, STR("Defined config entry names:\n"));
     cnt = 0;
-    for (i=0;i<cfg_count;i++) {
+    for (i = 0; i < cfg_count; i++) {
       if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
 	if (!cnt) {
           outbuf = nrealloc(outbuf, 2 + 1);
@@ -333,7 +333,7 @@ static void cmd_config(struct userrec *u, int idx, char *par)
 	cnt++;
 	if (cnt == 10) {
 	  dprintf(idx, "%s\n", outbuf);
-	  cnt=0;
+	  cnt = 0;
 	}
       }
     }
