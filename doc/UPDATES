@@ -18,6 +18,9 @@ This is a summary of ChangeLog basically.
 14.Several msgc cmds were replying incorrectly, fixed.
 15.Fixed the bad uname email not giving the login.
 16.SIGTERM now kills the bot.
+17.Cmds: voice, devoice, op, deop, invite, mop, kick, kickban now check if the user 
+   issuing the cmd has access for the channel.
+18.cmd_getkey now recognizes +private.
 
 1.1.5
 
