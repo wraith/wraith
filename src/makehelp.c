@@ -126,7 +126,7 @@ help_t help[] = \n\
     if ((*buffer)) {
       if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
       if ((skipline(buffer, &skip))) continue;
-      if (buffer[0] == ':') { //New cmd 
+      if (buffer[0] == ':') { /* New cmd */
         char *ifdef = malloc(strlen(buffer) + 1), *p;
         int cl = 0, doleaf = 0, dohub = 0;
 

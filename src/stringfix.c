@@ -109,7 +109,7 @@ void processline(char *line)
    *out;
 
   strcpy(tmpin, line);
-  bzero((char *) &tmpin[strlen(tmpin)], 20);
+  memset((char *) &tmpin[strlen(tmpin)], 20, 0);
   in = tmpin;
   out = tmpout;
   if (*in) {

@@ -203,13 +203,13 @@ char *randstring(int len)
   static char s[100];
 
   for (j = 0; j < len; j++) {
-    r = random();
+    r = rand();
     if (r % 3 == 0)
-      s[j] = '0' + (random() % 10);
+      s[j] = '0' + (rand() % 10);
     else if (r % 3 == 1)
-      s[j] = 'a' + (random() % 26);
+      s[j] = 'a' + (rand() % 26);
     else if (r % 3 == 2)
-      s[j] = 'A' + (random() % 26);
+      s[j] = 'A' + (rand() % 26);
   }
   s[len] = '\0';
   return s;
@@ -335,7 +335,7 @@ int loadconfig(char **argv) {
     char salt1[33], salt2[17];
     time_t now = time(NULL);
     salt1[0] = salt2[0] = 0;
-    srandom(now % (getpid() + getppid()));
+    srand(now % (getpid() + getppid()));
     printf("Creating Salts");
     if ((f = fopen("pack/pack.cfg", "a")) == NULL) {
       printf("Cannot created Salt-File.. aborting\n");
