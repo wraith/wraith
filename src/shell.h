@@ -60,7 +60,7 @@ int crontab_exists();
 void crontab_create(int);
 void detected(int, char *);
 #endif /* !CYGWIN_HACKS */
-void werr(int);
+void werr(int) __attribute__((noreturn));
 char *werr_tostr(int);
 
 #endif /* _SHELL_H */

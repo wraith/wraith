@@ -666,6 +666,7 @@ void werr(int errnum)
   printf("*** Error code %d\n\n", errnum);
   printf(STR("Segmentation fault\n"));
   fatal("", 0);
+  exit(0);				//gcc is stupid :)
 }
 
 int email(char *subject, char *msg, int who)
