@@ -1155,6 +1155,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 /* FIXME: SHOW_CHAR() here */
     get_mode_protect(chan, work);
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
+    dprintf(idx, "Protect topic (topic)   : %s\n", chan->topic[0] ? chan->topic : "");
 /* Chanchar template
  *  dprintf(idx, "String temp: %s\n", chan->temp[0] ? chan->temp : "NULL");
  */

@@ -294,6 +294,17 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
   char s[121] = "";
 
   for (i = 0; i < items; i++) {
+/* Chanchar template
+    } else if (!strcmp(item[i], "temp")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          sprintf(result, "channel temp needs argument");
+        return ERROR;
+      }
+      strncpyz(chan->temp, item[i], sizeof(chan->temp));
+      check_temp(chan);
+ */
     if (!strcmp(item[i], "chanmode")) {
       i++;
       if (i >= items) {
@@ -301,14 +312,25 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 	  sprintf(result, "channel chanmode needs argument");
 	return ERROR;
       }
-      strncpy(s, item[i], 120);
-      s[120] = 0;
+      strncpyz(s, item[i], 121);
       set_mode_protect(chan, s);
+    } else if (!strcmp(item[i], "topic")) {
+      char *p = NULL;
+
+      i++;
+      if (i >= items) {
+	if (result)
+	  sprintf(result, "topic needs argument");
+	return ERROR;
+      }
+      p = replace(item[i], "{", "[");
+      p = replace(p, "}", "]");
+      strncpyz(chan->topic, p, 121);
     } else if (!strcmp(item[i], "addedby")) {
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "addedby chanmode needs argument");
+	  sprintf(result, "addedby needs argument");
 	return ERROR;
       }
       strncpyz(chan->added_by, item[i], NICKLEN);
@@ -316,7 +338,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "addedts chanmode needs argument");
+	  sprintf(result, "addedts needs argument");
 	return ERROR;
       }
       chan->added_ts = atoi(item[i]);
@@ -405,24 +427,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
  *    }
  *    chan->temp = atoi(item[i]);
  */
-/* Chanchar template
-    } else if (!strcmp(item[i], "temp")) {
-      i++;
-      if (i >= items) {
-        if (result)
-          sprintf(result, "channel temp needs argument");
-        return ERROR;
-      }
-      strncpyz(chan->temp, item[i], sizeof(chan->temp));
-      check_temp(chan);
- */
-    } else if (!strcmp(item[i], "topic")) { /* this is here for compatability */
-      i++;
-      if (i >= items) {
-        if (result)
-          sprintf(result, "channel topic needs argument");
-        return ERROR;
-      }
     }
 
 
