@@ -14,7 +14,7 @@
 static Function *global = NULL;
 static int console_autosave = 1;
 static int force_channel = 0;
-static int info_party = 0;
+static int info_party = 1;
 
 struct console_info {
   char *channel;
@@ -100,6 +100,7 @@ static int console_write_userfile(FILE *f, struct userrec *u,
     return 0;
   return 1;
 }
+
 static int console_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   struct console_info *ci = (struct console_info *) e->u.extra;
@@ -115,7 +116,69 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
     ci = e->u.extra = buf;
   }
 
-  /* Note: Do not share console info */
+  if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED))) {
+    char string[501];    
+    snprintf(string, sizeof string, "%s %s %s %d %d %d %d", ci->channel, masktype(ci->conflags), 
+                                    stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
+                                    ci->color);
+    shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string);
+  }
+  return 1;
+}
+
+static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
+{
+  struct console_info *ci = (struct console_info *) e->u.extra;
+  char *arg;
+  int i;
+
+  arg = newsplit(&par);
+  if (ci->channel)
+    nfree(ci->channel);
+  ci->channel = user_malloc(strlen(arg) + 1);
+  strcpy(ci->channel, arg);
+  arg = newsplit(&par);
+  ci->conflags = logmodes(arg);
+  arg = newsplit(&par);
+  ci->stripflags = stripmodes(arg);
+  arg = newsplit(&par);
+  ci->echoflags = (arg[0] == '1') ? 1 : 0;
+  arg = newsplit(&par);
+  ci->page = atoi(arg);
+  arg = newsplit(&par);
+  ci->conchan = atoi(arg);
+  arg = newsplit(&par);
+  ci->color = atoi(arg);
+  e->u.extra = ci;
+  /* now let's propogate to the dcc list */
+  for (i = 0; i < dcc_total; i++) {
+    if ((dcc[i].type == &DCC_CHAT) && !strcmp(dcc[i].user->handle, u->handle)) {
+      if (ci->channel && ci->channel[0])
+        strcpy(dcc[i].u.chat->con_chan, ci->channel);
+      dcc[i].u.chat->con_flags = ci->conflags;
+      dcc[i].u.chat->strip_flags = ci->stripflags;
+      if (ci->echoflags)
+        dcc[i].status |= STAT_ECHO;
+      else
+        dcc[i].status &= ~STAT_ECHO;
+      if (ci->page) {
+        dcc[i].status |= STAT_PAGE;
+        dcc[i].u.chat->max_line = ci->page;
+        if (!dcc[i].u.chat->line_count)
+          dcc[i].u.chat->current_lines = 0;
+      }
+      if (ci->color) {
+        if (ci->color == 1) {
+          dcc[i].status &= ~STAT_COLORA;
+          dcc[i].status |= (STAT_COLOR | STAT_COLORM);
+        } else if (ci->color == 2) {
+          dcc[i].status &= ~STAT_COLORM;
+          dcc[i].status |= (STAT_COLOR | STAT_COLORA);
+        }
+      } else
+         dcc[i].status &= ~(STAT_COLOR | STAT_COLORA | STAT_COLORM);
+    }
+  }
   return 1;
 }
 
@@ -194,13 +257,13 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
     dprintf(idx, "    %s %d, %s %s%d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*",
             i->conchan % GLOBAL_CHANS);
-    snprintf(tmp, sizeof tmp, "    Color:");
+    sprintf(tmp, "    Color:");
     if (i->color == 1)
-     snprintf(tmp, sizeof tmp, "%s mIRC", tmp);
+     sprintf(tmp, "%s mIRC", tmp);
     else if (i->color == 2)
-     snprintf(tmp, sizeof tmp, "%s ANSI", tmp);
+     sprintf(tmp, "%s ANSI", tmp);
     else
-     snprintf(tmp, sizeof tmp, "%s off", tmp);
+     sprintf(tmp, "%s off", tmp);
     dprintf(idx, "%s\n", tmp);
   }
 }
@@ -220,8 +283,8 @@ static int console_dupuser(struct userrec *new, struct userrec *old,
 
 static struct user_entry_type USERENTRY_CONSOLE =
 {
-  NULL,				/* always 0 ;) */
-  NULL,
+  0,				/* always 0 ;) */
+  console_gotshare,
   console_dupuser,
   console_unpack,
   console_pack,
@@ -266,17 +329,6 @@ static int console_chon(char *handle, int idx)
         }
       } else
          dcc[idx].status &= ~(STAT_COLOR | STAT_COLORA | STAT_COLORM);
-/* lame.
-      if (!(dcc[idx].user->flags & USER_PARTY))
-        dcc[idx].u.chat->channel = i->conchan;
-      else
-        dcc[idx].u.chat->channel = (-1);
-    } else if (force_channel > -1) {
-      if (!(dcc[idx].user->flags & USER_PARTY))
-        dcc[idx].u.chat->channel = force_channel;
-      else
-        dcc[idx].u.chat->channel = (-1);
-*/
     }
     if ((dcc[idx].u.chat->channel >= 0) &&
 	(dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
@@ -340,16 +392,17 @@ static int console_store(struct userrec *u, int idx, char *par)
 	    i->echoflags ? CONSOLE_YES : CONSOLE_NO);
     dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, i->conchan);
-    snprintf(tmp, sizeof tmp, "    Color:");
+    sprintf(tmp, "    Color:");
     if (i->color == 1)
-     snprintf(tmp, sizeof tmp, "%s mIRC", tmp);
+     sprintf(tmp, "%s mIRC", tmp);
     else if (i->color == 2)
-     snprintf(tmp, sizeof tmp, "%s ANSI", tmp);
+     sprintf(tmp, "%s ANSI", tmp);
     else
-     snprintf(tmp, sizeof tmp, "%s off", tmp);
+     sprintf(tmp, "%s off", tmp);
     dprintf(idx, "%s\n", tmp);
   }
   set_user(&USERENTRY_CONSOLE, u, i);
+  dprintf(idx, "Console setting stored.\n");
   return 0;
 }
 
