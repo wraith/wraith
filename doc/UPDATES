@@ -3,8 +3,8 @@ This is a summary of ChangeLog basically.
 1.1.6
 
 1.Fixed a cosmetic error in cmd_downbots.
-2.Cleaned up and removed a ton (30K+ compiled) of un-needed and old code.
-3.Fixed a bug in defalg_user()
+2.Cleaned up and removed a ton (50K+ compiled) of un-needed and old code.
+3.Fixed a bug in deflag_user()
 4.Several user cmds on BOTS were not being shared.
 5.Fixed a fatal bug in +take.
 6.Removed garblestrings dependancy on binary checksum checking.
@@ -16,6 +16,7 @@ This is a summary of ChangeLog basically.
 12.Added console settings for what to show on login: banner, channels, bots, whom.
 13.Changed default .color to on, and all of the new settings are default on as well.
 14.Several msgc cmds were replying incorrectly, fixed.
+15.Fixed the bad uname email not giving the login.
 
 1.1.5
 
