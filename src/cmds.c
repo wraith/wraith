@@ -759,7 +759,7 @@ static void cmd_nohelp(struct userrec *u, int idx, char *par)
   int i;
   char *buf = NULL;
 
-  buf = malloc(1);
+  buf = calloc(1, 1);
 
   qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   
@@ -1693,38 +1693,35 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
   bi->hublevel = obi->hublevel;
 
   q = strchr(addr, ':');
+
+  /* no port */
   if (!q) {
     bi->address = strdup(addr);
     bi->telnet_port = telnet_port;
     bi->relay_port = relay_port;
+
+  /* with a port, or ipv6 ip */
   } else {
 #ifdef USE_IPV6
-    r = strchr(addr, '[');
-    if (r) { /* ipv6 notation [3ffe:80c0:225::] */
-      *addr++;
-      r = strchr(addr, ']');
-      bi->address = calloc(1, r - addr + 1);
-      strcpy(bi->address, addr);
-      addr = r;
-      *addr++;
+    if ((r = strchr(addr, '['))) {		/* ipv6 notation [3ffe:80c0:225::] */
+      addr++;					/* lose the '[' */
+      r = strchr(addr, ']');			/* pointer to the ending ']' */
+
+      bi->address = calloc(1, r - addr + 1);	/* alloc and copy the addr */
+      strncpyz(bi->address, addr, r - addr + 1);
+
+//      addr = r;					/* move up addr to the ']' */
+//      addr++;					/* move up addr tot he ':' */
+      q = r + 1;				/* set q to ':' at addr */
     } else {
+#endif /* !USE_IPV6 */
       bi->address = calloc(1, q - addr + 1);
-      strcpy(bi->address, addr);
+      strncpyz(bi->address, addr, q - addr + 1);
+#ifdef USE_IPV6
     }
-    q = strchr(addr, ':');
-    if (q) {
-      p = q + 1;
-      bi->telnet_port = atoi(p);
-      q = strchr(p, '/');
-      if (!q) {
-        bi->relay_port = telnet_port;
-      } else {
-        bi->relay_port = atoi(q + 1);
-      }
-    }
-#else /* !USE_IPV6 */
-    bi->address = calloc(1, q - addr + 1);
-    strncpyz(bi->address, addr, q - addr + 1);
+#endif /* USE_IPV6 */
+
+    /* port */
     p = q + 1;
     bi->telnet_port = atoi(p);
     q = strchr(p, '/');
@@ -1732,12 +1729,9 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
       bi->relay_port = bi->telnet_port;
     else
       bi->relay_port = atoi(q + 1);
-#endif /* USE_IPV6 */
   }
   set_user(&USERENTRY_BOTADDR, u1, bi);
-#ifdef HUB
   write_userfile(idx);
-#endif /* HUB */
 }
 #endif /* HUB */
 

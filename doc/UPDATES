@@ -7,6 +7,8 @@ This is a summary of ChangeLog basically.
 4.Remote idx's now set their socket to -1 (shouldnt cause any problems)
 5.Removed 'ppid: ' from startup.
 6.Fixed colors being shown even if .color was set to OFF.
+7.Fixed a segfault in cmd_chaddr (ipv6 ips still not supported)
+8.Changed format for ADDRESS display again.
 
 1.1.1
 1.Fixed a problem with using /DCC CHAT <bot>
