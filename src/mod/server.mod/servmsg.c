@@ -1119,7 +1119,8 @@ irc_whois(char *nick, char *format, ...)
 /* 311 $me nick username address * :realname */
 static int got311(char *from, char *msg)
 {
-  char *nick = NULL, *username = NULL, *address = NULL;
+  char *nick = NULL, *username = NULL, *address = NULL, uhost[UHOSTLEN + 1];
+  struct userrec *u = NULL;
   
   newsplit(&msg);
   nick = newsplit(&msg);
@@ -1132,6 +1133,11 @@ static int got311(char *from, char *msg)
     egg_snprintf(botuserhost, sizeof botuserhost, "%s@%s", username, address);
 
   irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);
+
+  egg_snprintf(uhost, sizeof uhost, "%s!%s@%s", nick, username, address);
+  if ((u = get_user_by_host(uhost))) 
+    irc_whois(nick, " username : $u%s$u", u->handle);
+
   irc_whois(nick, " ircname  : %s", msg);
   
   return 0;
