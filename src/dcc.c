@@ -1275,6 +1275,7 @@ static void dcc_telnet_hostresolved(int i)
   dcc[j].timeval = now;
   dprintf(j, "%d, %d\n", dcc[i].port, dcc[idx].port);
 }
+
 static void eof_dcc_telnet(int idx)
 {
   putlog(LOG_MISC, "*", DCC_PORTDIE, dcc[idx].port);

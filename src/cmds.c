@@ -563,8 +563,7 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n"));
   dprintf(idx, STR("..with credits and thanks to the following:\n"));
   dprintf(idx, STR(" \n"));
-  dprintf(idx, STR(" * Eggdrop team for developing such a great bot to code off of.\n"));
-  dprintf(idx, STR(" * $bEinride$b and $bievil$b for taking eggdrop1.4.3 and making their very effecient botpack Ghost.\n"));
+  dprintf(idx, STR(" * Eggdev for eggdrop obviously\n"));
   dprintf(idx, STR(" * $bryguy$b for beta testing, providing code, finding bugs, and providing input.\n"));
   dprintf(idx, STR(" * $bSFC$b for providing compile shells, continuous input, feature suggestions, and testing.\n"));
   dprintf(idx, STR(" * $bxmage$b for beta testing.\n"));
@@ -578,6 +577,10 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   dprintf(idx, STR(" * $Blackjac$b for helping with the bx auth script with his Sentinel script.\n"));
   dprintf(idx, STR(" * $bMystikal$b for various bugs\n"));
   dprintf(idx, STR(" \n"));
+  dprintf(idx, STR("The botpack ghost inspired the early versions of wraith and the current config system.\n"));
+  dprintf(idx, STR("* einride\n"));
+  dprintf(idx, STR("* ievil\n"));
+  dprintf(idx, STR("\n"));
   dprintf(idx, STR("The following botpacks gave me inspiration and ideas (no code):\n"));
   dprintf(idx, STR(" * $uawptic$u by $blordoptic$b\n"));
   dprintf(idx, STR(" * $uoptikz$u by $bryguy$b and $blordoptic$b\n"));

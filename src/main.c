@@ -895,8 +895,7 @@ int main(int argc, char **argv)
 	  idx = dcc_total + 1;
 	}
       if (idx == dcc_total) {
-	putlog(LOG_MISC, "*",
-	       "(@) EOF socket %d, not a dcc socket, not anything.", i);
+	putlog(LOG_MISC, "*", "(@) EOF socket %d, not a dcc socket, not anything.", i);
 	close(i);
 	killsock(i);
       }
