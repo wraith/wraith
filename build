@@ -141,6 +141,14 @@ then
   echo "[!] Automated packaging disabled, `uname` isn't recognized"
 fi
 
+if ! [ $scp = 0 ]; then
+  remotedate="`ssh -q -i misc/id_dsa bryan@endurance.quadspeedi.net ls -al public_html/nightly/${os}-current.tar.gz | \
+             sed -e 's/.*\-> \([0-1][0-2]\.[0-3][0-9]\.[0-9][0-9][0-9][0-9]\)\-.*/\1/'`"
+  if [ ${remotedate} = ${builddate} ]; then
+    exit 0
+  fi
+fi
+
 if [ $compile = "1" ]; then
 
  echo "[*] Building ${PACKNAME}::${type} for $os"
