@@ -632,7 +632,6 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
 int open_telnet_raw(int sock, char *server, port_t sport)
 {
   static port_t port = 0;
-  static int error = 0;
   union sockaddr_union so;
   char host[121] = "";
   int i, rc;
@@ -654,7 +653,6 @@ int open_telnet_raw(int sock, char *server, port_t sport)
     port = sport;
   }
 
-  error = 0;
   if (!setjmp(alarmret)) {
     alarm(resolve_timeout);
     if (!get_ip(host, &so)) {
@@ -663,20 +661,17 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 #ifdef USE_IPV6
       if (so.sa.sa_family == AF_INET6) {
         if (bind(sock, &cached_myip6_so.sa, SIZEOF_SOCKADDR(cached_myip6_so)) < 0) {
-          if (sock >= 0)
-            killsock(sock);
+          killsock(sock);
           return -1;
         }
       } else {
 #endif /* USE_IPV6 */
         if (bind(sock, &cached_myip4_so.sa, SIZEOF_SOCKADDR(cached_myip4_so)) < 0) {
-          if (sock >= 0)
-            killsock(sock);
+          killsock(sock);
           return -3;
         }
 #ifdef USE_IPV6
       }
-
       if (so.sa.sa_family == AF_INET6)
         so.sin6.sin6_port = htons(port);
       else
@@ -685,14 +680,9 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 
     } else {
       alarm(0);
-      error = 1;
+      killsock(sock);
+      return -2;
     }
-  }
-/* FIXME: (error) is unitialized */
-  /* I guess we broke something */
-  if (error) {
-    killsock(sock);
-    return -2;
   }
 
   for (i = 0; i < MAXSOCKS; i++) {
@@ -709,8 +699,10 @@ int open_telnet_raw(int sock, char *server, port_t sport)
       if (firewall[0])
 	return proxy_connect(sock, server, sport, proxy);
       return sock;		/* async success! */
-    } else
+    } else {
+      killsock(sock);
       return -1;
+    }
   }
   /* Synchronous? :/ */
   if (firewall[0])
