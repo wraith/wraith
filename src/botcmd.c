@@ -1517,7 +1517,7 @@ void bounce_simul(int idx, char *buf)
     return;
   }
 
-  snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].ridx, buf);          /* remote-simul[r]eturn idx buf */
+  snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].simul, buf);          /* remote-simul[r]eturn idx buf */
 
   putbot(dcc[idx].simulbot, rmsg);
 }

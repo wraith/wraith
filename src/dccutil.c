@@ -93,14 +93,14 @@ extern void (*qserver) (int, char *, int);
 
 void dprintf EGG_VARARGS_DEF(int, arg1)
 {
-  static char buf[1624];
-  char *format, buf3[1624] = "", buf2[1624] = "", c; 
-  int idx, len, id;
+  static char buf[1024];
+  char *format; 
+  int idx, len;
   va_list va;
 
   idx = EGG_VARARGS_START(int, arg1, va);
   format = va_arg(va, char *);
-  egg_vsnprintf(buf, 1623, format, va);
+  egg_vsnprintf(buf, 1023, format, va);
   va_end(va);
   /* We can not use the return value vsnprintf() to determine where
    * to null terminate. The C99 standard specifies that vsnprintf()
@@ -114,54 +114,6 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
   len = strlen(buf);
 
 /* this is for color on dcc :P */
-id = idx;
-if (id < 0) { id = idx + 7; id = -id; }
-
-if ((id < 0x7FF0) && (dcc[id].status & STAT_COLOR) && 
- (dcc[id].type == &DCC_CHAT)) {
- int i, a = 0, m = 0;
- if (dcc[id].status & STAT_COLORM) 
-  m = 1;
- else if (dcc[id].status & STAT_COLORA)
-  a = 1;
-if (!a && !m) { goto broke; }
- buf3[0] = '\0';
- for (i = 0 ; i < len ; i++) {
-   c = buf[i];
-   buf2[0] = '\0';
-
-   if (c == ':') {
-    if (a)
-      sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 37, c);
-     else
-      sprintf(buf2, "\003%d%c\003\002\002", 15, c);
-   } else if (c == '@') {
-     if (a)
-      sprintf(buf2, "\e[1m%c\e[0m", c);
-     else
-      sprintf(buf2, "\002%c\002", c);
-   } else if (c == ']' || c == '>' || c == ')') {
-     if (a)
-      sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
-     else
-      sprintf(buf2, "\00303%c\003\002\002", c);
-   } else if (c == '[' || c == '<' || c == '(') {
-     if (a)
-      sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
-     else
-      sprintf(buf2, "\00303%c\003\002\002", c);
-   } else {
-      sprintf(buf2, "%c", c);
-   }
-
-   sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : "");
- }
- buf3[strlen(buf3)] = '\0';
- strcpy(buf, buf3);
-}
-broke:
-  buf[sizeof(buf)-1] = 0;
-  len = strlen(buf);
 
   if (idx < 0) {
     tputs(-idx, buf, len);
@@ -179,32 +131,77 @@ broke:
     case DP_SERVER:
 #ifdef HUB
      return;
-#endif
+#endif /* HUB */
     case DP_HELP:
 #ifdef HUB
      return;
-#endif
+#endif /* HUB */
     case DP_MODE:
 #ifdef HUB
      return;
-#endif
+#endif /* HUB */
     case DP_MODE_NEXT:
 #ifdef HUB
      return;
-#endif
+#endif /* HUB */
     case DP_SERVER_NEXT:
 #ifdef HUB
      return;
-#endif
+#endif /* HUB */
     case DP_HELP_NEXT:
 #ifdef HUB
      return;
-#endif
+#endif /* HUB */
       qserver(idx, buf, len);
       break;
     }
     return;
-  } else {
+  } else { /* normal chat text */
+    if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type == &DCC_CHAT)
+        && ((dcc[idx].status & STAT_COLORM) || (dcc[idx].status & STAT_COLORA))) {
+      int i, a = 0, m = 0;
+      char buf3[1024] = "", buf2[1024] = "", c;
+
+      if (dcc[idx].status & STAT_COLORM) 
+        m = 1;
+      else if (dcc[idx].status & STAT_COLORA)
+        a = 1;
+      buf3[0] = '\0';
+      for (i = 0 ; i < len ; i++) {
+        c = buf[i];
+        buf2[0] = '\0';
+
+        if (c == ':') {
+        if (a)
+          sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 37, c);
+        else
+          sprintf(buf2, "\003%d%c\003\002\002", 15, c);
+        } else if (c == '@') {
+          if (a)
+            sprintf(buf2, "\e[1m%c\e[0m", c);
+          else
+            sprintf(buf2, "\002%c\002", c);
+        } else if (c == ']' || c == '>' || c == ')') {
+          if (a)
+            sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
+          else
+            sprintf(buf2, "\00303%c\003\002\002", c);
+        } else if (c == '[' || c == '<' || c == '(') {
+          if (a)
+            sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
+          else
+            sprintf(buf2, "\00303%c\003\002\002", c);
+        } else {
+          sprintf(buf2, "%c", c);
+        }
+        sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : "");
+      }
+      buf3[strlen(buf3)] = '\0';
+      strcpy(buf, buf3);
+    }
+    buf[sizeof(buf)-1] = 0;
+    len = strlen(buf);
+
     if (len > 1000) {		/* Truncate to fit */
       buf[1000] = 0;
       strcat(buf, "\n");

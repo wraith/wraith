@@ -447,7 +447,7 @@ char *wbanner() {
 
 void show_banner(int idx)
 {
-  dprintf(idx, "%s", wbanner());
+  dumplots(-dcc[idx].sock, "", wbanner()); /* we use sock so that colors aren't applied to banner */
   dprintf(idx, "\n \n");
   dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://www.shatow.net/wraith/ -\n"));
 }
@@ -455,11 +455,16 @@ void show_banner(int idx)
 /* show motd to dcc chatter */
 void show_motd(int idx)
 {
-  dprintf(idx, STR("Motd: "));
-  if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata)
-    dprintf(idx, STR("%s\n"), (char *) CFG_MOTD.gdata);
-  else
-    dprintf(idx, STR("none\n"));
+  if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
+    /* char *buf; 
+
+    * buf = nmalloc(strlen((char *)CFG_MOTD.gdata) + 1);
+    * strcpy(buf, (char *)CFG_MOTD.gdata);
+    */
+    dumplots(idx, "Motd: ", (char *)CFG_MOTD.gdata);
+    /* nfree(buf); */
+  } else
+    dprintf(idx, STR("Motd: none\n"));
 }
 
 void show_channels(int idx, char *handle)
