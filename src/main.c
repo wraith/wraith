@@ -720,26 +720,26 @@ int curcheck = 0;
 void core_10secondly()
 {
   curcheck++;
-  check_promisc();
+#ifdef LEAF
+  if (localhub)
+#endif /* LEAF */
+    check_promisc();
 
   if (curcheck==1)
     check_trace(0);
 
 #ifdef LEAF
   if (localhub) {
-#endif
+#endif /* LEAF */
     if (curcheck==2)
       check_last();
-#ifdef LEAF
-  }
-#endif
-  if (curcheck==3) {
-#ifdef LEAF
-    if (localhub)
+    if (curcheck==3) {
       check_processes();
-#endif
-    curcheck=0;
+      curcheck=0;
+    }
+#ifdef LEAF
   }
+#endif /* LEAF */
 }
 
 void do_fork() {
