@@ -1727,10 +1727,8 @@ Context;
   while (1) {
     int socket_cleanup = 0;
 
-#if !defined(HAVE_PRE7_5_TCL)
     /* Process a single tcl event */
     Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
-#endif
 
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers

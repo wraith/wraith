@@ -25,7 +25,7 @@ extern time_t		 now;
 extern sock_list	*socklist;
 extern Tcl_Interp	*interp;
 
-struct portmap *root = NULL;
+static struct portmap *root = NULL;
 
 char	motdfile[121] = "text/motd";	/* File where the motd is stored */
 int	connect_timeout = 15;		/* How long to wait before a telnet

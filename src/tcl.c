@@ -430,27 +430,17 @@ static tcl_strings def_tcl_strings[] =
   {"botnet-nick",	botnetnick,	HANDLEN,	0},
   {"origbotname",       origbotname,    HANDLEN,        0},
   {"userfile",		userfile,	120,		STR_PROTECT},
-  {"motd",		motdfile,	120,		STR_PROTECT},
   {"admin",		admin,		120,		0},
-  {"temp-path",		tempdir,	120,		STR_DIR | STR_PROTECT},
-  {"text-path",		textdir,	120,		STR_DIR | STR_PROTECT},
-  {"notify-newusers",	notify_new,	120,		0},
   {"owner",		owner,		120,		STR_PROTECT},
   {"my-ip",		myip,		120,		0},
   {"my-hostname",       hostname,       120,            0},
   {"my-ip6",            myip6,          120,            0},
   {"my-hostname6",      hostname6,      120,            0},
-  {"network",		network,	40,		0},
-  {"whois-fields",	whois_fields,	1024,		0},
   {"nat-ip",		natip,		120,		0},
   {"username",		botuser,	10,		0},
   {"version",		egg_version,	0,		STR_PROTECT},
   {"firewall",		firewall,	120,		0},
-/* confvar patch by aaronwl */
-  {"config",		configfile,	0,		0},
-  {"telnet-banner",	bannerfile,	120,		STR_PROTECT},
   {"pidfile",		pid_file,       120,		STR_PROTECT},
-/*settings made by installer */
   {"dcc_prefix",	dcc_prefix,	1,		0},
   {NULL,		NULL,		0,		0}
 };
@@ -459,16 +449,10 @@ static tcl_strings def_tcl_strings[] =
 static tcl_ints def_tcl_ints[] =
 {
   {"localhub",			&localhub,		2},
-  {"ignore-time",		&ignore_time,		0},
   {"handlen",			&handlen,		2},
   {"dcc-flood-thr",		&dcc_flood_thr,		0},
-  {"hourly-updates",		&notify_users_at,	0},
-  {"connect-timeout",		&connect_timeout,	0},
   {"reserved-port",		&reserved_port_min,		0},
   /* booleans (really just ints) */
-  {"open-telnets",		&allow_new_telnets,	0},
-  {"use-telnet-banner",		&use_telnet_banner,	0},
-  {"uptime",			(int *) &online_since,	2},
   {"console",			&conmask,		0},
   {"default-flags",		&default_flags,		0},
   /* moved from eggdrop.h */
@@ -476,24 +460,13 @@ static tcl_ints def_tcl_ints[] =
   {"die-on-sighup",		&die_on_sighup,		1},
   {"die-on-sigterm",		&die_on_sigterm,	1},
   {"remote-boots",		&remote_boots,		1},
-  {"max-dcc",			&max_dcc,		0},
-  {"enable-simul",		&enable_simul,		1},
   {"debug-output",		&debug_output,		1},
   {"protect-telnet",		&protect_telnet,	0},
-  {"dcc-sanitycheck",		&dcc_sanitycheck,	0},
   {"sort-users",		&sort_users,		0},
   {"ident-timeout",		&identtimeout,		0},
-  {"share-unlinks",		&share_unlinks,		0},
-  {"allow-dk-cmds",		&allow_dk_cmds,		0},
   {"resolve-timeout",		&resolve_timeout,	0},
-  {"must-be-owner",		&must_be_owner,		1},
-  {"use-exempts",		&use_exempts,		0},			/* Jason/drummer */
-  {"use-invites",		&use_invites,		0},			/* Jason/drummer */
-  {"quiet-save",		&quiet_save,		0},			/* Lucas */
-  {"force-expire",		&force_expire,		0},			/* Rufus */
   {"dupwait-timeout",		&dupwait_timeout,	0},
   {"strict-host",		&strict_host,		0}, 			/* drummer */
-  {"userfile-perm",		&userfile_perm,		0},
   {NULL,			NULL,			0}	/* arthur2 */
 };
 
@@ -535,21 +508,17 @@ void init_tcl(int argc, char **argv)
   int i;
   char *langEnv;
 #endif
-#ifndef HAVE_PRE7_5_TCL
   int j;
   char pver[1024] = "";
-#endif
 
 /* This must be done *BEFORE* Tcl_SetSystemEncoding(),
  * or Tcl_SetSystemEncoding() will cause a segfault.
  */
-#ifndef HAVE_PRE7_5_TCL
   /* This is used for 'info nameofexecutable'.
    * The filename in argv[0] must exist in a directory listed in
    * the environment variable PATH for it to register anything.
    */
   Tcl_FindExecutable(argv[0]);
-#endif
 
   /* Initialize the interpreter */
   interp = Tcl_CreateInterp();
@@ -638,7 +607,6 @@ resetPath:
   Tcl_GetEncoding(NULL, "iso8859-1");
 #endif
 
-#ifndef HAVE_PRE7_5_TCL
   /* Add eggdrop to Tcl's package list */
   for (j = 0; j <= strlen(egg_version); j++) {
     if ((egg_version[j] == ' ') || (egg_version[j] == '+'))
@@ -646,7 +614,6 @@ resetPath:
     pver[strlen(pver)] = egg_version[j];
   }
   Tcl_PkgProvide(interp, "eggdrop", pver);
-#endif
 
   /* Initialize binds and traces */
   Context;
@@ -656,7 +623,6 @@ resetPath:
   add_tcl_commands(tcluser_cmds);
   add_tcl_commands(tcldcc_cmds);
   add_tcl_commands(tclmisc_cmds);
-  add_tcl_objcommands(tclmisc_objcmds);
   add_tcl_commands(tcldns_cmds);
   Context;
 }

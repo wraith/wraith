@@ -19,41 +19,6 @@ extern char		 origbotname[], botnetnick[];
 extern time_t		 now;
 
 
-static int tcl_countusers STDVAR
-{
-  BADARGS(1, 1, "");
-  Tcl_AppendResult(irp, int_to_base10(count_users(userlist)), NULL);
-  return TCL_OK;
-}
-
-static int tcl_validuser STDVAR
-{
-  BADARGS(2, 2, " handle");
-  Tcl_AppendResult(irp, get_user_by_handle(userlist, argv[1]) ? "1" : "0",
-		   NULL);
-  return TCL_OK;
-}
-
-static int tcl_finduser STDVAR
-{
-  struct userrec *u;
-
-  BADARGS(2, 2, " nick!user@host");
-  u = get_user_by_host(argv[1]);
-  Tcl_AppendResult(irp, u ? u->handle : "*", NULL);
-  return TCL_OK;
-}
-
-static int tcl_passwdOk STDVAR
-{
-  struct userrec *u;
-
-  BADARGS(3, 3, " handle passwd");
-  Tcl_AppendResult(irp, ((u = get_user_by_handle(userlist, argv[1])) &&
-			 u_pass_match(u, argv[2])) ? "1" : "0", NULL);
-  return TCL_OK;
-}
-
 static int tcl_chattr STDVAR
 {
   char *chan, *chg, work[100];
@@ -124,109 +89,6 @@ static int tcl_chattr STDVAR
   return TCL_OK;
 }
 
-static int tcl_botattr STDVAR
-{
-  char *chan, *chg, work[100];
-  struct flag_record pls, mns, user;
-  struct userrec *u;
-
-  BADARGS(2, 4, " bot-handle ?changes? ?channel?");
-  u = get_user_by_handle(userlist, argv[1]);
-  if ((argv[1][0] == '*') || !u || !(u->flags & USER_BOT)) {
-    Tcl_AppendResult(irp, "*", NULL);
-    return TCL_OK;
-  }
-  if (argc == 4) {
-    user.match = FR_BOT | FR_CHAN;
-    chan = argv[3];
-    chg = argv[2];
-  } else if (argc == 3 && argv[2][0] &&
-             strchr(CHANMETA, argv[2][0]) != NULL) {
-    /* We need todo extra checking here to stop us mixing up +channel's
-     * with flags. <cybah>
-     */
-    if (!findchan_by_dname(argv[2]) && argv[2][0] != '+') {
-      /* Channel doesnt exist, and it cant possibly be flags as there
-       * is no + at the start of the string.
-       */
-      Tcl_AppendResult(irp, "no such channel", NULL);
-      return TCL_ERROR;
-    } else if(findchan_by_dname(argv[2])) {
-      /* Channel exists */
-      user.match = FR_BOT | FR_CHAN;
-      chan = argv[2];
-      chg = NULL;
-    } else {
-      /* 3rd possibility... channel doesnt exist, does start with a +.
-       * In this case we assume the string is flags.
-       */
-      user.match = FR_BOT;
-      chan = NULL;
-      chg = argv[2];
-    }
-  } else {
-    user.match = FR_BOT;
-    chan = NULL;
-    if (argc < 3)
-    chg = NULL;
-    else
-      chg = argv[2];
-  }
-  if (chan && !findchan_by_dname(chan)) {
-    Tcl_AppendResult(irp, "no such channel", NULL);
-    return TCL_ERROR;
-  }
-  get_user_flagrec(u, &user, chan);
-  /* Make changes */
-  if (chg) {
-    pls.match = user.match;
-    break_down_flags(chg, &pls, &mns);
-    /* No-one can change these flags on-the-fly */
-    if (chan) {
-      pls.chan &= BOT_SHARE;
-      mns.chan &= BOT_SHARE;
-    }
-    user.bot = sanity_check((user.bot | pls.bot) & ~mns.bot);
-    if (chan) {
-      user.chan = (user.chan | pls.chan) & ~mns.chan;
-      user.udef_chan = (user.udef_chan | pls.udef_chan) & ~mns.udef_chan;
-    }
-    set_user_flagrec(u, &user, chan);
-  }
-  /* Retrieve current flags and return them */
-  build_flags(work, &user, NULL);
-  Tcl_AppendResult(irp, work, NULL);
-  return TCL_OK;
-}
-
-static int tcl_matchattr STDVAR
-{
-  struct userrec *u;
-  struct flag_record plus, minus, user;
-  int ok = 0, f;
-
-  BADARGS(3, 4, " handle flags ?channel?");
-  if ((u = get_user_by_handle(userlist, argv[1]))) {
-    user.match = FR_GLOBAL | (argc == 4 ? FR_CHAN : 0) | FR_BOT;
-    get_user_flagrec(u, &user, argv[3]);
-    plus.match = user.match;
-    break_down_flags(argv[2], &plus, &minus);
-    f = (minus.global || minus.udef_global || minus.chan ||
-	 minus.udef_chan || minus.bot);
-    if (flagrec_eq(&plus, &user)) {
-      if (!f)
-	ok = 1;
-      else {
-	minus.match = plus.match ^ (FR_AND | FR_OR);
-	if (!flagrec_eq(&minus, &user))
-	  ok = 1;
-      }
-    }
-  }
-  Tcl_AppendResult(irp, ok ? "1" : "0", NULL);
-  return TCL_OK;
-}
-
 static int tcl_adduser STDVAR
 {
   BADARGS(2, 3, " handle ?hostmask?");
@@ -236,45 +98,6 @@ static int tcl_adduser STDVAR
     Tcl_AppendResult(irp, "0", NULL);
   else {
     userlist = adduser(userlist, argv[1], argv[2], "-", default_flags);
-    Tcl_AppendResult(irp, "1", NULL);
-  }
-  return TCL_OK;
-}
-
-static int tcl_addbot STDVAR
-{
-  struct bot_addr *bi;
-  char *p, *q;
-
-  BADARGS(3, 3, " handle address");
-  if (strlen(argv[1]) > HANDLEN)
-     argv[1][HANDLEN] = 0;
-  if (get_user_by_handle(userlist, argv[1]))
-     Tcl_AppendResult(irp, "0", NULL);
-  else if (argv[1][0] == '*')
-     Tcl_AppendResult(irp, "0", NULL);
-  else {
-    userlist = adduser(userlist, argv[1], "none", "-", USER_BOT);
-    bi = user_malloc(sizeof(struct bot_addr));
-    q = strchr(argv[2], ':');
-    if (!q) {
-      bi->address = user_malloc(strlen(argv[2]) + 1);
-      strcpy(bi->address, argv[2]);
-      bi->telnet_port = 3333;
-      bi->relay_port = 3333;
-    } else {
-      bi->address = user_malloc(q - argv[2] + 1);
-      strncpy(bi->address, argv[2], q - argv[2]);
-      bi->address[q - argv[2]] = 0;
-      p = q + 1;
-      bi->telnet_port = atoi(p);
-      q = strchr(p, '/');
-      if (!q)
-	bi->relay_port = bi->telnet_port;
-      else
-	bi->relay_port = atoi(q + 1);
-    }
-    set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, argv[1]), bi);
     Tcl_AppendResult(irp, "1", NULL);
   }
   return TCL_OK;
@@ -338,7 +161,6 @@ static int tcl_userlist STDVAR
 }
 
 #ifdef HUB
-
 static int tcl_save STDVAR
 {
   write_userfile(-1);
@@ -350,7 +172,7 @@ static int tcl_reload STDVAR
   reload();
   return TCL_OK;
 }
-#endif
+#endif /* HUB */
 
 static int tcl_chhandle STDVAR
 {
@@ -542,23 +364,15 @@ static int tcl_setuser STDVAR
 
 tcl_cmds tcluser_cmds[] =
 {
-  {"countusers",	tcl_countusers},
-  {"validuser",		tcl_validuser},
-  {"finduser",		tcl_finduser},
-  {"passwdok",		tcl_passwdOk},
   {"chattr",		tcl_chattr},
-  {"botattr",		tcl_botattr},
-  {"matchattr",		tcl_matchattr},
-  {"matchchanattr",	tcl_matchattr},
   {"adduser",		tcl_adduser},
-  {"addbot",		tcl_addbot},
   {"deluser",		tcl_deluser},
   {"delhost",		tcl_delhost},
   {"userlist",		tcl_userlist},
 #ifdef HUB
   {"save",		tcl_save},
   {"reload",		tcl_reload},
-#endif
+#endif /* HUB */
   {"chhandle",		tcl_chhandle},
   {"chnick",		tcl_chhandle},
   {"getting-users",	tcl_getting_users},
