@@ -4,12 +4,6 @@ dnl   versions.
 dnl
 
 dnl
-dnl EGG_REMOVE_MOD(MODULE-NAME)
-dnl
-define(EGG_REMOVE_MOD,
-[${srcdir}/../../../misc/modconfig -q --top_srcdir=${srcdir}/../../.. --bindir=../../.. del $1])
-
-dnl
 dnl EGG_INIT(UNIQUE-SOURCE-FILE)
 dnl
 define(EGG_INIT,

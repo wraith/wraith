@@ -1154,18 +1154,6 @@ EOF
 ])
 
 
-dnl EGG_CATCH_MAKEFILE_REBUILD()
-AC_DEFUN([EGG_CATCH_MAKEFILE_REBUILD],
-[
-  AC_CONFIG_COMMANDS([catch-make-rebuild],
-  [[
-    if test -f .modules; then
-      $srcdir/misc/modconfig --top_srcdir="$srcdir/src" Makefile
-    fi
-  ]])
-])
-
-
 dnl  EGG_SAVE_PARAMETERS()
 dnl
 AC_DEFUN(EGG_SAVE_PARAMETERS, [dnl

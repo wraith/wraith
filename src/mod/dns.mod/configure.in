@@ -89,11 +89,11 @@ if test "${dns_reslib_avail}" = false; then
   cat >&2 <<EOF
 configure: warning:
 
-  Your system provides no functional resolver library. The DNS
-  module will therefore be disabled.
+  Your system provides no functional resolver library. 
+  One is required for buld.
 
 EOF
-  EGG_REMOVE_MOD(dns)
+  exit 1
 fi
 AC_SUBST(RESLIB)
 AC_SUBST(RESINCLUDE)
