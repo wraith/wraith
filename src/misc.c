@@ -434,16 +434,21 @@ char *wbanner() {
 
 void show_banner(int idx)
 {
-  dumplots(-dcc[idx].sock, "", wbanner()); /* we use sock so that colors aren't applied to banner */
-  dprintf(idx, "\n \n");
-  dprintf(idx, STR("%sConributions welcomed by paypal: bryan@shatow.net%s\n"), BOLD(idx), BOLD_END(idx));
-  dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://wraith.shatow.net/ -\n \n"));
+  /* we use sock so that colors aren't applied to banner */
+  if (dcc[idx].status & STAT_BANNER)
+    dumplots(-dcc[idx].sock, "", wbanner()); 
+  dprintf(idx, " \n");
+  dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
+  dprintf(-dcc[idx].sock, STR("| Contributions welcomed by paypal: bryan@shatow.net |\n"));
+  dprintf(-dcc[idx].sock, STR("|             - http://wraith.shatow.net/ -             |\n"));
+  dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
+  dprintf(idx, " \n");
+
 }
 
 /* show motd to dcc chatter */
 void show_motd(int idx)
 {
-  
   if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
     char *who = NULL, *buf = NULL, *buf_ptr = NULL, date[50] = "";
     time_t when;

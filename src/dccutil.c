@@ -229,17 +229,23 @@ void dcc_chatter(int idx)
   strcpy(dcc[idx].u.chat->con_chan, "***");
   check_bind_chon(dcc[idx].nick, idx);
 
-  get_user_flagrec(dcc[idx].user, &fr, NULL);
   dprintf(idx, "Connected to %s, running %s\n", conf.bot->nick, version);
-  show_banner(idx);
-  show_motd(idx);
-  if (glob_master(fr)) {
+  show_banner(idx);		/* check STAT_BANNER inside function */
+
+  if (1 || dcc[idx].status & STAT_WHOM)
+    answer_local_whom(idx, -1);
+
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
+  if ((dcc[idx].status & STAT_BOTS) && glob_master(fr)) {
     if ((tands+1) > 1)
       dprintf(idx, "There are %s-%d- bots%s currently linked.\n", BOLD(idx), tands + 1, BOLD_END(idx));
     else
       dprintf(idx, "There is %s-%d- bot%s currently linked.\n", BOLD(idx), tands + 1, BOLD_END(idx));
   }
-  show_channels(idx, NULL);
+  if (dcc[idx].status & STAT_CHANNELS)
+    show_channels(idx, NULL);
+
+  show_motd(idx);
 
   if (glob_party(fr)) {
      i = dcc[idx].u.chat->channel;
@@ -279,8 +285,7 @@ void dcc_chatter(int idx)
     if (!dcc[idx].u.chat->channel) {
       chanout_but(-1, 0, "*** %s joined the party line.\n", dcc[idx].nick);
     } else if (dcc[idx].u.chat->channel > 0) {
-      chanout_but(-1, dcc[idx].u.chat->channel,
-		  "*** %s joined the channel.\n", dcc[idx].nick);
+      chanout_but(-1, dcc[idx].u.chat->channel, "*** %s joined the channel.\n", dcc[idx].nick);
     }
   }
 }
