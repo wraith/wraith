@@ -330,6 +330,13 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
   if (!chan || (which < 0) || (which >= FLOOD_CHAN_MAX))
     return 0;
 
+  /* Okay, make sure i'm not flood-checking myself */
+  if (match_my_nick(floodnick))
+    return 0;
+  if (!egg_strcasecmp(floodhost, botuserhost))
+    return 0;
+  /* My user@host (?) */
+
   /* Do not punish non-existant channel members and IRC services like
    * ChanServ
    */
@@ -391,12 +398,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
   }
   if ((thr == 0) || (lapse == 0))
     return 0;			/* no flood protection */
-  /* Okay, make sure i'm not flood-checking myself */
-  if (match_my_nick(floodnick))
-    return 0;
-  if (!egg_strcasecmp(floodhost, botuserhost))
-    return 0;
-  /* My user@host (?) */
+
   if ((which == FLOOD_KICK) || (which == FLOOD_DEOP))
     p = floodnick;
   else {
