@@ -2662,14 +2662,17 @@ static void cmd_echo(struct userrec *u, int idx, char *par)
 static void cmd_color(struct userrec *u, int idx, char *par)
 {
   module_entry *me;
-
+  int ansi = 0;
   char *of;
+
   putlog(LOG_CMDS, "*", STR("#%s# color %s"), dcc[idx].nick, par);
 
+  if ((idx && ((dcc[idx].type != &DCC_RELAYING) && (dcc[idx].status & STAT_TELNET))) || !backgrd)
+    ansi++;
   if (!par[0]) {
     dprintf(idx, STR("Usage: color <on/off>\n"));
     if (dcc[idx].status & STAT_COLOR) 
-      dprintf(idx, STR("Color is currently on.\n"));
+      dprintf(idx, STR("Color is currently on. (%s)\n"), ansi ? "ANSI" : "mIRC");
     else
       dprintf(idx, STR("Color is currently off.\n"));
     return;
