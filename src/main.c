@@ -609,7 +609,8 @@ static void startup_checks(int hack) {
   if (do_confedit)
     confedit();		/* this will exit() */
 #endif /* !CYGWIN_HACKS */
-  parseconf();
+  if (!old_hack)		/* don't parse, just leave it how it was read in. */
+    parseconf();
 
   if (old_hack)
     conf_to_bin(&conffile);	/* this will exit() in write_settings() */
