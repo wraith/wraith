@@ -437,6 +437,7 @@ void show_banner(int idx)
 {
   dumplots(-dcc[idx].sock, "", wbanner()); /* we use sock so that colors aren't applied to banner */
   dprintf(idx, "\n \n");
+  dprintf(idx, STR("%sConributions welcomed by paypal: root@shatow.net%s\n"), BOLD(idx), BOLD_END(idx));
   dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://wraith.shatow.net/ -\n \n"));
 }
 

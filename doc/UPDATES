@@ -19,6 +19,7 @@ This is a summary of ChangeLog basically.
 16.Fixed bots not joining right away when a +chan was made.
 17.New cmd: addline, see .help addline for more info.
 18.CYGWIN support now.
+19.Bots now respond to /ctcp CHAT quicker
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.

@@ -646,7 +646,7 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
       /* do me a favour and don't change this back to a CTCP reply,
        * CTCP replies are NOTICE's this has to be a PRIVMSG
        * -poptix 5/1/1997 */
-      dprintf(DP_HELP, "PRIVMSG %s :\001DCC CHAT chat %lu %u\001\n", nick, iptolong(getmyip()), dcc[ix].port);
+      dprintf(DP_SERVER, "PRIVMSG %s :\001DCC CHAT chat %lu %u\001\n", nick, iptolong(getmyip()), dcc[ix].port);
     }
     return BIND_RET_BREAK;
 }
