@@ -984,37 +984,66 @@ static void cmd_getkey(struct userrec *u, int idx, char *par)
 static void cmd_mop(struct userrec *u, int idx, char *par)
 {
   struct chanset_t *chan;
-  memberlist *m;
   int found = 0;
+  int all = 0;
 
-  if (par[0] && (strchr(CHANMETA, par[0]) != NULL)) {
-    char *chname = newsplit(&par);
-    chan = get_channel(idx, chname);
-  } else
-    chan = get_channel(idx, "");
+  if (par[0] == '*' && !par[1]) {
+    all = 1;
+    chan = chanset;
+    newsplit(&par);
+  } else {
+    if (par[0] && (strchr(CHANMETA, par[0]) != NULL)) {
+      char *chname = newsplit(&par);
+      chan = get_channel(idx, chname);
+    } else
+      chan = get_channel(idx, "");
+  }
 
-  if (!chan || !has_op(idx, chan))
+  if (!chan && !all)
     return;
 
-  putlog(LOG_CMDS, "*", "#%s# (%s) mop %s", dcc[idx].nick, chan->dname, par);
+  putlog(LOG_CMDS, "*", "#%s# (%s) mop %s", dcc[idx].nick, all ? "*" : chan->dname, par);
+  while (chan) {
+    memberlist *m;
 
-  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+    get_user_flagrec(dcc[idx].user, &user, chan->dname);
+    if (private(user, chan, PRIV_OP)) {
+      if (all) goto next;
+      dprintf(idx, "No such channel.\n");
+      return;
+    }
+    if (!chk_op(user, chan)) {
+      if (all) goto next;
+      dprintf(idx, "You are not a channel op on %s.\n", chan->dname);
+      return;
+    }
 
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!m->user) {
-      char s[256];
-      sprintf(s, STR("%s!%s"), m->nick, m->userhost);
-      m->user = get_user_by_host(s);
+    if (channel_active(chan) && !channel_pending(chan)) {
+      for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+        if (!m->user) {
+          char s[256];
+          sprintf(s, STR("%s!%s"), m->nick, m->userhost);
+          m->user = get_user_by_host(s);
+        }
+        get_user_flagrec(m->user, &victim, chan->dname);
+        if (!chan_hasop(m) && !glob_bot(victim) && chk_op(victim, chan)) {
+          found++;
+          dprintf(idx, "Gave op to '%s' as '%s' on %s\n", m->user->handle, m->nick, chan->dname);
+          do_op(m->nick, chan, 0);
+        }
+      }
+    } else {
+      if (!all)
+        dprintf(idx, "Channel %s is not active or pending.\n", chan->dname);
     }
-    get_user_flagrec(m->user, &victim, chan->dname);
-    if (!chan_hasop(m) && !glob_bot(victim) && chk_op(victim, chan)) {
-      found++;
-      dprintf(idx, "Gave op to %s on %s\n", m->nick, chan->dname);
-      do_op(m->nick, chan, 0);
-    }
+    if (!found && !all)
+      dprintf(idx, "No one to op on %s\n", chan->dname);
+    next:;
+    if (!all)
+      chan = NULL;
+    else
+      chan = chan->next;
   }
-  if (!found)
-    dprintf(idx, "No one to op on %s\n", chan->dname);
 }
 
 
