@@ -92,6 +92,9 @@ void sdprintf (char *format, ...)
     va_start(va, format);
     egg_vsnprintf(s, 2000, format, va);
     va_end(va);
+    
+    remove_crlf(s);
+
     if (!backgrd)
       dprintf(DP_STDOUT, "[D:%d] %s%s%s\n", getpid(), BOLD(-1), s, BOLD_END(-1));
     else
