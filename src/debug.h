@@ -30,7 +30,6 @@
  *    Handy aliases for memory tracking and core dumps
  */
 #ifdef DEBUG_CONTEXT
-#  include "main.h"
 #  define Context               eggContext(__FILE__, __LINE__, NULL)
 #  define ContextNote(note)     eggContextNote(__FILE__, __LINE__, NULL, note)
 #else

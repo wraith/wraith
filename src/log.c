@@ -14,11 +14,12 @@
 #include "rfc1459.h"
 #include "users.h"
 #include "misc.h"
+#include "main.h"
 
 extern struct userrec   *userlist;
 extern tand_t           *tandbot;
 extern struct dcc_t     *dcc;
-extern int               debug_output, backgrd, term_z, use_stderr,
+extern int               debug_output, backgrd, term_z, 
 			 dcc_total, loading;
 extern struct dcc_t     *dcc;
 extern time_t		now;

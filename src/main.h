@@ -1,6 +1,8 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
+extern int use_stderr;
+
 #ifndef MAKING_MODS
 int crontab_exists();
 void crontab_create(int);
