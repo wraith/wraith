@@ -50,10 +50,10 @@ bin_md5(const char *fname, int todo)
 
   if (todo == WRITE_MD5) {
     char *fname_bak = NULL, s[DIRMAX] = "";
-    FILE *fn = NULL;			/* the new binary */
+    FILE *fn = NULL;            /* the new binary */
     int i = 0, fd = -1;
     size_t size = 0;
-   
+
 
     size = strlen(fname) + 2;
     fname_bak = calloc(1, size);
@@ -62,7 +62,7 @@ bin_md5(const char *fname, int todo)
 
     if (!(f = fopen(fname, "rb")))
       werr(ERR_BINSTAT);
-    
+
     fseek(f, 0, SEEK_END);
     size = ftell(f);
     fseek(f, 0, SEEK_SET);
@@ -77,7 +77,7 @@ bin_md5(const char *fname, int todo)
     }
 
     while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
-      if (i) {		/* to skip bytes for hash */
+      if (i) {                  /* to skip bytes for hash */
         i -= sizeof(buf) - 1;
         continue;
       }
@@ -94,7 +94,7 @@ bin_md5(const char *fname, int todo)
 
         enc_hash = encrypt_string(SALT1, hash);
         fwrite(enc_hash, strlen(enc_hash), 1, fn);
-        i = strlen(enc_hash);			/* skip the next strlen(enc_hash) bytes */
+        i = strlen(enc_hash);   /* skip the next strlen(enc_hash) bytes */
         free(enc_hash);
       }
     }

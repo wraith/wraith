@@ -31,17 +31,18 @@
 #include "stat.h"
 
 #ifdef S_AUTHCMDS
-int 				auth_total = 0;
-static int 			max_auth = 100;
-struct auth_t 			*auth = NULL;
+int auth_total = 0;
+static int max_auth = 100;
+struct auth_t *auth = NULL;
 #endif /* S_AUTHCMDS */
 
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-char                            authkey[121] = "";      /* This is one of the keys used in the auth hash */
+char authkey[121] = "";         /* This is one of the keys used in the auth hash */
 #endif /* S_AUTHHASH || S_DCCAUTH */
 
 #ifdef S_AUTHCMDS
-void init_auth_max()
+void
+init_auth_max()
 {
   if (max_auth < 1)
     max_auth = 1;
@@ -51,12 +52,14 @@ void init_auth_max()
     auth = calloc(1, sizeof(struct auth_t) * max_auth);
 }
 
-static void expire_auths()
+static void
+expire_auths()
 {
   int i = 0, idle = 0;
 
-  if (!ischanhub()) return;
-  for (i = 0; i < auth_total;i++) {
+  if (!ischanhub())
+    return;
+  for (i = 0; i < auth_total; i++) {
     if (auth[i].authed) {
       idle = now - auth[i].atime;
       if (idle >= (60 * 60)) {
@@ -67,7 +70,8 @@ static void expire_auths()
 }
 #endif /* S_AUTHCMDS */
 
-void init_auth()
+void
+init_auth()
 {
 #ifdef S_AUTHCMDS
   init_auth_max();
@@ -76,7 +80,8 @@ void init_auth()
 }
 
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-char *makehash(struct userrec *u, char *randstring)
+char *
+makehash(struct userrec *u, char *randstring)
 {
   char hash[256] = "", *secpass = NULL;
 
@@ -84,8 +89,7 @@ char *makehash(struct userrec *u, char *randstring)
     secpass = strdup(get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
-  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "" , 
-                                                        (authkey && authkey[0]) ? authkey : "");
+  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", (authkey && authkey[0]) ? authkey : "");
   if (secpass)
     free(secpass);
 
@@ -94,7 +98,8 @@ char *makehash(struct userrec *u, char *randstring)
 #endif /* S_AUTHHASH || S_DCCAUTH */
 
 #ifdef S_AUTHCMDS
-int new_auth(void)
+int
+new_auth(void)
 {
   int i = auth_total;
 
@@ -107,9 +112,11 @@ int new_auth(void)
 }
 
 /* returns 0 if not found, -1 if problem, and > 0 if found. */
-int findauth(char *host)
+int
+findauth(char *host)
 {
   int i = 0;
+
   if (!host || !host[0])
     return -1;
   for (i = 0; i < auth_total; i++) {
@@ -123,8 +130,9 @@ int findauth(char *host)
   }
   return -1;
 }
-  
-void removeauth(int n)
+
+void
+removeauth(int n)
 {
   putlog(LOG_DEBUG, "*", "Removing %s from auth list.", auth[n].host);
   auth_total--;
