@@ -16,6 +16,7 @@ This is a summary of ChangeLog basically.
 13.Removed 53K from the binary (no more compression functions)
 14.Bots were not recognizing keys set in .chanset.
 15.cmd_pls_host now accepts multiple hosts.
+16.Fixed bots not joining right away when a +chan was made.
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.
