@@ -268,22 +268,6 @@ static void got_cont(int z)
 }
 #endif
 
-static void got_quit(int z)
-{
-  putlog(LOG_MISC, "*", STR("RECEIVED QUIT SIGNAL (IGNORING)"));
-  return;
-}
-
-static void got_hup(int z)
-{
-#ifdef HUB
-  write_userfile(-1);
-#endif
-  putlog(LOG_MISC, "*", STR("Received HUP signal: rehashing..."));
-  do_restart = -2;
-  return;
-}
-
 /* A call to resolver (gethostbyname, etc) timed out
  */
 static void got_alarm(int z)
@@ -306,42 +290,31 @@ static void got_ill(int z)
 
 void init_signals() 
 {
+#ifdef SA_RESETHAND
   struct sigaction sv;
 
   /* Set up error traps: */
   sv.sa_handler = got_bus;
   sigemptyset(&sv.sa_mask);
-#ifdef SA_RESETHAND
   sv.sa_flags = SA_RESETHAND;
-#else
-  sv.sa_flags = 0;
-#endif
   sigaction(SIGBUS, &sv, NULL);
+
   sv.sa_handler = got_segv;
   sigaction(SIGSEGV, &sv, NULL);
-#ifdef SA_RESETHAND
-  sv.sa_flags = 0;
-#endif
-  sv.sa_handler = got_fpe;
-  sigaction(SIGFPE, &sv, NULL);
-  sv.sa_handler = got_term;
-  sigaction(SIGTERM, &sv, NULL);
+#else /* !SA_RESETHAND */
+  signal(SIGBUS, got_bus);
+  signal(SIGSEGV, got_segv);
+#endif /* SA_RESETHAND */
+
+  signal(SIGFPE, got_fpe);
+  signal(SIGTERM, got_term);
 #ifdef S_HIJACKCHECK
-  sv.sa_handler = got_cont;
-  sigaction(SIGCONT, &sv, NULL);
-#endif
-  sv.sa_handler = got_abort;
-  sigaction(SIGABRT, &sv, NULL);
-  sv.sa_handler = got_hup;
-  sigaction(SIGHUP, &sv, NULL);
-  sv.sa_handler = got_quit;
-  sigaction(SIGQUIT, &sv, NULL);
-  sv.sa_handler = SIG_IGN;
-  sigaction(SIGPIPE, &sv, NULL);
-  sv.sa_handler = got_ill;
-  sigaction(SIGILL, &sv, NULL);
-  sv.sa_handler = got_alarm;
-  sigaction(SIGALRM, &sv, NULL);
+  signal(SIGCONT, got_cont);
+#endif /* S_HIJACKCHECK */
+  signal(SIGABRT, got_abort);
+  signal(SIGPIPE, SIG_IGN);
+  signal(SIGILL, got_ill);
+  signal(SIGALRM, got_alarm);
 }
 
 #ifdef DEBUG_CONTEXT
