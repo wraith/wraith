@@ -95,6 +95,22 @@ void addbot(char *who, char *from, char *next, char flag, int vernum)
   tands++;
 }
 
+#ifdef HUB
+#ifdef G_BACKUP
+void check_should_backup()
+{
+  struct chanset_t *chan;
+
+  for (chan = chanset; chan; chan = chan->next) {
+    if (chan->channel.backup_time && (chan->channel.backup_time < now) && !channel_backup(chan)) {
+      do_chanset(chan, STR("+backup"), 1);
+      chan->channel.backup_time = 0;
+    }
+  }
+}
+#endif /* G_BACKUP */
+#endif /* HUB */
+
 void updatebot(int idx, char *who, char share, int vernum)
 {
   tand_t *ptr = findbot(who);
@@ -1640,7 +1656,7 @@ void check_botnet_pings()
   int bots, users;
   tand_t *bot;
 
-  for (i = 0; i < dcc_total; i++)
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT)
       if (dcc[i].status & STAT_PINGED) {
 	char s[1024];
@@ -1657,12 +1673,14 @@ void check_botnet_pings()
 	killsock(dcc[i].sock);
 	lostdcc(i);
       }
-  for (i = 0; i < dcc_total; i++)
+  }
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT) {
       botnet_send_ping(i);
       dcc[i].status |= STAT_PINGED;
     }
-  for (i = 0; i < dcc_total; i++)
+  }
+  for (i = 0; i < dcc_total; i++) {
     if ((dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_LEAF)) {
       tand_t *bot, *via = findbot(dcc[i].nick);
 
@@ -1696,6 +1714,15 @@ void check_botnet_pings()
 	  dcc[i].status &= ~STAT_WARNED;
       }
     }
+  }
+#ifdef HUB
+#ifdef S_AUTOLOCK
+  local_check_should_lock();
+#endif /* S_AUTOLOCK */
+#ifdef G_BACKUP
+  check_should_backup();
+#endif /* G_BACKUP */
+#endif /* HUB */
 }
 
 void zapfbot(int idx)

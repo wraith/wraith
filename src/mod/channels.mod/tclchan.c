@@ -24,11 +24,6 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
   Tcl_AppendElement(irp, s);
   simple_sprintf(s, "%d", chan->revenge_mode);
   Tcl_AppendElement(irp, s);
-  Tcl_AppendElement(irp, chan->need_op);
-  Tcl_AppendElement(irp, chan->need_invite);
-  Tcl_AppendElement(irp, chan->need_key);
-  Tcl_AppendElement(irp, chan->need_unban);
-  Tcl_AppendElement(irp, chan->need_limit);
   simple_sprintf(s, "%d:%d", chan->flood_pub_thr, chan->flood_pub_time);
   Tcl_AppendElement(irp, s);
   simple_sprintf(s, "%d:%d", chan->flood_ctcp_thr, chan->flood_ctcp_time);
@@ -195,13 +190,6 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
 
   if      (CHECK("chanmode"))      get_mode_protect(chan, s);
 
-  /* Code in need_op can be longer than 120 chars, so we have to cut it.*/
-  else if (CHECK("need-op"))     { strncpy(s, chan->need_op, 120); s[120] = 0;     }
-  else if (CHECK("need-invite")) { strncpy(s, chan->need_invite, 120); s[120] = 0; }
-  else if (CHECK("need-key"))    { strncpy(s, chan->need_key, 120); s[120] = 0;    }
-  else if (CHECK("need-unban"))  { strncpy(s, chan->need_unban, 120); s[120] = 0;  }
-  else if (CHECK("need-limit"))  { strncpy(s, chan->need_limit, 120); s[120] = 0;  }
-
   else if (CHECK("idle-kick"))     simple_sprintf(s, "%d", chan->idle_kick);
   else if (CHECK("limit"))         simple_sprintf(s, "%d", chan->limitraise);
   else if (CHECK("stop-net-hack")) simple_sprintf(s, "%d", chan->stopnethack_mode);
@@ -280,12 +268,12 @@ static int tcl_channel STDVAR
     BADARGS(3, 4, " add channel-name ?options-list?");
     if (argc == 3) {
       
-      sprintf(buf2, "cjoin %s", argv[2]);
+      snprintf(buf2, sizeof buf2, "cjoin %s", argv[2]);
       if (!loading)
         botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
       return tcl_channel_add(irp, argv[2], "");
     }
-    sprintf(buf2, "cjoin %s %s", argv[2], argv[3]);
+    snprintf(buf2, sizeof buf2, "cjoin %s %s", argv[2], argv[3]);
     if (!loading)
       botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
     return tcl_channel_add(irp, argv[2], argv[3]);
@@ -301,8 +289,7 @@ static int tcl_channel STDVAR
       Tcl_AppendResult(irp, "no such channel record", NULL);
       return TCL_ERROR;
     }
-    sprintf(buf2, "cset %s %s", chan->dname, argv[3]);
-    botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+    do_chanset(chan, argv[3], 0);
     return tcl_channel_modify(irp, chan, argc - 3, &argv[3]);
   }
   if (!strcmp(argv[1], "get")) {
@@ -331,7 +318,7 @@ static int tcl_channel STDVAR
       Tcl_AppendResult(irp, "no such channel record", NULL);
       return TCL_ERROR;
     }
-    sprintf(buf2, "cpart %s", argv[2]);
+    snprintf(buf2, sizeof buf2, "cpart %s", argv[2]);
     botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
     remove_channel(chan);
     return TCL_OK;
@@ -357,53 +344,9 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
 #ifdef LEAF
   module_entry *me;
 #endif
+Context;
   for (i = 0; i < items; i++) {
-    if (!strcmp(item[i], "need-op")) {
-      i++;
-      if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel need-op needs argument", NULL);
-	return TCL_ERROR;
-      }
-      strncpy(chan->need_op, item[i], 120);
-      chan->need_op[120] = 0;
-    } else if (!strcmp(item[i], "need-invite")) {
-      i++;
-      if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel need-invite needs argument", NULL);
-	return TCL_ERROR;
-      }
-      strncpy(chan->need_invite, item[i], 120);
-      chan->need_invite[120] = 0;
-    } else if (!strcmp(item[i], "need-key")) {
-      i++;
-      if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel need-key needs argument", NULL);
-	return TCL_ERROR;
-      }
-      strncpy(chan->need_key, item[i], 120);
-      chan->need_key[120] = 0;
-    } else if (!strcmp(item[i], "need-limit")) {
-      i++;
-      if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel need-limit needs argument", NULL);
-	return TCL_ERROR;
-      }
-      strncpy(chan->need_limit, item[i], 120);
-      chan->need_limit[120] = 0;
-    } else if (!strcmp(item[i], "need-unban")) {
-      i++;
-      if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel need-unban needs argument", NULL);
-	return TCL_ERROR;
-      }
-      strncpy(chan->need_unban, item[i], 120);
-      chan->need_unban[120] = 0;
-    } else if (!strcmp(item[i], "chanmode")) {
+    if (!strcmp(item[i], "chanmode")) {
       i++;
       if (i >= items) {
 	if (irp)
@@ -627,6 +570,7 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
     else if (!strcmp(item[i], "+wasoptest"))  ;  /* Eule 01.2000 */
     else if (!strcmp(item[i], "+clearbans"))  ;
     else if (!strcmp(item[i], "-clearbans"))  ;
+    else if (!strncmp(item[i], "need-", 5))   ;
     else if (!strncmp(item[i], "flood-", 6)) {
       int *pthr = 0, *ptime;
       char *p;
@@ -1022,6 +966,12 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;
     chan->invite_time = global_invite_time;
+    /* let's initialize this stuff for shits & giggles */
+    chan->channel.jointime = 0;
+    chan->channel.parttime = 0;
+#ifdef S_AUTOLOCK
+    chan->channel.fighting = 0;
+#endif /* S_AUTOLOCK */
 
     /* We _only_ put the dname (display name) in here so as not to confuse
      * any code later on. chan->name gets updated with the channel name as

@@ -23,6 +23,7 @@
 #define lag_threshold (CFG_LAGTHRESHOLD.gdata ? atoi(CFG_LAGTHRESHOLD.gdata) : 15)
 #define opreq_count (CFG_OPREQUESTS.gdata ? atoi( CFG_OPREQUESTS.gdata ) : 2)
 #define opreq_seconds (CFG_OPREQUESTS.gdata ? atoi( strchr(CFG_OPREQUESTS.gdata, ':') + 1 ) : 5)
+#define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
 
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
@@ -33,13 +34,9 @@ struct cfg_entry CFG_OPBOTS,
   CFG_INBOTS,
   CFG_LAGTHRESHOLD,
   CFG_OPTIMESLACK,
-#ifdef G_AUTOLOCK
-
-  CFG_KILLTHRESHOLD,
-  CFG_LOCKTHRESHOLD,
+#ifdef S_AUTOLOCK
   CFG_FIGHTTHRESHOLD,
-#endif
-
+#endif /* S_AUTOLOCK */
   CFG_OPREQUESTS;
 
 static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL,
@@ -88,11 +85,7 @@ static int include_lk = 1;		/* For correct calculation
 
 void makeopline(struct chanset_t *chan, char *nick, char *buf)
 {
-  char plaincookie[20],
-    enccookie[48],
-   *p,
-    nck[20],
-    key[200];
+  char plaincookie[20], enccookie[48], *p, nck[20], key[200];
   memberlist * m;
   m=ismember(chan, nick);
   if (m)
@@ -103,13 +96,9 @@ void makeopline(struct chanset_t *chan, char *nick, char *buf)
   strcpy(key, botname);
   strcat(key, netpass);
 //  putlog(LOG_DEBUG, "*", "Encrypting opline for %s with cookie %s and key %s", nck, plaincookie, key);
-
   p = encrypt_string(key, plaincookie);
   strcpy(enccookie, p);
   nfree(p);
-//  p = enccookie + strlen(enccookie) - 1;
-//  while (*p == '.')
-//    *p-- = 0;
   sprintf(buf, STR("MODE %s +o-b %s *!*@<%s>\n"), chan->name, nck, enccookie);
 }
 
@@ -1075,6 +1064,38 @@ void check_servers() {
   }
 }
 
+#ifdef S_AUTOLOCK
+void check_netfight()
+{
+  int limit = atoi(CFG_FIGHTTHRESHOLD.gdata ? CFG_FIGHTTHRESHOLD.gdata : "0");
+Context;
+  if (limit) {
+    struct chanset_t *chan;
+    for (chan = chanset; chan; chan = chan->next) {
+Context;
+      if ((chan->channel.fighting) && (chan->channel.fighting > limit)) {
+Context;
+        if (!channel_bitch(chan) || !channel_closed(chan)) {
+Context;
+          putlog(LOG_WARN, "*", STR("Auto-closed %s - channel fight\n"), chan->dname);
+Context;
+          do_chanset(chan, STR("+bitch +closed"), 1);
+Context;
+          enforce_closed(chan);
+Context;
+          dprintf(DP_MODE, STR("TOPIC %s :Auto-closed - channel fight\n"), chan->name);
+Context;
+        }
+Context;
+      }
+      chan->channel.fighting = 0; 		/* we put this here because we need to clear it once per min */
+    }
+  }
+Context;
+}
+#endif /* S_AUTOLOCK */
+
+
 void raise_limit(struct chanset_t * chan) {
   int nl, cl, i, mem, ul, ll;
   char s[50];
@@ -1524,14 +1545,14 @@ static cmd_t irc_bot[] = {
 
 static void getin_3secondly()
 {
-  struct chanset_t *ch = chanset;
-
   if (!server_online)
     return;
-  while (ch) {
-    if ((channel_pending(ch) || channel_active(ch)) && (!me_op(ch)))
-      request_op(ch);
-    ch = ch->next;
+  else {
+    struct chanset_t *ch;
+    for (ch = chanset; ch; ch = ch->next) {
+      if ((channel_pending(ch) || channel_active(ch)) && (!me_op(ch)))
+        request_op(ch);
+    }
   }
 }
 
@@ -1576,14 +1597,13 @@ static Function irc_table[] =
   (Function) check_this_ban,
   (Function) check_this_user,
   (Function) me_voice,
-//  (Function) getchanmode,
 };
 
-void getin_describe(struct cfg_entry *cfgent, int idx)
+void irc_describe(struct cfg_entry *cfgent, int idx)
 {
 }
 
-void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+void irc_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 {
   int i;
 
@@ -1602,22 +1622,6 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
     value++;
     R = atoi(value);
     if ((R >= 60) || (R <= 3) || (L < 1) || (L > R))
-      return;
-    *valid = 1;
-    return;
-  }
-  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
-    int L,
-      R;
-    char *value = cfgent->gdata;
-
-    L = atoi(value);
-    value = strchr(value, ':');
-    if (!value)
-      return;
-    value++;
-    R = atoi(value);
-    if ((R >= 1000) || (R < 0) || (L < 0) || (L > 100))
       return;
     *valid = 1;
     return;
@@ -1644,9 +1648,6 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
   } else if (!strcmp(cfgent->name, STR("fight-threshold"))) {
     if (i && ((i < 50) || (i > 1000)))
       return;
-  } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
-    if ((i < 0) || (i >= 200))
-      return;
   } else if (!strcmp(cfgent->name, STR("op-time-slack"))) {
     if ((i < 30) || (i > 1200))
       return;
@@ -1655,48 +1656,38 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
   return;
 }
 
+
 struct cfg_entry CFG_OPBOTS = {
   "op-bots", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
+  irc_changed, NULL, irc_describe
 };
 
 struct cfg_entry CFG_INBOTS = {
   "in-bots", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
+  irc_changed, NULL, irc_describe
 };
 
 struct cfg_entry CFG_LAGTHRESHOLD = {
   "lag-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
+  irc_changed, NULL, irc_describe
 };
 
 struct cfg_entry CFG_OPREQUESTS = {
   "op-requests", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
+  irc_changed, NULL, irc_describe
 };
 
 struct cfg_entry CFG_OPTIMESLACK = {
   "op-time-slack", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
+  irc_changed, NULL, irc_describe
 };
 
-#ifdef G_AUTOLOCK
-struct cfg_entry CFG_LOCKTHRESHOLD = {
-  "lock-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-struct cfg_entry CFG_KILLTHRESHOLD = {
-  "kill-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
+#ifdef S_AUTOLOCK
 struct cfg_entry CFG_FIGHTTHRESHOLD = {
   "fight-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
+  irc_changed, NULL, irc_describe
 };
-#endif /* G_AUTOLOCK */
-
+#endif /* S_AUTOLOCK */
 
 char *irc_start(Function * global_funcs)
 {
@@ -1722,12 +1713,9 @@ char *irc_start(Function * global_funcs)
   add_cfg(&CFG_LAGTHRESHOLD);
   add_cfg(&CFG_OPREQUESTS);
   add_cfg(&CFG_OPTIMESLACK);
-#ifdef G_AUTOLOCK
-  add_cfg(&CFG_LOCKTHRESHOLD);
-  add_cfg(&CFG_KILLTHRESHOLD);
+#ifdef S_AUTOLOCK
   add_cfg(&CFG_FIGHTTHRESHOLD);
-#endif
-
+#endif /* S_AUTOLOCK */
   for (chan = chanset; chan; chan = chan->next) {
     if (shouldjoin(chan))
       dprintf(DP_MODE, "JOIN %s %s\n",
@@ -1744,9 +1732,9 @@ char *irc_start(Function * global_funcs)
   add_hook(HOOK_IDLE, (Function) flush_modes);
   add_hook(HOOK_3SECONDLY, (Function) getin_3secondly);
   add_hook(HOOK_10SECONDLY, (Function) irc_10secondly);
-#ifdef G_AUTOLOCK
+#ifdef S_AUTOLOCK
   add_hook(HOOK_MINUTELY, (Function) check_netfight);
-#endif
+#endif /* S_AUTOLOCK */
   Tcl_TraceVar(interp, "net-type",
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_nettype, NULL);

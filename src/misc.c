@@ -831,7 +831,6 @@ void check_last() {
 
 Context;
   pw = getpwuid(geteuid());
-Context;
   if (!pw) return;
 
   strncpy0(user, pw->pw_name ? pw->pw_name : "" , sizeof(user));
@@ -841,9 +840,11 @@ Context;
 
     sprintf(buf, STR("last %s"), user);
     if (shell_exec(buf, NULL, &out, NULL)) {
+Context;
       if (out) {
         char *p;
 
+Context;
         p = strchr(out, '\n');
         if (p)
           *p = 0;
@@ -1113,7 +1114,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
   char tmpfile[161];
   int x,
     fd;
-
+Context;
   if (!cmdline)
     return 0;
   /* Set up temp files */
@@ -1232,7 +1233,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     if (dup2(errd, STDERR_FILENO) == (-1)) {
       exit(1);
     }
-    argv[0] = STR("sh"); 		/* it should find it no problem, according to man (/bin,/usr/bin)*/
+    argv[0] = STR("sh");
     argv[1] = STR("-c");
     argv[2] = cmdline;
     argv[3] = NULL;
@@ -1983,3 +1984,12 @@ int chk_devoice(struct flag_record fr, struct chanset_t *chan)
     return 0;
 }
 
+void local_check_should_lock()
+{
+  module_entry *me;
+  if ((me = module_find("channels", 0, 0))) {
+    Function *func = me->funcs;
+    /* check_should_lock() */
+    (func[51]) ();
+  }
+}

@@ -293,7 +293,7 @@ Function global_table[] =
   (Function) & debug_output,	 /* int					*/
   (Function) & noshare,		 /* int					*/
   /* 108 - 111 */
-  (Function) 0, /* gban_total -- UNUSED! (Eule) */
+  (Function) do_chanset, 
   (Function) 0,	 /* int					*/
   (Function) & default_flags,	 /* int					*/
   (Function) & dcc_total,	 /* int					*/
@@ -344,7 +344,7 @@ Function global_table[] =
   (Function) copyfile,
   /* 148 - 151 */
   (Function) do_tcl,
-  (Function) readtclprog,
+  (Function) 0,
   (Function) 0,
   (Function) def_get,
   /* 152 - 155 */
@@ -413,8 +413,8 @@ Function global_table[] =
   (Function) stripmodes,
   (Function) stripmasktype,
   /* 204 - 207 */
-  (Function) 0,
   (Function) & online_since,	/* time_t *				*/
+  (Function) 0,
   (Function) 0,
   (Function) check_dcc_attrs,
   /* 208 - 211 */

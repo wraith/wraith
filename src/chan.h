@@ -100,6 +100,14 @@ struct chan_t {
   int maxmembers;
   int members;
   int do_opreq;
+  int jointime;
+  int parttime;
+#ifdef S_AUTOLOCK
+  int fighting;
+#endif
+#ifdef G_BACKUP
+  int backup_time;              /* If non-0, set +backup when now>backup_time */
+#endif
 
 };
 
@@ -129,11 +137,6 @@ struct chanset_t {
 				   like !eggdev				*/
   char name[81];                /* what the servers know the channel
 				   as, like !ABCDEeggdev		*/
-  char need_op[121];
-  char need_key[121];
-  char need_limit[121];
-  char need_unban[121];
-  char need_invite[121];
   int flood_pub_thr;
   int flood_pub_time;
   int flood_join_thr;
@@ -152,8 +155,6 @@ struct chanset_t {
 /* Chanint template 
  *int temp;
  */
-  int jointime;
-  int parttime;
   int idle_kick;
   int stopnethack_mode;
   int revenge_mode;
@@ -200,12 +201,6 @@ struct chanset_t {
   int floodnum[FLOOD_CHAN_MAX];
   char deopd[NICKLEN];		/* last person deop'd (must change	*/
   int opreqtime[5];             /* remember when ops was requested */
-#ifdef G_AUTOLOCK
-  int fighting;
-#endif
-#ifdef G_BACKUP
-  int backup_time;              /* If non-0, set +backup when now>backup_time */
-#endif
 #ifdef HUB
   char topic[91];
 #endif
@@ -235,7 +230,7 @@ struct chanset_t {
                                          - drummer                           */
 //#define CHAN_               0x4000	   /* unused */
 #define CHAN_VOICE          0x8000	   /* a bot +y|y will voice *, except +q */
-#define CHAN_SEEN           0x10000
+//#define CHAN_           0x10000
 #define CHAN_REVENGEBOT     0x20000	   /* revenge on actions against the bot */
 #define CHAN_NODESYNCH      0x40000
 #define CHAN_FASTOP         0x80000        /* Bots will not use +o-b to op (no cookies) */ 
@@ -284,7 +279,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
 #define channel_shared(chan) (1)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
-#define channel_seen(chan) (1)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
 #define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
 #ifdef S_IRCNET

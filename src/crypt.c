@@ -12,7 +12,7 @@
 unsigned char *hashdot(unsigned int r);
 unsigned int unhashdot(unsigned char *hash);
 
-char crybu[2000];
+char crybu[8000];
 
 char *psycrypt(char *st)
 {
@@ -43,7 +43,7 @@ char *psycrypt(char *st)
     pts2 = slt2 +SA2;
     while(*ptt!=0)
     {
-       if (slen>1990) break;
+       if (slen>7990) break;
         if (tslt1>255 || tslt1 <0) tslt1=CODE1;
         if (tslt2>255 || tslt2 <0) tslt2=CODE2;
        if (*pts1==0) pts1=slt1;
@@ -93,7 +93,7 @@ char *decryptit(char *todecipher)
 
 /* hashing routines for string driven systems */
 
-unsigned char base[]="'`0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@$=&*-#";
+unsigned char base[] = "'`0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@$=&*-#";
 
 int baselen=67;
 
@@ -161,9 +161,7 @@ int lfprintf(FILE *f, char *fmt, ...) {
   if(strchr(outbuf, '\n')) {
     while( (tptr = strchr(outbuf, '\n')) ) {
       *tptr = 0;
-Context;
       temps1 = (char *) encrypt_string(netpass, tptr2);
-Context;
       if (fprintf(f, "%s\n", cryptit(temps1)) == EOF) {
         nfree(temps1);
         return -1;

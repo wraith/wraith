@@ -40,11 +40,74 @@ static int gfld_ctcp_time;
 static int gfld_nick_thr;
 static int gfld_nick_time;
 
+#ifdef S_AUTOLOCK
+int killed_bots = 0;
+#endif /* S_AUTOLOCK */
+
 #include "channels.h"
 #include "cmdschan.c"
 #include "tclchan.c"
 #include "userchan.c"
 #include "udefchan.c"
+
+#ifdef S_AUTOLOCK
+#define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
+#endif /* S_AUTOLOCK */
+
+#ifdef S_AUTOLOCK
+struct cfg_entry CFG_LOCKTHRESHOLD, CFG_KILLTHRESHOLD;
+#endif /* S_AUTOLOCK */
+
+/* This will close channels if the HUB:leaf count is skewed from config setting */
+static void check_should_lock()
+{
+#ifdef S_AUTOLOCK
+#ifdef HUB
+  char *p = CFG_LOCKTHRESHOLD.gdata;
+  tand_t *bot;
+  int H,
+    L,
+    hc,
+    lc;
+  struct chanset_t *chan;
+
+  if (!p)
+    return;
+  H = atoi(p);
+  p = strchr(p, ':');
+  if (!p)
+    return;
+  p++;
+  L = atoi(p);
+  if ((H <= 0) || (L <= 0))
+    return;
+  hc = 1;
+  lc = 0;
+  for (bot = tandbot; bot; bot = bot->next) {
+    struct userrec *u = get_user_by_handle(userlist, bot->bot);
+
+    if (u) {
+      if (bot_hublevel(u) < 999)
+        hc++;
+      else
+        lc++;
+    }
+  }
+  if ((hc >= H) && (lc <= L)) {
+    for (chan = chanset; chan; chan = chan->next) {
+      if (!channel_closed(chan)) {
+        do_chanset(chan, STR("+closed chanmode +stni"), 1);
+#ifdef G_BACKUP
+        chan->channel.backup_time = now + 30;
+#endif
+      }
+    }
+  }
+
+#endif /* HUB */
+#endif /* S_AUTOLOCK */
+}
+
 
 static void got_cset(char *botnick, char *code, char *par)
 {
@@ -53,7 +116,7 @@ static void got_cset(char *botnick, char *code, char *par)
   struct chanset_t *chan = NULL;
 
   module_entry *me;
-
+Context;
   if (!par[0])
    return;
   else {
@@ -98,17 +161,20 @@ static void got_cset(char *botnick, char *code, char *par)
           putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid option\n",
                   list[0], all ? "all channels" : chname);
       }
-    break;
+      break;
     }
-    if (chan->status & CHAN_BITCH)
+    if (chan->status & CHAN_BITCH) {
+Context;
       if ((me = module_find("irc", 0, 0)))
         (me->funcs[IRC_RECHECK_CHANNEL])(chan, 0);
+    }
     if (!all)
       chan = NULL;
     else
       chan = chan->next;
-    nfree(buf);
   }
+  if (buf)
+    nfree(buf);
 }
 
 static void got_cpart(char *botnick, char *code, char *par)
@@ -193,6 +259,20 @@ static void got_role(char *botnick, char *code, char *par)
   putlog(LOG_DEBUG, "@", "Got role index %i", role);
 }
 
+void got_kl(char *botnick, char *code, char *par)
+{
+#ifdef S_AUTOLOCK
+  killed_bots++;
+  if (kill_threshold && (killed_bots = kill_threshold)) {
+    struct chanset_t *ch;
+    for (ch = chanset; ch; ch = ch->next)
+      do_chanset(ch, STR("+closed +backup +bitch"), 1);
+  /* botnet_send_zapf_broad(-1, botnetnick, NULL, "rn"); */
+  }
+#endif /* S_AUTOLOCK */
+}
+
+
 #ifdef HUB
 void rebalance_roles()
 {
@@ -253,25 +333,25 @@ static void channels_checkslowjoin() {
   struct chanset_t * chan;
 Context;
   for (chan=chanset;chan;chan=chan->next) {
-Context;
+ContextNote(chan->dname);
     /* slowpart */
-    if ((chan->parttime) && (chan->parttime < now)) {
-      chan->parttime = 0;
+    if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
+Context;
+      chan->channel.parttime = 0;
 Context;
 #ifdef LEAF
-      if (channel_active(chan) && shouldjoin(chan))
-        dprintf(DP_MODE, "PART %s\n", chan->name);
+      dprintf(DP_MODE, "PART %s\n", chan->name);
 #endif /* LEAF */
 Context;
       if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
         remove_channel(chan);
 Context;
     /* slowjoin */
-    } else if ((chan->jointime) && (chan->jointime < now)) {
+    } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
 Context;
         chan->status &= ~CHAN_INACTIVE;
 Context;
-        chan->jointime=0;
+        chan->channel.jointime=0;
 Context;
 #ifdef LEAF
       if (shouldjoin(chan) && !channel_active(chan))
@@ -279,6 +359,7 @@ Context;
 #endif /* LEAF */
     }
   }
+Context;
 }
 
 static void got_sj(int idx, char * code, char * par) {
@@ -289,7 +370,7 @@ static void got_sj(int idx, char * code, char * par) {
   delay=atoi(par) + now;
   chan = findchan_by_dname(chname);
   if (chan)
-    chan->jointime = delay;
+    chan->channel.jointime = delay;
 }
 static void got_sp(int idx, char * code, char * par) {
   char * chname;
@@ -299,7 +380,7 @@ static void got_sp(int idx, char * code, char * par) {
   delay=atoi(par) + now;
   chan = findchan_by_dname(chname);
   if (chan)
-    chan->parttime = delay;
+    chan->channel.parttime = delay;
 }
 
 static void *channel_malloc(int size, char *file, int line)
@@ -823,7 +904,8 @@ cmd_t channels_bot[] = {
   {"cset",     "", (Function) got_cset,  NULL},
   {"cycle",    "", (Function) got_cycle, NULL},
   {"down",     "", (Function) got_down,  NULL},
-  {"rl", "", (Function) got_role, NULL},
+  {"rl",       "", (Function) got_role,  NULL},
+  {"kl",       "", (Function) got_kl,    NULL},
   {"sj",       "", (Function) got_sj,    NULL},
   {"sp",       "", (Function) got_sp,    NULL},
 /*
@@ -963,7 +1045,67 @@ static Function channels_table[] =
 #endif
   (Function) write_chans,
   (Function) write_config,
+  (Function) check_should_lock,
 };
+
+void channels_describe(struct cfg_entry *cfgent, int idx)
+{
+#ifdef HUB
+  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
+    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, lock all channels\n"));
+  } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
+    dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
+  } else {
+    dprintf(idx, STR("No description for %s ???\n"), cfgent->name);
+    putlog(LOG_ERRORS, "*", STR("channels_describe() called with unknown config entry %s"), cfgent->name);
+  }
+#endif /* HUB */
+}
+
+void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+{
+  int i;
+
+  if (!cfgent->gdata)
+    return;
+  *valid = 0;
+  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
+    int L,
+      R;
+    char *value = cfgent->gdata;
+
+    L = atoi(value);
+    value = strchr(value, ':');
+    if (!value)
+      return;
+    value++;
+    R = atoi(value);
+    if ((R >= 1000) || (R < 0) || (L < 0) || (L > 100))
+      return;
+    *valid = 1;
+    return;
+  }
+  i = atoi(cfgent->gdata);
+  if (!strcmp(cfgent->name, STR("kill-threshold"))) {
+    if ((i < 0) || (i >= 200))
+      return;
+  } 
+  *valid = 1;
+  return;
+}
+
+#ifdef S_AUTOLOCK
+struct cfg_entry CFG_LOCKTHRESHOLD = {
+  "lock-threshold", CFGF_GLOBAL, NULL, NULL,
+  channels_changed, NULL, channels_describe
+};
+
+struct cfg_entry CFG_KILLTHRESHOLD = {
+  "kill-threshold", CFGF_GLOBAL, NULL, NULL,
+  channels_changed, NULL, channels_describe
+};
+#endif /* S_AUTOLOCK */
+
 
 char *channels_start(Function * global_funcs)
 {
@@ -1027,7 +1169,7 @@ char *channels_start(Function * global_funcs)
   add_hook(HOOK_MINUTELY, (Function) check_expired_invites);
 #endif /* S_IRCNET */
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
-  add_hook(HOOK_3SECONDLY, (Function) channels_checkslowjoin);
+  add_hook(HOOK_10SECONDLY, (Function) channels_checkslowjoin);
   Tcl_TraceVar(interp, "global-chanset",
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_globchanset, NULL);
@@ -1039,5 +1181,9 @@ char *channels_start(Function * global_funcs)
   my_tcl_ints[0].val = &share_greet;
   add_tcl_ints(my_tcl_ints);
   add_tcl_coups(mychan_tcl_coups);
+#ifdef S_AUTOLOCK
+  add_cfg(&CFG_LOCKTHRESHOLD);
+  add_cfg(&CFG_KILLTHRESHOLD);
+#endif /* S_AUTOLOCK */
   return NULL;
 }

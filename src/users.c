@@ -733,10 +733,9 @@ Context;
 		restore_ignore(s);
 #ifdef S_DCCPASS
               else if (lasthand[1] == CONFIG_NAME[1]) {
-Context;
                 set_cmd_pass(s, 1);
               }
-#endif
+#endif /* S_DCCPASS */
 	      else
 		restore_chanban(NULL, s);
 	    } else if (lasthand[0])
@@ -1013,10 +1012,9 @@ Context;
       }
   }
   /* process the user data *now* */
-Context;
 #ifdef LEAF
   unlink(userfile);
-#endif
+#endif /* LEAF */
   return 1;
 }
 

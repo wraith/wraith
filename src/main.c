@@ -396,6 +396,20 @@ static void got_stop(int z)
   exit(1);
 }
 
+static void got_abort(int z)
+{
+#ifdef DEBUG_CONTEXT
+  write_debug();
+#endif
+  fatal(STR("GOT SIGABRT -- CRASHING!"), 1);
+#ifdef SA_RESETHAND
+  kill(getpid(), SIGABRT);
+#else
+  bg_send_quit(BG_ABORT);
+  exit(1);
+#endif
+}
+
 #ifdef S_HIJACKCHECK
 static void got_cont(int z) 
 {
@@ -1108,7 +1122,6 @@ static void gotspawn(char *filename)
 
   while(fscanf(fp,"%[^\n]\n",templine) != EOF) 
   {
-    Context;
     temps = (char *) decrypt_string(netpass, decryptit(templine));
 
 #ifdef S_PSCLOAK
@@ -1150,6 +1163,7 @@ static void gotspawn(char *filename)
     if (ipsix && ipsix[1]) {
       snprintf(myip6, 120, "%s", ipsix);
     }
+    nfree(temps);
   }
 
   fclose(fp);
@@ -1362,10 +1376,10 @@ int main(int argc, char **argv)
   int skip = 0;
   FILE *fp;
   char newbin[DIRMAX], tmp[DIRMAX], 
-       cfile[DIRMAX], templine[8192], *temps;
+       cfile[DIRMAX], templine[8192];
   int ok = 1;
 #else
-  char tmp[DIRMAX], cfile[DIRMAX], templine[8192], *temps;
+  char tmp[DIRMAX], cfile[DIRMAX], templine[8192];
 #endif
   char c[1024];
 
@@ -1442,6 +1456,8 @@ int main(int argc, char **argv)
   sv.sa_handler = got_cont;
   sigaction(SIGCONT, &sv, NULL);
 #endif
+  sv.sa_handler = got_abort;
+  sigaction(SIGABRT, &sv, NULL);
   sv.sa_handler = got_hup;
   sigaction(SIGHUP, &sv, NULL);
   sv.sa_handler = got_quit;
@@ -1592,14 +1608,16 @@ int main(int argc, char **argv)
        werr(0);
     Context;
     while(fscanf(f,"%[^\n]\n",templine) != EOF) {
-      char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
+      char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps;
+      void *temp_ptr;
       int skip = 0;
       if (templine[0] != '+') {
         printf(STR("%d: "), i);
         werr(ERR_CONFBADENC);
       }
 
-      temps = (char *) decrypt_string(netpass, decryptit(templine));
+      temps = temp_ptr = (char *) decrypt_string(netpass, decryptit(templine));
+      sdprintf("malloc`d %d bytes", strlen(temps)+1);
       if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
         printf(STR("%d: "), i);
         werr(ERR_CONFBADENC);
@@ -1703,7 +1721,9 @@ int main(int argc, char **argv)
         }
 #endif /* LEAF */
       } // if read in[0] != #
-      temps = 0;
+Context;
+//      if (temps)
+      nfree(temp_ptr);
     }
   fclose(f);
 #ifdef LEAF

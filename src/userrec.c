@@ -35,7 +35,7 @@ int		userfile_perm = 0600;	/* Userfile permissions,
 					   default rw-------		    */
 #ifdef S_DCCPASS
 extern struct cmd_pass *cmdpass;
-#endif
+#endif /* S_DCCPASS */
 
 
 void *_user_malloc(int size, const char *file, int line)
@@ -47,9 +47,9 @@ void *_user_malloc(int size, const char *file, int line)
   p = strrchr(file, '/');
   simple_sprintf(x, "xuserrec.c:%s", p ? p + 1 : file);
   return n_malloc(size, x, line);
-#else
+#else /* !DEBUG_MEM */
   return nmalloc(size);
-#endif
+#endif /* DEBUG_MEM */
 }
 
 void *_user_realloc(void *ptr, int size, const char *file, int line)
@@ -61,9 +61,9 @@ void *_user_realloc(void *ptr, int size, const char *file, int line)
   p = strrchr(file, '/');
   simple_sprintf(x, "xuserrec.c:%s", p ? p + 1 : file);
   return n_realloc(ptr, size, x, line);
-#else
+#else /* !DEBUG_MEM */
   return nrealloc(ptr, size);
-#endif
+#endif /* DEBUG_MEM */
 }
 
 inline int expmem_mask(struct maskrec *m)
@@ -867,7 +867,7 @@ struct cfg_entry
   CFG_MEANDEOP,
   CFG_MEANKICK,
   CFG_MEANBAN,
-#endif
+#endif /* G_MEAN */
   CFG_MDOP;
 
 int deflag_dontshare=0;
@@ -892,7 +892,7 @@ void deflag_describe(struct cfg_entry *cfgent, int idx)
     dprintf(idx, STR("mean-kick decides what happens to a user kicking a bot in a +mean channel\n"));
   else if (cfgent==&CFG_MEANBAN)
     dprintf(idx, STR("mean-ban decides what happens to a user banning a bot in a +mean channel\n"));
-#endif
+#endif /* G_MEAN */
   else if (cfgent==&CFG_MDOP)
     dprintf(idx, STR("mdop decides what happens to a user doing a mass deop\n"));
   dprintf(idx, STR("Valid settings are: ignore (No flag changes), deop (set flags to +d), kick (set flags to +dk) or delete (remove from userlist)\n"));
@@ -942,7 +942,7 @@ struct cfg_entry CFG_MEANBAN = {
   NULL,
   deflag_describe
 };
-#endif
+#endif /* G_MEAN */
 
 struct cfg_entry CFG_MDOP = {
   "mdop", CFGF_GLOBAL, NULL, NULL,
@@ -985,7 +985,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     strcpy(tmp, STR("Banned bot in +mean channel"));
     ent=&CFG_MEANDEOP;
     break;
-#endif
+#endif /* G_MEAN */
   case DEFLAG_MDOP:
     strcpy(tmp, STR("Mass deop"));
     ent=&CFG_MDOP;
@@ -1027,7 +1027,7 @@ void init_userrec() {
   add_cfg(&CFG_MEANDEOP);
   add_cfg(&CFG_MEANKICK);
   add_cfg(&CFG_MEANBAN);
-#endif
+#endif /* G_MEAN */
   add_cfg(&CFG_MDOP);
 }
 

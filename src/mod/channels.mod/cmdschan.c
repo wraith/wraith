@@ -1531,19 +1531,6 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     else
       dprintf(idx, "invite-time: 0\n");
 #endif /* S_IRCNET */
-    /* Only bot owners can see/change these (they're TCL commands) */
-    if (u->flags & USER_OWNER) {
-      if (chan->need_op[0])
-	dprintf(idx, "To regain op's (need-op):\n%s\n", chan->need_op);
-      if (chan->need_invite[0])
-	dprintf(idx, "To get invite (need-invite):\n%s\n", chan->need_invite);
-      if (chan->need_key[0])
-	dprintf(idx, "To get key (need-key):\n%s\n", chan->need_key);
-      if (chan->need_unban[0])
-	dprintf(idx, "If I'm banned (need-unban):\n%s\n", chan->need_unban);
-      if (chan->need_limit[0])
-	dprintf(idx, "When channel full (need-limit):\n%s\n", chan->need_limit);
-    }
     dprintf(idx, "Other modes:\n");
     dprintf(idx, "     %cinactive       %cprivate     %ccycle          %cdontkickops\n",
 	    (chan->status & CHAN_INACTIVE) ? '+' : '-',
@@ -1645,7 +1632,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 static void cmd_chanset(struct userrec *u, int idx, char *par)
 {
   char *chname = NULL, answers[512], *parcpy;
-  char *list[2], *bak, *buf, buf2[1024];
+  char *list[2], *bak, *buf;
   struct chanset_t *chan = NULL;
   int all = 0, items = 0;
 
@@ -1723,13 +1710,6 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	 * just ignore any non global +n's trying to set the need-commands.
 	 */
 	if (strncmp(list[0], "need-", 5) || (u->flags & USER_OWNER)) {
-	  if (!strncmp(list[0], "need-", 5) && !(isowner(dcc[idx].nick)) &&
-	      must_be_owner) {
-	    dprintf(idx, "Due to security concerns, only permanent owners can set these modes.\n");
-
-	    nfree(buf);
-	    return;
-	  }
 	  list[1] = par;
 	  /* Par gets modified in tcl channel_modify under some
   	   * circumstances, so save it now.
@@ -1749,8 +1729,10 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	break;
       }
       if (!all && answers[0]) {
-        sprintf(buf2, "cset %s %s", chname, bak);
-        botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+        struct chanset_t *my_chan;
+        my_chan = findchan_by_dname(chname);
+        if (my_chan)
+          do_chanset(my_chan, bak, 0);
 	dprintf(idx, "Successfully set modes { %s } on %s.\n",
 		answers, chname);
 #ifdef HUB
@@ -1763,8 +1745,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
         chan = chan->next;
     }
     if (all && answers[0]) {
-      sprintf(buf2, "cset * %s", bak);
-      botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+      do_chanset(NULL, bak, 0);		/* NULL does all */
       dprintf(idx, "Successfully set modes { %s } on all channels.\n",
 	      answers);
 #ifdef HUB

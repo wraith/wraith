@@ -15,7 +15,7 @@
 #include <sys/socket.h>
 #if HAVE_SYS_SELECT_H
 #  include <sys/select.h>
-#endif
+#endif /* HAVE_SYS_SELECT_H */
 #include <netinet/in.h>
 #include <arpa/inet.h>		/* is this really necessary? */
 #include <errno.h>
@@ -25,7 +25,7 @@
 
 #if HAVE_UNISTD_H
 #  include <unistd.h>
-#endif
+#endif /* HAVE_UNITSTD_H */
 #include <setjmp.h>
 
 #if !HAVE_GETDTABLESIZE
@@ -34,7 +34,7 @@
 #  else
 #    define getdtablesize() 200
 #  endif
-#endif
+#endif /* !HAVE_GETDTABLESIZE */
 
 extern struct dcc_t	*dcc;
 extern char *netpass;
@@ -179,7 +179,7 @@ int seed_PRNG(void)
   FILE *fh = 0;
 #if OPENSSL_VERSION_NUMBER >= 0x00905100
   if (RAND_status()) return 0;
-#endif
+#endif /* OPENSSL_VERSION_NUMBER */
   if ((fh = fopen("/dev/urandom", "r"))) {
     fclose(fh);
     return 0;
@@ -401,17 +401,17 @@ void neterror(char *s)
   case ECONNRESET:
     strcpy(s, "Connection reset by peer");
     break;
-#endif
+#endif /* ECONNRESET */
 #ifdef EACCES
   case EACCES:
     strcpy(s, "Permission denied");
     break;
-#endif
+#endif /* EACCESS */
 #ifdef EMFILE
   case EMFILE:
     strcpy(s, "Too many open files");
     break;
-#endif
+#endif /* EMFILE */
   case 0:
     strcpy(s, "Error 0");
     break;
@@ -679,7 +679,7 @@ int open_telnet_raw(int sock, char *server, int sport)
           return -1;
         }
       } else {
-#endif
+#endif /* USE_IPV6 */
         if (bind(sock, &cached_myip4_so.sa, SIZEOF_SOCKADDR(cached_myip4_so)) < 0) {
           killsock(sock);
           return -3;
@@ -1096,7 +1096,7 @@ static int sockread(char *s, int *len)
 #ifdef FD_SETSIZE
   if (fds > FD_SETSIZE)
     fds = FD_SETSIZE;		/* Fixes YET ANOTHER freebsd bug!!! */
-#endif
+#endif /* FD_SETSIZE */
   /* timeout: 1 sec */
   t.tv_sec = 1;
   t.tv_usec = 0;
@@ -1122,12 +1122,12 @@ static int sockread(char *s, int *len)
 #ifdef HPUX_HACKS
 #ifndef HPUX10_HACKS
   x = select(fds, (int *) &fd, (int *) NULL, (int *) NULL, &t);
-#else
+#else /* !HPUX10_HACKS */
   x = select(fds, &fd, NULL, NULL, &t);
-#endif
-#else
+#endif /* HPUX10_HACKS */
+#else /* !HPUX_HACKS */
   x = select(fds, &fd, NULL, NULL, &t);
-#endif
+#endif /* HPUX_HACKS */
   if (x > 0) {
     /* Something happened */
     for (i = 0; i < MAXSOCKS; i++) {
@@ -1270,9 +1270,9 @@ char *botlink_encrypt(int snum, char *src)
     eline = encrypt_string(socklist[snum].okey, line);
     if (socklist[snum].oseed) {
       for (i = 0; i <= 3; i++)
-       *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+        *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
       if (!socklist[snum].oseed)
-       socklist[snum].oseed++;
+        socklist[snum].oseed++;
     }
     buf = nrealloc(buf, bufpos + strlen(eline) + 10);
     strcpy((char *) &buf[bufpos], eline);
@@ -1519,9 +1519,9 @@ void tputs(register int z, char *s, unsigned int len)
 #ifdef EUSE_COLORPUTS
      colorputs(s);
      x = len;
-#else
+#else /* !EUSE_COLORPUTS */
     write(z, s, len);
-#endif
+#endif /* EUSE_COLORPUTS */
     return;
   }
   for (i = 0; i < MAXSOCKS; i++) {
@@ -1650,7 +1650,7 @@ void dequeue_sockets()
 #ifdef FD_SETSIZE
   if (fds > FD_SETSIZE)
     fds = FD_SETSIZE;           /* Fixes YET ANOTHER freebsd bug!!! */
-#endif
+#endif /* FD_SETSIZE */
   FD_ZERO(&wfds);
   tv.tv_sec = 0;
   tv.tv_usec = 0; 		/* we only want to see if it's ready for writing, no need to actually wait.. */
@@ -1665,12 +1665,12 @@ void dequeue_sockets()
 #ifdef HPUX_HACKS
  #ifndef HPUX10_HACKS
   select(fds, (int *) NULL, (int *) &wfds, (int *) NULL, &tv);
- #else
+ #else /* !HPUX10_HACKS */
   select(fds, NULL, &wfds, NULL, &tv);
- #endif
-#else
+ #endif /* HPUX10_HACKS */
+#else /* !HPUX_HACKS */
   select(fds, NULL, &wfds, NULL, &tv);
-#endif
+#endif /* HPUX_HACKS */
 
 /* end poptix */
 
@@ -1698,15 +1698,15 @@ void dequeue_sockets()
           }
         }
       } else
-#endif
+#endif /* HAVE_SSL */
       x = write(socklist[i].sock, socklist[i].outbuf, socklist[i].outbuflen);
       if ((x < 0) && (errno != EAGAIN)
 #ifdef EBADSLT
 	  && (errno != EBADSLT)
-#endif
+#endif /* EBADSLT */
 #ifdef ENOTCONN
 	  && (errno != ENOTCONN)
-#endif
+#endif /* EBADSLT */
 	) {
 	/* This detects an EOF during writing */
 	debug3(STR("net: eof!(write) socket %d (%s,%d)"), socklist[i].sock,

@@ -168,6 +168,7 @@ inline static int chanset_unlink(struct chanset_t *chan);
 #endif
 #define write_chans ((int (*)(FILE *, int))channels_funcs[49])
 #define write_config ((int (*)(FILE *, int))channels_funcs[50])
+#define check_should_lock ((void (*)(void))channels_funcs[51])
 
 #endif				/* MAKING_CHANNELS */
 

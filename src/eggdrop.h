@@ -81,12 +81,6 @@
 
 #define SGRAB 2011         /* How much data to allow through sockets. */
 
-#define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
-
-#ifdef G_AUTOLOCK
-#define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
-#endif
-
 #define PRIV_OP 1
 #define PRIV_VOICE 2
 
@@ -259,6 +253,8 @@ typedef int socklen_t;
 #  define malloc(x)	dont_use_old_malloc(x)
 #  undef free
 #  define free(x)	dont_use_old_free(x)
+#  undef realloc
+#  define realloc(x)    dont_use_old_realloc(x)
 #endif /* !COMPILING_MEM */
 
 /* 32 bit type */

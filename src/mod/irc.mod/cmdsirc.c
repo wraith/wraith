@@ -763,11 +763,9 @@ Context;
     bots--;
     bpos++;
   }
-  if (bitch && !simul) {
-    char buf2[1024];
+  if (bitch && !simul && chan) {
     chan->status |= CHAN_BITCH;
-    sprintf(buf2, "cset %s +bitch", chan->dname);
-    botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+    do_chanset(chan, STR("+bitch"), 1);
   }
   nfree(targets);
   nfree(chanbots);

@@ -310,23 +310,30 @@ static void cmd_config(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", STR("#%s# config %s"), dcc[idx].nick, par);
   if (!par[0]) {
-    dprintf(idx, STR("Usage: config [name [value]]\n"));
+    char *outbuf = nmalloc(1);
+    outbuf[0] = 0;
+    dprintf(idx, STR("Usage: config [name [value|-]]\n"));
     dprintf(idx, STR("Defined config entry names:\n"));
     cnt = 0;
     for (i=0;i<cfg_count;i++) {
       if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
-	if (!cnt)
-	  dprintf(idx, "  ");
-	dprintf(idx, STR("%s "), cfg[i]->name);
+	if (!cnt) {
+          outbuf = nrealloc(outbuf, 2 + 1);
+	  sprintf(outbuf, "  ");
+        }
+        outbuf = nrealloc(outbuf, strlen(outbuf) + strlen(cfg[i]->name) + 1 + 1);
+	sprintf(outbuf, STR("%s%s "), outbuf, cfg[i]->name);
 	cnt++;
 	if (cnt==10) {
-	  dprintf(idx, "\n");
+	  dprintf(idx, "%s\n", outbuf);
 	  cnt=0;
 	}
       }
     }
     if (cnt)
-      dprintf(idx, "\n");
+      dprintf(idx, "%s\n", outbuf);
+    if (outbuf)
+      nfree(outbuf);
     return;
   }
   name = newsplit(&par);

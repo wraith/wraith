@@ -56,7 +56,7 @@ extern struct user_entry_type USERENTRY_COMMENT, USERENTRY_LASTON,
   USERENTRY_CONFIG,
   USERENTRY_SECPASS,
   USERENTRY_XTRA;
-#endif
+#endif /* MAKING_MODS */
 
 
 struct laston_info {
@@ -104,7 +104,7 @@ void *_user_realloc(void *ptr, int size, const char *file, int line);
 #ifndef MAKING_MODS
 #  define user_malloc(x)	_user_malloc(x, __FILE__, __LINE__)
 #  define user_realloc(x, y)	_user_realloc(x, y, __FILE__, __LINE__)
-#endif
+#endif /* MAKING_MODS */
 
 int add_entry_type(struct user_entry_type *);
 int del_entry_type(struct user_entry_type *);

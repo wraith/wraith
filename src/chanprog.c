@@ -870,8 +870,76 @@ int shouldjoin(struct chanset_t *chan)
   get_user_flagrec(get_user_by_handle(userlist, botnetnick), &fr, chan->name);
   return (!channel_inactive(chan)
           && (channel_backup(chan) || !glob_backupbot(fr)));
-#else
+#else /* !G_BACKUP */
   return !channel_inactive(chan);
-#endif
+#endif /* G_BACKUP */
+}
+
+void do_chanset(struct chanset_t *chan, char *options, int local)
+{
+  char *buf;
+  module_entry *me;
+
+Context;   
+  /* send out over botnet. */
+  /* nmalloc(options,chan,'cset ',' ',+ 1) */
+  if (chan)
+    buf = nmalloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+  else
+    buf = nmalloc(strlen(options) + 1 + 5 + 1 + 1);
+  buf[0] = 0;
+  strcat(buf, "cset ");
+  if (chan)
+    strcat(buf, chan->dname);
+  else
+    strcat(buf, "*");
+  strcat(buf, " ");
+  strcat(buf, options);
+  putallbots(buf);
+  nfree(buf);
+
+  /* now set locally, hopefully it works */
+  if (local && (me = module_find("channels", 0, 0))) {
+  /* tcl_channel_modify(0, chan, 1, options) */
+    Function *func = me->funcs;
+    char *list[2], *buf2, *bak;
+    struct chanset_t *ch;
+    int all = 0;
+
+    if (!chan) {
+      ch = chanset;
+      all++;
+    } else
+      ch = chan;
+
+    bak = options;
+    buf2 = nmalloc(strlen(options) + 1);
+
+    while (ch) {
+      strcpy(buf2, bak);
+      options = buf2;
+      list[0] = newsplit(&options);
+      while (list[0][0]) {
+        if (list[0][0] == '+' || list[0][0] == '-' ||
+           (!strcmp(list[0], "dont-idle-kick"))) {
+          (func[38]) (0, ch, 1, list);
+          list[0] = newsplit(&options);
+          continue;
+        }
+        if (strncmp(list[0], "need-", 5)) {
+          list[1] = options;
+          /* Par gets modified in tcl channel_modify under some
+           * circumstances, so save it now.
+           */
+           (func[38]) (0, ch, 2, list);
+        }
+      }
+      if (all)
+        ch = ch->next;
+      else
+        ch = NULL;
+    }
+    nfree(buf2);
+  }
 }
 

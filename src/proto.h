@@ -96,6 +96,7 @@ char *unsigned_int_to_base10(unsigned int);
 char *int_to_base64(unsigned int);
 
 /* chanprog.c */
+void do_chanset(struct chanset_t *, char *, int);
 void checkchans(int);
 void tell_verbose_uptime(int);
 void tell_verbose_status(int);
@@ -229,6 +230,7 @@ void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 
 /* misc.c */
+void local_check_should_lock();
 void werr(int);
 char *werr_tostr(int);
 void sdprintf EGG_VARARGS(char *, arg1);
@@ -335,11 +337,11 @@ int flush_inbuf(int idx);
 void protect_tcl();
 void unprotect_tcl();
 void do_tcl(char *, char *);
-int readtclprog(char *fname);
 int findidx(int);
 int findanyidx(int);
 
 /* userent.c */
+void add_cfg(struct cfg_entry *);
 void list_type_kill(struct list_type *);
 int list_type_expmem(struct list_type *);
 int xtra_set();
