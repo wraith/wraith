@@ -14,29 +14,29 @@ fi
 
 ver="?.?.?"
 ver=`grep "char" src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
-PACKNAME=`grep "PACKNAME " pack/pack.cfg | $AWK '/PACKNAME/ {print $2}'`
 BUILDTS=`cat src/build.h | $AWK '{print $3}'`
 builddate=`perl -e "use POSIX 'strftime';print strftime(\"%m.%d.%Y\n\",gmtime(${BUILDTS}));"`
 
 clear
 #Display a banner
-bt=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*switch (r % \(.\)) {/\1/"`
+bt=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*switch (randint(\(.\))) {/\1/"`
 bn=$[($RANDOM % ${bt})]
 banner=`grep -A 15 "char \*wbanner() {" src/misc.c | grep "case ${bn}:" | sed -e "s/.*case ${bn}: return STR(\"\(.*\)\");/\1/"`
 echo -e "${banner}"
 echo -e "Version:   ${ver}\nBuild:     ${builddate}"
-echo -e `grep -r "http://" src/misc.c | sed -e "s/dprintf(idx, STR(\"\(.*\)\"));/\1/"`
-echo
 
 usage() 
 {
-    echo "Usage: $0 [-bcdn] [all|hub|leaf]"
+    echo
+    echo "Usage: $0 [-bcCdn] [-p FILE] [all|hub|leaf]"
     echo
     echo "    The options are as follows:"
     echo "    -b        Use bzip2 instead of gzip when packaging."
     echo "    -c        Cleans up old binaries/files before compile."
+    echo "    -C        Preforms a distclean before making."
     echo "    -d        Builds a debug package."
     echo "    -n        Do not package the binaries."
+    echo "    -p  FILE  Used for development."
 }
 
 debug=0
@@ -47,21 +47,31 @@ clean=0
 type=
 nopkg=0
 bzip=0
+pack=pack/pack.cfg
+if test -f Makefile; then
+  pack="`grep "CFG =" Makefile | sed -e 's/CFG = \(.*\)/\1/'`"
+fi
 
-while getopts bcdhn opt ; do
+while getopts bCcdhnp: opt ; do
         case "$opt" in
         b) bzip=1 ;;
 	c) clean=1 ;;
+	C) clean=2 ;;
         d) debug=1 ;;
 	h) usage; exit 0 ;;
         n) nopkg=1 ;;
-#	t) tcldir="$OPTARG" ;;
+	p) pack="$OPTARG" ;;
         *) usage; exit 1 ;;
 
         esac
 done
 
 shift $(($OPTIND - 1))
+
+PACKNAME=`grep "PACKNAME " ${pack} | $AWK '/PACKNAME/ {print $2}'`
+echo "Packname:  ${PACKNAME} (${pack})"
+echo -e `grep -r "http://" src/misc.c | sed -e "s/dprintf(idx, STR(\"\(.*\)\"));/\1/"`
+echo
 
 if test -z "$1"; then
  usage
@@ -116,7 +126,7 @@ echo "[*] Building ${PACKNAME}::${type} for $os"
 echo "[*] Configuring..."
 umask 077 >/dev/null
 
-./configure --silent
+./configure --silent --with-pack=${pack}
 
 MAKE="`which gmake`"
 if test -z "${MAKE}"; then
@@ -127,6 +137,9 @@ fi
 if [ $clean = "1" ]; then
  echo "[*] Cleaning up old binaries/files..."
  ${MAKE} clean > /dev/null
+elif [ $clean = "2" ]; then
+ echo "[*] DistCleaning old files..."
+ ${MAKE} distclean > /dev/null
 fi
 
 _build()

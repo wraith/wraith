@@ -478,16 +478,17 @@ dnl  EGG_SUBST_VERSION()
 dnl
 AC_DEFUN(EGG_SUBST_VERSION, [dnl
 VERSION=`grep "char" $srcdir/src/main.c | $AWK '/egg_version/ {print [$]5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
-if ! test -f $srcdir/pack/pack.cfg; then
+if ! test -f $cfg; then
  cat << EOF >&2
 configure: error:
 
-  Your pack cfg is missing, please copy it to $srcdir/pack/pack.cfg
+  Your pack cfg is missing, please copy it to $srcdir/$cfg
+  Or specify the path to it with: --with-cfg=
 
 EOF
  exit 1
 fi
-PACKNAME=`grep "PACKNAME " $srcdir/pack/pack.cfg | $AWK '/PACKNAME/ {print [$]2}'`
+PACKNAME=`grep "PACKNAME " $cfg | $AWK '/PACKNAME/ {print [$]2}'`
 version_num=`echo $VERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", [$]1, [$]2, [$]3)}'`
 AC_DEFINE_UNQUOTED(EGG_VERSION, $version_num, [Defines the current pack version])dnl
 AC_SUBST(VERSION)dnl

@@ -10,6 +10,7 @@ AC_COPYRIGHT([Copyright (c) 2003, 2004 Bryan Drewery (bryan)])
 AC_REVISION($Revision$)
 
 EGG_SAVE_PARAMETERS
+EGG_CHECK_PACKCFG
 
 # Setup build environment
 AC_PROG_CC

@@ -10,13 +10,14 @@ VPATH = @srcdir@
 @SET_MAKE@
 prefix = @prefix@
 VERSION = @VERSION@
+CFG = @CFG@
 PACKNAME = @PACKNAME@
 DISTRIB = @PACKNAME@-@VERSION@
 CCDEPMODE = @CCDEPMODE@
 LEAFEXEC = leaf
 HUBEXEC = hub
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
-EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
+EXCLUDES = $(CFG) misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
            src/crypto/Makefile src/crypto/.deps src/crypto/.cvsignore \
            src/mod/dns.mod/Makefile src/mod/*.mod/.deps/ src/mod/*.mod/.cvsignore \
            src/.deps src/compat/.deps misc/commit misc/grep autotools/ \
@@ -115,8 +116,8 @@ tar: distrib
 #	rm -rf $(DISTRIB)/
 #	cd ../ && rm -rf distrib/
 
-packconf: makesettings pack/pack.cfg
-	@src/makesettings pack/pack.cfg src/settings.c~
+packconf: makesettings $(CFG)
+	@src/makesettings $(CFG) src/settings.c~
 	@(if [ ! -f src/settings.c ]; then \
 	touch src/settings.c; \
 	fi)
@@ -156,7 +157,7 @@ help: packconf makehelp stringfix
 	cp -f src/help.h~ src/help.h; \
 	fi)
 
-stringfix: packconf src/stringfix.c pack/pack.cfg
+stringfix: packconf src/stringfix.c config.h
 	+@cd src && ${MAKE_UTILS} stringfix
 
 makesettings: src/makesettings.c
