@@ -495,6 +495,7 @@ void show_motd(int idx)
 #endif /* S_UTCTIME */
     dprintf(idx, "Motd set by \002%s\002 (%s)\n", who, date);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
+    dprintf(idx, " \n");
     nfree(buf_ptr);
   } else
     dprintf(idx, STR("Motd: none\n"));
