@@ -8,7 +8,7 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
-CFLAGS = @CFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
+CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 
 OBJCOPY = @OBJCOPY@
@@ -59,7 +59,7 @@ MODOBJS = mod/channels.o \
         mod/update.o
 
 
-MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
+MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
 
 blah:
 	@echo ""
@@ -68,22 +68,22 @@ blah:
 
 makeres: makeres.c
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
 	@$(STRIP) makeres
 
 makehelp: makehelp.c
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c -o makehelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c -o makehelp
 	@$(STRIP) makehelp
 
 sorthelp: sorthelp.c
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c -o sorthelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c -o sorthelp
 	@$(STRIP) sorthelp
 
 stringfix: stringfix.c common.h ../config.h eggdrop.h
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
 	@$(STRIP) stringfix
 
 ../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability
@@ -122,7 +122,7 @@ include ./.deps/includes
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
 	@./stringfix $< _$< || cp -f $< _$<
 	@source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c _$<  -o `basename $< .c`.o
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c _$<  -o `basename $< .c`.o
 #        $(COMPILE) -c `test -f '$<' || echo '$(srcdir)/'`$<
 
 

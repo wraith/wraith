@@ -6,7 +6,7 @@ dnl  EGG_CHECK_DEPMODE()
 dnl
 AC_DEFUN(EGG_CHECK_DEPMODE, [dnl
 CCDEPMODE=gcc
-num=`$CC -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
+num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num = "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"

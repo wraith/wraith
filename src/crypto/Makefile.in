@@ -3,10 +3,10 @@ top_srcdir = @top_srcdir@
 srcdir = @srcdir@
 
 SHELL = @SHELL@
-CFLAGS = @CFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
+CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
-CC = @CC@
-LD = @CC@
+CXX = @CXX@
+LD = @CXX@
 STRIP = @STRIP@
 
 VPATH = @srcdir@
@@ -38,7 +38,7 @@ include ./.deps/includes
 .c.o:
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
 	@source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -c $<
 
 
 

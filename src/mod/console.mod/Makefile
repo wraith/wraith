@@ -19,7 +19,7 @@ static: ../console.o
 ../console.o:
 	@echo -e "Compiling: \033[1mconsole\033[0m"
 	@source='console.c' object='$@' depfile='.deps/console.Po' tmpdepfile='.deps/console.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(srcdir)/console.c
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/console.c
 	@rm -f ../console.o
 	@mv console.o ../
 

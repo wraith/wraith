@@ -19,7 +19,7 @@ static: ../ctcp.o
 ../ctcp.o:
 	@echo -e "Compiling: \033[1mctcp\033[0m"
 	@source='ctcp.c' object='$@' depfile='.deps/ctcp.Po' tmpdepfile='.deps/ctcp.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(srcdir)/ctcp.c
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/ctcp.c
 	@rm -f ../ctcp.o
 	@mv ctcp.o ../
 

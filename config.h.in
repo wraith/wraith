@@ -132,9 +132,6 @@
 /* Define to 1 if you have the `strftime' function. */
 #undef HAVE_STRFTIME
 
-/* Define to 1 if cpp supports the ANSI # stringizing operator. */
-#undef HAVE_STRINGIZE
-
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
@@ -236,9 +233,6 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define to 1 if the C compiler supports function prototypes. */
-#undef PROTOTYPES
-
 /* The size of a `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
@@ -298,20 +292,8 @@
 # undef __CHAR_UNSIGNED__
 #endif
 
-/* Define like PROTOTYPES; this can be used by system headers. */
-#undef __PROTOTYPES
-
-/* Define to empty if `const' does not conform to ANSI C. */
-#undef const
-
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
-#endif
 
 /* Define to rpl_malloc if the replacement function should be used. */
 #undef malloc

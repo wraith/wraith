@@ -8,12 +8,12 @@ MOD_UPDIR = @MOD_UPDIR@
 
 @SET_MAKE@
 
-CC = @CC@
-LD = @CC@
+CXX = @CXX@
+LD = @CXX@
 STRIP = @STRIP@
-CFLAGS = @CFLAGS@ -I../.. -I$(top_srcdir) @DEFS@ $(CFLGS)
+CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
-MOD_CFLAGS = @CFLAGS@ -I. -I../../.. -I$(MOD_UPDIR)$(top_srcdir) \
+MOD_CXXFLAGS = @CXXFLAGS@ -I. -I../../.. -I$(MOD_UPDIR)$(top_srcdir) \
   -I$(MOD_UPDIR)$(top_srcdir)/src/mod -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 MOD_CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
@@ -43,9 +43,9 @@ mod_objs = channels.mod_o \
 
 egg_ac_parameters = @egg_ac_parameters@
 
-MAKE_MOD = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
+MAKE_MOD = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'STRIP=$(STRIP)' 'CFLAGS=$(MOD_CFLAGS)' 'CPPFLAGS=$(MOD_CPPFLAGS)' \
+'STRIP=$(STRIP)' 'CXXFLAGS=$(MOD_CXXFLAGS)' 'CPPFLAGS=$(MOD_CPPFLAGS)' \
 'LIBS=$(LIBS)' 'SHELL=$(SHELL)'
 
 

@@ -18,8 +18,8 @@ EOF
   exit 1
 fi
 
-if test -n "$GCC"; then
-  CFLAGS="$CFLAGS -O3"
+if test -n "$GXX"; then
+  CXXFLAGS="$CXXFLAGS -O3"
 fi
 
 ])dnl
@@ -83,10 +83,10 @@ dnl which speeds up the compilation.
 dnl
 AC_DEFUN([EGG_CHECK_CCPIPE],
 [
-  if test -n "$GCC" && test -z "$no_pipe"; then
+  if test -n "$GXX" && test -z "$no_pipe"; then
     AC_CACHE_CHECK([whether the compiler understands -pipe], egg_cv_var_ccpipe, [
-        ac_old_CC="$CC"
-        CC="$CC -pipe"
+        ac_old_CXX="$CXX"
+        CXX="$CXX -pipe"
         AC_COMPILE_IFELSE([[
           int main ()
           {
@@ -97,11 +97,11 @@ AC_DEFUN([EGG_CHECK_CCPIPE],
         ], [
           egg_cv_var_ccpipe="no"
         ])
-        CC="$ac_old_CC"
+        CXX="$ac_old_CXX"
     ])
 
     if test "$egg_cv_var_ccpipe" = "yes"; then
-      CC="$CC -pipe"
+      CXX="$CXX -pipe"
     fi
   fi
 ])
@@ -112,10 +112,10 @@ dnl See if the compiler supports -Wall.
 dnl
 AC_DEFUN([EGG_CHECK_CCWALL],
 [
-  if test -n "$GCC" && test -z "$no_wall"; then
+  if test -n "$GXX" && test -z "$no_wall"; then
     AC_CACHE_CHECK([whether the compiler understands -Wall], egg_cv_var_ccwall, [
-      ac_old_CFLAGS="$CFLAGS"
-      CFLAGS="$CFLAGS -Wall"
+      ac_old_CXXFLAGS="$CXXFLAGS"
+      CXXFLAGS="$CXXFLAGS -Wall"
        AC_COMPILE_IFELSE([[
          int main ()
          {
@@ -126,11 +126,11 @@ AC_DEFUN([EGG_CHECK_CCWALL],
        ], [
          egg_cv_var_ccwall="no"
        ])
-      CFLAGS="$ac_old_CFLAGS"
+      CXXFLAGS="$ac_old_CXXFLAGS"
     ])
 
     if test "$egg_cv_var_ccwall" = "yes"; then
-      CFLAGS="$CFLAGS -Wall"
+      CXXFLAGS="$CXXFLAGS -Wall"
     fi
   fi
 ])
@@ -141,19 +141,19 @@ dnl  Checks whether the compiler supports the `-static' flag.
 AC_DEFUN(EGG_CHECK_CCSTATIC, [dnl
 if test -z "$no_static"
 then
-  if test -n "$GCC"
+  if test -n "$GXX"
   then
     AC_CACHE_CHECK(whether the compiler understands -static, egg_cv_var_ccstatic, [dnl
-      ac_old_CC="$CC"
-      CC="$CC -static"
+      ac_old_CXX="$CXX"
+      CXX="$CXX -static"
       AC_TRY_COMPILE(,, egg_cv_var_ccstatic="yes", egg_cv_var_ccstatic="no")
-      CC="$ac_old_CC"
+      CXX="$ac_old_CXX"
       
     ])
     if test "$egg_cv_var_ccstatic" = "yes"
     then
-      CCDEBUG="$CC"
-      CC="$CC -static"
+      CCDEBUG="$CXX"
+      CXX="$CXX -static"
     else
       cat << 'EOF' >&2
 configure: error:
@@ -266,7 +266,7 @@ case "$egg_cv_var_system_type" in
   ;;
   CYGWI*)
     AC_PROG_CC_WIN32
-    CC="$CC $WIN32FLAGS"
+    CXX="$CXX $WIN32FLAGS"
     EGG_CYGWIN="yes"
     EGG_CYGWIN_BINMODE
     AC_DEFINE(CYGWIN_HACKS, 1, [Define if running under cygwin])
@@ -590,9 +590,9 @@ AC_MSG_RESULT([present by default])
 dnl try -mwin32
 ac_compile_save="$ac_compile"
 dnl we change CC so config.log looks correct
-save_CC="$CC"
+save_CXX="$CXX"
 ac_compile="$ac_compile -mwin32"
-CC="$CC -mwin32"
+CXX="$CXX -mwin32"
 AC_TRY_COMPILE(,[
 #ifndef WIN32
 # ifndef _WIN32
@@ -602,11 +602,11 @@ AC_TRY_COMPILE(,[
 dnl found windows.h using -mwin32
 AC_MSG_RESULT([found via -mwin32])
 ac_compile="$ac_compile_save"
-CC="$save_CC"
+CXX="$save_CC"
 WIN32FLAGS="-mwin32"
 ], [
 ac_compile="$ac_compile_save"
-CC="$save_CC"
+CXX="$save_CC"
 AC_MSG_RESULT([not found])
 ])
 ])
