@@ -373,7 +373,7 @@ int allocsock(int sock, int options)
       socklist[i].okey[0] = 0;
       socklist[i].ikey[0] = 0;
       socks_total++;
-      sdprintf("allocsock(%d) = %d", sock, i);
+      sdprintf("allocsock(%d) = %d", i, sock);
       return i;
     }
   }
@@ -1572,8 +1572,10 @@ void tputs(register int z, char *s, size_t len)
 
 int findanysnum(register int sock)
 {
+  register int i = 0;
+
   if (sock != -1)
-    for (int i = 0; i < socks_total; i++)
+    for (i = 0; i < socks_total; i++)
       if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED))
         return i;
 

@@ -748,9 +748,9 @@ static void parse_reply(char *response, int nbytes)
 {
 	dns_header_t header;
 	dns_rr_t reply;
-	dns_query_t *q, *prev;
-	char result[512];
-	unsigned char *ptr;
+	dns_query_t *q = NULL, *prev = NULL;
+	char result[512] = "";
+	unsigned char *ptr = NULL;
 	int i;
 
 	ptr = (unsigned char *) response;

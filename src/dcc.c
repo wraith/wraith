@@ -1307,12 +1307,12 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   dcc[i].timeval = now;
   dcc[i].u.ident_sock = dcc[idx].sock;
   
-  sock = open_telnet((char *) ip, 113);
-
   if (hosts)
     putlog(LOG_MISC, "*", "Telnet connection: %s[%s]/%d", dcc[i].host, ip, dcc[i].port);
   else
     putlog(LOG_MISC, "*", "Telnet connection: %s/%d", dcc[i].host, dcc[i].port);
+
+  sock = open_telnet((char *) ip, 113);
 
   char s[UHOSTLEN] = "";
 
@@ -1555,9 +1555,8 @@ dcc_telnet_pass(int idx, int atr)
   if (glob_bot(fr))
     ok = 1;
   if (!ok) {
-    struct chat_info *ci;
+    struct chat_info *ci = dcc[idx].u.chat;
 
-    ci = dcc[idx].u.chat;
     dcc[idx].u.file = (struct file_info *) calloc(1, sizeof(struct file_info));
     dcc[idx].u.file->chat = ci;
   }
