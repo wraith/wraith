@@ -13,7 +13,7 @@
 #define PRIV_VOICE 2
 
 
-typedef unsigned long long	flag_t;
+typedef uint64_t flag_t;
 
 extern flag_t	FLAG[128];
 
