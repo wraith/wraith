@@ -138,7 +138,7 @@ fi
 echo "[*] Configuring..."
 umask 077 >/dev/null
 
-./configure --silent --with-pack=${pack}
+./configure --silent --with-cfg=${pack}
 
 if [ $clean = "1" ]; then
  echo "[*] Cleaning up old binaries/files..."
