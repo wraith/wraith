@@ -695,8 +695,8 @@ printf("out: %s\n", out);
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
 //  doesn't work correctly yet, if we don't go in here, our settings stay encrypted
   if (argc == 2 && !strcmp(argv[1], "-p")) {
-    if (settings.uname[0]) exit(4);
-    exit(5);
+    if (settings.hash[0]) exit(4);	/* initialized */
+    exit(5);				/* not initialized */
   }
 
   check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
