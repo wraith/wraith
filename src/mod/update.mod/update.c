@@ -167,20 +167,23 @@ static void got_nu(char *botnick, char *code, char *par)
   time_t newts;
 #ifdef LEAF
   tand_t *bot = NULL;
-  struct bot_addr *bi = NULL, *obi = NULL;
 
   bot = tandbot;
-  if (!strcmp(bot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
+  if (bot->bot && !strcmp(bot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
     return;
+
   if (!localhub)
     return;
+
   if (localhub && updated)
     return;
 #endif /* LEAF */
-   if (!par[0]) return;
-   newts = atoi(newsplit(&par));
+   if (!par || (par && !par[0])) return;
+   newts = atol(newsplit(&par));
    if (newts > buildts) {
 #ifdef LEAF
+     struct bot_addr *bi = NULL, *obi = NULL;
+
      obi = get_user(&USERENTRY_BOTADDR, conf.bot->u);
      bi = calloc(1, sizeof(struct bot_addr));
 
@@ -198,14 +201,14 @@ static void got_nu(char *botnick, char *code, char *par)
      usleep(1000 * 500);
      botlink("", -3, botnick);
 #else
-     putlog(LOG_MISC, "*", "I need to be updated with %lu", newts);
+     putlog(LOG_MISC, "*", "I need to be updated with %li", newts);
 #endif /* LEAF */
    }  
 }
 
 static cmd_t update_bot[] = {
   {"nu?",    "", (Function) got_nu, NULL}, //need update?
-  {0, 0, 0, 0}
+  {NULL, NULL, NULL, NULL}
 };
 
 
