@@ -129,7 +129,6 @@ int ssl_link(int, int);
 #endif /* HAVE_SSL */
 char *myipstr(int);
 in_addr_t getmyip();
-in_addr_t getmyip6();
 void cache_my_ip();
 void setsock(int, int);
 int allocsock(int, int);

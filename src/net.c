@@ -268,11 +268,6 @@ in_addr_t getmyip() {
   return natip[0] ? inet_addr(natip) : cached_myip4_so.sin.sin_addr.s_addr;
 }
 
-in_addr_t getmyip6() {
-  return cached_myip6_so.sin.sin_addr.s_addr;
-}
-
-
 /* see if it's necessary to set inaddr_any... because if we can't resolve, we die anyway */
 void cache_my_ip()
 {
