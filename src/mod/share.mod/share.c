@@ -1642,7 +1642,6 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
     for (u = bu; u && ok; u = u->next)
     if (!write_user(u, f, idx))
      ok = 0;
-    lfprintf(f, "#DONT DELETE THIS LINE");
     fclose(f);
   }
   if (!ok)

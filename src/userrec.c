@@ -540,7 +540,6 @@ int write_userfile(int idx)
     nfree(new_userfile);
     return 3;
   }
-  lfprintf(f, "#DONT DELETE THIS LINE.");
   fclose(f);
   putlog(LOG_DEBUG, "@", "Done writing userfile.");
   egg_snprintf(backup, sizeof backup, "%s/%s~", tempdir, userfile);
