@@ -226,7 +226,7 @@
 #define global_bans (*(maskrec **)(global[96]))
 #define global_ign (*(struct igrec **)(global[97]))
 #define password_timeout (*(int *)(global[98]))
-/* UNUSED -- 99 */
+#define md5 ((char *(*)(const char *))global[99])
 /* 100 - 103 */
 #define max_dcc (*(int *)global[100])
 #define shouldjoin ((int (*) (struct chanset_t *))global[101])
@@ -471,11 +471,6 @@
 #define listen_all ((int (*)(int, int))global[280])
 #endif
 /* 281 - 284 */
-/* gay
-#define MD5_Init ((void (*)(MD5_CTX))global[281])
-#define MD5_Update ((void (*)(MD5_CTX *, void *, unsigned long))global[282])
-#define MD5_Final ((void (*)(unsigned char *, MD5_CTX *))global[283])
-*/
 #define _wild_match_per ((int (*)(const char *, const char *))global[284])
 /* 285 - 288 */
 #define role (*(int*)global[285])

@@ -29,7 +29,7 @@ extern char		 ver[], botnetnick[], firewall[], myip[],
 extern time_t		 now, online_since;
 extern int		 backgrd, term_z, con_chan, cache_hit, cache_miss,
 			 firewallport, default_flags, conmask,
-			 protect_readonly, noshare,
+			 protect_readonly, noshare, localhub,
 #ifdef HUB
 			 my_port,
 #endif /* HUB */
@@ -313,6 +313,8 @@ void tell_verbose_status(int idx)
   dprintf(idx, "I am %s, running %s:  %d user%s (mem: %uk)\n",
 	  botnetnick, ver, i, i == 1 ? "" : "s",
           (int) (expected_memory() / 1024));
+  if (localhub)
+    dprintf(idx, "I am a localhub.\n");
   if (isupdatehub())
     dprintf(idx, "I am an update hub.\n");
 #endif /* HUB */
@@ -376,10 +378,6 @@ void tell_verbose_status(int idx)
 	  interp->result : (Tcl_Eval(interp, "info tclversion") == TCL_OK) ?
 	  interp->result : "*unknown*", MISC_TCLHVERSION,
 	  TCL_PATCH_LEVEL ? TCL_PATCH_LEVEL : "*unknown*");
-#if HAVE_TCL_THREADS
-  dprintf(idx, "Tcl is threaded\n");
-#endif /* HAVE_TCL_THREADS */
-	  
 }
 
 /* Show all internal state variables

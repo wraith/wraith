@@ -259,3 +259,17 @@ void DecryptFile(char *infile, char *outfile)
   if (f2)
     fclose(f2);
 }
+
+
+char *md5(const char *string) 
+{
+  static char	  md5string[MD5_HASH_LENGTH + 1] = "";
+  unsigned char   md5out[MD5_HASH_LENGTH + 1] = "";
+  MD5_CTX ctx;
+
+  MD5_Init(&ctx);
+  MD5_Update(&ctx, string, strlen(string));
+  MD5_Final(md5out, &ctx);
+  strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  return md5string;
+}

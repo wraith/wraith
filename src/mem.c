@@ -34,7 +34,6 @@ struct {
 #endif
 
 /* Prototypes */
-int expected_memory();
 int expmem_chanprog();
 int expmem_misc();
 int expmem_fileq();
@@ -51,6 +50,21 @@ int expmem_auth();
 int expmem_tcldcc();
 int expmem_dns();
 int expmem_crypt();
+
+
+/* calculate memory we SHOULD be using
+ */
+
+int expected_memory(void)
+{
+  int tot;
+
+  tot = expmem_chanprog() + expmem_users() + expmem_config() + expmem_misc() +
+    expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() +
+    expmem_net() + expmem_modules(0) + expmem_tcldcc() + expmem_auth() +
+    expmem_tclmisc();
+  return tot;
+}
 
 
 /* Initialize the memory structure

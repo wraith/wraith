@@ -29,7 +29,6 @@
 #include <signal.h>
 #include <sys/utsname.h>
 #include "stat.h"
-#include "bg.h"
 
 extern struct userrec 	*userlist;
 extern struct dcc_t	*dcc;
@@ -41,7 +40,7 @@ extern char		 version[], origbotname[], botname[],
 			 bannerfile[], textdir[], userfile[], dcc_prefix[],
                          *binname, pid_file[], tempdir[], *owneremail;
 
-extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug, 
+extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync,  
 #ifdef HUB
                          my_port,
 #endif
@@ -1307,7 +1306,6 @@ void updatelocal(void)
 
   fatal("Updating...", 1);
   usleep(2000 * 500);
-  bg_send_quit(BG_ABORT);
   unlink(pid_file); //if this fails it is ok, cron will restart the bot, *hopefully*
   system(binname); //start new bot. 
   exit(0);
@@ -1425,7 +1423,6 @@ int updatebin (int idx, char *par, int autoi)
     botnet_send_bye();
     fatal("Updating...", 1);
     usleep(2000 * 500);
-    bg_send_quit(BG_ABORT);
     system(buf);		/* run the binary, it SHOULD work from earlier tests.. */
     exit(0);
 #ifdef LEAF
@@ -1870,23 +1867,6 @@ char *getfullbinname(char *argv0)
   strcpy(bin, cwd);
   nfree(cwd);
   return bin;
-}
-
-void sdprintf EGG_VARARGS_DEF(char *, arg1)
-{
-  if (sdebug) {
-    char *format;
-    char s[2001];
-    va_list va;
-
-    format = EGG_VARARGS_START(char *, arg1, va);
-    egg_vsnprintf(s, 2000, format, va);
-    va_end(va);
-    if (!backgrd)
-      dprintf(DP_STDOUT, "[D:%d] %s\n", getpid(), s);
-    else
-      putlog(LOG_MISC, "*", "[D:%d] %s", getpid(), s);
-  }
 }
 
 char *werr_tostr(int errnum)

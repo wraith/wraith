@@ -23,7 +23,6 @@
 
 
 #include "stat.h"
-#include "bg.h"
 
 extern struct userrec 		*userlist;
 extern struct dcc_t		*dcc;
@@ -85,9 +84,7 @@ void init_auth()
 #ifdef S_AUTH
 char *makehash(struct userrec *u, char *rand)
 {
-  MD5_CTX ctx;
-  unsigned char md5out[MD5_HASH_LENGTH + 1];
-  char md5string[MD5_HASH_LENGTH + 1], hash[256], *ret = NULL, *secpass = NULL;
+  char hash[256], *secpass = NULL;
   if (get_user(&USERENTRY_SECPASS, u)) {
     secpass = nmalloc(strlen(get_user(&USERENTRY_SECPASS, u)) + 1);
     strcpy(secpass, (char *) get_user(&USERENTRY_SECPASS, u));
@@ -96,13 +93,8 @@ char *makehash(struct userrec *u, char *rand)
   sprintf(hash, "%s%s%s", rand, (secpass && secpass[0]) ? secpass : "" , (authkey && authkey[0]) ? authkey : "");
   if (secpass)
     nfree(secpass);
-  MD5_Init(&ctx);
-  MD5_Update(&ctx, hash, strlen(hash));
-  MD5_Final(md5out, &ctx);
-  strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof md5string);
 
-  ret = md5string;
-  return ret;
+  return md5(hash);
 }
 
 int new_auth(void)

@@ -634,6 +634,20 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
   dprintf(idx, MISC_FOUNDMATCH, cnt, cnt == 1 ? "" : MISC_MATCH_PLURAL);
 }
 
+#ifdef HUB
+void backup_userfile()
+{
+  char s[DIRMAX], s2[DIRMAX];
+
+  putlog(LOG_MISC, "*", USERF_BACKUP);
+  egg_snprintf(s, sizeof s, "%s.u.0", tempdir);
+  egg_snprintf(s2, sizeof s2, "%s.u.1", tempdir);
+  movefile(s, s2);
+  copyfile(userfile, s);
+}
+#endif /* HUB */
+
+
 /*
  * tagged lines in the user file:
  * * OLD:

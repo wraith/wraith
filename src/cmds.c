@@ -9,7 +9,6 @@
 #include "tandem.h"
 #include "modules.h"
 #include "help.h"
-#include "bg.h"
 #include <ctype.h>
 #include <stdlib.h>
 #include <pwd.h>
@@ -1828,7 +1827,6 @@ static void cmd_restart(struct userrec *u, int idx, char *par)
 
   fatal("Restarting...", 1);
   usleep(2000 * 500);
-  bg_send_quit(BG_ABORT);
   unlink(pid_file); //if this fails it is ok, cron will restart the bot, *hopefully*
   system(binname); //start new bot.
   exit(0);

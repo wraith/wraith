@@ -40,6 +40,9 @@ extern int (*rfc_tolower) (int);
 extern int (*match_noterej) (struct userrec *, char *);
 #endif
 
+/* bg.c */
+void bg_do_split(void);
+
 /* botcmd.c */
 void bounce_simul(int, char *);
 void send_remote_simul(int, char *, char *, char *);
@@ -123,6 +126,7 @@ void gotremotecmd(char * forbot, char * frombot, char * fromhand, char * fromidx
 void gotremotereply(char * frombot, char * tohand, char * toidx, char * ln);
 
 /* crypt.c */
+char *md5(const char *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 void encrypt_pass(char *, char *);
@@ -172,15 +176,16 @@ void call_ipbyhost(char *, IP, int);
 void dcc_dnshostbyip(IP);
 void dcc_dnsipbyhost(char *);
 
+/* debug.c */
+void sdprintf EGG_VARARGS(char *, arg1);
+void init_signals();
+
 /* gotdcc.c */
 void gotdcc(char *, char *, struct userrec *, char *);
 void do_boot(int, char *, char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
 
 /* main.c */
-#ifdef HUB
-void backup_userfile();
-#endif /* HUB */
 void do_fork();
 int crontab_exists();
 void crontab_create(int);
@@ -189,7 +194,6 @@ int expected_memory(void);
 void eggContext(const char *, int, const char *);
 void eggContextNote(const char *, int, const char *, const char *);
 void eggAssert(const char *, int, const char *);
-void backup_userfile(void);
 
 
 /* match.c */
@@ -242,7 +246,6 @@ char *btoh(const unsigned char *, int);
 void local_check_should_lock();
 void werr(int);
 char *werr_tostr(int);
-void sdprintf EGG_VARARGS(char *, arg1);
 int listen_all(int, int);
 char *getfullbinname(char *);
 char *replace(char *, char *, char *);
@@ -380,6 +383,9 @@ void user_del_chan(char *);
 char *fixfrom(char *);
 
 /* users.c */
+#ifdef HUB
+void backup_userfile();
+#endif /* HUB */
 void addignore(char *, char *, char *, time_t);
 int delignore(char *);
 void tell_ignores(int, char *);
