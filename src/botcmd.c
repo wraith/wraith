@@ -1214,7 +1214,7 @@ static void bot_rsim(char *botnick, char *code, char *msg)
   int ridx = -1, idx = -1, i = 0, rconmask;
   unsigned long status = 0;
   char *nick = NULL, *cmd = NULL, *rconchan = NULL, buf[UHOSTMAX] = "", *par = NULL, *parp = NULL;
-  struct userrec *u = get_user_by_handle(botnick);
+  struct userrec *u = get_user_by_handle(userlist, botnick);
 
   if (bot_hublevel(u) == 999) {
     putlog(LOG_WARN, "*", "BOTCMD received from a leaf. HIJACK.");
