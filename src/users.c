@@ -682,7 +682,7 @@ int readuserfile(char *file, struct userrec **ret)
   FILE *f;
   struct userrec *bu, *u = NULL;
   struct chanset_t *cst = NULL;
-  int i;
+  int i, line = 0;
   char ignored[512];
   struct flag_record fr;
   struct chanuserrec *cr;
@@ -720,6 +720,7 @@ int readuserfile(char *file, struct userrec **ret)
     egg_snprintf(s, 1024, temps);
     nfree(temps);
     if (!feof(f)) {
+      line++;
       if (s[0] != '#' && s[0] != ';' && s[0]) {
 	code = newsplit(&s);
 	rmspace(s);
@@ -813,7 +814,7 @@ int readuserfile(char *file, struct userrec **ret)
         } else if (!strcmp(code, "+")) {
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
           if (Tcl_Eval(interp, s) != TCL_OK) {
-           putlog(LOG_MISC, "*", "Tcl error in userfile");
+           putlog(LOG_MISC, "*", "Tcl error in userfile on line %d", line);
            putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
            return 1;
           }
@@ -956,7 +957,7 @@ Context;
 	  rmspace(s);
 Context;
 	  if (!attr[0] || !pass[0]) {
-	    putlog(LOG_MISC, "*", "* %s '%s'!", USERF_CORRUPT, code);
+	    putlog(LOG_MISC, "*", "* %s '%s' line: %d split: %s::%s!", USERF_CORRUPT, code, line, (pass && pass[0]) ? pass : "" , (attr && attr[0]) ? attr : "");
 	    lasthand[0] = 0;
             return 1;
 	  } else {
