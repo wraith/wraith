@@ -34,6 +34,7 @@ This is a summary of ChangeLog basically.
 30.Rewrote nick generator on 'nick in use'
 31.Detected promisc now shows which interface.
 32.Now using daemon(3) to fork into background.
+33.Possibly fixed a bug with bots dying on link.
 
 1.1.7
 

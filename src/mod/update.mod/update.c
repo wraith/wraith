@@ -166,6 +166,8 @@ static void got_nu(char *botnick, char *code, char *par)
 /* needupdate? curver */
   time_t newts;
 #ifdef LEAF
+  if (!conf.bot->u || !userlist || !get_user_by_handle(userlist, botnick))	/* probably still getting userfile */
+    return;
 
   if (tandbot && tandbot->bot && !strcmp(tandbot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
     return;
