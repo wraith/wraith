@@ -16,6 +16,7 @@
 #include "src/misc_file.h"
 #include "src/net.h"
 #include "src/tclhash.h"
+#include "src/egg_timer.h"
 #include "src/misc.h"
 
 #include <netinet/in.h>
