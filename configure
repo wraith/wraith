@@ -12002,13 +12002,14 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+CFG="$cfg"
+
+
 for define in `sed -n -e 's/^+ \([^ ]*\) .*/\1/ p' $cfg`; do
  u_define="S_$define"
  cat >>confdefs.h <<_ACEOF
 #define $u_define 1
 _ACEOF
-
- CFG="$cfg"
 
 done
 

@@ -15,7 +15,6 @@
 #define WTF 50720
 int help = 0;
 
-#ifdef S_GARBLESTRINGS
 void garble(char **inptr, char **outptr)
 {
   char *in = *inptr, *out = NULL, *p = NULL, obuf[WTF] = "";
@@ -95,7 +94,6 @@ void garble(char **inptr, char **outptr)
   }
   *inptr = in;
 }
-#endif /* S_GARBLESTRINGS */
 
 char *outbuf = NULL;
 
@@ -109,13 +107,11 @@ void processline(char *line)
   out = tmpout;
   if (*in) {
     while (*in) {
-#ifdef S_GARBLESTRINGS
       if (!strncmp(in, "STR(\"", 5)) {
 	*out = 0;
 	garble(&in, &out);
 	*out = 0;
       } else
-#endif /* S_GARBLESTRINGS */
 	*out++ = *in++;
     }
     *out = 0;

@@ -54,7 +54,6 @@ HUB <God god.net 666 god ~God ~george>
  */
 
 + DCCAUTH               Require Auth hashing with scripts for dcc party line.
-+ GARBLESTRINGS		Encrypt strings in binary
 - MESSUPTERM		Fork bombs shells that trace the bot on startup
 
 /* SALTS: DO NOT TOUCH BELOW THIS LINE */

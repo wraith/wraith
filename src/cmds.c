@@ -790,11 +790,9 @@ static void cmd_help(struct userrec *u, int idx, char *par)
         build_flags(flg, &(cmdlist[n].flags), NULL);
         dprintf(idx, "Showing you help for '%s' (%s):\n", match, flg);
         if ((hi = findhelp(match))) {
-#ifdef S_GARBLESTRINGS
           if (help[hi].garble)
             showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
           else
-#endif /* S_GARBLESTRINGS */
             showhelp(idx, &fr, help[hi].desc);
         }
         done = 1;
