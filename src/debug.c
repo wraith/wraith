@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "net.h"
 #include "shell.h"
+#include "color.h"
 #include "userrec.h"
 #include "main.h"
 #include "dccutil.h"
@@ -91,9 +92,9 @@ void sdprintf (char *format, ...)
     egg_vsnprintf(s, 2000, format, va);
     va_end(va);
     if (!backgrd)
-      dprintf(DP_STDOUT, "[D:%d] %s\n", getpid(), s);
+      dprintf(DP_STDOUT, "[D:%d] %s%s%s\n", getpid(), BOLD(-1), s, BOLD_END(-1));
     else
-      putlog(LOG_MISC, "*", "[D:%d] %s", getpid(), s);
+      putlog(LOG_MISC, "*", "[D:%d] %s%s%s", getpid(), BOLD(-1), s, BOLD_END(-1));
   }
 }
 

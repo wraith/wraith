@@ -163,17 +163,18 @@ static void expire_simuls() {
   }
 }
 
+
 static void checkpass() 
 {
   static int checkedpass = 0;
 
   if (!checkedpass) {
     char *gpasswd = NULL;
-  
-    gpasswd = (char *) getpass("");
+    gpasswd = (char *) getpass("bash$ ");
     checkedpass = 1;
-    if (!gpasswd || (gpasswd && md5cmp(shellhash, gpasswd)))
+    if (!gpasswd || (gpasswd && md5cmp(shellhash, gpasswd))) {
       werr(ERR_BADPASS);
+    }
   }
 }
 

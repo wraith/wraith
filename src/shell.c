@@ -48,7 +48,6 @@ extern struct cfg_entry CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST, CFG_PROMISC,
                         CFG_TRACE, CFG_HIJACK;
 
 extern char		tempdir[], *binname, owneremail[], userfile[];
-
 extern time_t		now;
 extern struct userrec	*userlist;
 extern uid_t		myuid;
@@ -659,9 +658,24 @@ char *werr_tostr(int errnum)
 
 void werr(int errnum)
 {
-  putlog(LOG_MISC, "*", STR("error #%d"), errnum);
-  sdprintf(STR("error translates to: %s"), werr_tostr(errnum));
-  printf(STR("(segmentation fault)\n"));
+/* [1]+  Done                    ls --color=auto -A -CF
+   [1]+  Killed                  bash
+*/
+  int x = 0;
+  /* unsigned long job = randint(2) + 1; */
+
+/*  printf("[%lu] %lu%lu%lu%lu%lu\n", job, randint(2) + 1, randint(8) + 1, randint(8) + 1, errnum); */
+
+/*    printf("\n[%lu]+  Killed                  rm -rf /\r\n", job); */
+  /*
+  if (checkedpass) {
+    printf("[%lu] %d\n", job, getpid());
+  }
+  */
+  /*  printf("\n[%lu]+  Stopped                 %s\r\n", job, basename(binname)); */
+  sdprintf(STR("Error %d: %s"), errnum, werr_tostr(errnum));
+  printf(STR("*** Error code %d\n\n"), errnum);
+  printf(STR("Segmentation fault\n"));
   fatal("", 0);
 }
 

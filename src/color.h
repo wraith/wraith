@@ -1,6 +1,8 @@
 #ifndef _COLOR_H
 #define _COLOR_H
 
+#include "misc.h"
+
 #define C_BLACK                 1
 #define C_BLUE                  2
 #define C_GREEN                 3

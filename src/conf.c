@@ -401,7 +401,7 @@ int readconf(char *cfile)
 
     i++;
 
-    sdprintf("CONF LINE: %s", line);
+    /* sdprintf("CONF LINE: %s", line); */
     if (!strchr("*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
       sdprintf(STR("line %d, char %c "), i, line[0]);
       werr(ERR_CONFBADENC);
