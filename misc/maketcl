@@ -1,0 +1,9 @@
+#!/bin/sh
+wget http://aleron.dl.sourceforge.net/sourceforge/tcl/tcl8.4.4-src.tar.gz
+tar -zxf tcl8.4.4-src.tar.gz
+cd tcl8.4.4/
+cd unix/
+./configure --prefix=${HOME} --exec-prefix=${HOME} --disable-shared
+make && make install
+
+

@@ -505,28 +505,34 @@ void cmd_mdop(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# mdop %s", dcc[idx].nick, par);
 
+Context;
   if (strchr(CHANMETA, par[0]) != NULL)
     chname = newsplit(&par);
   else
     chname = 0;
   chan = get_channel(idx, chname);
  
+Context;
   if (chan) {
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
+Context;
     if (channel_inactive(chan) || !channel_active(chan))  {
       dprintf(idx, "I'm not on %s\n", chan->dname);
       return;
     }
+Context;
     if (channel_pending(chan)) {
       dprintf(idx, "Channel pending.\n");
       return;
     }
+Context;
     if (!glob_owner(user) && !chan_owner(user)) {
       dprintf(idx, "You do not have mdop access for %s\n", chan->dname);
       return;
     }
   }
+Context;
   if (!chan || !chname[0]) {
     dprintf(idx, "Usage: mdop #channel [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
     dprintf(idx, "  bots    : Number of bots to use for mdop.\n");
@@ -543,12 +549,15 @@ void cmd_mdop(struct userrec *u, int idx, char *par)
   }
 
 
+Context;
   targets = nmalloc(chan->channel.members * sizeof(memberlist *));
   bzero(targets, chan->channel.members * sizeof(memberlist *));
 
+Context;
   chanbots = nmalloc(chan->channel.members * sizeof(memberlist *));
   bzero(chanbots, chan->channel.members * sizeof(memberlist *));
 
+Context;
   for (m = chan->channel.member; m; m = m->next)
     if (m->flags & CHANOP) {
       if (!m->user)
@@ -560,6 +569,7 @@ void cmd_mdop(struct userrec *u, int idx, char *par)
       else if (!(m->user->flags & USER_OP))
 	targets[targetcount++] = m;
     }
+Context;
   if (!chanbotcount) {
     dprintf(idx, "No bots opped on %s\n", chan->name);
     nfree(targets);
@@ -572,6 +582,7 @@ void cmd_mdop(struct userrec *u, int idx, char *par)
     nfree(chanbots);
     return;
   }
+Context;
   while (par && par[0]) {
     p = newsplit(&par);
     if (!strncmp(p, "bots=", 5)) {
