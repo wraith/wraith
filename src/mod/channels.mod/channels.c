@@ -293,7 +293,8 @@ static void got_down(char *botnick, char *code, char *par)
 
 static void got_role(char *botnick, char *code, char *par)
 {
-  putlog(LOG_DEBUG, "@", "Got role index %d", atoi(newsplit(&par)));
+  role = atoi(newsplit(&par));
+  putlog(LOG_DEBUG, "@", "Got role index %d", role);
 }
 
 void got_kl(char *botnick, char *code, char *par)
