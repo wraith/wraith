@@ -65,7 +65,7 @@ static void wipe_tmp_filename(char *fn, int idx)
   if (!copy_to_tmp)
     return;
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && i != idx && dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING) {
+    if (dcc[i].type && i != idx && (dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING)) {
       if (!strcmp(dcc[i].u.xfer->filename, fn)) {
         ok = 0;
         break;
@@ -83,7 +83,7 @@ static int at_limit(char *nick)
   int i, x = 0;
 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type && dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING)
+    if (dcc[i].type && (dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING))
       if (!egg_strcasecmp(dcc[i].nick, nick))
 	x++;
   return (x >= dcc_limit);

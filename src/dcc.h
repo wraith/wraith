@@ -99,12 +99,12 @@ struct xfer_info {
   unsigned long int offset;     /* offset from beginning of file, during
 
                                    resend.                                 */
-  unsigned long int block_pending;  	/* bytes of this DCC block which weren't sent yet. */
+  unsigned long block_pending; 	/* bytes of this DCC block which weren't sent yet. */
   unsigned int type;            /* xfer connection type, see enum below    */
   time_t start_time;            /* Time when a xfer was started.           */
-  unsigned char sofar;          /* how much of the byte count received     */
   char *filename;
   char *origname;
+  unsigned char sofar;          /* how much of the byte count received     */
   unsigned short ack_type;      /* type of ack                             */
   char dir[DIRLEN];             /* used when uploads go to the current dir */
   char from[NICKLEN];           /* [GET] user who offered the file         */

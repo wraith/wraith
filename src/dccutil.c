@@ -516,7 +516,7 @@ int new_dcc(struct dcc_table *type, int xtra_size)
   if (xtra_size)
     dcc[i].u.other = (char *) calloc(1, xtra_size);
 
-  sdprintf("new_dcc: %d (dccn/dcc_total: %d/%d)", i, dccn, dcc_total);
+  sdprintf("new_dcc (%s): %d (dccn/dcc_total: %d/%d)", type->name, i, dccn, dcc_total);
   return i;
 }
 
