@@ -7,8 +7,8 @@
 #ifndef _EGG_MISC_FILE_H
 #define _EGG_MISC_FILE_H
 
-int copyfile(char *, char *);
-int movefile(char *, char *);
+int copyfile(const char *, const char *);
+int movefile(const char *, const char *);
 int is_file(const char *);
 int can_stat(const char *);
 int can_lstat(const char *);

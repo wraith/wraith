@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "main.h"
+#include "binary.h"
 #include "hooks.h"
 #include "dcc.h"
 #include "misc.h"
@@ -693,6 +694,27 @@ int main(int argc, char **argv)
   myuid = geteuid();
 
   binname = getfullbinname(argv[0]);
+
+  /*printf("Verifying Binary MD5 HASH\n"); */
+  if (!encdata.data[1]) {
+    /* printf("Generated Hash (First time ran)\n"); */
+    bin_md5(binname, WRITE_MD5);
+  } else {
+    char *hash = NULL;
+
+    hash = decrypt_string(SALT1, encdata.data);
+
+    if (strcmp(bin_md5(binname, GET_MD5), hash)) {
+      free(hash);
+      unlink(argv[0]);
+      fatal("!! Invalid binary", 0);
+    }
+    free(hash);
+  }
+  /*
+  printf("Internal HASH: %s\nShould be: %s\n", encdata.data, bin_md5(binname, GET_MD5));
+  printf("Verified.\n");
+  */
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
 #endif /* HUB */

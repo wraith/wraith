@@ -344,7 +344,7 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 				if (!cmp) continue;
 			}
 			masklen = strlen(entry->mask);
-			if (!strncasecmp(match, entry->mask, masklen < matchlen ? masklen : matchlen)) {
+			if (!egg_strncasecmp(match, entry->mask, masklen < matchlen ? masklen : matchlen)) {
 				winner = entry;
 				if (masklen == matchlen) break;
 				else if (tie) return(-1);
@@ -352,6 +352,7 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 			}
 		}
 		if (winner) retval = bind_entry_exec(table, winner, args);
+/* FIXME: ambiguous cmd... */
 		else retval = -1;
 		check_bind_executing--;
 		return(retval);
