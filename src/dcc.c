@@ -309,8 +309,8 @@ static void bot_version(int idx, char *par)
 
 #ifdef HUB
   botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vversion);
-  dump_links(idx);
 #endif /* HUB */
+  dump_links(idx);
 
   touch_laston(dcc[idx].user, "linked", now);
   dcc[idx].type = &DCC_BOT;

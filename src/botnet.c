@@ -747,6 +747,7 @@ void tell_bottree(int idx)
   /* Hop information: (9d) */
   dprintf(idx, "Average hops: %3.1f, total bots: %d\n", ((float) tothops) / ((float) tands), tands + 1);
 }
+#endif /* HUB */
 
 /* Dump list of links to a new bot
  */
@@ -755,6 +756,7 @@ void dump_links(int z)
   register int i;
   register size_t l;
   char x[1024] = "";
+#ifdef HUB
   tand_t *bot = NULL;
 
   for (bot = tandbot; bot; bot = bot->next) {
@@ -768,6 +770,8 @@ void dump_links(int z)
                                                         bot->buildts, bot->version ? bot->version : "");
      tputs(dcc[z].sock, x, l);
   }
+#endif /* HUB */
+
   /* Dump party line members */
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_CHAT) {
@@ -788,7 +792,6 @@ void dump_links(int z)
     }
   }
 }
-#endif /* HUB */
 
 int in_chain(char *who)
 {

@@ -20,8 +20,8 @@ int in_chain(char *);
 #ifdef HUB
 void tell_bots(int);
 void tell_bottree(int);
-void dump_links(int);
 #endif /* HUB */
+void dump_links(int);
 int botlink(char *, int, char *);
 int botunlink(int, char *, char *);
 void addbot(char *, char *, char *, char, int, time_t, char *);
