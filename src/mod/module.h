@@ -1,22 +1,22 @@
-/* 
+/*
  * module.h
- * 
- * $Id: module.h,v 1.25 2000/01/08 22:38:19 per Exp $
+ *
+ * $Id: module.h,v 1.58 2002/02/24 07:17:57 guppy Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -25,22 +25,22 @@
 #ifndef _EGG_MOD_MODULE_H
 #define _EGG_MOD_MODULE_H
 
-/* just include *all* the include files...it's slower but EASIER */
-#ifdef HAVE_CONFIG_H
-#  include "../../config.h"
-#endif
-#include "../main.h"
+/* Just include *all* the include files...it's slower but EASIER */
+#include "src/main.h"
 #include "modvals.h"
-#include "../tandem.h"
+#include "src/tandem.h"
 
-/* 
- * this file contains all the orrible stuff required to do the lookup
- * table for symbols, rather than getting the OS to do it, since most OS's
- * require all symbols resolved, this can cause a problem with some modules
- * this is intimately related to the table in modules.c
- * don't change the files unless you have flamable underwear
- * do not read this file whilst unless heavily sedated, I will not be held
- * responsible for mental break-downs caused by this file <G>
+/*
+ * This file contains all the orrible stuff required to do the lookup
+ * table for symbols, rather than getting the OS to do it, since most
+ * OS's require all symbols resolved, this can cause a problem with
+ * some modules.
+ *
+ * This is intimately related to the table in `modules.c'. Don't change
+ * the files unless you have flamable underwear.
+ *
+ * Do not read this file whilst unless heavily sedated, I will not be
+ * held responsible for mental break-downs caused by this file <G>
  */
 
 #undef nmalloc
@@ -56,11 +56,38 @@
 #undef ContextNote
 #undef Assert
 
+/* Compability functions. */
+#ifdef egg_inet_aton
+#  undef egg_inet_aton
+#endif
+#ifdef egg_vsnprintf
+#  undef egg_vsnprintf
+#endif
+#ifdef egg_snprintf
+#  undef egg_snprintf
+#endif
+#ifdef egg_memset
+#  undef egg_memset
+#endif
+#ifdef egg_strcasecmp
+#  undef egg_strcasecmp
+#endif
+#ifdef egg_strncasecmp
+#  undef egg_strncasecmp
+#endif
+
+#if defined (__CYGWIN__) && !defined(STATIC)
+#  define EXPORT_SCOPE	__declspec(dllexport)
+#else
+#  define EXPORT_SCOPE
+#endif
+
 /* Version checks for modules. */
 #define EGG_IS_MIN_VER(ver) 		((ver) <= EGG_VERSION)
 #define EGG_IS_MAX_VER(ver)		((ver) >= EGG_VERSION)
 
-/* redefine for module-relevance */
+/* Redefine for module-relevance */
+
 /* 0 - 3 */
 #define nmalloc(x) ((void *)(global[0]((x),MODULE_NAME,__FILE__,__LINE__)))
 #define nfree(x) (global[1]((x),MODULE_NAME,__FILE__,__LINE__))
@@ -76,10 +103,10 @@
 #define module_depend ((Function *(*)(char *,char *,int,int))global[6])
 #define module_undepend ((int(*)(char *))global[7])
 /* 8 - 11 */
-#define add_bind_table ((p_tcl_bind_list(*)(char *,int,Function))global[8])
+#define add_bind_table ((p_tcl_bind_list(*)(const char *,int,Function))global[8])
 #define del_bind_table ((void (*) (p_tcl_bind_list))global[9])
-#define find_bind_table ((p_tcl_bind_list(*)(char *))global[10])
-#define check_tcl_bind ((int (*) (p_tcl_bind_list,char *,struct flag_record *,char *, int))global[11])
+#define find_bind_table ((p_tcl_bind_list(*)(const char *))global[10])
+#define check_tcl_bind ((int (*) (p_tcl_bind_list,const char *,struct flag_record *,const char *, int))global[11])
 /* 12 - 15 */
 #define add_builtins ((int (*) (p_tcl_bind_list, cmd_t *))global[12])
 #define rem_builtins ((int (*) (p_tcl_bind_list, cmd_t *))global[13])
@@ -121,8 +148,8 @@
 #define add_entry_type ((int (*) ( struct user_entry_type * ))global[42])
 #define del_entry_type ((int (*) ( struct user_entry_type * ))global[43])
 /* 44 - 47 */
-#define get_user_flagrec ((void (*)(struct userrec *, struct flag_record *, char *))global[44])
-#define set_user_flagrec ((void (*)(struct userrec *, struct flag_record *, char *))global[45])
+#define get_user_flagrec ((void (*)(struct userrec *, struct flag_record *, const char *))global[44])
+#define set_user_flagrec ((void (*)(struct userrec *, struct flag_record *, const char *))global[45])
 #define get_user_by_host ((struct userrec * (*)(char *))global[46])
 #define get_user_by_handle ((struct userrec *(*)(struct userrec *,char *))global[47])
 /* 48 - 51 */
@@ -146,7 +173,7 @@
 #define count_users ((int(*)(struct userrec *))global[62])
 #define sanity_check ((int(*)(int))global[63])
 /* 64 - 67 */
-#define break_down_flags ((void (*)(char *,struct flag_record *,struct flag_record *))global[64])
+#define break_down_flags ((void (*)(const char *,struct flag_record *,struct flag_record *))global[64])
 #define build_flags ((void (*)(char *, struct flag_record *, struct flag_record *))global[65])
 #define flagrec_eq ((int(*)(struct flag_record*,struct flag_record *))global[66])
 #define flagrec_ok ((int(*)(struct flag_record*,struct flag_record *))global[67])
@@ -176,9 +203,7 @@
 #define get_data_ptr(x) ((void *(*)(int,char*,int))global[86])(x,__FILE__,__LINE__)
 #define open_telnet ((int (*) (char *, int))global[87])
 /* 88 - 91 */
-#ifndef HAVE_BZERO
-#define bzero ((void (*) (void *, int))global[88])
-#endif
+#define check_tcl_event ((void * (*) (const char *))global[88])
 #define my_memcpy ((void * (*) (void *, const void *, size_t))global[89])
 #define my_atoul ((IP(*)(char *))global[90])
 #define my_strcpy ((int (*)(char *, const char *))global[91])
@@ -195,15 +220,15 @@
 /* 100 - 103 */
 #define max_dcc (*(int *)global[100])
 #define require_p (*(int *)global[101])
-#define use_silence (*(int *)(global[102]))
+#define ignore_time (*(int *)(global[102]))
 #define use_console_r (*(int *)(global[103]))
 /* 104 - 107 */
-#define ignore_time (*(int *)(global[104]))
-#define reserved_port (*(int *)(global[105]))
+#define reserved_port_min (*(int *)(global[104]))
+#define reserved_port_max (*(int *)(global[105]))
 #define debug_output (*(int *)(global[106]))
 #define noshare (*(int *)(global[107]))
 /* 108 - 111 */
-#define gban_total (*(int*)global[108])
+/* 108: gban_total -- UNUSED (Eule) */
 #define make_userfile (*(int*)global[109])
 #define default_flags (*(int*)global[110])
 #define dcc_total (*(int*)global[111])
@@ -253,18 +278,18 @@
 #define movefile ((int (*) (char *, char *))global[146])
 #define copyfile ((int (*) (char *, char *))global[147])
 /* 148 - 151 */
-#define do_tcl ((void (*)(char *,char*))global[148])
-#define readtclprog ((int (*)(char *))global[149])
+#define do_tcl ((void (*)(char *, char *))global[148])
+#define readtclprog ((int (*)(const char *))global[149])
 #define get_language ((char *(*)(int))global[150])
 #define def_get ((void *(*)(struct userrec *, struct user_entry *))global[151])
 /* 152 - 155 */
 #define makepass ((void (*) (char *))global[152])
 #define wild_match ((int (*)(const char *, const char *))global[153])
-#define maskhost ((void(*)(char *,char*))global[154])
+#define maskhost ((void (*)(const char *, char *))global[154])
 #define show_motd ((void(*)(int))global[155])
 /* 156 - 159 */
-#define tellhelp ((void(*)(int,char *,struct flag_record *,int))global[156])
-#define showhelp ((void(*)(char *,char *,struct flag_record *,int))global[157])
+#define tellhelp ((void(*)(int, char *, struct flag_record *, int))global[156])
+#define showhelp ((void(*)(char *, char *, struct flag_record *, int))global[157])
 #define add_help_reference ((void(*)(char *))global[158])
 #define rem_help_reference ((void(*)(char *))global[159])
 /* 160 - 163 */
@@ -274,14 +299,14 @@
 #define in_chain ((int (*)(char *))global[163])
 /* 164 - 167 */
 #define add_note ((int (*)(char *,char*,char*,int,int))global[164])
-#define removedcc ((void (*) (int))global[165])
+#define del_lang_section ((int(*)(char *))global[165])
 #define detect_dcc_flood ((int (*) (time_t *,struct chat_info *,int))global[166])
 #define flush_lines ((void(*)(int,struct chat_info*))global[167])
 /* 168 - 171 */
 #define expected_memory ((int(*)(void))global[168])
 #define tell_mem_status ((void(*)(char *))global[169])
 #define do_restart (*(int *)(global[170]))
-#define check_tcl_filt ((char *(*)(int, char *))global[171])
+#define check_tcl_filt ((const char *(*)(int, const char *))global[171])
 /* 172 - 175 */
 #define add_hook(a,b) (((void (*) (int, Function))global[172])(a,b))
 #define del_hook(a,b) (((void (*) (int, Function))global[173])(a,b))
@@ -333,20 +358,20 @@
 #define rem_tcl_coups ((void (*) (tcl_coups *))global[210])
 #define botname ((char *)(global[211]))
 /* 212 - 215 */
-#define remove_gunk ((void(*)(char *))global[212])
-#define check_tcl_chjn ((void (*) (char *,char *,int,char,int,char *))global[213])
+/* 212: remove_gunk() -- UNUSED (drummer) */
+#define check_tcl_chjn ((void (*) (const char *,const char *,int,char,int,const char *))global[213])
 #define sanitycheck_dcc ((int (*)(char *, char *, char *, char *))global[214])
 #define isowner ((int (*)(char *))global[215])
 /* 216 - 219 */
-#define min_dcc_port (*(int *)(global[216]))	/* dcc-portrange dw/guppy */
-#define max_dcc_port (*(int *)(global[217]))
+/* 216: min_dcc_port -- UNUSED (guppy) */
+/* 217: max_dcc_port -- UNUSED (guppy) */
 #define rfc_casecmp ((int(*)(char *, char *))(*(Function**)(global[218])))
 #define rfc_ncasecmp ((int(*)(char *, char *, int *))(*(Function**)(global[219])))
 /* 220 - 223 */
 #define global_exempts (*(maskrec **)(global[220]))
 #define global_invites (*(maskrec **)(global[221]))
-#define ginvite_total (*(int*)global[222])
-#define gexempt_total (*(int*)global[223])
+/* 222: ginvite_total -- UNUSED (Eule) */
+/* 223: gexempt_total -- UNUSED (Eule) */
 /* 224 - 227 */
 #define H_event (*(p_tcl_bind_list *)(global[224]))
 #define use_exempts (*(int *)(global[225]))	/* drummer/Jason */
@@ -361,22 +386,82 @@
 #ifdef DEBUG_CONTEXT
 #  define ContextNote(note) (global[232](__FILE__, __LINE__, MODULE_NAME, note))
 #else
-#  define ContextNote(note) {}
+#  define ContextNote(note)	do {	} while (0)
 #endif
 #ifdef DEBUG_ASSERT
-#  define Assert(expr) (global[233](__FILE__, __LINE__, MODULE_NAME, (int)(expr)))
+#  define Assert(expr)		do {					\
+	if (!(expr))							\
+		(global[233](__FILE__, __LINE__, MODULE_NAME));		\
+} while (0)
 #else
-#  define Assert(expr) {}
+#  define Assert(expr)	do {	} while (0)
 #endif
-#define protect_readonly (*(int *)(global[234]))
-#define del_lang_section ((int(*)(char *))global[235])
+#define allocsock ((int(*)(int sock,int options))global[234])
+#define call_hostbyip ((void(*)(IP, char *, int))global[235])
 /* 236 - 239 */
+#define call_ipbyhost ((void(*)(char *, IP, int))global[236])
+#define iptostr ((char *(*)(IP))global[237])
+#define DCC_DNSWAIT (*(struct dcc_table *)(global[238]))
+#define hostsanitycheck_dcc ((int(*)(char *, char *, IP, char *, char *))global[239])
+/* 240 - 243 */
+#define dcc_dnsipbyhost ((void (*)(char *))global[240])
+#define dcc_dnshostbyip ((void (*)(IP))global[241])
+#define changeover_dcc ((void (*)(int, struct dcc_table *, int))global[242])
+#define make_rand_str ((void (*) (char *, int))global[243])
+/* 244 - 247 */
+#define protect_readonly (*(int *)(global[244]))
+#define findchan_by_dname ((struct chanset_t *(*)(char *))global[245])
+#define removedcc ((void (*) (int))global[246])
+#define userfile_perm (*(int *)global[247])
+/* 248 - 251 */
+#define sock_has_data ((int(*)(int, int))global[248])
+#define bots_in_subtree ((int (*)(tand_t *))global[249])
+#define users_in_subtree ((int (*)(tand_t *))global[250])
+#define egg_inet_aton ((int (*)(const char *cp, struct in_addr *addr))global[251])
+/* 252 - 255 */
+#define egg_snprintf (global[252])
+#define egg_vsnprintf ((int (*)(char *, size_t, const char *, va_list))global[253])
+#define egg_memset ((void *(*)(void *, int, size_t))global[254])
+#define egg_strcasecmp ((int (*)(const char *, const char *))global[255])
+/* 256 - 259 */
+#define egg_strncasecmp ((int (*)(const char *, const char *, size_t))global[256])
+#define is_file ((int (*)(const char *))global[257])
+#define must_be_owner (*(int *)(global[258]))
+#define tandbot (*(tand_t **)(global[259]))
+/* 260 - 263 */
+#define party (*(party_t **)(global[260]))
+#define open_address_listen ((int (*)(IP addr, int *port))global[261])
+#define str_escape ((char *(*)(const char *, const char, const char))global[262])
+#define strchr_unescape ((char *(*)(char *, const char, register const char))global[263])
+/* 264 - 267 */
+#define str_unescape ((void (*)(char *, register const char))global[264])
+#define egg_strcatn ((int (*)(char *dst, const char *src, size_t max))global[265])
+#define clear_chanlist_member ((void (*)(const char *nick))global[266])
+#define fixfrom ((char *(*)(char *))global[267])
+/* 268 - 271 */
+/* Please don't modify socklist directly, unless there's no other way.
+ * Its structure might be changed, or it might be completely removed,
+ * so you can't rely on it without a version-check.
+ */
+#define socklist (*(struct sock_list **)global[268])
+#define sockoptions ((int (*)(int, int, int))global[269])
+#define flush_inbuf ((int (*)(int))global[270])
+#define kill_bot ((void (*)(char *, char *))global[271])
+/* 272 - 275 */
+#define quit_msg ((char *)(global[272]))
+#define module_load ((char *(*)(char *))global[273])
+#define module_unload ((char *(*)(char *, char *))global[274])
+#define parties (*(int *)global[275])
 
-/* this is for blowfish module, couldnt be bothereed making a whole new .h
- * file for it ;) */
-#ifndef MAKING_BLOWFISH
-#define encrypt_string(a,b) (((char *(*)(char *,char*))blowfish_funcs[4])(a,b))
-#define decrypt_string(a,b) (((char *(*)(char *,char*))blowfish_funcs[5])(a,b))
+/* This is for blowfish module, couldnt be bothered making a whole new .h
+ * file for it ;)
+ */
+#ifndef MAKING_ENCRYPTION
+
+#  define encrypt_string(a, b)						\
+	(((char *(*)(char *,char*))encryption_funcs[4])(a,b))
+#  define decrypt_string(a, b)						\
+	(((char *(*)(char *,char*))encryption_funcs[5])(a,b))
 #endif
 
 #endif				/* _EGG_MOD_MODULE_H */

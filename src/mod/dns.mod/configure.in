@@ -1,0 +1,102 @@
+dnl Eggdrop compile-time configuration file for src/mod/dns.mod
+dnl
+dnl $Id: configure.in,v 1.7 2001/07/24 15:08:22 guppy Exp $
+
+dnl This file is based on the autoconf m4 macros. Special eggdrop
+dnl macros are used to optimise the size of the resulting configure
+dnl script `./configure'.  Run `../eggautoconf' to update that
+dnl script. You need to have the GNU autoconf package installed
+dnl though.
+
+
+dnl Instead of AC_INIT, we call EGG_INIT().
+sinclude(../eggmod.m4)
+EGG_INIT(coredns.c)
+
+
+AC_PROG_CC
+AC_CYGWIN
+
+dns_reslib_avail="true"
+AC_CHECK_FUNC(res_init, ,
+  AC_CHECK_LIB(resolv, res_init, RESLIB="-lresolv",
+    AC_CHECK_LIB(bind, res_init, RESLIB="-lbind", [dnl
+      dns_reslib_avail="false";
+    ])dnl
+  )dnl
+)dnl
+
+if test "${dns_reslib_avail}" = false; then
+  dns_reslib_avail="true"
+  AC_CHECK_FUNC(__res_init, ,
+    AC_CHECK_LIB(resolv, __res_init, RESLIB="-lresolv",
+      AC_CHECK_LIB(bind, __res_init, RESLIB="-lbind", [dnl
+        dns_reslib_avail="false";
+      ])dnl
+    )dnl
+  )dnl
+fi
+
+AC_CHECK_FUNC(res_mkquery, ,
+  AC_CHECK_LIB(resolv, res_mkquery, [dnl
+    if test "x${RESLIB}" != "x-lresolv"; then
+      RESLIB="${RESLIB} -lresolv"
+    fi
+  ],
+    AC_CHECK_LIB(bind, res_mkquery, [dnl
+      if test "x${RESLIB}" != "x-lbind"; then
+        RESLIB="${RESLIB} -lbind"
+      fi
+    ], [dnl
+      dns_reslib_avail="false";
+    ])
+  )
+)
+
+if test "${dns_reslib_avail}" = false; then
+dns_reslib_avail="true" 
+AC_CHECK_FUNC(__res_mkquery, ,
+  AC_CHECK_LIB(resolv, __res_mkquery, [dnl
+    if test "x${RESLIB}" != "x-lresolv"; then
+      RESLIB="${RESLIB} -lresolv"
+    fi
+  ],
+    AC_CHECK_LIB(bind, __res_mkquery, [dnl
+      if test "x${RESLIB}" != "x-lbind"; then
+        RESLIB="${RESLIB} -lbind"
+      fi
+    ], [dnl
+      dns_reslib_avail="false";
+    ])
+  )
+)
+fi
+
+if test "$ac_cv_cygwin" = "yes"
+then
+  AC_MSG_CHECKING(for /usr/local/bind/lib/libbind.a)
+  if test -r /usr/local/bind/lib/libbind.a
+  then
+    AC_MSG_RESULT(yes)
+    RESLIB="${RESLIB} /usr/local/bind/lib/libbind.a"
+    RESINCLUDE="-I/usr/local/bind/include"
+    dns_reslib_avail="true" 
+  else
+    AC_MSG_RESULT(no)
+  fi
+fi
+
+if test "${dns_reslib_avail}" = false; then
+  cat >&2 <<EOF
+configure: warning:
+
+  Your system provides no functional resolver library. The DNS
+  module will therefore be disabled.
+
+EOF
+  EGG_REMOVE_MOD(dns)
+fi
+AC_SUBST(RESLIB)
+AC_SUBST(RESINCLUDE)
+
+AC_OUTPUT(Makefile)

@@ -1,11 +1,13 @@
 #
-#  This is the Makefile for EGGDROP (the irc bot)
+#  This is the Makefile for EGGDROP (the IRC bot)
 #  You should never need to edit this.
 #
-# $Id: Makefile.in,v 1.31 1999/12/15 02:32:56 guppy Exp $
+# $Id: Makefile.in,v 1.30 2002/02/28 05:13:54 wcc Exp $
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 top_srcdir = @top_srcdir@
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 @SET_MAKE@
 prefix = @prefix@
@@ -42,6 +44,7 @@ MOD_STRIP = @MOD_STRIP@
 SHLIB_CC = @SHLIB_CC@
 SHLIB_LD = @SHLIB_LD@
 SHLIB_STRIP = @SHLIB_STRIP@
+MOD_EXT = @MOD_EXT@
 
 # programs make install uses
 LN_S = @LN_S@
@@ -61,57 +64,78 @@ XLIBS = @TCL_LIBS@ @LIBS@
 TCLLIB = @TCLLIB@
 TCLLIBFN = @TCLLIBFN@
 
-CFLAGS = @CFLAGS@ -I.. @DEFS@ $(CFLGS)
-DEBCFLAGS = @CFLAGS@ -I.. @DEFS@ -DDEBUG_ASSERT -DDEBUG_MEM $(CFLGS)
+DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM 
+
+modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
+
+egg_test_run =  EGG_LANGDIR=$(top_srcdir)/language ./$(EGGEXEC) -v
+
+post_config  =  echo "" && \
+		echo "You can now compile the bot, using \"make\"." && \
+		echo ""
+
+post_iconfig =  $(modconf) update-depends && \
+		$(modconf) Makefile && \
+		(cd src/mod && $(MAKE_CONFIG) config) && \
+		$(modconf) Makefile
+
+egg_install_msg =  echo "" && \
+		   echo "Now run \"make install\" to install your bot." && \
+		   echo ""
 
 MAKE_MODEGG = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(MOD_CC)' 'LD=$(MOD_LD)' \
-'STRIP=$(MOD_STRIP)' 'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS)' \
-'CPPFLAGS=$(CPPFLAGS)' 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' \
-'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' \
-'EGGBUILD=' 'MODOBJS='
+'STRIP=$(MOD_STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS)' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=' 'MODOBJS='
 
 MAKE_MODULES = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(SHLIB_CC)' 'LD=$(SHLIB_LD)' \
-'STRIP=$(SHLIB_STRIP)' 'CFLAGS=$(CFLAGS)' 'CPPFLAGS=$(CPPFLAGS)'
+'STRIP=$(SHLIB_STRIP)' 'CFLGS=$(CFLGS)' 'XLIBS=$(XLIBS)' 'MOD_EXT=$(MOD_EXT)'
 
 MAKE_STATIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
-'STRIP=$(STRIP)' 'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS) -DSTATIC' \
-'CPPFLAGS=$(CPPFLAGS)' 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' \
-'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' \
-'EGGBUILD=(static version)' 'MODOBJS=mod/*.o'
+'STRIP=$(STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -DSTATIC' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=(static version)' \
+'MODOBJS=mod/*.o'
 
 MAKE_DEBEGG = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(MOD_CC)' 'LD=$(MOD_LD) -g' \
-'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS)' \
-'CPPFLAGS=$(CPPFLAGS)' 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' \
-'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' \
-'EGGBUILD=(debug version)' 'MODOBJS='
+'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) $(CFLGS)' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=(debug version)' 'MODOBJS='
 
 MAKE_DEBMODULES = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(SHLIB_CC)' 'LD=$(SHLIB_LD)' \
-'STRIP=touch' 'CFLAGS=-g3 $(DEBCFLAGS)' 'CPPFLAGS=$(CPPFLAGS)'
+'XLIBS=$(XLIBS)' 'STRIP=touch' 'CFLGS=-g3 $(DEBCFLAGS) $(CFLGS)' \
+'MOD_EXT=$(MOD_EXT)'
 
 MAKE_SDEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
-'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS) -DSTATIC' \
-'CPPFLAGS=$(CPPFLAGS)' 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' \
-'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' \
-'EGGBUILD=(static and debug version)' 'MODOBJS=mod/*.o'
+'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) -DSTATIC $(CFLGS)' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
+'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=(static and debug version)' 'MODOBJS=mod/*.o'
 
 MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
-'STRIP=$(STRIP)' 'CFLAGS=$(CFLAGS)' 'CPPFLAGS=$(CPPFLAGS)'
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
+
+MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
 MAKE_INSTALL = $(MAKE) 'MAKE=$(MAKE)' 'DEST=$(DEST)'
 
 all: @DEFAULT_MAKE@
 
-clean:
-	@rm -f $(EGGEXEC) *.so *.stamp core DEBUG *~
-	@cd doc; $(MAKE) clean
-	@cd scripts; $(MAKE) clean
-	@cd src; $(MAKE) clean
-	@cd src/md5; $(MAKE) clean
-	@cd src/mod; $(MAKE) clean
+eggclean:
+	@rm -f $(EGGEXEC) *.$(MOD_EXT) *.stamp core DEBUG *~
+	@cd doc && $(MAKE) clean
+	@cd scripts && $(MAKE) clean
+	@cd src && $(MAKE) clean
+	@cd src/md5 && $(MAKE) clean
+	@cd src/compat && $(MAKE) clean
 
-distclean: clean
-	@rm -f Makefile doc/Makefile scripts/Makefile src/Makefile src/md5/Makefile src/mod/Makefile
+clean: eggclean
+	@cd src/mod && $(MAKE) clean
+
+distclean: eggclean clean-modconfig
+	@cd src/mod && $(MAKE) distclean
+	@rm -f Makefile doc/Makefile scripts/Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h
+	@rm -rf autom4te.cache
 
 distrib: distclean
 	@rm -f `find . \( -name '*~' -o -name '*#' -o -name '*.orig' \
@@ -127,66 +151,117 @@ distrib: distclean
 
 depend:
 	@cat /dev/null > lush.h
-	@cd src; $(MAKE_DEPEND) depend
-	@cd src/md5; $(MAKE_DEPEND) depend
-	@cd src/mod; $(MAKE_DEPEND) depend
+	@cd src && $(MAKE_DEPEND) depend
+	@cd src/md5 && $(MAKE_DEPEND) depend
+	@cd src/mod && $(MAKE_DEPEND) depend
+	@cd src/compat && $(MAKE_DEPEND) depend
+
+eggautoconf:
+	@$(modconf) eggautoconf
+
+config:
+	@$(modconf) modules-still-exist
+	@$(modconf) detect-modules
+	@$(modconf) update-depends
+	@$(modconf) Makefile
+	@cd src/mod && $(MAKE_CONFIG) config
+	@$(modconf) Makefile
+	@$(post_config)
+
+new-iconfig:
+	@$(modconf) modules-still-exist
+	@$(modconf) update-depends
+	@$(modconf) -n configure
+	@$(post_iconfig)
+	@$(post_config)
+
+iconfig:
+	@$(modconf) modules-still-exist
+	@$(modconf) detect-modules
+	@$(modconf) update-depends
+	@$(modconf) configure
+	@$(post_iconfig)
+	@$(post_config)
+
+clean-modconfig:
+	@rm -f .modules .known_modules
+
+conftest:
+	@if test ! -f .modules; then \
+		echo ""; \
+		echo "You have NOT configured the modules yet. This has to be done"; \
+		echo "before you can start compiling."; \
+		echo ""; \
+		echo "   Run \"make config\" or \"make iconfig\" now."; \
+		echo ""; \
+		exit 1; \
+	fi
+
+reconfig: clean-modconfig config
 
 eggdrop: modegg modules
 
 modegg: modtest
-	@cd src; $(MAKE_MODEGG) $(EGGEXEC)
+	@rm -f src/mod/mod.xlibs
+	@cd src && $(MAKE_MODEGG) $(EGGEXEC)
 	@echo ""
-	@./$(EGGEXEC) -v
+	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
 
 modules: modtest
-	@cd src/mod; $(MAKE_MODULES) modules
+	@cd src/mod && $(MAKE_MODULES) modules
 	@echo ""
 	@echo "modules made:"
-	@ls -l *.so
+	@ls -l *.$(MOD_EXT)
+	@$(egg_install_msg)
 
 static: eggtest
 	@echo ""
 	@echo "Making module objects for static linking..."
 	@echo ""
-	@cd src/mod; $(MAKE_STATIC) static
+	@rm -f src/mod/mod.xlibs
+	@cd src/mod && $(MAKE_STATIC) static
 	@echo ""
 	@echo "Making core eggdrop for static linking..."
 	@echo ""
-	@cd src; $(MAKE_STATIC) $(EGGEXEC)
+	@cd src && $(MAKE_STATIC) $(EGGEXEC)
 	@echo ""
-	@./$(EGGEXEC) -v
+	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
+	@$(egg_install_msg)
 
 debug: debegg debmodules
 
 debegg: modtest
-	@cd src; $(MAKE_DEBEGG) $(EGGEXEC)
+	@cd src && $(MAKE_DEBEGG) $(EGGEXEC)
 	@echo ""
-	@./$(EGGEXEC) -v
+	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
 
 debmodules: modtest
-	@cd src/mod; $(MAKE_DEBMODULES) modules
+	@cd src/mod && $(MAKE_DEBMODULES) modules
 	@echo ""
 	@echo "modules made:"
-	@ls -l *.so
+	@ls -l *.$(MOD_EXT)
+	@$(egg_install_msg)
 
 sdebug: eggtest
 	@echo ""
 	@echo "Making module objects for static linking..."
 	@echo ""
-	@cd src/mod; $(MAKE_SDEBUG) static
+	@rm -f src/mod/mod.xlibs
+	@cd src/mod && $(MAKE_SDEBUG) static
 	@echo ""
 	@echo "Making core eggdrop for static linking..."
 	@echo ""
-	@cd src; $(MAKE_SDEBUG) $(EGGEXEC)
+	@cd src && $(MAKE_SDEBUG) $(EGGEXEC)
 	@echo ""
-	@./$(EGGEXEC) -v
+	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
+	@$(egg_install_msg)
 
-eggtest:
-	@if [ -f EGGMOD.stamp ]; then \
+eggtest: conftest
+	@if test -f EGGMOD.stamp; then \
 		echo "You're trying to do a STATIC build of eggdrop when you've";\
 		echo "already run 'make' for a module build.";\
 		echo "You must first type \"make clean\" before you can build";\
@@ -195,7 +270,7 @@ eggtest:
 	fi
 	@echo "stamp" >EGGDROP.stamp
 
-modtest:
+modtest: conftest
 	@if [ -f EGGDROP.stamp ]; then \
 		echo "You're trying to do a MODULE build of eggdrop when you've";\
 		echo "already run 'make' for a static build.";\
@@ -231,17 +306,17 @@ install-start:
 		exit 1; \
 	fi
 	@echo ""
-	@./$(EGGEXEC) -v
+	@$(egg_test_run)
 	@echo
 	@echo "Installing in directory: '$(DEST)'."
 	@echo
 	@if test ! -d $(DEST); then \
 		echo "Creating directory: $(DEST)."; \
-		$(top_srcdir)/mkinstalldirs $(DEST); \
+		$(top_srcdir)/misc/mkinstalldirs $(DEST); \
 	fi
 
 install-bin:
-	@if test -f $(DEST)/$(EGGEXEC); then \
+	@if test -f $(DEST)/o$(EGGEXEC); then \
 		rm -f $(DEST)/o$(EGGEXEC); \
 	fi
 	@if test -h $(DEST)/$(EGGEXEC); then \
@@ -266,91 +341,102 @@ install-modules:
 		rm -rf $(DEST)/modules.old; \
 		mv -f $(DEST)/modules $(DEST)/modules.old; \
 	fi
-	@if test ! "x`echo *.so`" = "x*.so"; then \
+	@if test ! "x`echo *.$(MOD_EXT)`" = "x*.$(MOD_EXT)"; then \
 		if test ! -d $(DEST)/modules-$(EGGVERSION); then \
 			echo "Creating modules-$(EGGVERSION) directory and symlink."; \
-			$(top_srcdir)/mkinstalldirs $(DEST)/modules-$(EGGVERSION); \
+			$(top_srcdir)/misc/mkinstalldirs $(DEST)/modules-$(EGGVERSION); \
 		fi; \
 		(cd $(DEST) && $(LN_S) modules-$(EGGVERSION) modules); \
 		echo "Copying new modules."; \
-		for i in *.so; do \
+		for i in *.$(MOD_EXT); do \
 			$(INSTALL_PROGRAM) $$i $(DEST)/modules-$(EGGVERSION)/; \
 		done; \
 	fi
 
 install-data:
-	@$(INSTALL_DATA) eggdrop.conf.dist $(DEST)
-	@if test ! -f $(DEST)/motd; then \
-		$(INSTALL_DATA) motd $(DEST); \
+	@$(INSTALL_DATA) $(srcdir)/eggdrop.advanced.conf $(DEST)
+	@$(INSTALL_DATA) $(srcdir)/eggdrop.complete.conf $(DEST)
+	@$(INSTALL_DATA) $(srcdir)/eggdrop.simple.conf $(DEST)
+	@if test ! -d $(DEST)/logs; then \
+		echo "Creating 'logs' subdirectory."; \
+		$(top_srcdir)/misc/mkinstalldirs $(DEST)/logs; \
+		$(INSTALL_DATA) $(srcdir)/logs/CONTENTS $(DEST)/logs/; \
+	fi;
+	@if test ! -d $(DEST)/text; then \
+		echo "Creating 'text' subdirectory."; \
+		$(top_srcdir)/misc/mkinstalldirs $(DEST)/text; \
+	fi;
+	@if test ! -f $(DEST)/text/motd; then \
+		$(INSTALL_DATA) $(srcdir)/text/motd $(DEST)/text/; \
 	fi
-	@if test ! -f $(DEST)/telnet-banner; then \
-		$(INSTALL_DATA) telnet-banner $(DEST); \
+	@if test ! -f $(DEST)/text/banner; then \
+		$(INSTALL_DATA) $(srcdir)/text/banner $(DEST)/text/; \
 	fi
 
 install-help:
 	@echo "Copying help files."
-	@if test ! "x`echo help/*.help`" = "xhelp/*.help"; then \
+	@if test ! "x`echo $(srcdir)/help/*.help`" = "x$(srcdir)/help/*.help"; then \
 		if test ! -d $(DEST)/help; then \
 			echo "Creating 'help' subdirectory."; \
-			$(top_srcdir)/mkinstalldirs $(DEST)/help; \
+			$(top_srcdir)/misc/mkinstalldirs $(DEST)/help; \
 		fi; \
-		for i in help/*.help; do \
+		for i in $(srcdir)/help/*.help; do \
 			$(INSTALL_DATA) $$i $(DEST)/help/; \
 		done; \
 	fi
-	@if test ! "x`echo help/msg/*.help`" = "xhelp/msg/*.help"; then \
+	@if test ! "x`echo $(srcdir)/help/msg/*.help`" = "x$(srcdir)/help/msg/*.help"; then \
 		if test ! -d $(DEST)/help/msg; then \
 			echo "Creating 'help/msg' subdirectory."; \
-			$(top_srcdir)/mkinstalldirs $(DEST)/help/msg; \
+			$(top_srcdir)/misc/mkinstalldirs $(DEST)/help/msg; \
 		fi; \
-		for i in help/msg/*.help; do \
+		for i in $(srcdir)/help/msg/*.help; do \
 			$(INSTALL_DATA) $$i $(DEST)/help/msg/; \
 		done; \
 	fi
-	@if test ! "x`echo help/set/*.help`" = "xhelp/set/*.help"; then \
+	@if test ! "x`echo $(srcdir)/help/set/*.help`" = "x$(srcdir)/help/set/*.help"; then \
 		if test ! -d $(DEST)/help/set; then \
 			echo "Creating 'help/set' subdirectory."; \
-			$(top_srcdir)/mkinstalldirs $(DEST)/help/set; \
+			$(top_srcdir)/misc/mkinstalldirs $(DEST)/help/set; \
 		fi; \
-		for i in help/set/*.help; do \
+		for i in $(srcdir)/help/set/*.help; do \
 			$(INSTALL_DATA) $$i $(DEST)/help/set/; \
 		done; \
 	fi
-	@cd src/mod/; $(MAKE_INSTALL) install-help
+	@cd src/mod/ && $(MAKE_INSTALL) install-help
 
 install-language:
 	@echo "Copying language files."
-	@if test ! "x`echo language/*.lang`" = "xlanguage/*.lang"; then \
+	@if test ! "x`echo $(srcdir)/language/*.lang`" = "x$(srcdir)/language/*.lang"; then \
 		if test ! -d $(DEST)/language; then \
 			echo "Creating 'language' subdirectory."; \
-			$(top_srcdir)/mkinstalldirs $(DEST)/language; \
+			$(top_srcdir)/misc/mkinstalldirs $(DEST)/language; \
 		fi; \
-		for i in language/*.lang; do \
+		for i in $(srcdir)/language/*.lang; do \
 			$(INSTALL_DATA) $$i $(DEST)/language/; \
 		done; \
 	fi
-	@cd src/mod/; $(MAKE_INSTALL) install-language
+	@cd src/mod && $(MAKE_INSTALL) install-language
 
 install-filesys:
 	@if test ! -d $(DEST)/filesys; then \
 		echo "Creating a skeletal filesys subdirectory."; \
-		$(top_srcdir)/mkinstalldirs $(DEST)/filesys; \
-		$(top_srcdir)/mkinstalldirs $(DEST)/filesys/incoming; \
+		$(top_srcdir)/misc/mkinstalldirs $(DEST)/filesys; \
+		$(top_srcdir)/misc/mkinstalldirs $(DEST)/filesys/incoming; \
 	fi
 
 install-doc:
-	@$(INSTALL_DATA) README $(DEST)
-	@cd doc/; $(MAKE_INSTALL) install
+	@$(INSTALL_DATA) $(srcdir)/README $(DEST)
+	@cd doc/ && $(MAKE_INSTALL) install
 
 install-scripts:
-	@cd scripts/; $(MAKE_INSTALL) install
+	@cd scripts/ && $(MAKE_INSTALL) install
 
 install-end:
 	@echo
 	@echo "Installation completed."
 	@echo ""
 	@echo "You MUST ensure that you edit/verify your configuration file."
-	@echo "'eggdrop.conf.dist' lists current options."
+	@echo "Use one of the three configuration files (eggdrop.simple.conf, eggdrop.advanced.conf and eggdrop.complete.conf) distributed with your bot."
 	@echo ""
 	@echo "Remember to change directory to $(DEST) before you proceed."
 	@echo ""

@@ -1,10 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION($Revision $)
-AC_INIT(eggdrop.conf.dist)
+AC_INIT(src/eggdrop.h)
+AC_CONFIG_AUX_DIR(misc)
 AC_PREFIX_DEFAULT([\${HOME}/eggdrop])
 AC_CONFIG_HEADER(config.h)
 
 EGG_MSG_CONFIGURE_START
+EGG_SAVE_PARAMETERS
 
 # Setup build environment
 AC_PROG_CC
@@ -15,6 +16,9 @@ AC_AIX
 AC_ISC_POSIX
 AC_MINIX
 
+# Speedup compile
+EGG_CHECK_CCPIPE
+
 # Checks for programs
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
@@ -24,6 +28,9 @@ EGG_PROG_STRIP
 EGG_PROG_AWK
 EGG_PROG_BASENAME
 AC_CHECK_PROG(UNAME,uname,uname)
+
+# Should -O2 CFLAG be removed? 
+EGG_DISABLE_CC_OPTIMIZATION
 
 # Test the os and set the module linking settings
 EGG_CHECK_OS
@@ -36,52 +43,52 @@ AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(sys/time.h)
 AC_HEADER_TIME
-AC_CHECK_HEADERS(sys/select.h sys/rusage.h unistd.h dlfcn.h stdarg.h std_args.h strings.h)
+AC_CHECK_HEADERS(sys/select.h sys/rusage.h unistd.h dlfcn.h stdarg.h std_args.h strings.h limits.h)
 
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_C_CONST
 AC_C_BIGENDIAN
 AC_C_INLINE
 AC_CHECK_SIZEOF(long, 0)
 AC_CHECK_SIZEOF(int, 0)
-AC_CHECK_SIZEOF(char, 0)
-AC_CHECK_SIZEOF(short int, 0)
 
 # Checks for library functions
-AC_CHECK_FUNCS(clock getrusage setpgid uname sigaction sigemptyset rename strcasecmp getdtablesize bzero random srandom dlopen dprintf snprintf vsnprintf)
+AC_CHECK_FUNCS(clock getrusage setpgid uname sigaction sigemptyset rename strcasecmp strncasecmp getdtablesize memset random srandom dlopen dprintf snprintf vsnprintf isascii inet_aton memcpy strftime fsync)
 EGG_CHECK_FUNC_VSPRINTF
 
 # Make sure we have stdc headers, since we can't compile without them
 EGG_HEADER_STDC
 
-# Checks for cygwin
-EGG_CYGWIN
+# Make sure we are using the correct result from a broken libsafe sscanf
+EGG_CHECK_LIBSAFE_SSCANF
+
+# Checks for executable extension
 EGG_EXEEXT
 
-# Check how much space is left in filedb (informational purposes)
-EGG_CHECK_FILEDB_STRUCT
-
-# Where is tcl?  Is it here?
-# ---------- begin robey's tcl thingies
-# (well, what used to be robey's tcl thingies...)
+# Where is Tcl?  Is it here?
+# ---------- begin robey's Tcl thingies
+# (well, what used to be robey's Tcl thingies...)
 
 # Latest tested Tcl version to recommend if Tcl isn't found
-tclrecommendver="8.2.2"
+tclrecommendver="8.3.3"
 
 # Site recommended to download Tcl from
-tclrecommendsite="ftp://ftp.scriptics.com/pub/tcl/tcl8_2/"
+tclrecommendsite="ftp://ftp.eggheads.org/pub/tcl/tcl8_3/"
 
 # Tcl library filename prefixes (also used for Tcl header dir on FreeBSD)
-tcllibnames="tcl tcl8.3 tcl83 tcl8.2 tcl82 tcl8.1 tcl81 \
+tcllibnames="tcl tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 tcl8.1 tcl81 \
 	tcl8.0 tcl80 tcl7.6 tcl76 tcl7.5 tcl75 tcl7.4 tcl74 \
 	tcl7.3 tcl73 tcl7.2 tcl72 tcl7.1 tcl71 tcl7.0 tcl70"
 
 # Tcl library filename suffixes
-tcllibextensions=".so .so.1 .so.1.0 .so.1.2 .a"
+tcllibextensions=".so .so.1 .so.1.0 .so.1.2 .a .sl .dll"
 
 # Tcl library search paths
 tcllibpaths="/usr/local/lib /usr/local/pkgs/tcl/lib \
 	/usr/lib /lib /usr/i486-linuxaout/lib \
+	/beos/system/lib /sys/lib \
 	$HOME/lib $HOME/tcl/lib $HOME"
 
 # Tcl header filenames
@@ -89,7 +96,8 @@ tclheadernames="tcl.h"
 
 # Tcl header search paths
 tclheaderpaths="/usr/local/include /usr/local/pkgs/tcl/include \
-	/usr/include $HOME/include $HOME/tcl/include $HOME"
+	/usr/include /beos/system/include /beos/devel/include \
+       /sys/include $HOME/include $HOME/tcl/include $HOME"
 
 EGG_TCL_ARG_WITH
 EGG_TCL_ENV
@@ -99,20 +107,26 @@ EGG_TCL_FIND_LIBRARY
 EGG_TCL_FIND_HEADER
 EGG_TCL_CHECK_LIBRARY
 EGG_TCL_CHECK_HEADER
+EGG_TCL_DETECT_CHANGE
+
 EGG_TCL_CHECK_VERSION
 EGG_TCL_CHECK_PRE70
 EGG_TCL_CHECK_PRE75
 EGG_TCL_TESTLIBS
 EGG_TCL_CHECK_FREE
+EGG_TCL_ENABLE_THREADS
 EGG_TCL_CHECK_THREADS
 EGG_TCL_LIB_REQS
-# ---------- end of (what used to be) robey's tcl thingies
+EGG_TCL_LUSH
+# ---------- end of (what used to be) robey's Tcl thingies
 
 EGG_FUNC_DLOPEN
 
 EGG_SUBST_EGGVERSION
 EGG_SUBST_DEST
+EGG_SUBST_MOD_UPDIR
+EGG_CATCH_MAKEFILE_REBUILD
 
-AC_OUTPUT(Makefile doc/Makefile scripts/Makefile src/Makefile src/md5/Makefile src/mod/Makefile lush.h)
+AC_OUTPUT(Makefile doc/Makefile scripts/Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile)
 
 EGG_MSG_CONFIGURE_END

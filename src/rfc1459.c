@@ -1,9 +1,12 @@
 /* 
  * rfc1459.c
  * 
- * $Id: rfc1459.c,v 1.4 1999/12/22 20:30:03 guppy Exp $
+ * $Id: rfc1459.c,v 1.5 2002/01/02 08:06:14 tothwolf Exp $
  */
 /* 
+ * Copyright (C) 1990 Jarkko Oikarinen
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ * 
  * This code was more or less cloned from the ircd-hybrid 5.3 source.
  * The original code was written by Otto Harkoonen and even though it
  * it not entirely in synch with section 2.2 of RFC1459 in that it
@@ -30,7 +33,7 @@ int _rfc_casecmp(const char *s1, const char *s2)
   register unsigned char *str2 = (unsigned char *) s2;
   register int res;
 
-  while ((res = rfc_toupper(*str1) - rfc_toupper(*str2)) == 0) {
+  while (!(res = rfc_toupper(*str1) - rfc_toupper(*str2))) {
     if (*str1 == '\0')
       return 0;
     str1++;
@@ -45,11 +48,11 @@ int _rfc_ncasecmp(const char *str1, const char *str2, int n)
   register unsigned char *s2 = (unsigned char *) str2;
   register int res;
 
-  while ((res = rfc_toupper(*s1) - rfc_toupper(*s2)) == 0) {
+  while (!(res = rfc_toupper(*s1) - rfc_toupper(*s2))) {
     s1++;
     s2++;
     n--;
-    if (n == 0 || (*s1 == '\0' && *s2 == '\0'))
+    if (!n || (*s1 == '\0' && *s2 == '\0'))
       return 0;
   }
   return (res);

@@ -1,28 +1,28 @@
-/* 
+/*
  * proto.h
  *   prototypes for every function used outside its own module
- * 
+ *
  * (i guess i'm not very modular, cuz there are a LOT of these.)
  * with full prototyping, some have been moved to other .h files
  * because they use structures in those
  * (saves including those .h files EVERY time) - Beldin
- * 
- * $Id: proto.h,v 1.23 2000/01/08 21:23:14 per Exp $
+ *
+ * $Id: proto.h,v 1.48 2002/01/02 03:46:36 guppy Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -31,15 +31,11 @@
 #ifndef _EGG_PROTO_H
 #define _EGG_PROTO_H
 
-#include "../lush.h"
+#include "lush.h"
+#include "misc_file.h"
 
 #ifdef HAVE_DPRINTF
 #define dprintf dprintf_eggdrop
-#endif
-
-#ifndef HAVE_BZERO
-void bzero(char *, int);
-
 #endif
 
 struct chanset_t;		/* keeps the compiler warnings down :) */
@@ -59,7 +55,6 @@ extern int (*rfc_ncasecmp) (const char *, const char *, int);
 extern int (*rfc_toupper) (int);
 extern int (*rfc_tolower) (int);
 extern int (*match_noterej) (struct userrec *, char *);
-
 #endif
 
 /* botcmd.c */
@@ -116,10 +111,11 @@ void reload();
 void chanprog();
 void check_timers();
 void check_utimers();
-void rmspace(char *);
+void rmspace(char *s);
 void check_timers();
-void set_chanlist(char *host, struct userrec *rec);
-void clear_chanlist();
+void set_chanlist(const char *host, struct userrec *rec);
+void clear_chanlist(void);
+void clear_chanlist_member(const char *nick);
 
 /* cmds.c */
 int check_dcc_attrs(struct userrec *, int);
@@ -129,6 +125,7 @@ char *stripmasktype(int);
 
 /* dcc.c */
 void failed_link(int);
+void dupwait_notify(char *);
 
 /* dccutil.c */
 void dprintf EGG_VARARGS(int, arg1);
@@ -152,6 +149,17 @@ struct dcc_t *find_idx(int);
 int new_dcc(struct dcc_table *, int);
 void del_dcc(int);
 char *add_cr(char *);
+void changeover_dcc(int, struct dcc_table *, int);
+
+/* dns.c */
+extern void (*dns_hostbyip) (IP);
+extern void (*dns_ipbyhost) (char *);
+void block_dns_hostbyip(IP);
+void block_dns_ipbyhost(char *);
+void call_hostbyip(IP, char *, int);
+void call_ipbyhost(char *, IP, int);
+void dcc_dnshostbyip(IP);
+void dcc_dnsipbyhost(char *);
 
 /* gotdcc.c */
 void gotdcc(char *, char *, struct userrec *, char *);
@@ -163,40 +171,43 @@ char *get_language(int);
 int cmd_loadlanguage(struct userrec *, int, char *);
 void add_lang_section(char *);
 int del_lang_section(char *);
+int exist_lang_section(char *);
 
 /* main.c */
-void fatal(char *, int);
-int expected_memory();
-void patch(char *);
-void eggContext(char *, int, char *);
-void eggContextNote(char *, int, char *, char *);
-void eggAssert(char *, int, char *, int);
-void backup_userfile();
+void fatal(const char *, int);
+int expected_memory(void);
+void patch(const char *);
+void eggContext(const char *, int, const char *);
+void eggContextNote(const char *, int, const char *, const char *);
+void eggAssert(const char *, int, const char *);
+void backup_userfile(void);
 
 /* match.c */
 int _wild_match(register unsigned char *, register unsigned char *);
 #define wild_match(a,b) _wild_match((unsigned char *)(a),(unsigned char *)(b))
 
 /* mem.c */
-void *n_malloc(int, char *, int);
-void *n_realloc(void *, int, char *, int);
-void n_free(void *, char *, int);
+void *n_malloc(int, const char *, int);
+void *n_realloc(void *, int, const char *, int);
+void n_free(void *, const char *, int);
 void tell_mem_status(char *);
 void tell_mem_status_dcc(int);
 void debug_mem_to_dcc(int);
 
 /* misc.c */
+int egg_strcatn(char *dst, const char *src, size_t max);
 int my_strcpy(char *, char *);
 void putlog EGG_VARARGS(int, arg1);
 void flushlogs();
 void check_logsize();
-void maskhost(char *, char *);
+void maskhost(const char *, char *);
 char *stristr(char *, char *);
 void splitc(char *, char *, char);
+void splitcn(char *, char *, char, size_t);
 char *newsplit(char **);
 char *splitnick(char **);
 void stridx(char *, char *, int);
-void dumplots(int, char *, char *);
+void dumplots(int, const char *, char *);
 void daysago(time_t, time_t, char *);
 void days(time_t, time_t, char *);
 void daysdur(time_t, time_t, char *);
@@ -207,28 +218,34 @@ void tellhelp(int, char *, struct flag_record *, int);
 void tellwildhelp(int, char *, struct flag_record *);
 void tellallhelp(int, char *, struct flag_record *);
 void showhelp(char *, char *, struct flag_record *, int);
-int copyfile(char *, char *);
-int movefile(char *, char *);
 void rem_help_reference(char *file);
 void add_help_reference(char *file);
 void debug_help(int);
 void reload_help_data(void);
-void remove_gunk(char *);
 char *extracthostname(char *);
 void show_banner(int i);
 void make_rand_str(char *, int);
+int oatoi(const char *);
+int is_file(const char *);
+void logsuffix_change(char *);
+char *str_escape(const char *str, const char div, const char mask);
+char *strchr_unescape(char *str, const char div, register const char esc_char);
+void str_unescape(char *str, register const char esc_char);
+void kill_bot(char *, char *);
 
 /* net.c */
-void my_memcpy(char *, char *, int);
 IP my_atoul(char *);
 unsigned long iptolong(IP);
 IP getmyip();
 void neterror(char *);
 void setsock(int, int);
+int allocsock(int, int);
 int getsock(int);
+char *hostnamefromip(unsigned long);
 void killsock(int);
 int answer(int, char *, unsigned long *, unsigned short *, int);
-int open_listen(int *);
+inline int open_listen(int *);
+int open_address_listen(IP addr, int *port);
 int open_telnet(char *, int);
 int open_telnet_dcc(int, char *, char *);
 int open_telnet_raw(int, char *, int);
@@ -237,12 +254,17 @@ void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);
 int sanitycheck_dcc(char *, char *, char *, char *);
+int hostsanitycheck_dcc(char *, char *, IP, char *, char *);
+char *iptostr(IP);
+int sock_has_data(int, int);
+int sockoptions(int sock, int operation, int sock_options);
+int flush_inbuf(int idx);
 
 /* tcl.c */
 void protect_tcl();
 void unprotect_tcl();
 void do_tcl(char *, char *);
-int readtclprog(char *);
+int readtclprog(char *fname);
 int findidx(int);
 int findanyidx(int);
 
@@ -269,6 +291,7 @@ void write_userfile(int);
 struct userrec *check_dcclist_hand(char *);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
+char *fixfrom(char *);
 
 /* users.c */
 void addignore(char *, char *, char *, time_t);

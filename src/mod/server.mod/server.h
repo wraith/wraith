@@ -1,22 +1,22 @@
-/* 
+/*
  * server.h -- part of server.mod
- * 
- * $Id: server.h,v 1.7 2000/01/08 21:23:17 per Exp $
+ *
+ * $Id: server.h,v 1.13 2002/01/02 03:46:40 guppy Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -27,9 +27,9 @@
 
 #define check_tcl_ctcp(a,b,c,d,e,f) check_tcl_ctcpr(a,b,c,d,e,f,H_ctcp)
 #define check_tcl_ctcr(a,b,c,d,e,f) check_tcl_ctcpr(a,b,c,d,e,f,H_ctcr)
+
 #ifndef MAKING_SERVER
 /* 4 - 7 */
-
 #define botuserhost ((char *)(server_funcs[5]))
 #define quiet_reject (*(int *)(server_funcs[6]))
 #define serv (*(int *)(server_funcs[7]))
@@ -67,9 +67,40 @@
 #define H_flud (*(p_tcl_bind_list *)(server_funcs[32]))
 #define H_ctcp (*(p_tcl_bind_list *)(server_funcs[33]))
 #define H_ctcr (*(p_tcl_bind_list *)(server_funcs[34]))
-/* 35 - 36 */
+/* 35 - 38 */
 #define ctcp_reply ((char *)(server_funcs[35]))
 #define get_altbotnick ((char *(*)(void))(server_funcs[36]))
-#endif				/* MAKING_SERVER */
+#define nick_len (*(int *)(server_funcs[37]))
+#define check_tcl_notc ((int (*)(char *,char *,struct userrec *,char *,char *))server_funcs[38])
 
-#endif				/* _EGG_MOD_SERVER_SERVER_H */
+#else		/* MAKING_SERVER */
+
+/* Macros for commonly used commands.
+ */
+
+#define free_null(ptr)	do {				\
+	nfree(ptr);					\
+	ptr = NULL;					\
+} while (0)
+
+#endif		/* MAKING_SERVER */
+
+struct server_list {
+  struct server_list	*next;
+
+  char			*name;
+  int			 port;
+  char			*pass;
+  char			*realname;
+};
+
+/* Available net types.  */
+enum {
+	NETT_EFNET		= 0,	/* EfNet except new +e/+I hybrid. */
+	NETT_IRCNET		= 1,	/* Ircnet.			  */
+	NETT_UNDERNET		= 2,	/* Undernet.			  */
+	NETT_DALNET		= 3,	/* Dalnet.			  */
+	NETT_HYBRID_EFNET	= 4	/* new +e/+I Efnet hybrid.	  */
+} nett_t;
+
+#endif		/* _EGG_MOD_SERVER_SERVER_H */

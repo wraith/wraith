@@ -1,23 +1,23 @@
-/* 
+/*
  * cmdsserv.c -- part of server.mod
  *   handles commands from a user via dcc that cause server interaction
- * 
- * $Id: cmdsserv.c,v 1.5 2000/01/08 21:23:17 per Exp $
+ *
+ * $Id: cmdsserv.c,v 1.14 2002/02/25 03:34:16 wcc Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -30,21 +30,24 @@ static void cmd_servers(struct userrec *u, int idx, char *par)
   char s[1024];
 
   putlog(LOG_CMDS, "*", "#%s# servers", dcc[idx].nick);
-
   if (!x) {
-    dprintf(idx, "No servers.\n");
+    dprintf(idx, "There are no servers in the server list.\n");
   } else {
-    dprintf(idx, "My server list:\n");
+    dprintf(idx, "Server list:\n");
     i = 0;
-    while (x != NULL) {
-      sprintf(s, "%14s %20.20s:%-10d", (i == curserv) ? "I am here ->" : "",
-	      x->name, x->port ? x->port : default_port);
+    for (; x; x = x->next) {
       if (x->realname)
-	sprintf(s + 46, " (%-.20s)", x->realname);
+	egg_snprintf(s, sizeof s, "  %s:%d (%s) %s", x->name,
+                     x->port ? x->port : default_port, x->realname,
+                     (i == curserv) ? "<- I am here" : "");
+      else 
+        egg_snprintf(s, sizeof s, "  %s:%d %s", x->name, 
+		     x->port ? x->port : default_port, 
+		     (i == curserv) ? "<- I am here" : "");
       dprintf(idx, "%s\n", s);
-      x = x->next;
       i++;
     }
+    dprintf(idx, "End of server list.\n"); 
   }
 }
 
@@ -74,11 +77,9 @@ static void cmd_jump(struct userrec *u, int idx, char *par)
       port = default_port;
     putlog(LOG_CMDS, "*", "#%s# jump %s %d %s", dcc[idx].nick, other,
 	   port, par);
-    strncpy(newserver, other, 120);
-    newserver[120] = 0;
+    strncpyz(newserver, other, sizeof newserver);
     newserverport = port;
-    strncpy(newserverpass, par, 120);
-    newserverpass[120] = 0;
+    strncpyz(newserverpass, par, sizeof newserverpass);
   } else
     putlog(LOG_CMDS, "*", "#%s# jump", dcc[idx].nick);
   dprintf(idx, "%s...\n", IRC_JUMP);
@@ -86,131 +87,61 @@ static void cmd_jump(struct userrec *u, int idx, char *par)
   nuke_server("changing servers");
 }
 
- static void cmd_clearqueue (struct userrec * u, int idx, char * par)
- {
- struct msgq *q, *qq;
- int msgs;
- msgs = 0;
- if (!par[0]) {
-     dprintf(idx, "Usage: clearqueue <mode|server|help|all>\n");
-     putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
-     return;
-     }
- if (!strcasecmp(par, "all")) {
-     msgs = (int) (modeq.tot + mq.tot + hq.tot);
-     q = modeq.head;
-     while (q) {
-         qq = q->next;
-         nfree(q->msg);
-         nfree(q);
-         q = qq;
-         }
-     q = mq.head;
-     while (q) {
-         qq = q->next;
-         nfree(q->msg);
-         nfree(q);
-         q = qq;
-         }
-     q = hq.head;
-     while (q) {
-         qq = q->next;
-         nfree(q->msg);
-         nfree(q);  
-         q = qq;
-         }
-     modeq.tot = mq.tot = hq.tot = modeq.warned = mq.warned = hq.warned = 0;
-     mq.head = hq.head = modeq.head = mq.last = hq.last = modeq.last = 0;
-     double_warned = 0;
-     burst = 0;  
-     dprintf(idx, "Removed %d msgs from all queues\n",msgs);
-     putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
-     return;
-     }
- if (!strcasecmp(par, "mode")) {
-     q = modeq.head;
-     msgs = modeq.tot;
-     while (q) {
-          qq = q->next;
-         nfree(q->msg);
-         nfree(q);  
-         q = qq;
-         }
-     if (mq.tot == 0) {
-         burst = 0;
-         }
-     double_warned = 0;
-     modeq.tot = modeq.warned = 0;
-     modeq.head = modeq.last = 0;
-     dprintf(idx, "Removed %d msgs from the mode queue\n",msgs);
-     putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
-     return;
-     }
- if (!strcasecmp(par, "help")) {
-     msgs = hq.tot;   
-     q = hq.head;
-     while (q) {
-         qq = q->next; 
-         nfree(q->msg);
-         nfree(q);
-         q = qq;
-         }
-     double_warned = 0;
-     hq.tot = hq.warned = 0;
-     hq.head = hq.last = 0;
-     dprintf(idx, "Removed %d msgs from the help queue\n",msgs);
-     putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
-     return;
-     }
- if (!strcasecmp(par, "server")) {
-     msgs = mq.tot;
-     q = mq.head;
-     while (q) {      
-         qq = q->next;
-         nfree(q->msg);
-         nfree(q);
-         q = qq;
-         mq.tot = mq.warned = 0;
-         mq.head = mq.last = 0;
-         if (modeq.tot == 0) {
-             burst = 0;
-             }
-         }
-     double_warned = 0;
-     mq.tot = mq.warned = 0;
-     mq.head = mq.last = 0;
-     dprintf(idx, "Removed %d msgs from the server queue\n",msgs);
-     putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
-     return;
-     }
- dprintf(idx, "Usage: clearqueue <mode|server|help|all>\n");
- putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
- }
-         
-
-/* this overrides the default die, handling extra server stuff
- * send a QUIT if on the server */
-static void my_cmd_die(struct userrec *u, int idx, char *par)
+static void cmd_clearqueue(struct userrec *u, int idx, char *par)
 {
-  cycle_time = 100;
-  if (server_online) {
-    dprintf(-serv, "QUIT :%s\n", par[0] ? par : dcc[idx].nick);
-    sleep(3);			/* give the server time to understand */
+  int	msgs;
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: clearqueue <mode|server|help|all>\n");
+    return;
   }
-  nuke_server(NULL);
-  cmd_die(u, idx, par);
+  if (!egg_strcasecmp(par, "all")) {
+    msgs = modeq.tot + mq.tot + hq.tot;
+    msgq_clear(&modeq);
+    msgq_clear(&mq);
+    msgq_clear(&hq);
+    double_warned = burst = 0;
+    dprintf(idx, "Removed %d message%s from all queues.\n", msgs, 
+        (msgs != 1) ? "s" : "");
+  } else if (!egg_strcasecmp(par, "mode")) {
+    msgs = modeq.tot;
+    msgq_clear(&modeq);
+    if (mq.tot == 0)
+      burst = 0;
+    double_warned = 0;
+    dprintf(idx, "Removed %d message%s from the mode queue.\n", msgs, 
+        (msgs != 1) ? "s" : "");
+  } else if (!egg_strcasecmp(par, "help")) {
+    msgs = hq.tot;
+    msgq_clear(&hq);
+    double_warned = 0;
+    dprintf(idx, "Removed %d message%s from the help queue.\n", msgs,
+        (msgs != 1) ? "s" : "");
+  } else if (!egg_strcasecmp(par, "server")) {
+    msgs = mq.tot;
+    msgq_clear(&mq);
+    if (modeq.tot == 0)
+      burst = 0;
+    double_warned = 0;
+    dprintf(idx, "Removed %d message%s from the server queue.\n", msgs,
+        (msgs != 1) ? "s" : "");
+  } else {
+    dprintf(idx, "Usage: clearqueue <mode|server|help|all>\n");
+    return;
+  }
+  putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
 }
 
-/* DCC CHAT COMMANDS */
-/* function call should be: int cmd_whatever(idx,"parameters");
- * as with msg commands, function is responsible for any logging */
-/* update the add/rem_builtins in server.c if you add to this list!! */
+/* Function call should be:
+ *   int cmd_whatever(idx,"parameters");
+ *
+ * As with msg commands, function is responsible for any logging.
+ */
 static cmd_t C_dcc_serv[] =
 {
-  {"die", "n", (Function) my_cmd_die, "server:die"},
-  {"dump", "m", (Function) cmd_dump, NULL},
-  {"jump", "m", (Function) cmd_jump, NULL},
-  {"servers", "o", (Function) cmd_servers, NULL},
-  {"clearqueue", "m", (Function)cmd_clearqueue, NULL },
-  {0, 0, 0, 0}
+  {"dump",		"m",	(Function) cmd_dump,		NULL},
+  {"jump",		"m",	(Function) cmd_jump,		NULL},
+  {"servers",		"o",	(Function) cmd_servers,		NULL},
+  {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL},
+  {NULL,		NULL,	NULL,				NULL}
 };

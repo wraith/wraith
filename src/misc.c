@@ -1,31 +1,28 @@
-/* 
+/*
  * misc.c -- handles:
- *   split() maskhost() copyfile() movefile()
- *   dumplots() daysago() days() daysdur()
+ *   split() maskhost() dumplots() daysago() days() daysdur()
  *   logging things
  *   queueing output for the bot (msg and help)
  *   resync buffers for sharebots
  *   help system
  *   motd display and %var substitution
- * 
- * dprintf'ized, 12dec1995
- * 
- * $Id: misc.c,v 1.26 2000/01/17 16:14:45 per Exp $
+ *
+ * $Id: misc.c,v 1.48 2002/07/09 05:43:27 guppy Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -36,25 +33,31 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "chan.h"
+#include "tandem.h"
+#include "modules.h"
 #ifdef HAVE_UNAME
-#include <sys/utsname.h>
+#  include <sys/utsname.h>
 #endif
+#include "stat.h"
 
-extern struct dcc_t *dcc;
-extern struct chanset_t *chanset;
-extern char helpdir[], version[], origbotname[], botname[], admin[];
-extern char motdfile[], ver[], botnetnick[], bannerfile[];
-extern int backgrd, con_chan, term_z, use_stderr, dcc_total;
-extern int keep_all_logs, quick_logs, strict_host;
-extern time_t now;
+extern struct dcc_t	*dcc;
+extern struct chanset_t	*chanset;
+extern char		 helpdir[], version[], origbotname[], botname[],
+			 admin[], network[], motdfile[], ver[], botnetnick[],
+			 bannerfile[], logfile_suffix[], textdir[];
+extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total,
+			 keep_all_logs, quick_logs, strict_host;
+extern time_t		 now;
+extern Tcl_Interp	*interp;
 
-int shtime = 1;			/* whether or not to display the time
-				 * with console output */
-log_t *logs = 0;		/* logfiles */
-int max_logs = 5;		/* current maximum log files */
-int max_logsize = 0;		/* maximum logfile size, 0 for no limit */
-int conmask = LOG_MODES | LOG_CMDS | LOG_MISC;	/* console mask */
-int debug_output = 0;		/* disply output to server to LOG_SERVEROUT */
+
+int	 shtime = 1;		/* Whether or not to display the time
+				   with console output */
+log_t	*logs = 0;		/* Logfiles */
+int	 max_logs = 5;		/* Current maximum log files */
+int	 max_logsize = 0;	/* Maximum logfile size, 0 for no limit */
+int	 conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
+int	 debug_output = 0;	/* Disply output to server to LOG_SERVEROUT */
 
 struct help_list_t {
   struct help_list_t *next;
@@ -68,7 +71,9 @@ static struct help_ref {
   struct help_ref *next;
 } *help_list = NULL;
 
-/* expected memory usage */
+
+/* Expected memory usage
+ */
 int expmem_misc()
 {
   struct help_ref *current;
@@ -98,18 +103,22 @@ void init_misc()
     logs[last].filename = logs[last].chname = NULL;
     logs[last].mask = 0;
     logs[last].f = NULL;
-    /*        Added by cybah  */
-    logs[last].szLast[0] = 0;
-    logs[last].Repeats = 0;
-    /*        Added by rtc  */
+    /* Added by cybah  */
+    logs[last].szlast[0] = 0;
+    logs[last].repeats = 0;
+    /* Added by rtc  */
     logs[last].flags = 0;
   }
 }
 
-/***** MISC FUNCTIONS *****/
 
-/* low-level stuff for other modules */
-static int is_file(char *s)
+/*
+ *    Misc functions
+ */
+
+/* low-level stuff for other modules
+ */
+int is_file(const char *s)
 {
   struct stat ss;
   int i = stat(s, &ss);
@@ -121,23 +130,58 @@ static int is_file(char *s)
   return 0;
 }
 
-/* unixware has no strcasecmp() without linking in a hefty library */
-#if !HAVE_STRCASECMP
-#define upcase(c) (((c)>='a' && (c)<='z') ? (c)-'a'+'A' : (c))
-
-int strcasecmp(char *s1, char *s2)
+/*	  This implementation wont overrun dst - 'max' is the max bytes that dst
+ *	can be, including the null terminator. So if 'dst' is a 128 byte buffer,
+ *	pass 128 as 'max'. The function will _always_ null-terminate 'dst'.
+ *
+ *	Returns: The number of characters appended to 'dst'.
+ *
+ *  Usage eg.
+ *
+ *		char 	buf[128];
+ *		size_t	bufsize = sizeof(buf);
+ *
+ *		buf[0] = 0, bufsize--;
+ *
+ *		while (blah && bufsize) {
+ *			bufsize -= egg_strcatn(buf, <some-long-string>, sizeof(buf));
+ *		}
+ *
+ *	<Cybah>
+ */
+int egg_strcatn(char *dst, const char *src, size_t max)
 {
-  while ((*s1) && (*s2) && (upcase(*s1) == upcase(*s2))) {
-    s1++;
-    s2++;
+  size_t tmpmax = 0;
+
+  /* find end of 'dst' */
+  while (*dst && max > 0) {
+    dst++;
+    max--;
   }
-  return upcase(*s1) - upcase(*s2);
-}
-#endif
 
-int my_strcpy(char *a, char *b)
+  /*    Store 'max', so we can use it to workout how many characters were
+   *  written later on.
+   */
+  tmpmax = max;
+
+  /* copy upto, but not including the null terminator */
+  while (*src && max > 1) {
+    *dst++ = *src++;
+    max--;
+  }
+
+  /* null-terminate the buffer */
+  *dst = 0;
+
+  /*    Don't include the terminating null in our count, as it will cumulate
+   *  in loops - causing a headache for the caller.
+   */
+  return tmpmax - max;
+}
+
+int my_strcpy(register char *a, register char *b)
 {
-  char *c = b;
+  register char *c = b;
 
   while (*b)
     *a++ = *b++;
@@ -145,14 +189,14 @@ int my_strcpy(char *a, char *b)
   return b - c;
 }
 
-/* split first word off of rest and put it in first */
+/* Split first word off of rest and put it in first
+ */
 void splitc(char *first, char *rest, char divider)
 {
-  char *p;
+  char *p = strchr(rest, divider);
 
-  p = strchr(rest, divider);
   if (p == NULL) {
-    if ((first != rest) && (first != NULL))
+    if (first != rest && first)
       first[0] = 0;
     return;
   }
@@ -160,6 +204,41 @@ void splitc(char *first, char *rest, char divider)
   if (first != NULL)
     strcpy(first, rest);
   if (first != rest)
+    /*    In most circumstances, strcpy with src and dst being the same buffer
+     *  can produce undefined results. We're safe here, as the src is
+     *  guaranteed to be at least 2 bytes higher in memory than dest. <Cybah>
+     */
+    strcpy(rest, p + 1);
+}
+
+/*    As above, but lets you specify the 'max' number of bytes (EXCLUDING the
+ * terminating null).
+ *
+ * Example of use:
+ *
+ * char buf[HANDLEN + 1];
+ *
+ * splitcn(buf, input, "@", HANDLEN);
+ *
+ * <Cybah>
+ */
+void splitcn(char *first, char *rest, char divider, size_t max)
+{
+  char *p = strchr(rest, divider);
+
+  if (p == NULL) {
+    if (first != rest && first)
+      first[0] = 0;
+    return;
+  }
+  *p = 0;
+  if (first != NULL)
+    strncpyz(first, rest, max);
+  if (first != rest)
+    /*    In most circumstances, strcpy with src and dst being the same buffer
+     *  can produce undefined results. We're safe here, as the src is
+     *  guaranteed to be at least 2 bytes higher in memory than dest. <Cybah>
+     */
     strcpy(rest, p + 1);
 }
 
@@ -193,18 +272,24 @@ char *newsplit(char **rest)
   return r;
 }
 
-/* convert "abc!user@a.b.host" into "*!user@*.b.host"
- * or "abc!user@1.2.3.4" into "*!user@1.2.3.*"  */
-void maskhost(char *s, char *nw)
+/* Convert "abc!user@a.b.host" into "*!user@*.b.host"
+ * or "abc!user@1.2.3.4" into "*!user@1.2.3.*"
+ * or "abc!user@0:0:0:0:0:ffff:1.2.3.4" into "*!user@0:0:0:0:0:ffff:1.2.3.*"
+ * or "abc!user@3ffe:604:2:b02e:6174:7265:6964:6573" into
+ *    "*!user@3ffe:604:2:b02e:6174:7265:6964:*"
+ */
+void maskhost(const char *s, char *nw)
 {
-  char *p, *q, *e, *f;
+  register const char *p, *q, *e, *f;
   int i;
 
   *nw++ = '*';
   *nw++ = '!';
   p = (q = strchr(s, '!')) ? q + 1 : s;
-  /* strip of any nick, if a username is found, use last 8 chars */
+  /* Strip of any nick, if a username is found, use last 8 chars */
   if ((q = strchr(p, '@'))) {
+    int fl = 0;
+
     if ((q - p) > 9) {
       nw[0] = '*';
       p = q - 7;
@@ -212,13 +297,14 @@ void maskhost(char *s, char *nw)
     } else
       i = 0;
     while (*p != '@') {
-      if (strchr("~+-^=", *p))
+      if (!fl && strchr("~+-^=", *p)) {
         if (strict_host)
 	  nw[i] = '?';
 	else
-	  i--; 
-      else
+	  i--;
+      } else
 	nw[i] = *p;
+      fl++;
       p++;
       i++;
     }
@@ -231,132 +317,100 @@ void maskhost(char *s, char *nw)
     q = s;
   }
   nw += i;
-  /* now q points to the hostname, i point to where to put the mask */
-  if (!(p = strchr(q, '.')) || !(e = strchr(p + 1, '.')))
+  e = NULL;
+  /* Now q points to the hostname, i point to where to put the mask */
+  if ((!(p = strchr(q, '.')) || !(e = strchr(p + 1, '.'))) && !strchr(q, ':'))
     /* TLD or 2 part host */
     strcpy(nw, q);
   else {
-    for (f = e; *f; f++);
-    f--;
-    if ((*f >= '0') && (*f <= '9')) {	/* numeric IP address */
-      while (*f != '.')
-	f--;
+    if (e == NULL) {		/* IPv6 address?		*/
+      const char *mask_str;
+
+      f = strrchr(q, ':');
+      if (strchr(f, '.')) {	/* IPv4 wrapped in an IPv6?	*/
+	f = strrchr(f, '.');
+	mask_str = ".*";
+      } else 			/* ... no, true IPv6.		*/
+	mask_str = ":*";
       strncpy(nw, q, f - q);
-      /* No need to nw[f-q]=0 here. */
-      nw += (f - q);
-      strcpy(nw, ".*");
-    } else {			/* normal host >= 3 parts */
-      /* ok, people whined at me...how about this? ..
-       *    a.b.c  -> *.b.c
-       *    a.b.c.d ->  *.b.c.d if tld is a country (2 chars)
-       *             OR   *.c.d if tld is com/edu/etc (3 chars)
-       *    a.b.c.d.e -> *.c.d.e   etc
+      /* No need to nw[f-q] = 0 here, as the strcpy below will
+       * terminate the string for us.
        */
-      char *x = strchr(e + 1, '.');
+      nw += (f - q);
+      strcpy(nw, mask_str);
+    } else {
+      for (f = e; *f; f++);
+      f--;
+      if (*f >= '0' && *f <= '9') {	/* Numeric IP address */
+	while (*f != '.')
+	  f--;
+	strncpy(nw, q, f - q);
+	/* No need to nw[f-q] = 0 here, as the strcpy below will
+	 * terminate the string for us.
+	 */
+	nw += (f - q);
+	strcpy(nw, ".*");
+      } else {				/* Normal host >= 3 parts */
+	/*    a.b.c  -> *.b.c
+	 *    a.b.c.d ->  *.b.c.d if tld is a country (2 chars)
+	 *             OR   *.c.d if tld is com/edu/etc (3 chars)
+	 *    a.b.c.d.e -> *.c.d.e   etc
+	 */
+	const char *x = strchr(e + 1, '.');
 
-      if (!x)
-	x = p;
-      else if (strchr(x + 1, '.'))
-	x = e;
-      else if (strlen(x) == 3)
-	x = p;
-      else
-	x = e;
-      sprintf(nw, "*%s", x);
-    }
-  }
-}
-
-/* copy a file from one place to another (possibly erasing old copy) */
-/* returns 0 if OK, 1 if can't open original file, 2 if can't open new */
-/* file, 3 if original file isn't normal, 4 if ran out of disk space */
-int copyfile(char *oldpath, char *newpath)
-{
-  int fi, fo, x;
-  char buf[512];
-  struct stat st;
-
-  fi = open(oldpath, O_RDONLY, 0);
-  if (fi < 0)
-    return 1;
-  fstat(fi, &st);
-  if (!(st.st_mode & S_IFREG))
-    return 3;
-  fo = creat(newpath, (int) (st.st_mode & 0777));
-  if (fo < 0) {
-    close(fi);
-    return 2;
-  }
-  for (x = 1; x > 0;) {
-    x = read(fi, buf, 512);
-    if (x > 0) {
-      if (write(fo, buf, x) < x) {	/* couldn't write */
-	close(fo);
-	close(fi);
-	unlink(newpath);
-	return 4;
+	if (!x)
+	  x = p;
+	else if (strchr(x + 1, '.'))
+	  x = e;
+	else if (strlen(x) == 3)
+	  x = p;
+	else
+	  x = e;
+	sprintf(nw, "*%s", x);
       }
     }
   }
-  close(fo);
-  close(fi);
-  return 0;
 }
 
-int movefile(char *oldpath, char *newpath)
+/* Dump a potentially super-long string of text.
+ */
+void dumplots(int idx, const char *prefix, char *data)
 {
-  int ret;
-  
-#ifdef HAVE_RENAME
-  /* try to use rename first */
-  if (rename(oldpath, newpath) == 0)
-    return 0;
-#endif /* HAVE_RENAME */
+  char		*p = data, *q, *n, c;
+  const int	 max_data_len = 500 - strlen(prefix);
 
-  /* if that fails, fall back to copying the file */
-  ret = copyfile(oldpath, newpath);
-  if (ret == 0)
-    unlink(oldpath);
-  return ret;
-}
-
-/* dump a potentially super-long string of text */
-/* assume prefix 20 chars or less */
-void dumplots(int idx, char *prefix, char *data)
-{
-  char *p = data, *q, *n, c;
-
-  if (!(*data)) {
+  if (!*data) {
     dprintf(idx, "%s\n", prefix);
     return;
   }
-  while (strlen(p) > 480) {
-    q = p + 480;
-    /* search for embedded linefeed first */
+  while (strlen(p) > max_data_len) {
+    q = p + max_data_len;
+    /* Search for embedded linefeed first */
     n = strchr(p, '\n');
-    if ((n != NULL) && (n < q)) {
-      /* great! dump that first line then start over */
+    if (n && n < q) {
+      /* Great! dump that first line then start over */
       *n = 0;
       dprintf(idx, "%s%s\n", prefix, p);
       *n = '\n';
       p = n + 1;
     } else {
-      /* search backwards for the last space */
-      while ((*q != ' ') && (q != p))
+      /* Search backwards for the last space */
+      while (*q != ' ' && q != p)
 	q--;
       if (q == p)
-	q = p + 480;
-      /* ^ 1 char will get squashed cos there was no space -- too bad */
+	q = p + max_data_len;
       c = *q;
       *q = 0;
       dprintf(idx, "%s%s\n", prefix, p);
       *q = c;
-      p = q + 1;
+      p = q;
+      if (c == ' ')
+	p++;
     }
   }
-  /* last trailing bit: split by linefeeds if possible */
+  /* Last trailing bit: split by linefeeds if possible */
   n = strchr(p, '\n');
-  while (n != NULL) {
+  while (n) {
     *n = 0;
     dprintf(idx, "%s%s\n", prefix, p);
     *n = '\n';
@@ -364,46 +418,40 @@ void dumplots(int idx, char *prefix, char *data)
     n = strchr(p, '\n');
   }
   if (*p)
-    dprintf(idx, "%s%s\n", prefix, p);	/* last trailing bit */
+    dprintf(idx, "%s%s\n", prefix, p);	/* Last trailing bit */
 }
 
-/* convert an interval (in seconds) to one of:
- * "19 days ago", "1 day ago", "18:12" */
+/* Convert an interval (in seconds) to one of:
+ * "19 days ago", "1 day ago", "18:12"
+ */
 void daysago(time_t now, time_t then, char *out)
 {
-  char s[81];
-
   if (now - then > 86400) {
     int days = (now - then) / 86400;
 
     sprintf(out, "%d day%s ago", days, (days == 1) ? "" : "s");
     return;
   }
-  strcpy(s, ctime(&then));
-  s[16] = 0;
-  strcpy(out, &s[11]);
+  egg_strftime(out, 6, "%H:%M", localtime(&then));
 }
 
-/* convert an interval (in seconds) to one of:
- * "in 19 days", "in 1 day", "at 18:12" */
+/* Convert an interval (in seconds) to one of:
+ * "in 19 days", "in 1 day", "at 18:12"
+ */
 void days(time_t now, time_t then, char *out)
 {
-  char s[81];
-
   if (now - then > 86400) {
     int days = (now - then) / 86400;
 
     sprintf(out, "in %d day%s", days, (days == 1) ? "" : "s");
     return;
   }
-  strcpy(out, "at ");
-  strcpy(s, ctime(&now));
-  s[16] = 0;
-  strcpy(&out[3], &s[11]);
+  egg_strftime(out, 9, "at %H:%M", localtime(&now));
 }
 
-/* convert an interval (in seconds) to one of:
- * "for 19 days", "for 1 day", "for 09:10" */
+/* Convert an interval (in seconds) to one of:
+ * "for 19 days", "for 1 day", "for 09:10"
+ */
 void daysdur(time_t now, time_t then, char *out)
 {
   char s[81];
@@ -423,54 +471,54 @@ void daysdur(time_t now, time_t then, char *out)
   strcat(out, s);
 }
 
-/***** LOGGING *****/
 
-/* log something */
-/* putlog(level,channel_name,format,...);  */
+/*
+ *    Logging functions
+ */
+
+/* Log something
+ * putlog(level,channel_name,format,...);
+ */
 void putlog EGG_VARARGS_DEF(int, arg1)
 {
   int i, type;
-  char *format, *chname, s[MAX_LOG_LINE + 1], s1[256], *out;
+  char *format, *chname, s[LOGLINELEN], s1[256], *out;
   time_t tt;
-  char ct[81];
-  struct tm *T = localtime(&now);
-
+  char ct[81], *s2;
+  struct tm *t = localtime(&now);
   va_list va;
+
   type = EGG_VARARGS_START(int, arg1, va);
   chname = va_arg(va, char *);
   format = va_arg(va, char *);
 
-  /* format log entry at offset 8, then i can prepend the timestamp */
+  /* Format log entry at offset 8, then i can prepend the timestamp */
   out = &s[8];
-#ifdef HAVE_VSNPRINTF
-  /* no need to check if out should be null-terminated here,
-   * just do it! <cybah> */
-  vsnprintf(out, MAX_LOG_LINE - 8, format, va);
-  out[MAX_LOG_LINE - 8] = 0;
-#else
-  vsprintf(out, format, va);
-#endif
+  /* No need to check if out should be null-terminated here,
+   * just do it! <cybah>
+   */
+  egg_vsnprintf(out, LOGLINEMAX - 8, format, va);
+  out[LOGLINEMAX - 8] = 0;
   tt = now;
   if (keep_all_logs) {
-    strcpy(ct, ctime(&tt));
-    ct[10] = 0;
-    strcpy(ct, &ct[8]);
-    ct[7] = 0;
-    strcpy(&ct[2], &ct[4]);
-    ct[24] = 0;
-    strcpy(&ct[5], &ct[20]);
-    if (ct[0] == ' ')
-      ct[0] = '0';
+    if (!logfile_suffix[0])
+      egg_strftime(ct, 12, ".%d%b%Y", localtime(&tt));
+    else {
+      egg_strftime(ct, 80, logfile_suffix, localtime(&tt));
+      ct[80] = 0;
+      s2 = ct;
+      /* replace spaces by underscores */
+      while (s2[0]) {
+	if (s2[0] == ' ')
+	  s2[0] = '_';
+	s2++;
+      }
+    }
   }
   if ((out[0]) && (shtime)) {
-    strcpy(s1, ctime(&tt));
-    strcpy(s1, &s1[11]);
-    s1[5] = 0;
+    egg_strftime(s1, 9, "[%H:%M] ", localtime(&tt));
+    strncpy(&s[0], s1, 8);
     out = s;
-    s[0] = '[';
-    strncpy(&s[1], s1, 5);
-    s[6] = ']';
-    s[7] = ' ';
   }
   strcat(out, "\n");
   if (!use_stderr) {
@@ -479,40 +527,43 @@ void putlog EGG_VARARGS_DEF(int, arg1)
 	  ((chname[0] == '*') || (logs[i].chname[0] == '*') ||
 	   (!rfc_casecmp(chname, logs[i].chname)))) {
 	if (logs[i].f == NULL) {
-	  /* open this logfile */
+	  /* Open this logfile */
 	  if (keep_all_logs) {
-	    sprintf(s1, "%s.%s", logs[i].filename, ct);
+	    egg_snprintf(s1, 256, "%s%s", logs[i].filename, ct);
 	    logs[i].f = fopen(s1, "a+");
 	  } else
 	    logs[i].f = fopen(logs[i].filename, "a+");
 	}
 	if (logs[i].f != NULL) {
 	  /* Check if this is the same as the last line added to
-	   * the log. <cybah> */
-	  if (!strcasecmp(out + 8, logs[i].szLast)) {
-	    /*      It is a repeat, so increment Repeats */
-	    logs[i].Repeats++;
+	   * the log. <cybah>
+	   */
+	  if (!egg_strcasecmp(out + 8, logs[i].szlast)) {
+	    /* It is a repeat, so increment repeats */
+	    logs[i].repeats++;
 	  } else {
 	    /* Not a repeat, check if there were any repeat
-	     * lines previously... */
-	    if (logs[i].Repeats > 0) {
+	     * lines previously...
+	     */
+	    if (logs[i].repeats > 0) {
 	      /* Yep.. so display 'last message repeated x times'
 	       * then reset repeats. We want the current time here,
-	       * so put that in the file first. */
-	      if (T) {
-		fprintf(logs[i].f, "[%2.2d:%2.2d] ", T->tm_hour, T->tm_min);
-		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
+	       * so put that in the file first.
+	       */
+	      if (t) {
+		fprintf(logs[i].f, "[%2.2d:%2.2d] ", t->tm_hour, t->tm_min);
+		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
 	      } else {
 		fprintf(logs[i].f, "[??:??] ");
-		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
+		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
 	      }
-	      logs[i].Repeats = 0;
-	      /* no need to reset logs[i].szLast here
-	       * because we update it later on... */
+	      logs[i].repeats = 0;
+	      /* No need to reset logs[i].szlast here
+	       * because we update it later on...
+	       */
 	    }
 	    fputs(out, logs[i].f);
-	    strncpy(logs[i].szLast, out + 8, MAX_LOG_LINE);
-	    logs[i].szLast[MAX_LOG_LINE] = 0;
+	    strncpyz(logs[i].szlast, out + 8, LOGLINEMAX);
 	  }
 	}
       }
@@ -525,7 +576,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
 	dprintf(i, "%s", out);
     }
   if ((!backgrd) && (!con_chan) && (!term_z))
-    printf("%s", out);
+    dprintf(DP_STDOUT, "%s", out);
   else if ((type & LOG_MISC) && use_stderr) {
     if (shtime)
       out += 8;
@@ -534,103 +585,111 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   va_end(va);
 }
 
+/* Called as soon as the logfile suffix changes. All logs are closed
+ * and the new suffix is stored in `logfile_suffix'.
+ */
+void logsuffix_change(char *s)
+{
+  int	 i;
+  char	*s2 = logfile_suffix;
+
+  debug0("Logfile suffix changed. Closing all open logs.");
+  strcpy(logfile_suffix, s);
+  while (s2[0]) {
+    if (s2[0] == ' ')
+      s2[0] = '_';
+    s2++;
+  }
+  for (i = 0; i < max_logs; i++) {
+    if (logs[i].f) {
+      fflush(logs[i].f);
+      fclose(logs[i].f);
+      logs[i].f = NULL;
+    }
+  }
+}
+
 void check_logsize()
 {
   struct stat ss;
   int i;
-
 /* int x=1; */
-  char buf[1024];		/* should be plenty */
+  char buf[1024];		/* Should be plenty */
 
-  Context;
-  if ((keep_all_logs == 0) && (max_logsize != 0)) {
+  if (!keep_all_logs && max_logsize > 0) {
     for (i = 0; i < max_logs; i++) {
       if (logs[i].filename) {
 	if (stat(logs[i].filename, &ss) != 0) {
 	  break;
 	}
 	if ((ss.st_size >> 10) > max_logsize) {
-	  Context;
 	  if (logs[i].f) {
 	    /* write to the log before closing it huh.. */
 	    putlog(LOG_MISC, "*", MISC_CLOGS, logs[i].filename, ss.st_size);
 	    fflush(logs[i].f);
 	    fclose(logs[i].f);
 	    logs[i].f = NULL;
-	    Context;
 	  }
-	  Context;
 
-	  simple_sprintf(buf, "%s.yesterday", logs[i].filename);
+	  egg_snprintf(buf, sizeof buf, "%s.yesterday", logs[i].filename);
 	  buf[1023] = 0;
 	  unlink(buf);
-/* x++; 
- * This is an alternate method i was considering, i want to leave
- * this in here and commented.. in case someone wants it like this
- * it really depends on feedback from the users. - poptix
- * feel free to ask me, if you have questions on this.. 
- * 
- * while (x > 0) {
- * x++;
- * * only YOU can prevent buffer overflows! *
- * simple_sprintf(buf,"%s.%d",logs[i].filename,x);
- * buf[1023] = 0;
- * if (stat(buf,&ss) == -1) { 
- * * file doesnt exist, lets use it *
- */
 	  movefile(logs[i].filename, buf);
-/* x=0;
- * }
- * } */
 	}
       }
     }
   }
-  Context;
 }
 
-/* flush the logfiles to disk */
+/* Flush the logfiles to disk
+ */
 void flushlogs()
 {
   int i;
-  struct tm *T = localtime(&now);
+  struct tm *t = localtime(&now);
 
-  Context;
-  /* logs may not be initialised yet.  (Fabian) */
+  /* Logs may not be initialised yet. */
   if (!logs)
     return;
+
   /* Now also checks to see if there's a repeat message and
-   * displays the 'last message repeated...' stuff too <cybah> */
+   * displays the 'last message repeated...' stuff too <cybah>
+   */
   for (i = 0; i < max_logs; i++) {
     if (logs[i].f != NULL) {
-       if ((logs[i].Repeats > 0) && quick_logs) {
+       if ((logs[i].repeats > 0) && quick_logs) {
          /* Repeat.. if quicklogs used then display 'last message
-          * repeated x times' and reset Repeats. */
-	if (T) {
-	  fprintf(logs[i].f, "[%2.2d:%2.2d] ", T->tm_hour, T->tm_min);
-	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
+          * repeated x times' and reset repeats.
+	  */
+	if (t) {
+	  fprintf(logs[i].f, "[%2.2d:%2.2d] ", t->tm_hour, t->tm_min);
+	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
 	} else {
 	  fprintf(logs[i].f, "[??:??] ");
-	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
+	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
 	}
 	/* Reset repeats */
-	logs[i].Repeats = 0;
+	logs[i].repeats = 0;
       }
       fflush(logs[i].f);
     }
   }
-  Context;
 }
 
-/********** STRING SUBSTITUTION **********/
 
-static int cols = 0;
-static int colsofar = 0;
-static int blind = 0;
-static int subwidth = 70;
-static char *colstr = NULL;
+/*
+ *     String substitution functions
+ */
 
-/* add string to colstr */
+static int	 cols = 0;
+static int	 colsofar = 0;
+static int	 blind = 0;
+static int	 subwidth = 70;
+static char	*colstr = NULL;
+
+
+/* Add string to colstr
+ */
 static void subst_addcol(char *s, char *newcol)
 {
   char *p, *q;
@@ -666,12 +725,14 @@ static void subst_addcol(char *s, char *newcol)
   }
 }
 
-/* substitute %x codes in help files
+/* Substitute %x codes in help files
+ *
  * %B = bot nickname
  * %V = version
  * %C = list of channels i monitor
  * %E = eggdrop banner
  * %A = admin line
+ * %n = network name
  * %T = current time ("14:15")
  * %N = user's nickname
  * %U = display system name if possible
@@ -696,14 +757,12 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
   struct chanset_t *chan;
   int i, j, center = 0;
   static int help_flags;
-
 #ifdef HAVE_UNAME
   struct utsname uname_info;
-
 #endif
 
   if (s == NULL) {
-    /* used to reset substitutions */
+    /* Used to reset substitutions */
     blind = 0;
     cols = 0;
     subwidth = 70;
@@ -714,14 +773,14 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
     help_flags = isdcc;
     return;
   }
-  strncpy(xx, s, HELP_BUF_LEN);
-  xx[HELP_BUF_LEN] = 0;
+  strncpyz(xx, s, sizeof xx);
   readidx = xx;
   writeidx = s;
   current = strchr(readidx, '%');
   while (current) {
-    /* are we about to copy a chuck to the end of the buffer? 
-     * if so return */
+    /* Are we about to copy a chuck to the end of the buffer?
+     * if so return
+     */
     if ((writeidx + (current - readidx)) >= (s + HELP_BUF_LEN)) {
       strncpy(writeidx, readidx, (s + HELP_BUF_LEN) - writeidx);
       s[HELP_BUF_LEN] = 0;
@@ -793,8 +852,8 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
       break;
     case 'U':
 #ifdef HAVE_UNAME
-      if (!uname(&uname_info)) {
-	simple_sprintf(sub, "%s %s", uname_info.sysname,
+      if (uname(&uname_info) >= 0) {
+	egg_snprintf(sub, sizeof sub, "%s %s", uname_info.sysname,
 		       uname_info.release);
 	towrite = sub;
       } else
@@ -813,10 +872,12 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
     case 'A':
       towrite = admin;
       break;
+    case 'n':
+      towrite = network;
+      break;
     case 'T':
-      strcpy(sub, ctime(&now));
-      sub[16] = 0;
-      towrite = sub + 11;
+      egg_strftime(sub, 6, "%H:%M", localtime(&now));
+      towrite = sub;
       break;
     case 'N':
       towrite = strchr(nick, ':');
@@ -828,13 +889,13 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
     case 'C':
       if (!blind)
 	for (chan = chanset; chan; chan = chan->next) {
-	  if ((strlen(chan->name) + writeidx + 2) >=
+	  if ((strlen(chan->dname) + writeidx + 2) >=
 	      (s + HELP_BUF_LEN)) {
-	    strncpy(writeidx, chan->name, (s + HELP_BUF_LEN) - writeidx);
+	    strncpy(writeidx, chan->dname, (s + HELP_BUF_LEN) - writeidx);
 	    s[HELP_BUF_LEN] = 0;
 	    return;
 	  }
-	  writeidx += my_strcpy(writeidx, chan->name);
+	  writeidx += my_strcpy(writeidx, chan->dname);
 	  if (chan->next) {
 	    *writeidx++ = ',';
 	    *writeidx++ = ' ';
@@ -850,9 +911,9 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
 	*current = 0;
 	current--;
 	q += 2;
-	/* now q is the string and p is where the rest of the fcn expects */
+	/* Now q is the string and p is where the rest of the fcn expects */
 	if (!strncmp(q, "help=", 5)) {
-	  if (topic && strcasecmp(q + 5, topic))
+	  if (topic && egg_strcasecmp(q + 5, topic))
 	    blind |= 2;
 	  else
 	    blind &= ~2;
@@ -868,7 +929,7 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
 	      blind &= ~1;
 	  } else if (q[0] == '-') {
 	    blind &= ~1;
-	  } else if (!strcasecmp(q, "end")) {
+	  } else if (!egg_strcasecmp(q, "end")) {
 	    blind &= ~1;
 	    subwidth = 70;
 	    if (cols) {
@@ -879,7 +940,7 @@ void help_subst(char *s, char *nick, struct flag_record *flags,
 	      cols = 0;
 	      towrite = sub;
 	    }
-	  } else if (!strcasecmp(q, "center"))
+	  } else if (!egg_strcasecmp(q, "center"))
 	    center = 1;
 	  else if (!strncmp(q, "cols=", 5)) {
 	    char *r;
@@ -987,7 +1048,7 @@ void add_help_reference(char *file)
 
   for (current = help_list; current; current = current->next)
     if (!strcmp(current->name, file))
-      return;			/* already exists, can't re-add :P */
+      return;			/* Already exists, can't re-add :P */
   current = nmalloc(sizeof(struct help_ref));
 
   current->name = nmalloc(strlen(file) + 1);
@@ -995,11 +1056,11 @@ void add_help_reference(char *file)
   current->next = help_list;
   current->first = NULL;
   help_list = current;
-  simple_sprintf(s, "%smsg/%s", helpdir, file);
+  egg_snprintf(s, sizeof s, "%smsg/%s", helpdir, file);
   scan_help_file(current, s, 0);
-  simple_sprintf(s, "%s%s", helpdir, file);
+  egg_snprintf(s, sizeof s, "%s%s", helpdir, file);
   scan_help_file(current, s, 1);
-  simple_sprintf(s, "%sset/%s", helpdir, file);
+  egg_snprintf(s, sizeof s, "%sset/%s", helpdir, file);
   scan_help_file(current, s, 2);
 }
 
@@ -1061,54 +1122,40 @@ void debug_help(int idx)
 
 FILE *resolve_help(int dcc, char *file)
 {
-  char s[1024], *p;
+
+  char s[1024];
   FILE *f;
   struct help_ref *current;
   struct help_list_t *item;
 
-  /* somewhere here goes the eventual substituation */
+  /* Somewhere here goes the eventual substituation */
   if (!(dcc & HELP_TEXT))
+  {
     for (current = help_list; current; current = current->next)
       for (item = current->first; item; item = item->next)
 	if (!strcmp(item->name, file)) {
 	  if (!item->type && !dcc) {
-	    simple_sprintf(s, "%smsg/%s", helpdir, current->name);
+	    egg_snprintf(s, sizeof s, "%smsg/%s", helpdir, current->name);
 	    if ((f = fopen(s, "r")))
 	      return f;
 	  } else if (dcc && item->type) {
 	    if (item->type == 1)
-	      simple_sprintf(s, "%s%s", helpdir, current->name);
+	      egg_snprintf(s, sizeof s, "%s%s", helpdir, current->name);
 	    else
-	      simple_sprintf(s, "%sset/%s", helpdir, current->name);
+	      egg_snprintf(s, sizeof s, "%sset/%s", helpdir, current->name);
 	    if ((f = fopen(s, "r")))
 	      return f;
 	  }
 	}
-  for (p = s + simple_sprintf(s, "%s%s", helpdir, dcc ? "" : "msg/");
-       *file && (p < s + 1023); file++, p++) {
-    switch (*file) {
-    case ' ':
-    case '.':
-      *p = '/';
-      break;
-    case '-':
-      *p = '-';
-      break;
-    case '+':
-      *p = 'P';
-      break;
-    default:
-      *p = *file;
-    }
+    /* No match was found, so we better return NULL */
+    return NULL;
   }
-  *p = 0;
-  if (!is_file(s)) {
-    strcat(s, "/");
-    strcat(s, file);
-    if (!is_file(s))
-      return NULL;
-  }
-  return fopen(s, "r");
+  /* Since we're not dealing with help files, we should just prepend the filename with textdir */
+  simple_sprintf(s, "%s%s", textdir, file);
+  if (is_file(s))
+    return fopen(s, "r");
+  else
+    return NULL;
 }
 
 void showhelp(char *who, char *file, struct flag_record *flags, int fl)
@@ -1118,7 +1165,7 @@ void showhelp(char *who, char *file, struct flag_record *flags, int fl)
   FILE *f = resolve_help(fl, file);
 
   if (f) {
-    help_subst(NULL, NULL, 0, HELP_IRC, NULL);	/* clear flags */
+    help_subst(NULL, NULL, 0, HELP_IRC, NULL);	/* Clear flags */
     while (!feof(f)) {
       fgets(s, HELP_BUF_LEN, f);
       if (!feof(f)) {
@@ -1139,11 +1186,12 @@ void showhelp(char *who, char *file, struct flag_record *flags, int fl)
     dprintf(DP_HELP, "NOTICE %s :%s\n", who, IRC_NOHELP2);
 }
 
-static int display_tellhelp(int idx, char *file, FILE *f, struct flag_record *flags)
+static int display_tellhelp(int idx, char *file, FILE *f,
+			    struct flag_record *flags)
 {
   char s[HELP_BUF_LEN + 1];
   int lines = 0;
-  
+
   if (f) {
     help_subst(NULL, NULL, 0,
 	       (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
@@ -1177,7 +1225,8 @@ void tellhelp(int idx, char *file, struct flag_record *flags, int fl)
     dprintf(idx, "%s\n", IRC_NOHELP2);
 }
 
-/* same as tellallhelp, just using wild_match instead of strcmp */
+/* Same as tellallhelp, just using wild_match instead of strcmp
+ */
 void tellwildhelp(int idx, char *match, struct flag_record *flags)
 {
   struct help_ref *current;
@@ -1190,9 +1239,9 @@ void tellwildhelp(int idx, char *match, struct flag_record *flags)
     for (item = current->first; item; item = item->next)
       if (wild_match(match, item->name) && item->type) {
 	if (item->type == 1)
-	  simple_sprintf(s, "%s%s", helpdir, current->name);
+	  egg_snprintf(s, sizeof s, "%s%s", helpdir, current->name);
 	else
-	  simple_sprintf(s, "%sset/%s", helpdir, current->name);
+	  egg_snprintf(s, sizeof s, "%sset/%s", helpdir, current->name);
 	if ((f = fopen(s, "r")))
 	  display_tellhelp(idx, item->name, f, flags);
       }
@@ -1200,7 +1249,8 @@ void tellwildhelp(int idx, char *match, struct flag_record *flags)
     dprintf(idx, "%s\n", IRC_NOHELP2);
 }
 
-/* same as tellwildhelp, just using strcmp instead of wild_match */
+/* Same as tellwildhelp, just using strcmp instead of wild_match
+ */
 void tellallhelp(int idx, char *match, struct flag_record *flags)
 {
   struct help_ref *current;
@@ -1214,9 +1264,9 @@ void tellallhelp(int idx, char *match, struct flag_record *flags)
       if (!strcmp(match, item->name) && item->type) {
 
 	if (item->type == 1)
-	  simple_sprintf(s, "%s%s", helpdir, current->name);
+	  egg_snprintf(s, sizeof s, "%s%s", helpdir, current->name);
 	else
-	  simple_sprintf(s, "%sset/%s", helpdir, current->name);
+	  egg_snprintf(s, sizeof s, "%sset/%s", helpdir, current->name);
 	if ((f = fopen(s, "r")))
 	  display_tellhelp(idx, item->name, f, flags);
       }
@@ -1224,18 +1274,17 @@ void tellallhelp(int idx, char *match, struct flag_record *flags)
     dprintf(idx, "%s\n", IRC_NOHELP2);
 }
 
-/* substitute vars in a lang text to dcc chatter */
+/* Substitute vars in a lang text to dcc chatter
+ */
 void sub_lang(int idx, char *text)
 {
   char s[1024];
-  struct flag_record fr =
-  {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
   help_subst(NULL, NULL, 0,
 	     (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-  strncpy(s, text, 1023);
-  s[1023] = 0;
+  strncpyz(s, text, sizeof s);
   if (s[strlen(s) - 1] == '\n')
     s[strlen(s) - 1] = 0;
   if (!s[0])
@@ -1245,94 +1294,83 @@ void sub_lang(int idx, char *text)
     dprintf(idx, "%s\n", s);
 }
 
-/* show motd to dcc chatter */
+/* This will return a pointer to the first character after the @ in the
+ * string given it.  Possibly it's time to think about a regexp library
+ * for eggdrop...
+ */
+char *extracthostname(char *hostmask)
+{
+  char *p = strrchr(hostmask, '@');
+  return p ? p + 1 : "";
+}
+
+/* Show motd to dcc chatter
+ */
 void show_motd(int idx)
 {
   FILE *vv;
   char s[1024];
-  struct flag_record fr =
-  {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+
+  if (!is_file(motdfile))
+    return;
+
+  vv = fopen(motdfile, "r");
+  if (!vv)
+    return;
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  vv = fopen(motdfile, "r");
-  if (vv != NULL) {
-    if (!is_file(motdfile)) {
-      fclose(vv);
-      dprintf(idx, "### MOTD %s\n", IRC_NOTNORMFILE);
-      return;
+  dprintf(idx, "\n");
+  /* reset the help_subst variables to their defaults */
+  help_subst(NULL, NULL, 0,
+	     (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
+  while (!feof(vv)) {
+    fgets(s, 120, vv);
+    if (!feof(vv)) {
+      if (s[strlen(s) - 1] == '\n')
+	s[strlen(s) - 1] = 0;
+      if (!s[0])
+	strcpy(s, " ");
+      help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
+      if (s[0])
+	dprintf(idx, "%s\n", s);
     }
-    dprintf(idx, "\n");
-    help_subst(NULL, NULL, 0,
-	       (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-    while (!feof(vv)) {
-      fgets(s, 120, vv);
-      if (!feof(vv)) {
-	if (s[strlen(s) - 1] == '\n')
-	  s[strlen(s) - 1] = 0;
-	if (!s[0])
-	  strcpy(s, " ");
-	help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
-	if (s[0])
-	  dprintf(idx, "%s\n", s);
-      }
-    }
-    fclose(vv);
-    dprintf(idx, "\n");
   }
+  fclose(vv);
+  dprintf(idx, "\n");
 }
 
-/* remove :'s from ignores and bans */
-void remove_gunk(char *par)
-{
-  char *q, *p, *WBUF = nmalloc(strlen(par) + 1);
-
-  for (p = par, q = WBUF; *p; p++, q++) {
-    if (*p == ':')
-      q--;
-    else
-      *q = *p;
-  }
-  *q = *p;
-  strcpy(par, WBUF);
-  nfree(WBUF);
-}
-
-/* This will return a pointer to the first character after the @ in the
- * string given it.  Possibly it's time to think about a regexp library
- * for eggdrop... */
-char *extracthostname(char *hostmask)
-{
-  char *ptr = strrchr(hostmask, '@');
-
-  if (ptr) {
-    ptr = ptr + 1;
-    return ptr;
-  }
-  return "";
-}
-
-/* show banner to telnet user, simialer to show_motd() - [seC] */
+/* Show banner to telnet user 
+ */
 void show_banner(int idx) {
-   FILE *vv;
-   char s[1024];
-   struct flag_record fr = {FR_GLOBAL|FR_CHAN,0,0,0,0,0};
+  FILE *vv;
+  char s[1024];
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 
-   get_user_flagrec(dcc[idx].user,&fr,dcc[idx].u.chat->con_chan);
-   vv = fopen(bannerfile, "r");
-   if (!vv || !is_file(bannerfile))
-      return;
-   while(!feof(vv)) {
-      fgets(s, 120, vv);
-      if (!feof(vv)) {
-        if (!s[0])
-          strcpy(s, " \n");
-        help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
-        dprintf(idx, "%s", s);
-      }
-   }
+  if (!is_file(bannerfile))
+    return;
+
+  vv = fopen(bannerfile, "r");
+  if (!vv)
+    return;
+
+  get_user_flagrec(dcc[idx].user, &fr,dcc[idx].u.chat->con_chan);
+  /* reset the help_subst variables to their defaults */
+  help_subst(NULL, NULL, 0, 0, NULL);
+  while(!feof(vv)) {
+    fgets(s, 120, vv);
+    if (!feof(vv)) {
+      if (!s[0])
+	strcpy(s, " \n");
+      help_subst(s, dcc[idx].nick, &fr, 0, botnetnick);
+      dprintf(idx, "%s", s);
+    }
+  }
+  fclose(vv);
 }
 
-/* create a string with random letters and digits */
+/* Create a string with random letters and digits
+ */
 void make_rand_str(char *s, int len)
 {
   int j;
@@ -1344,4 +1382,118 @@ void make_rand_str(char *s, int len)
       s[j] = 'a' + (random() % 26);
   }
   s[len] = 0;
+}
+
+/* Convert an octal string into a decimal integer value.  If the string
+ * is empty or contains non-octal characters, -1 is returned.
+ */
+int oatoi(const char *octal)
+{
+  register int i;
+
+  if (!*octal)
+    return -1;
+  for (i = 0; ((*octal >= '0') && (*octal <= '7')); octal++)
+    i = (i * 8) + (*octal - '0');
+  if (*octal)
+    return -1;
+  return i;
+}
+
+/* Return an allocated buffer which contains a copy of the string
+ * 'str', with all 'div' characters escaped by 'mask'. 'mask'
+ * characters are escaped too.
+ *
+ * Remember to free the returned memory block.
+ */
+char *str_escape(const char *str, const char div, const char mask)
+{
+  const int	 len = strlen(str);
+  int		 buflen = (2 * len), blen = 0;
+  char		*buf = nmalloc(buflen + 1), *b = buf;
+  const char	*s;
+
+  if (!buf)
+    return NULL;
+  for (s = str; *s; s++) {
+    /* Resize buffer. */
+    if ((buflen - blen) <= 3) {
+      buflen = (buflen * 2);
+      buf = nrealloc(buf, buflen + 1);
+      if (!buf)
+	return NULL;
+      b = buf + blen;
+    }
+
+    if (*s == div || *s == mask) {
+      sprintf(b, "%c%02x", mask, *s);
+      b += 3;
+      blen += 3;
+    } else {
+      *(b++) = *s;
+      blen++;
+    }
+  }
+  *b = 0;
+  return buf;
+}
+
+/* Search for a certain character 'div' in the string 'str', while
+ * ignoring escaped characters prefixed with 'mask'.
+ *
+ * The string
+ *
+ *   "\\3a\\5c i am funny \\3a):further text\\5c):oink"
+ *
+ * as str, '\\' as mask and ':' as div would change the str buffer
+ * to
+ *
+ *   ":\\ i am funny :)"
+ *
+ * and return a pointer to "further text\\5c):oink".
+ *
+ * NOTE: If you look carefully, you'll notice that strchr_unescape()
+ *       behaves differently than strchr().
+ */
+char *strchr_unescape(char *str, const char div, register const char esc_char)
+{
+  char		 buf[3];
+  register char	*s, *p;
+
+  buf[3] = 0;
+  for (s = p = str; *s; s++, p++) {
+    if (*s == esc_char) {	/* Found escape character.		*/
+      /* Convert code to character. */
+      buf[0] = s[1], buf[1] = s[2];
+      *p = (unsigned char) strtol(buf, NULL, 16);
+      s += 2;
+    } else if (*s == div) {
+      *p = *s = 0;
+      return (s + 1);		/* Found searched for character.	*/
+    } else
+      *p = *s;
+  }
+  *p = 0;
+  return NULL;
+}
+
+/* As strchr_unescape(), but converts the complete string, without
+ * searching for a specific delimiter character.
+ */
+void str_unescape(char *str, register const char esc_char)
+{
+  (void) strchr_unescape(str, 0, esc_char);
+}
+
+/* Kills the bot. s1 is the reason shown to other bots, 
+ * s2 the reason shown on the partyline. (Sup 25Jul2001)
+ */
+void kill_bot(char *s1, char *s2)
+{
+  call_hook(HOOK_DIE);
+  chatout("*** %s\n", s1);
+  botnet_send_chat(-1, botnetnick, s1);
+  botnet_send_bye();
+  write_userfile(-1);
+  fatal(s2, 0);
 }

@@ -1,75 +1,56 @@
-/* 
+/*
  * mem.c -- handles:
  *   memory allocation and deallocation
  *   keeping track of what memory is being used by whom
- * 
- * dprintf'ized, 15nov1995
- * 
- * $Id: mem.c,v 1.12 2000/01/08 21:23:14 per Exp $
+ *
+ * $Id: mem.c,v 1.17 2002/01/02 03:46:35 guppy Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#define LOG_MISC 32
 #define MEMTBLSIZE 25000	/* yikes! */
+#define COMPILING_MEM
 
-#if HAVE_CONFIG_H
-#  include <config.h>
-#endif
+#include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
-typedef int (*Function) ();
 #include "mod/modvals.h"
 
-extern module_entry *module_list;
-void fatal(char *, int);
+
+extern module_entry	*module_list;
 
 #ifdef DEBUG_MEM
-unsigned long memused = 0;
-static int lastused = 0;
+unsigned long	memused = 0;
+static int	lastused = 0;
 
 struct {
-  void *ptr;
-  int size;
-  short line;
-  char file[20];
+  void	*ptr;
+  int	 size;
+  short	 line;
+  char	 file[20];
 } memtbl[MEMTBLSIZE];
-
 #endif
 
-#ifdef HAVE_DPRINTF
-#define dprintf dprintf_eggdrop
-#endif
-
-#define DP_HELP         0x7FF4
-
-/* prototypes */
-#if !defined(HAVE_PRE7_5_TCL) && defined(__STDC__)
-void dprintf(int arg1, ...);
-void putlog(int arg1, ...);
-#else
-void dprintf();
-void putlog();
-#endif
+/* Prototypes */
 int expected_memory();
 int expmem_chanprog();
 int expmem_misc();
@@ -79,14 +60,16 @@ int expmem_dccutil();
 int expmem_botnet();
 int expmem_tcl();
 int expmem_tclhash();
+int expmem_tclmisc();
 int expmem_net();
 int expmem_modules();
 int expmem_language();
 int expmem_tcldcc();
-void tell_netdebug();
-void do_module_report(int, int, char *);
+int expmem_dns();
 
-/* initialize the memory structure */
+
+/* Initialize the memory structure
+ */
 void init_mem()
 {
 #ifdef DEBUG_MEM
@@ -97,7 +80,8 @@ void init_mem()
 #endif
 }
 
-/* tell someone the gory memory details */
+/* Tell someone the gory memory details
+ */
 void tell_mem_status(char *nick)
 {
 #ifdef DEBUG_MEM
@@ -119,7 +103,8 @@ void tell_mem_status_dcc(int idx)
 
   exp = expected_memory();	/* in main.c ? */
   per = ((lastused * 1.0) / (MEMTBLSIZE * 1.0)) * 100.0;
-  dprintf(idx, "Memory table: %d/%d (%.1f%% full)\n", lastused, MEMTBLSIZE, per);
+  dprintf(idx, "Memory table: %d/%d (%.1f%% full)\n", lastused, MEMTBLSIZE,
+	  per);
   per = ((exp * 1.0) / (memused * 1.0)) * 100.0;
   if (per != 100.0)
     dprintf(idx, "Memory fault: only accounting for %d/%ld (%.1f%%)\n",
@@ -132,7 +117,7 @@ void tell_mem_status_dcc(int idx)
 void debug_mem_to_dcc(int idx)
 {
 #ifdef DEBUG_MEM
-#define MAX_MEM 11
+#define MAX_MEM 13
   unsigned long exp[MAX_MEM], use[MAX_MEM], l;
   int i, j;
   char fn[20], sofar[81];
@@ -148,8 +133,10 @@ void debug_mem_to_dcc(int idx)
   exp[6] = expmem_botnet();
   exp[7] = expmem_tcl();
   exp[8] = expmem_tclhash();
-  exp[9] = expmem_modules(1);
-  exp[10] = expmem_tcldcc();
+  exp[9] = expmem_tclmisc();
+  exp[10] = expmem_modules(1);
+  exp[11] = expmem_tcldcc();
+  exp[12] = expmem_dns();
   for (me = module_list; me; me = me->next)
     me->mem_work = 0;
   for (i = 0; i < MAX_MEM; i++)
@@ -160,37 +147,38 @@ void debug_mem_to_dcc(int idx)
     if (p)
       *p = 0;
     l = memtbl[i].size;
-    if (!strcasecmp(fn, "language.c"))
+    if (!strcmp(fn, "language.c"))
       use[0] += l;
-    else if (!strcasecmp(fn, "chanprog.c"))
+    else if (!strcmp(fn, "chanprog.c"))
       use[1] += l;
-    else if (!strcasecmp(fn, "misc.c"))
+    else if (!strcmp(fn, "misc.c"))
       use[2] += l;
-    else if (!strcasecmp(fn, "userrec.c"))
+    else if (!strcmp(fn, "userrec.c"))
       use[3] += l;
-    else if (!strcasecmp(fn, "net.c"))
+    else if (!strcmp(fn, "net.c"))
       use[4] += l;
-    else if (!strcasecmp(fn, "dccutil.c"))
+    else if (!strcmp(fn, "dccutil.c"))
       use[5] += l;
-    else if (!strcasecmp(fn, "botnet.c"))
+    else if (!strcmp(fn, "botnet.c"))
       use[6] += l;
-    else if (!strcasecmp(fn, "tcl.c"))
+    else if (!strcmp(fn, "tcl.c"))
       use[7] += l;
-    else if (!strcasecmp(fn, "tclhash.c"))
+    else if (!strcmp(fn, "tclhash.c"))
       use[8] += l;
-    else if (!strcasecmp(fn, "modules.c"))
+    else if (!strcmp(fn, "tclmisc.c"))
       use[9] += l;
-    else if (!strcasecmp(fn, "tcldcc.c"))
+    else if (!strcmp(fn, "modules.c"))
       use[10] += l;
+    else if (!strcmp(fn, "tcldcc.c"))
+      use[11] += l;
+    else if (!strcmp(fn, "dns.c"))
+      use[12] += l;
     else if (p) {
       for (me = module_list; me; me = me->next)
 	if (!strcmp(fn, me->name))
 	  me->mem_work += l;
-    } else {
+    } else
       dprintf(idx, "Not logging file %s!\n", fn);
-    }
-    if (p)
-      *p = ':';
   }
   for (i = 0; i < MAX_MEM; i++) {
     switch (i) {
@@ -222,10 +210,16 @@ void debug_mem_to_dcc(int idx)
       strcpy(fn, "tclhash.c");
       break;
     case 9:
-      strcpy(fn, "modules.c");
+      strcpy(fn, "tclmisc.c");
       break;
     case 10:
+      strcpy(fn, "modules.c");
+      break;
+    case 11:
       strcpy(fn, "tcldcc.c");
+      break;
+    case 12:
+      strcpy(fn, "dns.c");
       break;
     }
     if (use[i] == exp[i]) {
@@ -238,7 +232,7 @@ void debug_mem_to_dcc(int idx)
       for (j = 0; j < lastused; j++) {
 	if ((p = strchr(memtbl[j].file, ':')))
 	  *p = 0;
-	if (!strcasecmp(memtbl[j].file, fn)) {
+	if (!egg_strcasecmp(memtbl[j].file, fn)) {
 	  if (p)
 	    sprintf(&sofar[strlen(sofar)], "%-10s/%-4d:(%04d) ",
 		    p + 1, memtbl[j].line, memtbl[j].size);
@@ -278,7 +272,7 @@ void debug_mem_to_dcc(int idx)
 	strcpy(fn, memtbl[j].file);
 	if ((p = strchr(fn, ':')) != NULL) {
 	  *p = 0;
-	  if (!strcasecmp(fn, me->name)) {
+	  if (!egg_strcasecmp(fn, me->name)) {
 	    sprintf(&sofar[strlen(sofar)], "%-10s/%-4d:(%04X) ", p + 1,
 		    memtbl[j].line, memtbl[j].size);
 	    if (strlen(sofar) > 60) {
@@ -303,11 +297,12 @@ void debug_mem_to_dcc(int idx)
   tell_netdebug(idx);
 }
 
-void *n_malloc(int size, char *file, int line)
+void *n_malloc(int size, const char *file, int line)
 {
-  void *x;
+  void	*x;
 #ifdef DEBUG_MEM
-  int i = 0;
+  int	 i = 0;
+  char	*p;
 #endif
 
   x = (void *) malloc(size);
@@ -319,13 +314,14 @@ void *n_malloc(int size, char *file, int line)
 #ifdef DEBUG_MEM
   if (lastused == MEMTBLSIZE) {
     putlog(LOG_MISC, "*", "*** MEMORY TABLE FULL: %s (%d)", file, line);
-    return x;
+    fatal("Memory table full", 0);
   }
   i = lastused;
   memtbl[i].ptr = x;
   memtbl[i].line = line;
   memtbl[i].size = size;
-  strncpy(memtbl[i].file, file, 19);
+  p = strrchr(file, '/');
+  strncpy(memtbl[i].file, p ? p + 1 : file, 19);
   memtbl[i].file[19] = 0;
   memused += size;
   lastused++;
@@ -333,10 +329,13 @@ void *n_malloc(int size, char *file, int line)
   return x;
 }
 
-void *n_realloc(void *ptr, int size, char *file, int line)
+void *n_realloc(void *ptr, int size, const char *file, int line)
 {
   void *x;
   int i = 0;
+#ifdef DEBUG_MEM
+  char *p;
+#endif
 
   /* ptr == NULL is valid. Avoiding duplicate code further down */
   if (!ptr)
@@ -359,14 +358,15 @@ void *n_realloc(void *ptr, int size, char *file, int line)
   memtbl[i].ptr = x;
   memtbl[i].line = line;
   memtbl[i].size = size;
-  strncpy(memtbl[i].file, file, 19);
+  p = strrchr(file, '/');
+  strncpy(memtbl[i].file, p ? p + 1 : file, 19);
   memtbl[i].file[19] = 0;
   memused += size;
 #endif
   return x;
 }
 
-void n_free(void *ptr, char *file, int line)
+void n_free(void *ptr, const char *file, int line)
 {
   int i = 0;
 
@@ -377,7 +377,7 @@ void n_free(void *ptr, char *file, int line)
     return;
   }
 #ifdef DEBUG_MEM
-  /* give tcl builtins an escape mechanism */
+  /* Give tcl builtins an escape mechanism */
   if (line) {
     for (i = 0; (i < lastused) && (memtbl[i].ptr != ptr); i++);
     if (i == lastused) {

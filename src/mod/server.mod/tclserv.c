@@ -1,22 +1,22 @@
-/* 
+/*
  * tclserv.c -- part of server.mod
- * 
- * $Id: tclserv.c,v 1.4 2000/01/08 21:23:17 per Exp $
+ *
+ * $Id: tclserv.c,v 1.11 2002/01/02 03:46:40 guppy Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -36,8 +36,13 @@ static int tcl_putquick STDVAR
 {
   char s[511], *p;
 
-  Context;
-  BADARGS(2, 2, " text");
+  BADARGS(2, 3, " text ?options?");
+  if ((argc == 3) &&
+      egg_strcasecmp(argv[2], "-next") && egg_strcasecmp(argv[2], "-normal")) {
+      Tcl_AppendResult(irp, "unknown putquick option: should be one of: ",
+		       "-normal -next", NULL);
+    return TCL_ERROR;
+  }
   strncpy(s, argv[1], 510);
   s[510] = 0;
   p = strchr(s, '\n');
@@ -46,7 +51,10 @@ static int tcl_putquick STDVAR
    p = strchr(s, '\r');
   if (p != NULL)
     *p = 0;
-  dprintf(DP_MODE, "%s\n", s);
+  if (argc == 3 && !egg_strcasecmp(argv[2], "-next"))
+    dprintf(DP_MODE_NEXT, "%s\n", s);
+  else
+    dprintf(DP_MODE, "%s\n", s);
   return TCL_OK;
 }
 
@@ -54,8 +62,13 @@ static int tcl_putserv STDVAR
 {
   char s[511], *p;
 
-  Context;
-  BADARGS(2, 2, " text");
+  BADARGS(2, 3, " text ?options?");
+  if ((argc == 3) &&
+    egg_strcasecmp(argv[2], "-next") && egg_strcasecmp(argv[2], "-normal")) {
+    Tcl_AppendResult(irp, "unknown putserv option: should be one of: ",
+		     "-normal -next", NULL);
+    return TCL_ERROR;
+  }
   strncpy(s, argv[1], 510);
   s[510] = 0;
   p = strchr(s, '\n');
@@ -64,7 +77,10 @@ static int tcl_putserv STDVAR
    p = strchr(s, '\r');
   if (p != NULL)
     *p = 0;
-  dprintf(DP_SERVER, "%s\n", s);
+  if (argc == 3 && !egg_strcasecmp(argv[2], "-next"))
+    dprintf(DP_SERVER_NEXT, "%s\n", s);
+  else
+    dprintf(DP_SERVER, "%s\n", s);
   return TCL_OK;
 }
 
@@ -72,8 +88,13 @@ static int tcl_puthelp STDVAR
 {
   char s[511], *p;
 
-  Context;
-  BADARGS(2, 2, " text");
+  BADARGS(2, 3, " text ?options?");
+  if ((argc == 3) &&
+    egg_strcasecmp(argv[2], "-next") && egg_strcasecmp(argv[2], "-normal")) {
+    Tcl_AppendResult(irp, "unknown puthelp option: should be one of: ",
+		     "-normal -next", NULL);
+    return TCL_ERROR;
+  }
   strncpy(s, argv[1], 510);
   s[510] = 0;
   p = strchr(s, '\n');
@@ -82,7 +103,10 @@ static int tcl_puthelp STDVAR
    p = strchr(s, '\r');
   if (p != NULL)
     *p = 0;
-  dprintf(DP_HELP, "%s\n", s);
+  if (argc == 3 && !egg_strcasecmp(argv[2], "-next"))
+    dprintf(DP_HELP_NEXT, "%s\n", s);
+  else
+    dprintf(DP_HELP, "%s\n", s);
   return TCL_OK;
 }
 
@@ -90,13 +114,13 @@ static int tcl_jump STDVAR
 {
   BADARGS(1, 4, " ?server? ?port? ?pass?");
   if (argc >= 2) {
-    strcpy(newserver, argv[1]);
+    strncpyz(newserver, argv[1], sizeof newserver);
     if (argc >= 3)
       newserverport = atoi(argv[2]);
     else
       newserverport = default_port;
     if (argc == 4)
-      strcpy(newserverpass, argv[3]);
+      strncpyz(newserverpass, argv[3], sizeof newserverpass);
   }
   cycle_time = 0;
   nuke_server("changing servers\n");
@@ -113,26 +137,20 @@ static int tcl_clearqueue STDVAR
   BADARGS(2,2, " queue");
   if (!strcmp(argv[1],"all")) {
     msgs = (int) (modeq.tot + mq.tot + hq.tot);
-    q = modeq.head;
-    while (q) {
+    for (q = modeq.head; q; q = qq) { 
       qq = q->next;
       nfree(q->msg);
       nfree(q);
-      q = qq;
     }
-    q = mq.head;
-    while (q) {
+    for (q = mq.head; q; q = qq) {
       qq = q->next;
       nfree(q->msg);
       nfree(q);
-      q = qq;
     }
-    q = hq.head;
-    while (q) {
+    for (q = hq.head; q; q = qq) {
       qq = q->next;
       nfree(q->msg);
       nfree(q);
-      q = qq;
     }
     modeq.tot = mq.tot = hq.tot = modeq.warned = mq.warned = hq.warned = 0;
     mq.head = hq.head = modeq.head = mq.last = hq.last = modeq.last = 0;
@@ -143,12 +161,10 @@ static int tcl_clearqueue STDVAR
     return TCL_OK;
   } else if (!strncmp(argv[1],"serv", 4)) {
     msgs = mq.tot;
-    q = mq.head;
-    while (q) {
+    for (q = mq.head; q; q = qq) {
       qq = q->next;
       nfree(q->msg);
       nfree(q);
-      q = qq;
     }
     mq.tot = mq.warned = 0;
     mq.head = mq.last = 0;
@@ -162,12 +178,10 @@ static int tcl_clearqueue STDVAR
     return TCL_OK;
   } else if (!strcmp(argv[1],"mode")) {
     msgs = modeq.tot;
-    q = modeq.head;
-    while (q) {
+    for (q = modeq.head; q; q = qq) { 
       qq = q->next;
       nfree(q->msg);
       nfree(q);
-      q = qq;
     }
     if (mq.tot == 0)
       burst = 0;
@@ -179,12 +193,10 @@ static int tcl_clearqueue STDVAR
     return TCL_OK;
   } else if (!strcmp(argv[1],"help")) {
     msgs = hq.tot;
-    q = hq.head;
-    while (q) {
+    for (q = hq.head; q; q = qq) {
       qq = q->next;
       nfree(q->msg);
       nfree(q);
-      q = qq;
     }
     double_warned = 0;
     hq.tot = hq.warned = 0;
@@ -231,12 +243,12 @@ static int tcl_queuesize STDVAR
 
 static tcl_cmds my_tcl_cmds[] =
 {
-  {"jump", tcl_jump},
-  {"isbotnick", tcl_isbotnick},
-  {"clearqueue", tcl_clearqueue},
-  {"queuesize", tcl_queuesize},
-  {"puthelp", tcl_puthelp},
-  {"putserv", tcl_putserv},
-  {"putquick", tcl_putquick},
-  {0, 0},
+  {"jump",		tcl_jump},
+  {"isbotnick",		tcl_isbotnick},
+  {"clearqueue",	tcl_clearqueue},
+  {"queuesize",		tcl_queuesize},
+  {"puthelp",		tcl_puthelp},
+  {"putserv",		tcl_putserv},
+  {"putquick",		tcl_putquick},
+  {NULL,		NULL},
 };

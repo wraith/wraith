@@ -1,8 +1,11 @@
+#ifndef _EGG_CONFIG_H
+#define _EGG_CONFIG_H
+@TOP@
 /* 
  * acconfig.h
  *   template file autoheader uses when building config.h.in
  * 
- * $Id: acconfig.h,v 1.5 2000/01/08 22:38:19 per Exp $
+ * $Id: acconfig.h,v 1.10 2001/11/11 20:24:44 guppy Exp $
  */
 
 /* Define if modules will work on your system  */
@@ -29,6 +32,9 @@
 /* Define if running under cygwin  */
 #undef CYGWIN_HACKS
 
+/* Define if you have a version of libsafe with a broken sscanf */
+#undef LIBSAFE_HACKS
+
 /* Define if we need dlopen (for module support)  */
 #undef HAVE_DLOPEN
 
@@ -41,5 +47,12 @@
 /* Define for Tcl that has threads  */
 #undef HAVE_TCL_THREADS
 
-/* Defines the current eggdrop version */
+/* Defines the current eggdrop version  */
 #undef EGG_VERSION
+
+/* Defines extension of eggdrop modules  */
+#undef EGG_MOD_EXT
+
+@BOTTOM@
+
+#endif /* !_EGG_CONFIG_H */

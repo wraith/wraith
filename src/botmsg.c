@@ -1,26 +1,26 @@
-/* 
+/*
  * botmsg.c -- handles:
  *   formatting of messages to be sent on the botnet
  *   sending differnet messages to different versioned bots
- * 
+ *
  * by Darrin Smith (beldin@light.iinet.net.au)
- * 
- * $Id: botmsg.c,v 1.13 2000/01/08 21:23:13 per Exp $
+ *
+ * $Id: botmsg.c,v 1.25 2002/01/02 03:46:35 guppy Exp $
  */
-/* 
- * Copyright (C) 1997  Robey Pointer
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1997 Robey Pointer
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -29,42 +29,42 @@
 #include "main.h"
 #include "tandem.h"
 
-extern struct dcc_t *dcc;
-extern int dcc_total, tands;
-extern char botnetnick[];
-extern party_t *party;
-extern Tcl_Interp *interp;
-extern struct userrec *userlist;
+extern struct dcc_t	*dcc;
+extern int		 dcc_total, tands;
+extern char		 botnetnick[];
+extern party_t		*party;
+extern Tcl_Interp	*interp;
+extern struct userrec	*userlist;
 
-static char OBUF[1024];
+static char	OBUF[1024];
+
 
 #ifndef NO_OLD_BOTNET
-/* ditto for tandem bots */
+/* Ditto for tandem bots
+ */
 void tandout_but EGG_VARARGS_DEF(int, arg1)
 {
-  int i, x, l;
+  int i, x, len;
   char *format;
   char s[601];
-
   va_list va;
+
   x = EGG_VARARGS_START(int, arg1, va);
   format = va_arg(va, char *);
-
-#ifdef HAVE_VSNPRINTF
-  if ((l = vsnprintf(s, 511, format, va)) < 0)
-    s[l = 511] = 0;
-#else
-  l = vsprintf(s, format, va);
-#endif
+  egg_vsnprintf(s, 511, format, va);
   va_end(va);
+  s[sizeof(s)-1] = 0;
+
+  len = strlen(s);
+
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_BOT) && (i != x) &&
-	(b_numver(i) < NEAT_BOTNET))
-      tputs(dcc[i].sock, s, l);
+        (b_numver(i) < NEAT_BOTNET))
+      tputs(dcc[i].sock, s, len);
 }
 #endif
 
-/* thank you ircu :) */
+/* Thank you ircu :) */
 static char tobase64array[64] =
 {
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -142,33 +142,29 @@ int simple_sprintf EGG_VARARGS_DEF(char *,arg1)
 {
   char *buf, *format, *s;
   int c = 0, i;
-
   va_list va;
+
   buf = EGG_VARARGS_START(char *, arg1, va);
   format = va_arg(va, char *);
 
-  while (*format && (c < 1023)) {
+  while (*format && c < 1023) {
     if (*format == '%') {
       format++;
       switch (*format) {
       case 's':
 	s = va_arg(va, char *);
-
 	break;
       case 'd':
       case 'i':
 	i = va_arg(va, int);
-
 	s = int_to_base10(i);
 	break;
       case 'D':
 	i = va_arg(va, int);
-
 	s = int_to_base64((unsigned int) i);
 	break;
       case 'u':
 	i = va_arg(va, unsigned int);
-
         s = unsigned_int_to_base10(i);
 	break;
       case '%':
@@ -176,15 +172,14 @@ int simple_sprintf EGG_VARARGS_DEF(char *,arg1)
 	continue;
       case 'c':
 	buf[c++] = (char) va_arg(va, int);
-
 	format++;
 	continue;
       default:
 	continue;
       }
       if (s)
-      while (*s && (c < 1023))
-        buf[c++] = *s++;
+	while (*s && c < 1023)
+	  buf[c++] = *s++;
       format++;
     } else
       buf[c++] = *format++;
@@ -194,7 +189,8 @@ int simple_sprintf EGG_VARARGS_DEF(char *,arg1)
   return c;
 }
 
-/* ditto for tandem bots */
+/* Ditto for tandem bots
+ */
 void send_tand_but(int x, char *buf, int len)
 {
   int i, iso = 0;
@@ -296,21 +292,17 @@ void botnet_send_priv EGG_VARARGS_DEF(int, arg1)
   int idx, l;
   char *from, *to, *tobot, *format;
   char tbuf[1024];
-
   va_list va;
+
   idx = EGG_VARARGS_START(int, arg1, va);
   from = va_arg(va, char *);
   to = va_arg(va, char *);
   tobot = va_arg(va, char *);
   format = va_arg(va, char *);
-
-#ifdef HAVE_VSNPRINTF
-  if (vsnprintf(tbuf, 450, format, va) < 0)
-    tbuf[450] = 0;
-#else
-  vsprintf(tbuf, format, va);
-#endif
+  egg_vsnprintf(tbuf, 450, format, va);
   va_end(va);
+  tbuf[sizeof(tbuf)-1] = 0;
+
   if (tobot) {
 #ifndef NO_OLD_BOTNET
     if (b_numver(idx) < NEAT_BOTNET)
@@ -382,8 +374,6 @@ void botnet_send_link(int idx, char *who, char *via, char *bot)
 void botnet_send_unlinked(int idx, char *bot, char *args)
 {
   int l;
-
-  Context;
 
   if (tands > 0) {
     l = simple_sprintf(OBUF, "un %s %s\n", bot, args ? args : "");
@@ -562,7 +552,6 @@ void botnet_send_idle(int idx, char *bot, int sock, int idle, char *away)
 {
   int l;
 
-  Context;
   if (tands > 0) {
     l = simple_sprintf(OBUF, "i %s %D %D %s\n", bot, sock, idle,
 		       away ? away : "");
@@ -651,19 +640,18 @@ void botnet_send_join_party(int idx, int linking, int useridx, int oldchan)
 {
   int l;
 
-  Context;
   if (tands > 0) {
     l = simple_sprintf(OBUF, "j %s%s %s %D %c%D %s\n", linking ? "!" : "",
 		       party[useridx].bot, party[useridx].nick,
 		       party[useridx].chan, party[useridx].flag,
 		       party[useridx].sock,
-		       safe_str(party[useridx].from));
+		       party[useridx].from ? party[useridx].from : "");
     send_tand_but(idx, OBUF, -l);
 #ifndef NO_OLD_BOTNET
     tandout_but(idx, "join %s %s %d %c%d %s\n", party[useridx].bot,
 		party[useridx].nick, party[useridx].chan,
 		party[useridx].flag, party[useridx].sock,
-		safe_str(party[useridx].from));
+		party[useridx].from ? party[useridx].from : "");
     if ((idx < 0) || (!linking && (b_numver(idx) >= NEAT_BOTNET))) {
       tandout_but(idx, "chan %s %d %s %s %s.\n",
 		  party[useridx].bot, party[useridx].chan,
@@ -761,7 +749,7 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
     tandout_but(butidx, "join %s %s %d %c%d %s\n", party[useridx].bot,
 		party[useridx].nick, party[useridx].chan,
 		party[useridx].flag, party[useridx].sock,
-		safe_str(party[useridx].from));
+		party[useridx].from ? party[useridx].from : "");
     tandout_but(butidx, "chan %s %d %s : %s -> %s.\n",
 		party[useridx].bot, party[useridx].chan,
 		NET_NICKCHANGE,
@@ -770,8 +758,9 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
   }
 }
 
-/* this part of add_note is more relevant to the botnet than
- * to the notes file */
+/* This part of add_note is more relevant to the botnet than
+ * to the notes file
+ */
 int add_note(char *to, char *from, char *msg, int idx, int echo)
 {
   int status, i, iaway, sock;
@@ -779,20 +768,20 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
   struct userrec *u;
 
   if (strlen(msg) > 450)
-    msg[450] = 0;		/* notes have a limit */
+    msg[450] = 0;		/* Notes have a limit */
   /* note length + PRIVMSG header + nickname + date  must be <512  */
   p = strchr(to, '@');
-  if (p != NULL) {		/* cross-bot note */
-    char x[20];
+  if (p != NULL) {		/* Cross-bot note */
+    char x[21];
 
     *p = 0;
     strncpy(x, to, 20);
     x[20] = 0;
     *p = '@';
     p++;
-    if (!strcasecmp(p, botnetnick))	/* to me?? */
-      return add_note(x, from, msg, idx, echo); /* start over, dimwit. */
-    if (strcasecmp(from, botnetnick)) {
+    if (!egg_strcasecmp(p, botnetnick))	/* To me?? */
+      return add_note(x, from, msg, idx, echo); /* Start over, dimwit. */
+    if (egg_strcasecmp(from, botnetnick)) {
       if (strlen(from) > 40)
 	from[40] = 0;
       if (strchr(from, '@')) {
@@ -814,9 +803,9 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
       botnet_send_priv(i, ssf, x, p, "%s", msg);
     } else
       botnet_send_priv(i, botf, x, p, "%s", msg);
-    return NOTE_OK;		/* forwarded to the right bot */
+    return NOTE_OK;		/* Forwarded to the right bot */
   }
-  /* might be form "sock:nick" */
+  /* Might be form "sock:nick" */
   splitc(ssf, from, ':');
   rmspace(ssf);
   splitc(ss, to, ':');
@@ -825,8 +814,8 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     sock = (-1);
   else
     sock = atoi(ss);
-  /* don't process if there's a note binding for it */
-  if (idx != (-2)) {		/* notes from bots don't trigger it */
+  /* Don't process if there's a note binding for it */
+  if (idx != (-2)) {		/* Notes from bots don't trigger it */
     if (check_tcl_note(from, to, msg)) {
       if ((idx >= 0) && (echo))
 	dprintf(idx, "-> %s: %s\n", to, msg);
@@ -850,17 +839,17 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
   }
   status = NOTE_STORED;
   iaway = 0;
-  /* online right now? */
+  /* Online right now? */
   for (i = 0; i < dcc_total; i++) {
     if ((dcc[i].type->flags & DCT_GETNOTES) &&
 	((sock == (-1)) || (sock == dcc[i].sock)) &&
-	(!strcasecmp(dcc[i].nick, to))) {
+	(!egg_strcasecmp(dcc[i].nick, to))) {
       int aok = 1;
 
       if (dcc[i].type == &DCC_CHAT)
 	if ((dcc[i].u.chat->away != NULL) &&
 	    (idx != (-2))) {
-	  /* only check away if it's not from a bot */
+	  /* Only check away if it's not from a bot */
 	  aok = 0;
 	  if (idx >= 0)
 	    dprintf(idx, "%s %s: %s\n", dcc[i].nick, BOT_USERAWAY,
@@ -881,7 +870,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
 	  else if (*from == '@')
 	    fr = p + 1;
 	}
-	if ((idx == (-2)) || (!strcasecmp(from, botnetnick)))
+	if (idx == -2 || (!egg_strcasecmp(from, botnetnick)))
 	  dprintf(i, "*** [%s] %s%s\n", fr, l ? work : "", msg);
 	else
 	  dprintf(i, "%cNote [%s]: %s%s\n", 7, fr, l ? work : "", msg);
@@ -892,22 +881,20 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     }
   }
   if (idx == (-2))
-    return NOTE_OK;		/* error msg from a tandembot: don't store */
-/* call store note here */
+    return NOTE_OK;		/* Error msg from a tandembot: don't store */
+  /* Call store note here */
   Tcl_SetVar(interp, "_from", from, 0);
   Tcl_SetVar(interp, "_to", to, 0);
   Tcl_SetVar(interp, "_data", msg, 0);
   simple_sprintf(ss, "%d", dcc[idx].sock);
   Tcl_SetVar(interp, "_idx", ss, 0);
   if (Tcl_VarEval(interp, "storenote", " $_from $_to $_data $_idx", NULL) == TCL_OK) {
-    if (interp->result && interp->result[0]) {
-      /* strncpy(to, interp->result, NOTENAMELEN);
-      to[NOTENAMELEN] = 0; */ /* notebug fixed ;) -- drummer 29May1999 */
+    if (interp->result && interp->result[0])
       status = NOTE_FWD;
-    }
     if (status == NOTE_AWAY) {
-      /* user is away in all sessions -- just notify the user that a
-       * message arrived and was stored. (only oldest session is notified.) */
+      /* User is away in all sessions -- just notify the user that a
+       * message arrived and was stored. (only oldest session is notified.)
+       */
       dprintf(iaway, "*** %s.\n", BOT_NOTEARRIVED);
     }
     return status;

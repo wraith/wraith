@@ -1,23 +1,23 @@
-/* 
+/*
  * console.c -- part of console.mod
  *   saved console settings based on console.tcl
  *   by cmwagner/billyjoe/D. Senso
- * 
- * $Id: console.c,v 1.15 2000/01/08 21:23:15 per Exp $
+ *
+ * $Id: console.c,v 1.25 2002/06/06 18:52:23 wcc Exp $
  */
-/* 
- * Copyright (C) 1999, 2000  Eggheads
- * 
+/*
+ * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -25,8 +25,9 @@
 
 #define MODULE_NAME "console"
 #define MAKING_CONSOLE
-#include "../module.h"
+#include "src/mod/module.h"
 #include <stdlib.h>
+#include "console.h"
 
 static Function *global = NULL;
 static int console_autosave = 0;
@@ -42,14 +43,14 @@ struct console_info {
   int conchan;
 };
 
+static struct user_entry_type USERENTRY_CONSOLE;
+
+
 static int console_unpack(struct userrec *u, struct user_entry *e)
 {
   struct console_info *ci = user_malloc(sizeof(struct console_info));
   char *par, *arg;
 
-  Context;
-  Assert(e);
-  Assert(e->name);
   par = e->u.list->extra;
   arg = newsplit(&par);
   ci->channel = user_malloc(strlen(arg) + 1);
@@ -75,10 +76,6 @@ static int console_pack(struct userrec *u, struct user_entry *e)
   struct console_info *ci;
   int l;
 
-  Assert(e);
-  Assert(e->u.extra);
-  Assert(!e->name);
-
   ci = (struct console_info *) e->u.extra;
 
   l = simple_sprintf(work, "%s %s %s %d %d %d",
@@ -100,18 +97,17 @@ static int console_kill(struct user_entry *e)
 {
   struct console_info *i = e->u.extra;
 
-  Context;
   nfree(i->channel);
   nfree(i);
   nfree(e);
   return 1;
 }
 
-static int console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
+static int console_write_userfile(FILE *f, struct userrec *u,
+				  struct user_entry *e)
 {
   struct console_info *i = e->u.extra;
 
-  Context;
   if (fprintf(f, "--CONSOLE %s %s %s %d %d %d\n",
 	      i->channel, masktype(i->conflags),
 	      stripmasktype(i->stripflags), i->echoflags,
@@ -129,20 +125,17 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
 
   if (ci != buf) {
     if (ci) {
-      Assert(ci->channel);
       nfree(ci->channel);
       nfree(ci);
     }
-    Context;
-
     ci = e->u.extra = buf;
   }
 
-  /* donut share console info */
+  /* Note: Do not share console info */
   return 1;
 }
 
-static int console_tcl_get(Tcl_Interp * irp, struct userrec *u,
+static int console_tcl_get(Tcl_Interp *irp, struct userrec *u,
 			   struct user_entry *e, int argc, char **argv)
 {
   char work[1024];
@@ -156,7 +149,7 @@ static int console_tcl_get(Tcl_Interp * irp, struct userrec *u,
   return TCL_OK;
 }
 
-int console_tcl_set(Tcl_Interp * irp, struct userrec *u,
+static int console_tcl_set(Tcl_Interp *irp, struct userrec *u,
 		    struct user_entry *e, int argc, char **argv)
 {
   struct console_info *i = e->u.extra;
@@ -165,7 +158,7 @@ int console_tcl_set(Tcl_Interp * irp, struct userrec *u,
   BADARGS(4, 9, " handle CONSOLE channel flags strip echo page conchan");
   if (!i) {
     i = user_malloc(sizeof(struct console_info));
-    bzero(i, sizeof(struct console_info));
+    egg_bzero(i, sizeof(struct console_info));
   }
   if (i->channel)
     nfree(i->channel);
@@ -189,30 +182,31 @@ int console_tcl_set(Tcl_Interp * irp, struct userrec *u,
       }
     }
   }
+  set_user(&USERENTRY_CONSOLE, u, i);
   return TCL_OK;
 }
 
-int console_expmem(struct user_entry *e)
+static int console_expmem(struct user_entry *e)
 {
   struct console_info *i = e->u.extra;
 
-  Context;
   return sizeof(struct console_info) + strlen(i->channel) + 1;
 }
 
-void console_display(int idx, struct user_entry *e)
+static void console_display(int idx, struct user_entry *e)
 {
   struct console_info *i = e->u.extra;
 
-  Context;
   if (dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
-    dprintf(idx, "  Saved Console Settings:\n");
-    dprintf(idx, "    Channel: %s\n", i->channel);
-    dprintf(idx, "    Console flags: %s, Strip flags: %s, Echo: %s\n",
-	    masktype(i->conflags), stripmasktype(i->stripflags),
-	    i->echoflags ? "yes" : "no");
-    dprintf(idx, "    Page setting: %d, Console channel: %s%d\n",
-	    i->page, (i->conchan < 100000) ? "" : "*", i->conchan % 100000);
+    dprintf(idx, "  %s\n", CONSOLE_SAVED_SETTINGS);
+    dprintf(idx, "    %s %s\n", CONSOLE_CHANNEL, i->channel);
+    dprintf(idx, "    %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,
+    	masktype(i->conflags), CONSOLE_STRIPFLAGS,
+	    stripmasktype(i->stripflags), CONSOLE_ECHO,
+	    i->echoflags ? CONSOLE_YES : CONSOLE_NO);
+    dprintf(idx, "    %s %d, %s %s%d\n", CONSOLE_PAGE_SETTING, i->page,
+            CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*",
+            i->conchan % GLOBAL_CHANS);
   }
 }
 
@@ -231,14 +225,14 @@ static int console_dupuser(struct userrec *new, struct userrec *old,
 
 static struct user_entry_type USERENTRY_CONSOLE =
 {
-  0,				/* always 0 ;) */
-  0,
+  NULL,				/* always 0 ;) */
+  NULL,
   console_dupuser,
   console_unpack,
   console_pack,
   console_write_userfile,
   console_kill,
-  0,
+  NULL,
   console_set,
   console_tcl_get,
   console_tcl_set,
@@ -282,6 +276,7 @@ static int console_chon(char *handle, int idx)
       if (p) {
 	if (dcc[idx].u.chat->channel >= 0) {
 	    char x[1024];
+
 	    chanout_but(-1, dcc[idx].u.chat->channel,
 			"*** [%s] %s\n", dcc[idx].nick, p);
 	    simple_sprintf(x, "[%s] %s", dcc[idx].nick, p);
@@ -300,7 +295,7 @@ static int console_store(struct userrec *u, int idx, char *par)
 
   if (!i) {
     i = user_malloc(sizeof(struct console_info));
-    bzero(i, sizeof(struct console_info));
+    egg_bzero(i, sizeof(struct console_info));
   }
   if (i->channel)
     nfree(i->channel);
@@ -315,13 +310,14 @@ static int console_store(struct userrec *u, int idx, char *par)
     i->page = 0;
   i->conchan = dcc[idx].u.chat->channel;
   if (par) {
-    dprintf(idx, "Saved Console your Settings:\n");
-    dprintf(idx, "  Channel: %s\n", i->channel);
-    dprintf(idx, "  Console flags: %s, Strip flags: %s, Echo: %s\n",
-	    masktype(i->conflags), stripmasktype(i->stripflags),
-	    i->echoflags ? "yes" : "no");
-    dprintf(idx, "  Page setting: %d, Console channel: %d\n",
-	    i->page, i->conchan);
+    dprintf(idx, "%s\n", CONSOLE_SAVED_SETTINGS2);
+    dprintf(idx, "  %s %s\n", CONSOLE_CHANNEL, i->channel);
+    dprintf(idx, "  %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,
+	    masktype(i->conflags), CONSOLE_STRIPFLAGS,
+	    stripmasktype(i->stripflags), CONSOLE_ECHO,
+	    i->echoflags ? CONSOLE_YES : CONSOLE_NO);
+    dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page,
+            CONSOLE_CHANNEL2, i->conchan);
   }
   set_user(&USERENTRY_CONSOLE, u, i);
   return 0;
@@ -337,44 +333,44 @@ static int console_dostore(int idx)
 
 static tcl_ints myints[] =
 {
-  {"console-autosave", &console_autosave, 0},
-  {"force-channel", &force_channel, 0},
-  {"info-party", &info_party, 0},
-  {0, 0, 0}
+  {"console-autosave",	&console_autosave,	0},
+  {"force-channel",	&force_channel,		0},
+  {"info-party",	&info_party,		0},
+  {NULL,		NULL,			0}
 };
 
 static cmd_t mychon[] =
 {
-  {"*", "", console_chon, "console:chon"},
-  {0, 0, 0, 0}
+  {"*",		"",	console_chon,		"console:chon"},
+  {NULL,	NULL,	NULL,			NULL}
 };
 
 static cmd_t mydcc[] =
 {
-  {"store", "", console_store, NULL},
-  {0, 0, 0, 0}
+  {"store",	"",	console_store,		NULL},
+  {NULL,	NULL,	NULL,			NULL}
 };
 
 static char *console_close()
 {
-  Context;
   rem_builtins(H_chon, mychon);
   rem_builtins(H_dcc, mydcc);
   rem_tcl_ints(myints);
   rem_help_reference("console.help");
   del_entry_type(&USERENTRY_CONSOLE);
+  del_lang_section("console");
   module_undepend(MODULE_NAME);
   return NULL;
 }
 
-char *console_start();
+EXPORT_SCOPE char *console_start();
 
 static Function console_table[] =
 {
   (Function) console_start,
   (Function) console_close,
-  (Function) 0,
-  (Function) 0,
+  (Function) NULL,
+  (Function) NULL,
   (Function) console_dostore,
 };
 
@@ -382,15 +378,17 @@ char *console_start(Function * global_funcs)
 {
   global = global_funcs;
 
-  Context;
   module_register(MODULE_NAME, console_table, 1, 1);
-  if (!module_depend(MODULE_NAME, "eggdrop", 104, 0))
-    return "This module requires eggdrop1.4.0 or later";
+  if (!module_depend(MODULE_NAME, "eggdrop", 106, 0)) {
+    module_undepend(MODULE_NAME);
+    return "This module requires Eggdrop 1.6.0 or later.";
+  }
   add_builtins(H_chon, mychon);
   add_builtins(H_dcc, mydcc);
   add_tcl_ints(myints);
   add_help_reference("console.help");
   USERENTRY_CONSOLE.get = def_get;
   add_entry_type(&USERENTRY_CONSOLE);
+  add_lang_section("console");
   return NULL;
 }
