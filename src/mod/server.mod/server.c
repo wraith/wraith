@@ -1407,12 +1407,12 @@ void server_postrehash()
     strcpy(botname, oldnick);
 }
 
-static void server_die()
+void server_die()
 {
   cycle_time = 100;
   if (server_online) {
     dprintf(-serv, "QUIT :%s\n", quit_msg[0] ? quit_msg : "");
-    sleep(3); /* Give the server time to understand */
+    sleep(2); /* Give the server time to understand */
   }
   nuke_server(NULL);
 }
@@ -1553,7 +1553,6 @@ void server_init()
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
   add_hook(HOOK_PRE_REHASH, (Function) server_prerehash);
-  add_hook(HOOK_DIE, (Function) server_die);
   mq.head = hq.head = modeq.head = NULL;
   mq.last = hq.last = modeq.last = NULL;
   mq.tot = hq.tot = modeq.tot = 0;

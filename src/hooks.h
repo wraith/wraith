@@ -8,9 +8,8 @@
 #define HOOK_PRE_REHASH           3
 #define HOOK_IDLE                 4
 #define HOOK_BACKUP               5
-#define HOOK_DIE                  6
-#define HOOK_DAILY                7
-#define REAL_HOOKS                8
+#define HOOK_DAILY                8
+#define REAL_HOOKS                9
 
 #define HOOK_RFC_CASECMP        111
 

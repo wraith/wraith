@@ -677,7 +677,9 @@ void kill_bot(char *s1, char *s2)
 #ifdef HUB
   write_userfile(-1);
 #endif /* HUB */
-  call_hook(HOOK_DIE);
+#ifdef LEAF
+  server_die();
+#endif /* LEAF */
   chatout("*** %s\n", s1);
   botnet_send_chat(-1, conf.bot->nick, s1);
   botnet_send_bye();
