@@ -5,6 +5,7 @@ This is a summary of ChangeLog basically.
 2.cmd_botversion and cmd_netversion are now HUB only.
 3.Bots will now email owners once a day if their uname() output changes.
 4.Fixed a segfault in cmd_botcmd.
+5.msg_op now shows OP before STATS log.
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.

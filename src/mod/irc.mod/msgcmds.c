@@ -68,10 +68,11 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
         if (chan && channel_active(chan)) {
           get_user_flagrec(u, &fr, par);
           if (chk_op(fr, chan)) {
-            if (do_op(nick, chan, 1))
+            if (do_op(nick, chan, 1)) {
               stats_add(u, 0, 1);
+              putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
+            }
           }
-          putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
           return 1;
         }
       } else {
@@ -83,9 +84,9 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
               stats++;
           }
         }
+        putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host, u->handle);
         if (stats)
           stats_add(u, 0, 1);
-        putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host, u->handle);
         return 1;
       }
     }
