@@ -386,6 +386,8 @@ See also: link
         $bclosed-ban$b        Set this to 1 to ban users who join +closed 
                           channels. This is probably not needed though, as
                           +closed maintains +i.
+        $bclosed-invite$b     If a channel is set +closed and this is set
+                          force the channel to always be +i, otherwise don't.
         $bclosed-private$b    If a channel is set +closed, the bots will
                           enforce +p as well. The point is to notice the chan
                           and bots when an /invite is done. This is useful in 

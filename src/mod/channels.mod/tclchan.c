@@ -409,6 +409,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->closed_ban = atoi(item[i]);
+    } else if (!strcmp(item[i], "closed-invite")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          sprintf(result, "channel closed-invite needs argument");
+        return ERROR;
+      }
+      chan->closed_invite = atoi(item[i]);
     } else if (!strcmp(item[i], "closed-private")) {
       i++;
       if (i >= items) {
@@ -783,7 +791,8 @@ int channel_add(char *result, char *newname, char *options)
     chan->limit_prot = 0;
     chan->limit = 0;
     chan->closed_ban = 0;
-    chan->closed_private = 0;
+    chan->closed_private = 1;
+    chan->closed_invite = 1;
 /* Chanint template
  *  chan->temp = 0;
  */

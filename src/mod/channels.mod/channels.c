@@ -776,7 +776,8 @@ void channels_report(int idx, int details)
 	strcpy(s, MISC_LURKING);
       get_mode_protect(chan, s2);
       if (channel_closed(chan)) {
-        strcat(s2, "i");
+        if (chan->closed_invite)
+          strcat(s2, "i");
         if (chan->closed_private)
           strcat(s2, "p");
       }

@@ -154,6 +154,7 @@ struct chanset_t {
   int limitraise;
   int closed_ban;
   int closed_private;
+  int closed_invite;
   int bad_cookie;
   time_t cookie_time_slack;
   int manop;

@@ -55,6 +55,8 @@ This is a summary of ChangeLog basically.
 * After changing conf with -C, binary is now moved to binpath/binname.
 * 'strict-host' is now '1'; ident is now parsed CORRECTLY, *!ident@host will no longer match *!~ident@host.
 * cmd_su allowed su'ing to a permanent owner.
+* New channels are now default closed-private = 1
+* Added chanint closed-invite, when set to 0, channel will NOT be +i.
 
 1.1.9
 

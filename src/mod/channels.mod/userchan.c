@@ -1000,7 +1000,7 @@ bool write_chans(FILE *f, int idx)
 bad-cookie %d cookie-time-slack %lu manop %d mdop %d mop %d \
 limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%lu \
 flood-ctcp %d:%lu flood-join %d:%lu flood-kick %d:%lu flood-deop %d:%lu \
-flood-nick %d:%lu closed-ban %d closed-private %d ban-time %lu \
+flood-nick %d:%lu closed-ban %d closed-invite %d closed-private %d ban-time %lu \
 exempt-time %lu invite-time %lu \
 %cenforcebans %cdynamicbans %cuserban %cbitch %cprotectops %crevenge \
 %crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
@@ -1034,6 +1034,7 @@ exempt-time %lu invite-time %lu \
  *      chan->temp,
  * also include temp %d in dprintf
  */
+        chan->closed_invite,
         chan->closed_private,
         chan->ban_time,
         chan->exempt_time,
