@@ -336,7 +336,6 @@
 #undef volatile
 
 /* Defines for pack features */
-#undef S_AUTHHASH
 #undef S_AUTOLOCK
 #undef S_DCCAUTH
 #undef S_GARBLESTRINGS

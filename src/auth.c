@@ -70,7 +70,6 @@ init_auth()
   timer_create_secs(60, "expire_auths", (Function) expire_auths);
 }
 
-#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 char *
 makehash(struct userrec *u, char *randstring)
 {
@@ -88,8 +87,6 @@ makehash(struct userrec *u, char *randstring)
 
   return MD5(hash);
 }
-#endif /* S_AUTHHASH || S_DCCAUTH */
-
 
 char *
 makebdhash(char *randstring)

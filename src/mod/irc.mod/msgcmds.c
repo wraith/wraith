@@ -255,15 +255,22 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
   dprintf(DP_HELP, "PRIVMSG %s :auth%s %s\n", nick, u ? "." : "!", conf.bot->nick);
 
   return BIND_RET_BREAK;
+}
 
+static void
+addauth(int i, char *nick, char *host)
+{
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, auth[i].user->handle);
+  auth[i].authed = 1;
+  auth[i].authing = 0;
+  auth[i].authtime = now;
+  auth[i].atime = now;
+  dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %chelp\n", nick, cmdprefix);
 }
 
 static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 {
   char *pass = NULL;
-#ifdef S_AUTHHASH
-  char randstring[50] = "";
-#endif /* S_AUTHHASH */
   int i = 0;
 
   if (match_my_nick(nick))
@@ -282,17 +289,23 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
   pass = newsplit(&par);
 
   if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
-      auth[i].user = u;
-      strcpy(auth[i].hand, u->handle);
-#ifdef S_AUTHHASH
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! -AUTH", nick, host, u->handle);
+    auth[i].user = u;
+    strcpy(auth[i].hand, u->handle);
+    if (strlen(authkey) && get_user(&USERENTRY_SECPASS, u)) {
+      char randstring[50] = "";
+
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! AUTH", nick, host, u->handle);
 
       auth[i].authing = 2;      
       make_rand_str(randstring, 50);
       strncpyz(auth[i].hash, makehash(u, randstring), sizeof auth[i].hash);
       dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, randstring, conf.bot->nick);
+    } else {
+      /* no authkey and/or no SECPASS for the user, don't require a hash auth */
+      addauth(i, nick, host);
+    }
   } else {
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed -AUTH", nick, host, u->handle);
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed AUTH", nick, host, u->handle);
     removeauth(i);
   }
   return BIND_RET_BREAK;
@@ -301,44 +314,36 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 
 static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
 {
+  if (strlen(authkey) && get_user(&USERENTRY_SECPASS, u)) {
+    int i = 0;
 
-  int i = 0;
+    if (match_my_nick(nick))
+      return BIND_RET_BREAK;
+    if (u && u->bot)
+      return BIND_RET_BREAK;
 
-  if (match_my_nick(nick))
+    i = findauth(host);
+
+    if (i == -1)
+      return BIND_RET_BREAK;
+
+    if (auth[i].authing != 2)
+      return BIND_RET_BREAK;
+
+    if (!strcmp(auth[i].hash, par)) { /* good hash! */
+      addauth(i, nick, host);
+    } else { /* bad hash! */
+      char s[300] = "";
+
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed +AUTH", nick, host, u->handle);
+      dprintf(DP_HELP, "NOTICE %s :Invalid hash.\n", nick);
+      sprintf(s, "*!%s", host);
+      addignore(s, origbotname, "Invalid auth hash.", now + (60 * ignore_time));
+      removeauth(i);
+    } 
     return BIND_RET_BREAK;
-  if (u && u->bot)
-    return BIND_RET_BREAK;
-
-  i = findauth(host);
-
-  if (i == -1)
-    return BIND_RET_BREAK;
-
-  if (auth[i].authing != 2)
-    return BIND_RET_BREAK;
-
-  if (!strcmp(auth[i].hash, par)) { /* good hash! */
-#endif /* S_AUTHHASH */
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, u->handle);
-    auth[i].authed = 1;
-    auth[i].authing = 0;
-    auth[i].authtime = now;
-    auth[i].atime = now;
-    dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %chelp\n", nick, cmdprefix);
-  } else { /* bad hash! */
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed +AUTH", nick, host, u->handle);
-#ifdef S_AUTHHASH
-{
-    char s[300] = "";
-
-    dprintf(DP_HELP, "NOTICE %s :Invalid hash.\n", nick);
-    sprintf(s, "*!%s", host);
-    addignore(s, origbotname, "Invalid auth hash.", now + (60 * ignore_time));
-}
-#endif /* S_AUTHHASH */
-    removeauth(i);
-  } 
-  return BIND_RET_BREAK;
+  }
+  return BIND_RET_LOG;
 }
 
 static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
@@ -449,9 +454,7 @@ static cmd_t C_msg[] =
 {
   {"auth?",		"",	(Function) msg_authstart,	NULL},
   {"auth",		"",	(Function) msg_auth,		NULL},
-#ifdef S_AUTHHASH
   {"+auth",		"",	(Function) msg_pls_auth,	NULL},
-#endif /* S_AUTHHASH */
   {"unauth",		"",	(Function) msg_unauth,		NULL},
   {"ident",   		"",	(Function) msg_ident,		NULL},
   {"invite",		"",	(Function) msg_invite,		NULL},

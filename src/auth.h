@@ -1,6 +1,7 @@
 #ifndef _AUTH_H
 #  define _AUTH_H
 
+#  include "cfg.h"
 #  include "crypt.h"
 
 struct auth_t {
@@ -20,19 +21,12 @@ int new_auth();
 int findauth(char *);
 void removeauth(int);
 char *makebdhash(char *);
-
-#  if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 char *makehash(struct userrec *, char *);
-#  endif /* S_AUTHHASH || S_DCCAUTH */
 
 
 extern int auth_total;
 extern struct auth_t *auth;
 
-#  if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-#    include "cfg.h"
-#    define authkey CFG_AUTHKEY.ldata ? CFG_AUTHKEY.ldata : CFG_AUTHKEY.gdata ? CFG_AUTHKEY.gdata : ""
-#  endif
-       /* S_AUTHHASH || S_DCCAUTH */
+#  define authkey CFG_AUTHKEY.ldata ? CFG_AUTHKEY.ldata : CFG_AUTHKEY.gdata ? CFG_AUTHKEY.gdata : ""
 
 #endif /* !_AUTH_H */
