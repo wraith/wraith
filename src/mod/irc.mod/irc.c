@@ -662,10 +662,10 @@ request_op(struct chanset_t *chan)
     return;
   }
 
-  char *l = (char *) my_calloc(1, cnt * 50), s[100] = "";
+  char *l = (char *) my_calloc(1, cnt * 50);
 
   /* first scan for bots on my server, ask first found for ops */
-  sprintf(s, "gi o %s %s", chan->dname, botname);
+  simple_sprintf(s, "gi o %s %s", chan->dname, botname);
 
   /* look for bots 0-1 hops away */
   for (i2 = 0; i2 < i; i2++) {
