@@ -46,6 +46,7 @@ union sockaddr_union cached_myip4_so;
 union sockaddr_union cached_myip6_so;
 #endif /* USE_IPV6 */
 
+char 	natip[121] = "";
 bool    identd_hack = 0;	/* identd_open() won't work on most servers, dont even bother warning. */
 char	firewall[121] = "";	/* Socks server for firewall		    */
 port_t	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
@@ -261,7 +262,7 @@ char *myipstr(int af_type)
 /* Get my ip number
  */
 in_addr_t getmyip() {
-  return cached_myip4_so.sin.sin_addr.s_addr;
+  return natip[0] ? inet_addr(natip) : cached_myip4_so.sin.sin_addr.s_addr;
 }
 
 /* see if it's necessary to set inaddr_any... because if we can't resolve, we die anyway */

@@ -350,9 +350,7 @@ static void start_sending_binary(int idx)
     dcc[idx].status |= STAT_SENDINGU;
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick);		/* Store bot's nick */
-    dprintf(idx, "sb us %lu %hd %lu\n",
-	    iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()),
-	    dcc[i].port, dcc[i].u.xfer->length);
+    dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[i].port, dcc[i].u.xfer->length);
   }
 #endif /* HUB */
 }

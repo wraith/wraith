@@ -1155,9 +1155,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
   dcc[i].u.xfer->type = resend ? XFER_RESEND_PEND : XFER_SEND;
   if (nick[0] != '*') {
     dprintf(DP_HELP, "PRIVMSG %s :\001DCC %sSEND %s %lu %d %lu\001\n", nick,
-	    resend ? "RE" :  "", nfn,
-	    iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()), port,
-	    dccfilesize);
+	    resend ? "RE" :  "", nfn, iptolong(getmyip()), port, dccfilesize);
     putlog(LOG_FILES, "*",TRANSFER_BEGIN_DCC, resend ? TRANSFER_RE :  "",
 	   nfn, nick);
   }

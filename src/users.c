@@ -37,7 +37,6 @@
 #include "misc_file.h"
 #endif /* HUB */
 
-char natip[121] = "";
 char userfile[121] = "";	/* where the user records are stored */
 time_t ignore_time = 10;		/* how many minutes will ignores last? */
 

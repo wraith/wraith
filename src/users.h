@@ -176,7 +176,7 @@ int readuserfile(const char *, struct userrec **);
 void check_pmode();
 void link_pref_val(struct userrec *u, char *lval);
 
-extern char			natip[], userfile[];
+extern char			userfile[];
 extern time_t			ignore_time;
 
 #endif				/* _EGG_USERS_H */
