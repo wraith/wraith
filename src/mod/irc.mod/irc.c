@@ -1224,11 +1224,14 @@ static void check_expired_chanstuff()
             struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0 };
 
             get_user_flagrec(m->user, &fr2, chan->dname);
-            if ((!glob_bot(fr2) && ((chan_voice(fr2) || (glob_voice(fr2) && !chan_quiet(fr2))) ||
+            if ((!channel_private(chan) || (channel_private(chan) && (glob_owner(fr2) || chan_voice(fr2)))) &&
+               ((!glob_bot(fr2) && ((chan_voice(fr2) || (glob_voice(fr2) && !chan_quiet(fr2))) ||
                (channel_voice(chan) && (!chan_quiet(fr2) && !glob_quiet(fr2)))) &&
-               !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE))) {
+               !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE)))) {
               add_mode(chan, '+', 'v', m->nick);
-            } else if (!glob_bot(fr2) && ((chan_quiet(fr2) || (glob_quiet(fr2) && !chan_voice(fr2))) || (m->flags & EVOICE))) {
+            } else if (!glob_bot(fr2) && 
+              ((chan_quiet(fr2) || (glob_quiet(fr2) && !chan_voice(fr2))) || 
+              (m->flags & EVOICE))) {
               if (!chan_hasop(m) && chan_hasvoice(m))
                 add_mode(chan, '-', 'v', m->nick);
             }
