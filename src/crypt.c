@@ -298,3 +298,32 @@ char *btoh(const unsigned char *md, int len)
   ret = buf;
   return ret;
 }
+
+static char *
+btoh_word(const unsigned char *md, int len)
+{
+  int i;
+  char buf[100] = "", *ret = NULL;
+
+  for (i = 0; i < len; i++)
+    sprintf(buf, "%s%02X%s", buf, md[i], ((i % 2) && (i != (len - 1))) ? ":" : "");
+
+  ret = buf;
+  return ret;
+}
+
+char *
+MD5WORD(const char *string) 
+{
+  static char	  md5string[MD5_HASH_LENGTH + 7 + 1] = "";
+  unsigned char   md5out[MD5_HASH_LENGTH + 1] = "";
+  MD5_CTX ctx;
+
+  MD5_Init(&ctx);
+  MD5_Update(&ctx, string, strlen(string));
+  MD5_Final(md5out, &ctx);
+  strncpyz(md5string, btoh_word(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
+  return md5string;
+}
+

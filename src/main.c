@@ -674,6 +674,8 @@ int tracecheck_breakpoint() {
 int main(int argc, char **argv)
 {
   egg_timeval_t egg_timeval_now;
+
+  Context;
 //  char *out = NULL;
 //printf("ret: %d\n", system("c:/wraith/leaf.exe"));
 //  shell_exec("c:\\windows\\notepad.exe", NULL, &out, &out);
