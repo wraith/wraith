@@ -104,7 +104,7 @@ void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
     cmdprefix[0] = entry->gdata[0];
     /* strncpyz(cmdprefix, (char *) entry->gdata, 2); */
   }
-  cmdprefix[1] = NULL;
+  cmdprefix[1] = 0;
 }
 
 struct cfg_entry CFG_CMDPREFIX = {
