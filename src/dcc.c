@@ -203,7 +203,7 @@ static void strip_telnet(int sock, char *buf, int *len)
   }
   *o = *p;
 }
-void send_timesync(idx)
+void send_timesync(int idx)
 {
   /* Send timesync to idx, or all lower bots if idx<0 */
   if (idx >= 0)

@@ -478,7 +478,6 @@ return 1;
 int main(int argc, char **argv) {
   mallocstruct();
   if (!loadconfig(argv)) return 1;
-//  tellconfig();
   if (!checkconfig()) return 1;
   if (!writeconfig(argv)) return 1;
   freecfg();
