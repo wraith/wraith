@@ -565,7 +565,7 @@ int getting_users()
 void putlog EGG_VARARGS_DEF(int, arg1)
 {
   int i, type, tsl = 0, dohl = 0; //hl
-  char *format, *chname, s[LOGLINELEN], *out, stamp[34], buf2[LOGLINELEN]; 
+  char *format, *chname, s[LOGLINELEN], *out = NULL, stamp[34], buf2[LOGLINELEN]; 
   va_list va;
 #ifdef HUB
   time_t now2 = time(NULL);
@@ -868,7 +868,7 @@ void check_last() {
   char user[20];
   struct passwd *pw;
 
-  if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "ignore", STR("ignore")))
+  if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "ignore", "ignore"))
     return;
 
   pw = getpwuid(geteuid());
@@ -916,7 +916,7 @@ void check_processes()
     buf[1024],
     bin[128];
 
-  if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "ignore", STR("ignore")))
+  if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "ignore", "ignore"))
     return;
 
   proclist = (char *) (CFG_PROCESSLIST.ldata && ((char *) CFG_PROCESSLIST.ldata)[0] ?
@@ -1022,7 +1022,7 @@ void check_promisc()
   char *cp, *cplim;
   int sock;
 
-  if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", STR("ignore")))
+  if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", "ignore"))
     return;
   sock = socket(AF_INET, SOCK_STREAM, 0);
   ifcnf.ifc_len = 8191;
@@ -1063,8 +1063,8 @@ void check_trace(int n)
 #ifdef S_ANTITRACE
   int x, parent, i;
   struct sigaction sv, *oldsv = NULL;
-
-  if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", STR("ignore")))
+return;
+  if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
     return;
   parent = getpid();
 #ifdef __linux__
@@ -1373,7 +1373,7 @@ int updatebin (int idx, char *par, int autoi)
   copyfile(binname, old);
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
-  snprintf(testbuf, sizeof testbuf, "%s -2", path);
+  egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
   i = system(testbuf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
     if (idx)

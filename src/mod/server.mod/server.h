@@ -7,8 +7,8 @@
 #ifndef _EGG_MOD_SERVER_SERVER_H
 #define _EGG_MOD_SERVER_SERVER_H
 
-#define check_tcl_ctcp(a,b,c,d,e,f) check_tcl_ctcpr(a,b,c,d,e,f,H_ctcp)
-#define check_tcl_ctcr(a,b,c,d,e,f) check_tcl_ctcpr(a,b,c,d,e,f,H_ctcr)
+#define check_tcl_ctcp(a,b,c,d,e,f) check_tcl_ctcpr(a,b,c,d,e,f,BT_ctcp)
+#define check_tcl_ctcr(a,b,c,d,e,f) check_tcl_ctcpr(a,b,c,d,e,f,BT_ctcr)
 
 #ifndef MAKING_SERVER
 /* 4 - 7 */
@@ -27,7 +27,7 @@
 #define answer_ctcp (*(int *)(server_funcs[15]))
 /* 16 - 19 */
 #define trigger_on_ignore (*(int *)(server_funcs[16]))
-#define check_tcl_ctcpr ((int(*)(char*,char*,struct userrec*,char*,char*,char*,p_tcl_bind_list))server_funcs[17])
+#define check_tcl_ctcpr ((int(*)(char*,char*,struct userrec*,char*,char*,char*,bind_table_t *))server_funcs[17])
 #define detect_avalanche ((int(*)(char *))server_funcs[18])
 #define nuke_server ((void(*)(char *))server_funcs[19])
 /* 20 - 22 */
@@ -40,12 +40,12 @@
 #define server_online (*(int *)(server_funcs[25]))
 /* 26 -- UNUSED */
 /* 27 - 30 */
-#define H_raw (*(p_tcl_bind_list *)(server_funcs[27]))
-#define H_msg (*(p_tcl_bind_list *)(server_funcs[29]))
+/* UNUSED -- 28 */
+/* UNUSED -- 29 */
 /* UNUSED -- 30 */
 /* 31 - 34 */
-#define H_ctcp (*(p_tcl_bind_list *)(server_funcs[33]))
-#define H_ctcr (*(p_tcl_bind_list *)(server_funcs[34]))
+/* UNUSED -- 33 */
+/* UNUSED -- 34 */
 /* 35 - 38 */
 #define ctcp_reply ((char *)(server_funcs[35]))
 /* 36 UNUSED */
@@ -55,9 +55,6 @@
 #define curserv (*(int *)(server_funcs[40))
 #define cursrvname ((char *)(server_funcs[41]))
 #define botrealname ((char *)(server_funcs[42]))
-#ifdef S_AUTH
-#define H_msgc (*(p_tcl_bind_list *)(server_funcs[43]))
-#endif /* S_AUTH */
 
 #else		/* MAKING_SERVER */
 

@@ -10,7 +10,6 @@
 #include "tandem.h"
 
 extern p_tcl_bind_list	 bind_table_list;
-extern tcl_timer_t	*timer, *utimer;
 extern struct dcc_t	*dcc;
 extern char		 origbotname[], botnetnick[], quit_msg[];
 extern struct userrec	*userlist;

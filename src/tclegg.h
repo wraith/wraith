@@ -37,17 +37,6 @@
 #define BIND_EXEC_LOG   4	/* Proc returned 1 -> wants to be logged */
 #define BIND_EXEC_BRK   5	/* Proc returned BREAK (quit) */
 
-/* Extra commands are stored in Tcl hash tables (one hash table for each type
- * of command: msg, dcc, etc)
- */
-typedef struct timer_str {
-  struct timer_str	*next;
-  unsigned int		 mins;	/* Time to elapse			*/
-  char			*cmd;	/* Command linked to			*/
-  unsigned long		 id;	/* Used to remove timers		*/
-} tcl_timer_t;
-
-
 /* Used for stub functions:
  */
 
@@ -64,12 +53,6 @@ typedef struct timer_str {
 	}								\
 } while (0)
 
-
-unsigned long add_timer(tcl_timer_t **, int, char *, unsigned long);
-int remove_timer(tcl_timer_t **, unsigned long);
-void list_timers(Tcl_Interp *, tcl_timer_t *);
-void wipe_timers(Tcl_Interp *, tcl_timer_t **);
-void do_check_timers(tcl_timer_t **);
 
 typedef struct _tcl_strings {
   char *name;
@@ -95,68 +78,13 @@ typedef struct _tcl_cmds {
   Function func;
 } tcl_cmds;
 
-typedef struct _cd_tcl_cmd {
-  char *name;
-  Function callback;
-  void *cdata;
-} cd_tcl_cmd;
-
 void add_tcl_commands(tcl_cmds *);
-void add_cd_tcl_cmds(cd_tcl_cmd *);
 void rem_tcl_commands(tcl_cmds *);
-void rem_cd_tcl_cmds(cd_tcl_cmd *);
 void add_tcl_strings(tcl_strings *);
 void rem_tcl_strings(tcl_strings *);
 void add_tcl_coups(tcl_coups *);
 void rem_tcl_coups(tcl_coups *);
 void add_tcl_ints(tcl_ints *);
 void rem_tcl_ints(tcl_ints *);
-
-/* From Tcl's tclUnixInit.c */
-/* The following table is used to map from Unix locale strings to
- * encoding files.
- */
-typedef struct LocaleTable {
-  const char *lang;
-  const char *encoding;
-} LocaleTable;
-
-static const LocaleTable localeTable[] = {
-  {"ja_JP.SJIS",	"shiftjis"},
-  {"ja_JP.EUC",		"euc-jp"},
-  {"ja_JP.JIS",		"iso2022-jp"},
-  {"ja_JP.mscode",	"shiftjis"},
-  {"ja_JP.ujis",	"euc-jp"},
-  {"ja_JP",		"euc-jp"},
-  {"Ja_JP",		"shiftjis"},
-  {"Jp_JP",		"shiftjis"},
-  {"japan",		"euc-jp"},
-#ifdef hpux
-  {"japanese",		"shiftjis"},
-  {"ja",		"shiftjis"},
-#else
-  {"japanese",		"euc-jp"},
-  {"ja",		"euc-jp"},
-#endif
-  {"japanese.sjis",	"shiftjis"},
-  {"japanese.euc",	"euc-jp"},
-  {"japanese-sjis",	"shiftjis"},
-  {"japanese-ujis",	"euc-jp"},
-
-  {"ko",		"euc-kr"},
-  {"ko_KR",		"euc-kr"},
-  {"ko_KR.EUC",		"euc-kr"},
-  {"ko_KR.euc",		"euc-kr"},
-  {"ko_KR.eucKR",	"euc-kr"},
-  {"korean",		"euc-kr"},
-
-  {"ru",		"iso8859-5"},
-  {"ru_RU",		"iso8859-5"},
-  {"ru_SU",		"iso8859-5"},
-
-  {"zh",		"cp936"},
-
-  {NULL,		NULL}
-};
 
 #endif				/* _EGG_TCLEGG_H */

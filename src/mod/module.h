@@ -109,13 +109,13 @@
 #define module_depend ((Function *(*)(char *,char *,int,int))global[6])
 #define module_undepend ((int(*)(char *))global[7])
 /* 8 - 11 */
-#define add_bind_table ((p_tcl_bind_list(*)(const char *,int,Function))global[8])
-#define del_bind_table ((void (*) (p_tcl_bind_list))global[9])
-#define find_bind_table ((p_tcl_bind_list(*)(const char *))global[10])
-#define check_tcl_bind ((int (*) (p_tcl_bind_list,const char *,struct flag_record *,const char *, int))global[11])
+/* UNUSED 8 */
+/* UNUSED 9 */
+/* UNUSED 10 */
+/* UNUSED 11 */
 /* 12 - 15 */
-#define add_builtins ((int (*) (p_tcl_bind_list, cmd_t *))global[12])
-#define rem_builtins ((int (*) (p_tcl_bind_list, cmd_t *))global[13])
+/* UNUSED 12 */
+/* UNUSED 13 */
 #define add_tcl_commands ((void (*) (tcl_cmds *))global[14])
 #define rem_tcl_commands ((void (*) (tcl_cmds *))global[15])
 /* 16 - 19 */
@@ -189,7 +189,7 @@
 #define chatout (global[70])
 #define chanout_but ((void(*)())global[71])
 /* 72 - 75 */
-#define check_validity ((int (*) (char *,Function))global[72])
+/* UNUSED 72 */
 #define list_delete ((int (*)( struct list_type **, struct list_type *))global[73])
 #define list_append ((int (*) ( struct list_type **, struct list_type *))global[74])
 #define list_contains ((int (*) (struct list_type *, struct list_type *))global[75])
@@ -213,7 +213,7 @@
 #define get_data_ptr(x) ((void *(*)(int,char*,int))global[86])(x,__FILE__,__LINE__)
 #define open_telnet ((int (*) (char *, int))global[87])
 /* 88 - 91 */
-#define check_tcl_event ((void * (*) (const char *))global[88])
+#define check_bind_event ((void * (*) (const char *))global[88])
 #define my_memcpy ((void * (*) (void *, const void *, size_t))global[89])
 #define my_atoul ((IP(*)(char *))global[90])
 #define my_strcpy ((int (*)(char *, const char *))global[91])
@@ -320,23 +320,23 @@
 /* 172 - 175 */
 #define add_hook(a,b) (((void (*) (int, Function))global[172])(a,b))
 #define del_hook(a,b) (((void (*) (int, Function))global[173])(a,b))
-#define H_dcc (*(p_tcl_bind_list *)(global[174]))
+/* --- UNUSED 174 */
 /* --- UNUSED 175 */
 /* 176 - 179 */
-#define H_chon (*(p_tcl_bind_list *)(global[176]))
-#define H_chof (*(p_tcl_bind_list *)(global[177]))
-#define H_load (*(p_tcl_bind_list *)(global[178]))
-#define H_unld (*(p_tcl_bind_list *)(global[179]))
+/* UNUSED 176 */
+/* UNUSED 177 */
+/* --- UNUSED 178 */
+/* --- UNUSED 179 */
 /* 180 - 183 */
-#define H_chat (*(p_tcl_bind_list *)(global[180]))
-#define H_act (*(p_tcl_bind_list *)(global[181]))
-#define H_bcst (*(p_tcl_bind_list *)(global[182]))
-#define H_bot (*(p_tcl_bind_list *)(global[183]))
+/* UNUSED 180 */
+/* UNUSED 181 */
+/* UNUSED 182 */
+/* --- UNUSED 183 */
 /* 184 - 187 */
-#define H_link (*(p_tcl_bind_list *)(global[184]))
-#define H_disc (*(p_tcl_bind_list *)(global[185]))
-#define H_away (*(p_tcl_bind_list *)(global[186]))
-#define H_nkch (*(p_tcl_bind_list *)(global[187]))
+/* UNUSED 184 */
+/* UNUSED 185 */
+/* UNUSED 186 */
+/* UNUSED 187 */
 /* 188 - 191 */
 #define USERENTRY_BOTADDR (*(struct user_entry_type *)(global[188]))
 #define USERENTRY_BOTFL (*(struct user_entry_type *)(global[189]))
@@ -383,7 +383,7 @@
 /* 222: ginvite_total -- UNUSED (Eule) */
 /* 223: gexempt_total -- UNUSED (Eule) */
 /* 224 - 227 */
-#define H_event (*(p_tcl_bind_list *)(global[224]))
+/* 224 -- UNUSED */
 #define use_exempts (*(int *)(global[225]))	/* drummer/Jason */
 #define use_invites (*(int *)(global[226]))	/* drummer/Jason */
 #define force_expire (*(int *)(global[227]))	/* Rufus */
@@ -546,7 +546,15 @@
 #define CFG_MSGOP (*(struct cfg_entry *)(global[338]))
 #define CFG_MSGPASS (*(struct cfg_entry *)(global[339]))
 #define CFG_MSGINVITE (*(struct cfg_entry *)(global[340]))
+/* 341 - 344 */
 #define CFG_MSGIDENT (*(struct cfg_entry *)(global[341]))
+#define add_bind_table2 ((bind_table_t *(*)(const char *, int, char *, int, int))global[342])
+#define del_bind_table2 ((void (*)(bind_table_t *))global[343])
+#define add_builtins2 ((void (*)(bind_table_t *, cmd_t *))global[344])
+/* 345 - 348 */
+#define rem_builtins2 ((void (*)(bind_table_t *, cmd_t *))global[345])
+#define find_bind_table2 ((bind_table_t *(*)(const char *))global[346])
+#define check_bind ((int (*)(bind_table_t *, const char *, struct flag_record *, ...))global[347])
 
 
 extern int lfprintf(FILE *, char *, ...);

@@ -15,7 +15,7 @@
 #if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 1)) || (TCL_MAJOR_VERSION > 8)
 #define USE_BYTE_ARRAYS
 #endif
-
+void init_old_binds();
 
 /* Used for read/write to internal strings */
 typedef struct {
@@ -47,7 +47,6 @@ extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
 		pid_file[], dcc_prefix[];
 
 extern struct dcc_t	*dcc;
-extern tcl_timer_t	*timer, *utimer;
 
 int	    protect_readonly = 0;	/* turn on/off readonly protection */
 char	    whois_fields[1025] = "";	/* fields to display in a .whois */
@@ -359,21 +358,6 @@ void add_tcl_commands(tcl_cmds *table)
 
 }
 
-void add_cd_tcl_cmds(cd_tcl_cmd *table)
-{
-  void **cdata;
-
-  while (table->name) {
-    cdata = (void **)nmalloc(sizeof(void *) * 2);
-    clientdata_stuff += sizeof(void *) * 2;
-    cdata[0] = table->callback;
-    cdata[1] = table->cdata;
-    Tcl_CreateObjCommand(interp, table->name, utf_converter, (ClientData) cdata, 
-			 cmd_delete_callback);
-    table++;
-  }
-}
-
 #else
 
 void add_tcl_commands(tcl_cmds *table)
@@ -384,15 +368,6 @@ void add_tcl_commands(tcl_cmds *table)
     Tcl_CreateCommand(interp, table[i].name, table[i].func, NULL, NULL);
 }
 
-void add_cd_tcl_cmds(cd_tcl_cmd *table)
-{
-  while (table->name) {
-    Tcl_CreateCommand(interp, table->name, table->callback, 
-		      (ClientData) table->cdata, NULL);
-    table++;
-  }
-}
-
 #endif
 
 void rem_tcl_commands(tcl_cmds *table)
@@ -401,14 +376,6 @@ void rem_tcl_commands(tcl_cmds *table)
 
   for (i = 0; table[i].name; i++)
     Tcl_DeleteCommand(interp, table[i].name);
-}
-
-void rem_cd_tcl_cmds(cd_tcl_cmd *table)
-{
-  while (table->name) {
-    Tcl_DeleteCommand(interp, table->name);
-    table++;
-  }
 }
 
 void add_tcl_objcommands(tcl_cmds *table)
@@ -482,16 +449,7 @@ static void init_traces()
   add_tcl_ints(def_tcl_ints);
 }
 
-void kill_tcl()
-{
-  rem_tcl_coups(def_tcl_coups);
-  rem_tcl_strings(def_tcl_strings);
-  rem_tcl_ints(def_tcl_ints);
-  kill_bind();
-  Tcl_DeleteInterp(interp);
-}
-
-extern tcl_cmds tcluser_cmds[], tcldcc_cmds[], tclmisc_cmds[], tclmisc_objcmds[], tcldns_cmds[];
+extern tcl_cmds tcluser_cmds[], tcldcc_cmds[], tclmisc_cmds[], tclmisc_objcmds[];
 
 /* Not going through Tcl's crazy main() system (what on earth was he
  * smoking?!) so we gotta initialize the Tcl interpreter
@@ -547,11 +505,6 @@ void init_tcl(int argc, char **argv)
 
   encoding = NULL;
   if (langEnv != NULL) {
-    for (i = 0; localeTable[i].lang != NULL; i++)
-      if (strcmp(localeTable[i].lang, langEnv) == 0) {
-	encoding = localeTable[i].encoding;
-	break;
-      }
 
     /* There was no mapping in the locale table.  If there is an
      * encoding subfield, we can try to guess from that.
@@ -612,13 +565,13 @@ resetPath:
 
   /* Initialize binds and traces */
   Context;
-  init_bind();
+
+  init_old_binds();
   init_traces();
   /* Add new commands */
   add_tcl_commands(tcluser_cmds);
   add_tcl_commands(tcldcc_cmds);
   add_tcl_commands(tclmisc_cmds);
-  add_tcl_commands(tcldns_cmds);
   Context;
 }
 

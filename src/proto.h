@@ -30,15 +30,13 @@ struct list_type;
 struct tand_t_struct;
 
 #if !defined(MAKING_MODS)
-
-//extern int lfprintf(FILE *, char *, ...);
-
 extern int (*rfc_casecmp) (const char *, const char *);
 extern int (*rfc_ncasecmp) (const char *, const char *, int);
 extern int (*rfc_toupper) (int);
 extern int (*rfc_tolower) (int);
 extern int (*match_noterej) (struct userrec *, char *);
-#endif
+extern int (*storenote)(char *from, char *to, char *msg, int idx, char *who, int bufsize);
+#endif /* !MAKING_MODS */
 
 /* bg.c */
 void do_fork();

@@ -39,6 +39,14 @@ struct cfg_entry CFG_OPBOTS,
 #endif /* S_AUTOLOCK */
   CFG_OPREQUESTS;
 
+
+/* We import some bind tables from server.mod */
+static bind_table_t *BT_dcc, *BT_bot, *BT_raw, *BT_msg, *BT_ctcp, *BT_ctcr;
+#ifdef S_AUTH
+static bind_table_t *BT_msgc;
+#endif /* S_AUTH */
+
+
 static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL;
 
 
@@ -1265,69 +1273,18 @@ static void check_expired_chanstuff()
   }
 }
 
-static int channels_6char STDVAR
-{
-  Function F = (Function) cd;
-  char x[20];
-
-  BADARGS(7, 7, " nick user@host handle desto/chan keyword/nick text");
-  CHECKVALIDITY(channels_6char);
-  sprintf(x, "%d", F(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]));
-  Tcl_AppendResult(irp, x, NULL);
-  return TCL_OK;
-}
-
-static int channels_5char STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(6, 6, " nick user@host handle channel text");
-  CHECKVALIDITY(channels_5char);
-  F(argv[1], argv[2], argv[3], argv[4], argv[5]);
-  return TCL_OK;
-}
-
-static int channels_4char STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(5, 5, " nick uhost hand chan/param");
-  CHECKVALIDITY(channels_4char);
-  F(argv[1], argv[2], argv[3], argv[4]);
-  return TCL_OK;
-}
-
-static int channels_2char STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(3, 3, " channel type");
-  CHECKVALIDITY(channels_2char);
-  F(argv[1], argv[2]);
-  return TCL_OK;
-}
-
 #ifdef S_AUTH
-static int check_tcl_pubc(char *cmd, char *nick, char *uhost,
-                         struct userrec *u, char *args, char *chan)
+static int check_tcl_pubc(char *cmd, char *nick, char *from, struct userrec *u, char *args, char *chan)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  char *hand = u ? u->handle : "*";
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int x;
 
-  get_user_flagrec(u, &fr, chan);
-  Tcl_SetVar(interp, "_msgc1", nick, 0);
-  Tcl_SetVar(interp, "_msgc2", uhost, 0);
-  Tcl_SetVar(interp, "_msgc3", hand, 0);
-  Tcl_SetVar(interp, "_msgc4", args, 0);
-  Tcl_SetVar(interp, "_msgc5", chan, 0);
-  x = check_tcl_bind(H_msgc, cmd, &fr, " $_msgc1 $_msgc2 $_msgc3 $_msgc4 $_msgc5",
-                     MATCH_EXACT | BIND_HAS_BUILTINS | BIND_USE_ATTR);
-  if (x == BIND_EXEC_LOG)
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s%s %s", nick, uhost, hand, chan, cmdprefix,
-           cmd, args);
-  return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
+  x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, chan);
 
+  if (x & BIND_RET_LOG)
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s%s %s", nick, from, u ? u->handle : "*", chan, cmdprefix, cmd, args);
+  if (x & BIND_RET_BREAK) return(1);
+  return(0);
 }
 #endif /* S_AUTH */
 
@@ -1722,13 +1679,31 @@ char *irc_start(Function * global_funcs)
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_rfccompliant, NULL);
   add_tcl_ints(myints);
-  add_builtins(H_bot, irc_bot);
-  add_builtins(H_dcc, irc_dcc);
-  add_builtins(H_msg, C_msg);
+  /* Import bind tables from other places. */
+  BT_dcc = find_bind_table2("dcc");
+  BT_bot = find_bind_table2("bot");
+  BT_raw = find_bind_table2("raw");
+  BT_msg = find_bind_table2("msg");
 #ifdef S_AUTH
-  add_builtins(H_msgc, C_msgc);
+  BT_msgc = find_bind_table2("msgc");
 #endif /* S_AUTH */
-  add_builtins(H_raw, irc_raw);
+  BT_ctcp = find_bind_table2("ctcp");
+  BT_ctcr = find_bind_table2("ctcr");
+
+  /* Add our commands to the imported tables. */
+  if (BT_dcc) add_builtins2(BT_dcc, irc_dcc);
+  else putlog(LOG_MISC, "*", "Couldn't load dcc bind table!");
+  if (BT_bot) add_builtins2(BT_bot, irc_bot);
+  else putlog(LOG_MISC, "*", "Couldn't load bot bind table!");
+  if (BT_raw) add_builtins2(BT_raw, irc_raw);
+  else putlog(LOG_MISC, "*", "Couldn't load raw bind table!");
+  if (BT_msg) add_builtins2(BT_msg, C_msg);
+  else putlog(LOG_MISC, "*", "Couldn't load msg bind table!");
+#ifdef S_AUTH
+  if (BT_msgc) add_builtins2(BT_msgc, C_msgc);
+  else putlog(LOG_MISC, "*", "Couldn't load msgc bind table!");
+#endif /* S_AUTH */
+
   add_tcl_commands(tclchan_cmds);
   do_nettype();
   return NULL;

@@ -99,46 +99,32 @@ static int gotfake433(char *from)
  *
  * msg: proc-name <nick> <user@host> <handle> <args...>
  */
-static int check_tcl_msg(char *cmd, char *nick, char *uhost,
-			 struct userrec *u, char *args)
+
+static int check_tcl_msg(char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  char *hand = u ? u->handle : "*";
   int x;
 
   get_user_flagrec(u, &fr, NULL);
-  Tcl_SetVar(interp, "_msg1", nick, 0);
-  Tcl_SetVar(interp, "_msg2", uhost, 0);
-  Tcl_SetVar(interp, "_msg3", hand, 0);
-  Tcl_SetVar(interp, "_msg4", args, 0);
-  x = check_tcl_bind(H_msg, cmd, &fr, " $_msg1 $_msg2 $_msg3 $_msg4",
-		     MATCH_EXACT | BIND_HAS_BUILTINS | BIND_USE_ATTR);
-  if (x == BIND_EXEC_LOG)
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s", nick, uhost, hand,
-	   cmd, args);
-  return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
+  x = check_bind(BT_msg, cmd, &fr, nick, uhost, u, args);
+  if (x & BIND_RET_LOG) putlog(LOG_CMDS, "*", "in check_tcl_msg (%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
+  if (x) return(1);
+  else return(0);
 }
 
 #ifdef S_AUTH
-static int check_tcl_msgc(char *cmd, char *nick, char *uhost,
-                         struct userrec *u, char *args)
+static int check_tcl_msgc(char *cmd, char *nick, char *from, struct userrec *u, char *args)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  char *hand = u ? u->handle : "*";
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int x;
 
-  get_user_flagrec(u, &fr, NULL);
-  Tcl_SetVar(interp, "_msgc1", nick, 0);
-  Tcl_SetVar(interp, "_msgc2", uhost, 0);
-  Tcl_SetVar(interp, "_msgc3", hand, 0);
-  Tcl_SetVar(interp, "_msgc4", args, 0);
-  Tcl_SetVar(interp, "_msgc5", NULL, 0);
-  x = check_tcl_bind(H_msgc, cmd, &fr, " $_msgc1 $_msgc2 $_msgc3 $_msgc4 $_msgc5",
-                     MATCH_EXACT | BIND_HAS_BUILTINS | BIND_USE_ATTR);
-  if (x == BIND_EXEC_LOG)
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s%s %s", nick, uhost, hand, cmdprefix,
-           cmd, args);
-  return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
+  x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, NULL);
+
+  if (x & BIND_RET_LOG)
+    putlog(LOG_CMDS, "*", " in check_tcl_msgc(%s!%s) !%s! %s%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
+
+  if (x & BIND_RET_BREAK) return(1);
+  return(0);
 }
 #endif /* S_AUTH */
 
@@ -146,36 +132,21 @@ static int check_tcl_msgc(char *cmd, char *nick, char *uhost,
  */
 static int check_tcl_raw(char *from, char *code, char *msg)
 {
-  int x;
-  Tcl_SetVar(interp, "_raw1", from, 0);
-  Tcl_SetVar(interp, "_raw2", code, 0);
-  Tcl_SetVar(interp, "_raw3", msg, 0);
-  x = check_tcl_bind(H_raw, code, 0, " $_raw1 $_raw2 $_raw3",
-                    MATCH_EXACT | BIND_STACKABLE | BIND_WANTRET);
-  return (x == BIND_EXEC_LOG);
+//  return check_bind(BT_raw, code, NULL, from, code, msg);
+  return check_bind(BT_raw, code, NULL, from, msg);
 }
 
 
 static int check_tcl_ctcpr(char *nick, char *uhost, struct userrec *u,
-                          char *dest, char *keyword, char *args,
-                          p_tcl_bind_list table)
+                           char *dest, char *keyword, char *args,
+                           bind_table_t *table)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  int x;
-
   get_user_flagrec(u, &fr, NULL);
-  Tcl_SetVar(interp, "_ctcpr1", nick, 0);
-  Tcl_SetVar(interp, "_ctcpr2", uhost, 0);
-  Tcl_SetVar(interp, "_ctcpr3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_ctcpr4", dest, 0);
-  Tcl_SetVar(interp, "_ctcpr5", keyword, 0);
-  Tcl_SetVar(interp, "_ctcpr6", args, 0);
-  x = check_tcl_bind(table, keyword, &fr,
-                    " $_ctcpr1 $_ctcpr2 $_ctcpr3 $_ctcpr4 $_ctcpr5 $_ctcpr6",
-                    MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE |
-                    ((table == H_ctcp) ? BIND_WANTRET : 0));
-  return (x == BIND_EXEC_LOG) || (table == H_ctcr);
+
+  return check_bind(table, keyword, &fr, nick, uhost, u, dest, keyword, args);
 }
+
 
 static int match_my_nick(char *nick)
 {
@@ -395,7 +366,6 @@ static int gotmsg(char *from, char *msg)
 #endif /* S_AUTH */
   int ignoring = 0;
 
-
   if (msg[0] && ((strchr(CHANMETA, *msg) != NULL) ||
      (*msg == '@')))           /* Notice to a channel, not handled here */
     return 0;
@@ -561,7 +531,7 @@ static int gotmsg(char *from, char *msg)
             result = check_tcl_msg(code, nick, uhost, u, msg);
             
 	  if (!result)
-	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
+	    putlog(LOG_MSGS, "*", " in gotmsg [%s] %s %s", from, code, msg);
         }
 #ifdef S_AUTH
       }

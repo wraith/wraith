@@ -1038,109 +1038,68 @@ static void dcc_chat(int idx, char *buf, int i)
       strcpy(d, "\033[0m");
     else
       *d = 0;
-    if (buf[0]) {		/* Nothing to say - maybe paging... */
 
-      if (u_pass_match(dcc[idx].user, buf)) { //user said their password :)
-        dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
-      } else if (!strncmp(buf, "+Auth ", 6)) {              /* ignore extra +Auth lines */
-      } else if ((!strncmp(buf, dcc_prefix, strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
+    if (u_pass_match(dcc[idx].user, buf)) { //user said their password :)
+      dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
+    } else if (!strncmp(buf, "+Auth ", 6)) {              /* ignore extra +Auth lines */
+    } else if ((!strncmp(buf, dcc_prefix, strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
 
-	if (!strncmp(buf, dcc_prefix,strlen(dcc_prefix)))
-	  buf++;
-	v = newsplit(&buf);
-	rmspace(buf);
-	if (check_tcl_dcc(v, idx, buf)) {
-	  if (dcc[idx].u.chat->channel >= 0)
-	    check_tcl_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock,
-			   dcc[idx].u.chat->channel);
-	  check_tcl_chof(dcc[idx].nick, dcc[idx].sock);
-	  flush_lines(idx, dcc[idx].u.chat);
-	  putlog(LOG_MISC, "*", DCC_CLOSED, dcc[idx].nick,
-		 dcc[idx].host);
-	  if (dcc[idx].u.chat->channel >= 0) {
-	    chanout_but(-1, dcc[idx].u.chat->channel,
-			"*** %s left the party line%s%s\n",
-			dcc[idx].nick, buf[0] ? ": " : ".", buf);
-	    if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
-	      botnet_send_part_idx(idx, buf);
-	  }
-	  if (dcc[idx].u.chat->su_nick) {
-	    dcc[idx].user = get_user_by_handle(userlist,
-					       dcc[idx].u.chat->su_nick);
-	    strcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick);
-	    dcc[idx].type = &DCC_CHAT;
-	    dprintf(idx, "Returning to real nick %s!\n",
-		    dcc[idx].u.chat->su_nick);
-	    nfree(dcc[idx].u.chat->su_nick);
-	    dcc[idx].u.chat->su_nick = NULL;
-	    dcc_chatter(idx);
-	    if (dcc[idx].u.chat->channel < GLOBAL_CHANS &&
-		dcc[idx].u.chat->channel >= 0)
-	      botnet_send_join_idx(idx, -1);
-	    return;
-	  } else if ((dcc[idx].sock != STDOUT) || backgrd) {
-	    killsock(dcc[idx].sock);
-	    lostdcc(idx);
-	    return;
-	  } else {
-	    dprintf(DP_STDOUT, "\n### SIMULATION RESET\n\n");
-	    dcc_chatter(idx);
-	    return;
-	  }
-	}
-      } else if (buf[0] == ',') {
-	int me = 0;
+      if (!strncmp(buf, dcc_prefix,strlen(dcc_prefix)))
+        buf++;
+        v = newsplit(&buf);
+        rmspace(buf);
+	check_tcl_dcc(v, idx, buf);
+    } else if (buf[0] == ',') {
+      int me = 0;
 
-	if ((buf[1] == 'm') && (buf[2] == 'e') && buf[3] == ' ')
-	  me = 1;
-	for (i = 0; i < dcc_total; i++) {
-	  int ok = 0;
+      if ((buf[1] == 'm') && (buf[2] == 'e') && buf[3] == ' ')
+        me = 1;
+      for (i = 0; i < dcc_total; i++) {
+        int ok = 0;
 
-	  if (dcc[i].type->flags & DCT_MASTER) {
-	    if ((dcc[i].type != &DCC_CHAT) ||
-		(dcc[i].u.chat->channel >= 0))
-	      if ((i != idx) || (dcc[idx].status & STAT_ECHO))
-		ok = 1;
-	  }
-	  if (ok) {
-	    struct userrec *u = get_user_by_handle(userlist, dcc[i].nick);
+        if (dcc[i].type->flags & DCT_MASTER) {
+          if ((dcc[i].type != &DCC_CHAT) || (dcc[i].u.chat->channel >= 0))
+            if ((i != idx) || (dcc[idx].status & STAT_ECHO))
+              ok = 1;
+        }
+        if (ok) {
+          struct userrec *u = get_user_by_handle(userlist, dcc[i].nick);
 
-	    if (u && (u->flags & USER_MASTER)) {
-	      if (me)
-		dprintf(i, "-> %s%s\n", dcc[idx].nick, buf + 3);
-	      else
-		dprintf(i, "-%s-> %s\n", dcc[idx].nick, buf + 1);
-	    }
-	  }
-	}
-      } else if (buf[0] == '\'') {
-	int me = 0;
-
-	if ((buf[1] == 'm') && (buf[2] == 'e') &&
-	    ((buf[3] == ' ') || (buf[3] == '\'') || (buf[3] == ',')))
-	  me = 1;
-	for (i = 0; i < dcc_total; i++) {
-	  if (dcc[i].type->flags & DCT_CHAT) {
-	    if (me)
-	      dprintf(i, "=> %s%s\n", dcc[idx].nick, buf + 3);
-	    else
-	      dprintf(i, "=%s=> %s\n", dcc[idx].nick, buf + 1);
-	  }
-	}
-      } else {
-	if (dcc[idx].u.chat->away != NULL)
-	  not_away(idx);
-	if (dcc[idx].status & STAT_ECHO)
-	  chanout_but(-1, dcc[idx].u.chat->channel,
-		      "<%s> %s\n", dcc[idx].nick, buf);
-	else
-	  chanout_but(idx, dcc[idx].u.chat->channel, "<%s> %s\n",
-		      dcc[idx].nick, buf);
-	botnet_send_chan(-1, botnetnick, dcc[idx].nick,
-			 dcc[idx].u.chat->channel, buf);
-	check_tcl_chat(dcc[idx].nick, dcc[idx].u.chat->channel, buf);
+          if (u && (u->flags & USER_MASTER)) {
+            if (me)
+              dprintf(i, "-> %s%s\n", dcc[idx].nick, buf + 3);
+             else
+              dprintf(i, "-%s-> %s\n", dcc[idx].nick, buf + 1);
+          }
+        }
       }
-    }
+    } else if (buf[0] == '\'') {
+      int me = 0;
+
+      if ((buf[1] == 'm') && (buf[2] == 'e') && ((buf[3] == ' ') || (buf[3] == '\'') || (buf[3] == ',')))
+        me = 1;
+      for (i = 0; i < dcc_total; i++) {
+        if (dcc[i].type->flags & DCT_CHAT) {
+	  if (me)
+	    dprintf(i, "=> %s%s\n", dcc[idx].nick, buf + 3);
+	  else
+	    dprintf(i, "=%s=> %s\n", dcc[idx].nick, buf + 1);
+	}
+      }
+    } else {
+	int r;
+
+	r = check_tcl_chat(dcc[idx].nick, dcc[idx].u.chat->channel, buf);
+	if (r & BIND_RET_BREAK) return;
+
+      if (dcc[idx].u.chat->away != NULL)
+        not_away(idx);
+       if (dcc[idx].status & STAT_ECHO)
+         chanout_but(-1, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
+       else
+         chanout_but(idx, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
+       botnet_send_chan(-1, botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel, buf);
+    }  
   }
   if (dcc[idx].type == &DCC_CHAT)	/* Could have change to files */
     if (dcc[idx].status & STAT_PAGE)
@@ -1881,14 +1840,6 @@ static void dcc_telnet_got_ident(int i, char *host)
   if (match_ignore(x)) {
     killsock(dcc[i].sock);
     lostdcc(i);
-    return;
-  }
-  /* Script? */
-  if (!strcmp(dcc[idx].nick, "(script)")) {
-    dcc[i].type = &DCC_SOCKET;
-    dcc[i].u.other = NULL;
-    strcpy(dcc[i].nick, "*");
-    check_tcl_listen(dcc[idx].host, dcc[i].sock);
     return;
   }
   /* Do not buffer data anymore. All received and stored data is passed

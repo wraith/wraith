@@ -11,8 +11,6 @@
 #include <sys/stat.h>
 
 extern Tcl_Interp	*interp;
-extern tcl_timer_t	*timer,
-			*utimer;
 extern struct dcc_t	*dcc;
 
 extern int		 dcc_total, backgrd, parties,
@@ -288,8 +286,6 @@ static int tcl_restart STDVAR
   write_userfile(-1);
 #endif
   putlog(LOG_MISC, "*", MISC_RESTARTING);
-  wipe_timers(interp, &utimer);
-  wipe_timers(interp, &timer);
   do_restart = -1;
   return TCL_OK;
 }

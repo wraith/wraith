@@ -1454,7 +1454,10 @@ static cmd_t my_bot[] =
   {NULL, 	NULL, 	NULL, 			NULL}
 };
 
+static bind_table_t *BT_bot;
+
 void init_botcmd()
 {
-  add_builtins(H_bot, my_bot);
+  BT_bot = find_bind_table2("bot");
+  add_builtins2(BT_bot, my_bot);
 }

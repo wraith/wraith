@@ -23,12 +23,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+static bind_table_t *BT_load;
+static bind_table_t *BT_rcvd, *BT_sent, *BT_lost, *BT_tout;
 
 static Function *global = NULL, *update_funcs = NULL;
 
 static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
 static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
-static p_tcl_bind_list H_rcvd, H_sent, H_lost, H_tout;
 static int dcc_limit = 4;	/* Maximum number of simultaneous file
 				   downloads allowed */
 static int dcc_block = 0;	/* Size of one dcc block */
@@ -178,62 +179,26 @@ static char *replace_spaces(char *fn)
 }
 
 
-/*
- *    Tcl sent, rcvd, tout and lost functions
- */
-
-static int builtin_sentrcvd STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(4, 4, " hand nick path");
-  CHECKVALIDITY(builtin_sentrcvd);
-  F(argv[1], argv[2], argv[3]);
-  return TCL_OK;
-}
-
-static int builtin_toutlost STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(6, 6, " hand nick path acked length");
-  CHECKVALIDITY(builtin_toutlost);
-  F(argv[1], argv[2], argv[3], argv[4], argv[5]);
-  return TCL_OK;
-}
 
 static void check_tcl_sentrcvd(struct userrec *u, char *nick, char *path,
-			       p_tcl_bind_list h)
+			       bind_table_t *table)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
   char *hand = u ? u->handle : "*";	/* u might be NULL. */
 
   get_user_flagrec(u, &fr, NULL);
-  Tcl_SetVar(interp, "_sr1", hand, 0);
-  Tcl_SetVar(interp, "_sr2", nick, 0);
-  Tcl_SetVar(interp, "_sr3", path, 0);
-  check_tcl_bind(h, hand, &fr, " $_sr1 $_sr2 $_sr3",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
+  check_bind(table, hand, &fr, u, nick, path);
 }
 
 static void check_tcl_toutlost(struct userrec *u, char *nick, char *path,
 			       unsigned long acked, unsigned long length,
-                               p_tcl_bind_list h)
+				bind_table_t *table)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
   char *hand = u ? u->handle : "*";	/* u might be NULL. */
-  char s[15];
 
   get_user_flagrec(u, &fr, NULL);
-  Tcl_SetVar(interp, "_sr1", hand, 0);
-  Tcl_SetVar(interp, "_sr2", nick, 0);
-  Tcl_SetVar(interp, "_sr3", path, 0);
-  egg_snprintf(s, sizeof s, "%lu", acked);
-  Tcl_SetVar(interp, "_sr4", s, 0);
-  egg_snprintf(s, sizeof s, "%lu", length);
-  Tcl_SetVar(interp, "_sr5", s, 0);
-  check_tcl_bind(h, hand, &fr, " $_sr1 $_sr2 $_sr3 $_sr4 $_sr5",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
+  check_bind(table, hand, &fr, u, nick, path, acked, length);
 }
 
 /*
@@ -689,7 +654,7 @@ static void eof_dcc_send(int idx)
 	f(dcc[idx].u.xfer->dir, dcc[idx].u.xfer->origname, hand);
       }
       stats_add_upload(u, dcc[idx].u.xfer->length);
-      check_tcl_sentrcvd(u, dcc[idx].nick, nfn, H_rcvd);
+      check_tcl_sentrcvd(u, dcc[idx].nick, nfn, BT_rcvd);
     }
     nfree(ofn);
     nfree(nfn);
@@ -950,7 +915,7 @@ static void dcc_get(int idx, char *buf, int len)
       struct userrec *u = get_user_by_handle(userlist,
 					     dcc[idx].u.xfer->from);
       check_tcl_sentrcvd(u, dcc[idx].nick,
-			 dcc[idx].u.xfer->dir, H_sent);
+			 dcc[idx].u.xfer->dir, BT_sent);
       if (fs != NULL) {
 	Function f = fs->funcs[FILESYS_INCRGOTS];
 
@@ -1046,7 +1011,7 @@ static void eof_dcc_get(int idx)
     u = get_user_by_host(s);
     check_tcl_toutlost(u, dcc[idx].nick, dcc[idx].u.xfer->dir,
 		       dcc[idx].u.xfer->acked, dcc[idx].u.xfer->length,
-		       H_lost);
+		       BT_lost);
 
     putlog(LOG_FILES, "*",TRANSFER_LOST_DCCGET,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
@@ -1161,7 +1126,7 @@ static void transfer_get_timeout(int i)
     egg_snprintf(xx, sizeof xx, "%s!%s", dcc[i].nick, dcc[i].host);
     u = get_user_by_host(xx);
     check_tcl_toutlost(u, dcc[i].nick, dcc[i].u.xfer->dir,
-		       dcc[i].u.xfer->acked, dcc[i].u.xfer->length, H_tout);
+		       dcc[i].u.xfer->acked, dcc[i].u.xfer->length, BT_tout);
 
     putlog(LOG_FILES, "*",TRANSFER_DCC_GET_TIMEOUT,
 	   p ? p + 1 : dcc[i].u.xfer->origname, dcc[i].nick, dcc[i].status,
@@ -1870,10 +1835,10 @@ static cmd_t transfer_ctcps[] =
 /* Add our CTCP bindings if the server module is loaded. */
 static int server_transfer_setup(char *mod)
 {
-  p_tcl_bind_list H_ctcp;
+  bind_table_t *BT_ctcp;
 
-  if ((H_ctcp = find_bind_table("ctcp")))
-    add_builtins(H_ctcp, transfer_ctcps);
+  if ((BT_ctcp = find_bind_table2("ctcp")))
+    add_builtins2(BT_ctcp, transfer_ctcps);
   return 1;
 }
 
@@ -1923,15 +1888,15 @@ static Function transfer_table[] =
   /* 12 - 15 */
   (Function) wipe_tmp_filename,
   (Function) & DCC_GET,			/* struct dcc_table		*/
-  (Function) & H_rcvd,			/* p_tcl_bind_list		*/
-  (Function) & H_sent,			/* p_tcl_bind_list		*/
+  (Function) 0,
+  (Function) 0,
   /* 16 - 19 */
   (Function) & USERENTRY_FSTAT,		/* struct user_entry_type	*/
   (Function) & quiet_reject,		/* int				*/
   (Function) raw_dcc_resend,
-  (Function) & H_lost,			/* p_tcl_bind_list		*/
+  (Function) 0,
   /* 20 - 23 */
-  (Function) & H_tout,			/* p_tcl_bind_list		*/
+  (Function) 0,
 };
 
 char *transfer_start(Function *global_funcs)
@@ -1945,12 +1910,14 @@ char *transfer_start(Function *global_funcs)
     return "This module requires update module 0.0 or later.";
   }
 
-  add_builtins(H_load, transfer_load);
+  BT_load = find_bind_table2("load");
+  if (BT_load) add_builtins2(BT_load, transfer_load);
+
   server_transfer_setup(NULL);
-  H_rcvd = add_bind_table("rcvd", HT_STACKABLE, builtin_sentrcvd);
-  H_sent = add_bind_table("sent", HT_STACKABLE, builtin_sentrcvd);
-  H_lost = add_bind_table("lost", HT_STACKABLE, builtin_toutlost);
-  H_tout = add_bind_table("tout", HT_STACKABLE, builtin_toutlost);
+  BT_rcvd = add_bind_table2("rcvd", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
+  BT_sent = add_bind_table2("sent", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
+  BT_lost = add_bind_table2("lost", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
+  BT_tout = add_bind_table2("tout", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
 
   USERENTRY_FSTAT.get = def_get;
   add_entry_type(&USERENTRY_FSTAT);

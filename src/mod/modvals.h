@@ -56,6 +56,7 @@
 #define HOOK_DNS_HOSTBYIP	112
 #define HOOK_DNS_IPBYHOST	113
 #define HOOK_SHAREUPDATEIN	117
+#define HOOK_STORENOTE		116
 
 /* These are FIXED once they are in a release they STAY
  */

@@ -17,6 +17,9 @@
 #include <pwd.h>
 #include <ctype.h>
 
+/* Import this bind table from server.mod */
+static bind_table_t *BT_ctcp;
+
 static Function *global = NULL, *server_funcs = NULL;
 #else /* !LEAF */
 static Function *global = NULL;
@@ -437,7 +440,7 @@ static void ctcp_minutely()
     listen_time--;
 }
 
-static int ctcp_FINGER(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   char *p;
   int idletime;
@@ -460,7 +463,7 @@ static int ctcp_FINGER(char *nick, char *uhost, char *handle, char *object, char
   return 1;
 }
 
-static int ctcp_ECHO(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   char reply[60];
 
@@ -468,7 +471,7 @@ static int ctcp_ECHO(char *nick, char *uhost, char *handle, char *object, char *
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, reply);
   return 1;
 }
-static int ctcp_PING(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
 
   if (strlen(text) <= 80)       /* bitchx ignores > 80 */
@@ -476,7 +479,7 @@ static int ctcp_PING(char *nick, char *uhost, char *handle, char *object, char *
   return 1;
 }
 
-static int ctcp_VERSION(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   char s[50] = "";
 
@@ -514,14 +517,14 @@ static int ctcp_VERSION(char *nick, char *uhost, char *handle, char *object, cha
   return 1;
 }
 
-static int ctcp_WHOAMI(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_WHOAMI(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
 
   dprintf(DP_HELP, STR("NOTICE %s :\002BitchX\002: Access Denied\n"), nick);
   return 1;
 }
 
-static int ctcp_OP(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   char chan[256],
    *p;
@@ -535,7 +538,8 @@ static int ctcp_OP(char *nick, char *uhost, char *handle, char *object, char *ke
   }
   return 1;
 }
-static int ctcp_INVITE_UNBAN(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+
+static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   struct chanset_t *chan = chanset;
   char chname[256],
@@ -560,7 +564,7 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, char *handle, char *object
   return 1;
 }
 
-static int ctcp_USERINFO(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
 
   if (cloak_script == CLOAK_TUNNELVISION)
@@ -573,67 +577,67 @@ static int ctcp_USERINFO(char *nick, char *uhost, char *handle, char *object, ch
   return 1;
 }
 
-static int ctcp_CLIENTINFO(char *nick, char *uhost, char *handle, char *object, char *keyword, char *msg)
+static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char text[256];
+  char buf[256];
 
-  if (!msg[0]) {
-    strcpy(text, STR("SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information"));
-  } else if (!egg_strcasecmp(msg, STR("UNBAN")))
-    strcpy(text, STR("UNBAN unbans the person from channel"));
-  else if (!egg_strcasecmp(msg, STR("OPS")))
-    strcpy(text, STR("OPS ops the person if on userlist"));
-  else if (!egg_strcasecmp(msg, STR("ECHO")))
-    strcpy(text, STR("ECHO returns the arguments it receives"));
-  else if (!egg_strcasecmp(msg, STR("WHOAMI")))
-    strcpy(text, STR("WHOAMI user list information"));
-  else if (!egg_strcasecmp(msg, STR("INVITE")))
-    strcpy(text, STR("INVITE invite to channel specified"));
-  else if (!egg_strcasecmp(msg, STR("PING")))
-    strcpy(text, STR("PING returns the arguments it receives"));
-  else if (!egg_strcasecmp(msg, STR("UTC")))
-    strcpy(text, STR("UTC substitutes the local timezone"));
-  else if (!egg_strcasecmp(msg, STR("XDCC")))
-    strcpy(text, STR("XDCC checks cdcc info for you"));
-  else if (!egg_strcasecmp(msg, STR("BDCC")))
-    strcpy(text, STR("BDCC checks cdcc info for you"));
-  else if (!egg_strcasecmp(msg, STR("CDCC")))
-    strcpy(text, STR("CDCC checks cdcc info for you"));
-  else if (!egg_strcasecmp(msg, STR("DCC")))
-    strcpy(text, STR("DCC requests a direct_client_connection"));
-  else if (!egg_strcasecmp(msg, STR("ACTION")))
-    strcpy(text, STR("ACTION contains action descriptions for atmosphere"));
-  else if (!egg_strcasecmp(msg, STR("FINGER")))
-    strcpy(text, STR("FINGER shows real name, login name and idle time of user"));
-  else if (!egg_strcasecmp(msg, STR("ERRMSG")))
-    strcpy(text, STR("ERRMSG returns error messages"));
-  else if (!egg_strcasecmp(msg, STR("USERINFO")))
-    strcpy(text, STR("USERINFO returns user settable information"));
-  else if (!egg_strcasecmp(msg, STR("CLIENTINFO")))
-    strcpy(text, STR("CLIENTINFO gives information about available CTCP commands"));
-  else if (!egg_strcasecmp(msg, STR("SED")))
-    strcpy(text, STR("SED contains simple_encrypted_data"));
-  else if (!egg_strcasecmp(msg, "OP"))
-    strcpy(text, STR("OP ops the person if on userlist"));
-  else if (!egg_strcasecmp(msg, STR("VERSION")))
-    strcpy(text, STR("VERSION shows client type, version and environment"));
-  else if (!egg_strcasecmp(msg, STR("XLINK")))
-    strcpy(text, STR("XLINK x-filez rule"));
-  else if (!egg_strcasecmp(msg, STR("IDENT")))
-    strcpy(text, STR("IDENT change userhost of userlist"));
-  else if (!egg_strcasecmp(msg, STR("TIME")))
-    strcpy(text, STR("TIME tells you the time on the user's host"));
-  else if (!egg_strcasecmp(msg, STR("UPTIME")))
-    strcpy(text, STR("UPTIME my uptime"));
+  if (!text[0]) {
+    strcpy(buf, STR("SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information"));
+  } else if (!egg_strcasecmp(text, STR("UNBAN")))
+    strcpy(buf, STR("UNBAN unbans the person from channel"));
+  else if (!egg_strcasecmp(text, STR("OPS")))
+    strcpy(buf, STR("OPS ops the person if on userlist"));
+  else if (!egg_strcasecmp(text, STR("ECHO")))
+    strcpy(buf, STR("ECHO returns the arguments it receives"));
+  else if (!egg_strcasecmp(text, STR("WHOAMI")))
+    strcpy(buf, STR("WHOAMI user list information"));
+  else if (!egg_strcasecmp(text, STR("INVITE")))
+    strcpy(buf, STR("INVITE invite to channel specified"));
+  else if (!egg_strcasecmp(text, STR("PING")))
+    strcpy(buf, STR("PING returns the arguments it receives"));
+  else if (!egg_strcasecmp(text, STR("UTC")))
+    strcpy(buf, STR("UTC substitutes the local timezone"));
+  else if (!egg_strcasecmp(text, STR("XDCC")))
+    strcpy(buf, STR("XDCC checks cdcc info for you"));
+  else if (!egg_strcasecmp(text, STR("BDCC")))
+    strcpy(buf, STR("BDCC checks cdcc info for you"));
+  else if (!egg_strcasecmp(text, STR("CDCC")))
+    strcpy(buf, STR("CDCC checks cdcc info for you"));
+  else if (!egg_strcasecmp(text, STR("DCC")))
+    strcpy(buf, STR("DCC requests a direct_client_connection"));
+  else if (!egg_strcasecmp(text, STR("ACTION")))
+    strcpy(buf, STR("ACTION contains action descriptions for atmosphere"));
+  else if (!egg_strcasecmp(text, STR("FINGER")))
+    strcpy(buf, STR("FINGER shows real name, login name and idle time of user"));
+  else if (!egg_strcasecmp(text, STR("ERRMSG")))
+    strcpy(buf, STR("ERRMSG returns error messages"));
+  else if (!egg_strcasecmp(text, STR("USERINFO")))
+    strcpy(buf, STR("USERINFO returns user settable information"));
+  else if (!egg_strcasecmp(text, STR("CLIENTINFO")))
+    strcpy(buf, STR("CLIENTINFO gives information about available CTCP commands"));
+  else if (!egg_strcasecmp(text, STR("SED")))
+    strcpy(buf, STR("SED contains simple_encrypted_data"));
+  else if (!egg_strcasecmp(text, "OP"))
+    strcpy(buf, STR("OP ops the person if on userlist"));
+  else if (!egg_strcasecmp(text, STR("VERSION")))
+    strcpy(buf, STR("VERSION shows client type, version and environment"));
+  else if (!egg_strcasecmp(text, STR("XLINK")))
+    strcpy(buf, STR("XLINK x-filez rule"));
+  else if (!egg_strcasecmp(text, STR("IDENT")))
+    strcpy(buf, STR("IDENT change userhost of userlist"));
+  else if (!egg_strcasecmp(text, STR("TIME")))
+    strcpy(buf, STR("TIME tells you the time on the user's host"));
+  else if (!egg_strcasecmp(text, STR("UPTIME")))
+    strcpy(buf, STR("UPTIME my uptime"));
   else {
-    dprintf(DP_HELP, STR("NOTICE %s :\001ERRMSG %s is not a valid function\001\n"), nick, msg);
+    dprintf(DP_HELP, STR("NOTICE %s :\001ERRMSG %s is not a valid function\001\n"), nick, text);
     return 0;
   }
-  dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, text);
+  dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, buf);
   return 1;
 }
 
-static int ctcp_TIME(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   char tms[81];
 
@@ -643,10 +647,8 @@ static int ctcp_TIME(char *nick, char *uhost, char *handle, char *object, char *
 }
 
 
-static int ctcp_CHAT(char *nick, char *uhost, char *handle, char *object, char *keyword, char *text)
+static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-
-  struct userrec *u = get_user_by_handle(userlist, handle);
   int i, ix = (-1);
 
   if (!ischanhub())
@@ -790,7 +792,8 @@ char *ctcp_start(Function * global_funcs)
   }
   scriptchanged();
 
-  add_builtins(H_ctcp, myctcp);
+  BT_ctcp = find_bind_table2("ctcp");
+  if (BT_ctcp) add_builtins2(BT_ctcp, myctcp);
   add_hook(HOOK_MINUTELY, (Function) ctcp_minutely);
 #endif /* LEAF */
   add_cfg(&CFG_CLOAK_SCRIPT);

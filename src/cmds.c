@@ -18,7 +18,6 @@
 extern struct chanset_t	 *chanset;
 extern struct dcc_t	 *dcc;
 extern struct userrec	 *userlist;
-extern tcl_timer_t	 *timer, *utimer;
 extern int		 dcc_total, remote_boots, backgrd, 
 			 do_restart, conmask, must_be_owner,
 			 strict_host, quiet_save, cfg_count,
@@ -44,7 +43,7 @@ extern struct cfg_entry  CFG_MOTD, **cfg;
 extern tand_t             *tandbot;
 
 static char		 *btos(unsigned long);
-mycmds 			 cmds[500]; //the list of dcc cmds for help system
+mycmds 			 cmdlist[500]; //the list of dcc cmds for help system
 int    			 cmdi = 0;
 
 #ifdef HUB
@@ -764,15 +763,15 @@ static void cmd_nohelp(struct userrec *u, int idx, char *par)
   char *buf = nmalloc(1);
   buf[0] = 0;
 
-  qsort(cmds, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
+  qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   
   for (i = 0; i < cmdi; i++) {
     int o, found = 0;
     for (o = 0; (help[o].cmd) && (help[o].desc); o++)
-      if (!egg_strcasecmp(help[o].cmd, cmds[i].name)) found++;
+      if (!egg_strcasecmp(help[o].cmd, cmdlist[i].name)) found++;
     if (!found) {
-      buf = nrealloc(buf, strlen(buf) + 2 + strlen(cmds[i].name) + 1);
-      strcat(buf, cmds[i].name);
+      buf = nrealloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
+      strcat(buf, cmdlist[i].name);
       strcat(buf, ", ");
     }
   }
@@ -804,7 +803,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   }
   if (!nowild)
     dprintf(idx, STR("Showing help topics matching '%s' for flags: (%s)\n"), match, flg);
-  qsort(cmds, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
+  qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   buf[0] = 0;
   /* even if we have nowild, we loop to conserve code/space */
   while (!done) {
@@ -816,12 +815,12 @@ static void cmd_help(struct userrec *u, int idx, char *par)
       done = 1;
 
     for (n = 0; n < cmdi; n++) { /* loop each command */
-      if (!flagrec_ok(&cmds[n].flags, &fr) || !wild_match(match, cmds[n].name))
+      if (!flagrec_ok(&cmdlist[n].flags, &fr) || !wild_match(match, cmdlist[n].name))
         continue;
       fnd++;
       if (nowild) {
         flg[0] = 0;
-        build_flags(flg, &(cmds[n].flags), NULL);
+        build_flags(flg, &(cmdlist[n].flags), NULL);
         dprintf(idx, STR("Showing you help for '%s' (%s):\n"), match, flg);
         for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++) {
           if (!egg_strcasecmp(match, help[hi].cmd)) {
@@ -835,7 +834,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
         break;
       } else {
         flg[0] = 0;
-        build_flags(flg, &(cmds[n].flags), NULL);
+        build_flags(flg, &(cmdlist[n].flags), NULL);
         if (!strcmp(flg, flag)) {
           if (first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
@@ -847,7 +846,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
             /* we dumped the buf to dprintf, now start a new one... */
             sprintf(buf, "  ");
           }
-          sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmds[n].name);
+          sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmdlist[n].name);
           first = 0;
           end = 0;
           i++;
@@ -2012,12 +2011,6 @@ static void cmd_trace(struct userrec *u, int idx, char *par)
   simple_sprintf(x, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, botnetnick);
   simple_sprintf(y, ":%d", now);
   botnet_send_trace(i, x, par, y);
-}
-
-static void cmd_binds(struct userrec *u, int idx, char *par)
-{
-  putlog(LOG_CMDS, "*", STR("#%s# binds %s"), dcc[idx].nick, par);
-  tell_binds(idx, par);
 }
 #endif /* HUB */
 
@@ -4054,6 +4047,43 @@ static void cmd_whoami(struct userrec *u, int idx, char *par)
   dprintf(idx, "You are %s@%s.\n", dcc[idx].nick, botnetnick);
 }
 
+static void cmd_quit(struct userrec *u, int idx, char *text)
+{
+	if (dcc[idx].u.chat->channel >= 0 && dcc[idx].u.chat->channel < GLOBAL_CHANS) {
+		check_tcl_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock, dcc[idx].u.chat->channel);
+	}
+	check_tcl_chof(dcc[idx].nick, dcc[idx].sock);
+	dprintf(idx, "*** See you later cowboy!\n\n");
+	flush_lines(idx, dcc[idx].u.chat);
+	putlog(LOG_MISC, "*", "DCC connection closed (%s!%s)", dcc[idx].nick, dcc[idx].host);
+	if (dcc[idx].u.chat->channel >= 0) {
+		chanout_but(-1, dcc[idx].u.chat->channel, "*** %s left the party line%s%s\n", dcc[idx].nick, text[0] ? ": " : ".", text);
+		if (dcc[idx].u.chat->channel < 100000) {
+			botnet_send_part_idx(idx, text);
+		}
+	}
+
+	if (dcc[idx].u.chat->su_nick) {
+		dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
+		dcc[idx].type = &DCC_CHAT;
+		dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);
+		nfree(dcc[idx].u.chat->su_nick);
+		dcc[idx].u.chat->su_nick = NULL;
+		dcc_chatter(idx);
+		if (dcc[idx].u.chat->channel < 100000 && dcc[idx].u.chat->channel >= 0) {
+			botnet_send_join_idx(idx, -1);
+		}
+	}
+	else if ((dcc[idx].sock != STDOUT) || backgrd) {
+		killsock(dcc[idx].sock);
+		lostdcc(idx);
+	}
+	else {
+		dprintf(DP_STDOUT, "\n### SIMULATION RESET\n\n");
+		dcc_chatter(idx);
+	}
+}
+
 /* DCC CHAT COMMANDS
  */
 /* Function call should be:
@@ -4078,7 +4108,6 @@ cmd_t C_dcc[] =
   {"back",		"",	(Function) cmd_back,		NULL},
 #ifdef HUB
   {"backup",		"m|m",	(Function) cmd_backup,		NULL},
-  {"binds",		"a",	(Function) cmd_binds,		NULL},
   {"boot",		"m",	(Function) cmd_boot,		NULL},
   {"botconfig",		"n",	(Function) cmd_botconfig,	NULL},
   {"botinfo",		"",	(Function) cmd_botinfo,		NULL},
@@ -4133,7 +4162,7 @@ cmd_t C_dcc[] =
   {"secpass",		"",	(Function) cmd_secpass,		NULL},
   {"nick",		"",	(Function) cmd_handle,		NULL,		1},
   {"page",		"",	(Function) cmd_page,		NULL},
-  {"quit",		"",	(Function) NULL,		NULL},
+  {"quit",		"",	(Function) cmd_quit,		NULL},
   {"relay",		"i",	(Function) cmd_relay,		NULL},
 #ifdef HUB
   {"reload",		"m|m",	(Function) cmd_reload,		NULL},

@@ -73,12 +73,6 @@ static int kick_method;
 static int optimize_kicks;
 
 
-static p_tcl_bind_list H_raw, H_msg, 
-		       H_ctcr, H_ctcp;
-#ifdef S_AUTH
-static p_tcl_bind_list H_msgc;
-#endif /* S_AUTH */
-
 static void empty_msgq(void);
 static void next_server(int *, char *, unsigned int *, char *);
 static void disconnect_server(int);
@@ -91,6 +85,16 @@ static void purge_kicks(struct msgq_head *);
 static int deq_kick(int);
 static void msgq_clear(struct msgq_head *qh);
 static int stack_limit;
+
+/* New bind tables. */
+static bind_table_t *BT_raw, *BT_msg;
+static bind_table_t *BT_ctcr, *BT_ctcp;
+#ifdef S_AUTH
+static bind_table_t *BT_msgc;
+#endif /* S_AUTH */
+
+/* Imported bind tables. */
+static bind_table_t *BT_dcc;
 
 #include "servmsg.c"
 
@@ -1167,71 +1171,6 @@ static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
     pass[0] = 0;
 }
 
-static int server_6char STDVAR
-{
-  Function F = (Function) cd;
-  char x[20];
-
-  BADARGS(7, 7, " nick user@host handle dest/chan keyword/nick text");
-  CHECKVALIDITY(server_6char);
-  egg_snprintf(x, sizeof x, "%d",
-	       F(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]));
-  Tcl_AppendResult(irp, x, NULL);
-  return TCL_OK;
-}
-
-static int server_5char STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(6, 6, " nick user@host handle dest/channel text");
-  CHECKVALIDITY(server_5char);
-  F(argv[1], argv[2], argv[3], argv[4], argv[5]);
-  return TCL_OK;
-}
-
-static int server_2char STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(3, 3, " nick msg");
-  CHECKVALIDITY(server_2char);
-  F(argv[1], argv[2]);
-  return TCL_OK;
-}
-
-static int server_msg STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(5, 5, " nick uhost hand buffer");
-  CHECKVALIDITY(server_msg);
-  F(argv[1], argv[2], get_user_by_handle(userlist, argv[3]), argv[4]);
-  return TCL_OK;
-}
-
-#ifdef S_AUTH
-static int server_msgc STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(6, 6, " nick uhost hand buffer chan");
-  CHECKVALIDITY(server_msgc);
-  F(argv[1], argv[2], get_user_by_handle(userlist, argv[3]), argv[4], argv[5]);
-  return TCL_OK;
-}
-#endif /* S_AUTH */
-
-static int server_raw STDVAR
-{
-  Function F = (Function) cd;
-
-  BADARGS(4, 4, " from code args");
-  CHECKVALIDITY(server_raw);
-  Tcl_AppendResult(irp, int_to_base10(F(argv[1], argv[3])), NULL);
-  return TCL_OK;
-}
-
 static void do_nettype(void)
 {
   switch (net_type) {
@@ -1309,20 +1248,18 @@ static void dcc_chat_hostresolved(int);
 
 /* This only handles CHAT requests, otherwise it's handled in filesys.
  */
-static int ctcp_DCC_CHAT(char *nick, char *from, char *handle,
-			 char *object, char *keyword, char *text)
+static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char *action, *param, *ip, *prt, buf[512], *msg = buf;
+  char *action, *param, *ip, *prt;
   int i, ok;
-  struct userrec *u = get_user_by_handle(userlist, handle);
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
+  
   if (!ischanhub())
     return 0;
-  strcpy(msg, text);
-  action = newsplit(&msg);
-  param = newsplit(&msg);
-  ip = newsplit(&msg);
-  prt = newsplit(&msg);
+  action = newsplit(&text);
+  param = newsplit(&text);
+  ip = newsplit(&text);
+  prt = newsplit(&text);
   if (egg_strcasecmp(action, "CHAT") || egg_strcasecmp(object, botname) || !u)
     return 0;
   get_user_flagrec(u, &fr, 0);
@@ -1656,16 +1593,16 @@ static Function server_table[] =
   (Function) & default_port,	/* int					*/
   (Function) & server_online,	/* int					*/
   (Function) 0,	
-  (Function) & H_raw,		/* p_tcl_bind_list			*/
+  (Function) 0,
   /* 28 - 31 */
   (Function) 0,
-  (Function) & H_msg,		/* p_tcl_bind_list			*/
+  (Function) 0,
   (Function) 0,
   (Function) 0,
   /* 32 - 35 */
   (Function) 0,
-  (Function) & H_ctcp,		/* p_tcl_bind_list			*/
-  (Function) & H_ctcr,		/* p_tcl_bind_list			*/
+  (Function) 0,	
+  (Function) 0,
   (Function) ctcp_reply,
   /* 36 - 38 */
   (Function) 0,	
@@ -1675,9 +1612,6 @@ static Function server_table[] =
   (Function) & curserv,
   (Function) cursrvname,
   (Function) botrealname,
-#ifdef S_AUTH
-  (Function) & H_msgc,          /* p_tcl_bind_list */
-#endif /* S_AUTH */
 
 };
 
@@ -1740,16 +1674,21 @@ char *server_start(Function *global_funcs)
   server_table[4] = (Function) botname;
   module_register(MODULE_NAME, server_table, 1, 2);
 
-  H_raw = add_bind_table("raw", HT_STACKABLE, server_raw);
+        /* Import bind tables. */
+        BT_dcc = find_bind_table2("dcc");
+
+        BT_msg = add_bind_table2("msg", 4, "ssUs", 0, BIND_USE_ATTR);
 #ifdef S_AUTH
-  H_msgc = add_bind_table("msgc", 0, server_msgc);
+	BT_msgc = add_bind_table2("msgc", 5, "ssUss", 0, BIND_USE_ATTR); 
 #endif /* S_AUTH */
-  H_msg = add_bind_table("msg", 0, server_msg);
-  H_ctcr = add_bind_table("ctcr", HT_STACKABLE, server_6char);
-  H_ctcp = add_bind_table("ctcp", HT_STACKABLE, server_6char);
-  add_builtins(H_raw, my_raw_binds);
-  add_builtins(H_dcc, C_dcc_serv);
-  add_builtins(H_ctcp, my_ctcps);
+        BT_raw = add_bind_table2("raw", 3, "ss", MATCH_MASK, BIND_STACKABLE);
+	BT_ctcr = add_bind_table2("ctcr", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+	BT_ctcp = add_bind_table2("ctcp", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+
+  add_builtins2(BT_raw, my_raw_binds);
+  add_builtins2(BT_dcc, C_dcc_serv);
+  add_builtins2(BT_ctcp, my_ctcps);
+
   my_tcl_ints[0].val = &use_console_r;
   add_tcl_ints(my_tcl_ints);
   add_tcl_commands(my_tcl_cmds);

@@ -10,6 +10,7 @@
 #include "modules.h"
 #include "tandem.h"
 #include <ctype.h>
+#include "core_binds.h"
 
 extern struct dcc_t	*dcc;
 #ifdef S_AUTH
@@ -132,6 +133,7 @@ void (*shareupdatein) (int, char *) = null_share;
 void (*qserver) (int, char *, int) = (void (*)(int, char *, int)) null_func;
 void (*add_mode) () = null_func;
 int (*match_noterej) (struct userrec *, char *) = (int (*)(struct userrec *, char *)) false_func;
+int (*storenote)(char *from, char *to, char *msg, int idx, char *who, int bufsize) = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
 int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
 int (*rfc_ncasecmp) (const char *, const char *, int) = _rfc_ncasecmp;
 int (*rfc_toupper) (int) = _rfc_toupper;
@@ -165,13 +167,13 @@ Function global_table[] =
   (Function) module_depend,
   (Function) module_undepend,
   /* 8 - 11 */
-  (Function) add_bind_table,
-  (Function) del_bind_table,
-  (Function) find_bind_table,
-  (Function) check_tcl_bind,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   /* 12 - 15 */
-  (Function) add_builtins,
-  (Function) rem_builtins,
+  (Function) 0,
+  (Function) 0,
   (Function) add_tcl_commands,
   (Function) rem_tcl_commands,
   /* 16 - 19 */
@@ -245,7 +247,7 @@ Function global_table[] =
   (Function) chatout,
   (Function) chanout_but,
   /* 72 - 75 */
-  (Function) check_validity,
+  (Function) 0,
   (Function) list_delete,
   (Function) list_append,
   (Function) list_contains,
@@ -265,7 +267,7 @@ Function global_table[] =
   (Function) _get_data_ptr,
   (Function) open_telnet,
   /* 88 - 91 */
-  (Function) check_tcl_event,
+  (Function) check_bind_event,
   (Function) egg_memcpy,
   (Function) my_atoul,
   (Function) my_strcpy,
@@ -372,23 +374,23 @@ Function global_table[] =
   /* 172 - 175 */
   (Function) add_hook,
   (Function) del_hook,
-  (Function) & H_dcc,		/* p_tcl_bind_list *			*/
+  (Function) 0,
   (Function) 0,
   /* 176 - 179 */
-  (Function) & H_chon,		/* p_tcl_bind_list *			*/
-  (Function) & H_chof,		/* p_tcl_bind_list *			*/
-  (Function) & H_load,		/* p_tcl_bind_list *			*/
-  (Function) & H_unld,		/* p_tcl_bind_list *			*/
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   /* 180 - 183 */
-  (Function) & H_chat,		/* p_tcl_bind_list *			*/
-  (Function) & H_act,		/* p_tcl_bind_list *			*/
-  (Function) & H_bcst,		/* p_tcl_bind_list *			*/
-  (Function) & H_bot,		/* p_tcl_bind_list *			*/
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   /* 184 - 187 */
-  (Function) & H_link,		/* p_tcl_bind_list *			*/
-  (Function) & H_disc,		/* p_tcl_bind_list *			*/
-  (Function) & H_away,		/* p_tcl_bind_list *			*/
-  (Function) & H_nkch,		/* p_tcl_bind_list *			*/
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   /* 188 - 191 */
   (Function) & USERENTRY_BOTADDR,	/* struct user_entry_type *	*/
   (Function) & USERENTRY_BOTFL,		/* struct user_entry_type *	*/
@@ -435,7 +437,7 @@ Function global_table[] =
   (Function) 0, /* ginvite_total -- UNUSED! (Eule) */
   (Function) 0, /* gexempt_total -- UNUSED! (Eule) */
   /* 224 - 227 */
-  (Function) & H_event,		/* p_tcl_bind_list *			*/
+  (Function) 0,
   (Function) & use_exempts,	/* int					*/
   (Function) & use_invites,	/* int					*/
   (Function) & force_expire,	/* int					*/
@@ -596,20 +598,29 @@ Function global_table[] =
   (Function) & CFG_MSGOP,
   (Function) & CFG_MSGPASS,
   (Function) & CFG_MSGINVITE,
-  (Function) & CFG_MSGIDENT
+  (Function) & CFG_MSGIDENT,
 #else /* !S_MSGCMDS */
   (Function) 0,
   (Function) 0,
   (Function) 0,
-  (Function) 0
+  (Function) 0,
 #endif /* S_MSGCMDS */
-
+  (Function) add_bind_table2,
+  (Function) del_bind_table2,
+  (Function) add_builtins2,
+  (Function) rem_builtins2,
+  (Function) find_bind_table2,
+  (Function) check_bind
 
 };
+
+static bind_table_t *BT_load;
 
 void init_modules(void)
 {
   int i;
+
+  BT_load = add_bind_table2("load", 1, "s", MATCH_MASK, 0);
 
   module_list = nmalloc(sizeof(module_entry));
   module_list->name = nmalloc(8);
@@ -699,7 +710,7 @@ const char *module_load(char *name)
     nfree(p);
     return e;
   }
-  check_tcl_load(name);
+  check_bind(BT_load, name, NULL, name);
   return NULL;
 }
 
@@ -877,6 +888,10 @@ void add_hook(int hook_num, Function func)
       if (match_noterej == (int (*)(struct userrec *, char *))false_func)
 	match_noterej = func;
       break;
+    case HOOK_STORENOTE:
+	if (func == NULL) storenote = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
+	else storenote = func;
+	break;
     case HOOK_DNS_HOSTBYIP:
       if (dns_hostbyip == block_dns_hostbyip)
 	dns_hostbyip = (void (*)(IP)) func;
@@ -931,6 +946,9 @@ void del_hook(int hook_num, Function func)
       if (match_noterej == (int (*)(struct userrec *, char *))func)
 	match_noterej = false_func;
       break;
+    case HOOK_STORENOTE:
+	if (storenote == func) storenote = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
+	break;
     case HOOK_DNS_HOSTBYIP:
       if (dns_hostbyip == (void (*)(IP)) func)
 	dns_hostbyip = block_dns_hostbyip;

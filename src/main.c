@@ -33,6 +33,8 @@
 #include "chan.h"
 #include "modules.h"
 #include "tandem.h"
+#include "egg_timer.h"
+#include "core_binds.h"
 
 #ifdef CYGWIN_HACKS
 #include <windows.h>
@@ -62,8 +64,6 @@ extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
 extern Tcl_Interp	*interp;
-extern tcl_timer_t	*timer,
-			*utimer;
 
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
@@ -493,7 +493,7 @@ static void core_secondly()
 #ifdef CRAZY_TRACE 
   if (!attached) crazy_trace();
 #endif /* CRAZY_TRACE */
-  do_check_timers(&utimer);	/* Secondly timers */
+  call_hook(HOOK_SECONDLY);	/* Will be removed later */
   if (fork_interval && backgrd) {
     if ((now - lastfork) > fork_interval)
       do_fork();
@@ -595,8 +595,7 @@ static void core_minutely()
 #ifdef LEAF
   check_mypid();
 #endif
-  check_tcl_time(&nowtm);
-  do_check_timers(&timer);
+  check_bind_time(&nowtm);
 /*     flushlogs(); */
 }
 
@@ -613,17 +612,17 @@ static void core_halfhourly()
 
 static void event_rehash()
 {
-  check_tcl_event("rehash");
+  check_bind_event("rehash");
 }
 
 static void event_prerehash()
 {
-  check_tcl_event("prerehash");
+  check_bind_event("prerehash");
 }
 
 static void event_save()
 {
-  check_tcl_event("save");
+  check_bind_event("save");
 }
 
 static void event_resettraffic()
@@ -645,7 +644,6 @@ static void event_resettraffic()
   itraffic_trans_today = otraffic_trans_today = 0;
 }
 
-void kill_tcl();
 extern module_entry *module_list;
 void restart_chons();
 
@@ -655,15 +653,7 @@ void check_static(char *, char *(*)());
 int init_mem(), init_dcc_max(), init_userent(), init_misc(), init_auth(), init_config(), init_bots(),
  init_net(), init_modules(), init_tcl(int, char **), init_botcmd(), init_settings();
 
-static inline void garbage_collect(void)
-{
-  static u_8bit_t	run_cnt = 0;
-
-  if (run_cnt == 3)
-    garbage_collect_tclhash();
-  else
-    run_cnt++;
-}
+void binds_init();
 
 int crontab_exists() {
   char buf[2048], *out=NULL;
@@ -927,6 +917,7 @@ void check_trace_start()
 
 int main(int argc, char **argv)
 {
+  egg_timeval_t howlong;
   int xx, i;
 #ifdef LEAF
   int x = 1;
@@ -1005,6 +996,8 @@ int main(int argc, char **argv)
 
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
+  binds_init();
+  core_binds_init();
   init_dcc_max();
   init_userent();
   init_misc();
@@ -1371,7 +1364,9 @@ int main(int argc, char **argv)
   then = now;
   online_since = now;
   autolink_cycle(NULL);		/* Hurry and connect to tandem bots */
-  add_hook(HOOK_SECONDLY, (Function) core_secondly);
+  howlong.sec = 1;
+  howlong.usec = 0;
+  timer_create_repeater(&howlong, (Function) core_secondly);
   add_hook(HOOK_10SECONDLY, (Function) core_10secondly);
   add_hook(HOOK_30SECONDLY, (Function) expire_simuls);
   add_hook(HOOK_MINUTELY, (Function) core_minutely);
@@ -1393,8 +1388,9 @@ int main(int argc, char **argv)
      * calls to periodic_timers
      */
     now = time(NULL);
+    timer_run();
     if (now != then) {		/* Once a second */
-      call_hook(HOOK_SECONDLY);
+/*      call_hook(HOOK_SECONDLY); */
       then = now;
     }
 
@@ -1410,9 +1406,6 @@ int main(int argc, char **argv)
     } else
       socket_cleanup--;
 
-    /* Free unused structures. */
-    garbage_collect();
-    
     buf[0] = 0;
     xx = sockgets(buf, &i); 
     if (xx >= 0) {		/* Non-error */

@@ -28,15 +28,15 @@ enum dccsend_types {
 /* 12 - 15 */
 #define wipe_tmp_filename(a,b) (((void (*) (char *,int))transfer_funcs[12])(a,b))
 #define DCC_GET (*(struct dcc_table *)(transfer_funcs[13]))
-#define H_rcvd (*(p_tcl_bind_list*)(transfer_funcs[14]))
-#define H_sent (*(p_tcl_bind_list*)(transfer_funcs[15]))
+/* UNUSED 14 */
+/* UNUSED 15 */
 /* 16 - 19 */
 #define USERENTRY_FSTAT (*(struct user_entry_type *)(transfer_funcs[16]))
 #define quiet_reject (*(int *)(transfer_funcs[17]))
 #define raw_dcc_resend(a,b,c,d) (((int (*) (char *,char *,char *,char *))transfer_funcs[18])(a,b,c,d))
-#define H_lost (*(p_tcl_bind_list*)(transfer_funcs[19]))
+/* UNUSED 19 */
 /* 20 - 23 */
-#define H_tout (*(p_tcl_bind_list*)(transfer_funcs[20]))
+/* UNUSED 20 */
 
 #else	/* MAKING_TRANSFER */
 

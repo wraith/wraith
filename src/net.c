@@ -27,6 +27,7 @@
 #  include <unistd.h>
 #endif /* HAVE_UNITSTD_H */
 #include <setjmp.h>
+#include "egg_timer.h"
 
 #if !HAVE_GETDTABLESIZE
 #  ifdef FD_SETSIZE
@@ -1090,15 +1091,23 @@ static int sockread(char *s, int *len)
   int fds, i, x, fdtmp;
   struct timeval t;
   int grab = SGRAB;
+  egg_timeval_t howlong;
 
   fds = getdtablesize();
 #ifdef FD_SETSIZE
   if (fds > FD_SETSIZE)
     fds = FD_SETSIZE;		/* Fixes YET ANOTHER freebsd bug!!! */
 #endif /* FD_SETSIZE */
-  /* timeout: 1 sec */
-  t.tv_sec = 1;
-  t.tv_usec = 0;
+  if (timer_get_shortest(&howlong)) {
+    /* No timer, default to 1 second. */
+    t.tv_sec = 1;
+    t.tv_usec = 0;
+  }
+  else {
+    t.tv_sec = howlong.sec;
+    t.tv_usec = howlong.usec;
+  }
+
   FD_ZERO(&fd);
   
   for (i = 0; i < MAXSOCKS; i++)

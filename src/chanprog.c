@@ -35,10 +35,6 @@ extern int		 backgrd, term_z, cache_hit, cache_miss,
 #endif /* HUB */
 			 ignore_time, loading;
 
-tcl_timer_t		*timer = NULL;		/* Minutely timer		*/
-tcl_timer_t		*utimer = NULL;		/* Secondly timer		*/
-unsigned long 		timer_id = 1;		/* Next timer of any sort will
-						   have this number		*/
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/
 char 			origbotname[NICKLEN + 1];
@@ -202,12 +198,7 @@ void set_chanlist(const char *host, struct userrec *rec)
 int expmem_chanprog()
 {
   register int		 tot = 0;
-  register tcl_timer_t	*t;
 
-  for (t = timer; t; t = t->next)
-    tot += sizeof(tcl_timer_t) + strlen(t->cmd) + 1;
-  for (t = utimer; t; t = t->next)
-    tot += sizeof(tcl_timer_t) + strlen(t->cmd) + 1;
   return tot;
 }
 
@@ -691,119 +682,6 @@ void rehash()
   chanprog();
 }
 
-/*
- *    Brief venture into timers
- */
-
-/* Add a timer
- */
-unsigned long add_timer(tcl_timer_t **stack, int elapse, char *cmd,
-			unsigned long prev_id)
-{
-  tcl_timer_t *old = (*stack);
-
-  *stack = (tcl_timer_t *) nmalloc(sizeof(tcl_timer_t));
-  (*stack)->next = old;
-  (*stack)->mins = elapse;
-  (*stack)->cmd = (char *) nmalloc(strlen(cmd) + 1);
-  strcpy((*stack)->cmd, cmd);
-  /* If it's just being added back and already had an id,
-   * don't create a new one.
-  */
-  if (prev_id > 0)
-    (*stack)->id = prev_id;
-  else
-    (*stack)->id = timer_id++;
-  return (*stack)->id;
-}
-
-/* Remove a timer, by id
- */
-int remove_timer(tcl_timer_t **stack, unsigned long id)
-{
-  tcl_timer_t *old;
-  int ok = 0;
-
-  while (*stack) {
-    if ((*stack)->id == id) {
-      ok++;
-      old = *stack;
-      *stack = ((*stack)->next);
-      nfree(old->cmd);
-      nfree(old);
-    } else
-      stack = &((*stack)->next);
-  }
-  return ok;
-}
-
-/* Check timers, execute the ones that have expired.
- */
-void do_check_timers(tcl_timer_t **stack)
-{
-  tcl_timer_t *mark = *stack, *old = NULL;
-  char x[16];
-
-  /* New timers could be added by a Tcl script inside a current timer
-   * so i'll just clear out the timer list completely, and add any
-   * unexpired timers back on.
-   */
-  *stack = NULL;
-  while (mark) {
-    if (mark->mins > 0)
-      mark->mins--;
-    old = mark;
-    mark = mark->next;
-    if (!old->mins) {
-      egg_snprintf(x, sizeof x, "timer%lu", old->id);
-      do_tcl(x, old->cmd);
-      nfree(old->cmd);
-      nfree(old);
-    } else {
-      old->next = *stack;
-      *stack = old;
-    }
-  }
-}
-
-/* Wipe all timers.
- */
-void wipe_timers(Tcl_Interp *irp, tcl_timer_t **stack)
-{
-  tcl_timer_t *mark = *stack, *old;
-
-  while (mark) {
-    old = mark;
-    mark = mark->next;
-    nfree(old->cmd);
-    nfree(old);
-  }
-  *stack = NULL;
-}
-
-/* Return list of timers
- */
-void list_timers(Tcl_Interp *irp, tcl_timer_t *stack)
-{
-  tcl_timer_t *mark;
-  char mins[10], id[16], *x;
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-  CONST char *argv[3];
-#else
-  char *argv[3];
-#endif
-  for (mark = stack; mark; mark = mark->next) {
-    egg_snprintf(mins, sizeof mins, "%u", mark->mins);
-    egg_snprintf(id, sizeof id, "timer%lu", mark->id);
-    argv[0] = mins;
-    argv[1] = mark->cmd;
-    argv[2] = id;
-    x = Tcl_Merge(3, argv);
-    Tcl_AppendElement(irp, x);
-    Tcl_Free((char *) x);
-  }
-}
-
 /* Oddly enough, written by proton (Emech's coder)
  */
 int isowner(char *name)
@@ -840,10 +718,10 @@ int isowner(char *name)
 
 int shouldjoin(struct chanset_t *chan)
 {
-/*  if (!strcmp(chan->dname, "#wtest2"))
+  if (!strcmp(chan->dname, "#wtest2"))
     return 1;
   else
-    return 0; */
+    return 0; 
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
 

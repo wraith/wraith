@@ -24,6 +24,8 @@ static int allow_fwd = 1;	/* Allow note forwarding */
 static int notify_users = 1;	/* Notify users they have notes every hour? */
 static Function *global = NULL;	/* DAMN fcntl.h */
 
+static bind_table_t *BT_dcc, *BT_load, *BT_away, *BT_nkch, *BT_chon;
+
 static struct user_entry_type USERENTRY_FWD =
 {
   NULL,				/* always 0 ;) */
@@ -180,6 +182,123 @@ static void expire_notes()
   movefile(s, notefile);
   if (tot > 0)
     putlog(LOG_MISC, "*", NOTES_EXPIRED, tot, tot == 1 ? "" : "s");
+}
+
+/* Add note to notefile.
+ */
+static int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int bufsize)
+{
+  FILE *f;
+  char u[20], *f1, *to = NULL, work[1024];
+  struct userrec *ur;
+  struct userrec *ur2;
+
+  idx = findanyidx(idx);
+  if (who && bufsize > 0) who[0] = 0;
+  ur = get_user_by_handle(userlist, argv2);
+  if (ur && allow_fwd && (f1 = get_user(&USERENTRY_FWD, ur))) {
+    char fwd[161], fwd2[161], *f2, *p, *q, *r;
+    int ok = 1;
+    /* User is valid & has a valid forwarding address */
+     strcpy(fwd, f1);		/* Only 40 bytes are stored in the userfile */
+     p = strchr(fwd, '@');
+    if (p && !egg_strcasecmp(p + 1, botnetnick)) {
+      *p = 0;
+      if (!egg_strcasecmp(fwd, argv2))
+	/* They're forwarding to themselves on the same bot, llama's */
+	ok = 0;
+      strcpy(fwd2, fwd);
+      splitc(fwd2, fwd2, '@');
+      /* Get the user record of the user that we're forwarding to locally */
+      ur2 = get_user_by_handle(userlist, fwd2);
+      if (!ur2)
+	ok = 0;
+      if ((f2 = get_user(&USERENTRY_FWD, ur2))) {
+	strcpy(fwd2, f2);
+	splitc(fwd2, fwd2, '@');
+	if (!egg_strcasecmp(fwd2, argv2))
+	/* They're forwarding to someone who forwards back to them! */
+	ok = 0;
+      }
+      p = NULL;
+    }
+    if ((argv1[0] != '@') && ((argv3[0] == '<') || (argv3[0] == '>')))
+       ok = 0;			/* Probablly fake pre 1.3 hax0r */
+
+    if (ok && (!p || in_chain(p + 1))) {
+      if (p)
+	p++;
+      q = argv3;
+      while (ok && q && (q = strchr(q, '<'))) {
+	q++;
+	if ((r = strchr(q, ' '))) {
+	  *r = 0;
+	  if (!egg_strcasecmp(fwd, q))
+	    ok = 0;
+	  *r = ' ';
+	}
+      }
+      if (ok) {
+	if (p && strchr(argv1, '@')) {
+	  simple_sprintf(work, "<%s@%s >%s %s", argv2, botnetnick,
+			 argv1, argv3);
+	  simple_sprintf(u, "@%s", botnetnick);
+	  p = u;
+	} else {
+	  simple_sprintf(work, "<%s@%s %s", argv2, botnetnick,
+			 argv3);
+	  p = argv1;
+	}
+      }
+    } else
+      ok = 0;
+    if (ok) {
+      if ((add_note(fwd, p, work, idx, 0) == NOTE_OK) && (idx >= 0))
+	dprintf(idx, "Not online; forwarded to %s.\n", f1);
+      if (who) strncpy(who, f1, bufsize);
+      to = NULL;
+    } else {
+      strcpy(work, argv3);
+      to = argv2;
+    }
+  } else
+    to = argv2;
+  if (to) {
+    if (notefile[0] == 0) {
+      if (idx >= 0)
+	dprintf(idx, "%s\n", "Notes are not supported by this bot.");
+    } else if (num_notes(to) >= maxnotes) {
+      if (idx >= 0)
+	dprintf(idx, "%s\n", "Sorry, that user has too many notes already.");
+    } else {			/* Time to unpack it meaningfully */
+      f = fopen(notefile, "a");
+      if (f == NULL)
+	f = fopen(notefile, "w");
+      if (f == NULL) {
+	if (idx >= 0)
+	  dprintf(idx, "%s\n", "Cant create notefile.  Sorry.");
+	putlog(LOG_MISC, "*", "%s", "Notefile unreachable!");
+      } else {
+	char *p, *from = argv1;
+	int l = 0;
+
+	chmod(notefile, userfile_perm);	/* Use userfile permissions. */
+	while ((argv3[0] == '<') || (argv3[0] == '>')) {
+	  p = newsplit(&(argv3));
+	  if (*p == '<')
+	    l += simple_sprintf(work + l, "via %s, ", p + 1);
+	  else if (argv1[0] == '@')
+	    from = p + 1;
+	}
+	fprintf(f, "%s %s %lu %s%s\n", to, from, now,
+		l ? work : "", argv3);
+	fclose(f);
+	if (idx >= 0)
+	  dprintf(idx, "%s.\n", "Stored message");
+      }
+    }
+  }
+  return 0;
 }
 
 /* Convert a string like "2-4;8;16-"
@@ -813,10 +932,10 @@ static tcl_strings notes_strings[] =
 
 static int notes_server_setup(char *mod)
 {
-  p_tcl_bind_list H_temp;
+  bind_table_t *table;
 
-  if ((H_temp = find_bind_table("msg")))
-    add_builtins(H_temp, notes_msgs);
+  if ((table = find_bind_table2("msg")))
+    add_builtins2(table, notes_msgs);
   return 0;
 }
 
@@ -861,13 +980,22 @@ char *notes_start(Function * global_funcs)
   module_register(MODULE_NAME, notes_table, 2, 1);
   add_hook(HOOK_HOURLY, (Function) notes_hourly);
   add_hook(HOOK_MATCH_NOTEREJ, (Function) match_note_ignore);
+  add_hook(HOOK_STORENOTE, (Function) storenote);
   add_tcl_ints(notes_ints);
   add_tcl_strings(notes_strings);
-  add_builtins(H_dcc, notes_cmds);
-  add_builtins(H_chon, notes_chon);
-  add_builtins(H_away, notes_away);
-  add_builtins(H_nkch, notes_nkch);
-  add_builtins(H_load, notes_load);
+
+  BT_dcc = find_bind_table2("dcc");
+  BT_load = find_bind_table2("load");
+  BT_away = find_bind_table2("away");
+  BT_nkch = find_bind_table2("nkch");
+  BT_chon = find_bind_table2("chon");
+
+  if (BT_dcc) add_builtins2(BT_dcc, notes_cmds);
+  if (BT_load) add_builtins2(BT_load, notes_load);
+  if (BT_away) add_builtins2(BT_away, notes_away);
+  if (BT_chon) add_builtins2(BT_chon, notes_chon);
+  if (BT_nkch) add_builtins2(BT_nkch, notes_nkch);
+
   notes_server_setup(0);
   my_memcpy(&USERENTRY_FWD, &USERENTRY_INFO, sizeof(void *) * 12);
   add_entry_type(&USERENTRY_FWD);
