@@ -76,6 +76,9 @@ void check_processes();
 void detected(int, char *);
 void werr(int);
 char *werr_tostr(int);
+void crontab_del();
+int crontab_exists();
+void crontab_create(int);
 #endif /* !MAKING_MODS */
 
 

@@ -6,8 +6,6 @@
 extern int use_stderr;
 extern time_t now;
 
-int crontab_exists();
-void crontab_create(int);
 void fatal(const char *, int);
 #endif /* !MAKING_MODS */
 

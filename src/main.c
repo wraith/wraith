@@ -80,7 +80,6 @@ extern int		 dcc_total, conmask, cache_hit, cache_miss,
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
-extern Tcl_Interp	*interp;
 
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
@@ -630,64 +629,6 @@ int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
 
 void binds_init();
 
-int crontab_exists() {
-  char buf[2048] = "", *out = NULL;
-  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep \"%s\" | grep -v \"^#\""), binname);
-  if (shell_exec(buf, NULL, &out, NULL)) {
-
-    if (out && strstr(out, binname)) {
-      free(out);
-      return 1;
-    } else {
-      if (out)
-        free(out);
-      return 0;
-    }
-  } else
-    return (-1);
-}
-
-void crontab_create(int interval) {
-  char tmpfile[161] = "", buf[256] = "";
-  FILE *f;
-  int fd;
-
-  /* always use mkstemp() when handling temp files! -dizz */
-  egg_snprintf(tmpfile, sizeof tmpfile, "%s.crontab-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpfile)) == -1) {
-    unlink(tmpfile);
-    return;
-  } 
-
-  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), binname, tmpfile);
-  if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
-    buf[0] = 0;
-    if (interval == 1)
-      strcpy(buf, "*");
-    else {
-      int i = 1;
-      int si = random() % interval;
-
-      while (i < 60) {
-        if (buf[0])
-          sprintf(buf + strlen(buf), STR(",%i"), (i + si) % 60);
-        else
-          sprintf(buf, "%i", (i + si) % 60);
-        i += interval;
-      }
-    }
-    egg_snprintf(buf + strlen(buf), sizeof buf, STR(" * * * * %s > /dev/null 2>&1"), binname);
-    fseek(f, 0, SEEK_END);
-    fprintf(f, STR("\n%s\n"), buf);
-    fclose(f);
-    sprintf(buf, STR("crontab %s"), tmpfile);
-    shell_exec(buf, NULL, NULL, NULL);
-  }
-  close(fd);
-  unlink(tmpfile);
-
-}
-
 static void check_crontab()
 {
   int i = 0;
@@ -1094,7 +1035,7 @@ int main(int argc, char **argv)
             pscloak = 0;
           } else {
             newsplit(&temps);
-            Tcl_Eval(interp, temps);
+/*            Tcl_Eval(interp, temps); */
           }
         } else if (c[0] != '#') {  //now to parse nick/hosts
           /* we have the right uname/uid, safe to setup crontab now. */

@@ -3662,26 +3662,10 @@ static void cmd_netlast(struct userrec * u, int idx, char * par) {
 }
 #endif /* HUB */
 
-void crontab_show(struct userrec * u, int idx) {
+void crontab_show(struct userrec *u, int idx) {
   dprintf(idx, STR("Showing current crontab:\n"));
   if (!exec_str(idx, STR("crontab -l | grep -v \"^#\"")))
     dprintf(idx, STR("Exec failed"));
-}
-
-void crontab_del() {
-  char *tmpfile, *p, buf[2048];
-  tmpfile = malloc(strlen(binname) + 100);
-  strcpy(tmpfile, binname);
-  if (!(p = strrchr(tmpfile, '/')))
-    return;
-  p++;
-  strcpy(p, STR(".ctb"));
-  sprintf(buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s"), binname, tmpfile);
-  if (shell_exec(buf, NULL, NULL, NULL)) {
-    sprintf(buf, STR("crontab %s"), tmpfile);
-    shell_exec(buf, NULL, NULL, NULL);
-  }
-  unlink(tmpfile);
 }
 
 static void cmd_crontab(struct userrec *u, int idx, char *par) {
@@ -3694,7 +3678,7 @@ static void cmd_crontab(struct userrec *u, int idx, char *par) {
   }
   code=newsplit(&par);
   if (!strcmp(code, STR("status"))) {
-    i=crontab_exists();
+    i = crontab_exists();
     if (!i)
       dprintf(idx, STR("No crontab\n"));
     else if (i==1)
@@ -3705,7 +3689,7 @@ static void cmd_crontab(struct userrec *u, int idx, char *par) {
     crontab_show(u, idx);
   } else if (!strcmp(code, STR("delete"))) {
     crontab_del();
-    i=crontab_exists();
+    i = crontab_exists();
     if (!i)
       dprintf(idx, STR("No crontab\n"));
     else if (i==1)
@@ -3713,11 +3697,11 @@ static void cmd_crontab(struct userrec *u, int idx, char *par) {
     else
       dprintf(idx, STR("Error checking crontab status\n"));
   } else if (!strcmp(code, STR("new"))) {
-    i=atoi(par);
+    i = atoi(par);
     if ((i<=0) || (i>60))
       i=10;
     crontab_create(i);
-    i=crontab_exists();
+    i = crontab_exists();
     if (!i)
       dprintf(idx, STR("No crontab\n"));
     else if (i==1)
@@ -3787,7 +3771,7 @@ void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
     if (!scmd[0]) {
       char s[200];
       int i;
-      i=crontab_exists();
+      i = crontab_exists();
       if (!i)
         sprintf(s, STR("No crontab"));
       else if (i==1)

