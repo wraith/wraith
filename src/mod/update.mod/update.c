@@ -186,18 +186,17 @@ static void got_nu(char *botnick, char *code, char *par)
 
    if (newts > buildts) {
 #ifdef LEAF
-     struct bot_addr *bi = NULL, *obi = NULL;
-
-     obi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
-     bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+     struct bot_addr *obi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
+     struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
 
      bi->uplink = strdup(botnick);
-     bi->address = strdup(obi->address);
-     bi->telnet_port = obi->telnet_port;
-     bi->relay_port = obi->relay_port;
-     bi->hublevel = obi->hublevel;
+     if (obi) {
+       bi->address = strdup(obi->address);
+       bi->telnet_port = obi->telnet_port;
+       bi->relay_port = obi->relay_port;
+       bi->hublevel = obi->hublevel;
+     } 
      set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
-
    /* Change our uplink to them */
    /* let cont_link restructure us.. */
      putlog(LOG_MISC, "*", "Changed uplink to %s for update.", botnick);
