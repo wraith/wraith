@@ -1,6 +1,7 @@
 
 * The installation process has changed starting at version 1.0.11. 
 * The build currently requires a static TCL 8.0 or newer library. (TCL will be stripped soon)
+* All commands and directories/ are assumed to be located/ran in the wraith root dir. (TCL excluded)
 
 1. TCL
 2. Pack settings
@@ -18,23 +19,26 @@ Once you have it, untar -zxf tcl8.4.4-src.tar.gz
 Then, cd tcl8.4.4/unix
 ./configure --disable-shared --prefix=/path/to/your/home --exec-prefix=/path/to/your/home
 Then: make; make install
+Make sure you edit pack/conf.h and change the path to TCL. (See Pack settings)
 
 Step 2: Pack settings
 
 The files listed here are all located in pack/, and will need to be saved for future compiles.
 If you have settings.c, conf.h, or salt.h, place them in pack/
-NOTE: conf.h (pack.conf) from verions previous to 1.0.11 are NOT compatable with 1.0.11 and higher.
+NOTE: conf.h (pack.conf) from versions previous to 1.0.11 are NOT compatable with 1.0.11 and higher.
 
 conf.h:
+ This file contains pack compile-time options and the path to TCL
  If you have an older pack.conf, print it out and edit the template pack/conf.h and change accordingly.
 salt.h:
- This file is generated automatically, if you do not already have one, during compilation
+ This file is generated automatically, if you do not already have one, during compilation.
 settings.c:
  Edit the template pack/settings.c if you don't already have one.
 
 
 Step 3: Compiling
 
+cd root/
 For leaf build: ./build leaf
 For hub build: ./build hub
 To build both: ./build all
