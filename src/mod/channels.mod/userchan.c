@@ -997,7 +997,7 @@ bool write_chans(FILE *f, int idx)
 
     if (lfprintf(f, "\
 + channel add %s { chanmode { %s } addedby %s addedts %lu idle-kick %d \
-bad-cookie %d cookie-time-slack %lu manop %d mdop %d mop %d \
+bad-cookie %d manop %d mdop %d mop %d \
 limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%lu \
 flood-ctcp %d:%lu flood-join %d:%lu flood-kick %d:%lu flood-deop %d:%lu \
 flood-nick %d:%lu closed-ban %d closed-invite %d closed-private %d ban-time %lu \
@@ -1016,7 +1016,6 @@ exempt-time %lu invite-time %lu \
  */
 	chan->idle_kick, /* idle-kick 0 is same as dont-idle-kick (lcode)*/
 	chan->bad_cookie,
-	chan->cookie_time_slack,
 	chan->manop,
 	chan->mdop,
 	chan->mop,

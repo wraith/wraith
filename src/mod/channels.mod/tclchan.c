@@ -433,14 +433,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->bad_cookie = deflag_translate(item[i]);
-    } else if (!strcmp(item[i], "cookie_time_slack")) {
-      i++;
-      if (i >= items) {
-        if (result)
-          sprintf(result, "channel cookie-time-slack needs argument");
-        return ERROR;
-      }
-      chan->cookie_time_slack = atoi(item[i]);
     } else if (!strcmp(item[i], "manop")) {
       i++;
       if (i >= items) {

@@ -1276,8 +1276,6 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Closed-ban: ", chan->closed_ban, NULL, "Don't!");
     SHOW_INT("Closed-invite:", chan->closed_invite, NULL, "Don't!");
     SHOW_INT("Closed-Private:", chan->closed_private, NULL, "Don't!");
-    deflag = chan->cookie_time_slack;
-    SHOW_INT("Cookie-time-slack:", chan->cookie_time_slack, P_STR, "Ignore");
     SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
     SHOW_INT("Idle Kick after (idle-kick): ", chan->idle_kick, "", "Don't!");
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");

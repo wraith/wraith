@@ -414,8 +414,6 @@ See also: link
                           channel is set to +i. Once the channel is -i then the
                           invite will be removed the next time the bot checks.
                           Please note that this is an IRCnet feature.
-        $bcookie-time-slack$b    How many seconds off of botnet timesync is allowed
-                                 in cookies.
      The following options chose how to respond to specific events.
         Each can be set as any of the specified options.
         ignore/0           Ignore

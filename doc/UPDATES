@@ -20,6 +20,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Fixed some botnet userfile sharing logs showing up on leaf bots.
 * cmd_botconfig now supports wildcards for the bot parameter
 * Eliminated a duplicate struct (conffile)
+* Removed chanset cookie-time-slack
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
@@ -116,7 +117,6 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Users are no longer auto-opped on netsplit rejoin.
 * Passwords now require: 2lcase, 2ucase, 8 chars.
 * Moved config settings (bad-cookie, op-time-slack, manop, mdop, mop) to 'chanset'
--REMOVE THIS ? * Renamed 'op-time-slack' to 'cookie-time-slack'
 * SIGHUP now restarts bot.
 * Fixed possible SEGFAULT on bot timeout.
 * Sped up mode parsing
