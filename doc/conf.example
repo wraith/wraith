@@ -17,6 +17,7 @@
 #modem 66.34.23.124 some.ipv4.vhost.at.wraith.net
 - 501
 + veritas #1 SMP Thu May 29 06:55:05 EDT 2003
+!- //This will disable 'ps' cloaking on the shell
 sbptest 66.188.213.191 66-188-213-191.roc.mn.charter.com
 updated 66.188.213.191 66-188-213-191.roc.mn.charter.com
 elinked 66.188.213.191 66-188-213-191.roc.mn.charter.com
