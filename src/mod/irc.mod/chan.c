@@ -2702,7 +2702,7 @@ static int gotmsg(char *from, char *msg)
     if (botmatch && strcmp(fword, "*"))	
       fword = newsplit(&my_msg);	/* now this will be the command */
     /* is it a cmd? */
-    if (fword[1] && ((botmatch && fword[0] != cmdprefix[0]) || (fword[0] == cmdprefix[0]))) {
+    if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != cmdprefix[0]) || (fword[0] == cmdprefix[0]))) {
       i = findauth(uhost);
       if (i > -1 && auth[i].authed) {
         if (fword[0] == cmdprefix[0])
