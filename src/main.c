@@ -165,7 +165,7 @@ void fatal(const char *s, int recoverable)
 #endif /* HUB */
 
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].sock >= 0)
+    if (dcc[i].type && dcc[i].sock >= 0)
       killsock(dcc[i].sock);
 
   if (!recoverable) {
@@ -194,7 +194,7 @@ static void check_expired_dcc()
 /* this also expires irc dcc_cmd auths */
 static void expire_simuls() {
   for (int idx = 0; idx < dcc_total; idx++) {
-    if (dcc[idx].simul > 0) {
+    if (dcc[idx].type && dcc[idx].simul > 0) {
       if ((now - dcc[idx].simultime) >= 100) { /* expire simuls after 100 seconds (re-uses idx, so it wont fill up) */
         dcc[idx].simul = -1;
         lostdcc(idx);
@@ -945,7 +945,7 @@ printf("out: %s\n", out);
 
     if (xx >= 0) {		/* Non-error */
       for (idx = 0; idx < dcc_total; idx++) {
-	if (dcc[idx].sock == xx) {
+	if (dcc[idx].type && dcc[idx].sock == xx) {
 	  if (dcc[idx].type && dcc[idx].type->activity) {
 	    /* Traffic stats */
 	    if (dcc[idx].type->name) {
@@ -976,8 +976,8 @@ printf("out: %s\n", out);
       if (i == STDOUT && !backgrd)
 	fatal("END OF FILE ON TERMINAL", 0);
       for (idx = 0; idx < dcc_total; idx++) {
-	if (dcc[idx].sock == i) {
-	  if (dcc[idx].type && dcc[idx].type->eof)
+	if (dcc[idx].type && dcc[idx].sock == i) {
+	  if (dcc[idx].type->eof)
 	    dcc[idx].type->eof(idx);
 	  else {
 	    putlog(LOG_MISC, "*",
@@ -997,7 +997,7 @@ printf("out: %s\n", out);
     } else if (xx == -2 && errno != EINTR) {	/* select() error */
       putlog(LOG_MISC, "*", "* Socket error #%d; recovering.", errno);
       for (i = 0; i < dcc_total; i++) {
-	if (dcc[i].sock != -1 && (fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
+	if (dcc[i].type && dcc[i].sock != -1 && (fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
 	  putlog(LOG_MISC, "*",
 		 "DCC socket %d (type %s, name '%s') expired -- pfft",
 		 dcc[i].sock, dcc[i].type->name, dcc[i].nick);

@@ -54,7 +54,7 @@ int count_users(struct userrec *bu)
 static struct userrec *check_dcclist_hand(char *handle)
 {
   for (int i = 0; i < dcc_total; i++)
-    if (!egg_strcasecmp(dcc[i].nick, handle))
+    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, handle))
       return dcc[i].user;
   return NULL;
 }
@@ -141,7 +141,8 @@ void clear_userlist(struct userrec *bu)
     struct chanset_t *cst = NULL;
 
     for (int i = 0; i < dcc_total; i++)
-      dcc[i].user = NULL;
+      if (dcc[i].type)
+        dcc[i].user = NULL;
 
     conf.bot->u = NULL;
 
@@ -423,7 +424,7 @@ int change_handle(struct userrec *u, char *newh)
   strncpyz(s, u->handle, sizeof s);
   strncpyz(u->handle, newh, sizeof u->handle);
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type != &DCC_BOT && !egg_strcasecmp(dcc[i].nick, s)) {
+    if (dcc[i].type && dcc[i].type != &DCC_BOT && !egg_strcasecmp(dcc[i].nick, s)) {
       strncpyz(dcc[i].nick, newh, sizeof dcc[i].nick);
       if (dcc[i].type == &DCC_CHAT && dcc[i].u.chat->channel >= 0) {
 	chanout_but(-1, dcc[i].u.chat->channel, "*** Handle change: %s -> %s\n", s, newh);
@@ -550,7 +551,7 @@ int deluser(char *handle)
   if (!noshare && (handle[0] != '*'))
     shareout("k %s\n", handle);
   for (fnd = 0; fnd < dcc_total; fnd++)
-    if (dcc[fnd].user == u)
+    if (dcc[fnd].type && dcc[fnd].user == u)
       dcc[fnd].user = NULL;	/* Clear any dcc users for this entry null is safe-ish */
   clear_chanlist();
   freeuser(u);

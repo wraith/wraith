@@ -474,7 +474,7 @@ static int msgc_test(char *nick, char *host, struct userrec *u, char *chname, ch
     chan++;
 
   for (i = 0; i < dcc_total; i++) {
-   if (dcc[i].msgc && ((chan && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, u->handle)) || 
+   if (dcc[i].type && dcc[i].msgc && ((chan && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, u->handle)) || 
       (!chan && !strcmp(dcc[i].simulbot, nick)))) {
      putlog(LOG_DEBUG, "*", "Simul found old idx for %s/%s: %d", nick, chname, i);
      dcc[i].simultime = now;

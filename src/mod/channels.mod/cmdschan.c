@@ -1066,7 +1066,7 @@ static void mns_chan(int idx, char *par, char *bot)
 
   if (!bot) {
     for (i = 0; i < dcc_total; i++)
-      if ((dcc[i].type->flags & DCT_CHAT) && !rfc_casecmp(dcc[i].u.chat->con_chan, chan->dname)) {
+      if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) && !rfc_casecmp(dcc[i].u.chat->con_chan, chan->dname)) {
         dprintf(i, "%s is no longer a valid channel, changing your console to '*'\n", chname);
         strcpy(dcc[i].u.chat->con_chan, "*");
       } 

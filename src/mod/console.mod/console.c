@@ -162,7 +162,7 @@ console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
   e->u.extra = ci;
   /* now let's propogate to the dcc list */
   for (int i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type == &DCC_CHAT) && !strcmp(dcc[i].user->handle, u->handle)) {
+    if (dcc[i].type && (dcc[i].type == &DCC_CHAT) && !strcmp(dcc[i].user->handle, u->handle)) {
       if (ci->channel && ci->channel[0])
         strcpy(dcc[i].u.chat->con_chan, ci->channel);
       dcc[i].u.chat->con_flags = ci->conflags;

@@ -371,7 +371,7 @@ static void check_updates()
     cnt = 0;
 
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE) &&
+      if (dcc[i].type && dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE) &&
           !(dcc[i].status & STAT_SENDINGU) && !(dcc[i].status & STAT_OFFEREDU) &&
           !(dcc[i].status & STAT_UPDATED)) { /* only offer binary to bots that are sharing */
         bot = findbot(dcc[i].nick);
@@ -398,12 +398,12 @@ void update_report(int idx, int details)
 
   if (details) {
     for (i = 0; i < dcc_total; i++)
-      if (dcc[i].type == &DCC_BOT) {
+      if (dcc[i].type && dcc[i].type == &DCC_BOT) {
 	if (dcc[i].status & STAT_GETTINGU) {
 	  int ok = 0;
 
 	  for (j = 0; j < dcc_total; j++)
-	    if (((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
+	    if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
 		 == (DCT_FILETRAN | DCT_FILESEND)) &&
 		!egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
 	      dprintf(idx, "Downloading binary from %s (%d%% done)\n",
@@ -419,7 +419,7 @@ void update_report(int idx, int details)
 #ifdef HUB
 	} else if (dcc[i].status & STAT_SENDINGU) {
 	  for (j = 0; j < dcc_total; j++) {
-	    if (((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
+	    if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
 		 == DCT_FILETRAN)
 		&& !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
 	      if (dcc[j].type == &DCC_GET)
@@ -443,7 +443,7 @@ void update_report(int idx, int details)
 static void cmd_bupdate(int idx, char *par)
 {
   for (int i = 0; i < dcc_total; i++) {
-    if (!egg_strcasecmp(dcc[i].nick, par)) {
+    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, par)) {
       dprintf(i, "sb u?\n");
       dcc[i].status &= ~(STAT_SENDINGU | STAT_UPDATED);
       dcc[i].status |= STAT_OFFEREDU;

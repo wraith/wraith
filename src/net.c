@@ -1472,7 +1472,7 @@ void tputs(register int z, char *s, size_t len)
   for (register int i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == z)) {
       for (idx = 0; idx < dcc_total; idx++) {
-        if ((dcc[idx].sock == z) && dcc[idx].type && dcc[idx].type->name) {
+        if (dcc[idx].type && (dcc[idx].sock == z) && dcc[idx].type->name) {
           if (!strncmp(dcc[idx].type->name, "BOT", 3))
                 traffic.out_today.bn += len;
           else if (!strcmp(dcc[idx].type->name, "SERVER"))
@@ -1584,7 +1584,7 @@ int findanyidx(register int sock)
 
   if (sock != -1)
     for (j = 0; j < dcc_total; j++)
-      if (dcc[j].sock == sock)
+      if (dcc[j].type && dcc[j].sock == sock)
         return j;
 
   return -1;

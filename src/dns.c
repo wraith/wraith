@@ -81,7 +81,7 @@ struct dcc_table DCC_DNSWAIT =
 static void dns_dcchostbyip(in_addr_t ip, char *hostn, int ok, void *other)
 {
   for (int idx = 0; idx < dcc_total; idx++) {
-    if ((dcc[idx].type == &DCC_DNSWAIT) &&
+    if (dcc[idx].type && (dcc[idx].type == &DCC_DNSWAIT) &&
         (dcc[idx].u.dns->dns_type == RES_HOSTBYIP) &&
         (dcc[idx].u.dns->ip == ip)) {
       if (dcc[idx].u.dns->host)
@@ -102,7 +102,7 @@ static void dns_dcchostbyip(in_addr_t ip, char *hostn, int ok, void *other)
 static void dns_dccipbyhost(in_addr_t ip, char *hostn, int ok, void *other)
 {
   for (int idx = 0; idx < dcc_total; idx++) {
-    if ((dcc[idx].type == &DCC_DNSWAIT) &&
+    if (dcc[idx].type && (dcc[idx].type == &DCC_DNSWAIT) &&
         (dcc[idx].u.dns->dns_type == RES_IPBYHOST) &&
         !egg_strcasecmp(dcc[idx].u.dns->host, hostn)) {
       dcc[idx].u.dns->ip = ip;

@@ -1112,7 +1112,7 @@ irc_whois(char *nick, char *format, ...)
   va_end(va);
 
   for (int idx = 0; idx < dcc_total; idx++)
-    if (dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois))
+    if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois))
       dprintf(idx, "%s\n", va_out);
 }
 
@@ -1242,7 +1242,7 @@ static int got318_369(char *from, char *msg, int whowas)
 
   irc_whois(nick, "%s", msg);
   for (int idx = 0; idx < dcc_total; idx++) {
-    if (dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick) &&
+    if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick) &&
        ((!whowas && !dcc[idx].whowas) || (whowas && dcc[idx].whowas))) {
       dcc[idx].whois[0] = 0;
       dcc[idx].whowas = 0;
@@ -1262,7 +1262,7 @@ static int got401(char *from, char *msg)
   fixcolon(msg);
   irc_whois(nick, "%s", msg);
   for (int idx = 0; idx < dcc_total; idx++)
-    if (dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick))
+    if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick))
       dcc[idx].whowas = 1;
 
   dprintf(DP_SERVER, "WHOWAS %s %s\n", nick, from);

@@ -64,13 +64,14 @@ static void wipe_tmp_filename(char *fn, int idx)
 
   if (!copy_to_tmp)
     return;
-  for (i = 0; i < dcc_total; i++)
-    if (i != idx)
-      if (dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING)
-	if (!strcmp(dcc[i].u.xfer->filename, fn)) {
-	  ok = 0;
-	  break;
-	}
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && i != idx && dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING) {
+      if (!strcmp(dcc[i].u.xfer->filename, fn)) {
+        ok = 0;
+        break;
+      }
+    }
+  }
   if (ok)
     unlink(fn);
 }
@@ -82,7 +83,7 @@ static int at_limit(char *nick)
   int i, x = 0;
 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING)
+    if (dcc[i].type && dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING)
       if (!egg_strcasecmp(dcc[i].nick, nick))
 	x++;
   return (x >= dcc_limit);
@@ -279,7 +280,7 @@ void eof_dcc_fork_send(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if ((!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
 	  (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
 	break;
@@ -294,7 +295,7 @@ void eof_dcc_fork_send(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if ((!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
 	  (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
 	break;
@@ -378,7 +379,7 @@ static void eof_dcc_send(int idx)
     free(ofn);
     free(nfn);
     for (j = 0; j < dcc_total; j++)
-      if (!ok && (dcc[j].type->flags & (DCT_GETNOTES)) &&
+      if (dcc[j].type && !ok && (dcc[j].type->flags & (DCT_GETNOTES)) &&
 	  !egg_strcasecmp(dcc[j].nick, hand)) {
 	ok = 1;
 	dprintf(j,TRANSFER_THANKS);
@@ -395,7 +396,7 @@ static void eof_dcc_send(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if ((!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     if (y) {
@@ -425,7 +426,7 @@ static void eof_dcc_send(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if ((!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     if (y) {
@@ -599,7 +600,7 @@ void dcc_get(int idx, char *buf, int len)
       int x, y = 0;
 
       for (x = 0; x < dcc_total; x++)
-	if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
 	    (dcc[x].type->flags & DCT_BOT))
 	  y = x;
       if (y != 0)
@@ -614,7 +615,7 @@ void dcc_get(int idx, char *buf, int len)
       int x, y = 0;
 
       for (x = 0; x < dcc_total; x++)
-	if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
 	    (dcc[x].type->flags & DCT_BOT))
 	  y = x;
       if (y != 0) {
@@ -659,7 +660,7 @@ void eof_dcc_get(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     putlog(LOG_BOTS, "*", TRANSFER_ABORT_USERFILE);
@@ -683,7 +684,7 @@ void eof_dcc_get(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     putlog(LOG_BOTS, "*", "Lost binary transfer; aborting.");
@@ -769,7 +770,7 @@ static void transfer_get_timeout(int i)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if ((!egg_strcasecmp(dcc[x].nick, dcc[i].host)) &&
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     if (y != 0) {
@@ -796,7 +797,7 @@ static void transfer_get_timeout(int i)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if ((!egg_strcasecmp(dcc[x].nick, dcc[i].host)) &&
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     if (y != 0) {
@@ -845,7 +846,7 @@ void tout_dcc_send(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     if (y != 0) {
@@ -858,7 +859,7 @@ void tout_dcc_send(int idx)
     int x, y = 0;
 
     for (x = 0; x < dcc_total; x++)
-      if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     if (y != 0) {
@@ -1205,7 +1206,7 @@ static int ctcp_DCC_RESUME(char *nick, char *from, char *handle, char *object, c
   offset = my_atoul(newsplit(&msg));
   // Search for existing SEND 
   for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_GET_PENDING) &&
+    if (dcc[i].type && (dcc[i].type == &DCC_GET_PENDING) &&
 	(!rfc_casecmp(dcc[i].nick, nick)) && (dcc[i].port == port))
       break;
   // No matching transfer found?

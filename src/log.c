@@ -197,7 +197,7 @@ void putlog(int type, const char *chname, const char *format, ...)
   }
 
   for (idx = 0; idx < dcc_total; idx++) {
-    if ((dcc[idx].type == &DCC_CHAT && !dcc[idx].simul) && (dcc[idx].u.chat->con_flags & type)) {
+    if (dcc[idx].type && (dcc[idx].type == &DCC_CHAT && !dcc[idx].simul) && (dcc[idx].u.chat->con_flags & type)) {
       if ((chname[0] == '@') || (chname[0] == '*') || (dcc[idx].u.chat->con_chan[0] == '*') ||
           (!rfc_casecmp(chname, dcc[idx].u.chat->con_chan)))
         dprintf(idx, "%s\n", out);

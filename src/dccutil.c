@@ -237,7 +237,7 @@ void chatout(const char *format, ...)
     *p++ = 0;
 
   for (int i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_CHAT) && !(dcc[i].simul))
+    if (dcc[i].type && (dcc[i].type == &DCC_CHAT) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel >= 0)
         dprintf(i, "%s\n", s);
 }
@@ -257,7 +257,7 @@ void chanout_but(int x, int chan, const char *format, ...)
     *p = 0;
 
   for (int i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_CHAT) && (i != x) && !(dcc[i].simul))
+    if (dcc[i].type && (dcc[i].type == &DCC_CHAT) && (i != x) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel == chan)
         dprintf(i, "%s\n", s);
 }
@@ -390,7 +390,7 @@ static void removedcc(int n)
 void dcc_remove_lost(void)
 {
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_LOST) {
+    if (dcc[i].type && dcc[i].type == &DCC_LOST) {
       dcc[i].type = NULL;
       dcc[i].sock = -1;
       removedcc(i);
@@ -423,7 +423,7 @@ void tell_dcc(int idx)
 
   /* calculate max nicklen */
   for (i = 0; i < dcc_total; i++) {
-      if(strlen(dcc[i].nick) > (unsigned) nicklen)
+      if(dcc[i].type && strlen(dcc[i].nick) > (unsigned) nicklen)
           nicklen = strlen(dcc[i].nick);
   }
   if(nicklen < 9) 
@@ -438,6 +438,7 @@ void tell_dcc(int idx)
 
   dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
   for (i = 0; i < dcc_total; i++) {
+   if (dcc[i].type) {
     j = strlen(dcc[i].host);
     if (j > 40)
       j -= 40;
@@ -452,6 +453,7 @@ void tell_dcc(int idx)
     if (dcc[i].type == &DCC_LOST)
       dprintf(idx, "LOST:\n");
     dprintf(idx, format, dcc[i].sock, i, dcc[i].addr, dcc[i].port, dcc[i].nick, dcc[i].host + j, other);
+   }
   }
 }
 
@@ -655,7 +657,7 @@ port_t listen_all(port_t lport, bool off)
     }
 
   for (int ii = 0; ii < dcc_total; ii++) {
-    if ((dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port)) {
+    if (dcc[ii].type && (dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port)) {
       idx = ii;
 
       if (off) {

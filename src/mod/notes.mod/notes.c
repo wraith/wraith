@@ -620,7 +620,7 @@ static int msg_notes(char *nick, char *host, struct userrec *u, char *par)
       return 1;
     }
     for (i = 0; i < dcc_total; i++) {
-      if ((!egg_strcasecmp(dcc[i].nick, to)) &&
+      if (dcc[i].type && (!egg_strcasecmp(dcc[i].nick, to)) &&
 	  (dcc[i].type->flags & DCT_GETNOTES)) {
 	int aok = 1;
 
@@ -680,7 +680,7 @@ static void notes_hourly()
 	if (u) {
 	  k = num_notes(u->handle);
 	  for (l = 0; l < dcc_total; l++)
-	    if ((dcc[l].type->flags & DCT_CHAT) &&
+	    if (dcc[l].type && (dcc[l].type->flags & DCT_CHAT) &&
 		!egg_strcasecmp(dcc[l].nick, u->handle)) {
 	      k = 0;		/* They already know they have notes */
 	      break;
@@ -695,11 +695,13 @@ static void notes_hourly()
       }
     }
     for (l = 0; l < dcc_total; l++) {
+     if (dcc[l].type) {
       k = num_notes(dcc[l].nick);
       if ((k > 0) && (dcc[l].type->flags & DCT_CHAT)) {
 	dprintf(l, NOTES_WAITING2, k, k == 1 ? "" : "s");
 	dprintf(l, NOTES_DCC_USAGE_READ2);
       }
+     }
     }
   }
 }

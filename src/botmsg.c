@@ -166,7 +166,7 @@ size_t simple_sprintf (char *buf, const char *format, ...)
 static void send_tand_but(int x, char *buf, size_t len)
 {
   for (int i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type == &DCC_BOT) && i != x) {
+    if (dcc[i].type && (dcc[i].type == &DCC_BOT) && i != x) {
       tputs(dcc[i].sock, buf, len);
     }
   }
@@ -591,7 +591,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
   iaway = 0;
   /* Online right now? */
   for (i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type->flags & DCT_GETNOTES) &&
+    if (dcc[i].type && (dcc[i].type->flags & DCT_GETNOTES) &&
 	((sock == (-1)) || (sock == dcc[i].sock)) &&
 	(!egg_strcasecmp(dcc[i].nick, to))) {
       int aok = 1;

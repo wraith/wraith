@@ -379,7 +379,7 @@ int nextbot(char *who)
     return -1;
 
   for (int j = 0; j < dcc_total; j++) {
-    if (bot->via && !egg_strcasecmp(bot->via->bot, dcc[j].nick) && (dcc[j].type == &DCC_BOT))
+    if (dcc[j].type && bot->via && !egg_strcasecmp(bot->via->bot, dcc[j].nick) && (dcc[j].type == &DCC_BOT))
       return j;
   }
 
@@ -414,13 +414,14 @@ void answer_local_whom(int idx, int chan)
 
   /* Find longest nick and botnick */
   nicklen = botnicklen = 0;
-  for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type == &DCC_CHAT) {
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && dcc[i].type == &DCC_CHAT) {
       if ((chan == (-1)) || ((chan >= 0) && (dcc[i].u.chat->channel == chan))) {
         t = strlen(dcc[i].nick); if(t > nicklen) nicklen = t;
         t = strlen(conf.bot->nick); if(t > botnicklen) botnicklen = t;
       }
     }
+  }
   for (i = 0; i < parties; i++) {
     if ((chan == (-1)) || ((chan >= 0) && (party[i].chan == chan))) {
       t = strlen(party[i].nick); if(t > nicklen) nicklen = t;
@@ -443,8 +444,8 @@ void answer_local_whom(int idx, int chan)
   dprintf(idx, format, "----------");
   egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%s\n", nicklen);
 #endif /* HUB */
-  for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type == &DCC_CHAT) {
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && dcc[i].type == &DCC_CHAT) {
       if ((chan == (-1)) || ((chan >= 0) && (dcc[i].u.chat->channel == chan))) {
 	c = geticon(i);
 	if (c == '-')
@@ -477,6 +478,7 @@ void answer_local_whom(int idx, int chan)
 	  dprintf(idx, "   AWAY: %s\n", dcc[i].u.chat->away);
       }
     }
+  }
   for (i = 0; i < parties; i++) {
     if ((chan == (-1)) || ((chan >= 0) && (party[i].chan == chan))) {
       c = party[i].flag;
@@ -729,7 +731,7 @@ void dump_links(int z)
 
   /* Dump party line members */
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_CHAT) {
+    if (dcc[i].type && dcc[i].type == &DCC_CHAT) {
       if ((dcc[i].u.chat->channel >= 0) && (dcc[i].u.chat->channel < GLOBAL_CHANS)) {
         l = simple_sprintf(x, "j !%s %s %D %c%D %s\n", conf.bot->nick, dcc[i].nick, dcc[i].u.chat->channel, geticon(i), dcc[i].sock, dcc[i].host);
 	tputs(dcc[z].sock, x, l);
@@ -801,7 +803,7 @@ int botunlink(int idx, char *nick, char *reason)
   if (nick[0] == '*')
     dprintf(idx, "%s\n", BOT_UNLINKALL);
   for (i = 0; i < dcc_total; i++) {
-    if ((nick[0] == '*') || !egg_strcasecmp(dcc[i].nick, nick)) {
+    if (dcc[i].type && (nick[0] == '*') || !egg_strcasecmp(dcc[i].nick, nick)) {
       if (dcc[i].type == &DCC_FORK_BOT) {
 	if (idx >= 0)
 	  dprintf(idx, "%s: %s -> %s.\n", BOT_KILLLINKATTEMPT,
@@ -910,14 +912,15 @@ int botlink(char *linker, int idx, char *nick)
   } else {
     register int i;
 
-    for (i = 0; i < dcc_total; i++)
-      if ((dcc[i].user == u) &&
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].user == u) &&
 	  ((dcc[i].type == &DCC_FORK_BOT) ||
 	   (dcc[i].type == &DCC_BOT_NEW))) {
 	if (idx >= 0)
 	  dprintf(idx, "%s\n", BOT_ALREADYLINKING);
 	return 0;
       }
+    }
     /* Address to connect to is in 'info' */
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u);
 
@@ -1053,10 +1056,11 @@ static void failed_tandem_relay(int idx)
 {
   int uidx = (-1), i;
 
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_PRE_RELAY) &&
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type == &DCC_PRE_RELAY) &&
 	(dcc[i].u.relay->sock == dcc[idx].sock))
       uidx = i;
+  }
   if (uidx < 0) {
     putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[idx].sock, dcc[idx].u.relay->sock);
@@ -1181,12 +1185,13 @@ static void tandem_relay_resolve_failure(int idx)
 {
   register int uidx = (-1), i;
 
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_PRE_RELAY) &&
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type == &DCC_PRE_RELAY) &&
 	(dcc[i].u.relay->sock == dcc[idx].sock)) {
       uidx = i;
       break;
     }
+  }
   if (uidx < 0) {
     putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[idx].sock, dcc[idx].u.relay->sock);
@@ -1239,20 +1244,22 @@ static void pre_relay(int idx, char *buf, register int len)
 {
   register int tidx = (-1), i;
 
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_FORK_RELAY) &&
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type == &DCC_FORK_RELAY) &&
 	(dcc[i].u.relay->sock == dcc[idx].sock)) {
       tidx = i;
       break;
     }
+  }
   if (tidx < 0) {
     /* Now try to find it among the DNSWAIT sockets instead. */
-    for (i = 0; i < dcc_total; i++)
-      if ((dcc[i].type == &DCC_DNSWAIT) &&
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT) &&
 	  (dcc[i].sock == dcc[idx].u.relay->sock)) {
 	tidx = i;
 	break;
       }
+    }
   }
   if (tidx < 0) {
     putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
@@ -1285,20 +1292,22 @@ static void failed_pre_relay(int idx)
 {
   register int tidx = (-1), i;
 
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_FORK_RELAY) &&
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type == &DCC_FORK_RELAY) &&
 	(dcc[i].u.relay->sock == dcc[idx].sock)) {
       tidx = i;
       break;
     }
+  }
   if (tidx < 0) {
     /* Now try to find it among the DNSWAIT sockets instead. */
-    for (i = 0; i < dcc_total; i++)
-      if ((dcc[i].type == &DCC_DNSWAIT) &&
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT) &&
 	  (dcc[i].sock == dcc[idx].u.relay->sock)) {
 	tidx = i;
 	break;
       }
+    }
   }
   if (tidx < 0) {
     putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
@@ -1330,10 +1339,10 @@ static void cont_tandem_relay(int idx, char *buf, register int len)
 {
   register int uidx = (-1), i;
 
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_PRE_RELAY) &&
-	(dcc[i].u.relay->sock == dcc[idx].sock))
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type == &DCC_PRE_RELAY) && (dcc[i].u.relay->sock == dcc[idx].sock))
       uidx = i;
+  }
   if (uidx < 0) {
     putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[i].sock, dcc[i].u.relay->sock);
@@ -1369,7 +1378,7 @@ static void eof_dcc_relay(int idx)
   register int j;
 
   for (j = 0; j < dcc_total; j++)
-    if (dcc[j].sock == dcc[idx].u.relay->sock)
+    if (dcc[j].type && dcc[j].sock == dcc[idx].u.relay->sock)
       break;
   if (j == dcc_total) {
     killsock(dcc[idx].sock);
@@ -1590,31 +1599,30 @@ void check_botnet_pings()
   tand_t *bot = NULL;
 
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_BOT)
-      if (dcc[i].status & STAT_PINGED) {
-	char s[1024] = "";
+    if (dcc[i].type && dcc[i].type == &DCC_BOT && (dcc[i].status & STAT_PINGED)) {
+      char s[1024] = "";
 
-	putlog(LOG_BOTS, "*", "%s: %s", BOT_PINGTIMEOUT, dcc[i].nick);
-	bot = findbot(dcc[i].nick);
-	bots = bots_in_subtree(bot);
-	users = users_in_subtree(bot);
-	simple_sprintf(s, "%s: %s (lost %d bot%s and %d user%s)", BOT_PINGTIMEOUT,
+      putlog(LOG_BOTS, "*", "%s: %s", BOT_PINGTIMEOUT, dcc[i].nick);
+      bot = findbot(dcc[i].nick);
+      bots = bots_in_subtree(bot);
+      users = users_in_subtree(bot);
+      simple_sprintf(s, "%s: %s (lost %d bot%s and %d user%s)", BOT_PINGTIMEOUT,
 		       dcc[i].nick, bots, (bots != 1) ? "s" : "",
 		       users, (users != 1) ? "s" : "");
-	chatout("*** %s\n", s);
-	botnet_send_unlinked(i, dcc[i].nick, s);
-	killsock(dcc[i].sock);
-	lostdcc(i);
-      }
+      chatout("*** %s\n", s);
+      botnet_send_unlinked(i, dcc[i].nick, s);
+      killsock(dcc[i].sock);
+      lostdcc(i);
+    }
   }
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_BOT) {
+    if (dcc[i].type && dcc[i].type == &DCC_BOT) {
       botnet_send_ping(i);
       dcc[i].status |= STAT_PINGED;
     }
   }
   for (i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_LEAF)) {
+    if (dcc[i].type && (dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_LEAF)) {
       tand_t *via = findbot(dcc[i].nick);
 
       for (bot = tandbot; bot; bot = bot->next) {

@@ -75,13 +75,13 @@ static void tell_who(int idx, int chan)
   /* calculate max nicklen */
   nicklen = 0;
   for (i = 0; i < dcc_total; i++) {
-      if(strlen(dcc[i].nick) > nicklen)
+      if(dcc[i].type && strlen(dcc[i].nick) > nicklen)
           nicklen = strlen(dcc[i].nick);
   }
   if(nicklen < 9) nicklen = 9;
   
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type == &DCC_CHAT)
+    if (dcc[i].type && dcc[i].type == &DCC_CHAT)
       if (dcc[i].u.chat->channel == chan) {
 	if (atr & USER_OWNER) {
 	  egg_snprintf(format, sizeof format, "  [%%.2lu]  %%c%%-%us %%s", nicklen);
@@ -117,7 +117,7 @@ static void tell_who(int idx, int chan)
 	  dprintf(idx, "      AWAY: %s\n", dcc[i].u.chat->away);
       }
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type == &DCC_BOT) {
+    if (dcc[i].type && dcc[i].type == &DCC_BOT) {
       if (!ok) {
 	ok = 1;
 	dprintf(idx, "Bots connected:\n");
@@ -141,7 +141,7 @@ static void tell_who(int idx, int chan)
     }
   ok = 0;
   for (i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->channel != chan)) {
+    if (dcc[i].type && (dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->channel != chan)) {
       if (!ok) {
 	ok = 1;
 	dprintf(idx, "Other people on the bot:\n");
@@ -485,7 +485,7 @@ static void cmd_lagged(int idx, char *par)
   /* Lists botnet lag to *directly connected* bots */
   putlog(LOG_CMDS, "*", "#%s# lagged %s", dcc[idx].nick, par);
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_BOT) {
+    if (dcc[i].type && dcc[i].type == &DCC_BOT) {
       dprintf(idx, "%9s - %li seconds\n", dcc[i].nick, (dcc[i].pingtime > 120) ? (now - dcc[i].pingtime) : dcc[i].pingtime);
     }
   }
@@ -505,7 +505,7 @@ static void cmd_me(int idx, char *par)
   if (dcc[idx].u.chat->away != NULL)
     not_away(idx);
   for (int i = 0; i < dcc_total; i++)
-    if ((dcc[i].type->flags & DCT_CHAT) && (dcc[i].u.chat->channel == dcc[idx].u.chat->channel) &&
+    if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) && (dcc[i].u.chat->channel == dcc[idx].u.chat->channel) &&
 	((i != idx) || (dcc[i].status & STAT_ECHO)))
       dprintf(i, "* %s %s\n", dcc[idx].nick, par);
 
@@ -1165,9 +1165,8 @@ static void cmd_boot(int idx, char *par)
 	     who, par[0] ? par : dcc[idx].nick);
     return;
   }
-  for (i = 0; i < dcc_total; i++)
-    if (!egg_strcasecmp(dcc[i].nick, who)
-        && !ok && (dcc[i].type->flags & DCT_CANBOOT)) {
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, who) && !ok && (dcc[i].type->flags & DCT_CANBOOT)) {
       u2 = get_user_by_handle(userlist, dcc[i].nick);
       if (u2 && (u2->flags & USER_OWNER)
           && egg_strcasecmp(dcc[idx].nick, who)) {
@@ -1183,6 +1182,7 @@ static void cmd_boot(int idx, char *par)
       do_boot(i, dcc[idx].nick, par);
       ok = 1;
     }
+  }
   if (!ok)
     dprintf(idx, "Who?  No such person on the party line.\n");
 }
@@ -1209,12 +1209,12 @@ static void cmd_console(int idx, char *par)
    * he doesn't use IRCnet ++rtc.
    */
   if (nick[0] && !strchr(CHANMETA "+-*", nick[0]) && glob_master(fr)) {
-    for (i = 0; i < dcc_total; i++)
-      if (!egg_strcasecmp(nick, dcc[i].nick) &&
-	  (dcc[i].type == &DCC_CHAT) && (!ok)) {
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && !egg_strcasecmp(nick, dcc[i].nick) && (dcc[i].type == &DCC_CHAT) && (!ok)) {
 	ok = 1;
 	dest = i;
       }
+    }
     if (!ok) {
       dprintf(idx, "No such user on the party line!\n");
       return;
@@ -2101,15 +2101,15 @@ static void cmd_simul(int idx, char *par)
 
   bool ok = 0;
 
-  for (int i = 0; i < dcc_total; i++)
-    if (!egg_strcasecmp(nick, dcc[i].nick) && !ok &&
-	(dcc[i].type->flags & DCT_SIMUL)) {
+  for (int i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && !egg_strcasecmp(nick, dcc[i].nick) && !ok && (dcc[i].type->flags & DCT_SIMUL)) {
       putlog(LOG_CMDS, "*", "#%s# simul %s %s", dcc[idx].nick, nick, par);
       if (dcc[i].type && dcc[i].type->activity) {
 	dcc[i].type->activity(i, par, strlen(par));
 	ok = 1;
       }
     }
+  }
   if (!ok)
     dprintf(idx, "No such user on the party line.\n");
 }
@@ -2255,6 +2255,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
   int stat;
 
   for (int i = 0; i < dcc_total; i++) {
+   if (dcc[i].type) {
 #ifdef LEAF
     if (dcc[i].type && dcc[i].type == &DCC_CHAT && !ischanhub() && u == conf.bot->u) {
       dprintf(i, "I am no longer a chathub..\n\n");
@@ -2352,6 +2353,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
       }
 #endif /* HUB */
     }
+   }
   }
   return u->flags;
 }
@@ -2365,8 +2367,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, flag_t chflags, flag_t 
   struct chanset_t *chan = NULL;
 
   for (int i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type->flags & DCT_MASTER) &&
-	!egg_strcasecmp(u->handle, dcc[i].nick)) {
+    if (dcc[i].type && (dcc[i].type->flags & DCT_MASTER) && !egg_strcasecmp(u->handle, dcc[i].nick)) {
       if ((dcc[i].type == &DCC_CHAT) &&
 	  ((chflags & (USER_OP | USER_MASTER | USER_OWNER))
 	   != (ochatr & (USER_OP | USER_MASTER | USER_OWNER))))
@@ -2972,12 +2973,12 @@ static void cmd_strip(int idx, char *par)
   int dest = 0, i, pls, md, ok = 0;
 
   if ((nick[0] != '+') && (nick[0] != '-') &&dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
-    for (i = 0; i < dcc_total; i++)
-      if (!egg_strcasecmp(nick, dcc[i].nick) && dcc[i].type == &DCC_CHAT &&
-	  !ok) {
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && !egg_strcasecmp(nick, dcc[i].nick) && dcc[i].type == &DCC_CHAT && !ok) {
 	ok = 1;
 	dest = i;
       }
+    }
     if (!ok) {
       dprintf(idx, "No such user on the party line!\n");
       return;
@@ -3422,8 +3423,8 @@ static void cmd_mns_user(int idx, char *par)
     int idx2;
 
     for (idx2 = 0; idx2 < dcc_total; idx2++)
-      if (dcc[idx2].type != &DCC_RELAY && dcc[idx2].type != &DCC_FORK_BOT &&
-          !egg_strcasecmp(dcc[idx2].nick, handle))
+      if (dcc[idx2].type && dcc[idx2].type != &DCC_RELAY && dcc[idx2].type != &DCC_FORK_BOT && 
+                 !egg_strcasecmp(dcc[idx2].nick, handle))
         break;
     if (idx2 != dcc_total) {
       dprintf(idx, "You can't remove a directly linked bot.\n");

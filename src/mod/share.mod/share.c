@@ -1009,7 +1009,7 @@ share_userfileq(int idx, char *par)
     bool ok = 1;
 
     for (int i = 0; i < dcc_total; i++)
-      if (dcc[i].type->flags & DCT_BOT) {
+      if (dcc[i].type && dcc[i].type->flags & DCT_BOT) {
         if ((dcc[i].status & STAT_SHARE) && (dcc[i].status & STAT_AGGRESSIVE) && (i != idx)) {
           ok = 0;
           break;
@@ -1104,7 +1104,7 @@ hook_read_userfile()
 {
   if (!noshare) {
     for (int i = 0; i < dcc_total; i++) {
-      if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & STAT_AGGRESSIVE)
+      if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & STAT_AGGRESSIVE)
           && (1)) {
         /* Cancel any existing transfers */
         if (dcc[i].status & STAT_SENDING)
@@ -1213,7 +1213,8 @@ shareout(const char *format, ...)
   va_end(va);
 
   for (int i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
+    if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) && 
+         (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
   }
@@ -1234,7 +1235,7 @@ shareout_but(int x, const char *format, ...)
   va_end(va);
 
   for (int i = 0; i < dcc_total; i++)
-    if ((dcc[i].type->flags & DCT_BOT) && (i != x) &&
+    if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) && (i != x) &&
         (dcc[i].status & STAT_SHARE) && (!(dcc[i].status & STAT_GETTING)) &&
         (!(dcc[i].status & STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
@@ -1249,7 +1250,7 @@ check_expired_tbufs()
 {
   /* Resend userfile requests */
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type->flags & DCT_BOT) {
+    if (dcc[i].type && dcc[i].type->flags & DCT_BOT) {
       if (dcc[i].status & STAT_OFFERED) {
         if (now - dcc[i].timeval > 120) {
           if (dcc[i].user && bot_aggressive_to(dcc[i].user))
@@ -1310,7 +1311,7 @@ finish_share(int idx)
   int i, j = -1;
 
   for (i = 0; i < dcc_total; i++)
-    if (!egg_strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT))
+    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT))
       j = i;
   if (j == -1)
     return;
@@ -1367,7 +1368,8 @@ finish_share(int idx)
    * to NULL directly.
    */
   for (i = 0; i < dcc_total; i++)
-    dcc[i].user = NULL;
+    if (dcc[i].type)
+      dcc[i].user = NULL;
   for (i = 0; i < auth_total; i++)
     auth[i].user = NULL;
 
@@ -1390,7 +1392,8 @@ finish_share(int idx)
     clear_chanlist();           /* Remove all user references from the
                                  * channel lists.                       */
     for (i = 0; i < dcc_total; i++)
-      dcc[i].user = get_user_by_handle(ou, dcc[i].nick);
+      if (dcc[i].type)
+        dcc[i].user = get_user_by_handle(ou, dcc[i].nick);
     for (i = 0; i < auth_total; i++)
       if (auth[i].hand[0])
         auth[i].user = get_user_by_handle(ou, auth[i].hand);
@@ -1505,7 +1508,7 @@ cancel_user_xfer(int idx, void *x)
     if (dcc[idx].status & STAT_GETTING) {
       j = 0;
       for (i = 0; i < dcc_total; i++)
-        if (!egg_strcasecmp(dcc[i].host, dcc[idx].nick) &&
+        if (dcc[i].type && !egg_strcasecmp(dcc[i].host, dcc[idx].nick) &&
             ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND)) == (DCT_FILETRAN | DCT_FILESEND)))
           j = i;
       if (j != 0) {
@@ -1518,7 +1521,7 @@ cancel_user_xfer(int idx, void *x)
     if (dcc[idx].status & STAT_SENDING) {
       j = 0;
       for (i = 0; i < dcc_total; i++)
-        if ((!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) &&
+        if (dcc[i].type && (!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) &&
             ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND))
              == DCT_FILETRAN))
           j = i;
@@ -1541,12 +1544,12 @@ share_report(int idx, int details)
 
   if (details) {
     for (i = 0; i < dcc_total; i++)
-      if (dcc[i].type == &DCC_BOT) {
+      if (dcc[i].type && dcc[i].type == &DCC_BOT) {
         if (dcc[i].status & STAT_GETTING) {
           int ok = 0;
 
           for (j = 0; j < dcc_total; j++)
-            if (((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
+            if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
                  == (DCT_FILETRAN | DCT_FILESEND)) && !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
               dprintf(idx, "Downloading userlist from %s (%d%% done)\n",
                       dcc[i].nick, (int) (100.0 * ((float) dcc[j].status) / ((float) dcc[j].u.xfer->length)));
@@ -1558,7 +1561,7 @@ share_report(int idx, int details)
 #ifdef HUB
         } else if (dcc[i].status & STAT_SENDING) {
           for (j = 0; j < dcc_total; j++) {
-            if (((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
+            if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
                  == DCT_FILETRAN)
                 && !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
               if (dcc[j].type == &DCC_GET)

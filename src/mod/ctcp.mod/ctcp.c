@@ -363,7 +363,8 @@ static void ctcp_minutely()
 
   if (listen_time <= 0) {
     for (int i = 0; i < dcc_total; i++) {
-      if ((dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)") || !strcmp(dcc[i].nick, "(telnet6)"))) {
+      if (dcc[i].type && (dcc[i].type->flags & DCT_LISTEN) && 
+           (!strcmp(dcc[i].nick, "(telnet)") || !strcmp(dcc[i].nick, "(telnet6)"))) {
         putlog(LOG_DEBUG, "*", "Closing listening port %d %s", dcc[i].port, dcc[i].nick);
 
         killsock(dcc[i].sock);
@@ -582,7 +583,7 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
     int ix = -1;
 
     for (int i = 0; i < dcc_total; i++) {
-      if ((dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)")))
+      if (dcc[i].type && (dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)")))
         ix = i;
     }
     if (dcc_total == max_dcc || (ix < 0 && (ix = listen_all(0, 0)) < 0))
