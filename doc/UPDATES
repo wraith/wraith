@@ -8,6 +8,7 @@ This is a summary of ChangeLog basically.
 4.Fixed problem with cmd_chattr +pj
 5.No longer warning about "Can't create new socket" for identd.
 6.Re-wrote cmd_bots.
+7.Don't auto-op users in a +take chan.
 
 1.1.7
 
