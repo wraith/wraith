@@ -280,7 +280,7 @@ init_conf()
 #endif /* HUB */
   conffile.portmin = 0;
   conffile.portmax = 0;
-  conffile.pscloak = 1;
+  conffile.pscloak = 0;
   conffile.uid = 0;
   conffile.uname = NULL;
   conffile.username = NULL;

@@ -65,6 +65,7 @@ This is a summary of ChangeLog basically.
 * cmdpasses now require that the old pass be used to clear old pass.
 * cmd_bottree now shows HUBS as yellow.
 * Added cmd_login to change login display settings seen in .whois for a few versions
+* pscloak is now default 0.
 
 1.1.9
 
