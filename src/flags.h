@@ -13,12 +13,14 @@
 #define PRIV_VOICE 2
 
 
-typedef long flag_t;
+typedef unsigned long long	flag_t;
+
+extern flag_t	FLAG[128];
 
 struct flag_record {
   flag_t match;
   flag_t global;
-  flag_t  bot;
+  flag_t bot;
   flag_t chan;
 };
 
@@ -63,33 +65,28 @@ struct flag_record {
 #define CHAN_VALID 0x03ffffff	/* all flags that can be chan specific */
 #define BOT_VALID  0x7fe689C1 /* all BOT_ flags in use               */
 
+#define USER_ADMIN	FLAG['a']
+#define USER_BOT	FLAG['b']
+#define USER_CHANHUB	FLAG['c']
+#define USER_DEOP	FLAG['d']
+#define USER_EXEMPT	FLAG['e']
+#define USER_HUBA	FLAG['i']
+#define USER_CHUBA	FLAG['j']
+#define USER_KICK	FLAG['k']
+#define USER_DOLIMIT	FLAG['l']
+#define USER_MASTER	FLAG['m']
+#define USER_OWNER	FLAG['n']
+#define USER_OP		FLAG['o']
+#define USER_PARTY	FLAG['p']
+#define USER_QUIET	FLAG['q']
+#define USER_UPDATEHUB	FLAG['u']
+#define USER_VOICE	FLAG['v']
+#define USER_WASOPTEST	FLAG['w']
+#define USER_NOFLOOD	FLAG['x']
+#define USER_DOVOICE	FLAG['y']
+#define USER_DEFAULT	0
 
-#define USER_ADMIN         BIT0  /* a  user is an admin                  */
-#define USER_BOT           BIT1  /* b  user is a bot                     */
-#define USER_CHANHUB       BIT2  /* c  bot is a chanhub    */
-#define USER_DEOP          BIT3  /* d  user is global de-op              */
-#define USER_EXEMPT        BIT4  /* e  exempted from stopnethack         */
-#define USER_F             BIT5  /* f  unused             */
-#define USER_G             BIT6  /* g  unused                            */
-#define USER_H             BIT7  /* h  unused                            */
-#define USER_HUBA          BIT8  /* i  access to HUBS        */
-#define USER_CHUBA         BIT9  /* j  access to CHANHUBS(+c)            */
-#define USER_KICK          BIT10 /* k  user is global auto-kick          */
-#define USER_DOLIMIT       BIT11 /* l  bot sets limit on channel(s)        */
-#define USER_MASTER        BIT12 /* m  user has full bot access          */
-#define USER_OWNER         BIT13 /* n  user is the bot owner             */
-#define USER_OP            BIT14 /* o  user is +o on all channels        */
-#define USER_PARTY         BIT15 /* p  user can CHAT on partyline:*needs (+i or +j)    */
-#define USER_QUIET         BIT16 /* q  user is global de-voice           */
-#define USER_R  	   BIT17 /* r  unused    */
-#define USER_S             BIT18 /* s  unused             */
-#define USER_T             BIT19 /* t  unused             */
-#define USER_UPDATEHUB     BIT20 /* u  bot is the updatehub         */
-#define USER_VOICE         BIT21 /* v  user is +v on all channels        */
-#define USER_WASOPTEST     BIT22 /* w  wasop test needed for stopnethack */
-#define USER_NOFLOOD       BIT23 /* x  user is exempt from flood kicks   */
-#define USER_DOVOICE       BIT24 /* y  bot gives voices                  */
-#define USER_DEFAULT       BIT25 /* use default-flags                    */
+
 
 #define bot_hublevel(x) ( ( (x) && (x->flags & USER_BOT) && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
                           ( ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel ? \
@@ -98,38 +95,39 @@ struct flag_record {
 
 /* Flag checking macros
  */
-#define chan_op(x)			((x).chan & USER_OP)
-#define glob_op(x)			((x).global & USER_OP)
-#define chan_deop(x)			((x).chan & USER_DEOP)
-#define glob_deop(x)			((x).global & USER_DEOP)
-#define glob_master(x)			((x).global & USER_MASTER)
-#define glob_bot(x)			((x).global & USER_BOT)
-#define glob_owner(x)			((x).global & USER_OWNER)
-#define chan_master(x)			((x).chan & USER_MASTER)
-#define chan_owner(x)			((x).chan & USER_OWNER)
-#define chan_kick(x)			((x).chan & USER_KICK)
-#define glob_kick(x)			((x).global & USER_KICK)
-#define chan_voice(x)			((x).chan & USER_VOICE)
-#define glob_voice(x)			((x).global & USER_VOICE)
-#define chan_wasoptest(x)		((x).chan & USER_WASOPTEST)
-#define glob_wasoptest(x)		((x).global & USER_WASOPTEST)
-#define chan_quiet(x)			((x).chan & USER_QUIET)
-#define glob_quiet(x)			((x).global & USER_QUIET)
-#define glob_party(x)			((x).global & USER_PARTY)
-#define glob_hilite(x) 			((x).global & USER_HIGHLITE)
-#define chan_exempt(x)			((x).chan & USER_EXEMPT)
-#define glob_exempt(x)			((x).global & USER_EXEMPT)
-#define glob_admin(x)			((x).global & USER_ADMIN)
-#define glob_huba(x)			((x).global & USER_HUBA)
-#define glob_chuba(x)			((x).global & USER_CHUBA)
-#define glob_dolimit(x)			((x).global & USER_DOLIMIT)
-#define chan_dolimit(x)			((x).chan & USER_DOLIMIT)
-#define glob_dovoice(x)			((x).global & USER_DOVOICE)
-#define chan_dovoice(x)			((x).chan & USER_DOVOICE)
-#define glob_noflood(x)			((x).global & USER_NOFLOOD)
-#define chan_noflood(x)			((x).chan & USER_NOFLOOD)
-#define glob_chanhub(x)			((x).global & USER_CHANHUB)
+#define chan_op(x)                     ((x).chan & USER_OP)
+#define glob_op(x)                     ((x).global & USER_OP)
+#define chan_deop(x)                   ((x).chan & USER_DEOP)
+#define glob_deop(x)                   ((x).global & USER_DEOP)
+#define glob_master(x)                 ((x).global & USER_MASTER)
+#define glob_bot(x)                    ((x).global & USER_BOT)
+#define glob_owner(x)                  ((x).global & USER_OWNER)
+#define chan_master(x)                 ((x).chan & USER_MASTER)
+#define chan_owner(x)                  ((x).chan & USER_OWNER)
+#define chan_kick(x)                   ((x).chan & USER_KICK)
+#define glob_kick(x)                   ((x).global & USER_KICK)
+#define chan_voice(x)                  ((x).chan & USER_VOICE)
+#define glob_voice(x)                  ((x).global & USER_VOICE)
+#define chan_wasoptest(x)              ((x).chan & USER_WASOPTEST)
+#define glob_wasoptest(x)              ((x).global & USER_WASOPTEST)
+#define chan_quiet(x)                  ((x).chan & USER_QUIET)
+#define glob_quiet(x)                  ((x).global & USER_QUIET)
+#define glob_party(x)                  ((x).global & USER_PARTY)
+#define glob_hilite(x)                         ((x).global & USER_HIGHLITE)
+#define chan_exempt(x)                 ((x).chan & USER_EXEMPT)
+#define glob_exempt(x)                 ((x).global & USER_EXEMPT)
+#define glob_admin(x)                  ((x).global & USER_ADMIN)
+#define glob_huba(x)                   ((x).global & USER_HUBA)
+#define glob_chuba(x)                  ((x).global & USER_CHUBA)
+#define glob_dolimit(x)                        ((x).global & USER_DOLIMIT)
+#define chan_dolimit(x)                        ((x).chan & USER_DOLIMIT)
+#define glob_dovoice(x)                        ((x).global & USER_DOVOICE)
+#define chan_dovoice(x)                        ((x).chan & USER_DOVOICE)
+#define glob_noflood(x)                        ((x).global & USER_NOFLOOD)
+#define chan_noflood(x)                        ((x).chan & USER_NOFLOOD)
+#define glob_chanhub(x)                        ((x).global & USER_CHANHUB)
 
+void init_flags();
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void set_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void break_down_flags(const char *, struct flag_record *, struct flag_record *);

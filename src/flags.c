@@ -14,7 +14,26 @@
 #include "userent.h"
 #include "users.h"
 
-static int                     allow_dk_cmds = 1;
+flag_t		FLAG[128];
+
+void init_flags()
+{
+       unsigned char i;
+
+       for (i = 0; i < 'A'; i++)
+               FLAG[i] = 0;
+       for (; i <= 'Z'; i++)
+               FLAG[i] = (flag_t) 1 << (26 + (i - 'A'));
+       for (; i < 'a'; i++)
+               FLAG[i] = 0;
+       for (; i <= 'z'; i++)
+               FLAG[i] = (flag_t) 1 << (i - 'a');
+       for (; i < 128; i++)
+               FLAG[i] = 0;
+
+//printf("a: %llX A: %llX\n",  FLAG['a'],  FLAG['Z']);
+//printf("0: %llX 26: %llX\n",  BIT0, BIT31);
+}
 
 /* Some flags are mutually exclusive -- this roots them out
  */
@@ -145,41 +164,18 @@ void break_down_flags(const char *string, struct flag_record *plus, struct flag_
       if ((*string >= 'a') && (*string <= 'z')) {
 	switch (mode) {
 	case 0:
-	  which->global |= 1 << (*string - 'a');
+	  /* which->global |= (flag_t) 1 << (*string - 'a'); */
+          which->global |= FLAG[(unsigned char) *string];
 	  break;
 	case 1:
-	  which->chan |= 1 << (*string - 'a');
+	  /* which->chan |= (flag_t) 1 << (*string - 'a'); */
+          which->chan |= FLAG[(unsigned char) *string];
 	  break;
 	case 2:
-	  which->bot |= 1 << (*string - 'a');
+	  /* which->bot |= (flag_t) 1 << (*string - 'a'); */
+          which->bot |= FLAG[(unsigned char) *string];
 	}
       } 
-/* udef
-      else if ((*string >= 'A') && (*string <= 'Z')) {
-	switch (mode) {
-	case 0:
-	  which->udef_global |= 1 << (*string - 'A');
-	  break;
-	case 1:
-	  which->udef_chan |= 1 << (*string - 'A');
-	  break;
-	}
-      } 
-      else if ((*string >= '0') && (*string <= '9')) {
-	switch (mode) {
-	  // Map 0->9 to A->K for glob/chan so they are not lost
-	case 0:
-	  which->udef_global |= 1 << (*string - '0');
-	  break;
-	case 1:
-	  which->udef_chan |= 1 << (*string - '0');
-	  break;
-	case 2:
-	  which->bot |= BOT_FLAG0 << (*string - '0');
-	  break;
-	}
-      }
-*/
     }
     string++;
   }
@@ -302,17 +298,8 @@ int flagrec_ok(struct flag_record *req, struct flag_record *have)
     int hav = have->global;
 
     /* Exception 1 - global +d/+k cant use -|-, unless they are +p */
-    if (!req->chan && !req->global) {
-      if (!allow_dk_cmds) {
-	if (glob_party(*have))
-	  return 1;
-	if (glob_kick(*have) || chan_kick(*have))
-	  return 0;		/* +k cant use -|- commands */
-	if (glob_deop(*have) || chan_deop(*have))
-	  return 0;		/* neither can +d's */
-      }
+    if (!req->chan && !req->global)
       return 1;
-    }
     /* The +n/+m checks arent needed anymore since +n/+m
      * automatically add lower flags
      */
