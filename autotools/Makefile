@@ -4,7 +4,7 @@ all: clean aclocal autoheader autoconf clean_again
 
 aclocal:
 	@rm -rf aclocal.m4
-	aclocal-1.6 -I includes/
+	aclocal -I includes/
 
 autoheader:
 	@rm -rf ../config.h.in

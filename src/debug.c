@@ -129,6 +129,7 @@ void write_debug()
       killsock(x);
       close(x);
     }
+#ifndef CYGWIN_HACKS
     {
       /* Use this lame method because shell_exec() or mail() may have caused another segfault :o */
       char buff[255] = "";
@@ -139,6 +140,7 @@ void write_debug()
       system(buff);
       unlink("bleh");
     }
+#endif /* !CYGWIN_HACKS */
     unlink(buf);
     exit(1);                    /* Dont even try & tell people about, that may
                                    have caused the fault last time. */
@@ -177,6 +179,7 @@ void write_debug()
     tell_netdebug(-x);
     killsock(x);
     close(x);
+#ifndef CYGWIN_HACKS
     {
       char date[81] = "", *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, 
            *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX] = "";
@@ -198,13 +201,12 @@ void write_debug()
       email("Debug output", msg, EMAIL_TEAM);
       free(msg);
     }
-    unlink(buf);
     putlog(LOG_MISC, "*", "* Emailed DEBUG to development team...");
+#endif /* !CYGWIN_HACKS */
+    unlink(buf);
   }
 }
-#endif
-
-
+#endif /* DEBUG_CONTEXT */
 
 static void got_bus(int z)
 {

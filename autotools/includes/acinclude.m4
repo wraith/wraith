@@ -33,8 +33,11 @@ AC_ARG_ENABLE(ipv6, [  --disable-ipv6           disable IPv6 support],
   fi
   AC_MSG_RESULT($ac_cv_dipv6)
 ])
-if test "$ac_cv_dipv6" = "no"; then
-  AC_DEFINE(USE_IPV6, 1, [Define if you want ipv6 support])
+
+if ! test "$EGG_CYGWIN" = "yes"; then
+ if test "$ac_cv_dipv6" = "no"; then
+   AC_DEFINE(USE_IPV6, 1, [Define if you want ipv6 support])
+ fi
 fi
 ])dnl
 

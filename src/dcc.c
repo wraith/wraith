@@ -559,6 +559,7 @@ struct dcc_table DCC_BOT =
   NULL,
   display_dcc_bot,
   free_dcc_bot_,
+  NULL,
   NULL
 };
 
@@ -572,8 +573,93 @@ struct dcc_table DCC_FORK_BOT =
   failed_link,
   display_dcc_fork_bot,
   free_dcc_bot_,
+  NULL,
   NULL
 };
+
+static void dcc_identd(int idx, char *buf, int atr)
+{
+  char outbuf[1024] = "";
+
+  egg_snprintf(outbuf, sizeof outbuf, "%s : USERID : UNIX : %s\n", buf, conf.bot->nick);
+  tputs(dcc[idx].sock, outbuf, strlen(outbuf));
+}
+
+static void eof_dcc_identd(int idx)
+{
+  /* dont bother logging it, who gives a fuck */
+  killsock(dcc[idx].sock);
+  lostdcc(idx);
+}
+
+static void display_dcc_identd(int idx, char *buf)
+{
+  sprintf(buf, "idtd  %d%s", dcc[idx].port, (dcc[idx].status & LSTN_PUBLIC) ? " pub" : "");
+}
+
+struct dcc_table DCC_IDENTD = 
+{
+ "IDENTD",
+ DCT_LISTEN,
+ eof_dcc_identd,
+ dcc_identd,
+ NULL,
+ NULL,
+ display_dcc_identd,
+ NULL,
+ NULL,
+ NULL
+}; 
+
+static void dcc_identd_connect(int idx, char *buf, int atr)
+{
+  unsigned long ip;
+  unsigned short port;
+  int j = 0, sock;
+  char s[UHOSTLEN + 1] = "";
+
+  if (dcc_total + 1 > max_dcc) {
+    j = answer(dcc[idx].sock, s, &ip, &port, 0);
+    if (j != -1)
+      killsock(j);
+    return;
+  }
+  sock = answer(dcc[idx].sock, s, &ip, &port, 0);
+
+  while ((sock == -1) && (errno == EAGAIN))
+    sock = answer(sock, s, &ip, &port, 0);
+
+  if (sock < 0) {
+    neterror(s);
+    putlog(LOG_MISC, "*", DCC_FAILED, s);
+    return;
+  }
+  /* changeover_dcc(idx, &DCC_IDENTD, 0); */
+
+  j = new_dcc(&DCC_IDENTD, 0);
+
+  dcc[j].sock = sock;
+  dcc[j].port = port;
+  dcc[j].addr = dcc[idx].addr;
+  strcpy(dcc[j].host, dcc[idx].host);
+  strcpy(dcc[j].nick, "*");
+  /* dcc[j].u.ident_sock = dcc[idx].sock; */
+  dcc[j].timeval = now;
+}
+
+struct dcc_table DCC_IDENTD_CONNECT = 
+{
+ "IDENTD",
+ DCT_LISTEN,
+ eof_dcc_identd,
+ dcc_identd_connect,
+ NULL,
+ NULL,
+ display_dcc_identd,
+ NULL,
+ NULL,
+ NULL
+}; 
 
 static void dcc_chat_secpass(int idx, char *buf, int atr)
 {

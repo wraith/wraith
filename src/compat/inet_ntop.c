@@ -8,7 +8,7 @@
 #include "common.h"
 #include "inet_ntop.h"
 
-#if defined(USE_IPV6) && !defined(HAVE_INET_NTOP)
+#ifndef HAVE_INET_NTOP
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -57,8 +57,10 @@ egg_inet_ntop(af, src, dst, size)
 	switch (af) {
 	case AF_INET:
 		return (egg_inet_ntop4(src, dst, size));
+#ifdef USE_IPV6
 	case AF_INET6:
 		return (egg_inet_ntop6(src, dst, size));
+#endif /* USE_IPV6 */
 	default:
 		return (NULL);
 	}

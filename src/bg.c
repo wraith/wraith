@@ -45,9 +45,9 @@ static void bg_do_detach(pid_t p)
   printf("%s launched into the background  (pid: %d)\n\n", conf.bot->nick, p);
 #endif /* HUB */
 
-#if HAVE_SETPGID
+#ifndef CYGWIN_HACKS
   setpgid(p, p);
-#endif
+#endif /* !CYGWIN_HACKS */
   exit(0);
 }
 

@@ -44,6 +44,7 @@ char *add_cr(char *);
 void changeover_dcc(int, struct dcc_table *, int);
 void do_boot(int, char *, char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
+void open_identd();
 
 extern int		max_dcc, connect_timeout;
 

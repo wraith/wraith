@@ -671,3 +671,26 @@ int listen_all(int lport, int off)
    */
   return idx;
 }
+
+void open_identd()
+{
+  int idx = -1, port = 113, i = -1;
+
+#ifdef USE_IPV6
+  i = open_listen_by_af(&port, AF_INET6);
+#else
+  i = open_listen(&port);
+#endif /* USE_IPV6 */
+  if (i > 0) {
+    idx = new_dcc(&DCC_IDENTD_CONNECT, 0);
+    if (idx > 0) {
+      dcc[idx].addr = iptolong(getmyip());
+      dcc[idx].port = port;
+      dcc[idx].sock = i;
+      dcc[idx].timeval = now;
+      strcpy(dcc[idx].nick, STR("(identd)"));
+      strcpy(dcc[idx].host, "*");
+      putlog(LOG_MISC, "*", STR("Identd daemon started."), port, i, idx);
+    }
+  }
+}

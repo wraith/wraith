@@ -169,7 +169,13 @@ void confedit(char *cfile) {
         goto fatal;
       } else if (WIFSIGNALED(waiter)) {
         fprintf(stderr, "\"%s\" killed; signal %d (%score dumped)\n",
-                        editor, WTERMSIG(waiter), WCOREDUMP(waiter) ?"" :"no ");
+                        editor, WTERMSIG(waiter), 
+#ifdef CYGWIN_HACKS
+                        0
+#else
+                        WCOREDUMP(waiter) 
+#endif /* CYGWIN_HACKS */
+                        ? "" : "no ");
         goto fatal;
       } else {
         break;
@@ -185,7 +191,7 @@ void confedit(char *cfile) {
       fatal("Error reading new config file", 0);
 
     unlink(cfile);
-    EncryptFile(s, cfile);
+    Encrypt_File(s, cfile);
     unlink(s);
     fatal("New config file saved, restart bot to use", 0);
 
@@ -203,7 +209,11 @@ void init_conf() {
 
   conffile.autocron = 1;
   conffile.autouname = 0;
+#ifdef CYGWIN_HACKS
+  conffile.binpath = strdup(homedir());
+#else /* !CYGWIN_HACKS */
   conffile.binpath = strdup(STR("~/"));
+#endif /* CYGWIN_HACKS */
   conffile.binname = strdup(STR(".sshrc"));
   conffile.portmin = 0;
   conffile.portmax = 0;
@@ -304,6 +314,7 @@ void showconf() {
   conf_bot *bot = NULL;
 
   sdprintf("---------------------------CONF START---------------------------");
+#ifndef CYGWIN_HACKS
   sdprintf("uid      : %d", conffile.uid);
   sdprintf("uname    : %s", conffile.uname);
   sdprintf("username : %s", conffile.username);
@@ -315,6 +326,7 @@ void showconf() {
   sdprintf("pscloak  : %d", conffile.pscloak);
   sdprintf("autocron : %d", conffile.autocron);
   sdprintf("autouname: %d", conffile.autouname);
+#endif /* !CYGWIN_HACKS */
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next)
     sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d PID_FILE: %s LOCALHUB %d", bot->nick, bot->ip, bot->host,
                  bot->ip6, bot->host6, bot->pid, bot->pid_file, 
@@ -352,12 +364,12 @@ int parseconf() {
   if (!conffile.bots->nick && !conffile.bots->next) /* no bots ! */
     werr(ERR_NOBOTS);
 
+#ifndef CYGWIN_HACKS
   if (conffile.uid && conffile.uid != myuid) {
     sdprintf("wrong uid, conf: %d :: %d", conffile.uid, myuid);
     werr(ERR_WRONGUID);
-  } else if (!conffile.uid) {
+  } else if (!conffile.uid)
     conffile.uid = myuid;
-  }
 
   if (conffile.uname && strcmp(conffile.uname, my_uname()) && !conffile.autouname) {
     baduname(conffile.uname, my_uname());                       /* its not auto, and its not RIGHT, bail out. */
@@ -392,6 +404,7 @@ int parseconf() {
     else
       fatal("Unforseen error expanding '~'", 0);
   }
+#endif /* !CYGWIN_HACKS */
   return 0;
 }
 
@@ -401,6 +414,7 @@ int readconf(char *cfile)
   int i = 0;
   char inbuf[8192] = "";
 
+  sdprintf("readconf(%s)", cfile);
   Context;
   if (!(f = fopen(cfile, "r")))
     fatal("Cannot read config", 0);
@@ -544,6 +558,7 @@ int writeconf(char *filename, FILE *stream, int bits) {
       return 1;
   }
 
+#ifndef CYGWIN_HACKS
   comment("# Lines beginning with # are what the preceeding line SHOULD be");
   comment("# They are also ignored during parsing\n");
 
@@ -603,6 +618,7 @@ int writeconf(char *filename, FILE *stream, int bits) {
 
   comment("");
 
+#endif /* CYGWIN_HACKS */
   comment("# '|' means OR, [] means the enclosed is optional");
   comment("# A '+' in front of HOST means the HOST is ipv6");
   comment("# A '/' in front of BOT will disable that bot.");
@@ -672,4 +688,3 @@ void fillconf(conf_t *inconf) {
   inconf->pscloak = 		conffile.pscloak;
   inconf->uid = 		conffile.uid;
 }
-

@@ -196,7 +196,7 @@ int lfprintf (FILE *stream, ...)
   return 0;
 }
 
-void EncryptFile(char *infile, char *outfile)
+void Encrypt_File(char *infile, char *outfile)
 {
   char  buf[8192] = "";
   FILE *f = NULL, *f2 = NULL;
@@ -229,7 +229,7 @@ void EncryptFile(char *infile, char *outfile)
     fclose(f2);
 }
 
-void DecryptFile(char *infile, char *outfile)
+void Decrypt_File(char *infile, char *outfile)
 {
   char buf[8192] = "", *temps = NULL;
   FILE *f = NULL, *f2 = NULL;

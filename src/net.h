@@ -132,6 +132,10 @@ void cache_my_ip();
 void neterror(char *);
 void setsock(int, int);
 int allocsock(int, int);
+#ifdef CYGWIN_HACKS
+#  define getsock cygwin_sucks
+#endif /* CYGWIN_HACKS */
+
 #ifdef USE_IPV6
 int getsock(int, int);
 #else

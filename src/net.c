@@ -935,7 +935,7 @@ char *iptostr(IP ip)
   struct in_addr a;
 
   a.s_addr = ip;
-  return (char *)inet_ntop(AF_INET, &a, ipbuf, sizeof(ipbuf));
+  return (char *) egg_inet_ntop(AF_INET, &a, ipbuf, sizeof(ipbuf));
 }
 
 /* Short routine to answer a connect received on a socket made previously

@@ -87,6 +87,8 @@ void check_mypid()
 #endif /* LEAF */
 
 
+#ifndef CYGWIN_HACKS
+
 #ifdef S_LASTCHECK
 char last_buf[128] = "";
 #endif /* S_LASTCHECK */
@@ -223,6 +225,7 @@ void check_processes()
     free(out);
 #endif /* S_PROCESSCHECK */
 }
+#endif /* !CYGWIN_HACKS */
 
 void check_promisc()
 {
@@ -770,12 +773,16 @@ char *homedir()
     if (conf.homedir)
       egg_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
     else {
+#ifdef CYGWIN_HACKS
+      egg_snprintf(tmp, sizeof tmp, "%s", dirname(binname));
+#else /* !CYGWIN_HACKS */
       struct passwd *pw = NULL;
  
       ContextNote("getpwuid()");
       pw = getpwuid(myuid);
       egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
       ContextNote("getpwuid(): Success");
+#endif /* CYGWIN_HACKS */
     }
     ContextNote("realpath()");
     realpath(tmp, homedir); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
@@ -792,12 +799,16 @@ char *my_username()
     if (conf.username)
       egg_snprintf(username, sizeof username, "%s", conf.username);
     else {
+#ifdef CYGWIN_HACKS
+      egg_snprintf(username, sizeof username, "cygwin");
+#else /* !CYGWIN_HACKS */
       struct passwd *pw = NULL;
 
       ContextNote("getpwuid()");
       pw = getpwuid(myuid);
       ContextNote("getpwuid(): Success");
       egg_snprintf(username, sizeof username, "%s", pw->pw_name);
+#endif /* CYGWIN_HACKS */
     }
   }
   return username;
@@ -814,6 +825,9 @@ char *confdir()
 #ifdef HUB
     egg_snprintf(confdir, sizeof confdir, "%s", dirname(binname));
 #endif /* HUB */
+#ifdef CYGWIN_HACKS
+    egg_snprintf(confdir, sizeof confdir, "%s", homedir());
+#endif /* CYGWIN_HACKS */
   }
   return confdir;
 }

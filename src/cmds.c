@@ -2665,7 +2665,7 @@ static void cmd_last(struct userrec *u, int idx, char *par) {
   }
   if (par && par[0]) {
     strncpyz(user, par, sizeof(user));
-  } else {
+  } else if (conf.username) {
     strncpyz(user, conf.username, sizeof(user));
   }
   if (!user[0]) {
@@ -3747,7 +3747,7 @@ void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
 
     if (par[0]) {
       strncpyz(user, par, sizeof(user));
-    } else {
+    } else if (conf.username) {
       strncpyz(user, conf.username, sizeof(user));
     }
     if (!user[0]) {
