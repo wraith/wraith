@@ -175,7 +175,7 @@ static void got_nu(char *botnick, char *code, char *par)
   struct bot_addr *bi = NULL, *obi = NULL;
 
   bot = tandbot;
-  if (!strcmp(bot->bot, botnick)) //dont listen to our uplink.. use normal upate system..
+  if (!strcmp(bot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
     return;
   if (!localhub)
     return;
