@@ -577,23 +577,6 @@ void chanprog()
 
   /* We should be safe now */
 
-  /* test tempdir: it's vital */
-  {
-    FILE *f = NULL;
-    char s[DIRMAX] = "";
-    int fd;
-
-    egg_snprintf(s, sizeof s, STR("%s.test-XXXXXX"), tempdir);
-    if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
-      if (fd != -1) {
-        unlink(s);
-        close(fd);
-      }
-      fatal(STR("Can't write to tempdir!"), 0);
-    }
-    unlink(s);
-    fclose(f);
-  }
   reaffirm_owners();
 }
 

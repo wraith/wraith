@@ -535,6 +535,28 @@ static void startup_checks() {
   if (!fixmod(tempdir))
     werr(ERR_TMPMOD);
 
+  /* test tempdir: it's vital */
+  {
+    FILE *f = NULL;
+    char s[DIRMAX] = "";
+    int fd;
+
+    egg_snprintf(s, sizeof s, STR("%s.test-XXXXXX"), tempdir);
+    if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
+      if (fd != -1) {
+        unlink(s);
+        close(fd);
+      }
+      fatal(STR("Can't write to tempdir!"), 0);
+    }
+    fprintf(f, "\n");
+    if (fflush(f))
+      fatal(strerror(errno), 0);
+
+    unlink(s);
+    fclose(f);
+  }
+
   if (can_stat(cfile))
     readconf(cfile, enc);
       

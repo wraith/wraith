@@ -579,6 +579,7 @@ int writeconf(char *filename, FILE *stream, int bits) {
   comment("# They are also ignored during parsing\n");
 
   my_write(f, "! uid %d\n", conffile.uid);
+
   if ((bits & CONF_COMMENT) && conffile.uid != myuid)
     my_write(f, "#! uid %d\n\n", myuid);
 
@@ -651,7 +652,6 @@ int writeconf(char *filename, FILE *stream, int bits) {
 
   if (!stream)
     fclose(f);
-
   return 0;
 }
 
