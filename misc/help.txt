@@ -18,7 +18,7 @@ See also: -chan, chanset, chaninfo
    Adds an empty channel record for the specified user so that channel lastons
    and info lines can be saved. No flags are associated with the channel.
  
-See also: -chrec, chattr%{+n}, +chan, -chan
+See also: -chrec, chattr%{+n}, +chan, -chan%{-}
 ::+exempt
 ###  %b+exempt%b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds an exempt to the list of exempts stored on the bot, with optional
@@ -59,7 +59,7 @@ See also: -noteign noteigns
    Creates a new user record for the handle given. The new user record will
    have no flags, an optional hostmask, and a random pass/secpass.
  
-See also: -user, +host, -host%{+ni}, newleaf
+See also: -user, +host, -host%{+ni}, newleaf%{-}
 ::-ban
 ###  %b-ban%b <banmask or number> [channel]
    Removes the specified ban from the list of bans stored on the bot. You may
@@ -71,7 +71,7 @@ See also: bans, +ban, stick, unstick
    This is exactly the same as %b'%d-user'%b (it removes a user record). It is
    included for convenience.
  
-See also: +user, -user%{+n}, newleaf
+See also: +user, -user%{+n}, newleaf%{-}
 ::-chan
 ### %b-chan%b <channel>
      This removes ALL information about a channel from the bot. 
@@ -129,7 +129,7 @@ See also: +noteign noteigns
 ###  %b-user%b <handle>
    Removes the specified handle's user record.
  
-See also: +user%{+ai}, -bot%{+n}, newleaf
+See also: +user%{+ai}, -bot%{-}%{+nai}, newleaf%{-}
 ::about:
 ###  %babout%b
    If you feel you are missing from the list feel free to contact bryan.
@@ -286,7 +286,7 @@ See also: botconfig
    eventually send you one line containing its version, network setting,
    channels, and uptime.
  
-See also: %{+n}bottree, vbottree%{+m}, bots
+See also: %{+n}bottree, vbottree%{-}%{+m}, bots%{-}
 ::botjump:
 ###  %bbotjump%b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
@@ -302,7 +302,7 @@ See also: jump, servers, botserver
    sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
-See also: msg%{+n}, netmsg
+See also: msg%{+n}, netmsg%{-}
 ::botnick:
 ###  %bbotnick%b <bot>
    The bot will display it's current nick over DCC.
@@ -321,7 +321,7 @@ See also: downbots%{+n}, bottree, vbottree%{-}, botinfo
 ###  %bbotserver%b <bot>
    The bot will display it's current server and lag over DCC.
  
-See also: netserver, servers%{+n}, config
+See also: netserver, servers%{+n}, config%{-}
 :hub:bottree
 ###  %bbottree%b
    Shows a tree-format diagram of the bots currently on the botnet. It's just a
@@ -333,7 +333,7 @@ See also: bots, downbots, botinfo, vbottree
 ###  %bbotversion%b <bot>
    The bot will display it's pack version and uname.
  
-See also: netversion, about%{+m|m}, status
+See also: netversion, about%{+m|m}, status%{-}
 :hub:chaddr
 ###  %bchaddr%b <bot> <address[:bot port[/user port]]>
    Changes the address for a bot. This is the address your bot will try to
@@ -508,7 +508,8 @@ See also: link
         %bflood-nick%b   Set here how many nick changes in how many seconds from
                     one host constitutes a flood. Setting this to 0 or 0:0
                     disables nick flood protection for the channel.
-See also: %{+n}+chan, -chan%{+m|m}, chanset
+ 
+See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
 :leaf:channel
 ###  %bchannel%b [channel-name]
    Shows you an extensive display of the users on a channel, and
@@ -544,7 +545,7 @@ See also: status, whois
 %{+m}
    Masters: You can specify other users to see what channels their 
             flags grant them access to.%{-}
-See also: whois%{+m}, chattr, chaninfo
+See also: whois%{+m}, chattr, chaninfo%{-}
 ::chanset
 ###  %bchanset%b <channel> <settings>
    Allows you to change the channel settings (see %b'chaninfo'%b for the
@@ -596,7 +597,7 @@ See also: whois
    Changes the handle of a user. For example, to change the handle of user
    'gavroche' to 'jamie', you would use 'chhandle gavroche jamie'.
  
-See also: chpass%{+n}, chsecpass
+See also: chpass%{+n}, chsecpass%{-}
 ::chinfo
 ###  %bchinfo%b <user> [channel] [info-line/none]
    Sets the information line for a user. This line is shown via the /msg
@@ -616,7 +617,7 @@ See: chhandle
    join the party line, etc. If the newpassword is 'rand', a random password
    will be used.
  
-See also: chhandle%{+n}, chsecpass
+See also: chhandle%{+n}, chsecpass%{-}
 :hub:chsecpass:
 ###  %bchsecpass%b <handle> [newpassword|rand]
    Changes a user's secpass. If you do not specify the new password, the user
@@ -685,7 +686,7 @@ See also: botconfig
      %bc%b  commands
      %bo%b  misc info, etc (IMPORTANT STUFF)
      %bw%b  wallops
- 
+%{-} 
 %{+n}
    Owners only (these have to be enabled in the config file via "set raw-log"):
      %be%b  errors
@@ -695,15 +696,15 @@ See also: botconfig
      %bt%b  raw botnet traffic
      %bu%b  warnings
      %bv%b  raw outgoing server traffic
- 
+%{-} 
 %{+o|o}
    The mode can also be a modifier like '+p' or '-jk' or '+mp-b'. If you omit
    the channel and modes, your current console channel and flags will be shown.
- 
+%{-} 
 %{+m|m}
 ###  %bconsole%b <user> [channel] [modes]
    This is used to set the console level of another user. This can even be used
-   on users who normally would not be able to set their own console mode.
+   on users who normally would not be able to set their own console mode.%{-}
 ::crontab:
 ###  %bcrontab%b <status|delete|show|new> [interval]
    This command is used to manipulate the crontab entries for the user
@@ -911,14 +912,14 @@ See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstic
    If there is a key set for channel, it is displayed. If channel is not
    specified, your console channel is used.
  
-See also: console, channels%{+m}, status
+See also: console, channels%{+m}, status%{-}
 ::handle
 ###  %bhandle%b <new-handle>
    Changes your handle on the bot. This is the handle (nickname) that the
    bot will know you as from this point forward. It is used to log into the
    bot.
  
-See also: newpass%{+m}, %{+i}chhand, chpass%{+n}, chsecpass
+See also: newpass%{+mi}, chhand, chpass%{-}%{+n}, chsecpass%{-}
 ::help:
 ###  %bhelp%b [cmd]
    Alone, will show all cmds that match your flags. With a cmd it will show
@@ -1070,13 +1071,13 @@ See also: netlag
    Displays the 'last' output from the shell the bot is running on,
    for the user it is running as.
  
-%{+i}See also: netlast
+%{+i}See also: netlast%{-}
 :hub:link
 ###  %blink%b [via-bot] <bot-to-link>
    Attempts to link to another hub.  This command is deprecated and not 
    recommended for use.
  
-See also: unlink, newleaf%{+a}, -bot
+See also: unlink, newleaf%{+a}, -bot%{-}
 ::match
 ###  %bmatch%b <attr> [channel] [[start] limit]
    This displays all user records with the attributes requested.
@@ -1156,13 +1157,13 @@ See also: whois, console
 ::motd
 ###  %bmotd%b %{+m}<message>%{-}
    This redisplays the partyline Message Of The Day, which was shown when you
-   first joined the partyline.%{+m} Inclue a message to set the motd.
+   first joined the partyline.%{+m} Inclue a message to set the motd.%{-}
 :leaf:msg
 ###  %bmsg%b <nickname> <text>
    Sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
-See also: botmsg%{+n}, netmsg
+See also: botmsg%{+n}, netmsg%{-}
 :hub:netcrontab:
 ###  %bnetcrontab%b <status|delete|show|new> [interval]
    Runs the specified command on all linked bots.
@@ -1204,12 +1205,12 @@ See also: ps
    All bots on the botnet will display their current server and lag
    to that server over DCC.
  
-See also: botserver, servers%{+n}, config
+See also: botserver, servers%{+n}, config%{-}
 ::netversion:
 ###  %bnetversion%b <bot>
    All bots on the botnet will display their pack version, and uname.
  
-See also: botversion, about%{+m|m}, status
+See also: botversion, about%{+m|m}, status%{-}
 :hub:netw:
 ###  %bnetw%b
    All bots on the botnet will run 'w' on their shell and display
@@ -1228,7 +1229,7 @@ See also: w
    newpassword is 'rand', a random password will be used.
  
  
-%{+mi}See also: chpass%{+n}, chsecpass
+%{+mi}See also: chpass%{-}%{+n}, chsecpass%{-}
 ::nick
 See: handle
 ::note
@@ -1280,7 +1281,7 @@ See also: echo, color
    Will run 'ps' on the bot's shell and display any results. If
    any params are specified, they will be used.
  
-%{+i}See also: netps
+%{+i}See also: netps%{-}
 ::quit
 ###  %bquit%b [comment]
    This disconnects you from the partyline. If you specify a comment, it will
@@ -1294,7 +1295,7 @@ See also: echo, color
    The local bot must, however, have a bot record for the bot you wish to
    relay to. Typing .quit or "*bye*" on a line by itself will end the relay.
  
-See also: bots%{+n}, newleaf%{+a}, -bot
+See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
 ::reload
 ###  %breload%b
    Reloads the bot's user file, discarding any changes made since the last
@@ -1318,7 +1319,7 @@ See also: save
    global ban list or channel ban list that are not currently on the
    channel, they will be added.
  
-See also: bans, console%{+m|m}, reset
+See also: bans, console%{+m|m}, reset%{-}
 :leaf:resetexempts
 ###  %bresetexempts%b [channel]
    resets the bot's exemption list for the channel. this command
@@ -1355,7 +1356,7 @@ See also: reload, backup
    Changes your secpass on the bot. This is used for Authing via /msg
    and for DCC. If the password is 'rand', a random password will be used.
  
-%{+mi}See also: chpass%{+n}, chsecpass
+%{+mi}See also: chpass%{-}%{+n}, chsecpass%{-}
 :leaf:servers
 ###  %bservers%b
    lists the servers that the bot has in its server list.  this is
@@ -1387,7 +1388,7 @@ See also: slowpart, chanset, chaninfo
    All bots on the botnet will part the specified channel at the rate
    of one bot per 'interval-seconds'
  
-%{+n}See also: slowjoin
+%{+n}See also: slowjoin%{-}
 ::status
 ###  %bstatus%b
 ###  %bstatus all%b
@@ -1422,7 +1423,7 @@ See also: slowpart, chanset, chaninfo
    information. If you use %b'%dstatus all'%b instead, you will see all status
    information available from loaded modules.
  
-See also: channel, channels%{+a}, debug
+See also: channel, channels%{+a}, debug%{-}
 ::stick
 ###  %bstick%b [ban/exempt/invite] <hostmask/number> [channel]
    Makes a ban, exempt, or invite "sticky". This means that the bot will always
@@ -1453,7 +1454,7 @@ See also: fixcodes, color, echo, page
 %{+m}
 ###  %bstrip%b <user> [modes]
    Set the strip level of another user. A master can't set their own strip
-   flags without prefixing the modes with a '+' or '-'.
+   flags without prefixing the modes with a '+' or '-'.%{-}
 ::su
 ###  %bsu%b <user>
    Lets you assume the identity of another user. If you are a global owner,
@@ -1480,7 +1481,7 @@ See also: bots, bottree, vbottree
    Shows total and daily net traffic stats since the last %b'%drestart'%b.
    Stats groups are IRC, Botnet, Partyline, Transfer.mod and Misc.
  
-%{+m}See also: restart
+%{+m}See also: restart%{-}
 ::unlink
 ###  %bunlink%b <bot|*>
    This disconnects the specified bot from the botnet (assuming it was linked
@@ -1488,7 +1489,7 @@ See also: bots, bottree, vbottree
    to unlink them. If "*" is specified as the parameter, all bots will be
    unlinked.
  
-See also: %{+n}link, %{-}bots, downbots%{+n}, newleaf, bottree, vbottree
+See also: %{+n}link, %{-}bots, downbots%{+n}, newleaf, bottree, vbottree%{-}
 ::unstick
 ###  %bunstick%b [ban/exempt/invite] <hostmask/number> [channel]
    Makes a "sticky" ban, exempt, or invite normal again.
@@ -1536,7 +1537,7 @@ See also: devoice
    The output of 'w' will be displayed over DCC, bot the shell
    the bot is running on.
  
-%{+i}See also: netw
+%{+i}See also: netw%{-}
 ::who
 ###  %bwho%b [bot]
    Displays a list of users on the local bot.
@@ -1578,8 +1579,7 @@ See also: devoice
    will see the actual channels other users are on. Also, people in the
    filesystem will be listed (as being in channel "files") if the filesys
    module is loaded. A '+' next to the nickname here means the user has
-   access to return to the party line.
-%{-}
+   access to return to the party line.%{-}
  
 See also: whom
 ::whoami
@@ -1645,5 +1645,5 @@ See also: whom
  
    Masters: if the user has a comment, you will see it under "COMMENT:".%{-}
  
-See also: match, who, whom%{+m|m}, chattr, chaninfo
+See also: match, who, whom%{+m|m}, chattr, chaninfo%{-}
 ::end

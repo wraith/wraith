@@ -2049,53 +2049,54 @@ char *btoh(const unsigned char *md, int len)
 #define HELP_UNDER 4
 #define HELP_FLASH 8
 
+/* so many string++ is making the problem */
 void showhelp (int idx, struct flag_record *flags, char *string)
 {
   static int help_flags;
-  struct flag_record tr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  static char helpstr[8092] = "", tmp[2] = "", flagstr[10] = "";
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  char helpstr[12288], tmp[2] = "", flagstr[10] = "";
   int ok = 1;
 Context;
   helpstr[0] = 0;
-  while ((string) && (string[0])) {
-    if ((*string == '%')) {
+  while (string && string[0]) {
+    if (*string == '%') {
       if (!strncmp(string + 1, "{+", 2)) {
-        while ((*string) && (*string != '+')) {
+        while (*string && *string != '+') {
           string++;
         }
         flagstr[0] = 0;
-        while ((*string) && (*string != '}')) {
+        while (*string && *string != '}') {
           sprintf(tmp, "%c", *string);
           strcat(flagstr, tmp);
           string++;
         }
         string++;
-        break_down_flags(flagstr, &tr, NULL);
-        if (flagrec_ok(&tr, flags)) {
+        break_down_flags(flagstr, &fr, NULL);
+        if (flagrec_ok(&fr, flags)) {
           ok = 1;
-          while ((*string) && (*string != '%')) {
+          while (*string && *string != '%') {
             sprintf(tmp, "%c", *string);
             strcat(helpstr, tmp);
             string++;
           }
           if (!strncmp(string + 1, "{-", 2)) {
             ok = 1;
-            while ((*string) && (*string != '}')) {
+            while (*string && *string != '}') {
               string++;
             }
+            string++;
           }
-          string++;
         } else {
           ok = 0;
         }
       } else if (!strncmp(string + 1, "{-", 2)) {
         ok = 1;
-        while ((*string) && (*string != '}')) {
+        while (*string && *string != '}') {
           string++;
         }
         string++;
       } else if (*string == '{') {
-        while ((*string) && (*string != '}')) {
+        while (*string && *string != '}') {
           string++;
         }
       } else if (*(string + 1) == 'b') {
@@ -2138,8 +2139,7 @@ Context;
       string++;
     }
   }
-  if (strchr(helpstr, '\0'))
-    *(char*)(strchr(helpstr, '\0')) = 0;
+  helpstr[strlen(helpstr)] = 0;
   if (helpstr[0]) dumplots(idx, "", helpstr);
 }
 
