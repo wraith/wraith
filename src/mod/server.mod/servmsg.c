@@ -321,7 +321,7 @@ void nuke_server(char *reason)
 char ctcp_reply[1024] = "";
 
 static int lastmsgs[FLOOD_GLOBAL_MAX];
-static char lastmsghost[FLOOD_GLOBAL_MAX][81];
+static char lastmsghost[FLOOD_GLOBAL_MAX][128];
 static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
 
 /* Do on NICK, PRIVMSG, NOTICE and JOIN.
