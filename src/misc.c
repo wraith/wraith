@@ -821,15 +821,12 @@ void makeplaincookie(char *chname, char *nick, char *buf)
 int goodpass(char *pass, int idx, char *nick)
 {
   char tell[501] = "";
-#ifdef S_NAZIPASS
   int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
-#endif /* S_NAZIPASS */
 
   if (!pass[0]) 
     return 0;
 
-#ifdef S_NAZIPASS
-  for (i = 0; i < strlen(pass); i++) {
+  for (i = 0; i < (signed) strlen(pass); i++) {
     tc = (int) pass[i];
     if (tc < 58 && tc > 47)
       ocase++; /* number */
@@ -842,13 +839,9 @@ int goodpass(char *pass, int idx, char *nick)
   }
 
 /*  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) { */
-  if (ocase < 1 || lcase < 2 || ucase < 2 || strlen(pass) < 8) {
-#else /* !S_NAZIPASS */
-  if (strlen(pass) < 8) {
-#endif /* S_NAZIPASS */
+  if (lcase < 2 || ucase < 2 || strlen(pass) < 8) {
 
     sprintf(tell, "Insecure pass, must be: ");
-#ifdef S_NAZIPASS 
     if (ocase < 1)
       strcat(tell, "\002>= 1 number\002, ");
     else
@@ -869,7 +862,6 @@ int goodpass(char *pass, int idx, char *nick)
     else
       strcat(tell, ">= 1 non-alpha/num, ");
 */
-#endif /* S_NAZIPASS */
     if (strlen(pass) < 8)
       strcat(tell, "\002>= 8 chars.\002");
     else

@@ -339,4 +339,3 @@
 #undef S_DCCAUTH
 #undef S_GARBLESTRINGS
 #undef S_MESSUPTERM
-#undef S_NAZIPASS

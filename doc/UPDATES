@@ -6,7 +6,7 @@ This is a summary of ChangeLog basically.
 * Removed many unnecesary compile defines: (.config controlling them makes more sense)
   ANTITRACE, HIJACKCHECK, LASTCHECK, NODELAY, PROCESSCHECK, PROMISC, AUTHCMDS, CONFEDIT
   RANDSERVERS, DCCPASS, PSCLOAK, MSGCMDS, UTCTIME, AUTOAWAY, AUTHHASH, SPLITHIJACK
-  AUTOLOCK
+  AUTOLOCK, NAZIPASS
   -Moved PSCLOAK entries to misc/responses.txt
 * All dates are UTC (GMT) now.
 * cmd_newleaf was sharing the new bot incorrectly.
@@ -19,6 +19,7 @@ This is a summary of ChangeLog basically.
   If either of the above two things are empty, auth hashing will NOT occur.
 * CLOAK_MIRC now randomly will add a SECOND version reply; some lame mIRC script.
 * Users are no longer auto-opped on netsplit rejoin.
+* Passwords now require: 2lcase, 2ucase, 8 chars.
 
 1.1.9
 

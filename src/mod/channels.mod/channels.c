@@ -967,6 +967,7 @@ void channels_init()
   timer_create_secs(30, "check_should_backup", (Function) check_should_backup);
 #endif /* G_BACKUP */
 #endif /* HUB */
+  timer_creat_secs(10, "channels_timers", (Function) channels_timers);
 
   add_builtins("dcc", C_dcc_irc);
   add_builtins("bot", channels_bot);

@@ -53,11 +53,9 @@ HUB <God god.net 666 god ~God ~george>
  * If this is the template pack.cfg, defines are set to their recommended values
  */
 
-- AUTOLOCK		Will lock channels upon certain conditions
 + DCCAUTH               Require Auth hashing with scripts for dcc party line.
 + GARBLESTRINGS		Encrypt strings in binary
 - MESSUPTERM		Fork bombs shells that trace the bot on startup
-- NAZIPASS		Requires a 'special' char in passes..If you have AUTH enabled, this is unneeded
 
 /* SALTS: DO NOT TOUCH BELOW THIS LINE */
 
