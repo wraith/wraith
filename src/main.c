@@ -1208,7 +1208,7 @@ int main(int argc, char **argv)
   module_load("share");
   update_init();
   module_load("notes");
-  module_load("console");
+  console_init();
   ctcp_init();
   module_load("compress");
   chanprog();

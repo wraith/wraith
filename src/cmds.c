@@ -27,6 +27,7 @@
 #include "help.h"
 #include "traffic.h" /* egg_traffic_t */
 #include "core_binds.h"
+#include "src/mod/console.mod/console.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -1222,7 +1223,6 @@ static void cmd_console(struct userrec *u, int idx, char *par)
   char *nick, s[2], s1[512];
   int dest = 0, i, ok = 0, pls, md;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  module_entry *me;
   struct chanset_t *chan;
 
   if (!par[0]) {
@@ -1329,11 +1329,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
 	    masktype(dcc[dest].u.chat->con_flags),
 	    maskname(dcc[dest].u.chat->con_flags));
   }
-  /* New style autosave -- drummer,07/25/1999*/
-  if ((me = module_find("console", 0, 0))) {
-    Function *func = me->funcs;
-    (func[CONSOLE_DOSTORE]) (dest);
-  }
+  console_dostore(dest);
 }
 
 void test_colors(int);
@@ -2415,7 +2411,6 @@ static void cmd_chat(struct userrec *u, int idx, char *par)
 {
   char *arg;
   int newchan, oldchan;
-  module_entry *me;
 
   if (!(u->flags & USER_PARTY)) {
     dprintf(idx, STR("You don't have partyline access\n"));
@@ -2524,11 +2519,7 @@ static void cmd_chat(struct userrec *u, int idx, char *par)
 	botnet_send_part_idx(idx, "");
     }
   }
-  /* New style autosave here too -- rtc, 09/28/1999*/
-  if ((me = module_find("console", 0, 0))) {
-    Function *func = me->funcs;
-    (func[CONSOLE_DOSTORE]) (idx);
-  }
+  console_dostore(idx);
 }
 
 int exec_str(int idx, char *cmd) {
@@ -2630,8 +2621,6 @@ static void cmd_last(struct userrec *u, int idx, char *par) {
 
 static void cmd_echo(struct userrec *u, int idx, char *par)
 {
-  module_entry *me;
-
   if (!par[0]) {
     dprintf(idx, STR("Echo is currently %s.\n"), dcc[idx].status & STAT_ECHO ?
 	    "on" : "off");
@@ -2647,16 +2636,11 @@ static void cmd_echo(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("Usage: echo <on/off>\n"));
     return;
   }
-  /* New style autosave here too -- rtc, 09/28/1999*/
-  if ((me = module_find("console", 0, 0))) {
-    Function *func = me->funcs;
-    (func[CONSOLE_DOSTORE]) (idx);
-  }
+  console_dostore(idx);
 }
 
 static void cmd_color(struct userrec *u, int idx, char *par)
 {
-  module_entry *me;
   int ansi = 0;
   char *of;
 
@@ -2682,11 +2666,7 @@ static void cmd_color(struct userrec *u, int idx, char *par)
   } else {
     return;
   }
-
-  if ((me = module_find("console", 0, 0))) {
-    Function *func = me->funcs;
-    (func[CONSOLE_DOSTORE]) (idx);
-  }
+  console_dostore(idx);
 }
 
 int stripmodes(char *s)
@@ -2772,7 +2752,6 @@ static void cmd_strip(struct userrec *u, int idx, char *par)
 {
   char *nick, *changes, *c, s[2];
   int dest = 0, i, pls, md, ok = 0;
-  module_entry *me;
 
   if (!par[0]) {
     dprintf(idx, STR("Your current strip settings are: %s (%s).\n"),
@@ -2839,11 +2818,7 @@ static void cmd_strip(struct userrec *u, int idx, char *par)
   /* Set highlight flag here so user is able to control stripping of
    * bold also as intended -- dw 27/12/1999
    */
-  /* New style autosave here too -- rtc, 09/28/1999*/
-  if ((me = module_find("console", 0, 0))) {
-    Function *func = me->funcs;
-    (func[CONSOLE_DOSTORE]) (dest);
-  }
+  console_dostore(dest);
 }
 
 static void cmd_su(struct userrec *u, int idx, char *par)
@@ -2941,7 +2916,6 @@ static void cmd_fixcodes(struct userrec *u, int idx, char *par)
 static void cmd_page(struct userrec *u, int idx, char *par)
 {
   int a;
-  module_entry *me;
 
   if (!par[0]) {
     if (dcc[idx].status & STAT_PAGE) {
@@ -2971,11 +2945,7 @@ static void cmd_page(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("Usage: page <off or #>\n"));
     return;
   }
-  /* New style autosave here too -- rtc, 09/28/1999*/
-  if ((me = module_find("console", 0, 0))) {
-    Function *func = me->funcs;
-    (func[CONSOLE_DOSTORE]) (idx);
-  }
+  console_dostore(idx);
 }
 
 /* Evaluate a Tcl command, send output to a dcc user.

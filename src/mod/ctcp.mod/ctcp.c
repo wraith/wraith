@@ -668,9 +668,6 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
        * -poptix 5/1/1997 */
       dprintf(DP_HELP, "PRIVMSG %s :\001DCC CHAT chat %lu %u\001\n", nick, iptolong(getmyip()), dcc[ix].port);
     }
-
-
-
     return 1;
 }
 
