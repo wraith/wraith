@@ -4,36 +4,6 @@ dnl
 dnl
 
 
-dnl  EGG_MSG_CONFIGURE_START()
-dnl
-AC_DEFUN(EGG_MSG_CONFIGURE_START, [dnl
-AC_MSG_RESULT()
-AC_MSG_RESULT(This is Eggdrop's GNU configure script.)
-AC_MSG_RESULT(It's going to run a bunch of strange tests to hopefully)
-AC_MSG_RESULT(make your compile work without much twiddling.)
-AC_MSG_RESULT()
-])dnl
-
-
-dnl  EGG_MSG_CONFIGURE_END()
-dnl
-AC_DEFUN(EGG_MSG_CONFIGURE_END, [dnl
-AC_MSG_RESULT()
-AC_MSG_RESULT(Configure is done.)
-AC_MSG_RESULT()
-AC_MSG_RESULT([Type 'make config' to configure the modules, or type 'make iconfig'])
-AC_MSG_RESULT(to interactively choose which modules to compile.)
-AC_MSG_RESULT()
-if test -f "./$EGGEXEC"
-then
-  AC_MSG_RESULT([After that, type 'make clean' and then 'make' to create the bot.])
-else
-  AC_MSG_RESULT([After that, type 'make' to create the bot.])
-fi
-AC_MSG_RESULT()
-])dnl
-
-
 dnl  EGG_CHECK_CC()
 dnl
 dnl  FIXME: make a better test
@@ -125,16 +95,6 @@ EOF
 fi
 ])dnl
 
-
-dnl  EGG_DISABLE_CC_OPTIMIZATION()
-dnl
-dnl check if user requested to remove -O2 cflag 
-dnl would be usefull on some weird *nix
-AC_DEFUN(EGG_DISABLE_CC_OPTIMIZATION, [dnl
- AC_ARG_ENABLE(cc-optimization,
-   [  --disable-cc-optimization   disable -O2 cflag],  
-   CFLAGS=`echo $CFLAGS | sed 's/\-O2//'`)
-])dnl
 
 dnl  EGG_CHECK_OS()
 dnl
@@ -909,15 +869,7 @@ then
 configure: error:
 
   I can't find Tcl on this system.
-
-  Eggdrop requires Tcl to compile.  If you already have Tcl installed
-  on this system, and I just wasn't looking in the right place for it,
-  set the environment variables TCLLIB and TCLINC so I will know where
-  to find 'libtcl.a' (or 'libtcl.so') and 'tcl.h' (respectively). Then
-  run 'configure' again.
-
-  Read the README file if you don't know what Tcl is or how to get it
-  and install it.
+  You must set the path for it in pack/conf.h
 
 EOF
   exit 1
