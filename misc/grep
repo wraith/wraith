@@ -1,3 +1,3 @@
 #!/bin/sh
 grep=`which grep` 
-grep "$@" | grep -v "^Binary" | grep -v "src/_" | grep -v "help." | grep -v "CVS"
+grep "$@" | grep -v "^Binary" | grep -v "src/_" | grep -v "help." | grep -v "CVS" | grep -v ".deps.*\.Po"

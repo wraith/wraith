@@ -423,7 +423,7 @@ void load_internal_users()
   struct userrec *u;
 
   /* hubs */
-  snprintf(buf, sizeof buf, "%s", hubs);
+  egg_snprintf(buf, sizeof buf, "%s", hubs);
   p = buf;
   while (p) {
     ln = p;
@@ -470,7 +470,7 @@ void load_internal_users()
 	if (ln)
 	  *ln++ = 0;
 	while (hosts) {
-	  snprintf(host, sizeof host, "*!%s@%s", hosts, ip);
+	  egg_snprintf(host, sizeof host, "*!%s@%s", hosts, ip);
 	  set_user(&USERENTRY_HOSTS, get_user_by_handle(userlist, hand), host);
 	  hosts = ln;
 	  if (ln)
@@ -491,7 +491,7 @@ void load_internal_users()
   /* perm owners */
   owner[0] = 0;
 
-  snprintf(buf, sizeof buf, "%s", owners);
+  egg_snprintf(buf, sizeof buf, "%s", owners);
   p = buf;
   while (p) {
     ln = p;
@@ -614,7 +614,7 @@ void chanprog()
     char s[DIRMAX] = "";
     int fd;
 
-    snprintf(s, sizeof s, STR("%s.test-XXXXXX"), tempdir);
+    egg_snprintf(s, sizeof s, STR("%s.test-XXXXXX"), tempdir);
     if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
       if (fd != -1) {
         unlink(s);
