@@ -248,6 +248,7 @@ static void show_help()
   printf(format, "Option", "Description");
   printf(format, "------", "-----------");
   printf(format, STR("-B <botnick>"), STR("Starts the specified bot"));
+  printf(format, STR("-c"), STR("Crypt/Hash functions (MD5/SHA1/AES256)"));
   printf(format, STR("-C"), STR("Config file editor [reads env: EDITOR]"));
   printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
   printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
@@ -269,7 +270,7 @@ static void show_help()
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS "0234:B:Cd:De:Eg:G:k:L:P:hnr:stu:U:v"
+#define PARSE_FLAGS "0234:B:c:Cd:De:Eg:G:k:L:P:hnr:stu:U:v"
 #define FLAGS_CHECKPASS "CdDeEgGhknrtuUv"
 static void dtx_arg(int argc, char *argv[])
 {
@@ -298,6 +299,11 @@ static void dtx_arg(int argc, char *argv[])
         localhub = 0;
         used_B = 1;
         strlcpy(origbotname, optarg, NICKLEN + 1);
+        break;
+      case 'c':
+        printf("SHA1 (%s): %s\n", optarg, SHA1(optarg));
+//        do_crypt_console();
+        exit(0);
         break;
       case 'C':
         do_confedit = 1;
