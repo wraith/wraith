@@ -152,16 +152,16 @@ Tempfile::Tempfile()
 {
   len = strlen(tempdir) + 1 + 6 + 1;
   file = new char[len];
-  sprintf(file, "%s.XXXXXX", tempdir[0] ? tempdir : "");
+  sprintf(file, "%s.XXXXXX", tempdir);
 
   MakeTemp();
 }
 
 Tempfile::Tempfile(const char *prefix)
 {
-  len = strlen(tempdir) + strlen(prefix) + 8;
-  file = new char[len + 45];
-  sprintf(this->file, "%s.%s-XXXXXX", tempdir[0] ? tempdir : "", prefix);
+  len = strlen(tempdir) + 1 + strlen(prefix) + 6 + 1;
+  file = new char[len];
+  sprintf(file, "%s.%s-XXXXXX", tempdir, prefix);
 
   MakeTemp();
 }
