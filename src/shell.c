@@ -111,13 +111,15 @@ void check_maxfiles()
 
   sock1 = getsock(0, AF_INET);		/* fill up any lower avail */
   sock = getsock(0, AF_INET);
-  
-  if (sock == -1)
-    fatal("Cannot create new socket.", 0);		/* this shouldnt happen */
-  else
-    killsock(sock);
+
   if (sock1 != -1)
     killsock(sock1);
+  
+  if (sock == -1) {
+    return;
+  } else
+    killsock(sock);
+
   bogus = sock - socks_total - 4;	//4 for stdin/stdout/stderr/dns 
  
   if (bogus >= 50) {			/* Attempt to close them */
