@@ -551,6 +551,7 @@
 #define CFG_MSGOP (*(struct cfg_entry *)(global[338]))
 #define CFG_MSGPASS (*(struct cfg_entry *)(global[339]))
 #define CFG_MSGINVITE (*(struct cfg_entry *)(global[340]))
+#define CFG_MSGIDENT (*(struct cfg_entry *)(global[341]))
 
 
 extern int lfprintf(FILE *, char *, ...);

@@ -55,7 +55,7 @@ struct cfg_entry CFG_AUTHKEY = {
 #endif /* S_AUTH */
 
 #ifdef S_MSGCMDS
-struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE;
+struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE, CFG_MSGIDENT;
 void msgcmds_describe(struct cfg_entry *entry, int idx) {
   if (entry == &CFG_MSGOP)
     dprintf(idx, STR("msgop defines the cmd for opping via msging the bot (leave blank to disable)\n"));
@@ -63,6 +63,8 @@ void msgcmds_describe(struct cfg_entry *entry, int idx) {
     dprintf(idx, STR("msgpass defines the cmd for setting a pass via msging the bot (leave blank to disable)\n"));
   else if (entry == &CFG_MSGINVITE)
     dprintf(idx, STR("msginvite defines the cmd for requesting invite via msging the bot (leave blank to disable)\n"));
+  else if (entry == &CFG_MSGIDENT)
+    dprintf(idx, STR("msgident defines the cmd for identing via msging the bot (leave blank to disable)\n"));
 }
 
 void msgcmds_changed(struct cfg_entry * entry, char * olddata, int * valid) {
@@ -80,6 +82,11 @@ struct cfg_entry CFG_MSGPASS = {
 
 struct cfg_entry CFG_MSGINVITE = {
   "msginvite", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  msgcmds_changed, msgcmds_changed, msgcmds_describe
+};
+
+struct cfg_entry CFG_MSGIDENT = {
+  "msgident", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
   msgcmds_changed, msgcmds_changed, msgcmds_describe
 };
 #endif /* S_MSGCMDS */
@@ -708,6 +715,7 @@ void init_config()
   add_cfg(&CFG_MSGOP);
   add_cfg(&CFG_MSGPASS);
   add_cfg(&CFG_MSGINVITE);
+  add_cfg(&CFG_MSGIDENT);
 #endif /* S_MSGCMDS */
 #ifdef HUB
   add_cfg(&CFG_NICK);

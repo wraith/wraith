@@ -94,6 +94,60 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
   return 1;
 }
 
+static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
+{
+  char s[UHOSTLEN], s1[UHOSTLEN], *pass, who[NICKLEN];
+  struct userrec *u2;
+
+  if (match_my_nick(nick) || (u && (u->flags & USER_BOT)))
+    return 1;
+
+  pass = newsplit(&par);
+  if (!par[0])
+    strcpy(who, nick);
+  else {
+    strncpy(who, par, NICKMAX);
+    who[NICKMAX] = 0;
+  }
+  u2 = get_user_by_handle(userlist, who);
+  if (!u2) {
+    if (u && !quiet_reject)
+      dprintf(DP_HELP, IRC_MISIDENT, nick, nick, u->handle);
+  } else if (rfc_casecmp(who, origbotname) && !(u2->flags & USER_BOT)) {
+    /* This could be used as detection... */
+    if (u_pass_match(u2, "-")) {
+      putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
+      if (!quiet_reject)
+        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_NOPASS);
+    } else if (!u_pass_match(u2, pass)) {
+      if (!quiet_reject)
+        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_DENYACCESS);
+    } else if (u == u2) {
+      /*
+       * NOTE: Checking quiet_reject *after* u_pass_match()
+       * verifies the password makes NO sense!
+       * (Broken since 1.3.0+bel17)  Bad Beldin! No Cookie!
+       *   -Toth  [July 30, 2003]
+       */
+      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_RECOGNIZED);
+      return 1;
+    } else if (u) {
+      dprintf(DP_HELP, IRC_MISIDENT, nick, who, u->handle);
+      return 1;
+    } else {
+      putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
+      egg_snprintf(s, sizeof s, "%s!%s", nick, host);
+      maskhost(s, s1);
+      dprintf(DP_HELP, "NOTICE %s :%s: %s\n", nick, IRC_ADDHOSTMASK, s1);
+      addhost_by_handle(who, s1);
+      check_this_user(who, 0, NULL);
+      return 1;
+    }
+  }
+  putlog(LOG_CMDS, "*", "(%s!%s) !*! failed IDENT %s", nick, host, who);
+  return 1;
+}
+
 static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 {
   char *pass;
@@ -358,6 +412,7 @@ static cmd_t C_msg[] =
 #endif /* S_AUTH */
   {"word",		"",	(Function) msg_word,		NULL},
 #ifdef S_MSGCMDS
+  {"ident",   		"",	(Function) msg_ident,		NULL},
   {"invite",		"o|o",	(Function) msg_invite,		NULL},
   {"op",		"",	(Function) msg_op,		NULL},
   {"pass",		"",	(Function) msg_pass,		NULL},

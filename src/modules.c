@@ -46,7 +46,7 @@ extern party_t *party;
 extern int parties;
 extern sock_list        *socklist;
 #ifdef S_MSGCMDS
-extern struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE;
+extern struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE, CFG_MSGIDENT;
 #endif /* S_MSGCMDS */
 int xtra_kill();
 int xtra_unpack();
@@ -595,8 +595,10 @@ Function global_table[] =
 #ifdef S_MSGCMDS
   (Function) & CFG_MSGOP,
   (Function) & CFG_MSGPASS,
-  (Function) & CFG_MSGINVITE
+  (Function) & CFG_MSGINVITE,
+  (Function) & CFG_MSGIDENT
 #else /* !S_MSGCMDS */
+  (Function) 0,
   (Function) 0,
   (Function) 0,
   (Function) 0

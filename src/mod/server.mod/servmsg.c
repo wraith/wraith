@@ -11,6 +11,7 @@
 #define msgop CFG_MSGOP.ldata ? CFG_MSGOP.ldata : CFG_MSGOP.gdata ? CFG_MSGOP.gdata : ""
 #define msgpass CFG_MSGPASS.ldata ? CFG_MSGPASS.ldata : CFG_MSGPASS.gdata ? CFG_MSGPASS.gdata : ""
 #define msginvite CFG_MSGINVITE.ldata ? CFG_MSGINVITE.ldata : CFG_MSGINVITE.gdata ? CFG_MSGINVITE.gdata : ""
+#define msgident CFG_MSGIDENT.ldata ? CFG_MSGIDENT.ldata : CFG_MSGIDENT.gdata ? CFG_MSGIDENT.gdata : ""
 
 
 char cursrvname[120]="";
@@ -535,17 +536,21 @@ static int gotmsg(char *from, char *msg)
         if (!ignoring) {
           int doit = 1, result = 0;
 #ifdef S_MSGCMDS
-          if (!egg_strcasecmp(code, "op") || !egg_strcasecmp(code, "pass") || !egg_strcasecmp(code, "invite")
-             || !egg_strcasecmp(code, msgop) || !egg_strcasecmp(code, msgpass) || !egg_strcasecmp(code, msgop)) {
-/*             || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) { */
+          if (!egg_strcasecmp(code, "op") || !egg_strcasecmp(code, "pass") || !egg_strcasecmp(code, "invite") 
+              || !egg_strcasecmp(code, "ident")
+               || !egg_strcasecmp(code, msgop) || !egg_strcasecmp(code, msgpass) 
+               || !egg_strcasecmp(code, msginvite) || !egg_strcasecmp(code, msgident)) {
+/*           || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) { */
             char buf[10];
             doit = 0;
             if (!egg_strcasecmp(code, msgop))
               sprintf(buf, "op");
-            if (!egg_strcasecmp(code, msgpass))
+            else if (!egg_strcasecmp(code, msgpass))
               sprintf(buf, "pass");
-            if (!egg_strcasecmp(code, msginvite))
+            else if (!egg_strcasecmp(code, msginvite))
               sprintf(buf, "invite");
+            else if (!egg_strcasecmp(code, msgident))
+              sprintf(buf, "ident");
             if (buf[0])
               result = check_tcl_msg(buf, nick, uhost, u, msg);
           }
