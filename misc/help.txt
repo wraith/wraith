@@ -7,7 +7,12 @@
    reason. Ban time has to be expressed in days, hours, and/or minutes.
  
 See also: bans, -ban, stick, unstick
-
+::+chan
+### %b+chan%b <channel> [options]
+    Adds a channel to the bot's channel list. If options are specified, the 
+    channel will be configured with the options.
+ 
+See also: -chan, chanset, chaninfo
 ::+exempt
 ###  %b+exempt%b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds an exempt to the list of exempts stored on the bot, with optional
@@ -16,7 +21,6 @@ See also: bans, -ban, stick, unstick
    Exempt time has to be expressed in days, hours, and/or minutes.
  
 See also: exempts, -exempt, stick, unstick
-
 ::+host
 ###  %b+host%b [handle] <hostmask>
    Adds a hostmask to a user's user record. Hostmasks are used to identify your
@@ -24,7 +28,6 @@ See also: exempts, -exempt, stick, unstick
    YOUR user record.
  
 See also: -host
-
 ::+ignore
 ###  %b+ignore%b <hostmask> [%%<XdXhXm>] [comment]
    Adds an ignore to the list of ignores stored on the bot, with optional
@@ -32,7 +35,6 @@ See also: -host
    creator. Ignore time has to be expressed in days, hours, and/or minutes.
  
 See also: -ignore, ignores
-
 ::+invite
 ###  %b+invite%b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds an invite to the list of invites stored on the bot, with optional
@@ -41,21 +43,18 @@ See also: -ignore, ignores
    Invite time has to be expressed in days, hours, and/or minutes.
  
 See also: invites, -invite, stick, unstick
-
 ::+user
 ###  %b+user%b <handle> [hostmask]
    Creates a new user record for the handle given. The new user record will
    have no flags, an optional hostmask, and a random pass/secpass.
  
 See also: -user, +host, -host%(hub)%{+n}, newleaf
-
 :hub:-bot
 ###  %b-bot%b <bot>
    This is exactly the same as %b'%d-user'%b (it removes a user record). It is
    included for convenience.
  
 See also: +user, -user%{+n}, newleaf
-
 ::-host
 ###  %b-host%b <hostmask>
    Removes a host from your handle.
@@ -65,27 +64,22 @@ See also: +user, -user%{+n}, newleaf
 %{-}
  
 See also: +host
-
 ::-ignore
 ###  %b-ignore%b <hostmask/number>
    Removes the specified ignore from the list of ignores stored on the bot. You
    may also reference the ignore by the number shown by the 'ignores' command.
  
 See also: +ignore, ignores
-
 ::-user
 ###  %b-user%b <handle>
    Removes the specified handle's user record.
  
 See also: +user%(hub)%{+a}, -bot%{+n}, newleaf
-
 ::addlog
 ###  %baddlog%b <text>
    Adds your comment to the bot's logfile. Bot masters can go back later and
    review the log, and will see your comment (with your handle attached). This
    is useful for explaining confusing activity.
- 
-
 ::away
 ###  %baway%b [reason]
    Marks you as "away" on the party line. Your away message will show up in
@@ -96,13 +90,11 @@ See also: +user%(hub)%{+a}, -bot%{+n}, newleaf
    itself.
  
 See also: back
-
 ::back
 ###  %bback%b
    This marks you as no longer away on the party line.
  
 See also: away
-
 :hub:backup
 ###  %bbackup%b
    This makes the bot write a backup of its entire user list to the disk. 
@@ -110,7 +102,6 @@ See also: away
    settings.
  
 See also: reload, save
-
 :hub:binds
 ###  %bbinds%b [type/match] [all]
    Shows the Tcl bindings in effect, in a list similar to this:
@@ -130,14 +121,12 @@ See also: reload, save
    view more binds by adding 'all' to the end of the command.
  
 See also: tcl
-
 :hub:boot
 ###  %bboot%b <handle[@bot]> [reason]
    Kicks a user off the party line and displays the reason, if you specify
    one. You can also specify a bot, and attempt to boot someone from another
    bot on the botnet, though it may be rejected if that bot does not allow
    remote boots. You can not boot a bot owner.
-
 :hub:botinfo
 ###  %bbotinfo%b
    Requests information from every bot currently on the botnet. Each bot should
@@ -145,7 +134,6 @@ See also: tcl
    channels, and uptime.
  
 See also: %{+n}bottree, vbottree%{+m}, bots
-
 :hub:bots
 ###  %bbots%b
    Shows the list of bots currently on the botnet.
@@ -155,7 +143,6 @@ See also: %{+n}bottree, vbottree%{+m}, bots
    bot. %{+n}Use %b'%dwho'%b or %b'%dbottree'%b for that information.%{-}
  
 See also: downbots%{+n}, bottree, vbottree%{-}, botinfo
-
 :hub:bottree
 ###  %bbottree%b
    Shows a tree-format diagram of the bots currently on the botnet. It's just a
@@ -163,7 +150,6 @@ See also: downbots%{+n}, bottree, vbottree%{-}, botinfo
    are sharing, a + will be indicated, or a ? if nothing is known.
  
 See also: bots, downbots, botinfo, vbottree
-
 :hub:chaddr
 ###  %bchaddr%b <bot> <address[:bot port[/user port]]>
    Changes the address for a bot. This is the address your bot will try to
@@ -175,7 +161,6 @@ See also: bots, downbots, botinfo, vbottree
 %{-}
  
 See also: link
-
 ::chat
 ###  %bchat%b <on/off>
 ###  %bchat%b <[*]channel number/name>
@@ -191,7 +176,6 @@ See also: link
    If you prefix the channel with a '*', you will join a local channel.
  
 See also: console
-
 ::chattr
 ###  %bchattr%b <handle> [flags] [channel]
    This lets you view and change the flags for a user.
@@ -214,14 +198,12 @@ See also: console
           You must remove the permanent owner in the binary.
  
 See also: whois
-
 :hub:chhandle
 ###  %bchhandle%b <oldhandle> <newhandle>
    Changes the handle of a user. For example, to change the handle of user
    'gavroche' to 'jamie', you would use 'chhandle gavroche jamie'.
  
 See also: chpass%{+n}, chsecpass
-
 :hub:chpass
 ###  %bchpass%b <handle> [newpassword]
    Changes a user's password. If you do not specify the new password, the user
@@ -230,13 +212,11 @@ See also: chpass%{+n}, chsecpass
    will be used.
  
 See also: chhandle%{+n}, chsecpass
-
 ::comment
 ###  %bcomment%b <user> <comment>
    Creates or changes the comment field for a user. The comment field can only
    be seen via 'whois' or 'match'. Non-masters cannot see the comment field.
    Using the comment 'none' will clear a user's comment.
-
 :hub:dccstat
 ###  %bdccstat%b
    Displays a table-format list of all "dcc" connections in use on the bot.
@@ -290,19 +270,16 @@ See also: chhandle%{+n}, chsecpass
      %bI%b  bot is currently in the 'linking' stage
      %bA%b  bot is being aggressively shared with
    For 'CHAT' users, the party-line channel is also listed.
-
 ::debug
 ###  %bdebug%b
    Display a dump of memory allocation information, assuming the bot was
    compiled with memory debugging. It's useless to anyone but developers
    trying to find memory leaks.
-
 ::die
 ###  %bdie%b [reason]
    This kills the bot. The bot goes offline immediately, logging who issued
    the 'die' command. You shouldn't have to use this too often. If you specify
    a reason, it is logged, otherwise the reason is "authorized by <handle>".
-
 ::echo
 ###  %becho%b <on/off>
    Specifies whether you want your messages echoed back to you. If it's on,
@@ -310,7 +287,6 @@ See also: chhandle%{+n}, chsecpass
    just like everyone else will see it. If it's off, then it won't happen.
  
 See also: color
-
 ::fixcodes
 ### %bfixcodes%b
      This is for use in situations where the bot gets mixed up about the type
@@ -319,7 +295,6 @@ See also: color
      "Local time is now [1m17:17[0m" for example instead of "Local time is
      now 17:17". Use this to turn telnet codes on or off/change the display
      mode.
-
 ::handle
 ###  %bhandle%b <new-handle>
    Changes your handle on the bot. This is the handle (nickname) that the
@@ -327,7 +302,6 @@ See also: color
    bot.
  
 See also: newpass%{+m}, %(hub)chhand, chpass%{+n}, chsecpass
-
 ::ignores
 ###  %bignores%b [wildcard]
    Shows a list of hostmasks from which the bot is currently ignoring msgs,
@@ -355,14 +329,12 @@ See also: newpass%{+m}, %(hub)chhand, chpass%{+n}, chsecpass
    that match against your wildcard.
  
 See also: +ignore, -ignore
-
 :hub:link
 ###  %blink%b [via-bot] <bot-to-link>
    Attempts to link to another hub.  This command is deprecated and not 
    recommended for use.
  
 See also: unlink, newleaf%{+a}, -bot
-
 ::match
 ###  %bmatch%b <attr> [channel] [[start] limit]
    This displays all user records with the attributes requested.
@@ -401,24 +373,20 @@ See also: unlink, newleaf%{+a}, -bot
      .match *.edu 16 25
    This would show results 16 through 25 matching any users with a hostmask
    that ends with ".edu".
-
 ::me
 ###  %bme%b <text>
    Performs an action on the party line. This appears as "* Wcc is leaving",
    etc.
-
 ::motd
 ###  %bmotd%b %{+m}<message>%{-}
    This redisplays the partyline Message Of The Day, which was shown when you
    first joined the partyline.%{m) Inclue a message to set the motd.
-
 ::newpass
 ###  %bnewpass%b <password>
    Changes your password on the bot. This is similar to the '/msg <bot> pass'
    command, except you don't need to specify your old password.
  
 %(hub)%{+m}See also: chpass%{+n}, chsecpass
-
 ::note
 ###  %bnote%b <nickname[@bot]> <message>
    Sends a private note to a user on the partyline. If that user is currently
@@ -428,7 +396,6 @@ See also: unlink, newleaf%{+a}, -bot
    the nickname.
  
 See also: whom, notes
-
 ::page
 ### %bpage%b <number/off>
    This allows you to slow down the number of lines the bot sends you at once
@@ -436,12 +403,10 @@ See also: whom, notes
    specified number of lines will stop when that number is reached and wait for
    you to type another command (or press enter) to continue. If you have too
    many pending lines, you may be booted off the bot.
-
 ::quit
 ###  %bquit%b [comment]
    This disconnects you from the partyline. If you specify a comment, it will
    be displayed to other partyline users as you leave.
-
 ::relay
 ###  %brelay%b <botname>
    Relays you via telnet to another bot, whether or not it is currently linked.
@@ -449,7 +414,6 @@ See also: whom, notes
    relay to. Typing .quit or "*bye*" on a line by itself will end the relay.
  
 See also: bots%{+n}, newleaf%{+a}, -bot
-
 ::reload
 ###  %breload%b
    Reloads the bot's user file, discarding any changes made since the last
@@ -457,7 +421,6 @@ See also: bots%{+n}, newleaf%{+a}, -bot
    never do this.
  
 See also: save
-
 ::restart
 ###  %brestart%b
    Restarts the Tcl interpreter, wipes all timers, reloads all modules, and
@@ -466,7 +429,6 @@ See also: save
    the %b'%drehash'%b command, it also saves and reloads the user file from disk.
  
 See also: reload, save
-
 :hub:save
 ###  %bsave%b
    This makes the bot write its entire userfile to disk. This is useful if you
@@ -474,7 +436,6 @@ See also: reload, save
    written to disk about once an hour.
  
 See also: reload, backup
-
 ::simul
 ###  %bsimul%b <handle> <text>
    This allows you to simulate the specified handle typing the given text.
@@ -484,7 +445,6 @@ See also: reload, backup
    work unless eggdrop has simul enabled in the config file. 
  
 See also: su
-
 ::strip
 ###  %bstrip%b [modes]
    Allows you to remove embedded 'attribute' codes your partyline output. Valid
@@ -503,13 +463,11 @@ See also: fixcodes, color, echo
 ###  %bstrip%b <user> [modes]
    Set the strip level of another user. A master can't set their own strip
    flags without prefixing the modes with a '+' or '-'.
-
 ::su
 ###  %bsu%b <user>
    Lets you assume the identity of another user. If you are a global owner,
    this does not require a password. Otherwise, you will be asked for the
    user's password. %b%dquit%b returns you to your original handle.
-
 :hub:trace
 ###  %btrace%b <bot>
    Sends out a trace signal to another bot. If/when the trace signal returns,
@@ -519,18 +477,15 @@ See also: fixcodes, color, echo
    It should also return the time in seconds taken for the trace to occur.
  
 See also: bots, bottree, vbottree
-
 :hub:traffic
 ###  %btraffic%b
    Shows total and daily net traffic stats since the last %b'%drestart'%b.
    Stats groups are IRC, Botnet, Partyline, Transfer.mod and Misc.
  
 %{+m}See also: restart
-
 ::whoami
 ###  %bwhoami%b
    Shows your current handle and to what bot you are connected.
  
 See also: whom
-
 ::end

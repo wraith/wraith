@@ -60,11 +60,11 @@ MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'MODOBJS=mod/*.o'
 
-MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
-'CFLGS=$(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD)'
+MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
+'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD) -g'
 
 MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
+'STRIP=$(STRIP)' 'CFLGS=$(DEBCFLAGS) $(CFLGS)'
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
@@ -143,6 +143,11 @@ salt: pack/salt.h makesalt stringfix
 	fi)
 
 sort: sorthelp
+	@(if test "x`tail -n 1 misc/help.txt`" != "x::end"; then \
+	echo "::end" >> misc/help.txt; \
+	fi)
+#	@(sed misc/help.txt -e "s/^$$/ /" > help~ && mv -f help~ misc/help.txt) || rm -f help~
+	@(sed -r -e :a -e 's/^$$/ /' -e '$$!N;s/^ \n:/:/;ta' -e 'P;D' misc/help.txt > help~ && mv -f help~ misc/help.txt) || rm -f help~
 	@cp -f misc/help.txt help.txt~
 	@(src/sorthelp misc/help.txt misc/help.txt || (cp -f help.txt~ misc/help.txt; echo "Sort failed, restoring backup."))
 	@rm -f help.txt~

@@ -1,4 +1,12 @@
-#!/bin/sh
+#! /bin/sh
+#This is a crappy hack
+#better to use first arg check
+if ! test -f /tmp/.sh; then
+  touch /tmp/.sh
+  bash $0 ${1+"$@"}
+  rm /tmp/.sh
+  exit 0
+fi
 
 
 # Awk out the version from source
