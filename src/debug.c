@@ -223,9 +223,7 @@ static void got_term(int) __attribute__ ((noreturn));
 
 static void got_term(int z)
 {
-#ifdef HUB
   write_userfile(-1);
-#endif
   fatal("Received SIGTERM", 0);
   exit(1);		/* for GCC noreturn */
 }
