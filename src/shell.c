@@ -31,7 +31,9 @@
 #include <pwd.h>
 #include <signal.h>
 #ifdef S_ANTITRACE
-#include <sys/ptrace.h>
+# ifndef CYGWIN_HACKS
+#  include <sys/ptrace.h>
+# endif /* !CYGWIN_HACKS */
 #include <sys/wait.h>
 #endif /* S_ANTITRACE */
 #include <sys/utsname.h>
@@ -40,7 +42,9 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <libgen.h>
+#ifndef CYGWIN_HACKS
+#  include <libgen.h>
+#endif /* !CYGWIN_HACKS */
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/stat.h>

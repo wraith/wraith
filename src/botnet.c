@@ -1088,7 +1088,6 @@ static void failed_tandem_relay(int idx)
 #ifdef USE_IPV6
       open_telnet_raw(dcc[idx].sock, dcc[idx].host,
 #else
-  if (dcc[idx].sock < 0 ||
       open_telnet_raw(dcc[idx].sock, dcc[idx].addr ?
 				     iptostr(htonl(dcc[idx].addr)) :
 				     dcc[idx].host, 
