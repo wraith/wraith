@@ -766,12 +766,47 @@ Context;
   lastfork = now;
 }
 
+#ifdef CRAZY_TRACE
+/* This code will attach a ptrace() to getpid() hence blocking process hijackers/tracers on the pid
+ * only problem.. it just creates a new pid to be traced/hijacked :\
+ */
+int attached = 0;
+void crazy_trace() 
+{
+  int parent = getpid();
+  int x = fork();
+  if (x == -1) {
+    printf("Can't fork(): %s\n", strerror(errno));
+  } else if (x == 0) {
+    int i;
+    i = ptrace(PTRACE_ATTACH, parent, (char *) 1, 0);
+    if (i == (-1) && errno == EPERM) {
+      printf("CANT PTRACE PARENT: errno: %d %s, i: %d\n", errno, strerror(errno), i);
+      waitpid(parent, &i, 0);
+      kill(parent, SIGCHLD);
+      ptrace(PTRACE_DETACH, parent, 0, 0);
+      kill(parent, SIGCHLD);
+      exit(0);
+    } else {
+      printf("SUCCESSFUL ATTACH to %d: %d\n", parent, i);
+      attached++;
+    }
+  } else {
+    printf("wait()\n");
+    wait(&x);
+  }
+  printf("end\n");
+}
+#endif /* CRAZY_TRACE */
 
 static void core_secondly()
 {
   static int cnt = 0;
   int miltime, idx;
- 
+
+#ifdef CRAZY_TRACE 
+  if (!attached) crazy_trace();
+#endif /* CRAZY_TRACE */
   if (geteuid() != myuid || getuid() != myuid) {
     putlog(LOG_MISC, "*", STR("MY UID CHANGED!, POSSIBLE HIJACK ATTEMPT"));
   }
