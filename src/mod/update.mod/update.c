@@ -93,13 +93,14 @@ static void update_ufsend(int idx, char *par)
   char *ip = NULL, *port = NULL, s[1024] = "";
   int i, sock;
   FILE *f = NULL;
+
   putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
 #ifdef HUB
   egg_snprintf(s, sizeof s, "%s.update.%s.hub", tempdir, conf.bot->nick);
 #else
   egg_snprintf(s, sizeof s, "%s.update.%s.leaf", tempdir, conf.bot->nick);
 #endif
-  unlink(s); //make sure there isnt already a new binary here..
+  unlink(s); /* make sure there isnt already a new binary here.. */
   if (dcc_total == max_dcc) {
     putlog(LOG_MISC, "*", "NO MORE DCC CONNECTIONS -- can't grab new binary");
     dprintf(idx, "sb e I can't open a DCC to you; I'm full.\n");
@@ -238,8 +239,7 @@ void finish_update(int idx)
   int i, j = -1;
 
   for (i = 0; i < dcc_total; i++)
-    if (!egg_strcasecmp(dcc[i].nick, dcc[idx].host) &&
-	(dcc[i].type->flags & DCT_BOT))
+    if (!egg_strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT))
       j = i;
   if (j == -1)
     return;
@@ -292,7 +292,7 @@ static void start_sending_binary(int idx)
   struct stat sb;
   int i = 1;
 
-  dcc[idx].status &= ~STAT_OFFEREDU;
+  dcc[idx].status &= ~(STAT_OFFEREDU | STAT_SENDINGU);
 
   if (bupdating) return;
   bupdating = 1;
@@ -304,15 +304,16 @@ static void start_sending_binary(int idx)
     putlog(LOG_MISC, "*", "Cannot update \002%s\002 automatically, uname not returning os name.", dcc[idx].nick);
     return;
   }
-  if (bot_hublevel(dcc[idx].user) == 999) { //send them the leaf binary..
+  if (bot_hublevel(dcc[idx].user) == 999) { /* send them the leaf binary.. */
     sprintf(buf2, "leaf");
   } else {
     sprintf(buf2, "hub");
   }
-  sprintf(update_file, "%s.%s.%s", buf2,dcc[idx].u.bot->sysname, egg_version);
+  sprintf(update_file, "%s.%s-%s", buf2,dcc[idx].u.bot->sysname, egg_version);
 
   if (stat(update_file, &sb)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s, but it cannot be accessed", dcc[idx].nick, update_file);
+    bupdating = 0;
     return;
   } 
   sprintf(buf3, "%s.%s", tempdir, update_file);
@@ -411,17 +412,16 @@ static void check_updates()
     char buf[1024] = "";
 
     cnt++;
-    if ((cnt > 5) && bupdating)  bupdating = 0; //2 minutes should be plenty.
+    if ((cnt > 5) && bupdating)  bupdating = 0; /* 2 minutes should be plenty. */
     if (bupdating) return;
     cnt = 0;
 
     for (i = 0; i < dcc_total; i++) {
       if (dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE) &&
           !(dcc[i].status & STAT_SENDINGU) && !(dcc[i].status & STAT_OFFEREDU) &&
-          !(dcc[i].status & STAT_UPDATED)) { //only offer binary to bots that are sharing
+          !(dcc[i].status & STAT_UPDATED)) { /* only offer binary to bots that are sharing */
 
-        dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU |
-                         STAT_OFFEREDU);
+        dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
 
         if ((dcc[i].u.bot->bts < buildts) && (isupdatehub())) {
           putlog(LOG_DEBUG, "@", "Bot: %s has build %lu, offering them %lu", dcc[i].nick, dcc[i].u.bot->bts, buildts);

@@ -177,7 +177,7 @@ struct dupwait_info {
 #define STAT_LEAF    0x00080    /* this bot is a leaf only               */
 #define STAT_LINKING 0x00100    /* the bot is currently going through
                                    the linking stage                     */
-#define STAT_AGGRESSIVE   0x200 /* aggressively sharing with this bot    */
+#define STAT_AGGRESSIVE   0x00200 /* aggressively sharing with this bot    */
 #define STAT_OFFEREDU 0x00400
 #define STAT_SENDINGU 0x00800
 #define STAT_GETTINGU 0x01000

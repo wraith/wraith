@@ -594,13 +594,7 @@ static void eof_dcc_send(int idx)
       lostdcc(idx);
       return;
     } else if (!strcmp(dcc[idx].nick, "*binary")) {
-      module_entry *me = module_find("update", 0, 0);
-
-      if (me && me->funcs) {
-	Function f = me->funcs[UPDATE_FINISH];
-
-	(f) (idx);
-      }
+      finish_update(idx);
       killsock(dcc[idx].sock);
       lostdcc(idx);
       return;
