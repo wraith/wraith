@@ -477,6 +477,10 @@ void show_channels(int idx, char *handle)
   struct userrec *u;
   int first = 0, l = 0, total = 0;
   char format[120];
+#ifdef LEAF
+  module_entry *me = module_find("irc", 0, 0);
+  Function *func = me->funcs;
+#endif /* LEAF */
 
   if (handle)
     u = get_user_by_handle(userlist, handle);
@@ -492,18 +496,22 @@ void show_channels(int idx, char *handle)
       total++;
   }
 
-  egg_snprintf(format, sizeof format, "  %%-%us %%-s%%-s%%-s%%-s%%-s\n", (l+2));
+  egg_snprintf(format, sizeof format, "  %%c%%-%us %%-s%%-s%%-s%%-s%%-s\n", (l+2));
 
   for (chan = chanset;chan;chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
-
+#ifdef LEAF
+    int opped = (func[16] (chan));
+#else /* !LEAF */
+    int opped = 0;
+#endif /* LEAF */
     if (chk_op(fr, chan)) {
         if (!first) { 
           dprintf(idx, STR("%s %s access to %d channel%s:\n"), handle ? u->handle : "You", handle ? "has" : "have", total, (total > 1) ? "s" : "");
           
           first = 1;
         }
-        dprintf(idx, format, chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
+        dprintf(idx, format, opped ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
            channel_private(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
            channel_bitch(chan) ? "(bitch)    " : "", channel_closed(chan) ?  "(closed)" : "");
     }
