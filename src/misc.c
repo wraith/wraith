@@ -705,9 +705,9 @@ int ucnt = 0;
 void updatelocal(void)
 {
 #ifdef LEAF
-  module_entry *me;
+  module_entry *me = NULL;
 #endif /* LEAF */
-  Context;
+
   if (ucnt < 300) {
     ucnt++;
     return;
@@ -739,15 +739,11 @@ int updatebin(int idx, char *par, int autoi)
   char buf[DIRMAX] = "", old[DIRMAX] = "", testbuf[DIRMAX] = "";
   struct stat sb;
   int i;
-#ifdef LEAF
-  module_entry *me = NULL;
-#endif /* LEAF */
 
   path = newsplit(&par);
   par = path;
   if (!par[0]) {
-    if (idx)
-      dprintf(idx, STR("Not enough parameters.\n"));
+    logidx(idx, STR("Not enough parameters."));
     return 1;
   }
   path = calloc(1, strlen(binname) + strlen(par) + 2);
@@ -755,34 +751,29 @@ int updatebin(int idx, char *par, int autoi)
   newbin = strrchr(path, '/');
   if (!newbin) {
     free(path);
-    if (idx)
-      dprintf(idx, STR("Don't know current binary name\n"));
+    logidx(idx, STR("Don't know current binary name"));
     return 1;
   }
   newbin++;
   if (strchr(par, '/')) {
     *newbin = 0;
-    if (idx)
-      dprintf(idx, STR("New binary must be in %s and name must be specified without path information\n"), path);
+    logidx(idx, STR("New binary must be in %s and name must be specified without path information"), path);
     free(path);
     return 1;
   }
   strcpy(newbin, par);
   if (!strcmp(path, binname)) {
     free(path);
-    if (idx)
-      dprintf(idx, STR("Can't update with the current binary\n"));
+    logidx(idx, STR("Can't update with the current binary"));
     return 1;
   }
   if (stat(path, &sb)) {
-    if (idx)
-      dprintf(idx, STR("%s can't be accessed\n"), path);
+    logidx(idx, STR("%s can't be accessed"), path);
     free(path);
     return 1;
   }
   if (chmod(path, S_IRUSR | S_IWUSR | S_IXUSR)) {
-    if (idx)
-      dprintf(idx, STR("Can't set mode 0600 on %s\n"), path);
+    logidx(idx, STR("Can't set mode 0600 on %s"), path);
     free(path);
     return 1;
   }
@@ -796,15 +787,13 @@ int updatebin(int idx, char *par, int autoi)
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
   i = system(testbuf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
-    if (idx)
-      dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
+    dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
     putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)"), i);
     return i;
   }
 
   if (movefile(path, binname)) {
-    if (idx)
-      dprintf(idx, STR("Can't rename %s to %s\n"), path, binname);
+    logidx(idx, STR("Can't rename %s to %s"), path, binname);
     free(path);
     return 1;
   }
@@ -820,14 +809,15 @@ int updatebin(int idx, char *par, int autoi)
   putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
 #ifdef LEAF
   if (!autoi && localhub) {
+    module_entry *me = NULL;
+
     /* let's drop the server connection ASAP */
     if ((me = module_find("server", 0, 0))) {
       Function *func = me->funcs;
       (func[SERVER_NUKESERVER]) ("Updating...");
     }
 #endif /* LEAF */
-    if (idx)
-      dprintf(idx, STR("Updating...bye\n"));
+    logidx(idx, STR("Updating...bye"));
     putlog(LOG_MISC, "*", STR("Updating..."));
     botnet_send_chat(-1, conf.bot->nick, "Updating...");
     botnet_send_bye();

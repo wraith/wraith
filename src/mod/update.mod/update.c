@@ -265,10 +265,7 @@ void finish_update(int idx)
   sprintf(buf, "%s%s", conf.homedir,  strrchr(dcc[idx].u.xfer->filename, '/'));
 
   movefile(dcc[idx].u.xfer->filename, buf); 
-  
   chmod(buf, S_IRUSR | S_IWUSR | S_IXUSR);
-
-  
 
   sprintf(buf, "%s", strrchr(buf, '/'));
   buf2 = buf;
@@ -431,7 +428,7 @@ static void check_updates()
       }
     }
     /* send out notice to update remote bots ... */
-    sprintf(buf, "nu? %lu", buildts);
+    egg_snprintf(buf, sizeof buf, "nu? %lu", buildts);
     putallbots(buf);
   }
 }

@@ -37,6 +37,7 @@
 
 
 #ifndef MAKING_MODS
+inline void logidx(int, char *, ...);
 void putlog (int, char *, char *, ...);
 int logmodes(char *);
 char *masktype(int);

@@ -670,6 +670,7 @@ void fillconf(conf_t *inconf) {
   inconf->binname = 		conffile.binname ? strdup(conffile.binname) : NULL;
   inconf->uname = 		conffile.uname ? strdup(conffile.uname) : NULL;
   inconf->username = 		conffile.username ? strdup(conffile.username) : NULL;
+  inconf->homedir = 		conffile.homedir ? strdup(conffile.homedir) : NULL;
   inconf->autocron = 		conffile.autocron;
   inconf->autouname = 		conffile.autouname;
   inconf->portmin = 		conffile.portmin;

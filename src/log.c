@@ -121,6 +121,21 @@ char *maskname(int x)
  *    Logging functions
  */
 
+inline void logidx(int idx, char *format, ...)
+{
+  char va_out[LOGLINEMAX + 1];
+  va_list va;
+
+  va_start(va, format);
+  egg_vsnprintf(va_out, LOGLINEMAX, format, va);
+  va_end(va);
+
+  if (idx < 0)
+    putlog(LOG_DEBUG, "*", "%s", va_out);
+  else
+    dprintf(idx, "%s\n", va_out);
+}
+
 /* Log something
  * putlog(level,channel_name,format,...);
  * Broadcast the log if chname is not '@'
