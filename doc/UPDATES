@@ -6,6 +6,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Read in '.resolv.conf' before '/etc/resolv.conf'
 * Fixed binary getting an excess of 1-15 bytes during write. 
 * Binary writing is now a bit faster as the hash is calculated on the fly now.
+* If a binary is already initialized when updating, the pack data will not be overwritten.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
@@ -82,6 +83,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Fixed bots not updating/restarting correctly (being killed before finishing process of restart/update)
 
 1.2
+* New multi-op cookie ops and hash
 * No longer displaying SALTS on ./bin -v
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
 * Removed all compile time defines, moved to .config/.chanset
