@@ -124,14 +124,6 @@ void dprintf(int idx, const char *format, ...)
       char buf3[1024] = "", buf2[1024] = "", c = 0;
 
       for (i = 0 ; i < len ; i++) {
-/* FIXME: Trying to fix bug where you do .color on ANSI, then .bc <bot> help help OVER TELNET
-        if (buf[i] == '\033') {
-          unsigned char *e;
-          for (e = buf + 2; *e != 'm' && *e; e++)
-            i++;
-          if (i >= len) break;
-        }
-*/
         c = buf[i];
         buf2[0] = 0;
 
