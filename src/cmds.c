@@ -11,6 +11,7 @@
 #include "color.h"
 #include "settings.h"
 #include "settings.h"
+#include "adns.h"
 #include "debug.h"
 #include "dcc.h"
 #include "shell.h"
@@ -3911,6 +3912,27 @@ static void cmd_crontab(int idx, char *par) {
 }
 #endif /* !CYGWIN_HACKS */
 
+static int my_dns_callback(void *client_data, const char *host, char **ips)
+{
+  int idx = (int) client_data;
+
+  if (ips)
+    for (int i = 0; ips[i]; i++)
+      dprintf(idx, "Resolved %s using (%s) to: %s\n", host, dns_ip, ips[i]);
+  else
+    dprintf(idx, "Failed to lookup via (%s): %s\n", dns_ip, host);
+
+  return 0;
+}
+
+static void cmd_dns(int idx, char *par)
+{
+  putlog(LOG_CMDS, "*", "#%s# dns %s", dcc[idx].nick, par);
+
+  dprintf(idx, "Looking up %s ...\n", par);
+  egg_dns_lookup(par, 0, my_dns_callback, (void *) idx);
+}
+
 #ifdef HUB
 static void cmd_netcrontab(int idx, char * par) {
   char *cmd = NULL;
@@ -4338,6 +4360,7 @@ cmd_t C_dcc[] =
 #ifndef CYGWIN_HACKS
   {"crontab",		"a",	(Function) cmd_crontab,		NULL},
 #endif /* !CYGWIN_HACKS */
+  {"dns",               "",      (Function) cmd_dns,             NULL},
 #ifdef HUB
   {"who",		"n",	(Function) cmd_who,		NULL},
 #endif /* HUB */

@@ -37,6 +37,7 @@ struct dcc_t {
     struct dns_info *dns;
     struct dupwait_info *dupwait;
     int ident_sock;
+    int dns_id;
     void *other;
   } u;                          /* Special use depending on type        */
 

@@ -39,9 +39,11 @@ OBJS = auth.o \
 	misc.o \
 	misc_file.o \
 	net.o \
+	adns.o \
 	response.o \
 	rfc1459.o \
 	shell.o \
+	socket.o \
 	tclhash.o \
 	userent.o \
 	userrec.o \

@@ -13,6 +13,7 @@
 #include "color.h"
 #include "dcc.h"
 #include "botnet.h"
+#include "adns.h"
 #include "net.h"
 #include "main.h"
 #include "dccutil.h"
@@ -395,8 +396,17 @@ void dcc_remove_lost(void)
     }
   }
 #ifdef LEAF
-  if (serv >= 0)
-    servidx = findanyidx(serv);		/* servidx may have moved :\ */
+  /* check if any of our idx's moved. */
+  if (serv >= 0 && (servidx < dcc_total && dcc[servidx].sock != serv) || (servidx >= dcc_total)) {
+    sdprintf("changing serv: %d servidx: %d to ...", serv, servidx);
+    servidx = findanyidx(serv);		
+    sdprintf("...      serv: %d servidx: %d", serv, servidx);
+  }
+  if (dns_sock >= 0 && (dns_idx < dcc_total && dcc[dns_idx].sock != dns_sock) || (dns_idx >= dcc_total)) {
+    sdprintf("changing dns_sock: %d dns_idx: %d to ...", dns_sock, dns_idx);
+    dns_idx = findanyidx(dns_sock);	
+    sdprintf("...      dns_sock: %d dns_idx: %d", dns_sock, dns_idx);
+  }
 #endif /* LEAF */
 }
 
