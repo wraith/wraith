@@ -209,28 +209,23 @@ void write_debug()
 
 static void got_bus(int z)
 {
+  signal(SIGBUS, SIG_DFL);
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
   fatal(STR("BUS ERROR -- CRASHING!"), 1);
-#ifdef SA_RESETHAND
   kill(getpid(), SIGBUS);
-#else
-  exit(1);
-#endif
 }
+
 
 static void got_segv(int z)
 {
+  signal(SIGSEGV, SIG_DFL);
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
   fatal(STR("SEGMENT VIOLATION -- CRASHING!"), 1);
-#ifdef SA_RESETHAND
   kill(getpid(), SIGSEGV);
-#else
-  exit(1);
-#endif
 }
 
 static void got_fpe(int z)
@@ -251,15 +246,12 @@ static void got_term(int z)
 
 static void got_abort(int z)
 {
+  signal(SIGABRT, SIG_DFL);
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
   fatal(STR("GOT SIGABRT -- CRASHING!"), 1);
-#ifdef SA_RESETHAND
   kill(getpid(), SIGSEGV);
-#else
-  exit(1);
-#endif
 }
 
 #ifdef S_HIJACKCHECK
@@ -291,22 +283,8 @@ static void got_ill(int z)
 
 void init_signals() 
 {
-#ifdef SA_RESETHAND
-  struct sigaction sv;
-
-  /* Set up error traps: */
-  sv.sa_handler = got_bus;
-  sigemptyset(&sv.sa_mask);
-  sv.sa_flags = SA_RESETHAND;
-  sigaction(SIGBUS, &sv, NULL);
-
-  sv.sa_handler = got_segv;
-  sigaction(SIGSEGV, &sv, NULL);
-#else /* !SA_RESETHAND */
   signal(SIGBUS, got_bus);
   signal(SIGSEGV, got_segv);
-#endif /* SA_RESETHAND */
-
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
 #ifdef S_HIJACKCHECK

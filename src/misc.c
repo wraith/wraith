@@ -1145,41 +1145,6 @@ char *replace (char *string, char *oldie, char *newbie)
   return (newstring);
 }
 
-char *getfullbinname(char *argv0)
-{
-  char cwd[DIRMAX] = "", *bin = NULL, *p = NULL, *p2 = NULL;
-
-  bin = strdup(argv0);
-  if (bin[0] == '/') {
-    return bin;
-  }
-  getcwd(cwd, DIRMAX);
-  cwd[DIRMAX] = 0;
-  if (cwd[strlen(cwd) - 1] == '/')
-    cwd[strlen(cwd) - 1] = 0;
-
-  p = bin;
-  p2 = strchr(p, '/');
-  while (p) {
-    if (p2)
-      *p2++ = 0;
-    if (!strcmp(p, "..")) {
-      p = strrchr(cwd, '/');
-      if (p)
-        *p = 0;
-    } else if (strcmp(p, ".")) {
-      strcat(cwd, "/");
-      strcat(cwd, p);
-    }
-    p = p2;
-    if (p)
-      p2 = strchr(p, '/');
-  }
-  free(bin);
-  bin = strdup(cwd);
-  return bin;
-}
-
 void local_check_should_lock()
 {
   module_entry *me = NULL;

@@ -105,6 +105,46 @@ extern struct cfg_entry CFG_FORKINTERVAL;
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
 
 
+static char *getfullbinname(const char *argv_zero)
+{
+  char *cwd = NULL, *bin = NULL, *p = NULL, *p2 = NULL;
+
+  bin = strdup(argv_zero);
+
+  if (bin[0] == '/')
+    return bin;
+
+  if (!getcwd(cwd, DIRMAX))
+    fatal("BABY JESUS IS CRYING", 0);
+
+  cwd[DIRMAX] = 0;
+  if (cwd[strlen(cwd) - 1] == '/')
+    cwd[strlen(cwd) - 1] = 0;
+
+  p = bin;
+  p2 = strchr(p, '/');
+  while (p) {
+    if (p2)
+      *p2++ = 0;
+    if (!strcmp(p, "..")) {
+      p = strrchr(cwd, '/');
+      if (p)
+        *p = 0;
+    } else if (strcmp(p, ".")) {
+      strcat(cwd, "/");
+      strcat(cwd, p);
+    }
+    p = p2;
+    if (p)
+      p2 = strchr(p, '/');
+  }
+  str_redup(&bin, cwd);
+  free(cwd);
+printf("bin: %s\n", bin);
+  return bin;
+}
+
+
 /* Traffic stats
  */
 egg_traffic_t traffic;
@@ -231,14 +271,14 @@ static void show_help()
 #define FLAGS_CHECKPASS "CdDeEgGhkntv"
 static void dtx_arg(int argc, char *argv[])
 {
-  int i;
+  int i = 0;
 #ifdef LEAF
   int localhub_pid = 0;
 #endif /* LEAF */
   char *p = NULL;
-
-  opterr = 0;
+printf("PARSE_FLAGS: %s\n", PARSE_FLAGS);
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
+printf("i: %c\n", i);
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
     switch (i) {
@@ -541,7 +581,12 @@ int main(int argc, char **argv)
   lastmin = nowtm.tm_min;
   srandom(now % (getpid() + getppid()));
   myuid = geteuid();
+
+printf("%d: argc: %d %d\n", getpid(), argc, __LINE__);
+printf("argv[0]: %s\n", argv[0]);
   binname = getfullbinname(argv[0]);
+printf("argv[0]: %s :: binname: %s\n", argv[0], binname);
+printf("%d: argc: %d %d\n", getpid(), argc, __LINE__);
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
   egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
@@ -730,7 +775,7 @@ int main(int argc, char **argv)
   }
 #endif /* LEAF */
 
-#if defined(LEAF) && defined(S_PSCLOAK)
+#if defined(LEAF) && defined(S_PSCLOAK) && defined(__linux__)
   if (conf.pscloak) {
     int on = 0;
     char *p = progname();
