@@ -42,12 +42,10 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
  *simple_sprintf(s, "%s", chan->temp);
  *Tcl_AppendElement(irp, s);
  */
-#ifdef S_IRCNET
   simple_sprintf(s, "%d", chan->exempt_time);
   Tcl_AppendElement(irp, s);
   simple_sprintf(s, "%d", chan->invite_time);
   Tcl_AppendElement(irp, s);
-#endif
   if (chan->status & CHAN_ENFORCEBANS)
     Tcl_AppendElement(irp, "+enforcebans");
   else
@@ -88,7 +86,6 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement(irp, "+cycle");
   else
     Tcl_AppendElement(irp, "-cycle");
-#ifdef S_IRCNET
   if (chan->ircnet_status& CHAN_DYNAMICEXEMPTS)
     Tcl_AppendElement(irp, "+dynamicexempts");
   else
@@ -105,7 +102,6 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement(irp, "-userinvites");
   else
     Tcl_AppendElement(irp, "+userinvites");
-#endif
   if (chan->status & CHAN_NODESYNCH)
     Tcl_AppendElement(irp, "+nodesynch");
   else
@@ -200,10 +196,8 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
  *else if (CHECK("temp"))	   simple_sprintf(s, "%s", chan->temp);
  */
   else if (CHECK("ban-time"))  	   simple_sprintf(s, "%d", chan->ban_time);
-#ifdef S_IRCNET
   else if (CHECK("exempt-time"))   simple_sprintf(s, "%d", chan->exempt_time);
   else if (CHECK("invite-time"))   simple_sprintf(s, "%d", chan->invite_time);
-#endif
   else if CHKFLAG_POS(CHAN_ENFORCEBANS,    "enforcebans",    chan->status)
   else if CHKFLAG_POS(CHAN_DYNAMICBANS,    "dynamicbans",    chan->status)
   else if CHKFLAG_NEG(CHAN_NOUSERBANS,     "userbans",       chan->status)
@@ -215,12 +209,10 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
   else if CHKFLAG_POS(CHAN_SECRET,         "secret",         chan->status)
   else if CHKFLAG_POS(CHAN_CYCLE,          "cycle",          chan->status)
   else if CHKFLAG_POS(CHAN_NODESYNCH,      "nodesynch",      chan->status)
-#ifdef S_IRCNET
   else if CHKFLAG_POS(CHAN_DYNAMICEXEMPTS, "dynamicexempts", chan->ircnet_status)
   else if CHKFLAG_NEG(CHAN_NOUSEREXEMPTS,  "userexempts",    chan->ircnet_status)
   else if CHKFLAG_POS(CHAN_DYNAMICINVITES, "dynamicinvites", chan->ircnet_status)
   else if CHKFLAG_NEG(CHAN_NOUSERINVITES,  "userinvites",    chan->ircnet_status)
-#endif
   else if CHKFLAG_POS(CHAN_CLOSED,	   "closed",         chan->status)
   else if CHKFLAG_POS(CHAN_TAKE,	   "take",           chan->status)
   else if CHKFLAG_POS(CHAN_NOMOP,	   "nomop",          chan->status)
@@ -394,7 +386,6 @@ Context;
         return TCL_ERROR;
       }
       chan->ban_time = atoi(item[i]);
-#ifdef S_IRCNET
     } else if (!strcmp(item[i], "exempt-time")) {
       i++;
       if (i >= items) {
@@ -411,7 +402,6 @@ Context;
         return TCL_ERROR;
       }
       chan->invite_time = atoi(item[i]);
-#endif
 /* Chanint template
  *  } else if (!strcmp(item[i], "temp")) {
  *    i++;
@@ -486,7 +476,6 @@ Context;
       chan->status |= CHAN_CYCLE;
     else if (!strcmp(item[i], "-cycle"))
       chan->status &= ~CHAN_CYCLE;
-#ifdef S_IRCNET
     else if (!strcmp(item[i], "+dynamicexempts"))
       chan->ircnet_status|= CHAN_DYNAMICEXEMPTS;
     else if (!strcmp(item[i], "-dynamicexempts"))
@@ -503,7 +492,6 @@ Context;
       chan->ircnet_status|= CHAN_NOUSERINVITES;
     else if (!strcmp(item[i], "+userinvites"))
       chan->ircnet_status&= ~CHAN_NOUSERINVITES;
-#endif
     else if (!strcmp(item[i], "+closed"))
       chan->status |= CHAN_CLOSED;
     else if (!strcmp(item[i], "-closed"))

@@ -78,11 +78,7 @@ typedef struct maskrec {
          lastactive;
   int flags;
 } maskrec;
-#ifdef S_IRCNET
 extern maskrec *global_bans, *global_exempts, *global_invites;
-#else
-extern maskrec *global_bans;
-#endif
 #define MASKREC_STICKY 1
 #define MASKREC_PERM   2
 
@@ -90,10 +86,8 @@ extern maskrec *global_bans;
 struct chan_t {
   memberlist *member;
   masklist *ban;
-#ifdef S_IRCNET
   masklist *exempt;
   masklist *invite;
-#endif 
   char *topic;
   char *key;
   unsigned short int mode;
@@ -160,16 +154,12 @@ struct chanset_t {
   int stopnethack_mode;
   int revenge_mode;
   int ban_time;
-#ifdef S_IRCNET
   int invite_time;
   int exempt_time;
 
   maskrec *bans,		/* temporary channel bans		*/
           *exempts,		/* temporary channel exempts		*/
           *invites;		/* temporary channel invites		*/
-#else
-  maskrec *bans;
-#endif
   /* desired channel modes: */
   int mode_pls_prot;		/* modes to enforce			*/
   int mode_mns_prot;		/* modes to reject			*/
@@ -247,7 +237,6 @@ struct chanset_t {
 #define CHAN_JUPED          0x40000000 /* Is channel juped                   */
 #define CHAN_STOP_CYCLE     0x80000000 /* Some efnetservers have defined
                                           NO_CHANOPS_WHEN_SPLIT              */
-#ifdef S_IRCNET
 #define CHAN_ASKED_EXEMPTS  0x0001
 #define CHAN_ASKED_INVITED  0x0002
 
@@ -255,7 +244,6 @@ struct chanset_t {
 #define CHAN_NOUSEREXEMPTS  0x0008
 #define CHAN_DYNAMICINVITES 0x0010
 #define CHAN_NOUSERINVITES  0x0020
-#endif
 /* prototypes */
 memberlist *ismember(struct chanset_t *, char *);
 struct chanset_t *findchan(const char *name);
@@ -281,12 +269,10 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
 #define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
-#ifdef S_IRCNET
 #define channel_dynamicexempts(chan) (chan->ircnet_status & CHAN_DYNAMICEXEMPTS)
 #define channel_nouserexempts(chan) (chan->ircnet_status & CHAN_NOUSEREXEMPTS)
 #define channel_dynamicinvites(chan) (chan->ircnet_status & CHAN_DYNAMICINVITES)
 #define channel_nouserinvites(chan) (chan->ircnet_status & CHAN_NOUSERINVITES)
-#endif
 #define channel_juped(chan) (chan->status & CHAN_JUPED)
 #define channel_stop_cycle(chan) (chan->status & CHAN_STOP_CYCLE)
 

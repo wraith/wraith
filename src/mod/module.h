@@ -378,18 +378,14 @@
 #define rfc_casecmp ((int(*)(char *, char *))(*(Function**)(global[218])))
 #define rfc_ncasecmp ((int(*)(char *, char *, int *))(*(Function**)(global[219])))
 /* 220 - 223 */
-#ifdef S_IRCNET
 #define global_exempts (*(maskrec **)(global[220]))
 #define global_invites (*(maskrec **)(global[221]))
-#endif
 /* 222: ginvite_total -- UNUSED (Eule) */
 /* 223: gexempt_total -- UNUSED (Eule) */
 /* 224 - 227 */
 #define H_event (*(p_tcl_bind_list *)(global[224]))
-#ifdef S_IRCNET
 #define use_exempts (*(int *)(global[225]))	/* drummer/Jason */
 #define use_invites (*(int *)(global[226]))	/* drummer/Jason */
-#endif
 #define force_expire (*(int *)(global[227]))	/* Rufus */
 /* 228 - 231 */
 /* 228 */

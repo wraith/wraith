@@ -1161,7 +1161,6 @@ static int write_bans(FILE *f, int idx)
     }
   return 1;
 }
-#ifdef S_IRCNET
 /* Write the exemptlists to a file.
  */
 static int write_exempts(FILE *f, int idx)
@@ -1271,7 +1270,7 @@ static int write_invites(FILE *f, int idx)
     }
   return 1;
 }
-#endif
+
 /* Write the channels to the userfile
  */
 static int write_chans(FILE *f, int idx)
@@ -1356,10 +1355,8 @@ ban-time %d exempt-time %d invite-time %d \
  * also include temp %d in dprintf
  */
         chan->ban_time,
-#ifdef S_IRCNET
         chan->exempt_time,
         chan->invite_time,
-#endif
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),
@@ -1370,12 +1367,10 @@ ban-time %d exempt-time %d invite-time %d \
 	PLSMNS(channel_private(chan)),
 	PLSMNS(channel_cycle(chan)),
 	PLSMNS(channel_inactive(chan)),
-#ifdef S_IRCNET
 	PLSMNS(channel_dynamicexempts(chan)),
 	PLSMNS(!channel_nouserexempts(chan)),
  	PLSMNS(channel_dynamicinvites(chan)),
 	PLSMNS(!channel_nouserinvites(chan)),
-#endif
 	PLSMNS(channel_nodesynch(chan)),
 	PLSMNS(channel_closed(chan)),
 	PLSMNS(channel_take(chan)),
@@ -1412,17 +1407,11 @@ static void channels_writeuserfile(void)
     ret  = write_chans(f, -1);
     ret += write_config(f, -1);
     ret += write_bans(f, -1);
-#ifdef S_IRCNET
     ret += write_exempts(f, -1);
     ret += write_invites(f, -1);
-#endif
     fclose(f);
   }
-#ifdef S_IRCNET
   if (ret < 5)
-#else
-  if (ret < 3)
-#endif
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
   //old .chan write_channels();
 #endif /* HUB */
@@ -1525,7 +1514,7 @@ static void check_expired_bans(void)
     }
   }
 }
-#ifdef S_IRCNET
+
 /* Check for expired timed-exemptions
  */
 static void check_expired_exempts(void)
@@ -1646,4 +1635,3 @@ static void check_expired_invites(void)
     }
   }
 }
-#endif

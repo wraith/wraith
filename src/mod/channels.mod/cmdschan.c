@@ -147,7 +147,6 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
   }
 }
 
-#ifdef S_IRCNET
 static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
 {
   char *chname, *who, s[UHOSTLEN], s1[UHOSTLEN], *p, *p_expire;
@@ -406,7 +405,6 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
     }
   }
 }
-#endif /* S_IRCNET */
 
 static void cmd_mns_ban(struct userrec *u, int idx, char *par)
 {
@@ -520,7 +518,6 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
   dprintf(idx, "No such ban.\n");
 }
 
-#ifdef S_IRCNET
 static void cmd_mns_exempt(struct userrec *u, int idx, char *par)
 {
   int console = 0, i = 0, j;
@@ -756,7 +753,6 @@ static void cmd_mns_invite(struct userrec *u, int idx, char *par)
   }
   dprintf(idx, "No such invite.\n");
 }
-#endif /* S_IRCNET */
 
 static void cmd_bans(struct userrec *u, int idx, char *par)
 {
@@ -769,7 +765,6 @@ static void cmd_bans(struct userrec *u, int idx, char *par)
   }
 }
 
-#ifdef S_IRCNET
 static void cmd_exempts(struct userrec *u, int idx, char *par)
 {
   if (!use_exempts) {
@@ -799,7 +794,6 @@ static void cmd_invites(struct userrec *u, int idx, char *par)
     tell_invites(idx, 0, par);
   }
 }
-#endif /* S_IRCNET */
 
 static void cmd_info(struct userrec *u, int idx, char *par)
 {
@@ -1090,27 +1084,18 @@ static void cmd_stick_yn(int idx, char *par, int yn)
   stick_type = newsplit(&par);
   strncpyz(s, newsplit(&par), sizeof s);
   strncpyz(chname, newsplit(&par), sizeof chname);
-#ifdef S_IRCNET
   if (egg_strcasecmp(stick_type, "exempt") &&
       egg_strcasecmp(stick_type, "invite") &&
       egg_strcasecmp(stick_type, "ban")) {
-#else
-  if (egg_strcasecmp(stick_type, "ban")) {
-#endif
     strncpyz(chname, s, sizeof chname);
     strncpyz(s, stick_type, sizeof s);
   }
   if (!s[0]) {
-#ifdef S_IRCNET
     dprintf(idx, "Usage: %sstick [ban/exempt/invite] <hostmask or number> [channel]\n",
-#else
-    dprintf(idx, "Usage: %sstick [ban] <hostmask or number> [channel]\n",
-#endif
             yn ? "" : "un");
     return;
   }
   /* Now deal with exemptions */
-#ifdef S_IRCNET
   if (!egg_strcasecmp(stick_type, "exempt")) {
     if (!use_exempts) {
       dprintf(idx, "This command can only be used with use-exempts enabled.\n");
@@ -1195,7 +1180,6 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     dprintf(idx, "No such invite.\n");
     return;
   }
-#endif /* S_IRCNET */
   if (!chname[0]) {
     i = u_setsticky_ban(NULL, s,
                         (dcc[idx].user->flags & USER_MASTER) ? yn : -1);
@@ -1569,7 +1553,6 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
  * else
  *   dprintf(idx, temp: 0\n");
  */
-#ifdef S_IRCNET
     if (chan->exempt_time)
       dprintf(idx, "exempt-time: %d\n", chan->exempt_time);
     else
@@ -1578,7 +1561,6 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
       dprintf(idx, "invite-time: %d\n", chan->invite_time);
     else
       dprintf(idx, "invite-time: 0\n");
-#endif /* S_IRCNET */
     dprintf(idx, "Other modes:\n");
     work[0] = 0;
     MSET("bitch",		channel_bitch(chan));
@@ -1599,12 +1581,10 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     MSET("", 0);
     MSET("dynamicbans",		channel_dynamicbans(chan));
     MSET("userbans",		!channel_nouserbans(chan));
-#ifdef S_IRCNET
     MSET("dynamicexempts",	channel_dynamicexempts(chan));
     MSET("userexempts",		!channel_nouserexempts(chan));
     MSET("dynamicinvites",	channel_dynamicinvites(chan));
     MSET("userinvites",		!channel_nouserinvites(chan));
-#endif /* S_IRCNET */
     MSET("", 0);
     work[0] = 0;
 
@@ -1796,24 +1776,18 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 static cmd_t C_dcc_irc[] =
 {
   {"+ban",	"o|o",	(Function) cmd_pls_ban,		NULL},
-#ifdef S_IRCNET
   {"+exempt",	"o|o",	(Function) cmd_pls_exempt,	NULL},
   {"+invite",	"o|o",	(Function) cmd_pls_invite,	NULL},
-#endif /* S_IRCNET */
   {"+chan",	"n",	(Function) cmd_pls_chan,	NULL},
   {"+chrec",	"m|m",	(Function) cmd_pls_chrec,	NULL},
   {"-ban",	"o|o",	(Function) cmd_mns_ban,		NULL},
   {"-chan",	"n",	(Function) cmd_mns_chan,	NULL},
   {"-chrec",	"m|m",	(Function) cmd_mns_chrec,	NULL},
-#ifdef S_IRCNET
   {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL},
   {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL},
-#endif /* S_IRCNET */
   {"bans",	"o|o",	(Function) cmd_bans,		NULL},
-#ifdef S_IRCNET
   {"exempts",	"o|o",	(Function) cmd_exempts,		NULL},
   {"invites",	"o|o",	(Function) cmd_invites,		NULL},
-#endif /* S_IRCNET */
   {"chaninfo",	"m|m",	(Function) cmd_chaninfo,	NULL},
   {"chanset",	"m|m",	(Function) cmd_chanset,		NULL},
   {"chinfo",	"m|m",	(Function) cmd_chinfo,		NULL},

@@ -22,10 +22,6 @@
 #endif /* HAVE_OPENSSL_SSL_H */
 
 
-// If you undefine this, be ready for a good novel of errors. (Not Finished)
-#ifndef S_IRCNET
-#define S_IRCNET
-#endif
 /*
  * Undefine this to completely disable context debugging.
  * WARNING: DO NOT send in bug reports if you undefine this!

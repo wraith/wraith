@@ -36,9 +36,7 @@ extern int	 	 noshare, loading, role, server_lag,
 			 use_console_r, ignore_time, must_be_owner,
 			 debug_output, default_flags,  
 			 max_dcc, password_timeout, localhub,
-#ifdef S_IRCNET
 			 use_invites, use_exempts, 
-#endif
                          force_expire, do_restart, timesync,
 			 protect_readonly, reserved_port_min, reserved_port_max;
 extern time_t now, online_since;
@@ -430,24 +428,14 @@ Function global_table[] =
   (Function) & rfc_casecmp,	/* Function *				*/
   (Function) & rfc_ncasecmp,	/* Function *				*/
   /* 220 - 223 */
-#ifdef S_IRCNET
   (Function) & global_exempts,	/* struct exemptrec *			*/
   (Function) & global_invites,	/* struct inviterec *			*/
-#else
-  (Function) 0,
-  (Function) 0,
-#endif
   (Function) 0, /* ginvite_total -- UNUSED! (Eule) */
   (Function) 0, /* gexempt_total -- UNUSED! (Eule) */
   /* 224 - 227 */
   (Function) & H_event,		/* p_tcl_bind_list *			*/
-#ifdef S_IRCNET
   (Function) & use_exempts,	/* int					*/
   (Function) & use_invites,	/* int					*/
-#else
-  (Function) 0,
-  (Function) 0,
-#endif
   (Function) & force_expire,	/* int					*/
   /* 228 - 231 */
   (Function) 0,

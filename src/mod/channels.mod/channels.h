@@ -55,14 +55,12 @@ static int u_setsticky_mask(struct chanset_t *chan, maskrec *m, char *uhost,
 
 static int u_equals_mask(maskrec *u, char *uhost);
 static int u_match_mask(struct maskrec *rec, char *mask);
-#ifdef S_IRCNET
 static int u_delexempt (struct chanset_t * c, char * who, int doit);
 static int u_addexempt (struct chanset_t * chan, char * exempt, char * from,
  			char * note,  time_t expire_time, int flags);
 static int u_delinvite (struct chanset_t * c, char * who, int doit);
 static int u_addinvite (struct chanset_t * chan, char * invite, char * from,
  			char * note,  time_t expire_time, int flags);
-#endif
 static int u_delban(struct chanset_t *c, char *who, int doit);
 static int u_addban(struct chanset_t *chan, char *ban, char *from, char *note,
 		    time_t expire_time, int flags);
@@ -70,17 +68,13 @@ static void tell_bans(int idx, int show_inact, char *match);
 static int write_bans(FILE * f, int idx);
 static int write_config (FILE * f, int idx);
 static void check_expired_bans(void);
-#ifdef S_IRCNET
 static void tell_exempts (int idx, int show_inact, char * match);
 static int write_exempts (FILE * f, int idx);
-#endif
 static int write_chans (FILE * f, int idx);
-#ifdef S_IRCNET
 static void check_expired_exempts(void);
 static void tell_invites (int idx, int show_inact, char * match);
 static int write_invites (FILE * f, int idx);
 static void check_expired_invites(void);
-#endif
 static void clear_channel(struct chanset_t *, int);
 static void get_mode_protect(struct chanset_t *chan, char *s);
 static void set_mode_protect(struct chanset_t *chan, char *set);
@@ -142,18 +136,14 @@ inline static int chanset_unlink(struct chanset_t *chan);
 /* *HOLE* channels_funcs[32] used to be u_sticky_exempt() <cybah> */
 /* *HOLE* channels_funcs[33] used to be u_match_invite() <cybah> */
 /* *HOLE* channels_funcs[34] used to be killchanset().			*/
-#ifdef S_IRCNET
 #define u_delinvite ((int (*)(struct chanset_t *, char *, int))channels_funcs[35])
 /* 36 - 39 */
 #define u_addinvite ((int (*)(struct chanset_t *, char *, char *, char *, time_t, int))channels_funcs[36])
-#endif
 #define tcl_channel_add ((int (*)(Tcl_Interp *, char *, char *))channels_funcs[37])
 #define tcl_channel_modify ((int (*)(Tcl_Interp *, struct chanset_t *, int, char **))channels_funcs[38])
-#ifdef S_IRCNET
 #define write_exempts ((int (*)(FILE *, int))channels_funcs[39])
 /* 40 - 43 */
 #define write_invites ((int (*)(FILE *, int))channels_funcs[40])
-#endif
 #define ismodeline ((int(*)(masklist *, char *))channels_funcs[41])
 #define initudef ((void(*)(int, char *,int))channels_funcs[42])
 #define ngetudef ((int(*)(char *, char *))channels_funcs[43])
@@ -161,11 +151,9 @@ inline static int chanset_unlink(struct chanset_t *chan);
 #define expired_mask ((int (*)(struct chanset_t *, char *))channels_funcs[44])
 #define remove_channel ((void (*)(struct chanset_t *))channels_funcs[45])
 #define global_ban_time (*(int *)(channels_funcs[46]))
-#ifdef S_IRCNET
 #define global_exempt_time (*(int *)(channels_funcs[47]))
 /* 48 - 51 */
 #define global_invite_time (*(int *)(channels_funcs[48]))
-#endif
 #define write_chans ((int (*)(FILE *, int))channels_funcs[49])
 #define write_config ((int (*)(FILE *, int))channels_funcs[50])
 #define check_should_lock ((void (*)(void))channels_funcs[51])
@@ -176,20 +164,14 @@ inline static int chanset_unlink(struct chanset_t *chan);
  * generic. <cybah>
  */
 #define isbanned(chan, user)    ismasked((chan)->channel.ban, user)
-#ifdef S_IRCNET
 #define isexempted(chan, user)  ismasked((chan)->channel.exempt, user)
 #define isinvited(chan, user)   ismasked((chan)->channel.invite, user)
-#endif
 
 #define ischanban(chan, user)    ismodeline((chan)->channel.ban, user)
-#ifdef S_IRCNET
 #define ischanexempt(chan, user) ismodeline((chan)->channel.exempt, user)
 #define ischaninvite(chan, user) ismodeline((chan)->channel.invite, user)
-#endif
 
 #define u_setsticky_ban(chan, host, sticky)     u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->bans : global_bans, host, sticky, "s")
-#ifdef S_IRCNET
 #define u_setsticky_exempt(chan, host, sticky)  u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->exempts : global_exempts, host, sticky, "se")
 #define u_setsticky_invite(chan, host, sticky)  u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->invites : global_invites, host, sticky, "sInv")
-#endif
 #endif				/* _EGG_MOD_CHANNELS_CHANNELS_H */

@@ -231,13 +231,11 @@ static void cmd_kickban(struct userrec *u, int idx, char *par)
       dprintf(idx, "%s is another channel bot!\n", nick);
       return;
     }
-#ifdef S_IRCNET
     if (use_exempts && (u_match_mask(global_exempts,s) ||
         u_match_mask(chan->exempts, s))) {
       dprintf(idx, "%s is permanently exempted!\n", nick);
       return;
     }
-#endif /* S_IRCNET */
     if (m->flags & CHANOP)
       add_mode(chan, '-', 'o', m->nick);
     check_exemptlist(chan, s);

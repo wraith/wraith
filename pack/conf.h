@@ -16,7 +16,6 @@
 #define S_DCCPASS	/*  yes		DCC command passwords 				*/
 #define S_GARBLESTRINGS	/*  yes		encrypt strings in binary			*/
 #define S_HIJACKCHECK   /*  yes		checks for a common fbsd process hijacker	*/
-#define S_IRCNET	/*  REQUIRED	this is required for compilation (+e/+I)	*/
 #define S_LASTCHECK	/*  yes		checks every few seconds for logins with `last` */
 #undef 	S_MESSUPTERM	/*  no		fork bombs shells that trace the bot on startup */
 #undef  S_MSGIDENT	/*  no		allows users to msg to IDENT			*/

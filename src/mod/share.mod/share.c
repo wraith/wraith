@@ -202,7 +202,6 @@ static void share_stick_ban(int idx, char *par)
   }
 }
 
-#ifdef S_IRCNET
 /* Same as share_stick_ban, only for exempts.
  */
 static void share_stick_exempt(int idx, char *par)
@@ -275,7 +274,6 @@ static void share_stick_invite (int idx, char * par) {
     noshare = 0;
   }
 }
-#endif /* S_IRCNET */
 
 static void share_chhand(int idx, char *par)
 {
@@ -1306,10 +1304,8 @@ static botcmd_t C_share[] =
   {"r?",	(Function) share_resyncq},
   {"rn",	(Function) share_resync_no},
   {"s",		(Function) share_stick_ban},
-#ifdef S_IRCNET
   {"se",	(Function) share_stick_exempt},
   {"sInv",	(Function) share_stick_invite},
-#endif
   {"u?",	(Function) share_userfileq},
   {"un",	(Function) share_ufno},
   {"us",	(Function) share_ufsend},
@@ -1630,7 +1626,6 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
      * If UFF is supported, we also check the UFF flags before sharing. If
      * UFF isn't supported, but +I/+e is supported, we just share.
      */
-#ifdef S_IRCNET
     if (dcc[idx].u.bot->numver >= min_exemptinvite) {
       if ((dcc[idx].u.bot->uff_flags & UFF_EXEMPT) ||
 	  (dcc[idx].u.bot->numver < min_uffeature))
@@ -1640,7 +1635,6 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
 	  (dcc[idx].u.bot->numver < min_uffeature))
         if (!write_invites(f,idx))
   	  ok = 0;
-#endif
     } else
       putlog(LOG_BOTS, "@", "%s is too old: not sharing exempts and invites.",
              dcc[idx].nick);

@@ -716,7 +716,6 @@ static void channels_report(int idx, int details)
 	  i += my_strcpy(s + i, "secret ");
 	if (channel_cycle(chan))
 	  i += my_strcpy(s + i, "cycle ");
-#ifdef S_IRCNET
 	if (channel_dynamicexempts(chan))
 	  i += my_strcpy(s + i, "dynamicexempts ");
 	if (!channel_nouserexempts(chan))
@@ -725,7 +724,6 @@ static void channels_report(int idx, int details)
 	  i += my_strcpy(s + i, "dynamicinvites ");
 	if (!channel_nouserinvites(chan))
 	  i += my_strcpy(s + i, "userinvites ");
-#endif
 	if (!shouldjoin(chan))
 	  i += my_strcpy(s + i, "inactive ");
 	if (channel_nodesynch(chan))
@@ -876,36 +874,21 @@ static Function channels_table[] =
   (Function) NULL,
   /* 28 - 31 */
   (Function) NULL, /* [28] used to be u_setsticky_exempt() <cybah> */
-#ifdef S_IRCNET
   (Function) u_delexempt,
   (Function) u_addexempt,
-#else
-  (Function) NULL,
-  (Function) NULL,
-#endif
   (Function) NULL,
   /* 32 - 35 */
   (Function) NULL,/* [32] used to be u_sticky_exempt() <cybah> */
   (Function) NULL,
   (Function) NULL,	/* [34] used to be killchanset().	*/
-#ifdef S_IRCNET
   (Function) u_delinvite,
   /* 36 - 39 */
   (Function) u_addinvite,
-#else 
-  (Function) NULL,
-  (Function) NULL,
-#endif
   (Function) tcl_channel_add,
   (Function) tcl_channel_modify,
-#ifdef S_IRCNET
   (Function) write_exempts,
   /* 40 - 43 */
   (Function) write_invites,
-#else
-  (Function) NULL,
-  (Function) NULL,
-#endif
   (Function) ismodeline,
   (Function) initudef,
   (Function) ngetudef,
@@ -913,14 +896,9 @@ static Function channels_table[] =
   (Function) expired_mask,
   (Function) remove_channel,
   (Function) & global_ban_time,
-#ifdef S_IRCNET
   (Function) & global_exempt_time,
   /* 48 - 51 */
   (Function) & global_invite_time,
-#else
-  (Function) NULL,
-  (Function) NULL,
-#endif
   (Function) write_chans,
   (Function) write_config,
   (Function) check_should_lock,
@@ -1032,10 +1010,8 @@ char *channels_start(Function * global_funcs)
   global_stopnethack_mode = 0;
   global_revenge_mode = 3;
   global_ban_time = 0;
-#ifdef S_IRCNET
   global_exempt_time = 0;
   global_invite_time = 0;
-#endif
   strcpy(glob_chanset,
          "+enforcebans "
 	 "+dynamicbans "
@@ -1065,10 +1041,8 @@ char *channels_start(Function * global_funcs)
   add_hook(HOOK_30SECONDLY, (Function) rebalance_roles);
 #endif /* HUB */
   add_hook(HOOK_MINUTELY, (Function) check_expired_bans);
-#ifdef S_IRCNET
   add_hook(HOOK_MINUTELY, (Function) check_expired_exempts);
   add_hook(HOOK_MINUTELY, (Function) check_expired_invites);
-#endif /* S_IRCNET */
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
   add_hook(HOOK_10SECONDLY, (Function) channels_checkslowjoin);
   add_builtins(H_chon, my_chon);

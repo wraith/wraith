@@ -1040,7 +1040,7 @@ static void got_unban(struct chanset_t *chan, char *nick, char *from,
       add_mode(chan, '+', 'b', who);
   }
 }
-#ifdef S_IRCNET
+
 static void got_exempt(struct chanset_t *chan, char *nick, char *from,
 		       char *who)
 {
@@ -1186,7 +1186,6 @@ static void got_uninvite(struct chanset_t *chan, char *nick, char *from,
       add_mode(chan, '+', 'I', who);
   }
 }
-#endif
 
 static int gotmode(char *from, char *msg)
 {
@@ -1725,7 +1724,6 @@ static int gotmode(char *from, char *msg)
 	  else
 	    got_unban(chan, nick, from, op, u);
 	  break;
-#ifdef S_IRCNET
 	case 'e':
 #ifdef S_AUTOLOCK
           chan->channel.fighting++;
@@ -1749,7 +1747,6 @@ static int gotmode(char *from, char *msg)
 	    got_uninvite(chan, nick, from, op, u);
 	  break;
 	}
-#endif
 	if (todo) {
 	  if (ms2[0] == '+')
 	    chan->channel.mode |= todo;
