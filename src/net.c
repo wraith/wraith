@@ -1575,7 +1575,7 @@ int findanysnum(register int sock)
   register int i = 0;
 
   if (sock != -1)
-    for (i = 0; i < socks_total; i++)
+    for (i = 0; i <= socks_total; i++)
       if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED))
         return i;
 
