@@ -648,18 +648,19 @@ void
 restart(int idx)
 {
   char buf[1024] = "";
-
+  const char *reason = idx != -1 ?  "Updating..." : "Restarting...";
+ 
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
 #ifdef LEAF
-  nuke_server("Updating...");		/* let's drop the server connection ASAP */
+  nuke_server((char *) reason);		/* let's drop the server connection ASAP */
 #endif /* LEAF */
   if (tands > 0) {
-    botnet_send_chat(-1, conf.bot->nick, "Updating...");
+    botnet_send_chat(-1, conf.bot->nick, (char *) reason);
     botnet_send_bye();
   }
-  fatal(idx <= 0x7FF0 && idx != -1 ? "Updating..." : NULL, 1);
+  fatal(idx <= 0x7FF0 ? reason : NULL, 1);
   usleep(2000 * 500);
   unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
   sprintf(buf, "%s -B %s\n", binname, conf.bot->nick);
