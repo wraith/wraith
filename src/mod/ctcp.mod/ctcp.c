@@ -454,8 +454,8 @@ static void ctcp_minutely()
 
   if (listen_time <= 0) {
     for (i = 0; i < dcc_total; i++) {
-      if ((dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)"))) {
-        putlog(LOG_DEBUG, "*", "Closing listening port %d", dcc[i].port);
+      if ((dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)") || !strcmp(dcc[i].nick, "(telnet6)"))) {
+        putlog(LOG_DEBUG, "*", "Closing listening port %d %s", dcc[i].port, dcc[i].nick);
 
         killsock(dcc[i].sock);
         lostdcc(i);

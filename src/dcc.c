@@ -432,6 +432,12 @@ static void dcc_bot_new(int idx, char *buf, int x)
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
     killsock(dcc[idx].sock);
     lostdcc(idx);
+  } else if (strcmp(code, "")) {
+      /* Invalid password/digest */
+      putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
+//      putlog(LOG_ERRORS, "*", "Expected elink, got %s %s", code, buf);
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
   }
   /* Ignore otherwise */
 }
@@ -676,8 +682,8 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
       send_timesync(idx);
     } else {
       /* Invalid password/digest */
-      putlog(LOG_MISC, "*", "%s failed encrypted link handshake", dcc[idx].nick);
-      putlog(LOG_ERRORS, "*", "Expected elinkdone, got %s", buf);
+      putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
+//      putlog(LOG_ERRORS, "*", "Expected elinkdone, got %s", buf);
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }
@@ -1264,7 +1270,9 @@ static void dcc_telnet(int idx, char *buf, int i)
   dcc[i].sock = sock;
   dcc[i].addr = ip;
 #ifdef USE_IPV6
-  strcpy(dcc[i].addr6, s);
+Context;
+  if (sockprotocol(sock) == AF_INET6)
+    strcpy(dcc[i].addr6, s);
 #endif /* USE_IPV6 */
   dcc[i].port = port;
   dcc[i].timeval = now;
@@ -1275,11 +1283,13 @@ static void dcc_telnet(int idx, char *buf, int i)
   dcc[i].u.dns->dns_type = RES_HOSTBYIP;
   dcc[i].u.dns->ibuf = dcc[idx].sock;
   dcc[i].u.dns->type = &DCC_IDENTWAIT;
+Context;
 #ifdef USE_IPV6
-  dcc_telnet_hostresolved(i);
-#else
-  dcc_dnshostbyip(ip);
+  if (sockprotocol(sock) == AF_INET6)
+    dcc_telnet_hostresolved(i);
+  else
 #endif /* USE_IPV6 */
+    dcc_dnshostbyip(ip);
 }
 
 static void dcc_telnet_hostresolved(int i)
@@ -1293,7 +1303,7 @@ static void dcc_telnet_hostresolved(int i)
     strncpyz(dcc[i].host, dcc[i].addr6, UHOSTLEN);
   else
 #endif /* USE_IPV6 */
-  strncpyz(dcc[i].host, dcc[i].u.dns->host, UHOSTLEN);
+    strncpyz(dcc[i].host, dcc[i].u.dns->host, UHOSTLEN);
 
   for (idx = 0; idx < dcc_total; idx++)
     if ((dcc[idx].type == &DCC_TELNET) &&

@@ -17,6 +17,9 @@
 
 extern struct dcc_t	*dcc;
 extern int		 dcc_total, max_dcc, dcc_flood_thr, backgrd, MAXSOCKS, tands;
+#ifdef USE_IPV6
+extern unsigned long     notalloc;
+#endif /* USE_IPV6 */
 extern char		 botnetnick[], version[];
 extern time_t		 now;
 extern sock_list	*socklist;
@@ -420,7 +423,7 @@ void tell_dcc(int zidx)
   dprintf(zidx, format, "----", "--------", "-----", "---------", 
                         "-------------------------", "----");
 
-  egg_snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-17s %%s\n", 
+  egg_snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-25s %%s\n", 
                           nicklen);
   /* Show server */
   for (i = 0; i < dcc_total; i++) {
@@ -664,6 +667,9 @@ int listen_all(int lport, int off)
   int i,
     idx = (-1),
     port,
+#ifdef USE_IPV6
+    i6 = 0,
+#endif /* USE_IPV6 */
     realport;
   struct portmap *pmap = NULL,
    *pold = NULL;
@@ -676,43 +682,64 @@ Context;
       break;
     }
 
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_TELNET) && (dcc[i].port == port))
+  for (i = 0; i < dcc_total; i++) {
+    if ((dcc[i].type == &DCC_TELNET) && (dcc[i].port == port)) {
       idx = i;
 
-  if (off) {
-    if (pmap) {
-      if (pold)
-        pold->next = pmap->next;
-      else
-        root = pmap->next;
-      nfree(pmap);
-    }
-    if (idx < 0) {
+      if (off) {
+        if (pmap) {
+          if (pold)
+            pold->next = pmap->next;
+          else
+           root = pmap->next;
+           nfree(pmap);
+        }
+#ifdef USE_IPV6
+        if (sockprotocol(dcc[idx].sock) == AF_INET6)
+          putlog(LOG_DEBUG, "*", "Closing IPv6 listening port %d", dcc[idx].port);
+        else
+#endif /* USE_IPV6 */   
+          putlog(LOG_DEBUG, "*", "Closing IPv4 listening port %d", dcc[idx].port);
+        killsock(dcc[idx].sock);
+        lostdcc(idx);
+        return idx;
+      }
+    }  
+  }
+  if (idx < 0) {
+    if (off) {
       putlog(LOG_ERRORS, "*", STR("No such listening port open - %d"), lport);
       return idx;
     }
-    putlog(LOG_DEBUG, "*", "Closing listening port %d", dcc[idx].port);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-    return idx;
-  }
-  if (idx < 0) {
     /* make new one */
     if (dcc_total >= max_dcc) {
       putlog(LOG_ERRORS, "*", STR("Can't open listening port - no more DCC Slots"));
     } else {
 #ifdef USE_IPV6
-      /* dum de dum, listen needs an af_def option, on linux this will listen on
-       * both ipv6 and ipv4
-       */
-      i = open_listen_by_af(&port, AF_INET6);
+      i6 = open_listen_by_af(&port, AF_INET6);
+      if (i6 < 0)
+        putlog(LOG_ERRORS, "*", STR("Can't open IPv6 listening port %d - %s"), port, 
+               i6 == -1 ? "it's taken." : "couldn't assign ip.");
+      else {
+        idx = new_dcc(&DCC_TELNET, 0);
+        dcc[idx].addr = notalloc;
+        dcc[idx].addr6 = getmyip6();
+        dcc[idx].port = port;
+        dcc[idx].sock = i6;
+        dcc[idx].timeval = now;
+        strcpy(dcc[idx].nick, STR("(telnet6)"));
+        strcpy(dcc[idx].host, "*");
+        putlog(LOG_DEBUG, "*", STR("Listening on IPv6 at telnet port %d"), port);
+      }
+      i = open_listen_by_af(&port, AF_INET);
 #else
       i = open_listen(&port);
 #endif /* USE_IPV6 */
       if (i < 0)
-        putlog(LOG_ERRORS, "*", STR("Can't open listening port - it's taken"));
+        putlog(LOG_ERRORS, "*", STR("Can't open IPv4 listening port %d - %s"), port,
+               i == -1 ? "it's taken." : "couldn't assign ip.");
       else {
+	idx = (-1); /* now setup ipv4 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = iptolong(getmyip());
         dcc[idx].port = port;
@@ -720,6 +747,13 @@ Context;
         dcc[idx].timeval = now;
         strcpy(dcc[idx].nick, STR("(telnet)"));
         strcpy(dcc[idx].host, "*");
+        putlog(LOG_DEBUG, "*", STR("Listening on IPv4 at telnet port %d"), port);
+      }
+#ifdef USE_IPV6
+      if (i > 0 || i6 > 0) {
+#else
+      if (i > 0) {
+#endif /* USE_IPV6 */
         if (!pmap) {
           pmap = nmalloc(sizeof(struct portmap));
           pmap->next = root;
@@ -727,10 +761,15 @@ Context;
         }
         pmap->realport = realport;
         pmap->mappedto = port;
-        putlog(LOG_DEBUG, "*", STR("Listening at telnet port %d"), port);
       }
     }
   }
+  /* if one of the protocols failed, the one which worked will be returned
+   * if both were successful, it wont matter which idx is returned, because the 
+   * code reading listen_all will only be reading dcc[idx].port, which would be
+   * open on both protocols.
+   * -bryan (10/29/03)
+   */
   return idx;
 }
 

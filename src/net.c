@@ -193,6 +193,20 @@ int expmem_net()
   return tot;
 }
 
+/* Get my ipv6 ip
+ */
+char *getmyip6()
+{
+#ifdef USE_IPV6
+  static char s[UHOSTLEN + 1];
+  egg_inet_ntop(AF_INET6, &cached_myip6_so.sin6.sin6_addr, s, 119);
+  s[120] = 0;
+  return s;
+#else
+  return "";
+#endif /* USE_IPV6 */
+}
+
 /* Get my ip number
  */
 IP getmyip() {
@@ -203,7 +217,10 @@ IP getmyip() {
 void cache_my_ip()
 {
   char s[121];
-  int error, any = 0;
+  int error;
+#ifdef USE_IPV6
+  int any = 0;
+#endif /* USE_IPV6 */
 
   debug0("cache_my_ip()");
   memset(&cached_myip4_so, 0, sizeof(union sockaddr_union));
@@ -396,6 +413,7 @@ void setsock(int sock, int options)
   }
   /* Yay async i/o ! */
   fcntl(sock, F_SETFL, O_NONBLOCK);
+
 }
 
 #ifdef USE_IPV6
@@ -634,9 +652,6 @@ int open_address_listen(IP addr, int *port)
  {
   int sock = 0;
   unsigned int addrlen;
-#ifdef USE_IPV6
-  struct sockaddr_in6 name6;
-#endif /* USE_IPV6 */
   struct sockaddr_in name;
 
   if (firewall[0]) {
@@ -647,35 +662,42 @@ int open_address_listen(IP addr, int *port)
   }
 #ifdef USE_IPV6
   if (af_def == AF_INET6) {
-debug0("Opening listen socket with AF_INET6");
-      sock = getsock(SOCK_LISTEN, af_def);
-      bzero((char *) &name6, sizeof(name6));
-      name6.sin6_family = af_def;
-      name6.sin6_port = htons(*port);
-      memcpy(&name6.sin6_addr, &in6addr_any, 16);
-      if (bind(sock, (struct sockaddr *) &name6, sizeof(name6)) < 0) {
-        killsock(sock);
-        return -1;
-      }
-      addrlen = sizeof(name6);
-      if (getsockname(sock, (struct sockaddr *) &name6, &addrlen) < 0) {
-        killsock(sock);
-        return -1;
-      }
-      *port = ntohs(name6.sin6_port);
-      if (listen(sock, 1) < 0) {
-        killsock(sock);
-        return -1;
-      }
+    struct sockaddr_in6 name6;
+    sock = getsock(SOCK_LISTEN, af_def);
+
+    if (sock < 1)
+    return -1;
+
+    debug2("Opening listen socket on port %d with AF_INET6, sock: %d", *port, sock);
+    bzero((char *) &name6, sizeof(name6));
+    name6.sin6_family = af_def;
+    name6.sin6_port = htons(*port); /* 0 = just assign us a port */
+    /* memcpy(&name6.sin6_addr, &in6addr_any, 16); */ /* this is the only way to get ipv6+ipv4 in 1 socket */
+    memcpy(&name6.sin6_addr, &cached_myip6_so.sin6.sin6_addr, 16);
+    if (bind(sock, (struct sockaddr *) &name6, sizeof(name6)) < 0) {
+      killsock(sock);
+      return -1;
+    }
+    addrlen = sizeof(name6);
+    if (getsockname(sock, (struct sockaddr *) &name6, &addrlen) < 0) {
+      killsock(sock);
+      return -1;
+    }
+    *port = ntohs(name6.sin6_port);
+    if (listen(sock, 1) < 0) {
+      killsock(sock);
+      return -1;
+    }
   } else {
-    sock = getsock(SOCK_LISTEN, AF_INET);
+      sock = getsock(SOCK_LISTEN, AF_INET);
 #else
-    sock = getsock(SOCK_LISTEN);
+      sock = getsock(SOCK_LISTEN);
 #endif /* USE_IPV6 */
+
     if (sock < 1)
       return -1;
 
-debug0("Opening listen socket with AF_INET");
+    debug2("Opening listen socket on port %d with AF_INET, sock: %d", *port, sock);
     egg_bzero((char *) &name, sizeof(struct sockaddr_in));
     name.sin_family = AF_INET;
     name.sin_port = htons(*port); /* 0 = just assign us a port */

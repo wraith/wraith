@@ -49,6 +49,7 @@
 #undef feof
 #undef user_malloc
 #undef dprintf
+#undef sdprintf
 #undef get_data_ptr
 #undef wild_match
 #undef wild_match_per
@@ -206,7 +207,7 @@
 #endif /* USE_IPV6 */
 #define killsock(x) (((void *(*)())global[83])((x),MODULE_NAME,__FILE__,__LINE__))
 /* 84 - 87 */
-#define open_listen ((int (*) (int *))global[84])
+#define open_listen_by_af ((int (*) (int *, int))global[84])
 #define open_telnet_dcc ((int (*) (int,char *,char *))global[85])
 #define get_data_ptr(x) ((void *(*)(int,char*,int))global[86])(x,__FILE__,__LINE__)
 #define open_telnet ((int (*) (char *, int))global[87])
@@ -531,10 +532,11 @@
 #define cmdprefix ((char *)(global[325]))
 #define replace ((char*(*)(char *, char *, char *))global[326])
 #define degarble ((char *(*)(int, char *))global[327])
-#define open_listen_by_af ((int (*) (int *, int))global[328])
+#define open_listen ((int (*) (int *))global[328])
 /* 329 - 332 */
 #define egg_inet_ntop ((int (*)(int af, const void *src, char *dst, socklen_t size))global[329])
 #define hostprotocol ((int (*) (char *))global[330])
+#define sdprintf (global[331])
 
 
 

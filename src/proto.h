@@ -55,7 +55,6 @@ char *decryptit (char *);
 int lfprintf(FILE *, char *, ...);
 
 /* botnet.c */
-inline int open_listen_by_af(int *, int);
 void lower_bot_linked(int idx);
 void higher_bot_linked(int idx);
 void answer_local_whom(int, int);
@@ -285,6 +284,7 @@ void set_cmd_pass(char *, int);
 /* net.c */
 IP my_atoul(char *);
 unsigned long iptolong(IP);
+char *getmyip6();
 IP getmyip();
 void cache_my_ip();
 void neterror(char *);
@@ -301,6 +301,7 @@ char *hostnamefromip(unsigned long);
 void real_killsock(int, const char *, int);
 int answer(int, char *, unsigned long *, unsigned short *, int);
 inline int open_listen(int *);
+inline int open_listen_by_af(int *, int);
 #ifdef USE_IPV6
 int open_address_listen(IP addr, int af_def, int *);
 #else

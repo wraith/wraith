@@ -256,7 +256,7 @@ Function global_table[] =
   (Function) getsock,
   (Function) mod_killsock,
   /* 84 - 87 */
-  (Function) open_listen,
+  (Function) open_listen_by_af,
   (Function) open_telnet_dcc,
   (Function) _get_data_ptr,
   (Function) open_telnet,
@@ -578,8 +578,9 @@ Function global_table[] =
   (Function) replace,
   (Function) degarble,
   (Function) egg_inet_ntop,
-  (Function) open_listen_by_af,
-  (Function) hostprotocol
+  (Function) open_listen,
+  (Function) hostprotocol,
+  (Function) sdprintf
 
 
 };
