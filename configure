@@ -3749,11 +3749,6 @@ cat >>confdefs.h <<\_ACEOF
 #define CYGWIN_HACKS 1
 _ACEOF
 
-
-cat >>confdefs.h <<\_ACEOF
-#define USE_IPV6 0
-_ACEOF
-
   ;;
   IRIX)
     IRIX=yes

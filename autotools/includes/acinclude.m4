@@ -251,7 +251,6 @@ case "$egg_cv_var_system_type" in
     esac
     EGG_CYGWIN=yes
     AC_DEFINE(CYGWIN_HACKS, 1, [Define if running under cygwin])
-    AC_DEFINE(USE_IPV6, 0, [Wont work on cygwin])
   ;;
   IRIX)
     IRIX=yes

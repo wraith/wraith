@@ -12,6 +12,10 @@
 #  include "config.h"
 #endif
 
+#ifdef CYGWIN_HACKS
+#  undef USE_IPV6
+#endif /* CYGWIN_HACKS */
+
 /* AUTHHASH is pointless without AUTHCMDS. */
 #ifdef S_AUTHHASH
 # ifndef S_AUTHCMDS
