@@ -66,11 +66,11 @@ bin_checksum(const char *fname, int todo)
     while ((len = fread(buf, 1, sizeof buf - 1, f))) {
       if (!memcmp(buf, &settings.prefix, PREFIXLEN))
         break;
-      MD5_Update(ctx, buf, len);
+      MD5_Update(&ctx, buf, len);
     }
 
     fclose(f);
-    MD5_Final(md5out, ctx);
+    MD5_Final(md5out, &ctx);
     strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
   }
@@ -100,7 +100,7 @@ bin_checksum(const char *fname, int todo)
       newpos += len;
 
       if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {		/* found the settings struct! */
-        MD5_Final(md5out, ctx);
+        MD5_Final(md5out, &ctx);
         strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
         OPENSSL_cleanse(&ctx, sizeof(ctx));
 
@@ -145,7 +145,7 @@ bin_checksum(const char *fname, int todo)
         /* skip reading over the stuff we already wrote */
         fseek(f, newpos, SEEK_SET);
       } else if (!hash[0])		/* hash as long as we haven't reached the prefix */
-        MD5_Update(ctx, buf, len);
+        MD5_Update(&ctx, buf, len);
     }
 
     fclose(f);
@@ -470,3 +470,14 @@ void conf_to_bin(conf_t *in, bool move, int die)
   /* tellconfig(&settings); */
   write_settings(newbin, die, 1);
 }
+
+void reload_bin_data() {
+  if (bin_checksum(binname, GET_CONF)) {
+    free_conf();
+    bin_to_conf();
+    fill_conf_bot();
+    if (!conf.bot->localhub)
+      free_conf_bots();
+  }
+}
+

@@ -13,6 +13,7 @@
 #include "net.h"
 #include "shell.h"
 #include "color.h"
+#include "binary.h"
 #include "userrec.h"
 #include "main.h"
 #include "dccutil.h"
@@ -283,6 +284,14 @@ got_hup(int z)
   restart(-1);
 }
 
+static void
+got_usr1(int z)
+{
+  putlog(LOG_MISC, "*", "GOT SIGUSR1 -- RECHECKING BINARY");
+  
+  reload_bin_data();
+}
+
 void init_signals() 
 {
   signal(SIGBUS, got_bus);
@@ -295,6 +304,7 @@ void init_signals()
   signal(SIGILL, got_ill);
   signal(SIGALRM, got_alarm);
   signal(SIGHUP, got_hup);
+  signal(SIGUSR1, got_usr1);
 }
 
 #ifdef DEBUG_CONTEXT
