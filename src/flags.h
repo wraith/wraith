@@ -46,9 +46,6 @@ struct flag_record {
  *   unused letters: bchijpstw
  */
 
-#define ROLE_KICK_MDOP     (role)
-#define ROLE_KICK_MEAN     (role)
-
 #define DEFLAG_BADCOOKIE   1
 #define DEFLAG_MANUALOP    2
 #ifdef G_MEAN
