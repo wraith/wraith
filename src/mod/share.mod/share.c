@@ -40,7 +40,7 @@ static int private_global = 0;
 static int private_user = 0;
 static char private_globals[50] = "";
 static int allow_resync = 0;
-static struct flag_record fr = {0, 0, 0, 0, 0, 0};
+static struct flag_record fr = {0, 0, 0, 0};
 static int resync_time = 900;
 static int overr_local_bots = 1;	/* Override local bots?		    */
 
@@ -2134,7 +2134,7 @@ void share_init()
 
 int private_globals_bitmask()
 {
-  struct flag_record my_fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
+  struct flag_record my_fr = {FR_GLOBAL, 0, 0, 0};
 
   break_down_flags(private_globals, &my_fr, 0);
   return my_fr.global;

@@ -56,7 +56,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
 {
   struct chanset_t *chan = NULL;
   char *pass = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
@@ -153,7 +153,7 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 {
   char *pass = NULL;
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
@@ -444,7 +444,7 @@ static int msgc_test(char *nick, char *host, struct userrec *u, char *par, char 
 {
   char *chn, *hand;
   struct chanset_t *chan;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   struct userrec *user;
   
   hand = newsplit(&par);
@@ -464,7 +464,7 @@ static int msgc_test(char *nick, char *host, struct userrec *u, char *par, char 
 static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   int force = 0;
   memberlist *m = NULL;
 
@@ -514,7 +514,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
 static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   int force = 0;
   memberlist *m = NULL;
 
@@ -562,7 +562,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
 static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   char list[1024] = "";
 
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sCHANNELS %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
@@ -587,7 +587,7 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
 static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   if (chname && chname[0]) 
     return 0;
@@ -615,7 +615,7 @@ static int msgc_help(char *nick, char *host, struct userrec *u, char *par, char 
 {
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %sHELP %s", nick, host, u->handle, cmdprefix, par ? par : "");
 
@@ -661,7 +661,7 @@ static int msgc_sha1(char *nick, char *host, struct userrec *u, char *par, char 
 static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   int force = 0;
 
   if (chname && chname[0])

@@ -6,8 +6,8 @@
 
 #include <ctype.h>
 
-static struct flag_record user	 = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+static struct flag_record user	 = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
 
 static void cmd_pls_mask(char type, struct userrec *u, int idx, char *par)

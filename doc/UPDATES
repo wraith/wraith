@@ -4,6 +4,7 @@ This is a summary of ChangeLog basically.
 
 1.Fixed a cosmetic error in cmd_downbots.
 2.Cleaned up and removed more un-needed code.
+3.Fixed a bug in defalg_user()
 
 1.1.5
 

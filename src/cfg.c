@@ -211,7 +211,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
 {
   char tmp[256] = "", tmp2[1024] = "";
   struct cfg_entry *ent = NULL;
-  struct flag_record fr = {FR_GLOBAL, FR_CHAN, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   if (!u)
     return;

@@ -151,7 +151,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
         bpos = (ops - 1);
 
     } else if (!opsonly || chan_hasop(m)) {
-        struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+        struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0};
         if (m->user)
           get_user_flagrec(m->user, &fr, chan->dname);
 
@@ -176,7 +176,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
   sent = 0;
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     if (!opsonly || chan_hasop(m)) {
-      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
       if (m->user)
         get_user_flagrec(m->user, &fr, chan->dname);
@@ -219,7 +219,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
   tpos = 0;
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     if (!opsonly || chan_hasop(m)) {
-      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
       if (m->user)
         get_user_flagrec(m->user, &fr, chan->dname);
@@ -267,7 +267,7 @@ static int target_priority(struct chanset_t * chan, memberlist *target, int opso
       if (match_my_nick(m->nick))
         bpos = ops;
     } else if (!opsonly || chan_hasop(m)) {
-      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
       if (m->user)
         get_user_flagrec(m->user, &fr, chan->dname);
@@ -335,7 +335,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
   struct userrec *u = NULL;
   memberlist *m = NULL;
   int thr = 0, lapse = 0;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   if (!chan || (which < 0) || (which >= FLOOD_CHAN_MAX))
     return 0;
@@ -554,7 +554,7 @@ static void kick_all(struct chanset_t *chan, char *hostmask, char *comment, int 
 {
   memberlist *m = NULL;
   char kicknick[512] = "", s[UHOSTLEN] = "";
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   int k, l, flushed;
 
   if (!me_op(chan))
@@ -611,7 +611,7 @@ static void refresh_ban_kick(struct chanset_t *chan, char *user, char *nick)
   for (cycle = 0; cycle < 2; cycle++) {
     for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
       if (wild_match(b->mask, user)) {
-	struct flag_record	fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+	struct flag_record	fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 	char c[512] = "";		/* The ban comment.	*/
 	char s[UHOSTLEN] = "";
 
@@ -966,7 +966,7 @@ void check_this_user(char *hand, int delete, char *host)
   memberlist *m = NULL;
   struct userrec *u = NULL;
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
@@ -1116,7 +1116,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 {
   memberlist *m = NULL;
   char s[UHOSTLEN] = "";
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   static int stacking = 0;
   int stop_reset = 0, botops = 0, nonbotops = 0, botnonops = 0;
 
@@ -1352,7 +1352,7 @@ static void memberlist_reposition(struct chanset_t * chan, memberlist * target) 
 
 static int got352or4(struct chanset_t *chan, char *user, char *host, char *serv, char *nick, char *flags, int hops)
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0};
   char userhost[UHOSTLEN] = "";
   memberlist *m = NULL;
   int waschanop;
@@ -1995,7 +1995,7 @@ static int gotjoin(char *from, char *chname)
   memberlist *m = NULL;
   masklist *b = NULL;
   struct userrec *u = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   fixcolon(chname);
   chan = findchan(chname);
@@ -2273,7 +2273,7 @@ static int gotkick(char *from, char *origmsg)
   memberlist *m = NULL;
   struct chanset_t *chan = NULL;
   struct userrec *u = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   strncpy(buf2, origmsg, 510);
   buf2[510] = 0;
@@ -2351,7 +2351,7 @@ static int gotnick(char *from, char *msg)
   memberlist *m = NULL, *mm = NULL;
   struct chanset_t *chan = NULL, *oldchan = NULL;
   struct userrec *u = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   strcpy(uhost, from);
   nick = splitnick(&uhost);
@@ -2556,7 +2556,7 @@ static int gotmsg(char *from, char *msg)
   int ignoring;
   struct userrec *u = NULL;
   memberlist *m = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   if (!strchr("&#!+@$", msg[0]))
     return 0;
@@ -2733,7 +2733,7 @@ static int gotnotice(char *from, char *msg)
   struct userrec *u = NULL;
   memberlist *m = NULL;
   struct chanset_t *chan = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   int ignoring;
 
   if (!strchr(CHANMETA "@", *msg))

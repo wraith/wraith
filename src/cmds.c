@@ -785,7 +785,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100] = "", *fcats = NULL, temp[100] = "", buf[2046] = "", match[20] = "";
   int fnd = 0, done = 0, nowild = 0;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   egg_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
   fcats = temp;
@@ -1234,7 +1234,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
 {
   char *nick = NULL, s[2] = "", s1[512] = "";
   int dest = 0, i, ok = 0, pls, md;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   struct chanset_t *chan = NULL;
 
   if (!par[0]) {
@@ -2163,7 +2163,7 @@ int check_dcc_attrs(struct userrec *u, int oatr)
 	botnet_send_join_idx(i, -1);
       }
       if ((oatr & USER_MASTER) && !(u->flags & USER_MASTER)) {
-	struct flag_record fr = {FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
+	struct flag_record fr = {FR_CHAN | FR_ANYWH, 0, 0, 0};
 
 	dcc[i].u.chat->con_flags &= ~(LOG_MISC | LOG_CMDS | LOG_RAW |
 				      LOG_FILES | LOG_WALL | LOG_DEBUG);
@@ -2295,7 +2295,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, int chflags, int ochatr
 	   (!(chflags & (USER_OP | USER_MASTER | USER_OWNER)))) ||
 	  ((chflags & (USER_OP | USER_MASTER | USER_OWNER)) &&
 	   (!(ochatr & (USER_OP | USER_MASTER | USER_OWNER))))) {
-	struct flag_record fr = {FR_CHAN, 0, 0, 0, 0, 0};
+	struct flag_record fr = {FR_CHAN, 0, 0, 0};
 
 	for (chan = chanset; chan && !found; chan = chan->next) {
 	  get_user_flagrec(u, &fr, chan->dname);
@@ -2319,10 +2319,10 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
   char *hand = NULL, *arg = NULL, *tmpchg = NULL, *chg = NULL, work[1024] = "";
   struct chanset_t *chan = NULL;
   struct userrec *u2 = NULL;
-  struct flag_record pls = {0, 0, 0, 0, 0, 0},
-  		     mns = {0, 0, 0, 0, 0, 0},
-		     user = {0, 0, 0, 0, 0, 0},
-		     ouser = {0, 0, 0, 0, 0, 0};
+  struct flag_record pls = {0, 0, 0, 0},
+  		     mns = {0, 0, 0, 0},
+		     user = {0, 0, 0, 0},
+		     ouser = {0, 0, 0, 0};
   int fl = -1, of = 0, ocf = 0;
 
   if (!par[0]) {
@@ -2930,7 +2930,7 @@ static void cmd_strip(struct userrec *u, int idx, char *par)
 static void cmd_su(struct userrec *u, int idx, char *par)
 {
   int atr = u ? u->flags : 0, ok;
-  struct flag_record fr = {FR_ANYWH | FR_CHAN | FR_GLOBAL, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_ANYWH | FR_CHAN | FR_GLOBAL, 0, 0, 0};
 
   u = get_user_by_handle(userlist, par);
 
@@ -3346,8 +3346,8 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
   char *handle = NULL, *host = NULL;
   struct userrec *u2 = NULL;
   struct list_type *q = NULL;
-  struct flag_record fr2 = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0},
-                     fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
+  struct flag_record fr2 = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0},
+                     fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
 
   putlog(LOG_CMDS, "*", "#%s# +host %s", dcc[idx].nick, par);
 
@@ -3429,8 +3429,8 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
 {
   char *handle = NULL, *host = NULL;
   struct userrec *u2 = NULL;
-  struct flag_record fr2 = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0},
-                     fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
+  struct flag_record fr2 = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0},
+                     fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
 
   putlog(LOG_CMDS, "*", "#%s# -host %s", dcc[idx].nick, par);
   if (!par[0]) {

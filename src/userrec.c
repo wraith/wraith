@@ -289,7 +289,7 @@ int write_user(struct userrec *u, FILE * f, int idx)
   struct chanuserrec *ch = NULL;
   struct chanset_t *cst = NULL;
   struct user_entry *ue = NULL;
-  struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL, 0, 0, 0};
 
   fr.global = u->flags;
   build_flags(s, &fr, NULL);
@@ -520,7 +520,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
     clear_chanlist();
   noshare = oldshare;
   if ((!noshare) && (handle[0] != '*') && (!(flags & USER_UNSHARED)) && (bu == userlist)) {
-    struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
+    struct flag_record fr = {FR_GLOBAL, 0, 0, 0};
     char x[100] = "";
 
     fr.global = u->flags;

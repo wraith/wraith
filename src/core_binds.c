@@ -46,7 +46,7 @@ void core_binds_init()
 
 void check_bind_dcc(const char *cmd, int idx, const char *text)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   int x, hits;
 #ifdef S_DCCPASS
   bind_entry_t *entry = NULL;
@@ -116,7 +116,7 @@ void check_bind_bot(const char *nick, const char *code, const char *param)
 
 void check_bind_chon(char *hand, int idx)
 {
-  struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   struct userrec        *u = NULL;
 
   u = get_user_by_handle(userlist, hand);
@@ -127,7 +127,7 @@ void check_bind_chon(char *hand, int idx)
 
 void check_bind_chof(char *hand, int idx)
 {
-  struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   struct userrec        *u = NULL;
 
   u = get_user_by_handle(userlist, hand);
@@ -173,7 +173,7 @@ int check_bind_note(const char *from, const char *to, const char *text)
 
 void check_bind_chjn(const char *bot, const char *nick, int chan, const char type, int sock, const char *host)
 {
-  struct flag_record    fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
+  struct flag_record    fr = {FR_GLOBAL, 0, 0, 0};
   char                  s[11] = "", t[2] = "";
 
   t[0] = type;

@@ -467,7 +467,7 @@ void show_motd(int idx)
 void show_channels(int idx, char *handle)
 {
   struct chanset_t *chan = NULL;
-  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0, 0 };
+  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0};
   struct userrec *u = NULL;
   int first = 0, l = 0, total = 0;
   char format[120] = "";
@@ -1109,7 +1109,7 @@ char *replace(const char *string, char *oldie, char *newbie)
 void showhelp (int idx, struct flag_record *flags, char *string)
 {
   static int help_flags;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   char helpstr[12288] = "", tmp[2] = "", flagstr[10] = "";
   int ok = 1;
 
