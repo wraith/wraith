@@ -282,7 +282,7 @@ dprintf(int idx, const char *format, ...)
       strcat(buf, "\n");
       len = 1001;
     }
-    if (dcc[idx].simul > 0 && !dcc[idx].irc) {
+    if (dcc[idx].simul >= 0 && !dcc[idx].irc) {
       bounce_simul(idx, buf);
     } else if (dcc[idx].irc) {
 //      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
@@ -446,7 +446,9 @@ lostdcc(int n)
   else if (dcc[n].u.other)
     free(dcc[n].u.other);
 
-  egg_bzero(&dcc[n], sizeof(struct dcc_t));
+//  This is also done when we new_dcc(), so don't bother for now, we set sock/type to NULL, so it won't even be 
+//  parsed by anything.
+//  egg_bzero(&dcc[n], sizeof(struct dcc_t));
 
   dcc[n].sock = -1;
   dcc[n].type = NULL;
@@ -609,6 +611,8 @@ new_dcc(struct dcc_table *type, int xtra_size)
   dcc[i].type = type;
   if (xtra_size)
     dcc[i].u.other = (char *) my_calloc(1, xtra_size);
+  dcc[i].simul = -1;
+  dcc[i].sock = -1;
 
   sdprintf("new_dcc (%s): %d (dccn/dcc_total: %d/%d)", type->name, i, dccn, dcc_total);
   return i;

@@ -776,7 +776,7 @@ void dump_links(int z)
 
   /* Dump party line members */
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_CHAT && !dcc[i].simul) {
+    if (dcc[i].type && dcc[i].type == &DCC_CHAT && dcc[i].simul == -1) {
       if ((dcc[i].u.chat->channel >= 0) && (dcc[i].u.chat->channel < GLOBAL_CHANS)) {
         l = simple_sprintf2(x, "j !%s %s %D %c%D %s\n", conf.bot->nick, dcc[i].nick, 
                                dcc[i].u.chat->channel, geticon(i), dcc[i].sock, dcc[i].host);

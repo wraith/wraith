@@ -223,7 +223,7 @@ bool Auth::GetIdx(const char *chname)
     dcc[idx].timeval = now;
     dcc[idx].irc = 1;
     dcc[idx].simultime = now;
-    dcc[idx].simul = 1;
+    dcc[idx].simul = 0;		/* not -1, so it's cleaned up later */
     dcc[idx].status = STAT_COLOR;
     dcc[idx].u.chat->con_flags = 0;
     strlcpy(dcc[idx].simulbot, chname ? chname : nick, NICKLEN);

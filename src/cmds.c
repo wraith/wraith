@@ -2083,7 +2083,7 @@ static void cmd_unlink(int idx, char *par)
 
 static void cmd_relay(int idx, char *par)
 {
-  if (dcc[idx].simul) {
+  if (dcc[idx].simul >= 0) {
     dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
     return;
   }
@@ -2167,7 +2167,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
   int stat;
 
   for (int i = 0; i < dcc_total; i++) {
-   if (dcc[i].type && !dcc[i].simul) {
+   if (dcc[i].type && dcc[i].simul == -1) {
     if (dcc[i].type == &DCC_CHAT && !conf.bot->hub && !ischanhub() && u == conf.bot->u) {
       dprintf(i, "I am no longer a chathub..\n");
       do_boot(i, conf.bot->nick, "I am no longer a chathub.");
@@ -2984,7 +2984,7 @@ static void cmd_strip(int idx, char *par)
 
 static void cmd_su(int idx, char *par)
 {
-  if (dcc[idx].simul) {
+  if (dcc[idx].simul >= 0) {
     dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
     return;
   }
