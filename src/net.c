@@ -1440,7 +1440,7 @@ int sockgets(char *s, int *len)
     strcpy(s, xx);
 /*    strcpy(xx, p + 1); */
     sprintf(xx, "%s", p + 1);
-//    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r'))
+/*    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r')) */
     if (s[strlen(s) - 1] == '\r')
       s[strlen(s) - 1] = 0;
     data = 1;			/* DCC_CHAT may now need to process a blank line */

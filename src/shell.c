@@ -307,7 +307,7 @@ void check_trace()
       if (i == (-1) && errno == EPERM)
         detected(DETECT_TRACE, "I'm being traced!");
       else {
-        //waitpid(parent, &i, 0);
+        /* waitpid(parent, &i, 0); */
         kill(parent, SIGCHLD);
         ptrace(PTRACE_DETACH, parent, 0, 0);
         kill(parent, SIGCHLD);

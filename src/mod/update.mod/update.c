@@ -207,7 +207,7 @@ static void got_nu(char *botnick, char *code, char *par)
 }
 
 static cmd_t update_bot[] = {
-  {"nu?",    "", (Function) got_nu, NULL}, //need update?
+  {"nu?",    "", (Function) got_nu, NULL}, 
   {NULL, NULL, NULL, NULL}
 };
 

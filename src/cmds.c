@@ -1735,8 +1735,6 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
       bi->address = calloc(1, r - addr + 1);	/* alloc and copy the addr */
       strncpyz(bi->address, addr, r - addr + 1);
 
-//      addr = r;					/* move up addr to the ']' */
-//      addr++;					/* move up addr tot he ':' */
       q = r + 1;				/* set q to ':' at addr */
     } else {
 #endif /* !USE_IPV6 */
@@ -1887,9 +1885,10 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
       if (par[0] && what) { /* set */
         set++;
         save = 1;
-//        if (!egg_strcasecmp(what, "uid"))            conffile.uid = atoi(par);
-//        else if (!egg_strcasecmp(what, "uname"))     str_redup(&conffile.uname, par);
-//        else if (!egg_strcasecmp(what, "username"))  str_redup(&conffile.username, par);
+/*        if (!egg_strcasecmp(what, "uid"))            conffile.uid = atoi(par);
+        else if (!egg_strcasecmp(what, "uname"))     str_redup(&conffile.uname, par);
+        else if (!egg_strcasecmp(what, "username"))  str_redup(&conffile.username, par);
+*/
         if (!egg_strcasecmp(what, "homedir"))   str_redup(&conffile.homedir, par);
         else if (!egg_strcasecmp(what, "binpath"))   str_redup(&conffile.binpath, par);
         else if (!egg_strcasecmp(what, "binname"))   str_redup(&conffile.binname, par);
@@ -1908,9 +1907,10 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
     if (show) {
       char *ss = set ? "Set: " : "";
       
-//      if (!what || !egg_strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conffile.uid);
-//      if (!what || !egg_strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conffile.uname);
-//      if (!what || !egg_strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conffile.username);
+/*      if (!what || !egg_strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conffile.uid);
+      if (!what || !egg_strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conffile.uname);
+      if (!what || !egg_strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conffile.username);
+*/
       if (!what || !egg_strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conffile.homedir);
       if (!what || !egg_strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conffile.binpath);
       if (!what || !egg_strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conffile.binname);
@@ -1989,8 +1989,8 @@ static void cmd_restart(struct userrec *u, int idx, char *par)
 
   fatal("Restarting...", 1);
   usleep(2000 * 500);
-  unlink(conf.bot->pid_file); //if this fails it is ok, cron will restart the bot, *hopefully*
-  system(binname); //start new bot.
+  unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
+  system(binname); /* start new bot. */
   exit(0);
 }
 
@@ -2271,7 +2271,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
 	dprintf(i, "You are no longer an owner of this bot.\n");
       }
 
-      if (!(u->flags & USER_PARTY) && dcc[i].u.chat->channel >= 0) { //who cares about old flags, they shouldnt be here anyway.
+      if (!(u->flags & USER_PARTY) && dcc[i].u.chat->channel >= 0) { /* who cares about old flags, they shouldnt be here anyway. */
         dprintf(i, "-+- POOF! -+-\n");
         dprintf(i, "You no longer have party line chat access.\n");
         dprintf(i, "Leaving chat mode...\n");
@@ -3973,9 +3973,9 @@ void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
     port = atoi(newsplit(&par));
     if (!port)
       port = default_port;
-    strncpyz(newserver, other, 120); //newserver
-    newserverport = port; //newserverport
-    strncpyz(newserverpass, par, 120); //newserverpass
+    strncpyz(newserver, other, 120); 
+    newserverport = port; 
+    strncpyz(newserverpass, par, 120); 
   }
   botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, "Jumping...");
 

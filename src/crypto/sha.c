@@ -77,12 +77,12 @@ void sha1_block_host_order (SHA_CTX *c, const void *d, int num)
         {
         const SHA_LONG *W=d;
         register unsigned long A,B,C,D,E,T;
-//#ifndef MD32_XARRAY
+/* #ifndef MD32_XARRAY */
         unsigned long     XX0, XX1, XX2, XX3, XX4, XX5, XX6, XX7,
                                 XX8, XX9,XX10,XX11,XX12,XX13,XX14,XX15;
-//#else
-//        SHA_LONG        XX[16];
-//#endif
+/*#else
+        SHA_LONG        XX[16];
+#endif*/
 
         A=c->h0;
         B=c->h1;
@@ -202,12 +202,12 @@ void sha1_block_data_order (SHA_CTX *c, const void *p, int num)
         {
         const unsigned char *data=p;
         register unsigned long A,B,C,D,E,T,l;
-//#ifndef MD32_XARRAY
+/* #ifndef MD32_XARRAY */
         unsigned long     XX0, XX1, XX2, XX3, XX4, XX5, XX6, XX7,
                                 XX8, XX9,XX10,XX11,XX12,XX13,XX14,XX15;
-//#else
-//        SHA_LONG        XX[16];
-//#endif
+/*#else
+        SHA_LONG        XX[16];
+#endif*/
 
         A=c->h0;
         B=c->h1;

@@ -155,9 +155,9 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
         if (m->user)
           get_user_flagrec(m->user, &fr, chan->dname);
 
-        if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) || //+d ?
-           ((!channel_private(chan) && !chan_op(fr) && !glob_op(fr)) || //simply no +o flag.
-           (channel_private(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { //private?
+        if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) || /* +d */
+           ((!channel_private(chan) && !chan_op(fr) && !glob_op(fr)) || /* simply no +o flag. */
+           (channel_private(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { /* private? */
           targets++;
         }
     }

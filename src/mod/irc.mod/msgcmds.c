@@ -306,7 +306,7 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
   if (auth[i].authing != 2)
     return BIND_RET_BREAK;
 
-  if (!strcmp(auth[i].hash, par)) { //good hash!
+  if (!strcmp(auth[i].hash, par)) { /* good hash! */
 #endif /* S_AUTHHASH */
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, u->handle);
     auth[i].authed = 1;
@@ -314,7 +314,7 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
     auth[i].authtime = now;
     auth[i].atime = now;
     dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %shelp\n", nick, cmdprefix);
-  } else { //bad hash!
+  } else { /* bad hash! */
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed +AUTH", nick, host, u->handle);
 #ifdef S_AUTHHASH
 {

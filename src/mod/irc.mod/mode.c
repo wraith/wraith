@@ -419,14 +419,15 @@ static void got_op(struct chanset_t *chan, char *nick, char *from,
     /* deop if they are +d or it is +bitch */
     if ( chk_deop(victim, chan) ||
         (!loading && userlist && channel_bitch(chan) && !chk_op(victim, chan)) ) {	/* chk_op covers +private */
-//      char outbuf[101] = "";
+/*      char outbuf[101] = ""; */
 
       /* if (target_priority(chan, m, 1)) */
 /*        dprintf(DP_MODE, "MODE %s -o %s\n", chan->name, who); */
 add_mode(chan, '-', 'o', who);
 flush_mode(chan, QUICK);
-//      sprintf(outbuf, "MODE %s -o %s\n", chan->name, who);
-//      tputs(serv, outbuf, strlen(outbuf));
+/*      sprintf(outbuf, "MODE %s -o %s\n", chan->name, who);
+      tputs(serv, outbuf, strlen(outbuf));
+*/
     } else if (reversing) {
       add_mode(chan, '-', 'o', who);
     }

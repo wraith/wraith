@@ -904,7 +904,7 @@ static void cmd_cycle(struct userrec *u, int idx, char *par)
   if (par[0])
     delay = atoi(newsplit(&par));
 
-  sprintf(buf2, "cycle %s %d", chname, delay); //this just makes the bot PART
+  sprintf(buf2, "cycle %s %d", chname, delay); /* this just makes the bot PART */
   putallbots(buf2);
 #ifdef LEAF
   do_chanset(NULL, chan, "+inactive", DO_LOCAL);

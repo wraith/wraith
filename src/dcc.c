@@ -1087,9 +1087,9 @@ static void dcc_chat(int idx, char *buf, int i)
 	}
 	v++;
 	break;
-      case 27:			// ESC - ansi code?
+      case 27:			/* ESC - ansi code? */
 	doron = check_ansi(v);
-	// If it's valid, append a return-to-normal code at the end
+	/* If it's valid, append a return-to-normal code at the end */
 	if (!doron) {
 	  *d++ = *v++;
 	  fixed = 1;

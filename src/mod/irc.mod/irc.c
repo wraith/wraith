@@ -1114,15 +1114,15 @@ void raise_limit(struct chanset_t * chan) {
     return;
   }
 
-  mem = chan->channel.members; //members
-  nl = mem + chan->limitraise; //new limit
-  cl = chan->channel.maxmembers; //current limit
+  mem = chan->channel.members; /* members */
+  nl = mem + chan->limitraise; /* new limit */
+  cl = chan->channel.maxmembers; /* current limit */
 
   i = chan->limitraise / 4;
 
   /* if the newlimit will be in the range made by these vars, dont change. */
-  ul = nl + i; //upper limit range
-  ll = nl - i; //lower limit range
+  ul = nl + i; /* upper limit range */
+  ll = nl - i; /* lower limit range */
   if (cl > ll && cl < ul) {
     return; 			/* the current limit is in the range, so leave it. */
   }
