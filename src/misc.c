@@ -707,6 +707,20 @@ char *str_escape(const char *str, const char div, const char mask)
   return buf;
 }
 
+/* Is every character in a string a digit? */
+int str_isdigit(const char *str)
+{
+  if (!*str)
+    return 0;
+
+  for(; *str; ++str) {
+    if (!egg_isdigit(*str))
+      return 0;
+  }
+  return 1;
+}
+
+
 /* Search for a certain character 'div' in the string 'str', while
  * ignoring escaped characters prefixed with 'mask'.
  *

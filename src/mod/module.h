@@ -238,7 +238,7 @@
 #define noshare (*(int *)(global[107]))
 /* 108 - 111 */
 #define do_chanset ((void (*)(struct chanset_t *, char *, int))global[108])
-/* 109: make_userfile -- UNUED (bryan) */
+#define str_isdigit ((int (*) (const char *))global[109])
 #define default_flags (*(int*)global[110])
 #define dcc_total (*(int*)global[111])
 /* 112 - 115 */

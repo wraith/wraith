@@ -294,7 +294,7 @@ Function global_table[] =
   (Function) & noshare,		 /* int					*/
   /* 108 - 111 */
   (Function) do_chanset, 
-  (Function) 0,	 /* int					*/
+  (Function) str_isdigit,
   (Function) & default_flags,	 /* int					*/
   (Function) & dcc_total,	 /* int					*/
   /* 112 - 115 */
