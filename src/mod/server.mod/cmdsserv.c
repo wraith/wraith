@@ -43,7 +43,8 @@ static void cmd_dump(int idx, char *par)
     dprintf(idx, "Usage: dump <server stuff>\n");
     return;
   }
-  dprintf(DP_SERVER, "%s\n", par);
+
+  tputs(serv, par, strlen(par));
 }
 
 static void cmd_jump(int idx, char *par)
