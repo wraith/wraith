@@ -6,7 +6,7 @@ It will improve over time to be as effecient as the mIRC script.
 
 
 Compile the md5 binary and place: $HOME/.BitchX/md5
-Edit the w.bx file and change the path near the top.
+Edit the wraith.bx file and change the path near the top.
 
 To load: /load /path/to/w.bx
 

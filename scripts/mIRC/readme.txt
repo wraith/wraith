@@ -7,4 +7,3 @@ Currently the script supports 5.80 and up.
 type /helpauth once it is loaded.
 
 
--bryan
