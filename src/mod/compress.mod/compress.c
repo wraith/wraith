@@ -45,8 +45,6 @@
 
 #define BUFLEN	512
 
-#undef HAVE_MMAP
-
 static Function *global = NULL,
 		*share_funcs = NULL;
 
