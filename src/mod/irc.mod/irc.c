@@ -1369,7 +1369,6 @@ irc_init()
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_ASKEDBANS);
     chan->ircnet_status &= ~(CHAN_ASKED_INVITED | CHAN_ASKED_EXEMPTS);
   }
-  timer_create_secs(60, "check_expired_chanstuff", (Function) check_expired_chanstuff);
   timer_create_secs(60, "irc_minutely", (Function) irc_minutely);
   timer_create_secs(5, "getin_5secondly", (Function) getin_5secondly);
 
