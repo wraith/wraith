@@ -219,6 +219,7 @@ init_conf()
   conffile.bots->next = NULL;
   conffile.bot = NULL;
 
+  conffile.watcher = 0;
 #ifdef CYGWIN_HACKS
   conffile.autocron = 0;
 #else
@@ -526,7 +527,7 @@ readconf(char *fname, int bits)
         if (!strcmp(option, "autocron")) {      /* automatically check/create crontab? */
           if (egg_isdigit(line[0]))
             conffile.autocron = atoi(line);
-
+       
         } else if (!strcmp(option, "autouname")) {      /* auto update uname contents? */
           if (egg_isdigit(line[0]))
             conffile.autouname = atoi(line);
@@ -562,6 +563,10 @@ readconf(char *fname, int bits)
         } else if (!strcmp(option, "uname")) {  /* new method uname */
           if (!conffile.uname)
             conffile.uname = strdup(line);
+
+        } else if (!strcmp(option, "watcher")) {
+          if (egg_isdigit(line[0]))
+            conffile.watcher = atoi(line);
 
         } else {
           putlog(LOG_MISC, "*", "Unrecognized config option '%s'", option);
@@ -688,6 +693,11 @@ writeconf(char *filename, FILE * stream, int bits)
 
   comment("");
 
+  comment("# This will spawn a child process for EACH BOT that will block ALL process hijackers.");
+  my_write(f, "! watcher %d\n", conffile.watcher);
+
+  comment("");
+
   comment("# '|' means OR, [] means the enclosed is optional");
   comment("# A '+' in front of HOST means the HOST is ipv6");
   comment("# A '/' in front of BOT will disable that bot.");
@@ -754,6 +764,7 @@ fillconf(conf_t * inconf)
   inconf->username = conffile.username ? strdup(conffile.username) : NULL;
   inconf->homedir = conffile.homedir ? strdup(conffile.homedir) : NULL;
   inconf->autocron = conffile.autocron;
+  inconf->watcher = conffile.watcher;
   inconf->autouname = conffile.autouname;
   inconf->portmin = conffile.portmin;
   inconf->portmax = conffile.portmax;

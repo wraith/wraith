@@ -1907,6 +1907,7 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
         else if (!egg_strcasecmp(what, "pscloak"))   conffile.pscloak = atoi(par);
         else if (!egg_strcasecmp(what, "autocron"))  conffile.autocron = atoi(par);
         else if (!egg_strcasecmp(what, "autouname")) conffile.autouname = atoi(par);
+        else if (!egg_strcasecmp(what, "watcher"))  conffile.watcher = atoi(par);
         else { 
           set--;
           save = 0;
@@ -1929,6 +1930,7 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
       if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spscloak: %d\n", ss, conffile.pscloak);
       if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conffile.autocron);
       if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conffile.autouname);
+      if (!what || !egg_strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conffile.watcher);
     }
   }
 #endif /* !CYGWIN_HACKS || HUB */

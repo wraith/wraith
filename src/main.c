@@ -11,6 +11,7 @@
 #include "binary.h"
 #include "dcc.h"
 #include "misc.h"
+#include "thread.h"
 #include "settings.h"
 #include "salt.h"
 #include "misc_file.h"
@@ -36,6 +37,7 @@
 #include <time.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #ifdef STOP_UAC				/* osf/1 complains a lot */
 # include <sys/sysinfo.h>
 # define UAC_NOPRINT			/* Don't report unaligned fixups */
@@ -902,8 +904,11 @@ int main(int argc, char **argv)
   while (1) {
 //if (tracecheck_breakpoint())
 //exit(0);
-    int socket_cleanup = 0, i, xx;
+    int socket_cleanup = 0, i, xx, status = 0;
     char buf[SGRAB + 10] = "";
+
+    if (conf.watcher && waitpid(watcher, &status, WNOHANG))
+      fatal("watcher PID died/stopped", 0);
 
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers
