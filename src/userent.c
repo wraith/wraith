@@ -25,6 +25,9 @@ void init_userent()
   add_entry_type(&USERENTRY_INFO);
   add_entry_type(&USERENTRY_LASTON);
   add_entry_type(&USERENTRY_BOTADDR);
+  add_entry_type(&USERENTRY_OS);
+  add_entry_type(&USERENTRY_NODENAME);
+  add_entry_type(&USERENTRY_USERNAME);
   add_entry_type(&USERENTRY_PASS);
   add_entry_type(&USERENTRY_SECPASS);
   add_entry_type(&USERENTRY_HOSTS);
@@ -371,6 +374,72 @@ struct user_entry_type USERENTRY_CONFIG = {
   "CONFIG"
 };
 
+#ifdef HUB
+static void botmisc_display(int idx, struct user_entry *e, struct userrec *u)
+{
+  struct flag_record fr = {FR_GLOBAL, 0, 0};
+
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
+  if (glob_admin(fr))
+    dprintf(idx, "  %s: %s\n", e->type->name, e->u.string ? e->u.string : "");
+}
+#endif /* HUB */
+
+struct user_entry_type USERENTRY_USERNAME = {
+ 0,
+ def_gotshare,
+ def_unpack,
+#ifdef HUB
+ def_write_userfile,
+#endif /* HUB */
+ def_kill,
+ def_get,
+ def_set,
+#ifdef HUB
+ botmisc_display,
+#else
+ NULL,
+#endif /* HUB */
+ "USERNAME"
+};
+
+struct user_entry_type USERENTRY_NODENAME = {
+ 0,
+ def_gotshare,
+ def_unpack,
+#ifdef HUB
+ def_write_userfile,
+#endif /* HUB */
+ def_kill,
+ def_get,
+ def_set,
+#ifdef HUB
+ botmisc_display,
+#else
+ NULL,
+#endif /* HUB */
+ "NODENAME"
+};
+
+struct user_entry_type USERENTRY_OS = {
+ 0,
+ def_gotshare,
+ def_unpack,
+#ifdef HUB
+ def_write_userfile,
+#endif /* HUB */
+ def_kill,
+ def_get,
+ def_set,
+#ifdef HUB
+ botmisc_display,
+#else
+ NULL,
+#endif /* HUB */
+ "OS"
+};
+
+
 void stats_add(struct userrec *u, int login, int op)
 {
   char *s = NULL, s2[50] = "";
@@ -716,9 +785,9 @@ static int botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
   return 1;
 }
 
+#ifdef HUB
 static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
 {
-#ifdef HUB
   struct flag_record fr = {FR_GLOBAL, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
@@ -732,8 +801,8 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
     if (bi->uplink && bi->uplink[0])
       dprintf(idx, "  UPLINK: %s\n", bi->uplink);
   }
-#endif /* HUB */
 }
+#endif /* HUB */
 
 static int botaddr_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
 {
@@ -768,7 +837,11 @@ struct user_entry_type USERENTRY_BOTADDR =
   botaddr_kill,
   def_get,
   botaddr_set,
+#ifdef HUB
   botaddr_display,
+#else
+  NULL,
+#endif /* HUB */
   "BOTADDR"
 };
 

@@ -243,7 +243,11 @@ static void greet_new_bot(int idx)
     sysname = un.sysname;
 
   dprintf(idx, "v 1001500 %d %s <%s> %d %li %s\n", HANDLEN, ver, network, localhub, buildts, egg_version);
+/* FIXME: remove after 1.1.8 */
   dprintf(idx, "vs %s\n", sysname);
+  dprintf(idx, "username %s\n", conf.username ? conf.username : "");	/* username */
+  dprintf(idx, "nodename %s\n", un.nodename ? un.nodename : "");	/* nodename */
+  dprintf(idx, "os %s\n", un.sysname ? un.sysname : "");		/* os */
   dprintf(idx, "bts %lu\n", buildts);
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_FORK_BOT) {

@@ -447,6 +447,33 @@ static void bot_sysname(int idx, char *par)
   strcpy(dcc[idx].u.bot->sysname, par);
 }
 
+static void bot_username(int idx, char *par)
+{
+  if (par && par[0]) {
+    set_user(&USERENTRY_USERNAME, dcc[idx].user, par);
+  }
+}
+
+static void bot_nodename(int idx, char *par)
+{
+  if (par && par[0]) {
+    set_user(&USERENTRY_NODENAME, dcc[idx].user, par);
+  }
+}
+
+static void bot_os(int idx, char *par)
+{
+  if (par && par[0]) {
+    set_user(&USERENTRY_OS, dcc[idx].user, par);
+  }
+}
+
+
+//  dprintf(idx, "username %s\n", conf.username ? conf.username : "");  /* username */
+//  dprintf(idx, "nodename %s\n", un.nodename ? un.nodename : "");      /* nodename */
+//  dprintf(idx, "os %s\n", un.sysname ? un.sysname : "");        /* os */
+
+
 
 /* who <from@bot> <tobot> <chan#>
  */
@@ -1275,6 +1302,8 @@ botcmd_t C_bot[] =
   {"l",			(Function) bot_link},
   {"n",			(Function) bot_nlinked},
   {"nc",		(Function) bot_nickchange},
+  {"nodename",		(Function) bot_nodename},
+  {"os",		(Function) bot_os},
   {"p",			(Function) bot_priv},
   {"pi",		(Function) bot_ping},
   {"po",		(Function) bot_pong},
@@ -1291,6 +1320,7 @@ botcmd_t C_bot[] =
   {"u",			(Function) bot_update},
   {"ul",		(Function) bot_unlink},
   {"un",		(Function) bot_unlinked},
+  {"username",		(Function) bot_username},
   {"v",			(Function) bot_versions},
   {"vs",		(Function) bot_sysname},
   {"w",			(Function) bot_who},
