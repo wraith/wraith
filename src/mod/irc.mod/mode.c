@@ -899,7 +899,7 @@ gotmode(char *from, char *msg)
 
       if (!isserver) {
         char **modes = NULL;
-        char tmp[1024] = "", *wptr = NULL, *p = NULL, work[1024] = "";
+        char tmp[1024] = "", *wptr = NULL, *p = NULL, work[1024] = "", sign = '+';
         int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0, me_opped = 0;
 
         /* Split up the mode: #chan modes param param param param */
@@ -908,8 +908,7 @@ gotmode(char *from, char *msg)
         p = newsplit(&wptr);
         modes = calloc(modesperline + 1, sizeof(char *));
         while (*p) {            /* +MODES PARAM PARAM PARAM ... */
-          char *mp = NULL, sign = '+';
-
+          char *mp = NULL;
           if (*p == '+')
             sign = '+';
           else if (*p == '-')
@@ -982,13 +981,13 @@ gotmode(char *from, char *msg)
               int isbadop = 0;
 
               /* If no unbans or the -b is not the LAST mode, it's bad. */
-              if (unbans != 1 || (strncmp(modes[modecnt], "-b", 2))) {
+              if (unbans != 1 || (strncmp(modes[modecnt - 1], "-b", 2))) {
                 isbadop = 1;
               } else {
                 char enccookie[25] = "", plaincookie[25] = "", key[NICKLEN + 20] = "", goodcookie[25] = "";
 
                 /* -b *!*@[...] */
-                strncpyz(enccookie, (char *) &(modes[modecnt][8]), sizeof(enccookie));
+                strncpyz(enccookie, (char *) &(modes[modecnt - 1][8]), sizeof(enccookie));
                 p = enccookie + strlen(enccookie) - 1;
                 strcpy(key, nick);
                 strcat(key, SALT2);
