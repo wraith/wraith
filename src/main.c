@@ -363,9 +363,11 @@ static void dtx_arg(int argc, char *argv[])
 static int		lastmin = 99;
 static struct tm	nowtm;
 
-int curcheck = 0;
 void core_10secondly()
 {
+#ifndef CYGWIN_HACKS
+  static int curcheck = 0;
+
   curcheck++;
   check_promisc();
 
@@ -375,17 +377,16 @@ void core_10secondly()
 #ifdef LEAF
   if (localhub) {
 #endif /* LEAF */
-#ifndef CYGWIN_HACKS
     if (curcheck == 2)
       check_last();
     if (curcheck == 3) {
       check_processes();
       curcheck = 0;
     }
-#endif /* !CYGWIN_HACKS */
 #ifdef LEAF
   }
 #endif /* LEAF */
+#endif /* !CYGWIN_HACKS */
 }
 
 /* Traffic stats
@@ -662,11 +663,13 @@ void compress_init();
 void share_init();
 void transfer_init();
 
+#ifndef CYGWIN_HACKS
 void _start();
 int tracecheck_breakpoint() {
   unsigned char * u = (unsigned char *) _start;
   return (*u == 0xCC);
 }
+#endif /* !CYGWIN_HACKS */
 
 int main(int argc, char **argv)
 {
@@ -747,9 +750,10 @@ int main(int argc, char **argv)
     sdprintf("Calling dtx_arg with %d params.", argc);
     dtx_arg(argc, argv);
   }
-
+#ifndef CYGWIN_HACKS
   if (checktrace)
     check_trace(1);
+#endif /* !CYGWIN_HACKS */
 
   startup_checks();
 
@@ -793,8 +797,10 @@ int main(int argc, char **argv)
   if (localhub) {
     sdprintf("I am localhub (%s)", conf.bot->nick);
 #endif /* LEAF */
+#ifndef CYGWIN_HACKS
     if (conffile.autocron)
       check_crontab();
+#endif /* !CYGWIN_HACKS */
 #ifdef LEAF
   }
 #endif /* LEAF */
@@ -892,8 +898,10 @@ int main(int argc, char **argv)
     int socket_cleanup = 0, i, xx, status = 0;
     char buf[SGRAB + 10] = "";
 
+#ifndef CYGWIN_HACKS
     if (conf.watcher && waitpid(watcher, &status, WNOHANG))
       fatal("watcher PID died/stopped", 0);
+#endif /* !CYGWIN_HACKS */
 
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers

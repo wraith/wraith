@@ -128,7 +128,9 @@ static void write_debug()
     egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
     dprintf(-x, "Build: %s (%lu)\n", date, buildts);
 
+#ifndef CYGWIN_HACKS
     stackdump(-x);
+#endif /* !CYGWIN_HACKS */
     dprintf(-x, "Context: ");
     cx_ptr = cx_ptr & 15;
     for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
@@ -182,6 +184,7 @@ static void got_bus(int z)
 #endif /* DEBUG_MEM */
 }
 
+#ifndef CYGWIN_HACKS
 struct stackframe {
   struct stackframe *ebp;
   unsigned long addr;
@@ -232,6 +235,7 @@ stackdump(int idx)
   sf = NULL;
   sleep(1);
 };
+#endif /* !CYGWIN_HACKS */
 
 static void got_segv(int z)
 {

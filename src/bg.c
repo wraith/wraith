@@ -10,17 +10,21 @@
 #include "thread.h"
 #include "main.h"
 #include <signal.h>
+#ifndef CYGWIN_HACKS
 #include <sys/ptrace.h>
 #include <sys/wait.h>
+#endif /* !CYGWIN_HACKS */
 #include <sys/types.h>
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
 
 time_t lastfork = 0;
+#ifndef CYGWIN_HACKS
 pid_t watcher;                  /* my child/watcher */
 
 static void init_watcher(pid_t);
+#endif /* !CYGWIN_HACKS */
 
 pid_t
 do_fork()
@@ -33,8 +37,10 @@ do_fork()
   pid = getpid();
   writepid(conf.bot->pid_file, pid);
   lastfork = now;
+#ifndef CYGWIN_HACKS
   if (conf.watcher)
     init_watcher(pid);
+#endif /* !CYGWIN_HACKS */
   return pid;
 }
 
@@ -60,6 +66,7 @@ writepid(const char *pidfile, pid_t pid)
     printf(EGG_NOWRITE, pidfile);
 }
 
+#ifndef CYGWIN_HACKS
 static void
 init_watcher(pid_t parent)
 {
@@ -100,3 +107,4 @@ init_watcher(pid_t parent)
     }
   }
 }
+#endif /* !CYGWIN_HACKS */

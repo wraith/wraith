@@ -1,6 +1,10 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #define ERR_BINSTAT     1
 #define ERR_BINMOD      2
 #define ERR_PASSWD      3
@@ -45,16 +49,18 @@ char *confdir();
 void baduname(char *, char *);
 int email(char *, char *, int);
 int shell_exec(char *, char *, char **, char **);
+#ifndef CYGWIN_HACKS
 void check_last();
 void check_promisc();
 void check_trace(int);
 void check_processes();
-void detected(int, char *);
-void werr(int);
-char *werr_tostr(int);
 void check_crontab();
 void crontab_del();
 int crontab_exists();
 void crontab_create(int);
+void detected(int, char *);
+#endif /* !CYGWIN_HACKS */
+void werr(int);
+char *werr_tostr(int);
 
 #endif /* _SHELL_H */
