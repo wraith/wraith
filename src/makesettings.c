@@ -32,8 +32,6 @@ struct cfg_struct {
   char *owners;
   char *hubs;
   char *owneremail;
-  char *pscloak;
-  int pscloakn;
   char *salt1;
   char *salt2;
   char *defines;
@@ -44,11 +42,9 @@ void mallocstruct() {
   cfg.owners = calloc(1, 1);
   cfg.hubs = calloc(1, 1);
   cfg.owneremail = calloc(1, 1);
-  cfg.pscloak = calloc(1, 1);
   cfg.salt1 = calloc(1, 1);
   cfg.salt2 = calloc(1, 1);
   cfg.defines = calloc(1, 1);
-  cfg.pscloakn = 0;
   cfg.definesn = 0;
 }
 
@@ -296,16 +292,6 @@ int loadconfig(char **argv) {
           strcat(cfg.hubs, trim(p));
           strcat(cfg.hubs, ",");
           printf(".");
-        } else if (!strcmp(lcase(buffer), "pscloak")) {
-          if (cfg.pscloak && strlen(cfg.pscloak))
-            size += strlen(cfg.pscloak);
-
-          size += strlen(trim(p)) + 1;
-          cfg.pscloak = realloc(cfg.pscloak, size);
-          strcat(cfg.pscloak, trim(p));
-          strcat(cfg.pscloak, " ");
-          cfg.pscloakn++;
-          printf(".");
         } else if (!strcmp(lcase(buffer), "-")) {
         } else if (!strcmp(lcase(buffer), "+")) {
           char *define = NULL;
@@ -387,7 +373,6 @@ void tellconfig()
   printf("owners: %s\n", cfg.owners);
   printf("owneremails: %s\n", cfg.owneremail);
   printf("hubs: %s\n", cfg.hubs);
-  printf("pscloak(%d) %s\n", cfg.pscloakn, cfg.pscloak);
 }
 
 void freecfg()
@@ -395,7 +380,6 @@ void freecfg()
   free(cfg.owners);
   free(cfg.hubs);
   free(cfg.owneremail);
-  free(cfg.pscloak);
 }
 
 int checkconfig()
@@ -403,21 +387,9 @@ int checkconfig()
   return 1;
 }
 
-char *pscloak (int n)
-{
-  int i = 0;
-  char *ps = strdup(cfg.pscloak), *p = NULL;
-
-  for (i = 0; i < n; i++)
-    p = newsplit(&ps);
-
-  return p;
-}
-
 int writeconfig(char **argv)
 {
   FILE *f = NULL;
-  int i = 0;
 
   f = fopen(argv[2], "w");
   if (!f) {
@@ -433,19 +405,7 @@ fprintf(f, " \
 #include \"debug.h\"\n\
 \n\
 char packname[512] = \"\", shellhash[33] = \"\", bdhash[33] = \"\", dcc_prefix[2] = \"\", \
-*owners = NULL, *hubs = NULL, *owneremail = NULL;\n\n\
-char *progname() {\n", cfgfile);
-fprintf(f," \
-  switch (random() %% %d) {\n", cfg.pscloakn + 1);
-
-  for (i = 0; i < (cfg.pscloakn + 1); i++)
-fprintf(f, " \
-    case %d: return \"%s\";\n", i, pscloak(i+1));
-fprintf(f, " \
-  }\n\
-  return \"wraith\";\n\
-}\n\n");
-
+*owners = NULL, *hubs = NULL, *owneremail = NULL;\n\n", cfgfile);
 
   fprintf(f, "#define _PACKNAME STR(\"%s\")\n", cfg.packname);
   fprintf(f, "#define _DCCPREFIX STR(\"%s\")\n", cfg.dccprefix);

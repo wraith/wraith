@@ -810,7 +810,7 @@ int main(int argc, char **argv)
 #if defined(LEAF) && defined(__linux__)
   if (conf.pscloak) {
     int on = 0;
-    char *p = progname();
+    char *p = response(RES_PSCLOAK);
 
     egg_memset(argv[0], 0, strlen(argv[0]));
     strncpyz(argv[0], p, strlen(p) + 1);

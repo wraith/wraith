@@ -140,4 +140,18 @@
  hey I'm late for a date with your mom, cya..
  you're still here?
  jesus loves you, but I ain't jesus. \002FUCK OFF\002
+:pscloak
+ -bash
+ ftp
+ /usr/sbin/sshd
+ man
+ pine
+ bash
+ top
+ last
+ w
+ ps ux
+ bash
+ ./psybnc
+ BitchX
 :end
