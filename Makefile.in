@@ -8,7 +8,6 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 @SET_MAKE@
-prefix = @prefix@
 VERSION = @VERSION@
 CFG = @CFG@
 PACKNAME = @PACKNAME@
