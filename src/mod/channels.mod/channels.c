@@ -270,10 +270,11 @@ void got_kl(char *botnick, char *code, char *par)
 void rebalance_roles()
 {
   struct bot_addr *ba = NULL;
-  int r[5] = { 0, 0, 0, 0, 0 }, hNdx, lNdx, i;
+  int r[5] = { 0, 0, 0, 0, 0 };
+  unsigned int hNdx, lNdx, i;
   char tmp[10] = "";
 
-  for (i = 0; i < dcc_total; i++) {
+  for (i = 0; i < (unsigned) dcc_total; i++) {
     if (dcc[i].user && (dcc[i].user->flags & USER_BOT)) {
       ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
       if (ba && (ba->roleid > 0) && (ba->roleid < 5))
@@ -295,7 +296,7 @@ void rebalance_roles()
       hNdx = i;
   }
   while (r[hNdx] - r[lNdx] >= 2) {
-    for (i = 0; i < dcc_total; i++) {
+    for (i = 0; i < (unsigned) dcc_total; i++) {
       if (dcc[i].user && (dcc[i].user->flags & USER_BOT)) {
         ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
         if (ba && (ba->roleid == (hNdx + 1))) {

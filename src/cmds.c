@@ -72,7 +72,7 @@ static void tell_who(struct userrec *u, int idx, int chan)
   /* calculate max nicklen */
   nicklen = 0;
   for (i = 0; i < dcc_total; i++) {
-      if(strlen(dcc[i].nick) > nicklen)
+      if(strlen(dcc[i].nick) > (size_t) nicklen)
           nicklen = strlen(dcc[i].nick);
   }
   if(nicklen < 9) nicklen = 9;
@@ -1371,7 +1371,8 @@ static void cmd_date(struct userrec *u, int idx, char *par)
 static void cmd_chhandle(struct userrec *u, int idx, char *par)
 {
   char hand[HANDLEN + 1] = "", newhand[HANDLEN + 1] = "";
-  int i, atr = u ? u->flags : 0, atr2;
+  int atr = u ? u->flags : 0, atr2;
+  size_t i;
   struct userrec *u2 = NULL;
 
   strncpyz(hand, newsplit(&par), sizeof hand);

@@ -16,16 +16,16 @@
 #define LOG_RAW      BIT7   /* r   raw server stuff coming in       */
 #define LOG_FILES    BIT8   /* x   file transfer commands and stats */
 #define LOG_ERRORS   BIT9   /* e   misc errors                      */
-#define LOG_ERROR    BIT10  /* e   misc errors                      */
-#define LOG_GETIN    BIT11  /* g   op system. (Getin)                       */
-#define LOG_WARN     BIT12  /* u   warnings                 */
-#define LOG_WARNING  BIT13  /* u   warnings                 */
-#define LOG_SERV     BIT14   /* s   server information               */
-#define LOG_DEBUG    BIT15   /* d   debug                            */
-#define LOG_WALL     BIT16   /* w   wallops                          */
-#define LOG_SRVOUT   BIT17   /* v   server output                    */
-#define LOG_BOTNET   BIT18   /* t   botnet traffic                   */
-#define LOG_BOTSHARE BIT19   /* h   share traffic                    */
+#define LOG_ERROR    LOG_ERRORS
+#define LOG_GETIN    BIT10  /* g   op system. (Getin)                       */
+#define LOG_WARN     BIT11  /* u   warnings                 */
+#define LOG_WARNING  LOG_WARN
+#define LOG_SERV     BIT17   /* s   server information               */
+#define LOG_DEBUG    BIT18   /* d   debug                            */
+#define LOG_WALL     BIT19   /* w   wallops                          */
+#define LOG_SRVOUT   BIT20   /* v   server output                    */
+#define LOG_BOTNET   BIT21   /* t   botnet traffic                   */
+#define LOG_BOTSHARE BIT22   /* h   share traffic                    */
 #define LOG_ALL      0xfffffff   /* (dump to all logfiles)               */
 
 inline void logidx(int, char *, ...);

@@ -1806,8 +1806,6 @@ static void start_sending_users(int idx)
   struct userrec *u = NULL;
   char share_file[1024] = "", s1[64] = "";
   int i = 1;
-  struct chanuserrec *ch = NULL;
-  struct chanset_t *cst = NULL;
 
   egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%li", tempdir, dcc[idx].nick, now);
   if (dcc[idx].u.bot->uff_flags & UFF_OVERRIDE) {
