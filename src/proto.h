@@ -41,7 +41,8 @@ extern int (*match_noterej) (struct userrec *, char *);
 #endif
 
 /* bg.c */
-void bg_do_split(void);
+void do_fork();
+void bg_do_split();
 
 /* botcmd.c */
 void bounce_simul(int, char *);
@@ -236,7 +237,9 @@ void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 
 /* misc.c */
-int whois_access(struct userrec *, struct userrec *);
+char *homedir();
+char *my_uname();
+char *confdir();
 void baduname(char *, char *);
 int email(char *, char *, int);
 char *color(int, int, int);
@@ -383,6 +386,7 @@ void user_del_chan(char *);
 char *fixfrom(char *);
 
 /* users.c */
+int whois_access(struct userrec *, struct userrec *);
 #ifdef HUB
 void backup_userfile();
 #endif /* HUB */

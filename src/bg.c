@@ -10,6 +10,7 @@
 
 
 extern char	pid_file[], botnetnick[];
+extern time_t	lastfork, now;
 
 /* Do everything we normally do after we have split off a new
  * process to the background. This includes writing a PID file
@@ -57,3 +58,28 @@ void bg_do_split(void)
   if (xx != 0)
     bg_do_detach(xx);
 }
+
+void do_fork() {
+  int xx;
+
+  xx = fork();
+  if (xx == -1)
+    return;
+  if (xx != 0) {
+      FILE *fp;
+      unlink(pid_file);
+      fp = fopen(pid_file, "w");
+      if (fp != NULL) {
+        fprintf(fp, "%u\n", xx);
+        fclose(fp);
+      }
+  }
+  if (xx) {
+#if HAVE_SETPGID
+    setpgid(xx, xx);
+#endif
+    exit(0);
+  }
+  lastfork = now;
+}
+

@@ -19,9 +19,6 @@
 # include <sys/sysinfo.h>
 # define UAC_NOPRINT    0x00000001	/* Don't report unaligned fixups */
 #endif /* STOP_UAC */
-/* Some systems have a working sys/wait.h even though configure will
- * decide it's not bsd compatable.  Oh well.
- */
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -59,7 +56,8 @@ extern char		 origbotname[], userfile[], botnetnick[], packname[],
                          shellhash[], myip6[], myip[], hostname[],
                          hostname6[], natip[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
-			 fork_interval, optind, local_fork_interval;
+			 fork_interval, optind, local_fork_interval,
+			 sdebug;
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
@@ -71,7 +69,6 @@ extern tcl_timer_t	*timer,
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.0.15";
 const int	egg_numver = 1001500;
-time_t 	lastfork=0;
 
 #ifdef HUB
 int 	my_port;
@@ -85,19 +82,14 @@ int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
 int	backgrd = 1;		/* Run in the background? */
-int     sdebug = 0;		/* enable debug output? */
-int	con_chan = 0;		/* Foreground: constantly display channel
-				   stats? */
+time_t 	lastfork = 0;
 uid_t   myuid;
-int	term_z = 0;		/* Foreground: use the terminal as a party
-				   line? */
+int	term_z = 0;		/* Foreground: use the terminal as a party line? */
 int 	checktrace = 1;		/* Check for trace when starting up? */
-int 	pscloak = 1;
+int 	pscloak = 1;		/* cloak the process name in ps for linux? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
-char 	lock_file[40] = "";
 char 	*binname;
-char	textdir[121] = "";	/* Directory for text files that get dumped */
 time_t	online_since;		/* Unix-time that the bot loaded up */
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
@@ -143,74 +135,6 @@ unsigned long	itraffic_trans = 0;
 unsigned long	itraffic_trans_today = 0;
 unsigned long	itraffic_unknown = 0;
 unsigned long	itraffic_unknown_today = 0;
-
-char *homedir()
-{
-  static char homedir[DIRMAX] = "";
-  if (!homedir || (homedir && !homedir[0])) {
-    char tmp[DIRMAX];
-    struct passwd *pw;
-    sdprintf(STR("If the bot dies after this, try compiling on Debian."));
-    Context;
-    pw = getpwuid(geteuid());
-    sdprintf(STR("End Debian suggestion."));
-
-    if (!pw)
-     werr(ERR_PASSWD);
-    Context;
-    egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
-    Context;
-    realpath(tmp, homedir); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
-  }
-  return homedir;
-}
-
-char *confdir()
-{
-  static char confdir[DIRMAX] = "";
-  if (!confdir || (confdir && !confdir[0])) {
-#ifdef LEAF
-    {
-      egg_snprintf(confdir, sizeof confdir, "%s/.ssh", homedir());
-    }
-#endif /* LEAF */
-#ifdef HUB
-    {
-      char *tmpdir;
-
-      tmpdir = nmalloc(strlen(binname) + 1);
-      strcpy(tmpdir, binname);
-      egg_snprintf(confdir, sizeof confdir, "%s", dirname(tmpdir));
-      nfree(tmpdir);
-    }
-#endif /* HUB */
-  }
-  return confdir;
-}
-
-char *my_uname() 
-{
-  static char os_uname[250] = "";
-  if (!os_uname || (os_uname && !os_uname[0])) {
-    char *unix_n, *vers_n;
-    struct utsname un;
-
-      if (uname(&un) < 0) {
-        unix_n = "*unkown*";
-        vers_n = "";
-      } else {
-        unix_n = un.nodename;
-#ifdef __FreeBSD__
-        vers_n = un.release;
-#else /* __linux__ */
-        vers_n = un.version;
-#endif /* __FreeBSD__ */
-      }
-    egg_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
-  }
-  return os_uname;
-}
-
 
 void fatal(const char *s, int recoverable)
 {
@@ -497,30 +421,6 @@ static void dtx_arg(int argc, char *argv[])
   }
 }
 
-void do_fork() {
-  int xx;
-
-  xx = fork();
-  if (xx == -1)
-    return;
-  if (xx != 0) {
-      FILE *fp;
-      unlink(pid_file);
-      fp = fopen(pid_file, "w");
-      if (fp != NULL) {
-        fprintf(fp, "%u\n", xx);
-        fclose(fp);
-      }
-  }  
-  if (xx) {
-#if HAVE_SETPGID
-    setpgid(xx, xx);
-#endif
-    exit(0);
-  }
-  lastfork = now;
-}
-
 #ifdef CRAZY_TRACE
 /* This code will attach a ptrace() to getpid() hence blocking process hijackers/tracers on the pid
  * only problem.. it just creates a new pid to be traced/hijacked :\
@@ -559,11 +459,6 @@ static int		lastmin = 99;
 static time_t		then;
 static struct tm	nowtm;
 
-/* Called once a second.
- *
- * Note:  Try to not put any Context lines in here (guppy 21Mar2000).
- */
-
 int curcheck = 0;
 void core_10secondly()
 {
@@ -600,7 +495,7 @@ static void core_secondly()
 #endif /* CRAZY_TRACE */
   do_check_timers(&utimer);	/* Secondly timers */
   if (fork_interval && backgrd) {
-    if (now-lastfork > fork_interval)
+    if ((now - lastfork) > fork_interval)
       do_fork();
   }
   cnt++;
@@ -609,13 +504,6 @@ static void core_secondly()
   if ((cnt % 10) == 0) {
     call_hook(HOOK_10SECONDLY);
     check_expired_dcc();
-    if (con_chan && !backgrd) {
-      dprintf(DP_STDOUT, "\033[2J\033[1;1H");
-      tell_verbose_status(DP_STDOUT);
-      do_module_report(DP_STDOUT, 0, "server");
-      do_module_report(DP_STDOUT, 0, "channels");
-      tell_mem_status_dcc(DP_STDOUT);
-    }
   }
   if ((cnt % 30) == 0) {
     autolink_cycle(NULL);         /* attempt autolinks */
@@ -628,7 +516,6 @@ static void core_secondly()
 #else /* !S_UTCTIME */
   egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
 #endif /* S_UTCTIME */
-
   if (nowtm.tm_min != lastmin) {
     int i = 0;
 
@@ -701,7 +588,7 @@ static void check_mypid()
     fclose(fp);
   }
 }
-#endif
+#endif /* LEAF */
 
 static void core_minutely()
 {

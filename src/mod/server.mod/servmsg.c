@@ -651,34 +651,6 @@ static int gotnotice(char *from, char *msg)
   return 0;
 }
 
-/* got 251: lusers
- * <server> 251 <to> :there are 2258 users and 805 invisible on 127 servers
- */
-static int got251(char *from, char *msg)
-{
-  int i;
-  char *servs;
-
-  if (min_servs == 0)
-    return 0;			/* No minimum limit on servers */
-  newsplit(&msg);
-  fixcolon(msg);		/* NOTE!!! If servlimit is not set or is 0 */
-  for (i = 0; i < 8; i++)
-    newsplit(&msg);		/* lusers IS NOT SENT AT ALL!! */
-  servs = newsplit(&msg);
-  if (strncmp(msg, "servers", 7))
-    return 0;			/* Was invalid format */
-  while (*servs && (*servs < 32))
-    servs++;			/* I've seen some lame nets put bolds &
-				 * stuff in here :/ */
-  i = atoi(servs);
-  if (i < min_servs) {
-    putlog(LOG_SERV, "*", IRC_AUTOJUMP, min_servs, i);
-    nuke_server(IRC_CHANGINGSERV);
-  }
-  return 0;
-}
-
 /* WALLOPS: oper's nuisance
  */
 static int gotwall(char *from, char *msg)
@@ -716,7 +688,7 @@ static void server_10secondly()
 static void minutely_checks()
 {
   /* Only check if we have already successfully logged in.  */
-  if (server_online && (min_servs != 0)) {
+  if (server_online) {
     static int count = 4;
     int ok = 0;
     struct chanset_t *chan;
@@ -1176,7 +1148,6 @@ static cmd_t my_raw_binds[] =
   {"PONG",	"",	(Function) gotpong,		NULL},
   {"WALLOPS",	"",	(Function) gotwall,		NULL},
   {"001",	"",	(Function) got001,		NULL},
-  {"251",	"",	(Function) got251,		NULL},
   {"303",	"",	(Function) got303,		NULL},
   {"432",	"",	(Function) got432,		NULL},
   {"433",	"",	(Function) got433,		NULL},

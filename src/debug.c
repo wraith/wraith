@@ -21,6 +21,8 @@ extern jmp_buf           alarmret;
 extern Tcl_Interp       *interp;
 
 
+int     sdebug = 0;             /* enable debug output? */
+
 void sdprintf EGG_VARARGS_DEF(char *, arg1)
 {
   if (sdebug) {

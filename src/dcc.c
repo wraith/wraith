@@ -51,7 +51,6 @@ int     protect_telnet = 1;
 int	flood_telnet_thr = 10;	/* Number of telnet connections to be
 				   considered a flood			   */
 int	flood_telnet_time = 5;	/* In how many seconds?			   */
-char	bannerfile[121] = ""; /* File displayed on telnet login */
 
 static void dcc_telnet_hostresolved(int);
 static void dcc_telnet_got_ident(int, char *);

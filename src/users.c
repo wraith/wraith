@@ -1283,3 +1283,19 @@ void autolink_cycle(char *start)
 }
 #endif /* LEAF */
 
+int whois_access(struct userrec *user, struct userrec *whois_user)
+{
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record whois = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+
+  get_user_flagrec(user, &fr, NULL);
+  get_user_flagrec(whois_user, &whois, NULL);
+
+  if ((glob_master(whois) && !glob_master(fr)) ||
+     (glob_owner(whois) && !glob_owner(fr)) ||
+     (glob_admin(whois) && !glob_admin(fr)) ||
+     (glob_bot(whois) && !glob_master(fr)))
+    return 0;
+  return 1;
+}
+

@@ -43,7 +43,6 @@ static time_t server_online;	/* server connection time */
 static time_t server_cycle_wait;	/* seconds to wait before
 					   re-beginning the server list */
 static char botrealname[121];	/* realname of bot */
-static int min_servs;		/* minimum number of servers to be around */
 static int server_timeout;	/* server timeout for connecting */
 static int never_give_up;	/* never give up when connecting to servers? */
 static int strict_servernames;	/* don't update server list */
@@ -1272,7 +1271,6 @@ static void do_nettype(void)
 static tcl_ints my_tcl_ints[] =
 {
   {"use-console-r",		NULL,				1},
-  {"servlimit",			&min_servs,			0},
   {"server-timeout",		&server_timeout,		0},
   {"lowercase-ctcp",		&lowercase_ctcp,		0},
   {"server-online",		(int *) &server_online,		2},
@@ -1565,8 +1563,6 @@ static void server_report(int idx, int details)
     dprintf(idx, "    %s %d%%, %d msgs\n", IRC_HELPQUEUE,
            (int) ((float) (hq.tot * 100.0) / (float) maxqmsg), (int) hq.tot);
   if (details) {
-    if (min_servs)
-      dprintf(idx, "    Requiring a net of at least %d server(s)\n", min_servs);
     dprintf(idx, "    Flood is: %d msg/%ds, %d ctcp/%ds\n",
 	    flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time);
   }
@@ -1659,7 +1655,7 @@ static Function server_table[] =
   /* 24 - 27 */
   (Function) & default_port,	/* int					*/
   (Function) & server_online,	/* int					*/
-  (Function) & min_servs,	/* int					*/
+  (Function) 0,	
   (Function) & H_raw,		/* p_tcl_bind_list			*/
   /* 28 - 31 */
   (Function) 0,
@@ -1712,7 +1708,6 @@ char *server_start(Function *global_funcs)
   server_online = 0;
   server_cycle_wait = 15;
   strcpy(botrealname, "A deranged product of evil coders");
-  min_servs = 0;
   server_timeout = 15;
   never_give_up = 1;
   strict_servernames = 1;

@@ -43,8 +43,8 @@ extern int	backgrd, flood_telnet_thr, flood_telnet_time,
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
                 firewall[], notify_new[], hostname[], hostname6[], myip[], myip6[],
 		tempdir[], owner[], network[], botnetnick[],
-		bannerfile[], egg_version[], natip[], 
-		textdir[], pid_file[], dcc_prefix[];
+		egg_version[], natip[], 
+		pid_file[], dcc_prefix[];
 
 extern struct dcc_t	*dcc;
 extern tcl_timer_t	*timer, *utimer;

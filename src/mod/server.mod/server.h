@@ -38,7 +38,7 @@
 #define cycle_time (*(int *)(server_funcs[23]))
 #define default_port (*(int *)(server_funcs[24]))
 #define server_online (*(int *)(server_funcs[25]))
-#define min_servs (*(int *)(server_funcs[26]))
+/* 26 -- UNUSED */
 /* 27 - 30 */
 #define H_raw (*(p_tcl_bind_list *)(server_funcs[27]))
 #define H_msg (*(p_tcl_bind_list *)(server_funcs[29]))
