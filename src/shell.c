@@ -643,7 +643,7 @@ char *werr_tostr(int errnum)
 #ifdef LEAF
     return STR("Cannot access tmp directory (~/.ssh/.../)");
 #else
-    return STR("Cannot access config directory (./tmp/)");
+    return STR("Cannot access tmp directory (./tmp/)");
 #endif /* LEAF */
   case ERR_CONFDIRMOD:
 #ifdef LEAF
