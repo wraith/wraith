@@ -1344,7 +1344,7 @@ int sockgets(char *s, int *len)
 	  return socklist[i].sock;
 	}
       } else {
-/* FIXME, THESE SGRABS SHOULD BE 510 I THINK. */
+        /* i dont think any of this is *ever* called */
 	/* Handling buffered binary data (must have been SOCK_BUFFER before). */
 	if (socklist[i].inbuflen <= SGRAB) {
 	  *len = socklist[i].inbuflen;
@@ -1576,7 +1576,7 @@ void tputs(register int z, char *s, unsigned int len)
 	x = 0;
       if (x < len) {
 	/* Socket is full, queue it */
-	socklist[i].outbuf = (char *) calloc(1, len - x);
+	socklist[i].outbuf = calloc(1, len - x);
 	egg_memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }

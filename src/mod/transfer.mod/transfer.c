@@ -318,8 +318,7 @@ void eof_dcc_fork_send(int idx)
   lostdcc(idx);
 }
 
-int tlen = 0;
-int tslen = 0;
+long tlen = 0;
 
 static void eof_dcc_send(int idx)
 {
@@ -327,13 +326,16 @@ static void eof_dcc_send(int idx)
   char *ofn = NULL, *nfn = NULL, s[1024] = "", *hand = NULL;
   struct userrec *u = NULL;
 
+  fflush(dcc[idx].u.xfer->f);
+  fsync(fileno(dcc[idx].u.xfer->f));
+  
   fclose(dcc[idx].u.xfer->f);
   if (dcc[idx].u.xfer->length == dcc[idx].status) {
     int l;
 
     /* Success */
     ok = 0;
-putlog(LOG_MISC, "*", "tlen: %d tslen: %d length: %d status: %d", tlen, tslen, dcc[idx].u.xfer->length, dcc[idx].status);
+    putlog(LOG_DEBUG, "*", "tlen: %li length: %li status: %li", tlen, dcc[idx].u.xfer->length, dcc[idx].status);
     if (!strcmp(dcc[idx].nick, "*users")) {
       finish_share(idx);
       killsock(dcc[idx].sock);
@@ -726,17 +728,13 @@ void dcc_send(int idx, char *buf, int len)
 {
   char s[SGRAB + 2] = "", *b = NULL;
   unsigned long sent;
-  int ret = 0;
 
-  if ((ret = fwrite(buf, 1, len, dcc[idx].u.xfer->f)) != len)
-    putlog(LOG_MISC, "*", "fwrite() only wrote %d bytes and we expected to write %d bytes", ret, len);
+  fwrite(buf, len, 1, dcc[idx].u.xfer->f);
 
-//  if (len != strlen(buf))
-//;
-//    putlog(LOG_MISC, "*", "fwrite() came up WRONG!! len: %d strlen: %d", len, strlen(buf));
+  fflush(dcc[idx].u.xfer->f);
+  fsync(fileno(dcc[idx].u.xfer->f));
 
   tlen += len;
-  tslen += strlen(buf);
 
   dcc[idx].status += len;
   /* Put in network byte order */
@@ -909,7 +907,7 @@ void display_dcc_send(int idx, char *buf)
 
 void display_dcc_fork_send(int idx, char *buf)
 {
-  sprintf(buf,TRANSFER_CONN_SEND);
+  sprintf(buf, TRANSFER_CONN_SEND);
 }
 
 void kill_dcc_xfer(int idx, void *x)
@@ -973,16 +971,12 @@ void dcc_fork_send(int idx, char *x, int y)
   if (dcc[idx].type != &DCC_FORK_SEND)
     return;
   dcc[idx].type = &DCC_SEND;
-//  dcc[idx].status = 0;
-putlog(LOG_MISC, "*", "status: %d", dcc[idx].status);
+  dcc[idx].status = 0;
   dcc[idx].u.xfer->start_time = now;
   egg_snprintf(s1, sizeof s1, "%s!%s", dcc[idx].nick, dcc[idx].host);
   if (strcmp(dcc[idx].nick, "*users") && strcmp(dcc[idx].nick, "*binary"))
     putlog(LOG_MISC, "*", TRANSFER_DCC_CONN, dcc[idx].u.xfer->origname, s1);
   tlen = 0;
-  tslen = 0;
-
-
 }
 
 struct dcc_table DCC_GET =
@@ -1189,7 +1183,7 @@ int raw_dcc_send(char *filename, char *nick, char *from, char *dir)
 /* NOT EVEN USED :D 
 static int ctcp_DCC_RESUME(char *nick, char *from, char *handle, char *object, char *keyword, char *text)
 {
-  char *action = NULL, *fn = NULL, buf[512] = "", *msg = buf;
+  char *action = NULL, *fn = NULL, buf[SGRAB + 2] = "", *msg = buf;
   int i, port;
   unsigned long offset;
 

@@ -229,15 +229,7 @@ void updatein(int idx, char *msg)
 
 void finish_update(int idx)
 {
-  /* module_entry *me; */
   char buf[1024] = "", *buf2 = NULL;
-  int i, j = -1;
-
-  for (i = 0; i < dcc_total; i++)
-    if (!egg_strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT))
-      j = i;
-  if (j == -1)
-    return;
 
 /* NO
   ic = 0;
@@ -257,6 +249,14 @@ void finish_update(int idx)
       goto next;
   }
 */
+  {
+    FILE *f = NULL;
+    f = fopen(dcc[idx].u.xfer->filename, "rb");
+    fseek(f, 0, SEEK_END);
+    putlog(LOG_DEBUG, "*", "Update binary is %d bytes and its length: %li status: %li", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
+    fclose(f);
+  }
+
   sprintf(buf, "%s%s", dirname(binname),  strrchr(dcc[idx].u.xfer->filename, '/'));
 
   movefile(dcc[idx].u.xfer->filename, buf); 
