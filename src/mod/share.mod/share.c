@@ -1800,10 +1800,11 @@ static void finish_share(int idx)
   checkchans(0); /* flag all the channels.. */
 Context;
   if (!readuserfile(dcc[idx].u.xfer->filename, &u)) {
+    char xx[1024];
 Context;
     unlink(dcc[idx].u.xfer->filename); //why the fuck was this not here, stupid eggdev team.
     loading = 0;
-    putlog(LOG_MISC, "@", "%s", USERF_CANTREAD);
+    putlog(LOG_MISC, "*", "%s", USERF_CANTREAD);
     clear_userlist(u);		/* Clear new, obsolete, user list.	*/
     clear_chanlist();		/* Remove all user references from the
 				   channel lists.			*/
@@ -1812,6 +1813,15 @@ Context;
     userlist = ou;		/* Revert to old user list.		*/
     lastuser = NULL;		/* Reset last accessed user ptr.	*/
     checkchans(2); 		/* un-flag the channels, we are keeping them.. */
+
+    dprintf(idx, "bye\n");
+    egg_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[idx].nick);
+    botnet_send_unlinked(idx, dcc[idx].nick, xx);
+    chatout("*** %s\n", xx);
+
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
+
     return;
   }
   unlink(dcc[idx].u.xfer->filename); //I mean really, shit fills up the quota fast.
