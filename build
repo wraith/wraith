@@ -222,7 +222,7 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
   echo "Binaries are now in '${PACKNAME}.$os-$ver${d}.tar.${ext}'."
  
   if ! [ $scp = 0 ]; then
-    scp -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
+    scp -i misc/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
   fi
 elif ! [ $scp = 0 ]; then
   cp hub hub.$os-$ver${d}-${builddate} > /dev/null 2>&1
@@ -235,7 +235,7 @@ elif ! [ $scp = 0 ]; then
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
-  scp -p -C $os-$ver${d}-${builddate}.tar.${ext} $scp
+  scp -i misc/id_dsa -B -p -C $os-$ver${d}-${builddate}.tar.${ext} $scp
   rm -rf $os-$ver${d}-${builddate}.tar.${ext} hub.$os-$ver${d}-${builddate} leaf.$os-$ver${d}-${builddate}
 fi
 
