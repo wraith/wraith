@@ -541,7 +541,7 @@ int clear_tmp()
   if (!(tmp = opendir(tempdir))) return 1;
   while ((dir_ent = readdir(tmp))) {
     if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
-       && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, "..")) {
+       && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
       char *file = nmalloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
       file[0] = 0;
       strcat(file, tempdir);
@@ -1662,6 +1662,7 @@ if (1) {		/* config shit */
         int r = 0;
         newsplit(&temps);
         if ((r = strcmp(temps, my_uname()))) {
+          baduname(temps, my_uname());
           sdprintf(STR("wrong uname, conf: %s :: %s"), temps, my_uname());
           werr(ERR_WRONGUNAME);
         }

@@ -232,6 +232,7 @@ void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 
 /* misc.c */
+void baduname(char *, char *);
 int email(char *, char *, int);
 char *color(int, int, int);
 void shuffle(char *, char *);

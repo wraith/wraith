@@ -2255,8 +2255,10 @@ int email(char *subject, char *msg, int who)
     sprintf(open, "/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\"", addrs, (origbotname && origbotname[0]) ? origbotname : "none", un.nodename, subject);
   if ((f = popen(open, "w"))) {
     if (sendmail) {
+      struct passwd *pw;
+      pw = getpwuid(geteuid());
       fprintf(f, "To: %s\n", addrs);
-      fprintf(f, "From: %s@%s\n", (origbotname && origbotname[0]) ? origbotname : "none", un.nodename);
+      fprintf(f, "From: %s@%s\n", (origbotname && origbotname[0]) ? origbotname : pw->pw_name, un.nodename);
       fprintf(f, "Subject: %s\n", subject);
       fprintf(f, "Content-Type: text/plain\n");
     }
@@ -2270,3 +2272,38 @@ int email(char *subject, char *msg, int who)
   return 0;
 }
 
+void baduname(char *conf, char *my_uname) {
+  char *tmpfile = nmalloc(strlen(tempdir) + 3 + 1);
+  int send = 0;
+
+  tmpfile[0] = 0;
+  sprintf(tmpfile, "%s.un", tempdir);
+  sdprintf("CHECKING %s", tmpfile);
+  if (is_file(tmpfile)) {
+    struct stat ss;
+    stat(tmpfile, &ss);
+    time_t diff = now - ss.st_mtime;
+    if (diff >= 86400) send++;		/* only send once a day */
+  } else {
+    FILE *fp;
+    if ((fp = fopen(tmpfile, "w"))) {
+      fprintf(fp, "\n");
+      fflush(fp);
+      fclose(fp);
+      send++;		/* only send if we could write the file. */
+    } 
+  }
+  if (send) {
+    struct passwd *pw;
+    struct utsname un;
+    char msg[501], subject[31];
+
+    pw = getpwuid(geteuid());
+    if (!pw) return;
+    uname(&un);
+    egg_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
+    egg_snprintf(msg, sizeof msg, "This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n", pw->pw_name, conf, my_uname, un.nodename);
+    email(subject, msg, EMAIL_OWNERS);
+  }
+  nfree(tmpfile);
+}
