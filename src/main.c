@@ -276,14 +276,6 @@ static void dtx_arg(int argc, char *argv[])
       checkpass();
     switch (i) {
       case '0':
-printf("%s\n", response(RES_USERNAME));
-printf("%s\n", response(RES_USERNAME));
-printf("%s\n", response(RES_USERNAME));
-printf("%s\n", response(RES_USERNAME));
-printf("%s\n", response(RES_USERNAME));
-printf("%s\n", response(RES_USERNAME));
-printf("%s\n", response(RES_USERNAME));
-printf("%s\n", response(RES_USERNAME));
         exit(0);
       case '2':		/* used for testing new binary through update */
         exit(2);
