@@ -555,34 +555,49 @@ void answer_local_whom(int idx, int chan)
  */
 void tell_bots(int idx)
 {
-  char s[512] = "";
-  int i;
-  tand_t *bot = NULL;
+  char *up = NULL, *down = NULL;
+  int upi = 1, downi = 0;
+  size_t ulen = 0, dlen = 0;
+  struct userrec *u = NULL;
 
-  if (!tands) {
-    dprintf(idx, "No bots linked\n");
-    return;
-  }
-  strcpy(s, conf.bot->nick);
-  i = strlen(conf.bot->nick);
+  ulen = strlen(conf.bot->nick);
+  up = calloc(1, ulen + 1);
+  strcpy(up, conf.bot->nick);
+  down = calloc(1, 1);
 
-  for (bot = tandbot; bot; bot = bot->next) {
-    if (i > (500 - HANDLEN)) {
-      dprintf(idx, "Bots: %s\n", s);
-      s[0] = 0;
-      i = 0;
+  for (u = userlist; u; u = u->next) {
+    if ((u->flags & USER_BOT) && (egg_strcasecmp(u->handle, conf.bot->nick))) {
+      size_t hlen = strlen(u->handle);
+
+      if (findbot(u->handle)) {
+        upi++;
+        up = realloc(up, ulen + hlen + /*', '*/ + 2 + 1);
+        strcat(up, ", ");
+        strcat(up, u->handle);
+        ulen += hlen + 3;
+      } else {
+        down = realloc(down, dlen + hlen + /*', '*/ + 2 + 1);
+        if (downi)
+          strcat(down, ", ");
+        downi++;
+        strcat(down, u->handle);
+        dlen += hlen + 3;
+      }
     }
-    if (i) {
-      s[i++] = ',';
-      s[i++] = ' ';
-    }
-    strcpy(s + i, bot->bot);
-    i += strlen(bot->bot);
   }
-  if (s[0])
-    dprintf(idx, "Bots: %s\n", s);
-  dprintf(idx, "(Total up: %d)\n", tands + 1);
 
+  if (!downi)
+    dprintf(idx, "Bots up (%d) [%sall%s]: %s\n", upi, BOLD(idx), BOLD_END(idx), up);
+  else
+    dprintf(idx, "Bots up (%d): %s\n", upi, up);
+  
+  if (downi)
+    dprintf(idx, "Bots down (%d): %s\n", downi, down);
+
+  dprintf(idx, "Total: %d [%s%d%% up%s, %s%d%% down%s]\n", upi + downi, GREEN(idx), (100 * upi / (upi + downi)),
+               COLOR_END(idx), RED(idx), (100 * downi / (upi + downi)), COLOR_END(idx));
+  free(up);
+  free(down);
 }
 
 /* Show a simpleton bot tree

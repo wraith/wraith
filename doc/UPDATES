@@ -7,6 +7,7 @@ This is a summary of ChangeLog basically.
 3.Fixed config file not saving/recognizing IPV6 ip.
 4.Fixed problem with cmd_chattr +pj
 5.No longer warning about "Can't create new socket" for identd.
+6.Re-wrote cmd_bots.
 
 1.1.7
 
