@@ -254,18 +254,13 @@ void rebalance_roles()
   int r[5] = { 0, 0, 0, 0, 0 }, hNdx, lNdx, i;
   struct userrec *u;
   char tmp[10];
-  int i;
-
-/*  for (u = userlist; u; u = u->next) {
-    if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) { */
+  tmp[0] = 0;
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].user->flags & USER_BOT) {
+    if (dcc[i].user && (dcc[i].user->flags & USER_BOT)) {
       ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
       if (ba && (ba->roleid > 0) && (ba->roleid < 5))
         r[(ba->roleid - 1)]++;
     }
-
-
   }
   /*
      Find high & low
@@ -283,9 +278,7 @@ void rebalance_roles()
   }
   while (r[hNdx] - r[lNdx] >= 2) {
     for (i = 0; i < dcc_total; i++) {
-/*    for (u = userlist; u; u = u->next) {
-      if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) { */
-      if (dcc[i].user->flags & USER_BOT) {
+      if (dcc[i].user && (dcc[i].user->flags & USER_BOT)) {
         ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
         if (ba && (ba->roleid == (hNdx + 1))) {
           ba->roleid = lNdx + 1;
