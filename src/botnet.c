@@ -83,7 +83,6 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   tands++;
 }
 
-#ifdef HUB
 #ifdef G_BACKUP
 void check_should_backup()
 {
@@ -97,7 +96,6 @@ void check_should_backup()
   }
 }
 #endif /* G_BACKUP */
-#endif /* HUB */
 
 void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, char *vversion)
 {
