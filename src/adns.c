@@ -988,14 +988,12 @@ int egg_dns_init()
 	read_hosts(".hosts");
     
         /* some backup servers, probably will never be used. */
+	add_server("205.152.0.20"); //ns.atl.bellsouth.net
         add_server("203.251.80.133"); //ns.abovenet.net
         add_server("68.2.16.30"); //some cox ns
         add_server("68.6.16.25"); //another cox
-        add_server("66.254.96.53"); //reflected
         add_server("65.215.220.12"); //staminus
-	add_server("69.50.170.230"); //ns1.qsi
-	add_server("65.75.162.29"); //ns2.qsi
-	add_server("69.50.180.62"); //ns3.qsi
+	add_server("72.20.1.2"); //new staminus
 
 /* root servers for future development (tracing down)
 	add_server("198.41.0.4");
