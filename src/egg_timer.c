@@ -214,13 +214,14 @@ int timer_run()
 
 			/* Add it back into the list. */
 			timer_add_to_list(timer);
+
+			timer->called++;
 		}
 		else {
 			if (timer->name) free(timer->name);
 			free(timer);
 		}
 
-		if (timer) timer->called++;
 		callback(client_data);
 	}
 	return(0);
