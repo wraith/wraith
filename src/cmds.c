@@ -1538,7 +1538,7 @@ static void cmd_botcmd(int idx, char *par)
   if (!strcmp(botm, "*")) {
     if (!strcmp(botm, "di") || !strcmp(botm, "die")) 
       dprintf(idx, "Not a good idea.\n");
-    else if (!dcc[idx].u->flags & USER_OWNER)
+    else if (!dcc[idx].user->flags & USER_OWNER)
       dprintf(idx, "'botcmd *' is limited to +n only.\n");
     return;
   }
