@@ -662,32 +662,30 @@ static void got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
       add_mode(chan, '-', 'b', who);
       return;
     }
-      for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-       egg_snprintf(s1, sizeof s1, "%s!%s", m->nick, m->userhost);
-	if (wild_match(who, s1)) {
-	  u = get_user_by_host(s1);
-	  if (u) {
-	    get_user_flagrec(u, &victim, chan->dname);
-          if (channel_private(chan) && !glob_bot(victim) && !chan_op(victim) && !glob_owner(victim))
-            goto skip;
-          if (((glob_op(victim) && !chan_deop(victim)) ||
-              chan_op(victim)) && !glob_master(user) &&
-              !glob_bot(user) && !chan_master(user) && !isexempted(chan, s1)) {
-                if (target_priority(chan, m, 0))
-		  add_mode(chan, '-', 'b', who);
-                  return;
+    /* remove bans on ops unless a master/bot set it */
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      egg_snprintf(s1, sizeof s1, "%s!%s", m->nick, m->userhost);
+      if (wild_match(who, s1)) {
+        u = get_user_by_host(s1);
+	if (u) {
+	  get_user_flagrec(u, &victim, chan->dname);
+          if (chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && 
+             !glob_bot(user) && !isexempted(chan, s1)) {
+            if (target_priority(chan, m, 0))
+              add_mode(chan, '-', 'b', who);
+            return;
 	  }
 	}
       }
     }
   }
-  skip:;
   refresh_exempt(chan, who);
+  /* This looks for bans added through bot and tacks on banned: if a description is found */
   if (nick[0] && channel_enforcebans(chan)) {
     register maskrec *b;
     int cycle;
     char resn[512]="";
-
+    /* The point of this cycle crap is to first check chan->bans then global_bans */
     for (cycle = 0; cycle < 2; cycle++) {
       for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
 	if (wild_match(b->mask, who)) {

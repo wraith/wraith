@@ -922,12 +922,15 @@ static int any_ops(struct chanset_t *chan)
  */
 static void reset_chan_info(struct chanset_t *chan)
 {
+  int opped = 0;
   /* Don't reset the channel if we're already resetting it */
   if (channel_inactive(chan)) {
     dprintf(DP_MODE,"PART %s\n", chan->name);
     return;
   }
   if (!channel_pending(chan)) {
+    if (me_op(chan))
+      opped += 1;
     nfree(chan->channel.key);
     chan->channel.key = (char *) channel_malloc(1);
     chan->channel.key[0] = 0;
@@ -939,9 +942,12 @@ static void reset_chan_info(struct chanset_t *chan)
       dprintf(DP_MODE, "MODE %s +b\n", chan->name);
     }
 #ifdef S_IRCNET
-    if (me_op(chan)) {
+    if (opped) {
+/* FIXME: broken +e checking */
+putlog(LOG_DEBUG, "@", "I AM +o in %s, need to send +e", chan->dname);
       if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) &&
   	  use_exempts == 1) {
+putlog(LOG_DEBUG, "@", "I AM NOW CHECKING +e for %s", chan->dname);
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
         dprintf(DP_MODE, "MODE %s +e\n", chan->name);
       }
