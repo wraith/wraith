@@ -137,7 +137,7 @@
 #define botnet_send_chat ((void(*)(int,char*,char*))global[28])
 #define server_lag (*(int *)global[29])
 #define remove_crlf ((void (*)(char **))global[30])
-/* UNUSED 31 */
+#define shuffle ((void (*)(char *, char *))global[31])
 /* 32 - 35 */
 #define botnet_send_join_idx ((void(*)(int,int))global[32])
 #define botnet_send_part_idx ((void(*)(int,char *))global[33])

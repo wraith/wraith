@@ -1004,126 +1004,46 @@ void servers_describe(struct cfg_entry * entry, int idx) {
 void servers6_describe(struct cfg_entry * entry, int idx) {
 }
 
-int count(const char *s, const char *delim)
-{
-  char *ele;
-  int i = 0;
-  char work[2000];
-  
-  strncpyz(work, s, sizeof work);
-  ele = strtok(work, delim);
-  while(ele && *ele)
-  {
-    i++;
-    ele = strtok((char*) NULL, delim);
-  }
-  return (i - 1);
-}
-
-int rrand(int a, int b)
-{
-  b++;
-  return ((random()%(b - a))+a);
-}
-
-char *randomize(char *line, char **new)
-{
-  char *str, *words[2000], *bak;
-  int i, o, b, r, u = 0;
-  bak = nmalloc(strlen(line) + 1);
-  strcpy(bak, line);
-  i = count(line, ",");
-
-  b = i + 1;
-  str = strtok(line, ",");
-  o = 0;
-  while(str && *str)
-  {
-    words[o] = str;
-    o++;
-    str=strtok((char*)NULL, ",");
-  }
-
-  while (b) {
-
-    if (u > 200) { //some problem, bail out
-      sprintf(*new, "%s", bak);
-      nfree(bak);
-      return *new;
-    }
-
-    r = rrand(0,i);
-
-    if (strstr(*new,words[r]) == NULL) {
-      if (b == i + 1) sprintf(*new,"%s",words[r]);
-      else sprintf(*new,"%s,%s", *new, words[r]);
-      b--;
-    } else 
-      u++;
-
-  }
-  nfree(bak);
-  return *new;
-}
-
 void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   char *slist, *p;
-#ifdef S_RANDSERVERS
-  char *new;
 
   if (hostname6[0] || myip6[0]) //we want to use the servers6 entry.
     return;
-#endif /* S_RANDSERVERS */
 
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
   if (serverlist) {
     clearq(serverlist);
     serverlist = NULL;
   }
-  p=nmalloc(strlen(slist)+1);
-  strcpy(p, slist);
+  p = nmalloc(strlen(slist) + 1);
 #ifdef S_RANDSERVERS
-  new = nmalloc(strlen(slist)+1);
-  randomize(p,&new);
-  strcpy(p, new);
- 
+  shuffle(slist, ",");
 #endif /* S_RANDSERVERS */
+  strcpy(p, slist);
   add_server(p);
   nfree(p);
-#ifdef S_RANDSERVERS
-  nfree(new);
-#endif /* S_RANDSERVERS */
 #endif /* LEAF */
 }
 
 void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   char *slist, *p;
-#ifdef S_RANDSERVERS
-  char *new;
 
   if (!hostname6[0] && !myip6[0]) //we probably want to use the normal server list..
     return;
-#endif /* S_RANDSERVERS */
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
   if (serverlist) {
     clearq(serverlist);
     serverlist = NULL;
   }
-  p=nmalloc(strlen(slist)+1);
-  strcpy(p, slist);
+  p = nmalloc(strlen(slist) + 1);
 #ifdef S_RANDSERVERS
-  new = nmalloc(strlen(slist)+1);
-  randomize(p,&new);
-  strcpy(p, new);
- 
+  shuffle(slist, ",");
 #endif /* S_RANDSERVERS */
+  strcpy(p, slist);
   add_server(p);
   nfree(p);
-#ifdef S_RANDSERVERS
-  nfree(new);
-#endif /* S_RANDSERVERS */
 #endif /* LEAF */
 }
 

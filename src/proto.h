@@ -229,6 +229,7 @@ void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 
 /* misc.c */
+void shuffle(char *, char *);
 void showhelp(int, struct flag_record *, char *);
 char *btoh(const unsigned char *, int);
 void local_check_should_lock();

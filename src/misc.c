@@ -2117,3 +2117,59 @@ Context;
   if (helpstr[0]) dumplots(idx, "", helpstr);
 }
 
+/* Arrange the N elements of ARRAY in random order. */
+static void shuffleArray(char *array[], int n)
+{
+  int i;
+  for (i = 0; i < n; i++) {
+    int j = i + random() / (RAND_MAX / (n - i) + 1);
+    char *t = array[j];
+    array[j] = array[i];
+    array[i] = t;
+  }
+}
+
+static void str2array(const char *string, char *array[], char *delim, int *len)
+{
+  char *p, *work = nmalloc(strlen(string) + 1);
+
+  strcpy(work, string);
+  if ((p = strtok(work, delim))) {
+    array[(*len)] = nmalloc(strlen(p) + 1);
+    strcpy(array[(*len)], p);
+    (*len)++;
+    while (p && *p) {
+      if ((p = strtok(NULL, delim))) {
+        array[(*len)] = nmalloc(strlen(p) + 1);
+        strcpy(array[(*len)], p);
+        (*len)++;
+      } else
+        array[(*len)] = 0;
+    }
+  }
+  nfree(work);
+}
+
+static void array2str(char **array, char *string, char *delim, int len)
+{
+  int i = 0;
+  string[0] = 0;
+  for (i = 0; i < len; i++) {
+    strcat(string, array[i]);
+    strcat(string, delim);
+    nfree(array[i]);
+  }
+  string[strlen(string) - 1] = 0;               /* remove trailing comma */
+}
+
+void shuffle(char *string, char *delim)
+{
+  char *array[501];
+  int len = 0;
+//printf("SHUFFLING: %s\n", string);
+  str2array(string, array, delim, &len);
+  shuffleArray(array, len);
+  array2str(array, string, delim, len);
+//printf("NOW: %s\n", string);
+}
+
