@@ -21,6 +21,38 @@ enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH };
 
 #ifdef MAKING_IRC
 
+typedef struct cache_chan_b {
+  struct cache_chan_b *next;
+  bool invite;		/* set to invite on userhost */
+  bool ban;		/* set to ban on join */
+  bool op;		/* should we auto-op? */
+  bool invited;		/* set when we've called cache_invite, meaning we aren't hijacked */
+  char dname[81];
+} cache_chan_t;
+
+typedef struct cache_b {
+  struct cache_b *next;
+  cache_chan_t *cchan;
+//  struct chanset_t *chan;
+//  struct userrec *user;
+  time_t timeval;
+//  bool invite;			/* INVITE ON USERHOST */
+//  bool ban;			/* BAN ON USERHOST */
+//  bool invited;			/* INVITED - CLEARED */
+  char nick[NICKLEN];
+  char handle[NICKLEN];
+  char uhost[UHOSTLEN];
+} cache_t;
+
+static void cache_chan_del(char *, char *);
+//static cache_chan_t *cache_chan_find(cache_t *, char *, char *);
+static void cache_chan_find(cache_t *, cache_chan_t *, char *, char *);
+static cache_chan_t *cache_chan_add(cache_t *, char *);
+static void cache_invite(struct chanset_t *, char *, char *, char *, bool);
+static cache_t *cache_find(char *);
+static cache_t *cache_new(char *);
+static void cache_del(char *, cache_t *);
+static void cache_debug(void);
 
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
 static char *makecookie(char *, char *);
@@ -60,6 +92,7 @@ static int gotmode(char *, char *);
 
 #endif /* MAKING_IRC */
 
+void notice_invite(struct chanset_t *, char *, char *, char *, bool);
 void real_add_mode(struct chanset_t *, const char, const char, const char *, bool);
 #define add_mode(chan, pls, mode, nick) real_add_mode(chan, pls, mode, nick, 0)
 #define add_cookie(chan, nick) real_add_mode(chan, '+', 'o', nick, 1)

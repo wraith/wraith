@@ -1170,7 +1170,7 @@ static void cmd_find(int idx, char *par)
   dprintf(idx, "--- Found %d matches.\n", fcount);
 }
 
-static void cmd_invite(int idx, char *par)
+static void do_invite(int idx, char *par, bool op)
 {
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
@@ -1191,7 +1191,7 @@ static void cmd_invite(int idx, char *par)
   if (all)
     chan = chanset;
 
-  putlog(LOG_CMDS, "*", "#%s# (%s) invite %s", dcc[idx].nick, all ? "*" : chan->dname,  nick);
+  putlog(LOG_CMDS, "*", "#%s# (%s) %s %s", dcc[idx].nick, all ? "*" : chan->dname, op ? "iop" : "invite", nick);
 
   while (chan) {
 
@@ -1202,7 +1202,7 @@ static void cmd_invite(int idx, char *par)
     }
     else if (!chk_op(user, chan)) {
       if (all) goto next;
-      dprintf(idx, "You don't have access to op on %s\n", chan->dname);
+      dprintf(idx, "You don't have access to invite to %s\n", chan->dname);
       return;
     }
 
@@ -1223,7 +1223,8 @@ static void cmd_invite(int idx, char *par)
       dprintf(idx, "%s is already on %s!\n", nick, chan->dname);
       return;
     }
-    dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
+
+    cache_invite(chan, nick, NULL, NULL, op);
     dprintf(idx, "Inviting %s to %s.\n", nick, chan->dname);
     next:;
     if (!all)
@@ -1231,6 +1232,16 @@ static void cmd_invite(int idx, char *par)
     else
     chan = chan->next;
   }
+}
+
+static void cmd_invite(int idx, char *par)
+{
+  do_invite(idx, par, 0);
+}
+
+static void cmd_iop(int idx, char *par)
+{
+  do_invite(idx, par, 1);
 }
 
 static void cmd_authed(int idx, char *par)
@@ -1682,6 +1693,7 @@ static cmd_t irc_dcc[] =
   {"getkey",            "o|o",   (Function) cmd_getkey,         NULL},
   {"find",		"",	 (Function) cmd_find,		NULL},
   {"invite",		"o|o",	 (Function) cmd_invite,		NULL},
+  {"iop",		"o|o",	 (Function) cmd_iop,		NULL},
   {"kick",		"o|o",	 (Function) cmd_kick,		NULL},
   {"kickban",		"o|o",	 (Function) cmd_kickban,	NULL},
   {"mdop",              "n|n",	 (Function) cmd_mdop,		NULL},

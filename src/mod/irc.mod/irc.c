@@ -36,6 +36,8 @@
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
+static cache_t *irccache = NULL;
+
 static int net_type = 0;
 static time_t wait_split = 300;    /* Time to wait for user to return from
                                  * net-split. */
@@ -96,6 +98,147 @@ dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
   }
 */
 
+}
+
+void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost, bool op) {
+  char fhandle[21] = "";
+  const char *ops = " (auto-op)";
+
+  if (handle)
+    sprintf(fhandle, "\002%s\002 ", handle);
+  putlog(LOG_MISC, "*", "Invited %s%s(%s%s%s) to %s.", handle ? handle : "", handle ? " " : "", nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname);
+  dprintf(DP_MODE, "PRIVMSG %s :\001ACTION has invited %s(%s%s%s) to %s.%s\001\n",
+    chan->name, fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
+}
+
+static cache_t *cache_new(char *nick)
+{
+  cache_t *cache = (cache_t *) my_calloc(1, sizeof(cache_t));
+
+  cache->next = NULL;
+  strcpy(cache->nick, nick);
+  cache->uhost[0] = 0;
+  cache->handle[0] = 0;
+//  cache->user = NULL;
+  cache->timeval = now;
+  cache->cchan = NULL;
+  list_append((struct list_type **) &irccache, (struct list_type *) cache);
+
+  return cache;
+}
+
+static cache_chan_t *cache_chan_add(cache_t *cache, char *chname)
+{
+  cache_chan_t *cchan = (cache_chan_t *) my_calloc(1, sizeof(cache_chan_t));
+  
+  cchan->next = NULL;
+  strcpy(cchan->dname, chname);
+  cchan->ban = 0;
+  cchan->invite = 0;
+  cchan->invited = 0;
+
+  list_append((struct list_type **) &(cache->cchan), (struct list_type *) cchan);
+
+  return cchan;
+}
+
+static void cache_chan_find(cache_t *cache, cache_chan_t *cchan, char *nick, char *chname)
+{
+  if (!cache)
+    cache = cache_find(nick);
+
+  if (cache) {
+    for (cchan = cache->cchan; cchan && cchan->dname[0]; cchan = cchan->next) {
+      if (!rfc_casecmp(cchan->dname, chname)) {
+        return;
+      }
+    }
+  }
+
+  return;
+}
+
+
+static void cache_chan_del(char *nick, char *chname) {
+  cache_t *cache = NULL;
+  cache_chan_t *cchan = NULL;
+
+  cache_chan_find(cache, cchan, nick, chname);
+
+  if (cchan) {
+    list_delete((struct list_type **) &cache->cchan, (struct list_type *) cchan);
+    free(cache);
+  }
+}
+static cache_t *cache_find(char *nick)
+{
+  cache_t *cache = NULL;
+
+  for (cache = irccache; cache && cache->nick[0]; cache = cache->next)
+    if (!rfc_casecmp(cache->nick, nick))
+      break;
+
+  return cache;
+}
+
+static void cache_del(char *nick, cache_t *cache)
+{
+  if (!cache)
+    cache = cache_find(nick);
+ 
+  if (cache) {
+    list_delete((struct list_type **) &irccache, (struct list_type *) cache);
+    free(cache);
+  }
+}
+
+static void cache_debug(void)
+{
+  cache_t *cache = NULL;
+  cache_chan_t *cchan = NULL;
+
+  for (cache = irccache; cache && cache->nick[0]; cache = cache->next) {
+    dprintf(DP_MODE, "PRIVMSG #wraith :%s!%s (%s)\n", cache->nick, cache->uhost, cache->handle);
+    for (cchan = cache->cchan; cchan && cchan->dname[0]; cchan = cchan->next)
+      dprintf(DP_MODE, "PRIVMSG #wraith :%s %d %d %d\n", cchan->dname, cchan->ban, cchan->invite, cchan->invited);
+  }
+}
+
+static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *handle, bool op)
+{
+  cache_t *cache = NULL;
+
+  if ((cache = cache_find(nick)) == NULL)
+    cache = cache_new(nick);
+
+  /* if we find they have a host but it doesnt match the new host, wipe it */
+  if (host && cache->uhost[0] && egg_strcasecmp(cache->uhost, host))
+    cache->uhost[0] = 0;
+
+  if (host && !cache->uhost[0])
+    strcpy(cache->uhost, host);
+
+  /* if we find they have a handle but it doesnt match the new handle, wipe it */
+  if (handle && cache->handle[0] && egg_strcasecmp(cache->handle, handle))
+    cache->handle[0] = 0;
+
+  if (handle && !cache->handle[0])
+    strcpy(cache->handle, handle);
+
+  cache_chan_t *cchan = cache_chan_add(cache, chan->dname);
+
+  cchan->op = op;
+    
+  if (!host) {
+    cchan->invite = 1;
+    dprintf(DP_MODE, "USERHOST %s\n", nick);
+    return;
+  }
+
+  /* if we have a uhost already, it's safe to invite them */
+  cchan->invited = 1;
+  cchan->invite = 0;
+  dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
 }
 
 static char *

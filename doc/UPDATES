@@ -41,6 +41,9 @@ This is a summary of ChangeLog basically.
 * WHO parsing was redundant and had a ton of inner loops per line, fixed.
 * Fixed a problem with leaf bots not chosing a hub when only 1 was set.
 * Fixed cmd_channel showing a user as an op in a +private chan where they might have not access.
+* Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
+* Added hijacked invite detection based on server invite notices.
+* Added an action when a bot performs an invite, including username and full address.
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -164,8 +164,9 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
     if (par[0] == '*') {
       for (chan = chanset; chan; chan = chan->next) {
 	get_user_flagrec(u, &fr, chan->dname);
-        if (chk_op(fr, chan) && (chan->channel.mode & CHANINV))
-	  dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
+        if (chk_op(fr, chan) && (chan->channel.mode & CHANINV)) {
+          cache_invite(chan, nick, host, u->handle, 0);
+        }
       }
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE ALL", nick, host, u->handle);
       return BIND_RET_BREAK;
@@ -182,7 +183,7 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
     /* We need to check access here also (dw 991002) */
     get_user_flagrec(u, &fr, par);
     if (chk_op(fr, chan)) {
-      dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
+      cache_invite(chan, nick, host, u->handle, 0);
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE %s", nick, host, u->handle, par);
       return BIND_RET_BREAK;
     }
@@ -720,7 +721,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *chname, 
       if ((!(chan->channel.mode & CHANINV) && force) || (chan->channel.mode & CHANINV)) {
         get_user_flagrec(u, &fr, chan->dname);
         if (chk_op(fr, chan)) {
-          dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
+          cache_invite(chan, nick, host, u->handle, 0);
         }
         return BIND_RET_BREAK;
       }
@@ -731,7 +732,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *chname, 
         if ((!(chan->channel.mode & CHANINV) && force) || (chan->channel.mode & CHANINV)) {
           get_user_flagrec(u, &fr, chan->dname);
           if (chk_op(fr, chan)) {
-            dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
+            cache_invite(chan, nick, host, u->handle, 0);
           }
         }
       }

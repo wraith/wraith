@@ -1054,7 +1054,12 @@ See also: +ignore, -ignore
    is +i.  a user with the +o flag can also request an invite from
    the bot with /MSG INVITE. Specify * for all channels.
  
-See also: console
+See also: console, iop
+:leaf:iop
+###  $biop$b <nickname> [channel|*]
+   same as normal invite, except auto-ops them when they join.
+ 
+See also: console, invite
 ::invites
 ###  $binvites$b [[channel/all]/wildcard]
    Shows you a list of the global invites active on the current channel, and

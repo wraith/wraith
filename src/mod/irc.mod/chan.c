@@ -1266,6 +1266,124 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   stacking--;
 }
 
+/* got 302: userhost
+ * <server> 302 <to> :<nick??user@host>
+ */
+static int got302(char *from, char *msg)
+{
+  char *p = NULL, *nick = NULL, *uhost = NULL;
+  cache_t *cache = NULL;
+  cache_chan_t *cchan = NULL;
+
+  newsplit(&msg);
+  fixcolon(msg);
+  
+  p = strchr(msg, '=');
+  if (!p)
+    p = strchr(msg, '*');
+  if (!p)
+    return 0;
+  *p = 0;
+  nick = msg;
+  p += 2;		/* skip =|* plus the next char */
+  uhost = p;
+
+  if ((p = strchr(uhost, ' ')))
+    *p = 0;
+
+  if ((cache = cache_find(nick))) {
+    if (!cache->uhost[0])
+    strcpy(cache->uhost, uhost);
+
+    if (!cache->handle[0]) {
+      char s[UHOSTLEN] = "";
+      struct userrec *u = NULL;
+
+      sprintf(s, "%s!%s", nick, uhost);
+      if ((u = get_user_by_host(s)))
+        strcpy(cache->handle, u->handle);
+    }
+    cache->timeval = now;
+ 
+    /* check if we should invite this client to chans */
+    for (cchan = cache->cchan; cchan && cchan->dname[0]; cchan = cchan->next) {
+      if (cchan->invite) {
+        dprintf(DP_SERVER, "INVITE %s %s\n", nick, cchan->dname);
+        cchan->invite = 0;
+        cchan->invited = 1;
+      }
+      if (cchan->ban) {
+        cchan->ban = 0;
+        dprintf(DP_DUMP, "MODE %s +b *!%s\n", cchan->dname, uhost);
+      }
+    }
+  }
+
+  return 0;
+}
+
+/* got341 invited
+ * <server> 341 <to> <nick> <channel>
+ */
+static int got341(char *from, char *msg)
+{
+  char *nick = NULL, *chname = NULL;
+  cache_t *cache = NULL;
+  cache_chan_t *cchan = NULL;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  chname = newsplit(&msg);
+
+  struct chanset_t *chan = findchan(chname);
+
+  if (!chan) {
+    putlog(LOG_MISC, "*", "%s: %s", IRC_UNEXPECTEDMODE, chname);
+    dprintf(DP_SERVER, "PART %s\n", chname);
+    return 0;
+  }
+
+  cache = cache_find(nick);
+
+  if (cache) {
+    for (cchan = cache->cchan; cchan && cchan->dname; cchan = cchan->next) {
+      if (!rfc_casecmp(cchan->dname, chan->dname)) {
+        if (!cache->uhost[0] || !cchan->invited)
+          goto hijack;
+
+        cache->timeval = now;
+        notice_invite(chan, cache->handle[0] ? cache->handle : NULL, nick, cache->uhost, cchan->op);
+
+        break;
+      }
+    }
+  }
+
+  if (!cache || !cchan)
+    goto hijack;
+
+  return 0;
+
+  hijack:
+
+  if (!cache)
+    cache = cache_new(nick);
+  if (!cchan)
+    cchan = cache_chan_add(cache, chan->dname);
+
+  if (!cache->uhost[0]) {
+    dprintf(DP_DUMP, "MODE %s +b %s!*@*\n", chan->name, nick);
+    cchan->ban = 1;
+    dprintf(DP_DUMP, "USERHOST %s\n", nick);
+  } else {
+    dprintf(DP_DUMP, "MODE %s +b *!*%s\n", chan->name, cache->uhost);
+  }
+  putlog(LOG_MISC, "*", "HIJACKED invite detected: %s to %s", nick, chan->dname);
+  dprintf(DP_DUMP, "PRIVMSG %s :ALERT! \002%s was invited via a hijacked connection/process.\002\n", chan->name, nick);
+  return 0;
+}
+
+
 /* got 324: mode status
  * <server> 324 <to> <channel> <mode>
  */
@@ -1367,6 +1485,7 @@ static int got324(char *from, char *msg)
     recheck_channel_modes(chan);
   return 0;
 }
+
 
 static void memberlist_reposition(struct chanset_t *chan, memberlist *target) {
   /* Move target from it's current position to it's correct sorted position */
@@ -2224,9 +2343,7 @@ static int gotjoin(char *from, char *chname)
 	    u_match_mask(chan->invites, from))
 	  refresh_invite(chan, from);
 
-	if (!(use_exempts &&
-	      (u_match_mask(global_exempts,from) ||
-	       u_match_mask(chan->exempts, from)))) {
+	if (!(use_exempts && (u_match_mask(global_exempts,from) || u_match_mask(chan->exempts, from)))) {
           if (channel_enforcebans(chan) && !chan_op(fr) && !glob_op(fr) && !chan_sentkick(m) &&
               !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS))) && 
               me_op(chan)) {
@@ -2239,8 +2356,7 @@ static int gotjoin(char *from, char *chname)
             }
           }
 	  /* If it matches a ban, dispose of them. */
-	  if (u_match_mask(global_bans, from) ||
-	      u_match_mask(chan->bans, from)) {
+	  if (u_match_mask(global_bans, from) || u_match_mask(chan->bans, from)) {
 	    refresh_ban_kick(chan, from, nick);
 	  /* Likewise for kick'ees */
 	  } else if (!chan_sentkick(m) && (glob_kick(fr) || chan_kick(fr)) &&
@@ -2252,7 +2368,28 @@ static int gotjoin(char *from, char *chname)
 	    m->flags |= SENTKICK;
 	  }
 	}
-        if (!splitjoin && !chan_hasop(m) && dovoice(chan) && chk_autoop(fr, chan)) {
+        cache_t *cache = cache_find(nick);
+        bool op = 0;
+
+        if (cache) {
+          cache_chan_t *cchan = NULL;
+
+          if (egg_strcasecmp(cache->uhost, m->userhost)) {
+
+
+          }
+
+          for (cchan = cache->cchan; cchan && cchan->dname[0]; cchan = cchan->next) {
+            if (!rfc_casecmp(cchan->dname, chan->dname)) {
+              if (cchan->op) {
+                op = 1;
+                cchan->op = 0;
+              }
+              break;
+            }
+          }
+        }
+        if (!splitjoin && !chan_hasop(m) && (op || (dovoice(chan) && chk_autoop(fr, chan)))) {
           do_op(m->nick, chan, 1, 0);
         }
       }
@@ -2584,6 +2721,12 @@ static int gotquit(char *from, char *msg)
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
     }
   }
+  /* see if they were in our cache at all */
+  cache_t *cache = cache_find(nick);
+
+  if (cache) 
+    cache_del(nick, cache);
+
   return 0;
 }
 
@@ -2857,7 +3000,9 @@ static int gotnotice(char *from, char *msg)
 
 static cmd_t irc_raw[] =
 {
+  {"302",       "",     (Function) got302,      "irc:302"},
   {"324",	"",	(Function) got324,	"irc:324"},
+  {"341",       "",     (Function) got341,      "irc:341"},
   {"352",	"",	(Function) got352,	"irc:352"},
   {"354",	"",	(Function) got354,	"irc:354"},
   {"315",	"",	(Function) got315,	"irc:315"},
