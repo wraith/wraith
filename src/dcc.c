@@ -29,7 +29,8 @@ extern time_t		 now, buildts;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
 			 ignore_time;
-extern char		 botnetnick[], ver[], origbotname[], notify_new[], bdhash[];
+extern char		 botnetnick[], ver[], origbotname[], notify_new[], bdhash[],
+                         dcc_prefix[];
 
 extern sock_list 	*socklist;
 extern int 		MAXSOCKS;
@@ -55,8 +56,6 @@ int	flood_telnet_thr = 10;	/* Number of telnet connections to be
 				   considered a flood			   */
 int	flood_telnet_time = 5;	/* In how many seconds?			   */
 char	bannerfile[121] = ""; /* File displayed on telnet login */
-
-extern char dcc_prefix[];
 
 static void dcc_telnet_hostresolved(int);
 static void dcc_telnet_got_ident(int, char *);
@@ -1005,8 +1004,8 @@ static void dcc_chat(int idx, char *buf, int i)
   char *v, *d;
 
   strip_telnet(dcc[idx].sock, buf, &i);
-  if (buf[0] && (buf[0] != '.') &&
-      detect_dcc_flood(&dcc[idx].timeval, dcc[idx].u.chat, idx))
+  if (buf[0] && (buf[0] != dcc_prefix[0]) && !(dcc[idx].user && (dcc[idx].user->flags & USER_NOFLOOD)) &&
+     detect_dcc_flood(&dcc[idx].timeval, dcc[idx].u.chat, idx))
     return;
   dcc[idx].timeval = now;
   if (buf[0])
