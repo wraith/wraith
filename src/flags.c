@@ -205,8 +205,8 @@ int sanity_check(int atr)
     atr &= ~(USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA);
 // only bots should be there:
   if (!(atr & USER_BOT) &&
-      (atr & (USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB | USER_SECHUB)))
-    atr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB | USER_SECHUB);
+      (atr & (USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB)))
+    atr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB);
   if ((atr & USER_OP) && (atr & USER_DEOP))
     atr &= ~(USER_OP | USER_DEOP);
   if ((atr & USER_VOICE) && (atr & USER_QUIET))

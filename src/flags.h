@@ -66,7 +66,7 @@ struct flag_record {
 #define USER_FRIEND        0x00000020 /* f  user is global friend             */
 #define USER_G             0x00000040 /* g  unused                            */
 #define USER_H             0x00000080 /* h  unused                            */
-#define USER_HUBA          0x00000100 /* i  access to HUBS/SECHUBS(+s)        */
+#define USER_HUBA          0x00000100 /* i  access to HUBS        */
 #define USER_CHUBA         0x00000200 /* j  access to CHANHUBS(+c)            */
 #define USER_KICK          0x00000400 /* k  user is global auto-kick          */
 #define USER_DOLIMIT       0x00000800 /* l  bot sets limit on channel(s)        */
@@ -76,7 +76,7 @@ struct flag_record {
 #define USER_PARTY         0x00008000 /* p  user can CHAT on partyline:*needs (+i or +j)    */
 #define USER_QUIET         0x00010000 /* q  user is global de-voice           */
 #define USER_R  	   0x00020000 /* r  unused    */
-#define USER_SECHUB        0x00040000 /* s  bot is a sechub                 */
+#define USER_S             0x00040000 /* s  unused             */
 #define USER_T             0x00080000 /* t  unused             */
 #define USER_UPDATEHUB     0x00100000 /* u  bot is the updatehub         */
 #define USER_VOICE         0x00200000 /* v  user is +v on all channels        */
@@ -172,7 +172,6 @@ struct flag_record {
 #define glob_noflood(x)			((x).global & USER_NOFLOOD)
 #define chan_noflood(x)			((x).chan & USER_NOFLOOD)
 #define glob_chanhub(x)			((x).global & USER_CHANHUB)
-#define glob_sechub(x)			((x).global & USER_SECHUB)
 
 //#define bot_global(x)		((x).bot & BOT_GLOBAL)
 #define bot_global(x)		(1)

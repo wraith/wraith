@@ -1562,7 +1562,7 @@ static int ctcp_DCC_CHAT(char *nick, char *from, char *handle,
   int i, ok;
   struct userrec *u = get_user_by_handle(userlist, handle);
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  if (!ischanhub() && !issechub())
+  if (!ischanhub())
     return 0;
   strcpy(msg, text);
   action = newsplit(&msg);
@@ -1573,8 +1573,6 @@ static int ctcp_DCC_CHAT(char *nick, char *from, char *handle,
     return 0;
   get_user_flagrec(u, &fr, 0);
   ok = 1;
-  if (issechub() && !glob_huba(fr))
-   ok = 0;
   if (ischanhub() && !glob_chuba(fr))
    ok = 0;
   if (dcc_total == max_dcc) {
@@ -1650,8 +1648,6 @@ static void dcc_chat_hostresolved(int i)
     dcc[i].status = STAT_ECHO;
     get_user_flagrec(dcc[i].user, &fr, 0);
     ok = 1;
-    if (issechub() && !glob_huba(fr))
-     ok = 0;
     if (ischanhub() && !glob_chuba(fr))
      ok = 0;
     if (ok)

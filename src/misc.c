@@ -1448,17 +1448,6 @@ int ischanhub()
     return 0;
 }
 
-int issechub()
-{
-
-  struct userrec *buser;
-  buser = get_user_by_handle(userlist, botnetnick);
-  if ((buser) && (buser->flags & USER_SECHUB))
-    return 1;
-  else
-    return 0;
- 
-}
 #ifdef S_DCCPASS
 int check_cmd_pass(char *cmd, char *pass) 
 {

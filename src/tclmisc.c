@@ -260,18 +260,7 @@ static int tcl_ischanhub STDVAR
     Tcl_AppendResult(irp, "0", NULL);
   return TCL_OK;
 }
-static int tcl_issechub STDVAR
-{
-#ifdef HUB
-  Tcl_AppendResult(irp, "0", NULL);
-  return TCL_OK;
-#endif
-  if (issechub()) 
-    Tcl_AppendResult(irp, "1", NULL);
-  else 
-    Tcl_AppendResult(irp, "0", NULL);
-  return TCL_OK;
-}
+
 static int tcl_utimer STDVAR
 {
   unsigned long x;
@@ -615,7 +604,6 @@ tcl_cmds tclmisc_cmds[] =
   {"backup",		tcl_backup},
 #endif
   {"ischanhub",		tcl_ischanhub},
-  {"issechub",		tcl_issechub},
   {"timesync",		tcl_timesync},
   {"exit",		tcl_die},
   {"die",		tcl_die},

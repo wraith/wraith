@@ -678,7 +678,7 @@ static int ctcp_CHAT(char *nick, char *uhost, char *handle, char *object, char *
   struct userrec *u = get_user_by_handle(userlist, handle);
   int i, ix = (-1);
 
-  if (!ischanhub() && !issechub())
+  if (!ischanhub())
     return 0;
 
     if (u_pass_match(u, "-")) {

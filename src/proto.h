@@ -246,7 +246,6 @@ int egg_strcatn(char *dst, const char *src, size_t max);
 int my_strcpy(char *, char *);
 void putlog EGG_VARARGS(int, arg1);
 int ischanhub();
-int issechub();
 void flushlogs();
 void check_logsize();
 void maskhost(const char *, char *);

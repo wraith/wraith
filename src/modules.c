@@ -503,7 +503,7 @@ Function global_table[] =
   /* 277 - 280 */
   (Function) ischanhub,        
   (Function) rand_dccresp,
-  (Function) issechub,
+  (Function) 0,
 #ifdef LEAF
   (Function) listen_all,
 #else
