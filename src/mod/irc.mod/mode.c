@@ -30,8 +30,7 @@ do_op(char *nick, struct chanset_t *chan, int delay, int force)
     return 0;
 
   if (channel_fastop(chan) || channel_take(chan)) {
-//    add_mode(chan, '+', 'o', nick);
-    add_cookie(chan, nick);
+    add_mode(chan, '+', 'o', nick);
   } else {
     add_cookie(chan, nick);
   }
