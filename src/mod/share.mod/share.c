@@ -101,7 +101,7 @@ static void add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
   d->mask = (char *) calloc(1, strlen(mask) + 1);
 
   strncpy(d->mask, mask, strlen(mask) + 1);
-  d->seconds = (int) (now + (random() % 20));
+  d->seconds = (int) (now + randint(20));
   d->next = start_delay;
   start_delay = d;
 }

@@ -1273,7 +1273,7 @@ void autolink_cycle(char *start)
     }
   }
   putlog(LOG_DEBUG, "@", STR("Picking random hub from %d hubs"), hlc);
-  hlc = random() % hlc;
+  hlc = randint(hlc);
   putlog(LOG_DEBUG, "@", STR("Picked #%d for hub"), hlc);
   while (hl) {
     if (!hlc) {

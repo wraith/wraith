@@ -92,6 +92,12 @@
 #  define random() (rand()/16)
 #endif
 
+/* Use high-order bits for getting the random integer. With random()
+ * modulo would probably be sufficient but on systems lacking random(),
+ * the function will be just renamed rand().
+ */
+#define randint(n) (unsigned long) (random() / (RAND_MAX + 1.0) * ((n) < 0 ? (-(n)) : (n)))
+
 
 /***********************************************************************/
 

@@ -77,7 +77,7 @@ static void dcc_telnet_pass(int, int);
 
 char *rand_dccresp()
 {
-  switch (random() % 10) { /* 0-5: random response, 6-9: none */
+  switch (randint(10)) { /* 0-5: random response, 6-9: none */
   case 0:
     return STR("sup\n");
   case 1:
@@ -106,7 +106,7 @@ char *rand_dccresp()
 
 char *rand_dccresppass()
 {
-  switch (random() % 10) { /* 0-5: random response, 6-9: none */
+  switch (randint(10)) { /* 0-5: random response, 6-9: none */
   case 0:
     return STR("what?\n");
   case 1:
@@ -129,7 +129,7 @@ char *rand_dccresppass()
 }
 char *rand_dccrespbye()
 {
-  switch (random() % 10) { /* 0-5: random response, 6-9: none */
+  switch (randint(10)) { /* 0-5: random response, 6-9: none */
   case 0:
     return STR("stop wasting my time.\n");
   case 1:

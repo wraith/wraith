@@ -556,7 +556,7 @@ static void request_op(struct chanset_t *chan)
 
   /* Pick random op and ask for ops */
   while (cnt) {
-    i2 = random() % i;
+    i2 = randint(i);
     if (botops[i2]) {
       putbot(botops[i2]->user->handle, s);
       chan->opreqtime[first] = n;
@@ -607,7 +607,7 @@ static void request_in(struct chanset_t *chan)
                                           , myipstr(6) ? myipstr(6) : ".");
   l = calloc(1, cnt * 30);
   while (cnt) {
-    n = random() % i;
+    n = randint(i);
     if (botops[n]) {
       putbot(botops[n]->handle, s);
       if (l[0]) {

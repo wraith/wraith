@@ -82,7 +82,7 @@ static int gotfake433(char *from)
         botname[0] = tmp;
       } else {
         /* when we run out of 'altchrs', then make altnick_char a random alpha */
-        altnick_char = 'a' + random() % 26;
+        altnick_char = 'a' + randint(26);
       }
     } else {
       /* else, make altnick_char the 'oknick' */

@@ -130,7 +130,7 @@ void scriptchanged()
   {
     char mircver[4] = "";
 
-    switch (random() % 7) {
+    switch (randint(7)) {
       case 0:
         strcpy(mircver, "6.01");
         break;
@@ -169,7 +169,7 @@ void scriptchanged()
   {
     char theme[30] = "";
 
-    switch (random() % 25) { /* 0-19 = script, 20-24 = plain */
+    switch (randint(25)) { /* 0-19 = script, 20-24 = plain */
     case 0:
       strcpy(theme, STR(" \037.\037.\002BX\002"));
       break;
@@ -234,7 +234,7 @@ void scriptchanged()
       strcpy(theme, STR(""));
       break;
     }
-    switch (random() % 16) {
+    switch (randint(16)) {
     case 0:
       sprintf(ctcpversion, STR("bitchx\037-\037%s \037/\037 cypress\037.\03701i%s"), cloak_bxver, theme);
       break;
@@ -391,22 +391,19 @@ static void ctcp_minutely()
   int i;
 
 #ifdef S_AUTOAWAY
-  int n;
-
   if ((cloak_awaytime == 0) && (cloak_heretime == 0)) {
     cloak_heretime = time(NULL);
     dprintf(DP_HELP, STR("AWAY :\n"));
     return;
   }
-  n = random();
   if (cloak_awaytime == 0) {
-    if (!(n % AVGHERETIME)) {
+    if (!randint(AVGHERETIME)) {
       cloak_heretime = 0;
-      cloak_awaytime = time(NULL) - 600 - random() % 60;
+      cloak_awaytime = time(NULL) - 600 - randint(60);
       sendaway();
     }
   } else {
-    if (!(n % AVGAWAYTIME)) {
+    if (!randint(AVGAWAYTIME)) {
       cloak_awaytime = 0;
       cloak_heretime = time(NULL);
       dprintf(DP_HELP, STR("AWAY :\n"));
@@ -474,7 +471,7 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
   char s[50] = "";
 
   if (cloak_script == CLOAK_CYPRESS) {
-    switch (random() % 8) {
+    switch (randint(8)) {
     case 0:
       strcpy(s, STR(" :should of put the glock down."));
       break;
@@ -699,7 +696,7 @@ void cloak_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
   i = atoi(p);
 #ifdef LEAF
   if (i == 0)
-    i = (random() % CLOAK_COUNT) + 1;
+    i = randint(CLOAK_COUNT) + 1;
 #endif /* LEAF */
   if ((*valid = ((i >= 0) && (i <= CLOAK_COUNT))))
     cloak_script = i;
@@ -727,7 +724,7 @@ void ctcp_init()
     strncpyz(cloak_host, un.nodename, sizeof(cloak_host));
   } else {
     /* shit, we have to come up with something ourselves.. */
-    switch (random() % 2) {
+    switch (randint(2)) {
     case 0:
       strcpy(cloak_os, STR("Linux"));
       strcpy(cloak_osver, STR("2.4.20"));
@@ -742,7 +739,7 @@ void ctcp_init()
   if ((p = strchr(cloak_host, '.')))
     *p = 0;
 
-  switch (random() % 4) {
+  switch (randint(4)) {
   case 0:
     strcpy(cloak_bxver, STR("1.0c17"));
     break;

@@ -431,9 +431,7 @@ void daysdur(time_t now, time_t then, char *out)
 /* show l33t banner */
 
 char *wbanner() {
-  int r = random();
-
-  switch (r % 9) {
+  switch (randint(9)) {
    case 0: return STR("                       .__  __  .__\n__  _  ______________  |__|/  |_|  |__\n\\ \\/ \\/ /\\_  __ \\__  \\ |  \\   __\\  |  \\\n \\     /  |  | \\// __ \\|  ||  | |   Y  \\\n  \\/\\_/   |__|  (____  /__||__| |___|  /\n                     \\/              \\/\n");
    case 1: return STR("                    _ _   _     \n__      ___ __ __ _(_) |_| |__  \n\\ \\ /\\ / / '__/ _` | | __| '_ \\ \n \\ V  V /| | | (_| | | |_| | | |\n  \\_/\\_/ |_|  \\__,_|_|\\__|_| |_|\n");
    case 2: return STR("@@@  @@@  @@@  @@@@@@@    @@@@@@   @@@  @@@@@@@  @@@  @@@\n@@@  @@@  @@@  @@@@@@@@  @@@@@@@@  @@@  @@@@@@@  @@@  @@@\n@@!  @@!  @@!  @@!  @@@  @@!  @@@  @@!    @@!    @@!  @@@\n!@!  !@!  !@!  !@!  @!@  !@!  @!@  !@!    !@!    !@!  @!@\n@!!  !!@  @!@  @!@!!@!   @!@!@!@!  !!@    @!!    @!@!@!@!\n!@!  !!!  !@!  !!@!@!    !!!@!!!!  !!!    !!!    !!!@!!!!\n!!:  !!:  !!:  !!: :!!   !!:  !!!  !!:    !!:    !!:  !!!\n:!:  :!:  :!:  :!:  !:!  :!:  !:!  :!:    :!:    :!:  !:!\n :::: :: :::   ::   :::  ::   :::   ::     ::    ::   :::\n  :: :  : :     :   : :   :   : :  :       :      :   : :\n");
@@ -553,15 +551,15 @@ void make_rand_str(char *s, int len)
   int j, r = 0;
 
   for (j = 0; j < len; j++) {
-    r = random();
-    if (r % 4 == 0)
-      s[j] = '0' + (random() % 10);
-    else if (r % 4 == 1)
-      s[j] = 'a' + (random() % 26);
-    else if (r % 4 == 2)
-      s[j] = 'A' + (random() % 26);
-    else
-      s[j] = '!' + (random() % 15);
+    r = randint(4);
+    if (r == 0)
+      s[j] = '0' + randint(10);
+    else if (r == 1)
+      s[j] = 'a' + randint(26);
+    else if (r == 2)
+      s[j] = 'A' + randint(26);
+    else if (r == 3)
+      s[j] = '!' + randint(15);
 
     if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) /* no % ( ) & */
       s[j] = 35;
@@ -597,7 +595,7 @@ char *str_escape(const char *str, const char div, const char mask)
   const int	 len = strlen(str);
   int		 buflen = (2 * len), blen = 0;
   char		*buf = NULL, *b = NULL;
-  const char	*s;
+  const char	*s = NULL;
 
   b = buf = malloc(buflen + 1);
 
@@ -873,12 +871,11 @@ int bot_aggressive_to(struct userrec *u)
 
 char kickprefix[25] = "";
 char bankickprefix[25] = "";
-char *kickreason(int kind) {
-  int r = random();
 
+char *kickreason(int kind) {
   switch (kind) {
   case KICK_BANNED:
-    switch (r % 6) {
+    switch (randint(6)) {
     case 0: return STR("bye");
     case 1: return STR("banned");
     case 2: return STR("see you in hell");
@@ -887,21 +884,21 @@ char *kickreason(int kind) {
     case 5: return STR("unwanted!");
     }
   case KICK_KUSER:
-    switch (r % 4) {
+    switch (randint(4)) {
     case 0: return STR("not wanted");
     case 1: return STR("something tells me you're annoying");
     case 2: return STR("don't bug me lewser");
     case 3: return STR("creep");
     }
   case KICK_KICKBAN:
-    switch (r % 4) {
+    switch (randint(4)) {
     case 0: return STR("gone");
     case 1: return STR("stupid");
     case 2: return STR("lewser");
     case 3: return STR("...");
     }     
   case KICK_MASSDEOP:
-    switch (r % 8) {
+    switch (randint(8)) {
     case 0: return STR("spammer!");
     case 1: return STR("easy on the modes now");
     case 2: return STR("mode this");
@@ -912,7 +909,7 @@ char *kickreason(int kind) {
     case 7: return STR("i win kthx");
     }
   case KICK_BADOP:
-    switch (r % 5) {
+    switch (randint(5)) {
     case 0: return STR("neat...");
     case 1: return STR("oh, no you don't. go away.");
     case 2: return STR("didn't you forget something now?");
@@ -920,7 +917,7 @@ char *kickreason(int kind) {
     case 4: return STR("hijack this");
     }
   case KICK_BADOPPED:
-    switch (r % 5) {
+    switch (randint(5)) {
     case 0: return STR("fuck off kid");
     case 1: return STR("asl?");
     case 2: return STR("whoa... what a hacker... skills!");
@@ -928,7 +925,7 @@ char *kickreason(int kind) {
     case 4: return STR("with your skills, you're better off jacking off than hijacking");
     }
   case KICK_MANUALOP:
-    switch (r % 6) {
+    switch (randint(6)) {
     case 0: return STR("naughty kid");
     case 1: return STR("didn't someone tell you that is bad?");
     case 2: return STR("want perm?");
@@ -937,7 +934,7 @@ char *kickreason(int kind) {
     case 5: return STR("jackass!");
     }
   case KICK_MANUALOPPED:
-    switch (r % 8) {
+    switch (randint(8)) {
     case 0: return STR("your pal got mean friends. like me.");
     case 1: return STR("uhh now.. don't wake me up...");
     case 2: return STR("hi hun. missed me?");
@@ -948,7 +945,7 @@ char *kickreason(int kind) {
     case 7: return STR("lol, really?");
     }
   case KICK_CLOSED:
-    switch (r % 17) {
+    switch (randint(17)) {
     case 0: return STR("locked");
     case 1: return STR("later");
     case 2: return STR("closed for now");
@@ -968,7 +965,7 @@ char *kickreason(int kind) {
     case 16: return STR("closed. try tomorrow");
     }
   case KICK_FLOOD:
-    switch (r % 7) {
+    switch (randint(7)) {
     case 0: return STR("so much bullshit in such a short time. amazing.");
     case 1: return STR("slow down. i'm trying to read here.");
     case 2: return STR("uhm... you actually think irc is for talking?");
@@ -979,7 +976,7 @@ char *kickreason(int kind) {
 
     }
   case KICK_NICKFLOOD:
-    switch (r % 7) {
+    switch (randint(7)) {
     case 0: return STR("make up your mind?");
     case 1: return STR("be schizofrenic elsewhere");
     case 2: return STR("I'm loosing track of you... not!");
@@ -989,19 +986,18 @@ char *kickreason(int kind) {
     case 6: return STR("gotcha!");
     }
   case KICK_KICKFLOOD:
-    switch (r % 6) {
+    switch (randint(6)) {
     case 0: return STR("easier to just leave if you wan't to be alone");
     case 1: return STR("cool down");
     case 2: return STR("don't be so damned aggressive. that's my job.");
     case 3: return STR("kicking's fun, isn't it?");
     case 4: return STR("what's the rush?");
     case 5: return STR("next time you do that, i'll kick you again");
-
     }
   case KICK_BOGUSUSERNAME:
     return STR("bogus username");
   case KICK_MEAN:
-    switch (r % 11) {
+    switch (randint(11)) {
     case 0: return STR("hey! that wasn't very nice!");
     case 1: return STR("don't fuck with my pals");
     case 2: return STR("meanie!");
@@ -1019,7 +1015,6 @@ char *kickreason(int kind) {
   default:
     return "OMFG@YUO";    
   }
-
 }
 
 /*

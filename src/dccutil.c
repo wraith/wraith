@@ -461,7 +461,7 @@ void set_away(int idx, char *s)
  */
 void makepass(char *s)
 {
-  make_rand_str(s, 10 + (random() % 6));
+  make_rand_str(s, 10 + randint(6));
 }
 
 void flush_lines(int idx, struct chat_info *ci)
