@@ -303,8 +303,7 @@ void rebalance_roles()
 /* FIXME: needs more testing */
 static void channels_checkslowjoin() {
   struct chanset_t *chan;
-ContextNote("channels_checkslowjoin");
-  for (chan = chanset; chan ; chan = chan->next) {
+  for (chan = chanset; chan; chan = chan->next) {
     /* slowpart */
     if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
       chan->channel.parttime = 0;

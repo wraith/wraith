@@ -693,9 +693,7 @@ static int gotwall(char *from, char *msg)
 
 static void server_10secondly()
 {
-  if (!server_online)
-    return;
-  if (keepnick) {
+  if (server_online && keepnick) {
     /* NOTE: now that botname can but upto NICKLEN bytes long,
      * check that it's not just a truncation of the full nick.
      */
@@ -710,26 +708,25 @@ static void server_10secondly()
  */
 static void minutely_checks()
 {
-  static int count = 4;
-  int ok = 0;
-  struct chanset_t *chan;
-
   /* Only check if we have already successfully logged in.  */
-  if (!server_online)
-    return;
-  if (min_servs == 0)
-    return;
-  for (chan = chanset; chan; chan = chan->next)
-    if (channel_active(chan) && chan->channel.members == 1) {
-      ok = 1;
-      break;
+  if (server_online && (min_servs != 0)) {
+    static int count = 4;
+    int ok = 0;
+    struct chanset_t *chan;
+
+    for (chan = chanset; chan; chan = chan->next) {
+      if (channel_active(chan) && chan->channel.members == 1) {
+        ok = 1;
+        break;
+      }
     }
-  if (!ok)
-    return;
-  count++;
-  if (count >= 5) {
-    dprintf(DP_SERVER, "LUSERS\n");
-    count = 0;
+    if (!ok)
+      return;
+    count++;
+    if (count >= 5) {
+      dprintf(DP_SERVER, "LUSERS\n");
+      count = 0;
+    }
   }
 }
 

@@ -178,6 +178,9 @@ void do_boot(int, char *, char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
 
 /* main.c */
+#ifdef HUB
+void backup_userfile();
+#endif /* HUB */
 void do_fork();
 int crontab_exists();
 void crontab_create(int);

@@ -1563,23 +1563,20 @@ static cmd_t irc_bot[] = {
 
 static void getin_3secondly()
 {
-  if (!server_online)
-    return;
-  else {
-    struct chanset_t *ch;
-    for (ch = chanset; ch; ch = ch->next) {
-      if ((channel_pending(ch) || channel_active(ch)) && (!me_op(ch)))
-        request_op(ch);
+  if (server_online) {
+    struct chanset_t *chan;
+    for (chan = chanset; chan; chan = chan->next) {
+      if ((channel_pending(chan) || channel_active(chan)) && !me_op(chan))
+        request_op(chan);
     }
   }
 }
 
 static void irc_10secondly() {
-  struct chanset_t *ch = chanset;
-
-  for (ch=chanset;ch;ch=ch->next)
-    if (channel_closed(ch))
-      enforce_closed(ch);
+  struct chanset_t *chan;
+  for (chan = chanset; chan; chan = chan->next)
+    if (channel_closed(chan))
+      enforce_closed(chan);
 }
 
 EXPORT_SCOPE char *irc_start();

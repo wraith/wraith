@@ -1972,8 +1972,8 @@ static void cmd_backup(struct userrec *u, int idx, char *par)
   dprintf(idx, STR("Backing up the channel & user files...\n"));
 #ifdef HUB
   write_userfile(idx);
+  backup_userfile();
 #endif /* HUB */
-  call_hook(HOOK_BACKUP);
 }
 
 static void cmd_trace(struct userrec *u, int idx, char *par)

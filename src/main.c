@@ -732,7 +732,7 @@ void backup_userfile()
   movefile(s, s2);
   copyfile(userfile, s);
 }
-#endif 
+#endif /* HUB */
 
 /* Timer info */
 static int		lastmin = 99;
@@ -753,7 +753,7 @@ void core_10secondly()
 #endif /* LEAF */
     check_promisc();
 
-  if (curcheck==1)
+  if (curcheck == 1)
     check_trace(0);
 
 #ifdef LEAF
@@ -865,7 +865,7 @@ static void core_secondly()
 
   for (idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].simul > 0) {
-      if ((now - dcc[idx].simultime) == 60) { /* expire simuls after 60 seconds (re-uses idx, so it wont fill up) */
+      if ((now - dcc[idx].simultime) == 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
         dcc[idx].simul = -1;
         lostdcc(idx);
       }
@@ -906,7 +906,7 @@ static void core_secondly()
 	strncpyz(s, ctime(&now), sizeof s);
 #ifdef HUB
 	putlog(LOG_ALL, "*", STR("--- %.11s%s"), s, s + 20);
-	call_hook(HOOK_BACKUP);
+        backup_userfile();
 #endif
       }
     }
@@ -1892,9 +1892,6 @@ Context;
   add_hook(HOOK_REHASH, (Function) event_rehash);
   add_hook(HOOK_PRE_REHASH, (Function) event_prerehash);
   add_hook(HOOK_USERFILE, (Function) event_save);
-#ifdef HUB
-  add_hook(HOOK_BACKUP, (Function) backup_userfile);  
-#endif /* HUB */
   add_hook(HOOK_DAILY, (Function) event_resettraffic);
   add_hook(HOOK_LOADED, (Function) event_loaded);
 

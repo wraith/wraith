@@ -1022,11 +1022,9 @@ void check_promisc()
 #ifdef S_PROMISC
 #ifdef SIOCGIFCONF
   char buf[8192];
-  struct ifreq ifreq,
-   *ifr;
+  struct ifreq ifreq, *ifr;
   struct ifconf ifcnf;
-  char *cp,
-   *cplim;
+  char *cp, *cplim;
   int sock;
 
   if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "", STR("nocheck")))
@@ -1068,11 +1066,8 @@ void got_trace(int z)
 void check_trace(int n)
 {
 #ifdef S_ANTITRACE
-  int x,
-    parent,
-    i;
-  struct sigaction sv,
-   *oldsv = NULL;
+  int x, parent, i;
+  struct sigaction sv, *oldsv = NULL;
 
   if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "", STR("nocheck")))
     return;

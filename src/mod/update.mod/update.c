@@ -406,36 +406,36 @@ static void cancel_user_xfer(int idx, void *x)
 int cnt = 0;
 static void check_updates()
 {
-  int i;
-  char buf[1024];
+  if (isupdatehub()) {
+    int i;
+    char buf[1024];
 
-  if (!isupdatehub()) return;
-  cnt++;
-  if ((cnt > 5) && bupdating)  bupdating = 0; //2 minutes should be plenty.
-  if (bupdating) return;
-  cnt = 0;
+    cnt++;
+    if ((cnt > 5) && bupdating)  bupdating = 0; //2 minutes should be plenty.
+    if (bupdating) return;
+    cnt = 0;
 
-  for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE) &&
-        !(dcc[i].status & STAT_SENDINGU) && !(dcc[i].status & STAT_OFFEREDU) &&
-        !(dcc[i].status & STAT_UPDATED)) { //only offer binary to bots that are sharing
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE) &&
+          !(dcc[i].status & STAT_SENDINGU) && !(dcc[i].status & STAT_OFFEREDU) &&
+          !(dcc[i].status & STAT_UPDATED)) { //only offer binary to bots that are sharing
 
-      dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU |
-                       STAT_OFFEREDU);
+        dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU |
+                         STAT_OFFEREDU);
 
-      if ((dcc[i].u.bot->bts < buildts) && (isupdatehub())) {
-        putlog(LOG_DEBUG, "@", "Bot: %s has build %lu, offering them %lu", dcc[i].nick, dcc[i].u.bot->bts, buildts);
-        dprintf(i, "sb u?\n");
-        dcc[i].status |= STAT_OFFEREDU;
+        if ((dcc[i].u.bot->bts < buildts) && (isupdatehub())) {
+          putlog(LOG_DEBUG, "@", "Bot: %s has build %lu, offering them %lu", dcc[i].nick, dcc[i].u.bot->bts, buildts);
+          dprintf(i, "sb u?\n");
+          dcc[i].status |= STAT_OFFEREDU;
+        }
       }
     }
+    //send out notice to update remote bots ...
+    sprintf(buf, "nu? %lu", buildts);
+    putallbots(buf);
   }
-
-  //send out notice to update remote bots ...
-  sprintf(buf, "nu? %lu", buildts);
-  putallbots(buf);
 }
-#endif
+#endif /* HUB */
 
 static int update_expmem()
 {
