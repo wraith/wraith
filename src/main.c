@@ -178,7 +178,7 @@ void fatal(const char *s, int recoverable)
 static void check_expired_dcc()
 {
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && dcc[i].type->timeout_val &&
+    if (dcc[i].type && (dcc[i].type != &DCC_LOST) && dcc[i].type->timeout_val &&
 	((now - dcc[i].timeval) > *(dcc[i].type->timeout_val))) {
       if (dcc[i].type->timeout)
 	dcc[i].type->timeout(i);
