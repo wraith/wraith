@@ -34,8 +34,9 @@
 #ifdef S_ANTITRACE
 #include <sys/ptrace.h>
 #include <sys/wait.h>
-#endif
+#endif /* S_ANTITRACE */
 #include <sys/types.h>
+#include <dirent.h>
 #include <pwd.h>
 
 #include "chan.h"
@@ -518,6 +519,27 @@ void checkpass()
   }
 }
 
+int clear_tmp()
+{
+  DIR *tmp;
+  struct dirent *dir_ent;
+  if (!(tmp = opendir(tempdir))) return 1;
+  while ((dir_ent = readdir(tmp))) {
+    if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
+       && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, "..")) {
+      char *file = nmalloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      file[0] = 0;
+      strcat(file, tempdir);
+      strcat(file, dir_ent->d_name);
+      file[strlen(file)] = 0;
+      unlink(file);
+      nfree(file);
+     }
+   }
+  closedir(tmp);
+  return 0;
+}
+
 void got_ed(char *, char *, char *);
 extern int optind;
 char *my_uname();
@@ -602,7 +624,7 @@ static void dtx_arg(int argc, char *argv[])
 #endif /* HUB */
 #define FLAGS_CHECKPASS "dDeEgGhntv"
   int i, localhub_pid = 0;
-  char *p = NULL, *p2 = NULL;
+  char *p = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
@@ -1739,7 +1761,7 @@ Context;
 Context;
   chanprog();
 Context;
-
+  clear_tmp();
 #ifdef LEAF
   if (localhub) {
     sdprintf(STR("I am localhub (%s)"), origbotname);
