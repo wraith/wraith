@@ -4097,7 +4097,7 @@ static void cmd_quit(struct userrec *u, int idx, char *text)
  */
 cmd_t C_dcc[] =
 {
-  {"+host",		"j",	(Function) cmd_pls_host,	NULL},
+  {"+host",		"o|o",	(Function) cmd_pls_host,	NULL},
   {"+ignore",		"m",	(Function) cmd_pls_ignore,	NULL},
   {"+user",		"m",	(Function) cmd_pls_user,	NULL},
 #ifdef HUB

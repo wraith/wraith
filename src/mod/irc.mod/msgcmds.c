@@ -157,6 +157,7 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
+
   pass = newsplit(&par);
   if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
     if (par[0] == '*') {
@@ -430,7 +431,7 @@ static cmd_t C_msg[] =
   {"word",		"",	(Function) msg_word,		NULL},
 #ifdef S_MSGCMDS
   {"ident",   		"",	(Function) msg_ident,		NULL},
-  {"invite",		"o|o",	(Function) msg_invite,		NULL},
+  {"invite",		"",	(Function) msg_invite,		NULL},
   {"op",		"",	(Function) msg_op,		NULL},
   {"pass",		"",	(Function) msg_pass,		NULL},
 #endif /* S_MSGCMDS */

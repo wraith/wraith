@@ -544,7 +544,7 @@ int pass_set(struct userrec *u, struct user_entry *e, void *buf)
       encrypt_pass(pass, new);
     e->u.extra = strdup(new);
   }
-  if (!noshare && !(u->flags & USER_BOT))
+  if (!noshare)
     shareout(NULL, "c PASS %s %s\n", u->handle, pass ? pass : "");
   return 1;
 }

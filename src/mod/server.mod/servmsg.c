@@ -102,16 +102,18 @@ static int gotfake433(char *from)
  * msg: proc-name <nick> <user@host> <handle> <args...>
  */
 
-static int check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
+static void check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
   int x;
 
   get_user_flagrec(u, &fr, NULL);
   x = check_bind(BT_msg, cmd, &fr, nick, uhost, u, args);
-  if (x & BIND_RET_LOG) putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
-  if (x) return(1);
-  else return(0);
+
+  if (x & BIND_RET_LOG) 
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
+  else if (x == 0)
+    putlog(LOG_MSGS, "*", "[%s!%s] %s %s", nick, uhost, cmd, args);
 }
 
 #ifdef S_AUTHCMDS
@@ -123,7 +125,7 @@ static int check_bind_msgc(char *cmd, char *nick, char *from, struct userrec *u,
   x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, NULL);
 
   if (x & BIND_RET_LOG)
-    putlog(LOG_CMDS, "*", " in check_bind_msgc(%s!%s) !%s! %s%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
 
   if (x & BIND_RET_BREAK) return(1);
   return(0);
@@ -498,7 +500,7 @@ static int gotmsg(char *from, char *msg)
       /* is it a cmd? */
 
       if (i > -1 && auth[i].authed && my_code[0] == cmdprefix[0] && my_code[1]) {
-        my_code++;        
+        my_code++;
         my_u = auth[i].user;
 
         if (check_bind_msgc(my_code, nick, uhost, my_u, msg))
@@ -508,13 +510,12 @@ static int gotmsg(char *from, char *msg)
       } else if ((my_code[0] != cmdprefix[0] || !my_code[1] || i == -1 || !(auth[i].authed))) {
 #endif /* S_AUTHCMDS */
         if (!ignoring) {
-          int doit = 1, result = 0;
+          int doit = 1;
 #ifdef S_MSGCMDS
           if (!egg_strcasecmp(my_code, "op") || !egg_strcasecmp(my_code, "pass") || !egg_strcasecmp(my_code, "invite") 
               || !egg_strcasecmp(my_code, "ident")
                || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
                || !egg_strcasecmp(my_code, msginvite) || !egg_strcasecmp(my_code, msgident)) {
-/*           || !strcmp(my_code, msgop) || !strcmp(my_code, msgpass) || !strcmp(my_code, msgop)) { */
             char buf2[10] = "";
 
             doit = 0;
@@ -527,14 +528,11 @@ static int gotmsg(char *from, char *msg)
             else if (!egg_strcasecmp(my_code, msgident))
               sprintf(buf2, "ident");
             if (buf[0])
-              result = check_bind_msg(buf2, nick, uhost, my_u, msg);
+              check_bind_msg(buf2, nick, uhost, my_u, msg);
           }
 #endif /* S_MSGCMDS */
           if (doit)
-            result = check_bind_msg(my_code, nick, uhost, my_u, msg);
-            
-	  if (!result)
-	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, my_code, msg);
+            check_bind_msg(my_code, nick, uhost, my_u, msg);
         }
 #ifdef S_AUTHCMDS
       }

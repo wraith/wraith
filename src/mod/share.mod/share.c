@@ -1481,12 +1481,12 @@ finish_share(int idx)
   unlink(dcc[idx].u.xfer->filename);    //I mean really, shit fills up the quota fast.
 
   loading = 0;
-  putlog(LOG_BOTS, "*", "%s.", USERF_XFERDONE);
 
   clear_chanlist();             /* Remove all user references from the
                                  * channel lists.                       */
   userlist = u;                 /* Set new user list.                   */
   lastuser = NULL;              /* Reset last accessed user ptr.        */
+  putlog(LOG_BOTS, "*", "%s.", USERF_XFERDONE);
 
   /*
    * Migrate:

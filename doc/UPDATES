@@ -8,6 +8,8 @@ This is a summary of ChangeLog basically.
 4.Several user cmds on BOTS were not being shared.
 5.Fixed a fatal bug in +take.
 6.Removed garblestrings dependancy on binary checksum checking.
+7.Cmd_pls_host now is available to o|o. Users can add hosts to themselves now.
+8.Fixed msg_invite spamming the password for non-users.
 
 1.1.5
 

@@ -428,6 +428,7 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 		}
 		else {
 			if (table->match_type & MATCH_CASE) cmp = strcmp(entry->mask, match);
+			/* MATCH_EXACT */
 			else cmp = strcasecmp(entry->mask, match);
 		}
 		if (cmp) continue; /* Doesn't match. */
