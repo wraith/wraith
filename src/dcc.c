@@ -1260,7 +1260,10 @@ dcc_telnet(int idx, char *buf, int ii)
   strcpy(dcc[i].nick, "*");
 
   dcc[i].u.dns->ibuf = idx;
-  dcc[i].u.dns->dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
+
+  int dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
+  if (dns_id >= 0)
+    dcc[i].u.dns->dns_id = dns_id;
 }
 
 static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, char **hosts)

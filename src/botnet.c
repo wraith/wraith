@@ -950,7 +950,9 @@ int botlink(char *linker, int idx, char *nick)
       dcc[i].u.dns->cptr = strdup(linker);
       dcc[i].u.dns->ibuf = idx;
 
-      dcc[i].u.dns->dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
+      int dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
+      if (dns_id >= 0)
+        dcc[i].u.dns->dns_id = dns_id;
      
       return 1;
       /* wait for async reply */
@@ -1121,7 +1123,10 @@ void tandem_relay(int idx, char *nick, register int i)
 
   dcc[i].timeval = now;
   dcc[i].u.dns->ibuf = idx;
-  dcc[i].u.dns->dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
+  
+  int dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
+  if (dns_id >= 0)
+    dcc[i].u.dns->dns_id = dns_id;
 
   return;
   /* wait for async reply */
