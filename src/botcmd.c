@@ -708,12 +708,9 @@ static void bot_nlinked(int idx, char *par)
       bogus = 1;
   }
   if (bogus) {
-    putlog(LOG_BOTS, "*", "%s %s!  (%s -> %s)", BOT_BOGUSLINK, dcc[idx].nick,
-	   next, newbot);
-    simple_sprintf(s, "%s: %s %s", BOT_BOGUSLINK, dcc[idx].nick,
-		   MISC_DISCONNECTED);
-    dprintf(idx, "error %s (%s -> %s)\n",
-	    BOT_BOGUSLINK, next, newbot);
+    putlog(LOG_BOTS, "*", "%s %s!  (%s -> %s)", BOT_BOGUSLINK, dcc[idx].nick, next, newbot);
+    simple_sprintf(s, "%s: %s %s", BOT_BOGUSLINK, dcc[idx].nick, MISC_DISCONNECTED);
+    dprintf(idx, "error %s (%s -> %s)\n", BOT_BOGUSLINK, next, newbot);
   }
   if (s[0]) {
     chatout("*** %s\n", s);
@@ -743,8 +740,7 @@ static void bot_nlinked(int idx, char *par)
   u = get_user_by_handle(userlist, newbot);
   if (bot_flags(u) & BOT_REJECT) {
     botnet_send_reject(idx, conf.bot->nick, NULL, newbot, NULL, NULL);
-    putlog(LOG_BOTS, "*", "%s %s %s %s", BOT_REJECTING,
-	   newbot, MISC_FROM, dcc[idx].nick);
+    putlog(LOG_BOTS, "*", "%s %s %s %s", BOT_REJECTING, newbot, MISC_FROM, dcc[idx].nick);
   }
 }
 

@@ -43,7 +43,6 @@ typedef struct {
 
 #ifndef MAKING_MODS
 
-void send_tand_but(int, char *, int);
 void botnet_send_chan(int, char *, char *, int, char *);
 void botnet_send_chat(int, char *, char *);
 void botnet_send_act(int, char *, char *, int, char *);
