@@ -141,7 +141,8 @@ static void tell_who(int idx, int chan)
     }
   ok = 0;
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && (dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->channel != chan)) {
+   if (dcc[i].type) {
+    if ((dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->channel != chan)) {
       if (!ok) {
 	ok = 1;
 	dprintf(idx, "Other people on the bot:\n");
@@ -200,6 +201,7 @@ static void tell_who(int idx, int chan)
       }
       dprintf(idx, "%s\n", s);
     }
+   }
   }
 }
 #endif /* HUB */
