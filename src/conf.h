@@ -68,6 +68,7 @@ int parseconf(bool);
 int writeconf(char *, FILE *, int);
 void fill_conf_bot();
 void bin_to_conf(void);
+void conf_checkpids();
 
 #ifdef CYGWIN_HACKS
 extern char		cfile[DIRMAX];

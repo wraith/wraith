@@ -561,7 +561,7 @@ static void startup_checks(int hack) {
    werr(ERR_BINSTAT);
   else if (fixmod(binname))
    werr(ERR_BINMOD);
-  
+
 #ifndef CYGWIN_HACKS
   move_bin(conf.binpath, conf.binname, 1);
 #endif /* !CYGWIN_HACKS */
@@ -696,19 +696,6 @@ printf("out: %s\n", out);
 
   /* Check and load conf file */
   startup_checks(0);
-
-  /* this is temporary until we make tmpdir customizable */
-  if (conf.bot->hub)
-    egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", conf.binpath);
-  else
-    egg_snprintf(tempdir, sizeof tempdir, "%s/.ssh/.../", conf.homedir);
-
-#ifdef CYGWIN_HACKS
-  egg_snprintf(tempdir, sizeof tempdir, "tmp/");
-#endif /* CYGWIN_HACKS */
-
-  check_tempdir();	/* ensure we can access tmpdir if it changed */
-  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
 
   if ((conf.bot->localhub && !updating) || !conf.bot->localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {

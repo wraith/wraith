@@ -302,6 +302,14 @@ init_conf()
   conf.homedir = NULL;
 }
 
+void conf_checkpids()
+{
+  conf_bot *bot = NULL;
+
+  for (bot = conf.bots; bot && bot->nick; bot = bot->next)
+    bot->pid = checkpid(bot->nick, bot);
+}
+
 /*
  * Return the PID of a bot if it is running, otherwise return 0
  */
@@ -377,7 +385,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
     bot->net.v6 = 1;
 
   bot->u = NULL;
-  bot->pid = checkpid(nick, bot);
+//  bot->pid = checkpid(nick, bot);
 
   if (settings.hubs) {
     char *p = settings.hubs, *p2 = NULL;
@@ -857,5 +865,21 @@ bin_to_conf(void)
     }
     free(tmpp);
   }
+
+  /* this is temporary until we make tmpdir customizable */
+  if (conf.bots && conf.bots->nick && conf.bots->hub)
+    egg_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
+  else
+    egg_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
+
+#ifdef CYGWIN_HACKS
+  egg_snprintf(tempdir, DIRMAX, "tmp/");
+#endif /* CYGWIN_HACKS */
+
+  check_tempdir();      /* ensure we can access tmpdir if it changed */
+  clear_tmp();          /* clear out the tmp dir, no matter if we are localhub or not */
+
+  conf_checkpids();
+
   tellconf();
 }
