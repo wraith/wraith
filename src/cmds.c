@@ -3690,7 +3690,7 @@ static void cmd_botversion(int idx, char * par) {
     dprintf(idx, "Usage: botversion <bot>\n");
     return;
   }
-  if (nextbot(par)<0) {
+  if (!egg_strcasecmp(par, conf.bot->nick) && nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot\n", par);
   }
   botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "ver");
