@@ -21,9 +21,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#ifdef HAVE_PATHS_H
-# include <paths.h>
-#endif /* HAVE_PATHS_H */
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -39,7 +36,7 @@ int close_tty()
 {
   int fd = -1;
 
-  if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
+  if ((fd = open("/dev/null", O_RDWR, 0)) != -1) {
     dup2(fd, STDIN_FILENO);
     dup2(fd, STDOUT_FILENO);
     dup2(fd, STDERR_FILENO);
@@ -50,9 +47,7 @@ int close_tty()
   return 0;
 }
 
-/*
-int
-my_daemon(int nochdir, int noclose)
+static int my_daemon(int nochdir, int noclose)
 {
   switch (fork()) {
     case -1:
@@ -73,12 +68,12 @@ my_daemon(int nochdir, int noclose)
     close_tty();
   return (0);
 }
-*/
+
 
 pid_t
 do_fork()
 {
-  if (daemon(1, 1))
+  if (my_daemon(1, 1))
     fatal(strerror(errno), 0);
 
   pid_t pid = getpid();
