@@ -216,12 +216,13 @@ dprintf(int idx, const char *format, ...)
     if (dcc[idx].simul > 0 && !dcc[idx].msgc) {
       bounce_simul(idx, buf);
     } else if (dcc[idx].msgc > 0) {
-      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
-      char *ircbuf = (char *) my_calloc(1, size);
+//      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
+//      char *ircbuf = (char *) my_calloc(1, size);
 
-      egg_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
-      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
-      free(ircbuf);
+//      egg_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
+//      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
+      dprintf(DP_HELP, "PRIVMSG %s :%s\n", dcc[idx].simulbot, buf);
+//      free(ircbuf);
     } else {
       if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {
         char *p = add_cr(buf);
