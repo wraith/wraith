@@ -97,6 +97,8 @@ int skipline (char *line, int *skip) {
   return (*skip);
 }
 
+#define type(hub, leaf) (hub ? 1 : (leaf ? 2 : 0))
+
 int parse_help(char *infile, char *outfile) {
   FILE *in = NULL, *out = NULL;
   char *buffer = NULL, *cmd = NULL;
@@ -155,9 +157,9 @@ help_t help[] = \n\
             fprintf(out,"\")},\n");
           else
             fprintf(out,"\"},\n");
-          if (cl) { cl = 0; fprintf(out, "#endif\n"); }
-          if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
-          else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
+//          if (cl) { cl = 0; fprintf(out, "#endif\n"); }
+//          if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
+//          else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
           free(cmd);
         }
         p = strchr(buffer, ':');
@@ -167,17 +169,17 @@ help_t help[] = \n\
 
           strcpy(cmd, p);
           printf(".");
-          if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
-          else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
+//          if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
+//          else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
           if (strchr(cmd, ':')) {
             char *p2 = NULL, *cmdn = (char *) calloc(1,strlen(cmd) + 1);
 
             strcpy(cmdn, cmd);
             p2 = strchr(cmdn, ':');
             *p2 = 0;
-            fprintf(out, "  {2, \"%s\", STR(\"", cmdn);
+            fprintf(out, "  {%d, \"%s\", STR(\"", type(dohub, doleaf), cmdn);
           } else
-            fprintf(out, "  {2, \"%s\", 0, \"", cmd);
+            fprintf(out, "  {%d, \"%s\", 0, \"", type(dohub, doleaf), cmd);
         } else {			/* END */
           fprintf(out, "  {0, NULL, 0, NULL}\n};\n");
         }
@@ -187,7 +189,7 @@ help_t help[] = \n\
     }
     buffer = NULL;
   }
-  fprintf(out, "#endif /* HELP_H */\n");
+//  fprintf(out, "#endif /* HELP_H */\n");
   printf(" Success\n");
   if (in) fclose(in);
   if (out) fclose(out);

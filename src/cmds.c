@@ -709,7 +709,8 @@ int
 findhelp(const char *cmd)
 {
   for (int hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
-    if (!egg_strcasecmp(cmd, help[hi].cmd))
+    if (!egg_strcasecmp(cmd, help[hi].cmd) &&
+      (!help[hi].cmd || (conf.bot->hub && help[hi].type == 1) || (!conf.bot->hub && help[hi].type == 2)))
       return hi;
 
   return -1;
