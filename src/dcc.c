@@ -1240,15 +1240,22 @@ dcc_telnet(int idx, char *buf, int ii)
   putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
 
   sprintf(x, "-telnet!telnet@%s", iptostr(htonl(ip)));
+
   if (match_ignore(x) || detect_telnet_flood(x)) {
     killsock(sock);
     return;
   }
+  
+  /* If a matching bot ip is found, it might still be on the ignore list as a host,
+   * so we'll just reverse the ip anyway and check the ignores before
+   * proceeding with user matching 
+   */
 
   i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
 
   dcc[i].addr = ip;
   dcc[i].sock = sock;
+  dcc[i].user = get_user_by_host(x);		/* check for matching -telnet!telnet@ip */
   strcpy(dcc[i].host, s);
 #ifdef USE_IPV6
   if (sockprotocol(sock) == AF_INET6)
@@ -1281,7 +1288,8 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   strncpyz(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
 
   sprintf(s2, "-telnet!telnet@%s", dcc[i].host);
-  if (match_ignore(s2) || detect_telnet_flood(s2)) {
+
+  if (match_ignore(s2)) {
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
@@ -1303,11 +1311,15 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
       return;
     }
   }
+
 /* .  ssl_link(dcc[i].sock, ACCEPT_SSL); */
 
   changeover_dcc(i, &DCC_IDENTWAIT, 0);
   dcc[i].timeval = now;
   dcc[i].u.ident_sock = dcc[idx].sock;
+
+  if (!dcc[i].user)
+    dcc[i].user = get_user_by_host(s2);		/* check for matching -telnet!telnet@host */
   
   if (hosts)
     putlog(LOG_MISC, "*", "Telnet connection: %s[%s]/%d", dcc[i].host, ip, dcc[i].port);
@@ -1342,6 +1354,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   strcpy(dcc[j].host, dcc[i].host);
   strcpy(dcc[j].nick, "*");
   dcc[j].u.ident_sock = dcc[i].sock;
+  dcc[j].user = dcc[i].user;
   dcc[j].timeval = now;
   dprintf(j, "%d, %d\n", dcc[i].port, dcc[idx].port);
 }
@@ -1459,6 +1472,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
 {
   strip_telnet(dcc[idx].sock, buf, &atr);
   buf[HANDLEN] = 0;
+
   /* Toss out bad nicknames */
   if ((dcc[idx].nick[0] != '@') && (!wild_match(dcc[idx].nick, buf))) {
 /* FIXME: if a bot gets this, they will try to decrypt it ;/ */
@@ -1793,34 +1807,44 @@ dcc_telnet_got_ident(int i, char *host)
     lostdcc(i);
     return;
   }
-  char x[1024] = "";
 
   strncpyz(dcc[i].host, host, UHOSTLEN);
-  egg_snprintf(x, sizeof x, "-telnet!%s", dcc[i].host);
 
-  if (match_ignore(x)) {
+  char shost[UHOSTLEN + 20] = "", sip[UHOSTLEN + 20] = "";
+  char *p = strchr(host, '@');
+  *p = 0;
+
+  egg_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[i].host);
+  egg_snprintf(sip, sizeof(sip), "-telnet!%s@%s", host, iptostr(htonl(dcc[i].addr)));
+
+  if (match_ignore(shost) || match_ignore(sip)) {
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
   }
-
+  
   if (protect_telnet) {
-    struct userrec *u = get_user_by_host(x);
+    struct userrec *u = NULL;
     bool ok = 1;
 
-    /* Not a user or +p & require p OR +o */
+    u = dcc[i].user;
+    if (!u)
+      u = get_user_by_host(sip);			/* Check for -telnet!ident@ip */
+    if (!u)
+      u = get_user_by_host(shost);		/* Check for -telnet!ident@host */
     if (!u)
       ok = 0;
+
 #ifdef HUB
-    if (ok && !(u->flags & USER_HUBA))
+    if (ok && u && !(u->flags & USER_HUBA))
       ok = 0;
 #else /* !HUB */
     /* if I am a chanhub and they dont have +c then drop */
-    if (ok && (ischanhub() && !(u->flags & USER_CHUBA)))
+    if (ok && (ischanhub() && u && !(u->flags & USER_CHUBA)))
       ok = 0;
 #endif /* HUB */
 /*    else if (!(u->flags & USER_PARTY))
-      ok = 0; */
+    ok = 0; */
     if (!ok && u && u->bot)
       ok = 1;
     if (!ok && (dcc[idx].status & LSTN_PUBLIC))

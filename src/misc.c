@@ -764,7 +764,8 @@ int bot_aggressive_to(struct userrec *u)
 
   link_pref_val(u, botpval);
   link_pref_val(conf.bot->u, mypval);
-
+  sdprintf("botpval: %s", botpval);
+  sdprintf("mypval: %s", mypval);
   if (strcmp(mypval, botpval) < 0)
     return 1;
   else

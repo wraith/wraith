@@ -6,6 +6,10 @@ This is a summary of ChangeLog basically.
 - Disabled all the DEBUG emailing and context shit, it was utterly pointless
 * Fixed closed-invite not being checked correctly.
 * Fixed segfault while relaying.
+* Telnet host matching is now fixed to match these hosts against the userfile (ONLY FOR ACCESS):
+  -telnet!telnet@ip -telnet!telnet@HOST -telnet!IDENT@IP -telnet!IDENT@HOST
+
+
 
 1.2
 * No longer displaying SALTS on ./bin -v
