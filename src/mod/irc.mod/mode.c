@@ -453,13 +453,14 @@ static void flush_mode(struct chanset_t *chan, int pri)
 {
   char *p = NULL, out[512] = "", post[512] = "";
   size_t postsize = sizeof(post);
-  int i, plus = 2;              /* 0 = '-', 1 = '+', 2 = none */
+  int plus = 2;              /* 0 = '-', 1 = '+', 2 = none */
+  unsigned int i = 0;
 
 /* dequeue_op_deop(chan); */
   p = out;
   post[0] = 0, postsize--;
 
-/* new does +o first.. */
+/* now does +o first.. */
   if (chan->mns[0]) {
     *p++ = '-', plus = 0;
     for (i = 0; i < strlen(chan->mns); i++)
@@ -591,7 +592,8 @@ static void flush_mode(struct chanset_t *chan, int pri)
  */
 void add_mode(struct chanset_t *chan, char plus, char mode, char *op)
 {
-  int i, type, modes, l;
+  int type, modes, l;
+  unsigned int i;
   masklist *m = NULL;
   memberlist *mx = NULL;
   char s[21] = "";

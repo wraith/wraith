@@ -61,12 +61,12 @@ struct laston_info {
 };
 
 struct bot_addr {
-  int telnet_port;
-  int relay_port;
-  int hublevel;
+  unsigned int telnet_port;
+  unsigned int relay_port;
+  unsigned int hublevel;
   char *address;
   char *uplink;
-  int roleid;
+  unsigned int roleid;
 };
 
 struct user_entry {
@@ -120,8 +120,7 @@ struct chanuserrec {
   struct chanuserrec *next;
   char channel[81];
   time_t laston;
-  unsigned long flags;
-  /* FIXME:rem unsigned long flags_udef; */
+  flag_t flags;
   char *info;
 };
 
@@ -130,8 +129,7 @@ struct chanuserrec {
 struct userrec {
   struct userrec *next;
   char handle[HANDLEN + 1];
-  unsigned long flags;
-  /* FIXME: rem unsigned long flags_udef; */
+  flag_t flags;
   struct chanuserrec *chanrec;
   struct user_entry *entries;
 };

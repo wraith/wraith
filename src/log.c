@@ -50,7 +50,7 @@ static logmode_mapping_t logmode_mappings[] = {
 	{LOG_ERRORS, 'e', "errors"},
 	{LOG_GETIN, 'g', "getin"},
 	{LOG_WARN, 'u', "warnings"},
-	{0}
+	{0, 0, NULL}
 };
 #define LOG_LEVELS 18 		/* change this if you change the levels */
 

@@ -13,12 +13,14 @@
 #define PRIV_VOICE 2
 
 
+typedef unsigned long flag_t;
+
 struct flag_record {
-  int match;
-  int global;
+  flag_t match;
+  flag_t global;
 /* FIXME: ALSO MAKE THESE LONG */
-  int bot;
-  int chan;
+  flag_t  bot;
+  flag_t chan;
 };
 
 #define FR_GLOBAL 0x00000001
@@ -186,7 +188,7 @@ void break_down_flags(const char *, struct flag_record *, struct flag_record *);
 int build_flags(char *, struct flag_record *, struct flag_record *);
 int flagrec_eq(struct flag_record *, struct flag_record *);
 int flagrec_ok(struct flag_record *, struct flag_record *);
-int sanity_check(int);
+int sanity_check(flag_t);
 int chan_sanity_check(int, int);
 char geticon(int);
 

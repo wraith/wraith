@@ -359,7 +359,7 @@ void tell_dcc(int idx)
 
   /* calculate max nicklen */
   for (i = 0; i < dcc_total; i++) {
-      if(strlen(dcc[i].nick) > nicklen)
+      if(strlen(dcc[i].nick) > (unsigned) nicklen)
           nicklen = strlen(dcc[i].nick);
   }
   if(nicklen < 9) nicklen = 9;
@@ -369,7 +369,7 @@ void tell_dcc(int idx)
   dprintf(idx, format, "----", "---", "--------", "-----", "---------", 
                         "----------------------------------------", "----");
 
-  egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5d %%-%us %%-40s %%s\n", nicklen);
+  egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5ud %%-%us %%-40s %%s\n", nicklen);
 
   for (i = 0; i < dcc_total; i++) {
     j = strlen(dcc[i].host);
@@ -569,7 +569,8 @@ void do_boot(int idx, char *by, char *reason)
 
 int listen_all(int lport, int off)
 {
-  int i, idx = (-1), port, realport;
+  int i, idx = (-1);
+  unsigned int port, realport;
 #ifdef USE_IPV6
   int i6 = 0;
 #endif /* USE_IPV6 */

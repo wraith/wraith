@@ -24,7 +24,7 @@ struct server_list {
   struct server_list	*next;
 
   char			*name;
-  int			 port;
+  unsigned int		 port;
   char			*pass;
   char			*realname;
 };
@@ -48,10 +48,11 @@ extern bind_table_t	*BT_ctcp, *BT_ctcr;
 #ifdef S_MSGCMDS
 extern bind_table_t	*BT_msgc;
 #endif /* S_MSGCMDS */
-extern int 		serv, servidx, cycle_time, default_port, newserverport,
+extern int 		serv, servidx, cycle_time, newserverport,
 			nick_len, checked_hostmask, ctcp_mode, quiet_reject,
 			flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time,
 			answer_ctcp, trigger_on_ignore;
+extern unsigned int	default_port;
 extern time_t		server_online;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[];

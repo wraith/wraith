@@ -6,8 +6,8 @@
 char *
 dirname(const char *path)
 {
-        static char bname[MAXPATHLEN];
-        register const char *endp;
+        static char bname[MAXPATHLEN] = "";
+        register const char *endp = NULL;
 
         /* Empty or NULL string gets treated as "." */
         if (path == NULL || *path == '\0') {

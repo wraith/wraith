@@ -32,8 +32,8 @@ typedef struct cmd_pass {
 extern mycmds 		cmdlist[]; 
 extern int		cmdi;
 
-int check_dcc_attrs(struct userrec *, int);
-int check_dcc_chanattrs(struct userrec *, char *, int, int);
+int check_dcc_attrs(struct userrec *, flag_t);
+int check_dcc_chanattrs(struct userrec *, char *, flag_t, flag_t);
 int stripmodes(char *);
 char *stripmasktype(int);
 void gotremotecmd(char * forbot, char * frombot, char * fromhand, char * fromidx, char * cmd);

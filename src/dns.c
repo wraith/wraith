@@ -64,11 +64,12 @@ struct dcc_table DCC_DNSWAIT =
   DCT_VALIDIDX,
   eof_dcc_dnswait,
   dcc_dnswait,
-  0,
-  0,
+  NULL,
+  NULL,
   display_dcc_dnswait,
   kill_dcc_dnswait,
-  0
+  NULL,
+  NULL
 };
 
 

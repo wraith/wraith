@@ -1173,7 +1173,7 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
   char handle[HANDLEN + 1] = "", s[UHOSTLEN] = "", s1[UHOSTLEN] = "", atrflag = 0, chanflag[2] = "";
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
-  int maxnicklen, maxhandlen;
+  unsigned int maxnicklen, maxhandlen;
   char format[81] = "";
 
   chan = get_channel(idx, par);

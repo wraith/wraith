@@ -310,7 +310,7 @@ void maskhost(const char *s, char *nw)
 void dumplots(int idx, const char *prefix, char *data)
 {
   char		*p = data, *q = NULL, *n = NULL, c = 0;
-  const int	 max_data_len = 500 - strlen(prefix);
+  const size_t max_data_len = 500 - strlen(prefix);
 
   if (!*data) {
     dprintf(idx, "%s\n", prefix);
@@ -416,7 +416,9 @@ void daysdur(time_t now, time_t then, char *out)
 static char *fuckyou = " _   _ _      __            _                            ____\n| | | (_)    / _|_   _  ___| | __  _   _  ___  _   _   _|  _ \\\n| |_| | |   | |_| | | |/ __| |/ / | | | |/ _ \\| | | | (_) | | |\n|  _  | |_  |  _| |_| | (__|   <  | |_| | (_) | |_| |  _| |_| |\n|_| |_|_( ) |_|  \\__,_|\\___|_|\\_\\  \\__, |\\___/ \\__,_| (_)____/\n        |/                         |___/\n";
 
 char *wbanner() {
-  if (fuckyou) ;
+  if (fuckyou) {
+    ;
+  }
 
   switch (randint(9)) {
    case 0: return STR("                       .__  __  .__\n__  _  ______________  |__|/  |_|  |__\n\\ \\/ \\/ /\\_  __ \\__  \\ |  \\   __\\  |  \\\n \\     /  |  | \\// __ \\|  ||  | |   Y  \\\n  \\/\\_/   |__|  (____  /__||__| |___|  /\n                     \\/              \\/\n");
@@ -469,7 +471,8 @@ void show_channels(int idx, char *handle)
   struct chanset_t *chan = NULL;
   struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0};
   struct userrec *u = NULL;
-  int first = 0, l = 0, total = 0;
+  int first = 0, total = 0;
+  size_t l = 0;
   char format[120] = "";
 
   if (handle)

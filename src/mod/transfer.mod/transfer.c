@@ -35,7 +35,7 @@ static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
 static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
 static int dcc_limit = 4;	/* Maximum number of simultaneous file
 				   downloads allowed */
-static int dcc_block = 0;	/* Size of one dcc block */
+static unsigned int dcc_block = 0;	/* Size of one dcc block */
 static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
                                    users without access? */
 
@@ -886,7 +886,7 @@ void tout_dcc_send(int idx)
 void display_dcc_get(int idx, char *buf)
 {
   if (dcc[idx].status == dcc[idx].u.xfer->length)
-    sprintf(buf,TRANSFER_SEND, dcc[idx].u.xfer->acked,
+    sprintf(buf, TRANSFER_SEND, dcc[idx].u.xfer->acked,
 	    dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
   else
     sprintf(buf,TRANSFER_SEND, dcc[idx].status,
@@ -946,7 +946,8 @@ struct dcc_table DCC_SEND =
   tout_dcc_send,
   display_dcc_send,
   kill_dcc_xfer,
-  out_dcc_xfer
+  out_dcc_xfer,
+  NULL
 };
 
 void dcc_fork_send(int idx, char *x, int y);
@@ -961,7 +962,8 @@ struct dcc_table DCC_FORK_SEND =
   eof_dcc_fork_send,
   display_dcc_fork_send,
   kill_dcc_xfer,
-  out_dcc_xfer
+  out_dcc_xfer,
+  NULL
 };
 
 void dcc_fork_send(int idx, char *x, int y)
@@ -990,7 +992,7 @@ struct dcc_table DCC_GET =
   display_dcc_get,
   kill_dcc_xfer,
   out_dcc_xfer,
-  outdone_dcc_xfer
+  outdone_dcc_xfer,
 };
 
 struct dcc_table DCC_GET_PENDING =
@@ -1003,7 +1005,8 @@ struct dcc_table DCC_GET_PENDING =
   transfer_get_timeout,
   display_dcc_get_p,
   kill_dcc_xfer,
-  out_dcc_xfer
+  out_dcc_xfer,
+  NULL
 };
 
 static void dcc_get_pending(int idx, char *buf, int len)
@@ -1038,7 +1041,7 @@ static void dcc_get_pending(int idx, char *buf, int len)
 
   /* Are we resuming? */
   if (dcc[idx].u.xfer->type == XFER_RESUME_PEND) {
-    int l;
+    long unsigned int l;
 
     if (dcc_block == 0 || dcc[idx].u.xfer->length < dcc_block) {
       l = dcc[idx].u.xfer->length - dcc[idx].u.xfer->offset;
@@ -1049,7 +1052,6 @@ static void dcc_get_pending(int idx, char *buf, int len)
     }
 
     /* Seek forward ... */
-putlog(LOG_MISC, "*", "!! Resuming on transfer");
     fseek(dcc[idx].u.xfer->f, dcc[idx].u.xfer->offset, SEEK_SET);
     dcc[idx].u.xfer->block_pending = pump_file_to_sock(dcc[idx].u.xfer->f,
 						       dcc[idx].sock, l);

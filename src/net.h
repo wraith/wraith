@@ -102,14 +102,14 @@ typedef struct {
   short          flags;
   char          *inbuf;
   char          *outbuf;
-  unsigned long  outbuflen;             /* Outbuf could be binary data  */
+  size_t outbuflen;             /* Outbuf could be binary data  */
+  size_t inbuflen;              /* Inbuf could be binary data   */
   int encstatus;                        /* encrypted botlink */
   int oseed;                            /* botlink out seed */
   int iseed;                            /* botlink in seed */
   char okey[33];                        /* botlink enckey: out */
   char ikey[33];                        /* botlink enckey: in  */
   int gz; /* gzip compression */
-  unsigned long  inbuflen;              /* Inbuf could be binary data   */
 #ifdef USE_IPV6
   unsigned int af;
 #endif /* USE_IPV6 */
@@ -149,17 +149,17 @@ void dropssl(int);
 void real_killsock(int, const char *, int);
 int answer(int, char *, unsigned long *, unsigned short *, int);
 int findanyidx(register int);
-inline int open_listen(int *);
-inline int open_listen_by_af(int *, int);
+inline int open_listen(unsigned int *);
+inline int open_listen_by_af(unsigned int *, int);
 #ifdef USE_IPV6
-int open_address_listen(IP, int, int *);
+int open_address_listen(IP, int, unsigned int *);
 #else
-int open_address_listen(IP, int *);
+int open_address_listen(IP, unsigned int *);
 #endif /* USE_IPV6 */
-int open_telnet(char *, int);
+int open_telnet(char *, unsigned int);
 int open_telnet_dcc(int, char *, char *);
-int open_telnet_raw(int, char *, int);
-void tputs(int, char *, unsigned int);
+int open_telnet_raw(int, char *, unsigned int);
+void tputs(int, char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);

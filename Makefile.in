@@ -36,7 +36,7 @@ STRIP = @STRIP@
 LIBS = @LIBS@ @ZLIB@ @RESLIB@
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
-CFLGS = -fno-strict-aliasing -Wno-format-y2k
+CFLGS = -fno-strict-aliasing -Wno-format-y2k -W -Wno-unused-parameter
 #-Wuninitialized -W -Wnested-externs -Wdisabled-optimization -Winline
 #-Wpadded -Wshadow -finline-functions
 MAKEFLAGS = -s -j4

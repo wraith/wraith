@@ -71,7 +71,7 @@ static int bounce_bans = 0;
 static int bounce_exempts = 0;
 static int bounce_invites = 0;
 static int bounce_modes = 0;
-static int modesperline = 4;		/* Number of modes per line to send. */
+static unsigned int modesperline = 4;	/* Number of modes per line to send. */
 static int mode_buf_len = 200;		/* Maximum bytes to send in 1 mode. */
 static int use_354 = 0;			/* Use ircu's short 354 /who
 					   responses. */

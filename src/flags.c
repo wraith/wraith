@@ -18,7 +18,7 @@ static int                     allow_dk_cmds = 1;
 
 /* Some flags are mutually exclusive -- this roots them out
  */
-int sanity_check(int atr)
+int sanity_check(flag_t atr)
 {
 /* bots shouldnt have +pmcnaijlys */
   if ((atr & USER_BOT) &&

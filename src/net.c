@@ -625,11 +625,12 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
  *   -1  neterror() type error
  *   -2  can't resolve hostname
  */
-int open_telnet_raw(int sock, char *server, int sport)
+int open_telnet_raw(int sock, char *server, unsigned int sport)
 {
   union sockaddr_union so;
   char host[121] = "";
-  int i, error = 0, port, rc;
+  int i, error = 0, rc;
+  unsigned int port;
   volatile int proxy;
 
   /* firewall?  use socks */
@@ -709,7 +710,7 @@ int open_telnet_raw(int sock, char *server, int sport)
 }
 
 /* Ordinary non-binary connection attempt */
-int open_telnet(char *server, int port)
+int open_telnet(char *server, unsigned int port)
 {
 #ifdef USE_IPV6
   int sock = getsock(0, hostprotocol(server)) , ret = open_telnet_raw(sock, server, port);
@@ -726,7 +727,7 @@ int open_telnet(char *server, int port)
  * 'addr' is ignored if af_def is AF_INET6 -poptix (02/03/03)
  */
 #ifdef USE_IPV6
-int open_address_listen(IP addr, int af_def, int *port)
+int open_address_listen(IP addr, int af_def, unsigned int *port)
 #else
 int open_address_listen(IP addr, int *port)
 #endif /* USE_IPV6 */
@@ -807,7 +808,7 @@ int open_address_listen(IP addr, int *port)
 /* Returns a socket number for a listening socket that will accept any
  * connection -- port # is returned in port
  */
-inline int open_listen(int *port)
+inline int open_listen(unsigned int *port)
 {
 #ifdef USE_IPV6
   return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, AF_INET, port);
@@ -820,7 +821,7 @@ inline int open_listen(int *port)
  * the above is being left in for compatibility, and should NOT LONGER BE USED IN THE CORE CODE.
  */
 
-inline int open_listen_by_af(int *port, int af_def)
+inline int open_listen_by_af(unsigned int *port, int af_def)
 {
 #ifdef USE_IPV6
   return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, af_def, port);
@@ -1489,7 +1490,7 @@ int sockgets(char *s, int *len)
  * 
  * NOTE: Do NOT put Contexts in here if you want DEBUG to be meaningful!!
  */
-void tputs(register int z, char *s, unsigned int len)
+void tputs(register int z, char *s, size_t len)
 {
   register int i, x, idx;
   char *p = NULL;
@@ -1574,7 +1575,7 @@ void tputs(register int z, char *s, unsigned int len)
         x = write(z, s, len);
       if (x == -1)
 	x = 0;
-      if (x < len) {
+      if ((size_t) x < len) {
 	/* Socket is full, queue it */
 	socklist[i].outbuf = calloc(1, len - x);
 	egg_memcpy(socklist[i].outbuf, &s[x], len - x);
@@ -1682,7 +1683,7 @@ void dequeue_sockets()
 	debug3("net: eof!(write) socket %d (%s,%d)", socklist[i].sock,
 	       strerror(errno), errno);
 	socklist[i].flags |= SOCK_EOFD;
-      } else if (x == socklist[i].outbuflen) {
+      } else if ((size_t) x == socklist[i].outbuflen) {
 	/* If the whole buffer was sent, nuke it */
 	free(socklist[i].outbuf);
 	socklist[i].outbuf = NULL;
@@ -1741,7 +1742,7 @@ void tell_netdebug(int idx)
       if (socklist[i].inbuf != NULL)
 	sprintf(&s[strlen(s)], " (inbuf: %04X)", strlen(socklist[i].inbuf));
       if (socklist[i].outbuf != NULL)
-	sprintf(&s[strlen(s)], " (outbuf: %06lX)", socklist[i].outbuflen);
+	sprintf(&s[strlen(s)], " (outbuf: %06lX)", (unsigned long) socklist[i].outbuflen);
       strcat(s, ",");
       dprintf(idx, "%s", s);
     }

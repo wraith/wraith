@@ -974,6 +974,7 @@ static struct dcc_table SERVER_SOCKET =
   timeout_server,
   display_server,
   kill_server,
+  NULL,
   NULL
 };
 

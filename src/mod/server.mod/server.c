@@ -62,7 +62,7 @@ static int strict_servernames;	/* don't update server list */
 static struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 int cycle_time;			/* cycle time till next server connect */
-int default_port;		/* default IRC port */
+unsigned int default_port;		/* default IRC port */
 static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
 int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp;		/* answer how many stacked ctcp's ? */

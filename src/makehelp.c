@@ -179,7 +179,7 @@ help_t help[] = \n\
           } else
             fprintf(out, "  {2, \"%s\", 0, \"", cmd);
         } else {			/* END */
-          fprintf(out, "  {0, NULL}\n};\n");
+          fprintf(out, "  {0, NULL, 0, NULL}\n};\n");
         }
       } else {				/* CMD HELP INFO */
         fprintf(out, "%s\\n", replace(buffer, "\"", "\\\""));

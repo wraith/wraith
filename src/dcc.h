@@ -85,17 +85,17 @@ struct xfer_info {
   char *filename;
   char *origname;
   char dir[DIRLEN];             /* used when uploads go to the current dir */
-  unsigned long length;
-  unsigned long acked;
+  long unsigned int length;
+  long unsigned int acked;
   char buf[4];                  /* you only need 5 bytes!                  */
   unsigned char sofar;          /* how much of the byte count received     */
   char from[NICKLEN];           /* [GET] user who offered the file         */
   FILE *f;                      /* pointer to file being sent/received     */
   unsigned int type;            /* xfer connection type, see enum below    */
   unsigned short ack_type;      /* type of ack                             */
-  unsigned long offset;         /* offset from beginning of file, during
+  long unsigned int offset;     /* offset from beginning of file, during
                                    resend.                                 */
-  unsigned long block_pending;  /* bytes of this DCC block which weren't
+  long unsigned int block_pending;  	/* bytes of this DCC block which weren't
                                    sent yet.                               */
   time_t start_time;            /* Time when a xfer was started.           */
 };
@@ -106,14 +106,14 @@ struct bot_info {
   char linker[NOTENAMELEN + 1]; /* who requested this link              */
   int  numver;
   char sysname[121];
-  int  port;                    /* base port                            */
+  unsigned int port;            /* base port                            */
   int  uff_flags;               /* user file feature flags              */
 };
 
 struct relay_info {
   struct chat_info *chat;
   int sock;
-  int port;
+  unsigned int port;
   int old_status;
 };
 
