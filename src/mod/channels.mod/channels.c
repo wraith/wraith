@@ -615,8 +615,7 @@ static void channels_report(int idx, int details)
   for (chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
-    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-        ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr))) {
+    if (!private(fr, chan, PRIV_OP) && ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr))) {
       s[0] = 0;
       if (channel_bitch(chan))
 	strcat(s, "bitch, ");

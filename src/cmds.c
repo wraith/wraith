@@ -2128,7 +2128,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
       nfree(tmpchg);
     return;
   }
-    if (chan && channel_private(chan) && !glob_owner(user) && !chan_master(user)) {
+    if (chan && private(user, chan, PRIV_OP)) {
       dprintf(idx, STR("You do not have access to change flags for %s\n"), chan->dname);
       if (tmpchg)
         nfree(tmpchg);

@@ -500,13 +500,10 @@ Context;
     /* and it isn't a server op */
 	   nick[0]) {
     /* Channis is +bitch, and the opper isn't a global master or a bot */
-
-    if ((channel_bitch(chan) || channel_closed(chan) || channel_take(chan)) && 
-      ((!channel_private(chan) && !glob_op(victim) && !chan_op(victim)) || 
-      (channel_private(chan) && !glob_bot(victim) && !chan_op(victim) && !glob_owner(victim)))) {
-      if (target_priority(chan, m, 1))
-        add_mode(chan, '-', 'o', who);
-    } else if (chan_deop(victim) || (glob_deop(victim) && !chan_op(victim))) {
+    /* deop if they are +d or it is +bitch */
+    if (chk_deop(victim, chan) ||
+        (channel_bitch(chan) && !chk_op(victim, chan))		/* chk_op covers +private */
+       ) {
       if (target_priority(chan, m, 1))
         add_mode(chan, '-', 'o', who);
     } else if (reversing) {
@@ -517,7 +514,7 @@ Context;
   if (!nick[0] && me_op(chan) && !match_my_nick(who)) {
 
 Context;
-    if (chan_deop(victim) || (glob_deop(victim) && !chan_op(victim))) {
+    if (chk_deop(victim, chan)) {
       m->flags |= FAKEOP;
       add_mode(chan, '-', 'o', who);
     } else if (snm > 0 && snm < 7 && !((0 || 0 ||

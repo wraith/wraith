@@ -1510,8 +1510,8 @@ static void irc_report(int idx, int details)
   for (chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
-
-    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+     
+    if (!private(fr, chan, PRIV_OP) &&
         (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
       p = NULL;
       if (!channel_inactive(chan)) {
@@ -1655,16 +1655,6 @@ static cmd_t irc_bot[] = {
   {0, 0, 0, 0}
 };
 
-static void channel_check_locked(struct chanset_t * chan) {
-  /* Kick one random nonop */
-  if (!chan) return;
-  if (!me_op(chan))
-    return;
-  if (!strchr(getchanmode(chan), 'i'))
-    dprintf(DP_MODE, STR("MODE %s +i\n"), chan->name);
-  priority_do(chan, 0, PRIO_KICK);
-}
-
 
 static void getin_3secondly()
 {
@@ -1684,7 +1674,7 @@ static void irc_10secondly() {
 
   for (ch=chanset;ch;ch=ch->next)
     if (channel_closed(ch))
-      channel_check_locked(ch);
+      enforce_closed(ch);
 }
 
 EXPORT_SCOPE char *irc_start();

@@ -260,8 +260,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
         chan = findchan_by_dname(par);
         if (chan && channel_active(chan)) {
           get_user_flagrec(u, &fr, par);
-          if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-             (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+          if (chk_op(fr, chan)) {
             stats_add(u, 0, 1);
             do_op(nick, chan, 1);
           }
@@ -272,8 +271,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
       } else {
         for (chan = chanset; chan; chan = chan->next) {
           get_user_flagrec(u, &fr, chan->dname);
-          if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-             (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+          if (chk_op(fr, chan)) {
             stats_add(u, 0, 1);
             do_op(nick, chan, 1);
           }
@@ -304,8 +302,7 @@ static int msg_voice(char *nick, char *host, struct userrec *u, char *par)
 	chan = findchan_by_dname(par);
 	if (chan && channel_active(chan)) {
 	  get_user_flagrec(u, &fr, par);
-	  if ((!channel_private(chan) || (channel_private(chan) && (chan_voice(fr) || glob_owner(fr)))) &&
-              (chan_voice(fr) || glob_voice(fr) || chan_op(fr) || glob_op(fr))) {
+          if (chk_voice(fr, chan)) {
 	    add_mode(chan, '+', 'v', nick);
 	    putlog(LOG_CMDS, "*", "(%s!%s) !%s! VOICE %s",
 		   nick, host, u->handle, par);
@@ -317,8 +314,7 @@ static int msg_voice(char *nick, char *host, struct userrec *u, char *par)
       } else {
 	for (chan = chanset; chan; chan = chan->next) {
 	  get_user_flagrec(u, &fr, chan->dname);
-	  if ((!channel_private(chan) || (channel_private(chan) && (chan_voice(fr) || glob_owner(fr)))) &&
-              (chan_voice(fr) || glob_voice(fr) || chan_op(fr) || glob_op(fr)))
+          if (chk_voice(fr, chan)) {
 	    add_mode(chan, '+', 'v', nick);
 	}
 	putlog(LOG_CMDS, "*", "(%s!%s) !%s! VOICE", nick, host, u->handle);
@@ -413,9 +409,7 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
     if (par[0] == '*') {
       for (chan = chanset; chan; chan = chan->next) {
 	get_user_flagrec(u, &fr, chan->dname);
-	if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-            (chan_op(fr) || (glob_op(fr) && !chan_deop(fr))) &&
-	    (chan->channel.mode & CHANINV))
+        if (chk_op(fr, chan) && (chan->channel.mode & CHANINV)) {
 	  dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
       }
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE ALL", nick, host,
@@ -433,8 +427,7 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
     }
     /* We need to check access here also (dw 991002) */
     get_user_flagrec(u, &fr, par);
-    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-       (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) { 
+    if (chk_op(fr, chan)) {
       dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE %s", nick, host,
 	     u->handle, par);
@@ -530,8 +523,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
       chan = findchan_by_dname(par);
     if (chan && channel_active(chan)) {
       get_user_flagrec(u, &fr, chan->dname);
-      if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-         (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+      if (chk_op(fr, chan)) {
         stats_add(u, 0, 1);
         do_op(nick, chan, force);
       }
@@ -541,8 +533,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
     for (chan = chanset; chan; chan = chan->next) {
       int op = 0;
       get_user_flagrec(u, &fr, chan->dname);
-      if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-         (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+      if (chk_op(fr, chan)) {
         if (!op) 
           stats_add(u, 0, 1);
         op = 1;
@@ -587,8 +578,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
       chan = findchan_by_dname(par);
     if (chan && channel_active(chan)) {
       get_user_flagrec(u, &fr, chan->dname);
-      if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-         (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+      if (chk_voice(fr, chan)) {
         add_mode(chan, '+', 'v', nick);
       }
       return 1;
@@ -596,8 +586,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
   } else {
     for (chan = chanset; chan; chan = chan->next) {
       get_user_flagrec(u, &fr, chan->dname);
-      if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-         (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+      if (chk_voice(fr, chan)) {
         add_mode(chan, '+', 'v', nick);
       }
     }
@@ -618,8 +607,9 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
   list[0] = 0;
   for (chan = chanset; chan; chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
-    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-       (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+    if (chk_op(fr, chan)) {
+      if (me_op(chan)) 
+        strcat(list, "@");
       strcat(list, chan->dname);
       strcat(list, " ");
     }
@@ -652,13 +642,7 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
   chan = findchan_by_dname(par);
   if (chan && channel_active(chan) && !channel_pending(chan)) {
     get_user_flagrec(u, &fr, chan->dname);
-/*    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-       (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) { */
     if (chk_op(fr, chan)) {
-/*      char buf[512];
-      if (chan->key_prot[0])
-        snprintf(buf, sizeof buf, "Enforcing +k %s", chan->key_prot); */
-
       if (chan->channel.key[0]) {
         dprintf(DP_HELP, "NOTICE %s :Key for %s is: %s\n", nick, chan->dname, chan->channel.key);
       } else {
@@ -707,8 +691,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
     if (chan && channel_active(chan) && !ismember(chan, nick)) {
       if ((!(chan->channel.mode & CHANINV) && force) || (chan->channel.mode & CHANINV)) {
         get_user_flagrec(u, &fr, chan->dname);
-        if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-           (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+        if (chk_op(fr, chan)) {
           dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
         }
         return 1;
@@ -719,8 +702,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
       if (channel_active(chan) && !ismember(chan, nick)) {
         if ((!(chan->channel.mode & CHANINV) && force) || (chan->channel.mode & CHANINV)) {
           get_user_flagrec(u, &fr, chan->dname);
-          if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-             (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+          if (chk_op(fr, chan)) {
             dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
           }
         }
