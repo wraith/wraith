@@ -956,15 +956,17 @@ static void reset_chan_info(struct chanset_t *chan)
       dprintf(DP_MODE, "MODE %s +b\n", chan->name);
     }
 #ifdef S_IRCNET
-    if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) &&
-	use_exempts == 1) {
-      chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
-      dprintf(DP_MODE, "MODE %s +e\n", chan->name);
-    }
-    if (!(chan->ircnet_status & CHAN_ASKED_INVITED) &&
-	use_invites == 1) {
-      chan->ircnet_status |= CHAN_ASKED_INVITED;
-      dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+    if (me_op(chan)) {
+      if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) &&
+  	  use_exempts == 1) {
+        chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
+        dprintf(DP_MODE, "MODE %s +e\n", chan->name);
+      }
+      if (!(chan->ircnet_status & CHAN_ASKED_INVITED) &&
+	  use_invites == 1) {
+        chan->ircnet_status |= CHAN_ASKED_INVITED;
+        dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+      }
     }
 #endif
     /* These 2 need to get out asap, so into the mode queue */
