@@ -598,7 +598,7 @@ static void refresh_ban_kick(struct chanset_t *chan, char *user, char *nick)
      in second cycle. */
   for (int cycle = 0; cycle < 2; cycle++) {
     for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
-      if (wild_match(b->mask, user)) {
+      if (wild_match(b->mask, user) || match_dir(b->mask, user)) {
 	struct flag_record	fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 	char c[512] = "";		/* The ban comment.	*/
 	char s[UHOSTLEN] = "";
@@ -635,7 +635,7 @@ static void refresh_exempt(struct chanset_t *chan, char *user)
      in second cycle. */
   for (int cycle = 0; cycle < 2; cycle++) {
     for (e = cycle ? chan->exempts : global_exempts; e; e = e->next) {
-      if (wild_match(user, e->mask) || wild_match(e->mask,user)) {
+      if (wild_match(user, e->mask) || wild_match(e->mask, user) || match_cidr(e->mask, user)) {
         for (b = chan->channel.ban; b && b->mask[0]; b = b->next) {
           if (wild_match(b->mask, user) || wild_match(user, b->mask)) {
             if (e->lastactive < now - 60 && !isexempted(chan, e->mask)) {
