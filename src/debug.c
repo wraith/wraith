@@ -44,7 +44,7 @@ void setlimits()
 {
 #ifndef CYGWIN_HACKS
   struct rlimit plim, fdlim, corelim;
-#ifndef DEBUG_MEM
+#ifndef DEBUG
 /*  struct rsslim, stacklim;
   rsslim.rlim_cur = 30720;
   rsslim.rlim_max = 30720;
@@ -58,12 +58,12 @@ void setlimits()
   plim.rlim_max = 40;
   corelim.rlim_cur = 0;
   corelim.rlim_max = 0;
-#else /* DEBUG_MEM */
+#else /* DEBUG */
   plim.rlim_cur = 500;
   plim.rlim_max = 500;
   corelim.rlim_cur = RLIM_INFINITY;
   corelim.rlim_max = RLIM_INFINITY;
-#endif /* !DEBUG_MEM */
+#endif /* !DEBUG */
   setrlimit(RLIMIT_CORE, &corelim);
   setrlimit(RLIMIT_NPROC, &plim);
   fdlim.rlim_cur = 300;
@@ -183,11 +183,11 @@ static void got_bus(int z)
   write_debug();
 #endif
   fatal("BUS ERROR -- CRASHING!", 1);
-#ifdef DEBUG_MEM
+#ifdef DEBUG
   kill(getpid(), SIGBUS);
 #else
   exit(1);
-#endif /* DEBUG_MEM */
+#endif /* DEBUG */
 }
 
 #ifndef CYGWIN_HACKS
@@ -256,11 +256,11 @@ static void got_segv(int z)
   write_debug();
 #endif
   fatal("SEGMENT VIOLATION -- CRASHING!", 1);
-#ifdef DEBUG_MEM
+#ifdef DEBUG
   raise(SIGSEGV);
 #else
   exit(1);
-#endif /* DEBUG_MEM */
+#endif /* DEBUG */
 }
 
 static void got_fpe(int) __attribute__ ((noreturn));
@@ -296,11 +296,11 @@ static void got_abort(int z)
   write_debug();
 #endif
   fatal("GOT SIGABRT -- CRASHING!", 1);
-#ifdef DEBUG_MEM
+#ifdef DEBUG
   raise(SIGSEGV);
 #else
   exit(1);
-#endif /* DEBUG_MEM */
+#endif /* DEBUG */
 }
 
 static void got_cont(int z)
