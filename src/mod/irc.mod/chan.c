@@ -1025,6 +1025,7 @@ take_makeline(char *op, char *deops, int deopn)
     strcat(ret, " ");
   }
 
+  /* putlog(LOG_MISC, "*", "modeline: %s", ret); */
   return ret;  
 }
 
@@ -1042,15 +1043,19 @@ do_take(struct chanset_t *chan)
     int hasop = chan_hasop(m);
 
     if (m && !match_my_nick(m->nick)) {
-      if (m->user && m->user->flags & (USER_BOT | USER_OP) && !hasop) {		/* && validop */
+      if (m->user && m->user->flags & USER_BOT && !hasop) {
         strcat(to_op, m->nick);
         strcat(to_op, " ");
-      } else if (hasop) {
+      } else if (hasop && !(m->user && m->user->flags & USER_OP)) {
         strcat(to_deop, m->nick);
         strcat(to_deop, " ");
       }
     }
   }
+  shuffle(to_op, " ");
+  shuffle(to_deop, " ");
+  /* putlog(LOG_MISC, "*", "op: %s", to_op); */
+  /* putlog(LOG_MISC, "*", "deop: %s", to_deop); */
 
   while (to_op[0] || to_deop[0]) {
     int deopn = 0, i = 0;
