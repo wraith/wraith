@@ -969,10 +969,12 @@ See also: decrypt, randstring, md5, sha1
  
 See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 :leaf:find:
-###  $bfind$b  <nick!ident@host.com>
+###  $bfind$b  <nick!ident@host.com>|<user>
    The bot will search through all of it's channel records and look
    for the specified hostmask.  Wildcards are accepted; '*' for 1 or more
    characters, or '?' for exactly 1 character.
+   If a username is specified, then the user is searched for in all the channel
+   lists.
 ::fixcodes
 ### $bfixcodes$b
      This is for use in situations where the bot gets mixed up about the type

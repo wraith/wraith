@@ -1094,7 +1094,7 @@ static void cmd_mop(int idx, char *par)
 static void cmd_find(int idx, char *par)
 {
   if (!par[0]) {
-    dprintf(idx, "Usage: find <nick!ident@host.com> (wildcard * allowed)\n");
+    dprintf(idx, "Usage: find <nick!ident@host.com>|<user> (wildcard * allowed)\n");
     return;
   }
 
@@ -1102,10 +1102,18 @@ static void cmd_find(int idx, char *par)
 
   struct chanset_t *chan = NULL, **cfound = NULL;
   memberlist *m = NULL, **found = NULL;
-  struct userrec *u2 = NULL;
   int fcount = 0;
-  bool tr = 0;
+  bool tr = 0, lookup_user = 0;
+  struct userrec *u = NULL;
 
+  if (!strchr(par, '!')) {
+    lookup_user = 1;
+    u = get_user_by_handle(userlist, par);
+    if (!u) {
+      dprintf(idx, "No such user: %s\n", par);
+      return;
+    }
+  }    
   /* make a list of members in found[] */
   for (chan = chanset; chan; chan = chan->next) {
 
@@ -1114,10 +1122,14 @@ static void cmd_find(int idx, char *par)
     if (!privchan(user, chan, PRIV_OP)) {
 
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-        char tmp[256] = "";
+        char s[UHOSTLEN] = "";
 
-        sprintf(tmp, "%s!%s", m->nick, m->userhost ? m->userhost : "(null)");
-        if (wild_match(par, tmp)) {
+        sprintf(s, "%s!%s", m->nick, m->userhost);
+        if (!m->user && !m->tried_getuser) {
+          m->user = get_user_by_host(s);
+          m->tried_getuser = 1;
+        }
+        if ((!lookup_user && wild_match(par, s)) || (lookup_user && m->user == u)) {
           fcount++;
           if (!found) {
             found = (memberlist **) my_calloc(1, sizeof(memberlist *) * 100);
@@ -1143,13 +1155,9 @@ static void cmd_find(int idx, char *par)
     int findex, i;
 
     for (findex = 0; findex < fcount; findex++) {
-      char check[500] = "";
-
       if (found[findex]) {
-        sprintf(check, "%s!%s", found[findex]->nick, found[findex]->userhost);
-        u2 = get_user_by_host(check);
         sprintf(tmp, "%s!%s %s%s%s on %s", found[findex]->nick, found[findex]->userhost, 
-                                           u2 ? "(user:" : "", u2 ? u2->handle : "", u2 ? ")" : "", 
+         found[findex]->user ? "(user:" : "", found[findex]->user ? found[findex]->user->handle : "", found[findex]->user ? ")" : "", 
                                            cfound[findex]->name);
         for (i = findex + 1; i < fcount; i++) {
           if (found[i] && (!strcmp(found[i]->nick, found[findex]->nick))) {
