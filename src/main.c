@@ -61,7 +61,7 @@ int hub = 0;
 int leaf = 1;
 #endif
 
-int localhub = 0;
+int localhub = 1; //we set this to 0 if we have -c, later.
 
 extern char		 origbotname[], userfile[], botnetnick[], 
                          thekey[], netpass[], thepass[], myip6[], myip[], hostname[],
@@ -101,7 +101,6 @@ int	term_z = 1;		/* Foreground: use the terminal as a party
 				   line? */
 
 int pscloak = 1;
-int cpass = 0; /* check pass ? */
 int updating = 0; /* this is set when the binary is called from itself. */
 char tempdir[DIRMAX] = "";
 char lock_file[40] = "";
@@ -562,16 +561,17 @@ void checkpass()
   gpasswd = 0;
 }
 
+void got_ed(char *, char *);
 
 #ifdef LEAF
-#define PARSE_FLAGS "nvPct"
+#define PARSE_FLAGS "edntvPc"
 #endif
 #ifdef HUB
-#define PARSE_FLAGS "ntv"
+#define PARSE_FLAGS "edntv"
 #endif
 static void dtx_arg(int argc, char *argv[])
 {
-  int i;
+  int i, cpass = 0;
 #ifdef LEAF
   char *p = NULL;
 #endif
@@ -579,6 +579,7 @@ static void dtx_arg(int argc, char *argv[])
     switch (i) {
 #ifdef LEAF
       case 'c':
+        localhub = 0;
         p = argv[optind];
         if (!localhub)
           gotspawn(p);
@@ -591,6 +592,12 @@ static void dtx_arg(int argc, char *argv[])
       case 't':
         term_z = 0;
         break;
+      case 'e':
+        p = argv[optind];
+        got_ed("e", p);
+      case 'd':
+        p = argv[optind];
+        got_ed("d", p);
       case 'v':
 	checkpass();
 	printf("%d\n", egg_numver);
@@ -614,6 +621,8 @@ static void dtx_arg(int argc, char *argv[])
         break;
     }
   }
+  if (cpass)
+    checkpass();
 }
 
 #ifdef HUB
@@ -925,6 +934,30 @@ void checklockfile()
     exit(1);
 }
 
+void got_ed(char *which, char *p)
+{
+  char *in = NULL, *out = NULL;
+
+  in = newsplit(&p);
+  out = newsplit(&p);
+  if (!in || !out)
+    fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
+  checkpass();
+  check_static("blowfish", blowfish_start);
+  Context;
+  module_load(ENCMOD);
+  if (!strcmp(which, "e")) {
+  Context;
+    EncryptFile(in, out);
+    fatal("File Encryption complete",3);
+  } else if (!strcmp(which, "d")) {
+  Context;
+    DecryptFile(in, out);
+    fatal("File Decryption complete",3);
+  }
+  exit(0);
+}
+
 static inline void garbage_collect(void)
 {
   static u_8bit_t	run_cnt = 0;
@@ -1102,6 +1135,80 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
 }
 #endif
 
+void check_trace_start()
+{
+#ifdef S_ANTITRACE
+  int parent = getpid();
+  int xx = 0, i = 0;
+#ifdef __linux__
+  xx = fork();
+  if (xx == -1) {
+    printf(STR("Can't fork process!\n"));
+    exit(1);
+  } else if (xx == 0) {
+    i = ptrace(PTRACE_ATTACH, parent, 0, 0);
+    if (i == (-1) && errno == EPERM) {
+      kill(parent, SIGKILL);
+      exit(1);
+    } else {
+      waitpid(parent, &i, 0);
+      kill(parent, SIGCHLD);
+      ptrace(PTRACE_DETACH, parent, 0, 0);
+      kill(parent, SIGCHLD);
+    }
+    exit(0);
+  } else {
+    wait(&i);
+  }
+#endif /* __linux__ */
+#ifdef __FreeBSD__
+  xx = fork();
+  if (xx == -1) {
+    printf(STR("Can't fork process!\n"));
+    exit(1);
+  } else if (xx == 0) {
+    i = ptrace(PT_ATTACH, parent, 0, 0);
+    if (i == (-1) && errno == EBUSY) {
+      kill(parent, SIGKILL);
+      exit(1);
+    } else {
+       wait(&i);
+      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
+      kill(parent, SIGCHLD);
+      wait(&i);
+      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
+      wait(&i);
+    }
+    exit(0);
+  } else {
+    waitpid(xx, NULL, 0);
+  }
+#endif /* __FreeBSD__ */
+#ifdef __OpenBSD__
+  xx = fork();
+  if (xx == -1) {
+    printf(STR("Can't fork process!\n"));
+    exit(1);
+  } else if (xx == 0) {
+    i = ptrace(PT_ATTACH, parent, 0, 0);
+    if (i == (-1) && errno == EBUSY) {
+      kill(parent, SIGKILL);
+      exit(1);
+    } else {
+      wait(&i);
+      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
+      kill(parent, SIGCHLD);
+      wait(&i);
+      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
+      wait(&i);
+    }
+    exit(0);
+  } else {
+    waitpid(xx, NULL, 0);
+  }
+#endif /* __OpenBSD__ */
+#endif /* S_ANTITRACE */
+}
 
 int main(int argc, char **argv)
 {
@@ -1214,121 +1321,30 @@ int main(int argc, char **argv)
   Context;
   binname = getfullbinname(argv[0]);
   Context;
-#ifdef S_ANTITRACE
-  {
-    int parent = getpid();
 
-#ifdef __linux__
-    xx = fork();
-    if (xx == -1) {
-      printf(STR("Can't fork process!\n"));
-      exit(1);
-    } else if (xx == 0) {
-      i = ptrace(PTRACE_ATTACH, parent, 0, 0);
-      if (i == (-1) && errno == EPERM) {
-        kill(parent, SIGKILL);
-        exit(1);
-      } else {
-        waitpid(parent, &i, 0);
-        kill(parent, SIGCHLD);
-        ptrace(PTRACE_DETACH, parent, 0, 0);
-        kill(parent, SIGCHLD);
-      }
-      exit(0);
-    } else
-      wait(&i);
-#endif /* __linux__ */
-#ifdef __FreeBSD__
-    xx = fork();
-    if (xx == -1) {
-      printf(STR("Can't fork process!\n"));
-      exit(1);
-    } else if (xx == 0) {
-      i = ptrace(PT_ATTACH, parent, 0, 0);
-      if (i == (-1) && errno == EBUSY) {
-        kill(parent, SIGKILL);
-        exit(1);
-      } else {
-        wait(&i);
-        i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-        kill(parent, SIGCHLD);
-        wait(&i);
-        i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-        wait(&i);
-      }
-      exit(0);
-    } else
-      waitpid(xx, NULL, 0);
-#endif /* __FreeBSD__ */
-#ifdef __OpenBSD__
-    xx = fork();
-    if (xx == -1) {
-      printf(STR("Can't fork process!\n"));
-      exit(1);
-    } else if (xx == 0) {
-      i = ptrace(PT_ATTACH, parent, 0, 0);
-      if (i == (-1) && errno == EBUSY) {
-        kill(parent, SIGKILL);
-        exit(1);
-      } else {
-        wait(&i);
-        i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-        kill(parent, SIGCHLD);
-        wait(&i);
-        i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-        wait(&i);
-      }
-      exit(0);
-    } else
-      waitpid(xx, NULL, 0);
-#endif /* __OpenBSD__ */
-  }
-#endif /* G_ANTITRACE */
+  check_trace_start();
+
   if (stat(binname, &sb))
    fatal("Cannot access binary.", 0);
   if (chmod(binname, S_IRUSR | S_IWUSR | S_IXUSR))
    fatal("Cannot chmod binary.", 0);
 
   init_settings();
+  init_tcl(argc, argv);
 
-  if (argc >= 2) {
-      if (!strcmp(argv[1],"-d") || !strcmp(argv[1],"-e")) {
-          //lets parse -e/-d before checking anything else.
-          if (argc != 4) 
-            fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
-          checkpass();
-          init_tcl(argc, argv);
-          check_static("blowfish", blowfish_start);
-          Context;
-          module_load(ENCMOD);
-          if (!strcmp(argv[1], "-e")) {
-            Context;
-            EncryptFile(argv[2],argv[3]);
-            fatal("File Encryption complete",3);
-          } else if (!strcmp(argv[1], "-d")) {
-            Context;
-            DecryptFile(argv[2],argv[3]);
-            fatal("File Decryption complete",3);
-          }
-      exit(0); 
-      }
+  if (argc) {
+    if (SDEBUG)
+      printf("Calling dtx_arg with %d params.\n", argc);
+    dtx_arg(argc, argv);
   }
-
 
 #ifdef LEAF
 
-/* not needed
-  id = geteuid();
-  if (!id) 
-   fatal("Cannot read userid.", 0);
-*/
   if (SDEBUG)
     printf("my uid: %d my uuid: %d, my ppid: %d my pid: %d\n", getuid(), geteuid(), getppid(), getpid());
 
 Context;
   pw = getpwuid(geteuid());
-
-  usleep(1000);
 
   if (!pw)
    fatal("Cannot read from the passwd file.", 0);
@@ -1353,12 +1369,10 @@ Context;
   if (!stat(newbin, &ss)) {
     int f = 0;
     if (ss.st_mode & S_IFLNK) {  //stupid symlinked home dirs !
-Context;
       f = readlink(newbin, newbinbuf, sizeof newbinbuf);
       if (!f) {
         if (SDEBUG)
           printf("symlink newbin: %s\n", newbin);
-Context;
         strcpy(newbin, newbinbuf);
         if (SDEBUG)
           printf("newbin is now: %s\n", newbin);
@@ -1376,6 +1390,7 @@ Context;
   if (SDEBUG)
     printf(STR("skip is: %d\n"), skip);
 */
+
   if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
     if (SDEBUG)
       printf("wrong dir, is: %s :: %s\n", binname, newbin);
@@ -1411,31 +1426,8 @@ Context;
 
   // Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config...
 
-  /* this code checks for -c, if not present assume we are a localhub. -c is gotspawn from a localhub. */  
-  localhub=1;
-  for (i=0;i<argc;i++) {
-    if (!strcmp(argv[i], "-c"))
-      localhub=0;
-  }
-/* obsolete
-  if (argc == 1) {
-    // I am the first running bot
-    localhub = 1; //we will use this after checking for config access
-  }
-*/
-
-  init_tcl(argc, argv);
 
 #endif
-
-  if (argc) {
-    if (SDEBUG)
-      printf("Calling dtx_arg with %d params.\n", argc);
-    dtx_arg(argc, argv);
-  }
-  if (cpass)
-    checkpass();
-  cpass = 0;
  
   snprintf(tmp, sizeof tmp, "%s/", confdir);
   if (stat(tmp, &sb)) {
@@ -1487,6 +1479,7 @@ Context;
   if (backgrd)
     bg_prepare_split();
 #ifndef LEAF
+  kill_tcl();
   init_tcl(argc, argv);
 #endif
   init_language(0);
