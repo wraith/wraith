@@ -1321,7 +1321,7 @@ static cmd_t my_raw_binds[] =
   {NULL,	NULL,	NULL,				NULL}
 };
 
-static void server_dns_callback(void *, const char *, char **);
+static void server_dns_callback(int, void *, const char *, char **);
 
 /* Hook up to a server
  */
@@ -1381,16 +1381,19 @@ static void connect_server(void)
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;
     /* Resolve the hostname. */
-    egg_dns_lookup(botserver, 20, server_dns_callback, (void *) newidx);
+    dcc[newidx].dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) newidx);
     /* wait for async reply */
   }
 }
 
-static void server_dns_callback(void *client_data, const char *host, char **ips)
+static void server_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
   int idx = (int) client_data;
 
   resolvserv = 0;
+
+  if (!valid_dns_id(idx, id))
+    return;
 
   if (!ips) {
     putlog(LOG_SERV, "*", "Failed connect to %s (DNS lookup failed)", host);

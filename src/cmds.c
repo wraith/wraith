@@ -3925,9 +3925,13 @@ static void cmd_crontab(int idx, char *par) {
 }
 #endif /* !CYGWIN_HACKS */
 
-static void my_dns_callback(void *client_data, const char *host, char **ips)
+static void my_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
   int idx = (int) client_data;
+
+  if (!valid_dns_id(idx, id))
+    return;
+
 if (ips)
 sdprintf("CALLBACK WITH IDX: %d and ip[0]: %s (msgc: %d)", idx, ips[0], dcc[idx].msgc);
   if (ips)

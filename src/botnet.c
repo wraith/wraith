@@ -892,7 +892,7 @@ int botunlink(int idx, char *nick, char *reason)
   return 0;
 }
 
-static void botlink_dns_callback(void *, const char *, char **);
+static void botlink_dns_callback(int id, void *, const char *, char **);
 
 /* Link to another bot
  */
@@ -950,7 +950,7 @@ int botlink(char *linker, int idx, char *nick)
       strcpy(dcc[i].u.bot->linker, linker);
       dcc[i].u.bot->numver = idx;
 
-      egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
+      dcc[i].dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
      
       return 1;
       /* wait for async reply */
@@ -959,9 +959,12 @@ int botlink(char *linker, int idx, char *nick)
   return 0;
 }
 
-static void botlink_dns_callback(void *client_data, const char *host, char **ips)
+static void botlink_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
   int i = (int) client_data;
+
+  if (!valid_dns_id(i, id))
+    return;
 
   if (!ips) {
     lostdcc(i);
@@ -1050,7 +1053,7 @@ static void failed_tandem_relay(int idx)
     failed_tandem_relay(idx);
 }
 
-static void tandem_relay_dns_callback(void *, const char *, char **);
+static void tandem_relay_dns_callback(int, void *, const char *, char **);
 
 /* Relay to another tandembot
  */
@@ -1108,15 +1111,18 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[i].u.relay->sock = dcc[idx].sock;
   dcc[i].u.relay->idx = idx;
 
-  egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
+  dcc[i].dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
 
   return;
   /* wait for async reply */
 }
 
-static void tandem_relay_dns_callback(void *client_data, const char *host, char **ips)
+static void tandem_relay_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
   int i = (int) client_data, idx = -1;
+
+  if (!valid_dns_id(i, id))
+    return;
 
   if (dcc[i].type)
     idx = dcc[i].u.relay->idx;

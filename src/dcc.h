@@ -51,6 +51,7 @@ struct dcc_t {
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   int msgc;			/* forward the output back to irc? */
   int whowas;
+  int dns_id;
   port_t port;
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */

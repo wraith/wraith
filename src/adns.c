@@ -316,7 +316,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 
 		answer_init(&answer);
 		answer_add(&answer, host);
-		callback(client_data, host, answer.list);
+		callback(-1, client_data, host, answer.list);
 		answer_free(&answer);
 		return(-1);
 	}
@@ -328,7 +328,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 
 			answer_init(&answer);
 			answer_add(&answer, hosts[i].ip);
-			callback(client_data, host, answer.list);
+			callback(-1, client_data, host, answer.list);
 			answer_free(&answer);
 			return(-1);
 		}
@@ -337,7 +337,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 	cache_id = cache_find(host);
 	if (cache_id >= 0) {
 		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
-		callback(client_data, host, cache[cache_id].answer.list);
+		callback(-1, client_data, host, cache[cache_id].answer.list);
 		return(-1);
 	}
 
@@ -369,7 +369,7 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 
 	if (!is_dotted_ip(ip)) {
 		/* If it's not a valid ip, don't even make the request. */
-		callback(client_data, ip, NULL);
+		callback(-1, client_data, ip, NULL);
 		return(-1);
 	}
 
@@ -380,7 +380,7 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 
 			answer_init(&answer);
 			answer_add(&answer, hosts[i].host);
-			callback(client_data, ip, answer.list);
+			callback(-1, client_data, ip, answer.list);
 			answer_free(&answer);
 			return(-1);
 		}
@@ -389,7 +389,7 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 	cache_id = cache_find(ip);
         if (cache_id >= 0) {
 		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
-		callback(client_data, ip, cache[cache_id].answer.list);
+		callback(-1, client_data, ip, cache[cache_id].answer.list);
 		return(-1);
 	}
 
@@ -677,7 +677,7 @@ int egg_dns_cancel(int id, int issue_callback)
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
 	sdprintf("Cancelling query: %s", q->query);
-	if (issue_callback) q->callback(q->client_data, q->query, NULL);
+	if (issue_callback) q->callback(q->id, q->client_data, q->query, NULL);
 	free(q);
 	return(0);
 }
@@ -797,7 +797,7 @@ static void parse_reply(char *response, int nbytes)
 
 	cache_add(q->query, &q->answer);
 
-	q->callback(q->client_data, q->query, q->answer.list);
+	q->callback(q->id, q->client_data, q->query, q->answer.list);
 	answer_free(&q->answer);
 	free(q->query);
 	free(q);
@@ -898,3 +898,10 @@ int egg_dns_init()
 	return(0);
 }
 
+
+bool valid_dns_id(int idx, int id)
+{
+  if (valid_idx(idx) && dcc[idx].dns_id == id)
+    return 1;
+  return 0;
+}

@@ -1193,7 +1193,7 @@ detect_telnet_flood(char *floodhost)
   return 0;
 }
 
-static void dcc_telnet_dns_callback(void *, const char *, char **);
+static void dcc_telnet_dns_callback(int id, void *, const char *, char **);
 
 static void
 dcc_telnet(int idx, char *buf, int ii)
@@ -1256,20 +1256,23 @@ dcc_telnet(int idx, char *buf, int ii)
   dcc[i].timeval = now;
   strcpy(dcc[i].nick, "*");
   dcc[i].u.other = (void *) idx;
-sdprintf("setting dcc[%d].u.other = %d", i, idx);
-  egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
+  dcc[i].dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
 }
 
-static void dcc_telnet_dns_callback(void *client_data, const char *ip, char **hosts)
+static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, char **hosts)
 {
   int idx = -1, i = (int) client_data;
+
+  if (!valid_dns_id(i, id))
+    return;
+
   int j = 0, sock;
   char s2[UHOSTLEN + 20] = "";
 
   if (dcc[i].type)
     idx = (int) dcc[i].u.other;
-sdprintf("dcc[%d].u.other = %d", i, idx);
-  dcc[i].u.other = NULL;
+
+  dcc[i].u.other = 0;
 
   strncpyz(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
 
@@ -1729,7 +1732,7 @@ dcc_ident(int idx, char *buf, int len)
       simple_sprintf(buf1, "%s@%s", uid, dcc[idx].host);
       dcc_telnet_got_ident(i, buf1);
     }
-  dcc[idx].u.other = NULL;
+  dcc[idx].u.other = 0;
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1746,7 +1749,7 @@ eof_dcc_ident(int idx)
       dcc_telnet_got_ident(i, buf);
     }
   killsock(dcc[idx].sock);
-  dcc[idx].u.other = NULL;
+  dcc[idx].u.other = 0;
   lostdcc(idx);
 }
 
@@ -1778,7 +1781,7 @@ dcc_telnet_got_ident(int i, char *host)
     if (dcc[i].type && (dcc[idx].type == &DCC_TELNET) && (dcc[idx].sock == dcc[i].u.ident_sock))
       break;
 
-  dcc[i].u.other = NULL;
+  dcc[i].u.other = 0;
 
   if (!dcc[idx].type) {
     putlog(LOG_MISC, "*", DCC_LOSTIDENT);
