@@ -273,31 +273,6 @@ failed_link(int idx)
   autolink_cycle(s);            /* Check for more auto-connections */
 }
 
-static void gen_linkkey(int idx)
-{
-  int snum = findanysnum(dcc[idx].sock);
-  
-  if (snum == -1)
-    return;
-  struct sockaddr_in sa;
-  socklen_t socklen = sizeof(sa);
-  char tmp[301] = "";
-
-  /* initkey-gen leaf */
-  /* bdhash myport hubnick mynick */
-  egg_bzero(&sa, socklen);
-  getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &socklen);
-  egg_snprintf(tmp, sizeof tmp, "%s@%4x@%s@%s", settings.bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
-  strncpyz(socklist[snum].ikey, SHA1(tmp), sizeof(socklist[snum].ikey));
-  putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
-  putlog(LOG_DEBUG, "@", "initkey (%d): %s", strlen(socklist[snum].ikey), socklist[snum].ikey);
-  /* We've send our conf.bot->nick and set the key for the link on the sock, wait for 'elink' back to verify key */
-  socklist[snum].encstatus = 1;
-  socklist[snum].gz = 1;
-
-  /* expecting 'elink' back encrypted */
-}
-
 static void
 cont_link(int idx, char *buf, int ii)
 {
@@ -322,7 +297,8 @@ cont_link(int idx, char *buf, int ii)
 /* need to support the posibility of old hubs being up */
   if (ii == 2) {
     dprintf(idx, "%s\n", conf.bot->nick);
-    gen_linkkey(idx);
+
+    enclink_call(idx, LINK_GHOST, TO);
 
     /* wait for "elink" now */
   } else if (ii == 3) {			/* new hub response */
@@ -1629,44 +1605,6 @@ dcc_telnet_id(int idx, char *buf, int atr)
   dcc_telnet_pass(idx, atr);
 }
 
-#ifdef HUB
-static void gen_linkkey_hub(int idx)
-{
-  int snum = findanysnum(dcc[idx].sock);
-
-  if (snum >= 0) {
-    char initkey[33] = "", *tmp2 = NULL;
-    char tmp[256] = "";
-
-    /* initkey-gen hub */
-    /* bdhash port mynick conf.bot->nick */
-    sprintf(tmp, "%s@%4x@%s@%s", settings.bdhash, htons(dcc[idx].port), conf.bot->nick, dcc[idx].nick);
-    strncpyz(socklist[snum].okey, SHA1(tmp), sizeof(socklist[snum].okey));
-    putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
-    putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(socklist[snum].okey), socklist[snum].okey);
-
-    make_rand_str(initkey, 32);       /* set the initial out/in link key to random chars. */
-    socklist[snum].oseed = random();
-    socklist[snum].iseed = socklist[snum].oseed;
-    tmp2 = encrypt_string(settings.salt2, initkey);
-    putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
-
-    /* the leaf bot set encstatus right after it sent it's nick, but we just set the key.... */
-    socklist[snum].encstatus = 1;
-    socklist[snum].gz = 1;
-
-    dprintf(idx, "elink %s %d\n", tmp2, socklist[snum].oseed);
-    free(tmp2);
-    strcpy(socklist[snum].okey, initkey);
-    strcpy(socklist[snum].ikey, initkey);
-  } else {
-    putlog(LOG_MISC, "*", "Couldn't find socket for %s connection?? Shouldn't happen :/", dcc[idx].nick);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-  }
-}
-#endif /* HUB */
-
 static void
 dcc_telnet_pass(int idx, int atr)
 {
@@ -1703,7 +1641,7 @@ dcc_telnet_pass(int idx, int atr)
   if (glob_bot(fr)) {
     /* FIXME: remove after 1.2.2 */
     if (!dcc[idx].newbot) {
-      gen_linkkey_hub(idx);
+      enclink_call(idx, LINK_GHOST, FROM);
     } else {
       /* negotiate a new linking scheme */
       int i = 0;

@@ -71,6 +71,18 @@ static void link_ghost(int idx, direction_t direction)
   }
 }
 
+void enclink_call(int idx, int type, direction_t direction)
+{
+  int i = 0;
+
+  for (i = 0; enclink[i].name; i++) {
+    if (enclink[i].type == type) {
+      (enclink[i].func) (idx, direction);
+      return;
+    }
+  }
+  return;
+}
 
 struct enc_link enclink[] = {
   { "ghost", LINK_GHOST, link_ghost },
