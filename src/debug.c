@@ -94,7 +94,7 @@ void sdprintf (char *format, ...)
     if (!backgrd)
       dprintf(DP_STDOUT, "[D:%d] %s%s%s\n", getpid(), BOLD(-1), s, BOLD_END(-1));
     else
-      putlog(LOG_MISC, "*", "[D:%d] %s%s%s", getpid(), BOLD(-1), s, BOLD_END(-1));
+      printf("[D:%d] %s%s%s\n", getpid(), BOLD(-1), s, BOLD_END(-1));
   }
 }
 

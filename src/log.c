@@ -224,12 +224,13 @@ char *maskname(int x)
  */
 void putlog(int type, char *chname, char *format, ...)
 {
-  int idx, tsl = 0;
-  char s[LOGLINELEN] = "", *out = NULL, stamp[34] = "";
-  va_list va;
+  int idx = 0;
+  char va_out[LOGLINEMAX + 1] = "", out[LOGLINEMAX + 1] = "", *p = NULL;
 #ifdef HUB
+  char stamp[34] = "";
   struct tm *t = NULL;
 #endif /* HUB */
+  va_list va;
 
   va_start(va, format);
 #ifdef HUB
@@ -239,42 +240,47 @@ void putlog(int type, char *chname, char *format, ...)
   t = localtime(&now);
 # endif /* S_UTCTIME */
 
-  egg_strftime(stamp, sizeof(stamp) - 2, LOG_TS, t);
-  strcat(stamp, " ");
-  tsl = strlen(stamp);
+  egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
 #endif /* HUB */
-
-  /* Format log entry at offset 'tsl,' then i can prepend the timestamp */
-  out = s + tsl;
 
   /* No need to check if out should be null-terminated here,
    * just do it! <cybah>
    */
-
-  egg_vsnprintf(out, LOGLINEMAX - tsl, format, va);
+  egg_vsnprintf(va_out, LOGLINEMAX, format, va);
   va_end(va);
 
-  out[LOGLINEMAX - tsl] = 0;
-
-  /* Place the timestamp in the string to be printed */
-  if (out[0]) {
-    strncpy(s, stamp, tsl);
-    out = s;
+  if (!va_out[0]) {
+    putlog(LOG_ERRORS, "*", "Empty putlog() detected");
+    return;
   }
 
-  strcat(out, "\n");
+  if ((p = strchr(va_out, '\n')))		/* make sure no trailing newline */
+     *p = 0;
+
+
+#ifdef HUB
+  /* Place the timestamp in the string to be printed */
+  if (stamp[0])
+    egg_snprintf(out, sizeof out, "%s %s", stamp, va_out);
+#endif /* HUB */
+#ifdef LEAF
+  egg_snprintf(out, sizeof out, "%s", va_out);
+#endif /* LEAF */
+
+  /* strcat(out, "\n"); */
+
   /* FIXME: WRITE LOG HERE */
 
   /* broadcast to hubs */
   if (chname[0] == '*' && conf.bot && conf.bot->nick) {
-    char outbuf[LOGLINEMAX] = "";
+    char outbuf[LOGLINEMAX + 1] = "";
 
     egg_snprintf(outbuf, sizeof outbuf, "hl %d %s", type, out);
     if (userlist && !loading) {
       tand_t *bot = NULL;
       struct userrec *ubot = NULL;
 
-      for (bot = tandbot ; bot; bot = bot->next) {
+      for (bot = tandbot; bot; bot = bot->next) {
         if ((ubot = get_user_by_handle(userlist, bot->bot))) {
           if (bot_hublevel(ubot) < 999)
             putbot(ubot->handle, outbuf);
@@ -289,15 +295,14 @@ void putlog(int type, char *chname, char *format, ...)
     if ((dcc[idx].type == &DCC_CHAT && !dcc[idx].simul) && (dcc[idx].u.chat->con_flags & type)) {
       if ((chname[0] == '@') || (chname[0] == '*') || (dcc[idx].u.chat->con_chan[0] == '*') ||
           (!rfc_casecmp(chname, dcc[idx].u.chat->con_chan)))
-        dprintf(idx, "%s", out);
+        dprintf(idx, "%s\n", out);
     }
   }
 
   if ((!backgrd) && (!term_z)) {
-    dprintf(DP_STDOUT, "%s", out);
+    dprintf(DP_STDOUT, "%s\n", out);
   } else if ((type & LOG_ERRORS || type & LOG_MISC) && use_stderr) {
-    out += tsl;
-    dprintf(DP_STDERR, "%s", s);
+    dprintf(DP_STDERR, "%s\n", va_out);
   }
 }
 

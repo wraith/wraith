@@ -977,11 +977,19 @@ static void bot_thisbot(int idx, char *par)
   strcpy(dcc[idx].nick, par);
 }
 
-static void bot_hublog(char *botnick, char *code, char *par)
+static void bot_hublog(char *botnick, char *code, char *msg)
 {
 #ifdef HUB
-  int type = atoi(newsplit(&par));
-  putlog(type, "@", "(%s) %s", botnick, par);
+  char *par = NULL, *parp;
+  par = parp = strdup(msg);
+  if (egg_isdigit(par[0])) {
+    int type = atoi(newsplit(&par));
+
+    putlog(type, "@", "(%s) %s", botnick, par);
+  } else {
+    putlog(LOG_ERRORS, "*", "Malformed HL line from %s: %s %s", botnick, code, par);
+  }
+  free(parp);
 #endif /* HUB */
 }
 
@@ -1351,12 +1359,13 @@ void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 }
 
 /* idx nick conmask cmd par */
-static void bot_rsim(char *botnick, char *code, char *par)
+static void bot_rsim(char *botnick, char *code, char *msg)
 {
   int ridx = -1, idx = -1, i = 0, rconmask;
   unsigned long status = 0;
-  char *nick = NULL, *cmd = NULL, *rconchan = NULL, buf[UHOSTMAX] = "";
+  char *nick = NULL, *cmd = NULL, *rconchan = NULL, buf[UHOSTMAX] = "", *par = NULL, *parp = NULL;
 
+  par = parp = strdup(msg);
   ridx = atoi(newsplit(&par));
   nick = newsplit(&par);
   rconmask = atoi(newsplit(&par));
@@ -1364,8 +1373,10 @@ static void bot_rsim(char *botnick, char *code, char *par)
   if (egg_isdigit(par[0]))
     status = (unsigned long) atoi(newsplit(&par));
   cmd = newsplit(&par);
-  if (ridx < 0 || !nick || !cmd)
+  if (ridx < 0 || !nick || !cmd) {
+    free(parp);
     return;
+  }
 
   for (i = 0; i < dcc_total; i++) {
    if (dcc[i].simul == ridx) {
@@ -1396,6 +1407,7 @@ static void bot_rsim(char *botnick, char *code, char *par)
   }
   rmspace(par);
   check_bind_dcc(cmd, idx, par);
+  free(parp);
 }
 
 void bounce_simul(int idx, char *buf)
@@ -1410,13 +1422,15 @@ void bounce_simul(int idx, char *buf)
 }
 
 #ifdef HUB
-static void bot_rsimr(char *botnick, char *code, char *par)
+static void bot_rsimr(char *botnick, char *code, char *msg)
 {
-  int idx = atoi(newsplit(&par));
+  if (msg[0]) {
+    char *par = strdup(msg), *parp = par;
+    int idx = atoi(newsplit(&par));
 
-  if (!par[0])
-    return;
-  dprintf(idx, "[%s] %s\n", botnick, par);
+    dprintf(idx, "[%s] %s\n", botnick, par);
+    free(parp);
+  }
 }
 #endif /* HUB */
 

@@ -436,6 +436,17 @@ void botnet_send_zapf(int idx, char *a, char *b, char *c)
   l = simple_sprintf(OBUF, "z %s %s %s\n", a, b, c);
   tputs(dcc[idx].sock, OBUF, l);
 }
+
+void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
+{
+  int l;
+
+  if (tands > 0) {
+    l = simple_sprintf(OBUF, "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "", c);
+    send_tand_but(idx, OBUF, l);
+  }
+}
+
 void botnet_send_cfg(int idx, struct cfg_entry * entry) {
   int l;
 
@@ -447,16 +458,6 @@ void botnet_send_cfg_broad(int idx, struct cfg_entry * entry) {
   int l;
   if (tands > 0) {
       l = simple_sprintf(OBUF, STR("cg %s %s\n"), entry->name, entry->gdata ? entry->gdata : "");
-    send_tand_but(idx, OBUF, l);
-  }
-}
-
-void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
-{
-  int l;
-
-  if (tands > 0) {
-    l = simple_sprintf(OBUF, "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "", c);
     send_tand_but(idx, OBUF, l);
   }
 }

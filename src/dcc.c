@@ -500,7 +500,7 @@ static void dcc_bot(int idx, char *code, int i)
       if (code[0] == 's')
         putlog(LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code + 2);
       else
-        putlog(LOG_BOTNET, "@", "[%s] %s", dcc[idx].nick, code);
+        putlog(LOG_BOTNET, "@", "<-[%s] %s", dcc[idx].nick, code);
 /*     } */
   }
   msg = strchr(code, ' ');
