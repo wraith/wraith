@@ -585,12 +585,14 @@ readconf(char *fname, int bits)
             conffile.pscloak = atoi(line);
 
         } else if (!strcmp(option, "uid")) {    /* new method uid */
-          if (!conffile.uid && egg_isdigit(line[0]))
+          if (egg_isdigit(line[0]))
             conffile.uid = atoi(line);
 
         } else if (!strcmp(option, "uname")) {  /* new method uname */
           if (!conffile.uname)
             conffile.uname = strdup(line);
+          else
+            str_redup(&conffile.uname, line);
 
         } else if (!strcmp(option, "watcher")) {
           if (egg_isdigit(line[0]))
