@@ -654,6 +654,11 @@ static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
 int main(int argc, char **argv)
 {
   egg_timeval_t egg_timeval_now;
+
+  setlimits();
+  init_debug();
+  init_signals();		
+
   if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a"))) {
     unlink(argv[0]);
     fatal("!! Invalid binary", 0);
@@ -671,9 +676,6 @@ int main(int argc, char **argv)
   /* Version info! */
   egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);
   egg_snprintf(version, sizeof version, "Wraith %s (%lu)", egg_version, buildts);
-
-  init_debug();
-  init_signals();
 
   Context;
   /* Initialize variables and stuff */

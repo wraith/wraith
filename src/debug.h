@@ -55,6 +55,7 @@
 
 extern int		sdebug;
 
+void setlimits();
 void sdprintf (char *, ...);
 void init_signals();
 void init_debug();

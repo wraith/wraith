@@ -21,6 +21,7 @@ This is a summary of ChangeLog basically.
 17.Cmds: voice, devoice, op, deop, invite, mop, kick, kickban now check if the user 
    issuing the cmd has access for the channel.
 18.cmd_getkey now recognizes +private.
+19.Limits were not being set.
 
 1.1.5
 
