@@ -30,7 +30,7 @@
 #  include "src/mod/irc.mod/irc.h"
 #endif /* LEAF */
 
-static struct flag_record fr = { 0, 0, 0};
+static struct flag_record fr = { 0, 0, 0 };
 
 #ifdef LEAF
 struct delay_mode {
@@ -49,7 +49,8 @@ static struct delay_mode *start_delay = NULL;
 #ifdef HUB
 static void start_sending_users(int);
 #endif /* HUB */
-static void shareout_but(struct chanset_t *chan, int, const char *, ...) __attribute__((format(printf, 3, 4)));
+static void shareout_but(struct chanset_t *chan, int, const char *, ...)
+  __attribute__ ((format(printf, 3, 4)));
 static void cancel_user_xfer(int, void *);
 
 #include "share.h"
@@ -369,30 +370,32 @@ share_newuser(int idx, char *par)
     host = newsplit(&par);
     pass = newsplit(&par);
 
-    fr.global = 0;
+    if (!(u = get_user_by_handle(userlist, nick))) {
+      fr.global = 0;
 
-    fr.match = FR_GLOBAL;
-    break_down_flags(par, &fr, NULL);
+      fr.match = FR_GLOBAL;
+      break_down_flags(par, &fr, NULL);
 
-    /* If user already exists, ignore command */
-    shareout_but(NULL, idx, "n %s %s %s %s\n", nick, host, pass, par);
+      /* If user already exists, ignore command */
+      shareout_but(NULL, idx, "n %s %s %s %s\n", nick, host, pass, par);
 
-    noshare = 1;
-    if (strlen(nick) > HANDLEN)
-      nick[HANDLEN] = 0;
+      noshare = 1;
+      if (strlen(nick) > HANDLEN)
+        nick[HANDLEN] = 0;
 
-    fr.match = FR_GLOBAL;
-    build_flags(s, &fr, 0);
-    userlist = adduser(userlist, nick, host, pass, 0);
+      fr.match = FR_GLOBAL;
+      build_flags(s, &fr, 0);
+      userlist = adduser(userlist, nick, host, pass, 0);
 
-    /* Support for userdefinedflag share - drummer */
-    u = get_user_by_handle(userlist, nick);
-    set_user_flagrec(u, &fr, 0);
-    fr.match = FR_CHAN;         /* why?? */
-    noshare = 0;
+      /* Support for userdefinedflag share - drummer */
+      u = get_user_by_handle(userlist, nick);
+      set_user_flagrec(u, &fr, 0);
+      fr.match = FR_CHAN;       /* why?? */
+      noshare = 0;
 #ifndef LEAF
-    putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
+      putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
 #endif /* LEAF */
+    }
   }
 }
 
@@ -1063,7 +1066,8 @@ hook_read_userfile()
 
   if (!noshare) {
     for (i = 0; i < dcc_total; i++)
-      if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & STAT_AGGRESSIVE) && (1)) {
+      if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & STAT_AGGRESSIVE)
+          && (1)) {
         /* Cancel any existing transfers */
         if (dcc[i].status & STAT_SENDING)
           cancel_user_xfer(-i, 0);
@@ -1171,7 +1175,8 @@ shareout(struct chanset_t *chan, const char *format, ...)
   va_end(va);
 
   for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
+    if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) &&
+        !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
 }
@@ -1192,7 +1197,8 @@ shareout_but(struct chanset_t *chan, int x, const char *format, ...)
 
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type->flags & DCT_BOT) && (i != x) &&
-        (dcc[i].status & STAT_SHARE) && (!(dcc[i].status & STAT_GETTING)) && (!(dcc[i].status & STAT_SENDING))) {
+        (dcc[i].status & STAT_SHARE) && (!(dcc[i].status & STAT_GETTING)) &&
+        (!(dcc[i].status & STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
 }
@@ -1439,7 +1445,8 @@ start_sending_users(int idx)
     dcc[idx].status |= STAT_SENDING;
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick); /* Store bot's nick */
-    dprintf(idx, "s us %lu %d %lu\n", iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()), dcc[i].port, dcc[i].u.xfer->length);
+    dprintf(idx, "s us %lu %d %lu\n", iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()), dcc[i].port,
+            dcc[i].u.xfer->length);
 
     /* Unlink the file. We don't really care whether this causes problems
      * for NFS setups. It's not worth the trouble.
@@ -1478,8 +1485,9 @@ cancel_user_xfer(int idx, void *x)
     if (dcc[idx].status & STAT_SENDING) {
       j = 0;
       for (i = 0; i < dcc_total; i++)
-        if ((!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) && ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND))
-                                                              == DCT_FILETRAN))
+        if ((!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) &&
+            ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND))
+             == DCT_FILETRAN))
           j = i;
       if (j != 0) {
         killsock(dcc[j].sock);
@@ -1522,7 +1530,8 @@ share_report(int idx, int details)
                 && !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
               if (dcc[j].type == &DCC_GET)
                 dprintf(idx, "Sending userlist to %s (%d%% done)\n",
-                        dcc[i].nick, (int) (100.0 * ((float) dcc[j].status) / ((float) dcc[j].u.xfer->length)));
+                        dcc[i].nick,
+                        (int) (100.0 * ((float) dcc[j].status) / ((float) dcc[j].u.xfer->length)));
               else
                 dprintf(idx, "Sending userlist to %s (waiting for connect)\n", dcc[i].nick);
             }
