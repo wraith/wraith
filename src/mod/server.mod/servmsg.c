@@ -869,20 +869,22 @@ static int gotnick(char *from, char *msg)
 
 static int gotmode(char *from, char *msg)
 {
-  char *ch;
+  char *ch, *buf = strdup(msg), *buf_ptr;
+  buf_ptr = buf;
 
-  ch = newsplit(&msg);
+  ch = newsplit(&buf);
   /* Usermode changes? */
   if (strchr(CHANMETA, ch[0]) == NULL) {
     if (match_my_nick(ch) && check_mode_r) {
       /* umode +r? - D0H dalnet uses it to mean something different */
-      fixcolon(msg);
-      if ((msg[0] == '+') && strchr(msg, 'r')) {
+      fixcolon(buf);
+      if ((buf[0] == '+') && strchr(buf, 'r')) {
 	putlog(LOG_MISC | LOG_JOIN, "*", "%s has me i-lined (jumping)", dcc[servidx].host);
 	nuke_server("i-lines suck");
       }
     }
   }
+  free(buf_ptr);
   return 0;
 }
 
