@@ -59,7 +59,7 @@ void binds_init(void)
 	BT_away = bind_table_add("away", 3, "sis", MATCH_MASK, BIND_STACKABLE);
 	BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
 	BT_chof = bind_table_add("chof", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
-	BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_MASK, BIND_USE_ATTR);
+	BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_PARTIAL, BIND_USE_ATTR);
 	BT_bot = bind_table_add("bot", 3, "sss", MATCH_EXACT, 0);
         BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);
 	BT_chat = bind_table_add("chat", 3, "sis", MATCH_MASK, BIND_STACKABLE | BIND_BREAKABLE);
@@ -349,18 +349,23 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 
 	/* If it's a partial bind, we have to find the closest match. */
 	if (table->match_type & MATCH_PARTIAL) {
-		int len, tie;
+		int matchlen, masklen, tie;
+		bind_entry_t *winner;
 
-		len = strlen(match);
+		matchlen = strlen(match);
 		tie = 0;
+		winner = NULL;
 		for (entry = table->entries; entry; entry = entry->next) {
 			if (entry->flags & BIND_DELETED) continue;
-			if (!strncasecmp(match, entry->mask, len)) {
-				if (tie) return(-1);
-				tie = 1;
+			masklen = strlen(entry->mask);
+			if (!strncasecmp(match, entry->mask, masklen < matchlen ? masklen : matchlen)) {
+				winner = entry;
+				if (masklen == matchlen) break;
+				else if (tie) return(-1);
+				else tie = 1;
 			}
 		}
-		if (entry && !tie) retval = bind_entry_exec(table, entry, args);
+		if (winner) retval = bind_entry_exec(table, winner, args);
 		else retval = -1;
 		check_bind_executing--;
 		return(retval);
