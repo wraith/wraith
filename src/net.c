@@ -136,7 +136,8 @@ int get_ip(char *hostname, union sockaddr_union *so)
   hints.ai_socktype = SOCK_STREAM;
 
   if ((error = getaddrinfo(hostname, NULL, &hints, &res))) {
-    freeaddrinfo(res);
+    if (res)
+      freeaddrinfo(res);
     return error;
   }
 
@@ -149,7 +150,8 @@ int get_ip(char *hostname, union sockaddr_union *so)
     }
   }
 
-  freeaddrinfo(res);
+  if (res)
+    freeaddrinfo(res);
   return error;
 #else
 

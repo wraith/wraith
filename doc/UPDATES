@@ -5,6 +5,7 @@ This is a summary of ChangeLog basically.
 1.Fixed cmd_help to display the proper entry.
 2.HUBS now save userfile on remote cmd_chattr.
 3.cmd_bots was showing all bots instead of just the ones up.
+4.Fixed a memory corruption bug caused by failed DNS.
 
 1.1.8
 
