@@ -55,6 +55,10 @@ int killbot(char *);
 #ifdef S_CONFEDIT
 void confedit(char *) __attribute__((noreturn));
 #endif /* S_CONFEDIT */
+#ifdef LEAF
+void conf_addbot(char *, char *, char *, char *);
+int conf_delbot(char *);
+#endif /* LEAF */
 pid_t checkpid(char *, conf_bot *);
 void init_conf();
 void free_conf();

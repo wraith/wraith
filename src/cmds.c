@@ -1841,6 +1841,9 @@ static void cmd_sha1(struct userrec *u, int idx, char *par)
 static void cmd_conf(struct userrec *u, int idx, char *par)
 {
   char *cmd = NULL;
+#ifdef LEAF
+  char *listbot = NULL;
+#endif /* LEAF */
   int save = 0;
 
   if (!localhub) {
@@ -1854,28 +1857,51 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
   /* del/change should restart the specified bot ;) */
 
   if (!cmd) {
-    dprintf(idx, "Usage: conf <add|del|list|change|set> [options]\n");
+#ifdef LEAF
+    dprintf(idx, "Usage: conf <add|del|list|set> [options]\n");
+#endif /* LEAF */
+#ifdef HUB
+    dprintf(idx, "Usage: conf <set> [options]\n");
+#endif /* HUB */
     return;
   }
   
   putlog(LOG_CMDS, "*", "#%s# conf %s %s", dcc[idx].nick, cmd, par[0] ? par : "");
+#ifdef LEAF
+  if (!egg_strcasecmp(cmd, "add")) {
+    char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
 
-  if (!egg_strcasecmp(cmd, "list")) {
-    conf_bot *bot = NULL;
-    unsigned int i = 0;
-
-    for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
-      i++;
-      dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
-                    bot->nick,
-                    bot->ip ? bot->ip : "",
-                    bot->host ? bot->host : "",
-                    bot->ip6 ? bot->ip6 : "",
-                    bot->host6 ? bot->host6 : "",
-                    bot->pid);
+    nick = newsplit(&par);
+    if (!nick || (nick && !nick[0])) {
+      dprintf(idx, "Usage: conf add <bot> [<ip|.> <[+]host|.> [ipv6-ip]]\n");
+      return;
     }
-#ifndef CYGWIN_HACKS
-  } else if (!egg_strcasecmp(cmd, "set")) {
+
+    if (par[0])
+      ip = newsplit(&par);
+    if (par[0])
+      host = newsplit(&par);
+    if (par[0])
+      ipsix = newsplit(&par);
+
+    conf_addbot(nick, ip, host, ipsix);
+    dprintf(idx, "Added bot: %s\n", nick);
+    listbot = strdup(nick);
+    save++;
+  } else if (!egg_strcasecmp(cmd, "del")) {
+    if (!par[0]) {
+      dprintf(idx, "Usage: conf del <bot>\n");
+      return;
+    }
+    if (!conf_delbot(par)) {
+      dprintf(idx, "Deleted bot: %s\n", par);
+      save++;
+    } else
+      dprintf(idx, "Error trying to remove bot '%s'\n", par);
+  }
+#endif /* LEAF */
+#if !defined(CYGWIN_HACKS) || defined(HUB)
+  if (!egg_strcasecmp(cmd, "set")) {
     char *what = NULL;
     int show = 1, set = 0;
 
@@ -1920,11 +1946,36 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
       if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conffile.autocron);
       if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conffile.autouname);
     }
-#endif /* !CYGWIN_HACKS */
   }
-  if (save)
+#endif /* !CYGWIN_HACKS || HUB */
+
+#ifdef LEAF
+  if (listbot || !egg_strcasecmp(cmd, "list")) {
+    conf_bot *bot = NULL;
+    unsigned int i = 0;
+
+    for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
+      i++;
+      if (!listbot || (listbot && !strcmp(listbot, bot->nick)))
+        dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
+                      bot->nick,
+                      bot->ip ? bot->ip : "",
+                      bot->host ? bot->host : "",
+                      bot->ip6 ? bot->ip6 : "",
+                      bot->host6 ? bot->host6 : "",
+                      bot->pid);
+    }
+  }
+  if (listbot)
+    free(listbot);
+#endif /* LEAF */
+
+  if (save) {
     writeconf(cfile, NULL, CONF_ENC);
-  /* showconf(idx); */
+#ifdef LEAF
+    spawnbots();			/* parse conffile struct and spawn/kill as needed */
+#endif /* LEAF */
+  }
 }
 
 static void cmd_encrypt(struct userrec *u, int idx, char *par)

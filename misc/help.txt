@@ -664,6 +664,39 @@ See also: echo, page, strip
    Creates or changes the comment field for a user. The comment field can only
    be seen via 'whois' or 'match'. Non-masters cannot see the comment field.
    Using the comment 'none' will clear a user's comment.
+::conf:
+###  %bconf%b <add|del|list|set> [options]
+ 
+   This command is used to modify the bot's local shell config. Only
+   the first bot listed will be able to perform this command. Using the cmd
+   on a non-'localhub' will result in an error similar to:
+ 
+   [16:42] #bryan# botcmd wtest2 conf ...
+   [wtest2] Please use 'wtest' for this login/shell.
+ 
+   Simple use the command on the bot specified.
+   
+    'add' uses the same syntax as the conf file:
+      add <bot> [<ip|.> <[+]host|.> [ipv6-ip]]
+      ip/host/ipv6-ip are all optional and/or can be replaced with '.'
+     Newly added bots will start immediately, don't forget to 'newleaf'.
+ 
+    'del' syntax is simply:
+      del <bot>
+    Deleted bots that are running will be killed.
+  
+    'list' shows all the bots currently in the config.
+ 
+    'set' allows changing some variables in the config.
+      Using with no parameters will show all changable options.
+      Simply specifiy the option and new setting as follows:
+      set <what> [option]
+      WARNING: Options changed MAY OR MAY not affect bots already running,
+               it is a good idea to restart all bots on the shell
+               if you change any of the following: 
+    %bhomedir%b, %bbinpath%b, %bbinname%b, %bportmin%b, %bportmax%b, %bpscloak%b
+ 
+See also: newleaf
 :hub:config:
 ###  %bconfig%b [name [value|-]]
    Sets various config options. Type alone to see all config entries. To set

@@ -29,6 +29,7 @@ This is a summary of ChangeLog basically.
 24.Fixed a problem with my chmod() function.
 25.Fixed many various somewhat random bugs.
 26.Hubs weren't setting their link socket to encrypt early enough.
+27.Added cmd_conf for modifying the bot's shell conf via dcc.
 
 1.1.5
 

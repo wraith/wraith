@@ -307,7 +307,10 @@ checkpid(char *nick, conf_bot * bot)
   return 0;
 }
 
-static void
+#ifdef HUB
+static
+#endif /* HUB */
+void
 conf_addbot(char *nick, char *ip, char *host, char *ip6)
 {
   conf_bot *bot = NULL;
@@ -349,6 +352,53 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   bot->pid = checkpid(nick, bot);
 }
 
+void 
+free_bot(char *botn)
+{
+  conf_bot *bot = NULL, *old = NULL;
+
+  for (bot = conffile.bots; bot && bot->nick; old = bot, bot = bot->next) {
+    if (!strcmp(botn, bot->nick)) {
+      free(bot->nick);
+      free(bot->pid_file);
+      if (bot->ip)
+        free(bot->ip);
+      if (bot->host)
+        free(bot->host);
+      if (bot->ip6)
+        free(bot->ip6);
+      if (bot->host6)
+        free(bot->host6);
+
+      if (old)
+        old->next = bot->next;
+      else
+        conffile.bots = bot->next;
+      free(bot);
+
+      break;
+    }
+  }
+}
+
+#ifdef LEAF
+int
+conf_delbot(char *botn)
+{
+  conf_bot *bot = NULL;
+  
+  for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
+    if (!strcmp(bot->nick, botn)) { /* found it! */
+      bot->pid = checkpid(bot->nick, bot);
+      killbot(bot->nick);
+      free_bot(bot->nick);
+      return 0;
+    }
+  }
+  return 1;
+}
+#endif /* LEAF */
+
 void
 free_conf()
 {
@@ -356,18 +406,7 @@ free_conf()
 
   for (bot = conffile.bots; bot; bot = bot_n) {
     bot_n = bot->next;
-    free(bot->nick);
-    free(bot->pid_file);
-    if (bot->ip)
-      free(bot->ip);
-    if (bot->host)
-      free(bot->host);
-    if (bot->ip6)
-      free(bot->ip6);
-    if (bot->host6)
-      free(bot->host6);
-    /* must also free() anything malloc`d in conf_addbot() */
-    free(bot);
+    free_bot(bot->nick);
   }
   free(conffile.uname);
   free(conffile.username);
