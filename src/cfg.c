@@ -5,8 +5,8 @@
  */
 
 #include "common.h"
-#include "cmds.h"
 #include "cfg.h"
+#include "cmds.h"
 #include "userrec.h"
 #include "auth.h"
 #include "misc.h"
@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include "chan.h"
 #include "tandem.h"
+#include "src/mod/channels.mod/channels.h"
 #ifdef S_DCCPASS
 #include "botnet.h"
 #endif /* S_DCCPASS */
@@ -33,18 +34,35 @@ char 				cmdprefix[1] = "+";	/* This is the prefix for msg/channel cmds */
 struct cmd_pass 		*cmdpass = NULL;
 #endif /* S_DCCPASS */
 
-struct cfg_entry CFG_MOTD = { 
-	"motd", CFGF_GLOBAL, NULL, NULL, 
-	NULL, NULL, NULL 
+
+void chanset_describe(struct cfg_entry * entry, int idx) {
+#ifdef HUB
+  dprintf(idx, STR("chanset is a list of default options for when a channel is added. Same format as .chanset.\n"));
+#endif /* HUB */
+}
+
+void chanset_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+  if (entry->ldata) {
+    strncpyz(cfg_glob_chanset, (char *) entry->ldata, 512);
+  } else if (entry->gdata) {
+    strncpyz(cfg_glob_chanset, (char *) entry->gdata, 512);
+  }
+}
+
+struct cfg_entry CFG_CHANSET = {
+	"chanset", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL, 
+	chanset_changed, chanset_changed, chanset_describe
 };
 
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-void authkey_describe(struct cfg_entry * entry, int idx) {
+void authkey_describe(struct cfg_entry *entry, int idx) {
+#ifdef HUB
   dprintf(idx, 
   STR("authkey is used for authing, give to your users if they are to use DCC chat or IRC cmds. (can be bot specific)\n"));
+#endif /* HUB */
 }
 
-void authkey_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+void authkey_changed(struct cfg_entry *entry, char *olddata, int *valid) {
   if (entry->ldata) {
     strncpyz(authkey, (char *) entry->ldata, sizeof authkey);
   } else if (entry->gdata) {
@@ -60,6 +78,7 @@ struct cfg_entry CFG_AUTHKEY = {
 
 #ifdef S_MSGCMDS
 void msgcmds_describe(struct cfg_entry *entry, int idx) {
+#ifdef HUB
   if (entry == &CFG_MSGOP)
     dprintf(idx, STR("msgop defines the cmd for opping via msging the bot (leave blank to disable)\n"));
   else if (entry == &CFG_MSGPASS)
@@ -68,6 +87,7 @@ void msgcmds_describe(struct cfg_entry *entry, int idx) {
     dprintf(idx, STR("msginvite defines the cmd for requesting invite via msging the bot (leave blank to disable)\n"));
   else if (entry == &CFG_MSGIDENT)
     dprintf(idx, STR("msgident defines the cmd for identing via msging the bot (leave blank to disable)\n"));
+#endif /* HUB */
 }
 
 struct cfg_entry CFG_MSGOP = {
@@ -92,7 +112,9 @@ struct cfg_entry CFG_MSGIDENT = {
 #endif /* S_MSGCMDS */
 
 void cmdprefix_describe(struct cfg_entry *entry, int idx) {
+#ifdef HUB
   dprintf(idx, STR("cmdprefix is the prefix used for msg cmds, ie: !op or .op\n"));
+#endif /* HUB */
 }
 
 void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
@@ -114,6 +136,7 @@ struct cfg_entry CFG_CMDPREFIX = {
 
 void deflag_describe(struct cfg_entry *cfgent, int idx)
 {
+#ifdef HUB
   if (cfgent == &CFG_BADCOOKIE)
     dprintf(idx, STR("bad-cookie decides what happens to a bot if it does an illegal op (no/incorrect op cookie)\n"));
   else if (cfgent == &CFG_MANUALOP)
@@ -130,7 +153,9 @@ void deflag_describe(struct cfg_entry *cfgent, int idx)
     dprintf(idx, STR("mdop decides what happens to a user doing a mass deop\n"));
   else if (cfgent == &CFG_MOP)
     dprintf(idx, STR("mop decides what happens to a user doing a mass op\n"));
-  dprintf(idx, STR("Valid settings are: ignore (No flag changes), deop (set flags to +d), kick (set flags to +dk) or delete (remove from userlist)\n"));
+  dprintf(idx, 
+  STR("Valid settings are: ignore (No flag changes), deop (set flags to +d), kick (set flags to +dk) or delete (remove from userlist)\n"));
+#endif /* HUB */
 }
 
 void deflag_changed(struct cfg_entry *entry, char *oldval, int *valid) 
@@ -254,6 +279,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
 
 void misc_describe(struct cfg_entry *cfgent, int idx)
 {
+#ifdef HUB
   int i = 0;
 
   if (!strcmp(cfgent->name, STR("fork-interval"))) {
@@ -285,6 +311,7 @@ void misc_describe(struct cfg_entry *cfgent, int idx)
   }
   if (!i)
     dprintf(idx, STR("Valid settings are: ignore, warn, die, reject, suicide\n"));
+#endif /* HUB */
 }
 
 void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
@@ -302,7 +329,9 @@ void fork_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
 }
 
 void fork_describe(struct cfg_entry * cfgent, int idx) {
+#ifdef HUB
   dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
+#endif /* HUB */
 }
 
 struct cfg_entry CFG_FORKINTERVAL = {
@@ -368,21 +397,30 @@ struct cfg_entry CFG_PROCESSLIST = {
 
 /* this is cfg shit from servers/irc/ctcp because hub doesnt load
  * these mods */
+
 #ifdef HUB
 void servers_describe(struct cfg_entry * entry, int idx) {
+#ifdef HUB
   dprintf(idx, STR("servers is a comma-separated list of servers the bot will use\n"));
+#endif /* HUB */
 }
 
 void servers6_describe(struct cfg_entry * entry, int idx) {
+#ifdef HUB
   dprintf(idx, STR("servers6 is a comma-separated list of servers the bot will use (FOR IPv6)\n"));
+#endif /* HUB */
 }
 
 void nick_describe(struct cfg_entry * entry, int idx) {
+#ifdef HUB
   dprintf(idx, STR("nick is the bots preferred nick when connecting/using .resetnick\n"));
+#endif /* HUB */
 }
 
 void realname_describe(struct cfg_entry * entry, int idx) {
+#ifdef HUB
   dprintf(idx, STR("realname is the bots \"real name\" when connecting\n"));
+#endif /* HUB */
 }
 
 struct cfg_entry CFG_SERVERS = {
@@ -406,6 +444,7 @@ struct cfg_entry CFG_REALNAME = {
 
 void getin_describe(struct cfg_entry *cfgent, int idx)
 {
+#ifdef HUB
   if (!strcmp(cfgent->name, STR("op-bots")))
     dprintf(idx, STR("op-bots is number of bots to ask every time a oprequest is to be made\n"));
   else if (!strcmp(cfgent->name, STR("in-bots")))
@@ -426,6 +465,7 @@ void getin_describe(struct cfg_entry *cfgent, int idx)
     dprintf(idx, STR("No description for %s ???\n"), cfgent->name);
     putlog(LOG_ERRORS, "*", STR("getin_describe() called with unknown config entry %s"), cfgent->name);
   }
+#endif /* HUB */
 }
 
 void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
@@ -637,8 +677,14 @@ void set_cfg_str(char *target, char *entryname, char *data)
   }
 }
 
+struct cfg_entry CFG_MOTD = { 
+	"motd", CFGF_GLOBAL, NULL, NULL, 
+	NULL, NULL, NULL 
+};
+
 void init_config()
 {
+  add_cfg(&CFG_CHANSET);
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
   add_cfg(&CFG_AUTHKEY);
 #endif /* S_AUTHHASH || S_DCCAUTH */

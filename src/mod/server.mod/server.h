@@ -65,5 +65,6 @@ int detect_avalanche(char *);
 void server_report(int, int);
 void server_init();
 void queue_server(int, char *, int);
+void server_postrehash();
 
 #endif /*leaf*/

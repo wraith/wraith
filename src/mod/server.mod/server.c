@@ -1393,13 +1393,14 @@ static void server_prerehash()
   strcpy(oldnick, botname);
 }
 
-static void server_postrehash()
+void server_postrehash()
 {
   strncpyz(botname, origbotname, NICKLEN);
   if (oldnick[0] && !rfc_casecmp(oldnick, botname)) {
     /* Change botname back, don't be premature. */
     strcpy(botname, oldnick);
-    dprintf(DP_SERVER, "NICK %s\n", origbotname);
+    if (server_online)
+      dprintf(DP_SERVER, "NICK %s\n", origbotname);
   }
   /* Change botname back incase we were using altnick previous to rehash. */
   else if (oldnick[0])
@@ -1552,7 +1553,6 @@ void server_init()
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
   add_hook(HOOK_PRE_REHASH, (Function) server_prerehash);
-  add_hook(HOOK_REHASH, (Function) server_postrehash);
   add_hook(HOOK_DIE, (Function) server_die);
   mq.head = hq.head = modeq.head = NULL;
   mq.last = hq.last = modeq.last = NULL;
@@ -1568,8 +1568,11 @@ void server_init()
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
-  cfg_noshare = 1;
-  set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders.");
-  cfg_noshare = 0;
+
+  if (!CFG_REALNAME.gdata) {
+    cfg_noshare = 1;
+    set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders.");
+    cfg_noshare = 0;
+  }
 }
 #endif /* LEAF */

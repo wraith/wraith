@@ -750,6 +750,8 @@ int channel_add(char *result, char *newname, char *options)
   }
   simple_sprintf(buf, "chanmode { %s } ", glob_chanmode);
   strcat(buf, glob_chanset);
+  strcat(buf, cfg_glob_chanset);
+  strcat(buf, " ");
   strcat(buf, options);
   buf[strlen(buf)] = 0;
 

@@ -18,7 +18,7 @@ typedef struct cfg_entry {
   void (*describe) (struct cfg_entry *, int idx);
 } cfg_entry_T;
 
-extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_BADCOOKIE, CFG_MANUALOP, CFG_MDOP, CFG_MOP, CFG_FORKINTERVAL;
+extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_BADCOOKIE, CFG_MANUALOP, CFG_MDOP, CFG_MOP, CFG_FORKINTERVAL, CFG_CHANSET;
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 extern struct cfg_entry CFG_AUTHKEY;
 #endif /* S_AUTHHASH || S_DCCAUTH */

@@ -22,6 +22,8 @@ This is a summary of ChangeLog basically.
 19.Bots now respond to /ctcp CHAT quicker
 20.lock-threshold config option is now close-threshold.
 21.Fixed a bug with a full harddrive.
+22.Added config setting "chanset". Change to change what flags new channels will have. 
+   Original default list will apply for options you leave out.
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.

@@ -742,6 +742,7 @@ int main(int argc, char **argv)
     }
   }
 
+  chanprog();
   dns_init();
   channels_init();
 #ifdef LEAF
@@ -754,7 +755,9 @@ int main(int argc, char **argv)
   notes_init();
   console_init();
   ctcp_init();
-  chanprog();
+
+  strcpy(botuser, origbotname);
+  trigger_cfg_changed();
 
 #ifdef LEAF
   if (localhub) {

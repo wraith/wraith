@@ -526,11 +526,6 @@ void chanprog()
   sdprintf("ip6: %s", myipstr(6));
   conmask = 0;
 
- /* now this only checks server shit. (no channels) */
-  call_hook(HOOK_REHASH);
-
-  strcpy(botuser, origbotname);
-
   if (!conf.bot->nick)
     fatal("I don't have a nickname!!\n", 0);
 #ifdef HUB

@@ -92,6 +92,8 @@ int ismodeline(masklist *, char *);
 
 void channels_report(int, int);
 
+extern char		glob_chanset[], cfg_glob_chanset[];
+
 /* Macro's here because their functions were replaced by something more
  * generic. <cybah>
  */

@@ -45,7 +45,7 @@ static int 			global_exempt_time;
 static int 			global_invite_time;
 
 /* Global channel settings (drummer/dw) */
-static char 			glob_chanset[512] = "";
+char 				glob_chanset[512] = "", cfg_glob_chanset[512] = "";
 
 /* Global flood settings */
 static int 			gfld_chan_thr;
@@ -943,6 +943,14 @@ void channels_init()
 	 "-voice "
          "-private "
 	 "-fastop ");
+#ifdef HUB
+  /* this should only happen while upgrading to 1.1.4 */
+  if (!CFG_CHANSET.gdata) {
+    cfg_noshare++;
+    set_cfg_str(NULL, "chanset", glob_chanset);
+    cfg_noshare--;
+  }
+#endif /* HUB */
 #ifdef LEAF
   timer_create_secs(60, "check_limitraise", (Function) check_limitraise);
 #endif /* LEAF */
