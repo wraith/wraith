@@ -30,6 +30,13 @@ void init_flags()
                FLAG[i] = (flag_t) 1 << (i - 'a');
        for (; i < 128; i++)
                FLAG[i] = 0;
+struct flag_record pls = { FR_GLOBAL, 0, 0, 0 }, mns = { FR_GLOBAL, 0, 0, 0 };
+char string[501] = "";
+pls.global = FLAG['a'] | FLAG['A'];
+mns.global = FLAG['a'];
+
+break_down_flags(string, &pls, NULL);
+printf("break_down_flags:  %s\n", string);
 
 //printf("a: %llX A: %llX\n",  FLAG['a'],  FLAG['Z']);
 //printf("0: %llX 26: %llX\n",  BIT0, BIT31);
@@ -120,14 +127,12 @@ char geticon(int idx)
 void break_down_flags(const char *string, struct flag_record *plus, struct flag_record *minus)
 {
   struct flag_record	*which = plus;
-  int			 mode = 0;	/* 0 = glob, 1 = chan, 2 = bot */
+  int			 chan = 0;	/* 0 = glob, 1 = chan */
   int			 flags = plus->match;
 
   if (!(flags & FR_GLOBAL)) {
-    if (flags & FR_BOT)
-      mode = 2;
-    else if (flags & FR_CHAN)
-      mode = 1;
+    if (flags & FR_CHAN)
+      chan = 1;
     else
       return;			/* We dont actually want any..huh? */
   }
@@ -147,22 +152,29 @@ void break_down_flags(const char *string, struct flag_record *plus, struct flag_
       break;
     case '|':
     case '&':
-      if (!mode) {
+      if (!chan) {
 	if (*string == '|')
 	  plus->match = FR_OR;
 	else
 	  plus->match = FR_AND;
       }
       which = plus;
-      mode++;
-      if ((mode == 2) && !(flags & (FR_CHAN | FR_BOT)))
+      chan++;
+/* FIXME: blah */
+/*
+      if ((chan == 2) && !(flags & (FR_CHAN | FR_BOT)) )
 	string = "";
-      else if (mode == 3)
-	mode = 1;
-      break;
+      else if (chan == 3)
+	chan = 1;
+*/
+      if (chan == 2)
+        string = "";
+      else if (chan == 3)
+        chan = 1;
+      break;		/* switch() */
     default:
       if ((*string >= 'a') && (*string <= 'z')) {
-	switch (mode) {
+	switch (chan) {
 	case 0:
 	  /* which->global |= (flag_t) 1 << (*string - 'a'); */
           which->global |= FLAG[(unsigned char) *string];
@@ -171,19 +183,15 @@ void break_down_flags(const char *string, struct flag_record *plus, struct flag_
 	  /* which->chan |= (flag_t) 1 << (*string - 'a'); */
           which->chan |= FLAG[(unsigned char) *string];
 	  break;
-	case 2:
-	  /* which->bot |= (flag_t) 1 << (*string - 'a'); */
-          which->bot |= FLAG[(unsigned char) *string];
 	}
       } 
     }
     string++;
   }
   for (which = plus; which; which = (which == plus ? minus : 0)) {
-    which->global &=USER_VALID;
+    which->global &= USER_VALID;
 
     which->chan &= CHAN_VALID;
-    which->bot &= BOT_VALID;
   }
   plus->match |= flags;
   if (minus) {
@@ -193,47 +201,18 @@ void break_down_flags(const char *string, struct flag_record *plus, struct flag_
   }
 }
 
-static int flag2str(char *string, flag_t bot)
+static int flag2str(char *string, flag_t flag)
 {
-  char x = 'a', *old = string;
+  unsigned char c;
+  char *old = string;
 
-  while (bot && (x <= 'z')) {
-    if (bot & 1)
-      *string++ = x;
-    x++;
-    bot = bot >> 1;
-  }
-/* udef
-  x = 'A';
-  while (udef && (x <= 'Z')) {
-    if (udef & 1)
-      *string++ = x;
-    udef = udef >> 1;
-    x++;
-  }
-*/
+  for (c = 0; c < 128; c++)
+    if (flag & FLAG[c])
+      *string++ = c;
+
   if (string == old)
     *string++ = '-';
-  return string - old;
-}
 
-static int bot2str(char *string, int bot)
-{
-  char x = 'a', *old = string;
-
-  while (x < 'v') {
-    if (bot & 1)
-      *string++ = x;
-    x++;
-    bot >>= 1;
-  }
-  x = '0';
-  while (x <= '9') {
-    if (bot & 1)
-      *string++ = x;
-    x++;
-    bot >>= 1;
-  }
   return string - old;
 }
 
@@ -250,14 +229,6 @@ int build_flags(char *string, struct flag_record *plus, struct flag_record *minu
       *string++ = '-';
       string += flag2str(string, minus->global);
     }
-  } else if (plus->match & FR_BOT) {
-    if (minus && plus->bot)
-      *string++ = '+';
-    string += bot2str(string, plus->bot);
-    if (minus && minus->bot) {
-      *string++ = '-';
-      string += bot2str(string, minus->bot);
-    }
   }
   if (plus->match & FR_CHAN) {
     if (plus->match & (FR_GLOBAL | FR_BOT))
@@ -268,16 +239,6 @@ int build_flags(char *string, struct flag_record *plus, struct flag_record *minu
     if (minus && minus->chan) {
       *string++ = '-';
       string += flag2str(string, minus->global);
-    }
-  }
-  if ((plus->match & (FR_BOT | FR_CHAN)) == (FR_BOT | FR_CHAN)) {
-    *string++ = (plus->match & FR_AND) ? '&' : '|';
-    if (minus && plus->bot)
-      *string++ = '+';
-    string += bot2str(string, plus->bot);
-    if (minus && minus->bot) {
-      *string++ = '-';
-      string += bot2str(string, minus->bot);
     }
   }
   if (string == old) {
@@ -297,21 +258,16 @@ int flagrec_ok(struct flag_record *req, struct flag_record *have)
   } else if (req->match & FR_OR) {
     int hav = have->global;
 
-    /* Exception 1 - global +d/+k cant use -|-, unless they are +p */
+    /* no flags, is a match*/
     if (!req->chan && !req->global)
       return 1;
-    /* The +n/+m checks arent needed anymore since +n/+m
-     * automatically add lower flags
-     */
-/*    if (!1 && ((hav & USER_OP) || (have->chan & USER_OWNER)))
-      hav |= USER_PARTY;*/
     if (hav & req->global)
       return 1;
     if (have->chan & req->chan)
       return 1;
     return 0;
   }
-  return 0;			/* fr0k3 binding, dont pass it */
+  return 0;			
 }
 
 /* Returns 1 if flags match, 0 if they don't. */
@@ -322,24 +278,18 @@ int flagrec_eq(struct flag_record *req, struct flag_record *have)
       if ((req->global &have->global) !=req->global)
 	return 0;
     }
-    if (req->match & FR_BOT)
-      if ((req->bot & have->bot) != req->bot)
-	return 0;
     if (req->match & FR_CHAN) {
       if ((req->chan & have->chan) != req->chan)
 	return 0;
     }
     return 1;
   } else if (req->match & FR_OR) {
-    if (!req->chan && !req->global && !req->bot)
+    if (!req->chan && !req->global)
       return 1;
     if (req->match & FR_GLOBAL) {
       if (have->global &req->global)
 	return 1;
     }
-    if (req->match & FR_BOT)
-      if (have->bot & req->bot)
-	return 1;
     if (req->match & FR_CHAN) {
       if (have->chan & req->chan)
 	return 1;
@@ -367,7 +317,7 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
       shareout(NULL, "a %s %s\n", u->handle, buffer);
     }
   }
-  /* Don't share bot attrs */
+
   if ((oldflags & FR_CHAN) && chname) {
     for (cr = u->chanrec; cr; cr = cr->next)
       if (!rfc_casecmp(chname, cr->channel))
@@ -399,7 +349,7 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
   struct chanuserrec *cr = NULL;
 
   if (!u) {
-    fr->global = fr->chan = fr->bot = 0;
+    fr->global = fr->chan = 0;
     return;
   }
   if (fr->match & FR_GLOBAL) {
@@ -407,7 +357,7 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
   } else {
     fr->global = 0;
   }
-  fr->bot = 0;
+
   if (fr->match & FR_CHAN) {
     if (fr->match & FR_ANYWH) {
       fr->chan = u->flags;
