@@ -30,6 +30,7 @@
 #include "chan.h"
 #include "compat/compat.h"
 
+#include <sys/param.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>

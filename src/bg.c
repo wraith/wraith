@@ -59,13 +59,6 @@ bg_do_detach(pid_t p)
   exit(0);
 }
 
-#ifdef BSD
-#  define PT_CONT PTRACE_CONTINUE
-#endif /* BSD */
-#ifdef __linux__
-#  define PT_CONT PTRACE_CONT
-#endif /* __linux__ */
-
 static void
 init_watcher()
 {
@@ -85,7 +78,7 @@ init_watcher()
       watcher = getpid();
       /* printf("MY PARENT: %d\n", parent); */
       /* printf("my pid: %d\n", watcher); */
-      if (ptrace(PTRACE_ATTACH, parent, 0, 0) == -1)
+      if (ptrace(PT_ATTACH, parent, 0, 0) == -1)
         fatal("Cannot attach to parent", 0);
 
       while (1) {
@@ -94,12 +87,12 @@ init_watcher()
         waitpid(parent, &status, 0);
         sig = WSTOPSIG(status);
         if (sig) {
-          ret = ptrace(PT_CONT, parent, (char *) 1, sig);
+          ret = ptrace(PT_CONTINUE, parent, (char *) 1, sig);
           if (ret == -1)        /* send the signal! */
             fatal("Could not send signal to parent", 0);
           /* printf("Sent signal %s (%d) to parent\n", strsignal(sig), sig); */
         } else {
-          ret = ptrace(PT_CONT, parent, (char *) 1, 0);
+          ret = ptrace(PT_CONTINUE, parent, (char *) 1, 0);
           if (ret == -1) {
             if (errno == ESRCH) /* parent is gone! */
               exit(0);          /* just exit */

@@ -227,7 +227,6 @@ irc_log(struct chanset_t *chan, const char *format, ...)
   va_start(va, format);
   egg_vsnprintf(va_out, LOGLINEMAX, format, va);
   va_end(va);
-  char *TO = "#shadow";
 
 //  if (egg_strcasecmp(chan->dname, TO))
 //    dprintf(DP_HELP, "PRIVMSG %s :[%s] %s\n", TO, chan->dname, va_out);
