@@ -984,23 +984,24 @@ sdprintf("DUMP!");
 
 static void cmd_userlist(int idx, char *par)
 {
-  int cnt = 0, tt = 0, tmp = 0;
+  int cnt = 0, tt = 0, bt = 0;
   char work[200] = "";
 
   putlog(LOG_CMDS, "*", "#%s# userlist", dcc[idx].nick);
   
   PRINT_USERS(1, 0, 0, "Bots");
-  tmp = tt;			/* we don't want to add these duplicates into the total */
+  bt = tt;			/* we don't want to add these duplicates into the total */
   PRINT_USERS(1, USER_CHANHUB, 0, "Chatbots");
   PRINT_USERS(1, USER_DOVOICE, 0, "Voicebots");
   PRINT_USERS(1, USER_DOLIMIT, 0, "Limitbots");
-  tt = tmp;
+  tt = 0;
   PRINT_USERS(0, USER_ADMIN, 0, "Admins");
   PRINT_USERS(0, USER_OWNER, USER_ADMIN, "Owners");
   PRINT_USERS(0, USER_MASTER, USER_OWNER, "Masters");
   PRINT_USERS(0, USER_OP, USER_MASTER, "Ops");
   PRINT_USERS(0, 0, USER_OP, "Users");
 
+  dprintf(idx, "Total bots: %d\n", bt);
   dprintf(idx, "Total users: %d\n", tt);
 
   return;
