@@ -1522,6 +1522,14 @@ See also: fixcodes, color, echo, page
    Lets you assume the identity of another user. If you are a global owner,
    this does not require a password. Otherwise, you will be asked for the
    user's password. %b%dquit%b returns you to your original handle.
+:leaf:swhois
+###  %bswhois%b [server/nick] <nick>
+   Displays a server /whois for the specified nick. Specifying
+   the nick twice will display idle time. Specifying a server will 
+   display the whois as viewed by that server.
+   If the nick is currently not online, a /WHOWAS is done automatically.
+ 
+See also: find
 :leaf:topic
 ###  %btopic%b <text>
    changes the channel's topic, assuming the bot is a chanop or the

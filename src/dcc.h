@@ -52,6 +52,7 @@ struct dcc_t {
   int ssl;                      /* use ssl on this dcc? */
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   int msgc;			/* forward the output back to irc? */
+  int whowas;
   port_t port;
 #ifdef USE_IPV6
   char addr6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */
@@ -59,6 +60,7 @@ struct dcc_t {
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
   char nick[NICKLEN];
+  char whois[UHOSTLEN];
   char host[UHOSTLEN];
 };
 

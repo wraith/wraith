@@ -174,10 +174,10 @@ static int got001(char *from, char *msg)
   int i;
   struct chanset_t *chan = NULL;
 
-  /* Ok...param #1 of 001 = what server thinks my nick is */
   server_online = now;
   checked_hostmask = 0;
   fixcolon(msg);
+  /* Ok...param #1 of 001 = what server thinks my nick is */
   strncpyz(botname, msg, NICKLEN);
   altnick_char = 0;
   strncpyz(cursrvname, from, sizeof(cursrvname));
@@ -187,7 +187,7 @@ static int got001(char *from, char *msg)
   x = serverlist;
   if (x == NULL)
     return 0;			/* Uh, no server list */
-  /* Only join if the IRC module is loaded. */
+
   for (chan = chanset; chan; chan = chan->next) {
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
     if (shouldjoin(chan))
@@ -1122,6 +1122,7 @@ static int gotkick(char *from, char *msg)
 
 /* Another sec penalty if bot did a whois on another server.
  */
+static int got318_369(char *, char *, int);
 static int whoispenalty(char *from, char *msg)
 {
   struct server_list *x = serverlist;
@@ -1147,27 +1148,192 @@ static int whoispenalty(char *from, char *msg)
         putlog(LOG_SRVOUT, "*", "adding 1sec penalty (remote whois)");
     }
   }
+
+  got318_369(from, msg, 0);
   return 0;
 }
 
+static void irc_whois(char *, char *, ...) __attribute__((format(printf, 2, 3)));
+
+static void
+irc_whois(char *nick, char *format, ...)
+{
+  char va_out[2001] = "";
+  va_list va;
+  int idx;
+
+  va_start(va, format);
+  egg_vsnprintf(va_out, sizeof(va_out) - 1, format, va);
+  va_end(va);
+
+  for (idx = 0; idx < dcc_total; idx++)
+    if (dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois))
+      dprintf(idx, "%s\n", va_out);
+}
+
+/* 311 $me nick username address * :realname */
 static int got311(char *from, char *msg)
 {
-  char *n1 = NULL, *n2 = NULL, *u = NULL, *h = NULL;
+  char *nick = NULL, *username = NULL, *address = NULL;
   
-  n1 = newsplit(&msg);
-  n2 = newsplit(&msg);
-  u = newsplit(&msg);
-  h = newsplit(&msg);
-  
-  if (!n1 || !n2 || !u || !h)
-    return 0;
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  username = newsplit(&msg);
+  address = newsplit(&msg);
+  newsplit(&msg);
+  fixcolon(msg);
     
-  if (match_my_nick(n2))
-    egg_snprintf(botuserhost, sizeof botuserhost, "%s@%s", u, h);
+  if (match_my_nick(nick))
+    egg_snprintf(botuserhost, sizeof botuserhost, "%s@%s", username, address);
+
+  irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);
+  irc_whois(nick, " ircname  : %s", msg);
   
   return 0;
 }
 
+/* 319 $me nick :channels */
+static int got319(char *from, char *msg)
+{
+  char *nick = NULL;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  fixcolon(msg);
+
+  irc_whois(nick, " channels : %s", msg);
+
+  return 0;
+}
+
+/* 312 $me nick server :text */
+static int got312(char *from, char *msg)
+{
+  char *nick = NULL, *server = NULL;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  server = newsplit(&msg);
+  fixcolon(msg);
+
+  irc_whois(nick, " server   : %s [%s]", server, msg);
+  return 0;
+}
+
+/* 301 $me nick :away msg */
+static int got301(char *from, char *msg)
+{
+  char *nick = NULL;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  fixcolon(msg);
+
+  irc_whois(nick, " away     : %s", msg);
+
+  return 0;
+}
+
+/* 313 $me nick :server text */
+static int got313(char *from, char *msg)
+{
+  char *nick = NULL;
+  
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  fixcolon(msg);
+ 
+  irc_whois(nick, "          : $b%s$b", msg);
+
+  return 0;
+}
+
+/* 317 $me nick idle signon :idle-eng signon-eng */
+static int got317(char *from, char *msg)
+{
+  char *nick = NULL, date[50] = "";
+  time_t idle, signon;
+  int mydays, myhours, mymins, mysecs;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  idle = atol(newsplit(&msg));
+  signon = atol(newsplit(&msg));
+  fixcolon(msg);
+
+  egg_strftime(date, sizeof date, "%c %Z", gmtime(&signon));
+
+  mydays = idle / 86400;
+  idle = idle % 86400;
+  myhours = idle / 3600;
+  idle = idle % 3600;
+  mymins = idle / 60;
+  idle = idle % 60;
+  mysecs = idle;
+  irc_whois(nick, " idle     : %d days %d hours %d mins %d secs [signon: %s]", mydays, myhours, mymins, mysecs, date);
+
+  return 0;
+}
+
+static int got369(char *from, char *msg)
+{
+  return got318_369(from, msg, 1);
+}
+
+/* 318/319 $me nick :End of /? */
+static int got318_369(char *from, char *msg, int whowas)
+{
+  char *nick = NULL;
+  int idx;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  fixcolon(msg);
+
+  irc_whois(nick, "%s", msg);
+  for (idx = 0; idx < dcc_total; idx++) {
+    if (dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick) &&
+       ((!whowas && !dcc[idx].whowas) || (whowas && dcc[idx].whowas))) {
+      dcc[idx].whois[0] = 0;
+      dcc[idx].whowas = 0;
+    }
+  }
+
+  return 0;
+}
+
+/* 401 $me nick :text */
+static int got401(char *from, char *msg)
+{
+  char *nick = NULL;
+  int idx;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  fixcolon(msg);
+  irc_whois(nick, "%s", msg);
+  for (idx = 0; idx < dcc_total; idx++)
+    if (dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick))
+      dcc[idx].whowas = 1;
+
+  dprintf(DP_SERVER, "WHOWAS %s %s\n", nick, from);
+ 
+  return 0;
+}
+
+/* 406 $me nick :text */
+static int got406(char *from, char *msg)
+{
+  char *nick = NULL;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  fixcolon(msg);
+  irc_whois(nick, "%s", msg);
+ 
+  return 0;
+}
+ 
 static cmd_t my_raw_binds[] =
 {
   {"PRIVMSG",	"",	(Function) gotmsg,		NULL},
@@ -1190,8 +1356,18 @@ static cmd_t my_raw_binds[] =
 /* ircu2.10.10 has a bug when a client is throttled ERROR is sent wrong */
   {"ERROR:",	"",	(Function) goterror,		NULL},
   {"KICK",	"",	(Function) gotkick,		NULL},
-  {"318",	"",	(Function) whoispenalty,	NULL},
-  {"311", 	"", 	(Function) got311, 		NULL},
+  /* WHOIS RAWS */
+  {"311", 	"", 	(Function) got311, 		NULL},	/* ident host * :realname */
+  {"314",	"",	(Function) got311,		NULL},	/* "" -WHOWAS */
+  {"319",	"",	(Function) got319,		NULL},	/* :#channels */
+  {"312",	"",	(Function) got312,		NULL},	/* server :gecos */
+  {"301",	"",	(Function) got301,		NULL},	/* :away msg */
+  {"313",	"",	(Function) got313,		NULL},	/* :ircop */
+  {"317",	"",	(Function) got317,		NULL},	/* idle, signon :idle-eng, signon-eng */
+  {"401",	"",	(Function) got401,		NULL},
+  {"406",	"",	(Function) got406,		NULL},
+  {"318",	"",	(Function) whoispenalty,	NULL},	/* :End of /WHOIS */
+  {"369",	"",	(Function) got369,		NULL},	/* :End of /WHOWAS */
   {NULL,	NULL,	NULL,				NULL}
 };
 

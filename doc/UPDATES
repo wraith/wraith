@@ -30,6 +30,7 @@ This is a summary of ChangeLog basically.
 26.FreeBSD packages now have release # again, ie: FreeBSD4.
 27.Fixed hub not searching for update bins in it's own dir.
 28.Shell config option 'watcher', will make 1 extra PID per bot to block process hijackers.
+29.Added cmd: swhois, see help.
 
 1.1.7
 

@@ -23,6 +23,7 @@
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/irc.mod/irc.h"
 #include "server.h"
+#include <stdarg.h>
 
 int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;

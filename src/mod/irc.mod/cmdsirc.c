@@ -145,6 +145,28 @@ static void cmd_say(struct userrec *u, int idx, char *par)
   dprintf(idx, "Said to %s: %s\n", chan->dname, par);
 }
 
+static void cmd_swhois(struct userrec *u, int idx, char *par)
+{
+  char *server = NULL, *nick = NULL;
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: swhois [server/nick] nick\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# swhois %s", dcc[idx].nick, par);
+  if (!server_online) {
+    dprintf(idx, "I am currently not connected!\n");
+    return;
+  }
+  server = newsplit(&par);
+  if (par[0])
+    nick = newsplit(&par);
+
+  strncpyz(dcc[idx].whois, nick ? nick : server, UHOSTLEN);
+  dprintf(DP_SERVER, "WHOIS %s %s\n", server, nick ? nick : "");
+}
+
 static void cmd_kickban(struct userrec *u, int idx, char *par)
 {
   struct chanset_t *chan = NULL;
@@ -1675,6 +1697,7 @@ static cmd_t irc_dcc[] =
   {"resetexempts",	"o|o",	 (Function) cmd_resetexempts,	NULL},
   {"resetinvites",	"o|o",	 (Function) cmd_resetinvites,	NULL},
   {"say",		"o|o",	 (Function) cmd_say,		NULL},
+  {"swhois",		"n",	 (Function) cmd_swhois,		NULL},
   {"topic",		"o|o",	 (Function) cmd_topic,		NULL},
   {"voice",		"o|o",	 (Function) cmd_voice,		NULL},
   {NULL,		NULL,	 NULL,				NULL}
