@@ -22,7 +22,8 @@ for mf in $files; do
   mf=`echo "$mf" | sed -e 's/:.*$//'`
   dirpart=`AS_DIRNAME("$mf")`
 #  echo "dirpart: $dirpart mf: $mf"
-  rm -rf "$dirpart/.deps/"
+#  rm -rf "$dirpart/.deps/"
+  rm -f "$dirpart/.deps/includes"
   test -d "$dirpart/.deps" || mkdir "$dirpart/.deps"
   for file in `sed -n -e '
     /^OBJS = .*\\\\$/ {
@@ -38,10 +39,13 @@ for mf in $files; do
   do
     base=`basename $file .o`
     test -f "$dirpart/$base.c" || continue
-#    fdir=`AS_DIRNAME(["$file"])`
-#    AS_MKDIR_P([$dirpart/$fdir])
-#    echo "creating $dirpart/.deps/$base.Po"
-    echo '# dummy' > "$dirpart/.deps/$base.Po"
+    if ! test -f "$dirpart/.deps/$base.Po"; then
+      echo '# dummy' > "$dirpart/.deps/$base.Po"
+      #Remove the .o file, because it needs to be recompiled for its dependancies.
+      if test -f "$dirpart/$base.o"; then
+        rm -f "$dirpart/$base.o"
+      fi
+    fi
     echo "include .deps/$base.Po" >> "$dirpart/.deps/includes"
     echo "_$base.c:" >> "$dirpart/.deps/includes"
   done
