@@ -45,13 +45,14 @@ sanity_check(flag_t atr, int bot)
 /* only bots should be there: */
   if (!bot && (atr & (USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB)))
     atr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB);
+  if (atr & USER_AUTOOP)
+    atr |= USER_OP;
   if ((atr & USER_OP) && (atr & USER_DEOP))
     atr &= ~(USER_OP | USER_DEOP);
   if ((atr & USER_AUTOOP) && (atr & USER_DEOP))
     atr &= ~(USER_AUTOOP | USER_DEOP);
   if ((atr & USER_VOICE) && (atr & USER_QUIET))
     atr &= ~(USER_VOICE | USER_QUIET);
-
   /* Can't be admin without also being owner and having hub access */
   if (atr & USER_ADMIN)
     atr |= USER_OWNER | USER_HUBA | USER_PARTY;

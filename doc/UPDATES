@@ -72,6 +72,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Fixed some excess newlines when a user is booted for losing hub/leaf access.
 * cmd_find now optional takes a username instead of a nick!user@host to search for.
 * Fixed unsetting a global ban when the same ban is local to a chan causes the bots to unban it. (#24)
+* +O now implies +o
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
