@@ -22,7 +22,6 @@ char *replace(const char *, const char *, const char *);
 int goodpass(char *, int, char *);
 int bot_aggressive_to(struct userrec *);
 int updatebin(int, char *, int);
-size_t egg_strcatn(char *dst, const char *src, size_t max);
 size_t my_strcpy(char *, char *);
 void maskhost(const char *, char *);
 char *stristr(char *, char *);

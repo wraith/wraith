@@ -21,6 +21,54 @@ static bool reversing = 0;
 static struct flag_record user = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 static struct flag_record victim = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
+/*        This implementation wont overrun dst - 'max' is the max bytes that dst
+ *      can be, including the null terminator. So if 'dst' is a 128 byte buffer,
+ *      pass 128 as 'max'. The function will _always_ null-terminate 'dst'.
+ *
+ *      Returns: The number of characters appended to 'dst'.
+ *
+ *  Usage eg.
+ *
+ *              char    buf[128];
+ *              size_t  bufsize = sizeof(buf);
+ *
+ *              buf[0] = 0, bufsize--;
+ *
+ *              while (blah && bufsize) {
+ *                      bufsize -= egg_strcatn(buf, <some-long-string>, sizeof(buf));
+ *              }
+ *
+ *      <Cybah>
+ */
+static size_t egg_strcatn(char *dst, const char *src, size_t max)
+{
+  size_t tmpmax = 0;
+
+  /* find end of 'dst' */
+  while (*dst && max > 0) {
+    dst++;
+    max--;
+  }
+
+  /*    Store 'max', so we can use it to workout how many characters were
+   *  written later on.
+   */
+  tmpmax = max;
+
+  /* copy upto, but not including the null terminator */
+  while (*src && max > 1) {
+    *dst++ = *src++;
+    max--;
+  }
+
+  /* null-terminate the buffer */
+  /*    Don't include the terminating null in our count, as it will cumulate
+   *  in loops - causing a headache for the caller.
+   */
+  return tmpmax - max;
+}
+
+
 static bool
 do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
 {
@@ -897,6 +945,7 @@ gotmode(char *from, char *msg)
         } else {
           if (channel_pending(chan))
             return 0;
+          dprintf(DP_MODE, "KICK %s %s :Desync\n", chan->dname, nick);
           putlog(LOG_MISC, "*", CHAN_BADCHANMODE, chan->dname, nick);
           dprintf(DP_MODE, "WHO %s\n", nick);
           return 0;

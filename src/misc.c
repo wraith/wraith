@@ -47,55 +47,6 @@ bool		use_exempts = 1;            /* Jason/drummer */
 /* low-level stuff for other modules
  */
 
-/*	  This implementation wont overrun dst - 'max' is the max bytes that dst
- *	can be, including the null terminator. So if 'dst' is a 128 byte buffer,
- *	pass 128 as 'max'. The function will _always_ null-terminate 'dst'.
- *
- *	Returns: The number of characters appended to 'dst'.
- *
- *  Usage eg.
- *
- *		char 	buf[128];
- *		size_t	bufsize = sizeof(buf);
- *
- *		buf[0] = 0, bufsize--;
- *
- *		while (blah && bufsize) {
- *			bufsize -= egg_strcatn(buf, <some-long-string>, sizeof(buf));
- *		}
- *
- *	<Cybah>
- */
-size_t egg_strcatn(char *dst, const char *src, size_t max)
-{
-  size_t tmpmax = 0;
-
-  /* find end of 'dst' */
-  while (*dst && max > 0) {
-    dst++;
-    max--;
-  }
-
-  /*    Store 'max', so we can use it to workout how many characters were
-   *  written later on.
-   */
-  tmpmax = max;
-
-  /* copy upto, but not including the null terminator */
-  while (*src && max > 1) {
-    *dst++ = *src++;
-    max--;
-  }
-
-  /* null-terminate the buffer */
-  *dst = 0;
-
-  /*    Don't include the terminating null in our count, as it will cumulate
-   *  in loops - causing a headache for the caller.
-   */
-  return tmpmax - max;
-}
-
 size_t my_strcpy(register char *a, register char *b)
 {
   register char *c = b;
