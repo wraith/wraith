@@ -1512,16 +1512,16 @@ dcc_telnet_id(int idx, char *buf, int atr)
 
   dcc[idx].user = get_user_by_handle(userlist, nick);
 
-  if (!bot && dcc[idx].user->bot) {
-    putlog(LOG_WARN, "*", "Refused %s (fake bot login for '%s')", dcc[idx].host, nick);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-    return;
-  }
-
   bool ok = 0;
 
   if (dcc[idx].user) {
+    if (!bot && dcc[idx].user->bot) {
+      putlog(LOG_WARN, "*", "Refused %s (fake bot login for '%s')", dcc[idx].host, nick);
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
+      return;
+    }
+
     struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
     get_user_flagrec(dcc[idx].user, &fr, NULL);
