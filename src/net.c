@@ -44,7 +44,7 @@
 #endif /* !HAVE_GETDTABLESIZE */
 
 extern struct dcc_t	*dcc;
-extern int		 backgrd, use_stderr, resolve_timeout, dcc_total;
+extern int		 backgrd, use_stderr, dcc_total;
 extern egg_traffic_t traffic;
 
 #ifdef HAVE_SSL
@@ -68,6 +68,7 @@ int	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
 char	botuser[21] = "wraith"; /* Username of the user running the bot    */
 int	dcc_sanitycheck = 0;	/* We should do some sanity checking on dcc
 				   connections.				    */
+int     resolve_timeout = 10;   /* hostname/address lookup timeout */
 sock_list *socklist = NULL;	/* Enough to be safe			    */
 int	MAXSOCKS = 0;
 jmp_buf	alarmret;		/* Env buffer for alarm() returns	    */
