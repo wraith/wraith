@@ -13,6 +13,7 @@
 
 
 char *wbanner();
+void restart(int) __attribute__((noreturn));
 int coloridx(int);
 char *color(int, int, int);
 void shuffle(char *, char *);

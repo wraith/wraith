@@ -2002,20 +2002,7 @@ static void cmd_restart(struct userrec *, int, char *) __attribute__((noreturn))
 static void cmd_restart(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# restart", dcc[idx].nick);
-#ifdef HUB
-  write_userfile(idx);
-#endif /* HUB */
-#ifdef LEAF
-  nuke_server("Restarting...");
-#endif /* LEAF */
-  botnet_send_chat(-1, conf.bot->nick, "Restarting...");
-  botnet_send_bye();
-
-  fatal("Restarting...", 1);
-  usleep(2000 * 500);
-  unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
-  system(binname); /* start new bot. */
-  exit(0);
+  restart(idx);
 }
 
 #ifdef HUB

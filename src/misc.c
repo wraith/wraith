@@ -1118,3 +1118,22 @@ char *color(int idx, int type, int which)
   /* This should never be reached.. */
   return "";
 }
+
+void
+restart(int idx)
+{
+#ifdef HUB
+  write_userfile(idx);
+#endif /* HUB */
+#ifdef LEAF
+  nuke_server("Restarting...");
+#endif /* LEAF */
+  botnet_send_chat(-1, conf.bot->nick, "Restarting...");
+  botnet_send_bye();
+
+  fatal("Restarting...", 1);
+  sleep(1);
+  unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
+  system(binname); /* start new bot. */
+  exit(0);
+}

@@ -309,6 +309,14 @@ static void got_ill(int z)
 #endif /* DEBUG_CONTEXT */
 }
 
+static void got_hup(int) __attribute__((noreturn));
+
+static void
+got_hup(int z)
+{
+  putlog(LOG_MISC, "*", "GOT SIGHUP -- RESTARTING");
+  restart(-1);
+}
 
 void init_signals() 
 {
@@ -321,6 +329,7 @@ void init_signals()
   signal(SIGPIPE, SIG_IGN);
   signal(SIGILL, got_ill);
   signal(SIGALRM, got_alarm);
+  signal(SIGHUP, got_hup);
 }
 
 #ifdef DEBUG_CONTEXT
