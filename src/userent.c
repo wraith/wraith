@@ -695,9 +695,9 @@ void modified_display(int idx, struct user_entry *e, struct userrec *u)
     tm = atoi(tmp);
     strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S GMT", gmtime(&tm));
     if (hnd)
-      dprintf(idx, " -- Modified %s by %s\n", tmp2, hnd);
+      dprintf(idx, "  -- Modified %s by %s\n", tmp2, hnd);
     else
-      dprintf(idx, " -- Modified %s\n", tmp2);
+      dprintf(idx, "  -- Modified %s\n", tmp2);
   }
 }
 
