@@ -62,7 +62,7 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
   char *s = NULL;
   char *fp = (char *) format;
   size_t c = 0;
-  unsigned int i;
+  unsigned int i = 0;
 
   while (*fp && c < size - 1) {
     if (*fp == '%') {
@@ -79,6 +79,7 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
       case 'D':
         i = va_arg(va, int);
         s = int_to_base64((unsigned int) i);
+        break;
       case 'u':
         i = va_arg(va, unsigned int);
         s = unsigned_int_to_base10(i);

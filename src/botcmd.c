@@ -9,6 +9,7 @@
 #include "common.h"
 #include "botcmd.h"
 #include "main.h"
+#include "base64.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/update.mod/update.h"
 #include "net.h"

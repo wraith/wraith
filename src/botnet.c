@@ -117,15 +117,13 @@ void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, c
 
 /* New botnet member
  */
-int addparty(char *bot, char *nick, int chan, char flag, int sock,
-	     char *from, int *idx)
+int addparty(char *bot, char *nick, int chan, char flag, int sock, char *from, int *idx)
 {
-  int i;
+  int i = 0;
 
   for (i = 0; i < parties; i++) {
     /* Just changing the channel of someone already on? */
-    if (!egg_strcasecmp(party[i].bot, bot) &&
-	(party[i].sock == sock)) {
+    if (!egg_strcasecmp(party[i].bot, bot) && (party[i].sock == sock)) {
       int oldchan = party[i].chan;
 
       party[i].chan = chan;
