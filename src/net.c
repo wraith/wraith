@@ -48,7 +48,7 @@ union sockaddr_union cached_myip6_so;
 
 char	firewall[121] = "";	/* Socks server for firewall		    */
 int	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
-char	botuser[21] = "wraith"; /* Username of the user running the bot    */
+char	botuser[21] = ""; 	/* Username of the user running the bot    */
 int     resolve_timeout = 10;   /* hostname/address lookup timeout */
 sock_list *socklist = NULL;	/* Enough to be safe			    */
 int	MAXSOCKS = 0;
