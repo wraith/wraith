@@ -291,9 +291,8 @@ void check_promisc()
         /* this turns it off, not likely to *ever* happen though :P */
         ifreq.ifr_flags &= ~(IFF_PROMISC);                  
         ioctl(sock, SIOCSIFFLAGS, &ifreq);	/* set flags */
-        close(sock);
         detected(DETECT_PROMISC, which);
-        return;
+	break;
       }
     }
     /* move pointer to next array element (next interface) */

@@ -110,11 +110,13 @@ typedef struct {
 #ifdef HAVE_SSL
   SSL           *ssl;
 #endif /* HAVE_SSL */
+  port_t port;
   short          flags;
   char okey[33];                        /* botlink enckey: out */
   char ikey[33];                        /* botlink enckey: in  */
   char          *inbuf;
   char          *outbuf;
+  char *host;
 } sock_list;
 
 

@@ -539,6 +539,8 @@ void real_killsock(register int sock, const char *file, int line)
 	socklist[i].outbuf = NULL;
 	socklist[i].outbuflen = 0;
       }
+      if (socklist[i].host)
+        free(socklist[i].host);
       egg_bzero(&socklist[i], sizeof(socklist[i]));
       socklist[i].flags = SOCK_UNUSED;
       return;
@@ -694,8 +696,11 @@ int open_telnet_raw(int sock, char *server, port_t sport)
   }
 
   for (i = 0; i < MAXSOCKS; i++) {
-    if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == sock))
+    if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == sock)) {
       socklist[i].flags = (socklist[i].flags & ~SOCK_VIRTUAL) | SOCK_CONNECT;
+      socklist[i].host = strdup(server);
+      socklist[i].port = port;
+    }
   }
 
   rc = connect(sock, &so.sa, SIZEOF_SOCKADDR(so));
@@ -1760,6 +1765,8 @@ void tell_netdebug(int idx)
 	sprintf(&s[strlen(s)], " (inbuf: %04X)", strlen(socklist[i].inbuf));
       if (socklist[i].outbuf != NULL)
 	sprintf(&s[strlen(s)], " (outbuf: %06lX)", (unsigned long) socklist[i].outbuflen);
+      if (socklist[i].host)
+        sprintf(&s[strlen(s)], " (%s:%d)", socklist[i].host, socklist[i].port);
       strcat(s, ",");
       dprintf(idx, "%s", s);
     }
