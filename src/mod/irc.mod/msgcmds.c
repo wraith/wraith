@@ -265,6 +265,8 @@ addauth(int i, char *nick, char *host)
   auth[i].authing = 0;
   auth[i].authtime = now;
   auth[i].atime = now;
+  strcpy(auth[i].nick, nick);
+  strcpy(auth[i].host, host);
   dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %chelp\n", nick, cmdprefix);
 }
 
