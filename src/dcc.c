@@ -1019,6 +1019,9 @@ dcc_chat(int idx, char *buf, int i)
     d = buf;
     while (*v)
       switch (*v) {
+        case 1:			/* CTCP ?! */
+          v++;
+          break;
         case 7:                /* Beep - no more than 3 */
           nathan++;
           if (nathan > 3)
@@ -1101,11 +1104,18 @@ dcc_chat(int idx, char *buf, int i)
     } else {
       if (dcc[idx].u.chat->away != NULL)
         not_away(idx);
-      if (dcc[idx].status & STAT_ECHO)
-        chanout_but(-1, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
-      else
-        chanout_but(idx, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
-      botnet_send_chan(-1, conf.bot->nick, dcc[idx].nick, dcc[idx].u.chat->channel, buf);
+      if (!strncmp(buf, "CTCP_MESSAGE ", 13))		/* irssi */
+        buf += 13;
+      if (!strncmp(buf, "ACTION ", 7)) {
+        buf += 7;
+        check_bind_dcc("me", idx, buf);
+      } else {
+        if (dcc[idx].status & STAT_ECHO)
+          chanout_but(-1, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
+        else
+          chanout_but(idx, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
+        botnet_send_chan(-1, conf.bot->nick, dcc[idx].nick, dcc[idx].u.chat->channel, buf);
+      }
     }
   }
   if (dcc[idx].type == &DCC_CHAT)       /* Could have change to files */

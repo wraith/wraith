@@ -34,6 +34,7 @@ This is a summary of ChangeLog basically.
 * +c bots will now boot users when they lose +c
 * Fixed a bug with removing hosts while having +d or +k
 * Fixed an obscure memory bug with the perm-owner list
+* Fixed /me over partyline; now auto changes into cmd_me
 
 1.1.9
 
