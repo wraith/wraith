@@ -155,7 +155,7 @@ bind_table_t *bind_table_lookup_or_fake(const char *name)
 
 
 /* Look up a bind entry based on either function name or id. */
-bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, const char *function_name)
+static bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, const char *function_name, Function callback)
 {
 	bind_entry_t *entry = NULL;
 	int hit;
@@ -170,17 +170,18 @@ bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, c
 			if (entry->mask && !strcmp(entry->mask, mask)) hit++;
 			else if (!entry->mask) hit++;
 			if (entry->function_name && !strcmp(entry->function_name, function_name)) hit++;
-			if (hit == 2) break;
+			if (entry->callback == callback || !callback) hit++;
+			if (hit == 3) break;
 		}
 	}
 	return(entry);
 }
 
-int bind_entry_del(bind_table_t *table, int id, const char *mask, const char *function_name, void *cdata)
+int bind_entry_del(bind_table_t *table, int id, const char *mask, const char *function_name, Function callback)
 {
 	bind_entry_t *entry = NULL;
 
-	entry = bind_entry_lookup(table, id, mask, function_name);
+	entry = bind_entry_lookup(table, id, mask, function_name, callback);
 	if (!entry) return(-1);
 
 
@@ -209,7 +210,7 @@ int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char 
 {
 	bind_entry_t *entry = NULL;
 
-	entry = bind_entry_lookup(table, id, mask, function_name);
+	entry = bind_entry_lookup(table, id, mask, function_name, NULL);
 	if (!entry) return(-1);
 
 	/* Modify it. */
@@ -241,7 +242,7 @@ int bind_entry_overwrite(bind_table_t *table, int id, const char *mask, const ch
 {
 	bind_entry_t *entry = NULL;
 
-	entry = bind_entry_lookup(table, id, mask, function_name);
+	entry = bind_entry_lookup(table, id, mask, function_name, NULL);
 	if (!entry) return(-1);
 
 	entry->callback = callback;
@@ -253,7 +254,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 {
 	bind_entry_t *entry = NULL, *old_entry = NULL;
 
-	old_entry = bind_entry_lookup(table, -1, mask, function_name);
+	old_entry = bind_entry_lookup(table, -1, mask, function_name, NULL);
 
 	if (old_entry) {
 		if (table->flags & BIND_STACKABLE) {
@@ -348,7 +349,7 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 	void *args[11] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 	bind_entry_t *entry = NULL, *next = NULL, *winner = NULL;
 	int i, cmp, retval;
-	int tie = 0, matchlen = 0, masklen = 0;
+	int tie = 0, matchlen = 0;
 	va_list ap;
 
 	Assert(table);
@@ -390,10 +391,10 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 		}
 		else if (table->match_type & MATCH_PARTIAL) {
 			cmp = 1;
-			masklen = strlen(entry->mask);
-			if (!egg_strncasecmp(match, entry->mask, masklen < matchlen ? masklen : matchlen)) {
+			if (!egg_strncasecmp(match, entry->mask, matchlen)) {
 				winner = entry;
-				if (masklen == matchlen) {
+				/* Is it an exact match? */
+				if (!entry->mask[matchlen]) {
 					tie = 1;
 					break;
 				}
