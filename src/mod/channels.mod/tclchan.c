@@ -360,7 +360,7 @@ Context;
       i++;
       if (i >= items) {
 	if (irp)
-	  Tcl_AppendResult(irp, "addedby chanmode needs argument", NULL);
+	  Tcl_AppendResult(irp, "addedts chanmode needs argument", NULL);
 	return TCL_ERROR;
       }
       chan->added_ts = atoi(item[i]);
