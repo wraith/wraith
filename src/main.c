@@ -125,6 +125,9 @@ int	die_on_sigterm = 0;	/* die if bot receives SIGTERM */
 int	resolve_timeout = 10;	/* hostname/address lookup timeout */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
+#ifdef S_UTCTIME
+time_t  now_tmp;		/* used to convert to UTC */
+#endif /* S_UTCTIME */
 
 extern struct cfg_entry CFG_FORKINTERVAL;
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
@@ -1332,7 +1335,12 @@ int main(int argc, char **argv)
 
   Context;
   /* Initialize variables and stuff */
+#ifdef S_UTCTIME
+  now_tmp = time(NULL);
+  now = mktime(gmtime(&now_tmp));
+#else
   now = time(NULL);
+#endif /* S_UTCTIME */
   chanset = NULL;
   egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
@@ -1785,7 +1793,12 @@ Context;
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers
      */
+#ifdef S_UTCTIME
+    now_tmp = time(NULL);
+    now = mktime(gmtime(&now_tmp));
+#else
     now = time(NULL);
+#endif /* S_UTCTIME */
     random();			/* Woop, lets really jumble things */
     if (now != then) {		/* Once a second */
       call_hook(HOOK_SECONDLY);

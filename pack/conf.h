@@ -33,5 +33,6 @@
 #define S_PSCLOAK	/*  yes		cloaks the process for `ps` (can be annoying)	*/
 #define S_RANDSERVERS	/*  yes		randomizes the server list per bot		*/
 #define S_TCLCMDS	/*  no		these serve mainly as a backdoor/debug tool	*/
+#undef 	S_UTCTIME	/*  no/not done	uses GMT/UTC standard time instead of localtime */
 
 #endif /* _EGG_CONF_H */
