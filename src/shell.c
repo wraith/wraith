@@ -118,7 +118,7 @@ void check_maxfiles()
     killsock(sock);
   if (sock1 != -1)
     killsock(sock1);
-  bogus = sock - socks_total;	
+  bogus = sock - socks_total - 4;	//4 for stdin/stdout/stderr/dns 
 
   sdprintf("SOCK: %d BOGUS: %d SOCKS_TOTAL: %d", sock, bogus, socks_total);
 
