@@ -1419,43 +1419,33 @@ int updatebin (int idx, char *par, int autoi)
   usleep(5000);
 #endif /* HUB */
   putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
-  i = system(buf);
-  if (i == -1 || WEXITSTATUS(i)) {
-    if (idx)
-      dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
-    putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)\n"), i);
-    return i;
-
-  } else {
 #ifdef LEAF
-    if (!autoi && localhub) {
-      /* let's drop the server connection ASAP */
-      if ((me = module_find("server", 0, 0))) {
-        Function *func = me->funcs;
-        (func[SERVER_NUKESERVER]) ("Updating...");
-      }
-#endif /* LEAF */
-      if (idx)
-        dprintf(idx, STR("Updating...bye\n"));
-      putlog(LOG_MISC, "*", STR("Updating...\n"));
-      botnet_send_chat(-1, botnetnick, "Updating...");
-      botnet_send_bye();
-      fatal("Updating...", 1);
-      usleep(2000 * 500);
-      bg_send_quit(BG_ABORT);
-
-      exit(0);
-      //No need to return :)
-#ifdef LEAF
-    } else {
-      if (localhub && autoi) {
-        add_hook(HOOK_SECONDLY, (Function) updatelocal);
-        return 0;
-      }
+  if (!autoi && localhub) {
+    /* let's drop the server connection ASAP */
+    if ((me = module_find("server", 0, 0))) {
+      Function *func = me->funcs;
+      (func[SERVER_NUKESERVER]) ("Updating...");
     }
 #endif /* LEAF */
+    if (idx)
+      dprintf(idx, STR("Updating...bye\n"));
+    putlog(LOG_MISC, "*", STR("Updating...\n"));
+    botnet_send_chat(-1, botnetnick, "Updating...");
+    botnet_send_bye();
+    fatal("Updating...", 1);
+    usleep(2000 * 500);
+    bg_send_quit(BG_ABORT);
+    system(buf);		/* run the binary, it SHOULD work from earlier tests.. */
+    exit(0);
+#ifdef LEAF
+  } else {
+    if (localhub && autoi) {
+      add_hook(HOOK_SECONDLY, (Function) updatelocal);
+      return 0;
+    }
   }
-  /* this should never be reached */
+#endif /* LEAF */
+ /* this should never be reached */
   return 2;
 }
 

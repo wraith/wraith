@@ -168,14 +168,22 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
         a = 1;
       buf3[0] = '\0';
       for (i = 0 ; i < len ; i++) {
+/* FIXME: Trying to fix bug where you do .color on ANSI, then .bc <bot> help help OVER TELNET
+        if (buf[i] == '\033') {
+          unsigned char *e;
+          for (e = buf + 2; *e != 'm' && *e; e++)
+            i++;
+          if (i >= len) break;
+        }
+*/
         c = buf[i];
         buf2[0] = '\0';
 
         if (c == ':') {
-        if (a)
-          sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 37, c);
-        else
-          sprintf(buf2, "\003%d%c\003\002\002", 15, c);
+          if (a)
+            sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 37, c);
+          else
+            sprintf(buf2, "\003%d%c\003\002\002", 15, c);
         } else if (c == '@') {
           if (a)
             sprintf(buf2, "\e[1m%c\e[0m", c);
