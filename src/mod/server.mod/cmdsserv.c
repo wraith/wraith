@@ -63,8 +63,8 @@ static void cmd_jump(struct userrec *u, int idx, char *par)
   } else
     putlog(LOG_CMDS, "*", "#%s# jump", dcc[idx].nick);
   dprintf(idx, "%s...\n", IRC_JUMP);
-  cycle_time = 0;
   nuke_server("changing servers");
+  cycle_time = 0;
 }
 
 static void cmd_clearqueue(struct userrec *u, int idx, char *par)

@@ -1,5 +1,12 @@
 This is a summary of ChangeLog basically.
 
+1.1.2
+1.Fixed a major bug with server connections.
+2.Fixed a bug in share.mod where it was reconnecting if the userfile was corrupt.
+3.cmd_dccstat is now available on leaf bots for (+a|-)
+4.Remote idx's now set their socket to -1 (shouldnt cause any problems)
+5.Removed 'ppid: ' from startup.
+
 1.1.1
 1.Fixed a problem with using /DCC CHAT <bot>
 2.Fixed a bug in cmd_botcmd with picking a random leaf.

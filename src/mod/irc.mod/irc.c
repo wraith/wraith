@@ -16,7 +16,6 @@
 #include "src/egg_timer.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/server.mod/server.h"
-#undef serv
 #include "src/mod/channels.mod/channels.h"
 
 #define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)

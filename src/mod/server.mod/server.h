@@ -25,7 +25,7 @@
 /* 4 - 7 */
 #define botuserhost ((char *)(server_funcs[5]))
 #define quiet_reject (*(int *)(server_funcs[6]))
-#define serv (*(int *)(server_funcs[7]))
+/* UNUSED 7 */
 #define servi (*(int *)(server_funcs[7]))
 /* 8 - 11 */
 #define flud_thr (*(int*)(server_funcs[8]))
@@ -34,13 +34,13 @@
 #define flud_ctcp_time (*(int*)(server_funcs[11]))
 /* 12 - 15 */
 #define match_my_nick ((int(*)(char *))server_funcs[12])
-#define servidx (*(int *)(server_funcs[14]))
+/* UNUSED 14 */
 #define answer_ctcp (*(int *)(server_funcs[15]))
 /* 16 - 19 */
 #define trigger_on_ignore (*(int *)(server_funcs[16]))
 #define check_bind_ctcpr ((int(*)(char*,char*,struct userrec*,char*,char*,char*,bind_table_t *))server_funcs[17])
 #define detect_avalanche ((int(*)(char *))server_funcs[18])
-#define nuke_server ((void(*)(char *))server_funcs[19])
+/* 19 UNUSED */
 /* 20 - 22 */
 #define newserver ((char *)(server_funcs[20]))
 #define newserverport (*(int *)(server_funcs[21]))
@@ -105,5 +105,8 @@ enum {
 
 #define IRC_CANTCHANGENICK "Can't change nickname on %s.  Is my nickname banned?"
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
+
+void nuke_server(char *);
+extern int serv, servidx;
 
 #endif /*leaf*/

@@ -251,11 +251,16 @@ static int got442(char *from, char *msg)
 
 /* Close the current server connection.
  */
-static void nuke_server(char *reason)
+void nuke_server(char *reason)
 {
-  if (serv >= 0) {
-    if (reason && (servidx > 0)) 
+  if (serv >= 0 && servidx > 0) {
+    if (servidx > 0 && serv != dcc[servidx].sock)
+      putlog(LOG_MISC, "*", "Problem!! serv: %d dcc[%d].sock: %d", serv, servidx, dcc[servidx].sock);
+      
+    if (reason)
       dprintf(servidx, "QUIT :%s\n", reason);
+
+    sleep(2);
     disconnect_server(servidx, DO_LOST);
   }
 }
@@ -688,6 +693,7 @@ static int gotpong(char *from, char *msg)
 {
   newsplit(&msg);
   fixcolon(msg);		/* Scrap server name */
+
   server_lag = now - my_atoul(msg);
   if (server_lag > 99999) {
     /* IRCnet lagmeter support by drummer */
@@ -819,7 +825,7 @@ static int got451(char *from, char *msg)
    * (minutely) sending of joins occurs before the bot does its ping reply.
    * Probably should do something about it some time - beldin
    */
-  putlog(LOG_MISC, "*", IRC_NOTREGISTERED1, from);
+  putlog(LOG_MISC, "*", "%s says I'm not registered, trying next one.", from);
   nuke_server(IRC_NOTREGISTERED2);
   return 0;
 }
@@ -907,12 +913,14 @@ static void disconnect_server(int idx, int dolost)
   server_online = 0;
   if (dcc[idx].sock >= 0)
     killsock(dcc[idx].sock);
-  dcc[idx].sock = (-1);
-  serv = (-1);
-  servidx = (-1);
+  dcc[idx].sock = -1;
+  serv = -1;
+  servidx = -1;
   botuserhost[0] = 0;
-  if (dolost)
+  if (dolost) {
+    trying_server = 0;
     lostdcc(idx);
+  }
 }
 
 static void eof_server(int idx)
@@ -1021,6 +1029,8 @@ static void server_activity(int idx, char *msg, int len)
   if (trying_server) {
     strcpy(dcc[idx].nick, "(server)");
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
+
+    /* servidx = idx; */
     trying_server = 0;
     SERVER_SOCKET.timeout_val = 0;
   }
@@ -1152,10 +1162,11 @@ static void connect_server(void)
 {
   char pass[121] = "", botserver[UHOSTLEN] = "";
   static int oldserv = -1;
+  int newidx;
   unsigned int botserverport = 0;
 
   waiting_for_awake = 0;
-  trying_server = now;
+  /* trying_server = now; */
   empty_msgq();
   /* Start up the counter (always reset it if "never-give-up" is on) */
   if ((oldserv < 0) || (never_give_up))
@@ -1171,6 +1182,7 @@ static void connect_server(void)
     oldserv = (-1);
   } else
     pass[0] = 0;
+
   if (!cycle_time) {
     struct chanset_t *chan = NULL;
     struct server_list *x = serverlist;
@@ -1178,8 +1190,10 @@ static void connect_server(void)
     if (!x)
       return;
  
-    servidx = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
-    if (servidx < 0) {
+    trying_server = now;
+
+    newidx = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
+    if (newidx < 0) {
       putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create server connection.");
       return;
     }
@@ -1187,9 +1201,9 @@ static void connect_server(void)
     next_server(&curserv, botserver, &botserverport, pass);
     putlog(LOG_SERV, "*", "%s %s:%d", IRC_SERVERTRY, botserver, botserverport);
 
-    dcc[servidx].port = botserverport;
-    strcpy(dcc[servidx].nick, "(server)");
-    strncpyz(dcc[servidx].host, botserver, UHOSTLEN);
+    dcc[newidx].port = botserverport;
+    strcpy(dcc[newidx].nick, "(server)");
+    strncpyz(dcc[newidx].host, botserver, UHOSTLEN);
 
     botuserhost[0] = 0;
 
@@ -1197,16 +1211,16 @@ static void connect_server(void)
     for (chan = chanset; chan; chan = chan->next)
       chan->status &= ~CHAN_JUPED;
 
-    dcc[servidx].timeval = now;
-    dcc[servidx].sock = -1;
-    dcc[servidx].u.dns->host = calloc(1, strlen(dcc[servidx].host) + 1);
-    strcpy(dcc[servidx].u.dns->host, dcc[servidx].host);
-    dcc[servidx].u.dns->cbuf = calloc(1, strlen(pass) + 1);
-    strcpy(dcc[servidx].u.dns->cbuf, pass);
-    dcc[servidx].u.dns->dns_success = server_resolve_success;
-    dcc[servidx].u.dns->dns_failure = server_resolve_failure;
-    dcc[servidx].u.dns->dns_type = RES_IPBYHOST;
-    dcc[servidx].u.dns->type = &SERVER_SOCKET;
+    dcc[newidx].timeval = now;
+    dcc[newidx].sock = -1;
+    dcc[newidx].u.dns->host = calloc(1, strlen(dcc[newidx].host) + 1);
+    strcpy(dcc[newidx].u.dns->host, dcc[newidx].host);
+    dcc[newidx].u.dns->cbuf = calloc(1, strlen(pass) + 1);
+    strcpy(dcc[newidx].u.dns->cbuf, pass);
+    dcc[newidx].u.dns->dns_success = server_resolve_success;
+    dcc[newidx].u.dns->dns_failure = server_resolve_failure;
+    dcc[newidx].u.dns->dns_type = RES_IPBYHOST;
+    dcc[newidx].u.dns->type = &SERVER_SOCKET;
 
     if (server_cycle_wait)
       /* Back to 1st server & set wait time.
@@ -1220,9 +1234,9 @@ static void connect_server(void)
     resolvserv = 1;
     /* Resolve the hostname. */
 #ifdef USE_IPV6
-    server_resolve_success(servidx);
+    server_resolve_success(newidx);
 #else
-    dcc_dnsipbyhost(dcc[servidx].host);
+    dcc_dnsipbyhost(dcc[newidx].host);
 #endif /* USE_IPV6 */
   }
 }
@@ -1230,7 +1244,7 @@ static void connect_server(void)
 static void server_resolve_failure(int idx)
 {
   serv = -1;
-  servidx = -1;
+  /* servidx = -1; */
   resolvserv = 0;
   putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, IRC_DNSFAILED);
   lostdcc(idx);
@@ -1240,9 +1254,6 @@ static void server_resolve_failure(int idx)
 static void server_resolve_success(int idx)
 {
   int oldserv = dcc[idx].u.dns->ibuf;
-#ifdef S_NODELAY
-  int i = 0;
-#endif
   char s[121] = "", pass[121] = "";
 
   resolvserv = 0;
@@ -1258,11 +1269,14 @@ static void server_resolve_success(int idx)
     neterror(s);
     putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, s);
     lostdcc(idx);
-    servidx = -1;
+    /* servidx = -1; */
     if (oldserv == curserv && !never_give_up)
       fatal("NO SERVERS WILL ACCEPT MY CONNECTION.", 0);
   } else {
     dcc[idx].sock = serv;
+
+    servidx = idx; 		/* not sure about this, servidx serves as current server idx.. sooo... ? */
+
 #ifdef HAVE_SSL
     if (!ssl_link(dcc[idx].sock, CONNECT_SSL)) {
       dcc[idx].ssl = 0;
@@ -1275,8 +1289,10 @@ static void server_resolve_success(int idx)
       dcc[idx].ssl = 0;
 #endif /* HAVE_SSL */
 #ifdef S_NODELAY
-    i = 1;
-    setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(i));
+    {
+      int i = 1;
+      setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(i));
+    }
 #endif /* S_NODELAY */
     /* Queue standard login */
     dcc[idx].timeval = now;

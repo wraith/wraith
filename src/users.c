@@ -1171,7 +1171,7 @@ void autolink_cycle(char *start)
          while a dcc scan indicates we *are* connected to a better bot than
          the one we failed a link to.
        */
-      putlog(LOG_BOTS, "*",  STR("Failed link attempt to %s but connected to %s already???"), u->handle, (char *) &bestval[3]);
+      putlog(LOG_BOTS, "*",  STR("Failed link attempt to %s but connected to %s already???"), u->handle, (char *) &bestval[2]);
       return;
     }
   } else

@@ -144,6 +144,7 @@ char *hostnamefromip(unsigned long);
 void dropssl(int);
 void real_killsock(int, const char *, int);
 int answer(int, char *, unsigned long *, unsigned short *, int);
+int findanyidx(register int);
 inline int open_listen(int *);
 inline int open_listen_by_af(int *, int);
 #ifdef USE_IPV6

@@ -30,6 +30,9 @@
 #include "traffic.h" /* egg_traffic_t */
 #include "core_binds.h"
 #include "src/mod/console.mod/console.h"
+#ifdef LEAF
+#include "src/mod/server.mod/server.h"
+#endif /* LEAF */
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -1142,13 +1145,11 @@ static void cmd_status(struct userrec *u, int idx, char *par)
   }
 }
 
-#ifdef HUB
 static void cmd_dccstat(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", STR("#%s# dccstat"), dcc[idx].nick);
   tell_dcc(idx);
 }
-#endif /* HUB */
 
 static void cmd_boot(struct userrec *u, int idx, char *par)
 {
@@ -1318,7 +1319,6 @@ static void cmd_console(struct userrec *u, int idx, char *par)
   }
   console_dostore(dest);
 }
-
 static void cmd_date(struct userrec *u, int idx, char *par)
 {
   char date[50] = "", utctime[50] = "", ltime[50] = "";
@@ -1806,13 +1806,7 @@ static void cmd_restart(struct userrec *u, int idx, char *par)
   write_userfile(idx);
 #endif /* HUB */
 #ifdef LEAF
-{
-  module_entry *me;
-  if ((me = module_find("server", 0, 0))) {
-    Function *func = me->funcs;
-    (func[SERVER_NUKESERVER]) ("Restarting...");
-  }
-}
+  nuke_server("Restarting...");
 #endif /* LEAF */
   botnet_send_chat(-1, conf.bot->nick, "Restarting...");
   botnet_send_bye();
@@ -3427,17 +3421,17 @@ static void cmd_botserver(struct userrec * u, int idx, char * par) {
 
 void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
 #ifdef LEAF
-  char tmp[2048] = "", cursrvname[500] = "";
-  int server_online = 0;
+  char tmp[2048] = "", _cursrvname[500] = "";
+  int _server_online = 0;
   module_entry *me = NULL;
 
   if ((me = module_find("server", 0, 0))) {
     Function *func = me->funcs;
-    server_online = (*(int *)(func[25]));
-    sprintf(cursrvname, "%s", ((char *)(func[41])));
+    _server_online = (*(int *)(func[25]));
+    sprintf(_cursrvname, "%s", ((char *)(func[41])));
   }
-  if (server_online)
-    sprintf(tmp, "Currently: %-40s Lag: %d", cursrvname, server_lag);
+  if (_server_online)
+    sprintf(tmp, "Currently: %-40s Lag: %d", _cursrvname, server_lag);
   else
     sprintf(tmp, "Currently: none");
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
@@ -3499,19 +3493,19 @@ static void cmd_botnick(struct userrec * u, int idx, char * par) {
 void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
 #ifdef LEAF
   char tmp[1024] = "";
-  int server_online = 0;
+  int _server_online = 0;
   module_entry *me = NULL;
 
   if ((me = module_find("server", 0, 0))) {
     Function *func = me->funcs;
-    server_online = (*(int *)(func[25]));
+    _server_online = (*(int *)(func[25]));
   }
 
-  if (server_online)
+  if (_server_online)
     sprintf(tmp, STR("Currently: %-20s "), botname);
   if (strncmp(botname, origbotname, strlen(botname)))
     sprintf(tmp, STR("%sWant: %s"), tmp, origbotname);
-  if (!server_online)
+  if (!_server_online)
     sprintf(tmp, STR("%s(not online)"), tmp);
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 #endif /* LEAF */
@@ -3816,19 +3810,19 @@ void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
   char *other = NULL;
   module_entry *me = NULL;
   Function *func = NULL;
-  int port, default_port = 0;
+  int port, _default_port = 0;
 
   if (!(me = module_find("server", 0, 0)) )
     return;
   func = me->funcs;
 
-  default_port = (*(int *)(func[24]));
+  _default_port = (*(int *)(func[24]));
 
   if (par[0]) {
     other = newsplit(&par);
     port = atoi(newsplit(&par));
     if (!port)
-      port = default_port;
+      port = _default_port;
     strncpyz(((char *)(func[20])), other, 120); //newserver
     (*(int *)(func[21])) = port; //newserverport
     strncpyz(((char *)(func[22])), par, 120); //newserverpass
@@ -3836,7 +3830,7 @@ void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
   botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, STR("Jumping..."));
 
   (*(int *)(func[23])) = 0; //cycle_time
-  (func[SERVER_NUKESERVER]) ("jumping...");
+  nuke_server("Jumping...");
 #endif /* LEAF */
 }
 
@@ -4073,9 +4067,7 @@ cmd_t C_dcc[] =
 #endif /* HUB */
   {"console",		"-|-",	(Function) cmd_console,		NULL},
   {"date",		"",	(Function) cmd_date,		NULL},
-#ifdef HUB
   {"dccstat",		"a",	(Function) cmd_dccstat,		NULL},
-#endif /* HUB */
   {"debug",		"a",	(Function) cmd_debug,		NULL},
   {"timers",		"a",	(Function) cmd_timers,		NULL},
   {"die",		"n",	(Function) cmd_die,		NULL},

@@ -19,8 +19,8 @@ extern struct cfg_entry CFG_OPTIMESLACK;
 extern int		cfg_noshare;
 static int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 static int ctcp_mode;
-static int serv;		/* sock # of server currently */
-static int servidx;		/* idx of server */
+int serv;		/* sock # of server currently */
+int servidx;		/* idx of server */
 static int strict_host;		/* strict masking of hosts ? */
 static char newserver[121] = "";	/* new server? */
 static int newserverport;	/* new server port? */
@@ -1360,7 +1360,7 @@ static void server_secondly()
   if (cycle_time)
     cycle_time--;
   deq_msg();
-  if (!resolvserv && serv < 0)
+  if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
 }
 
@@ -1485,7 +1485,7 @@ static Function server_table[] =
   (Function) NULL,		/* char * (points to botname later on)	*/
   (Function) botuserhost,	/* char *				*/
   (Function) & quiet_reject,	/* int					*/
-  (Function) & serv,		/* int					*/
+  (Function) 0,
   /* 8 - 11 */
   (Function) & flud_thr,	/* int					*/
   (Function) & flud_time,	/* int					*/
@@ -1494,13 +1494,13 @@ static Function server_table[] =
   /* 12 - 15 */
   (Function) match_my_nick,
   (Function) 0,
-  (Function) & servidx,		/* int					*/
+  (Function) 0,
   (Function) & answer_ctcp,	/* int					*/
   /* 16 - 19 */
   (Function) & trigger_on_ignore, /* int				*/
   (Function) check_bind_ctcpr,
   (Function) detect_avalanche,
-  (Function) nuke_server,
+  (Function) 0,
   /* 20 - 23 */
   (Function) newserver,		/* char *				*/
   (Function) & newserverport,	/* int					*/
@@ -1544,7 +1544,7 @@ char *server_start(Function *global_funcs)
   servidx = -1;
   strict_host = 1;
   botname[0] = 0;
-  trying_server = 0L;
+  trying_server = 0;
   server_lag = 0;
   curserv = 0;
   flud_thr = 5;

@@ -21,6 +21,7 @@
 #include "modules.h"
 #include "tandem.h"
 #include "core_binds.h"
+#include "src/mod/server.mod/server.h"
 #include <stdarg.h>
 
 extern struct dcc_t	*dcc;
@@ -348,6 +349,7 @@ void removedcc(int n)
     free(dcc[n].u.other);
 
   dcc_total--;
+
   if (n < dcc_total)
     egg_memcpy(&dcc[n], &dcc[dcc_total], sizeof(struct dcc_t));
   else
@@ -368,12 +370,15 @@ void dcc_remove_lost(void)
       i--;
     }
   }
+#ifdef LEAF
+  servidx = findanyidx(serv);		/* servidx may have moved :\ */
+#endif /* LEAF */
 }
 
 /* Show list of current dcc's to a dcc-chatter
  * positive value: idx given -- negative value: sock given
  */
-void tell_dcc(int zidx)
+void tell_dcc(int idx)
 {
   int i, j, nicklen = 0;
   char other[160] = "", format[81] = "";
@@ -385,15 +390,13 @@ void tell_dcc(int zidx)
   }
   if(nicklen < 9) nicklen = 9;
   
-  egg_snprintf(format, sizeof format, "%%-4s %%-8s %%-5s %%-%us %%-40s %%s\n", 
-                          nicklen);
-  dprintf(zidx, format, "SOCK", "ADDR",     "PORT",  "NICK", "HOST", "TYPE");
-  dprintf(zidx, format, "----", "--------", "-----", "---------", 
+  egg_snprintf(format, sizeof format, "%%-4s %%-4s %%-8s %%-5s %%-%us %%-40s %%s\n", nicklen);
+  dprintf(idx, format, "SOCK", "IDX", "ADDR",     "PORT",  "NICK", "HOST", "TYPE");
+  dprintf(idx, format, "----", "---", "--------", "-----", "---------", 
                         "----------------------------------------", "----");
 
-  egg_snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-40s %%s\n", 
-                          nicklen);
-  /* Show server */
+  egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5d %%-%us %%-40s %%s\n", nicklen);
+
   for (i = 0; i < dcc_total; i++) {
     j = strlen(dcc[i].host);
     if (j > 40)
@@ -406,8 +409,9 @@ void tell_dcc(int zidx)
       sprintf(other, "?:%lX  !! ERROR !!", (long) dcc[i].type);
       break;
     }
-    dprintf(zidx, format, dcc[i].sock, dcc[i].addr, dcc[i].port, dcc[i].nick, 
-			  dcc[i].host + j, other);
+    if (dcc[i].type == &DCC_LOST)
+      dprintf(idx, "LOST:\n");
+    dprintf(idx, format, dcc[i].sock, i, dcc[i].addr, dcc[i].port, dcc[i].nick, dcc[i].host + j, other);
   }
 }
 

@@ -26,6 +26,9 @@
 #include "bg.h"	
 #include "botnet.h"
 #include "build.h"
+#ifdef LEAF
+#include "src/mod/server.mod/server.h"
+#endif /* LEAF */
 #include <time.h>
 #include <errno.h>
 #include <unistd.h>
@@ -152,16 +155,12 @@ void fatal(const char *s, int recoverable)
   int i = 0;
 
 #ifdef LEAF
-  module_entry *me = NULL;
-
-  if ((me = module_find("server", 0, 0))) {
-    Function *func = me->funcs;
-    (func[SERVER_NUKESERVER]) (s);
-  }
+  nuke_server((char *) s);
 #endif /* LEAF */
 
   if (s[0])
     putlog(LOG_MISC, "*", "* %s", s);
+
 /*  flushlogs(); */
 #ifdef HAVE_SSL
     ssl_cleanup();

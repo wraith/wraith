@@ -24,6 +24,9 @@
 #include "chan.h"
 #include "tandem.h"
 #include "modules.h"
+#ifdef LEAF
+#include "src/mod/server.mod/server.h"
+#endif /* LEAF */
 #ifdef HUB
 #include "userrec.h"
 #endif /* HUB */
@@ -706,12 +709,7 @@ void kill_bot(char *s1, char *s2)
 static void updatelocal(void)
 {
   /* let's drop the server connection ASAP */
-  module_entry *me = NULL;
-
-  if ((me = module_find("server", 0, 0))) {
-    Function *func = me->funcs;
-    (func[SERVER_NUKESERVER]) ("Updating...");
-  }
+  nuke_server("Updating...");
 
   botnet_send_chat(-1, conf.bot->nick, "Updating...");
   botnet_send_bye();
@@ -800,13 +798,8 @@ int updatebin(int idx, char *par, int autoi)
   putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
 #ifdef LEAF
   if (!autoi && localhub) {
-    module_entry *me = NULL;
-
     /* let's drop the server connection ASAP */
-    if ((me = module_find("server", 0, 0))) {
-      Function *func = me->funcs;
-      (func[SERVER_NUKESERVER]) ("Updating...");
-    }
+    nuke_server("Updating...");
 #endif /* LEAF */
     logidx(idx, STR("Updating...bye"));
     putlog(LOG_MISC, "*", STR("Updating..."));
