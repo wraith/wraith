@@ -193,6 +193,16 @@ then
 fi
 ])dnl
 
+dnl  EGG_PROG_DISTCC()
+dnl
+AC_DEFUN(EGG_PROG_DISTCC, [dnl
+AC_CHECK_PROG(DISTCC, distcc, distcc)
+if test "${DISTCC-x}" = "x"
+then
+  DISTCC=distcc
+fi
+])dnl
+
 dnl  EGG_PROG_AWK()
 dnl
 AC_DEFUN(EGG_PROG_AWK, [dnl
