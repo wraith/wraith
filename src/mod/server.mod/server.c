@@ -1601,7 +1601,7 @@ static int ctcp_DCC_CHAT(char *nick, char *from, char *handle,
   } else if (!ok) {
     if (!quiet_reject)
       dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_REFUSED2);
-    putlog(LOG_MISC, "*", "%s: %s!%s", DCC_REFUSED, nick, from);
+    putlog(LOG_MISC, "*", "%s: %s!%s", ischanhub() ? DCC_REFUSED : DCC_REFUSEDNC, nick, from);
   } else if (u_pass_match(u, "-")) {
     if (!quiet_reject)
       dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_REFUSED3);
