@@ -520,41 +520,47 @@ void checkpass()
 
 void got_ed(char *, char *, char *);
 extern int optind;
+char *my_uname();
 
-void gen_conf(char *filename)
+void gen_conf(char *filename, int type)
 {
   FILE *fp;
 
   if (is_file(filename) || is_dir(filename))
     fatal(STR("File already exists.."), 0);
   
-  fp = fopen(filename, "w+");
-
-  fprintf(fp, STR("#All lines beginning with '#' will be ignored during the bot startup. They are comments only.\n"));
-  fprintf(fp, STR("#These lines MUST be correctly syntaxed or the bot will not work properly.\n"));
-  fprintf(fp, STR("#A hub conf is located in the same dir as the hub binary, as 'conf' (encrypted)\n"));
-  fprintf(fp, STR("#A leaf conf is located at '~/.ssh/.known_hosts' (encrypted)\n"));
-  fprintf(fp, STR("#\n"));
-  fprintf(fp, STR("#Note the \"- \" and \"+ \" for the following items, the space is REQUIRED.\n"));
-  fprintf(fp, STR("#The first line must be the UID of the shell the bot is to be run on. (use \"id\" in shell to get uid)\n"));
-  fprintf(fp, STR("#- 1113\n"));
-  fprintf(fp, STR("#The second must be the output from uname -nv (-nr on FBSD)\n"));
-  fprintf(fp, STR("#+ somebox #1 SMP Thu May 29 06:55:05 EDT 2003\n"));
-  fprintf(fp, STR("#\n"));
-  fprintf(fp, STR("#The following line will disable ps cloaking on the shell if you compiled with S_PSCLOAK\n"));
-  fprintf(fp, STR("#!-\n"));
-  fprintf(fp, STR("#The rest of the conf is for bots and is in the following syntax:\n"));
-  fprintf(fp, STR("#botnick [!]ip4 [+]hostname IPv6-ip\n"));
-  fprintf(fp, STR("#A . (period) can be used in place of ip4 and/or hostname if the field is not needed. (ie, for using only an ipv6 ip)\n"));
-  fprintf(fp, STR("#(the ! means internal NAT ip address, IE: 10.10.0.3, Hostname REQUIRED)\n"));
-  fprintf(fp, STR("#Full example:\n"));
-  fprintf(fp, STR("#- 101\n"));
-  fprintf(fp, STR("#+ somebox 5.1-RELEASE\n"));
-  fprintf(fp, STR("#bot1 1.2.3.4 some.vhost.com\n"));
-  fprintf(fp, STR("#bot2 . +ipv6.uber.leet.la\n"));
-  fprintf(fp, STR("#bot3 . +another.ipv6.host.com 2001:66:669:3a4::1\n"));
-  fprintf(fp, STR("#bot4 1.2.3.4 +someipv6.host.com\n"));
-  fprintf(fp, STR("\n\n\n\n#if there are any trailing newlines at the end, remove them up to the last bot.\n"));
+  fp = fopen(filename, "w");
+  if (type == 1) {
+    fprintf(fp, STR("#All lines beginning with '#' will be ignored during the bot startup. They are comments only.\n"));
+    fprintf(fp, STR("#These lines MUST be correctly syntaxed or the bot will not work properly.\n"));
+    fprintf(fp, STR("#A hub conf is located in the same dir as the hub binary, as 'conf' (encrypted)\n"));
+    fprintf(fp, STR("#A leaf conf is located at '~/.ssh/.known_hosts' (encrypted)\n"));
+    fprintf(fp, STR("#\n"));
+    fprintf(fp, STR("#Note the \"- \" and \"+ \" for the following items, the space is REQUIRED.\n"));
+    fprintf(fp, STR("#The first line must be the UID of the shell the bot is to be run on. (use \"id\" in shell to get uid)\n"));
+    fprintf(fp, STR("#- 1113\n"));
+    fprintf(fp, STR("#The second must be the output from uname -nv (-nr on FBSD)\n"));
+    fprintf(fp, STR("#+ somebox #1 SMP Thu May 29 06:55:05 EDT 2003\n"));
+    fprintf(fp, STR("#\n"));
+    fprintf(fp, STR("#The following line will disable ps cloaking on the shell if you compiled with S_PSCLOAK\n"));
+    fprintf(fp, STR("#!-\n"));
+    fprintf(fp, STR("#The rest of the conf is for bots and is in the following syntax:\n"));
+    fprintf(fp, STR("#botnick [!]ip4 [+]hostname IPv6-ip\n"));
+    fprintf(fp, STR("#A . (period) can be used in place of ip4 and/or hostname if the field is not needed. (ie, for using only an ipv6 ip)\n"));
+    fprintf(fp, STR("#(the ! means internal NAT ip address, IE: 10.10.0.3, Hostname REQUIRED)\n"));
+    fprintf(fp, STR("#Full example:\n"));
+    fprintf(fp, STR("#- 101\n"));
+    fprintf(fp, STR("#+ somebox 5.1-RELEASE\n"));
+    fprintf(fp, STR("#bot1 1.2.3.4 some.vhost.com\n"));
+    fprintf(fp, STR("#bot2 . +ipv6.uber.leet.la\n"));
+    fprintf(fp, STR("#bot3 . +another.ipv6.host.com 2001:66:669:3a4::1\n"));
+    fprintf(fp, STR("#bot4 1.2.3.4 +someipv6.host.com\n"));
+    fprintf(fp, STR("\n\n\n\n#if there are any trailing newlines at the end, remove them up to the last bot.\n"));
+  } else {
+    fprintf(fp, "- %d\n", geteuid());
+    fprintf(fp, "+ %s\n", my_uname());
+    fprintf(fp, STR("#bot ip|. [+]host|. [ipv6-ip]\n"));
+  }
   fflush(fp);
   fclose(fp);
   printf(STR("Template config created as '%s'\n"), filename);
@@ -575,6 +581,7 @@ void show_help()
   printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
   printf(format, STR("-E [#/all]"), STR("Display Error codes english translation (use 'all' to display all)"));
   printf(format, STR("-g <file>"), STR("Generates a template config file"));
+  printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
   printf(format, STR("-h"), STR("Display this help listing"));
 /*   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
@@ -586,12 +593,12 @@ void show_help()
 
 
 #ifdef LEAF
-#define PARSE_FLAGS "cedghnstvPDE"
+#define PARSE_FLAGS "cedghnstvDEGP"
 #endif /* LEAF */
 #ifdef HUB
-#define PARSE_FLAGS "edghnstvDE"
+#define PARSE_FLAGS "edghnstvDEG"
 #endif /* HUB */
-#define FLAGS_CHECKPASS "edhgntDEv"
+#define FLAGS_CHECKPASS "edhgntDEGv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i;
@@ -614,9 +621,16 @@ static void dtx_arg(int argc, char *argv[])
       case 'g':
         p = argv[optind];
         if (p)
-          gen_conf(p);
+          gen_conf(p, 1);
         else
           fatal(STR("You must specify a filename after -g"), 0);
+        break; /* never reached */
+      case 'G':
+        p = argv[optind];
+        if (p)
+          gen_conf(p, 2);
+        else
+          fatal(STR("You must specify a filename after -G"), 0);
         break; /* never reached */
       case 'k':
         p = argv[optind];
