@@ -649,9 +649,9 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
       if (chan->channel.key[0]) {
-        dprintf(DP_HELP, "NOTICE %s :Key for %s is: %s\n", nick, chan->dname, chan->channel.key);
+        dprintf(DP_HELP, "NOTICE %s :Key for %s is: %s\n", nick, chan->name, chan->channel.key);
       } else {
-        dprintf(DP_HELP, "NOTICE %s :%s has no key set.\n", nick, chan->dname);
+        dprintf(DP_HELP, "NOTICE %s :%s has no key set.\n", nick, chan->name);
       }
     }
   }
