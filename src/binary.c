@@ -279,9 +279,11 @@ static void edpack(settings_t *incfg, const char *hash, int what)
     enc_dec_string = decrypt_string;
 
 #define dofield(_field) 		do {		\
-	tmp = enc_dec_string(hash, _field);		\
-	egg_snprintf(_field, sizeof(_field), tmp);	\
-	free(tmp);					\
+	if (_field && _field[0]) {			\
+		tmp = enc_dec_string(hash, _field);		\
+		egg_snprintf(_field, sizeof(_field), tmp);	\
+		free(tmp);					\
+	}						\
 } while (0)
 
   /* -- STATIC -- */
