@@ -3167,7 +3167,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", STR("#%s# +user %s"), dcc[idx].nick, par);
   if (!par[0]) {
-    dprintf(idx, STR("Usage: +user <handle> [hostmask]\n"));
+    dprintf(idx, STR("Usage: +user <handle> [host] [anotherhost] ...\n"));
     return;
   }
   handle = newsplit(&par);

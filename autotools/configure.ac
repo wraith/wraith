@@ -133,7 +133,7 @@ AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf])
 
 #autoscan suggested this....
 #These are recommended by autoscan, but no code supports it currently
-#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday inet_ntoa mbrlen
+#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday mbrlen
 #mkdir munmap realpath select setlocale socket strchr strerror strpbrk strrchr strstr strtol tzset])
 
 EGG_CHECK_FUNC_VSPRINTF

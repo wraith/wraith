@@ -51,9 +51,10 @@ See also: -ignore, ignores
  
 See also: invites, -invite, stick, unstick
 ::+user
-###  %b+user%b <handle> [hostmask]
+###  %b+user%b <handle> [host] [anotherhost] ...
    Creates a new user record for the handle given. The new user record will
    have no flags, an optional hostmask, and a random pass/secpass.
+   List as many hosts as needed.
  
 See also: -user, +host, -host%{+ni}, newleaf%{-}
 ::-ban

@@ -931,10 +931,11 @@ char *hostnamefromip(unsigned long ip)
  */
 char *iptostr(IP ip)
 {
+  static char ipbuf[32];
   struct in_addr a;
 
   a.s_addr = ip;
-  return inet_ntoa(a);
+  return (char *)inet_ntop(AF_INET, &a, ipbuf, sizeof(ipbuf));
 }
 
 /* Short routine to answer a connect received on a socket made previously
