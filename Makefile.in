@@ -120,6 +120,7 @@ eggautoconf:
 
 packconf: makesettings
 	@./makesettings pack/pack.cfg src/settings.tmp
+	@touch src/settings.c
 	@(if test "x`diff -qurN src/settings.tmp src/settings.c`" != "x"; then \
 	cp -f src/settings.tmp src/settings.c; \
 	fi)

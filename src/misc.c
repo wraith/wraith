@@ -499,12 +499,12 @@ void show_channels(int idx, char *handle)
   egg_snprintf(format, sizeof format, "  %%c%%-%us %%-s%%-s%%-s%%-s%%-s\n", (l+2));
 
   for (chan = chanset;chan;chan = chan->next) {
-    get_user_flagrec(u, &fr, chan->dname);
 #ifdef LEAF
     int opped = (func[16] (chan));
 #else /* !LEAF */
     int opped = 0;
 #endif /* LEAF */
+    get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
         if (!first) { 
           dprintf(idx, STR("%s %s access to %d channel%s:\n"), handle ? u->handle : "You", handle ? "has" : "have", total, (total > 1) ? "s" : "");

@@ -8,8 +8,9 @@
 #define MAKING_CHANNELS
 #include <sys/stat.h>
 #include "src/mod/module.h"
+#include "irc.mod/irc.h"
 
-static Function *global		= NULL;
+static Function *global		= NULL, *irc_funcs = NULL;
 
 static int  use_info;
 static int  quiet_save;
@@ -1158,6 +1159,11 @@ char *channels_start(Function * global_funcs)
          "-private "
 	 "-fastop ");
   module_register(MODULE_NAME, channels_table, 1, 0);
+  if (!(irc_funcs = module_depend(MODULE_NAME, "irc", 0, 0))) {
+    module_undepend(MODULE_NAME);
+    return "This module requires channels module 0.0 or later.";
+  }
+
 #ifdef LEAF
   add_hook(HOOK_MINUTELY, (Function) check_limitraise);
 #endif /* LEAF */

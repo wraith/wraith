@@ -554,7 +554,6 @@
 #define checkchans ((void (*)(int))global[337])
 
 extern int lfprintf(FILE *, char *, ...);
-extern void raise_limit(struct chanset_t *);
 extern int egg_numver;
 extern int cfg_count;
 extern struct cfg_entry **cfg;

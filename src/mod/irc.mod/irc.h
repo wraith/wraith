@@ -69,6 +69,7 @@ static int gotmode(char *, char *);
 #define check_this_ban ((void (*)(struct chanset_t *, char *, int))irc_funcs[20])
 #define check_this_user ((void(*)(char *, int, char *))irc_funcs[21])
 #define me_voice ((int(*)(struct chanset_t *))irc_funcs[22])
+#define raise_limit ((void (*)(struct chanset_t *))irc_funcs[23])
 //#define getchanmode ((char *(*)(struct chanset_t *))irc_funcs[23])
 
 #endif				/* MAKING_IRC */

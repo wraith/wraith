@@ -1625,6 +1625,7 @@ static Function irc_table[] =
   (Function) check_this_ban,
   (Function) check_this_user,
   (Function) me_voice,
+  (Function) raise_limit,
 };
 
 void irc_describe(struct cfg_entry *cfgent, int idx)
