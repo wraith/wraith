@@ -1,15 +1,8 @@
 #! /bin/sh
 # We want to use BASH, not whatever /bin/sh points to.
 if test -z "$BASH"; then
+  PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
   bash="`which bash`"
-  if ! test -e ${bash}; then
-    bash="/bin/bash"
-  fi
-
-  if ! test -e ${bash}; then
-    bash="/usr/local/bin/bash"
-  fi
-
   ${bash} $0 ${1+"$@"}
   exit 0
 fi
