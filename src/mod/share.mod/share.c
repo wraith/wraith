@@ -962,13 +962,14 @@ share_userfileq(int idx, char *par)
     if (!ok)
       dprintf(idx, "s un Already sharing.\n");
     else {
+      dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
       dprintf(idx, "s uy overbots invites exempts\n");
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
 #ifdef HUB
-      putlog(LOG_BOTS, "@", "Downloading user file from %s", dcc[idx].nick);
+      putlog(LOG_BOTS, "*", "Downloading user file from %s", dcc[idx].nick);
 #else /* !HUB */
-      putlog(LOG_BOTS, "@", "Downloading user file via uplink.");
+      putlog(LOG_BOTS, "*", "Downloading user file via uplink.");
 #endif /* HUB */
     }
   }
@@ -1032,7 +1033,7 @@ share_version(int idx, char *par)
 {
   /* Cleanup any share flags */
   dcc[idx].status &= ~(STAT_SHARE | STAT_GETTING | STAT_SENDING | STAT_OFFERED | STAT_AGGRESSIVE);
-  dcc[idx].u.bot->uff_flags = 0;
+  dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
   if (bot_aggressive_to(dcc[idx].user)) {
     dprintf(idx, "s u?\n");
     dcc[idx].status |= STAT_OFFERED;
@@ -1078,10 +1079,10 @@ share_end(int idx, char *par)
   dcc[idx].u.bot->uff_flags = 0;
 }
 
+/* FIXME: REMOVE THE FEATS CRAP AFTER EVERYONE UPGRADE TO 1.1.6 */
 static void
 share_feats(int idx, char *par)
 {
-   dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
 }
 
 
@@ -1629,6 +1630,7 @@ share_report(int idx, int details)
             }
           if (!ok)
             dprintf(idx, "Download userlist from %s (negotiating " "botentries)\n", dcc[i].nick);
+#ifdef HUB
         } else if (dcc[i].status & STAT_SENDING) {
           for (j = 0; j < dcc_total; j++) {
             if (((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
@@ -1645,6 +1647,7 @@ share_report(int idx, int details)
           dprintf(idx, "    Passively sharing with %s.\n", dcc[i].nick);
         } else if (dcc[i].status & STAT_SHARE) {
           dprintf(idx, "    Aggressively sharing with %s.\n", dcc[i].nick);
+#endif /* HUB */
         }
       }
   }

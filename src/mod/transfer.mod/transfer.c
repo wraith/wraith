@@ -31,7 +31,9 @@
 
 extern int		bupdating;
 
+#ifdef HUB
 static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
+#endif /* HUB */
 static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
 static int dcc_limit = 4;	/* Maximum number of simultaneous file
 				   downloads allowed */
@@ -42,12 +44,14 @@ static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
 /*
  * Prototypes
  */
+struct dcc_table DCC_SEND;
+#ifdef HUB
 static void wipe_tmp_filename(char *, int);
 static int at_limit(char *);
 static void dcc_get_pending(int, char *, int);
-struct dcc_table DCC_SEND;
 struct dcc_table DCC_GET;
 struct dcc_table DCC_GET_PENDING;
+#endif /* HUB */
 
 static fileq_t *fileq = NULL;
 
@@ -55,7 +59,7 @@ static fileq_t *fileq = NULL;
 /*
  *   Misc functions
  */
-
+#ifdef HUB
 static void wipe_tmp_filename(char *fn, int idx)
 {
   int i, ok = 1;
@@ -231,7 +235,6 @@ static void send_next_file(char *to)
   return;
 }
 
-
 /*
  *    DCC routines
  */
@@ -267,6 +270,7 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
   }
   return pending_data;
 }
+#endif /* HUB */
 
 void eof_dcc_fork_send(int idx)
 {
@@ -460,6 +464,7 @@ static void eof_dcc_send(int idx)
   }
 }
 
+#ifdef HUB
 /* Determine byte order. Used for resend DCC startup packets.
  */
 static inline u_8bit_t byte_order_test(void)
@@ -605,6 +610,7 @@ void dcc_get(int idx, char *buf, int len)
 	  y = x;
       if (y != 0)
 	dcc[y].status &= ~STAT_SENDING;
+
       putlog(LOG_BOTS, "*", TRANSFER_COMPLETED_USERFILE, dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
       /* Any sharebot things that were queued: */
@@ -723,6 +729,7 @@ void eof_dcc_get(int idx)
   if (!at_limit(xnick))
     send_next_file(xnick);
 }
+#endif /* HUB */
 
 void dcc_send(int idx, char *buf, int len)
 {
@@ -761,6 +768,7 @@ void dcc_send(int idx, char *buf, int len)
   }
 }
 
+#ifdef HUB
 static void transfer_get_timeout(int i)
 {
   char xx[1024] = "";
@@ -838,6 +846,7 @@ static void transfer_get_timeout(int i)
   if (!at_limit(xx))
     send_next_file(xx);
 }
+#endif /* HUB */
 
 void tout_dcc_send(int idx)
 {
@@ -883,6 +892,7 @@ void tout_dcc_send(int idx)
   lostdcc(idx);
 }
 
+#ifdef HUB
 void display_dcc_get(int idx, char *buf)
 {
   if (dcc[idx].status == dcc[idx].u.xfer->length)
@@ -898,6 +908,7 @@ void display_dcc_get_p(int idx, char *buf)
   sprintf(buf,TRANSFER_SEND_WAITED, now - dcc[idx].timeval,
 	  dcc[idx].u.xfer->origname);
 }
+#endif /* HUB */
 
 void display_dcc_send(int idx, char *buf)
 {
@@ -928,6 +939,7 @@ void out_dcc_xfer(int idx, char *buf, void *x)
 {
 }
 
+#ifdef HUB
 static void outdone_dcc_xfer(int idx)
 {
   if (dcc[idx].u.xfer->block_pending)
@@ -935,6 +947,7 @@ static void outdone_dcc_xfer(int idx)
 	    pump_file_to_sock(dcc[idx].u.xfer->f, dcc[idx].sock,
 			      dcc[idx].u.xfer->block_pending);
 }
+#endif /* HUB */
 
 struct dcc_table DCC_SEND =
 {
@@ -981,6 +994,7 @@ void dcc_fork_send(int idx, char *x, int y)
   tlen = 0;
 }
 
+#ifdef HUB
 struct dcc_table DCC_GET =
 {
   "GET",
@@ -1175,8 +1189,9 @@ int raw_dcc_send(char *filename, char *nick, char *from, char *dir)
 {
   return raw_dcc_resend_send(filename, nick, from, dir, 0);
 }
+#endif /* HUB */
 
-
+#ifdef LEAF
 /*
  *    CTCP functions
  */
@@ -1231,7 +1246,7 @@ static int server_transfer_setup(char *mod)
   /* add_builtins("ctcp", transfer_ctcps); */
   return 1;
 }
-
+#endif /* LEAF */
 /*
  *   Module functions
  */
@@ -1247,6 +1262,7 @@ void transfer_report(int idx, int details)
 void transfer_init()
 {
   fileq = NULL;
-
+#ifdef LEAF
   server_transfer_setup(NULL);
+#endif /* LEAF */
 }

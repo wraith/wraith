@@ -411,6 +411,7 @@ void update_report(int idx, int details)
 	  if (!ok)
 	    dprintf(idx, "Download binary from %s (negotiating "
 		    "botentries)\n", dcc[i].nick);
+#ifdef HUB
 	} else if (dcc[i].status & STAT_SENDINGU) {
 	  for (j = 0; j < dcc_total; j++) {
 	    if (((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
@@ -427,6 +428,7 @@ void update_report(int idx, int details)
 			dcc[i].nick);
 	    }
 	  }
+#endif /* HUB */
 	}
       }
   }

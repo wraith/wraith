@@ -13,7 +13,7 @@ typedef struct tand_t_struct {
   struct tand_t_struct *via;
   struct tand_t_struct *uplink;
   struct tand_t_struct *next;
-  char *version;
+  char version[121];
   time_t buildts;
   int localhub;
   char share;
