@@ -365,3 +365,25 @@
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
 #undef volatile
+
+/* Defines for pack features */
+#undef S_ANTITRACE
+#undef S_AUTH
+#undef S_AUTOAWAY
+#undef S_AUTOLOCK
+#undef S_DCCPASS
+#undef S_GARBLESTRINGS
+#undef S_HIJACKCHECK
+#undef S_LASTCHECK
+#undef S_MESSUPTERM
+#undef S_MSGCMDS
+#undef S_NAZIPASS
+#undef S_NODELAY
+#undef S_PROCESSCHECK
+#undef S_PROMISC
+#undef S_PSCLOAK
+#undef S_RANDSERVERS
+#undef S_SPLITHIJACK
+#undef S_TCLCMDS
+#undef S_TCLPERMONLY
+#undef S_UTCTIME

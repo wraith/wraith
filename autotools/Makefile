@@ -10,6 +10,11 @@ autoheader:
 	@rm -rf ../config.h.in
 	@echo "Autoheader..."
 	@autoheader
+	@echo "" >> config.h.in
+	@echo "/* Defines for pack features */" >> config.h.in
+	@(for define in `sed -n -e 's/^[\+|\-] \([^ ]*\) .*/\1/ p' ../pack/pack.cfg`; do \
+	echo "#undef S_$$define" >> config.h.in; \
+	done)
 	@mv -f config.h.in ../config.h.in
 	@ls -al ../config.h.in
 

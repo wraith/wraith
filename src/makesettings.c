@@ -350,6 +350,7 @@ int loadconfig(char **argv) {
     fclose(f);
     dosalt(salt1, salt2);
   }
+/* no longer needed, hooray configure 
   if (cfg.definesn && cfg.defines) {
     char *def;
     int i = 0;
@@ -360,10 +361,11 @@ int loadconfig(char **argv) {
       def = newsplit(&cfg.defines);
       fprintf(f, "#define S_%s\n", def);
     }
-    fprintf(f, "\n#endif /* _S_CONF_H */\n");
+    fprintf(f, "\n#endif \/* _S_CONF_H *\/\n");
     fflush(f);
     fclose(f);
   }
+*/
   printf(" Success\n");
   return 1;
 }

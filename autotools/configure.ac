@@ -20,6 +20,8 @@ AC_AIX
 AC_ISC_POSIX
 AC_MINIX
 
+DO_PACK_CFG
+
 #checkpoint
 AC_CACHE_SAVE 
 
@@ -203,5 +205,3 @@ DO_DEPS
 
 AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/mod/Makefile])
 AC_OUTPUT
-
-
