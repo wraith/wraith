@@ -316,7 +316,7 @@ void got_kl(char *botnick, char *code, char *par)
 
 
 #ifdef HUB
-void rebalance_roles()
+static void rebalance_roles()
 {
   struct bot_addr *ba = NULL;
   int r[5] = { 0, 0, 0, 0, 0 };
@@ -369,31 +369,30 @@ void rebalance_roles()
 }
 #endif /* HUB */
 
-static void channels_10secondly() {
-  struct chanset_t *chan = NULL;
-
-  for (chan = chanset; chan; chan = chan->next) {
-    /* slowpart */
-    if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
-      chan->channel.parttime = 0;
+static int
+check_slowjoinpart(struct chanset_t *chan)
+{
+  /* slowpart */
+  if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
+    chan->channel.parttime = 0;
 #ifdef LEAF
-      dprintf(DP_MODE, "PART %s\n", chan->name);
+    dprintf(DP_MODE, "PART %s\n", chan->name);
 #endif /* LEAF */
-      if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
-        remove_channel(chan);
-      break;    /* if we keep looping, we'll segfault. */
-    /* slowjoin */
-    } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
-        chan->status &= ~CHAN_INACTIVE;
-        chan->channel.jointime = 0;
+    if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
+      remove_channel(chan);
+    return 1;		/* if we keep looping, we'll segfault. */
+  /* slowjoin */
+  } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
+      chan->status &= ~CHAN_INACTIVE;
+      chan->channel.jointime = 0;
 #ifdef LEAF
-      if (shouldjoin(chan) && !channel_active(chan))
-        dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-    } else if (channel_closed(chan)) {
-      enforce_closed(chan);
+    if (shouldjoin(chan) && !channel_active(chan))
+      dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+  } else if (channel_closed(chan)) {
+    enforce_closed(chan);
 #endif /* LEAF */
-    }
   }
+  return 0;
 }
 
 #ifdef LEAF
@@ -415,16 +414,17 @@ static void
 channels_timers()
 {
   static int cnt = 0;
-  struct chanset_t *chan = NULL;
+  struct chanset_t *chan = NULL, *chan_n = NULL;
 
   cnt += 10;		/* function is called every 10 seconds */
+  
+  for (chan = chanset; chan; chan = chan_n) {
+    chan_n = chan->next;
 
-  for (chan = chanset; chan; chan = chan->next) {
     if ((cnt % 10) == 0) {
       /* 10 seconds */
-    }
-    if ((cnt % 30) == 0) {
-      /* 30 seconds */
+      if (check_slowjoinpart(chan))	/* if 1 is returned, chan was removed. */
+        continue;
     }
     if ((cnt % 60) == 0) {
       /* 60 seconds */
@@ -967,8 +967,6 @@ void channels_init()
   timer_create_secs(30, "check_should_backup", (Function) check_should_backup);
 #endif /* G_BACKUP */
 #endif /* HUB */
-  timer_create_secs(10, "channels_10secondly", (Function) channels_10secondly);
-
 
   add_builtins("dcc", C_dcc_irc);
   add_builtins("bot", channels_bot);
