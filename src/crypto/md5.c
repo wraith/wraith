@@ -189,7 +189,7 @@ void MD5_Init(MD5_CTX *ctx)
 void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
 {
 	MD5_u32plus saved_lo;
-	unsigned long used, free;
+	unsigned long used, freeb;
 
 	saved_lo = ctx->lo;
 	if ((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo) ctx->hi++;
@@ -198,16 +198,16 @@ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
 	used = saved_lo & 0x3f;
 
 	if (used) {
-		free = 64 - used;
+		freeb = 64 - used;
 
-		if (size < free) {
+		if (size < freeb) {
 			egg_memcpy(&ctx->buffer[used], data, size);
 			return;
 		}
 
-		egg_memcpy(&ctx->buffer[used], data, free);
-		(unsigned char *)data += free;
-		size -= free;
+		egg_memcpy(&ctx->buffer[used], data, freeb);
+		(unsigned char *)data += freeb;
+		size -= freeb;
 		body(ctx, ctx->buffer, 64);
 	}
 
@@ -221,22 +221,22 @@ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
 
 void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 {
-	unsigned long used, free;
+	unsigned long used, freeb;
 
 	used = ctx->lo & 0x3f;
 
 	ctx->buffer[used++] = 0x80;
 
-	free = 64 - used;
+	freeb = 64 - used;
 
-	if (free < 8) {
-		egg_memset(&ctx->buffer[used], 0, free);
+	if (freeb < 8) {
+		egg_memset(&ctx->buffer[used], 0, freeb);
 		body(ctx, ctx->buffer, 64);
 		used = 0;
-		free = 64;
+		freeb = 64;
 	}
 
-	egg_memset(&ctx->buffer[used], 0, free - 8);
+	egg_memset(&ctx->buffer[used], 0, freeb - 8);
 
 	ctx->lo <<= 3;
 	ctx->buffer[56] = ctx->lo;
