@@ -634,6 +634,8 @@ static void startup_checks() {
 
   fillconf(&conf);
 #ifdef LEAF
+ /*   printf("%s%s%s\n", BOLD(-1), packname, BOLD_END(-1)); */
+
   if (localhub) {
     if (do_killbot[0]) {
       if (killbot(do_killbot) == 0)
@@ -643,7 +645,8 @@ static void startup_checks() {
       exit(0);
     } else {
       spawnbots();
-      if (updating) exit(0); /* just let the timer restart us (our parent) */
+      if (updating) 
+        exit(0); /* just let the timer restart us (our parent) */
     }
   }
   if (!localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
@@ -818,8 +821,6 @@ int main(int argc, char **argv)
   }
 #endif /* LEAF && PSCLOAK */
 
-  putlog(LOG_MISC, "*", "=== %s: %d users.", conf.bot->nick, count_users(userlist));
-
   /* Move into background? */
   /* we don't split cygwin because to run as a service the bot shouldn't exit.
      confuses windows ;)
@@ -827,26 +828,36 @@ int main(int argc, char **argv)
   use_stderr = 0;		/* stop writing to stderr now! */
   if (backgrd) {
 #ifndef CYGWIN_HACKS
-    pid_t pid = do_fork();
+    pid_t pid = 0;
+  
+    pid = do_fork();
 
     writepid(conf.bot->pid_file, pid);
-#ifdef lame
+/*
+    printf("  |- %-10s (%d)\n", conf.bot->nick, pid);
+    if (localhub) {
+      if (bots_ran)
+        printf("  `- %d bots launched\n", bots_ran + 1);
+      else
+        printf("  `- 1 bot launched\n");
+    }
+*/
+    printf("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n",
+           BOLD(-1), BOLD_END(-1), packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
+           BOLD(-1), BOLD_END(-1), pid, BOLD(-1), BOLD_END(-1));
+
+#ifdef lame	/* keeping for god knows why */
     printf("%s%s%c%s%s%s l%sA%su%sN%sc%sH%se%sD%s %s(%s%d%s)%s\n",
             RED(-1), BOLD(-1), conf.bot->nick[0], BOLD_END(-1), &conf.bot->nick[1],
             COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
             BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), pid, YELLOW(-1), COLOR_END(-1));
 #endif
-    printf("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n",
-           BOLD(-1), BOLD_END(-1), packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
-           BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1));
   } else {
 #endif /* !CYGWIN_HACKS */
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif /* CYGWIN_HACKS */
-    printf("%s[%s%s%s]%s -%s- initiated %s(%sNot backgrounding%s)%s\n",
-           BOLD(-1), BOLD_END(-1), packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
-           BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1));
+    printf("%s[%s%s%s]%s -%s- initiated\n", BOLD(-1), BOLD_END(-1), packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
   }
 
   /* Terminal emulating dcc chat */

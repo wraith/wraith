@@ -44,6 +44,7 @@ spawnbots()
     } else if (!strcmp(bot->nick, conf.bot->nick) || (bot->pid && !updating)) {
       continue;
     } else {
+      int status = 0;
       char *run = NULL;
       size_t size = 0;
 
@@ -57,7 +58,11 @@ spawnbots()
       run = calloc(1, size);
       egg_snprintf(run, size, "%s -B %s", binname, bot->nick);
       sdprintf("Spawning '%s': %s", bot->nick, run);
-      system(run);
+      status = system(run);
+      if (status == -1 || WEXITSTATUS(status))
+        sdprintf("Failed to spawn '%s': %s", bot->nick, strerror(errno));
+      else
+        bots_ran++;        
       free(run);
     }
   }
