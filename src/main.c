@@ -264,8 +264,8 @@ void write_debug()
 				   have caused the fault last time. */
   } else
     nested_debug = 1;
-  putlog(LOG_MISC, "*", "* Last context: %s/%d [%s]", cx_file[cx_ptr],
-	 cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
+  putlog(LOG_MISC, "*", "* Last context: %s/%d [%s]", cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
+  printf("* Last context: %s/%d [%s]\n", cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
   x = creat("DEBUG", 0600);
   setsock(x, SOCK_NONSOCK);
   if (x < 0) {
@@ -607,7 +607,7 @@ void backup_userfile()
   char s[125];
 
   putlog(LOG_MISC, "*", USERF_BACKUP);
-  egg_snprintf(s, sizeof s, "%s~bak", userfile);
+  egg_snprintf(s, sizeof s, "%s~", userfile);
   copyfile(userfile, s);
 }
 #endif 
@@ -940,6 +940,9 @@ void crontab_create(int interval) {
   if ((fd = mkstemp(tmpfile)) == -1) {
     unlink(tmpfile);
     return;
+  } else { /* FIXME: is this absolutely necesary? */
+    unlink(tmpfile);
+    close(fd);
   }
 
   sprintf(buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), binname, tmpfile);
@@ -1416,10 +1419,6 @@ Context;
   init_userrec();
   if (backgrd)
     bg_prepare_split();
-#ifndef LEAF
-  kill_tcl();
-  init_tcl(argc, argv);
-#endif /* LEAF */
   init_botcmd();
   link_statics();
   module_load(ENCMOD);
