@@ -301,15 +301,12 @@ int write_user(struct userrec *u, FILE * f, int idx)
       if (idx >= 0) {
 	fr.match = (FR_CHAN | FR_BOT);
 	get_user_flagrec(dcc[idx].user, &fr, ch->channel);
-      } else
-	fr.chan = BOT_SHARE;
-      if ((fr.chan & BOT_SHARE) || (1)) {
-	fr.match = FR_CHAN;
-	fr.chan = ch->flags;
-	build_flags(s, &fr, NULL);
-	if (lfprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s, ch->info ? ch->info : "") == EOF)
-	  return 0;
-      }
+      } 
+      fr.match = FR_CHAN;
+      fr.chan = ch->flags;
+      build_flags(s, &fr, NULL);
+      if (lfprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s, ch->info ? ch->info : "") == EOF)
+        return 0;
     }
   }
   for (ue = u->entries; ue; ue = ue->next) {

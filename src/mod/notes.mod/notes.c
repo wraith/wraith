@@ -282,18 +282,18 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
 	  dprintf(idx, "%s\n", "Cant create notefile.  Sorry.");
 	putlog(LOG_MISC, "*", "%s", "Notefile unreachable!");
       } else {
-	char *p, *from = argv1;
-	int l = 0;
+	char *p = NULL, *from = argv1;
+	size_t len = 0;
 
 	chmod(notefile, userfile_perm);	/* Use userfile permissions. */
 	while ((argv3[0] == '<') || (argv3[0] == '>')) {
 	  p = newsplit(&(argv3));
 	  if (*p == '<')
-	    l += simple_sprintf(work + l, "via %s, ", p + 1);
+	    len += simple_sprintf(work + len, "via %s, ", p + 1);
 	  else if (argv1[0] == '@')
 	    from = p + 1;
 	}
-	fprintf(f, "%s %s %li %s%s\n", to, from, now, l ? work : "", argv3);
+	fprintf(f, "%s %s %li %s%s\n", to, from, now, len ? work : "", argv3);
 	fclose(f);
 	if (idx >= 0)
 	  dprintf(idx, "%s.\n", "Stored message");

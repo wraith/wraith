@@ -69,9 +69,6 @@ int chan_sanity_check(int chatr, int atr)
   /* Master implies op */
   if (chatr & USER_MASTER)
     chatr |= USER_OP ;
-  /* Can't be +s on chan unless you're a bot */
-  if (!(atr & USER_BOT))
-    chatr &= ~BOT_SHARE;
   return chatr;
 }
 
@@ -438,10 +435,13 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
 	  fr->chan |= cr->flags;
 	}
     } else {
-      if (chname)
-	for (cr = u->chanrec; cr; cr = cr->next)
+      if (chname) {
+	for (cr = u->chanrec; cr; cr = cr->next) {
 	  if (!rfc_casecmp(chname, cr->channel))
 	    break;
+        }
+      }
+
       if (cr) {
 	fr->chan = cr->flags;
       } else {
@@ -500,18 +500,6 @@ static int botfl_set(struct userrec *u, struct user_entry *e, void *buf)
     return 1;			/* Don't even bother trying to set the
 				   flags for a non-bot */
 
-/*  if ((atr & BOT_HUB) && (atr & BOT_ALT))
-    atr &= ~BOT_ALT;*/
-  if (atr & BOT_REJECT) {
-    if (atr & BOT_SHARE)
-      atr &= ~(BOT_SHARE | BOT_REJECT);
-    if (atr & BOT_HUB)
-      atr &= ~(BOT_HUB | BOT_REJECT);
-/*    if (atr & BOT_ALT)
-      atr &= ~(BOT_ALT | BOT_REJECT);*/
-  }
-  if (!(atr & BOT_SHARE))
-    atr &= ~BOT_GLOBAL;
   e->u.ulong = atr;
   return 1;
 }

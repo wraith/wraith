@@ -525,7 +525,9 @@ static void eof_dcc_bot(int idx)
 
 static void display_dcc_bot(int idx, char *buf)
 {
-  int i = simple_sprintf(buf, "bot   flags: ");
+  size_t i;
+
+  i = simple_sprintf(buf, "bot   flags: ");
 
   buf[i++] = b_status(idx) & STAT_PINGED ? 'P' : 'p';
   buf[i++] = b_status(idx) & STAT_SHARE ? 'U' : 'u';
@@ -1160,8 +1162,9 @@ static void dcc_chat(int idx, char *buf, int i)
 
 static void display_dcc_chat(int idx, char *buf)
 {
-  int i = simple_sprintf(buf, "chat  flags: ");
+  size_t i;
 
+  i = simple_sprintf(buf, "chat  flags: ");
   buf[i++] = dcc[idx].status & STAT_CHAT ? 'C' : 'c';
   buf[i++] = dcc[idx].status & STAT_PARTY ? 'P' : 'p';
   buf[i++] = dcc[idx].status & STAT_TELNET ? 'T' : 't';

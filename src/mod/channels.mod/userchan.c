@@ -874,32 +874,24 @@ int write_bans(FILE *f, int idx)
     }
     free(mask);
   }
-  for (chan = chanset; chan; chan = chan->next)
-    if ((idx < 0)  || 1) {
-      struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0};
-
-      if (idx >= 0)
-	get_user_flagrec(dcc[idx].user, &fr, chan->dname);
-      else
-	fr.chan = BOT_SHARE;
-
-	if (lfprintf(f, "::%s bans\n", chan->dname) == EOF)
-	  return 0;
-	for (b = chan->bans; b; b = b->next) {
-	  mask = str_escape(b->mask, ':', '\\');
-	  if (!mask ||
-	      lfprintf(f, "- %s:%s%lu%s:+%lu:%lu:%s:%s\n", mask,
-		      (b->flags & MASKREC_PERM) ? "+" : "", b->expire,
-		      (b->flags & MASKREC_STICKY) ? "*" : "", b->added,
-		      b->lastactive, b->user ? b->user : conf.bot->nick,
-		      b->desc ? b->desc : "requested") == EOF) {
-	    if (mask)
-	      free(mask);
-	    return 0;
-	  }
-	  free(mask);
-	}
+  for (chan = chanset; chan; chan = chan->next) {
+    if (lfprintf(f, "::%s bans\n", chan->dname) == EOF)
+      return 0;
+    for (b = chan->bans; b; b = b->next) {
+      mask = str_escape(b->mask, ':', '\\');
+      if (!mask ||
+        lfprintf(f, "- %s:%s%lu%s:+%lu:%lu:%s:%s\n", mask,
+	        (b->flags & MASKREC_PERM) ? "+" : "", b->expire,
+	        (b->flags & MASKREC_STICKY) ? "*" : "", b->added,
+	        b->lastactive, b->user ? b->user : conf.bot->nick,
+	        b->desc ? b->desc : "requested") == EOF) {
+          if (mask)
+            free(mask);
+          return 0;
+        }
+      free(mask);
     }
+  }
   return 1;
 }
 /* Write the exemptlists to a file.
@@ -927,31 +919,24 @@ int write_exempts(FILE *f, int idx)
     }
     free(mask);
   }
-  for (chan = chanset;chan;chan=chan->next)
-    if ((idx < 0) || 1) {
-      struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0};
-
-      if (idx >= 0)
-	get_user_flagrec(dcc[idx].user,&fr,chan->dname);
-      else
-	fr.chan = BOT_SHARE;
-	if (lfprintf(f, "&&%s exempts\n", chan->dname) == EOF)
-	  return 0;
-	for (e = chan->exempts; e; e = e->next) {
-	  mask = str_escape(e->mask, ':', '\\');
-	  if (!mask ||
-	      lfprintf(f,"%s %s:%s%lu%s:+%lu:%lu:%s:%s\n","%", mask,
-		      (e->flags & MASKREC_PERM) ? "+" : "", e->expire,
-		      (e->flags & MASKREC_STICKY) ? "*" : "", e->added,
-		      e->lastactive, e->user ? e->user : conf.bot->nick,
-		      e->desc ? e->desc : "requested") == EOF) {
-	    if (mask)
-	      free(mask);
-	    return 0;
-	  }
-	  free(mask);
-	}
+  for (chan = chanset;chan;chan=chan->next) {
+    if (lfprintf(f, "&&%s exempts\n", chan->dname) == EOF)
+      return 0;
+    for (e = chan->exempts; e; e = e->next) {
+      mask = str_escape(e->mask, ':', '\\');
+      if (!mask ||
+		lfprintf(f,"%s %s:%s%lu%s:+%lu:%lu:%s:%s\n","%", mask,
+		(e->flags & MASKREC_PERM) ? "+" : "", e->expire,
+		(e->flags & MASKREC_STICKY) ? "*" : "", e->added,
+		e->lastactive, e->user ? e->user : conf.bot->nick,
+		e->desc ? e->desc : "requested") == EOF) {
+        if (mask)
+           free(mask);
+         return 0;
+      }
+      free(mask);
     }
+  }
   return 1;
 }
 
@@ -980,31 +965,24 @@ int write_invites(FILE *f, int idx)
     }
     free(mask);
   }
-  for (chan = chanset; chan; chan = chan->next)
-    if ((idx < 0) || (1)) {
-      struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0};
-
-      if (idx >= 0)
-	get_user_flagrec(dcc[idx].user,&fr,chan->dname);
-      else
-	fr.chan = BOT_SHARE;
-	if (lfprintf(f, "$$%s invites\n", chan->dname) == EOF)
-	  return 0;
-	for (ir = chan->invites; ir; ir = ir->next) {
-	  mask = str_escape(ir->mask, ':', '\\');
-	  if (!mask ||
+  for (chan = chanset; chan; chan = chan->next) {
+    if (lfprintf(f, "$$%s invites\n", chan->dname) == EOF)
+      return 0;
+    for (ir = chan->invites; ir; ir = ir->next) {
+      mask = str_escape(ir->mask, ':', '\\');
+      if (!mask ||
 	      lfprintf(f,"@ %s:%s%lu%s:+%lu:%lu:%s:%s\n", mask,
 		      (ir->flags & MASKREC_PERM) ? "+" : "", ir->expire,
 		      (ir->flags & MASKREC_STICKY) ? "*" : "", ir->added,
 		      ir->lastactive, ir->user ? ir->user : conf.bot->nick,
 		      ir->desc ? ir->desc : "requested") == EOF) {
-	    if (mask)
-	      free(mask);
-	    return 0;
-	  }
+        if (mask)
 	  free(mask);
-	}
+	return 0;
+      }
+      free(mask);
     }
+  }
   return 1;
 }
 
@@ -1021,18 +999,10 @@ int write_chans(FILE *f, int idx)
     return 0;
 
   for (chan = chanset; chan; chan = chan->next) {
-    if ((idx < 0) || (1)) {
-      struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0};
-      if (idx >= 0)
-        get_user_flagrec(dcc[idx].user,&fr,chan->dname);
-      else
-        fr.chan = BOT_SHARE;
+    putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
+    get_mode_protect(chan, w);
 
-     putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
-
-     get_mode_protect(chan, w);
-
-     if (lfprintf(f, "\
+    if (lfprintf(f, "\
 + channel add %s { chanmode { %s } addedby %s addedts %lu idle-kick %d \
 limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d \
 flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d \
@@ -1094,7 +1064,6 @@ exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans \
  */
         ) == EOF)
           return 0;
-    } 
   }
   return 1;
 }

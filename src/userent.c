@@ -751,16 +751,16 @@ static int botaddr_pack(struct userrec *u, struct user_entry *e)
 {
   char work[1024] = "";
   struct bot_addr *bi = NULL;
-  int l;
+  size_t len;
 
   Assert(e);
   Assert(!e->name);
   bi = (struct bot_addr *) e->u.extra;
-  l = simple_sprintf(work, "%s:%u/%u:%u:%s", bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
+  len = simple_sprintf(work, "%s:%u/%u:%u:%s", bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
   e->u.list = calloc(1, sizeof(struct list_type));
 
   e->u.list->next = NULL;
-  e->u.list->extra = calloc(1, l + 1);
+  e->u.list->extra = calloc(1, len + 1);
   strcpy(e->u.list->extra, work);
   free(bi->address);
   free(bi->uplink);

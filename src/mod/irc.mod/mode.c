@@ -1062,8 +1062,7 @@ static void got_unban(struct chanset_t *chan, char *nick, char *from,
   if ((u_equals_mask(global_bans, who) || u_equals_mask(chan->bans, who)) &&
       me_op(chan) && !channel_dynamicbans(chan)) {
     /* That's a permban! */
-    if ((!glob_bot(user) || !(bot_flags(u) & BOT_SHARE)) && ((!glob_op(user) ||
-        chan_deop(user)) && !chan_op(user)))
+    if (!glob_bot(user) && !chk_op(user, chan))
       add_mode(chan, '+', 'b', who);
   }
 }
@@ -1137,13 +1136,8 @@ static void got_unexempt(struct chanset_t *chan, char *nick, char *from,
     }
   }
   if ((u_equals_mask(global_exempts, who) || u_equals_mask(chan->exempts, who)) &&
-      me_op(chan) && !channel_dynamicexempts(chan)) {
-    /* That's a permexempt! */
-    if (glob_bot(user) && (bot_flags(u) & BOT_SHARE)) {
-      /* Sharebot -- do nothing */
-    } else
-      add_mode(chan, '+', 'e', who);
-  }
+      me_op(chan) && !channel_dynamicexempts(chan) && !glob_bot(user))
+    add_mode(chan, '+', 'e', who);
 }
 
 static void got_invite(struct chanset_t *chan, char *nick, char *from,
@@ -1205,13 +1199,8 @@ static void got_uninvite(struct chanset_t *chan, char *nick, char *from,
     add_mode(chan, '+', 'I', who);
   if ((u_equals_mask(global_invites, who) ||
        u_equals_mask(chan->invites, who)) && me_op(chan) &&
-      !channel_dynamicinvites(chan)) {
-    /* That's a perminvite! */
-    if (glob_bot(user) && (bot_flags(u) & BOT_SHARE)) {
-      /* Sharebot -- do nothing */
-    } else
-      add_mode(chan, '+', 'I', who);
-  }
+      !channel_dynamicinvites(chan) && !glob_bot(user))
+    add_mode(chan, '+', 'I', who);
 }
 
 static int gotmode(char *from, char *msg)

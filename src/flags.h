@@ -65,84 +65,38 @@ struct flag_record {
 #define BOT_VALID  0x7fe689C1 /* all BOT_ flags in use               */
 
 
-#define USER_ADMIN         0x00000001 /* a  user is an admin                  */
-#define USER_BOT           0x00000002 /* b  user is a bot                     */
-#define USER_CHANHUB       0x00000004 /* c  bot is a chanhub    */
-#define USER_DEOP          0x00000008 /* d  user is global de-op              */
-#define USER_EXEMPT        0x00000010 /* e  exempted from stopnethack         */
-#define USER_F             0x00000020 /* f  unused             */
-#define USER_G             0x00000040 /* g  unused                            */
-#define USER_H             0x00000080 /* h  unused                            */
-#define USER_HUBA          0x00000100 /* i  access to HUBS        */
-#define USER_CHUBA         0x00000200 /* j  access to CHANHUBS(+c)            */
-#define USER_KICK          0x00000400 /* k  user is global auto-kick          */
-#define USER_DOLIMIT       0x00000800 /* l  bot sets limit on channel(s)        */
-#define USER_MASTER        0x00001000 /* m  user has full bot access          */
-#define USER_OWNER         0x00002000 /* n  user is the bot owner             */
-#define USER_OP            0x00004000 /* o  user is +o on all channels        */
-#define USER_PARTY         0x00008000 /* p  user can CHAT on partyline:*needs (+i or +j)    */
-#define USER_QUIET         0x00010000 /* q  user is global de-voice           */
-#define USER_R  	   0x00020000 /* r  unused    */
-#define USER_S             0x00040000 /* s  unused             */
-#define USER_T             0x00080000 /* t  unused             */
-#define USER_UPDATEHUB     0x00100000 /* u  bot is the updatehub         */
-#define USER_VOICE         0x00200000 /* v  user is +v on all channels        */
-#define USER_WASOPTEST     0x00400000 /* w  wasop test needed for stopnethack */
-#define USER_NOFLOOD       0x00800000 /* x  user is exempt from flood kicks   */
-#define USER_DOVOICE       0x01000000 /* y  bot gives voices                  */
-#define USER_UNSHARED      0x02000000 /* z  not shared with sharebots	      */
-#define USER_DEFAULT       0x40000000 /* use default-flags                    */
+#define USER_ADMIN         BIT0  /* a  user is an admin                  */
+#define USER_BOT           BIT1  /* b  user is a bot                     */
+#define USER_CHANHUB       BIT2  /* c  bot is a chanhub    */
+#define USER_DEOP          BIT3  /* d  user is global de-op              */
+#define USER_EXEMPT        BIT4  /* e  exempted from stopnethack         */
+#define USER_F             BIT5  /* f  unused             */
+#define USER_G             BIT6  /* g  unused                            */
+#define USER_H             BIT7  /* h  unused                            */
+#define USER_HUBA          BIT8  /* i  access to HUBS        */
+#define USER_CHUBA         BIT9  /* j  access to CHANHUBS(+c)            */
+#define USER_KICK          BIT10 /* k  user is global auto-kick          */
+#define USER_DOLIMIT       BIT11 /* l  bot sets limit on channel(s)        */
+#define USER_MASTER        BIT12 /* m  user has full bot access          */
+#define USER_OWNER         BIT13 /* n  user is the bot owner             */
+#define USER_OP            BIT14 /* o  user is +o on all channels        */
+#define USER_PARTY         BIT15 /* p  user can CHAT on partyline:*needs (+i or +j)    */
+#define USER_QUIET         BIT16 /* q  user is global de-voice           */
+#define USER_R  	   BIT17 /* r  unused    */
+#define USER_S             BIT18 /* s  unused             */
+#define USER_T             BIT19 /* t  unused             */
+#define USER_UPDATEHUB     BIT20 /* u  bot is the updatehub         */
+#define USER_VOICE         BIT21 /* v  user is +v on all channels        */
+#define USER_WASOPTEST     BIT22 /* w  wasop test needed for stopnethack */
+#define USER_NOFLOOD       BIT23 /* x  user is exempt from flood kicks   */
+#define USER_DOVOICE       BIT24 /* y  bot gives voices                  */
+#define USER_UNSHARED      BIT25 /* z  not shared with sharebots	      */
+#define USER_DEFAULT       BIT26 /* use default-flags                    */
 
 #define bot_hublevel(x) ( ( (x) && (x->flags & USER_BOT) && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
                           ( ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel ? \
                             ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel : 999) \
                          : 999)
-
-/* Flags specifically for bots
- */
-#define BOT_A         0x00000001	/* a  unused			 */
-#define BOT_BOT       0x00000002	/* b  sanity bot flag		 */
-#define BOT_C         0x00000004	/* c  unused			 */
-#define BOT_D         0x00000008	/* d  unused			 */
-#define BOT_E         0x00000010	/* e  unused			 */
-#define BOT_F         0x00000020	/* f  unused			 */
-#define BOT_GLOBAL    0x00000040	/* g  all channel are shared	 */
-#define BOT_HUB       0x00000080	/* h  auto-link to ONE of these
-					      bots			 */
-#define BOT_ISOLATE   0x00000100	/* i  isolate party line from
-					      botnet			 */
-#define BOT_J         0x00000200	/* j  unused			 */
-#define BOT_K         0x00000400	/* k  unused			 */
-#define BOT_LEAF      0x00000800	/* l  may not link other bots	 */
-#define BOT_M         0x00001000	/* m  unused			 */
-#define BOT_N         0x00002000	/* n  unused			 */
-#define BOT_O         0x00004000	/* o  unused			 */
-#define BOT_PASSIVE   0x00008000	/* p  share passively with this
-					      bot			 */
-#define BOT_Q         0x00010000	/* q  unused */
-#define BOT_REJECT    0x00020000	/* r  automatically reject
-					      anywhere			 */
-#define BOT_AGGRESSIVE 0x00040000	/* s  bot shares user files	 */
-#define BOT_T         0x00080000	/* t  unused			 */
-#define BOT_U         0x00100000	/* u  unused			 */
-#define BOT_V         0x00200000	/* v  unused			 */
-#define BOT_W         0x00400000	/* w  unused			 */
-#define BOT_X         0x00800000	/* x  unused			 */
-#define BOT_Y         0x01000000	/* y  unused			 */
-#define BOT_Z         0x02000000	/* z  unused			 */
-#define BOT_FLAG0     0x00200000	/* 0  user-defined flag #0	 */
-#define BOT_FLAG1     0x00400000	/* 1  user-defined flag #1	 */
-#define BOT_FLAG2     0x00800000	/* 2  user-defined flag #2	 */
-#define BOT_FLAG3     0x01000000	/* 3  user-defined flag #3	 */
-#define BOT_FLAG4     0x02000000	/* 4  user-defined flag #4	 */
-#define BOT_FLAG5     0x04000000	/* 5  user-defined flag #5	 */
-#define BOT_FLAG6     0x08000000	/* 6  user-defined flag #6	 */
-#define BOT_FLAG7     0x10000000	/* 7  user-defined flag #7	 */
-#define BOT_FLAG8     0x20000000	/* 8  user-defined flag #8	 */
-#define BOT_FLAG9     0x40000000	/* 9  user-defined flag #9	 */
-
-#define BOT_SHARE    (BOT_AGGRESSIVE|BOT_PASSIVE)
-
 
 /* Flag checking macros
  */
@@ -151,7 +105,7 @@ struct flag_record {
 #define chan_deop(x)			((x).chan & USER_DEOP)
 #define glob_deop(x)			((x).global & USER_DEOP)
 #define glob_master(x)			((x).global & USER_MASTER)
-#define glob_bot(x)				((x).global & USER_BOT)
+#define glob_bot(x)			((x).global & USER_BOT)
 #define glob_owner(x)			((x).global & USER_OWNER)
 #define chan_master(x)			((x).chan & USER_MASTER)
 #define chan_owner(x)			((x).chan & USER_OWNER)
@@ -177,10 +131,6 @@ struct flag_record {
 #define glob_noflood(x)			((x).global & USER_NOFLOOD)
 #define chan_noflood(x)			((x).chan & USER_NOFLOOD)
 #define glob_chanhub(x)			((x).global & USER_CHANHUB)
-
-#define bot_global(x)		(1)
-#define bot_chan(x)		((x).chan & BOT_AGGRESSIVE)
-#define bot_shared(x)		((x).bot & BOT_SHARE)
 
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void set_user_flagrec(struct userrec *, struct flag_record *, const char *);

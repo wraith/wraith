@@ -84,8 +84,6 @@ static void bot_chan2(int idx, char *msg)
   char *from = NULL, *p = NULL;
   int i, chan;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   from = newsplit(&msg);
   p = newsplit(&msg);
   chan = base64_to_int(p);
@@ -205,8 +203,6 @@ static void bot_chat(int idx, char *par)
   char *from = NULL;
   int i;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   from = newsplit(&par);
   if (strchr(from, '@') != NULL) {
     fake_alert(idx, "bot", from);
@@ -229,8 +225,6 @@ static void bot_actchan(int idx, char *par)
   char *from = NULL, *p = NULL;
   int i, chan;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   from = newsplit(&par);
   p = strchr(from, '@');
   if (p == NULL) {
@@ -713,8 +707,9 @@ static void bot_nlinked(int idx, char *par)
   }
   addbot(newbot, dcc[idx].nick, next, x, i);
   check_bind_link(newbot, next);
+
   u = get_user_by_handle(userlist, newbot);
-  if (bot_flags(u) & BOT_REJECT) {
+  if (u && u->flags && (!(u->flags & USER_OP))) {
     botnet_send_reject(idx, conf.bot->nick, NULL, newbot, NULL, NULL);
     putlog(LOG_BOTS, "*", "%s %s %s %s", BOT_REJECTING, newbot, MISC_FROM, dcc[idx].nick);
   }
@@ -841,8 +836,6 @@ static void bot_reject(int idx, char *par)
   struct userrec *u = NULL;
   int i;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   from = newsplit(&par);
   frombot = strchr(from, '@');
   if (frombot)
@@ -891,28 +884,21 @@ static void bot_reject(int idx, char *par)
 	else
 	  frombot++;
 	u = get_user_by_handle(userlist, frombot);
-	if (!(bot_flags(u) & BOT_SHARE)) {
-	  add_note(from, conf.bot->nick, "No non sharebot boots.", -1, 0);
-	  ok = 1;
-	}
       } else if (remote_boots == 0) {
 	botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s",
 			 BOT_NOREMOTEBOOT);
 	ok = 1;
       }
       for (i = 0; (i < dcc_total) && (!ok); i++)
-	if ((!egg_strcasecmp(who, dcc[i].nick)) &&
-	    (dcc[i].type->flags & DCT_CHAT)) {
+	if ((!egg_strcasecmp(who, dcc[i].nick)) && (dcc[i].type->flags & DCT_CHAT)) {
 	  u = get_user_by_handle(userlist, dcc[i].nick);
-	  if (u && 
-              ((u->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_ADMIN))) {
+	  if (u && ((u->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_ADMIN))) {
 	    add_note(from, conf.bot->nick, BOT_NOOWNERBOOT, -1, 0);
 	    return;
 	  }
 	  do_boot(i, from, par);
 	  ok = 1;
-	  putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, 
-		 par[0] ? par : "No reason");
+	  putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
 	}
     } else {
       i = nextbot(destbot);
@@ -939,8 +925,7 @@ static void bot_thisbot(int idx, char *par)
     lostdcc(idx);
     return;
   }
-  if (bot_flags(dcc[idx].user) & BOT_LEAF)
-    dcc[idx].status |= STAT_LEAF;
+
   /* Set capitalization the way they want it */
   noshare = 1;
   change_handle(dcc[idx].user, par);
@@ -1035,8 +1020,6 @@ static void bot_nickchange(int idx, char *par)
   char *bot = NULL, *ssock = NULL, *newnick = NULL;
   int sock, i;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   bot = newsplit(&par);
   i = nextbot(bot);
   if (i != idx) {
@@ -1064,8 +1047,6 @@ static void bot_join(int idx, char *par)
   struct userrec *u = NULL;
   int i, sock, chan, i2, linking = 0;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   bot = newsplit(&par);
   if (bot[0] == '!') {
     linking = 1;
@@ -1128,8 +1109,6 @@ static void bot_part(int idx, char *par)
   int sock, partyidx;
   int silent = 0;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   bot = newsplit(&par);
   if (bot[0] == '!') {
     silent = 1;
@@ -1173,8 +1152,6 @@ static void bot_away(int idx, char *par)
   char *bot = NULL, *etc = NULL;
   int sock, partyidx, linking = 0;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   bot = newsplit(&par);
   if (bot[0] == '!') {
     linking = 1;
@@ -1216,8 +1193,6 @@ static void bot_idle(int idx, char *par)
   char *bot = NULL, *work = NULL;
   int sock, idle;
 
-  if (bot_flags(dcc[idx].user) & BOT_ISOLATE)
-    return;
   bot = newsplit(&par);
   work = newsplit(&par);
   sock = base64_to_int(work);

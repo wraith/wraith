@@ -1321,7 +1321,8 @@ void irc_report(int idx, int details)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
   char ch[1024] = "", q[160] = "", *p = NULL;
-  int k, l;
+  int k;
+  size_t len;
   struct chanset_t *chan = NULL;
 
   strcpy(q, "Channels: ");
@@ -1343,9 +1344,8 @@ void irc_report(int idx, int details)
         else if ((chan->dname[0] != '+') && !me_op(chan))
 	  p = MISC_WANTOPS;
       }
-      l = simple_sprintf(ch, "%s%s%s%s, ", chan->dname, p ? "(" : "",
-			 p ? p : "", p ? ")" : "");
-      if ((k + l) > 70) {
+      len = simple_sprintf(ch, "%s%s%s%s, ", chan->dname, p ? "(" : "", p ? p : "", p ? ")" : "");
+      if ((k + len) > 70) {
 	dprintf(idx, "   %s\n", q);
 	strcpy(q, "          ");
 	k = 10;

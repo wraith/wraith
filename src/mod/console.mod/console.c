@@ -65,18 +65,18 @@ static int console_pack(struct userrec *u, struct user_entry *e)
 {
   char work[1024] = "";
   struct console_info *ci = NULL;
-  int l;
+  size_t len;
 
   ci = (struct console_info *) e->u.extra;
 
-  l = simple_sprintf(work, "%s %s %s %d %d %d %d",
+  len = simple_sprintf(work, "%s %s %s %d %d %d %d",
 		     ci->channel, masktype(ci->conflags),
 		     stripmasktype(ci->stripflags), ci->echoflags,
 		     ci->page, ci->conchan, ci->colour);
 
   e->u.list = calloc(1, sizeof(struct list_type));
   e->u.list->next = NULL;
-  e->u.list->extra = calloc(1, l + 1);
+  e->u.list->extra = calloc(1, len + 1);
   strcpy(e->u.list->extra, work);
 
   free(ci->channel);
