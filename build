@@ -113,15 +113,6 @@ if [ $clean = "1" ]; then
  make clean > /dev/null
 fi
 
-# Build utils and check we got the bins
-echo "[*] Building utils..."
-make utils > /dev/null
-if ! test -f stringfix
-then
-  echo "[!] Util build failed"
-  exit 1
-fi
-
 if [ $leaf = "1" ]; then
  # Build leaf and check
  echo "[*] Building ${d}leaf..."
