@@ -10,6 +10,7 @@
 #include "eggmain.h"
 #include "misc_file.h"
 #include "rfc1459.h"
+#include "dcc.h"
 #include "userrec.h"
 #include "misc.h"
 #include "users.h"

@@ -15,6 +15,7 @@
 #include "eggmain.h"
 #include "users.h"
 #include "rfc1459.h"
+#include "dcc.h"
 #include "salt.h"
 #include "userrec.h"
 #include "misc.h"

@@ -11,6 +11,7 @@
 #include "misc.h"
 #include "rfc1459.h"
 #include "misc_file.h"
+#include "dcc.h"
 #include "users.h"
 #include "main.h"
 #include "debug.h"

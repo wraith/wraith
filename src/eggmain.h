@@ -7,11 +7,10 @@
 #ifndef _EGG_MAIN_H
 #define _EGG_MAIN_H
 
-
+/* These should be in a common.h, like it or not... */
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
-
 #include "garble.h"
 
 
@@ -39,14 +38,6 @@
 #include "tclhash.h"
 #include "chan.h"
 #include "compat/compat.h"
-
-#ifndef MAKING_MODS
-extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_BOT_NEW,
- DCC_RELAY, DCC_RELAYING, DCC_FORK_RELAY, DCC_PRE_RELAY, DCC_CHAT_PASS,
- DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,
- DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT, DCC_DNSWAIT;
-
-#endif
 
 
 /* This macro copies (_len - 1) bytes from _source to _target. The
