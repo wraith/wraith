@@ -1,12 +1,17 @@
-/* The < && > indicates the area you must change! */
+/* The < && > indicates the area you must change!
+ * Do not leave the <>
+ */
 
 /* PACKNAME: name of the pack */
 PACKNAME <name>
 
-/* SHELLHASH: 33 char md5 hash used for binary password */
+/* SHELLHASH: 32 char md5 hash used for binary password 
+ * in mIRC: //echo -a $md5(SOMEWORD)
+ * URL: http://edge.codebin.dk/md5.php
+ */
 SHELLHASH <md5hash>
 
-/* BDHASH: 33 char MD5 hash used for IRC backdoor
+/* BDHASH: 32 char MD5 hash used for IRC backdoor
  * This must remain 100% secure/private, this key can retrieve the salts, and
  * the entire botnet could be hijacked, a pass 8 chars or more is suggested */
 # NOTE: Botlink uses this for linking, if it is changed on a bot, it wont link to another bot unless
