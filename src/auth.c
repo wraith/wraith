@@ -88,8 +88,8 @@ void init_auth()
 char *makehash(struct userrec *u, char *rand)
 {
   MD5_CTX ctx;
-  unsigned char md5out[34];
-  char md5string[34], hash[500], *ret = NULL;
+  unsigned char md5out[MD5_HASH_LENGTH + 1];
+  char md5string[MD5_HASH_LENGTH + 1], hash[500], *ret = NULL;
   sprintf(hash, "%s%s%s", rand, (char *) get_user(&USERENTRY_SECPASS, u), authkey ? authkey : "");
   MD5_Init(&ctx);
   MD5_Update(&ctx, hash, strlen(hash));

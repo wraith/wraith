@@ -311,9 +311,12 @@ struct dcc_table {
 
 struct userrec;
 
+#define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
+#define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)
+
 struct auth_t {
   struct userrec *user;
-  char hash[33];                /* used for dcc authing */
+  char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
   char nick[NICKLEN];
   char host[UHOSTLEN];
   int authed;
@@ -335,7 +338,7 @@ struct dcc_t {
   char simulbot[NICKLEN];	/* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   time_t simultime;		/* the time when the simul dcc is initiated, expires after a number of seconds */
   int simul;			/* this will hold the idx on the remote bot to return result. */
-  char hash[33];                /* used for dcc authing */
+  char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
   char nick[NICKLEN];
   char host[UHOSTLEN];
   struct dcc_table *type;
@@ -717,8 +720,6 @@ enum {
 /* This is used by the net module to keep track of sockets and what's
  * queued on them
  */
-#define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
-#define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)
 typedef struct {
   int		 sock;
   short		 flags;

@@ -10,7 +10,7 @@
 
 /*      S_FEATURE	  RECOMMENDED	DESCRIPTION 					*/
 #define S_ANTITRACE	/*  yes		ptrace detection 				*/
-#undef S_AUTH		/*  yes		authorization system (HIGHLY RECOMMENDED)	*/
+#define S_AUTH		/*  yes		authorization system (HIGHLY RECOMMENDED)	*/
 #define S_AUTOAWAY	/*  yes		random autoaway/return on IRC 			*/
 #define S_AUTOLOCK      /*  yes         will lock channels upon certain coniditions     */
 #define S_DCCPASS	/*  yes		DCC command passwords 				*/
