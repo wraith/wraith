@@ -1132,7 +1132,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     int hasop = chan_hasop(m);
 
-    if (m && !match_my_nick(m->nick)) {
+    if (m) {
       if (m->user && m->user->flags & (USER_BOT | USER_OP)) {
         if (hasop)
           botops++;
@@ -1145,7 +1145,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
 
   /* don't do much if i'm lonely bot. Maybe they won't notice me? :P */
-  if (botops == 0 && !botnonops) {
+  if (botops == 1 && !botnonops) {
     if (channel_bitch(chan) || channel_closed(chan))
       putlog(LOG_MISC, "*", "Opped in %s, not checking +closed/+bitch until more bots arrive.", chan->dname);
   } else {
