@@ -12,6 +12,7 @@
 #include "stat.h"
 #include "misc_file.h"
 #include "main.h"
+#include "shell.h"
 
 /* Copy a file from one place to another (possibly erasing old copy).
  *
