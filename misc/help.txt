@@ -1,0 +1,536 @@
+::+ban
+###  %b+ban%b <hostmask> [channel] [%%<XdXhXm>] [comment]
+   Adds a ban to the list of bans stored on the bot, with optional comment and
+   ban time. This ban is stored with your handle as the creator, and will be
+   in effect for every channel if no channel is specified. Prefixing a comment
+   with '@' will make it only visible within the bot, and not used as the ban
+   reason. Ban time has to be expressed in days, hours, and/or minutes.
+ 
+See also: bans, -ban, stick, unstick
+
+::+exempt
+###  %b+exempt%b <hostmask> [channel] [%%<XdXhXm>] [comment]
+   Adds an exempt to the list of exempts stored on the bot, with optional
+   comment and exempt time. This exempt is stored with your handle as the
+   creator, and will be in effect for every channel if no channel is specified.
+   Exempt time has to be expressed in days, hours, and/or minutes.
+ 
+See also: exempts, -exempt, stick, unstick
+
+::+host
+###  %b+host%b [handle] <hostmask>
+   Adds a hostmask to a user's user record. Hostmasks are used to identify your
+   handle on IRC. If a handle is not specified, the hostmask will be added to
+   YOUR user record.
+ 
+See also: -host
+
+::+ignore
+###  %b+ignore%b <hostmask> [%%<XdXhXm>] [comment]
+   Adds an ignore to the list of ignores stored on the bot, with optional
+   comment and ignore time. This ignore is stored with your handle as the
+   creator. Ignore time has to be expressed in days, hours, and/or minutes.
+ 
+See also: -ignore, ignores
+
+::+invite
+###  %b+invite%b <hostmask> [channel] [%%<XdXhXm>] [comment]
+   Adds an invite to the list of invites stored on the bot, with optional
+   comment and invite time. This invite is stored with your handle as the
+   creator, and will be in effect for every channel if no channel is specified.
+   Invite time has to be expressed in days, hours, and/or minutes.
+ 
+See also: invites, -invite, stick, unstick
+
+::+user
+###  %b+user%b <handle> [hostmask]
+   Creates a new user record for the handle given. The new user record will
+   have no flags, an optional hostmask, and a random pass/secpass.
+ 
+See also: -user, +host, -host%(hub)%{+n}, newleaf
+
+:hub:-bot
+###  %b-bot%b <bot>
+   This is exactly the same as %b'%d-user'%b (it removes a user record). It is
+   included for convenience.
+ 
+See also: +user, -user%{+n}, newleaf
+
+::-host
+###  %b-host%b <hostmask>
+   Removes a host from your handle.
+%{+m|m}
+###  %b-host%b <handle> <hostmask>
+   Removes a hostmask from a user's user record.
+%{-}
+ 
+See also: +host
+
+::-ignore
+###  %b-ignore%b <hostmask/number>
+   Removes the specified ignore from the list of ignores stored on the bot. You
+   may also reference the ignore by the number shown by the 'ignores' command.
+ 
+See also: +ignore, ignores
+
+::-user
+###  %b-user%b <handle>
+   Removes the specified handle's user record.
+ 
+See also: +user%(hub)%{+a}, -bot%{+n}, newleaf
+
+::addlog
+###  %baddlog%b <text>
+   Adds your comment to the bot's logfile. Bot masters can go back later and
+   review the log, and will see your comment (with your handle attached). This
+   is useful for explaining confusing activity.
+ 
+
+::away
+###  %baway%b [reason]
+   Marks you as "away" on the party line. Your away message will show up in
+   the %b'%dwho'%b list, and will be displayed to anyone who tries to send you
+   a note. Your notes will be stored, and then displayed to you as soon as you
+   are no longer away. Saying something on the party line will automatically
+   remove your "away" status, or you can type %b'%dback'%b or %b'%daway'%b by
+   itself.
+ 
+See also: back
+
+::back
+###  %bback%b
+   This marks you as no longer away on the party line.
+ 
+See also: away
+
+:hub:backup
+###  %bbackup%b
+   This makes the bot write a backup of its entire user list to the disk. 
+   This is useful if you feel the need to backup the userfile and channel
+   settings.
+ 
+See also: reload, save
+
+:hub:binds
+###  %bbinds%b [type/match] [all]
+   Shows the Tcl bindings in effect, in a list similar to this:
+      Command bindings:
+        TYPE FLGS COMMAND              HITS BINDING (TCL)
+        msg  -|-  rose                    0 msg_rose
+        msg  -|-  go                      0 msg_go
+        dcc  m|-  bind                    0 cmd_bind
+        pub  -|-  gross                   0 pub_gross
+   The fields should be self-explanatory, except for HITS, which records the
+   number of times that binding has been called. If not, go read the file
+   %b'doc/tcl-commands.doc'%b for help on the Tcl bind command. Note that the
+   builtin commands are now shown. You may also specify a type of binding to
+   show (i.e. %b'%dbinds msg'%b) or you can specify a wild card match (i.e.
+   %b'%dbinds *seen*'%b) if you want to narrow the field a bit. The wild card
+   matches will match against the TYPE, COMMAND and BINDING fields. You can
+   view more binds by adding 'all' to the end of the command.
+ 
+See also: tcl
+
+:hub:boot
+###  %bboot%b <handle[@bot]> [reason]
+   Kicks a user off the party line and displays the reason, if you specify
+   one. You can also specify a bot, and attempt to boot someone from another
+   bot on the botnet, though it may be rejected if that bot does not allow
+   remote boots. You can not boot a bot owner.
+
+:hub:botinfo
+###  %bbotinfo%b
+   Requests information from every bot currently on the botnet. Each bot should
+   eventually send you one line containing its version, network setting,
+   channels, and uptime.
+ 
+See also: %{+n}bottree, vbottree%{+m}, bots
+
+:hub:bots
+###  %bbots%b
+   Shows the list of bots currently on the botnet.
+   Example:
+      Bots: cEvin, ruthie, Killa1
+   There is no indication of which bots are directly connected to this current
+   bot. %{+n}Use %b'%dwho'%b or %b'%dbottree'%b for that information.%{-}
+ 
+See also: downbots%{+n}, bottree, vbottree%{-}, botinfo
+
+:hub:bottree
+###  %bbottree%b
+   Shows a tree-format diagram of the bots currently on the botnet. It's just a
+   nice way to get a feel for how the bots are physically connected. If 2 bots
+   are sharing, a + will be indicated, or a ? if nothing is known.
+ 
+See also: bots, downbots, botinfo, vbottree
+
+:hub:chaddr
+###  %bchaddr%b <bot> <address[:bot port[/user port]]>
+   Changes the address for a bot. This is the address your bot will try to
+   connect to when linking. If the bot has a separate port for bots and users,
+   they should be separated  by a slash (/).
+%{+a}
+   It is not recommneded that this is used, you should change your source,
+   and update all bots instead.
+%{-}
+ 
+See also: link
+
+::chat
+###  %bchat%b <on/off>
+###  %bchat%b <[*]channel number/name>
+   Changes your current channel on the partyline. When you first connect to
+   the partyline, it places you on channel 0 (the main party line).
+   Some channels may have assigned names if the assoc module is loaded. For
+   these, you can specify the channel by name instead of channel number if
+   you wish.
+   %b'%dchat off'%b removes you from all channels, including the main party line.
+   You can still use bot commands and see the console, but you can't talk to
+   anyone except via %b'%dnote'%b. %b'%dchat on'%b returns you to the main party
+   line (channel 0) if you were elsewhere.
+   If you prefix the channel with a '*', you will join a local channel.
+ 
+See also: console
+
+::chattr
+###  %bchattr%b <handle> [flags] [channel]
+   This lets you view and change the flags for a user.
+   For example, to give Lamer the p and f flags:
+      .chattr Lamer +pf
+   To remove Denali from the global op list:
+      .chattr Denali -o
+   You may also do any combination of the above:
+      .chattr Fred1 -m+xj-o
+   You can also change the flags for Usagi on a specific channel by supplying
+   the channel after the attributes:
+      .chattr Usagi -m+dk-o #blah
+   Changing global and channel specific flags within the same command line is
+   also possible (global +f, +o #lamer):
+      .chattr Bill f|o #lamer
+   Whether or not you change any flags, it will show you the user's attributes
+   afterwards. To get a list of all possible flags, see %b'%dhelp whois'%b.
+   %bNOTES:%b Only the owner may add or remove the 'a' (admin) or 'n' (owner) flags.
+          It is pointless to -a a permanent owner.
+          You must remove the permanent owner in the binary.
+ 
+See also: whois
+
+:hub:chhandle
+###  %bchhandle%b <oldhandle> <newhandle>
+   Changes the handle of a user. For example, to change the handle of user
+   'gavroche' to 'jamie', you would use 'chhandle gavroche jamie'.
+ 
+See also: chpass%{+n}, chsecpass
+
+:hub:chpass
+###  %bchpass%b <handle> [newpassword]
+   Changes a user's password. If you do not specify the new password, the user
+   effectively no longer has a password set. A password is needed to get ops,
+   join the party line, etc. If the newpassword is 'rand', a random password
+   will be used.
+ 
+See also: chhandle%{+n}, chsecpass
+
+::comment
+###  %bcomment%b <user> <comment>
+   Creates or changes the comment field for a user. The comment field can only
+   be seen via 'whois' or 'match'. Non-masters cannot see the comment field.
+   Using the comment 'none' will clear a user's comment.
+
+:hub:dccstat
+###  %bdccstat%b
+   Displays a table-format list of all "dcc" connections in use on the bot.
+   Dcc stands for "Direct Client-to-client Communication", and Eggdrop expands
+   this to cover every open socket. Any type of network connection to the bot
+   is considered a "dcc" connection.
+   The headings of the table are:
+     %bSOCK%b  the socket number of this connection (always unique)
+     %bADDR%b  the ip address mask of the host the bot is connected to, if
+           applicable
+     %bPORT%b  the port number being used for this connection
+     %bNICK%b  the handle of the user or bot, if applicable
+     %bHOST%b  the hostname corresponding to the IP address, if available
+     %bTYPE%b  the type of dcc connection (see below)
+   The types of connections currently possible are as follows (but more are
+   being added all the time):
+     %bCHAT%b  dcc-chat partyline user
+     %bPASS%b  user entering dcc chat (being asked for password)
+     %bSEND%b  user sending a file
+     %bGET%b   sending a file to a user
+     %bGETP%b  pending get (waiting for the user to acknowledge)
+     %bLSTN%b  telnet listening port (in place of a hostname, it will show the
+           callback procedure name, or a mask of acceptable handles)
+     %bT-IN%b  incoming telnet user (being asked for handle)
+     %bFILE%b  user in dcc-chat file area
+     %bBOT%b   connected bot (botnet connection)
+     %bBOT*%b  pending bot link (waiting for acknowledgement)
+     %bRELA%b  user in relay connection to another bot
+     %b>RLY%b  bot being relay'd to (one for each "RELA")
+     %bCONN%b  pending telnet connection (chat, relay, bot-link, etc)
+     %bNEW%b   new user via telnet (entering a handle)
+     %bNEWP%b  new user via telnet (entering a password)
+   In addition, 'CHAT' and 'BOT' have flags listed for each connection. Capital
+   letters mean that the flag is on, and lowercase letters mean that the flag
+   is off. The flags for 'CHAT' are:
+     %bC%b  in file area, but allowed to return to party line
+     %bP%b  party line access only
+     %bT%b  telnet connection (instead of dcc chat)
+     %bE%b  echo is on
+     %bP%b  paging is on
+     %b6%b  socket is ipv6
+   The flags for 'BOT' are:
+     %bP%b  ping sent, waiting for reply
+     %bU%b  user-file sharing is active
+     %bC%b  local bot initiated the connection
+     %bO%b  user-file offered, waiting for reply
+     %bS%b  in the process of sending the user-file
+     %bG%b  in the process of getting the user-file
+     %bW%b  warned this bot to stop hubbing
+     %bL%b  leaf-only bot (not allowed to be a hub)
+     %bI%b  bot is currently in the 'linking' stage
+     %bA%b  bot is being aggressively shared with
+   For 'CHAT' users, the party-line channel is also listed.
+
+::debug
+###  %bdebug%b
+   Display a dump of memory allocation information, assuming the bot was
+   compiled with memory debugging. It's useless to anyone but developers
+   trying to find memory leaks.
+
+::die
+###  %bdie%b [reason]
+   This kills the bot. The bot goes offline immediately, logging who issued
+   the 'die' command. You shouldn't have to use this too often. If you specify
+   a reason, it is logged, otherwise the reason is "authorized by <handle>".
+
+::echo
+###  %becho%b <on/off>
+   Specifies whether you want your messages echoed back to you. If it's on,
+   then when you say something on the party line, it will be displayed to you
+   just like everyone else will see it. If it's off, then it won't happen.
+ 
+See also: color
+
+::fixcodes
+### %bfixcodes%b
+     This is for use in situations where the bot gets mixed up about the type
+     of connection you have with it. For example, you /CTCP CHAT the bot and
+     it thinks you are connecting via telnet, and you see text displayed as
+     "Local time is now [1m17:17[0m" for example instead of "Local time is
+     now 17:17". Use this to turn telnet codes on or off/change the display
+     mode.
+
+::handle
+###  %bhandle%b <new-handle>
+   Changes your handle on the bot. This is the handle (nickname) that the
+   bot will know you as from this point forward. It is used to log into the
+   bot.
+ 
+See also: newpass%{+m}, %(hub)chhand, chpass%{+n}, chsecpass
+
+::ignores
+###  %bignores%b [wildcard]
+   Shows a list of hostmasks from which the bot is currently ignoring msgs,
+   notices, etc. There are two types of ignores: permanent and temporary.
+   Permanent ignores never automatically expire. You must use %b'%d-ignore'%b
+   to remove them.
+   Here is a sample permanent ignore:
+      [  1] *!*@217.156.44.184 (perm)
+            Wcc: go away
+            Started 523 days ago
+   The number (1) can be used to reference the ignore if you wish to remove it
+   (see %b'%dhelp -ignore'%b). Next is the actual hostmask being ignored. The
+   "(perm)" means that the ignore is "permanent": that is, it doesn't
+   automatically expire. The second line of the ignore entry is the comment
+   ("go away"), and who set the ban (Wcc). The last line shows when the ignore
+   was added.
+   Here is a sample temporary ignore:
+      [ 10] blah!blah@blah.cc (expires in 1 day)
+            Wcc: requested
+            Started 18:02
+   Here, you see the "perm" in the parentheses next to the hostmask is instead
+   an expire time. This means that the ignore will expire automatically in one
+   day.
+   If you use %b'%dignores <wildcard>'%b, it will list all the ignores
+   that match against your wildcard.
+ 
+See also: +ignore, -ignore
+
+:hub:link
+###  %blink%b [via-bot] <bot-to-link>
+   Attempts to link to another hub.  This command is deprecated and not 
+   recommended for use.
+ 
+See also: unlink, newleaf%{+a}, -bot
+
+::match
+###  %bmatch%b <attr> [channel] [[start] limit]
+   This displays all user records with the attributes requested.
+   "attr" is of the form:  <+/-><global>[&/|<channel>[&/|<bot>]]
+   Specifying "&" as the separator will cause AND style matching.
+   For example:
+      .match p&o
+   This will match all users with both the "p" global flag and the "o" channel
+   flag on your current console channel.
+   Specifying "|" as the separator will cause OR style matching.
+   For example:
+     .match p|o
+   This will match all users with either the "p" global flag or the "o" channel
+   flag on your current console channel. If you specify a channel, it will be
+   used instead of the current console channel.
+   For example:
+     .match p|o #eggdrop
+   This will match all users with either the "p" global flag or the "o" channel
+   flag on the channel #eggdrop. You can also match bot flags.
+   For example:
+     .match o|o|h
+   This will match all bots with either the "o" global flag, the "o" channel
+   flag on the current console channel, or the "h" botflag. You can also limit
+   the number of total results returned by specifying a limit at the end of the
+   command. A starting point can also be specified.
+   For example:
+     .match p&o #eggdrop 16 25
+   This would show results 16 through 25 matching any users with the "p" global
+   flag or the "o" channel flag on #eggdrop.
+###  %bmatch%b <wildcard-string> [[start] limit]
+   This displays all user records where the user's handle or any of the user's
+   hostmasks match the specified wildcard string. You can also limit the number
+   of total results returned by specifying a limit at the end of the command. A
+   starting point can also be specified.
+   For example:
+     .match *.edu 16 25
+   This would show results 16 through 25 matching any users with a hostmask
+   that ends with ".edu".
+
+::me
+###  %bme%b <text>
+   Performs an action on the party line. This appears as "* Wcc is leaving",
+   etc.
+
+::motd
+###  %bmotd%b %{+m}<message>%{-}
+   This redisplays the partyline Message Of The Day, which was shown when you
+   first joined the partyline.%{m) Inclue a message to set the motd.
+
+::newpass
+###  %bnewpass%b <password>
+   Changes your password on the bot. This is similar to the '/msg <bot> pass'
+   command, except you don't need to specify your old password.
+ 
+%(hub)%{+m}See also: chpass%{+n}, chsecpass
+
+::note
+###  %bnote%b <nickname[@bot]> <message>
+   Sends a private note to a user on the partyline. If that user is currently
+   logged in and not marked as away, the message will be received immediately.
+   Otherwise, it will be stored and displayed the next time that user joins the
+   partyline. To send a note to someone on a different bot, add "nick@bot" to
+   the nickname.
+ 
+See also: whom, notes
+
+::page
+### %bpage%b <number/off>
+   This allows you to slow down the number of lines the bot sends you at once
+   via the partyline. When enabled, any commands that send greater than the
+   specified number of lines will stop when that number is reached and wait for
+   you to type another command (or press enter) to continue. If you have too
+   many pending lines, you may be booted off the bot.
+
+::quit
+###  %bquit%b [comment]
+   This disconnects you from the partyline. If you specify a comment, it will
+   be displayed to other partyline users as you leave.
+
+::relay
+###  %brelay%b <botname>
+   Relays you via telnet to another bot, whether or not it is currently linked.
+   The local bot must, however, have a bot record for the bot you wish to
+   relay to. Typing .quit or "*bye*" on a line by itself will end the relay.
+ 
+See also: bots%{+n}, newleaf%{+a}, -bot
+
+::reload
+###  %breload%b
+   Reloads the bot's user file, discarding any changes made since the last
+   %b'%dsave'%b command or hourly user file save. Sharebots should probably
+   never do this.
+ 
+See also: save
+
+::restart
+###  %brestart%b
+   Restarts the Tcl interpreter, wipes all timers, reloads all modules, and
+   reloads the config file for the bot (which resets any changes made via the
+   %b'%dset'%b command and reloads any Tcl scripts your config loads). As with
+   the %b'%drehash'%b command, it also saves and reloads the user file from disk.
+ 
+See also: reload, save
+
+:hub:save
+###  %bsave%b
+   This makes the bot write its entire userfile to disk. This is useful if you
+   think the bot is about to crash or something, since the user file is only
+   written to disk about once an hour.
+ 
+See also: reload, backup
+
+::simul
+###  %bsimul%b <handle> <text>
+   This allows you to simulate the specified handle typing the given text.
+   For example:
+      %dsimul dweeb%d.quit
+   This would appear just as if "dweeb" typed "%dquit". This command will not
+   work unless eggdrop has simul enabled in the config file. 
+ 
+See also: su
+
+::strip
+###  %bstrip%b [modes]
+   Allows you to remove embedded 'attribute' codes your partyline output. Valid
+   options are:
+      %bb%b - remove all boldface codes
+      %bc%b - remove all color codes
+      %br%b - remove all reverse video codes
+      %bu%b - remove all underline codes
+      %ba%b - remove all ANSI codes
+      %bg%b - remove all ctrl-g (bell) codes
+   The mode can also be a modifier like '+c' or '-bu' or '+ru-c'. If
+   you omit modes, it will show your current setting.
+ 
+See also: fixcodes, color, echo
+%{+m}
+###  %bstrip%b <user> [modes]
+   Set the strip level of another user. A master can't set their own strip
+   flags without prefixing the modes with a '+' or '-'.
+
+::su
+###  %bsu%b <user>
+   Lets you assume the identity of another user. If you are a global owner,
+   this does not require a password. Otherwise, you will be asked for the
+   user's password. %b%dquit%b returns you to your original handle.
+
+:hub:trace
+###  %btrace%b <bot>
+   Sends out a trace signal to another bot. If/when the trace signal returns,
+   (and it should!) you will get an output that looks something like this:
+      Trace result -> Valis:Stonewall:NoBoty:SomeBoty
+   This is a list of the bots connected between you and the destination bot.
+   It should also return the time in seconds taken for the trace to occur.
+ 
+See also: bots, bottree, vbottree
+
+:hub:traffic
+###  %btraffic%b
+   Shows total and daily net traffic stats since the last %b'%drestart'%b.
+   Stats groups are IRC, Botnet, Partyline, Transfer.mod and Misc.
+ 
+%{+m}See also: restart
+
+::whoami
+###  %bwhoami%b
+   Shows your current handle and to what bot you are connected.
+ 
+See also: whom
+
+::end

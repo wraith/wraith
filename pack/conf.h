@@ -14,6 +14,8 @@
 #define S_AUTOAWAY	/*  yes		random autoaway/return on IRC 			*/
 #define S_AUTOLOCK      /*  yes         will lock channels upon certain coniditions     */
 #define S_DCCPASS	/*  yes		DCC command passwords 				*/
+#undef S_GARBLEHELP	/*  no		This will garble all help info, bloating binary *
+			 *		You may want this if you are paranoid.		*/
 #define S_GARBLESTRINGS	/*  yes		encrypt strings in binary			*/
 #define S_HIJACKCHECK   /*  yes		checks for a common fbsd process hijacker	*/
 #define S_LASTCHECK	/*  yes		checks every few seconds for logins with `last` */

@@ -22,16 +22,25 @@ tcluser.o userent.o userrec.o users.o
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
 
-doofus:
+blah:
 	@echo ""
-	@echo "Let's try this from the right directory..."
+	@echo "Use the build script."
 	@echo ""
-	@cd .. && $(MAKE)
 
 makesalt: makesalt.c
 	@echo -e "Compiling: \033[1mmakesalt\033[0m"
 	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makesalt.c -o makesalt
 	@$(STRIP) makesalt
+
+makehelp: makehelp.c ../pack/conf.h
+	@echo -e "Compiling: \033[1mmakehelp\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c -o makehelp
+	@$(STRIP) makehelp
+
+sorthelp: sorthelp.c
+	@echo -e "Compiling: \033[1msorthelp\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c -o sorthelp
+	@$(STRIP) sorthelp
 
 makesettings: makesettings.c
 	@echo -e "Compiling: \033[1mmakesettings\033[0m"
@@ -169,7 +178,7 @@ misc.o: misc.c stringfix main.h ../config.h ../pack/conf.h lang.h eggdrop.h flag
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
- stat.h help.h
+ stat.h
 misc_file.o: misc_file.c stringfix main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \

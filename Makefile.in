@@ -70,11 +70,11 @@ MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
 all:
 	@echo ""
-	@echo "Use the build script doofus."
+	@echo "Use the build script."
 	@echo ""
 
 cleanutils:
-	@rm -f src/stringfix src/makesettings src/makesalt
+	@rm -f src/stringfix src/makesettings src/makesalt src/sorthelp src/makehelp
 	@misc/dostrings l
 
 clean:  cleanutils
@@ -82,7 +82,7 @@ clean:  cleanutils
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ src/*~ key configure.temp .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h utctime
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h src/help.h utctime
 
 distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
@@ -142,6 +142,21 @@ salt: pack/salt.h makesalt stringfix
 	echo "done."; \
 	fi)
 
+sort: sorthelp
+	@cp -f misc/help.txt help.txt~
+	@(src/sorthelp misc/help.txt misc/help.txt || (cp -f help.txt~ misc/help.txt; echo "Sort failed, restoring backup."))
+	@rm -f help.txt~
+
+help: makehelp stringfix
+	@src/makehelp misc/help.txt src/help.h.tmp~
+	@(if [ ! -f src/help.h ]; then \
+	touch src/help.h; \
+	fi)
+	@src/stringfix src/help.h.tmp~ src/help.h~ 1
+	@(if test "x`diff -qurN src/help.h~ src/help.h`" != "x"; then \
+	cp -f src/help.h~ src/help.h; \
+	fi)
+
 config:
 	@$(modconf) modules-still-exist
 	@$(modconf) detect-modules
@@ -156,7 +171,7 @@ clean-modconfig:
 reconfig: clean-modconfig config
 
 
-stringfix: src/stringfix.c
+stringfix: src/stringfix.c pack/conf.h
 	+@cd src && ${MAKE_UTILS} stringfix
 
 makesalt: src/makesalt.c
@@ -165,7 +180,13 @@ makesalt: src/makesalt.c
 makesettings: src/makesettings.c
 	+@cd src && ${MAKE_UTILS} makesettings
 
-utils: makesettings makesalt stringfix
+makehelp: src/makehelp.c pack/conf.h
+	+@cd src && ${MAKE_UTILS} makehelp
+
+sorthelp: src/sorthelp.c
+	+@cd src && ${MAKE_UTILS} sorthelp
+
+utils: makesettings makesalt stringfix makehelp
 
 dostrings: stringfix
 	@misc/dostrings
@@ -180,7 +201,7 @@ dephub:
 	+@cd src/mod && $(MAKE_DEPEND) dephub
 	+@cd src/compat && $(MAKE_DEPEND) dephub
 
-general: dostrings salt packconf config
+general: dostrings salt packconf config help
 
 leaf:	general
 	@echo ""

@@ -10,7 +10,9 @@
 #include "conf.h"
 
 #define WTF 16384
-
+#ifdef S_GARBLEHELP
+int help = 0;
+#endif /* S_GARBLEHELP */
 #ifdef S_GARBLESTRINGS
 void garble(char **inptr, char **outptr)
 {
@@ -81,7 +83,12 @@ void garble(char **inptr, char **outptr)
       out += 4;
       *out = 0;
     }
-    sprintf(*outptr, "degarble(%d,\"%s\")", chars, obuf);
+#ifdef S_GARBLEHELP
+    if (help)
+      sprintf(*outptr, "%d,\"%s\"", chars, obuf);
+    else
+#endif /* S_GARBLEHELP */
+      sprintf(*outptr, "degarble(%d,\"%s\")", chars, obuf);
     *outptr += strlen(*outptr);
     in = p + 2;
   } else {
@@ -138,8 +145,12 @@ int main(int argc, char *argv[0])
   int insize;
   char *buf;
 
-  if (argc != 3)
+  if (argc != 3 && argc != 4)
     return 1;
+#ifdef S_GARBLEHELP
+  if (argc == 4)
+    help = 1;
+#endif /* S_GARBLEHELP */
   if (!(f = fopen(argv[1], "r")))
     return 1;
   fseek(f, 0, SEEK_END);

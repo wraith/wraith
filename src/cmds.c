@@ -765,7 +765,7 @@ static void cmd_nohelp(struct userrec *u, int idx, char *par)
   char *buf = nmalloc(1);
   buf[0] = 0;
 
-  qsort(cmds, cmdi - 1, sizeof(mycmds), (int (*)()) &my_cmp);
+  qsort(cmds, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   
   for (i = 0; i < (cmdi - 1); i++) {
     int o, found = 0;
@@ -786,7 +786,7 @@ static void cmd_nohelp(struct userrec *u, int idx, char *par)
 static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100];
-  int fnd = 0, done = 0, o = 0, nowild = 0;
+  int fnd = 0, done = 0, nowild = 0;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   char *fcats, temp[100], buf[2046], match[20];
 
@@ -805,8 +805,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   }
   if (!nowild)
     dprintf(idx, STR("Showing help topics matching '%s' for flags: (%s)\n"), match, flg);
-  o = cmdi - 1;  
-  qsort(cmds, o, sizeof(mycmds), (int (*)()) &my_cmp);
+  qsort(cmds, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   buf[0] = 0;
   /* even if we have nowild, we loop to conserve code/space */
   while (!done) {
@@ -817,15 +816,21 @@ static void cmd_help(struct userrec *u, int idx, char *par)
     if (!flag[0]) 
       done = 1;
 
-    for (n = 0; n < o ; n++) { /* loop each command */
-      if (!flagrec_ok(&cmds[n].flags, &fr) || !wild_match(match,cmds[n].name))
+    for (n = 0; n < cmdi; n++) { /* loop each command */
+      if (!flagrec_ok(&cmds[n].flags, &fr) || !wild_match(match, cmds[n].name))
         continue;
       fnd++;
       if (nowild) {
-        dprintf(idx, STR("Showing you help for '%s':"), match);
+        flg[0] = 0;
+        build_flags(flg, &(cmds[n].flags), NULL);
+        dprintf(idx, STR("Showing you help for '%s' (%s):"), match, flg);
         for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++) {
           if (!egg_strcasecmp(match, help[hi].cmd)) {
+#ifdef S_GARBLEHELP
+            showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
+#else /* !S_GARBLEHELP */
             showhelp(idx, &fr, help[hi].desc);
+#endif /* S_GARBLEHELP */
           }
         }
         done = 1;
