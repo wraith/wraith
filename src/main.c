@@ -593,15 +593,16 @@ void show_help()
 
 
 #ifdef LEAF
-#define PARSE_FLAGS "cedghnstvDEGP"
+#define PARSE_FLAGS "cedghnstvDEGLP"
 #endif /* LEAF */
 #ifdef HUB
 #define PARSE_FLAGS "edghnstvDEG"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "edhgntDEGv"
+char *confdir();
 static void dtx_arg(int argc, char *argv[])
 {
-  int i;
+  int i, localhub_pid = 0;
   char *p = NULL, *p2 = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i))
@@ -691,12 +692,28 @@ static void dtx_arg(int argc, char *argv[])
         break; /* this should never be reached */
       }
 #ifdef LEAF
-      case 'P':
-        if (getppid() != atoi(argv[optind]))
-          exit(0);
-        else {
-          sdprintf(STR("Updating..."));
+      case 'L':
+      {
+        p = argv[optind];
+        if (p && p[0]) {
+          FILE *fp;
+          char buf2[DIRMAX], s[11];
+
+          egg_snprintf(buf2, sizeof buf2, "%s/.../.pid.%s", confdir(), p);
+          if ((fp = fopen(buf2, "r"))) {
+            fgets(s, 10, fp);
+            localhub_pid = atoi(s);
+            fclose(fp);
+            /* printf("LOCALHUB PID: %d\n", localhub_pid); */
+          }
         }
+        break;
+      }
+      case 'P':	
+        if (atoi(argv[optind]) != localhub_pid)
+          exit(1);
+        else
+          sdprintf(STR("Updating..."));
         localhub = 1;
         updating = 1;
         break;

@@ -25,7 +25,7 @@ extern tcl_timer_t	 *timer, *utimer;
 extern int		 dcc_total, remote_boots, backgrd, 
 			 do_restart, conmask, must_be_owner,
 			 strict_host, quiet_save, cfg_count,
-			 server_lag, egg_numver;
+			 server_lag, egg_numver, localhub;
 
 extern unsigned long	 otraffic_irc, otraffic_irc_today,
 			 itraffic_irc, itraffic_irc_today,
@@ -958,6 +958,10 @@ static void cmd_match(struct userrec *u, int idx, char *par)
 static void cmd_update(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", STR("#%s# update %s"), dcc[idx].nick, par);
+#ifdef LEAF
+  if (!localhub)
+    dprintf(idx, STR("Please use this command on the first listed in the conf for this user@box\n"));
+#endif /* LEAF */
   if (!par[0])
     dprintf(idx, STR("Usage: update <binname>\n"));
   updatebin(idx, par, 0);

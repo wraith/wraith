@@ -1333,6 +1333,7 @@ int updatebin (int idx, char *par, int autoi)
   module_entry *me;
 #endif /* LEAF */
 
+  buf[0] = 0;
   path = newsplit(&par);
   par = path;
   if (!par[0]) {
@@ -1396,7 +1397,7 @@ int updatebin (int idx, char *par, int autoi)
     /* if localhub = 1, this is the spawn bot and controls
      * the spawning of new bots. */
 
-    sprintf(buf, "%s -P %d", buf, getpid());
+     sprintf(buf, "%s -L %s -P %d", buf, botnetnick, getpid());
   } 
 #endif /* LEAF */
 
@@ -1409,16 +1410,16 @@ int updatebin (int idx, char *par, int autoi)
   listen_all(my_port, 1); //close the listening port...
   usleep(5000);
 #endif /* HUB */
+  putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
   if ((i = system(buf))) {
     if (idx)
       dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
-      putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)\n"), i);
+    putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)\n"), i);
     return i;
 
   } else {
-
 #ifdef LEAF
-    if (!autoi && !localhub) {
+    if (!autoi && localhub) {
       /* let's drop the server connection ASAP */
       if ((me = module_find("server", 0, 0))) {
         Function *func = me->funcs;
