@@ -16,10 +16,10 @@ DISTRIB = @PACKNAME@-@VERSION@
 LEAFEXEC = leaf
 HUBEXEC = hub
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
-EXCLUDES = pack/salt.h pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
+EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
            config.cache config.log config.status config.h lush.h stamp.* misc/.cvsignore src/compat/.cvsignore \
            src/mod/dns.mod/.cvsignore src/mod/.cvsignore src/.cvsignore .cvsignore misc/commit misc/fstrings \
-           misc/plainh misc/grep misc/cp.sh src/settings.c src/salt.h
+           misc/plainh misc/grep misc/cp.sh src/settings.c src/salt.h 
 
 # defaults
 CC = @CC@
@@ -63,6 +63,9 @@ MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
 'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD) -g'
 
+MAKE_UTILS_NR = $(MAKE) 'CC=$(CC)' 'STRIP=touch' \
+'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD) -g'
+
 MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(DEBCFLAGS) $(CFLGS)'
 
@@ -74,7 +77,7 @@ all:
 	@echo ""
 
 cleanutils:
-	@rm -f src/stringfix src/makesettings src/makesalt src/sorthelp src/makehelp
+	@rm -f src/stringfix src/makesettings src/sorthelp src/makehelp
 	@misc/dostrings l
 
 clean:  cleanutils
@@ -87,7 +90,7 @@ clean:  cleanutils
 distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h stamp.*
-	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
+	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan src/salt.h.tmp src/conf.h
 
 
 distrib: clean clean-modconfig
@@ -129,16 +132,14 @@ packconf: makesettings pack/pack.cfg
 	cp -f src/settings.c~ src/settings.c; \
 	fi)
 
-
-salt: makesalt stringfix
-	@src/makesalt
+salt: packconf stringfix
 	@(if [ ! -f src/salt.h ]; then \
 	touch src/salt.h; \
 	fi)
-	@src/stringfix pack/salt.h src/salt.h~
+	@src/stringfix src/salt.h.tmp src/salt.h~
 	@(if test "x`diff -qurN src/salt.h~ src/salt.h`" != "x"; then \
 	echo -n "[*] Encrypting salts..."; \
-	src/stringfix pack/salt.h src/salt.h; \
+	src/stringfix src/salt.h.tmp src/salt.h; \
 	echo "done."; \
 	fi)
 
@@ -153,7 +154,7 @@ sort: sorthelp
 	@(src/sorthelp misc/help.txt misc/help.txt || (cp -f help.txt~ misc/help.txt; echo "Sort failed, restoring backup."))
 	@rm -f help.txt~
 
-help: makehelp stringfix
+help: packconf makehelp stringfix
 	@src/makehelp misc/help.txt src/help.h.tmp~
 	@(if [ ! -f src/help.h ]; then \
 	touch src/help.h; \
@@ -177,22 +178,19 @@ clean-modconfig:
 reconfig: clean-modconfig config
 
 
-stringfix: src/stringfix.c pack/conf.h
+stringfix: packconf src/stringfix.c pack/pack.cfg
 	+@cd src && ${MAKE_UTILS} stringfix
-
-makesalt: src/makesalt.c
-	+@cd src && ${MAKE_UTILS} makesalt
 
 makesettings: src/makesettings.c
 	+@cd src && ${MAKE_UTILS} makesettings
 
-makehelp: src/makehelp.c pack/conf.h
+makehelp: packconf src/makehelp.c
 	+@cd src && ${MAKE_UTILS} makehelp
 
 sorthelp: src/sorthelp.c
 	+@cd src && ${MAKE_UTILS} sorthelp
 
-utils: makesettings makesalt stringfix makehelp
+utils: makesettings stringfix makehelp
 
 dostrings: stringfix
 	@misc/dostrings
@@ -207,7 +205,7 @@ dephub:
 	+@cd src/mod && $(MAKE_DEPEND) dephub
 	+@cd src/compat && $(MAKE_DEPEND) dephub
 
-general: dostrings salt packconf config help
+general: makesettings packconf salt help dostrings config
 
 leaf:	general
 	@echo ""

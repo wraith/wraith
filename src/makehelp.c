@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include "conf.h"
 
 char *replace(char *string, char *oldie, char *newbie)
 {

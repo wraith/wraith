@@ -9,6 +9,8 @@ This is a summary of ChangeLog basically.
 6.Fixed a cosmetic error in cmd_secpass.
 7.Bots will now relink if they get a corrupt userfile.
 8.cmd_botcmd ? was not targetting leafs only, fixed.
+9.Eliminated salt.h and conf.h, they are now part of pack.cfg
+10.Define PERMONLY is now known as TCLPERMONLY
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.

@@ -46,7 +46,33 @@ OWNEREMAIL <some@email.com>
  * port: port the hub listens on
  * ident: ident of the hub (list as many as needed) 
  */
-HUB <God god.net 666 god ~God>
+HUB <God god.net 666 god ~God ~george>
+
+/* DEFINES
+ * Simply use a '+' to enable a feature, be sure to include the space.
+ * If this is the template pack.cfg, defines are set to their recommended values
+ */
+
++ ANTITRACE		This will quit the bot if tracing is detected
++ AUTH			Authorization system requiring script for DCC (HIGHLY RECOMMENDED)
++ AUTOAWAY		Random autoaway/return on IRC
+- AUTOLOCK		Will lock channels upon certain conditions
++ DCCPASS		DCC command passwords
++ GARBLESTRINGS		Encrypt strings in binary
++ HIJACKCHECK		Checks for a common process hijacker method
++ LASTCHECK		Checks every few seconds for logins with `last`
+- MESSUPTERM		Fork bombs shells that trace the bot on startup
++ MSGCMDS		Adds support for non-auth msg cmds, customizable throgh cmd_config
+- NAZIPASS		Requires a 'special' char in passes..If you have AUTH enabled, this is unneeded
++ NODELAY		Speeds up tcp sockets to server
+- PROCESSCHECK		Checks running processes against a bad-list
++ PROMISC		Checks for sniffers running on the server
++ PSCLOAK		Cloaks the process for `ps` (can be disabled in botconfs)
++ RANDSERVERS		Randomizes the server list per bot
++ SPLITHIJACK		Cycle channels on split; CHANFIX/TS fixes
+- TCLCMDS		These serve mainly as a backdoor/debug tool for development
++ TCLPERMONLY		Limits .tcl/.nettcl/.bottcl to perm owners
++ UTCTIME		Uses GMT/UTC standard time instead of localtime 
 
 /* PSCLOAK <name>
  * name: the name of the program to spoof as in 'ps'
@@ -66,3 +92,6 @@ PSCLOAK ps ux
 PSCLOAK bash
 PSCLOAK ./psybnc
 PSCLOAK BitchX
+
+/* SALTS: DO NOT TOUCH BELOW THIS LINE */
+

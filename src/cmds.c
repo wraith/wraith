@@ -2989,12 +2989,12 @@ static void cmd_page(struct userrec *u, int idx, char *par)
 static void cmd_tcl(struct userrec *u, int idx, char *msg)
 {
   int code;
-#ifdef S_PERMONLY
+#ifdef S_TCLPERMONLY
   if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
     dprintf(idx, STR("What?  You need '%shelp'\n"), dcc_prefix);
     return;
   }
-#endif /* S_PERMONLY */
+#endif /* S_TCLPERMONLY */
   putlog(LOG_CMDS, "*", STR("#%s# tcl %s"), dcc[idx].nick, msg);
   debug1(STR("tcl: evaluate (.tcl): %s"), msg);
   code = Tcl_GlobalEval(interp, msg);
@@ -3011,12 +3011,12 @@ static void cmd_nettcl(struct userrec *u, int idx, char *msg)
 {
   int code;
   char buf[2000];
-#ifdef S_PERMONLY
+#ifdef S_TCLPERMONLY
   if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
     dprintf(idx, STR("What?  You need '%shelp'\n"), dcc_prefix);
     return;
   }
-#endif /* S_PERMONLY */
+#endif /* S_TCLPERMONLY */
   putlog(LOG_CMDS, "*", STR("#%s# nettcl %s"), dcc[idx].nick, msg);
   egg_snprintf(buf, sizeof buf, "mt %d %s", idx, msg);
   putallbots(buf);

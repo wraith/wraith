@@ -30,7 +30,7 @@ distclean: clean
 
 #safety hash
 ../irc.o: .././irc.mod/irc.c ../../../src/mod/module.h \
- ../../../src/main.h ../../../config.h ../../../pack/conf.h \
+ ../../../src/main.h ../../../config.h ../../../src/conf.h \
  ../../../src/lang.h \
  ../../../src/eggdrop.h ../../../src/flags.h ../../../src/proto.h \
  ../../../lush.h ../../../src/misc_file.h ../../../src/cmdt.h \

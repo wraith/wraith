@@ -12,7 +12,7 @@
 #  include "config.h"
 #endif
 
-#include "pack/conf.h"
+#include "conf.h"
 #include "salt.h"
 
 #include "lush.h" /* We seem to need this everywhere... */

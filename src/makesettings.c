@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 
 #define strncpyz(_target, _source, _len)        do {                    \
         strncpy((_target), (_source), (_len) - 1);                      \
@@ -29,8 +33,23 @@ struct cfg_struct {
   char *owneremail;
   char *pscloak;
   int pscloakn;
+  char *salt1;
+  char *salt2;
+  char *defines;
+  int definesn;
 } cfg;
 
+void mallocstruct() {
+  cfg.owners = malloc(1);
+  cfg.hubs = malloc(1);
+  cfg.owneremail = malloc(1);
+  cfg.pscloak = malloc(1);
+  cfg.salt1 = malloc(1);
+  cfg.salt2 = malloc(1);
+  cfg.defines = malloc(1);
+  cfg.pscloakn = 0;
+  cfg.definesn = 0;
+}
 
 char *step_thru_file(FILE *fd)
 {
@@ -178,6 +197,34 @@ int validuserid (char * uid) {
   return 0;
 }
 
+char *randstring(int len)
+{
+  int j, r = 0;
+  static char s[100];
+
+  for (j = 0; j < len; j++) {
+    r = random();
+    if (r % 3 == 0)
+      s[j] = '0' + (random() % 10);
+    else if (r % 3 == 1)
+      s[j] = 'a' + (random() % 26);
+    else if (r % 3 == 2)
+      s[j] = 'A' + (random() % 26);
+  }
+  s[len] = '\0';
+  return s;
+}
+
+void dosalt(char *salt1, char *salt2) {
+  FILE *f = NULL;
+  f = fopen("src/salt.h.tmp", "w");
+  fprintf(f, "#define STR(x) x\n");
+  fprintf(f, "#define SALT1 STR(\"%s\")\n", salt1);
+  fprintf(f, "#define SALT2 STR(\"%s\")\n", salt2);
+  fflush(f);
+  fclose(f);
+}
+
 int loadconfig(char **argv) {
   FILE *f = NULL;
   char *buffer = NULL, *p = NULL;
@@ -219,6 +266,7 @@ int loadconfig(char **argv) {
           if (cfg.owners && strlen(cfg.owners))
             size += strlen(cfg.owners);
 
+          size += strlen(trim(p)) + 1;
           cfg.owners = realloc(cfg.owners, size);
           strcat(cfg.owners, trim(p));
           strcat(cfg.owners, ",");
@@ -227,6 +275,7 @@ int loadconfig(char **argv) {
           if (cfg.owneremail && strlen(cfg.owneremail))
             size += strlen(cfg.owneremail);
 
+          size += strlen(trim(p)) + 1;
           cfg.owneremail = realloc(cfg.owneremail, size);
           strcat(cfg.owneremail, trim(p));
           strcat(cfg.owneremail, ",");
@@ -235,6 +284,7 @@ int loadconfig(char **argv) {
           if (cfg.hubs && strlen(cfg.hubs))
             size += strlen(cfg.hubs);
 
+          size += strlen(trim(p)) + 1;
           cfg.hubs = realloc(cfg.hubs, size);
           strcat(cfg.hubs, trim(p));
           strcat(cfg.hubs, ",");
@@ -243,12 +293,35 @@ int loadconfig(char **argv) {
           if (cfg.pscloak && strlen(cfg.pscloak))
             size += strlen(cfg.pscloak);
 
+          size += strlen(trim(p)) + 1;
           cfg.pscloak = realloc(cfg.pscloak, size);
           strcat(cfg.pscloak, trim(p));
           strcat(cfg.pscloak, " ");
           cfg.pscloakn++;
           printf(".");
+        } else if (!strcmp(lcase(buffer), "-")) {
+        } else if (!strcmp(lcase(buffer), "+")) {
+          char *define;
+          if (cfg.defines && strlen(cfg.defines))
+            size += strlen(cfg.defines);
+          trim(p);
+          define = newsplit(&p);
+          size += strlen(define) + 1;
+          cfg.defines = realloc(cfg.defines, size);
+          strcat(cfg.defines, define);
+          strcat(cfg.defines, " ");
+          cfg.definesn++;
+          printf(".");
+        } else if (!strcmp(lcase(buffer), "salt1")) {
+          cfg.salt1 = malloc(strlen(trim(p)) + 1);
+          strcat(cfg.salt1, trim(p));
+          printf(".");
+        } else if (!strcmp(lcase(buffer), "salt2")) {
+          cfg.salt2 = malloc(strlen(trim(p)) + 1);
+          strcat(cfg.salt2, trim(p));
+          printf(".");
         } else {
+          printf("%s %s\n", buffer, p);
           printf(",");
         }
       }
@@ -256,6 +329,41 @@ int loadconfig(char **argv) {
     buffer = NULL;
   }
   if (f) fclose(f);
+  if (cfg.salt1 && cfg.salt2 && cfg.salt1[2] && cfg.salt2[2]) {
+    dosalt(cfg.salt1, cfg.salt2);
+  } else { /* we need to generate the SALTS */
+    char salt1[33], salt2[17];
+    time_t now = time(NULL);
+    salt1[0] = salt2[0] = 0;
+    srandom(now % (getpid() + getppid()));
+    printf("Creating Salts");
+    if ((f = fopen("pack/pack.cfg", "a")) == NULL) {
+      printf("Cannot created Salt-File.. aborting\n");
+      exit(1);
+    }
+    strcat(salt1, randstring(sizeof salt1));
+    strcat(salt2, randstring(sizeof salt2));
+    salt1[sizeof salt1] = salt2[sizeof salt2] = 0;
+    fprintf(f, "SALT1 %s\n", salt1);
+    fprintf(f, "SALT2 %s\n", salt2);
+    fflush(f);
+    fclose(f);
+    dosalt(salt1, salt2);
+  }
+  if (cfg.definesn && cfg.defines) {
+    char *def;
+    int i = 0;
+    f = fopen("src/conf.h", "w");
+    fprintf(f, "#ifndef _S_CONF_H\n#define _S_CONF_H\n\n");
+
+    for (i = 0; i < cfg.definesn; i++) {
+      def = newsplit(&cfg.defines);
+      fprintf(f, "#define S_%s\n", def);
+    }
+    fprintf(f, "\n#endif /* _S_CONF_H */\n");
+    fflush(f);
+    fclose(f);
+  }
   printf(" Success\n");
   return 1;
 }
@@ -366,6 +474,7 @@ return 1;
 }
 
 int main(int argc, char **argv) {
+  mallocstruct();
   if (!loadconfig(argv)) return 1;
 //  tellconfig();
   if (!checkconfig()) return 1;
