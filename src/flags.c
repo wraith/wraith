@@ -367,8 +367,6 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
       shareout(NULL, "a %s %s\n", u->handle, buffer);
     }
   }
-  if ((oldflags & FR_BOT) && (u->flags & USER_BOT))
-    set_user(&USERENTRY_BOTFL, u, (void *) fr->bot);
   /* Don't share bot attrs */
   if ((oldflags & FR_CHAN) && chname) {
     for (cr = u->chanrec; cr; cr = cr->next)
@@ -409,10 +407,7 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
   } else {
     fr->global = 0;
   }
-  if (fr->match & FR_BOT) {
-    fr->bot = (long) get_user(&USERENTRY_BOTFL, u);
-  } else
-    fr->bot = 0;
+  fr->bot = 0;
   if (fr->match & FR_CHAN) {
     if (fr->match & FR_ANYWH) {
       fr->chan = u->flags;
@@ -436,73 +431,6 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
     }
   }
 }
-
-static int botfl_unpack(struct userrec *u, struct user_entry *e)
-{
-  struct flag_record fr = {FR_BOT, 0, 0, 0};
-
-  break_down_flags(e->u.list->extra, &fr, NULL);
-  list_type_kill(e->u.list);
-  e->u.ulong = fr.bot;
-  return 1;
-}
-
-static int botfl_kill(struct user_entry *e)
-{
-  free(e);
-  return 1;
-}
-
-#ifdef HUB
-static int botfl_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
-{
-  char x[100] = "";
-  struct flag_record fr = {FR_BOT, 0, 0, 0};
-
-  fr.bot = e->u.ulong;
-  build_flags(x, &fr, NULL);
-  if (lfprintf(f, "--%s %s\n", e->type->name, x) == EOF)
-    return 0;
-  return 1;
-}
-#endif /* HUB */
-
-static int botfl_set(struct userrec *u, struct user_entry *e, void *buf)
-{
-  register long atr = ((long) buf & BOT_VALID);
-
-  if (!(u->flags & USER_BOT))
-    return 1;			/* Don't even bother trying to set the
-				   flags for a non-bot */
-
-  e->u.ulong = atr;
-  return 1;
-}
-
-static void botfl_display(int idx, struct user_entry *e, struct userrec *u)
-{
-  struct flag_record fr = {FR_BOT, 0, 0, 0};
-  char x[100] = "";
-
-  fr.bot = e->u.ulong;
-  build_flags(x, &fr, NULL);
-  dprintf(idx, "  BOT FLAGS: %s\n", x);
-}
-
-struct user_entry_type USERENTRY_BOTFL =
-{
-  0,				/* always 0 ;) */
-  0,
-  botfl_unpack,
-#ifdef HUB
-  botfl_write_userfile,
-#endif /* HUB */
-  botfl_kill,
-  def_get,
-  botfl_set,
-  botfl_display,
-  "BOTFL"
-};
 
 /* private returns 0 if user has access, and 1 if they dont because of +private
  * This function does not check if the user has "op" access, it only checks if the user is

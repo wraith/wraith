@@ -28,7 +28,6 @@ void init_userent()
   add_entry_type(&USERENTRY_PASS);
   add_entry_type(&USERENTRY_SECPASS);
   add_entry_type(&USERENTRY_HOSTS);
-  add_entry_type(&USERENTRY_BOTFL);
   add_entry_type(&USERENTRY_STATS);
   add_entry_type(&USERENTRY_ADDED);
   add_entry_type(&USERENTRY_MODIFIED);

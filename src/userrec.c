@@ -299,7 +299,7 @@ int write_user(struct userrec *u, FILE * f, int idx)
     cst = findchan_by_dname(ch->channel);
     if (cst) {
       if (idx >= 0) {
-	fr.match = (FR_CHAN | FR_BOT);
+	fr.match = FR_CHAN;
 	get_user_flagrec(dcc[idx].user, &fr, ch->channel);
       } 
       fr.match = FR_CHAN;

@@ -560,7 +560,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, int master, cha
   if (start > 1)
     dprintf(idx, "(%s %d)\n", MISC_SKIPPING, start - 1);
   if (strchr("+-&|", *mtch)) {
-    user.match = pls.match = FR_GLOBAL | FR_BOT | FR_CHAN;
+    user.match = pls.match = FR_GLOBAL | FR_CHAN;
     break_down_flags(mtch, &pls, &mns);
     mns.match = pls.match ^ (FR_AND | FR_OR);
     if (!mns.global && !mns.chan && !mns.bot) {
