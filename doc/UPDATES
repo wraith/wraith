@@ -10,6 +10,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Fixed DNS to timeout queries after 30 seconds, server socket after 40, and to parse EOF correctly.
 * Added some responses/cloaks
 * Fixed '+ban' not showing up in help system.
+* Fixed double cmd log with cmd_whom.
 
 1.2.1
 

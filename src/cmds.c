@@ -192,7 +192,6 @@ static void cmd_whom(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# whom %s", dcc[idx].nick, par);
 
   if (par[0] == '*' || !par[0]) {
-    putlog(LOG_CMDS, "*", "#%s# whom %s", dcc[idx].nick, par);
     answer_local_whom(idx, -1);
     return;
   }
