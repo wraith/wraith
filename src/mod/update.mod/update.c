@@ -441,7 +441,7 @@ void update_report(int idx, int details)
 }
 
 #ifdef HUB
-static void cmd_bupdate(struct userrec *u, int idx, char *par)
+static void cmd_bupdate(int idx, char *par)
 {
   int i;
 

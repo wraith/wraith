@@ -4,7 +4,7 @@
  *
  */
 
-static void cmd_fwd(struct userrec *u, int idx, char *par)
+static void cmd_fwd(int idx, char *par)
 {
   char *handle = NULL;
   struct userrec *u1 = NULL;
@@ -39,7 +39,7 @@ static void cmd_fwd(struct userrec *u, int idx, char *par)
   set_user(&USERENTRY_FWD, u1, par);
 }
 
-static void cmd_notes(struct userrec *u, int idx, char *par)
+static void cmd_notes(int idx, char *par)
 {
   char *fcn = NULL;
 
@@ -71,7 +71,7 @@ static void cmd_notes(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# notes %s %s", dcc[idx].nick, fcn, par);
 }
 
-static void cmd_note(struct userrec *u, int idx, char *par)
+static void cmd_note(int idx, char *par)
 {
   char handle[512] = "", *p = NULL;
   int echo;

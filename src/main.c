@@ -680,9 +680,9 @@ void share_init();
 void transfer_init();
 
 #ifndef CYGWIN_HACKS
-long *_start();
+int _start();
 int tracecheck_breakpoint() {
-  long *u = _start;
+  int *u = _start;
   return (*u == 0xCC);
 }
 #endif /* !CYGWIN_HACKS */

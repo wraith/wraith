@@ -27,7 +27,7 @@ void core_binds_init()
         BT_away = bind_table_add("away", 3, "sis", MATCH_MASK, BIND_STACKABLE);
         BT_bot = bind_table_add("bot", 3, "sss", MATCH_EXACT, 0);
         BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
-        BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_PARTIAL | MATCH_FLAGS, 0);
+        BT_dcc = bind_table_add("dcc", 2, "is", MATCH_PARTIAL | MATCH_FLAGS, 0);
         add_builtins("dcc", C_dcc);
         BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);
@@ -77,7 +77,7 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
     }
   }
 
-  x = check_bind_hits(BT_dcc, cmd, &fr, &hits, dcc[idx].user, idx, args);
+  x = check_bind_hits(BT_dcc, cmd, &fr, &hits, idx, args);
 
   if (hits != 1)
     putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);

@@ -202,7 +202,7 @@ static void tell_who(struct userrec *u, int idx, int chan)
 }
 #endif /* HUB */
 
-static void cmd_whom(struct userrec *u, int idx, char *par)
+static void cmd_whom(int idx, char *par)
 {
   if (par[0] == '*') {
     putlog(LOG_CMDS, "*", "#%s# whom %s", dcc[idx].nick, par);
@@ -242,7 +242,7 @@ static void cmd_whom(struct userrec *u, int idx, char *par)
    .config name value
    Set
  */
-static void cmd_config(struct userrec *u, int idx, char *par)
+static void cmd_config(int idx, char *par)
 {
   char *name = NULL;
   struct cfg_entry *cfgent = NULL;
@@ -286,7 +286,7 @@ static void cmd_config(struct userrec *u, int idx, char *par)
     dprintf(idx, "No such config entry\n");
     return;
   }
-  if (!isowner(u->handle)) {
+  if (!isowner(dcc[idx].nick)) {
     int no = 0;
     if (!egg_strcasecmp(name, "authkey"))
       no++;
@@ -328,7 +328,7 @@ static void cmd_config(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 }
 
-static void cmd_botconfig(struct userrec *u, int idx, char *par)
+static void cmd_botconfig(int idx, char *par)
 {
   struct userrec *u2 = NULL;
   char *p = NULL;
@@ -411,7 +411,7 @@ static void cmd_botconfig(struct userrec *u, int idx, char *par)
     dprintf(idx, "  %s: (not set)\n", cfgent->name);
 }
 
-static void cmd_cmdpass(struct userrec *u, int idx, char *par)
+static void cmd_cmdpass(int idx, char *par)
 {
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
@@ -452,7 +452,7 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
   if (pass[0]) {
     char epass[36] = "", tmp[256] = "";
 
-    if (!isowner(u->handle) && has_cmd_pass(cmd)) {
+    if (!isowner(dcc[idx].nick) && has_cmd_pass(cmd)) {
       putlog(LOG_MISC, "*", "%s attempted to change command password for %s - not perm owner", dcc[idx].nick, cmd);
       dprintf(idx, "Perm owners only.\n");
       return;
@@ -465,7 +465,7 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
       dprintf(idx, "Set command password for %s to '%s'\n", cmd, pass);
     set_cmd_pass(tmp, 1);
   } else {
-    if (!isowner(u->handle)) {
+    if (!isowner(dcc[idx].nick)) {
       putlog(LOG_MISC, "*", "%s attempted to remove command password for %s - not perm owner", dcc[idx].nick, cmd);
       dprintf(idx, "Perm owners only.\n");
       return;
@@ -478,12 +478,12 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 }
 
-static void cmd_lagged(struct userrec *u, int idx, char *par)
+static void cmd_lagged(int idx, char *par)
 {
   /* Lists botnet lag to *directly connected* bots */
   int i;
 
-  putlog(LOG_CMDS, "*", "#%s# lagged %s", u->handle, par);
+  putlog(LOG_CMDS, "*", "#%s# lagged %s", dcc[idx].nick, par);
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT) {
       dprintf(idx, "%9s - %li seconds\n", dcc[i].nick, (dcc[i].pingtime > 120) ? (now - dcc[i].pingtime) : dcc[i].pingtime);
@@ -492,7 +492,7 @@ static void cmd_lagged(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-static void cmd_me(struct userrec *u, int idx, char *par)
+static void cmd_me(int idx, char *par)
 {
   int i;
 
@@ -515,10 +515,10 @@ static void cmd_me(struct userrec *u, int idx, char *par)
 		  dcc[idx].u.chat->channel, par);
 }
 
-static void cmd_motd(struct userrec *u, int idx, char *par)
+static void cmd_motd(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# motd %s", dcc[idx].nick, par);
-  if (par[0] && (u->flags & USER_MASTER)) {
+  if (par[0] && (dcc[idx].user->flags & USER_MASTER)) {
     char *s = NULL;
     size_t size;
   
@@ -537,7 +537,7 @@ static void cmd_motd(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_about(struct userrec *u, int idx, char *par)
+static void cmd_about(int idx, char *par)
 {
   char c[80] = "";
 
@@ -573,7 +573,7 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   dprintf(idx, STR(" * $utfbot$u by $bwarknite$b and $bloslinux$b\n"));
 }
 
-static void cmd_addline(struct userrec *user, int idx, char *par)
+static void cmd_addline(int idx, char *par)
 {
   struct userrec *u = NULL;
   struct list_type *q = NULL;
@@ -588,7 +588,7 @@ static void cmd_addline(struct userrec *user, int idx, char *par)
 
   u = get_user_by_handle(userlist, par);
 
-  if (!u || (u && !whois_access(user, u))) {
+  if (!u || (u && !whois_access(dcc[idx].user, u))) {
     dprintf(idx, "No such user.\n");
     return;
   }
@@ -608,19 +608,19 @@ static void cmd_addline(struct userrec *user, int idx, char *par)
   free(outbuf);
 }
 
-static void cmd_away(struct userrec *u, int idx, char *par)
+static void cmd_away(int idx, char *par)
 {
   if (strlen(par) > 60)
     par[60] = 0;
   set_away(idx, par);
 }
 
-static void cmd_back(struct userrec *u, int idx, char *par)
+static void cmd_back(int idx, char *par)
 {
   not_away(idx);
 }
 
-static void cmd_newpass(struct userrec *u, int idx, char *par)
+static void cmd_newpass(int idx, char *par)
 {
   char *new = NULL, pass[MAXPASSLEN + 1] = "";
 
@@ -647,14 +647,14 @@ static void cmd_newpass(struct userrec *u, int idx, char *par)
   if (!goodpass(pass, idx, NULL))
     return;
 
-  set_user(&USERENTRY_PASS, u, pass);
+  set_user(&USERENTRY_PASS, dcc[idx].user, pass);
   dprintf(idx, "Changed your password to: %s\n", pass);
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
 }
 
-static void cmd_secpass(struct userrec *u, int idx, char *par)
+static void cmd_secpass(int idx, char *par)
 {
   char *new = NULL, pass[MAXPASSLEN + 1] = "";
 
@@ -677,7 +677,7 @@ static void cmd_secpass(struct userrec *u, int idx, char *par)
   }
   if (strlen(pass) > MAXPASSLEN)
     pass[MAXPASSLEN] = 0;
-  set_user(&USERENTRY_SECPASS, u, pass);
+  set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
   dprintf(idx, "Changed your secpass to: %s\n", pass);
 #ifdef HUB
   write_userfile(idx);
@@ -685,20 +685,20 @@ static void cmd_secpass(struct userrec *u, int idx, char *par)
 }
 
 #ifdef HUB
-static void cmd_bots(struct userrec *u, int idx, char *par)
+static void cmd_bots(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# bots", dcc[idx].nick);
   tell_bots(idx, 1);
 }
 
-static void cmd_downbots(struct userrec *u, int idx, char *par)
+static void cmd_downbots(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# downbots", dcc[idx].nick);
   tell_bots(idx, 0);
 }
 
 
-static void cmd_bottree(struct userrec *u, int idx, char *par)
+static void cmd_bottree(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# bottree", dcc[idx].nick);
   tell_bottree(idx);
@@ -710,7 +710,7 @@ int my_cmp (const mycmds *c1, const mycmds *c2)
   return strcmp (c1->name, c2->name);
 }
 
-static void cmd_nohelp(struct userrec *u, int idx, char *par)
+static void cmd_nohelp(int idx, char *par)
 {
   int i;
   char *buf = NULL;
@@ -746,7 +746,7 @@ findhelp(const char *cmd)
   return 0;
 }
 
-static void cmd_help(struct userrec *u, int idx, char *par)
+static void cmd_help(int idx, char *par)
 {
   char flg[100] = "", *fcats = NULL, temp[100] = "", buf[2046] = "", match[20] = "";
   int fnd = 0, done = 0, nowild = 0;
@@ -756,7 +756,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   fcats = temp;
 
   putlog(LOG_CMDS, "*", "#%s# help %s", dcc[idx].nick, par);
-  get_user_flagrec(u, &fr, NULL);
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
   build_flags(flg, &fr, NULL);
   if (!par[0]) {
     sprintf(match, "*");
@@ -833,7 +833,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   dprintf(idx, "Some commands may require you to '%sconsole #chan' to a chan you have flags on first.\n", settings.dcc_prefix);
 }
 
-static void cmd_addlog(struct userrec *u, int idx, char *par)
+static void cmd_addlog(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# addlog %s", dcc[idx].nick, par);
   putlog(LOG_MISC, "*", "%s: %s", dcc[idx].nick, par);
@@ -845,7 +845,7 @@ static void cmd_addlog(struct userrec *u, int idx, char *par)
 }
 
 #ifdef HUB
-static void cmd_who(struct userrec *u, int idx, char *par)
+static void cmd_who(int idx, char *par)
 {
   int i;
 
@@ -880,7 +880,7 @@ static void cmd_who(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-static void cmd_whois(struct userrec *u, int idx, char *par)
+static void cmd_whois(int idx, char *par)
 {
   if (!par[0]) {
     dprintf(idx, "Usage: whois <handle>\n");
@@ -918,17 +918,17 @@ static void match(struct userrec *u, int idx, char *par, int isbot)
   tell_users_match(idx, s, start, limit, chname, isbot);
 }
 
-static void cmd_matchbot(struct userrec *u, int idx, char *par)
+static void cmd_matchbot(int idx, char *par)
 {
-  match(u, idx, par, 1);
+  match(dcc[idx].user, idx, par, 1);
 }
 
-static void cmd_match(struct userrec *u, int idx, char *par)
+static void cmd_match(int idx, char *par)
 {
-  match(u, idx, par, 0);
+  match(dcc[idx].user, idx, par, 0);
 }
 
-static void cmd_update(struct userrec *u, int idx, char *par)
+static void cmd_update(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# update %s", dcc[idx].nick, par);
 #ifdef LEAF
@@ -940,15 +940,16 @@ static void cmd_update(struct userrec *u, int idx, char *par)
   updatebin(idx, par, 0);
 }
 
-static void cmd_uptime(struct userrec *u, int idx, char *par)
+static void cmd_uptime(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# uptime", dcc[idx].nick);
   tell_verbose_uptime(idx);
 }
 
-static void cmd_userlist(struct userrec *u, int idx, char *par)
+static void cmd_userlist(int idx, char *par)
 {
   int cnt = 0, tt = 0;
+  struct userrec *u = NULL;
 
   putlog(LOG_CMDS, "*", "#%s# userlist", dcc[idx].nick);
 
@@ -1080,13 +1081,13 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
   dprintf(idx, "Total users: %d\n", tt);
 }
 
-static void cmd_channels(struct userrec *u, int idx, char *par) {
+static void cmd_channels(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# channels %s", dcc[idx].nick, par);
-  if (par[0] && (u->flags & USER_MASTER)) {
+  if (par[0] && (dcc[idx].user->flags & USER_MASTER)) {
     struct userrec *user = NULL;
 
     user = get_user_by_handle(userlist, par);
-    if (user && whois_access(u, user)) {
+    if (user && whois_access(dcc[idx].user, user)) {
       show_channels(idx, par);
     } else  {
       dprintf(idx, "There is no user by that name.\n");
@@ -1095,7 +1096,7 @@ static void cmd_channels(struct userrec *u, int idx, char *par) {
       show_channels(idx, NULL);
   }
 
-  if ((u->flags & USER_MASTER) && !(par && par[0]))
+  if ((dcc[idx].user->flags & USER_MASTER) && !(par && par[0]))
     dprintf(idx, "You can also %schannels <user>\n", settings.dcc_prefix);
 }
 
@@ -1107,9 +1108,9 @@ void share_report(int, int);
 void update_report(int, int);
 void notes_report(int, int);
 
-static void cmd_status(struct userrec *u, int idx, char *par)
+static void cmd_status(int idx, char *par)
 {
-  int atr = u ? u->flags : 0, all = 0;
+  int atr = dcc[idx].user ? dcc[idx].user->flags : 0, all = 0;
 
   if (!egg_strcasecmp(par, "all")) {
     if (!(atr & USER_MASTER)) {
@@ -1137,13 +1138,13 @@ static void cmd_status(struct userrec *u, int idx, char *par)
   notes_report(idx, all);
 }
 
-static void cmd_dccstat(struct userrec *u, int idx, char *par)
+static void cmd_dccstat(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# dccstat", dcc[idx].nick);
   tell_dcc(idx);
 }
 
-static void cmd_boot(struct userrec *u, int idx, char *par)
+static void cmd_boot(int idx, char *par)
 {
   char *who = NULL;
   int i, ok = 0;
@@ -1159,7 +1160,7 @@ static void cmd_boot(struct userrec *u, int idx, char *par)
 
     splitcn(whonick, who, '@', HANDLEN + 1);
     if (!egg_strcasecmp(who, conf.bot->nick)) {
-      cmd_boot(u, idx, whonick);
+      cmd_boot(idx, whonick);
       return;
     }
       i = nextbot(who);
@@ -1182,7 +1183,7 @@ static void cmd_boot(struct userrec *u, int idx, char *par)
         dprintf(idx, "You can't boot a bot owner.\n");
         return;
       }
-      if (u2 && (u2->flags & USER_MASTER) && !(u && (u->flags & USER_MASTER))) {
+      if (u2 && (u2->flags & USER_MASTER) && !(dcc[idx].user && (dcc[idx].user->flags & USER_MASTER))) {
         dprintf(idx, "You can't boot a bot master.\n");
         return;
       }
@@ -1195,7 +1196,7 @@ static void cmd_boot(struct userrec *u, int idx, char *par)
     dprintf(idx, "Who?  No such person on the party line.\n");
 }
 
-static void cmd_console(struct userrec *u, int idx, char *par)
+static void cmd_console(int idx, char *par)
 {
   char *nick = NULL, s[2] = "", s1[512] = "";
   int dest = 0, i, ok = 0, pls, md;
@@ -1209,7 +1210,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
 	    maskname(dcc[idx].u.chat->con_flags));
     return;
   }
-  get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
+  get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
   strcpy(s1, par);
   nick = newsplit(&par);
   /* Don't remove '+' as someone couldn't have '+' in CHANMETA cause
@@ -1240,7 +1241,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
       return;
     }
 
-    get_user_flagrec(u, &fr, nick);
+    get_user_flagrec(dcc[idx].user, &fr, nick);
 
     if (strcmp(nick, "*") && private(fr, findchan_by_dname(nick), PRIV_OP)) {
       dprintf(idx, "Invalid console channel: %s.\n", nick);
@@ -1309,7 +1310,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
   console_dostore(dest);
 }
 
-static void cmd_date(struct userrec *u, int idx, char *par)
+static void cmd_date(int idx, char *par)
 {
   char date[50] = "";
   time_t hub;
@@ -1327,7 +1328,7 @@ static void cmd_date(struct userrec *u, int idx, char *par)
 }
 
 #ifdef HUB
-static void cmd_chhandle(struct userrec *u, int idx, char *par)
+static void cmd_chhandle(int idx, char *par)
 {
   char hand[HANDLEN + 1] = "", newhand[HANDLEN + 1] = "";
   int atr = u ? u->flags : 0, atr2;
@@ -1377,7 +1378,7 @@ static void cmd_chhandle(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-static void cmd_handle(struct userrec *u, int idx, char *par)
+static void cmd_handle(int idx, char *par)
 {
   char oldhandle[HANDLEN + 1] = "", newhandle[HANDLEN + 1] = "";
   size_t i;
@@ -1401,7 +1402,7 @@ static void cmd_handle(struct userrec *u, int idx, char *par)
     dprintf(idx, "Hey!  That's MY name!\n");
   } else {
     strncpyz(oldhandle, dcc[idx].nick, sizeof oldhandle);
-    if (change_handle(u, newhandle)) {
+    if (change_handle(dcc[idx].user, newhandle)) {
       putlog(LOG_CMDS, "*", "#%s# handle %s", oldhandle, newhandle);
       dprintf(idx, "Okay, changed.\n");
     } else
@@ -1413,7 +1414,7 @@ static void cmd_handle(struct userrec *u, int idx, char *par)
 }
 
 #ifdef HUB
-static void cmd_chpass(struct userrec *u, int idx, char *par)
+static void cmd_chpass(int idx, char *par)
 {
   char *handle = NULL, *new = NULL, pass[MAXPASSLEN] = "";
   int atr = u ? u->flags : 0, l;
@@ -1468,7 +1469,7 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_chsecpass(struct userrec *u, int idx, char *par)
+static void cmd_chsecpass(int idx, char *par)
 {
   char *handle = NULL, *new = NULL, pass[MAXPASSLEN + 1] = "";
   int atr = u ? u->flags : 0, l;
@@ -1521,7 +1522,7 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_botcmd(struct userrec *u, int idx, char *par)
+static void cmd_botcmd(int idx, char *par)
 {
   tand_t *tbot = NULL;
   int cnt = 0, rleaf = -1, tbots = 0, found = 0;
@@ -1569,7 +1570,7 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
   return;
 }
 
-static void cmd_hublevel(struct userrec *u, int idx, char *par)
+static void cmd_hublevel(int idx, char *par)
 {
   char *handle = NULL, *level = NULL;
   struct bot_addr *bi = NULL, *obi = NULL;
@@ -1602,7 +1603,7 @@ static void cmd_hublevel(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 }
 
-static void cmd_uplink(struct userrec *u, int idx, char *par)
+static void cmd_uplink(int idx, char *par)
 {
   char *handle = NULL, *uplink = NULL;
   struct bot_addr *bi = NULL, *obi = NULL;
@@ -1641,7 +1642,7 @@ static void cmd_uplink(struct userrec *u, int idx, char *par)
 }
 
 
-static void cmd_chaddr(struct userrec *u, int idx, char *par)
+static void cmd_chaddr(int idx, char *par)
 {
   int telnet_port = 3333, relay_port = 3333;
 #ifdef USE_IPV6
@@ -1725,7 +1726,7 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-static void cmd_comment(struct userrec *u, int idx, char *par)
+static void cmd_comment(int idx, char *par)
 {
   char *handle = NULL;
   struct userrec *u1 = NULL;
@@ -1759,7 +1760,7 @@ static void cmd_comment(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 }
 
-static void cmd_randstring(struct userrec *u, int idx, char *par)
+static void cmd_randstring(int idx, char *par)
 {
   int len;
 
@@ -1782,7 +1783,7 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
     dprintf(idx, "Too long, must be <= 300\n");
 }
 
-static void cmd_md5(struct userrec *u, int idx, char *par)
+static void cmd_md5(int idx, char *par)
 {
   if (!par[0]) {
     dprintf(idx, "Usage: md5 <string>\n");
@@ -1793,7 +1794,7 @@ static void cmd_md5(struct userrec *u, int idx, char *par)
   dprintf(idx, "MD5(%s) = %s\n", par, MD5(par));
 }
 
-static void cmd_sha1(struct userrec *u, int idx, char *par)
+static void cmd_sha1(int idx, char *par)
 {
   if (!par[0]) {
     dprintf(idx, "Usage: sha1 <string>\n");
@@ -1804,7 +1805,7 @@ static void cmd_sha1(struct userrec *u, int idx, char *par)
   dprintf(idx, "SHA1(%s) = %s\n", par, SHA1(par));
 }
 
-static void cmd_conf(struct userrec *u, int idx, char *par)
+static void cmd_conf(int idx, char *par)
 {
   char *cmd = NULL;
 #ifdef LEAF
@@ -1946,7 +1947,7 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_encrypt(struct userrec *u, int idx, char *par)
+static void cmd_encrypt(int idx, char *par)
 {
   char *key = NULL, *buf = NULL;
 
@@ -1970,7 +1971,7 @@ static void cmd_encrypt(struct userrec *u, int idx, char *par)
   free(buf);
 }
 
-static void cmd_decrypt(struct userrec *u, int idx, char *par)
+static void cmd_decrypt(int idx, char *par)
 {
   char *key = NULL, *buf = NULL;
 
@@ -1994,16 +1995,16 @@ static void cmd_decrypt(struct userrec *u, int idx, char *par)
   free(buf);
 }
 
-static void cmd_restart(struct userrec *, int, char *) __attribute__((noreturn));
+static void cmd_restart(int, char *) __attribute__((noreturn));
 
-static void cmd_restart(struct userrec *u, int idx, char *par)
+static void cmd_restart(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# restart", dcc[idx].nick);
   restart(idx);
 }
 
 #ifdef HUB
-static void cmd_reload(struct userrec *u, int idx, char *par)
+static void cmd_reload(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# reload", dcc[idx].nick);
   dprintf(idx, "Reloading user file...\n");
@@ -2011,7 +2012,7 @@ static void cmd_reload(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-static void cmd_die(struct userrec *u, int idx, char *par)
+static void cmd_die(int idx, char *par)
 {
   char s1[1024] = "", s2[1024] = "";
 
@@ -2028,7 +2029,7 @@ static void cmd_die(struct userrec *u, int idx, char *par)
   kill_bot(s1, s2);
 }
 
-static void cmd_debug(struct userrec *u, int idx, char *par)
+static void cmd_debug(int idx, char *par)
 {
   char *cmd = NULL;
 
@@ -2051,7 +2052,7 @@ static void cmd_debug(struct userrec *u, int idx, char *par)
 #endif /* !CYGWIN_HACKS */
 }
 
-static void cmd_timers(struct userrec *u, int idx, char *par)
+static void cmd_timers(int idx, char *par)
 {
   int *ids = 0, n = 0, called = 0;
   egg_timeval_t howlong, trigger_time, mynow, diff;
@@ -2075,7 +2076,7 @@ static void cmd_timers(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_simul(struct userrec *u, int idx, char *par)
+static void cmd_simul(int idx, char *par)
 {
   char *nick = NULL;
   int i, ok = 0;
@@ -2103,7 +2104,7 @@ static void cmd_simul(struct userrec *u, int idx, char *par)
 }
 
 #ifdef HUB
-static void cmd_link(struct userrec *u, int idx, char *par)
+static void cmd_link(int idx, char *par)
 {
   char *s = NULL;
   int i;
@@ -2130,7 +2131,7 @@ static void cmd_link(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-static void cmd_unlink(struct userrec *u, int idx, char *par)
+static void cmd_unlink(int idx, char *par)
 {
   int i;
   char *bot = NULL;
@@ -2159,7 +2160,7 @@ static void cmd_unlink(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_relay(struct userrec *u, int idx, char *par)
+static void cmd_relay(int idx, char *par)
 {
   if (!par[0]) {
     dprintf(idx, "Usage: relay <bot>\n");
@@ -2170,7 +2171,7 @@ static void cmd_relay(struct userrec *u, int idx, char *par)
 }
 
 #ifdef HUB
-static void cmd_save(struct userrec *u, int idx, char *par)
+static void cmd_save(int idx, char *par)
 {
   char buf[100] = "";
   int i = 0;
@@ -2192,7 +2193,7 @@ static void cmd_save(struct userrec *u, int idx, char *par)
   dprintf(idx, "%s\n", buf);
 }
 
-static void cmd_backup(struct userrec *u, int idx, char *par)
+static void cmd_backup(int idx, char *par)
 {
   
   putlog(LOG_CMDS, "*", "#%s# backup", dcc[idx].nick);
@@ -2203,7 +2204,7 @@ static void cmd_backup(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 }
 
-static void cmd_trace(struct userrec *u, int idx, char *par)
+static void cmd_trace(int idx, char *par)
 {
   int i;
   char x[NOTENAMELEN + 11] = "", y[11] = "";
@@ -2404,7 +2405,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, flag_t chflags, flag_t 
   return chflags;
 }
 
-static void cmd_chattr(struct userrec *u, int idx, char *par)
+static void cmd_chattr(int idx, char *par)
 {
   char *hand = NULL, *arg = NULL, *tmpchg = NULL, *chg = NULL, work[1024] = "";
   struct chanset_t *chan = NULL;
@@ -2478,7 +2479,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
   user.match = FR_GLOBAL;
   if (chan)
     user.match |= FR_CHAN;
-  get_user_flagrec(u, &user, chan ? chan->dname : 0);
+  get_user_flagrec(dcc[idx].user, &user, chan ? chan->dname : 0);
   get_user_flagrec(u2, &ouser, chan ? chan->dname : 0);
   if (chan && !glob_master(user) && !chan_master(user)) {
     dprintf(idx, "You do not have channel master privileges for channel %s.\n",
@@ -2515,7 +2516,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
       pls.global &= ~USER_PARTY;
     }
     
-    if (!isowner(u->handle)) {
+    if (!isowner(dcc[idx].nick)) {
       if (pls.global & USER_HUBA)
         putlog(LOG_MISC, "*", "%s attempted to give %s hub connect access", dcc[idx].nick, u2->handle);
       if (mns.global & USER_HUBA)
@@ -2540,7 +2541,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
       pls.chan &= ~(USER_HUBA | USER_CHUBA);
       mns.chan &= ~(USER_HUBA | USER_CHUBA);
     }
-    if (!glob_owner(user) && !isowner(u->handle)) {
+    if (!glob_owner(user) && !isowner(dcc[idx].nick)) {
       pls.global &= ~(USER_CHUBA | USER_OWNER | USER_MASTER);
       mns.global &= ~(USER_CHUBA | USER_OWNER | USER_MASTER);
 
@@ -2549,7 +2550,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
 	mns.chan &= ~USER_OWNER;
       }
     }
-    if (chan && !chan_owner(user) && !glob_owner(user) && !isowner(u->handle)) {
+    if (chan && !chan_owner(user) && !glob_owner(user) && !isowner(dcc[idx].nick)) {
       pls.chan &= ~USER_MASTER;
       mns.chan &= ~USER_MASTER;
       if (!chan_master(user) && !glob_master(user)) {
@@ -2616,12 +2617,12 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 }
 
-static void cmd_chat(struct userrec *u, int idx, char *par)
+static void cmd_chat(int idx, char *par)
 {
   char *arg = NULL;
   int newchan, oldchan;
 
-  if (!(u->flags & USER_PARTY)) {
+  if (!(dcc[idx].user->flags & USER_PARTY)) {
     dprintf(idx, "You don't have partyline access\n");
     return;
   }
@@ -2750,10 +2751,10 @@ int exec_str(int idx, char *cmd) {
   return 0;
 }
 
-static void cmd_exec(struct userrec *u, int idx, char *par) {
+static void cmd_exec(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# exec %s", dcc[idx].nick, par);
 #ifdef LEAF
-  if (!isowner(u->handle)) {
+  if (!isowner(dcc[idx].nick)) {
     putlog(LOG_WARN, "*", "%s attempted 'exec' %s", dcc[idx].nick, par);
     dprintf(idx, "exec is only available to permanent owners on leaf bots\n");
     return;
@@ -2765,13 +2766,13 @@ static void cmd_exec(struct userrec *u, int idx, char *par) {
     dprintf(idx, "Exec failed\n");
 }
 
-static void cmd_w(struct userrec *u, int idx, char *par) {
+static void cmd_w(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# w", dcc[idx].nick);
   if (!exec_str(idx, "w"))
     dprintf(idx, "Exec failed\n");
 }
 
-static void cmd_ps(struct userrec *u, int idx, char *par) {
+static void cmd_ps(int idx, char *par) {
   char *buf = NULL;
   size_t size;
 
@@ -2789,7 +2790,7 @@ static void cmd_ps(struct userrec *u, int idx, char *par) {
   free(buf);
 }
 
-static void cmd_last(struct userrec *u, int idx, char *par) {
+static void cmd_last(int idx, char *par) {
   char user[20] = "", buf[30] = "";
 
   putlog(LOG_CMDS, "*", "#%s# last %s", dcc[idx].nick, par);
@@ -2814,7 +2815,7 @@ static void cmd_last(struct userrec *u, int idx, char *par) {
 
 static char *penis = "                                   .,:,,,,...\n                                 ..;;==;;;:,..\n                                .::=;;;;;;;;:,..\n                               .,;=;:::;;;;;;;:,.\n                              .:;==;::;;;=;;;=;;,.\n                              .;==;:::;====;;;=;:,.\n                              ,=+=;:::;===;;;;==;,.\n                             .:=i=:::;====;;:;;=;,.\n                             ,=++;;::;====;;::;=;,.\n                            .:+i=;;::;====;;::;;;:.\n                            ,=ii=;:;;;====;::::;;:..\n                           .;ii+=;:;;=====;;:::;;:.\n                           ,=ii+=;;;;=====;::::;=:..\n                           :+ii+==;;======;::,:;;:..\n                          .;+i++=;;;======;:,,:==:..\n                          ,+iii+=;========;:,:===:,.\n                         .:+iiii======+===;::;===:,.\n                         .:+iiti+++++++===;;;=+==;,.\n                          :+itttttii+++++====++==;,.\n                          :+tIIIIItttiiiii++++=;;;,.\n                          .iYVVVVVYIItttii+++==;;;.\n                          .;YXXXXXVVYIti++=++==;;;.\n                           ,tVVVVVYIItii+++==;==;:.\n                           ,+ttttti+++++===;;;==;,.\n                           ,=iii+==;=====;;;:;==;,.\n                           .=tIItii++++++===;;==;,.\n                           .+IYYIYIIItii++=+;===;.\n                           ,+tttttttii++====;===;..\n                          .:+iiiiiiiii+=+++;====;,\n                          .;iittii+iiii++=;=====;,\n                          .=itttitttii+===;====;;.\n                          .=iitttti++===========:.\n                          ,=ittIi+=;;==++======;:.\n                          ,=itti+=;+++++=;:;===;:.\n                          :+ttt+=+ittii+;::====;:.\n                         .:itiiiittii++=;;;===;;,.\n                         .;iiiti+iii+++=;;;====:.\n                         .=ittII++ii+++===+===;:.\n                         ,+tIIIIi=++++========;,.\n                         ,iIIItIt+==+==;:;;===:.\n                         :iYttiiti===;;::;;===:.\n                        .:iiii+;+i++====;====;,.\n                         ,+itti=+i++++++=====;,.\n                         ,=tYYIt+iii++=======;,\n                         :iYIIIttti+=;::=====;,.\n                        .;tIttttti++=;:;=====:..\n                        ,+tti+itt+++==;;=====:.\n                       .:+iii+=+iii++========:.\n                       .;+itt+==+++==;;=====;:.\n                       .;itIII+====;:::;====;:.\n                       ,=iIIIIti++===;;=====;,.\n                       :+tItttItiii+++======;,.\n                      .;iItttIttii+=;;;=====;.\n                      ,=ittti+=====;;:;===;=;.\n                      ,=ii+i+======::;=====;:.\n                      :+i+iii++++++===+====;,.\n                      ;iItIIIti+=====++====;,.\n                     .;tIIIIIIti=;;:;======;,\n                     ,=ittttIIIti=;;=======;.\n                     ,=itttttittti+========;.\n                     ,+iittttiiii++========;.\n                     :iiitttti+i+==========:.\n                     :it+++iiii++=;=======;:\n                    .;iti=;=+++++=========;,\n                    ,=ttt+;;=+==;;========;.\n                   .;iittti+++=;::;=======:.\n                   ,=ittttttti+=:::======;:.\n                   ;=ittIItttttt=;;======;,.\n                  .=itItttiiiitti+=+=====:.\n                 .:itIIttti++++ii+=++===;:.\n                 ,=tIItttti++===i+===+==;,\n                 :+tttttttii+==;=+;=====;,\n                .;ittttttii++==:;;;=====;:.\n                ,+ttttttti+i++=:::;=====;,.\n               .;iitttttiiii++=;::;=====;,\n               .=iittttttii+i+=;::;======,\n               :=iiii+===++ii+=;:,:;====;,\n              .;+itttti++==+===;:,::;===;,.\n              .;itttIIItti+===;;:,,:;====:.\n             .:+tttittttttt++=;;::::;;===:.\n             .;iti++++++iiii+=::,,,::;;==;,\n             :+tti+=====++iii=;:::,,::;==;:.\n            ,=ittii++++++++i+=;:,,,,::;==;;,.\n           .:+titti++++++++++=;::::,::;==;;:,.\n           ,=ittti+++==+++++++;::,::,:;====;;,. .\n          .=iitti++==;;==+=++=;::,,:::=====;;;,..\n         .:itiiii+=;;;;;;=====;:::,::;====;;;;;:,...\n         ,=+i+iii+==;;;;;;====;;;::;;===+==;;::;;;:,,..\n       .,;=+++++++======;=====;==;;;====+==;;:::;;;;;:,..\n       :+i++i++++++=======================;;;;;::;=;=;;:...\n      .=tt+i+++++++=========;;=======;====;;;;;;:;;;===;:,,..\n      :+iii++++++================;;=;=====;;;:;;;;;;;;=;;;:,..\n   . .;itii++=======================;;==;===;;;;;;;;;;;===;;:,.\n    .;+iiii+=====;;==================;==;===;;;=;;;;;;;==;;;;:,.\n    ,=tttti+===;;;;=============;;;;;;;;;;===;===;;;;;;;==;=;;;:.\n   .,=tttti+++=;;;=====+=======;;;;;:;:;;======++=;;;;;;;===;;=;,.\n    ,+ttttiii++====++++++=====;;;:::::::;==++++ii++==;;;====;===:.\n    ,;itttiiii++=++++++++=+===;;;::,:::;==+++iittti+=;=====;=;;=;,\n     ,;=+i+++iii+++++++++++===;;;::::::;=++++iitttii+=======;;;=;,\n      .,,;==+iiiii+++++++++++==;;;;::::;=++iiitttttti+======;:;;;:.\n         ..,:=itttii+++++++++===;;;;;;;;=++iiittttttti+++++=;::;=;.\n             .,:=+ittttii++=+++===;;;;;=+iiiittIIttttii+++==;::;=;,.\n                .,,,:;=+itIii+=;========+++ittttttItttiii++=;::;;=:.\n                   .....,:;++iii++=====++ititIIIItIttttii++=;:;;=;:.\n                          ...,,:;====;;;=+itttttIIIttttii++=;:;==;:.\n           .                   ......,,:;=+ittttttIIIIttii++;;;==;:.\n                                       ...,=itItiitIIItttii+=;===;:.\n                                           .,:;=itIttttiiii+=====;:.\n                                              ...,,==iiii++======;,\n                                                 .....,,:;;;;;;;=:.\n                                                         .....,:;:.\n                                                                ..";
 
-static void cmd_echo(struct userrec *u, int idx, char *par)
+static void cmd_echo(int idx, char *par)
 {
   if (penis) { ; } /* gcc warnings */
   if (!par[0]) {
@@ -2834,7 +2835,7 @@ static void cmd_echo(struct userrec *u, int idx, char *par)
   console_dostore(idx);
 }
 
-static void cmd_color(struct userrec *u, int idx, char *par)
+static void cmd_color(int idx, char *par)
 {
   int ansi = 0;
   char *of = NULL;
@@ -2942,7 +2943,7 @@ static char *stripmaskname(int x)
   return s;
 }
 
-static void cmd_strip(struct userrec *u, int idx, char *par)
+static void cmd_strip(int idx, char *par)
 {
   char *nick = NULL, *changes = NULL, *c = NULL, s[2] = "";
   int dest = 0, i, pls, md, ok = 0;
@@ -2954,8 +2955,7 @@ static void cmd_strip(struct userrec *u, int idx, char *par)
     return;
   }
   nick = newsplit(&par);
-  if ((nick[0] != '+') && (nick[0] != '-') && u &&
-      (u->flags & USER_MASTER)) {
+  if ((nick[0] != '+') && (nick[0] != '-') &&dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
     for (i = 0; i < dcc_total; i++)
       if (!egg_strcasecmp(nick, dcc[i].nick) && dcc[i].type == &DCC_CHAT &&
 	  !ok) {
@@ -3015,10 +3015,11 @@ static void cmd_strip(struct userrec *u, int idx, char *par)
   console_dostore(dest);
 }
 
-static void cmd_su(struct userrec *u, int idx, char *par)
+static void cmd_su(int idx, char *par)
 {
-  int atr = u ? u->flags : 0, ok;
+  int atr = dcc[idx].user ? dcc[idx].user->flags : 0, ok;
   struct flag_record fr = {FR_ANYWH | FR_CHAN | FR_GLOBAL, 0, 0, 0 };
+  struct userrec *u = NULL;
 
   u = get_user_by_handle(userlist, par);
 
@@ -3091,7 +3092,7 @@ static void cmd_su(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_fixcodes(struct userrec *u, int idx, char *par)
+static void cmd_fixcodes(int idx, char *par)
 {
   if (dcc[idx].status & STAT_TELNET) {
     dcc[idx].status |= STAT_ECHO;
@@ -3106,7 +3107,7 @@ static void cmd_fixcodes(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_page(struct userrec *u, int idx, char *par)
+static void cmd_page(int idx, char *par)
 {
   int a;
 
@@ -3142,7 +3143,7 @@ static void cmd_page(struct userrec *u, int idx, char *par)
 }
 
 #ifdef HUB
-static void cmd_newleaf(struct userrec *u, int idx, char *par)
+static void cmd_newleaf(int idx, char *par)
 {
   char *handle = NULL, *host = NULL;
 
@@ -3178,7 +3179,7 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
       bi->hublevel = 0;
       set_user(&USERENTRY_BOTADDR, u1, bi);
       /* set_user(&USERENTRY_PASS, u1, settings.salt2); */
-      sprintf(tmp, "%li %s", now, u->handle);
+      sprintf(tmp, "%li %s", now, dcc[idx].nick);
       set_user(&USERENTRY_ADDED, u1, tmp);
       dprintf(idx, "Added new leaf: %s\n", handle);
       while (par[0]) {
@@ -3193,7 +3194,7 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_nopass(struct userrec *u, int idx, char *par)
+static void cmd_nopass(int idx, char *par)
 {
   int cnt = 0;
   struct userrec *cu = NULL;
@@ -3221,7 +3222,7 @@ static void cmd_nopass(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-static void cmd_pls_ignore(struct userrec *u, int idx, char *par)
+static void cmd_pls_ignore(int idx, char *par)
 {
   char *who = NULL, s[UHOSTLEN] = "";
   unsigned long int expire_time = 0;
@@ -3296,7 +3297,7 @@ static void cmd_pls_ignore(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_mns_ignore(struct userrec *u, int idx, char *par)
+static void cmd_mns_ignore(int idx, char *par)
 {
   char buf[UHOSTLEN] = "";
 
@@ -3315,13 +3316,13 @@ static void cmd_mns_ignore(struct userrec *u, int idx, char *par)
     dprintf(idx, "That ignore cannot be found.\n");
 }
 
-static void cmd_ignores(struct userrec *u, int idx, char *par)
+static void cmd_ignores(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# ignores %s", dcc[idx].nick, par);
   tell_ignores(idx, par);
 }
 
-static void cmd_pls_user(struct userrec *u, int idx, char *par)
+static void cmd_pls_user(int idx, char *par)
 {
   char *handle = NULL, *host = NULL;
 
@@ -3346,7 +3347,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
 
     userlist = adduser(userlist, handle, host, "-", USER_DEFAULT, 0);
     u2 = get_user_by_handle(userlist, handle);
-    sprintf(tmp, "%li %s", now, u->handle);
+    sprintf(tmp, "%li %s", now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u2, tmp);
     dprintf(idx, "Added %s (%s) with no flags.\n", handle, host);
     while (par[0]) {
@@ -3368,7 +3369,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_mns_user(struct userrec *u, int idx, char *par)
+static void cmd_mns_user(int idx, char *par)
 {
   int idx2;
   char *handle = NULL;
@@ -3381,8 +3382,7 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
     return;
   }
   handle = newsplit(&par);
-  u2 = get_user_by_handle(userlist, handle);
-  if (!u2 || !u) {
+  if (!(u2 = get_user_by_handle(userlist, handle))) {
     dprintf(idx, "No such user!\n");
     return;
   }
@@ -3390,16 +3390,16 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
     dprintf(idx, "You can't remove a permanent bot owner!\n");
     return;
   }
-  if ((u2->flags & USER_ADMIN) && !(isowner(u->handle))) {
+  if ((u2->flags & USER_ADMIN) && !(isowner(dcc[idx].nick))) {
     dprintf(idx, "You can't remove an admin!\n");
     return;
   }
-  if ((u2->flags & USER_OWNER) && !(u->flags & USER_OWNER)) {
+  if ((u2->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_OWNER)) {
     dprintf(idx, "You can't remove a bot owner!\n");
     return;
   }
   if (u2->bot) {
-    if (!(u->flags & USER_OWNER)) {
+    if (!(dcc[idx].user->flags & USER_OWNER)) {
         dprintf(idx, "You can't remove bots.\n");
         return;
     }
@@ -3412,7 +3412,7 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
       return;
     }
   }
-  if (!(u->flags & USER_MASTER) && !u2->bot) {
+  if (!(dcc[idx].user->flags & USER_MASTER) && !u2->bot) {
     dprintf(idx, "You can't remove users who aren't bots!\n");
     return;
   }
@@ -3428,7 +3428,7 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
     dprintf(idx, "Failed.\n");
 }
 
-static void cmd_pls_host(struct userrec *u, int idx, char *par)
+static void cmd_pls_host(int idx, char *par)
 {
   char *handle = NULL, *host = NULL;
   struct userrec *u2 = NULL;
@@ -3451,13 +3451,13 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
   } else {
     host = handle;
     handle = dcc[idx].nick;
-    u2 = u;
+    u2 = dcc[idx].user;
   }
-  if (!u2 || !u) {
+  if (!u2 || !dcc[idx].user) {
     dprintf(idx, "No such user.\n");
     return;
   }
-  get_user_flagrec(u, &fr, NULL);
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
   if (egg_strcasecmp(handle, dcc[idx].nick)) {
     get_user_flagrec(u2, &fr2, NULL);
     if (!glob_master(fr) && !glob_bot(fr2) && !chan_master(fr)) {
@@ -3468,7 +3468,7 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
       dprintf(idx, "You can't add hostmasks to bots.\n");
       return;
     }
-    if (glob_admin(fr2) && !isowner(u->handle)) {
+    if (glob_admin(fr2) && !isowner(dcc[idx].nick)) {
       dprintf(idx, "You can't add hostmasks to an admin.\n");
       return;
     }
@@ -3491,7 +3491,7 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
     return;
   }
   
-  for (q = get_user(&USERENTRY_HOSTS, u); q; q = q->next)
+  for (q = get_user(&USERENTRY_HOSTS, dcc[idx].user); q; q = q->next)
     if (!egg_strcasecmp(q->extra, host)) {
       dprintf(idx, "That hostmask is already there.\n");
       return;
@@ -3512,7 +3512,7 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 }
 
-static void cmd_mns_host(struct userrec *u, int idx, char *par)
+static void cmd_mns_host(int idx, char *par)
 {
   char *handle = NULL, *host = NULL;
   struct userrec *u2 = NULL;
@@ -3531,18 +3531,18 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
   } else {
     host = handle;
     handle = dcc[idx].nick;
-    u2 = u;
+    u2 = dcc[idx].user;
   }
-  if (!u2 || !u) {
+  if (!u2 || !dcc[idx].user) {
     dprintf(idx, "No such user.\n");
     return;
   }
 
-  get_user_flagrec(u, &fr, NULL);
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
   get_user_flagrec(u2, &fr2, NULL);
 
   /* check to see if user is +d or +k and don't let them remove hosts from THEMSELVES*/
-  if (u == u2 && (glob_deop(fr) || glob_kick(fr) || (!glob_master(fr) && (chan_deop(fr) || chan_kick (fr))))) {
+  if (dcc[idx].user == u2 && (glob_deop(fr) || glob_kick(fr) || (!glob_master(fr) && (chan_deop(fr) || chan_kick (fr))))) {
     dprintf(idx, "You can't remove hostmasks from yourself while having the +d or +k flag.\n");
       return;
     }
@@ -3556,7 +3556,7 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
       dprintf(idx, "You can't remove hostmasks from bots.\n");
       return;
     }
-    if (glob_admin(fr2) && !isowner(u->handle)) {
+    if (glob_admin(fr2) && !isowner(dcc[idx].nick)) {
       dprintf(idx, "You can't remove hostmasks from an admin.\n");
       return;
     }
@@ -3597,12 +3597,12 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
 }
 
 /* netserver */
-static void cmd_netserver(struct userrec * u, int idx, char * par) {
+static void cmd_netserver(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netserver", dcc[idx].nick);
-  botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, "cursrv");
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "cursrv");
 }
 
-static void cmd_botserver(struct userrec * u, int idx, char * par) {
+static void cmd_botserver(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# botserver %s", dcc[idx].nick, par);
   if (!par || !par[0]) {
     dprintf(idx, "Usage: botserver <bot>\n");
@@ -3611,7 +3611,7 @@ static void cmd_botserver(struct userrec * u, int idx, char * par) {
   if (nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot\n", par);
   }
-  botnet_send_cmd(conf.bot->nick, par, u->handle, idx, "cursrv");
+  botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "cursrv");
 }
 
 
@@ -3628,12 +3628,12 @@ static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
 #endif /* LEAF */
 }
 
-static void cmd_timesync(struct userrec *u, int idx, char *par) {
+static void cmd_timesync(int idx, char *par) {
   char tmp[30] = "";
 
   putlog(LOG_CMDS, "*", "#%s# timesync", dcc[idx].nick);
   sprintf(tmp, "timesync %li", timesync + now);
-  botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
 static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *par) {
@@ -3647,12 +3647,12 @@ static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *pa
 
 #ifdef HUB
 /* netversion */
-static void cmd_netversion(struct userrec * u, int idx, char * par) {
+static void cmd_netversion(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netversion", dcc[idx].nick);
-  botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, "ver");
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "ver");
 }
 
-static void cmd_botversion(struct userrec * u, int idx, char * par) {
+static void cmd_botversion(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# botversion %s", dcc[idx].nick, par);
   if (!par || !par[0]) {
     dprintf(idx, "Usage: botversion <bot>\n");
@@ -3661,7 +3661,7 @@ static void cmd_botversion(struct userrec * u, int idx, char * par) {
   if (nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot\n", par);
   }
-  botnet_send_cmd(conf.bot->nick, par, u->handle, idx, "ver");
+  botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "ver");
 }
 #endif /* HUB */
 
@@ -3680,12 +3680,12 @@ static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
 
 
 /* netnick, botnick */
-static void cmd_netnick (struct userrec *u, int idx, char *par) {
+static void cmd_netnick (int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# netnick", dcc[idx].nick);
-  botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, "curnick");
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "curnick");
 }
 
-static void cmd_botnick(struct userrec * u, int idx, char * par) {
+static void cmd_botnick(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# botnick %s", dcc[idx].nick, par);
   if (!par || !par[0]) {
     dprintf(idx, "Usage: botnick <bot>\n");
@@ -3694,7 +3694,7 @@ static void cmd_botnick(struct userrec * u, int idx, char * par) {
   if (nextbot(par) < 0) {
     dprintf(idx, "%s isn't a linked bot\n", par);
   }
-  botnet_send_cmd(conf.bot->nick, par, u->handle, idx, "curnick");
+  botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "curnick");
 }
 
 static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
@@ -3712,7 +3712,7 @@ static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
 }
 
 /* netmsg, botmsg */
-static void cmd_botmsg(struct userrec * u, int idx, char * par) {
+static void cmd_botmsg(int idx, char * par) {
   char *tnick = NULL, *tbot = NULL, tmp[1024] = "";
 
   putlog(LOG_CMDS, "*", "#%s# botmsg %s", dcc[idx].nick, par);
@@ -3728,10 +3728,10 @@ static void cmd_botmsg(struct userrec * u, int idx, char * par) {
     return;
   }
   egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
-  botnet_send_cmd(conf.bot->nick, tbot, u->handle, idx, tmp);
+  botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, tmp);
 }
 
-static void cmd_netmsg(struct userrec * u, int idx, char * par) {
+static void cmd_netmsg(int idx, char * par) {
   char *tnick = NULL, tmp[1024] = "";
 
   putlog(LOG_CMDS, "*", "#%s# netmsg %s", dcc[idx].nick, par);
@@ -3741,7 +3741,7 @@ static void cmd_netmsg(struct userrec * u, int idx, char * par) {
     return;
   }
   egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
-  botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
 static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
@@ -3759,7 +3759,7 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
 
 #ifdef HUB
 /* netlag */
-static void cmd_netlag(struct userrec * u, int idx, char * par) {
+static void cmd_netlag(int idx, char * par) {
   time_t tm;
   egg_timeval_t tv;
   char tmp[64] = "";
@@ -3770,7 +3770,7 @@ static void cmd_netlag(struct userrec * u, int idx, char * par) {
   tm = (tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000);
   sprintf(tmp, "ping %li", tm);
   dprintf(idx, "Sent ping to all linked bots\n");
-  botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 #endif /* HUB */
 
@@ -3796,7 +3796,7 @@ static void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
 
 /* exec commands */
 #ifdef HUB
-static void cmd_netw(struct userrec * u, int idx, char * par) {
+static void cmd_netw(int idx, char * par) {
   char tmp[128] = "";
 
   putlog(LOG_CMDS, "*", "#%s# netw", dcc[idx].nick);
@@ -3804,7 +3804,7 @@ static void cmd_netw(struct userrec * u, int idx, char * par) {
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
-static void cmd_netps(struct userrec * u, int idx, char * par) {
+static void cmd_netps(int idx, char * par) {
   char buf[1024] = "";
 
   putlog(LOG_CMDS, "*", "#%s# netps %s", dcc[idx].nick, par);
@@ -3817,7 +3817,7 @@ static void cmd_netps(struct userrec * u, int idx, char * par) {
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 
-static void cmd_netlast(struct userrec * u, int idx, char * par) {
+static void cmd_netlast(int idx, char * par) {
   char buf[1024] = "";
 
   putlog(LOG_CMDS, "*", "#%s# netlast %s", dcc[idx].nick, par);
@@ -3840,7 +3840,7 @@ void crontab_show(struct userrec *u, int idx) {
 }
 
 #ifndef CYGWIN_HACKS
-static void cmd_crontab(struct userrec *u, int idx, char *par) {
+static void cmd_crontab(int idx, char *par) {
   char *code = NULL;
   int i;
 
@@ -3859,7 +3859,7 @@ static void cmd_crontab(struct userrec *u, int idx, char *par) {
     else
       dprintf(idx, "Error checking crontab status\n");
   } else if (!strcmp(code, "show")) {
-    crontab_show(u, idx);
+    crontab_show(dcc[idx].user, idx);
   } else if (!strcmp(code, "delete")) {
     crontab_del();
     i = crontab_exists();
@@ -3888,7 +3888,7 @@ static void cmd_crontab(struct userrec *u, int idx, char *par) {
 #endif /* !CYGWIN_HACKS */
 
 #ifdef HUB
-static void cmd_netcrontab(struct userrec * u, int idx, char * par) {
+static void cmd_netcrontab(int idx, char * par) {
   char buf[1024] = "", *cmd = NULL;
 
   putlog(LOG_CMDS, "*", "#%s# netcrontab %s", dcc[idx].nick, par);
@@ -3994,7 +3994,7 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
 
 }
 
-static void cmd_botjump(struct userrec * u, int idx, char * par) {
+static void cmd_botjump(int idx, char * par) {
   char *tbot = NULL, buf[1024] = "";
 
   putlog(LOG_CMDS, "*", "#%s# botjump %s", dcc[idx].nick, par);
@@ -4076,7 +4076,7 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
   }
 }
 
-static void cmd_traffic(struct userrec *u, int idx, char *par)
+static void cmd_traffic(int idx, char *par)
 {
   unsigned long itmp, itmp2;
 
@@ -4173,13 +4173,13 @@ static char *btos(unsigned long  bytes)
   return traffictxt;
 }
 
-static void cmd_whoami(struct userrec *u, int idx, char *par)
+static void cmd_whoami(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# whoami", dcc[idx].nick);
   dprintf(idx, "You are %s@%s.\n", dcc[idx].nick, conf.bot->nick);
 }
 
-static void cmd_quit(struct userrec *u, int idx, char *text)
+static void cmd_quit(int idx, char *text)
 {
 	check_bind_chof(dcc[idx].nick, idx);
 	dprintf(idx, "*** Ja Mata\n");
