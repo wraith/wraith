@@ -3911,15 +3911,8 @@ static void my_dns_callback(int id, void *client_data, const char *host, char **
 {
   int idx = (int) client_data;
 
-
-  if (!valid_dns_id(idx, id)) {
-    if (valid_idx(idx))
-      dcc[idx].dns_id = 0;
+  if (!valid_idx(idx))
     return;
-  }
-
-  if (valid_idx(idx))
-    dcc[idx].dns_id = 0;
 
   if (ips)
     for (int i = 0; ips[i]; i++)
@@ -3932,11 +3925,6 @@ static void my_dns_callback(int id, void *client_data, const char *host, char **
 
 static void cmd_dns(int idx, char *par)
 {
-  if (dcc[idx].dns_id) {
-    dprintf(idx, "Currently looking up your previous request.\n");
-    return;
-  }
-
   putlog(LOG_CMDS, "*", "#%s# dns %s", dcc[idx].nick, par);
 
   if (!egg_strcasecmp(par, "flush")) {
@@ -3946,11 +3934,11 @@ static void cmd_dns(int idx, char *par)
   }
   if (is_dotted_ip(par)) {
     dprintf(idx, "Reversing %s ...\n", par);
-    dcc[idx].dns_id = egg_dns_reverse(par, 20, my_dns_callback, (void *) idx);
+    egg_dns_reverse(par, 20, my_dns_callback, (void *) idx);
 
   } else {
     dprintf(idx, "Looking up %s ...\n", par);
-    dcc[idx].dns_id = egg_dns_lookup(par, 20, my_dns_callback, (void *) idx);
+    egg_dns_lookup(par, 20, my_dns_callback, (void *) idx);
   }
 }
 
