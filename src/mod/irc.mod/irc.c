@@ -951,21 +951,6 @@ static void reset_chan_info(struct chanset_t *chan)
   }
 }
 
-/* Leave the specified channel and notify registered Tcl procs. This
- * should not be called by itsself.
- */
-void do_channel_part(struct chanset_t *chan)
-{
-  if (shouldjoin(chan) && chan->name[0]) {
-    /* Using chan->name is important here, especially for !chans <cybah> */
-    dprintf(DP_SERVER, "PART %s\n", chan->name);
-
-    /* As we don't know of this channel anymore when we receive the server's
-       ack for the above PART, we have to notify about it _now_. */
-  }
-}
-
-
 /* If i'm the only person on the channel, and i'm not op'd,
  * might as well leave and rejoin. If i'm NOT the only person
  * on the channel, but i'm still not op'd, demand ops.

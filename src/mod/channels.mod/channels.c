@@ -650,12 +650,16 @@ __inline__ static int chanset_unlink(struct chanset_t *chan)
 void remove_channel(struct chanset_t *chan)
 {
    int		 i;
+   
+   irc_log(chan, "Parting");
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_part() call. */
    chanset_unlink(chan);
 
 #ifdef LEAF
-   do_channel_part(chan);
+  /* Using chan->name is important here, especially for !chans <cybah> */
+  if (shouldjoin(chan) && chan->name[0])
+    dprintf(DP_SERVER, "PART %s\n", chan->name);
 #endif /* LEAF */
 
    clear_channel(chan, 0);

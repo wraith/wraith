@@ -1705,6 +1705,19 @@ static int got349(char *from, char *msg)
   return 0;
 }
 
+static void got353(char *from, char *msg)
+{
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
+
+  newsplit(&msg); /* my nick */
+  newsplit(&msg); /*    *|@|=  */
+  chname = newsplit(&msg);
+  chan = findchan(chname);
+  fixcolon(msg);
+  irc_log(chan, "%s", msg);
+}
+
 /* got 346: invite exemption info
  * <server> 346 <to> <chan> <exemption>
  */
@@ -1994,8 +2007,7 @@ static int gottopic(char *from, char *msg)
   nick = splitnick(&from);
   chan = findchan(chname);
   if (chan) {
-    putlog(LOG_JOIN, chan->dname, "Topic changed on %s by %s!%s: %s",
-           chan->dname, nick, from, msg);
+    irc_log(chan, "%s!%s changed topic to: %s", nick, from, msg);
     m = ismember(chan, nick);
     if (m != NULL)
       m->last = now;
@@ -2097,7 +2109,7 @@ static int gotjoin(char *from, char *chname)
     strcpy(uhost, from);
     nick = splitnick(&uhost);
     if (match_my_nick(nick)) {
-      putlog(LOG_MISC, "*", "joined %s but didn't want to!", chname);
+      putlog(LOG_WARN, "*", "joined %s but didn't want to!", chname);
       dprintf(DP_MODE, "PART %s\n", chname);
     }
   } else if (!channel_pending(chan)) {
@@ -2122,9 +2134,7 @@ static int gotjoin(char *from, char *chname)
     get_user_flagrec(u, &fr, chan->dname); /* Lam: fix to work with !channels */
     if (!channel_active(chan) && !match_my_nick(nick)) {
       /* uh, what?!  i'm on the channel?! */
-      putlog(LOG_MISC, chan->dname,
-	     "confused bot: guess I'm on %s and didn't realize it",
-	     chan->dname);
+      putlog(LOG_ERROR, "*", "confused bot: guess I'm on %s and didn't realize it", chan->dname);
       chan->status |= CHAN_ACTIVE;
       chan->status &= ~CHAN_PEND;
       reset_chan_info(chan);
@@ -2151,8 +2161,7 @@ static int gotjoin(char *from, char *chname)
 	m->user = u;
 	set_handle_laston(chan->dname, u, now);
 	m->flags |= STOPWHO;
-	putlog(LOG_JOIN, chan->dname, "%s (%s) returned to %s.", nick, uhost,
-	       chan->dname);
+        irc_log(chan, "%s returned from netsplit", m->nick);
       } else {
 	if (m)
 	  killmember(chan, nick);
@@ -2199,19 +2208,13 @@ static int gotjoin(char *from, char *chname)
 	   * logs with the unique name.
            */
 	  if (chname[0] == '!')
-	    putlog(LOG_JOIN, chan->dname, "%s joined %s (%s)", nick, chan->dname, chname);
+            irc_log(chan, "Joined. (%s)", chname);
 	  else
-	    putlog(LOG_JOIN, chan->dname, "%s joined %s.", nick,
-	           chname);
+            irc_log(chan, "Joined.");
 	  if (!match_my_nick(chname))
  	    reset_chan_info(chan);
 	} else {
-
-	  putlog(LOG_JOIN, chan->dname,
-		 "%s (%s) joined %s.", nick, uhost, chan->dname);
-	  /* Don't re-display greeting if they've been on the channel
-	   * recently.
-	   */
+          irc_log(chan, "Join: %s (%s)", nick, uhost);
 	  set_handle_laston(chan->dname, u, now);
 	}
       }
@@ -2280,19 +2283,20 @@ static int gotpart(char *from, char *msg)
   fixcolon(chname);
   fixcolon(msg);
   chan = findchan(chname);
+  u = get_user_by_host(from);
+  nick = splitnick(&from);
   if (chan && !shouldjoin(chan)) {
   /* shouldnt this check for match_my_nick? */
+    if (match_my_nick(nick)) 
+      irc_log(chan, "Parting");    
     clear_channel(chan, 1);
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
     return 0;
   }
   if (chan && !channel_pending(chan)) {
-    u = get_user_by_host(from);
-    nick = splitnick(&from);
     if (!channel_active(chan)) {
       /* whoa! */
-      putlog(LOG_MISC, chan->dname,
-	  "confused bot: guess I'm on %s and didn't realize it", chan->dname);
+      putlog(LOG_ERRORS, "*", "confused bot: guess I'm on %s and didn't realize it", chan->dname);
       chan->status |= CHAN_ACTIVE;
       chan->status &= ~CHAN_PEND;
       reset_chan_info(chan);
@@ -2304,9 +2308,9 @@ static int gotpart(char *from, char *msg)
 
     killmember(chan, nick);
     if (msg[0])
-      putlog(LOG_JOIN, chan->dname, "%s (%s) left %s (%s).", nick, from, chan->dname, msg);
+      irc_log(chan, "Part: %s (%s) [%s]", nick, from, msg);
     else
-      putlog(LOG_JOIN, chan->dname, "%s (%s) left %s.", nick, from, chan->dname);
+      irc_log(chan, "Part: %s (%s)", nick, from);
     /* If it was me, all hell breaks loose... */
     if (match_my_nick(nick)) {
       clear_channel(chan, 1);
@@ -2383,8 +2387,7 @@ static int gotkick(char *from, char *origmsg)
     } else {
       simple_sprintf(s1, "%s!*@could.not.loookup.hostname", nick);
     }
-    putlog(LOG_MODES, chan->dname, "%s kicked from %s by %s: %s", s1,
-	   chan->dname, from, msg);
+    irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
     if (match_my_nick(nick) && shouldjoin(chan)) {
       chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
@@ -2420,21 +2423,13 @@ static int gotnick(char *from, char *msg)
     m = ismember(chan, nick);
 
     if (m) {
-      putlog(LOG_JOIN, chan->dname, "Nick change: %s -> %s", nick, msg);
+      irc_log(chan, "Nick change: %s -> %s", nick, msg);
       m->last = now;
+      /* Not just a capitalization change */
       if (rfc_casecmp(nick, msg)) {
-	/* Not just a capitalization change */
-	mm = ismember(chan, msg);
-	if (mm) {
-	  /* Someone on channel with old nick?! */
-	  if (mm->split)
-	    putlog(LOG_JOIN, chan->dname,
-		   "Possible future nick collision: %s", mm->nick);
-	  else
-	    putlog(LOG_MISC, chan->dname,
-		   "* Bug: nick change to existing nick");
+        /* Someone on channel with old nick?! */
+	if ((mm = ismember(chan, msg)))
 	  killmember(chan, mm->nick);
-	}
       }
       /*
        * Banned?
@@ -2573,15 +2568,16 @@ static int gotquit(char *from, char *msg)
           chan = oldchan;
 	  continue;
         }
-	putlog(LOG_JOIN, chan->dname, "%s (%s) got netsplit.", nick,
-	       from);
+        irc_log(chan, "%s (%s) got netsplit.", nick, from);
       } else {
 	if (!findchan_by_dname(chname)) {
 	  chan = oldchan;
 	  continue;
 	}
-	putlog(LOG_JOIN, chan->dname, "%s (%s) left irc: %s", nick,
-	       from, msg);
+        if (msg[0])
+          irc_log(chan, "Quits %s (%s) (%s)", nick, from, msg);
+        else
+          irc_log(chan, "Quits %s (%s)", nick, from);
 	killmember(chan, nick);
 	check_lonely_channel(chan);
       }
@@ -2626,6 +2622,7 @@ static int gotmsg(char *from, char *msg)
   fixcolon(msg);
   strcpy(uhost, from);
   nick = splitnick(&uhost);
+
   /* Only check if flood-ctcp is active */
   detect_autokick(nick, uhost, chan, msg);
   if (flud_ctcp_thr && detect_avalanche(msg)) {
@@ -2701,16 +2698,12 @@ static int gotmsg(char *from, char *msg)
 
 	      update_idle(chan->dname, nick);
             }
-	    if (!ignoring) {
 	      /* Log DCC, it's to a channel damnit! */
 	      if (!strcmp(code, "ACTION")) {
-		putlog(LOG_PUBLIC, chan->dname, "Action: %s %s", nick, ctcp);
+                irc_log(chan, "* %s %s", nick, ctcp);
 	      } else {
-		putlog(LOG_PUBLIC, chan->dname,
-		       "CTCP %s: %s from %s (%s) to %s", code, ctcp, nick,
-		       from, to);
+                irc_log(chan, "CTCP %s: %s from %s (%s) to %s", code, ctcp, nick, from, to);
 	      }
-	    }
 	  }
 	}
       }
@@ -2732,7 +2725,7 @@ static int gotmsg(char *from, char *msg)
     }
   }
   if (msg[0]) {
-    int dolog = 1, botmatch = 0;
+    int botmatch = 0;
 #ifdef S_AUTHCMDS
     int i = 0;
     char *my_msg = NULL, *my_ptr = NULL, *fword = NULL;
@@ -2760,20 +2753,12 @@ static int gotmsg(char *from, char *msg)
           fword++;
         if (check_bind_pubc(fword, nick, uhost, auth[i].user, my_msg, chan->dname)) {
           auth[i].atime = now;
-          dolog--; 		/* don't log */
         }
       }
     }
     free(my_ptr);
 #endif /* S_AUTHCMDS */
-    if (dolog) {
-      if (!ignoring) {
-        if (to[0] == '@')
-          putlog(LOG_PUBLIC, chan->dname, "@<%s> %s", nick, msg);
-        else
-          putlog(LOG_PUBLIC, chan->dname, "<%s> %s", nick, msg);
-      }
-    }
+    irc_log(chan, "%s<%s> %s", to[0] == '@' ? "@" : "", nick, msg);
     update_idle(chan->dname, nick);
   }
   return 0;
@@ -2857,12 +2842,8 @@ static int gotnotice(char *from, char *msg)
 	  chan = findchan(realto); 
 	  if (!chan)
 	    return 0;
-
-	  if (!ignoring) {
-	    putlog(LOG_PUBLIC, chan->dname, "CTCP reply %s: %s from %s (%s) to %s",
-		   code, msg, nick, from, chan->dname);
-	    update_idle(chan->dname, nick);
-	  }
+          irc_log(chan, "CTCP reply %s: %s from %s (%s) to %s", code, msg, nick, from, chan->dname);
+          update_idle(chan->dname, nick);
 	}
       }
     }
@@ -2880,9 +2861,7 @@ static int gotnotice(char *from, char *msg)
       if (!chan)
 	return 0;
     }
-
-    if (!ignoring)
-      putlog(LOG_PUBLIC, chan->dname, "-%s:%s- %s", nick, to, msg);
+    irc_log(chan, "-%s:%s- %s", nick, to, msg);
     update_idle(chan->dname, nick);
   }
   return 0;
@@ -2918,6 +2897,7 @@ static cmd_t irc_raw[] =
   {"347",	"",	(Function) got347,	"irc:347"},
   {"348",	"",	(Function) got348,	"irc:348"},
   {"349",	"",	(Function) got349,	"irc:349"},
+  {"353",	"",	(Function) got353,	"irc:353"},
   {NULL,	NULL,	NULL,			NULL}
 };
 #endif /* LEAF */

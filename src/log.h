@@ -33,6 +33,7 @@ void putlog (int, const char *, const char *, ...) __attribute((format(printf, 3
 int logmodes(const char *);
 char *masktype(int);
 char *maskname(int);
+void irc_log(struct chanset_t *, const char *, ...) __attribute__((format(printf, 2, 3)));
 
 extern int		conmask, debug_output, use_console_r;
 

@@ -71,7 +71,6 @@ void raise_limit(struct chanset_t *);
 void enforce_closed(struct chanset_t *);
 void recheck_channel(struct chanset_t *, int);
 void recheck_channel_modes(struct chanset_t *);
-void do_channel_part(struct chanset_t *);
 void irc_report(int, int);
 void flush_modes();
 
