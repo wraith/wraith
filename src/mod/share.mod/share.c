@@ -555,134 +555,190 @@ share_chchinfo(int idx, char *par)
   }
 }
 
-static void
-share_mns_ban(int idx, char *par)
+static void share_mns_mask(const char type, int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(idx, "-b %s\n", par);
+    shareout_but(idx, "-%s %s\n", type == 'b' ? "b" : type == 'e' ? "e" : "inv", par);
     if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: cancel ban %s", dcc[idx].nick, par);
+      putlog(LOG_CMDS, "@", "%s: cancel %s %s", dcc[idx].nick, type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite", par);
     str_unescape(par, '\\');
     noshare = 1;
-    if (u_delmask('b', NULL, par, 1) > 0) {
+    if (u_delmask(type, NULL, par, 1) > 0) {
       if (!conf.bot->hub) {
         struct chanset_t *chan = NULL;
 
         for (chan = chanset; chan; chan = chan->next)
-          add_delay(chan, '-', 'b', par);
+          add_delay(chan, '-', type, par);
       }
     }
     noshare = 0;
   }
+}
+
+static void share_mns_ban(int idx, char *par)
+{
+  share_mns_mask('b', idx, par);
 }
 
 static void
 share_mns_exempt(int idx, char *par)
 {
-  if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(idx, "-e %s\n", par);
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: cancel exempt %s", dcc[idx].nick, par);
-    str_unescape(par, '\\');
-    noshare = 1;
-    if (u_delmask('e', NULL, par, 1) > 0) {
-      if (!conf.bot->hub) {
-        struct chanset_t *chan = NULL;
-
-        for (chan = chanset; chan; chan = chan->next)
-          add_delay(chan, '-', 'e', par);
-      }
-    }
-    noshare = 0;
-  }
+  share_mns_mask('e', idx, par);
 }
 
 static void
 share_mns_invite(int idx, char *par)
 {
+  share_mns_mask('I', idx, par);
+}
+
+static void share_mns_maskchan(const char type, int idx, char *par)
+{
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(idx, "-inv %s\n", par);
+    char *chname = NULL;
+    struct chanset_t *chan = NULL;
+    int value = 0;
+
+    chname = newsplit(&par);
+    chan = findchan_by_dname(chname);
+    shareout_but(idx, "-%s %s %s\n", chname, type == 'b' ? "bc" : type == 'e' ? "ec" : "invc", par);
     if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: cancel invite %s", dcc[idx].nick, par);
+      putlog(LOG_CMDS, "@", "%s: cancel %s %s on %s", dcc[idx].nick, 
+                            type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite", par, chname);
     str_unescape(par, '\\');
     noshare = 1;
-    if (u_delmask('I', NULL, par, 1) > 0) {
-      if (!conf.bot->hub) {
-        struct chanset_t *chan = NULL;
+    value = u_delmask(type, chan, par, 1);
+    if (!conf.bot->hub && value > 0)
+      add_delay(chan, '-', type, par);
+    noshare = 0;
+  }
+}
 
-        for (chan = chanset; chan; chan = chan->next)
-          add_delay(chan, '-', 'I', par);
-      }
+static void share_mns_banchan(int idx, char *par)
+{
+  share_mns_maskchan('b', idx, par);
+}
+
+static void share_mns_exemptchan(int idx, char *par)
+{
+  share_mns_maskchan('e', idx, par);
+}
+
+static void share_mns_invitechan(int idx, char *par)
+{
+  share_mns_maskchan('I', idx, par);
+}
+
+static void share_pls_mask(const char type, int idx, char *par)
+{
+  if (dcc[idx].status & STAT_SHARE) {
+    const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
+    time_t expire_time;
+    char *mask = NULL, *tm = NULL, *from = NULL;
+    int flags = 0;
+    bool stick = 0;
+
+    shareout_but(idx, "+%s %s\n", type == 'b' ? "b" : type == 'e' ? "e" : "inv", par);
+    noshare = 1;
+    mask = newsplit(&par);
+    str_unescape(mask, '\\');
+    tm = newsplit(&par);
+    from = newsplit(&par);
+    if (strchr(from, 's')) {
+      flags |= MASKREC_STICKY;
+      stick = 1;
     }
+    if (strchr(from, 'p'))
+      flags |= MASKREC_PERM;
+    from = newsplit(&par);
+    expire_time = (time_t) atoi(tm);
+    if (expire_time != 0L)
+      expire_time += now;
+    u_addmask(type, NULL, mask, from, par, expire_time, flags);
     noshare = 0;
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: global %s %s (%s:%s)", dcc[idx].nick, str_type, mask, from, par);
+    else {
+      void (*check_this_mask) (struct chanset_t *, char *, bool) = NULL;
+
+      check_this_mask = (type == 'b' ? check_this_ban : type == 'e' ? check_this_exempt : check_this_invite);
+
+      for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
+        check_this_mask(chan, mask, stick);
+    }
   }
 }
 
-static void
-share_mns_banchan(int idx, char *par)
+static void share_pls_ban(int idx, char *par)
+{
+  share_pls_mask('b', idx, par);
+}
+
+static void share_pls_exempt(int idx, char *par)
+{
+  share_pls_mask('e', idx, par);
+}
+
+static void share_pls_invite(int idx, char *par)
+{
+  share_pls_mask('I', idx, par);
+}
+
+static void share_pls_maskchan(const char type, int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
-    char *chname = NULL;
+    const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
+    time_t expire_time;
+    int flags = 0;
+    char *mask = NULL, *tm = NULL, *chname = NULL, *from = NULL;
+    bool stick = 0;
     struct chanset_t *chan = NULL;
-    int value = 0;
 
+    mask = newsplit(&par);
+    tm = newsplit(&par);
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(idx, "-bc %s %s\n", chname, par);
+    shareout_but(idx, "+%s %s %s %s %s\n", type == 'b' ? "bc" : type == 'e' ? "ec" : "invc", mask, tm, chname, par);
+    str_unescape(mask, '\\');
+    from = newsplit(&par);
+    if (strchr(from, 's')) {
+      flags |= MASKREC_STICKY;
+      stick = 1;
+    }
+    if (strchr(from, 'p'))
+      flags |= MASKREC_PERM;
+    from = newsplit(&par);
     if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: cancel ban %s on %s", dcc[idx].nick, par, chname);
-    str_unescape(par, '\\');
+      putlog(LOG_CMDS, "@", "%s: %s %s on %s (%s:%s)", dcc[idx].nick, str_type, mask, chname, from, par);
     noshare = 1;
-    value = u_delmask('b', chan, par, 1);
-    if (!conf.bot->hub && value > 0)
-      add_delay(chan, '-', 'b', par);
+    expire_time = (time_t) atoi(tm);
+    if (expire_time != 0L)
+      expire_time += now;
+    u_addmask(type, chan, mask, from, par, expire_time, flags);
     noshare = 0;
+    if (!conf.bot->hub) {
+      void (*check_this_mask) (struct chanset_t *, char *, bool) = NULL;
+
+      check_this_mask = (type == 'b' ? check_this_ban : type == 'e' ? check_this_exempt : check_this_invite);
+
+      check_this_mask(chan, mask, stick);
+    }
   }
 }
 
-static void
-share_mns_exemptchan(int idx, char *par)
+static void share_pls_banchan(int idx, char *par)
 {
-  if (dcc[idx].status & STAT_SHARE) {
-    char *chname = NULL;
-    struct chanset_t *chan = NULL;
-    int value = 0;
-
-    chname = newsplit(&par);
-    chan = findchan_by_dname(chname);
-    shareout_but(idx, "-ec %s %s\n", chname, par);
-    if (conf.bot->hub)
-     putlog(LOG_CMDS, "@", "%s: cancel exempt %s on %s", dcc[idx].nick, par, chname);
-    str_unescape(par, '\\');
-    noshare = 1;
-    value = u_delmask('e', chan, par, 1);
-    if (!conf.bot->hub && value > 0)
-      add_delay(chan, '-', 'e', par);
-
-    noshare = 0;
-  }
+  share_pls_maskchan('b', idx, par);
 }
 
-static void
-share_mns_invitechan(int idx, char *par)
+static void share_pls_exemptchan(int idx, char *par)
 {
-  if (dcc[idx].status & STAT_SHARE) {
-    char *chname = NULL;
-    struct chanset_t *chan = NULL;
-    int value = 0;
+  share_pls_maskchan('e', idx, par);
+}
 
-    chname = newsplit(&par);
-    chan = findchan_by_dname(chname);
-    shareout_but(idx, "-invc %s %s\n", chname, par);
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: cancel invite %s on %s", dcc[idx].nick, par, chname);
-    str_unescape(par, '\\');
-    noshare = 1;
-    value = u_delmask('I', chan, par, 1);
-    if (!conf.bot->hub && value > 0)
-      add_delay(chan, '-', 'I', par);
-    noshare = 0;
-  }
+static void share_pls_invitechan(int idx, char *par)
+{
+  share_pls_maskchan('I', idx, par);
 }
 
 static void
@@ -696,230 +752,6 @@ share_mns_ignore(int idx, char *par)
     noshare = 1;
     delignore(par);
     noshare = 0;
-  }
-}
-
-static void
-share_pls_ban(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    time_t expire_time;
-    char *ban = NULL, *tm = NULL, *from = NULL;
-    int flags = 0;
-    bool stick = 0;
-
-    shareout_but(idx, "+b %s\n", par);
-    noshare = 1;
-    ban = newsplit(&par);
-    str_unescape(ban, '\\');
-    tm = newsplit(&par);
-    from = newsplit(&par);
-    if (strchr(from, 's')) {
-      flags |= MASKREC_STICKY;
-      stick = 1;
-    }
-    if (strchr(from, 'p'))
-      flags |= MASKREC_PERM;
-    from = newsplit(&par);
-    expire_time = (time_t) atoi(tm);
-    if (expire_time != 0L)
-      expire_time += now;
-    u_addmask('b', NULL, ban, from, par, expire_time, flags);
-    noshare = 0;
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: global ban %s (%s:%s)", dcc[idx].nick, ban, from, par);
-    else
-      for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
-        check_this_ban(chan, ban, stick);
-  }
-}
-
-static void
-share_pls_banchan(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    time_t expire_time;
-    int flags = 0;
-    char *ban = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-    bool stick = 0;
-    struct chanset_t *chan = NULL;
-
-    ban = newsplit(&par);
-    tm = newsplit(&par);
-    chname = newsplit(&par);
-    chan = findchan_by_dname(chname);
-    shareout_but(idx, "+bc %s %s %s %s\n", ban, tm, chname, par);
-    str_unescape(ban, '\\');
-    from = newsplit(&par);
-    if (strchr(from, 's')) {
-      flags |= MASKREC_STICKY;
-      stick = 1;
-    }
-    if (strchr(from, 'p'))
-      flags |= MASKREC_PERM;
-    from = newsplit(&par);
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: ban %s on %s (%s:%s)", dcc[idx].nick, ban, chname, from, par);
-    noshare = 1;
-    expire_time = (time_t) atoi(tm);
-    if (expire_time != 0L)
-      expire_time += now;
-    u_addmask('b', chan, ban, from, par, expire_time, flags);
-    noshare = 0;
-    if (!conf.bot->hub)
-      check_this_ban(chan, ban, stick);
-  }
-}
-
-/* Same as share_pls_ban, only for exempts.
- */
-static void
-share_pls_exempt(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    time_t expire_time;
-    char *exempt = NULL, *tm = NULL, *from = NULL;
-    int flags = 0;
-    bool stick = 0;
-
-    shareout_but(idx, "+e %s\n", par);
-    noshare = 1;
-    exempt = newsplit(&par);
-    str_unescape(exempt, '\\');
-    tm = newsplit(&par);
-    from = newsplit(&par);
-    if (strchr(from, 's')) {
-      flags |= MASKREC_STICKY;
-      stick++;
-    }
-    if (strchr(from, 'p'))
-      flags |= MASKREC_PERM;
-    from = newsplit(&par);
-    expire_time = (time_t) atoi(tm);
-    if (expire_time != 0L)
-      expire_time += now;
-    u_addmask('e', NULL, exempt, from, par, expire_time, flags);
-    noshare = 0;
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: global exempt %s (%s:%s)", dcc[idx].nick, exempt, from, par);
-    else
-      for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
-        check_this_exempt(chan, exempt, stick);
-  }
-}
-
-/* Same as share_pls_banchan, only for exempts.
- */
-static void
-share_pls_exemptchan(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    time_t expire_time;
-    int flags = 0;
-    struct chanset_t *chan = NULL;
-    char *exempt = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-    bool stick = 0;
-
-    exempt = newsplit(&par);
-    tm = newsplit(&par);
-    chname = newsplit(&par);
-    chan = findchan_by_dname(chname);
-    shareout_but(idx, "+ec %s %s %s %s\n", exempt, tm, chname, par);
-    str_unescape(exempt, '\\');
-    from = newsplit(&par);
-    if (strchr(from, 's')) {
-      flags |= MASKREC_STICKY;
-      stick++;
-    }
-    if (strchr(from, 'p'))
-      flags |= MASKREC_PERM;
-    from = newsplit(&par);
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: exempt %s on %s (%s:%s)", dcc[idx].nick, exempt, chname, from, par);
-    noshare = 1;
-    expire_time = (time_t) atoi(tm);
-    if (expire_time != 0L)
-      expire_time += now;
-    u_addmask('e', chan, exempt, from, par, expire_time, flags);
-    noshare = 0;
-    if (!conf.bot->hub)
-      check_this_exempt(chan, exempt, stick);
-  }
-}
-
-/* Same as share_pls_ban, only for invites.
- */
-static void
-share_pls_invite(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    time_t expire_time;
-    char *invite = NULL, *tm = NULL, *from = NULL;
-    int flags = 0;
-    bool stick = 0;
-
-    shareout_but(idx, "+inv %s\n", par);
-    noshare = 1;
-    invite = newsplit(&par);
-    str_unescape(invite, '\\');
-    tm = newsplit(&par);
-    from = newsplit(&par);
-    if (strchr(from, 's')) {
-      flags |= MASKREC_STICKY;
-      stick++;
-    }
-    if (strchr(from, 'p'))
-      flags |= MASKREC_PERM;
-    from = newsplit(&par);
-    expire_time = (time_t) atoi(tm);
-    if (expire_time != 0L)
-      expire_time += now;
-    u_addmask('I', NULL, invite, from, par, expire_time, flags);
-    noshare = 0;
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: global invite %s (%s:%s)", dcc[idx].nick, invite, from, par);
-    else
-      for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
-        check_this_invite(chan, invite, stick);
-  }
-}
-
-/* Same as share_pls_banchan, only for invites.
- */
-static void
-share_pls_invitechan(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    time_t expire_time;
-    int flags = 0;
-    struct chanset_t *chan = NULL;
-    char *invite = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-    bool stick = 0;
-
-    invite = newsplit(&par);
-    tm = newsplit(&par);
-    chname = newsplit(&par);
-    chan = findchan_by_dname(chname);
-    shareout_but(idx, "+invc %s %s %s %s\n", invite, tm, chname, par);
-    str_unescape(invite, '\\');
-    from = newsplit(&par);
-    if (strchr(from, 's')) {
-      flags |= MASKREC_STICKY;
-      stick++;
-    }
-    if (strchr(from, 'p'))
-      flags |= MASKREC_PERM;
-    from = newsplit(&par);
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: invite %s on %s (%s:%s)", dcc[idx].nick, invite, chname, from, par);
-    noshare = 1;
-    expire_time = (time_t) atoi(tm);
-    if (expire_time != 0L)
-      expire_time += now;
-    u_addmask('I', chan, invite, from, par, expire_time, flags);
-    noshare = 0;
-    if (!conf.bot->hub)
-      check_this_invite(chan, invite, stick);
   }
 }
 
