@@ -223,6 +223,18 @@ int socket_ipv6_to_dots(const char *ip, char *dots)
 
         dots[0] = 0;
         if (inet_pton(AF_INET6, ip, &buf) <= 0) return(-1);
+
+/*
+from lib/dns/byaddr.c
+                        cp = textname;
+                        for (i = 15; i >= 0; i--) {
+                                *cp++ = hex_digits[bytes[i] & 0x0f];
+                                *cp++ = '.';
+                                *cp++ = hex_digits[(bytes[i] >> 4) & 0x0f];
+                                *cp++ = '.';
+                        }
+
+*/
         sprintf(dots, "%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u",
                 buf.s6_addr[0], buf.s6_addr[1],
                 buf.s6_addr[2], buf.s6_addr[3],
