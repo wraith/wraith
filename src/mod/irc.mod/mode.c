@@ -30,8 +30,8 @@ do_op(char *nick, struct chanset_t *chan, int delay, int force)
     return 0;
 
   if (channel_fastop(chan) || channel_take(chan)) {
-    add_mode(chan, '+', 'o', nick);
-//    add_cookie(chan, nick);
+//    add_mode(chan, '+', 'o', nick);
+    add_cookie(chan, nick);
   } else {
     add_cookie(chan, nick);
   }
@@ -57,7 +57,6 @@ flush_cookies(struct chanset_t *chan, int pri)
       *p++ = 'o';
       postsize -= egg_strcatn(post, chan->ccmode[i].op, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
-
       free(chan->ccmode[i].op), chan->ccmode[i].op = NULL;
     }
   }
@@ -70,6 +69,7 @@ flush_cookies(struct chanset_t *chan, int pri)
   *p = 0;
 
   if (post[0]) {
+    char *cookie = NULL;
     /* remove the trailing space... */
     size_t myindex = (sizeof(post) - 1) - postsize;
 
@@ -79,14 +79,10 @@ flush_cookies(struct chanset_t *chan, int pri)
     egg_strcatn(out, " ", sizeof(out));
     egg_strcatn(out, post, sizeof(out));
     egg_strcatn(out, " ", sizeof(out));
-    egg_strcatn(out, "*!*@NEW.MULTI.BOT.COOKIE.OPS.COMING.SOON", sizeof(out));
-/*    char *tmp = NULL;
 
-    tmp = calloc(1, strlen(chan->name) + 200);
-    makeopline(chan, nick, tmp);
-    dprintf(DP_MODE, tmp);
-    free(tmp);
-*/
+    cookie = makecookie(chan->dname, botname);
+    egg_strcatn(out, cookie, sizeof(out));
+    free(cookie);
   }
   if (out[0]) {
     if (pri == QUICK) {
@@ -338,7 +334,6 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
     }
 
     /* op-type mode change */
-
     /* for cookie ops, use ccmode instead of cmode */
     if (cookie) {
       for (i = 0; i < (modesperline - 1); i++)
@@ -417,6 +412,14 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
     modes--;
   if (modes < 1)
     flush_mode(chan, NORMAL);   /* Full buffer! Flush modes. */
+ 
+  /* flush full cookie queue */
+  modes = modesperline - 1;
+  for (i = 0; i < (modesperline - 1); i++)
+    if (chan->ccmode[i].op)
+      modes--;
+  if (modes < 1)
+    flush_cookies(chan, NORMAL);
 }
 
 /*
@@ -984,22 +987,19 @@ gotmode(char *from, char *msg)
               if (unbans != 1 || (strncmp(modes[modecnt - 1], "-b", 2))) {
                 isbadop = 1;
               } else {
-                char enccookie[25] = "", plaincookie[25] = "", key[NICKLEN + 20] = "", goodcookie[25] = "";
+                char cookie[20] = "", *goodcookie = NULL;
 
-                /* -b *!*@[...] */
-                strncpyz(enccookie, (char *) &(modes[modecnt - 1][8]), sizeof(enccookie));
-                p = enccookie + strlen(enccookie) - 1;
-                strcpy(key, nick);
-                strcat(key, SALT2);
-                p = decrypt_string(key, enccookie);
-                strncpyz(plaincookie, p, sizeof(plaincookie));
-                free(p);
+                /* -b hash!rand@time */
+                strncpyz(cookie, (char *) &(modes[modecnt - 1][3]), sizeof(cookie));
+                checkcookie(chan->dname, nick, cookie);
+
                 /*
                  * last 6 digits of time
                  * last 5 chars of nick
                  * last 5 regular chars of chan
                  */
-                makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);	/*[0]+3 is first +o nick */
+/*
+                makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);	
                 if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
                   isbadop = 2;
                 else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
@@ -1008,18 +1008,18 @@ gotmode(char *from, char *msg)
                   char ltmp[20] = "";
                   time_t optime, off;
 
-                  /* this makes NO sense, optime should just be ltmp[4]-... but its not... ??? */
                   sprintf(ltmp, "%010li", now + timesync);
                   strncpyz((char *) &ltmp[4], plaincookie, 7);
                   optime = atol(ltmp);
                   off = (now + timesync - optime);
 
                   if (chan->cookie_time_slack && (abs(off) > chan->cookie_time_slack)) {
-                    /* isbadop = 4; */
+                    // isbadop = 4;
                     putlog(LOG_DEBUG, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nick,
                            optime, off);
                   }
                 }
+*/
               }
               if (isbadop) {
                 char trg[NICKLEN] = "";

@@ -102,27 +102,115 @@ dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
 
 }
 
+/* this is to become the NEW makeplaincookie */
+static char *salt2 = NULL;
 
-
-void
-makeopline(struct chanset_t *chan, char *nick, char *buf)
+static char *
+makecookie(char *chn, char *bnick)
 {
-  char plaincookie[20] = "", enccookie[48] = "", *p = NULL, nck[20] = "", key[200] = "";
-  memberlist *m = NULL;
+  char *buf = NULL, randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "";
 
-  if ((m = ismember(chan, nick)))
-    strcpy(nck, m->nick);
-  else
-    strcpy(nck, nick);
-  makeplaincookie(chan->dname, nck, plaincookie);
-  strcpy(key, botname);
-  strcat(key, SALT2);
-/*  putlog(LOG_DEBUG, "*", "Encrypting opline for %s with cookie %s and key %s", nck, plaincookie, key); */
-  p = encrypt_string(key, plaincookie);
-  strcpy(enccookie, p);
-  free(p);
-  sprintf(buf, "MODE %s +o-b %s *!*@<%s>\n", chan->name, nck, enccookie);
+  if (!salt2)
+    salt2 = strdup(SALT2);
+
+  chname = strdup(chn);
+
+  make_rand_str(randstring, 4);
+
+  /* &ts[4] is now last 6 digits of time */
+  sprintf(ts, "%010li", now + timesync);
+  
+  /* Only use first 3 chars of chan */
+  if (strlen(chname) > 2)
+    chname[3] = 0;
+  strtoupper(chname);
+
+  sprintf(tohash, "%c%s%s%s%s%c", salt2[0], bnick, chname, &ts[4], randstring, salt2[15]);
+  hash = MD5(tohash);
+  buf = calloc(1, 20);
+  sprintf(buf, "%c%c%c!%s@%s", hash[8], hash[16], hash[18], randstring, ts);
+  /* sprintf(buf, "%c/%s!%s@%X", hash[16], randstring, ts, BIT31); */
+  free(chname);
+  return buf;
 }
+
+static int
+checkcookie(char *chn, char *bnick, char *cookie)
+{
+  char randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "", *p = NULL;
+  time_t optime = 0;
+  int goodhash = 0, goodts = 0, goodobscure = 0;
+  if (!salt2)
+    salt2 = strdup(SALT2);
+
+  chname = strdup(chn);
+  p = cookie;
+  p += 4; /* has! */
+  strncpyz(randstring, p, sizeof(randstring));
+  p += 5; /* rand@ */
+  /* &ts[4] is now last 6 digits of time */
+  strncpyz(ts, p, sizeof(ts));
+  optime = atol(ts);
+
+  /* Only use first 3 chars of chan */
+  if (strlen(chname) > 2)
+    chname[3] = 0;
+  strtoupper(chname);
+  putlog(LOG_MISC, "*", "randstring: %s ts: %s", randstring, ts);
+  /* hash!rand@ts */
+  sprintf(tohash, "%c%s%s%s%s%c", salt2[0], bnick, chname, &ts[4], randstring, salt2[15]);
+  putlog(LOG_MISC, "*", "tohash: %s", tohash);
+  hash = MD5(tohash);
+  if (hash[8] == cookie[0] && hash[16] == cookie[1] && hash[18] == cookie[2])
+    goodhash = 1;
+  else
+    return 1;
+  putlog(LOG_MISC, "*", "slack: %d", ((now + timesync) - optime));
+  if (((now + timesync) - optime) < 300)
+    goodts = 1;
+  else
+    return 2;
+  goodobscure = 1;
+  if (goodhash && goodts && goodobscure)
+    putlog(LOG_MISC, "*", "GOOD COOKIE!");
+
+  return 0;
+}
+
+/*
+   plain cookie:
+   Last 6 digits of time
+   Last 5 chars of nick
+   Last 4 regular chars of chan
+ */
+static void 
+makeplaincookie(char *chname, char *nick, char *buf)
+{
+  char work[256] = "", work2[256] = "";
+  int i, n;
+
+  sprintf(work, "%010li", (now + timesync));
+  strcpy(buf, (char *) &work[4]);
+  work[0] = 0;
+  if (strlen(nick) < 5)
+    while (strlen(work) + strlen(nick) < 5)
+      strcat(work, " ");
+  else
+    strcpy(work, (char *) &nick[strlen(nick) - 5]);
+  strcat(buf, work);
+
+  n = 3;
+  for (i = strlen(chname) - 1; (i >= 0) && (n >= 0); i--)
+    if (((unsigned char) chname[i] < 128) && ((unsigned char) chname[i] > 32)) {
+      work2[n] = tolower(chname[i]);
+      n--;
+    }
+  while (n >= 0)
+    work2[n--] = ' ';
+  work2[4] = 0;
+  strcat(buf, work2);
+}
+
 
 /*
    opreq = o #chan nick

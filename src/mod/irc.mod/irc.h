@@ -21,7 +21,9 @@
 
 
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
-static void makeopline(struct chanset_t *, char *, char *);
+static char *makecookie(char *, char *);
+static int checkcookie(char *, char *, char *);
+static void makeplaincookie(char *, char *, char *);
 static int me_voice(struct chanset_t *);
 static int any_ops(struct chanset_t *);
 static char *getchanmode(struct chanset_t *);
