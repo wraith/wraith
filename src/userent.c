@@ -750,6 +750,7 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 
 }
+
 static int botaddr_pack(struct userrec *u, struct user_entry *e)
 {
   char work[1024] = "";
@@ -810,7 +811,9 @@ static int botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   Assert(u);
   if (bi && !noshare && !(u->flags & USER_UNSHARED)) {
-    shareout(NULL, STR("c BOTADDR %s %s %d %d %d %s\n"),u->handle, (bi->address && bi->address[0]) ? bi->address : STR("127.0.0.1"), bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
+    shareout(NULL, STR("c BOTADDR %s %s %d %d %d %s\n"),u->handle, 
+            (bi->address && bi->address[0]) ? bi->address : STR("127.0.0.1"), 
+            bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
   }
   return 1;
 }
@@ -824,7 +827,8 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
   if (glob_admin(fr)) {
     register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
     if (bi->address && bi->hublevel && bi->hublevel != 0)
-      dprintf(idx, STR("  ADDRESS: %.70s:%d\n"), bi->address, bi->telnet_port);
+      dprintf(idx, STR("  ADDRESS: %.70s\n"), bi->address);
+      dprintf(idx, STR("     port: %d\n"), bi->telnet_port);
     if (bi->hublevel && bi->hublevel != 0)
       dprintf(idx, STR("  HUBLEVEL: %d\n"), bi->hublevel);
     if (bi->uplink && bi->uplink[0])
