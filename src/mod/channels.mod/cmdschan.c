@@ -961,7 +961,7 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
   strcpy(buf, "+inactive ");
   if (par[0])
     strncat(buf, par, sizeof(buf));
-  if (tcl_channel_add(NULL, chname, buf) == ERROR) {
+  if (channel_add(NULL, chname, buf) == ERROR) {
     dprintf(idx, "Invalid channel.\n");
     return;
   }
@@ -1353,7 +1353,7 @@ static void cmd_cycle(struct userrec *u, int idx, char *par)
   sprintf(buf2, "cycle %s %d", chname, delay); //this just makes the bot PART
   putallbots(buf2);
 #ifdef LEAF
-  do_chanset(chan, "+inactive", 2);
+  do_chanset(chan, "+inactive", DO_LOCAL);
   dprintf(DP_SERVER, "PART %s\n", chan->name);
   chan->channel.jointime = ((now + delay) - server_lag);
 #endif /* LEAF */
@@ -1389,7 +1389,7 @@ static void cmd_down(struct userrec *u, int idx, char *par)
 
 static void cmd_pls_chan(struct userrec *u, int idx, char *par)
 {
-  char *chname = NULL, buf2[1024] = "", buf[2048] = "";
+  char *chname = NULL, result[1024] = "", buf[2048] = "";
   struct chanset_t *chan = NULL;
 
   putlog(LOG_CMDS, "*", "#%s# +chan %s", dcc[idx].nick, par);
@@ -1400,14 +1400,14 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
   }
 
   chname = newsplit(&par);
-  sprintf(buf2, "cjoin %s %s", chname, par);
+  sprintf(buf, "cjoin %s %s", chname, par);
 
   if (findchan_by_dname(chname)) {
-    putallbots(buf2);
+    putallbots(buf);
     dprintf(idx, "That channel already exists!\n");
     return;
   } else if ((chan = findchan(chname))) {
-    putallbots(buf2);
+    putallbots(buf);
     /* This prevents someone adding a channel by it's unique server
      * name <cybah>
      */
@@ -1415,22 +1415,24 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
     return;
   }
 
-  if (tcl_channel_add(buf, chname, par) == ERROR) {/* drummer */
+  if (channel_add(result, chname, par) == ERROR) {
     dprintf(idx, "Invalid channel or channel options.\n");
-    if (buf && buf[0])
-      dprintf(idx, "%s\n", buf);
+    if (result && result[0])
+      dprintf(idx, "%s\n", result);
   } else {
     if ((chan = findchan_by_dname(chname))) {
       char *tmp = NULL;
 
-      putallbots(buf2);
-      tmp = malloc(7 + 1 + strlen(dcc[idx].nick) + 1);
+      putallbots(buf);
+
+      tmp = calloc(1, 7 + 1 + strlen(dcc[idx].nick) + 1);
       sprintf(tmp, "addedby %s", dcc[idx].nick);
-      do_chanset(chan, tmp, 1);
+      do_chanset(chan, tmp, DO_LOCAL | DO_NET );
       free(tmp);
+
       tmp = calloc(1, 7 + 1 + 10 + 1);
       sprintf(tmp, "addedts %lu", now);
-      do_chanset(chan, tmp, 1);
+      do_chanset(chan, tmp, DO_LOCAL | DO_NET );
       free(tmp);
     }
 #ifdef HUB
@@ -1772,7 +1774,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
       while (list[0][0]) {
 	if (list[0][0] == '+' || list[0][0] == '-' ||
 	    (!strcmp(list[0], "dont-idle-kick"))) {
-	  if (tcl_channel_modify(0, chan, 1, list) == OK) {
+	  if (channel_modify(0, chan, 1, list) == OK) {
 	    strcat(answers, list[0]);
 	    strcat(answers, " ");
 	  } else if (!all || !chan->next)
@@ -1791,7 +1793,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
   	 * circumstances, so save it now.
 	 */
         parcpy = strdup(par);
-        if (tcl_channel_modify(0, chan, 2, list) == OK) {
+        if (channel_modify(0, chan, 2, list) == OK) {
 	  strcat(answers, list[0]);
 	  strcat(answers, " { ");
 	  strcat(answers, parcpy);
@@ -1805,7 +1807,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
         struct chanset_t *my_chan = NULL;
 
         if ((my_chan = findchan_by_dname(chname)))
-          do_chanset(my_chan, bak, 0);
+          do_chanset(my_chan, bak, DO_NET);
 	dprintf(idx, "Successfully set modes { %s } on %s.\n", answers, chname);
 #ifdef HUB
         write_userfile(idx);
@@ -1817,7 +1819,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
         chan = chan->next;
     }
     if (all && answers[0]) {
-      do_chanset(NULL, bak, 0);		/* NULL does all */
+      do_chanset(NULL, bak, DO_NET);		
       dprintf(idx, "Successfully set modes { %s } on all channels.\n", answers);
 #ifdef HUB
         write_userfile(idx);

@@ -827,7 +827,7 @@ int readuserfile(char *file, struct userrec **ret)
              newsplit(&options);
              options[strlen(options) - 1] = 0;
 /* Above is a hack to remove { } */
-             if ((func[37]) (resultbuf, chan, options) != OK) {	/* tcl_channel_add() */
+             if ((func[37]) (resultbuf, chan, options) != OK) {	/* channel_add() */
 printf("BUF: %s\n", resultbuf);
                putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
                free(my_ptr);

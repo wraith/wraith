@@ -1,6 +1,9 @@
 #ifndef _CHANPROG_H
 #define _CHANPROG_H
 
+#define DO_LOCAL	1
+#define DO_NET		2
+
 #ifndef MAKING_MODS
 extern struct chanset_t *chanset;
 extern char botname[];

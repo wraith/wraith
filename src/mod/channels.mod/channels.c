@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include "src/mod/module.h"
 #include "src/mod/irc.mod/irc.h"
+#include "src/chanprog.h"
 
 static Function *global = NULL, *irc_funcs = NULL;
 
@@ -92,7 +93,7 @@ static void check_should_lock()
   if ((hc >= H) && (lc <= L)) {
     for (chan = chanset; chan; chan = chan->next) {
       if (!channel_closed(chan)) {
-        do_chanset(chan, STR("+closed chanmode +stni"), 1);
+        do_chanset(chan, STR("+closed chanmode +stni"), DO_LOCAL | DO_NET);
 #ifdef G_BACKUP
         chan->channel.backup_time = now + 30;
 #endif /* G_BACKUP */
@@ -131,7 +132,7 @@ static void got_cset(char *botnick, char *code, char *par)
 
   while (chan) {
     chname = chan->dname;
-    do_chanset(chan, par, 2);
+    do_chanset(chan, par, DO_LOCAL);
     if (chan->status & CHAN_BITCH) {
       module_entry *me;
       if ((me = module_find("irc", 0, 0)))
@@ -174,7 +175,7 @@ static void got_cjoin(char *botnick, char *code, char *par)
    return;
   }
 
-  if (tcl_channel_add(NULL, chname, par) == ERROR) /* drummer */
+  if (channel_add(NULL, chname, par) == ERROR) /* drummer */
     putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s", botnick, chname);
   else {
 #ifdef HUB
@@ -199,7 +200,7 @@ static void got_cycle(char *botnick, char *code, char *par)
   if (par[0])
     delay = atoi(newsplit(&par));
   
-  do_chanset(chan, "+inactive", 2);
+  do_chanset(chan, "+inactive", DO_LOCAL);
   dprintf(DP_SERVER, "PART %s\n", chan->name);
   chan->channel.jointime = ((now + delay) - server_lag); 		/* rejoin in 10 seconds */
 }
@@ -241,7 +242,7 @@ void got_kl(char *botnick, char *code, char *par)
     struct chanset_t *ch = NULL;
 
     for (ch = chanset; ch; ch = ch->next)
-      do_chanset(ch, STR("+closed +backup +bitch"), 1);
+      do_chanset(ch, STR("+closed +backup +bitch"), DO_LOCAL | DO_NET);
   /* FIXME: we should randomize nick here ... */
   }
 #endif /* S_AUTOLOCK */
@@ -849,8 +850,8 @@ static Function channels_table[] =
   (Function) u_delinvite,
   /* 36 - 39 */
   (Function) u_addinvite,
-  (Function) tcl_channel_add,
-  (Function) tcl_channel_modify,
+  (Function) channel_add,
+  (Function) channel_modify,
   (Function) write_exempts,
   /* 40 - 43 */
   (Function) write_invites,

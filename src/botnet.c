@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "botnet.h"
+#include "chanprog.h"
 #include "net.h"
 #include "users.h"
 #include "misc.h"
@@ -90,7 +91,7 @@ void check_should_backup()
 
   for (chan = chanset; chan; chan = chan->next) {
     if (chan->channel.backup_time && (chan->channel.backup_time < now) && !channel_backup(chan)) {
-      do_chanset(chan, STR("+backup"), 1);
+      do_chanset(chan, STR("+backup"), DO_LOCAL | DO_NET);
       chan->channel.backup_time = 0;
     }
   }

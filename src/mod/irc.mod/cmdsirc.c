@@ -704,7 +704,7 @@ ContextNote("!mdop!");
   }
   if (bitch && !simul && chan) {
     chan->status |= CHAN_BITCH;
-    do_chanset(chan, STR("+bitch"), 1);
+    do_chanset(chan, STR("+bitch"), DO_LOCAL | DO_NET);
   }
   free(targets);
   free(chanbots);

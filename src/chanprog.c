@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "chanprog.h"
+#include "src/mod/channels.mod/channels.h"
 #include "rfc1459.h"
 #include "net.h"
 #include "misc.h"
@@ -703,22 +704,18 @@ int shouldjoin(struct chanset_t *chan)
 }
 
 /* do_chanset() set (options) on (chan)
- * local: 0 - send out over botnet only
- * local: 1 - ALSO set locally
- * local: 2 - ONLY set locally
+ * USES DO_LOCAL|DO_NET bits.
  */
 void do_chanset(struct chanset_t *chan, char *options, int local)
 {
-  char *buf = NULL;
-  module_entry *me = NULL;
 
-  /* send out over botnet. */
-  if (local != 2) {
+  if (local & DO_NET) {
+    char *buf = NULL;
          /* malloc(options,chan,'cset ',' ',+ 1) */
     if (chan)
-      buf = malloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+      buf = calloc(1, strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
     else
-      buf = malloc(strlen(options) + 1 + 5 + 1 + 1);
+      buf = calloc(1, strlen(options) + 1 + 5 + 1 + 1);
 
     strcat(buf, "cset ");
     if (chan)
@@ -733,11 +730,8 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
     free(buf);
   }
 
-  /* now set locally, hopefully it works */
-  if (local && (me = module_find("channels", 0, 0))) {
-  /* tcl_channel_modify(0, chan, 1, options) */
-    Function *func = me->funcs;
-    char *buf2 = NULL, *bak = NULL;
+  if (local & DO_LOCAL) {
+    char *buf2 = NULL, *bak = NULL; 
     struct chanset_t *ch = NULL;
     int all = 0;
 
@@ -748,9 +742,24 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
       ch = chan;
 
     bak = options;
-    buf2 = malloc(strlen(options) + 1);
+    buf2 = malloc(strlen(options) + 1); 
 
     while (ch) {
+/* expiremental code 
+      const char **list = NULL;
+      int items = 0;
+      char result[1024] = "";
+
+      if (SplitList(result, options, &items, &item) != OK) {
+        putlog(LOG_MISC, "*", "Error parsing channel options: %s", result);
+        return ERROR;
+
+      if ((channel_modify(result, chan, items, (char **) item) != OK) && !loading) {
+        ret = ERROR;
+      }
+
+  free(item);
+*/
       char *list[2] = { NULL, NULL };
 
       strcpy(buf2, bak);
@@ -758,13 +767,13 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
       list[0] = newsplit(&options);
       while (list[0][0]) {
         if (list[0][0] == '+' || list[0][0] == '-' || (!strcmp(list[0], "dont-idle-kick"))) {
-          (func[38]) (NULL, ch, 1, list);		/* tcl_channel_modify() */
+          channel_modify(NULL, ch, 1, list);
           list[0] = newsplit(&options);
           continue;
         }
-	/* chanints */
+        /* chanints */
         list[1] = options;
-        (func[38]) (NULL, ch, 2, list);			/* tcl_channel_modify() */
+        channel_modify(NULL, ch, 2, list);
         break;
       }
       if (all)

@@ -424,7 +424,7 @@ int write_userfile(int idx)
     free(new_userfile);
     return 2;
   }
-//  putlog(LOG_MISC, "*", USERF_WRITING);
+  /*  putlog(LOG_MISC, "*", USERF_WRITING); */
   if (sort_users)
     sort_userlist();
   tt = now;

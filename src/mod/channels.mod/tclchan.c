@@ -3,7 +3,9 @@
  *
  */
 
-int FindElement(char *resultBuf, const char *list, int listLength, const char **elementPtr, const char **nextPtr, int *sizePtr, int *bracePtr)
+static int FindElement(char *resultBuf, const char *list, int listLength, 
+                       const char **elementPtr, const char **nextPtr, 
+                       int *sizePtr, int *bracePtr)
 {
     const char *p = list;
     const char *elemStart = NULL;	/* Points to first byte of first element. */
@@ -281,7 +283,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
 
 /* Parse options for a channel.
  */
-static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, char **item)
+int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 {
   int i, x = 0, found;
 #ifdef LEAF
@@ -728,7 +730,7 @@ static void clear_channel(struct chanset_t *chan, int reset)
 
 /* Create new channel and parse commands.
  */
-static int tcl_channel_add(char *result, char *newname, char *options)
+static int channel_add(char *result, char *newname, char *options)
 {
   struct chanset_t *chan = NULL;
   int items = 0;
@@ -816,7 +818,7 @@ static int tcl_channel_add(char *result, char *newname, char *options)
    * if a user goes back to an eggdrop that no-longer supports certain
    * (channel) options.
    */
-  if ((tcl_channel_modify(result, chan, items, (char **) item) != OK) && !loading) {
+  if ((channel_modify(result, chan, items, (char **) item) != OK) && !loading) {
     ret = ERROR;
   }
 
