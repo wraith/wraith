@@ -110,8 +110,6 @@ typedef struct {
 /* end of langauge addon */
 
 extern struct dcc_table 		DCC_SEND, DCC_FORK_SEND;
-#ifdef HUB
 extern struct dcc_table			DCC_GET, DCC_GET_PENDING;
-#endif /* HUB */
 
 #endif				/* _EGG_MOD_TRANSFER_TRANSFER_H */

@@ -40,15 +40,12 @@ static unsigned int dcc_block = 0;	/* Size of one dcc block */
 /*
  * Prototypes
  */
-#ifdef HUB
 static void dcc_get_pending(int, char *, int);
-#endif /* HUB */
 
 
 /*
  *   Misc functions
  */
-#ifdef HUB
 /* Replaces all spaces with underscores (' ' -> '_').  The returned buffer
  * needs to be freed after use.
  */
@@ -98,7 +95,6 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
   }
   return pending_data;
 }
-#endif /* HUB */
 
 void eof_dcc_fork_send(int idx)
 {
@@ -219,7 +215,6 @@ static void eof_dcc_send(int idx)
   }
 }
 
-#ifdef HUB
 /* Determine byte order. Used for resend DCC startup packets.
  */
 static inline u_8bit_t byte_order_test(void)
@@ -377,9 +372,7 @@ void dcc_get(int idx, char *buf, int len)
         dcc[y].status |= STAT_UPDATED;
       }
       putlog(LOG_BOTS, "*", "Completed binary file send to %s", dcc[y].nick);
-#ifdef HUB
       bupdating = 0;
-#endif
     }
     lostdcc(idx);
     return;
@@ -435,9 +428,7 @@ void eof_dcc_get(int idx)
     /* Note: no need to unlink the xfer file, as it's already unlinked. */
     /* Drop that bot */
     dcc[y].status &= ~STAT_SENDINGU;
-#ifdef HUB
     bupdating = 0;
-#endif
 /*
     dprintf(-dcc[y].sock, "bye\n");
     egg_snprintf(s, sizeof s, "Disconnected %s (aborted binary transfer)",
@@ -456,7 +447,6 @@ void eof_dcc_get(int idx)
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
-#endif /* HUB */
 
 void dcc_send(int idx, char *buf, int len)
 {
@@ -493,7 +483,6 @@ void dcc_send(int idx, char *buf, int len)
   }
 }
 
-#ifdef HUB
 static void transfer_get_timeout(int i)
 {
   char xx[1024] = "";
@@ -557,7 +546,6 @@ static void transfer_get_timeout(int i)
   killsock(dcc[i].sock);
   lostdcc(i);
 }
-#endif /* HUB */
 
 void tout_dcc_send(int idx)
 {
@@ -592,7 +580,6 @@ void tout_dcc_send(int idx)
   lostdcc(idx);
 }
 
-#ifdef HUB
 void display_dcc_get(int idx, char *buf)
 {
   if (dcc[idx].status == dcc[idx].u.xfer->length)
@@ -607,7 +594,6 @@ void display_dcc_get_p(int idx, char *buf)
 {
   sprintf(buf,TRANSFER_SEND_WAITED, now - dcc[idx].timeval, dcc[idx].u.xfer->origname);
 }
-#endif /* HUB */
 
 void display_dcc_send(int idx, char *buf)
 {
@@ -638,7 +624,6 @@ void out_dcc_xfer(int idx, char *buf, void *x)
 {
 }
 
-#ifdef HUB
 static void outdone_dcc_xfer(int idx)
 {
   if (dcc[idx].u.xfer->block_pending)
@@ -646,7 +631,6 @@ static void outdone_dcc_xfer(int idx)
 	    pump_file_to_sock(dcc[idx].u.xfer->f, dcc[idx].sock,
 			      dcc[idx].u.xfer->block_pending);
 }
-#endif /* HUB */
 
 struct dcc_table DCC_SEND =
 {
@@ -693,7 +677,6 @@ void dcc_fork_send(int idx, char *x, int y)
     putlog(LOG_MISC, "*", TRANSFER_DCC_CONN, dcc[idx].u.xfer->origname, s1);
 }
 
-#ifdef HUB
 struct dcc_table DCC_GET =
 {
   "GET",
@@ -892,63 +875,7 @@ int raw_dcc_send(char *filename, char *nick, char *from, char *dir, int *idx)
 {
   return raw_dcc_resend_send(filename, nick, from, dir, 0, idx);
 }
-#endif /* HUB */
 
-#ifdef LEAF
-/*
- *    CTCP functions
- */
-
-/* This handles DCC RESUME requests.
- */
-/* NOT EVEN USED :D 
-static int ctcp_DCC_RESUME(char *nick, char *from, char *handle, char *object, char *keyword, char *text)
-{
-  char *action = NULL, *fn = NULL, buf[SGRAB + 2] = "", *msg = buf;
-  int i, port;
-  unsigned long offset;
-
-  strcpy(msg, text);
-  action = newsplit(&msg);
-  if (egg_strcasecmp(action, "RESUME"))
-    return BIND_RET_LOG;
-  fn = newsplit(&msg);
-  port = atoi(newsplit(&msg));
-  offset = my_atoul(newsplit(&msg));
-  // Search for existing SEND 
-  for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type && (dcc[i].type == &DCC_GET_PENDING) && (!rfc_casecmp(dcc[i].nick, nick)) && (dcc[i].port == port)) 
-      break;
-  // No matching transfer found?
-  if (i == dcc_total)
-    return BIND_RET_LOG;
-
-  if (dcc[i].u.xfer->length <= offset) {
-    char *p = strrchr(dcc[i].u.xfer->origname, '/');
-
-    dprintf(DP_HELP,TRANSFER_DCC_IGNORED, nick, p ? p + 1 : dcc[i].u.xfer->origname);
-    return BIND_RET_LOG;
-  }
-  dcc[i].u.xfer->type = XFER_RESUME_PEND;
-  dcc[i].u.xfer->offset = offset;
-  dprintf(DP_HELP, "PRIVMSG %s :\001DCC ACCEPT %s %d %u\001\n", nick, fn, port, offset);
-  // Now we wait for the client to connect.
-  return BIND_RET_BREAK;
-}
-
-static cmd_t transfer_ctcps[] =
-{
-  {"DCC",	"",	ctcp_DCC_RESUME,	"transfer:DCC"},
-  {NULL,	NULL,	NULL,			NULL}
-};
-*/
-/* Add our CTCP bindings if the server module is loaded. */
-static int server_transfer_setup(char *mod)
-{
-  /* add_builtins("ctcp", transfer_ctcps); */
-  return 1;
-}
-#endif /* LEAF */
 /*
  *   Module functions
  */
@@ -963,7 +890,4 @@ void transfer_report(int idx, int details)
 
 void transfer_init()
 {
-#ifdef LEAF
-  server_transfer_setup(NULL);
-#endif /* LEAF */
 }
