@@ -33,6 +33,7 @@ This is a summary of ChangeLog basically.
 * Optimized lots of code to use less CPU
 * +c bots will now boot users when they lose +c
 * Fixed a bug with removing hosts while having +d or +k
+* Fixed an obscure memory bug with the perm-owner list
 
 1.1.9
 

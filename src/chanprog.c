@@ -495,10 +495,13 @@ void load_internal_users()
 	  u = get_user_by_handle(userlist, hand);
 	  set_user(&USERENTRY_PASS, u, pass);
 	  while (hosts) {
+            char x[1024] = "";
+
 	    ln = strchr(ln, ' ');
 	    if (ln)
 	      *ln++ = 0;
-	    set_user(&USERENTRY_HOSTS, u, hosts);
+            sprintf(x, "-telnet!%s", hosts);
+	    set_user(&USERENTRY_HOSTS, u, x);
 	    hosts = ln;
 	  }
 	}

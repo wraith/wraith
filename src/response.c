@@ -10,7 +10,7 @@
 #include "main.h"
 #include "responses.h"
 
-static int response_totals[RES_TYPES];
+static int response_totals[RES_TYPES + 1];
 
 void
 init_responses()
