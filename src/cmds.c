@@ -1367,7 +1367,7 @@ static void cmd_chpass(int idx, char *par)
     set_user(&USERENTRY_PASS, u, NULL);
     dprintf(idx, "Removed password.\n");
   } else {
-    bool good = 0;
+    bool good = 0, randpass = 0;
     char *newpass = newsplit(&par), pass[MAXPASSLEN] = "";
     size_t l = strlen(newpass);
 
@@ -1375,6 +1375,7 @@ static void cmd_chpass(int idx, char *par)
       newpass[MAXPASSLEN] = 0;
     if (!strcmp(newpass, "rand")) {
       make_rand_str(pass, MAXPASSLEN);
+      randpass = 1;
       good = 1;
     } else {
       if (goodpass(newpass, idx, NULL)) {
@@ -1387,7 +1388,7 @@ static void cmd_chpass(int idx, char *par)
 
     if (good) {
       set_user(&USERENTRY_PASS, u, pass);
-      putlog(LOG_CMDS, "*", "#%s# chpass %s [something]", dcc[idx].nick, handle);
+      putlog(LOG_CMDS, "*", "#%s# chpass %s [%s]", dcc[idx].nick, handle, randpass ? "random" : "something");
       dprintf(idx, "Password for '%s' changed to: %s\n", handle, pass);
 #ifdef HUB
       write_userfile(idx);
@@ -1424,11 +1425,13 @@ static void cmd_chsecpass(int idx, char *par)
   } else {
     char *newpass = newsplit(&par), pass[MAXPASSLEN + 1] = "";
     size_t l = strlen(newpass);
+    bool randpass = 0;
 
     if (l > MAXPASSLEN)
       newpass[MAXPASSLEN] = 0;
     if (!strcmp(newpass, "rand")) {
       make_rand_str(pass, MAXPASSLEN);
+      randpass = 1;
     } else {
       if (strlen(newpass) < 6) {
         dprintf(idx, "Please use at least 6 characters.\n");
@@ -1440,7 +1443,7 @@ static void cmd_chsecpass(int idx, char *par)
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
     set_user(&USERENTRY_SECPASS, u, pass);
-    putlog(LOG_CMDS, "*", "#%s# chsecpass %s [something]", dcc[idx].nick, handle);
+    putlog(LOG_CMDS, "*", "#%s# chsecpass %s [%s]", dcc[idx].nick, handle, randpass ? "random" : "something");
     dprintf(idx, "Secpass for '%s' changed to: %s\n", handle, pass);
 #ifdef HUB
     write_userfile(idx);
