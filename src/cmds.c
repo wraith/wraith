@@ -1507,9 +1507,9 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
       dprintf(idx, STR("You can't change a share bot's password.\n"));
     else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) &&
 	     egg_strcasecmp(handle, dcc[idx].nick))
-      dprintf(idx, STR("You can't change a bot owner's password.\n"));
+      dprintf(idx, STR("You can't change a bot owner's secpass.\n"));
     else if (isowner(handle) && egg_strcasecmp(dcc[idx].nick, handle))
-      dprintf(idx, STR("You can't change a permanent bot owner's password.\n"));
+      dprintf(idx, STR("You can't change a permanent bot owner's secpass.\n"));
     else if (!par[0]) {
       putlog(LOG_CMDS, "*", STR("#%s# chsecpass %s [nothing]"), dcc[idx].nick,
 	     handle);
