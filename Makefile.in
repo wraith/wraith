@@ -66,9 +66,6 @@ MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
 MAKE_UTILS_NR = $(MAKE) 'CC=$(CC)' 'STRIP=touch' \
 'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD) -g'
 
-MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
-'STRIP=$(STRIP)' 'CFLGS=$(DEBCFLAGS) $(CFLGS)'
-
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
 all:
@@ -113,12 +110,6 @@ tar: distrib
 	ls -al $(DISTRIB).tgz
 #	rm -rf $(DISTRIB)/
 #	cd ../ && rm -rf distrib/
-
-depend:
-#	@cat /dev/null > lush.h
-	@cd src && $(MAKE_DEPEND) depend
-	@cd src/mod && $(MAKE_DEPEND) depend
-	@cd src/compat && $(MAKE_DEPEND) depend
 
 eggautoconf:
 	@$(modconf) eggautoconf
@@ -200,16 +191,6 @@ utils: makesettings stringfix makehelp
 
 dostrings: stringfix
 	@misc/dostrings
-
-depleaf:
-	+@cd src && $(MAKE_DEPEND) depleaf
-	+@cd src/mod && $(MAKE_DEPEND) depleaf
-	+@cd src/compat && $(MAKE_DEPEND) depleaf
-
-dephub:
-	+@cd src && $(MAKE_DEPEND) dephub
-	+@cd src/mod && $(MAKE_DEPEND) dephub
-	+@cd src/compat && $(MAKE_DEPEND) dephub
 
 general: makesettings packconf salt help dostrings config
 
