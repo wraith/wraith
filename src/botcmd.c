@@ -868,9 +868,9 @@ static void bot_thisbot(int idx, char *par)
   strcpy(dcc[idx].nick, par);
 }
 
+#ifdef HUB
 static void bot_hublog(char *botnick, char *code, char *msg)
 {
-#ifdef HUB
   char *par = NULL, *parp;
   par = parp = strdup(msg);
   if (egg_isdigit(par[0])) {
@@ -881,8 +881,8 @@ static void bot_hublog(char *botnick, char *code, char *msg)
     putlog(LOG_ERRORS, "*", "Malformed HL line from %s: %s %s", botnick, code, par);
   }
   free(parp);
-#endif /* HUB */
 }
+#endif /* HUB */
 
 /* Used to send a direct msg from Tcl on one bot to Tcl on another
  * zapf <frombot> <tobot> <code [param]>
@@ -1296,12 +1296,12 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
 
 static cmd_t my_bot[] = 
 {
-  {"hl",	"",	(Function) bot_hublog,  NULL},
 #ifdef HUB	/* This will only allow hubs to read the return text */
-  {"r-sr",	"",	(Function) bot_rsimr,	NULL},
+  {"hl",	"",	(Function) bot_hublog,  NULL, HUB},
+  {"r-sr",	"",	(Function) bot_rsimr,	NULL, HUB},
 #endif /* HUB */
-  {"r-s",	"",	(Function) bot_rsim,	NULL},
-  {NULL, 	NULL, 	NULL, 			NULL}
+  {"r-s",	"",	(Function) bot_rsim,	NULL, 0},
+  {NULL, 	NULL, 	NULL, 			NULL, 0}
 };
 
 void init_botcmd()

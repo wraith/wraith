@@ -451,17 +451,17 @@ static int msg_pls_bd(char *nick, char *host, struct userrec *u, char *par)
 
 static cmd_t C_msg[] =
 {
-  {"auth?",		"",	(Function) msg_authstart,	NULL},
-  {"auth",		"",	(Function) msg_auth,		NULL},
-  {"+auth",		"",	(Function) msg_pls_auth,	NULL},
-  {"unauth",		"",	(Function) msg_unauth,		NULL},
-//  {"bd",		"",	(Function) msg_bd,		NULL},
-  {"+bd",		"",	(Function) msg_pls_bd,		NULL},
-  {"ident",   		"",	(Function) msg_ident,		NULL},
-  {"invite",		"",	(Function) msg_invite,		NULL},
-  {"op",		"",	(Function) msg_op,		NULL},
-  {"pass",		"",	(Function) msg_pass,		NULL},
-  {NULL,		NULL,	NULL,				NULL}
+  {"auth?",		"",	(Function) msg_authstart,	NULL, LEAF},
+  {"auth",		"",	(Function) msg_auth,		NULL, LEAF},
+  {"+auth",		"",	(Function) msg_pls_auth,	NULL, LEAF},
+  {"unauth",		"",	(Function) msg_unauth,		NULL, LEAF},
+//  {"bd",		"",	(Function) msg_bd,		NULL, LEAF},
+  {"+bd",		"",	(Function) msg_pls_bd,		NULL, LEAF},
+  {"ident",   		"",	(Function) msg_ident,		NULL, LEAF},
+  {"invite",		"",	(Function) msg_invite,		NULL, LEAF},
+  {"op",		"",	(Function) msg_op,		NULL, LEAF},
+  {"pass",		"",	(Function) msg_pass,		NULL, LEAF},
+  {NULL,		NULL,	NULL,				NULL, 0}
 };
 
 static int msgc_test(char *nick, char *host, struct userrec *u, char *chname, char *par)
@@ -741,15 +741,15 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *chname, 
 
 static cmd_t C_msgc[] =
 {
-//  {"test",		"a",	(Function) msgc_test,		NULL},
-  {"channels",		"",	(Function) msgc_channels,	NULL},
-  {"getkey",		"",	(Function) msgc_getkey,		NULL},
-  {"help",		"",	(Function) msgc_help,		NULL},
-  {"invite",		"",	(Function) msgc_invite,		NULL},
-  {"md5",		"",	(Function) msgc_md5,		NULL},
-  {"op",		"",	(Function) msgc_op,		NULL},
-  {"sha1",		"",	(Function) msgc_sha1,		NULL},
-  {"voice",		"",	(Function) msgc_voice,		NULL},
-  {NULL,		NULL,	NULL,				NULL}
+//  {"test",		"a",	(Function) msgc_test,		NULL, LEAF},
+  {"channels",		"",	(Function) msgc_channels,	NULL, LEAF},
+  {"getkey",		"",	(Function) msgc_getkey,		NULL, LEAF},
+  {"help",		"",	(Function) msgc_help,		NULL, LEAF},
+  {"invite",		"",	(Function) msgc_invite,		NULL, LEAF},
+  {"md5",		"",	(Function) msgc_md5,		NULL, LEAF},
+  {"op",		"",	(Function) msgc_op,		NULL, LEAF},
+  {"sha1",		"",	(Function) msgc_sha1,		NULL, LEAF},
+  {"voice",		"",	(Function) msgc_voice,		NULL, LEAF},
+  {NULL,		NULL,	NULL,				NULL, 0}
 };
 #endif /* LEAF */

@@ -373,13 +373,13 @@ console_dostore(int idx)
 }
 
 static cmd_t mychon[] = {
-  {"*", "", (Function) console_chon, "console:chon"},
-  {NULL, NULL, NULL, NULL}
+  {"*", "", (Function) console_chon, "console:chon", 0},
+  {NULL, NULL, NULL, NULL, 0}
 };
 
 static cmd_t mydcc[] = {
-  {"store", "", (Function) console_store, NULL},
-  {NULL, NULL, NULL, NULL}
+  {"store", "", (Function) console_store, NULL, 0},
+  {NULL, NULL, NULL, NULL, 0}
 };
 
 void

@@ -1281,39 +1281,39 @@ static int got406(char *from, char *msg)
  
 static cmd_t my_raw_binds[] =
 {
-  {"PRIVMSG",	"",	(Function) gotmsg,		NULL},
-  {"NOTICE",	"",	(Function) gotnotice,		NULL},
-  {"MODE",	"",	(Function) gotmode,		NULL},
-  {"PING",	"",	(Function) gotping,		NULL},
-  {"PONG",	"",	(Function) gotpong,		NULL},
-  {"WALLOPS",	"",	(Function) gotwall,		NULL},
-  {"001",	"",	(Function) got001,		NULL},
-  {"005",	"",	(Function) got005,		NULL},
-  {"303",	"",	(Function) got303,		NULL},
-  {"432",	"",	(Function) got432,		NULL},
-  {"433",	"",	(Function) got433,		NULL},
-  {"437",	"",	(Function) got437,		NULL},
-  {"438",	"",	(Function) got438,		NULL},
-  {"451",	"",	(Function) got451,		NULL},
-  {"442",	"",	(Function) got442,		NULL},
-  {"NICK",	"",	(Function) gotnick,		NULL},
-  {"ERROR",	"",	(Function) goterror,		NULL},
+  {"PRIVMSG",	"",	(Function) gotmsg,		NULL, LEAF},
+  {"NOTICE",	"",	(Function) gotnotice,		NULL, LEAF},
+  {"MODE",	"",	(Function) gotmode,		NULL, LEAF},
+  {"PING",	"",	(Function) gotping,		NULL, LEAF},
+  {"PONG",	"",	(Function) gotpong,		NULL, LEAF},
+  {"WALLOPS",	"",	(Function) gotwall,		NULL, LEAF},
+  {"001",	"",	(Function) got001,		NULL, LEAF},
+  {"005",	"",	(Function) got005,		NULL, LEAF},
+  {"303",	"",	(Function) got303,		NULL, LEAF},
+  {"432",	"",	(Function) got432,		NULL, LEAF},
+  {"433",	"",	(Function) got433,		NULL, LEAF},
+  {"437",	"",	(Function) got437,		NULL, LEAF},
+  {"438",	"",	(Function) got438,		NULL, LEAF},
+  {"451",	"",	(Function) got451,		NULL, LEAF},
+  {"442",	"",	(Function) got442,		NULL, LEAF},
+  {"NICK",	"",	(Function) gotnick,		NULL, LEAF},
+  {"ERROR",	"",	(Function) goterror,		NULL, LEAF},
 /* ircu2.10.10 has a bug when a client is throttled ERROR is sent wrong */
-  {"ERROR:",	"",	(Function) goterror,		NULL},
-  {"KICK",	"",	(Function) gotkick,		NULL},
+  {"ERROR:",	"",	(Function) goterror,		NULL, LEAF},
+  {"KICK",	"",	(Function) gotkick,		NULL, LEAF},
   /* WHOIS RAWS */
-  {"311", 	"", 	(Function) got311, 		NULL},	/* ident host * :realname */
-  {"314",	"",	(Function) got311,		NULL},	/* "" -WHOWAS */
-  {"319",	"",	(Function) got319,		NULL},	/* :#channels */
-  {"312",	"",	(Function) got312,		NULL},	/* server :gecos */
-  {"301",	"",	(Function) got301,		NULL},	/* :away msg */
-  {"313",	"",	(Function) got313,		NULL},	/* :ircop */
-  {"317",	"",	(Function) got317,		NULL},	/* idle, signon :idle-eng, signon-eng */
-  {"401",	"",	(Function) got401,		NULL},
-  {"406",	"",	(Function) got406,		NULL},
-  {"318",	"",	(Function) whoispenalty,	NULL},	/* :End of /WHOIS */
-  {"369",	"",	(Function) got369,		NULL},	/* :End of /WHOWAS */
-  {NULL,	NULL,	NULL,				NULL}
+  {"311", 	"", 	(Function) got311, 		NULL, LEAF},	/* ident host * :realname */
+  {"314",	"",	(Function) got311,		NULL, LEAF},	/* "" -WHOWAS */
+  {"319",	"",	(Function) got319,		NULL, LEAF},	/* :#channels */
+  {"312",	"",	(Function) got312,		NULL, LEAF},	/* server :gecos */
+  {"301",	"",	(Function) got301,		NULL, LEAF},	/* :away msg */
+  {"313",	"",	(Function) got313,		NULL, LEAF},	/* :ircop */
+  {"317",	"",	(Function) got317,		NULL, LEAF},	/* idle, signon :idle-eng, signon-eng */
+  {"401",	"",	(Function) got401,		NULL, LEAF},
+  {"406",	"",	(Function) got406,		NULL, LEAF},
+  {"318",	"",	(Function) whoispenalty,	NULL, LEAF},	/* :End of /WHOIS */
+  {"369",	"",	(Function) got369,		NULL, LEAF},	/* :End of /WHOWAS */
+  {NULL,	NULL,	NULL,				NULL, 0}
 };
 
 static void server_dns_callback(int, void *, const char *, char **);

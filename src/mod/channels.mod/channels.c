@@ -755,8 +755,8 @@ static int channels_chon(char *handle, int idx)
 
 static cmd_t my_chon[] =
 {
-  {"*",		"",	(Function) channels_chon,	"channels:chon"},
-  {NULL,	NULL,	NULL,				NULL}
+  {"*",		"",	(Function) channels_chon,	"channels:chon", 0},
+  {NULL,	NULL,	NULL,				NULL, 0}
 };
 
 void channels_report(int idx, int details)
@@ -887,26 +887,26 @@ void channels_report(int idx, int details)
 }
 
 cmd_t channels_bot[] = {
-  {"cjoin",	"", 	(Function) got_cjoin, 	NULL},
-  {"cpart",	"", 	(Function) got_cpart, 	NULL},
-  {"cset",	"", 	(Function) got_cset,  	NULL},
+  {"cjoin",	"", 	(Function) got_cjoin, 	NULL, 0},
+  {"cpart",	"", 	(Function) got_cpart, 	NULL, 0},
+  {"cset",	"", 	(Function) got_cset,  	NULL, 0},
 #ifdef LEAF
-  {"cycle",	"", 	(Function) got_cycle, 	NULL},
-  {"down",	"", 	(Function) got_down,  	NULL},
+  {"cycle",	"", 	(Function) got_cycle, 	NULL, LEAF},
+  {"down",	"", 	(Function) got_down,  	NULL, LEAF},
 #endif /* LEAF */
-  {"rl",	"", 	(Function) got_role,  	NULL},
-  {"kl",	"", 	(Function) got_kl,    	NULL},
-  {"sj",	"", 	(Function) got_sj,    	NULL},
-  {"sp",	"", 	(Function) got_sp,    	NULL},
-  {"jn",	"", 	(Function) got_jn,    	NULL},
+  {"rl",	"", 	(Function) got_role,  	NULL, 0},
+  {"kl",	"", 	(Function) got_kl,    	NULL, 0},
+  {"sj",	"", 	(Function) got_sj,    	NULL, 0},
+  {"sp",	"", 	(Function) got_sp,    	NULL, 0},
+  {"jn",	"", 	(Function) got_jn,    	NULL, 0},
 /*
 #ifdef HUB
-  {"o1", "", (Function) got_o1, NULL},
-  {"kl", "", (Function) got_kl, NULL},
+  {"o1", "", (Function) got_o1, NULL, 0},
+  {"kl", "", (Function) got_kl, NULL, 0},
 #endif
-  {"ltp", "", (Function) got_locktopic, NULL},
+  {"ltp", "", (Function) got_locktopic, NULL, 0},
 */
-  {NULL, 	NULL, 	NULL, 			NULL}
+  {NULL, 	NULL, 	NULL, 			NULL, 0}
 };
 
 
@@ -945,7 +945,7 @@ void channels_init()
 #endif /* HUB */
   timer_create_secs(10, "channels_timers", (Function) channels_timers);
 
-  add_builtins("dcc", C_dcc_irc);
+  add_builtins("dcc", C_dcc_channels);
   add_builtins("bot", channels_bot);
   add_builtins("chon", my_chon);
 }

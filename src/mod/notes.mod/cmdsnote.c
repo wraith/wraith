@@ -94,8 +94,8 @@ static void cmd_note(int idx, char *par)
 
 static cmd_t notes_cmds[] =
 {
-  {"fwd",	"m",	(Function) cmd_fwd,		NULL},
-  {"notes",	"",	(Function) cmd_notes,		NULL},
-  {"note",	"",	(Function) cmd_note,		NULL},
-  {NULL,	NULL,	NULL,				NULL}
+  {"fwd",	"m",	(Function) cmd_fwd,		NULL, 0},
+  {"notes",	"",	(Function) cmd_notes,		NULL, 0},
+  {"note",	"",	(Function) cmd_note,		NULL, 0},
+  {NULL,	NULL,	NULL,				NULL, 0}
 };

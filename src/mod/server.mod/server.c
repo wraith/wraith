@@ -1010,8 +1010,8 @@ static void msgq_clear(struct msgq_head *qh)
 
 static cmd_t my_ctcps[] =
 {
-  {"DCC",	"",	(Function) ctcp_DCC_CHAT,		"server:DCC"},
-  {NULL,	NULL,	NULL,			NULL}
+  {"DCC",	"",	(Function) ctcp_DCC_CHAT,		"server:DCC", LEAF},
+  {NULL,	NULL,	NULL,			NULL, 0}
 };
 
 void server_init()

@@ -725,20 +725,20 @@ int notes_chon(int idx)
 
 static cmd_t notes_nkch[] =
 {
-  {"*",		"",	(Function) notes_change,	"notes"},
-  {NULL,	NULL,	NULL,				NULL}
+  {"*",		"",	(Function) notes_change,	"notes", 0},
+  {NULL,	NULL,	NULL,				NULL, 0}
 };
 
 static cmd_t notes_away[] =
 {
-  {"*",		"",	(Function) away_notes,		"notes"},
-  {NULL,	NULL,	NULL,				NULL}
+  {"*",		"",	(Function) away_notes,		"notes", 0},
+  {NULL,	NULL,	NULL,				NULL, 0}
 };
 
 static cmd_t notes_msgs[] =
 {
-  {"notes",	"",	(Function) msg_notes,		NULL},
-  {NULL,	NULL,	NULL,				NULL}
+  {"notes",	"",	(Function) msg_notes,		NULL, LEAF},
+  {NULL,	NULL,	NULL,				NULL, 0}
 };
 
 static int notes_server_setup(char *mod)

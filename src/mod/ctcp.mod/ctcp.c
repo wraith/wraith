@@ -601,21 +601,21 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
 
 static cmd_t myctcp[] =
 {
-  {"CLIENTINFO", 	"", 	(Function) ctcp_CLIENTINFO, 	NULL},
-  {"FINGER", 		"", 	(Function) ctcp_FINGER, 		NULL},
-  {"WHOAMI", 		"", 	(Function) ctcp_WHOAMI, 		NULL},
-  {"OP", 		"", 	(Function) ctcp_OP, 		NULL},
-  {"OPS", 		"", 	(Function) ctcp_OP, 		NULL},
-  {"INVITE", 		"",	(Function) ctcp_INVITE_UNBAN, 	NULL},
-  {"UNBAN", 		"", 	(Function) ctcp_INVITE_UNBAN, 	NULL},
-  {"ERRMSG", 		"", 	(Function) ctcp_ECHO, 		NULL},
-  {"USERINFO", 		"", 	(Function) ctcp_USERINFO, 		NULL},
-  {"ECHO", 		"", 	(Function) ctcp_ECHO, 		NULL},
-  {"VERSION", 		"", 	(Function) ctcp_VERSION, 		NULL},
-  {"PING", 		"", 	(Function) ctcp_PING, 		NULL},
-  {"TIME", 		"", 	(Function) ctcp_TIME, 		NULL},
-  {"CHAT",		"",	(Function) ctcp_CHAT,		NULL},
-  {NULL,		NULL,	NULL,			NULL}
+  {"CLIENTINFO", 	"", 	(Function) ctcp_CLIENTINFO, 	NULL, LEAF},
+  {"FINGER", 		"", 	(Function) ctcp_FINGER, 	NULL, LEAF},
+  {"WHOAMI", 		"", 	(Function) ctcp_WHOAMI, 	NULL, LEAF},
+  {"OP", 		"", 	(Function) ctcp_OP, 		NULL, LEAF},
+  {"OPS", 		"", 	(Function) ctcp_OP, 		NULL, LEAF},
+  {"INVITE", 		"",	(Function) ctcp_INVITE_UNBAN, 	NULL, LEAF},
+  {"UNBAN", 		"", 	(Function) ctcp_INVITE_UNBAN, 	NULL, LEAF},
+  {"ERRMSG", 		"", 	(Function) ctcp_ECHO, 		NULL, LEAF},
+  {"USERINFO", 		"", 	(Function) ctcp_USERINFO, 	NULL, LEAF},
+  {"ECHO", 		"", 	(Function) ctcp_ECHO, 		NULL, LEAF},
+  {"VERSION", 		"", 	(Function) ctcp_VERSION, 	NULL, LEAF},
+  {"PING", 		"", 	(Function) ctcp_PING, 		NULL, LEAF},
+  {"TIME", 		"", 	(Function) ctcp_TIME, 		NULL, LEAF},
+  {"CHAT",		"",	(Function) ctcp_CHAT,		NULL, LEAF},
+  {NULL,		NULL,	NULL,			NULL, 0}
 };
 #endif /* LEAF */
 

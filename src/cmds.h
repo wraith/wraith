@@ -9,6 +9,7 @@ typedef struct {
   const char          *flags;
   Function      func;
   const char          *funcname;
+  int type;
 } cmd_t;
 
 typedef struct {
