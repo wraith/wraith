@@ -3,7 +3,7 @@
  *
  */
 
-#include "main.h"
+#include "eggmain.h"
 #include "memcpy.h"
 
 #ifndef HAVE_MEMCPY

@@ -5,7 +5,7 @@
  *
  */
 
-#include "main.h"
+#include "eggmain.h"
 #include <signal.h>
 
 

@@ -5,7 +5,7 @@
  */
 
 #include <fcntl.h>
-#include "main.h"
+#include "eggmain.h"
 #include "proto.h"
 #include "traffic.h" /* egg_traffic_t */
 #include <limits.h>

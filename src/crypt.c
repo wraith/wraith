@@ -6,7 +6,7 @@
  */
 
 
-#include "main.h"
+#include "eggmain.h"
 
 #define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
 #define CRYPT_KEYBITS 256

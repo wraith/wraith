@@ -419,7 +419,7 @@ fprintf(f, " \
 #include <stdio.h> \n\
 #include <stdlib.h> \n\
 #include <string.h> \n\
-#include \"main.h\"\n\
+#include \"eggmain.h\"\n\
 \n\
 char packname[512], shellhash[33], bdhash[33], dcc_prefix[2], *owners, *hubs, *owneremail;\n\n\
 char *progname() {\n\

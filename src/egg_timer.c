@@ -1,6 +1,6 @@
 #include <stdio.h> /* For NULL */
 #include <sys/time.h> /* For gettimeofday() */
-#include "main.h"
+#include "eggmain.h"
 
 #include "egg_timer.h"
 

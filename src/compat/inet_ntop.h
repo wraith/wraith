@@ -7,7 +7,7 @@
 #ifndef _EGG_COMPAT_INET_NTOP_H
 #define _EGG_COMPAT_INET_NTOP_H
 
-#include "src/main.h"
+#include "src/eggmain.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -6,7 +6,7 @@
  * 
  */
 
-#include "main.h"
+#include "eggmain.h"
 #include "modules.h"
 #include "tandem.h"
 #include <ctype.h>

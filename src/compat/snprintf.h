@@ -7,7 +7,7 @@
 #ifndef _EGG_COMPAT_SNPRINTF_H_
 #define _EGG_COMPAT_SNPRINTF_H_
 
-#include "src/main.h"
+#include "src/eggmain.h"
 #include <stdio.h>
 
 /* Check for broken snprintf versions */

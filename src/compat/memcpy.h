@@ -7,7 +7,7 @@
 #ifndef _EGG_COMPAT_MEMCPY_H
 #define _EGG_COMPAT_MEMCPY_H
 
-#include "src/main.h"
+#include "src/eggmain.h"
 #include <string.h>
 
 #ifndef HAVE_MEMCPY

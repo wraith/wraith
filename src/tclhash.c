@@ -9,7 +9,7 @@
  *
  */
 
-#include "main.h"
+#include "eggmain.h"
 #include "chan.h"
 #include "users.h"
 #include "match.c"

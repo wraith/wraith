@@ -1,5 +1,5 @@
 /*
- * main.h
+ * eggmain.h
  *   include file to include most other include files
  *
  */

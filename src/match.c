@@ -21,7 +21,7 @@
  * I hereby release this code into the public domain
  *
  */
-#include "main.h"
+#include "eggmain.h"
 
 #define QUOTE '\\' /* quoting character (overrides wildcards) */
 #define WILDS '*'  /* matches 0 or more characters (including spaces) */

@@ -5,7 +5,7 @@
  *
  */
 
-#include "main.h"
+#include "eggmain.h"
 #include "tandem.h"
 #include "users.h"
 #include "chan.h"

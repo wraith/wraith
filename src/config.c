@@ -4,7 +4,7 @@
  *   cmdpass functions
  */
 
-#include "main.h"
+#include "eggmain.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>

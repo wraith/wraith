@@ -1,4 +1,4 @@
-#include "main.h"
+#include "eggmain.h"
 
 extern cmd_t C_dcc[];
 extern struct dcc_t *dcc;

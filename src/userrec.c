@@ -7,7 +7,7 @@
  */
 
 #include <sys/stat.h>
-#include "main.h"
+#include "eggmain.h"
 #include "users.h"
 #include "chan.h"
 #include "modules.h"

@@ -5,7 +5,7 @@
  *
  */
 
-#include "main.h"
+#include "eggmain.h"
 
 
 #define STR(x) x
