@@ -65,10 +65,6 @@ int answer_ctcp;		/* answer how many stacked ctcp's ? */
 static bool check_mode_r;	/* check for IRCNET +r modes */
 static int net_type;
 static bool resolvserv;		/* in the process of resolving a server host */
-static bool double_mode;		/* allow a msgs to be twice in a queue? */
-static bool double_server;
-static bool double_help;
-static bool double_warned;
 static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
 static char stackable2cmds[511] = "";
@@ -500,7 +496,7 @@ void queue_server(int which, char *buf, int len)
 
   struct msgq_head *h = NULL, tempq;
   struct msgq *q = NULL, *tq = NULL, *tqq = NULL;
-  int doublemsg = 0, qnext = 0;
+  int qnext = 0;
 
   /* No queue for PING and PONG - drummer */
   if (!egg_strncasecmp(buf, "PING", 4) || !egg_strncasecmp(buf, "PONG", 4)) {
@@ -522,8 +518,6 @@ void queue_server(int which, char *buf, int len)
   case DP_MODE:
     h = &modeq;
     tempq = modeq;
-    if (double_mode)
-      doublemsg = 1;
     break;
 
   case DP_SERVER_NEXT:
@@ -532,8 +526,6 @@ void queue_server(int which, char *buf, int len)
   case DP_SERVER:
     h = &mq;
     tempq = mq;
-    if (double_server)
-      doublemsg = 1;
     break;
 
   case DP_HELP_NEXT:
@@ -542,8 +534,6 @@ void queue_server(int which, char *buf, int len)
   case DP_HELP:
     h = &hq;
     tempq = hq;
-    if (double_help)
-      doublemsg = 1;
     break;
 
   default:
@@ -552,21 +542,6 @@ void queue_server(int which, char *buf, int len)
   }
 
   if (h->tot < maxqmsg) {
-    /* Don't queue msg if it's already queued?  */
-    if (!doublemsg)
-      for (tq = tempq.head; tq; tq = tqq) {
-	tqq = tq->next;
-	if (!egg_strcasecmp(tq->msg, buf)) {
-	  if (!double_warned) {
-	    if (buf[len - 1] == '\n')
-	      buf[len - 1] = 0;
-	    debug1("msg already queued. skipping: %s", buf);
-	    double_warned = 1;
-	  }
-	  return;
-	}
-      }
-
     q = (struct msgq *) calloc(1, sizeof(struct msgq));
     if (qnext)
       q->next = h->head;
@@ -585,7 +560,6 @@ void queue_server(int which, char *buf, int len)
     strncpyz(q->msg, buf, len + 1);
     h->tot++;
     h->warned = 0;
-    double_warned = 0;
   } else {
     if (!h->warned) {
       switch (which) {   
@@ -1097,9 +1071,6 @@ void server_init()
   maxqmsg = 300;
   burst = 0;
   net_type = NETT_EFNET;
-  double_mode = 0;
-  double_server = 0;
-  double_help = 0;
   use_penalties = 0;
   use_fastdeq = 0;
   stackablecmds[0] = 0;
@@ -1129,7 +1100,6 @@ void server_init()
   mq.last = hq.last = modeq.last = NULL;
   mq.tot = hq.tot = modeq.tot = 0;
   mq.warned = hq.warned = modeq.warned = 0;
-  double_warned = 0;
   newserver[0] = 0;
   newserverport = 0;
   curserv = 999;

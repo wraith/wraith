@@ -69,6 +69,7 @@ This is a summary of ChangeLog basically.
 * cmd_bots now takes an optional parameter. A nodename (hostname) to match for bots. Down bots are prepended with a *.
 * Recoded and spiffed up cmd_userlist.
 * When connecting with a floodless iline, bot will now dump msgs instead of queueing them to server.
+* Removed the checks for duplicate msgs in the queue, they're there for a reason. (also is slow)
 
 1.1.9
 
