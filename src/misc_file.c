@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #include "stat.h"
 
 
@@ -137,14 +138,9 @@ int is_dir(const char *s)
 int fixmod(const char *s)
 {
 #ifndef CYGWIN_HACKS
-  int i;
-
   if (!can_stat(s))
-    return 0;
-  i = chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
-  if (i < 0)
-    return 0;
-  return 1;
+    return 1;
+  return chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
 #else
   return 0;
 #endif /* !CYGWIN_HACKS */

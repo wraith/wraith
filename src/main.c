@@ -487,7 +487,6 @@ static void core_halfhourly()
 }
 
 static void startup_checks() {
-  char cfile[DIRMAX] = "";
   int enc = CONF_ENC;
 
 #ifdef LEAF
@@ -514,13 +513,13 @@ static void startup_checks() {
     }
 #endif /* LEAF */
   }
-  if (!fixmod(confdir()))
+  if (fixmod(confdir()))
     werr(ERR_CONFDIRMOD);
   /*technically no longer needed? 
    else if (!can_stat(cfile))
      werr(ERR_NOCONF);
   */
-  else if (can_stat(cfile) && !fixmod(cfile))
+  else if (fixmod(cfile))
     werr(ERR_CONFMOD);
 
   if (!can_stat(tempdir)) {
@@ -531,7 +530,7 @@ static void startup_checks() {
           werr(ERR_TMPSTAT);
     }
   }
-  if (!fixmod(tempdir))
+  if (fixmod(tempdir))
     werr(ERR_TMPMOD);
 
   /* test tempdir: it's vital */
@@ -572,7 +571,7 @@ static void startup_checks() {
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
-  else if (!fixmod(binname))
+  else if (fixmod(binname))
    werr(ERR_BINMOD);
 
 #ifdef LEAF
@@ -606,7 +605,7 @@ static void startup_checks() {
          ok = 0;
       }
 
-      if (ok && !fixmod(newbin)) {
+      if (ok && fixmod(newbin)) {
           unlink(newbin);
           ok = 0;
       }
@@ -826,9 +825,11 @@ int main(int argc, char **argv)
 #ifndef CYGWIN_HACKS
     setpgid(0, 0);
 #endif /* !CYGWIN_HACKS */
+    /*
     freopen("/dev/null", "r", stdin);
     freopen("/dev/null", "w", stdout);
     freopen("/dev/null", "w", stderr);
+    */
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif /* CYGWIN_HACKS */
