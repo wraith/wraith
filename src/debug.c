@@ -152,15 +152,6 @@ void write_debug()
     egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
     dprintf(-x, "Build: %s (%lu)\n", date, buildts);
 
-#ifdef CCFLAGS
-    dprintf(-x, "Compile flags: %s\n", CCFLAGS);
-#endif
-#ifdef LDFLAGS
-    dprintf(-x, "Link flags: %s\n", LDFLAGS);
-#endif
-#ifdef STRIPFLAGS
-    dprintf(-x, "Strip flags: %s\n", STRIPFLAGS);
-#endif
     dprintf(-x, "Context: ");
     cx_ptr = cx_ptr & 15;
     for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
