@@ -1244,13 +1244,13 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       resetbans(chan);
     else
       recheck_bans(chan);
-    if (use_invites) {
+    if (use_invites && !(chan->ircnet_status & CHAN_ASKED_INVITES)) {
       if (channel_nouserinvites(chan) && !stop_reset)
 	resetinvites(chan);
       else
 	recheck_invites(chan);
     }
-    if (use_exempts) {
+    if (use_exempts && !(chan->ircnet_status & CHAN_ASKED_EXEMPTS)) {
       if (channel_nouserexempts(chan) && !stop_reset)
 	resetexempts(chan);
       else
@@ -1811,6 +1811,12 @@ static int got349(char *from, char *msg)
     if (chan) {
       putlog(LOG_DEBUG, "*", "END +e %s", chan->dname);
       chan->ircnet_status &= ~CHAN_ASKED_EXEMPTS;
+      
+      if (channel_nouserexempts(chan))
+        resetexempts(chan);
+      else
+        recheck_exempts(chan);
+
       if (channel_enforcebans(chan))
         enforce_bans(chan);
     }
@@ -1872,8 +1878,14 @@ static int got347(char *from, char *msg)
     newsplit(&msg);
     chname = newsplit(&msg);
     chan = findchan(chname);
-    if (chan)
-      chan->ircnet_status &= ~CHAN_ASKED_INVITES;
+    if (chan) {
+      chan->ircnet_status &= ~CHAN_ASKED_INVITESD;
+
+      if (channel_nouserinvites(chan))
+        resetinvites(chan);
+      else
+        recheck_invites(chan);
+    }
   }
   return 0;
 }

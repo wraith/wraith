@@ -44,6 +44,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Added channel flag +|-botbitch, when set only bots will be allowed to be opped, users be auto-deopped.
 * chanset -bitch/-private/-botbitch/+botbitch/+closed/+private will now trigger bots to recheck channel (op/deop/kick people)
 * Fixed bot not updating it's hostmask when reconnecting to server
+* Fixed bot sending +Ie modes before recieving list after opping.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
