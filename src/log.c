@@ -161,7 +161,7 @@ void putlog(int type, const char *chname, const char *format, ...)
   int idx = 0;
   char out[LOGLINEMAX + 1] = "";
 
-  if (conf.bot->hub) {
+  if (conf.bot && conf.bot->hub) {
     char stamp[34] = "";
     struct tm *t = gmtime(&now);
 

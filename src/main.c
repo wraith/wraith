@@ -148,7 +148,7 @@ static char *getfullbinname(const char *argv_zero)
 
 void fatal(const char *s, int recoverable)
 {
-  if (conf && !conf.bot->hub)
+  if (conf.bot && !conf.bot->hub)
     nuke_server((char *) s);
 
   if (s && s[0])
