@@ -1990,7 +1990,7 @@ int private(struct flag_record fr, struct chanset_t *chan, int type)
 
 int chk_op(struct flag_record fr, struct chanset_t *chan)
 {
-  if (!chan || !private(fr, chan, PRIV_OP) && !chk_deop(fr, chan)) {
+  if (!chan || (!private(fr, chan, PRIV_OP) && !chk_deop(fr, chan))) {
     if (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))
       return 1;
   }
@@ -2007,7 +2007,7 @@ int chk_deop(struct flag_record fr, struct chanset_t *chan)
 
 int chk_voice(struct flag_record fr, struct chanset_t *chan)
 {
-  if (!chan || !private(fr, chan, PRIV_VOICE) && !chk_devoice(fr, chan)) {
+  if (!chan || (!private(fr, chan, PRIV_VOICE) && !chk_devoice(fr, chan))) {
     if (chan_voice(fr) || (glob_voice(fr) && !chan_quiet(fr)))
       return 1;
   }
