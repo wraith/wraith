@@ -11,6 +11,7 @@
 
 #include "eggmain.h"
 #include "tclhash.h"
+#include "debug.h"
 #include "chan.h"
 #include "users.h"
 #include "match.h"

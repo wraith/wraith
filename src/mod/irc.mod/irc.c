@@ -9,6 +9,7 @@
 #define MAKING_IRC
 #include "src/mod/module.h"
 #include "irc.h"
+#include "src/misc.h"
 #include "src/salt.h"
 #include "src/mod/server.mod/server.h"
 #undef serv

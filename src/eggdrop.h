@@ -9,33 +9,6 @@
 #ifndef _EGG_EGGDROP_H
 #define _EGG_EGGDROP_H
 
-#ifdef HAVE_OPENSSL_SSL_H
-# ifndef SSL_INC
-#  include <openssl/ssl.h>
-#  include <openssl/rand.h>
-#  include <openssl/err.h>
-#  include <openssl/md5.h>
-#  define SSL_INC
-# endif /* ! SSL_INC */
-# undef HAVE_SSL
-/* #define HAVE_SSL 1 */
-#endif /* HAVE_OPENSSL_SSL_H */
-
-
-/*
- * Undefine this to completely disable context debugging.
- * WARNING: DO NOT send in bug reports if you undefine this!
- */
-
-#define DEBUG_CONTEXT
-
-/*
- * Set the following to the timestamp for the logfile entries.
- * Popular times might be "[%H:%M]" (hour, min), or "[%H:%M:%S]" (hour, min, sec)
- * Read `man strftime' for more formatting options.  Keep it below 32 chars.
- */
-#define LOG_TS "[%H:%M]"
-
 /*
 
  * HANDLEN note:
@@ -65,49 +38,6 @@
 #define MAX_BOTS     500
 #define SERVLEN      60
 
-#define SGRAB 2011         /* How much data to allow through sockets. */
-
-#define PRIV_OP 1
-#define PRIV_VOICE 2
-
-#define PRIO_DEOP 1
-#define PRIO_KICK 2
-#define KICK_BANNED 1
-#define KICK_KUSER 2
-#define KICK_KICKBAN 3
-#define KICK_MASSDEOP 4
-#define KICK_BADOP 5
-#define KICK_BADOPPED 6
-#define KICK_MANUALOP 7
-#define KICK_MANUALOPPED 8
-#define KICK_CLOSED 9
-#define KICK_FLOOD 10
-#define KICK_NICKFLOOD 11
-#define KICK_KICKFLOOD 12
-#define KICK_BOGUSUSERNAME 13
-#define KICK_MEAN 14
-#define KICK_BOGUSKEY 15
-
-#define ERR_BINSTAT 1
-#define ERR_BINMOD 2
-#define ERR_PASSWD 3
-#define ERR_WRONGBINDIR 4
-#define ERR_CONFSTAT 5
-#define ERR_TMPSTAT 6
-#define ERR_CONFDIRMOD 7
-#define ERR_CONFMOD 8
-#define ERR_TMPMOD 9
-#define ERR_NOCONF 10
-#define ERR_CONFBADENC 11
-#define ERR_WRONGUID 12
-#define ERR_WRONGUNAME 13
-#define ERR_BADCONF 14
-#define ERR_MAX 15
-
-#define EMAIL_OWNERS    0x1
-#define EMAIL_TEAM      0x2
-
-
 /*
  *     The 'configure' script should make this next part automatic,
  *     so you shouldn't need to adjust anything below.
@@ -120,41 +50,6 @@
 #define NOTENAMELEN     ((HANDLEN * 2) + 1)
 #define BADNICKCHARS	"-,+*=:!.@#;$%&"
 
-
-/* Have to use a weird way to make the compiler error out cos not all
- * compilers support #error or error
- */
-#if !HAVE_VSPRINTF
-#  include "error_you_need_vsprintf_to_compile_eggdrop"
-#endif
-
-/*
- * Enable IPv6 debugging?
- */
-#define DEBUG_IPV6 1
-#define HAVE_IPV6 1
-
-/* IPv6 sanity checks. */
-#ifdef USE_IPV6
-#  ifndef HAVE_IPV6
-#    undef USE_IPV6
-#  endif
-#  ifndef HAVE_GETHOSTBYNAME2
-#    ifndef HAVE_GETIPNODEBYNAME
-#      undef USE_IPV6
-#    endif
-#  endif
-#endif
-
-
-#if HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-
-#if !defined(STDC_HEADERS)
-#  include "you_need_to_upgrade_your_compiler_to_a_standard_c_one_mate!"
-#endif
-
 #if (NICKMAX < 9) || (NICKMAX > 32)
 #  include "invalid NICKMAX value"
 #endif
@@ -166,6 +61,24 @@
 #if HANDLEN > NICKMAX
 #  include "HANDLEN MUST BE <= NICKMAX"
 #endif
+
+
+/* Have to use a weird way to make the compiler error out cos not all
+ * compilers support #error or error
+ */
+#if !HAVE_VSPRINTF
+#  include "error_you_need_vsprintf_to_compile_eggdrop"
+#endif
+
+
+#if HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
+#if !defined(STDC_HEADERS)
+#  include "you_need_to_upgrade_your_compiler_to_a_standard_c_one_mate!"
+#endif
+
 
 /* NAME_MAX is what POSIX defines, but BSD calls it MAXNAMLEN.
  * Use 255 if we can't find anything else.
@@ -198,52 +111,6 @@
 #  define random() (rand()/16)
 #endif
 
-#if !HAVE_SIGACTION		/* old "weird signals" */
-#  define sigaction sigvec
-#  ifndef sa_handler
-#    define sa_handler sv_handler
-#    define sa_mask sv_mask
-#    define sa_flags sv_flags
-#  endif
-#endif
-
-#if !HAVE_SIGEMPTYSET
-/* and they probably won't have sigemptyset, dammit */
-#  define sigemptyset(x) ((*(int *)(x))=0)
-#endif
-
-
-/*
- *    Handy aliases for memory tracking and core dumps
- */
-
-#define my_bzero(a, b) { char *x = (char *) a; int y = (int) b; while (y--) *x++ = 0; }
-#define killsock(x)	real_killsock((x),__FILE__,__LINE__)
-
-
-#ifdef DEBUG_CONTEXT
-#  include "main.h"
-#  define Context		eggContext(__FILE__, __LINE__, NULL)
-#  define ContextNote(note)	eggContextNote(__FILE__, __LINE__, NULL, note)
-#else
-#  define Context		{}
-#  define ContextNote(note)	{}
-#endif
-
-#ifdef DEBUG_ASSERT
-#  define Assert(expr)	do {						\
-	if (!(expr))							\
-		eggAssert(__FILE__, __LINE__, NULL);			\
-} while (0)
-#else
-#  define Assert(expr)	do {	} while (0)
-#endif
-
-#define debug0(x)		putlog(LOG_DEBUG,"*",x)
-#define debug1(x,a1)		putlog(LOG_DEBUG,"*",x,a1)
-#define debug2(x,a1,a2)		putlog(LOG_DEBUG,"*",x,a1,a2)
-#define debug3(x,a1,a2,a3)	putlog(LOG_DEBUG,"*",x,a1,a2,a3)
-#define debug4(x,a1,a2,a3,a4)	putlog(LOG_DEBUG,"*",x,a1,a2,a3,a4)
 
 /* These apparently are unsafe without recasting. */
 #define egg_isdigit(x)  isdigit((int)  (unsigned char) (x))
@@ -254,13 +121,6 @@
 #define egg_isupper(x)  isupper((int)  (unsigned char) (x))
 
 /***********************************************************************/
-
-/* Public structure for the listening port map */
-struct portmap {
-  int realport;
-  int mappedto;
-  struct portmap *next;
-};
 
 /* Public structure of all the dcc connections */
 struct dcc_table {
@@ -278,9 +138,7 @@ struct dcc_table {
 
 struct userrec;
 
-#define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
-#define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)
-#define md5cmp(hash, string)		strcmp(hash, md5(string))
+#include "crypt.h"
 
 struct auth_t {
   struct userrec *user;

@@ -7,6 +7,14 @@
 #  define dprintf dprintf_eggdrop
 #endif
 
+/* Public structure for the listening port map */
+struct portmap {
+  int realport;
+  int mappedto;
+  struct portmap *next;
+};
+
+
 #ifndef MAKING_MODS
 void dprintf (int, ...);
 void chatout (char *, ...);

@@ -751,3 +751,57 @@ struct user_entry_type USERENTRY_BOTFL =
   "BOTFL"
 };
 
+/* private returns 0 if user has access, and 1 if they dont because of +private
+ * This function does not check if the user has "op" access, it only checks if the user is
+ * restricted by +private for the channel
+ */
+int private(struct flag_record fr, struct chanset_t *chan, int type)
+{
+  if (!channel_private(chan) || glob_bot(fr) || glob_owner(fr))
+    return 0; /* user is implicitly not restricted by +private, they may however be lacking other flags */
+
+  if (type == PRIV_OP) {
+    /* |o implies all flags above. n| has access to all +private. Bots are exempt. */
+    if (chan_op(fr))
+      return 0;
+  } else if (type == PRIV_VOICE) {
+    if (chan_voice(fr))
+      return 0;
+  }
+  return 1; /* user is restricted by +private */
+}
+
+int chk_op(struct flag_record fr, struct chanset_t *chan)
+{
+  if (!chan || (!private(fr, chan, PRIV_OP) && !chk_deop(fr, chan))) {
+    if (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))
+      return 1;
+  }
+  return 0;
+}
+
+int chk_deop(struct flag_record fr, struct chanset_t *chan)
+{
+  if (chan_deop(fr) || (glob_deop(fr) && !chan_op(fr)))
+    return 1;
+  else
+    return 0;
+}
+
+int chk_voice(struct flag_record fr, struct chanset_t *chan)
+{
+  if (!chan || (!private(fr, chan, PRIV_VOICE) && !chk_devoice(fr, chan))) {
+    if (chan_voice(fr) || (glob_voice(fr) && !chan_quiet(fr)))
+      return 1;
+  }
+  return 0;
+}
+
+int chk_devoice(struct flag_record fr, struct chanset_t *chan)
+{
+  if (chan_quiet(fr) || (glob_quiet(fr) && !chan_voice(fr)))
+    return 1;
+  else
+    return 0;
+}
+

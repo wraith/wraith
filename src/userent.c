@@ -7,6 +7,7 @@
 #include "eggmain.h"
 #include "users.h"
 #include "misc.h"
+#include "debug.h"
 #include "match.h"
 #include "dccutil.h"
 #include "crypt.h"

@@ -10,6 +10,10 @@
 #define REVENGE_KICK 1		/* Kicked victim	*/
 #define REVENGE_DEOP 2		/* Took op		*/
 
+#define PRIO_DEOP 1
+#define PRIO_KICK 2
+
+
 #ifdef MAKING_IRC
 #ifdef S_AUTH
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);

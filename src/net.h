@@ -7,10 +7,46 @@
 
 #include "types.h"
 
+
+#ifdef HAVE_OPENSSL_SSL_H
+# ifdef USE_SSL
+#  include <openssl/ssl.h>
+#  include <openssl/rand.h>
+#  include <openssl/err.h>
+#  undef HAVE_SSL
+# endif /* USE_SSL */
+/* #define HAVE_SSL 1 */
+#endif /* HAVE_OPENSSL_SSL_H */
+
+/*
+ * Enable IPv6 debugging?
+ */
+#define DEBUG_IPV6 1
+#define HAVE_IPV6 1
+
+/* IPv6 sanity checks. */
+#ifdef USE_IPV6
+#  ifndef HAVE_IPV6
+#    undef USE_IPV6
+#  endif
+#  ifndef HAVE_GETHOSTBYNAME2
+#    ifndef HAVE_GETIPNODEBYNAME
+#      undef USE_IPV6
+#    endif
+#  endif
+#endif
+
+#define SGRAB 2011         /* How much data to allow through sockets. */
+
+
 #define iptolong(a)             (0xffffffff &                           \
                                  (long) (htonl((unsigned long) a)))
 
+
 #ifndef MAKING_MODS
+
+# define killsock(x)     	real_killsock((x),__FILE__,__LINE__)
+
 IP my_atoul(char *);
 #ifdef HAVE_SSL
 int ssl_cleanup();
