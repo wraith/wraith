@@ -823,7 +823,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
       if (nowild) {
         flg[0] = 0;
         build_flags(flg, &(cmds[n].flags), NULL);
-        dprintf(idx, STR("Showing you help for '%s' (%s):"), match, flg);
+        dprintf(idx, STR("Showing you help for '%s' (%s):\n"), match, flg);
         for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++) {
           if (!egg_strcasecmp(match, help[hi].cmd)) {
             if (help[hi].garble)
@@ -1293,7 +1293,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
 		    LOG_DEBUG);
 	}
 	if (!glob_owner(fr) && pls)
-	  md &= ~(LOG_RAW | LOG_SRVOUT | LOG_BOTNET | LOG_BOTSHARE);
+	  md &= ~(LOG_RAW | LOG_SRVOUT | LOG_BOTNET | LOG_BOTSHARE | LOG_ERRORS | LOG_GETIN | LOG_WARN);
 	if (!glob_master(fr) && pls)
 	  md &= ~LOG_BOTS;
 	if (pls)
@@ -4107,7 +4107,7 @@ cmd_t C_dcc[] =
 #endif /* HUB */
   {"newpass",		"",	(Function) cmd_newpass,		NULL},
   {"secpass",		"",	(Function) cmd_secpass,		NULL},
-  {"nick",		"",	(Function) cmd_handle,		NULL},
+  {"nick",		"",	(Function) cmd_handle,		NULL,		1},
   {"page",		"",	(Function) cmd_page,		NULL},
   {"quit",		"",	(Function) NULL,		NULL},
   {"relay",		"i",	(Function) cmd_relay,		NULL},
