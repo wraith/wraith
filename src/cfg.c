@@ -100,7 +100,6 @@ struct cfg_entry CFG_AUTHKEY = {
 };
 #endif /* S_AUTHHASH || S_DCCAUTH */
 
-#ifdef S_MSGCMDS
 #ifdef HUB
 static void msgcmds_describe(struct cfg_entry *entry, int idx) {
   if (entry == &CFG_MSGOP)
@@ -146,7 +145,6 @@ struct cfg_entry CFG_MSGIDENT = {
 	, msgcmds_describe
 #endif /* HUB */
 };
-#endif /* S_MSGCMDS */
 
 #ifdef HUB
 static void cmdprefix_describe(struct cfg_entry *entry, int idx) {
@@ -843,12 +841,10 @@ void init_config()
 #endif /* G_MEAN */
   add_cfg(&CFG_MDOP);
   add_cfg(&CFG_MOP);
-#ifdef S_MSGCMDS
   add_cfg(&CFG_MSGOP);
   add_cfg(&CFG_MSGPASS);
   add_cfg(&CFG_MSGINVITE);
   add_cfg(&CFG_MSGIDENT);
-#endif /* S_MSGCMDS */
   add_cfg(&CFG_CMDPREFIX);
   add_cfg(&CFG_NICK);
   add_cfg(&CFG_SERVERS);

@@ -43,10 +43,7 @@ enum {
 void nuke_server(char *);
 inline int match_my_nick(char *);
 
-extern bind_table_t	*BT_ctcp, *BT_ctcr;
-#ifdef S_MSGCMDS
-extern bind_table_t	*BT_msgc;
-#endif /* S_MSGCMDS */
+extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern int 		serv, servidx, cycle_time, newserverport,
 			nick_len, checked_hostmask, ctcp_mode, quiet_reject,
 			flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time,

@@ -561,7 +561,6 @@ static int gotmsg(char *from, char *msg)
       } else if ((my_code[0] != cmdprefix || !my_code[1] || i == -1 || !(auth[i].authed))) {
         if (!ignoring) {
           int doit = 1;
-#ifdef S_MSGCMDS
           if (!egg_strcasecmp(my_code, "op") || !egg_strcasecmp(my_code, "pass") || !egg_strcasecmp(my_code, "invite") 
               || !egg_strcasecmp(my_code, "ident")
                || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
@@ -580,7 +579,6 @@ static int gotmsg(char *from, char *msg)
             if (buf[0])
               check_bind_msg(buf2, nick, uhost, my_u, msg);
           }
-#endif /* S_MSGCMDS */
           if (doit)
             check_bind_msg(my_code, nick, uhost, my_u, msg);
         }

@@ -7,7 +7,6 @@
 
 #include "src/core_binds.h"
 
-#ifdef S_MSGCMDS
 static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
 {
   char *old = NULL, *new = NULL;
@@ -191,7 +190,6 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed INVITE %s", nick, host, (u ? u->handle : "*"), par);
   return BIND_RET_BREAK;
 }
-#endif /* S_MSGCMDS */
 
 static void reply(char *, struct chanset_t *, char *, ...) __attribute__((format(printf, 3, 4)));
 
@@ -455,12 +453,10 @@ static cmd_t C_msg[] =
   {"+auth",		"",	(Function) msg_pls_auth,	NULL},
 #endif /* S_AUTHHASH */
   {"unauth",		"",	(Function) msg_unauth,		NULL},
-#ifdef S_MSGCMDS
   {"ident",   		"",	(Function) msg_ident,		NULL},
   {"invite",		"",	(Function) msg_invite,		NULL},
   {"op",		"",	(Function) msg_op,		NULL},
   {"pass",		"",	(Function) msg_pass,		NULL},
-#endif /* S_MSGCMDS */
   {NULL,		NULL,	NULL,				NULL}
 };
 

@@ -27,9 +27,7 @@ extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_BADCOOKIE, CFG_MANUALOP, CF
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 extern struct cfg_entry CFG_AUTHKEY;
 #endif /* S_AUTHHASH || S_DCCAUTH */
-#ifdef S_MSGCMDS
 extern struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE, CFG_MSGIDENT;
-#endif /* S_MSGCMDS */
 #ifdef G_MEAN
 extern struct cfg_entry CFG_MEANDEOP, CFG_MEANKICK, CFG_MEANBAN;
 #endif /* G_MEAN */
