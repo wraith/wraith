@@ -47,7 +47,7 @@ void core_binds_init()
 void check_bind_dcc(const char *cmd, int idx, const char *text)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  int x;
+  int x, hits;
 #ifdef S_DCCPASS
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
@@ -92,10 +92,12 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
   }
 #endif /* S_DCCPASS */
 
-  x = check_bind(BT_dcc, cmd, &fr, dcc[idx].user, idx, args);
+  x = check_bind_hits(BT_dcc, cmd, &fr, &hits, dcc[idx].user, idx, args);
   putlog(LOG_DEBUG, "*", "%s RETURNED: %d", cmd, x);
-  if (x == -1)
+  if (hits == 0)
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
+  else if (hits > 1)
+    dprintf(idx, "Ambiguous command.\n");
 
   free(args);
 }

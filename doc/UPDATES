@@ -9,6 +9,7 @@ This is a summary of ChangeLog basically.
 5.Fixed a potential bug in share.
 6.Traffic stats are now properly cleared on leaf bots every day.
 7.Removed a bunch of unused code on leaf bots.
+8.Cmds over dcc now recognize ambiguous cmds and if a cmd is not valid.
 
 1.1.4 (Quickly advanced to 1.1.5)
 

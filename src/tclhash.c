@@ -27,12 +27,14 @@ static bind_table_t *bind_table_list_head = NULL;
 static int check_bind_executing = 0;
 static int already_scheduled = 0;
 /* main routine for bind checks */
+static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag_record *flags, int *hits, va_list args);
 static void bind_table_really_del(bind_table_t *table);
 static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry);
 
 void binds_init(void)
 {
 	bind_table_list_head = NULL;
+	egg_bzero(&cmdlist, 500);
 }
 
 static int internal_bind_cleanup()
@@ -346,20 +348,43 @@ static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 
 int check_bind(bind_table_t *table, const char *match, struct flag_record *flags, ...)
 {
+	va_list args;
+	int ret;
+
+	va_start (args, flags);
+	ret = bind_vcheck_hits (table, match, flags, NULL, args);	
+	va_end (args);
+
+	return ret;
+}
+
+int check_bind_hits(bind_table_t *table, const char *match, struct flag_record *flags, int *hits,...)
+{
+        va_list args;
+        int ret;
+
+        va_start (args, hits);
+        ret = bind_vcheck_hits (table, match, flags, hits, args);
+        va_end (args);
+
+	return ret;
+}
+
+static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag_record *flags, int *hits, va_list ap)
+{
 	void *args[11] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 	bind_entry_t *entry = NULL, *next = NULL, *winner = NULL;
 	int i, cmp, retval;
 	int tie = 0, matchlen = 0;
-	va_list ap;
 
 	Assert(table);
 	check_bind_executing++;
 
-        va_start(ap, flags);
 	for (i = 1; i <= table->nargs; i++) {
 		args[i] = va_arg(ap, void *);
 	}
-	va_end(ap);
+
+	if (hits) (*hits) = 0;
 
 	/* Default return value is 0 */
 	retval = 0;
@@ -407,13 +432,17 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 		}
 		if (cmp) continue; /* Doesn't match. */
 
+		if (hits) (*hits)++;
+
 		retval = bind_entry_exec(table, entry, args);
 		if ((table->flags & BIND_BREAKABLE) && (retval & BIND_RET_BREAK)) break;
 	}
 	/* If it's a partial match table, see if we have 1 winner. */
 	if (winner && tie == 1) {
+		if (hits) (*hits)++;
 		retval = bind_entry_exec(table, winner, args);
-	}
+	} else if (hits && tie) (*hits) = tie;
+
 	check_bind_executing--;
 	return(retval);
 }
