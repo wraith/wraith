@@ -9,14 +9,16 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-int socket_valid_ip(const char *ip)
+int is_dotted_ip(const char *ip)
 {
         char buf[512];
 
 #ifdef USE_IPV6
-        if (inet_pton(AF_INET6, ip, buf) > 0) return(1);
+        if (inet_pton(AF_INET6, ip, buf) > 0) 
+          return AF_INET6;
 #endif
-        if (inet_pton(AF_INET, ip, buf) > 0) return(1);
+        if (inet_pton(AF_INET, ip, buf) > 0)
+          return AF_INET;
         return(0);
 }
 
