@@ -10,8 +10,8 @@ This is a summary of ChangeLog basically.
 7.Removed define: AUTH, added: AUTHCMDS, AUTHHASH, DCCAUTH, see pack.cfg for details.
 8.Leaf binary now accepts -B <botnick>
 9.Bot is now much more portable.
-10.Removed defines: TCLPERMONLY, TCLCMDS.
-
+10.Fixed a bug in cmd_channels, was allowing to view higher flagged users.
+11.Added extort to CREDITS.
 
 1.0.15 (Non-Release Version)
 1.cmd_randstring is now limited to 300.

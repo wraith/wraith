@@ -618,6 +618,7 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   dprintf(idx, STR(" * $bSFC$b for providing compile shells, continuous input, feature suggestions, and testing.\n"));
   dprintf(idx, STR(" * $bxmage$b for beta testing.\n"));
   dprintf(idx, STR(" * $bpasswd$b for beta testing, and his dedication to finding bugs.\n"));
+  dprintf(idx, STR(" * $bextort$b for finding misc bugs.\n"));
   dprintf(idx, STR(" * $bpgpkeys$b for finding bugs, and providing input.\n"));
   dprintf(idx, STR(" * $bqFox$b for providing an mIRC $md5() alias, not requiring a dll or >6.03\n"));
   dprintf(idx, STR(" * $bSith_Lord$b helping test ipv6 on the bot (admin@elitepackets.com)\n"));
@@ -1120,7 +1121,7 @@ static void cmd_channels(struct userrec *u, int idx, char *par) {
     struct userrec *user = NULL;
 
     user = get_user_by_handle(userlist, par);
-    if (user) {
+    if (user && whois_access(u, user)) {
       show_channels(idx, par);
     } else  {
       dprintf(idx, STR("There is no user by that name.\n"));
