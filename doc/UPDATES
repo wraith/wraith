@@ -25,19 +25,27 @@ This is a summary of ChangeLog basically.
 22.Bots now link every 30 seconds.
 23.Fixed channel sharing desync bug.
 24.Added several compile time options, see pack/conf.h.
-25.Added hub->leaf/hub cmd relaying. .botcmd (or .bc) bot cmd ...
-26.Fixed bug with symlinked homedirs. (/home/user -> /usr/home/user)
+25.Added hub->leaf/hub cmd relaying. .botcmd (or .bc) <bot|*> <cmd ...>
+26.Fixed bug with symlinked homedirs. (/home/user -> /usr/home/user) (FreeBSD)
 27.Passwords no longer require a special character.
 28.Login now shows channels, banner, link to site.
 29.New install system, uses conf.h, salt.h and pack.cfg
 30.Added a script to download/build/install TCL if needed.
 31.More cmds now accept *; kick, kickban.
 32.Bot will now "roll" it's nick if needed, ie: nick_ -> _nick -> k_nic.
-33.Added some new defines to disable features.
+33.Added some new defines to enable/disable features.
 34.Fixed ipv6 ban saving/loading bug.
 35.Fixed and improved cmds: slowjoin/slowpart/down/cycle.
 36.Added cmd_mop <#chan|*>.
 37.Added help info for all cmds.
+38.Removed channel flag -/+dontkickops.
+39.During a slowjoin with +take, if a bot is opped, all bots will immediatly join now.
+40.New config entries: msgop, msginvite, msgpass (blank means DISABLED, value is cmd for msg)
+41.Added chanint closed-ban. Will ban hosts that join +closed channels.
+42.Much improved cmd_motd
+43.Added a MODIFIED field to whois.
+44.Console channel/flags now correctly shared among bots.
+45.Various cosmetic changes.
 
 1.0.10
 
