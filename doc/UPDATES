@@ -1,7 +1,7 @@
 This is a summary of ChangeLog basically.
 
 1.2
-* No longer displaying SATLS on ./bin -v
+* No longer displaying SALTS on ./bin -v
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
 * Removed all compile time defines, moved to .config/.chanset
   -Moved PSCLOAK entries to misc/responses.txt
