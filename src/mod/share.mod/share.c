@@ -381,7 +381,6 @@ share_newuser(int idx, char *par)
     /* If user already exists, ignore command */
     shareout_but(NULL, idx, "n %s %s %s %s\n", nick, host, pass, par);
 
-    if (!u) {
       noshare = 1;
       if (strlen(nick) > HANDLEN)
         nick[HANDLEN] = 0;
@@ -398,15 +397,17 @@ share_newuser(int idx, char *par)
 #ifndef LEAF
       putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
 #endif /* LEAF */
-    }
   }
 }
 
 static void
 share_killuser(int idx, char *par)
 {
+  struct userrec *u = NULL;
+
   /* If user is a share bot, ignore command */
-  if (dcc[idx].status & STAT_SHARE) {
+  if ((dcc[idx].status & STAT_SHARE) && (u = get_user_by_handle(userlist, par))) {
+
     noshare = 1;
     if (deluser(par)) {
       shareout_but(NULL, idx, "k %s\n", par);
@@ -441,12 +442,12 @@ share_pls_host(int idx, char *par)
 static void
 share_pls_bothost(int idx, char *par)
 {
-  char *hand = NULL, p[32] = "";
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
-    hand = newsplit(&par);
+    char *hand = NULL;
+    struct userrec *u = NULL;
 
+    hand = newsplit(&par);
+    u = get_user_by_handle(userlist, hand);
     if (!(dcc[idx].status & STAT_GETTING))
       shareout_but(NULL, idx, "+bh %s %s\n", hand, par);
     /* Add bot to userlist if not there */
@@ -455,8 +456,7 @@ share_pls_bothost(int idx, char *par)
         return;                 /* ignore */
       set_user(&USERENTRY_HOSTS, u, par);
     } else {
-      makepass(p);
-      userlist = adduser(userlist, hand, par, p, USER_BOT);
+      userlist = adduser(userlist, hand, par, "-", USER_BOT);
     }
 #ifndef LEAF
     if (!(dcc[idx].status & STAT_GETTING))
@@ -498,7 +498,9 @@ share_change(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     key = newsplit(&par);
     hand = newsplit(&par);
-    if ((u = get_user_by_handle(userlist, hand))) {
+
+    u = get_user_by_handle(userlist, hand);
+
       if (!(uet = find_entry_type(key)))
         /* If it's not a supported type, forget it */
         putlog(LOG_ERROR, "*", "Ignore ch %s from %s (unknown type)", key, dcc[idx].nick);
@@ -532,7 +534,6 @@ share_change(int idx, char *par)
         }
         noshare = 0;
       }
-    }
   }
 }
 
