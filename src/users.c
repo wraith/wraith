@@ -1258,6 +1258,7 @@ void autolink_cycle(char *start)
     }
   }
   putlog(LOG_DEBUG, "@", "Picking random hub from %d hubs", hlc);
+  /* This is mainly a sanity check if the userfile gets fucked :P */
   if (!hlc)
    fatal("userlist died!", 0);
   hlc = randint(hlc);

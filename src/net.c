@@ -521,9 +521,11 @@ void real_killsock(register int sock, const char *file, int line)
 {
   register int	i;
 
-  /* Ignore invalid sockets.  */
-  if (sock < 0)
+  if (sock < 0) {
+    putlog(LOG_MISC, "*", "Attempt to kill socket -1 %s:%d", file, line);
     return;
+  }
+
   for (i = 0; i < MAXSOCKS; i++) {
     if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED)) {
       dropssl(sock);
