@@ -457,7 +457,7 @@
 /* 277 - 280 */
 #define ischanhub ((int (*)(void))global[277])
 #define rand_dccresp ((char *(*)(void))global[278])
-/* 279 unused*
+/* 279 unused */
 #ifdef LEAF
 #define listen_all ((int (*)(int, int))global[280])
 #endif

@@ -1207,10 +1207,6 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
         atrflag = 'V';
       else if (chan_voice(user))
         atrflag = 'v';
-      else if (glob_friend(user))
-        atrflag = 'F';
-      else if (chan_friend(user))
-        atrflag = 'f';
       else if (glob_kick(user))
         atrflag = 'K';
       else if (chan_kick(user))

@@ -63,7 +63,7 @@ struct flag_record {
 #define USER_CHANHUB       0x00000004 /* c  bot is a chanhub    */
 #define USER_DEOP          0x00000008 /* d  user is global de-op              */
 #define USER_EXEMPT        0x00000010 /* e  exempted from stopnethack         */
-#define USER_FRIEND        0x00000020 /* f  user is global friend             */
+#define USER_F             0x00000020 /* f  unused             */
 #define USER_G             0x00000040 /* g  unused                            */
 #define USER_H             0x00000080 /* h  unused                            */
 #define USER_HUBA          0x00000100 /* i  access to HUBS        */
@@ -156,8 +156,6 @@ struct flag_record {
 #define glob_wasoptest(x)		((x).global & USER_WASOPTEST)
 #define chan_quiet(x)			((x).chan & USER_QUIET)
 #define glob_quiet(x)			((x).global & USER_QUIET)
-#define chan_friend(x)			((x).chan & USER_FRIEND)
-#define glob_friend(x)			((x).global & USER_FRIEND)
 #define glob_party(x)			((x).global & USER_PARTY)
 #define glob_hilite(x) 			((x).global & USER_HIGHLITE)
 #define chan_exempt(x)			((x).chan & USER_EXEMPT)

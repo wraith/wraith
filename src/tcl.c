@@ -67,8 +67,6 @@ int	    max_dcc = 200;		/* needs at least 4 or 5 just to
 					   get started. 20 should be enough   */
 int	    quick_logs = 1;		/* quick write logs? (flush them
 					   every min instead of every 5	      */
-int	    par_telnet_flood = 0;       /* trigger telnet flood for +f
-					   ppl? - dw			      */
 int	    quiet_save = 1;             /* quiet-save patch by Lucas	      */
 int	    strtot = 0;
 int 	    handlen = HANDLEN;
@@ -507,7 +505,6 @@ static tcl_ints def_tcl_ints[] =
   {"allow-dk-cmds",		&allow_dk_cmds,		0},
   {"resolve-timeout",		&resolve_timeout,	0},
   {"must-be-owner",		&must_be_owner,		1},
-  {"paranoid-telnet-flood",	&par_telnet_flood,	0},
   {"use-exempts",		&use_exempts,		0},			/* Jason/drummer */
   {"use-invites",		&use_invites,		0},			/* Jason/drummer */
   {"quiet-save",		&quiet_save,		0},			/* Lucas */

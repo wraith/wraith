@@ -453,7 +453,7 @@ void load_internal_users()
         break;
       case 4:
 	if (!get_user_by_handle(userlist, hand)) {
-	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP | USER_FRIEND);
+	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
 /* no thanks.
           if (atoi(hublevel) < 999 && strcmp(hand, origbotname)) {
             u = get_user_by_handle(userlist, hand);
@@ -537,7 +537,7 @@ void load_internal_users()
 	  strncat(owner, ",", 120);
 	strncat(owner, hand, 120);
 	if (!get_user_by_handle(userlist, hand)) {
-	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_FRIEND | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA);
+	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA);
 	  u = get_user_by_handle(userlist, hand);
 	  set_user(&USERENTRY_PASS, u, pass);
 	  while (hosts) {
@@ -609,7 +609,7 @@ void chanprog()
 
   if (!(u = get_user_by_handle(userlist, botnetnick))) {
     /* I need to be on the userlist... doh. */
-    userlist = adduser(userlist, botnetnick, STR("none"), "-", USER_BOT | USER_OP | USER_FRIEND);
+    userlist = adduser(userlist, botnetnick, STR("none"), "-", USER_BOT | USER_OP );
     u = get_user_by_handle(userlist, botnetnick);
     bi = user_malloc(sizeof(struct bot_addr));
 

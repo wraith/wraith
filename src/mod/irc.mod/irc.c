@@ -636,10 +636,8 @@ static int want_to_revenge(struct chanset_t *chan, struct userrec *u,
 
   get_user_flagrec(u, &fr, chan->dname);
 
-  /* Kickee is not a friend? */
-  if (!chan_friend(fr) && !glob_friend(fr) &&
-      /* ... and they didn't kick themself? */
-      rfc_casecmp(badnick, victim)) {
+  /* Kickee didn't kick themself? */
+  if (rfc_casecmp(badnick, victim)) {
     /* They kicked me? */
     if (mevictim) {
       /* ... and I'm allowed to take revenge? <snicker> */
@@ -651,11 +649,8 @@ static int want_to_revenge(struct chanset_t *chan, struct userrec *u,
 
       get_user_flagrec(u2, &fr2, chan->dname);
       /* Protecting friends? */
-      if ((channel_protectfriends(chan) &&
-	   /* ... and victim is valid friend? */
-	   (chan_friend(fr2) || (glob_friend(fr2) && !chan_deop(fr2)))) ||
-	  /* ... or protecting ops */
-	  (channel_protectops(chan) &&
+      /* Protecting ops? */
+      if ((channel_protectops(chan) &&
 	   /* ... and kicked is valid op? */
 	   (chan_op(fr2) || (glob_op(fr2) && !chan_deop(fr2)))))
 	return 1;
@@ -1190,9 +1185,7 @@ static void check_expired_chanstuff()
 	      sprintf(s, "%s!%s", m->nick, m->userhost);
 	      get_user_flagrec(m->user ? m->user : get_user_by_host(s),
 			       &fr, chan->dname);
-              if (!(glob_bot(fr) || glob_friend(fr) ||
-                  (glob_op(fr) && !glob_deop(fr)) ||
-                   chan_friend(fr) || chan_op(fr))) {
+              if (!(glob_bot(fr) || (glob_op(fr) && !glob_deop(fr)) || chan_op(fr))) {
 		dprintf(DP_SERVER, "KICK %s %s :%sidle %d min\n", chan->name,
 			m->nick, kickprefix, chan->idle_kick);
 		m->flags |= SENTKICK;

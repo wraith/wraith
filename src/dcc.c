@@ -34,7 +34,7 @@ extern Tcl_Interp	*interp;
 extern time_t		 now;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
-			 ignore_time, par_telnet_flood;
+			 ignore_time;
 extern char		 botnetnick[], ver[], origbotname[], notify_new[];
 
 
@@ -1190,7 +1190,7 @@ static int detect_telnet_flood(char *floodhost)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
 
   get_user_flagrec(get_user_by_host(floodhost), &fr, NULL);
-  if (!flood_telnet_thr || (glob_friend(fr) && !par_telnet_flood))
+  if (!flood_telnet_thr || glob_noflood(fr))
     return 0;			/* No flood protection */
   if (egg_strcasecmp(lasttelnethost, floodhost)) {	/* New... */
     strcpy(lasttelnethost, floodhost);

@@ -233,7 +233,7 @@ struct chanset_t {
 #define CHAN_DONTKICKOPS    0x1000	   /* never kick +o flag people -arthur2 */
 #define CHAN_INACTIVE       0x2000	   /* no irc support for this channel
                                          - drummer                           */
-#define CHAN_PROTECTFRIENDS 0x4000	   /* re-op any +f people who get deop'd */
+#define CHAN_               0x4000	   /* unused */
 #define CHAN_VOICE          0x8000	   /* a bot +y|y will voice *, except +q */
 #define CHAN_SEEN           0x10000
 #define CHAN_REVENGEBOT     0x20000	   /* revenge on actions against the bot */
@@ -279,7 +279,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_dynamicbans(chan) (chan->status & CHAN_DYNAMICBANS)
 #define channel_nouserbans(chan) (chan->status & CHAN_NOUSERBANS)
 #define channel_protectops(chan) (chan->status & CHAN_PROTECTOPS)
-#define channel_protectfriends(chan) (chan->status & CHAN_PROTECTFRIENDS)
 #define channel_autovoice(chan) (0)
 #define channel_dontkickops(chan) (chan->status & CHAN_DONTKICKOPS)
 #define channel_secret(chan) (chan->status & CHAN_SECRET)

@@ -1501,9 +1501,8 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 	    (chan->status & CHAN_PRIVATE) ? '+' : '-',
 	    (chan->status & CHAN_CYCLE) ? '+' : '-',
 	    (chan->status & CHAN_DONTKICKOPS) ? '+' : '-');
-    dprintf(idx, "     %cprotectops     %cprotectfriends %crevenge        %crevengebot\n",
+    dprintf(idx, "     %cprotectops     %crevenge        %crevengebot\n",
 	    (chan->status & CHAN_PROTECTOPS) ? '+' : '-',
-	    (chan->status & CHAN_PROTECTFRIENDS) ? '+' : '-',
 	    (chan->status & CHAN_REVENGE) ? '+' : '-',
 	    (chan->status & CHAN_REVENGEBOT) ? '+' : '-');
     dprintf(idx, "     %cbitch          %cnodesynch\n",

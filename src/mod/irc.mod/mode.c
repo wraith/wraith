@@ -589,9 +589,6 @@ static void got_deop(struct chanset_t *chan, char *nick, char *from,
       if (channel_protectops(chan) && (glob_master(victim) || chan_master(victim) ||
 	       glob_op(victim) || chan_op(victim)))
 	ok = 0;
-      else if (channel_protectfriends(chan) && (glob_friend(victim) ||
-	       chan_friend(victim)))
-	ok = 0;
     }
 
     /* do we want to reop victim? */
@@ -673,8 +670,8 @@ static void got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
 	    get_user_flagrec(u, &victim, chan->dname);
           if (channel_private(chan) && !glob_bot(victim) && !chan_op(victim) && !glob_owner(victim))
             goto skip;
-          if ((glob_friend(victim) || (glob_op(victim) && !chan_deop(victim)) ||
-              chan_friend(victim) || chan_op(victim)) && !glob_master(user) &&
+          if (((glob_op(victim) && !chan_deop(victim)) ||
+              chan_op(victim)) && !glob_master(user) &&
               !glob_bot(user) && !chan_master(user) && !isexempted(chan, s1)) {
                 if (target_priority(chan, m, 0))
 		  add_mode(chan, '-', 'b', who);
@@ -935,8 +932,7 @@ Context;
       if (m)
 	m->last = now;
       if (channel_active(chan) && m && me_op(chan) &&
-	  !(glob_friend(user) || chan_friend(user) ||
-	  (channel_dontkickops(chan) && (chan_op(user) || (glob_op(user) &&
+	  !((channel_dontkickops(chan) && (chan_op(user) || (glob_op(user) &&
 	  !chan_deop(user)))))) {
 	if (chan_fakeop(m)) {
 	  putlog(LOG_MODES, ch, CHAN_FAKEMODE, ch);

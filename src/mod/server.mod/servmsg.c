@@ -340,7 +340,7 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
 
   u = get_user_by_host(from);
   atr = u ? u->flags : 0;
-  if (atr & (USER_BOT | USER_FRIEND))
+  if (atr & (USER_BOT))
     return 0;
 
   if (isauthed(floodhost) > -1) 

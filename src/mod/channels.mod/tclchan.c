@@ -782,10 +782,6 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement(irp, "+protectops");
   else
     Tcl_AppendElement(irp, "-protectops");
-  if (chan->status & CHAN_PROTECTFRIENDS)
-    Tcl_AppendElement(irp, "+protectfriends");
-  else
-    Tcl_AppendElement(irp, "-protectfriends");
   if (chan->status & CHAN_DONTKICKOPS)
     Tcl_AppendElement(irp, "+dontkickops");
   else
@@ -938,7 +934,6 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
   else if CHKFLAG_NEG(CHAN_NOUSERBANS,     "userbans",       chan->status)
   else if CHKFLAG_POS(CHAN_BITCH,          "bitch",          chan->status)
   else if CHKFLAG_POS(CHAN_PROTECTOPS,     "protectops",     chan->status)
-  else if CHKFLAG_POS(CHAN_PROTECTFRIENDS, "protectfriends", chan->status)
   else if CHKFLAG_POS(CHAN_DONTKICKOPS,    "dontkickops",    chan->status)
   else if CHKFLAG_POS(CHAN_INACTIVE,       "inactive",       chan->status)
   else if CHKFLAG_POS(CHAN_REVENGE,        "revenge",        chan->status)
@@ -1243,10 +1238,6 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
       chan->status |= CHAN_PROTECTOPS;
     else if (!strcmp(item[i], "-protectops"))
       chan->status &= ~CHAN_PROTECTOPS;
-    else if (!strcmp(item[i], "+protectfriends"))
-      chan->status |= CHAN_PROTECTFRIENDS;
-    else if (!strcmp(item[i], "-protectfriends"))
-      chan->status &= ~CHAN_PROTECTFRIENDS;
     else if (!strcmp(item[i], "+dontkickops"))
       chan->status |= CHAN_DONTKICKOPS;
     else if (!strcmp(item[i], "-dontkickops"))
@@ -1319,7 +1310,7 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
       chan->status |= CHAN_FASTOP;
     }
     else if (!strcmp(item[i], "-fastop"))
-      chan->status &= ~(CHAN_FASTOP | CHAN_PROTECTFRIENDS | CHAN_PROTECTOPS | CHAN_DONTKICKOPS);
+      chan->status &= ~(CHAN_FASTOP | CHAN_PROTECTOPS | CHAN_DONTKICKOPS);
     else if (!strcmp(item[i], "+private")) {
       chan->status |= CHAN_PRIVATE;
     }
@@ -1332,6 +1323,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
     else if (!strcmp(item[i], "-nomdop"))  ;
     else if (!strcmp(item[i], "+nomop"))  ;
     else if (!strcmp(item[i], "-nomop"))  ;
+    else if (!strcmp(item[i], "+protectfriends"))  ;
+    else if (!strcmp(item[i], "-protectfriends"))  ;
     else if (!strcmp(item[i], "+punish"))  ;
     else if (!strcmp(item[i], "-punish"))  ;
     else if (!strcmp(item[i], "+seen"))  ;

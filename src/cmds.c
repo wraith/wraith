@@ -2887,7 +2887,7 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
     else if (strchr(BADHANDCHARS, handle[0]) != NULL)
       dprintf(idx, STR("You can't start a botnick with '%c'.\n"), handle[0]);
     else {
-      userlist = adduser(userlist, handle, STR("none"), "-", USER_BOT | USER_FRIEND | USER_OP);
+      userlist = adduser(userlist, handle, STR("none"), "-", USER_BOT | USER_OP);
       u1 = get_user_by_handle(userlist, handle);
       bi = user_malloc(sizeof(struct bot_addr));
 
