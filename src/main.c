@@ -523,7 +523,7 @@ static void startup_checks() {
    else if (!can_stat(cfile))
      werr(ERR_NOCONF);
   */
-  else if (canstat(cfile) && fixmod(cfile))
+  else if (can_stat(cfile) && fixmod(cfile))
     werr(ERR_CONFMOD);
 
   if (!can_stat(tempdir)) {
