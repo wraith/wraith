@@ -1037,21 +1037,19 @@ static int botaddr_expmem(struct user_entry *e)
 static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
 {
 #ifdef HUB
-
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
-
   if (glob_admin(fr)) {
-
-  register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
-
-  dprintf(idx, STR("  ADDRESS: %.70s\n"), bi->address);
-  dprintf(idx, STR("     telnet: %d, relay: %d\n"), bi->telnet_port, bi->relay_port);
-  dprintf(idx, STR("     hublevel: %d, uplink: %s\n"), bi->hublevel, bi->uplink);
-
+    register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
+    if (bi->address && bi->hublevel && bi->hublevel != 0)
+      dprintf(idx, STR("  ADDRESS: %.70s:%d\n"), bi->address, bi->telnet_port);
+    if (bi->hublevel && bi->hublevel != 0)
+      dprintf(idx, STR("  HUBLEVEL: %d\n"), bi->hublevel);
+    if (bi->uplink && bi->uplink[0])
+      dprintf(idx, STR("  UPLINK: %s\n"), bi->uplink);
   }
-#endif
+#endif /* HUB */
 }
 
 static int botaddr_gotshare(struct userrec *u, struct user_entry *e,
