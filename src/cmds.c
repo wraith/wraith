@@ -883,7 +883,7 @@ static void cmd_whois(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# whois %s", dcc[idx].nick, par);
 
-  tell_user_ident(idx, par[0] ? par : dcc[idx],nick);
+  tell_user_ident(idx, par[0] ? par : dcc[idx].nick);
 }
 
 static void match(int idx, char *par, int isbot)
