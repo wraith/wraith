@@ -81,10 +81,16 @@ unsigned long my_atoul(char *s)
 
 int hostprotocol(char *host)
 {
-#ifdef USE_IPV6
   if (!host || (host && !host[0]))
     return 0;
 
+  /* return the AF_TYPE if it's already an ip */
+  int af_type = is_dotted_ip(host);
+
+  if (af_type)
+    return af_type;
+
+#ifdef USE_IPV6
   struct hostent *he = NULL;
 
   sdprintf("WARNING: gethostbyname2() is about to block in hostprotocol()");
@@ -686,10 +692,7 @@ int open_telnet(char *server, port_t port)
   int sock = -1;
   
 #ifdef USE_IPV6
-  int af_type = is_dotted_ip(server);
-
-  /* Use the family from the ip, or if it's a host, resolve it with blocking calls ;/ */
-  sock = getsock(0, af_type ? af_type : hostprotocol(server));
+  sock = getsock(0, hostprotocol(server));
 #else
   sock = getsock(0);
 #endif /* USE_IPV6 */
