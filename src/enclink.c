@@ -330,7 +330,7 @@ void link_parse(int idx, char *buf)
 }
 
 struct enc_link enclink[] = {
-  { "ghost+nat", LINK_GHOSTNAT, ghost_linknat, ghost_write, ghost_read, ghost_parse },
+  { "ghost+nat", LINK_GHOSTNAT, ghost_link_nat, ghost_write, ghost_read, ghost_parse },
   { "ghost", LINK_GHOST, ghost_link, ghost_write, ghost_read, ghost_parse },
   { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL, NULL },
   { NULL, 0, NULL, NULL, NULL, NULL }
