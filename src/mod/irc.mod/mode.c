@@ -951,7 +951,8 @@ gotmode(char *from, char *msg)
         /* Now we got modes[], chan, u, nick, hfrom, and count of each relevant mode */
 
         /* check for mdop */
-        if ((chan) && (deops >= 3) && me_op(chan)) {
+        if (me_op(chan)) {
+        if (deops >= 3) {
           if (!u || !u->bot) {
             if (ROLE_KICK_MDOP) {
               if (m && !chan_sentkick(m)) {
@@ -968,7 +969,7 @@ gotmode(char *from, char *msg)
         }
 
         /* check for mop */
-        if (chan && (ops >= 3) && me_op(chan)) {
+        if (ops >= 3) {
           if (channel_nomop(chan)) {
             if (!u || !u->bot) {
               if (ROLE_KICK_MDOP) {
@@ -986,8 +987,8 @@ gotmode(char *from, char *msg)
             enforce_bitch(chan);        /* deop quick! */
           }
         }
-
-        if (chan && me_op(chan) && ops && u && u->bot && !channel_fastop(chan) && !channel_take(chan)) {
+        if (ops && u) {
+        if (u->bot && !channel_fastop(chan) && !channel_take(chan)) {
           int isbadop = 0;
 
           /* if unbans == 1 && ops */
@@ -1089,7 +1090,7 @@ gotmode(char *from, char *msg)
             putlog(LOG_DEBUG, "@", "Good op: %s", msg);
         }
 
-        if (ops && chan && me_op(chan) && !channel_manop(chan) && u && !u->bot) {
+        if (!channel_manop(chan) && !u->bot) {
           char trg[NICKLEN] = "";
 
           n = i = 0;
@@ -1138,6 +1139,8 @@ gotmode(char *from, char *msg)
               }
           }
         }
+}
+}
         for (i = 0; i < modecnt; i++)
           if (modes[i])
             free(modes[i]);
