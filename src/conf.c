@@ -18,9 +18,7 @@
 #include <errno.h>
 #include <paths.h>
 #include <sys/types.h>
-#ifdef S_CONFEDIT
-#  include <sys/wait.h>
-#endif /* S_CONFEDIT */
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <signal.h>
 
@@ -83,7 +81,6 @@ killbot(char *botnick)
 }
 #endif /* LEAF */
 
-#ifdef S_CONFEDIT
 #ifndef CYGWIN_HACKS
 static uid_t save_euid, save_egid;
 static int
@@ -214,7 +211,6 @@ fatal:
   exit(1);
 }
 #endif /* !CYGWIN_HACKS */
-#endif /* S_CONFEDIT */
 
 void
 init_conf()

@@ -339,7 +339,6 @@
 #undef S_AUTHHASH
 #undef S_AUTOAWAY
 #undef S_AUTOLOCK
-#undef S_CONFEDIT
 #undef S_DCCAUTH
 #undef S_DCCPASS
 #undef S_GARBLESTRINGS

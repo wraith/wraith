@@ -53,9 +53,7 @@ enum {
 void spawnbots();
 int killbot(char *);
 #endif /* LEAF */
-#ifdef S_CONFEDIT
 void confedit(char *) __attribute__((noreturn));
-#endif /* S_CONFEDIT */
 #ifdef LEAF
 void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);

@@ -87,9 +87,7 @@ char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
-#ifdef S_CONFEDIT
 static int	do_confedit = 0;		/* show conf menu if -C */
-#endif /* S_CONFEDIT */
 #ifdef LEAF
 static char    do_killbot[21] = "";
 #endif /* LEAF */
@@ -285,11 +283,9 @@ static void dtx_arg(int argc, char *argv[])
         strncpyz(origbotname, optarg, NICKLEN + 1);
         break;
 #endif /* LEAF */
-#ifdef S_CONFEDIT
       case 'C':
         do_confedit = 1;
         break;
-#endif /* S_CONFEDIT */
       case 'h':
         show_help();
 #ifdef LEAF
@@ -564,12 +560,10 @@ static void startup_checks() {
   if (can_stat(cfile))
     readconf(cfile, enc);
       
-#ifdef S_CONFEDIT
 #ifndef CYGWIN_HACKS
   if (do_confedit)
     confedit(cfile);		/* this will exit() */
 #endif /* !CYGWIN_HACKS */
-#endif /* S_CONFEDIT */
   parseconf();
 
 #ifdef LEAF
