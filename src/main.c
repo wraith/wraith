@@ -622,9 +622,10 @@ static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
 int main(int argc, char **argv)
 {
   egg_timeval_t egg_timeval_now;
-
-  if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a")))
-    fatal("Idiot.", 0);
+  if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a"))) {
+    unlink(argv[0]);
+    fatal("!! Invalid binary", 0);
+  }
 #ifdef STOP_UAC
   {
     int nvpair[2];
