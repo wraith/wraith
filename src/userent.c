@@ -577,7 +577,7 @@ static void secpass_display(int idx, struct user_entry *e, struct userrec *u)
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
 
-  if (!strcmp(u->handle, dcc[idx].nick) || glob_admin(fr)) {
+  if (!strcmp(u->handle, dcc[idx].nick) || (glob_admin(fr) && isowner(dcc[idx].nick))) {
 #ifdef HUB
     dprintf(idx, "  %s: %s\n", e->type->name, e->u.string);
 #else

@@ -30,6 +30,7 @@ This is a summary of ChangeLog basically.
 * Fixed cmd_botcmd not checking for "die" correctly.
 * Fixed random secpass being set 1 char too long.
 * Fixed cmd_ch(sec)pass <rand> to display "[random]" now isntead of "[something]"
+* SECPASS only displays for same user and +a/perm_owner now.
 
 1.2
 * No longer displaying SALTS on ./bin -v
