@@ -1798,10 +1798,13 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", STR("#%s# randstring %s"), dcc[idx].nick, par);
 
   len = atoi(par);
-  rand = nmalloc(len + 1);
-  make_rand_str(rand, len);
-  dprintf(idx, STR("string: %s\n"), rand);
-  nfree(rand);
+  if (len < 301) {
+    rand = nmalloc(len + 1);
+    make_rand_str(rand, len);
+    dprintf(idx, STR("string: %s\n"), rand);
+    nfree(rand);
+  } else 
+    dprintf(idx, "Too long, must be <= 300\n");
 }
 
 static void cmd_restart(struct userrec *u, int idx, char *par)
