@@ -1357,7 +1357,7 @@ static int gotmode(char *from, char *msg)
 
             if (abs(off) > OP_TIME_SLACK) {
 /*            isbadop = 4; */
-              putlog(LOG_ERRORS, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nfrom, optime, off);
+              putlog(LOG_DEBUG, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nfrom, optime, off);
             }
           }
         }
