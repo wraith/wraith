@@ -1485,7 +1485,7 @@ static void server_resolve_success(int idx)
     {
       int i = 1;
 
-      setsockopt(serv, SOL_TCP, TCP_NODELAY, &i, sizeof(int));
+      setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(int));
     }
 #endif /* S_NODELAY */
     /* Queue standard login */
