@@ -3,12 +3,9 @@
 
 #include <time.h>
 #include <stdio.h>
-#include <string.h>
 
 int main() {
-  time_t now, nowtm;
-  now = time(NULL);
-  nowtm = mktime(gmtime(&now));
-  printf("%lu\n", nowtm);
+  time_t now = time(NULL);
+  printf("%lu\n", mktime(gmtime(&now)));
   return 0;
 }
