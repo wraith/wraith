@@ -27,13 +27,10 @@
 #include "src/egg_timer.h"
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/channels.mod/channels.h"
-#ifdef LEAF
-#  include "src/mod/irc.mod/irc.h"
-#endif /* LEAF */
+#include "src/mod/irc.mod/irc.h"
 
 static struct flag_record fr = { 0, 0, 0, 0 };
 
-#ifdef LEAF
 struct delay_mode {
   struct delay_mode *next;
   struct chanset_t *chan;
@@ -44,12 +41,9 @@ struct delay_mode {
 };
 
 static struct delay_mode *start_delay = NULL;
-#endif /* LEAF */
 
 /* Prototypes */
-#ifdef HUB
 static void start_sending_users(int);
-#endif /* HUB */
 static void shareout_but(int, const char *, ...)  __attribute__ ((format(printf, 2, 3)));
 static void cancel_user_xfer(int, void *);
 
@@ -59,7 +53,6 @@ static void cancel_user_xfer(int, void *);
  *   Sup's delay code
  */
 
-#ifdef LEAF
 static void
 add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
 {
@@ -103,15 +96,11 @@ check_delay()
   for (struct delay_mode *d = start_delay; d; d = dnext) {
     dnext = d->next;
     if (d->seconds <= now) {
-#  ifdef LEAF
       add_mode(d->chan, d->plsmns, d->mode, d->mask);
-#  endif
-      /* LEAF */
       del_delay(d);
     }
   }
 }
-#endif /* LEAF */
 
 /*
  *   Botnet commands
@@ -129,36 +118,30 @@ share_stick_ban(int idx, char *par)
     yn = atoi(val);
     noshare = 1;
     if (!par[0]) {              /* Global ban */
-#ifdef LEAF
       struct chanset_t *chan = NULL;
-#endif /* LEAF */
+
       if (u_setsticky_ban(NULL, host, yn) > 0) {
-#ifdef HUB
-        putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-#endif /* HUB */
+        if (conf.bot->hub)
+          putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
         shareout_but(idx, "s %s %d\n", host, yn);
       }
-#ifdef LEAF
-      for (chan = chanset; chan != NULL; chan = chan->next)
-        check_this_ban(chan, host, yn);
-#endif /* LEAF */
+      if (!conf.bot->hub)
+        for (chan = chanset; chan != NULL; chan = chan->next)
+          check_this_ban(chan, host, yn);
     } else {
       struct chanset_t *chan = findchan_by_dname(par);
       struct chanuserrec *cr;
 
       if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
         if (u_setsticky_ban(chan, host, yn) > 0) {
-#ifdef HUB
-          putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
-#endif /* HUB */
+          if (conf.bot->hub)
+            putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
           shareout_but(idx, "s %s %d %s\n", host, yn, chan->dname);
           noshare = 0;
           return;
         }
-#ifdef LEAF
-      if (chan)
+      if (chan && !conf.bot->hub)
         check_this_ban(chan, host, yn);
-#endif /* LEAF */
       putlog(LOG_CMDS, "@", "Rejecting invalid sticky exempt: %s on %s%s", host, par, yn ? "" : " (unstick)");
     }
     noshare = 0;
@@ -180,9 +163,8 @@ share_stick_exempt(int idx, char *par)
     noshare = 1;
     if (!par[0]) {              /* Global exempt */
       if (u_setsticky_exempt(NULL, host, yn) > 0) {
-#ifdef HUB
-        putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-#endif /* HUB */
+        if (conf.bot->hub)
+          putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
         shareout_but(idx, "se %s %d\n", host, yn);
       }
     } else {
@@ -191,9 +173,8 @@ share_stick_exempt(int idx, char *par)
 
       if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
         if (u_setsticky_exempt(chan, host, yn) > 0) {
-#ifdef HUB
-          putlog(LOG_CMDS, "@", "%s: stick %s %c %s", dcc[idx].nick, host, yn ? 'y' : 'n', par);
-#endif /* HUB */
+          if (conf.bot->hub)
+            putlog(LOG_CMDS, "@", "%s: stick %s %c %s", dcc[idx].nick, host, yn ? 'y' : 'n', par);
           shareout_but(idx, "se %s %d %s\n", host, yn, chan->dname);
           noshare = 0;
           return;
@@ -219,9 +200,8 @@ share_stick_invite(int idx, char *par)
     noshare = 1;
     if (!par[0]) {              /* Global invite */
       if (u_setsticky_invite(NULL, host, yn) > 0) {
-#ifdef HUB
-        putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-#endif /* HUB */
+        if (conf.bot->hub)
+          putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
         shareout_but(idx, "sInv %s %d\n", host, yn);
       }
     } else {
@@ -230,9 +210,8 @@ share_stick_invite(int idx, char *par)
 
       if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
         if (u_setsticky_invite(chan, host, yn) > 0) {
-#ifdef HUB
-          putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
-#endif /* HUB */
+          if (conf.bot->hub)
+            putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
           shareout_but(idx, "sInv %s %d %s\n", host, yn, chan->dname);
           noshare = 0;
           return;
@@ -258,10 +237,8 @@ share_chhand(int idx, char *par)
       shareout_but(idx, "h %s %s\n", hand, par);
       noshare = 1;
       value = change_handle(u, par);
-#ifdef HUB
-      if (value)
+      if (value && conf.bot->hub)
         putlog(LOG_CMDS, "@", "%s: handle %s->%s", dcc[idx].nick, hand, par);
-#endif /* HUB */
       noshare = 0;
     }
   }
@@ -296,13 +273,11 @@ share_chattr(int idx, char *par)
           check_dcc_chanattrs(u, par, fr.chan, fr2.chan);
           noshare = 0;
           build_flags(s, &fr, 0);
-#ifdef HUB
-          if (!(dcc[idx].status & STAT_GETTING))
-            putlog(LOG_CMDS, "@", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
-#endif /* HUB */
-#ifdef LEAF
-          recheck_channel(cst, 0);
-#endif /* LEAF */
+          if (conf.bot->hub) {
+            if (!(dcc[idx].status & STAT_GETTING))
+              putlog(LOG_CMDS, "@", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
+          } else
+            recheck_channel(cst, 0);
         } else {
           fr.match = FR_GLOBAL;
           get_user_flagrec(dcc[idx].user, &fr, 0);
@@ -315,20 +290,18 @@ share_chattr(int idx, char *par)
           noshare = 0;
           build_flags(s, &fr, 0);
           fr.match = FR_CHAN;
-#ifdef HUB
-          if (!(dcc[idx].status & STAT_GETTING))
-            putlog(LOG_CMDS, "@", "%s: chattr %s %s", dcc[idx].nick, hand, s);
-#endif /* HUB */
-#ifdef LEAF
-          for (cst = chanset; cst; cst = cst->next)
-            recheck_channel(cst, 0);
-#endif /* LEAF */
+          if (conf.bot->hub) {
+            if (!(dcc[idx].status & STAT_GETTING))
+              putlog(LOG_CMDS, "@", "%s: chattr %s %s", dcc[idx].nick, hand, s);
+          } else {
+            for (cst = chanset; cst; cst = cst->next)
+              recheck_channel(cst, 0);
+          }
         }
         noshare = 0;
       }
-#ifdef HUB
-    write_userfile(-1);
-#endif /* HUB */
+      if (conf.bot->hub)
+        write_userfile(-1);
     }
   }
 }
@@ -348,9 +321,8 @@ share_pls_chrec(int idx, char *par)
       shareout_but(idx, "+cr %s %s\n", user, par);
       if (!get_chanrec(u, par)) {
         add_chanrec(u, par);
-#ifdef HUB
-        putlog(LOG_CMDS, "@", "%s: +chrec %s %s", dcc[idx].nick, user, par);
-#endif /* HUB */
+        if (conf.bot->hub)
+          putlog(LOG_CMDS, "@", "%s: +chrec %s %s", dcc[idx].nick, user, par);
       }
       noshare = 0;
     }
@@ -372,9 +344,8 @@ share_mns_chrec(int idx, char *par)
       del_chanrec(u, par);
       shareout_but(idx, "-cr %s %s\n", user, par);
       noshare = 0;
-#ifdef HUB
-      putlog(LOG_CMDS, "@", "%s: -chrec %s %s", dcc[idx].nick, user, par);
-#endif /* HUB */
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: -chrec %s %s", dcc[idx].nick, user, par);
     }
   }
 }
@@ -420,9 +391,8 @@ share_newuser(int idx, char *par)
       set_user_flagrec(u, &fr, 0);
       fr.match = FR_CHAN;       /* why?? */
       noshare = 0;
-#ifdef HUB
-      putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
-#endif /* HUB */
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
     }
   }
 }
@@ -438,9 +408,8 @@ share_killuser(int idx, char *par)
     noshare = 1;
     if (deluser(par)) {
       shareout_but(idx, "k %s\n", par);
-#ifdef HUB
-      putlog(LOG_CMDS, "@", "%s: killuser %s", dcc[idx].nick, par);
-#endif /* HUB */
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: killuser %s", dcc[idx].nick, par);
     }
     noshare = 0;
   }
@@ -457,11 +426,10 @@ share_pls_host(int idx, char *par)
     if ((u = get_user_by_handle(userlist, hand))) {
       shareout_but(idx, "+h %s %s\n", hand, par);
       set_user(&USERENTRY_HOSTS, u, par);
-#ifdef LEAF
-      check_this_user(u->handle, 0, NULL);
-#else /* !LEAF */
-      putlog(LOG_CMDS, "@", "%s: +host %s %s", dcc[idx].nick, hand, par);
-#endif /* LEAF */
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: +host %s %s", dcc[idx].nick, hand, par);
+      else
+        check_this_user(u->handle, 0, NULL);
     }
   }
 }
@@ -485,10 +453,8 @@ share_pls_bothost(int idx, char *par)
     } else {
       userlist = adduser(userlist, hand, par, "-", 0, 1);
     }
-#ifdef HUB
-    if (!(dcc[idx].status & STAT_GETTING))
+    if (conf.bot->hub && !(dcc[idx].status & STAT_GETTING))
       putlog(LOG_CMDS, "@", "%s: +host %s %s", dcc[idx].nick, hand, par);
-#endif /* HUB */
   }
 }
 
@@ -505,11 +471,10 @@ share_mns_host(int idx, char *par)
       noshare = 1;
       delhost_by_handle(hand, par);
       noshare = 0;
-#ifdef LEAF
-      check_this_user(hand, 2, par);
-#else /* !LEAF */
-      putlog(LOG_CMDS, "@", "%s: -host %s %s", dcc[idx].nick, hand, par);
-#endif /* LEAF */
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: -host %s %s", dcc[idx].nick, hand, par);
+      else
+        check_this_user(hand, 2, par);
     }
   }
 }
@@ -580,9 +545,8 @@ share_chchinfo(int idx, char *par)
       noshare = 1;
       set_handle_chaninfo(userlist, hand, chan, par);
       noshare = 0;
-#ifdef HUB
-      putlog(LOG_CMDS, "@", "%s: change info %s %s", dcc[idx].nick, chan, hand);
-#endif /* HUB */
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: change info %s %s", dcc[idx].nick, chan, hand);
     }
   }
 }
@@ -592,18 +556,17 @@ share_mns_ban(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(idx, "-b %s\n", par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: cancel ban %s", dcc[idx].nick, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: cancel ban %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('b', NULL, par, 1) > 0) {
-#ifdef LEAF
-      struct chanset_t *chan = NULL;
+      if (!conf.bot->hub) {
+        struct chanset_t *chan = NULL;
 
-      for (chan = chanset; chan; chan = chan->next)
-        add_delay(chan, '-', 'b', par);
-#endif /* LEAF */
+        for (chan = chanset; chan; chan = chan->next)
+          add_delay(chan, '-', 'b', par);
+      }
     }
     noshare = 0;
   }
@@ -614,18 +577,17 @@ share_mns_exempt(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(idx, "-e %s\n", par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: cancel exempt %s", dcc[idx].nick, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: cancel exempt %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('e', NULL, par, 1) > 0) {
-#ifdef LEAF
-      struct chanset_t *chan = NULL;
+      if (!conf.bot->hub) {
+        struct chanset_t *chan = NULL;
 
-      for (chan = chanset; chan; chan = chan->next)
-        add_delay(chan, '-', 'e', par);
-#endif /* LEAF */
+        for (chan = chanset; chan; chan = chan->next)
+          add_delay(chan, '-', 'e', par);
+      }
     }
     noshare = 0;
   }
@@ -636,18 +598,17 @@ share_mns_invite(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(idx, "-inv %s\n", par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: cancel invite %s", dcc[idx].nick, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: cancel invite %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('I', NULL, par, 1) > 0) {
-#ifdef LEAF
-      struct chanset_t *chan = NULL;
+      if (!conf.bot->hub) {
+        struct chanset_t *chan = NULL;
 
-      for (chan = chanset; chan; chan = chan->next)
-        add_delay(chan, '-', 'I', par);
-#endif /* LEAF */
+        for (chan = chanset; chan; chan = chan->next)
+          add_delay(chan, '-', 'I', par);
+      }
     }
     noshare = 0;
   }
@@ -659,22 +620,18 @@ share_mns_banchan(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     char *chname = NULL;
     struct chanset_t *chan = NULL;
+    int value = 0;
 
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
     shareout_but(idx, "-bc %s %s\n", chname, par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: cancel ban %s on %s", dcc[idx].nick, par, chname);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: cancel ban %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
-#ifdef LEAF
-    if (u_delmask('b', chan, par, 1) > 0)
+    value = u_delmask('b', chan, par, 1);
+    if (!conf.bot->hub && value > 0)
       add_delay(chan, '-', 'b', par);
-#endif /* LEAF */
-#ifdef HUB
-    u_delmask('b', chan, par, 1);
-#endif /* HUB */
     noshare = 0;
   }
 }
@@ -685,22 +642,18 @@ share_mns_exemptchan(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     char *chname = NULL;
     struct chanset_t *chan = NULL;
+    int value = 0;
 
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
     shareout_but(idx, "-ec %s %s\n", chname, par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: cancel exempt %s on %s", dcc[idx].nick, par, chname);
-#endif /* HUB */
+    if (conf.bot->hub)
+     putlog(LOG_CMDS, "@", "%s: cancel exempt %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
-#ifdef LEAF
-    if (u_delmask('e', chan, par, 1) > 0)
+    value = u_delmask('e', chan, par, 1);
+    if (!conf.bot->hub && value > 0)
       add_delay(chan, '-', 'e', par);
-#endif /* LEAF */
-#ifdef HUB
-    u_delmask('e', chan, par, 1);
-#endif /* HUB */
 
     noshare = 0;
   }
@@ -712,23 +665,18 @@ share_mns_invitechan(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     char *chname = NULL;
     struct chanset_t *chan = NULL;
+    int value = 0;
 
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
     shareout_but(idx, "-invc %s %s\n", chname, par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: cancel invite %s on %s", dcc[idx].nick, par, chname);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: cancel invite %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
-#ifdef LEAF
-    if (u_delmask('I', chan, par, 1) > 0)
+    value = u_delmask('I', chan, par, 1);
+    if (!conf.bot->hub && value > 0)
       add_delay(chan, '-', 'I', par);
-#endif /* LEAF */
-#ifdef HUB
-    u_delmask('I', chan, par, 1);
-#endif /* HUB */
-
     noshare = 0;
   }
 }
@@ -738,9 +686,8 @@ share_mns_ignore(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(idx, "-i %s\n", par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: cancel ignore %s", dcc[idx].nick, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: cancel ignore %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
     delignore(par);
@@ -755,9 +702,7 @@ share_pls_ban(int idx, char *par)
     time_t expire_time;
     char *ban = NULL, *tm = NULL, *from = NULL;
     int flags = 0;
-#ifdef LEAF
     bool stick = 0;
-#endif /* LEAF */
 
     shareout_but(idx, "+b %s\n", par);
     noshare = 1;
@@ -767,9 +712,7 @@ share_pls_ban(int idx, char *par)
     from = newsplit(&par);
     if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
-#ifdef LEAF
-      stick++;
-#endif /* LEAF */
+      stick = 1;
     }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
@@ -778,14 +721,12 @@ share_pls_ban(int idx, char *par)
     if (expire_time != 0L)
       expire_time += now;
     u_addmask('b', NULL, ban, from, par, expire_time, flags);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: global ban %s (%s:%s)", dcc[idx].nick, ban, from, par);
-#endif /* HUB */
     noshare = 0;
-#ifdef LEAF
-    for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
-      check_this_ban(chan, ban, stick);
-#endif /* LEAF */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: global ban %s (%s:%s)", dcc[idx].nick, ban, from, par);
+    else
+      for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
+        check_this_ban(chan, ban, stick);
   }
 }
 
@@ -796,9 +737,7 @@ share_pls_banchan(int idx, char *par)
     time_t expire_time;
     int flags = 0;
     char *ban = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-#ifdef LEAF
     bool stick = 0;
-#endif /* LEAF */
     struct chanset_t *chan = NULL;
 
     ban = newsplit(&par);
@@ -810,25 +749,21 @@ share_pls_banchan(int idx, char *par)
     from = newsplit(&par);
     if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
-#ifdef LEAF
-      stick++;
-#endif /* LEAF */
+      stick = 1;
     }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: ban %s on %s (%s:%s)", dcc[idx].nick, ban, chname, from, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: ban %s on %s (%s:%s)", dcc[idx].nick, ban, chname, from, par);
     noshare = 1;
     expire_time = (time_t) atoi(tm);
     if (expire_time != 0L)
       expire_time += now;
     u_addmask('b', chan, ban, from, par, expire_time, flags);
     noshare = 0;
-#ifdef LEAF
-    check_this_ban(chan, ban, stick);
-#endif /* LEAF */
+    if (!conf.bot->hub)
+      check_this_ban(chan, ban, stick);
   }
 }
 
@@ -860,14 +795,12 @@ share_pls_exempt(int idx, char *par)
     if (expire_time != 0L)
       expire_time += now;
     u_addmask('e', NULL, exempt, from, par, expire_time, flags);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: global exempt %s (%s:%s)", dcc[idx].nick, exempt, from, par);
-#endif /* HUB */
     noshare = 0;
-#ifdef LEAF
-    for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
-      check_this_exempt(chan, exempt, stick);
-#endif /* LEAF */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: global exempt %s (%s:%s)", dcc[idx].nick, exempt, from, par);
+    else
+      for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
+        check_this_exempt(chan, exempt, stick);
   }
 }
 
@@ -881,9 +814,7 @@ share_pls_exemptchan(int idx, char *par)
     int flags = 0;
     struct chanset_t *chan = NULL;
     char *exempt = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-#ifdef LEAF
     bool stick = 0;
-#endif /* LEAF */
 
     exempt = newsplit(&par);
     tm = newsplit(&par);
@@ -894,25 +825,21 @@ share_pls_exemptchan(int idx, char *par)
     from = newsplit(&par);
     if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
-#ifdef LEAF
       stick++;
-#endif /* LEAF */
     }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: exempt %s on %s (%s:%s)", dcc[idx].nick, exempt, chname, from, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: exempt %s on %s (%s:%s)", dcc[idx].nick, exempt, chname, from, par);
     noshare = 1;
     expire_time = (time_t) atoi(tm);
     if (expire_time != 0L)
       expire_time += now;
     u_addmask('e', chan, exempt, from, par, expire_time, flags);
     noshare = 0;
-#ifdef LEAF
-    check_this_exempt(chan, exempt, stick);
-#endif /* LEAF */
+    if (!conf.bot->hub)
+      check_this_exempt(chan, exempt, stick);
   }
 }
 
@@ -925,9 +852,7 @@ share_pls_invite(int idx, char *par)
     time_t expire_time;
     char *invite = NULL, *tm = NULL, *from = NULL;
     int flags = 0;
-#ifdef LEAF
     bool stick = 0;
-#endif /* LEAF */
 
     shareout_but(idx, "+inv %s\n", par);
     noshare = 1;
@@ -937,9 +862,7 @@ share_pls_invite(int idx, char *par)
     from = newsplit(&par);
     if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
-#ifdef LEAF
       stick++;
-#endif /* LEAF */
     }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
@@ -948,14 +871,12 @@ share_pls_invite(int idx, char *par)
     if (expire_time != 0L)
       expire_time += now;
     u_addmask('I', NULL, invite, from, par, expire_time, flags);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: global invite %s (%s:%s)", dcc[idx].nick, invite, from, par);
-#endif /* HUB */
     noshare = 0;
-#ifdef LEAF
-    for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
-      check_this_invite(chan, invite, stick);
-#endif /* LEAF */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: global invite %s (%s:%s)", dcc[idx].nick, invite, from, par);
+    else
+      for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
+        check_this_invite(chan, invite, stick);
   }
 }
 
@@ -969,9 +890,7 @@ share_pls_invitechan(int idx, char *par)
     int flags = 0;
     struct chanset_t *chan = NULL;
     char *invite = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-#ifdef LEAF
     bool stick = 0;
-#endif /* LEAF */
 
     invite = newsplit(&par);
     tm = newsplit(&par);
@@ -982,25 +901,21 @@ share_pls_invitechan(int idx, char *par)
     from = newsplit(&par);
     if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
-#ifdef LEAF
       stick++;
-#endif /* LEAF */
     }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: invite %s on %s (%s:%s)", dcc[idx].nick, invite, chname, from, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: invite %s on %s (%s:%s)", dcc[idx].nick, invite, chname, from, par);
     noshare = 1;
     expire_time = (time_t) atoi(tm);
     if (expire_time != 0L)
       expire_time += now;
     u_addmask('I', chan, invite, from, par, expire_time, flags);
     noshare = 0;
-#ifdef LEAF
-    check_this_invite(chan, invite, stick);
-#endif /* LEAF */
+    if (!conf.bot->hub)
+      check_this_invite(chan, invite, stick);
   }
 }
 
@@ -1029,15 +944,13 @@ share_pls_ignore(int idx, char *par)
     if (strlen(from) > HANDLEN + 1)
       from[HANDLEN + 1] = 0;
     par[65] = 0;
-#ifdef HUB
-    putlog(LOG_CMDS, "@", "%s: ignore %s (%s: %s)", dcc[idx].nick, ign, from, par);
-#endif /* HUB */
+    if (conf.bot->hub)
+      putlog(LOG_CMDS, "@", "%s: ignore %s (%s: %s)", dcc[idx].nick, ign, from, par);
     addignore(ign, from, (const char *) par, expire_time);
     noshare = 0;
   }
 }
 
-#ifdef HUB
 static void
 share_ufno(int idx, char *par)
 {
@@ -1064,7 +977,6 @@ share_ufyes(int idx, char *par)
     putlog(LOG_BOTS, "@", "Sending user file send request to %s", dcc[idx].nick);
   }
 }
-#endif /* HUB */
 
 static void
 share_userfileq(int idx, char *par)
@@ -1090,11 +1002,10 @@ share_userfileq(int idx, char *par)
       dprintf(idx, "s uy overbots invites exempts\n");
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
-#ifdef HUB
-      putlog(LOG_BOTS, "*", "Downloading user file from %s", dcc[idx].nick);
-#else /* !HUB */
-      putlog(LOG_BOTS, "*", "Downloading user file via uplink.");
-#endif /* HUB */
+      if (conf.bot->hub)
+        putlog(LOG_BOTS, "*", "Downloading user file from %s", dcc[idx].nick);
+      else
+        putlog(LOG_BOTS, "*", "Downloading user file via uplink.");
     }
   }
 }
@@ -1307,7 +1218,6 @@ shareout_but(int x, const char *format, ...)
     }
 }
 
-#ifdef HUB
 /* Flush all tbufs older than 15 minutes.
  */
 static void
@@ -1364,7 +1274,6 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
     putlog(LOG_MISC, "*", USERF_ERRWRITE2);
   return ok;
 }
-#endif /* HUB */
 
 /* Erase old user list, switch to new one.
  */
@@ -1513,7 +1422,6 @@ finish_share(int idx)
   updatebot(-1, dcc[j].nick, '+', 0, 0, NULL);
 }
 
-#ifdef HUB
 /* Begin the user transfer process.
  */
 static void
@@ -1556,7 +1464,6 @@ start_sending_users(int idx)
     unlink(share_file);
   }
 }
-#endif /* HUB */
 
 static void (*def_dcc_bot_kill) (int, void *) = 0;
 
@@ -1626,7 +1533,6 @@ share_report(int idx, int details)
             }
           if (!ok)
             dprintf(idx, "Download userlist from %s (negotiating " "botentries)\n", dcc[i].nick);
-#ifdef HUB
         } else if (dcc[i].status & STAT_SENDING) {
           for (j = 0; j < dcc_total; j++) {
             if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
@@ -1644,7 +1550,6 @@ share_report(int idx, int details)
           dprintf(idx, "    Passively sharing with %s.\n", dcc[i].nick);
         } else if (dcc[i].status & STAT_SHARE) {
           dprintf(idx, "    Aggressively sharing with %s.\n", dcc[i].nick);
-#endif /* HUB */
         }
       }
   }
@@ -1653,12 +1558,10 @@ share_report(int idx, int details)
 void
 share_init()
 {
-#ifdef HUB
-  timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
-#endif /* HUB */
-#ifdef LEAF
-  timer_create_secs(1, "check_delay", (Function) check_delay);
-#endif /* LEAF */
+  if (conf.bot->hub)
+    timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
+  else
+    timer_create_secs(1, "check_delay", (Function) check_delay);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
 }

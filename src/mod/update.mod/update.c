@@ -35,12 +35,8 @@ static void start_sending_binary(int);
 extern struct dcc_table DCC_FORK_SEND, DCC_GET;
 
 
-#ifdef HUB
 int bupdating = 0;
-#endif /* HUB */
-#ifdef LEAF
 int updated = 0;
-#endif /* LEAF */
 
 /*
  *   Botnet commands
@@ -62,20 +58,20 @@ static void update_ufyes(int idx, char *par)
 
 static void update_fileq(int idx, char *par)
 {
-  if (dcc[idx].status & STAT_GETTINGU) return;
-#ifdef LEAF
-  if (updated) return;
-  if (conf.bot->localhub) {
-#else
-  if (!isupdatehub()) {
-#endif /* LEAF */
-    dprintf(idx, "sb uy\n");
-  } 
-#ifdef HUB
-  else if (isupdatehub()) {
-    dprintf(idx, "sb un I am the update hub, NOT YOU.\n");
+  if (dcc[idx].status & STAT_GETTINGU || updated) 
+    return;
+
+  if (!conf.bot->hub) {
+    if (!conf.bot->localhub)
+      return;
+  } else {
+    if (isupdatehub()) {
+      dprintf(idx, "sb un I am the update hub, NOT YOU.\n");
+      return;
+    }
   }
-#endif /* HUB */
+
+  dprintf(idx, "sb uy\n");
 }
 
 /* us <ip> <port> <length>
@@ -88,11 +84,10 @@ static void update_ufsend(int idx, char *par)
   FILE *f = NULL;
 
   putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
-#ifdef HUB
-  egg_snprintf(s, sizeof s, "%s.update.%s.hub", tempdir, conf.bot->nick);
-#else
-  egg_snprintf(s, sizeof s, "%s.update.%s.leaf", tempdir, conf.bot->nick);
-#endif
+  if (conf.bot->hub)
+    egg_snprintf(s, sizeof s, "%s.update.%s.hub", tempdir, conf.bot->nick);
+  else
+    egg_snprintf(s, sizeof s, "%s.update.%s.leaf", tempdir, conf.bot->nick);
   unlink(s); /* make sure there isnt already a new binary here.. */
   if (dcc_total == max_dcc) {
     putlog(LOG_MISC, "*", "NO MORE DCC CONNECTIONS -- can't grab new binary");
@@ -167,42 +162,41 @@ static void got_nu(char *botnick, char *code, char *par)
 {
   if (!par || !*par || updated) 
     return;
-#ifdef LEAF
-  if (!conf.bot->localhub)
-    return;
+  if (!conf.bot->hub) {
+    if (!conf.bot->localhub)
+      return;
 
-  if (!conf.bot->u || !userlist || !get_user_by_handle(userlist, botnick))	/* probably still getting userfile */
-    return;
+    if (!conf.bot->u || !userlist || !get_user_by_handle(userlist, botnick))	/* probably still getting userfile */
+      return;
 
-  if (tandbot && tandbot->bot && !strcmp(tandbot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
-    return;
-#endif /* LEAF */
+    if (tandbot && tandbot->bot && !strcmp(tandbot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
+      return;
+  }
 
 /* needupdate? curver */
    time_t newts = atol(newsplit(&par));
 
    if (newts > buildts) {
-#ifdef LEAF
-     struct bot_addr *obi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
-     struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+     if (!conf.bot->hub) {
+       struct bot_addr *obi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
+       struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
 
-     bi->uplink = strdup(botnick);
-     if (obi) {
-       bi->address = strdup(obi->address);
-       bi->telnet_port = obi->telnet_port;
-       bi->relay_port = obi->relay_port;
-       bi->hublevel = obi->hublevel;
-     } 
-     set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
-   /* Change our uplink to them */
-   /* let cont_link restructure us.. */
-     putlog(LOG_MISC, "*", "Changed uplink to %s for update.", botnick);
-     botunlink(-2, tandbot->bot, "Restructure for update.");
-     usleep(1000 * 500);
-     botlink("", -3, botnick);
-#else
-     putlog(LOG_MISC, "*", "I need to be updated with %li", newts);
-#endif /* LEAF */
+       bi->uplink = strdup(botnick);
+       if (obi) {
+         bi->address = strdup(obi->address);
+         bi->telnet_port = obi->telnet_port;
+         bi->relay_port = obi->relay_port;
+         bi->hublevel = obi->hublevel;
+       } 
+       set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
+     /* Change our uplink to them */
+     /* let cont_link restructure us.. */
+       putlog(LOG_MISC, "*", "Changed uplink to %s for update.", botnick);
+       botunlink(-2, tandbot->bot, "Restructure for update.");
+       usleep(1000 * 500);
+       botlink("", -3, botnick);
+     } else 
+       putlog(LOG_MISC, "*", "I need to be updated with %li", newts);
    }  
 }
 
@@ -272,16 +266,13 @@ void finish_update(int idx)
   
   if (updatebin(0, buf2, 120))
     putlog(LOG_MISC, "*", "Failed to update to new binary..");
-#ifdef LEAF
   else
     updated = 1;
-#endif /* LEAF */
 }
 
 static void start_sending_binary(int idx)
 {
   /* module_entry *me; */
-#ifdef HUB
   char update_file[51] = "", update_fpath[DIRMAX] = "", tmpFile[1024] = "", *sysname = NULL;
   int i = 1, j = -1;
 
@@ -348,10 +339,8 @@ static void start_sending_binary(int idx)
     strcpy(dcc[j].host, dcc[idx].nick);		/* Store bot's nick */
     dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
   }
-#endif /* HUB */
 }
 
-#ifdef HUB
 int cnt = 0;
 static void check_updates()
 {
@@ -385,7 +374,6 @@ static void check_updates()
     putallbots(buf);
   }
 }
-#endif /* HUB */
 
 void update_report(int idx, int details)
 {
@@ -411,7 +399,6 @@ void update_report(int idx, int details)
 	  if (!ok)
 	    dprintf(idx, "Download binary from %s (negotiating "
 		    "botentries)\n", dcc[i].nick);
-#ifdef HUB
 	} else if (dcc[i].status & STAT_SENDINGU) {
 	  for (j = 0; j < dcc_total; j++) {
 	    if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
@@ -428,7 +415,6 @@ void update_report(int idx, int details)
 			dcc[i].nick);
 	    }
 	  }
-#endif /* HUB */
 	}
       }
   }
@@ -458,6 +444,7 @@ void update_init()
   add_builtins("bot", update_bot);
 #ifdef HUB
   add_builtins("dcc", update_cmds);
-  timer_create_secs(30, "check_updates", (Function) check_updates);
+  if (conf.bot->hub)
+    timer_create_secs(30, "check_updates", (Function) check_updates);
 #endif /* HUB */
 }
