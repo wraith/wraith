@@ -13,18 +13,6 @@
 #  include "proto.h"		/* This file needs this */
 #endif
 
-/* Used for stub functions:
- */
-
-#define BADARGS(nl, nh, example)	do {				\
-	if ((argc < (nl)) || (argc > (nh))) {				\
-		Tcl_AppendResult(irp, "wrong # args: should be \"",	\
-				 argv[0], (example), "\"", NULL);	\
-		return TCL_ERROR;					\
-	}								\
-} while (0)
-
-
 typedef struct _tcl_coups {
   char *name;
   int *lptr;

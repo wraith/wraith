@@ -48,7 +48,6 @@ extern int		 backgrd, term_z, use_stderr, dcc_total, timesync,
 			 strict_host, loading,
                          localhub;
 extern time_t		 now;
-extern Tcl_Interp	*interp;
 extern struct cfg_entry	CFG_MOTD, CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST, CFG_PROMISC, 
 			CFG_TRACE, CFG_HIJACK;
 

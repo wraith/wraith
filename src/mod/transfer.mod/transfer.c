@@ -1545,31 +1545,6 @@ static int fstat_set(struct userrec *u, struct user_entry *e, void *buf)
   return 1;
 }
 
-static int fstat_tcl_get(Tcl_Interp *irp, struct userrec *u,
-			 struct user_entry *e, int argc, char **argv)
-{
-  register struct filesys_stats *fs;
-  char d[50];
-
-  BADARGS(3, 4, " handle FSTAT ?u/d?");
-  fs = e->u.extra;
-  if (argc == 3)
-    egg_snprintf(d, sizeof d, "%u %u %u %u", fs->uploads, fs->upload_ks,
-                 fs->dnloads, fs->dnload_ks);
-  else
-    switch (argv[3][0]) {
-    case 'u':
-      egg_snprintf(d, sizeof d, "%u %u", fs->uploads, fs->upload_ks);
-      break;
-    case 'd':
-      egg_snprintf(d, sizeof d, "%u %u", fs->dnloads, fs->dnload_ks);
-      break;
-    }
-
-  Tcl_AppendResult(irp, d, NULL);
-  return TCL_OK;
-}
-
 static int fstat_kill(struct user_entry *e)
 {
   if (e->u.extra)
@@ -1594,8 +1569,6 @@ static int fstat_dupuser(struct userrec *u, struct userrec *o,
 			 struct user_entry *e);
 static void stats_add_dnload(struct userrec *u, unsigned long bytes);
 static void stats_add_upload(struct userrec *u, unsigned long bytes);
-static int fstat_tcl_set(Tcl_Interp *irp, struct userrec *u,
-			 struct user_entry *e, int argc, char **argv);
 
 static struct user_entry_type USERENTRY_FSTAT =
 {
@@ -1608,8 +1581,6 @@ static struct user_entry_type USERENTRY_FSTAT =
   fstat_kill,
   NULL,
   fstat_set,
-  fstat_tcl_get,
-  fstat_tcl_set,
   fstat_display,
   "FSTAT"
 };
@@ -1701,43 +1672,6 @@ static void stats_add_upload(struct userrec *u, unsigned long bytes)
     set_user(&USERENTRY_FSTAT, u, fs);
     /* No shareout here, set_user already sends info... --rtc */
   }
-}
-
-static int fstat_tcl_set(Tcl_Interp *irp, struct userrec *u,
-			 struct user_entry *e, int argc, char **argv)
-{
-  register struct filesys_stats *fs;
-  int f = 0, k = 0;
-
-  BADARGS(4, 6, " handle FSTAT u/d ?files ?ks??");
-  if (argc > 4)
-    f = atoi(argv[4]);
-  if (argc > 5)
-    k = atoi(argv[5]);
-  switch (argv[3][0]) {
-  case 'u':
-  case 'd':
-    if (!(fs = e->u.extra)) {
-      fs = malloc(sizeof(struct filesys_stats));
-      egg_bzero(fs, sizeof(struct filesys_stats));
-    }
-    switch (argv[3][0]) {
-    case 'u':
-      fs->uploads = f;
-      fs->upload_ks = k;
-      break;
-    case 'd':
-      fs->dnloads = f;
-      fs->dnload_ks = k;
-      break;
-    }
-    set_user (&USERENTRY_FSTAT, u, fs);
-    break;
-  case 'r':
-    set_user (&USERENTRY_FSTAT, u, NULL);
-    break;
-  }
-  return TCL_OK;
 }
 
 

@@ -21,7 +21,6 @@
 
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
-extern Tcl_Interp	*interp;
 extern time_t		 now, buildts;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,

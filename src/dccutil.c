@@ -24,7 +24,6 @@ extern unsigned long     notalloc;
 extern char		 botnetnick[], version[];
 extern time_t		 now;
 extern sock_list	*socklist;
-extern Tcl_Interp	*interp;
 
 static struct portmap 	*root = NULL;
 

@@ -16,7 +16,6 @@ extern int		 dcc_total, tands;
 extern char		 botnetnick[];
 extern time_t now;
 extern party_t		*party;
-extern Tcl_Interp	*interp;
 extern struct userrec	*userlist;
 
 static char	OBUF[SGRAB-110];

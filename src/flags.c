@@ -720,32 +720,6 @@ static int botfl_set(struct userrec *u, struct user_entry *e, void *buf)
   return 1;
 }
 
-static int botfl_tcl_get(Tcl_Interp *interp, struct userrec *u,
-			 struct user_entry *e, int argc, char **argv)
-{
-  char x[100];
-  struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
-
-  fr.bot = e->u.ulong;
-  build_flags(x, &fr, NULL);
-  Tcl_AppendResult(interp, x, NULL);
-  return TCL_OK;
-}
-
-static int botfl_tcl_set(Tcl_Interp *irp, struct userrec *u,
-			 struct user_entry *e, int argc, char **argv)
-{
-  struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
-
-  BADARGS(4, 4, " handle BOTFL flags");
-  if (u->flags & USER_BOT) {
-    /* Silently ignore for users */
-    break_down_flags(argv[3], &fr, NULL);
-    botfl_set(u, e, (void *) fr.bot);
-  }
-  return TCL_OK;
-}
-
 static void botfl_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
@@ -767,8 +741,6 @@ struct user_entry_type USERENTRY_BOTFL =
   botfl_kill,
   def_get,
   botfl_set,
-  botfl_tcl_get,
-  botfl_tcl_set,
   botfl_display,
   "BOTFL"
 };

@@ -13,7 +13,6 @@
 
 static Function *global = NULL;
 static int console_autosave = 1;
-static int force_channel = 0;
 static int info_party = 1;
 
 struct console_info {
@@ -178,60 +177,6 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
   return 1;
 }
 
-static int console_tcl_get(Tcl_Interp *irp, struct userrec *u,
-			   struct user_entry *e, int argc, char **argv)
-{
-  char work[1024];
-  struct console_info *i = e->u.extra;
-
-  simple_sprintf(work, "%s %s %s %d %d %d %d",
-		 i->channel, masktype(i->conflags),
-		 stripmasktype(i->stripflags), i->echoflags,
-		 i->page, i->conchan, i->colour);
-  Tcl_AppendResult(irp, work, NULL);
-  return TCL_OK;
-}
-
-static int console_tcl_set(Tcl_Interp *irp, struct userrec *u,
-		    struct user_entry *e, int argc, char **argv)
-{
-  struct console_info *i = e->u.extra;
-  int l;
-
-  BADARGS(4, 9, " handle CONSOLE channel flags strip echo page conchan");
-  if (!i) {
-    i = malloc(sizeof(struct console_info));
-    egg_bzero(i, sizeof(struct console_info));
-  }
-  if (i->channel)
-    free(i->channel);
-  l = strlen(argv[3]);
-  if (l > 80)
-    l = 80;
-  i->channel = malloc(l + 1);
-  strncpy(i->channel, argv[3], l);
-  i->channel[l] = 0;
-  if (argc > 4) {
-    i->conflags = logmodes(argv[4]);
-    if (argc > 5) {
-      i->stripflags = stripmodes(argv[5]);
-      if (argc > 6) {
-	i->echoflags = (argv[6][0] == '1') ? 1 : 0;
-	if (argc > 7) {
-	  i->page = atoi(argv[7]);
-	  if (argc > 8) {
-	    i->conchan = atoi(argv[8]);
-            if (argc > 9)
-              i->colour = atoi(argv[9]);
-          }  
-	}
-      }
-    }
-  }
-  set_user(&USERENTRY_CONSOLE, u, i);
-  return TCL_OK;
-}
-
 static void console_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct console_info *i = e->u.extra;
@@ -278,8 +223,6 @@ static struct user_entry_type USERENTRY_CONSOLE =
   console_kill,
   NULL,
   console_set,
-  console_tcl_get,
-  console_tcl_set,
   console_display,
   "CONSOLE"
 };

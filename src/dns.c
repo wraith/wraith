@@ -20,7 +20,6 @@ extern int		 dcc_total;
 extern int		 resolve_timeout;
 extern time_t		 now;
 extern jmp_buf		 alarmret;
-extern Tcl_Interp	*interp;
 
 devent_t	*dns_events = NULL;
 
@@ -188,35 +187,6 @@ void dcc_dnshostbyip(IP ip)
   dns_hostbyip(ip);
 }
 
-
-/*
- *   Tcl events
- */
-
-static void dns_tcl_iporhostres(IP ip, char *hostn, int ok, void *other)
-{
-  devent_tclinfo_t *tclinfo = (devent_tclinfo_t *) other;
-
-  if (Tcl_VarEval(interp, tclinfo->proc, " ", iptostr(htonl(ip)), " ",
-		  hostn, ok ? " 1" : " 0", tclinfo->paras, NULL) == TCL_ERROR)
-    putlog(LOG_MISC, "*", DCC_TCLERROR, tclinfo->proc, interp->result);
-
-  /* Free the memory. It will be unused after this event call. */
-  free(tclinfo->proc);
-  if (tclinfo->paras)
-    free(tclinfo->paras);
-  free(tclinfo);
-}
-
-devent_type DNS_TCLEVENT_HOSTBYIP = {
-  "TCLEVENT_HOSTBYIP",
-  dns_tcl_iporhostres
-};
-
-devent_type DNS_TCLEVENT_IPBYHOST = {
-  "TCLEVENT_IPBYHOST",
-  dns_tcl_iporhostres
-};
 
 
 /*

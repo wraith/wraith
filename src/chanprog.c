@@ -20,7 +20,6 @@
 #include "modules.h"
 
 extern struct userrec	*userlist;
-extern Tcl_Interp	*interp;
 extern char		 ver[], botnetnick[], firewall[], myip[], 
 			 motdfile[], userfile[], tempdir[],
 			 notify_new[], owner[], 
@@ -343,18 +342,6 @@ void tell_verbose_status(int idx)
     dprintf(idx, "Admin: %s\n", admin);
 
   dprintf(idx, "OS: %s %s\n", uni_t, vers_t);
-
-  /* info library */
-  dprintf(idx, "%s %s\n", MISC_TCLLIBRARY,
-	  ((interp) && (Tcl_Eval(interp, "info library") == TCL_OK)) ?
-	  interp->result : "*unknown*");
-
-  /* info tclversion/patchlevel */
-  dprintf(idx, "%s %s (%s %s)\n", MISC_TCLVERSION,
-	  ((interp) && (Tcl_Eval(interp, "info patchlevel") == TCL_OK)) ?
-	  interp->result : (Tcl_Eval(interp, "info tclversion") == TCL_OK) ?
-	  interp->result : "*unknown*", MISC_TCLHVERSION,
-	  TCL_PATCH_LEVEL ? TCL_PATCH_LEVEL : "*unknown*");
 }
 
 /* Show all internal state variables

@@ -22,8 +22,6 @@ extern int 		 sdebug, backgrd, do_restart;
 extern char		 tempdir[], origbotname[], ver[];
 extern time_t		 now, buildts;
 extern jmp_buf           alarmret;
-extern Tcl_Interp       *interp;
-
 
 void setlimits()
 {
@@ -153,17 +151,6 @@ void write_debug()
 
     egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
     dprintf(-x, "Build: %s (%lu)\n", date, buildts);
-    /* info library */
-    dprintf(-x, "Tcl library: %s\n",
-            ((interp) && (Tcl_Eval(interp, "info library") == TCL_OK)) ?
-            interp->result : "*unknown*");
-
-    /* info tclversion/patchlevel */
-    dprintf(-x, "Tcl version: %s (header version %s)\n",
-            ((interp) && (Tcl_Eval(interp, "info patchlevel") == TCL_OK)) ?
-     interp->result : (Tcl_Eval(interp, "info tclversion") == TCL_OK) ?
-     interp->result : "*unknown*", TCL_PATCH_LEVEL ? TCL_PATCH_LEVEL :
-     "*unknown*");
 
 #ifdef CCFLAGS
     dprintf(-x, "Compile flags: %s\n", CCFLAGS);

@@ -64,6 +64,9 @@ static int match_note_ignore(struct userrec *, char *);
 static void notes_read(char *, char *, char *, int);
 static void notes_del(char *, char *, char *, int);
 static void fwd_display(int, struct user_entry *, struct userrec *);
+#else
+#define num_notes ((int(*)(char *user))notes_funcs[5])
+
 #endif				/* MAKING_NOTES */
 
 #endif				/* _EGG_MOD_NOTES_H */

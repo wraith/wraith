@@ -26,7 +26,6 @@ extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
 extern int dcc_total, noshare, egg_numver;
 extern char botnetnick[], tempdir[];
-extern Tcl_Interp *interp;
 extern time_t now;
 
 char userfile[121] = "";	/* where the user records are stored */
@@ -447,21 +446,23 @@ void tell_user(int idx, struct userrec *u, int master)
 {
   char s[81], s1[81];
   char format[81];
-  int n;
+  int n = 0;
   time_t now2;
   struct chanuserrec *ch;
   struct chanset_t *chan;
   struct user_entry *ue;
   struct laston_info *li;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
+  module_entry *me = module_find("notes", 0, 0);
+  if (me) {
+    Function *func = me->funcs;
+    n = (func[5]) (u->handle);
+  }
+
 
   fr.global = u->flags;
   fr.udef_global = u->flags_udef;
   build_flags(s, &fr, NULL);
-  Tcl_SetVar(interp, "user", u->handle, 0);
-  n = 0;
-  if (Tcl_VarEval(interp, "notes ", "$user", NULL) == TCL_OK)
-    n = atoi(interp->result);
   li = get_user(&USERENTRY_LASTON, u);
   if (!li || !li->laston)
     strcpy(s1, "never");
@@ -822,9 +823,8 @@ int readuserfile(char *file, struct userrec **ret)
              options[strlen(options) - 1] = 0;
 /* Above is a hack to remove { } */
 //             putlog(LOG_MISC, "*", "TCL_CHANNEL_ADD: (%s) %s", chan, options);
-             if ((func[37]) (interp, chan, options) != TCL_OK) {	/* tcl_channel_add() */
+             if ((func[37]) (0, chan, options) != TCL_OK) {	/* tcl_channel_add() */
                putlog(LOG_MISC, "*", "Tcl error in userfile on line %d", line);
-               putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
                free(my_ptr);
                return 0;
              }

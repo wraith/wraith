@@ -35,8 +35,6 @@ static struct user_entry_type USERENTRY_FWD =
   NULL,
   NULL,
   NULL,
-  NULL,
-  NULL,
   fwd_display,
   "FWD"
 };
@@ -937,6 +935,7 @@ static Function notes_table[] =
   (Function) 0,
   (Function) notes_report,
   (Function) cmd_note,
+  (Function) num_notes,
 };
 
 char *notes_start(Function * global_funcs)

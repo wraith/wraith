@@ -37,10 +37,6 @@ struct user_entry_type {
   int (*kill) (struct user_entry *);
   void *(*get) (struct userrec *, struct user_entry *);
   int (*set) (struct userrec *, struct user_entry *, void *);
-  int (*tcl_get) (Tcl_Interp *, struct userrec *, struct user_entry *,
-		  int, char **);
-  int (*tcl_set) (Tcl_Interp *, struct userrec *, struct user_entry *,
-		  int, char **);
   void (*display) (int idx, struct user_entry *, struct userrec *);
   char *name;
 };
