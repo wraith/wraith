@@ -64,7 +64,7 @@ static connect_info_t *attach(int idx, const char *host, int port, int timeout)
                 char buf[128];
                 egg_timeval_t howlong;
 
-                snprintf(buf, sizeof(buf), "idx %d to %s/%d", idx, host, port);
+                egg_snprintf(buf, sizeof(buf), "idx %d to %s/%d", idx, host, port);
                 howlong.sec = timeout;
                 howlong.usec = 0;
                 connect_info->timer_id = timer_create_complex(&howlong, buf, 
