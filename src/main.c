@@ -1923,68 +1923,8 @@ int main(int argc, char **argv)
       socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
     }
 
-/* FIXME: do_restart */
     if (do_restart) {
-      if (do_restart == -2)
-	rehash();
-      else {
-	/* Unload as many modules as possible */
-	int f = 1;
-	module_entry *p;
-	Function x;
-	char xx[256];
-
- 	/* oops, I guess we should call this event before tcl is restarted */
-   	check_tcl_event("prerestart");
-
-	while (f) {
-	  f = 0;
-	  for (p = module_list; p != NULL; p = p->next) {
-	    dependancy *d = dependancy_list;
-	    int ok = 1;
-
-	    while (ok && d) {
-	      if (d->needed == p)
-		ok = 0;
-	      d = d->next;
-	    }
-	    if (ok) {
-	      strcpy(xx, p->name);
-	      if (module_unload(xx, botnetnick) == NULL) {
-		f = 1;
-		break;
-	      }
-	    }
-	  }
-	}
-
-	for (f = 0, p = module_list; p; p = p->next) {
-	  if (!strcmp(p->name, "eggdrop") || !strcmp(p->name, "encryption") ||
-	      !strcmp(p->name, "uptime"))
-	    f = 0;
-	  else 
-	    f = 1;
-	}
-	if (f)
-	  /* Should be only 3 modules now - eggdrop, encryption, and uptime */
-	  putlog(LOG_MISC, "*", MOD_STAGNANT);
-
-/* 	flushlogs(); */
-	kill_tcl();
-	init_tcl(argc, argv);
-
-	/* this resets our modules which we didn't unload (encryption and uptime) */
-	for (p = module_list; p; p = p->next) {
-	  if (p->funcs) {
-	    x = p->funcs[MODCALL_START];
-	    x(NULL);
-	  }
-	}
-
-	rehash();
-	restart_chons();
-	call_hook(HOOK_LOADED);
-      }
+      rehash();
       do_restart = 0;
     }
   }

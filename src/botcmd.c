@@ -1457,20 +1457,6 @@ botcmd_t C_bot[] =
   {NULL,		NULL}
 };
 
-
-void bounce_simul(int idx, char *buf)
-{
-  char rmsg[SGRAB-110];
-
-  if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0) {
-    return;
-  }
-
-  snprintf(rmsg, sizeof rmsg, "r-sr %d %s", idx, buf);          /* remote-simul[r]eturn idx buf */
-
-  putbot(dcc[idx].simulbot, rmsg);
-}
-
 void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {
   char msg[SGRAB-110];
@@ -1521,6 +1507,19 @@ static void bot_rsim(char *botnick, char *code, char *par)
     dcc[idx].user = get_user_by_handle(userlist, nick);
   }
   check_tcl_dcc(cmd, idx, par);
+}
+
+void bounce_simul(int idx, char *buf)
+{
+  char rmsg[SGRAB-110];
+
+  if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0) {
+    return;
+  }
+
+  snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].ridx, buf);          /* remote-simul[r]eturn idx buf */
+
+  putbot(dcc[idx].simulbot, rmsg);
 }
 
 #ifdef HUB

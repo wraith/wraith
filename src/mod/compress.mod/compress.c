@@ -385,23 +385,13 @@ static int compress_report(int idx, int details)
   return 0;
 }
 
-static char *compress_close()
-{
-  rem_tcl_commands(my_tcl_cmds);
-  rem_tcl_ints(my_tcl_ints);
-  uff_deltable(compress_uff_table);
-
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 EXPORT_SCOPE char *compress_start();
 
 static Function compress_table[] =
 {
   /* 0 - 3 */
   (Function) compress_start,
-  (Function) compress_close,
+  (Function) NULL,
   (Function) compress_expmem,
   (Function) compress_report,
   /* 4 - 7 */

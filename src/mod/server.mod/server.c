@@ -1900,63 +1900,12 @@ static cmd_t my_ctcps[] =
   {NULL,	NULL,	NULL,			NULL}
 };
 
-static char *server_close()
-{
-  cycle_time = 100;
-  nuke_server("Connection reset by peer");
-  clearq(serverlist);
-  rem_builtins_dcc(H_dcc, C_dcc_serv);
-  rem_builtins(H_raw, my_raw_binds);
-  rem_builtins(H_ctcp, my_ctcps);
-  /* Restore original commands. */
-  del_bind_table(H_wall);
-  del_bind_table(H_raw);
-  del_bind_table(H_notc);
-  del_bind_table(H_msgm);
-  del_bind_table(H_msg);
-  del_bind_table(H_flud);
-  del_bind_table(H_ctcr);
-  del_bind_table(H_ctcp);
-  rem_tcl_coups(my_tcl_coups);
-  rem_tcl_strings(my_tcl_strings);
-  rem_tcl_ints(my_tcl_ints);
-  rem_tcl_commands(my_tcl_cmds);
-  Tcl_UntraceVar(interp, "nick",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 nick_change, NULL);
-  Tcl_UntraceVar(interp, "altnick",
-		 TCL_TRACE_WRITES | TCL_TRACE_UNSETS, altnick_change, NULL);
-  Tcl_UntraceVar(interp, "botname",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 traced_botname, NULL);
-  Tcl_UntraceVar(interp, "server",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 traced_server, NULL);
-  Tcl_UntraceVar(interp, "net-type",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 traced_nettype, NULL);
-  Tcl_UntraceVar(interp, "nick-len",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 traced_nicklen, NULL);
-//  tcl_untraceserver("servers", NULL);
-  empty_msgq();
-  del_hook(HOOK_SECONDLY, (Function) server_secondly);
-  del_hook(HOOK_5MINUTELY, (Function) server_5minutely);
-  del_hook(HOOK_QSERV, (Function) queue_server);
-  del_hook(HOOK_MINUTELY, (Function) minutely_checks);
-  del_hook(HOOK_PRE_REHASH, (Function) server_prerehash);
-  del_hook(HOOK_REHASH, (Function) server_postrehash);
-  del_hook(HOOK_DIE, (Function) server_die);
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 EXPORT_SCOPE char *server_start();
 
 static Function server_table[] =
 {
   (Function) server_start,
-  (Function) server_close,
+  (Function) NULL,
   (Function) server_expmem,
   (Function) server_report,
   /* 4 - 7 */

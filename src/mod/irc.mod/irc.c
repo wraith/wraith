@@ -1668,58 +1668,13 @@ static void irc_10secondly() {
       channel_check_locked(ch);
 }
 
-
-static char *irc_close()
-{
-  struct chanset_t *chan;
-
-  dprintf(DP_MODE, "JOIN 0\n");
-  for (chan = chanset; chan; chan = chan->next)
-    clear_channel(chan, 1);
-  del_bind_table(H_topc);
-  del_bind_table(H_splt);
-  del_bind_table(H_sign);
-  del_bind_table(H_rejn);
-  del_bind_table(H_part);
-  del_bind_table(H_nick);
-  del_bind_table(H_mode);
-  del_bind_table(H_kick);
-  del_bind_table(H_join);
-  del_bind_table(H_pubm);
-  del_bind_table(H_pub);
-  del_bind_table(H_need);
-  rem_tcl_ints(myints);
-  rem_builtins(H_bot, irc_bot);
-  rem_builtins_dcc(H_dcc, irc_dcc);
-  rem_builtins(H_msg, C_msg);
-#ifdef S_AUTH
-  rem_builtins(H_msgc, C_msgc);
-#endif /* S_AUTH */
-  rem_builtins(H_raw, irc_raw);
-  rem_tcl_commands(tclchan_cmds);
-  del_hook(HOOK_MINUTELY, (Function) check_expired_chanstuff);
-  del_hook(HOOK_MINUTELY, (Function) check_servers);
-  del_hook(HOOK_ADD_MODE, (Function) real_add_mode);
-  del_hook(HOOK_IDLE, (Function) flush_modes);
-  del_hook(HOOK_3SECONDLY, (Function) getin_3secondly);
-  del_hook(HOOK_10SECONDLY, (Function) irc_10secondly);
-  Tcl_UntraceVar(interp, "rfc-compliant",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 traced_rfccompliant, NULL);
-  Tcl_UntraceVar(interp, "net-type",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 traced_nettype, NULL);
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 EXPORT_SCOPE char *irc_start();
 
 static Function irc_table[] =
 {
   /* 0 - 3 */
   (Function) irc_start,
-  (Function) irc_close,
+  (Function) NULL,
   (Function) irc_expmem,
   (Function) irc_report,
   /* 4 - 7 */

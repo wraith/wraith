@@ -2109,41 +2109,6 @@ static tcl_ints my_ints[] =
 };
 
 static tcl_strings my_strings[] =
-static char *share_close()
-{
-  int i;
-  tandbuf *t, *tnext = NULL;
-
-  module_undepend(MODULE_NAME);
-  putlog(LOG_MISC | LOG_BOTS, "@", "Sending 'share end' to all sharebots...");
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE)) {
-      dprintf(i, "s e Unload module\n");
-      cancel_user_xfer(-i, 0);
-      updatebot(-1, dcc[i].nick, '-', 0);
-      dcc[i].status &= ~(STAT_SHARE | STAT_GETTING | STAT_SENDING |
-			 STAT_OFFERED | STAT_AGGRESSIVE);
-      dcc[i].u.bot->uff_flags = 0;
-    }
-  putlog(LOG_MISC | LOG_BOTS, "@", "Unloaded sharing module, flushing tbuf's...");
-  for (t = tbuf; t; t = tnext) {
-    tnext = t->next; 
-    del_tbuf(t);                                  
-  }  
-  del_hook(HOOK_SHAREOUT, (Function) shareout_mod);
-  del_hook(HOOK_SHAREIN, (Function) sharein_mod);
-  del_hook(HOOK_MINUTELY, (Function) check_expired_tbufs);
-  del_hook(HOOK_READ_USERFILE, (Function) hook_read_userfile);
-  del_hook(HOOK_SECONDLY, (Function) check_delay);
-  DCC_BOT.kill = def_dcc_bot_kill;
-  uff_deltable(internal_uff_table);
-  delay_free_mem();
-  rem_tcl_ints(my_ints);
-  rem_tcl_strings(my_strings);
-  rem_builtins(H_dcc, my_cmds);
-  return NULL;
-}
-
 {
   {"private-globals",	private_globals,	50,	0},
   {NULL,		NULL,			0,	0}
@@ -2222,7 +2187,7 @@ static void share_report(int idx, int details)
 			(int) (100.0 * ((float) dcc[j].status) /
 			       ((float) dcc[j].u.xfer->length)));
 	      else
-  (Function) share_close,
+		dprintf(idx,
 			"Sending userlist to %s (waiting for connect)\n",
 			dcc[i].nick);
 	    }

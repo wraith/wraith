@@ -145,35 +145,13 @@ static int dns_report(int idx, int details)
   return 0;
 }
 
-static char *dns_close()
-{
-  int i;
-
-  del_hook(HOOK_DNS_HOSTBYIP, (Function) dns_lookup);
-  del_hook(HOOK_DNS_IPBYHOST, (Function) dns_forward);
-  del_hook(HOOK_SECONDLY, (Function) dns_check_expires);
-
-  for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_DNS &&
-	dcc[i].sock == resfd) {
-      killsock(dcc[i].sock);
-      lostdcc(i);
-      break;
-    }
-  }
-
-  dns_free_cache();
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 EXPORT_SCOPE char *dns_start();
 
 static Function dns_table[] =
 {
   /* 0 - 3 */
   (Function) dns_start,
-  (Function) dns_close,
+  (Function) NULL,
   (Function) dns_expmem,
   (Function) dns_report,
   /* 4 - 7 */

@@ -76,9 +76,6 @@ int partynick(char *, int, char *);
 int partyidle(char *, char *);
 void partysetidle(char *, int, int);
 void partyaway(char *, int, char *);
-#ifdef HUB
-void botnet_send_limitcheck(struct chanset_t * chan);
-#endif
 #ifdef S_DCCPASS
 void botnet_send_cmdpass(int, char *, char *);
 #endif

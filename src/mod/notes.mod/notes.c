@@ -1149,29 +1149,6 @@ static cmd_t notes_load[] =
   {NULL,	NULL,	NULL,				NULL}
 };
 
-static char *notes_close()
-{
-  p_tcl_bind_list H_temp;
-
-  rem_tcl_ints(notes_ints);
-  rem_tcl_strings(notes_strings);
-  rem_tcl_commands(notes_tcls);
-  if ((H_temp = find_bind_table("msg")))
-    rem_builtins(H_temp, notes_msgs);
-  if ((H_temp = find_bind_table("join")))
-    rem_builtins(H_temp, notes_join);
-  rem_builtins_dcc(H_dcc, notes_cmds);
-  rem_builtins(H_chon, notes_chon);
-  rem_builtins(H_away, notes_away);
-  rem_builtins(H_nkch, notes_nkch);
-  rem_builtins(H_load, notes_load);
-  del_hook(HOOK_MATCH_NOTEREJ, (Function) match_note_ignore);
-  del_hook(HOOK_HOURLY, (Function) notes_hourly);
-  del_entry_type(&USERENTRY_FWD);
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 static int notes_expmem()
 {
   return 0;
@@ -1192,7 +1169,7 @@ EXPORT_SCOPE char *notes_start();
 static Function notes_table[] =
 {
   (Function) notes_start,
-  (Function) notes_close,
+  (Function) NULL,
   (Function) notes_expmem,
   (Function) notes_report,
   (Function) cmd_note,

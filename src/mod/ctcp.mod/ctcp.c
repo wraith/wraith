@@ -757,21 +757,12 @@ struct cfg_entry CFG_CLOAK_SCRIPT = {
 };
 
 
-static char *ctcp_close()
-{
-#ifdef LEAF
-  rem_builtins(H_ctcp, myctcp);
-#endif
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 EXPORT_SCOPE char *ctcp_start();
 
 static Function ctcp_table[] =
 {
   (Function) ctcp_start,
-  (Function) ctcp_close,
+  (Function) NULL,
   (Function) NULL,
   (Function) NULL,
 };

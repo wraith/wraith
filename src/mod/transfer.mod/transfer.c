@@ -2014,37 +2014,6 @@ static cmd_t transfer_load[] =
  *   Module functions
  */
 
-static char *transfer_close()
-{
-  int i;
-  p_tcl_bind_list H_ctcp;
-
-Context;
-  putlog(LOG_MISC, "*",TRANSFER_UNLOADING);
-  for (i = dcc_total - 1; i >= 0; i--) {
-    if (dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING)
-      eof_dcc_get(i);
-    else if (dcc[i].type == &DCC_SEND)
-      eof_dcc_send(i);
-    else if (dcc[i].type == &DCC_FORK_SEND)
-      eof_dcc_fork_send(i);
-  }
-  while (fileq)
-    deq_this(fileq);
-  del_entry_type(&USERENTRY_FSTAT);
-  del_bind_table(H_rcvd);
-  del_bind_table(H_sent);
-  del_bind_table(H_lost);
-  del_bind_table(H_tout);
-  rem_builtins(H_load, transfer_load);
-  /* Try to remove our CTCP bindings */
-  if ((H_ctcp = find_bind_table("ctcp")))
-    rem_builtins(H_ctcp, transfer_ctcps);
-  rem_tcl_commands(mytcls);
-  rem_tcl_ints(myints);
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
 
 static int transfer_expmem()
 {
@@ -2065,7 +2034,7 @@ EXPORT_SCOPE char *transfer_start();
 static Function transfer_table[] =
 {
   (Function) transfer_start,
-  (Function) transfer_close,
+  (Function) NULL,
   (Function) transfer_expmem,
   (Function) transfer_report,
   /* 4- 7 */

@@ -378,22 +378,12 @@ static dcc_cmd_t mydcc[] =
   {NULL,	NULL,	NULL,			NULL,        NULL}
 };
 
-static char *console_close()
-{
-  rem_builtins(H_chon, mychon);
-  rem_builtins_dcc(H_dcc, mydcc);
-  rem_tcl_ints(myints);
-  del_entry_type(&USERENTRY_CONSOLE);
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 EXPORT_SCOPE char *console_start();
 
 static Function console_table[] =
 {
   (Function) console_start,
-  (Function) console_close,
+  (Function) NULL,
   (Function) NULL,
   (Function) NULL,
   (Function) console_dostore,

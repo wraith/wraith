@@ -441,19 +441,6 @@ static void check_updates()
 }
 #endif
 
-static char *update_close()
-{
-  module_undepend(MODULE_NAME);
-  rem_builtins(H_bot, update_bot);
-#ifdef HUB
-  del_hook(HOOK_30SECONDLY, (Function) check_updates);
-#endif
-  del_hook(HOOK_SHAREUPDATEIN, (Function) updatein_mod);
-  DCC_BOT.kill = def_dcc_bot_kill;
-  //uff_deltable(internal_uff_table);
-  return NULL;
-}
-
 static int update_expmem()
 {
   int tot = 0;
@@ -513,7 +500,7 @@ static Function update_table[] =
 {
   /* 0 - 3 */
   (Function) update_start,
-  (Function) update_close,
+  (Function) NULL,
   (Function) update_expmem,
   (Function) update_report,
   /* 4 - 7 */

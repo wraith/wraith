@@ -61,7 +61,7 @@
 /* These are FIXED once they are in a release they STAY
  */
 #define MODCALL_START		  0
-#define MODCALL_CLOSE		  1
+/* #define MODCALL_CLOSE		  1 */
 #define MODCALL_EXPMEM		  2
 #define MODCALL_REPORT		  3
 /* Filesys */

@@ -519,7 +519,7 @@ Function global_table[] =
   /* 273 - 276 */
   (Function) quit_msg,		/* char *				*/
   (Function) module_load,
-  (Function) module_unload,
+  (Function) 0,
   (Function) & parties,		/* int					*/
   /* 277 - 280 */
   (Function) ischanhub,        
@@ -701,45 +701,6 @@ const char *module_load(char *name)
   }
   check_tcl_load(name);
   return NULL;
-}
-
-char *module_unload(char *name, char *user)
-{
-  module_entry *p = module_list, *o = NULL;
-  char *e;
-  Function *f;
-
-  while (p) {
-    if ((p->name != NULL) && (!strcmp(name, p->name))) {
-      dependancy *d;
-
-      for (d = dependancy_list; d; d = d->next)  
-	if (d->needed == p)
-	  return MOD_NEEDED;
-
-      f = p->funcs;
-      if (f && !f[MODCALL_CLOSE])
-	return MOD_NOCLOSEDEF;
-      if (f) {
-	check_tcl_unld(name);
-	e = (((char *(*)()) f[MODCALL_CLOSE]) (user));
-	if (e != NULL)
-	  return e;
-      }
-      nfree(p->name);
-      if (o == NULL) {
-	module_list = p->next;
-      } else {
-	o->next = p->next;
-      }
-      nfree(p);
-      putlog(LOG_MISC, "*", "%s %s", MOD_UNLOADED, name);
-      return NULL;
-    }
-    o = p;
-    p = p->next;
-  }
-  return MOD_NOSUCH;
 }
 
 module_entry *module_find(char *name, int major, int minor)

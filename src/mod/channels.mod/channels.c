@@ -878,40 +878,13 @@ static tcl_strings my_tcl_strings[] =
   {NULL,		NULL,		0,	0}
 };
 
-static char *channels_close()
-{
-  free_udef(udef);
-  if (lastdeletedmask)
-    nfree(lastdeletedmask);
-  rem_builtins(H_chon, my_chon);
-  rem_builtins(H_bot, channels_bot);
-  rem_builtins_dcc(H_dcc, C_dcc_irc);
-  rem_tcl_commands(channels_cmds);
-  rem_tcl_strings(my_tcl_strings);
-  rem_tcl_ints(my_tcl_ints);
-  rem_tcl_coups(mychan_tcl_coups);
-  del_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
-  del_hook(HOOK_HOURLY, (Function) warn_pls_take);
-  del_hook(HOOK_MINUTELY, (Function) check_expired_bans);
-#ifdef S_IRCNET
-  del_hook(HOOK_MINUTELY, (Function) check_expired_exempts);
-  del_hook(HOOK_MINUTELY, (Function) check_expired_invites);
-#endif
-  del_hook(HOOK_3SECONDLY, (Function) channels_checkslowjoin);
-  Tcl_UntraceVar(interp, "global-chanset",
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 traced_globchanset, NULL);
-  module_undepend(MODULE_NAME);
-  return NULL;
-}
-
 EXPORT_SCOPE char *channels_start();
 
 static Function channels_table[] =
 {
   /* 0 - 3 */
   (Function) channels_start,
-  (Function) channels_close,
+  (Function) NULL,
   (Function) channels_expmem,
   (Function) channels_report,
   /* 4 - 7 */
