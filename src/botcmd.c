@@ -443,7 +443,7 @@ static void bot_shellinfo(int idx, char *par)
   nodename = newsplit(&par);
 
   set_user(&USERENTRY_USERNAME, dcc[idx].user, username);
-  set_user(&USERENTRY_OS, dcc[idx].user, par);
+  set_user(&USERENTRY_OS, dcc[idx].user, sysname);
   dcc[idx].u.bot->sysname[0] = 0;
   strcpy(dcc[idx].u.bot->sysname, sysname); 
   set_user(&USERENTRY_NODENAME, dcc[idx].user, nodename);
