@@ -981,7 +981,7 @@ void check_this_user(char *hand, int delete, char *host)
     }
 }
 
-void enforce_bitch(struct chanset_t *chan) {
+static void enforce_bitch(struct chanset_t *chan) {
   if (!chan || !me_op(chan)) return;
   priority_do(chan, 1, PRIO_DEOP);
 }
