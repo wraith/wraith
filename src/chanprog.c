@@ -260,9 +260,7 @@ void tell_verbose_uptime(int idx)
 void tell_verbose_status(int idx)
 {
   char s[256] = "", s1[121] = "", s2[81] = "", *vers_t = NULL, *uni_t = NULL;
-#ifdef HUB
   int i;
-#endif /* HUB */
   time_t now2, hr, min;
 #if HAVE_GETRUSAGE
   struct rusage ru;
@@ -281,12 +279,11 @@ void tell_verbose_status(int idx)
     uni_t = un.sysname;
   }
 
-#ifdef HUB
   i = count_users(userlist);
-  dprintf(idx, "I am %s, running %s:  %d user%s\n",
-	  conf.bot->nick, ver, i, i == 1 ? "" : "s");
+  dprintf(idx, "I am %s, running %s:  %d user%s\n", conf.bot->nick, ver, i, i == 1 ? "" : "s");
   if (localhub)
     dprintf(idx, "I am a localhub.\n");
+#ifdef HUB
   if (isupdatehub())
     dprintf(idx, "I am an update hub.\n");
 #endif /* HUB */

@@ -1128,9 +1128,20 @@ static void cmd_channels(struct userrec *u, int idx, char *par) {
 }
 
 
+int dns_report(int, int);  
+void channels_report(int, int);
+#ifdef LEAF
+void server_report(int, int);
+void irc_report(int, int);
+#endif /* LEAF */
+void transfer_report(int, int);
+void share_report(int, int);
+void update_report(int, int);
+void notes_report(int, int);
+
 static void cmd_status(struct userrec *u, int idx, char *par)
 {
-  int atr = u ? u->flags : 0;
+  int atr = u ? u->flags : 0, all = 0;
 
   if (!egg_strcasecmp(par, "all")) {
     if (!(atr & USER_MASTER)) {
@@ -1141,13 +1152,21 @@ static void cmd_status(struct userrec *u, int idx, char *par)
     tell_verbose_status(idx);
     dprintf(idx, "\n");
     tell_settings(idx);
-/* FIXME: call the _report functions here */
-    /* do_module_report(idx, 1, NULL); */
+    all++;
   } else {
     putlog(LOG_CMDS, "*", "#%s# status", dcc[idx].nick);
     tell_verbose_status(idx);
-    /* do_module_report(idx, 0, NULL); */
   }
+  dns_report(idx, all);  
+#ifdef LEAF
+  server_report(idx, all);
+  irc_report(idx, all);
+#endif /* LEAF */
+  channels_report(idx, all);
+  transfer_report(idx, all);
+  share_report(idx, all);
+  update_report(idx, all);
+  notes_report(idx, all);
 }
 
 static void cmd_dccstat(struct userrec *u, int idx, char *par)
