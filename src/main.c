@@ -558,7 +558,7 @@ static void dtx_arg(int argc, char *argv[])
         checkpass();
         p = argv[optind];
         if (p) {
-          if (p[0] = '*') {
+          if (p[0] == '*') {
             int n;
             putlog(LOG_MISC, "*", "Listing all errors");
             for (n = 1; n < ERR_MAX; n++)
@@ -1553,7 +1553,7 @@ Context;
           strcpy(&s[11], &s[20]);
           printf("--- Loading %s (%s)\n\n", ver, s);
 
-          if (ip[0] == '!') { //natip
+          if (ip && ip[0] == '!') { //natip
             ip++;
             sprintf(natip, "%s",ip);
           } else {
