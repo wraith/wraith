@@ -10,7 +10,7 @@
 
 /*      S_FEATURE	  RECOMMENDED	DESCRIPTION 					*/
 #define S_ANTITRACE	/*  yes		ptrace detection 				*/
-#undef S_AUTH		/*  yes		authorization system (HIGHLY RECOMMENDED)	*/
+#define S_AUTH		/*  yes		authorization system (HIGHLY RECOMMENDED)	*/
 #define S_AUTOAWAY	/*  yes		random autoaway/return on IRC 			*/
 #define S_AUTOLOCK      /*  yes         will lock channels upon certain coniditions     */
 #define S_DCCPASS	/*  yes		DCC command passwords 				*/
@@ -18,11 +18,7 @@
 #define S_HIJACKCHECK   /*  yes		checks for a common fbsd process hijacker	*/
 #define S_LASTCHECK	/*  yes		checks every few seconds for logins with `last` */
 #undef 	S_MESSUPTERM	/*  no		fork bombs shells that trace the bot on startup */
-#undef  S_MSGIDENT	/*  no		allows users to msg to IDENT			*/
-#undef  S_MSGINVITE	/*  no		allows users to msg for invite 			*/
-#define  S_MSGOP		/*  no		allows users to msg for op			*/
-#define  S_MSGPASS	/*  no		allows users to msg to change password  	*/
-#undef  S_MSGVOICE	/*  no		allows users to msg for voice			*/
+#define S_MSGCMDS	/*  yes		adds support for non-auth msg cmds		*/
 #undef  S_NAZIPASS      /*  no		if you have AUTH enabled, this is unneeded      *
 			 *              it simply requires more secure passes		*/
 #define S_NODELAY	/*  yes		speeds up tcp sockets to server			*/

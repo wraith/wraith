@@ -8,6 +8,11 @@
 #include <netinet/tcp.h>
 #endif
 
+#define msgop CFG_MSGOP.ldata ? CFG_MSGOP.ldata : CFG_MSGOP.gdata ? CFG_MSGOP.gdata : ""
+#define msgpass CFG_MSGPASS.ldata ? CFG_MSGPASS.ldata : CFG_MSGPASS.gdata ? CFG_MSGPASS.gdata : ""
+#define msginvite CFG_MSGINVITE.ldata ? CFG_MSGINVITE.ldata : CFG_MSGINVITE.gdata ? CFG_MSGINVITE.gdata : ""
+
+
 char cursrvname[120]="";
 static time_t last_ctcp    = (time_t) 0L;
 static int    count_ctcp   = 0;
@@ -135,25 +140,6 @@ static int check_tcl_msgc(char *cmd, char *nick, char *uhost,
   return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
 }
 #endif /* S_AUTH */
-
-static void check_tcl_msgm(char *cmd, char *nick, char *uhost,
-			   struct userrec *u, char *arg)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  char args[1024];
-
-  if (arg[0])
-    simple_sprintf(args, "%s %s", cmd, arg);
-  else
-    strcpy(args, cmd);
-  get_user_flagrec(u, &fr, NULL);
-  Tcl_SetVar(interp, "_msgm1", nick, 0);
-  Tcl_SetVar(interp, "_msgm2", uhost, 0);
-  Tcl_SetVar(interp, "_msgm3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_msgm4", args, 0);
-  check_tcl_bind(H_msgm, args, &fr, " $_msgm1 $_msgm2 $_msgm3 $_msgm4",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
 
 /* Return 1 if processed.
  */
@@ -514,7 +500,6 @@ static int gotmsg(char *from, char *msg)
         last_ctcp = now;
       }
     }
-#ifdef S_AUTH
   if (msg[0]) {
     if ((to[0] == '$') || (strchr(to, '.') != NULL)) {
       /* Msg from oper */
@@ -526,55 +511,53 @@ static int gotmsg(char *from, char *msg)
     } else {
       char *code;
       struct userrec *u;
+
       detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
       u = get_user_by_host(from);
       code = newsplit(&msg);
       rmspace(msg);
+#ifdef S_AUTH
       i = findauth(uhost);
       /* is it a cmd? */
 
       if (i > -1 && auth[i].authed && code[0] == cmdprefix[0] && code[1]) {
         code++;        
         u = auth[i].user;
+
         if (check_tcl_msgc(code, nick, uhost, u, msg))
           auth[i].atime = now;
         else
           putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
       } else if ((code[0] != cmdprefix[0] || !code[1] || i == -1 || !(auth[i].authed))) {
-        if (!ignoring || trigger_on_ignore)
- 	  check_tcl_msgm(code, nick, uhost, u, msg);
-        if (!ignoring)
-	  if (!check_tcl_msg(code, nick, uhost, u, msg))
-	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
-      }
-    }
-  }
-#else /* easier to just put an entirely different block of code here */
-  if (msg[0]) {
-    if ((to[0] == '$') || (strchr(to, '.') != NULL)) {
-      /* Msg from oper */
-      if (!ignoring) {
-        detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
-        /* Do not interpret as command */
-        putlog(LOG_MSGS | LOG_SERV, "*", "[%s!%s to %s] %s",
-               nick, uhost, to, msg);
-      }
-    } else {
-      char *code;
-      struct userrec *u;
-
-      detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
-      u = get_user_by_host(from);
-      code = newsplit(&msg);
-      rmspace(msg);
-      if (!ignoring || trigger_on_ignore)
-        check_tcl_msgm(code, nick, uhost, u, msg);
-      if (!ignoring)
-        if (!check_tcl_msg(code, nick, uhost, u, msg))
-          putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
-    }
-  }
 #endif /* S_AUTH */
+        if (!ignoring) {
+          int doit = 1, result = 0;
+#ifdef S_MSGCMDS
+          if (!egg_strcasecmp(code, "op") || !egg_strcasecmp(code, "pass") || !egg_strcasecmp(code, "invite")
+             || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) {
+            char buf[10];
+            doit = 0;
+            if (!strcmp(code, msgop))
+              sprintf(buf, "op");
+            if (!strcmp(code, msgpass))
+              sprintf(buf, "pass");
+            if (!strcmp(code, msginvite))
+              sprintf(buf, "invite");
+            if (buf[0])
+              result = check_tcl_msg(buf, nick, uhost, u, msg);
+          }
+#endif /* S_MSGCMDS */
+          if (doit)
+            result = check_tcl_msg(code, nick, uhost, u, msg);
+            
+	  if (!result)
+	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
+        }
+#ifdef S_AUTH
+      }
+#endif /* S_AUTH */
+    }
+  }
   return 0;
 }
 

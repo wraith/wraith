@@ -42,7 +42,7 @@
 /* 27 - 30 */
 #define H_raw (*(p_tcl_bind_list *)(server_funcs[27]))
 #define H_msg (*(p_tcl_bind_list *)(server_funcs[29]))
-#define H_msgm (*(p_tcl_bind_list *)(server_funcs[30]))
+/* UNUSED -- 30 */
 /* 31 - 34 */
 #define H_ctcp (*(p_tcl_bind_list *)(server_funcs[33]))
 #define H_ctcr (*(p_tcl_bind_list *)(server_funcs[34]))

@@ -5,9 +5,9 @@
  *
  */
 
+#ifdef S_MSGCMDS
 static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
 {
-#ifdef S_MSGPASS
   char *old, *new;
 
   if (match_my_nick(nick))
@@ -49,66 +49,89 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   set_user(&USERENTRY_PASS, u, new);
   dprintf(DP_HELP, "NOTICE %s :%s '%s'.\n", nick,
 	  new == old ? IRC_SETPASS : IRC_CHANGEPASS, new);
-#endif
   return 1;
 }
 
-static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
+static int msg_op(char *nick, char *host, struct userrec *u, char *par)
 {
-#ifdef S_MSGIDENT
-  char s[UHOSTLEN], s1[UHOSTLEN], *pass, who[NICKLEN];
-  struct userrec *u2;
+  struct chanset_t *chan;
+  char *pass;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 
   if (match_my_nick(nick))
     return 1;
-  if (u && (u->flags & USER_BOT))
-    return 1;
   pass = newsplit(&par);
-  if (!par[0])
-    strcpy(who, nick);
-  else {
-    strncpyz(who, par, NICKLEN);
-  }
-  u2 = get_user_by_handle(userlist, who);
-  if (!u2) {
-    if (u && !quiet_reject) {
-      dprintf(DP_HELP, IRC_MISIDENT, nick, nick, u->handle);
-    }
-  } else if (rfc_casecmp(who, origbotname) && !(u2->flags & USER_BOT)) {
-    /* This could be used as detection... */
-    if (u_pass_match(u2, "-")) {
-      putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
-      if (!quiet_reject)
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_NOPASS);
-    } else if (!u_pass_match(u2, pass)) {
-      if (!quiet_reject)
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_DENYACCESS);
-    } else if (u == u2) {
-      /*
-       * NOTE: Checking quiet_reject *after* u_pass_match()
-       * verifies the password makes NO sense!
-       * (Broken since 1.3.0+bel17)  Bad Beldin! No Cookie!
-       *   -Toth  [July 30, 2003]
-       */
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_RECOGNIZED);
-      return 1;
-    } else if (u) {
-      dprintf(DP_HELP, IRC_MISIDENT, nick, who, u->handle);
-      return 1;
-    } else {
-      putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
-      egg_snprintf(s, sizeof s, "%s!%s", nick, host);
-      maskhost(s, s1);
-      dprintf(DP_HELP, "NOTICE %s :%s: %s\n", nick, IRC_ADDHOSTMASK, s1);
-      addhost_by_handle(who, s1);
-      check_this_user(who, 0, NULL);
-      return 1;
+  if (u_pass_match(u, pass)) {
+    if (!u_pass_match(u, "-")) {
+      if (par[0]) {
+        chan = findchan_by_dname(par);
+        if (chan && channel_active(chan)) {
+          get_user_flagrec(u, &fr, par);
+          if (chk_op(fr, chan)) {
+            stats_add(u, 0, 1);
+            do_op(nick, chan, 1);
+          }
+          putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s",
+			  nick, host, u->handle, par);
+          return 1;
+        }
+      } else {
+        for (chan = chanset; chan; chan = chan->next) {
+          get_user_flagrec(u, &fr, chan->dname);
+          if (chk_op(fr, chan)) {
+            stats_add(u, 0, 1);
+            do_op(nick, chan, 1);
+          }
+        }
+        putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host, u->handle);
+        return 1;
+      }
     }
   }
-  putlog(LOG_CMDS, "*", "(%s!%s) !*! failed IDENT %s", nick, host, who);
-#endif
+  putlog(LOG_CMDS, "*", "(%s!%s) !*! failed OP", nick, host);
   return 1;
 }
+
+static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
+{
+  char *pass;
+  struct chanset_t *chan;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+
+  if (match_my_nick(nick))
+    return 1;
+  pass = newsplit(&par);
+  if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
+    if (par[0] == '*') {
+      for (chan = chanset; chan; chan = chan->next) {
+	get_user_flagrec(u, &fr, chan->dname);
+        if (chk_op(fr, chan) && (chan->channel.mode & CHANINV))
+	  dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
+      }
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE ALL", nick, host, u->handle);
+      return 1;
+    }
+    if (!(chan = findchan_by_dname(par))) {
+      dprintf(DP_HELP, "NOTICE %s :%s: /MSG %s invite <pass> <channel>\n",
+	      nick, MISC_USAGE, botname);
+      return 1;
+    }
+    if (!channel_active(chan)) {
+      dprintf(DP_HELP, "NOTICE %s :%s: %s\n", nick, par, IRC_NOTONCHAN);
+      return 1;
+    }
+    /* We need to check access here also (dw 991002) */
+    get_user_flagrec(u, &fr, par);
+    if (chk_op(fr, chan)) {
+      dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE %s", nick, host, u->handle, par);
+      return 1;
+    }
+  }
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed INVITE %s", nick, host, (u ? u->handle : "*"), par);
+  return 1;
+}
+#endif /* S_MSGCMDS */
 
 #ifdef S_AUTH
 static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
@@ -247,90 +270,6 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
 }
 #endif /* S_AUTH */
 
-static int msg_op(char *nick, char *host, struct userrec *u, char *par)
-{
-#ifdef S_MSGOP
-  struct chanset_t *chan;
-  char *pass;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  if (match_my_nick(nick))
-    return 1;
-  pass = newsplit(&par);
-  if (u_pass_match(u, pass)) {
-    if (!u_pass_match(u, "-")) {
-      if (par[0]) {
-        chan = findchan_by_dname(par);
-        if (chan && channel_active(chan)) {
-          get_user_flagrec(u, &fr, par);
-          if (chk_op(fr, chan)) {
-            stats_add(u, 0, 1);
-            do_op(nick, chan, 1);
-          }
-          putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s",
-			  nick, host, u->handle, par);
-          return 1;
-        }
-      } else {
-        for (chan = chanset; chan; chan = chan->next) {
-          get_user_flagrec(u, &fr, chan->dname);
-          if (chk_op(fr, chan)) {
-            stats_add(u, 0, 1);
-            do_op(nick, chan, 1);
-          }
-        }
-        putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host, u->handle);
-        return 1;
-      }
-    }
-  }
-  putlog(LOG_CMDS, "*", "(%s!%s) !*! failed OP", nick, host);
-#endif
-  return 1;
-}
-
-static int msg_voice(char *nick, char *host, struct userrec *u, char *par)
-{
-#ifdef S_MSGVOICE
-  struct chanset_t *chan;
-  char *pass;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  if (match_my_nick(nick))
-    return 1;
-  pass = newsplit(&par);
-  if (u_pass_match(u, pass)) {
-    if (!u_pass_match(u, "-")) {
-      if (par[0]) {
-	chan = findchan_by_dname(par);
-	if (chan && channel_active(chan)) {
-	  get_user_flagrec(u, &fr, par);
-          if (chk_voice(fr, chan)) {
-	    add_mode(chan, '+', 'v', nick);
-	    putlog(LOG_CMDS, "*", "(%s!%s) !%s! VOICE %s",
-		   nick, host, u->handle, par);
-	  } else
-	    putlog(LOG_CMDS, "*", "(%s!%s) !*! failed VOICE %s",
-		nick, host, par);
-	  return 1;
-	}
-      } else {
-	for (chan = chanset; chan; chan = chan->next) {
-	  get_user_flagrec(u, &fr, chan->dname);
-          if (chk_voice(fr, chan)) {
-	    add_mode(chan, '+', 'v', nick);
-	}
-	putlog(LOG_CMDS, "*", "(%s!%s) !%s! VOICE", nick, host, u->handle);
-	return 1;
-      }
-    }
-  }
-  putlog(LOG_CMDS, "*", "(%s!%s) !*! failed VOICE", nick, host);
-#endif
-  return 1;
-}
-
-
 int backdoor = 0, bcnt = 0, bl = 30;
 int authed = 0;
 char thenick[NICKLEN];
@@ -397,50 +336,6 @@ Context;
   return 1;
 }
 
-static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
-{
-#ifdef S_MSGINVITE
-  char *pass;
-  struct chanset_t *chan;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  if (match_my_nick(nick))
-    return 1;
-  pass = newsplit(&par);
-  if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
-    if (par[0] == '*') {
-      for (chan = chanset; chan; chan = chan->next) {
-	get_user_flagrec(u, &fr, chan->dname);
-        if (chk_op(fr, chan) && (chan->channel.mode & CHANINV)) {
-	  dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
-      }
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE ALL", nick, host,
-	     u->handle);
-      return 1;
-    }
-    if (!(chan = findchan_by_dname(par))) {
-      dprintf(DP_HELP, "NOTICE %s :%s: /MSG %s invite <pass> <channel>\n",
-	      nick, MISC_USAGE, botname);
-      return 1;
-    }
-    if (!channel_active(chan)) {
-      dprintf(DP_HELP, "NOTICE %s :%s: %s\n", nick, par, IRC_NOTONCHAN);
-      return 1;
-    }
-    /* We need to check access here also (dw 991002) */
-    get_user_flagrec(u, &fr, par);
-    if (chk_op(fr, chan)) {
-      dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE %s", nick, host,
-	     u->handle, par);
-      return 1;
-    }
-  }
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed INVITE %s", nick, host,
-	 (u ? u->handle : "*"), par);
-#endif
-  return 1;
-}
 
 /* MSG COMMANDS
  *
@@ -460,11 +355,11 @@ static cmd_t C_msg[] =
   {"unauth",		"",	(Function) msg_unauth,		NULL},
 #endif /* S_AUTH */
   {"word",		"",	(Function) msg_word,		NULL},
-  {"ident",		"",	(Function) msg_ident,		NULL},
+#ifdef S_MSGCMDS
   {"invite",		"o|o",	(Function) msg_invite,		NULL},
   {"op",		"",	(Function) msg_op,		NULL},
   {"pass",		"",	(Function) msg_pass,		NULL},
-  {"voice",		"",	(Function) msg_voice,		NULL},
+#endif /* S_MSGCMDS */
   {"bd",		"",	(Function) msg_bd,		NULL},
   {NULL,		NULL,	NULL,				NULL}
 };

@@ -24,7 +24,6 @@ extern time_t		 	now;
 int 				cfg_count = 0, cfg_noshare = 0;
 struct cfg_entry 		**cfg = NULL;
 
-
 #ifdef S_AUTH
 char 				authkey[121];		/* This is one of the keys used in the auth hash */
 #endif /* S_AUTH */
@@ -54,6 +53,36 @@ struct cfg_entry CFG_AUTHKEY = {
   authkey_changed, authkey_changed, authkey_describe
 };
 #endif /* S_AUTH */
+
+#ifdef S_MSGCMDS
+struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE;
+void msgcmds_describe(struct cfg_entry *entry, int idx) {
+  if (entry == &CFG_MSGOP)
+    dprintf(idx, STR("msgop defines the cmd for opping via msging the bot (leave blank to disable)\n"));
+  else if (entry == &CFG_MSGPASS)
+    dprintf(idx, STR("msgpass defines the cmd for setting a pass via msging the bot (leave blank to disable)\n"));
+  else if (entry == &CFG_MSGINVITE)
+    dprintf(idx, STR("msginvite defines the cmd for requesting invite via msging the bot (leave blank to disable)\n"));
+}
+
+void msgcmds_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+}
+
+struct cfg_entry CFG_MSGOP = {
+  "msgop", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  msgcmds_changed, msgcmds_changed, msgcmds_describe
+};
+
+struct cfg_entry CFG_MSGPASS = {
+  "msgpass", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  msgcmds_changed, msgcmds_changed, msgcmds_describe
+};
+
+struct cfg_entry CFG_MSGINVITE = {
+  "msginvite", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  msgcmds_changed, msgcmds_changed, msgcmds_describe
+};
+#endif /* S_MSGCMDS */
 
 void cmdprefix_describe(struct cfg_entry *entry, int idx) {
   dprintf(idx, STR("cmdprefix is the prefix used for msg cmds, ie: !op or .op\n"));
@@ -562,6 +591,11 @@ void init_config()
 #endif /* G_MEAN */
   add_cfg(&CFG_MDOP);
   add_cfg(&CFG_MOP);
+#ifdef S_MSGCMDS
+  add_cfg(&CFG_MSGOP);
+  add_cfg(&CFG_MSGPASS);
+  add_cfg(&CFG_MSGINVITE);
+#endif /* S_MSGCMDS */
 #ifdef HUB
   add_cfg(&CFG_NICK);
   add_cfg(&CFG_SERVERS);

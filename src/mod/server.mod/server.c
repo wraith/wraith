@@ -73,7 +73,7 @@ static int kick_method;
 static int optimize_kicks;
 
 
-static p_tcl_bind_list H_raw, H_msgm, H_msg, 
+static p_tcl_bind_list H_raw, H_msg, 
 		       H_ctcr, H_ctcp;
 #ifdef S_AUTH
 static p_tcl_bind_list H_msgc;
@@ -1743,7 +1743,7 @@ static Function server_table[] =
   /* 28 - 31 */
   (Function) 0,
   (Function) & H_msg,		/* p_tcl_bind_list			*/
-  (Function) & H_msgm,		/* p_tcl_bind_list			*/
+  (Function) 0,
   (Function) 0,
   /* 32 - 35 */
   (Function) 0,
@@ -1825,7 +1825,6 @@ char *server_start(Function *global_funcs)
   module_register(MODULE_NAME, server_table, 1, 2);
 
   H_raw = add_bind_table("raw", HT_STACKABLE, server_raw);
-  H_msgm = add_bind_table("msgm", HT_STACKABLE, server_msg);
 #ifdef S_AUTH
   H_msgc = add_bind_table("msgc", 0, server_msgc);
 #endif /* S_AUTH */

@@ -548,6 +548,10 @@
 #define myipstr ((char*(*)(int))global[336])
 /* 337 - 340 */
 #define checkchans ((void (*)(int))global[337])
+#define CFG_MSGOP (*(struct cfg_entry *)(global[338]))
+#define CFG_MSGPASS (*(struct cfg_entry *)(global[339]))
+#define CFG_MSGINVITE (*(struct cfg_entry *)(global[340]))
+
 
 extern int lfprintf(FILE *, char *, ...);
 extern int egg_numver;
