@@ -24,6 +24,7 @@ This is a summary of ChangeLog basically.
 21.Fixed some bugs in the readuserfile() function.
 22.cmd_mop didn't check if the bot was opped before sending +o lines.
 23.Fixed several file descriptors that weren't closed.
+24.The bot will now wait until it is finished recieving the +e listing before enforcing bans.
 
 1.0.13
 1.Fixed a fatal bug in console_gotshare()
