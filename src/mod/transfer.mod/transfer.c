@@ -277,30 +277,28 @@ void eof_dcc_fork_send(int idx)
 
   fclose(dcc[idx].u.xfer->f);
   if (!strcmp(dcc[idx].nick, "*users")) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
-	  (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
 	break;
       }
-    if (y != 0) {
+    if (y >= 0) {
       dcc[y].status &= ~STAT_GETTING;
       dcc[y].status &= ~STAT_SHARE;
     }
     putlog(LOG_BOTS, "*", USERF_FAILEDXFER);
     unlink(dcc[idx].u.xfer->filename);
   } else if (!strcmp(dcc[idx].nick, "*binary")) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
-	  (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
 	break;
       }
-    if (y != 0) {
+    if (y >= 0) {
       dcc[y].status &= ~STAT_GETTINGU;
     }
     putlog(LOG_BOTS, "*", "Failed binary transfer.");
@@ -379,27 +377,27 @@ static void eof_dcc_send(int idx)
     free(ofn);
     free(nfn);
     for (j = 0; j < dcc_total; j++)
-      if (dcc[j].type && !ok && (dcc[j].type->flags & (DCT_GETNOTES)) &&
-	  !egg_strcasecmp(dcc[j].nick, hand)) {
+      if (dcc[j].type && !ok && (dcc[j].type->flags & (DCT_GETNOTES)) && !egg_strcasecmp(dcc[j].nick, hand)) {
 	ok = 1;
-	dprintf(j,TRANSFER_THANKS);
+	dprintf(j, TRANSFER_THANKS);
       }
     if (!ok)
-      dprintf(DP_HELP,TRANSFER_NOTICE_THANKS,
-	      dcc[idx].nick);
+      dprintf(DP_HELP,TRANSFER_NOTICE_THANKS, dcc[idx].nick);
     killsock(dcc[idx].sock);
     lostdcc(idx);
     return;
   }
   /* Failure :( */
   if (!strcmp(dcc[idx].nick, "*users")) {
-    int x, y = 0;
+    int x, y = -1;
 
-    for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
-	  (dcc[x].type->flags & DCT_BOT))
+    for (x = 0; x < dcc_total; x++) {
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
-    if (y) {
+        break;
+      }
+    }
+    if (y >= 0) {
       putlog(LOG_BOTS, "*",TRANSFER_USERFILE_LOST, dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
       /* Drop that bot */
@@ -423,14 +421,14 @@ static void eof_dcc_send(int idx)
       lostdcc(idx);
     }
   } else if (!strcmp(dcc[idx].nick, "*binary")) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
-	  (dcc[x].type->flags & DCT_BOT))
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
-    if (y) {
-            
+        break;
+      }
+    if (y >= 0) {
       putlog(LOG_BOTS, "*", "Lost binary transfer from %s; aborting.", dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
 /* Drop that bot 
@@ -597,13 +595,14 @@ void dcc_get(int idx, char *buf, int len)
     killsock(dcc[idx].sock);
     fclose(dcc[idx].u.xfer->f);
     if (!strcmp(dcc[idx].nick, "*users")) {
-      int x, y = 0;
+      int x, y = -1;
 
       for (x = 0; x < dcc_total; x++)
-	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
-	    (dcc[x].type->flags & DCT_BOT))
+	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	  y = x;
-      if (y != 0)
+          break;
+        }
+      if (y >= 0)
 	dcc[y].status &= ~STAT_SENDING;
 
       putlog(LOG_BOTS, "*", TRANSFER_COMPLETED_USERFILE, dcc[y].nick);
@@ -612,13 +611,14 @@ void dcc_get(int idx, char *buf, int len)
       dprintf(y, "s !\n");
       xnick[0] = 0;
     } else if (!strcmp(dcc[idx].nick, "*binary")) {
-      int x, y = 0;
+      int x, y = -1;
 
       for (x = 0; x < dcc_total; x++)
-	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
-	    (dcc[x].type->flags & DCT_BOT))
+	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	  y = x;
-      if (y != 0) {
+          break;
+        }
+      if (y >= 0) {
 	dcc[y].status &= ~STAT_SENDINGU;
         dcc[y].status |= STAT_UPDATED;
       }
@@ -657,12 +657,13 @@ void eof_dcc_get(int idx)
 
   fclose(dcc[idx].u.xfer->f);
   if (!strcmp(dcc[idx].nick, "*users")) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
-	  (dcc[x].type->flags & DCT_BOT))
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
+        break;
+      }
     putlog(LOG_BOTS, "*", TRANSFER_ABORT_USERFILE);
     /* Note: no need to unlink the xfer file, as it's already unlinked. */
     xnick[0] = 0;
@@ -681,12 +682,13 @@ void eof_dcc_get(int idx)
     lostdcc(idx);
     return;
   } else if (!strcmp(dcc[idx].nick, "*binary")) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
-	  (dcc[x].type->flags & DCT_BOT))
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
+        break;
+      }
     putlog(LOG_BOTS, "*", "Lost binary transfer; aborting.");
     /* Note: no need to unlink the xfer file, as it's already unlinked. */
     xnick[0] = 0;
@@ -767,13 +769,14 @@ static void transfer_get_timeout(int i)
 
   fclose(dcc[i].u.xfer->f);
   if (strcmp(dcc[i].nick, "*users") == 0) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) &&
-	  (dcc[x].type->flags & DCT_BOT))
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
-    if (y != 0) {
+        break;
+      }
+    if (y >= 0) {
       dcc[y].status &= ~STAT_SENDING;
       dcc[y].status &= ~STAT_SHARE;
     }
@@ -794,13 +797,14 @@ static void transfer_get_timeout(int i)
     lostdcc(y);
     xx[0] = 0;
   } else if (strcmp(dcc[i].nick, "*binary") == 0) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) &&
-	  (dcc[x].type->flags & DCT_BOT))
+      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
-    if (y != 0) {
+        break;
+      }
+    if (y >= 0) {
       dcc[y].status &= ~STAT_SENDINGU;
     }
     putlog(LOG_BOTS, "*","Timeout on binary transfer.");
@@ -843,26 +847,28 @@ static void transfer_get_timeout(int i)
 void tout_dcc_send(int idx)
 {
   if (!strcmp(dcc[idx].nick, "*users")) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
-	  (dcc[x].type->flags & DCT_BOT))
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
-    if (y != 0) {
+        break;
+      }
+    if (y >= 0) {
       dcc[y].status &= ~STAT_GETTING;
       dcc[y].status &= ~STAT_SHARE;
     }
     unlink(dcc[idx].u.xfer->filename);
     putlog(LOG_BOTS, "*", TRANSFER_USERFILE_TIMEOUT);
   } else if (!strcmp(dcc[idx].nick, "*binary")) {
-    int x, y = 0;
+    int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
-	  (dcc[x].type->flags & DCT_BOT))
+      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
-    if (y != 0) {
+        break;
+      }
+    if (y >= 0) {
       dcc[y].status &= ~STAT_GETTINGU;
     }
     putlog(LOG_BOTS, "*", "Timeout on binary transfer.");
@@ -1209,8 +1215,7 @@ static int ctcp_DCC_RESUME(char *nick, char *from, char *handle, char *object, c
   offset = my_atoul(newsplit(&msg));
   // Search for existing SEND 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type && (dcc[i].type == &DCC_GET_PENDING) &&
-	(!rfc_casecmp(dcc[i].nick, nick)) && (dcc[i].port == port))
+    if (dcc[i].type && (dcc[i].type == &DCC_GET_PENDING) && (!rfc_casecmp(dcc[i].nick, nick)) && (dcc[i].port == port)) 
       break;
   // No matching transfer found?
   if (i == dcc_total)

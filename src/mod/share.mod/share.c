@@ -1311,8 +1311,10 @@ finish_share(int idx)
   int i, j = -1;
 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT))
+    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT)) {
       j = i;
+      break;
+    }
   if (j == -1)
     return;
 
@@ -1496,7 +1498,7 @@ static void (*def_dcc_bot_kill) (int, void *) = 0;
 static void
 cancel_user_xfer(int idx, void *x)
 {
-  int i, j, k = 0;
+  int i, j = -1, k = 0;
 
   if (idx < 0) {
     idx = -idx;
@@ -1505,12 +1507,13 @@ cancel_user_xfer(int idx, void *x)
   }
   if (dcc[idx].status & STAT_SHARE) {
     if (dcc[idx].status & STAT_GETTING) {
-      j = 0;
       for (i = 0; i < dcc_total; i++)
         if (dcc[i].type && !egg_strcasecmp(dcc[i].host, dcc[idx].nick) &&
-            ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND)) == (DCT_FILETRAN | DCT_FILESEND)))
+            ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND)) == (DCT_FILETRAN | DCT_FILESEND))) {
           j = i;
-      if (j != 0) {
+          break;
+        }
+      if (j >= 0) {
         killsock(dcc[j].sock);
         unlink(dcc[j].u.xfer->filename);
         lostdcc(j);
@@ -1518,13 +1521,14 @@ cancel_user_xfer(int idx, void *x)
       putlog(LOG_BOTS, "*", "(Userlist download aborted.)");
     }
     if (dcc[idx].status & STAT_SENDING) {
-      j = 0;
       for (i = 0; i < dcc_total; i++)
         if (dcc[i].type && (!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) &&
             ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND))
-             == DCT_FILETRAN))
+             == DCT_FILETRAN)) {
           j = i;
-      if (j != 0) {
+          break;
+        }
+      if (j >= 0) {
         killsock(dcc[j].sock);
         unlink(dcc[j].u.xfer->filename);
         lostdcc(j);
