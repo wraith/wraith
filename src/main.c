@@ -8,6 +8,7 @@
  */
 
 #include "main.h"
+#include "build.h"
 #include <libgen.h>
 #include <fcntl.h>
 #include <time.h>
@@ -80,6 +81,7 @@ extern jmp_buf		 alarmret;
 int role;
 int loading = 0;
 
+int buildts = CVSBUILD;		/* build timestamp (UTC) */
 char	egg_version[1024] = "1.0.11";
 int	egg_numver = 1001100;
 time_t lastfork=0;
