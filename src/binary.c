@@ -66,10 +66,10 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
   strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
-  if (todo == WRITE_CHECKSUM) {
+  if (todo & WRITE_CHECKSUM) {
     Tempfile *newbin = new Tempfile("bin");
     char *fname_bak = NULL;
-    size_t size = 0, i = 0;
+    size_t size = 0, skip_bytes = 0, pos = 0;
 
     size = strlen(fname) + 2;
     fname_bak = (char *) my_calloc(1, size);
@@ -82,33 +82,48 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
     fseek(f, 0, SEEK_END);
     size = ftell(f);
     fseek(f, 0, SEEK_SET);
+    pos = 0;
 
     while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
-      if (i) {                  /* to skip bytes for hash */
-        i -= sizeof(buf) - 1;
+      if (skip_bytes) {                  /* to skip bytes for pack data */
+        skip_bytes -= sizeof(buf) - 1;
         continue;
       }
-      if (fwrite(buf, sizeof(buf) - 1, 1, newbin->f) != 1) {
+
+//      if (fwrite(buf, sizeof(buf) - 1, 1, newbin->f) != 1) {
+      if (fwrite(buf, 1, len, newbin->f) != len) {
         fclose(f);
         delete newbin;
         werr(ERR_BINSTAT);
       }
-/*
-      if (!memcmp(buf, &encdata.prefix, PREFIXLEN)) {
-        // now we have 65 for data :D
-        char *enc_hash = NULL;
+      pos += len;
 
-        enc_hash = encrypt_string(SALT1, hash);
-        fwrite(enc_hash, strlen(enc_hash), 1, fn);
-        i = strlen(enc_hash);   // skip the next strlen(enc_hash) bytes
-        free(enc_hash);
-      }
-*/
-      if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {
+      if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {		/* found the settings struct! */
         strlcpy(settings.hash, hash, 65);
-        edpack(&settings, hash, PACK_ENC);
-        fwrite(&settings.hash, sizeof(settings_t) - PREFIXLEN, 1, newbin->f);
-        i = sizeof(settings_t) - PREFIXLEN;
+        edpack(&settings, hash, PACK_ENC);		/* encrypt the entire struct with the hash (including hash) */
+
+        /* just write both for now */
+        todo |= WRITE_PACK|WRITE_CONF;
+
+        skip_bytes += SIZE_PACK;
+        if (todo & WRITE_PACK) {
+          fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
+          sdprintf("writing pack: %d\n", SIZE_PACK);
+        } else 
+          fseek(newbin->f, pos + SIZE_PACK, SEEK_SET);
+        pos += SIZE_PACK;
+
+        skip_bytes += SIZE_CONF;
+        if (todo & WRITE_CONF) {
+          fwrite(&settings.bots, SIZE_CONF, 1, newbin->f);
+          sdprintf("writing conf: %d\n", SIZE_CONF);
+        } else
+          fseek(newbin->f, pos + SIZE_CONF, SEEK_SET);
+        pos += SIZE_CONF;
+
+        skip_bytes += SIZE_PAD;
+        fseek(newbin->f, pos + SIZE_PAD, SEEK_SET);
+        pos += SIZE_PAD;
       }
     }
 

@@ -5,8 +5,10 @@
 
 extern int checked_bin_buf;
 
-#  define WRITE_CHECKSUM 	1
-#  define GET_CHECKSUM		2
+#  define GET_CHECKSUM		BIT0
+#  define WRITE_CHECKSUM 	BIT1
+#  define WRITE_PACK            BIT2
+#  define WRITE_CONF            BIT3
 
 void check_sum(const char *, const char *);
 void write_settings(const char *, int);
