@@ -28,7 +28,6 @@
 
 extern struct userrec	*userlist;
 extern time_t now;
-extern char botnetnick[];
 extern int userfile_perm;
 
 static int maxnotes = 50;	/* Maximum number of notes to allow stored
@@ -210,7 +209,7 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
     /* User is valid & has a valid forwarding address */
      strcpy(fwd, f1);		/* Only 40 bytes are stored in the userfile */
      p = strchr(fwd, '@');
-    if (p && !egg_strcasecmp(p + 1, botnetnick)) {
+    if (p && !egg_strcasecmp(p + 1, conf.bot->nick)) {
       *p = 0;
       if (!egg_strcasecmp(fwd, argv2))
 	/* They're forwarding to themselves on the same bot, llama's */
@@ -248,12 +247,12 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
       }
       if (ok) {
 	if (p && strchr(argv1, '@')) {
-	  simple_sprintf(work, "<%s@%s >%s %s", argv2, botnetnick,
+	  simple_sprintf(work, "<%s@%s >%s %s", argv2, conf.bot->nick,
 			 argv1, argv3);
-	  simple_sprintf(u, "@%s", botnetnick);
+	  simple_sprintf(u, "@%s", conf.bot->nick);
 	  p = u;
 	} else {
-	  simple_sprintf(work, "<%s@%s %s", argv2, botnetnick,
+	  simple_sprintf(work, "<%s@%s %s", argv2, conf.bot->nick,
 			 argv3);
 	  p = argv1;
 	}
@@ -710,7 +709,7 @@ static void notes_hourly()
 
 static void away_notes(char *bot, int idx, char *msg)
 {
-  if (egg_strcasecmp(bot, botnetnick))
+  if (egg_strcasecmp(bot, conf.bot->nick))
     return;
   if (msg && msg[0])
     dprintf(idx, "%s\n", NOTES_STORED);

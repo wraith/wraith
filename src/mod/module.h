@@ -256,8 +256,8 @@
 /* 120 - 123 */
 /* UNUSED 120 */
 #define dovoice ((int (*)(struct chanset_t *))global[121])
-#define Version ((char *)global[122])
-#define botnetnick ((char *)global[123])
+#define version ((char *)global[122])
+/* UNUSED 123 */
 /* 124 - 127 */
 #define DCC_CHAT_PASS (*(struct dcc_table *)(global[124]))
 #define DCC_BOT (*(struct dcc_table *)(global[125]))

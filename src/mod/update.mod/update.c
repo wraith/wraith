@@ -40,7 +40,7 @@ static void cancel_user_xfer(int, void *);
 extern struct userrec	*userlist;
 extern tand_t		*tandbot;
 extern int 		localhub, max_dcc, egg_numver;
-extern char		botnetnick[], tempdir[], natip[];
+extern char		tempdir[], natip[];
 extern time_t		buildts;
 extern struct dcc_table DCC_FORK_SEND, DCC_GET;
 
@@ -96,9 +96,9 @@ static void update_ufsend(int idx, char *par)
   FILE *f;
   putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
 #ifdef HUB
-  egg_snprintf(s, sizeof s, "%s.update.%s.hub", tempdir, botnetnick);
+  egg_snprintf(s, sizeof s, "%s.update.%s.hub", tempdir, conf.bot->nick);
 #else
-  egg_snprintf(s, sizeof s, "%s.update.%s.leaf", tempdir, botnetnick);
+  egg_snprintf(s, sizeof s, "%s.update.%s.leaf", tempdir, conf.bot->nick);
 #endif
   unlink(s); //make sure there isnt already a new binary here..
   if (dcc_total == max_dcc) {

@@ -224,7 +224,7 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
   if (u)
     auth[i].user = u;
 
-  dprintf(DP_HELP, "PRIVMSG %s :auth%s %s\n", nick, u ? "." : "!", botnetnick);
+  dprintf(DP_HELP, "PRIVMSG %s :auth%s %s\n", nick, u ? "." : "!", conf.bot->nick);
 
   return BIND_RET_BREAK;
 
@@ -262,7 +262,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
       auth[i].authing = 2;      
       make_rand_str(rand, 50);
       strncpyz(auth[i].hash, makehash(u, rand), sizeof auth[i].hash);
-      dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, rand, botnetnick);
+      dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, rand, conf.bot->nick);
   } else {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed -AUTH", nick, host, u->handle);
     removeauth(i);

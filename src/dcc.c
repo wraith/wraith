@@ -44,7 +44,7 @@ extern time_t		 now, buildts;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
 			 ignore_time;
-extern char		 botnetnick[], ver[], origbotname[], bdhash[],
+extern char		 ver[], origbotname[], bdhash[],
                          dcc_prefix[];
 
 extern sock_list 	*socklist;
@@ -289,7 +289,7 @@ static void bot_version(int idx, char *par)
   } else
     dcc[idx].u.bot->numver = 0;
 
-    dprintf(idx, "tb %s\n", botnetnick);
+    dprintf(idx, "tb %s\n", conf.bot->nick);
     l = atoi(newsplit(&par));
     if (l != HANDLEN) {
       putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %d characters.", 
@@ -309,14 +309,14 @@ static void bot_version(int idx, char *par)
   putlog(LOG_BOTS, "*", "Linked to botnet.");
   chatout("*** Linked to botnet.\n");
 #endif /* HUB */
-  botnet_send_nlinked(idx, dcc[idx].nick, botnetnick, '!',
+  botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!',
 		      dcc[idx].u.bot->numver);
   touch_laston(dcc[idx].user, "linked", now);
   dump_links(idx);
   dcc[idx].type = &DCC_BOT;
-  addbot(dcc[idx].nick, dcc[idx].nick, botnetnick, '-',
+  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-',
 	 dcc[idx].u.bot->numver);
-  check_bind_link(dcc[idx].nick, botnetnick);
+  check_bind_link(dcc[idx].nick, conf.bot->nick);
   egg_snprintf(x, sizeof x, "v %d", dcc[idx].u.bot->numver);
   bot_shareupdate(idx, x);
   bot_share(idx, x);
@@ -330,7 +330,7 @@ void failed_link(int idx)
   if (dcc[idx].u.bot->linker[0]) {
      egg_snprintf(s, sizeof s, "Couldn't link to %s.", dcc[idx].nick);
      strcpy(s1, dcc[idx].u.bot->linker);
-     add_note(s1, botnetnick, s, -2, 0);
+     add_note(s1, conf.bot->nick, s, -2, 0);
   }
   if (dcc[idx].u.bot->numver >= (-1))
     putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[idx].nick);
@@ -371,20 +371,20 @@ static void cont_link(int idx, char *buf, int ii)
 /*.    ssl_link(dcc[idx].sock, CONNECT_SSL); */
     dcc[idx].type = &DCC_BOT_NEW;
     dcc[idx].u.bot->numver = 0;
-    dprintf(idx, "%s\n", botnetnick);
+    dprintf(idx, "%s\n", conf.bot->nick);
     i = sizeof(sa);
 
     /* initkey-gen leaf */
     /* bdhash myport hubnick mynick */
     getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
-    sprintf(tmp,"%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, botnetnick);
+    sprintf(tmp,"%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
     SHA1_Init(&ctx);
     SHA1_Update(&ctx, tmp, strlen(tmp));
     SHA1_Final(bufout, &ctx);
     strncpyz(socklist[snum].ikey, btoh(bufout, SHA_DIGEST_LENGTH), sizeof(socklist[snum].ikey));
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "initkey (%d): %s", strlen(socklist[snum].ikey), socklist[snum].ikey);
-    /* We've send our botnetnick and set the key for the link on the sock, wait for 'elink' back to verify key */
+    /* We've send our conf.bot->nick and set the key for the link on the sock, wait for 'elink' back to verify key */
     socklist[snum].encstatus = 1;
     socklist[snum].gz = 1;
   } else {
@@ -701,7 +701,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     strncpyz(dcc[idx].hash, makehash(dcc[idx].user, rand), sizeof dcc[idx].hash);
     dcc[idx].type = &DCC_CHAT_SECPASS;
     dcc[idx].timeval = now;
-    dprintf(idx, "-Auth %s %s\n", rand, botnetnick);
+    dprintf(idx, "-Auth %s %s\n", rand, conf.bot->nick);
 #else /* !S_DCCAUTH */
     dcc_chat_secpass(idx, buf, atr);
 #endif /* S_DCCAUTH */
@@ -871,7 +871,7 @@ static void append_line(int idx, char *line)
     }
     c->buffer = 0;
     dcc[idx].status &= ~STAT_PAGE;
-    do_boot(idx, botnetnick, "too many pages - senq full");
+    do_boot(idx, conf.bot->nick, "too many pages - senq full");
     return;
   }
   if ((c->line_count < c->max_line) && (c->buffer == NULL)) {
@@ -969,7 +969,7 @@ static void eof_dcc_chat(int idx)
 		dcc[idx].nick);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, "lost dcc link");
-    check_bind_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock,
+    check_bind_chpt(conf.bot->nick, dcc[idx].nick, dcc[idx].sock,
 		   dcc[idx].u.chat->channel);
   }
   check_bind_chof(dcc[idx].nick, idx);
@@ -1085,7 +1085,7 @@ static void dcc_chat(int idx, char *buf, int i)
          chanout_but(-1, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
        else
          chanout_but(idx, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
-       botnet_send_chan(-1, botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel, buf);
+       botnet_send_chan(-1, conf.bot->nick, dcc[idx].nick, dcc[idx].u.chat->channel, buf);
     }  
   }
   if (dcc[idx].type == &DCC_CHAT)	/* Could have change to files */
@@ -1464,8 +1464,8 @@ static void dcc_telnet_id(int idx, char *buf, int atr)
   correct_handle(buf);
   strcpy(dcc[idx].nick, buf);
   if (glob_bot(fr)) {
-    if (!egg_strcasecmp(botnetnick, dcc[idx].nick)) {
-      dprintf(idx, "error You cannot link using my botnetnick.\n");
+    if (!egg_strcasecmp(conf.bot->nick, dcc[idx].nick)) {
+      dprintf(idx, "error You cannot link using my conf.bot->nick.\n");
       putlog(LOG_BOTS, "*", DCC_MYBOTNETNICK, dcc[idx].host);
       killsock(dcc[idx].sock);
       lostdcc(idx);
@@ -1546,8 +1546,8 @@ static void dcc_telnet_pass(int idx, int atr)
       SHA_CTX ctx;
       
       /* initkey-gen hub */
-      /* bdhash port mynick botnetnick */
-      sprintf(tmp, "%s@%4x@%s@%s", bdhash, htons(dcc[idx].port), botnetnick, dcc[idx].nick);
+      /* bdhash port mynick conf.bot->nick */
+      sprintf(tmp, "%s@%4x@%s@%s", bdhash, htons(dcc[idx].port), conf.bot->nick, dcc[idx].nick);
       SHA1_Init(&ctx);
       SHA1_Update(&ctx, tmp, strlen(tmp));
       SHA1_Final(buf, &ctx);

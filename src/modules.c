@@ -42,7 +42,7 @@ extern struct auth_t    *auth;
 
 extern Tcl_Interp	*interp;
 extern struct userrec	*userlist, *lastuser;
-extern char		 tempdir[], botnetnick[], botname[], natip[], cmdprefix[],
+extern char		 tempdir[], botname[], natip[], cmdprefix[],
 			 hostname[], origbotname[], botuser[], admin[],
 			 userfile[], ver[], kickprefix[], bankickprefix[],
 			 version[], quit_msg[], hostname6[], bdhash[], dcc_prefix[],
@@ -320,7 +320,7 @@ Function global_table[] =
   (Function) 0,
   (Function) dovoice,
   (Function) version,		 /* char *				*/
-  (Function) botnetnick,	 /* char *				*/
+  (Function) 0,
   /* 124 - 127 */
   (Function) & DCC_CHAT_PASS,	 /* struct dcc_table *			*/
   (Function) & DCC_BOT,		 /* struct dcc_table *			*/

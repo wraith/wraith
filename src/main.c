@@ -53,7 +53,7 @@
 
 extern char *progname();		/* from settings.c */
 
-extern char		 origbotname[], userfile[], botnetnick[], packname[],
+extern char		 origbotname[], userfile[], packname[],
                          shellhash[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
 			 fork_interval, optind, local_fork_interval,

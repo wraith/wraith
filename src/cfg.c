@@ -22,7 +22,6 @@
 
 #include "stat.h"
 
-extern char			botnetnick[];
 extern struct userrec 		*userlist;
 extern time_t		 	now;
 
@@ -605,7 +604,7 @@ void set_cfg_str(char *target, char *entryname, char *data)
     struct xtra_key *xk;
     char *olddata = entry->ldata;
 
-    if (u && !strcmp(botnetnick, u->handle)) {
+    if (u && !strcmp(conf.bot->nick, u->handle)) {
       if (data) {
         entry->ldata = strdup(data);
       } else
@@ -831,7 +830,7 @@ void trigger_cfg_changed()
       if (xk) {
 	putlog(LOG_DEBUG, "*", STR("trigger_cfg_changed for %s"), cfg[i]->name ? cfg[i]->name : "(null)");
 	if (!strcmp(cfg[i]->name, xk->key ? xk->key : "")) {
-	  set_cfg_str(botnetnick, cfg[i]->name, xk->data);
+	  set_cfg_str(conf.bot->nick, cfg[i]->name, xk->data);
 	}
       }
     }

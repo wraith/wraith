@@ -36,7 +36,7 @@ extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
 
 extern char		 version[], origbotname[], botname[],
-			 admin[], network[], motdfile[], ver[], botnetnick[],
+			 admin[], network[], motdfile[], ver[], 
 			 userfile[], dcc_prefix[],
                          *binname, tempdir[], *owneremail;
 
@@ -688,7 +688,7 @@ void kill_bot(char *s1, char *s2)
 #endif /* HUB */
   call_hook(HOOK_DIE);
   chatout("*** %s\n", s1);
-  botnet_send_chat(-1, botnetnick, s1);
+  botnet_send_chat(-1, conf.bot->nick, s1);
   botnet_send_bye();
   fatal(s2, 0);
 }
@@ -717,7 +717,7 @@ void updatelocal(void)
   }
 #endif /* LEAF */
 
-  botnet_send_chat(-1, botnetnick, "Updating...");
+  botnet_send_chat(-1, conf.bot->nick, "Updating...");
   botnet_send_bye();
 
   fatal("Updating...", 1);
@@ -810,7 +810,7 @@ int updatebin(int idx, char *par, int autoi)
   if (localhub) {
     /* if localhub = 1, this is the spawn bot and controls
      * the spawning of new bots. */
-     sprintf(buf, "%s -L %s -P %d", buf, botnetnick, getpid());
+     sprintf(buf, "%s -L %s -P %d", buf, conf.bot->nick, getpid());
   } 
 #endif /* LEAF */
 
@@ -835,7 +835,7 @@ int updatebin(int idx, char *par, int autoi)
     if (idx)
       dprintf(idx, STR("Updating...bye\n"));
     putlog(LOG_MISC, "*", STR("Updating...\n"));
-    botnet_send_chat(-1, botnetnick, "Updating...");
+    botnet_send_chat(-1, conf.bot->nick, "Updating...");
     botnet_send_bye();
     fatal("Updating...", 1);
     usleep(2000 * 500);

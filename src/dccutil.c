@@ -28,7 +28,7 @@ extern int		 dcc_total, max_dcc, dcc_flood_thr, backgrd, MAXSOCKS, tands;
 #ifdef USE_IPV6
 extern unsigned long     notalloc;
 #endif /* USE_IPV6 */
-extern char		 botnetnick[], version[];
+extern char		 version[];
 extern time_t		 now;
 extern sock_list	*socklist;
 
@@ -255,7 +255,7 @@ void dcc_chatter(int idx)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
-  dprintf(idx, "Connected to %s, running %s\n", botnetnick, version);
+  dprintf(idx, "Connected to %s, running %s\n", conf.bot->nick, version);
   show_banner(idx);
   show_motd(idx);
   if (glob_master(fr)) {
@@ -301,7 +301,7 @@ void dcc_chatter(int idx)
 	  botnet_send_join_idx(idx, -1);
 	}
       }
-      check_bind_chjn(botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel,
+      check_bind_chjn(conf.bot->nick, dcc[idx].nick, dcc[idx].u.chat->channel,
 		     geticon(idx), dcc[idx].sock, dcc[idx].host);
     }
     /* But *do* bother with sending it locally */
@@ -427,13 +427,13 @@ void not_away(int idx)
     chanout_but(-1, dcc[idx].u.chat->channel,
 		"*** %s is no longer away.\n", dcc[idx].nick);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
-      botnet_send_away(-1, botnetnick, dcc[idx].sock, NULL, idx);
+      botnet_send_away(-1, conf.bot->nick, dcc[idx].sock, NULL, idx);
     }
   }
   dprintf(idx, "You're not away any more.\n");
   free(dcc[idx].u.chat->away);
   dcc[idx].u.chat->away = NULL;
-  check_bind_away(botnetnick, dcc[idx].sock, NULL);
+  check_bind_away(conf.bot->nick, dcc[idx].sock, NULL);
 }
 
 void set_away(int idx, char *s)
@@ -453,11 +453,11 @@ void set_away(int idx, char *s)
     chanout_but(-1, dcc[idx].u.chat->channel,
 		"*** %s is now away: %s\n", dcc[idx].nick, s);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
-      botnet_send_away(-1, botnetnick, dcc[idx].sock, s, idx);
+      botnet_send_away(-1, conf.bot->nick, dcc[idx].sock, s, idx);
     }
   }
   dprintf(idx, "You are now away.\n");
-  check_bind_away(botnetnick, dcc[idx].sock, s);
+  check_bind_away(conf.bot->nick, dcc[idx].sock, s);
 }
 
 

@@ -17,7 +17,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 
-extern char             origbotname[], botnetnick[], tempdir[],
+extern char             origbotname[], tempdir[],
                         userfile[], myip[], myip6[], natip[], hostname[], hostname6[];
 extern int              localhub;
 extern uid_t		myuid;
@@ -112,6 +112,7 @@ static void conf_addbot(char *nick, char *ip, char *host, char *ip6) {
   if (ip6)   bot->ip6 = strdup(ip6);
 
   bot->pid = checkpid(nick, bot);
+  bot->u = NULL;
 }
 
 
@@ -370,6 +371,7 @@ static void conf_bot_dup(conf_bot *dest, conf_bot *src) {
   dest->host =          src->host ? strdup(src->host) : NULL;
   dest->ip6 =           src->ip6 ? strdup(src->ip6) : NULL;
   dest->host6 =         src->host6 ? strdup(src->host6) : NULL;
+  dest->u =		src->u ? src->u : NULL;
   dest->pid =           src->pid;
 #ifdef LEAF
   dest->localhub =      src->localhub;

@@ -18,7 +18,7 @@ extern struct cfg_entry **cfg;
 extern struct userrec	*userlist;
 extern struct dcc_t	*dcc;
 extern Tcl_Interp	*interp;
-extern char		 whois_fields[], botnetnick[];
+extern char		 whois_fields[];
 extern time_t            now;
 
 static struct user_entry_type *entry_type_list;
@@ -346,7 +346,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
   arg = newsplit(&buf);
   if (!arg[0])
     return 1;
-  if (!strcmp(u->handle, botnetnick)) {
+  if (!strcmp(u->handle, conf.bot->nick)) {
     struct cfg_entry *cfgent = NULL;
     int i;
 
@@ -355,7 +355,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
       if (!strcmp(arg, cfg[i]->name) && (cfg[i]->flags & CFGF_LOCAL))
 	cfgent = cfg[i];
     if (cfgent) {
-      set_cfg_str(botnetnick, cfgent->name, (buf && buf[0]) ? buf : NULL);
+      set_cfg_str(conf.bot->nick, cfgent->name, (buf && buf[0]) ? buf : NULL);
     }
     cfg_noshare = 0;
     return 1;

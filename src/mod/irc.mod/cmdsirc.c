@@ -552,7 +552,7 @@ ContextNote("!mdop!");
       if (!m->user)
 	targets[targetcount++] = m;
       else if (((m->user->flags & (USER_BOT | USER_OP)) == (USER_BOT | USER_OP))
-	       && (strcmp(botnetnick, m->user->handle))
+	       && (strcmp(conf.bot->nick, m->user->handle))
 	       && (nextbot(m->user->handle) >= 0))
 	chanbots[chanbotcount++] = m;
       else if (!(m->user->flags & USER_OP))
@@ -709,7 +709,7 @@ ContextNote("!mdop!");
     if (simul)
       dprintf(idx, "%s deops%s\n", chanbots[bpos]->nick, work);
     else
-      botnet_send_zapf(nextbot(chanbots[bpos]->user->handle), botnetnick, chanbots[bpos]->user->handle, work);
+      botnet_send_zapf(nextbot(chanbots[bpos]->user->handle), conf.bot->nick, chanbots[bpos]->user->handle, work);
     bots--;
     bpos++;
   }

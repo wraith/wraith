@@ -20,7 +20,6 @@
 #include "src/core_binds.h"
 
 extern int noshare;
-extern char botnetnick[];
 
 static int console_autosave = 1;
 static int info_party = 1;
@@ -265,7 +264,7 @@ static int console_chon(char *handle, int idx)
     if ((dcc[idx].u.chat->channel >= 0) &&
 	(dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
       botnet_send_join_idx(idx, -1);
-      check_bind_chjn(botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel,
+      check_bind_chjn(conf.bot->nick, dcc[idx].nick, dcc[idx].u.chat->channel,
 		     geticon(idx), dcc[idx].sock, dcc[idx].host);
     }
     if (info_party) {
@@ -278,7 +277,7 @@ static int console_chon(char *handle, int idx)
 	    chanout_but(-1, dcc[idx].u.chat->channel,
 			"*** [%s] %s\n", dcc[idx].nick, p);
 	    simple_sprintf(x, "[%s] %s", dcc[idx].nick, p);
-	    botnet_send_chan(-1, botnetnick, NULL,
+	    botnet_send_chan(-1, conf.bot->nick, NULL,
 			     dcc[idx].u.chat->channel, x);
 	}
       }

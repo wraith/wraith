@@ -27,7 +27,7 @@ extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
 extern int		 default_flags, default_uflags, quiet_save,
 			 dcc_total;
-extern char		 userfile[], ver[], botnetnick[], tempdir[];
+extern char		 userfile[], ver[], tempdir[];
 extern time_t		 now;
 
 int		 noshare = 1;		/* don't send out to sharebots	    */
@@ -429,7 +429,7 @@ int write_userfile(int idx)
     sort_userlist();
   tt = now;
   strcpy(s1, ctime(&tt));
-  lfprintf(f, "#4v: %s -- %s -- written %s", ver, botnetnick, s1);
+  lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
   ok = 1;
   fclose(f);
   call_hook(HOOK_USERFILE);

@@ -412,7 +412,7 @@ void getin_request(char *botnick, char *code, char *par)
       sendi = 0;
       tmp = malloc(strlen(chan->dname) + strlen(p3) + 7);
       sprintf(tmp, STR("gi K %s %s"), chan->dname, p3);
-      botnet_send_zapf(nextbot(botnick), botnetnick, botnick, tmp);
+      botnet_send_zapf(nextbot(botnick), conf.bot->nick, botnick, tmp);
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Sent key (%s)"), botnick, nick, chan->dname, p3);
       free(tmp);
     }
@@ -466,7 +466,7 @@ void check_hostmask()
       return;
   }
 
-  addhost_by_handle(botnetnick, s);
+  addhost_by_handle(conf.bot->nick, s);
   putlog(LOG_GETIN, "*", STR("Updated my hostmask: %s"), s);
 }
 
@@ -773,7 +773,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
     splitnick(&whobad);
     maskhost(whobad, s1);
     simple_sprintf(s, "(%s) %s", ct, reason);
-    u_addban(chan, s1, botnetnick, s, now + (60 * chan->ban_time), 0);
+    u_addban(chan, s1, conf.bot->nick, s, now + (60 * chan->ban_time), 0);
     if (!mevictim && me_op(chan)) {
       add_mode(chan, '+', 'b', s1);
       flush_mode(chan, QUICK);

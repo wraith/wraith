@@ -39,7 +39,7 @@ extern struct dcc_t *dcc;
 extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
 extern int dcc_total, noshare, egg_numver;
-extern char botnetnick[], tempdir[];
+extern char 		tempdir[];
 extern time_t now;
 
 char natip[121] = "";
@@ -1026,7 +1026,7 @@ int readuserfile(char *file, struct userrec **ret)
   for (u = bu; u; u = u->next) {
     struct user_entry *e;
 
-    if (!(u->flags & USER_BOT) && !egg_strcasecmp (u->handle, botnetnick)) {
+    if (!(u->flags & USER_BOT) && !egg_strcasecmp (u->handle, conf.bot->nick)) {
       putlog(LOG_MISC, "*", "(!) I have a user record, but without +b");
       /* u->flags |= USER_BOT; */
     }
@@ -1101,7 +1101,7 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
       cur = userlist;
     if (cur == current)
       break;
-    if ((cur->flags & USER_BOT) && (strcmp(cur->handle, botnetnick))) {
+    if ((cur->flags & USER_BOT) && (strcmp(cur->handle, conf.bot->nick))) {
       link_pref_val(cur, thisval);
       if ((strcmp(thisval, lowval) < 0) && (strcmp(thisval, highval) > 0) &&(strcmp(thisval, bestmatchval) < 0)) {
         strcpy(bestmatchval, thisval);
@@ -1276,7 +1276,7 @@ void autolink_cycle(char *start)
   hlc = 0;
   for (u = userlist; u; u = u->next) {
     get_user_flagrec(u, &fr, NULL);
-    if (glob_bot(fr) && strcmp(u->handle, botnetnick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
+    if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
       putlog(LOG_DEBUG, "@", STR("Adding %s to hublist"), u->handle);
       hl2 = hl;
       hl = malloc(sizeof(struct hublist_entry));

@@ -43,7 +43,7 @@ extern int	backgrd, flood_telnet_thr, flood_telnet_time,
 		default_uflags, strict_host, userfile_perm;
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
                 firewall[], hostname[], hostname6[], myip[], myip6[],
-		tempdir[], owner[], network[], botnetnick[],
+		tempdir[], owner[], network[], 
 		egg_version[], natip[], 
 		dcc_prefix[];
 
@@ -74,16 +74,16 @@ Tcl_Interp *Tcl_CreateInterp();
 
 static void botnet_change(char *new)
 {
-  if (egg_strcasecmp(botnetnick, new)) {
+  if (egg_strcasecmp(conf.bot->nick, new)) {
     /* Trying to change bot's nickname */
     if (tands > 0) {
       putlog(LOG_MISC, "*", "* Tried to change my botnet nick, but I'm still linked to a botnet.");
       putlog(LOG_MISC, "*", "* (Unlink and try again.)");
       return;
     } else {
-      if (botnetnick[0])
-	putlog(LOG_MISC, "*", "* IDENTITY CHANGE: %s -> %s", botnetnick, new);
-      strcpy(botnetnick, new);
+      if (conf.bot->nick)
+	putlog(LOG_MISC, "*", "* IDENTITY CHANGE: %s -> %s", conf.bot->nick, new);
+      strcpy(conf.bot->nick, new);
     }
   }
 }
@@ -262,7 +262,7 @@ static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
     if (s != NULL) {
       if (strlen(s) > abs(st->max))
 	s[abs(st->max)] = 0;
-      if (st->str == botnetnick)
+      if (st->str == conf.bot->nick)
 	botnet_change(s);
       else if (st->str == firewall) {
 	splitc(firewall, s, ':');

@@ -30,7 +30,7 @@
 #include "modules.h"
 
 extern struct userrec	*userlist;
-extern char		 ver[], botnetnick[], firewall[], myip[], 
+extern char		 ver[], firewall[], myip[], 
 			 motdfile[], userfile[], tempdir[],
 			 owner[], 
                          botuser[], *owners, *hubs;
@@ -556,12 +556,11 @@ void chanprog()
  /* now this only checks server shit. (no channels) */
   call_hook(HOOK_REHASH);
   protect_readonly = 1;
-  if (!botnetnick[0]) {
-    strncpyz(botnetnick, origbotname, HANDLEN + 1);
-  }
+
   strcpy(botuser, origbotname);
-  if (!botnetnick[0])
-    fatal("I don't have a botnet nick!!\n", 0);
+
+  if (!conf.bot->nick)
+    fatal("I don't have a nickname!!\n", 0);
 #ifdef HUB
   loading = 1;
   checkchans(0);

@@ -1116,7 +1116,7 @@ static void share_ufsend(int idx, char *par)
   int i, sock;
   FILE *f;
 
-  egg_snprintf(s, sizeof s, "%s.share.%s.%lu.users", tempdir, botnetnick, now);
+  egg_snprintf(s, sizeof s, "%s.share.%s.%lu.users", tempdir, conf.bot->nick, now);
   if (!(b_status(idx) & STAT_SHARE)) {
     dprintf(idx, "s e You didn't ask; you just started sending.\n");
     dprintf(idx, "s e Ask before sending the userfile.\n");
@@ -1599,7 +1599,7 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
 
   if ((f = fopen(fn, "wb"))) {
     chmod(fn, 0600);		/* make it -rw------- */
-    lfprintf(f, "#4v: %s -- %s -- transmit\n", ver, botnetnick);
+    lfprintf(f, "#4v: %s -- %s -- transmit\n", ver, conf.bot->nick);
     ok = 1;
     if (!write_chans(f, idx))
      ok = 0;

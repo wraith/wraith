@@ -324,7 +324,7 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
     /* Private msg */
     simple_sprintf(h, "*!*@%s", p);
     putlog(LOG_MISC, "*", IRC_FLOODIGNORE1, p);
-    addignore(h, botnetnick, (which == FLOOD_CTCP) ? "CTCP flood" :
+    addignore(h, conf.bot->nick, (which == FLOOD_CTCP) ? "CTCP flood" :
 	      "MSG/NOTICE flood", now + (60 * ignore_time));
   }
   return 0;
@@ -379,7 +379,7 @@ static int gotmsg(char *from, char *msg)
       else
 	p = uhost;
       simple_sprintf(ctcpbuf, "*!*@%s", p);
-      addignore(ctcpbuf, botnetnick, "ctcp avalanche",
+      addignore(ctcpbuf, conf.bot->nick, "ctcp avalanche",
 		now + (60 * ignore_time));
     }
   }
