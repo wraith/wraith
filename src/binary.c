@@ -113,8 +113,9 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
 
         /* just write both for now */
         todo |= WRITE_PACK|WRITE_CONF;
-        skip_bytes += SIZE_PACK;
+
         if (todo & WRITE_PACK) {
+          skip_bytes += SIZE_PACK;
           fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
           sdprintf("writing pack: %d\n", SIZE_PACK);
         } else {
@@ -125,8 +126,8 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
 
         pos += SIZE_PACK;
 
-        skip_bytes += SIZE_CONF;
         if (todo & WRITE_CONF) {
+          skip_bytes += SIZE_CONF;
           fwrite(&settings.bots, SIZE_CONF, 1, newbin->f);
           sdprintf("writing conf: %d\n", SIZE_CONF);
         } else {
