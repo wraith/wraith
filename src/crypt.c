@@ -174,7 +174,7 @@ int lfprintf(FILE *f, char *fmt, ...) {
   char *tptr, *tptr2, *temps1, *temps2;
 
   va_start(va, fmt);
-  vsnprintf(outbuf, sizeof(outbuf), fmt, va);
+  egg_vsnprintf(outbuf, sizeof(outbuf), fmt, va);
   tptr2 = outbuf;
 
 

@@ -360,7 +360,7 @@ int u_pass_match(struct userrec *u, char *in)
   if (!u)
     return 0;
 
-  snprintf(pass, sizeof pass, "%s", in);
+  egg_snprintf(pass, sizeof pass, "%s", in);
 
   cmp = get_user(&USERENTRY_PASS, u);
   if (!cmp && (!pass[0] || (pass[0] == '-')))
@@ -544,7 +544,7 @@ int write_userfile(int idx)
   lfprintf(f, "#DONT DELETE THIS LINE.");
   fclose(f);
   putlog(LOG_DEBUG, "@", "Done writing userfile.");
-  snprintf(backup, sizeof backup, "%s/%s~", tempdir, userfile);
+  egg_snprintf(backup, sizeof backup, "%s/%s~", tempdir, userfile);
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
   nfree(new_userfile);

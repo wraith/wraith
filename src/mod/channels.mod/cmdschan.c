@@ -1488,7 +1488,7 @@ void modesetting(int idx, char *work, int *cnt, char *name, int state)
   if (!work[0])
     sprintf(work, "  ");
   if (name && name[0]) {
-    snprintf(tmp, sizeof tmp, "%s%-17s", state ? "\002+\002" : "\002-\002", name);
+    egg_snprintf(tmp, sizeof tmp, "%s%-17s", state ? "\002+\002" : "\002-\002", name);
     strcat(work, tmp);
   }
   if (*cnt >= 4)

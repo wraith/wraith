@@ -118,7 +118,7 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
 
   if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED))) {
     char string[501];    
-    snprintf(string, sizeof string, "%s %s %s %d %d %d %d", ci->channel, masktype(ci->conflags), 
+    egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d", ci->channel, masktype(ci->conflags), 
                                     stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
                                     ci->color);
     shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string);

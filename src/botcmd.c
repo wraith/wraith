@@ -1356,7 +1356,7 @@ botcmd_t C_bot[] =
 void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {
   char msg[SGRAB-110];
-  snprintf(msg, sizeof msg, "r-s %d %s %d %s %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, dcc[idx].u.chat->con_chan, cmd, par);
+  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, dcc[idx].u.chat->con_chan, cmd, par);
 
   putbot(bot, msg);
 }
@@ -1397,7 +1397,7 @@ static void bot_rsim(char *botnick, char *code, char *par)
     strcpy(dcc[idx].u.chat->con_chan, rconchan);
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
     strcpy(dcc[idx].nick, nick);
-    snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
+    egg_snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
     strcpy(dcc[idx].host, buf);
     dcc[idx].addr = 0;
     dcc[idx].user = get_user_by_handle(userlist, nick);
@@ -1413,7 +1413,7 @@ void bounce_simul(int idx, char *buf)
     return;
   }
 
-  snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].simul, buf);          /* remote-simul[r]eturn idx buf */
+  egg_snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].simul, buf);          /* remote-simul[r]eturn idx buf */
 
   putbot(dcc[idx].simulbot, rmsg);
 }

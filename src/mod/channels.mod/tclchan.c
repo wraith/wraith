@@ -258,12 +258,12 @@ static int tcl_channel STDVAR
     BADARGS(3, 4, " add channel-name ?options-list?");
     if (argc == 3) {
       
-      snprintf(buf2, sizeof buf2, "cjoin %s", argv[2]);
+      egg_snprintf(buf2, sizeof buf2, "cjoin %s", argv[2]);
       if (!loading)
         putallbots(buf2);
       return tcl_channel_add(irp, argv[2], "");
     }
-    snprintf(buf2, sizeof buf2, "cjoin %s %s", argv[2], argv[3]);
+    egg_snprintf(buf2, sizeof buf2, "cjoin %s %s", argv[2], argv[3]);
     if (!loading)
       putallbots(buf2);
     return tcl_channel_add(irp, argv[2], argv[3]);
@@ -310,7 +310,7 @@ Context;
       Tcl_AppendResult(irp, "no such channel record", NULL);
       return TCL_ERROR;
     }
-    snprintf(buf2, sizeof buf2, "cpart %s", argv[2]);
+    egg_snprintf(buf2, sizeof buf2, "cpart %s", argv[2]);
     putallbots(buf2);
     remove_channel(chan);
     return TCL_OK;

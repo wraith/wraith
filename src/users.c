@@ -708,7 +708,7 @@ Context;
   s = buf;
   fscanf(f, "%[^\n]\n", cbuf);
   temps = (char *) decrypt_string(SALT1, cbuf);
-  snprintf(s, 1024, temps);
+  egg_snprintf(s, 1024, temps);
   nfree(temps);
   if (s[1] < '4') {
     fatal(USERF_OLDFMT, 0);
@@ -719,7 +719,7 @@ Context;
     s = buf;
     fscanf(f, "%[^\n]\n", cbuf);
     temps = (char *) decrypt_string(SALT1, cbuf);
-    snprintf(s, 1024, temps);
+    egg_snprintf(s, 1024, temps);
     nfree(temps);
     if (!feof(f)) {
       if (s[0] != '#' && s[0] != ';' && s[0]) {

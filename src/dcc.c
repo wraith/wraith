@@ -602,7 +602,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
   check[0] = 0;
-  snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
+  egg_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
   check[MD5_HASH_LENGTH + 6] = 0;
 
   if (!strcmp(check, buf)) {

@@ -437,7 +437,7 @@ static void cmd_botconfig(struct userrec *u, int idx, char *par)
   if (par[0]) {
     char tmp[100];    
     set_cfg_str(u2->handle, cfgent->name, (strcmp(par, "-")) ? par : NULL);
-    snprintf(tmp, sizeof tmp, "%s %s", cfgent->name, par);
+    egg_snprintf(tmp, sizeof tmp, "%s %s", cfgent->name, par);
     update_mod(u2->handle, dcc[idx].nick, "botconfig", tmp);
     dprintf(idx, STR("Now: "));
     write_userfile(idx);
@@ -2282,7 +2282,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
   if (chan) {
     char tmp[100];
     putlog(LOG_CMDS, "*", STR("#%s# (%s) chattr %s %s"), dcc[idx].nick, chan ? chan->dname : "*", hand, chg ? chg : "");
-    snprintf(tmp, sizeof tmp, "chattr %s", chg);
+    egg_snprintf(tmp, sizeof tmp, "chattr %s", chg);
     update_mod(hand, dcc[idx].nick, tmp, chan->dname);
   } else {
     putlog(LOG_CMDS, "*", STR("#%s# chattr %s %s"), dcc[idx].nick, hand, chg ? chg : "");

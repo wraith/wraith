@@ -213,7 +213,7 @@ void getin_request(char *botnick, char *code, char *par)
       tmp = nmalloc(strlen(host) + 1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
-      snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2, "@") ,ip4);
+      egg_snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2, "@") ,ip4);
       nfree(tmp);
     } else {
       ip4host[0] = 0;
@@ -225,7 +225,7 @@ void getin_request(char *botnick, char *code, char *par)
       tmp = nmalloc(strlen(host) + 1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
-      snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2, "@") ,ip6);
+      egg_snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2, "@") ,ip6);
       nfree(tmp);
     } else {
       ip6host[0] = 0;
