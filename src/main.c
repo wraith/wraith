@@ -107,7 +107,7 @@ extern struct cfg_entry CFG_FORKINTERVAL;
 
 static char *getfullbinname(const char *argv_zero)
 {
-  char *cwd = NULL, *bin = NULL, *p = NULL, *p2 = NULL;
+  char cwd[DIRMAX] = "", *bin = NULL, *p = NULL, *p2 = NULL;
 
   bin = strdup(argv_zero);
 
@@ -117,7 +117,8 @@ static char *getfullbinname(const char *argv_zero)
   if (!getcwd(cwd, DIRMAX))
     fatal("BABY JESUS IS CRYING", 0);
 
-  cwd[DIRMAX] = 0;
+printf("%s\n", cwd);
+
   if (cwd[strlen(cwd) - 1] == '/')
     cwd[strlen(cwd) - 1] = 0;
 
@@ -139,7 +140,6 @@ static char *getfullbinname(const char *argv_zero)
       p2 = strchr(p, '/');
   }
   str_redup(&bin, cwd);
-  free(cwd);
 printf("bin: %s\n", bin);
   return bin;
 }
