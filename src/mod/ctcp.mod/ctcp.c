@@ -653,7 +653,7 @@ static void cloak_describe(struct cfg_entry *cfgent, int idx)
 }
 #endif /* HUB */
 
-static void cloak_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+static void cloak_changed(struct cfg_entry *cfgent, int *valid)
 {
   char *p = NULL;
   int i;

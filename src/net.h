@@ -125,8 +125,8 @@ typedef struct {
 unsigned long my_atoul(char *);
 #ifdef HAVE_SSL
 int ssl_cleanup();
-#endif /* HAVE_SSL */
 int ssl_link(int, int);
+#endif /* HAVE_SSL */
 char *myipstr(int);
 IP getmyip();
 void cache_my_ip();
@@ -145,7 +145,6 @@ int real_getsock(int, char *, int);
 int sockprotocol(int);
 int hostprotocol(char *);
 char *hostnamefromip(IP);
-void dropssl(int);
 void real_killsock(int, const char *, int);
 int answer(int, char *, IP *, port_t *, int);
 int findanyidx(register int);

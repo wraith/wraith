@@ -40,7 +40,10 @@ CFLGS = -fno-strict-aliasing -W -Wformat -Winline \
 -Wshadow -Wnested-externs -Wno-format-y2k \
 -Wlarger-than-2048 -Wpointer-arith -Wcast-align \
 -Waggrepate-return -Wlong-long -Wbad-function-cast \
+-Wunused-parameter \
 -Wmissing-noreturn @GCC3@
+
+#-Wunused-parameter
 
 #-Wwrite-strings
 #-Wconversion

@@ -50,8 +50,7 @@ static struct delay_mode *start_delay = NULL;
 #ifdef HUB
 static void start_sending_users(int);
 #endif /* HUB */
-static void shareout_but(struct chanset_t *chan, int, const char *, ...)
-  __attribute__ ((format(printf, 3, 4)));
+static void shareout_but(int, const char *, ...)  __attribute__ ((format(printf, 2, 3)));
 static void cancel_user_xfer(int, void *);
 
 #include "share.h"
@@ -137,7 +136,7 @@ share_stick_ban(int idx, char *par)
 #endif /* LEAF */
       if (u_setsticky_ban(NULL, host, yn) > 0) {
         putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-        shareout_but(NULL, idx, "s %s %d\n", host, yn);
+        shareout_but(idx, "s %s %d\n", host, yn);
       }
 #ifdef LEAF
       for (chan = chanset; chan != NULL; chan = chan->next)
@@ -150,7 +149,7 @@ share_stick_ban(int idx, char *par)
       if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
         if (u_setsticky_ban(chan, host, yn) > 0) {
           putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
-          shareout_but(chan, idx, "s %s %d %s\n", host, yn, chan->dname);
+          shareout_but(idx, "s %s %d %s\n", host, yn, chan->dname);
           noshare = 0;
           return;
         }
@@ -180,7 +179,7 @@ share_stick_exempt(int idx, char *par)
     if (!par[0]) {              /* Global exempt */
       if (u_setsticky_exempt(NULL, host, yn) > 0) {
         putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-        shareout_but(NULL, idx, "se %s %d\n", host, yn);
+        shareout_but(idx, "se %s %d\n", host, yn);
       }
     } else {
       struct chanset_t *chan = findchan_by_dname(par);
@@ -189,7 +188,7 @@ share_stick_exempt(int idx, char *par)
       if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
         if (u_setsticky_exempt(chan, host, yn) > 0) {
           putlog(LOG_CMDS, "@", "%s: stick %s %c %s", dcc[idx].nick, host, yn ? 'y' : 'n', par);
-          shareout_but(chan, idx, "se %s %d %s\n", host, yn, chan->dname);
+          shareout_but(idx, "se %s %d %s\n", host, yn, chan->dname);
           noshare = 0;
           return;
         }
@@ -215,7 +214,7 @@ share_stick_invite(int idx, char *par)
     if (!par[0]) {              /* Global invite */
       if (u_setsticky_invite(NULL, host, yn) > 0) {
         putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-        shareout_but(NULL, idx, "sInv %s %d\n", host, yn);
+        shareout_but(idx, "sInv %s %d\n", host, yn);
       }
     } else {
       struct chanset_t *chan = findchan_by_dname(par);
@@ -224,7 +223,7 @@ share_stick_invite(int idx, char *par)
       if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
         if (u_setsticky_invite(chan, host, yn) > 0) {
           putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
-          shareout_but(chan, idx, "sInv %s %d %s\n", host, yn, chan->dname);
+          shareout_but(idx, "sInv %s %d %s\n", host, yn, chan->dname);
           noshare = 0;
           return;
         }
@@ -244,7 +243,7 @@ share_chhand(int idx, char *par)
     hand = newsplit(&par);
     u = get_user_by_handle(userlist, hand);
     if (u) {
-      shareout_but(NULL, idx, "h %s %s\n", hand, par);
+      shareout_but(idx, "h %s %s\n", hand, par);
       noshare = 1;
       if (change_handle(u, par))
         putlog(LOG_CMDS, "@", "%s: handle %s->%s", dcc[idx].nick, hand, par);
@@ -270,7 +269,7 @@ share_chattr(int idx, char *par)
       cst = findchan_by_dname(par);
       if (!par[0] || cst) {
         if (!(dcc[idx].status & STAT_GETTING))
-          shareout_but(cst, idx, "a %s %s %s\n", hand, atr, par);
+          shareout_but(idx, "a %s %s %s\n", hand, atr, par);
         noshare = 1;
         if (par[0] && cst) {
           fr.match = FR_CHAN;
@@ -329,7 +328,7 @@ share_pls_chrec(int idx, char *par)
     if ((u = get_user_by_handle(userlist, user))) {
       chan = findchan_by_dname(par);
       noshare = 1;
-      shareout_but(chan, idx, "+cr %s %s\n", user, par);
+      shareout_but(idx, "+cr %s %s\n", user, par);
       if (!get_chanrec(u, par)) {
         add_chanrec(u, par);
         putlog(LOG_CMDS, "@", "%s: +chrec %s %s", dcc[idx].nick, user, par);
@@ -352,7 +351,7 @@ share_mns_chrec(int idx, char *par)
       chan = findchan_by_dname(par);
       noshare = 1;
       del_chanrec(u, par);
-      shareout_but(chan, idx, "-cr %s %s\n", user, par);
+      shareout_but(idx, "-cr %s %s\n", user, par);
       noshare = 0;
       putlog(LOG_CMDS, "@", "%s: -chrec %s %s", dcc[idx].nick, user, par);
     }
@@ -383,7 +382,7 @@ share_newuser(int idx, char *par)
       break_down_flags(par, &fr, NULL);
 
       /* If user already exists, ignore command */
-      shareout_but(NULL, idx, "n %s %s %s %s\n", nick, host, pass, par);
+      shareout_but(idx, "n %s %s %s %s\n", nick, host, pass, par);
 
       noshare = 1;
       if (strlen(nick) > HANDLEN)
@@ -421,7 +420,7 @@ share_killuser(int idx, char *par)
 
     noshare = 1;
     if (deluser(par)) {
-      shareout_but(NULL, idx, "k %s\n", par);
+      shareout_but(idx, "k %s\n", par);
 #ifndef LEAF
       putlog(LOG_CMDS, "@", "%s: killuser %s", dcc[idx].nick, par);
 #endif /* LEAF */
@@ -439,7 +438,7 @@ share_pls_host(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     hand = newsplit(&par);
     if ((u = get_user_by_handle(userlist, hand))) {
-      shareout_but(NULL, idx, "+h %s %s\n", hand, par);
+      shareout_but(idx, "+h %s %s\n", hand, par);
       set_user(&USERENTRY_HOSTS, u, par);
 #ifdef LEAF
       check_this_user(u->handle, 0, NULL);
@@ -460,7 +459,7 @@ share_pls_bothost(int idx, char *par)
     hand = newsplit(&par);
     u = get_user_by_handle(userlist, hand);
     if (!(dcc[idx].status & STAT_GETTING))
-      shareout_but(NULL, idx, "+bh %s %s\n", hand, par);
+      shareout_but(idx, "+bh %s %s\n", hand, par);
     /* Add bot to userlist if not there */
     if (u) {
       if (!u->bot)
@@ -485,7 +484,7 @@ share_mns_host(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     hand = newsplit(&par);
     if ((u = get_user_by_handle(userlist, hand))) {
-      shareout_but(NULL, idx, "-h %s %s\n", hand, par);
+      shareout_but(idx, "-h %s %s\n", hand, par);
       noshare = 1;
       delhost_by_handle(hand, par);
       noshare = 0;
@@ -517,7 +516,7 @@ share_change(int idx, char *par)
       putlog(LOG_ERROR, "*", "Ignore ch %s from %s (unknown type)", key, dcc[idx].nick);
     else {
       if (!(dcc[idx].status & STAT_GETTING))
-        shareout_but(NULL, idx, "c %s %s %s\n", key, hand, par);
+        shareout_but(idx, "c %s %s %s\n", key, hand, par);
       noshare = 1;
       if (!u && (uet == &USERENTRY_BOTADDR)) {
         char pass[30] = "";
@@ -560,7 +559,7 @@ share_chchinfo(int idx, char *par)
     if ((u = get_user_by_handle(userlist, hand))) {
       chan = newsplit(&par);
       cst = findchan_by_dname(chan);
-      shareout_but(cst, idx, "chchinfo %s %s %s\n", hand, chan, par);
+      shareout_but(idx, "chchinfo %s %s %s\n", hand, chan, par);
       noshare = 1;
       set_handle_chaninfo(userlist, hand, chan, par);
       noshare = 0;
@@ -573,7 +572,7 @@ static void
 share_mns_ban(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(NULL, idx, "-b %s\n", par);
+    shareout_but(idx, "-b %s\n", par);
     putlog(LOG_CMDS, "@", "%s: cancel ban %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
@@ -593,7 +592,7 @@ static void
 share_mns_exempt(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(NULL, idx, "-e %s\n", par);
+    shareout_but(idx, "-e %s\n", par);
     putlog(LOG_CMDS, "@", "%s: cancel exempt %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
@@ -613,7 +612,7 @@ static void
 share_mns_invite(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(NULL, idx, "-inv %s\n", par);
+    shareout_but(idx, "-inv %s\n", par);
     putlog(LOG_CMDS, "@", "%s: cancel invite %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
@@ -638,7 +637,7 @@ share_mns_banchan(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(chan, idx, "-bc %s %s\n", chname, par);
+    shareout_but(idx, "-bc %s %s\n", chname, par);
     putlog(LOG_CMDS, "@", "%s: cancel ban %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
@@ -662,7 +661,7 @@ share_mns_exemptchan(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(chan, idx, "-ec %s %s\n", chname, par);
+    shareout_but(idx, "-ec %s %s\n", chname, par);
     putlog(LOG_CMDS, "@", "%s: cancel exempt %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
@@ -687,7 +686,7 @@ share_mns_invitechan(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(chan, idx, "-invc %s %s\n", chname, par);
+    shareout_but(idx, "-invc %s %s\n", chname, par);
     putlog(LOG_CMDS, "@", "%s: cancel invite %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
@@ -707,7 +706,7 @@ static void
 share_mns_ignore(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(NULL, idx, "-i %s\n", par);
+    shareout_but(idx, "-i %s\n", par);
     putlog(LOG_CMDS, "@", "%s: cancel ignore %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
@@ -729,7 +728,7 @@ share_pls_ban(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     int stick = 0;
 
-    shareout_but(NULL, idx, "+b %s\n", par);
+    shareout_but(idx, "+b %s\n", par);
     noshare = 1;
     ban = newsplit(&par);
     str_unescape(ban, '\\');
@@ -770,7 +769,7 @@ share_pls_banchan(int idx, char *par)
     tm = newsplit(&par);
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(chan, idx, "+bc %s %s %s %s\n", ban, tm, chname, par);
+    shareout_but(idx, "+bc %s %s %s %s\n", ban, tm, chname, par);
     str_unescape(ban, '\\');
     from = newsplit(&par);
     if (strchr(from, 's')) {
@@ -808,7 +807,7 @@ share_pls_exempt(int idx, char *par)
 #endif /* LEAF */
     int stick = 0;
 
-    shareout_but(NULL, idx, "+e %s\n", par);
+    shareout_but(idx, "+e %s\n", par);
     noshare = 1;
     exempt = newsplit(&par);
     str_unescape(exempt, '\\');
@@ -851,7 +850,7 @@ share_pls_exemptchan(int idx, char *par)
     tm = newsplit(&par);
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(chan, idx, "+ec %s %s %s %s\n", exempt, tm, chname, par);
+    shareout_but(idx, "+ec %s %s %s %s\n", exempt, tm, chname, par);
     str_unescape(exempt, '\\');
     from = newsplit(&par);
     if (strchr(from, 's')) {
@@ -889,7 +888,7 @@ share_pls_invite(int idx, char *par)
 #endif /* LEAF */
     int stick = 0;
 
-    shareout_but(NULL, idx, "+inv %s\n", par);
+    shareout_but(idx, "+inv %s\n", par);
     noshare = 1;
     invite = newsplit(&par);
     str_unescape(invite, '\\');
@@ -932,7 +931,7 @@ share_pls_invitechan(int idx, char *par)
     tm = newsplit(&par);
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(chan, idx, "+invc %s %s %s %s\n", invite, tm, chname, par);
+    shareout_but(idx, "+invc %s %s %s %s\n", invite, tm, chname, par);
     str_unescape(invite, '\\');
     from = newsplit(&par);
     if (strchr(from, 's')) {
@@ -964,7 +963,7 @@ share_pls_ignore(int idx, char *par)
   char *ign = NULL, *from = NULL, *ts = NULL;
 
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(NULL, idx, "+i %s\n", par);
+    shareout_but(idx, "+i %s\n", par);
     noshare = 1;
     ign = newsplit(&par);
     str_unescape(ign, '\\');
@@ -1217,7 +1216,7 @@ sharein(int idx, char *msg)
 }
 
 void
-shareout(struct chanset_t *chan, const char *format, ...)
+shareout(const char *format, ...)
 {
   int i, l;
   char s[601] = "";
@@ -1238,7 +1237,7 @@ shareout(struct chanset_t *chan, const char *format, ...)
 }
 
 static void
-shareout_but(struct chanset_t *chan, int x, const char *format, ...)
+shareout_but(int x, const char *format, ...)
 {
   int i, l;
   char s[601] = "";

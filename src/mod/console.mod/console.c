@@ -123,8 +123,8 @@ console_set(struct userrec *u, struct user_entry *e, void *buf)
     egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d %d %d %d %d", ci->channel,
                  masktype(ci->conflags), stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
                  ci->color, ci->banner, ci->channels, ci->bots, ci->whom);
-    /* shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string); */
-    shareout(NULL, "c CONSOLE %s %s\n", u->handle, string);
+    /* shareout("c %s %s %s\n", e->type->name, u->handle, string); */
+    shareout("c CONSOLE %s %s\n", u->handle, string);
   }
   return 1;
 }
@@ -289,7 +289,7 @@ console_chon(char *handle, int idx)
 
     }
     if ((dcc[idx].u.chat->channel >= 0) && (dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
-      botnet_send_join_idx(idx, -1);
+      botnet_send_join_idx(idx);
     }
     if (info_party) {
       char *p = get_user(&USERENTRY_INFO, dcc[idx].user);

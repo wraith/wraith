@@ -72,7 +72,7 @@ sanity_check(flag_t atr, int bot)
 /* Sanity check on channel attributes
  */
 flag_t
-chan_sanity_check(flag_t chatr, flag_t atr)
+chan_sanity_check(flag_t chatr)
 {
   /* admin for chan does shit.. */
   if (chatr & USER_ADMIN)
@@ -319,7 +319,7 @@ set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
     if (!noshare) {
       fr->match = FR_GLOBAL;
       build_flags(buffer, fr, NULL);
-      shareout(NULL, "a %s %s\n", u->handle, buffer);
+      shareout("a %s %s\n", u->handle, buffer);
     }
   }
 
@@ -340,7 +340,7 @@ set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
       if (!noshare) {
         fr->match = FR_CHAN;
         build_flags(buffer, fr, NULL);
-        shareout(ch, "a %s %s %s\n", u->handle, buffer, chname);
+        shareout("a %s %s %s\n", u->handle, buffer, chname);
       }
     }
   }

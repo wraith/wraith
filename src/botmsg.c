@@ -460,7 +460,7 @@ void botnet_send_away(int idx, char *bot, int sock, char *msg, int linking)
   }
 }
 
-void botnet_send_join_idx(int useridx, int oldchan)
+void botnet_send_join_idx(int useridx)
 {
   size_t len;
 
@@ -473,7 +473,7 @@ void botnet_send_join_idx(int useridx, int oldchan)
   }
 }
 
-void botnet_send_join_party(int idx, int linking, int useridx, int oldchan)
+void botnet_send_join_party(int idx, int linking, int useridx)
 {
   size_t len;
 

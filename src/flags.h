@@ -132,7 +132,7 @@ int build_flags(char *, struct flag_record *, struct flag_record *);
 int flagrec_eq(struct flag_record *, struct flag_record *);
 int flagrec_ok(struct flag_record *, struct flag_record *);
 flag_t sanity_check(flag_t, int);
-flag_t chan_sanity_check(flag_t, flag_t);
+flag_t chan_sanity_check(flag_t);
 char geticon(int);
 
 inline int private(struct flag_record, struct chanset_t *, int);

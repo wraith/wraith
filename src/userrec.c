@@ -443,7 +443,7 @@ int change_handle(struct userrec *u, char *newh)
   check_bind_nkch(u->handle, newh);
   /* Yes, even send bot nick changes now: */
   if (!noshare)
-    shareout(NULL, "h %s %s\n", u->handle, newh);
+    shareout("h %s %s\n", u->handle, newh);
   strncpyz(s, u->handle, sizeof s);
   strncpyz(u->handle, newh, sizeof u->handle);
   for (i = 0; i < dcc_total; i++)
@@ -508,7 +508,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
 
     fr.global = u->flags;
     build_flags(xx, &fr, 0);
-    shareout(NULL, "n %s%s %s %s %s\n", bot ? "-" : "", handle, host && host[0] ? host : "none", pass, xx);
+    shareout("n %s%s %s %s %s\n", bot ? "-" : "", handle, host && host[0] ? host : "none", pass, xx);
   }
   if (bu == NULL)
     bu = u;
@@ -581,7 +581,7 @@ int deluser(char *handle)
   else
     prev->next = u->next;
   if (!noshare && (handle[0] != '*'))
-    shareout(NULL, "k %s\n", handle);
+    shareout("k %s\n", handle);
   for (fnd = 0; fnd < dcc_total; fnd++)
     if (dcc[fnd].user == u)
       dcc[fnd].user = 0;	/* Clear any dcc users for this entry,
@@ -635,7 +635,7 @@ int delhost_by_handle(char *handle, char *host)
   if (!qprev)
     set_user(&USERENTRY_HOSTS, u, "none");
   if (!noshare && i)
-    shareout(NULL, "-h %s %s\n", handle, host);
+    shareout("-h %s %s\n", handle, host);
   clear_chanlist();
   return i;
 }
@@ -648,9 +648,9 @@ void addhost_by_handle(char *handle, char *host)
   /* u will be cached, so really no overhead, even tho this looks dumb: */
   if (!noshare) {
     if (u->bot)
-      shareout(NULL, "+bh %s %s\n", handle, host);
+      shareout("+bh %s %s\n", handle, host);
     else
-      shareout(NULL, "+h %s %s\n", handle, host);
+      shareout("+h %s %s\n", handle, host);
   }
   clear_chanlist();
 }

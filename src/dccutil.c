@@ -285,7 +285,7 @@ void dcc_chatter(int idx)
 
       if (dcc[idx].u.chat->channel >= 0) {
 	if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
-	  botnet_send_join_idx(idx, -1);
+	  botnet_send_join_idx(idx);
 	}
       }
     }

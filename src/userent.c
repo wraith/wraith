@@ -113,7 +113,7 @@ int def_set(struct userrec *u, struct user_entry *e, void *buf)
     e->u.string = NULL;
   }
   if (!noshare) {
-    shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, e->u.string ? e->u.string : "");
+    shareout("c %s %s %s\n", e->type->name, u->handle, e->u.string ? e->u.string : "");
   }
   return 1;
 }
@@ -225,7 +225,7 @@ int config_set(struct userrec *u, struct user_entry *e, void *buf)
   /* we will possibly free new below, so let's send the information
    * to the botnet now */
   if (!noshare && !cfg_noshare)
-    shareout(NULL, "c CONFIG %s %s %s\n", u->handle, new->key, new->data ? new->data : "");
+    shareout("c CONFIG %s %s %s\n", u->handle, new->key, new->data ? new->data : "");
   if ((old && old != new) || !new->data || !new->data[0]) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
@@ -557,7 +557,7 @@ int pass_set(struct userrec *u, struct user_entry *e, void *buf)
     e->u.extra = strdup(new);
   }
   if (!noshare)
-    shareout(NULL, "c PASS %s %s\n", u->handle, pass ? pass : "");
+    shareout("c PASS %s %s\n", u->handle, pass ? pass : "");
   return 1;
 }
 
@@ -663,8 +663,8 @@ static int laston_set(struct userrec *u, struct user_entry *e, void *buf)
   }
 
   if (!noshare) {
-    /* shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string); */
-    shareout(NULL, "c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", li->laston);
+    /* shareout("c %s %s %s\n", e->type->name, u->handle, string); */
+    shareout("c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", li->laston);
   }
 
   return 1;
@@ -792,7 +792,7 @@ static int botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   Assert(u);
   if (bi && !noshare) {
-    shareout(NULL, "c BOTADDR %s %s %d %d %d %s\n",u->handle, 
+    shareout("c BOTADDR %s %s %d %d %d %s\n",u->handle, 
             (bi->address && bi->address[0]) ? bi->address : "127.0.0.1", 
             bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
   }

@@ -1365,7 +1365,7 @@ static void eof_dcc_relay(int idx)
     chanout_but(-1, dcc[j].u.chat->channel, "*** %s %s.\n",
 		dcc[j].nick, BOT_PARTYREJOINED);
     if (dcc[j].u.chat->channel < GLOBAL_CHANS)
-      botnet_send_join_idx(j, -1);
+      botnet_send_join_idx(j);
   }
   check_bind_chon(dcc[j].nick, j);
   killsock(dcc[idx].sock);
@@ -1447,7 +1447,7 @@ static void dcc_relaying(int idx, char *buf, int j)
     chanout_but(-1, dcc[idx].u.relay->chat->channel,
 		"*** %s joined the party line.\n", dcc[idx].nick);
     if (dcc[idx].u.relay->chat->channel < GLOBAL_CHANS)
-      botnet_send_join_idx(idx, -1);
+      botnet_send_join_idx(idx);
   }
   ci = dcc[idx].u.relay->chat;
   free(dcc[idx].u.relay);

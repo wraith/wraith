@@ -421,9 +421,9 @@ int real_getsock(int options, char *fname, int line)
   return sock;
 }
 
+#ifdef HAVE_SSL
 void dropssl(register int sock)
 {
-#ifdef HAVE_SSL
   int i;
 
   if (sock < 0)
@@ -439,8 +439,8 @@ void dropssl(register int sock)
     usleep(1000 * 500);
     socklist[i].ssl = NULL;
   }
-#endif /* HAVE_SSL */
 }
+#endif /* HAVE_SSL */
 
 /* Done with a socket
  */
@@ -455,7 +455,9 @@ void real_killsock(register int sock, const char *file, int line)
 
   for (i = 0; i < MAXSOCKS; i++) {
     if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED)) {
+#ifdef HAVE_SSL
       dropssl(sock);
+#endif /* HAVE_SSL */
       close(socklist[i].sock);
       if (socklist[i].inbuf != NULL) {
 	free(socklist[i].inbuf);
@@ -769,9 +771,9 @@ inline int open_listen_by_af(port_t *port, int af_def)
 #endif /* USE_IPV6 */
 }
 
+#ifdef HAVE_SSL
 int ssl_link(register int sock, int state)
 {
-#ifdef HAVE_SSL
   int err = 0, i = 0, errs = 0;
 
   debug2("ssl_link(%d, %d)", sock, state);
@@ -832,9 +834,9 @@ int ssl_link(register int sock, int state)
     putlog(LOG_ERROR, "*", "SSL_link(%d, %d) failed", sock, state);
     dropssl(socklist[i].sock);
   }
-#endif /* HAVE_SSL */
   return 0;
 }
+#endif /* HAVE_SSL */
 
 
 /* Given a network-style IP address, returns the hostname. The hostname

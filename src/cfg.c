@@ -41,7 +41,7 @@ static void chanset_describe(struct cfg_entry * entry, int idx) {
 #endif /* HUB */
 
 #ifdef LEAF
-static void chanset_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+static void chanset_changed(struct cfg_entry *entry, int *valid) {
   if (entry->ldata)
     strncpyz(cfg_glob_chanset, (char *) entry->ldata, 512);
   else if (entry->gdata)
@@ -65,7 +65,7 @@ static void servport_describe(struct cfg_entry * entry, int idx) {
 #endif /* HUB */
 
 #ifdef LEAF
-static void servport_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+static void servport_changed(struct cfg_entry *entry, int *valid) {
   if (entry->ldata)
     default_port = atoi(entry->ldata);
   else if (entry->gdata)
@@ -151,7 +151,7 @@ static void cmdprefix_describe(struct cfg_entry *entry, int idx) {
 #endif /* HUB */
 
 #ifdef LEAF
-static void cmdprefix_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+static void cmdprefix_changed(struct cfg_entry *entry, int *valid) {
   if (entry->ldata)
     cmdprefix = entry->ldata[0];
   else if (entry->gdata)
@@ -264,14 +264,14 @@ static void misc_describe(struct cfg_entry *cfgent, int idx)
 }
 #endif /* HUB */
 
-static void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void fork_lchanged(struct cfg_entry * cfgent, int * valid) {
   if (!cfgent->ldata)
     return;
   if (atoi(cfgent->ldata) <= 0)
     *valid = 0;
 }
 
-static void fork_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void fork_gchanged(struct cfg_entry * cfgent, int * valid) {
   if (!cfgent->gdata)
     return;
   if (atoi(cfgent->gdata) <= 0)
@@ -292,7 +292,7 @@ struct cfg_entry CFG_FORKINTERVAL = {
 #endif /* HUB */
 };
 
-static void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void detect_lchanged(struct cfg_entry * cfgent, int * valid) {
   char *p = NULL;
 
   if (!(p = (char *) cfgent->ldata))
@@ -301,7 +301,7 @@ static void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * vali
     *valid = 0;
 }
 
-static void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void detect_gchanged(struct cfg_entry * cfgent, int * valid) {
   char *p = (char *) cfgent->ldata;
   if (!p)
     *valid=1;
@@ -354,7 +354,7 @@ struct cfg_entry CFG_PROCESSLIST = {
 };
 
 #ifdef LEAF
-static void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+static void servers_changed(struct cfg_entry * entry, int * valid) {
   char *slist = NULL, *p = NULL;
 
   if (!strcmp(entry->name, "servers")) {
@@ -404,7 +404,7 @@ struct cfg_entry CFG_SERVERS6 = {
 };
 
 #ifdef LEAF
-static void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+static void nick_changed(struct cfg_entry * entry, int * valid) {
   char *p = NULL;
 
   if (entry->ldata)
@@ -444,7 +444,7 @@ static void realname_describe(struct cfg_entry * entry, int idx) {
 #endif /* HUB */
 
 #ifdef LEAF
-static void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+static void realname_changed(struct cfg_entry * entry, int * valid) {
   if (entry->ldata)
     strncpyz(botrealname, (char *) entry->ldata, 121);
   else if (entry->gdata)
@@ -487,7 +487,7 @@ static void getin_describe(struct cfg_entry *cfgent, int idx)
 }
 #endif /* HUB */
 
-static void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+static void getin_changed(struct cfg_entry *cfgent, int *valid)
 {
   int i;
 
@@ -675,7 +675,8 @@ void set_cfg_str(char *target, char *entryname, char *data)
       if (entry->localchanged) {
         int valid = 1;
 
-        entry->localchanged(entry, olddata, &valid);
+        /* entry->localchanged(entry, olddata, &valid); */
+        entry->localchanged(entry, &valid);
         if (!valid) {
           if (entry->ldata)
             free(entry->ldata);
@@ -703,7 +704,8 @@ void set_cfg_str(char *target, char *entryname, char *data)
     if (entry->globalchanged) {
       int valid = 1;
 
-      entry->globalchanged(entry, olddata, &valid);
+      /* entry->globalchanged(entry, olddata, &valid); */
+      entry->globalchanged(entry, &valid);
       if (!valid) {
         if (entry->gdata)
           free(entry->gdata);

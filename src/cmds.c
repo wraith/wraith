@@ -889,7 +889,7 @@ static void cmd_whois(struct userrec *u, int idx, char *par)
     return;
   }
   putlog(LOG_CMDS, "*", "#%s# whois %s", dcc[idx].nick, par);
-  tell_user_ident(idx, par, u ? (u->flags & USER_MASTER) : 0);
+  tell_user_ident(idx, par);
 }
 
 static void match(struct userrec *u, int idx, char *par, int isbot)
@@ -917,7 +917,7 @@ static void match(struct userrec *u, int idx, char *par, int isbot)
     } else
       limit = atoi(s1);
   }
-  tell_users_match(idx, s, start, limit, u ? (u->flags & USER_MASTER) : 0, chname, isbot);
+  tell_users_match(idx, s, start, limit, chname, isbot);
 }
 
 static void cmd_matchbot(struct userrec *u, int idx, char *par)
@@ -2253,7 +2253,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
       if ((dcc[i].type == &DCC_CHAT) &&
 	  ((u->flags & (USER_OP | USER_MASTER | USER_OWNER))
 	   != (oatr & (USER_OP | USER_MASTER | USER_OWNER)))) {
-	botnet_send_join_idx(i, -1);
+	botnet_send_join_idx(i);
       }
       if ((oatr & USER_MASTER) && !(u->flags & USER_MASTER)) {
 	struct flag_record fr = {FR_CHAN | FR_ANYWH, 0, 0, 0 };
@@ -2355,7 +2355,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, flag_t chflags, flag_t 
       if ((dcc[i].type == &DCC_CHAT) &&
 	  ((chflags & (USER_OP | USER_MASTER | USER_OWNER))
 	   != (ochatr & (USER_OP | USER_MASTER | USER_OWNER))))
-	botnet_send_join_idx(i, -1);
+	botnet_send_join_idx(i);
       if ((ochatr & USER_MASTER) && !(chflags & USER_MASTER)) {
 	if (!(atr & USER_MASTER))
 	  dcc[i].u.chat->con_flags &= ~(LOG_MISC | LOG_CMDS);
@@ -2565,7 +2565,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     }
     if (chan) {
       ocf = user.chan;
-      user.chan = chan_sanity_check((user.chan | pls.chan) & ~mns.chan, user.global);
+      user.chan = chan_sanity_check((user.chan | pls.chan) & ~mns.chan);
     }
     set_user_flagrec(u2, &user, par);
   }
@@ -2704,7 +2704,7 @@ static void cmd_chat(struct userrec *u, int idx, char *par)
 	chanout_but(-1, newchan, "*** %s joined the channel.\n", dcc[idx].nick);
       }
       if (newchan < GLOBAL_CHANS)
-	botnet_send_join_idx(idx, oldchan);
+	botnet_send_join_idx(idx);
       else if (oldchan < GLOBAL_CHANS)
 	botnet_send_part_idx(idx, "");
     }
@@ -4171,7 +4171,7 @@ static void cmd_quit(struct userrec *u, int idx, char *text)
 		dcc_chatter(idx);
 
 		if (dcc[idx].u.chat->channel < GLOBAL_CHANS && dcc[idx].u.chat->channel >= 0) {
-			botnet_send_join_idx(idx, -1);
+			botnet_send_join_idx(idx);
 		}
 	} else if ((dcc[idx].sock != STDOUT) || backgrd) {
 		killsock(dcc[idx].sock);

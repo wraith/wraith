@@ -677,7 +677,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       dcc[idx].u.chat->su_nick = NULL;
       dcc[idx].type = &DCC_CHAT;
       if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
-        botnet_send_join_idx(idx, -1);
+        botnet_send_join_idx(idx);
       chanout_but(-1, dcc[idx].u.chat->channel, DCC_JOIN, dcc[idx].nick);
     } else {
       killsock(dcc[idx].sock);
@@ -739,7 +739,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       dcc[idx].u.chat->su_nick = NULL;
       dcc[idx].type = &DCC_CHAT;
       if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
-        botnet_send_join_idx(idx, -1);
+        botnet_send_join_idx(idx);
       chanout_but(-1, dcc[idx].u.chat->channel, DCC_JOIN, dcc[idx].nick);
     } else {
       killsock(dcc[idx].sock);

@@ -341,7 +341,7 @@ getin_request(char *botnick, char *code, char *par)
       if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) ||
           wild_match((*mr)->mask, ip6host)) {
         if (!noshare) {
-          shareout(NULL, "-b %s\n", (*mr)->mask);
+          shareout("-b %s\n", (*mr)->mask);
         }
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed permanent global ban %s", botnick, nick,
                chan->dname, (*mr)->mask);
@@ -363,7 +363,7 @@ getin_request(char *botnick, char *code, char *par)
       if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) ||
           wild_match((*mr)->mask, ip6host)) {
         if (!noshare) {
-          shareout(NULL, "-bc %s %s\n", chan->dname, (*mr)->mask);
+          shareout("-bc %s %s\n", chan->dname, (*mr)->mask);
         }
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed permanent channel ban %s", botnick, nick,
                chan->dname, (*mr)->mask);

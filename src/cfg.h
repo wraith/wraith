@@ -13,8 +13,8 @@ typedef struct cfg_entry {
   int flags;
   char *gdata;
   char *ldata;
-  void (*globalchanged) (struct cfg_entry *, char *oldval, int *valid);
-  void (*localchanged) (struct cfg_entry *, char *oldval, int *valid);
+  void (*globalchanged) (struct cfg_entry *, int *valid);
+  void (*localchanged) (struct cfg_entry *, int *valid);
 #ifdef HUB
   void (*describe) (struct cfg_entry *, int idx);
 #endif /* HUB */

@@ -1004,7 +1004,7 @@ static void bot_join(int idx, char *par)
     touch_laston(u, TBUF, now);
   }
   i = addparty(bot, nick, chan, y[0], sock, par, &i2);
-  botnet_send_join_party(idx, linking, i2, i);
+  botnet_send_join_party(idx, linking, i2);
   if (i != chan) {
     if (i >= 0) {
       chanout_but(-1, i, "*** (%s) %s %s %s.\n", bot, nick, NET_LEFTTHE, i ? "channel" : "party line");
