@@ -193,7 +193,7 @@
 #define list_contains ((int (*) (struct list_type *, struct list_type *))global[75])
 /* 76 - 79 */
 #define answer ((int (*) (int,char *,unsigned long *,unsigned short *,int))global[76])
-#define getmyip ((IP (*) (int))global[77])
+#define getmyip ((IP (*) (void))global[77])
 #define neterror ((void (*) (char *))global[78])
 #define tputs ((void (*) (int, char *,unsigned int))global[79])
 /* 80 - 83 */
@@ -452,7 +452,7 @@
  * Its structure might be changed, or it might be completely removed,
  * so you can't rely on it without a version-check.
  */
-#define getprotocol ((int (*)(char *))global[268]) /* get protocol */
+#define sockprotocol ((int (*)(int))global[268]) /* get protocol */
 #define socklist (*(struct sock_list **)global[269])
 #define sockoptions ((int (*)(int, int, int))global[270])
 #define flush_inbuf ((int (*)(int))global[271])
@@ -534,6 +534,7 @@
 #define open_listen_by_af ((int (*) (int *, int))global[328])
 /* 329 - 332 */
 #define egg_inet_ntop ((int (*)(int af, const void *src, char *dst, socklen_t size))global[329])
+#define hostprotocol ((int (*) (char *))global[330])
 
 
 

@@ -1623,17 +1623,13 @@ static int ctcp_DCC_CHAT(char *nick, char *from, char *handle,
       return 1;
     }
 #ifdef USE_IPV6
-    if (ip[4] == ':') {
+    if (hostprotocol(ip) == AF_INET6 && sockprotocol(dcc[i].sock) == AF_INET6) {
       debug1("ipv6 addr: %s",ip);
       strcpy(dcc[i].addr6,ip);
       debug1("ipv6 addr: %s",dcc[i].addr6);
-      dcc[i].af_type = AF_INET6;
-    } else {
-      dcc[i].addr = my_atoul(ip);
-    }
-#else
-    dcc[i].addr = my_atoul(ip);
+    } else 
 #endif /* USE_IPV6 */
+    dcc[i].addr = my_atoul(ip);
     dcc[i].port = atoi(prt);
     dcc[i].sock = -1;
     strcpy(dcc[i].nick, u->handle);
@@ -1641,7 +1637,7 @@ static int ctcp_DCC_CHAT(char *nick, char *from, char *handle,
     dcc[i].timeval = now;
     dcc[i].user = u;
 #ifdef USE_IPV6
-    if (dcc[i].af_type != AF_INET6) {
+    if (sockprotocol(dcc[i].sock) != AF_INET6) {
 #endif /* USE_IPV6 */
 /* remove me? */
       dcc[i].addr = my_atoul(ip);
@@ -1673,14 +1669,14 @@ static void dcc_chat_hostresolved(int i)
     return;
   }
 #else
-  if (dcc[i].af_type == AF_INET6) {
+  if (sockprotocol(dcc[i].sock) == AF_INET6) {
     strcpy(ip,dcc[i].addr6); /* safe, addr6 is 121 */
     debug0("afinet6, af_type, strcpy");
   } else
 #endif /* !USE_IPV6 */
   egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
 #ifdef USE_IPV6
-  if (dcc[i].af_type == AF_INET6) {
+  if (sockprotocol(dcc[i].sock) == AF_INET6) {
 #  ifdef IPV6_DEBUG
     debug2("af_inet6 %s / %s", dcc[i].addr6, ip);
 #  endif /* IPV6_DEBUG */

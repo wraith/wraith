@@ -569,6 +569,9 @@ void chanprog()
 
   admin[0] = 0;
   helpdir[0] = 0;
+
+  /* cache our ip on load instead of every 30 seconds -zip */
+  cache_my_ip();
   for (i = 0; i < max_logs; i++)
     logs[i].flags |= LF_EXPIRING;
   conmask = 0;
@@ -594,15 +597,7 @@ void chanprog()
   //setstatic = 0;
   loading = 1;
   readuserfile(userfile, &userlist);
-/* old
-  if (!readuserfile(userfile, &userlist)) {
-   char tmp[178];
-   egg_snprintf(tmp, sizeof tmp, MISC_NOUSERFILE, configfile);
-   fatal(tmp, 0);
-  }
-*/
   loading = 0;
-  //setstatic = 1;
 #endif
 
   load_internal_users();

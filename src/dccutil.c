@@ -414,19 +414,19 @@ void tell_dcc(int zidx)
   }
   if(nicklen < 9) nicklen = 9;
   
-  egg_snprintf(format, sizeof format, "%%-4s %%-8s %%-5s %%-%us %%-17s %%s\n", 
+  egg_snprintf(format, sizeof format, "%%-4s %%-8s %%-5s %%-%us %%-25s %%s\n", 
                           nicklen);
   dprintf(zidx, format, "SOCK", "ADDR",     "PORT",  "NICK", "HOST", "TYPE");
   dprintf(zidx, format, "----", "--------", "-----", "---------", 
-                        "-----------------", "----");
+                        "-------------------------", "----");
 
   egg_snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-17s %%s\n", 
                           nicklen);
   /* Show server */
   for (i = 0; i < dcc_total; i++) {
     j = strlen(dcc[i].host);
-    if (j > 17)
-      j -= 17;
+    if (j > 25)
+      j -= 25;
     else
       j = 0;
     if (dcc[i].type && dcc[i].type->display)
@@ -714,11 +714,7 @@ Context;
         putlog(LOG_ERRORS, "*", STR("Can't open listening port - it's taken"));
       else {
         idx = new_dcc(&DCC_TELNET, 0);
-#ifdef USE_IPV6
-        dcc[idx].addr = 0x00000000; /* it's not big enough to hold '0xffffffffffffffffffffffffffffffff' =P */
-#else
-        dcc[idx].addr = iptolong(getmyip(0));
-#endif /* USE_IPV6 */
+        dcc[idx].addr = iptolong(getmyip());
         dcc[idx].port = port;
         dcc[idx].sock = i;
         dcc[idx].timeval = now;

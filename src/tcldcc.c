@@ -953,7 +953,7 @@ static int tcl_connect STDVAR
     return TCL_ERROR;
   }
 #ifdef USE_IPV6
-  sock = getsock(0, getprotocol(argv[1]));
+  sock = getsock(0, hostprotocol(argv[1]));
 #else
   sock = getsock(0);
 #endif /* USE_IPV6 */
@@ -1027,6 +1027,7 @@ static int tcl_listen STDVAR
       Tcl_AppendResult(irp, "no more DCC slots available", NULL);
       return TCL_ERROR;
     }
+    cache_my_ip(); /* may need to do this because config loads before ip's are cached -bryan */
     /* Try to grab port */
     j = port + 20;
     i = (-1);
@@ -1052,11 +1053,7 @@ static int tcl_listen STDVAR
       return TCL_ERROR;
     }
     idx = new_dcc(&DCC_TELNET, 0);
-#ifdef USE_IPV6
-    dcc[idx].addr = 0x00000000; /* it's not big enough to hold '0xffffffffffffffffffffffffffffffff' =P */
-#else
-    dcc[idx].addr = iptolong(getmyip(0));
-#endif /* USE_IPV6 */
+    dcc[idx].addr = iptolong(getmyip());
     dcc[idx].port = port;
     dcc[idx].sock = i;
     dcc[idx].timeval = now;

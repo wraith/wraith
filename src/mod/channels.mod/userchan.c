@@ -1061,30 +1061,6 @@ static int write_config(FILE *f, int idx)
         return 0;
     }
 
-/* old tcl shit..
-  int total = 0, i = 0;
-
-//fix proc config to accept NUM 0 for total, num for specific entry.
-  if (Tcl_Eval(interp, "config_start") == TCL_OK) { //make the tcl copy over vital vars first.
-   if (Tcl_Eval(interp, "array size a") == TCL_OK) { //get total config entries
-    total = atoi(interp->result);
-    for (i = 0; i < total; i++) { //loop each entry
-     buf[0] = '\0';
-     sprintf(buf, "config %i", i); //call proc config with i, returns + set...
-     if (Tcl_Eval(interp, buf) == TCL_OK) {
-       if (lfprintf(f, "%s\n", interp->result) == EOF) //write each config %i entry on a line alone.
-        return 0;
-     } else
-       return 0;
-    }
-//    if (lfprintf(f, "+ config_end\n") == EOF) //write config_end to userfile
-//      return 0;
-   } else 
-     return 0;
-  } else
-    return 0;
-*/
-
 #ifdef S_DCCPASS
   for (cp = cmdpass; cp; cp = cp->next)
     if (lfprintf(f, "- %s %s\n", cp->name, cp->pass) == EOF)

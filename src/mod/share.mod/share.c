@@ -1136,7 +1136,7 @@ static void share_userfileq(int idx, char *par)
  */
 static void share_ufsend(int idx, char *par)
 {
-    sock = getsock(SOCK_BINARY, getprotocol(ip)); /* Don't buffer this -> mark binary. */
+  char *ip=NULL, *port;
   char s[1024];
   int i, sock;
   FILE *f;
@@ -1967,7 +1967,7 @@ static void start_sending_users(int idx)
 
   if (!uff_call_sending(idx, share_file)) {
     unlink(share_file);
-	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip(0)),
+    dprintf(idx, "s e %s\n", "uff parsing failed");
     putlog(LOG_BOTS, "@", "uff parsing failed");
     dcc[idx].status &= ~(STAT_SHARE | STAT_SENDING | STAT_AGGRESSIVE);
     return;

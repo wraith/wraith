@@ -414,10 +414,8 @@ void block_dns_hostbyip(IP ip)
   static char s[UHOSTLEN];
 
   if (!setjmp(alarmret)) {
-    debug0("dns.c:437 alarm");
     alarm(resolve_timeout);
     hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
-    debug0("dns.c:440 alarm");
     alarm(0);
     if (hp) {
       strncpyz(s, hp->h_name, sizeof s);
@@ -445,10 +443,8 @@ void block_dns_ipbyhost(char *host)
     struct hostent *hp;
     struct in_addr *in;
     IP ip = 0;
-    debug0("dns.c:468 alarm");
     alarm(resolve_timeout);
     hp = gethostbyname(host);
-    debug0("dns.c:472 alarm");
     alarm(0);
 
     if (hp) {

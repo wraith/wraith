@@ -39,7 +39,6 @@ extern tand_t *tandbot;
 extern party_t *party;
 extern int parties;
 extern sock_list        *socklist;
-extern int getprotocol(char *);
 
 int cmd_die();
 int xtra_kill();
@@ -138,6 +137,7 @@ void (*dns_ipbyhost) (char *) = block_dns_ipbyhost;
 
 module_entry *module_list;
 dependancy *dependancy_list = NULL;
+
 
 /* The horrible global lookup table for functions
  * BUT it makes the whole thing *much* more portable than letting each
@@ -504,7 +504,7 @@ Function global_table[] =
   (Function) clear_chanlist_member,
   (Function) fixfrom,
   /* 268 - 272 */
-  (Function) getprotocol,
+  (Function) sockprotocol,
   (Function) & socklist,	/* sock_list *				*/
   (Function) sockoptions,
   (Function) flush_inbuf,
@@ -578,7 +578,8 @@ Function global_table[] =
   (Function) replace,
   (Function) degarble,
   (Function) egg_inet_ntop,
-  (Function) open_listen_by_af
+  (Function) open_listen_by_af,
+  (Function) hostprotocol
 
 
 };
@@ -811,6 +812,7 @@ void *mod_malloc(int size, const char *modname, const char *filename, int line)
   return nmalloc(size);
 #endif
 }
+
 
 void *mod_realloc(void *ptr, int size, const char *modname,
 		  const char *filename, int line)

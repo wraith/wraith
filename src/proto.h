@@ -283,18 +283,18 @@ void set_cmd_pass(char *, int);
 /* net.c */
 IP my_atoul(char *);
 unsigned long iptolong(IP);
-IP getmyip(int);
+IP getmyip();
+void cache_my_ip();
 void neterror(char *);
-#ifdef USE_IPV6
-void setsock(int, int, int);
-int allocsock(int, int, int);
-int getsock(int, int);
-#else
 void setsock(int, int);
 int allocsock(int, int);
+#ifdef USE_IPV6
+int getsock(int, int);
+#else
 int getsock(int);
 #endif /* USE_IPV6 */
-int getprotocol(char *);
+int sockprotocol(int);
+int hostprotocol(char *);
 char *hostnamefromip(unsigned long);
 void real_killsock(int, const char *, int);
 int answer(int, char *, unsigned long *, unsigned short *, int);

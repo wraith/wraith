@@ -302,7 +302,6 @@ struct dcc_t {
   IP addr;			/* IP address in host byte order	 */
 #ifdef USE_IPV6
   char addr6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */
-  int af_type;                  /* AF_INET or AF_INET6 */
 #endif /* USE_IPV6 */
   unsigned int port;
   struct userrec *user;
@@ -421,6 +420,27 @@ struct script_info {
     void *other;
   } u;
   char command[121];
+};
+
+#ifdef USE_IPV6
+#define SIZEOF_SOCKADDR(so) ((so).sa.sa_family == AF_INET6 ? sizeof(so.sin6) : sizeof(so.sin))
+#else
+#define SIZEOF_SOCKADDR(so) (sizeof(so.sin))
+#endif /* USE_IPV6 */
+
+#if !defined(IN6_IS_ADDR_V4MAPPED) 
+# define IN6_IS_ADDR_V4MAPPED(a) \
+        ((((u_int32_t *) (a))[0] == 0) && (((u_int32_t *) (a))[1] == 0) && \
+         (((u_int32_t *) (a))[2] == htonl (0xffff)))
+#endif /* !defined(IN6_IS_ADDR_V4MAPPED) */
+
+#include <netinet/in.h>
+union sockaddr_union {
+  struct sockaddr sa;
+  struct sockaddr_in sin;
+#ifdef USE_IPV6
+  struct sockaddr_in6 sin6;
+#endif /* USE_IPV6 */
 };
 
 struct dns_info {

@@ -105,7 +105,7 @@ static void update_ufsend(int idx, char *par)
     ip = newsplit(&par);
     port = newsplit(&par);
 #ifdef USE_IPV6
-    sock = getsock(SOCK_BINARY, getprotocol(ip)); /* Don't buffer this -> mark binary. */
+    sock = getsock(SOCK_BINARY, hostprotocol(ip)); /* Don't buffer this -> mark binary. */
 #else
     sock = getsock(SOCK_BINARY); /* Don't buffer this -> mark binary. */
 #endif /* USE_IPV6 */
@@ -361,7 +361,7 @@ static void start_sending_binary(int idx)
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick);		/* Store bot's nick */
     dprintf(idx, "sb us %lu %d %lu\n",
-	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip(0)),
+	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()),
 	    dcc[i].port, dcc[i].u.xfer->length);
   }
 #endif
