@@ -416,8 +416,8 @@ void getin_describe(struct cfg_entry *cfgent, int idx)
     dprintf(idx, STR("lag-threshold is maximum acceptable server lag for the bot to send/honor requests\n"));
   else if (!strcmp(cfgent->name, STR("op-time-slack")))
     dprintf(idx, STR("op-time-slack is number of seconds a opcookies encoded time value can be off from the bots current time\n"));
-  else if (!strcmp(cfgent->name, STR("lock-threshold")))
-    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, lock all channels\n"));
+  else if (!strcmp(cfgent->name, STR("close-threshold")))
+    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, close all channels\n"));
   else if (!strcmp(cfgent->name, STR("kill-threshold")))
     dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
   else if (!strcmp(cfgent->name, STR("fight-threshold")))
@@ -451,7 +451,7 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
     *valid = 1;
     return;
   }
-  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
+  if (!strcmp(cfgent->name, STR("close-threshold"))) {
     int L, R;
     char *value = NULL;
 

@@ -827,8 +827,8 @@ cmd_t channels_bot[] = {
 void channels_describe(struct cfg_entry *cfgent, int idx)
 {
 #ifdef HUB
-  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
-    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, lock all channels\n"));
+  if (!strcmp(cfgent->name, STR("close-threshold"))) {
+    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, close all channels\n"));
   } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
     dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
   } else {
@@ -845,7 +845,7 @@ void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
   if (!cfgent->gdata)
     return;
   *valid = 0;
-  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
+  if (!strcmp(cfgent->name, STR("close-threshold"))) {
     int L, R;
     char *value = cfgent->gdata;
 
@@ -871,7 +871,7 @@ void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_LOCKTHRESHOLD = {
-	"lock-threshold", CFGF_GLOBAL, NULL, NULL,
+	"close-threshold", CFGF_GLOBAL, NULL, NULL,
 	channels_changed, NULL, channels_describe
 };
 
