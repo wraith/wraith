@@ -48,6 +48,10 @@ int str_isdigit(const char *);
 void kill_bot(char *, char *);
 char *strtolower(char *);
 char *strtoupper(char *);
+char *step_thru_file(FILE *);
+char *trim(char *);
+int skipline(char *, int *);
+
 
 extern int		server_lag, use_invites, use_exempts;
 

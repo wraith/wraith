@@ -731,7 +731,7 @@ int main(int argc, char **argv)
 
   binname = getfullbinname(argv[0]);
 
-  check_sum(binname);
+  check_sum(binname, argc >= 3 ? argv[2] : NULL);
   if (!checked_bin_buf)
     exit(1);
 #ifdef HUB

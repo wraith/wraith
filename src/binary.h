@@ -7,5 +7,5 @@ extern int checked_bin_buf;
 #  define GET_MD5		2
 
 
-void check_sum(const char *);
+void check_sum(const char *, const char *);
 #endif /* !_BINARY_H */

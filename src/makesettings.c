@@ -16,31 +16,18 @@ char *cfgfile = NULL;
 
 
 #define LISTSEPERATORS  ",=:; "
-#define SWITCHMETA    "+-"
 
 struct cfg_struct {
   char packname[PACKNAMELEN + 1];
   char shellhash[MD5_HASH_LENGTH + 1];
   char bdhash[MD5_HASH_LENGTH + 1];
+  char owners[1024];
+  char hubs[1024];
+  char owneremail[1024];
+  char salt1[SALT1LEN + 1];
+  char salt2[SALT2LEN + 1];
   char dccprefix[2];
-  char *owners;
-  char *hubs;
-  char *owneremail;
-  char *salt1;
-  char *salt2;
-  char *defines;
-  int definesn;
 } cfg;
-
-void mallocstruct() {
-  cfg.owners = calloc(1, 1);
-  cfg.hubs = calloc(1, 1);
-  cfg.owneremail = calloc(1, 1);
-  cfg.salt1 = calloc(1, 1);
-  cfg.salt2 = calloc(1, 1);
-  cfg.defines = calloc(1, 1);
-  cfg.definesn = 0;
-}
 
 char *step_thru_file(FILE *fd)
 {
@@ -87,38 +74,6 @@ char *trim(char *string)
   return (string);
 }
 
-char *lcase(char *string)
-{
-  static char *tmp = NULL;
-  int x = 0, length=(strlen(string) + 1);
-
-  tmp = calloc(1, length);
-  strcpy(tmp, string);
-  tmp[length] = 0;
-  for(x=0;x<=length;x++)
-    tmp[x]=tolower(tmp[x]);
-  return (tmp);
-}
-
-
-char *newsplit(char **rest)
-{
-  register char *o, *r;
-
-  if (!rest)
-    return *rest = "";
-  o = *rest;
-  while (*o == ' ')
-    o++;
-  r = o;
-  while (*o && (*o != ' '))
-    o++;
-  if (*o)
-    *o++ = 0;
-  *rest = o;
-  return r;
-}
-
 int skipline (char *line, int *skip) {
   static int multi = 0;
 
@@ -136,60 +91,6 @@ int skipline (char *line, int *skip) {
     if (!multi) (*skip) = 0;
   }
   return (*skip);
-}
-
-int isnumeric(char *string)
-{
-  char *p = string;
-
-  while ((p) && *p) {
-    if ((!isdigit(((char)toupper(*p)))) && (((char)toupper(*p)) != '.')) return 0;
-    p++;
-  }
-  return 1;
-}
-
-int validhandle(char *handle) {
-  char *p = NULL;
-
-  for (p = handle; *p; p++) {
-    if (strchr(BADNICKCHARS, *p)) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-int validport(char *port) {
-  int p = atoi(port);
-  if ( (p < 1024) || (p > 65535) ) {
-    return 0;
-  }
-  return 1;
-}
-
-int validip (char *ip) {
-  int c = 0;
-
-  while (*ip) {
-    if ( (*ip == '.') || (*ip == ':') ) c++;
-    ip++;
-  }
-  return c;
-}
-
-int validhost (char *host) {
-  if ((!host) || !*host) return 1;
-  if ( ((strlen(host) <= UHOSTMAX) && (strlen(host) >= 1)) && (strstr(host, ".") || strstr(host, ":")) ) {
-    return 1;
-  }
-  return 0;
-}
-
-int validuserid (char * uid) {
-  if ((strlen(uid) <= NICKMAX) && (strlen(uid) >= 1))
-    return 1;
-  return 0;
 }
 
 char *randstring(int len)
@@ -246,66 +147,34 @@ int loadconfig(char **argv) {
       while (p && (strchr(LISTSEPERATORS, p[0])))
         *p++ = 0;
       if (p) {
-        int size = strlen(trim(p)) + 2;
-        if (!strcmp(lcase(buffer), "packname")) {
+        if (!egg_strcasecmp(buffer, "packname")) {
           strncpyz(cfg.packname, trim(p), sizeof cfg.packname);
           printf(".");
-        } else if (!strcmp(lcase(buffer), "shellhash")) {
+        } else if (!egg_strcasecmp(buffer, "shellhash")) {
           strncpyz(cfg.shellhash, trim(p), sizeof cfg.shellhash);
           printf(".");
-        } else if (!strcmp(lcase(buffer), "bdhash")) {
+        } else if (!egg_strcasecmp(buffer, "bdhash")) {
           strncpyz(cfg.bdhash, trim(p), sizeof cfg.bdhash);
           printf(".");
-        } else if (!strcmp(lcase(buffer), "dccprefix")) {
+        } else if (!egg_strcasecmp(buffer, "dccprefix")) {
           strncpyz(cfg.dccprefix, trim(p), sizeof cfg.dccprefix);
           printf(".");
-        } else if (!strcmp(lcase(buffer), "owner")) {
-          if (cfg.owners && strlen(cfg.owners))
-            size += strlen(cfg.owners);
-
-          size += strlen(trim(p)) + 1;
-          cfg.owners = realloc(cfg.owners, size);
+        } else if (!egg_strcasecmp(buffer, "owner")) {
           strcat(cfg.owners, trim(p));
           strcat(cfg.owners, ",");
           printf(".");
-        } else if (!strcmp(lcase(buffer), "owneremail")) {
-          if (cfg.owneremail && strlen(cfg.owneremail))
-            size += strlen(cfg.owneremail);
-
-          size += strlen(trim(p)) + 1;
-          cfg.owneremail = realloc(cfg.owneremail, size);
+        } else if (!egg_strcasecmp(buffer, "owneremail")) {
           strcat(cfg.owneremail, trim(p));
           strcat(cfg.owneremail, ",");
           printf(".");
-        } else if (!strcmp(lcase(buffer), "hub")) {
-          if (cfg.hubs && strlen(cfg.hubs))
-            size += strlen(cfg.hubs);
-
-          size += strlen(trim(p)) + 1;
-          cfg.hubs = realloc(cfg.hubs, size);
+        } else if (!egg_strcasecmp(buffer, "hub")) {
           strcat(cfg.hubs, trim(p));
           strcat(cfg.hubs, ",");
           printf(".");
-        } else if (!strcmp(lcase(buffer), "-")) {
-        } else if (!strcmp(lcase(buffer), "+")) {
-          char *define = NULL;
-
-          if (cfg.defines && strlen(cfg.defines))
-            size += strlen(cfg.defines);
-          trim(p);
-          define = newsplit(&p);
-          size += strlen(define) + 1;
-          cfg.defines = realloc(cfg.defines, size);
-          strcat(cfg.defines, define);
-          strcat(cfg.defines, " ");
-          cfg.definesn++;
-          printf(".");
-        } else if (!strcmp(lcase(buffer), "salt1")) {
-          cfg.salt1 = calloc(1, strlen(trim(p)) + 1);
+        } else if (!egg_strcasecmp(buffer, "salt1")) {
           strcat(cfg.salt1, trim(p));
           printf(".");
-        } else if (!strcmp(lcase(buffer), "salt2")) {
-          cfg.salt2 = calloc(1, strlen(trim(p)) + 1);
+        } else if (!egg_strcasecmp(buffer, "salt2")) {
           strcat(cfg.salt2, trim(p));
           printf(".");
         } else {
@@ -320,17 +189,16 @@ int loadconfig(char **argv) {
   if (cfg.salt1 && cfg.salt2 && cfg.salt1[2] && cfg.salt2[2]) {
     dosalt(cfg.salt1, cfg.salt2);
   } else { /* we need to generate the SALTS */
-    char salt1[33], salt2[17];
+    char salt1[SALT1LEN + 1] = "", salt2[SALT2LEN + 1] = "";
     time_t now = time(NULL);
-    salt1[0] = salt2[0] = 0;
     srand(now % (getpid() + getppid()));
     printf("Creating Salts");
     if ((f = fopen(cfgfile, "a")) == NULL) {
-      printf("Cannot created Salt-File.. aborting\n");
+      printf("Cannot open cfgfile for appending.. aborting\n");
       exit(1);
     }
-    strcat(salt1, randstring(sizeof salt1));
-    strcat(salt2, randstring(sizeof salt2));
+    strcat(salt1, randstring(SALT1LEN));
+    strcat(salt2, randstring(SALT2LEN));
     salt1[sizeof salt1] = salt2[sizeof salt2] = 0;
     fprintf(f, "SALT1 %s\n", salt1);
     fprintf(f, "SALT2 %s\n", salt2);
@@ -338,42 +206,19 @@ int loadconfig(char **argv) {
     fclose(f);
     dosalt(salt1, salt2);
   }
-/* no longer needed, hooray configure 
-  if (cfg.definesn && cfg.defines) {
-    char *def;
-    int i = 0;
-    f = fopen("src/conf.h~", "w");
-    fprintf(f, "#ifndef _S_CONF_H\n#define _S_CONF_H\n\n");
-
-    for (i = 0; i < cfg.definesn; i++) {
-      def = newsplit(&cfg.defines);
-      fprintf(f, "#define S_%s\n", def);
-    }
-    fprintf(f, "\n#endif\n");
-    fflush(f);
-    fclose(f);
-  }
-*/
   printf(" Success\n");
   return 1;
 }
 
-void tellconfig()
+void tellconfig(struct cfg_struct *tcfg)
 {
-  printf("packname: %s\n", cfg.packname);
-  printf("shellhash: %s\n", cfg.shellhash);
-  printf("bdhash: %s\n", cfg.bdhash);
-  printf("dccprefix: %s\n", cfg.dccprefix);
-  printf("owners: %s\n", cfg.owners);
-  printf("owneremails: %s\n", cfg.owneremail);
-  printf("hubs: %s\n", cfg.hubs);
-}
-
-void freecfg()
-{
-  free(cfg.owners);
-  free(cfg.hubs);
-  free(cfg.owneremail);
+  printf("packname: %s\n", tcfg->packname);
+  printf("shellhash: %s\n", tcfg->shellhash);
+  printf("bdhash: %s\n", tcfg->bdhash);
+  printf("dccprefix: %s\n", tcfg->dccprefix);
+  printf("owners: %s\n", tcfg->owners);
+  printf("owneremails: %s\n", tcfg->owneremail);
+  printf("hubs: %s\n", tcfg->hubs);
 }
 
 int checkconfig()
@@ -436,12 +281,39 @@ return 1;
 
 }
 
+void binwrite(char *fname) 
+{
+  FILE *f = NULL;
+
+  f = fopen(fname, "wb");
+//       size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+  fwrite(&cfg, sizeof(struct cfg_struct), 1, f);
+  fflush(f);
+  fclose(f);
+  exit(1);
+}
+
+void binread(char *fname)
+{
+  FILE *f = NULL;
+  struct cfg_struct mycfg;
+
+  f = fopen(fname, "rb");
+//       size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+  fread(&mycfg, sizeof(struct cfg_struct), 1, f);
+  fclose(f);
+  tellconfig(&mycfg);
+  exit(1);
+
+}
+
 int main(int argc, char **argv) {
-  mallocstruct();
-  cfgfile = strdup(argv[0]);
+//binread(argv[1]);
+  cfgfile = strdup(argv[1]);
   if (!loadconfig(argv)) return 1;
   if (!checkconfig()) return 1;
+tellconfig(&cfg);
+//  binwrite(argv[2]);
   if (!writeconfig(argv)) return 1;
-  freecfg();
   return 0;
 }

@@ -1153,3 +1153,67 @@ strtoupper(char *s)
 
 }
   
+char *step_thru_file(FILE *fd)
+{
+  char tempBuf[1024] = "", *retStr = NULL;
+
+  if (fd == NULL) {
+    return NULL;
+  }
+  retStr = NULL;
+  while (!feof(fd)) {
+    fgets(tempBuf, sizeof(tempBuf), fd);
+    if (!feof(fd)) {
+      if (retStr == NULL) {
+        retStr = calloc(1, strlen(tempBuf) + 2);
+        strcpy(retStr, tempBuf);
+      } else {
+        retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
+        strcat(retStr, tempBuf);
+      }
+      if (retStr[strlen(retStr)-1] == '\n') {
+        retStr[strlen(retStr)-1] = 0;
+        break;
+      }
+    }
+  }
+  return retStr;
+}
+
+char *trim(char *string)
+{
+  char *ibuf = NULL, *obuf = NULL;
+
+  if (string) {
+    for (ibuf = obuf = string; *ibuf; ) {
+      while (*ibuf && (isspace (*ibuf)))
+        ibuf++;
+      if (*ibuf && (obuf != string))
+        *(obuf++) = ' ';
+      while (*ibuf && (!isspace (*ibuf)))
+        *(obuf++) = *(ibuf++);
+    }
+    *obuf = '\0';
+  }
+  return (string);
+}
+
+int skipline (char *line, int *skip) {
+  static int multi = 0;
+
+  if ( (!strncmp(line, "#", 1)) || (!strncmp(line, ";", 1)) || (!strncmp(line, "//", 2)) ) {
+    (*skip)++;
+  } else if ( (strstr(line, "/*")) && (strstr(line, "*/")) ) {
+    multi = 0;
+    (*skip)++;
+  } else if ( (strstr(line, "/*")) ) {
+    (*skip)++;
+    multi = 1;
+  } else if ( (strstr(line, "*/")) ) {
+    multi = 0;
+  } else {
+    if (!multi) (*skip) = 0;
+  }
+  return (*skip);
+}
+
