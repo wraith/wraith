@@ -8,6 +8,7 @@
 #include "users.h"
 #include "src/mod/share.mod/share.h"
 #include "misc.h"
+#include "chanprog.h"
 #include "main.h"
 #include "debug.h"
 #include "userrec.h"
