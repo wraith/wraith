@@ -42,11 +42,9 @@ struct auth_t 			*auth = 0;
 int expmem_auth()
 {
   int tot = 0;
-
 #ifdef S_AUTH
   tot += sizeof(struct auth_t) * max_auth;
 #endif /* S_AUTH */
-
   return tot;
 }
 

@@ -969,11 +969,8 @@ static void reset_chan_info(struct chanset_t *chan)
       dprintf(DP_MODE, "MODE %s +b\n", chan->name);
     }
     if (opped) {
-/* FIXME: broken +e checking */
-putlog(LOG_DEBUG, "@", "I AM +o in %s, need to send +e", chan->dname);
       if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) &&
   	  use_exempts == 1) {
-putlog(LOG_DEBUG, "@", "I AM NOW CHECKING +e for %s", chan->dname);
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
         dprintf(DP_MODE, "MODE %s +e\n", chan->name);
       }
@@ -1276,8 +1273,6 @@ static void check_expired_chanstuff()
             }
           } else if (m->user == NULL && !(m->flags & EVOICE)) {
              if (channel_voice(chan) && !chan_hasop(m) && !chan_hasvoice(m)) {
-/* FIXME: remove next line after testing for +v of +q user bug on -host */
-               putlog(LOG_DEBUG, "@", "VOICING %s in %s as NULL user (+voice)", m->nick, chan->dname);
                add_mode(chan, '+', 'v', m->nick);
              }
           }
