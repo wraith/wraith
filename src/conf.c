@@ -265,7 +265,7 @@ fatal:
 #endif /* !CYGWIN_HACKS */
 
 void
-init_conf()
+init_conffile()
 {
   conffile.bots = (conf_bot *) my_calloc(1, sizeof(conf_bot));
   conffile.bots->nick = NULL;

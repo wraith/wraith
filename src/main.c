@@ -682,6 +682,7 @@ int main(int argc, char **argv)
   timer_update_now(&egg_timeval_now);
   now = egg_timeval_now.sec;
   mypid = getpid();
+  myuid = geteuid();
 
   srandom(now % (mypid + getppid()) * randint(1000));
 
@@ -712,7 +713,6 @@ printf("out: %s\n", out);
 
   check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
   // Now settings struct is decrypted
-
   if (!checked_bin_buf)
     exit(1);
 
@@ -725,14 +725,14 @@ printf("out: %s\n", out);
   }
 #endif
 
+  init_conffile();			/* establishes conffile and sets to defaults */
+
   /* Version info! */
   egg_snprintf(ver, sizeof ver, "[%s] Wraith %s", settings.packname, egg_version);
   egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu)", settings.packname, egg_version, buildts);
 
-  Context;
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
-  myuid = geteuid();
 
 #ifdef HUB
   egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
@@ -745,13 +745,12 @@ printf("out: %s\n", out);
 #endif /* CYGWIN_HACKS */
   clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
 
-  init_conf();			/* establishes conffile and sets to defaults */
   if (argc) {
     sdprintf("Calling dtx_arg with %d params.", argc);
     dtx_arg(argc, argv);
   }
 
-  sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", geteuid(), myuid, getppid(), mypid);
+  sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", myuid, getuid(), getppid(), mypid);
 
 #ifndef CYGWIN_HACKS
   if (checktrace)
