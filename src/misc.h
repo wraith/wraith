@@ -1,7 +1,7 @@
 #ifndef _MISC_H
 #define _MISC_H
 
-#include "eggmain.h"
+#include "common.h"
 
 
 /*

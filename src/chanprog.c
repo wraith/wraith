@@ -9,7 +9,7 @@
  *
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "chanprog.h"
 #include "rfc1459.h"
 #include "net.h"

@@ -7,7 +7,7 @@
  *
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "misc.h"
 #include "dcc.h"
 #include "net.h"

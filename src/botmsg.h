@@ -1,7 +1,7 @@
 #ifndef _BOTMSG_H
 #define _BOTMSG_H
 
-#include "eggmain.h"
+#include "common.h"
 #include "cfg.h"
 
 /* Return codes for add_note */

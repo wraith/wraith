@@ -9,7 +9,7 @@
  *
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "tclhash.h"
 #include "debug.h"
 #include "chan.h"

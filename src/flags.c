@@ -4,7 +4,7 @@
  *
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "crypt.h"
 #include "rfc1459.h"
 #include "misc.h"

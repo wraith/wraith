@@ -361,7 +361,7 @@ int loadconfig(char **argv) {
       def = newsplit(&cfg.defines);
       fprintf(f, "#define S_%s\n", def);
     }
-    fprintf(f, "\n#endif \/* _S_CONF_H *\/\n");
+    fprintf(f, "\n#endif\n");
     fflush(f);
     fclose(f);
   }
@@ -421,7 +421,7 @@ fprintf(f, " \
 #include <stdio.h> \n\
 #include <stdlib.h> \n\
 #include <string.h> \n\
-#include \"eggmain.h\"\n\
+#include \"common.h\"\n\
 #include \"debug.h\"\n\
 \n\
 char packname[512], shellhash[33], bdhash[33], dcc_prefix[2], *owners, *hubs, *owneremail;\n\n\

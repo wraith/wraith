@@ -8,7 +8,7 @@
 
 #include <stdlib.h>		/* getenv()				*/
 #include <locale.h>		/* setlocale()				*/
-#include "eggmain.h"
+#include "common.h"
 #include "misc.h"
 #include "chanprog.h"
 #include <sys/stat.h>

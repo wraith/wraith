@@ -2,7 +2,7 @@
  * memset.c -- provides memset() if necessary.
  *
  */
-#include "eggmain.h"
+#include "common.h"
 #include "memset.h"
 
 #ifndef HAVE_MEMSET

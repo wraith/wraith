@@ -7,7 +7,7 @@
 #ifndef _EGG_COMPAT_STRFTIME_H_
 #define _EGG_COMPAT_STRFTIME_H_
 
-#include "src/eggmain.h"
+#include "src/common.h"
 #include <time.h>
 
 /* Use the system libraries version of strftime() if available. Otherwise

@@ -7,7 +7,7 @@
 #ifndef _EGG_COMPAT_MEMSET_H
 #define _EGG_COMPAT_MEMSET_H
 
-#include "src/eggmain.h"
+#include "src/common.h"
 #include <string.h>
 
 #ifndef HAVE_MEMSET

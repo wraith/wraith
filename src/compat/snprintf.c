@@ -2,7 +2,7 @@
  *
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "snprintf.h"
 
 

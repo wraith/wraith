@@ -7,7 +7,7 @@
 #ifndef _EGG_COMPAT_STRCASECMP_H
 #define _EGG_COMPAT_STRCASECMP_H
 
-#include "src/eggmain.h"
+#include "src/common.h"
 #include <ctype.h>
 
 

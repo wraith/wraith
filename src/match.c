@@ -21,7 +21,7 @@
  * I hereby release this code into the public domain
  *
  */
-#include "eggmain.h"
+#include "common.h"
 #include "match.h"
 #include "rfc1459.h"
 

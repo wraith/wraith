@@ -4,7 +4,7 @@
  *
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "users.h"
 #include "misc.h"
 #include "debug.h"

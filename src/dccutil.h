@@ -1,7 +1,7 @@
 #ifndef _DCCUTIL_H
 #define _DCCUTIL_H
 
-#include "eggmain.h"
+#include "common.h"
 #include "dcc.h"
 
 #ifdef HAVE_DPRINTF

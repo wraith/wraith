@@ -9,7 +9,7 @@
  */
 
 #include <sys/stat.h>
-#include "eggmain.h"
+#include "common.h"
 #include "color.h"
 #include "dcc.h"
 #include "net.h"

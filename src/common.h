@@ -1,11 +1,11 @@
 /*
- * eggmain.h
+ * common.h
  *   include file to include most other include files
  *
  */
 
-#ifndef _EGG_MAIN_H
-#define _EGG_MAIN_H
+#ifndef _COMMON_H
+#define _COMMON_H
 
 /* These should be in a common.h, like it or not... */
 #ifdef HAVE_CONFIG_H
@@ -18,6 +18,9 @@
 #include "chan.h"
 #include "compat/compat.h"
 
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,10 +29,6 @@
 #  include <strings.h>
 #endif
 #include "lang.h"
-#ifdef HAVE_ZLIB_H
-#  include <zlib.h>
-#endif /* HAVE_ZLIB_H */
-
 #include "tclegg.h"
 
 
@@ -42,4 +41,4 @@
 } while (0)
 
 
-#endif				/* _EGG_MAIN_H */
+#endif				/* _COMMON_H */

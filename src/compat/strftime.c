@@ -4,7 +4,7 @@
  *
  */
 
-#include "src/eggmain.h"
+#include "src/common.h"
 #include "strftime.h"
 
 #ifndef HAVE_STRFTIME

@@ -6,7 +6,7 @@
  * 
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "modules.h"
 #include "tclhash.h"
 #include "misc_file.h"

@@ -5,7 +5,7 @@
  */
 
 #include <fcntl.h>
-#include "eggmain.h"
+#include "common.h"
 #include "net.h"
 #include "misc.h"
 #include "main.h"

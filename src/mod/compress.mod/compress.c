@@ -28,6 +28,7 @@
 #define MODULE_NAME "compress"
 #define MAKING_COMPRESS
 
+#include <zlib.h>
 #include <string.h>
 #include <errno.h>
 

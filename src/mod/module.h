@@ -25,7 +25,7 @@
 #define _EGG_MOD_MODULE_H
 
 /* Just include *all* the include files...it's slower but EASIER */
-#include "src/eggmain.h"
+#include "src/common.h"
 #include "src/dcc.h"
 #include "src/debug.h"
 #include "src/color.h"

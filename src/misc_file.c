@@ -4,7 +4,7 @@
  *
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>

@@ -4,7 +4,7 @@
  *   auth system hooks
  */
 
-#include "eggmain.h"
+#include "common.h"
 #include "auth.h"
 #include "misc.h"
 #include "types.h"

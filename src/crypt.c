@@ -6,7 +6,7 @@
  */
 
 
-#include "eggmain.h"
+#include "common.h"
 #include "crypt.h"
 #include "salt.h"
 #include "misc.h"

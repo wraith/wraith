@@ -7,7 +7,7 @@
 #ifndef _EGG_COMPAT_INET_ATON_H
 #define _EGG_COMPAT_INET_ATON_H
 
-#include "src/eggmain.h"
+#include "src/common.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
