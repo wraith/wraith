@@ -300,15 +300,22 @@ static void cmd_mns_invite(int idx, char *par)
   cmd_mns_mask('I', idx, par);
 }
 
+static void cmd_masks(const char type, int idx, char *par)
+{
+  const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
+
+  if (!egg_strcasecmp(par, "all")) {
+    putlog(LOG_CMDS, "*", "#%s# %ss all", dcc[idx].nick, str_type);
+    tell_masks(type, idx, 1, "");
+  } else {
+    putlog(LOG_CMDS, "*", "#%s# %ss %s", dcc[idx].nick, str_type, par);
+    tell_masks(type, idx, 0, par);
+  }
+}
+
 static void cmd_bans(int idx, char *par)
 {
-  if (!egg_strcasecmp(par, "all")) {
-    putlog(LOG_CMDS, "*", "#%s# bans all", dcc[idx].nick);
-    tell_bans(idx, 1, "");
-  } else {
-    putlog(LOG_CMDS, "*", "#%s# bans %s", dcc[idx].nick, par);
-    tell_bans(idx, 0, par);
-  }
+  cmd_masks('b', idx, par);
 }
 
 static void cmd_exempts(int idx, char *par)
@@ -317,13 +324,7 @@ static void cmd_exempts(int idx, char *par)
     dprintf(idx, "This command can only be used with use-exempts enabled.\n");
     return;
   }
-  if (!egg_strcasecmp(par, "all")) {
-    putlog(LOG_CMDS, "*", "#%s# exempts all", dcc[idx].nick);
-    tell_exempts(idx, 1, "");
-  } else {
-    putlog(LOG_CMDS, "*", "#%s# exempts %s", dcc[idx].nick, par);
-    tell_exempts(idx, 0, par);
-  }
+  cmd_masks('e', idx, par);
 }
 
 static void cmd_invites(int idx, char *par)
@@ -332,13 +333,7 @@ static void cmd_invites(int idx, char *par)
     dprintf(idx, "This command can only be used with use-invites enabled.\n");
     return;
   }
-  if (!egg_strcasecmp(par, "all")) {
-    putlog(LOG_CMDS, "*", "#%s# invites all", dcc[idx].nick);
-    tell_invites(idx, 1, "");
-  } else {
-    putlog(LOG_CMDS, "*", "#%s# invites %s", dcc[idx].nick, par);
-    tell_invites(idx, 0, par);
-  }
+  cmd_masks('I', idx, par);
 }
 
 static void cmd_info(int idx, char *par)
