@@ -966,6 +966,8 @@ coloridx(int idx)
   } else if (idx == -2) {
     return 2;	/* mIRC */
   /* valid idx and NOT relaying */
+  } else if (idx >= 0 && dcc[idx].msgc) {
+    return 0;
   } else if (idx >= 0 && (dcc[idx].status & STAT_COLOR) && (dcc[idx].type && dcc[idx].type != &DCC_RELAYING)) {
     /* telnet probably wants ANSI, even though it might be a relay from an mIRC client; fuck`em */
     if (dcc[idx].status & STAT_TELNET)
