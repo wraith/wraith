@@ -1123,17 +1123,17 @@ See also: unlink, newleaf%{+a}, -bot
  
    options:
  
-     %bbitch%b - set +bitch after finished with mdop.
-     %bsimul%b - Simulates the mdop. IE: Gives you a practice run, will show who 
-                 does what in the dcc chat window.
+     %bbitch%b   - set +bitch after finished with mdop.
+     %bsimul%b   - Simulates the mdop. IE: Gives you a practice run, will show who 
+                   does what in the dcc chat window.
  
      =============================================================================
      don't bother setting the following options unless you REALLY know what you're 
      doing, and don't bother messaging me asking me how to use them if you don't.
      =============================================================================
-     %bbots%b - Number of bots to use for mdop.
-     %balines%b - Number of MODE lines to assume each participating bot will get through.
-     %bslines%b - Number of MODE lines each participating bot will send.
+     %bbots%b    - Number of bots to use for mdop.
+     %balines%b  - Number of MODE lines to assume each participating bot will get through.
+     %bslines%b  - Number of MODE lines each participating bot will send.
      %boverlap%b - Number of times to deop each target nick (using alines for calc).
  
    bots, alines, slines and overlap are dependant on each other, set them wrong and
