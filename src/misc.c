@@ -133,7 +133,7 @@ int remove_crlf(char *line)
     *p = 0;
     removed++;
   } 
-  if ((p = strchr(line, '\r')))
+  if ((p = strchr(line, '\r'))) {
     *p = 0;
     removed++;
   }
@@ -149,7 +149,7 @@ int remove_crlf_r(char *line)
     *p = 0;
     removed++;
   } 
-  if ((p = strrchr(line, '\r')))
+  if ((p = strrchr(line, '\r'))) {
     *p = 0;
     removed++;
   }
