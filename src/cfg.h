@@ -58,6 +58,6 @@ extern struct cfg_entry		**cfg;
 #define msginvite (CFG_MSGINVITE.ldata ? CFG_MSGINVITE.ldata : CFG_MSGINVITE.gdata ? CFG_MSGINVITE.gdata : "")
 #define msgident (CFG_MSGIDENT.ldata ? CFG_MSGIDENT.ldata : CFG_MSGIDENT.gdata ? CFG_MSGIDENT.gdata : "")
 #define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
-#define dccauth (CFG_DCCAUTH.ldata ? 1 : CFG_DCCAUTH.gdata ? 1 : 0)
+#define dccauth (CFG_DCCAUTH.ldata ? atoi(CFG_DCCAUTH.ldata) : CFG_DCCAUTH.gdata ? atoi(CFG_DCCAUTH.gdata) : 0)
 
 #endif /* !_CFG_H */

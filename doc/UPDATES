@@ -80,6 +80,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
   -Changed (NEW) ip/host for bots are added to the botnet (if linked)
   -Removed bots are killed and removed from the userlist (if linked)
 * Added options 'enable' and 'disable' to cmd_conf for bots
+* Fixed dccauth not correctly working according to it's [bot]config setting (#30)
 
 
 1.2.2
