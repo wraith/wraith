@@ -2,6 +2,8 @@ This is a summary of ChangeLog basically.
 
 Lines prefixxed with '-' were disabled before release and are not finishsed.
 
+1.2.2
+
 1.2.1
 
 * No longer reading in /etc/hosts, still reading .hosts though
