@@ -487,36 +487,36 @@ static int gotmsg(char *from, char *msg)
           auth[i].atime = now;
         else
           putlog(LOG_MSGS, "*", "[%s] %c%s %s", from, cmdprefix[0], my_code, msg);
-      } else if ((code[0] != cmdprefix[0] || !code[1] || i == -1 || !(auth[i].authed))) {
+      } else if ((my_code[0] != cmdprefix[0] || !my_code[1] || i == -1 || !(auth[i].authed))) {
 #endif /* S_AUTHCMDS */
         if (!ignoring) {
           int doit = 1, result = 0;
 #ifdef S_MSGCMDS
-          if (!egg_strcasecmp(code, "op") || !egg_strcasecmp(code, "pass") || !egg_strcasecmp(code, "invite") 
-              || !egg_strcasecmp(code, "ident")
-               || !egg_strcasecmp(code, msgop) || !egg_strcasecmp(code, msgpass) 
-               || !egg_strcasecmp(code, msginvite) || !egg_strcasecmp(code, msgident)) {
-/*           || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) { */
+          if (!egg_strcasecmp(my_code, "op") || !egg_strcasecmp(my_code, "pass") || !egg_strcasecmp(my_code, "invite") 
+              || !egg_strcasecmp(my_code, "ident")
+               || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
+               || !egg_strcasecmp(my_code, msginvite) || !egg_strcasecmp(my_code, msgident)) {
+/*           || !strcmp(my_code, msgop) || !strcmp(my_code, msgpass) || !strcmp(my_code, msgop)) { */
             char buf2[10] = "";
 
             doit = 0;
-            if (!egg_strcasecmp(code, msgop))
+            if (!egg_strcasecmp(my_code, msgop))
               sprintf(buf2, "op");
-            else if (!egg_strcasecmp(code, msgpass))
+            else if (!egg_strcasecmp(my_code, msgpass))
               sprintf(buf2, "pass");
-            else if (!egg_strcasecmp(code, msginvite))
+            else if (!egg_strcasecmp(my_code, msginvite))
               sprintf(buf2, "invite");
-            else if (!egg_strcasecmp(code, msgident))
+            else if (!egg_strcasecmp(my_code, msgident))
               sprintf(buf2, "ident");
             if (buf[0])
               result = check_bind_msg(buf2, nick, uhost, my_u, msg);
           }
 #endif /* S_MSGCMDS */
           if (doit)
-            result = check_bind_msg(code, nick, uhost, my_u, msg);
+            result = check_bind_msg(my_code, nick, uhost, my_u, msg);
             
 	  if (!result)
-	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
+	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, my_code, msg);
         }
 #ifdef S_AUTHCMDS
       }

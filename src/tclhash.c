@@ -273,7 +273,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 {
 	bind_entry_t *prev = NULL;
-
+	ContextNote(entry->mask);
 	/* Give this entry a hit. */
 	entry->nhits++;
 
