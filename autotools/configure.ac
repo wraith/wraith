@@ -38,7 +38,7 @@ AC_PROG_MAKE_SET
 EGG_PROG_HEAD_1
 EGG_PROG_AWK
 EGG_PROG_BASENAME
-AC_CHECK_PROG(OBJCOPY, objcopy, [objcopy --remove-section=.note --remove-section=.comment])
+AC_CHECK_PROG(OBJCOPY, objcopy, [objcopy --remove-section=.note --remove-section=.comment], touch)
 AC_CHECK_PROG(STRIP, strip, strip, touch)
 AC_CHECK_PROG(UNAME, uname, uname)
 #AC_CHECK_PROG(CCACHE, ccache, ccache)
