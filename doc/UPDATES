@@ -49,6 +49,7 @@ This is a summary of ChangeLog basically.
 46.Leaf bots now correctly respond to remote userfile changes, (+/-host, chattr, [un]stick, +/-ban...)
 47.Made cmd_botjump m|-.
 48.cmd_netlag is now HUB only.
+49.Removed cmd_set.
 
 1.0.10
 
