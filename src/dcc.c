@@ -669,11 +669,11 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
     stats_add(dcc[idx].user, 1, 0);
     if (!get_user(&USERENTRY_SECPASS, dcc[idx].user)) {	/* this should check how many logins instead */
-      char pass[17] = "";
+      char pass[MAXPASSLEN + 1] = "";
 
       dprintf(idx, "********************************************************************\n \n \n");
       dprintf(idx, "%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n", FLASH(-1), FLASH_END(-1));
-      make_rand_str(pass, 16);
+      make_rand_str(pass, MAXPASSLEN);
       set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
 #ifdef HUB
       write_userfile(idx);

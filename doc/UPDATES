@@ -28,6 +28,7 @@ This is a summary of ChangeLog basically.
 * Fixed typo in cmd_date.
 * Added ability to negotiate a different link encryption for future use.
 * Fixed cmd_botcmd not checking for "die" correctly.
+* Fixed random secpass being set 1 char too long.
 
 1.2
 * No longer displaying SALTS on ./bin -v
