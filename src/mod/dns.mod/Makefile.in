@@ -15,7 +15,7 @@ static: ../dns.o
 	@echo "$(RESLIB)" >> ../mod.xlibs
 
 ../dns.o:
-	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@echo -e "Compiling: \033[1mdns\033[0m"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) $(RESINCLUDE) -DMAKING_MODS -c $(srcdir)/dns.c
 	@rm -f ../dns.o
 	@mv dns.o ../

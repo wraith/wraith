@@ -12,7 +12,7 @@ doofus:
 static: ../channels.o
 
 ../channels.o:
-	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@echo -e "Compiling: \033[1mchannels\033[0m"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/channels.c
 	@rm -f ../channels.o
 	@mv channels.o ../

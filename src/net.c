@@ -17,9 +17,6 @@
 #  include <sys/select.h>
 #endif
 #include <netinet/in.h>
-#ifdef ___FreeBSD___
-# include <netinet6/in6.h>
-#endif
 #include <arpa/inet.h>		/* is this really necessary? */
 #include <errno.h>
 

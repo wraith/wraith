@@ -12,7 +12,7 @@ doofus:
 static: ../notes.o
 
 ../notes.o:
-	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@echo -e "Compiling: \033[1mnotes\033[0m"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/notes.c
 	@rm -f ../notes.o
 	@mv notes.o ../

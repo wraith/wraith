@@ -422,6 +422,9 @@ struct script_info {
   char command[121];
 };
 
+#include <netinet/in.h>
+#include <sys/socket.h>
+
 #ifdef USE_IPV6
 #define SIZEOF_SOCKADDR(so) ((so).sa.sa_family == AF_INET6 ? sizeof(so.sin6) : sizeof(so.sin))
 #else
@@ -434,11 +437,6 @@ struct script_info {
          (((u_int32_t *) (a))[2] == htonl (0xffff)))
 #endif /* !defined(IN6_IS_ADDR_V4MAPPED) */
 
-#include <netinet/in.h>
-#include <netinet/socket.h>
-#ifdef __FreeBSD__
-# include <netinet6/in6.h>
-#endif
 union sockaddr_union {
   struct sockaddr sa;
   struct sockaddr_in sin;

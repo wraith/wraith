@@ -1214,11 +1214,11 @@ int main(int argc, char **argv)
     setrlimit(RLIMIT_NPROC, &plim);
     fdlim.rlim_cur = 200;
     fdlim.rlim_max = 200;
-#ifdef __FreeBSD__
-    setrlimit(RLIMIT_OFILE, &fdlim);
-#else
+//#ifdef __FreeBSD__
+//    setrlimit(RLIMIT_OFILE, &fdlim);
+//#else
     setrlimit(RLIMIT_NOFILE, &fdlim);
-#endif
+//#endif
     cdlim.rlim_cur = RLIM_INFINITY;
     cdlim.rlim_max = RLIM_INFINITY;
     setrlimit(RLIMIT_CORE, &cdlim);

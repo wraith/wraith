@@ -6,6 +6,7 @@ then ask bryan: AIM: Bryan M Drewery
 
 First, get tcl 8.4..
 	http://www.tcl.tk/software/tcltk/download84.html
+	http://aleron.dl.sourceforge.net/sourceforge/tcl/tcl8.4.4-src.tar.gz
 Then, untar it, cd to the dir, cd unix, ./configure --prefix=/home/YOU --exec-prefix=/home/YOU --disable-shared
 
 Now, go back to the pack dir..

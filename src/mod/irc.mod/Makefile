@@ -12,7 +12,7 @@ doofus:
 static: ../irc.o
 
 ../irc.o:
-	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@echo -e "Compiling: \033[1mirc\033[0m"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/irc.c
 	@rm -f ../irc.o
 	@mv irc.o ../

@@ -12,7 +12,7 @@ doofus:
 static: ../console.o
 
 ../console.o:
-	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@echo -e "Compiling: \033[1mconsole\033[0m"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/console.c
 	@rm -f ../console.o
 	@mv console.o ../
