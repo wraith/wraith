@@ -316,12 +316,12 @@
 #define expected_memory ((int(*)(void))global[168])
 #define tell_mem_status ((void(*)(char *))global[169])
 #define do_restart (*(int *)(global[170]))
-#define check_tcl_filt ((const char *(*)(int, const char *))global[171])
+/* --- UNUSED 171 */
 /* 172 - 175 */
 #define add_hook(a,b) (((void (*) (int, Function))global[172])(a,b))
 #define del_hook(a,b) (((void (*) (int, Function))global[173])(a,b))
 #define H_dcc (*(p_tcl_bind_list *)(global[174]))
-#define H_filt (*(p_tcl_bind_list *)(global[175]))
+/* --- UNUSED 175 */
 /* 176 - 179 */
 #define H_chon (*(p_tcl_bind_list *)(global[176]))
 #define H_chof (*(p_tcl_bind_list *)(global[177]))

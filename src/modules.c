@@ -368,12 +368,12 @@ Function global_table[] =
   (Function) expected_memory,
   (Function) tell_mem_status,
   (Function) & do_restart,	/* int					*/
-  (Function) check_tcl_filt,
+  (Function) 0,
   /* 172 - 175 */
   (Function) add_hook,
   (Function) del_hook,
   (Function) & H_dcc,		/* p_tcl_bind_list *			*/
-  (Function) & H_filt,		/* p_tcl_bind_list *			*/
+  (Function) 0,
   /* 176 - 179 */
   (Function) & H_chon,		/* p_tcl_bind_list *			*/
   (Function) & H_chof,		/* p_tcl_bind_list *			*/

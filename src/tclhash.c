@@ -27,7 +27,7 @@ extern char		dcc_prefix[];
 p_tcl_bind_list		bind_table_list;
 p_tcl_bind_list		H_chat, H_act, H_bcst, H_chon, H_chof,
 			H_load, H_unld, H_link, H_disc, H_dcc, H_chjn, H_chpt,
-			H_bot, H_time, H_nkch, H_away, H_note, H_filt, H_event;
+			H_bot, H_time, H_nkch, H_away, H_note, H_event;
 
 static int builtin_2char();
 static int builtin_3char();
@@ -35,7 +35,6 @@ static int builtin_5int();
 static int builtin_char();
 static int builtin_chpt();
 static int builtin_chjn();
-static int builtin_idxchar();
 static int builtin_charidx();
 static int builtin_chat();
 static int builtin_dcc();
@@ -206,7 +205,6 @@ void init_bind(void)
   H_nkch = add_bind_table("nkch", HT_STACKABLE, builtin_2char);
   H_load = add_bind_table("load", HT_STACKABLE, builtin_char);
   H_link = add_bind_table("link", HT_STACKABLE, builtin_2char);
-  H_filt = add_bind_table("filt", HT_STACKABLE, builtin_idxchar);
   H_disc = add_bind_table("disc", HT_STACKABLE, builtin_char);
   H_dcc = add_bind_table("dcc", 0, builtin_dcc);
   H_chpt = add_bind_table("chpt", HT_STACKABLE, builtin_chpt);
@@ -554,30 +552,6 @@ static int builtin_chjn STDVAR
   CHECKVALIDITY(builtin_chjn);
   F(argv[1], argv[2], atoi(argv[3]), argv[4][0],
     argv[4][0] ? atoi(argv[4] + 1) : 0, argv[5]);
-  return TCL_OK;
-}
-
-static int builtin_idxchar STDVAR
-{
-  Function F = (Function) cd;
-  int idx;
-  char *r;
-Context;
-  BADARGS(3, 3, " idx args");
-  CHECKVALIDITY(builtin_idxchar);
-  if (atoi(argv[1]) < 0) { /* this is a remote-simul idx */
-    idx = atoi(argv[1]) * -1;
-  } else {
-    idx = findidx(atoi(argv[1]));
-  }
-  if (idx < 0) {
-    Tcl_AppendResult(irp, "invalid idx", NULL);
-    return TCL_ERROR;
-  }
-  r = (((char *(*)()) F) (idx, argv[2]));
-
-  Tcl_ResetResult(irp);
-  Tcl_AppendResult(irp, r, NULL);
   return TCL_OK;
 }
 
@@ -948,28 +922,6 @@ void check_tcl_loadunld(const char *mod, tcl_bind_list_t *tl)
 {
   Tcl_SetVar(interp, "_lu1", (char *) mod, 0);
   check_tcl_bind(tl, mod, 0, " $_lu1", MATCH_MASK | BIND_STACKABLE);
-}
-
-const char *check_tcl_filt(int idx, const char *text)
-{
-  char			s[11];
-  int			x;
-  struct flag_record	fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  egg_snprintf(s, sizeof s, "%ld", dcc[idx].sock);
-  get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  Tcl_SetVar(interp, "_filt1", (char *) s, 0);
-  Tcl_SetVar(interp, "_filt2", (char *) text, 0);
-  x = check_tcl_bind(H_filt, text, &fr, " $_filt1 $_filt2",
-		     MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE |
-		     BIND_WANTRET | BIND_ALTER_ARGS);
-  if (x == BIND_EXECUTED || x == BIND_EXEC_LOG) {
-    if (interp->result == NULL || !interp->result[0])
-      return "";
-    else
-      return interp->result;
-  } else
-    return text;
 }
 
 int check_tcl_note(const char *from, const char *to, const char *text)

@@ -1008,8 +1008,6 @@ static void dcc_chat(int idx, char *buf, int i)
      detect_dcc_flood(&dcc[idx].timeval, dcc[idx].u.chat, idx))
     return;
   dcc[idx].timeval = now;
-  if (buf[0])
-    strcpy(buf, check_tcl_filt(idx, buf));
   if (buf[0]) {
     /* Check for beeps and cancel annoying ones */
     v = buf;

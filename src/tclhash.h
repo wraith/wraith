@@ -82,7 +82,6 @@ void check_tcl_chpt(const char *, const char *, int, int);
 void check_tcl_bot(const char *, const char *, const char *);
 void check_tcl_link(const char *, const char *);
 void check_tcl_disc(const char *);
-const char *check_tcl_filt(int, const char *);
 int check_tcl_note(const char *, const char *, const char *);
 void check_tcl_listen(const char *, int);
 void check_tcl_time(struct tm *);
@@ -110,7 +109,7 @@ void add_builtins(tcl_bind_list_t *, cmd_t *);
 int check_validity(char *, Function);
 extern p_tcl_bind_list H_chat, H_act, H_bcst, H_chon, H_chof;
 extern p_tcl_bind_list H_load, H_unld, H_dcc, H_bot, H_link;
-extern p_tcl_bind_list H_away, H_nkch, H_filt, H_disc, H_event;
+extern p_tcl_bind_list H_away, H_nkch, H_disc, H_event;
 
 #endif
 
