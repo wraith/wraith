@@ -1743,9 +1743,8 @@ static void cmd_comment(struct userrec *u, int idx, char *par)
     dprintf(idx, "No such user!\n");
     return;
   }
-  if ((u1->flags & USER_OWNER) && !(u && (u->flags & USER_OWNER)) &&
-      egg_strcasecmp(handle, dcc[idx].nick)) {
-    dprintf(idx, "You can't change comment on a bot owner.\n");
+  if (whois_access(dcc[idx].user, u1))
+    dprintf(idx, "You can't change comment on higher level users.\n");
     return;
   }
   putlog(LOG_CMDS, "*", "#%s# comment %s %s", dcc[idx].nick, handle, par);

@@ -39,6 +39,7 @@ This is a summary of ChangeLog basically.
 * cmd_mop no longer ops users without a pass set.
 * Alphabetized config list
 * cmd_mns_host now accepts multiple hosts
+* Fixed cmd_comment to work like cmd_whois/match with regards to accessing higher level users.
 
 1.1.9
 
