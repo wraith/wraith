@@ -1325,6 +1325,7 @@ static int write_chans(FILE *f, int idx)
 revenge-mode %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
+closed-ban %d \
 ban-time %d exempt-time %d invite-time %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprotectops %crevenge %crevengebot \
@@ -1350,6 +1351,7 @@ ban-time %d exempt-time %d invite-time %d \
         chan->flood_kick_thr, chan->flood_kick_time,
         chan->flood_deop_thr, chan->flood_deop_time,
 	chan->flood_nick_thr, chan->flood_nick_time,
+        chan->closed_ban,
 /* Chanint template
  *      chan->temp,
  * also include temp %d in dprintf

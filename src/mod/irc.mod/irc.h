@@ -43,6 +43,7 @@ static void maybe_revenge(struct chanset_t *, char *, char *, int);
 static int detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
 			     char *);
 static void newmask(masklist *, char *, char *);
+static void doban(struct chanset_t *, memberlist *);
 static char *quickban(struct chanset_t *, char *);
 static void got_op(struct chanset_t *chan, char *nick, char *from, char *who,
  		   struct userrec *opu, struct flag_record *opper);

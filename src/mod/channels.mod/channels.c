@@ -110,13 +110,17 @@ static void got_cset(char *botnick, char *code, char *par)
   char *chname = NULL;
   struct chanset_t *chan = NULL;
 
-  if (!par[0])
+  if (!par || !par[0])
    return;
   else {
    if (par[0] == '*' && par[1] == ' ') {
     all = 1;
     newsplit(&par);
    } else {
+    if (!strchr(CHANMETA, par[0])) {
+      putlog(LOG_ERROR, "*", "Got bad cset: bot: %s code: %s par: %s\n", botnick, code, par);
+      return;
+    }
     chname = newsplit(&par);
     if (!(chan = findchan_by_dname(chname)))
       return;

@@ -893,7 +893,9 @@ Context;
       strcat(buf, "*");
     strcat(buf, " ");
     strcat(buf, options);
-    putallbots(buf);
+    buf[strlen(buf)] = 0;
+    putlog(LOG_DEBUG, "*", "sending out cset: %s", buf);
+    putallbots(buf); 
     nfree(buf);
   }
   /* now set locally, hopefully it works */

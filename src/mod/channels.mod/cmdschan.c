@@ -1543,16 +1543,20 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
       dprintf(idx, "revenge-mode: %d\n", chan->revenge_mode);
     else
       dprintf(idx, "revenge-mode: 0\n");
-    if (chan->ban_time)
-      dprintf(idx, "ban-time: %d\n", chan->ban_time);
+    if (chan->closed_ban)
+      dprintf(idx, "closed-ban: %d", chan->closed_ban);
     else
-      dprintf(idx, "ban-time: 0\n");
+      dprintf(idx, "closed-ban: 0\n");
 /* Chanint template
  *  if (chan->temp)
  *   dprintf(idx, "temp: %d\n", chan->temp);
  * else
  *   dprintf(idx, temp: 0\n");
  */
+    if (chan->ban_time)
+      dprintf(idx, "ban-time: %d\n", chan->ban_time);
+    else
+      dprintf(idx, "ban-time: 0\n");
     if (chan->exempt_time)
       dprintf(idx, "exempt-time: %d\n", chan->exempt_time);
     else

@@ -38,6 +38,8 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
   Tcl_AppendElement(irp, s);
   simple_sprintf(s, "%d", chan->ban_time);
   Tcl_AppendElement(irp, s);
+  simple_sprintf(s, "%s", chan->closed_ban);
+  Tcl_AppendElement(irp, s);
 /* Chanint template 
  *simple_sprintf(s, "%s", chan->temp);
  *Tcl_AppendElement(irp, s);
@@ -195,6 +197,7 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
 /* Chanint template
  *else if (CHECK("temp"))	   simple_sprintf(s, "%s", chan->temp);
  */
+  else if (CHECK("closed-ban"))    simple_sprintf(s, "%d", chan->closed_ban);
   else if (CHECK("ban-time"))  	   simple_sprintf(s, "%d", chan->ban_time);
   else if (CHECK("exempt-time"))   simple_sprintf(s, "%d", chan->exempt_time);
   else if (CHECK("invite-time"))   simple_sprintf(s, "%d", chan->invite_time);
@@ -402,6 +405,14 @@ Context;
         return TCL_ERROR;
       }
       chan->invite_time = atoi(item[i]);
+    } else if (!strcmp(item[i], "closed-ban")) {
+      i++;
+      if (i >= items) {
+        if (irp)
+          Tcl_AppendResult(irp, "channel closed-ban needs argument", NULL);
+        return TCL_ERROR;
+      }
+      chan->closed_ban = atoi(item[i]);
 /* Chanint template
  *  } else if (!strcmp(item[i], "temp")) {
  *    i++;
@@ -920,9 +931,10 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
 
     /* Hells bells, why set *every* variable to 0 when we have bzero? */
     egg_bzero(chan, sizeof(struct chanset_t));
-
+    /* These are defaults, bzero already set them 0, but we set them for future reference */
     chan->limit_prot = 0;
     chan->limit = 0;
+    chan->closed_ban = 0;
 /* Chanint template
  *  chan->temp = 0;
  */
