@@ -4,6 +4,9 @@ srcdir = .
 depcomp = /bin/sh ../../../autotools/depcomp
 
 
+#This line is simple for configure to generate .deps/
+OBJS = irc.o
+
 doofus:
 	@echo ""
 	@echo "Let's try this from the right directory..."

@@ -88,6 +88,7 @@ distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h stamp.*
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan src/salt.h.tmp src/conf.h
+	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/
 
 
 distrib: clean clean-modconfig

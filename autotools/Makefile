@@ -1,5 +1,17 @@
 
-all: clean autoconf autoheader clean_again
+all: clean aclocal autoheader autoconf clean_again
+
+
+aclocal:
+	@rm -rf aclocal.m4
+	aclocal-1.6 -I includes/
+
+autoheader:
+	@rm -rf ../config.h.in
+	@echo "Autoheader..."
+	@autoheader
+	@mv -f config.h.in ../config.h.in
+	@ls -al ../config.h.in
 
 autoconf: 
 	@rm -rf ../configure
@@ -14,17 +26,10 @@ autoconf:
 	@chmod 700 ../configure
 	@ls -al ../configure
 
-autoheader:
-	@rm -rf ../config.h.in
-	@echo "Autoheader..."
-	@autoheader
-	@mv -f config.h.in ../config.h.in
-	@ls -al ../config.h.in
-
 clean:
 	@echo "Cleaning..."
-	@rm -rf autom4te.cache/ configure config.h.in
+	@rm -rf autom4te.cache/ configure config.h.in aclocal.m4
 
 clean_again:
 	@echo "Cleaning..."
-	@rm -rf autom4te.cache/ configure config.h.in
+	@rm -rf autom4te.cache/ configure config.h.in aclocal.m4

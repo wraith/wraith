@@ -14,7 +14,13 @@ STRIP = @STRIP@
 CFLAGS = @CFLAGS@ -I../.. -I$(top_srcdir) -I$(top_srcdir)/src @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 
-OBJS = inet_aton.o inet_ntop.o snprintf.o memset.o memcpy.o strcasecmp.o strftime.o
+OBJS = inet_aton.o \
+	inet_ntop.o \
+	snprintf.o \
+	memset.o \
+	memcpy.o \
+	strcasecmp.o \
+	strftime.o
 
 doofus:
 	@echo ""

@@ -3,6 +3,8 @@
 srcdir = .
 depcomp = /bin/sh ../../../autotools/depcomp
 
+#This line is simple for configure to generate .deps/
+OBJS = transfer.o
 
 doofus:
 	@echo ""

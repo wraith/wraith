@@ -14,35 +14,35 @@ STRIP = @STRIP@
 CFLAGS = @CFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 
-eggdrop_objs 		= auth.o \
-			bg.o \
-			botcmd.o \
-			botmsg.o \
-			botnet.o \
-			chanprog.o \
-			cmds.o \
-			config.o \
-			core_binds.o \
-			crypt.o \
-			dcc.o \
-			dccutil.o \
-			debug.o \
-			dns.o \
-			egg_timer.o \
-			flags.o \
-			main.o \
-			mem.o \
-			misc.o \
-			misc_file.o \
-			modules.o \
-			net.o \
-			rfc1459.o \
-			settings.o \
-			tcl.o \
-			tclhash.o \
-			userent.o \
-			userrec.o \
-			users.o
+OBJS = auth.o \
+	bg.o \
+	botcmd.o \
+	botmsg.o \
+	botnet.o \
+	chanprog.o \
+	cmds.o \
+	config.o \
+	core_binds.o \
+	crypt.o \
+	dcc.o \
+	dccutil.o \
+	debug.o \
+	dns.o \
+	egg_timer.o \
+	flags.o \
+	main.o \
+	mem.o \
+	misc.o \
+	misc_file.o \
+	modules.o \
+	net.o \
+	rfc1459.o \
+	settings.o \
+	tcl.o \
+	tclhash.o \
+	userent.o \
+	userrec.o \
+	users.o
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
 
@@ -71,12 +71,12 @@ stringfix: stringfix.c main.h ../config.h ../pack/pack.cfg eggdrop.h
 	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
 	@$(STRIP) stringfix
 
-../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compatability
+../$(EGGEXEC): build_msg $(OBJS) $(XREQS) compatability
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
 	@touch mod/mod.xlibs
-	@$(LD) -o ../$(EGGEXEC) $(eggdrop_objs) $(MODOBJS) $(XLIBS) compat/*.o `cat mod/mod.xlibs`
+	@$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(XLIBS) compat/*.o `cat mod/mod.xlibs`
 	@$(STRIP) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
 	@echo ""
