@@ -59,17 +59,6 @@ int def_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-int def_pack(struct userrec *u, struct user_entry *e)
-{
-  char *tmp = NULL;
-
-  tmp = e->u.string;
-  e->u.list = calloc(1, sizeof(struct list_type));
-  e->u.list->next = NULL;
-  e->u.list->extra = tmp;
-  return 1;
-}
-
 int def_kill(struct user_entry *e)
 {
   free(e->u.string);
@@ -77,12 +66,14 @@ int def_kill(struct user_entry *e)
   return 1;
 }
 
+#ifdef HUB
 int def_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 {
   if (lfprintf(f, "--%s %s\n", e->type->name, e->u.string) == EOF)
     return 0;
   return 1;
 }
+#endif /* HUB */
 
 void *def_get(struct userrec *u, struct user_entry *e)
 {
@@ -156,8 +147,9 @@ struct user_entry_type USERENTRY_COMMENT =
   def_gotshare,
   def_dupuser,
   def_unpack,
-  def_pack,
+#ifdef HUB
   def_write_userfile,
+#endif /* HUB */
   def_kill,
   def_get,
   def_set,
@@ -171,8 +163,9 @@ struct user_entry_type USERENTRY_INFO =
   def_gotshare,
   def_dupuser,
   def_unpack,
-  def_pack,
+#ifdef HUB
   def_write_userfile,
+#endif /* HUB */
   def_kill,
   def_get,
   def_set,
@@ -210,8 +203,9 @@ struct user_entry_type USERENTRY_ADDED = {
   def_gotshare,
   def_dupuser,
   def_unpack,
-  def_pack,
+#ifdef HUB
   def_write_userfile,
+#endif /* HUB */
   def_kill,
   def_get,
   def_set,
@@ -283,28 +277,6 @@ int config_unpack(struct userrec *u, struct user_entry *e)
     curr = curr->next;
   }
   list_type_kill(head);
-  return 1;
-}
-
-int config_pack(struct userrec *u, struct user_entry *e)
-{
-  struct list_type *t = NULL;
-  struct xtra_key *curr = NULL, *next = NULL;
-
-  curr = e->u.extra;
-  e->u.list = NULL;
-  while (curr) {
-    t = calloc(1, sizeof(struct list_type));
-
-    t->extra = calloc(1, strlen(curr->key) + strlen(curr->data) + 4);
-    sprintf(t->extra, "%s %s", curr->key, curr->data);
-    list_insert((&e->u.list), t);
-    next = curr->next;
-    free(curr->key);
-    free(curr->data);
-    free(curr);
-    curr = next;
-  }
   return 1;
 }
 
@@ -383,6 +355,7 @@ int config_dupuser(struct userrec *new, struct userrec *old, struct user_entry *
   return 1;
 }
 
+#ifdef HUB
 int config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
 {
   struct xtra_key *x = NULL;
@@ -391,6 +364,7 @@ int config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
     lfprintf(f, "--CONFIG %s %s\n", x->key, x->data);
   return 1;
 }
+#endif /* HUB */
 
 int config_kill(struct user_entry *e)
 {
@@ -411,8 +385,9 @@ struct user_entry_type USERENTRY_CONFIG = {
   config_gotshare,
   config_dupuser,
   config_unpack,
-  config_pack,
+#ifdef HUB
   config_write_userfile,
+#endif /* HUB */
   config_kill,
   def_get,
   config_set,
@@ -464,8 +439,9 @@ struct user_entry_type USERENTRY_STATS = {
   def_gotshare,
   def_dupuser,
   def_unpack,
-  def_pack,
+#ifdef HUB
   def_write_userfile,
+#endif /* HUB */
   def_kill,
   def_get,
   def_set,
@@ -510,8 +486,9 @@ struct user_entry_type USERENTRY_MODIFIED =
   def_gotshare,
   def_dupuser,
   def_unpack,
-  def_pack,
+#ifdef HUB
   def_write_userfile,
+#endif /* HUB */
   def_kill,
   def_get,
   def_set,
@@ -553,14 +530,15 @@ struct user_entry_type USERENTRY_PASS =
 {
   0,
   def_gotshare,
-  0,
+  NULL,
   def_unpack,
-  def_pack,
+#ifdef HUB
   def_write_userfile,
+#endif /* HUB */
   def_kill,
   def_get,
   pass_set,
-  0,
+  NULL,
   "PASS"
 };
 
@@ -590,8 +568,9 @@ struct user_entry_type USERENTRY_SECPASS =
   def_gotshare,
   def_dupuser,
   def_unpack,
-  def_pack,
+#ifdef HUB
   def_write_userfile,
+#endif /* HUB */
   def_kill,
   def_get,
   def_set,
@@ -616,24 +595,7 @@ static int laston_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static int laston_pack(struct userrec *u, struct user_entry *e)
-{
-  char work[1024] = "";
-  struct laston_info *li = NULL;
-  int l;
-
-  li = (struct laston_info *) e->u.extra;
-  l = sprintf(work, "%lu %s", li->laston, li->lastonplace);
-  e->u.list = calloc(1, sizeof(struct list_type));
-  e->u.list->next = NULL;
-  e->u.list->extra = calloc(1, l + 1);
-  strcpy(e->u.list->extra, work);
-  
-  free(li->lastonplace);
-  free(li);
-  return 1;
-}
-
+#ifdef HUB
 static int laston_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 {
   struct laston_info *li = (struct laston_info *) e->u.extra;
@@ -643,6 +605,7 @@ static int laston_write_userfile(FILE * f, struct userrec *u, struct user_entry 
     return 0;
   return 1;
 }
+#endif /* HUB */
 
 static int laston_kill(struct user_entry *e)
 {
@@ -689,8 +652,9 @@ struct user_entry_type USERENTRY_LASTON =
   0,
   laston_dupuser,
   laston_unpack,
-  laston_pack,
+#ifdef HUB
   laston_write_userfile,
+#endif /* HUB */
   laston_kill,
   def_get,
   laston_set,
@@ -747,27 +711,6 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
 
 }
 
-static int botaddr_pack(struct userrec *u, struct user_entry *e)
-{
-  char work[1024] = "";
-  struct bot_addr *bi = NULL;
-  size_t len;
-
-  Assert(e);
-  Assert(!e->name);
-  bi = (struct bot_addr *) e->u.extra;
-  len = simple_sprintf(work, "%s:%u/%u:%u:%s", bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
-  e->u.list = calloc(1, sizeof(struct list_type));
-
-  e->u.list->next = NULL;
-  e->u.list->extra = calloc(1, len + 1);
-  strcpy(e->u.list->extra, work);
-  free(bi->address);
-  free(bi->uplink);
-  free(bi);
-  return 1;
-}
-
 static int botaddr_kill(struct user_entry *e)
 {
   free(((struct bot_addr *) (e->u.extra))->address);
@@ -777,6 +720,7 @@ static int botaddr_kill(struct user_entry *e)
   return 1;
 }
 
+#ifdef HUB
 static int botaddr_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
@@ -786,6 +730,7 @@ static int botaddr_write_userfile(FILE *f, struct userrec *u, struct user_entry 
     return 0;
   return 1;
 }
+#endif /* HUB */
 
 static int botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
 {
@@ -882,8 +827,9 @@ struct user_entry_type USERENTRY_BOTADDR =
   botaddr_gotshare,
   botaddr_dupuser,
   botaddr_unpack,
-  botaddr_pack,
+#ifdef HUB
   botaddr_write_userfile,
+#endif /* HUB */
   botaddr_kill,
   def_get,
   botaddr_set,
@@ -905,6 +851,7 @@ static int hosts_null(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
+#ifdef HUB
 static int hosts_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
 {
   struct list_type *h = NULL;
@@ -914,6 +861,7 @@ static int hosts_write_userfile(FILE *f, struct userrec *u, struct user_entry *e
       return 0;
   return 1;
 }
+#endif /* HUB */
 
 static int hosts_kill(struct user_entry *e)
 {
@@ -1011,8 +959,9 @@ struct user_entry_type USERENTRY_HOSTS =
   hosts_gotshare,
   hosts_dupuser,
   hosts_null,
-  hosts_null,
+#ifdef HUB
   hosts_write_userfile,
+#endif /* HUB */
   hosts_kill,
   def_get,
   hosts_set,
@@ -1062,22 +1011,6 @@ int add_entry_type(struct user_entry_type *type)
     }
   }
   return 1;
-}
-
-int del_entry_type(struct user_entry_type *type)
-{
-  struct userrec *u = NULL;
-
-  for (u = userlist; u; u = u->next) {
-    struct user_entry *e = find_user_entry(type, u);
-
-    if (e && !e->name) {
-      e->type->pack(u, e);
-      e->name = strdup(e->type->name);
-      e->type = NULL;
-    }
-  }
-  return list_delete((struct list_type **) &entry_type_list, (struct list_type *) type);
 }
 
 struct user_entry_type *find_entry_type(char *name)

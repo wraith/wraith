@@ -39,8 +39,9 @@ static struct user_entry_type USERENTRY_FWD =
   NULL,
   NULL,
   NULL,
+#ifdef HUB
   NULL,
-  NULL,
+#endif /* HUB */
   NULL,
   NULL,
   NULL,

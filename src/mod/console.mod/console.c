@@ -61,29 +61,6 @@ static int console_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static int console_pack(struct userrec *u, struct user_entry *e)
-{
-  char work[1024] = "";
-  struct console_info *ci = NULL;
-  size_t len;
-
-  ci = (struct console_info *) e->u.extra;
-
-  len = simple_sprintf(work, "%s %s %s %d %d %d %d",
-		     ci->channel, masktype(ci->conflags),
-		     stripmasktype(ci->stripflags), ci->echoflags,
-		     ci->page, ci->conchan, ci->colour);
-
-  e->u.list = calloc(1, sizeof(struct list_type));
-  e->u.list->next = NULL;
-  e->u.list->extra = calloc(1, len + 1);
-  strcpy(e->u.list->extra, work);
-
-  free(ci->channel);
-  free(ci);
-  return 1;
-}
-
 static int console_kill(struct user_entry *e)
 {
   struct console_info *i = e->u.extra;
@@ -94,6 +71,7 @@ static int console_kill(struct user_entry *e)
   return 1;
 }
 
+#ifdef HUB
 static int console_write_userfile(FILE *f, struct userrec *u,
 				  struct user_entry *e)
 {
@@ -106,6 +84,7 @@ static int console_write_userfile(FILE *f, struct userrec *u,
     return 0;
   return 1;
 }
+#endif /* HUB */
 
 static int console_set(struct userrec *u, struct user_entry *e, void *buf)
 {
@@ -227,8 +206,9 @@ static struct user_entry_type USERENTRY_CONSOLE =
   console_gotshare,
   console_dupuser,
   console_unpack,
-  console_pack,
+#ifdef HUB
   console_write_userfile,
+#endif /* HUB */
   console_kill,
   NULL,
   console_set,

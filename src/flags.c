@@ -460,25 +460,13 @@ static int botfl_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static int botfl_pack(struct userrec *u, struct user_entry *e)
-{
-  char x[100] = "";
-  struct flag_record fr = {FR_BOT, 0, 0, 0};
-
-  fr.bot = e->u.ulong;
-  e->u.list = calloc(1, sizeof(struct list_type));
-  e->u.list->next = NULL;
-  e->u.list->extra = calloc(1, build_flags (x, &fr, NULL) + 1);
-  strcpy(e->u.list->extra, x);
-  return 1;
-}
-
 static int botfl_kill(struct user_entry *e)
 {
   free(e);
   return 1;
 }
 
+#ifdef HUB
 static int botfl_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
 {
   char x[100] = "";
@@ -490,6 +478,7 @@ static int botfl_write_userfile(FILE *f, struct userrec *u, struct user_entry *e
     return 0;
   return 1;
 }
+#endif /* HUB */
 
 static int botfl_set(struct userrec *u, struct user_entry *e, void *buf)
 {
@@ -519,8 +508,9 @@ struct user_entry_type USERENTRY_BOTFL =
   0,
   def_dupuser,
   botfl_unpack,
-  botfl_pack,
+#ifdef HUB
   botfl_write_userfile,
+#endif /* HUB */
   botfl_kill,
   def_get,
   botfl_set,

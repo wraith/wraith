@@ -55,6 +55,7 @@ static void cancel_user_xfer(int, void *);
  *   Sup's delay code
  */
 
+#ifdef LEAF
 static void
 add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
 {
@@ -107,6 +108,7 @@ check_delay()
     }
   }
 }
+#endif /* LEAF */
 
 /*
  *   Botnet commands
@@ -554,16 +556,18 @@ share_chchinfo(int idx, char *par)
 static void
 share_mns_ban(int idx, char *par)
 {
-  struct chanset_t *chan = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(NULL, idx, "-b %s\n", par);
     putlog(LOG_CMDS, "@", "%s: cancel ban %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('b', NULL, par, 1) > 0) {
+#ifdef LEAF
+      struct chanset_t *chan = NULL;
+
       for (chan = chanset; chan; chan = chan->next)
         add_delay(chan, '-', 'b', par);
+#endif /* LEAF */
     }
     noshare = 0;
   }
@@ -572,16 +576,18 @@ share_mns_ban(int idx, char *par)
 static void
 share_mns_exempt(int idx, char *par)
 {
-  struct chanset_t *chan = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(NULL, idx, "-e %s\n", par);
     putlog(LOG_CMDS, "@", "%s: cancel exempt %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('e', NULL, par, 1) > 0) {
+#ifdef LEAF
+      struct chanset_t *chan = NULL;
+
       for (chan = chanset; chan; chan = chan->next)
         add_delay(chan, '-', 'e', par);
+#endif /* LEAF */
     }
     noshare = 0;
   }
@@ -590,16 +596,18 @@ share_mns_exempt(int idx, char *par)
 static void
 share_mns_invite(int idx, char *par)
 {
-  struct chanset_t *chan = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(NULL, idx, "-inv %s\n", par);
     putlog(LOG_CMDS, "@", "%s: cancel invite %s", dcc[idx].nick, par);
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('I', NULL, par, 1) > 0) {
+#ifdef LEAF
+      struct chanset_t *chan = NULL;
+
       for (chan = chanset; chan; chan = chan->next)
         add_delay(chan, '-', 'I', par);
+#endif /* LEAF */
     }
     noshare = 0;
   }
@@ -621,7 +629,10 @@ share_mns_banchan(int idx, char *par)
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('b', chan, par, 1) > 0)
-      add_delay(chan, '-', 'b', par);
+#ifdef LEAF
+      add_delay(chan, '-', 'b', par)
+#endif /* LEAF */
+                  ;
     noshare = 0;
   }
 }
@@ -642,7 +653,10 @@ share_mns_exemptchan(int idx, char *par)
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('e', chan, par, 1) > 0)
-      add_delay(chan, '-', 'e', par);
+#ifdef LEAF
+      add_delay(chan, '-', 'e', par)
+#endif /* LEAF */
+                     ;
     noshare = 0;
   }
 }
@@ -663,7 +677,10 @@ share_mns_invitechan(int idx, char *par)
     str_unescape(par, '\\');
     noshare = 1;
     if (u_delmask('I', chan, par, 1) > 0)
-      add_delay(chan, '-', 'I', par);
+#ifdef LEAF
+      add_delay(chan, '-', 'I', par)
+#endif /* LEAF */
+                     ;
     noshare = 0;
   }
 }
@@ -1073,18 +1090,11 @@ share_endstartup(int idx, char *par)
 static void
 share_end(int idx, char *par)
 {
-  putlog(LOG_BOTS, "@", "Ending sharing with %s (%s).", dcc[idx].nick, par);
+  putlog(LOG_BOTS, "*", "Ending sharing with %s (%s).", dcc[idx].nick, par);
   cancel_user_xfer(-idx, 0);
   dcc[idx].status &= ~(STAT_SHARE | STAT_GETTING | STAT_SENDING | STAT_OFFERED | STAT_AGGRESSIVE);
   dcc[idx].u.bot->uff_flags = 0;
 }
-
-/* FIXME: REMOVE THE FEATS CRAP AFTER EVERYONE UPGRADE TO 1.1.6 */
-static void
-share_feats(int idx, char *par)
-{
-}
-
 
 /* Note: these MUST be sorted. */
 static botcmd_t C_share[] = {
@@ -1112,7 +1122,6 @@ static botcmd_t C_share[] = {
   {"c", (Function) share_change},
   {"chchinfo", (Function) share_chchinfo},
   {"e", (Function) share_end},
-  {"feats", (Function) share_feats},
   {"h", (Function) share_chhand},
   {"k", (Function) share_killuser},
   {"n", (Function) share_newuser},
@@ -1200,6 +1209,7 @@ shareout_but(struct chanset_t *chan, ...)
   va_end(va);
 }
 
+#ifdef HUB
 /* Flush all tbufs older than 15 minutes.
  */
 static void
@@ -1227,7 +1237,6 @@ check_expired_tbufs()
   }
 }
 
-#ifdef HUB
 static int
 write_tmp_userfile(char *fn, struct userrec *bu, int idx)
 {
@@ -1589,7 +1598,7 @@ cancel_user_xfer(int idx, void *x)
         unlink(dcc[j].u.xfer->filename);
         lostdcc(j);
       }
-      putlog(LOG_BOTS, "@", "(Userlist download aborted.)");
+      putlog(LOG_BOTS, "*", "(Userlist download aborted.)");
     }
     if (dcc[idx].status & STAT_SENDING) {
       j = 0;
@@ -1602,7 +1611,7 @@ cancel_user_xfer(int idx, void *x)
         unlink(dcc[j].u.xfer->filename);
         lostdcc(j);
       }
-      putlog(LOG_BOTS, "@", "(Userlist transmit aborted.)");
+      putlog(LOG_BOTS, "*", "(Userlist transmit aborted.)");
     }
   }
   if (!k)
@@ -1656,8 +1665,12 @@ share_report(int idx, int details)
 void
 share_init()
 {
+#ifdef HUB
   timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
+#endif /* HUB */
+#ifdef LEAF
   timer_create_secs(1, "check_delay", (Function) check_delay);
+#endif /* LEAF */
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
 }
