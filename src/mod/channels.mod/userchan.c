@@ -263,7 +263,9 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
 	free(mask);
       }
     }
-    free((*u)->mask);
+    if (lastdeletedmask)
+      free(lastdeletedmask);
+    lastdeletedmask = (*u)->mask;
     if ((*u)->desc)
       free((*u)->desc);
     if ((*u)->user)

@@ -44,6 +44,7 @@ static int 			global_invite_time;
 
 /* Global channel settings (drummer/dw) */
 char 				glob_chanset[512] = "", cfg_glob_chanset[512] = "";
+static char *lastdeletedmask = NULL;
 
 /* Global flood settings */
 static int 			gfld_chan_thr;
@@ -911,6 +912,7 @@ void channels_init()
   gfld_ctcp_thr = 0;
   gfld_ctcp_time = 0;
   global_idle_kick = 0;
+  lastdeletedmask = 0;
   use_info = 1;
   strcpy(glob_chanmode, "nt");
   udef = NULL;

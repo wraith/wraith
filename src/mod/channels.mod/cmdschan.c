@@ -175,8 +175,8 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
 {
   int i = 0, j;
   struct chanset_t *chan = NULL;
-  char s[UHOSTLEN], *who, *chname, *cmd;
-  masklist *m;
+  char s[UHOSTLEN] = "", *who = NULL, *chname = NULL, *cmd = NULL, *mask = NULL;
+  masklist *m = NULL;
 
   cmd = type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite";
   if (!par[0]) {
@@ -203,11 +203,15 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
   strncpyz(s, who, sizeof s);
   i = u_delmask(type, NULL, s, (u->flags & USER_MASTER));
   if (i > 0) {
-    putlog(LOG_CMDS, "*", "#%s# -%s %s", dcc[idx].nick, cmd, s);
+    if (lastdeletedmask)
+      mask = lastdeletedmask;
+    else
+      mask = s;
+    putlog(LOG_CMDS, "*", "#%s# -%s %s", dcc[idx].nick, cmd, mask);
     dprintf(idx, "%s %s: %s\n", "Removed", cmd, s);
 #ifdef LEAF
     for (chan = chanset; chan != NULL; chan = chan->next)
-      add_mode(chan, '-', type, s);
+      add_mode(chan, '-', type, mask);
 #endif /* LEAF */
     return;
   }
@@ -216,14 +220,18 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
     chan = findchan_by_dname(chname);
   if (chan) {
     m = type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite;
-    if (atoi(who) > 0) {
-      egg_snprintf(s, sizeof s, "%d", -i);
+    if ((i = atoi(who)) > 0) {
+      egg_snprintf(s, sizeof s, "%d", i);
       j = u_delmask(type, chan, s, 1);
       if (j > 0) {
-	putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s", dcc[idx].nick, chan->dname, cmd, s);
-	dprintf(idx, "Removed %1$s channel %2$s: %3$s\n", chan->dname, cmd, s);
+        if (lastdeletedmask)
+          mask = lastdeletedmask;
+        else
+          mask = s;
+	putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s", dcc[idx].nick, chan->dname, cmd, mask);
+	dprintf(idx, "Removed %1$s channel %2$s: %3$s\n", chan->dname, cmd, mask);
 #ifdef LEAF
-	add_mode(chan, '-', type, s);
+	add_mode(chan, '-', type, mask);
 #endif  /* LEAF */
 	return;
       }
@@ -954,13 +962,15 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
     return;
   } else if ((chan = findchan(chname))) {
     putallbots(buf);
-    /* This prevents someone adding a channel by it's unique server
-     * name <cybah>
-     */
     dprintf(idx, "That channel already exists as %s!\n", chan->dname);
     return;
+  } else if (strchr(CHANMETA, chname[0]) == NULL) {
+    dprintf(idx, "Invalid channel prefix.\n");
+    return;
+  } else if (strchr(chname, ',') != NULL) {
+    dprintf(idx, "Invalid channel name.\n");
+    return;
   }
-
   if (channel_add(result, chname, par) == ERROR) {
     dprintf(idx, "Invalid channel or channel options.\n");
     if (result && result[0])
