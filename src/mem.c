@@ -46,6 +46,8 @@ int expmem_tclhash();
 int expmem_tclmisc();
 int expmem_net();
 int expmem_modules();
+int expmem_config();
+int expmem_auth();
 int expmem_language() 
 {
   return 0;
@@ -103,7 +105,7 @@ void tell_mem_status_dcc(int idx)
 void debug_mem_to_dcc(int idx)
 {
 #ifdef DEBUG_MEM
-#define MAX_MEM 13
+#define MAX_MEM 15
   unsigned long exp[MAX_MEM], use[MAX_MEM], l;
   int i, j;
   char fn[20], sofar[81];
@@ -123,6 +125,8 @@ void debug_mem_to_dcc(int idx)
   exp[10] = expmem_modules(1);
   exp[11] = expmem_tcldcc();
   exp[12] = expmem_dns();
+  exp[13] = expmem_config();
+  exp[14] = expmem_auth();
   for (me = module_list; me; me = me->next)
     me->mem_work = 0;
   for (i = 0; i < MAX_MEM; i++)
@@ -159,6 +163,10 @@ void debug_mem_to_dcc(int idx)
       use[11] += l;
     else if (!strcmp(fn, "xdns.c"))
       use[12] += l;
+    else if (!strcmp(fn, "xconfig.c"))
+      use[13] += l;
+    else if (!strcmp(fn, "xauth.c"))
+      use[14] += l;
     else if (p) {
       for (me = module_list; me; me = me->next)
 	if (!strcmp(fn, me->name))
@@ -206,6 +214,12 @@ void debug_mem_to_dcc(int idx)
       break;
     case 12:
       strcpy(fn, "xdns.c");
+      break;
+    case 13:
+      strcpy(fn, "xconfig.c");
+      break;
+    case 14:
+      strcpy(fn, "xauth.c");
       break;
     }
     if (use[i] == exp[i]) {

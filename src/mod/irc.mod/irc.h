@@ -29,7 +29,9 @@ static void check_tcl_signtopcnick(char *, char *, struct userrec *u, char *,
 				   char *, p_tcl_bind_list);
 static void check_tcl_pubm(char *, char *, char *, char *);
 static int check_tcl_pub(char *, char *, char *, char *);
+#ifdef S_AUTH
 static int check_tcl_pubc(char *, char *, char *, struct userrec *, char *, char *);
+#endif /* S_AUTH */
 static void makeopline(struct chanset_t *, char *, char *);
 static int me_op(struct chanset_t *);
 static int me_voice(struct chanset_t *);

@@ -59,7 +59,9 @@
 #define curserv (*(int *)(server_funcs[40))
 #define cursrvname ((char *)(server_funcs[41]))
 #define botrealname ((char *)(server_funcs[42]))
+#ifdef S_AUTH
 #define H_msgc (*(p_tcl_bind_list *)(server_funcs[43]))
+#endif /* S_AUTH */
 
 #else		/* MAKING_SERVER */
 

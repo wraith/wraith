@@ -273,7 +273,7 @@ int config_set(struct userrec *u, struct user_entry *e, void *buf)
    *new = buf;
 
   for (curr = e->u.extra; curr; curr = curr->next) {
-    if (curr->key && !strcasecmp(curr->key, new->key)) {
+    if (curr->key && !egg_strcasecmp(curr->key, new->key)) {
       old = curr;
       break;
     }

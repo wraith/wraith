@@ -94,6 +94,7 @@ static int check_tcl_msg(char *cmd, char *nick, char *uhost,
   return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
 }
 
+#ifdef S_AUTH
 static int check_tcl_msgc(char *cmd, char *nick, char *uhost,
                          struct userrec *u, char *args)
 {
@@ -114,7 +115,7 @@ static int check_tcl_msgc(char *cmd, char *nick, char *uhost,
            cmd, args);
   return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
 }
-
+#endif /* S_AUTH */
 
 static void check_tcl_notc(char *nick, char *uhost, struct userrec *u,
 	       		   char *dest, char *arg)
@@ -346,8 +347,10 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
   if (atr & (USER_BOT))
     return 0;
 
+#ifdef S_AUTH
   if (isauthed(floodhost) > -1) 
     return 0;
+#endif /* S_AUTH */
 
   /* Determine how many are necessary to make a flood */
   switch (which) {
@@ -430,7 +433,10 @@ static int gotmsg(char *from, char *msg)
   char *to, buf[UHOSTLEN], *nick, ctcpbuf[512], *uhost = buf, *ctcp;
   char *p, *p1, *code;
   struct userrec *u;
-  int ctcp_count = 0, i;
+  int ctcp_count = 0;
+#ifdef S_AUTH
+  int i = 0;
+#endif /* S_AUTH */
   int ignoring = 0;
 
 
@@ -540,7 +546,7 @@ static int gotmsg(char *from, char *msg)
         last_ctcp = now;
       }
     }
-
+#ifdef S_AUTH
   if (msg[0]) {
     if ((to[0] == '$') || (strchr(to, '.') != NULL)) {
       /* Msg from oper */
@@ -579,6 +585,32 @@ Context;
       }
     }
   }
+#else /* easier to just put an entirely different block of code here */
+  if (msg[0]) {
+    if ((to[0] == '$') || (strchr(to, '.') != NULL)) {
+      /* Msg from oper */
+      if (!ignoring) {
+        detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
+        /* Do not interpret as command */
+        putlog(LOG_MSGS | LOG_SERV, "*", "[%s!%s to %s] %s",
+               nick, uhost, to, msg);
+      }
+    } else {
+      char *code;
+      struct userrec *u;
+
+      detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
+      u = get_user_by_host(from);
+      code = newsplit(&msg);
+      rmspace(msg);
+      if (!ignoring || trigger_on_ignore)
+        check_tcl_msgm(code, nick, uhost, u, msg);
+      if (!ignoring)
+        if (!check_tcl_msg(code, nick, uhost, u, msg))
+          putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
+    }
+  }
+#endif /* S_AUTH */
   return 0;
 }
 
@@ -1014,13 +1046,17 @@ static void disconnect_server(int idx)
 
 static void eof_server(int idx)
 {
-  int i = 0;
   putlog(LOG_SERV, "*", "%s %s", IRC_DISCONNECTED, dcc[idx].host);
+#ifdef S_AUTH
+{
+  int i = 0;
   if (ischanhub() && auth_total > 0) {
     putlog(LOG_DEBUG, "*", "Removing %d auth entries.", auth_total);
     for (i = 0; i < auth_total; i++)
       removeauth(i);  
   }
+}
+#endif /* S_AUTH */
   disconnect_server(idx);
   lostdcc(idx);
 }

@@ -21,7 +21,7 @@
 #ifdef S_ANTITRACE
 #include <sys/ptrace.h>
 #include <sys/wait.h>
-#endif
+#endif /* S_ANTITRACE */
 
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -31,7 +31,7 @@
 
 #ifdef HAVE_UNAME
 #  include <sys/utsname.h>
-#endif
+#endif /* HAVE_UNAME */
 #include "stat.h"
 #include "bg.h"
 
@@ -53,6 +53,8 @@ extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug,
                          localhub;
 extern time_t		 now;
 extern Tcl_Interp	*interp;
+extern struct cfg_entry			CFG_MOTD, CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST,
+					CFG_PROMISC, CFG_TRACE, CFG_HIJACK;
 
 void detected(int, char *);
 
@@ -61,449 +63,20 @@ int	 shtime = 1;		/* Whether or not to display the time
 int	 conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
 int	 debug_output = 1;	/* Disply output to server to LOG_SERVEROUT */
 
-int auth_total = 0;
-int max_auth = 100;
-char authkey[121];		/* This is one of the keys used in the auth hash */
-char cmdprefix[1] = "+";	/* This is the prefix for msg/channel cmds */
-
-struct auth_t *auth = 0;
-
-
-struct cfg_entry CFG_MOTD = {
-  "motd", CFGF_GLOBAL, NULL, NULL,
-  NULL, NULL, NULL
-};
-
-void authkey_describe(struct cfg_entry * entry, int idx) {
-  dprintf(idx, STR("authkey is used for authing, give to your users if they are to use DCC chat or IRC cmds. (can be bot specific)\n"));
-}
-
-void authkey_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-  if (entry->ldata) {
-    strncpy0(authkey, (char *) entry->ldata, sizeof authkey);
-  } else if (entry->gdata) {
-    strncpy0(authkey, (char *) entry->gdata, sizeof authkey);
-  }
-}
-
-struct cfg_entry CFG_AUTHKEY = {
-  "authkey", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  authkey_changed, authkey_changed, authkey_describe
-};
-
-void cmdprefix_describe(struct cfg_entry *entry, int idx) {
-  dprintf(idx, STR("cmdprefix is the prefix used for msg cmds, ie: !op or .op\n"));
-}
-
-void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-  if (entry->ldata) {
-    strncpy0(cmdprefix, (char *) entry->ldata, sizeof cmdprefix);
-  } else if (entry->gdata) {
-    strncpy0(cmdprefix, (char *) entry->gdata, sizeof cmdprefix);
-  }
-}
-
-struct cfg_entry CFG_CMDPREFIX = {
-  "cmdprefix", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  cmdprefix_changed, cmdprefix_changed, cmdprefix_describe
-};
-
-void misc_describe(struct cfg_entry *cfgent, int idx)
-{
-  int i = 0;
-
-  if (!strcmp(cfgent->name, STR("fork-interval"))) {
-    dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
-    i = 1;
-#ifdef S_LASTCHECK
-  } else if (!strcmp(cfgent->name, STR("login"))) {
-    dprintf(idx, STR("login sets how to handle someone logging in to the shell\n"));
-#endif /* S_LASTCHECK */
-#ifdef S_ANTITRACE
-  } else if (!strcmp(cfgent->name, STR("trace"))) {
-    dprintf(idx, STR("trace sets how to handle someone tracing/debugging the bot\n"));
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
-  } else if (!strcmp(cfgent->name, STR("promisc"))) {
-    dprintf(idx, STR("promisc sets how to handle when a interface is set to promiscuous mode\n"));
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
-  } else if (!strcmp(cfgent->name, STR("bad-process"))) {
-    dprintf(idx, STR("bad-process sets how to handle when a running process not listed in process-list is detected\n"));
-  } else if (!strcmp(cfgent->name, STR("process-list"))) {
-    dprintf(idx, STR("process-list is a comma-separated list of \"expected processes\" running on the bots uid\n"));
-    i = 1;
-#endif /* S_PROCESSCHECK */
-#ifdef S_HIJACKCHECK
-  } else if (!strcmp(cfgent->name, STR("hijack"))) {
-    dprintf(idx, STR("hijack sets how to handle when a commonly used hijack method attempt is detected. (recommended: die)\n"));
-#endif /* S_HIJACKCHECK */
-  }
-  if (!i)
-    dprintf(idx, STR("Valid settings are: nocheck, ignore, warn, die, reject, suicide\n"));
-}
-
-void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
-  if (!cfgent->ldata)
-    return;
-  if (atoi(cfgent->ldata)<=0)
-    *valid=0;
-}
-
-void fork_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
-  if (!cfgent->gdata)
-    return;
-  if (atoi(cfgent->gdata)<=0)
-    *valid=0;
-}
-
-void fork_describe(struct cfg_entry * cfgent, int idx) {
-  dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
-}
-
-struct cfg_entry CFG_FORKINTERVAL = {
-  "fork-interval", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  fork_gchanged, fork_lchanged, fork_describe
-};
-
-void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
-  char * p = cfgent->ldata;
-  if (!p)
-    *valid=1;
-  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
-           && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
-    *valid=0;
-}
-
-void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
-  char * p = (char *) cfgent->ldata;
-  if (!p)
-    *valid=1;
-  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
-           && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
-    *valid=0;
-}
-
-#ifdef S_LASTCHECK
-struct cfg_entry CFG_LOGIN = {
-  "login", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  detect_gchanged, detect_lchanged, misc_describe
-};
-#endif /* S_LASTCHECK */
-#ifdef S_HIJACKCHECK
-struct cfg_entry CFG_HIJACK = {
-  "hijack", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  detect_gchanged, detect_lchanged, misc_describe
-};
-#endif /* S_HIJACKCHECK */
-#ifdef S_ANTITRACE
-struct cfg_entry CFG_TRACE = {
-  "trace", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  detect_gchanged, detect_lchanged, misc_describe
-};
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
-struct cfg_entry CFG_PROMISC = {
-  "promisc", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  detect_gchanged, detect_lchanged, misc_describe
-};
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
-struct cfg_entry CFG_BADPROCESS = {
-  "bad-process", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  detect_gchanged, detect_lchanged, misc_describe
-};
-
-struct cfg_entry CFG_PROCESSLIST = {
-  "process-list", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  NULL, NULL, misc_describe
-};
-#endif /* S_PROCESSCHECK */
-
-#ifdef S_DCCPASS
-struct cmd_pass *cmdpass = NULL;
-#endif
-/* unixware has no strcasecmp() without linking in a hefty library */
-#define upcase(c) (((c)>='a' && (c)<='z') ? (c)-'a'+'A' : (c))
-
-#if !HAVE_STRCASECMP
-#define strcasecmp strcasecmp2
-#endif
-
-int strcasecmp2(char *s1, char *s2)
-{
-  while ((*s1) && (*s2) && (upcase(*s1) == upcase(*s2))) {
-    s1++;
-    s2++;
-  }
-  return upcase(*s1) - upcase(*s2);
-}
-
-/* this is cfg shit from servers/irc/ctcp because hub doesnt load
- * these mods */
-#ifdef HUB
-void servers_describe(struct cfg_entry * entry, int idx) {
-  dprintf(idx, STR("servers is a comma-separated list of servers the bot will use\n"));
-}
-void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-}
-void servers6_describe(struct cfg_entry * entry, int idx) {
-  dprintf(idx, STR("servers6 is a comma-separated list of servers the bot will use (FOR IPv6)\n"));
-}
-void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-}
-void nick_describe(struct cfg_entry * entry, int idx) {
-  dprintf(idx, STR("nick is the bots preferred nick when connecting/using .resetnick\n"));
-}
-void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-}
-void realname_describe(struct cfg_entry * entry, int idx) {
-  dprintf(idx, STR("realname is the bots \"real name\" when connecting\n"));
-}
-
-void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-}
-struct cfg_entry CFG_SERVERS = {
-  "servers", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  servers_changed, servers_changed, servers_describe
-};
-struct cfg_entry CFG_SERVERS6 = {
-  "servers6", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  servers6_changed, servers6_changed, servers6_describe
-};
-
-struct cfg_entry CFG_NICK = {
-  "nick", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  nick_changed, nick_changed, nick_describe
-};
-
-struct cfg_entry CFG_REALNAME = {
-  "realname", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  realname_changed, realname_changed, realname_describe
-};
-
-void getin_describe(struct cfg_entry *cfgent, int idx)
-{
-  if (!strcmp(cfgent->name, STR("op-bots")))
-    dprintf(idx, STR("op-bots is number of bots to ask every time a oprequest is to be made\n"));
-  else if (!strcmp(cfgent->name, STR("in-bots")))
-    dprintf(idx, STR("in-bots is number of bots to ask every time a inrequest is to be made\n"));
-  else if (!strcmp(cfgent->name, STR("op-requests")))
-    dprintf(idx, STR("op-requests (requests:seconds) limits how often the bot will ask for ops\n"));
-  else if (!strcmp(cfgent->name, STR("lag-threshold")))
-    dprintf(idx, STR("lag-threshold is maximum acceptable server lag for the bot to send/honor requests\n"));
-  else if (!strcmp(cfgent->name, STR("op-time-slack")))
-    dprintf(idx, STR("op-time-slack is number of seconds a opcookies encoded time value can be off from the bots current time\n"));
-  else if (!strcmp(cfgent->name, STR("lock-threshold")))
-    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, lock all channels\n"));
-  else if (!strcmp(cfgent->name, STR("kill-threshold")))
-    dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
-  else if (!strcmp(cfgent->name, STR("fight-threshold")))
-    dprintf(idx, STR("When more than fight-threshold ops/deops/kicks/bans/unbans altogether have happened on a channel in one minute, the channel is locked\n"));
-  else {
-    dprintf(idx, STR("No description for %s ???\n"), cfgent->name);
-    putlog(LOG_ERRORS, "*", STR("getin_describe() called with unknown config entry %s"), cfgent->name);
-  }
-}
-
-void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
-{
-  int i;
-
-  if (!cfgent->gdata)
-    return;
-  *valid = 0;
-  if (!strcmp(cfgent->name, STR("op-requests"))) {
-    int L,
-      R;
-    char *value = cfgent->gdata;
-
-    L = atoi(value);
-    value = strchr(value, ':');
-    if (!value)
-      return;
-    value++;
-    R = atoi(value);
-    if ((R >= 60) || (R <= 3) || (L < 1) || (L > R))
-      return;
-    *valid = 1;
-    return;
-  }
-  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
-    int L,
-      R;
-    char *value = cfgent->gdata;
-
-    L = atoi(value);
-    value = strchr(value, ':');
-    if (!value)
-      return;
-    value++;
-    R = atoi(value);
-    if ((R >= 1000) || (R < 0) || (L < 0) || (L > 100))
-      return;
-    *valid = 1;
-    return;
-  }
-  i = atoi(cfgent->gdata);
-  if (!strcmp(cfgent->name, STR("op-bots"))) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, STR("invite-bots"))) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, STR("key-bots"))) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, STR("limit-bots"))) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, STR("unban-bots"))) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, STR("lag-threshold"))) {
-    if ((i < 3) || (i > 60))
-      return;
-  } else if (!strcmp(cfgent->name, STR("fight-threshold"))) {
-    if (i && ((i < 50) || (i > 1000)))
-      return;
-  } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
-    if ((i < 0) || (i >= 200))
-      return;
-  } else if (!strcmp(cfgent->name, STR("op-time-slack"))) {
-    if ((i < 30) || (i > 1200))
-      return;
-  }
-  *valid = 1;
-  return;
-}
-
-struct cfg_entry CFG_OPBOTS = {
-  "op-bots", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-struct cfg_entry CFG_INBOTS = {
-  "in-bots", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-struct cfg_entry CFG_LAGTHRESHOLD = {
-  "lag-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-struct cfg_entry CFG_OPREQUESTS = {
-  "op-requests", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-struct cfg_entry CFG_OPTIMESLACK = {
-  "op-time-slack", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-#ifdef G_AUTOLOCK
-struct cfg_entry CFG_LOCKTHRESHOLD = {
-  "lock-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-struct cfg_entry CFG_KILLTHRESHOLD = {
-  "kill-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-
-struct cfg_entry CFG_FIGHTTHRESHOLD = {
-  "fight-threshold", CFGF_GLOBAL, NULL, NULL,
-  getin_changed, NULL, getin_describe
-};
-#endif /* G_AUTOLOCK */
-#endif /* HUB */
-
-int cfg_count=0;
-struct cfg_entry ** cfg = NULL;
-int cfg_noshare=0;
 
 /* Expected memory usage
  */
 int expmem_misc()
 {
-#ifdef S_DCCPASS
-  struct cmd_pass *cp = NULL;
-#endif /* S_DCCPASS */
+  int tot = 0;
 
-  int tot = 0, i;
-
-  for (i=0;i<cfg_count;i++) {
-    tot += sizeof(void *);
-    if (cfg[i]->gdata)
-      tot += strlen(cfg[i]->gdata) + 1;
-    if (cfg[i]->ldata)
-      tot += strlen(cfg[i]->ldata) + 1;
-  }
-#ifdef S_DCCPASS
-  for (cp=cmdpass;cp;cp=cp->next) {
-    tot += sizeof(struct cmd_pass) + strlen(cp->name)+1;
-  }
-#endif /* S_DCCPASS */
-  tot += sizeof(struct auth_t) * max_auth;
   tot += strlen(binname) + 1;
 
   return tot;
 }
 
-void init_auth_max()
-{
-  if (max_auth < 1)
-    max_auth = 1;
-  if (auth)
-    auth = nrealloc(auth, sizeof(struct auth_t) * max_auth);
-  else
-    auth = nmalloc(sizeof(struct auth_t) * max_auth);
-}
-
 void init_misc()
 {
-
-  init_auth_max();
-
-  add_cfg(&CFG_AUTHKEY);
-  add_cfg(&CFG_MOTD);
-  add_cfg(&CFG_FORKINTERVAL);
-#ifdef S_LASTCHECK
-  add_cfg(&CFG_LOGIN);
-#endif /* S_LASTCHECK */
-#ifdef S_HIJACKCHECK
-  add_cfg(&CFG_HIJACK);
-#endif /* S_HIJACKCHECK */
-#ifdef S_ANTITRACE
-  add_cfg(&CFG_TRACE);
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
-  add_cfg(&CFG_PROMISC);
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
-  add_cfg(&CFG_BADPROCESS);
-  add_cfg(&CFG_PROCESSLIST);
-#endif /* S_PROCESSCHECK */
-#ifdef HUB
-  add_cfg(&CFG_NICK);
-  add_cfg(&CFG_SERVERS);
-  add_cfg(&CFG_SERVERS6);
-  add_cfg(&CFG_REALNAME);
-  set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders");
-  add_cfg(&CFG_OPBOTS);
-  add_cfg(&CFG_INBOTS);
-  add_cfg(&CFG_LAGTHRESHOLD);
-  add_cfg(&CFG_OPREQUESTS);
-  add_cfg(&CFG_OPTIMESLACK);
-#ifdef G_AUTOLOCK
-  add_cfg(&CFG_LOCKTHRESHOLD);
-  add_cfg(&CFG_KILLTHRESHOLD);
-  add_cfg(&CFG_FIGHTTHRESHOLD);
-#endif /* G_AUTOLOCK */
-#endif /* HUB */
 }
 
 
@@ -888,6 +461,7 @@ void show_motd(int idx)
   else
     dprintf(idx, STR("none\n"));
 }
+
 void show_channels(int idx, char *handle)
 {
   struct chanset_t *chan;
@@ -1213,79 +787,9 @@ int ischanhub()
     return 0;
 }
 
-#ifdef S_DCCPASS
-int check_cmd_pass(char *cmd, char *pass) 
-{
-  struct cmd_pass *cp;
-
-  for (cp = cmdpass; cp; cp = cp->next)
-    if (!strcasecmp2(cmd, cp->name)) {
-      char tmp[32];
-
-      encrypt_pass(pass, tmp);
-      if (!strcmp(tmp, cp->pass))
-        return 1;
-      return 0;
-    }
-  return 0;
-}
-
-int has_cmd_pass(char *cmd) 
-{
-  struct cmd_pass *cp;
-
-  for (cp = cmdpass; cp; cp = cp->next)
-    if (!strcasecmp2(cmd, cp->name))
-      return 1;
-  return 0;
-}
-
-void set_cmd_pass(char *ln, int shareit) {
-  struct cmd_pass *cp;
-  char *cmd;
-
-  cmd = newsplit(&ln);
-  for (cp = cmdpass; cp; cp = cp->next)
-    if (!strcmp(cmd, cp->name))
-      break;
-  if (cp)
-    if (ln[0]) {
-      /* change */
-      strcpy(cp->pass, ln);
-      if (shareit)
-        botnet_send_cmdpass(-1, cp->name, cp->pass);
-    } else {
-      if (cp == cmdpass)
-        cmdpass = cp->next;
-      else {
-        struct cmd_pass *cp2;
-
-        cp2 = cmdpass;
-        while (cp2->next != cp)
-          cp2 = cp2->next;
-        cp2->next = cp->next;
-      }
-      if (shareit)
-        botnet_send_cmdpass(-1, cp->name, "");
-      nfree(cp->name);
-      nfree(cp);
-  } else if (ln[0]) {
-    /* create */
-    cp = nmalloc(sizeof(struct cmd_pass));
-    cp->next = cmdpass;
-    cmdpass = cp;
-    cp->name = nmalloc(strlen(cmd) + 1);
-    strcpy(cp->name, cmd);
-    strcpy(cp->pass, ln);
-    if (shareit)
-      botnet_send_cmdpass(-1, cp->name, cp->pass);
-  }
-}
-#endif
-
 #ifdef S_LASTCHECK
 char last_buf[128]="";
-#endif
+#endif /* S_LASTCHECK */
 
 void check_last() {
 #ifdef S_LASTCHECK
@@ -1328,7 +832,7 @@ Context;
       }
     }
   }
-#endif
+#endif /* S_LASTCHECK */
 }
 
 void check_processes()
@@ -1484,7 +988,7 @@ void got_trace(int z)
 {
   traced = 0;
 }
-#endif
+#endif /* S_ANTITRACE */
 
 void check_trace(int n)
 {
@@ -1527,7 +1031,7 @@ void check_trace(int n)
     } else
       wait(&i);
   }
-#endif
+#endif /* __linux__ */
 #ifdef __FreeBSD__
   x = fork();
   if (x == -1)
@@ -1569,175 +1073,6 @@ void check_trace(int n)
     waitpid(x, NULL, 0);
 #endif /* __OpenBSD__ */
 #endif /* S_ANTITRACE */
-}
-
-
-struct cfg_entry *check_can_set_cfg(char *target, char *entryname)
-{
-  int i;
-  struct userrec *u;
-  struct cfg_entry *entry = NULL;
-
-  for (i = 0; i < cfg_count; i++)
-    if (!strcmp(cfg[i]->name, entryname)) {
-      entry = cfg[i];
-      break;
-    }
-  if (!entry)
-    return 0;
-  if (target) {
-    if (!(entry->flags & CFGF_LOCAL))
-      return 0;
-    if (!(u = get_user_by_handle(userlist, target)))
-      return 0;
-    if (!(u->flags & USER_BOT))
-      return 0;
-  } else {
-    if (!(entry->flags & CFGF_GLOBAL))
-      return 0;
-  }
-  return entry;
-}
-
-void set_cfg_str(char *target, char *entryname, char *data)
-{
-  struct cfg_entry *entry;
-  int free = 0;
-
-  if (!(entry = check_can_set_cfg(target, entryname)))
-    return;
-  if (data && !strcmp(data, "-"))
-    data = NULL;
-  if (data && (strlen(data) >= 1024))
-    data[1023] = 0;
-  if (target) {
-    struct userrec *u = get_user_by_handle(userlist, target);
-    struct xtra_key *xk;
-    char *olddata = entry->ldata;
-
-    if (u && !strcmp(botnetnick, u->handle)) {
-      if (data) {
-	entry->ldata = nmalloc(strlen(data) + 1);
-	strcpy(entry->ldata, data);
-      } else
-	entry->ldata = NULL;
-      if (entry->localchanged) {
-	int valid = 1;
-
-	entry->localchanged(entry, olddata, &valid);
-	if (!valid) {
-	  if (entry->ldata)
-	    nfree(entry->ldata);
-	  entry->ldata = olddata;
-	  data = olddata;
-	  olddata = NULL;
-	}
-      }
-    }
-    xk = nmalloc(sizeof(struct xtra_key));
-    egg_bzero(xk, sizeof(struct xtra_key));
-    xk->key = nmalloc(strlen(entry->name) + 1);
-    strcpy(xk->key, entry->name);
-    if (data) {
-      xk->data = nmalloc(strlen(data) + 1);
-      strcpy(xk->data, data);
-    }
-    set_user(&USERENTRY_CONFIG, u, xk);
-    if (olddata)
-      nfree(olddata);
-  } else {
-    char *olddata = entry->gdata;
-
-    if (data) {
-      free = 1;
-      entry->gdata = nmalloc(strlen(data) + 1);
-      strcpy(entry->gdata, data);
-    } else
-      entry->gdata = NULL;
-    if (entry->globalchanged) {
-      int valid = 1;
-
-      entry->globalchanged(entry, olddata, &valid);
-      if (!valid) {
-	if (entry->gdata)
-	  nfree(entry->gdata);
-	entry->gdata = olddata;
-	olddata = NULL;
-      }
-    }
-    if (!cfg_noshare)
-      botnet_send_cfg_broad(-1, entry);
-    if (olddata)
-      nfree(olddata);
-  }
-}
-
-void userfile_cfg_line(char *ln)
-{
-  char *name;
-  int i;
-  struct cfg_entry *cfgent = NULL;
-
-  name = newsplit(&ln);
-  for (i = 0; !cfgent && (i < cfg_count); i++)
-    if (!strcmp(cfg[i]->name, name))
-      cfgent = cfg[i];
-  if (cfgent) {
-    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
-  } else
-    putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
-
-}
-
-void got_config_share(int idx, char *ln)
-{
-  char *name;
-  int i;
-  struct cfg_entry *cfgent = NULL;
-
-  cfg_noshare++;
-  name = newsplit(&ln);
-  for (i = 0; !cfgent && (i < cfg_count); i++)
-    if (!strcmp(cfg[i]->name, name))
-      cfgent = cfg[i];
-  if (cfgent) {
-    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
-    botnet_send_cfg_broad(idx, cfgent);
-  } else
-    putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
-  cfg_noshare--;
-}
-
-void add_cfg(struct cfg_entry *entry)
-{
-  cfg = (void *) user_realloc(cfg, sizeof(void *) * (cfg_count + 1));
-  cfg[cfg_count] = entry;
-  cfg_count++;
-  entry->ldata = NULL;
-  entry->gdata = NULL;
-}
-
-void trigger_cfg_changed()
-{
-  int i;
-  struct userrec *u;
-  struct xtra_key *xk;
-
-  u = get_user_by_handle(userlist, botnetnick);
-
-  for (i = 0; i < cfg_count; i++) {
-    if (cfg[i]->flags & CFGF_LOCAL) {
-      xk = get_user(&USERENTRY_CONFIG, u);
-      while (xk && strcmp(xk->key, cfg[i]->name))
-	xk = xk->next;
-      if (xk) {
-	putlog(LOG_DEBUG, "*", STR("trigger_cfg_changed for %s"), cfg[i]->name ? cfg[i]->name : "(null)");
-	if (!strcmp(cfg[i]->name, xk->key ? xk->key : "")) {
-	  set_cfg_str(botnetnick, cfg[i]->name, xk->data);
-	}
-      }
-    }
-  }
 }
 
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
@@ -1880,7 +1215,7 @@ void updatelocal(void)
 {
 #ifdef LEAF
   module_entry *me;
-#endif
+#endif /* LEAF */
   Context;
   if (ucnt < 300) {
     ucnt++;
@@ -1895,7 +1230,7 @@ void updatelocal(void)
     Function *func = me->funcs;
     (func[SERVER_NUKESERVER]) ("Updating...");
   }
-#endif
+#endif /* LEAF */
 
   botnet_send_chat(-1, botnetnick, "Updating...");
   botnet_send_bye();
@@ -1917,7 +1252,7 @@ int updatebin (int idx, char *par, int autoi)
   int i;
 #ifdef LEAF
   module_entry *me;
-#endif
+#endif /* LEAF */
 
   path = newsplit(&par);
   par = path;
@@ -1984,16 +1319,16 @@ int updatebin (int idx, char *par, int autoi)
 
     sprintf(buf, "%s -P %d", buf, getpid());
   } 
-#endif
+#endif /* LEAF */
 
   //safe to run new binary..
 #ifdef LEAF
   if (!autoi && !localhub) //dont delete pid for auto update!!!
-#endif
+#endif /* LEAF */
     unlink(pid_file); //delete pid so new binary doesnt exit.
 #ifdef HUB
   listen_all(my_port, 1); //close the listening port...
-#endif
+#endif /* HUB */
   i = system(buf);
   if (i == -1 || i == 1) {
     if (idx)
@@ -2010,7 +1345,7 @@ int updatebin (int idx, char *par, int autoi)
         Function *func = me->funcs;
         (func[SERVER_NUKESERVER]) ("Updating...");
       }
-#endif
+#endif /* LEAF */
       if (idx)
         dprintf(idx, STR("Updating...bye\n"));
       putlog(LOG_MISC, "*", STR("Updating...\n"));
@@ -2029,77 +1364,10 @@ int updatebin (int idx, char *par, int autoi)
         return 0;
       }
     }
-#endif
+#endif /* LEAF */
   }
   /* this should never be reached */
   return 2;
-}
-
-void EncryptFile(char *infile, char *outfile)
-{
-  char  buf[8192];
-  FILE *f, *f2 = NULL;
-  int std = 0;
-  if (!strcmp(outfile, "STDOUT"))
-    std = 1;
-  f  = fopen(infile, "r");
-  if(!f)
-    return; 
-  if (!std) {     
-    f2 = fopen(outfile, "w");
-    if (!f2)
-      return;
-  } else {
-    printf("----------------------------------START----------------------------------\n");
-  }
-
-  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
-    if (std)
-      printf("%s\n", cryptit(encrypt_string(netpass, buf)));
-    else
-      lfprintf(f2, "%s\n", buf);
-  }
-  if (std)
-    printf("-----------------------------------ENF-----------------------------------\n");
-
-  fclose(f);
-  if (f2)
-    fclose(f2);
-}
-
-void DecryptFile(char *infile, char *outfile)
-{
-  char  buf[8192], *temps;
-  FILE *f, *f2 = NULL;
-  int std = 0;
-
-  if (!strcmp(outfile, "STDOUT")) 
-    std = 1;
-  f  = fopen(infile, "r");
-  if (!f)
-    return; 
-  if (!std) {     
-    f2 = fopen(outfile, "w");
-    if (!f2)
-      return;
-  } else {
-    printf("----------------------------------START----------------------------------\n");
-  }
-
-  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
-    temps = (char *) decrypt_string(netpass, decryptit(buf));
-    if (!std)
-      fprintf(f2, "%s\n",temps);
-    else
-      printf("%s\n", temps);
-    nfree(temps);
-  }
-  if (std)
-    printf("-----------------------------------END-----------------------------------\n");
-
-  fclose(f);
-  if (f2)
-    fclose(f2);
 }
 
 int bot_aggressive_to(struct userrec *u)
@@ -2120,7 +1388,7 @@ void detected(int code, char *msg)
 {
 #ifdef LEAF
   module_entry *me;
-#endif
+#endif /* LEAF */
   char *p = NULL;
   char tmp[512];
   struct userrec *u;
@@ -2131,23 +1399,23 @@ void detected(int code, char *msg)
 #ifdef S_LASTCHECK
   if (code == DETECT_LOGIN)
     p = (char *) (CFG_LOGIN.ldata ? CFG_LOGIN.ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
-#endif
+#endif /* S_LASTCHECK */
 #ifdef S_ANTITRACE
   if (code == DETECT_TRACE)
     p = (char *) (CFG_TRACE.ldata ? CFG_TRACE.ldata : (CFG_TRACE.gdata ? CFG_TRACE.gdata : NULL));
-#endif
+#endif /* S_ANTITRACE */
 #ifdef S_PROMISC
   if (code == DETECT_PROMISC)
     p = (char *) (CFG_PROMISC.ldata ? CFG_PROMISC.ldata : (CFG_PROMISC.gdata ? CFG_PROMISC.gdata : NULL));
-#endif
+#endif /* S_PROMISC */
 #ifdef S_PROCESSCHECK
   if (code == DETECT_PROCESS)
     p = (char *) (CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : (CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : NULL));
-#endif
+#endif /* S_PROMISC */
 #ifdef S_HIJACKCHECK
   if (code == DETECT_SIGCONT)
     p = (char *) (CFG_HIJACK.ldata ? CFG_HIJACK.ldata : (CFG_HIJACK.gdata ? CFG_HIJACK.gdata : NULL));
-#endif
+#endif /* S_PROMISC */
 
   if (!p)
     act = DET_WARN;
@@ -2189,7 +1457,7 @@ void detected(int code, char *msg)
       Function *func = me->funcs;
       (func[SERVER_NUKESERVER]) ("BBL");
     }
-#endif
+#endif /* LEAF */
     sleep(1);
     fatal(msg, 0);
     break;
@@ -2202,14 +1470,14 @@ void detected(int code, char *msg)
       Function *func = me->funcs;
       (func[SERVER_NUKESERVER]) ("HARAKIRI!!");
     }
-#endif
+#endif /* LEAF */
     sleep(1);
     unlink(binname);
 #ifdef HUB
     unlink(userfile);
     sprintf(tmp, STR("%s~"), userfile);
     unlink(tmp);
-#endif
+#endif /* HUB */
     fatal(msg, 0);
     break;
   case DET_NOCHECK:
@@ -2217,8 +1485,8 @@ void detected(int code, char *msg)
   }
 }
 
-
-
+char kickprefix[25] = "";
+char bankickprefix[25] = "";
 char * kickreason(int kind) {
   int r;
   r=random();
@@ -2368,11 +1636,6 @@ char * kickreason(int kind) {
 
 }
 
-
-
-char kickprefix[25] = "";
-char bankickprefix[25] = "";
-
 void makeplaincookie(char *chname, char *nick, char *buf)
 {
   /*
@@ -2471,68 +1734,6 @@ int goodpass(char *pass, int idx, char *nick)
   return 1;
 }
 
-char *makehash(struct userrec *u, char *rand)
-{
-  int i = 0;
-  MD5_CTX ctx;
-  unsigned char md5out[33];
-  char md5string[33], hash[500], *ret = NULL;
-Context;
-  sprintf(hash, "%s%s%s", rand, (char *) get_user(&USERENTRY_SECPASS, u), authkey ? authkey : "");
-
-//  putlog(LOG_DEBUG, "*", STR("Making hash from %s %s: %s"), rand, get_user(&USERENTRY_SECPASS, u), hash);
-
-  MD5_Init(&ctx);
-  MD5_Update(&ctx, hash, strlen(hash));
-  MD5_Final(md5out, &ctx);
-
-  for(i=0; i<16; i++)
-    sprintf(md5string + (i*2), "%.2x", md5out[i]);
-   
-//  putlog(LOG_DEBUG, "*", STR("MD5 of hash: %s"), md5string);
-  ret = md5string;
-  return ret;
-}
-
-
-int new_auth(void)
-{
-  int i = auth_total;
-
-Context;
-  if (auth_total == max_auth)
-    return -1;
-
-  auth_total++;
-  egg_bzero((char *) &auth[i], sizeof(struct auth_t));
-  return i;
-}
-
-int isauthed(char *host)
-{
-  int i = 0;
-Context;
-  if (!host || !host[0])
-    return -1;
-  for (i = 0; i < auth_total; i++) {
-    if (auth[i].host[0] && !strcmp(auth[i].host, host)) {
-      putlog(LOG_DEBUG, "*", STR("Debug for isauthed: checking: %s i: %d :: %s"), host, i, auth[i].host);
-      return i;
-    }
-  }
-  return -1;
-}
-  
-void removeauth(int n)
-{
-Context;
-  auth_total--;
-  if (n < auth_total)
-    egg_memcpy(&auth[n], &auth[auth_total], sizeof(struct auth_t));
-  else
-    egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
-}
-
 char *replace (char *string, char *oldie, char *newbie)
 {
   static char newstring[1024] = "";
@@ -2560,7 +1761,6 @@ char *replace (char *string, char *oldie, char *newbie)
   strcpy(newstring + newstr_index, string + str_index);
   return (newstring);
 }
-
 
 char *getfullbinname(char *argv0)
 {
@@ -2603,7 +1803,6 @@ char *getfullbinname(char *argv0)
   nfree(cwd);
   return bin;
 }
-
 
 void sdprintf EGG_VARARGS_DEF(char *, arg1)
 {
@@ -2690,4 +1889,3 @@ void werr(int errnum)
   printf(STR("(segmentation fault)\n"));
   fatal("", 0);
 }
-

@@ -457,36 +457,36 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
   for (i = 0; cmd[i]; i++)
     cmd[i] = tolower(cmd[i]);
 
-  if (!strcasecmp(cmd, "op")) l++;
-  else if (!strcasecmp(cmd, "act")) l++;
-  else if (!strcasecmp(cmd, "adduser")) l++;
-  else if (!strcasecmp(cmd, "channel")) l++;
-  else if (!strcasecmp(cmd, "deluser")) l++;
-  else if (!strcasecmp(cmd, "deop")) l++;
-  else if (!strcasecmp(cmd, "devoice")) l++;
-  else if (!strcasecmp(cmd, "getkey")) l++;
-  else if (!strcasecmp(cmd, "find")) l++;
-  else if (!strcasecmp(cmd, "invite")) l++;
-  else if (!strcasecmp(cmd, "kick")) l++;
-  else if (!strcasecmp(cmd, "kickban")) l++;
-  else if (!strcasecmp(cmd, "mdop")) l++;
-  else if (!strcasecmp(cmd, "msg")) l++;
-  else if (!strcasecmp(cmd, "reset")) l++;
-  else if (!strcasecmp(cmd, "resetbans")) l++;
-  else if (!strcasecmp(cmd, "resetexempts")) l++;
-  else if (!strcasecmp(cmd, "resetinvites")) l++;
-  else if (!strcasecmp(cmd, "say")) l++;
-  else if (!strcasecmp(cmd, "topic")) l++;
-  else if (!strcasecmp(cmd, "voice")) l++;
-  else if (!strcasecmp(cmd, "clearqueue")) l++;
-  else if (!strcasecmp(cmd, "dump")) l++;
-  else if (!strcasecmp(cmd, "jump")) l++;
-  else if (!strcasecmp(cmd, "servers")) l++;
-  else if (!strcasecmp(cmd, "authed")) l++;
+  if (!egg_strcasecmp(cmd, "op")) l++;
+  else if (!egg_strcasecmp(cmd, "act")) l++;
+  else if (!egg_strcasecmp(cmd, "adduser")) l++;
+  else if (!egg_strcasecmp(cmd, "channel")) l++;
+  else if (!egg_strcasecmp(cmd, "deluser")) l++;
+  else if (!egg_strcasecmp(cmd, "deop")) l++;
+  else if (!egg_strcasecmp(cmd, "devoice")) l++;
+  else if (!egg_strcasecmp(cmd, "getkey")) l++;
+  else if (!egg_strcasecmp(cmd, "find")) l++;
+  else if (!egg_strcasecmp(cmd, "invite")) l++;
+  else if (!egg_strcasecmp(cmd, "kick")) l++;
+  else if (!egg_strcasecmp(cmd, "kickban")) l++;
+  else if (!egg_strcasecmp(cmd, "mdop")) l++;
+  else if (!egg_strcasecmp(cmd, "msg")) l++;
+  else if (!egg_strcasecmp(cmd, "reset")) l++;
+  else if (!egg_strcasecmp(cmd, "resetbans")) l++;
+  else if (!egg_strcasecmp(cmd, "resetexempts")) l++;
+  else if (!egg_strcasecmp(cmd, "resetinvites")) l++;
+  else if (!egg_strcasecmp(cmd, "say")) l++;
+  else if (!egg_strcasecmp(cmd, "topic")) l++;
+  else if (!egg_strcasecmp(cmd, "voice")) l++;
+  else if (!egg_strcasecmp(cmd, "clearqueue")) l++;
+  else if (!egg_strcasecmp(cmd, "dump")) l++;
+  else if (!egg_strcasecmp(cmd, "jump")) l++;
+  else if (!egg_strcasecmp(cmd, "servers")) l++;
+  else if (!egg_strcasecmp(cmd, "authed")) l++;
 
   if (!l) {
     for (hm = H_dcc->first; hm; hm = hm->next)
-      if (!strcasecmp2(cmd, hm->mask))
+      if (!egg_strcasecmp(cmd, hm->mask))
         break;
     if (!hm) {
       dprintf(idx, STR("No such DCC command\n"));
@@ -684,7 +684,7 @@ static void cmd_downbots(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", STR("#%s# downbots"), dcc[idx].nick);
   for (u2 = userlist; u2; u2 = u2->next) {
     if (u2->flags & USER_BOT) {
-      if (strcasecmp(u2->handle, botnetnick)) {
+      if (egg_strcasecmp(u2->handle, botnetnick)) {
         if (nextbot(u2->handle) == -1) {
           strcat(work, u2->handle);
           cnt++;
@@ -753,7 +753,7 @@ Context;
   for (o = 0; o < cmdi; o++) {
     if (!flagrec_ok(&cmds[o].flags, &fr))
       continue;
-    if (!showall && !strcasecmp(par, cmds[o].name)) {
+    if (!showall && !egg_strcasecmp(par, cmds[o].name)) {
       fnd = 1;
       build_flags(flg, &(cmds[o].flags), NULL);
       dprintf(idx, STR("### %s (required flags: %s)\n"), cmds[o].name, flg);

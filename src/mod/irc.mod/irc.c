@@ -88,21 +88,6 @@ static int include_lk = 1;		/* For correct calculation
 #include "msgcmds.c"
 #include "tclirc.c"
 
-
-void expire_auths()
-{
-  int i = 0, idle = 0;
-  if (!ischanhub()) return;
-  for (i = 0; i < auth_total;i++) {
-    if (auth[i].authed) {
-      idle = now - auth[i].atime;
-      if (idle >= 60*60) {
-        removeauth(i);
-      }
-    }
-  }
-}
-
 void makeopline(struct chanset_t *chan, char *nick, char *buf)
 {
   char plaincookie[20],
@@ -1392,6 +1377,7 @@ static int check_tcl_pub(char *nick, char *from, char *chname, char *msg)
   return 1;
 }
 
+#ifdef S_AUTH
 static int check_tcl_pubc(char *cmd, char *nick, char *uhost,
                          struct userrec *u, char *args, char *chan)
 {
@@ -1413,6 +1399,7 @@ static int check_tcl_pubc(char *cmd, char *nick, char *uhost,
   return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
 
 }
+#endif /* S_AUTH */
 
 static void check_tcl_pubm(char *nick, char *from, char *chname, char *msg)
 {
@@ -1705,12 +1692,12 @@ static char *irc_close()
   rem_builtins(H_bot, irc_bot);
   rem_builtins_dcc(H_dcc, irc_dcc);
   rem_builtins(H_msg, C_msg);
+#ifdef S_AUTH
   rem_builtins(H_msgc, C_msgc);
+#endif /* S_AUTH */
   rem_builtins(H_raw, irc_raw);
   rem_tcl_commands(tclchan_cmds);
   del_hook(HOOK_MINUTELY, (Function) check_expired_chanstuff);
-  del_hook(HOOK_MINUTELY, (Function) expire_auths);
-
   del_hook(HOOK_MINUTELY, (Function) check_servers);
   del_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   del_hook(HOOK_IDLE, (Function) flush_modes);
@@ -1920,7 +1907,6 @@ char *irc_start(Function * global_funcs)
     chan->ircnet_status &= ~(CHAN_ASKED_INVITED | CHAN_ASKED_EXEMPTS);
 #endif
   }
-  add_hook(HOOK_MINUTELY, (Function) expire_auths);
   add_hook(HOOK_MINUTELY, (Function) check_expired_chanstuff);
   add_hook(HOOK_MINUTELY, (Function) check_servers);
   add_hook(HOOK_ADD_MODE, (Function) real_add_mode);
@@ -1940,7 +1926,9 @@ char *irc_start(Function * global_funcs)
   add_builtins(H_bot, irc_bot);
   add_builtins_dcc(H_dcc, irc_dcc);
   add_builtins(H_msg, C_msg);
+#ifdef S_AUTH
   add_builtins(H_msgc, C_msgc);
+#endif /* S_AUTH */
   add_builtins(H_raw, irc_raw);
   add_tcl_commands(tclchan_cmds);
   H_topc = add_bind_table("topc", HT_STACKABLE, channels_5char);

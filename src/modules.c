@@ -12,7 +12,9 @@
 #include <ctype.h>
 
 extern struct dcc_t	*dcc;
+#ifdef S_AUTH
 extern struct auth_t    *auth;
+#endif /* S_AUTH */
 
 #include "users.h"
 
@@ -22,8 +24,15 @@ extern char		 tempdir[], botnetnick[], botname[], natip[], cmdprefix[],
 			 hostname[], origbotname[], botuser[], admin[],
 			 userfile[], ver[], notify_new[], kickprefix[], bankickprefix[],
 			 version[], quit_msg[], hostname6[], netpass[], thepass[], dcc_prefix[],
-                         authkey[], myip[], myip6[];
-extern int	 noshare, loading, role, auth_total, dcc_total, egg_numver, userfile_perm,
+#ifdef S_AUTH
+                         authkey[], 
+#endif /* S_AUTH */
+			 myip[], myip6[];
+extern int	 noshare, loading, role, 
+#ifdef S_AUTH
+			 auth_total, 
+#endif /* S_AUTH */
+ 			 dcc_total, egg_numver, userfile_perm,
 			 use_console_r, ignore_time, must_be_owner,
 			 debug_output, default_flags, norestruct, 
 			 max_dcc, share_greet, password_timeout, localhub,
@@ -562,6 +571,7 @@ Function global_table[] =
   (Function) deflag_user,
   (Function) dcc_prefix,
   (Function) goodpass,
+#ifdef S_AUTH
   (Function) & auth, /* struct auth_t *auth */
   (Function) & auth_total,
   (Function) new_auth,
@@ -570,6 +580,16 @@ Function global_table[] =
   (Function) makehash,
   (Function) & USERENTRY_SECPASS,
   (Function) authkey,
+#else
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) & USERENTRY_SECPASS,
+  (Function) 0,
+#endif /* S_AUTH */
   (Function) myip,
   (Function) myip6,
   (Function) cmdprefix,

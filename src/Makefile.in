@@ -13,11 +13,11 @@ STRIP = @STRIP@
 CFLAGS = @CFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 
-eggdrop_objs = pcrypt.o settings.o \
-bg.o botcmd.o botmsg.o botnet.o chanprog.o cmds.o \
-dcc.o dccutil.o dns.o flags.o main.o mem.o misc.o \
-misc_file.o modules.o net.o rfc1459.o tcl.o tcldcc.o tclhash.o \
-tclmisc.o tcluser.o userent.o userrec.o users.o
+eggdrop_objs = auth.o bg.o botcmd.o botmsg.o botnet.o \
+chanprog.o cmds.o config.o crypt.o dcc.o dccutil.o dns.o flags.o \
+main.o mem.o misc.o misc_file.o modules.o net.o \
+rfc1459.o settings.o tcl.o tcldcc.o tclhash.o tclmisc.o \
+tcluser.o userent.o userrec.o users.o
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
@@ -94,6 +94,10 @@ eggdrop.h:
 
 #safety hash
 ../stringfix: stringfix.c
+auth.o: auth.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
+ ../lush.h misc_file.h cmdt.h chan.h users.h compat/compat.h compat/inet_aton.h \
+ compat/inet_ntop.h ../src/main.h compat/snprintf.h  compat/memset.h \
+ compat/memcpy.h compat/strcasecmp.h compat/strftime.h
 bg.o: bg.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
@@ -124,6 +128,14 @@ cmds.o: cmds.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
  tandem.h modules.h mod/modvals.h
+config.o: config.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
+ ../lush.h misc_file.h cmdt.h chan.h users.h compat/compat.h compat/inet_aton.h \
+ compat/inet_ntop.h ../src/main.h compat/snprintf.h  compat/memset.h \
+ compat/memcpy.h compat/strcasecmp.h compat/strftime.h
+crypt.o: crypt.c main.h ../config.h ../pack/salt.h eggdrop.h proto.h \
+ ../lush.h misc_file.h compat/compat.h compat/inet_aton.h \
+ compat/inet_ntop.h ../src/main.h compat/snprintf.h  compat/memset.h \
+ compat/memcpy.h compat/strcasecmp.h compat/strftime.h
 dcc.o: dcc.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
@@ -178,6 +190,7 @@ rfc1459.o: rfc1459.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h 
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
  compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
  compat/strftime.h
+settings.o: settings.c eggdrop.h ../src/main.h ../pack/conf.h
 stringfix.o: stringfix.c
 tcl.o: tcl.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
@@ -218,6 +231,3 @@ users.o: users.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h prot
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
  modules.h mod/modvals.h tandem.h
-settings.o: settings.c eggdrop.h ../src/main.h
-pcrypt.o: pcrypt.c ../pack/salt.h
-

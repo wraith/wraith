@@ -515,6 +515,7 @@
 /* 313 - 316 */
 #define dcc_prefix ((char *)(global[313]))
 #define goodpass ((int (*)(char *, int, char *))global[314])
+#ifdef S_AUTH
 #define auth (*(struct auth_t **)global[315])
 #define auth_total (*(int*)global[316])
 /* 317 - 320 */
@@ -523,8 +524,11 @@
 #define removeauth ((void (*)(int))global[319])
 #define makehash ((char *(*)(struct userrec *, char *))global[320])
 /* 321 - 324 */
+#endif /* S_AUTH */
 #define USERENTRY_SECPASS (*(struct user_entry_type *)(global[321]))
+#ifdef S_AUTH
 #define authkey ((char *)(global[322]))
+#endif /* S_AUTH */
 #define myip ((char *)(global[323]))
 #define myip6 ((char *)(global[324]))
 /* 325 - 328 */

@@ -577,7 +577,7 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, char *handle, char *object
       *p = 0;
     while (chan) {
       if (chan->status & CHAN_ACTIVE) {
-        if (!strcasecmp(chan->name, chname)) {
+        if (!egg_strcasecmp(chan->name, chname)) {
           dprintf(DP_HELP, STR("NOTICE %s :\002BitchX\002: Access Denied\n"), nick);
           return 0;
         }
@@ -608,51 +608,51 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, char *handle, char *object, 
 
   if (!msg[0]) {
     strcpy(text, STR("SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information"));
-  } else if (!strcasecmp(msg, STR("UNBAN")))
+  } else if (!egg_strcasecmp(msg, STR("UNBAN")))
     strcpy(text, STR("UNBAN unbans the person from channel"));
-  else if (!strcasecmp(msg, STR("OPS")))
+  else if (!egg_strcasecmp(msg, STR("OPS")))
     strcpy(text, STR("OPS ops the person if on userlist"));
-  else if (!strcasecmp(msg, STR("ECHO")))
+  else if (!egg_strcasecmp(msg, STR("ECHO")))
     strcpy(text, STR("ECHO returns the arguments it receives"));
-  else if (!strcasecmp(msg, STR("WHOAMI")))
+  else if (!egg_strcasecmp(msg, STR("WHOAMI")))
     strcpy(text, STR("WHOAMI user list information"));
-  else if (!strcasecmp(msg, STR("INVITE")))
+  else if (!egg_strcasecmp(msg, STR("INVITE")))
     strcpy(text, STR("INVITE invite to channel specified"));
-  else if (!strcasecmp(msg, STR("PING")))
+  else if (!egg_strcasecmp(msg, STR("PING")))
     strcpy(text, STR("PING returns the arguments it receives"));
-  else if (!strcasecmp(msg, STR("UTC")))
+  else if (!egg_strcasecmp(msg, STR("UTC")))
     strcpy(text, STR("UTC substitutes the local timezone"));
-  else if (!strcasecmp(msg, STR("XDCC")))
+  else if (!egg_strcasecmp(msg, STR("XDCC")))
     strcpy(text, STR("XDCC checks cdcc info for you"));
-  else if (!strcasecmp(msg, STR("BDCC")))
+  else if (!egg_strcasecmp(msg, STR("BDCC")))
     strcpy(text, STR("BDCC checks cdcc info for you"));
-  else if (!strcasecmp(msg, STR("CDCC")))
+  else if (!egg_strcasecmp(msg, STR("CDCC")))
     strcpy(text, STR("CDCC checks cdcc info for you"));
-  else if (!strcasecmp(msg, STR("DCC")))
+  else if (!egg_strcasecmp(msg, STR("DCC")))
     strcpy(text, STR("DCC requests a direct_client_connection"));
-  else if (!strcasecmp(msg, STR("ACTION")))
+  else if (!egg_strcasecmp(msg, STR("ACTION")))
     strcpy(text, STR("ACTION contains action descriptions for atmosphere"));
-  else if (!strcasecmp(msg, STR("FINGER")))
+  else if (!egg_strcasecmp(msg, STR("FINGER")))
     strcpy(text, STR("FINGER shows real name, login name and idle time of user"));
-  else if (!strcasecmp(msg, STR("ERRMSG")))
+  else if (!egg_strcasecmp(msg, STR("ERRMSG")))
     strcpy(text, STR("ERRMSG returns error messages"));
-  else if (!strcasecmp(msg, STR("USERINFO")))
+  else if (!egg_strcasecmp(msg, STR("USERINFO")))
     strcpy(text, STR("USERINFO returns user settable information"));
-  else if (!strcasecmp(msg, STR("CLIENTINFO")))
+  else if (!egg_strcasecmp(msg, STR("CLIENTINFO")))
     strcpy(text, STR("CLIENTINFO gives information about available CTCP commands"));
-  else if (!strcasecmp(msg, STR("SED")))
+  else if (!egg_strcasecmp(msg, STR("SED")))
     strcpy(text, STR("SED contains simple_encrypted_data"));
-  else if (!strcasecmp(msg, "OP"))
+  else if (!egg_strcasecmp(msg, "OP"))
     strcpy(text, STR("OP ops the person if on userlist"));
-  else if (!strcasecmp(msg, STR("VERSION")))
+  else if (!egg_strcasecmp(msg, STR("VERSION")))
     strcpy(text, STR("VERSION shows client type, version and environment"));
-  else if (!strcasecmp(msg, STR("XLINK")))
+  else if (!egg_strcasecmp(msg, STR("XLINK")))
     strcpy(text, STR("XLINK x-filez rule"));
-  else if (!strcasecmp(msg, STR("IDENT")))
+  else if (!egg_strcasecmp(msg, STR("IDENT")))
     strcpy(text, STR("IDENT change userhost of userlist"));
-  else if (!strcasecmp(msg, STR("TIME")))
+  else if (!egg_strcasecmp(msg, STR("TIME")))
     strcpy(text, STR("TIME tells you the time on the user's host"));
-  else if (!strcasecmp(msg, STR("UPTIME")))
+  else if (!egg_strcasecmp(msg, STR("UPTIME")))
     strcpy(text, STR("UPTIME my uptime"));
   else {
     dprintf(DP_HELP, STR("NOTICE %s :\001ERRMSG %s is not a valid function\001\n"), nick, msg);

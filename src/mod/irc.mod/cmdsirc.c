@@ -1090,6 +1090,7 @@ static void cmd_invite(struct userrec *u, int idx, char *par)
 
 }
 
+#ifdef S_AUTH
 static void cmd_authed(struct userrec *u, int idx, char *par)
 {
   int i = 0;
@@ -1100,8 +1101,8 @@ static void cmd_authed(struct userrec *u, int idx, char *par)
   for (i = 0; i < auth_total; i++) {
    dprintf(idx, " %d. %s!%s at %li\n", i, auth[i].nick, auth[i].host, auth[i].authtime);
   }
-
 }
+#endif /* S_AUTH */
 
 static void cmd_channel(struct userrec *u, int idx, char *par)
 {
@@ -1567,7 +1568,9 @@ static dcc_cmd_t irc_dcc[] =
 {
   {"act",		"o|o",	 (Function) cmd_act,		NULL,         NULL},
   {"adduser",		"m|m",	 (Function) cmd_adduser,		NULL,         NULL},
+#ifdef S_AUTH
   {"authed",		"n",	 (Function) cmd_authed,			NULL,         NULL},
+#endif /* S_AUTH */
   {"channel",		"o|o",	 (Function) cmd_channel,		NULL,         NULL},
   {"deluser",		"m|m",	 (Function) cmd_deluser,		NULL,         NULL},
   {"deop",		"o|o",	 (Function) cmd_deop,		NULL,         NULL},

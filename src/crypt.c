@@ -1,6 +1,7 @@
 /*
- * pcrypt.c -- handles:
- * psybnc crypt and lfprintf functions.
+ * crypt.c -- handles:
+ * psybnc crypt() 
+ * File encryption
  *
  */
 
@@ -181,5 +182,72 @@ Context;
 
   va_end(va);
   return 0;
+}
+
+void EncryptFile(char *infile, char *outfile)
+{
+  char  buf[8192];
+  FILE *f, *f2 = NULL;
+  int std = 0;
+  if (!strcmp(outfile, "STDOUT"))
+    std = 1;
+  f  = fopen(infile, "r");
+  if(!f)
+    return;
+  if (!std) {
+    f2 = fopen(outfile, "w");
+    if (!f2)
+      return;
+  } else {
+    printf("----------------------------------START----------------------------------\n");
+  }
+
+  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
+    if (std)
+      printf("%s\n", cryptit(encrypt_string(netpass, buf)));
+    else
+      lfprintf(f2, "%s\n", buf);
+  }
+  if (std)
+    printf("-----------------------------------ENF-----------------------------------\n");
+
+  fclose(f);
+  if (f2)
+    fclose(f2);
+}
+
+void DecryptFile(char *infile, char *outfile)
+{
+  char  buf[8192], *temps;
+  FILE *f, *f2 = NULL;
+  int std = 0;
+
+  if (!strcmp(outfile, "STDOUT"))
+    std = 1;
+  f  = fopen(infile, "r");
+  if (!f)
+    return;
+  if (!std) {
+    f2 = fopen(outfile, "w");
+    if (!f2)
+      return;
+  } else {
+    printf("----------------------------------START----------------------------------\n");
+  }
+
+  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
+    temps = (char *) decrypt_string(netpass, decryptit(buf));
+    if (!std)
+      fprintf(f2, "%s\n",temps);
+    else
+      printf("%s\n", temps);
+    nfree(temps);
+  }
+  if (std)
+    printf("-----------------------------------END-----------------------------------\n");
+
+  fclose(f);
+  if (f2)
+    fclose(f2);
 }
 

@@ -14,6 +14,7 @@
 
 /*      S_FEATURE	  RECOMMENDED	DESCRIPTION 					*/
 #define S_ANTITRACE	/*  yes		ptrace detection 				*/
+#define S_AUTH		/*  yes		authorization system (HIGHLY RECOMMENDED)	*/
 #define S_AUTOAWAY	/*  yes		random autoaway/return on IRC 			*/
 #define S_DCCPASS	/*  yes		DCC command passwords 				*/
 #define S_GARBLESTRINGS	/*  yes		encrypt strings in binary			*/

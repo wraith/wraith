@@ -80,8 +80,11 @@ static int kick_method;
 static int optimize_kicks;
 
 
-static p_tcl_bind_list H_wall, H_raw, H_notc, H_msgc, H_msgm, H_msg, H_flud,
+static p_tcl_bind_list H_wall, H_raw, H_notc, H_msgm, H_msg, H_flud,
 		       H_ctcr, H_ctcp;
+#ifdef S_AUTH
+static p_tcl_bind_list H_msgc;
+#endif /* S_AUTH */
 
 static void empty_msgq(void);
 static void next_server(int *, char *, unsigned int *, char *);
@@ -1291,6 +1294,7 @@ static int server_msg STDVAR
   return TCL_OK;
 }
 
+#ifdef S_AUTH
 static int server_msgc STDVAR
 {
   Function F = (Function) cd;
@@ -1300,6 +1304,7 @@ static int server_msgc STDVAR
   F(argv[1], argv[2], get_user_by_handle(userlist, argv[3]), argv[4], argv[5]);
   return TCL_OK;
 }
+#endif /* S_AUTH */
 
 static int server_raw STDVAR
 {
@@ -2002,7 +2007,9 @@ static Function server_table[] =
   (Function) & curserv,
   (Function) cursrvname,
   (Function) botrealname,
+#ifdef S_AUTH
   (Function) & H_msgc,          /* p_tcl_bind_list */
+#endif /* S_AUTH */
 
 };
 
@@ -2108,7 +2115,9 @@ char *server_start(Function *global_funcs)
   H_raw = add_bind_table("raw", HT_STACKABLE, server_raw);
   H_notc = add_bind_table("notc", HT_STACKABLE, server_5char);
   H_msgm = add_bind_table("msgm", HT_STACKABLE, server_msg);
+#ifdef S_AUTH
   H_msgc = add_bind_table("msgc", 0, server_msgc);
+#endif /* S_AUTH */
   H_msg = add_bind_table("msg", 0, server_msg);
   H_flud = add_bind_table("flud", HT_STACKABLE, server_5char);
   H_ctcr = add_bind_table("ctcr", HT_STACKABLE, server_6char);

@@ -55,6 +55,8 @@ int base64_to_int(char *);
 char *cryptit (char *);
 char *decryptit (char *);
 int lfprintf(FILE *, char *, ...);
+void EncryptFile(char *, char *);
+void DecryptFile(char *, char *);
 
 /* botnet.c */
 void lower_bot_linked(int idx);
@@ -212,6 +214,26 @@ void debug_mem_to_dcc(int);
 char *progname();
 void init_settings();
 
+/* auth.c */
+int new_auth();
+int isauthed(char *);
+void removeauth(int);
+char *makehash(struct userrec *, char *);
+
+/* config.c */
+void set_cfg_int(char *target, char *entryname, int data);
+void set_cfg_str(char *target, char *entryname, char *data);
+void add_cfg(struct cfg_entry *entry);
+void got_config_share(int idx, char *ln);
+void userfile_cfg_line(char *ln);
+void trigger_cfg_changed();
+void got_config_share (int idx, char * ln);
+#ifdef S_DCCPASS
+int check_cmd_pass(char *,char *);
+int has_cmd_pass(char *);
+void set_cmd_pass(char *, int);
+#endif /* S_DCCPASS */
+
 /* misc.c */
 void werr(int);
 char *werr_tostr(int);
@@ -221,12 +243,8 @@ char *getfullbinname(char *);
 char *replace(char *, char *, char *);
 #ifdef S_GARBLESTRINGS
 char *degarble(int, char *);
-#endif
+#endif /* S_GARBLESTRINGS */
 void detected(int, char *);
-int new_auth();
-int isauthed(char *);
-void removeauth(int);
-char *makehash(struct userrec *, char *);
 int goodpass(char *, int, char *);
 void check_last();
 void check_promisc();
@@ -237,16 +255,7 @@ int isupdatehub();
 int getting_users();
 char *kickreason(int);
 int bot_aggressive_to(struct userrec *);
-void set_cfg_int(char *target, char *entryname, int data);
-void set_cfg_str(char *target, char *entryname, char *data);
-void add_cfg(struct cfg_entry *entry);
-void got_config_share(int idx, char *ln);
-void userfile_cfg_line(char *ln);
-void trigger_cfg_changed();
-void EncryptFile(char *, char *);
-void DecryptFile(char *, char *);
 int updatebin(int, char *, int);
-void got_config_share (int idx, char * ln);
 int shell_exec(char * cmdline, char * input, char ** output, char ** erroutput);
 int prand(int *seed, int range);
 int egg_strcatn(char *dst, const char *src, size_t max);
@@ -274,13 +283,6 @@ char *str_escape(const char *str, const char div, const char mask);
 char *strchr_unescape(char *str, const char div, register const char esc_char);
 void str_unescape(char *str, register const char esc_char);
 void kill_bot(char *, char *);
-int strcasecmp2(char *, char *);
-#ifdef S_DCCPASS
-int check_cmd_pass(char *,char *);
-int has_cmd_pass(char *);
-void set_cmd_pass(char *, int);
-#endif
-
 
 /* net.c */
 #ifdef HAVE_SSL

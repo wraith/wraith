@@ -108,7 +108,7 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
   return 1;
 }
 
-//move all the above shit to misc.c with proto.h additions.
+#ifdef S_AUTH
 static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 {
   int i = 0;
@@ -242,6 +242,7 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
 
   return 1;
 }
+#endif /* S_AUTH */
 
 static int msg_op(char *nick, char *host, struct userrec *u, char *par)
 {
@@ -457,10 +458,12 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 
 static cmd_t C_msg[] =
 {
+#ifdef S_AUTH
   {"auth?",		"",	(Function) msg_authstart,	NULL},
   {"auth",		"",	(Function) msg_auth,		NULL},
   {"+auth",		"",	(Function) msg_pls_auth,	NULL},
   {"unauth",		"",	(Function) msg_unauth,		NULL},
+#endif /* S_AUTH */
   {"word",		"",	(Function) msg_word,		NULL},
   {"ident",		"",	(Function) msg_ident,		NULL},
   {"invite",		"o|o",	(Function) msg_invite,		NULL},
@@ -471,6 +474,7 @@ static cmd_t C_msg[] =
   {NULL,		NULL,	NULL,				NULL}
 };
 
+#ifdef S_AUTH
 static int msgc_test(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   dprintf(DP_HELP, "NOTICE %s :Works :)\n", nick);
@@ -614,8 +618,6 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
   return 1;
 }
 
-
-
 static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   struct chanset_t *chan = NULL;
@@ -727,5 +729,5 @@ static cmd_t C_msgc[] =
   {"help",		"",	(Function) msgc_help,		NULL},
   {NULL,		NULL,	NULL,				NULL}
 };
-
-#endif
+#endif /* S_AUTH */
+#endif /* LEAF */

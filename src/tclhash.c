@@ -835,7 +835,7 @@ int check_tcl_dcc(char *cmd, int idx, char *args)
 #ifdef S_DCCPASS
 
   for (hm = H_dcc->first; hm; hm = hm->next) {
-    if (!strcasecmp(cmd, hm->mask)) {
+    if (!egg_strcasecmp(cmd, hm->mask)) {
       found = 1;
       break;
     }

@@ -161,7 +161,7 @@ do
   mv -f $bin $bin.$os.$numver${d}
 done
 
-tar -zcf $packname.$os.$numver${d}.tgz *.$os.$numver
+tar -zcf $packname.$os.$numver${d}.tgz *.$os.$numver${d}
 rm -f *.$os.$numver
 echo "Binaries are now in '$packname.$os.$numver${d}.tgz'."
 exit 0

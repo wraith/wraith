@@ -198,8 +198,8 @@ void fatal(const char *s, int recoverable)
   }
 }
 
-int expmem_chanprog(), expmem_users(), expmem_misc(), expmem_dccutil(),
- expmem_botnet(), expmem_tcl(), expmem_tclhash(), expmem_net(),
+int expmem_chanprog(), expmem_users(), expmem_config(), expmem_misc(), expmem_dccutil(),
+ expmem_botnet(), expmem_tcl(), expmem_tclhash(), expmem_net(), expmem_auth(),
  expmem_modules(int), expmem_tcldcc(),
  expmem_tclmisc();
 
@@ -210,9 +210,9 @@ int expected_memory(void)
 {
   int tot;
 
-  tot = expmem_chanprog() + expmem_users() + expmem_misc() +
+  tot = expmem_chanprog() + expmem_users() + expmem_config() + expmem_misc() +
     expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() +
-    expmem_net() + expmem_modules(0) + expmem_tcldcc() +
+    expmem_net() + expmem_modules(0) + expmem_tcldcc() + expmem_auth() +
     expmem_tclmisc();
   return tot;
 }
@@ -947,7 +947,7 @@ void restart_chons();
 void check_static(char *, char *(*)());
 
 #include "mod/static.h"
-int init_userrec(), init_mem(), init_dcc_max(), init_userent(), init_misc(), init_bots(),
+int init_userrec(), init_mem(), init_dcc_max(), init_userent(), init_misc(), init_auth(), init_config(), init_bots(),
  init_net(), init_modules(), init_tcl(int, char **), init_botcmd();
 
 void got_ed(char *which, char *in, char *out)
@@ -1510,6 +1510,8 @@ int main(int argc, char **argv)
   init_dcc_max();
   init_userent();
   init_misc();
+  init_auth();
+  init_config();
   init_bots();
   init_net();
   init_modules();
