@@ -37,6 +37,7 @@ This is a summary of ChangeLog basically.
 * Alphabetized config list
 * cmd_mns_host now accepts multiple hosts
 * Fixed cmd_comment to work like cmd_whois/match with regards to accessing higher level users.
+* Added proper support for $b/$u 
 
 1.1.9
 

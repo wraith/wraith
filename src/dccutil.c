@@ -125,30 +125,67 @@ void dprintf(int idx, const char *format, ...)
     }
     return;
   } else { /* normal chat text */
-    if (!dcc[idx].simul && coloridx(idx)) {
-      int i;
+    if (coloridx(idx)) {
+      int i, schar = 0, inbold = 0, inunderline = 0;
       char buf3[1024] = "", buf2[1024] = "", c = 0;
 
       for (i = 0 ; i < len ; i++) {
         c = buf[i];
         buf2[0] = 0;
+ 
+        if (schar) {	/* These are for $X replacements */
+          schar--;	/* Unset identifier int */
 
-        if (c == ':') {
-          sprintf(buf2, "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
-        } else if (c == '@') {
-          sprintf(buf2, "%s%c%s", BOLD(idx), c, BOLD_END(idx));
-/*        } else if (c == ']' || c == '>' || c == ')' || c == '[' || c == '<' || c == '(') { */
-        } else if (c == '>' || c == ')' || c == '<' || c == '(') {
-          sprintf(buf2, "%s%c%s", GREEN(idx), c, COLOR_END(idx));
-        } else {
-          sprintf(buf2, "%c", c);
+          switch (c) {
+            case 'b':
+              if (!inbold) {
+                sprintf(buf2, "%s", BOLD(idx));
+                inbold++;
+              } else {
+                sprintf(buf2, "%s", BOLD_END(idx));
+                inbold--;
+              }
+              break;
+            case 'u':
+              if (!inunderline) {
+                sprintf(buf2, "%s", UNDERLINE(idx));
+                inunderline++;
+              } else {
+                sprintf(buf2, "%s", UNDERLINE_END(idx));
+                inunderline--;
+              }
+              break;
+            default:
+              sprintf(buf2, "$%c", c);		/* No identifier, put the '$' back in */
+              break;
+          }
+        } else {    	/* These are character replacements */
+          switch (c) {
+            case '$':
+              schar++;
+              break;
+            case ':':
+              sprintf(buf2, "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
+              break;
+            case '@':
+              sprintf(buf2, "%s%c%s", BOLD(idx), c, BOLD_END(idx));
+              break;
+            case '>':
+            case ')':
+            case '<':
+            case '(':
+              sprintf(buf2, "%s%c%s", GREEN(idx), c, COLOR_END(idx));
+              break;
+            default:
+              sprintf(buf2, "%c", c);
+              break;
+          }
         }
-/*        sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : ""); */
+
         sprintf(buf3, "%s%s", (buf3 && buf3[0]) ? buf3 : "", (buf2 && buf2[0]) ? buf2 : "");
       }
       buf3[strlen(buf3)] = 0;
       strcpy(buf, buf3);
-/*      strncpyz(buf, buf2, sizeof buf); */
     }
     buf[sizeof(buf) - 1] = 0;
     len = strlen(buf);
