@@ -1,11 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
-#undef strdup
-#undef str_redup
 #include "memcpy.h"
 
-
-void str_redup(char **str, const char *newstr)
+void 
+__wrap_str_redup(char **str, const char *newstr)
 {
         int len;
 
@@ -19,7 +17,8 @@ void str_redup(char **str, const char *newstr)
         egg_memcpy(*str, newstr, len);
 }
 
-char *strdup(const char *entry)
+char *
+__wrap_strdup(const char *entry)
 {
   char *target = (char*)calloc(1, strlen(entry) + 1);
   if (target == 0) return 0;
