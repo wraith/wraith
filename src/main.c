@@ -831,8 +831,6 @@ int main(int argc, char **argv)
     pid_t pid = 0;
   
     pid = do_fork();
-
-    writepid(conf.bot->pid_file, pid);
 /*
     printf("  |- %-10s (%d)\n", conf.bot->nick, pid);
     if (localhub) {
@@ -858,6 +856,7 @@ int main(int argc, char **argv)
     FreeConsole();
 #endif /* CYGWIN_HACKS */
     printf("%s[%s%s%s]%s -%s- initiated\n", BOLD(-1), BOLD_END(-1), packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
+    writepid(conf.bot->pid_file, getpid());
   }
 
   /* Terminal emulating dcc chat */

@@ -103,58 +103,16 @@ void sdprintf (char *format, ...)
 
 #ifdef DEBUG_CONTEXT
 
-static int      nested_debug = 0;
+#define CX(ptr) cx_file[ptr] && cx_file[ptr][0] ? cx_file[ptr] : "", cx_line[ptr], cx_note[ptr] && cx_note[ptr][0] ? cx_note[ptr] : ""
 
-void write_debug()
+static void write_debug()
 {
   int x;
   char s[25] = "", tmpout[150] = "", buf[DIRMAX] = "";
   int y;
 
-  if (nested_debug) {
-    /* Yoicks, if we have this there's serious trouble!
-     * All of these are pretty reliable, so we'll try these.
-     *
-     * NOTE: dont try and display context-notes in here, it's
-     *       _not_ safe <cybah>
-     */
-    sprintf(buf, "%sDEBUG.DEBUG", tempdir);
-    x = creat(buf, 0600);
-    setsock(x, SOCK_NONSOCK);
-    if (x >= 0) {
-      strncpyz(s, ctime(&now), sizeof s);
-      dprintf(-x, "Debug (%s) written %s\n", ver, s);
-      dprintf(-x, "Context: ");
-      cx_ptr = cx_ptr & 15;
-      for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
-        dprintf(-x, "%s/%d,\n         ", cx_file[y], cx_line[y]);
-      dprintf(-x, "%s/%d\n\n", cx_file[y], cx_line[y]);
-      killsock(x);
-      close(x);
-    }
-#ifndef CYGWIN_HACKS
-    {
-      /* Use this lame method because shell_exec() or mail() may have caused another segfault :o */
-      char buff[255] = "";
-
-      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %sbleh\nNDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
-      system(buff);
-      egg_snprintf(buff, sizeof(buff), "cat %sbleh |mail wraith@shatow.net", tempdir);
-      system(buff);
-      unlink("bleh");
-    }
-#endif /* !CYGWIN_HACKS */
-    unlink(buf);
-    exit(1);                    /* Dont even try & tell people about, that may
-                                   have caused the fault last time. */
-  } else {
-    nested_debug = 1;
-  }
-
   egg_snprintf(tmpout, sizeof tmpout, "* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]",
-                                  cx_file[cx_ptr-2], cx_line[cx_ptr-2], cx_note[cx_ptr-2][0] ? cx_note[cx_ptr-2] : "",
-                                  cx_file[cx_ptr-1], cx_line[cx_ptr-1], cx_note[cx_ptr-1][0] ? cx_note[cx_ptr-1] : "",
-                                  cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
+                                  CX(cx_ptr - 2), CX(cx_ptr - 1), CX(cx_ptr));
   putlog(LOG_MISC, "*", "%s", tmpout);
   printf("%s\n", tmpout);
   sprintf(buf, "%sDEBUG", tempdir);
@@ -174,10 +132,8 @@ void write_debug()
     dprintf(-x, "Context: ");
     cx_ptr = cx_ptr & 15;
     for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
-      dprintf(-x, "%s/%d, [%s]\n         ", cx_file[y], cx_line[y],
-              (cx_note[y][0]) ? cx_note[y] : "");
-    dprintf(-x, "%s/%d [%s]\n\n", cx_file[cx_ptr], cx_line[cx_ptr],
-            (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
+      dprintf(-x, "%s/%d, [%s]\n         ", CX(y));
+    dprintf(-x, "%s/%d [%s]\n\n", CX(cx_ptr));
     tell_dcc(-x);
     dprintf(-x, "\n");
     tell_netdebug(-x);
@@ -277,14 +233,10 @@ stackdump(int idx)
   sleep(1);
 };
 
-static int nested_segv = 0;
 static void got_segv(int z)
 {
-  if (nested_segv)
-    signal(SIGSEGV, SIG_DFL);
-  else
-    nested_segv++;
-  stackdump(0);
+  signal(SIGSEGV, SIG_DFL);
+  /* stackdump(0); */
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif

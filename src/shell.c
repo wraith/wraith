@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "shell.h"
+#include "chanprog.h"
 #include "cfg.h"
 #include "settings.h"
 #include "userrec.h"
@@ -77,12 +78,8 @@ int clear_tmp()
 #ifdef LEAF
 void check_mypid()
 { 
-  if (can_stat(conf.bot->pid_file) && (getpid() != checkpid(conf.bot->nick, NULL))) {
-    fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 1);
-    nuke_server("Cloned Process...");
-    botnet_send_bye();
-    exit(1);
-  }
+  if (can_stat(conf.bot->pid_file) && (getpid() != checkpid(conf.bot->nick, NULL)))
+    fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 0);
 }
 #endif /* LEAF */
 
@@ -718,11 +715,7 @@ int email(char *subject, char *msg, int who)
   if ((f = popen(run, "w"))) {
     if (sendmail) {
       fprintf(f, "To: %s\n", addrs);
-      fprintf(f, "From: %s@%s\n", 
-                                  conffile.bots ? 
-                                  (conffile.bots->nick ? conffile.bots->nick : 
-                                  (conffile.username ? conffile.username : "WRAITH")) 
-                                  : "WRAITH", un.nodename);
+      fprintf(f, "From: %s@%s\n", origbotname[0] ? origbotname : (conf.username ? conf.username : "WRAITH"), un.nodename);
       fprintf(f, "Subject: %s\n", subject);
       fprintf(f, "Content-Type: text/plain\n");
     }
