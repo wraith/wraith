@@ -135,7 +135,7 @@ cmds.o: cmds.c stringfix main.h ../config.h ../pack/conf.h lang.h eggdrop.h flag
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
- tandem.h modules.h mod/modvals.h help.h
+ tandem.h modules.h mod/modvals.h help.h bg.h
 config.o: config.c stringfix main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h chan.h users.h compat/compat.h compat/inet_aton.h \
  compat/inet_ntop.h ../src/main.h compat/snprintf.h  compat/memset.h \
@@ -178,7 +178,7 @@ misc.o: misc.c stringfix main.h ../config.h ../pack/conf.h lang.h eggdrop.h flag
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
- stat.h
+ stat.h bg.h
 misc_file.o: misc_file.c stringfix main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
