@@ -88,7 +88,7 @@ do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
 {
   memberlist *m = ismember(chan, nick);
 
-  if (!me_op(chan) || !m || (m && !force && chan_hasop(m)))
+  if (!me_op(chan) || !m || (!force && (chan_hasop(m) || chan_sentop(m))))
     return 0;
 
   if (delay) {
@@ -105,6 +105,8 @@ do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
     egg_snprintf(buf, sizeof(buf), "AOp %s/%s", nick, chan->dname);
 
     timer_create_complex(&howlong, buf, (Function) do_autoop, (void *) auto_op, 0);
+
+    return 1;
   }
 
   if (channel_fastop(chan) || channel_take(chan)) {
