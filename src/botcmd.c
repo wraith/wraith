@@ -1405,7 +1405,6 @@ static void bot_rsim(char *botnick, char *code, char *par)
     dcc[idx].simul = ridx;
     dcc[idx].status = status;
     strcpy(dcc[idx].simulbot, botnick);
-    dcc[idx].status = STAT_ECHO;
     dcc[idx].u.chat->con_flags = rconmask;
     strcpy(dcc[idx].u.chat->con_chan, rconchan);
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
