@@ -226,7 +226,7 @@ void tell_verbose_uptime(int idx)
   now2 = now - online_since;
   if (now2 > 86400) {
     /* days */
-    sprintf(s, "%d day", (int) (now2 / 86400));
+    simple_sprintf(s, "%d day", (int) (now2 / 86400));
     if ((int) (now2 / 86400) >= 2)
       strcat(s, "s");
     strcat(s, ", ");
@@ -282,7 +282,7 @@ void tell_verbose_status(int idx)
   s[0] = 0;
   if (now2 > 86400) {
     /* days */
-    sprintf(s, "%d day", (int) (now2 / 86400));
+    simple_sprintf(s, "%d day", (int) (now2 / 86400));
     if ((int) (now2 / 86400) >= 2)
       strcat(s, "s");
     strcat(s, ", ");
@@ -313,7 +313,7 @@ void tell_verbose_status(int idx)
   min = (int) (cl - (hr * 60));
   sprintf(s2, "CPU %02d:%02d", (int) hr, (int) min);	/* Actually min/sec */
 # else
-  sprintf(s2, "CPU ???");
+  simple_sprintf(s2, "CPU ???");
 # endif
 #endif /* HAVE_GETRUSAGE */
   dprintf(idx, "%s %s  (%s)  %s  %s %4.1f%%\n", MISC_ONLINEFOR,
@@ -498,7 +498,7 @@ void load_internal_users()
               hosts = q;
             }
             
-            sprintf(x, "-telnet!%s", hosts);
+            simple_sprintf(x, "-telnet!%s", hosts);
 	    set_user(&USERENTRY_HOSTS, u, x);
 	    hosts = ln;
 	  }

@@ -479,7 +479,7 @@ display_dcc_bot(int idx, char *buf)
 static void
 display_dcc_fork_bot(int idx, char *buf)
 {
-  sprintf(buf, "conn  bot");
+  simple_sprintf(buf, "conn  bot");
 }
 
 struct dcc_table DCC_BOT = {
@@ -531,7 +531,7 @@ eof_dcc_identd(int idx)
 static void
 display_dcc_identd(int idx, char *buf)
 {
-  sprintf(buf, "idtd  %d%s", dcc[idx].port, (dcc[idx].status & LSTN_PUBLIC) ? " pub" : "");
+  simple_sprintf(buf, "idtd  %d%s", dcc[idx].port, (dcc[idx].status & LSTN_PUBLIC) ? " pub" : "");
 }
 
 struct dcc_table DCC_IDENTD = {
@@ -1259,7 +1259,7 @@ dcc_telnet(int idx, char *buf, int ii)
 
   putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
 
-  sprintf(x, "-telnet!telnet@%s", iptostr(htonl(ip)));
+  simple_sprintf(x, "-telnet!telnet@%s", iptostr(htonl(ip)));
 
   if (match_ignore(x) || detect_telnet_flood(x)) {
     killsock(sock);
@@ -1307,7 +1307,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
 
   strlcpy(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
 
-  sprintf(s2, "-telnet!telnet@%s", dcc[i].host);
+  simple_sprintf(s2, "-telnet!telnet@%s", dcc[i].host);
 
   if (match_ignore(s2)) {
     killsock(dcc[i].sock);
@@ -1364,7 +1364,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   }
   if (s[0]) {
     putlog(LOG_MISC, "*", DCC_IDENTFAIL, dcc[i].host, s);
-    sprintf(s, "telnet@%s", dcc[i].host);
+    simple_sprintf(s, "telnet@%s", dcc[i].host);
     dcc_telnet_got_ident(i, s);
     return;
   }
@@ -1390,7 +1390,7 @@ eof_dcc_telnet(int idx)
 static void
 display_telnet(int idx, char *buf)
 {
-  sprintf(buf, "lstn  %d%s", dcc[idx].port, (dcc[idx].status & LSTN_PUBLIC) ? " pub" : "");
+  simple_sprintf(buf, "lstn  %d%s", dcc[idx].port, (dcc[idx].status & LSTN_PUBLIC) ? " pub" : "");
 }
 
 struct dcc_table DCC_TELNET = {
@@ -1444,7 +1444,7 @@ timeout_dupwait(int idx)
 static void
 display_dupwait(int idx, char *buf)
 {
-  sprintf(buf, "wait  duplicate?");
+  simple_sprintf(buf, "wait  duplicate?");
 }
 
 static void
@@ -1598,7 +1598,7 @@ dcc_telnet_pass(int idx, int atr)
       link_hash(idx, rand);
 
       for (i = 0; enclink[i].name; i++)
-        sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
+        simple_sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
 
       dprintf(idx, "neg? %s %s\n", rand, buf);
     } else
@@ -1757,7 +1757,7 @@ eof_dcc_ident(int idx)
 static void
 display_dcc_ident(int idx, char *buf)
 {
-  sprintf(buf, "idnt  (sock %d)", dcc[idx].u.ident_sock);
+  simple_sprintf(buf, "idnt  (sock %d)", dcc[idx].u.ident_sock);
 }
 
 struct dcc_table DCC_IDENT = {

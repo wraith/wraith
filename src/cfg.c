@@ -183,11 +183,11 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     which = chan->mop;
     break;
   default:
-    sprintf(tmp, "Reason #%i", why);
+    simple_sprintf(tmp, "Reason #%i", why);
   }
   if (which == P_DEOP) {
     putlog(LOG_WARN, "*",  "Setting %s +d (%s): %s", u->handle, tmp, msg);
-    sprintf(tmp2, "+d: %s (%s)", tmp, msg);
+    simple_sprintf(tmp2, "+d: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
     get_user_flagrec(u, &fr, chan->dname);
     fr.global = USER_DEOP;
@@ -195,7 +195,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     set_user_flagrec(u, &fr, chan->dname);
   } else if (which == P_KICK) {
     putlog(LOG_WARN, "*",  "Setting %s +dk (%s): %s", u->handle, tmp, msg);
-    sprintf(tmp2, "+dk: %s (%s)", tmp, msg);
+    simple_sprintf(tmp2, "+dk: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
     get_user_flagrec(u, &fr, chan->dname);
     fr.global = USER_DEOP | USER_KICK;
@@ -206,7 +206,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     deluser(u->handle);
   } else {
     putlog(LOG_WARN, "*",  "No user flag effects for %s (%s): %s", u->handle, tmp, msg);
-    sprintf(tmp2, "Warning: %s (%s)", tmp, msg);
+    simple_sprintf(tmp2, "Warning: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
   }
 }

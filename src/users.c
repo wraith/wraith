@@ -147,7 +147,7 @@ void display_ignore(int idx, int number, struct igrec *ignore)
 
   if (ignore->added) {
     daysago(now, ignore->added, s);
-    sprintf(dates, "Started %s", s);
+    simple_sprintf(dates, "Started %s", s);
   } 
 
   if (ignore->flags & IGREC_PERM)
@@ -156,7 +156,7 @@ void display_ignore(int idx, int number, struct igrec *ignore)
     char s1[41] = "";
 
     days(ignore->expire, now, s1);
-    sprintf(s, "(expires %s)", s1);
+    simple_sprintf(s, "(expires %s)", s1);
   }
   if (number >= 0)
     dprintf(idx, "  [%3d] %s %s\n", number, ignore->igmask, s);

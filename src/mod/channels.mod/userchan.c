@@ -367,7 +367,7 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
 
   if (mask->added) {
     daysago(now, mask->added, s);
-    sprintf(dates, "%s %s", MODES_CREATED, s);
+    simple_sprintf(dates, "%s %s", MODES_CREATED, s);
     if (mask->added < mask->lastactive) {
       strcat(dates, ", ");
       strcat(dates, MODES_LASTUSED);
@@ -383,7 +383,7 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
     char s1[41] = "";
 
     days(mask->expire, now, s1);
-    sprintf(s, "(expires %s)", s1);
+    simple_sprintf(s, "(expires %s)", s1);
   }
   if (mask->flags & MASKREC_STICKY)
     strcat(s, " (sticky)");
@@ -486,9 +486,9 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
 	  s2 = s;
 	  s1 = splitnick(&s2);
 	  if (s1[0])
-	    sprintf(fill, "%s (%s!%s)", ml->mask, s1, s2);
+	    simple_sprintf(fill, "%s (%s!%s)", ml->mask, s1, s2);
 	  else
-	    sprintf(fill, "%s (server %s)", ml->mask, s2);
+	    simple_sprintf(fill, "%s (server %s)", ml->mask, s2);
 	  if (ml->timer != 0) {
 	    min = (now - ml->timer) / 60;
 	    sec = (now - ml->timer) - (min * 60);

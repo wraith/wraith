@@ -97,7 +97,7 @@ static int gotfake433(char *from)
  * msg: proc-name <nick> <user@host> <handle> <args...>
  */
 
-static void check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
+static void check_bind_msg(const char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
   int x;
@@ -537,19 +537,19 @@ static int gotmsg(char *from, char *msg)
             || !egg_strcasecmp(my_code, "ident")
             || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
             || !egg_strcasecmp(my_code, msginvite) || !egg_strcasecmp(my_code, msgident)) {
-          char buf2[10] = "";
+          const char *buf2 = NULL;
 
           doit = 0;
           if (!egg_strcasecmp(my_code, msgop))
-            sprintf(buf2, "op");
+            buf2 = "op";
           else if (!egg_strcasecmp(my_code, msgpass))
-            sprintf(buf2, "pass");
+            buf2 = "pass";
           else if (!egg_strcasecmp(my_code, msginvite))
-            sprintf(buf2, "invite");
+            buf2 = "invite";
           else if (!egg_strcasecmp(my_code, msgident))
-            sprintf(buf2, "ident");
+            buf2 = "ident";
 
-          if (buf2[0])
+          if (buf2)
             check_bind_msg(buf2, nick, uhost, my_u, msg);
           else
             putlog(LOG_MSGS, "*", "(%s!%s) attempted to use invalid msg cmd '%s'", nick, uhost, my_code);
@@ -938,7 +938,7 @@ static void eof_server(int idx)
 
 static void display_server(int idx, char *buf)
 {
-  sprintf(buf, "%s  (lag: %d)", trying_server ? "conn" : "serv", server_lag);
+  simple_sprintf(buf, "%s  (lag: %d)", trying_server ? "conn" : "serv", server_lag);
 }
 
 static void connect_server(void);

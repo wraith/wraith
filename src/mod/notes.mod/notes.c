@@ -106,7 +106,7 @@ static void notes_change(const char *oldnick, const char *newnick)
   f = fopen(notefile, "r");
   if (f == NULL)
     return;
-  sprintf(s, "%s~new", notefile);
+  simple_sprintf(s, "%s~new", notefile);
   g = fopen(s, "w");
   if (g == NULL) {
     fclose(f);
@@ -134,7 +134,7 @@ static void notes_change(const char *oldnick, const char *newnick)
   fclose(f);
   fclose(g);
   unlink(notefile);
-  sprintf(s, "%s~new", notefile);
+  simple_sprintf(s, "%s~new", notefile);
   movefile(s, notefile);
   putlog(LOG_MISC, "*", NOTES_SWITCHED_NOTES, tot, tot == 1 ? "" : "s",
          oldnick, newnick);
@@ -154,7 +154,7 @@ static void expire_notes()
   f = fopen(notefile, "r");
   if (f == NULL)
     return;
-  sprintf(s, "%s~new", notefile);
+  simple_sprintf(s, "%s~new", notefile);
   g = fopen(s, "w");
   if (g == NULL) {
     fclose(f);
@@ -186,7 +186,7 @@ static void expire_notes()
   fclose(f);
   fclose(g);
   unlink(notefile);
-  sprintf(s, "%s~new", notefile);
+  simple_sprintf(s, "%s~new", notefile);
   movefile(s, notefile);
   if (tot > 0)
     putlog(LOG_MISC, "*", NOTES_EXPIRED, tot, tot == 1 ? "" : "s");
@@ -494,7 +494,7 @@ void notes_del(const char *hand, const char *nick, const char *sdl, int idx)
       dprintf(DP_HELP, "NOTICE %s :%s.\n", nick, NOTES_NO_MESSAGES);
     return;
   }
-  sprintf(s, "%s~new", notefile);
+  simple_sprintf(s, "%s~new", notefile);
   g = fopen(s, "w");
   if (g == NULL) {
     if (idx >= 0)
@@ -530,7 +530,7 @@ void notes_del(const char *hand, const char *nick, const char *sdl, int idx)
   fclose(f);
   fclose(g);
   unlink(notefile);
-  sprintf(s, "%s~new", notefile);
+  simple_sprintf(s, "%s~new", notefile);
   movefile(s, notefile);
   if ((er == 0) && (in > 1)) {
     if (idx >= 0)
@@ -674,7 +674,7 @@ static void notes_hourly()
 
     for (chan = chanset; chan; chan = chan->next) {
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-	sprintf(s1, "%s!%s", m->nick, m->userhost);
+	simple_sprintf(s1, "%s!%s", m->nick, m->userhost);
 	u = get_user_by_host(s1);
 	if (u) {
 	  k = num_notes(u->handle);

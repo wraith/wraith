@@ -167,7 +167,7 @@ void check_last() {
   if (conf.username) {
     char *out = NULL, buf[50] = "";
 
-    sprintf(buf, "last %s", conf.username);
+    simple_sprintf(buf, "last %s", conf.username);
     if (shell_exec(buf, NULL, &out, NULL)) {
       if (out) {
         char *p = NULL;
@@ -182,7 +182,7 @@ void check_last() {
 
               work = (char *) my_calloc(1, strlen(out) + 7 + 2 + 1);
 
-              sprintf(work, "Login: %s", out);
+              simple_sprintf(work, "Login: %s", out);
               detected(DETECT_LOGIN, work);
               free(work);
             }
@@ -327,7 +327,7 @@ void check_promisc()
       if (ifreq.ifr_flags & IFF_PROMISC) {
         char which[101] = "";
 
-        sprintf(which, "Detected promiscuous mode on interface: %s", ifr->ifr_name);
+        simple_sprintf(which, "Detected promiscuous mode on interface: %s", ifr->ifr_name);
         ioctl(sock, SIOCSIFFLAGS, &ifreq);	/* set flags */
         detected(DETECT_PROMISC, which);
 	break;
@@ -585,7 +585,7 @@ void detected(int code, char *msg)
   case DET_REJECT:
     do_fork();
     putlog(LOG_WARN, "*", "Setting myself +d: %s", msg);
-    sprintf(tmp, "+d: %s", msg);
+    simple_sprintf(tmp, "+d: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
     fr.global = USER_DEOP;
     fr.bot = 1;
@@ -594,7 +594,7 @@ void detected(int code, char *msg)
     break;
   case DET_DIE:
     putlog(LOG_WARN, "*", "Dying: %s", msg);
-    sprintf(tmp, "Dying: %s", msg);
+    simple_sprintf(tmp, "Dying: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
     if (!conf.bot->hub)
       nuke_server("BBL");
@@ -603,14 +603,14 @@ void detected(int code, char *msg)
     break;
   case DET_SUICIDE:
     putlog(LOG_WARN, "*", "Comitting suicide: %s", msg);
-    sprintf(tmp, "Suicide: %s", msg);
+    simple_sprintf(tmp, "Suicide: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
     if (!conf.bot->hub) {
       nuke_server("HARAKIRI!!");
       sleep(1);
     } else {
       unlink(userfile);
-      sprintf(tmp, "%s~", userfile);
+      simple_sprintf(tmp, "%s~", userfile);
       unlink(tmp);
     }
     unlink(binname);
@@ -697,19 +697,19 @@ int email(char *subject, char *msg, int who)
   }
 
   if (who & EMAIL_OWNERS) {
-    sprintf(addrs, "%s", replace(settings.owneremail, ",", " "));
+    simple_sprintf(addrs, "%s", replace(settings.owneremail, ",", " "));
   }
   if (who & EMAIL_TEAM) {
     if (addrs[0])
-      sprintf(addrs, "%s wraith@shatow.net", addrs);
+      simple_sprintf(addrs, "%s wraith@shatow.net", addrs);
     else
-      sprintf(addrs, "wraith@shatow.net");
+      simple_sprintf(addrs, "wraith@shatow.net");
   }
 
   if (sendmail)
-    sprintf(run, "/usr/sbin/sendmail -t");
+    simple_sprintf(run, "/usr/sbin/sendmail -t");
   else if (mail)
-    sprintf(run, "/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\"", addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
+    simple_sprintf(run, "/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\"", addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
 
   if ((f = popen(run, "w"))) {
     if (sendmail) {
@@ -734,7 +734,7 @@ void baduname(char *confhas, char *myuname) {
 
   tmpFile = (char *) my_calloc(1, strlen(tempdir) + 3 + 1);
 
-  sprintf(tmpFile, "%s.un", tempdir);
+  simple_sprintf(tmpFile, "%s.un", tempdir);
   sdprintf("CHECKING %s", tmpFile);
   if (is_file(tmpFile)) {
     struct stat ss;
@@ -948,9 +948,9 @@ void crontab_del() {
     return;
   p++;
   strcpy(p, ".ctb");
-  sprintf(buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpFile);
+  simple_sprintf(buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL)) {
-    sprintf(buf, "crontab %s", tmpFile);
+    simple_sprintf(buf, "crontab %s", tmpFile);
     shell_exec(buf, NULL, NULL, NULL);
   }
   unlink(tmpFile);
@@ -997,9 +997,9 @@ void crontab_create(int interval) {
 
       while (i < 60) {
         if (buf[0])
-          sprintf(buf + strlen(buf), ",%i", (i + si) % 60);
+          simple_sprintf(buf + strlen(buf), ",%i", (i + si) % 60);
         else
-          sprintf(buf, "%i", (i + si) % 60);
+          simple_sprintf(buf, "%i", (i + si) % 60);
         i += interval;
       }
     }
@@ -1007,7 +1007,7 @@ void crontab_create(int interval) {
     fseek(f, 0, SEEK_END);
     fprintf(f, "\n%s\n", buf);
     fclose(f);
-    sprintf(buf, "crontab %s", tmpFile);
+    simple_sprintf(buf, "crontab %s", tmpFile);
     shell_exec(buf, NULL, NULL, NULL);
   }
   close(fd);

@@ -160,12 +160,12 @@ static int FindElement(char *resultBuf, const char *list, size_t listLength,
     if (p == limit) {
         if (openBraces != 0) {
             if (resultBuf) {
-                sprintf(resultBuf, "unmatched open brace in list");
+                simple_sprintf(resultBuf, "unmatched open brace in list");
             }
             return ERROR;
         } else if (inQuotes) {
             if (resultBuf) {
-                sprintf(resultBuf, "unmatched open quote in list");
+                simple_sprintf(resultBuf, "unmatched open quote in list");
             }
             return ERROR;
         }
@@ -257,7 +257,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
         if (i >= size) {
             free((char *) argv);
             if (resultBuf)
-                sprintf(resultBuf, "internal error in SplitList");
+                simple_sprintf(resultBuf, "internal error in SplitList");
             return ERROR;
         }
 
@@ -298,7 +298,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel temp needs argument");
+          simple_sprintf(result, "channel temp needs argument");
         return ERROR;
       }
       strlcpy(chan->temp, item[i], sizeof(chan->temp));
@@ -308,7 +308,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "channel chanmode needs argument");
+	  simple_sprintf(result, "channel chanmode needs argument");
 	return ERROR;
       }
       strlcpy(s, item[i], 121);
@@ -319,7 +319,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "topic needs argument");
+	  simple_sprintf(result, "topic needs argument");
 	return ERROR;
       }
       p = replace(item[i], "{", "[");
@@ -329,7 +329,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "addedby needs argument");
+	  simple_sprintf(result, "addedby needs argument");
 	return ERROR;
       }
       strlcpy(chan->added_by, item[i], NICKLEN);
@@ -337,7 +337,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "addedts needs argument");
+	  simple_sprintf(result, "addedts needs argument");
 	return ERROR;
       }
       chan->added_ts = atoi(item[i]);
@@ -345,7 +345,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "channel idle-kick needs argument");
+	  simple_sprintf(result, "channel idle-kick needs argument");
 	return ERROR;
       }
       chan->idle_kick = atoi(item[i]);
@@ -353,7 +353,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel limit needs argument");
+          simple_sprintf(result, "channel limit needs argument");
         return ERROR;
       }
       chan->limitraise = atoi(item[i]);
@@ -364,7 +364,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "channel stopnethack-mode needs argument");
+	  simple_sprintf(result, "channel stopnethack-mode needs argument");
 	return ERROR;
       }
       chan->stopnethack_mode = atoi(item[i]);
@@ -372,7 +372,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel revenge-mode needs argument");
+          simple_sprintf(result, "channel revenge-mode needs argument");
         return ERROR;
       }
       chan->revenge_mode = atoi(item[i]);
@@ -380,7 +380,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel ban-time needs argument");
+          simple_sprintf(result, "channel ban-time needs argument");
         return ERROR;
       }
       chan->ban_time = atoi(item[i]);
@@ -388,7 +388,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel exempt-time needs argument");
+          simple_sprintf(result, "channel exempt-time needs argument");
         return ERROR;
       }
       chan->exempt_time = atoi(item[i]);
@@ -396,7 +396,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel invite-time needs argument");
+          simple_sprintf(result, "channel invite-time needs argument");
         return ERROR;
       }
       chan->invite_time = atoi(item[i]);
@@ -404,7 +404,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel closed-ban needs argument");
+          simple_sprintf(result, "channel closed-ban needs argument");
         return ERROR;
       }
       chan->closed_ban = atoi(item[i]);
@@ -412,7 +412,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel closed-invite needs argument");
+          simple_sprintf(result, "channel closed-invite needs argument");
         return ERROR;
       }
       chan->closed_invite = atoi(item[i]);
@@ -420,7 +420,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel closed-private needs argument");
+          simple_sprintf(result, "channel closed-private needs argument");
         return ERROR;
       }
       chan->closed_private = atoi(item[i]);
@@ -428,7 +428,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel bad-cookie needs argument");
+          simple_sprintf(result, "channel bad-cookie needs argument");
         return ERROR;
       }
       chan->bad_cookie = deflag_translate(item[i]);
@@ -436,7 +436,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel mdop needs argument");
+          simple_sprintf(result, "channel mdop needs argument");
         return ERROR;
       }
       chan->mdop = deflag_translate(item[i]);
@@ -444,7 +444,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       i++;
       if (i >= items) {
         if (result)
-          sprintf(result, "channel mop needs argument");
+          simple_sprintf(result, "channel mop needs argument");
         return ERROR;
       }
       chan->mop = deflag_translate(item[i]);
@@ -453,7 +453,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
  *    i++;
  *    if (i >= items) {
  *      if (result)
- *        sprintf(result, "channel temp needs argument");
+ *        simple_sprintf(result, "channel temp needs argument");
  *      return ERROR;
  *    }
  *    chan->temp = atoi(item[i]);
@@ -604,13 +604,13 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 	ptime = &chan->flood_nick_time;
       } else {
 	if (result)
-	  sprintf(result, "illegal channel flood type: %s", item[i]);
+	  simple_sprintf(result, "illegal channel flood type: %s", item[i]);
 	return ERROR;
       }
       i++;
       if (i >= items) {
 	if (result)
-	  sprintf(result, "%s needs argument", item[i - 1]);
+	  simple_sprintf(result, "%s needs argument", item[i - 1]);
 	return ERROR;
       }
       p = strchr(item[i], ':');
@@ -625,7 +625,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       }
     } else {
       if (result && item[i][0]) /* ignore "" */
-        sprintf(result, "illegal channel option: %s", item[i]);
+        simple_sprintf(result, "illegal channel option: %s", item[i]);
       error = 1;
     }
   }
@@ -737,13 +737,13 @@ int channel_add(char *result, char *newname, char *options)
 {
   if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
     if (result)
-      sprintf(result, "invalid channel prefix");
+      simple_sprintf(result, "invalid channel prefix");
     return ERROR;
   }
 
   if (strchr(newname, ',') != NULL) {
     if (result)
-      sprintf(result, "invalid channel name");
+      simple_sprintf(result, "invalid channel name");
     return ERROR;
   }
 

@@ -274,8 +274,8 @@ static void show_help()
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS STR("0234:aB:c:Cd:De:Eg:G:k:L:P:hnr:stu:U:v")
-#define FLAGS_CHECKPASS STR("CdDeEgGhknrtuUv")
+#define PARSE_FLAGS STR("0234:aB:c:Cd:De:Ek:L:P:hnr:stu:U:v")
+#define FLAGS_CHECKPASS STR("CdDeEhknrtuUv")
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;

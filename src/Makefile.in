@@ -46,6 +46,7 @@ OBJS = auth.o \
 	rfc1459.o \
 	shell.o \
 	socket.o \
+	sprintf.o \
 	tclhash.o \
 	userent.o \
 	userrec.o \

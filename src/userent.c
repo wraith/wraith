@@ -425,7 +425,7 @@ void stats_add(struct userrec *u, int login, int op)
     sl++;
   if (op)
     so++;
-  sprintf(s2, "%i %i", sl, so);
+  simple_sprintf(s2, "%i %i", sl, so);
   set_user(&USERENTRY_STATS, u, s2);
 }
 
@@ -874,11 +874,11 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
       if (s[0] && !s[9])
         strcat(s, q->extra);
       else if (!s[0])
-        sprintf(s, "         %s", q->extra);
+        simple_sprintf(s, "         %s", q->extra);
       else {
         if (strlen(s) + strlen(q->extra) + 2 > 65) {
   	  dprintf(idx, "%s\n", s);
-  	  sprintf(s, "         %s", q->extra);
+  	  simple_sprintf(s, "         %s", q->extra);
         } else {
   	  strcat(s, ", ");
   	  strcat(s, q->extra);

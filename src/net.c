@@ -1041,7 +1041,7 @@ int open_telnet_dcc(int sock, char *server, char *port)
     c[1] = (addr >> 16) & 0xff;
     c[2] = (addr >> 8) & 0xff;
     c[3] = addr & 0xff;
-    sprintf(sv, "%u.%u.%u.%u", c[0], c[1], c[2], c[3]);
+    simple_sprintf(sv, "%u.%u.%u.%u", c[0], c[1], c[2], c[3]);
 #ifdef USE_IPV6
     }
   /* strcpy(sv,hostnamefromip(addr)); */
@@ -1660,7 +1660,7 @@ void tell_netdebug(int idx)
   dprintf(idx, "Open sockets:");
   for (int i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED)) {
-      sprintf(s, " %d", socklist[i].sock);
+      simple_sprintf(s, " %d", socklist[i].sock);
       if (socklist[i].flags & SOCK_BINARY)
 	strcat(s, " (binary)");
       if (socklist[i].flags & SOCK_LISTEN)

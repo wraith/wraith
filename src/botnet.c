@@ -657,9 +657,9 @@ void tell_bottree(int idx)
             color_str = (char *) NULL;
 
           if (bot->share)
-            i = sprintf(s, "%c", bot->share);
+            i = simple_sprintf(s, "%c", bot->share);
           else
-            i = sprintf(s, "-");
+            i = simple_sprintf(s, "-");
           i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
@@ -703,9 +703,9 @@ void tell_bottree(int idx)
 
 		bot2 = bot;
                 if (bot->share)
-                  i = sprintf(s, "%c", bot->share);
+                  i = simple_sprintf(s, "%c", bot->share);
                 else
-                  i = sprintf(s, "-");
+                  i = simple_sprintf(s, "-");
                 i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
@@ -1506,12 +1506,12 @@ static void dcc_relaying(int idx, char *buf, int j)
 
 static void display_relay(int i, char *other)
 {
-  sprintf(other, "rela  -> sock %d", dcc[i].u.relay->sock);
+  simple_sprintf(other, "rela  -> sock %d", dcc[i].u.relay->sock);
 }
 
 static void display_relaying(int i, char *other)
 {
-  sprintf(other, ">rly  -> sock %d", dcc[i].u.relay->sock);
+  simple_sprintf(other, ">rly  -> sock %d", dcc[i].u.relay->sock);
 }
 
 static void display_tandem_relay(int i, char *other)

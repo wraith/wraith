@@ -476,7 +476,7 @@ void rem_builtins(const char *table_name, cmd_t *cmds)
 	char name[50] = "";
 
 	for (; cmds->name; cmds++) {
-		sprintf(name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
+		simple_sprintf(name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
 		bind_entry_del(table, -1, cmds->name, name, NULL);
 	}
 }

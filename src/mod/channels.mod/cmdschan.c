@@ -520,7 +520,7 @@ static void cmd_slowjoin(int idx, char *par)
     dprintf(idx, "Hmmm... Channel didn't get added. Weird *shrug*\n");
     return;
   }
-  sprintf(buf2, "cjoin %s %s", chan->dname, buf);
+  simple_sprintf(buf2, "cjoin %s %s", chan->dname, buf);
   putallbots(buf2);
   if (conf.bot->hub)
     count = 0;
@@ -533,12 +533,12 @@ static void cmd_slowjoin(int idx, char *par)
     if (ubot) {
       /* Variation: 60 secs intvl should be 60 +/- 15 */
       if (bot_hublevel(ubot) < 999) {
-	sprintf(tmp, "sj %s 0\n", chan->dname);
+	simple_sprintf(tmp, "sj %s 0\n", chan->dname);
       } else {
 	int v = (random() % (intvl / 2)) - (intvl / 4);
 
 	delay += intvl;
-	sprintf(tmp, "sj %s %i\n", chan->dname, delay + v);
+	simple_sprintf(tmp, "sj %s %i\n", chan->dname, delay + v);
 	count++;
       }
       putbot(ubot->handle, tmp);
@@ -596,12 +596,12 @@ static void cmd_slowpart(int idx, char *par)
       /* Variation: 60 secs intvl should be 60 +/- 15 */
       if (ubot) {
         if (bot_hublevel(ubot) < 999) {
-  	  sprintf(tmp, "sp %s 0\n", chname);
+  	  simple_sprintf(tmp, "sp %s 0\n", chname);
         } else {
   	  int v = (random() % (intvl / 2)) - (intvl / 4);
 
   	  delay += intvl;
-  	  sprintf(tmp, "sp %s %i\n", chname, delay + v);
+  	  simple_sprintf(tmp, "sp %s %i\n", chname, delay + v);
   	  count++;
         }
         putbot(ubot->handle, tmp);
@@ -924,7 +924,7 @@ static void cmd_down(int idx, char *par)
     return;
   }
   
-  sprintf(buf2, "down %s", chan->dname);
+  simple_sprintf(buf2, "down %s", chan->dname);
   putallbots(buf2);
   if (!conf.bot->hub) {
     add_mode(chan, '-', 'o', botname);
@@ -946,7 +946,7 @@ static void pls_chan(int idx, char *par, char *bot)
   }
 
   chname = newsplit(&par);
-  sprintf(buf, "cjoin %s %s", chname, bot ? bot : "*");		/* +chan makes all bots join */
+  simple_sprintf(buf, "cjoin %s %s", chname, bot ? bot : "*");		/* +chan makes all bots join */
   if (par[0]) {
     strcat(buf, " ");
     strcat(buf, par);
@@ -1034,7 +1034,7 @@ static void mns_chan(int idx, char *par, char *bot)
   }
   chname = newsplit(&par);
 
-  sprintf(buf2, "cpart %s %s", chname, bot ? bot : "*");
+  simple_sprintf(buf2, "cpart %s %s", chname, bot ? bot : "*");
   if (bot)		/* bot will just set it +inactive */
     putbot(bot, buf2);
   else
@@ -1103,7 +1103,7 @@ void show_flag(int idx, char *work, int *cnt, const char *name, unsigned int sta
     work[0] = 0;
   }
   if (!work[0])
-    sprintf(work, "  ");
+    simple_sprintf(work, "  ");
   if (name && name[0]) {
     chr_state[0] = 0;
     if (state) {
@@ -1135,7 +1135,7 @@ void show_int(int idx, char *work, int *cnt, const char *desc, int state, const 
     work[0] = 0;
   }
   if (!work[0])
-    sprintf(work, "  ");
+    simple_sprintf(work, "  ");
   /* need to make next line all one char, and then put it into %-30s */
   if (desc && desc[0]) {
     char tmp2[50] = "", tmp3[50] = "";

@@ -467,13 +467,13 @@ void conf_to_bin(conf_t *in, bool move, int die)
 
   clear_settings();
   sdprintf("converting conf to bin\n");
-  sprintf(settings.uid, "%d", in->uid);
-  sprintf(settings.watcher, "%d", in->watcher);
-  sprintf(settings.autocron, "%d", in->autocron);
-  sprintf(settings.autouname, "%d", in->autouname);
-  sprintf(settings.portmin, "%d", in->portmin);
-  sprintf(settings.portmax, "%d", in->portmax);
-  sprintf(settings.pscloak, "%d", in->pscloak);
+  simple_sprintf(settings.uid, "%d", in->uid);
+  simple_sprintf(settings.watcher, "%d", in->watcher);
+  simple_sprintf(settings.autocron, "%d", in->autocron);
+  simple_sprintf(settings.autouname, "%d", in->autouname);
+  simple_sprintf(settings.portmin, "%d", in->portmin);
+  simple_sprintf(settings.portmax, "%d", in->portmax);
+  simple_sprintf(settings.pscloak, "%d", in->pscloak);
 
   strlcpy(settings.binname, in->binname, 16);
   strlcpy(settings.username, in->username, 16);
@@ -482,7 +482,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
   strlcpy(settings.homedir, in->homedir, 350);
   strlcpy(settings.binpath, in->binpath, 350);
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
-    sprintf(settings.bots, "%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
+    simple_sprintf(settings.bots, "%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
                            bot->nick,
                            bot->net.ip ? bot->net.ip : ".", 
                            bot->net.host6 ? "+" : "", 

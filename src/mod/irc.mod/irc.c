@@ -107,7 +107,7 @@ void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost
   const char *ops = " (auto-op)";
 
   if (handle)
-    sprintf(fhandle, "\002%s\002 ", handle);
+    simple_sprintf(fhandle, "\002%s\002 ", handle);
   putlog(LOG_MISC, "*", "Invited %s%s(%s%s%s) to %s.", handle ? handle : "", handle ? " " : "", nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname);
   dprintf(DP_MODE, "PRIVMSG %s :\001ACTION has invited %s(%s%s%s) to %s.%s\001\n",
     chan->name, fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
@@ -266,10 +266,10 @@ makecookie(char *chn, char *bnick)
     chname[3] = 0;
   strtoupper(chname);
 
-  sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
+  simple_sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
   hash = MD5(tohash);
   buf = (char *) my_calloc(1, 20);
-  sprintf(buf, "%c%c%c!%s@%s", hash[8], hash[16], hash[18], randstring, ts);
+  simple_sprintf(buf, "%c%c%c!%s@%s", hash[8], hash[16], hash[18], randstring, ts);
   /* sprintf(buf, "%c/%s!%s@%X", hash[16], randstring, ts, BIT31); */
   free(chname);
   return buf;
@@ -295,7 +295,7 @@ checkcookie(char *chn, char *bnick, char *cookie)
     chname[3] = 0;
   strtoupper(chname);
   /* hash!rand@ts */
-  sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
+  simple_sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
   hash = MD5(tohash);
   if (!(hash[8] == cookie[0] && hash[16] == cookie[1] && hash[18] == cookie[2]))
     return BC_HASH;
@@ -720,7 +720,7 @@ request_in(struct chanset_t *chan)
   char s[255] = "", *l = (char *) my_calloc(1, IN_BOTS * 30);
   int cnt = IN_BOTS, n;
 
-  sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
+  simple_sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
   while (cnt) {
     n = randint(i);
     if (botops[n]) {
@@ -1139,7 +1139,7 @@ check_lonely_channel(struct chanset_t *chan)
       whined = 1;
     }
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      sprintf(s, "%s!%s", m->nick, m->userhost);
+      simple_sprintf(s, "%s!%s", m->nick, m->userhost);
       u = get_user_by_host(s);
       if (!match_my_nick(m->nick) && (!u || !u->bot)) {
         ok = 0;
@@ -1218,7 +1218,7 @@ raise_limit(struct chanset_t *chan)
   if (nl != chan->channel.maxmembers) {
     char s[5] = "";
 
-    sprintf(s, "%d", nl);
+    simple_sprintf(s, "%d", nl);
     add_mode(chan, '+', 'l', s);
   }
 
@@ -1286,7 +1286,7 @@ check_expired_chanstuff(struct chanset_t *chan)
     for (m = chan->channel.member; m && m->nick[0]; m = n) {
       n = m->next;
       if (m->split && now - m->split > wait_split) {
-        sprintf(s, "%s!%s", m->nick, m->userhost);
+        simple_sprintf(s, "%s!%s", m->nick, m->userhost);
         putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
         killmember(chan, m->nick);
         continue;
@@ -1295,7 +1295,7 @@ check_expired_chanstuff(struct chanset_t *chan)
       if (me_op(chan)) {
         if (chan->idle_kick) {
           if (now - m->last >= chan->idle_kick * 60 && !match_my_nick(m->nick) && !chan_issplit(m)) {
-            sprintf(s, "%s!%s", m->nick, m->userhost);
+            simple_sprintf(s, "%s!%s", m->nick, m->userhost);
             get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
             if (!(glob_bot(fr) || (glob_op(fr) && !glob_deop(fr)) || chan_op(fr))) {
               dprintf(DP_SERVER, "KICK %s %s :%sidle %d min\n", chan->name, m->nick, kickprefix, chan->idle_kick);
@@ -1304,9 +1304,10 @@ check_expired_chanstuff(struct chanset_t *chan)
           }
         } else if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
           if (!chan_hasop(m) && !chan_hasvoice(m)) {
-            if (!m->user) {
-              sprintf(s, "%s!%s", m->nick, m->userhost);
+            if (!m->user && !m->tried_getuser) {
+              simple_sprintf(s, "%s!%s", m->nick, m->userhost);
               m->user = get_user_by_host(s);
+              m->tried_getuser = 1;
             }
 
             if (m->user) {

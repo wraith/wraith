@@ -137,7 +137,7 @@ static char *passkey()
 
   char *tmp = my_calloc(1, 512);
 
-  sprintf(tmp, "%s-%s.%s!%s", settings.salt1, settings.salt2, settings.packname, settings.bdhash);
+  simple_sprintf(tmp, "%s-%s.%s!%s", settings.salt1, settings.salt2, settings.packname, settings.bdhash);
   key = SHA1(tmp);
   free(tmp);
   egg_bzero(tmp, 512);

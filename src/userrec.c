@@ -366,7 +366,7 @@ int write_userfile(int idx)
   FILE *f = NULL;
   char *new_userfile = (char *) my_calloc(1, strlen(userfile) + 5);
 
-  sprintf(new_userfile, "%s~new", userfile);
+  simple_sprintf(new_userfile, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");
   fixmod(new_userfile);

@@ -163,7 +163,7 @@ flush_cookies(struct chanset_t *chan, int pri)
     if (pri == QUICK) {
       char outbuf[201] = "";
 
-      sprintf(outbuf, "MODE %s %s\r\n", chan->name, out);
+      simple_sprintf(outbuf, "MODE %s %s\r\n", chan->name, out);
       tputs(serv, outbuf, strlen(outbuf));
       /* dprintf(DP_MODE, "MODE %s %s\n", chan->name, out); */
     } else
@@ -302,7 +302,7 @@ flush_mode(struct chanset_t *chan, int pri)
 /* floods too much
       char outbuf[201] = "";
 
-      sprintf(outbuf, "MODE %s %s\r\n", chan->name, out);
+      simple_sprintf(outbuf, "MODE %s %s\r\n", chan->name, out);
       tputs(serv, outbuf, strlen(outbuf));
 */
       dprintf(DP_MODE, "MODE %s %s\n", chan->name, out);
@@ -549,13 +549,13 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
       char outbuf[101] = ""; 
 
       if (num == 4) {
-        sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, mv->nick);
+        simple_sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, mv->nick);
       } else if (num == 5) {
-        sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, m->nick);
+        simple_sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, m->nick);
       } else if (num == 6) {
-        sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
+        simple_sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
       } else if (num == 7) {
-        sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, m->nick, response(RES_BITCHOP));
+        simple_sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, m->nick, response(RES_BITCHOP));
       } else
         add_mode(chan, '-', 'o', mv->nick);
 
@@ -604,7 +604,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
     /* tell other bots to set jointime to 0 and join */
     char *buf = (char *) my_calloc(1, strlen(chan->dname) + 3 + 1);
 
-    sprintf(buf, "jn %s", chan->dname);
+    simple_sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);
     free(buf);
     recheck_channel(chan, 1);
@@ -1010,7 +1010,7 @@ gotmode(char *from, char *msg)
 
           /* Just want o's and b's */
           modes[modecnt] = (char *) my_calloc(1, strlen(mp) + 4);
-          sprintf(modes[modecnt], "%c%c %s", sign, chg[0], mp ? mp : "");
+          simple_sprintf(modes[modecnt], "%c%c %s", sign, chg[0], mp ? mp : "");
           modecnt++;
           if (chg[0] == 'o') {
             if (sign == '+') {
@@ -1046,10 +1046,10 @@ gotmode(char *from, char *msg)
           if (role && (!u || (u && !u->bot)) && m && !chan_sentkick(m)) {
             if (deops >= 3) {
               m->flags |= SENTKICK;
-              sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
+              simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
               tputs(serv, tmp, strlen(tmp));
               if (u) {
-                sprintf(tmp, "Mass deop on %s by %s", chan->dname, m->nick);
+                simple_sprintf(tmp, "Mass deop on %s by %s", chan->dname, m->nick);
                 deflag_user(u, DEFLAG_MDOP, tmp, chan);
               }
             }
@@ -1058,10 +1058,10 @@ gotmode(char *from, char *msg)
             if (ops >= 3) {
               if (chan->mop) {
                 m->flags |= SENTKICK;
-                sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+                simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
                 tputs(serv, tmp, strlen(tmp));
                 if (u) {
-                  sprintf(tmp, "Mass op on %s by %s", chan->dname, m->nick);
+                  simple_sprintf(tmp, "Mass op on %s by %s", chan->dname, m->nick);
                   deflag_user(u, DEFLAG_MOP, tmp, chan);
                 }
                 enforce_bitch(chan);        /* deop quick! */
@@ -1091,10 +1091,10 @@ gotmode(char *from, char *msg)
                     /* Kick opper */
                     if (!chan_sentkick(m)) {
                       m->flags |= SENTKICK;
-                      sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
+                      simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
                       tputs(serv, tmp, strlen(tmp));
                     }
-                    sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
+                    simple_sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
                     deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
                     break;
                   default:
@@ -1113,7 +1113,7 @@ gotmode(char *from, char *msg)
                           if (!mv || !chan_sentkick(mv)) {
                             if (mv)
                               mv->flags |= SENTKICK;
-                            sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
+                            simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
                             tputs(serv, tmp, strlen(tmp));
                           }
                         }
@@ -1140,12 +1140,12 @@ gotmode(char *from, char *msg)
                 case 1:
                   /* Kick opper */
                   if (!m || !chan_sentkick(m)) {
-                    sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+                    simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
                     tputs(serv, tmp, strlen(tmp));
                     if (m)
                       m->flags |= SENTKICK;
                   }
-                  sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
+                  simple_sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
                   deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
                   break;
                 default:
@@ -1164,7 +1164,7 @@ gotmode(char *from, char *msg)
                         if (!mv || !chan_sentkick(mv)) {
                           if (mv)
                             mv->flags |= SENTKICK;
-                          sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
+                          simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
                           tputs(serv, tmp, strlen(tmp));
                         }
                       }

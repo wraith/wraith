@@ -113,9 +113,9 @@ static char *getchanmode(struct chanset_t *chan)
     s[i++] = 'l';
   s[i] = 0;
   if (chan->channel.key[0])
-    i += sprintf(s + i, " %s", chan->channel.key);
+    i += simple_sprintf(s + i, " %s", chan->channel.key);
   if (chan->channel.maxmembers != 0)
-    sprintf(s + i, " %d", chan->channel.maxmembers);
+    simple_sprintf(s + i, " %d", chan->channel.maxmembers);
   return s;
 }
 
@@ -146,11 +146,12 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
   int ops = 0, targets = 0, bpos = 0, tpos = 0, ft = 0, ct = 0, actions = 0, sent = 0;
 
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!m->user) {
+    if (!m->user && !m->tried_getuser) {
       char s[256] = "";
 
-      sprintf(s, "%s!%s", m->nick, m->userhost);
+      simple_sprintf(s, "%s!%s", m->nick, m->userhost);
       m->user = get_user_by_host(s);
+      m->tried_getuser = 1;
     }
 
     if (m->user && m->user->bot && (m->user->flags & USER_OP)) {
@@ -485,7 +486,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
       if (!channel_enforcebans(chan) && me_op(chan)) {
 	  char s[UHOSTLEN];
 	  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {	  
-	    sprintf(s, "%s!%s", m->nick, m->userhost);
+	    simple_sprintf(s, "%s!%s", m->nick, m->userhost);
 	    if (wild_match(h, s) &&
 		(m->joined >= chan->floodtime[which]) &&
 		!chan_sentkick(m) && !match_my_nick(m->nick) && me_op(chan)) {
@@ -516,7 +517,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
       if (u) {
         char s[256] = "";
 
-        sprintf(s, "Mass deop on %s by %s", chan->dname, from);
+        simple_sprintf(s, "Mass deop on %s by %s", chan->dname, from);
         deflag_user(u, DEFLAG_MDOP, s, chan);
       }
       return 1;
@@ -533,7 +534,7 @@ static void doban(struct chanset_t *chan, memberlist *m)
 
   char s[UHOSTLEN] = "", *s1 = NULL;
 
-  sprintf(s, "%s!%s", m->nick, m->userhost);
+  simple_sprintf(s, "%s!%s", m->nick, m->userhost);
 
   if (!(use_exempts &&
         (u_match_mask(global_exempts,s) ||
@@ -575,7 +576,7 @@ static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    sprintf(s, "%s!%s", m->nick, m->userhost);
+    simple_sprintf(s, "%s!%s", m->nick, m->userhost);
     get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
     if (me_op(chan) &&
 	(wild_match(hostmask, s) || match_cidr(hostmask, s)) && 
@@ -616,7 +617,7 @@ static void refresh_ban_kick(struct chanset_t *chan, char *user, char *nick)
 	char c[512] = "";		/* The ban comment.	*/
 	char s[UHOSTLEN] = "";
 
-	sprintf(s, "%s!%s", m->nick, m->userhost);
+	simple_sprintf(s, "%s!%s", m->nick, m->userhost);
 	get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr,
 			 chan->dname);
         if (role == 1)
@@ -811,7 +812,7 @@ void check_this_ban(struct chanset_t *chan, char *banmask, bool sticky)
   char user[UHOSTLEN] = "";
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    sprintf(user, "%s!%s", m->nick, m->userhost);
+    simple_sprintf(user, "%s!%s", m->nick, m->userhost);
     if (wild_match(banmask, user) &&
         !(use_exempts &&
           (u_match_mask(global_exempts, user) ||
@@ -908,7 +909,7 @@ void recheck_channel_modes(struct chanset_t *chan)
     if ((chan->limit_prot != 0) && (chan->channel.maxmembers == 0)) {
       char s[50] = "";
 
-      sprintf(s, "%d", chan->limit_prot);
+      simple_sprintf(s, "%d", chan->limit_prot);
       add_mode(chan, '+', 'l', s);
     } else if ((mns & CHANLIMIT) && (chan->channel.maxmembers != 0))
       add_mode(chan, '-', 'l', "");
@@ -956,7 +957,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     }
   }
 
-  sprintf(s, "%s!%s", m->nick, m->userhost);
+  simple_sprintf(s, "%s!%s", m->nick, m->userhost);
   /* check vs invites */
   if (use_invites &&
       (u_match_mask(global_invites,s) ||
@@ -989,7 +990,7 @@ void check_this_user(char *hand, int del, char *host)
 
   for (struct chanset_t *chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      sprintf(s, "%s!%s", m->nick, m->userhost);
+      simple_sprintf(s, "%s!%s", m->nick, m->userhost);
       u = m->user ? m->user : get_user_by_host(s);
       if ((u && !egg_strcasecmp(u->handle, hand) && del < 2) ||
 	  (!u && del == 2 && wild_match(host, s))) {
@@ -1325,7 +1326,7 @@ static int got302(char *from, char *msg)
       char s[UHOSTLEN] = "";
       struct userrec *u = NULL;
 
-      sprintf(s, "%s!%s", nick, uhost);
+      simple_sprintf(s, "%s!%s", nick, uhost);
       if ((u = get_user_by_host(s)))
         strcpy(cache->handle, u->handle);
     }
@@ -1500,7 +1501,7 @@ static int got324(char *from, char *msg)
 	  *q = 0;
 	  chan->channel.maxmembers = atoi(p);
 /*	  strcpy(p, q + 1); */
-          sprintf(p, "%s", q + 1);
+          simple_sprintf(p, "%s", q + 1);
 	} else {
 	  chan->channel.maxmembers = atoi(p);
 	  *p = 0;
@@ -2616,7 +2617,7 @@ static int gotnick(char *from, char *msg)
        * Banned?
        */
       /* Compose a nick!user@host for the new nick */
-      sprintf(s1, "%s!%s", msg, uhost);
+      simple_sprintf(s1, "%s!%s", msg, uhost);
       strcpy(m->nick, msg);
       memberlist_reposition(chan, m);
       detect_chan_flood(msg, uhost, from, chan, FLOOD_NICK, NULL);

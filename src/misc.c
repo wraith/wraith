@@ -264,7 +264,7 @@ void maskhost(const char *s, char *nw)
 	  x = p;
 	else
 	  x = e;
-	sprintf(nw, "*%s", x);
+	simple_sprintf(nw, "*%s", x);
       }
     }
   }
@@ -279,7 +279,7 @@ void daysago(time_t mynow, time_t then, char *out)
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    sprintf(out, "%d day%s ago", mydays, (mydays == 1) ? "" : "s");
+    simple_sprintf(out, "%d day%s ago", mydays, (mydays == 1) ? "" : "s");
     return;
   }
   egg_strftime(out, 6, "%H:%M", gmtime(&then));
@@ -293,7 +293,7 @@ void days(time_t mynow, time_t then, char *out)
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    sprintf(out, "in %d day%s", mydays, (mydays == 1) ? "" : "s");
+    simple_sprintf(out, "in %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
   egg_strftime(out, 9, "at %H:%M", gmtime(&now));
@@ -307,7 +307,7 @@ void daysdur(time_t mynow, time_t then, char *out)
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    sprintf(out, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
+    simple_sprintf(out, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
 
@@ -578,7 +578,7 @@ restart(int idx)
   }
   fatal(idx <= 0x7FF0 ? reason : NULL, 1);
   usleep(2000 * 500);
-  sprintf(buf, "%s -B %s\n", binname, conf.bot->nick);
+  simple_sprintf(buf, "%s -B %s\n", binname, conf.bot->nick);
   unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
   system(buf); /* start new bot. */
   exit(0);
@@ -680,7 +680,7 @@ int updatebin(int idx, char *par, int secs)
     size_t binsize = strlen(tmpdir) + 7 + 1;
     char *tmpbuf = (char *) my_calloc(1, binsize);
 
-    sprintf(tmpbuf, "%sbin.old.exe", tmpdir);
+    simple_sprintf(tmpbuf, "%sbin.old.exe", tmpdir);
     tmpbuf[binsize - 1] = 0;
     movefile(binname, tmpbuf);
     free(tmpbuf);
@@ -747,7 +747,7 @@ int goodpass(char *pass, int idx, char *nick)
   int nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
 
   if (strchr(BADPASSCHARS, pass[0])) {
-    sprintf(tell, "Passes may not begin with '-'");
+    simple_sprintf(tell, "Passes may not begin with '-'");
     goto fail;
   }
 
@@ -766,7 +766,7 @@ int goodpass(char *pass, int idx, char *nick)
 /*  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) { */
   if (lcase < 2 || ucase < 2 || strlen(pass) < 8) {
 
-    sprintf(tell, "Insecure pass, must be: ");
+    simple_sprintf(tell, "Insecure pass, must be: ");
     if (ocase < 1)
       strcat(tell, "\002>= 1 number\002, ");
     else
@@ -847,7 +847,7 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         }
         flagstr[0] = 0;
         while (*string && *string != '}') {
-          sprintf(tmp, "%c", *string);
+          simple_sprintf(tmp, "%c", *string);
           strcat(flagstr, tmp);
           string++;
         }
@@ -856,7 +856,7 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         if (flagrec_ok(&fr, flags)) {
           ok = 1;
           while (*string && *string != '%') {
-            sprintf(tmp, "%c", *string);
+            simple_sprintf(tmp, "%c", *string);
             strcat(helpstr, tmp);
             string++;
           }
@@ -888,14 +888,14 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         strcat(helpstr, "%");        
       } else {
         if (ok) {
-          sprintf(tmp, "%c", *string);
+          simple_sprintf(tmp, "%c", *string);
           strcat(helpstr, tmp);
         }
         string++;
       }
     } else {
       if (ok) {
-        sprintf(tmp, "%c", *string);
+        simple_sprintf(tmp, "%c", *string);
         strcat(helpstr, tmp);
       }
       string++;
