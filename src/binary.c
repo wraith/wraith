@@ -90,7 +90,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
 
     while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
       if (skip_read) {                  /* to skip bytes for pack data */
-        skip_read -= sizeof(buf) - 1;
+        skip_read -= len;
         continue;
       }
 
