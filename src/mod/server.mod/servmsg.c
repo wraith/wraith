@@ -172,7 +172,7 @@ static int got001(char *from, char *msg)
   strncpyz(cursrvname, from, sizeof(cursrvname));
 
   dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
-  dprintf(DP_SERVER, "MODE %s +iws\n");
+  dprintf(DP_SERVER, "MODE %s +iws\n", botname);
   x = serverlist;
   if (x == NULL)
     return 0;			/* Uh, no server list */

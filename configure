@@ -3148,7 +3148,7 @@ fi
 
 
 CCDEPMODE=gcc
-num=`gcc -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
+num=`$CC -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num = "3"; then
   CCDEPMODE=gcc3
 fi
