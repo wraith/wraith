@@ -1,6 +1,11 @@
 This is a summary of ChangeLog basically.
 
+1.1.8
+
+1.Fixed cosmetic error in help:decrypt.
+
 1.1.7
+
 1.Fixed cosmetic error in cmd_conf.
 2.Fixed fatal bug in linux check_trace()
 

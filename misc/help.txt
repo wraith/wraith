@@ -832,7 +832,7 @@ See also: down
    compiled with memory debugging. It's useless to anyone but developers
    trying to find memory leaks.
 ::decrypt
-###  %decrypt%b <key> <string>
+###  %bdecrypt%b <key> <string>
    Decrypts the string using the specified key.
  
 See also: encrypt, randstring, md5, sha1
