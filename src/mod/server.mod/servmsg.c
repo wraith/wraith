@@ -859,9 +859,6 @@ static int got451(char *from, char *msg)
  */
 static int goterror(char *from, char *msg)
 {
- /* FIXME: fixcolon doesn't do what we need here, this is a temp fix
-  * fixcolon(msg);
-  */
   if (msg[0] == ':')
     msg++;       
   putlog(LOG_SERV, "*", "-ERROR from server- %s", msg);

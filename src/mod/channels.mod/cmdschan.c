@@ -1241,7 +1241,7 @@ static void cmd_chaninfo(int idx, char *par)
     work[0] = 0;
 
 /* Chanflag template
- *          (chan->status & CHAN_TEMP) ? '+' : '-',
+ *  SHOW_FLAG("template", channel_template(chan));
  * also include %ctemp in dprintf.
  */
 

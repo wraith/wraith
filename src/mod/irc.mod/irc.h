@@ -84,8 +84,7 @@ static bool detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
 static void new_mask(masklist *, char *, char *);
 static void doban(struct chanset_t *, memberlist *);
 static char *quickban(struct chanset_t *, char *);
-static bool real_killmember(struct chanset_t *chan, char *nick, const char *file, int line);
-#define killmember(chan, nick)        real_killmember((chan), (nick), __FILE__,__LINE__)
+static bool killmember(struct chanset_t *chan, char *nick);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
 #define newban(chan, mask, who)         new_mask((chan)->channel.ban, mask, who)

@@ -1015,9 +1015,8 @@ new_mask(masklist *m, char *s, char *who)
 
 /* Removes a nick from the channel member list (returns 1 if successful)
  */
-/* FIXME: This passing of FILE:LINE is unnecesary, an OLD bug may still exist from the malloc->my_calloc patch */
 static bool
-real_killmember(struct chanset_t *chan, char *nick, const char *file, int line)
+killmember(struct chanset_t *chan, char *nick)
 {
   memberlist *x = NULL, *old = NULL;
 
@@ -1026,7 +1025,7 @@ real_killmember(struct chanset_t *chan, char *nick, const char *file, int line)
       break;
   if (!x || !x->nick[0]) {
     if (!channel_pending(chan))
-      putlog(LOG_MISC, "*", "(!) killmember(%s, %s) -> nonexistent (%s: %d)", chan->dname, nick, file, line);
+      putlog(LOG_MISC, "*", "(!) killmember(%s, %s) -> nonexistent", chan->dname, nick);
     return 0;
   }
   if (old)

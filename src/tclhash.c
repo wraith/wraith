@@ -450,7 +450,6 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 	bind_table_t *table = bind_table_lookup_or_fake(table_name);
 
 	for (; cmds->name; cmds++) {
-		/* FIXME: replace 1/2 with HUB/LEAF after they are removed */
           if (!cmds->type || (cmds->type == HUB && conf.bot->hub) || (cmds->type == LEAF && !conf.bot->hub)) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
                 if (!strcmp(table->name, "dcc") && (findhelp(cmds->name) != -1)) {
