@@ -710,6 +710,8 @@ writeconf(char *filename, FILE * stream, int bits)
   } else
     my_write(f, "! uname %s\n", conf.uname);
 
+  comment("");
+
   my_write(f, "! username %s\n", conf.username ? conf.username : my_username());
   if (conf.username && strcmp(conf.username, my_username()))
     my_write(f, "#! username %s\n", my_username());
@@ -726,8 +728,7 @@ writeconf(char *filename, FILE * stream, int bits)
   } else
     my_write(f, "! binpath %s\n", conf.binpath);
 
-  comment
-    ("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
+  comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
   my_write(f, "! binname %s\n", conf.binname);
 
   comment("");
