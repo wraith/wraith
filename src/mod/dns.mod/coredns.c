@@ -189,7 +189,7 @@ static char *strtdiff(char *d, long signeddiff)
 	minutes = diff % 60;
 	diff /= 60;
 	hours = diff % 24;
-	day = signeddiff / (60 * 60 * 24);
+	day = signeddiff / 86400;
 	if (day)
 	    sprintf(d, "%lid", day);
 	else
