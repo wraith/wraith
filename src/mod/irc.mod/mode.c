@@ -547,6 +547,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
     if (reversing || chk_deop(victim, chan) || (!loading && userlist && chan_bitch(chan) && !chk_op(victim, chan))) {     /* chk_op covers +private */
       int num = randint(10);
       char outbuf[101] = ""; 
+/* should kick the oppee first, then deal with the opper */
 
       if (num == 4) {
         simple_sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, mv->nick);
