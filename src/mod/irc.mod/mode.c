@@ -699,7 +699,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
   if (channel_pending(chan) || !me_op(chan))
     return;
 
-  if (wild_match(mask, me) && !isexempted(chan, me)) {
+  if ((wild_match(mask, me) || match_cidr(mask, me)) && !isexempted(chan, me)) {
     add_mode(chan, '-', 'b', mask);
     reversing = 1;
     return;
@@ -715,7 +715,8 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 
     for (memberlist *m2 = chan->channel.member; m2 && m2->nick[0]; m2 = m2->next) {
       egg_snprintf(s1, sizeof s1, "%s!%s", m2->nick, m2->userhost);
-      if (wild_match(mask, s1) && !isexempted(chan, s1)) {
+      if ((wild_match(mask, s1) || match_cidr(mask, s1))
+          && !isexempted(chan, s1)) {
         if (m2->user || (!m2->user && (m2->user = get_user_by_host(s1)))) {
           get_user_flagrec(m2->user, &victim, chan->dname);
           if (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) &&
