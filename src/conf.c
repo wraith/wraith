@@ -668,7 +668,7 @@ writeconf(char *filename, FILE * stream, int bits)
   }
 #ifndef CYGWIN_HACKS
   comment("# Lines beginning with # are what the preceeding line SHOULD be");
-  comment("# They are also ignored during parsing\n");
+  comment("# They are simply comments and are not parsed at all.\n");
 
   my_write(f, "! uid %d\n", conffile.uid);
 
