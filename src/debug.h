@@ -5,20 +5,6 @@
 #  include "config.h"
 #endif
 
-#if !HAVE_SIGACTION             /* old "weird signals" */
-#  define sigaction sigvec
-#  ifndef sa_handler
-#    define sa_handler sv_handler
-#    define sa_mask sv_mask
-#    define sa_flags sv_flags
-#  endif
-#endif
-
-#if !HAVE_SIGEMPTYSET
-/* and they probably won't have sigemptyset, dammit */
-#  define sigemptyset(x) ((*(int *)(x))=0)
-#endif
-
 /*
  * Undefine this to completely disable context debugging.
  * WARNING: DO NOT send in bug reports if you undefine this!

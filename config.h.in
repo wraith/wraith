@@ -107,15 +107,6 @@
 /* Define to 1 if you have the `rename' function. */
 #undef HAVE_RENAME
 
-/* Define to 1 if you have the `setpgid' function. */
-#undef HAVE_SETPGID
-
-/* Define to 1 if you have the `sigaction' function. */
-#undef HAVE_SIGACTION
-
-/* Define to 1 if you have the `sigemptyset' function. */
-#undef HAVE_SIGEMPTYSET
-
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
