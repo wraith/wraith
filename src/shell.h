@@ -9,13 +9,9 @@
 #define ERR_BINMOD      2
 #define ERR_PASSWD      3
 #define ERR_WRONGBINDIR 4
-#define ERR_CONFSTAT    5
 #define ERR_TMPSTAT     6
-#define ERR_CONFDIRMOD  7
-#define ERR_CONFMOD     8
 #define ERR_TMPMOD      9
 #define ERR_NOCONF      10
-#define ERR_CONFBADENC  11
 #define ERR_WRONGUID    12
 #define ERR_WRONGUNAME  13
 #define ERR_BADCONF     14

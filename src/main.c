@@ -67,8 +67,6 @@ extern int		optind;
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.2.1";
 
-/* FIXME: remove after 1.2 ??? OR NOT */
-int	old_hack = 0;
 bool 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
 bool 	loading = 0;
@@ -268,8 +266,6 @@ static void show_help()
   printf(format, "-v", "Displays bot version");
   exit(0);
 }
-/* FIXME: remove after 1.2 */
-static void startup_checks(int);
 
 #ifdef LEAF
 # define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
@@ -293,11 +289,6 @@ static void dtx_arg(int argc, char *argv[])
       case '0':
         exit(0);
       case '2':		/* used for testing new binary through update */
-        if (settings.uname[0])		/* we're already initialized with data, just exit! */
-          exit(2);
-	/* FIXME: remove after 1.2 */
-	/* ... otherwise, we need to check if ~/.ssh/.known_hosts exists and write to our binary */
-        startup_checks(2);
         exit(2);
 #ifdef LEAF
       case 'B':
@@ -536,67 +527,20 @@ static void core_halfhourly()
 #endif /* HUB */
 }
 
-/* FIXME: Remove after 1.2 (the hacks) */
-static void startup_checks(int hack) {
-  int enc = CONF_ENC;
-
-  /* for compatability with old conf files 
-   * only check/use conf file if it exists and settings.uname is empty.
-   * if settings.uname is NOT empty, just erase the conf file if it exists
-   * otherwise, assume we're working only with the struct */
-
-#ifdef LEAF
-  egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
-#endif /* LEAF */
-#ifdef HUB
-  egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
-#endif /* HUB */
-#ifdef CYGWIN_HACKS
-  egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
-  enc = 0;
-#endif /* CYGWIN_HACKS */
-
-  if (!can_stat(confdir())) {
-#ifdef LEAF
-/* FIXME: > 1.2 still making confdir() because tmp is inside */
-    if (mkdir(confdir(),  S_IRUSR | S_IWUSR | S_IXUSR)) {
-      unlink(confdir());
-      if (!can_stat(confdir()))
-        if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR) && !hack)
-#endif /* LEAF */
-          werr(ERR_CONFSTAT);
-#ifdef LEAF
-    }
-#endif /* LEAF */
-  }
-
-  if (fixmod(confdir()) && !hack)
-    werr(ERR_CONFDIRMOD);
- 
-  if (can_stat(cfile) && !settings.uname[0])
-    old_hack = 1;
-  if (can_stat(cfile) && settings.uname[0])
-    unlink(cfile);		/* kill the old one! */
-
-  if (old_hack && hack)
-    old_hack = 2;		/* this is so write_settings() will exit(2); */
-
-  if (old_hack && can_stat(cfile) && fixmod(cfile) && !hack)
-    werr(ERR_CONFMOD);
-
+static void check_tempdir()
+{
   if (!can_stat(tempdir)) {
     if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(tempdir);
       if (!can_stat(tempdir))
-        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR) && !hack)
+        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
           werr(ERR_TMPSTAT);
     }
   }
-  if (fixmod(tempdir) && !hack)
+  if (fixmod(tempdir))
     werr(ERR_TMPMOD);
 
   /* test tempdir: it's vital */
-  if (!hack)
   {
     Tempfile *testdir = new Tempfile("test");
     int result;
@@ -607,21 +551,38 @@ static void startup_checks(int hack) {
     if (result)
       fatal(strerror(errno), 0);
   }
+}
 
-  if (old_hack && can_stat(cfile))
+/* FIXME: Remove after 1.2 (the hacks) */
+static void startup_checks(int hack) {
+  int enc = CONF_ENC;
+
+  /* for compatability with old conf files 
+   * only check/use conf file if it exists and settings.uname is empty.
+   * if settings.uname is NOT empty, just erase the conf file if it exists
+   * otherwise, assume we're working only with the struct */
+
+#ifdef CYGWIN_HACKS
+  egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
+  enc = 0;
+#endif /* CYGWIN_HACKS */
+
+  check_tempdir();
+
+#ifdef CYGWIN_HACKS
+  if (can_stat(cfile))
     readconf(cfile, enc);	/* will read into &conffile struct */
-  else if (settings.uname[0])
-    bin_to_conf();		/* read our memory from settings[] into conf[] */
+#endif /* CYGWIN_HACKS */
 
 #ifndef CYGWIN_HACKS
+  if (settings.uname[0])
+    bin_to_conf();		/* read our memory from settings[] into conf[] */
+
   if (do_confedit)
     confedit();		/* this will exit() */
 #endif /* !CYGWIN_HACKS */
-  if (!old_hack)		/* don't parse, just leave it how it was read in. */
-    parseconf();
 
-  if (old_hack)
-    conf_to_bin(&conffile);	/* this will exit() in write_settings() */
+  parseconf();
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
@@ -634,8 +595,6 @@ static void startup_checks(int hack) {
 
   fillconf(&conf);
 #ifdef LEAF
- /*   printf("%s%s%s\n", BOLD(-1), settings.packname, BOLD_END(-1)); */
-
   if (localhub) {
     if (do_killbot[0]) {
       if (killbot(do_killbot) == 0)

@@ -633,29 +633,11 @@ char *werr_tostr(int errnum)
     return "Cannot access the global passwd file";
   case ERR_WRONGBINDIR:
     return "Wrong directory/binary name";
-  case ERR_CONFSTAT:
-#ifdef LEAF
-    return STR("Cannot access config directory (~/.ssh/)");
-#else
-    return "Cannot access config directory (./)";
-#endif /* LEAF */
   case ERR_TMPSTAT:
 #ifdef LEAF
     return STR("Cannot access tmp directory (~/.ssh/.../)");
 #else
     return STR("Cannot access tmp directory (./tmp/)");
-#endif /* LEAF */
-  case ERR_CONFDIRMOD:
-#ifdef LEAF
-    return STR("Cannot chmod() config directory (~/.ssh/)");
-#else
-    return "Cannot chmod() config directory (./)";
-#endif /* LEAF */
-  case ERR_CONFMOD:
-#ifdef LEAF
-    return STR("Cannot chmod() config (~/.ssh/.known_hosts/)");
-#else
-    return STR("Cannot chmod() config (./conf)");
 #endif /* LEAF */
   case ERR_TMPMOD:
 #ifdef LEAF
@@ -669,12 +651,10 @@ char *werr_tostr(int errnum)
 #else
     return STR("The local config is missing (./conf)");
 #endif /* LEAF */
-  case ERR_CONFBADENC:
-    return STR("Encryption in config is wrong/corrupt");
   case ERR_WRONGUID:
-    return STR("UID in conf does not match geteuid()");
+    return STR("UID in binary does not match geteuid()");
   case ERR_WRONGUNAME:
-    return STR("Uname in conf does not match uname()");
+    return STR("Uname in binary does not match uname()");
   case ERR_BADCONF:
     return "Config file is incomplete";
   case ERR_BADBOT:
@@ -682,7 +662,7 @@ char *werr_tostr(int errnum)
   case ERR_BOTDISABLED:
     return STR("Bot is disabled, remove '/' in config");
   case ERR_NOBOTS:
-    return STR("There are no bots in the config! Please use ./binary -C to edit");
+    return STR("There are no bots in the binary! Please use ./binary -C to edit");
   default:
     return "Unforseen error";
   }

@@ -522,7 +522,7 @@ readconf(char *fname, int bits)
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
     if (enc && line[0] > '~') {
       sdprintf("line %d, char %c ", i, line[0]);
-      werr(ERR_CONFBADENC);
+      fatal("Bad encryption", 0);
     } else {                    /* line is good to parse */
       /* - uid */
       if (line[0] == '-') {
