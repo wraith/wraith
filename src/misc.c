@@ -1099,14 +1099,16 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       unlink(tmpfile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*" , STR("exec: Couldn't open %s"), tmpfile);
+    Context;
+    putlog(LOG_ERRORS, "*" , STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
     return 0;
   }
   unlink(tmpfile);
   if (input) {
     if (fwrite(input, 1, strlen(input), inpFile) != strlen(input)) {
       fclose(inpFile);
-      putlog(LOG_ERRORS, "*", STR("exec: Couldn't write to %s"), tmpfile);
+      Context;
+      putlog(LOG_ERRORS, "*", STR("exec: Couldn't write to '%s': %s"), tmpfile, strerror(errno));
       return 0;
     }
     fseek(inpFile, 0, SEEK_SET);
@@ -1118,7 +1120,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       unlink(tmpfile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open %s"), tmpfile);
+    Context;
+    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
     return 0;
   }
   unlink(tmpfile);
@@ -1128,13 +1131,14 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       unlink(tmpfile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open %s"), tmpfile);
+    Context;
+    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
     return 0;
   }
   unlink(tmpfile);
   x = fork();
   if (x == -1) {
-    putlog(LOG_ERRORS, "*", STR("exec: fork() failed"));
+    putlog(LOG_ERRORS, "*", STR("exec: fork() failed: %s"), strerror(errno));
     fclose(inpFile);
     fclose(errFile);
     fclose(outFile);
