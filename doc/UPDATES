@@ -49,6 +49,7 @@ This is a summary of ChangeLog basically.
 * All bots are now spawned with -B regardless of order in config.
 * +m no longer implies +j.
 * Fixed irc authing only working on +c bots (should be like this, but isnt needed soon)
+* Fixed chanset limit not being set every 2 minutes.
 
 1.2
 * No longer displaying SALTS on ./bin -v

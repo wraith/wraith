@@ -408,6 +408,7 @@ channels_timers()
 {
   static int cnt = 0;
   struct chanset_t *chan_n = NULL;
+  bool reset = 0;
 
   cnt += 10;		/* function is called every 10 seconds */
   
@@ -421,12 +422,15 @@ channels_timers()
     }
     if ((cnt % 60) == 0) {
       /* 60 seconds */
-      cnt = 0;
+      reset = 1;
 #ifdef LEAF
       check_limitraise(chan);
 #endif /* LEAF */
     }
   }
+
+  if (reset)
+    cnt = 0;
 }
 
 static void got_sj(int idx, char *code, char *par) 
