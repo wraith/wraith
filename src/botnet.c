@@ -23,10 +23,10 @@
 #include "core_binds.h"
 
 extern int			dcc_total, backgrd, connect_timeout, max_dcc,
-				egg_numver, cfg_count;
+				cfg_count;
 extern struct userrec		*userlist;
 extern struct dcc_t		*dcc;
-extern time_t 			now;
+extern time_t 			now, buildts;
 extern Tcl_Interp		*interp;
 extern struct cfg_entry 	**cfg;
 
@@ -617,11 +617,7 @@ void tell_bottree(int idx, int showver)
   if (s[0])
     dprintf(idx, "(%s %s)\n", BOT_NOTRACEINFO, s);
   if (showver)
-    dprintf(idx, "%s (%d.%d.%d.%d)\n", conf.bot->nick,
-	    egg_numver / 1000000,
-	    egg_numver % 1000000 / 10000,
-	    egg_numver % 10000 / 100,
-	    egg_numver % 100);
+    dprintf(idx, "%s (%lu)\n", conf.bot->nick, buildts);
   else
     dprintf(idx, "%s\n", conf.bot->nick);
   this = (tand_t *) 1;

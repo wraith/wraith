@@ -558,7 +558,6 @@
 #define check_bind ((int (*)(bind_table_t *, const char *, struct flag_record *, ...))global[347])
 
 extern int lfprintf(FILE *, char *, ...);
-extern int egg_numver;
 extern int cfg_count;
 extern struct cfg_entry **cfg;
 #define STR(x) x

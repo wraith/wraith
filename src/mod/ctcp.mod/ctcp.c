@@ -64,8 +64,7 @@ char *strtolower(char *s)
 
 void scriptchanged()
 {
-  char tmp[200],
-    *p;
+  char tmp[200] = "", *p = NULL;
 
   switch (cloak_script) {
   case CLOAK_PLAIN:
@@ -321,13 +320,10 @@ void scriptchanged()
 #ifdef S_AUTOAWAY
 void sendaway()
 {
-  char awtime[20];
-  int hrs,
-    min,
-    sec,
-    gt;
+  char awtime[20] = "";
+  int hrs, min, sec, gt;
 
-  gt = time(NULL) - cloak_awaytime;
+  gt = now - cloak_awaytime;
   hrs = gt / 3600;
   min = (gt % 3600) / 60;
   sec = gt % 60;

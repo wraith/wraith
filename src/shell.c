@@ -83,6 +83,7 @@ void check_mypid()
 {
   if (getpid() != checkpid(conf.bot->nick, NULL)) {
     module_entry *me;
+
     fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 1);
     if ((me = module_find("server", 0, 0))) {
       Function *func = me->funcs;

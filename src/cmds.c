@@ -41,7 +41,7 @@ extern struct userrec	 *userlist;
 extern int		 dcc_total, remote_boots, backgrd, 
 			 do_restart, conmask, must_be_owner,
 			 strict_host, quiet_save, cfg_count,
-			 server_lag, egg_numver, localhub;
+			 server_lag, localhub;
 
 extern egg_traffic_t traffic;
 extern Tcl_Interp 	 *interp;
@@ -611,7 +611,7 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", STR("#%s# about"), dcc[idx].nick);
   dprintf(idx, STR("Wraith botpack by bryan\n"));
   egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
-  dprintf(idx, STR("Version: %s (%d) \n"), egg_version, egg_numver);
+  dprintf(idx, STR("Version: %s\n"), egg_version);
   dprintf(idx, STR("Build: %s (%lu)\n"), c, buildts);
   dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n"));
   dprintf(idx, STR("..with credits and thanks to the following:\n"));
@@ -2594,7 +2594,7 @@ static void cmd_ps(struct userrec *u, int idx, char *par) {
 }
 
 static void cmd_last(struct userrec *u, int idx, char *par) {
-  char user[20], buf[30];
+  char user[20] = "", buf[30] = "";
 
   putlog(LOG_CMDS, "*", STR("#%s# last %s"), dcc[idx].nick, par);
   if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
@@ -2602,7 +2602,7 @@ static void cmd_last(struct userrec *u, int idx, char *par) {
     dprintf(idx, STR("No."));
     return;
   }
-  if (par[0]) {
+  if (par && par[0]) {
     strncpyz(user, par, sizeof(user));
   } else {
     strncpyz(user, conf.username, sizeof(user));

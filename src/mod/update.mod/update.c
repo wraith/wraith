@@ -39,8 +39,8 @@ static void cancel_user_xfer(int, void *);
 
 extern struct userrec	*userlist;
 extern tand_t		*tandbot;
-extern int 		localhub, max_dcc, egg_numver;
-extern char		tempdir[], natip[];
+extern int 		localhub, max_dcc;
+extern char		tempdir[], natip[], egg_version[];
 extern time_t		buildts;
 extern struct dcc_table DCC_FORK_SEND, DCC_GET;
 
@@ -312,7 +312,7 @@ static void start_sending_binary(int idx)
   } else {
     sprintf(buf2, "hub");
   }
-  sprintf(update_file, "%s.%s.%d", buf2,dcc[idx].u.bot->sysname, egg_numver);
+  sprintf(update_file, "%s.%s.%s", buf2,dcc[idx].u.bot->sysname, egg_version);
 
   if (stat(update_file, &sb)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s, but it cannot be accessed", dcc[idx].nick, update_file);

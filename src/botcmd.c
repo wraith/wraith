@@ -502,7 +502,7 @@ static void bot_endlink(int idx, char *par)
  */
 static void bot_infoq(int idx, char *par)
 {
-  char s[200], s2[32], *realnick;
+  char s[200] = "", s2[32] = "", *realnick = NULL;
   struct chanset_t *chan;
   time_t now2;
   int hr, min;
@@ -1161,14 +1161,11 @@ static void bot_join(int idx, char *par)
   botnet_send_join_party(idx, linking, i2, i);
   if (i != chan) {
     if (i >= 0) {
-      if (b_numver(idx) >= NEAT_BOTNET)
-	chanout_but(-1, i, "*** (%s) %s %s %s.\n", bot, nick, NET_LEFTTHE,
-		    i ? "channel" : "party line");
+      chanout_but(-1, i, "*** (%s) %s %s %s.\n", bot, nick, NET_LEFTTHE, i ? "channel" : "party line");
       check_bind_chpt(bot, nick, sock, i);
     }
-    if ((b_numver(idx) >= NEAT_BOTNET) && !linking)
-      chanout_but(-1, chan, "*** (%s) %s %s %s.\n", bot, nick, NET_JOINEDTHE,
-		  chan ? "channel" : "party line");
+    if (!linking)
+    chanout_but(-1, chan, "*** (%s) %s %s %s.\n", bot, nick, NET_JOINEDTHE, chan ? "channel" : "party line");
     check_bind_chjn(bot, nick, chan, y[0], sock, par);
   }
 }
@@ -1202,7 +1199,7 @@ static void bot_part(int idx, char *par)
   if ((partyidx = getparty(bot, sock)) != -1) {
     if (party[partyidx].chan >= 0)
       check_bind_chpt(bot, nick, sock, party[partyidx].chan);
-    if ((b_numver(idx) >= NEAT_BOTNET) && !silent) {
+    if (!silent) {
       register int chan = party[partyidx].chan;
 
       if (par[0])
@@ -1249,7 +1246,7 @@ static void bot_away(int idx, char *par)
     partystat(bot, sock, 0, PLSTAT_AWAY);
   }
   partyidx = getparty(bot, sock);
-  if ((b_numver(idx) >= NEAT_BOTNET) && !linking) {
+  if (!linking) {
     if (par[0])
       chanout_but(-1, party[partyidx].chan,
 		  "*** (%s) %s %s: %s.\n", bot,
@@ -1389,7 +1386,7 @@ static void bot_rsim(char *botnick, char *code, char *par)
 {
   int ridx = -1, idx = -1, i = 0, rconmask;
   unsigned long status = 0;
-  char *nick = NULL, *cmd = NULL, *rconchan = NULL, buf[UHOSTMAX];
+  char *nick = NULL, *cmd = NULL, *rconchan = NULL, buf[UHOSTMAX] = "";
 
   ridx = atoi(newsplit(&par));
   nick = newsplit(&par);
@@ -1428,6 +1425,7 @@ static void bot_rsim(char *botnick, char *code, char *par)
     dcc[idx].addr = 0;
     dcc[idx].user = get_user_by_handle(userlist, nick);
   }
+  rmspace(par);
   check_bind_dcc(cmd, idx, par);
 }
 

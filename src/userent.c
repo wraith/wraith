@@ -361,8 +361,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
     return 1;
   }
 
-  xk = malloc(sizeof(struct xtra_key));
-  egg_bzero(xk, sizeof(struct xtra_key));
+  xk = calloc(1, sizeof(struct xtra_key));
 
   l = strlen(arg);
   if (l > 1500)
@@ -721,17 +720,13 @@ struct user_entry_type USERENTRY_LASTON =
 
 static int botaddr_unpack(struct userrec *u, struct user_entry *e)
 {
-  char p[1024],
-   *q1,
-   *q2;
-  struct bot_addr *bi = malloc(sizeof(struct bot_addr));
-  egg_bzero(bi, sizeof(struct bot_addr));
+  char p[1024] = "", *q1 = NULL, *q2 = NULL;
+  struct bot_addr *bi = calloc(1, sizeof(struct bot_addr));
 
   /* address:port/port:hublevel:uplink */
   Context;
   Assert(e);
   Assert(e->name);
-  egg_bzero(bi, sizeof(struct bot_addr));
 
   strcpy(p, e->u.list->extra);
   q1 = strchr(p, ':');
@@ -753,7 +748,6 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
       if (q1) {
         *q1++ = 0;
         bi->uplink = strdup(q1);
-
       }
       bi->hublevel = atoi(q2);
     }
@@ -773,7 +767,7 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
 }
 static int botaddr_pack(struct userrec *u, struct user_entry *e)
 {
-  char work[1024];
+  char work[1024] = "";
   struct bot_addr *bi;
   int l;
 
@@ -859,10 +853,8 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
 static int botaddr_gotshare(struct userrec *u, struct user_entry *e,
 			    char *buf, int idx)
 {
-  struct bot_addr *bi = malloc(sizeof(struct bot_addr));
+  struct bot_addr *bi = calloc(1, sizeof(struct bot_addr));
   char *arg;
-
-  egg_bzero(bi, sizeof(struct bot_addr));
 
   arg = newsplit(&buf);
   bi->address = strdup(arg);
@@ -888,7 +880,7 @@ static int botaddr_dupuser(struct userrec *new, struct userrec *old,
      *bi2;
 
     if (bi) {
-      bi2 = malloc(sizeof(struct bot_addr));
+      bi2 = calloc(1, sizeof(struct bot_addr));
 
       bi2->telnet_port = bi->telnet_port;
       bi2->relay_port = bi->relay_port;

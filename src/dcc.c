@@ -41,7 +41,7 @@
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
 extern time_t		 now, buildts;
-extern int		 egg_numver, connect_timeout, conmask, backgrd,
+extern int		 connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
 			 ignore_time;
 extern char		 ver[], origbotname[], bdhash[],
@@ -258,7 +258,7 @@ static void greet_new_bot(int idx)
   else
     sysname = un.sysname;
 
-  dprintf(idx, "v %d %d %s <%s>\n", egg_numver, HANDLEN, ver, network);
+  dprintf(idx, "v 1001500 %d %s <%s>\n", HANDLEN, ver, network);
   dprintf(idx, "vs %s\n", sysname);
   dprintf(idx, "bts %lu\n", buildts);
   for (i = 0; i < dcc_total; i++)
@@ -286,16 +286,14 @@ static void bot_version(int idx, char *par)
 
     work = newsplit(&par);
     dcc[idx].u.bot->numver = atoi(work);
+    /* old numver crap */
   } else
     dcc[idx].u.bot->numver = 0;
-
     dprintf(idx, "tb %s\n", conf.bot->nick);
     l = atoi(newsplit(&par));
     if (l != HANDLEN) {
-      putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %d characters.", 
-	     dcc[idx].nick, l);  
-      dprintf(idx, "error Non-matching handle length: mine %d, yours %d\n",
-	      HANDLEN, l);
+      putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %d characters.", dcc[idx].nick, l);  
+      dprintf(idx, "error Non-matching handle length: mine %d, yours %d\n", HANDLEN, l);
       dprintf(idx, "bye %s\n", "bad handlen");
       killsock(dcc[idx].sock);
       lostdcc(idx);
@@ -309,15 +307,13 @@ static void bot_version(int idx, char *par)
   putlog(LOG_BOTS, "*", "Linked to botnet.");
   chatout("*** Linked to botnet.\n");
 #endif /* HUB */
-  botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!',
-		      dcc[idx].u.bot->numver);
+  botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', 1001500);
   touch_laston(dcc[idx].user, "linked", now);
   dump_links(idx);
   dcc[idx].type = &DCC_BOT;
-  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-',
-	 dcc[idx].u.bot->numver);
+  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', 1001500);
   check_bind_link(dcc[idx].nick, conf.bot->nick);
-  egg_snprintf(x, sizeof x, "v %d", dcc[idx].u.bot->numver);
+  egg_snprintf(x, sizeof x, "v 1001500");
   bot_shareupdate(idx, x);
   bot_share(idx, x);
   dprintf(idx, "el\n");
@@ -980,7 +976,7 @@ static void eof_dcc_chat(int idx)
 static void dcc_chat(int idx, char *buf, int i)
 {
   int nathan = 0, doron = 0, fixed = 0;
-  char *v, *d;
+  char *v = NULL, *d = NULL;
 
   strip_telnet(dcc[idx].sock, buf, &i);
   if (buf[0] && (buf[0] != dcc_prefix[0]) && !(dcc[idx].user && (dcc[idx].user->flags & USER_NOFLOOD)) &&
@@ -1026,16 +1022,15 @@ static void dcc_chat(int idx, char *buf, int i)
     else
       *d = 0;
 
-    if (u_pass_match(dcc[idx].user, buf)) { //user said their password :)
+    if (u_pass_match(dcc[idx].user, buf)) { /* user said their password :) */
       dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
     } else if (!strncmp(buf, "+Auth ", 6)) {              /* ignore extra +Auth lines */
     } else if ((!strncmp(buf, dcc_prefix, strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
-
-      if (!strncmp(buf, dcc_prefix,strlen(dcc_prefix)))
+      if (!strncmp(buf, dcc_prefix,strlen(dcc_prefix)))		/* strip '.' out */
         buf++;
-        v = newsplit(&buf);
-        rmspace(buf);
-	check_bind_dcc(v, idx, buf);
+      v = newsplit(&buf);
+      rmspace(buf);
+      check_bind_dcc(v, idx, buf);
     } else if (buf[0] == ',') {
       int me = 0;
 

@@ -97,7 +97,7 @@ static int      nested_debug = 0;
 void write_debug()
 {
   int x;
-  char s[25], tmpout[150], buf[DIRMAX];
+  char s[25] = "", tmpout[150] = "", buf[DIRMAX] = "";
   int y;
 
   if (nested_debug) {
@@ -123,7 +123,7 @@ void write_debug()
     }
     {
       /* Use this lame method because shell_exec() or mail() may have caused another segfault :o */
-      char buff[255];
+      char buff[255] = "";
 
       egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %sbleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
 
@@ -150,7 +150,7 @@ void write_debug()
   if (x < 0) {
     putlog(LOG_MISC, "*", "* Failed to write DEBUG");
   } else {
-    char date[80];
+    char date[80] = "";
     strncpyz(s, ctime(&now), sizeof s);
     dprintf(-x, "Debug (%s) written %s\n", ver, s);
 
@@ -171,7 +171,7 @@ void write_debug()
     close(x);
     {
 
-      char date[81], *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX];
+      char date[81] = "", *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX] = "";
 
       egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
       shell_exec("w", NULL, &w, NULL);
@@ -184,9 +184,8 @@ void write_debug()
       sprintf(buf2, "cat %s", buf);
       shell_exec(buf2, NULL, &debug, NULL);
 
-      msg = malloc(strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
+      msg = calloc(1, strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
 
-      msg[0] = 0;
       sprintf(msg, "%s\n%s\n%s\n\n%s\n%s\n\n%s\n\n-----%s-----\n\n\n\n%s", date, id, uname, w, who, ps, ls, debug);
       email("Debug output", msg, EMAIL_TEAM);
       free(msg);

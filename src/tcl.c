@@ -38,7 +38,7 @@ extern int	backgrd, flood_telnet_thr, flood_telnet_time,
 		firewallport, notify_users_at, flood_thr, ignore_time,
 		reserved_port_min, reserved_port_max, localhub,
 		enable_simul, dcc_total, debug_output, identtimeout,
-		protect_telnet, dupwait_timeout, egg_numver, share_unlinks,
+		protect_telnet, dupwait_timeout, share_unlinks,
 		dcc_sanitycheck, sort_users, tands, resolve_timeout,
 		default_uflags, strict_host, userfile_perm;
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],

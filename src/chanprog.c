@@ -56,19 +56,18 @@ int     		my_port;
  */
 void rmspace(char *s)
 {
-#define whitespace(c) (((c) == 32) || ((c) == 9) || ((c) == 13) || ((c) == 10))
   char *p, *end;
   int len;
 
-  if (!*s)
+  if (!s || (s && !*s))
     return;
 
   /* Wipe end of string */
   end = s + strlen(s) - 1;
-  for (p = end; ((whitespace(*p)) && (p >= s)); p--);
+  for (p = end; ((egg_isspace(*p)) && (p >= s)); p--);
   if (p != end) *(p + 1) = 0;
   len = p+1 - s;
-  for (p = s; ((whitespace(*p)) && (*p)); p++);
+  for (p = s; ((egg_isspace(*p)) && (*p)); p++);
   len -= (p - s);
   if (p != s) {
     /* +1 to include the null in the copy */
@@ -700,10 +699,10 @@ int isowner(char *name)
 
 int shouldjoin(struct chanset_t *chan)
 {
-/*  if (!strcmp(chan->dname, "#wtest2"))
+  if (!strcmp(conf.bot->nick, "wtest2") && !strcmp(chan->dname, "#wtest2"))
     return 1;
-  else
-    return 0; */
+  else if (!strcmp(conf.bot->nick, "wtest2"))
+    return 0; 
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
 

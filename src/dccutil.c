@@ -49,13 +49,13 @@ void init_dcc_max()
   if (dcc)
     dcc = realloc(dcc, sizeof(struct dcc_t) * max_dcc);
   else 
-    dcc = malloc(sizeof(struct dcc_t) * max_dcc);
+    dcc = calloc(1, sizeof(struct dcc_t) * max_dcc);
 
   MAXSOCKS = max_dcc + 10;
   if (socklist)
     socklist = (sock_list *) realloc((void *) socklist, sizeof(sock_list) * MAXSOCKS);
   else
-    socklist = (sock_list *) malloc(sizeof(sock_list) * MAXSOCKS);
+    socklist = (sock_list *) calloc(1, sizeof(sock_list) * MAXSOCKS);
 
   for (; osock < MAXSOCKS; osock++)
     socklist[osock].flags = SOCK_UNUSED;
@@ -505,10 +505,9 @@ int new_dcc(struct dcc_table *type, int xtra_size)
   egg_bzero((char *) &dcc[i], sizeof(struct dcc_t));
 
   dcc[i].type = type;
-  if (xtra_size) {
-    dcc[i].u.other = malloc(xtra_size);
-    egg_bzero(dcc[i].u.other, xtra_size);
-  }
+  if (xtra_size)
+    dcc[i].u.other = calloc(1, xtra_size);
+
   return i;
 }
 

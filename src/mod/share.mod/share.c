@@ -1092,10 +1092,7 @@ static void share_userfileq(int idx, char *par)
     if (!ok)
       dprintf(idx, "s un Already sharing.\n");
     else {
-      if (dcc[idx].u.bot->numver >= min_uffeature)
-	dprintf(idx, "s uy %s\n", uf_features_dump(idx));
-      else
-        dprintf(idx, "s uy\n");
+      dprintf(idx, "s uy %s\n", uf_features_dump(idx));
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
 #ifdef HUB
@@ -1612,15 +1609,11 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
      * If UFF is supported, we also check the UFF flags before sharing. If
      * UFF isn't supported, but +I/+e is supported, we just share.
      */
-    if (dcc[idx].u.bot->numver >= min_exemptinvite) {
-      if ((dcc[idx].u.bot->uff_flags & UFF_EXEMPT) || (dcc[idx].u.bot->numver < min_uffeature)) {
-        if (!write_exempts(f, idx)) ok = 0;
-      }
-      if ((dcc[idx].u.bot->uff_flags & UFF_INVITE) || (dcc[idx].u.bot->numver < min_uffeature)) {
-        if (!write_invites(f,idx)) ok = 0;
-      }
-    } else {
-      putlog(LOG_BOTS, "@", "%s is too old: not sharing exempts and invites.", dcc[idx].nick);
+    if ((dcc[idx].u.bot->uff_flags & UFF_EXEMPT)) {
+      if (!write_exempts(f, idx)) ok = 0;
+    }
+    if ((dcc[idx].u.bot->uff_flags & UFF_INVITE)) {
+      if (!write_invites(f,idx)) ok = 0;
     }
     for (u = bu; u && ok; u = u->next) {
       if (!write_user(u, f, idx)) {

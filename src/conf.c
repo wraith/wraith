@@ -13,9 +13,9 @@
 #include "misc.h"
 
 #include <errno.h>
-#include <signal.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <signal.h>
 
 extern char             origbotname[], tempdir[],
                         userfile[], natip[];
@@ -62,7 +62,6 @@ int checkpid(char *nick, conf_bot *bot) {
   char buf[DIRMAX] = "", s[11] = "";
 
   egg_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, nick);
-
   if (bot && !(bot->pid_file))
     bot->pid_file = strdup(buf);
   else if (bot && strcmp(bot->pid_file, buf))
@@ -73,6 +72,7 @@ int checkpid(char *nick, conf_bot *bot) {
     fclose(f);
     xx = atoi(s);
     kill(xx, SIGCHLD);
+
     if (errno != ESRCH) /* PID is !running */
       return xx;
   }
@@ -109,11 +109,12 @@ static void conf_addbot(char *nick, char *ip, char *host, char *ip6) {
   } else if (host) {
     bot->host = strdup(host);
   }
+
   if (ip)    bot->ip = strdup(ip);
   if (ip6)   bot->ip6 = strdup(ip6);
 
-  bot->pid = checkpid(nick, bot);
   bot->u = NULL;
+  bot->pid = checkpid(nick, bot);
 }
 
 
@@ -303,10 +304,13 @@ int readconf(char *cfile)
         nick = newsplit(&line);
         if (!nick || (nick && !nick[0]))
           werr(ERR_BADCONF);
-
-        ip = newsplit(&line);
-        host = newsplit(&line);
-        ipsix = newsplit(&line);
+        
+        if (line[0])
+          ip = newsplit(&line);
+        if (line[0])
+          host = newsplit(&line);
+        if (line[0])
+          ipsix = newsplit(&line);
 
         conf_addbot(nick, ip, host, ipsix);
       } else {
@@ -399,18 +403,17 @@ void fillconf(conf_t *inconf) {
   free(mynick);
   inconf->bot = (conf_bot *) calloc(1, sizeof(conf_bot));
   conf_bot_dup(inconf->bot, bot);
-  /* inconf->bot = bot; */
-  /* inconf->bot->next = NULL; */
-  inconf->autocron = conffile.autocron;
-  inconf->autouname = conffile.autouname;
-  inconf->binpath = conffile.binpath;
-  inconf->binname = conffile.binname;
-  inconf->uname = conffile.uname;
+  inconf->binpath = 		conffile.binpath ? strdup(conffile.binpath) : NULL;
+  inconf->binname = 		conffile.binname ? strdup(conffile.binname) : NULL;
+  inconf->uname = 		conffile.uname ? strdup(conffile.uname) : NULL;
+  inconf->username = 		conffile.username ? strdup(conffile.username) : NULL;
+  inconf->autocron = 		conffile.autocron;
+  inconf->autouname = 		conffile.autouname;
 #ifdef HUB
-  inconf->portmin = conffile.portmin;
-  inconf->portmax = conffile.portmax;
+  inconf->portmin = 		conffile.portmin;
+  inconf->portmax = 		conffile.portmax;
 #endif /* HUB */
-  inconf->pscloak = conffile.pscloak;
-  inconf->uid = conffile.uid;
+  inconf->pscloak = 		conffile.pscloak;
+  inconf->uid = 		conffile.uid;
 }
 

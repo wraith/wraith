@@ -54,7 +54,7 @@ extern int	 	 noshare, loading, role, server_lag,
 #ifdef S_AUTHCMDS
 			 auth_total, 
 #endif /* S_AUTHCMDS */
- 			 dcc_total, egg_numver, userfile_perm,
+ 			 dcc_total, userfile_perm,
 			 use_console_r, ignore_time, must_be_owner,
 			 debug_output, default_flags,  
 			 max_dcc, password_timeout, localhub,
@@ -636,8 +636,8 @@ void init_modules(void)
 
   module_list = malloc(sizeof(module_entry));
   module_list->name = strdup("eggdrop");
-  module_list->major = (egg_numver) / 10000;
-  module_list->minor = ((egg_numver) / 100) % 100;
+  module_list->major = 100;
+  module_list->minor = 15;
   module_list->next = NULL;
   module_list->funcs = NULL;
   for (i = 0; i < REAL_HOOKS; i++)

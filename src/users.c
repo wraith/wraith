@@ -38,7 +38,7 @@
 extern struct dcc_t *dcc;
 extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
-extern int dcc_total, noshare, egg_numver;
+extern int 		dcc_total, noshare;
 extern char 		tempdir[];
 extern time_t now;
 
@@ -1130,9 +1130,7 @@ void autolink_cycle(char *start)
 {
   struct userrec *u = NULL;
   int i;
-  char bestval[HANDLEN + 4],
-    curval[HANDLEN + 4],
-    myval[HANDLEN + 4];
+  char bestval[HANDLEN + 4] = "", curval[HANDLEN + 4] = "", myval[HANDLEN + 4] = "";
 
   link_pref_val(conf.bot->u, myval);
   strcpy(bestval, myval);
@@ -1145,7 +1143,7 @@ void autolink_cycle(char *start)
       if (dcc[i].status & (STAT_OFFEREDU | STAT_GETTINGU | STAT_SENDINGU))
         continue; /* lets let the binary have it's peace. */
 
-      if (dcc[i].u.bot->numver != egg_numver)
+      if (dcc[i].u.bot->bts != buildts)
         continue; /* same thing. */
 
       if (dcc[i].status & (STAT_SHARE | STAT_OFFERED | STAT_SENDING | STAT_GETTING)) {
@@ -1213,7 +1211,7 @@ void autolink_cycle(char *start)
   struct userrec *u = NULL;
   struct hublist_entry *hl = NULL, *hl2 = NULL;
   struct bot_addr *my_ba;
-  char uplink[HANDLEN + 1], avoidbot[HANDLEN + 1], curhub[HANDLEN + 1];
+  char uplink[HANDLEN + 1] = "", avoidbot[HANDLEN + 1] = "", curhub[HANDLEN + 1] = "";
   int i, hlc;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
 
@@ -1282,8 +1280,7 @@ void autolink_cycle(char *start)
     if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
       putlog(LOG_DEBUG, "@", STR("Adding %s to hublist"), u->handle);
       hl2 = hl;
-      hl = malloc(sizeof(struct hublist_entry));
-      egg_bzero(hl, sizeof(struct hublist_entry));
+      hl = calloc(1, sizeof(struct hublist_entry));
 
       hl->next = hl2;
       hlc++;

@@ -84,6 +84,5 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
 #define b_status(a)	(dcc[a].status)
 #define b_version(a)	(dcc[a].u.bot->version)
 #define b_linker(a)	(dcc[a].u.bot->linker)
-#define b_numver(a)	(dcc[a].u.bot->numver)
 
 #endif				/* _EGG_TANDEM_H */

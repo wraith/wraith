@@ -168,9 +168,7 @@ void send_tand_but(int x, char *buf, int len)
     iso = 1;
   }
   for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_BOT) && (i != x) &&
-	(b_numver(i) >= NEAT_BOTNET) &&
-	(!iso || !(bot_flags(dcc[i].user) & BOT_ISOLATE)))
+    if ((dcc[i].type == &DCC_BOT) && (i != x) && (!iso || !(bot_flags(dcc[i].user) & BOT_ISOLATE)))
       tputs(dcc[i].sock, buf, len);
 }
 #ifdef S_DCCPASS

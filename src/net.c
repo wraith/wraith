@@ -90,12 +90,14 @@ IP my_atoul(char *s)
 int hostprotocol(char *host)
 {
 #ifdef USE_IPV6
-  struct hostent *he;
+  struct hostent *he = NULL;
 #  ifndef HAVE_GETHOSTBYNAME2
   int error_num;
 #  endif /* !HAVE_GETHOSTBYNAME2 */
+
   if (!host || (host && !host[0]))
     return 0;
+
   if (!setjmp(alarmret)) {
     alarm(resolve_timeout);
 
@@ -131,8 +133,8 @@ int sockprotocol(int socket)
 int get_ip(char *hostname, union sockaddr_union *so)
 {
 #ifdef USE_IPV6
-  struct addrinfo hints, *ai, *res;
-  int error;
+  struct addrinfo hints, *ai = NULL, *res = NULL;
+  int error = 0;
 #else
   struct hostent *hp;
 #endif /* USE_IPV6 */
@@ -140,7 +142,7 @@ int get_ip(char *hostname, union sockaddr_union *so)
   egg_memset(so, 0, sizeof(union sockaddr_union));
   debug1(STR("get_ip(%s)"), hostname);
 
-  if (!hostname || !hostname[0])
+  if (!hostname || (hostname && !hostname[0]))
     return 1;
 #ifdef USE_IPV6
   egg_memset(&hints, 0, sizeof(struct addrinfo));
@@ -449,6 +451,8 @@ int allocsock(int sock, int options)
       socklist[i].gz = 0;
       egg_bzero(&socklist[i].okey, sizeof(socklist[i].okey));
       egg_bzero(&socklist[i].ikey, sizeof(socklist[i].ikey));
+      socklist[i].okey[0] = 0;
+      socklist[i].ikey[0] = 0;
       return i;
     }
   }
@@ -631,8 +635,8 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
 int open_telnet_raw(int sock, char *server, int sport)
 {
   union sockaddr_union so;
-  char host[121];
-  int i, error, port, rc;
+  char host[121] = "";
+  int i, error = 0, port, rc;
   volatile int proxy;
 
   /* firewall?  use socks */
@@ -647,14 +651,14 @@ int open_telnet_raw(int sock, char *server, int sport)
     port = firewallport;
   } else {
     proxy = 0;
-    strcpy(host, server);
+    strncpyz(host, server, sizeof host);
     port = sport;
   }
 
   error = 0;
   if (!setjmp(alarmret)) {
     alarm(resolve_timeout);
-    if (!get_ip(host,&so)) {
+    if (!get_ip(host, &so)) {
       alarm(0);
       /* ok, we resolved it, bind an appropriate ip */
 #ifdef USE_IPV6
@@ -1327,7 +1331,7 @@ char *botlink_encrypt(int snum, char *src)
 
 int sockgets(char *s, int *len)
 {
-  char xx[SGRAB+3], *p, *px;
+  char xx[SGRAB + 3] = "", *p = NULL, *px = NULL;
   int ret, i, data = 0, grab = SGRAB+1;
 
   for (i = 0; i < MAXSOCKS; i++) {
