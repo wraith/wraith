@@ -47,7 +47,7 @@ typedef struct conf_b {
   port_t portmax;       /* for hubs, the reserved port range for incoming connections */
 } conf_t;
 
-extern conf_t		conf, conffile;
+extern conf_t		conf;
 
 enum {
   CONF_ENC = 1,
@@ -66,12 +66,12 @@ void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
 #endif /* LEAF */
 pid_t checkpid(char *, conf_bot *);
-void init_conffile();
-void free_conffile();
+void init_conf();
+void free_conf_bots();
 int readconf(const char *, int);
 int parseconf(bool);
 int writeconf(char *, FILE *, int);
-void fillconf(conf_t *);
+void fill_conf_bot();
 void bin_to_conf(void);
 
 #ifdef CYGWIN_HACKS

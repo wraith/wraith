@@ -301,7 +301,7 @@ static void dtx_arg(int argc, char *argv[])
       case '4':
         readconf(optarg, CONF_ENC);
         parseconf(0);
-        conf_to_bin(&conffile, 1);		/* this will exit() in write_settings() */
+        conf_to_bin(&conf, 1);		/* this will exit() in write_settings() */
 #ifdef LEAF
       case 'B':
         localhub = 0;
@@ -599,7 +599,7 @@ static void startup_checks(int hack) {
   egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
 
   if (can_stat(cfile))
-    readconf(cfile, 0);	/* will read into &conffile struct */
+    readconf(cfile, 0);	/* will read into &conf struct */
 #endif /* CYGWIN_HACKS */
 
 #ifndef CYGWIN_HACKS
@@ -618,10 +618,10 @@ static void startup_checks(int hack) {
    werr(ERR_BINMOD);
   
 #ifndef CYGWIN_HACKS
-  move_bin(conffile.binpath, conffile.binname, 1);
+  move_bin(conf.binpath, conf.binname, 1);
 #endif /* !CYGWIN_HACKS */
 
-  fillconf(&conf);
+  fill_conf_bot();
 #ifdef LEAF
   if (conf.bot->localhub && !used_B) {
     if (do_killbot[0]) {
@@ -654,8 +654,8 @@ static void startup_checks(int hack) {
       exit(0); /* our job is done! */
     }
   }
-  if (!conf.bot->localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
-    free_conffile();
+  if (!conf.bot->localhub)
+    free_conf_bots();			/* not a localhub, so no need to store all bot info */
 #endif /* LEAF */
 }
 
@@ -725,7 +725,7 @@ printf("out: %s\n", out);
   }
 #endif
 
-  init_conffile();			/* establishes conffile and sets to defaults */
+  init_conf();			/* establishes conf and sets to defaults */
 
   /* Version info! */
   egg_snprintf(ver, sizeof ver, "[%s] Wraith %s", settings.packname, egg_version);
@@ -811,7 +811,7 @@ printf("out: %s\n", out);
     sdprintf("I am localhub (%s)", conf.bot->nick);
 #endif /* LEAF */
 #ifndef CYGWIN_HACKS
-    if (conffile.autocron)
+    if (conf.autocron)
       check_crontab();
 #endif /* !CYGWIN_HACKS */
 #ifdef LEAF

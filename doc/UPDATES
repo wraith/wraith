@@ -19,6 +19,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * cmd_deluser change: only allow a |m user to remove users whom they have added.
 * Fixed some botnet userfile sharing logs showing up on leaf bots.
 * cmd_botconfig now supports wildcards for the bot parameter
+* Eliminated a duplicate struct (conffile)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

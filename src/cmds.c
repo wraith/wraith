@@ -1823,19 +1823,19 @@ static void cmd_conf(int idx, char *par)
       if (par[0] && what) { /* set */
         set++;
         save = 1;
-/*        if (!egg_strcasecmp(what, "uid"))            conffile.uid = atoi(par);
-        else if (!egg_strcasecmp(what, "uname"))     str_redup(&conffile.uname, par);
-        else if (!egg_strcasecmp(what, "username"))  str_redup(&conffile.username, par);
+/*        if (!egg_strcasecmp(what, "uid"))            conf.uid = atoi(par);
+        else if (!egg_strcasecmp(what, "uname"))     str_redup(&conf.uname, par);
+        else if (!egg_strcasecmp(what, "username"))  str_redup(&conf.username, par);
 */
-        if (!egg_strcasecmp(what, "homedir"))   str_redup(&conffile.homedir, par);
-        else if (!egg_strcasecmp(what, "binpath"))   str_redup(&conffile.binpath, par);
-        else if (!egg_strcasecmp(what, "binname"))   str_redup(&conffile.binname, par);
-        else if (!egg_strcasecmp(what, "portmin"))   conffile.portmin = atoi(par);
-        else if (!egg_strcasecmp(what, "portmax"))   conffile.portmax = atoi(par);
-        else if (!egg_strcasecmp(what, "pscloak"))   conffile.pscloak = atoi(par);
-        else if (!egg_strcasecmp(what, "autocron"))  conffile.autocron = atoi(par);
-        else if (!egg_strcasecmp(what, "autouname")) conffile.autouname = atoi(par);
-        else if (!egg_strcasecmp(what, "watcher"))  conffile.watcher = atoi(par);
+        if (!egg_strcasecmp(what, "homedir"))   str_redup(&conf.homedir, par);
+        else if (!egg_strcasecmp(what, "binpath"))   str_redup(&conf.binpath, par);
+        else if (!egg_strcasecmp(what, "binname"))   str_redup(&conf.binname, par);
+        else if (!egg_strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
+        else if (!egg_strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
+        else if (!egg_strcasecmp(what, "pscloak"))   conf.pscloak = atoi(par);
+        else if (!egg_strcasecmp(what, "autocron"))  conf.autocron = atoi(par);
+        else if (!egg_strcasecmp(what, "autouname")) conf.autouname = atoi(par);
+        else if (!egg_strcasecmp(what, "watcher"))  conf.watcher = atoi(par);
         else { 
           set--;
           save = 0;
@@ -1846,19 +1846,19 @@ static void cmd_conf(int idx, char *par)
     if (show) {
       const char *ss = set ? "Set: " : "";
       
-/*      if (!what || !egg_strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conffile.uid);
-      if (!what || !egg_strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conffile.uname);
-      if (!what || !egg_strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conffile.username);
+/*      if (!what || !egg_strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conf.uid);
+      if (!what || !egg_strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conf.uname);
+      if (!what || !egg_strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conf.username);
 */
-      if (!what || !egg_strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conffile.homedir);
-      if (!what || !egg_strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conffile.binpath);
-      if (!what || !egg_strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conffile.binname);
-      if (!what || !egg_strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conffile.portmin);
-      if (!what || !egg_strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conffile.portmax);
-      if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spscloak: %d\n", ss, conffile.pscloak);
-      if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conffile.autocron);
-      if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conffile.autouname);
-      if (!what || !egg_strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conffile.watcher);
+      if (!what || !egg_strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conf.homedir);
+      if (!what || !egg_strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conf.binpath);
+      if (!what || !egg_strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conf.binname);
+      if (!what || !egg_strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
+      if (!what || !egg_strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
+      if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spscloak: %d\n", ss, conf.pscloak);
+      if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
+      if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conf.autouname);
+      if (!what || !egg_strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conf.watcher);
     }
   }
 #endif /* !CYGWIN_HACKS || HUB */
@@ -1868,7 +1868,7 @@ static void cmd_conf(int idx, char *par)
     conf_bot *bot = NULL;
     unsigned int i = 0;
 
-    for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
+    for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
       i++;
       if (!listbot || (listbot && !strcmp(listbot, bot->nick)))
         dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
@@ -1887,7 +1887,7 @@ static void cmd_conf(int idx, char *par)
   if (save) {
     write_settings(binname, -1);
 #ifdef LEAF
-    spawnbots();			/* parse conffile struct and spawn/kill as needed */
+    spawnbots();			/* parse conf struct and spawn/kill as needed */
 #endif /* LEAF */
   }
 }
