@@ -3048,6 +3048,8 @@ static void cmd_su(int idx, char *par)
     dprintf(idx, "You can't su to a bot... then again, why would you wanna?\n");
   else if (dcc[idx].u.chat->su_nick)
     dprintf(idx, "You cannot currently double .su; try .su'ing directly.\n");
+  else if (isowner(u->handle) && egg_strcasecmp(dcc[idx].nick, u->handle))
+    dprintf(idx, "You can't su to a permanent bot owner.\n");
   else {
     get_user_flagrec(u, &fr, NULL);
     ok = 1;
