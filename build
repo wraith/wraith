@@ -6,6 +6,9 @@
 
 TCLDIR="/home/wheel/bryan"
 
+#change this to 0 to not clean previously compiled files (faster/for dev)
+clean=1
+
 
 #### DO NOT EDIT BELOW THIS LINE #####
 
@@ -25,8 +28,9 @@ hub=0
 leaf=0
 #if test $# -lt 1; then
 if test -z "$1"; then
- echo "Usage: $0 -d all|leaf|hub pack.conf"
+ echo "Usage: $0 -d all|leaf|hub pack.conf -c"
  echo "   -d: Builds a debug package."
+# echo "   -c: Does not erase previously compiled files unless *necessary* (faster)"
  echo ""
  exit 1
 elif [ $1 = "all" ]; then
@@ -126,9 +130,10 @@ umask 077 >/dev/null
 #rm -f configure.temp
 
 # make clean, just in case
-echo "[*] Cleaning up old binaries..."
-make clean > /dev/null
-
+if [ $clean = "1" ]; then
+ echo "[*] Cleaning up old binaries/files..."
+ make clean > /dev/null
+fi
 
 # Read the config
 echo -n "[*] Compiling with:"
