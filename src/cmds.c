@@ -1886,7 +1886,7 @@ static void cmd_conf(int idx, char *par)
 #endif /* LEAF */
 
   if (save) {
-    writeconf(cfile, NULL, CONF_ENC);
+    write_settings(binname, 0);
 #ifdef LEAF
     spawnbots();			/* parse conffile struct and spawn/kill as needed */
 #endif /* LEAF */
