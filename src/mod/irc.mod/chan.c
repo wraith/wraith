@@ -953,14 +953,14 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     if (!chan_sentkick(m) && (chan_kick(*fr) || glob_kick(*fr)) && me_op(chan)) {
       check_exemptlist(chan, s);
       quickban(chan, m->userhost);
-      p = get_user(&USERENTRY_COMMENT, m->user);
+      p = (char *) get_user(&USERENTRY_COMMENT, m->user);
       dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : response(RES_KUSER));
       m->flags |= SENTKICK;
     }
   }
 }
 
-void check_this_user(char *hand, int delete, char *host)
+void check_this_user(char *hand, int del, char *host)
 {
   char s[UHOSTLEN] = "";
   memberlist *m = NULL;
@@ -972,9 +972,9 @@ void check_this_user(char *hand, int delete, char *host)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       sprintf(s, "%s!%s", m->nick, m->userhost);
       u = m->user ? m->user : get_user_by_host(s);
-      if ((u && !egg_strcasecmp(u->handle, hand) && delete < 2) ||
-	  (!u && delete == 2 && wild_match(host, fixfrom(s)))) {
-	u = delete ? NULL : u;
+      if ((u && !egg_strcasecmp(u->handle, hand) && del < 2) ||
+	  (!u && del == 2 && wild_match(host, fixfrom(s)))) {
+	u = del ? NULL : u;
 	get_user_flagrec(u, &fr, chan->dname);
 	check_this_member(chan, m->nick, &fr);
       }
@@ -2243,7 +2243,7 @@ static int gotjoin(char *from, char *chname)
 		     me_op(chan)) {
 	    check_exemptlist(chan, from);
 	    quickban(chan, from);
-	    p = get_user(&USERENTRY_COMMENT, m->user);
+	    p = (char *) get_user(&USERENTRY_COMMENT, m->user);
             dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, nick, bankickprefix, response(RES_KUSER));
 	    m->flags |= SENTKICK;
 	  }

@@ -112,7 +112,8 @@ console_set(struct userrec *u, struct user_entry *e, void *buf)
       free(ci->channel);
       free(ci);
     }
-    ci = e->u.extra = (struct console_info *) buf;
+    ci = (struct console_info *) buf;
+    e->u.extra = (struct console_info *) buf;
   }
 
   if (!noshare && !u->bot) {

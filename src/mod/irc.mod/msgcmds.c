@@ -9,7 +9,7 @@
 
 static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
 {
-  char *old = NULL, *new = NULL;
+  char *old = NULL, *mynew = NULL;
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
@@ -33,23 +33,23 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
       dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_FAILPASS);
       return BIND_RET_BREAK;
     }
-    new = newsplit(&par);
+    mynew = newsplit(&par);
   } else {
-    new = old;
+    mynew = old;
   }
-  if (strlen(new) > MAXPASSLEN)
-    new[MAXPASSLEN] = 0;
+  if (strlen(mynew) > MAXPASSLEN)
+    mynew[MAXPASSLEN] = 0;
 
-  if (!goodpass(new, 0, nick)) {
+  if (!goodpass(mynew, 0, nick)) {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! \002!\002PASS...", nick, host, u->handle);
     return BIND_RET_BREAK;
   }
 
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS...", nick, host, u->handle);
 
-  set_user(&USERENTRY_PASS, u, new);
+  set_user(&USERENTRY_PASS, u, mynew);
   dprintf(DP_HELP, "NOTICE %s :%s '%s'.\n", nick,
-	  new == old ? IRC_SETPASS : IRC_CHANGEPASS, new);
+	  mynew == old ? IRC_SETPASS : IRC_CHANGEPASS, mynew);
   return BIND_RET_BREAK;
 }
 

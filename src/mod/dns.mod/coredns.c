@@ -654,7 +654,7 @@ static void parserespacket(u_8bit_t *s, size_t l)
     u_8bit_t *c = NULL;
     long ttl;
     int r, usefulanswer;
-    u_16bit_t rr, datatype, class, qdatatype, qclass;
+    u_16bit_t rr, datatype, myclass, qdatatype, qclass;
     u_8bit_t rdatalength;
 
     if (l < sizeof(packetheader)) {
@@ -787,18 +787,18 @@ static void parserespacket(u_8bit_t *s, size_t l)
 		    return;
 		}
 		datatype = sucknetword(c);
-		class = sucknetword(c);
+		myclass = sucknetword(c);
 		ttl = sucknetlong(c);
 		rdatalength = sucknetword(c);
-		if (class != qclass) {
+		if (myclass != qclass) {
 		    ddebug2(RES_MSG "query class: %u (%s)",
 			    qclass,
 			    qclass < CLASSTYPES_COUNT ?
 				classtypes[qclass] :
 				classtypes[CLASSTYPES_COUNT]);
-		    ddebug2(RES_MSG "rr class: %u (%s)", class,
-			    class < CLASSTYPES_COUNT ?
-				classtypes[class] :
+		    ddebug2(RES_MSG "rr class: %u (%s)", myclass,
+			    myclass < CLASSTYPES_COUNT ?
+				classtypes[myclass] :
 				classtypes[CLASSTYPES_COUNT]);
 		    ddebug0(RES_ERR "Answered class does not match queried class.");
 		    return;

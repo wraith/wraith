@@ -474,7 +474,7 @@ check_hostmask()
   } else
     sprintf(s, "*!%s", tmp);
 
-  for (q = get_user(&USERENTRY_HOSTS, conf.bot->u); q; q = q->next) {
+  for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, conf.bot->u); q; q = q->next) {
     if (!egg_strcasecmp(q->extra, s))
       return;
   }
