@@ -1662,8 +1662,7 @@ static int gotmode(char *from, char *msg)
 	  if (!m) {
 	    if (channel_pending(chan))
 	      break;
-	    putlog(LOG_MISC, chan->dname,
-		   CHAN_BADCHANMODE, chan->dname, op);
+	    putlog(LOG_MISC, chan->dname, CHAN_BADCHANMODE, chan->dname, op);
 	    dprintf(DP_MODE, "WHO %s\n", op);
 	  } else {
 	    int dv = 0;
