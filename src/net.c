@@ -661,13 +661,15 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 #ifdef USE_IPV6
       if (so.sa.sa_family == AF_INET6) {
         if (bind(sock, &cached_myip6_so.sa, SIZEOF_SOCKADDR(cached_myip6_so)) < 0) {
-          killsock(sock);
+          if (sock >= 0)
+            killsock(sock);
           return -1;
         }
       } else {
 #endif /* USE_IPV6 */
         if (bind(sock, &cached_myip4_so.sa, SIZEOF_SOCKADDR(cached_myip4_so)) < 0) {
-          killsock(sock);
+          if (sock >= 0)
+            killsock(sock);
           return -3;
         }
 #ifdef USE_IPV6
@@ -715,12 +717,15 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 /* Ordinary non-binary connection attempt */
 int open_telnet(char *server, port_t port)
 {
-#ifdef USE_IPV6
-  int sock = getsock(0, hostprotocol(server)) , ret = open_telnet_raw(sock, server, port);
-#else
-  int sock = getsock(0) , ret = open_telnet_raw(sock, server, port);
-#endif /* USE_IPV6 */
+  int ret = -1, sock = -1;
 
+#ifdef USE_IPV6
+  sock = getsock(0, hostprotocol(server));
+#else
+  sock = getsock(0);
+#endif /* USE_IPV6 */
+  if (sock >= 0)
+    ret = open_telnet_raw(sock, server, port);
   return ret;
 }
 
