@@ -14,6 +14,8 @@
 #include "color.h"
 #include "chanprog.h"
 #include "net.h"
+#include "socket.h"
+#include "adns.h"
 #include "users.h"
 #include "misc.h"
 #include "userrec.h"
@@ -888,8 +890,7 @@ int botunlink(int idx, char *nick, char *reason)
   return 0;
 }
 
-static void botlink_resolve_success(int);
-static void botlink_resolve_failure(int);
+static void botlink_dns_callback(void *, const char *, char **);
 
 /* Link to another bot
  */
@@ -936,32 +937,68 @@ int botlink(char *linker, int idx, char *nick)
 	putlog(LOG_BOTS, "*", "%s %s at %s:%d ...", BOT_LINKING, nick,
 	       bi->address, bi->telnet_port);
 
-      i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
+      i = new_dcc(&DCC_FORK_BOT, sizeof(struct bot_info));
       dcc[i].timeval = now;
       dcc[i].port = bi->telnet_port;
       dcc[i].user = u;
       strcpy(dcc[i].nick, nick);
       strcpy(dcc[i].host, bi->address);
-      dcc[i].u.dns->ibuf = idx;
-      dcc[i].u.dns->cptr = (char *) calloc(1, strlen(linker) + 1);
-      strcpy(dcc[i].u.dns->cptr, linker);
-      dcc[i].u.dns->host = (char *) calloc(1, strlen(dcc[i].host) + 1);
-      strcpy(dcc[i].u.dns->host, dcc[i].host);
-      dcc[i].u.dns->dns_success = botlink_resolve_success;
-      dcc[i].u.dns->dns_failure = botlink_resolve_failure;
-      dcc[i].u.dns->dns_type = RES_IPBYHOST;
-      dcc[i].u.dns->type = &DCC_FORK_BOT;
-#ifdef USE_IPV6
-      botlink_resolve_success(i);
-#else
-      dcc_dnsipbyhost(bi->address);
-#endif /* USE_IPV6 */
+
+      strcpy(dcc[i].u.bot->linker, linker);
+      dcc[i].u.bot->numver = idx;
+
+      egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
+     
       return 1;
+      /* wait for async reply */
     }
   }
   return 0;
 }
 
+static void botlink_dns_callback(void *client_data, const char *host, char **ips)
+{
+  int i = (int) client_data;
+
+  if (!ips) {
+    lostdcc(i);
+    return;
+  }
+
+  dcc[i].addr = inet_addr(ips[0]);
+
+  dcc[i].timeval = now;
+  strcpy(dcc[i].u.bot->version, "(primitive bot)");
+  strcpy(dcc[i].u.bot->sysname, "*");
+  dcc[i].u.bot->port = dcc[i].port;             /* Remember where i started */
+#ifdef USE_IPV6
+  dcc[i].sock = getsock(SOCK_STRONGCONN, is_dotted_ip(ips[0]));
+#else
+  dcc[i].sock = getsock(SOCK_STRONGCONN);
+#endif /* USE_IPV6 */
+
+  if (dcc[i].sock > 0)
+    identd_open();                      /* will be closed when an ident is replied. */
+
+  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port) < 0)
+    failed_link(i);
+  else { /* let's attempt to initiate SSL before ANYTHING else... */
+#ifdef HAVE_SSL
+/*    if (!ssl_link(dcc[i].sock, CONNECT_SSL)) {
+      debug2("back from ssl_link(%d, %d) for botlink (failed)", dcc[i].sock, CONNECT_SSL);
+      dcc[i].ssl = 0;
+      putlog(LOG_BOTS, "*", "SSL link for '%s' failed", dcc[i].nick);
+    } else */
+      dcc[i].ssl = 1;
+#else
+      dcc[i].ssl = 0;
+#endif /* HAVE_SSL */
+  }
+
+  /* wait for async reply */
+}
+
+#ifdef UNF
 static void botlink_resolve_failure(int i)
 {
   free(dcc[i].u.dns->cptr);
@@ -1010,6 +1047,7 @@ static void botlink_resolve_success(int i)
 #endif /* HAVE_SSL */
   }
 }
+#endif /* UNF */
 
 static void failed_tandem_relay(int idx)
 {

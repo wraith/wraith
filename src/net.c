@@ -87,6 +87,8 @@ int hostprotocol(char *host)
 
   struct hostent *he = NULL;
 
+  sdprintf("WARNING: gethostbyname2() is about to block in hostprotocol()");
+
   if (!setjmp(alarmret)) {
     alarm(resolve_timeout);
 
@@ -682,9 +684,12 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 int open_telnet(char *server, port_t port)
 {
   int sock = -1;
-
+  
 #ifdef USE_IPV6
-  sock = getsock(0, hostprotocol(server));
+  int af_type = is_dotted_ip(server);
+
+  /* Use the family from the ip, or if it's a host, resolve it with blocking calls ;/ */
+  sock = getsock(0, af_type ? af_type : hostprotocol(server));
 #else
   sock = getsock(0);
 #endif /* USE_IPV6 */
