@@ -32,6 +32,7 @@ This is a summary of ChangeLog basically.
 * LAST info for .whois is now properly shared
 * Optimized lots of code to use less CPU
 * +c bots will now boot users when they lose +c
+* Fixed a bug with removing hosts while having +d or +k
 
 1.1.9
 

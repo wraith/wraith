@@ -3541,9 +3541,10 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
 
   get_user_flagrec(u, &fr, NULL);
   get_user_flagrec(u2, &fr2, NULL);
-  /* check to see if user is +d or +k and don't let them remove hosts */
-  if (glob_deop(fr) || glob_kick(fr) || chan_deop(fr) || chan_kick (fr)) {
-    dprintf(idx, "You can't remove hostmasks while having the +d or +k flag.\n");
+
+  /* check to see if user is +d or +k and don't let them remove hosts from THEMSELVES*/
+  if (u == u2 && (glob_deop(fr) || glob_kick(fr) || chan_deop(fr) || chan_kick (fr))) {
+    dprintf(idx, "You can't remove hostmasks from yourself while having the +d or +k flag.\n");
       return;
     }
 
