@@ -364,6 +364,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     simple_sprintf(h, "*!*@%s", p);
     putlog(LOG_MISC, "*", IRC_FLOODIGNORE1, p);
     addignore(h, conf.bot->nick, (which == FLOOD_CTCP) ? "CTCP flood" : "MSG/NOTICE flood", now + (60 * ignore_time));
+    return 1;
   }
   return 0;
 }
@@ -414,6 +415,7 @@ static int gotmsg(char *from, char *msg)
 	p = uhost;
       simple_sprintf(ctcpbuf, "*!*@%s", p);
       addignore(ctcpbuf, conf.bot->nick, "ctcp avalanche", now + (60 * ignore_time));
+      ignoring++;
     }
   }
 
@@ -430,7 +432,7 @@ static int gotmsg(char *from, char *msg)
       ctcp = strcpy(ctcpbuf, p1);
       strcpy(p1 - 1, p + 1);
       if (!ignoring)
-        detect_flood(nick, uhost, from, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
+        ignoring = detect_flood(nick, uhost, from, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
       /* Respond to the first answer_ctcp */
       p = strchr(msg, 1);
       if (ctcp_count < answer_ctcp) {
@@ -508,8 +510,8 @@ static int gotmsg(char *from, char *msg)
   if (msg[0]) {
     if ((to[0] == '$') || (strchr(to, '.') != NULL)) {
       /* Msg from oper */
+      ignoring = detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
       if (!ignoring) {
-	detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
 	/* Do not interpret as command */
 	putlog(LOG_MSGS | LOG_SERV, "*", "[%s!%s to %s] %s",nick, uhost, to, msg);
       }
@@ -518,7 +520,7 @@ static int gotmsg(char *from, char *msg)
       Auth *auth = Auth::Find(uhost);
 
       if (!auth)
-        detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
+        ignoring = detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
       my_code = newsplit(&msg);
       rmspace(msg);
       /* is it a cmd? */
@@ -598,7 +600,7 @@ static int gotnotice(char *from, char *msg)
       ctcp = strcpy(ctcpbuf, p1);
       strcpy(p1 - 1, p + 1);
       if (!ignoring)
-	detect_flood(nick, uhost, from, FLOOD_CTCP);
+	ignoring = detect_flood(nick, uhost, from, FLOOD_CTCP);
       p = strchr(ctcpmsg, 1);
       if (ctcp[0] != ' ') {
 	char *code = newsplit(&ctcp);
@@ -622,7 +624,7 @@ static int gotnotice(char *from, char *msg)
   free(ptr);
   if (msg[0]) {
     if (((to[0] == '$') || strchr(to, '.')) && !ignoring) {
-      detect_flood(nick, uhost, from, FLOOD_NOTICE);
+      ignoring = detect_flood(nick, uhost, from, FLOOD_NOTICE);
       putlog(LOG_MSGS | LOG_SERV, "*", "-%s (%s) to %s- %s", nick, uhost, to, msg);
     } else {
       /* Server notice? */
@@ -635,7 +637,7 @@ static int gotnotice(char *from, char *msg)
 	if (strncmp(msg, "Highest connection count:", 25))
 	  putlog(LOG_SERV, "*", "-NOTICE- %s", msg);
       } else {
-        detect_flood(nick, uhost, from, FLOOD_NOTICE);
+        ignoring = detect_flood(nick, uhost, from, FLOOD_NOTICE);
         u = get_user_by_host(from);
         if (!ignoring)
   	      putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
