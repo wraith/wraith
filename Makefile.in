@@ -143,6 +143,7 @@ salt: pack/salt.h makesalt stringfix
 	fi)
 
 sort: sorthelp
+	@cp -f misc/help.txt misc/help.bak
 	@(if test "x`tail -n 1 misc/help.txt`" != "x::end"; then \
 	echo "::end" >> misc/help.txt; \
 	fi)
