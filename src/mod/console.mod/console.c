@@ -215,12 +215,10 @@ console_display(int idx, struct user_entry *e, struct userrec *u)
             stripmasktype(i->stripflags), CONSOLE_ECHO, i->echoflags ? CONSOLE_YES : CONSOLE_NO);
     dprintf(idx, "    %s %d, %s %s%d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*", i->conchan % GLOBAL_CHANS);
-    dprintf(idx, "    Color: %s\n", i->color ? "on" : "off");
+    dprintf(idx, "    Color: $b%s$b\n", i->color ? "on" : "off");
     dprintf(idx, "    Login settings:\n");
-    dprintf(idx, "     Banner: %s\n", i->banner ? "on" : "off");
-    dprintf(idx, "     Channels: %s\n", i->channels ? "on" : "off");
-    dprintf(idx, "     Bots: %s\n", i->bots ? "on" : "off");
-    dprintf(idx, "     Whom: %s\n", i->whom ? "on" : "off");
+    dprintf(idx, "     Banner:   $b%-3s$b   Bots: $b%-3s$b\n", i->banner ? "on" : "off", i->bots ? "on" : "off");
+    dprintf(idx, "     Channels: $b%-3s$b   Whom: $b%-3s$b\n", i->channels ? "on" : "off", i->whom ? "on" : "off");
   }
 }
 
@@ -350,12 +348,12 @@ console_store(int idx, char *par)
             masktype(i->conflags), CONSOLE_STRIPFLAGS,
             stripmasktype(i->stripflags), CONSOLE_ECHO, i->echoflags ? CONSOLE_YES : CONSOLE_NO);
     dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page, CONSOLE_CHANNEL2, i->conchan);
-    dprintf(idx, "    Color: %s\n", i->color ? "on" : "off");
+    dprintf(idx, "    Color: $b%s$b\n", i->color ? "on" : "off");
     dprintf(idx, "    Login settings:\n");
-    dprintf(idx, "     Banner: %s\n", i->banner ? "on" : "off");
-    dprintf(idx, "     Channels: %s\n", i->channels ? "on" : "off");
-    dprintf(idx, "     Bots: %s\n", i->bots ? "on" : "off");
-    dprintf(idx, "     Whom: %s\n", i->whom ? "on" : "off");
+    dprintf(idx, "    Login settings:\n");
+    dprintf(idx, "     Banner:   $b%-3s$b   Bots: $b%-3s$b\n", i->banner ? "on" : "off", i->bots ? "on" : "off");
+    dprintf(idx, "     Channels: $b%-3s$b   Whom: $b%-3s$b\n", i->channels ? "on" : "off", i->whom ? "on" : "off");
+
   }
   set_user(&USERENTRY_CONSOLE, dcc[idx].user, i);
   dprintf(idx, "Console setting stored.\n");
