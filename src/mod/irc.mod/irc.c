@@ -1181,26 +1181,27 @@ check_expired_chanstuff(struct chanset_t *chan)
     /* autovoice of +v users if bot is +y */
     if (!loading && channel_active(chan) && me_op(chan) && dovoice(chan)) {
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-        sprintf(s, "%s!%s", m->nick, m->userhost);
-        if (!m->user)
-          m->user = get_user_by_host(s);
-
-        if (m->user) {
-          struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-          get_user_flagrec(m->user, &fr2, chan->dname);
-          if (!private(fr2, chan, PRIV_VOICE) &&
-              ((channel_voice(chan) && !chk_devoice(fr2)) ||
-               (!channel_voice(chan) && chk_voice(fr2, chan))) &&
-              !glob_bot(fr2) && !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE)) {
-            putlog(LOG_DEBUG, "@", "VOICING %s in %s as '%s'", m->nick, chan->dname, m->user->handle);
-            add_mode(chan, '+', 'v', m->nick);
-          } else if (!glob_bot(fr2) && (chk_devoice(fr2) || (m->flags & EVOICE))) {
-            if (!chan_hasop(m) && chan_hasvoice(m))
-              add_mode(chan, '-', 'v', m->nick);
+        if (!chan_hasop(m) && !chan_hasvoice(m)) {
+          if (!m->user) {
+            sprintf(s, "%s!%s", m->nick, m->userhost);
+            m->user = get_user_by_host(s);
           }
-        } else if (m->user == NULL && !(m->flags & EVOICE)) {
-          if (channel_voice(chan) && !chan_hasop(m) && !chan_hasvoice(m)) {
-            add_mode(chan, '+', 'v', m->nick);
+
+          if (m->user) {
+            struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+            get_user_flagrec(m->user, &fr2, chan->dname);
+            if (!glob_bot(fr2)) {
+              if (!(m->flags & EVOICE) && !private(fr2, chan, PRIV_VOICE) &&
+                  ((channel_voice(chan) && !chk_devoice(fr2)) ||
+                   (!channel_voice(chan) && chk_voice(fr2, chan)))) {
+                add_mode(chan, '+', 'v', m->nick);
+              } else if ((chk_devoice(fr2) || (m->flags & EVOICE))) {
+                add_mode(chan, '-', 'v', m->nick);
+              }
+            }
+          } else if (!m->user && !(m->flags & EVOICE) && channel_voice(chan)) {
+              add_mode(chan, '+', 'v', m->nick);
           }
         }
       }

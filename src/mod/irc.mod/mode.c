@@ -1331,10 +1331,10 @@ gotmode(char *from, char *msg)
 
               if (ms2[0] == '+') {
                 if (m->flags & EVOICE) {
+/* FIXME: This is a lame check, we need to expand on this more */
                   if (!chan_master(user) && !glob_master(user)) {
                     dv++;
                   } else {
-                    putlog(LOG_DEBUG, "@", "Stripping EVOICE flag from: %s (%s)", m->nick, chan->dname);
                     m->flags &= ~EVOICE;
                   }
                 }
@@ -1358,6 +1358,7 @@ gotmode(char *from, char *msg)
                     add_mode(chan, '+', 'v', op);
                     /* if they arent +v|v and VOICER is m+ then EVOICE them */
                   } else {
+/* FIXME: same thing here */
                     if (!match_my_nick(nick) && channel_voice(chan) &&
                         (glob_master(user) || chan_master(user) || glob_bot(user))) {
                       /* if the user is not +q set them norEVOICE. */
