@@ -33,6 +33,7 @@ void init_userent()
   add_entry_type(&USERENTRY_BOTFL);
   add_entry_type(&USERENTRY_STATS);
   add_entry_type(&USERENTRY_ADDED);
+  add_entry_type(&USERENTRY_MODIFIED);
   add_entry_type(&USERENTRY_CONFIG);
 }
 
@@ -674,6 +675,51 @@ struct user_entry_type USERENTRY_STATS = {
   def_expmem,
   stats_display,
   "STATS"
+};
+
+void update_mod(char *handle, char *nick, char *cmd, char *par)
+{
+  char tmp[100];
+  snprintf(tmp, sizeof tmp, "%lu, %s (%s %s)", now, nick, cmd, par);
+  set_user(&USERENTRY_MODIFIED, get_user_by_handle(userlist, handle), tmp);
+}
+
+void modified_display(int idx, struct user_entry *e, struct userrec *u)
+{
+  if (e && dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
+    char tmp[1024],
+      tmp2[1024],
+     *hnd;
+    time_t tm;
+    strncpyz(tmp, e->u.string, sizeof(tmp));
+    hnd = strchr(tmp, ' ');
+    if (hnd)
+      *hnd++ = 0;
+    tm = atoi(tmp);
+    strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S GMT", gmtime(&tm));
+    if (hnd)
+      dprintf(idx, " -- Modified %s by %s\n", tmp2, hnd);
+    else
+      dprintf(idx, " -- Modified %s\n", tmp2);
+  }
+}
+
+struct user_entry_type USERENTRY_MODIFIED =
+{
+  0,
+  def_gotshare,
+  def_dupuser,
+  def_unpack,
+  def_pack,
+  def_write_userfile,
+  def_kill,
+  def_get,
+  def_set,
+  0,
+  0,
+  def_expmem,
+  modified_display,
+  "MODIFIED"
 };
 
 int pass_set(struct userrec *u, struct user_entry *e, void *buf)

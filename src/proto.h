@@ -342,6 +342,7 @@ int findidx(int);
 int findanyidx(int);
 
 /* userent.c */
+void update_mod(char *, char *, char *, char *);
 void add_cfg(struct cfg_entry *);
 void list_type_kill(struct list_type *);
 int list_type_expmem(struct list_type *);
