@@ -650,18 +650,19 @@ dcc_chat_secpass(int idx, char *buf, int atr)
     if (dcc[idx].status & STAT_TELNET)
       dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
     stats_add(dcc[idx].user, 1, 0);
-    if (!get_user(&USERENTRY_SECPASS, dcc[idx].user)) {
+    if (!get_user(&USERENTRY_SECPASS, dcc[idx].user)) {	/* this should check how many logins instead */
       char pass[17] = "";
 
-      dprintf(idx, "******************************************************************** \
-\n \n \n%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n", FLASH(-1), FLASH_END(-1));
+      dprintf(idx, "********************************************************************\n \n \n");
+      dprintf(idx, "%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n", FLASH(-1), FLASH_END(-1));
       make_rand_str(pass, 16);
       set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
 #ifdef HUB
       write_userfile(idx);
 #endif /* HUB */
-      dprintf(idx, "Your secpass is now: %s%s%s\nMake sure you do not lose this, as it is \
-needed to login for now on.\n \n********************************************************************\n", pass, BOLD(-1), BOLD_END(-1));
+      dprintf(idx, "Your secpass is now: %s%s%s\n", pass, BOLD(-1), BOLD_END(-1));
+      dprintf(idx, "Make sure you do not lose this, as it is needed to login for now on.\n \n");
+      dprintf(idx, "********************************************************************\n");
     }
     dcc_chatter(idx);
 #ifdef S_DCCAUTH
