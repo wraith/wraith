@@ -70,16 +70,12 @@ void check_static(char *name, char *(*func) ())
 
 void *mod_killsock(int size, const char *modname, const char *filename, int line)
 {
-#ifdef DEBUG_MEM
   char x[100], *p;
 
   p = strrchr(filename, '/');
   egg_snprintf(x, sizeof x, "%s:%s", modname, p ? p + 1 : filename);
   x[19] = 0;
   real_killsock(size, x, line);
-#else
-  killsock(size);
-#endif
   return NULL;
 }
 

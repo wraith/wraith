@@ -1,3 +1,6 @@
+#ifndef _COLOR_H
+#define _COLOR_H
+
 #define C_BLACK                 1
 #define C_BLUE                  2
 #define C_GREEN                 3
@@ -46,3 +49,4 @@
 #define FLASH(idx) 		color(idx, FLASH_OPEN, 0)
 #define FLASH_END(idx) 		color(idx, FLASH_CLOSE, 0)
 
+#endif /* !_COLOR_H */
