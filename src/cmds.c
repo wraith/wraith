@@ -3076,6 +3076,32 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
     }
   }
 }
+
+static void cmd_nopass(struct userrec *u, int idx, char *par)
+{
+  int cnt = 0;
+  struct userrec *cu;
+  char *users = nmalloc(1);
+
+  putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
+
+  users[0] = 0;
+  for (cu = userlist; cu; cu = cu->next) {
+    if (!(cu->flags & USER_BOT)) {
+      if (u_pass_match(cu, "-")) {
+        cnt++;
+        users = nrealloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
+        strcat(users, cu->handle);
+        strcat(users, " ");
+      }
+    }
+  }
+  if (!cnt) 
+    dprintf(idx, "All users have passwords set.\n");
+  else
+    dprintf(idx, "Users without passwords: %s\n", users);
+  nfree(users);
+}
 #endif /* HUB */
 
 static void cmd_pls_ignore(struct userrec *u, int idx, char *par)
@@ -4100,6 +4126,7 @@ cmd_t C_dcc[] =
   {"nettcl",		"a",	(Function) cmd_nettcl,		NULL},
 #endif /* S_TCLCMDS */
   {"newleaf",		"n",	(Function) cmd_newleaf,		NULL},
+  {"nopass",		"m",	(Function) cmd_nopass,		NULL},
 #endif /* HUB */
   {"newpass",		"",	(Function) cmd_newpass,		NULL},
   {"secpass",		"",	(Function) cmd_secpass,		NULL},

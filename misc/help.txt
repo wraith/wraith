@@ -1234,6 +1234,9 @@ See also: w
 %{+mi}See also: chpass%{-}%{+n}, chsecpass%{-}
 ::nick
 See: handle
+:hub:nopass
+###  %bnohelp%b
+   Displays all users who do not have a password set.
 ::note
 ###  %bnote%b <nickname[@bot]> <message>
    Sends a private note to a user on the partyline. If that user is currently
