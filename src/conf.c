@@ -276,15 +276,15 @@ init_conf()
 //#ifdef LEAF
 //  conffile.binname = strdup(STR(".sshrc"));
 //#endif /* LEAF */
-#ifdef HUB
-  {
+//#ifdef HUB
+//  {
     char *p = NULL;
 
     p = strrchr(binname, '/');
     p++;
     conffile.binname = strdup(p);
-  }
-#endif /* HUB */
+//  }
+//#endif /* HUB */
   conffile.portmin = 0;
   conffile.portmax = 0;
   conffile.pscloak = 0;
