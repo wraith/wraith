@@ -1427,7 +1427,7 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
       dprintf(idx, "%s\n", s);
 #ifdef LEAF
   } else {
-//    dprintf(idx, "  HOSTS:          Hidden on leaf bots.\n");
+    dprintf(idx, "  HOSTS:          Hidden on leaf bots.\n");
   }
 #endif
 }
