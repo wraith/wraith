@@ -2,4 +2,10 @@
 
 I don't know perl, so if you improve this script, commit it or submit it to bryan.
 
+Type these:
+
+/script load /path/to/wraith.pl
+/auth
+
+This has not been tested with psyBNC, but in theory it will work.
 
