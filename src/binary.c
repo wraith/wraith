@@ -67,13 +67,13 @@ bin_md5(const char *fname, int todo)
     size = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    egg_snprintf(s, sizeof s, "%s.bin-XXXXXX", tempdir);
+    egg_snprintf(s, sizeof s, ".bin-XXXXXX");
     if ((fd = mkstemp(s)) == -1 || (fn = fdopen(fd, "wb")) == NULL) {
       if (fd != -1) {
         unlink(s);
         close(fd);
       }
-      fatal("Can't write to tempdir!", 0);
+      fatal("Can't create temporary file!", 0);
     }
 
     while ((len = fread(buf, 1, sizeof buf - 1, f))) {

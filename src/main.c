@@ -697,17 +697,6 @@ int main(int argc, char **argv)
   srandom(now % (getpid() + getppid()));
   myuid = geteuid();
 
-#ifdef HUB
-  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
-#endif /* HUB */
-#ifdef LEAF 
-  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
-#endif /* LEAF */
-#ifdef CYGWIN_HACKS
-  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
-#endif /* CYGWIN_HACKS */
-  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
-
   binname = getfullbinname(argv[0]);
 
 #ifndef CYGWIN_HACKS
@@ -732,6 +721,16 @@ int main(int argc, char **argv)
   egg_snprintf(userfile, 121, "%s/.u", confdir());
 #endif /* HUB */
 
+#ifdef HUB
+  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+#endif /* HUB */
+#ifdef LEAF 
+  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
+#endif /* LEAF */
+#ifdef CYGWIN_HACKS
+  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+#endif /* CYGWIN_HACKS */
+  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
   hooks_init();
