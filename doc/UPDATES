@@ -24,6 +24,8 @@ This is a summary of ChangeLog basically.
 19.Limits were not being set.
 20.No longer chmodding on CYGWIN
 21.The AES core should be slightly faster now.
+22.Added channel flag +autoop (users only, +private accounted for).
+23.Added user flag for autoop (+O).
 
 1.1.5
 

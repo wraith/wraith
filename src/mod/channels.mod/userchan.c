@@ -1009,7 +1009,7 @@ flood-nick %d:%d closed-ban %d closed-private %d ban-time %d \
 exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans \
 %cbitch %cprotectops %crevenge %crevengebot %cprivate %ccycle \
 %cinactive %cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites \
-%cnodesynch %cclosed %ctake %cmanop %cvoice %cfastop }\n",
+%cnodesynch %cclosed %ctake %cmanop %cvoice %cfastop %cautoop }\n",
 	chan->dname,
 	w,
         chan->added_by,
@@ -1056,7 +1056,8 @@ exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans \
 	PLSMNS(channel_take(chan)),
 	PLSMNS(channel_manop(chan)),
 	PLSMNS(channel_voice(chan)),
-	PLSMNS(channel_fastop(chan))
+	PLSMNS(channel_fastop(chan)),
+        PLSMNS(channel_autoop(chan))
 /* Chanflag template
  * also include a %ctemp above.
  *      PLSMNS(channel_temp(chan)),

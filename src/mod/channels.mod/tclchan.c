@@ -510,6 +510,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       chan->status |= CHAN_VOICE;
     else if (!strcmp(item[i], "-voice"))
       chan->status &= ~CHAN_VOICE;
+    else if (!strcmp(item[i], "+autoop"))
+      chan->status |= CHAN_AUTOOP;
+    else if (!strcmp(item[i], "-autoop"))
+      chan->status &= ~CHAN_AUTOOP;
 /* Chanflag template
  *  else if (!strcmp(item[i], "+temp"))
  *    chan->status |= CHAN_TEMP;

@@ -68,7 +68,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
         if (chan && channel_active(chan)) {
           get_user_flagrec(u, &fr, par);
           if (chk_op(fr, chan)) {
-            if (do_op(nick, chan, 1)) {
+            if (do_op(nick, chan, 0, 1)) {
               stats_add(u, 0, 1);
               putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
             }
@@ -80,7 +80,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
         for (chan = chanset; chan; chan = chan->next) {
           get_user_flagrec(u, &fr, chan->dname);
           if (chk_op(fr, chan)) {
-            if (do_op(nick, chan, 1))
+            if (do_op(nick, chan, 0, 1))
               stats++;
           }
         }
@@ -495,7 +495,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
     if (chan && channel_active(chan)) {
       get_user_flagrec(u, &fr, chan->dname);
       if (chk_op(fr, chan)) {
-        if (do_op(nick, chan, force))
+        if (do_op(nick, chan, 0, force))
           stats_add(u, 0, 1);
       }
       return BIND_RET_BREAK;
@@ -504,7 +504,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
     for (chan = chanset; chan; chan = chan->next) {
       get_user_flagrec(u, &fr, chan->dname);
       if (chk_op(fr, chan)) {
-       if (do_op(nick, chan, force))
+       if (do_op(nick, chan, 0, force))
          stats_add(u, 0, 1);
       }
     }

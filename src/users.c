@@ -952,7 +952,7 @@ int readuserfile(char *file, struct userrec **ret)
 		putlog(LOG_MISC, "*", "* %s '%s'", USERF_BROKEPASS, code);
 		strcpy(pass, "-");
 	      }
-	      bu = adduser(bu, code, 0, pass, sanity_check(fr.global &USER_VALID));
+	      bu = adduser(bu, code, 0, pass, sanity_check(fr.global));
 
 	      u = get_user_by_handle(bu, code);
 	      for (i = 0; i < dcc_total; i++)

@@ -145,8 +145,8 @@ struct chanset_t {
   int flood_ctcp_time;
   int flood_nick_thr;
   int flood_nick_time;
-  int status;
-  int ircnet_status;
+  uint32_t status;
+  uint32_t ircnet_status;
   int limitraise;
   int closed_ban;
   int closed_private;
@@ -218,6 +218,7 @@ struct chanset_t {
 #define CHAN_ASKEDMODES     BIT22	/* find out key-info on IRCu          */
 #define CHAN_JUPED          BIT23	/* Is channel juped                   */
 #define CHAN_STOP_CYCLE     BIT24	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
+#define CHAN_AUTOOP         BIT25
 
 #define CHAN_ASKED_EXEMPTS  BIT0
 #define CHAN_ASKED_INVITED  BIT1
@@ -263,6 +264,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_voice(chan) (chan->status & CHAN_VOICE)
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
 #define channel_private(chan) (chan->status & CHAN_PRIVATE)
+#define channel_autoop(chan) (chan->status & CHAN_AUTOOP)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */

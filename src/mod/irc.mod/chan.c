@@ -915,7 +915,6 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
   if (!m || match_my_nick(nick) || !me_op(chan))
     return;
   if (me_op(chan)) {
-	// user mode +d
     /* +d or bitch and not an op
      * we dont check private because +private does not imply bitch. */
     if (chan_hasop(m) && 
@@ -923,6 +922,8 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
          (!loading && userlist && channel_bitch(chan) && !chk_op(*fr, chan)) ) ) {
       /* if (target_priority(chan, m, 1)) */
         add_mode(chan, '-', 'o', m->nick);
+    } else if (!chan_hasop(m) && chk_autoop(*fr, chan)) {
+      do_op(m->nick, chan, 1, 0);
     }
     if (dovoice(chan)) {
       if (chan_hasvoice(m) && !chan_hasop(m)) {
@@ -1432,7 +1433,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serv,
   if (match_my_nick(nick) && !waschanop && me_op(chan))
     recheck_channel(chan, 1);
   if (match_my_nick(nick) && any_ops(chan) && !me_op(chan))
-    chan->channel.do_opreq=1;
+    chan->channel.do_opreq = 1;
 
   m->user = get_user_by_host(userhost);
   m->tried_getuser = 1;
@@ -2202,6 +2203,9 @@ static int gotjoin(char *from, char *chname)
 	    m->flags |= SENTKICK;
 	  }
 	}
+        if (!chan_hasop(m) && chk_autoop(fr, chan)) {
+          do_op(m->nick, chan, 1, 0);
+        }
       }
     }
   }

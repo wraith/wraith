@@ -21,7 +21,7 @@ static int reversing = 0;
 static struct flag_record user   = {FR_GLOBAL | FR_CHAN, 0, 0};
 static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0};
 
-static int do_op(char *nick, struct chanset_t *chan, int force)
+static int do_op(char *nick, struct chanset_t *chan, int delay, int force)
 {
   memberlist *m = ismember(chan, nick);
 
@@ -523,7 +523,7 @@ static void got_deop(struct chanset_t *chan, char *nick, char *from,
 	((chan_op(victim) || (glob_op(victim) && !chan_deop(victim))) ||
 	 !channel_bitch(chan)))
       /* Then we'll bless the victim */
-      do_op(who, chan, 0);
+      do_op(who, chan, 0, 0);
   }
 
   if (!nick[0])

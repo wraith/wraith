@@ -1161,6 +1161,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
  */
     dprintf(idx, "Channel flags:\n");
     work[0] = 0;
+    SHOW_FLAG("autoop",		channel_autoop(chan));
     SHOW_FLAG("bitch",		channel_bitch(chan));
     SHOW_FLAG("closed",		channel_closed(chan));
     SHOW_FLAG("cycle",		channel_cycle(chan));

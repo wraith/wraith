@@ -271,18 +271,17 @@ share_chattr(int idx, char *par)
           shareout_but(cst, idx, "a %s %s %s\n", hand, atr, par);
         noshare = 1;
         if (par[0] && cst) {
-          fr.match = (FR_CHAN);
-          get_user_flagrec(dcc[idx].user, &fr, par);
           fr.match = FR_CHAN;
           fr2.match = FR_CHAN;
           break_down_flags(atr, &fr, 0);
-          set_user_flagrec(u, &fr, par);
           get_user_flagrec(u, &fr2, par);
+
+          set_user_flagrec(u, &fr, par);
           check_dcc_chanattrs(u, par, fr.chan, fr2.chan);
           noshare = 0;
           build_flags(s, &fr, 0);
           if (!(dcc[idx].status & STAT_GETTING))
-            putlog(LOG_CMDS, "@", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
+            putlog(LOG_CMDS, "*", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
 #ifdef LEAF
           recheck_channel(cst, 0);
 #endif /* LEAF */

@@ -301,7 +301,7 @@ void getin_request(char *botnick, char *code, char *par)
       else
         chan->channel.no_op = 0;
     }
-    do_op(nick, chan, 1);
+    do_op(nick, chan, 0, 1);
     mem->flags |= SENTOP;
 
     putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Opped", botnick, nick, chan->dname);
@@ -1295,7 +1295,7 @@ void flush_modes()
 	m->flags &= ~FULL_DELAY;
         if (chan_sentop(m)) {
           m->flags &= ~SENTOP;
-          do_op(m->nick, chan, 0);
+          do_op(m->nick, chan, 0, 0);
         }
         if (chan_sentvoice(m)) {
           m->flags &= ~SENTVOICE;

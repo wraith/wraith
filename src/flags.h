@@ -28,7 +28,6 @@ struct flag_record {
 #define FR_ANYWH  0x10000000
 #define FR_AND    0x20000000
 #define FR_OR     0x40000000
-#define FR_ALL    0x0fffffff
 
 /*
  * userflags:
@@ -59,9 +58,8 @@ struct flag_record {
 #define DEFLAG_MDOP        6
 #define DEFLAG_MOP	   7
 
-#define USER_VALID 0x03ffffff	/* all USER_ flags in use              */
-#define CHAN_VALID 0x03ffffff	/* all flags that can be chan specific */
-#define BOT_VALID  0x7fe689C1 /* all BOT_ flags in use               */
+#define USER_VALID (flag_t) 0xfffffffffffff
+#define CHAN_VALID (flag_t) 0xfffffffffffff
 
 #define USER_ADMIN	FLAG['a']
 #define USER_BOT	FLAG['b']
@@ -75,6 +73,7 @@ struct flag_record {
 #define USER_MASTER	FLAG['m']
 #define USER_OWNER	FLAG['n']
 #define USER_OP		FLAG['o']
+#define USER_AUTOOP	FLAG['O']
 #define USER_PARTY	FLAG['p']
 #define USER_QUIET	FLAG['q']
 #define USER_UPDATEHUB	FLAG['u']
@@ -83,7 +82,6 @@ struct flag_record {
 #define USER_NOFLOOD	FLAG['x']
 #define USER_DOVOICE	FLAG['y']
 #define USER_DEFAULT	0
-
 
 
 #define bot_hublevel(x) ( ( (x) && (x->flags & USER_BOT) && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
@@ -95,6 +93,8 @@ struct flag_record {
  */
 #define chan_op(x)                     ((x).chan & USER_OP)
 #define glob_op(x)                     ((x).global & USER_OP)
+#define chan_autoop(x)                 ((x).chan & USER_AUTOOP)
+#define glob_autoop(x)                 ((x).global & USER_AUTOOP)
 #define chan_deop(x)                   ((x).chan & USER_DEOP)
 #define glob_deop(x)                   ((x).global & USER_DEOP)
 #define glob_master(x)                 ((x).global & USER_MASTER)
@@ -132,12 +132,13 @@ void break_down_flags(const char *, struct flag_record *, struct flag_record *);
 int build_flags(char *, struct flag_record *, struct flag_record *);
 int flagrec_eq(struct flag_record *, struct flag_record *);
 int flagrec_ok(struct flag_record *, struct flag_record *);
-int sanity_check(flag_t);
-int chan_sanity_check(int, int);
+flag_t sanity_check(flag_t);
+flag_t chan_sanity_check(flag_t, flag_t);
 char geticon(int);
 
 int private(struct flag_record, struct chanset_t *, int);
 int chk_op(struct flag_record, struct chanset_t *);
+int chk_autoop(struct flag_record, struct chanset_t *);
 int chk_deop(struct flag_record, struct chanset_t *);
 int chk_voice(struct flag_record, struct chanset_t *);
 int chk_devoice(struct flag_record, struct chanset_t *);

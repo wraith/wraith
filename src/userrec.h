@@ -2,7 +2,7 @@
 #define _USERREC_H
 
 void deflag_user(struct userrec *, int, char *, struct chanset_t *);
-struct userrec *adduser(struct userrec *, char *, char *, char *, int);
+struct userrec *adduser(struct userrec *, char *, char *, char *, flag_t);
 void addhost_by_handle(char *, char *);
 void clear_masks(struct maskrec *);
 void clear_userlist(struct userrec *);
