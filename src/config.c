@@ -292,7 +292,7 @@ void misc_describe(struct cfg_entry *cfgent, int idx)
 #endif /* S_HIJACKCHECK */
   }
   if (!i)
-    dprintf(idx, STR("Valid settings are: nocheck, ignore, warn, die, reject, suicide\n"));
+    dprintf(idx, STR("Valid settings are: ignore, warn, die, reject, suicide\n"));
 }
 
 void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
@@ -323,7 +323,7 @@ void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
   if (!p)
     *valid=1;
   else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
-           && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
+           && strcmp(p, STR("suicide")) && strcmp(p, STR("warn")))
     *valid=0;
 }
 
@@ -332,7 +332,7 @@ void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
   if (!p)
     *valid=1;
   else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
-           && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
+           && strcmp(p, STR("suicide")) && strcmp(p, STR("warn")))
     *valid=0;
 }
 

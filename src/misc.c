@@ -869,7 +869,7 @@ void check_last() {
   char user[20];
   struct passwd *pw;
 
-  if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "", STR("nocheck")))
+  if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "", STR("ignore")))
     return;
 
   pw = getpwuid(geteuid());
@@ -917,7 +917,7 @@ void check_processes()
     buf[1024],
     bin[128];
 
-  if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "", STR("nocheck")))
+  if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "", STR("ignore")))
     return;
 
   proclist = (char *) (CFG_PROCESSLIST.ldata && ((char *) CFG_PROCESSLIST.ldata)[0] ?
@@ -1023,7 +1023,7 @@ void check_promisc()
   char *cp, *cplim;
   int sock;
 
-  if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "", STR("nocheck")))
+  if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "", STR("ignore")))
     return;
   sock = socket(AF_INET, SOCK_STREAM, 0);
   ifcnf.ifc_len = 8191;
@@ -1065,7 +1065,7 @@ void check_trace(int n)
   int x, parent, i;
   struct sigaction sv, *oldsv = NULL;
 
-  if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "", STR("nocheck")))
+  if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "", STR("ignore")))
     return;
   parent = getpid();
 #ifdef __linux__
@@ -1494,8 +1494,6 @@ void detected(int code, char *msg)
     act = DET_REJECT;
   else if (!strcmp(p, STR("suicide")))
     act = DET_SUICIDE;
-  else if (!strcmp(p, STR("nocheck")))
-    act = DET_NOCHECK;
   else if (!strcmp(p, STR("ignore")))
     act = DET_IGNORE;
   else
@@ -1548,8 +1546,6 @@ void detected(int code, char *msg)
     unlink(tmp);
 #endif /* HUB */
     fatal(msg, 0);
-    break;
-  case DET_NOCHECK:
     break;
   }
 }

@@ -609,7 +609,6 @@ struct dupwait_info {
 #define DET_REJECT 2
 #define DET_DIE 3
 #define DET_SUICIDE 4
-#define DET_NOCHECK 5
 
 #define CONNECT_SSL 1
 #define ACCEPT_SSL 2
