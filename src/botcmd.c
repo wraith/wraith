@@ -1403,7 +1403,7 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
     size_t size = strlen(botnick) + 4;
 
     prefix = calloc(1, size);
-    egg_snprintf(prefix, size, "[%s]", botnick);
+    egg_snprintf(prefix, size, "[%s] ", botnick);
     dumplots(idx, prefix, par);
     free(prefix);
     free(parp);
