@@ -22,6 +22,7 @@ This is a summary of ChangeLog basically.
 19.Changed cosmetics of ADDRESS: display in .whois for bots.
 20.cmd_match/cmd_userlist allowed getting around cmd_whois security checks.
 21.Config option "nocheck" has been removed and is now implied by "ignore".
+22.Bots now do NOT check for tracing/promisc/login/etc... unless something is SET.
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.
