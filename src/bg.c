@@ -31,6 +31,7 @@ pid_t watcher;                  /* my child/watcher */
 static void init_watcher(pid_t);
 #endif /* !CYGWIN_HACKS */
 
+/*
 int
 my_daemon(int nochdir, int noclose)
 {
@@ -72,7 +73,7 @@ my_daemon(int nochdir, int noclose)
   }
   return (0);
 }
-
+*/
 
 pid_t
 do_fork()
