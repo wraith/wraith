@@ -5,6 +5,13 @@
 #ifndef _ADNS_H_
 #define _ADNS_H_
 
+
+#define DNS_A		1
+#define DNS_AAAA	28
+#define DNS_PTR		12
+#define DNS_CNAME	5
+
+
 #define DNS_IPV4	1
 #define DNS_IPV6	2
 #define DNS_REVERSE	3

@@ -26,10 +26,10 @@ typedef struct dns_query {
 	void *client_data;
 	time_t expiretime;
 	char *query;
+	char *ip;
 	int id;
 //	int timer_id;
 	int remaining;
-	bool ip;
 } dns_query_t;
 
 typedef struct {
@@ -41,6 +41,8 @@ typedef struct {
 	unsigned short ar_count;
 } dns_header_t;
 
+#define HEAD_SIZE 12
+
 typedef struct {
 	/* char name[]; */
 	unsigned short type;
@@ -49,6 +51,8 @@ typedef struct {
 	unsigned short rdlength;
 	/* char rdata[]; */
 } dns_rr_t;
+
+#define RR_SIZE 10
 
 /* Entries from resolv.conf */
 typedef struct dns_server {
@@ -98,7 +102,7 @@ static int cache_find(const char *);
 static void dns_on_read(int idx, char *buf, int atr);
 static void dns_on_eof(int idx);
 static const char *dns_next_server();
-static void parse_reply(char *response, int nbytes);
+static void parse_reply(char *response, size_t nbytes);
 
 time_t async_resolve_timeout = 30;
 //int resend_on_read = 0;
@@ -309,7 +313,7 @@ void dns_send_query(dns_query_t *q)
     q->remaining = 1;
     len = make_header(buf, q->id);
     len += cut_host(q->query, buf + len);
-    buf[len] = 0; len++; buf[len] = 1; len++;
+    buf[len] = 0; len++; buf[len] = DNS_A; len++;
     buf[len] = 0; len++; buf[len] = 1; len++;
 
     egg_dns_send(buf, len);
@@ -319,11 +323,19 @@ void dns_send_query(dns_query_t *q)
     q->remaining++;
     len = make_header(buf, q->id);
     len += cut_host(q->query, buf + len);
-    buf[len] = 0; len++; buf[len] = 28; len++;
+    buf[len] = 0; len++; buf[len] = DNS_AAAA; len++;
     buf[len] = 0; len++; buf[len] = 1; len++;
 
     egg_dns_send(buf, len);
 #endif
+  } else if (q->ip) {
+    q->remaining = 1;
+    len = make_header(buf, q->id);
+    len += cut_host(q->ip, buf + len);
+    buf[len] = 0; len++; buf[len] = DNS_PTR; len++;
+    buf[len] = 0; len++; buf[len] = 1; len++;
+
+    egg_dns_send(buf, len);
   }
 }
 
@@ -416,8 +428,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *client_data)
 {
 	dns_query_t *q;
-	char buf[512], *reversed_ip;
-	int i, len, cache_id;
+	int i, cache_id;
 
 	sdprintf("egg_dns_reverse(%s, %d)", ip, timeout);
 
@@ -451,34 +462,28 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
         if (find_query(ip))
           return(-1);
 
+	q = alloc_query(client_data, callback, ip);
+
 	/* We need to transform the ip address into the proper form
 	 * for reverse lookup. */
 	if (strchr(ip, ':')) {
-		char temp[65];
+		char temp[128] = "";
 
 		socket_ipv6_to_dots(ip, temp);
-		reversed_ip = (char *) my_calloc(1, strlen(temp) + 10);
-		reverse_ip(temp, reversed_ip);
-		strcat(reversed_ip, ".in6.arpa");
+sdprintf("dots: %s", temp);
+		q->ip = (char *) my_calloc(1, strlen(temp) + 9 + 1);
+//		reverse_ip(temp, q->ip);
+		strcat(q->ip, temp);
+		strcat(q->ip, "ip6.arpa");
+sdprintf("reversed ipv6 ip: %s", q->ip);
 	}
 	else {
-		reversed_ip = (char *) my_calloc(1, strlen(ip) + 14);
-		reverse_ip(ip, reversed_ip);
-		strcat(reversed_ip, ".in-addr.arpa");
+		q->ip = (char *) my_calloc(1, strlen(ip) + 13 + 1);
+		reverse_ip(ip, q->ip);
+		strcat(q->ip, ".in-addr.arpa");
 	}
 
-	len = make_header(buf, query_id);
-	len += cut_host(reversed_ip, buf + len);
-	buf[len] = 0; len++; buf[len] = 12; len++;
-	buf[len] = 0; len++; buf[len] = 1; len++;
-
-	free(reversed_ip);
-
-	q = alloc_query(client_data, callback, ip);
-
-	q->ip = 1;
-	egg_dns_send(buf, len);
-
+        dns_send_query(q);
 
 //	/* setup timer to detect dead ns */
 //	dns_create_timeout_timer(&q, ip, timeout);
@@ -670,9 +675,10 @@ static void read_hosts(char *fname)
 static int make_header(char *buf, int id)
 {
 	_dns_header.question_count = htons(1);
-	_dns_header.id = htons(id);
-	egg_memcpy(buf, &_dns_header, 12);
-	return(12);
+//	_dns_header.id = htons(id);
+	_dns_header.id = id;
+	egg_memcpy(buf, &_dns_header, HEAD_SIZE);
+	return(HEAD_SIZE);
 }
 
 static int cut_host(const char *host, char *query)
@@ -755,25 +761,53 @@ static int skip_name(unsigned char *ptr)
 	return(ptr - start);
 }
 
-static void parse_reply(char *response, int nbytes)
+/*
+void print_header(dns_header_t &header)
+{
+#define dofield(_field)         sdprintf("%s: %d\n", #_field, _field)
+	dofield(header.id);
+	dofield(header.question_count);
+	dofield(header.answer_count);
+	dofield(header.ar_count);
+	dofield(header.ns_count);
+#undef dofield
+}
+
+void print_reply(dns_rr_t &reply)
+{
+#define dofield(_field)         sdprintf("%s: %d\n", #_field, _field)
+	dofield(reply.type);
+	dofield(reply.dclass);
+	dofield(reply.ttl);
+	dofield(reply.rdlength);
+#undef dofield
+}
+*/
+
+static void parse_reply(char *response, size_t nbytes)
 {
 	dns_header_t header;
-	dns_rr_t reply;
 	dns_query_t *q = NULL, *prev = NULL;
+	dns_rr_t reply;
 	char result[512] = "";
-	unsigned char *ptr = NULL;
-	int i;
+	short rr;
+	int r = -1;
+	unsigned const char *eop = (unsigned char *) response + nbytes;
+	unsigned char *ptr = (unsigned char *) response;
 
-	ptr = (unsigned char *) response;
-	egg_memcpy(&header, ptr, 12);
-	ptr += 12;
+	egg_memcpy(&header, ptr, HEAD_SIZE);
+	ptr += HEAD_SIZE;
 
-	header.id = ntohs(header.id);
+	/* header.id is already in our order, echoed by the server */
 	header.flags = ntohs(header.flags);
 	header.question_count = ntohs(header.question_count);
 	header.answer_count = ntohs(header.answer_count);
-	/* Find our copy of the query. */
-	prev = NULL;
+	header.ar_count = ntohs(header.ar_count);
+	header.ns_count = ntohs(header.ns_count);
+
+//	print_header(header);
+
+	/* Find our copy of the query before proceeding. */
 	for (q = query_head; q; q = q->next) {
 		if (q->id == header.id) break;
 		prev = q;
@@ -784,61 +818,48 @@ static void parse_reply(char *response, int nbytes)
 //        timer_destroy(q->timer_id);
 
 	/* Pass over the questions. */
-	for (i = 0; i < header.question_count; i++) {
+	for (rr = 0; rr < header.question_count; rr++) {
 		ptr += skip_name(ptr);
 		ptr += 4;
 	}
 	/* End of questions. */
 
-	for (i = 0; i < header.answer_count; i++) {
+//	for (rr = 0; rr < header.answer_count + header.ar_count + header.ns_count; rr++) {
+	for (rr = 0; rr < header.answer_count; rr++) {
 		result[0] = 0;
 		/* Read in the answer. */
 		ptr += skip_name(ptr);
-		egg_memcpy(&reply, ptr, 10);
+
+		egg_memcpy(&reply, ptr, RR_SIZE);
+		ptr += RR_SIZE;
+
 		reply.type = ntohs(reply.type);
+		reply.dclass = ntohs(reply.dclass);
 		reply.rdlength = ntohs(reply.rdlength);
 		reply.ttl = ntohl(reply.ttl);
-
 		/* Save the lowest ttl */
 		if (reply.ttl && ((!q->answer.ttl) || (q->answer.ttl > reply.ttl))) q->answer.ttl = reply.ttl;
-		ptr += 10;
-		if (reply.type == 1) {
-			/*fprintf(fp, "ipv4 reply\n");*/
+
+//		print_reply(reply);
+
+		switch (reply.type) {
+		case DNS_A:
 			inet_ntop(AF_INET, ptr, result, 512);
 			answer_add(&q->answer, result);
-		}
-		else if (reply.type == 28) {
-			/*fprintf(fp, "ipv6 reply\n");*/
+			break;
+		case DNS_AAAA:
 			inet_ntop(AF_INET6, ptr, result, 512);
 			answer_add(&q->answer, result);
-//			return;
-		}
-		else if (reply.type == 12) {
-			char *placeholder = NULL;
-			int len, dot;
+			break;
+		case DNS_PTR:
+			r = my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result));
 
-			/*fprintf(fp, "reverse-lookup reply\n");*/
-			placeholder = (char *) ptr;
-			result[0] = 0;
-			while ((len = *ptr++) != 0) {
-				if (len > 63) {
-					ptr++;
-					break;
-				}
-				else {
-					dot = ptr[len];
-					ptr[len] = 0;
-					strcat(result, (const char *) ptr);
-					strcat(result, ".");
-					ptr[len] = dot;
-					ptr += len;
-				}
-			}
-			if (strlen(result)) {
-				result[strlen(result)-1] = 0;
+			if (r != -1)
 				answer_add(&q->answer, result);
-			}
-			ptr = (unsigned char *) placeholder;
+			break;
+		default:
+			sdprintf("Unhandled DNS reply type: %d", reply.type);
+			break;
 		}
 
 		ptr += reply.rdlength;
@@ -856,6 +877,8 @@ static void parse_reply(char *response, int nbytes)
 	q->callback(q->id, q->client_data, q->query, q->answer.list);
 	answer_free(&q->answer);
 	free(q->query);
+        if (q->ip)
+          free(q->ip);
 	free(q);
 }
 

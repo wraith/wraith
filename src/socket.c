@@ -211,8 +211,14 @@ int socket_ip_to_uint(const char *ip, unsigned int *longip)
         return(0);
 }
 
+static char hex_digits[] = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+};
+
+
 /* Converts shorthand ipv6 notation (123:456::789) into long dotted-decimal
- * notation. 'dots' must be 16*4+1 = 65 bytes long. */
+ * notation. 'dots' must be 16*4+1 = 128 bytes long. */
 int socket_ipv6_to_dots(const char *ip, char *dots)
 {
 #ifndef USE_IPV6
@@ -220,31 +226,27 @@ int socket_ipv6_to_dots(const char *ip, char *dots)
         return(-1);
 #else
         struct in6_addr buf;
+	char *cp = NULL;
+	unsigned char *bytes = NULL;
+	int i = 0;
 
         dots[0] = 0;
         if (inet_pton(AF_INET6, ip, &buf) <= 0) return(-1);
 
-/*
+/* bind9
 from lib/dns/byaddr.c
-                        cp = textname;
-                        for (i = 15; i >= 0; i--) {
-                                *cp++ = hex_digits[bytes[i] & 0x0f];
-                                *cp++ = '.';
-                                *cp++ = hex_digits[(bytes[i] >> 4) & 0x0f];
-                                *cp++ = '.';
-                        }
-
 */
-        sprintf(dots, "%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u.%u",
-                buf.s6_addr[0], buf.s6_addr[1],
-                buf.s6_addr[2], buf.s6_addr[3],
-                buf.s6_addr[4], buf.s6_addr[5],
-                buf.s6_addr[6], buf.s6_addr[7],
-                buf.s6_addr[8], buf.s6_addr[9],
-                buf.s6_addr[10], buf.s6_addr[11],
-                buf.s6_addr[12], buf.s6_addr[13],
-                buf.s6_addr[14], buf.s6_addr[15]
-        );
+	bytes = (unsigned char *) (&buf.s6_addr);
+
+	cp = dots;
+
+	for (i = 15; i >= 0; i--) {
+		*cp++ = hex_digits[bytes[i] & 0x0f];
+		*cp++ = '.';
+		*cp++ = hex_digits[(bytes[i] >> 4) & 0x0f];
+		*cp++ = '.';
+	}
+                        
         return(0);
 #endif
 }
