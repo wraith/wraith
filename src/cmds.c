@@ -1329,20 +1329,22 @@ static void cmd_console(struct userrec *u, int idx, char *par)
   }
 }
 
+void test_colors(int);
 static void cmd_date(struct userrec *u, int idx, char *par)
 {
   char date[50], utctime[50], ltime[50];
+  ltime[0] = utctime[0] = 0;
   putlog(LOG_CMDS, "*", "#%s# date", dcc[idx].nick);
   egg_strftime(date, sizeof date, "%c %Z", localtime(&now));
 #ifndef S_UTCTIME
   sprintf(ltime, "<-- This time is used on the bot.");
 #endif /* !S_UTCTIME */
-  dprintf(idx, "%s %s\n", date, ltime[0] ? ltime : "");
+  dprintf(idx, "%s %s\n", date, (ltime && ltime[0]) ? ltime : "");
   egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
 #ifdef S_UTCTIME
   sprintf(utctime, "<-- This time is used on the bot.");
 #endif /* S_UTCTIME */
-  dprintf(idx, "%s %s\n", date, utctime[0] ? utctime : "");
+  dprintf(idx, "%s %s\n", date, (utctime && utctime[0]) ? utctime : "");
 }
 
 #ifdef HUB
