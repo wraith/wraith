@@ -1285,11 +1285,17 @@ char *color(int idx, int type, int color)
   /* if user is connected over TELNET or !backgrd, show ANSI
    * if they are relaying, they are most likely on an IRC client and should have mIRC codes
    */
-  if (!(dcc[idx].status & STAT_COLOR))
-    return "";
 
-  if ((idx && (idx != -1 && (dcc[idx].type != &DCC_RELAYING) && (dcc[idx].status & STAT_TELNET))) 
-     || (idx == -1 || !backgrd)) ansi++;
+  if (idx == -1) {		/* who cares, just show color! */
+    ansi++;
+  } else if (idx && dcc[idx].status & STAT_COLOR) {
+    /* over telnet but not relaying */
+    if (dcc[idx].type != &DCC_RELAYING && dcc[idx].status & STAT_TELNET)
+      ansi++;
+    /* else: use mIRC color codes. */
+  } else {
+    return "";
+  }
 
   if (type == BOLD_OPEN) {
     return ansi ? "\033[1m" : "\002";
