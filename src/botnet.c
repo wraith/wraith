@@ -11,6 +11,7 @@
 
 #include "main.h"
 #include "tandem.h"
+#include "core_binds.h"
 
 extern int			dcc_total, backgrd, connect_timeout, max_dcc,
 				egg_numver, cfg_count;
@@ -289,7 +290,7 @@ void rembot(char *who)
   if (!*ptr)
     /* May have just .unlink *'d */
     return;
-  check_disc(who);
+  check_bind_disc(who);
 
   u = get_user_by_handle(userlist, who);
   if (u != NULL)
@@ -338,7 +339,7 @@ void rempartybot(char *bot)
   for (i = 0; i < parties; i++)
     if (!egg_strcasecmp(party[i].bot, bot)) {
       if (party[i].chan >= 0)
-        check_chpt(bot, party[i].nick, party[i].sock, party[i].chan);
+        check_bind_chpt(bot, party[i].nick, party[i].sock, party[i].chan);
       remparty(bot, party[i].sock);
       i--;
     }
@@ -929,7 +930,7 @@ int botunlink(int idx, char *nick, char *reason)
       parties--;
       /* Assert? */
       if (party[i].chan >= 0)
-        check_chpt(party[i].bot, party[i].nick, party[i].sock,
+        check_bind_chpt(party[i].bot, party[i].nick, party[i].sock,
 		       party[i].chan);
     }
     strcpy(s, "killassoc &");
@@ -1367,10 +1368,10 @@ static void cont_tandem_relay(int idx, char *buf, register int i)
 		dcc[uidx].nick, BOT_PARTYLEFT);
     if (dcc[uidx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(uidx, NULL);
-    check_chpt(botnetnick, dcc[uidx].nick, dcc[uidx].sock,
+    check_bind_chpt(botnetnick, dcc[uidx].nick, dcc[uidx].sock,
 		   dcc[uidx].u.chat->channel);
   }
-  check_chof(dcc[uidx].nick, uidx);
+  check_bind_chof(dcc[uidx].nick, uidx);
   dcc[uidx].type = &DCC_RELAYING;
   dcc[uidx].u.relay = ri;
 }
@@ -1405,8 +1406,8 @@ static void eof_dcc_relay(int idx)
     if (dcc[j].u.chat->channel < GLOBAL_CHANS)
       botnet_send_join_idx(j, -1);
   }
-  check_chon(dcc[j].nick, j);
-  check_chjn(botnetnick, dcc[j].nick, dcc[j].u.chat->channel,
+  check_bind_chon(dcc[j].nick, j);
+  check_bind_chjn(botnetnick, dcc[j].nick, dcc[j].u.chat->channel,
 		 geticon(j), dcc[j].sock, dcc[j].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
@@ -1500,9 +1501,9 @@ static void dcc_relaying(int idx, char *buf, int j)
   free(dcc[idx].u.relay);
   dcc[idx].u.chat = ci;
   dcc[idx].type = &DCC_CHAT;
-  check_chon(dcc[idx].nick, idx);
+  check_bind_chon(dcc[idx].nick, idx);
   if (dcc[idx].u.chat->channel >= 0)
-    check_chjn(botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel,
+    check_bind_chjn(botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel,
 		   geticon(idx), dcc[idx].sock, dcc[idx].host);
   killsock(dcc[j].sock);
   lostdcc(j);
@@ -1701,13 +1702,13 @@ void restart_chons()
   /* Dump party line members */
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_CHAT) {
-      check_chon(dcc[i].nick, i);
-      check_chjn(botnetnick, dcc[i].nick, dcc[i].u.chat->channel,
+      check_bind_chon(dcc[i].nick, i);
+      check_bind_chjn(botnetnick, dcc[i].nick, dcc[i].u.chat->channel,
 		     geticon(i), dcc[i].sock, dcc[i].host);
     }
   }
   for (i = 0; i < parties; i++) {
-    check_chjn(party[i].bot, party[i].nick, party[i].chan,
+    check_bind_chjn(party[i].bot, party[i].nick, party[i].chan,
 		   party[i].flag, party[i].sock, party[i].from);
   }
 }

@@ -12,7 +12,7 @@
 
 #ifdef MAKING_IRC
 #ifdef S_AUTH
-static int check_pubc(char *, char *, char *, struct userrec *, char *, char *);
+static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
 #endif /* S_AUTH */
 static void makeopline(struct chanset_t *, char *, char *);
 static int me_op(struct chanset_t *);

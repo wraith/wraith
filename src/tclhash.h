@@ -65,27 +65,6 @@ typedef struct bind_table_b {
 
 void kill_binds(void);
 
-
-void check_dcc(const char *, int, const char *);
-void check_chjn(const char *, const char *, int, char, int, const char *);
-void check_chpt(const char *, const char *, int, int);
-void check_bot(const char *, const char *, const char *);
-void check_link(const char *, const char *);
-void check_disc(const char *);
-int check_note(const char *, const char *, const char *);
-void check_listen(const char *, int);
-void check_time(struct tm *);
-void tell_binds(int, char *);
-void check_nkch(const char *, const char *);
-void check_away(const char *, int, const char *);
-
-int check_chat(char *, int, const char *);
-void check_act(const char *, int, const char *);
-void check_bcst(const char *, int, const char *);
-void check_chon(char *, int);
-void check_chof(char *, int);
-
-
 int check_bind(bind_table_t *table, const char *match, struct flag_record *_flags, ...);
 bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, int match_type, int flags);
 void bind_table_del(bind_table_t *table);

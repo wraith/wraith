@@ -12,6 +12,7 @@
 #include "chan.h"
 #include "modules.h"
 #include "tandem.h"
+#include "core_binds.h"
 
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
@@ -451,7 +452,7 @@ int change_handle(struct userrec *u, char *newh)
   /* Nothing that will confuse the userfile */
   if (!newh[1] && strchr(BADHANDCHARS, newh[0]))
     return 0;
-  check_nkch(u->handle, newh);
+  check_bind_nkch(u->handle, newh);
   /* Yes, even send bot nick changes now: */
   if (!noshare && !(u->flags & USER_UNSHARED))
     shareout(NULL, "h %s %s\n", u->handle, newh);

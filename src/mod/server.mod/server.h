@@ -7,8 +7,8 @@
 #ifndef _EGG_MOD_SERVER_SERVER_H
 #define _EGG_MOD_SERVER_SERVER_H
 
-#define check_ctcp(a,b,c,d,e,f) check_ctcpr(a,b,c,d,e,f,BT_ctcp)
-#define check_ctcr(a,b,c,d,e,f) check_ctcpr(a,b,c,d,e,f,BT_ctcr)
+#define check_bind_ctcp(a,b,c,d,e,f) check_bind_ctcpr(a,b,c,d,e,f,BT_ctcp)
+#define check_bind_ctcr(a,b,c,d,e,f) check_bind_ctcpr(a,b,c,d,e,f,BT_ctcr)
 
 #ifndef MAKING_SERVER
 /* 4 - 7 */
@@ -27,7 +27,7 @@
 #define answer_ctcp (*(int *)(server_funcs[15]))
 /* 16 - 19 */
 #define trigger_on_ignore (*(int *)(server_funcs[16]))
-#define check_ctcpr ((int(*)(char*,char*,struct userrec*,char*,char*,char*,bind_table_t *))server_funcs[17])
+#define check_bind_ctcpr ((int(*)(char*,char*,struct userrec*,char*,char*,char*,bind_table_t *))server_funcs[17])
 #define detect_avalanche ((int(*)(char *))server_funcs[18])
 #define nuke_server ((void(*)(char *))server_funcs[19])
 /* 20 - 22 */

@@ -362,7 +362,7 @@
 #define botname ((char *)(global[211]))
 /* 212 - 215 */
 /* 212: remove_gunk() -- UNUSED (drummer) */
-#define check_chjn ((void (*) (const char *,const char *,int,char,int,const char *))global[213])
+#define check_bind_chjn ((void (*) (const char *,const char *,int,char,int,const char *))global[213])
 #define sanitycheck_dcc ((int (*)(char *, char *, char *, char *))global[214])
 #define isowner ((int (*)(char *))global[215])
 /* 216 - 219 */

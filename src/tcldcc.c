@@ -73,37 +73,6 @@ static int tcl_valididx STDVAR
    return TCL_OK;
 }
 
-static int tcl_killdcc STDVAR
-{
-  int idx;
-
-  BADARGS(2, 3, " idx ?reason?");
-  idx = findidx(atoi(argv[1]));
-  if (idx < 0) {
-    Tcl_AppendResult(irp, "invalid idx", NULL);
-    return TCL_ERROR;
-  }
-  /* Don't kill terminal socket */
-  if ((dcc[idx].sock == STDOUT) && !backgrd)
-    return TCL_OK;
-  /* Make sure 'whom' info is updated for other bots */
-  if (dcc[idx].type->flags & DCT_CHAT) {
-    chanout_but(idx, dcc[idx].u.chat->channel, "*** %s has left the %s%s%s\n",
-		dcc[idx].nick, dcc[idx].u.chat ? "channel" : "partyline",
-		argc == 3 ? ": " : "", argc == 3 ? argv[2] : "");
-    botnet_send_part_idx(idx, argc == 3 ? argv[2] : "");
-    if ((dcc[idx].u.chat->channel >= 0) &&
-	(dcc[idx].u.chat->channel < GLOBAL_CHANS))
-      check_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock,
-		     dcc[idx].u.chat->channel);
-    check_chof(dcc[idx].nick, idx);
-    /* Notice is sent to the party line, the script can add a reason. */
-  }
-  killsock(dcc[idx].sock);
-  lostdcc(idx);
-  return TCL_OK;
-}
-
 static int tcl_putbot STDVAR
 {
   int i;
@@ -290,7 +259,6 @@ tcl_cmds tcldcc_cmds[] =
   {"putidx",		tcl_putdcc},
   {"hand2idx",		tcl_hand2idx},
   {"valididx",		tcl_valididx},
-  {"killdcc",		tcl_killdcc},
   {"putbot",		tcl_putbot},
   {"putallbots",	tcl_putallbots},
   {"idx2hand",		tcl_idx2hand},
