@@ -36,9 +36,16 @@ STRIP = @STRIP@
 LIBS = @LIBS@ @ZLIB@ @RESLIB@
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
-CFLGS = -fno-strict-aliasing -Wno-format-y2k -W -Wno-unused-parameter
-#-Wuninitialized -W -Wnested-externs -Wdisabled-optimization -Winline
-#-Wpadded -Wshadow -finline-functions
+CFLGS = -fno-strict-aliasing -W \
+-Wdisabled-optimization -Wshadow -Winline \
+-Wnested-externs -fno-asm -Wno-unused-parameter -Wno-format-y2k \
+-Wlarger-than-2048 -Wpointer-arith -Wcast-align \
+-Waggrepate-return -Wmissing-format-attribute -Wpacked \
+-Wlong-long -Wbad-function-cast -Wmissing-noreturn \
+#-Wwrite-strings
+#-Wconversion
+#-Wtraditional
+
 MAKEFLAGS = -s -j4
 
 MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
