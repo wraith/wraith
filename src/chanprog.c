@@ -485,8 +485,8 @@ void load_internal_users()
       case 2:
 	hosts = ln;
 	if (owner[0])
-	  strlcat(owner, ",", 120);
-	strlcat(owner, hand, 120);
+	  strlcat(owner, ",", 121);
+	strlcat(owner, hand, 121);
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA, 0);
 	  u = get_user_by_handle(userlist, hand);

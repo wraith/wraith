@@ -122,7 +122,7 @@ void encrypt_pass(char *s1, char *s2)
     s1[MAXPASSLEN] = 0;
   tmp = encrypt_string(s1, s1);
   strcpy(s2, "+");
-  strlcat(s2, tmp, MAXPASSLEN);
+  strlcat(s2, tmp, MAXPASSLEN + 1);
   s2[MAXPASSLEN] = 0;
   free(tmp);
 }
@@ -153,7 +153,7 @@ void encrypt_pass_new(char *s1, char *s2)
     s1[MAXPASSLEN] = 0;
   tmp = encrypt_string(s1, passkey);
   strcpy(s2, "+");
-  strlcat(s2, tmp, MAXPASSLEN);
+  strlcat(s2, tmp, MAXPASSLEN + 1);
   s2[MAXPASSLEN] = 0;
   free(tmp);
 }
