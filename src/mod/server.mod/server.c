@@ -27,8 +27,6 @@ static int flud_thr;		/* msg flood threshold */
 static int flud_time;		/* msg flood time */
 static int flud_ctcp_thr;	/* ctcp flood threshold */
 static int flud_ctcp_time;	/* ctcp flood time */
-static char initserver[121];	/* what, if anything, to send to the
-				   server on connection */
 static char botuserhost[121];	/* bot's user@host (refreshed whenever the
 				   bot joins a channel) */
 				/* may not be correct user@host BUT it's
@@ -1523,7 +1521,6 @@ static tcl_strings my_tcl_strings[] =
   {"botnick",			NULL,		0,		STR_PROTECT},
   {"altnick",			altnick,	NICKMAX,	0},
   {"realname",			botrealname,	80,		0},
-  {"init-server",		initserver,	120,		0},
   {"connect-server",		connectserver,	120,		0},
   {"stackable-commands",	stackablecmds,	510,		0},
   {"stackable2-commands",	stackable2cmds,	510,		0},
@@ -1840,8 +1837,6 @@ static void server_report(int idx, int details)
   if (details) {
     if (min_servs)
       dprintf(idx, "    Requiring a net of at least %d server(s)\n", min_servs);
-    if (initserver[0])
-      dprintf(idx, "    On connect, I do: %s\n", initserver);
     if (connectserver[0])
       dprintf(idx, "    Before connect, I do: %s\n", connectserver);
     dprintf(idx, "    Flood is: %d msg/%ds, %d ctcp/%ds\n",
@@ -1989,7 +1984,6 @@ char *server_start(Function *global_funcs)
   flud_time = 60;
   flud_ctcp_thr = 3;
   flud_ctcp_time = 60;
-  initserver[0] = 0;
   connectserver[0] = 0;		/* drummer */
   botuserhost[0] = 0;
   keepnick = 1;

@@ -213,10 +213,7 @@ static int got001(char *from, char *msg)
   strncpy0(cursrvname, from, sizeof(cursrvname));
 
   dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
-  /* Call Tcl init-server */
-  if (initserver[0])
-    do_tcl("init-server", initserver);
-  check_tcl_event("init-server");
+  dprintf(DP_SERVER, "MODE %s +iws\n");
   x = serverlist;
   if (x == NULL)
     return 0;			/* Uh, no server list */
