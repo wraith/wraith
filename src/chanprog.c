@@ -456,7 +456,7 @@ void load_internal_users()
           egg_snprintf(host, sizeof host, "-telnet!%s@%s", hosts, ip);
           set_user(&USERENTRY_HOSTS, u, host);
           hosts = ln;
-          if (ln && ((ln = strchr(ln, ' ')))
+          if (ln && (ln = strchr(ln, ' ')))
             *ln++ = 0;
         }
         egg_snprintf(host, sizeof host, "-telnet!telnet@%s", ip);
