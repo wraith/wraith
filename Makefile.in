@@ -92,7 +92,7 @@ clean:  cleanutils
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp *~ src/*~ configure.temp .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h src/help.h utctime
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h src/help.h src/response.h src/responses.h utctime
 
 distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
@@ -170,11 +170,29 @@ help: packconf makehelp stringfix
 	cp -f src/help.h~ src/help.h; \
 	fi)
 
+res: makeres
+	@src/makeres misc/responses.txt src/ 1
+	@(if [ ! -f src/response.h ]; then \
+	touch src/response.h; \
+	fi)
+	@(if [ ! -f src/responses.h ]; then \
+	touch src/responses.h; \
+	fi)
+	@(if test "x`diff -qurN src/response.h~ src/response.h`" != "x"; then \
+	cp -f src/response.h~ src/response.h; \
+	fi)
+	@(if test "x`diff -qurN src/responses.h~ src/responses.h`" != "x"; then \
+	cp -f src/responses.h~ src/responses.h; \
+	fi)
+
 stringfix: packconf src/stringfix.c config.h
 	+@cd src && ${MAKE_UTILS} stringfix
 
 makesettings: src/makesettings.c
 	+@cd src && ${MAKE_UTILS} makesettings
+
+makeres: src/makeres.c
+	+@cd src && ${MAKE_UTILS} makeres
 
 makehelp: packconf src/makehelp.c
 	+@cd src && ${MAKE_UTILS} makehelp
@@ -187,7 +205,7 @@ utils: makesettings stringfix makehelp
 crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
-general: makesettings packconf salt help 
+general: makesettings packconf salt help res
 
 leaf:	general
 	@echo ""

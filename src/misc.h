@@ -12,22 +12,6 @@
 #define LOG_TS "[%H:%M]"
 
 
-#define KICK_BANNED 		1
-#define KICK_KUSER 		2
-#define KICK_KICKBAN 		3
-#define KICK_MASSDEOP 		4
-#define KICK_BADOP 		5
-#define KICK_BADOPPED 		6
-#define KICK_MANUALOP 		7
-#define KICK_MANUALOPPED	8
-#define KICK_CLOSED		9
-#define KICK_FLOOD 		10
-#define KICK_NICKFLOOD 		11
-#define KICK_KICKFLOOD 		12
-#define KICK_BOGUSUSERNAME 	13
-#define KICK_MEAN 		14
-#define KICK_BOGUSKEY 		15
-
 char *wbanner();
 int coloridx(int);
 char *color(int, int, int);
@@ -37,7 +21,6 @@ int listen_all(int, int);
 char *replace(const char *, const char *, const char *);
 int goodpass(char *, int, char *);
 void makeplaincookie(char *, char *, char *);
-char *kickreason(int);
 int bot_aggressive_to(struct userrec *);
 int updatebin(int, char *, int);
 int egg_strcatn(char *dst, const char *src, size_t max);
@@ -64,7 +47,6 @@ inline void str_unescape(char *, register const char);
 int str_isdigit(const char *);
 void kill_bot(char *, char *);
 
-extern char		kickprefix[], bankickprefix[];
 extern int		server_lag, use_invites, use_exempts;
 
 #endif /* !_MISC_H_ */

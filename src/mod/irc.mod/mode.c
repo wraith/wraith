@@ -618,7 +618,7 @@ static void got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
 	}
       }
     }
-    kick_all(chan, who, resn[0] ? resn : kickreason(KICK_BANNED), match_my_nick(nick) ? 0 : 1);
+    kick_all(chan, who, resn[0] ? resn : response(RES_BANNED), match_my_nick(nick) ? 0 : 1);
   }
   if (!nick[0] && (bounce_bans || bounce_modes) &&
       (!u_equals_mask(global_bans, who) || !u_equals_mask(chan->bans, who)))
@@ -880,7 +880,7 @@ static int gotmode(char *from, char *msg)
             m = ismember(chan, nfrom);
             if (m && !chan_sentkick(m)) {
               m->flags |= SENTKICK;
-              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
+              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, response(RES_MASSDEOP));
               tputs(serv, tmp, strlen(tmp));
               if (ufrom) {
                 sprintf(tmp, "Mass deop on %s by %s", chan->dname, nfrom);
@@ -899,7 +899,7 @@ static int gotmode(char *from, char *msg)
               m = ismember(chan, nfrom);
               if (m && !chan_sentkick(m)) {
                 m->flags |= SENTKICK;
-                sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+                sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, response(RES_MANUALOP));
                 tputs(serv, tmp, strlen(tmp));
                 if (ufrom) {
                   sprintf(tmp, "Mass op on %s by %s", chan->dname, nfrom);
@@ -966,7 +966,7 @@ static int gotmode(char *from, char *msg)
             /* Kick opper */
             m = ismember(chan, nfrom);
             if (!m || !chan_sentkick(m)) {
-              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_BADOP));
+              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, response(RES_BADOP));
               tputs(serv, tmp, strlen(tmp));
               if (m)
                 m->flags |= SENTKICK;
@@ -989,7 +989,7 @@ static int gotmode(char *from, char *msg)
               if (m) {
                 if (!(m->flags & CHANOP)) {
                   if (!chan_sentkick(m)) {
-                    sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, kickreason(KICK_BADOPPED));
+                    sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, response(RES_BADOPPED));
                     tputs(serv, tmp, strlen(tmp));
                     m->flags |= SENTKICK;
                   }
@@ -1022,7 +1022,7 @@ static int gotmode(char *from, char *msg)
           /* Kick opper */
           m = ismember(chan, nfrom);
           if (!m || !chan_sentkick(m)) {
-            sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+            sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, response(RES_MANUALOP));
             tputs(serv, tmp, strlen(tmp));
             if (m)
               m->flags |= SENTKICK;
@@ -1045,13 +1045,13 @@ static int gotmode(char *from, char *msg)
             if (m) {
               if (!(m->flags & CHANOP) && (rfc_casecmp(botname, trg))) {
                 if (!chan_sentkick(m)) {
-                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, response(RES_MANUALOPPED));
                   tputs(serv, tmp, strlen(tmp));
                   m->flags |= SENTKICK;
                 }
               }
             } else {
-              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, response(RES_MANUALOPPED));
               tputs(serv, tmp, strlen(tmp));
             }
           }

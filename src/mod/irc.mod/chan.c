@@ -198,7 +198,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
             sent++;
             if (chan->closed_ban)
               doban(chan, m);
-            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, kickreason(KICK_CLOSED));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
             m->flags |= SENTKICK;
             if (actions >= ct)
               return;
@@ -240,7 +240,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
             actions++;
             if (chan->closed_ban)
               doban(chan, m);
-            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, kickreason(KICK_CLOSED));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
             m->flags |= SENTKICK;
             if ((actions >= ct) || (sent > 5))
               return;
@@ -443,7 +443,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
       /* Flooding chan! either by public or notice */
       if (!chan_sentkick(m) && me_op(chan)) {
 	putlog(LOG_MODES, chan->dname, IRC_FLOODKICK, floodnick);
-        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, kickreason(KICK_FLOOD));
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, response(RES_FLOOD));
 	m->flags |= SENTKICK;
       }
       return 1;
@@ -479,7 +479,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
    	        dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick,
 		      kickprefix, IRC_JOIN_FLOOD);
 	      else
-                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, kickreason(KICK_NICKFLOOD));
+                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_NICKFLOOD));
 	    }
 	  }
 	}
@@ -487,7 +487,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
     case FLOOD_KICK:
       if (me_op(chan) && !chan_sentkick(m)) {
 	putlog(LOG_MODES, chan->dname, "Kicking %s, for mass kick.", floodnick);
-        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, kickreason(KICK_KICKFLOOD));
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, response(RES_KICKFLOOD));
 	m->flags |= SENTKICK;
       }
     return 1;
@@ -495,7 +495,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
       if (me_op(chan) && !chan_sentkick(m)) {
 	putlog(LOG_MODES, chan->dname,
 	       CHAN_MASSDEOP, chan->dname, from);
-        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, kickreason(KICK_MASSDEOP));
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, response(RES_MASSDEOP));
 	m->flags |= SENTKICK;
       }
       if (u) {
@@ -953,7 +953,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
       check_exemptlist(chan, s);
       quickban(chan, m->userhost);
       p = get_user(&USERENTRY_COMMENT, m->user);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : kickreason(KICK_KUSER));
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : response(RES_KUSER));
       m->flags |= SENTKICK;
     }
   }
@@ -1489,7 +1489,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serve
       /* and it's not me, and i'm an op */
       !match_my_nick(nick) && me_op(chan)) {
     /*  && target_priority(chan, m, 0) */
-    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, kickreason(KICK_BANNED));
+    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_BANNED));
     m->flags |= SENTKICK;
   }
   /* if the user is a +k */
@@ -1500,7 +1500,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serve
            /* && target_priority(chan, m, 0) */
     /* cya later! */
     quickban(chan, userhost);
-    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, kickreason(KICK_KUSER));
+    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_KUSER));
     m->flags |= SENTKICK;
   }
 
@@ -2224,7 +2224,7 @@ static int gotjoin(char *from, char *chname)
               me_op(chan)) {
             for (b = chan->channel.ban; b->mask[0]; b = b->next) {
               if (wild_match(b->mask, from)) {
-                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, kickreason(KICK_BANNED));
+                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, response(RES_BANNED));
                 m->flags |= SENTKICK;
                 goto exit;
               }
@@ -2240,7 +2240,7 @@ static int gotjoin(char *from, char *chname)
 	    check_exemptlist(chan, from);
 	    quickban(chan, from);
 	    p = get_user(&USERENTRY_COMMENT, m->user);
-            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, nick, bankickprefix, kickreason(KICK_KUSER));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, nick, bankickprefix, response(RES_KUSER));
 	    m->flags |= SENTKICK;
 	  }
 	}

@@ -15,6 +15,7 @@
 #include "color.h"
 #include "salt.h"
 #include "net.h"
+#include "response.h"
 #include "misc.h"
 #include "users.h"
 #include "userrec.h"
@@ -60,82 +61,6 @@ static int	flood_telnet_time = 5;	/* In how many seconds?			   */
 static void dcc_telnet_hostresolved(int);
 static void dcc_telnet_got_ident(int, char *);
 static void dcc_telnet_pass(int, int);
-
-char *rand_dccresp()
-{
-  switch (randint(10)) { /* 0-5: random response, 6-9: none */
-  case 0:
-    return "sup\n";
-  case 1:
-    return "a/s/l?\ni'm 17/f/ca ;)\n";
-  case 2:
-    return "who are you?\n";
-  case 3:
-    return "uhhh do i know you?\n";
-  case 4:
-    return "what?\n";
-  case 5:
-    return "wtf do you want?\n";
-  case 6:
-    return "hold on a second, I am sort of busy..\n";
-  case 7:
-    return "mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]\n";
-  case 8:
-    return "got any porn?\n";
-  case 9:
-    return "?\n";
-  default:
-    return "";
-    /* there's intentionally no newline in this response. You go figure out why :) */
-  }
-}
-
-char *rand_dccresppass()
-{
-  switch (randint(10)) { /* 0-5: random response, 6-9: none */
-  case 0:
-    return "what?\n";
-  case 1:
-    return "huh?\n";
-  case 2:
-    return "no.\n";
-  case 3:
-    return "thats great..\n";
-  case 4:
-    return "hmm, ok..I've got a better idea, check this out: http://peeldmonkeys.8k.com/images/keza-_middle_finger.jpg\n";
-  case 5:
-    return "I don't remember caring..\n";
-  case 6:
-    return "good for you.\n";
-  case 7:
-    return "I'm going to report you to the RIAA!!!\n";
-  default:
-    return "";
-  }
-}
-char *rand_dccrespbye()
-{
-  switch (randint(10)) { /* 0-5: random response, 6-9: none */
-  case 0:
-    return "stop wasting my time.\n";
-  case 1:
-    return "gtg\n";
-  case 2:
-    return "go away\n";
-  case 3:
-    return "fuck off already\n";
-  case 4:
-    return "ehh..no, bye.\n";
-  case 5:
-    return "hey I'm late for a date with your mom, cya..\n";
-  case 6:
-    return "you're still here?\n";
-  case 7:
-    return "jesus loves you, but I ain't jesus. \002FUCK OFF\002\n";
-  default:
-    return "";
-  }
-}
 
 static void strip_telnet(int sock, char *buf, int *len)
 {
@@ -727,7 +652,7 @@ needed to login for now on.\n \n************************************************
       dcc_chatter(idx);
 #ifdef S_DCCAUTH
   } else {		/* bad auth */
-    dprintf(idx, "%s", rand_dccrespbye());
+    dprintf(idx, "%s", response(RES_BADUSERPASS));
     putlog(LOG_MISC, "*", DCC_BADAUTH, dcc[idx].nick,
 	   dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {	/* su from a dumb user */
@@ -789,7 +714,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     dcc_chat_secpass(idx, buf, atr);
 #endif /* S_DCCAUTH */
   } else {
-    dprintf(idx, "%s", rand_dccrespbye());
+    dprintf(idx, "%s", response(RES_BADUSERPASS));
     putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {	/* su from a dumb user */
       /* Turn echo back on for telnet sessions (send IAC WON'T ECHO). */
@@ -1643,7 +1568,7 @@ static void dcc_telnet_pass(int idx, int atr)
 #ifdef HUB
     dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
 #else /* !HUB */
-    dprintf(idx, "%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, rand_dccresppass());
+    dprintf(idx, "%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, response(RES_PASSWORD));
 #endif /* HUB */
   }
 }
@@ -1773,12 +1698,12 @@ struct dcc_table DCC_IDENTWAIT =
 
 void dcc_ident(int idx, char *buf, int len)
 {
-  char response[512] = "", uid[512] = "", buf1[UHOSTLEN] = "";
+  char ident_response[512] = "", uid[512] = "", buf1[UHOSTLEN] = "";
   int i;
 
-  sscanf(buf, "%*[^:]:%[^:]:%*[^:]:%[^\n]\n", response, uid);
-  rmspace(response);
-  if (response[0] != 'U') {
+  sscanf(buf, "%*[^:]:%[^:]:%*[^:]:%[^\n]\n", ident_response, uid);
+  rmspace(ident_response);
+  if (ident_response[0] != 'U') {
     dcc[idx].timeval = now;
     return;
   }
@@ -1905,7 +1830,7 @@ static void dcc_telnet_got_ident(int i, char *host)
 #ifdef HUB
   dprintf(i, "\n");
 #else /* !HUB */
-  dprintf(i, "%s", rand_dccresp());
+  dprintf(i, "%s", response(RES_USERNAME));
 #endif /* HUB */
 }
 

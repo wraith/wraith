@@ -42,6 +42,9 @@ char cloak_host[161] = "";
 char ctcpversion[400] = "";
 char ctcpuserinfo[400] = "";
 char autoaway[100] = "";
+char kickprefix[25] = "";
+char bankickprefix[25] = "";
+
 
 char *strtolower(char *s)
 {

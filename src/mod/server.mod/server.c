@@ -14,6 +14,7 @@
 #include "src/users.h"
 #include "src/userrec.h"
 #include "src/main.h"
+#include "src/response.h"
 #include "src/misc.h"
 #include "src/chanprog.h"
 #include "src/net.h"
@@ -952,7 +953,7 @@ static void dcc_chat_hostresolved(int i)
     dcc[i].timeval = now;
     /* Ok, we're satisfied with them now: attempt the connect */
     putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick, dcc[i].host);
-    dprintf(i, "%s", rand_dccresp());
+    dprintf(i, "%s", response(RES_USERNAME));
   }
   return;
 }

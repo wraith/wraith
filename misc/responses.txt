@@ -1,0 +1,137 @@
+:banned
+ bye
+ banned
+ see you in hell
+ go away
+ cya around lewser
+ unwanted!
+:kuser
+ not wanted
+ something tells me you're annoying
+ don't bug me lewser
+ creep
+:kickban
+ gone
+ stupid
+ lewser
+ ...
+:massdeop
+ spammer!
+ easy on the modes now
+ mode this
+ nice try
+ really?
+ you lose
+ scary... really scary...
+ i win kthx
+:badop
+ neat...
+ oh, no you don't. go away.
+ didn't you forget something now?
+ no
+ hijack this
+:badopped
+ fuck off kid
+ asl?
+ whoa... what a hacker... skills!
+ yes! yes! yes! hit me baby one more time!
+ with your skills, you're better off jacking off than hijacking
+:manualop
+ naughty kid
+ didn't someone tell you that is bad?
+ want perm?
+ see how much good that did you?
+ not a smart move...
+ jackass!
+:manualopped
+ your pal got mean friends. like me.
+ uhh now.. don't wake me up...
+ hi hun. missed me?
+ spammer! die!
+ boo!
+ that @ was useful, don't ya think
+ not in my book
+ lol, really?
+:closed
+ locked
+ later
+ closed for now
+ come back later
+ better safe than sorry
+ cleanup, come back later
+ this channel is closed
+ shutting down for now
+ lockdown
+ reopening later
+ not for the public atm
+ private channel for now
+ might reopen soon, might reopen later
+ you're not supposed to be here right now
+ sorry, closed
+ try us later, atm we're locked down
+ closed. try tomorrow
+:flood
+ so much bullshit in such a short time. amazing.
+ slow down. i'm trying to read here.
+ uhm... you actually think irc is for talking?
+ talk talk talk
+ blabbering are we?
+ ... and i don't even like you!
+ and you're outa here...
+:nickflood
+ make up your mind?
+ be schizofrenic elsewhere
+ I'm loosing track of you... not
+ that is REALLY annoying
+ try this: /NICK n00b
+ playing hide 'n' seek?
+ gotcha!
+:kickflood
+ easier to just leave if you wan't to be alone
+ cool down
+ don't be so damned aggressive. that's my job.
+ kicking's fun, isn't it?
+ what's the rush?
+ next time you do that, i'll kick you again
+:mean
+ hey! that wasn't very nice!
+ don't fuck with my pals
+ meanie!
+ I can be a bitch too...
+ leave the bots alone, will ya?
+ not very clever
+ watch it
+ fuck off
+ easy now. that's a friend.
+ abuse of power. leave that to me, will ya?
+ there as some things you cannot do, and that was one of them...
+:username
+ sup
+ a/s/l?\ni'm 17/f/ca ;)
+ who are you?
+ uhhh do i know you?
+ what?
+ wtf do you want?
+ hold on a second, I am sort of busy..
+ mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]
+ got any porn?
+ ?
+:password
+ what?
+ huh?
+ no.
+ thats great..
+ hmm, ok..I've got a better idea, check this out: http://peeldmonkeys.8k.com/images/keza-_middle_finger.jpg
+ I don't remember caring..
+ good for you.
+ I'm going to report you to the RIAA!!!
+:baduserpass
+ stop wasting my time.
+ gtg
+ go away
+ fuck off already
+ ehh..no, bye.
+ hey I'm late for a date with your mom, cya..
+ you're still here?
+ jesus loves you, but I ain't jesus. \002FUCK OFF\002
+:end

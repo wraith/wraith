@@ -15,6 +15,7 @@
 #include "src/botnet.h"
 #include "src/botmsg.h"
 #include "src/main.h"
+#include "src/response.h"
 #include "src/cfg.h"
 #include "src/userrec.h"
 #include "src/misc.h"
@@ -29,6 +30,7 @@
 #include "src/mod/share.mod/share.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
+#include "src/mod/ctcp.mod/ctcp.h"
 
 #include <stdarg.h>
 
@@ -750,7 +752,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
       !chan_sentkick(m) &&
       /* ... and can I actually do anything about it? */
       me_op(chan) && !mevictim) {
-    dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, kickreason(KICK_MEAN));
+    dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, response(RES_MEAN));
     m->flags |= SENTKICK;
   }
 }

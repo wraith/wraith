@@ -35,4 +35,8 @@
 
 void ctcp_init();
 
+#ifdef LEAF
+extern char		kickprefix[], bankickprefix[];
+#endif /* LEAF */
+
 #endif				/* _EGG_MOD_CTCP_CTCP_H */

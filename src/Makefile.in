@@ -39,6 +39,7 @@ OBJS = auth.o \
 	misc.o \
 	misc_file.o \
 	net.o \
+	response.o \
 	rfc1459.o \
 	settings.o \
 	shell.o \
@@ -65,6 +66,11 @@ blah:
 	@echo ""
 	@echo "Use the build script."
 	@echo ""
+
+makeres: makeres.c
+	@echo -e "Compiling: \033[1mmakeres\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
+	@$(STRIP) makeres
 
 makehelp: makehelp.c
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"

@@ -2,6 +2,7 @@ This is a summary of ChangeLog basically.
 
 1.2
 * No longer displaying SATLS on ./bin -v
+* Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
 
 1.1.9
 
