@@ -8,8 +8,9 @@
 #define MAKING_CHANNELS
 #include <sys/stat.h>
 #include "src/mod/module.h"
+#include "irc.mod/irc.h"
 
-static Function *global		= NULL;
+static Function *global = NULL, *irc_funcs = NULL;
 
 static int 			use_info;
 static int			quiet_save;
@@ -301,7 +302,7 @@ void rebalance_roles()
 #endif /* HUB */
 
 /* FIXME: needs more testing */
-static void channels_checkslowjoin() {
+static void channels_10secondly() {
   struct chanset_t *chan;
   for (chan = chanset; chan; chan = chan->next) {
     /* slowpart */
@@ -321,6 +322,8 @@ static void channels_checkslowjoin() {
       if (shouldjoin(chan) && !channel_active(chan))
         dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
 #endif /* LEAF */
+    } else if (channel_closed(chan)) {
+      enforce_closed(chan);
     }
   }
 }
@@ -1016,6 +1019,7 @@ char *channels_start(Function * global_funcs)
 {
   global = global_funcs;
 
+
   gfld_chan_thr = 0;
   gfld_chan_time = 0;
   gfld_deop_thr = 8;
@@ -1059,6 +1063,11 @@ char *channels_start(Function * global_funcs)
          "-private "
 	 "-fastop ");
   module_register(MODULE_NAME, channels_table, 1, 0);
+  if (!(irc_funcs = module_depend(MODULE_NAME, "irc", 1, 0))) {
+    module_undepend(MODULE_NAME);
+    return "This module requires irc module 1.0 or later.";
+  }
+
 #ifdef LEAF
   add_hook(HOOK_MINUTELY, (Function) check_limitraise);
 #endif /* LEAF */
@@ -1069,7 +1078,7 @@ char *channels_start(Function * global_funcs)
   add_hook(HOOK_MINUTELY, (Function) check_expired_exempts);
   add_hook(HOOK_MINUTELY, (Function) check_expired_invites);
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
-  add_hook(HOOK_10SECONDLY, (Function) channels_checkslowjoin);
+  add_hook(HOOK_10SECONDLY, (Function) channels_10secondly);
   add_builtins(H_chon, my_chon);
   add_builtins(H_dcc, C_dcc_irc);
   add_builtins(H_bot, channels_bot);

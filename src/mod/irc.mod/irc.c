@@ -1549,13 +1549,6 @@ static void getin_5secondly()
   }
 }
 
-static void irc_10secondly() {
-  struct chanset_t *chan;
-  for (chan = chanset; chan; chan = chan->next)
-    if (channel_closed(chan))
-      enforce_closed(chan);
-}
-
 EXPORT_SCOPE char *irc_start();
 
 static Function irc_table[] =
@@ -1590,6 +1583,7 @@ static Function irc_table[] =
   (Function) check_this_user,
   (Function) me_voice,
   (Function) raise_limit,
+  (Function) enforce_closed,
 };
 
 void irc_describe(struct cfg_entry *cfgent, int idx)
@@ -1718,7 +1712,6 @@ char *irc_start(Function * global_funcs)
   add_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   add_hook(HOOK_IDLE, (Function) flush_modes);
   add_hook(HOOK_5SECONDLY, (Function) getin_5secondly);
-  add_hook(HOOK_10SECONDLY, (Function) irc_10secondly);
 #ifdef S_AUTOLOCK
   add_hook(HOOK_MINUTELY, (Function) check_netfight);
 #endif /* S_AUTOLOCK */

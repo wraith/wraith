@@ -71,6 +71,7 @@ void raise_limit(struct chanset_t *);
 #define check_this_user ((void(*)(char *, int, char *))irc_funcs[21])
 #define me_voice ((int(*)(struct chanset_t *))irc_funcs[22])
 #define raise_limit ((void (*)(struct chanset_t *))irc_funcs[23])
+#define enforce_closed ((void (*)(struct chanset_t *))irc_funcs[24])
 //#define getchanmode ((char *(*)(struct chanset_t *))irc_funcs[23])
 
 #endif				/* MAKING_IRC */
