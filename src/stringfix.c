@@ -9,7 +9,7 @@
 #include <string.h>
 #include "conf.h"
 
-#define WTF 20000
+#define WTF 16384
 
 #ifdef S_GARBLESTRINGS
 void garble(char **inptr, char **outptr)
