@@ -288,7 +288,7 @@ share_stick_ban(int idx, char *par)
         }
       if (chan && !conf.bot->hub)
         check_this_ban(chan, host, yn);
-      putlog(LOG_CMDS, "@", "Rejecting invalid sticky exempt: %s on %s%s", host, par, yn ? "" : " (unstick)");
+      putlog(LOG_CMDS, "@", "Rejecting invalid sticky ban: %s on %s%s", host, par, yn ? "" : " (unstick)");
     }
     noshare = 0;
   }
