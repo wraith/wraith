@@ -22,7 +22,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
-
+#include <stdarg.h>
 
 extern int 		 sdebug, backgrd, do_restart;
 extern char		 tempdir[], origbotname[], ver[];
@@ -68,14 +68,13 @@ void init_debug()
 
 int     sdebug = 0;             /* enable debug output? */
 
-void sdprintf EGG_VARARGS_DEF(char *, arg1)
+void sdprintf (char *format, ...)
 {
   if (sdebug) {
-    char *format;
     char s[2001];
     va_list va;
 
-    format = EGG_VARARGS_START(char *, arg1, va);
+    va_start(va, format);
     egg_vsnprintf(s, 2000, format, va);
     va_end(va);
     if (!backgrd)

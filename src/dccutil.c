@@ -21,6 +21,7 @@
 #include "modules.h"
 #include "tandem.h"
 #include "core_binds.h"
+#include <stdarg.h>
 
 extern struct dcc_t	*dcc;
 extern int		 dcc_total, max_dcc, dcc_flood_thr, backgrd, MAXSOCKS, tands;
@@ -78,14 +79,14 @@ char *add_cr(char *buf)
 
 extern void (*qserver) (int, char *, int);
 
-void dprintf EGG_VARARGS_DEF(int, arg1)
+void dprintf (int idx, ...)
 {
   static char buf[1024];
   char *format; 
-  int idx, len;
+  int len;
   va_list va;
 
-  idx = EGG_VARARGS_START(int, arg1, va);
+  va_start(va, idx);
   format = va_arg(va, char *);
   egg_vsnprintf(buf, 1023, format, va);
   va_end(va);
@@ -202,14 +203,13 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
   }
 }
 
-void chatout EGG_VARARGS_DEF(char *, arg1)
+void chatout (char *format, ...)
 {
   int i, len;
-  char *format;
   char s[601];
   va_list va;
 
-  format = EGG_VARARGS_START(char *, arg1, va);
+  va_start(va, format);
   egg_vsnprintf(s, 511, format, va);
   va_end(va);
   len = strlen(s);
@@ -226,14 +226,14 @@ void chatout EGG_VARARGS_DEF(char *, arg1)
 
 /* Print to all on this channel but one.
  */
-void chanout_but EGG_VARARGS_DEF(int, arg1)
+void chanout_but (int x, ...)
 {
-  int i, x, chan, len;
+  int i, chan, len;
   char *format;
   char s[601];
   va_list va;
 
-  x = EGG_VARARGS_START(int, arg1, va);
+  va_start(va, x);
   chan = va_arg(va, int);
   format = va_arg(va, char *);
   egg_vsnprintf(s, 511, format, va);

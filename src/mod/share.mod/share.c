@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include <stdarg.h>
 
 #include "src/chan.h"
 #include "src/net.h"
@@ -72,7 +73,7 @@ tandbuf *tbuf;
 
 /* Prototypes */
 static void start_sending_users(int);
-static void shareout_but EGG_VARARGS(struct chanset_t *, arg1);
+static void shareout_but (struct chanset_t *, ...);
 static int flush_tbuf(char *);
 static int can_resync(char *);
 static void dump_resync(int);
@@ -1319,15 +1320,14 @@ static void sharein_mod(int idx, char *msg)
   }
 }
 
-static void shareout_mod EGG_VARARGS_DEF(struct chanset_t *, arg1)
+static void shareout_mod (struct chanset_t *chan, ...)
 {
   int i, l;
   char *format;
   char s[601];
-  struct chanset_t *chan;
   va_list va;
 
-  chan = EGG_VARARGS_START(struct chanset_t *, arg1, va);
+  va_start(va, chan);
   if (!chan || channel_shared(chan)) {
     format = va_arg(va, char *);
     strcpy(s, "s ");
@@ -1349,15 +1349,14 @@ static void shareout_mod EGG_VARARGS_DEF(struct chanset_t *, arg1)
   va_end(va);
 }
 
-static void shareout_but EGG_VARARGS_DEF(struct chanset_t *, arg1)
+static void shareout_but (struct chanset_t *chan, ...)
 {
   int i, x, l;
   char *format;
   char s[601];
-  struct chanset_t *chan;
   va_list va;
 
-  chan = EGG_VARARGS_START(struct chanset_t *, arg1, va);
+  va_start(va, chan);
   x = va_arg(va, int);
   format = va_arg(va, char *);
 

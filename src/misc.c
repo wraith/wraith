@@ -45,6 +45,7 @@
 #include <signal.h>
 #include <sys/utsname.h>
 #include "stat.h"
+#include <stdarg.h>
 
 extern struct userrec 	*userlist;
 extern struct dcc_t	*dcc;
@@ -560,10 +561,10 @@ int getting_users()
 /* Log something
  * putlog(level,channel_name,format,...);
  */
-void putlog EGG_VARARGS_DEF(int, arg1)
+void putlog(int type, char *chname, char *format, ...)
 {
-  int i, type, tsl = 0, dohl = 0; //hl
-  char *format, *chname, s[LOGLINELEN], *out = NULL, stamp[34], buf2[LOGLINELEN]; 
+  int i, tsl = 0, dohl = 0; //hl
+  char s[LOGLINELEN], *out = NULL, stamp[34], buf2[LOGLINELEN]; 
   va_list va;
 #ifdef HUB
   time_t now2 = time(NULL);
@@ -572,9 +573,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
 #ifdef LEAF
   t = 0;
 #endif /* LEAF */
-  type = EGG_VARARGS_START(int, arg1, va);
-  chname = va_arg(va, char *);
-  format = va_arg(va, char *);
+  va_start(va, format);
 //The putlog should not be broadcast over bots, @ is *.
   if ((chname[0] == '*'))
     dohl = 1;
@@ -600,6 +599,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
    */
 
   egg_vsnprintf(out, LOGLINEMAX - tsl, format, va);
+  va_end(va);
 
   out[LOGLINEMAX - tsl] = 0;
 
@@ -644,7 +644,6 @@ void putlog EGG_VARARGS_DEF(int, arg1)
       out += tsl;
     dprintf(DP_STDERR, "%s", s);
   }
-  va_end(va);
 }
 
 char *extracthostname(char *hostmask)

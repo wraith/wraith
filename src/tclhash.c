@@ -15,6 +15,7 @@
 #include "users.h"
 #include "match.h"
 #include "egg_timer.h"
+#include <stdarg.h>
 
 extern struct dcc_t *dcc;
 extern int dcc_total;

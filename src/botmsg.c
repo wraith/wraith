@@ -20,6 +20,7 @@
 #include "botnet.h"
 #include "tandem.h"
 #include "core_binds.h"
+#include <stdarg.h>
 
 extern struct dcc_t	*dcc;
 extern int		 dcc_total, tands;
@@ -105,13 +106,13 @@ char *unsigned_int_to_base10(unsigned int val)
   return buf_base10 + i;
 }
 
-int simple_sprintf EGG_VARARGS_DEF(char *,arg1)
+int simple_sprintf (char *buf, ...)
 {
-  char *buf, *format, *s;
+  char *format, *s;
   int c = 0, i;
   va_list va;
-
-  buf = EGG_VARARGS_START(char *, arg1, va);
+  
+  va_start(va, buf);
   format = va_arg(va, char *);
 
   while (*format && c < 1023) {
@@ -281,14 +282,14 @@ void botnet_send_pong(int idx)
   tputs(dcc[idx].sock, "po\n", 3);
 }
 
-void botnet_send_priv EGG_VARARGS_DEF(int, arg1)
+void botnet_send_priv (int idx, ...)
 {
-  int idx, l;
+  int l;
   char *from, *to, *tobot, *format;
   char tbuf[1024];
   va_list va;
 
-  idx = EGG_VARARGS_START(int, arg1, va);
+  va_start(va, idx);
   from = va_arg(va, char *);
   to = va_arg(va, char *);
   tobot = va_arg(va, char *);

@@ -14,11 +14,6 @@
 #include "garble.h"
 
 
-#include <stdarg.h>
-#define EGG_VARARGS(type, name) (type name, ...)
-#define EGG_VARARGS_DEF(type, name) (type name, ...)
-#define EGG_VARARGS_START(type, name, list) (va_start(list, name), name)
-
 
 #include <stdio.h>
 #include <stdlib.h>

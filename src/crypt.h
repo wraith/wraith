@@ -8,7 +8,7 @@ char *decrypt_string(const char *, char *);
 void encrypt_pass(char *, char *);
 char *cryptit (char *);
 char *decryptit (char *);
-int lfprintf EGG_VARARGS(FILE *, arg1);
+int lfprintf (FILE *, ...);
 void EncryptFile(char *, char *);
 void DecryptFile(char *, char *);
 #endif /* !MAKING_MODS */

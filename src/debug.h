@@ -2,7 +2,7 @@
 #define _DEBUG_H
 
 #ifndef MAKING_MODS
-void sdprintf EGG_VARARGS(char *, arg1);
+void sdprintf (char *, ...);
 void init_signals();
 #endif /* !MAKING_MODS */
 

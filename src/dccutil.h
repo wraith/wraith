@@ -8,12 +8,12 @@
 #endif
 
 #ifndef MAKING_MODS
-void dprintf EGG_VARARGS(int, arg1);
-void chatout EGG_VARARGS(char *, arg1);
+void dprintf (int, ...);
+void chatout (char *, ...);
 extern void (*shareout) ();
 extern void (*sharein) (int, char *);
 extern void (*shareupdatein) (int, char *);
-void chanout_but EGG_VARARGS(int, arg1);
+void chanout_but (int, ...);
 void dcc_chatter(int);
 void lostdcc(int);
 void makepass(char *);

@@ -10,6 +10,7 @@
 #include "crypt.h"
 #include "salt.h"
 #include "misc.h"
+#include <stdarg.h>
 
 #define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
 #define CRYPT_KEYBITS 256
@@ -165,17 +166,17 @@ void encrypt_pass(char *s1, char *s2)
   free(tmp);
 }
 
-int lfprintf EGG_VARARGS_DEF(FILE *, arg1)
+int lfprintf (FILE *stream, ...)
 {
   va_list va;
   char buf[8192], *ln, *nln, *tmp, *format;
   int res;
-  FILE *stream;
 
-  stream = EGG_VARARGS_START(FILE *, arg1, va);
+  va_start(va, stream);
   format = va_arg(va, char *);
-
   egg_vsnprintf(buf, sizeof buf, format, va);
+  va_end(va);
+
   ln = buf;
   while ((ln) && (ln[0])) {
     nln = strchr(ln, '\n');
