@@ -46,6 +46,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Fixed bot not updating it's hostmask when reconnecting to server
 * Fixed bot sending +Ie modes before recieving list after opping.
 * Fixed channel bans not displaying on hubs (#1)
+* Fixed users showing up in .whom after doing .botcmd and relinking the bot which the cmd was ran on. (#9)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
