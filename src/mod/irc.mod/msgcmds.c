@@ -201,7 +201,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
       auth[i].authing = 2;      
       auth[i].user = u;
       make_rand_str(rand, 50);
-      strcpy(auth[i].hash, makehash(u, rand));
+      strncpyz(auth[i].hash, makehash(u, rand), sizeof auth[i].hash);
       dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, rand, botnetnick);
     }
   } else {

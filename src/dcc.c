@@ -595,14 +595,15 @@ struct dcc_table DCC_FORK_BOT =
 static void dcc_chat_secpass(int idx, char *buf, int atr)
 {
 #ifdef S_AUTH
-  char *check;
+  char check[MD5_HASH_LENGTH + 7];
 
   if (!atr)
     return;
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-  check = nmalloc(strlen(dcc[idx].hash) + 6 + 1);
-  sprintf(check, "+Auth %s", dcc[idx].hash);
+  check[0] = 0;
+  snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
+  check[MD5_HASH_LENGTH + 6] = 0;
 
   if (!strcmp(check, buf)) {
 //+secpass
@@ -645,7 +646,6 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
       lostdcc(idx);
     }
   }
-  nfree(check);
 #endif /* S_AUTH */
 }
 struct dcc_table DCC_CHAT_SECPASS;
@@ -678,7 +678,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     char rand[51];
 
     make_rand_str(rand, 50);
-    strcpy(dcc[idx].hash, makehash(dcc[idx].user, rand));
+    strncpyz(dcc[idx].hash, makehash(dcc[idx].user, rand), sizeof dcc[idx].hash);
     dcc[idx].type = &DCC_CHAT_SECPASS;
     dcc[idx].timeval = now;
     dprintf(idx, "-Auth %s %s\n", rand, botnetnick);

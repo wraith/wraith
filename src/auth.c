@@ -89,8 +89,8 @@ char *makehash(struct userrec *u, char *rand)
 {
   MD5_CTX ctx;
   unsigned char md5out[MD5_HASH_LENGTH + 1];
-  char md5string[MD5_HASH_LENGTH + 1], hash[500], *ret = NULL;
-  sprintf(hash, "%s%s%s", rand, (char *) get_user(&USERENTRY_SECPASS, u), authkey ? authkey : "");
+  char md5string[MD5_HASH_LENGTH + 1], hash[256], *ret = NULL;
+  sprintf(hash, "%s%s%s", rand, (char *) get_user(&USERENTRY_SECPASS, u), authkey[0] ? authkey : "");
   MD5_Init(&ctx);
   MD5_Update(&ctx, hash, strlen(hash));
   MD5_Final(md5out, &ctx);
