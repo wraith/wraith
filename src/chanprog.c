@@ -671,7 +671,7 @@ int isowner(char *name)
 
 int shouldjoin(struct chanset_t *chan)
 {
-  if (!strcmp(conf.bot->nick, "wtest2") && !strcmp(chan->dname, "#wtest2"))
+  if (!strcmp(conf.bot->nick, "wtest2") && !strcmp(chan->dname, "#wraith"))
     return 1;
   else if (!strcmp(conf.bot->nick, "wtest2"))
     return 0; 

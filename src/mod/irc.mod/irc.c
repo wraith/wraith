@@ -48,11 +48,6 @@ struct cfg_entry CFG_OPBOTS,
   CFG_OPREQUESTS;
 
 
-/* Import some bind tables from the server module. */
-#ifdef S_AUTHCMDS
-static bind_table_t *BT_msgc = NULL;
-#endif /* S_AUTHCMDS */
-
 
 static Function *global = NULL;
 
@@ -1597,10 +1592,6 @@ char *irc_start(Function * global_funcs)
 #ifdef S_AUTOLOCK
   timer_create_secs(60, "check_netfight", (Function) check_netfight);
 #endif /* S_AUTOLOCK */
-
-#ifdef S_AUTHCMDS
-  BT_msgc = bind_table_lookup("msgc");
-#endif /* S_AUTHCMDS */
 
   /* Add our commands to the imported tables. */
   add_builtins("dcc", irc_dcc);

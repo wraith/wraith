@@ -2597,7 +2597,7 @@ static int gotmsg(char *from, char *msg)
     }
   }
   if (msg[0]) {
-    int dolog = 1;
+    int dolog = 1, botmatch = 0;
 #ifdef S_AUTHCMDS
     int i = 0;
     struct userrec *my_u = NULL;
@@ -2615,13 +2615,15 @@ static int gotmsg(char *from, char *msg)
     fword = newsplit(&my_msg);		/* take out first word */
     
     /* the first word is a wildcard match to our nick. */
-    if (wild_match(fword, botname) && strcmp(fword, "*"))	
+    botmatch = wild_match(fword, botname);
+    if (botmatch && strcmp(fword, "*"))	
       fword = newsplit(&my_msg);	/* now this will be the command */
     /* is it a cmd? */
-    if (fword[0] == cmdprefix[0] && fword[1]) {
+    if (fword[1] && ((botmatch && fword[0] != cmdprefix[0]) || (fword[0] == cmdprefix[0]))) {
       i = findauth(uhost);
       if (i > -1 && auth[i].authed) {
-        fword++;
+        if (fword[0] == cmdprefix[0])
+          fword++;
         my_u = auth[i].user;
         if (check_bind_pubc(fword, nick, uhost, my_u, my_msg, chan->dname)) {
           auth[i].atime = now;

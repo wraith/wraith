@@ -106,7 +106,7 @@ static int stack_limit;
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
 bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL;
 #ifdef S_AUTHCMDS
-static bind_table_t *BT_msgc = NULL;
+bind_table_t *BT_msgc = NULL;
 #endif /* S_AUTHCMDS */
 
 #include "servmsg.c"
