@@ -455,14 +455,9 @@ got_op(struct chanset_t *chan, char *nick, char *from,
   }
 
   /* Did *I* just get opped? */
-  if (!me_op(chan) && match_my_nick(who)) {
-    /* take asap. */
-    if (channel_take(chan))
-      do_take(chan);
-    else
-      check_chan = 1;
-  }
-
+  if (!me_op(chan) && match_my_nick(who))
+    check_chan = 1;
+  
   if (!m->user) {
     simple_sprintf(s, "%s!%s", m->nick, m->userhost);
     u = get_user_by_host(s);
@@ -902,9 +897,7 @@ gotmode(char *from, char *msg)
       if (!isserver) {
         char **modes = NULL;
         char tmp[1024] = "", *wptr = NULL, *p = NULL, work[1024] = "";
-        int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
-
-
+        int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0, me_opped = 0;
 
         /* Split up the mode: #chan modes param param param param */
         strncpyz(work, msg, sizeof(work));
@@ -926,9 +919,11 @@ gotmode(char *from, char *msg)
               sprintf(modes[modecnt], "%c%c %s", sign, p[0], mp);
               modecnt++;
               if (p[0] == 'o') {
-                if (sign == '+')
+                if (sign == '+') {
                   ops++;
-                else
+                  if (match_my_nick(mp))
+                    me_opped++;
+                } else
                   deops++;
               }
               if (p[0] == 'b') {
@@ -945,6 +940,10 @@ gotmode(char *from, char *msg)
           }
           p++;
         }
+
+        /* take ASAP */
+        if (me_opped && !me_op(chan) && channel_take(chan))
+          do_take(chan);
 
         /* Now we got modes[], chan, u, nick, hfrom, and count of each relevant mode */
 

@@ -24,6 +24,9 @@ This is a summary of ChangeLog basically.
 * Renamed 'op-time-slack' to 'cookie-time-slack'
 * SIGHUP now restarts bot.
 * Fixed possible SEGFAULT on bot timeout.
+* Sped up mode parsing
+* +take is now enforced much quicker (take() moved up ~300 lines of code)
+* +take now uses MAXMODES-1 deops
 
 1.1.9
 
