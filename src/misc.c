@@ -2193,55 +2193,34 @@ char *color(int idx, int type, int color)
   /* if user is connected over TELNET or !backgrd, show ANSI
    * if they are relaying, they are most likely on an IRC client and should have mIRC codes
    */
-  if (((dcc[idx].type != &DCC_RELAYING) && (dcc[idx].status & STAT_TELNET)) || !backgrd) ansi++;
+  if ((idx && ((dcc[idx].type != &DCC_RELAYING) && (dcc[idx].status & STAT_TELNET))) || !backgrd) ansi++;
 
   if (type == BOLD_OPEN) {
-    if (ansi) return "\033[1m";
-    return "\002";
+    return ansi ? "\033[1m" : "\002";
   } else if (type == BOLD_CLOSE) {
-    if (ansi) return "\033[22m";
-    return "\002";
-   } else if (type == UNDERLINE_OPEN) {
-    if (ansi) return "\033[4m";
-    return "\037";
+    return ansi ? "\033[22m" : "\002";
+  } else if (type == UNDERLINE_OPEN) {
+    return ansi ? "\033[4m" : "\037";
   } else if (type == UNDERLINE_CLOSE) {
-    if (ansi) return "\033[24m";
-    return "\037";
+    return ansi ? "\033[24m" : "\037";
   } else if (type == FLASH_OPEN) {
-    if (ansi) return "\033[5m";
-    return "\002\037";
+    return ansi ? "\033[5m" : "\002\037";
   } else if (type == FLASH_CLOSE) {
-    if (ansi) return "\033[0m";
-    return "\037\002";
+    return ansi ? "\033[0m" : "\037\002";
   } else if (type == COLOR_OPEN) {
-    if (color == C_BLACK) {
-      if (ansi) return "\033[30m";
-      return "\00301";
-    } else if (color == C_RED) {
-      if (ansi) return "\033[31m";
-      return "\00304";
-    } else if (color == C_GREEN) {
-      if (ansi) return "\033[32m";
-      return "\00303";
-    } else if (color == C_YELLOW) {
-      if (ansi) return "\033[33m";
-      return "\00308";
-    } else if (color == C_BLUE) {
-      if (ansi) return "\033[34m";
-      return "\00302";
-    } else if (color == C_PURPLE) {
-      if (ansi) return "\033[35m";
-      return "\00306";
-    } else if (color == C_CYAN) {
-      if (ansi) return "\033[36m";
-      return "\00309";
-    } else if (color == C_WHITE) {
-      if (ansi) return "\033[37m";
-      return "\00300";
+    switch (color) {
+      case C_BLACK: 	return ansi ? "\033[30m" : "\00301";
+      case C_RED: 	return ansi ? "\033[31m" : "\00304";
+      case C_GREEN: 	return ansi ? "\033[32m" : "\00303";
+      case C_YELLOW: 	return ansi ? "\033[33m" : "\00308";
+      case C_BLUE: 	return ansi ? "\033[34m" : "\00302";
+      case C_PURPLE: 	return ansi ? "\033[35m" : "\00306";
+      case C_CYAN: 	return ansi ? "\033[36m" : "\00309";
+      case C_WHITE: 	return ansi ? "\033[37m" : "\00300";
+      default: break;
     }
   } else if (type == COLOR_CLOSE) {
-    if (ansi) return "\033[0m";
-    return "\003";
+    return ansi ? "\033[0m" : "\003";
   } 
   /* This should never be reached.. */
   return "";
