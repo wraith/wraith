@@ -157,11 +157,9 @@ int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
 }
 
 
-int match_my_nick(char *nick)
+inline int match_my_nick(char *nick)
 {
-  if (!rfc_casecmp(nick, botname))
-    return 1;
-  return 0;
+  return (!rfc_casecmp(nick, botname));
 }
 
 /* 001: welcome to IRC (use it to fix the server name)

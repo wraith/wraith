@@ -1040,7 +1040,7 @@ do_take(struct chanset_t *chan)
   to_deop = to_deop_ptr = calloc(1, 2048);
 
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    int hasop = chan_hasop(m);
+    int hasop = (m->flags & CHANOP);
 
 
     if (m && !match_my_nick(m->nick)) {
