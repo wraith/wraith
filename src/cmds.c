@@ -423,7 +423,7 @@ static void cmd_botconfig(struct userrec *u, int idx, char *par)
     return;
   }
   p = newsplit(&par);
-  cfgent=NULL;
+  cfgent = NULL;
   for (i = 0; !cfgent && (i < cfg_count); i++)
     if (!strcmp(cfg[i]->name, p) && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe))
       cfgent=cfg[i];
