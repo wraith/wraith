@@ -364,7 +364,7 @@ static void cmd_botconfig(struct userrec *u, int idx, char *par)
     dprintf(idx, "No such user.\n");
     return;
   }
-  if (!(u2->flags & USER_BOT)) {
+  if (!u2->bot) {
     dprintf(idx, "%s isn't a bot.\n", p);
     return;
   }
@@ -704,7 +704,7 @@ static void cmd_downbots(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# downbots", dcc[idx].nick);
   for (u2 = userlist; u2; u2 = u2->next) {
-    if (u2->flags & USER_BOT) {
+    if (u2->bot) {
       if (egg_strcasecmp(u2->handle, conf.bot->nick)) {
         if (nextbot(u2->handle) == -1) {
           strcat(work, u2->handle);
@@ -972,7 +972,7 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# userlist", dcc[idx].nick);
 
   for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && (u->flags & USER_BOT) && (u->flags & USER_CHANHUB)) {
+    if (whois_access(dcc[idx].user, u) && u->bot && (u->flags & USER_CHANHUB)) {
       if (cnt)
         dprintf(idx, ", ");
       else
@@ -993,7 +993,7 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
 
 #ifdef HUB
   for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !(u->flags & USER_BOT) && (u->flags & USER_ADMIN)) {
+    if (whois_access(dcc[idx].user, u) && !u->bot && (u->flags & USER_ADMIN)) {
       if (cnt)
         dprintf(idx, ", ");
       else
@@ -1014,7 +1014,7 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
 
 
   for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !(u->flags & (USER_BOT | USER_ADMIN)) && (u->flags & USER_OWNER)) {
+    if (whois_access(dcc[idx].user, u) && !u->bot && !(u->flags & USER_ADMIN) && (u->flags & USER_OWNER)) {
       if (cnt)
         dprintf(idx, ", ");
       else
@@ -1034,7 +1034,7 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
   cnt = 0;
 
   for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !(u->flags & (USER_BOT | USER_OWNER)) && (u->flags & USER_MASTER)) {
+    if (whois_access(dcc[idx].user, u) && !u->bot && !(u->flags & USER_OWNER) && (u->flags & USER_MASTER)) {
       if (cnt)
         dprintf(idx, ", ");
       else
@@ -1056,9 +1056,9 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
   for (u = userlist; u; u = u->next) {
     if (whois_access(dcc[idx].user, u)) {
 #ifdef HUB
-      if (!(u->flags & (USER_BOT | USER_MASTER)) && (u->flags & USER_OP)) {
+      if (!u->bot && !(u->flags & USER_MASTER) && (u->flags & USER_OP)) {
 #else /* !HUB */
-      if (!(u->flags & USER_BOT) && (u->flags & USER_OP)) {
+      if (!u->bot && (u->flags & USER_OP)) {
 #endif /* HUB */
         if (cnt)
           dprintf(idx, ", ");
@@ -1079,7 +1079,7 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
   cnt = 0;
 
   for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !(u->flags & (USER_BOT | USER_OP))) {
+    if (whois_access(dcc[idx].user, u) && !u->bot && !(u->flags & USER_OP)) {
       if (cnt)
         dprintf(idx, ", ");
       else
@@ -1378,17 +1378,16 @@ static void cmd_chhandle(struct userrec *u, int idx, char *par)
   else {
     u2 = get_user_by_handle(userlist, hand);
     atr2 = u2 ? u2->flags : 0;
-    if (!(atr & USER_MASTER) && !(atr2 & USER_BOT))
+    if (!(atr & USER_MASTER) && !u2->bot)
       dprintf(idx, "You can't change handles for non-bots.\n");
-    else if ((u2->flags & USER_BOT) && !(atr & USER_OWNER))
+    else if (u2->bot && !(atr & USER_OWNER))
       dprintf(idx, "You can't change a bot's nick.\n");
     else if ((atr2 & USER_OWNER) && !(atr & USER_OWNER) &&
             egg_strcasecmp(dcc[idx].nick, hand))
       dprintf(idx, "You can't change a bot owner's handle.\n");
     else if (isowner(hand) && egg_strcasecmp(dcc[idx].nick, hand))
       dprintf(idx, "You can't change a permanent bot owner's handle.\n");
-    else if (!egg_strcasecmp(newhand, conf.bot->nick) && (!(atr2 & USER_BOT) ||
-             nextbot(hand) != -1))
+    else if (!egg_strcasecmp(newhand, conf.bot->nick) && !(u2->bot || nextbot(hand) != -1))
       dprintf(idx, "Hey! That's MY name!\n");
     else if (change_handle(u2, newhand)) {
       putlog(LOG_CMDS, "*", "#%s# chhandle %s %s", dcc[idx].nick,
@@ -1451,9 +1450,9 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
     u = get_user_by_handle(userlist, handle);
     if (!u)
       dprintf(idx, "No such user.\n");
-    else if (!(atr & USER_MASTER) && !(u->flags & USER_BOT))
+    else if (!(atr & USER_MASTER) && !u->bot)
       dprintf(idx, "You can't change passwords for non-bots.\n");
-    else if ((u->flags & USER_BOT) && !(atr & USER_OWNER))
+    else if (u->bot && !(atr & USER_OWNER))
       dprintf(idx, "You can't change a bot's password.\n");
     else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) &&
 	     egg_strcasecmp(handle, dcc[idx].nick))
@@ -1506,9 +1505,9 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
     u = get_user_by_handle(userlist, handle);
     if (!u)
       dprintf(idx, "No such user.\n");
-    else if (!(atr & USER_MASTER) && !(u->flags & USER_BOT))
+    else if (!(atr & USER_MASTER) && !u->bot)
       dprintf(idx, "You can't change passwords for non-bots.\n");
-    else if ((u->flags & USER_BOT) && !(atr & USER_OWNER))
+    else if (u->bot && !(atr & USER_OWNER))
       dprintf(idx, "You can't change a bot's password.\n");
     else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) &&
 	     egg_strcasecmp(handle, dcc[idx].nick))
@@ -1609,7 +1608,7 @@ static void cmd_hublevel(struct userrec *u, int idx, char *par)
   handle = newsplit(&par);
   level = newsplit(&par);
   u1 = get_user_by_handle(userlist, handle);
-  if (!u1 || !(u1->flags & USER_BOT)) {
+  if (!u1 || !u1->bot) {
     dprintf(idx, "Useful only for bots.\n");
     return;
   }
@@ -1644,7 +1643,7 @@ static void cmd_uplink(struct userrec *u, int idx, char *par)
   if (!uplink)
     uplink = "";
   u1 = get_user_by_handle(userlist, handle);
-  if (!u1 || !(u1->flags & USER_BOT)) {
+  if (!u1 || !u1->bot) {
     dprintf(idx, "Useful only for bots.\n");
     return;
   }
@@ -1687,11 +1686,11 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
   if (strlen(addr) > UHOSTMAX)
     addr[UHOSTMAX] = 0;
   u1 = get_user_by_handle(userlist, handle);
-  if (!u1 || !(u1->flags & USER_BOT)) {
+  if (!u1 || !u1->bot) {
     dprintf(idx, "This command is only useful for tandem bots.\n");
     return;
   }
-  if ((u1->flags & USER_BOT) && (!u || !u->flags & USER_OWNER)) {
+  if ((u1 && u1->bot) && (!u || !u->flags & USER_OWNER)) {
     dprintf(idx, "You can't change a bot's address.\n");
     return;
   }
@@ -2278,7 +2277,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
 
   /* Make sure default owners are +a */
   if (isowner(u->handle)) {
-    u->flags = sanity_check(u->flags | USER_ADMIN);
+    u->flags = sanity_check(u->flags | USER_ADMIN, 0);
   }
 
   for (i = 0; i < dcc_total; i++) {
@@ -2532,9 +2531,6 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
 
     pls.match = user.match;
     break_down_flags(chg, &pls, &mns);
-    /* No-one can change these flags on-the-fly */
-    pls.global &= ~(USER_BOT);
-    mns.global &= ~(USER_BOT);
 
     if ((pls.global & USER_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
       dprintf(idx, "Only a hub can be set as the updatehub.\n");
@@ -2599,7 +2595,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     get_user_flagrec(u2, &user, par);
     if (user.match & FR_GLOBAL) {
       of = user.global;
-      user.global = sanity_check((user.global |pls.global) &~mns.global);
+      user.global = sanity_check((user.global |pls.global) &~mns.global, u2->bot);
     }
     if (chan) {
       ocf = user.chan;
@@ -3059,7 +3055,7 @@ static void cmd_su(struct userrec *u, int idx, char *par)
     dprintf(idx, "Usage: su <user>\n");
   else if (!u)
     dprintf(idx, "No such user.\n");
-  else if (u->flags & USER_BOT)
+  else if (u->bot)
     dprintf(idx, "You can't su to a bot... then again, why would you wanna?\n");
   else if (dcc[idx].u.chat->su_nick)
     dprintf(idx, "You cannot currently double .su; try .su'ing directly.\n");
@@ -3197,7 +3193,7 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
       struct bot_addr *bi = NULL;
       char tmp[81] = "";
 
-      userlist = adduser(userlist, handle, "none", "-", USER_BOT | USER_OP);
+      userlist = adduser(userlist, handle, "none", "-", USER_OP, 1);
       u1 = get_user_by_handle(userlist, handle);
       bi = calloc(1, sizeof(struct bot_addr));
 
@@ -3237,7 +3233,7 @@ static void cmd_nopass(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
 
   for (cu = userlist; cu; cu = cu->next) {
-    if (!(cu->flags & USER_BOT)) {
+    if (!cu->bot) {
       if (u_pass_match(cu, "-")) {
         cnt++;
         users = realloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
@@ -3377,7 +3373,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
     struct userrec *u2 = NULL;
     char tmp[50] = "", s[16] = "", s2[17] = "";
 
-    userlist = adduser(userlist, handle, host, "-", USER_DEFAULT);
+    userlist = adduser(userlist, handle, host, "-", USER_DEFAULT, 0);
     u2 = get_user_by_handle(userlist, handle);
     sprintf(tmp, "%li %s", now, u->handle);
     set_user(&USERENTRY_ADDED, u2, tmp);
@@ -3431,7 +3427,7 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
     dprintf(idx, "You can't remove a bot owner!\n");
     return;
   }
-  if (u2->flags & USER_BOT) {
+  if (u2->bot) {
     if (!(u->flags & USER_OWNER)) {
         dprintf(idx, "You can't remove bots.\n");
         return;
@@ -3445,7 +3441,7 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
       return;
     }
   }
-  if (!(u->flags & USER_MASTER) && !(u2->flags & USER_BOT)) {
+  if (!(u->flags & USER_MASTER) && !u2->bot) {
     dprintf(idx, "You can't remove users who aren't bots!\n");
     return;
   }

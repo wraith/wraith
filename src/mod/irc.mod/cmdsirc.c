@@ -580,7 +580,7 @@ ContextNote("!mdop!");
       ContextNote(m->nick);
       if (!m->user)
 	targets[targetcount++] = m;
-      else if (((m->user->flags & (USER_BOT | USER_OP)) == (USER_BOT | USER_OP))
+      else if (m->user->bot && (m->user->flags & USER_OP) 
 	       && (strcmp(conf.bot->nick, m->user->handle))
 	       && (nextbot(m->user->handle) >= 0))
 	chanbots[chanbotcount++] = m;
@@ -1560,7 +1560,7 @@ static void cmd_adduser(struct userrec *u, int idx, char *par)
     p1[0] = '*';
   }
   if (!u) {
-    userlist = adduser(userlist, hand, p1, "-", USER_DEFAULT);
+    userlist = adduser(userlist, hand, p1, "-", USER_DEFAULT, 0);
     u = get_user_by_handle(userlist, hand);
     sprintf(tmp, "%li %s", now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u, tmp);

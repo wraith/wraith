@@ -1149,7 +1149,7 @@ int expired_mask(struct chanset_t *chan, char *who)
     u = get_user_by_host(buf);
   }
   /* Do not expire masks set by bots. */
-  if (u && u->flags & USER_BOT)
+  if (u && u->bot)
     return 0;
   else
     return 1;

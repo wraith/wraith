@@ -875,7 +875,7 @@ static int gotmode(char *from, char *msg)
 
       /* check for mdop */
       if ((chan) && (deops >= 3) && me_op(chan)) {
-        if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
+        if (!ufrom || !ufrom->bot) {
           if (ROLE_KICK_MDOP) {
             m = ismember(chan, nfrom);
             if (m && !chan_sentkick(m)) {
@@ -894,7 +894,7 @@ static int gotmode(char *from, char *msg)
       /* check for mop */
       if (chan && (ops >= 3) && me_op(chan)) {
         if (channel_nomop(chan)) {
-          if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
+          if (!ufrom || !ufrom->bot) {
             if (ROLE_KICK_MDOP) {
               m = ismember(chan, nfrom);
               if (m && !chan_sentkick(m)) {
@@ -912,7 +912,7 @@ static int gotmode(char *from, char *msg)
         }
       }
 
-      if (chan && me_op(chan) && ops && (ufrom) && (ufrom->flags & USER_BOT) && !channel_fastop(chan) && !channel_take(chan)) {
+      if (chan && me_op(chan) && ops && ufrom && ufrom->bot && !channel_fastop(chan) && !channel_take(chan)) {
         int isbadop = 0;
 
         if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) || (strncmp(modes[1], "-b", 2))) {
@@ -1010,7 +1010,7 @@ static int gotmode(char *from, char *msg)
           putlog(LOG_DEBUG, "@", "Good op: %s", msg);
       }
 
-      if ((ops) && chan && me_op(chan) && !channel_manop(chan) && (ufrom) && !(ufrom->flags & USER_BOT)) {
+      if (ops && chan && me_op(chan) && !channel_manop(chan) && ufrom && !ufrom->bot) {
         char trg[NICKLEN] = "";
 
         n = i = 0;
@@ -1074,9 +1074,11 @@ static int gotmode(char *from, char *msg)
       u = get_user_by_host(from);
       get_user_flagrec(u, &user, ch);
       nick = splitnick(&from);
-      m = ismember(chan, nick);
-      if (m)
+      if ((m = ismember(chan, nick))) {
 	m->last = now;
+        if (!m->user && u)
+          m->user = u;
+      }
       if (channel_active(chan) && m && me_op(chan)) {
 	if (chan_fakeop(m)) {
 	  putlog(LOG_MODES, ch, CHAN_FAKEMODE, ch);

@@ -330,7 +330,7 @@ void rebalance_roles()
   char tmp[10] = "";
 
   for (i = 0; i < (unsigned) dcc_total; i++) {
-    if (dcc[i].user && (dcc[i].user->flags & USER_BOT)) {
+    if (dcc[i].user && dcc[i].user->bot) {
       ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
       if (ba && (ba->roleid > 0) && (ba->roleid < 5))
         r[(ba->roleid - 1)]++;
@@ -352,7 +352,7 @@ void rebalance_roles()
   }
   while (r[hNdx] - r[lNdx] >= 2) {
     for (i = 0; i < (unsigned) dcc_total; i++) {
-      if (dcc[i].user && (dcc[i].user->flags & USER_BOT)) {
+      if (dcc[i].user && dcc[i].user->bot) {
         ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
         if (ba && (ba->roleid == (hNdx + 1))) {
           ba->roleid = lNdx + 1;

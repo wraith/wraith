@@ -438,7 +438,7 @@ static void cmd_chinfo(struct userrec *u, int idx, char *par)
     }
   } else
     chname = 0;
-  if ((u1->flags & USER_BOT) && !(u->flags & USER_MASTER)) {
+  if (u1->bot && !(u->flags & USER_MASTER)) {
     dprintf(idx, "You have to be master to change bots info.\n");
     return;
   }
@@ -1017,7 +1017,7 @@ static void cmd_botjoin(struct userrec *u, int idx, char *par)
   }
   bot = newsplit(&par);
   botu = get_user_by_handle(userlist, bot);
-  if (botu && botu->flags && (botu->flags & USER_BOT)) {
+  if (botu && botu->bot) {
     pls_chan(u, idx, par, bot);
   } else {
     dprintf(idx, "Error: '%s' is not a bot.\n", bot);
@@ -1089,7 +1089,7 @@ static void cmd_botpart(struct userrec *u, int idx, char *par)
 
   bot = newsplit(&par);
   botu = get_user_by_handle(userlist, bot);
-  if (botu && botu->flags && (botu->flags & USER_BOT)) {
+  if (botu && botu->bot) {
     mns_chan(u, idx, par, bot);
   } else {
     dprintf(idx, "Error: '%s' is not a bot.\n", bot);

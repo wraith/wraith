@@ -144,8 +144,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
       m->user = get_user_by_host(s);
     }
 
-
-    if (m->user && ((m->user->flags & (USER_BOT | USER_OP)) == (USER_BOT | USER_OP))) {
+    if (m->user && m->user->bot && (m->user->flags & USER_OP)) {
       ops++;
       if (!strcmp(m->nick, botname))
         bpos = (ops - 1);
@@ -1078,7 +1077,7 @@ do_take(struct chanset_t *chan)
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     int hasop = (m->flags & CHANOP), isbot = 0;
 
-    if (m->user && (m->user->flags & USER_BOT))
+    if (m->user && m->user->bot)
       isbot++;
 
     if (rfc_casecmp(m->nick, botname)) {
@@ -1174,7 +1173,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
     int hasop = chan_hasop(m);
 
     if (m) {
-      if (m->user && m->user->flags & (USER_BOT | USER_OP)) {
+      if (m->user && m->user->bot && (m->user->flags & USER_OP)) {
         if (hasop)
           botops++;
         else
@@ -2473,11 +2472,11 @@ void check_should_cycle(struct chanset_t *chan)
     if (chan_hasop(ml)) {
       if (chan_issplit(ml)) {
         splitops++;
-        if ((ml->user) && (ml->user->flags & USER_BOT))
+        if ((ml->user) && ml->user->bot)
           splitbotops++;
       } else {
         localops++;
-        if ((ml->user) && (ml->user->flags & USER_BOT))
+        if ((ml->user) && ml->user->bot)
           localbotops++;
         if (localbotops >= 2)
           return;

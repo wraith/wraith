@@ -34,14 +34,12 @@ void init_flags()
 
 /* Some flags are mutually exclusive -- this roots them out
  */
-flag_t sanity_check(flag_t atr)
+flag_t sanity_check(flag_t atr, int bot)
 {
-  if ((atr & USER_BOT) &&
-      (atr & (USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA)))
+  if (bot && (atr & (USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA)))
     atr &= ~(USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA);
 /* only bots should be there: */
-  if (!(atr & USER_BOT) &&
-      (atr & (USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB)))
+  if (!bot && (atr & (USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB)))
     atr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB);
   if ((atr & USER_OP) && (atr & USER_DEOP))
     atr &= ~(USER_OP | USER_DEOP);
@@ -344,10 +342,13 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
 {
   struct chanuserrec *cr = NULL;
 
+  fr->bot = 0;
   if (!u) {
     fr->global = fr->chan = 0;
     return;
   }
+  if (u->bot)
+    fr->bot = 1;
   if (fr->match & FR_GLOBAL) {
     fr->global = u->flags;
   } else {

@@ -926,7 +926,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	} else if (code[0] == '*') {
 	  lasthand[0] = 0;
 	  u = NULL;
-	} else {
+	} else {		/* its a user ! */
 	  pass = newsplit(&s);
 	  attr = newsplit(&s);
 	  rmspace(s);
@@ -935,12 +935,16 @@ int readuserfile(const char *file, struct userrec **ret)
 	    lasthand[0] = 0;
             return 0;
 	  } else {
+            int isbot = 0;
+
+            if (code[0] == '-') {
+              code++;
+              isbot++;
+            }
+
 	    u = get_user_by_handle(bu, code);
 	    if (u) {
 	      putlog(LOG_ERROR, "@", "* %s '%s'!", USERF_DUPE, code);
-	      lasthand[0] = 0;
-	      u = NULL;
-	    } else if (u) {
 	      lasthand[0] = 0;
 	      u = NULL;
 	    } else {
@@ -948,13 +952,19 @@ int readuserfile(const char *file, struct userrec **ret)
 	      break_down_flags(attr, &fr, 0);
 	      strcpy(lasthand, code);
 	      cst = NULL;
+/* FIXME: remove after 1.1.8 */
+              if (fr.global & USER_BOT) {	/* this should pick up the old +b flag for now */
+                isbot++;
+                fr.global &= ~USER_BOT;
+              }
+              
 	      if (strlen(code) > HANDLEN)
 		code[HANDLEN] = 0;
 	      if (strlen(pass) > 20) {
 		putlog(LOG_MISC, "*", "* %s '%s'", USERF_BROKEPASS, code);
 		strcpy(pass, "-");
 	      }
-	      bu = adduser(bu, code, 0, pass, sanity_check(fr.global));
+	      bu = adduser(bu, code, 0, pass, sanity_check(fr.global, isbot), isbot);
 
 	      u = get_user_by_handle(bu, code);
 	      for (i = 0; i < dcc_total; i++)
@@ -980,8 +990,9 @@ int readuserfile(const char *file, struct userrec **ret)
   for (u = bu; u; u = u->next) {
     struct user_entry *e = NULL;
 
-    if (!(u->flags & USER_BOT) && !egg_strcasecmp (u->handle, conf.bot->nick)) {
-      putlog(LOG_MISC, "*", "(!) I have a user record, but without +b");
+    if (!u->bot && !egg_strcasecmp (u->handle, conf.bot->nick)) {
+      putlog(LOG_MISC, "*", "(!) I have a user record, but am not classified as a BOT!");
+      u->bot = 1;
       /* u->flags |= USER_BOT; */
     }
 
@@ -1017,7 +1028,7 @@ void link_pref_val(struct userrec *u, char *val)
   if (!u)
     return;
 
-  if (!(u->flags & USER_BOT))
+  if (!u->bot)
     return;
   if (!(ba = get_user(&USERENTRY_BOTADDR, u))) {
     return;
@@ -1048,7 +1059,7 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
       cur = userlist;
     if (cur == current)
       break;
-    if ((cur->flags & USER_BOT) && (strcmp(cur->handle, conf.bot->nick))) {
+    if (cur->bot && (strcmp(cur->handle, conf.bot->nick))) {
       link_pref_val(cur, thisval);
       if ((strcmp(thisval, lowval) < 0) && (strcmp(thisval, highval) > 0) &&(strcmp(thisval, bestmatchval) < 0)) {
         strcpy(bestmatchval, thisval);

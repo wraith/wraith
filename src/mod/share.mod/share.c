@@ -260,7 +260,7 @@ share_chattr(int idx, char *par)
   struct chanset_t *cst = NULL;
   struct userrec *u = NULL;
   struct flag_record fr2;
-  flag_t bfl, ofl;
+  flag_t ofl;
 
   if (dcc[idx].status & STAT_SHARE) {
     hand = newsplit(&par);
@@ -292,12 +292,8 @@ share_chattr(int idx, char *par)
           get_user_flagrec(dcc[idx].user, &fr, 0);
           /* Don't let bot flags be altered */
           ofl = fr.global;
-
           break_down_flags(atr, &fr, 0);
-          bfl = u->flags & USER_BOT;
-
-          fr.global = sanity_check(fr.global |bfl);
-
+          fr.global = sanity_check(fr.global, u->bot);
           set_user_flagrec(u, &fr, 0);
           check_dcc_attrs(u, ofl);
           noshare = 0;
@@ -367,10 +363,16 @@ share_newuser(int idx, char *par)
   struct userrec *u = NULL;
 
   if (dcc[idx].status & STAT_SHARE) {
+    int isbot = 0;
+
     nick = newsplit(&par);
     host = newsplit(&par);
     pass = newsplit(&par);
-
+    
+    if (nick[0] == '-') {
+      isbot++;
+      nick++;
+    }    
     if (!(u = get_user_by_handle(userlist, nick))) {
       fr.global = 0;
 
@@ -386,7 +388,13 @@ share_newuser(int idx, char *par)
 
       fr.match = FR_GLOBAL;
       build_flags(s, &fr, 0);
-      userlist = adduser(userlist, nick, host, pass, 0);
+/* FIXME: remove after 1.1.8 */
+      if (fr.global & USER_BOT) {
+        isbot++;
+        fr.global &= ~USER_BOT;
+      }
+
+      userlist = adduser(userlist, nick, host, pass, 0, isbot);
 
       /* Support for userdefinedflag share - drummer */
       u = get_user_by_handle(userlist, nick);
@@ -452,11 +460,11 @@ share_pls_bothost(int idx, char *par)
       shareout_but(NULL, idx, "+bh %s %s\n", hand, par);
     /* Add bot to userlist if not there */
     if (u) {
-      if (!(u->flags & USER_BOT))
+      if (!u->bot)
         return;                 /* ignore */
       set_user(&USERENTRY_HOSTS, u, par);
     } else {
-      userlist = adduser(userlist, hand, par, "-", USER_BOT);
+      userlist = adduser(userlist, hand, par, "-", 0, 1);
     }
 #ifndef LEAF
     if (!(dcc[idx].status & STAT_GETTING))
@@ -512,7 +520,7 @@ share_change(int idx, char *par)
         char pass[30] = "";
 
         makepass(pass);
-        userlist = adduser(userlist, hand, "none", pass, USER_BOT);
+        userlist = adduser(userlist, hand, "none", pass, 0, 1);
         u = get_user_by_handle(userlist, hand);
       } else if (!u)
         return;

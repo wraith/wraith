@@ -718,7 +718,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
         } else
           strcpy(s1, "bad1");		/* Start with '1' */
       }
-      userlist = adduser(userlist, s1, s, "-", 0);
+      userlist = adduser(userlist, s1, s, "-", 0, 0);
       fr.match = FR_CHAN;
       fr.chan = USER_DEOP;
       u = get_user_by_handle(userlist, s1);
@@ -995,7 +995,7 @@ static void check_lonely_channel(struct chanset_t *chan)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       sprintf(s, "%s!%s", m->nick, m->userhost);
       u = get_user_by_host(s);
-      if (!match_my_nick(m->nick) && (!u || !(u->flags & USER_BOT))) {
+      if (!match_my_nick(m->nick) && (!u || !u->bot)) {
 	ok = 0;
 	break;
       }

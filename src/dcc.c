@@ -759,7 +759,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     return;
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-  if (atr & USER_BOT) {
+  if (dcc[idx].user->bot) {
     if (!egg_strcasecmp(buf, "elinkdone")) {
       free(dcc[idx].u.chat);
       dcc[idx].type = &DCC_BOT_NEW;
@@ -1867,7 +1867,7 @@ static void dcc_telnet_got_ident(int i, char *host)
 #endif /* HUB */
 /*    else if (!(u->flags & USER_PARTY))
       ok = 0; */
-    if (!ok && u && (u->flags & USER_BOT))
+    if (!ok && u && u->bot)
       ok = 1;
     if (!ok && (dcc[idx].status & LSTN_PUBLIC))
       ok = 1;

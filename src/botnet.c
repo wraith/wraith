@@ -553,7 +553,7 @@ void tell_bots(int idx)
   
 /* FIXME: NEED ME! */
   for (u = userlist; u; u = u->next) {
-    if ((u->flags & USER_BOT) && (egg_strcasecmp(u->handle, conf.bot->nick))) {
+    if (u->bot && (egg_strcasecmp(u->handle, conf.bot->nick))) {
       size_t hlen = strlen(u->handle);
       int up = 0;
 
@@ -932,7 +932,7 @@ int botlink(char *linker, int idx, char *nick)
   register int i;
 
   u = get_user_by_handle(userlist, nick);
-  if (!u || !(u->flags & USER_BOT)) {
+  if (!u || !u->bot) {
     if (idx >= 0)
       dprintf(idx, "%s %s\n", nick, BOT_BOTUNKNOWN);
   } else if (!egg_strcasecmp(nick, conf.bot->nick)) {
@@ -1104,7 +1104,7 @@ void tandem_relay(int idx, char *nick, register int i)
   struct chat_info *ci = NULL;
 
   u = get_user_by_handle(userlist, nick);
-  if (!u || !(u->flags & USER_BOT)) {
+  if (!u || !u->bot) {
     dprintf(idx, "%s %s\n", nick, BOT_BOTUNKNOWN);
     return;
   }
@@ -1677,7 +1677,7 @@ static int get_role(char *bot)
     return 1;
 
   for (u = userlist; u; u = u->next) {
-    if (u->flags & USER_BOT) {
+    if (u->bot) {
       if (strcmp(u->handle, bot)) {
         ba = get_user(&USERENTRY_BOTADDR, u);
         if ((nextbot(u->handle) >= 0) && (ba) && (ba->roleid > 0) && (ba->roleid < 5))

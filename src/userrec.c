@@ -253,7 +253,7 @@ int u_pass_match(struct userrec *u, char *in)
     return 1;
   if (!cmp || !pass || !pass[0] || (pass[0] == '-'))
     return 0;
-  if (u->flags & USER_BOT) {
+  if (u->bot) {
     if (!strcmp(cmp, pass))
       return 1;
   } else {
@@ -277,7 +277,7 @@ int write_user(struct userrec *u, FILE * f, int idx)
 
   fr.global = u->flags;
   build_flags(s, &fr, NULL);
-  if (lfprintf(f, "%-10s - %-24s\n", u->handle, s) == EOF)
+  if (lfprintf(f, "%c%-10s - %-24s\n", u->bot ? '-' : 0, u->handle, s) == EOF)
     return 0;
   for (ch = u->chanrec; ch; ch = ch->next) {
     cst = findchan_by_dname(ch->channel);
@@ -315,7 +315,7 @@ static int sort_compare(struct userrec *a, struct userrec *b)
    * then users: +n / +m / +o / other users
    * return true if (a > b)
    */
-  if (a->flags & b->flags & USER_BOT) {
+  if (a->bot && b->bot) {
     if (bot_hublevel(a) > bot_hublevel(b))
       return 1;
     else if (bot_hublevel(a) < bot_hublevel(b))
@@ -323,9 +323,9 @@ static int sort_compare(struct userrec *a, struct userrec *b)
     else if (bot_hublevel(a) == bot_hublevel(b) && bot_hublevel(a) == 999)
       return 0;
   } else {
-    if (~a->flags & b->flags & USER_BOT)
+    if (a->bot && !b->bot)
       return 1;
-    if (a->flags & ~b->flags & USER_BOT)
+    if (!a->bot && b->bot)
       return 0;
     if (~a->flags & b->flags & USER_ADMIN)
       return 1;
@@ -458,13 +458,15 @@ int change_handle(struct userrec *u, char *newh)
   return 1;
 }
 
-struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass, flag_t flags)
+struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass, flag_t flags, int bot)
 {
   struct userrec *u = NULL, *x = NULL;
   int oldshare = noshare;
 
   noshare = 1;
   u = (struct userrec *) calloc(1, sizeof(struct userrec));
+
+  u->bot = bot;
 
   /* u->next=bu; bu=u; */
   strncpyz(u->handle, handle, sizeof u->handle);
@@ -644,7 +646,7 @@ void addhost_by_handle(char *handle, char *host)
   set_user(&USERENTRY_HOSTS, u, host);
   /* u will be cached, so really no overhead, even tho this looks dumb: */
   if (!noshare) {
-    if (u->flags & USER_BOT)
+    if (u->bot)
       shareout(NULL, "+bh %s %s\n", handle, host);
     else
       shareout(NULL, "+h %s %s\n", handle, host);

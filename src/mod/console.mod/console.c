@@ -117,7 +117,7 @@ console_set(struct userrec *u, struct user_entry *e, void *buf)
     ci = e->u.extra = buf;
   }
 
-  if (!noshare && !(u->flags & USER_BOT)) {
+  if (!noshare && !u->bot) {
     char string[501] = "";
 
     egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d %d %d %d %d", ci->channel,

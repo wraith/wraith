@@ -377,7 +377,7 @@ void reaffirm_owners()
       rmspace(s);
       u = get_user_by_handle(userlist, s);
       if (u)
-	u->flags = sanity_check(u->flags | USER_ADMIN);
+	u->flags = sanity_check(u->flags | USER_ADMIN, 0);
       q = p + 1;
       p = strchr(q, ',');
     }
@@ -385,7 +385,7 @@ void reaffirm_owners()
     rmspace(s);
     u = get_user_by_handle(userlist, s);
     if (u)
-      u->flags = sanity_check(u->flags | USER_ADMIN);
+      u->flags = sanity_check(u->flags | USER_ADMIN, 0);
   }
 }
 
@@ -423,7 +423,7 @@ void load_internal_users()
       case 3:
         hublevel++;		/* We must increment this even if it is already added */
 	if (!get_user_by_handle(userlist, hand)) {
-	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
+	  userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
 	  bi = calloc(1, sizeof(struct bot_addr));
 
           bi->address = strdup(ip);
@@ -491,7 +491,7 @@ void load_internal_users()
 	  strncat(owner, ",", 120);
 	strncat(owner, hand, 120);
 	if (!get_user_by_handle(userlist, hand)) {
-	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA);
+	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA, 0);
 	  u = get_user_by_handle(userlist, hand);
 	  set_user(&USERENTRY_PASS, u, pass);
 	  while (hosts) {
@@ -540,7 +540,7 @@ void chanprog()
 
   if (!(conf.bot->u = get_user_by_handle(userlist, conf.bot->nick))) {
     /* I need to be on the userlist... doh. */
-    userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_BOT | USER_OP );
+    userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_OP, 1);
     conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
     bi = calloc(1, sizeof(struct bot_addr));
     if (conf.bot->ip)

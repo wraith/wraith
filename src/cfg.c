@@ -772,7 +772,7 @@ static struct cfg_entry *check_can_set_cfg(char *target, char *entryname)
       return 0;
     if (!(u = get_user_by_handle(userlist, target)))
       return 0;
-    if (!(u->flags & USER_BOT))
+    if (!u->bot)
       return 0;
   } else {
     if (!(entry->flags & CFGF_GLOBAL))

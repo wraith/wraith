@@ -21,6 +21,7 @@ struct flag_record {
   flag_t match;
   flag_t global;
   flag_t chan;
+  char bot;
 };
 
 #define FR_GLOBAL 0x00000001
@@ -62,6 +63,7 @@ struct flag_record {
 #define CHAN_VALID (flag_t) 0xfffffffffffff
 
 #define USER_ADMIN	FLAG['a']
+/* FIXME; REMOVE AFTER 1.1.8 */
 #define USER_BOT	FLAG['b']
 #define USER_CHANHUB	FLAG['c']
 #define USER_DEOP	FLAG['d']
@@ -84,10 +86,11 @@ struct flag_record {
 #define USER_DEFAULT	0
 
 
-#define bot_hublevel(x) ( ( (x) && (x->flags & USER_BOT) && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
+#define bot_hublevel(x) ( ( (x) && x->bot && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
                           ( ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel ? \
                             ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel : 999) \
                          : 999)
+#define glob_bot(x)		       ((x).bot)
 
 /* Flag checking macros
  */
@@ -98,7 +101,6 @@ struct flag_record {
 #define chan_deop(x)                   ((x).chan & USER_DEOP)
 #define glob_deop(x)                   ((x).global & USER_DEOP)
 #define glob_master(x)                 ((x).global & USER_MASTER)
-#define glob_bot(x)                    ((x).global & USER_BOT)
 #define glob_owner(x)                  ((x).global & USER_OWNER)
 #define chan_master(x)                 ((x).chan & USER_MASTER)
 #define chan_owner(x)                  ((x).chan & USER_OWNER)
@@ -132,7 +134,7 @@ void break_down_flags(const char *, struct flag_record *, struct flag_record *);
 int build_flags(char *, struct flag_record *, struct flag_record *);
 int flagrec_eq(struct flag_record *, struct flag_record *);
 int flagrec_ok(struct flag_record *, struct flag_record *);
-flag_t sanity_check(flag_t);
+flag_t sanity_check(flag_t, int);
 flag_t chan_sanity_check(flag_t, flag_t);
 char geticon(int);
 

@@ -16,7 +16,7 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
     return BIND_RET_BREAK;
   if (!u)
     return BIND_RET_BREAK;
-  if (u->flags & (USER_BOT))
+  if (u->bot)
     return BIND_RET_BREAK;
   if (!par[0]) {
     dprintf(DP_HELP, "NOTICE %s :%s\n", nick,
@@ -102,7 +102,7 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
   char s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *pass = NULL, who[NICKLEN] = "";
   struct userrec *u2 = NULL;
 
-  if (match_my_nick(nick) || (u && (u->flags & USER_BOT)))
+  if (match_my_nick(nick) || (u && u->bot))
     return BIND_RET_BREAK;
 
   pass = newsplit(&par);
@@ -116,7 +116,7 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
   if (!u2) {
     if (u && !quiet_reject)
       dprintf(DP_HELP, IRC_MISIDENT, nick, nick, u->handle);
-  } else if (rfc_casecmp(who, origbotname) && !(u2->flags & USER_BOT)) {
+  } else if (rfc_casecmp(who, origbotname) && !u2->bot) {
     /* This could be used as detection... */
     if (u_pass_match(u2, "-")) {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
@@ -230,7 +230,7 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
     return 0;
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
-  if (u && (u->flags & USER_BOT))
+  if (u && u->bot)
     return BIND_RET_BREAK;
 
   i = findauth(host);
@@ -271,7 +271,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
-  if (u && (u->flags & USER_BOT))
+  if (u && u->bot)
     return BIND_RET_BREAK;
 
   i = findauth(host);
@@ -309,7 +309,7 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
-  if (u && (u->flags & USER_BOT))
+  if (u && u->bot)
     return BIND_RET_BREAK;
 
   i = findauth(host);
@@ -350,7 +350,7 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
-  if (u && (u->flags & USER_BOT))
+  if (u && u->bot)
     return BIND_RET_BREAK;
 
   i = findauth(host);

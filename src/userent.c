@@ -558,7 +558,7 @@ int pass_set(struct userrec *u, struct user_entry *e, void *buf)
 	*p = '?';
       p++;
     }
-    if ((u->flags & USER_BOT) || (pass[0] == '+'))
+    if (u->bot || (pass[0] == '+'))
       strcpy(new, pass);
     else
       encrypt_pass(pass, new);

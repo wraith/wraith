@@ -556,9 +556,8 @@ void detected(int code, char *msg)
     putlog(LOG_WARN, "*", "Setting myself +d: %s", msg);
     sprintf(tmp, "+d: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
-    get_user_flagrec(u, &fr, 0);
-    fr.global = USER_DEOP | USER_BOT;
-
+    fr.global = USER_DEOP;
+    fr.bot = 1;
     set_user_flagrec(u, &fr, 0);
     sleep(1);
     break;
