@@ -1706,14 +1706,24 @@ static void finish_share(int idx)
     return;
 
   if (!uff_call_receiving(j, dcc[idx].u.xfer->filename)) {
-    putlog(LOG_BOTS, "@", "A uff parsing function failed for the userfile!");
+    char xx[1024] = "";
+
+    putlog(LOG_BOTS, "*", "A uff parsing function failed for the userfile!");
     unlink(dcc[idx].u.xfer->filename);
+
+    dprintf(j, "bye\n");
+    egg_snprintf(xx, sizeof xx, "Disconnected %s (uff error)", dcc[j].nick);
+    botnet_send_unlinked(j, dcc[j].nick, xx);
+    chatout("*** %s\n", xx);
+
+    killsock(dcc[j].sock);
+    lostdcc(j);
+
     return;
   }
 
   if (dcc[j].u.bot->uff_flags & UFF_OVERRIDE)
-    debug1("NOTE: Sharing passively with %s, overriding local bots.",
-	   dcc[j].nick);
+    debug1("NOTE: Sharing passively with %s, overriding local bots.", dcc[j].nick);
   else
     /* Copy the bots over. The entries will be used in the new user list. */
     u = dup_userlist(1);
@@ -1788,12 +1798,12 @@ Context;
     checkchans(2); 		/* un-flag the channels, we are keeping them.. */
 
     dprintf(idx, "bye\n");
-    egg_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[idx].nick);
-    botnet_send_unlinked(idx, dcc[idx].nick, xx);
+    egg_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[j].nick);
+    botnet_send_unlinked(j, dcc[j].nick, xx);
     chatout("*** %s\n", xx);
 
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
+    killsock(dcc[j].sock);
+    lostdcc(j);
 
     return;
   }
