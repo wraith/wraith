@@ -192,16 +192,9 @@ static int got001(char *from, char *msg)
       putlog(LOG_MISC, "*", "Invalid server list!");
       return 0;
     }
-    if (x->realname)
+    if (x->realname) 
       free(x->realname);
-    if (strict_servernames == 1) {
-      x->realname = NULL;
-      if (x->name)
-	free(x->name);
-      x->name = strdup(from);
-    } else {
-      x->realname = strdup(from);
-    }
+    x->realname = strdup(from);
   }
   return 0;
 }
@@ -1081,7 +1074,7 @@ static int whoispenalty(char *from, char *msg)
 
     for (; x; x = x->next) {
       if (i == curserv) {
-        if ((strict_servernames == 1) || !x->realname) {
+        if (!x->realname) {
           if (strcmp(x->name, from))
             ii = 1;
         } else {

@@ -28,42 +28,40 @@
 #include <stdarg.h>
 
 bool floodless = 0;		/* floodless iline? */
-bool strict_servernames;
-bool checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
+bool checked_hostmask = 0;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;
 int serv = -1;		/* sock # of server currently */
 int servidx = -1;		/* idx of server */
 char newserver[121] = "";	/* new server? */
-port_t newserverport;		/* new server port? */
+port_t newserverport = 0;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
 static char serverpass[121] = "";
 static time_t trying_server;	/* trying to connect to a server right now? */
-static int curserv;		/* current position in server list: */
-int flud_thr;		/* msg flood threshold */
-time_t flud_time;		/* msg flood time */
-int flud_ctcp_thr;	/* ctcp flood threshold */
-time_t flud_ctcp_time;	/* ctcp flood time */
+static int curserv = 999;		/* current position in server list: */
+int flud_thr = 5;		/* msg flood threshold */
+time_t flud_time = 60;		/* msg flood time */
+int flud_ctcp_thr = 3;	/* ctcp flood threshold */
+time_t flud_ctcp_time = 60;	/* ctcp flood time */
 char botuserhost[UHOSTLEN] = "";	/* bot's user@host (refreshed whenever the bot joins a channel) */
 					/* may not be correct user@host BUT it's how the server sees it */
 static bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
-bool quiet_reject;	/* Quietly reject dcc chat or sends from
+bool quiet_reject = 1;	/* Quietly reject dcc chat or sends from
 				   users without access? */
 static time_t waiting_for_awake;	/* set when i unidle myself, cleared when
 				   i get the response */
 time_t server_online;	/* server connection time */
 char botrealname[121] = "";	/* realname of bot */
-static time_t server_timeout;	/* server timeout for connecting */
+static time_t server_timeout = 15;	/* server timeout for connecting */
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 time_t cycle_time;			/* cycle time till next server connect */
 port_t default_port;		/* default IRC port */
-static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
-int answer_ctcp;		/* answer how many stacked ctcp's ? */
+int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
 static bool check_mode_r;	/* check for IRCNET +r modes */
-static int net_type;
+static int net_type = NETT_EFNET;
 static bool resolvserv;		/* in the process of resolving a server host */
 static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
@@ -80,7 +78,7 @@ static int calc_penalty(char *);
 static bool fast_deq(int);
 static char *splitnicks(char **);
 static void msgq_clear(struct msgq_head *qh);
-static int stack_limit;
+static int stack_limit = 4;
 
 /* New bind tables. */
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
@@ -97,7 +95,7 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 #define msgrate 2
 
 /* Maximum messages to store in each queue. */
-static int maxqmsg;
+static int maxqmsg = 300;
 static struct msgq_head mq, hq, modeq;
 static int burst;
 
@@ -1018,46 +1016,22 @@ static cmd_t my_ctcps[] =
 
 void server_init()
 {
+  strcpy(botrealname, "A deranged product of evil coders");
+  strcpy(stackable2cmds, "USERHOST ISON");
+
+  mq.head = hq.head = modeq.head = NULL;
+  mq.last = hq.last = modeq.last = NULL;
+  mq.tot = hq.tot = modeq.tot = 0;
+  mq.warned = hq.warned = modeq.warned = 0;
+
   /*
    * Init of all the variables *must* be done in _start rather than
    * globally.
    */
-  botname[0] = 0;
-  trying_server = 0;
-  server_lag = 0;
-  curserv = 0;
-  flud_thr = 5;
-  flud_time = 60;
-  flud_ctcp_thr = 3;
-  flud_ctcp_time = 60;
-  quiet_reject = 1;
-  waiting_for_awake = 0;
-  server_online = 0;
-  strcpy(botrealname, "A deranged product of evil coders");
-  server_timeout = 15;
-  strict_servernames = 1;
-  serverlist = NULL;
-  cycle_time = 0;
-  oldnick[0] = 0;
-  trigger_on_ignore = 0;
-  answer_ctcp = 1;
-  check_mode_r = 0;
-  maxqmsg = 300;
-  burst = 0;
-  net_type = NETT_EFNET;
-  use_penalties = 0;
-  use_fastdeq = 0;
-  stackablecmds[0] = 0;
-  strcpy(stackable2cmds, "USERHOST ISON");
-  resolvserv = 0;
-  lastpingtime = 0;
-  last_time = 0;
-  stack_limit = 4;
 
   BT_msgc = bind_table_add("msgc", 5, "ssUss", MATCH_FLAGS, 0); 
   BT_msg = bind_table_add("msg", 4, "ssUs", MATCH_FLAGS, 0);
   BT_raw = bind_table_add("raw", 2, "ss", 0, BIND_STACKABLE);
-
   BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", 0, BIND_STACKABLE);
   BT_ctcp = bind_table_add("ctcp", 6, "ssUsss", 0, BIND_STACKABLE);
 
@@ -1070,14 +1044,7 @@ void server_init()
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
-  mq.head = hq.head = modeq.head = NULL;
-  mq.last = hq.last = modeq.last = NULL;
-  mq.tot = hq.tot = modeq.tot = 0;
-  mq.warned = hq.warned = modeq.warned = 0;
-  newserver[0] = 0;
-  newserverport = 0;
-  curserv = 999;
-  checked_hostmask = 0;
+
   do_nettype();
 }
 #endif /* LEAF */

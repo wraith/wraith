@@ -1261,7 +1261,6 @@ void transfer_report(int idx, int details)
 
 void transfer_init()
 {
-  fileq = NULL;
 #ifdef LEAF
   server_transfer_setup(NULL);
 #endif /* LEAF */

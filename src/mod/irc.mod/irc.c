@@ -1533,12 +1533,6 @@ getin_5secondly()
 void
 irc_init()
 {
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    if (shouldjoin(chan))
-      dprintf(DP_MODE, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname, chan->key_prot);
-    chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_ASKEDBANS);
-    chan->ircnet_status &= ~(CHAN_ASKED_INVITED | CHAN_ASKED_EXEMPTS);
-  }
   timer_create_secs(60, "irc_minutely", (Function) irc_minutely);
   timer_create_secs(5, "getin_5secondly", (Function) getin_5secondly);
 

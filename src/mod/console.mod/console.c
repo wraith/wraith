@@ -233,7 +233,7 @@ static struct user_entry_type USERENTRY_CONSOLE = {
   console_write_userfile,
 #endif /* HUB */
   console_kill,
-  NULL,
+  def_get,
   console_set,
   console_display,
   "CONSOLE"
@@ -388,6 +388,5 @@ console_init()
   add_builtins("dcc", mydcc);
   add_builtins("chon", mychon);
 
-  USERENTRY_CONSOLE.get = def_get;
   add_entry_type(&USERENTRY_CONSOLE);
 }

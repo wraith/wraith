@@ -51,7 +51,7 @@
 static unsigned int compressed_files;	/* Number of files compressed.      */
 static unsigned int uncompressed_files;	/* Number of files uncompressed.    */
 static unsigned int share_compressed;	/* Compress userfiles when sharing? */
-static unsigned int compress_level;	/* Default compression used.	    */
+static unsigned int compress_level = 9;	/* Default compression used.	    */
 
 
 static int uncompress_to_file(char *f_src, char *f_target);
@@ -380,10 +380,5 @@ int compress_report(int idx, int details)
 
 void compress_init()
 {
-  compressed_files	= 0;
-  uncompressed_files	= 0;
-  share_compressed	= 0;
-  compress_level	= 9;
-
   uff_addtable(compress_uff_table);
 }

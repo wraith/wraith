@@ -32,14 +32,15 @@
 
 #include <sys/stat.h>
 
-static bool 			use_info;
+static bool 			use_info = 1;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
 static int 			global_stopnethack_mode;
-static int 			global_revenge_mode;
+static int 			global_revenge_mode = 3;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
 static time_t 			global_ban_time;
 static time_t			global_exempt_time;
 static time_t 			global_invite_time;
+
 
 /* Global channel settings (drummer/dw) */
 char glob_chanset[512] = "", cfg_glob_chanset[512] = "";
@@ -48,8 +49,8 @@ static char *lastdeletedmask = NULL;
 /* Global flood settings */
 static int 			gfld_chan_thr;
 static time_t 			gfld_chan_time;
-static int 			gfld_deop_thr;
-static time_t 			gfld_deop_time;
+static int 			gfld_deop_thr = 8;
+static time_t 			gfld_deop_time = 10;
 static int 			gfld_kick_thr;
 static time_t 			gfld_kick_time;
 static int 			gfld_join_thr;
@@ -911,25 +912,7 @@ cmd_t channels_bot[] = {
 
 void channels_init()
 {
-  gfld_chan_thr = 0;
-  gfld_chan_time = 0;
-  gfld_deop_thr = 8;
-  gfld_deop_time = 10;
-  gfld_kick_thr = 0;
-  gfld_kick_time = 0;
-  gfld_join_thr = 0;
-  gfld_join_time = 0;
-  gfld_ctcp_thr = 0;
-  gfld_ctcp_time = 0;
-  global_idle_kick = 0;
-  lastdeletedmask = 0;
-  use_info = 1;
   strcpy(glob_chanmode, "nt");
-  global_stopnethack_mode = 0;
-  global_revenge_mode = 3;
-  global_ban_time = 0;
-  global_exempt_time = 0;
-  global_invite_time = 0;
   strcpy(glob_chanset,
          "+enforcebans "
 	 "+dynamicbans "
