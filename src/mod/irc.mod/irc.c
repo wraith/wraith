@@ -1084,14 +1084,15 @@ static void warn_pls_take()
 
 
 void check_servers() {
-  struct chanset_t * chan;
-  memberlist * m;
-  for (chan=chanset;chan;chan=chan->next) {
-    for (m=chan->channel.member;m && m->nick[0];m=m->next)
-      if (chan_hasop(m) && (!m->server || !m->server[0] || !m->hops)) {
+  struct chanset_t *chan;
+  for (chan = chanset; chan; chan = chan->next) {
+    memberlist *m;
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (chan_hasop(m) && (!m->server || !m->server[0]) || !m->hops) {
         dprintf(DP_HELP, STR("WHO %s\n"), chan->name);
         return;
       }
+    }
   }
 }
 
