@@ -243,6 +243,8 @@ void check_promisc()
   if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", "ignore"))
     return;
   sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0)
+    return;
   ifcnf.ifc_len = 8191;
   ifcnf.ifc_buf = buf;
   if (ioctl(sock, SIOCGIFCONF, (char *) &ifcnf) < 0) {

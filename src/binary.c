@@ -76,12 +76,12 @@ bin_md5(const char *fname, int todo)
       fatal("Can't create temporary file!", 0);
     }
 
-    while ((len = fread(buf, 1, sizeof buf - 1, f))) {
+    while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
       if (i) {		/* to skip bytes for hash */
-        i -= 16;
+        i -= sizeof(buf) - 1;
         continue;
       }
-      if (fwrite(buf, sizeof buf - 1, 1, fn) != 1) {
+      if (fwrite(buf, sizeof(buf) - 1, 1, fn) != 1) {
         fclose(f);
         fclose(fn);
         unlink(s);
