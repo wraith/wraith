@@ -359,7 +359,7 @@ check_sum(const char *fname, const char *cfgfile)
     readcfg(cfgfile);
 
 // tellconfig(&settings); 
-    if (bin_checksum(fname, WRITE_CHECKSUM, &ctx))
+    if (bin_checksum(fname, WRITE_CHECKSUM|WRITE_CONF|WRITE_PACK, &ctx))
       printf("* Wrote settings to binary.\n"); 
     exit(0);
   } else {
