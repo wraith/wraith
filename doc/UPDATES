@@ -1,7 +1,8 @@
 This is a summary of ChangeLog basically.
 
 1.0.15
-1.cmd_randstring is now limited to 300
+1.cmd_randstring is now limited to 300.
+2.cmd_botversion and cmd_netversion are now HUB only.
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.

@@ -3515,6 +3515,7 @@ void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
 #endif /* LEAF */
 }
 
+#ifdef HUB
 /* netversion */
 static void cmd_netversion(struct userrec * u, int idx, char * par) {
   putlog(LOG_CMDS, "*", STR("#%s# netversion"), dcc[idx].nick);
@@ -3532,6 +3533,7 @@ static void cmd_botversion(struct userrec * u, int idx, char * par) {
   }
   botnet_send_cmd(botnetnick, par, u->handle, idx, STR("ver"));
 }
+#endif /* HUB */
 
 void rcmd_ver(char * fbot, char * fhand, char * fidx) {
   char tmp[2048];
@@ -4182,8 +4184,10 @@ cmd_t C_dcc[] =
 #endif /* HUB */
   {"botserver",		"m",	(Function) cmd_botserver,	NULL},
   {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL},
+#ifdef HUB
   {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL},
   {"netversion", 	"o", 	(Function) cmd_netversion, 	NULL},
+#endif /* HUB */
   {"userlist", 		"m", 	(Function) cmd_userlist, 	NULL},
   {"ps", 		"n", 	(Function) cmd_ps, 		NULL},
   {"last", 		"n", 	(Function) cmd_last, 		NULL},
