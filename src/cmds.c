@@ -933,12 +933,14 @@ static void cmd_update(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# update %s", dcc[idx].nick, par);
 #ifdef LEAF
-  if (!localhub)
-    dprintf(idx, "Please use this command on the first listed in the conf for this user@box\n");
+  if (!localhub) {
+    dprintf(idx, "Please use '%s%s%s' for this login/shell.\n", RED(idx), conf.localhub, COLOR_END(idx));
+    return;
+  }
 #endif /* LEAF */
   if (!par[0])
     dprintf(idx, "Usage: update <binname>\n");
-  updatebin(idx, par, 0);
+  updatebin(idx, par, 20);
 }
 
 static void cmd_uptime(int idx, char *par)

@@ -9,9 +9,9 @@
 #include "common.h"
 #include "main.h"
 #include "color.h"
-#include "binary.h"
 #include "dcc.h"
 #include "misc.h"
+#include "binary.h"
 #include "response.h"
 #include "thread.h"
 #include "settings.h"
@@ -92,6 +92,7 @@ static int	do_confedit = 0;		/* show conf menu if -C */
 #ifdef LEAF
 static char    do_killbot[21] = "";
 #endif /* LEAF */
+static char *update_bin = NULL;
 static int 	checktrace = 1;		/* Check for trace when starting up? */
 
 
@@ -150,13 +151,17 @@ void fatal(const char *s, int recoverable)
   nuke_server((char *) s);
 #endif /* LEAF */
 
-  if (s[0])
+  if (s && s[0])
     putlog(LOG_MISC, "*", "!*! %s", s);
 
 /*  flushlogs(); */
 #ifdef HAVE_SSL
     ssl_cleanup();
 #endif /* HAVE_SSL */
+
+#ifdef HUB
+  listen_all(my_port, 1); /* close the listening port... */
+#endif /* HUB */
 
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].sock >= 0)
@@ -267,11 +272,11 @@ static void show_help()
 
 
 #ifdef LEAF
-# define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstv"
+# define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstu:v"
 #else /* !LEAF */
-# define PARSE_FLAGS "02Cd:De:Eg:G:hnstv"
+# define PARSE_FLAGS "02Cd:De:Eg:G:hnstu:v"
 #endif /* HUB */
-#define FLAGS_CHECKPASS "CdDeEgGhkntv"
+#define FLAGS_CHECKPASS "CdDeEgGhkntuv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;
@@ -341,6 +346,13 @@ static void dtx_arg(int argc, char *argv[])
         if (argv[optind])
           p = argv[optind];
         got_ed("d", optarg, p);
+      case 'u':
+        if (optarg) {
+          update_bin = strdup(optarg);
+          updating++;
+          break;
+        } else
+          exit(0);
       case 'v':
       {
         char date[50] = "";
@@ -678,8 +690,14 @@ static void startup_checks() {
         printf("Error killing '%s'\n", do_killbot);
       exit(0);
     } else {
+      if (update_bin)	{			/* invoked with -u bin */
+        kill(conf.bot->pid, SIGKILL);
+        unlink(conf.bot->pid_file);
+        writepid(conf.bot->pid_file, getpid());
+        updatebin(DP_STDOUT, update_bin, 1);	/* will call restart all bots */
+      }
       spawnbots();
-      if (updating) 
+      if (updating)
         exit(0); /* just let the timer restart us (our parent) */
     }
   }
@@ -717,6 +735,8 @@ int tracecheck_breakpoint() {
 
 int main(int argc, char **argv)
 {
+//printf("YAY!\n\n\n\n\n\n\n\n");
+//exit(0);
   egg_timeval_t egg_timeval_now;
 
   Context;

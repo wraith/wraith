@@ -770,7 +770,9 @@ fillconf(conf_t * inconf)
   inconf->uid = conffile.uid;
 }
 
-void tellconf(conf_t *inconf)
+/*
+static void 
+tellconf(conf_t *inconf)
 {
 conf_bot *bot;
 int i = 0;
@@ -797,10 +799,11 @@ printf("watcher: %d\n", inconf->watcher);
     }
 printf("\n\n\n\n");
 }
+*/
 
 void bin_to_conf(settings_t *in)
 {
-printf("Converting binary data to conf struct\n");
+/* printf("Converting binary data to conf struct\n"); */
   conffile.uid = atol(settings.uid);
   conffile.username = strdup(settings.username);
   conffile.uname = strdup(settings.uname);
@@ -841,5 +844,5 @@ printf("Converting binary data to conf struct\n");
     }
     free(tmpp);
   }
-  tellconf(&conffile);
+  /* tellconf(&conffile); */
 }

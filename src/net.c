@@ -1391,9 +1391,11 @@ int sockgets(char *s, int *len)
     p = strchr(xx, '\r');
   if (p != NULL) {
     *p = 0;
+/* FIXME: overlapping here */
+
     strcpy(s, xx);
-/*  overlap  strcpy(xx, p + 1); */
-    sprintf(xx, "%s", p + 1);
+    strcpy(xx, p + 1);
+
 /*    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r')) */
     if (s[strlen(s) - 1] == '\r')
       s[strlen(s) - 1] = 0;

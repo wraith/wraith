@@ -10,7 +10,9 @@
 #include "common.h"
 #include "misc.h"
 #include "settings.h"
+#include "binary.h"
 #include "rfc1459.h"
+#include "botnet.h"
 #include "misc_file.h"
 #include "egg_timer.h"
 #include "dcc.h"
@@ -646,34 +648,40 @@ void kill_bot(char *s1, char *s2)
 
 /* Update system code
  */
-#ifdef LEAF
-static void updatelocal() __attribute__((noreturn));
 
-static void updatelocal(void)
+void 
+restart(int idx)
 {
-  /* let's drop the server connection ASAP */
-  nuke_server("Updating...");
-
-  botnet_send_chat(-1, conf.bot->nick, "Updating...");
-  botnet_send_bye();
-
-  fatal("Updating...", 1);
+#ifdef HUB
+  write_userfile(idx);
+#endif /* HUB */
+#ifdef LEAF
+  nuke_server("Updating...");		/* let's drop the server connection ASAP */
+#endif /* LEAF */
+  if (tands > 0) {
+    botnet_send_chat(-1, conf.bot->nick, "Updating...");
+    botnet_send_bye();
+  }
+  fatal(idx <= 0x7FF0 ? "Updating..." : NULL, 1);
   usleep(2000 * 500);
   unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
   system(binname); /* start new bot. */
   exit(0);
 }
-#endif /* LEAF */
 
-int updatebin(int idx, char *par, int autoi)
+static void restart_data(int *idx)
+{
+  restart(*idx);
+}
+
+int updatebin(int idx, char *par, int secs)
 {
   char *path = NULL, *newbin = NULL, buf[DIRMAX] = "", old[DIRMAX] = "", testbuf[DIRMAX] = "";
-  struct stat sb;
   int i;
 
-  path = newsplit(&par);
-  par = path;
-  if (!par[0]) {
+  path = par;
+
+  if (!par || !par[0]) {
     logidx(idx, "Not enough parameters.");
     return 1;
   }
@@ -706,7 +714,7 @@ int updatebin(int idx, char *par, int autoi)
     logidx(idx, "Can't update with the current binary");
     return 1;
   }
-  if (stat(path, &sb)) {
+  if (!can_stat(path)) {
     logidx(idx, "%s can't be accessed", path);
     free(path);
     return 1;
@@ -721,6 +729,8 @@ int updatebin(int idx, char *par, int autoi)
 
   egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
   copyfile(binname, old);
+
+  write_settings(path, 0);	/* re-write the binary with our data */
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
@@ -751,44 +761,29 @@ int updatebin(int idx, char *par, int autoi)
     return 1;
   }
 
-  egg_snprintf(buf, sizeof buf, "%s", binname);
-
   /* safe to run new binary.. */
 
-#ifdef HUB
-  listen_all(my_port, 1); /* close the listening port... */
-  usleep(5000);
-#endif /* HUB */
 #ifdef LEAF
-  if (!autoi && localhub) {
-    /* let's drop the server connection ASAP */
-    nuke_server("Updating...");
-#endif /* LEAF */
-    putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
-    logidx(idx, "Updating...bye");
-    putlog(LOG_MISC, "*", "Updating...");
-    botnet_send_chat(-1, conf.bot->nick, "Updating...");
-    botnet_send_bye();
-    fatal("Updating...", 1);
-    usleep(2000 * 500);
-    unlink(conf.bot->pid_file); /* delete pid so new binary doesnt exit. */
-    system(buf);		/* run the binary, it SHOULD work from earlier tests.. */
-    exit(0);
-#ifdef LEAF
-  } else if (localhub && autoi) {
-    egg_timeval_t howlong;
-
-    egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());	
-    putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
+  if (secs > 0) {
     /* will exit after run, cron will restart us later */
-    system(buf);
-
-    howlong.sec = 300;
-    howlong.usec = 0;
-    timer_create(&howlong, "updatelocal()", (Function) updatelocal);
+    egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());
+    putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
+    system(buf);	/* restarts other bots running, removes pid files */
+    
+    /* this odd statement makes it so specifying 1 sec will restart other bots running
+     * and then just restart with no delay */
+    if (secs > 1) {
+      egg_timeval_t howlong;
+      howlong.sec = secs;
+      howlong.usec = 0;
+      timer_create_complex(&howlong, "restarting for update", (Function) restart_data, (void *) &idx, 0);
+    } else
+      restart(idx);
     return 0;
-  }
+  } else
 #endif /* LEAF */
+    restart(idx);	/* no timer */
+
  /* this should never be reached */
   return 2;
 }
@@ -1080,25 +1075,6 @@ char *color(int idx, int type, int which)
   } 
   /* This should never be reached.. */
   return "";
-}
-
-void
-restart(int idx)
-{
-#ifdef HUB
-  write_userfile(idx);
-#endif /* HUB */
-#ifdef LEAF
-  nuke_server("Restarting...");
-#endif /* LEAF */
-  botnet_send_chat(-1, conf.bot->nick, "Restarting...");
-  botnet_send_bye();
-
-  fatal("Restarting...", 1);
-  sleep(1);
-  unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
-  system(binname); /* start new bot. */
-  exit(0);
 }
 
 char *

@@ -984,12 +984,3 @@ void crazy_trace()
 #endif /* CRAZY_TRACE */
 
 
-/* need to account for this after reading in conf/spawning bots. 
-ifdef LEAF
-      if (updating)
-        exit(0);  let cron restart us. 
-    }  localhub 
-endif LEAF 
-*/
-
-

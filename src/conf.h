@@ -66,7 +66,6 @@ int parseconf();
 int writeconf(char *, FILE *, int);
 void fillconf(conf_t *);
 void bin_to_conf();
-void tellconf(conf_t *);
 
 extern char		cfile[DIRMAX];
 #endif /* !_CONF_H */

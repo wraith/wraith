@@ -272,12 +272,12 @@ static void edpack(settings_t *incfg, const char *hash, int what)
 #undef dofield
 }
 
-
-void
+/* 
+static void
 tellconfig(settings_t *incfg)
 {
 #define dofield(_field)		printf("%s: %s\n", #_field, _field);
-  /* -- STATIC -- */
+  // -- STATIC --
   dofield(incfg->hash);
   dofield(incfg->packname);
   dofield(incfg->shellhash);
@@ -286,7 +286,7 @@ tellconfig(settings_t *incfg)
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
-  /* -- DYNAMIC -- */
+  // -- DYNAMIC --
   dofield(incfg->bots);
   dofield(incfg->uid);
   dofield(incfg->autouname);
@@ -302,6 +302,7 @@ tellconfig(settings_t *incfg)
   dofield(incfg->portmax);
 #undef dofield
 }
+*/
 
 void
 check_sum(const char *fname, const char *cfgfile)
@@ -316,7 +317,7 @@ check_sum(const char *fname, const char *cfgfile)
       fatal("Binary not initialized.", 0);
 
     readcfg(cfgfile);
-tellconfig(&settings);
+/* tellconfig(&settings); */
     if (bin_md5(fname, WRITE_MD5, &ctx))
       printf("* Wrote settings to binary.\n"); 
     exit(0);
@@ -325,10 +326,9 @@ tellconfig(&settings);
 
 
     hash = bin_md5(fname, GET_MD5, &ctx);
-tellconfig(&settings);
+/* tellconfig(&settings); */
     edpack(&settings, hash, PACK_DEC);
-printf("\n\n");
-tellconfig(&settings);
+/* tellconfig(&settings); */
 
     if (strcmp(settings.hash, hash)) {
       unlink(fname);
@@ -337,14 +337,19 @@ tellconfig(&settings);
   }
 }
 
-void write_settings(const char *fname)
+void write_settings(const char *fname, int die)
 {
   MD5_CTX ctx;
+  char *hash = NULL;
 
   MD5_Init(&ctx);
-  if (bin_md5(fname, WRITE_MD5, &ctx))
+  if ((hash = bin_md5(fname, WRITE_MD5, &ctx))) {
     printf("* Wrote settings to %s.\n", fname);
-  exit(0);
+    edpack(&settings, hash, PACK_DEC);
+  }
+
+  if (die)
+    exit(0);
 }
 
 void conf_to_bin(conf_t *in)
@@ -374,6 +379,6 @@ void conf_to_bin(conf_t *in)
                            bot->ip6 ? bot->ip6 : "");
     }
 
-  tellconfig(&settings);
-  write_settings(binname);
+  /* tellconfig(&settings); */
+  write_settings(binname, 1);
 }
