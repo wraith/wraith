@@ -12,10 +12,12 @@ prefix = @prefix@
 VERSION = @VERSION@
 NUMVER = @NUMVER@
 PACKNAME = @PACKNAME@
+DISTRIB = @PACKNAME@-@VERSION@
 LEAFEXEC = leaf
 HUBEXEC = hub
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
-EXCLUDES = pack/salt.h pack/pack.cfg misc/ind doc/DEVEL
+EXCLUDES = pack/salt.h pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
+           config.cache config.log config.status config.h lush.h stamp.*
 
 # defaults
 CC = @CC@
@@ -78,33 +80,34 @@ clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp makesalt makesettings
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp makesalt makesettings .mangled
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/makesalt src/makesettings src/settings.c src/settings.tmp
 
 distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h stamp.*
-	@rm -rf autom4te.cache
+	@rm -rf *-$(VERSION)/ autom4te.cache/
 
 
-distrib: distclean
-	@rm -f `find . \( -name '*~' -o -name '*#' -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' \) -print`
-	@rm -rf `find . \( -name 'CVS' \) -print`
-	@mfiles="`find src -name '*.h' -or -name '*.c'`"; \
+distrib: clean clean-modconfig
+	@rm -rf $(DISTRIB)/
+	@mkdir $(DISTRIB) && cp -r $(DISTROFILES) $(DISTRIB)
+	@rm -f `find $(DISTRIB)/ \( -name '*~' -o -name '*#' -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' \) -print`
+	@rm -rf `find $(DISTRIB)/ \( -name 'CVS' \) -print`
+	@for s in $(EXCLUDES); \
+	do \
+	 rm -rf $(DISTRIB)/$$s; \
+	done;
+	@mfiles="`find $(DISTRIB)/src/ -name '*.h' -or -name '*.c'`"; \
 	for s in $$mfiles; \
 	do \
 	 mangle -rnw $$s > /dev/null 2>&1;\
 	done
 
-distro: distrib
-	@mkdir wraith-$(VERSION); \
-	cp -r $(DISTROFILES) wraith-$(VERSION); \
-	for s in $(EXCLUDES); \
-	do \
-	 rm -rf wraith-$(VERSION)/$$s; \
-	done; \
-	tar -czvf wraith-$(VERSION).tgz wraith-$(VERSION)/; \
-	rm -rf wraith-$(VERSION)/
+tar: distrib
+	tar -czvf $(DISTRIB).tgz $(DISTRIB)/
+#	rm -rf $(DISTRIB)/
+#	cd ../ && rm -rf distrib/
 
 depend:
 #	@cat /dev/null > lush.h
