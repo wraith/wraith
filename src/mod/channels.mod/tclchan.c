@@ -433,14 +433,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->bad_cookie = deflag_translate(item[i]);
-    } else if (!strcmp(item[i], "manop")) {
-      i++;
-      if (i >= items) {
-        if (result)
-          sprintf(result, "channel manop needs argument");
-        return ERROR;
-      }
-      chan->manop = deflag_translate(item[i]);
     } else if (!strcmp(item[i], "mdop")) {
       i++;
       if (i >= items) {
@@ -542,10 +534,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       chan->status |= CHAN_NOMOP;
     else if (!strcmp(item[i], "-nomop"))
       chan->status &= ~CHAN_NOMOP;
-    else if (!strcmp(item[i], "+manop"))
-      chan->status |= CHAN_MANOP;
-    else if (!strcmp(item[i], "-manop"))
-      chan->status &= ~CHAN_MANOP;
     else if (!strcmp(item[i], "+voice"))
       chan->status |= CHAN_VOICE;
     else if (!strcmp(item[i], "-voice"))

@@ -851,8 +851,6 @@ void channels_report(int idx, int details)
           i += my_strcpy(s + i, "take ");
         if (channel_nomop(chan))
           i += my_strcpy(s + i, "nomop ");
-        if (channel_manop(chan))
-          i += my_strcpy(s + i, "manop ");
         if (channel_voice(chan))
           i += my_strcpy(s + i, "voice ");
         if (channel_autoop(chan))
@@ -930,7 +928,6 @@ void channels_init()
 	 "-nodesynch "
 	 "-closed "
 	 "-take "
-	 "+manop "
 	 "-voice "
          "-private "
 	 "-fastop ");

@@ -1241,7 +1241,6 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_FLAG("enforcebans", 	channel_enforcebans(chan));
     SHOW_FLAG("fastop",		channel_fastop(chan));
     SHOW_FLAG("inactive",	channel_inactive(chan));
-    SHOW_FLAG("manop",		channel_manop(chan));
     SHOW_FLAG("nodesynch",	channel_nodesynch(chan));
     SHOW_FLAG("nomop",		channel_nomop(chan));
     SHOW_FLAG("private",	channel_privchan(chan));

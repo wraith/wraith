@@ -456,7 +456,7 @@ void show_channels(int idx, char *handle)
           first = 1;
         }
         dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
-           channel_privchan(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
+           channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 
            channel_bitch(chan) ? "(bitch)    " : "", channel_closed(chan) ?  "(closed)" : "");
     }
   }

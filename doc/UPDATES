@@ -24,6 +24,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Default binpath is now the directory the binary is in when doing -C.
 * Fixed a memory leak in dns
 * Fixed DNS staying on nameservers that fail to give replies
+* Removed channel flag '+|-manop' as it was redundant with chanint 'manop'
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

@@ -1129,7 +1129,7 @@ gotmode(char *from, char *msg)
                 putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
             }
 
-            if (!channel_manop(chan) && !u->bot) {
+            if (chan->manop && !u->bot) {
               n = i = 0;
 
               switch (role) {

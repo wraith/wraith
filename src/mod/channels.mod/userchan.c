@@ -1004,7 +1004,7 @@ flood-nick %d:%lu closed-ban %d closed-invite %d closed-private %d ban-time %lu 
 exempt-time %lu invite-time %lu \
 %cenforcebans %cdynamicbans %cuserban %cbitch %cprotectops %crevenge \
 %crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
-%cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cmanop %cvoice \
+%cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cvoice \
 %cfastop %cautoop }\n",
 	chan->dname,
 	w,
@@ -1055,7 +1055,6 @@ exempt-time %lu invite-time %lu \
 	PLSMNS(channel_nodesynch(chan)),
 	PLSMNS(channel_closed(chan)),
 	PLSMNS(channel_take(chan)),
-	PLSMNS(channel_manop(chan)),
 	PLSMNS(channel_voice(chan)),
 	PLSMNS(channel_fastop(chan)),
         PLSMNS(channel_autoop(chan))

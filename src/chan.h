@@ -215,7 +215,7 @@ struct chanset_t {
 #define CHAN_NOMOP	    BIT7        /* If a bot sees a mass op, botnet mdops */
 #define CHAN_REVENGE        BIT8	/* get revenge on bad people          */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
-#define CHAN_MANOP          BIT10       /* manual opping allowed? */
+#undef  CHAN_10		    BIT10       /* not used */
 #define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
 #define CHAN_INACTIVE       BIT12	/* no irc support for this channel */
 #define CHAN_VOICE          BIT13	/* a bot +y|y will voice *, except +q */
@@ -272,7 +272,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_closed(chan) (chan->status & CHAN_CLOSED)
 #define channel_take(chan) (chan->status & CHAN_TAKE)
 #define channel_nomop(chan) (chan->status & CHAN_NOMOP)
-#define channel_manop(chan) (chan->status & CHAN_MANOP)
 #define channel_voice(chan) (chan->status & CHAN_VOICE)
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
 #define channel_privchan(chan) (chan->status & CHAN_PRIVATE)
