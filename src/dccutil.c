@@ -706,7 +706,7 @@ Context;
       else {
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = notalloc;
-        dcc[idx].addr6 = getmyip6();
+        strcpy(dcc[idx].addr6, getmyip6());
         dcc[idx].port = port;
         dcc[idx].sock = i6;
         dcc[idx].timeval = now;
