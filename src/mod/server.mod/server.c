@@ -1633,7 +1633,7 @@ char *server_start(Function *global_funcs)
   BT_msgc = bind_table_add("msgc", 5, "ssUss", 0, BIND_USE_ATTR); 
 #endif /* S_AUTH */
   BT_msg = bind_table_add("msg", 4, "ssUs", 0, BIND_USE_ATTR);
-  BT_raw = bind_table_add("raw", 3, "ss", MATCH_MASK, BIND_STACKABLE);
+  BT_raw = bind_table_add("raw", 2, "ss", MATCH_MASK, BIND_STACKABLE);
   BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
   BT_ctcp = bind_table_add("ctcp", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
 
