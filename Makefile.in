@@ -33,7 +33,7 @@ STRIP = @STRIP@
 LIBS = @LIBS@ @ZLIB@ @RESLIB@
 
 DEBCXXFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -Dinline= -fno-inline -g3 -ggdb3
-CFLGS = -W -Wno-unused-parameter -fpermissive -Wdisabled-optimization -Wmissing-format-attribute
+CFLGS = -fpermissive @GCC3@
 _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wshadow -Wnested-externs -Wno-format-y2k \
 #-Wlarger-than-6608 -Wpointer-arith -Wcast-align \
