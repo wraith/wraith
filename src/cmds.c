@@ -895,33 +895,6 @@ static void cmd_match(struct userrec *u, int idx, char *par)
 		   chname);
 }
 
-#ifdef HUB
-void cmd_botupdate(struct userrec *u, int idx, char *par)
-{
-  char *tbot,
-    tmp[256];
-
-  putlog(LOG_CMDS, "*", STR("#%s# botupdate %s"), dcc[idx].nick, par);
-  tbot = newsplit(&par);
-  if (!par[0]) {
-    dprintf(idx, STR("Not enough parameters.\n"));
-    return;
-  }
-  if (nextbot(tbot) < 0) {
-    dprintf(idx, STR("No such bot linked\n"));
-    return;
-  }
-  sprintf(tmp, STR("update %s"), par);
-  botnet_send_cmd(botnetnick, tbot, u->handle, idx, tmp);
-}
-#endif /* HUB */
-
-static void rcmd_update(char *fbot, char *fhand, char *fidx, char *par)
-{
-  if (!par[0])
-    return;
-  updatebin(0, par, 0);
-}
 static void cmd_update(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", STR("#%s# update %s"), dcc[idx].nick, par);
@@ -946,7 +919,7 @@ static void cmd_userlist(struct userrec *u, int idx, char *par)
       if (cnt)
         dprintf(idx, ", ");
       else
-        dprintf(idx, STR("Chathubs  : "));
+        dprintf(idx, STR("Chathubs: "));
       dprintf(idx, u->handle);
       cnt++;
       if (cnt==15) {
@@ -1094,13 +1067,15 @@ static void cmd_status(struct userrec *u, int idx, char *par)
     do_module_report(idx, 0, NULL);
   }
 }
+
 #ifdef HUB
 static void cmd_dccstat(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# dccstat", dcc[idx].nick);
   tell_dcc(idx);
 }
-#endif
+#endif /* HUB */
+
 static void cmd_boot(struct userrec *u, int idx, char *par)
 {
   int i, files = 0, ok = 0;
@@ -1274,6 +1249,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
     (func[CONSOLE_DOSTORE]) (dest);
   }
 }
+
 #ifdef HUB
 static void cmd_chhandle(struct userrec *u, int idx, char *par)
 {
@@ -1320,7 +1296,8 @@ static void cmd_chhandle(struct userrec *u, int idx, char *par)
       dprintf(idx, "Failed.\n");
   }
 }
-#endif
+#endif /* HUB */
+
 static void cmd_handle(struct userrec *u, int idx, char *par)
 {
   char oldhandle[HANDLEN + 1], newhandle[HANDLEN + 1];
@@ -1352,6 +1329,7 @@ static void cmd_handle(struct userrec *u, int idx, char *par)
       dprintf(idx, "Failed.\n");
   }
 }
+
 #ifdef HUB
 static void cmd_chpass(struct userrec *u, int idx, char *par)
 {
@@ -1405,6 +1383,7 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
     }
   }
 }
+
 static void cmd_chsecpass(struct userrec *u, int idx, char *par)
 {
   char *handle, *new, pass[16];
@@ -1507,6 +1486,7 @@ static void cmd_hublevel(struct userrec *u, int idx, char *par)
   set_user(&USERENTRY_BOTADDR, u1, bi);
   write_userfile(idx);
 }
+
 static void cmd_uplink(struct userrec *u, int idx, char *par)
 {
   char *handle,
@@ -1634,7 +1614,7 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
   }
   set_user(&USERENTRY_BOTADDR, u1, bi);
 }
-#endif
+#endif /* HUB */
 
 static void cmd_comment(struct userrec *u, int idx, char *par)
 {
@@ -1709,7 +1689,8 @@ static void cmd_reload(struct userrec *u, int idx, char *par)
   dprintf(idx, "Reloading user file...\n");
   reload();
 }
-#endif
+#endif /* HUB */
+
 void cmd_die(struct userrec *u, int idx, char *par)
 {
   char s1[1024], s2[1024];
@@ -1759,6 +1740,7 @@ static void cmd_simul(struct userrec *u, int idx, char *par)
   if (!ok)
     dprintf(idx, "No such user on the party line.\n");
 }
+
 #ifdef HUB
 static void cmd_link(struct userrec *u, int idx, char *par)
 {
@@ -1785,7 +1767,8 @@ static void cmd_link(struct userrec *u, int idx, char *par)
     botnet_send_link(i, x, s, par);
   }
 }
-#endif
+#endif /* HUB */
+
 static void cmd_unlink(struct userrec *u, int idx, char *par)
 {
   int i;
@@ -1814,6 +1797,7 @@ static void cmd_unlink(struct userrec *u, int idx, char *par)
     botnet_send_unlink(i, x, lastbot(bot), bot, par);
   }
 }
+
 static void cmd_relay(struct userrec *u, int idx, char *par)
 {
   if (!par[0]) {
@@ -1823,6 +1807,7 @@ static void cmd_relay(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# relay %s", dcc[idx].nick, par);
   tandem_relay(idx, par, 0);
 }
+
 #ifdef HUB
 static void cmd_save(struct userrec *u, int idx, char *par)
 {
@@ -1837,6 +1822,7 @@ static void cmd_backup(struct userrec *u, int idx, char *par)
   dprintf(idx, "Backing up the channel & user files...\n");
   call_hook(HOOK_BACKUP);
 }
+
 static void cmd_trace(struct userrec *u, int idx, char *par)
 {
   int i;
@@ -1860,12 +1846,13 @@ static void cmd_trace(struct userrec *u, int idx, char *par)
   simple_sprintf(y, ":%d", now);
   botnet_send_trace(i, x, par, y);
 }
+
 static void cmd_binds(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# binds %s", dcc[idx].nick, par);
   tell_binds(idx, par);
 }
-#endif
+#endif /* HUB */
 
 /* After messing with someone's user flags, make sure the dcc-chat flags
  * are set correctly.
@@ -2049,6 +2036,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, int chflags,
   }
   return chflags;
 }
+
 static void cmd_chattr(struct userrec *u, int idx, char *par)
 {
   char *hand, *arg = NULL, *tmpchg = NULL, *chg = NULL, work[1024];
@@ -2493,6 +2481,7 @@ static void cmd_echo(struct userrec *u, int idx, char *par)
     (func[CONSOLE_DOSTORE]) (idx);
   }
 }
+
 static void cmd_color(struct userrec *u, int idx, char *par)
 {
   module_entry *me;
@@ -2876,28 +2865,6 @@ static void cmd_nettcl(struct userrec *u, int idx, char *msg)
   else
     dumplots(idx, "Tcl error: ", interp->result);
 }
-
-static void cmd_bottcl(struct userrec *u, int idx, char *msg)
-{
-  char buf[2000], *bot;
-#ifdef S_PERMONLY
-  if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
-    dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
-    return;
-  }
-#endif /* S_PERMONLY */
-  putlog(LOG_CMDS, "*", "#%s# bottcl %s", dcc[idx].nick, msg);
-
-  if (!msg[0]) {
-    dprintf(idx, "Usage: bottcl <botnick> cmd\n");
-    return;
-  }
-  bot = newsplit(&msg);
-
-  egg_snprintf(buf, sizeof buf, "mt %d %s", idx, msg);
-  putbot(bot, buf);
-}
-
 #endif /* S_TCLCMDS */
 
 static void cmd_newleaf(struct userrec *u, int idx, char *par)
@@ -2974,7 +2941,8 @@ static void cmd_set(struct userrec *u, int idx, char *msg)
   } else
     dprintf(idx, "Error: %s\n", interp->result);
 }
-#endif
+#endif /* HUB */
+
 static void cmd_pls_ignore(struct userrec *u, int idx, char *par)
 {
   char			*who;
@@ -3070,6 +3038,7 @@ static void cmd_ignores(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# ignores %s", dcc[idx].nick, par);
   tell_ignores(idx, par);
 }
+
 static void cmd_pls_user(struct userrec *u, int idx, char *par)
 {
   char *handle, *host;
@@ -3111,7 +3080,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
 
 #ifdef HUB
     write_userfile(idx);
-#endif
+#endif /* HUB */
   }
 }
 
@@ -3349,6 +3318,7 @@ static void cmd_botserver(struct userrec * u, int idx, char * par) {
   botnet_send_cmd(botnetnick, par, u->handle, idx, STR("cursrv"));
 }
 
+
 void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
 #ifdef LEAF
   char tmp[2048], cursrvname[500];
@@ -3390,17 +3360,17 @@ void rcmd_ver(char * fbot, char * fhand, char * fidx) {
   char tmp[2048];
 #ifdef HAVE_UNAME
   struct utsname un;
-#endif
+#endif /* HAVE_UNAME */
   sprintf(tmp, STR("%s "), ver);
 #ifdef HAVE_UNAME
   if (uname(&un) < 0) {
-#endif
+#endif /* HAVE_UNAME */
     strcat(tmp, STR("(unknown OS)"));
 #ifdef HAVE_UNAME
   } else {
     sprintf(tmp + strlen(tmp), STR("%s %s (%s)"), un.sysname, un.release, un.machine);
   }
-#endif
+#endif /* HAVE_UNAME */
   botnet_send_cmdreply(botnetnick, fbot, fhand, fidx, tmp);
 }
 
@@ -3439,6 +3409,7 @@ void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
   botnet_send_cmdreply(botnetnick, fbot, fhand, fidx, tmp);
 #endif
 }
+
 /* netmsg, botmsg */
 static void cmd_botmsg(struct userrec * u, int idx, char * par) {
   char * tnick, * tbot;
@@ -3470,6 +3441,7 @@ static void cmd_netmsg(struct userrec * u, int idx, char * par) {
   sprintf(tmp, STR("msg %s %s"), tnick, par);
   botnet_send_cmd_broad(-1, botnetnick, u->handle, idx, tmp);
 }
+
 void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
 #ifdef LEAF
   char buf[1024], *nick;
@@ -3481,6 +3453,7 @@ void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, cha
   }
 #endif
 }
+
 /* netlag */
 static void cmd_netlag(struct userrec * u, int idx, char * par) {
   struct timeval tv;
@@ -3513,94 +3486,11 @@ void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
 
 /* exec commands */
 #ifdef HUB
-static void cmd_botw(struct userrec * u, int idx, char * par) {
-  char * tbot, tmp[128];
-  putlog(LOG_CMDS, "*", STR("#%s# botw %s"), dcc[idx].nick, par);
-  tbot=newsplit(&par);
-  if (!tbot[0]) {
-    dprintf(idx, STR("Usage: botw <botname>\n"));
-    return;
-  }
-  if (nextbot(tbot)<0) {
-    dprintf(idx, STR("No such linked bot\n"));
-    return;
-  }
-  strcpy(tmp, STR("exec w"));
-  botnet_send_cmd(botnetnick, tbot, dcc[idx].nick, idx, tmp);
-}
-
 static void cmd_netw(struct userrec * u, int idx, char * par) {
   char tmp[128];
   putlog(LOG_CMDS, "*", STR("#%s# netw"), dcc[idx].nick);
   strcpy(tmp, STR("exec w"));
   botnet_send_cmd_broad(-1, botnetnick, dcc[idx].nick, idx, tmp);
-}
-
-static void cmd_botkill(struct userrec * u, int idx, char * par) {
-  char * tbot, buf[1024];
-  putlog(LOG_CMDS, "*", STR("#%s# botkill %s"), dcc[idx].nick, par);
-  tbot=newsplit(&par);
-  if (!tbot[0]) {
-    dprintf(idx, STR("Usage: botkill <botname> [kill-parameters]\n"));
-    return;
-  }
-  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
-    putlog(LOG_WARN, "*", STR("%s attempted 'botkill' with pipe/semicolon in parameters: %s"), dcc[idx].nick, par);
-    dprintf(idx, STR("No."));
-    return;
-  }
-  if (nextbot(tbot)<0) {
-    dprintf(idx, STR("No such linked bot\n"));
-    return;
-  }
-  sprintf(buf, STR("exec kill %s"), par);
-  botnet_send_cmd(botnetnick, tbot, dcc[idx].nick, idx, buf);
-}
-
-static void cmd_botps(struct userrec * u, int idx, char * par) {
-  char * tbot, buf[1024];
-  putlog(LOG_CMDS, "*", STR("#%s# botps %s"), dcc[idx].nick, par);
-  tbot=newsplit(&par);
-  if (!tbot[0]) {
-    dprintf(idx, STR("Usage: botps <botname> [ps-parameters]\n"));
-    return;
-  }
-  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
-    putlog(LOG_WARN, "*", STR("%s attempted 'botps' with pipe/semicolon in parameters: %s"), dcc[idx].nick, par);
-    dprintf(idx, STR("No."));
-    return;
-  }
-  if (nextbot(tbot)<0) {
-    dprintf(idx, STR("No such linked bot\n"));
-    return;
-  }
-  sprintf(buf, STR("exec ps %s"), par);
-  botnet_send_cmd(botnetnick, tbot, dcc[idx].nick, idx, buf);
-}
-
-static void cmd_botexec(struct userrec * u, int idx, char * par) {
-  char * tbot, buf[1024];
-
-  putlog(LOG_CMDS, "*", STR("#%s# botexec %s"), dcc[idx].nick, par);
-#ifdef S_PERMONLY
-  if (!isowner(u->handle)) {
-    putlog(LOG_WARN, "*", STR("%s attempted 'botexec' %s"), dcc[idx].nick, par);
-    dprintf(idx, STR("botexec is only available to permanent owners\n"));
-    return;
-  }
-#endif /* S_PERMONLY */
-  tbot=newsplit(&par);
-  if (!tbot[0]) {
-    dprintf(idx, STR("Usage: botexec <botname> [parameters]\n"));
-    return;
-  }
-
-  if (nextbot(tbot)<0) {
-    dprintf(idx, STR("No such linked bot\n"));
-    return;
-  }
-  sprintf(buf, STR("exec raw %s"), par);
-  botnet_send_cmd(botnetnick, tbot, dcc[idx].nick, idx, buf);
 }
 
 static void cmd_netps(struct userrec * u, int idx, char * par) {
@@ -3614,26 +3504,6 @@ static void cmd_netps(struct userrec * u, int idx, char * par) {
   sprintf(buf, STR("exec ps %s"), par);
   botnet_send_cmd_broad(-1, botnetnick, dcc[idx].nick, idx, buf);
 }
-static void cmd_botlast(struct userrec * u, int idx, char * par) {
-  char * tbot, buf[1024];
-  putlog(LOG_CMDS, "*", STR("#%s# botlast %s"), dcc[idx].nick, par);
-  tbot=newsplit(&par);
-  if (!tbot[0]) {
-    dprintf(idx, STR("Usage: botlast <botname> [userid]\n"));
-    return;
-  }
-  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
-    putlog(LOG_WARN, "*", STR("%s attempted 'botlast' with pipe/semicolon in parameters: %s"), dcc[idx].nick, par);
-    dprintf(idx, STR("No."));
-    return;
-  }
-  if (nextbot(tbot)<0) {
-    dprintf(idx, STR("No such linked bot\n"));
-    return;
-  }
-  sprintf(buf, STR("exec last %s"), par);
-  botnet_send_cmd(botnetnick, tbot, dcc[idx].nick, idx, buf);
-}
 
 static void cmd_netlast(struct userrec * u, int idx, char * par) {
   char buf[1024];
@@ -3646,7 +3516,8 @@ static void cmd_netlast(struct userrec * u, int idx, char * par) {
   sprintf(buf, STR("exec last %s"), par);
   botnet_send_cmd_broad(-1, botnetnick, dcc[idx].nick, idx, buf);
 }
-#endif
+#endif /* HUB */
+
 void crontab_show(struct userrec * u, int idx) {
   dprintf(idx, STR("Showing current crontab:\n"));
   if (!exec_str(u, idx, STR("crontab -l | grep -v \"^#\"")))
@@ -3713,24 +3584,8 @@ void cmd_crontab(struct userrec *u, int idx, char *par) {
     dprintf(idx, STR("Usage: crontab status|delete|show|new [interval]\n"));
   }
 }
-#ifdef HUB
-static void cmd_botcrontab(struct userrec * u, int idx, char * par) {
-  char * tbot, buf[1024], *cmd;
-  putlog(LOG_CMDS, "*", STR("#%s# botcrontab %s"), dcc[idx].nick, par);
-  tbot=newsplit(&par);
-  cmd=newsplit(&par);
-  if (!tbot[0] || (strcmp(cmd, STR("status")) && strcmp(cmd, STR("show")) && strcmp(cmd, STR("delete")) && strcmp(cmd, STR("new")))) {
-    dprintf(idx, STR("Usage: botcrontab <botname> status|delete|show|new [interval]\n"));
-    return;
-  }
-  if (nextbot(tbot)<0) {
-    dprintf(idx, STR("No such linked bot\n"));
-    return;
-  }
-  egg_snprintf(buf, sizeof buf, STR("exec crontab %s %s"), cmd, par);
-  botnet_send_cmd(botnetnick, tbot, dcc[idx].nick, idx, buf);
-}
 
+#ifdef HUB
 static void cmd_netcrontab(struct userrec * u, int idx, char * par) {
   char buf[1024], *cmd;
   putlog(LOG_CMDS, "*", STR("#%s# netcrontab %s"), dcc[idx].nick, par);
@@ -3742,7 +3597,7 @@ static void cmd_netcrontab(struct userrec * u, int idx, char * par) {
   egg_snprintf(buf, sizeof buf, STR("exec crontab %s %s"), cmd, par);
   botnet_send_cmd_broad(-1, botnetnick, dcc[idx].nick, idx, buf);
 }
-#endif
+#endif /* HUB */
 
 void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
   char * cmd, scmd[512], *out, *err;
@@ -3832,23 +3687,6 @@ void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
   }
 
 }
-#ifdef HUB
-static void cmd_botdie(struct userrec * u, int idx, char * par) {
-  char *tbot, buf[1024];
-  putlog(LOG_CMDS, "*", STR("#%s# botdie %s"), dcc[idx].nick, par);
-  tbot=newsplit(&par);
-  if (!tbot[0]) {
-    dprintf(idx, STR("Usage: botdie <botname>\n"));
-    return;
-  }
-  if (nextbot(tbot)<0) {
-    dprintf(idx, STR("No such linked bot\n"));
-    return;
-  }
-  sprintf(buf, STR("die %s"), par);
-  botnet_send_cmd(botnetnick, tbot, dcc[idx].nick, idx, buf);
-}
-#endif
 
 static void cmd_botjump(struct userrec * u, int idx, char * par) {
   char *tbot, buf[1024];
@@ -3892,8 +3730,9 @@ void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
 
   (*(int *)(func[23])) = 0; //cycle_time
   (func[SERVER_NUKESERVER]) ("jumping...");
-#endif
+#endif /* LEAF */
 }
+
 
 /* "Remotable" commands */
 void gotremotecmd (char * forbot, char * frombot, char * fromhand, char * fromidx, char * cmd) {
@@ -3917,8 +3756,6 @@ void gotremotecmd (char * forbot, char * frombot, char * fromhand, char * fromid
     rcmd_pong(frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, STR("die"))) {
     exit(0);
-  } else if (!strcmp(cmd, STR("update"))) {
-    rcmd_update(frombot, fromhand, fromidx, par);
   } else {
     botnet_send_cmdreply(botnetnick, frombot, fromhand, fromidx, STR("Unrecognized remote command"));
   }
@@ -4103,7 +3940,6 @@ dcc_cmd_t C_dcc[] =
 #ifdef HUB
 #ifdef S_TCLCMDS
   {"nettcl",		"a",	(Function) cmd_nettcl,		NULL,    NULL},
-  {"bottcl",		"a",	(Function) cmd_bottcl,		NULL,    NULL},
 #endif /* S_TCLCMDS */
   {"newleaf",		"n",	(Function) cmd_newleaf,		NULL,    NULL},
 #endif /* HUB */
@@ -4135,8 +3971,6 @@ dcc_cmd_t C_dcc[] =
   {"unlink",		"m",	(Function) cmd_unlink,		NULL,    NULL},
   {"update",		"a",	(Function) cmd_update,		NULL,    NULL},
 #ifdef HUB
-  {"botupdate",		"a",	(Function) cmd_botupdate,	NULL,    NULL},
-  {"botcrontab",	"a",	(Function) cmd_botcrontab,	NULL,    NULL},
   {"netcrontab",	"a",	(Function) cmd_netcrontab,	NULL,    NULL},
 #endif /* HUB */
   {"uptime",		"m|m",	(Function) cmd_uptime,		NULL,    NULL},
@@ -4148,26 +3982,18 @@ dcc_cmd_t C_dcc[] =
   {"whois",		"",	(Function) cmd_whois,		NULL,    NULL},
   {"whom",		"",	(Function) cmd_whom,		NULL,    NULL},
   {"whoami",		"",	(Function) cmd_whoami,		NULL,    NULL},
-  {"botjump", 		"n", 	(Function) cmd_botjump, 	NULL,    NULL},
-#ifdef HUB
-  {"botdie", 		"a", 	(Function) cmd_botdie, 	NULL,    NULL},
-#endif /* HUB */
-  {"botmsg", 		"o", 	(Function) cmd_botmsg, 		NULL,    NULL},
+  {"botjump",           "n",    (Function) cmd_botjump,         NULL,    NULL},
+  {"botmsg",           "o",    (Function) cmd_botmsg,          NULL,    NULL},
   {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL,    NULL},
   {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL,    NULL},
   {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL,    NULL},
 #ifdef HUB
-  {"botw", 		"n", 	(Function) cmd_botw, 		NULL,    NULL},
   {"netw", 		"n", 	(Function) cmd_netw, 		NULL,    NULL},
-  {"botps", 		"n", 	(Function) cmd_botps, 		NULL,    NULL},
-  {"botexec",		"a",	(Function) cmd_botexec,		NULL,	 NULL},
-  {"botkill", 		"n", 	(Function) cmd_botkill,		NULL,    NULL},
   {"netps", 		"n", 	(Function) cmd_netps, 		NULL,    NULL},
-  {"botlast", 		"n", 	(Function) cmd_botlast, 	NULL,    NULL},
   {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL,    NULL},
 #endif /* HUB */
   {"netlag", 		"m", 	(Function) cmd_netlag, 		NULL,    NULL},
-  {"botserver", 	"m", 	(Function) cmd_botserver, 	NULL,    NULL},
+  {"botserver",		"m",	(Function) cmd_botserver,	NULL,	 NULL},
   {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL,    NULL},
   {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL,    NULL},
   {"netversion", 	"o", 	(Function) cmd_netversion, 	NULL,    NULL},
