@@ -179,13 +179,15 @@ wraith:	general
 	+@cd src && $(MAKE_BIN) $(BINEXEC)
 	@echo ""
 
+dwraith: debug
+
 debug:  general
 	@echo ""
 	@echo "Making debug binary"
 	@echo ""
 	@echo ""
-	+@cd src/mod && $(MAKE_DBIN) static
-	+@cd src && $(MAKE_DBIN) $(BINEXEC)
+	+@cd src/mod && $(MAKE_DEBUG) static
+	+@cd src && $(MAKE_DEBUG) $(BINEXEC)
 	@echo ""
 
 #safety hash

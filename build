@@ -30,7 +30,7 @@ echo -e "Version:   ${ver}\nBuild:     ${builddate}"
 usage() 
 {
     echo
-    echo "Usage: $0 [-bcCdnP] [-p FILE] [all|hub|leaf]"
+    echo "Usage: $0 [-bcCdnP] [-p FILE]"
     echo
     echo "    The options are as follows:"
     echo "    -b        Use bzip2 instead of gzip when packaging."
@@ -44,11 +44,7 @@ usage()
 }
 
 debug=0
-all=0
-hub=0
-leaf=0
 clean=0
-type=
 nopkg=0
 bzip=0
 pkg=0
@@ -83,18 +79,6 @@ echo
 if test -z "$1"; then
  usage
  exit 1
-else
- if [ $1 = "all" ]; then
-  all=1
- elif [ $1 = "leaf" ]; then
-  leaf=1
-  type="leaf"
- elif [ $1 = "hub" ]; then
-  hub=1
-  type="hub"
- else
-  all=1
- fi
 fi
 
 rm=1
@@ -105,15 +89,11 @@ if [ $pkg = "1" ]; then
 fi
 
 if [ $debug = "1" ]; then
- d="d"
+ dmake="d"
+ d="-debug"
 else
+ dmake=""
  d=""
-fi
-
-if [ $all = "1" ]; then
- type="all"
- leaf=1
- hub=1
 fi
 
 # Figure what bins we're making
@@ -147,7 +127,7 @@ fi
 
 if [ $compile = "1" ]; then
 
- echo "[*] Building ${PACKNAME}::${type} for $os"
+ echo "[*] Building ${PACKNAME} for $os"
 
  MAKE="`which gmake`"
  if test -z "${MAKE}"; then
@@ -173,41 +153,27 @@ if [ $compile = "1" ]; then
  fi
 fi
 
-if test -n "$d"; then
- d="-debug"
-fi
-
 _build()
 {
- if [ $[${tb}] = "1" ]; then
-  if [ $compile = "1" ]; then
-   echo "[*] Building ${d}${tb}..."
-   ${MAKE} ${d}${tb}
-   if ! test -f ${tb}; then
-     echo "[!] ${d}${tb} build failed"
-     exit 1
-   fi
+ if [ $compile = "1" ]; then
+  echo "[*] Building ${dmake}${tb}..."
+  ${MAKE} ${dmake}${tb}
+  if ! test -f ${tb}; then
+    echo "[!] ${dmake}${tb} build failed"
+    exit 1
   fi
-  if [ $nopkg = "0" -o $pkg = "1" ]; then
-   echo "[*] Hashing and initializing settings in binary"
-    cp ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
-   ./${tb}.$os-$ver${d} -p ${pack}
-   rm=1
-  elif [ $nopkg = "0" ]; then
-    mv ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
-  fi
+ fi
+ if [ $nopkg = "0" -o $pkg = "1" ]; then
+  echo "[*] Hashing and initializing settings in binary"
+   cp ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
+  ./${tb}.$os-$ver${d} -p ${pack}
+  rm=1
+ elif [ $nopkg = "0" ]; then
+   mv ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
  fi
 }
 
-if [ -f stamp.hub ]; then
- tb="hub"
- _build
- tb="leaf"
-else
- tb="leaf"
- _build
- tb="hub"
-fi
+tb="wraith"
 _build
 
 if [ $bzip = "1" ]; then
@@ -224,7 +190,7 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
   #This MALLOC business is to not Abort 'tar' due to some bug it has.
   tmp=${MALLOC_CHECK_}
   unset MALLOC_CHECK_
-  tar -c${zip}f ${PACKNAME}.$os-$ver${d}.tar.${ext} hub.$os-$ver${d} leaf.$os-$ver${d}
+  tar -c${zip}f ${PACKNAME}.$os-$ver${d}.tar.${ext} wraith.$os-$ver${d}
   chmod 0644 ${PACKNAME}.$os-$ver${d}.tar.${ext}
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
@@ -239,21 +205,20 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
     scp -i misc/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
   fi
 elif ! [ $scp = "0" ]; then
-  cp hub hub.$os-$ver${d} > /dev/null 2>&1
-  cp leaf leaf.$os-$ver${d} > /dev/null 2>&1
+  cp wraith wraith.$os-$ver${d} > /dev/null 2>&1
   cp ChangeLog ChangeLog-${builddate}
   gzip -9 ChangeLog-${builddate}
   #This MALLOC business is to not Abort 'tar' due to some bug it has.
   tmp=${MALLOC_CHECK_}
   unset MALLOC_CHECK_
-  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d} leaf.$os-$ver${d} ChangeLog-${builddate}.gz
+  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz
   chmod 0644 ${builddate}-$os-$ver${d}.tar.${ext}
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
   chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
-  rm -rf ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d} leaf.$os-$ver${d} ChangeLog-${builddate}.gz
+  rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz
   ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
 fi
 
