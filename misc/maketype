@@ -1,5 +1,10 @@
 #!/bin/sh
 
+#some files dont have any #ifdef HUB|LEAF
+#but they do have a header included which DOES
+#this can potentially cause major problems with sizeof(struct) etc...
+#temporary solution: MAKE CLEAN 
+
 other=""
 
 if [ $1 = "hub" ]; then
@@ -13,11 +18,11 @@ fi
 
 if test ! -f stamp.$1 && test -f stamp.$other
 then
-  #Find and remove .c files
   flist="`find src -name \*.c`"
-  cfiles="`grep -l \"def [H|L][U|E][B|A]\" $flist`"
+#  cfiles="`grep -l \"def [H|L][U|E][B|A]\" $flist`"
   echo "[*] Cleaning up files for $1 build"
-  for s in $cfiles 
+#  for s in $cfiles 
+  for s in $flist
   do
     bleh="`echo $s | cut -d / -f 2`";
     if [ $bleh = "mod" ]; then
@@ -39,13 +44,6 @@ then
         fi
       fi
     fi
-  done
-  #Now find and 'touch' header files
-  flist="`find src -name \*.h`"
-  cfiles="`grep -l \"def [H|L][U|E][B|A]\" $flist`"
-  for s in $cfiles
-  do
-    touch $s
   done
 fi
 rm -f stamp.*
