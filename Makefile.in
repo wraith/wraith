@@ -14,8 +14,8 @@ CFG = @CFG@
 PACKNAME = @PACKNAME@
 DISTRIB = @PACKNAME@-@VERSION@
 CCDEPMODE = @CCDEPMODE@
-LEAFEXEC = leaf
-HUBEXEC = hub
+LEAFEXEC = leaf@EXEEXT@
+HUBEXEC = hub@EXEEXT@
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
 EXCLUDES = $(CFG) misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
            src/crypto/Makefile src/crypto/.deps src/crypto/.cvsignore \

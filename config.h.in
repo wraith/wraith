@@ -248,6 +248,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define to 1 if the C compiler supports function prototypes. */
+#undef PROTOTYPES
+
 /* Define to the type of arg 1 for `select'. */
 #undef SELECT_TYPE_ARG1
 
@@ -287,6 +290,9 @@
 /* Define if you want ipv6 support */
 #undef USE_IPV6
 
+/* Define if windows */
+#undef WIN32_LEAN_AND_MEAN
+
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
 #undef WORDS_BIGENDIAN
@@ -312,6 +318,9 @@
 #ifndef __CHAR_UNSIGNED__
 # undef __CHAR_UNSIGNED__
 #endif
+
+/* Define like PROTOTYPES; this can be used by system headers. */
+#undef __PROTOTYPES
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
