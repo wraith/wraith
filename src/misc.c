@@ -482,8 +482,11 @@ void make_rand_str(char *s, size_t len)
       s[j] = '!' + randint(15);
 
     if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) /* no % ( ) & */
-      s[j] = 35;
+      s[j] = 'a' + randint(26);
   }
+
+  if (s[0] == '+' || s[0] == '-')
+    s[0] = 'a' + randint(26);
 
   s[len] = '\0';
 }
@@ -790,6 +793,11 @@ int goodpass(char *pass, int idx, char *nick)
   char tell[501] = "";
   int nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
 
+  if (strchr(BADPASSCHARS, pass[0])) {
+    sprintf(tell, "Passes may not begin with '-'");
+    goto fail;
+  }
+
   for (int i = 0; i < (signed) strlen(pass); i++) {
     tc = (int) pass[i];
     if (tc < 58 && tc > 47)
@@ -830,6 +838,8 @@ int goodpass(char *pass, int idx, char *nick)
       strcat(tell, "\002>= 8 chars.\002");
     else
       strcat(tell, ">= 8 chars.");
+
+    fail:
 
     if (idx)
       dprintf(idx, "%s\n", tell);

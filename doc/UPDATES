@@ -30,6 +30,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Upped user limit for processes to 60.
 * After you edit a binary with -C, the first bot will be sent a signal to reload the data from the binary.
   (Fixes old bots/uname/data showing up in conf after bot is updated)
+* Fixed some bad passes being generated/set beginning with -/+
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

@@ -52,6 +52,7 @@
 #define UHOSTLEN        UHOSTMAX + 1
 #define DIRLEN          DIRMAX + 1
 #define NOTENAMELEN     ((HANDLEN << 1) + 1)
+#define BADPASSCHARS    "-+"
 #define LISTSEPERATORS  ",=:; "
 
 
