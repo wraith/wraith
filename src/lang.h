@@ -3,10 +3,13 @@
  *   Conversion definitions for language support
  *
  */
+#define STR(x) x
 
 #ifndef _EGG_LANG_H
 #define _EGG_LANG_H
 
+
+#define DETEST			STR("WORKS")
 
 #define MISC_USAGE		"Usage"
 #define MISC_FAILED		"Failed.\n"
@@ -39,6 +42,7 @@
 /* Misc messages
  */
 
+#define USERF_OLDFMT		"boring...."
 #define MISC_EXPIRED		"expired"
 #define MISC_TOTAL		"total"
 #define MISC_ERASED		"Erased"

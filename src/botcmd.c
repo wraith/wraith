@@ -93,22 +93,22 @@ static void bot_chan2(int idx, char *msg)
   }
   p = strchr(from, '@');
   if (p) {
-    sprintf(TBUF, "<%s> %s", from, msg);
+    sprintf(TBUF, STR("<%s> %s"), from, msg);
     *p = 0;
     if (!partyidle(p + 1, from)) {
       *p = '@';
-      fake_alert(idx, "user", from);
+      fake_alert(idx, STR("user"), from);
       return;
     }
     *p = '@';
     p++;
   } else {
-    sprintf(TBUF, "*** (%s) %s", from, msg);
+    sprintf(TBUF, STR("*** (%s) %s"), from, msg);
     p = from;
   }
   i = nextbot(p);
   if (i != idx) {
-    fake_alert(idx, "direction", p);
+    fake_alert(idx, STR("direction"), p);
   } else {
     chanout_but(-1, chan, "%s\n", TBUF);
     /* Send to new version bots */
@@ -185,16 +185,16 @@ static void bot_chat(int idx, char *par)
     return;
   from = newsplit(&par);
   if (strchr(from, '@') != NULL) {
-    fake_alert(idx, "bot", from);
+    fake_alert(idx, STR("bot"), from);
     return;
   }
   /* Make sure the bot is valid */
   i = nextbot(from);
   if (i != idx) {
-    fake_alert(idx, "direction", from);
+    fake_alert(idx, STR("direction"), from);
     return;
   }
-  chatout("*** (%s) %s\n", from, par);
+  chatout(STR("*** (%s) %s\n"), from, par);
   botnet_send_chat(idx, from, par);
 }
 
@@ -211,20 +211,20 @@ static void bot_actchan(int idx, char *par)
   p = strchr(from, '@');
   if (p == NULL) {
     /* How can a bot do an action? */
-    fake_alert(idx, "user@bot", from);
+    fake_alert(idx, STR("user@bot"), from);
     return;
   }
   *p = 0;
   if (!partyidle(p + 1, from)) {
     *p = '@';
-    fake_alert(idx, "user", from);
+    fake_alert(idx, STR("user"), from);
     return;
   }
   *p = '@';
   p++;
   i = nextbot(p);
   if (i != idx) {
-    fake_alert(idx, "direction", p);
+    fake_alert(idx, STR("direction"), p);
     return;
   }
   p = newsplit(&par);
@@ -235,7 +235,7 @@ static void bot_actchan(int idx, char *par)
     else
       p++;
   }
-  chanout_but(-1, chan, "* %s %s\n", from, par);
+  chanout_but(-1, chan, STR("* %s %s\n"), from, par);
   botnet_send_act(idx, from, NULL, chan, par);
   check_tcl_act(from, chan, par);
 }
@@ -257,7 +257,7 @@ static void bot_priv(int idx, char *par)
     p = from;
   i = nextbot(p);
   if (i != idx) {
-    fake_alert(idx, "direction", p);
+    fake_alert(idx, STR("direction"), p);
     return;
   }
   if (!to[0])
@@ -271,34 +271,27 @@ static void bot_priv(int idx, char *par)
       if (from[0] != '@')
 	switch (i) {
 	case NOTE_ERROR:
-	  botnet_send_priv(idx, botnetnick, from, NULL,
-			   "%s %s.", BOT_NOSUCHUSER, to);
+	  botnet_send_priv(idx, botnetnick, from, NULL, STR("%s %s."), BOT_NOSUCHUSER, to);
 	  break;
 	case NOTE_STORED:
-	  botnet_send_priv(idx, botnetnick, from, NULL,
-			   "%s", BOT_NOTESTORED2);
+	  botnet_send_priv(idx, botnetnick, from, NULL, STR("%s"), BOT_NOTESTORED2);
 	  break;
 	case NOTE_FULL:
-	  botnet_send_priv(idx, botnetnick, from, NULL,
-			   "%s", BOT_NOTEBOXFULL);
+	  botnet_send_priv(idx, botnetnick, from, NULL, STR("%s"), BOT_NOTEBOXFULL);
 	  break;
 	case NOTE_AWAY:
-	  botnet_send_priv(idx, botnetnick, from, NULL,
-			   "%s %s", to, BOT_NOTEISAWAY);
+	  botnet_send_priv(idx, botnetnick, from, NULL, STR("%s %s"), to, BOT_NOTEISAWAY);
 	  break;
 	case NOTE_FWD:
-	  botnet_send_priv(idx, botnetnick, from, NULL,
-			   "%s %s", "Not online; note forwarded to:", to);
+	  botnet_send_priv(idx, botnetnick, from, NULL, STR("%s %s"), STR("Not online; note forwarded to:"), to);
 	  break;
 	case NOTE_REJECT:
-	  botnet_send_priv(idx, botnetnick, from, NULL,
-			   "%s %s", to, "rejected your note.");
+	  botnet_send_priv(idx, botnetnick, from, NULL, STR("%s %s"), to, STR("rejected your note."));
           break;
 	case NOTE_TCL:
 	  break;		/* Do nothing */
 	case NOTE_OK:
-	  botnet_send_priv(idx, botnetnick, from, NULL,
-			   "%s %s.", BOT_NOTESENTTO, to);
+	  botnet_send_priv(idx, botnetnick, from, NULL, STR("%s %s."), BOT_NOTESENTTO, to);
 	  break;
 	}
     }
