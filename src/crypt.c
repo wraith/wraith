@@ -167,38 +167,29 @@ void encrypt_pass(char *s1, char *s2)
   nfree(tmp);
 }
 
-
-int lfprintf(FILE *f, char *fmt, ...) {
+int lfprintf EGG_VARARGS_DEF(FILE *, arg1)
+{
   va_list va;
-  char outbuf[8192];
-  char *tptr, *tptr2, *temps1, *temps2;
+  char buf[8192], *ln, *nln, *tmp, *format;
+  int res;
+  FILE *stream;
 
-  va_start(va, fmt);
-  egg_vsnprintf(outbuf, sizeof(outbuf), fmt, va);
-  tptr2 = outbuf;
+  stream = EGG_VARARGS_START(FILE *, arg1, va);
+  format = va_arg(va, char *);
 
-
-  if(strchr(outbuf, '\n')) {
-    while( (tptr = strchr(outbuf, '\n')) ) {
-      *tptr = 0;
-      temps1 = (char *) encrypt_string(SALT1, tptr2);
-      if (fprintf(f, "%s\n", temps1) == EOF) {
-        nfree(temps1);
-        return -1;
-      }
-      nfree(temps1);
-
-      tptr++;
-      tptr2 = tptr;
-    }
-  } else {
-    temps2 = (char *) encrypt_string(SALT1, outbuf);
-    fprintf(f, "%s", temps2);
-    nfree(temps2);
-    return -1;
+  egg_vsnprintf(buf, sizeof buf, format, va);
+  ln = buf;
+  while ((ln) && (ln[0])) {
+    nln = strchr(ln, '\n');
+    if (nln)
+      *nln++ = 0;
+    tmp = encrypt_string(SALT1, ln);
+    res = fprintf(stream, "%s\n", tmp);
+    nfree(tmp);
+    if (res == EOF)
+      return EOF;
+    ln = nln;
   }
-
-  va_end(va);
   return 0;
 }
 
