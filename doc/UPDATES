@@ -56,6 +56,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * No longer enforcing $binpath/$binname when using -C.
 * $binname is no longer defaulted to ".sshrc"
 * cmd_whom now assumes argument '*'
+* Changed HIJACK warning to suggest that it may just be a box reboot.
 
 1.2
 * No longer displaying SALTS on ./bin -v

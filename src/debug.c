@@ -250,7 +250,7 @@ static void got_abort(int z)
 
 static void got_cont(int z)
 {
-  detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED");
+  detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED (!! MAY BE BOX REBOOT !!)");
 }
 
 static void got_alarm(int) __attribute__((noreturn));
