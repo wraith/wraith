@@ -663,7 +663,6 @@ static void bot_update(int idx, char *par)
 static void bot_nlinked(int idx, char *par)
 {
   char *newbot = NULL, *next = NULL, *p = NULL, s[1024] = "", x = 0, *vversion = NULL;
-  struct userrec *u = NULL;
   int bogus = 0, i, vlocalhub = 0;
   time_t vbuildts = 0L;
 
@@ -707,8 +706,8 @@ static void bot_nlinked(int idx, char *par)
   else
     x = '-';
 
-  newsplit(&par);		/* vnum */
-
+  if (par[0])
+    newsplit(&par);		/* vnum */
   if (par[0])
     vlocalhub = atoi(newsplit(&par));
   if (par[0])
@@ -727,12 +726,6 @@ static void bot_nlinked(int idx, char *par)
   }
   addbot(newbot, dcc[idx].nick, next, x, vlocalhub, vbuildts, vversion ? vversion : "");
   check_bind_link(newbot, next);
-
-  u = get_user_by_handle(userlist, newbot);
-  if (u && u->flags && (!(u->flags & USER_OP))) {
-    botnet_send_reject(idx, conf.bot->nick, NULL, newbot, NULL, NULL);
-    putlog(LOG_BOTS, "*", "%s %s %s %s", BOT_REJECTING, newbot, MISC_FROM, dcc[idx].nick);
-  }
 }
 
 static void bot_unlinked(int idx, char *par)
