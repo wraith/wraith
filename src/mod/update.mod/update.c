@@ -528,7 +528,7 @@ char *update_start(Function *global_funcs)
   add_builtins(H_bot, update_bot);
 #ifdef HUB
   add_hook(HOOK_30SECONDLY, (Function) check_updates);
-#endif
+#endif /* HUB */
   add_hook(HOOK_SHAREUPDATEIN, (Function) updatein_mod);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
