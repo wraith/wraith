@@ -313,7 +313,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS egg_ac_parameters CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CXXCPP EGREP CCDEPMODE GCC3 SET_MAKE HEAD_1 AWK BASENAME OBJCOPY STRIP UNAME DISTCC CCDEBUG ZLIB LIBOBJS VERSION NUMVER MOD_UPDIR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS egg_ac_parameters CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CXXCPP EGREP CCDEPMODE GCC3 SET_MAKE HEAD_1 AWK BASENAME OBJCOPY STRIP DIFF UNAME DISTCC CCDEBUG ZLIB LIBOBJS VERSION NUMVER MOD_UPDIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3203,6 +3203,42 @@ STRIP=$ac_cv_prog_STRIP
 if test -n "$STRIP"; then
   echo "$as_me:$LINENO: result: $STRIP" >&5
 echo "${ECHO_T}$STRIP" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+# Extract the first word of "gdiff", so it can be a program name with args.
+set dummy gdiff; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_DIFF+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$DIFF"; then
+  ac_cv_prog_DIFF="$DIFF" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_DIFF="gdiff"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_prog_DIFF" && ac_cv_prog_DIFF="diff"
+fi
+fi
+DIFF=$ac_cv_prog_DIFF
+if test -n "$DIFF"; then
+  echo "$as_me:$LINENO: result: $DIFF" >&5
+echo "${ECHO_T}$DIFF" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -11245,6 +11281,7 @@ s,@AWK@,$AWK,;t t
 s,@BASENAME@,$BASENAME,;t t
 s,@OBJCOPY@,$OBJCOPY,;t t
 s,@STRIP@,$STRIP,;t t
+s,@DIFF@,$DIFF,;t t
 s,@UNAME@,$UNAME,;t t
 s,@DISTCC@,$DISTCC,;t t
 s,@CCDEBUG@,$CCDEBUG,;t t

@@ -43,6 +43,7 @@ EGG_PROG_AWK
 EGG_PROG_BASENAME
 AC_CHECK_PROG(OBJCOPY, objcopy, [objcopy --remove-section=.note --remove-section=.comment], touch)
 AC_CHECK_PROG(STRIP, strip, strip, touch)
+AC_CHECK_PROG(DIFF, gdiff, gdiff, diff)
 AC_CHECK_PROG(UNAME, uname, uname)
 #AC_CHECK_PROG(CCACHE, ccache, ccache)
 AC_CHECK_PROG(DISTCC, distcc, distcc)
