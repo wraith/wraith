@@ -855,7 +855,7 @@ void crazy_trace()
 static void core_secondly()
 {
   static int cnt = 0;
-  int miltime, idx;
+  int miltime;
 
 #ifdef CRAZY_TRACE 
   if (!attached) crazy_trace();

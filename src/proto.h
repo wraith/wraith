@@ -128,7 +128,7 @@ char *decrypt_string(const char *, char *);
 void encrypt_pass(char *, char *);
 char *cryptit (char *);
 char *decryptit (char *);
-int lfprintf(FILE *, char *, ...);
+int lfprintf EGG_VARARGS(FILE *, arg1);
 void EncryptFile(char *, char *);
 void DecryptFile(char *, char *);
 
