@@ -335,8 +335,6 @@ void tell_settings(int idx)
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
 
   dprintf(idx, "Botnet Nickname: %s\n", conf.bot->nick);
-  if (firewall[0])
-    dprintf(idx, "Firewall: %s, port %d\n", firewall, firewallport);
   if (conf.bot->hub)
     dprintf(idx, "Userfile: %s   \n", userfile);
   dprintf(idx, "Directories:\n");

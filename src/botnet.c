@@ -1047,7 +1047,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
   if (dcc[i].sock > 0)
     identd_open();                      /* will be closed when an ident is replied. */
 
-  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port) < 0)
+  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port, 0) < 0)
     failed_link(i);
   else { /* let's attempt to initiate SSL before ANYTHING else... */
 #ifdef HAVE_SSL
@@ -1110,7 +1110,7 @@ static void failed_tandem_relay(int idx)
 				     iptostr(htonl(dcc[idx].addr)) :
 				     dcc[idx].host, 
 #endif /* USE_IPV6 */
-      dcc[idx].port) < 0)
+      dcc[idx].port, 0) < 0)
     failed_tandem_relay(idx);
 }
 
@@ -1237,7 +1237,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   dcc[i].u.relay->chat->current_lines = 0;
   dcc[i].timeval = now;
 
-  if (open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port) < 0) 
+  if (open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port, 0) < 0) 
     failed_tandem_relay(i);
 }
 

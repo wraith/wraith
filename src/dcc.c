@@ -1346,7 +1346,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   else
     putlog(LOG_MISC, "*", "Telnet connection: %s/%d", dcc[i].host, dcc[i].port);
 
-  sock = open_telnet((char *) ip, 113);
+  sock = open_telnet((char *) ip, 113, 0);
 
   char s[UHOSTLEN] = "";
 

@@ -144,7 +144,7 @@ int real_getsock(int, char *, int);
 
 
 int sockprotocol(int);
-int hostprotocol(char *);
+int hostprotocol(const char *);
 void real_killsock(int, const char *, int);
 int answer(int, char *, in_addr_t *, port_t *, int);
 int findanysnum(register int);
@@ -155,9 +155,9 @@ int open_address_listen(in_addr_t, int, port_t *);
 #else
 int open_address_listen(in_addr_t, port_t *);
 #endif /* USE_IPV6 */
-int open_telnet(char *, port_t);
+int open_telnet(const char *, port_t, bool);
 int open_telnet_dcc(int, char *, char *);
-int open_telnet_raw(int, char *, port_t);
+int open_telnet_raw(int, const char *, port_t, bool);
 void tputs(int, char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);

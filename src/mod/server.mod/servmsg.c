@@ -1427,7 +1427,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
 
   identd_open();
 
-  serv = open_telnet(ip, dcc[idx].port);
+  serv = open_telnet(ip, dcc[idx].port, 0);
 
   if (serv < 0) {
     putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, strerror(errno));
