@@ -8,6 +8,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Updated binary -h
 * Fixed limit, wasn't correclty checking *each chan* every *2* minutes.
 * Fixed DNS to timeout queries after 30 seconds, server socket after 40, and to parse EOF correctly.
+* Added some responses/cloaks
 
 1.2.1
 

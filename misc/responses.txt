@@ -123,9 +123,18 @@
  what?
  wtf do you want?
  hold on a second, I am sort of busy..
- mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]
+ mIRC v6.16 File Server\n\nUse: cd dir ls get read help exit\n[\\]
  got any porn?
  ?
+ can I help you?
+ this better be good.
+ haha, I got your ip now!
+ you again?
+ make it quick
+ yes?
+ ...
+ lost?
+ .
 :password
  what?
  huh?
@@ -135,15 +144,34 @@
  I don't remember caring..
  good for you.
  I'm going to report you to the RIAA!!!
+ who?
+ why?
+ you're aren't making any sense!
+ hurry up so I can get back to this porn
+ eh?
+ why do you keep bugging me?
+ I hear you're gay?
+ asl?
 :baduserpass
  stop wasting my time.
  gtg
  go away
  fuck off already
  ehh..no, bye.
- hey I'm late for a date with your mom, cya..
  you're still here?
  jesus loves you, but I ain't jesus. \002FUCK OFF\002
+ stop bugging me.
+ haha, I'm going to tell everyone that!
+ lost?
+ cya
+ oops?
+ leave me alone.
+ ...?
+ whatever man, cya
+ lewser
+ try again, newb
+ newb
+ haha, no.
 :pscloak
  -bash
  ftp
@@ -158,6 +186,25 @@
  bash
  ./psybnc
  BitchX
+ who
+ irssi
+ sh
+ -sh
+ screen -r
+ -screen
+ -SCREEN
+ pico
+ vi
+ eggdrop
+ ./eggdrop
+ lynx
+ ssh-agent
+ epic (epic-EPIC4-2.2)
+ screen epic
+ screen BitchX
+ screen irssi
+ ezbnc
+ ./bnc
 :mIRCver
  5.91
  6.01
