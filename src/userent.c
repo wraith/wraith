@@ -623,16 +623,16 @@ void secpass_display(int idx, struct user_entry *e, struct userrec *u)
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
 
-  if (!strcmp(u->handle, dcc[idx].nick) 
-   || glob_admin(fr)
-   ) {
+  if (!strcmp(u->handle, dcc[idx].nick) || glob_admin(fr)) {
 #ifdef HUB
     dprintf(idx, "  %s: %s\n", e->type->name, e->u.string);
 #else
-    dprintf(idx, "  %s: Hidden on leaf bots.\n", e->type->name);
-#endif    
+    dprintf(idx, "  %s: Hidden on leaf bots.", e->type->name);
+    if (dcc[idx].u.chat->su_nick)
+      dprintf(idx, " Nice try, %s.", dcc[idx].u.chat->su_nick);
+    dprintf(idx, "\n");
+#endif /* HUB */
   }
-
 }
 
 
@@ -1399,12 +1399,11 @@ static int hosts_expmem(struct user_entry *e)
 
 static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
 {
-  
 #ifdef LEAF
-  /* let users see their own hosts */
-  if (!strcmp(u->handle,dcc[idx].nick)) 
-  { 
-#endif
+  /* if this is a su, dont show hosts
+   * otherwise, let users see their own hosts */
+  if (!strcmp(u->handle,dcc[idx].nick) && !dcc[idx].u.chat->su_nick) { 
+#endif /* LEAF */
     char s[1024];
     struct list_type *q;
 
@@ -1429,9 +1428,12 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
       dprintf(idx, "%s\n", s);
 #ifdef LEAF
   } else {
-    dprintf(idx, "  HOSTS:          Hidden on leaf bots.\n");
+    dprintf(idx, "  HOSTS:          Hidden on leaf bots.");
+    if (dcc[idx].u.chat->su_nick)
+      dprintf(idx, " Nice try, %s.", dcc[idx].u.chat->su_nick);
+    dprintf(idx, "\n");
   }
-#endif
+#endif /* LEAF */
 }
 
 static int hosts_set(struct userrec *u, struct user_entry *e, void *buf)
