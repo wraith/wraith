@@ -1329,6 +1329,7 @@ finish_share(int idx)
 
   noshare = 1;
   fr.match = (FR_CHAN | FR_BOT);
+
   while (global_bans)
     u_delmask('b', NULL, global_bans->mask, 1);
   while (global_ign)
@@ -1337,6 +1338,7 @@ finish_share(int idx)
     u_delmask('I', NULL, global_invites->mask, 1);
   while (global_exempts)
     u_delmask('e', NULL, global_exempts->mask, 1);
+
   for (chan = chanset; chan; chan = chan->next) {
     while (chan->bans)
       u_delmask('b', chan, chan->bans->mask, 1);
@@ -1365,11 +1367,12 @@ finish_share(int idx)
   loading = 1;
   checkchans(0);                /* flag all the channels.. */
   Context;
-  if (!readuserfile(dcc[idx].u.xfer->filename, &u)) {
+  if (!readuserfile(dcc[idx].u.xfer->filename, &u)) {		/* read the userfile into 'u' */
+    /* FAILURE */
     char xx[1024] = "";
 
     Context;
-    unlink(dcc[idx].u.xfer->filename);  /* why the fuck was this not here, stupid eggdev team. */
+    unlink(dcc[idx].u.xfer->filename);
     clear_userlist(u);          /* Clear new, obsolete, user list.      */
     clear_chanlist();           /* Remove all user references from the
                                  * channel lists.                       */
@@ -1397,7 +1400,9 @@ finish_share(int idx)
     return;
   }
 
-  unlink(dcc[idx].u.xfer->filename);    //I mean really, shit fills up the quota fast.
+  /* SUCCESS! */
+
+  unlink(dcc[idx].u.xfer->filename);    
 
   loading = 0;
 
@@ -1409,50 +1414,8 @@ finish_share(int idx)
 
   /*
    * Migrate:
-   *   - old channel flags over (unshared channels see)
    *   - unshared (got_share == 0) user entries
-   *   - old bot flags and passwords
    */
-  noshare = 1;
-  fr.match = (FR_CHAN | FR_BOT);
-  for (u = userlist; u; u = u->next) {
-    struct userrec *u2 = get_user_by_handle(ou, u->handle);
-
-    if (u2 && (u2->flags & USER_BOT)) {
-      /* We knew this bot before, copy flags and the password back over. */
-      set_user(&USERENTRY_BOTFL, u, get_user(&USERENTRY_BOTFL, u2));
-      set_user(&USERENTRY_PASS, u, get_user(&USERENTRY_PASS, u2));
-    } else if (u->flags & USER_BOT) {
-      /* This bot was unknown to us, reset it's flags and password. */
-      set_user(&USERENTRY_BOTFL, u, NULL);
-      set_user(&USERENTRY_PASS, u, NULL);
-    } else if (u2 && !(u2->flags & (USER_BOT))) {
-      struct chanuserrec *cr = NULL, *cr_next = NULL, *cr_old = NULL;
-      struct user_entry *ue = NULL;
-
-      for (cr = u2->chanrec; cr; cr = cr_next) {
-        struct chanset_t *mychan = findchan_by_dname(cr->channel);
-
-        cr_next = cr->next;
-        if (mychan) {
-          get_user_flagrec(dcc[j].user, &fr, mychan->dname);
-        }
-        /* Shared channel, still keep old laston time */
-        for (cr_old = u->chanrec; cr_old; cr_old = cr_old->next)
-          if (!rfc_casecmp(cr_old->channel, cr->channel)) {
-            cr_old->laston = cr->laston;
-            break;
-          }
-        cr_old = cr;
-      }
-
-      /* Any unshared user entries need copying over */
-      for (ue = u2->entries; ue; ue = ue->next)
-        if (ue->type && !ue->type->got_share && ue->type->dup_user)
-          ue->type->dup_user(u, u2, ue);
-    }
-  }
-  noshare = 0;
   clear_userlist(ou);
   
   unlink(dcc[idx].u.xfer->filename);    /* Done with you!               */

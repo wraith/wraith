@@ -130,11 +130,6 @@ void def_display(int idx, struct user_entry *e, struct userrec *u)
 }
 
 
-int def_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
-{
-  return set_user(e->type, new, e->u.string);
-}
-
 static void comment_display(int idx, struct user_entry *e, struct userrec *u)
 {
   if (dcc[idx].user && (dcc[idx].user->flags & USER_MASTER))
@@ -145,7 +140,6 @@ struct user_entry_type USERENTRY_COMMENT =
 {
   0,				/* always 0 ;) */
   def_gotshare,
-  def_dupuser,
   def_unpack,
 #ifdef HUB
   def_write_userfile,
@@ -161,7 +155,6 @@ struct user_entry_type USERENTRY_INFO =
 {
   0,				/* always 0 ;) */
   def_gotshare,
-  def_dupuser,
   def_unpack,
 #ifdef HUB
   def_write_userfile,
@@ -201,7 +194,6 @@ void added_display(int idx, struct user_entry *e, struct userrec *u)
 struct user_entry_type USERENTRY_ADDED = {
   0,				/* always 0 ;) */
   def_gotshare,
-  def_dupuser,
   def_unpack,
 #ifdef HUB
   def_write_userfile,
@@ -341,20 +333,6 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
   return 1;
 }
 
-int config_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
-{
-  struct xtra_key *x1 = NULL, *x2 = NULL;
-
-  for (x1 = e->u.extra; x1; x1 = x1->next) {
-    x2 = calloc(1, sizeof(struct xtra_key));
-
-    x2->key = strdup(x1->key);
-    x2->data = strdup(x1->data);
-    set_user(&USERENTRY_CONFIG, new, x2);
-  }
-  return 1;
-}
-
 #ifdef HUB
 int config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
 {
@@ -383,7 +361,6 @@ int config_kill(struct user_entry *e)
 struct user_entry_type USERENTRY_CONFIG = {
   0,
   config_gotshare,
-  config_dupuser,
   config_unpack,
 #ifdef HUB
   config_write_userfile,
@@ -437,7 +414,6 @@ void stats_display(int idx, struct user_entry *e, struct userrec *u)
 struct user_entry_type USERENTRY_STATS = {
   0,				/* always 0 ;) */
   def_gotshare,
-  def_dupuser,
   def_unpack,
 #ifdef HUB
   def_write_userfile,
@@ -484,7 +460,6 @@ struct user_entry_type USERENTRY_MODIFIED =
 {
   0,
   def_gotshare,
-  def_dupuser,
   def_unpack,
 #ifdef HUB
   def_write_userfile,
@@ -530,7 +505,6 @@ struct user_entry_type USERENTRY_PASS =
 {
   0,
   def_gotshare,
-  NULL,
   def_unpack,
 #ifdef HUB
   def_write_userfile,
@@ -566,7 +540,6 @@ struct user_entry_type USERENTRY_SECPASS =
 {
   0,
   def_gotshare,
-  def_dupuser,
   def_unpack,
 #ifdef HUB
   def_write_userfile,
@@ -632,25 +605,10 @@ static int laston_set(struct userrec *u, struct user_entry *e, void *buf)
   return 1;
 }
 
-static int laston_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
-{
-  struct laston_info *li = e->u.extra, *li2 = NULL;
-
-  if (li) {
-    li2 = calloc(1, sizeof(struct laston_info));
-
-    li2->laston = li->laston;
-    li2->lastonplace = strdup(li->lastonplace);
-    return set_user(&USERENTRY_LASTON, new, li2);
-  }
-  return 0;
-}
-
 struct user_entry_type USERENTRY_LASTON =
 {
   0,				/* always 0 ;) */
   0,
-  laston_dupuser,
   laston_unpack,
 #ifdef HUB
   laston_write_userfile,
@@ -800,32 +758,10 @@ static int botaddr_gotshare(struct userrec *u, struct user_entry *e, char *buf, 
   return botaddr_set(u, e, bi);
 }
 
-static int botaddr_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
-{
-  if (old->flags & USER_BOT) {
-    struct bot_addr *bi = e->u.extra;
-
-    if (bi) {
-      struct bot_addr *bi2 = NULL;
-
-      bi2 = calloc(1, sizeof(struct bot_addr));
-
-      bi2->telnet_port = bi->telnet_port;
-      bi2->relay_port = bi->relay_port;
-      bi2->hublevel = bi->hublevel;
-      bi2->address = strdup(bi->address);
-      bi2->uplink = strdup(bi->uplink);
-      return set_user(&USERENTRY_BOTADDR, new, bi2);
-    }
-  }
-  return 0;
-}
-
 struct user_entry_type USERENTRY_BOTADDR =
 {
   0,				/* always 0 ;) */
   botaddr_gotshare,
-  botaddr_dupuser,
   botaddr_unpack,
 #ifdef HUB
   botaddr_write_userfile,
@@ -836,15 +772,6 @@ struct user_entry_type USERENTRY_BOTADDR =
   botaddr_display,
   "BOTADDR"
 };
-
-static int hosts_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
-{
-  struct list_type *h = NULL;
-
-  for (h = e->u.extra; h; h = h->next)
-    set_user(&USERENTRY_HOSTS, new, h->extra);
-  return 1;
-}
 
 static int hosts_null(struct userrec *u, struct user_entry *e)
 {
@@ -957,7 +884,6 @@ struct user_entry_type USERENTRY_HOSTS =
 {
   0,
   hosts_gotshare,
-  hosts_dupuser,
   hosts_null,
 #ifdef HUB
   hosts_write_userfile,

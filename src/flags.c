@@ -506,7 +506,6 @@ struct user_entry_type USERENTRY_BOTFL =
 {
   0,				/* always 0 ;) */
   0,
-  def_dupuser,
   botfl_unpack,
 #ifdef HUB
   botfl_write_userfile,

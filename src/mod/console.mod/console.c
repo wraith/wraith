@@ -189,22 +189,10 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
   }
 }
 
-static int console_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
-{
-  struct console_info *i = e->u.extra, *j = NULL;
-
-  j = calloc(1, sizeof(struct console_info));
-  egg_memcpy(j, i, sizeof(struct console_info));
-
-  j->channel = strdup(i->channel);
-  return set_user(e->type, new, j);
-}
-
 static struct user_entry_type USERENTRY_CONSOLE =
 {
   0,				/* always 0 ;) */
   console_gotshare,
-  console_dupuser,
   console_unpack,
 #ifdef HUB
   console_write_userfile,

@@ -33,8 +33,6 @@ struct user_entry;
 struct user_entry_type {
   struct user_entry_type *next;
   int (*got_share) (struct userrec *, struct user_entry *, char *, int);
-  int (*dup_user) (struct userrec *, struct userrec *,
-		   struct user_entry *);
   int (*unpack) (struct userrec *, struct user_entry *);
 #ifdef HUB
   int (*write_userfile) (FILE *, struct userrec *, struct user_entry *);
