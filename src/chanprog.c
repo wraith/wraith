@@ -39,15 +39,16 @@ extern time_t		 now, online_since;
 extern int		 backgrd, term_z, cache_hit, cache_miss,
 			 firewallport, default_flags, conmask,
 			 protect_readonly, noshare, localhub,
-#ifdef HUB
-			 my_port,
-#endif /* HUB */
 			 ignore_time, loading;
 
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/
 char 			origbotname[NICKLEN + 1];
 char 			botname[NICKLEN + 1];	/* Primary botname		*/
+
+#ifdef HUB
+int     		my_port;
+#endif /* HUB */
 
 
 /* Remove space characters from beginning and end of string
