@@ -136,6 +136,7 @@ static void got_bus(int z)
 }
 
 #ifndef CYGWIN_HACKS
+#ifdef __i386__
 struct stackframe {
   struct stackframe *ebp;
   unsigned long addr;
@@ -186,6 +187,7 @@ stackdump(int idx)
   sf = NULL;
   sleep(1);
 }
+#endif /* __i386__ */
 #endif /* !CYGWIN_HACKS */
 
 #ifndef DEBUG_CONTEXT
