@@ -37,7 +37,7 @@ LIBS = @LIBS@ @ZLIB@ @RESLIB@
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
 CFLGS = -fno-strict-aliasing -W -Wformat \
--Wdisabled-optimization -Wshadow -Winline \
+-Wshadow -Winline \
 -Wnested-externs -fno-asm -Wno-format-y2k \
 -Wlarger-than-2048 -Wpointer-arith -Wcast-align \
 -Waggrepate-return -Wlong-long -Wbad-function-cast \

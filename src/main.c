@@ -642,8 +642,8 @@ static void startup_checks() {
     }
   }
   if (!localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
-#endif /* LEAF */
     free_conf();
+#endif /* LEAF */
 }
 
 #include "mod/static.h"
