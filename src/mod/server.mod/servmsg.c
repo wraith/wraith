@@ -1073,25 +1073,6 @@ int ismdop(char *mode)
   }
   return (cnt >= 3);
 }
-/*
-void got_rsn(char *botnick, char *code, char *par) {
-  if (strcmp(origbotname, botname)) {
-    randuse = 0;
-    dprintf(DP_MODE, STR("NICK %s\n"), origbotname);
-  }
-}
-
-void got_rn(char *botnick, char *code, char *par) {
-  int l = (random() % 4) + 6, i;
-  char newnick[NICKLEN+1];
-  for (i=0;i<l;i++)
-    newnick[i]=(random() % 2) * 32 + 65 + random() % 26;
-  newnick[l]=0;
-  randuse = 1;
-  //havealt = 1;
-  dprintf(DP_MODE, STR("NICK %s\n"), newnick);
-}
-*/
 
 static void server_activity(int idx, char *msg, int len)
 {

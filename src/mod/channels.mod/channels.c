@@ -237,7 +237,7 @@ void got_kl(char *botnick, char *code, char *par)
     struct chanset_t *ch;
     for (ch = chanset; ch; ch = ch->next)
       do_chanset(ch, STR("+closed +backup +bitch"), 1);
-  /* botnet_send_zapf_broad(-1, botnetnick, NULL, "rn"); */
+  /* FIXME: we should randomize nick here ... */
   }
 #endif /* S_AUTOLOCK */
 }

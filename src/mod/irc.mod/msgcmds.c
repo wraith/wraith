@@ -67,8 +67,7 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
   if (!par[0])
     strcpy(who, nick);
   else {
-    strncpy(who, par, NICKMAX);
-    who[NICKMAX] = 0;
+    strncpyz(who, par, NICKLEN);
   }
   u2 = get_user_by_handle(userlist, who);
   if (!u2) {
