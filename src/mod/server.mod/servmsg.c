@@ -255,7 +255,7 @@ static void nuke_server(char *reason)
 {
   if (serv >= 0) {
     if (reason && (servidx > 0)) 
-      dprintf(servidx, "QUIT :%s\r\n", reason);
+      dprintf(servidx, "QUIT :%s\n", reason);
     disconnect_server(servidx, DO_LOST);
   }
 }
@@ -1285,9 +1285,9 @@ static void server_resolve_success(int idx)
     /* Start alternate nicks from the beginning */
     altnick_char = 0;
 
-    if (pass[0]) dprintf(DP_MODE, "PASS %s\r\n", pass);
-    dprintf(DP_MODE, "NICK %s\r\n", botname);
-    dprintf(DP_MODE, "USER %s localhost %s :%s\r\n", botuser, dcc[idx].host, botrealname);
+    if (pass[0]) dprintf(DP_MODE, "PASS %s\n", pass);
+    dprintf(DP_MODE, "NICK %s\n", botname);
+    dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, botrealname);
     /* Wait for async result now */
   }
 }

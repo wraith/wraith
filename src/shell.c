@@ -910,7 +910,6 @@ void crontab_create(int interval) {
   FILE *f = NULL;
   int fd;
 
-  /* always use mkstemp() when handling temp files! -dizz */
   egg_snprintf(tmpfile, sizeof tmpfile, "%s.crontab-XXXXXX", tempdir);
   if ((fd = mkstemp(tmpfile)) == -1) {
     unlink(tmpfile);

@@ -10,6 +10,7 @@ This is a summary of ChangeLog basically.
 7.And if no bots are listed, the bot nows gives an error.
 8.cmd_quit was not returning from 'su' correctly.
 9.Fixed bots mass sending out CONFIG entries when they linked.
+10.Fixed some bugs in writing to server (caused too many open files errors)
 
 1.1.0
 1.Rewrote the shell config parsing...
