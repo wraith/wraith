@@ -72,6 +72,158 @@ struct cfg_entry CFG_CMDPREFIX = {
   cmdprefix_changed, cmdprefix_changed, cmdprefix_describe
 };
 
+
+struct cfg_entry
+  CFG_BADCOOKIE,
+  CFG_MANUALOP,
+#ifdef G_MEAN
+  CFG_MEANDEOP,
+  CFG_MEANKICK,
+  CFG_MEANBAN,
+#endif /* G_MEAN */
+  CFG_MDOP,
+  CFG_MOP;
+
+
+void deflag_describe(struct cfg_entry *cfgent, int idx)
+{
+  if (cfgent == &CFG_BADCOOKIE)
+    dprintf(idx, STR("bad-cookie decides what happens to a bot if it does an illegal op (no/incorrect op cookie)\n"));
+  else if (cfgent==&CFG_MANUALOP)
+    dprintf(idx, STR("manop decides what happens to a user doing a manual op in a -manop channel\n"));
+#ifdef G_MEAN
+  else if (cfgent==&CFG_MEANDEOP)
+    dprintf(idx, STR("mean-deop decides what happens to a user deopping a bot in a +mean channel\n"));
+  else if (cfgent==&CFG_MEANKICK)
+    dprintf(idx, STR("mean-kick decides what happens to a user kicking a bot in a +mean channel\n"));
+  else if (cfgent==&CFG_MEANBAN)
+    dprintf(idx, STR("mean-ban decides what happens to a user banning a bot in a +mean channel\n"));
+#endif /* G_MEAN */
+  else if (cfgent==&CFG_MDOP)
+    dprintf(idx, STR("mdop decides what happens to a user doing a mass deop\n"));
+  else if (cfgent==&CFG_MOP)
+    dprintf(idx, STR("mop decides what happens to a user doing a mass op\n"));
+  dprintf(idx, STR("Valid settings are: ignore (No flag changes), deop (set flags to +d), kick (set flags to +dk) or delete (remove from userlist)\n"));
+}
+
+void deflag_changed(struct cfg_entry *entry, char *oldval, int *valid) 
+{
+  char *p = (char *) entry->gdata;
+  if (!p)
+    return;
+  if (strcmp(p, STR("ignore")) && strcmp(p, STR("deop")) && strcmp(p, STR("kick")) && strcmp(p, STR("delete")))
+    *valid=0;
+}
+
+struct cfg_entry CFG_BADCOOKIE = {
+  "bad-cookie", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed, NULL, deflag_describe
+};
+
+struct cfg_entry CFG_MANUALOP = {
+  "manop", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed, NULL, deflag_describe
+};
+
+#ifdef G_MEAN
+struct cfg_entry CFG_MEANDEOP = {
+  "mean-deop", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed, NULL, deflag_describe
+};
+
+
+struct cfg_entry CFG_MEANKICK = {
+  "mean-kick", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed, NULL, deflag_describe
+};
+
+struct cfg_entry CFG_MEANBAN = {
+  "mean-ban", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed, NULL, deflag_describe
+};
+#endif /* G_MEAN */
+
+struct cfg_entry CFG_MDOP = {
+  "mdop", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed, NULL, deflag_describe
+};
+
+struct cfg_entry CFG_MOP = {
+  "mop", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed, NULL, deflag_describe
+};
+
+void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
+{
+  char tmp[256], tmp2[1024];
+  struct cfg_entry *ent = NULL;
+
+  struct flag_record fr = {FR_GLOBAL, FR_CHAN, 0, 0, 0};
+
+  if (!u)
+    return;
+
+  switch (why) {
+  case DEFLAG_BADCOOKIE:
+    strcpy(tmp, STR("Bad op cookie"));
+    ent = &CFG_BADCOOKIE;
+    break;
+  case DEFLAG_MANUALOP:
+    strcpy(tmp, STR("Manual op in -manop channel"));
+    ent = &CFG_MANUALOP;
+    break;
+#ifdef G_MEAN
+  case DEFLAG_MEAN_DEOP:
+    strcpy(tmp, STR("Deopped bot in +mean channel"));
+    ent = &CFG_MEANDEOP;
+    break;
+  case DEFLAG_MEAN_KICK:
+    strcpy(tmp, STR("Kicked bot in +mean channel"));
+    ent = &CFG_MEANDEOP;
+    break;
+  case DEFLAG_MEAN_BAN:
+    strcpy(tmp, STR("Banned bot in +mean channel"));
+    ent = &CFG_MEANDEOP;
+    break;
+#endif /* G_MEAN */
+  case DEFLAG_MDOP:
+    strcpy(tmp, STR("Mass deop"));
+    ent = &CFG_MDOP;
+    break;
+  case DEFLAG_MOP:
+    strcpy(tmp, STR("Mass op"));
+    ent = &CFG_MOP;
+    break;
+  default:
+    ent = NULL;
+    sprintf(tmp, STR("Reason #%i"), why);
+  }
+  if (ent && ent->gdata && !strcmp(ent->gdata, STR("deop"))) {
+    putlog(LOG_WARN, "*",  STR("Setting %s +d (%s): %s\n"), u->handle, tmp, msg);
+    sprintf(tmp2, STR("+d: %s (%s)"), tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+    get_user_flagrec(u, &fr, chan->dname);
+    fr.global = USER_DEOP;
+    fr.chan = USER_DEOP;
+    set_user_flagrec(u, &fr, chan->dname);
+  } else if (ent && ent->gdata && !strcmp(ent->gdata, STR("kick"))) {
+    putlog(LOG_WARN, "*",  STR("Setting %s +dk (%s): %s\n"), u->handle, tmp, msg);
+    sprintf(tmp2, STR("+dk: %s (%s)"), tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+    get_user_flagrec(u, &fr, chan->dname);
+    fr.global = USER_DEOP | USER_KICK;
+    fr.chan = USER_DEOP | USER_KICK;
+    set_user_flagrec(u, &fr, chan->dname);
+  } else if (ent && ent->gdata && !strcmp(ent->gdata, STR("delete"))) {
+    putlog(LOG_WARN, "*",  STR("Deleting %s (%s): %s\n"), u->handle, tmp, msg);
+    deluser(u->handle);
+  } else {
+    putlog(LOG_WARN, "*",  STR("No user flag effects for %s (%s): %s\n"), u->handle, tmp, msg);
+    sprintf(tmp2, STR("Warning: %s (%s)"), tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+  }
+}
+
 void misc_describe(struct cfg_entry *cfgent, int idx)
 {
   int i = 0;
@@ -186,7 +338,7 @@ struct cfg_entry CFG_PROCESSLIST = {
 
 #ifdef S_DCCPASS
 struct cmd_pass *cmdpass = NULL;
-#endif
+#endif /* S_DCCPASS */
 
 /* this is cfg shit from servers/irc/ctcp because hub doesnt load
  * these mods */
@@ -405,6 +557,15 @@ void init_config()
   add_cfg(&CFG_BADPROCESS);
   add_cfg(&CFG_PROCESSLIST);
 #endif /* S_PROCESSCHECK */
+  add_cfg(&CFG_BADCOOKIE);
+  add_cfg(&CFG_MANUALOP);
+#ifdef G_MEAN
+  add_cfg(&CFG_MEANDEOP);
+  add_cfg(&CFG_MEANKICK);
+  add_cfg(&CFG_MEANBAN);
+#endif /* G_MEAN */
+  add_cfg(&CFG_MDOP);
+  add_cfg(&CFG_MOP);
 #ifdef HUB
   add_cfg(&CFG_NICK);
   add_cfg(&CFG_SERVERS);

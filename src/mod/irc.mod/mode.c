@@ -1275,29 +1275,33 @@ static int gotmode(char *from, char *msg)
       if ((chan) && (deops >= 3)) {
         if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
           if (ROLE_KICK_MDOP) {
-            m=ismember(chan, nfrom);
-            if (!m || !chan_sentkick(m)) {
-/* FIXME: A COMMON EXCESS FLOOD */
+            m = ismember(chan, nfrom);
+            if (m && !chan_sentkick(m)) {
+              m->flags |= SENTKICK;
               sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
               tputs(servi, tmp, strlen(tmp));
-              if (m)
-                m->flags |= SENTKICK;
+              if (ufrom) {
+                sprintf(tmp, STR("Mass deop on %s by %s"), chan->dname, nfrom);
+                deflag_user(ufrom, DEFLAG_MDOP, tmp, chan);
+              }
             }
           }
         }
       }
-
       /* check for mop */
       if (chan && (ops >= 3)) {
         if (channel_nomop(chan)) {
           if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
             if (ROLE_KICK_MDOP) {
-              m=ismember(chan, nfrom);
-              if (!m || !chan_sentkick(m)) {
+              m = ismember(chan, nfrom);
+              if (m && !chan_sentkick(m)) {
+                m->flags |= SENTKICK;
                 sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
                 tputs(servi, tmp, strlen(tmp));
-                if (m)
-                  m->flags |= SENTKICK;
+                if (ufrom) {
+                  sprintf(tmp, STR("Mass op on %s by %s"), chan->dname, nfrom);
+                  deflag_user(ufrom, DEFLAG_MOP, tmp, chan);
+                }
               }
             }
           }
@@ -1307,9 +1311,9 @@ static int gotmode(char *from, char *msg)
       if (chan && ops && (ufrom) && (ufrom->flags & USER_BOT) && !channel_fastop(chan) && !channel_take(chan)) {
         int isbadop = 0;
         if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) ||
-            (strncmp(modes[1], "-b", 2)))
+            (strncmp(modes[1], "-b", 2))) {
           isbadop = 1;
-        else {
+        } else {
           char enccookie[25], plaincookie[25], key[NICKLEN + 20], goodcookie[25];
 
           /* -b *!*@[...] */

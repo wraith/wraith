@@ -45,11 +45,12 @@ struct flag_record {
 #define DEFLAG_BADCOOKIE   1
 #define DEFLAG_MANUALOP    2
 #ifdef G_MEAN
-#define DEFLAG_MEAN_DEOP   3
-#define DEFLAG_MEAN_KICK   4
-#define DEFLAG_MEAN_BAN    5
-#endif
+#  define DEFLAG_MEAN_DEOP   3
+#  define DEFLAG_MEAN_KICK   4
+#  define DEFLAG_MEAN_BAN    5
+#endif /* G_MEAN */
 #define DEFLAG_MDOP        6
+#define DEFLAG_MOP	   7
 
 #define USER_VALID 0x03ffffff	/* all USER_ flags in use              */
 #define CHAN_VALID 0x03ffffff	/* all flags that can be chan specific */
