@@ -1125,10 +1125,6 @@ static void cmd_channels(struct userrec *u, int idx, char *par) {
 
 int dns_report(int, int);  
 void channels_report(int, int);
-#ifdef LEAF
-void server_report(int, int);
-void irc_report(int, int);
-#endif /* LEAF */
 void transfer_report(int, int);
 void share_report(int, int);
 void update_report(int, int);

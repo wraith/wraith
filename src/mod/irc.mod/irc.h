@@ -61,7 +61,7 @@ static int gotmode(char *, char *);
 
 #endif /* MAKING_IRC */
 
-void add_mode(struct chanset_t *, char, char, char *);
+void add_mode(struct chanset_t *, unsigned char, unsigned char, char *);
 int me_op(struct chanset_t *);
 void check_this_ban(struct chanset_t *, char *, int);
 void check_this_user(char *, int, char *);

@@ -25,27 +25,8 @@ struct dcc_table {
 };
 
 struct dcc_t {
-  long sock;                    /* This should be a long to keep 64-bit
-                                   machines sane                         */
-  IP addr;                      /* IP address in host byte order         */
-#ifdef USE_IPV6
-  char addr6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */
-#endif /* USE_IPV6 */
-  port_t port;
-  int ssl;                      /* use ssl on this dcc? */
-  struct userrec *user;
-  char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
-  time_t simultime;             /* the time when the simul dcc is initiated, expires after a number of seconds */
-  int simul;                    /* this will hold the idx on the remote bot to return result. */
-  char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
-  char nick[NICKLEN];
-  char host[UHOSTLEN];
   struct dcc_table *type;
-  time_t timeval;               /* Use for any timing stuff
-                                   - this is used for timeout checking  */
-  time_t pingtime;
-  unsigned long status;         /* A LOT of dcc types have status
-                                   thingos, this makes it more avaliabe */
+  struct userrec *user;
   union {
     struct chat_info *chat;
     struct file_info *file;
@@ -58,22 +39,42 @@ struct dcc_t {
     int ident_sock;
     void *other;
   } u;                          /* Special use depending on type        */
+
+  IP addr;                      /* IP address in host byte order         */
+  time_t simultime;             /* the time when the simul dcc is initiated, expires after a number of seconds */
+  time_t timeval;               /* Use for any timing stuff
+                                   - this is used for timeout checking  */
+  time_t pingtime;
+  unsigned long status;         /* A LOT of dcc types have status
+                                   thingos, this makes it more avaliabe */
+  long sock;                    /* This should be a long to keep 64-bit
+                                   machines sane                         */
+  int ssl;                      /* use ssl on this dcc? */
+  int simul;                    /* this will hold the idx on the remote bot to return result. */
+  port_t port;
+#ifdef USE_IPV6
+  char addr6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */
+#endif /* USE_IPV6 */
+  char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
+  char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
+  char nick[NICKLEN];
+  char host[UHOSTLEN];
 };
 
 
 struct chat_info {
-  char *away;                   /* non-NULL if user is away             */
-  int msgs_per_sec;             /* used to stop flooding                */
-  int con_flags;                /* with console: what to show           */
-  int strip_flags;              /* what codes to strip (b,r,u,c,a,g,*)  */
-  char con_chan[81];            /* with console: what channel to view   */
-  int channel;                  /* 0=party line, -1=off                 */
   struct msgq *buffer;          /* a buffer of outgoing lines
                                    (for .page cmd)                      */
   int max_line;                 /* maximum lines at once                */
   int line_count;               /* number of lines sent since last page */
   int current_lines;            /* number of lines total stored         */
+  int msgs_per_sec;             /* used to stop flooding                */
+  int con_flags;                /* with console: what to show           */
+  int strip_flags;              /* what codes to strip (b,r,u,c,a,g,*)  */
+  int channel;                  /* 0=party line, -1=off                 */
+  char *away;                   /* non-NULL if user is away             */
   char *su_nick;
+  char con_chan[81];            /* with console: what channel to view   */
 };
 
 struct file_info {
@@ -82,44 +83,44 @@ struct file_info {
 };
 
 struct xfer_info {
+  FILE *f;                      /* pointer to file being sent/received     */
+  unsigned long int length;
+  unsigned long int acked;
+  unsigned long int offset;     /* offset from beginning of file, during
+                                   resend.                                 */
+  unsigned long int block_pending;  	/* bytes of this DCC block which weren't
+                                   sent yet.                               */
+  unsigned int type;            /* xfer connection type, see enum below    */
+  time_t start_time;            /* Time when a xfer was started.           */
   char *filename;
   char *origname;
-  char dir[DIRLEN];             /* used when uploads go to the current dir */
-  long unsigned int length;
-  long unsigned int acked;
-  char buf[4];                  /* you only need 5 bytes!                  */
-  unsigned char sofar;          /* how much of the byte count received     */
-  char from[NICKLEN];           /* [GET] user who offered the file         */
-  FILE *f;                      /* pointer to file being sent/received     */
-  unsigned int type;            /* xfer connection type, see enum below    */
   unsigned short ack_type;      /* type of ack                             */
-  long unsigned int offset;     /* offset from beginning of file, during
-                                   resend.                                 */
-  long unsigned int block_pending;  	/* bytes of this DCC block which weren't
-                                   sent yet.                               */
-  time_t start_time;            /* Time when a xfer was started.           */
+  unsigned char sofar;          /* how much of the byte count received     */
+  char dir[DIRLEN];             /* used when uploads go to the current dir */
+  char from[NICKLEN];           /* [GET] user who offered the file         */
+  char buf[4];                  /* you only need 5 bytes!                  */
 };
 
 struct bot_info {
-  char version[121];            /* channel/version info                 */
   time_t bts;                   /* build timestamp */
-  char linker[NOTENAMELEN + 1]; /* who requested this link              */
   int  numver;
-  char sysname[121];
-  port_t port;		        /* base port                            */
   int  uff_flags;               /* user file feature flags              */
+  port_t port;		        /* base port                            */
+  char linker[NOTENAMELEN + 1]; /* who requested this link              */
+  char sysname[121];
+  char version[121];            /* channel/version info                 */
 };
 
 struct relay_info {
   struct chat_info *chat;
   int sock;
-  port_t port;
   int old_status;
+  port_t port;
 };
 
 struct dupwait_info {
-  int atr;                      /* the bots attributes                  */
   struct chat_info *chat;       /* holds current chat data              */
+  int atr;                      /* the bots attributes                  */
 };
 
 

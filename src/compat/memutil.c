@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
+#undef strdup
+#undef str_redup
 #include "memcpy.h"
+
 
 void str_redup(char **str, const char *newstr)
 {

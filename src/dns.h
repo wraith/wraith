@@ -16,17 +16,17 @@
 #define RES_IPBYHOST  2         /* IP address to hostname               */
 
 struct dns_info {
+  struct dcc_table *type;       /* type of the dcc table we are making the
+                                   lookup for                              */
+  IP ip;                        /* IP address                              */
+  int ibuf;                     /* temporary buffer for one integer        */
   void (*dns_success)(int);     /* is called if the dns request succeeds   */
   void (*dns_failure)(int);     /* is called if it fails                   */
   char *host;                   /* hostname                                */
   char *cbuf;                   /* temporary buffer. Memory will be free'd
                                    as soon as dns_info is free'd           */
   char *cptr;                   /* temporary pointer                       */
-  IP ip;                        /* IP address                              */
-  int ibuf;                     /* temporary buffer for one integer        */
   char dns_type;                /* lookup type, e.g. RES_HOSTBYIP          */
-  struct dcc_table *type;       /* type of the dcc table we are making the
-                                   lookup for                              */
 };
 
 typedef struct {
@@ -42,12 +42,12 @@ typedef struct {
 typedef struct devent_str {
   struct devent_str *next;	/* Pointer to next dns_event	  */
   devent_type	*type;
-  u_8bit_t	lookup;		/* RES_IPBYHOST or RES_HOSTBYIP	  */
   union {
     IP		ip_addr;	/* IP address			  */
     char	*hostname; 	/* Hostname			  */
   } res_data;
   void		*other;		/* Data specific to the event type */
+  u_8bit_t	lookup;		/* RES_IPBYHOST or RES_HOSTBYIP	  */
 } devent_t;
 
 void block_dns_hostbyip(IP);

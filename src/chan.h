@@ -9,18 +9,18 @@
 #define _EGG_CHAN_H
 
 typedef struct memstruct {
-  char nick[NICKLEN];
-  char userhost[UHOSTLEN];
-  char server[SERVLEN];
-  int hops;
+  struct memstruct *next;
+  struct userrec *user;
   time_t joined;
-  unsigned short flags;
   time_t split;			/* in case they were just netsplit	*/
   time_t last;			/* for measuring idle time		*/
   time_t delay;                  /* for delayed autoop                   */
-  struct userrec *user;
+  int hops;
   int tried_getuser;
-  struct memstruct *next;
+  unsigned short flags;
+  char nick[NICKLEN];
+  char userhost[UHOSTLEN];
+  char server[SERVLEN];
 } memberlist;
 
 #define CHANMETA "#&!+"
@@ -57,22 +57,22 @@ typedef struct memstruct {
  * name? <cybah>
  */
 typedef struct maskstruct {
+  struct maskstruct *next;
+  time_t timer;
   char *mask;
   char *who;
-  time_t timer;
-  struct maskstruct *next;
 } masklist;
 
 /* Used for temporary bans, exempts and invites */
 typedef struct maskrec {
   struct maskrec *next;
-  char *mask,
-       *desc,
-       *user;
   time_t expire,
          added,
          lastactive;
   int flags;
+  char *mask,
+       *desc,
+       *user;
 } maskrec;
 extern maskrec *global_bans, *global_exempts, *global_invites;
 #define MASKREC_STICKY 1
@@ -84,12 +84,6 @@ struct chan_t {
   masklist *ban;
   masklist *exempt;
   masklist *invite;
-  char *topic;
-  char *key;
-  unsigned short int mode;
-  int maxmembers;
-  int members;
-  int do_opreq;
   time_t jointime;
   time_t parttime;
   time_t no_op;
@@ -99,6 +93,12 @@ struct chan_t {
 #ifdef G_BACKUP
   int backup_time;              /* If non-0, set +backup when now>backup_time */
 #endif /* G_BACKUP */
+  int maxmembers;
+  int members;
+  int do_opreq;
+  char *topic;
+  char *key;
+  unsigned short int mode;
 };
 
 #define CHANINV    BIT0		/* +i					*/
@@ -124,10 +124,16 @@ struct chan_t {
 struct chanset_t {
   struct chanset_t *next;
   struct chan_t channel;	/* current information			*/
-  char dname[81];               /* what the users know the channel as,
-				   like !eggdev				*/
-  char name[81];                /* what the servers know the channel
-				   as, like !ABCDEeggdev		*/
+  maskrec *bans,		/* temporary channel bans		*/
+          *exempts,		/* temporary channel exempts		*/
+          *invites;		/* temporary channel invites		*/
+  time_t added_ts;		/* ..and when? */
+  struct {
+    char *op;
+    int type;
+  } cmode[MODES_PER_LINE_MAX];                 /* parameter-type mode changes -        */
+  /* detect floods */
+  time_t floodtime[FLOOD_CHAN_MAX];
   int flood_pub_thr;
   int flood_pub_time;
   int flood_join_thr;
@@ -155,38 +161,31 @@ struct chanset_t {
   int invite_time;
   int exempt_time;
 
-  maskrec *bans,		/* temporary channel bans		*/
-          *exempts,		/* temporary channel exempts		*/
-          *invites;		/* temporary channel invites		*/
   /* desired channel modes: */
   int mode_pls_prot;		/* modes to enforce			*/
   int mode_mns_prot;		/* modes to reject			*/
   int limit_prot;		/* desired limit			*/
+  /* queued mode changes: */
+  int limit;			/* new limit to set			*/
+  int bytes;			/* total bytes so far			*/
+  int compat;			/* to prevent mixing old/new modes	*/
+  int floodnum[FLOOD_CHAN_MAX];
+  int opreqtime[5];             /* remember when ops was requested */
+
+  char *key;			/* new key to set			*/
+  char *rmkey;			/* old key to remove			*/
+  char pls[21];			/* positive mode changes		*/
+  char mns[21];			/* negative mode changes		*/
   char key_prot[121];		/* desired password			*/
 /* Chanchar template
  *char temp[121];
  */
   char topic[121];
   char added_by[NICKLEN];	/* who added the channel? */
-  time_t added_ts;		/* ..and when? */
-  /* queued mode changes: */
-  char pls[21];			/* positive mode changes		*/
-  char mns[21];			/* negative mode changes		*/
-  char *key;			/* new key to set			*/
-  char *rmkey;			/* old key to remove			*/
-  int limit;			/* new limit to set			*/
-  int bytes;			/* total bytes so far			*/
-  int compat;			/* to prevent mixing old/new modes	*/
-  struct {
-    char *op;
-    int type;
-  } cmode[MODES_PER_LINE_MAX];                 /* parameter-type mode changes -        */
-  /* detect floods */
   char floodwho[FLOOD_CHAN_MAX][81];
-  time_t floodtime[FLOOD_CHAN_MAX];
-  int floodnum[FLOOD_CHAN_MAX];
   char deopd[NICKLEN];		/* last person deop'd (must change	*/
-  int opreqtime[5];             /* remember when ops was requested */
+  char dname[81];               /* what the users know the channel as like !eggdev */
+  char name[81];                /* what the servers know the channel as, like !ABCDEeggdev */
 };
 
 /* behavior modes for the channel */

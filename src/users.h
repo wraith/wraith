@@ -60,12 +60,12 @@ struct laston_info {
 };
 
 struct bot_addr {
-  port_t telnet_port;
-  port_t relay_port;
-  unsigned short hublevel;
+  unsigned int roleid;
   char *address;
   char *uplink;
-  unsigned int roleid;
+  unsigned short hublevel;
+  port_t telnet_port;
+  port_t relay_port;
 };
 
 struct user_entry {
@@ -114,30 +114,30 @@ int set_user(struct user_entry_type *, struct userrec *, void *);
  */
 struct chanuserrec {
   struct chanuserrec *next;
-  char channel[81];
-  time_t laston;
   flag_t flags;
+  time_t laston;
   char *info;
+  char channel[81];
 };
 
 /* New-style userlist
  */
 struct userrec {
-  struct userrec *next;
-  char handle[HANDLEN + 1];
-  flag_t flags;
-  struct chanuserrec *chanrec;
   struct user_entry *entries;
+  struct chanuserrec *chanrec;
+  struct userrec *next;
+  flag_t flags;
+  char handle[HANDLEN + 1];
 };
 
 struct igrec {
   struct igrec *next;
-  char *igmask;
   time_t expire;
-  char *user;
   time_t added;
-  char *msg;
   int flags;
+  char *igmask;
+  char *user;
+  char *msg;
 };
 extern struct igrec *global_ign;
 
@@ -147,7 +147,6 @@ extern struct igrec *global_ign;
  * Note: Flags are in eggdrop.h
  */
 
-struct userrec *adduser();
 struct userrec *get_user_by_handle(struct userrec *, char *);
 struct userrec *get_user_by_host(char *);
 struct userrec *get_user_by_nick(char *);

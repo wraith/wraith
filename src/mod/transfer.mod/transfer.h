@@ -36,20 +36,20 @@ int raw_dcc_send(char *, char *, char *, char *);
 #define TRANSFER_REGET_PACKETID 0xfeab
 
 typedef struct {
+  u_32bit_t byte_offset;	/* Number of bytes to skip relative to
+				   the file beginning			*/
   u_16bit_t packet_id;		/* Identification ID, should be equal
 	 			   to TRANSFER_REGET_PACKETID		*/
   u_8bit_t  byte_order;		/* Byte ordering, see byte_order_test()	*/
-  u_32bit_t byte_offset;	/* Number of bytes to skip relative to
-				   the file beginning			*/
 } transfer_reget;
 
 typedef struct zarrf {
+  struct zarrf *next;
   char *dir;			/* Absolute dir if it starts with '*',
 				   otherwise dcc dir.			*/
   char *file;
   char nick[NICKLEN];		/* Who queued this file			*/
   char to[NICKLEN];		/* Who will it be sent to		*/
-  struct zarrf *next;
 } fileq_t;
 
 #endif				/* MAKING_TRANSFER */

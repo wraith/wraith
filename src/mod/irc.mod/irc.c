@@ -58,8 +58,6 @@ struct cfg_entry CFG_OPBOTS,
 #endif /* S_AUTOLOCK */
   CFG_OPREQUESTS;
 
-
-
 static int net_type = 0;
 static int wait_split = 300;		/* Time to wait for user to return from
 					   net-split. */

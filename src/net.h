@@ -97,24 +97,24 @@ union sockaddr_union {
  * queued on them
  */
 typedef struct {
-  int            sock;
-  short          flags;
-  char          *inbuf;
-  char          *outbuf;
   size_t outbuflen;             /* Outbuf could be binary data  */
   size_t inbuflen;              /* Inbuf could be binary data   */
-  int encstatus;                        /* encrypted botlink */
-  int oseed;                            /* botlink out seed */
-  int iseed;                            /* botlink in seed */
-  char okey[33];                        /* botlink enckey: out */
-  char ikey[33];                        /* botlink enckey: in  */
-  int gz; /* gzip compression */
 #ifdef USE_IPV6
   unsigned int af;
 #endif /* USE_IPV6 */
+  int encstatus;                        /* encrypted botlink */
+  int oseed;                            /* botlink out seed */
+  int iseed;                            /* botlink in seed */
+  int            sock;
+  int gz; /* gzip compression */
 #ifdef HAVE_SSL
   SSL           *ssl;
 #endif /* HAVE_SSL */
+  short          flags;
+  char okey[33];                        /* botlink enckey: out */
+  char ikey[33];                        /* botlink enckey: in  */
+  char          *inbuf;
+  char          *outbuf;
 } sock_list;
 
 

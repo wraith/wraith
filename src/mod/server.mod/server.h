@@ -22,11 +22,10 @@
 
 struct server_list {
   struct server_list	*next;
-
   char			*name;
-  port_t		 port;
   char			*pass;
   char			*realname;
+  port_t		 port;
 };
 
 /* Available net types.  */

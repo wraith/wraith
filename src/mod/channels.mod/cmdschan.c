@@ -1041,7 +1041,7 @@ static void cmd_mns_chan(struct userrec *u, int idx, char *par)
 
 /* thanks Excelsior */
 #define FLAG_COLS 4
-void show_flag(int idx, char *work, int *cnt, char *name, int state)
+void show_flag(int idx, char *work, int *cnt, char *name, unsigned int state)
 {
   char tmp[101] = "", chr_state[15] = "";
   /* empty buffer if no (char *) name */

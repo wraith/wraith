@@ -8,28 +8,28 @@
 
 /* Keep track of tandem-bots in the chain */
 typedef struct tand_t_struct {
-  char bot[HANDLEN + 1];
-  char *not_chans;
   struct tand_t_struct *via;
   struct tand_t_struct *uplink;
   struct tand_t_struct *next;
-  char version[121];
   time_t buildts;
   int localhub;
+  char *not_chans;
+  char bot[HANDLEN + 1];
+  char version[121];
   char share;
 } tand_t;
 
 /* Keep track of party-line members */
 typedef struct {
-  char nick[HANDLEN + 1];
-  char bot[HANDLEN + 1];
+  time_t timer;			/* Track idle time */
   int sock;
   int chan;
   char *from;
+  char *away;
+  char nick[HANDLEN + 1];
+  char bot[HANDLEN + 1];
   char flag;
   char status;
-  time_t timer;			/* Track idle time */
-  char *away;
 } party_t;
 
 /* Status: */

@@ -6,9 +6,6 @@
 #define DO_LOCAL	1
 #define DO_NET		2
 
-extern struct chanset_t *chanset;
-extern char botname[];
-
 int do_chanset(char *, struct chanset_t *, char *, int);
 void checkchans(int);
 void tell_verbose_uptime(int);
