@@ -10,15 +10,13 @@
 #include "eggmain.h"
 #include "misc.h"
 #include "rfc1459.h"
-#ifdef HUB
-#include "userrec.h"
-#endif
 #include "misc_file.h"
 #include "users.h"
 #include "main.h"
 #include "debug.h"
 #include "dccutil.h"
 #include "chanprog.h"
+#include "color.h"
 #include "botmsg.h"
 #include "bg.h"	
 #include <sys/stat.h>
@@ -33,6 +31,9 @@
 #include <pwd.h>
 #include <errno.h>
 #include <libgen.h>
+#ifdef HUB
+#include "userrec.h"
+#endif /* HUB */
 #ifdef S_ANTITRACE
 #include <sys/ptrace.h>
 #include <sys/wait.h>
