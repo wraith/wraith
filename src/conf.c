@@ -35,6 +35,7 @@ tellconf()
   conf_bot *bot;
   int i = 0;
 
+  sdprintf("tempdir: %s\n", tempdir);
   sdprintf("uid: %d\n", conf.uid);
   sdprintf("uname: %s\n", conf.uname);
   sdprintf("homedir: %s\n", conf.homedir);
