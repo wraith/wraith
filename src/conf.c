@@ -296,7 +296,7 @@ init_conf()
   conf.portmin = 0;
   conf.portmax = 0;
   conf.pscloak = 0;
-  conf.uid = 0;
+  conf.uid = -1;
   conf.uname = NULL;
   conf.username = NULL;
   conf.homedir = NULL;
@@ -488,7 +488,7 @@ parseconf(bool error)
   }
 
 #ifndef CYGWIN_HACKS
-  if (error && conf.uid && conf.uid != myuid) {
+  if (error && conf.uid != (signed) myuid) {
     sdprintf("wrong uid, conf: %d :: %d", conf.uid, myuid);
     werr(ERR_WRONGUID);
   } else if (!conf.uid)
@@ -691,7 +691,7 @@ writeconf(char *filename, FILE * stream, int bits)
 
   my_write(f, "! uid %d\n", conf.uid);
 
-  if ((bits & CONF_COMMENT) && conf.uid != myuid)
+  if ((bits & CONF_COMMENT) && conf.uid != (signed) myuid)
     my_write(f, "#! uid %d\n\n", myuid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
