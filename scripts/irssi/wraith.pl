@@ -100,5 +100,4 @@ Irssi::settings_add_str('auth', 'auth_secpass', '');
 Irssi::settings_add_str('auth', 'auth_authkey', '');
 
 Irssi::command_bind("auth", "cmd_auth");
-
-Irssi::print "Wraith authorization script by bryan loaded. \$Rev: \$";
+Irssi::print "Wraith authorization script by bryan loaded. \$Revision$";
