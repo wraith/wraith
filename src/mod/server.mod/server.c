@@ -990,7 +990,6 @@ static void server_5minutely()
        */
       disconnect_server(servidx, DO_LOST);
       putlog(LOG_SERV, "*", IRC_SERVERSTONED);
-    }
   }
 }
 

@@ -1527,7 +1527,7 @@ void check_botnet_pings()
 
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_BOT) {
-      if (dcc[i].status & STAT_LEAF)) {
+      if (dcc[i].status & STAT_LEAF) {
         tand_t *via = findbot(dcc[i].nick);
 
         for (bot = tandbot; bot; bot = bot->next) {
