@@ -1,272 +1,221 @@
 /*
- * This is an OpenSSL-compatible implementation of the RSA Data Security,
- * Inc. MD5 Message-Digest Algorithm.
- *
- * Written by Solar Designer <solar@openwall.com> in 2001, and placed in
- * the public domain.  There's absolutely no warranty.
- *
- * This differs from Colin Plumb's older public domain implementation in
- * that no 32-bit integer data type is required, there's no compile-time
- * endianness configuration, and the function prototypes match OpenSSL's.
- * The primary goals are portability and ease of use.
- *
- * This implementation is meant to be fast, but not as fast as possible.
- * Some known optimizations are not included to reduce source code size
- * and avoid compile-time configuration.
- *
  */
 
 
-#include <string.h>
 #include <stdio.h>
-#include "md5.h"
-#include "src/compat/compat.h"
+#include "md5_locl.h"
 
-/*
- * The basic MD5 functions.
- *
- * F is optimized compared to its RFC 1321 definition just like in Colin
- * Plumb's implementation.
- */
-#define F(x, y, z)			((z) ^ ((x) & ((y) ^ (z))))
-#define G(x, y, z)			((y) ^ ((z) & ((x) ^ (y))))
-#define H(x, y, z)			((x) ^ (y) ^ (z))
-#define I(x, y, z)			((y) ^ ((x) | ~(z)))
 
-/*
- * The MD5 transformation for all four rounds.
+/* Implemented from RFC1321 The MD5 Message-Digest Algorithm
  */
-#define STEP(f, a, b, c, d, x, t, s) \
-	(a) += f((b), (c), (d)) + (x) + (t); \
-	(a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
-	(a) += (b);
 
-/*
- * SET reads 4 input bytes in little-endian byte order and stores them
- * in a properly aligned word in host byte order.
- *
- * The check for little-endian architectures which tolerate unaligned
- * memory accesses is just an optimization.  Nothing will break if it
- * doesn't work.
- */
-#if defined(__i386__) || defined(__vax__)
-#define SET(n) \
-	(*(MD5_u32plus *)&ptr[(n) * 4])
-#define GET(n) \
-	SET(n)
-#else
-#define SET(n) \
-	(ctx->block[(n)] = \
-	(MD5_u32plus)ptr[(n) * 4] | \
-	((MD5_u32plus)ptr[(n) * 4 + 1] << 8) | \
-	((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
-	((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
-#define GET(n) \
-	(ctx->block[(n)])
+#define INIT_DATA_A (unsigned long)0x67452301L
+#define INIT_DATA_B (unsigned long)0xefcdab89L
+#define INIT_DATA_C (unsigned long)0x98badcfeL
+#define INIT_DATA_D (unsigned long)0x10325476L
+
+int MD5_Init(MD5_CTX *c)
+        {
+        c->A=INIT_DATA_A;
+        c->B=INIT_DATA_B;
+        c->C=INIT_DATA_C;
+        c->D=INIT_DATA_D;
+        c->Nl=0;
+        c->Nh=0;
+        c->num=0;
+        return 1;
+        }
+
+#ifndef md5_block_host_order
+void md5_block_host_order (MD5_CTX *c, const void *data, int num)
+        {
+        const MD5_LONG *X = (MD5_LONG *) data;
+        register unsigned MD32_REG_T A,B,C,D;
+
+        A=c->A;
+        B=c->B;
+        C=c->C;
+        D=c->D;
+
+        for (;num--;X+=HASH_LBLOCK)
+                {
+        /* Round 0 */
+        R0(A,B,C,D,X[ 0], 7,0xd76aa478L);
+        R0(D,A,B,C,X[ 1],12,0xe8c7b756L);
+        R0(C,D,A,B,X[ 2],17,0x242070dbL);
+        R0(B,C,D,A,X[ 3],22,0xc1bdceeeL);
+        R0(A,B,C,D,X[ 4], 7,0xf57c0fafL);
+        R0(D,A,B,C,X[ 5],12,0x4787c62aL);
+        R0(C,D,A,B,X[ 6],17,0xa8304613L);
+        R0(B,C,D,A,X[ 7],22,0xfd469501L);
+        R0(A,B,C,D,X[ 8], 7,0x698098d8L);
+        R0(D,A,B,C,X[ 9],12,0x8b44f7afL);
+        R0(C,D,A,B,X[10],17,0xffff5bb1L);
+        R0(B,C,D,A,X[11],22,0x895cd7beL);
+        R0(A,B,C,D,X[12], 7,0x6b901122L);
+        R0(D,A,B,C,X[13],12,0xfd987193L);
+        R0(C,D,A,B,X[14],17,0xa679438eL);
+        R0(B,C,D,A,X[15],22,0x49b40821L);
+        /* Round 1 */
+        R1(A,B,C,D,X[ 1], 5,0xf61e2562L);
+        R1(D,A,B,C,X[ 6], 9,0xc040b340L);
+        R1(C,D,A,B,X[11],14,0x265e5a51L);
+        R1(B,C,D,A,X[ 0],20,0xe9b6c7aaL);
+        R1(A,B,C,D,X[ 5], 5,0xd62f105dL);
+        R1(D,A,B,C,X[10], 9,0x02441453L);
+        R1(C,D,A,B,X[15],14,0xd8a1e681L);
+        R1(B,C,D,A,X[ 4],20,0xe7d3fbc8L);
+        R1(A,B,C,D,X[ 9], 5,0x21e1cde6L);
+        R1(D,A,B,C,X[14], 9,0xc33707d6L);
+        R1(C,D,A,B,X[ 3],14,0xf4d50d87L);
+        R1(B,C,D,A,X[ 8],20,0x455a14edL);
+        R1(A,B,C,D,X[13], 5,0xa9e3e905L);
+        R1(D,A,B,C,X[ 2], 9,0xfcefa3f8L);
+        R1(C,D,A,B,X[ 7],14,0x676f02d9L);
+        R1(B,C,D,A,X[12],20,0x8d2a4c8aL);
+        /* Round 2 */
+        R2(A,B,C,D,X[ 5], 4,0xfffa3942L);
+        R2(D,A,B,C,X[ 8],11,0x8771f681L);
+        R2(C,D,A,B,X[11],16,0x6d9d6122L);
+        R2(B,C,D,A,X[14],23,0xfde5380cL);
+        R2(A,B,C,D,X[ 1], 4,0xa4beea44L);
+        R2(D,A,B,C,X[ 4],11,0x4bdecfa9L);
+        R2(C,D,A,B,X[ 7],16,0xf6bb4b60L);
+        R2(B,C,D,A,X[10],23,0xbebfbc70L);
+        R2(A,B,C,D,X[13], 4,0x289b7ec6L);
+        R2(D,A,B,C,X[ 0],11,0xeaa127faL);
+        R2(C,D,A,B,X[ 3],16,0xd4ef3085L);
+        R2(B,C,D,A,X[ 6],23,0x04881d05L);
+        R2(A,B,C,D,X[ 9], 4,0xd9d4d039L);
+        R2(D,A,B,C,X[12],11,0xe6db99e5L);
+        R2(C,D,A,B,X[15],16,0x1fa27cf8L);
+        R2(B,C,D,A,X[ 2],23,0xc4ac5665L);
+        /* Round 3 */
+        R3(A,B,C,D,X[ 0], 6,0xf4292244L);
+        R3(D,A,B,C,X[ 7],10,0x432aff97L);
+        R3(C,D,A,B,X[14],15,0xab9423a7L);
+        R3(B,C,D,A,X[ 5],21,0xfc93a039L);
+        R3(A,B,C,D,X[12], 6,0x655b59c3L);
+        R3(D,A,B,C,X[ 3],10,0x8f0ccc92L);
+        R3(C,D,A,B,X[10],15,0xffeff47dL);
+        R3(B,C,D,A,X[ 1],21,0x85845dd1L);
+        R3(A,B,C,D,X[ 8], 6,0x6fa87e4fL);
+        R3(D,A,B,C,X[15],10,0xfe2ce6e0L);
+        R3(C,D,A,B,X[ 6],15,0xa3014314L);
+        R3(B,C,D,A,X[13],21,0x4e0811a1L);
+        R3(A,B,C,D,X[ 4], 6,0xf7537e82L);
+        R3(D,A,B,C,X[11],10,0xbd3af235L);
+        R3(C,D,A,B,X[ 2],15,0x2ad7d2bbL);
+        R3(B,C,D,A,X[ 9],21,0xeb86d391L);
+
+        A = c->A += A;
+        B = c->B += B;
+        C = c->C += C;
+        D = c->D += D;
+                }
+        }
 #endif
 
-/*
- * This processes one or more 64-byte data blocks, but does NOT update
- * the bit counters.  There're no alignment requirements.
- */
-static const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
-{
-	const unsigned char *ptr;
-	MD5_u32plus a, b, c, d;
-	MD5_u32plus saved_a, saved_b, saved_c, saved_d;
+#ifndef md5_block_data_order
+#ifdef X
+#undef X
+#endif
+void md5_block_data_order (MD5_CTX *c, const void *data_, int num)
+        {
+        const unsigned char *data = (const unsigned char *) data_;
+        register unsigned MD32_REG_T A,B,C,D,l;
+#ifndef MD32_XARRAY
+        /* See comment in crypto/sha/sha_locl.h for details. */
+        unsigned MD32_REG_T     XX0, XX1, XX2, XX3, XX4, XX5, XX6, XX7,
+                                XX8, XX9,XX10,XX11,XX12,XX13,XX14,XX15;
+# define X(i)   XX##i
+#else
+        MD5_LONG XX[MD5_LBLOCK];
+# define X(i)   XX[i]
+#endif
 
-	ptr = (const unsigned char *) data;
+        A=c->A;
+        B=c->B;
+        C=c->C;
+        D=c->D;
 
-	a = ctx->a;
-	b = ctx->b;
-	c = ctx->c;
-	d = ctx->d;
+        for (;num--;)
+                {
+        HOST_c2l(data,l); X( 0)=l;              HOST_c2l(data,l); X( 1)=l;
+        /* Round 0 */
+        R0(A,B,C,D,X( 0), 7,0xd76aa478L);       HOST_c2l(data,l); X( 2)=l;
+        R0(D,A,B,C,X( 1),12,0xe8c7b756L);       HOST_c2l(data,l); X( 3)=l;
+        R0(C,D,A,B,X( 2),17,0x242070dbL);       HOST_c2l(data,l); X( 4)=l;
+        R0(B,C,D,A,X( 3),22,0xc1bdceeeL);       HOST_c2l(data,l); X( 5)=l;
+        R0(A,B,C,D,X( 4), 7,0xf57c0fafL);       HOST_c2l(data,l); X( 6)=l;
+        R0(D,A,B,C,X( 5),12,0x4787c62aL);       HOST_c2l(data,l); X( 7)=l;
+        R0(C,D,A,B,X( 6),17,0xa8304613L);       HOST_c2l(data,l); X( 8)=l;
+        R0(B,C,D,A,X( 7),22,0xfd469501L);       HOST_c2l(data,l); X( 9)=l;
+        R0(A,B,C,D,X( 8), 7,0x698098d8L);       HOST_c2l(data,l); X(10)=l;
+        R0(D,A,B,C,X( 9),12,0x8b44f7afL);       HOST_c2l(data,l); X(11)=l;
+        R0(C,D,A,B,X(10),17,0xffff5bb1L);       HOST_c2l(data,l); X(12)=l;
+        R0(B,C,D,A,X(11),22,0x895cd7beL);       HOST_c2l(data,l); X(13)=l;
+        R0(A,B,C,D,X(12), 7,0x6b901122L);       HOST_c2l(data,l); X(14)=l;
+        R0(D,A,B,C,X(13),12,0xfd987193L);       HOST_c2l(data,l); X(15)=l;
+        R0(C,D,A,B,X(14),17,0xa679438eL);
+        R0(B,C,D,A,X(15),22,0x49b40821L);
+        /* Round 1 */
+        R1(A,B,C,D,X( 1), 5,0xf61e2562L);
+        R1(D,A,B,C,X( 6), 9,0xc040b340L);
+        R1(C,D,A,B,X(11),14,0x265e5a51L);
+        R1(B,C,D,A,X( 0),20,0xe9b6c7aaL);
+        R1(A,B,C,D,X( 5), 5,0xd62f105dL);
+        R1(D,A,B,C,X(10), 9,0x02441453L);
+        R1(C,D,A,B,X(15),14,0xd8a1e681L);
+        R1(B,C,D,A,X( 4),20,0xe7d3fbc8L);
+        R1(A,B,C,D,X( 9), 5,0x21e1cde6L);
+        R1(D,A,B,C,X(14), 9,0xc33707d6L);
+        R1(C,D,A,B,X( 3),14,0xf4d50d87L);
+        R1(B,C,D,A,X( 8),20,0x455a14edL);
+        R1(A,B,C,D,X(13), 5,0xa9e3e905L);
+        R1(D,A,B,C,X( 2), 9,0xfcefa3f8L);
+        R1(C,D,A,B,X( 7),14,0x676f02d9L);
+        R1(B,C,D,A,X(12),20,0x8d2a4c8aL);
+        /* Round 2 */
+        R2(A,B,C,D,X( 5), 4,0xfffa3942L);
+        R2(D,A,B,C,X( 8),11,0x8771f681L);
+        R2(C,D,A,B,X(11),16,0x6d9d6122L);
+        R2(B,C,D,A,X(14),23,0xfde5380cL);
+        R2(A,B,C,D,X( 1), 4,0xa4beea44L);
+        R2(D,A,B,C,X( 4),11,0x4bdecfa9L);
+        R2(C,D,A,B,X( 7),16,0xf6bb4b60L);
+        R2(B,C,D,A,X(10),23,0xbebfbc70L);
+        R2(A,B,C,D,X(13), 4,0x289b7ec6L);
+        R2(D,A,B,C,X( 0),11,0xeaa127faL);
+        R2(C,D,A,B,X( 3),16,0xd4ef3085L);
+        R2(B,C,D,A,X( 6),23,0x04881d05L);
+        R2(A,B,C,D,X( 9), 4,0xd9d4d039L);
+        R2(D,A,B,C,X(12),11,0xe6db99e5L);
+        R2(C,D,A,B,X(15),16,0x1fa27cf8L);
+        R2(B,C,D,A,X( 2),23,0xc4ac5665L);
+        /* Round 3 */
+        R3(A,B,C,D,X( 0), 6,0xf4292244L);
+        R3(D,A,B,C,X( 7),10,0x432aff97L);
+        R3(C,D,A,B,X(14),15,0xab9423a7L);
+        R3(B,C,D,A,X( 5),21,0xfc93a039L);
+        R3(A,B,C,D,X(12), 6,0x655b59c3L);
+        R3(D,A,B,C,X( 3),10,0x8f0ccc92L);
+        R3(C,D,A,B,X(10),15,0xffeff47dL);
+        R3(B,C,D,A,X( 1),21,0x85845dd1L);
+        R3(A,B,C,D,X( 8), 6,0x6fa87e4fL);
+        R3(D,A,B,C,X(15),10,0xfe2ce6e0L);
+        R3(C,D,A,B,X( 6),15,0xa3014314L);
+        R3(B,C,D,A,X(13),21,0x4e0811a1L);
+        R3(A,B,C,D,X( 4), 6,0xf7537e82L);
+        R3(D,A,B,C,X(11),10,0xbd3af235L);
+        R3(C,D,A,B,X( 2),15,0x2ad7d2bbL);
+        R3(B,C,D,A,X( 9),21,0xeb86d391L);
 
-	do {
-		saved_a = a;
-		saved_b = b;
-		saved_c = c;
-		saved_d = d;
+        A = c->A += A;
+        B = c->B += B;
+        C = c->C += C;
+        D = c->D += D;
+                }
+        }
+#endif
 
-/* Round 1 */
-		STEP(F, a, b, c, d, SET(0), 0xd76aa478, 7)
-		STEP(F, d, a, b, c, SET(1), 0xe8c7b756, 12)
-		STEP(F, c, d, a, b, SET(2), 0x242070db, 17)
-		STEP(F, b, c, d, a, SET(3), 0xc1bdceee, 22)
-		STEP(F, a, b, c, d, SET(4), 0xf57c0faf, 7)
-		STEP(F, d, a, b, c, SET(5), 0x4787c62a, 12)
-		STEP(F, c, d, a, b, SET(6), 0xa8304613, 17)
-		STEP(F, b, c, d, a, SET(7), 0xfd469501, 22)
-		STEP(F, a, b, c, d, SET(8), 0x698098d8, 7)
-		STEP(F, d, a, b, c, SET(9), 0x8b44f7af, 12)
-		STEP(F, c, d, a, b, SET(10), 0xffff5bb1, 17)
-		STEP(F, b, c, d, a, SET(11), 0x895cd7be, 22)
-		STEP(F, a, b, c, d, SET(12), 0x6b901122, 7)
-		STEP(F, d, a, b, c, SET(13), 0xfd987193, 12)
-		STEP(F, c, d, a, b, SET(14), 0xa679438e, 17)
-		STEP(F, b, c, d, a, SET(15), 0x49b40821, 22)
-
-/* Round 2 */
-		STEP(G, a, b, c, d, GET(1), 0xf61e2562, 5)
-		STEP(G, d, a, b, c, GET(6), 0xc040b340, 9)
-		STEP(G, c, d, a, b, GET(11), 0x265e5a51, 14)
-		STEP(G, b, c, d, a, GET(0), 0xe9b6c7aa, 20)
-		STEP(G, a, b, c, d, GET(5), 0xd62f105d, 5)
-		STEP(G, d, a, b, c, GET(10), 0x02441453, 9)
-		STEP(G, c, d, a, b, GET(15), 0xd8a1e681, 14)
-		STEP(G, b, c, d, a, GET(4), 0xe7d3fbc8, 20)
-		STEP(G, a, b, c, d, GET(9), 0x21e1cde6, 5)
-		STEP(G, d, a, b, c, GET(14), 0xc33707d6, 9)
-		STEP(G, c, d, a, b, GET(3), 0xf4d50d87, 14)
-		STEP(G, b, c, d, a, GET(8), 0x455a14ed, 20)
-		STEP(G, a, b, c, d, GET(13), 0xa9e3e905, 5)
-		STEP(G, d, a, b, c, GET(2), 0xfcefa3f8, 9)
-		STEP(G, c, d, a, b, GET(7), 0x676f02d9, 14)
-		STEP(G, b, c, d, a, GET(12), 0x8d2a4c8a, 20)
-
-/* Round 3 */
-		STEP(H, a, b, c, d, GET(5), 0xfffa3942, 4)
-		STEP(H, d, a, b, c, GET(8), 0x8771f681, 11)
-		STEP(H, c, d, a, b, GET(11), 0x6d9d6122, 16)
-		STEP(H, b, c, d, a, GET(14), 0xfde5380c, 23)
-		STEP(H, a, b, c, d, GET(1), 0xa4beea44, 4)
-		STEP(H, d, a, b, c, GET(4), 0x4bdecfa9, 11)
-		STEP(H, c, d, a, b, GET(7), 0xf6bb4b60, 16)
-		STEP(H, b, c, d, a, GET(10), 0xbebfbc70, 23)
-		STEP(H, a, b, c, d, GET(13), 0x289b7ec6, 4)
-		STEP(H, d, a, b, c, GET(0), 0xeaa127fa, 11)
-		STEP(H, c, d, a, b, GET(3), 0xd4ef3085, 16)
-		STEP(H, b, c, d, a, GET(6), 0x04881d05, 23)
-		STEP(H, a, b, c, d, GET(9), 0xd9d4d039, 4)
-		STEP(H, d, a, b, c, GET(12), 0xe6db99e5, 11)
-		STEP(H, c, d, a, b, GET(15), 0x1fa27cf8, 16)
-		STEP(H, b, c, d, a, GET(2), 0xc4ac5665, 23)
-
-/* Round 4 */
-		STEP(I, a, b, c, d, GET(0), 0xf4292244, 6)
-		STEP(I, d, a, b, c, GET(7), 0x432aff97, 10)
-		STEP(I, c, d, a, b, GET(14), 0xab9423a7, 15)
-		STEP(I, b, c, d, a, GET(5), 0xfc93a039, 21)
-		STEP(I, a, b, c, d, GET(12), 0x655b59c3, 6)
-		STEP(I, d, a, b, c, GET(3), 0x8f0ccc92, 10)
-		STEP(I, c, d, a, b, GET(10), 0xffeff47d, 15)
-		STEP(I, b, c, d, a, GET(1), 0x85845dd1, 21)
-		STEP(I, a, b, c, d, GET(8), 0x6fa87e4f, 6)
-		STEP(I, d, a, b, c, GET(15), 0xfe2ce6e0, 10)
-		STEP(I, c, d, a, b, GET(6), 0xa3014314, 15)
-		STEP(I, b, c, d, a, GET(13), 0x4e0811a1, 21)
-		STEP(I, a, b, c, d, GET(4), 0xf7537e82, 6)
-		STEP(I, d, a, b, c, GET(11), 0xbd3af235, 10)
-		STEP(I, c, d, a, b, GET(2), 0x2ad7d2bb, 15)
-		STEP(I, b, c, d, a, GET(9), 0xeb86d391, 21)
-
-		a += saved_a;
-		b += saved_b;
-		c += saved_c;
-		d += saved_d;
-
-		ptr += 64;
-	} while (size -= 64);
-
-	ctx->a = a;
-	ctx->b = b;
-	ctx->c = c;
-	ctx->d = d;
-
-	return ptr;
-}
-
-void MD5_Init(MD5_CTX *ctx)
-{
-	ctx->a = 0x67452301;
-	ctx->b = 0xefcdab89;
-	ctx->c = 0x98badcfe;
-	ctx->d = 0x10325476;
-
-	ctx->lo = 0;
-	ctx->hi = 0;
-}
-
-void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
-{
-	MD5_u32plus saved_lo;
-	unsigned long used, freeb;
-
-	saved_lo = ctx->lo;
-	if ((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo) ctx->hi++;
-	ctx->hi += size >> 29;
-
-	used = saved_lo & 0x3f;
-
-	if (used) {
-		freeb = 64 - used;
-
-		if (size < freeb) {
-			egg_memcpy(&ctx->buffer[used], data, size);
-			return;
-		}
-
-		egg_memcpy(&ctx->buffer[used], data, freeb);
-		(unsigned char *)data += freeb;
-		size -= freeb;
-		body(ctx, ctx->buffer, 64);
-	}
-
-	if (size >= 64) {
-		data = body(ctx, data, size & ~(unsigned long)0x3f);
-		size &= 0x3f;
-	}
-
-	egg_memcpy(ctx->buffer, data, size);
-}
-
-void MD5_Final(unsigned char *result, MD5_CTX *ctx)
-{
-	unsigned long used, freeb;
-
-	used = ctx->lo & 0x3f;
-
-	ctx->buffer[used++] = 0x80;
-
-	freeb = 64 - used;
-
-	if (freeb < 8) {
-		egg_memset(&ctx->buffer[used], 0, freeb);
-		body(ctx, ctx->buffer, 64);
-		used = 0;
-		freeb = 64;
-	}
-
-	egg_memset(&ctx->buffer[used], 0, freeb - 8);
-
-	ctx->lo <<= 3;
-	ctx->buffer[56] = ctx->lo;
-	ctx->buffer[57] = ctx->lo >> 8;
-	ctx->buffer[58] = ctx->lo >> 16;
-	ctx->buffer[59] = ctx->lo >> 24;
-	ctx->buffer[60] = ctx->hi;
-	ctx->buffer[61] = ctx->hi >> 8;
-	ctx->buffer[62] = ctx->hi >> 16;
-	ctx->buffer[63] = ctx->hi >> 24;
-
-	body(ctx, ctx->buffer, 64);
-
-	result[0] = ctx->a;
-	result[1] = ctx->a >> 8;
-	result[2] = ctx->a >> 16;
-	result[3] = ctx->a >> 24;
-	result[4] = ctx->b;
-	result[5] = ctx->b >> 8;
-	result[6] = ctx->b >> 16;
-	result[7] = ctx->b >> 24;
-	result[8] = ctx->c;
-	result[9] = ctx->c >> 8;
-	result[10] = ctx->c >> 16;
-	result[11] = ctx->c >> 24;
-	result[12] = ctx->d;
-	result[13] = ctx->d >> 8;
-	result[14] = ctx->d >> 16;
-	result[15] = ctx->d >> 24;
-
-	egg_memset(ctx, 0, sizeof(ctx));
-}

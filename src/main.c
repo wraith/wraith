@@ -302,6 +302,7 @@ static void dtx_arg(int argc, char *argv[])
         break;
       case 'c':
         printf("SHA1 (%s): %s\n", optarg, SHA1(optarg));
+        printf("MD5  (%s): %s\n", optarg, MD5(optarg));
 //        do_crypt_console();
         exit(0);
         break;
