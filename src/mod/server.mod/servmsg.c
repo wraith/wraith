@@ -1383,7 +1383,7 @@ static void connect_server(void)
     /* Resolve the hostname. */
     int dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) newidx);
     if (dns_id >= 0)
-      dcc[newidx].u.dns->dns_id = dns_id;
+      dcc[newidx].dns_id = dns_id;
     /* wait for async reply */
   }
 }
