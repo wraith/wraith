@@ -150,7 +150,6 @@ static int got001(char *from, char *msg)
   struct server_list *x = NULL;
 
   server_online = now;
-  checked_hostmask = 0;
   fixcolon(msg);
   /* Ok...param #1 of 001 = what server thinks my nick is */
   strlcpy(botname, msg, NICKLEN);
@@ -921,7 +920,6 @@ static void disconnect_server(int idx, int dolost)
   serv = -1;
   servidx = -1;
   server_online = 0;
-  checked_hostmask = 0;
   floodless = 0;
   botuserhost[0] = 0;
   botuserip[0] = 0; 
@@ -1084,6 +1082,31 @@ irc_whois(char *nick, char *format, ...)
       dprintf(idx, "%s\n", va_out);
 }
 
+static void check_hostmask()
+{
+  char s[UHOSTLEN + 2] = "";
+
+  simple_sprintf(s, "*!%s", botuserhost);              /* just add actual user@ident, regardless of ~ */
+
+  /* dont add the host if it conflicts with another in the userlist */
+  struct userrec *u = NULL;
+  struct list_type *q = NULL;
+
+  for (u = userlist; u; u = u->next) {
+    q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
+    for (; q; q = q->next) {
+      if (wild_match(s, q->extra) || wild_match(q->extra, s)) {
+        if (u != conf.bot->u)
+          putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
+        return;
+      }
+    }
+  }
+  addhost_by_handle(conf.bot->nick, s);
+
+  putlog(LOG_GETIN, "*", "Updated my hostmask: %s", s);
+}
+
 /* 311 $me nick username address * :realname */
 static int got311(char *from, char *msg)
 {
@@ -1099,7 +1122,7 @@ static int got311(char *from, char *msg)
     
   if (match_my_nick(nick)) {
     egg_snprintf(botuserhost, sizeof botuserhost, "%s@%s", username, address);
-    checked_hostmask = 0;
+    check_hostmask();
   }
 
   irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);

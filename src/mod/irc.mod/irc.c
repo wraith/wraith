@@ -596,37 +596,6 @@ getin_request(char *botnick, char *code, char *par)
   }
 }
 
-void
-check_hostmask()
-{
-  if (!server_online || !botuserhost[0])
-    return;
-
-  char s[UHOSTLEN + 2] = "";
-
-  checked_hostmask = 1;
-
-  sprintf(s, "*!%s", botuserhost);		/* just add actual user@ident, regardless of ~ */
-
-  /* dont add the host if it conflicts with another in the userlist */
-  struct userrec *u = NULL;
-  struct list_type *q = NULL;
-
-  for (u = userlist; u; u = u->next) {
-    q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
-    for (; q; q = q->next) {
-      if (wild_match(s, q->extra) || wild_match(q->extra, s)) {
-        if (u != conf.bot->u)
-          putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
-        return;
-      }
-    }
-  }
-
-  addhost_by_handle(conf.bot->nick, s);
-  putlog(LOG_GETIN, "*", "Updated my hostmask: %s", s);
-}
-
 static void
 request_op(struct chanset_t *chan)
 {
@@ -665,9 +634,6 @@ request_op(struct chanset_t *chan)
            OPREQ_SECONDS);
     return;
   }
-  if (!checked_hostmask)
-    check_hostmask();           /* check, and update hostmask */
-
   int cnt = OP_BOTS, i2;
   memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
@@ -763,8 +729,6 @@ request_in(struct chanset_t *chan)
   char s[255] = "", *l = (char *) my_calloc(1, IN_BOTS * 30);
   int cnt = IN_BOTS, n;
 
-  if (!checked_hostmask)
-    check_hostmask();           /* check, and update hostmask */
   sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
   while (cnt) {
     n = randint(i);
