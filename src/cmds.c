@@ -1841,7 +1841,7 @@ static void cmd_conf(int idx, char *par)
     free(listbot);
 
   if (save) {
-    write_settings(binname, -1);
+    write_settings(binname, -1, 1);
     if (!conf.bot->hub)
       spawnbots();			/* parse conf struct and spawn/kill as needed */
   }

@@ -396,7 +396,7 @@ static bool check_bin_initialized(const char *fname)
   return 0;
 }
 
-void write_settings(const char *fname, int die)
+void write_settings(const char *fname, int die, int conf)
 {
   MD5_CTX ctx;
   char *hash = NULL;
@@ -411,8 +411,8 @@ void write_settings(const char *fname, int die)
    */
   if (!initialized)
     bits |= WRITE_PACK;
-
-  bits |= WRITE_CONF;		/* always for now */
+  if (conf)
+    bits |= WRITE_CONF;
 
   if ((hash = bin_checksum(fname, bits, &ctx))) {
     printf("* Wrote settings to: %s.\n", fname);
@@ -465,5 +465,5 @@ void conf_to_bin(conf_t *in, bool move)
   else
     newbin = binname;
   /* tellconfig(&settings); */
-  write_settings(newbin, 1);
+  write_settings(newbin, 1, 1);
 }

@@ -683,7 +683,8 @@ int updatebin(int idx, char *par, int secs)
   egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
   copyfile(binname, old);
 
-  write_settings(path, -1);	/* re-write the binary with our data */
+  write_settings(path, -1, 1);	/* re-write the binary with our data */
+  
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
