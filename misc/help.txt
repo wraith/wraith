@@ -357,7 +357,7 @@ See also: link
         $bidle-kick$b  Kick idle users that are not +f or above on the channel
                    after how many minutes (set this to 0 to disable).
 %{+m|m}
-        $blimit-raise$b       If this is set, the +l bot will raise the limit 
+        $blimit$b             If this is set, the +l bot will raise the limit 
                           to the users in the channel + this ammount. Set to 
                           0 to disable.
         $bstopnethack-mode$b  This setting will make the bot de-op anyone who
