@@ -1780,8 +1780,6 @@ Context;
 
 Context;
     unlink(dcc[idx].u.xfer->filename); /* why the fuck was this not here, stupid eggdev team. */
-    putlog(LOG_MISC, "*", "%s", USERF_CANTREAD);
-    loading = 0;
     clear_userlist(u);		/* Clear new, obsolete, user list.	*/
     clear_chanlist();		/* Remove all user references from the
 				   channel lists.			*/
@@ -1792,8 +1790,12 @@ Context;
 
     userlist = ou;		/* Revert to old user list.		*/
     lastuser = NULL;		/* Reset last accessed user ptr.	*/
+
     checkchans(2); 		/* un-flag the channels, we are keeping them.. */
 
+    /* old userlist is now being used, safe to do this stuff... */
+    loading = 0;
+    putlog(LOG_MISC, "*", "%s", USERF_CANTREAD);
     dprintf(idx, "bye\n");
     egg_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[j].nick);
     botnet_send_unlinked(j, dcc[j].nick, xx);
