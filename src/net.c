@@ -726,6 +726,9 @@ sock_t open_address_listen(in_addr_t addr, port_t *port)
 #ifdef USE_IPV6
   }
 #endif /* USE_IPV6 */
+
+  debug2("Opened listen socket on port %d with AF_INET, sock: %lu", *port, sock);
+
   return sock;
 }
 
