@@ -156,8 +156,11 @@ for bin in $fls
 do
   mv -f $bin $bin.$os.$numver
 done
-tar -zcf $packname.$os.$numver.tgz *.$os.$numver
+if [ $d = "d" ]; then
+ d="-debug"
+fi
+tar -zcf $packname.$os.$numver${d}.tgz *.$os.$numver
 rm -f *.$os.$numver
-echo "Binaries are now in '$packname.$os.$numver.tgz'."
+echo "Binaries are now in '$packname.$os.$numver${d}.tgz'."
 exit 0
 
