@@ -414,7 +414,7 @@
 /* 244 - 247 */
 #define protect_readonly (*(int *)(global[244]))
 #define findchan_by_dname ((struct chanset_t *(*)(char *))global[245])
-#define removedcc ((void (*) (int))global[246])
+/* 246 UNUSED */
 #define userfile_perm (*(int *)global[247])
 /* 248 - 251 */
 #define sock_has_data ((int(*)(int, int))global[248])

@@ -150,7 +150,6 @@ extern void (*shareupdatein) (int, char *);
 void chanout_but EGG_VARARGS(int, arg1);
 void dcc_chatter(int);
 void lostdcc(int);
-void removedcc(int);
 void makepass(char *);
 void tell_dcc(int);
 void not_away(int);

@@ -471,7 +471,7 @@ Function global_table[] =
   /* 244 - 247 */
   (Function) & protect_readonly, /* int					*/
   (Function) findchan_by_dname,
-  (Function) removedcc,
+  (Function) 0,
   (Function) & userfile_perm,	 /* int					*/
   /* 248 - 251 */
   (Function) sock_has_data,
