@@ -627,7 +627,7 @@ static void dtx_arg(int argc, char *argv[])
           }
           exit(0);
         } else {
-          fatal("You must specify error number after -E", 0);
+          fatal("You must specify error number after -E (or 'all')", 0);
         }
          break;
       case 'e':
