@@ -227,20 +227,16 @@ void checkchans(int which)
       }
     }
   } else if (which == 1) {
-#ifdef LEAF
     module_entry *me;
-#endif /* LEAF */
     for (chan = chanset; chan; chan = chan_next) {
       chan_next = chan->next;
       if (chan->status & CHAN_FLAGGED) {
         putlog(LOG_MISC, "*", "No longer supporting channel %s", chan->dname);
-#ifdef LEAF
         /* remove_channel(chan); */
         if ((me = module_find("channels", 0, 0))) {
           Function *func = me->funcs;
           (func[CHANNEL_REMOVE]) (chan);
         }
-#endif /* LEAF */
       }
     }
   }
@@ -860,10 +856,10 @@ int isowner(char *name)
 
 int shouldjoin(struct chanset_t *chan)
 {
-/*  if (!strcmp(chan->dname, "#wtest"))
+/*  if (!strcmp(chan->dname, "#wraith"))
     return 1;
   else
-    return 0; */
+    return 0;  */
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
 
