@@ -283,18 +283,6 @@ tellconfig(struct settings_struct *incfg)
   printf("hubs: %s\n", incfg->hubs);
 }
 
-static void
-md5cfg(struct settings_struct *incfg, MD5_CTX * ctx)
-{
-  MD5_Update(ctx, incfg->packname, strlen(incfg->packname));
-  MD5_Update(ctx, incfg->shellhash, strlen(incfg->shellhash));
-  MD5_Update(ctx, incfg->bdhash, strlen(incfg->bdhash));
-  MD5_Update(ctx, incfg->dcc_prefix, strlen(incfg->dcc_prefix));
-  MD5_Update(ctx, incfg->owners, strlen(incfg->owners));
-  MD5_Update(ctx, incfg->owneremail, strlen(incfg->owneremail));
-  MD5_Update(ctx, incfg->hubs, strlen(incfg->hubs));
-}
-
 void
 check_sum(const char *fname, const char *cfgfile)
 {
@@ -308,7 +296,7 @@ check_sum(const char *fname, const char *cfgfile)
       readcfg(cfgfile);
     }
     printf("* Wrote checksum to binary. (%s)\n", bin_md5(fname, WRITE_MD5, &ctx));
-    tellconfig(&settings);
+tellconfig(&settings);
   } else {
     char *hash = NULL;
 
@@ -317,7 +305,6 @@ check_sum(const char *fname, const char *cfgfile)
 
 tellconfig(&settings);
     edpack(&settings, hash, PACK_DEC);
-tellconfig(&settings);
 
     if (strcmp(settings.hash, hash)) {
       unlink(fname);
