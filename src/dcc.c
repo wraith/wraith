@@ -264,7 +264,8 @@ failed_link(int idx)
   }
   if (dcc[idx].u.bot->numver >= (-1))
     putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[idx].nick);
-  killsock(dcc[idx].sock);
+  if (dcc[idx].sock != -1)
+    killsock(dcc[idx].sock);
   strcpy(s, dcc[idx].nick);
   lostdcc(idx);
   autolink_cycle(s);            /* Check for more auto-connections */
