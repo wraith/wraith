@@ -696,11 +696,11 @@ static void dtx_arg(int argc, char *argv[])
 #ifdef HUB
 void backup_userfile()
 {
-  char s[125], s2[125];
+  char s[DIRMAX], s2[DIRMAX];
 
   putlog(LOG_MISC, "*", USERF_BACKUP);
-  egg_snprintf(s, sizeof s, "%s.0", userfile);
-  egg_snprintf(s2, sizeof s2, "%s.1", userfile);
+  egg_snprintf(s, sizeof s, "%s/%s.0", tempdir, userfile);
+  egg_snprintf(s2, sizeof s2, "%s/%s.1", tempdir, userfile);
   copyfile(s, s2);
   copyfile(userfile, s);
 }
