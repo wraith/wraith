@@ -22,7 +22,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/utsname.h>
-#include <pwd.h>
 #include <ctype.h>
 #endif /* LEAF */
 
@@ -124,7 +123,7 @@ void scriptchanged()
   {
     char mircver[4] = "";
 
-    switch (randint(7)) {
+    switch (randint(9)) {
       case 0:
         strcpy(mircver, "6.01");
         break;
@@ -149,6 +148,8 @@ void scriptchanged()
       case 7:
         strcpy(mircver, "6.14");
         break;
+      case 8:
+        strcpy(mircver, "6.15");
       default:
         strcpy(mircver, "");
     }
@@ -426,9 +427,7 @@ static void ctcp_minutely()
 
 static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char *p = NULL;
   int idletime;
-  struct passwd *pwd = NULL;
 
   if (cloak_awaytime)
     idletime = now - cloak_awaytime;
@@ -436,14 +435,9 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
     idletime = now - cloak_heretime;
   else
     idletime = 0;
-  if (!(pwd = getpwuid(myuid)))
-    return BIND_RET_LOG;
-#ifndef GECOS_DELIMITER
-#define GECOS_DELIMITER ','
-#endif
-  if ((p = strchr(pwd->pw_gecos, GECOS_DELIMITER)) != NULL)
-    *p = 0;
-  dprintf(DP_HELP, STR("NOTICE %s :\001%s %s (%s@%s) Idle %ld second%s\001\n"), nick, keyword, pwd->pw_gecos, conf.username ? conf.username : conf.bot->nick, (char *) (strchr(botuserhost, '@') + 1), idletime, (idletime == 1) ? "" : "s"); 
+  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s@%s) Idle %ld second%s\001\n", nick, keyword, "",
+                   conf.username ? conf.username : conf.bot->nick, 
+                   (strchr(botuserhost, '@') + 1), idletime, idletime == 1 ? "" : "s");
   return BIND_RET_BREAK;
 }
 
@@ -712,6 +706,7 @@ void ctcp_init()
 {
 #ifdef LEAF
   char *p = NULL;
+#ifndef CYGWIN_HACKS
   struct utsname un;
 
   egg_bzero(&un, sizeof(un));
@@ -720,6 +715,7 @@ void ctcp_init()
     strncpyz(cloak_osver, un.release, sizeof(cloak_osver));
     strncpyz(cloak_host, un.nodename, sizeof(cloak_host));
   } else {
+#endif /* !CYGWIN_HACKS */
     /* shit, we have to come up with something ourselves.. */
     switch (randint(2)) {
     case 0:
@@ -732,7 +728,9 @@ void ctcp_init()
       break;
     }
     strcpy(cloak_host, STR("login"));
+#ifndef CYGWIN_HACKS
   }
+#endif /* !CYGWIN_HACKS */
   if ((p = strchr(cloak_host, '.')))
     *p = 0;
 
