@@ -623,6 +623,19 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
       if (dcc[idx].status & STAT_TELNET)
 	dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
       stats_add(dcc[idx].user, 1, 0);
+      if (!get_user(&USERENTRY_SECPASS, dcc[idx].user)) {
+        char pass[17];
+
+        dprintf(idx, "******************************************************************** \
+                      \n \n \n WARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....\n");
+        make_rand_str(pass, 16);
+        pass[16] = 0;
+        set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
+#ifdef HUB
+        write_userfile(idx);
+#endif
+        dprintf(idx, "Your secpass is now '%s'\nMake sure you do not lose this, as it is needed to login for now on.\n \n*******************************************************\n", pass);
+      }
       dcc_chatter(idx);
 #ifdef S_AUTH
   } else {		/* bad auth */
