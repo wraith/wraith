@@ -20,6 +20,8 @@
 time_t lastfork = 0;
 pid_t watcher;                  /* my child/watcher */
 
+static void init_watcher(pid_t);
+
 pid_t
 do_fork()
 {
@@ -31,6 +33,8 @@ do_fork()
   pid = getpid();
   writepid(conf.bot->pid_file, pid);
   lastfork = now;
+  if (conf.watcher)
+    init_watcher(pid);
   return pid;
 }
 
@@ -57,48 +61,42 @@ writepid(const char *pidfile, pid_t pid)
 }
 
 static void
-init_watcher()
+init_watcher(pid_t parent)
 {
-  if (conf.watcher) {
-    int x = 0;
-    pid_t parent = getpid();
+  int x = fork();
 
-    x = fork();
+  if (x == -1)
+    fatal("Could not fork off a watcher process", 0);
+  if (x != 0) {                 /* parent [bot] */
+    watcher = x;
+    printf("WATCHER: %d\n", watcher);
+    return;
+  } else {                      /* child [watcher] */
+    watcher = getpid();
+    printf("MY PARENT: %d\n", parent);
+    printf("my pid: %d\n", watcher);
+    if (ptrace(PT_ATTACH, parent, 0, 0) == -1)
+      fatal("Cannot attach to parent", 0);
 
-    if (x == -1)
-      fatal("Could not fork off a watcher process", 0);
-    if (x != 0) {               /* parent [bot] */
-      watcher = x;
-      /* printf("WATCHER: %d\n", watcher); */
-      return;
-    } else {                    /* child */
-      watcher = getpid();
-      /* printf("MY PARENT: %d\n", parent); */
-      /* printf("my pid: %d\n", watcher); */
-      if (ptrace(PT_ATTACH, parent, 0, 0) == -1)
-        fatal("Cannot attach to parent", 0);
+    while (1) {
+      int status = 0, sig = 0, ret = 0;
 
-      while (1) {
-        int status = 0, sig = 0, ret = 0;
-
-        waitpid(parent, &status, 0);
-        sig = WSTOPSIG(status);
-        if (sig) {
-          ret = ptrace(PT_CONTINUE, parent, (char *) 1, sig);
-          if (ret == -1)        /* send the signal! */
-            fatal("Could not send signal to parent", 0);
-          /* printf("Sent signal %s (%d) to parent\n", strsignal(sig), sig); */
-        } else {
-          ret = ptrace(PT_CONTINUE, parent, (char *) 1, 0);
-          if (ret == -1) {
-            if (errno == ESRCH) /* parent is gone! */
-              exit(0);          /* just exit */
-            else
-              fatal("Could not continue parent", 0);
-          }
+      waitpid(parent, &status, 0);
+      sig = WSTOPSIG(status);
+      if (sig) {
+        ret = ptrace(PT_CONTINUE, parent, (char *) 1, sig);
+        if (ret == -1)          /* send the signal! */
+          fatal("Could not send signal to parent", 0);
+        printf("Sent signal %s (%d) to parent\n", strsignal(sig), sig);
+      } else {
+        ret = ptrace(PT_CONTINUE, parent, (char *) 1, 0);
+        if (ret == -1) {
+          if (errno == ESRCH)   /* parent is gone! */
+            exit(0);            /* just exit */
+          else
+            fatal("Could not continue parent", 0);
         }
       }
     }
   }
 }
-
