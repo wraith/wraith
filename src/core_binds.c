@@ -37,7 +37,6 @@ void core_binds_init()
 void check_bind_dcc(const char *cmd, int idx, const char *text)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  bool found = 0;
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
   char *args = strdup(text);
@@ -45,35 +44,40 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
 
   table = bind_table_lookup("dcc");
+
   for (entry = table->entries; entry && entry->next; entry = entry->next) {
     if (!egg_strcasecmp(cmd, entry->mask)) {
-      found = 1;
-      break;
-    }
-  }
+      if (has_cmd_pass(cmd)) {
+        if (flagrec_ok(&entry->user_flags, &fr)) {
+          char *p = NULL, work[1024] = "", pass[128] = "";
 
-  if (found) {
-    if (has_cmd_pass(cmd)) {
-      char *p = NULL, work[1024] = "", pass[128] = "";
+          p = strchr(args, ' ');
+          if (p)
+            *p = 0;
+          strlcpy(pass, args, sizeof(pass));
 
-      p = strchr(args, ' ');
-      if (p)
-        *p = 0;
-      strlcpy(pass, args, sizeof(pass));
-
-      if (check_cmd_pass(cmd, pass)) {
-        if (p)
-          *p = ' ';
-        strlcpy(work, args, sizeof(work));
-        p = work;
-        newsplit(&p);
-        strcpy(args, p);
-      } else {
-        dprintf(idx, "Invalid command password. Use %scommand password arguments\n", settings.dcc_prefix);
-        putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, cmd);
-        free(args);
-        return;
+          if (check_cmd_pass(cmd, pass)) {
+            if (p)
+              *p = ' ';
+            strlcpy(work, args, sizeof(work));
+            p = work;
+            newsplit(&p);
+            strcpy(args, p);
+          } else {
+            dprintf(idx, "Invalid command password.\nUse: $b%scommand <password> [arguments]$b\n", settings.dcc_prefix);
+            putlog(LOG_CMDS, "*", "$ #%s# %s %s", dcc[idx].nick, cmd, args);
+            putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, cmd);
+            free(args);
+            return;
+          }
+        } else {
+          putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
+          dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
+          free(args);
+          return;
+        }
       }
+      break;
     }
   }
 

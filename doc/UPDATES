@@ -14,6 +14,8 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Removed compatability code left from 1.2->1.2.1 switch
 * Removed/cleaned up more code left from eggdrop/modules
 * Fixed chanset (manop/mop/mdop/bad-cookie) to accept english parameters: ignore/deop/kick/delete/remove. 
+* cmd_cmdpass was not clear on usage.
+* Using a cmd with a cmdpass without proper flags now acts as if cmd is not valid (no longer spams wrong pass error)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
