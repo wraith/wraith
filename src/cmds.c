@@ -2086,7 +2086,7 @@ static void cmd_debug(struct userrec *u, int idx, char *par)
   if (!cmd || (cmd &&!strcmp(cmd, "net")))
     tell_netdebug(idx);
   if (!cmd || (cmd &&!strcmp(cmd, "stackdump")))
-    stackdump(idx);
+    stackdump(0);
 }
 
 static void cmd_timers(struct userrec *u, int idx, char *par)

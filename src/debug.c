@@ -170,6 +170,7 @@ void write_debug()
     egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
     dprintf(-x, "Build: %s (%lu)\n", date, buildts);
 
+    stackdump(-x);
     dprintf(-x, "Context: ");
     cx_ptr = cx_ptr & 15;
     for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
@@ -206,7 +207,7 @@ void write_debug()
     }
     putlog(LOG_MISC, "*", "* Emailed DEBUG to development team...");
 #endif /* !CYGWIN_HACKS */
-    unlink(buf);
+//    unlink(buf);
   }
 }
 #endif /* DEBUG_CONTEXT */
@@ -258,13 +259,13 @@ stackdump(int idx)
 {
   __asm__("movl %EBP, %EAX");
   __asm__("movl %EAX, sf");
-  if (idx == -1)
+  if (idx == 0)
     putlog(LOG_MISC, "*", "STACK DUMP (%%ebp)");
   else
     dprintf(idx, "STACK DUMP (%%ebp)\n");
 
-  while (canaccess(sf) && stackdepth < 20) {
-    if (idx == -1)
+  while (canaccess(sf) && stackdepth < 20 && sf->ebp) {
+    if (idx == 0)
       putlog(LOG_MISC, "*", " %02d: 0x%08lx/0x%08lx", stackdepth, (unsigned long) sf->ebp, sf->addr);
     else
       dprintf(idx, " %02d: 0x%08lx/0x%08lx\n", stackdepth, (unsigned long) sf->ebp, sf->addr);
@@ -272,13 +273,18 @@ stackdump(int idx)
     stackdepth++;
   }
   stackdepth = 0;
+  sf = NULL;
   sleep(1);
 };
 
+static int nested_segv = 0;
 static void got_segv(int z)
 {
-  signal(SIGSEGV, SIG_DFL);
-  stackdump(-1);
+  if (nested_segv)
+    signal(SIGSEGV, SIG_DFL);
+  else
+    nested_segv++;
+  stackdump(0);
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif

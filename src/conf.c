@@ -61,8 +61,6 @@ spawnbots()
       status = system(run);
       if (status == -1 || WEXITSTATUS(status))
         sdprintf("Failed to spawn '%s': %s", bot->nick, strerror(errno));
-      else
-        bots_ran++;        
       free(run);
     }
   }
