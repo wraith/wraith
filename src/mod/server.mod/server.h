@@ -66,7 +66,7 @@ void queue_server(int, char *, int);
 void server_die();
 void add_server(char *);
 void clearq(struct server_list *);
-void nuke_server(char *);
+void nuke_server(const char *);
 bool match_my_nick(char *);
 
 #endif /*leaf*/
