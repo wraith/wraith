@@ -14,6 +14,8 @@
 #include "main.h"
 #include "misc_file.h"
 
+#include <sys/wait.h>
+
 /*
 typedef struct encdata_struct {
   char prefix[PREFIXLEN];
