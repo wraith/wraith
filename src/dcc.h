@@ -39,7 +39,6 @@ struct dcc_t {
     int ident_sock;
     int dns_id;
     void *other;
-    char buf[101];
   } u;                          /* Special use depending on type        */
 
   in_addr_t addr;                      /* IP address in host byte order         */
