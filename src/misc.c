@@ -376,7 +376,7 @@ void show_banner(int idx)
     dumplots(-dcc[idx].sock, "", wbanner()); 
   dprintf(idx, " \n");
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
-  dprintf(-dcc[idx].sock, STR("| Contributions welcomed by paypal: bryan@shatow.net |\n"));
+  dprintf(-dcc[idx].sock, STR("| Contributions welcomed by paypal: $bbryan@shatow.net$b |\n"));
   dprintf(-dcc[idx].sock, STR("|             - http://wraith.shatow.net/ -             |\n"));
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
   dprintf(idx, " \n");
