@@ -1219,9 +1219,9 @@ void recheck_channel(struct chanset_t *chan, int dobans)
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
         dprintf(DP_MODE, "MODE %s +e\n", chan->name);
     }
-    if (!(chan->ircnet_status & CHAN_ASKED_INVITED) &&
+    if (!(chan->ircnet_status & CHAN_ASKED_INVITES) &&
         use_invites == 1) {
-      chan->ircnet_status |= CHAN_ASKED_INVITED;
+      chan->ircnet_status |= CHAN_ASKED_INVITES;
       dprintf(DP_MODE, "MODE %s +I\n", chan->name);
     }
   }
@@ -1873,7 +1873,7 @@ static int got347(char *from, char *msg)
     chname = newsplit(&msg);
     chan = findchan(chname);
     if (chan)
-      chan->ircnet_status &= ~CHAN_ASKED_INVITED;
+      chan->ircnet_status &= ~CHAN_ASKED_INVITES;
   }
   return 0;
 }

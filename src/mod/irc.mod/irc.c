@@ -1128,8 +1128,8 @@ reset_chan_info(struct chanset_t *chan)
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
         dprintf(DP_MODE, "MODE %s +e\n", chan->name);
       }
-      if (!(chan->ircnet_status & CHAN_ASKED_INVITED) && use_invites == 1) {
-        chan->ircnet_status |= CHAN_ASKED_INVITED;
+      if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
+        chan->ircnet_status |= CHAN_ASKED_INVITES;
         dprintf(DP_MODE, "MODE %s +I\n", chan->name);
       }
     }
