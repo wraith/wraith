@@ -113,7 +113,6 @@ int hash_table_insert(hash_table_t *ht, const void *key, void *data)
 
 	hash = ht->hash(key);
 	idx = hash % ht->max_rows;
-printf("idx: %d/%d\n", idx, ht->max_rows);
 	row = ht->rows+idx;
 
 	/* Allocate an entry. */
