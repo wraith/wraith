@@ -1,4 +1,3 @@
-#ifdef LEAF
 /*
  * server.c -- part of server.mod
  *   basic irc server support
@@ -1047,4 +1046,3 @@ void server_init()
 
   do_nettype();
 }
-#endif /* LEAF */

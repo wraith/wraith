@@ -1,4 +1,3 @@
-#ifdef LEAF
 /*
  * irc.c -- part of irc.mod
  *   support for channels within the bot
@@ -1545,4 +1544,3 @@ irc_init()
 
   do_nettype();
 }
-#endif /* LEAF */

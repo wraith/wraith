@@ -741,13 +741,13 @@ printf("out: %s\n", out);
   if (!conf.bot->hub) {
     server_init();
     irc_init();
+    ctcp_init();
   }
   transfer_init();
   share_init();
   update_init();
   notes_init();
   console_init();
-  ctcp_init();
   chanprog();
   if (conf.bot->hub) {
     cfg_noshare = 1;

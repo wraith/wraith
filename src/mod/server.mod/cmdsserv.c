@@ -3,7 +3,6 @@
  *   handles commands from a user via dcc that cause server interaction
  *
  */
-#ifdef LEAF
 static void cmd_servers(int idx, char *par)
 {
   struct server_list *x = serverlist;
@@ -124,4 +123,3 @@ static cmd_t C_dcc_serv[] =
   {NULL,		NULL,	NULL,				NULL, 0}
 };
 
-#endif /* LEAF */

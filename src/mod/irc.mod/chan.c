@@ -1,4 +1,3 @@
-#ifdef LEAF
 /*
  *
  * chan.c -- part of irc.mod
@@ -3042,4 +3041,3 @@ static cmd_t irc_raw[] =
   {"353",	"",	(Function) got353,	"irc:353", LEAF},
   {NULL,	NULL,	NULL,			NULL, 0}
 };
-#endif /* LEAF */

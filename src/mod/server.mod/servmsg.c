@@ -1,4 +1,3 @@
-#ifdef LEAF
 /*
  * servmsg.c -- part of server.mod
  *
@@ -1455,4 +1454,3 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     /* Wait for async connect now */
   }
 }
-#endif /* LEAF */

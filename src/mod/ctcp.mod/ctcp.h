@@ -35,8 +35,6 @@
 
 void ctcp_init();
 extern struct cfg_entry 	CFG_CLOAK_SCRIPT;
-#ifdef LEAF
 extern char		kickprefix[], bankickprefix[];
-#endif /* LEAF */
 
 #endif				/* _EGG_MOD_CTCP_CTCP_H */

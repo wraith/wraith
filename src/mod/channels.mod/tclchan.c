@@ -286,11 +286,9 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
 int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 {
   bool error = 0;
-#ifdef LEAF
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
-#endif /* LEAF */
   char s[121] = "";
 
   for (register int i = 0; i < items; i++) {
@@ -626,25 +624,25 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       error = 1;
     }
   }
-#ifdef LEAF
-  if ((old_status ^ chan->status) & CHAN_INACTIVE) {
-    if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
-      dprintf(DP_SERVER, "PART %s\n", chan->name);
-    if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
-      dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
-			   chan->name : chan->dname,
-			   chan->channel.key[0] ?
-			   chan->channel.key : chan->key_prot);
+  if (!conf.bot->hub) {
+    if ((old_status ^ chan->status) & CHAN_INACTIVE) {
+      if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+        dprintf(DP_SERVER, "PART %s\n", chan->name);
+      if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+        dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
+  			   chan->name : chan->dname,
+  			   chan->channel.key[0] ?
+    			   chan->channel.key : chan->key_prot);
+    }
+    if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
+      recheck_channel(chan, 1);
+    /* if we -take, recheck the chan for modes and shit */
+    } else if ((chan->status ^ old_status) & (CHAN_TAKE)) {
+      recheck_channel(chan, 1);
+    } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
+      recheck_channel_modes(chan);
+    }
   }
-  if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
-    recheck_channel(chan, 1);
-  /* if we -take, recheck the chan for modes and shit */
-  } else if ((chan->status ^ old_status) & (CHAN_TAKE)) {
-    recheck_channel(chan, 1);
-  } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
-    recheck_channel_modes(chan);
-  }
-#endif /* LEAF */
   if (error)
     return ERROR;
   return OK;
@@ -751,9 +749,7 @@ int channel_add(char *result, char *newname, char *options)
   if (SplitList(result, buf, &items, &item) != OK)
     return ERROR;
 
-#ifdef LEAF
   bool join = 0;
-#endif /* LEAF */
   struct chanset_t *chan = NULL;
   int ret = OK;
 
@@ -805,10 +801,9 @@ int channel_add(char *result, char *newname, char *options)
     /* Initialize chan->channel info */
     init_channel(chan, 0);
     list_append((struct list_type **) &chanset, (struct list_type *) chan);
-#ifdef LEAF
     /* Channel name is stored in xtra field for sharebot stuff */
-    join = 1;
-#endif /* LEAF */
+    if (!conf.bot->hub)
+      join = 1;
   }
   /* If loading is set, we're loading the userfile. Ignore errors while
    * reading userfile and just return OK. This is for compatability
@@ -819,9 +814,7 @@ int channel_add(char *result, char *newname, char *options)
     ret = ERROR;
 
   free(item);
-#ifdef LEAF
   if (join && shouldjoin(chan))
     dprintf(DP_SERVER, "JOIN %s %s\n", chan->dname, chan->key_prot);
-#endif /* LEAF */
   return ret;
 }

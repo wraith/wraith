@@ -17,18 +17,14 @@
 #include "src/botmsg.h"
 #include "src/tclhash.h"
 #include "src/egg_timer.h"
-
-#ifdef LEAF
 #include "src/mod/server.mod/server.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/utsname.h>
 #include <ctype.h>
-#endif /* LEAF */
 
 int cloak_script = CLOAK_PLAIN;
 
-#ifdef LEAF
 #define AVGAWAYTIME             60
 #define AVGHERETIME             5
 time_t cloak_awaytime = 0;
@@ -617,7 +613,6 @@ static cmd_t myctcp[] =
   {"CHAT",		"",	(Function) ctcp_CHAT,		NULL, LEAF},
   {NULL,		NULL,	NULL,			NULL, 0}
 };
-#endif /* LEAF */
 
 static void cloak_describe(struct cfg_entry *cfgent, int idx)
 {
@@ -632,27 +627,24 @@ static void cloak_changed(struct cfg_entry *cfgent, int *valid)
   if (!(p = cfgent->ldata ? cfgent->ldata : cfgent->gdata))
     return;
 
-  if (!conf.bot->hub) {
-    int i = atoi(p);
+  int i = atoi(p);
 
-    if (i == 0)
-      i = randint(CLOAK_COUNT) + 1;
-    if ((*valid = ((i >= 0) && (i <= CLOAK_COUNT))))
-      cloak_script = i;
+  if (i == 0)
+    i = randint(CLOAK_COUNT) + 1;
+  if ((*valid = ((i >= 0) && (i <= CLOAK_COUNT))))
+    cloak_script = i;
 
-    scriptchanged();
-  }
+  scriptchanged();
 }
 
 struct cfg_entry CFG_CLOAK_SCRIPT = {
-	"cloak-script", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+	"cloak-script", CFGF_GLOBAL | CFGF_LOCAL | CFGF_LEAF, NULL, NULL,
 	cloak_changed, cloak_changed, cloak_describe
 };
 
 
 void ctcp_init()
 {
-#ifdef LEAF
   char *p = NULL;
 #ifndef CYGWIN_HACKS
   struct utsname un;
@@ -701,5 +693,4 @@ void ctcp_init()
   add_builtins("ctcp", myctcp);
 
   timer_create_secs(60, "ctcp_minutely", (Function) ctcp_minutely);
-#endif /* LEAF */
 }

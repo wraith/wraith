@@ -1,4 +1,3 @@
-#ifdef LEAF
 /*
  * msgcmds.c -- part of irc.mod
  *   all commands entered via /MSG
@@ -752,4 +751,3 @@ static cmd_t C_msgc[] =
   {"voice",		"",	(Function) msgc_voice,		NULL, LEAF},
   {NULL,		NULL,	NULL,				NULL, 0}
 };
-#endif /* LEAF */

@@ -180,7 +180,6 @@ dprintf(int idx, const char *format, ...)
       case DP_STDERR:
         tputs(STDERR, buf, len);
         break;
-#ifdef LEAF
       case DP_SERVER:
       case DP_HELP:
       case DP_MODE:
@@ -188,6 +187,8 @@ dprintf(int idx, const char *format, ...)
       case DP_SERVER_NEXT:
       case DP_HELP_NEXT:
       case DP_DUMP:
+        if (conf.bot->hub)
+          break;
         len -= remove_crlf_r(buf);
 
         if ((idx == DP_DUMP || floodless)) {
@@ -199,7 +200,6 @@ dprintf(int idx, const char *format, ...)
         } else
           queue_server(idx, buf, len);
         break;
-#endif /* LEAF */
     }
     return;
   } else {                      /* normal chat text */
@@ -413,9 +413,7 @@ tell_dcc(int idx)
   egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5ud %%-%us %%-40s %%s\n", nicklen);
 
   dprintf(idx, "dccn: %d, dcc_total: %d\n", dccn, dcc_total);
-#ifdef LEAF
   dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
-#endif /* LEAF */
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type) {
       j = strlen(dcc[i].host);

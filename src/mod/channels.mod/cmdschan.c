@@ -92,11 +92,10 @@ static void cmd_pls_mask(const char type, int idx, char *par)
     egg_snprintf(s, sizeof s, "%s@*", who);	/* brain-dead? */
   else
     strlcpy(s, who, sizeof s);
-#ifdef LEAF
-    egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
-#else
-    egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
-#endif /* LEAF */
+    if (conf.bot->hub)
+      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
+    else
+      egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
   if (type == 'b' && s1[0] && wild_match(s, s1)) {
     dprintf(idx, "I'm not going to ban myself.\n");
     putlog(LOG_CMDS, "*", "#%s# attempted +ban %s", dcc[idx].nick, s);
@@ -120,14 +119,14 @@ static void cmd_pls_mask(const char type, int idx, char *par)
 	     dcc[idx].u.chat->con_chan, cmd, s, chan->dname, par);
       dprintf(idx, "New %s %s: %s (%s)\n", chan->dname, cmd, s, par);
     }
-#ifdef LEAF
-    if (type == 'e' || type == 'I')
-      add_mode(chan, '+', type, s);
-    /* Avoid unnesessary modes if you got +dynamicbans
-     */
-    else
-      check_this_ban(chan, s, sticky);
-#endif /* LEAF */
+    if (!conf.bot->hub) {
+      if (type == 'e' || type == 'I')
+        add_mode(chan, '+', type, s);
+      /* Avoid unnesessary modes if you got +dynamicbans
+       */
+      else
+        check_this_ban(chan, s, sticky);
+    }
   } else {
     u_addmask(type, NULL, s, dcc[idx].nick, par, expire_time ? now + expire_time : 0, 0);
     if (par[0] == '*') {
@@ -139,14 +138,14 @@ static void cmd_pls_mask(const char type, int idx, char *par)
       putlog(LOG_CMDS, "*", "#%s# (GLOBAL) +%s %s (%s)", dcc[idx].nick, cmd, s, par);
       dprintf(idx, "New %s: %s (%s)\n", cmd, s, par);
     }
-#ifdef LEAF
-    for (chan = chanset; chan != NULL; chan = chan->next) {
-      if (type == 'b')
-        check_this_ban(chan, s, sticky);
-      else
-        add_mode(chan, '+', type, s);
+    if (!conf.bot->hub) {
+      for (chan = chanset; chan != NULL; chan = chan->next) {
+        if (type == 'b')
+          check_this_ban(chan, s, sticky);
+        else
+          add_mode(chan, '+', type, s);
+      }
     }
-#endif /* LEAF */
   }
 }
 
@@ -213,10 +212,10 @@ static void cmd_mns_mask(const char type, int idx, char *par)
       mask = s;
     putlog(LOG_CMDS, "*", "#%s# -%s %s", dcc[idx].nick, cmd, mask);
     dprintf(idx, "%s %s: %s\n", "Removed", cmd, s);
-#ifdef LEAF
-    for (chan = chanset; chan != NULL; chan = chan->next)
-      add_mode(chan, '-', type, mask);
-#endif /* LEAF */
+    if (!conf.bot->hub) {
+      for (chan = chanset; chan != NULL; chan = chan->next)
+        add_mode(chan, '-', type, mask);
+    }
     return;
   }
   /* Channel-specific ban? */
@@ -234,9 +233,8 @@ static void cmd_mns_mask(const char type, int idx, char *par)
           mask = s;
 	putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s", dcc[idx].nick, chan->dname, cmd, mask);
 	dprintf(idx, "Removed %s channel %s: %s\n", chan->dname, cmd, mask);
-#ifdef LEAF
-	add_mode(chan, '-', type, mask);
-#endif  /* LEAF */
+        if (!conf.bot->hub)
+          add_mode(chan, '-', type, mask);
 	return;
       }
       i = 0;
@@ -247,9 +245,8 @@ static void cmd_mns_mask(const char type, int idx, char *par)
 	      chan->invites, m->mask))) {
 	  i++;
 	  if (i == -j) {
-#ifdef LEAF
-	    add_mode(chan, '-', type, m->mask);
-#endif  /* LEAF */
+            if (!conf.bot->hub)
+              add_mode(chan, '-', type, m->mask);
 	    dprintf(idx, "%s %s '%s' on %s.\n", "Removed", cmd, m->mask, chan->dname);
 	    putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s [on channel]", dcc[idx].nick, chan->dname, cmd, who);
 	    return;
@@ -261,16 +258,14 @@ static void cmd_mns_mask(const char type, int idx, char *par)
       if (j > 0) {
 	putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, who);
 	dprintf(idx, "Removed %s channel %s: %s\n", chname, cmd, who);
-#ifdef LEAF
-	add_mode(chan, '-', type, who);
-#endif  /* LEAF */
+        if (!conf.bot->hub)
+          add_mode(chan, '-', type, who);
 	return;
       }
       for (; m && m->mask && m->mask[0]; m = m->next) {
 	if (!rfc_casecmp(m->mask, who)) {
-#ifdef LEAF
-	  add_mode(chan, '-', type, m->mask);
-#endif  /* LEAF */
+          if (!conf.bot->hub)
+            add_mode(chan, '-', type, m->mask);
 	  dprintf(idx, "%s %s '%s' on %s.\n", "Removed", cmd, m->mask, chan->dname);
 	  putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s [on channel]", dcc[idx].nick, chan->dname, cmd, who);
 	  return;
@@ -531,11 +526,9 @@ static void cmd_slowjoin(int idx, char *par)
   }
   sprintf(buf2, "cjoin %s %s", chan->dname, buf);
   putallbots(buf2);
-#ifdef HUB
-  count=0;
-#else /* !HUB */
-  count=1;
-#endif /* HUB */
+  if (conf.bot->hub)
+    count = 0;
+
   for (bot = tandbot; bot; bot = bot->next) {
     struct userrec *ubot = NULL;
     char tmp[100] = "";
@@ -557,10 +550,8 @@ static void cmd_slowjoin(int idx, char *par)
   }
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
   chan->status &= ~CHAN_INACTIVE;
-#ifdef LEAF
-  if (shouldjoin(chan)) 
+  if (!conf.bot->hub && shouldjoin(chan)) 
     dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-#endif /* LEAF */
 }
 
 static void cmd_slowpart(int idx, char *par)
@@ -588,9 +579,8 @@ static void cmd_slowpart(int idx, char *par)
     return;
   }
   remove_channel(chan);
-#ifdef HUB
-  write_userfile(-1);
-#endif /* HUB */
+  if (conf.bot->hub)
+    write_userfile(-1);
   dprintf(idx, "Channel %s removed from the bot.\n", chname);
   dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
 
@@ -598,11 +588,8 @@ static void cmd_slowpart(int idx, char *par)
     dprintf(idx, "Hmmm... Channel didn't get removed. Weird *shrug*\n");
     return;
   }
-#ifdef HUB
-  count = 0;
-#else /* !HUB */
-  count = 1;
-#endif /* HUB */
+  if (conf.bot->hub)
+    count = 0;
   for (bot = tandbot; bot; bot = bot->next) {
     char tmp[100] = "";
     struct userrec *ubot = NULL;
@@ -623,9 +610,8 @@ static void cmd_slowpart(int idx, char *par)
       }  
   }
   dprintf(idx, "%i bots parting %s during the next %i seconds\n", count, chname, delay);
-#ifdef LEAF
-  dprintf(DP_MODE, "PART %s\n", chname);
-#endif /* LEAF */
+  if (!conf.bot->hub)
+    dprintf(DP_MODE, "PART %s\n", chname);
 }
 
 static void cmd_stick_yn(int idx, char *par, int yn)
@@ -737,14 +723,12 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     if (i > 0) {
       putlog(LOG_CMDS, "*", "#%s# %sstick ban %s", dcc[idx].nick, yn ? "" : "un", s);
       dprintf(idx, "%stuck ban: %s\n", yn ? "S" : "Uns", s);
-#ifdef LEAF
-    {
-      struct chanset_t *achan = NULL;
+      if (!conf.bot->hub) {
+        struct chanset_t *achan = NULL;
  
-      for (achan = chanset; achan != NULL; achan = achan->next)
-        check_this_ban(achan, s, yn);
-    }
-#endif /* LEAF */
+        for (achan = chanset; achan != NULL; achan = achan->next)
+          check_this_ban(achan, s, yn);
+      }
       return;
     }
     strlcpy(chname, dcc[idx].u.chat->con_chan, sizeof chname);
@@ -769,9 +753,8 @@ static void cmd_stick_yn(int idx, char *par, int yn)
   if (j > 0) {
     putlog(LOG_CMDS, "*", "#%s# %sstick ban %s %s", dcc[idx].nick, yn ? "" : "un", s, chname);
     dprintf(idx, "%stuck %s ban: %s\n", yn ? "S" : "Uns", chname, s);
-#ifdef LEAF
-    check_this_ban(chan, s, yn);
-#endif /* LEAF */
+    if (!conf.bot->hub)
+      check_this_ban(chan, s, yn);
     return;
   }
   dprintf(idx, "No such ban.\n");
@@ -914,11 +897,11 @@ static void cmd_cycle(int idx, char *par)
 
   sprintf(buf2, "cycle %s %d", chname, delay); /* this just makes the bot PART */
   putallbots(buf2);
-#ifdef LEAF
-  do_chanset(NULL, chan, "+inactive", DO_LOCAL);
-  dprintf(DP_SERVER, "PART %s\n", chan->name);
-  chan->channel.jointime = ((now + delay) - server_lag);
-#endif /* LEAF */
+  if (!conf.bot->hub) {
+    do_chanset(NULL, chan, "+inactive", DO_LOCAL);
+    dprintf(DP_SERVER, "PART %s\n", chan->name);
+    chan->channel.jointime = ((now + delay) - server_lag);
+  }
 }
 
 static void cmd_down(int idx, char *par)
@@ -942,11 +925,10 @@ static void cmd_down(int idx, char *par)
   
   sprintf(buf2, "down %s", chan->dname);
   putallbots(buf2);
-#ifdef LEAF
-  add_mode(chan, '-', 'o', botname);
-  chan->channel.no_op = (now + 10);
-#endif /* LEAF */
-  
+  if (!conf.bot->hub) {
+    add_mode(chan, '-', 'o', botname);
+    chan->channel.no_op = (now + 10);
+  }
 }
 
 static void pls_chan(int idx, char *par, char *bot)
@@ -1006,9 +988,8 @@ static void pls_chan(int idx, char *par, char *bot)
       }
       putallbots(buf);
     }
-#ifdef HUB
-    write_userfile(-1);
-#endif /* HUB */
+    if (conf.bot->hub)
+      write_userfile(-1);
   }
 }
 
@@ -1074,9 +1055,8 @@ static void mns_chan(int idx, char *par, char *bot)
         strcpy(dcc[i].u.chat->con_chan, "*");
       } 
     remove_channel(chan);
-#ifdef HUB
-    write_userfile(-1);
-#endif /* HUB */
+    if (conf.bot->hub)
+      write_userfile(-1);
     dprintf(idx, "Channel %s removed from the botnet.\n", chname);
     dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
   } else
@@ -1363,9 +1343,8 @@ static void cmd_chanset(int idx, char *par)
   else
     dprintf(idx, "Successfully set modes { %s } on %s\n", par, chan->dname);
 
-#ifdef HUB
-  write_userfile(idx);
-#endif /* HUB */
+  if (conf.bot->hub)
+    write_userfile(idx);
 }
 
 /* DCC CHAT COMMANDS

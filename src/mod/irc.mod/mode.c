@@ -1,4 +1,3 @@
-#ifdef LEAF
 /*
  * mode.c -- part of irc.mod
  *   queuing and flushing mode changes made by the bot
@@ -1435,4 +1434,3 @@ gotmode(char *from, char *msg)
   return 0;
 }
 
-#endif /* LEAF */
