@@ -1104,8 +1104,8 @@ do_take(struct chanset_t *chan)
     if (to_op[0])
       op = newsplit(&to_op);
 
-    for (i = 0; i < modesperline; i ++) {
-      if (to_deop[0] && ((i < (modesperline - 1)) || (!op))) {
+    for (i = 0; i < (signed) modesperline; i ++) {
+      if (to_deop[0] && ((i < ((signed) modesperline - 1)) || (!op))) {
         deopn++; 
         strcat(deops, newsplit(&to_deop)); 
         strcat(deops, " "); 
