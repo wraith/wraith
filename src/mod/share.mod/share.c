@@ -529,7 +529,7 @@ share_change(int idx, char *par)
 
       if (uet->got_share) {
         if (!(e = find_user_entry(uet, u))) {
-          e = calloc(1, sizeof(struct user_entry));
+          e = (struct user_entry *) calloc(1, sizeof(struct user_entry));
 
           e->type = uet;
           e->name = NULL;

@@ -540,7 +540,7 @@ got_op(struct chanset_t *chan, char *nick, char *from,
     /* tell other bots to set jointime to 0 and join */
     char *buf = NULL;
 
-    buf = calloc(1, strlen(chan->dname) + 3 + 1);
+    buf = (char *) calloc(1, strlen(chan->dname) + 3 + 1);
 
     sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);
@@ -908,7 +908,7 @@ gotmode(char *from, char *msg)
         strncpyz(work, msg, sizeof(work));
         wptr = work;
         p = newsplit(&wptr);
-        modes = calloc(modesperline + 1, sizeof(char *));
+        modes = (char **) calloc(modesperline + 1, sizeof(char *));
         while (*p) {            /* +MODES PARAM PARAM PARAM ... */
           char *mp = NULL;
           if (*p == '+')
@@ -919,7 +919,7 @@ gotmode(char *from, char *msg)
             mp = newsplit(&wptr);       /* PARAM as noted above */
             if (strchr("ob", p[0])) {
               /* Just want o's and b's */
-              modes[modecnt] = calloc(1, strlen(mp) + 4);
+              modes[modecnt] = (char *) calloc(1, strlen(mp) + 4);
               sprintf(modes[modecnt], "%c%c %s", sign, p[0], mp);
               modecnt++;
               if (p[0] == 'o') {

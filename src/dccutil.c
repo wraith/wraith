@@ -46,9 +46,9 @@ void init_dcc_max()
   if (max_dcc < 1)
     max_dcc = 1;
   if (dcc)
-    dcc = realloc(dcc, sizeof(struct dcc_t) * max_dcc);
+    dcc = (struct dcc_t *) realloc(dcc, sizeof(struct dcc_t) * max_dcc);
   else 
-    dcc = calloc(1, sizeof(struct dcc_t) * max_dcc);
+    dcc = (struct dcc_t *) calloc(1, sizeof(struct dcc_t) * max_dcc);
 
   MAXSOCKS = max_dcc + 10;
   if (socklist)
@@ -212,7 +212,7 @@ void dprintf(int idx, const char *format, ...)
       size_t size = 0;
       
       size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
-      ircbuf = calloc(1, size);
+      ircbuf = (char *) calloc(1, size);
       egg_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
       tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
       free(ircbuf);
@@ -535,7 +535,7 @@ int new_dcc(struct dcc_table *type, int xtra_size)
 
   dcc[i].type = type;
   if (xtra_size)
-    dcc[i].u.other = calloc(1, xtra_size);
+    dcc[i].u.other = (char *) calloc(1, xtra_size);
 
   return i;
 }
@@ -553,7 +553,7 @@ void changeover_dcc(int i, struct dcc_table *type, int xtra_size)
   }
   dcc[i].type = type;
   if (xtra_size)
-    dcc[i].u.other = calloc(1, xtra_size);
+    dcc[i].u.other = (char *) calloc(1, xtra_size);
 }
 
 int detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
@@ -715,7 +715,7 @@ int listen_all(int lport, int off)
       if (i > 0) {
 #endif /* USE_IPV6 */
         if (!pmap) {
-          pmap = calloc(1, sizeof(struct portmap));
+          pmap = (struct portmap *) calloc(1, sizeof(struct portmap));
           pmap->next = root;
           root = pmap;
         }

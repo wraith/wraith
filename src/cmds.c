@@ -252,7 +252,7 @@ static void cmd_config(int idx, char *par)
   if (!par[0]) {
     char *outbuf = NULL;
 
-    outbuf = calloc(1, 1);
+    outbuf = (char *) calloc(1, 1);
 
     dprintf(idx, "Usage: config [name [value|-]]\n");
     dprintf(idx, "Defined config entry names:\n");
@@ -260,10 +260,10 @@ static void cmd_config(int idx, char *par)
     for (i = 0; i < cfg_count; i++) {
       if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
 	if (!cnt) {
-          outbuf = realloc(outbuf, 2 + 1);
+          outbuf = (char *) realloc(outbuf, 2 + 1);
 	  sprintf(outbuf, "  ");
         }
-        outbuf = realloc(outbuf, strlen(outbuf) + strlen(cfg[i]->name) + 1 + 1);
+        outbuf = (char *) realloc(outbuf, strlen(outbuf) + strlen(cfg[i]->name) + 1 + 1);
 	sprintf(outbuf, "%s%s ", outbuf, cfg[i]->name);
 	cnt++;
 	if (cnt == 10) {
@@ -523,7 +523,7 @@ static void cmd_motd(int idx, char *par)
     size_t size;
   
     size = strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1;
-    s = calloc(1, size); /* +2: ' 'x2 */
+    s = (char *) calloc(1, size); /* +2: ' 'x2 */
 
     egg_snprintf(s, size, "%s %li %s", dcc[idx].nick, now, par);
     set_cfg_str(NULL, "motd", s);
@@ -595,13 +595,13 @@ static void cmd_addline(int idx, char *par)
 
   q = get_user(&USERENTRY_HOSTS, u);
   
-  hostbuf = calloc(1, 1);
+  hostbuf = (char *) calloc(1, 1);
   for (; q; q = q->next) {
-    hostbuf = realloc(hostbuf, strlen(hostbuf) + strlen(q->extra) + 2);
+    hostbuf = (char *) realloc(hostbuf, strlen(hostbuf) + strlen(q->extra) + 2);
     strcat(hostbuf, q->extra);
     strcat(hostbuf, " ");
   }
-  outbuf = calloc(1, strlen(hostbuf) + strlen(u->handle) + 20);
+  outbuf = (char *) calloc(1, strlen(hostbuf) + strlen(u->handle) + 20);
   sprintf(outbuf, "Addline: +user %s %s", u->handle, hostbuf);
   dumplots(idx, "", outbuf);
   free(hostbuf);
@@ -715,7 +715,7 @@ static void cmd_nohelp(int idx, char *par)
   int i;
   char *buf = NULL;
 
-  buf = calloc(1, 1);
+  buf = (char *) calloc(1, 1);
 
   qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   
@@ -724,7 +724,7 @@ static void cmd_nohelp(int idx, char *par)
     for (o = 0; (help[o].cmd) && (help[o].desc); o++)
       if (!egg_strcasecmp(help[o].cmd, cmdlist[i].name)) found++;
     if (!found) {
-      buf = realloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
+      buf = (char *) realloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
       strcat(buf, cmdlist[i].name);
       strcat(buf, ", ");
     }
@@ -1595,7 +1595,7 @@ static void cmd_hublevel(int idx, char *par)
   }
   dprintf(idx, "Changed bot's hublevel.\n");
   obi = get_user(&USERENTRY_BOTADDR, u1);
-  bi = calloc(1, sizeof(struct bot_addr));
+  bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
   bi->uplink = strdup(obi->uplink);
   bi->address = strdup(obi->address);
@@ -1633,7 +1633,7 @@ static void cmd_uplink(int idx, char *par)
   else
     dprintf(idx, "Cleared bot's uplink.\n");
   obi = get_user(&USERENTRY_BOTADDR, u1);
-  bi = calloc(1, sizeof(struct bot_addr));
+  bi = (struct bot_addry *) calloc(1, sizeof(struct bot_addr));
 
   bi->uplink = strdup(uplink);
   bi->address = strdup(obi->address);
@@ -1685,7 +1685,7 @@ static void cmd_chaddr(int idx, char *par)
     relay_port = bi->relay_port;
   }
 
-  bi = calloc(1, sizeof(struct bot_addr));
+  bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
   bi->uplink = strdup(obi->uplink);
   bi->hublevel = obi->hublevel;
@@ -1705,13 +1705,13 @@ static void cmd_chaddr(int idx, char *par)
       addr++;					/* lose the '[' */
       r = strchr(addr, ']');			/* pointer to the ending ']' */
 
-      bi->address = calloc(1, r - addr + 1);	/* alloc and copy the addr */
+      bi->address = (char *) calloc(1, r - addr + 1);	/* alloc and copy the addr */
       strncpyz(bi->address, addr, r - addr + 1);
 
       q = r + 1;				/* set q to ':' at addr */
     } else {
 #endif /* !USE_IPV6 */
-      bi->address = calloc(1, q - addr + 1);
+      bi->address = (char *) calloc(1, q - addr + 1);
       strncpyz(bi->address, addr, q - addr + 1);
 #ifdef USE_IPV6
     }
@@ -1780,7 +1780,7 @@ static void cmd_randstring(int idx, char *par)
   if (len < 301) {
     char *randstring = NULL;
 
-    randstring = calloc(1, len + 1);
+    randstring = (char *) calloc(1, len + 1);
     make_rand_str(randstring, len);
     dprintf(idx, "string: %s\n", randstring);
     free(randstring);
@@ -2474,7 +2474,7 @@ static void cmd_chattr(int idx, char *par)
 	return;
       }
     } else if (arg && !strpbrk(chg, "&|")) {
-      tmpchg = calloc(1, strlen(chg) + 2);
+      tmpchg = (char *) calloc(1, strlen(chg) + 2);
       strcpy(tmpchg, "|");
       strcat(tmpchg, chg);
       chg = tmpchg;
@@ -2788,7 +2788,7 @@ static void cmd_ps(int idx, char *par) {
     return;
   }
   size = strlen(par) + 9 + 1;
-  buf = calloc(1, size);
+  buf = (char *) calloc(1, size);
   egg_snprintf(buf, size, "ps %s", par);
   if (!exec_str(idx, buf))
     dprintf(idx, "Exec failed\n");
@@ -3068,9 +3068,9 @@ static void cmd_su(int idx, char *par)
 	 */
 	if (dcc[idx].u.chat->away != NULL)
 	  free(dcc[idx].u.chat->away);
-        dcc[idx].u.chat->away = calloc(1, strlen(dcc[idx].nick) + 1);
+        dcc[idx].u.chat->away = (char *) calloc(1, strlen(dcc[idx].nick) + 1);
 	strcpy(dcc[idx].u.chat->away, dcc[idx].nick);
-        dcc[idx].u.chat->su_nick = calloc(1, strlen(dcc[idx].nick) + 1);
+        dcc[idx].u.chat->su_nick = (char *) calloc(1, strlen(dcc[idx].nick) + 1);
 	strcpy(dcc[idx].u.chat->su_nick, dcc[idx].nick);
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);
@@ -3087,7 +3087,7 @@ static void cmd_su(int idx, char *par)
 	dprintf(idx, "Setting your username to %s.\n", par);
 	if (atr & USER_MASTER)
 	  dcc[idx].u.chat->con_flags = conmask;
-        dcc[idx].u.chat->su_nick = calloc(1, strlen(dcc[idx].nick) + 1);
+        dcc[idx].u.chat->su_nick = (char *) calloc(1, strlen(dcc[idx].nick) + 1);
 	strcpy(dcc[idx].u.chat->su_nick, dcc[idx].nick);
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);
@@ -3172,13 +3172,13 @@ static void cmd_newleaf(int idx, char *par)
 
       userlist = adduser(userlist, handle, "none", "-", USER_OP, 1);
       u1 = get_user_by_handle(userlist, handle);
-      bi = calloc(1, sizeof(struct bot_addr));
+      bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
-      bi->uplink = calloc(1, strlen(conf.bot->nick) + 1); 
+      bi->uplink = (char *) calloc(1, strlen(conf.bot->nick) + 1); 
 /*      strcpy(bi->uplink, conf.bot->nick); */
       strcpy(bi->uplink, "");
 
-      bi->address = calloc(1, 1);
+      bi->address = (char *) calloc(1, 1);
       bi->telnet_port = 3333;
       bi->relay_port = 3333;
       bi->hublevel = 0;
@@ -3205,7 +3205,7 @@ static void cmd_nopass(int idx, char *par)
   struct userrec *cu = NULL;
   char *users = NULL;
 
-  users = calloc(1, 1);
+  users = (char *) calloc(1, 1);
 
   putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
 
@@ -3213,7 +3213,7 @@ static void cmd_nopass(int idx, char *par)
     if (!cu->bot) {
       if (u_pass_match(cu, "-")) {
         cnt++;
-        users = realloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
+        users = (char *) realloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
         strcat(users, cu->handle);
         strcat(users, " ");
       }
@@ -4073,7 +4073,7 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
   if ((idx >= 0) && (idx < dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {
     char *buf = NULL;
     
-    buf = calloc(1, strlen(frombot) + 2 + 1);
+    buf = (char *) calloc(1, strlen(frombot) + 2 + 1);
 
     sprintf(buf, "(%s)", frombot);
     dprintf(idx, "%-13s %s\n", buf, ln);

@@ -285,7 +285,7 @@ int compress_file(char *filename, int mode_num)
   int ret;
 
   /* Create temporary filename. */
-  temp_fn = calloc(1, strlen(filename) + 5);
+  temp_fn = (char *) calloc(1, strlen(filename) + 5);
   make_rand_str(randstr, 4);
   strcpy(temp_fn, filename);
   strcat(temp_fn, randstr);
@@ -311,7 +311,7 @@ int uncompress_file(char *filename)
   int ret;
 
   /* Create temporary filename. */
-  temp_fn = calloc(1, strlen(filename) + 5);
+  temp_fn = (char *) calloc(1, strlen(filename) + 5);
   make_rand_str(randstr, 4);
   strcpy(temp_fn, filename);
   strcat(temp_fn, randstr);

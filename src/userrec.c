@@ -390,7 +390,7 @@ int write_userfile(int idx)
   if (userlist == NULL)
     return 1;			/* No point in saving userfile */
 
-  new_userfile = calloc(1, strlen(userfile) + 5);
+  new_userfile = (char *) calloc(1, strlen(userfile) + 5);
   sprintf(new_userfile, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");
@@ -663,7 +663,7 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
     struct laston_info *li = (struct laston_info *) get_user(&USERENTRY_LASTON, u);
 
     if (!li)
-      li = calloc(1, sizeof(struct laston_info));
+      li = (struct laston_info *) calloc(1, sizeof(struct laston_info));
 
     else if (li->lastonplace)
       free(li->lastonplace);

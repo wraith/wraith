@@ -325,7 +325,7 @@ set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
         break;
     ch = findchan_by_dname(chname);
     if (!cr && ch) {
-      cr = calloc(1, sizeof(struct chanuserrec));
+      cr = (struct chanuserrec *) calloc(1, sizeof(struct chanuserrec));
 
       cr->next = u->chanrec;
       u->chanrec = cr;

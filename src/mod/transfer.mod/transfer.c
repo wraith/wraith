@@ -159,7 +159,7 @@ static void send_next_file(char *to)
     return;			/* None */
   /* Copy this file to /tmp */
   if (this->dir[0] == '*') {	/* Absolute path */
-    s = calloc(1, strlen(&this->dir[1]) + strlen(this->file) + 2);
+    s = (char *) calloc(1, strlen(&this->dir[1]) + strlen(this->file) + 2);
     sprintf(s, "%s/%s", &this->dir[1], this->file);
   } else {
     char *p = strchr(this->dir, '*');
@@ -169,12 +169,12 @@ static void send_next_file(char *to)
       return;
     }
     p++;
-    s = calloc(1, strlen(p) + strlen(this->file) + 2);
+    s = (char *) calloc(1, strlen(p) + strlen(this->file) + 2);
     sprintf(s, "%s%s%s", p, p[0] ? "/" : "", this->file);
     strcpy(this->dir, &(p[atoi(this->dir)]));
   }
   if (copy_to_tmp) {
-    s1 = calloc(1, strlen(tempdir) + strlen(this->file) + 1);
+    s1 = (char *) calloc(1, strlen(tempdir) + strlen(this->file) + 1);
     sprintf(s1, "%s%s", tempdir, this->file);
     if (copyfile(s, s1) != 0) {
       putlog(LOG_FILES | LOG_MISC, "*",
@@ -193,10 +193,10 @@ static void send_next_file(char *to)
     s1 = strdup(s);
   }
   if (this->dir[0] == '*') {
-    s = realloc(s, strlen(&this->dir[1]) + strlen(this->file) + 2);
+    s = (char *) realloc(s, strlen(&this->dir[1]) + strlen(this->file) + 2);
     sprintf(s, "%s/%s", &this->dir[1], this->file);
   } else {
-    s = realloc(s, strlen(this->dir) + strlen(this->file) + 2);
+    s = (char *) realloc(s, strlen(this->dir) + strlen(this->file) + 2);
     sprintf(s, "%s%s%s", this->dir, this->dir[0] ? "/" : "", this->file);
   }
   x = raw_dcc_send(s1, this->to, this->nick, s);
@@ -257,7 +257,7 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
 {
   const unsigned long		 buf_len = pending_data >= PMAX_SIZE ?
 	  					PMAX_SIZE : pending_data;
-  char				*bf = calloc(1, buf_len);
+  char				*bf = (char *) calloc(1, buf_len);
   register unsigned long	 actual_size;
 
   if (bf) {
@@ -315,7 +315,7 @@ void eof_dcc_fork_send(int idx)
     putlog(LOG_MISC, "*", "%s: SEND %s (%s!%s)", DCC_CONNECTFAILED2,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     putlog(LOG_MISC, "*", "    (%s)", s1);
-    s2 = calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    s2 = (char *) calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(s2, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(s2);
     free(s2);
@@ -370,8 +370,8 @@ static void eof_dcc_send(int idx)
       return;
     }
     /* Move the file from /tmp */
-    ofn = calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
-    nfn = calloc(1, strlen(dcc[idx].u.xfer->dir)
+    ofn = (char *) calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    nfn = (char *) calloc(1, strlen(dcc[idx].u.xfer->dir)
 		  + strlen(dcc[idx].u.xfer->origname) + 1);
     sprintf(ofn, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     sprintf(nfn, "%s%s", dcc[idx].u.xfer->dir, dcc[idx].u.xfer->origname);
@@ -452,7 +452,7 @@ static void eof_dcc_send(int idx)
     putlog(LOG_FILES, "*",TRANSFER_LOST_DCCSEND,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host,
 	   dcc[idx].status, dcc[idx].u.xfer->length);
-    ofn = calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    ofn = (char *) calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(ofn, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(ofn);
     free(ofn);
@@ -752,7 +752,7 @@ void dcc_send(int idx, char *buf, int len)
 	   TRANSFER_FILE_TOO_LONG,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);
-    b = calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    b = (char *) calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(b, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(b);
     free(b);
@@ -876,7 +876,7 @@ void tout_dcc_send(int idx)
     putlog(LOG_FILES, "*",TRANSFER_DCC_SEND_TIMEOUT,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].status,
 	   dcc[idx].u.xfer->length);
-    buf = calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    buf = (char *) calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(buf, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(buf);
     free(buf);
@@ -1144,11 +1144,11 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
   dcc[i].port = port;
   strcpy(dcc[i].nick, nick);
   strcpy(dcc[i].host, "irc");
-  dcc[i].u.xfer->filename = calloc(1, strlen(filename) + 1);
+  dcc[i].u.xfer->filename = (char *) calloc(1, strlen(filename) + 1);
   strcpy(dcc[i].u.xfer->filename, filename);
   if (strchr(nfn, ' '))
     nfn = buf = replace_spaces(nfn);
-  dcc[i].u.xfer->origname = calloc(1, strlen(nfn) + 1);
+  dcc[i].u.xfer->origname = (char *) calloc(1, strlen(nfn) + 1);
   strcpy(dcc[i].u.xfer->origname, nfn);
   strncpyz(dcc[i].u.xfer->from, from, NICKLEN);
   strncpyz(dcc[i].u.xfer->dir, dir, DIRLEN);

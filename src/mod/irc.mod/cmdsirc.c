@@ -573,9 +573,9 @@ static void cmd_mdop(int idx, char *par)
   }
 
 
-  targets = calloc(1, chan->channel.members * sizeof(memberlist *));
+  targets = (memberlist **) calloc(1, chan->channel.members * sizeof(memberlist *));
 
-  chanbots = calloc(1, chan->channel.members * sizeof(memberlist *));
+  chanbots = (memberlist **) calloc(1, chan->channel.members * sizeof(memberlist *));
 
 ContextNote("!mdop!");
   for (m = chan->channel.member; m; m = m->next)
@@ -1105,8 +1105,8 @@ static void cmd_find(int idx, char *par)
         if (wild_match(par, tmp)) {
           fcount++;
           if (!found) {
-            found = calloc(1, sizeof(memberlist *) * 100);
-            cfound = calloc(1, sizeof(struct chanset_t *) * 100);
+            found = (memberlist **) calloc(1, sizeof(memberlist *) * 100);
+            cfound = (struct chanset_t **) calloc(1, sizeof(struct chanset_t *) * 100);
           }
           found[fcount - 1] = m;
           cfound[fcount - 1] = chan;

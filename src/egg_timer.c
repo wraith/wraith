@@ -121,7 +121,7 @@ int timer_create_complex(egg_timeval_t *howlong, const char *name, Function call
 	egg_timer_t *timer = NULL;
 
 	/* Fill out a new timer. */
-	timer = (egg_timer_t *)calloc(1, sizeof(*timer));
+	timer = (egg_timer_t *) calloc(1, sizeof(*timer));
 	timer->id = timer_next_id++;
 	if (name) timer->name = strdup(name);
 	else timer->name = NULL;
@@ -233,7 +233,7 @@ int timer_list(int **ids)
 	for (timer = timer_list_head; timer; timer = timer->next) ntimers++;
 
 	/* Fill in array. */
-	*ids = calloc(1, sizeof(int) * (ntimers+1));
+	*ids = (int *) calloc(1, sizeof(int) * (ntimers+1));
 	ntimers = 0;
 	for (timer = timer_list_head; timer; timer = timer->next) {
 		(*ids)[ntimers++] = timer->id;

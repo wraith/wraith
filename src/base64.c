@@ -30,7 +30,7 @@ b64enc(const unsigned char *data, int len)
 {
   char *dest = NULL;
 
-  dest = calloc(1, (len << 2) / 3 + 4 + 1);
+  dest = (char *) calloc(1, (len << 2) / 3 + 4 + 1);
   b64enc_buf(data, len, dest);
   return (dest);
 }
@@ -56,7 +56,7 @@ b64dec(const unsigned char *data, int *len)
 {
   char *dest = NULL;
 
-  dest = calloc(1, ((*len * 3) >> 2) + 6 + 1);
+  dest = (char *) calloc(1, ((*len * 3) >> 2) + 6 + 1);
   b64dec_buf(data, len, dest);
   return (dest);
 }

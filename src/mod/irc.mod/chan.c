@@ -1005,8 +1005,8 @@ take_massopline(char *op, char **to_op)
   char *nick = NULL, *modes = NULL, *nicks = NULL, *ret = NULL;
   int i = 0, useop = 0;
 
-  nicks = calloc(1, 51);
-  modes = calloc(1, 10);
+  nicks = (char *) calloc(1, 51);
+  modes = (char *) calloc(1, 10);
 
   for (i = 0; i < 4; i++) {
     nick = NULL;
@@ -1025,7 +1025,7 @@ take_massopline(char *op, char **to_op)
     }
   }
   
-  ret = calloc(1, 61);
+  ret = (char *) calloc(1, 61);
   strcat(ret, modes);
   strcat(ret, " ");
   strcat(ret, nicks);
@@ -1042,7 +1042,7 @@ take_makeline(char *op, char *deops, int deopn)
   char *ret = NULL;
 
   n = opn + deopn;		/* op + deops */
-  ret = calloc(1, 101);
+  ret = (char *) calloc(1, 101);
   pos = randint(deopn);
   
   for (i = 0; i < n; i++) {
@@ -1072,8 +1072,8 @@ do_take(struct chanset_t *chan)
   char work[512] = "", *to_op = NULL, *to_deop = NULL, *to_op_ptr = NULL, *to_deop_ptr = NULL;
   int lines = 0;
 
-  to_op = to_op_ptr = calloc(1, 2048);
-  to_deop = to_deop_ptr = calloc(1, 2048);
+  to_op = to_op_ptr = (char *) calloc(1, 2048);
+  to_deop = to_deop_ptr = (char *) calloc(1, 2048);
 
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     int hasop = (m->flags & CHANOP), isbot = 0;
@@ -2060,7 +2060,7 @@ static int gotjoin(char *from, char *chname)
     int	l_chname = strlen(chname);
 
     if (l_chname > (CHANNEL_ID_LEN + 1)) {
-      ch_dname = calloc(1, l_chname + 1);
+      ch_dname = (char *) calloc(1, l_chname + 1);
       if (ch_dname) {
 	egg_snprintf(ch_dname, l_chname + 2, "!%s",
 		     chname + (CHANNEL_ID_LEN + 1));

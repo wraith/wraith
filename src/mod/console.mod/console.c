@@ -44,7 +44,7 @@ console_unpack(struct userrec *u, struct user_entry *e)
   struct console_info *ci = NULL;
   char *par = NULL, *arg = NULL;
 
-  ci = calloc(1, sizeof(struct console_info));
+  ci = (struct console_info *) calloc(1, sizeof(struct console_info));
 
   par = e->u.list->extra;
   arg = newsplit(&par);
@@ -141,7 +141,7 @@ console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
     free(ci->channel);
     free(ci);
   }
-  ci = calloc(1, sizeof(struct console_info));
+  ci = (struct console_info *) calloc(1, sizeof(struct console_info));
   ci->channel = strdup(arg);
   arg = newsplit(&par);
   ci->conflags = logmodes(arg);
@@ -314,7 +314,7 @@ console_store(struct userrec *u, int idx, char *par)
   struct console_info *i = get_user(&USERENTRY_CONSOLE, u);
 
   if (!i) {
-    i = calloc(1, sizeof(struct console_info));
+    i = (struct console_info *) calloc(1, sizeof(struct console_info));
   }
   if (i->channel)
     free(i->channel);

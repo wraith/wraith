@@ -187,7 +187,7 @@ static void got_nu(char *botnick, char *code, char *par)
      struct bot_addr *bi = NULL, *obi = NULL;
 
      obi = get_user(&USERENTRY_BOTADDR, conf.bot->u);
-     bi = calloc(1, sizeof(struct bot_addr));
+     bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
      bi->uplink = strdup(botnick);
      bi->address = strdup(obi->address);

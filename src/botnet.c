@@ -61,7 +61,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
       putlog(LOG_BOTS, "*", "!!! Duplicate botnet bot entry!!");
     ptr = &((*ptr)->next);
   }
-  ptr2 = calloc(1, sizeof(tand_t));
+  ptr2 = (tand_t *) calloc(1, sizeof(tand_t));
   strncpy(ptr2->bot, who, HANDLEN);
   ptr2->bot[HANDLEN] = 0;
   ptr2->share = flag;
@@ -957,9 +957,9 @@ int botlink(char *linker, int idx, char *nick)
       strcpy(dcc[i].nick, nick);
       strcpy(dcc[i].host, bi->address);
       dcc[i].u.dns->ibuf = idx;
-      dcc[i].u.dns->cptr = calloc(1, strlen(linker) + 1);
+      dcc[i].u.dns->cptr = (char *) calloc(1, strlen(linker) + 1);
       strcpy(dcc[i].u.dns->cptr, linker);
-      dcc[i].u.dns->host = calloc(1, strlen(dcc[i].host) + 1);
+      dcc[i].u.dns->host = (char *) calloc(1, strlen(dcc[i].host) + 1);
       strcpy(dcc[i].u.dns->host, dcc[i].host);
       dcc[i].u.dns->dns_success = botlink_resolve_success;
       dcc[i].u.dns->dns_failure = botlink_resolve_failure;
@@ -1132,13 +1132,13 @@ void tandem_relay(int idx, char *nick, register int i)
   dprintf(idx, "%s\n", BOT_BYEINFO1);
   dcc[idx].type = &DCC_PRE_RELAY;
   ci = dcc[idx].u.chat;
-  dcc[idx].u.relay = calloc(1, sizeof(struct relay_info));
+  dcc[idx].u.relay = (struct relay_info *) calloc(1, sizeof(struct relay_info));
   dcc[idx].u.relay->chat = ci;
   dcc[idx].u.relay->old_status = dcc[idx].status;
   dcc[idx].u.relay->sock = dcc[i].sock;
   dcc[i].timeval = now;
   dcc[i].u.dns->ibuf = dcc[idx].sock;
-  dcc[i].u.dns->host = calloc(1, strlen(bi->address) + 1);
+  dcc[i].u.dns->host = (char *) calloc(1, strlen(bi->address) + 1);
   strcpy(dcc[i].u.dns->host, bi->address);
   dcc[i].u.dns->dns_success = tandem_relay_resolve_success;
   dcc[i].u.dns->dns_failure = tandem_relay_resolve_failure;
@@ -1186,7 +1186,7 @@ static void tandem_relay_resolve_success(int i)
 
   dcc[i].addr = dcc[i].u.dns->ip;
   changeover_dcc(i, &DCC_FORK_RELAY, sizeof(struct relay_info));
-  dcc[i].u.relay->chat = calloc(1, sizeof(struct chat_info));
+  dcc[i].u.relay->chat = (struct chat_info *) calloc(1, sizeof(struct chat_info));
 
   dcc[i].u.relay->sock = sock;
   dcc[i].u.relay->port = dcc[i].port;

@@ -22,7 +22,7 @@ struct chanuserrec *add_chanrec(struct userrec *u, char *chname)
   struct chanuserrec *ch = NULL;
 
   if (findchan_by_dname(chname)) {
-    ch = calloc(1, sizeof(struct chanuserrec));
+    ch = (struct chanuserrec *) calloc(1, sizeof(struct chanuserrec));
 
     ch->next = u->chanrec;
     u->chanrec = ch;
@@ -329,7 +329,7 @@ int u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *no
   }
 
   if (p == NULL) {
-    p = calloc(1, sizeof(maskrec));
+    p = (maskrec *) calloc(1, sizeof(maskrec));
     p->next = *u;
     *u = p;
   }

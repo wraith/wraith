@@ -1413,9 +1413,9 @@ static void connect_server(void)
 
     dcc[newidx].timeval = now;
     dcc[newidx].sock = -1;
-    dcc[newidx].u.dns->host = calloc(1, strlen(botserver) + 1);
+    dcc[newidx].u.dns->host = (char *) calloc(1, strlen(botserver) + 1);
     strcpy(dcc[newidx].u.dns->host, botserver);
-    dcc[newidx].u.dns->cbuf = calloc(1, strlen(pass) + 1);
+    dcc[newidx].u.dns->cbuf = (char *) calloc(1, strlen(pass) + 1);
     strcpy(dcc[newidx].u.dns->cbuf, pass);
     dcc[newidx].u.dns->dns_success = server_resolve_success;
     dcc[newidx].u.dns->dns_failure = server_resolve_failure;

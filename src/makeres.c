@@ -62,10 +62,10 @@ char *step_thru_file(FILE *fd)
     fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = calloc(1, strlen(tempBuf) + 2);
+        retStr = (char *) calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);
       } else {
-        retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
+        retStr = (char *) realloc(retStr, strlen(retStr) + strlen(tempBuf));
         strcat(retStr, tempBuf);
       }
       if (retStr[strlen(retStr)-1] == '\n') {
@@ -160,7 +160,7 @@ typedef char * res_t;\n\n");
         p = strchr(buffer, ':');
         p++;
         if (strcmp(p, "end")) {		/* NEXT RES */
-          cmd = calloc(1, strlen(p) + 1);
+          cmd = (char *) calloc(1, strlen(p) + 1);
 
           total_responses++;
           strcpy(cmd, p);
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
   int ret = 0;
 
   if (argc < 3) return 1;
-  in = calloc(1, strlen(argv[1]) + 1);
+  in = (char *) calloc(1, strlen(argv[1]) + 1);
   strcpy(in, argv[1]);
   sprintf(out, "%s/response.h%s", argv[2], argc == 4 ? "~" : "");
   sprintf(outs, "%s/responses.h%s", argv[2], argc == 4 ? "~" : "");

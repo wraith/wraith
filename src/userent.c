@@ -98,7 +98,7 @@ int def_set(struct userrec *u, struct user_entry *e, void *buf)
       l = 160;
 
 
-    e->u.string = realloc (e->u.string, l + 1);
+    e->u.string = (char *) realloc (e->u.string, l + 1);
 
     strncpyz (e->u.string, string, l + 1);
 
@@ -255,7 +255,7 @@ int config_unpack(struct userrec *u, struct user_entry *e)
   head = curr = e->u.list;
   e->u.extra = NULL;
   while (curr) {
-    t = calloc(1, sizeof(struct xtra_key));
+    t = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
 
     data = curr->extra;
     key = newsplit(&data);
@@ -310,12 +310,12 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
     return 1;
   }
 
-  xk = calloc(1, sizeof(struct xtra_key));
+  xk = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
 
   l = strlen(arg);
   if (l > 1500)
     l = 1500;
-  xk->key = calloc(1, l + 1);
+  xk->key = (char *) calloc(1, l + 1);
   strncpy(xk->key, arg, l + 1);
 
   if (buf && buf[0]) {
@@ -323,7 +323,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
 
     if (k > 1500 - l)
       k = 1500 - l;
-    xk->data = calloc(1, k + 1);
+    xk->data = (char *) calloc(1, k + 1);
     strncpy(xk->data, buf, k + 1);
   }
   config_set(u, e, xk);
@@ -620,7 +620,7 @@ static int laston_unpack(struct userrec *u, struct user_entry *e)
   arg = newsplit (&par);
   if (!par[0])
     par = "???";
-  li = calloc(1, sizeof(struct laston_info));
+  li = (struct laston_info *) calloc(1, sizeof(struct laston_info));
   li->laston = atoi(arg);
   li->lastonplace = strdup(par);
   list_type_kill(e->u.list);
@@ -707,7 +707,7 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
   char p[1024] = "", *q1 = NULL, *q2 = NULL;
   struct bot_addr *bi = NULL;
 
-  bi = calloc(1, sizeof(struct bot_addr));
+  bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
   /* address:port/port:hublevel:uplink */
   Context;
@@ -743,7 +743,7 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
   if (!bi->relay_port)
     bi->relay_port = bi->telnet_port;
   if (!bi->uplink) {
-    bi->uplink = calloc(1, 1);
+    bi->uplink = (char *) calloc(1, 1);
   }
   list_type_kill(e->u.list);
   e->u.extra = bi;
@@ -824,7 +824,7 @@ static int botaddr_gotshare(struct userrec *u, struct user_entry *e, char *buf, 
   struct bot_addr *bi = NULL;
   char *arg = NULL;
 
-  bi = calloc(1, sizeof(struct bot_addr));
+  bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
   arg = newsplit(&buf);
   bi->address = strdup(arg);
   arg = newsplit(&buf);
@@ -953,7 +953,7 @@ static int hosts_set(struct userrec *u, struct user_entry *e, void *buf)
       } else
 	t = &((*t)->next);
     }
-    *t = calloc(1, sizeof(struct list_type));
+    *t = (struct list_type *) calloc(1, sizeof(struct list_type));
 
     (*t)->next = NULL;
     (*t)->extra = strdup(host);
@@ -1072,7 +1072,7 @@ int set_user(struct user_entry_type *et, struct userrec *u, void *d)
     return 0;
 
   if (!(e = find_user_entry(et, u))) {
-    e = calloc(1, sizeof(struct user_entry));
+    e = (struct user_entry *) calloc(1, sizeof(struct user_entry));
 
     e->type = et;
     e->name = NULL;

@@ -120,7 +120,7 @@ makecookie(char *chn, char *bnick)
 
   sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
   hash = MD5(tohash);
-  buf = calloc(1, 20);
+  buf = (char *) calloc(1, 20);
   sprintf(buf, "%c%c%c!%s@%s", hash[8], hash[16], hash[18], randstring, ts);
   /* sprintf(buf, "%c/%s!%s@%X", hash[16], randstring, ts, BIT31); */
   free(chname);
@@ -421,7 +421,7 @@ getin_request(char *botnick, char *code, char *par)
     }
     if (strchr(p2, 'k')) {
       sendi = 0;
-      tmp = calloc(1, strlen(chan->dname) + strlen(p3) + 7);
+      tmp = (char *) calloc(1, strlen(chan->dname) + strlen(p3) + 7);
       sprintf(tmp, "gi K %s %s", chan->dname, p3);
       botnet_send_zapf(nextbot(botnick), conf.bot->nick, botnick, tmp);
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Sent key (%s)", botnick, nick, chan->dname, p3);
@@ -549,7 +549,7 @@ request_op(struct chanset_t *chan)
   /* first scan for bots on my server, ask first found for ops */
   cnt = OP_BOTS;
   sprintf(s, "gi o %s %s", chan->dname, botname);
-  l = calloc(1, cnt * 50);
+  l = (char *) calloc(1, cnt * 50);
   for (i2 = 0; i2 < i; i2++) {
     if (botops[i2]->server && (!strcmp(botops[i2]->server, myserv))) {
       putbot(botops[i2]->user->handle, s);
@@ -621,7 +621,7 @@ request_in(struct chanset_t *chan)
   cnt = IN_BOTS;
   sprintf(s, "gi i %s %s %s!%s %s %s", chan->dname, botname, botname, botuserhost,
           myipstr(4) ? myipstr(4) : ".", myipstr(6) ? myipstr(6) : ".");
-  l = calloc(1, cnt * 30);
+  l = (char *) calloc(1, cnt * 30);
   while (cnt) {
     n = randint(i);
     if (botops[n]) {

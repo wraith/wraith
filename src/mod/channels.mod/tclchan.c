@@ -667,7 +667,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 
 static void init_masklist(masklist *m)
 {
-  m->mask = (char *)calloc(1, 1);
+  m->mask = (char *) calloc(1, 1);
   m->who = NULL;
   m->next = NULL;
 }

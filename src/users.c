@@ -120,7 +120,7 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
     }
 
   if (p == NULL) {
-    p = calloc(1, sizeof(struct igrec));
+    p = (struct igrec *) calloc(1, sizeof(struct igrec));
     p->next = global_ign;
     global_ign = p;
   } else {
@@ -223,7 +223,7 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
 			 char *note, time_t expire_time, int flags,
 			 time_t added, time_t last)
 {
-  maskrec *p = calloc(1, sizeof(maskrec));
+  maskrec *p = (maskrec *) calloc(1, sizeof(maskrec));
   maskrec **u = (chan) ? m : global;
 
   p->next = *u;
@@ -425,7 +425,7 @@ static void restore_ignore(char *host)
 	added = "0";
 	desc = NULL;
       }
-      p = calloc(1, sizeof(struct igrec));
+      p = (struct igrec *) calloc(1, sizeof(struct igrec));
 
       p->next = global_ign;
       global_ign = p;
@@ -883,7 +883,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	      if (ue->name && !egg_strcasecmp(code + 2, ue->name)) {
 		struct list_type *list = NULL;
 
-		list = calloc(1, sizeof(struct list_type));
+		list = (struct list_type *) calloc(1, sizeof(struct list_type));
 
 		list->next = NULL;
                 list->extra = strdup(s);
@@ -891,12 +891,12 @@ int readuserfile(const char *file, struct userrec **ret)
 		ok = 1;
 	      }
 	    if (!ok) {
-	      ue = calloc(1, sizeof(struct user_entry));
+	      ue = (struct user_entry *) calloc(1, sizeof(struct user_entry));
 
-	      ue->name = calloc(1, strlen(code + 1));
+	      ue->name = (char *) calloc(1, strlen(code + 1));
 	      ue->type = NULL;
 	      strcpy(ue->name, code + 2);
-	      ue->u.list = calloc(1, sizeof(struct list_type));
+	      ue->u.list = (struct list_type *) calloc(1, sizeof(struct list_type));
 
 	      ue->u.list->next = NULL;
               ue->u.list->extra = strdup(s);
@@ -1235,7 +1235,7 @@ void autolink_cycle(char *start)
     if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
       putlog(LOG_DEBUG, "@", "Adding %s to hublist", u->handle);
       hl2 = hl;
-      hl = calloc(1, sizeof(struct hublist_entry));
+      hl = (struct hublist_entry *) calloc(1, sizeof(struct hublist_entry));
 
       hl->next = hl2;
       hlc++;

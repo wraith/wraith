@@ -31,7 +31,7 @@ encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
   if (len % CRYPT_BLOCKSIZE)             /* more than 1 block? */
     len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
 
-  out = calloc(1, len + 1);
+  out = (unsigned char *) calloc(1, len + 1);
   egg_memcpy(out, in, *inlen);
   *inlen = len;
 
@@ -59,7 +59,7 @@ decrypt_binary(const char *keydata, unsigned char *in, size_t len)
   unsigned char *out = NULL;
 
   len -= len % CRYPT_BLOCKSIZE;
-  out = calloc(1, len + 1);
+  out = (unsigned char *) calloc(1, len + 1);
   egg_memcpy(out, in, len);
 
   if (!keydata || !*keydata) {
@@ -109,7 +109,7 @@ char *decrypt_string(const char *keydata, char *in)
     free(buf);
     return res;
   } else {
-    res = calloc(1, len + 1);
+    res = (char *) calloc(1, len + 1);
     strcpy(res, in);
     return res;
   }
@@ -173,7 +173,7 @@ void Encrypt_File(char *infile, char *outfile)
     printf("----------------------------------START----------------------------------\n");
   }
 
-  buf = calloc(1, 1024);
+  buf = (char *) calloc(1, 1024);
   while (fgets(buf, 1024, f) != NULL) {
     remove_crlf(buf);
 
@@ -211,7 +211,7 @@ void Decrypt_File(char *infile, char *outfile)
     printf("----------------------------------START----------------------------------\n");
   }
 
-  buf = calloc(1, 2048);
+  buf = (char *) calloc(1, 2048);
   while (fgets(buf, 2048, f) != NULL) {
     char *temps = NULL;
 

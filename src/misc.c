@@ -540,7 +540,7 @@ char *str_escape(const char *str, const char divc, const char mask)
   char		*buf = NULL, *b = NULL;
   const char	*s = NULL;
 
-  b = buf = calloc(1, buflen + 1);
+  b = buf = (char *) calloc(1, buflen + 1);
 
   if (!buf)
     return NULL;
@@ -548,7 +548,7 @@ char *str_escape(const char *str, const char divc, const char mask)
     /* Resize buffer. */
     if ((buflen - blen) <= 3) {
       buflen <<= 1;		/* * 2 */
-      buf = realloc(buf, buflen + 1);
+      buf = (char *) realloc(buf, buflen + 1);
       if (!buf)
 	return NULL;
       b = buf + blen;
@@ -685,7 +685,7 @@ int updatebin(int idx, char *par, int secs)
     logidx(idx, "Not enough parameters.");
     return 1;
   }
-  path = calloc(1, strlen(binname) + strlen(par) + 2);
+  path = (char *) calloc(1, strlen(binname) + strlen(par) + 2);
   strcpy(path, binname);
   newbin = strrchr(path, '/');
   if (!newbin) {
@@ -704,7 +704,7 @@ int updatebin(int idx, char *par, int secs)
 #ifdef CYGWIN_HACKS
   /* tack on the .exe */
   if (!strstr(path, ".exe")) {
-    path = realloc(path, strlen(path) + 4 + 1);
+    path = (char *) realloc(path, strlen(path) + 4 + 1);
     strcat(path, ".exe");
     path[strlen(path)] = 0;
   }
@@ -746,7 +746,7 @@ int updatebin(int idx, char *par, int secs)
 #ifdef CYGWIN_HACKS
   {
     size_t binsize = strlen(tmpdir) + 7 + 1;
-    char *tmpbuf = calloc(1, binsize);
+    char *tmpbuf = (char *) calloc(1, binsize);
 
     sprintf(tmpbuf, "%sbin.old", tmpdir);
     tmpbuf[binsize - 1] = 0;
@@ -895,7 +895,7 @@ void showhelp(int idx, struct flag_record *flags, char *string)
   char *helpstr = NULL, tmp[2] = "", flagstr[10] = "";
   int ok = 1;
 
-  helpstr = calloc(1, strlen(string) + 1000 + 1);
+  helpstr = (char *) calloc(1, strlen(string) + 1000 + 1);
   while (string && string[0]) {
     if (*string == '%') {
       if (!strncmp(string + 1, "{+", 2)) {
@@ -1117,10 +1117,10 @@ char *step_thru_file(FILE *fd)
     fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = calloc(1, strlen(tempBuf) + 2);
+        retStr = (char *) calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);
       } else {
-        retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
+        retStr = (char *) realloc(retStr, strlen(retStr) + strlen(tempBuf));
         strcat(retStr, tempBuf);
       }
       if (retStr[strlen(retStr)-1] == '\n') {

@@ -119,9 +119,9 @@ void processline(char *line)
     tmpout[0] = 0;
 
   if (outbuf)
-    outbuf = realloc(outbuf, strlen(outbuf) + strlen(tmpout) + 10);
+    outbuf = (char *) realloc(outbuf, strlen(outbuf) + strlen(tmpout) + 10);
   else {
-    outbuf = calloc(1, strlen(tmpout) + 10);
+    outbuf = (char *) calloc(1, strlen(tmpout) + 10);
   }
   strcat(outbuf, tmpout);
   strcat(outbuf, "\n");
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
   fseek(f, 0, SEEK_END);
   insize = ftell(f);
   fseek(f, 0, SEEK_SET);
-  buf = calloc(1, insize + 1);
+  buf = (char *) calloc(1, insize + 1);
   fread(buf, 1, insize, f);
   fclose(f);
   buf[insize] = 0;

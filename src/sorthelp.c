@@ -54,10 +54,10 @@ char *step_thru_file(FILE *fd)
     fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = calloc(1, strlen(tempBuf) + 2);
+        retStr = (char *) calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);
       } else {
-        retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
+        retStr = (char *) realloc(retStr, strlen(retStr) + strlen(tempBuf));
         strcat(retStr, tempBuf);
       }
       if (retStr[strlen(retStr)-1] == '\n') {
@@ -114,7 +114,7 @@ int my_cmp (const cmds *c1, const cmds *c2)
 
 int parse_help(char *infile, char *outfile) {
   FILE *in = NULL, *out = NULL;
-  char *buffer = NULL, my_buf[12048] = "", *fulllist = calloc(1, 1);
+  char *buffer = NULL, my_buf[12048] = "", *fulllist = (char *) calloc(1, 1);
   int skip = 0, line = 0, i = 0, leaf = 0, hub = 0;
 
   if (!(in = fopen(infile, "r"))) {
@@ -128,7 +128,7 @@ int parse_help(char *infile, char *outfile) {
       if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
       if ((skipline(buffer, &skip))) continue;
       if (buffer[0] == ':') { //New cmd 
-        char *ifdef = calloc(1, strlen(buffer) + 1), *p;
+        char *ifdef = (char *) calloc(1, strlen(buffer) + 1), *p;
 
         buffer++;
         strcpy(ifdef, buffer);
@@ -144,7 +144,7 @@ int parse_help(char *infile, char *outfile) {
         /* finish last command */
         if (my_buf && my_buf[0]) {
           my_buf[strlen(my_buf)] = 0;
-          cmdlist[cmdi].txt = calloc(1, strlen(my_buf) + 1);
+          cmdlist[cmdi].txt = (char *) calloc(1, strlen(my_buf) + 1);
           strcpy(cmdlist[cmdi].txt, my_buf);
           i++;
           cmdi++;
@@ -165,7 +165,7 @@ int parse_help(char *infile, char *outfile) {
               my_buf[0] = 0;
               continue;
             }
-          cmdlist[cmdi].name = calloc(1, strlen(p) + 1);
+          cmdlist[cmdi].name = (char *) calloc(1, strlen(p) + 1);
           strcpy(cmdlist[cmdi].name, p);
         } else {			/* END */
           break;
@@ -185,7 +185,7 @@ int parse_help(char *infile, char *outfile) {
   qsort(cmdlist, cmdi, sizeof(cmds), (int (*)()) &my_cmp);
 
   for (i = 0; i < cmdi; i++ ) {
-    fulllist = realloc(fulllist, strlen(fulllist) + strlen(cmdlist[i].name) + 2);
+    fulllist = (char *) realloc(fulllist, strlen(fulllist) + strlen(cmdlist[i].name) + 2);
     strcat(fulllist, cmdlist[i].name);
     strcat(fulllist, " ");
     fprintf(out, ":");
@@ -208,9 +208,9 @@ int main(int argc, char **argv) {
   int ret = 0;
 
   if (argc < 3) return 1;
-  in = calloc(1, strlen(argv[1]) + 1);
+  in = (char *) calloc(1, strlen(argv[1]) + 1);
   strcpy(in, argv[1]);
-  out = calloc(1, strlen(argv[2]) + 1);
+  out = (char *) calloc(1, strlen(argv[2]) + 1);
   strcpy(out, argv[2]);
   ret = parse_help(in, out);
   free(in);

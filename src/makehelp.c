@@ -46,10 +46,10 @@ char *step_thru_file(FILE *fd)
     fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = calloc(1, strlen(tempBuf) + 2);
+        retStr = (char *) calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);
       } else {
-        retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
+        retStr = (char *) realloc(retStr, strlen(retStr) + strlen(tempBuf));
         strcat(retStr, tempBuf);
       }
       if (retStr[strlen(retStr)-1] == '\n') {
@@ -129,7 +129,7 @@ help_t help[] = \n\
       if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
       if ((skipline(buffer, &skip))) continue;
       if (buffer[0] == ':') { /* New cmd */
-        char *ifdef = calloc(1, strlen(buffer) + 1), *p = NULL;
+        char *ifdef = (char *) calloc(1, strlen(buffer) + 1), *p = NULL;
         int cl = 0, doleaf = 0, dohub = 0;
 
         buffer++;
@@ -163,14 +163,14 @@ help_t help[] = \n\
         p = strchr(buffer, ':');
         p++;
         if (strcmp(p, "end")) {		/* NEXT CMD */
-          cmd = calloc(1, strlen(p) + 1);
+          cmd = (char *) calloc(1, strlen(p) + 1);
 
           strcpy(cmd, p);
           printf(".");
           if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
           else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
           if (strchr(cmd, ':')) {
-            char *p2 = NULL, *cmdn = calloc(1,strlen(cmd) + 1);
+            char *p2 = NULL, *cmdn = (char *) calloc(1,strlen(cmd) + 1);
 
             strcpy(cmdn, cmd);
             p2 = strchr(cmdn, ':');
@@ -199,9 +199,9 @@ int main(int argc, char **argv) {
   int ret = 0;
 
   if (argc < 3) return 1;
-  in = calloc(1, strlen(argv[1]) + 1);
+  in = (char *) calloc(1, strlen(argv[1]) + 1);
   strcpy(in, argv[1]);
-  out = calloc(1, strlen(argv[2]) + 1);
+  out = (char *) calloc(1, strlen(argv[2]) + 1);
   strcpy(out, argv[2]);
   ret = parse_help(in, out);
   free(in);
