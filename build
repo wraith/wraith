@@ -30,15 +30,13 @@ echo
 
 usage() 
 {
-    echo "Usage: $0 [-bcdn] [-t dir] [-T] [all|hub|leaf]"
+    echo "Usage: $0 [-bcdn] [all|hub|leaf]"
     echo
     echo "    The options are as follows:"
     echo "    -b        Use bzip2 instead of gzip when packaging."
     echo "    -c        Cleans up old binaries/files before compile."
     echo "    -d        Builds a debug package."
     echo "    -n        Do not package the binaries."
-    echo "    -t dir    Where to search for TCL libraries."
-    echo "    -T        Builds TCL if it is not on the system."
 }
 
 debug=0
@@ -47,34 +45,23 @@ hub=0
 leaf=0
 clean=0
 type=
-tcldir=
-buildtcl=0
 nopkg=0
 bzip=0
 
-while getopts t:bcdhnT opt ; do
+while getopts bcdhn opt ; do
         case "$opt" in
         b) bzip=1 ;;
 	c) clean=1 ;;
         d) debug=1 ;;
 	h) usage; exit 0 ;;
         n) nopkg=1 ;;
-	t) tcldir="$OPTARG" ;;
-	T) buildtcl=1 ;;
+#	t) tcldir="$OPTARG" ;;
         *) usage; exit 1 ;;
 
         esac
 done
 
 shift $(($OPTIND - 1))
-
-if [ $buildtcl = "1" ]; then
- echo "Hold tight"
- misc/maketcl
- rm -rf tcl8.4.4*
- echo "Done. (You must run ./build again with normal parameters)"
- exit 0
-fi
 
 if test -z "$1"; then
  usage
@@ -129,14 +116,7 @@ echo "[*] Building ${PACKNAME}::${type} for $os"
 echo "[*] Configuring..."
 umask 077 >/dev/null
 
-if test -z "$tcldir"; then
-  echo "[*] Searching for TCL in default paths (use '-t dir' to change)"
-  ./configure --silent 
-else
-  echo "[*] Searching for TCL in: $tcldir"
-  ./configure --silent --with-tcllib=${tcldir}/lib/libtcl8.4.a --with-tclinc=${tcldir}/include/tcl.h
-fi
-
+./configure --silent
 
 MAKE="`which gmake`"
 if test -z "${MAKE}"; then

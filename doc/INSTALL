@@ -1,47 +1,22 @@
 
 * The installation process has changed starting at version 1.0.11. 
-* The build currently requires a static TCL 8.0 or newer library. (TCL will be stripped soon)
-* All commands and directories/ are assumed to be located/ran in the wraith root dir. (TCL excluded)
+* All commands and directories/ are assumed to be located/ran in the wraith root dir.
 
-1. TCL
-2. Pack settings
-3. Compiling
-4. Making bots
+1. Pack settings
+2. Compiling
+3. Making bots
 
-Step 1: TCL
-
-If you have already made a static TCL build proceed to Step 2. If you are unsure then keep reading...
-From the main pack dir, just type: ./build -T
-If this fails, keep reading, otherwise, proceed to Step 2.
-The download website is at:
-	http://www.tcl.tk/software/tcltk/download84.html
-A nice direct link for the tarball is:
-	http://aleron.dl.sourceforge.net/sourceforge/tcl/tcl8.4.4-src.tar.gz
-Once you have it, untar -zxf tcl8.4.4-src.tar.gz
-Then, cd tcl8.4.4/unix
-./configure --disable-shared --prefix=/path/to/your/home --exec-prefix=/path/to/your/home
-Then: make; make install
-Make sure you edit pack/conf.h and change the path to TCL. (See Pack settings)
-
-Step 2: Pack settings
+Step 1: Pack settings
 
 The files listed here are all located in pack/, and will need to be saved for future compiles.
-If you have pack.cfg, conf.h, or salt.h, place them in pack/
-NOTE: salt.h, settings.c and conf.h (pack.conf) from versions previous to 1.0.11 are NOT compatable with 1.0.11 and higher.
+If you have pack.cff place it in pack/
 
-conf.h:
- This file contains pack compile-time options and the path to TCL
- If you have an older pack.conf, print it out and edit the template pack/conf.h and change accordingly.
-salt.h:
- This file is generated automatically, if you do not already have one, during compilation.
- If you have an older salt.h, do not use it.
 pack.cfg(.sample):
- This is the new and improved version of settings.c
  Simply edit it and change accordingly 
  Rename to pack.cfg when completed and make sure it is in pack/
 
 
-Step 3: Compiling
+Step 2: Compiling
 
 For leaf build: ./build leaf
 For hub build: ./build hub
@@ -54,7 +29,7 @@ After the compile process is finished, the binaries will be placed in wraith.OS.
  The OS and version are dynamic depending on the pack build, type 'ls' to find exact name.
 
 
-Step 4: Making bots
+Step 3: Making bots
 
 NOTE: conf files from versions older than 1.0.11 still work, but improvements have been made.
 

@@ -4,9 +4,7 @@
 #include "common.h"
 #include "dcc.h"
 
-#ifdef HAVE_DPRINTF
-#  define dprintf dprintf_eggdrop
-#endif
+#define dprintf dprintf_eggdrop
 
 /* Public structure for the listening port map */
 struct portmap {

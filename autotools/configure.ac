@@ -123,7 +123,7 @@ AC_FUNC_STRFTIME
 
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([clock dprintf fsync getdtablesize getrusage inet_aton isascii gethostbyname2])
+AC_CHECK_FUNCS([clock fsync getdtablesize getrusage inet_aton isascii gethostbyname2])
 AC_CHECK_FUNCS([getipnodebyname memcpy memset random rename setpgid sigaction sigemptyset snprintf srandom])
 #checkpoint
 AC_CACHE_SAVE
@@ -131,7 +131,9 @@ AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf])
 
 #autoscan suggested this....
 #These are recommended by autoscan, but no code supports it currently
-#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday inet_ntoa mbrlen mkdir munmap realpath select setlocale socket strchr strerror strpbrk strrchr strstr strtol tzset])
+#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday inet_ntoa mbrlen
+#mkdir munmap realpath select setlocale socket strchr strerror strpbrk strrchr strstr strtol tzset])
+
 EGG_CHECK_FUNC_VSPRINTF
 EGG_CHECK_FUNC_UNAME
 

@@ -26,9 +26,6 @@
    */
 #undef HAVE_DIRENT_H
 
-/* Define to 1 if you have the `dprintf' function. */
-#undef HAVE_DPRINTF
-
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 

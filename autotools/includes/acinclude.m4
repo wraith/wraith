@@ -354,8 +354,8 @@ else
   AC_CHECK_LIB(nsl, connect)
   AC_CHECK_LIB(dns, gethostbyname)
   AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
-  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lssl -lcrypto", SSL="", -lcrypto) 
-#  AC_CHECK_LIB(m, tan, EGG_MATH_LIB="-lm")
+#  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lssl -lcrypto", SSL="", -lcrypto) 
+  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lcrypto", SSL="", -lcrypto) 
   # This is needed for Tcl libraries compiled with thread support
 #  AC_CHECK_LIB(pthread, pthread_mutex_init, [dnl
 #  ac_cv_lib_pthread_pthread_mutex_init=yes
