@@ -452,6 +452,7 @@ void real_killsock(register int sock, const char *file, int line)
     return;
   }
 
+  sdprintf("killsock(%d, %s, %d)", sock, file, line);
   for (register int i = 0; i < MAXSOCKS; i++) {
     if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED)) {
 #ifdef HAVE_SSL
@@ -669,7 +670,7 @@ int open_telnet_raw(int sock, char *server, port_t sport)
   int rc = connect(sock, &so.sa, SIZEOF_SOCKADDR(so));
 
   if (rc < 0) {    
-    sdprintf("connect(%s) failed: %s", server, strerror(errono));
+    sdprintf("connect(%s) failed: %s", server, strerror(errno));
     if (errno == EINPROGRESS) {
       /* Firewall?  announce connect attempt to proxy */
       if (firewall[0])
