@@ -1149,7 +1149,8 @@ See also: whois, console
 ::motd
 ###  %bmotd%b %{+m}<message>%{-}
    This redisplays the partyline Message Of The Day, which was shown when you
-   first joined the partyline.%{+m} Inclue a message to set the motd.%{-}
+   first joined the partyline.
+%{+m}+m: Inclue a message to set the motd.%{-}
 :leaf:msg
 ###  %bmsg%b <nickname> <text>
    Sends a private message to someone from the bot, just as if the
