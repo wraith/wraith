@@ -511,7 +511,7 @@ struct dupwait_info {
 #define DCT_SIMUL     0x00000020	/* can be tcl_simul'd		    */
 #define DCT_CANBOOT   0x00000040	/* can be booted		    */
 #define DCT_GETNOTES  DCT_CHAT		/* can receive notes		    */
-#define DCT_FILES     0x00000080	/* gratuitous hack ;)		    */
+#define DCT_  	      0x00000080	/* unused */
 #define DCT_FORKTYPE  0x00000100	/* a forking type		    */
 #define DCT_BOT       0x00000200	/* a bot connection of some sort... */
 #define DCT_FILETRAN  0x00000400	/* a file transfer of some sort	    */

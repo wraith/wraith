@@ -810,7 +810,7 @@ static void eof_dcc_send(int idx)
     nfree(ofn);
     nfree(nfn);
     for (j = 0; j < dcc_total; j++)
-      if (!ok && (dcc[j].type->flags & (DCT_GETNOTES | DCT_FILES)) &&
+      if (!ok && (dcc[j].type->flags & (DCT_GETNOTES)) &&
 	  !egg_strcasecmp(dcc[j].nick, hand)) {
 	ok = 1;
 	dprintf(j,TRANSFER_THANKS);

@@ -1081,7 +1081,7 @@ static void cmd_dccstat(struct userrec *u, int idx, char *par)
 
 static void cmd_boot(struct userrec *u, int idx, char *par)
 {
-  int i, files = 0, ok = 0;
+  int i, ok = 0;
   char *who;
   struct userrec *u2;
 
@@ -1125,11 +1125,7 @@ static void cmd_boot(struct userrec *u, int idx, char *par)
         dprintf(idx, STR("You can't boot a bot master.\n"));
         return;
       }
-      files = (dcc[i].type->flags & DCT_FILES);
-      if (files)
-        dprintf(idx, STR("Booted %s from the file area.\n"), dcc[i].nick);
-      else
-        dprintf(idx, STR("Booted %s from the party line.\n"), dcc[i].nick);
+      dprintf(idx, STR("Booted %s from the party line.\n"), dcc[i].nick);
       putlog(LOG_CMDS, "*", STR("#%s# boot %s %s"), dcc[idx].nick, who, par);
       do_boot(i, dcc[idx].nick, par);
       ok = 1;
@@ -1942,9 +1938,7 @@ int check_dcc_attrs(struct userrec *u, int oatr)
        if (ischanhub() && !(u->flags & USER_CHUBA))
          stat &= ~STAT_CHAT;
       }
-      if ((dcc[i].type->flags & DCT_FILES) && !(stat & STAT_CHAT) &&
-	  ((u->flags & USER_MASTER) || (u->flags & USER_PARTY) ||
-	   ((u->flags & USER_OP) && !1)))
+      if ((u->flags & USER_PARTY))
 	stat |= STAT_CHAT;
       dcc[i].status = stat;
       /* Check if they no longer have access to wherever they are.
