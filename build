@@ -53,9 +53,10 @@ nopkg=0
 bzip=0
 pkg=0
 scp=0
+nightly=0
 pack=pack/pack.cfg
 
-while getopts bCcdhnPp:s: opt ; do
+while getopts bCcdhnNPp:s: opt ; do
         case "$opt" in
         b) bzip=1 ;;
 	c) clean=1 ;;
@@ -63,6 +64,7 @@ while getopts bCcdhnPp:s: opt ; do
         d) debug=1 ;;
 	h) usage; exit 0 ;;
         n) nopkg=1 ;;
+	N) nightly=1 ;;
 	p) pack="$OPTARG" ;;
         P) pkg=1 ;;
 	s) scp="$OPTARG" ;;
@@ -134,7 +136,7 @@ then
   echo "[!] Automated packaging disabled, `uname` isn't recognized"
 fi
 
-if ! [ $scp = "0" ]; then
+if [ $nightly = "1" ]; then
   chmod 0700 misc/id_dsa
   remotedate="`ssh -q -i misc/id_dsa bryan@endurance.quadspeedi.net ls -al public_html/nightly/${os}-current.tar.gz | \
              sed -e 's/.*\-> \([0-1][0-2]\.[0-3][0-9]\.[0-9][0-9][0-9][0-9]\)\-.*/\1/'`"
