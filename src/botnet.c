@@ -566,11 +566,12 @@ void tell_bottree(int idx)
     return;
   }
 
-  char s[161] = "", work[1024] = "";
+  char s[161] = "", work[1024] = "", *color = NULL;
   tand_t *last[20] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   tand_t *thisbot = NULL, *bot = NULL, *bot2 = NULL;
   int lev = 0, more = 1, mark[20], ok, cnt, i = 0, imark, tothops = 0;
+  struct userrec *botu = NULL;
 
   for (bot = tandbot; bot; bot = bot->next)
     if (!bot->uplink) {
@@ -582,11 +583,17 @@ void tell_bottree(int idx)
       i += strlen(bot->bot);
     }
 
+  if (bot_hublevel(conf.bot->u) < 999))
+    color = YELLOW(idx);
+  if (localhub)
+    color = RED(idx);
+  else
+    color = NULL;
+
   if (s[0])
     dprintf(idx, "(%s %s)\n", BOT_NOTRACEINFO, s);
-  dprintf(idx, "%s%s%s (%s %li)\n", localhub ? RED(idx) : "", 
-                                    conf.bot->nick, 
-                                    localhub ? COLOR_END(idx) : "",
+  dprintf(idx, "%s%s%s (%s %li)\n", color ? color : "", 
+                                    color ? COLOR_END(idx) : "",
                                     egg_version, buildts);
 
   thisbot = (tand_t *) 1;
@@ -618,13 +625,22 @@ void tell_bottree(int idx)
       bot = tandbot;
       while (!s[0]) {
 	if (bot->uplink == thisbot) {
+          botu = get_user_by_handle(userlist, bot->bot);
+       
+          if (botu && bot_hublevel(botu) < 999)
+            color = YELLOW(idx);
+          if (botu && bot->localhub)
+            color = RED(idx);
+          else
+            color = NULL;
+
           if (bot->share)
             i = sprintf(s, "%c", bot->share);
           else
             i = sprintf(s, "-");
-          i = sprintf(s + 1, "%s%s%s (%s %li)", bot->localhub ? RED(idx) : "",
+          i = sprintf(s + 1, "%s%s%s (%s %li)", color ? color : "",
                                                 bot->bot,
-                                                bot->localhub ? COLOR_END(idx) : "",
+                                                color ? COLOR_END(idx) : "",
                                                 bot->version, bot->buildts);
 	} else
 	  bot = bot->next;
@@ -654,14 +670,23 @@ void tell_bottree(int idx)
 	    else if (ok) {
 	      cnt++;
 	      if (cnt == 1) {
+                botu = get_user_by_handle(userlist, bot->bot);
+       
+                if (botu && bot_hublevel(botu) < 999)
+                  color = YELLOW(idx);
+                if (botu && bot->localhub)
+                  color = RED(idx);
+                else
+                  color = NULL;
+
 		bot2 = bot;
                 if (bot->share)
                   i = sprintf(s, "%c", bot->share);
                 else
                   i = sprintf(s, "-");
-                i = sprintf(s + 1, "%s%s%s (%s %li)", bot->localhub ? RED(idx) : "",
+                i = sprintf(s + 1, "%s%s%s (%s %li)", color ? color : "",
                                                       bot->bot,
-                                                      bot->localhub ? COLOR_END(idx) : "",
+                                                      color ? COLOR_END(idx) : "",
                                                       bot->version, bot->buildts);
 	      }
 	    }
