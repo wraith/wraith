@@ -6,7 +6,6 @@
 #define DO_LOCAL	1
 #define DO_NET		2
 
-#ifndef MAKING_MODS
 extern struct chanset_t *chanset;
 extern char botname[];
 
@@ -34,7 +33,5 @@ extern char			admin[], origbotname[], botname[];
 #ifdef HUB
 extern int			my_port;
 #endif /* HUB */
-
-#endif /* !MAKING_MODS */
 
 #endif /* !_CHANPROG_H */

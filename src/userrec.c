@@ -19,7 +19,7 @@
 #include "chan.h"
 #include "match.h"
 #include "dccutil.h"
-#include "modules.h"
+#include "hooks.h"
 #include "tandem.h"
 #include "chanprog.h"
 #include "crypt.h"

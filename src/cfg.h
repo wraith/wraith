@@ -52,7 +52,6 @@ struct cfg_entry CFG_FIGHTTHRESHOLD;
 #endif /* S_AUTOLOCK */
 #endif /* HUB */
 
-#ifndef MAKING_MODS
 void set_cfg_str(char *, char *, char *);
 void add_cfg(struct cfg_entry *);
 void got_config_share(int, char *, int);
@@ -69,6 +68,5 @@ extern struct cmd_pass            *cmdpass;
 extern char			cmdprefix[];
 extern int			cfg_count, cfg_noshare;
 extern struct cfg_entry		**cfg;
-#endif /* MAKING_MODS */
 
 #endif /* !_CFG_H */

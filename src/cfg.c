@@ -19,7 +19,6 @@
 #include <fcntl.h>
 #include "chan.h"
 #include "tandem.h"
-#include "modules.h"
 #ifdef S_DCCPASS
 #include "botnet.h"
 #endif /* S_DCCPASS */

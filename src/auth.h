@@ -18,7 +18,6 @@ struct auth_t {
 };
 #endif /* S_AUTHCMDS */
 
-#ifndef MAKING_MODS
 # ifdef S_AUTHCMDS
 int new_auth();
 int findauth(char *);
@@ -36,7 +35,5 @@ extern struct auth_t		*auth;
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 extern char                     authkey[121];
 #endif /* S_AUTHHASH || S_DCCAUTH */
-
-#endif /* !MAKING_MODS */
 
 #endif /* !_AUTH_H */

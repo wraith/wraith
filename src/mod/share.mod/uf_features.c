@@ -123,20 +123,6 @@ static void uff_insert_entry(uff_list_t *nul)
     uff_list.end = nul;
 }
 
-/* Remove entry from sorted list.
- */
-static void uff_remove_entry(uff_list_t *ul)
-{
-  if (!ul->next)
-    uff_list.end = ul->prev;
-  else
-    ul->next->prev = ul->prev;
-  if (!ul->prev)
-    uff_list.start = ul->next;
-  else
-    ul->prev->next = ul->next;
-}
-
 /* Add a single feature to the list.
  */
 static void uff_addfeature(uff_table_t *ut)
@@ -159,39 +145,13 @@ static void uff_addfeature(uff_table_t *ut)
 
 /* Add a complete table to the list.
  */
-static void uff_addtable(uff_table_t *ut)
+void uff_addtable(uff_table_t *ut)
 {
   if (!ut)
     return;
   for (; ut->feature; ++ut)
     uff_addfeature(ut);
 }
-
-/* Remove a single feature from the list.
- */
-static int uff_delfeature(uff_table_t *ut)
-{
-  uff_list_t *ul = NULL;
-
-  for (ul = uff_list.start; ul; ul = ul->next)
-    if (!strcmp(ul->entry->feature, ut->feature)) {
-      uff_remove_entry(ul);
-      free(ul);
-      return 1;
-    }
-  return 0;
-}
-
-/* Remove a complete table from the list.
- */
-static void uff_deltable(uff_table_t *ut)
-{
-  if (!ut)
-    return;
-  for (; ut->feature; ++ut)
-    (int) uff_delfeature(ut);
-}
-
 
 /*
  *    Userfile feature parsing functions

@@ -57,9 +57,6 @@ typedef struct bind_table_b {
 } bind_table_t;
 
 
-#ifndef MAKING_MODS
-
-
 void kill_binds(void);
 void binds_init();
 
@@ -72,8 +69,5 @@ int bind_entry_del(bind_table_t *table, int id, const char *mask, const char *fu
 int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char *function_name, const char *newflags, const char *newmask);
 void add_builtins(const char *table_name, cmd_t *cmds);
 void rem_builtins(const char *table_name, cmd_t *cmds);
-
-#endif
-
 
 #endif				/* _EGG_TCLHASH_H */

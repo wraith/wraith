@@ -26,7 +26,6 @@ struct portmap {
 #define DP_HELP_NEXT    0x7FF9
 
 
-#ifndef MAKING_MODS
 void dprintf (int, ...);
 void chatout (char *, ...);
 void chanout_but (int, ...);
@@ -47,6 +46,5 @@ void do_boot(int, char *, char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
 
 extern int		max_dcc, connect_timeout;
-#endif /* !MAKING_MODS */
 
 #endif /* !_DCCUTIL_H */

@@ -4,7 +4,6 @@
  *
  */
 
-#undef MAKING_MODS /* TEMP HACK */
 #include "ctcp.h"
 #include "src/common.h"
 #include "src/main.h"
@@ -16,7 +15,6 @@
 #include "src/userrec.h"
 #include "src/botmsg.h"
 #include "src/tclhash.h"
-#include "src/modules.h"
 #include "src/egg_timer.h"
 
 #ifdef LEAF

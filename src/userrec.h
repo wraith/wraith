@@ -1,8 +1,6 @@
 #ifndef _USERREC_H
 #define _USERREC_H
 
-
-#ifndef MAKING_MODS
 void deflag_user(struct userrec *, int, char *, struct chanset_t *);
 struct userrec *adduser(struct userrec *, char *, char *, char *, int);
 void addhost_by_handle(char *, char *);
@@ -26,6 +24,4 @@ char *fixfrom(char *);
 extern struct userrec  		*userlist, *lastuser;
 extern int			noshare, cache_hit, cache_miss, strict_host,
 				userfile_perm;
-#endif /* !MAKING_MODS */
-
 #endif /* !_USERREC_H */

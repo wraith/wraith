@@ -24,7 +24,7 @@
 #include "bg.h"	
 #include "chan.h"
 #include "tandem.h"
-#include "modules.h"
+#include "hooks.h"
 #ifdef LEAF
 #include "src/mod/server.mod/server.h"
 #include "src/mod/irc.mod/irc.h"

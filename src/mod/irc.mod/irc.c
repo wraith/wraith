@@ -5,11 +5,10 @@
  *
  */
 
-#undef MAKING_MODS
 #include "src/common.h"
 #define MAKING_IRC
 #include "irc.h"
-#include "src/modules.h"
+#include "src/hooks.h"
 #include "src/match.h"
 #include "src/settings.h"
 #include "src/tandem.h"
@@ -1421,8 +1420,9 @@ static void do_nettype()
   default:
     break;
   }
+
   /* Update all rfc_ function pointers */
-  add_hook(HOOK_RFC_CASECMP, (Function) rfc_compliant);
+  /* add_hook(HOOK_RFC_CASECMP, (Function) rfc_compliant); */
 }
 
 static cmd_t irc_bot[] = {
@@ -1551,7 +1551,6 @@ void irc_init()
   timer_create_secs(60, "warn_pls_take", (Function) warn_pls_take);
   timer_create_secs(60, "check_servers", (Function) check_servers);
   timer_create_secs(5, "getin_5secondly", (Function) getin_5secondly);
-  add_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   add_hook(HOOK_IDLE, (Function) flush_modes);
 #ifdef S_AUTOLOCK
   timer_create_secs(60, "check_netfight", (Function) check_netfight);

@@ -36,8 +36,6 @@
 #define DET_DIE 3
 #define DET_SUICIDE 4
 
-
-#ifndef MAKING_MODS
 void check_mypid();
 int clear_tmp();
 char *homedir();
@@ -59,7 +57,5 @@ void crontab_del();
 int crontab_exists();
 void crontab_create(int);
 void check_trace_start();
-#endif /* !MAKING_MODS */
-
 
 #endif /* _SHELL_H */

@@ -24,7 +24,6 @@
 #include "tandem.h"
 #include "users.h"
 #include "chan.h"
-#include "modules.h"
 #include "core_binds.h"
 
 int remote_boots = 2;
@@ -1271,7 +1270,6 @@ void bot_shareupdate(int idx, char *par)
 static void bot_versions(int sock, char *par)
 {
   char *frombot = newsplit(&par), *tobot = NULL, *from = NULL;
-  module_entry *me = NULL;
 
   if (nextbot(frombot) != sock)
     fake_alert(sock, "versions-direction", frombot);
@@ -1281,9 +1279,10 @@ static void bot_versions(int sock, char *par)
   } else {
     from = newsplit(&par);
     botnet_send_priv(sock, conf.bot->nick, from, frombot, "Modules loaded:\n");
+/* wtf?
     for (me = module_list; me; me = me->next)
-      botnet_send_priv(sock, conf.bot->nick, from, frombot, "  Module: %s\n",
-		       me->name);
+      botnet_send_priv(sock, conf.bot->nick, from, frombot, "  Module: %s\n", me->name);
+*/
     botnet_send_priv(sock, conf.bot->nick, from, frombot, "End of module list.\n");
   }
 }

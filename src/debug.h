@@ -53,7 +53,6 @@
 #define debug4(x,a1,a2,a3,a4)   putlog(LOG_DEBUG,"*",x,a1,a2,a3,a4)
 
 
-#ifndef MAKING_MODS
 extern int		sdebug;
 
 void sdprintf (char *, ...);
@@ -62,6 +61,5 @@ void init_debug();
 void eggContext(const char *, int, const char *);
 void eggContextNote(const char *, int, const char *, const char *);
 void eggAssert(const char *, int, const char *);
-#endif /* !MAKING_MODS */
 
 #endif /* !_DEBUG_H */

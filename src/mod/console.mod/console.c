@@ -5,7 +5,6 @@
  *
  */
 
-#undef MAKING_MODS
 #include "console.h"
 #include "src/common.h"
 #include "src/mod/share.mod/share.h"

@@ -3,7 +3,6 @@
 
 #include <sys/types.h>
 
-#ifndef MAKING_MODS
 extern int		localhub, role, loading, default_flags, default_uflags,
 			backgrd, term_z, updating, use_stderr, do_restart;
 extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[];
@@ -13,6 +12,5 @@ extern const time_t	buildts;
 extern const char	egg_version[];
 
 void fatal(const char *, int);
-#endif /* !MAKING_MODS */
 
 #endif /* !_MAIN_H */

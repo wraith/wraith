@@ -39,17 +39,11 @@ typedef struct {
 				   to `priority'.			*/
 } uff_table_t;
 
-#ifndef MAKING_SHARE
-/* 4 - 7 */
-#define finish_share ((void (*) (int))share_funcs[4])
-#define dump_resync ((void (*) (int))share_funcs[5])
-#define uff_addtable ((void (*) (uff_table_t *))share_funcs[6])
-#define uff_deltable ((void (*) (uff_table_t *))share_funcs[7])
-/* 8 - 11 */
-
 void sharein(int, char *);
 void shareout(struct chanset_t *, ...);
-
-#endif				/* !MAKING_SHARE */
+void finish_share(int);
+void dump_resync(int);
+void uff_addtable(uff_table_t *);
+void share_report(int, int);
 
 #endif				/* _EGG_MOD_SHARE_SHARE_H */

@@ -181,8 +181,6 @@ struct flag_record {
 #define bot_chan(x)		((x).chan & BOT_AGGRESSIVE)
 #define bot_shared(x)		((x).bot & BOT_SHARE)
 
-#ifndef MAKING_MODS
-
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void set_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void break_down_flags(const char *, struct flag_record *, struct flag_record *);
@@ -204,7 +202,5 @@ int isupdatehub();
 int dovoice(struct chanset_t *);
 int dolimit(struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);
-
-#endif				/* MAKING_MODS */
 
 #endif				/* _EGG_FLAGS_H */

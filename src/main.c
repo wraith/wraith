@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "main.h"
+#include "hooks.h"
 #include "dcc.h"
 #include "misc.h"
 #include "settings.h"
@@ -41,7 +42,6 @@
 #include <sys/stat.h>
 
 #include "chan.h"
-#include "modules.h"
 #include "tandem.h"
 #include "egg_timer.h"
 #include "core_binds.h"
@@ -618,7 +618,7 @@ static void startup_checks() {
 #include "mod/static.h"
 
 int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
- init_net(), init_modules(), init_botcmd();
+ init_net(), init_botcmd();
 
 int main(int argc, char **argv)
 {
@@ -667,18 +667,17 @@ int main(int argc, char **argv)
 
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
+  hooks_init();
   binds_init();
   core_binds_init();
   init_dcc_max();
   init_userent();
   init_bots();
   init_net();
-  init_modules();
   init_auth();
   init_config();
   init_botcmd();
   init_conf();
-  link_statics();
 
   if (argc) {
     sdprintf(STR("Calling dtx_arg with %d params."), argc);
@@ -705,13 +704,13 @@ int main(int argc, char **argv)
   server_init();
   irc_init();
 #endif /* LEAF */
-  module_load("transfer");
-  module_load("share");
+  transfer_init();
+  share_init();
   update_init();
   notes_init();
   console_init();
   ctcp_init();
-  module_load("compress");
+  compress_init();
   chanprog();
 
 

@@ -119,8 +119,6 @@ typedef struct {
 } sock_list;
 
 
-#ifndef MAKING_MODS
-
 # define killsock(x)     	real_killsock((x),__FILE__,__LINE__)
 
 IP my_atoul(char *);
@@ -177,8 +175,5 @@ extern char				firewall[], botuser[];
 extern int				firewallport, resolve_timeout, MAXSOCKS;
 extern jmp_buf				alarmret;
 extern sock_list			*socklist;
-
-
-#endif /* !MAKING_MODS */
 
 #endif /* !_NET_H */

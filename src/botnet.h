@@ -7,8 +7,6 @@
 
 #include "tandem.h"
 
-#ifndef MAKING_MODS
-
 extern tand_t		*tandbot;
 extern party_t		*party;
 extern int		tands;
@@ -45,6 +43,5 @@ void botnet_send_cmdpass(int, char *, char *);
 void zapfbot(int);
 void tandem_relay(int, char *, int);
 int getparty(char *, int);
-#endif /* !MAKING_MODS */
 
 #endif /* !_BOTNET_H */

@@ -7,30 +7,32 @@
  * BitchX, copyright by panasync.
  */
 
-#define MODULE_NAME "transfer"
-#define MAKING_TRANSFER
-
-/* sigh sunos */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "src/mod/module.h"
+#include "src/common.h"
+#include "src/cmds.h"
+#include "src/misc_file.h"
+#include "src/misc.h"
+#include "src/main.h"
+#include "src/userrec.h"
+#include "src/userent.h"
 #include "src/tandem.h"
-#include "src/mod/share.mod/share.h"
 #include "src/net.h"
-
+#include "src/tclhash.h"
 #include "src/users.h"
+
+#define MAKING_TRANSFER
 #include "transfer.h"
 
+#include "src/mod/share.mod/share.h"
 #include "src/mod/update.mod/update.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
 extern int		bupdating;
 
 static bind_table_t *BT_rcvd = NULL, *BT_sent = NULL, *BT_lost = NULL, *BT_tout = NULL;
-
-static Function *global = NULL;
 
 static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
 static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
@@ -583,13 +585,7 @@ static void eof_dcc_send(int idx)
     /* Success */
     ok = 0;
     if (!strcmp(dcc[idx].nick, "*users")) {
-      module_entry *me = module_find("share", 0, 0);
-
-      if (me && me->funcs) {
-	Function f = me->funcs[SHARE_FINISH];
-
-	(f) (idx);
-      }
+      finish_share(idx);
       killsock(dcc[idx].sock);
       lostdcc(idx);
       return;
@@ -625,17 +621,9 @@ static void eof_dcc_send(int idx)
     sprintf(ofn, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     sprintf(nfn, "%s%s", dcc[idx].u.xfer->dir, dcc[idx].u.xfer->origname);
     if (movefile(ofn, nfn))
-      putlog(LOG_MISC | LOG_FILES, "*",
-	     TRANSFER_FAILED_MOVE, nfn, ofn);
+      putlog(LOG_MISC | LOG_FILES, "*", TRANSFER_FAILED_MOVE, nfn, ofn);
     else {
-      /* Add to file database */
-      module_entry *fs = module_find("filesys", 0, 0);
-
-      if (fs != NULL) {
-	Function f = fs->funcs[FILESYS_ADDFILE];
-
-	f(dcc[idx].u.xfer->dir, dcc[idx].u.xfer->origname, hand);
-      }
+      /* old filesys crap was here */
       stats_add_upload(u, dcc[idx].u.xfer->length);
       check_sentrcvd(u, dcc[idx].nick, nfn, BT_rcvd);
     }
@@ -780,7 +768,7 @@ void dcc_get(int idx, char *buf, int len)
    */
   if (w < 4 ||
       (w < 8 && dcc[idx].u.xfer->type == XFER_RESEND_PEND)) {
-    my_memcpy(&(dcc[idx].u.xfer->buf[dcc[idx].u.xfer->sofar]), buf, len);
+    egg_memcpy(&(dcc[idx].u.xfer->buf[dcc[idx].u.xfer->sofar]), buf, len);
     dcc[idx].u.xfer->sofar += len;
     return;
   /* Waiting for the 8 bit reget packet? */
@@ -789,8 +777,8 @@ void dcc_get(int idx, char *buf, int len)
     if (w == 8) {
       transfer_reget reget_data;
 
-      my_memcpy(&reget_data, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
-      my_memcpy(&reget_data + dcc[idx].u.xfer->sofar, buf, len);
+      egg_memcpy(&reget_data, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
+      egg_memcpy(&reget_data + dcc[idx].u.xfer->sofar, buf, len);
       handle_resend_packet(idx, &reget_data);
       cmp = dcc[idx].u.xfer->offset;
     } else
@@ -800,16 +788,16 @@ void dcc_get(int idx, char *buf, int len)
   } else {
     /* Complete packet? */
     if (w == 4) {
-      my_memcpy(bbuf, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
-      my_memcpy(&(bbuf[dcc[idx].u.xfer->sofar]), buf, len);
+      egg_memcpy(bbuf, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
+      egg_memcpy(&(bbuf[dcc[idx].u.xfer->sofar]), buf, len);
     } else {
       p = ((w - 1) & ~3) - dcc[idx].u.xfer->sofar;
       w = w - ((w - 1) & ~3);
       if (w < 4) {
-	my_memcpy(dcc[idx].u.xfer->buf, &(buf[p]), w);
+	egg_memcpy(dcc[idx].u.xfer->buf, &(buf[p]), w);
 	return;
       }
-      my_memcpy(bbuf, &(buf[p]), w);
+      egg_memcpy(bbuf, &(buf[p]), w);
     }
     /* This is more compatible than ntohl for machines where an int
      * is more than 4 bytes:
@@ -861,7 +849,6 @@ void dcc_get(int idx, char *buf, int len)
     killsock(dcc[idx].sock);
     fclose(dcc[idx].u.xfer->f);
     if (!strcmp(dcc[idx].nick, "*users")) {
-      module_entry *me = module_find("share", 0, 0);
       int x, y = 0;
 
       for (x = 0; x < dcc_total; x++)
@@ -870,12 +857,10 @@ void dcc_get(int idx, char *buf, int len)
 	  y = x;
       if (y != 0)
 	dcc[y].status &= ~STAT_SENDING;
-      putlog(LOG_BOTS, "*",TRANSFER_COMPLETED_USERFILE,
-	     dcc[y].nick);
+      putlog(LOG_BOTS, "*",TRANSFER_COMPLETED_USERFILE, dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
       /* Any sharebot things that were queued: */
-      if (me && me->funcs[SHARE_DUMP_RESYNC])
-	((me->funcs)[SHARE_DUMP_RESYNC]) (y);
+      dump_resync(y);
       xnick[0] = 0;
     } else if (!strcmp(dcc[idx].nick, "*binary")) {
       int x, y = 0;
@@ -895,16 +880,8 @@ void dcc_get(int idx, char *buf, int len)
       bupdating = 0;
 #endif
     } else {
-      module_entry *fs = module_find("filesys", 0, 0);
-      struct userrec *u = get_user_by_handle(userlist,
-					     dcc[idx].u.xfer->from);
-      check_sentrcvd(u, dcc[idx].nick,
-			 dcc[idx].u.xfer->dir, BT_sent);
-      if (fs != NULL) {
-	Function f = fs->funcs[FILESYS_INCRGOTS];
-
-	f(dcc[idx].u.xfer->dir);
-      }
+      struct userrec *u = get_user_by_handle(userlist, dcc[idx].u.xfer->from);
+      check_sentrcvd(u, dcc[idx].nick, dcc[idx].u.xfer->dir, BT_sent);
       /* Download is credited to the user who requested it
        * (not the user who actually received it)
        */
@@ -1628,7 +1605,7 @@ static int fstat_dupuser(struct userrec *u, struct userrec *o,
 
   if (e->u.extra) {
     fs = calloc(1, sizeof(struct filesys_stats));
-    my_memcpy(fs, e->u.extra, sizeof(struct filesys_stats));
+    egg_memcpy(fs, e->u.extra, sizeof(struct filesys_stats));
 
     return set_user(&USERENTRY_FSTAT, u, fs);
   }
@@ -1725,17 +1702,11 @@ static int server_transfer_setup(char *mod)
   return 1;
 }
 
-static cmd_t transfer_load[] =
-{
-  {"server",	"",	server_transfer_setup,	NULL},
-  {NULL,	"",	NULL,			NULL}
-};
-
 /*
  *   Module functions
  */
 
-static void transfer_report(int idx, int details)
+void transfer_report(int idx, int details)
 {
   if (details) {
     dprintf(idx,TRANSFER_STAT_BLOCK,
@@ -1743,46 +1714,9 @@ static void transfer_report(int idx, int details)
   }
 }
 
-EXPORT_SCOPE char *transfer_start();
-
-static Function transfer_table[] =
+void transfer_init()
 {
-  (Function) transfer_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) transfer_report,
-  /* 4- 7 */
-  (Function) & DCC_FORK_SEND,		/* struct dcc_table		*/
-  (Function) at_limit,
-  (Function) & copy_to_tmp,		/* int				*/
-  (Function) fileq_cancel,
-  /* 8 - 11 */
-  (Function) queue_file,
-  (Function) raw_dcc_send,
-  (Function) show_queued_files,
-  (Function) wild_match_file,
-  /* 12 - 15 */
-  (Function) wipe_tmp_filename,
-  (Function) & DCC_GET,			/* struct dcc_table		*/
-  (Function) 0,
-  (Function) 0,
-  /* 16 - 19 */
-  (Function) & USERENTRY_FSTAT,		/* struct user_entry_type	*/
-  (Function) & quiet_reject,		/* int				*/
-  (Function) raw_dcc_resend,
-  (Function) 0,
-  /* 20 - 23 */
-  (Function) 0,
-};
-
-char *transfer_start(Function *global_funcs)
-{
-  global = global_funcs;
-
   fileq = NULL;
-  module_register(MODULE_NAME, transfer_table, 2, 2);
-
-  add_builtins("load", transfer_load);
 
   server_transfer_setup(NULL);
   BT_rcvd = bind_table_add("rcvd", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
@@ -1792,5 +1726,4 @@ char *transfer_start(Function *global_funcs)
 
   USERENTRY_FSTAT.get = def_get;
   add_entry_type(&USERENTRY_FSTAT);
-  return NULL;
 }

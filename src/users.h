@@ -46,7 +46,6 @@ struct user_entry_type {
 };
 
 
-#ifndef MAKING_MODS
 extern struct user_entry_type USERENTRY_COMMENT, USERENTRY_LASTON,
  USERENTRY_INFO, USERENTRY_BOTADDR, USERENTRY_HOSTS,
  USERENTRY_PASS, USERENTRY_BOTFL,
@@ -55,8 +54,6 @@ extern struct user_entry_type USERENTRY_COMMENT, USERENTRY_LASTON,
   USERENTRY_MODIFIED,
   USERENTRY_CONFIG,
   USERENTRY_SECPASS;
-#endif /* MAKING_MODS */
-
 
 struct laston_info {
   time_t laston;
@@ -178,7 +175,6 @@ int def_dupuser(struct userrec *new, struct userrec *old,
 		struct user_entry *e);
 
 
-#ifndef MAKING_MODS
 #ifdef HUB
 void backup_userfile();
 #endif /* HUB */
@@ -197,6 +193,5 @@ void link_pref_val(struct userrec *u, char *lval);
 
 extern char			natip[], userfile[];
 extern int			ignore_time;
-#endif /* !MAKING_MODS */
 
 #endif				/* _EGG_USERS_H */

@@ -31,12 +31,12 @@ OBJS = auth.o \
 	egg_timer.o \
 	flags.o \
 	garble.o \
+	hooks.o \
 	log.o \
 	main.o \
 	match.o \
 	misc.o \
 	misc_file.o \
-	modules.o \
 	net.o \
 	rfc1459.o \
 	settings.o \

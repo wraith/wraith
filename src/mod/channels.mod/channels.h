@@ -17,8 +17,6 @@
 
 #ifdef MAKING_CHANNELS
 
-#define add_mode real_add_mode
-
 /* Structure for udef channel values. Udef setting have one such
  * structure for each channel where they have a defined value.
  */

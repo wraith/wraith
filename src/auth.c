@@ -19,7 +19,6 @@
 #include <fcntl.h>
 #include "chan.h"
 #include "tandem.h"
-#include "modules.h"
 #include <pwd.h>
 #include <errno.h>
 

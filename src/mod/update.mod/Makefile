@@ -19,7 +19,7 @@ static: ../update.o
 ../update.o:
 	@echo -e "Compiling: \033[1mupdate\033[0m"
 	@source='update.c' object='$@' depfile='.deps/update.Po' tmpdepfile='.deps/update.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/update.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(srcdir)/update.c
 	@rm -f ../update.o
 	@mv update.o ../
 

@@ -29,7 +29,7 @@
 #endif
 #endif
 #include <sys/utsname.h>
-#include "modules.h"
+#include "hooks.h"
 
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/

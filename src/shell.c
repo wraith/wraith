@@ -18,7 +18,6 @@
 #include "tandem.h"
 #include "main.h"
 #include "dccutil.h"
-#include "modules.h"
 #include "misc.h"
 #include "misc_file.h"
 #include "bg.h"

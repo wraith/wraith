@@ -3,10 +3,17 @@
  *
  */
 
-#define MODULE_NAME "share"
-#define MAKING_SHARE
-
-#include "src/mod/module.h"
+#include "src/common.h"
+#include "src/main.h"
+#include "src/rfc1459.h"
+#include "src/botmsg.h"
+#include "src/misc.h"
+#include "src/cmds.h"
+#include "src/chanprog.h"
+#include "src/users.h"
+#include "src/userrec.h"
+#include "src/botnet.h"
+#include "src/hooks.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -20,7 +27,7 @@
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/channels.mod/channels.h"
 #ifdef LEAF
-#include "src/mod/irc.mod/irc.h"
+# include "src/mod/irc.mod/irc.h"
 #endif /* LEAF */
 
 /* Minimum version I will share with. */
@@ -29,8 +36,6 @@ static const int min_share		= 1000000;
 static const int min_exemptinvite	= 1000000;
 /* Minimum version that supports userfile features. */
 static const int min_uffeature		= 1000000;
-
-static Function *global = NULL, *transfer_funcs = NULL;
 
 static int private_global = 0;
 static int private_user = 0;
@@ -74,7 +79,6 @@ static void start_sending_users(int);
 static void shareout_but (struct chanset_t *, ...);
 static int flush_tbuf(char *);
 static int can_resync(char *);
-static void dump_resync(int);
 static void q_resync(char *, struct chanset_t *);
 static void cancel_user_xfer(int, void *);
 static int private_globals_bitmask();
@@ -129,7 +133,9 @@ static void check_delay()
   for (d = start_delay; d; d = dnext) {
     dnext = d->next;
     if (d->seconds <= now) {
+#ifdef LEAF
       add_mode(d->chan, d->plsmns, d->mode, d->mask);
+#endif /* LEAF */
       del_delay(d);
     }
   }
@@ -1531,7 +1537,7 @@ static int can_resync(char *bot)
 
 /* Dump the resync buffer for a bot.
  */
-static void dump_resync(int idx)
+void dump_resync(int idx)
 {
   struct share_msgq *q = NULL;
   tandbuf *t = NULL;
@@ -1683,7 +1689,7 @@ static struct userrec *dup_userlist(int t)
 
 /* Erase old user list, switch to new one.
  */
-static void finish_share(int idx)
+void finish_share(int idx)
 {
   struct userrec *u = NULL, *ou = NULL;
   struct chanset_t *chan = NULL;
@@ -1774,8 +1780,8 @@ Context;
 
 Context;
     unlink(dcc[idx].u.xfer->filename); /* why the fuck was this not here, stupid eggdev team. */
-    loading = 0;
     putlog(LOG_MISC, "*", "%s", USERF_CANTREAD);
+    loading = 0;
     clear_userlist(u);		/* Clear new, obsolete, user list.	*/
     clear_chanlist();		/* Remove all user references from the
 				   channel lists.			*/
@@ -2049,7 +2055,7 @@ static void cancel_user_xfer(int idx, void *x)
     def_dcc_bot_kill(idx, x);
 }
 
-static void share_report(int idx, int details)
+void share_report(int idx, int details)
 {
   int i, j;
 
@@ -2102,33 +2108,8 @@ static void share_report(int idx, int details)
   }
 }
 
-EXPORT_SCOPE char *share_start();
-
-static Function share_table[] =
+void share_init()
 {
-  /* 0 - 3 */
-  (Function) share_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) share_report,
-  /* 4 - 7 */
-  (Function) finish_share,
-  (Function) dump_resync,
-  (Function) uff_addtable,
-  (Function) uff_deltable
-  /* 8 - 11 */
-};
-
-char *share_start(Function *global_funcs)
-{
-
-  global = global_funcs;
-
-  module_register(MODULE_NAME, share_table, 2, 3);
-  if (!(transfer_funcs = module_depend(MODULE_NAME, "transfer", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires transfer module 2.0 or later.";
-  }
 
   timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
   timer_create_secs(1, "check_delay", (Function) check_delay);
@@ -2137,7 +2118,6 @@ char *share_start(Function *global_funcs)
   DCC_BOT.kill = cancel_user_xfer;
   uff_init();
   uff_addtable(internal_uff_table);
-  return NULL;
 }
 
 int private_globals_bitmask()

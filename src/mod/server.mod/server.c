@@ -5,7 +5,6 @@
  *
  */
 
-#undef MAKING_MODS
 #include "src/common.h"
 #include "src/cfg.h"
 #include "src/botmsg.h"
@@ -17,7 +16,7 @@
 #include "src/main.h"
 #include "src/misc.h"
 #include "src/chanprog.h"
-#include "src/modules.h"
+#include "src/hooks.h"
 #include "src/net.h"
 #include "src/auth.h"
 #include "src/dns.h"
@@ -774,7 +773,7 @@ static void empty_msgq()
 
 /* Use when sending msgs... will spread them out so there's no flooding.
  */
-static void queue_server(int which, char *buf, int len)
+void queue_server(int which, char *buf, int len)
 {
   struct msgq_head *h = NULL, tempq;
   struct msgq *q = NULL, *tq = NULL, *tqq = NULL;
@@ -1553,7 +1552,6 @@ void server_init()
   timer_create_secs(10, "server_10secondly", (Function) server_10secondly);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
-  add_hook(HOOK_QSERV, (Function) queue_server);
   add_hook(HOOK_PRE_REHASH, (Function) server_prerehash);
   add_hook(HOOK_REHASH, (Function) server_postrehash);
   add_hook(HOOK_DIE, (Function) server_die);

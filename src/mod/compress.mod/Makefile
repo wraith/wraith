@@ -19,7 +19,7 @@ static: ../compress.o
 ../compress.o:
 	@echo -e "Compiling: \033[1mcompress\033[0m"
 	@source='compress.c' object='$@' depfile='.deps/compress.Po' tmpdepfile='.deps/compress.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/compress.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(srcdir)/compress.c
 	@rm -f ../compress.o
 	@mv compress.o ../
 

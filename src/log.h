@@ -35,8 +35,6 @@
 #define LOG_BOTSHARE 0x400000   /* h   share traffic                    */
 #define LOG_ALL      0x7fffff   /* (dump to all logfiles)               */
 
-
-#ifndef MAKING_MODS
 inline void logidx(int, char *, ...);
 void putlog (int, char *, char *, ...);
 int logmodes(char *);
@@ -44,6 +42,5 @@ char *masktype(int);
 char *maskname(int);
 
 extern int		conmask, debug_output, use_console_r;
-#endif /* !MAKING_MODS */
 
 #endif /* !_LOG_H */

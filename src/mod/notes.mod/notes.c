@@ -7,7 +7,6 @@
  *
  */
 
-#undef MAKING_MODS
 #include "notes.h"
 #include "src/common.h"
 #include "src/chanprog.h"
@@ -16,7 +15,6 @@
 #include "src/userrec.h"
 #include "src/userent.h"
 #include "src/misc_file.h"
-#include "src/modules.h"
 #include "src/misc.h"
 #include "src/users.h"
 #include "src/egg_timer.h"
@@ -752,12 +750,6 @@ static int notes_server_setup(char *mod)
   return 0;
 }
 
-static cmd_t notes_load[] =
-{
-  {"server",	"",	notes_server_setup,		"notes:server"},
-  {NULL,	NULL,	NULL,				NULL}
-};
-
 void notes_report(int idx, int details)
 {
   if (details) {
@@ -773,7 +765,6 @@ void notes_init()
   timer_create_secs(3600, "notes_hourly", (Function) notes_hourly);
 
   add_builtins("dcc", notes_cmds);
-  add_builtins("load", notes_load);
   add_builtins("away", notes_away);
   add_builtins("chon", notes_chon);
   add_builtins("nkch", notes_nkch);

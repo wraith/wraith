@@ -28,9 +28,9 @@
 #include "crypt.h"
 #include "botnet.h"
 #include "chan.h"
-#include "modules.h"
 #include "tandem.h"
 #include "src/mod/channels.mod/channels.h"
+#include "src/mod/notes.mod/notes.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef HUB
@@ -456,13 +456,8 @@ void tell_user(int idx, struct userrec *u, int master)
   struct user_entry *ue = NULL;
   struct laston_info *li = NULL;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
-  module_entry *me = NULL;
 
-  if ((me = module_find("notes", 0, 0))) {
-    Function *func = me->funcs;
-    n = (func[5]) (u->handle);
-  }
-
+  n = num_notes(u->handle);
 
   fr.global = u->flags;
   fr.udef_global = u->flags_udef;

@@ -33,30 +33,21 @@ enum {
 int raw_dcc_send(char *, char *, char *, char *);
 
 #if !defined(MAKING_TRANSFER) && defined(MAKING_MODS)
-/* 4 - 7 */
 #define DCC_FORK_SEND (*(struct dcc_table *)(transfer_funcs[4]))
 #define at_limit(a) (((int (*) (char *))transfer_funcs[5])(a))
 #define copy_to_tmp (*(int *)(transfer_funcs[6]))
 #define fileq_cancel(a,b) (((void (*) (int,char *))transfer_funcs[7])(a,b))
-/* 8 - 11 */
 #define queue_file(a,b,c,d) (((void (*)(char *,char *,char *,char *))transfer_funcs[8])(a,b,c,d))
 #define raw_dcc_send(a,b,c,d) (((int (*) (char *,char *,char *,char *))transfer_funcs[9])(a,b,c,d))
 #define show_queued_files(a) (((void (*) (int))transfer_funcs[10])(a))
 #define wild_match_file(a,b) (((int (*)(register char * m, register char * n))transfer_funcs[11])(a,b))
-/* 12 - 15 */
 #define wipe_tmp_filename(a,b) (((void (*) (char *,int))transfer_funcs[12])(a,b))
 #define DCC_GET (*(struct dcc_table *)(transfer_funcs[13]))
-/* UNUSED 14 */
-/* UNUSED 15 */
-/* 16 - 19 */
 #define USERENTRY_FSTAT (*(struct user_entry_type *)(transfer_funcs[16]))
 #define quiet_reject (*(int *)(transfer_funcs[17]))
 #define raw_dcc_resend(a,b,c,d) (((int (*) (char *,char *,char *,char *))transfer_funcs[18])(a,b,c,d))
-/* UNUSED 19 */
-/* 20 - 23 */
-/* UNUSED 20 */
-
 #endif
+
 #ifdef MAKING_TRANSFER
 
 static int raw_dcc_resend(char *, char *, char *, char *);
@@ -146,5 +137,8 @@ typedef struct zarrf {
 #define TRANSFER_STAT_BLOCK         "    DCC block is %d%s, max concurrent d/ls is %d\n"
 #define TRANSFER_STAT_MEMORY        "   Using %d bytes of memory\n"
 /* end of langauge addon */
+
+extern struct dcc_table 		DCC_SEND, DCC_GET, DCC_GET_PENDING, DCC_FORK_SEND;
+
 
 #endif				/* _EGG_MOD_TRANSFER_TRANSFER_H */

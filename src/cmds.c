@@ -27,7 +27,6 @@
 #include "botcmd.h"	
 #include "botnet.h"
 #include "tandem.h"
-#include "modules.h"
 #include "help.h"
 #include "traffic.h" /* egg_traffic_t */
 #include "core_binds.h"
@@ -1101,11 +1100,12 @@ static void cmd_status(struct userrec *u, int idx, char *par)
     tell_verbose_status(idx);
     dprintf(idx, "\n");
     tell_settings(idx);
-    do_module_report(idx, 1, NULL);
+/* FIXME: call the _report functions here */
+    /* do_module_report(idx, 1, NULL); */
   } else {
     putlog(LOG_CMDS, "*", STR("#%s# status"), dcc[idx].nick);
     tell_verbose_status(idx);
-    do_module_report(idx, 0, NULL);
+    /* do_module_report(idx, 0, NULL); */
   }
 }
 

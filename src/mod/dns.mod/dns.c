@@ -6,11 +6,9 @@
  *
  */
 
-#undef MAKING_MODS
 #include "dns.h"
 #include "src/common.h"
 #include "src/dccutil.h"
-#include "src/modules.h"
 #include "src/main.h"
 #include "src/egg_timer.h"
 #include "src/types.h"

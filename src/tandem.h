@@ -41,8 +41,6 @@ typedef struct {
 #define GLOBAL_CHANS 100000
 
 
-#ifndef MAKING_MODS
-
 void botnet_send_chan(int, char *, char *, int, char *);
 void botnet_send_chat(int, char *, char *);
 void botnet_send_act(int, char *, char *, int, char *);
@@ -75,10 +73,6 @@ int users_in_subtree(tand_t *);
 int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cmd);
 void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char * cmd);
 void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
-
-
-#endif				/* MAKING_MODS */
-
 
 #define b_status(a)	(dcc[a].status)
 #define b_version(a)	(dcc[a].u.bot->version)

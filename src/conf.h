@@ -44,8 +44,6 @@ enum {
 };
 
 
-#ifndef MAKING_MODS
-
 #ifdef LEAF
 void spawnbots();
 int killbot(char *);
@@ -61,6 +59,5 @@ int readconf(char *);
 int parseconf();
 int writeconf(char *, FILE *, int);
 void fillconf(conf_t *);
-#endif /* !MAKING_MODS */
 
 #endif /* !_CONF_H */

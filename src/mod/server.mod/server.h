@@ -64,5 +64,6 @@ int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, b
 int detect_avalanche(char *);
 void server_report(int, int);
 void server_init();
+void queue_server(int, char *, int);
 
 #endif /*leaf*/

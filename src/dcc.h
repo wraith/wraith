@@ -205,8 +205,6 @@ struct dupwait_info {
 #define TLN_ECHO        1               /* Echo                 */
 #define TLN_ECHO_C      "\001"
 
-#ifndef MAKING_MODS
-
 extern struct dcc_t 		*dcc;
 extern int 			dcc_total, timesync;
 extern char			network[];
@@ -220,6 +218,5 @@ void send_timesync(int);
 void failed_link(int);
 void dupwait_notify(char *);
 char *rand_dccresp();
-#endif /* !MAKING_MODS */
 
 #endif /* !_DCC_H */

@@ -1,7 +1,6 @@
 #ifndef _CORE_BINDS_H_
 #define _CORE_BINDS_H_
 
-#ifndef MAKING_MODS
 void core_binds_init();
 void check_bind_time(struct tm *tm);
 void check_bind_dcc(const char *, int, const char *);
@@ -18,5 +17,4 @@ void check_bind_act(const char *, int, const char *);
 void check_bind_bcst(const char *, int, const char *);
 void check_bind_chon(char *, int);
 void check_bind_chof(char *, int);
-#endif /* !MAKING_MODS */
 #endif /* !_CORE_BINDS_H */
