@@ -1439,7 +1439,7 @@ static void getin_5secondly()
     struct chanset_t *chan = NULL;
 
     for (chan = chanset; chan; chan = chan->next) {
-      if ((channel_pending(chan) || channel_active(chan)) && !me_op(chan))
+      if ((!channel_pending(chan) && channel_active(chan)) && !me_op(chan))
         request_op(chan);
     }
   }
