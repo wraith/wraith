@@ -183,7 +183,7 @@ static int console_expmem(struct user_entry *e)
 static void console_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct console_info *i = e->u.extra;
-
+  char tmp[100];
   if (dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
     dprintf(idx, "  %s\n", CONSOLE_SAVED_SETTINGS);
     dprintf(idx, "    %s %s\n", CONSOLE_CHANNEL, i->channel);
@@ -194,13 +194,14 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
     dprintf(idx, "    %s %d, %s %s%d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*",
             i->conchan % GLOBAL_CHANS);
-    dprintf(idx, "    Color:");
+    snprintf(tmp, sizeof tmp, "    Color:");
     if (i->color == 1)
-     dprintf(idx, " mIRC\n");
+     snprintf(tmp, sizeof tmp, " mIRC");
     else if (i->color == 2)
-     dprintf(idx, " ANSI\n");
+     snprintf(tmp, sizeof tmp, " ANSI");
     else
-     dprintf(idx, " off\n");      
+     snprintf(tmp, sizeof tmp, " off");
+    dprintf(idx, "%s\n", tmp);
   }
 }
 
@@ -330,6 +331,7 @@ static int console_store(struct userrec *u, int idx, char *par)
    i->color = 0;
   i->conchan = dcc[idx].u.chat->channel;
   if (par) {
+    char tmp[100];
     dprintf(idx, "%s\n", CONSOLE_SAVED_SETTINGS2);
     dprintf(idx, "  %s %s\n", CONSOLE_CHANNEL, i->channel);
     dprintf(idx, "  %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,
@@ -338,13 +340,14 @@ static int console_store(struct userrec *u, int idx, char *par)
 	    i->echoflags ? CONSOLE_YES : CONSOLE_NO);
     dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, i->conchan);
-    dprintf(idx, "    Color:");
+    snprintf(tmp, sizeof tmp, "    Color:");
     if (i->color == 1)
-     dprintf(idx, " mIRC\n");
+     snprintf(tmp, sizeof tmp, " mIRC");
     else if (i->color == 2)
-     dprintf(idx, " ANSI\n");
+     snprintf(tmp, sizeof tmp, " ANSI");
     else
-     dprintf(idx, " off\n");
+     snprintf(tmp, sizeof tmp, " off");
+    dprintf(idx, "%s\n", tmp);
   }
   set_user(&USERENTRY_CONSOLE, u, i);
   return 0;
