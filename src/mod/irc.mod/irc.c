@@ -439,16 +439,12 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    if (!mem->user && !mem->tried_getuser) {
-      mem->user = get_user_by_host(uhost);
-      mem->tried_getuser = 1;
-    }
-
+#ifdef no
     if (mem->user != u) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't match %s", botnick, nick, chan->dname, nick, botnick);
       return;
     }
-
+#endif
     get_user_flagrec(u, &fr, chan->dname);
     if (!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr)) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
