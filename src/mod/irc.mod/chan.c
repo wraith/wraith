@@ -2126,6 +2126,8 @@ static int gotjoin(char *from, char *chname)
       chan->status &= ~CHAN_PEND;
       reset_chan_info(chan);
     } else {
+      int splitjoin = 0;
+
       m = ismember(chan, nick);
       if (m && m->split && !egg_strcasecmp(m->userhost, uhost)) {
 	chan = findchan(chname);
@@ -2141,6 +2143,7 @@ static int gotjoin(char *from, char *chname)
 
 	/* The tcl binding might have deleted the current user. Recheck. */
 	u = get_user_by_host(from);
+        splitjoin++;
 	m->split = 0;
 	m->last = now;
 	m->delay = 0L;
@@ -2245,7 +2248,7 @@ static int gotjoin(char *from, char *chname)
 	    m->flags |= SENTKICK;
 	  }
 	}
-        if (!chan_hasop(m) && dovoice(chan) && chk_autoop(fr, chan)) {
+        if (!splitjoin && !chan_hasop(m) && dovoice(chan) && chk_autoop(fr, chan)) {
           do_op(m->nick, chan, 1, 0);
         }
       }

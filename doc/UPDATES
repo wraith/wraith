@@ -18,6 +18,7 @@ This is a summary of ChangeLog basically.
   If a user has a SECPASS set (default: random), auth hashing will occur.
   If either of the above two things are empty, auth hashing will NOT occur.
 * CLOAK_MIRC now randomly will add a SECOND version reply; some lame mIRC script.
+* Users are no longer auto-opped on netsplit rejoin.
 
 1.1.9
 
