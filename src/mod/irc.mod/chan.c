@@ -1001,20 +1001,28 @@ void enforce_closed(struct chanset_t *chan) {
 }
 
 static char *
-take_massopline(char *to_op)
+take_massopline(char *op, char **to_op)
 {
-  char *op = NULL, *modes = NULL, *nicks = NULL, *ret = NULL;
-  int i = 0;
+  char *nick = NULL, *modes = NULL, *nicks = NULL, *ret = NULL;
+  int i = 0, useop = 0;
 
   nicks = calloc(1, 51);
   modes = calloc(1, 10);
-  
+
   for (i = 0; i < 4; i++) {
-    if (to_op[0]) {
-      op = newsplit(&to_op);
-      strcat(modes, "+o");
-      strcat(nicks, op);
-      strcat(nicks, " "); 
+    nick = NULL;
+    if (*to_op[0] || op) {
+      /* if 'op' then use it, then move on to to_op */
+      if (!useop && op) {
+        nick = op;
+        useop++;
+      } else if (*to_op[0])
+        nick = newsplit(to_op);
+      if (nick) {
+        strcat(modes, "+o");
+        strcat(nicks, nick);
+        strcat(nicks, " "); 
+      }
     }
   }
   
@@ -1069,15 +1077,16 @@ do_take(struct chanset_t *chan)
   to_deop = to_deop_ptr = calloc(1, 2048);
 
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    int hasop = (m->flags & CHANOP);
+    int hasop = (m->flags & CHANOP), isbot = 0;
 
+    if (m->user && (m->user->flags & USER_BOT))
+      isbot++;
 
-    if (m && rfc_casecmp(m->nick, botname)) {
-      if (m->user && (m->user->flags & USER_BOT) && !hasop) {
+    if (rfc_casecmp(m->nick, botname)) {
+      if (isbot && !hasop) {
         strcat(to_op, m->nick);
         strcat(to_op, " ");
-/*    } else if (hasop && !(m->user && m->user->flags & USER_OP)) { */
-      } else if (hasop && !(m->user && (m->user->flags & USER_BOT))) {
+      } else if (!isbot && hasop) {
         strcat(to_deop, m->nick);
         strcat(to_deop, " ");
       }
@@ -1111,7 +1120,7 @@ do_take(struct chanset_t *chan)
     if (deops[0])
       modeline = take_makeline(op, deops, deopn);
     else
-      modeline = take_massopline(to_op);
+      modeline = take_massopline(op, &to_op);
     strcat(work, modeline);
     strcat(work, "\n");
     lines++;
