@@ -1225,7 +1225,6 @@ static void check_expired_chanstuff()
   }
 }
 
-#ifdef S_AUTHCMDS
 static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u, char *args, char *chname)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
@@ -1239,7 +1238,6 @@ static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u,
   if (x & BIND_RET_BREAK) return(1);
   return(0);
 }
-#endif /* S_AUTHCMDS */
 
 /* Flush the modes for EVERY channel.
  */
@@ -1376,9 +1374,7 @@ void irc_init()
   add_builtins("bot", irc_bot);
   add_builtins("raw", irc_raw);
   add_builtins("msg", C_msg);
-#ifdef S_AUTHCMDS
   add_builtins("msgc", C_msgc);
-#endif /* S_AUTHCMDS */
 
   do_nettype();
 }

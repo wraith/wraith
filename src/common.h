@@ -12,13 +12,6 @@
 #  include "config.h"
 #endif
 
-/* AUTHHASH is pointless without AUTHCMDS. */
-#ifdef S_AUTHHASH
-# ifndef S_AUTHCMDS
-#  undef S_AUTHHASH
-# endif /* !S_AUTHCMDS */
-#endif /* S_AUTHHASH */
-
 #include "bits.h"
 #include "garble.h"
 #include "conf.h"

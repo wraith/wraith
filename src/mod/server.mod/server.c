@@ -89,10 +89,7 @@ static int stack_limit;
 
 /* New bind tables. */
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
-bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL;
-#ifdef S_AUTHCMDS
-bind_table_t *BT_msgc = NULL;
-#endif /* S_AUTHCMDS */
+bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 
 #include "servmsg.c"
 
@@ -1109,9 +1106,7 @@ void server_init()
   nick_len = 9;
   stack_limit = 4;
 
-#ifdef S_AUTHCMDS
   BT_msgc = bind_table_add("msgc", 5, "ssUss", MATCH_FLAGS, 0); 
-#endif /* S_AUTHCMDS */
   BT_msg = bind_table_add("msg", 4, "ssUs", MATCH_FLAGS, 0);
   BT_raw = bind_table_add("raw", 2, "ss", 0, BIND_STACKABLE);
 

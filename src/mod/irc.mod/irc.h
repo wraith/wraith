@@ -19,10 +19,8 @@
 
 #ifdef MAKING_IRC
 
-#ifdef S_AUTHCMDS
 
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
-#endif /* S_AUTHCMDS */
 static void makeopline(struct chanset_t *, char *, char *);
 static int me_voice(struct chanset_t *);
 static int any_ops(struct chanset_t *);

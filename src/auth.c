@@ -31,13 +31,10 @@
 
 #include "stat.h"
 
-#ifdef S_AUTHCMDS
 int auth_total = 0;
 static int max_auth = 50;
 struct auth_t *auth = NULL;
-#endif /* S_AUTHCMDS */
 
-#ifdef S_AUTHCMDS
 void
 init_auth_max()
 {
@@ -65,15 +62,12 @@ expire_auths()
     }
   }
 }
-#endif /* S_AUTHCMDS */
 
 void
 init_auth()
 {
-#ifdef S_AUTHCMDS
   init_auth_max();
   timer_create_secs(60, "expire_auths", (Function) expire_auths);
-#endif /* S_AUTHCMDS */
 }
 
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
@@ -97,7 +91,6 @@ makehash(struct userrec *u, char *randstring)
 #endif /* S_AUTHHASH || S_DCCAUTH */
 
 
-#ifdef S_AUTHCMDS
 char *
 makebdhash(char *randstring)
 {
@@ -152,4 +145,3 @@ removeauth(int n)
   else
     egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
 }
-#endif /* S_AUTHCMDS */

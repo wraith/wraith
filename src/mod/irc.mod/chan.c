@@ -2712,18 +2712,13 @@ static int gotmsg(char *from, char *msg)
     }
   }
   if (msg[0]) {
-    int botmatch = 0;
-#ifdef S_AUTHCMDS
-    int i = 0;
+    int botmatch = 0, i = 0;
     char *my_msg = NULL, *my_ptr = NULL, *fword = NULL;
-#endif /* S_AUTHCMDS */
     /* Check even if we're ignoring the host. (modified by Eule 17.7.99) */
     detect_chan_flood(nick, uhost, from, chan, FLOOD_PRIVMSG, NULL);
     
-    chan = findchan(realto);
-    if (!chan)
+    if (!(chan = findchan(realto)))
       return 0;
-#ifdef S_AUTHCMDS
     my_msg = my_ptr = strdup(msg);
 
     fword = newsplit(&my_msg);		/* take out first word */
@@ -2744,7 +2739,6 @@ static int gotmsg(char *from, char *msg)
       }
     }
     free(my_ptr);
-#endif /* S_AUTHCMDS */
     irc_log(chan, "%s<%s> %s", to[0] == '@' ? "@" : "", nick, msg);
     update_idle(chan->dname, nick);
   }
