@@ -712,7 +712,7 @@ static void away_notes(char *bot, int idx, char *msg)
     notes_read(dcc[idx].nick, 0, "+", idx);
 }
 
-int chon_notes(int idx)
+int notes_chon(int idx)
 {
   if (dcc[idx].type == &DCC_CHAT)
     notes_read(dcc[idx].nick, 0, "+", idx);

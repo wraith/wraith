@@ -24,6 +24,7 @@
 #include "core_binds.h"
 #include "egg_timer.h"
 #include "src/mod/server.mod/server.h"
+#include "src/mod/notes.mod/notes.h"
 #include <stdarg.h>
 
 static struct portmap 	*root = NULL;
