@@ -441,7 +441,7 @@ fprintf(f," \
 
   for (i = 0; i < (cfg.pscloakn + 1); i++)
 fprintf(f, " \
-    case %d: return STR(\"%s\");\n", i, pscloak(i+1));
+    case %d: return \"%s\";\n", i, pscloak(i+1));
 fprintf(f, " \
   }\n\
 #endif /* S_PSCLOAK */\n\
