@@ -30,7 +30,6 @@
 
 #include <string.h>
 #include <errno.h>
-#include <zlib.h>
 
 #include "src/mod/module.h"
 #include "share.mod/share.h"

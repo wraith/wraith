@@ -111,7 +111,8 @@ eggautoconf:
 
 packconf: utils
 	@./makesettings pack/pack.cfg src/settings.tmp
-	@(if test "x`diff -urN src/settings.tmp src/settings.c`" != "x"; then \
+	@(touch src/settings.c; \
+	if test "x`diff -qurN src/settings.tmp src/settings.c`" != "x"; then \
 	cp -f src/settings.tmp src/settings.c; \
 	fi)
 

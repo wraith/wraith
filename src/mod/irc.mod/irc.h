@@ -55,7 +55,7 @@ static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
 static void reset_chan_info(struct chanset_t *);
 static void recheck_channel(struct chanset_t *, int);
-static void setkey(struct chanset_t *, char *);
+static void my_setkey(struct chanset_t *, char *);
 static void maybe_revenge(struct chanset_t *, char *, char *, int);
 static int detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
 			     char *);

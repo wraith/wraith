@@ -1091,7 +1091,7 @@ Context;
 	  }
 	  check_tcl_mode(nick, from, u, chan->dname, ms2, op);
 	  if (ms2[0] == '+') {
-	    setkey(chan, op);
+	    my_setkey(chan, op);
 	    if (channel_active(chan))
 	      got_key(chan, nick, from, op);
 	  } else {
@@ -1102,7 +1102,7 @@ Context;
 		       && !chan_master(user))
 		add_mode(chan, '+', 'k', chan->key_prot);
 	    }
-	    setkey(chan, NULL);
+	    my_setkey(chan, NULL);
 	  }
 	  break;
 	case 'o':

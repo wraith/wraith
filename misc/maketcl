@@ -5,5 +5,4 @@ cd tcl8.4.4/
 cd unix/
 ./configure --prefix=${HOME} --exec-prefix=${HOME} --disable-shared
 make && make install
-
-
+rm -rf tcl8.4.4*
