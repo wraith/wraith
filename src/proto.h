@@ -216,6 +216,9 @@ char *progname();
 void init_settings();
 
 /* misc.c */
+#ifdef S_GARBLESTRINGS
+char *degarble(int, char *);
+#endif
 void detected(int, char *);
 int new_auth();
 int isauthed(char *);

@@ -13,6 +13,8 @@ prefix = @prefix@
 DEST = @DEST@
 EGGEXEC = @EGGEXEC@
 EGGVERSION = @EGGVERSION@
+LEAFEXEC = leaf
+HUBEXEC = hub
 
 # things you can put here:
 #   -Wall            if you're using gcc and it supports it
@@ -22,14 +24,15 @@ EGGVERSION = @EGGVERSION@
 #   -DDEBUG_MEM      to be able to debug memory allocation (.debug)
 #                    These can both be set by using 'make debug'
 #                    or 'make sdebug'
-CFLGS =
+CFLGS = -fno-strict-aliasing 
 
 # configure SHOULD set these...you may need to tweak them to get modules
 # to compile .. if you do...let the devel-team know the working settings
 # btw to turn STRIP off, do 'STRIP = touch' not 'STRIP ='
 
 # defaults
-CC = @CC@
+#CC = @CC@
+CC = gcc-2.95
 LD = @CC@
 STRIP = @STRIP@
 RANLIB = @RANLIB@
@@ -63,8 +66,6 @@ XLIBS = @TCL_LIBS@ @LIBS@
 TCLLIB = @TCLLIB@
 TCLLIBFN = @TCLLIBFN@
 
-DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM 
-
 modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
 
 post_config  =  echo "" && \
@@ -80,57 +81,57 @@ egg_install_msg =  echo "" && \
 		   echo "Now run \"make install\" to install your bot." && \
 		   echo ""
 
-MAKE_MODEGG = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(MOD_CC)' 'LD=$(MOD_LD)' \
-'STRIP=$(MOD_STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS)' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=' 'MODOBJS='
+CFLAGS = @CFLAGS@ -I.. @DEFS@ $(CFLGS)
+DEBCFLAGS = @CFLAGS@ -I.. @DEFS@ -DDEBUG_ASSERT -DDEBUG_MEM $(CFLGS)
 
-MAKE_MODULES = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(SHLIB_CC)' 'LD=$(SHLIB_LD)' \
-'STRIP=$(SHLIB_STRIP)' 'CFLGS=$(CFLGS)' 'XLIBS=$(XLIBS)' 'MOD_EXT=$(MOD_EXT)'
+MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
+'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS) -DSTATIC -DLEAF' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)' 'LD=$(LD)' \
+'MODS=$(MODSALL) $(MODSLEAF)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DLEAF'
 
-MAKE_STATIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
-'STRIP=$(STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -DSTATIC' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=(static version)' \
-'MODOBJS=mod/*.o'
+MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
+'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS) -DSTATIC -DHUB' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' 'LD=$(LD)' \
+'MODS=$(MODSALL) $(MODSHUB)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DHUB'
 
-MAKE_DEBEGG = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(MOD_CC)' 'LD=$(MOD_LD) -g' \
-'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) $(CFLGS)' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=(debug version)' 'MODOBJS='
+MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
+'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS) -DSTATIC -DLEAF' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 'LD=$(LD) -g' \
+'MODS=$(MODSALL) $(MODSLEAF)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DLEAF'
 
-MAKE_DEBMODULES = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(SHLIB_CC)' 'LD=$(SHLIB_LD)' \
-'XLIBS=$(XLIBS)' 'STRIP=touch' 'CFLGS=-g3 $(DEBCFLAGS) $(CFLGS)' \
-'MOD_EXT=$(MOD_EXT)'
+MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
+'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS) -DSTATIC -DHUB' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'LD=$(LD) -g' \
+'MODS=$(MODSALL) $(MODSHUB)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DHUB'
 
-MAKE_SDEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
-'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) -DSTATIC $(CFLGS)' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
-'EGGEXEC=$(EGGEXEC)' 'EGGBUILD=(static and debug version)' 'MODOBJS=mod/*.o'
+MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
+'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS) -DSTATIC -DSTANDALONE' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'LD=$(LD)'
+
+MAKE_DUTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
+'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS) -DSTATIC -DSTANDALONE' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'LD=$(LD)'
 
 MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-MAKE_INSTALL = $(MAKE) 'MAKE=$(MAKE)' 'DEST=$(DEST)'
+cleanutils:
+	@rm -f stringfix
 
-all: @DEFAULT_MAKE@
-
-eggclean:
-	@rm -f $(EGGEXEC) *.$(MOD_EXT) *.stamp core DEBUG *~
+clean:  cleanutils
 	@cd src && $(MAKE) clean
 	@cd src/md5 && $(MAKE) clean
 	@cd src/compat && $(MAKE) clean
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.$(MOD_EXT) *.so *.stamp core DEBUG *~ key configure.temp makesalt
 
-clean: eggclean
-	@cd src/mod && $(MAKE) clean
-
-distclean: eggclean clean-modconfig
+distclean: clean clean-modconfig
 	@cd src/mod && $(MAKE) distclean
 	@rm -f Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile
-	@rm -f config.cache config.log config.status config.h lush.h
+	@rm -f config.cache config.log config.status config.h lush.h stamp.*
 	@rm -rf autom4te.cache
+
 
 distrib: distclean
 	@rm -f `find . \( -name '*~' -o -name '*#' -o -name '*.orig' \
@@ -154,6 +155,12 @@ depend:
 eggautoconf:
 	@$(modconf) eggautoconf
 
+salt:
+	@echo [*] Compiling MakeSalt for Encryption..
+	@$(CC) -I. -o makesalt src/makesalt.c
+	@./makesalt
+
+
 config:
 	@$(modconf) modules-still-exist
 	@$(modconf) detect-modules
@@ -163,206 +170,85 @@ config:
 	@$(modconf) Makefile
 	@$(post_config)
 
-new-iconfig:
-	@$(modconf) modules-still-exist
-	@$(modconf) update-depends
-	@$(modconf) -n configure
-	@$(post_iconfig)
-	@$(post_config)
-
-iconfig:
-	@$(modconf) modules-still-exist
-	@$(modconf) detect-modules
-	@$(modconf) update-depends
-	@$(modconf) configure
-	@$(post_iconfig)
-	@$(post_config)
-
 clean-modconfig:
 	@rm -f .modules .known_modules
 
-conftest:
-	@if test ! -f .modules; then \
-		echo ""; \
-		echo "You have NOT configured the modules yet. This has to be done"; \
-		echo "before you can start compiling."; \
-		echo ""; \
-		echo "   Run \"make config\" or \"make iconfig\" now."; \
-		echo ""; \
-		exit 1; \
-	fi
-
 reconfig: clean-modconfig config
 
-eggdrop: modegg modules
+utils:
+	@./misc/maketype utils
+	@cd src; $(MAKE_UTILS) ../stringfix
 
-modegg: modtest
-	@rm -f src/mod/mod.xlibs
-	@cd src && $(MAKE_MODEGG) $(EGGEXEC)
-	@echo ""
-	@ls -l $(EGGEXEC)
+dutils:
+	@./misc/maketype utils
+	@cd src; $(MAKE_DUTILS) ../stringfix
 
-modules: modtest
-	@cd src/mod && $(MAKE_MODULES) modules
-	@echo ""
-	@echo "modules made:"
-	@ls -l *.$(MOD_EXT)
-	@$(egg_install_msg)
 
-static: eggtest
-	@echo ""
-	@echo "Making module objects for static linking..."
-	@echo ""
-	@rm -f src/mod/mod.xlibs
-	@cd src/mod && $(MAKE_STATIC) static
-	@echo ""
-	@echo "Making core eggdrop for static linking..."
-	@echo ""
-	@cd src && $(MAKE_STATIC) $(EGGEXEC)
-	@echo ""
-	@ls -l $(EGGEXEC)
-	@$(egg_install_msg)
 
-debug: debegg debmodules
+depleaf:
+	@cat /dev/null > lush.h
+	@cd src && $(MAKE_DEPEND) depleaf
+	@cd src/md5 && $(MAKE_DEPEND) depleaf
+	@cd src/mod && $(MAKE_DEPEND) depleaf
+	@cd src/compat && $(MAKE_DEPEND) depleaf
 
-debegg: modtest
-	@cd src && $(MAKE_DEBEGG) $(EGGEXEC)
-	@echo ""
-	@ls -l $(EGGEXEC)
+dephub:
+	@cat /dev/null > lush.h
+	@cd src && $(MAKE_DEPEND) dephub
+	@cd src/md5 && $(MAKE_DEPEND) dephub
+	@cd src/mod && $(MAKE_DEPEND) dephub
+	@cd src/compat && $(MAKE_DEPEND) dephub
 
-debmodules: modtest
-	@cd src/mod && $(MAKE_DEBMODULES) modules
-	@echo ""
-	@echo "modules made:"
-	@ls -l *.$(MOD_EXT)
-	@$(egg_install_msg)
 
-sdebug: eggtest
+leaf:	salt config
 	@echo ""
-	@echo "Making module objects for static linking..."
+	@echo "Making leaf"
 	@echo ""
 	@rm -f src/mod/mod.xlibs
-	@cd src/mod && $(MAKE_SDEBUG) static
+	@./misc/maketype leaf
 	@echo ""
-	@echo "Making core eggdrop for static linking..."
+	@cd src/mod && $(MAKE_LEAF) static
 	@echo ""
-	@cd src && $(MAKE_SDEBUG) $(EGGEXEC)
+	@cd src && $(MAKE_LEAF) $(LEAFEXEC)
 	@echo ""
-	@ls -l $(EGGEXEC)
-	@$(egg_install_msg)
 
-eggtest: conftest
-	@if test -f EGGMOD.stamp; then \
-		echo "You're trying to do a STATIC build of eggdrop when you've";\
-		echo "already run 'make' for a module build.";\
-		echo "You must first type \"make clean\" before you can build";\
-		echo "a static version.";\
-		exit 1;\
-	fi
-	@echo "stamp" >EGGDROP.stamp
-
-modtest: conftest
-	@if [ -f EGGDROP.stamp ]; then \
-		echo "You're trying to do a MODULE build of eggdrop when you've";\
-		echo "already run 'make' for a static build.";\
-		echo "You must first type \"make clean\" before you can build";\
-		echo "a module version.";\
-		exit 1;\
-	fi
-	@echo "stamp" >EGGMOD.stamp
-
-install: ainstall
-
-dinstall: eggdrop ainstall
-
-sinstall: static ainstall
-
-ainstall: install-start install-bin install-modules install-data \
-install-filesys \
-install-end
-
-install-start:
-	@if test ! -f $(EGGEXEC); then \
-		echo ""; \
-		echo "You haven't compiled eggdrop yet."; \
-		echo "To compile eggdrop use:"; \
-		echo "  make <target>"; \
-		echo ""; \
-		echo "  valid targets: eggdrop static debug sdebug"; \
-		echo ""; \
-		exit 1; \
-	fi
-	@if test "x$(DEST)" = "x"; then \
-		echo "You must specify a destination directory with DEST="; \
-		exit 1; \
-	fi
+dleaf:  salt config
 	@echo ""
-	@echo
-	@echo "Installing in directory: '$(DEST)'."
-	@echo
-	@if test ! -d $(DEST); then \
-		echo "Creating directory: $(DEST)."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST); \
-	fi
-
-install-bin:
-	@if test -f $(DEST)/o$(EGGEXEC); then \
-		rm -f $(DEST)/o$(EGGEXEC); \
-	fi
-	@if test -h $(DEST)/$(EGGEXEC); then \
-		echo "Removing symlink to archival eggdrop binary."; \
-		rm -f $(DEST)/$(EGGEXEC); \
-	fi
-	@if test -f $(DEST)/$(EGGEXEC); then \
-		echo "Renamed the old '$(EGGEXEC)' executable to 'o$(EGGEXEC)'."; \
-		mv -f $(DEST)/$(EGGEXEC) $(DEST)/o$(EGGEXEC); \
-	fi
-	@echo "Copying new '$(EGGEXEC)' executable and creating symlink."
-	@$(INSTALL_PROGRAM) $(EGGEXEC) $(DEST)/$(EGGEXEC)-$(EGGVERSION)
-	@(cd $(DEST) && $(LN_S) $(EGGEXEC)-$(EGGVERSION) $(EGGEXEC))
-
-install-modules:
-	@if test -h $(DEST)/modules; then \
-		echo "Removing symlink to archival modules directory."; \
-		rm -f $(DEST)/modules; \
-	fi
-	@if test -d $(DEST)/modules; then \
-		echo "Moving old modules into 'modules.old' directory."; \
-		rm -rf $(DEST)/modules.old; \
-		mv -f $(DEST)/modules $(DEST)/modules.old; \
-	fi
-	@if test ! "x`echo *.$(MOD_EXT)`" = "x*.$(MOD_EXT)"; then \
-		if test ! -d $(DEST)/modules-$(EGGVERSION); then \
-			echo "Creating modules-$(EGGVERSION) directory and symlink."; \
-			$(top_srcdir)/misc/mkinstalldirs $(DEST)/modules-$(EGGVERSION); \
-		fi; \
-		(cd $(DEST) && $(LN_S) modules-$(EGGVERSION) modules); \
-		echo "Copying new modules."; \
-		for i in *.$(MOD_EXT); do \
-			$(INSTALL_PROGRAM) $$i $(DEST)/modules-$(EGGVERSION)/; \
-		done; \
-	fi
-
-install-data:
-	@if test ! -d $(DEST)/logs; then \
-		echo "Creating 'logs' subdirectory."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/logs; \
-	fi;
-	@if test ! -d $(DEST)/text; then \
-		echo "Creating 'text' subdirectory."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/text; \
-	fi;
-
-install-filesys:
-	@if test ! -d $(DEST)/filesys; then \
-		echo "Creating a skeletal filesys subdirectory."; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/filesys; \
-		$(top_srcdir)/misc/mkinstalldirs $(DEST)/filesys/incoming; \
-	fi
-
-install-end:
-	@echo
-	@echo "Installation completed."
+	@echo "Making debug leaf"
 	@echo ""
+	@rm -f src/mod/mod.xlibs
+	@./misc/maketype leaf
+	@echo ""
+	@cd src/mod && $(MAKE_DLEAF) static
+	@echo ""
+	@cd src; $(MAKE_DLEAF) $(LEAFEXEC)
+	@echo ""
+
+hub:	salt config
+	@echo ""
+	@echo "Making hub"
+	@echo ""
+	@rm -f src/mod/mod.xlibs
+	@rm -f src/mod/mod.xlibs
+	@./misc/maketype hub
+	@echo ""
+	@cd src/mod && $(MAKE_HUB) static
+	@echo ""
+	@cd src && $(MAKE_HUB) $(HUBEXEC)
+	@echo ""
+
+dhub:   salt config
+	@echo ""
+	@echo "Making debug hub"
+	@echo ""
+	@rm -f src/mod/mod.xlibs
+	@./misc/maketype hub
+	@echo ""
+	@cd src/mod && $(MAKE_DHUB) static
+	@echo ""
+	@cd src; $(MAKE_DHUB) $(HUBEXEC)
+	@echo ""
+
 
 #safety hash
+

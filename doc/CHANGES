@@ -1,4 +1,4 @@
-Wraith - Changelog
+Wraith - CHANGES
 
 + : Added
 - : Removed
@@ -8,6 +8,28 @@ Wraith - Changelog
 ? : Question to users...
 
 ------------------------------
+
+1.0.11
+@ 1.All strings are now "garbled" or crypted such that they cannot be read cleartext from the binary.
+@ 2.Source code now in CVS.
+
+1.0.1
+! 1.Fixed a cosmetic bug in show_channels
+! 2.Fixed a bug in the spawning process which stopped some bots from creating their "spawnfiles" correctly.
+! 3.Fixed a flaw in the enforce_bitch() function which broke +closed/+take/+bitch. -found by xmage
+@ 4.Added "(closed)" to show_channels.
+@ 5.cmd_chpass now accepts "rand" to generate a random password.
+! 6.cmd_chanset now only lets n|- set/unset +private on a chan. -found by passwd
+! 7.cmd_chattr now only allows a n|- or -|m user to give flags on a +private chan. -found by passwd
++ 8.Added chan/msg cmds: voice, channels.
+! 9.Possibly fixed bug in isauthed().
+! 10.Fixed bug in putlog() which obscured the DEBUG.
+! 11.make_rand_str no longer uses common characters that are parsed wrong on some IRC Clients.
+@ 12.Auth timeout for DCC raised to 40 seconds. -passwd
+@ 13.Updated cmd_about to reflect the CREDITS correctly.
+! 14.msg_authstart no longer will return "auth!" for users without a matching host. (to be improved later to work like IDENT)
++ 15.Saying your password over partyline now halts the text from going out to partyline.
+! 16.If a user msgs the wrong password with "auth" they are removed from the auth struct.
 
 1.0.09
 + 1.Added command logging to cmd_nettcl cmd_bottcl cmd_tcl.

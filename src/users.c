@@ -86,7 +86,7 @@ int delignore(char *ign)
       char *mask = str_escape(temp, ':', '\\');
 
       if (mask) {
-	shareout(NULL, "-i %s\n", mask);
+	shareout(NULL, STR("-i %s\n"), mask);
 	nfree(mask);
       }
     }
@@ -135,7 +135,7 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
     char *mask = str_escape(ign, ':', '\\');
 
     if (mask) {
-      shareout(NULL, "+i %s %lu %c %s %s\n", mask, expire_time - now,
+      shareout(NULL, STR("+i %s %lu %c %s %s\n"), mask, expire_time - now,
 	       (p->flags & IGREC_PERM) ? 'p' : '-', from, mnote);
       nfree(mask);
     }
@@ -149,27 +149,27 @@ void display_ignore(int idx, int number, struct igrec *ignore)
 
   if (ignore->added) {
     daysago(now, ignore->added, s);
-    sprintf(dates, "Started %s", s);
+    sprintf(dates, STR("Started %s"), s);
   } else
     dates[0] = 0;
   if (ignore->flags & IGREC_PERM)
-    strcpy(s, "(perm)");
+    strcpy(s, STR("(perm)"));
   else {
     char s1[41];
 
     days(ignore->expire, now, s1);
-    sprintf(s, "(expires %s)", s1);
+    sprintf(s, STR("(expires %s)"), s1);
   }
   if (number >= 0)
-    dprintf(idx, "  [%3d] %s %s\n", number, ignore->igmask, s);
+    dprintf(idx, STR("  [%3d] %s %s\n"), number, ignore->igmask, s);
   else
-    dprintf(idx, "IGNORE: %s %s\n", ignore->igmask, s);
+    dprintf(idx, STR("IGNORE: %s %s\n"), ignore->igmask, s);
   if (ignore->msg && ignore->msg[0])
-    dprintf(idx, "        %s: %s\n", ignore->user, ignore->msg);
+    dprintf(idx, STR("        %s: %s\n"), ignore->user, ignore->msg);
   else
-    dprintf(idx, "        %s %s\n", MODES_PLACEDBY, ignore->user);
+    dprintf(idx, STR("        %s %s\n"), MODES_PLACEDBY, ignore->user);
   if (dates[0])
-    dprintf(idx, "        %s\n", dates);
+    dprintf(idx, STR("        %s\n"), dates);
 }
 
 /* list the ignores and how long they've been active */
@@ -179,10 +179,10 @@ void tell_ignores(int idx, char *match)
   int k = 1;
 
   if (u == NULL) {
-    dprintf(idx, "No ignores.\n");
+    dprintf(idx, STR("No ignores.\n"));
     return;
   }
-  dprintf(idx, "%s:\n", IGN_CURRENT);
+  dprintf(idx, STR("%s:\n"), IGN_CURRENT);
   for (; u; u = u->next) {
     if (match[0]) {
       if (wild_match(match, u->igmask) ||
@@ -204,7 +204,7 @@ void check_expired_ignores()
     return;
   while (*u) {
     if (!((*u)->flags & IGREC_PERM) && (now >= (*u)->expire)) {
-      putlog(LOG_MISC, "*", "%s %s (%s)", IGN_NOLONGER, (*u)->igmask,
+      putlog(LOG_MISC, "*", STR("%s %s (%s)"), IGN_NOLONGER, (*u)->igmask,
 	     MISC_EXPIRED);
       delignore((*u)->igmask);
     } else {
@@ -288,8 +288,8 @@ static void restore_chanban(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", "*** Malformed banline for %s.",
-	 chan ? chan->dname : "global_bans");
+  putlog(LOG_MISC, "*", STR("*** Malformed banline for %s."),
+	 chan ? chan->dname : STR("global_bans"));
 }
 
 static void restore_chanexempt(struct chanset_t *chan, char *host)
@@ -342,8 +342,8 @@ static void restore_chanexempt(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", "*** Malformed exemptline for %s.",
-	 chan ? chan->dname : "global_exempts");
+  putlog(LOG_MISC, "*", STR("*** Malformed exemptline for %s."),
+	 chan ? chan->dname : STR("global_exempts"));
 }
 
 static void restore_chaninvite(struct chanset_t *chan, char *host)
@@ -396,8 +396,8 @@ static void restore_chaninvite(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", "*** Malformed inviteline for %s.",
-	 chan ? chan->dname : "global_invites");
+  putlog(LOG_MISC, "*", STR("*** Malformed inviteline for %s."),
+	 chan ? chan->dname : STR("global_invites"));
 }
 
 static void restore_ignore(char *host)
@@ -449,7 +449,7 @@ static void restore_ignore(char *host)
       return;
     }
   }
-  putlog(LOG_MISC, "*", "*** Malformed ignore line.");
+  putlog(LOG_MISC, "*", STR("*** Malformed ignore line."));
 }
 
 void tell_user(int idx, struct userrec *u, int master)
@@ -549,9 +549,9 @@ void tell_user_ident(int idx, char *id, int master)
     dprintf(idx, "%s.\n", USERF_NOMATCH);
     return;
   }
-  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", 
+  egg_snprintf(format, sizeof format, STR("%%-%us PASS NOTES FLAGS           LAST\n"), 
                           HANDLEN);
-  dprintf(idx, format, "HANDLE");
+  dprintf(idx, format, STR("HANDLE"));
   tell_user(idx, u, master);
 }
 
@@ -567,13 +567,13 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
   struct list_type *q;
   struct flag_record user, pls, mns;
 
-  dprintf(idx, "*** %s '%s':\n", MISC_MATCHING, mtch);
+  dprintf(idx, STR("*** %s '%s':\n"), MISC_MATCHING, mtch);
   cnt = 0;
-  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", 
+  egg_snprintf(format, sizeof format, STR("%%-%us PASS NOTES FLAGS           LAST\n"), 
                       HANDLEN);
-  dprintf(idx, format, "HANDLE");
+  dprintf(idx, format, STR("HANDLE"));
   if (start > 1)
-    dprintf(idx, "(%s %d)\n", MISC_SKIPPING, start - 1);
+    dprintf(idx, STR("(%s %d)\n"), MISC_SKIPPING, start - 1);
   if (strchr("+-&|", *mtch)) {
     user.match = pls.match = FR_GLOBAL | FR_BOT | FR_CHAN;
     break_down_flags(mtch, &pls, &mns);
@@ -584,7 +584,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
       if (!pls.global && !pls.udef_global && !pls.chan && !pls.udef_chan &&
 	  !pls.bot) {
 	/* happy now BB you weenie :P */
-	dprintf(idx, "Unknown flag specified for matching!!\n");
+	dprintf(idx, STR("Unknown flag specified for matching!!\n"));
 	return;
       }
     }

@@ -578,10 +578,21 @@ void cmd_motd(struct userrec *u, int idx, char *par)
 static void cmd_about(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# about", dcc[idx].nick);
-
-  dprintf(idx, "Wraith %s\n", egg_version);
-  dprintf(idx, "by: bryan\nwith beta testing/ideas from: SFC, xmage\n");
-  dprintf(idx, "credit goes to ievil/einride for ghost, which a lot of code in this pack is based off of..\n");
+dprintf(idx, STR("Wraith (%s) botpack by bryan, with credits and thanks to the following:\n"), egg_version);
+dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n\n"));
+dprintf(idx, STR("Eggdrop team for developing such a great bot to code off of.\n"));
+dprintf(idx, STR("Einride and ievil for taking eggdrop1.4.3 and making their very effecient botpack Ghost.\n"));
+dprintf(idx, STR("SFC for providing compile shells, continuous input, feature suggestions, and testing.\n"));
+dprintf(idx, STR("xmage for beta testing.\n"));
+dprintf(idx, STR("ryguy for providing some cosmetic dcc login code.\n"));
+dprintf(idx, STR("Blackjac for helping with the bx auth script with his Sentinel script.\n"));
+dprintf(idx, STR("passwd for being so dedicated at suggesting improvements and finding bugs.\n"));
+dprintf(idx, STR("pgpkeys for suggestions.\n"));
+dprintf(idx, STR("syt for giving me inspiration to code a more secure bot.\n\n\n"));
+dprintf(idx, STR("The following botpacks gave me inspiration and ideas (no code):\n"));
+dprintf(idx, STR("awptic by lordoptic\n"));
+dprintf(idx, STR("celdrop by excelsior\n"));
+dprintf(idx, STR("genocide by various\n"));
 }
 
 static void cmd_away(struct userrec *u, int idx, char *par)
@@ -1338,7 +1349,7 @@ static void cmd_handle(struct userrec *u, int idx, char *par)
 #ifdef HUB
 static void cmd_chpass(struct userrec *u, int idx, char *par)
 {
-  char *handle, *new;
+  char *handle, *new, pass[16];
   int atr = u ? u->flags : 0, l;
   if (!par[0])
     dprintf(idx, "Usage: chpass <handle> [password]\n");
@@ -1362,15 +1373,28 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
       set_user(&USERENTRY_PASS, u, NULL);
       dprintf(idx, "Removed password.\n");
     } else {
-
+      int good = 0;
       l = strlen(new = newsplit(&par));
       if (l > 16)
 	new[16] = 0;
-      if (goodpass(new, idx, NULL)) {
-	set_user(&USERENTRY_PASS, u, new);
-	putlog(LOG_CMDS, "*", "#%s# chpass %s [something]", dcc[idx].nick,
+      if (!strcmp(new, "rand")) {
+        make_rand_str(pass, 16);
+        
+        good = 1;
+      } else {
+        if (goodpass(new, idx, NULL)) {
+          sprintf(pass, "%s", new);
+          good = 1;
+        }
+      }
+      if (strlen(pass) > 16)
+      pass[16] = 0;
+
+      if (good) {
+        set_user(&USERENTRY_SECPASS, u, pass);
+        putlog(LOG_CMDS, "*", "#%s# chpass %s [something]", dcc[idx].nick,
 	       handle);
-	dprintf(idx, "Changed password.\n");
+        dprintf(idx, "%s password changed to: %s\n", handle, pass);
       }
     }
   }
@@ -2055,6 +2079,13 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
       nfree(tmpchg);
     return;
   }
+    if (chan && channel_private(chan) && !glob_owner(user) && !chan_master(user)) {
+      dprintf(idx, "You do not have access to change flags for %s\n", chan->dname);
+      if (tmpchg)
+        nfree(tmpchg);
+      return;
+    }
+
   user.match &= fl;
   if (chg) {
     pls.match = user.match;
@@ -2063,10 +2094,13 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     pls.global &= ~(USER_BOT);
     mns.global &= ~(USER_BOT);
 //only THE owner can add these flags
+
+
     if ((pls.global & USER_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
       dprintf(idx, "Only a hub can be set as the updatehub.\n");
       pls.global &= ~(USER_UPDATEHUB);
     }
+
     if (!isowner(u->handle)) {
       if (pls.global & USER_HUBA)
         putlog(LOG_MISC, "*", "%s attempted to give %s hub connect access", dcc[idx].nick, u2->handle);
@@ -4030,7 +4064,7 @@ dcc_cmd_t C_dcc[] =
 #ifdef HUB
   {"config",		"n",	(Function) cmd_config,		NULL,    NULL},
 #endif
-  {"console",		"",	(Function) cmd_console,		NULL,    NULL},
+  {"console",		"-|-",	(Function) cmd_console,		NULL,    NULL},
 #ifdef HUB
   {"dccstat",		"a",	(Function) cmd_dccstat,		NULL,    NULL},
 #endif
@@ -4039,7 +4073,7 @@ dcc_cmd_t C_dcc[] =
   {"echo",		"",	(Function) cmd_echo,		NULL,    NULL},
   {"fixcodes",		"",	(Function) cmd_fixcodes,	NULL,    NULL},
   {"handle",		"",	(Function) cmd_handle,		NULL,    NULL},
-  {"help",		"",	(Function) cmd_help,		NULL,    NULL},
+  {"help",		"-|-",	(Function) cmd_help,		NULL,    NULL},
   {"ignores",		"m",	(Function) cmd_ignores,		NULL,    NULL},
 #ifdef HUB
   {"link",		"n",	(Function) cmd_link,		NULL,    NULL},

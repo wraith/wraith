@@ -1568,7 +1568,10 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	} else if (!(chan = findchan_by_dname(chname)) && (chname[0] != '+')) {
 	  dprintf(idx, "That channel doesn't exist!\n");
 	  return;
-	}
+	} else if ((strstr(par, "+private") || strstr(par, "-private")) && (!glob_owner(user))) {
+	  dprintf(idx, "You don't have access to set +/-private on %s (halting command due to lazy coder).\n", chname);
+	  return;
+        }
 	if (!chan) {
 	  if (par[0])
 	    *--par = ' ';

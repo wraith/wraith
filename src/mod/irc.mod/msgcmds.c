@@ -111,7 +111,8 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 
   if (!ischanhub()) 
     return 0;
-
+  if (!u) 
+    return 0;
   if (match_my_nick(nick))
     return 1;
   if (u && (u->flags & USER_BOT))
@@ -142,7 +143,7 @@ Context;
 
 Context;
 
-  dprintf(DP_HELP, "PRIVMSG %s :auth%s\n", nick, u ? "." : "!");
+  dprintf(DP_HELP, "PRIVMSG %s :auth%s %s\n", nick, u ? "." : "!", botnetnick);
 
   return 0;
 
@@ -181,8 +182,10 @@ Context;
 Context;
       dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, rand, botnetnick);
     }
-  } else
+  } else {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed -AUTH", nick, host, u->handle);
+    removeauth(i);
+  }
   return 1;
 
 }
@@ -496,7 +499,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
       m = ismember(chan, nick);
   }
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %OP %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sOP %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
 
   if (par[0] == '-') { //we have an option!
     char *tmp;
@@ -536,6 +539,88 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
   }
   return 1;
 }
+
+static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char *chname)
+{
+  struct chanset_t *chan = NULL;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  int force = 0;
+  memberlist *m;
+
+  if (match_my_nick(nick))
+    return 1;
+
+  if (chname[0]) {
+    chan = findchan_by_dname(chname);
+    if (chan) 
+      m = ismember(chan, nick);
+  }
+
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sVOICE %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+
+  if (par[0] == '-') { //we have an option!
+    char *tmp;
+    par++;
+    tmp = newsplit(&par);
+    if (!strcasecmp(tmp, "force") || !strcasecmp(tmp, "f")) 
+      force = 1;
+    else {
+      dprintf(DP_HELP, "NOTICE %s :Invalid option: %s\n", nick, tmp);
+      return 0;
+    }
+  }
+  if (par[0] || chan) {
+    if (!chan)
+      chan = findchan_by_dname(par);
+    if (chan && channel_active(chan)) {
+      get_user_flagrec(u, &fr, chan->dname);
+      if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+         (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+        add_mode(chan, '+', 'v', nick);
+      }
+      return 1;
+    }
+  } else {
+    for (chan = chanset; chan; chan = chan->next) {
+      get_user_flagrec(u, &fr, chan->dname);
+      if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+         (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+        add_mode(chan, '+', 'v', nick);
+      }
+    }
+  }
+  return 1;
+}
+
+static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, char *chname)
+{
+  struct chanset_t *chan = NULL;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  char list[1024];
+
+  if (match_my_nick(nick))
+    return 1;
+
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sCHANNELS %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  list[0] = 0;
+  for (chan = chanset; chan; chan = chan->next) {
+    get_user_flagrec(u, &fr, chan->dname);
+    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+       (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
+      strcat(list, chan->dname);
+      strcat(list, " ");
+    }
+  }
+
+  if (list[0]) 
+    dprintf(DP_HELP, "NOTICE %s :You have access to: %s\n", nick, list);
+  else
+    dprintf(DP_HELP, "NOTICE %s :You do not have access to any channels.\n", nick);
+
+  return 1;
+}
+
+
 
 static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
@@ -583,7 +668,7 @@ Context;
 static int msgc_help(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %sHELP %s", nick, host, u->handle, cmdprefix, par ? par : "");
-  dprintf(DP_HELP, "NOTICE %s :op invite getkey test\n", nick);
+  dprintf(DP_HELP, "NOTICE %s :op invite getkey voice test\n", nick);
   return 1;
 }
 
@@ -645,6 +730,8 @@ static cmd_t C_msgc[] =
 {
   {"test",		"",	(Function) msgc_test,		NULL},
   {"op",		"",	(Function) msgc_op,		NULL},
+  {"voice",		"",	(Function) msgc_voice,		NULL},
+  {"channels",		"",	(Function) msgc_channels,	NULL},
   {"getkey",		"",	(Function) msgc_getkey,		NULL},
   {"invite",		"",	(Function) msgc_invite,		NULL},
   {"help",		"",	(Function) msgc_help,		NULL},

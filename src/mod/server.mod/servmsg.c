@@ -40,8 +40,10 @@ Context;
     altnick_char = oknicks[0];
 Context;
     if (l + 1 == NICKMAX) {
+Context;
       botname[l] = altnick_char;
     } else {
+Context;
       botname[++l] = altnick_char;
       botname[l + 1] = 0;
     }
@@ -49,6 +51,7 @@ Context;
     char *p = strchr(oknicks, altnick_char);
 Context;
     p++;
+Context;
     if (!*p)
       altnick_char = 'a' + random() % 26;
     else
@@ -57,7 +60,8 @@ Context;
     botname[l] = altnick_char;
   }
 
-  putlog(LOG_MISC, "*", IRC_BOTNICKINUSE, botname);
+  putlog(LOG_SERV, "*", IRC_BOTNICKINUSE, botname);
+Context;
   dprintf(DP_MODE, "NICK %s\n", botname);
 Context;
   return 0;
@@ -549,16 +553,20 @@ static int gotmsg(char *from, char *msg)
       u = get_user_by_host(from);
       code = newsplit(&msg);
       rmspace(msg);
+Context;
       i = isauthed(uhost);
       /* is it a cmd? */
 
+Context;
       if (i > -1 && auth[i].authed && code[0] == cmdprefix[0] && code[1]) {
         code++;        
+Context;
         if (check_tcl_msgc(code, nick, uhost, u, msg))
           auth[i].atime = now;
         else
           putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
       } else if ((code[0] != cmdprefix[0] || !code[1] || i == -1 || !(auth[i].authed))) {
+Context;
         if (!ignoring || trigger_on_ignore)
  	  check_tcl_msgm(code, nick, uhost, u, msg);
         if (!ignoring)
@@ -827,7 +835,7 @@ static int got432(char *from, char *msg)
 static int got433(char *from, char *msg)
 {
   char *tmp;
-
+Context;
   if (server_online) {
     /* We are online and have a nickname, we'll keep it */
     newsplit(&msg);
@@ -836,7 +844,9 @@ static int got433(char *from, char *msg)
     nick_juped = 0;
     return 0;
   }
+Context;
   gotfake433(from);
+Context;
   return 0;
 }
 
@@ -1126,6 +1136,7 @@ Context;
     trying_server = 0;
     SERVER_SOCKET.timeout_val = 0;
   }
+Context;
   waiting_for_awake = 0;
   from = "";
   if (msg[0] == ':') {
@@ -1135,7 +1146,7 @@ Context;
   code = newsplit(&msg);
 
 /* check MODEs now, we're in a rush */
-
+Context;
   if (!strcmp(code, STR("MODE")) && (msg[0] == '#') && strchr(from, '!')) {
     /* It's MODE #chan by a user */
     char *modes[5] = { NULL, NULL, NULL, NULL, NULL };
@@ -1159,7 +1170,7 @@ Context;
     /* Split up the mode: #chan modes param param param param */
     strncpy0(work, msg, sizeof(work));
     wptr = work;
-
+Context;
     p = newsplit(&wptr);
     chan = findchan(p);
 
@@ -1198,7 +1209,7 @@ Context;
       }
       p++;
     }
-
+Context;
     ufrom = get_user_by_host(from);
     
     /* Split up from */
@@ -1622,7 +1633,10 @@ static void server_resolve_failure(int servidx)
 
 static void server_resolve_success(int servidx)
 {
-  int oldserv = dcc[servidx].u.dns->ibuf, i = 0;
+  int oldserv = dcc[servidx].u.dns->ibuf;
+#ifdef S_NODELAY
+  int i = 0;
+#endif
   char s[121], pass[121];
 
   resolvserv = 0;

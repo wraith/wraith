@@ -1075,7 +1075,9 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #endif
   add_server(p);
   nfree(p);
+#ifdef S_RANDSERVERS
   nfree(new);
+#endif
 #endif
 }
 
@@ -1103,7 +1105,9 @@ void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #endif
   add_server(p);
   nfree(p);
+#ifdef S_RANDSERVERS
   nfree(new);
+#endif
 #endif
 }
 

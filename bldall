@@ -2,7 +2,7 @@
 
 #edit this to your homedir (no trailing slash)
 
-TCLDIR="/home/bryan"
+TCLDIR="/home/wheel/bryan"
 
 
 #### DO NOT EDIT BELOW THIS LINE #####
@@ -36,14 +36,9 @@ then
   echo "Automated packing disabled, `uname` isn't recognized"
 fi
 
-# make clean, just in case
-echo "Cleaning up old binaries..."
-make distclean > /dev/null
-
 # Run ./configure, then verify it's ok
 echo "Configuring..."
-#./configure > /dev/null 2>configure.temp
-./configure --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
+./configure --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
 #if test "`cat configure.temp`"
 #then
 #  echo "Configure error'd"
@@ -53,6 +48,9 @@ echo "Configuring..."
 #fi
 #rm -f configure.temp
 
+# make clean, just in case
+echo "Cleaning up old binaries..."
+make clean > /dev/null
 
 
 # Read the config
@@ -65,20 +63,17 @@ done
 echo ""
 
 # Build utils and check we got the bins
-#echo "Building utils..."
-#make utils CFLGS="$defines" > /dev/null
-#if ! test -f readlog -a -f makebot -a -f makepack -a -f stringfix
-#then
-#  echo "Util build failed"
-#  exit 1
-#fi
+echo "Building utils..."
+make utils CFLGS="$defines" > /dev/null
+if ! test -f stringfix
+then
+  echo "Util build failed"
+  exit 1
+fi
 
 # Build leaf and check
 echo "Building leaf..."
-make config CFLGS="-DLEAF $defines" > /dev/null
-make static CFLGS="-DLEAF $defines" > /dev/null
-#make static CFLGS="-DLEAF $defines" > /dev/null
-mv -f eggdrop leaf
+make leaf CFLGS="$defines" > /dev/null
 if ! test -f leaf
 then
   echo "leaf build failed"
@@ -87,14 +82,9 @@ fi
 
 # Build hub and check
 echo "Building hub..."
-make clean > /dev/null
-make config CFLGS="-DHUB $defines" > /dev/null
-#make -j sdebug CFLGS="-DHUB $defines" > /dev/null
-make static CFLGS="-DHUB $defines" > /dev/null
-mv -f eggdrop hub
+make hub CFLGS="$defines" > /dev/null
 if ! test -f hub
 then
   echo "hub build failed"
   exit 1
 fi
-make clean > /dev/null

@@ -50,9 +50,10 @@ int	allow_new_telnets = 0;	/* Allow people to introduce themselves
 				   via telnet				   */
 int	use_telnet_banner = 0;	/* Display telnet banner?		   */
 char	network[41] = "EFnet"; /* Name of the IRC network you're on  */
-int	password_timeout = 15;	/* Time to wait for a password from a user */
+int	password_timeout = 20;	/* Time to wait for a password from a user */
+int     auth_timeout = 40;
 int	bot_timeout = 25;	/* Bot timeout value			   */
-int	identtimeout = 10;	/* Timeout value for ident lookups	   */
+int	identtimeout = 15;	/* Timeout value for ident lookups	   */
 int	dupwait_timeout = 5;	/* Timeout for rejecting duplicate entries */
 #ifdef LEAF
 int	protect_telnet = 0;	/* Even bother with ident lookups :)	   */
@@ -927,7 +928,7 @@ struct dcc_table DCC_CHAT_SECPASS =
   0,
   eof_dcc_general,
   dcc_chat_secpass,
-  &password_timeout,
+  &auth_timeout,
   tout_dcc_chat_secpass,
   display_dcc_chat_secpass,
   expmem_dcc_general,
@@ -1044,7 +1045,15 @@ static void dcc_chat(int idx, char *buf, int i)
     else
       *d = 0;
     if (buf[0]) {		/* Nothing to say - maybe paging... */
-      if ((!strncmp(buf,dcc_prefix,strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
+      char *tmppass;
+
+      tmppass = nmalloc(strlen(buf)+1);
+      strcpy(tmppass, buf);
+      if (u_pass_match(dcc[idx].user, tmppass)) { //user said their password :)
+        dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
+        if (tmppass)
+          nfree(tmppass);
+      } else if ((!strncmp(buf,dcc_prefix,strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
 	if (!strncmp(buf,dcc_prefix,strlen(dcc_prefix)))
 	  buf++;
 	v = newsplit(&buf);

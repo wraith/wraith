@@ -1,3 +1,9 @@
+/*
+ * makesalt.c -- handles:
+ * making the salt for the encryption.
+ *
+ */
+
 /************************************************************************
  *   psybnc2.2.2, tools/makesalt.c
  *   Copyright (C) 2001 the most psychoid  and
@@ -48,13 +54,13 @@ int main(void)
     srand(time(NULL));
     saltlen1=(rand()&20)+5;
     saltlen2=(rand()&20)+5;
-    if ( (salt=fopen("salt.h","r"))!=NULL) {
+    if ( (salt=fopen("src/salt.h","r"))!=NULL) {
 	fclose(salt);
 	printf("Using existent Salt-File\n");
 	exit(0x0);
     }
     printf("Creating Salt File\n");
-    if ( (salt=fopen("salt.h","w"))==NULL) {
+    if ( (salt=fopen("src/salt.h","w"))==NULL) {
 	printf("Cannot created Salt-File.. aborting\n");
 	exit(0x1);
     }

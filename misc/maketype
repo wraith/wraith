@@ -1,0 +1,49 @@
+#!/bin/sh
+cd $PWD
+if test ! -f stamp.$1
+then
+  cfiles="`find src -name \*.c`"
+  cfiles="`grep -l \"def [H|L][U|E][B|A]\" $cfiles` src/md5/md5c.c"
+  for s in $cfiles 
+  do
+    bleh="`echo $s | cut -d / -f 2`";
+    if [ $bleh = "mod" ]; then
+#echo "src/mod/irc.mod/cmdsirc.c" | cut -d / -f 3
+#elif [ $1 = "binary" ]; then
+      mod="`echo $s | cut -d / -f 3`";
+      os="`echo src/mod/$mod | sed s/\\\.mod/\\\.o/g`";
+     echo "deleting $os"
+     rm -f $os
+#    fi
+    else
+      os="`echo $s | sed s/\\\.c/\\\.o/g`";
+      if test -f $os
+      then
+        if test "`file $os | grep ELF`"
+        then
+          echo "Deleting $os"
+  	  rm -f $os
+        else
+          if test "`file $os | grep object`"
+          then
+            echo "Deleting $os"
+    	    rm -f $os
+          fi
+        fi
+      fi
+    fi
+  done
+fi
+rm -f stamp.*
+touch stamp.$1
+
+
+
+
+
+
+
+
+
+
+

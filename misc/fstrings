@@ -1,0 +1,17 @@
+#!/bin/sh
+if test -z $1
+then
+  grep -n -R "\"" src/*.c | grep -v "STR(" | grep -v "^src/x" | grep -v "\#include" | grep -v "[\"][^X][\"]" | grep -v "[\"][^X][^X][\"]" | grep -v "\"\"" | grep -v "Context" | grep -v "\#define" | grep -v "makepack\.c" | grep -v "stringfix\.c" | grep -v "remote\.c"
+else
+  grep -n -R "\"" $1 | grep -v "STR(" | grep -v "^src/x" | grep -v "\#include" | grep -v "[\"][^X][\"]" | grep -v "[\"][^X][^X][\"]" | grep -v "\"\"" | grep -v "Context" | grep -v "\#define" | grep -v "makepack\.c" | grep -v "stringfix\.c" | grep -v "remote\.c"
+fi
+
+
+
+
+
+
+
+
+
+

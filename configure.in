@@ -86,18 +86,19 @@ tcllibnames="tcl tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 tcl8.1 tcl81 \
 tcllibextensions=".so .so.1 .so.1.0 .so.1.2 .a .sl .dll"
 
 # Tcl library search paths
-tcllibpaths="/usr/local/lib /usr/local/pkgs/tcl/lib \
+tcllibpaths="$HOME/lib $HOME/tcl/lib $HOME \
+        /usr/local/lib /usr/local/pkgs/tcl/lib \
 	/usr/lib /lib /usr/i486-linuxaout/lib \
-	/beos/system/lib /sys/lib \
-	$HOME/lib $HOME/tcl/lib $HOME"
+	/beos/system/lib /sys/lib"
 
 # Tcl header filenames
 tclheadernames="tcl.h"
 
 # Tcl header search paths
-tclheaderpaths="/usr/local/include /usr/local/pkgs/tcl/include \
+tclheaderpaths="$HOME/include $HOME/tcl/include $HOME \
+        /usr/local/include /usr/local/pkgs/tcl/include \
 	/usr/include /beos/system/include /beos/devel/include \
-       /sys/include $HOME/include $HOME/tcl/include $HOME"
+       /sys/include"
 
 EGG_TCL_ARG_WITH
 EGG_TCL_ENV
@@ -127,6 +128,6 @@ EGG_SUBST_DEST
 EGG_SUBST_MOD_UPDIR
 EGG_CATCH_MAKEFILE_REBUILD
 
-AC_OUTPUT(Makefile scripts/Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile)
+AC_OUTPUT(Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile)
 
 EGG_MSG_CONFIGURE_END

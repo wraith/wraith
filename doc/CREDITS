@@ -1,20 +1,19 @@
-Wraith botpack by bryan, with credits to the following:
+Wraith botpack by bryan, with credits and thanks to the following:
 (written from a base of Eggdrop 1.6.12)
 
 Eggdrop team for developing such a great bot to code off of.
 Einride and ievil for taking eggdrop1.4.3 and making their very effecient botpack Ghost.
-ryguy for providing some cosmetic dcc login code.
 SFC for providing compile shells, continuous input, feature suggestions, and testing.
-#c on EFnet.
-Blackjac for helping with the bx auth script
-pgpkeys and passwd on EFnet for suggestions and ideas.
-
+xmage for beta testing.
+ryguy for providing some cosmetic dcc login code.
+Blackjac for helping with the bx auth script with his Sentinel script.
+passwd for being so dedicated at suggesting improvements and finding bugs.
+pgpkeys for suggestions.
+syt for giving me inspiration to code a more secure bot.
 
 The following botpacks gave me inspiration and ideas (no code):
 awptic by lordoptic
 celdrop by excelsior
 genocide by various
+tfbot
 
-Beta testers:
-SFC
-xmage

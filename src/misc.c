@@ -928,12 +928,12 @@ void daysdur(time_t now, time_t then, char *out)
 /* show l33t banner */
 void show_banner(int idx)
 {
-  dprintf(idx, "                    _ _   _     \n");
-  dprintf(idx, "__      ___ __ __ _(_) |_| |__  \n");
-  dprintf(idx, "\\ \\ /\\ / / '__/ _` | | __| '_ \\ \n");
-  dprintf(idx, " \\ V  V /| | | (_| | | |_| | | |\n");
-  dprintf(idx, "  \\_/\\_/ |_|  \\__,_|_|\\__|_| |_|\n");
-  dprintf(idx, "           by bryan          \n");
+  dprintf(idx, STR("                    _ _   _     \n"));
+  dprintf(idx, STR("__      ___ __ __ _(_) |_| |__  \n"));
+  dprintf(idx, STR("\\ \\ /\\ / / '__/ _` | | __| '_ \\ \n"));
+  dprintf(idx, STR(" \\ V  V /| | | (_| | | |_| | | |\n"));
+  dprintf(idx, STR("  \\_/\\_/ |_|  \\__,_|_|\\__|_| |_|\n"));
+  dprintf(idx, STR("           by bryan          \n"));
 }
 
 /* show motd to dcc chatter */
@@ -966,7 +966,7 @@ Context;
 
 Context;
 
-  egg_snprintf(format, sizeof format, "  %%-%us %%-s%%-s%%-s%%-s\n", (l+2));
+  egg_snprintf(format, sizeof format, "  %%-%us %%-s%%-s%%-s%%-s%%-s\n", (l+2));
 
   for (chan = chanset;chan;chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
@@ -981,11 +981,11 @@ Context;
         }
         dprintf(idx, format, chan->dname, channel_inactive(chan) ? "(inactive) " : "", 
            channel_private(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
-           channel_bitch(chan) ? "(bitch)" : "");
+           channel_bitch(chan) ? "(bitch)   " : "", channel_closed(chan) ?  "(closed)" : "");
     }
   }
   if (!first)
-    dprintf(idx, "You do not have access to any channels.\n");
+    dprintf(idx, "%s %s not have access to any channels.\n", handle ? u->handle : "You", handle ? "does" : "do");
 Context;
 
 }
@@ -1131,7 +1131,6 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   if (dohl) {
     tand_t *bot;
     struct userrec *ubot;
-Context;
     sprintf(buf2, "hl %d %s", type, out);
     if (userlist && !loading) {
       for (bot = tandbot ;bot ; bot = bot->next) {
@@ -1266,7 +1265,6 @@ void make_rand_str(char *s, int len)
 Context;
   for (j = 0; j < len; j++) {
     r = random();
-Context;
     if (r % 4 == 0)
       s[j] = '0' + (random() % 10);
     else if (r % 4 == 1)
@@ -1276,14 +1274,14 @@ Context;
     else
       s[j] = '!' + (random() % 15);
 
-    if (s[j] == 37) //take out % because mIRC is lame and bugged with % in $md5(text)
+    if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) //no % ( ) & 
       s[j] = 35;
+    
   }
 
 
   s[len] = '\0';
 //  s[len] = 0;
-Context;
 }
 
 /* Convert an octal string into a decimal integer value.  If the string
@@ -2736,9 +2734,12 @@ int isauthed(char *host)
   int i = 0;
 Context;
   for (i = 0; i < auth_total; i++) {
-    if (!strcmp(auth[i].host, host))
+Context;
+    if (auth[i].host[0] && host[0] && !strcmp(auth[i].host, host))
+Context;
       return i;
   }
+Context;
   return -1;
 }
   
@@ -2752,3 +2753,32 @@ Context;
     egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
 }
 
+#ifdef S_GARBLESTRINGS
+#define GARBLE_BUFFERS 40
+unsigned char *garble_buffer[GARBLE_BUFFERS] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+int garble_ptr = (-1);
+
+char *degarble(int len, char *g)
+{
+  int i;
+  unsigned char x;
+
+  garble_ptr++;
+  if (garble_ptr == GARBLE_BUFFERS)
+    garble_ptr = 0;
+  if (garble_buffer[garble_ptr])
+    nfree(garble_buffer[garble_ptr]);
+  garble_buffer[garble_ptr] = nmalloc(len + 1);
+  x = 0xFF;
+  for (i = 0; i < len; i++) {
+    garble_buffer[garble_ptr][i] = g[i] ^ x;
+    x = garble_buffer[garble_ptr][i];
+  }
+  garble_buffer[garble_ptr][len] = 0;
+  return (char *) garble_buffer[garble_ptr];
+}
+#endif

@@ -18,7 +18,6 @@
 #define USERF_CANTREAD		"CAN'T READ NEW USERFILE"
 #define USERF_CANTSEND		"Can't send userfile to you (internal error)"
 #define USERF_NOMATCH		"Can't find anyone matching that"
-#define USERF_OLDFMT		"Old userfile, use 'tclsh scripts/weed <userfile> c' to convert"
 #define USERF_INVALID		"Invalid userfile format."
 #define USERF_CORRUPT		"Corrupt user record"
 #define USERF_DUPE		"Duplicate user record"

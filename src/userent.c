@@ -13,7 +13,7 @@ extern struct userrec	*userlist;
 extern struct dcc_t	*dcc;
 extern Tcl_Interp	*interp;
 extern char		 whois_fields[], botnetnick[];
-
+extern time_t            now;
 
 int share_greet = 0;		/* Share greeting info			*/
 static struct user_entry_type *entry_type_list;
@@ -97,7 +97,6 @@ int def_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 
 void *def_get(struct userrec *u, struct user_entry *e)
 {
-  Context;
   return e->u.string;
 }
 
@@ -1618,7 +1617,6 @@ void *get_user(struct user_entry_type *et, struct userrec *u)
 {
   struct user_entry *e;
 
-Context;
   if (u && (e = find_user_entry(et, u)))
     return et->get(u, e);
   return 0;

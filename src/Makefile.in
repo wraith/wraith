@@ -31,6 +31,10 @@ doofus:
 	@echo ""
 	@cd .. && $(MAKE)
 
+../stringfix:
+	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) stringfix.c -o ../stringfix
+	$(STRIP) ../stringfix
+
 ../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compile_md5 compatability
 	@echo ""
 	@echo "Linking eggdrop... $(EGGBUILD)"
@@ -41,19 +45,26 @@ doofus:
 	@echo "Successful compile: $(EGGEXEC)"
 	@echo ""
 
-$(EGGEXEC): ../$(EGGEXEC)
+$(EGGEXEC): ../stringfix ../$(EGGEXEC)
 
 depend:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/*.c > .depend
+	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) -MM $(srcdir)/*.c > .depend
 
 clean:
-	@rm -f .depend *.o *.a *~
+	@rm -f .depend *.o *.a *~ x*.c
+
+depleaf:
+	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) -DLEAF -MM *.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) -DHUB -MM *.c > .depend
+
 
 build_msg:
 	@echo "(This may take a while.  Go get some runts.)"
 
 main.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) \
+	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) \
 '-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
 '-DLDFLAGS="$(LD)"' \
 '-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/main.c
@@ -79,10 +90,18 @@ eggdrop.h:
 .SUFFIXES:
 .SUFFIXES: .c .h .o .a
 
-.c.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+.c.o:   ../stringfix
+	cp -f $< x$<
+	../stringfix x$<
+	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) -I$(top_srcdir) \
+        $(CPPFLAGS)"' '-DLDFLAGS="$(LD)"' \
+        '-DSTRIPFLAGS="$(STRIP)"' -c x$< -o `basename $< .c`.o
+#.c.o:
+#	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 #safety hash
+../stringfix: stringfix.c
 bg.o: ./bg.c main.h ../config.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h ../src/main.h compat/snprintf.h \
@@ -172,6 +191,7 @@ rfc1459.o: ./rfc1459.c main.h ../config.h lang.h eggdrop.h flags.h \
  users.h compat/compat.h compat/inet_aton.h ../src/main.h \
  compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
  compat/strftime.h
+stringfix.o: stringfix.c
 tcl.o: ./tcl.c main.h ../config.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h ../src/main.h compat/snprintf.h \
@@ -211,6 +231,6 @@ users.o: ./users.c main.h ../config.h lang.h eggdrop.h flags.h proto.h \
  compat/compat.h compat/inet_aton.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
  modules.h mod/modvals.h tandem.h
-settings.o: ./settings.c 
+settings.o: ./settings.c
 pcrypt.o: ./pcrypt.c salt.h
 

@@ -9,6 +9,8 @@
 #ifndef _EGG_EGGDROP_H
 #define _EGG_EGGDROP_H
 
+#define SDEBUG 1
+
 // If you undefine this, be ready for a good novel of errors. (Not Finished)
 #ifndef S_IRCNET
 #define S_IRCNET
@@ -17,9 +19,6 @@
  * Undefine this to completely disable context debugging.
  * WARNING: DO NOT send in bug reports if you undefine this!
  */
-#define OWNERS = "\
-bryan Pass1234 *!bryan@botpack.net *!bryan@ip68-8-80-38.sd.sd.cox.net\
-"
 
 #define DEBUG_CONTEXT
 

