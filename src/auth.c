@@ -71,22 +71,29 @@ init_auth()
   timer_create_secs(60, "expire_auths", (Function) expire_auths);
 }
 
-char *
-makehash(struct userrec *u, char *randstring)
+void makehash(int idx, int authi, char *randstring)
 {
   char hash[256] = "", *secpass = NULL;
+  struct userrec *u = NULL;
+
+  if (idx != -1)
+    u = dcc[idx].user;
+  else if (authi != -1)
+    u = auth[authi].user;
 
   if (get_user(&USERENTRY_SECPASS, u)) {
     secpass = strdup((char *) get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
   egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", authkey);
-
-  sdprintf("hash: %s", hash);
   if (secpass)
     free(secpass);
+  if (idx != -1) 
+    strncpyz(dcc[idx].hash, hash, sizeof dcc[idx].hash);
+  else if (authi != -1)
+    strncpyz(auth[authi].hash, hash, sizeof auth[authi].hash);
 
-  return MD5(hash);
+  egg_bzero(hash, sizeof(hash));
 }
 
 char *

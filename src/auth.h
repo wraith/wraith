@@ -22,7 +22,7 @@ int new_auth();
 int findauth(char *);
 void removeauth(int);
 char *makebdhash(char *);
-char *makehash(struct userrec *, char *);
+void makehash(int, int, char *);
 
 
 extern int auth_total;

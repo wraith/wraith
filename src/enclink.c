@@ -251,6 +251,7 @@ void link_hash(int idx, char *rand)
 
   egg_snprintf(hash, sizeof(hash), "%s.%s.%s", settings.packname, settings.salt1, rand);
   strncpyz(dcc[idx].shahash, SHA1(hash), sizeof(dcc[idx].shahash));
+  egg_bzero(hash, sizeof(hash));
   return;
 }
 

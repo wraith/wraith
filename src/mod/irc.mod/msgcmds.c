@@ -298,7 +298,8 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 
       auth[i].authing = 2;      
       make_rand_str(auth[i].rand, 50);
-      strncpyz(auth[i].hash, makehash(u, auth[i].rand), sizeof auth[i].hash);
+      makehash(-1, i, auth[i].rand);
+
       dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, auth[i].rand, conf.bot->nick);
     } else {
       /* no authkey and/or no SECPASS for the user, don't require a hash auth */
