@@ -187,9 +187,21 @@ dnl  EGG_PROG_CCACHE()
 dnl
 AC_DEFUN(EGG_PROG_CCACHE, [dnl
 AC_CHECK_PROG(CCACHE, ccache, ccache)
-if test "${CCACHE-x}" = "x"
+if ! test "${CCACHE-x}" = "x"
 then
   CCACHE=ccache
+fi
+])dnl
+
+dnl  EGG_PROG_OBJCOPY()
+dnl
+AC_DEFUN(EGG_PROG_OBJCOPY, [dnl
+AC_CHECK_PROG(OBJCOPY, objcopy, objcopy)
+if ! test "${OBJCOPY-x}" = "x"
+then
+  OBJCOPY="objcopy --remove-section=.note --remove-section=.comment"
+else
+  OBJCOPY=touch
 fi
 ])dnl
 
@@ -197,7 +209,7 @@ dnl  EGG_PROG_DISTCC()
 dnl
 AC_DEFUN(EGG_PROG_DISTCC, [dnl
 AC_CHECK_PROG(DISTCC, distcc, distcc)
-if test "${DISTCC-x}" = "x"
+if ! test "${DISTCC-x}" = "x"
 then
   DISTCC=distcc
 fi

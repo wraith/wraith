@@ -11,6 +11,8 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 CFLAGS = @CFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 
+OBJCOPY = @OBJCOPY@
+
 OBJS = auth.o \
 	bg.o \
 	botcmd.o \
@@ -90,6 +92,7 @@ stringfix: stringfix.c common.h ../config.h ../pack/pack.cfg eggdrop.h
 	@echo ""
 	@$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(XLIBS) compat/*.o
 	@$(STRIP) ../$(EGGEXEC)
+	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
 	@echo ""
 
