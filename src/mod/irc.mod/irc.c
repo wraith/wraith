@@ -464,7 +464,7 @@ check_hostmask()
   sprintf(s, "*!%s", tmp);		/* just add actual user@ident, regardless of ~ */
 
   /* dont add the host if it conflicts with another in the userlist */
-  if (u = get_user_by_host(s)) {
+  if ((u = get_user_by_host(s))) {
     if (u != conf.bot->u)
       putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
     return;
