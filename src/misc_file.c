@@ -10,6 +10,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "stat.h"
+#include "misc_file.h"
+#include "main.h"
 
 
 /* Copy a file from one place to another (possibly erasing old copy).
@@ -145,3 +147,38 @@ int fixmod(const char *s)
   return 0;
 #endif /* !CYGWIN_HACKS */
 }
+
+Tempfile::Tempfile()
+{
+  file = new char[strlen(tempdir) + 7 + 1];
+  sprintf(file, "%s.XXXXXX", tempdir);
+
+  MakeTemp();
+}
+
+Tempfile::Tempfile(const char *prefix)
+{
+  file = new char[strlen(tempdir) + strlen(prefix) + 7 + 1];
+  sprintf(file, "%s.%s-XXXXXX", tempdir, prefix);
+
+  MakeTemp();
+}
+
+void Tempfile::MakeTemp()
+{
+  if ((fd = mkstemp(file)) == -1 || (f = fdopen(fd, "wb")) == NULL) {
+    if (fd != -1) {
+      unlink(file);
+      close(fd);
+    }
+    fatal("Cannot create temporary file!", 0);
+  }
+}
+
+Tempfile::~Tempfile()
+{
+  close(fd);
+  unlink(file);
+  delete[] file;
+}
+
