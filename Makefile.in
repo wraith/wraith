@@ -19,7 +19,7 @@ DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build config
 EXCLUDES = pack/salt.h pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
            config.cache config.log config.status config.h lush.h stamp.* misc/.cvsignore src/compat/.cvsignore \
            src/mod/dns.mod/.cvsignore src/mod/.cvsignore src/.cvsignore .cvsignore misc/commit misc/fstrings \
-           misc/plainh misc/grep
+           misc/plainh misc/grep misc/cp.sh src/settings.c src/salt.h
 
 # defaults
 CC = @CC@
@@ -81,8 +81,8 @@ clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c utctime
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ src/*~ key configure.temp .mangled
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h utctime
 
 distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
@@ -107,6 +107,7 @@ distrib: clean clean-modconfig
 
 tar: distrib
 	tar -czvf $(DISTRIB).tgz $(DISTRIB)/
+	ls -al $(DISTRIB).tgz
 #	rm -rf $(DISTRIB)/
 #	cd ../ && rm -rf distrib/
 
