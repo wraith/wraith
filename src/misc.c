@@ -806,39 +806,6 @@ int bot_aggressive_to(struct userrec *u)
     return 0;
 }
 
-/*
-   plain cookie:
-   Last 6 digits of time
-   Last 5 chars of nick
-   Last 4 regular chars of chan
- */
-void makeplaincookie(char *chname, char *nick, char *buf)
-{
-  char work[256] = "", work2[256] = "";
-  int i, n;
-
-  sprintf(work, "%010li", (now + timesync));
-  strcpy(buf, (char *) &work[4]);
-  work[0] = 0;
-  if (strlen(nick) < 5)
-    while (strlen(work) + strlen(nick) < 5)
-      strcat(work, " ");
-  else
-    strcpy(work, (char *) &nick[strlen(nick) - 5]);
-  strcat(buf, work);
-
-  n = 3;
-  for (i = strlen(chname) - 1; (i >= 0) && (n >= 0); i--)
-    if (((unsigned char) chname[i] < 128) && ((unsigned char) chname[i] > 32)) {
-      work2[n] = tolower(chname[i]);
-      n--;
-    }
-  while (n >= 0)
-    work2[n--] = ' ';
-  work2[4] = 0;
-  strcat(buf, work2);
-}
-
 int goodpass(char *pass, int idx, char *nick)
 {
   char tell[501] = "";
@@ -1158,3 +1125,31 @@ restart(int idx)
   system(binname); /* start new bot. */
   exit(0);
 }
+
+char *
+strtolower(char *s)
+{
+  char *p = NULL;
+  
+  p = s;
+  while (*p) {
+    *p = tolower(*p);
+    p++;
+  }
+  return s;
+}
+
+char *
+strtoupper(char *s)
+{
+  char *p = NULL;
+  
+  p = s;
+  while (*p) {
+    *p = toupper(*p);
+    p++;
+  }
+  return s;
+
+}
+  

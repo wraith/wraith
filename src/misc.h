@@ -21,7 +21,6 @@ void showhelp(int, struct flag_record *, char *);
 int listen_all(int, int);
 char *replace(const char *, const char *, const char *);
 int goodpass(char *, int, char *);
-void makeplaincookie(char *, char *, char *);
 int bot_aggressive_to(struct userrec *);
 int updatebin(int, char *, int);
 int egg_strcatn(char *dst, const char *src, size_t max);
@@ -47,6 +46,8 @@ char *strchr_unescape(char *, const char, register const char);
 inline void str_unescape(char *, register const char);
 int str_isdigit(const char *);
 void kill_bot(char *, char *);
+char *strtolower(char *);
+char *strtoupper(char *);
 
 extern int		server_lag, use_invites, use_exempts;
 
