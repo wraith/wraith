@@ -565,7 +565,8 @@ static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment
     sprintf(s, "%s!%s", m->nick, m->userhost);
     get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
     if (me_op(chan) &&
-	wild_match(hostmask, s) && !chan_sentkick(m) &&
+	(wild_match(hostmask, s) || match_cidr(hostmask, s)) && 
+        !chan_sentkick(m) &&
 	!match_my_nick(m->nick) && !chan_issplit(m) &&
 	!(use_exempts &&
 	  ((bantype && (isexempted(chan, s) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS))) ||

@@ -730,7 +730,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     register maskrec *b = NULL;
     char resn[512] = "";
 
-    /* The point of this cycle crap is to first check chan->bans then global_bans */
+    /* The point of this cycle crap is to first check chan->bans then global_bans for a reason */
     for (int cycle = 0; cycle < 2; cycle++) {
       for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
         if (wild_match(b->mask, mask)) {

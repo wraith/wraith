@@ -24,6 +24,7 @@
 #include "common.h"
 #include "match.h"
 #include "rfc1459.h"
+#include "socket.h"
 
 #define QUOTE '\\' /* quoting character (overrides wildcards) */
 #define WILDS '*'  /* matches 0 or more characters (including spaces) */
@@ -196,3 +197,82 @@ int _wild_match(register unsigned char *m, register unsigned char *n)
     m--;                        /* Zap leftover %s & *s */
   return (m >= ma) ? NOMATCH : MATCH;   /* Start of both = match */
 }
+
+static inline int
+comp_with_mask(void *addr, void *dest, unsigned int mask)
+{
+  if (memcmp(addr, dest, mask / 8) == 0)
+  {
+    int n = mask / 8;
+    int m = ((-1) << (8 - (mask % 8)));
+
+    if (mask % 8 == 0 ||
+       (((unsigned char *) addr)[n] & m) == (((unsigned char *) dest)[n] & m))
+      return (1);
+  }
+  return (0);
+}
+
+/* match_cidr()
+ *
+ * Input - mask, address
+ * Ouput - 1 = Matched 0 = Did not match
+ */
+
+int
+match_cidr(const char *s1, const char *s2)
+{
+  sockname_t ipaddr, maskaddr;
+  char address[NICKLEN + UHOSTLEN + 6] = "", mask[NICKLEN + UHOSTLEN + 6] = "", *ipmask = NULL, *ip = NULL, *len = NULL;
+  int cidrlen, aftype;
+
+  egg_bzero(&ipaddr, sizeof(ipaddr));
+  egg_bzero(&maskaddr, sizeof(maskaddr));
+
+  strcpy(mask, s1);
+  strcpy(address, s2);
+
+  ipmask = strrchr(mask, '@');
+  if(ipmask == NULL)
+    return 0;
+
+  *ipmask++ = '\0';
+
+  ip = strrchr(address, '@');
+  if(ip == NULL)
+    return 0;
+  *ip++ = '\0';
+
+  len = strrchr(ipmask, '/');
+  if(len == NULL)
+    return 0;
+
+  *len++ = '\0';
+
+  cidrlen = atoi(len);
+  if(cidrlen == 0)
+    return 0;
+
+  if (strchr(ip, ':') && strchr(ipmask, ':'))
+    aftype = ipaddr.family = maskaddr.family = AF_INET6;
+  else if (!strchr(ip, ':') && !strchr(ipmask, ':'))
+    aftype = ipaddr.family = maskaddr.family =  AF_INET;
+  else
+    return 0;
+
+  if (aftype == AF_INET6) {
+    inet_pton(aftype, ip, &ipaddr.u.ipv6.sin6_addr);
+    inet_pton(aftype, ipmask, &maskaddr.u.ipv6.sin6_addr);
+    if (comp_with_mask(&ipaddr.u.ipv6.sin6_addr.s6_addr, &maskaddr.u.ipv6.sin6_addr.s6_addr, cidrlen) && 
+       wild_match(mask, address))
+      return 1;
+  } else if (aftype == AF_INET) {
+    inet_pton(aftype, ip, &ipaddr.u.ipv4.sin_addr);
+    inet_pton(aftype, ipmask, &maskaddr.u.ipv4.sin_addr);
+    if (comp_with_mask(&ipaddr.u.ipv4.sin_addr.s_addr, &maskaddr.u.ipv4.sin_addr.s_addr, cidrlen) && 
+       wild_match(mask, address))
+      return 1;
+  }
+  return 0;
+}
+

@@ -14,4 +14,6 @@ int _wild_match_per(register unsigned char *, register unsigned char *);
 //int wild_match(register char *, register char *);
 //int wild_match_per(register char *, register char *);
 
+int match_cidr(const char *, const char *);
+
 #endif /* !_MATCH_H */

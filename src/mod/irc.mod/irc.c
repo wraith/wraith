@@ -517,8 +517,8 @@ getin_request(char *botnick, char *code, char *par)
 
     mr = &global_bans;
     while (*mr) {
-      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) ||
-          wild_match((*mr)->mask, ip6host)) {
+      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) || wild_match((*mr)->mask, ip6host) || 
+          match_cidr((*mr)->mask, ip4host) || match_cidr((*mr)->mask, ip6host)) {
         if (!noshare) {
           shareout("-b %s\n", (*mr)->mask);
         }
@@ -539,8 +539,8 @@ getin_request(char *botnick, char *code, char *par)
     }
     mr = &chan->bans;
     while (*mr) {
-      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) ||
-          wild_match((*mr)->mask, ip6host)) {
+      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) || wild_match((*mr)->mask, ip6host) ||
+          match_cidr((*mr)->mask, ip4host) || match_cidr((*mr)->mask, ip6host)) {
         if (!noshare) {
           shareout("-bc %s %s\n", chan->dname, (*mr)->mask);
         }
@@ -559,7 +559,8 @@ getin_request(char *botnick, char *code, char *par)
       }
     }
     for (struct maskstruct *b = chan->channel.ban; b->mask[0]; b = b->next) {
-      if (wild_match(b->mask, host) || wild_match(b->mask, ip4host) || wild_match(b->mask, ip6host)) {
+      if (wild_match(b->mask, host) || wild_match(b->mask, ip4host) || wild_match(b->mask, ip6host) ||
+          match_cidr(b->mask, ip4host) || match_cidr(b->mask, ip6host)) {
         add_mode(chan, '-', 'b', b->mask);
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed active ban %s", botnick, nick, chan->dname,
                b->mask);
