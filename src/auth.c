@@ -88,10 +88,11 @@ void makehash(int idx, int authi, char *randstring)
   egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", authkey);
   if (secpass)
     free(secpass);
+
   if (idx != -1) 
-    strncpyz(dcc[idx].hash, hash, sizeof dcc[idx].hash);
+    strncpyz(dcc[idx].hash, MD5(hash), sizeof dcc[idx].hash);
   else if (authi != -1)
-    strncpyz(auth[authi].hash, hash, sizeof auth[authi].hash);
+    strncpyz(auth[authi].hash, MD5(hash), sizeof auth[authi].hash);
 
   egg_bzero(hash, sizeof(hash));
 }
