@@ -623,18 +623,8 @@ static int gotnotice(char *from, char *msg)
  */
 static int gotwall(char *from, char *msg)
 {
-  char *nick = NULL;
-
   fixcolon(msg);
-
-  /* Following is not needed at all, but we'll keep it for compatibility sak$
-   * so not to confuse possible scripts that are parsing log files.
-   */
-  if (strchr(from, '!')) {
-    nick = splitnick(&from);
-    putlog(LOG_WALL, "*", "!%s(%s)! %s", nick, from, msg);
-  } else
-    putlog(LOG_WALL, "*", "!%s! %s", from, msg);
+  putlog(LOG_WALL, "*", "!%s! %s", from, msg);
   return 0;
 }
 

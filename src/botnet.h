@@ -30,7 +30,6 @@ void rembot(const char *);
 struct tand_t_struct *findbot(char *);
 void unvia(int, struct tand_t_struct *);
 void check_botnet_pings();
-int partysock(char *, char *);
 int addparty(char *, char *, int, char, int, char *, int *);
 void remparty(char *, int);
 void partystat(char *, int, int, int);

@@ -60,11 +60,6 @@ int base64_to_int(char *buf)
   return i;
 }
 
-/* Used for 1.0 compatibility: if a join message arrives with no sock#,
- * i'll just grab the next "fakesock" # (incrementing to assure uniqueness)
- */
-static int fakesock = 2300;
-
 static void fake_alert(int idx, char *item, char *extra)
 {
   static unsigned long lastfake;	/* The last time fake_alert was used */
@@ -1097,14 +1092,6 @@ static void bot_join(int idx, char *par)
   } else {
     sock = base64_to_int(y + 1);
   }
-  /* 1.1 bots always send a sock#, even on a channel change
-   * so if sock# is 0, this is from an old bot and we must tread softly
-   * grab old sock# if there is one, otherwise make up one.
-   */
-  if (sock == 0)
-    sock = partysock(bot, nick);
-  if (sock == 0)
-    sock = fakesock++;
   i = nextbot(bot);
   if (i != idx) {		/* Ok, garbage from a 1.0g (who uses that
 				 * now?) OR raistlin being evil :) */
@@ -1144,8 +1131,7 @@ static void bot_part(int idx, char *par)
   nick = newsplit(&par);
   etc = newsplit(&par);
   sock = base64_to_int(etc);
-  if (sock == 0)
-    sock = partysock(bot, nick);
+
   u = get_user_by_handle(userlist, nick);
   if (u) {
     sprintf(TBUF, "@%s", bot);
@@ -1187,8 +1173,6 @@ static void bot_away(int idx, char *par)
   }
   etc = newsplit(&par);
   sock = base64_to_int(etc);
-  if (sock == 0)
-    sock = partysock(bot, etc);
   check_bind_away(bot, idx, par);
   if (par[0]) {
     partystat(bot, sock, PLSTAT_AWAY, 0);
@@ -1221,8 +1205,6 @@ static void bot_idle(int idx, char *par)
   bot = newsplit(&par);
   work = newsplit(&par);
   sock = base64_to_int(work);
-  if (sock == 0)
-    sock = partysock(bot, work);
   work = newsplit(&par);
   idle = base64_to_int(work);
   partysetidle(bot, sock, idle);

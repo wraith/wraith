@@ -118,21 +118,6 @@ void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, c
   }
 }
 
-/* For backward 1.0 compatibility:
- * grab the (first) sock# for a user on another bot
- */
-int partysock(char *bot, char *nick)
-{
-  int i;
-
-  for (i = 0; i < parties; i++) {
-    if ((!egg_strcasecmp(party[i].bot, bot)) &&
-	(!egg_strcasecmp(party[i].nick, nick)))
-      return party[i].sock;
-  }
-  return 0;
-}
-
 /* New botnet member
  */
 int addparty(char *bot, char *nick, int chan, char flag, int sock,
