@@ -595,7 +595,7 @@ static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
     if (u->bot || (pass[0] == '+'))
       e->u.extra = strdup(pass);
     else
-      e->u.extra = encrypt_string((char *) get_user(&USERENTRY_ADDED, u), pass);
+      e->u.extra = encrypt_string(u->handle, pass);
   }
   if (!noshare)
     shareout("c TMPPASS %s %s\n", u->handle, pass ? pass : "");

@@ -32,9 +32,9 @@ DCCPREFIX <.>
  * Multiple OWNER lines may be defined, each will be added as a +a perm owner.
  * nick: nickname what else?
  * password: initial password for user
- * host: hosts of the user (list as many as needed)
+ * host: hosts of the user that will be accepted for telnet only.
  */
-OWNER <Bob S0m3P4ass *!bob@1.2.3.4 *!*@1.2.3.4>
+OWNER <Bob S0m3P4ass bob@1.2.3.4 user@1.2.3.4>
 
 /* OWNEREMAIL: email addresses that status/errors will be sent to when needed 
  * list as many as needed
