@@ -213,7 +213,7 @@ static void show_help()
   printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
 */
   printf(format, STR("-h"), STR("Display this help listing"));
-  printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
+  printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9"));
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
   printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -n)"));
