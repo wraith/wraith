@@ -460,11 +460,11 @@ check_hostmask()
 
   checked_hostmask = 1;
 
-  if (tmp[0] == '~' && !strict_host) {
+  if (tmp[0] == '~' && !strict_host) {	/* crappy *! method */
     tmp++;
     sprintf(s, "*!?%s", tmp);
   } else
-    sprintf(s, "*!%s", tmp);
+    sprintf(s, "*!%s", tmp);		/* else just add actual user@ident, regardless of ~ */
 
   for (struct list_type *q = (struct list_type *) get_user(&USERENTRY_HOSTS, conf.bot->u); q; q = q->next) {
     if (!egg_strcasecmp(q->extra, s))
