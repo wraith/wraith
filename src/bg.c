@@ -18,6 +18,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
+#include <paths.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 time_t lastfork = 0;
 
@@ -26,6 +30,49 @@ pid_t watcher;                  /* my child/watcher */
 
 static void init_watcher(pid_t);
 #endif /* !CYGWIN_HACKS */
+
+int
+my_daemon(int nochdir, int noclose)
+{
+  int fd;
+
+  switch (fork()) {
+    case -1:
+      return (-1);
+    case 0:
+      break;
+    default:
+      _exit(0);
+  }
+
+  if (setsid() == -1)
+    return (-1);
+
+  if (!nochdir)
+    (void) chdir("/");
+
+  if (!noclose && (fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
+    struct stat64 st;
+
+    if (__builtin_expect(__fxstat64(_STAT_VER, fd, &st), 0) == 0
+        && __builtin_expect(S_ISCHR(st.st_mode), 1) != 0
+#if defined DEV_NULL_MAJOR && defined DEV_NULL_MINOR
+        && st.st_rdev == makedev(DEV_NULL_MAJOR, DEV_NULL_MINOR)
+#endif
+      ) {
+      (void) dup2(fd, STDIN_FILENO);
+      (void) dup2(fd, STDOUT_FILENO);
+      (void) dup2(fd, STDERR_FILENO);
+      if (fd > 2)
+        (void) close(fd);
+    } else {
+      (void) close(fd);
+      return -1;
+    }
+  }
+  return (0);
+}
+
 
 pid_t
 do_fork()
