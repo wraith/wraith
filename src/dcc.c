@@ -2052,7 +2052,7 @@ static void dcc_telnet_got_ident(int i, char *host)
   /* Copy acceptable-nick/host mask */
   strncpyz(dcc[i].nick, dcc[idx].host, HANDLEN);
   dcc[i].timeval = now;
-  strcpy(dcc[i].u.chat->con_chan, chanset ? chanset->name : "*");
+  strcpy(dcc[i].u.chat->con_chan, chanset ? chanset->dname : "*");
   /* This is so we dont tell someone doing a portscan anything
    * about ourselves. <cybah>
    */
