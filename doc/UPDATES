@@ -45,6 +45,7 @@ This is a summary of ChangeLog basically.
 * Added hijacked invite detection based on server invite notices.
 * Added an action when a bot performs an invite, including username and full address.
 * No longer making the bot fatal() if it cannot open a new socket.
+* Fixed NAT bug for botlinks.
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -9,6 +9,7 @@
 
 enum {
         LINK_GHOST = 0,
+	LINK_GHOSTNAT,
         LINK_GHOSTSHA1,
         LINK_GHOSTMD5,
         LINK_CLEARTEXT
