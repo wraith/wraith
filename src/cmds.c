@@ -1588,7 +1588,7 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
         tbots++;
     }
     if (tbots)
-      rleaf = 1 + randint(tbots + 1);		/* 1 <--> tbots */
+      rleaf = 1 + randint(tbots);		/* 1 <--> tbots */
   }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
