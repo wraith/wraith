@@ -945,139 +945,64 @@ static void cmd_uptime(int idx, char *par)
   tell_verbose_uptime(idx);
 }
 
-static void cmd_userlist(int idx, char *par)
+static void print_users(char *work, int idx, int *cnt, int *tt, bool bot, int flags, int notflags, const char *str)
 {
-  int cnt = 0, tt = 0;
   struct userrec *u = NULL;
 
+  for (u = userlist; u; u = u->next) {
+    if (whois_access(dcc[idx].user, u) && 
+        ((bot && u->bot) || (!bot && !u->bot)) && 
+         ((!flags) || (u->flags & flags)) &&
+         ((!notflags) || !(u->flags & notflags))) {
+      if (!*cnt)
+        sprintf(work, "%-10s: ", str); 
+      else
+        sprintf(work, "%s, ", work[0] ? work : "");
+
+      strcat(work, u->handle);
+      (*cnt)++;
+      (*tt)++;
+sdprintf("cnt is now: %d", *cnt);
+      if (*cnt == 11) {
+sdprintf("DUMP!");
+        dprintf(idx, "%s\n", work);
+        work[0] = 0;
+        *cnt = 0;
+      }
+    }
+  }
+  if (work[0])
+    dprintf(idx, "%s\n", work);
+
+  work[0] = 0;
+  *cnt = 0;
+}
+
+#define PRINT_USERS(bot, flags, notflags, str)	print_users(work, idx, &cnt, &tt, bot, flags, notflags, str)
+
+static void cmd_userlist(int idx, char *par)
+{
+  int cnt = 0, tt = 0, tmp = 0;
+  struct userrec *u = NULL;
+  char work[200] = "";
+
   putlog(LOG_CMDS, "*", "#%s# userlist", dcc[idx].nick);
+  
+  PRINT_USERS(1, 0, 0, "Bots");
+  tmp = tt;			/* we don't want to add these duplicates into the total */
+  PRINT_USERS(1, USER_CHANHUB, 0, "Chatbots");
+  PRINT_USERS(1, USER_DOVOICE, 0, "Voicebots");
+  PRINT_USERS(1, USER_DOLIMIT, 0, "Limitbots");
+  tt = tmp;
+  PRINT_USERS(0, USER_ADMIN, 0, "Admins");
+  PRINT_USERS(0, USER_OWNER, USER_ADMIN, "Owners");
+  PRINT_USERS(0, USER_MASTER, USER_OWNER, "Masters");
+  PRINT_USERS(0, USER_OP, USER_MASTER, "Ops");
+  PRINT_USERS(0, 0, USER_OP, "Users");
 
-  for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && u->bot && (u->flags & USER_CHANHUB)) {
-      if (cnt)
-        dprintf(idx, ", ");
-      else
-        dprintf(idx, "Chathubs: ");
-      dprintf(idx, u->handle);
-      cnt++;
-      tt++;
-      if (cnt == 15) {
-        dprintf(idx, "\n");
-        cnt=0;
-      }
-    }
-  }
-
-  if (cnt)
-    dprintf(idx, "\n");
-  cnt = 0;
-
-#ifdef HUB
-  for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !u->bot && (u->flags & USER_ADMIN)) {
-      if (cnt)
-        dprintf(idx, ", ");
-      else
-        dprintf(idx, "Admins  : ");
-      dprintf(idx, u->handle);
-      cnt++;
-      tt++;
-      if (cnt == 15) {
-        dprintf(idx, "\n");
-        cnt = 0;
-      }
-    }
-  }
-
-  if (cnt)
-    dprintf(idx, "\n");
-  cnt = 0;
-
-
-  for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !u->bot && !(u->flags & USER_ADMIN) && (u->flags & USER_OWNER)) {
-      if (cnt)
-        dprintf(idx, ", ");
-      else
-        dprintf(idx, "Owners  : ");
-      dprintf(idx, u->handle);
-      cnt++;
-      tt++;
-      if (cnt == 15) {
-        dprintf(idx, "\n");
-        cnt = 0;
-      }
-    }
-  }
-
-  if (cnt)
-    dprintf(idx, "\n");
-  cnt = 0;
-
-  for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !u->bot && !(u->flags & USER_OWNER) && (u->flags & USER_MASTER)) {
-      if (cnt)
-        dprintf(idx, ", ");
-      else
-        dprintf(idx, "Masters : ");
-      dprintf(idx, u->handle);
-      cnt++;
-      tt++;
-      if (cnt == 15) {
-        dprintf(idx, "\n");
-        cnt = 0;
-      }
-    }
-  }
-  if (cnt)
-    dprintf(idx, "\n");
-  cnt = 0;
-#endif /* HUB */
-
-  for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u)) {
-#ifdef HUB
-      if (!u->bot && !(u->flags & USER_MASTER) && (u->flags & USER_OP)) {
-#else /* !HUB */
-      if (!u->bot && (u->flags & USER_OP)) {
-#endif /* HUB */
-        if (cnt)
-          dprintf(idx, ", ");
-        else
-          dprintf(idx, "Ops     : ");
-        dprintf(idx, u->handle);
-        cnt++;
-        tt++;
-        if (cnt == 15) {
-          dprintf(idx, "\n");
-          cnt= 0 ;
-        }
-      }
-    }
-  }
-  if (cnt)
-    dprintf(idx, "\n");
-  cnt = 0;
-
-  for (u = userlist; u; u = u->next) {
-    if (whois_access(dcc[idx].user, u) && !u->bot && !(u->flags & USER_OP)) {
-      if (cnt)
-        dprintf(idx, ", ");
-      else
-        dprintf(idx, "Users   : ");
-      dprintf(idx, u->handle);
-      cnt++;
-      tt++;
-      if (cnt==15) {
-        dprintf(idx, "\n");
-        cnt = 0;
-      }
-    }
-  }
-  if (cnt)
-    dprintf(idx, "\n");
-  cnt = 0;
   dprintf(idx, "Total users: %d\n", tt);
+
+  return;
 }
 
 static void cmd_channels(int idx, char *par) {
