@@ -259,8 +259,10 @@ failed_link(int idx)
   }
   if (dcc[idx].u.bot->numver >= (-1))
     putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[idx].nick);
-  if (dcc[idx].sock != -1)
+  if (dcc[idx].sock != -1) {
     killsock(dcc[idx].sock);
+    dcc[idx].sock = -1; 
+  }
   strcpy(s, dcc[idx].nick);
   lostdcc(idx);
   autolink_cycle(s);            /* Check for more auto-connections */
@@ -310,7 +312,8 @@ cont_link(int idx, char *buf, int ii)
     socklist[snum].encstatus = 1;
     socklist[snum].gz = 1;
   } else {
-    killsock(dcc[idx].sock);
+/* FIXME: This seems unnecesary, we didnt find a socket yet we are killing one.. ?*/
+  /*  killsock(dcc[idx].sock); */
     lostdcc(idx);
   }
   return;
