@@ -420,7 +420,7 @@
 #define changeover_dcc ((void (*)(int, struct dcc_table *, int))global[242])
 #define make_rand_str ((void (*) (char *, int))global[243])
 /* 244 - 247 */
-#define protect_readonly (*(int *)(global[244]))
+/* UNUSED 244 */
 #define findchan_by_dname ((struct chanset_t *(*)(char *))global[245])
 /* 246 UNUSED */
 #define userfile_perm (*(int *)global[247])
@@ -428,7 +428,7 @@
 #define sock_has_data ((int(*)(int, int))global[248])
 #define bots_in_subtree ((int (*)(tand_t *))global[249])
 #define users_in_subtree ((int (*)(tand_t *))global[250])
-#define egg_inet_aton ((int (*)(const char *cp, struct in_addr *addr))global[251])
+#define egg_inet_aton ((int (*)(const char *, struct in_addr *))global[251])
 /* 252 - 255 */
 #define egg_snprintf (global[252])
 #define egg_vsnprintf ((int (*)(char *, size_t, const char *, va_list))global[253])
@@ -446,8 +446,8 @@
 #define strchr_unescape ((char *(*)(char *, const char, register const char))global[263])
 /* 264 - 267 */
 #define str_unescape ((void (*)(char *, register const char))global[264])
-#define egg_strcatn ((int (*)(char *dst, const char *src, size_t max))global[265])
-#define clear_chanlist_member ((void (*)(const char *nick))global[266])
+#define egg_strcatn ((int (*)(char *, const char *, size_t))global[265])
+#define clear_chanlist_member ((void (*)(const char *))global[266])
 #define fixfrom ((char *(*)(char *))global[267])
 /* 268 - 272 */
 /* Please don't modify socklist directly, unless there's no other way.

@@ -234,7 +234,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 {
   char *pass = NULL;
 #ifdef S_AUTHHASH
-  char rand[50] = "";
+  char randstring[50] = "";
 #endif /* S_AUTHHASH */
   int i = 0;
 
@@ -259,9 +259,9 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! -AUTH", nick, host, u->handle);
 
       auth[i].authing = 2;      
-      make_rand_str(rand, 50);
-      strncpyz(auth[i].hash, makehash(u, rand), sizeof auth[i].hash);
-      dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, rand, conf.bot->nick);
+      make_rand_str(randstring, 50);
+      strncpyz(auth[i].hash, makehash(u, randstring), sizeof auth[i].hash);
+      dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, randstring, conf.bot->nick);
   } else {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed -AUTH", nick, host, u->handle);
     removeauth(i);

@@ -489,19 +489,19 @@ static int fast_deq(int which)
   return 0;
 }
 
-static void check_queues(char *oldnick, char *newnick)
+static void check_queues(char *old_nick, char *newnick)
 {
   if (optimize_kicks == 2) {
     if (modeq.head)
-      parse_q(&modeq, oldnick, newnick);
+      parse_q(&modeq, old_nick, newnick);
     if (mq.head)
-      parse_q(&mq, oldnick, newnick);
+      parse_q(&mq, old_nick, newnick);
     if (hq.head)
-      parse_q(&hq, oldnick, newnick);
+      parse_q(&hq, old_nick, newnick);
   }
 }
 
-static void parse_q(struct msgq_head *q, char *oldnick, char *newnick)
+static void parse_q(struct msgq_head *q, char *old_nick, char *newnick)
 {
   struct msgq *m = NULL, *lm = NULL;  char buf[511] = "", *msg = NULL, *nicks = NULL, 
               *nick = NULL, *chan = NULL, newnicks[511] = "", newmsg[511] = "";
@@ -520,7 +520,7 @@ static void parse_q(struct msgq_head *q, char *oldnick, char *newnick)
       nicks = newsplit(&msg);
       while (strlen(nicks) > 0) {
         nick = splitnicks(&nicks);
-        if (!egg_strcasecmp(nick, oldnick) &&
+        if (!egg_strcasecmp(nick, old_nick) &&
             ((9 + strlen(chan) + strlen(newnicks) + strlen(newnick) +
               strlen(nicks) + strlen(msg)) < 510)) {
           if (newnick)
@@ -1101,7 +1101,7 @@ struct cfg_entry CFG_REALNAME = {
  *
  * -> if (*ptr == -1) then jump to that particular server
  */
-static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
+static void next_server(int *ptr, char *servname, unsigned int *port, char *pass)
 {
   struct server_list *x = serverlist;
   int i = 0;
@@ -1112,12 +1112,12 @@ static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
   if (*ptr == (-1)) {
     for (; x; x = x->next) {
       if (x->port == *port) {
-	if (!egg_strcasecmp(x->name, serv)) {
+	if (!egg_strcasecmp(x->name, servname)) {
 	  *ptr = i;
 	  return;
-	} else if (x->realname && !egg_strcasecmp(x->realname, serv)) {
+	} else if (x->realname && !egg_strcasecmp(x->realname, servname)) {
 	  *ptr = i;
-	  strncpyz(serv, x->realname, sizeof serv);
+	  strncpyz(servname, x->realname, sizeof servname);
 	  return;
 	}
       }
@@ -1128,7 +1128,7 @@ static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
 
     x->next = 0;
     x->realname = 0;
-    x->name = strdup(serv);
+    x->name = strdup(servname);
     x->port = *port ? *port : default_port;
     if (pass && pass[0]) {
       x->pass = strdup(pass);
@@ -1152,7 +1152,7 @@ static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
     x = serverlist;
     *ptr = 0;
   }				/* Start over at the beginning */
-  strcpy(serv, x->name);
+  strcpy(servname, x->name);
   *port = x->port ? x->port : default_port;
   if (x->pass)
     strcpy(pass, x->pass);
@@ -1300,7 +1300,10 @@ static void dcc_chat_hostresolved(int i)
     debug0("afinet6, af_type, strcpy");
   } else
 #endif /* !USE_IPV6 */
+/* redundant?
   egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
+*/
+  egg_snprintf(ip, sizeof ip, "%lu", iptolong(dcc[i].addr));
 #ifdef USE_IPV6
   if (sockprotocol(dcc[i].sock) == AF_INET6) {
 #  ifdef IPV6_DEBUG

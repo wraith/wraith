@@ -38,7 +38,7 @@ extern char		 ver[], firewall[],
 extern time_t		 now, online_since;
 extern int		 backgrd, term_z, cache_hit, cache_miss,
 			 firewallport, default_flags, conmask,
-			 protect_readonly, noshare, localhub,
+			 noshare, localhub,
 			 ignore_time, loading;
 
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
@@ -541,12 +541,9 @@ void chanprog()
   sdprintf("ip4: %s", myipstr(4));
   sdprintf("ip6: %s", myipstr(6));
   conmask = 0;
-  /* Turn off read-only variables (make them write-able) for rehash */
-  protect_readonly = 0;
 
  /* now this only checks server shit. (no channels) */
   call_hook(HOOK_REHASH);
-  protect_readonly = 1;
 
   strcpy(botuser, origbotname);
 

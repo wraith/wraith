@@ -816,6 +816,7 @@ int readuserfile(char *file, struct userrec **ret)
            if ((me = module_find("channels", 0, 0))) {
              Function *func = me->funcs;
              char *options = NULL, *chan = NULL, *my_ptr = NULL;
+             char resultbuf[2048] = "";
 
              options = my_ptr = strdup(s);
 
@@ -826,7 +827,8 @@ int readuserfile(char *file, struct userrec **ret)
              newsplit(&options);
              options[strlen(options) - 1] = 0;
 /* Above is a hack to remove { } */
-             if ((func[37]) (NULL, chan, options) != TCL_OK) {	/* tcl_channel_add() */
+             if ((func[37]) (resultbuf, chan, options) != OK) {	/* tcl_channel_add() */
+printf("BUF: %s\n", resultbuf);
                putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
                free(my_ptr);
                return 0;

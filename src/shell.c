@@ -65,7 +65,7 @@ int clear_tmp()
        && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
       char *file = NULL;
 
-      file = malloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      file = calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
 
       strcat(file, tempdir);
       strcat(file, dir_ent->d_name);

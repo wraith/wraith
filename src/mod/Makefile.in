@@ -16,7 +16,7 @@ CPPFLAGS = @CPPFLAGS@
 MOD_CFLAGS = @CFLAGS@ -I. -I../../.. -I$(MOD_UPDIR)$(top_srcdir) \
   -I$(MOD_UPDIR)$(top_srcdir)/src/mod -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 MOD_CPPFLAGS = @CPPFLAGS@
-XLIBS = @XLIBS@
+LIBS = @LIBS@
 
 mods = channels.mod \
 	compress.mod \
@@ -48,7 +48,7 @@ egg_ac_parameters = @egg_ac_parameters@
 MAKE_MOD = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=$(STRIP)' 'CFLAGS=$(MOD_CFLAGS)' 'CPPFLAGS=$(MOD_CPPFLAGS)' \
-'XLIBS=$(XLIBS)' 'SHELL=$(SHELL)'
+'LIBS=$(LIBS)' 'SHELL=$(SHELL)'
 
 
 doofus:

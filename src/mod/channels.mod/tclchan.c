@@ -3,6 +3,281 @@
  *
  */
 
+int FindElement(char *resultBuf, const char *list, int listLength, const char **elementPtr, const char **nextPtr, int *sizePtr, int *bracePtr)
+{
+    const char *p = list;
+    const char *elemStart = NULL;	/* Points to first byte of first element. */
+    const char *limit = NULL;		/* Points just after list's last byte. */
+    int openBraces = 0;   	/* Brace nesting level during parse. */
+    int inQuotes = 0;
+    int size = 0;               /* lint. */
+    const char *p2 = NULL;
+
+    /*
+     * Skim off leading white space and check for an opening brace or
+     * quote. We treat embedded NULLs in the list as bytes belonging to
+     * a list element.
+     */
+
+    limit = (list + listLength);
+    while ((p < limit) && egg_isspace(*p)) { /* INTL: ISO space. */
+        p++;
+    }
+
+    if (p == limit) {           /* no element found */
+        elemStart = limit;
+        goto done;
+    }
+
+    if (*p == '{') {
+        openBraces = 1;
+        p++;
+    } else if (*p == '"') {
+        inQuotes = 1;
+        p++;
+    }
+    elemStart = p;
+    if (bracePtr != 0) {
+        *bracePtr = openBraces;
+    }
+
+    /*
+     * Find element's end (a space, close brace, or the end of the string).
+     */
+
+    while (p < limit) {
+        switch (*p) {
+            /*
+             * Open brace: don't treat specially unless the element is in
+             * braces. In this case, keep a nesting count.
+             */
+
+            case '{':
+                if (openBraces != 0) {
+                    openBraces++;
+                }
+                break;
+
+            /*
+             * Close brace: if element is in braces, keep nesting count and
+             * quit when the last close brace is seen.
+             */
+
+            case '}':
+                if (openBraces > 1) {
+                    openBraces--;
+                } else if (openBraces == 1) {
+                    size = (p - elemStart);
+                    p++;
+                    if ((p >= limit) || egg_isspace(*p)) { /* INTL: ISO space. */
+                        goto done;
+                    }
+
+                    /*
+                     * Garbage after the closing brace; return an error.
+                     */
+
+                    if (resultBuf) {
+                        p2 = p;
+                        while ((p2 < limit)
+                                && (!egg_isspace(*p2)) /* INTL: ISO space. */
+                                && (p2 < p+20)) {
+                            p2++;
+                        }
+                        sprintf(resultBuf, "list element in braces followed by \"%.*s\" instead of space", (int) (p2-p), p);
+                    }
+                    return ERROR;
+                }
+                break;
+
+            /*
+             * Backslash:  skip over everything up to the end of the
+             * backslash sequence.
+             */
+
+/*            case '\\': {
+                Tcl_UtfBackslash(p, &numChars, NULL);
+                p += (numChars - 1);
+                break;
+            }
+*/
+            /*
+             * Space: ignore if element is in braces or quotes; otherwise
+             * terminate element.
+             */
+
+            case ' ':
+            case '\f':
+            case '\n':
+            case '\r':
+            case '\t':
+            case '\v':
+                if ((openBraces == 0) && !inQuotes) {
+                    size = (p - elemStart);
+                    goto done;
+                }
+                break;
+
+            /*
+             * Double-quote: if element is in quotes then terminate it.
+             */
+
+            case '"':
+                if (inQuotes) {
+                    size = (p - elemStart);
+                    p++;
+                    if ((p >= limit) || egg_isspace(*p)) { /* INTL: ISO space */
+                        goto done;
+                    }
+
+                    /*
+                     * Garbage after the closing quote; return an error.
+                     */
+
+                    if (resultBuf) {
+                        p2 = p;
+                        while ((p2 < limit)
+                                && (!egg_isspace(*p2)) /* INTL: ISO space */
+                                 && (p2 < p+20)) {
+                            p2++;
+                        }
+                        sprintf(resultBuf, "list element in quotes followed by \"%.*s\" %s", (int) (p2-p), p, "instead of space");
+                    }
+                    return ERROR;
+                }
+                break;
+        }
+        p++;
+    }
+
+
+    /*
+     * End of list: terminate element.
+     */
+
+    if (p == limit) {
+        if (openBraces != 0) {
+            if (resultBuf) {
+                sprintf(resultBuf, "unmatched open brace in list");
+            }
+            return ERROR;
+        } else if (inQuotes) {
+            if (resultBuf) {
+                sprintf(resultBuf, "unmatched open quote in list");
+            }
+            return ERROR;
+        }
+        size = (p - elemStart);
+    }
+
+done:
+    while ((p < limit) && (egg_isspace(*p))) { /* INTL: ISO space. */
+        p++;
+    }
+    *elementPtr = elemStart;
+    *nextPtr = p;
+    if (sizePtr != 0) {
+        *sizePtr = size;
+    }
+    return OK;
+}
+
+/* unneeded?
+int CopyAndCollapse(int count, const char *src, char *dst)
+{
+    register char c;
+    int numRead; 
+    int newCount = 0;
+    int backslashCount; 
+
+    for (c = *src;  count > 0;  src++, c = *src, count--) {
+        if (c == '\\') {
+           backslashCount = Tcl_UtfBackslash(src, &numRead, dst);
+            dst += backslashCount;
+            newCount += backslashCount;
+            src += numRead-1;
+            count -= numRead-1;
+        } else { 
+            *dst = c;
+            dst++;
+            newCount++;
+        } 
+    }
+    *dst = 0;
+    return newCount;
+}
+*/
+
+
+int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***argvPtr)
+{
+    const char **argv = NULL;
+    const char *l = NULL;
+    const char *element = NULL;
+    char *p = NULL;
+    int length, size, i = 0, result, elSize, brace;
+
+    /*
+     * Figure out how much space to allocate.  There must be enough
+     * space for both the array of pointers and also for a copy of
+     * the list.  To estimate the number of pointers needed, count
+     * the number of space characters in the list.
+     */
+
+    for (size = 1, l = list; *l != 0; l++) {
+        if (egg_isspace(*l)) { /* INTL: ISO space. */
+            size++;
+        }
+    }
+    size++;                     /* Leave space for final NULL pointer. */
+
+    argv = (const char **) calloc(1, (unsigned) ((size * sizeof(char *)) + (l - list) + 1 + 15));	/* 15 cuz the tcl src is hard to follow */
+
+    length = strlen(list);
+
+    for (p = ((char *) argv) + size*sizeof(char *); *list != 0; i++) {
+        const char *prevList = list;
+
+        result = FindElement(resultBuf, list, length, &element, &list, &elSize, &brace);
+
+        length -= (list - prevList);
+
+        if (result != OK) {
+            free((char *) argv);
+            return result;
+        }
+
+        if (*element == 0) {
+            break;
+        }
+
+        if (i >= size) {
+            free((char *) argv);
+            if (resultBuf)
+                sprintf(resultBuf, "internal error in SplitList");
+            return ERROR;
+        }
+
+        argv[i] = p;
+
+        if (brace) {
+            egg_memcpy(p, element, elSize);
+            p += elSize;
+            *p = 0;
+            p++;
+        } else {
+/*            CopyAndCollapse(elSize, element, p); */
+            egg_memcpy(p, element, elSize);
+            p += elSize + 1;
+        }
+    }
+
+    argv[i] = NULL;
+    *argvPtr = argv;
+    *argcPtr = i;
+    return OK;
+}
+
 
 /* Parse options for a channel.
  */
@@ -24,7 +299,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
 	if (result)
 	  sprintf(result, "channel chanmode needs argument");
-	return TCL_ERROR;
+	return ERROR;
       }
       strncpy(s, item[i], 120);
       s[120] = 0;
@@ -34,7 +309,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
 	if (result)
 	  sprintf(result, "addedby chanmode needs argument");
-	return TCL_ERROR;
+	return ERROR;
       }
       strncpyz(chan->added_by, item[i], NICKLEN);
     } else if (!strcmp(item[i], "addedts")) {
@@ -42,7 +317,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
 	if (result)
 	  sprintf(result, "addedts chanmode needs argument");
-	return TCL_ERROR;
+	return ERROR;
       }
       chan->added_ts = atoi(item[i]);
     } else if (!strcmp(item[i], "idle-kick")) {
@@ -50,7 +325,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
 	if (result)
 	  sprintf(result, "channel idle-kick needs argument");
-	return TCL_ERROR;
+	return ERROR;
       }
       chan->idle_kick = atoi(item[i]);
     } else if (!strcmp(item[i], "limit")) {
@@ -58,7 +333,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel limit needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
       chan->limitraise = atoi(item[i]);
       chan->limit_prot = 0;
@@ -69,7 +344,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
 	if (result)
 	  sprintf(result, "channel stopnethack-mode needs argument");
-	return TCL_ERROR;
+	return ERROR;
       }
       chan->stopnethack_mode = atoi(item[i]);
     } else if (!strcmp(item[i], "revenge-mode")) {
@@ -77,7 +352,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel revenge-mode needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
       chan->revenge_mode = atoi(item[i]);
     } else if (!strcmp(item[i], "ban-time")) {
@@ -85,7 +360,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel ban-time needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
       chan->ban_time = atoi(item[i]);
     } else if (!strcmp(item[i], "exempt-time")) {
@@ -93,7 +368,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel exempt-time needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
       chan->exempt_time = atoi(item[i]);
     } else if (!strcmp(item[i], "invite-time")) {
@@ -101,7 +376,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel invite-time needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
       chan->invite_time = atoi(item[i]);
     } else if (!strcmp(item[i], "closed-ban")) {
@@ -109,7 +384,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel closed-ban needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
       chan->closed_ban = atoi(item[i]);
 /* Chanint template
@@ -118,7 +393,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
  *    if (i >= items) {
  *      if (result)
  *        sprintf(result, "channel temp needs argument");
- *      return TCL_ERROR;
+ *      return ERROR;
  *    }
  *    chan->temp = atoi(item[i]);
  */
@@ -128,7 +403,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel temp needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
       strncpyz(chan->temp, item[i], sizeof(chan->temp));
       check_temp(chan);
@@ -138,7 +413,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       if (i >= items) {
         if (result)
           sprintf(result, "channel topic needs argument");
-        return TCL_ERROR;
+        return ERROR;
       }
     }
     else if (!strcmp(item[i], "+enforcebans"))
@@ -284,13 +559,13 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
       } else {
 	if (result)
 	  sprintf(result, "illegal channel flood type: %s", item[i]);
-	return TCL_ERROR;
+	return ERROR;
       }
       i++;
       if (i >= items) {
 	if (result)
 	  sprintf(result, "%s needs argument", item[i - 1]);
-	return TCL_ERROR;
+	return ERROR;
       }
       p = strchr(item[i], ':');
       if (p) {
@@ -331,7 +606,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
           if (i >= items) {
             if (result)
               sprintf(result, "this setting needs an argument");
-            return TCL_ERROR;
+            return ERROR;
           }
           setudef(ul, chan->dname, atoi(item[i]));
           found = 1;
@@ -352,7 +627,7 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
    * <drummer/1999/10/21>
    */
 #ifdef LEAF
-  if (protect_readonly || loading) {
+  if (loading) {
     if (((old_status ^ chan->status) & CHAN_INACTIVE) &&
 	module_find("irc", 0, 0)) {
       if (!shouldjoin(chan) &&
@@ -376,8 +651,8 @@ static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, c
   }
 #endif /* LEAF */
   if (x > 0)
-    return TCL_ERROR;
-  return TCL_OK;
+    return ERROR;
+  return OK;
 }
 
 static void init_masklist(masklist *m)
@@ -456,31 +731,31 @@ static void clear_channel(struct chanset_t *chan, int reset)
 static int tcl_channel_add(char *result, char *newname, char *options)
 {
   struct chanset_t *chan = NULL;
-  int items;
-  int ret = TCL_OK;
+  int items = 0;
+  int ret = OK;
   int join = 0;
   char buf[3001] = "";
-  CONST char **item = NULL;
+  const char **item = NULL;
 
   if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
     if (result)
       sprintf(result, "invalid channel prefix");
-    return TCL_ERROR;
+    return ERROR;
   }
 
   if (strchr(newname, ',') != NULL) {
     if (result)
       sprintf(result, "invalid channel name");
-    return TCL_ERROR;
+    return ERROR;
   }
-
   simple_sprintf(buf, "chanmode %s ", glob_chanmode);
   strcat(buf, glob_chanset);
   strcat(buf, options);
-  buf[sizeof(buf) - 1] = 0;
+  buf[strlen(buf)] = 0;
 
-  if (Tcl_SplitList(NULL, buf, &items, &item) != TCL_OK)
-    return TCL_ERROR;
+
+  if (SplitList(result, buf, &items, &item) != OK)
+    return ERROR;
 
   if ((chan = findchan_by_dname(newname))) {
     /* Already existing channel, maybe a reload of the channel file */
@@ -488,7 +763,7 @@ static int tcl_channel_add(char *result, char *newname, char *options)
   } else {
     chan = (struct chanset_t *) calloc(1, sizeof(struct chanset_t));
 
-    /* Hells bells, why set *every* variable to 0 when we have bzero? */
+    /* Hells bells, const set *every* variable to 0 when we have bzero? */
 /* not needed..    egg_bzero(chan, sizeof(struct chanset_t)); */
 
     /* These are defaults, bzero already set them 0, but we set them for future reference */
@@ -537,14 +812,15 @@ static int tcl_channel_add(char *result, char *newname, char *options)
     join = 1;
   }
   /* If loading is set, we're loading the userfile. Ignore errors while
-   * reading userfile and just return TCL_OK. This is for compatability
+   * reading userfile and just return OK. This is for compatability
    * if a user goes back to an eggdrop that no-longer supports certain
    * (channel) options.
    */
-  if ((tcl_channel_modify(result, chan, items, (char **) item) != TCL_OK) && !loading) {
-    ret = TCL_ERROR;
+  if ((tcl_channel_modify(result, chan, items, (char **) item) != OK) && !loading) {
+    ret = ERROR;
   }
-  Tcl_Free((char *) item);
+
+  free(item);
 #ifdef LEAF
   if (join && shouldjoin(chan) && module_find("irc", 0, 0))
     dprintf(DP_SERVER, "JOIN %s %s\n", chan->dname, chan->key_prot);

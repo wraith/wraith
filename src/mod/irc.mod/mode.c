@@ -1214,7 +1214,6 @@ static int gotmode(char *from, char *msg)
       char *modes[5] = { NULL, NULL, NULL, NULL, NULL };
       char tmp[1024] = "", sign = '+', *nfrom = NULL, *hfrom = NULL, *wptr = NULL, *p = NULL, work[1024] = "";
       struct userrec *ufrom = NULL;
-      memberlist *m = NULL;
       int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
 
       /* Split up the mode: #chan modes param param param param */

@@ -41,7 +41,6 @@
 #  include <strings.h>
 #endif
 #include "lang.h"
-#include "lush.h"
 
 
 /* This macro copies (_len - 1) bytes from _source to _target. The

@@ -41,7 +41,6 @@ OBJS = auth.o \
 	rfc1459.o \
 	settings.o \
 	shell.o \
-	tcl.o \
 	tclhash.o \
 	userent.o \
 	userrec.o \
@@ -87,11 +86,11 @@ stringfix: stringfix.c common.h ../config.h ../pack/pack.cfg eggdrop.h
 	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
 	@$(STRIP) stringfix
 
-../$(EGGEXEC): build_msg $(OBJS) $(XREQS) compatability
+../$(EGGEXEC): build_msg $(OBJS) compatability
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-	@$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(XLIBS) compat/*.o
+	@$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"

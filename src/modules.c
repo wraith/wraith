@@ -58,8 +58,8 @@ extern int	 	 noshare, loading, role, server_lag,
 			 debug_output, default_flags,  
 			 max_dcc, password_timeout, localhub,
 			 use_invites, use_exempts, 
-                         do_restart, timesync,
-			 protect_readonly;
+                         do_restart, timesync;
+			 
 extern time_t now, online_since, buildts;
 extern struct chanset_t *chanset;
 extern tand_t *tandbot;
@@ -484,7 +484,7 @@ Function global_table[] =
   (Function) changeover_dcc,  
   (Function) make_rand_str,
   /* 244 - 247 */
-  (Function) & protect_readonly, /* int					*/
+  (Function) 0,
   (Function) findchan_by_dname,
   (Function) 0,
   (Function) & userfile_perm,	 /* int					*/

@@ -489,7 +489,7 @@ void check_static(char *, char *(*)());
 #include "mod/static.h"
 
 int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
- init_net(), init_modules(), init_tcl(int, char **), init_botcmd(), init_settings();
+ init_net(), init_modules(), init_botcmd(), init_settings();
 
 int main(int argc, char **argv)
 {
@@ -545,7 +545,6 @@ int main(int argc, char **argv)
   init_bots();
   init_net();
   init_modules();
-  init_tcl(argc, argv);
   init_auth();
   init_config();
   init_botcmd();
@@ -744,10 +743,11 @@ printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host
 #if HAVE_SETPGID && !defined(CYGWIN_HACKS)
     setpgid(0, 0);
 #endif
-    /* Tcl wants the stdin, stdout and stderr file handles kept open. */
+    /* fuck tcl.
     freopen("/dev/null", "r", stdin);
     freopen("/dev/null", "w", stdout);
     freopen("/dev/null", "w", stderr);
+    */
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif /* CYGWIN_HACKS */
@@ -796,9 +796,6 @@ printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host
   while (1) {
     int socket_cleanup = 0, i, xx;
     char buf[SGRAB + 9] = "";
-
-    /* Process a single tcl event */
-    Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
 
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers

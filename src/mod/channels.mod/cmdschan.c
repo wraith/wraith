@@ -961,7 +961,7 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
   strcpy(buf, "+inactive ");
   if (par[0])
     strncat(buf, par, sizeof(buf));
-  if (tcl_channel_add(NULL, chname, buf) == TCL_ERROR) {
+  if (tcl_channel_add(NULL, chname, buf) == ERROR) {
     dprintf(idx, "Invalid channel.\n");
     return;
   }
@@ -1389,7 +1389,7 @@ static void cmd_down(struct userrec *u, int idx, char *par)
 
 static void cmd_pls_chan(struct userrec *u, int idx, char *par)
 {
-  char *chname = NULL, buf2[1024] = "";
+  char *chname = NULL, buf2[1024] = "", buf[2048] = "";
   struct chanset_t *chan = NULL;
 
   putlog(LOG_CMDS, "*", "#%s# +chan %s", dcc[idx].nick, par);
@@ -1401,11 +1401,13 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
 
   chname = newsplit(&par);
   sprintf(buf2, "cjoin %s %s", chname, par);
-  putallbots(buf2);
+
   if (findchan_by_dname(chname)) {
+    putallbots(buf2);
     dprintf(idx, "That channel already exists!\n");
     return;
   } else if ((chan = findchan(chname))) {
+    putallbots(buf2);
     /* This prevents someone adding a channel by it's unique server
      * name <cybah>
      */
@@ -1413,12 +1415,15 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
     return;
   }
 
-  if (tcl_channel_add(NULL, chname, par) == TCL_ERROR) /* drummer */
+  if (tcl_channel_add(buf, chname, par) == ERROR) {/* drummer */
     dprintf(idx, "Invalid channel or channel options.\n");
-  else {
+    if (buf && buf[0])
+      dprintf(idx, "%s\n", buf);
+  } else {
     if ((chan = findchan_by_dname(chname))) {
       char *tmp = NULL;
 
+      putallbots(buf2);
       tmp = malloc(7 + 1 + strlen(dcc[idx].nick) + 1);
       sprintf(tmp, "addedby %s", dcc[idx].nick);
       do_chanset(chan, tmp, 1);
@@ -1767,7 +1772,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
       while (list[0][0]) {
 	if (list[0][0] == '+' || list[0][0] == '-' ||
 	    (!strcmp(list[0], "dont-idle-kick"))) {
-	  if (tcl_channel_modify(0, chan, 1, list) == TCL_OK) {
+	  if (tcl_channel_modify(0, chan, 1, list) == OK) {
 	    strcat(answers, list[0]);
 	    strcat(answers, " ");
 	  } else if (!all || !chan->next)
@@ -1786,7 +1791,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
   	 * circumstances, so save it now.
 	 */
         parcpy = strdup(par);
-        if (tcl_channel_modify(0, chan, 2, list) == TCL_OK) {
+        if (tcl_channel_modify(0, chan, 2, list) == OK) {
 	  strcat(answers, list[0]);
 	  strcat(answers, " { ");
 	  strcat(answers, parcpy);

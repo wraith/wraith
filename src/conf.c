@@ -9,6 +9,7 @@
 #include "shell.h"
 #include "debug.h"
 #include "crypt.h"
+#include "main.h"
 #include "salt.h"
 #include "misc.h"
 
@@ -212,7 +213,8 @@ int readconf(char *cfile)
   char inbuf[8192] = "";
 
   Context;
-  f = fopen(cfile, "r");
+  if (!(f = fopen(cfile, "r")))
+    fatal("Cannot read config", 0);
   while (fgets(inbuf, sizeof inbuf, f) != NULL) {
     char *line = NULL, *temp_ptr = NULL;
 

@@ -174,7 +174,7 @@ static void got_cjoin(char *botnick, char *code, char *par)
    return;
   }
 
-  if (tcl_channel_add(NULL, chname, par) == TCL_ERROR) /* drummer */
+  if (tcl_channel_add(NULL, chname, par) == ERROR) /* drummer */
     putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s", botnick, chname);
   else {
 #ifdef HUB
@@ -533,20 +533,20 @@ static void get_mode_protect(struct chanset_t *chan, char *s)
 
 /* Returns true if this is one of the channel masks
  */
-static int ismodeline(masklist *m, char *user)
+static int ismodeline(masklist *m, char *username)
 {
   for (; m && m->mask[0]; m = m->next)  
-    if (!rfc_casecmp(m->mask, user))
+    if (!rfc_casecmp(m->mask, username))
       return 1;
   return 0;
 }
 
 /* Returns true if user matches one of the masklist -- drummer
  */
-static int ismasked(masklist *m, char *user)
+static int ismasked(masklist *m, char *username)
 {
   for (; m && m->mask[0]; m = m->next)
-    if (wild_match(m->mask, user))
+    if (wild_match(m->mask, username))
       return 1;
   return 0;
 }

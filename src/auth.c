@@ -80,7 +80,7 @@ void init_auth()
 }
 
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-char *makehash(struct userrec *u, char *rand)
+char *makehash(struct userrec *u, char *randstring)
 {
   char hash[256] = "", *secpass = NULL;
 
@@ -88,7 +88,7 @@ char *makehash(struct userrec *u, char *rand)
     secpass = strdup(get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
-  egg_snprintf(hash, sizeof hash, "%s%s%s", rand, (secpass && secpass[0]) ? secpass : "" , (authkey && authkey[0]) ? authkey : "");
+  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "" , (authkey && authkey[0]) ? authkey : "");
   if (secpass)
     free(secpass);
 

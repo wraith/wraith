@@ -19,7 +19,7 @@ DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build config
 EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
            src/mod/dns.mod/Makefile src/mod/*.mod/.deps/ src/mod/*.mod/.cvsignore \
            src/.deps src/compat/.deps misc/commit misc/grep autotools/ \
-           config.cache config.log config.status config.h lush.h stamp.* misc/.cvsignore src/compat/.cvsignore \
+           config.cache config.log config.status config.h stamp.* misc/.cvsignore src/compat/.cvsignore \
            src/mod/.cvsignore src/.cvsignore .cvsignore misc/commit misc/fstrings \
            misc/plainh misc/grep misc/cp.sh src/settings.c src/salt.h src/salt.h.tmp
 
@@ -30,14 +30,10 @@ CCDEBUG = @DISTCC@ @CCDEBUG@
 LDDEBUG = @DISTCC@ @CCDEBUG@
 STRIP = @STRIP@
 
-# stuff for Tcl
-XREQS = @TCL_REQS@
-XLIBS = @TCL_LIBS@ @LIBS@ @ZLIB@ @SSL@ @RESLIB@
-TCLLIB = @TCLLIB@
-TCLLIBFN = @TCLLIBFN@
+LIBS = @LIBS@ @ZLIB@ @SSL@ @RESLIB@
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
-CFLGS = -fno-strict-aliasing -Wno-format-y2k 
+CFLGS = -fno-strict-aliasing -Wno-format-y2k
 #-Wuninitialized -W -Wnested-externs -Wdisabled-optimization -Winline
 #-Wpadded -Wshadow -finline-functions
 MAKEFLAGS = -s -j4
@@ -45,34 +41,30 @@ MAKEFLAGS = -s -j4
 MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DLEAF' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)'
+'LIBS=$(LIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)'
 
 MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DLEAF $(CFLGS)' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
-'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 
+'LIBS=$(LIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 
 
 MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DHUB' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' 
+'LIBS=$(LIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' 
 
 MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DHUB $(CFLGS)' \
-'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
-'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)'
+'LIBS=$(LIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LDDEBUG) -g'
+'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'LIBS=$(LIBS)' 'LD=$(LDDEBUG) -g'
 
 MAKE_UTILS_NR = $(MAKE) 'CC=$(CC)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD) -g'
+'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'LIBS=$(LIBS)' 'LD=$(LD) -g'
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
@@ -94,7 +86,7 @@ clean:  cleanutils
 
 distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
-	@rm -f config.cache config.log config.status config.h lush.h stamp.*
+	@rm -f config.cache config.log config.status config.h stamp.*
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan src/salt.h.tmp
 	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/
 

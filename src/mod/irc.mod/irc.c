@@ -164,7 +164,7 @@ void getin_request(char *botnick, char *code, char *par)
    *p3 = NULL;
   struct chanset_t *chan = NULL;
   memberlist *mem = NULL;
-  struct userrec *user = NULL;
+  struct userrec *u = NULL;
   char nick[NICKLEN] = "";
   char host[UHOSTLEN] = "";
   char ip4host[UHOSTLEN] = "";
@@ -240,7 +240,7 @@ void getin_request(char *botnick, char *code, char *par)
       return;
     }
   */
-  user = get_user_by_handle(userlist, botnick);
+  u = get_user_by_handle(userlist, botnick);
 
   if (nick[0])
     mem = ismember(chan, nick);
@@ -258,15 +258,15 @@ void getin_request(char *botnick, char *code, char *par)
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s isn't on %s"), botnick, nick, chan->dname, nick, chan->dname);
       return;
     }
-    if (!user) {
+    if (!u) {
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - No user called %s in userlist"), botnick, nick, chan->dname, botnick);
       return;
     }
-    if (mem->user != user) {
+    if (mem->user != u) {
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s doesn't match %s"), botnick, nick, chan->dname, nick, botnick);
       return;
     }
-    get_user_flagrec(user, &fr, chan->dname);
+    get_user_flagrec(u, &fr, chan->dname);
 
     if ((!chan_op(fr) && !glob_op(fr)) || (glob_deop(fr) && !chan_op(fr))) {
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s doesnt have +o for chan."), botnick, nick, chan->dname, botnick);
@@ -323,11 +323,11 @@ void getin_request(char *botnick, char *code, char *par)
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - %s is already on %s"), botnick, nick, chan->dname, nick, chan->dname);
       return;
     }
-    if (!user) {
+    if (!u) {
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - No user called %s in userlist"), botnick, nick, chan->dname, botnick);
       return;
     }
-    get_user_flagrec(user, &fr, chan->dname);
+    get_user_flagrec(u, &fr, chan->dname);
     if ((!chan_op(fr) && !glob_op(fr)) || (glob_deop(fr) && !chan_op(fr))) {
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - %s doesn't have acces for chan."), botnick, nick, chan->dname, botnick);
       return;
@@ -471,7 +471,7 @@ void check_hostmask()
 
 static void request_op(struct chanset_t *chan)
 {
-  int i = 0, exp = 0, first = 100, n, cnt, i2;
+  int i = 0, my_exp = 0, first = 100, n, cnt, i2;
   memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
   char s[100] = "", *l = NULL, myserv[SERVLEN] = "";
@@ -499,12 +499,12 @@ static void request_op(struct chanset_t *chan)
     if (n - chan->opreqtime[i] > OPREQ_SECONDS) {
       if (first > i)
 	first = i;
-      exp++;
+      my_exp++;
       chan->opreqtime[i] = 0;
     }
     i++;
   }
-  if ((5 - exp) >= OPREQ_COUNT) {
+  if ((5 - my_exp) >= OPREQ_COUNT) {
     putlog(LOG_GETIN, "*", STR("Delaying opreq for %s - Maximum of %d:%d reached"), chan->dname, OPREQ_COUNT, OPREQ_SECONDS);
     return;
   }
@@ -582,17 +582,17 @@ static void request_in(struct chanset_t *chan)
   char s[255] = "", *l = NULL;
   int i = 0;
   int cnt, n;
-  struct userrec *botops[MAX_BOTS], *user = NULL;
+  struct userrec *botops[MAX_BOTS], *u = NULL;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
 
-  for (user = userlist; user && (i < MAX_BOTS); user = user->next) {
-    get_user_flagrec(user, &fr, NULL);
-    if (bot_hublevel(user) == 999 && glob_bot(fr) && chk_op(fr, chan)
+  for (u = userlist; u && (i < MAX_BOTS); u = u->next) {
+    get_user_flagrec(u, &fr, NULL);
+    if (bot_hublevel(u) == 999 && glob_bot(fr) && chk_op(fr, chan)
 #ifdef G_BACKUP
 	&& (!glob_backupbot(fr) || channel_backup(chan))
 #endif/* G_BACKUP */
-	&& nextbot(user->handle) >= 0)
-      botops[i++] = user;
+	&& nextbot(u->handle) >= 0)
+      botops[i++] = u;
   }
   if (!i) {
     putlog(LOG_GETIN, "*", STR("No bots linked, can't request help to join %s"), chan->dname);
@@ -630,7 +630,7 @@ static void request_in(struct chanset_t *chan)
  * true (1) if we want to, false (0) if not.
  */
 static int want_to_revenge(struct chanset_t *chan, struct userrec *u,
-			   struct userrec *u2, char *badnick, char *victim,
+			   struct userrec *u2, char *badnick, char *victimstr,
 			   int mevictim)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0 };
@@ -642,7 +642,7 @@ static int want_to_revenge(struct chanset_t *chan, struct userrec *u,
   get_user_flagrec(u, &fr, chan->dname);
 
   /* Kickee didn't kick themself? */
-  if (rfc_casecmp(badnick, victim)) {
+  if (rfc_casecmp(badnick, victimstr)) {
     /* They kicked me? */
     if (mevictim) {
       /* ... and I'm allowed to take revenge? <snicker> */
@@ -667,7 +667,7 @@ static int want_to_revenge(struct chanset_t *chan, struct userrec *u,
 /* Dependant on revenge_mode, punish the offender.
  */
 static void punish_badguy(struct chanset_t *chan, char *whobad,
-			  struct userrec *u, char *badnick, char *victim,
+			  struct userrec *u, char *badnick, char *victimstr,
 			  int mevictim, int type)
 {
   char reason[1024] = "", ct[81] = "", *kick_msg = NULL;
@@ -691,10 +691,10 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
   switch (type) {
   case REVENGE_KICK:
     kick_msg = IRC_KICK_PROTECT;
-    simple_sprintf(reason, "kicked %s off %s", victim, chan->dname);
+    simple_sprintf(reason, "kicked %s off %s", victimstr, chan->dname);
     break;
   case REVENGE_DEOP:
-    simple_sprintf(reason, "deopped %s on %s", victim, chan->dname);
+    simple_sprintf(reason, "deopped %s on %s", victimstr, chan->dname);
     kick_msg = IRC_DEOP_PROTECT;
     break;
   default:
@@ -793,7 +793,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
 static void maybe_revenge(struct chanset_t *chan, char *whobad,
 			  char *whovictim, int type)
 {
-  char *badnick = NULL, *victim = NULL;
+  char *badnick = NULL, *victimstr = NULL;
   int mevictim;
   struct userrec *u = NULL, *u2 = NULL;
 
@@ -806,15 +806,15 @@ static void maybe_revenge(struct chanset_t *chan, char *whobad,
 
   /* Get info about victim */
   u2 = get_user_by_host(whovictim);
-  victim = splitnick(&whovictim);
-  mevictim = match_my_nick(victim);
+  victimstr = splitnick(&whovictim);
+  mevictim = match_my_nick(victimstr);
 
   /* Do we want to revenge? */
-  if (!want_to_revenge(chan, u, u2, badnick, victim, mevictim))
+  if (!want_to_revenge(chan, u, u2, badnick, victimstr, mevictim))
     return;	/* No, leave them alone ... */
 
   /* Haha! Do the vengeful thing ... */
-  punish_badguy(chan, whobad, u, badnick, victim, mevictim, type);
+  punish_badguy(chan, whobad, u, badnick, victimstr, mevictim, type);
 }
 
 /* Set the key.

@@ -1519,7 +1519,6 @@ static void cmd_deluser(struct userrec *u, int idx, char *par)
   char *nick = NULL, s[UHOSTLEN] = "";
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
-  struct flag_record victim = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
 
   if (!par[0]) {
     dprintf(idx, "Usage: deluser <nick>\n");

@@ -62,12 +62,6 @@
 /* Define to 1 if you have the `isascii' function. */
 #undef HAVE_ISASCII
 
-/* Define to 1 if you have the `dl' library (-ldl). */
-#undef HAVE_LIBDL
-
-/* Define to 1 if you have the `dld' library (-ldld). */
-#undef HAVE_LIBDLD
-
 /* Define to 1 if you have the `dns' library (-ldns). */
 #undef HAVE_LIBDNS
 
@@ -208,9 +202,6 @@
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
-
-/* Define for Tcl that has Tcl_Free() (7.5p1 and later) */
-#undef HAVE_TCL_FREE
 
 /* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
    `HAVE_STRUCT_TM_TM_ZONE' instead. */

@@ -141,63 +141,6 @@ EGG_HEADER_STDC
 #checkpoint
 AC_CACHE_SAVE 
 
-# Where is Tcl?  Is it here?
-# ---------- begin robey's Tcl thingies
-# (well, what used to be robey's Tcl thingies...)
-
-# Latest tested Tcl version to recommend if Tcl isn't found
-tclrecommendver="8.4"
-
-# Site recommended to download Tcl from
-tclrecommendsite="http://www.tcl.tk/software/tcltk/download84.html"
-
-# Tcl library filename prefixes (also used for Tcl header dir on FreeBSD)
-tcllibnames="tcl tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 tcl8.1 tcl81 \
-	tcl8.0 tcl80"
-
-# Tcl library filename suffixes
-tcllibextensions=".a .so .so.1 .so.1.0 .so.1.2 .sl .dll .dylib"
-
-# Tcl library search paths
-tcllibpaths="${HOME}/lib ${HOME}/tcl/lib ${HOME} \
-        /usr/local/lib /usr/local/pkgs/tcl/lib \
-	/usr/lib /lib /usr/i486-linuxaout/lib \
-	/beos/system/lib /sys/lib"
-
-# Tcl header filenames
-tclheadernames="tcl.h"
-
-# Tcl header search paths
-tclheaderpaths="${HOME}/include ${HOME}/tcl/include ${HOME} \
-        /usr/local/include /usr/local/pkgs/tcl/include \
-	/usr/include /beos/system/include /beos/devel/include \
-       /sys/include"
-
-EGG_TCL_ARG_WITH
-EGG_TCL_ENV
-EGG_TCL_WITH_TCLLIB
-EGG_TCL_WITH_TCLINC
-EGG_TCL_FIND_LIBRARY
-EGG_TCL_FIND_HEADER
-EGG_TCL_CHECK_LIBRARY
-EGG_TCL_CHECK_HEADER
-EGG_TCL_DETECT_CHANGE
-
-#checkpoint
-AC_CACHE_SAVE 
-
-EGG_TCL_CHECK_VERSION
-EGG_TCL_CHECK_PRE80
-EGG_TCL_TESTLIBS
-EGG_TCL_CHECK_FREE
-EGG_TCL_CHECK_THREADS
-EGG_TCL_LIB_REQS
-EGG_TCL_LUSH
-
-#checkpoint
-AC_CACHE_SAVE 
-# ---------- end of (what used to be) robey's Tcl thingies
-
 EGG_SUBST_VERSION
 DO_PACK_CFG
 EGG_SUBST_MOD_UPDIR
