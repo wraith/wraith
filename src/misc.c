@@ -422,8 +422,9 @@ void show_channels(int idx, char *handle)
 void make_rand_str(char *s, size_t len)
 {
   int r = 0;
+  size_t j = 0;
 
-  for (size_t j = 0; j < len; j++) {
+  for (j = 0; j < len; j++) {
     r = randint(4);
     if (r == 0)
       s[j] = '0' + randint(10);
