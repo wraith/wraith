@@ -1042,8 +1042,8 @@ See also: +ignore, -ignore
 ::info
 ###  $binfo$b [channel] [info-line]
    Sets your info line. This line is shown via the /msg commands $b'who'$b and
-   $b'whois'$b. If you have set greet on, it is also shown when you joins the
-   channel. If the info line begins with an '@', then it is "locked", and tou
+   $b'whois'$b. If you have set greet on, it is also shown when you join the
+   channel. If the info line begins with an '@', then it is "locked", and you
    may no longer change it.
  
 %{+m|m}See also: chinfo%{-}
