@@ -704,12 +704,14 @@ printf("out: %s\n", out);
   binname = getfullbinname(argv[0]);
 
   /* This allows -2/-0 to be used without an initialized binary */
-  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0"))))
+  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
     check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
+
+    if (!checked_bin_buf)
+      exit(1);
+  }
   /* Now settings struct is filled */
 
-  if (!checked_bin_buf)
-    exit(1);
 
 #ifdef STOP_UAC
   {
