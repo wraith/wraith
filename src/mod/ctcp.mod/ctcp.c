@@ -6,6 +6,7 @@
 
 #include "ctcp.h"
 #include "src/common.h"
+#include "src/response.h"
 #include "src/main.h"
 #include "src/cfg.h"
 #include "src/chanprog.h"
@@ -37,8 +38,9 @@ char cloak_bxver[10] = "";
 char cloak_os[20] = "";
 char cloak_osver[100] = "";
 char cloak_host[161] = "";
-char ctcpversion[400] = "";
-char ctcpuserinfo[400] = "";
+char ctcpversion[200] = "";
+char ctcpversion2[200] = "";
+char ctcpuserinfo[200] = "";
 char autoaway[100] = "";
 char kickprefix[25] = "";
 char bankickprefix[25] = "";
@@ -60,6 +62,8 @@ void scriptchanged()
 {
   char tmp[200] = "", *p = NULL;
 
+  ctcpversion[0] = ctcpversion2[0] = ctcpuserinfo[0] = autoaway[0] = kickprefix[0] = bankickprefix[0] = 0;
+  
   switch (cloak_script) {
   case CLOAK_PLAIN:
     sprintf(ctcpversion, "\002BitchX-%s\002 by panasync - %s %s : \002Keep it to yourself!\002", cloak_bxver, cloak_os, cloak_osver);
@@ -122,39 +126,12 @@ void scriptchanged()
     break;
   case CLOAK_MIRC:
   {
-    char mircver[4] = "";
-
-    switch (randint(9)) {
-      case 0:
-        strcpy(mircver, "6.01");
-        break;
-      case 1:
-        strcpy(mircver, "6.02");
-        break;
-      case 2:
-        strcpy(mircver, "6.03");
-        break;
-      case 3:
-        strcpy(mircver, "6.1");
-        break;
-      case 4:
-        strcpy(mircver, "5.91");
-        break;
-      case 5:   
-        strcpy(mircver, "6.11");
-        break;
-      case 6:
-        strcpy(mircver, "6.12");
-        break;
-      case 7:
-        strcpy(mircver, "6.14");
-        break;
-      case 8:
-        strcpy(mircver, "6.15");
-      default:
-        strcpy(mircver, "");
-    }
+    char mircver[5] = "";
+   
+    strcpy(mircver, response(RES_MIRCVER));
     sprintf(ctcpversion, "mIRC v%s Khaled Mardam-Bey", mircver);
+    if (randint(2) % 2)
+      strcpy(ctcpversion2, response(RES_MIRCSCRIPT));
     strcpy(ctcpuserinfo, botrealname);
     strcpy(autoaway, "auto-away after 10 minutes");
     strcpy(kickprefix, "");
@@ -487,8 +464,8 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
     }
   }
   dprintf(DP_HELP, "NOTICE %s :\001%s %s%s\001\n", nick, keyword, ctcpversion, s);
-/* if mirc send second reply here.. */
-
+  if (ctcpversion2[0])
+    dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, ctcpversion2);
   return BIND_RET_BREAK;
 }
 

@@ -16,6 +16,7 @@ This is a summary of ChangeLog basically.
   If authkey is set in .config, auth hashing will occur.
   If a user has a SECPASS set (default: random), auth hashing will occur.
   If either of the above two things are empty, auth hashing will NOT occur.
+* CLOAK_MIRC now randomly will add a SECOND version reply; some lame mIRC script.
 
 1.1.9
 
