@@ -793,9 +793,10 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
   get_user_flagrec(dcc[idx].user, &fr, NULL);
   if (glob_admin(fr)) {
     register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
-    if (bi->address && bi->hublevel && bi->hublevel != 0)
+    if (bi->address && bi->hublevel && bi->hublevel != 0) {
       dprintf(idx, "  ADDRESS: %.70s\n", bi->address);
       dprintf(idx, "     port: %d\n", bi->telnet_port);
+    }
     if (bi->hublevel && bi->hublevel != 0)
       dprintf(idx, "  HUBLEVEL: %d\n", bi->hublevel);
     if (bi->uplink && bi->uplink[0])
