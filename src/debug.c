@@ -65,7 +65,9 @@ void setlimits()
   corelim.rlim_max = RLIM_INFINITY;
 #endif /* !DEBUG */
   setrlimit(RLIMIT_CORE, &corelim);
+#ifndef __sun__
   setrlimit(RLIMIT_NPROC, &plim);
+#endif
   fdlim.rlim_cur = 300;
   fdlim.rlim_max = 300;
   setrlimit(RLIMIT_NOFILE, &fdlim);
