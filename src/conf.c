@@ -39,11 +39,11 @@ tellconf()
   conf_bot *bot = NULL;
   int i = 0;
 
-  sdprintf("tempdir: %s\n", tempdir);
+  sdprintf("tempdir: %s\n", replace(tempdir, conf.homedir, "~"));
   sdprintf("uid: %d\n", conf.uid);
   sdprintf("uname: %s\n", conf.uname);
   sdprintf("homedir: %s\n", conf.homedir);
-  sdprintf("binpath: %s\n", conf.binpath);
+  sdprintf("binpath: %s\n", replace(conf.binpath, conf.homedir, "~"));
   sdprintf("binname: %s\n", conf.binname);
   sdprintf("portmin: %d\n", conf.portmin);
   sdprintf("portmax: %d\n", conf.portmax);
