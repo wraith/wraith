@@ -43,7 +43,7 @@ static void edpack(settings_t *, const char *, int);
 int checked_bin_buf = 0;
 
 static char *
-bin_md5(const char *fname, int todo, MD5_CTX * ctx)
+bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
 {
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
@@ -66,7 +66,7 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
   strncpyz(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
-  if (todo == WRITE_MD5) {
+  if (todo == WRITE_CHECKSUM) {
     Tempfile *newbin = new Tempfile("bin");
     char *fname_bak = NULL;
     size_t size = 0, i = 0;
@@ -309,11 +309,11 @@ check_sum(const char *fname, const char *cfgfile)
     readcfg(cfgfile);
 
 // tellconfig(&settings); 
-    if (bin_md5(fname, WRITE_MD5, &ctx))
+    if (bin_checksum(fname, WRITE_CHECKSUM, &ctx))
       printf("* Wrote settings to binary.\n"); 
     exit(0);
   } else {
-    char *hash = bin_md5(fname, GET_MD5, &ctx);
+    char *hash = bin_checksum(fname, GET_CHECKSUM, &ctx);
 
 // tellconfig(&settings); 
     edpack(&settings, hash, PACK_DEC);
@@ -332,7 +332,7 @@ void write_settings(const char *fname, int die)
   char *hash = NULL;
 
   MD5_Init(&ctx);
-  if ((hash = bin_md5(fname, WRITE_MD5, &ctx))) {
+  if ((hash = bin_checksum(fname, WRITE_CHECKSUM, &ctx))) {
     printf("* Wrote settings to %s.\n", fname);
     edpack(&settings, hash, PACK_DEC);
   }
