@@ -61,7 +61,7 @@ static int gotfake433(char *from)
 #ifdef ROLL_LEFT
         tmp = botname[0]; 
 #endif /* ROLL_LEFT */
-        if (strchr(BADNICKCHARS, tmp))
+        if (strchr(BADHANDCHARS, tmp))
           tmp = '_';
         rolls++;
 #ifdef ROLL_RIGHT

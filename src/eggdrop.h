@@ -37,7 +37,7 @@
 #define PACKNAMELEN     32
 
 #define UHOSTMAX    291 + NICKMAX /* 32 (ident) + 3 (\0, !, @) + NICKMAX */
-#define DIRMAX		512	/* paranoia				*/
+#define DIRMAX		PATH_MAX	/* paranoia				*/
 #define BADHANDCHARS	"-,+*=:!.@#;$%&"
 
 #define MAX_BOTS     500
@@ -52,7 +52,6 @@
 #define UHOSTLEN        UHOSTMAX + 1
 #define DIRLEN          DIRMAX + 1
 #define NOTENAMELEN     ((HANDLEN << 1) + 1)
-#define BADNICKCHARS	"-,+*=:!.@#;$%&"
 #define LISTSEPERATORS  ",=:; "
 
 

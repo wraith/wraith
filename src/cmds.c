@@ -3275,7 +3275,7 @@ static void cmd_pls_user(int idx, char *par)
     handle[HANDLEN] = 0;
   if (get_user_by_handle(userlist, handle))
     dprintf(idx, "Someone already exists by that name.\n");
-  else if (strchr(BADNICKCHARS, handle[0]) != NULL)
+  else if (strchr(BADHANDCHARS, handle[0]) != NULL)
     dprintf(idx, "You can't start a nick with '%c'.\n", handle[0]);
   else if (!egg_strcasecmp(handle, conf.bot->nick))
     dprintf(idx, "Hey! That's MY name!\n");
