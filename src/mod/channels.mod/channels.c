@@ -45,8 +45,6 @@ static int 			gfld_nick_time;
 int 				killed_bots = 0;
 #endif /* S_AUTOLOCK */
 
-static bind_table_t *BT_dcc, *BT_bot, *BT_chon;
-
 #include "channels.h"
 #include "cmdschan.c"
 #include "tclchan.c"
@@ -1082,13 +1080,9 @@ char *channels_start(Function * global_funcs)
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
   add_hook(HOOK_10SECONDLY, (Function) channels_10secondly);
 
-  BT_dcc = find_bind_table2("dcc");
-  BT_bot = find_bind_table2("bot");
-  BT_chon = find_bind_table2("chon");
-
-  if (BT_dcc) add_builtins2(BT_dcc, C_dcc_irc);
-  if (BT_bot) add_builtins2(BT_bot, channels_bot);
-  if (BT_chon) add_builtins2(BT_chon, my_chon);
+  add_builtins("dcc", C_dcc_irc);
+  add_builtins("bot", channels_bot);
+  add_builtins("chon", my_chon);
 
   add_tcl_commands(channels_cmds);
 #ifdef S_AUTOLOCK

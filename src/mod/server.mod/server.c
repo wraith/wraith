@@ -87,14 +87,10 @@ static void msgq_clear(struct msgq_head *qh);
 static int stack_limit;
 
 /* New bind tables. */
-static bind_table_t *BT_raw, *BT_msg;
-static bind_table_t *BT_ctcr, *BT_ctcp;
+static bind_table_t *BT_raw, *BT_msg, *BT_ctcr, *BT_ctcp;
 #ifdef S_AUTH
 static bind_table_t *BT_msgc;
 #endif /* S_AUTH */
-
-/* Imported bind tables. */
-static bind_table_t *BT_dcc;
 
 #include "servmsg.c"
 
@@ -1674,20 +1670,18 @@ char *server_start(Function *global_funcs)
   server_table[4] = (Function) botname;
   module_register(MODULE_NAME, server_table, 1, 2);
 
-        /* Import bind tables. */
-        BT_dcc = find_bind_table2("dcc");
 
-        BT_msg = add_bind_table2("msg", 4, "ssUs", 0, BIND_USE_ATTR);
 #ifdef S_AUTH
-	BT_msgc = add_bind_table2("msgc", 5, "ssUss", 0, BIND_USE_ATTR); 
+  BT_msgc = bind_table_add("msgc", 5, "ssUss", 0, BIND_USE_ATTR); 
 #endif /* S_AUTH */
-        BT_raw = add_bind_table2("raw", 3, "ss", MATCH_MASK, BIND_STACKABLE);
-	BT_ctcr = add_bind_table2("ctcr", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
-	BT_ctcp = add_bind_table2("ctcp", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+  BT_msg = bind_table_add("msg", 4, "ssUs", 0, BIND_USE_ATTR);
+  BT_raw = bind_table_add("raw", 3, "ss", MATCH_MASK, BIND_STACKABLE);
+  BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+  BT_ctcp = bind_table_add("ctcp", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
 
-  add_builtins2(BT_raw, my_raw_binds);
-  add_builtins2(BT_dcc, C_dcc_serv);
-  add_builtins2(BT_ctcp, my_ctcps);
+  add_builtins("raw", my_raw_binds);
+  add_builtins("dcc", C_dcc_serv);
+  add_builtins("ctcp", my_ctcps);
 
   my_tcl_ints[0].val = &use_console_r;
   add_tcl_ints(my_tcl_ints);

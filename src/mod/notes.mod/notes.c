@@ -24,8 +24,6 @@ static int allow_fwd = 1;	/* Allow note forwarding */
 static int notify_users = 1;	/* Notify users they have notes every hour? */
 static Function *global = NULL;	/* DAMN fcntl.h */
 
-static bind_table_t *BT_dcc, *BT_load, *BT_away, *BT_nkch, *BT_chon;
-
 static struct user_entry_type USERENTRY_FWD =
 {
   NULL,				/* always 0 ;) */
@@ -932,10 +930,7 @@ static tcl_strings notes_strings[] =
 
 static int notes_server_setup(char *mod)
 {
-  bind_table_t *table;
-
-  if ((table = find_bind_table2("msg")))
-    add_builtins2(table, notes_msgs);
+  add_builtins("msg", notes_msgs);
   return 0;
 }
 
@@ -984,17 +979,11 @@ char *notes_start(Function * global_funcs)
   add_tcl_ints(notes_ints);
   add_tcl_strings(notes_strings);
 
-  BT_dcc = find_bind_table2("dcc");
-  BT_load = find_bind_table2("load");
-  BT_away = find_bind_table2("away");
-  BT_nkch = find_bind_table2("nkch");
-  BT_chon = find_bind_table2("chon");
-
-  if (BT_dcc) add_builtins2(BT_dcc, notes_cmds);
-  if (BT_load) add_builtins2(BT_load, notes_load);
-  if (BT_away) add_builtins2(BT_away, notes_away);
-  if (BT_chon) add_builtins2(BT_chon, notes_chon);
-  if (BT_nkch) add_builtins2(BT_nkch, notes_nkch);
+  add_builtins("dcc", notes_cmds);
+  add_builtins("load", notes_load);
+  add_builtins("away", notes_away);
+  add_builtins("chon", notes_chon);
+  add_builtins("nkch", notes_nkch);
 
   notes_server_setup(0);
   my_memcpy(&USERENTRY_FWD, &USERENTRY_INFO, sizeof(void *) * 12);

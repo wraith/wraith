@@ -4,8 +4,8 @@ static bind_table_t *BT_time, *BT_event;
 
 void core_binds_init()
 {
-	BT_time = add_bind_table2("time", 5, "iiiii", MATCH_MASK, BIND_STACKABLE);
-	BT_event = add_bind_table2("event", 1, "s", MATCH_MASK, BIND_STACKABLE);
+	BT_time = bind_table_add("time", 5, "iiiii", MATCH_MASK, BIND_STACKABLE);
+	BT_event = bind_table_add("event", 1, "s", MATCH_MASK, BIND_STACKABLE);
 }
 
 void check_bind_time(struct tm *tm)

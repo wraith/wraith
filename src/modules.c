@@ -605,11 +605,11 @@ Function global_table[] =
   (Function) 0,
   (Function) 0,
 #endif /* S_MSGCMDS */
-  (Function) add_bind_table2,
-  (Function) del_bind_table2,
-  (Function) add_builtins2,
-  (Function) rem_builtins2,
-  (Function) find_bind_table2,
+  (Function) bind_table_add,
+  (Function) bind_table_add,
+  (Function) add_builtins,
+  (Function) rem_builtins,
+  (Function) bind_table_find,
   (Function) check_bind
 
 };
@@ -620,7 +620,7 @@ void init_modules(void)
 {
   int i;
 
-  BT_load = add_bind_table2("load", 1, "s", MATCH_MASK, 0);
+  BT_load = bind_table_add("load", 1, "s", MATCH_MASK, 0);
 
   module_list = nmalloc(sizeof(module_entry));
   module_list->name = nmalloc(8);

@@ -40,8 +40,8 @@ struct cfg_entry CFG_OPBOTS,
   CFG_OPREQUESTS;
 
 
-/* We import some bind tables from server.mod */
-static bind_table_t *BT_dcc, *BT_bot, *BT_raw, *BT_msg, *BT_ctcp, *BT_ctcr;
+/* Import some bind tables from the server module. */
+static bind_table_t *BT_ctcp, *BT_ctcr;
 #ifdef S_AUTH
 static bind_table_t *BT_msgc;
 #endif /* S_AUTH */
@@ -1679,29 +1679,17 @@ char *irc_start(Function * global_funcs)
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_rfccompliant, NULL);
   add_tcl_ints(myints);
-  /* Import bind tables from other places. */
-  BT_dcc = find_bind_table2("dcc");
-  BT_bot = find_bind_table2("bot");
-  BT_raw = find_bind_table2("raw");
-  BT_msg = find_bind_table2("msg");
-#ifdef S_AUTH
-  BT_msgc = find_bind_table2("msgc");
-#endif /* S_AUTH */
-  BT_ctcp = find_bind_table2("ctcp");
-  BT_ctcr = find_bind_table2("ctcr");
+
+  BT_ctcp = bind_table_find("ctcp");
+  BT_ctcr = bind_table_find("ctcr");
 
   /* Add our commands to the imported tables. */
-  if (BT_dcc) add_builtins2(BT_dcc, irc_dcc);
-  else putlog(LOG_MISC, "*", "Couldn't load dcc bind table!");
-  if (BT_bot) add_builtins2(BT_bot, irc_bot);
-  else putlog(LOG_MISC, "*", "Couldn't load bot bind table!");
-  if (BT_raw) add_builtins2(BT_raw, irc_raw);
-  else putlog(LOG_MISC, "*", "Couldn't load raw bind table!");
-  if (BT_msg) add_builtins2(BT_msg, C_msg);
-  else putlog(LOG_MISC, "*", "Couldn't load msg bind table!");
+  add_builtins("dcc", irc_dcc);
+  add_builtins("bot", irc_bot);
+  add_builtins("raw", irc_raw);
+  add_builtins("msg", C_msg);
 #ifdef S_AUTH
-  if (BT_msgc) add_builtins2(BT_msgc, C_msgc);
-  else putlog(LOG_MISC, "*", "Couldn't load msgc bind table!");
+  add_builtins("msgc", C_msgc);
 #endif /* S_AUTH */
 
   add_tcl_commands(tclchan_cmds);

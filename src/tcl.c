@@ -15,7 +15,6 @@
 #if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 1)) || (TCL_MAJOR_VERSION > 8)
 #define USE_BYTE_ARRAYS
 #endif
-void init_old_binds();
 
 /* Used for read/write to internal strings */
 typedef struct {
@@ -566,7 +565,6 @@ resetPath:
   /* Initialize binds and traces */
   Context;
 
-  init_old_binds();
   init_traces();
   /* Add new commands */
   add_tcl_commands(tcluser_cmds);

@@ -17,9 +17,6 @@
 #include <pwd.h>
 #include <ctype.h>
 
-/* Import this bind table from server.mod */
-static bind_table_t *BT_ctcp;
-
 static Function *global = NULL, *server_funcs = NULL;
 #else /* !LEAF */
 static Function *global = NULL;
@@ -792,8 +789,8 @@ char *ctcp_start(Function * global_funcs)
   }
   scriptchanged();
 
-  BT_ctcp = find_bind_table2("ctcp");
-  if (BT_ctcp) add_builtins2(BT_ctcp, myctcp);
+  add_builtins("ctcp", myctcp);
+
   add_hook(HOOK_MINUTELY, (Function) ctcp_minutely);
 #endif /* LEAF */
   add_cfg(&CFG_CLOAK_SCRIPT);

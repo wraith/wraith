@@ -83,36 +83,30 @@ extern cmd_t C_dcc[];
 void binds_init(void)
 {
 	bind_table_list_head = NULL;
-	BT_link = add_bind_table2("link", 2, "ss", MATCH_MASK, BIND_STACKABLE);
-        BT_nkch = add_bind_table2("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
-	BT_disc = add_bind_table2("disc", 1, "s", MATCH_MASK, BIND_STACKABLE);
-	BT_away = add_bind_table2("away", 3, "sis", MATCH_MASK, BIND_STACKABLE);
-	BT_chon = add_bind_table2("chon", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
-	BT_chof = add_bind_table2("chof", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
-	BT_dcc = add_bind_table2("dcc", 3, "Uis", MATCH_MASK, BIND_USE_ATTR);
-	BT_bot = add_bind_table2("bot", 3, "sss", MATCH_EXACT, 0);
-        BT_note = add_bind_table2("note", 3 , "sss", MATCH_EXACT, 0);
-	BT_chat = add_bind_table2("chat", 3, "sis", MATCH_MASK, BIND_STACKABLE | BIND_BREAKABLE);
-	BT_act = add_bind_table2("act", 3, "sis", MATCH_MASK, BIND_STACKABLE);
-	BT_bcst = add_bind_table2("bcst", 3, "sis", MATCH_MASK, BIND_STACKABLE);
-        BT_chpt = add_bind_table2("chpt", 4, "ssii", MATCH_MASK, BIND_STACKABLE);
-        BT_chjn = add_bind_table2("chjn", 6, "ssisis", MATCH_MASK, BIND_STACKABLE);
+	BT_link = bind_table_add("link", 2, "ss", MATCH_MASK, BIND_STACKABLE);
+        BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
+	BT_disc = bind_table_add("disc", 1, "s", MATCH_MASK, BIND_STACKABLE);
+	BT_away = bind_table_add("away", 3, "sis", MATCH_MASK, BIND_STACKABLE);
+	BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+	BT_chof = bind_table_add("chof", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+	BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_MASK, BIND_USE_ATTR);
+	BT_bot = bind_table_add("bot", 3, "sss", MATCH_EXACT, 0);
+        BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);
+	BT_chat = bind_table_add("chat", 3, "sis", MATCH_MASK, BIND_STACKABLE | BIND_BREAKABLE);
+	BT_act = bind_table_add("act", 3, "sis", MATCH_MASK, BIND_STACKABLE);
+	BT_bcst = bind_table_add("bcst", 3, "sis", MATCH_MASK, BIND_STACKABLE);
+        BT_chpt = bind_table_add("chpt", 4, "ssii", MATCH_MASK, BIND_STACKABLE);
+        BT_chjn = bind_table_add("chjn", 6, "ssisis", MATCH_MASK, BIND_STACKABLE);
 
-	add_builtins2(BT_dcc, C_dcc);
+	add_builtins("dcc", C_dcc);
 }
 
-void init_old_binds(void)
+void kill_binds(void)
 {
-  bind_table_list = NULL;
-  Context;
+	while (bind_table_list_head) bind_table_del(bind_table_list_head);
 }
 
-void kill_bind2(void)
-{
-	while (bind_table_list_head) del_bind_table2(bind_table_list_head);
-}
-
-bind_table_t *add_bind_table2(const char *name, int nargs, const char *syntax, int match_type, int flags)
+bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, int match_type, int flags)
 {
 	bind_table_t *table;
 
@@ -132,7 +126,7 @@ bind_table_t *add_bind_table2(const char *name, int nargs, const char *syntax, i
 	return(table);
 }
 
-void del_bind_table2(bind_table_t *table)
+void bind_table_del(bind_table_t *table)
 {
 	bind_table_t *cur, *prev;
 	bind_chain_t *chain, *next_chain;
@@ -161,7 +155,7 @@ void del_bind_table2(bind_table_t *table)
 	}
 }
 
-bind_table_t *find_bind_table2(const char *name)
+bind_table_t *bind_table_find(const char *name)
 {
 	bind_table_t *table;
 
@@ -171,7 +165,7 @@ bind_table_t *find_bind_table2(const char *name)
 	return(table);
 }
 
-int del_bind_entry(bind_table_t *table, const char *flags, const char *mask, const char *function_name)
+int bind_entry_del(bind_table_t *table, const char *flags, const char *mask, const char *function_name, void *cdata)
 {
 	bind_chain_t *chain;
 	bind_entry_t *entry, *prev;
@@ -197,7 +191,7 @@ int del_bind_entry(bind_table_t *table, const char *flags, const char *mask, con
 	return(0);
 }
 
-int add_bind_entry(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
+int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
 	bind_chain_t *chain;
 	bind_entry_t *entry;
@@ -493,9 +487,13 @@ void check_tcl_away(const char *bot, int idx, const char *msg)
   check_bind(BT_away, bot, NULL, bot, idx, msg);
 }
 
-void add_builtins2(bind_table_t *table, cmd_t *cmds)
+void add_builtins(const char *table_name, cmd_t *cmds)
 {
 	char name[50];
+	bind_table_t *table;
+
+	table = bind_table_find(table_name);
+	if (!table) return;
 
 	for (; cmds->name; cmds++) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
@@ -505,17 +503,21 @@ void add_builtins2(bind_table_t *table, cmd_t *cmds)
                   break_down_flags(cmds->flags, &(cmdlist[cmdi].flags), NULL);
                   cmdi++;
                 }
-		snprintf(name, 50, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
-		add_bind_entry(table, cmds->flags, cmds->name, name, 0, cmds->func, NULL);
+		egg_snprintf(name, 50, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
+		bind_entry_add(table, cmds->flags, cmds->name, name, 0, cmds->func, NULL);
 	}
 }
 
-void rem_builtins2(bind_table_t *table, cmd_t *cmds)
+void rem_builtins(const char *table_name, cmd_t *cmds)
 {
 	char name[50];
+	bind_table_t *table;
+
+	table = bind_table_find(table_name);
+	if (!table) return;
 
 	for (; cmds->name; cmds++) {
 		sprintf(name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
-		del_bind_entry(table, cmds->flags, cmds->name, name);
+		bind_entry_del(table, cmds->flags, cmds->name, name, NULL);
 	}
 }

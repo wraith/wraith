@@ -23,7 +23,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-static bind_table_t *BT_load;
 static bind_table_t *BT_rcvd, *BT_sent, *BT_lost, *BT_tout;
 
 static Function *global = NULL, *update_funcs = NULL;
@@ -1835,10 +1834,7 @@ static cmd_t transfer_ctcps[] =
 /* Add our CTCP bindings if the server module is loaded. */
 static int server_transfer_setup(char *mod)
 {
-  bind_table_t *BT_ctcp;
-
-  if ((BT_ctcp = find_bind_table2("ctcp")))
-    add_builtins2(BT_ctcp, transfer_ctcps);
+  add_builtins("ctcp", transfer_ctcps);
   return 1;
 }
 
@@ -1910,14 +1906,13 @@ char *transfer_start(Function *global_funcs)
     return "This module requires update module 0.0 or later.";
   }
 
-  BT_load = find_bind_table2("load");
-  if (BT_load) add_builtins2(BT_load, transfer_load);
+  add_builtins("load", transfer_load);
 
   server_transfer_setup(NULL);
-  BT_rcvd = add_bind_table2("rcvd", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
-  BT_sent = add_bind_table2("sent", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
-  BT_lost = add_bind_table2("lost", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
-  BT_tout = add_bind_table2("tout", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
+  BT_rcvd = bind_table_add("rcvd", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
+  BT_sent = bind_table_add("sent", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
+  BT_lost = bind_table_add("lost", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
+  BT_tout = bind_table_add("tout", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
 
   USERENTRY_FSTAT.get = def_get;
   add_entry_type(&USERENTRY_FSTAT);

@@ -548,14 +548,13 @@
 #define CFG_MSGINVITE (*(struct cfg_entry *)(global[340]))
 /* 341 - 344 */
 #define CFG_MSGIDENT (*(struct cfg_entry *)(global[341]))
-#define add_bind_table2 ((bind_table_t *(*)(const char *, int, char *, int, int))global[342])
-#define del_bind_table2 ((void (*)(bind_table_t *))global[343])
-#define add_builtins2 ((void (*)(bind_table_t *, cmd_t *))global[344])
+#define bind_table_add ((bind_table_t *(*)(const char *, int, char *, int, int))global[342])
+#define bind_table_del ((void (*)(bind_table_t *))global[343])
+#define add_builtins ((void (*)(const char *, cmd_t *))global[344])
 /* 345 - 348 */
-#define rem_builtins2 ((void (*)(bind_table_t *, cmd_t *))global[345])
-#define find_bind_table2 ((bind_table_t *(*)(const char *))global[346])
+#define rem_builtins ((void (*)(const char *, cmd_t *))global[345])
+#define bind_table_find ((bind_table_t *(*)(const char *))global[346])
 #define check_bind ((int (*)(bind_table_t *, const char *, struct flag_record *, ...))global[347])
-
 
 extern int lfprintf(FILE *, char *, ...);
 extern int egg_numver;

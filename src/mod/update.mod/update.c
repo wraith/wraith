@@ -21,8 +21,6 @@
 #include "transfer.mod/transfer.h"
 #include "compress.mod/compress.h"
 
-static bind_table_t *BT_bot;
-
 static Function *global = NULL, *transfer_funcs = NULL, *compress_funcs = NULL,
                 *uncompress_funcs = NULL;
 
@@ -527,8 +525,8 @@ char *update_start(Function *global_funcs)
     module_undepend(MODULE_NAME);
     return "This module requires the compression.";
   }
-  BT_bot = find_bind_table2("bot");
-  if (BT_bot) add_builtins2(BT_bot, update_bot);
+
+  add_builtins("bot", update_bot);
 #ifdef HUB
   add_hook(HOOK_30SECONDLY, (Function) check_updates);
 #endif /* HUB */
