@@ -48,15 +48,12 @@
 //#define HOOK_CHANFILE            17
 #define HOOK_SHAREOUT		105
 #define HOOK_SHAREIN		106
-#define HOOK_ENCRYPT_PASS	107
 #define HOOK_QSERV		108
 #define HOOK_ADD_MODE		109
 #define HOOK_MATCH_NOTEREJ	110
 #define HOOK_RFC_CASECMP	111
 #define HOOK_DNS_HOSTBYIP	112
 #define HOOK_DNS_IPBYHOST	113
-#define HOOK_ENCRYPT_STRING     114
-#define HOOK_DECRYPT_STRING     115
 #define HOOK_SHAREUPDATEIN	117
 
 /* These are FIXED once they are in a release they STAY

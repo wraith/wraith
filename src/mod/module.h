@@ -29,6 +29,7 @@
 #include "modvals.h"
 #include "src/tandem.h"
 
+
 /*
  * This file contains all the orrible stuff required to do the lookup
  * table for symbols, rather than getting the OS to do it, since most
@@ -288,8 +289,8 @@
 #define copyfile ((int (*) (char *, char *))global[147])
 /* 148 - 151 */
 #define do_tcl ((void (*)(char *, char *))global[148])
-/* 149 -- UNUSED */
-/* #define get_language ((char *(*)(int))global[150]) */
+#define encrypt_string ((char *(*)(const char *, char *))global[149])
+#define decrypt_string ((char *(*)(const char *, char *))global[150])
 #define def_get ((void *(*)(struct userrec *, struct user_entry *))global[151])
 /* 152 - 155 */
 #define makepass ((void (*) (char *))global[152])
@@ -498,7 +499,7 @@
 /* 297 - 300 */
 #define hostname6 ((char *)(global[297]))
 #define timesync (*(int*)global[298])
-#define netpass ((char *)(global[299]))
+/* UNUSED 299 */
 #define kickreason ((char *(*)(int))global[300])
 /* 301 - 304 */
 #define getting_users ((int (*)())global[301])
@@ -552,22 +553,11 @@
 /* 337 - 340 */
 #define checkchans ((void (*)(int))global[337])
 
-/* This is for blowfish module, couldnt be bothered making a whole new .h
- * file for it ;)
- */
-#ifndef MAKING_ENCRYPTION
-
-#  define encrypt_string(a, b)						\
-	(((char *(*)(char *,char*))encryption_funcs[4])(a,b))
-#  define decrypt_string(a, b)						\
-	(((char *(*)(char *,char*))encryption_funcs[5])(a,b))
-
-#endif
-
 extern int lfprintf(FILE *, char *, ...);
 extern void raise_limit(struct chanset_t *);
 extern int egg_numver;
 extern int cfg_count;
 extern struct cfg_entry **cfg;
 #define STR(x) x
+
 #endif				/* _EGG_MOD_MODULE_H */

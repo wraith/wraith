@@ -29,7 +29,7 @@ extern time_t		 now;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
 			 ignore_time;
-extern char		 botnetnick[], ver[], origbotname[], notify_new[], bdhash[], *netpass;
+extern char		 botnetnick[], ver[], origbotname[], notify_new[], bdhash[];
 
 
 extern sock_list *socklist;
@@ -407,7 +407,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
        *p;
 
       p = newsplit(&buf);
-      tmp = decrypt_string(netpass, p);
+      tmp = decrypt_string(SALT2, p);
       strncpy0(socklist[snum].okey, tmp, 17);
       strcpy(socklist[snum].ikey, socklist[snum].okey);
       nfree(tmp);
@@ -1633,7 +1633,7 @@ static void dcc_telnet_pass(int idx, int atr)
       socklist[snum].oseed = rand();
       socklist[snum].iseed = socklist[snum].oseed;
       initkey[16] = 0;
-      tmp2 = encrypt_string(netpass, initkey);
+      tmp2 = encrypt_string(SALT2, initkey);
       putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;

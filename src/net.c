@@ -37,7 +37,6 @@
 #endif /* !HAVE_GETDTABLESIZE */
 
 extern struct dcc_t	*dcc;
-extern char *netpass;
 extern int		 backgrd, use_stderr, resolve_timeout, dcc_total;
 extern unsigned long	 otraffic_irc_today, otraffic_bn_today,
 			 otraffic_dcc_today, otraffic_filesys_today,

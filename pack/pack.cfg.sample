@@ -3,9 +3,6 @@
 /* PACKNAME: name of the pack */
 PACKNAME <name>
 
-/* NETPASS: 15 random characters used for botlink encryption */
-NETPASS <15charstring>
-
 /* SHELLHASH: 33 char md5 hash used for binary password */
 SHELLHASH <md5hash>
 

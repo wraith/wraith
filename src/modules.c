@@ -23,7 +23,7 @@ extern struct userrec	*userlist, *lastuser;
 extern char		 tempdir[], botnetnick[], botname[], natip[], cmdprefix[],
 			 hostname[], origbotname[], botuser[], admin[],
 			 userfile[], ver[], notify_new[], kickprefix[], bankickprefix[],
-			 version[], quit_msg[], hostname6[], bdhash[], dcc_prefix[], enetpass[],
+			 version[], quit_msg[], hostname6[], bdhash[], dcc_prefix[],
 #ifdef S_AUTH
                          authkey[], 
 #endif /* S_AUTH */
@@ -126,9 +126,6 @@ static void null_share(int idx, char *x)
     dprintf(idx, "s un Not sharing userfile.\n");
 }
 
-void (*encrypt_pass) (char *, char *) = 0;
-char *(*encrypt_string) (char *, char *) = 0;
-char *(*decrypt_string) (char *, char *) = 0;
 void (*shareout) () = null_func;
 void (*sharein) (int, char *) = null_share;
 void (*shareupdatein) (int, char *) = null_share;
@@ -344,8 +341,8 @@ Function global_table[] =
   (Function) copyfile,
   /* 148 - 151 */
   (Function) do_tcl,
-  (Function) 0,
-  (Function) 0,
+  (Function) encrypt_string,
+  (Function) decrypt_string,
   (Function) def_get,
   /* 152 - 155 */
   (Function) makepass,
@@ -555,7 +552,7 @@ Function global_table[] =
   (Function) botunlink,
   (Function) hostname6,		 /* char *				*/
   (Function) & timesync, /* int					*/
-  (Function) enetpass,  	/* char *				*/
+  (Function) 0, 
   (Function) kickreason,
   (Function) getting_users,
   (Function) 0,
@@ -842,15 +839,6 @@ void add_hook(int hook_num, Function func)
     p->func = func;
   } else
     switch (hook_num) {
-    case HOOK_ENCRYPT_PASS:
-      encrypt_pass = (void (*)(char *, char *)) func;
-      break;
-    case HOOK_ENCRYPT_STRING:
-      encrypt_string = (char *(*)(char *, char *)) func;
-      break;
-    case HOOK_DECRYPT_STRING:
-      decrypt_string = (char *(*)(char *, char *)) func;
-      break; 
     case HOOK_SHAREOUT:
       shareout = (void (*)()) func;
       break;
@@ -916,18 +904,6 @@ void del_hook(int hook_num, Function func)
     }
   } else
     switch (hook_num) {
-    case HOOK_ENCRYPT_PASS:
-      if (encrypt_pass == (void (*)(char *, char *)) func)
-	encrypt_pass = (void (*)(char *, char *)) null_func;
-      break;
-    case HOOK_ENCRYPT_STRING:
-      if (encrypt_string == (char *(*)(char *, char *)) func)
-        encrypt_string = (char *(*)(char *, char *)) null_func;
-      break;
-    case HOOK_DECRYPT_STRING:
-      if (decrypt_string == (char *(*)(char *, char *)) func)
-        decrypt_string = (char *(*)(char *, char *)) null_func;
-      break;
     case HOOK_SHAREOUT:
       if (shareout == (void (*)()) func)
 	shareout = null_func;

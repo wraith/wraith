@@ -7,146 +7,162 @@
 
 
 #include "main.h"
-#include "salt.h"
 
-unsigned char *hashdot(unsigned int r);
-unsigned int unhashdot(unsigned char *hash);
-
-char crybu[8000];
-
-char *psycrypt(char *st)
+int expmem_crypt()
 {
-    char *pte;
-    char *ptt;
-    char *pts1,*pts2;
-    char *pt;
-    char *hpt;
-    char hbuf[3];
-    int res;
-    int slen=0;
-    unsigned int tslt1 = CODE1;
-    unsigned int tslt2 = CODE2;
-    int p1,p2,p3,p4,p5;
-    int erg;
-    int de=0;
-    memset(crybu,0x0,sizeof(crybu));
-    pt = crybu;
-    pte = pt;
-    ptt = st;
-    if (*ptt=='+') {
-       ptt++;
-       de=1;
-    } else {
-       *pte++='+';
-    }
-    pts1 = slt1 +SA1;
-    pts2 = slt2 +SA2;
-    while(*ptt!=0)
-    {
-       if (slen>7990) break;
-        if (tslt1>255 || tslt1 <0) tslt1=CODE1;
-        if (tslt2>255 || tslt2 <0) tslt2=CODE2;
-       if (*pts1==0) pts1=slt1;
-       if (*pts2==0) pts2=slt2;
-       res=0;
-       if (de) {
-          hbuf[0]=*ptt++;
-          hbuf[1]=*ptt;
-          hbuf[2]=0;
-         p1=unhashdot(hbuf);
-          p2=*pts1;p3=tslt1;p4=*pts2;p5=tslt2;
-          erg=p1-p2-p3+p4-p5;
-          *pte=erg;
-          res=erg;
-       } else {
-          p1=*ptt;p2=*pts1;p3=tslt1;p4=*pts2;p5=tslt2;
-          res=p1;
-          erg=p1+p2+p3-p4+p5;
-          hpt=hashdot(erg);
-          *pte++=hpt[0];slen++;
-          *pte=hpt[1];
-       }
-       tslt1--;
-       res=res/10;
-       tslt2=tslt2+res;
-       pte++;ptt++;pts1++;pts2++;slen=slen+1;
-    }
-    *pte=0;
-    return pt;
+  return 0;
 }
 
-char *cryptit(char *tocipher)
+#define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
+#define CRYPT_KEYSIZE 256
+
+AES_KEY e_key, d_key;
+
+char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
 {
-    if (*tocipher=='+')
-       return tocipher;
-    else
-       return psycrypt(tocipher);
+  int newdatalen = *datalen;
+  int blockcount = 0, blockndx = 0;
+  unsigned char *newdata = NULL;
+
+/* First pad indata to CRYPT_BLOCKSIZE multiplum */
+  if (newdatalen % CRYPT_BLOCKSIZE)             /* more than 1 block? */
+    newdatalen += (CRYPT_BLOCKSIZE - (newdatalen % CRYPT_BLOCKSIZE));
+
+  newdata = (unsigned char *) nmalloc(newdatalen);
+  egg_memcpy(newdata, data, *datalen);
+  if (newdatalen != *datalen)
+    egg_bzero((void *) &newdata[*datalen], (newdatalen - *datalen));
+  *datalen = newdatalen;
+
+  if ((!keydata) || (!keydata[0])) {
+    /* No key, no encryption */
+    egg_memcpy(newdata, data, newdatalen);
+  } else {
+    /* Init/fetch key */
+    AES_set_encrypt_key(keydata, CRYPT_KEYSIZE, &e_key);
+
+    /* Now loop through the blocks and crypt them */
+    blockcount = newdatalen / CRYPT_BLOCKSIZE;
+    for (blockndx = blockcount - 1; blockndx >= 0; blockndx--) {
+      AES_encrypt((void *) &newdata[blockndx * CRYPT_BLOCKSIZE], (void *) &newdata[blockndx * CRYPT_BLOCKSIZE], &e_key);
+    }
+  }
+  return newdata;
 }
 
-char *decryptit(char *todecipher)
+char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
 {
-    if (todecipher[0]=='+')
-       return psycrypt(todecipher);
-    else
-       return todecipher;
+  int blockcount = 0, blockndx = 0;
+  unsigned char *newdata = NULL;
+
+  datalen -= datalen % CRYPT_BLOCKSIZE;
+  newdata = (unsigned char *) nmalloc(datalen);
+  egg_memcpy(newdata, data, datalen);
+
+  if ((!keydata) || (!keydata[0])) {
+    /* No key, no decryption */
+  } else {
+    /* Init/fetch key */
+    AES_set_decrypt_key(keydata, CRYPT_KEYSIZE, &d_key);
+
+
+    /* Now loop through the blocks and crypt them */
+    blockcount = datalen / CRYPT_BLOCKSIZE;
+
+    for (blockndx = blockcount - 1; blockndx >= 0; blockndx--) {
+      AES_decrypt(&newdata[blockndx * CRYPT_BLOCKSIZE], &newdata[blockndx * CRYPT_BLOCKSIZE], &d_key);
+    }
+
+  }
+
+  return newdata;
 }
 
-/* hashing routines for string driven systems */
+const char base64[64] = ".\\0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const char base64r[256] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 0, 0, 0, 0, 0,
+  0, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+  27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 0, 1, 0, 0, 0,
+  0, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
+  53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
 
-unsigned char base[] = "'`0123456789abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@$=&*-#";
-
-int baselen=67;
-
-unsigned char xres[3];
-
-unsigned char *hashdot(unsigned int r)
+char *encrypt_string(const char *keydata, char *data)
 {
-    unsigned int cnt;
-    unsigned int hh=0;
-    unsigned int hl=0;
-    cnt=r;
-    for(;cnt>0;cnt--)
-    {
-       hl++;
-       if (hl==baselen) {hl=0;hh++;}
+  int l, i, t;
+  unsigned char *bdata;
+  char *res;
+  l = strlen(data) + 1;
+  bdata = encrypt_binary(keydata, data, &l);
+  if ((keydata) && (keydata[0])) {
+    res = nmalloc((l * 4) / 3 + 5);
+#define DB(x) ((unsigned char) (x+i<l ? bdata[x+i] : 0))
+    for (i = 0, t = 0; i < l; i += 3, t += 4) {
+      res[t] = base64[DB(0) >> 2];
+      res[t + 1] = base64[((DB(0) & 3) << 4) | (DB(1) >> 4)];
+      res[t + 2] = base64[((DB(1) & 0x0F) << 2) | (DB(2) >> 6)];
+      res[t + 3] = base64[(DB(2) & 0x3F)];
     }
-    xres[0]=base[hh];
-    xres[1]=base[hl];
-    xres[2]=0;
-    return xres;
+#undef DB
+    res[t] = 0;
+    nfree(bdata);
+    return res;
+  } else {
+    return bdata;
+  }
 }
 
-int wrong=0;
-
-unsigned int unhashdot(unsigned char *hash)
+char *decrypt_string(const char *keydata, char *data)
 {
-    unsigned int lf=baselen;
-/*    unsigned char *pt; */
-    unsigned int erg=0;
-    unsigned long ln=0;
-    wrong=0;
-    while (ln<baselen && base[ln] != hash[0]) {
-       ln++;
-    }
-    if (ln!=baselen) {
-       erg=ln * lf;
-    } else {
-       wrong=1;
-    }
-    ln=0;
-    while (ln<baselen && base[ln] != hash[1]) {
-       ln++;
-    }
-    if (ln!=baselen) {
-       erg=erg+ln;
-    } else {
-       wrong=1;
-    }
-    return erg;
+  int i, l, t;
+  char *buf, *res;
+  l = strlen(data);
+  if ((keydata) && (keydata[0])) {
+    buf = nmalloc((l * 3) / 4 + 6);
+#define DB(x) ((unsigned char) (x+i<l ? base64r[(unsigned char) data[x+i]] : 0))
+    for (i = 0, t = 0; i < l; i += 4, t += 3) {
+      buf[t] = (DB(0) << 2) + (DB(1) >> 4);
+      buf[t + 1] = ((DB(1) & 0x0F) << 4) + (DB(2) >> 2);
+      buf[t + 2] = ((DB(2) & 3) << 6) + DB(3);
+    };
+#undef DB
+    t += 3;
+    t -= (t % 4);
+    res = decrypt_binary(keydata, buf, t);
+    nfree(buf);
+    return res;
+  } else {
+    res = nmalloc(l + 1);
+    strcpy(res, data);
+    return res;
+  }
 }
 
-/* end pcrypt */
-extern char *netpass;
+void encrypt_pass(char *s1, char *s2)
+{
+  /* fix this, standard eggs don't allow this long password hashes */
+  char *tmp;
+
+  if (strlen(s1) > 16)
+    s1[16] = 0;
+  tmp = encrypt_string(s1, s1);
+  strcpy(s2, "+");
+  strncat(s2, tmp, 16);
+  s2[16] = 0;
+  nfree(tmp);
+}
+
 
 int lfprintf(FILE *f, char *fmt, ...) {
   va_list va;
@@ -161,8 +177,8 @@ int lfprintf(FILE *f, char *fmt, ...) {
   if(strchr(outbuf, '\n')) {
     while( (tptr = strchr(outbuf, '\n')) ) {
       *tptr = 0;
-      temps1 = (char *) encrypt_string(netpass, tptr2);
-      if (fprintf(f, "%s\n", cryptit(temps1)) == EOF) {
+      temps1 = (char *) encrypt_string(SALT1, tptr2);
+      if (fprintf(f, "%s\n", temps1) == EOF) {
         nfree(temps1);
         return -1;
       }
@@ -172,8 +188,8 @@ int lfprintf(FILE *f, char *fmt, ...) {
       tptr2 = tptr;
     }
   } else {
-    temps2 = (char *) encrypt_string(netpass, outbuf);
-    fprintf(f, "%s", cryptit(temps2));
+    temps2 = (char *) encrypt_string(SALT1, outbuf);
+    fprintf(f, "%s", temps2);
     nfree(temps2);
     return -1;
   }
@@ -202,7 +218,7 @@ void EncryptFile(char *infile, char *outfile)
 
   while (fscanf(f,"%[^\n]\n",buf) != EOF) {
     if (std)
-      printf("%s\n", cryptit(encrypt_string(netpass, buf)));
+      printf("%s\n", encrypt_string(SALT1, buf));
     else
       lfprintf(f2, "%s\n", buf);
   }
@@ -234,7 +250,7 @@ void DecryptFile(char *infile, char *outfile)
   }
 
   while (fscanf(f,"%[^\n]\n",buf) != EOF) {
-    temps = (char *) decrypt_string(netpass, decryptit(buf));
+    temps = (char *) decrypt_string(SALT1, buf);
     if (!std)
       fprintf(f2, "%s\n",temps);
     else
@@ -248,4 +264,3 @@ void DecryptFile(char *infile, char *outfile)
   if (f2)
     fclose(f2);
 }
-

@@ -26,7 +26,7 @@ extern Tcl_Interp	*interp;
 extern char		 ver[], botnetnick[], firewall[], myip[], 
 			 motdfile[], userfile[], tempdir[],
 			 notify_new[], owner[], 
-                         *netpass, botuser[], *owners, *hubs;
+                         botuser[], *owners, *hubs;
 
 extern time_t		 now, online_since;
 extern int		 backgrd, term_z, con_chan, cache_hit, cache_miss,
@@ -494,7 +494,7 @@ void load_internal_users()
           bi->uplink = user_malloc(1);
           bi->uplink[0] = 0;
 	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
-	  set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), netpass);
+	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
 	}
       default:
 //	ln = userids for hostlist, add them all 

@@ -30,9 +30,6 @@ struct list_type;
 struct tand_t_struct;
 
 #if !defined(MAKING_MODS)
-extern void (*encrypt_pass) (char *, char *);
-extern char *(*encrypt_string) (char *, char *);
-extern char *(*decrypt_string) (char *, char *);
 
 //extern int lfprintf(FILE *, char *, ...);
 
@@ -126,6 +123,9 @@ void gotremotecmd(char * forbot, char * frombot, char * fromhand, char * fromidx
 void gotremotereply(char * frombot, char * tohand, char * toidx, char * ln);
 
 /* crypt.c */
+char *encrypt_string(const char *, char *);
+char *decrypt_string(const char *, char *);
+void encrypt_pass(char *, char *);
 char *cryptit (char *);
 char *decryptit (char *);
 int lfprintf(FILE *, char *, ...);

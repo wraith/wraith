@@ -47,8 +47,6 @@
 #include <windows.h>
 #endif
 
-#define ENCMOD "blowfish"
-
 #ifndef _POSIX_SOURCE
 /* Solaris needs this */
 #define _POSIX_SOURCE 1
@@ -65,7 +63,7 @@ int leaf = 1;
 int localhub = 1; //we set this to 0 if we have -c, later.
 
 extern char		 origbotname[], userfile[], botnetnick[], packname[],
-                         *netpass, shellhash[], myip6[], myip[], hostname[],
+                         shellhash[], myip6[], myip[], hostname[],
                          hostname6[], natip[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
 			 fork_interval, 
@@ -90,7 +88,6 @@ time_t lastfork=0;
 int my_port;
 #endif
 
-char enetpass[16] = ""; /* cheap fucking hack */
 char	notify_new[121] = "";	/* Person to send a note to for new users */
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
@@ -397,7 +394,7 @@ static void got_abort(int z)
 #endif
   fatal(STR("GOT SIGABRT -- CRASHING!"), 1);
 #ifdef SA_RESETHAND
-  kill(getpid(), SIGABRT);
+  kill(getpid(), SIGSEGV);
 #else
   bg_send_quit(BG_ABORT);
   exit(1);
@@ -673,7 +670,7 @@ static void dtx_arg(int argc, char *argv[])
         got_ed("d", p, p2);
         break; /* this should never be reached */
       case 'v':
-	printf("Wraith %s\nBuild Date: %s\n", egg_version, ctime(&buildts));
+	printf("Wraith %s\nBuild Date: (%lu) %s\n", egg_version, buildts, ctime(&buildts));
 	bg_send_quit(BG_ABORT);
 	exit(0);
         break; /* this should never be reached */
@@ -1110,7 +1107,7 @@ static void gotspawn(char *filename)
 
   while(fscanf(fp,"%[^\n]\n",templine) != EOF) {
     void *my_ptr;
-    temps = my_ptr = (char *) decrypt_string(netpass, decryptit(templine));
+    temps = my_ptr = decrypt_string(SALT1, templine);
 
 #ifdef S_PSCLOAK
     sdprintf(STR("GOTSPAWN: %s"), temps);
@@ -1470,7 +1467,6 @@ int main(int argc, char **argv)
 
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
-  egg_snprintf(enetpass, sizeof enetpass, netpass);
   init_dcc_max();
   init_userent();
   init_misc();
@@ -1484,7 +1480,6 @@ int main(int argc, char **argv)
     bg_prepare_split();
   init_botcmd();
   link_statics();
-  module_load(ENCMOD);
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
@@ -1599,19 +1594,13 @@ if (1) {		/* config shit */
       char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps, c[1024];
       void *temp_ptr;
       int skip = 0;
-      if (templine[0] != '+') {
-        printf(STR("%d: "), i);
-        werr(ERR_CONFBADENC);
-      }
 
-      temps = temp_ptr = (char *) decrypt_string(netpass, decryptit(templine));
-      sdprintf("malloc`d %d bytes", strlen(temps)+1);
+      temps = temp_ptr = decrypt_string(SALT1, templine);
       if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
-        printf(STR("%d: "), i);
+        sdprintf(STR("line %d, char %c "), i, temps[0]);
         werr(ERR_CONFBADENC);
       }
-
-      snprintf(c, sizeof c, "%s",temps);
+      snprintf(c, sizeof c, "%s", temps);
 
       if (c[0] == '*')
         skip = 1;

@@ -25,7 +25,7 @@ extern struct dcc_t *dcc;
 extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
 extern int dcc_total, noshare, egg_numver;
-extern char botnetnick[], *netpass;
+extern char botnetnick[];
 extern Tcl_Interp *interp;
 extern time_t now;
 
@@ -663,7 +663,6 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
 int readuserfile(char *file, struct userrec **ret)
 {
   char *p, buf[1024], lasthand[512], *attr, *pass, *code, s1[1024], *s, cbuf[1024], *temps;
-  char *horesak;
 
   FILE *f;
   struct userrec *bu, *u = NULL;
@@ -688,11 +687,11 @@ Context;
   f = fopen(file, "r");
   if (f == NULL)
     return 0;
+  noshare = 1;
   /* read opening comment */
   s = buf;
-  fscanf(f, "%s\n", cbuf);
-  horesak = decryptit(cbuf);
-  temps = (char *) decrypt_string(netpass, horesak);
+  fscanf(f, "%[^\n]\n", cbuf);
+  temps = (char *) decrypt_string(SALT1, cbuf);
   snprintf(s, 1024, temps);
   nfree(temps);
   if (s[1] < '4') {
@@ -702,9 +701,8 @@ Context;
     fatal(USERF_INVALID, 0);
   while (!feof(f)) {
     s = buf;
-    fscanf(f, "%s\n", cbuf);
-    horesak = decryptit(cbuf);
-    temps = (char *) decrypt_string(netpass, horesak);
+    fscanf(f, "%[^\n]\n", cbuf);
+    temps = (char *) decrypt_string(SALT1, cbuf);
     snprintf(s, 1024, temps);
     nfree(temps);
     if (!feof(f)) {
@@ -1015,6 +1013,7 @@ Context;
 #ifdef LEAF
   unlink(userfile);
 #endif /* LEAF */
+  noshare = 0;
   return 1;
 }
 

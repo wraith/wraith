@@ -10,12 +10,11 @@
 #define NICKMAX         32
 #define UHOSTMAX        160
 #define MAXPASSLEN      25
-#define NETKEYLEN       16
+#define NETKEYLEN       33
 #define PACKNAMELEN     40
 
 struct cfg_struct {
-  char packname[512];
-  char netpass[16];
+  char packname[PACKNAMELEN];
   char shellhash[33];
   char bdhash[33];
   char dccprefix[1];
@@ -201,9 +200,6 @@ int loadconfig(char **argv) {
         if (!strcmp(lcase(buffer), "packname")) {
           strncpy(cfg.packname, trim(p), sizeof cfg.packname - 1);
           printf(".");
-        } else if (!strcmp(lcase(buffer), "netpass")) {
-          strncpy(cfg.netpass, trim(p), sizeof cfg.netpass - 1);
-          printf(".");
         } else if (!strcmp(lcase(buffer), "shellhash")) {
           strncpy(cfg.shellhash, trim(p), sizeof cfg.shellhash - 1);
           printf(".");
@@ -261,7 +257,6 @@ int loadconfig(char **argv) {
 void tellconfig()
 {
   printf("packname: %s\n", cfg.packname);
-  printf("netpass: %s\n", cfg.netpass);
   printf("shellhash: %s\n", cfg.shellhash);
   printf("bdhash: %s\n", cfg.bdhash);
   printf("dccprefix: %s\n", cfg.dccprefix);
@@ -313,7 +308,7 @@ fprintf(f, " \
 #include <string.h> \n\
 #include \"main.h\"\n\
 \n\
-char *netpass, packname[512], shellhash[33], bdhash[33], dcc_prefix[1], *owners, *hubs, *owneremail;\n\n\
+char packname[512], shellhash[33], bdhash[33], dcc_prefix[1], *owners, *hubs, *owneremail;\n\n\
 char *progname() {\n\
 #ifdef S_PSCLOAK\n");
 fprintf(f," \
@@ -330,8 +325,7 @@ fprintf(f, " \
 
 
   fprintf(f, "#define _PACKNAME STR(\"%s\")\n", cfg.packname);
-  fprintf(f, "#define _NETPASS STR(\"%s\")\n", cfg.netpass);
-  fprintf(f, "#define _DCCPREFIX STR(\"%s\")\n", cfg.dccprefix);
+  fprintf(f, "#define _DCCPREFIX STR(\"%c\")\n", cfg.dccprefix[0]);
   fprintf(f, "#define _SHELLHASH STR(\"%s\")\n", cfg.shellhash);
   fprintf(f, "#define _BDHASH STR(\"%s\")\n", cfg.bdhash);
   fprintf(f, "#define _OWNERS STR(\"%s\")\n", cfg.owners);
@@ -344,20 +338,16 @@ int init_settings()\n\
   owners = my_malloc(strlen(_OWNERS) + 1);\n\
   hubs = my_malloc(strlen(_HUBS) + 1);\n\
   owneremail = my_malloc(strlen(_OWNEREMAIL) + 1);\n\
-  netpass = my_malloc(strlen(_NETPASS) + 1);\n\
 \n\
   sprintf(owners, _OWNERS);\n\
   sprintf(hubs, _HUBS);\n\
   sprintf(owneremail, _OWNEREMAIL);\n\
-  sprintf(netpass, _NETPASS);\n\
   egg_snprintf(packname, sizeof packname, _PACKNAME);\n\
-//  snprintf(netpass, sizeof netpass, NETPASS);\n\
-//printf(\"netpass: %%s sizeof: %%d NETPASS: %%s\\n\", netpass, sizeof netpass, NETPASS);\n\
   egg_snprintf(bdhash, sizeof bdhash, _BDHASH);\n\
   egg_snprintf(shellhash, sizeof shellhash, _SHELLHASH);\n\
   sprintf(dcc_prefix, _DCCPREFIX);\n\
   sdprintf(STR(\"owners: %%s\\nhubs: %%s\\nowneremail: %%s\"), owners, hubs, owneremail);\n\
-  sdprintf(STR(\"dcc_prefix: %%s \\nnetpass: %%s \\nbdhash: %%s \\nshellhash: %%s\"), dcc_prefix, netpass, bdhash, shellhash);\n\
+  sdprintf(STR(\"dcc_prefix: %%s \\nbdhash: %%s \\nshellhash: %%s\"), dcc_prefix, bdhash, shellhash);\n\
   return 1;\n\
 }\n");
 

@@ -1327,7 +1327,7 @@ static int gotmode(char *from, char *msg)
           }
 */
           strcpy(key, nfrom);
-          strcat(key, netpass);
+          strcat(key, SALT2);
 /* putlog(LOG_DEBUG, "*", "Decrypting cookie: %s with key %s", enccookie, key); */
           p = decrypt_string(key, enccookie);
 /* putlog(LOG_DEBUG, "*", "Decrypted cookie: %s", p); */
