@@ -1777,8 +1777,23 @@ static void cmd_conf(int idx, char *par)
       dprintf(idx, "Usage: conf del <bot>\n");
       return;
     }
+
     if (!conf_delbot(par)) {
-      dprintf(idx, "Deleted bot: %s\n", par);
+      struct userrec *u = NULL;
+
+      dprintf(idx, "Deleted bot from conf: %s\n", par);
+      if ((u = get_user_by_handle(par))) {
+#ifdef LEAF
+        check_this_user(par, 1, NULL);
+#endif /* LEAF */
+        if (deluser(par)) {
+          dprintf(idx, "Removed bot: %s.\n", par);
+#ifdef HUB
+          write_userfile(idx);
+#endif /* HUB */
+        }
+      }
+
       save++;
     } else
       dprintf(idx, "Error trying to remove bot '%s'\n", par);
@@ -3401,7 +3416,7 @@ static void cmd_mns_user(int idx, char *par)
   check_this_user(handle, 1, NULL);
 #endif /* LEAF */
   if (deluser(handle)) {
-    dprintf(idx, "Deleted %s.\n", handle);
+    dprintf(idx, "Removed %s: %s.\n", u2->bot ? "bot" : "user", handle);
 #ifdef HUB
     write_userfile(idx);
 #endif /* HUB */
