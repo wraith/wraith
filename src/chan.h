@@ -152,6 +152,7 @@ struct chanset_t {
   int flood_nick_thr;
   time_t flood_nick_time;
   int limitraise;
+  int checklimit;
   int closed_ban;
   int closed_private;
   int closed_invite;

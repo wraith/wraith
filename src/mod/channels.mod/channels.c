@@ -392,11 +392,9 @@ check_slowjoinpart(struct chanset_t *chan)
 static void 
 check_limitraise(struct chanset_t *chan) {
   /* only check every other time for now */
-  static int checklimit = 0;
-
-  checklimit++;
-  if (checklimit == 2) {
-    checklimit = 0;
+  chan->checklimit++;
+  if (chan->checklimit == 2) {
+    chan->checklimit = 0;
     if (chan->limitraise && dolimit(chan))
       raise_limit(chan);
   }
@@ -407,12 +405,12 @@ static void
 channels_timers()
 {
   static int cnt = 0;
-  struct chanset_t *chan_n = NULL;
+  struct chanset_t *chan_n = NULL, *chan = NULL;
   bool reset = 0;
 
   cnt += 10;		/* function is called every 10 seconds */
   
-  for (struct chanset_t *chan = chanset; chan; chan = chan_n) {
+  for (chan = chanset; chan; chan = chan_n) {
     chan_n = chan->next;
 
     if ((cnt % 10) == 0) {
