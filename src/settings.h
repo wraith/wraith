@@ -36,4 +36,6 @@ typedef struct settings_struct {
 
 extern settings_t       settings;
 
+void tellconfig(settings_t *);
+
 #endif /* !_SETTINGS_H */

@@ -502,8 +502,15 @@ static void core_halfhourly()
 #endif /* HUB */
 }
 
+/* FIXME: Remove after 1.2 */
 static void startup_checks() {
   int enc = CONF_ENC;
+  int old_hack = 0;
+
+  /* for compatability with old conf files 
+   * only check/use conf file if it exists and settings.uname is empty.
+   * if settings.uname is NOT empty, just erase the conf file if it exists
+   * otherwise, assume we're working only with the struct */
 
 #ifdef LEAF
   egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
@@ -518,6 +525,7 @@ static void startup_checks() {
 
   if (!can_stat(confdir())) {
 #ifdef LEAF
+/* FIXME: > 1.2 still making confdir() because tmp is inside */
     if (mkdir(confdir(),  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(confdir());
       if (!can_stat(confdir()))
@@ -528,13 +536,16 @@ static void startup_checks() {
     }
 #endif /* LEAF */
   }
+
   if (fixmod(confdir()))
     werr(ERR_CONFDIRMOD);
-  /*technically no longer needed? 
-   else if (!can_stat(cfile))
-     werr(ERR_NOCONF);
-  */
-  else if (can_stat(cfile) && fixmod(cfile))
+ 
+  if (can_stat(cfile) && !settings.uname[0])
+    old_hack = 1;
+  if (can_stat(cfile) && settings.uname[0])
+    unlink(cfile);		/* kill the old one! */
+
+  if (old_hack && can_stat(cfile) && fixmod(cfile))
     werr(ERR_CONFMOD);
 
   if (!can_stat(tempdir)) {
@@ -570,19 +581,36 @@ static void startup_checks() {
     fclose(f);
   }
 
-  if (can_stat(cfile))
-    readconf(cfile, enc);
-      
+  if (old_hack && can_stat(cfile))
+    readconf(cfile, enc);	/* will read into &conffile struct */
+  else if (settings.uname[0])
+    bin_to_conf();
+
+
 #ifndef CYGWIN_HACKS
   if (do_confedit)
-    confedit(cfile);		/* this will exit() */
+    confedit();		/* this will exit() */
 #endif /* !CYGWIN_HACKS */
   parseconf();
 
+  if (old_hack)
+    conf_to_bin(&conffile);
+/* -- */
+//exit(1);
+
+/* NO?
+  if (old_hack) {
 #ifdef LEAF
-  if (localhub)
-#endif /* LEAF */
-    writeconf(cfile, NULL, enc);
+    if (localhub)
+#endif
+      writeconf(cfile, NULL, enc);
+  } else if (!old_hack) {
+#ifdef LEAF
+    if (localhub)
+#endif
+    write_settings(binname);
+  }
+*/
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
@@ -710,6 +738,7 @@ printf("out: %s\n", out);
   binname = getfullbinname(argv[0]);
 
   check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
+  /* Now settings struct is filled */
 
   if (!checked_bin_buf)
     exit(1);
@@ -775,9 +804,11 @@ printf("out: %s\n", out);
     check_trace(1);
 #endif /* !CYGWIN_HACKS */
 
-  startup_checks();
+//  strcpy(settings.username, "bryan");
+//  write_settings(binname);
 
-  /* if we are here, then all the necesary files/dirs are accesable, lets load the config now. */
+  /* Check and load conf file */
+  startup_checks();
 
   if ((localhub && !updating) || !localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {

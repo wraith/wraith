@@ -7,6 +7,7 @@
 #include "common.h"
 #include "conf.h"
 #include "shell.h"
+#include "binary.h"
 #include "debug.h"
 #include "chanprog.h"
 #include "crypt.h"
@@ -97,7 +98,7 @@ swap_uids_back()
 }
 
 void
-confedit(char *fname)
+confedit()
 {
   FILE *f = NULL;
   char s[DIRMAX] = "", *editor = NULL;
@@ -201,10 +202,10 @@ confedit(char *fname)
   if (!can_stat(s))
     fatal("Error reading new config file", 0);
 
-  unlink(fname);
-  Encrypt_File(s, fname);
+  readconf(s, 0);	/* read cleartext conf tmp into &settings */
   unlink(s);
-  fatal("New config file saved, restart bot to use", 0);
+  conf_to_bin(&conffile);	/* will exit */
+  exit(0);	/* never reached */
 
 fatal:
   unlink(s);
@@ -767,4 +768,78 @@ fillconf(conf_t * inconf)
   inconf->portmax = conffile.portmax;
   inconf->pscloak = conffile.pscloak;
   inconf->uid = conffile.uid;
+}
+
+void tellconf(conf_t *inconf)
+{
+conf_bot *bot;
+int i = 0;
+
+printf("uid: %d\n", inconf->uid);
+printf("homedir: %s\n", inconf->homedir);
+printf("binpath: %s\n", inconf->binpath);
+printf("binname: %s\n", inconf->binname);
+printf("portmin: %d\n", inconf->portmin);
+printf("portmax: %d\n", inconf->portmax);
+printf("pscloak: %d\n", inconf->pscloak);
+printf("autocron: %d\n", inconf->autocron);
+printf("autouname: %d\n", inconf->autouname);
+printf("watcher: %d\n", inconf->watcher);
+    for (bot = inconf->bots; bot && bot->nick; bot = bot->next) {
+      i++;
+      printf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
+                      bot->nick,
+                      bot->ip ? bot->ip : "",
+                      bot->host ? bot->host : "",
+                      bot->ip6 ? bot->ip6 : "",
+                      bot->host6 ? bot->host6 : "",
+                      bot->pid);
+    }
+printf("\n\n\n\n");
+}
+
+void bin_to_conf(settings_t *in)
+{
+printf("Converting binary data to conf struct\n");
+  conffile.uid = atol(settings.uid);
+  conffile.username = strdup(settings.username);
+  conffile.uname = strdup(settings.uname);
+  conffile.homedir = strdup(settings.homedir);
+  conffile.binpath = strdup(settings.binpath);
+  conffile.binname = strdup(settings.binname);
+  conffile.portmin = atol(settings.portmin);
+  conffile.portmax = atol(settings.portmax);
+  conffile.autouname = atoi(settings.autouname);
+  conffile.autocron = atoi(settings.autocron);
+  conffile.watcher = atoi(settings.watcher);
+  conffile.pscloak = atoi(settings.pscloak);
+
+  /* BOTS */
+  {
+    char *p = NULL, *tmp = NULL, *tmpp = NULL;
+    tmp = tmpp = strdup(settings.bots);
+    while ((p = strchr(tmp, ','))) {
+      char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
+
+      *p++ = 0;
+      if (!tmp[0])
+        break;
+      nick = newsplit(&tmp);
+      if (!nick || (nick && !nick[0]))
+        werr(ERR_BADCONF);
+
+
+      if (tmp[0])
+        ip = newsplit(&tmp);
+      if (tmp[0])
+        host = newsplit(&tmp);
+      if (tmp[0])
+        ipsix = newsplit(&tmp);
+
+      conf_addbot(nick, ip, host, ipsix);
+      tmp = p++;
+    }
+    free(tmpp);
+  }
+  tellconf(&conffile);
 }

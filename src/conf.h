@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "types.h"
 #include "eggdrop.h"
-
+#include "settings.h"
 
 typedef struct conf_bot_b {
   struct conf_bot_b *next;
@@ -53,7 +53,7 @@ enum {
 void spawnbots();
 int killbot(char *);
 #endif /* LEAF */
-void confedit(char *) __attribute__((noreturn));
+void confedit() __attribute__((noreturn));
 #ifdef LEAF
 void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
@@ -65,6 +65,8 @@ int readconf(char *, int);
 int parseconf();
 int writeconf(char *, FILE *, int);
 void fillconf(conf_t *);
+void bin_to_conf();
+void tellconf(conf_t *);
 
 extern char		cfile[DIRMAX];
 #endif /* !_CONF_H */

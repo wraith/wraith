@@ -38,7 +38,7 @@ settings_t settings = {
 
 #define PACK_ENC 1
 #define PACK_DEC 2
-static void edpack(struct settings_struct *, const char *, int);
+static void edpack(settings_t *, const char *, int);
 
 int checked_bin_buf = 0;
 
@@ -119,8 +119,8 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
       if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {
         strncpyz(settings.hash, hash, 65);
         edpack(&settings, hash, PACK_ENC);
-        fwrite(&settings.hash, sizeof(struct settings_struct) - PREFIXLEN, 1, fn);
-        i = sizeof(struct settings_struct) - PREFIXLEN;
+        fwrite(&settings.hash, sizeof(settings_t) - PREFIXLEN, 1, fn);
+        i = sizeof(settings_t) - PREFIXLEN;
       }
     }
 
@@ -230,7 +230,7 @@ readcfg(const char *cfgfile)
   return 1;
 }
 
-static void edpack(struct settings_struct *incfg, const char *hash, int what)
+static void edpack(settings_t *incfg, const char *hash, int what)
 {
   char *tmp = NULL;
   char *(*enc_dec_string)();
@@ -273,8 +273,8 @@ static void edpack(struct settings_struct *incfg, const char *hash, int what)
 }
 
 
-static void
-tellconfig(struct settings_struct *incfg)
+void
+tellconfig(settings_t *incfg)
 {
 #define dofield(_field)		printf("%s: %s\n", #_field, _field);
   /* -- STATIC -- */
@@ -335,4 +335,45 @@ tellconfig(&settings);
       fatal("!! Invalid binary", 0);
     }
   }
+}
+
+void write_settings(const char *fname)
+{
+  MD5_CTX ctx;
+
+  MD5_Init(&ctx);
+  if (bin_md5(fname, WRITE_MD5, &ctx))
+    printf("* Wrote settings to %s.\n", fname);
+  exit(0);
+}
+
+void conf_to_bin(conf_t *in)
+{
+  conf_bot *bot = NULL;
+  printf("converting conf to bin\n");
+  sprintf(settings.uid, "%d", in->uid);
+  sprintf(settings.watcher, "%d", in->watcher);
+  sprintf(settings.autocron, "%d", in->autocron);
+  sprintf(settings.autouname, "%d", in->autouname);
+  sprintf(settings.portmin, "%d", in->portmin);
+  sprintf(settings.portmax, "%d", in->portmax);
+  sprintf(settings.pscloak, "%d", in->pscloak);
+
+  strncpyz(settings.binname, in->binname, 16);
+  strncpyz(settings.username, in->username, 16);
+
+  strncpyz(settings.uname, in->uname, 350);
+  strncpyz(settings.homedir, in->homedir, 350);
+  strncpyz(settings.binpath, in->binpath, 350);
+  for (bot = in->bots; bot && bot->nick; bot = bot->next) {
+    sprintf(settings.bots, "%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
+                           bot->nick,
+                           bot->ip ? bot->ip : ".", 
+                           bot->host6 ? "+" : "", 
+                           bot->host ? bot->host : (bot->host6 ? bot->host6 : "."),
+                           bot->ip6 ? bot->ip6 : "");
+    }
+
+  tellconfig(&settings);
+  write_settings(binname);
 }
