@@ -571,7 +571,7 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   dprintf(idx, STR(" * $uawptic$u by $blordoptic$b\n"));
   dprintf(idx, STR(" * $uoptikz$u by $bryguy$b and $blordoptic$b\n"));
   dprintf(idx, STR(" * $uceldrop$u by $bexcelsior$b\n"));
-  dprintf(idx, STR(" * $ugenocide$u by $Crazi$b, $bDor$b, $bpsychoid$b, and $bAce24$b\n"));
+  dprintf(idx, STR(" * $ugenocide$u by $bCrazi$b, $bDor$b, $bpsychoid$b, and $bAce24$b\n"));
   dprintf(idx, STR(" * $utfbot$u by $bwarknite$b and $bloslinux$b\n"));
 }
 
