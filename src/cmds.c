@@ -983,7 +983,6 @@ sdprintf("DUMP!");
 static void cmd_userlist(int idx, char *par)
 {
   int cnt = 0, tt = 0, tmp = 0;
-  struct userrec *u = NULL;
   char work[200] = "";
 
   putlog(LOG_CMDS, "*", "#%s# userlist", dcc[idx].nick);
