@@ -65,7 +65,7 @@ extern conf_t		conffile;
 
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
-const char	egg_version[1024] = "1.1.0";
+const char	egg_version[1024] = "1.1.1";
 
 #ifdef S_CONFEDIT
 int	do_confedit = 0;		/* show conf menu if -C */

@@ -1,5 +1,15 @@
 This is a summary of ChangeLog basically.
 
+1.1.1
+1.Fixed a problem with using /DCC CHAT <bot>
+2.Fixed a bug in cmd_botcmd with picking a random leaf.
+3.Fixed a bug in the conf parsing which didn't read 'homedir' correctly. (broke update in 1.1)
+4.Fixed cosmetic bugs when doing /DCC CHAT <bot> or /CTCP <bot> CHAT.
+5.Fixed a double log cosmetic bug with dcc cmds.
+6.If no config file, one is generated now.
+7.And if no bots are listed, the bot nows gives an error.
+
+
 1.1.0
 1.Rewrote the shell config parsing...
 2.Stripped that long version (1001400) stuff out, now just 1.1.0 and the build timestamp...
