@@ -522,7 +522,7 @@ void real_killsock(register int sock, const char *file, int line)
   register int	i;
 
   if (sock < 0) {
-    putlog(LOG_MISC, "*", "Attempt to kill socket -1 %s:%d", file, line);
+    putlog(LOG_ERRORS, "*", "Attempt to kill socket -1 %s:%d", file, line);
     return;
   }
 
