@@ -2403,6 +2403,7 @@ static int gotnick(char *from, char *msg)
   strcpy(uhost, from);
   nick = splitnick(&uhost);
   fixcolon(msg);
+  irc_log(NULL, "[%s] Nick change: %s -> %s", samechans(nick, ","), nick, msg);
   clear_chanlist_member(nick);	/* Cache for nick 'nick' is meaningless now. */
   for (chan = chanset; chan; chan = chan->next) {
     oldchan = chan;
@@ -2410,7 +2411,6 @@ static int gotnick(char *from, char *msg)
     m = ismember(chan, nick);
 
     if (m) {
-      irc_log(chan, "Nick change: %s -> %s", nick, msg);
       m->last = now;
       /* Not just a capitalization change */
       if (rfc_casecmp(nick, msg)) {
@@ -2538,6 +2538,11 @@ static int gotquit(char *from, char *msg)
     } else
       *p = ' ';
   }
+  if (msg[0])
+    irc_log(NULL, "[%s] Quits %s (%s) (%s)", samechans(nick, ","), nick, from, msg);
+  else
+    irc_log(NULL, "[%s] Quits %s (%s)", samechans(nick, ","), nick, from);
+
   for (chan = chanset; chan; chan = chan->next) {
     oldchan = chan;
     chname = chan->dname;
@@ -2561,10 +2566,6 @@ static int gotquit(char *from, char *msg)
 	  chan = oldchan;
 	  continue;
 	}
-        if (msg[0])
-          irc_log(chan, "Quits %s (%s) (%s)", nick, from, msg);
-        else
-          irc_log(chan, "Quits %s (%s)", nick, from);
 	killmember(chan, nick);
 	check_lonely_channel(chan);
       }

@@ -788,3 +788,20 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int lo
   }
   return ret;
 }
+
+char *
+samechans(const char *nick, const char *delim)
+{
+  static char ret[1024];
+  struct chanset_t *chan = NULL;
+
+  for (chan = chanset; chan; chan = chan->next) {
+    if (ismember(chan, nick)) {
+      strcat(ret, chan->dname);
+      strcat(ret, delim);
+    }
+  }
+  ret[strlen(ret) - 1] = 0;
+
+  return ret;
+}
