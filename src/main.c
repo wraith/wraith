@@ -36,6 +36,7 @@
 #include <sys/wait.h>
 #endif /* S_ANTITRACE */
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <dirent.h>
 #include <pwd.h>
 
@@ -1398,35 +1399,36 @@ int main(int argc, char **argv)
   int ok = 1;
 #endif
 
-#ifdef DEBUG_MEM
-  /* Make sure it can write core, if you make debug. Else it's pretty
-   * useless (dw)
-   */
+#ifndef DEBUG_MEM
   {
-#include <sys/resource.h>
-    struct rlimit cdlim, plim, fdlim, rsslim, stacklim;
-  
-//    rsslim.rlim_cur = 30720;
-//    rsslim.rlim_max = 30720;
-//    setrlimit(RLIMIT_RSS, &rsslim);
-//    stacklim.rlim_cur = 30720;
-//    stacklim.rlim_max = 30720;
-//    setrlimit(RLIMIT_STACK, &stacklim);   
+    struct rlimit cdlim, plim, fdlim, corelim;
+/*  struct rsslim, stacklim;
+    rsslim.rlim_cur = 30720;
+    rsslim.rlim_max = 30720;
+    setrlimit(RLIMIT_RSS, &rsslim);
+    stacklim.rlim_cur = 30720;
+    stacklim.rlim_max = 30720;
+    setrlimit(RLIMIT_STACK, &stacklim);   
+*/
+    /* do NOT dump a core. */
+    corelim.rlim_cur = 0;
+    corelim.rlim_max = 0;
+    setrlimit(RLIMIT_CORE, &corelim);
     plim.rlim_cur = 50;
     plim.rlim_max = 50;
     setrlimit(RLIMIT_NPROC, &plim);
     fdlim.rlim_cur = 200;
     fdlim.rlim_max = 200;
-//#ifdef __FreeBSD__
-//    setrlimit(RLIMIT_OFILE, &fdlim);
-//#else
     setrlimit(RLIMIT_NOFILE, &fdlim);
-//#endif
+  }
+#else /* DEBUG_MEM */
+  {
+    struct rlimit cdlim;
     cdlim.rlim_cur = RLIM_INFINITY;
     cdlim.rlim_max = RLIM_INFINITY;
     setrlimit(RLIMIT_CORE, &cdlim);
-  }
-#endif
+  }  
+#endif /* !DEBUG_MEM */
 
   /* Initialise context list */
   for (i = 0; i < 16; i++)
