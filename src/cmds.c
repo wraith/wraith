@@ -1482,7 +1482,10 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
   }
 
   putlog(LOG_CMDS, "*", STR("#%s# botcmd %s %s ..."), dcc[idx].nick, botm, cmd);		/* the rest of the cmd will be logged remotely */
-
+  if (!strcmp(botm, "*") && (!strcmp(botm, "di") || !strcmp(botm, "die"))) {
+    dprintf(idx, STR("Not a good idea.\n"));
+    return;
+  }
   for (tbot = tandbot; tbot; tbot = tbot->next) {
     if (wild_match(botm, tbot->bot)) {
       cnt++;
