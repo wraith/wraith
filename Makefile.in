@@ -23,7 +23,7 @@ EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src
            misc/plainh misc/grep misc/cp.sh
 
 # defaults
-CXX = @DISTCC@ @CXX@ -march=i486
+CXX = @DISTCC@ @CXX@
 LD = @DISTCC@ @CXX@
 CCDEBUG = @DISTCC@ @CCDEBUG@
 LDDEBUG = @DISTCC@ @CCDEBUG@
