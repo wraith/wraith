@@ -1762,7 +1762,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
       return;
     }
   }
-  if (do_chanset(result, all ? chan : NULL, par, DO_LOCAL) == ERROR) {
+  if (do_chanset(result, all ? NULL : chan, par, DO_LOCAL | DO_NET) == ERROR) {
     dprintf(idx, "Error trying to set { %s } on %s: %s\n", par, all ? "all channels" : chan->dname, result);
     return;
   }

@@ -392,20 +392,20 @@ static void ctcp_minutely()
 
 #ifdef S_AUTOAWAY
   if ((cloak_awaytime == 0) && (cloak_heretime == 0)) {
-    cloak_heretime = time(NULL);
+    cloak_heretime = now;
     dprintf(DP_HELP, STR("AWAY :\n"));
     return;
   }
   if (cloak_awaytime == 0) {
     if (!randint(AVGHERETIME)) {
       cloak_heretime = 0;
-      cloak_awaytime = time(NULL) - 600 - randint(60);
+      cloak_awaytime = now - 600 - randint(60);
       sendaway();
     }
   } else {
     if (!randint(AVGAWAYTIME)) {
       cloak_awaytime = 0;
-      cloak_heretime = time(NULL);
+      cloak_heretime = now;
       dprintf(DP_HELP, STR("AWAY :\n"));
     } else
       sendaway();

@@ -185,7 +185,7 @@ int seed_PRNG(void)
     return 1;
   if (!RAND_load_file(rand_file, 1024)) {
     unsigned int c;
-    c = time(NULL);
+    c = now;
     RAND_seed(&c, sizeof(c));
     c = getpid();
     RAND_seed(&c, sizeof(c));

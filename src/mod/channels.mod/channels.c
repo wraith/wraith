@@ -138,7 +138,7 @@ static void got_cset(char *botnick, char *code, char *par)
     chname = chan->dname;
     do_chanset(NULL, chan, par, DO_LOCAL);
     if (chan->status & CHAN_BITCH) {
-      module_entry *me;
+      module_entry *me = NULL;
       if ((me = module_find("irc", 0, 0)))
         (me->funcs[IRC_RECHECK_CHANNEL])(chan, 0);
     }

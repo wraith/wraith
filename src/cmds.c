@@ -14,6 +14,7 @@
 #include "net.h"
 #include "userrec.h"
 #include "users.h"
+#include "egg_timer.h"
 #include "userent.h"
 #include "tclhash.h"
 #include "match.h"
@@ -48,6 +49,7 @@ extern char		 origbotname[], ver[], network[],
 			 owner[], quit_msg[], dcc_prefix[], 
                          botname[], *binname, version[], egg_version[];
 extern time_t		 now, online_since, buildts;
+extern egg_timeval_t egg_timeval_now;
 extern module_entry	*module_list;
 extern struct cfg_entry	CFG_MOTD, **cfg;
 extern tand_t		*tandbot;
@@ -1851,6 +1853,22 @@ static void cmd_debug(struct userrec *u, int idx, char *par)
   tell_netdebug(idx);
 }
 
+static void cmd_timers(struct userrec *u, int idx, char *par)
+{
+  int *ids = 0, n = 0;
+  
+  if ((n = timer_list(&ids))) {
+    int i = 0;
+    char *name = NULL;
+
+    for (i = *ids; i <= n; i++) {
+      timer_info(i, &name, NULL, NULL);
+      dprintf(idx, "%d: %s\n", i, name);
+    }
+    free(ids);
+  }
+}
+
 static void cmd_simul(struct userrec *u, int idx, char *par)
 {
   char *nick = NULL;
@@ -2969,7 +2987,7 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
         host = newsplit(&par);
       }
       /* set_user(&USERENTRY_PASS, u1, SALT2); */
-      sprintf(tmp, STR("%lu %s"), time(NULL), u->handle);
+      sprintf(tmp, STR("%lu %s"), now, u->handle);
       set_user(&USERENTRY_ADDED, u1, tmp);
       dprintf(idx, STR("Added new leaf: %s\n"), handle);
 #ifdef HUB
@@ -3132,7 +3150,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
 
     userlist = adduser(userlist, handle, host, "-", USER_DEFAULT);
     u2 = get_user_by_handle(userlist, handle);
-    sprintf(tmp, STR("%lu %s"), time(NULL), u->handle);
+    sprintf(tmp, STR("%lu %s"), now, u->handle);
     set_user(&USERENTRY_ADDED, u2, tmp);
     dprintf(idx, STR("Added %s (%s) with no flags.\n"), handle, host);
     while (par[0]) {
@@ -3537,13 +3555,12 @@ void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, cha
 #ifdef HUB
 /* netlag */
 static void cmd_netlag(struct userrec * u, int idx, char * par) {
-  struct timeval tv;
   time_t tm;
   char tmp[64] = "";
 
   putlog(LOG_CMDS, "*", STR("#%s# netlag"), dcc[idx].nick);
-  gettimeofday(&tv, NULL);
-  tm = (tv.tv_sec % 10000) * 100 + (tv.tv_usec * 100) / (1000000);
+  
+  tm = (egg_timeval_now.sec % 10000) * 100 + (egg_timeval_now.usec * 100) / (1000000);
   sprintf(tmp, STR("ping %lu"), tm);
   dprintf(idx, STR("Sent ping to all linked bots\n"));
   botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
@@ -3561,11 +3578,9 @@ void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
   int i = atoi(fromidx);
 
   if ((i >= 0) && (i < dcc_total) && (dcc[i].type == &DCC_CHAT) && (!strcmp(dcc[i].nick, fromhand))) {
-    struct timeval tv;
     time_t tm;
 
-    gettimeofday(&tv, NULL);
-    tm = ((tv.tv_sec % 10000) * 100 + (tv.tv_usec * 100) / (1000000)) - atoi(par);
+    tm = ((egg_timeval_now.sec % 10000) * 100 + (egg_timeval_now.usec * 100) / (1000000)) - atoi(par);
     dprintf(i, STR("Pong from %s: %i.%i seconds\n"), frombot, (tm / 100), (tm % 100));
   }
 }
@@ -4047,6 +4062,7 @@ cmd_t C_dcc[] =
   {"dccstat",		"a",	(Function) cmd_dccstat,		NULL},
 #endif /* HUB */
   {"debug",		"a",	(Function) cmd_debug,		NULL},
+  {"timers",		"a",	(Function) cmd_timers,		NULL},
   {"die",		"n",	(Function) cmd_die,		NULL},
   {"echo",		"",	(Function) cmd_echo,		NULL},
   {"fixcodes",		"",	(Function) cmd_fixcodes,	NULL},

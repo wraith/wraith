@@ -496,7 +496,7 @@ static void request_op(struct chanset_t *chan)
     return;
   }
   /* max OPREQ_COUNT requests per OPREQ_SECONDS sec */
-  n = time(NULL);
+  n = now;
   while (i < 5) {
     if (n - chan->opreqtime[i] > OPREQ_SECONDS) {
       if (first > i)
@@ -941,7 +941,7 @@ static void reset_chan_info(struct chanset_t *chan)
 
   /* Don't reset the channel if we're already resetting it */
   if (!shouldjoin(chan)) {
-    dprintf(DP_MODE,"PART %s\n", chan->name);
+    dprintf(DP_MODE, "PART %s\n", chan->name);
     return;
   }
   if (!channel_pending(chan)) {

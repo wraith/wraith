@@ -67,7 +67,7 @@ static void schedule_bind_cleanup()
 
 	when.sec = 0;
 	when.usec = 0;
-	timer_create(&when, internal_bind_cleanup);
+	timer_create(&when, "internal_bind_cleanup", internal_bind_cleanup);
 }
 
 

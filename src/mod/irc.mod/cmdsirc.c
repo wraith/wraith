@@ -1494,7 +1494,7 @@ static void cmd_adduser(struct userrec *u, int idx, char *par)
   if (!u) {
     userlist = adduser(userlist, hand, p1, "-", USER_DEFAULT);
     u = get_user_by_handle(userlist, hand);
-    sprintf(tmp, STR("%lu %s"), time(NULL), dcc[idx].nick);
+    sprintf(tmp, STR("%lu %s"), now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u, tmp);
     make_rand_str(s2, 15);
     set_user(&USERENTRY_PASS, u, s2);

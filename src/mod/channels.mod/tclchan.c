@@ -624,34 +624,24 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       }
     }
   }
-  /* If protect_readonly == 0 and loading == 0 then
-   * bot is now processing the configfile, so dont do anything,
-   * we've to wait the channelfile that maybe override these settings
-   * (note: it may cause problems if there is no chanfile!)
-   * <drummer/1999/10/21>
-   */
 #ifdef LEAF
-  if (loading) {
-    if (((old_status ^ chan->status) & CHAN_INACTIVE) &&
-	module_find("irc", 0, 0)) {
-      if (!shouldjoin(chan) &&
-	  (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
-	dprintf(DP_SERVER, "PART %s\n", chan->name);
-      if (shouldjoin(chan) &&
-	  !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+  if (1 || loading) {
+    if (((old_status ^ chan->status) & CHAN_INACTIVE) && module_find("irc", 0, 0)) {
+      if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+        dprintf(DP_SERVER, "PART %s\n", chan->name);
+      if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
 	dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
 					   chan->name : chan->dname,
 					   chan->channel.key[0] ?
 					   chan->channel.key : chan->key_prot);
     }
-    if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS |
-	CHAN_BITCH)) {
+    if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
       if ((me = module_find("irc", 0, 0)))
         (me->funcs[IRC_RECHECK_CHANNEL])(chan, 1);
-    } else if (old_mode_pls_prot != chan->mode_pls_prot ||
-	       old_mode_mns_prot != chan->mode_mns_prot)
-    if ((me = module_find("irc", 0, 0)))
-      (me->funcs[IRC_RECHECK_CHANNEL_MODES])(chan);
+    } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
+      if ((me = module_find("irc", 0, 0)))
+        (me->funcs[IRC_RECHECK_CHANNEL_MODES])(chan);
+    }
   }
 #endif /* LEAF */
   if (x > 0)

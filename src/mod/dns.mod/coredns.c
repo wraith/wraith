@@ -595,7 +595,7 @@ static void sendrequest(struct resolve *rp, int type)
 {
     /* Create unique id */
     do {
-	idseed = (((idseed + idseed) | (long) time(NULL))
+	idseed = (((idseed + idseed) | (long) now)
 		  + idseed - 0x54bad4a) ^ aseed;
 	aseed ^= idseed;
 	rp->id = (u_16bit_t) idseed;
