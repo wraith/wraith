@@ -352,10 +352,18 @@ void write_settings(const char *fname, int die)
     exit(0);
 }
 
+static void 
+clear_settings(void)
+{
+  memset(&settings.bots, 0, sizeof(settings_t) - 3467);
+}
+
 void conf_to_bin(conf_t *in)
 {
   conf_bot *bot = NULL;
-  printf("converting conf to bin\n");
+  
+  clear_settings();
+  sdprintf("converting conf to bin\n");
   sprintf(settings.uid, "%d", in->uid);
   sprintf(settings.watcher, "%d", in->watcher);
   sprintf(settings.autocron, "%d", in->autocron);

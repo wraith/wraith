@@ -27,6 +27,31 @@ char cfile[DIRMAX] = "";
 conf_t conf;                    /* global conf struct */
 conf_t conffile;                /* just some config options only avail during loading */
 
+static void
+tellconf(conf_t * inconf)
+{
+  conf_bot *bot;
+  int i = 0;
+
+  sdprintf("uid: %d\n", inconf->uid);
+  sdprintf("homedir: %s\n", inconf->homedir);
+  sdprintf("binpath: %s\n", inconf->binpath);
+  sdprintf("binname: %s\n", inconf->binname);
+  sdprintf("portmin: %d\n", inconf->portmin);
+  sdprintf("portmax: %d\n", inconf->portmax);
+  sdprintf("pscloak: %d\n", inconf->pscloak);
+  sdprintf("autocron: %d\n", inconf->autocron);
+  sdprintf("autouname: %d\n", inconf->autouname);
+  sdprintf("watcher: %d\n", inconf->watcher);
+  for (bot = inconf->bots; bot && bot->nick; bot = bot->next) {
+    i++;
+    sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
+             bot->nick,
+             bot->ip ? bot->ip : "",
+             bot->host ? bot->host : "", bot->ip6 ? bot->ip6 : "", bot->host6 ? bot->host6 : "", bot->pid);
+  }
+}
+
 #ifdef LEAF
 void
 spawnbots()
@@ -186,7 +211,7 @@ confedit()
 #  else
               WCOREDUMP(waiter)
 #  endif
-       /* CYGWIN_HACKS */
+              /* CYGWIN_HACKS */
               ? "" : "no ");
       goto fatal;
     } else {
@@ -201,11 +226,10 @@ confedit()
 
   if (!can_stat(s))
     fatal("Error reading new config file", 0);
-
-  readconf(s, 0);	/* read cleartext conf tmp into &settings */
+  readconf(s, 0);               /* read cleartext conf tmp into &settings */
   unlink(s);
-  conf_to_bin(&conffile);	/* will exit */
-  exit(0);	/* never reached */
+  conf_to_bin(&conffile);       /* will exit */
+  exit(0);                      /* never reached */
 
 fatal:
   unlink(s);
@@ -308,8 +332,8 @@ checkpid(char *nick, conf_bot * bot)
 
 #ifdef HUB
 static
-#endif /* HUB */
-void
+#endif                          /* HUB */
+  void
 conf_addbot(char *nick, char *ip, char *host, char *ip6)
 {
   conf_bot *bot = NULL;
@@ -351,7 +375,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   bot->pid = checkpid(nick, bot);
 }
 
-void 
+void
 free_bot(char *botn)
 {
   conf_bot *bot = NULL, *old = NULL;
@@ -385,9 +409,9 @@ int
 conf_delbot(char *botn)
 {
   conf_bot *bot = NULL;
-  
+
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
-    if (!strcmp(bot->nick, botn)) { /* found it! */
+    if (!strcmp(bot->nick, botn)) {     /* found it! */
       bot->pid = checkpid(bot->nick, bot);
       killbot(bot->nick);
       free_bot(bot->nick);
@@ -398,8 +422,8 @@ conf_delbot(char *botn)
 }
 #endif /* LEAF */
 
-void
-free_conf()
+static void
+free_conf_bots(void)
 {
   conf_bot *bot = NULL, *bot_n = NULL;
 
@@ -407,6 +431,11 @@ free_conf()
     bot_n = bot->next;
     free_bot(bot->nick);
   }
+}
+
+void free_conf(void)
+{
+  free_conf_bots();
   free(conffile.uname);
   free(conffile.username);
   free(conffile.homedir);
@@ -476,6 +505,7 @@ readconf(char *fname, int bits)
   if (!(f = fopen(fname, "r")))
     fatal("Cannot read config", 0);
 
+  free_conf_bots();
   inbuf = calloc(1, 201);
   while (fgets(inbuf, 201, f) != NULL) {
     char *line = NULL, *temp_ptr = NULL;
@@ -525,7 +555,7 @@ readconf(char *fname, int bits)
         if (!strcmp(option, "autocron")) {      /* automatically check/create crontab? */
           if (egg_isdigit(line[0]))
             conffile.autocron = atoi(line);
-       
+
         } else if (!strcmp(option, "autouname")) {      /* auto update uname contents? */
           if (egg_isdigit(line[0]))
             conffile.autouname = atoi(line);
@@ -665,7 +695,8 @@ writeconf(char *filename, FILE * stream, int bits)
   } else
     my_write(f, "! binpath %s\n", conffile.binpath);
 
-  comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
+  comment
+    ("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
   my_write(f, "! binname %s\n", conffile.binname);
 
   comment("");
@@ -703,7 +734,8 @@ writeconf(char *filename, FILE * stream, int bits)
 #endif /* CYGWIN_HACKS */
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
     my_write(f, "%s %s %s%s %s\n", bot->nick,
-             bot->ip ? bot->ip : ".", bot->host6 ? "+" : "", bot->host ? bot->host : (bot->host6 ? bot->host6 : "."), bot->ip6 ? bot->ip6 : "");
+             bot->ip ? bot->ip : ".", bot->host6 ? "+" : "",
+             bot->host ? bot->host : (bot->host6 ? bot->host6 : "."), bot->ip6 ? bot->ip6 : "");
   }
 
   fflush(f);
@@ -770,38 +802,8 @@ fillconf(conf_t * inconf)
   inconf->uid = conffile.uid;
 }
 
-/*
-static void 
-tellconf(conf_t *inconf)
-{
-conf_bot *bot;
-int i = 0;
-
-printf("uid: %d\n", inconf->uid);
-printf("homedir: %s\n", inconf->homedir);
-printf("binpath: %s\n", inconf->binpath);
-printf("binname: %s\n", inconf->binname);
-printf("portmin: %d\n", inconf->portmin);
-printf("portmax: %d\n", inconf->portmax);
-printf("pscloak: %d\n", inconf->pscloak);
-printf("autocron: %d\n", inconf->autocron);
-printf("autouname: %d\n", inconf->autouname);
-printf("watcher: %d\n", inconf->watcher);
-    for (bot = inconf->bots; bot && bot->nick; bot = bot->next) {
-      i++;
-      printf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
-                      bot->nick,
-                      bot->ip ? bot->ip : "",
-                      bot->host ? bot->host : "",
-                      bot->ip6 ? bot->ip6 : "",
-                      bot->host6 ? bot->host6 : "",
-                      bot->pid);
-    }
-printf("\n\n\n\n");
-}
-*/
-
-void bin_to_conf(settings_t *in)
+void
+bin_to_conf(settings_t * in)
 {
 /* printf("Converting binary data to conf struct\n"); */
   conffile.uid = atol(settings.uid);
@@ -820,6 +822,7 @@ void bin_to_conf(settings_t *in)
   /* BOTS */
   {
     char *p = NULL, *tmp = NULL, *tmpp = NULL;
+
     tmp = tmpp = strdup(settings.bots);
     while ((p = strchr(tmp, ','))) {
       char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
@@ -844,5 +847,5 @@ void bin_to_conf(settings_t *in)
     }
     free(tmpp);
   }
-  /* tellconf(&conffile); */
+  tellconf(&conffile);
 }
