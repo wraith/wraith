@@ -173,7 +173,7 @@ extern unsigned long			notalloc;
 #endif /* USE_IPV6 */
 
 extern char				firewall[], botuser[], natip[];
-extern int				resolve_timeout, MAXSOCKS;
+extern int				resolve_timeout, MAXSOCKS, socks_total;
 extern bool				identd_hack;
 extern port_t				firewallport;
 extern jmp_buf				alarmret;

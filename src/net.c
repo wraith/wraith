@@ -52,6 +52,7 @@ char	firewall[121] = "";	/* Socks server for firewall		    */
 port_t	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
 char	botuser[21] = ""; 	/* Username of the user running the bot    */
 int     resolve_timeout = 10;   /* hostname/address lookup timeout */
+int	socks_total = 0;	/* total number of sockets */
 sock_list *socklist = NULL;	/* Enough to be safe			    */
 int	MAXSOCKS = 0;
 jmp_buf	alarmret;		/* Env buffer for alarm() returns	    */
@@ -361,6 +362,7 @@ int allocsock(int sock, int options)
       egg_bzero(&socklist[i].ikey, sizeof(socklist[i].ikey));
       socklist[i].okey[0] = 0;
       socklist[i].ikey[0] = 0;
+      socks_total++;
       return i;
     }
   }
@@ -459,6 +461,7 @@ void real_killsock(register int sock, const char *file, int line)
         free(socklist[i].host);
       egg_bzero(&socklist[i], sizeof(socklist[i]));
       socklist[i].flags = SOCK_UNUSED;
+      socks_total--;
       return;
     }
   }
