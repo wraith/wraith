@@ -649,7 +649,7 @@ request_op(struct chanset_t *chan)
       ml->tried_getuser = 1;
     }
     if ((i < MAX_BOTS) && ml->user && ml->user->bot && 
-        (nextbot(ml->user->handle) >= 0) && chan_hasop(ml) && !chan_issplit(ml)) {
+        findbot(ml->user->handle) && chan_hasop(ml) && !chan_issplit(ml)) {
 
       get_user_flagrec(ml->user, &fr, NULL);
       if (chk_op(fr, chan))
