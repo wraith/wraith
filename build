@@ -178,7 +178,6 @@ do
   mv -f $bin $bin.$os.$numver${d}
 done
 
-set -x
 # Wrap it nicely up into an archive
 if [ $nopkg = "0" ]; then
   echo "[*] Packaging..."
