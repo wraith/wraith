@@ -21,6 +21,7 @@
 #include "tandem.h"
 #include "src/mod/channels.mod/channels.h"
 #ifdef LEAF
+#include "src/chanprog.h"
 #include "src/mod/server.mod/server.h"
 #endif /* LEAF */
 #ifdef S_DCCPASS
@@ -415,54 +416,118 @@ struct cfg_entry CFG_PROCESSLIST = {
 };
 #endif /* S_PROCESSCHECK */
 
+#ifdef LEAF
+void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+  char *slist = NULL, *p = NULL;
 
-/* this is cfg shit from servers/irc/ctcp because hub doesnt load
- * these mods */
+  if (!strcmp(entry->name, "servers")) {
+    if (conf.bot->host6 || conf.bot->ip6) /* we want to use the servers6 entry. */
+      return;
+  } else if (!strcmp(entry->name, "servers6")) {
+    if (!conf.bot->host6 && !conf.bot->ip6) /* we probably want to use the normal server list.. */
+      return;
+  }
+  slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
+  if (serverlist) {
+    clearq(serverlist);
+    serverlist = NULL;
+  }
+#ifdef S_RANDSERVERS
+  shuffle(slist, ",");
+#endif /* S_RANDSERVERS */
+  p = strdup(slist);
+  add_server(p);
+  free(p);
+}
+#endif /* LEAF */
 
 #ifdef HUB
 void servers_describe(struct cfg_entry * entry, int idx) {
-#ifdef HUB
-  dprintf(idx, STR("servers is a comma-separated list of servers the bot will use\n"));
-#endif /* HUB */
+  if (!strcmp(entry->name, "servers")) 
+    dprintf(idx, STR("servers is a comma-separated list of servers the bot will use\n"));
+  else
+    dprintf(idx, STR("servers6 is a comma-separated list of servers the bot will use (FOR IPv6)\n"));
 }
-
-void servers6_describe(struct cfg_entry * entry, int idx) {
-#ifdef HUB
-  dprintf(idx, STR("servers6 is a comma-separated list of servers the bot will use (FOR IPv6)\n"));
 #endif /* HUB */
-}
-
-void nick_describe(struct cfg_entry * entry, int idx) {
-#ifdef HUB
-  dprintf(idx, STR("nick is the bots preferred nick when connecting/using .resetnick\n"));
-#endif /* HUB */
-}
-
-void realname_describe(struct cfg_entry * entry, int idx) {
-#ifdef HUB
-  dprintf(idx, STR("realname is the bots \"real name\" when connecting\n"));
-#endif /* HUB */
-}
 
 struct cfg_entry CFG_SERVERS = {
 	"servers", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+#ifdef LEAF
+	servers_changed, servers_changed, NULL
+#else
 	NULL, NULL, servers_describe
+#endif /* LEAF */
 };
+
 struct cfg_entry CFG_SERVERS6 = {
 	"servers6", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-	NULL, NULL, servers6_describe
+#ifdef LEAF
+	servers_changed, servers_changed, NULL
+#else
+	NULL, NULL, servers_describe
+#endif /* LEAF */
 };
+
+#ifdef LEAF
+void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+  char *p = NULL;
+
+  if (entry->ldata)
+    p = entry->ldata;
+  else if (entry->gdata)
+    p = entry->gdata;
+  else
+    p = NULL;
+  if (p && p[0])
+    strncpyz(origbotname, p, NICKLEN + 1);
+  else
+    strncpyz(origbotname, conf.bot->nick, NICKLEN + 1);
+  if (server_online)
+    dprintf(DP_SERVER, "NICK %s\n", origbotname);
+}
+#endif /* LEAF */
+
+#ifdef HUB
+void nick_describe(struct cfg_entry * entry, int idx) {
+  dprintf(idx, STR("nick is the bots preferred nick when connecting/using .resetnick\n"));
+}
+#endif /* HUB */
 
 struct cfg_entry CFG_NICK = {
 	"nick", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+#ifdef LEAF
+	nick_changed, nick_changed, NULL
+#else
 	NULL, NULL, nick_describe
+#endif /* LEAF */
 };
+
+#ifdef HUB
+void realname_describe(struct cfg_entry * entry, int idx) {
+  dprintf(idx, STR("realname is the bots \"real name\" when connecting\n"));
+}
+#endif /* HUB */
+
+#ifdef LEAF
+void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+  if (entry->ldata) {
+    strncpyz(botrealname, (char *) entry->ldata, 121);
+  } else if (entry->gdata) {
+    strncpyz(botrealname, (char *) entry->gdata, 121);
+  }
+}
+#endif /* LEAF */
 
 struct cfg_entry CFG_REALNAME = {
 	"realname", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+#ifdef LEAF
+	realname_changed, realname_changed, NULL
+#else
 	NULL, NULL, realname_describe
+#endif /* LEAF */
 };
 
+#ifdef HUB
 void getin_describe(struct cfg_entry *cfgent, int idx)
 {
 #ifdef HUB
@@ -744,14 +809,11 @@ void init_config()
   add_cfg(&CFG_MSGIDENT);
 #endif /* S_MSGCMDS */
   add_cfg(&CFG_CMDPREFIX);
-#ifdef HUB
   add_cfg(&CFG_NICK);
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
-  cfg_noshare = 1;
-  set_cfg_str(NULL, "realname", "A deranged product of evil coders");
-  cfg_noshare = 0;
+#ifdef HUB
   add_cfg(&CFG_OPBOTS);
   add_cfg(&CFG_INBOTS);
   add_cfg(&CFG_LAGTHRESHOLD);

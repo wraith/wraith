@@ -55,6 +55,7 @@ extern port_t		default_port;
 extern time_t		server_online;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[];
+extern struct server_list *serverlist;
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 
@@ -66,5 +67,7 @@ void server_report(int, int);
 void server_init();
 void queue_server(int, char *, int);
 void server_die();
+void add_server(char *);
+void clearq(struct server_list *);
 
 #endif /*leaf*/

@@ -681,7 +681,7 @@ int open_telnet_raw(int sock, char *server, port_t sport)
       error = 1;
     }
   }
-
+/* FIXME: (error) is unitialized */
   /* I guess we broke something */
   if (error) {
     killsock(sock);

@@ -775,11 +775,14 @@ int main(int argc, char **argv)
   ctcp_init();
   chanprog();
 #ifdef HUB
-  if (!CFG_CHANSET.gdata) {
-    cfg_noshare++;
+  cfg_noshare = 1;
+  if (!CFG_CHANSET.gdata)
     set_cfg_str(NULL, "chanset", glob_chanset);
-    cfg_noshare--;
-  }
+  if (!CFG_SERVPORT.gdata)
+    set_cfg_str(NULL, "servport", "6667");
+  if (!CFG_REALNAME.gdata)
+    set_cfg_str(NULL, "realname", "A deranged product of evil coders.");
+  cfg_noshare = 0;
 #endif /* HUB */
 
   strcpy(botuser, origbotname);

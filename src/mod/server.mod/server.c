@@ -59,7 +59,7 @@ char botrealname[121] = "";	/* realname of bot */
 static int server_timeout;	/* server timeout for connecting */
 static int never_give_up;	/* never give up when connecting to servers? */
 static int strict_servernames;	/* don't update server list */
-static struct server_list *serverlist = NULL;	/* old-style queue, still used by
+struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 int cycle_time;			/* cycle time till next server connect */
 port_t default_port;		/* default IRC port */
@@ -922,7 +922,7 @@ void queue_server(int which, char *buf, int len)
 
 /* Add a new server to the server_list.
  */
-static void add_server(char *ss)
+void add_server(char *ss)
 {
   struct server_list *x = NULL, *z = NULL;
 #ifdef USE_IPV6
@@ -986,7 +986,7 @@ static void add_server(char *ss)
 
 /* Clear out the given server_list.
  */
-static void clearq(struct server_list *xx)
+void clearq(struct server_list *xx)
 {
   struct server_list *x = NULL;
 
@@ -1002,109 +1002,6 @@ static void clearq(struct server_list *xx)
     xx = x;
   }
 }
-
-void servers_describe(struct cfg_entry * entry, int idx) {
-}
-void servers6_describe(struct cfg_entry * entry, int idx) {
-}
-
-void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-#ifdef LEAF
-  char *slist = NULL, *p = NULL;
-
-  if (conf.bot->host6 || conf.bot->ip6) /* we want to use the servers6 entry. */
-    return;
-
-  slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
-  if (serverlist) {
-    clearq(serverlist);
-    serverlist = NULL;
-  }
-#ifdef S_RANDSERVERS
-  shuffle(slist, ",");
-#endif /* S_RANDSERVERS */
-  p = strdup(slist);
-  add_server(p);
-  free(p);
-#endif /* LEAF */
-}
-
-void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-#ifdef LEAF
-  char *slist = NULL, *p = NULL;
-
-  if (!conf.bot->host6 && !conf.bot->ip6) /* we probably want to use the normal server list.. */
-    return;
-
-  slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
-  if (serverlist) {
-    clearq(serverlist);
-    serverlist = NULL;
-  }
-#ifdef S_RANDSERVERS
-  shuffle(slist, ",");
-#endif /* S_RANDSERVERS */
-  p = strdup(slist);
-  add_server(p);
-  free(p);
-#endif /* LEAF */
-}
-
-void nick_describe(struct cfg_entry * entry, int idx) {
-}
-
-void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-#ifdef LEAF
-  char *p = NULL;
-
-  if (entry->ldata)
-    p = entry->ldata;
-  else if (entry->gdata)
-    p = entry->gdata;
-  else
-    p = NULL;
-  if (p && p[0])
-    strncpyz(origbotname, p, NICKLEN + 1);
-  else
-    strncpyz(origbotname, conf.bot->nick, NICKLEN + 1);
-  if (server_online)
-    dprintf(DP_SERVER, "NICK %s\n", origbotname);
-#endif /* LEAF */
-}
-
-void realname_describe(struct cfg_entry * entry, int idx) {
-}
-
-void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-#ifdef LEAF
-  if (entry->ldata) {
-    strncpyz(botrealname, (char *) entry->ldata, 121);
-  } else if (entry->gdata) {
-    strncpyz(botrealname, (char *) entry->gdata, 121);
-  }
-#endif /* LEAF */
-}
-
-struct cfg_entry CFG_SERVERS = {
-  "servers", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  servers_changed, servers_changed, servers_describe
-};
-
-struct cfg_entry CFG_SERVERS6 = {
-  "servers6", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  servers6_changed, servers6_changed, servers6_describe
-};
-
-struct cfg_entry CFG_NICK = {
-  "nick", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  nick_changed, nick_changed, nick_describe
-};
-
-struct cfg_entry CFG_REALNAME = {
-  "realname", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-  realname_changed, realname_changed, realname_describe
-};
-
 
 /* Set botserver to the next available server.
  *
@@ -1533,14 +1430,5 @@ void server_init()
   curserv = 999;
   checked_hostmask = 0;
   do_nettype();
-  add_cfg(&CFG_NICK);
-  add_cfg(&CFG_SERVERS);
-  add_cfg(&CFG_SERVERS6);
-  add_cfg(&CFG_REALNAME);
-    cfg_noshare = 1;
-  if (!CFG_REALNAME.gdata)
-    set_cfg_str(NULL, "realname", "A deranged product of evil coders.");
-  set_cfg_str(NULL, "servport", "6667");
-  cfg_noshare = 0;
 }
 #endif /* LEAF */

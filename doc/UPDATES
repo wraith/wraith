@@ -18,6 +18,7 @@ This is a summary of ChangeLog basically.
 14.Now only perm owners may change cfg settings: authkey, cmdprefix, hijack, bad-cookie, manop
 15.Hubs weren't saving userflie on remote -chan.
 16.Bot specific channels (cmd_botjoin/cmd_botpart)
+17.Added CFG: servport.
 
 1.1.7
 
