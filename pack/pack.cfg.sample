@@ -39,7 +39,7 @@ OWNER <Bob S0m3P4ass *!bob@1.2.3.4 *!*@1.2.3.4>
  */
 OWNEREMAIL <some@email.com>
 
-/* HUB <nick host port host> 
+/* HUB <nick host port ident> 
  * Hubs are ranked by the order they are listed (previously was hublevel in settings.c)
  * nick: nick of hub
  * host: hostname or ip of hub (A 'dynamic' OR 'changeable' HOSTNAME IS RECOMMENDED)
