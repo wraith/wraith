@@ -514,7 +514,7 @@ Context;
     ml = ml->next;
   }
   if (!i) {
-    putlog(LOG_GETIN, "@", STR("Noone to ask for ops on %s"), chan->dname);
+    putlog(LOG_GETIN, "@", STR("No one to ask for ops on %s"), chan->dname);
     return;
   }
   /* first scan for bots on my server, ask first found for ops */
