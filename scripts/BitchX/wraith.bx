@@ -8,13 +8,11 @@
 # $pass is the DEFPASS setting from your pack.cfg
 
 #change this to your homedir.
-assign wpath /home/admin/bryan
+assign wpath /home/wheel/bryan
 
 #put the 'md5' binary in $HOME/.BitchX/md5 
 
 
-#        if ($2 == "") {
-#        }
 
 alias setauth {
         if ([$2] == "") {
