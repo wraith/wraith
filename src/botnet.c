@@ -1112,9 +1112,15 @@ static void failed_tandem_relay(int idx)
   dcc[idx].port++;
   dcc[idx].timeval = now;
   if (dcc[idx].sock < 0 ||
+#ifdef USE_IPV6
+      open_telnet_raw(dcc[idx].sock, dcc[idx].host,
+#else
+  if (dcc[idx].sock < 0 ||
       open_telnet_raw(dcc[idx].sock, dcc[idx].addr ?
 				     iptostr(htonl(dcc[idx].addr)) :
-				     dcc[idx].host, dcc[idx].port) < 0)
+				     dcc[idx].host, 
+#endif /* USE_IPV6 */
+      dcc[idx].port) < 0)
     failed_tandem_relay(idx);
 }
 
@@ -1190,7 +1196,12 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[i].u.dns->dns_failure = tandem_relay_resolve_failure;
   dcc[i].u.dns->dns_type = RES_IPBYHOST;
   dcc[i].u.dns->type = &DCC_FORK_RELAY;
+#ifdef USE_IPV6
+  tandem_relay_resolve_success(i);
+#else
   dcc_dnsipbyhost(bi->address);
+#endif /* USE_IPV6 */
+
 }
 
 static void tandem_relay_resolve_failure(int idx)
@@ -1239,7 +1250,11 @@ static void tandem_relay_resolve_success(int i)
   dcc[i].u.relay->chat->line_count = 0;
   dcc[i].u.relay->chat->current_lines = 0;
   dcc[i].timeval = now;
+#ifdef USE_IPV6
+  if (open_telnet_raw(dcc[i].sock, dcc[i].host,
+#else
   if (open_telnet_raw(dcc[i].sock, iptostr(htonl(dcc[i].addr)),
+#endif /* USE_IPV6 */
 		      dcc[i].port) < 0)
     failed_tandem_relay(i);
 }
