@@ -265,7 +265,7 @@ void putlog(int type, char *chname, char *format, ...)
   /* FIXME: WRITE LOG HERE */
 
   /* broadcast to hubs */
-  if (chname[0] == '*') {
+  if (chname[0] == '*' && conf.bot && conf.bot->nick) {
     char outbuf[LOGLINEMAX] = "";
 
     egg_snprintf(outbuf, sizeof outbuf, "hl %d %s", type, out);

@@ -1775,6 +1775,8 @@ static void finish_share(int idx)
   else
     for (i = 0; i < dcc_total; i++)
       dcc[i].user = get_user_by_handle(u, dcc[i].nick);
+  
+  conf.bot->u = NULL;
 
   /* Read the transferred userfile. Add entries to u, which already holds
    * the bot entries in non-override mode.
@@ -1785,7 +1787,7 @@ Context;
   if (!readuserfile(dcc[idx].u.xfer->filename, &u)) {
     char xx[1024];
 Context;
-    unlink(dcc[idx].u.xfer->filename); //why the fuck was this not here, stupid eggdev team.
+    unlink(dcc[idx].u.xfer->filename); /* why the fuck was this not here, stupid eggdev team. */
     loading = 0;
     putlog(LOG_MISC, "*", "%s", USERF_CANTREAD);
     clear_userlist(u);		/* Clear new, obsolete, user list.	*/
@@ -1793,6 +1795,9 @@ Context;
 				   channel lists.			*/
     for (i = 0; i < dcc_total; i++)
       dcc[i].user = get_user_by_handle(ou, dcc[i].nick);
+    
+    conf.bot->u = get_user_by_handle(ou, conf.bot->nick);
+
     userlist = ou;		/* Revert to old user list.		*/
     lastuser = NULL;		/* Reset last accessed user ptr.	*/
     checkchans(2); 		/* un-flag the channels, we are keeping them.. */

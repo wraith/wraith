@@ -175,6 +175,9 @@ void clear_userlist(struct userrec *bu)
 
     for (i = 0; i < dcc_total; i++)
       dcc[i].user = NULL;
+
+    conf.bot->u = NULL;
+
     clear_chanlist();
     lastuser = NULL;
 
