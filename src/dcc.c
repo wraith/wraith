@@ -495,7 +495,7 @@ static void dcc_bot(int idx, char *code, int i)
   if (debug_output) {
 /*    if (code[0] != 'z' && code[1] != 'b' && code[2] != ' ') { */
       if (code[0] == 's')
-        putlog(LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code + 2);
+        putlog(LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code);
       else
         putlog(LOG_BOTNET, "@", "<-[%s] %s", dcc[idx].nick, code);
 /*     } */

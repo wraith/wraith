@@ -103,9 +103,10 @@ check_delay()
   for (d = start_delay; d; d = dnext) {
     dnext = d->next;
     if (d->seconds <= now) {
-#ifdef LEAF
+#  ifdef LEAF
       add_mode(d->chan, d->plsmns, d->mode, d->mask);
-#endif /* LEAF */
+#  endif
+       /* LEAF */
       del_delay(d);
     }
   }
@@ -497,37 +498,40 @@ share_change(int idx, char *par)
   if (dcc[idx].status & STAT_SHARE) {
     key = newsplit(&par);
     hand = newsplit(&par);
-    if (!(uet = find_entry_type(key)))
-      /* If it's not a supported type, forget it */
-      debug2("Ignore ch %s from %s (unknown type)", key, dcc[idx].nick);
-    else {
-      if (!(dcc[idx].status & STAT_GETTING))
-        shareout_but(NULL, idx, "c %s %s %s\n", key, hand, par);
-      noshare = 1;
-      if (!u && (uet == &USERENTRY_BOTADDR)) {
-        char pass[30] = "";
+    if ((u = get_user_by_handle(userlist, hand))) {
+      if (!(uet = find_entry_type(key)))
+        /* If it's not a supported type, forget it */
+        putlog(LOG_ERROR, "*", "Ignore ch %s from %s (unknown type)", key, dcc[idx].nick);
+      else {
+        if (!(dcc[idx].status & STAT_GETTING))
+          shareout_but(NULL, idx, "c %s %s %s\n", key, hand, par);
+        noshare = 1;
+        if (!u && (uet == &USERENTRY_BOTADDR)) {
+          char pass[30] = "";
 
-        makepass(pass);
-        userlist = adduser(userlist, hand, "none", pass, USER_BOT);
-        u = get_user_by_handle(userlist, hand);
-      } else if (!u)
-        return;
-      if (uet->got_share) {
-        if (!(e = find_user_entry(uet, u))) {
-          e = calloc(1, sizeof(struct user_entry));
+          makepass(pass);
+          userlist = adduser(userlist, hand, "none", pass, USER_BOT);
+          u = get_user_by_handle(userlist, hand);
+        } else if (!u)
+          return;
 
-          e->type = uet;
-          e->name = NULL;
-          e->u.list = NULL;
-          list_insert((&(u->entries)), e);
+        if (uet->got_share) {
+          if (!(e = find_user_entry(uet, u))) {
+            e = calloc(1, sizeof(struct user_entry));
+
+            e->type = uet;
+            e->name = NULL;
+            e->u.list = NULL;
+            list_insert((&(u->entries)), e);
+          }
+          uet->got_share(u, e, par, idx);
+          if (!e->u.list) {
+            list_delete((struct list_type **) &(u->entries), (struct list_type *) e);
+            free(e);
+          }
         }
-        uet->got_share(u, e, par, idx);
-        if (!e->u.list) {
-          list_delete((struct list_type **) &(u->entries), (struct list_type *) e);
-          free(e);
-        }
+        noshare = 0;
       }
-      noshare = 0;
     }
   }
 }
@@ -958,7 +962,7 @@ share_ufyes(int idx, char *par)
     dcc[idx].status |= STAT_SHARE;
     dcc[idx].status |= STAT_SENDING;
 
-    dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
+    dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT);
     dprintf(idx, "s feats overbots invites exempts\n");
 
     lower_bot_linked(idx);
@@ -989,7 +993,7 @@ share_userfileq(int idx, char *par)
     if (!ok)
       dprintf(idx, "s un Already sharing.\n");
     else {
-      dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
+      dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT);
       dprintf(idx, "s uy overbots invites exempts\n");
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
@@ -1060,7 +1064,7 @@ share_version(int idx, char *par)
 {
   /* Cleanup any share flags */
   dcc[idx].status &= ~(STAT_SHARE | STAT_GETTING | STAT_SENDING | STAT_OFFERED | STAT_AGGRESSIVE);
-  dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
+  dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT);
   if (bot_aggressive_to(dcc[idx].user)) {
     dprintf(idx, "s u?\n");
     dcc[idx].status |= STAT_OFFERED;
@@ -1367,7 +1371,7 @@ finish_share(int idx)
   loading = 1;
   checkchans(0);                /* flag all the channels.. */
   Context;
-  if (!readuserfile(dcc[idx].u.xfer->filename, &u)) {		/* read the userfile into 'u' */
+  if (!readuserfile(dcc[idx].u.xfer->filename, &u)) {   /* read the userfile into 'u' */
     /* FAILURE */
     char xx[1024] = "";
 
@@ -1402,7 +1406,7 @@ finish_share(int idx)
 
   /* SUCCESS! */
 
-  unlink(dcc[idx].u.xfer->filename);    
+  unlink(dcc[idx].u.xfer->filename);
 
   loading = 0;
 
@@ -1417,7 +1421,7 @@ finish_share(int idx)
    *   - unshared (got_share == 0) user entries
    */
   clear_userlist(ou);
-  
+
   unlink(dcc[idx].u.xfer->filename);    /* Done with you!               */
 
   checkchans(1);                /* remove marked channels */
