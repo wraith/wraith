@@ -11,6 +11,71 @@
 
 #include <stdarg.h>
 
+static void ghost_link_case(int idx, direction_t direction)
+{
+  int snum = findanysnum(dcc[idx].sock);
+
+  if (snum >= 0) {
+    char initkey[33] = "", *tmp2 = NULL;
+    char tmp[256] = "";
+    char *keyp = NULL, *nick1 = NULL, *nick2 = NULL;
+    size_t key_len = 0;
+    port_t port = 0;
+
+    if (direction == TO) {
+      keyp = socklist[snum].ikey;
+      key_len = sizeof(socklist[snum].ikey);
+      nick1 = strdup(dcc[idx].nick);
+      nick2 = strdup(conf.bot->nick);
+      port = htons(dcc[idx].port);
+    } else if (direction == FROM) {
+      keyp = socklist[snum].okey;
+      key_len = sizeof(socklist[snum].okey);
+      nick1 = strdup(conf.bot->nick);
+      nick2 = strdup(dcc[idx].nick);
+
+      struct sockaddr_in sa;
+      socklen_t socklen = sizeof(sa);
+
+      egg_bzero(&sa, socklen);
+      getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &socklen);
+      port = sa.sin_port;
+    }
+
+    /* initkey-gen */
+    /* bdhash port mynick conf.bot->nick */
+    sprintf(tmp, "%s@%4x@%s@%s", settings.bdhash, port, strtoupper(nick1), strtoupper(nick2));
+    free(nick1);
+    free(nick2);
+    strlcpy(keyp, SHA1(tmp), key_len);
+    putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
+    putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(keyp), keyp);
+
+    if (direction == FROM) {
+      make_rand_str(initkey, 32);       /* set the initial out/in link key to random chars. */
+      socklist[snum].oseed = random();
+      socklist[snum].iseed = socklist[snum].oseed;
+      tmp2 = encrypt_string(settings.salt2, initkey);
+      putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
+
+      socklist[snum].encstatus = 1;
+      socklist[snum].gz = 1;
+
+      link_send(idx, "elink %s %d\n", tmp2, socklist[snum].oseed);
+      free(tmp2);
+      strcpy(socklist[snum].okey, initkey);
+      strcpy(socklist[snum].ikey, initkey);
+    } else {
+      socklist[snum].encstatus = 1;
+      socklist[snum].gz = 1;
+    }
+  } else {
+    putlog(LOG_MISC, "*", "Couldn't find socket for %s connection?? Shouldn't happen :/", dcc[idx].nick);
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
+  }
+}
+
 static void ghost_link_nat(int idx, direction_t direction)
 {
   int snum = findanysnum(dcc[idx].sock);
@@ -264,6 +329,7 @@ void link_parse(int idx, char *buf)
 }
 
 struct enc_link enclink[] = {
+  { "ghost+case", LINK_GHOSTCASE, ghost_link_case, ghost_write, ghost_read, ghost_parse },
   { "ghost+nat", LINK_GHOSTNAT, ghost_link_nat, ghost_write, ghost_read, ghost_parse },
   { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL, NULL },
   { NULL, 0, NULL, NULL, NULL, NULL }

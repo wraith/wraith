@@ -13,7 +13,8 @@ enum {
 	LINK_GHOSTNAT,
         LINK_GHOSTSHA1,
         LINK_GHOSTMD5,
-        LINK_CLEARTEXT
+        LINK_CLEARTEXT,
+	LINK_GHOSTCASE
 };
 enum direction_t {
         FROM,

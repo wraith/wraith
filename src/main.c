@@ -578,7 +578,8 @@ static void startup_checks(int hack) {
 #endif /* !CYGWIN_HACKS */
 
   fill_conf_bot();
-  if (((!conf.bot || !conf.bot->nick) || (!conf.bot->hub && conf.bot->localhub)) && !used_B) {
+//  if (((!conf.bot || !conf.bot->nick) || (!conf.bot->hub && conf.bot->localhub)) && !used_B) {
+  if (!used_B) {
     if (do_killbot[0]) {
       const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
 
@@ -598,7 +599,9 @@ static void startup_checks(int hack) {
           kill(conf.bot->pid, SIGKILL);
           unlink(conf.bot->pid_file);
           writepid(conf.bot->pid_file, mypid);
-        }
+        } else if (!conf.bot)
+          updating = UPDATE_EXIT;		//if we don't have a botlist, dont bother with restarting bots...
+
         updatebin(DP_STDOUT, update_bin, 1);	/* will call restart all bots */
         /* never reached */
         exit(0);
