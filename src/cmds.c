@@ -602,31 +602,33 @@ static void cmd_about(struct userrec *u, int idx, char *par)
 {
   char c[80];
   putlog(LOG_CMDS, "*", STR("#%s# about"), dcc[idx].nick);
-  dprintf(idx, STR("Wraith by bryan\n"));
+  dprintf(idx, STR("Wraith botpack by bryan\n"));
   egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
   dprintf(idx, STR("Version: %s (%d) \n"), egg_version, egg_numver);
   dprintf(idx, STR("Build: %s (%lu)\n"), c, buildts);
+  dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n"));
   dprintf(idx, STR("..with credits and thanks to the following:\n"));
-  dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n\n"));
-  dprintf(idx, STR("Eggdrop team for developing such a great bot to code off of.\n"));
-  dprintf(idx, STR("Einride and ievil for taking eggdrop1.4.3 and making their very effecient botpack Ghost.\n"));
-  dprintf(idx, STR("SFC for providing compile shells, continuous input, feature suggestions, and testing.\n"));
-  dprintf(idx, STR("xmage for beta testing.\n"));
-  dprintf(idx, STR("ryguy for beta testing, providing code, finding bugs, and providing input.\n"));
-  dprintf(idx, STR("passwd for beta testing, and his dedication to finding bugs.\n"));
-  dprintf(idx, STR("pgpkeys for suggestions.\n"));
-  dprintf(idx, STR("qFox for providing an mIRC $md5() alias, not requiring a dll or >6.03\n"));
-  dprintf(idx, STR("Sith_Lord helping test ipv6 on the bot (admin@elitepackets.com)\n"));
-  dprintf(idx, STR("Excelsior for finding a bug on BSD with the ipv6.\n"));
-  dprintf(idx, STR("syt for giving me inspiration to code a more secure bot.\n\n\n"));
-  dprintf(idx, STR("Mystikal for finding various bugs.\n"));
-  dprintf(idx, STR("Blackjac for helping with the bx auth script with his Sentinel script.\n"));
+  dprintf(idx, STR(" \n"));
+  dprintf(idx, STR(" * Eggdrop team for developing such a great bot to code off of.\n"));
+  dprintf(idx, STR(" * $bEinride$b and $bievil$b for taking eggdrop1.4.3 and making their very effecient botpack Ghost.\n"));
+  dprintf(idx, STR(" * $bryguy$b for beta testing, providing code, finding bugs, and providing input.\n"));
+  dprintf(idx, STR(" * $bSFC$b for providing compile shells, continuous input, feature suggestions, and testing.\n"));
+  dprintf(idx, STR(" * $bxmage$b for beta testing.\n"));
+  dprintf(idx, STR(" * $bpasswd$b for beta testing, and his dedication to finding bugs.\n"));
+  dprintf(idx, STR(" * $bpgpkeys$b for finding bugs, and providing input.\n"));
+  dprintf(idx, STR(" * $bqFox$b for providing an mIRC $md5() alias, not requiring a dll or >6.03\n"));
+  dprintf(idx, STR(" * $bSith_Lord$b helping test ipv6 on the bot (admin@elitepackets.com)\n"));
+  dprintf(idx, STR(" * $bExcelsior$b for finding a bug on BSD with the ipv6, and for celdrop which inspired many features.\n"));
+  dprintf(idx, STR(" * $bsyt$b for giving me inspiration to code a more secure bot.\n"));
+  dprintf(idx, STR(" * $Blackjac$b for helping with the bx auth script with his Sentinel script.\n"));
+  dprintf(idx, STR(" * $bMystikal$b for various bugs\n"));
+  dprintf(idx, STR(" \n"));
   dprintf(idx, STR("The following botpacks gave me inspiration and ideas (no code):\n"));
-  dprintf(idx, STR("awptic by lordoptic\n"));
-  dprintf(idx, STR("optikz by ryguy and lordoptic\n"));
-  dprintf(idx, STR("celdrop by excelsior\n"));
-  dprintf(idx, STR("genocide by various\n"));
-  dprintf(idx, STR("tfbot by warknight and loslinux\n"));
+  dprintf(idx, STR(" * $uawptic$u by $blordoptic$b\n"));
+  dprintf(idx, STR(" * $uoptikz$u by $bryguy$b and $blordoptic$b\n"));
+  dprintf(idx, STR(" * $uceldrop$u by $bexcelsior$b\n"));
+  dprintf(idx, STR(" * $ugenocide$u by $Crazi$b, $bDor$b, $bpsychoid$b, and $bAce24$b\n"));
+  dprintf(idx, STR(" * $utfbot$u by $bwarknite$b and $bloslinux$b\n"));
 }
 
 static void cmd_away(struct userrec *u, int idx, char *par)

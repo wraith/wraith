@@ -1,23 +1,23 @@
 Wraith botpack by bryan, with credits and thanks to the following:
 (written from a base of Eggdrop 1.6.12)
 
-Eggdrop team for developing such a great bot to code off of.
-Einride and ievil for taking eggdrop1.4.3 and making their very effecient botpack Ghost.
-ryguy for beta testing, providing code, finding bugs, and providing input.
-SFC for providing compile shells, continuous input, feature suggestions, and testing.
-xmage for beta testing.
-passwd for beta testing, and his dedication to finding bugs.
-pgpkeys for finding bugs, and providing input.
-qFox for providing an mIRC $md5() alias, not requiring a dll or >6.03
-Sith_Lord helping test ipv6 on the bot (admin@elitepackets.com)
-Excelsior for finding a bug on BSD with the ipv6, and for celdrop which inspired many features.
-syt for giving me inspiration to code a more secure bot.
-Blackjac for helping with the bx auth script with his Sentinel script.
-Mystikal for various bugs
+* Eggdrop team for developing such a great bot to code off of.
+* Einride and ievil for taking eggdrop1.4.3 and making their very effecient botpack Ghost.
+* ryguy for beta testing, providing code, finding bugs, and providing input.
+* SFC for providing compile shells, continuous input, feature suggestions, and testing.
+* xmage for beta testing.
+* passwd for beta testing, and his dedication to finding bugs.
+* pgpkeys for finding bugs, and providing input.
+* qFox for providing an mIRC $md5() alias, not requiring a dll or >6.03
+* Sith_Lord helping test ipv6 on the bot (admin@elitepackets.com)
+* Excelsior for finding a bug on BSD with the ipv6, and for celdrop which inspired many features.
+* syt for giving me inspiration to code a more secure bot.
+* Blackjac for helping with the bx auth script with his Sentinel script.
+* Mystikal for various bugs
 
 The following botpacks gave me inspiration and ideas (no code):
-awptic by lordoptic
-optikz by ryguy and lordoptic
-celdrop by excelsior
-genocide by various
-tfbot by warknite
+* awptic by lordoptic
+* optikz by ryguy and lordoptic
+* celdrop by excelsior
+* genocide by Crazi, Dor, psychoid, and Ace24
+* tfbot by warknite and loslinux
