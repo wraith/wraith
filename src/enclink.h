@@ -40,7 +40,7 @@ extern void link_link(int, int, int, direction_t);
 extern char *link_write(int, char *, size_t *);
 extern int link_read(int, char *, size_t *);
 extern void link_hash(int, char *);
-extern void link_send(int, char *, ...) __attribute__((format(printf, 2, 3)));
+extern void link_send(int, const char *, ...) __attribute__((format(printf, 2, 3)));
 extern void link_done(int);
 extern void link_parse(int, char *);
 

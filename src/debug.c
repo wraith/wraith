@@ -85,14 +85,14 @@ void init_debug()
 #endif /* DEBUG_CONTEXT */
 }
 
-void sdprintf (char *format, ...)
+void sdprintf (const char *format, ...)
 {
   if (sdebug) {
     char s[2001] = "";
     va_list va;
 
     va_start(va, format);
-    egg_vsnprintf(s, 2000, format, va);
+    egg_vsnprintf(s, sizeof(s), format, va);
     va_end(va);
     
     remove_crlf(s);

@@ -1065,10 +1065,10 @@ static int whoispenalty(char *from, char *msg)
   return 0;
 }
 
-static void irc_whois(char *, char *, ...) __attribute__((format(printf, 2, 3)));
+static void irc_whois(char *, const char *, ...) __attribute__((format(printf, 2, 3)));
 
 static void
-irc_whois(char *nick, char *format, ...)
+irc_whois(char *nick, const char *format, ...)
 {
   char va_out[2001] = "";
   va_list va;

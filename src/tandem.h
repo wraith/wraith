@@ -48,7 +48,7 @@ void botnet_send_chat(int, char *, char *);
 void botnet_send_act(int, char *, char *, int, char *);
 void botnet_send_ping(int);
 void botnet_send_pong(int);
-void botnet_send_priv (int, char *, char *, char *, char *, ...) __attribute__((format(printf, 5, 6)));
+void botnet_send_priv (int, char *, char *, char *, const char *, ...) __attribute__((format(printf, 5, 6)));
 void botnet_send_who(int, char *, char *, int);
 void botnet_send_unlinked(int, char *, char *);
 void botnet_send_traced(int, char *, char *);

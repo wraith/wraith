@@ -3,13 +3,13 @@
 
 
 #include <sys/types.h>
+#include <stdarg.h>
 
-#define VSPRINTF_SIZE		2047
+#define VSPRINTF_MAXSIZE		4096
 
-size_t simple_sprintf (char *, const char *, ...);
-size_t simple_snprintf (char *, size_t, const char *, ...);
-//char *int_to_base10(int);
-//char *unsigned_int_to_base10(unsigned int);
-//char *int_to_base64(unsigned int);
+size_t simple_vsnprintf(char *, size_t, const char *, va_list);
+size_t simple_vsprintf(char *, const char *, va_list);
+size_t simple_sprintf (char *, const char *, ...) __attribute__((format(printf, 2, 3)));
+size_t simple_snprintf (char *, size_t, const char *, ...) __attribute__((format(printf, 3, 4)));
 
 #endif /* _SPRINTF_H */

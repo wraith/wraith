@@ -240,7 +240,7 @@ void ghost_parse(int idx, int snum, char *buf)
   }
 }
 
-void link_send(int idx, char *format, ...)
+void link_send(int idx, const char *format, ...)
 {
   char s[2001] = "";
   va_list va;

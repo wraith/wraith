@@ -7,39 +7,6 @@
 #include "sprintf.h"
 #include <stdarg.h>
 
-
-/* Thank you ircu :) */
-static char tobase64array[64] =
-{
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-  'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-  '[', ']'
-};
-
-static char *int_to_base64(unsigned int val)
-{
-  static char buf_base64[12] = "";
-
-  buf_base64[11] = 0;
-  if (!val) {
-    buf_base64[10] = 'A';
-    return buf_base64 + 10;
-  }
-
-  int i = 11;
-
-  while (val) {
-    i--;
-    buf_base64[i] = tobase64array[val & 0x3f];
-    val = val >> 6;
-  }
-
-  return buf_base64 + i;
-}
-
 static char *int_to_base10(int val)
 {
   static char buf_base10[17] = "";
@@ -89,14 +56,14 @@ static char *unsigned_int_to_base10(unsigned int val)
   return buf_base10 + i;
 }
 
-static size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
+size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
 {
   char *s = NULL;
   char *fp = (char *) format;
   size_t c = 0;
   unsigned int i;
 
-  while (*fp && c < size) {
+  while (*fp && c < size - 1) {
     if (*fp == '%') {
       fp++;
       switch (*fp) {
@@ -107,10 +74,6 @@ static size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_li
       case 'i':
         i = va_arg(va, int);
         s = int_to_base10(i);
-        break;
-      case 'D':
-        i = va_arg(va, int);
-        s = int_to_base64((unsigned int) i);
         break;
       case 'u':
         i = va_arg(va, unsigned int);
@@ -127,7 +90,7 @@ static size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_li
         continue;
       }
       if (s)
-        while (*s && c < size)
+        while (*s && c < size - 1)
           buf[c++] = *s++;
       fp++;
     } else
@@ -138,9 +101,9 @@ static size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_li
   return c;
 }
 
-static size_t simple_vsprintf(char *buf, const char *format, va_list va)
+size_t simple_vsprintf(char *buf, const char *format, va_list va)
 {
-  return simple_vsnprintf(buf, VSPRINTF_SIZE, format, va);
+  return simple_vsnprintf(buf, VSPRINTF_MAXSIZE, format, va);
 }
 
 size_t simple_sprintf (char *buf, const char *format, ...)

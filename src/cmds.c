@@ -2111,7 +2111,7 @@ static void cmd_trace(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# trace %s", dcc[idx].nick, par);
   simple_sprintf(x, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
-  simple_sprintf(y, ":%d", now);
+  sprintf(y, ":%li", now);
   botnet_send_trace(i, x, par, y);
 }
 

@@ -34,7 +34,7 @@ extern bool		sdebug;
 
 void stackdump(int);
 void setlimits();
-void sdprintf (char *, ...) __attribute__((format(printf, 1, 2)));
+void sdprintf (const char *, ...) __attribute__((format(printf, 1, 2)));
 void init_signals();
 void init_debug();
 void eggContext(const char *, int);
