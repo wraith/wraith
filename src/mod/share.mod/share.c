@@ -31,6 +31,7 @@
 
 static struct flag_record fr = { 0, 0, 0, 0 };
 
+#ifdef LEAF
 struct delay_mode {
   struct delay_mode *next;
   struct chanset_t *chan;
@@ -41,6 +42,7 @@ struct delay_mode {
 };
 
 static struct delay_mode *start_delay = NULL;
+#endif /* LEAF */
 
 /* Prototypes */
 #ifdef HUB
@@ -628,11 +630,13 @@ share_mns_banchan(int idx, char *par)
     putlog(LOG_CMDS, "@", "%s: cancel ban %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
-    if (u_delmask('b', chan, par, 1) > 0)
 #ifdef LEAF
-      add_delay(chan, '-', 'b', par)
+    if (u_delmask('b', chan, par, 1) > 0)
+      add_delay(chan, '-', 'b', par);
 #endif /* LEAF */
-                  ;
+#ifdef HUB
+    u_delmask('b', chan, par, 1);
+#endif /* HUB */
     noshare = 0;
   }
 }
@@ -652,11 +656,14 @@ share_mns_exemptchan(int idx, char *par)
     putlog(LOG_CMDS, "@", "%s: cancel exempt %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
-    if (u_delmask('e', chan, par, 1) > 0)
 #ifdef LEAF
-      add_delay(chan, '-', 'e', par)
+    if (u_delmask('e', chan, par, 1) > 0)
+      add_delay(chan, '-', 'e', par);
 #endif /* LEAF */
-                     ;
+#ifdef HUB
+    u_delmask('e', chan, par, 1);
+#endif /* HUB */
+
     noshare = 0;
   }
 }
@@ -676,11 +683,14 @@ share_mns_invitechan(int idx, char *par)
     putlog(LOG_CMDS, "@", "%s: cancel invite %s on %s", dcc[idx].nick, par, chname);
     str_unescape(par, '\\');
     noshare = 1;
-    if (u_delmask('I', chan, par, 1) > 0)
 #ifdef LEAF
-      add_delay(chan, '-', 'I', par)
+    if (u_delmask('I', chan, par, 1) > 0)
+      add_delay(chan, '-', 'I', par);
 #endif /* LEAF */
-                     ;
+#ifdef HUB
+    u_delmask('I', chan, par, 1);
+#endif /* HUB */
+
     noshare = 0;
   }
 }
@@ -1238,7 +1248,7 @@ check_expired_tbufs()
 }
 
 static int
-write_tmp_userfile(char *fn, struct userrec *bu, int idx)
+write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
 {
   FILE *f = NULL;
   struct userrec *u = NULL;
@@ -1265,7 +1275,7 @@ write_tmp_userfile(char *fn, struct userrec *bu, int idx)
     if (!write_invites(f, idx))
       ok = 0;
 
-    for (u = bu; u && ok; u = u->next) {
+    for (u = (struct userrec *) bu; u && ok; u = u->next) {
       if (!write_user(u, f, idx)) {
         ok = 0;
       }
@@ -1273,79 +1283,8 @@ write_tmp_userfile(char *fn, struct userrec *bu, int idx)
     fclose(f);
   }
   if (!ok)
-    putlog(LOG_MISC, "@", USERF_ERRWRITE2);
+    putlog(LOG_MISC, "*", USERF_ERRWRITE2);
   return ok;
-}
-
-
-/* Create a copy of the entire userlist (for sending user lists to clone
- * bots) -- userlist is reversed in the process, which is OK because the
- * receiving bot reverses the list AGAIN when saving.
- *
- * t = 0:   copy everything BUT tandem-bots
- * t = 1:   copy only tandem-bots
- * t = 2;   copy all entries
- */
-static struct userrec *
-dup_userlist(int t)
-{
-  struct userrec *u = NULL, *u1 = NULL, *retu = NULL, *nu = NULL;
-  struct chanuserrec *ch = NULL;
-  struct user_entry *ue = NULL;
-  char *p = NULL;
-
-  nu = retu = NULL;
-  noshare = 1;
-  for (u = userlist; u; u = u->next)
-    /* Only copying non-bot entries? */
-    if (((t == 0) && !(u->flags & (USER_BOT))) ||
-        /* ... or only copying bot entries? */
-        ((t == 1) && (u->flags & (USER_BOT))) ||
-        /* ... or copying everything? */
-        (t == 2)) {
-      p = get_user(&USERENTRY_PASS, u);
-      u1 = adduser(NULL, u->handle, 0, p, u->flags);
-      if (!nu)
-        nu = retu = u1;
-      else {
-        nu->next = u1;
-        nu = nu->next;
-      }
-      for (ch = u->chanrec; ch; ch = ch->next) {
-        struct chanuserrec *z = add_chanrec(nu, ch->channel);
-
-        if (z) {
-          z->flags = ch->flags;
-          z->laston = ch->laston;
-          set_handle_chaninfo(nu, nu->handle, ch->channel, ch->info);
-        }
-      }
-      for (ue = u->entries; ue; ue = ue->next) {
-        if (ue->name) {
-          struct list_type *lt;
-          struct user_entry *nue;
-
-          nue = calloc(1, sizeof(struct user_entry));
-          nue->type = NULL;
-          nue->u.list = NULL;
-          nue->name = strdup(ue->name);
-          list_insert((&nu->entries), nue);
-          for (lt = ue->u.list; lt; lt = lt->next) {
-            struct list_type *list;
-
-            list = calloc(1, sizeof(struct list_type));
-            list->next = NULL;
-            list->extra = strdup(lt->extra);
-            list_append((&nue->u.list), list);
-          }
-        } else {
-          if (ue->type->dup_user && (t || ue->type->got_share))
-            ue->type->dup_user(nu, u, ue);
-        }
-      }
-    }
-  noshare = 0;
-  return retu;
 }
 #endif /* HUB */
 
@@ -1530,16 +1469,12 @@ finish_share(int idx)
 static void
 start_sending_users(int idx)
 {
-  struct userrec *u = NULL;
   char share_file[1024] = "";
   int i = 1;
 
   egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%li", tempdir, dcc[idx].nick, now);
 
-  u = dup_userlist(2);        /* All entries          */
-
-  write_tmp_userfile(share_file, u, idx);
-  clear_userlist(u);
+  write_tmp_userfile(share_file, userlist, idx);
 
 /* compress.mod
   if (!compress_file(share_file, compress_level)) {
