@@ -216,15 +216,13 @@ void check_tempdir()
     werr(ERR_TMPMOD);
 
   /* test tempdir: it's vital */
-  {
-    Tempfile *testdir = new Tempfile("test");
-    int result;
+  Tempfile *testdir = new Tempfile("test");
+  int result;
 
-    fprintf(testdir->f, "\n");
-    result = fflush(testdir->f);
-    delete testdir;
-    if (result)
-      fatal(strerror(errno), 0);
-  }
+  fprintf(testdir->f, "\n");
+  result = fflush(testdir->f);
+  delete testdir;
+  if (result)
+    fatal(strerror(errno), 0);
 }
 

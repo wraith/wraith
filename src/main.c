@@ -640,9 +640,9 @@ printf("out: %s\n", out);
   }
 
   /* setup initial tempdir as ./ until we read in tmpdir from conf */
-  egg_snprintf(tempdir, sizeof(tempdir), "./");
 
   binname = getfullbinname(argv[0]);
+  egg_snprintf(tempdir, sizeof(tempdir), "%s/", dirname(binname));
   chdir(dirname(binname));
 
   check_tempdir();	/* make sure directory exists and we can access it */
