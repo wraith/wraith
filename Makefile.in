@@ -113,6 +113,11 @@ distclean: clean clean-modconfig
 distrib: distclean
 	@rm -f `find . \( -name '*~' -o -name '*#' -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' \) -print`
 	@rm -rf `find . \( -name 'CVS' \) -print`
+	@mfiles="`find src -name '*.h' -or -name '*.c'`"; \
+	for s in $$mfiles; \
+	do \
+	 mangle -rnw $$s > /dev/null 2>&1;\
+	done
 
 depend:
 #	@cat /dev/null > lush.h
@@ -128,7 +133,6 @@ packconf: utils
 	@(if test "x`diff -urN src/settings.tmp src/settings.c`" != "x"; then \
 	cp -f src/settings.tmp src/settings.c; \
 	fi)
-#	@cp -fu pack/settings.c src/settings.c
 
 salt:	utils
 	@./makesalt
