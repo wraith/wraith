@@ -212,6 +212,8 @@ AC_CHECK_PROG(DISTCC, distcc, distcc)
 if ! test "${DISTCC-x}" = "x"
 then
   DISTCC=distcc
+else
+  DISTCC=
 fi
 ])dnl
 
