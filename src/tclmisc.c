@@ -466,9 +466,9 @@ static int tcl_backup STDVAR
 #endif
 static int tcl_timesync STDVAR
 {
-  char buf[20];
+  char buf[50];
 
-  sprintf(buf, "%li %li %d", (now+timesync), now, timesync);
+  egg_snprintf(buf, sizeof buf, "%li %li %d", (now+timesync), now, timesync);
   Tcl_AppendResult(irp, buf, NULL);
   return TCL_OK;
 }
