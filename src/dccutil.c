@@ -145,6 +145,56 @@ colorbuf(char *buf, size_t len, int idx)
   strcpy(buf, buf3);
 }
 
+/* Dump a potentially super-long string of text.
+ */
+void dumplots(int idx, const char *prefix, char *data)
+{
+  if (!*data) {
+    dprintf(idx, "%s\n", prefix);
+    return;
+  }
+
+  char *p = data, *q = NULL, *n = NULL, c = 0;
+  const size_t max_data_len = 500 - strlen(prefix);
+
+  while (strlen(p) > max_data_len) {
+    q = p + max_data_len;
+    /* Search for embedded linefeed first */
+    n = strchr(p, '\n');
+    if (n && n < q) {
+      /* Great! dump that first line then start over */
+      *n = 0;
+      dprintf(idx, "%s%s\n", prefix, p);
+      *n = '\n';
+      p = n + 1;
+    } else {
+      /* Search backwards for the last space */
+      while (*q != ' ' && q != p)
+        q--;
+      if (q == p)
+        q = p + max_data_len;
+      c = *q;
+      *q = 0;
+      dprintf(idx, "%s%s\n", prefix, p);
+      *q = c;
+      p = q;
+      if (c == ' ')
+        p++;
+    }
+  }
+  /* Last trailing bit: split by linefeeds if possible */
+  n = strchr(p, '\n');
+  while (n) {
+    *n = 0;
+    dprintf(idx, "%s%s\n", prefix, p);
+    *n = '\n';
+    p = n + 1;
+    n = strchr(p, '\n');
+  }
+  if (*p)
+    dprintf(idx, "%s%s\n", prefix, p);  /* Last trailing bit */
+}
+
 void
 dprintf(int idx, const char *format, ...)
 {

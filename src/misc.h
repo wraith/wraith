@@ -33,7 +33,6 @@ int remove_crlf_r(char *);
 char *newsplit(char **);
 char *splitnick(char **);
 void stridx(char *, char *, int);
-void dumplots(int, const char *, char *);
 void daysago(time_t, time_t, char *);
 void days(time_t, time_t, char *);
 void daysdur(time_t, time_t, char *);

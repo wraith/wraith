@@ -270,55 +270,6 @@ void maskhost(const char *s, char *nw)
   }
 }
 
-/* Dump a potentially super-long string of text.
- */
-void dumplots(int idx, const char *prefix, char *data)
-{
-  if (!*data) {
-    dprintf(idx, "%s\n", prefix);
-    return;
-  }
-
-  char *p = data, *q = NULL, *n = NULL, c = 0;
-  const size_t max_data_len = 500 - strlen(prefix);
-
-  while (strlen(p) > max_data_len) {
-    q = p + max_data_len;
-    /* Search for embedded linefeed first */
-    n = strchr(p, '\n');
-    if (n && n < q) {
-      /* Great! dump that first line then start over */
-      *n = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
-      *n = '\n';
-      p = n + 1;
-    } else {
-      /* Search backwards for the last space */
-      while (*q != ' ' && q != p)
-	q--;
-      if (q == p)
-	q = p + max_data_len;
-      c = *q;
-      *q = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
-      *q = c;
-      p = q;
-      if (c == ' ')
-	p++;
-    }
-  }
-  /* Last trailing bit: split by linefeeds if possible */
-  n = strchr(p, '\n');
-  while (n) {
-    *n = 0;
-    dprintf(idx, "%s%s\n", prefix, p);
-    *n = '\n';
-    p = n + 1;
-    n = strchr(p, '\n');
-  }
-  if (*p)
-    dprintf(idx, "%s%s\n", prefix, p);	/* Last trailing bit */
-}
 
 /* Convert an interval (in seconds) to one of:
  * "19 days ago", "1 day ago", "18:12"
@@ -397,7 +348,7 @@ void show_banner(int idx)
     dumplots(-dcc[idx].sock, "", wbanner()); 
   dprintf(idx, " \n");
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
-  dprintf(-dcc[idx].sock, STR("| Contributions welcomed by paypal: bryan@shatow.net |\n"));
+  dprintf(_dcc[idx].sock  STR("|             - paypal: bryan@shatow.net  -             |\n"));
   dprintf(-dcc[idx].sock, STR("|             - http://wraith.shatow.net/ -             |\n"));
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
   dprintf(idx, " \n");
@@ -487,7 +438,7 @@ void make_rand_str(char *s, size_t len)
       s[j] = 'a' + randint(26);
   }
 
-  if (s[0] == '+' || s[0] == '-')
+  if (strchr(BADPASSCHARS, s[0]))
     s[0] = 'a' + randint(26);
 
   s[len] = '\0';
@@ -530,20 +481,6 @@ char *str_escape(const char *str, const char divc, const char mask)
   *b = 0;
   return buf;
 }
-
-/* Is every character in a string a digit? */
-int str_isdigit(const char *str)
-{
-  if (!str || (str && !*str))
-    return 0;
-
-  for(; *str; ++str) {
-    if (!egg_isdigit(*str))
-      return 0;
-  }
-  return 1;
-}
-
 
 /* Search for a certain character 'div' in the string 'str', while
  * ignoring escaped characters prefixed with 'mask'.
@@ -590,6 +527,19 @@ void str_unescape(char *str, register const char esc_char)
 {
   strchr_unescape(str, 0, esc_char);
   return;
+}
+
+/* Is every character in a string a digit? */
+int str_isdigit(const char *str)
+{
+  if (!str || (str && !*str))
+    return 0;
+
+  for(; *str; ++str) {
+    if (!egg_isdigit(*str))
+      return 0;
+  }
+  return 1;
 }
 
 /* Kills the bot. s1 is the reason shown to other bots, 
@@ -958,10 +908,10 @@ void showhelp(int idx, struct flag_record *flags, char *string)
 /* Arrange the N elements of ARRAY in random order. */
 void shuffleArray(char *array[], size_t n)
 {
-  size_t j = 0;
+  size_t j = 0, i;
   char *temp = NULL;
 
-  for (size_t i = 0; i < n; i++) {
+  for (i = 0; i < n; i++) {
     j = i + random() / (RAND_MAX / (n - i) + 1);
     temp = array[j];
     array[j] = array[i];

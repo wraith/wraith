@@ -28,6 +28,7 @@ struct portmap {
 
 
 void init_dcc(void);
+void dumplots(int, const char *, char *);
 void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
 void chatout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void chanout_but(int, int, const char *, ...) __attribute__((format(printf, 3, 4)));
