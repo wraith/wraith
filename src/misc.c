@@ -862,7 +862,8 @@ int goodpass(char *pass, int idx, char *nick)
 char *replace(const char *string, const char *oldie, const char *newbie)
 {
   static char newstring[1024] = "";
-  int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
+  unsigned int str_index, newstr_index, oldie_index;
+  size_t new_len, old_len, end, cpy_len;
   char *c = NULL;
 
   if (string == NULL) return "";
