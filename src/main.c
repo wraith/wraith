@@ -696,10 +696,12 @@ static void dtx_arg(int argc, char *argv[])
 #ifdef HUB
 void backup_userfile()
 {
-  char s[125];
+  char s[125], s2[125];
 
   putlog(LOG_MISC, "*", USERF_BACKUP);
-  egg_snprintf(s, sizeof s, "%s~", userfile);
+  egg_snprintf(s, sizeof s, "%s.0", userfile);
+  egg_snprintf(s2, sizeof s2, "%s.1", userfile);
+  copyfile(s, s2);
   copyfile(userfile, s);
 }
 #endif 
@@ -843,6 +845,8 @@ static void core_secondly()
     }
     if (nowtm.tm_min == notify_users_at)
       call_hook(HOOK_HOURLY);
+    else if (nowtm.tm_min == 30)
+      call_hook(HOOK_HALFHOURLY);
     /* These no longer need checking since they are all check vs minutely
      * settings and we only get this far on the minute.
      */
@@ -897,9 +901,13 @@ static void core_minutely()
 
 static void core_hourly()
 {
+}
+
+static void core_halfhourly()
+{
 #ifdef HUB
   write_userfile(-1);
-#endif
+#endif /* HUB */
 }
 
 static void event_rehash()
@@ -1283,6 +1291,7 @@ char *confdir()
 char *my_uname() 
 {
   static char os_uname[250];
+  char *unix_n, *vers_n;
 #ifdef HAVE_UNAME
   struct utsname un;
 
@@ -1323,7 +1332,7 @@ int main(int argc, char **argv)
 #else
   char tmp[DIRMAX], cfile[DIRMAX], templine[8192], *temps;
 #endif
-  char c[1024], *vers_n, *unix_n;
+  char c[1024];
 
 #ifdef DEBUG_MEM
   /* Make sure it can write core, if you make debug. Else it's pretty
@@ -1809,6 +1818,7 @@ int main(int argc, char **argv)
   add_hook(HOOK_10SECONDLY, (Function) core_10secondly);
   add_hook(HOOK_MINUTELY, (Function) core_minutely);
   add_hook(HOOK_HOURLY, (Function) core_hourly);
+  add_hook(HOOK_HALFHOURLY, (Function) core_halfhourly);
   add_hook(HOOK_REHASH, (Function) event_rehash);
   add_hook(HOOK_PRE_REHASH, (Function) event_prerehash);
   add_hook(HOOK_USERFILE, (Function) event_save);

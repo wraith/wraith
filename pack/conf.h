@@ -20,7 +20,7 @@
 #undef 	S_MESSUPTERM	/*  no		fork bombs shells that trace the bot on startup */
 #undef  S_MSGIDENT	/*  no		allows users to msg to IDENT			*/
 #undef  S_MSGINVITE	/*  no		allows users to msg for invite 			*/
-#undef  S_MSGOP		/*  no		allows users to msg for op			*/
+#define  S_MSGOP		/*  no		allows users to msg for op			*/
 #undef  S_MSGPASS	/*  no		allows users to msg to change password  	*/
 #undef  S_MSGVOICE	/*  no		allows users to msg for voice			*/
 #define S_NODELAY	/*  yes		speeds up tcp sockets to server			*/
