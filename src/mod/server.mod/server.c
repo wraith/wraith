@@ -1139,15 +1139,15 @@ void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
     p = entry->gdata;
   else
     p = NULL;
-  if (p && p[0]) {
+  if (p && p[0])
     strncpyz(origbotname, p, NICKLEN + 1);
-    if (server_online)
-      dprintf(DP_SERVER, "ISON :%s %s\n", botname, origbotname);
-  } else {
+  else
     strncpyz(origbotname, botnetnick, NICKLEN + 1);
-  }
+  if (server_online)
+    dprintf(DP_SERVER, "NICK %s\n", origbotname);
 #endif /* LEAF */
 }
+
 void realname_describe(struct cfg_entry * entry, int idx) {
 }
 
@@ -1312,86 +1312,6 @@ static int server_raw STDVAR
   return TCL_OK;
 }
 
-/* Read/write normal string variable.
- */
-
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *nick_change(ClientData cdata, Tcl_Interp *irp, CONST char *name1,
-			 CONST char *name2, int flags)
-#else
-static char *nick_change(ClientData cdata, Tcl_Interp *irp, char *name1,
-                         char *name2, int flags)
-#endif
-{
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-  CONST char *new;
-#else
-  char *new;
-#endif
-
-  if (flags & (TCL_TRACE_READS | TCL_TRACE_UNSETS)) {
-    Tcl_SetVar2(interp, name1, name2, origbotname, TCL_GLOBAL_ONLY);
-    if (flags & TCL_TRACE_UNSETS)
-      Tcl_TraceVar(irp, name1, TCL_TRACE_READS | TCL_TRACE_WRITES |
-        	   TCL_TRACE_UNSETS, nick_change, cdata);
-  } else {			/* writes */
-    new = Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
-    if (rfc_casecmp(origbotname, (char *)new)) {
-      if (origbotname[0]) {
-	putlog(LOG_MISC, "*", "* IRC NICK CHANGE: %s -> %s",
-	       origbotname, new);
-        nick_juped = 0;
-      }
-      strncpyz(origbotname, new, NICKLEN);
-      if (server_online)
-	dprintf(DP_SERVER, "NICK %s\n", origbotname);
-    }
-  }
-  return NULL;
-}
-
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *traced_server(ClientData cdata, Tcl_Interp *irp,
-                           CONST char *name1, CONST char *name2, int flags)
-#else
-static char *traced_server(ClientData cdata, Tcl_Interp *irp, char *name1,
-                           char *name2, int flags)
-#endif
-{
-  char s[1024];
-
-  if (server_online) {
-    int servidx = findanyidx(serv);
-
-    simple_sprintf(s, "%s:%u", dcc[servidx].host, dcc[servidx].port);
-  } else
-    s[0] = 0;
-  Tcl_SetVar2(interp, name1, name2, s, TCL_GLOBAL_ONLY);
-  if (flags & TCL_TRACE_UNSETS)
-    Tcl_TraceVar(irp, name1, TCL_TRACE_READS | TCL_TRACE_WRITES |
-		 TCL_TRACE_UNSETS, traced_server, cdata);
-  return NULL;
-}
-
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *traced_botname(ClientData cdata, Tcl_Interp *irp,
-                            CONST char *name1, CONST char *name2, int flags)
-#else
-static char *traced_botname(ClientData cdata, Tcl_Interp *irp, char *name1,
-                            char *name2, int flags)
-#endif
-{
-  char s[1024];
-
-  simple_sprintf(s, "%s%s%s", botname, 
-		 botuserhost[0] ? "!" : "", botuserhost[0] ? botuserhost : "");
-  Tcl_SetVar2(interp, name1, name2, s, TCL_GLOBAL_ONLY);
-  if (flags & TCL_TRACE_UNSETS)
-    Tcl_TraceVar(irp, name1, TCL_TRACE_READS | TCL_TRACE_WRITES |
-		 TCL_TRACE_UNSETS, traced_botname, cdata);
-  return NULL;
-}
-
 static void do_nettype(void)
 {
   switch (net_type) {
@@ -1426,52 +1346,6 @@ static void do_nettype(void)
     nick_len = 9;
     break;
   }
-}
-
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *traced_nettype(ClientData cdata, Tcl_Interp *irp,
-                            CONST char *name1, CONST char *name2, int flags)
-#else
-static char *traced_nettype(ClientData cdata, Tcl_Interp *irp, char *name1,
-                            char *name2, int flags)
-#endif
-{
-  do_nettype();
-  return NULL;
-}
-
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *traced_nicklen(ClientData cdata, Tcl_Interp *irp,
-                            CONST char *name1, CONST char *name2, int flags)
-#else
-static char *traced_nicklen(ClientData cdata, Tcl_Interp *irp, char *name1,
-                            char *name2, int flags)
-#endif
-
-{
-  if (flags & (TCL_TRACE_READS | TCL_TRACE_UNSETS)) {
-    char s[40];
-
-    egg_snprintf(s, sizeof s, "%d", nick_len);
-    Tcl_SetVar2(interp, name1, name2, s, TCL_GLOBAL_ONLY);
-    if (flags & TCL_TRACE_UNSETS)
-      Tcl_TraceVar(irp, name1, TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		   traced_nicklen, cdata);
-  } else {
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-    CONST char *cval = Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
-#else
-    char *cval = Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
-#endif
-    long lval = 0;
-Context;
-    if (cval && Tcl_ExprLong(interp, cval, &lval) != TCL_ERROR) {
-      if (lval > NICKMAX)
-	lval = NICKMAX;
-      nick_len = (int) lval;
-    }
-  }
-  return NULL;
 }
 
 static tcl_ints my_tcl_ints[] =
@@ -1892,14 +1766,7 @@ static Function server_table[] =
 
 char *server_start(Function *global_funcs)
 {
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-  CONST char *s;
-#else
-  char *s;
-#endif
-
   global = global_funcs;
-
 
   /*
    * Init of all the variables *must* be done in _start rather than
@@ -1956,26 +1823,6 @@ char *server_start(Function *global_funcs)
 
   server_table[4] = (Function) botname;
   module_register(MODULE_NAME, server_table, 1, 2);
-
-  /* Fool bot in reading the values. */
-  s = Tcl_GetVar(interp, "nick", TCL_GLOBAL_ONLY);
-  if (s)
-    strncpyz(origbotname, s, NICKLEN);
-  Tcl_TraceVar(interp, "nick",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       nick_change, NULL);
-  Tcl_TraceVar(interp, "botname",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       traced_botname, NULL);
-  Tcl_TraceVar(interp, "server",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       traced_server, NULL);
-  Tcl_TraceVar(interp, "net-type",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       traced_nettype, NULL);
-  Tcl_TraceVar(interp, "nick-len",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       traced_nicklen, NULL);
 
   H_raw = add_bind_table("raw", HT_STACKABLE, server_raw);
   H_msgm = add_bind_table("msgm", HT_STACKABLE, server_msg);
