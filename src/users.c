@@ -1216,23 +1216,33 @@ void autolink_cycle(char *start)
   /* Pick a random hub, but avoid 'avoidbot' */
   int hlc = 0;
   struct hublist_entry *hl = NULL, *hl2 = NULL;
+  struct userrec *tmpu = NULL;
 
   for (struct userrec *u = userlist; u; u = u->next) {
     get_user_flagrec(u, &fr, NULL);
-    if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
-      putlog(LOG_DEBUG, "@", "Adding %s to hublist", u->handle);
-      hl2 = hl;
-      hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
+    if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
+      if (strcmp(u->handle, avoidbot)) {
+        putlog(LOG_DEBUG, "@", "Adding %s to hublist", u->handle);
+        hl2 = hl;
+        hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
 
-      hl->next = hl2;
-      hlc++;
-      hl->u = u;
+        hl->next = hl2;
+        hlc++;
+        hl->u = u;
+      } else
+        tmpu = u;
     }
   }
   putlog(LOG_DEBUG, "@", "Picking random hub from %d hubs", hlc);
-  /* This is mainly a sanity check if the userfile gets fucked :P */
-  if (!hlc)
-   fatal("userlist died!", 0);
+
+  /* We probably have 1 hub and avoided it :/ */
+  if (!hlc && tmpu) {
+    hl2 = hl;
+    hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
+    hl->next = hl2;
+    hlc++;
+    hl->u = tmpu;
+  }
   hlc = randint(hlc);
   putlog(LOG_DEBUG, "@", "Picked #%d for hub", hlc);
   while (hl) {

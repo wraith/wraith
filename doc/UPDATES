@@ -39,6 +39,7 @@ This is a summary of ChangeLog basically.
 * Quietly ignore/drop invalid nicks for telnet login.
 * Detect botcmds from leaf bots (hijack).
 * WHO parsing was redundant and had a ton of inner loops per line, fixed.
+* Fixed a problem with leaf bots not chosing a hub when only 1 was set.
 
 1.2
 * No longer displaying SALTS on ./bin -v
