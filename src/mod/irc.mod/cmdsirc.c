@@ -1024,21 +1024,24 @@ static void cmd_find(struct userrec *u, int idx, char *par)
   struct userrec *u2 = NULL;
   int fcount = 0, tr = 0;
 
-  putlog(LOG_CMDS, "*", STR("#%s# find %s"), dcc[idx].nick, par);
+  putlog(LOG_CMDS, "*", "#%s# find %s", dcc[idx].nick, par);
 
   if (!par[0]) {
     dprintf(idx, "Usage: find <nick!ident@host.com> (wildcard * allowed)\n");
     return;
   }
+
+  /* make a list of members in found[] */
   for (chan = chanset; chan; chan = chan->next) {
 
-  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+    get_user_flagrec(dcc[idx].user, &user, chan->dname);
+
     if (!private(user, chan, PRIV_OP)) {
 
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
         char tmp[256] = "";
 
-        sprintf(tmp, STR("%s!%s"), m->nick, m->userhost ? m->userhost : STR("(null)"));
+        sprintf(tmp, STR("%s!%s"), m->nick, m->userhost ? m->userhost : "(null)");
         if (wild_match(par, tmp)) {
           fcount++;
           if (!found) {
@@ -1059,6 +1062,7 @@ static void cmd_find(struct userrec *u, int idx, char *par)
       break;
     }
   }
+
   if (fcount) {
     char tmp[1024] = "";
     int findex, i;
@@ -1069,20 +1073,22 @@ static void cmd_find(struct userrec *u, int idx, char *par)
       if (found[findex]) {
         sprintf(check, "%s!%s", found[findex]->nick, found[findex]->userhost);
         u2 = get_user_by_host(check);
-        sprintf(tmp, STR("%s!%s %s%s%s on %s"), found[findex]->nick, found[findex]->userhost, u2 ? "(user:" : "", u2 ? u2->handle : "", u2 ? ")" : "", cfound[findex]->name);
+        sprintf(tmp, "%s!%s %s%s%s on %s", found[findex]->nick, found[findex]->userhost, 
+                                           u2 ? "(user:" : "", u2 ? u2->handle : "", u2 ? ")" : "", 
+                                           cfound[findex]->name);
         for (i = findex + 1; i < fcount; i++) {
           if (found[i] && (!strcmp(found[i]->nick, found[findex]->nick))) {
-            sprintf(tmp + strlen(tmp), STR(", %s"), cfound[i]->name);
+            sprintf(tmp + strlen(tmp), ", %s", cfound[i]->name);
             found[i] = NULL;
           }
         }
-        dprintf(idx, STR("%s\n"), tmp);
+        dprintf(idx, "%s\n", tmp);
       }
     }
     free(found);
     free(cfound);
   } else {
-    dprintf(idx, STR("No matches for %s on any channels.\n"), par);
+    dprintf(idx, "No matches for %s on any channels.\n", par);
   }
   if (tr)
     dprintf(idx, "(more than 100 matches; list truncated)\n");
