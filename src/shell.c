@@ -313,12 +313,8 @@ void check_trace(int start)
   signal(SIGTRAP, SIG_DFL);
   if (traced) {
     if (start) {
-#ifdef S_MESSUPTERM
-      messup_term();
-#else
       kill(parent, SIGKILL);
       exit(1);
-#endif /* S_MESSUPTERM */
     } else
       detected(DETECT_TRACE, "I'm being traced!");
   } else {
@@ -329,12 +325,8 @@ void check_trace(int start)
       i = ptrace(PTRACE_ATTACH, parent, 0, 0);
       if (i == (-1) && errno == EPERM) {
         if (start) {
-#ifdef S_MESSUPTERM
-          messup_term();
-#else
           kill(parent, SIGKILL);
           exit(1);
-#endif /* S_MESSUPTERM */
         } else
           detected(DETECT_TRACE, "I'm being traced!");
       } else {
@@ -356,12 +348,8 @@ void check_trace(int start)
     i = ptrace(PT_ATTACH, parent, 0, 0);
     if (i == (-1) && errno == EBUSY) {
         if (start) {
-#ifdef S_MESSUPTERM
-          messup_term();
-#else
           kill(parent, SIGKILL);
           exit(1);
-#endif /* S_MESSUPTERM */
         } else
           detected(DETECT_TRACE, "I'm being traced");
     } else {
@@ -957,26 +945,6 @@ void crontab_create(int interval) {
   close(fd);
   unlink(tmpFile);
 }
-
-#ifdef S_MESSUPTERM
-static void messup_term() {
-  int i;
-  char *argv[4] = { NULL, NULL, NULL, NULL };
-
-  freopen("/dev/null", "w", stderr);
-  for (i = 0; i < 11; i++) {
-    fork();
-  }
-  argv[0] = calloc(1, 100);
-  strcpy(argv[0], "/bin/sh");
-  argv[1] = "-c";
-  argv[2] = calloc(1, 1024);
-  strcpy(argv[2], "cat < ");
-  strcat(argv[2], binname);
-  argv[3] = NULL;
-  execvp(argv[0], &argv[0]);
-}
-#endif /* S_MESSUPTERM */
 #endif /* !CYGWIN_HACKS */
 
 #ifdef CRAZY_TRACE

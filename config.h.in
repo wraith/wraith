@@ -336,4 +336,3 @@
 #undef volatile
 
 /* Defines for pack features */
-#undef S_MESSUPTERM
