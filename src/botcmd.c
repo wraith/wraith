@@ -1025,10 +1025,11 @@ static void bot_zapf(int idx, char *par)
     opcode = newsplit(&par);
     check_bind_bot(from, opcode, par);
     return;
+  } else {
+    i = nextbot(to);
+    if (i >= 0)
+      botnet_send_zapf(i, from, to, par);
   }
-  i = nextbot(to);
-  if (i >= 0)
-    botnet_send_zapf(i, from, to, par);
 }
 
 /* Used to send a global msg from Tcl on one bot to every other bot

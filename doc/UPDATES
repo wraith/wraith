@@ -19,6 +19,7 @@ This is a summary of ChangeLog basically.
 16.Bad cmdline passwords now spoof an error.
 17.A long-standing bug with updating channel lists has been fixed, MAY cause "max sendq" quits.
 18.Added -k <botnick> for cmdline (to kill botnick)
+19.Small cosmetic fix in cmd_status for closed channels (show "+i")
 
 1.0.15 (Non-Release Version)
 1.cmd_randstring is now limited to 300.

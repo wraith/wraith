@@ -682,6 +682,9 @@ static void channels_report(int idx, int details)
       if (!s[0])
 	strcpy(s, MISC_LURKING);
       get_mode_protect(chan, s2);
+      if (channel_closed(chan))
+        strcat(s2, "i");
+
       if (shouldjoin(chan)) {
 	if (channel_active(chan)) {
 	  /* If it's a !chan, we want to display it's unique name too <cybah> */

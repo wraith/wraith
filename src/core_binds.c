@@ -106,7 +106,14 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
 
 void check_bind_bot(const char *nick, const char *code, const char *param)
 {
-  check_bind(BT_bot, code, NULL, nick, code, param);
+  char *mynick = NULL, *myparam = NULL, *p1 = NULL, *p2 = NULL;
+
+  mynick = p1 = strdup(nick);
+  myparam = p2 = strdup(param);
+
+  check_bind(BT_bot, code, NULL, mynick, code, myparam);
+  free(p1);
+  free(p2);
 }
 
 void check_bind_chon(char *hand, int idx)
