@@ -450,6 +450,8 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 	bind_table_t *table = bind_table_lookup_or_fake(table_name);
 
 	for (; cmds->name; cmds++) {
+		/* FIXME: replace 1/2 with HUB/LEAF after they are removed */
+          if (!cmds->type || (cmds->type == 1 && conf.bot->hub) || (cmds->type == 2 && !conf.bot->hub)) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
                 if (!strcmp(table->name, "dcc") && (findhelp(cmds->name) != -1)) {
                   cmdlist[cmdi].name = cmds->name;
@@ -459,6 +461,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
                 } 
 		egg_snprintf(name, sizeof name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
 		bind_entry_add(table, cmds->flags, cmds->name, name, 0, cmds->func, NULL);
+          }
 	}
 }
 
