@@ -121,7 +121,8 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
     egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d", ci->channel, masktype(ci->conflags), 
                                     stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
                                     ci->color);
-    shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string);
+    /* shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string); */
+    shareout(NULL, "c CONSOLE %s %s\n", u->handle, string);
   }
   return 1;
 }
@@ -133,8 +134,11 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
   int i;
 
   arg = newsplit(&par);
-  if (ci->channel)
+  if (ci) {
     nfree(ci->channel);
+    nfree(ci);
+  }
+  ci = user_malloc(sizeof(struct console_info));
   ci->channel = user_malloc(strlen(arg) + 1);
   strcpy(ci->channel, arg);
   arg = newsplit(&par);

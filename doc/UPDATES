@@ -1,5 +1,8 @@
 This is a summary of ChangeLog basically.
 
+1.0.13
+1.Fixed a fatal bug in console_gotshare()
+
 1.0.12
 1.When a user first logs in, if they don't have a secpass set, one is set and displayed.
 2.+closed now enforces +i AND +p (+p notifies you of invites in hybrid)
