@@ -1352,7 +1352,7 @@ static void memberlist_reposition(struct chanset_t * chan, memberlist * target) 
 }
 
 
-static int got352or4(struct chanset_t *chan, char *user, char *host, char *serv, char *nick, char *flags, int hops)
+static int got352or4(struct chanset_t *chan, char *user, char *host, char *server, char *nick, char *flags, int hops)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0};
   char userhost[UHOSTLEN] = "";
@@ -1368,10 +1368,10 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serv,
   }
   strcpy(m->nick, nick);	/* Store the nick in list */
 
-  if (serv) {
+  if (server) {
     struct chanset_t *ch = NULL;
     memberlist *ml = NULL;
-    strncpyz(m->server, serv, SERVLEN);
+    strncpyz(m->server, server, SERVLEN);
     /* Propagate server to other channel memlists... might save us a WHO #chan */
     for (ch = chanset; ch; ch = ch->next) {
       if (ch != chan) {
@@ -1473,7 +1473,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serv,
  */
 static int got352(char *from, char *msg)
 {
-  char *nick = NULL, *user = NULL, *host = NULL, *chname = NULL, *flags = NULL, *serv = NULL, *hops = NULL;
+  char *nick = NULL, *user = NULL, *host = NULL, *chname = NULL, *flags = NULL, *server = NULL, *hops = NULL;
   struct chanset_t *chan = NULL;
 
   newsplit(&msg);		/* Skip my nick - effeciently */
@@ -1482,12 +1482,12 @@ static int got352(char *from, char *msg)
   if (chan) {			/* Am I? */
     user = newsplit(&msg);	/* Grab the user */
     host = newsplit(&msg);	/* Grab the host */
-    serv = newsplit(&msg);      /* And the server */
+    server = newsplit(&msg);      /* And the server */
     nick = newsplit(&msg);	/* Grab the nick */
     flags = newsplit(&msg);	/* Grab the flags */
     hops = newsplit(&msg);	/* grab server hops */
     hops++;
-    got352or4(chan, user, host, serv, nick, flags, atoi(hops));
+    got352or4(chan, user, host, server, nick, flags, atoi(hops));
   }
   return 0;
 }

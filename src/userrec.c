@@ -501,11 +501,11 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
   noshare = oldshare;
   if ((!noshare) && (handle[0] != '*') && (bu == userlist)) {
     struct flag_record fr = {FR_GLOBAL, 0, 0};
-    char x[100] = "";
+    char xx[100] = "";
 
     fr.global = u->flags;
-    build_flags(x, &fr, 0);
-    shareout(NULL, "n %s %s %s %s\n", handle, host && host[0] ? host : "none", pass, x);
+    build_flags(xx, &fr, 0);
+    shareout(NULL, "n %s %s %s %s\n", handle, host && host[0] ? host : "none", pass, xx);
   }
   if (bu == NULL)
     bu = u;

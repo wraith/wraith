@@ -387,13 +387,13 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	k = sprintf(s, "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)),
 		    dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
-	  unsigned long days, hrs, mins;
+	  unsigned long mydays, hrs, mins;
 
-	  days = (now - dcc[i].timeval) / 86400;
-	  hrs = ((now - dcc[i].timeval) - (days * 86400)) / 3600;
+	  mydays = (now - dcc[i].timeval) / 86400;
+	  hrs = ((now - dcc[i].timeval) - (mydays * 86400)) / 3600;
 	  mins = ((now - dcc[i].timeval) - (hrs * 3600)) / 60;
-	  if (days > 0)
-	    sprintf(s + k, " (%s %lud%luh)", MISC_IDLE, days, hrs);
+	  if (mydays > 0)
+	    sprintf(s + k, " (%s %lud%luh)", MISC_IDLE, mydays, hrs);
 	  else if (hrs > 0)
 	    sprintf(s + k, " (%s %luh%lum)", MISC_IDLE, hrs, mins);
 	  else
@@ -502,14 +502,14 @@ static void bot_infoq(int idx, char *par)
   now2 = now - online_since;
   s2[0] = 0;
   if (now2 > 86400) {
-    int days = now2 / 86400;
+    int mydays = now2 / 86400;
 
     /* Days */
-    sprintf(s2, "%d day", days);
-    if (days >= 2)
+    sprintf(s2, "%d day", mydays);
+    if (mydays >= 2)
       strcat(s2, "s");
     strcat(s2, ", ");
-    now2 -= days * 86400;
+    now2 -= mydays * 86400;
   }
   hr = (time_t) ((int) now2 / 3600);
   now2 -= (hr * 3600);
@@ -786,7 +786,7 @@ static void bot_traced(int idx, char *par)
   }
   if (!egg_strcasecmp(p, conf.bot->nick)) {
     time_t t = 0;
-    char *p = par, *ss = TBUF;
+    char *p2 = par, *ss = TBUF;
 
     splitc(ss, to, ':');
     if (ss[0])
@@ -795,11 +795,11 @@ static void bot_traced(int idx, char *par)
       sock = (-1);
     if (par[0] == ':') {
       t = atoi(par + 1);
-      p = strchr(par + 1, ':');
-      if (p)
-	p++;
+      p2 = strchr(par + 1, ':');
+      if (p2)
+	p2++;
       else
-	p = par + 1;
+	p2 = par + 1;
     }
     for (i = 0; i < dcc_total; i++)
       if ((dcc[i].type->flags & DCT_CHAT) &&
@@ -811,7 +811,7 @@ static void bot_traced(int idx, char *par)
             register char *c=p;
             for (; *c != '\0'; c++) if (*c == ':') j++;
           }
-         dprintf(i, "%s -> %s (%lu secs, %d hop%s)\n", BOT_TRACERESULT, p,
+         dprintf(i, "%s -> %s (%lu secs, %d hop%s)\n", BOT_TRACERESULT, p2,
             now - t, j, (j != 1) ? "s" : "");
 	} else
 	  dprintf(i, "%s -> %s\n", BOT_TRACERESULT, p);

@@ -855,13 +855,13 @@ static int hosts_set(struct userrec *u, struct user_entry *e, void *buf)
     t = &(e->u.list);
     while (*t) {
       if (wild_match(host, (*t)->extra)) {
-	struct list_type *u;
+	struct list_type *listu;
 
-	u = *t;
+	listu = *t;
 	*t = (*t)->next;
-	if (u->extra)
-	  free(u->extra);
-	free(u);
+	if (listu->extra)
+	  free(listu->extra);
+	free(listu);
       } else
 	t = &((*t)->next);
     }

@@ -46,7 +46,7 @@ static void my_setkey(struct chanset_t *, char *);
 static void maybe_revenge(struct chanset_t *, char *, char *, int);
 static int detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
 			     char *);
-static void newmask(masklist *, char *, char *);
+static void new_mask(masklist *, char *, char *);
 static void doban(struct chanset_t *, memberlist *);
 static char *quickban(struct chanset_t *, char *);
 static void got_op(struct chanset_t *chan, char *nick, char *from, char *who,
@@ -55,9 +55,9 @@ static int real_killmember(struct chanset_t *chan, char *nick, const char *file,
 #define killmember(chan, nick)        real_killmember((chan), (nick), __FILE__,__LINE__)
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
-#define newban(chan, mask, who)         newmask((chan)->channel.ban, mask, who)
-#define newexempt(chan, mask, who)      newmask((chan)->channel.exempt, mask, who)
-#define newinvite(chan, mask, who)      newmask((chan)->channel.invite, mask, who)
+#define newban(chan, mask, who)         new_mask((chan)->channel.ban, mask, who)
+#define newexempt(chan, mask, who)      new_mask((chan)->channel.exempt, mask, who)
+#define newinvite(chan, mask, who)      new_mask((chan)->channel.invite, mask, who)
 
 #endif /* MAKING_IRC */
 

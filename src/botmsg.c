@@ -642,16 +642,16 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
 	  status = NOTE_AWAY;
 	}
       if (aok) {
-	char *p = NULL, *fr = from;
+	char *p2 = NULL, *fr = from;
 	int l = 0;
 	char work[1024] = "";
 
 	while ((*msg == '<') || (*msg == '>')) {
-	  p = newsplit(&msg);
-	  if (*p == '<')
-	    l += simple_sprintf(work + l, "via %s, ", p + 1);
+	  p2 = newsplit(&msg);
+	  if (*p2 == '<')
+	    l += simple_sprintf(work + l, "via %s, ", p2 + 1);
 	  else if (*from == '@')
-	    fr = p + 1;
+	    fr = p2 + 1;
 	}
 	if (idx == -2 || (!egg_strcasecmp(from, conf.bot->nick)))
 	  dprintf(i, "*** [%s] %s%s\n", fr, l ? work : "", msg);

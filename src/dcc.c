@@ -348,8 +348,6 @@ static void cont_link(int idx, char *buf, int ii)
     }
   }
   if (snum >= 0) {
-    int i;
-
     /* If we're already connected somewhere, unlink and idle a sec */
     for (i = 0; i < dcc_total; i++) {
       if ((dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user))) {

@@ -104,12 +104,12 @@ int hostprotocol(char *host)
 }
 
 /* get the protocol used on a socket */
-int sockprotocol(int socket)
+int sockprotocol(int sock)
 {
   struct sockaddr sa;
   int i = sizeof(sa);
 
-  if (getsockname(socket, &sa, &i))
+  if (getsockname(sock, &sa, &i))
     return -1;
   else
     return sa.sa_family;

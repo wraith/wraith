@@ -829,7 +829,7 @@ static void my_setkey(struct chanset_t *chan, char *k)
 /* Adds a ban, exempt or invite mask to the list
  * m should be chan->channel.(exempt|invite|ban)
  */
-static void newmask(masklist *m, char *s, char *who)
+static void new_mask(masklist *m, char *s, char *who)
 {
   for (; m && m->mask[0] && rfc_casecmp(m->mask, s); m = m->next);
   if (m->mask[0])

@@ -159,10 +159,10 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
   if (post[0]) {
     /* remove the trailing space... */
-    size_t index = (sizeof(post) - 1) - postsize;
+    size_t myindex = (sizeof(post) - 1) - postsize;
 
-    if (index > 0 && post[index - 1] == ' ')
-      post[index - 1] = 0;
+    if (myindex > 0 && post[myindex - 1] == ' ')
+      post[myindex - 1] = 0;
 
     egg_strcatn(out, " ", sizeof(out));
     egg_strcatn(out, post, sizeof(out));

@@ -98,13 +98,13 @@ static void tell_who(struct userrec *u, int idx, int chan)
 		    masktype(dcc[i].u.chat->con_flags));
 	}
 	if (now - dcc[i].timeval > 300) {
-	  unsigned long days, hrs, mins;
+	  unsigned long mydays, hrs, mins;
 
-	  days = (now - dcc[i].timeval) / 86400;
-	  hrs = ((now - dcc[i].timeval) - (days * 86400)) / 3600;
+	  mydays = (now - dcc[i].timeval) / 86400;
+	  hrs = ((now - dcc[i].timeval) - (mydays * 86400)) / 3600;
 	  mins = ((now - dcc[i].timeval) - (hrs * 3600)) / 60;
-	  if (days > 0)
-	    sprintf(&s[strlen(s)], " (idle %lud%luh)", days, hrs);
+	  if (mydays > 0)
+	    sprintf(&s[strlen(s)], " (idle %lud%luh)", mydays, hrs);
 	  else if (hrs > 0)
 	    sprintf(&s[strlen(s)], " (idle %luh%lum)", hrs, mins);
 	  else
@@ -215,14 +215,14 @@ static void cmd_botinfo(struct userrec *u, int idx, char *par)
   now2 = now - online_since;
   s2[0] = 0;
   if (now2 > 86400) {
-    int days = now2 / 86400;
+    int mydays = now2 / 86400;
 
-    /* Days */
-    sprintf(s2, "%d day", days);
-    if (days >= 2)
+    /* mydays */
+    sprintf(s2, "%d day", mydays);
+    if (mydays >= 2)
       strcat(s2, "s");
     strcat(s2, ", ");
-    now2 -= days * 86400;
+    now2 -= mydays * 86400;
   }
   hr = (time_t) ((int) now2 / 3600);
   now2 -= (hr * 3600);
@@ -1806,12 +1806,12 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
 
   len = atoi(par);
   if (len < 301) {
-    char *rand = NULL;
+    char *randstring = NULL;
 
-    rand = calloc(1, len + 1);
-    make_rand_str(rand, len);
-    dprintf(idx, "string: %s\n", rand);
-    free(rand);
+    randstring = calloc(1, len + 1);
+    make_rand_str(randstring, len);
+    dprintf(idx, "string: %s\n", randstring);
+    free(randstring);
   } else 
     dprintf(idx, "Too long, must be <= 300\n");
 }

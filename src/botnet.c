@@ -380,7 +380,7 @@ void unvia(int idx, tand_t * who)
 void besthub(char *hub)
 {
   tand_t *ptr = tandbot;
-  struct userrec *u = NULL, *besthub = NULL;
+  struct userrec *u = NULL, *besthubu = NULL;
   char bestlval[20] = "", lval[20] = "";
 
   hub[0] = 0;
@@ -391,13 +391,13 @@ void besthub(char *hub)
       link_pref_val(u, lval);
       if (strcmp(lval, bestlval) < 0) {
         strcpy(bestlval, lval);
-        besthub = u;
+        besthubu = u;
       }
     }
     ptr = ptr->next;
   }
-  if (besthub)
-    strcpy(hub, besthub->handle);
+  if (besthubu)
+    strcpy(hub, besthubu->handle);
   return;
 }
 
@@ -484,13 +484,13 @@ void answer_local_whom(int idx, int chan)
 	if (c == '-')
 	  c = ' ';
 	if (now - dcc[i].timeval > 300) {
-	  unsigned long days, hrs, mins;
+	  unsigned long mydays, hrs, mins;
 
-	  days = (now - dcc[i].timeval) / 86400;
-	  hrs = ((now - dcc[i].timeval) - (days * 86400)) / 3600;
+	  mydays = (now - dcc[i].timeval) / 86400;
+	  hrs = ((now - dcc[i].timeval) - (mydays * 86400)) / 3600;
 	  mins = ((now - dcc[i].timeval) - (hrs * 3600)) / 60;
-	  if (days > 0)
-	    sprintf(idle, " [idle %lud%luh]", days, hrs);
+	  if (mydays > 0)
+	    sprintf(idle, " [idle %lud%luh]", mydays, hrs);
 	  else if (hrs > 0)
 	    sprintf(idle, " [idle %luh%lum]", hrs, mins);
 	  else
@@ -519,13 +519,13 @@ void answer_local_whom(int idx, int chan)
       if (party[i].timer == 0L)
 	strcpy(idle, " [idle?]");
       else if (now - party[i].timer > 300) {
-	unsigned long days, hrs, mins;
+	unsigned long mydays, hrs, mins;
 
-	days = (now - party[i].timer) / 86400;
-	hrs = ((now - party[i].timer) - (days * 86400)) / 3600;
+	mydays = (now - party[i].timer) / 86400;
+	hrs = ((now - party[i].timer) - (mydays * 86400)) / 3600;
 	mins = ((now - party[i].timer) - (hrs * 3600)) / 60;
-	if (days > 0)
-	  sprintf(idle, " [idle %lud%luh]", days, hrs);
+	if (mydays > 0)
+	  sprintf(idle, " [idle %lud%luh]", mydays, hrs);
 	else if (hrs > 0)
 	  sprintf(idle, " [idle %luh%lum]", hrs, mins);
 	else
@@ -1618,7 +1618,7 @@ void check_botnet_pings()
   }
   for (i = 0; i < dcc_total; i++) {
     if ((dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_LEAF)) {
-      tand_t *bot, *via = findbot(dcc[i].nick);
+      tand_t *via = findbot(dcc[i].nick);
 
       for (bot = tandbot; bot; bot = bot->next) {
 	if ((via == bot->via) && (bot != via)) {

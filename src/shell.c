@@ -363,7 +363,7 @@ void check_trace()
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
 {
   FILE *inpFile = NULL, *outFile = NULL, *errFile = NULL;
-  char tmpfile[161] = "";
+  char tmpFile[161] = "";
   int x, fd;
   int parent = getpid();
 
@@ -371,45 +371,45 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     return 0;
   /* Set up temp files */
   /* always use mkstemp() when handling temp filess! -dizz */
-  sprintf(tmpfile, "%s.in-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpfile)) == -1 || (inpFile = fdopen(fd, "w+")) == NULL) {
+  sprintf(tmpFile, "%s.in-XXXXXX", tempdir);
+  if ((fd = mkstemp(tmpFile)) == -1 || (inpFile = fdopen(fd, "w+")) == NULL) {
     if (fd != -1) {
-      unlink(tmpfile);
+      unlink(tmpFile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*" , "exec: Couldn't open '%s': %s", tmpfile, strerror(errno));
+    putlog(LOG_ERRORS, "*" , "exec: Couldn't open '%s': %s", tmpFile, strerror(errno));
     return 0;
   }
-  unlink(tmpfile);
+  unlink(tmpFile);
   if (input) {
     if (fwrite(input, strlen(input), 1, inpFile) != 1) {
       fclose(inpFile);
-      putlog(LOG_ERRORS, "*", "exec: Couldn't write to '%s': %s", tmpfile, strerror(errno));
+      putlog(LOG_ERRORS, "*", "exec: Couldn't write to '%s': %s", tmpFile, strerror(errno));
       return 0;
     }
     fseek(inpFile, 0, SEEK_SET);
   }
-  unlink(tmpfile);
-  sprintf(tmpfile, "%s.err-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpfile)) == -1 || (errFile = fdopen(fd, "w+")) == NULL) {
+  unlink(tmpFile);
+  sprintf(tmpFile, "%s.err-XXXXXX", tempdir);
+  if ((fd = mkstemp(tmpFile)) == -1 || (errFile = fdopen(fd, "w+")) == NULL) {
     if (fd != -1) {
-      unlink(tmpfile);
+      unlink(tmpFile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpfile, strerror(errno));
+    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpFile, strerror(errno));
     return 0;
   }
-  unlink(tmpfile);
-  sprintf(tmpfile, "%s.out-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpfile)) == -1 || (outFile = fdopen(fd, "w+")) == NULL) {
+  unlink(tmpFile);
+  sprintf(tmpFile, "%s.out-XXXXXX", tempdir);
+  if ((fd = mkstemp(tmpFile)) == -1 || (outFile = fdopen(fd, "w+")) == NULL) {
     if (fd != -1) {
-      unlink(tmpfile);
+      unlink(tmpFile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpfile, strerror(errno));
+    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpFile, strerror(errno));
     return 0;
   }
-  unlink(tmpfile);
+  unlink(tmpFile);
   x = fork();
   if (x == -1) {
     putlog(LOG_ERRORS, "*", "exec: fork() failed: %s", strerror(errno));
@@ -675,7 +675,7 @@ void werr(int errnum)
 int email(char *subject, char *msg, int who)
 {
   struct utsname un;
-  char open[2048] = "", addrs[1024] = "";
+  char run[2048] = "", addrs[1024] = "";
   int mail = 0, sendmail = 0;
   FILE *f = NULL;
 
@@ -700,11 +700,11 @@ int email(char *subject, char *msg, int who)
   }
 
   if (sendmail)
-    sprintf(open, "/usr/sbin/sendmail -t");
+    sprintf(run, "/usr/sbin/sendmail -t");
   else if (mail)
-    sprintf(open, "/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\"", addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
+    sprintf(run, "/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\"", addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
 
-  if ((f = popen(open, "w"))) {
+  if ((f = popen(run, "w"))) {
     if (sendmail) {
       fprintf(f, "To: %s\n", addrs);
       fprintf(f, "From: %s@%s\n", 
@@ -725,23 +725,23 @@ int email(char *subject, char *msg, int who)
   return 0;
 }
 
-void baduname(char *confhas, char *my_uname) {
-  char *tmpfile = NULL;
-  int send = 0, make = 0;
+void baduname(char *confhas, char *myuname) {
+  char *tmpFile = NULL;
+  int tosend = 0, make = 0;
 
-  tmpfile = calloc(1, strlen(tempdir) + 3 + 1);
+  tmpFile = calloc(1, strlen(tempdir) + 3 + 1);
 
-  sprintf(tmpfile, "%s.un", tempdir);
-  sdprintf("CHECKING %s", tmpfile);
-  if (is_file(tmpfile)) {
+  sprintf(tmpFile, "%s.un", tempdir);
+  sdprintf("CHECKING %s", tmpFile);
+  if (is_file(tmpFile)) {
     struct stat ss;
     time_t diff;
 
-    stat(tmpfile, &ss);
+    stat(tmpFile, &ss);
     diff = now - ss.st_mtime;
     if (diff >= 86400) {
-      send++;          		/* only send once a day */
-      unlink(tmpfile);		/* remove file */
+      tosend++;          		/* only send once a day */
+      unlink(tmpFile);		/* remove file */
       make++;			/* make a new one at thie time. */
     }
   } else {
@@ -750,15 +750,15 @@ void baduname(char *confhas, char *my_uname) {
 
   if (make) {
     FILE *fp = NULL;
-    if ((fp = fopen(tmpfile, "w"))) {
+    if ((fp = fopen(tmpFile, "w"))) {
       fprintf(fp, "\n");
       fflush(fp);
       fclose(fp);
-      send++;           /* only send if we could write the file. */
+      tosend++;           /* only send if we could write the file. */
     }
   }
 
-  if (send) {
+  if (tosend) {
     struct utsname un;
     char msg[501] = "", subject[31] = "";
 
@@ -766,17 +766,17 @@ void baduname(char *confhas, char *my_uname) {
     egg_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
     egg_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
                                   conffile.username ? conffile.username : (conf.username ? conf.username : "unknown"), 
-                                  confhas, my_uname, un.nodename);
+                                  confhas, myuname, un.nodename);
     email(subject, msg, EMAIL_OWNERS);
   }
-  free(tmpfile);
+  free(tmpFile);
 }
 
 char *homedir()
 {
-  static char homedir[DIRMAX] = "";
+  static char homedir_buf[DIRMAX] = "";
 
-  if (!homedir || (homedir && !homedir[0])) {
+  if (!homedir_buf || (homedir_buf && !homedir_buf[0])) {
     char tmp[DIRMAX] = "";
     if (conf.homedir)
       egg_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
@@ -793,10 +793,10 @@ char *homedir()
 #endif /* CYGWIN_HACKS */
     }
     ContextNote("realpath()");
-    realpath(tmp, homedir); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+    realpath(tmp, homedir_buf); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
     ContextNote("realpath(): Success");
   }
-  return homedir;
+  return homedir_buf;
 }
 
 char *my_username()
@@ -824,20 +824,20 @@ char *my_username()
 
 char *confdir()
 {
-  static char confdir[DIRMAX] = "";
+  static char confdir_buf[DIRMAX] = "";
 
-  if (!confdir || (confdir && !confdir[0])) {
+  if (!confdir_buf || (confdir_buf && !confdir_buf[0])) {
 #ifdef LEAF
-    egg_snprintf(confdir, sizeof confdir, "%s/.ssh", homedir());
+    egg_snprintf(confdir_buf, sizeof confdir, "%s/.ssh", homedir());
 #endif /* LEAF */
 #ifdef HUB
-    egg_snprintf(confdir, sizeof confdir, "%s", dirname(binname));
+    egg_snprintf(confdir_buf, sizeof confdir, "%s", dirname(binname));
 #endif /* HUB */
 #ifdef CYGWIN_HACKS
-    egg_snprintf(confdir, sizeof confdir, "%s", homedir());
+    egg_snprintf(confdir_buf, sizeof confdir, "%s", homedir());
 #endif /* CYGWIN_HACKS */
   }
-  return confdir;
+  return confdir_buf;
 }
 
 char *my_uname()
@@ -880,21 +880,21 @@ void check_crontab()
 }
 
 void crontab_del() {
-  char *tmpfile = NULL, *p = NULL, buf[2048] = "";
+  char *tmpFile = NULL, *p = NULL, buf[2048] = "";
 
-  tmpfile = calloc(1, strlen(binname) + 100);
+  tmpFile = calloc(1, strlen(binname) + 100);
 
-  strcpy(tmpfile, binname);
-  if (!(p = strrchr(tmpfile, '/')))
+  strcpy(tmpFile, binname);
+  if (!(p = strrchr(tmpFile, '/')))
     return;
   p++;
   strcpy(p, ".ctb");
-  sprintf(buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpfile);
+  sprintf(buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL)) {
-    sprintf(buf, "crontab %s", tmpfile);
+    sprintf(buf, "crontab %s", tmpFile);
     shell_exec(buf, NULL, NULL, NULL);
   }
-  unlink(tmpfile);
+  unlink(tmpFile);
 }
 
 int crontab_exists() {
@@ -915,17 +915,17 @@ int crontab_exists() {
 }
 
 void crontab_create(int interval) {
-  char tmpfile[161] = "", buf[256] = "";
+  char tmpFile[161] = "", buf[256] = "";
   FILE *f = NULL;
   int fd;
 
-  egg_snprintf(tmpfile, sizeof tmpfile, "%s.crontab-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpfile)) == -1) {
-    unlink(tmpfile);
+  egg_snprintf(tmpFile, sizeof tmpFile, "%s.crontab-XXXXXX", tempdir);
+  if ((fd = mkstemp(tmpFile)) == -1) {
+    unlink(tmpFile);
     return;
   }
 
-  egg_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", binname, tmpfile);
+  egg_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
     buf[0] = 0;
     if (interval == 1)
@@ -946,11 +946,11 @@ void crontab_create(int interval) {
     fseek(f, 0, SEEK_END);
     fprintf(f, "\n%s\n", buf);
     fclose(f);
-    sprintf(buf, "crontab %s", tmpfile);
+    sprintf(buf, "crontab %s", tmpFile);
     shell_exec(buf, NULL, NULL, NULL);
   }
   close(fd);
-  unlink(tmpfile);
+  unlink(tmpFile);
 }
 
 #ifdef S_MESSUPTERM

@@ -96,7 +96,7 @@ swap_uids_back()
 }
 
 void
-confedit(char *cfile)
+confedit(char *fname)
 {
   FILE *f = NULL;
   char s[DIRMAX] = "", *editor = NULL;
@@ -200,8 +200,8 @@ confedit(char *cfile)
   if (!can_stat(s))
     fatal("Error reading new config file", 0);
 
-  unlink(cfile);
-  Encrypt_File(s, cfile);
+  unlink(fname);
+  Encrypt_File(s, fname);
   unlink(s);
   fatal("New config file saved, restart bot to use", 0);
 
@@ -427,30 +427,27 @@ parseconf()
 }
 
 int
-readconf(char *cfile, int bits)
+readconf(char *fname, int bits)
 {
   FILE *f = NULL;
   int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
   char inbuf[201] = "";
 
-  sdprintf("readconf(%s, %d)", cfile, enc);
+  sdprintf("readconf(%s, %d)", fname, enc);
   Context;
-  if (!(f = fopen(cfile, "r")))
+  if (!(f = fopen(fname, "r")))
     fatal("Cannot read config", 0);
 
   while (fgets(inbuf, sizeof inbuf, f) != NULL) {
-    char *line = NULL, *temp_ptr = NULL, *p = NULL;
-
-    /* fucking DOS */
-    if ((p = strchr(inbuf, '\n')))
-      *p = 0;
-    if ((p = strchr(inbuf, '\r')))
-      *p = 0;
+    char *line = NULL, *temp_ptr = NULL;
 
     if (enc)
       line = temp_ptr = decrypt_string(SALT1, inbuf);
     else
       line = inbuf;
+
+    /* fucking DOS */
+    remove_crlf(&line);
 
     if ((line && !line[0]) || line[0] == '\n') {
       if (enc)

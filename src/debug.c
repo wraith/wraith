@@ -181,7 +181,7 @@ void write_debug()
     close(x);
 #ifndef CYGWIN_HACKS
     {
-      char date[81] = "", *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, 
+      char *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, 
            *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX] = "";
 
       egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));

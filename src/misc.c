@@ -357,12 +357,12 @@ void dumplots(int idx, const char *prefix, char *data)
 /* Convert an interval (in seconds) to one of:
  * "19 days ago", "1 day ago", "18:12"
  */
-void daysago(time_t now, time_t then, char *out)
+void daysago(time_t mynow, time_t then, char *out)
 {
-  if (now - then > 86400) {
-    int days = (now - then) / 86400;
+  if (mynow - then > 86400) {
+    int mydays = (mynow - then) / 86400;
 
-    sprintf(out, "%d day%s ago", days, (days == 1) ? "" : "s");
+    sprintf(out, "%d day%s ago", mydays, (mydays == 1) ? "" : "s");
     return;
   }
 #ifdef S_UTCTIME
@@ -375,12 +375,12 @@ void daysago(time_t now, time_t then, char *out)
 /* Convert an interval (in seconds) to one of:
  * "in 19 days", "in 1 day", "at 18:12"
  */
-void days(time_t now, time_t then, char *out)
+void days(time_t mynow, time_t then, char *out)
 {
-  if (now - then > 86400) {
-    int days = (now - then) / 86400;
+  if (mynow - then > 86400) {
+    int mydays = (mynow - then) / 86400;
 
-    sprintf(out, "in %d day%s", days, (days == 1) ? "" : "s");
+    sprintf(out, "in %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
 #ifdef S_UTCTIME
@@ -393,21 +393,21 @@ void days(time_t now, time_t then, char *out)
 /* Convert an interval (in seconds) to one of:
  * "for 19 days", "for 1 day", "for 09:10"
  */
-void daysdur(time_t now, time_t then, char *out)
+void daysdur(time_t mynow, time_t then, char *out)
 {
   char s[81] = "";
   int hrs, mins;
 
-  if (now - then > 86400) {
-    int days = (now - then) / 86400;
+  if (mynow - then > 86400) {
+    int mydays = (mynow - then) / 86400;
 
-    sprintf(out, "for %d day%s", days, (days == 1) ? "" : "s");
+    sprintf(out, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
   strcpy(out, "for ");
-  now -= then;
-  hrs = (int) (now / 3600);
-  mins = (int) ((now - (hrs * 3600)) / 60);
+  mynow -= then;
+  hrs = (int) (mynow / 3600);
+  mins = (int) ((mynow - (hrs * 3600)) / 60);
   sprintf(s, "%02d:%02d", hrs, mins);
   strcat(out, s);
 }
@@ -448,15 +448,15 @@ void show_motd(int idx)
   
   if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
     char *who = NULL, *buf = NULL, *buf_ptr = NULL, date[50] = "";
-    time_t time;
+    time_t when;
 
     buf = buf_ptr = strdup(CFG_MOTD.gdata);
     who = newsplit(&buf);
-    time = atoi(newsplit(&buf));
+    when = atoi(newsplit(&buf));
 #ifdef S_UTCTIME
-    egg_strftime(date, sizeof date, "%c %Z", gmtime(&time));
+    egg_strftime(date, sizeof date, "%c %Z", gmtime(&when));
 #else /* !S_UTCTIME */
-    egg_strftime(date, sizeof date, "%c %Z", localtime(&time));
+    egg_strftime(date, sizeof date, "%c %Z", localtime(&when));
 #endif /* S_UTCTIME */
     dprintf(idx, "Motd set by \002%s\002 (%s)\n", who, date);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
@@ -543,7 +543,7 @@ void make_rand_str(char *s, int len)
  *
  * Remember to free the returned memory block.
  */
-char *str_escape(const char *str, const char div, const char mask)
+char *str_escape(const char *str, const char divc, const char mask)
 {
   const int	 len = strlen(str);
   int		 buflen = (2 * len), blen = 0;
@@ -564,7 +564,7 @@ char *str_escape(const char *str, const char div, const char mask)
       b = buf + blen;
     }
 
-    if (*s == div || *s == mask) {
+    if (*s == divc || *s == mask) {
       sprintf(b, "%c%02x", mask, *s);
       b += 3;
       blen += 3;
@@ -608,7 +608,7 @@ int str_isdigit(const char *str)
  * NOTE: If you look carefully, you'll notice that strchr_unescape()
  *       behaves differently than strchr().
  */
-char *strchr_unescape(char *str, const char div, register const char esc_char)
+char *strchr_unescape(char *str, const char divc, register const char esc_char)
 {
   char buf[3] = "";
   register char	*s = NULL, *p = NULL;
@@ -619,7 +619,7 @@ char *strchr_unescape(char *str, const char div, register const char esc_char)
       buf[0] = s[1], buf[1] = s[2];
       *p = (unsigned char) strtol(buf, NULL, 16);
       s += 2;
-    } else if (*s == div) {
+    } else if (*s == divc) {
       *p = *s = 0;
       return (s + 1);		/* Found searched for character.	*/
     } else
@@ -1206,7 +1206,7 @@ void shuffle(char *string, char *delim)
   string[strlen(string)] = 0;
 }
 
-char *color(int idx, int type, int color)
+char *color(int idx, int type, int which)
 {
   int ansi = 0;
    
@@ -1238,7 +1238,7 @@ char *color(int idx, int type, int color)
   } else if (type == FLASH_CLOSE) {
     return ansi ? "\033[0m" : "\037\002";
   } else if (type == COLOR_OPEN) {
-    switch (color) {
+    switch (which) {
       case C_BLACK: 		return ansi ? "\033[30m"   : "\00301";
       case C_RED: 		return ansi ? "\033[31m"   : "\00305";
       case C_GREEN: 		return ansi ? "\033[32m"   : "\00303";
