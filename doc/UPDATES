@@ -13,6 +13,7 @@ This is a summary of ChangeLog basically.
 10.Now all bots check for promisc.
 11.Added chanint: closed-private. Will set +p in +closed chans.
 12.New +take.
+13.Removed 53K from the binary (no more compression functions)
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.
