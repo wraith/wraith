@@ -7,13 +7,13 @@ ver=`grep "char" src/main.c | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' 
 numver=`grep "int" src/main.c | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
 PACKNAME=`grep "PACKNAME " pack/pack.cfg | awk '/PACKNAME/ {print $2}'`
 
-#load the banners file
-if test -f misc/.banners; then
- . misc/.banners
-fi
 
 clear
-banner
+#Display a banner
+btotal=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*switch (r % \(.\)) {/\1/"`
+bnum=$[(`date '+%s'` % ${btotal})]
+banner=`grep -A 15 "char \*wbanner() {" src/misc.c | grep "case ${bnum}:" | sed -e "s/.*case ${bnum}: return STR(\"\(.*\)\");/\1/"`
+echo -e "${banner}"
 
 usage() 
 {
