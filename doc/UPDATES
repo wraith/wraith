@@ -6,6 +6,7 @@ This is a summary of ChangeLog basically.
 3.Bots will now email owners once a day if their uname() output changes.
 4.Fixed a segfault in cmd_botcmd.
 5.msg_op now shows OP before STATS log.
+6.Fixed a cosmetic error in cmd_secpass.
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.

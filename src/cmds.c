@@ -701,7 +701,7 @@ static void cmd_secpass(struct userrec *u, int idx, char *par)
   if (strlen(pass) > 15)
     pass[15] = 0;
   set_user(&USERENTRY_SECPASS, u, pass);
-  dprintf(idx, STR("Changed your secpass to: %s.\n"), pass);
+  dprintf(idx, STR("Changed your secpass to: %s\n"), pass);
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
