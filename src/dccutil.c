@@ -682,11 +682,13 @@ void identd_open()
 
   idx = -1;
 
+  identd_hack = 1;
 #ifdef USE_IPV6
   i = open_listen_by_af(&port, AF_INET6);
 #else
   i = open_listen(&port);
 #endif /* USE_IPV6 */
+  identd_hack = 0;
   if (i > 0) {
     idx = new_dcc(&DCC_IDENTD_CONNECT, 0);
     if (idx > 0) {

@@ -46,6 +46,7 @@ union sockaddr_union cached_myip4_so;
 union sockaddr_union cached_myip6_so;
 #endif /* USE_IPV6 */
 
+int     identd_hack = 0;	/* identd_open() won't work on most servers, dont even bother warning. */
 char	firewall[121] = "";	/* Socks server for firewall		    */
 port_t	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
 char	botuser[21] = ""; 	/* Username of the user running the bot    */
@@ -486,8 +487,10 @@ int real_getsock(int options, char *fname, int line)
 
   if (sock >= 0)
     setsock(sock, options);
-  else
+  else if (!identd_hack)
     putlog(LOG_WARNING, "*", "Warning: Can't create new socket! (%s:%d)", fname, line);
+  else if (identd_hack)
+    identd_hack = 0;
   return sock;
 }
 
