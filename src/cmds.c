@@ -1055,25 +1055,17 @@ static void cmd_boot(int idx, char *par)
         dprintf(idx, "No such bot connected.\n");
         return;
       }
-      botnet_send_reject(i, dcc[idx].nick, conf.bot->nick, whonick,
-			 who, par[0] ? par : dcc[idx].nick);
-      putlog(LOG_BOTS, "*", "#%s# boot %s@%s (%s)", dcc[idx].nick, whonick,
-	     who, par[0] ? par : dcc[idx].nick);
+      botnet_send_reject(i, dcc[idx].nick, conf.bot->nick, whonick, who, par[0] ? par : dcc[idx].nick);
+      putlog(LOG_BOTS, "*", "#%s# boot %s@%s (%s)", dcc[idx].nick, whonick, who, par[0] ? par : dcc[idx].nick);
     return;
   }
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, who) && !ok && (dcc[i].type->flags & DCT_CANBOOT)) {
-      u2 = get_user_by_handle(userlist, dcc[i].nick);
-      if (u2 && (u2->flags & USER_OWNER)
-          && egg_strcasecmp(dcc[idx].nick, who)) {
-        dprintf(idx, "You can't boot a bot owner.\n");
+      if (!whois_access(dcc[idx].user, dcc[i].user)) {
+        dprintf(idx, "Sorry, you cannot boot %s.\n", dcc[i].nick);
         return;
       }
-      if (u2 && (u2->flags & USER_MASTER) && !(dcc[idx].user && (dcc[idx].user->flags & USER_MASTER))) {
-        dprintf(idx, "You can't boot a bot master.\n");
-        return;
-      }
-      dprintf(idx, "Booted %s from the party line.\n", dcc[i].nick);
+      dprintf(idx, "Booting %s from the party line.\n", dcc[i].nick);
       putlog(LOG_CMDS, "*", "#%s# boot %s %s", dcc[idx].nick, who, par);
       do_boot(i, dcc[idx].nick, par);
       ok = 1;

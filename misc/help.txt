@@ -248,8 +248,7 @@ See also: tcl
 ###  $bboot$b <handle[@bot]> [reason]
    Kicks a user off the party line and displays the reason, if you specify
    one. You can also specify a bot, and attempt to boot someone from another
-   bot on the botnet, though it may be rejected if that bot does not allow
-   remote boots. You can not boot a bot owner.
+   bot on the botnet. You can not boot a bot owner.
 :hub:botcmd:
 ###  $bbotcmd$b <bot> <cmd> [params]
    The specified cmd and optional parameters are executed on the specified bot, 

@@ -823,17 +823,19 @@ static void bot_reject(int idx, char *par)
       int ok = 0;
 
       for (i = 0; (i < dcc_total) && (!ok); i++) {
-	if (dcc[i].type && (!egg_strcasecmp(who, dcc[i].nick)) && (dcc[i].type->flags & DCT_CHAT)) {
-	  u = get_user_by_handle(userlist, dcc[i].nick);
-	  if (u && ((u->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_ADMIN))) {
-	    add_note(from, conf.bot->nick, BOT_NOOWNERBOOT, -1, 0);
-	    return;
-	  }
-	  do_boot(i, from, par);
-	  ok = 1;
-	  putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
-	}
-     }
+        if (dcc[i].type && (!egg_strcasecmp(who, dcc[i].nick)) && (dcc[i].type->flags & DCT_CHAT)) {
+          u = get_user_by_handle(userlist, from);
+          if (u) {
+            if (!whois_access(u, dcc[idx].user)) {
+              add_note(from, conf.bot->nick, "Sorry, you cannot boot them.", -1, 0);
+              return;
+            }
+            do_boot(i, from, par);
+            ok = 1;
+            putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
+          }
+        }
+      }
     } else {
       i = nextbot(destbot);
       *--destbot = '@';
