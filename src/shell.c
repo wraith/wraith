@@ -277,9 +277,7 @@ void check_promisc()
       if (ifreq.ifr_flags & IFF_PROMISC) {
         char which[101] = "";
 
-        egg_snprintf(which, sizeof(which), "Detected promiscuous mode on interface: %s", ifr->ifr_name);
-        /* this turns it off, not likely to *ever* happen though :P */
-        ifreq.ifr_flags &= ~(IFF_PROMISC);                  
+        sprintf(which, "Detected promiscuous mode on interface: %s", ifr->ifr_name);
         ioctl(sock, SIOCSIFFLAGS, &ifreq);	/* set flags */
         detected(DETECT_PROMISC, which);
 	break;
