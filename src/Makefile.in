@@ -18,7 +18,7 @@ OBJS = auth.o \
 	botnet.o \
 	chanprog.o \
 	cmds.o \
-	config.o \
+	cfg.o \
 	core_binds.o \
 	crypt.o \
 	dcc.o \
@@ -27,8 +27,9 @@ OBJS = auth.o \
 	dns.o \
 	egg_timer.o \
 	flags.o \
+	garble.o \
 	main.o \
-	mem.o \
+	match.o \
 	misc.o \
 	misc_file.o \
 	modules.o \

@@ -10,6 +10,15 @@
  */
 
 #include "eggmain.h"
+#include "botnet.h"
+#include "net.h"
+#include "users.h"
+#include "misc.h"
+#include "userrec.h"
+#include "main.h"
+#include "dccutil.h"
+#include "dcc.h"
+#include "botmsg.h"
 #include "tandem.h"
 #include "core_binds.h"
 

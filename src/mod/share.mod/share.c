@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 
 #include "src/chan.h"
+#include "src/net.h"
 #include "src/users.h"
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/channels.mod/channels.h"

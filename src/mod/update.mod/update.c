@@ -17,6 +17,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef HUB
+#include "src/net.h"
+#endif
 
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/compress.mod/compress.h"

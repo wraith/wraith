@@ -1,4 +1,8 @@
 #include "eggmain.h"
+#include "dccutil.h"
+#include "userrec.h"
+#include "users.h"
+#include "misc.h"
 
 extern cmd_t C_dcc[];
 extern struct dcc_t *dcc;

@@ -7,6 +7,21 @@
  */
 
 #include "eggmain.h"
+#include "dcc.h"
+#include "net.h"
+#include "misc.h"
+#include "users.h"
+#include "userrec.h"
+#include "userent.h"
+#include "match.h"
+#include "dns.h"
+#include "auth.h"
+#include "dccutil.h"
+#include "crypt.h"
+#include "chanprog.h"
+#include "botmsg.h"
+#include "botcmd.h"
+#include "botnet.h"
 #include <ctype.h>
 #include <errno.h>
 #include "modules.h"

@@ -7,6 +7,10 @@
 #ifndef _EGG_USERS_H
 #define _EGG_USERS_H
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 /* List functions :) , next *must* be the 1st item in the struct */
 struct list_type {
   struct list_type *next;
@@ -176,5 +180,25 @@ int def_tcl_set(Tcl_Interp *irp, struct userrec *u,
 void def_display(int idx, struct user_entry *e, struct userrec *u);
 int def_dupuser(struct userrec *new, struct userrec *old,
 		struct user_entry *e);
+
+
+#ifndef MAKING_MODS
+int whois_access(struct userrec *, struct userrec *);
+#ifdef HUB
+void backup_userfile();
+#endif /* HUB */
+void addignore(char *, char *, char *, time_t);
+int delignore(char *);
+void tell_ignores(int, char *);
+int match_ignore(char *);
+void check_expired_ignores();
+void autolink_cycle(char *);
+void tell_file_stats(int, char *);
+void tell_user_ident(int, char *, int);
+void tell_users_match(int, char *, int, int, int, char *);
+int readuserfile(char *, struct userrec **);
+void check_pmode();
+void link_pref_val(struct userrec *u, char *lval);
+#endif /* !MAKING_MODS */
 
 #endif				/* _EGG_USERS_H */

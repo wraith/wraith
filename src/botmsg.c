@@ -8,6 +8,15 @@
  */
 
 #include "eggmain.h"
+#include "misc.h"
+#include "net.h"
+#include "users.h"
+#include "cfg.h"
+#include "botmsg.h"
+#include "dccutil.h"
+#include "cmds.h"
+#include "chanprog.h"
+#include "botnet.h"
 #include "tandem.h"
 #include "core_binds.h"
 
@@ -550,6 +559,7 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
 /* This part of add_note is more relevant to the botnet than
  * to the notes file
  */
+extern int (*storenote)(char *from, char *to, char *msg, int idx, char *who, int bufsize);
 int add_note(char *to, char *from, char *msg, int idx, int echo)
 {
   int status, i, iaway, sock;

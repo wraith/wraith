@@ -26,6 +26,10 @@
 
 /* Just include *all* the include files...it's slower but EASIER */
 #include "src/eggmain.h"
+#include "src/users.h"
+#include "src/types.h"
+#include "src/cfg.h"
+#include "src/cmds.h"
 #include "modvals.h"
 #include "src/tandem.h"
 

@@ -8,6 +8,19 @@
  */
 
 #include "eggmain.h"
+#include "misc.h"
+#include "rfc1459.h"
+#ifdef HUB
+#include "userrec.h"
+#endif
+#include "misc_file.h"
+#include "users.h"
+#include "main.h"
+#include "debug.h"
+#include "dccutil.h"
+#include "chanprog.h"
+#include "botmsg.h"
+#include "bg.h"	
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>

@@ -10,6 +10,16 @@
  */
 
 #include "eggmain.h"
+#include "chanprog.h"
+#include "rfc1459.h"
+#include "net.h"
+#include "misc.h"
+#include "users.h"
+#include "userrec.h"
+#include "main.h"
+#include "debug.h"
+#include "dccutil.h"
+#include "botmsg.h"
 #if HAVE_GETRUSAGE
 #include <sys/resource.h>
 #if HAVE_SYS_RUSAGE_H

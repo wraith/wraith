@@ -6,6 +6,11 @@
 
 #include "eggmain.h"
 #include "users.h"
+#include "misc.h"
+#include "match.h"
+#include "dccutil.h"
+#include "crypt.h"
+#include "botmsg.h"
 
 extern int		 noshare, cfg_noshare, cfg_count;
 extern struct cfg_entry **cfg;

@@ -13,7 +13,20 @@
  */
 
 #include "eggmain.h"
+#ifdef HUB
+#include "misc_file.h"
+#endif
 #include "users.h"
+#include "rfc1459.h"
+#include "userrec.h"
+#include "misc.h"
+#include "cfg.h"
+#include "match.h"
+#include "main.h"
+#include "chanprog.h"
+#include "dccutil.h"
+#include "crypt.h"
+#include "botnet.h"
 #include "chan.h"
 #include "modules.h"
 #include "tandem.h"

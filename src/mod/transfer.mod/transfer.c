@@ -16,6 +16,7 @@
 #include "src/mod/module.h"
 #include "src/mod/update.mod/update.h"
 #include "src/tandem.h"
+#include "src/net.h"
 
 #include "src/users.h"
 #include "transfer.h"

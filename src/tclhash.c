@@ -12,7 +12,7 @@
 #include "eggmain.h"
 #include "chan.h"
 #include "users.h"
-#include "match.c"
+#include "match.h"
 #include "egg_timer.h"
 
 extern struct dcc_t *dcc;

@@ -8,6 +8,12 @@
 
 
 #include "eggmain.h"
+#include "debug.h"
+#include "net.h"
+#include "misc.h"
+#include "userrec.h"
+#include "main.h"
+#include "dccutil.h"
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/types.h>

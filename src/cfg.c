@@ -5,6 +5,12 @@
  */
 
 #include "eggmain.h"
+#include "cfg.h"
+#include "userrec.h"
+#include "misc.h"
+#include "users.h"
+#include "dccutil.h"
+#include "botmsg.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>

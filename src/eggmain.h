@@ -15,8 +15,9 @@
 #include "conf.h"
 #include "salt.h"
 #include "color.h"
+#include "garble.h"
 
-#include "lush.h" /* We seem to need this everywhere... */
+#include "lush.h"
 
 #if (((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION >= 5)) || (TCL_MAJOR_VERSION > 7))
 #  define USE_TCL_EVENTS
@@ -79,14 +80,9 @@
 #  include <zlib.h>
 #endif /* HAVE_ZLIB_H */
 
-#ifndef MAKING_MODS
-#  include "proto.h"
-#endif
-#include "cmdt.h"
 #include "tclegg.h"
 #include "tclhash.h"
 #include "chan.h"
-#include "users.h"
 #include "compat/compat.h"
 
 /* For pre Tcl7.5p1 versions */
@@ -107,8 +103,6 @@ extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_BOT_NEW,
 
 #endif
 
-#define iptolong(a)		(0xffffffff & 				\
-				 (long) (htonl((unsigned long) a)))
 #define fixcolon(x)		do {					\
 	if ((x)[0] == ':')			 			\
 		(x)++;							\

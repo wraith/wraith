@@ -8,6 +8,7 @@
 #define MAKING_CTCP
 #include "ctcp.h"
 #include "src/mod/module.h"
+#include "src/net.h"
 
 #ifdef LEAF
 #include "server.mod/server.h"

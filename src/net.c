@@ -6,7 +6,12 @@
 
 #include <fcntl.h>
 #include "eggmain.h"
-#include "proto.h"
+#include "net.h"
+#include "misc.h"
+#include "main.h"
+#include "debug.h"
+#include "dccutil.h"
+#include "crypt.h"
 #include "traffic.h" /* egg_traffic_t */
 #include <limits.h>
 #include <string.h>

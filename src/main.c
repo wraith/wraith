@@ -7,6 +7,19 @@
  */
 
 #include "eggmain.h"
+#include "main.h"
+#include "misc_file.h"
+#include "net.h"
+#include "users.h"
+#include "misc.h"
+#include "userrec.h"
+#include "cfg.h"
+#include "dccutil.h"
+#include "crypt.h"
+#include "debug.h"
+#include "chanprog.h"
+#include "bg.h"	
+#include "botnet.h"
 #include "build.h"
 #include <libgen.h>
 #include <time.h>
@@ -51,6 +64,8 @@ int leaf = 0;
 int hub = 0;
 int leaf = 1;
 #endif
+
+char *progname();		/* from settings.c */
 
 
 extern char		 origbotname[], userfile[], botnetnick[], packname[],

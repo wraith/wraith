@@ -6,6 +6,16 @@
  */
 
 #include "eggmain.h"
+#include "botcmd.h"
+#include "net.h"
+#include "misc.h"
+#include "userrec.h"
+#include "cfg.h"
+#include "dccutil.h"
+#include "cmds.h"
+#include "chanprog.h"
+#include "botmsg.h"
+#include "botnet.h"
 #include "tandem.h"
 #include "users.h"
 #include "chan.h"

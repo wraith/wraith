@@ -5,6 +5,12 @@
  */
 
 #include "eggmain.h"
+#include "crypt.h"
+#include "rfc1459.h"
+#include "misc.h"
+#include "dccutil.h"
+#include "userent.h"
+#include "users.h"
 
 extern int		 use_console_r, debug_output, noshare,
 			 allow_dk_cmds;

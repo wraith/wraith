@@ -10,6 +10,10 @@
 
 #include <sys/stat.h>
 #include "eggmain.h"
+#include "net.h"
+#include "dccutil.h"
+#include "misc.h"
+#include "botcmd.h"
 #include <errno.h>
 #include "chan.h"
 #include "modules.h"

@@ -8,10 +8,18 @@
 
 #include <sys/stat.h>
 #include "eggmain.h"
+#include "misc_file.h"
+#include "rfc1459.h"
+#include "userrec.h"
+#include "misc.h"
 #include "users.h"
 #include "chan.h"
+#include "match.h"
+#include "dccutil.h"
 #include "modules.h"
 #include "tandem.h"
+#include "chanprog.h"
+#include "crypt.h"
 #include "core_binds.h"
 
 extern struct dcc_t	*dcc;

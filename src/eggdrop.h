@@ -212,10 +212,6 @@
 #  define sigemptyset(x) ((*(int *)(x))=0)
 #endif
 
-#if !HAVE_SOCKLEN_T
-typedef int socklen_t;
-#endif
-
 
 /*
  *    Handy aliases for memory tracking and core dumps
@@ -224,7 +220,9 @@ typedef int socklen_t;
 #define my_bzero(a, b) { char *x = (char *) a; int y = (int) b; while (y--) *x++ = 0; }
 #define killsock(x)	real_killsock((x),__FILE__,__LINE__)
 
+
 #ifdef DEBUG_CONTEXT
+#  include "main.h"
 #  define Context		eggContext(__FILE__, __LINE__, NULL)
 #  define ContextNote(note)	eggContextNote(__FILE__, __LINE__, NULL, note)
 #else
@@ -241,25 +239,6 @@ typedef int socklen_t;
 #  define Assert(expr)	do {	} while (0)
 #endif
 
-/* 32 bit type */
-#if (SIZEOF_INT == 4)
-typedef unsigned int		u_32bit_t;
-#else
-#  if (SIZEOF_LONG == 4)
-typedef unsigned long		u_32bit_t;
-#  else
-#    include "cant/find/32bit/type"
-#  endif
-#endif
-
-typedef unsigned short int	u_16bit_t;
-typedef unsigned char		u_8bit_t;
-
-/* IP type */
-typedef u_32bit_t		IP;
-
-typedef u_32bit_t dword;
-
 #define debug0(x)		putlog(LOG_DEBUG,"*",x)
 #define debug1(x,a1)		putlog(LOG_DEBUG,"*",x,a1)
 #define debug2(x,a1,a2)		putlog(LOG_DEBUG,"*",x,a1,a2)
@@ -275,9 +254,6 @@ typedef u_32bit_t dword;
 #define egg_isupper(x)  isupper((int)  (unsigned char) (x))
 
 /***********************************************************************/
-
-/* It's used in so many places, let's put it here */
-typedef int (*Function) ();
 
 /* Public structure for the listening port map */
 struct portmap {
@@ -316,6 +292,8 @@ struct auth_t {
   time_t authtime;	 /* what time they authed at */
   time_t atime;	         /* when they last were active */
 };
+
+#include "types.h"
 
 struct dcc_t {
   long sock;			/* This should be a long to keep 64-bit
@@ -368,18 +346,6 @@ struct chat_info {
   int current_lines;		/* number of lines total stored		*/
   char *su_nick;
 };
-#define CFGF_GLOBAL  1          /* Accessible as .config */
-#define CFGF_LOCAL   2          /* Accessible as .botconfig */
-
-typedef struct cfg_entry {
-  char *name;
-  int flags;
-  char *gdata;
-  char *ldata;
-  void (*globalchanged) (struct cfg_entry *, char *oldval, int *valid);
-  void (*localchanged) (struct cfg_entry *, char *oldval, int *valid);
-  void (*describe) (struct cfg_entry *, int idx);
-} cfg_entry_T;
 
 struct file_info {
   struct chat_info *chat;
@@ -571,11 +537,6 @@ struct dupwait_info {
 #define FLOOD_CHAN_MAX   7
 #define FLOOD_GLOBAL_MAX 3
 
-/* For local console: */
-#define STDIN      0
-#define STDOUT     1
-#define STDERR     2
-
 #ifdef S_LASTCHECK
 #define DETECT_LOGIN 1
 #endif
@@ -600,18 +561,6 @@ struct dupwait_info {
 
 #define CONNECT_SSL 1
 #define ACCEPT_SSL 2
-
-/* Structure for internal logs */
-typedef struct {
-  char *filename;
-  unsigned int mask;		/* what to send to this log		    */
-  char *chname;			/* which channel			    */
-  char szlast[LOGLINELEN];	/* for 'Last message repeated n times'
-				   stuff in misc.c/putlog() <cybah>	    */
-  int repeats;			/* number of times szLast has been repeated */
-  unsigned int flags;		/* other flags <rtc>			    */
-  FILE *f;			/* existing file			    */
-} log_t;
 
 /* Logfile display flags
  */

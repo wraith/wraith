@@ -420,6 +420,7 @@ fprintf(f, " \
 #include <stdlib.h> \n\
 #include <string.h> \n\
 #include \"eggmain.h\"\n\
+#include \"debug.h\"\n\
 \n\
 char packname[512], shellhash[33], bdhash[33], dcc_prefix[2], *owners, *hubs, *owneremail;\n\n\
 char *progname() {\n\
@@ -448,9 +449,9 @@ fprintf(f, " \
 fprintf(f, " \n\n\
 int init_settings()\n\
 {\n\
-  owners = my_malloc(strlen(_OWNERS) + 1);\n\
-  hubs = my_malloc(strlen(_HUBS) + 1);\n\
-  owneremail = my_malloc(strlen(_OWNEREMAIL) + 1);\n\
+  owners = malloc(strlen(_OWNERS) + 1);\n\
+  hubs = malloc(strlen(_HUBS) + 1);\n\
+  owneremail = malloc(strlen(_OWNEREMAIL) + 1);\n\
 \n\
   sprintf(owners, _OWNERS);\n\
   sprintf(hubs, _HUBS);\n\

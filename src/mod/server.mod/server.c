@@ -8,6 +8,7 @@
 #define MODULE_NAME "server"
 #define MAKING_SERVER
 #include "src/mod/module.h"
+#include "src/net.h"
 #include "server.h"
 
 static Function *global = NULL;

@@ -1,44 +1,14 @@
 /*
- * mem.c -- handles:
- *   memory allocation and deallocation
+ * garble.c -- handles:
  *   garble strings
  *
  */
 
 #include "eggmain.h"
-
+#include "garble.h"
+#include "main.h"
 
 #define STR(x) x
-
-void *my_malloc(int size)
-{
-  void *x;
-
-  x = (void *) malloc(size);
-  if (x == NULL) 
-    fatal("Memory allocation failed", 0);
-  return x;
-}
-
-void *my_realloc(void *ptr, int size)
-{
-  void *x;
-
-  if (!ptr)
-    return my_malloc(size);
-
-  x = (void *) realloc(ptr, size);
-  if (x == NULL && size > 0)
-    return NULL;
-  return x;
-}
-
-void my_free(void *ptr)
-{
-  if (ptr == NULL)
-    return;
-  free(ptr);
-}
 
 #ifdef S_GARBLESTRINGS
 #define GARBLE_BUFFERS 40
