@@ -48,17 +48,21 @@ tellconf(conf_t * inconf)
   sdprintf("bots:\n");
   for (bot = inconf->bots; bot && bot->nick; bot = bot->next) {
     i++;
-    sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
+    sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d PID: %d\n", i,
              bot->nick,
              bot->net.ip ? bot->net.ip : "",
-             bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", bot->pid);
+             bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
+             bot->net.v6,
+             bot->pid);
   }
   sdprintf("bot:\n");
   if (inconf->bot && ((bot = inconf->bot)))
-    sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n",
+    sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d PID: %d\n",
              bot->nick,
              bot->net.ip ? bot->net.ip : "",
-             bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", bot->pid);
+             bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
+             bot->net.v6,
+             bot->pid);
 }
 
 #ifdef LEAF
@@ -374,6 +378,9 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
     bot->net.ip = strdup(ip);
   if (ip6 && strcmp(ip6, ".") && is_dotted_ip(ip) == AF_INET6)
     bot->net.ip6 = strdup(ip6);
+
+  if (bot->net.ip6 || bot->net.host6)
+    bot->net.v6 = 1;
 
   bot->u = NULL;
   bot->pid = checkpid(nick, bot);
@@ -752,6 +759,7 @@ conf_bot_dup(conf_bot * dest, conf_bot * src)
   dest->net.host = src->net.host ? strdup(src->net.host) : NULL;
   dest->net.ip6 = src->net.ip6 ? strdup(src->net.ip6) : NULL;
   dest->net.host6 = src->net.host6 ? strdup(src->net.host6) : NULL;
+  dest->net.v6 = src->net.v6;
   dest->u = src->u ? src->u : NULL;
   dest->pid = src->pid;
 #ifdef LEAF

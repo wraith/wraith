@@ -1413,8 +1413,28 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
   }
 
   addr_t addr;
+  char *ip = NULL;
 
-  get_addr(ips[0], &addr);
+
+  /* FIXME: this is a temporary hack to stop bots from connecting over ipv4 when they should be on ipv6
+   * eventually will handle this in open_telnet(ips);
+   */
+  if (conf.bot->net.v6) {
+    int i = 0;
+    for (i = 0; ips[i]; i++) {
+      if (is_dotted_ip(ips[i]) == AF_INET6) {
+        ip = ips[i];
+        break;
+      }
+    }
+    if (!ip) {
+      putlog(LOG_SERV, "*", "Failed connect to %s (Could not DNS as IPV6)", host);
+      return;
+    }
+  } else
+    ip = ips[0];
+
+  get_addr(ip, &addr);
  
   if (addr.family == AF_INET)
     dcc[idx].addr = htonl(addr.u.addr.s_addr);

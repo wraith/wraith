@@ -12,7 +12,7 @@ typedef struct conf_net_b {
   char *host6;
   char *ip;
   char *ip6;
-  int family;
+  bool v6;
 } conf_net;  
 
 typedef struct conf_bot_b {
