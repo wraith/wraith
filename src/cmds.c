@@ -1871,12 +1871,13 @@ static void cmd_conf(int idx, char *par)
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
       i++;
       if (!listbot || (listbot && !strcmp(listbot, bot->nick)))
-        dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
+        dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s HUB: %d PID: %d\n", i,
                       bot->nick,
                       bot->net.ip ? bot->net.ip : "",
                       bot->net.host ? bot->net.host : "",
                       bot->net.ip6 ? bot->net.ip6 : "",
                       bot->net.host6 ? bot->net.host6 : "",
+                      bot->hub
                       bot->pid);
     }
   }
