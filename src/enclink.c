@@ -233,11 +233,7 @@ void ghost_parse(int idx, int snum, char *buf)
     socklist[snum].oseed = atoi(buf);
     putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
     free(tmp);
-    if (dcc[idx].newbot)
-      link_done(idx);
-    else
-/* FIXME: remove after 1.2.2 */
-      dprintf(idx, "elinkdone\n");
+    link_done(idx);
   }
 }
 
@@ -251,10 +247,7 @@ void link_send(int idx, char *format, ...)
   va_end(va);
   remove_crlf(s);
 
-  if (dcc[idx].newbot) 
-    dprintf(idx, "neg! %s\n", s);
-  else
-    dprintf(idx, "%s\n", s);
+  dprintf(idx, "neg! %s\n", s);
 }
 
 void link_done(int idx)

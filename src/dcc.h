@@ -52,7 +52,6 @@ struct dcc_t {
   int msgc;			/* forward the output back to irc? */
   int whowas;
   int dns_id;
-  int newbot;		/*FIXME: remove after 1.2.2 */
   port_t port;
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
