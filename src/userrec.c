@@ -518,7 +518,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
 
     fr.global = u->flags;
     build_flags(xx, &fr, 0);
-    shareout(NULL, "n %s %s %s %s\n", handle, host && host[0] ? host : "none", pass, xx);
+    shareout(NULL, "n %s%s %s %s %s\n", bot ? "-" : "", handle, host && host[0] ? host : "none", pass, xx);
   }
   if (bu == NULL)
     bu = u;
