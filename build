@@ -197,20 +197,22 @@ else
 fi
 _build
 
+if [ $bzip = "1" ]; then
+  zip="j"
+  ext="bz2"
+else
+  zip="z"
+  ext="gz"
+fi
+
 # Wrap it nicely up into an archive
 if [ $nopkg = "0" -o $pkg = "1" ]; then
   echo "[*] Packaging..."
-  if [ $bzip = "1" ]; then
-    zip="j"
-    ext="bz2"
-  else
-    zip="z"
-    ext="gz"
-  fi
   #This MALLOC business is to not Abort 'tar' due to some bug it has.
   tmp=${MALLOC_CHECK_}
   unset MALLOC_CHECK_
-  tar -c${zip}f ${PACKNAME}.$os-$ver${d}.tar.${ext} *.$os-$ver${d}
+  tar -c${zip}f ${PACKNAME}.$os-$ver${d}.tar.${ext} hub.$os-$ver${d} leaf.$os-$ver${d}
+  chmod 0644 ${PACKNAME}.$os-$ver${d}.tar.${ext}
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
@@ -220,8 +222,22 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
   echo "Binaries are now in '${PACKNAME}.$os-$ver${d}.tar.${ext}'."
  
   if ! [ $scp = 0 ]; then
-    scp -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
+    scp -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
   fi
+elif ! [ $scp = 0 ]; then
+  cp hub hub.$os-$ver${d}-${builddate} > /dev/null 2>&1
+  cp leaf leaf.$os-$ver${d}-${builddate} > /dev/null 2>&1
+  #This MALLOC business is to not Abort 'tar' due to some bug it has.
+  tmp=${MALLOC_CHECK_}
+  unset MALLOC_CHECK_
+  tar -c${zip}f $os-$ver${d}-${builddate}.tar.${ext} hub.$os-$ver${d}-${builddate} leaf.$os-$ver${d}-${builddate}
+  chmod 0644 $os-$ver${d}-${builddate}.tar.${ext}
+  if test -n "$tmp"; then
+    declare -x MALLOC_CHECK_=$tmp
+  fi
+  scp -p -C $os-$ver${d}-${builddate}.tar.${ext} $scp
+  rm -rf $os-$ver${d}-${builddate}.tar.${ext} hub.$os-$ver${d}-${builddate} leaf.$os-$ver${d}-${builddate}
 fi
-  exit 0
 
+
+exit 0
