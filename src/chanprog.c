@@ -517,6 +517,7 @@ void chanprog()
 {
   /* char buf[2048] = ""; */
   struct bot_addr *bi = NULL;
+  struct utsname un;
 
   admin[0] = 0;
   /* cache our ip on load instead of every 30 seconds */
@@ -566,6 +567,12 @@ void chanprog()
     my_port = bi->telnet_port;
 #endif /* HUB */
   }
+
+  /* set our shell info */
+  uname(&un);  
+  set_user(&USERENTRY_OS, conf.bot->u, un.sysname);
+  set_user(&USERENTRY_USERNAME, conf.bot->u, conf.username);
+  set_user(&USERENTRY_NODENAME, conf.bot->u, un.nodename);
 
   trigger_cfg_changed();
 

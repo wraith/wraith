@@ -659,7 +659,7 @@ void backup_userfile()
  * $$#chan channel Invites
  */
 
-int readuserfile(char *file, struct userrec **ret)
+int readuserfile(const char *file, struct userrec **ret)
 {
   char *p = NULL, buf[1024] = "", lasthand[512] = "", *attr = NULL, *pass = NULL;
   char *code = NULL, s1[1024] = "", *s = NULL, cbuf[1024] = "", *temps = NULL, ignored[512] = "";
@@ -689,7 +689,7 @@ int readuserfile(char *file, struct userrec **ret)
   s = buf;
   fgets(cbuf, 180, f);
   temps = (char *) decrypt_string(SALT1, cbuf);
-  egg_snprintf(s, 180, temps);
+  egg_snprintf(s, 180, "%s", temps);
   free(temps);
   if (s[1] < '4') {
     fatal(USERF_OLDFMT, 0);
@@ -700,7 +700,7 @@ int readuserfile(char *file, struct userrec **ret)
     s = buf;
     fgets(cbuf, 1024, f);
     temps = (char *) decrypt_string(SALT1, cbuf);
-    egg_snprintf(s, 1024, temps);
+    egg_snprintf(s, 1024, "%s", temps);
     free(temps);
     if (!feof(f)) {
       line++;
