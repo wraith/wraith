@@ -9,6 +9,7 @@
 /* Keep track of tandem-bots in the chain */
 typedef struct tand_t_struct {
   char bot[HANDLEN + 1];
+  char *not_chans;
   struct tand_t_struct *via;
   struct tand_t_struct *uplink;
   struct tand_t_struct *next;
