@@ -85,6 +85,7 @@ static void cmd_clearqueue(int idx, char *par)
     msgq_clear(&mq);
     msgq_clear(&hq);
     burst = 0;
+    double_warned = 0;
     dprintf(idx, "Removed %d message%s from all queues.\n", msgs, 
         (msgs != 1) ? "s" : "");
   } else if (!egg_strcasecmp(par, "mode")) {
@@ -92,11 +93,13 @@ static void cmd_clearqueue(int idx, char *par)
     msgq_clear(&modeq);
     if (mq.tot == 0)
       burst = 0;
+    double_warned = 0;
     dprintf(idx, "Removed %d message%s from the mode queue.\n", msgs, 
         (msgs != 1) ? "s" : "");
   } else if (!egg_strcasecmp(par, "help")) {
     msgs = hq.tot;
     msgq_clear(&hq);
+    double_warned = 0;
     dprintf(idx, "Removed %d message%s from the help queue.\n", msgs,
         (msgs != 1) ? "s" : "");
   } else if (!egg_strcasecmp(par, "server")) {
@@ -104,6 +107,7 @@ static void cmd_clearqueue(int idx, char *par)
     msgq_clear(&mq);
     if (modeq.tot == 0)
       burst = 0;
+    double_warned = 0;
     dprintf(idx, "Removed %d message%s from the server queue.\n", msgs,
         (msgs != 1) ? "s" : "");
   } else {

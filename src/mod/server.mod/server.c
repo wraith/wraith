@@ -71,6 +71,11 @@ static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 
+static bool double_mode = 0;		/* allow a msgs to be twice in a queue? */
+static bool double_server = 0;
+static bool double_help = 0;
+static bool double_warned = 0;
+
 static void empty_msgq(void);
 static void next_server(int *, char *, port_t *, char *);
 static void disconnect_server(int, int);
@@ -483,6 +488,7 @@ void queue_server(int which, char *buf, int len)
   struct msgq_head *h = NULL, tempq;
   struct msgq *q = NULL;
   int qnext = 0;
+  bool doublemsg = 0;
 
   switch (which) {
   case DP_MODE_NEXT:
@@ -491,6 +497,8 @@ void queue_server(int which, char *buf, int len)
   case DP_MODE:
     h = &modeq;
     tempq = modeq;
+    if (double_mode)
+      doublemsg = 1;
     break;
 
   case DP_SERVER_NEXT:
@@ -499,6 +507,8 @@ void queue_server(int which, char *buf, int len)
   case DP_SERVER:
     h = &mq;
     tempq = mq;
+    if (double_server)
+      doublemsg = 1;
     break;
 
   case DP_HELP_NEXT:
@@ -507,6 +517,8 @@ void queue_server(int which, char *buf, int len)
   case DP_HELP:
     h = &hq;
     tempq = hq;
+    if (double_help)
+      doublemsg = 1;
     break;
 
   default:
@@ -515,6 +527,22 @@ void queue_server(int which, char *buf, int len)
   }
 
   if (h->tot < maxqmsg) {
+    /* Don't queue msg if it's already queued?  */
+    if (!doublemsg) {
+      for (tq = tempq.head; tq; tq = tqq) {
+	tqq = tq->next;
+	if (!egg_strcasecmp(tq->msg, buf)) {
+	  if (!double_warned) {
+	    if (buf[len - 1] == '\n')
+	      buf[len - 1] = 0;
+	    debug1("msg already queued. skipping: %s", buf);
+	    double_warned = 1;
+	  }
+	  return;
+	}
+      }
+    }
+
     q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
     if (qnext)
       q->next = h->head;
@@ -533,6 +561,7 @@ void queue_server(int which, char *buf, int len)
     strlcpy(q->msg, buf, len + 1);
     h->tot++;
     h->warned = 0;
+    double_warned = 0;
   } else {
     if (!h->warned) {
       switch (which) {   
