@@ -396,7 +396,7 @@ static bool check_bin_initialized(const char *fname)
   return 0;
 }
 
-void write_settings(const char *fname, int die, int conf)
+void write_settings(const char *fname, int die, bool conf)
 {
   MD5_CTX ctx;
   char *hash = NULL;
