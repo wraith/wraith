@@ -609,16 +609,18 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
         char pass[17] = "";
 
         dprintf(idx, "******************************************************************** \
-                      \n \n \n%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n",
-                     FLASH(idx), FLASH_END(idx));
+\n \n \n%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n",
+                     FLASH(-1), FLASH_END(-1));
         make_rand_str(pass, 16);
         set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
 #ifdef HUB
         write_userfile(idx);
 #endif /* HUB */
         dprintf(idx, "Your secpass is now: %s%s%s\nMake sure you do not lose this, as it is \
-                     needed to login for now on.\n \n*******************************************************\n", 
-                    BOLD(idx), BOLD_END(idx));
+needed to login for now on.\n \n********************************************************************\n", 
+                    pass,
+                    BOLD(-1), 
+                    BOLD_END(-1));
       }
       dcc_chatter(idx);
 #ifdef S_DCCAUTH
