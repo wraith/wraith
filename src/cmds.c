@@ -639,7 +639,7 @@ static void cmd_newpass(struct userrec *u, int idx, char *par)
     return;
 
   set_user(&USERENTRY_PASS, u, pass);
-  dprintf(idx, STR("Changed your password to: %s.\n"), pass);
+  dprintf(idx, STR("Changed your password to: %s\n"), pass);
 }
 
 static void cmd_secpass(struct userrec *u, int idx, char *par)
