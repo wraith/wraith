@@ -20,6 +20,7 @@ This is a summary of ChangeLog basically.
 17.Removed some redundant system calls in getin system.
 18.Fixed bots asking bots for ops in a chan where the op-bot is +d
 19.Changed cosmetics of ADDRESS: display in .whois for bots.
+20.cmd_match/cmd_userlist allowed getting around cmd_whois security checks.
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.

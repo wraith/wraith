@@ -232,6 +232,7 @@ void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 
 /* misc.c */
+int whois_access(struct userrec *, struct userrec *);
 void baduname(char *, char *);
 int email(char *, char *, int);
 char *color(int, int, int);

@@ -542,8 +542,6 @@ void tell_user_ident(int idx, char *id, int master)
   char format[81];
   struct userrec *u;
   struct flag_record user = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  int noax = 0;
 
   get_user_flagrec(dcc[idx].user, &user, NULL);
 
@@ -551,16 +549,7 @@ void tell_user_ident(int idx, char *id, int master)
   if (u == NULL)
     u = get_user_by_host(id);
 
-  if (u) {
-    get_user_flagrec(u, &fr, NULL);
-
-    if (glob_master(fr) && !glob_master(user)) { u = dcc[idx].user; noax = 1; }
-    else if (glob_owner(fr) && !glob_owner(user)) { u = dcc[idx].user; noax = 1; }
-    else if (glob_admin(fr) && !glob_admin(user)) { u = dcc[idx].user; noax = 1; }
-    else if (glob_bot(fr) && !glob_master(user)) { u = dcc[idx].user; noax = 1; }
-  }
-
-  if (u == NULL || noax) {
+  if (u == NULL || (u && !whois_access(dcc[idx].user, u))) {
     dprintf(idx, "%s.\n", USERF_NOMATCH);
     return;
   }
@@ -608,7 +597,9 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
     flags = 1;
   }
   for (u = userlist; u; u = u->next) {
-    if (flags) {
+    if (!whois_access(dcc[idx].user, u)) {
+      continue;
+    } else if (flags) {
       get_user_flagrec(u, &user, chname);
       if (flagrec_eq(&pls, &user)) {
 	if (nomns || !flagrec_eq(&mns, &user)) {
