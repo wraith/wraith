@@ -61,9 +61,9 @@ struct laston_info {
 };
 
 struct bot_addr {
-  unsigned int telnet_port;
-  unsigned int relay_port;
-  unsigned int hublevel;
+  port_t telnet_port;
+  port_t relay_port;
+  unsigned short hublevel;
   char *address;
   char *uplink;
   unsigned int roleid;

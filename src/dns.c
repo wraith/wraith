@@ -259,7 +259,7 @@ void call_ipbyhost(char *hostn, IP ip, int ok)
 void block_dns_hostbyip(IP ip)
 {
   struct hostent *hp = NULL;
-  unsigned long addr = htonl(ip);
+  IP addr = htonl(ip);
   static char s[UHOSTLEN] = "";
 
   if (!setjmp(alarmret)) {

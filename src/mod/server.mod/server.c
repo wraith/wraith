@@ -62,7 +62,7 @@ static int strict_servernames;	/* don't update server list */
 static struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 int cycle_time;			/* cycle time till next server connect */
-unsigned int default_port;		/* default IRC port */
+port_t default_port;		/* default IRC port */
 static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
 int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp;		/* answer how many stacked ctcp's ? */
@@ -86,7 +86,7 @@ static int optimize_kicks;
 
 
 static void empty_msgq(void);
-static void next_server(int *, char *, unsigned int *, char *);
+static void next_server(int *, char *, port_t *, char *);
 static void disconnect_server(int, int);
 static int calc_penalty(char *);
 static int fast_deq(int);
@@ -1110,7 +1110,7 @@ struct cfg_entry CFG_REALNAME = {
  *
  * -> if (*ptr == -1) then jump to that particular server
  */
-static void next_server(int *ptr, char *servname, unsigned int *port, char *pass)
+static void next_server(int *ptr, char *servname, port_t *port, char *pass)
 {
   struct server_list *x = serverlist;
   int i = 0;

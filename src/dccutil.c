@@ -570,7 +570,7 @@ void do_boot(int idx, char *by, char *reason)
 int listen_all(int lport, int off)
 {
   int i, idx = (-1);
-  unsigned int port, realport;
+  port_t port, realport;
 #ifdef USE_IPV6
   int i6 = 0;
 #endif /* USE_IPV6 */
@@ -676,7 +676,8 @@ int listen_all(int lport, int off)
 
 void identd_open()
 {
-  int idx = -1, port = 113, i = -1;
+  int idx = -1, i = -1;
+  port_t port = 113;
 
   for (idx = 0; idx < dcc_total; idx++)
     if (dcc[idx].type == &DCC_IDENTD_CONNECT)

@@ -31,7 +31,7 @@ struct dcc_t {
 #ifdef USE_IPV6
   char addr6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */
 #endif /* USE_IPV6 */
-  unsigned int port;
+  port_t port;
   int ssl;                      /* use ssl on this dcc? */
   struct userrec *user;
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
@@ -106,14 +106,14 @@ struct bot_info {
   char linker[NOTENAMELEN + 1]; /* who requested this link              */
   int  numver;
   char sysname[121];
-  unsigned int port;            /* base port                            */
+  port_t port;		        /* base port                            */
   int  uff_flags;               /* user file feature flags              */
 };
 
 struct relay_info {
   struct chat_info *chat;
   int sock;
-  unsigned int port;
+  port_t port;
   int old_status;
 };
 

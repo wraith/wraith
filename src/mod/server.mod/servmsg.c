@@ -1153,7 +1153,7 @@ static void connect_server(void)
   char pass[121] = "", botserver[UHOSTLEN] = "";
   static int oldserv = -1;
   int newidx;
-  unsigned int botserverport = 0;
+  port_t botserverport = 0;
 
   waiting_for_awake = 0;
   /* trying_server = now; */

@@ -24,7 +24,7 @@ struct server_list {
   struct server_list	*next;
 
   char			*name;
-  unsigned int		 port;
+  port_t		 port;
   char			*pass;
   char			*realname;
 };
@@ -52,7 +52,7 @@ extern int 		serv, servidx, cycle_time, newserverport,
 			nick_len, checked_hostmask, ctcp_mode, quiet_reject,
 			flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time,
 			answer_ctcp, trigger_on_ignore;
-extern unsigned int	default_port;
+extern port_t		default_port;
 extern time_t		server_online;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[];

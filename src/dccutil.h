@@ -8,8 +8,8 @@
 
 /* Public structure for the listening port map */
 struct portmap {
-  unsigned int realport;
-  unsigned int mappedto;
+  port_t realport;
+  port_t mappedto;
   struct portmap *next;
 };
 

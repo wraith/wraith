@@ -47,7 +47,7 @@ union sockaddr_union cached_myip6_so;
 #endif /* USE_IPV6 */
 
 char	firewall[121] = "";	/* Socks server for firewall		    */
-int	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
+port_t	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
 char	botuser[21] = ""; 	/* Username of the user running the bot    */
 int     resolve_timeout = 10;   /* hostname/address lookup timeout */
 sock_list *socklist = NULL;	/* Enough to be safe			    */
@@ -625,12 +625,12 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
  *   -1  neterror() type error
  *   -2  can't resolve hostname
  */
-int open_telnet_raw(int sock, char *server, unsigned int sport)
+int open_telnet_raw(int sock, char *server, port_t sport)
 {
   union sockaddr_union so;
   char host[121] = "";
   int i, error = 0, rc;
-  unsigned int port;
+  port_t port;
   volatile int proxy;
 
   /* firewall?  use socks */
@@ -710,7 +710,7 @@ int open_telnet_raw(int sock, char *server, unsigned int sport)
 }
 
 /* Ordinary non-binary connection attempt */
-int open_telnet(char *server, unsigned int port)
+int open_telnet(char *server, port_t port)
 {
 #ifdef USE_IPV6
   int sock = getsock(0, hostprotocol(server)) , ret = open_telnet_raw(sock, server, port);
@@ -727,7 +727,7 @@ int open_telnet(char *server, unsigned int port)
  * 'addr' is ignored if af_def is AF_INET6 -poptix (02/03/03)
  */
 #ifdef USE_IPV6
-int open_address_listen(IP addr, int af_def, unsigned int *port)
+int open_address_listen(IP addr, int af_def, port_t *port)
 #else
 int open_address_listen(IP addr, int *port)
 #endif /* USE_IPV6 */
@@ -808,7 +808,7 @@ int open_address_listen(IP addr, int *port)
 /* Returns a socket number for a listening socket that will accept any
  * connection -- port # is returned in port
  */
-inline int open_listen(unsigned int *port)
+inline int open_listen(port_t *port)
 {
 #ifdef USE_IPV6
   return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, AF_INET, port);
@@ -821,7 +821,7 @@ inline int open_listen(unsigned int *port)
  * the above is being left in for compatibility, and should NOT LONGER BE USED IN THE CORE CODE.
  */
 
-inline int open_listen_by_af(unsigned int *port, int af_def)
+inline int open_listen_by_af(port_t *port, int af_def)
 {
 #ifdef USE_IPV6
   return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, af_def, port);
@@ -904,10 +904,10 @@ int ssl_link(register int sock, int state)
  * NOTE: This function is depreciated. Try using the async dns approach
  *       instead.
  */
-char *hostnamefromip(unsigned long ip)
+char *hostnamefromip(IP ip)
 {
   struct hostent *hp = NULL;
-  unsigned long addr = ip;
+  IP addr = ip;
   unsigned char *p = NULL;
   static char s[UHOSTLEN] = "";
 
@@ -943,8 +943,7 @@ char *iptostr(IP ip)
  * by open_listen ... returns hostname of the caller & the new socket
  * does NOT dispose of old "public" socket!
  */
-int answer(int sock, char *caller, unsigned long *ip, unsigned short *port,
-	   int binary)
+int answer(int sock, char *caller, IP *ip, port_t *port, int binary)
 {
   int new_sock;
   unsigned int addrlen;
@@ -1770,7 +1769,7 @@ int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
 
   char badaddress[16] = "";
   IP ip = my_atoul(ipaddy);
-  int prt = atoi(port);
+  port_t prt = (port_t) atoi(port);
 
   /* It is disabled HERE so we only have to check in *one* spot! */
   if (!dcc_sanitycheck)
@@ -1781,7 +1780,7 @@ int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
 	   nick, from, prt);
     return 0;
   }
-  sprintf(badaddress, "%u.%u.%u.%u", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
+  sprintf(badaddress, "%lu.%lu.%lu.%lu", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
 	  (ip >> 8) & 0xff, ip & 0xff);
   if (ip < (1 << 24)) {
     putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible IP of %s!",
@@ -1802,7 +1801,7 @@ int hostsanitycheck_dcc(char *nick, char *from, IP ip, char *dnsname,
   /* It is disabled HERE so we only have to check in *one* spot! */
   if (!dcc_sanitycheck)
     return 1;
-  sprintf(badaddress, "%u.%u.%u.%u", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
+  sprintf(badaddress, "%lu.%lu.%lu.%lu", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
 	  (ip >> 8) & 0xff, ip & 0xff);
   /* These should pad like crazy with zeros, since 120 bytes or so is
    * where the routines providing our data currently lose interest. I'm
