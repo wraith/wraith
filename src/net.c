@@ -490,7 +490,7 @@ int real_getsock(int options, char *fname, int line)
   if (sock >= 0)
     setsock(sock, options);
   else
-    putlog(LOG_MISC, "*", "Warning: Can't create new socket! (%s:%d)", fname, line);
+    putlog(LOG_WARNING, "*", "Warning: Can't create new socket! (%s:%d)", fname, line);
   return sock;
 }
 
