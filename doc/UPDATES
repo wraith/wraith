@@ -28,6 +28,7 @@ This is a summary of ChangeLog basically.
 25.Fixed a bug with .config msginvite.
 26.Added a config option for msgident.
 27.Changed bad op-cookie (TS) to LOG_DEBUG.
+28.cmd_newleaf now modifies USERENTRY_ADDED for .whois
 
 1.0.13
 1.Fixed a fatal bug in console_gotshare()

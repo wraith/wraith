@@ -3039,6 +3039,7 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
     else if (strchr(BADHANDCHARS, handle[0]) != NULL)
       dprintf(idx, STR("You can't start a botnick with '%c'.\n"), handle[0]);
     else {
+      char tmp[81];
       userlist = adduser(userlist, handle, STR("none"), "-", USER_BOT | USER_OP);
       u1 = get_user_by_handle(userlist, handle);
       bi = user_malloc(sizeof(struct bot_addr));
@@ -3059,6 +3060,8 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
         host = newsplit(&par);
       }
       /* set_user(&USERENTRY_PASS, u1, SALT2); */
+      sprintf(tmp, STR("%lu %s"), time(NULL), u->handle);
+      set_user(&USERENTRY_ADDED, u1, tmp);
       dprintf(idx, STR("Added new leaf: %s\n"), handle);
 #ifdef HUB
       write_userfile(idx);
