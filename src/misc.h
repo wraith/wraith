@@ -29,6 +29,7 @@ char *stristr(char *, char *);
 void splitc(char *, char *, char);
 void splitcn(char *, char *, char, size_t);
 void remove_crlf(char *);
+void remove_crlf_r(char *);
 char *newsplit(char **);
 char *splitnick(char **);
 void stridx(char *, char *, int);

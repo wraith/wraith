@@ -124,14 +124,34 @@ char *splitnick(char **blah)
   return "";
 }
 
-void remove_crlf(char *line)
+int remove_crlf(char *line)
 {
   char *p = NULL;
+  int removed = 0;
 
-  if ((p = strchr(line, '\n')))
+  if ((p = strchr(line, '\n'))) {
     *p = 0;
-  if ((p = strchr(line, '\r')))
+    removed++
+  } if ((p = strchr(line, '\r')))
     *p = 0;
+    removed++;
+  }
+  return removed;
+}
+
+int remove_crlf_r(char *line)
+{
+  char *p = NULL;
+  int removed = 0;
+
+  if ((p = strrchr(line, '\n'))) {
+    *p = 0;
+    removed++
+  } if ((p = strrchr(line, '\r')))
+    *p = 0;
+    removed++;
+  }
+  return removed;
 }
 
 char *newsplit(char **rest)
