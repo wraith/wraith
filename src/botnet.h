@@ -17,13 +17,15 @@ void answer_local_whom(int, int);
 char *lastbot(char *);
 int nextbot(char *);
 int in_chain(char *);
+#ifdef HUB
 void tell_bots(int);
-void tell_bottree(int, int);
+void tell_bottree(int);
+void dump_links(int);
+#endif /* HUB */
 int botlink(char *, int, char *);
 int botunlink(int, char *, char *);
-void dump_links(int);
-void addbot(char *, char *, char *, char, int);
-void updatebot(int, char *, char, int);
+void addbot(char *, char *, char *, char, int, time_t, char *);
+void updatebot(int, char *, char, int, time_t, char *);
 void rembot(char *);
 struct tand_t_struct *findbot(char *);
 void unvia(int, struct tand_t_struct *);

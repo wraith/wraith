@@ -343,12 +343,12 @@ void botnet_send_unlinked(int idx, char *bot, char *args)
   }
 }
 
-void botnet_send_nlinked(int idx, char *bot, char *next, char flag, int vernum)
+void botnet_send_nlinked(int idx, char *bot, char *next, char flag, int vlocalhub, time_t vbuildts, char *vversion)
 {
   size_t len;
 
   if (tands > 0) {
-    len = simple_sprintf(OBUF, "n %s %s %c%D\n", bot, next, flag, vernum);
+    len = simple_sprintf(OBUF, "n %s %s %cD0gc %d %d %s\n", bot, next, flag, vlocalhub, vbuildts, vversion ? vversion : "");
     send_tand_but(idx, OBUF, len);
   }
 }
@@ -374,7 +374,9 @@ void botnet_send_update(int idx, tand_t * ptr)
   size_t len;
 
   if (tands > 0) {
-    len = simple_sprintf(OBUF, "u %s %c%D\n", ptr->bot, ptr->share, ptr->ver);
+    /* the D0gc is a lingering hack which probably will never be able to come out. */
+    len = simple_sprintf(OBUF, "u %s %cD0gc %d %d %s\n", ptr->bot, ptr->share, ptr->localhub, 
+                                                          ptr->buildts, ptr->version ? ptr->version : "");
     send_tand_but(idx, OBUF, len);
   }
 }

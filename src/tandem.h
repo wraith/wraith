@@ -13,7 +13,9 @@ typedef struct tand_t_struct {
   struct tand_t_struct *via;
   struct tand_t_struct *uplink;
   struct tand_t_struct *next;
-  int ver;
+  char *version;
+  time_t buildts;
+  int localhub;
   char share;
 } tand_t;
 
@@ -55,7 +57,7 @@ void botnet_send_trace(int, char *, char *, char *);
 void botnet_send_unlink(int, char *, char *, char *, char *);
 void botnet_send_link(int, char *, char *, char *);
 void botnet_send_update(int, tand_t *);
-void botnet_send_nlinked(int, char *, char *, char, int);
+void botnet_send_nlinked(int, char *, char *, char, int, time_t, char *);
 void botnet_send_reject(int, char *, char *, char *, char *, char *);
 void botnet_send_zapf(int, char *, char *, char *);
 void botnet_send_zapf_broad(int, char *, char *, char *);
@@ -75,7 +77,5 @@ void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char 
 void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
 
 #define b_status(a)	(dcc[a].status)
-#define b_version(a)	(dcc[a].u.bot->version)
-#define b_linker(a)	(dcc[a].u.bot->linker)
 
 #endif				/* _EGG_TANDEM_H */

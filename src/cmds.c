@@ -741,13 +741,7 @@ static void cmd_downbots(struct userrec *u, int idx, char *par)
 static void cmd_bottree(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# bottree", dcc[idx].nick);
-  tell_bottree(idx, 0);
-}
-
-static void cmd_vbottree(struct userrec *u, int idx, char *par)
-{
-  putlog(LOG_CMDS, "*", "#%s# vbottree", dcc[idx].nick);
-  tell_bottree(idx, 1);
+  tell_bottree(idx);
 }
 #endif /* HUB */
 
@@ -4189,7 +4183,6 @@ cmd_t C_dcc[] =
   {"uptime",		"m|m",	(Function) cmd_uptime,		NULL},
   {"crontab",		"a",	(Function) cmd_crontab,		NULL},
 #ifdef HUB
-  {"vbottree",		"n",	(Function) cmd_vbottree,	NULL},
   {"who",		"n",	(Function) cmd_who,		NULL},
 #endif /* HUB */
   {"whois",		"",	(Function) cmd_whois,		NULL},

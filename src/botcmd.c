@@ -636,25 +636,36 @@ static void bot_unlink(int idx, char *par)
  */
 static void bot_update(int idx, char *par)
 {
-  char *bot = NULL, x;
-  int vnum;
+  char *bot = NULL, x, *vversion = NULL;
+  int vlocalhub = 0;
+  time_t vbuildts = 0L;
 
   bot = newsplit(&par);
   x = par[0];
   if (x)
     par++;
-  vnum = base64_to_int(par);
+
+  newsplit(&par);		/* vnum */
+
+  if (par[0])
+    vlocalhub = atoi(newsplit(&par));
+  if (par[0])
+    vbuildts = atol(newsplit(&par));
+  if (par[0])
+    vversion = newsplit(&par);
+
   if (in_chain(bot))
-    updatebot(idx, bot, x, vnum);
+    updatebot(idx, bot, x, vlocalhub, vbuildts, vversion);
 }
 
 /* Newbot next share?
  */
 static void bot_nlinked(int idx, char *par)
 {
-  char *newbot = NULL, *next = NULL, *p = NULL, s[1024] = "", x = 0;
+  char *newbot = NULL, *next = NULL, *p = NULL, s[1024] = "", x = 0, *vversion = NULL;
   struct userrec *u = NULL;
-  int bogus = 0, i;
+  int bogus = 0, i, vlocalhub = 0;
+  time_t vbuildts = 0L;
 
   newbot = newsplit(&par);
   next = newsplit(&par);
@@ -695,8 +706,17 @@ static void bot_nlinked(int idx, char *par)
     par++;
   else
     x = '-';
-  i = base64_to_int(par);
-  botnet_send_nlinked(idx, newbot, next, x, i);
+
+  newsplit(&par);		/* vnum */
+
+  if (par[0])
+    vlocalhub = atoi(newsplit(&par));
+  if (par[0])
+    vbuildts = atol(newsplit(&par));
+  if (par[0])
+    vversion = newsplit(&par);
+  botnet_send_nlinked(idx, newbot, next, x, vlocalhub, vbuildts, vversion);
+  
   if (x == '!') {
 #ifdef HUB
     chatout("*** (%s) %s %s.\n", next, NET_LINKEDTO, newbot);
@@ -705,7 +725,7 @@ static void bot_nlinked(int idx, char *par)
 #endif
     x = '-';
   }
-  addbot(newbot, dcc[idx].nick, next, x, i);
+  addbot(newbot, dcc[idx].nick, next, x, vlocalhub, vbuildts, vversion ? vversion : "");
   check_bind_link(newbot, next);
 
   u = get_user_by_handle(userlist, newbot);

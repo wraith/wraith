@@ -243,7 +243,7 @@ static void greet_new_bot(int idx)
   else
     sysname = un.sysname;
 
-  dprintf(idx, "v 1001500 %d %s <%s>\n", HANDLEN, ver, network);
+  dprintf(idx, "v 1001500 %d %s <%s> %d %li %s\n", HANDLEN, ver, network, localhub, buildts, egg_version);
   dprintf(idx, "vs %s\n", sysname);
   dprintf(idx, "bts %lu\n", buildts);
   for (i = 0; i < dcc_total; i++) {
@@ -256,8 +256,9 @@ static void greet_new_bot(int idx)
 
 static void bot_version(int idx, char *par)
 {
-  char x[1024] = "";
-  int l;
+  char x[1024] = "", *vversion = NULL;
+  int l, vlocalhub = 0;
+  time_t vbuildts = 0;
 
   dcc[idx].timeval = now;
   if (in_chain(dcc[idx].nick)) {
@@ -286,6 +287,15 @@ static void bot_version(int idx, char *par)
       return;
     }
   strncpyz(dcc[idx].u.bot->version, par, 120);
+  newsplit(&par);	/* 'ver' */
+  newsplit(&par);	/* handlen */
+  newsplit(&par);	/* network */
+  if (par[0])
+    vlocalhub = atoi(newsplit(&par));
+  if (par[0])
+    vbuildts = atol(newsplit(&par));
+  if (par[0])
+    vversion = newsplit(&par);
 #ifdef HUB
   putlog(LOG_BOTS, "*", DCC_LINKED, dcc[idx].nick);
   chatout("*** Linked to %s\n", dcc[idx].nick);
@@ -293,11 +303,15 @@ static void bot_version(int idx, char *par)
   putlog(LOG_BOTS, "*", "Linked to botnet.");
   chatout("*** Linked to botnet.\n");
 #endif /* HUB */
-  botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', 1001500);
-  touch_laston(dcc[idx].user, "linked", now);
+
+#ifdef HUB
+  botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vversion);
   dump_links(idx);
+#endif /* HUB */
+
+  touch_laston(dcc[idx].user, "linked", now);
   dcc[idx].type = &DCC_BOT;
-  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', 1001500);
+  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vversion);
   check_bind_link(dcc[idx].nick, conf.bot->nick);
   egg_snprintf(x, sizeof x, "v 1001500");
   bot_shareupdate(idx, x);

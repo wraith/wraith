@@ -3,13 +3,15 @@ This is a summary of ChangeLog basically.
 1.1.6
 
 1.Fixed a cosmetic error in cmd_downbots.
-2.Cleaned up and removed a ton of un-needed and old code.
+2.Cleaned up and removed a ton (30K+ compiled) of un-needed and old code.
 3.Fixed a bug in defalg_user()
 4.Several user cmds on BOTS were not being shared.
 5.Fixed a fatal bug in +take.
 6.Removed garblestrings dependancy on binary checksum checking.
 7.Cmd_pls_host now is available to o|o. Users can add hosts to themselves now.
 8.Fixed msg_invite spamming the password for non-users.
+9.Removed cmd_vbottree (cmd_bottree now shows the information).
+10.Fixed msgc_voice, was checking for +v instead of +q.
 
 1.1.5
 

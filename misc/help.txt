@@ -285,7 +285,7 @@ See also: botconfig
    eventually send you one line containing its version, network setting,
    channels, and uptime.
  
-See also: %{+n}bottree, vbottree%{-}%{+m}, bots%{-}
+See also: %{+n}bottree %{-}%{+m}, bots%{-}
 ::botjump:
 ###  %bbotjump%b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
@@ -315,7 +315,7 @@ See also: netnick
    There is no indication of which bots are directly connected to this current
    bot. %{+n}Use %b'%dwho'%b or %b'%dbottree'%b for that information.%{-}
  
-See also: downbots%{+n}, bottree, vbottree%{-}, botinfo
+See also: downbots%{+n}, bottree%{-}, botinfo
 ::botserver:
 ###  %bbotserver%b <bot>
    The bot will display it's current server and lag over DCC.
@@ -327,7 +327,7 @@ See also: netserver, servers%{+n}, config%{-}
    nice way to get a feel for how the bots are physically connected. If 2 bots
    are sharing, a + will be indicated, or a ? if nothing is known.
  
-See also: bots, downbots, botinfo, vbottree
+See also: bots, downbots, botinfo
 ::botversion:
 ###  %bbotversion%b <bot>
    The bot will display it's pack version and uname.
@@ -1498,7 +1498,7 @@ See also: console
    This is a list of the bots connected between you and the destination bot.
    It should also return the time in seconds taken for the trace to occur.
  
-See also: bots, bottree, vbottree
+See also: bots, bottree
 ::traffic
 ###  %btraffic%b
    Shows total and daily net traffic stats since the last %b'%drestart'%b.
@@ -1512,7 +1512,7 @@ See also: bots, bottree, vbottree
    to unlink them. If "*" is specified as the parameter, all bots will be
    unlinked.
  
-See also: %{+n}link, %{-}bots, downbots%{+n}, newleaf, bottree, vbottree%{-}
+See also: %{+n}link, %{-}bots, downbots%{+n}, newleaf, bottree%{-}
 ::unstick
 ###  %bunstick%b [ban/exempt/invite] <hostmask/number> [channel]
    Makes a "sticky" ban, exempt, or invite normal again.
@@ -1543,12 +1543,6 @@ See also: status
    will not appear in the list.
  
 See also: match, whois
-:hub:vbottree
-###  %bvbottree%b
-   Shows a tree-format diagram of the bots currently on the botnet, along with 
-   their internal version number. 
- 
-See also: bots, downbots, botinfo, vbottree
 :leaf:voice
 ###  %bvoice%b <nickname> [channel|*]
     will give a +v voice to a person you specify, so long as the

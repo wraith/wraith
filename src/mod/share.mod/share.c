@@ -1511,7 +1511,7 @@ finish_share(int idx)
   checkchans(1);                /* remove marked channels */
   trigger_cfg_changed();
   reaffirm_owners();            /* Make sure my owners are +a   */
-  updatebot(-1, dcc[j].nick, '+', 0);
+  updatebot(-1, dcc[j].nick, '+', 0, 0, NULL);
 }
 
 #ifdef HUB
@@ -1550,7 +1550,7 @@ start_sending_users(int idx)
            i == DCCSEND_BADFN ? "BAD FILE" : i == DCCSEND_FEMPTY ? "EMPTY FILE" : "UNKNOWN REASON!");
     dcc[idx].status &= ~(STAT_SHARE | STAT_SENDING | STAT_AGGRESSIVE);
   } else {
-    updatebot(-1, dcc[idx].nick, '+', 0);
+    updatebot(-1, dcc[idx].nick, '+', 0, 0, NULL);
     dcc[idx].status |= STAT_SENDING;
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick); /* Store bot's nick */
@@ -1574,7 +1574,7 @@ cancel_user_xfer(int idx, void *x)
   if (idx < 0) {
     idx = -idx;
     k = 1;
-    updatebot(-1, dcc[idx].nick, '-', 0);
+    updatebot(-1, dcc[idx].nick, '-', 0, 0, NULL);
   }
   if (dcc[idx].status & STAT_SHARE) {
     if (dcc[idx].status & STAT_GETTING) {
