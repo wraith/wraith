@@ -26,8 +26,8 @@ class Tempfile
     ~Tempfile();				//destructor
 
     FILE *f;
-    int fd;
     char *file;
+    int fd;
     size_t len;
   private:
     void MakeTemp();				//Used for mktemp() and checking
