@@ -179,7 +179,7 @@ static char *replace_spaces(char *fn)
 
 
 
-static void check_tcl_sentrcvd(struct userrec *u, char *nick, char *path,
+static void check_sentrcvd(struct userrec *u, char *nick, char *path,
 			       bind_table_t *table)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
@@ -189,7 +189,7 @@ static void check_tcl_sentrcvd(struct userrec *u, char *nick, char *path,
   check_bind(table, hand, &fr, u, nick, path);
 }
 
-static void check_tcl_toutlost(struct userrec *u, char *nick, char *path,
+static void check_toutlost(struct userrec *u, char *nick, char *path,
 			       unsigned long acked, unsigned long length,
 				bind_table_t *table)
 {
@@ -653,7 +653,7 @@ static void eof_dcc_send(int idx)
 	f(dcc[idx].u.xfer->dir, dcc[idx].u.xfer->origname, hand);
       }
       stats_add_upload(u, dcc[idx].u.xfer->length);
-      check_tcl_sentrcvd(u, dcc[idx].nick, nfn, BT_rcvd);
+      check_sentrcvd(u, dcc[idx].nick, nfn, BT_rcvd);
     }
     nfree(ofn);
     nfree(nfn);
@@ -913,7 +913,7 @@ static void dcc_get(int idx, char *buf, int len)
       module_entry *fs = module_find("filesys", 0, 0);
       struct userrec *u = get_user_by_handle(userlist,
 					     dcc[idx].u.xfer->from);
-      check_tcl_sentrcvd(u, dcc[idx].nick,
+      check_sentrcvd(u, dcc[idx].nick,
 			 dcc[idx].u.xfer->dir, BT_sent);
       if (fs != NULL) {
 	Function f = fs->funcs[FILESYS_INCRGOTS];
@@ -1008,7 +1008,7 @@ static void eof_dcc_get(int idx)
      */
     egg_snprintf(s, sizeof s, "%s!%s", dcc[idx].nick, dcc[idx].host);
     u = get_user_by_host(s);
-    check_tcl_toutlost(u, dcc[idx].nick, dcc[idx].u.xfer->dir,
+    check_toutlost(u, dcc[idx].nick, dcc[idx].u.xfer->dir,
 		       dcc[idx].u.xfer->acked, dcc[idx].u.xfer->length,
 		       BT_lost);
 
@@ -1124,7 +1124,7 @@ static void transfer_get_timeout(int i)
      */
     egg_snprintf(xx, sizeof xx, "%s!%s", dcc[i].nick, dcc[i].host);
     u = get_user_by_host(xx);
-    check_tcl_toutlost(u, dcc[i].nick, dcc[i].u.xfer->dir,
+    check_toutlost(u, dcc[i].nick, dcc[i].u.xfer->dir,
 		       dcc[i].u.xfer->acked, dcc[i].u.xfer->length, BT_tout);
 
     putlog(LOG_FILES, "*",TRANSFER_DCC_GET_TIMEOUT,

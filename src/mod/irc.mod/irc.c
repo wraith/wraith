@@ -1274,7 +1274,7 @@ static void check_expired_chanstuff()
 }
 
 #ifdef S_AUTH
-static int check_tcl_pubc(char *cmd, char *nick, char *from, struct userrec *u, char *args, char *chan)
+static int check_pubc(char *cmd, char *nick, char *from, struct userrec *u, char *args, char *chan)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int x;

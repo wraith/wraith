@@ -100,20 +100,20 @@ static int gotfake433(char *from)
  * msg: proc-name <nick> <user@host> <handle> <args...>
  */
 
-static int check_tcl_msg(char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
+static int check_msg(char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
   int x;
 
   get_user_flagrec(u, &fr, NULL);
   x = check_bind(BT_msg, cmd, &fr, nick, uhost, u, args);
-  if (x & BIND_RET_LOG) putlog(LOG_CMDS, "*", "in check_tcl_msg (%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
+  if (x & BIND_RET_LOG) putlog(LOG_CMDS, "*", "in check_msg (%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
   if (x) return(1);
   else return(0);
 }
 
 #ifdef S_AUTH
-static int check_tcl_msgc(char *cmd, char *nick, char *from, struct userrec *u, char *args)
+static int check_msgc(char *cmd, char *nick, char *from, struct userrec *u, char *args)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int x;
@@ -121,7 +121,7 @@ static int check_tcl_msgc(char *cmd, char *nick, char *from, struct userrec *u, 
   x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, NULL);
 
   if (x & BIND_RET_LOG)
-    putlog(LOG_CMDS, "*", " in check_tcl_msgc(%s!%s) !%s! %s%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
+    putlog(LOG_CMDS, "*", " in check_msgc(%s!%s) !%s! %s%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
 
   if (x & BIND_RET_BREAK) return(1);
   return(0);
@@ -130,14 +130,14 @@ static int check_tcl_msgc(char *cmd, char *nick, char *from, struct userrec *u, 
 
 /* Return 1 if processed.
  */
-static int check_tcl_raw(char *from, char *code, char *msg)
+static int check_raw(char *from, char *code, char *msg)
 {
 //  return check_bind(BT_raw, code, NULL, from, code, msg);
   return check_bind(BT_raw, code, NULL, from, msg);
 }
 
 
-static int check_tcl_ctcpr(char *nick, char *uhost, struct userrec *u,
+static int check_ctcpr(char *nick, char *uhost, struct userrec *u,
                            char *dest, char *keyword, char *args,
                            bind_table_t *table)
 {
@@ -420,7 +420,7 @@ static int gotmsg(char *from, char *msg)
 	    } else {
 	      u = get_user_by_host(from);
 	      if (!ignoring || trigger_on_ignore) {
-	        if (!check_tcl_ctcp(nick, uhost, u, to, code, ctcp) &&
+	        if (!check_ctcp(nick, uhost, u, to, code, ctcp) &&
 		    !ignoring) {
 		  if ((lowercase_ctcp && !egg_strcasecmp(code, "DCC")) ||
 		      (!lowercase_ctcp && !strcmp(code, "DCC"))) {
@@ -498,7 +498,7 @@ static int gotmsg(char *from, char *msg)
         code++;        
         u = auth[i].user;
 
-        if (check_tcl_msgc(code, nick, uhost, u, msg))
+        if (check_msgc(code, nick, uhost, u, msg))
           auth[i].atime = now;
         else
           putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
@@ -524,11 +524,11 @@ static int gotmsg(char *from, char *msg)
             else if (!egg_strcasecmp(code, msgident))
               sprintf(buf, "ident");
             if (buf[0])
-              result = check_tcl_msg(buf, nick, uhost, u, msg);
+              result = check_msg(buf, nick, uhost, u, msg);
           }
 #endif /* S_MSGCMDS */
           if (doit)
-            result = check_tcl_msg(code, nick, uhost, u, msg);
+            result = check_msg(code, nick, uhost, u, msg);
             
 	  if (!result)
 	    putlog(LOG_MSGS, "*", " in gotmsg [%s] %s %s", from, code, msg);
@@ -588,7 +588,7 @@ static int gotnotice(char *from, char *msg)
 	} else {
 	  u = get_user_by_host(from);
 	  if (!ignoring || trigger_on_ignore) {
-            check_tcl_ctcr(nick, uhost, u, to, code, ctcp);
+            check_ctcr(nick, uhost, u, to, code, ctcp);
 	    if (!ignoring)
 	      /* Who cares? */
 	      putlog(LOG_MSGS, "*",
@@ -1035,7 +1035,7 @@ static void server_activity(int idx, char *msg, int len)
   /* This has GOT to go into the raw binding table, * merely because this
    * is less effecient.
   */
-  check_tcl_raw(from, code, msg);
+  check_raw(from, code, msg);
 }
 
 static int gotping(char *from, char *msg)

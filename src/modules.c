@@ -423,7 +423,7 @@ Function global_table[] =
   (Function) botname,
   /* 212 - 215 */
   (Function) 0,			/* remove_gunk() -- UNUSED! (drummer)	*/
-  (Function) check_tcl_chjn,
+  (Function) check_chjn,
   (Function) sanitycheck_dcc,
   (Function) isowner,
   /* 216 - 219 */

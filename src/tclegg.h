@@ -13,7 +13,7 @@
 #  include "proto.h"		/* This file needs this */
 #endif
 
-/* Match types for check_tcl_bind
+/* Match types for check_bind
  */
 #define MATCH_PARTIAL       0
 #define MATCH_EXACT         1

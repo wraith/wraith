@@ -591,7 +591,7 @@ static void remove_channel(struct chanset_t *chan)
    int		 i;
    module_entry	*me;
    /* Remove the channel from the list, so that noone can pull it
-      away from under our feet during the check_tcl_part() call. */
+      away from under our feet during the check_part() call. */
    (void) chanset_unlink(chan);
 
    if ((me = module_find("irc", 0, 0)) != NULL)

@@ -1577,7 +1577,7 @@ static Function server_table[] =
   (Function) & answer_ctcp,	/* int					*/
   /* 16 - 19 */
   (Function) & trigger_on_ignore, /* int				*/
-  (Function) check_tcl_ctcpr,
+  (Function) check_ctcpr,
   (Function) detect_avalanche,
   (Function) nuke_server,
   /* 20 - 23 */

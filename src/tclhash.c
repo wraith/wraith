@@ -338,7 +338,7 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *_flag
 /* Check for tcl-bound dcc command, return 1 if found
  * dcc: proc-name <handle> <sock> <args...>
  */
-void check_tcl_dcc(const char *cmd, int idx, const char *args)
+void check_dcc(const char *cmd, int idx, const char *args)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int x;
@@ -386,12 +386,12 @@ void check_tcl_dcc(const char *cmd, int idx, const char *args)
   }
 }
 
-void check_tcl_bot(const char *nick, const char *code, const char *param)
+void check_bot(const char *nick, const char *code, const char *param)
 {
   check_bind(BT_bot, code, NULL, nick, code, param);
 }
 
-void check_tcl_chon(char *hand, int idx)
+void check_chon(char *hand, int idx)
 {
   struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   struct userrec        *u;
@@ -402,7 +402,7 @@ void check_tcl_chon(char *hand, int idx)
   check_bind(BT_chon, hand, &fr, hand, idx);
 }
 
-void check_tcl_chof(char *hand, int idx)
+void check_chof(char *hand, int idx)
 {
   struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   struct userrec        *u;
@@ -413,42 +413,42 @@ void check_tcl_chof(char *hand, int idx)
   check_bind(BT_chof, hand, &fr, hand, idx);
 }
 
-int check_tcl_chat(char *handle, int chan, const char *text)
+int check_chat(char *handle, int chan, const char *text)
 {
   return check_bind(BT_chat, text, NULL, handle, chan, text);
 }
 
-void check_tcl_act(const char *from, int chan, const char *text)
+void check_act(const char *from, int chan, const char *text)
 {
   check_bind(BT_act, text, NULL, from, chan, text);
 }
 
-void check_tcl_bcst(const char *from, int chan, const char *text)
+void check_bcst(const char *from, int chan, const char *text)
 {
   check_bind(BT_bcst, text, NULL, from, chan, text);
 }
 
-void check_tcl_nkch(const char *ohand, const char *nhand)
+void check_nkch(const char *ohand, const char *nhand)
 {
   check_bind(BT_nkch, ohand, NULL, ohand, nhand);
 }
 
-void check_tcl_link(const char *bot, const char *via)
+void check_link(const char *bot, const char *via)
 {
   check_bind(BT_link, bot, NULL, bot, via);
 }
 
-void check_tcl_disc(const char *bot)
+void check_disc(const char *bot)
 {
   check_bind(BT_disc, bot, NULL, bot);
 }
 
-int check_tcl_note(const char *from, const char *to, const char *text)
+int check_note(const char *from, const char *to, const char *text)
 {
   return check_bind(BT_note, to, NULL, from, to, text);
 }
 
-void check_tcl_chjn(const char *bot, const char *nick, int chan,
+void check_chjn(const char *bot, const char *nick, int chan,
                     const char type, int sock, const char *host)
 {
   struct flag_record    fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
@@ -474,7 +474,7 @@ void check_tcl_chjn(const char *bot, const char *nick, int chan,
   check_bind(BT_chjn, s, &fr, bot, nick, chan, t, sock, host);
 }
 
-void check_tcl_chpt(const char *bot, const char *hand, int sock, int chan)
+void check_chpt(const char *bot, const char *hand, int sock, int chan)
 {
   char  v[11];
 
@@ -482,7 +482,7 @@ void check_tcl_chpt(const char *bot, const char *hand, int sock, int chan)
   check_bind(BT_chpt, v, NULL, bot, hand, sock, chan);
 }
 
-void check_tcl_away(const char *bot, int idx, const char *msg)
+void check_away(const char *bot, int idx, const char *msg)
 {
   check_bind(BT_away, bot, NULL, bot, idx, msg);
 }

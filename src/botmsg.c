@@ -605,7 +605,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     sock = atoi(ss);
   /* Don't process if there's a note binding for it */
   if (idx != (-2)) {		/* Notes from bots don't trigger it */
-    if (check_tcl_note(from, to, msg)) {
+    if (check_note(from, to, msg)) {
       if ((idx >= 0) && (echo))
 	dprintf(idx, "-> %s: %s\n", to, msg);
       return NOTE_TCL;

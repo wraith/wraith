@@ -297,7 +297,7 @@ static void bot_version(int idx, char *par)
   dcc[idx].type = &DCC_BOT;
   addbot(dcc[idx].nick, dcc[idx].nick, botnetnick, '-',
 	 dcc[idx].u.bot->numver);
-  check_tcl_link(dcc[idx].nick, botnetnick);
+  check_link(dcc[idx].nick, botnetnick);
   egg_snprintf(x, sizeof x, "v %d", dcc[idx].u.bot->numver);
   bot_shareupdate(idx, x);
   bot_share(idx, x);
@@ -982,10 +982,10 @@ static void eof_dcc_chat(int idx)
 		dcc[idx].nick);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, "lost dcc link");
-    check_tcl_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock,
+    check_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock,
 		   dcc[idx].u.chat->channel);
   }
-  check_tcl_chof(dcc[idx].nick, idx);
+  check_chof(dcc[idx].nick, idx);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1048,7 +1048,7 @@ static void dcc_chat(int idx, char *buf, int i)
         buf++;
         v = newsplit(&buf);
         rmspace(buf);
-	check_tcl_dcc(v, idx, buf);
+	check_dcc(v, idx, buf);
     } else if (buf[0] == ',') {
       int me = 0;
 
@@ -1089,7 +1089,7 @@ static void dcc_chat(int idx, char *buf, int i)
     } else {
 	int r;
 
-	r = check_tcl_chat(dcc[idx].nick, dcc[idx].u.chat->channel, buf);
+	r = check_chat(dcc[idx].nick, dcc[idx].u.chat->channel, buf);
 	if (r & BIND_RET_BREAK) return;
 
       if (dcc[idx].u.chat->away != NULL)

@@ -116,9 +116,9 @@ static void bot_chan2(int idx, char *msg)
     if (i >= 0)
       botnet_send_chan(idx, from, NULL, chan, msg);
     if (strchr(from, '@') != NULL)
-      check_tcl_chat(from, chan, msg);
+      check_chat(from, chan, msg);
     else
-      check_tcl_bcst(from, chan, msg);
+      check_bcst(from, chan, msg);
   }
 }
 
@@ -241,7 +241,7 @@ static void bot_actchan(int idx, char *par)
   }
   chanout_but(-1, chan, "* %s %s\n", from, par);
   botnet_send_act(idx, from, NULL, chan, par);
-  check_tcl_act(from, chan, par);
+  check_act(from, chan, par);
 }
 
 /* priv <from> <to> <message>
@@ -762,7 +762,7 @@ static void bot_nlinked(int idx, char *par)
     x = '-';
   }
   addbot(newbot, dcc[idx].nick, next, x, i);
-  check_tcl_link(newbot, next);
+  check_link(newbot, next);
   u = get_user_by_handle(userlist, newbot);
   if (bot_flags(u) & BOT_REJECT) {
     botnet_send_reject(idx, botnetnick, NULL, newbot, NULL, NULL);
@@ -1034,7 +1034,7 @@ static void bot_zapf(int idx, char *par)
     char *opcode;
 
     opcode = newsplit(&par);
-    check_tcl_bot(from, opcode, par);
+    check_bot(from, opcode, par);
     return;
   }
   i = nextbot(to);
@@ -1058,7 +1058,7 @@ static void bot_zapfbroad(int idx, char *par)
     fake_alert(idx, "direction", from);
     return;
   }
-  check_tcl_bot(from, opcode, par);
+  check_bot(from, opcode, par);
   botnet_send_zapf_broad(idx, from, opcode, par);
 }
 
@@ -1152,12 +1152,12 @@ static void bot_join(int idx, char *par)
       if (b_numver(idx) >= NEAT_BOTNET)
 	chanout_but(-1, i, "*** (%s) %s %s %s.\n", bot, nick, NET_LEFTTHE,
 		    i ? "channel" : "party line");
-      check_tcl_chpt(bot, nick, sock, i);
+      check_chpt(bot, nick, sock, i);
     }
     if ((b_numver(idx) >= NEAT_BOTNET) && !linking)
       chanout_but(-1, chan, "*** (%s) %s %s %s.\n", bot, nick, NET_JOINEDTHE,
 		  chan ? "channel" : "party line");
-    check_tcl_chjn(bot, nick, chan, y[0], sock, par);
+    check_chjn(bot, nick, chan, y[0], sock, par);
   }
 }
 
@@ -1189,7 +1189,7 @@ static void bot_part(int idx, char *par)
   }
   if ((partyidx = getparty(bot, sock)) != -1) {
     if (party[partyidx].chan >= 0)
-      check_tcl_chpt(bot, nick, sock, party[partyidx].chan);
+      check_chpt(bot, nick, sock, party[partyidx].chan);
     if ((b_numver(idx) >= NEAT_BOTNET) && !silent) {
       register int chan = party[partyidx].chan;
 
@@ -1229,7 +1229,7 @@ static void bot_away(int idx, char *par)
   sock = base64_to_int(etc);
   if (sock == 0)
     sock = partysock(bot, etc);
-  check_tcl_away(bot, sock, par);
+  check_away(bot, sock, par);
   if (par[0]) {
     partystat(bot, sock, PLSTAT_AWAY, 0);
     partyaway(bot, sock, par);
@@ -1416,7 +1416,7 @@ static void bot_rsim(char *botnick, char *code, char *par)
     dcc[idx].addr = 0;
     dcc[idx].user = get_user_by_handle(userlist, nick);
   }
-  check_tcl_dcc(cmd, idx, par);
+  check_dcc(cmd, idx, par);
 }
 
 void bounce_simul(int idx, char *buf)
