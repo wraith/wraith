@@ -113,7 +113,7 @@ int can_lstat(const char *s)
 int is_symlink(const char *s)
 {
   struct stat ss;
-  int i = stat(s, &ss);
+  int i = lstat(s, &ss);
 
   if (i < 0)
     return 0;
