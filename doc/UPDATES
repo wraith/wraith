@@ -31,6 +31,7 @@ This is a summary of ChangeLog basically.
 28.cmd_newleaf now modifies USERENTRY_ADDED for .whois
 29.Passing '?' as the bot to cmd_botcmd will send the cmd to a random leaf.
 30.Userfile is now sorted correctly.
+31.Fixed a segfault bug in cmd_mns_/exempt/ban/invite
 
 1.0.13
 1.Fixed a fatal bug in console_gotshare()
