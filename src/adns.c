@@ -955,8 +955,8 @@ static void expire_queries()
 int egg_dns_init()
 {
 	_dns_header.flags = htons(1 << 8 | 1 << 7);
-	read_resolv("/etc/resolv.conf");
 	read_resolv(".resolv.conf");
+	read_resolv("/etc/resolv.conf");
 //	read_hosts("/etc/hosts");
 	read_hosts(".hosts");
     
