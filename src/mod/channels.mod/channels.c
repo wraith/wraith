@@ -304,7 +304,7 @@ void rebalance_roles()
 /* FIXME: needs more testing */
 static void channels_checkslowjoin() {
   struct chanset_t *chan;
-ContextNote("slowpart");
+ContextNote("channels_checkslowjoin");
   for (chan = chanset; chan ; chan = chan->next) {
     /* slowpart */
     if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
@@ -337,7 +337,7 @@ static void got_sj(int idx, char *code, char *par)
   delay = atoi(par) + now;
   chan = findchan_by_dname(chname);
   if (chan)
-    chan->channel.jointime = delay;
+    chan->channel.jointime = ((now + delay) - server_lag);
 }
 
 static void got_sp(int idx, char *code, char *par) 
@@ -350,7 +350,7 @@ static void got_sp(int idx, char *code, char *par)
   delay = atoi(par) + now;
   chan = findchan_by_dname(chname);
   if (chan)
-    chan->channel.parttime = delay;
+    chan->channel.parttime = ((now + delay) - server_lag);
 }
 /* got_jn
  * We get this when a bot is opped in a +take chan
