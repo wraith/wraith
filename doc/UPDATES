@@ -5,7 +5,7 @@ This is a summary of ChangeLog basically.
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
 * Removed many unnecesary compile defines: (.config controlling them makes more sense)
   ANTITRACE, HIJACKCHECK, LASTCHECK, NODELAY, PROCESSCHECK, PROMISC, AUTHCMDS, CONFEDIT
-  RANDSERVERS, DCCPASS, PSCLOAK, MSGCMDS, UTCTIME
+  RANDSERVERS, DCCPASS, PSCLOAK, MSGCMDS, UTCTIME, AUTOAWAY
   -Moved PSCLOAK entries to misc/responses.txt
 * All dates are UTC (GMT) now.
 
