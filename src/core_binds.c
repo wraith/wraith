@@ -11,6 +11,9 @@
 #include "users.h"
 #include "misc.h"
 #include "tclhash.h"
+#ifdef S_DCCPASS
+#include "cfg.h"
+#endif /* S_DCCPASS */
 
 extern cmd_t 		C_dcc[];
 extern struct dcc_t 	*dcc;
@@ -53,41 +56,45 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int x;
 #ifdef S_DCCPASS
+  bind_entry_t *entry = NULL;
+  bind_table_t *table = NULL;
   int found = 0;
+  char *args = NULL;
 #endif
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
 
 #ifdef S_DCCPASS
-  for (hm = H_dcc->first; hm; hm = hm->next) {
-    if (!egg_strcasecmp(cmd, hm->mask)) {
+  args = strdup(text);
+
+  table = bind_table_lookup("dcc");
+  for (entry = table->entries; entry && entry->next; entry = entry->next) {
+    if (!egg_strcasecmp(cmd, entry->mask)) {
       found = 1;
       break;
     }
   }
+
   if (found) {
     if (has_cmd_pass(cmd)) {
-      char *p = NULL, work[1024] = "", pass[128] = "";
+      char *p = NULL, pass[128] = "";
 
       p = strchr(args, ' ');
       if (p)
         *p = 0;
       strncpyz(pass, args, sizeof(pass));
-      if (check_cmd_pass(cmd, pass)) {
-        if (p)
-          *p = ' ';
-        strncpyz(work, args, sizeof(work));
-        p = work;
-        newsplit(&p);
-        strcpy(args, p);
-      } else {
+
+      if (!check_cmd_pass(cmd, pass)) {
         dprintf(idx, "Invalid command password. Use %scommand password arguments\n", dcc_prefix);
         putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, dcc_prefix, cmd);
-        return 0;
+        free(args);
+        return;
       }
     }
   }
+  free(args);
 #endif /* S_DCCPASS */
+
   x = check_bind(BT_dcc, cmd, &fr, dcc[idx].user, idx, text);
   putlog(LOG_DEBUG, "*", "%s RETURNED: %d", cmd, x);
   if (x == -1)

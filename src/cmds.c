@@ -460,11 +460,13 @@ static void cmd_botconfig(struct userrec *u, int idx, char *par)
 #ifdef S_DCCPASS
 static void cmd_cmdpass(struct userrec *u, int idx, char *par)
 {
-  struct tcl_bind_mask_b *hm = NULL;
+  bind_entry_t *entry = NULL;
+  bind_table_t *table = NULL;
   char *cmd = NULL, *pass = NULL;
   int i, l = 0;
 
   /* cmdpass [command [newpass]] */
+  table = bind_table_lookup("dcc");
   cmd = newsplit(&par);
   putlog(LOG_CMDS, "*", STR("#%s# cmdpass %s ..."), dcc[idx].nick, cmd[0] ? cmd : "");
   pass = newsplit(&par);
@@ -476,42 +478,24 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
   for (i = 0; cmd[i]; i++)
     cmd[i] = tolower(cmd[i]);
 
-  if (!egg_strcasecmp(cmd, "op")) l++;
-  else if (!egg_strcasecmp(cmd, "act")) l++;
-  else if (!egg_strcasecmp(cmd, "adduser")) l++;
-  else if (!egg_strcasecmp(cmd, "channel")) l++;
-  else if (!egg_strcasecmp(cmd, "deluser")) l++;
-  else if (!egg_strcasecmp(cmd, "deop")) l++;
-  else if (!egg_strcasecmp(cmd, "devoice")) l++;
-  else if (!egg_strcasecmp(cmd, "getkey")) l++;
-  else if (!egg_strcasecmp(cmd, "find")) l++;
-  else if (!egg_strcasecmp(cmd, "invite")) l++;
-  else if (!egg_strcasecmp(cmd, "kick")) l++;
-  else if (!egg_strcasecmp(cmd, "kickban")) l++;
-  else if (!egg_strcasecmp(cmd, "mdop")) l++;
-  else if (!egg_strcasecmp(cmd, "msg")) l++;
-  else if (!egg_strcasecmp(cmd, "reset")) l++;
-  else if (!egg_strcasecmp(cmd, "resetbans")) l++;
-  else if (!egg_strcasecmp(cmd, "resetexempts")) l++;
-  else if (!egg_strcasecmp(cmd, "resetinvites")) l++;
-  else if (!egg_strcasecmp(cmd, "say")) l++;
-  else if (!egg_strcasecmp(cmd, "topic")) l++;
-  else if (!egg_strcasecmp(cmd, "voice")) l++;
-  else if (!egg_strcasecmp(cmd, "clearqueue")) l++;
-  else if (!egg_strcasecmp(cmd, "dump")) l++;
-  else if (!egg_strcasecmp(cmd, "jump")) l++;
-  else if (!egg_strcasecmp(cmd, "servers")) l++;
-  else if (!egg_strcasecmp(cmd, "authed")) l++;
+  /* need to check for leaf cmds, and set l > 0 here */
 
   if (!l) {
-    for (hm = H_dcc->first; hm; hm = hm->next)
-      if (!egg_strcasecmp(cmd, hm->mask))
+    int found = 0;
+
+    for (entry = table->entries; entry && entry->next; entry = entry->next) {
+      if (!egg_strcasecmp(cmd, entry->mask)) {
+        found++;
         break;
-    if (!hm) {
+      }
+    }
+
+    if (!found) {
       dprintf(idx, STR("No such DCC command\n"));
       return;
     }
   }
+
   if (pass[0]) {
     char epass[36] = "", tmp[256] = "";
 

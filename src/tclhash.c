@@ -214,6 +214,19 @@ int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char 
 	return(0);
 }
 
+/* void blah()
+{
+  bind_entry_t *entry = NULL;
+  bind_table_t *table = NULL;
+
+  table = bind_table_lookup_or_fake("dcc");
+
+  for (entry = table->entries; entry && entry->next; entry = entry->next) {
+    printf("MASK: %s\n", entry->mask);
+  }
+}
+*/
+
 int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
 	bind_entry_t *entry = NULL, *old_entry = NULL;

@@ -25,8 +25,8 @@ void got_config_share(int idx, char * ln);
 void userfile_cfg_line(char *ln);
 void trigger_cfg_changed();
 #ifdef S_DCCPASS
-int check_cmd_pass(char *,char *);
-int has_cmd_pass(char *);
+int check_cmd_pass(const char *, char *);
+int has_cmd_pass(const char *);
 void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 #endif /* MAKING_MODS */
