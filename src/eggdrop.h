@@ -104,6 +104,32 @@
 #define ERR_BADCONF 14
 #define ERR_MAX 15
 
+#define C_BLACK                 1
+#define C_BLUE                  2
+#define C_GREEN                 3
+#define C_CYAN                  4
+#define C_RED                   5
+#define C_PURPLE                6
+#define C_BROWN                 7
+#define C_LIGHTGREY             8
+#define C_DARKGREY              9
+#define C_LIGHTBLUE             10
+#define C_LIGHTGREEN            11
+#define C_LIGHTCYAN             12
+#define C_LIGHTRED              13
+#define C_LIGHTPURPLE           14
+#define C_YELLOW                15
+#define C_WHITE                 16
+#define BOLD_OPEN               1
+#define BOLD_CLOSE              2
+#define UNDERLINE_OPEN          3
+#define UNDERLINE_CLOSE         4
+#define COLOR_OPEN              5
+#define COLOR_CLOSE             6
+#define FLASH_OPEN              7
+#define FLASH_CLOSE             8
+
+
 /*
  *     The 'configure' script should make this next part automatic,
  *     so you shouldn't need to adjust anything below.
@@ -534,9 +560,7 @@ struct dupwait_info {
 #define STAT_BOTONLY 0x00020	/* telnet on bots-only connect		*/
 #define STAT_USRONLY 0x00040	/* telnet on users-only connect		*/
 #define STAT_PAGE    0x00080	/* page output to the user		*/
-#define STAT_COLORM  0x00100    /* show crazy colors to user mIRC */
-#define STAT_COLORA  0x00200    /* show crazy colors to user ANSI */
-#define STAT_COLOR   0x00400    /* Color enabled for user */
+#define STAT_COLOR   0x00100    /* Color enabled for user */
 
 /* For stripping out mIRC codes
  */

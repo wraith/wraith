@@ -2053,7 +2053,6 @@ char *btoh(const unsigned char *md, int len)
 #define HELP_REV   2
 #define HELP_UNDER 4
 #define HELP_FLASH 8
-#define HELP_IRC   16
 
 void showhelp (int idx, struct flag_record *flags, char *string)
 {
@@ -2061,7 +2060,6 @@ void showhelp (int idx, struct flag_record *flags, char *string)
   struct flag_record tr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   static char helpstr[8092] = "", tmp[2] = "", flagstr[10] = "";
   int ok = 1;
-  if (!help_flags) help_flags = (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC;
 Context;
   helpstr[0] = 0;
   while ((string) && (string[0])) {
@@ -2107,33 +2105,23 @@ Context;
         }
       } else if (*(string + 1) == 'b') {
         string += 2;
-        if (help_flags & HELP_IRC) {
-          sprintf(tmp, "\002");
-        } else if (help_flags & HELP_BOLD) {
+        if (help_flags & HELP_BOLD) {
           help_flags &= ~HELP_BOLD;
-         sprintf(tmp, "\033[0m");
+          strcat(helpstr, color(idx, BOLD_CLOSE, 0));
         } else {
           help_flags |= HELP_BOLD;
-          sprintf(tmp, "\033[1m");
+          strcat(helpstr, color(idx, BOLD_OPEN, 0));
         }
-        strcat(helpstr, tmp);
       } else if (*(string + 1) == 'f') {
         string += 2;
         
         if (help_flags & HELP_FLASH) {
-          if (help_flags & HELP_IRC)
-            sprintf(tmp, "\002\037");
-          else
-            sprintf(tmp, "\033[0m");
+          strcat(helpstr, color(idx, FLASH_CLOSE, 0));
           help_flags &= ~HELP_FLASH;
         } else {
           help_flags |= HELP_FLASH;
-          if (help_flags & HELP_IRC)
-            sprintf(tmp, "\002\037");
-          else
-            sprintf(tmp, "\033[5m");
+          strcat(helpstr, color(idx, FLASH_OPEN, 0));
         }
-        strcat(helpstr, tmp);
       } else if (*(string + 1) == 'd') {
         string += 2;
         strcat(helpstr, dcc_prefix);        
@@ -2196,5 +2184,66 @@ void shuffle(char *string, char *delim)
   }
   nfree(work);
   string[strlen(string)] = 0;
+}
+
+char *color(int idx, int type, int color)
+{
+  int ansi = 0;
+   
+  /* if user is connected over TELNET or !backgrd, show ANSI
+   * if they are relaying, they are most likely on an IRC client and should have mIRC codes
+   */
+  if (((dcc[idx].type != &DCC_RELAYING) && (dcc[idx].status & STAT_TELNET)) || !backgrd) ansi++;
+
+  if (type == BOLD_OPEN) {
+    if (ansi) return "\033[1m";
+    return "\002";
+  } else if (type == BOLD_CLOSE) {
+    if (ansi) return "\033[22m";
+    return "\002";
+   } else if (type == UNDERLINE_OPEN) {
+    if (ansi) return "\033[4m";
+    return "\037";
+  } else if (type == UNDERLINE_CLOSE) {
+    if (ansi) return "\033[24m";
+    return "\037";
+  } else if (type == FLASH_OPEN) {
+    if (ansi) return "\033[5m";
+    return "\002\037";
+  } else if (type == FLASH_CLOSE) {
+    if (ansi) return "\033[0m";
+    return "\037\002";
+  } else if (type == COLOR_OPEN) {
+    if (color == C_BLACK) {
+      if (ansi) return "\033[30m";
+      return "\00301";
+    } else if (color == C_RED) {
+      if (ansi) return "\033[31m";
+      return "\00304";
+    } else if (color == C_GREEN) {
+      if (ansi) return "\033[32m";
+      return "\00303";
+    } else if (color == C_YELLOW) {
+      if (ansi) return "\033[33m";
+      return "\00308";
+    } else if (color == C_BLUE) {
+      if (ansi) return "\033[34m";
+      return "\00302";
+    } else if (color == C_PURPLE) {
+      if (ansi) return "\033[35m";
+      return "\00306";
+    } else if (color == C_CYAN) {
+      if (ansi) return "\033[36m";
+      return "\00309";
+    } else if (color == C_WHITE) {
+      if (ansi) return "\033[37m";
+      return "\00300";
+    }
+  } else if (type == COLOR_CLOSE) {
+    if (ansi) return "\033[0m";
+    return "\003";
+  } 
+  /* This should never be reached.. */
+  return "";
 }
 

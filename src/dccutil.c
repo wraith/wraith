@@ -157,16 +157,11 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
     }
     return;
   } else { /* normal chat text */
-    if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type == &DCC_CHAT)
-        && ((dcc[idx].status & STAT_COLORM) || (dcc[idx].status & STAT_COLORA))) {
-      int i, a = 0, m = 0;
-      char buf3[1024] = "", buf2[1024] = "", c;
+    if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type == &DCC_CHAT)) {
+      int i;
+      char buf3[1024], buf2[1024], c;
 
-      if (dcc[idx].status & STAT_COLORM) 
-        m = 1;
-      else if (dcc[idx].status & STAT_COLORA)
-        a = 1;
-      buf3[0] = '\0';
+      buf3[0] = buf2[0] = 0;
       for (i = 0 ; i < len ; i++) {
 /* FIXME: Trying to fix bug where you do .color on ANSI, then .bc <bot> help help OVER TELNET
         if (buf[i] == '\033') {
@@ -177,37 +172,26 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
         }
 */
         c = buf[i];
-        buf2[0] = '\0';
+        buf2[0] = 0;
 
         if (c == ':') {
-          if (a)
-            sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 37, c);
-          else
-            sprintf(buf2, "\003%d%c\003\002\002", 15, c);
+          sprintf(buf2, "%s%c%s", color(idx, COLOR_OPEN, C_LIGHTGREY), c, color(idx, COLOR_CLOSE, 0));
         } else if (c == '@') {
-          if (a)
-            sprintf(buf2, "\e[1m%c\e[0m", c);
-          else
-            sprintf(buf2, "\002%c\002", c);
-        } else if (c == ']' || c == '>' || c == ')') {
-          if (a)
-            sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
-          else
-            sprintf(buf2, "\00303%c\003\002\002", c);
-        } else if (c == '[' || c == '<' || c == '(') {
-          if (a)
-            sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
-          else
-            sprintf(buf2, "\00303%c\003\002\002", c);
+          sprintf(buf2, "%s%c%s", color(idx, BOLD_OPEN, 0), c, color(idx, BOLD_CLOSE, 0));
+//        } else if (c == ']' || c == '>' || c == ')' || c == '[' || c == '<' || c == '(') {
+        } else if (c == '>' || c == ')' || c == '<' || c == '(') {
+          sprintf(buf2, "%s%c%s", color(idx, COLOR_OPEN, C_GREEN), c, color(idx, COLOR_CLOSE, 0));
         } else {
           sprintf(buf2, "%c", c);
         }
-        sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : "");
+//        sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : "");
+        sprintf(buf3, "%s%s", (buf3 && buf3[0]) ? buf3 : "", (buf2 && buf2[0]) ? buf2 : "");
       }
-      buf3[strlen(buf3)] = '\0';
+      buf3[strlen(buf3)] = 0;
       strcpy(buf, buf3);
+//      strncpyz(buf, buf2, sizeof buf);
     }
-    buf[sizeof(buf)-1] = 0;
+    buf[sizeof(buf) - 1] = 0;
     len = strlen(buf);
 
     if (len > 1000) {		/* Truncate to fit */

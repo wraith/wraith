@@ -2649,44 +2649,28 @@ static void cmd_color(struct userrec *u, int idx, char *par)
 {
   module_entry *me;
 
-  char *type, *of;
+  char *of;
   putlog(LOG_CMDS, "*", STR("#%s# color %s"), dcc[idx].nick, par);
 
   if (!par[0]) {
-    dprintf(idx, STR("Usage: color <on/off> <mIRC/ANSI>\n"));
+    dprintf(idx, STR("Usage: color <on/off>\n"));
     if (dcc[idx].status & STAT_COLOR) 
-      dprintf(idx, STR("Color is currently on (%s).\n"), dcc[idx].status & STAT_COLORM ? "mIRC" : "ANSI");
+      dprintf(idx, STR("Color is currently on.\n"));
     else
       dprintf(idx, STR("Color is currently off.\n"));
     return;
   }
   of = newsplit(&par);
-  type = newsplit(&par);
 
   if (!egg_strcasecmp(of, "on")) {
-    if (!type) {
-      dprintf(idx, STR("Usage: color <on/off> <mIRC/ANSI>\n"));
-      return;
-    }
-    if (!egg_strcasecmp(type, "mirc")) {
-      dcc[idx].status &= ~STAT_COLORA;
-      dcc[idx].status |= (STAT_COLOR | STAT_COLORM);
-      dprintf(idx, STR("Color turned on (mIRC).\n"));
-    } else if (!egg_strcasecmp(type, "ansi")) {
-      dcc[idx].status &= ~STAT_COLORM;
-      dcc[idx].status |= (STAT_COLOR | STAT_COLORA);
-      dprintf(idx, STR("Color turned on (ANSI).\n"));
-    } else {
-      return;
-    }
+    dcc[idx].status |= STAT_COLOR;
   } else if (!egg_strcasecmp(of, "off")) {
-    dcc[idx].status &= ~(STAT_COLOR | STAT_COLORM | STAT_COLORA);
+    dcc[idx].status &= ~(STAT_COLOR);
     dprintf(idx, STR("Color turned off.\n"));
   } else {
     return;
   }
 
-  /* New style autosave here too -- rtc, 09/28/1999*/
   if ((me = module_find("console", 0, 0))) {
     Function *func = me->funcs;
     (func[CONSOLE_DOSTORE]) (idx);

@@ -167,16 +167,10 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
         if (!dcc[i].u.chat->line_count)
           dcc[i].u.chat->current_lines = 0;
       }
-      if (ci->color) {
-        if (ci->color == 1) {
-          dcc[i].status &= ~STAT_COLORA;
-          dcc[i].status |= (STAT_COLOR | STAT_COLORM);
-        } else if (ci->color == 2) {
-          dcc[i].status &= ~STAT_COLORM;
-          dcc[i].status |= (STAT_COLOR | STAT_COLORA);
-        }
-      } else
-         dcc[i].status &= ~(STAT_COLOR | STAT_COLORA | STAT_COLORM);
+      if (ci->color)
+        dcc[i].status |= (STAT_COLOR);
+      else
+        dcc[i].status &= ~(STAT_COLOR);
     }
   }
   return 1;
@@ -259,9 +253,7 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
             i->conchan % GLOBAL_CHANS);
     sprintf(tmp, "    Color:");
     if (i->color == 1)
-     sprintf(tmp, "%s mIRC", tmp);
-    else if (i->color == 2)
-     sprintf(tmp, "%s ANSI", tmp);
+     sprintf(tmp, "%s on", tmp);
     else
      sprintf(tmp, "%s off", tmp);
     dprintf(idx, "%s\n", tmp);
@@ -319,16 +311,10 @@ static int console_chon(char *handle, int idx)
 	if (!dcc[idx].u.chat->line_count)
 	  dcc[idx].u.chat->current_lines = 0;
       }
-      if (i->color) {
-        if (i->color == 1) {
-         dcc[idx].status &= ~STAT_COLORA;
-         dcc[idx].status |= (STAT_COLOR | STAT_COLORM);
-        } else if (i->color == 2) {
-         dcc[idx].status &= ~STAT_COLORM;
-         dcc[idx].status |= (STAT_COLOR | STAT_COLORA);
-        }
-      } else
-         dcc[idx].status &= ~(STAT_COLOR | STAT_COLORA | STAT_COLORM);
+      if (i->color)
+        dcc[idx].status |= (STAT_COLOR);
+      else
+        dcc[idx].status &= ~(STAT_COLOR);
     }
     if ((dcc[idx].u.chat->channel >= 0) &&
 	(dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
@@ -374,13 +360,10 @@ static int console_store(struct userrec *u, int idx, char *par)
     i->page = dcc[idx].u.chat->max_line;
   else
     i->page = 0;
-  if (dcc[idx].status & STAT_COLOR) {
-    if (dcc[idx].status & STAT_COLORM)
-      i->color = 1;
-    else if (dcc[idx].status & STAT_COLORA)
-      i->color = 2;
-  } else
-   i->color = 0;
+  if (dcc[idx].status & STAT_COLOR)
+    i->color = 1;
+  else
+    i->color = 0;
   i->conchan = dcc[idx].u.chat->channel;
   if (par) {
     char tmp[100];
@@ -394,9 +377,7 @@ static int console_store(struct userrec *u, int idx, char *par)
             CONSOLE_CHANNEL2, i->conchan);
     sprintf(tmp, "    Color:");
     if (i->color == 1)
-     sprintf(tmp, "%s mIRC", tmp);
-    else if (i->color == 2)
-     sprintf(tmp, "%s ANSI", tmp);
+     sprintf(tmp, "%s on", tmp);
     else
      sprintf(tmp, "%s off", tmp);
     dprintf(idx, "%s\n", tmp);
