@@ -266,22 +266,25 @@ static int get_dns_idx()
 //	sockbuf_set_sock(dns_idx, sock, 0);
 //        allocsock(sock, SOCK_CONNECT);
 
-        dns_idx = new_dcc(&dns_handler, 0);
+        if (sock >= 0 && dns_ip) {
+          dns_idx = new_dcc(&dns_handler, 0);
 
-        if (dns_idx < 0) {
-         putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create dns connection.");
-         return 1;
+          if (dns_idx < 0) {
+           putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create dns connection.");
+           return 1;
+          }
+          sdprintf("dns_idx: %d", dns_idx);
+          dcc[dns_idx].sock = sock;
+          dns_sock = sock;
+          sdprintf("dns_sock: %d", dcc[dns_idx].sock);
+          strcpy(dcc[dns_idx].host, dns_ip);
+          strcpy(dcc[dns_idx].nick, "(new_dns)");
+          sdprintf("dns_ip: %s", dns_ip);
+          dcc[dns_idx].timeval = now;
+          dns_handler.timeout_val = 0;
+          return 0;
         }
-        sdprintf("dns_idx: %d", dns_idx);
-        dcc[dns_idx].sock = sock;
-        dns_sock = sock;
-        sdprintf("dns_sock: %d", dcc[dns_idx].sock);
-        strcpy(dcc[dns_idx].host, dns_ip);
-        strcpy(dcc[dns_idx].nick, "(new_dns)");
-        sdprintf("dns_ip: %s", dns_ip);
-        dcc[dns_idx].timeval = now;
-        dns_handler.timeout_val = 0;
-        return 0;
+	return 1;
 }
 
 void egg_dns_send(char *query, int len)
