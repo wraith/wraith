@@ -705,8 +705,8 @@ void backup_userfile()
   char s[DIRMAX], s2[DIRMAX];
 
   putlog(LOG_MISC, "*", USERF_BACKUP);
-  egg_snprintf(s, sizeof s, "%s/%s.0", tempdir, userfile);
-  egg_snprintf(s2, sizeof s2, "%s/%s.1", tempdir, userfile);
+  egg_snprintf(s, sizeof s, "%s.%s.0", tempdir, userfile);
+  egg_snprintf(s2, sizeof s2, "%s.%s.1", tempdir, userfile);
   movefile(s, s2);
   copyfile(userfile, s);
 }
@@ -1666,7 +1666,7 @@ if (1) {		/* config shit */
           }
           egg_snprintf(origbotname, 10, "%s", nick);
 #ifdef HUB
-          sprintf(userfile, "%s/.%s.user", confdir(), nick);
+          sprintf(userfile, "%s/.u", confdir());
 #endif /* HUB */
 /* log          sprintf(logfile, "%s/.%s.log", confdir(), nick); */
           if (host && host[1]) { //only copy host if it is longer than 1 char (.)
