@@ -314,6 +314,7 @@ static void got_alarm(int) __attribute__((noreturn));
 
 static void got_alarm(int z)
 {
+  sdprintf("SIGALARM");
   longjmp(alarmret, 1);
 
   /* -Never reached- */

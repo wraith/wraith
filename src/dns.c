@@ -13,7 +13,6 @@
 #include "misc.h"
 #include "src/mod/dns.mod/dns.h"
 #include <netdb.h>
-#include <setjmp.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
