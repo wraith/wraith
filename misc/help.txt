@@ -678,7 +678,7 @@ See also: chhandle, chpass
    Enables or disables misc coloring over DCC. mIRC or ANSI method is
    chosen automatically.
  
-See also: echo, page, strip
+See also: console, echo, page, strip
 ::comment
 ###  $bcomment$b <user> <comment>
    Creates or changes the comment field for a user. The comment field can only
@@ -765,6 +765,8 @@ See also: botconfig
 ###  $bconsole$b <user> [channel] [modes]
    This is used to set the console level of another user. This can even be used
    on users who normally would not be able to set their own console mode.%{-}
+
+See also: color, echo, page, strip
 ::crontab:
 ###  $bcrontab$b <status|delete|show|new> [interval]
    This command is used to manipulate the crontab entries for the user
@@ -912,7 +914,7 @@ See also: bots
    then when you say something on the party line, it will be displayed to you
    just like everyone else will see it. If it's off, then it won't happen.
  
-See also: color, page, strip
+See also: color, console, page, strip
 ::encrypt
 ###  $bencrypt$b <key> <string>
    Encrypts the string using the specified key.
@@ -1357,7 +1359,7 @@ See also: deop, console
    you to type another command (or press enter) to continue. If you have too
    many pending lines, you may be booted off the bot.
  
-See also: echo, color
+See also: color, console, echo, strip
 ::ps:
 ###  $bps$b [ps-param]
    Will run 'ps' on the bot's shell and display any results. If
