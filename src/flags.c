@@ -61,7 +61,7 @@ sanity_check(flag_t atr, int bot)
   }
   /* Master implies botmaster, op */
   if (atr & USER_MASTER)
-    atr |= USER_OP | USER_CHUBA;
+    atr |= USER_OP;
   /* Can't be botnet master without party-line access */
 /*  if (atr & USER_BOTMAST)
     atr |= USER_PARTY;

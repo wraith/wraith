@@ -47,6 +47,7 @@ This is a summary of ChangeLog basically.
 * No longer making the bot fatal() if it cannot open a new socket.
 * Fixed NAT bug for botlinks.
 * All bots are now spawned with -B regardless of order in config.
+* +m no longer implies +j.
 
 1.2
 * No longer displaying SALTS on ./bin -v
