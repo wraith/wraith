@@ -45,12 +45,15 @@ static void edpack(settings_t *, const char *, int);
 int checked_bin_buf = 0;
 
 static char *
-bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
+bin_checksum(const char *fname, int todo)
 {
+  MD5_CTX ctx;
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
   FILE *f = NULL;
   size_t len = 0;
+
+  MD5_Init(&ctx);
 
   checked_bin_buf++;
  
@@ -351,11 +354,7 @@ tellconfig(settings_t *incfg)
 void
 check_sum(const char *fname, const char *cfgfile)
 {
-  MD5_CTX ctx;
-
-  MD5_Init(&ctx);
- 
-  if (!settings.hash[0]) {
+   if (!settings.hash[0]) {
 
     if (!cfgfile)
       fatal("Binary not initialized.", 0);
@@ -363,11 +362,11 @@ check_sum(const char *fname, const char *cfgfile)
     readcfg(cfgfile);
 
 // tellconfig(&settings); 
-    if (bin_checksum(fname, WRITE_CHECKSUM|WRITE_CONF|WRITE_PACK, &ctx))
+    if (bin_checksum(fname, WRITE_CHECKSUM|WRITE_CONF|WRITE_PACK))
       printf("* Wrote settings to binary.\n"); 
     exit(0);
   } else {
-    char *hash = bin_checksum(fname, GET_CHECKSUM, &ctx);
+    char *hash = bin_checksum(fname, GET_CHECKSUM);
 
 // tellconfig(&settings); 
     edpack(&settings, hash, PACK_DEC);
@@ -398,13 +397,10 @@ static bool check_bin_initialized(const char *fname)
 
 void write_settings(const char *fname, int die, bool conf)
 {
-  MD5_CTX ctx;
   char *hash = NULL;
   int bits = WRITE_CHECKSUM;
   /* see if the binary is already initialized or not */
   bool initialized = check_bin_initialized(fname);
-
-  MD5_Init(&ctx);
 
   /* only write pack data if the binary is uninitialized
    * otherwise, assume it has similar/correct/updated pack data
@@ -416,7 +412,7 @@ void write_settings(const char *fname, int die, bool conf)
 
   /* only bother writing anything if we have pack or conf, checksum is worthless to write out */
   if (bits & (WRITE_PACK|WRITE_CONF)) {
-    if ((hash = bin_checksum(fname, bits, &ctx))) {
+    if ((hash = bin_checksum(fname, bits))) {
       printf("* Wrote %ssettings to: %s.\n", ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :
                                              ((bits & WRITE_CONF) && !(bits & WRITE_PACK)) ? "conf " :
                                              ((bits & WRITE_PACK) && (bits & WRITE_CONF))  ? "pack/conf "  :
