@@ -104,7 +104,9 @@
  * modulo would probably be sufficient but on systems lacking random(),
  * the function will be just renamed rand().
  */
-#define randint(n) (unsigned long) (random() / (RANDOM_MAX + 1.0) * n)
+//#define randint(n) (unsigned long) (random() / (RANDOM_MAX + 1.0) * n)
+#define randint(n) (unsigned long) (random() / (RANDOM_MAX + 1.0) * ((signed) (n) < 0 ? (signed) (-(n)) : (signed) (n)))
+
 
 /***********************************************************************/
 

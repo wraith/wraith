@@ -688,6 +688,12 @@ int main(int argc, char **argv)
 {
   egg_timeval_t egg_timeval_now;
 
+  /* Initialize variables and stuff */
+  timer_update_now(&egg_timeval_now);
+  now = egg_timeval_now.sec;
+
+  srandom(now % (getpid() + getppid()) * randint(1000));
+
   Context;		/* FIXME: wtf is this here for?, probably some old hack to fix a corrupt heap */
 /*
   char *out = NULL;
@@ -730,13 +736,8 @@ printf("out: %s\n", out);
   egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu)", settings.packname, egg_version, buildts);
 
   Context;
-  /* Initialize variables and stuff */
-  timer_update_now(&egg_timeval_now);
-  now = egg_timeval_now.sec;
-
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
-  srandom(now % (getpid() + getppid()) * randint(1000));
   myuid = geteuid();
 
 #ifdef HUB
