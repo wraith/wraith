@@ -273,6 +273,7 @@ See also: bc, cmdpass
 :hub:botconfig:
 ###  $bbotconfig$b <bot> [name [value|-]]
    Set's a bot specific entry.
+   <bot> may contain wildcards.
    NOTE: 'config' and 'botconfig' have different entries. 
    If there is a botconfig entry for 'name' and a config entry for 'name', 
    the bot will use the 'botconfig' entry. Otherwise, the 'config' entry

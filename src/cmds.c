@@ -310,15 +310,18 @@ static void cmd_config(int idx, char *par)
 static void cmd_botconfig(int idx, char *par)
 {
   struct userrec *u2 = NULL;
-  char *p = NULL;
+  char *entry = NULL, *botm = NULL;
   struct xtra_key *k = NULL;
   struct cfg_entry *cfgent = NULL;
   int i, cnt;
+  tand_t *tbot = NULL;
+  bool found = 0, described = 0;
 
   /* botconfig bot [name [value]]  */
   putlog(LOG_CMDS, "*", "#%s# botconfig %s", dcc[idx].nick, par);
   if (!par[0]) {
-    dprintf(idx, "Usage: botconfig bot [name [value|-]]\n");
+    dprintf(idx, "Usage: botconfig <bot> [name [value|-]]\n");
+    dprintf(idx, " <bot> may contain wildcards\n");
     cnt = 0;
     for (i = 0; i < cfg_count; i++) {
       if (cfg[i]->flags & CFGF_LOCAL) {
@@ -334,60 +337,70 @@ static void cmd_botconfig(int idx, char *par)
       dprintf(idx, "\n");
     return;
   }
-  p = newsplit(&par);
-  u2 = get_user_by_handle(userlist, p);
-  if (!u2) {
-    dprintf(idx, "No such user.\n");
-    return;
-  }
-  if (!u2->bot) {
-    dprintf(idx, "%s isn't a bot.\n", p);
-    return;
-  }
-  if (!par[0]) {
-    for (i = 0; i < cfg_count; i++) {
-      if ((cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe)) {
-	k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
-	while (k && strcmp(k->key, cfg[i]->name))
-	  k=k->next;
-	if (k)
-	  dprintf(idx, "  %s: %s\n", k->key, k->data);
-	else
-	  dprintf(idx, "  %s: (not set)\n", cfg[i]->name);
-      }
-    }
-    return;
-  }
-  p = newsplit(&par);
-  cfgent = NULL;
-  for (i = 0; !cfgent && (i < cfg_count); i++)
-    if (!strcmp(cfg[i]->name, p) && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe))
-      cfgent=cfg[i];
-  if (!cfgent) {
-    dprintf(idx, "No such configuration value\n");
-    return;
-  }
-  if (par[0]) {
-    char tmp[100] = "";
+  botm = newsplit(&par);
+  entry = newsplit(&par);
 
-    set_cfg_str(u2->handle, cfgent->name, (strcmp(par, "-")) ? par : NULL);
-    egg_snprintf(tmp, sizeof tmp, "%s %s", cfgent->name, par);
-    update_mod(u2->handle, dcc[idx].nick, "botconfig", tmp);
-    dprintf(idx, "Now: ");
+  for (tbot = tandbot; tbot; tbot = tbot->next) {
+    if (wild_match(botm, tbot->bot)) {
+      u2 = get_user_by_handle(userlist, tbot->bot);
+      if (!u2)
+        continue;
+
+      found = 1;
+
+      dprintf(idx, "%s:\n", tbot->bot);
+
+      if (!entry || !entry[0]) {
+        for (i = 0; i < cfg_count; i++) {
+          if ((cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe)) {
+	    k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
+            while (k && strcmp(k->key, cfg[i]->name))
+              k = k->next;
+            if (k)
+              dprintf(idx, "  %s: %s\n", k->key, k->data);
+            else
+              dprintf(idx, "  %s: (not set)\n", cfg[i]->name);
+          }
+        }
+        continue;
+      }
+
+      cfgent = NULL;
+      for (i = 0; !cfgent && (i < cfg_count); i++)
+        if (!strcmp(cfg[i]->name, entry) && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe))
+          cfgent = cfg[i];
+      if (!cfgent) {
+        dprintf(idx, "No such configuration value\n");
+        return;
+      }
+      if (par[0]) {
+        char tmp[100] = "";
+
+        set_cfg_str(u2->handle, cfgent->name, (strcmp(par, "-")) ? par : NULL);
+        egg_snprintf(tmp, sizeof tmp, "%s %s", cfgent->name, par);
+        update_mod(u2->handle, dcc[idx].nick, "botconfig", tmp);
+        dprintf(idx, "Now: ");
 #ifdef HUB
-    write_userfile(idx);
+        write_userfile(idx);
 #endif /* HUB */
-  } else {
-    if (cfgent->describe)
-      cfgent->describe(cfgent, idx);
+      } else {
+        if (cfgent->describe && !described) {
+          described++;
+          cfgent->describe(cfgent, idx);
+        }
+      }
+      k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
+      while (k && strcmp(k->key, cfgent->name))
+        k = k->next;
+      if (k)
+        dprintf(idx, "  %s: %s\n", k->key, k->data);
+      else
+        dprintf(idx, "  %s: (not set)\n", cfgent->name);
+    }
   }
-  k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
-  while (k && strcmp(k->key, cfgent->name))
-    k = k->next;
-  if (k)
-    dprintf(idx, "  %s: %s\n", k->key, k->data);
-  else
-    dprintf(idx, "  %s: (not set)\n", cfgent->name);
+
+  if (!found)
+    dprintf(idx, "No bot matching '%s' linked\n", botm);
 }
 
 static void cmd_cmdpass(int idx, char *par)
