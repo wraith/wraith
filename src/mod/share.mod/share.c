@@ -14,6 +14,7 @@
 #include "src/users.h"
 #include "src/userrec.h"
 #include "src/botnet.h"
+#include "src/auth.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -1334,6 +1335,8 @@ finish_share(int idx)
    */
   for (i = 0; i < dcc_total; i++)
     dcc[i].user = NULL;
+  for (i = 0; i < auth_total; i++)
+    auth[i].user = NULL;
 
   if (conf.bot->u)
     conf.bot->u = NULL;
@@ -1355,6 +1358,9 @@ finish_share(int idx)
                                  * channel lists.                       */
     for (i = 0; i < dcc_total; i++)
       dcc[i].user = get_user_by_handle(ou, dcc[i].nick);
+    for (i = 0; i < auth_total; i++)
+      if (auth[i].hand[0])
+        auth[i].user = get_user_by_handle(ou, auth[i].hand);
 
     conf.bot->u = get_user_by_handle(ou, conf.bot->nick);
 
@@ -1379,10 +1385,10 @@ finish_share(int idx)
 
   /* SUCCESS! */
 
+
   unlink(dcc[idx].u.xfer->filename);
 
   loading = 0;
-
   clear_chanlist();             /* Remove all user references from the
                                  * channel lists.                       */
   userlist = u;                 /* Set new user list.                   */
@@ -1395,7 +1401,10 @@ finish_share(int idx)
    */
   clear_userlist(ou);
 
-  unlink(dcc[idx].u.xfer->filename);    /* Done with you!               */
+  /* copy over any auth users */
+  for (i = 0; i < auth_total; i++)
+    if (auth[i].hand[0])
+      auth[i].user = get_user_by_handle(userlist, auth[i].hand);
 
   checkchans(1);                /* remove marked channels */
   trigger_cfg_changed();
