@@ -1009,6 +1009,10 @@ static void cmd_mop(struct userrec *u, int idx, char *par)
       dprintf(idx, "You are not a channel op on %s.\n", chan->dname);
       return;
     }
+    if (!me_op(chan)) {
+      if (all) goto next;
+      dprintf(idx, "I am not opped on %s.\n", chan->dname);
+    }
     if (channel_active(chan) && !channel_pending(chan)) {
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
         if (!m->user) {

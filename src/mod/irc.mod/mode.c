@@ -26,7 +26,7 @@ static int do_op(char *nick, struct chanset_t *chan, int force)
 {
   memberlist *m = ismember(chan, nick);
 
-  if ((!m) || (m && !force && chan_hasop(m)))
+  if (!me_op(chan) || !m || (m && !force && chan_hasop(m)))
     return 0;
 
   if (channel_fastop(chan) || channel_take(chan)) {
