@@ -45,7 +45,7 @@ struct dcc_t {
   time_t timeval;               /* Use for any timing stuff
                                    - this is used for timeout checking  */
   time_t pingtime;
-  size_t status;         /* A LOT of dcc types have status
+  unsigned long status;         /* A LOT of dcc types have status
                                    thingos, this makes it more avaliabe */
   sock_t sock;                    /* This should be a long to keep 64-bit
                                    machines sane                         */
@@ -87,15 +87,15 @@ struct file_info {
 
 struct xfer_info {
   FILE *f;                      /* pointer to file being sent/received     */
-  size_t length;
-  size_t acked;
-  size_t offset;     /* offset from beginning of file, during
+  unsigned long int length;
+  unsigned long int acked;
+  unsigned long int offset;     /* offset from beginning of file, during
 
                                    resend.                                 */
-  size_t block_pending;  	/* bytes of this DCC block which weren't sent yet. */
-  size_t sofar;          /* how much of the byte count received     */
+  unsigned long int block_pending;  	/* bytes of this DCC block which weren't sent yet. */
   unsigned int type;            /* xfer connection type, see enum below    */
   time_t start_time;            /* Time when a xfer was started.           */
+  unsigned char sofar;          /* how much of the byte count received     */
   char *filename;
   char *origname;
   unsigned short ack_type;      /* type of ack                             */

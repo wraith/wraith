@@ -1479,7 +1479,7 @@ start_sending_users(int idx)
     dcc[idx].status |= STAT_SENDING;
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick); /* Store bot's nick */
-    dprintf(idx, "s us %lu %d %u\n", iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()), dcc[i].port,
+    dprintf(idx, "s us %lu %d %lu\n", iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()), dcc[i].port,
             dcc[i].u.xfer->length);
 
     /* Unlink the file. We don't really care whether this causes problems

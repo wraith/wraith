@@ -258,7 +258,7 @@ void finish_update(int idx)
     FILE *f = NULL;
     f = fopen(dcc[idx].u.xfer->filename, "rb");
     fseek(f, 0, SEEK_END);
-    putlog(LOG_DEBUG, "*", "Update binary is %li bytes and its length: %zu status: %zu", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
+    putlog(LOG_DEBUG, "*", "Update binary is %li bytes and its length: %lu status: %lu", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
     fclose(f);
   }
 
@@ -350,7 +350,7 @@ static void start_sending_binary(int idx)
     dcc[idx].status |= STAT_SENDINGU;
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick);		/* Store bot's nick */
-    dprintf(idx, "sb us %lu %hd %zu\n",
+    dprintf(idx, "sb us %lu %hd %lu\n",
 	    iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()),
 	    dcc[i].port, dcc[i].u.xfer->length);
   }

@@ -1201,7 +1201,7 @@ void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {
   char msg[SGRAB - 110] = "";
 
-  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %zu %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, 
+  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %lu %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, 
                dcc[idx].u.chat->con_chan, dcc[idx].status, cmd, par);
   putbot(bot, msg);
 }

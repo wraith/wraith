@@ -38,7 +38,7 @@ static bool copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
 static time_t wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
 static int dcc_limit = 4;	/* Maximum number of simultaneous file
 				   downloads allowed */
-static size_t dcc_block = 0;	/* Size of one dcc block */
+static unsigned int dcc_block = 0;	/* Size of one dcc block */
 static bool quiet_reject = 1;        /* Quietly reject dcc chat or sends from
                                    users without access? */
 
@@ -506,7 +506,7 @@ void dcc_get(int idx, char *buf, size_t len)
   char xnick[NICKLEN] = "";
   unsigned char bbuf[4] = "";
   unsigned long cmp, l;
-  size_t w = len + dcc[idx].u.xfer->sofar, p = 0;
+  int w = len + dcc[idx].u.xfer->sofar, p = 0;
 
   dcc[idx].timeval = now;		/* Mark as active		*/
 
@@ -726,7 +726,7 @@ void eof_dcc_get(int idx)
 void dcc_send(int idx, char *buf, size_t len)
 {
   char s[SGRAB + 2] = "", *b = NULL;
-  size_t sent;
+  unsigned long sent;
 
   fwrite(buf, len, 1, dcc[idx].u.xfer->f);
 
@@ -1043,7 +1043,7 @@ static void dcc_get_pending(int idx, char *buf, size_t len)
 
   /* Are we resuming? */
   if (dcc[idx].u.xfer->type == XFER_RESUME_PEND) {
-    size_t l;
+    long unsigned int l;
 
     if (dcc_block == 0 || dcc[idx].u.xfer->length < dcc_block) {
       l = dcc[idx].u.xfer->length - dcc[idx].u.xfer->offset;
