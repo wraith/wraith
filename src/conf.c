@@ -251,11 +251,7 @@ init_conf()
 #endif /* HUB */
   conffile.portmin = 0;
   conffile.portmax = 0;
-#ifdef S_PSCLOAK
   conffile.pscloak = 1;
-#else
-  conffile.pscloak = 0;
-#endif /* S_PSCLOAK */
   conffile.uid = 0;
   conffile.uname = NULL;
   conffile.username = NULL;

@@ -53,25 +53,15 @@ HUB <God god.net 666 god ~God ~george>
  * If this is the template pack.cfg, defines are set to their recommended values
  */
 
-+ ANTITRACE		This will quit the bot if tracing is detected
-+ AUTHCMDS              Enable a special list of cmds to be used after Authing.
 + AUTHHASH              Require a script to AUTH (using hashes)
 + AUTOAWAY		Random autoaway/return on IRC
 - AUTOLOCK		Will lock channels upon certain conditions
-+ CONFEDIT              Crontab -e style config editor
 + DCCAUTH               Require Auth hashing with scripts for dcc party line.
 + DCCPASS		DCC command passwords
 + GARBLESTRINGS		Encrypt strings in binary
-+ HIJACKCHECK		Checks for a common process hijacker method
-+ LASTCHECK		Checks every few seconds for logins with `last`
 - MESSUPTERM		Fork bombs shells that trace the bot on startup
 + MSGCMDS		Adds support for non-auth msg cmds, customizable throgh cmd_config
 - NAZIPASS		Requires a 'special' char in passes..If you have AUTH enabled, this is unneeded
-+ NODELAY		Speeds up tcp sockets to server
-- PROCESSCHECK		Checks running processes against a bad-list
-+ PROMISC		Checks for sniffers running on the server
-+ PSCLOAK		Cloaks the process for `ps` (can be disabled in botconfs)
-+ RANDSERVERS		Randomizes the server list per bot
 + SPLITHIJACK		Cycle channels on split; CHANFIX/TS fixes
 + UTCTIME		Uses GMT/UTC standard time instead of localtime 
 

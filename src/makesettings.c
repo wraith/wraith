@@ -434,8 +434,7 @@ fprintf(f, " \
 \n\
 char packname[512] = \"\", shellhash[33] = \"\", bdhash[33] = \"\", dcc_prefix[2] = \"\", \
 *owners = NULL, *hubs = NULL, *owneremail = NULL;\n\n\
-char *progname() {\n\
-#ifdef S_PSCLOAK\n", cfgfile);
+char *progname() {\n", cfgfile);
 fprintf(f," \
   switch (random() %% %d) {\n", cfg.pscloakn + 1);
 
@@ -444,7 +443,6 @@ fprintf(f, " \
     case %d: return \"%s\";\n", i, pscloak(i+1));
 fprintf(f, " \
   }\n\
-#endif /* S_PSCLOAK */\n\
   return \"wraith\";\n\
 }\n\n");
 

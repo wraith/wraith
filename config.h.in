@@ -344,6 +344,5 @@
 #undef S_MESSUPTERM
 #undef S_MSGCMDS
 #undef S_NAZIPASS
-#undef S_PSCLOAK
 #undef S_SPLITHIJACK
 #undef S_UTCTIME
