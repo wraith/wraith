@@ -87,7 +87,7 @@ spawnbots()
       }
 
       size = strlen(bot->nick) + strlen(binname) + 20;
-      run = (char *) calloc(1, size);
+      run = (char *) my_calloc(1, size);
       egg_snprintf(run, size, "%s -B %s", binname, bot->nick);
       sdprintf("Spawning '%s': %s", bot->nick, run);
       status = system(run);
@@ -182,7 +182,7 @@ confedit()
 
       setgid(getgid());
       setuid(getuid());
-      run = (char *) calloc(1, size);
+      run = (char *) my_calloc(1, size);
       /* child */
       egg_snprintf(run, size, "%s %s", editor, tmpconf.file);
       execlp("/bin/sh", "/bin/sh", "-c", run, NULL);
@@ -244,7 +244,7 @@ fatal:
 void
 init_conf()
 {
-  conffile.bots = (conf_bot *) calloc(1, sizeof(conf_bot));
+  conffile.bots = (conf_bot *) my_calloc(1, sizeof(conf_bot));
   conffile.bots->nick = NULL;
   conffile.bots->next = NULL;
   conffile.bot = NULL;
@@ -343,7 +343,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next) ;
 
-  bot->next = (conf_bot *) calloc(1, sizeof(conf_bot));
+  bot->next = (conf_bot *) my_calloc(1, sizeof(conf_bot));
   bot->next->next = NULL;
   bot->pid_file = NULL;
   bot->nick = strdup(nick);
@@ -500,7 +500,7 @@ readconf(char *fname, int bits)
     fatal("Cannot read config", 0);
 
   free_conf_bots();
-  inbuf = (char *) calloc(1, 201);
+  inbuf = (char *) my_calloc(1, 201);
   while (fgets(inbuf, 201, f) != NULL) {
     char *line = NULL, *temp_ptr = NULL;
 
@@ -782,7 +782,7 @@ fillconf(conf_t * inconf)
     werr(ERR_BADBOT);
 
   free(mynick);
-  inconf->bot = (conf_bot *) calloc(1, sizeof(conf_bot));
+  inconf->bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
   conf_bot_dup(inconf->bot, bot);
   inconf->localhub = conffile.localhub ? strdup(conffile.localhub) : NULL;
   inconf->binpath = conffile.binpath ? strdup(conffile.binpath) : NULL;

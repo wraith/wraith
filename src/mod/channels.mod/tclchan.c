@@ -233,7 +233,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
         }
     }
 
-    argv = (const char **) calloc(1, (unsigned) ((size * sizeof(char *)) + (l - list) + 1 + 15));	/* 15 cuz the tcl src is hard to follow */
+    argv = (const char **) my_calloc(1, (unsigned) ((size * sizeof(char *)) + (l - list) + 1 + 15));	/* 15 cuz the tcl src is hard to follow */
 
     length = strlen(list);
 
@@ -676,7 +676,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 
 static void init_masklist(masklist *m)
 {
-  m->mask = (char *) calloc(1, 1);
+  m->mask = (char *) my_calloc(1, 1);
   m->who = NULL;
   m->next = NULL;
 }
@@ -690,18 +690,18 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.members = 0;
 
   if (!reset)
-    chan->channel.key = (char *) calloc(1, 1);
+    chan->channel.key = (char *) my_calloc(1, 1);
 
-  chan->channel.ban = (masklist *) calloc(1, sizeof(masklist));
+  chan->channel.ban = (masklist *) my_calloc(1, sizeof(masklist));
   init_masklist(chan->channel.ban);
 
-  chan->channel.exempt = (masklist *) calloc(1, sizeof(masklist));
+  chan->channel.exempt = (masklist *) my_calloc(1, sizeof(masklist));
   init_masklist(chan->channel.exempt);
 
-  chan->channel.invite = (masklist *) calloc(1, sizeof(masklist));
+  chan->channel.invite = (masklist *) my_calloc(1, sizeof(masklist));
   init_masklist(chan->channel.invite);
 
-  chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
+  chan->channel.member = (memberlist *) my_calloc(1, sizeof(memberlist));
   chan->channel.member->nick[0] = 0;
   chan->channel.member->next = NULL;
   chan->channel.topic = NULL;
@@ -785,7 +785,7 @@ int channel_add(char *result, char *newname, char *options)
     /* Already existing channel, maybe a reload of the channel file */
     chan->status &= ~CHAN_FLAGGED;	/* don't delete me! :) */
   } else {
-    chan = (struct chanset_t *) calloc(1, sizeof(struct chanset_t));
+    chan = (struct chanset_t *) my_calloc(1, sizeof(struct chanset_t));
 
     /* These are defaults, bzero already set them 0, but we set them for future reference */
     chan->limit_prot = 0;

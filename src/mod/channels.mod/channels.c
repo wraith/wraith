@@ -224,7 +224,7 @@ static void got_cjoin(char *botnick, char *code, char *par)
   if (!match) {
     size_t size = strlen(par) + 12 + 1;
 
-    options = (char *) calloc(1, size);
+    options = (char *) my_calloc(1, size);
     egg_snprintf(options, size, "%s +inactive", par);
   } else if (match && chan && !shouldjoin(chan)) {
     if (!inactive)

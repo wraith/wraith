@@ -23,7 +23,7 @@ static char   last_invchan[300] = "";
  */
 static memberlist *newmember(struct chanset_t *chan, char * nick)
 {
-  memberlist *x = x = chan->channel.member, *lx = NULL, *n = (memberlist *) calloc(1, sizeof(memberlist));
+  memberlist *x = x = chan->channel.member, *lx = NULL, *n = (memberlist *) my_calloc(1, sizeof(memberlist));
 
   while (x && x->nick[0] && (rfc_casecmp(x->nick, nick)<0)) {
     lx = x;
@@ -1006,9 +1006,9 @@ void enforce_closed(struct chanset_t *chan) {
 static char *
 take_massopline(char *op, char **to_op)
 {
-  char *nicks = (char *) calloc(1, 151),
-       *modes = (char *) calloc(1, 31),
-       *ret = (char *) calloc(1, 182),
+  char *nicks = (char *) my_calloc(1, 151),
+       *modes = (char *) my_calloc(1, 31),
+       *ret = (char *) my_calloc(1, 182),
        *nick = NULL;
   register bool useop = 0;
 
@@ -1043,7 +1043,7 @@ take_makeline(char *op, char *deops, unsigned int deopn)
   bool opn = op ? 1 : 0;
   unsigned int n = opn + deopn;		/* op + deops */
   unsigned int pos = randint(deopn), i;
-  char *ret = (char *) calloc(1, 151);
+  char *ret = (char *) my_calloc(1, 151);
   
   for (i = 0; i < n; i++) {
     if (opn && i == pos)
@@ -1070,8 +1070,8 @@ static void
 do_take(struct chanset_t *chan)
 {
   char work[1024] = "", *op, *modeline, deops[512] = "";;
-  char *to_op = (char *) calloc(1, 2048), *to_op_ptr = to_op;
-  char *to_deop = (char *) calloc(1, 2048), *to_deop_ptr = to_deop;
+  char *to_op = (char *) my_calloc(1, 2048), *to_op_ptr = to_op;
+  char *to_deop = (char *) my_calloc(1, 2048), *to_deop_ptr = to_deop;
   register bool hasop, isbot;
   register unsigned int lines_max = 5, lines = 0, deopn, i;
 
@@ -1917,7 +1917,7 @@ static int got475(char *from, char *msg)
     putlog(LOG_JOIN, chan->dname, IRC_BADCHANKEY, chan->dname);
     if (chan->channel.key[0]) {
       free(chan->channel.key);
-      chan->channel.key = (char *) calloc(1, 1);
+      chan->channel.key = (char *) my_calloc(1, 1);
       dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
     } else {
       request_in(chan);
@@ -1968,7 +1968,7 @@ static void set_topic(struct chanset_t *chan, char *k)
   if (chan->channel.topic)
     free(chan->channel.topic);
   if (k && k[0]) {
-    chan->channel.topic = (char *) calloc(1, strlen(k) + 1);
+    chan->channel.topic = (char *) my_calloc(1, strlen(k) + 1);
     strcpy(chan->channel.topic, k);
   } else
     chan->channel.topic = NULL;
@@ -2054,7 +2054,7 @@ static int gotjoin(char *from, char *chname)
     int	l_chname = strlen(chname);
 
     if (l_chname > (CHANNEL_ID_LEN + 1)) {
-      ch_dname = (char *) calloc(1, l_chname + 1);
+      ch_dname = (char *) my_calloc(1, l_chname + 1);
       if (ch_dname) {
 	egg_snprintf(ch_dname, l_chname + 2, "!%s",
 		     chname + (CHANNEL_ID_LEN + 1));

@@ -72,7 +72,7 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
     size_t size = 0, i = 0;
 
     size = strlen(fname) + 2;
-    fname_bak = (char *) calloc(1, size);
+    fname_bak = (char *) my_calloc(1, size);
     egg_snprintf(fname_bak, size, "%s~", fname);
     size = 0;
 

@@ -842,10 +842,10 @@ append_line(int idx, char *line)
     else
       for (q = c->buffer; q->next; q = q->next) ;
 
-    p = (struct msgq *) calloc(1, sizeof(struct msgq));
+    p = (struct msgq *) my_calloc(1, sizeof(struct msgq));
 
     p->len = l;
-    p->msg = (char *) calloc(1, l + 1);
+    p->msg = (char *) my_calloc(1, l + 1);
     p->next = NULL;
     strcpy(p->msg, line);
     if (q == NULL)
@@ -894,7 +894,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
     if (!egg_strcasecmp(buf, "elinkdone")) {
       free(dcc[idx].u.chat);
       dcc[idx].type = &DCC_BOT_NEW;
-      dcc[idx].u.bot = (struct bot_info *) calloc(1, sizeof(struct bot_info));
+      dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
       dcc[idx].status = STAT_CALLED;
       dprintf(idx, "goodbye!\n");
       greet_new_bot(idx);
@@ -1522,7 +1522,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
       struct chat_info *ci = dcc[idx].u.chat;
 
       dcc[idx].type = &DCC_DUPWAIT;
-      dcc[idx].u.dupwait = (struct dupwait_info *) calloc(1, sizeof(struct dupwait_info));
+      dcc[idx].u.dupwait = (struct dupwait_info *) my_calloc(1, sizeof(struct dupwait_info));
       dcc[idx].u.dupwait->chat = ci;
       dcc[idx].u.dupwait->atr = atr;
       return;
@@ -1573,7 +1573,7 @@ dcc_telnet_pass(int idx, int atr)
   if (!ok) {
     struct chat_info *ci = dcc[idx].u.chat;
 
-    dcc[idx].u.file = (struct file_info *) calloc(1, sizeof(struct file_info));
+    dcc[idx].u.file = (struct file_info *) my_calloc(1, sizeof(struct file_info));
     dcc[idx].u.file->chat = ci;
   }
 
@@ -1862,7 +1862,7 @@ dcc_telnet_got_ident(int i, char *host)
   sockoptions(dcc[i].sock, EGG_OPTION_UNSET, SOCK_BUFFER);
 
   dcc[i].type = &DCC_TELNET_ID;
-  dcc[i].u.chat = (struct chat_info *) calloc(1, sizeof(struct chat_info));
+  dcc[i].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
   egg_bzero(dcc[i].u.chat, sizeof(struct chat_info));
 
   /* Copy acceptable-nick/host mask */

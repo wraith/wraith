@@ -1203,7 +1203,7 @@ char *botlink_encrypt(int snum, char *src, size_t *len)
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
   size_t bufpos = 0;
 
-  srcbuf = (char *) calloc(1, *len + 9 + 1);
+  srcbuf = (char *) my_calloc(1, *len + 9 + 1);
   strcpy(srcbuf, src);
   line = srcbuf;
 
@@ -1220,7 +1220,7 @@ char *botlink_encrypt(int snum, char *src, size_t *len)
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }
-    buf = (char *) realloc(buf, bufpos + strlen(eline) + 1 + 9);
+    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
     free(eline);
     strcat(buf, "\n");
@@ -1239,7 +1239,7 @@ char *botlink_encrypt(int snum, char *src, size_t *len)
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }
-    buf = (char *) realloc(buf, bufpos + strlen(eline) + 1 + 9);
+    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
     free(eline);
     strcat(buf, "\n");
@@ -1290,7 +1290,7 @@ int sockgets(char *s, int *len)
 	  if (strlen(socklist[i].inbuf) > SGRAB)
 	    socklist[i].inbuf[SGRAB] = 0;
 	  strcpy(s, socklist[i].inbuf);
-	  px = (char *) calloc(1, strlen(p + 1) + 1);
+	  px = (char *) my_calloc(1, strlen(p + 1) + 1);
 	  strcpy(px, p + 1);
 	  free(socklist[i].inbuf);
 	  if (px[0])
@@ -1322,7 +1322,7 @@ int sockgets(char *s, int *len)
 	  egg_memcpy(s, socklist[i].inbuf, *len);
 	  egg_memcpy(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
 	  socklist[i].inbuflen -= *len;
-	  socklist[i].inbuf = (char *) realloc(socklist[i].inbuf, socklist[i].inbuflen);
+	  socklist[i].inbuf = (char *) my_realloc(socklist[i].inbuf, socklist[i].inbuflen);
 	}
 	return socklist[i].sock;
       }
@@ -1348,7 +1348,7 @@ int sockgets(char *s, int *len)
       socklist[ret].flags &= ~SOCK_STRONGCONN;
       /* Buffer any data that came in, for future read. */
       socklist[ret].inbuflen = *len;
-      socklist[ret].inbuf = (char *) calloc(1, *len + 1);
+      socklist[ret].inbuf = (char *) my_calloc(1, *len + 1);
       /* It might be binary data. You never know. */
       egg_memcpy(socklist[ret].inbuf, xx, *len);
       socklist[ret].inbuf[*len] = 0;
@@ -1364,7 +1364,7 @@ int sockgets(char *s, int *len)
   if ((socklist[ret].flags & SOCK_LISTEN) || (socklist[ret].flags & SOCK_PASS))
     return socklist[ret].sock;
   if (socklist[ret].flags & SOCK_BUFFER) {
-    socklist[ret].inbuf = (char *) realloc(socklist[ret].inbuf,
+    socklist[ret].inbuf = (char *) my_realloc(socklist[ret].inbuf,
 		    			    socklist[ret].inbuflen + *len + 1);
     egg_memcpy(socklist[ret].inbuf + socklist[ret].inbuflen, xx, *len);
     socklist[ret].inbuflen += *len;
@@ -1376,7 +1376,7 @@ int sockgets(char *s, int *len)
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
-    socklist[ret].inbuf = (char *) calloc(1, strlen(p) + strlen(xx) + 1);
+    socklist[ret].inbuf = (char *) my_calloc(1, strlen(p) + strlen(xx) + 1);
     strcpy(socklist[ret].inbuf, p);
     strcat(socklist[ret].inbuf, xx);
     free(p);
@@ -1388,7 +1388,7 @@ int sockgets(char *s, int *len)
     } else {
       p = socklist[ret].inbuf;
       socklist[ret].inbuflen = strlen(p) - SGRAB;
-      socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1); 
+      socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1); 
       strcpy(socklist[ret].inbuf, p + SGRAB);
       *(p + SGRAB) = 0;
       strcpy(xx, p);
@@ -1439,13 +1439,13 @@ int sockgets(char *s, int *len)
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
     socklist[ret].inbuflen = strlen(p) + strlen(xx);
-    socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
     strcat(socklist[ret].inbuf, p);
     free(p);
   } else {
     socklist[ret].inbuflen = strlen(xx);
-    socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
   }
   if (data) {
@@ -1498,7 +1498,7 @@ void tputs(register int z, char *s, size_t len)
       
       if (socklist[i].outbuf != NULL) {
 	/* Already queueing: just add it */
-	p = (char *) realloc(socklist[i].outbuf, socklist[i].outbuflen + len);
+	p = (char *) my_realloc(socklist[i].outbuf, socklist[i].outbuflen + len);
 	egg_memcpy(p + socklist[i].outbuflen, s, len);
 	socklist[i].outbuf = p;
 	socklist[i].outbuflen += len;
@@ -1542,7 +1542,7 @@ void tputs(register int z, char *s, size_t len)
 	x = 0;
       if ((size_t) x < len) {
 	/* Socket is full, queue it */
-	socklist[i].outbuf = (char *) calloc(1, len - x);
+	socklist[i].outbuf = (char *) my_calloc(1, len - x);
 	egg_memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }
@@ -1670,7 +1670,7 @@ void dequeue_sockets()
 	char *p = socklist[i].outbuf;
 
 	/* This removes any sent bytes from the beginning of the buffer */
-	socklist[i].outbuf = (char *) calloc(1, socklist[i].outbuflen - x);
+	socklist[i].outbuf = (char *) my_calloc(1, socklist[i].outbuflen - x);
 	egg_memcpy(socklist[i].outbuf, p + x, socklist[i].outbuflen - x);
 	socklist[i].outbuflen -= x;
 	free(p);

@@ -363,7 +363,7 @@ int write_userfile(int idx)
     return 1;			/* No point in saving userfile */
 
   FILE *f = NULL;
-  char *new_userfile = (char *) calloc(1, strlen(userfile) + 5);
+  char *new_userfile = (char *) my_calloc(1, strlen(userfile) + 5);
 
   sprintf(new_userfile, "%s~new", userfile);
 
@@ -443,7 +443,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
   int oldshare = noshare;
 
   noshare = 1;
-  u = (struct userrec *) calloc(1, sizeof(struct userrec));
+  u = (struct userrec *) my_calloc(1, sizeof(struct userrec));
 
   u->bot = bot;
 
@@ -630,7 +630,7 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
     struct laston_info *li = (struct laston_info *) get_user(&USERENTRY_LASTON, u);
 
     if (!li)
-      li = (struct laston_info *) calloc(1, sizeof(struct laston_info));
+      li = (struct laston_info *) my_calloc(1, sizeof(struct laston_info));
 
     else if (li->lastonplace)
       free(li->lastonplace);

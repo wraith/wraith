@@ -63,12 +63,12 @@ static void cancel_user_xfer(int, void *);
 static void
 add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
 {
-  struct delay_mode *d = (struct delay_mode *) calloc(1, sizeof(struct delay_mode));
+  struct delay_mode *d = (struct delay_mode *) my_calloc(1, sizeof(struct delay_mode));
 
   d->chan = chan;
   d->plsmns = plsmns;
   d->mode = mode;
-  d->mask = (char *) calloc(1, strlen(mask) + 1);
+  d->mask = (char *) my_calloc(1, strlen(mask) + 1);
 
   strncpy(d->mask, mask, strlen(mask) + 1);
   d->seconds = (int) (now + randint(20));
@@ -528,7 +528,7 @@ share_change(int idx, char *par)
 
       if (uet->got_share) {
         if (!(e = find_user_entry(uet, u))) {
-          e = (struct user_entry *) calloc(1, sizeof(struct user_entry));
+          e = (struct user_entry *) my_calloc(1, sizeof(struct user_entry));
 
           e->type = uet;
           e->name = NULL;

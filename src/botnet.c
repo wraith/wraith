@@ -40,7 +40,7 @@ static int		share_unlinks = 1;		/* Allow remote unlinks of my
 
 void init_party()
 {
-  party = (party_t *) calloc(1, maxparty * sizeof(party_t));
+  party = (party_t *) my_calloc(1, maxparty * sizeof(party_t));
 }
 
 tand_t *findbot(char *who)
@@ -64,7 +64,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
       putlog(LOG_BOTS, "*", "!!! Duplicate botnet bot entry!!");
     ptr = &((*ptr)->next);
   }
-  ptr2 = (tand_t *) calloc(1, sizeof(tand_t));
+  ptr2 = (tand_t *) my_calloc(1, sizeof(tand_t));
   strncpy(ptr2->bot, who, HANDLEN);
   ptr2->bot[HANDLEN] = 0;
   ptr2->share = flag;
@@ -146,7 +146,7 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock,
   /* New member */
   if (parties == maxparty) {
     maxparty += 50;
-    party = (party_t *) realloc((void *) party, maxparty * sizeof(party_t));
+    party = (party_t *) my_realloc((void *) party, maxparty * sizeof(party_t));
   }
   strncpy(party[parties].nick, nick, HANDLEN);
   party[parties].nick[HANDLEN] = 0;
@@ -1167,7 +1167,7 @@ void tandem_relay(int idx, char *nick, register int i)
 
   struct chat_info *ci = dcc[idx].u.chat;
 
-  dcc[idx].u.relay = (struct relay_info *) calloc(1, sizeof(struct relay_info));
+  dcc[idx].u.relay = (struct relay_info *) my_calloc(1, sizeof(struct relay_info));
   dcc[idx].u.relay->chat = ci;
   dcc[idx].u.relay->old_status = dcc[idx].status;
 
@@ -1230,7 +1230,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
 
   dcc[i].addr = inet_addr(ips[0]);
 
-  dcc[i].u.relay->chat = (struct chat_info *) calloc(1, sizeof(struct chat_info));
+  dcc[i].u.relay->chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
   dcc[i].u.relay->sock = sock;
   dcc[i].u.relay->port = dcc[i].port;
   dcc[i].u.relay->chat->away = NULL;

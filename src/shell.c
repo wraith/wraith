@@ -90,7 +90,7 @@ int clear_tmp()
     if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
        && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
 
-      file = (char *) calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      file = (char *) my_calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
 
       strcat(file, tempdir);
       strcat(file, dir_ent->d_name);
@@ -174,7 +174,7 @@ void check_last() {
             if (strncmp(last_buf, out, sizeof(last_buf))) {
               char *work = NULL;
 
-              work = (char *) calloc(1, strlen(out) + 7 + 2 + 1);
+              work = (char *) my_calloc(1, strlen(out) + 7 + 2 + 1);
 
               sprintf(work, "Login: %s", out);
               detected(DETECT_LOGIN, work);
@@ -214,7 +214,7 @@ void check_processes()
     bin[0] = 0;
   }
   /* Fix up the "permitted processes" list */
-  p = (char *) calloc(1, strlen(proclist) + strlen(bin) + 6);
+  p = (char *) my_calloc(1, strlen(proclist) + strlen(bin) + 6);
   strcpy(p, proclist);
   strcat(p, " ");
   strcat(p, bin);
@@ -271,7 +271,7 @@ void check_processes()
             size_t size = 0;
 
             size = strlen(line) + 22;
-            work = (char *) calloc(1, size);
+            work = (char *) my_calloc(1, size);
             egg_snprintf(work, size, "Unexpected process: %s", line);
             detected(DETECT_PROCESS, work);
             free(work);
@@ -488,7 +488,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       if (fs == 0) {
         (*erroutput) = NULL;
       } else {
-        buf = (char *) calloc(1, fs + 1);
+        buf = (char *) my_calloc(1, fs + 1);
         fseek(errFile, 0, SEEK_SET);
         fread(buf, 1, fs, errFile);
         buf[fs] = 0;
@@ -505,7 +505,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       if (fs == 0) {
         (*output) = NULL;
       } else {
-        buf = (char *) calloc(1, fs + 1);
+        buf = (char *) my_calloc(1, fs + 1);
         fseek(outFile, 0, SEEK_SET);
         fread(buf, 1, fs, outFile);
         buf[fs] = 0;
@@ -767,7 +767,7 @@ void baduname(char *confhas, char *myuname) {
   char *tmpFile = NULL;
   int tosend = 0, make = 0;
 
-  tmpFile = (char *) calloc(1, strlen(tempdir) + 3 + 1);
+  tmpFile = (char *) my_calloc(1, strlen(tempdir) + 3 + 1);
 
   sprintf(tmpFile, "%s.un", tempdir);
   sdprintf("CHECKING %s", tmpFile);
@@ -991,7 +991,7 @@ void check_crontab()
 void crontab_del() {
   char *tmpFile = NULL, *p = NULL, buf[2048] = "";
 
-  tmpFile = (char *) calloc(1, strlen(binname) + 100);
+  tmpFile = (char *) my_calloc(1, strlen(binname) + 100);
 
   strcpy(tmpFile, binname);
   if (!(p = strrchr(tmpFile, '/')))

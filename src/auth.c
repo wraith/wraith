@@ -41,9 +41,9 @@ init_auth_max()
   if (max_auth < 1)
     max_auth = 1;
   if (auth)
-    auth = (struct auth_t *) realloc(auth, sizeof(struct auth_t) * max_auth);
+    auth = (struct auth_t *) my_realloc(auth, sizeof(struct auth_t) * max_auth);
   else
-    auth = (struct auth_t *) calloc(1, sizeof(struct auth_t) * max_auth);
+    auth = (struct auth_t *) my_calloc(1, sizeof(struct auth_t) * max_auth);
 }
 
 static void

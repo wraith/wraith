@@ -159,7 +159,7 @@ static void write_debug()
       sprintf(buf2, "cat %s", buf);
       shell_exec(buf2, NULL, &debug, NULL);
 
-      msg = (char *) calloc(1, strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
+      msg = (char *) my_calloc(1, strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
 
       sprintf(msg, "%s\n%s\n%s\n\n%s\n%s\n\n%s\n\n-----%s-----\n\n\n\n%s", date, id, uname, w, who, ps, ls, debug);
       email("Debug output", msg, EMAIL_TEAM);

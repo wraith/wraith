@@ -117,7 +117,7 @@ makecookie(char *chn, char *bnick)
 
   sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
   hash = MD5(tohash);
-  buf = (char *) calloc(1, 20);
+  buf = (char *) my_calloc(1, 20);
   sprintf(buf, "%c%c%c!%s@%s", hash[8], hash[16], hash[18], randstring, ts);
   /* sprintf(buf, "%c/%s!%s@%X", hash[16], randstring, ts, BIT31); */
   free(chname);
@@ -416,7 +416,7 @@ getin_request(char *botnick, char *code, char *par)
     }
     if (strchr(p2, 'k')) {
       sendi = 0;
-      tmp = (char *) calloc(1, strlen(chan->dname) + strlen(p3) + 7);
+      tmp = (char *) my_calloc(1, strlen(chan->dname) + strlen(p3) + 7);
       sprintf(tmp, "gi K %s %s", chan->dname, p3);
       botnet_send_zapf(nextbot(botnick), conf.bot->nick, botnick, tmp);
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Sent key (%s)", botnick, nick, chan->dname, p3);
@@ -543,7 +543,7 @@ request_op(struct chanset_t *chan)
     return;
   }
 
-  char *l = (char *) calloc(1, cnt * 50), s[100] = "";
+  char *l = (char *) my_calloc(1, cnt * 50), s[100] = "";
 
   /* first scan for bots on my server, ask first found for ops */
   sprintf(s, "gi o %s %s", chan->dname, botname);
@@ -614,7 +614,7 @@ request_in(struct chanset_t *chan)
     return;
   }
 
-  char s[255] = "", *l = (char *) calloc(1, IN_BOTS * 30);
+  char s[255] = "", *l = (char *) my_calloc(1, IN_BOTS * 30);
   int cnt = IN_BOTS, n;
 
   if (!checked_hostmask)
@@ -832,10 +832,10 @@ my_setkey(struct chanset_t *chan, char *k)
 {
   free(chan->channel.key);
   if (k == NULL) {
-    chan->channel.key = (char *) calloc(1, 1);
+    chan->channel.key = (char *) my_calloc(1, 1);
     return;
   }
-  chan->channel.key = (char *) calloc(1, strlen(k) + 1);
+  chan->channel.key = (char *) my_calloc(1, strlen(k) + 1);
   strcpy(chan->channel.key, k);
 }
 
@@ -849,20 +849,20 @@ new_mask(masklist *m, char *s, char *who)
   if (m->mask[0])
     return;                     /* Already existent mask */
 
-  m->next = (masklist *) calloc(1, sizeof(masklist));
+  m->next = (masklist *) my_calloc(1, sizeof(masklist));
   m->next->next = NULL;
-  m->next->mask = (char *) calloc(1, 1);
+  m->next->mask = (char *) my_calloc(1, 1);
   free(m->mask);
-  m->mask = (char *) calloc(1, strlen(s) + 1);
+  m->mask = (char *) my_calloc(1, strlen(s) + 1);
   strcpy(m->mask, s);
-  m->who = (char *) calloc(1, strlen(who) + 1);
+  m->who = (char *) my_calloc(1, strlen(who) + 1);
   strcpy(m->who, who);
   m->timer = now;
 }
 
 /* Removes a nick from the channel member list (returns 1 if successful)
  */
-/* FIXME: This passing of FILE:LINE is unnecesary, an OLD bug may still exist from the malloc->calloc patch */
+/* FIXME: This passing of FILE:LINE is unnecesary, an OLD bug may still exist from the malloc->my_calloc patch */
 static bool
 real_killmember(struct chanset_t *chan, char *nick, const char *file, int line)
 {
@@ -893,7 +893,7 @@ real_killmember(struct chanset_t *chan, char *nick, const char *file, int line)
     putlog(LOG_MISC, "*", "(!) actually I know of %d members.", chan->channel.members);
   }
   if (!chan->channel.member) {
-    chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
+    chan->channel.member = (memberlist *) my_calloc(1, sizeof(memberlist));
     chan->channel.member->nick[0] = 0;
     chan->channel.member->next = NULL;
   }
@@ -963,7 +963,7 @@ reset_chan_info(struct chanset_t *chan)
     if (me_op(chan))
       opped = 1;
     free(chan->channel.key);
-    chan->channel.key = (char *) calloc(1, 1);
+    chan->channel.key = (char *) my_calloc(1, 1);
     clear_channel(chan, 1);
     chan->status |= CHAN_PEND;
     chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES);

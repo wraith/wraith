@@ -139,7 +139,7 @@ static char *getfullbinname(const char *argv_zero)
 #ifdef CYGWIN_HACKS
   /* tack on the .exe */
   cygwin:
-  bin = (char *) realloc(bin, strlen(bin) + 4 + 1);
+  bin = (char *) my_realloc(bin, strlen(bin) + 4 + 1);
   strcat(bin, ".exe");
   bin[strlen(bin)] = 0;
 #endif /* CYGWIN_HACKS */

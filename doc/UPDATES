@@ -11,7 +11,6 @@ This is a summary of ChangeLog basically.
 * Fixed cmd_comment bug with changing comment on lower level users.
 * Bots now unban bans that match *linked* bots, +m bans besides this will not be unset auto.
 
-
 1.2
 * No longer displaying SALTS on ./bin -v
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...

@@ -14,7 +14,7 @@ str_redup(char **str, const char *newstr)
                 return;
         }
         len = strlen(newstr) + 1;
-        *str = (char *) realloc(*str, len);
+        *str = (char *) my_realloc(*str, len);
         egg_memcpy(*str, newstr, len);
 }
 
@@ -22,8 +22,28 @@ char *
 strdup(const char *entry)
 {
   size_t len = strlen(entry) + 1;
-  char *target = (char *) calloc(1, len);
+  char *target = (char *) my_calloc(1, len);
   if (target == NULL) return NULL;
   return (char *) egg_memcpy(target, entry, len);
+}
+
+void *my_calloc(size_t nmemb, size_t size)
+{
+  void *ptr = calloc(nmemb, size);
+
+  if (ptr == NULL)
+    fatal("Cannot allocate memory", 0);
+  
+  return ptr;
+}
+
+void *my_realloc(void *ptr, size_t size)
+{
+  void *x = realloc(ptr, size);
+
+  if (x == NULL && size > 0)
+    fatal("Cannot allocate memory", 0);
+
+  return x;
 }
 

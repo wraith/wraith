@@ -386,7 +386,7 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
         flush_mode(chan, NORMAL);
       for (i = 0; i < (modesperline - 1); i++)
         if (!chan->ccmode[i].op) {
-          chan->ccmode[i].op = (char *) calloc(1, l);
+          chan->ccmode[i].op = (char *) my_calloc(1, l);
           chan->cbytes += l;    /* Add 1 for safety */
           strcpy(chan->ccmode[i].op, op);
           break;
@@ -401,7 +401,7 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
       for (i = 0; i < modesperline; i++)
         if (chan->cmode[i].type == 0) {
           chan->cmode[i].type = type;
-          chan->cmode[i].op = (char *) calloc(1, l);
+          chan->cmode[i].op = (char *) my_calloc(1, l);
           chan->bytes += l;     /* Add 1 for safety */
           strcpy(chan->cmode[i].op, op);
           break;
@@ -413,14 +413,14 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
   else if (plus == '+' && mode == 'k') {
     if (chan->key)
       free(chan->key);
-    chan->key = (char *) calloc(1, strlen(op) + 1);
+    chan->key = (char *) my_calloc(1, strlen(op) + 1);
     strcpy(chan->key, op);
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
     if (chan->rmkey)
       free(chan->rmkey);
-    chan->rmkey = (char *) calloc(1, strlen(op) + 1);
+    chan->rmkey = (char *) my_calloc(1, strlen(op) + 1);
     strcpy(chan->rmkey, op);
   }
   /* +l ? store limit */
@@ -568,7 +568,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
   mv->flags |= WASOP;
   if (check_chan) {
     /* tell other bots to set jointime to 0 and join */
-    char *buf = (char *) calloc(1, strlen(chan->dname) + 3 + 1);
+    char *buf = (char *) my_calloc(1, strlen(chan->dname) + 3 + 1);
 
     sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);
@@ -922,7 +922,7 @@ gotmode(char *from, char *msg)
     if ((channel_active(chan) || channel_pending(chan))) {
       int i = 0, modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
       bool me_opped = 0;
-      char **modes = (char **) calloc(modesperline + 1, sizeof(char *));
+      char **modes = (char **) my_calloc(modesperline + 1, sizeof(char *));
       char *nick = NULL, *chg = NULL, s[UHOSTLEN] = "", sign = '+', *mp = NULL, *isserver = NULL;
       size_t z = strlen(msg);
       struct userrec *u = NULL;
@@ -970,7 +970,7 @@ gotmode(char *from, char *msg)
           fixcolon(mp);
 
           /* Just want o's and b's */
-          modes[modecnt] = (char *) calloc(1, strlen(mp) + 4);
+          modes[modecnt] = (char *) my_calloc(1, strlen(mp) + 4);
           sprintf(modes[modecnt], "%c%c %s", sign, chg[0], mp ? mp : "");
           modecnt++;
           if (chg[0] == 'o') {

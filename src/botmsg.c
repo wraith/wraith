@@ -175,7 +175,7 @@ static void send_tand_but(int x, char *buf, size_t len)
 void botnet_send_cmdpass(int idx, char *cmd, char *pass)
 {
   if (tands > 0) {
-    char *buf = (char *) calloc(1, strlen(cmd) + strlen(pass) + 5 + 1);
+    char *buf = (char *) my_calloc(1, strlen(cmd) + strlen(pass) + 5 + 1);
 
     sprintf(buf, "cp %s %s\n", cmd, pass);
     send_tand_but(idx, buf, strlen(buf));

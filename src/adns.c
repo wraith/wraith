@@ -208,7 +208,7 @@ static void answer_init(dns_answer_t *answer)
 
 static void answer_add(dns_answer_t *answer, const char *what)
 {
-	answer->list = (char **) realloc(answer->list, sizeof(*answer->list) * (answer->len+2));
+	answer->list = (char **) my_realloc(answer->list, sizeof(*answer->list) * (answer->len+2));
 	answer->list[answer->len] = strdup(what);
 	answer->len++;
 	answer->list[answer->len] = NULL;
@@ -223,7 +223,7 @@ static void answer_free(dns_answer_t *answer)
 
 static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, const char *query)
 {
-	dns_query_t *q = (dns_query_t *) calloc(1, sizeof(*q));
+	dns_query_t *q = (dns_query_t *) my_calloc(1, sizeof(*q));
 
 	q->id = query_id;
 	query_id++;
@@ -457,12 +457,12 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 		char temp[65];
 
 		socket_ipv6_to_dots(ip, temp);
-		reversed_ip = (char *) malloc(strlen(temp) + 10);
+		reversed_ip = (char *) my_calloc(1, strlen(temp) + 10);
 		reverse_ip(temp, reversed_ip);
 		strcat(reversed_ip, ".in6.arpa");
 	}
 	else {
-		reversed_ip = (char *) malloc(strlen(ip) + 14);
+		reversed_ip = (char *) my_calloc(1, strlen(ip) + 14);
 		reverse_ip(ip, reversed_ip);
 		strcat(reversed_ip, ".in-addr.arpa");
 	}
@@ -549,7 +549,7 @@ static const char *dns_next_server()
 
 static void add_server(char *ip)
 {
-	servers = (dns_server_t *) realloc(servers, (nservers+1)*sizeof(*servers));
+	servers = (dns_server_t *) my_realloc(servers, (nservers+1)*sizeof(*servers));
 	servers[nservers].ip = strdup(ip);
 	nservers++;
         sdprintf("Added NS: %s", ip);
@@ -557,7 +557,7 @@ static void add_server(char *ip)
 
 static void add_host(char *host, char *ip)
 {
-	hosts = (dns_host_t *) realloc(hosts, (nhosts+1)*sizeof(*hosts));
+	hosts = (dns_host_t *) my_realloc(hosts, (nhosts+1)*sizeof(*hosts));
 	hosts[nhosts].host = strdup(host);
 	hosts[nhosts].ip = strdup(ip);
 	nhosts++;
@@ -580,14 +580,14 @@ static void cache_del(int id)
 	if (id < ncache) egg_memcpy(&cache[id], &cache[ncache], sizeof(dns_cache_t));
 	else egg_bzero(&cache[id], sizeof(dns_cache_t));
 
-	cache = (dns_cache_t *) realloc(cache, (ncache+1)*sizeof(*cache));
+	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
 }
 
 static void cache_add(const char *query, dns_answer_t *answer)
 {
 	int i;
 
-	cache = (dns_cache_t *) realloc(cache, (ncache+1)*sizeof(*cache));
+	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
 	egg_bzero(&cache[ncache], sizeof(cache[ncache]));
 	cache[ncache].query = strdup(query);
 	answer_init(&cache[ncache].answer);

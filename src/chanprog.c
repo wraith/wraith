@@ -421,7 +421,7 @@ void load_internal_users()
         hublevel++;		/* We must increment this even if it is already added */
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
-	  bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
+	  bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
 
           bi->address = strdup(ip);
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
@@ -431,7 +431,7 @@ void load_internal_users()
 	  if ((!bi->hublevel) && (!strcmp(hand, conf.bot->nick)))
 	    bi->hublevel = 99;
 #endif /* HUB */
-          bi->uplink = (char *) calloc(1, 1);
+          bi->uplink = (char *) my_calloc(1, 1);
 	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
 	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
 	}
@@ -543,7 +543,7 @@ void chanprog()
     /* I need to be on the userlist... doh. */
     userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_OP, 1);
     conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
-    bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
+    bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
     if (conf.bot->ip)
       bi->address = strdup(conf.bot->ip);
     /* bi->telnet_port = atoi(buf) ? atoi(buf) : 3333; */
@@ -553,7 +553,7 @@ void chanprog()
 #else /* !HUB */
     bi->hublevel = 0;
 #endif /* HUB */
-    bi->uplink = (char *) calloc(1, 1);
+    bi->uplink = (char *) my_calloc(1, 1);
     set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
   } else {
     bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
@@ -674,7 +674,7 @@ chans_addbot(const char *bot, struct chanset_t *chan)
     char *buf = NULL;
    
     size = strlen(chans) + strlen(chan->dname) + 2;
-    buf = (char *) calloc(1, size);
+    buf = (char *) my_calloc(1, size);
     egg_snprintf(buf, size, "%s %s", chans, chan->dname);
     set_user(&USERENTRY_CHANS, u, buf);
     free(buf);
@@ -736,9 +736,9 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int lo
     char *buf = NULL;
          /* malloc(options,chan,'cset ',' ',+ 1) */
     if (chan)
-      buf = (char *) calloc(1, strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+      buf = (char *) my_calloc(1, strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
     else
-      buf = (char *) calloc(1, strlen(options) + 1 + 5 + 1 + 1);
+      buf = (char *) my_calloc(1, strlen(options) + 1 + 5 + 1 + 1);
 
     strcat(buf, "cset ");
     if (chan)
