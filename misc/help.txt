@@ -99,7 +99,7 @@ See also: exempts, +exempt, stick, unstick
 ###  %b-host%b <hostmask>
    Removes a host from your handle.
 %{+m|m}
-###  %b-host%b <handle> <hostmask>
+###  %b-host%b <handle> <hostmask> [anotherhost] ...
    Removes a hostmask from a user's user record.
 %{-}
  

@@ -3524,7 +3524,7 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# -host %s", dcc[idx].nick, par);
   if (!par[0]) {
-    dprintf(idx, "Usage: -host [handle] <hostmask>\n");
+    dprintf(idx, "Usage: -host [handle] <hostmask> [anotherhost] ...\n");
     return;
   }
   handle = newsplit(&par);
@@ -3578,11 +3578,20 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
     }
   }
   if (delhost_by_handle(handle, host)) {
-    dprintf(idx, "Removed '%s' from %s.\n", host, handle);
+    dprintf(idx, "Removed host '%s' from %s.\n", host, handle);
     update_mod(handle, dcc[idx].nick, "-host", host);
+
+    while (par[0]) {
+      host = newsplit(&par);
+      addhost_by_handle(handle, host);
+      if (delhost_by_handle(handle, host)) {
 #ifdef LEAF
-    check_this_user(handle, 2, host);
+        check_this_user(handle, 2, host);
 #endif /* LEAF */
+        dprintf(idx, "Removed host '%s' from %s.\n", host, handle);
+      }
+    }
+
 #ifdef HUB
     write_userfile(idx);
 #endif /* HUB */

@@ -38,6 +38,7 @@ This is a summary of ChangeLog basically.
 * Ignores are now checked before host is checked for access for telnet
 * cmd_mop no longer ops users without a pass set.
 * Alphabetized config list
+* cmd_mns_host now accepts multiple hosts
 
 1.1.9
 
