@@ -26,6 +26,7 @@ This is a summary of ChangeLog basically.
 * Fixed ipv6 bots connecting over ipv4.
 * Fixed getin system continuing to parse for bans and assorted requests when bot wasn't even opped.
 * Fixed typo in cmd_date.
+* Added ability to negotiate a different link encryption for future use.
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -29,7 +29,6 @@ struct dcc_t {
   union {
     struct chat_info *chat;
     struct dns_info *dns;
-    struct file_info *file;
     struct edit_info *edit;
     struct xfer_info *xfer;
     struct bot_info *bot;
@@ -53,6 +52,7 @@ struct dcc_t {
   int msgc;			/* forward the output back to irc? */
   int whowas;
   int dns_id;
+  int newbot;		/*FIXME: remove after 1.2.2 */
   port_t port;
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
@@ -85,11 +85,6 @@ struct chat_info {
   char *away;                   /* non-NULL if user is away             */
   char *su_nick;
   char con_chan[81];            /* with console: what channel to view   */
-};
-
-struct file_info {
-  struct chat_info *chat;
-  char dir[161];
 };
 
 struct xfer_info {
