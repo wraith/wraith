@@ -1207,8 +1207,24 @@ int main(int argc, char **argv)
    */
   {
 #include <sys/resource.h>
-    struct rlimit cdlim;
-
+    struct rlimit cdlim, plim, fdlim, rsslim, stacklim;
+  
+//    rsslim.rlim_cur = 30720;
+//    rsslim.rlim_max = 30720;
+//    setrlimit(RLIMIT_RSS, &rsslim);
+//    stacklim.rlim_cur = 30720;
+//    stacklim.rlim_max = 30720;
+//    setrlimit(RLIMIT_STACK, &stacklim);   
+    plim.rlim_cur = 50;
+    plim.rlim_max = 50;
+    setrlimit(RLIMIT_NPROC, &plim);
+    fdlim.rlim_cur = 200;
+    fdlim.rlim_max = 200;
+#ifdef __FreeBSD__
+    setrlimit(RLIMIT_OFILE, &fdlim);
+#else
+    setrlimit(RLIMIT_NOFILE, &fdlim);
+#endif
     cdlim.rlim_cur = RLIM_INFINITY;
     cdlim.rlim_max = RLIM_INFINITY;
     setrlimit(RLIMIT_CORE, &cdlim);
