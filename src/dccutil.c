@@ -368,7 +368,7 @@ void lostdcc(int n)
  * Note: The entry will be deconstructed if it was not deconstructed
  *       already. This case should normally not occur.
  */
-void removedcc(int n)
+static void removedcc(int n)
 {
   sdprintf("removedcc(%d)", n);
   if (dcc[n].type && dcc[n].type->kill)
