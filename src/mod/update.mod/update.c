@@ -279,7 +279,7 @@ void finish_update(int idx)
 #ifdef LEAF
   else
     updated = 1;
-#endif
+#endif /* LEAF */
 }
 
 static void start_sending_binary(int idx)
