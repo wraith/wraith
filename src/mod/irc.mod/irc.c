@@ -958,7 +958,7 @@ static void reset_chan_info(struct chanset_t *chan)
       chan->status |= CHAN_ASKEDBANS;
       dprintf(DP_MODE, "MODE %s +b\n", chan->name);
     }
-    if (opped) {
+    if (opped && !channel_take(chan)) {
       if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) &&
   	  use_exempts == 1) {
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
