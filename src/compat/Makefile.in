@@ -24,7 +24,8 @@ OBJS = dirname.o \
 	memutil.o \
 	strcasecmp.o \
 	strftime.o \
-	strlcpy.o 
+	strlcpy.o \
+	strsep.o
 
 doofus:
 	@echo ""
