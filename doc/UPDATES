@@ -42,6 +42,7 @@ This is a summary of ChangeLog basically.
 38.All dcc cmds are now logged regardless if they are valid.
 39.Changed the log showing 'HUB: change BLAH' into debugging.
 40.Fixed some truncating with long text on dcc.
+41.cmd_help now shows all usable cmds regardless of console settings.
 
 1.1.7
 

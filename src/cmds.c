@@ -780,13 +780,13 @@ static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100] = "", *fcats = NULL, temp[100] = "", buf[2046] = "", match[20] = "";
   int fnd = 0, done = 0, nowild = 0;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANY, 0, 0, 0 };
 
   egg_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
   fcats = temp;
 
   putlog(LOG_CMDS, "*", "#%s# help %s", dcc[idx].nick, par);
-  get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
+  get_user_flagrec(u, &fr, NULL);
   build_flags(flg, &fr, NULL);
   if (!par[0]) {
     sprintf(match, "*");
@@ -862,7 +862,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   } else if (!fnd) {
     dprintf(idx, "No match for '%s'.\n", match);
   }
-  dprintf(idx, "If you have flags on a channel, type %sconsole #chan to possibly see more commands.\n", dcc_prefix);
+  dprintf(idx, "Some commands may require you to '%sconsole #chan' to a chan you have flags on first.\n", dcc_prefix
 }
 
 static void cmd_addlog(struct userrec *u, int idx, char *par)
