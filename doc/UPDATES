@@ -41,6 +41,7 @@ This is a summary of ChangeLog basically.
 37.Fixed a ton of unchecked buffers in cmds.c.
 38.All dcc cmds are now logged regardless if they are valid.
 39.Changed the log showing 'HUB: change BLAH' into debugging.
+40.Fixed some truncating with long text on dcc.
 
 1.1.7
 

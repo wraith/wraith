@@ -180,46 +180,42 @@ void dprintf(int idx, const char *format, ...)
 
 void chatout(const char *format, ...)
 {
-  int i, len;
-  char s[601] = "";
+  int i;
+  char s[1025] = "", *p = NULL;
   va_list va;
 
   va_start(va, format);
-  egg_vsnprintf(s, 511, format, va);
+  egg_vsnprintf(s, 1024, format, va);
   va_end(va);
 
-  len = strlen(s);
-  if (len > 511)
-    len = 511;
-  s[len + 1] = 0;
+  if ((p = strrchr(s, '\n')))
+    *p++ = 0;
 
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_CHAT) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel >= 0)
-        dprintf(i, "%s", s);
-
+        dprintf(i, "%s\n", s);
 }
 
 /* Print to all on this channel but one.
  */
 void chanout_but(int x, int chan, const char *format, ...)
 {
-  int i, len;
-  char s[601] = "";
+  int i;
+  char s[1025] = "", *p = NULL;
   va_list va;
 
   va_start(va, format);
-  egg_vsnprintf(s, 511, format, va);
+  egg_vsnprintf(s, 1024, format, va);
   va_end(va);
-  len = strlen(s);
-  if (len > 511)
-    len = 511;
-  s[len + 1] = 0;
+
+  if ((p = strrchr(s, '\n')))
+    *p = 0;
 
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_CHAT) && (i != x) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel == chan)
-        dprintf(i, "%s", s);
+        dprintf(i, "%s\n", s);
 }
 
 void dcc_chatter(int idx)
