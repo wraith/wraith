@@ -702,8 +702,6 @@ static bool botaddr_unpack(struct userrec *u, struct user_entry *e)
 
   /* address:port/port:hublevel:uplink */
   Context;
-  Assert(e);
-  Assert(e->name);
 
   strcpy(p, e->u.list->extra);
   q1 = strchr(p, ':');
@@ -770,9 +768,7 @@ static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
     return 1;
   if (bi != buf) {
     if (bi) {
-      Assert(bi->address);
       free(bi->address);
-      Assert(bi->uplink);
       free(bi->uplink);
       free(bi);
     }
@@ -780,7 +776,6 @@ static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
     bi = (struct bot_addr *) buf;
     e->u.extra = (struct bot_addr *) buf;
   }
-  Assert(u);
   if (bi && !noshare) {
     shareout("c BOTADDR %s %s %d %d %d %s\n",u->handle, 
             (bi->address && bi->address[0]) ? bi->address : "127.0.0.1", 

@@ -933,7 +933,6 @@ int botunlink(int idx, char *nick, char *reason)
       rembot(tandbot->bot);
     while (parties) {
       parties--;
-      /* Assert? */
     }
   }
   return 0;

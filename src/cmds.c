@@ -2344,7 +2344,6 @@ static void cmd_chattr(int idx, char *par)
    * chan: pointer to channel structure, NULL if none found or none specified
    * chg:  pointer to changes, NULL if none specified
    */
-  Assert(!(!arg && chan));
   if (arg && !chan) {
     dprintf(idx, "No channel record for %s.\n", arg);
     return;

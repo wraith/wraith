@@ -23,15 +23,6 @@
 #  define ContextNote(note)     {}
 #endif
 
-#ifdef DEBUG_ASSERT
-#  define Assert(expr)  do {                                            \
-        if (!(expr))                                                    \
-                eggAssert(__FILE__, __LINE__);                          \
-} while (0)
-#else
-#  define Assert(expr)  do {    } while (0)
-#endif
-
 #define debug0(x)               putlog(LOG_DEBUG,"*",x)
 #define debug1(x,a1)            putlog(LOG_DEBUG,"*",x,a1)
 #define debug2(x,a1,a2)         putlog(LOG_DEBUG,"*",x,a1,a2)
@@ -48,6 +39,5 @@ void init_signals();
 void init_debug();
 void eggContext(const char *, int);
 void eggContextNote(const char *, int, const char *);
-void eggAssert(const char *, int);
 
 #endif /* !_DEBUG_H */

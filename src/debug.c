@@ -333,16 +333,3 @@ void eggContextNote(const char *file, int line, const char *note)
 }
 #endif
 
-#ifdef DEBUG_ASSERT
-/* Called from the Assert macro.
- */
-void eggAssert(const char *file, int line)
-{
-  putlog(LOG_MISC, "*", "* In file %s, line %u", file, line);
-
-#ifdef DEBUG_CONTEXT
-  write_debug();
-#endif /* DEBUG_CONTEXT */
-  fatal("ASSERT FAILED -- CRASHING!", 1);
-}
-#endif /* DEBUG_ASSERT */

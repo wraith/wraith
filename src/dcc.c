@@ -1477,7 +1477,6 @@ struct dcc_table DCC_DUPWAIT = {
 void
 dupwait_notify(const char *who)
 {
-  Assert(who);
   for (register int idx = 0; idx < dcc_total; idx++)
     if (dcc[idx].type && (dcc[idx].type == &DCC_DUPWAIT) && !egg_strcasecmp(dcc[idx].nick, who)) {
       dcc_telnet_pass(idx, dcc[idx].u.dupwait->atr);

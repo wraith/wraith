@@ -374,7 +374,6 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 	int cmp, retval, tie = 0;
         size_t matchlen = 0;
 
-	Assert(table);
 	check_bind_executing++;
 
 	for (int i = 1; i <= table->nargs; i++) {
