@@ -17,7 +17,6 @@ extern int		 noshare, cfg_noshare, cfg_count;
 extern struct cfg_entry **cfg;
 extern struct userrec	*userlist;
 extern struct dcc_t	*dcc;
-extern char		 whois_fields[];
 extern time_t            now;
 
 static struct user_entry_type *entry_type_list;

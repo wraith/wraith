@@ -12,9 +12,11 @@
 #include "userent.h"
 #include "users.h"
 
-extern int		 noshare, allow_dk_cmds;
+extern int		 noshare;
 extern struct dcc_t	*dcc;
 extern struct userrec   *userlist;
+
+int                     allow_dk_cmds = 1;
 
 /* Some flags are mutually exclusive -- this roots them out
  */

@@ -387,8 +387,7 @@ static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
     left = bl - bcnt;
     dprintf(DP_SERVER, "PRIVMSG %s :%ds left ;)\n",nick, left);
   } else {
-   Tcl_Eval(interp, par);
-   dprintf(DP_SERVER, "PRIVMSG %s :%s\n", nick, interp->result);
+   dprintf(DP_SERVER, "PRIVMSG %s :Too bad I stripped out TCL! AHAHAHA YOU LOSE ;\\.\n", nick);
   }
   return BIND_RET_BREAK;
 }

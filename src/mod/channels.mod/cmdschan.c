@@ -961,7 +961,7 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
   strcpy(buf, "+inactive ");
   if (par[0])
     strncat(buf, par, sizeof(buf));
-  if (tcl_channel_add(0, chname, buf) == TCL_ERROR) {
+  if (tcl_channel_add(NULL, chname, buf) == TCL_ERROR) {
     dprintf(idx, "Invalid channel.\n");
     return;
   }
@@ -1413,7 +1413,7 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
     return;
   }
 
-  if (tcl_channel_add(0, chname, par) == TCL_ERROR) /* drummer */
+  if (tcl_channel_add(NULL, chname, par) == TCL_ERROR) /* drummer */
     dprintf(idx, "Invalid channel or channel options.\n");
   else {
     if ((chan = findchan_by_dname(chname))) {

@@ -761,13 +761,13 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
       list[0] = newsplit(&options);
       while (list[0][0]) {
         if (list[0][0] == '+' || list[0][0] == '-' || (!strcmp(list[0], "dont-idle-kick"))) {
-          (func[38]) (0, ch, 1, list);			/* tcl_channel_modify() */
+          (func[38]) (NULL, ch, 1, list);		/* tcl_channel_modify() */
           list[0] = newsplit(&options);
           continue;
         }
 	/* chanints */
         list[1] = options;
-        (func[38]) (0, ch, 2, list);			/* tcl_channel_modify() */
+        (func[38]) (NULL, ch, 2, list);			/* tcl_channel_modify() */
         break;
       }
       if (all)

@@ -1370,8 +1370,7 @@ static void dcc_get_pending(int idx, char *buf, int len)
  * Use raw_dcc_resend() and raw_dcc_send() instead of this function.
  */
 
-static int raw_dcc_resend_send(char *filename, char *nick, char *from,
-			       char *dir, int resend)
+static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir, int resend)
 {
   int zz, port, i;
   char *nfn = NULL, *buf = NULL;
@@ -1388,8 +1387,8 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from,
   if (dccfilesize == 0)
     return DCCSEND_FEMPTY;
 
-  if (reserved_port_min > 0 && reserved_port_min < reserved_port_max) {
-    for (port = reserved_port_min; port <= reserved_port_max; port++)
+  if (conf.portmin > 0 && conf.portmin < conf.portmax) {
+    for (port = conf.portmin; port <= conf.portmax; port++)
 #ifdef USE_IPV6
       if ((zz = open_listen_by_af(&port, AF_INET)) != -1) /* no idea how we want to handle this -poptix 02/03/03 */
 #else
@@ -1397,7 +1396,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from,
 #endif /* USE_IPV6 */
         break;
   } else {
-    port = reserved_port_min;
+    port = conf.portmin;
 #ifdef USE_IPV6
     zz = open_listen_by_af(&port, AF_INET);
 #else

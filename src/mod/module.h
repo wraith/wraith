@@ -234,8 +234,8 @@
 #define ignore_time (*(int *)(global[102]))
 #define use_console_r (*(int *)(global[103]))
 /* 104 - 107 */
-#define reserved_port_min (*(int *)(global[104]))
-#define reserved_port_max (*(int *)(global[105]))
+/* UNUSED 104 */
+/* UNUSED 105 */
 #define debug_output (*(int *)(global[106]))
 #define noshare (*(int *)(global[107]))
 /* 108 - 111 */
@@ -264,7 +264,7 @@
 #define DCC_LOST (*(struct dcc_table *)(global[126]))
 #define DCC_CHAT (*(struct dcc_table *)(global[127]))
 /* 128 - 131 */
-#define interp (*(Tcl_Interp **)(global[128]))
+/* UNUSED 128 */
 #define now (*(time_t*)global[129])
 /* UNUSED 130 */
 #define findchan ((struct chanset_t *(*)(char *))global[131])
@@ -387,7 +387,7 @@
 /* 224 -- UNUSED */
 #define use_exempts (*(int *)(global[225]))	/* drummer/Jason */
 #define use_invites (*(int *)(global[226]))	/* drummer/Jason */
-#define force_expire (*(int *)(global[227]))	/* Rufus */
+/* UNUSED 227 */
 /* 228 - 231 */
 /* 228 */
 /* UNUSED 229 */
@@ -437,7 +437,7 @@
 /* 256 - 259 */
 #define egg_strncasecmp ((int (*)(const char *, const char *, size_t))global[256])
 #define is_file ((int (*)(const char *))global[257])
-#define must_be_owner (*(int *)(global[258]))
+/* UNUSED 258 */
 #define tandbot (*(tand_t **)(global[259]))
 /* 260 - 263 */
 #define party (*(party_t **)(global[260]))

@@ -7,6 +7,8 @@
 extern struct cmd_pass *cmdpass;
 #endif
 
+int force_expire = 0;
+
 struct chanuserrec *get_chanrec(struct userrec *u, char *chname)
 {
   struct chanuserrec *ch = NULL;

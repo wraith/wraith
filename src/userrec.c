@@ -25,7 +25,7 @@
 
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
-extern int		 default_flags, default_uflags, quiet_save,
+extern int		 default_flags, default_uflags, 
 			 dcc_total;
 extern char		 userfile[], ver[], tempdir[];
 extern time_t		 now;
@@ -424,8 +424,7 @@ int write_userfile(int idx)
     free(new_userfile);
     return 2;
   }
-  if (!quiet_save)
-    putlog(LOG_MISC, "*", USERF_WRITING);
+//  putlog(LOG_MISC, "*", USERF_WRITING);
   if (sort_users)
     sort_userlist();
   tt = now;

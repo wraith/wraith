@@ -6,7 +6,7 @@
 
 /* Parse options for a channel.
  */
-static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int items, char **item)
+static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 {
   int i, x = 0, found;
 #ifdef LEAF
@@ -22,8 +22,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
     if (!strcmp(item[i], "chanmode")) {
       i++;
       if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel chanmode needs argument", NULL);
+	if (result)
+	  sprintf(result, "channel chanmode needs argument");
 	return TCL_ERROR;
       }
       strncpy(s, item[i], 120);
@@ -32,32 +32,32 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
     } else if (!strcmp(item[i], "addedby")) {
       i++;
       if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "addedby chanmode needs argument", NULL);
+	if (result)
+	  sprintf(result, "addedby chanmode needs argument");
 	return TCL_ERROR;
       }
       strncpyz(chan->added_by, item[i], NICKLEN);
     } else if (!strcmp(item[i], "addedts")) {
       i++;
       if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "addedts chanmode needs argument", NULL);
+	if (result)
+	  sprintf(result, "addedts chanmode needs argument");
 	return TCL_ERROR;
       }
       chan->added_ts = atoi(item[i]);
     } else if (!strcmp(item[i], "idle-kick")) {
       i++;
       if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel idle-kick needs argument", NULL);
+	if (result)
+	  sprintf(result, "channel idle-kick needs argument");
 	return TCL_ERROR;
       }
       chan->idle_kick = atoi(item[i]);
     } else if (!strcmp(item[i], "limit")) {
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel limit needs argument", NULL);
+        if (result)
+          sprintf(result, "channel limit needs argument");
         return TCL_ERROR;
       }
       chan->limitraise = atoi(item[i]);
@@ -67,48 +67,48 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
     else if (!strcmp(item[i], "stopnethack-mode")) {
       i++;
       if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel stopnethack-mode needs argument", NULL);
+	if (result)
+	  sprintf(result, "channel stopnethack-mode needs argument");
 	return TCL_ERROR;
       }
       chan->stopnethack_mode = atoi(item[i]);
     } else if (!strcmp(item[i], "revenge-mode")) {
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel revenge-mode needs argument", NULL);
+        if (result)
+          sprintf(result, "channel revenge-mode needs argument");
         return TCL_ERROR;
       }
       chan->revenge_mode = atoi(item[i]);
     } else if (!strcmp(item[i], "ban-time")) {
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel ban-time needs argument", NULL);
+        if (result)
+          sprintf(result, "channel ban-time needs argument");
         return TCL_ERROR;
       }
       chan->ban_time = atoi(item[i]);
     } else if (!strcmp(item[i], "exempt-time")) {
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel exempt-time needs argument", NULL);
+        if (result)
+          sprintf(result, "channel exempt-time needs argument");
         return TCL_ERROR;
       }
       chan->exempt_time = atoi(item[i]);
     } else if (!strcmp(item[i], "invite-time")) {
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel invite-time needs argument", NULL);
+        if (result)
+          sprintf(result, "channel invite-time needs argument");
         return TCL_ERROR;
       }
       chan->invite_time = atoi(item[i]);
     } else if (!strcmp(item[i], "closed-ban")) {
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel closed-ban needs argument", NULL);
+        if (result)
+          sprintf(result, "channel closed-ban needs argument");
         return TCL_ERROR;
       }
       chan->closed_ban = atoi(item[i]);
@@ -116,8 +116,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
  *  } else if (!strcmp(item[i], "temp")) {
  *    i++;
  *    if (i >= items) {
- *      if (irp)
- *        Tcl_AppendResult(irp, "channel temp needs argument", NULL);
+ *      if (result)
+ *        sprintf(result, "channel temp needs argument");
  *      return TCL_ERROR;
  *    }
  *    chan->temp = atoi(item[i]);
@@ -126,8 +126,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
     } else if (!strcmp(item[i], "temp")) {
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel temp needs argument", NULL);
+        if (result)
+          sprintf(result, "channel temp needs argument");
         return TCL_ERROR;
       }
       strncpyz(chan->temp, item[i], sizeof(chan->temp));
@@ -136,8 +136,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
     } else if (!strcmp(item[i], "topic")) { //this is here for compatability
       i++;
       if (i >= items) {
-        if (irp)
-          Tcl_AppendResult(irp, "channel topic needs argument", NULL);
+        if (result)
+          sprintf(result, "channel topic needs argument");
         return TCL_ERROR;
       }
     }
@@ -282,14 +282,14 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
 	pthr = &chan->flood_nick_thr;
 	ptime = &chan->flood_nick_time;
       } else {
-	if (irp)
-	  Tcl_AppendResult(irp, "illegal channel flood type: ", item[i], NULL);
+	if (result)
+	  sprintf(result, "illegal channel flood type: %s", item[i]);
 	return TCL_ERROR;
       }
       i++;
       if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, item[i - 1], " needs argument", NULL);
+	if (result)
+	  sprintf(result, "%s needs argument", item[i - 1]);
 	return TCL_ERROR;
       }
       p = strchr(item[i], ':');
@@ -329,8 +329,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
 		     !egg_strcasecmp(item[i] + 9, ul->name)))) {
           i++;
           if (i >= items) {
-            if (irp)
-              Tcl_AppendResult(irp, "this setting needs an argument", NULL);
+            if (result)
+              sprintf(result, "this setting needs an argument");
             return TCL_ERROR;
           }
           setudef(ul, chan->dname, atoi(item[i]));
@@ -339,8 +339,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int item
         }
       }
       if (!found) {
-        if (irp && item[i][0]) /* ignore "" */
-      	  Tcl_AppendResult(irp, "illegal channel option: ", item[i], NULL);
+        if (result && item[i][0]) /* ignore "" */
+      	  sprintf(result, "illegal channel option: %s", item[i]);
       	x++;
       }
     }
@@ -453,28 +453,26 @@ static void clear_channel(struct chanset_t *chan, int reset)
 
 /* Create new channel and parse commands.
  */
-static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
+static int tcl_channel_add(char *result, char *newname, char *options)
 {
   struct chanset_t *chan = NULL;
   int items;
   int ret = TCL_OK;
   int join = 0;
   char buf[2048] = "", buf2[256] = "";
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
+//  char **item = NULL;
   CONST char **item;
-#else
-  char **item = NULL;
-#endif
+
 
   if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
-    if (irp)
-      Tcl_AppendResult(irp, "invalid channel prefix", NULL);
+    if (result)
+      sprintf(result, "invalid channel prefix");
     return TCL_ERROR;
   }
 
   if (strchr(newname, ',') != NULL) {
-    if (irp)
-      Tcl_AppendResult(irp, "invalid channel name", NULL);
+    if (result)
+      sprintf(result, "invalid channel name");
     return TCL_ERROR;
   }
 
@@ -546,11 +544,7 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
    * if a user goes back to an eggdrop that no-longer supports certain
    * (channel) options.
    */
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-  if ((tcl_channel_modify(irp, chan, items, (char **)item) != TCL_OK) && !loading) {
-#else
-  if ((tcl_channel_modify(irp, chan, items, item) != TCL_OK) && !loading) {
-#endif
+  if ((tcl_channel_modify(result, chan, items, (char **) item) != TCL_OK) && !loading) {
     ret = TCL_ERROR;
   }
   Tcl_Free((char *) item);

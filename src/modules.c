@@ -40,7 +40,6 @@ extern struct auth_t    *auth;
 
 #include "users.h"
 
-extern Tcl_Interp	*interp;
 extern struct userrec	*userlist, *lastuser;
 extern char		 tempdir[], botname[], natip[], cmdprefix[],
 			 origbotname[], botuser[], admin[],
@@ -55,12 +54,12 @@ extern int	 	 noshare, loading, role, server_lag,
 			 auth_total, 
 #endif /* S_AUTHCMDS */
  			 dcc_total, userfile_perm,
-			 use_console_r, ignore_time, must_be_owner,
+			 use_console_r, ignore_time, 
 			 debug_output, default_flags,  
 			 max_dcc, password_timeout, localhub,
 			 use_invites, use_exempts, 
-                         force_expire, do_restart, timesync,
-			 protect_readonly, reserved_port_min, reserved_port_max;
+                         do_restart, timesync,
+			 protect_readonly;
 extern time_t now, online_since, buildts;
 extern struct chanset_t *chanset;
 extern tand_t *tandbot;
@@ -302,8 +301,8 @@ Function global_table[] =
   (Function) & ignore_time,	 /* int					*/
   (Function) & use_console_r,	 /* int					*/
   /* 104 - 107 */
-  (Function) & reserved_port_min,
-  (Function) & reserved_port_max,
+  (Function) 0,
+  (Function) 0,
   (Function) & debug_output,	 /* int					*/
   (Function) & noshare,		 /* int					*/
   /* 108 - 111 */
@@ -332,7 +331,7 @@ Function global_table[] =
   (Function) & DCC_LOST,	 /* struct dcc_table *			*/
   (Function) & DCC_CHAT,	 /* struct dcc_table *			*/
   /* 128 - 131 */
-  (Function) & interp,		 /* Tcl_Interp *			*/
+  (Function) 0,
   (Function) & now,		 /* time_t				*/
   (Function) 0,
   (Function) findchan,
@@ -455,7 +454,7 @@ Function global_table[] =
   (Function) 0,
   (Function) & use_exempts,	/* int					*/
   (Function) & use_invites,	/* int					*/
-  (Function) & force_expire,	/* int					*/
+  (Function) 0,
   /* 228 - 231 */
   (Function) 0,
   (Function) 0,
@@ -502,7 +501,7 @@ Function global_table[] =
   /* 256 - 259 */
   (Function) egg_strncasecmp,
   (Function) is_file,
-  (Function) & must_be_owner,	/* int					*/
+  (Function) 0,
   (Function) & tandbot,		/* tand_t *				*/
   /* 260 - 263 */
   (Function) & party,		/* party_t *				*/

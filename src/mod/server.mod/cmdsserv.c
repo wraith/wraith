@@ -35,7 +35,7 @@ static void cmd_servers(struct userrec *u, int idx, char *par)
 static void cmd_dump(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# dump %s", dcc[idx].nick, par);
-  if (!(isowner(dcc[idx].nick)) && (must_be_owner == 2)) {
+  if (!isowner(dcc[idx].nick)) {
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
     return;
   }

@@ -51,6 +51,8 @@ extern struct cfg_entry	CFG_MOTD;
 extern conf_t		conf;
 
 int 	 server_lag = 0;	/* GUESS! */
+int         use_invites = 1;            /* Jason/drummer */
+int         use_exempts = 1;            /* Jason/drummer */
 
 /*
  *    Misc functions

@@ -24,7 +24,7 @@
 #include <stdarg.h>
 
 extern struct dcc_t	*dcc;
-extern int		 dcc_total, max_dcc, dcc_flood_thr, backgrd, MAXSOCKS, tands;
+extern int		 dcc_total, backgrd, MAXSOCKS, tands;
 #ifdef USE_IPV6
 extern unsigned long     notalloc;
 #endif /* USE_IPV6 */
@@ -37,9 +37,9 @@ static struct portmap 	*root = NULL;
 char	motdfile[121] = "text/motd";	/* File where the motd is stored */
 int	connect_timeout = 15;		/* How long to wait before a telnet
 					   connection times out */
-
-int reserved_port_min = 0;
-int reserved_port_max = 0;
+int         max_dcc = 200;              /* needs at least 4 or 5 just to
+                                           get started. 20 should be enough   */
+int         dcc_flood_thr = 3;
 
 void init_dcc_max()
 {

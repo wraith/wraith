@@ -80,9 +80,8 @@ static void get_mode_protect(struct chanset_t *chan, char *s);
 static void set_mode_protect(struct chanset_t *chan, char *set);
 static int ismasked(masklist *m, char *user);
 static int ismodeline(masklist *m, char *user);
-static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
-			      int items, char **item);
-static int tcl_channel_add(Tcl_Interp * irp, char *, char *);
+static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, char **item);
+static int tcl_channel_add(char *result, char *, char *);
 static char *convert_element(char *src, char *dst);
 static int getudef(struct udef_chans *, char *);
 static void initudef(int type, char *, int);
@@ -136,8 +135,8 @@ inline static int chanset_unlink(struct chanset_t *chan);
 #define u_delinvite ((int (*)(struct chanset_t *, char *, int))channels_funcs[35])
 /* 36 - 39 */
 #define u_addinvite ((int (*)(struct chanset_t *, char *, char *, char *, time_t, int))channels_funcs[36])
-#define tcl_channel_add ((int (*)(Tcl_Interp *, char *, char *))channels_funcs[37])
-#define tcl_channel_modify ((int (*)(Tcl_Interp *, struct chanset_t *, int, char **))channels_funcs[38])
+#define tcl_channel_add ((int (*)(char *, char *, char *))channels_funcs[37])
+#define tcl_channel_modify ((int (*)(char *, struct chanset_t *, int, char **))channels_funcs[38])
 #define write_exempts ((int (*)(FILE *, int))channels_funcs[39])
 /* 40 - 43 */
 #define write_invites ((int (*)(FILE *, int))channels_funcs[40])

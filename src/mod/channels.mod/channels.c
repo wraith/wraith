@@ -13,7 +13,6 @@
 static Function *global = NULL, *irc_funcs = NULL;
 
 static int 			use_info;
-static int			quiet_save;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
 static char 			*lastdeletedmask = NULL;
 static struct udef_struct 	*udef = NULL;
@@ -175,7 +174,7 @@ static void got_cjoin(char *botnick, char *code, char *par)
    return;
   }
 
-  if (tcl_channel_add(0, chname, par) == TCL_ERROR) /* drummer */
+  if (tcl_channel_add(NULL, chname, par) == TCL_ERROR) /* drummer */
     putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s", botnick, chname);
   else {
 #ifdef HUB
@@ -981,7 +980,6 @@ char *channels_start(Function * global_funcs)
   global_idle_kick = 0;
   lastdeletedmask = 0;
   use_info = 1;
-  quiet_save = 0;
   strcpy(glob_chanmode, "nt");
   udef = NULL;
   global_stopnethack_mode = 0;
