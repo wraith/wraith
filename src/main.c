@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "main.h"
+#include "color.h"
 #include "binary.h"
 #include "dcc.h"
 #include "misc.h"
@@ -823,45 +824,24 @@ int main(int argc, char **argv)
   /* we don't split cygwin because to run as a service the bot shouldn't exit.
      confuses windows ;)
    */
+  use_stderr = 0;		/* stop writing to stderr now! */
   if (backgrd) {
 #ifndef CYGWIN_HACKS
-    bg_do_split();
+    pid_t pid = do_fork();
+
+    writepid(conf.bot->pid_file, pid);
+    printf("%s%s%c%s%s%s l%sA%su%sN%sc%sH%se%sD%s %s(%s%d%s)%s\n",
+            RED(-1), BOLD(-1), conf.bot->nick[0], BOLD_END(-1), &conf.bot->nick[1],
+            COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
+            BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), pid, YELLOW(-1), COLOR_END(-1));
+  
+    printf("%s launched into the background  (pid: %d)\n\n", conf.bot->nick, pid);
   } else {
 #endif /* !CYGWIN_HACKS */
-    FILE *f = NULL;
-    int xx;
-
-    xx = getpid();
-    /* Write pid to file */
-    unlink(conf.bot->pid_file);
-    if ((f = fopen(conf.bot->pid_file, "w")) != NULL) {
-      fprintf(f, "%u\n", xx);
-      if (fflush(f)) {
-        printf(EGG_NOWRITE, conf.bot->pid_file);
-        unlink(conf.bot->pid_file);
-      }
-      fclose(f);
-    } else
-      printf(EGG_NOWRITE, conf.bot->pid_file);
-#ifdef CYGWIN_HACKS
-      printf("Launched into the background  (pid: %d)\n\n", xx);
-#endif
-  }
-
-  use_stderr = 0;		/* Stop writing to stderr now */
-  if (backgrd) {
-    /* Ok, try to disassociate from controlling terminal (finger cross) */
-#ifndef CYGWIN_HACKS
-    setpgid(0, 0);
-#endif /* !CYGWIN_HACKS */
-    /*
-    freopen("/dev/null", "r", stdin);
-    freopen("/dev/null", "w", stdout);
-    freopen("/dev/null", "w", stderr);
-    */
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif /* CYGWIN_HACKS */
+    printf("%s launched (not backgrounding)\n\n", conf.bot->nick);
   }
 
   /* Terminal emulating dcc chat */

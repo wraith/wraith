@@ -20,43 +20,40 @@
 time_t lastfork = 0;
 pid_t watcher;                  /* my child/watcher */
 
-/* Do everything we normally do after we have split off a new
- * process to the background. This includes writing a PID file
- * and informing the user of the split.
- */
-static void bg_do_detach(pid_t) __attribute__ ((noreturn));
+pid_t
+do_fork()
+{
+  pid_t pid = 0;
 
-static void
-bg_do_detach(pid_t p)
+  if (daemon(1, 1))
+    fatal(strerror(errno), 0);
+
+  pid = getpid();
+  writepid(conf.bot->pid_file, pid);
+  lastfork = now;
+  return pid;
+}
+
+void
+writepid(const char *pidfile, pid_t pid)
 {
   FILE *fp = NULL;
 
   /* Need to attempt to write pid now, not later. */
-  unlink(conf.bot->pid_file);
-  fp = fopen(conf.bot->pid_file, "w");
-  if (fp != NULL) {
-    fprintf(fp, "%u\n", p);
+  unlink(pidfile);
+  if ((fp = fopen(pidfile, "w"))) {
+    fprintf(fp, "%u\n", pid);
     if (fflush(fp)) {
       /* Kill bot incase a botchk is run from crond. */
-      printf(EGG_NOWRITE, conf.bot->pid_file);
+      printf(EGG_NOWRITE, pidfile);
       printf("  Try freeing some disk space\n");
       fclose(fp);
-      unlink(conf.bot->pid_file);
+      unlink(pidfile);
       exit(1);
-    }
-    fclose(fp);
+    } else
+      fclose(fp);
   } else
-    printf(EGG_NOWRITE, conf.bot->pid_file);
-#ifdef HUB
-  printf("Launched into the background  (pid: %d)\n\n", p);
-#else /* LEAF */
-  printf("%s launched into the background  (pid: %d)\n\n", conf.bot->nick, p);
-#endif /* HUB */
-
-#ifndef CYGWIN_HACKS
-  setpgid(p, p);
-#endif /* !CYGWIN_HACKS */
-  exit(0);
+    printf(EGG_NOWRITE, pidfile);
 }
 
 static void
@@ -105,55 +102,3 @@ init_watcher()
   }
 }
 
-void
-bg_do_split(void)
-{
-  /* Split off a new process.
-   */
-  int xx = fork();
-
-  if (xx == -1)
-    fatal("CANNOT FORK PROCESS.", 0);
-  if (xx != 0)                  /* parent */
-    bg_do_detach(xx);
-  else                          /* child */
-    init_watcher();
-/*    init_thread(getpid()); */
-#ifdef CRAZY_TRACE
-  /* block ptrace? */
-#  ifdef __linux__
-  ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-#  endif
-#  ifdef BSD
-  ptrace(PT_TRACE_ME, 0, NULL, NULL);
-#  endif /* BSD */
-#endif /* CRAZY_TRACE */
-
-}
-
-void
-do_fork()
-{
-  int xx;
-
-  xx = fork();
-  if (xx == -1)
-    return;
-  if (xx != 0) {
-    FILE *fp;
-
-    unlink(conf.bot->pid_file);
-    fp = fopen(conf.bot->pid_file, "w");
-    if (fp != NULL) {
-      fprintf(fp, "%u\n", xx);
-      fclose(fp);
-    }
-  }
-  if (xx) {
-#if HAVE_SETPGID
-    setpgid(xx, xx);
-#endif
-    exit(0);
-  }
-  lastfork = now;
-}

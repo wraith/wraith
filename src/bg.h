@@ -6,7 +6,7 @@
 extern time_t 		lastfork;
 extern pid_t 		watcher;
 
-void do_fork();
-void bg_do_split();
+pid_t do_fork();
+void writepid(const char *, pid_t);
 
 #endif /* !_BG_H */
