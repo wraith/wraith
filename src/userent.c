@@ -477,7 +477,7 @@ void update_mod(char *handle, char *nick, char *cmd, char *par)
 {
   char tmp[100] = "";
 
-  egg_snprintf(tmp, sizeof tmp, "%lu, %s (%s %s)", now, nick, cmd, (par && par[0]) ? par : "");
+  egg_snprintf(tmp, sizeof tmp, "%li, %s (%s %s)", now, nick, cmd, (par && par[0]) ? par : "");
   set_user(&USERENTRY_MODIFIED, get_user_by_handle(userlist, handle), tmp);
 }
 

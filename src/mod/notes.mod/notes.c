@@ -293,8 +293,7 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
 	  else if (argv1[0] == '@')
 	    from = p + 1;
 	}
-	fprintf(f, "%s %s %lu %s%s\n", to, from, now,
-		l ? work : "", argv3);
+	fprintf(f, "%s %s %li %s%s\n", to, from, now, l ? work : "", argv3);
 	fclose(f);
 	if (idx >= 0)
 	  dprintf(idx, "%s.\n", "Stored message");
@@ -649,7 +648,7 @@ static int msg_notes(char *nick, char *host, struct userrec *u, char *par)
       return 1;
     }
     chmod(notefile, userfile_perm);	/* Use userfile permissions. */
-    fprintf(f, "%s %s %lu %s\n", to, u->handle, now, par);
+    fprintf(f, "%s %s %li %s\n", to, u->handle, now, par);
     fclose(f);
     dprintf(DP_HELP, "NOTICE %s :%s\n", nick, NOTES_DELIVERED);
     return 1;

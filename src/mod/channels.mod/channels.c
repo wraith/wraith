@@ -302,7 +302,7 @@ void rebalance_roles()
         ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
         if (ba && (ba->roleid == (hNdx + 1))) {
           ba->roleid = lNdx + 1;
-          sprintf(tmp, STR("rl %d %li"), lNdx + 1, (timesync + now));
+          sprintf(tmp, "rl %d %li", lNdx + 1, timesync + now);
           putbot(dcc[i].nick, tmp);
         }
       }

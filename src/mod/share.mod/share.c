@@ -1104,7 +1104,7 @@ static void share_ufsend(int idx, char *par)
   int i, sock;
   FILE *f = NULL;
 
-  egg_snprintf(s, sizeof s, "%s.share.%s.%lu.users", tempdir, conf.bot->nick, now);
+  egg_snprintf(s, sizeof s, "%s.share.%s.%li.users", tempdir, conf.bot->nick, now);
   if (!(b_status(idx) & STAT_SHARE)) {
     dprintf(idx, "s e You didn't ask; you just started sending.\n");
     dprintf(idx, "s e Ask before sending the userfile.\n");
@@ -1913,7 +1913,7 @@ static void start_sending_users(int idx)
   struct chanuserrec *ch = NULL;
   struct chanset_t *cst = NULL;
 
-  egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%lu", tempdir, dcc[idx].nick, now);
+  egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%li", tempdir, dcc[idx].nick, now);
   if (dcc[idx].u.bot->uff_flags & UFF_OVERRIDE) {
     debug1("NOTE: Sharing aggressively with %s, overriding its local bots.",
 	   dcc[idx].nick);

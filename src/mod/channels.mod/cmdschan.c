@@ -1458,7 +1458,7 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
       free(tmp);
 
       tmp = calloc(1, 7 + 1 + 10 + 1);
-      sprintf(tmp, "addedts %lu", now);
+      sprintf(tmp, "addedts %li", now);
       do_chanset(NULL, chan, tmp, DO_LOCAL | DO_NET );
       free(tmp);
     }

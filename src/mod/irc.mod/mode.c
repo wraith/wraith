@@ -1311,8 +1311,8 @@ static int gotmode(char *from, char *msg)
 
       if (chan && me_op(chan) && ops && (ufrom) && (ufrom->flags & USER_BOT) && !channel_fastop(chan) && !channel_take(chan)) {
         int isbadop = 0;
-        if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) ||
-            (strncmp(modes[1], "-b", 2))) {
+
+        if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) || (strncmp(modes[1], "-b", 2))) {
           isbadop = 1;
         } else {
           char enccookie[25] = "", plaincookie[25] = "", key[NICKLEN + 20] = "", goodcookie[25] = "";
@@ -1320,18 +1320,9 @@ static int gotmode(char *from, char *msg)
           /* -b *!*@[...] */
           strncpyz(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
           p = enccookie + strlen(enccookie) - 1;
-/* old shit 
-          *p = 0;
-          while (p - enccookie < 24) {
-            *p++ = '.';
-            *p = 0;
-          }
-*/
           strcpy(key, nfrom);
           strcat(key, SALT2);
-/* putlog(LOG_DEBUG, "*", "Decrypting cookie: %s with key %s", enccookie, key); */
           p = decrypt_string(key, enccookie);
-/* putlog(LOG_DEBUG, "*", "Decrypted cookie: %s", p); */
           strncpyz(plaincookie, p, sizeof(plaincookie));
           free(p);
           /*
@@ -1340,23 +1331,22 @@ static int gotmode(char *from, char *msg)
            * last 5 regular chars of chan
            */
           makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);
-/* putlog(LOG_DEBUG, "*", "cookie from %s: %s should be: %s", nfrom, plaincookie, goodcookie); */
           if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
             isbadop = 2;
           else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
             isbadop = 3;
           else {
             char ltmp[20] = "";
-            long optime;
-            int off;
+            time_t optime, off;
 
-            sprintf(ltmp, STR("%010li"), (now + timesync));
+            /* this makes NO sense, optime should just be ltmp[4]-... but its not... ??? */
+            sprintf(ltmp, "%010li", now + timesync);
             strncpyz((char *) &ltmp[4], plaincookie, 7);
             optime = atol(ltmp);
             off = (now + timesync - optime);
 
             if (abs(off) > OP_TIME_SLACK) {
-/*            isbadop = 4; */
+              /* isbadop = 4; */
               putlog(LOG_DEBUG, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nfrom, optime, off);
             }
           }
@@ -1364,6 +1354,7 @@ static int gotmode(char *from, char *msg)
         if (isbadop) {
           char trg[NICKLEN] = "";
 
+          putlog(LOG_DEBUG, "*", "%s opped in %s with bad cookie(%d): %s", nfrom, chan->dname, isbadop, msg);
           n = i = 0;
           switch (role) {
           case 0:
@@ -1372,12 +1363,12 @@ static int gotmode(char *from, char *msg)
             /* Kick opper */
             m = ismember(chan, nfrom);
             if (!m || !chan_sentkick(m)) {
-              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_BADOP));
+              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_BADOP));
               tputs(serv, tmp, strlen(tmp));
               if (m)
                 m->flags |= SENTKICK;
             }
-            sprintf(tmp, STR("%s MODE %s"), from, msg);
+            sprintf(tmp, "%s MODE %s", from, msg);
             deflag_user(ufrom, DEFLAG_BADCOOKIE, tmp, chan);
             break;
           default:
@@ -1395,7 +1386,7 @@ static int gotmode(char *from, char *msg)
               if (m) {
                 if (!(m->flags & CHANOP)) {
                   if (!chan_sentkick(m)) {
-                    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_BADOPPED));
+                    sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, kickreason(KICK_BADOPPED));
                     tputs(serv, tmp, strlen(tmp));
                     m->flags |= SENTKICK;
                   }
@@ -1403,6 +1394,7 @@ static int gotmode(char *from, char *msg)
               }
             }
           }
+
           if (isbadop == 1)
             putlog(LOG_WARN, "*", STR("Missing cookie: %s MODE %s"), from, msg);
           else if (isbadop == 2)
@@ -1414,8 +1406,8 @@ static int gotmode(char *from, char *msg)
         } else
           putlog(LOG_DEBUG, "@", STR("Good op: %s"), msg);
       }
-      if ((ops) && chan && me_op(chan) && !channel_manop(chan) && (ufrom) &&
-          !(ufrom->flags & USER_BOT)) {
+
+      if ((ops) && chan && me_op(chan) && !channel_manop(chan) && (ufrom) && !(ufrom->flags & USER_BOT)) {
         char trg[NICKLEN] = "";
 
         n = i = 0;

@@ -206,7 +206,8 @@ struct dupwait_info {
 #define TLN_ECHO_C      "\001"
 
 extern struct dcc_t 		*dcc;
-extern int 			dcc_total, timesync;
+extern int 			dcc_total;
+extern time_t			timesync;
 extern char			network[];
 
 extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_BOT_NEW,

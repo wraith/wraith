@@ -825,8 +825,9 @@ static void bot_buildts(int idx, char *par)
 
 static void bot_timesync(int idx, char *par)
 {
-  putlog(LOG_DEBUG, "@", "Got timesync from %s: %s", dcc[idx].nick, par);
-  timesync = atoi(par) - now;
+  putlog(LOG_DEBUG, "@", "Got timesync from %s: %s (%li - %li)", dcc[idx].nick, par, atol(par), now);
+  timesync = atol(par) - now;
+
 #ifdef HUB
   send_timesync(-1);
 #endif /* HUB */

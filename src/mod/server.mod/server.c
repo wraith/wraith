@@ -1383,7 +1383,7 @@ static void server_5minutely()
       putlog(LOG_SERV, "*", IRC_SERVERSTONED);
     } else if (!trying_server) {
       /* Check for server being stoned. */
-      dprintf(DP_MODE, "PING :%lu\n", (unsigned long) now);
+      dprintf(DP_MODE, "PING :%li\n", now);
       waiting_for_awake = 1;
     }
   }

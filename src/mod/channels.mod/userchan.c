@@ -443,11 +443,11 @@ int u_addban(struct chanset_t *chan, char *ban, char *from, char *note, time_t e
 
     if (mask) {
       if (!chan)
-	shareout(NULL, "+b %s %lu %s%s %s %s\n", mask, expire_time - now,
+	shareout(NULL, "+b %s %li %s%s %s %s\n", mask, expire_time - now,
 		 (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p" : "-", from, note);
       else
-	shareout(chan, "+bc %s %lu %s %s%s %s %s\n", mask, expire_time - now,
+	shareout(chan, "+bc %s %li %s %s%s %s %s\n", mask, expire_time - now,
 		 chan->dname, (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p" : "-", from, note);
       free(mask);
@@ -520,11 +520,11 @@ int u_addinvite(struct chanset_t *chan, char *invite, char *from, char *note, ti
 
     if (mask) {
       if (!chan)
-	shareout(NULL, "+inv %s %lu %s%s %s %s\n", mask, expire_time - now,
+	shareout(NULL, "+inv %s %li %s%s %s %s\n", mask, expire_time - now,
 		 (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p": "-", from, note);
       else
-	shareout(chan, "+invc %s %lu %s %s%s %s %s\n", mask, expire_time - now,
+	shareout(chan, "+invc %s %li %s %s%s %s %s\n", mask, expire_time - now,
 		 chan->dname, (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p": "-", from, note);
       free(mask);
@@ -597,11 +597,11 @@ int u_addexempt(struct chanset_t *chan, char *exempt, char *from, char *note, ti
 
     if (mask) {
       if (!chan)
-	shareout(NULL, "+e %s %lu %s%s %s %s\n", mask, expire_time - now,
+	shareout(NULL, "+e %s %li %s%s %s %s\n", mask, expire_time - now,
 		 (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p": "-", from, note);
       else
-	shareout(chan, "+ec %s %lu %s %s%s %s %s\n", mask, expire_time - now,
+	shareout(chan, "+ec %s %li %s %s%s %s %s\n", mask, expire_time - now,
 		 chan->dname, (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p": "-", from, note);
       free(mask);
