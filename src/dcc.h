@@ -28,6 +28,7 @@ struct dcc_t {
   struct userrec *user;
   union {
     struct chat_info *chat;
+    struct dns_info *dns;
     struct file_info *file;
     struct edit_info *edit;
     struct xfer_info *xfer;
@@ -51,7 +52,6 @@ struct dcc_t {
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   int msgc;			/* forward the output back to irc? */
   int whowas;
-  int dns_id;
   port_t port;
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
@@ -63,6 +63,14 @@ struct dcc_t {
 #endif /* USE_IPV6 */
 };
 
+struct dns_info {
+  char *cbuf;			/* free`d when done */
+  char *cptr;
+  int dns_id;
+  int ibuf;
+  int ibuf2;
+//  struct dcc_table *type;       /* type we are doing the lookup for          */
+};
 
 struct chat_info {
   struct msgq *buffer;          /* a buffer of outgoing lines
@@ -219,7 +227,7 @@ extern char			network[];
 extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_BOT_NEW,
  DCC_RELAY, DCC_RELAYING, DCC_FORK_RELAY, DCC_PRE_RELAY, DCC_CHAT_PASS,
  DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,
- DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT, DCC_IDENTD, DCC_IDENTD_CONNECT;
+ DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT, DCC_IDENTD, DCC_IDENTD_CONNECT, DCC_DNSWAIT;
 
 #ifdef HUB
 void send_timesync(int);

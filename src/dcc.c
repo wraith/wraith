@@ -1193,7 +1193,7 @@ detect_telnet_flood(char *floodhost)
   return 0;
 }
 
-static void dcc_telnet_dns_callback(int id, void *, const char *, char **);
+static void dcc_telnet_dns_callback(int, void *, const char *, char **);
 
 static void
 dcc_telnet(int idx, char *buf, int ii)
@@ -1246,10 +1246,10 @@ dcc_telnet(int idx, char *buf, int ii)
     return;
   }
 
-  i = new_dcc(&DCC_IDENTWAIT, 0);
+  i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
 
-  dcc[i].sock = sock;
   dcc[i].addr = ip;
+  dcc[i].sock = sock;
   strcpy(dcc[i].host, s);
 #ifdef USE_IPV6
   if (sockprotocol(sock) == AF_INET6)
@@ -1258,24 +1258,23 @@ dcc_telnet(int idx, char *buf, int ii)
   dcc[i].port = port;
   dcc[i].timeval = now;
   strcpy(dcc[i].nick, "*");
-  dcc[i].u.other = (void *) idx;
-  dcc[i].dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
+
+  dcc[i].u.dns->ibuf = idx;
+  dcc[i].u.dns->dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
 }
 
 static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, char **hosts)
 {
-  int idx = -1, i = (int) client_data;
+  int i = (int) client_data;
 
   if (!valid_dns_id(i, id))
     return;
 
-  int j = 0, sock;
+  int j = 0, sock, idx = -1;
   char s2[UHOSTLEN + 20] = "";
 
-  if (dcc[i].type)
-    idx = (int) dcc[i].u.other;
-
-  dcc[i].u.other = 0;
+  if (valid_idx(i))
+    idx = dcc[i].u.dns->ibuf;
 
   strncpyz(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
 
@@ -1304,6 +1303,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   }
 /* .  ssl_link(dcc[i].sock, ACCEPT_SSL); */
 
+  changeover_dcc(i, &DCC_IDENTWAIT, 0);
   dcc[i].timeval = now;
   dcc[i].u.ident_sock = dcc[idx].sock;
   

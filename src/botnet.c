@@ -892,7 +892,7 @@ int botunlink(int idx, char *nick, char *reason)
   return 0;
 }
 
-static void botlink_dns_callback(int id, void *, const char *, char **);
+static void botlink_dns_callback(int, void *, const char *, char **);
 
 /* Link to another bot
  */
@@ -940,17 +940,17 @@ int botlink(char *linker, int idx, char *nick)
 	putlog(LOG_BOTS, "*", "%s %s at %s:%d ...", BOT_LINKING, nick,
 	       bi->address, bi->telnet_port);
 
-      i = new_dcc(&DCC_FORK_BOT, sizeof(struct bot_info));
+      i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
+
       dcc[i].timeval = now;
       dcc[i].port = bi->telnet_port;
       dcc[i].user = u;
       strcpy(dcc[i].nick, nick);
       strcpy(dcc[i].host, bi->address);
+      dcc[i].u.dns->cptr = strdup(linker);
+      dcc[i].u.dns->ibuf = idx;
 
-      strcpy(dcc[i].u.bot->linker, linker);
-      dcc[i].u.bot->numver = idx;
-
-      dcc[i].dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
+      dcc[i].u.dns->dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
      
       return 1;
       /* wait for async reply */
@@ -966,6 +966,14 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
   if (!valid_dns_id(i, id))
     return;
 
+  int idx = -1;
+  char *linker = NULL;
+
+  if (valid_idx(i)) {
+    idx = dcc[i].u.dns->ibuf;
+    linker = strdup(dcc[i].u.dns->cptr);
+  }
+
   if (!ips) {
     lostdcc(i);
     return;
@@ -973,9 +981,14 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
 
   dcc[i].addr = inet_addr(ips[0]);
 
+  changeover_dcc(i, &DCC_FORK_BOT, sizeof(struct bot_info));
   dcc[i].timeval = now;
   strcpy(dcc[i].u.bot->version, "(primitive bot)");
   strcpy(dcc[i].u.bot->sysname, "*");
+  strcpy(dcc[i].u.bot->linker, linker);
+  dcc[i].u.bot->numver = idx;
+  free(linker);
+
   dcc[i].u.bot->port = dcc[i].port;             /* Remember where i started */
 #ifdef USE_IPV6
   dcc[i].sock = getsock(SOCK_STRONGCONN, is_dotted_ip(ips[0]));
@@ -1081,7 +1094,7 @@ void tandem_relay(int idx, char *nick, register int i)
     return;
   }
 
-  i = new_dcc(&DCC_FORK_RELAY, sizeof(struct relay_info));
+  i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
 
   if (i < 0) {
     dprintf(idx, "%s\n", DCC_TOOMANYDCCS1);
@@ -1106,12 +1119,9 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[idx].u.relay->chat = ci;
   dcc[idx].u.relay->old_status = dcc[idx].status;
 
-
   dcc[i].timeval = now;
-  dcc[i].u.relay->sock = dcc[idx].sock;
-  dcc[i].u.relay->idx = idx;
-
-  dcc[i].dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
+  dcc[i].u.dns->ibuf = idx;
+  dcc[i].u.dns->dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
 
   return;
   /* wait for async reply */
@@ -1124,8 +1134,8 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   if (!valid_dns_id(i, id))
     return;
 
-  if (dcc[i].type)
-    idx = dcc[i].u.relay->idx;
+  if (valid_idx(i))
+    idx = dcc[i].u.dns->ibuf;
   
   if (idx < 0) {
     putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER, i, idx);
@@ -1159,9 +1169,14 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
 
   dcc[idx].u.relay->sock = dcc[i].sock;
 
+  int sock = dcc[idx].u.dns->ibuf;
+
+  changeover_dcc(i, &DCC_FORK_RELAY, sizeof(struct relay_info));
+
   dcc[i].addr = inet_addr(ips[0]);
 
   dcc[i].u.relay->chat = (struct chat_info *) calloc(1, sizeof(struct chat_info));
+  dcc[i].u.relay->sock = sock;
   dcc[i].u.relay->port = dcc[i].port;
   dcc[i].u.relay->chat->away = NULL;
   dcc[i].u.relay->chat->msgs_per_sec = 0;
@@ -1189,8 +1204,9 @@ static void pre_relay(int idx, char *buf, register int len)
     }
   }
   if (tidx < 0) {
+    /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && !dcc[i].addr && (dcc[i].sock == dcc[idx].u.relay->sock)) {
+      if (dcc[i].type && (dcc[i].type != &DCC_DNSWAIT || (dcc[i].sock == dcc[idx].u.relay->sock))) {
 	tidx = i;
 	break;
       }
@@ -1235,8 +1251,9 @@ static void failed_pre_relay(int idx)
     }
   }
   if (tidx < 0) {
+    /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && !dcc[i].addr && (dcc[i].sock == dcc[idx].u.relay->sock)) {
+      if (dcc[i].type && (dcc[i].type != &DCC_DNSWAIT || (dcc[i].sock == dcc[idx].u.relay->sock))) {
 	tidx = i;
 	break;
       }

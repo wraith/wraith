@@ -1352,7 +1352,7 @@ static void connect_server(void)
  
     trying_server = now;
 
-    newidx = new_dcc(&SERVER_SOCKET, strlen(pass) + 1);
+    newidx = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
     if (newidx < 0) {
       putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create server connection.");
       trying_server = 0;
@@ -1374,14 +1374,14 @@ static void connect_server(void)
 
     dcc[newidx].timeval = now;
     dcc[newidx].sock = -1;
-    dcc[newidx].u.other = (void *) strdup(pass);
+    dcc[newidx].u.dns->cbuf = strdup(pass);
 
     cycle_time = 15;		/* wait 15 seconds before attempting next server connect */
 
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;
     /* Resolve the hostname. */
-    dcc[newidx].dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) newidx);
+    dcc[newidx].u.dns->dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) newidx);
     /* wait for async reply */
   }
 }
@@ -1409,10 +1409,9 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
   if (addr.family == AF_INET)
     dcc[idx].addr = htonl(addr.u.addr.s_addr);
 
-  strcpy(serverpass, (char *) dcc[idx].u.other);
-//  changeover_dcc(idx, &SERVER_SOCKET, 0);
-  free(dcc[idx].u.other);
-  dcc[idx].u.other = NULL;
+  strcpy(serverpass, (char *) dcc[idx].u.dns->cbuf);
+  free(dcc[idx].u.dns->cbuf);
+  changeover_dcc(idx, &SERVER_SOCKET, 0);
 
   identd_open();
 

@@ -102,7 +102,7 @@ time_t async_resolve_timeout = 30;
 static void 
 dns_display(int idx, char *buf)
 {
-  sprintf(buf, "adns   waited %lis", now - dcc[idx].timeval);
+  sprintf(buf, "named   waited %lis", now - dcc[idx].timeval);
 }
 
 static void
@@ -142,8 +142,51 @@ static struct dcc_table dns_handler = {
   dns_display,
   NULL,
   NULL,
-  NULL,
+  NULL
 };
+
+static void dcc_dnswait(int idx, char *buf, int len)
+{
+  /* Ignore anything now. */
+}
+
+static void eof_dcc_dnswait(int idx)
+{
+  putlog(LOG_MISC, "*", "Lost connection while resolving hostname [%s/%d]",
+         iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
+  killsock(dcc[idx].sock);
+  lostdcc(idx);
+}
+
+static void display_dcc_dnswait(int idx, char *buf)
+{
+  sprintf(buf, "dns   waited %lis", now - dcc[idx].timeval);
+}
+
+static void kill_dcc_dnswait(int idx, void *x)
+{
+  struct dns_info *p = (struct dns_info *) x;
+
+  if (p) {
+    if (p->cbuf)
+      free(p->cbuf);
+  }
+}
+
+struct dcc_table DCC_DNSWAIT = {
+ "DNSWAIT",
+  DCT_VALIDIDX,
+  eof_dcc_dnswait,
+  dcc_dnswait,
+  NULL,
+  NULL,
+  display_dcc_dnswait,
+  kill_dcc_dnswait,
+  NULL,
+  NULL
+};
+
+
 
 /*
 static void async_timeout(void *client_data)
@@ -903,7 +946,11 @@ int egg_dns_init()
 
 bool valid_dns_id(int idx, int id)
 {
-  if (valid_idx(idx) && (id == -1 || dcc[idx].dns_id == id))
+
+sdprintf("valid_dns_id, idx: %d id: %d / dcc[idx].id... %d", idx, id, dcc[idx].u.dns->dns_id);
+  if (id == -1)
+    return 1;
+  if (valid_idx(idx) && dcc[idx].u.dns && dcc[idx].u.dns->dns_id && dcc[idx].u.dns->dns_id == id)
     return 1;
   sdprintf("dns_id: %d is not associated with dead idx: %d", id, idx);
   return 0;
