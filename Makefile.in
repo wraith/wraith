@@ -36,11 +36,12 @@ STRIP = @STRIP@
 LIBS = @LIBS@ @ZLIB@ @RESLIB@
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
-CFLGS = -fno-strict-aliasing -W \
+CFLGS = -fno-strict-aliasing -W -Wformat \
 -Wdisabled-optimization -Wshadow -Winline \
 -Wnested-externs -fno-asm -Wno-format-y2k \
 -Wlarger-than-2048 -Wpointer-arith -Wcast-align \
--Waggrepate-return -Wlong-long -Wbad-function-cast -Wmissing-noreturn @GCC3@
+-Waggrepate-return -Wlong-long -Wbad-function-cast \
+-Wmissing-noreturn @GCC3@
 
 #-Wwrite-strings
 #-Wconversion
