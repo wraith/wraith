@@ -56,7 +56,7 @@ ON *:TEXT:auth*:?:{
 
 ON *:TEXT:*:?:{ 
   var %c = %auth. [ $+ [ $nick ] ]
-  if (!$psy($left($nick, 1) && !%c) { return }
+  if (!$psy($left($nick, 1)) && !%c) { return }
   if (($1 === -Auth || $1 === ÿû-Auth) && $len($2) == 50) {
     msg $nick +Auth $wmd5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
