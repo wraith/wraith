@@ -11,17 +11,13 @@
 
 #include "common.h"
 #include "tclhash.h"
+#include "cmds.h"
 #include "debug.h"
 #include "chan.h"
 #include "users.h"
 #include "match.h"
 #include "egg_timer.h"
 #include <stdarg.h>
-
-extern struct dcc_t *dcc;
-extern int dcc_total;
-extern mycmds            cmdlist[];
-extern int               cmdi;
 
 
 /* The head of the bind table linked list. */

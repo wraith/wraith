@@ -68,6 +68,9 @@ char *strchr_unescape(char *, const char, register const char);
 void str_unescape(char *, register const char);
 int str_isdigit(const char *);
 void kill_bot(char *, char *);
+
+extern char		kickprefix[], bankickprefix[];
+extern int		server_lag, use_invites, use_exempts;
 #endif /* !MAKING_MODS */
 
 #endif /* !_MISC_H_ */

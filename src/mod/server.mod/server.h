@@ -57,5 +57,6 @@ extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 int detect_avalanche(char *);
+void server_report(int, int);
 
 #endif /*leaf*/

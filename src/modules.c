@@ -14,6 +14,7 @@
 #include "net.h"
 #include "misc.h"
 #include "userent.h"
+#include "settings.h"
 #include "userrec.h"
 #include "cfg.h"
 #include "match.h"
@@ -33,42 +34,8 @@
 #include <ctype.h>
 #include "core_binds.h"
 
-extern struct dcc_t	*dcc;
-#ifdef S_AUTHCMDS
-extern struct auth_t    *auth;
-#endif /* S_AUTHCMDS */
-
 #include "users.h"
 
-extern struct userrec	*userlist, *lastuser;
-extern char		 tempdir[], botname[], natip[], cmdprefix[],
-			 origbotname[], botuser[], admin[],
-			 userfile[], ver[], kickprefix[], bankickprefix[],
-#ifdef S_AUTHHASH
-                         authkey[], 
-#endif /* S_AUTHHASH */
-			 version[], quit_msg[], bdhash[], dcc_prefix[];
-
-extern int	 	 noshare, loading, role, server_lag, 
-#ifdef S_AUTHCMDS
-			 auth_total, 
-#endif /* S_AUTHCMDS */
- 			 dcc_total, userfile_perm,
-			 use_console_r, ignore_time, 
-			 debug_output, default_flags,  
-			 max_dcc, password_timeout, localhub,
-			 use_invites, use_exempts, 
-                         do_restart, timesync;
-			 
-extern time_t now, online_since, buildts;
-extern struct chanset_t *chanset;
-extern tand_t *tandbot;
-extern party_t *party;
-extern int parties;
-extern sock_list        *socklist;
-#ifdef S_MSGCMDS
-extern struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE, CFG_MSGIDENT;
-#endif /* S_MSGCMDS */
 static int module_rename(char *name, char *newname);
 
 
@@ -277,7 +244,7 @@ Function global_table[] =
   /* 96 - 99 */
   (Function) & global_bans,	 /* struct banrec *			*/
   (Function) & global_ign,	 /* struct igrec *			*/
-  (Function) & password_timeout, /* int					*/
+  (Function) 0,
   (Function) md5,
   /* 100 - 103 */
   (Function) & max_dcc,		 /* int					*/
@@ -507,7 +474,7 @@ Function global_table[] =
   (Function) quit_msg,		/* char *				*/
   (Function) module_load,
   (Function) 0,
-  (Function) & parties,		/* int					*/
+  (Function) 0,
   /* 277 - 280 */
   (Function) ischanhub,        
   (Function) rand_dccresp,

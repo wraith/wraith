@@ -9,6 +9,7 @@
 
 #include "common.h"
 #include "misc.h"
+#include "settings.h"
 #include "rfc1459.h"
 #include "misc_file.h"
 #include "egg_timer.h"
@@ -27,36 +28,15 @@
 #ifdef LEAF
 #include "src/mod/server.mod/server.h"
 #endif /* LEAF */
-#ifdef HUB
 #include "userrec.h"
-#endif /* HUB */
 #include "stat.h"
 
 #include <sys/wait.h>
 #include <stdarg.h>
 
-extern struct userrec 	*userlist;
-extern struct dcc_t	*dcc;
-extern struct chanset_t	*chanset;
-
-extern char		 version[], origbotname[], botname[],
-			 admin[], network[], motdfile[], ver[], 
-			 userfile[], dcc_prefix[],
-                         *binname, tempdir[], *owneremail;
-
-extern int		 backgrd, term_z, use_stderr, dcc_total, timesync,  
-#ifdef HUB
-                         my_port,
-#endif
-			 strict_host, loading,
-                         localhub;
-extern time_t		 now;
-extern struct cfg_entry	CFG_MOTD;
-extern conf_t		conf;
-
-int 	 server_lag = 0;	/* GUESS! */
-int         use_invites = 1;            /* Jason/drummer */
-int         use_exempts = 1;            /* Jason/drummer */
+int		server_lag = 0;	/* GUESS! */
+int		use_invites = 1;            /* Jason/drummer */
+int		use_exempts = 1;            /* Jason/drummer */
 
 /*
  *    Misc functions

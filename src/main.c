@@ -10,6 +10,7 @@
 #include "main.h"
 #include "dcc.h"
 #include "misc.h"
+#include "settings.h"
 #include "salt.h"
 #include "misc_file.h"
 #include "net.h"
@@ -22,7 +23,7 @@
 #include "crypt.h"
 #include "debug.h"
 #include "chanprog.h"
-#include "traffic.h" /* egg_traffic_t */
+#include "traffic.h"
 #include "bg.h"	
 #include "botnet.h"
 #include "build.h"
@@ -34,7 +35,7 @@
 #include <unistd.h>
 #ifdef STOP_UAC				/* osf/1 complains a lot */
 # include <sys/sysinfo.h>
-# define UAC_NOPRINT    0x00000001	/* Don't report unaligned fixups */
+# define UAC_NOPRINT			/* Don't report unaligned fixups */
 #endif /* STOP_UAC */
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -51,31 +52,14 @@
 
 #ifndef _POSIX_SOURCE
 /* Solaris needs this */
-#define _POSIX_SOURCE 1
+#define _POSIX_SOURCE
 #endif
 
-extern char *progname();		/* from settings.c */
-
-extern char		 origbotname[], userfile[], packname[],
-                         shellhash[];
-extern int		 dcc_total, conmask, cache_hit, cache_miss,
-			 fork_interval, optind, local_fork_interval,
-			 sdebug;
-extern struct dcc_t	*dcc;
-extern struct userrec	*userlist;
-extern struct chanset_t	*chanset;
-extern conf_t		conffile;
-
+extern int		optind;
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.1.2";
 
-#ifdef S_CONFEDIT
-int	do_confedit = 0;		/* show conf menu if -C */
-#endif /* S_CONFEDIT */
-#ifdef LEAF
-char    do_killbot[21] = "";
-#endif /* LEAF */
 int 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
 int 	loading = 0;
@@ -83,20 +67,14 @@ int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
 int	backgrd = 1;		/* Run in the background? */
-time_t 	lastfork = 0;
 uid_t   myuid;
 int	term_z = 0;		/* Foreground: use the terminal as a party line? */
-int 	checktrace = 1;		/* Check for trace when starting up? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
 char 	*binname = NULL;
 time_t	online_since;		/* Unix-time that the bot loaded up */
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
-int	save_users_at = 0;	/* How many minutes past the hour to
-				   save the userfile? */
-int	notify_users_at = 0;	/* How many minutes past the hour to
-				   notify users of notes? */
 char	version[81] = "";	/* Version info (long form) */
 char	ver[41] = "";		/* Version info (short form) */
 int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
@@ -104,9 +82,14 @@ int	do_restart = 0;		/* .restart has been called, restart asap */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
-extern struct cfg_entry CFG_FORKINTERVAL;
-
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
+#ifdef S_CONFEDIT
+static int	do_confedit = 0;		/* show conf menu if -C */
+#endif /* S_CONFEDIT */
+#ifdef LEAF
+static char    do_killbot[21] = "";
+#endif /* LEAF */
+static int 	checktrace = 1;		/* Check for trace when starting up? */
 
 
 static char *getfullbinname(const char *argv_zero)
@@ -647,12 +630,10 @@ static void startup_checks() {
   free_conf();
 }
 
-extern module_entry *module_list;
-
 #include "mod/static.h"
 
 int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
- init_net(), init_modules(), init_botcmd(), init_settings();
+ init_net(), init_modules(), init_botcmd();
 
 int main(int argc, char **argv)
 {
@@ -736,7 +717,7 @@ int main(int argc, char **argv)
   dns_init();
   module_load("channels");
 #ifdef LEAF
-  module_load("server");
+  server_init();
   module_load("irc");
 #endif /* LEAF */
   module_load("transfer");

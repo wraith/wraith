@@ -12,32 +12,29 @@
 #include "debug.h"
 #include "dccutil.h"
 #include "crypt.h"
-#include "traffic.h" /* egg_traffic_t */
+#include "egg_timer.h"
+#include "traffic.h"
 #include <limits.h>
 #include <string.h>
 #include <netdb.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <setjmp.h>
 #if HAVE_SYS_SELECT_H
 #  include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
+
 #include <netinet/in.h>
-#include <arpa/inet.h>		/* is this really necessary? */
+#include <arpa/inet.h>	
 #include <errno.h>
-
 #include <sys/stat.h>
-
 
 #if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif /* HAVE_UNITSTD_H */
-#include <setjmp.h>
-#include "egg_timer.h"
 
-extern struct dcc_t	*dcc;
-extern int		 backgrd, use_stderr, dcc_total;
-extern egg_traffic_t traffic;
+extern egg_traffic_t 	traffic;
 
 #ifdef HAVE_SSL
   SSL_CTX 		*ssl_c_ctx = NULL, *ssl_s_ctx = NULL;
@@ -47,18 +44,18 @@ extern egg_traffic_t traffic;
 union sockaddr_union cached_myip4_so;
 #ifdef USE_IPV6
 union sockaddr_union cached_myip6_so;
-unsigned long notalloc = 0;
 #endif /* USE_IPV6 */
 
 char	firewall[121] = "";	/* Socks server for firewall		    */
 int	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
 char	botuser[21] = "wraith"; /* Username of the user running the bot    */
-int	dcc_sanitycheck = 0;	/* We should do some sanity checking on dcc
-				   connections.				    */
 int     resolve_timeout = 10;   /* hostname/address lookup timeout */
 sock_list *socklist = NULL;	/* Enough to be safe			    */
 int	MAXSOCKS = 0;
 jmp_buf	alarmret;		/* Env buffer for alarm() returns	    */
+
+static int	dcc_sanitycheck = 0;	/* We should do some sanity checking on dcc connections. */
+
 
 /* Types of proxy */
 #define PROXY_SOCKS   1
@@ -976,7 +973,7 @@ int answer(int sock, char *caller, unsigned long *ip, unsigned short *port,
     if (af_ty == AF_INET6 && (!IN6_IS_ADDR_V4MAPPED(&from6.sin6_addr))) {
       egg_inet_ntop(AF_INET6, &from6.sin6_addr, caller, 119);
       caller[120] = 0;
-      *ip = notalloc;
+      *ip = 0L;
     } else if (IN6_IS_ADDR_V4MAPPED(&from6.sin6_addr)) {    /* ...and convert it to plain (AF_INET) IPv4 address (openssh) */
       struct sockaddr_in *from4 = (struct sockaddr_in *)&from6;
       struct in_addr addr;

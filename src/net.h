@@ -8,6 +8,7 @@
 #include "types.h"
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <setjmp.h>
 
 
 #ifdef HAVE_OPENSSL_SSL_H
@@ -165,6 +166,18 @@ char *iptostr(IP);
 int sock_has_data(int, int);
 int sockoptions(int sock, int operation, int sock_options);
 int flush_inbuf(int idx);
+
+extern union sockaddr_union 		cached_myip4_so;
+#ifdef USE_IPV6
+extern union sockaddr_union 		cached_myip6_so;
+extern unsigned long			notalloc;
+#endif /* USE_IPV6 */
+
+extern char				firewall[], botuser[];
+extern int				firewallport, resolve_timeout, MAXSOCKS;
+extern jmp_buf				alarmret;
+extern sock_list			*socklist;
+
 
 #endif /* !MAKING_MODS */
 

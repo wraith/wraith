@@ -37,13 +37,6 @@
 #include "misc_file.h"
 #endif /* HUB */
 
-extern struct dcc_t *dcc;
-extern struct userrec *userlist, *lastuser;
-extern struct chanset_t *chanset;
-extern int 		dcc_total, noshare;
-extern char 		tempdir[];
-extern time_t 		now, buildts;
-
 char natip[121] = "";
 char userfile[121] = "";	/* where the user records are stored */
 int ignore_time = 10;		/* how many minutes will ignores last? */

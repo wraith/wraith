@@ -11,6 +11,7 @@
 #include "notes.h"
 #include "src/common.h"
 #include "src/chanprog.h"
+#include "src/main.h"
 #include "src/botnet.h"
 #include "src/userrec.h"
 #include "src/userent.h"
@@ -26,10 +27,6 @@
 
 #include <fcntl.h>
 #include <sys/stat.h> /* chmod(..) */
-
-extern struct userrec	*userlist;
-extern time_t now;
-extern int userfile_perm;
 
 static int maxnotes = 50;	/* Maximum number of notes to allow stored
 				 * for each user */

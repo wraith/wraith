@@ -12,7 +12,9 @@
 #include "common.h"
 #include "color.h"
 #include "dcc.h"
+#include "botnet.h"
 #include "net.h"
+#include "main.h"
 #include "dccutil.h"
 #include "misc.h"
 #include "botcmd.h"
@@ -24,23 +26,13 @@
 #include "src/mod/server.mod/server.h"
 #include <stdarg.h>
 
-extern struct dcc_t	*dcc;
-extern int		 dcc_total, backgrd, MAXSOCKS, tands;
-#ifdef USE_IPV6
-extern unsigned long     notalloc;
-#endif /* USE_IPV6 */
-extern char		 version[];
-extern time_t		 now;
-extern sock_list	*socklist;
-
 static struct portmap 	*root = NULL;
 
-char	motdfile[121] = "text/motd";	/* File where the motd is stored */
 int	connect_timeout = 15;		/* How long to wait before a telnet
 					   connection times out */
 int         max_dcc = 200;              /* needs at least 4 or 5 just to
                                            get started. 20 should be enough   */
-int         dcc_flood_thr = 3;
+static int         dcc_flood_thr = 3;
 
 void init_dcc_max()
 {
@@ -649,7 +641,7 @@ int listen_all(int lport, int off)
                i6 == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
         idx = new_dcc(&DCC_TELNET, 0);
-        dcc[idx].addr = notalloc;
+        dcc[idx].addr = 0L;
         strcpy(dcc[idx].addr6, myipstr(6));
         dcc[idx].port = port;
         dcc[idx].sock = i6;

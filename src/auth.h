@@ -27,6 +27,16 @@ void removeauth(int);
 # if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 char *makehash(struct userrec *, char *);
 # endif /* S_AUTHHASH || S_DCCAUTH */
+
+
+#ifdef S_AUTHCMDS
+extern int			auth_total;
+extern struct auth_t		*auth;
+#endif /* S_AUTHCMDS */
+#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
+extern char                     authkey[121];
+#endif /* S_AUTHHASH || S_DCCAUTH */
+
 #endif /* !MAKING_MODS */
 
 #endif /* !_AUTH_H */

@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "cmds.h"
+#include "settings.h"
 #include "debug.h"
 #include "dcc.h"
 #include "shell.h"
@@ -39,29 +40,12 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-extern struct chanset_t	 *chanset;
-extern struct dcc_t	 *dcc;
-extern struct userrec	 *userlist;
-extern int		 dcc_total, backgrd, 
-			 do_restart, conmask, 
-			 strict_host, cfg_count,
-			 server_lag, localhub;
+extern egg_traffic_t 	traffic;
 
-extern egg_traffic_t traffic;
-extern char		 origbotname[], ver[], network[],
-			 owner[], quit_msg[], dcc_prefix[], 
-                         botname[], *binname, version[], egg_version[];
-extern time_t		 now, online_since, buildts;
-extern module_entry	*module_list;
-extern struct cfg_entry	CFG_MOTD, **cfg;
-extern tand_t		*tandbot;
-extern conf_t		conf;
-
-static char		 *btos(unsigned long);
 mycmds 			 cmdlist[500]; /* the list of dcc cmds for help system */
 int    			 cmdi = 0;
-int         		remote_boots = 2;
 
+static char		 *btos(unsigned long);
 
 #ifdef HUB
 static void tell_who(struct userrec *u, int idx, int chan)

@@ -30,10 +30,6 @@
 #include <ctype.h>
 #endif /* LEAF */
 
-extern int 		max_dcc;
-extern char 		kickprefix[], bankickprefix[], botrealname[], botuserhost[],
-			ctcp_reply[];
-
 int cloak_script = CLOAK_PLAIN;
 
 #ifdef LEAF

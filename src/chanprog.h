@@ -1,6 +1,8 @@
 #ifndef _CHANPROG_H
 #define _CHANPROG_H
 
+#include "src/chan.h"
+
 #define DO_LOCAL	1
 #define DO_NET		2
 
@@ -25,6 +27,14 @@ void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
 int shouldjoin(struct chanset_t *);
+
+
+extern struct chanset_t		*chanset;
+extern char			admin[], origbotname[], botname[];
+#ifdef HUB
+extern int			my_port;
+#endif /* HUB */
+
 #endif /* !MAKING_MODS */
 
 #endif /* !_CHANPROG_H */

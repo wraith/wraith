@@ -8,6 +8,8 @@
 #include "common.h"
 #include "dccutil.h"
 #include "userrec.h"
+#include "main.h"
+#include "settings.h"
 #include "users.h"
 #include "misc.h"
 #include "tclhash.h"
@@ -16,12 +18,6 @@
 #endif /* S_DCCPASS */
 
 extern cmd_t 		C_dcc[];
-extern struct dcc_t 	*dcc;
-extern struct userrec 	*userlist;
-extern time_t 		now;
-extern char             dcc_prefix[];
-
-
 
 static bind_table_t *BT_link = NULL, *BT_disc = NULL, *BT_away = NULL, *BT_dcc = NULL;
 static bind_table_t *BT_chat = NULL, *BT_act = NULL, *BT_bcst = NULL, *BT_note = NULL;

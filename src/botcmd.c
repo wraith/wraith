@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "botcmd.h"
+#include "main.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/update.mod/update.h"
 #include "net.h"
@@ -26,14 +27,7 @@
 #include "modules.h"
 #include "core_binds.h"
 
-extern char		 ver[], admin[], network[], motdfile[];
-extern int		 dcc_total, remote_boots, noshare, timesync, conmask;
-extern struct dcc_t	*dcc;
-extern struct chanset_t	*chanset;
-extern struct userrec	*userlist;
-extern time_t		 now, online_since;
-extern party_t		*party;
-extern module_entry	*module_list;
+int remote_boots = 2;
 
 static char TBUF[1024] = "";		/* Static buffer for goofy bot stuff */
 
@@ -1408,7 +1402,7 @@ static void bot_rsim(char *botnick, char *code, char *msg)
     strcpy(dcc[idx].nick, nick);
     egg_snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
     strcpy(dcc[idx].host, buf);
-    dcc[idx].addr = 0;
+    dcc[idx].addr = 0L;
     dcc[idx].user = get_user_by_handle(userlist, nick);
   }
   rmspace(par);

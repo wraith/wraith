@@ -8,17 +8,13 @@
 #include "users.h"
 #include "src/mod/share.mod/share.h"
 #include "misc.h"
+#include "main.h"
 #include "debug.h"
+#include "userrec.h"
 #include "match.h"
 #include "dccutil.h"
 #include "crypt.h"
 #include "botmsg.h"
-
-extern int		 noshare, cfg_noshare, cfg_count;
-extern struct cfg_entry **cfg;
-extern struct userrec	*userlist;
-extern struct dcc_t	*dcc;
-extern time_t            now;
 
 static struct user_entry_type *entry_type_list;
 

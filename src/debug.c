@@ -9,6 +9,7 @@
 
 #include "common.h"
 #include "debug.h"
+#include "chanprog.h"
 #include "net.h"
 #include "shell.h"
 #include "color.h"
@@ -25,10 +26,8 @@
 #include <unistd.h>
 #include <stdarg.h>
 
-extern int 		 sdebug, backgrd, do_restart;
-extern char		 tempdir[], origbotname[], ver[];
-extern time_t		 now, buildts;
-extern jmp_buf           alarmret;
+int		sdebug = 0;             /* enable debug output? */
+
 
 #ifdef DEBUG_CONTEXT
 /* Context storage for fatal crashes */
@@ -79,8 +78,6 @@ void init_debug()
   egg_bzero(&cx_note, sizeof cx_note);
 #endif /* DEBUG_CONTEXT */
 }
-
-int		sdebug = 0;             /* enable debug output? */
 
 void sdprintf (char *format, ...)
 {

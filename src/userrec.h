@@ -22,6 +22,10 @@ struct userrec *check_dcclist_hand(char *);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
 char *fixfrom(char *);
+
+extern struct userrec  		*userlist, *lastuser;
+extern int			noshare, cache_hit, cache_miss, strict_host,
+				userfile_perm;
 #endif /* !MAKING_MODS */
 
 #endif /* !_USERREC_H */

@@ -13,8 +13,7 @@
 #include <sys/ptrace.h>
 #endif
 
-extern time_t	lastfork, now;
-extern conf_t	conf;
+time_t  lastfork = 0;
 
 /* Do everything we normally do after we have split off a new
  * process to the background. This includes writing a PID file

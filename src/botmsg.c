@@ -10,6 +10,8 @@
 #include "common.h"
 #include "misc.h"
 #include "dcc.h"
+#include "userrec.h"
+#include "main.h"
 #include "net.h"
 #include "users.h"
 #include "cfg.h"
@@ -22,12 +24,6 @@
 #include "core_binds.h"
 #include "src/mod/notes.mod/notes.h"
 #include <stdarg.h>
-
-extern struct dcc_t	*dcc;
-extern int		 dcc_total, tands;
-extern time_t now;
-extern party_t		*party;
-extern struct userrec	*userlist;
 
 static char	OBUF[SGRAB - 110] = "";
 

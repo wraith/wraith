@@ -8,6 +8,8 @@
 #include "common.h"
 #include "log.h"
 #include "tandem.h"
+#include "userrec.h"
+#include "botnet.h"
 #include "botmsg.h"
 #include "dcc.h"
 #include "dccutil.h"
@@ -18,15 +20,6 @@
 
 #include <ctype.h>
 #include <stdarg.h>
-
-extern struct userrec   *userlist;
-extern tand_t           *tandbot;
-extern struct dcc_t     *dcc;
-extern int               debug_output, backgrd, term_z, 
-			 dcc_total, loading;
-extern struct dcc_t     *dcc;
-extern time_t		now;
-
 
 int	conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
 int	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */

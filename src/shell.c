@@ -12,6 +12,8 @@
 #include "common.h"
 #include "shell.h"
 #include "cfg.h"
+#include "settings.h"
+#include "userrec.h"
 #include "flags.h"
 #include "tandem.h"
 #include "main.h"
@@ -46,15 +48,6 @@
 #include <unistd.h>
 #include <dirent.h>
 
-
-extern struct cfg_entry CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST, CFG_PROMISC,
-                        CFG_TRACE, CFG_HIJACK;
-
-extern char		tempdir[], *binname, owneremail[], userfile[];
-extern time_t		now;
-extern struct userrec	*userlist;
-extern uid_t		myuid;
-extern conf_t		conf;
 
 int clear_tmp()
 {

@@ -5,7 +5,14 @@
 #  include "config.h"
 #endif
 
+#include "tandem.h"
+
 #ifndef MAKING_MODS
+
+extern tand_t		*tandbot;
+extern party_t		*party;
+extern int		tands;
+
 void restart_chons();
 void lower_bot_linked(int idx);
 void higher_bot_linked(int idx);

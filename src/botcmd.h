@@ -3,6 +3,8 @@
 
 
 #ifndef MAKING_MODS
+extern int		remote_boots;
+
 void bounce_simul(int, char *);
 void send_remote_simul(int, char *, char *, char *);
 void bot_share(int, char *);

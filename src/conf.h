@@ -36,7 +36,7 @@ typedef struct conf_b {
   conf_bot *bot;        /* single bot (me) */
 } conf_t;
 
-extern conf_t		conf;
+extern conf_t		conf, conffile;
 
 enum {
   CONF_ENC = 1,

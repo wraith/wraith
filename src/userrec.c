@@ -8,12 +8,13 @@
 
 #include <sys/stat.h>
 #include "common.h"
+#include "userrec.h"
+#include "misc.h"
 #include "misc_file.h"
 #include "rfc1459.h"
 #include "dcc.h"
 #include "src/mod/share.mod/share.h"
-#include "userrec.h"
-#include "misc.h"
+#include "main.h"
 #include "users.h"
 #include "chan.h"
 #include "match.h"
@@ -24,15 +25,7 @@
 #include "crypt.h"
 #include "core_binds.h"
 
-extern struct dcc_t	*dcc;
-extern struct chanset_t	*chanset;
-extern int		 default_flags, default_uflags, 
-			 dcc_total;
-extern char		 userfile[], ver[], tempdir[];
-extern time_t		 now;
-
 int		 noshare = 1;		/* don't send out to sharebots	    */
-int		 sort_users = 1;	/* sort the userlist when saving    */
 struct userrec	*userlist = NULL;	/* user records are stored here	    */
 struct userrec	*lastuser = NULL;	/* last accessed user record	    */
 maskrec		*global_bans = NULL,
@@ -44,10 +37,9 @@ int		cache_hit = 0,
 int		strict_host = 0;
 int		userfile_perm = 0600;	/* Userfile permissions,
 					   default rw-------		    */
-#ifdef S_DCCPASS
-extern struct cmd_pass *cmdpass;
-#endif /* S_DCCPASS */
 
+
+static int		 sort_users = 1;	/* sort the userlist when saving    */
 
 int count_users(struct userrec *bu)
 {

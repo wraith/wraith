@@ -7,7 +7,19 @@
 
 #define MODULE_NAME "server"
 #define MAKING_SERVER
-#include "src/mod/module.h"
+#undef MAKING_MODS
+#include "src/common.h"
+#include "src/cfg.h"
+#include "src/botmsg.h"
+#include "src/rfc1459.h"
+#include "src/settings.h"
+#include "src/tclhash.h"
+#include "src/users.h"
+#include "src/userrec.h"
+#include "src/main.h"
+#include "src/misc.h"
+#include "src/chanprog.h"
+#include "src/modules.h"
 #include "src/net.h"
 #include "src/auth.h"
 #include "src/dns.h"
@@ -15,14 +27,12 @@
 #include "src/mod/channels.mod/channels.h"
 #include "server.h"
 
-static Function *global = NULL;
 extern struct cfg_entry CFG_OPTIMESLACK;
-extern int		cfg_noshare;
+
 int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;
 int serv;		/* sock # of server currently */
 int servidx;		/* idx of server */
-static int strict_host;		/* strict masking of hosts ? */
 char newserver[121] = "";	/* new server? */
 int newserverport;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
@@ -1411,7 +1421,7 @@ static void server_die()
 
 /* A report on the module status.
  */
-static void server_report(int idx, int details)
+void server_report(int idx, int details)
 {
   char s1[64] = "", s[128] = "";
 
@@ -1473,27 +1483,14 @@ static cmd_t my_ctcps[] =
   {NULL,	NULL,	NULL,			NULL}
 };
 
-EXPORT_SCOPE char *server_start();
-
-static Function server_table[] =
+void server_init()
 {
-  (Function) server_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) server_report,
-};
-
-char *server_start(Function *global_funcs)
-{
-  global = global_funcs;
-
   /*
    * Init of all the variables *must* be done in _start rather than
    * globally.
    */
   serv = -1;
   servidx = -1;
-  strict_host = 1;
   botname[0] = 0;
   trying_server = 0;
   server_lag = 0;
@@ -1540,10 +1537,6 @@ char *server_start(Function *global_funcs)
   optimize_kicks = 0;
   stack_limit = 4;
 
-  server_table[4] = (Function) botname;
-  module_register(MODULE_NAME, server_table, 1, 2);
-
-
 #ifdef S_AUTHCMDS
   BT_msgc = bind_table_add("msgc", 5, "ssUss", 0, BIND_USE_ATTR); 
 #endif /* S_AUTHCMDS */
@@ -1581,6 +1574,5 @@ char *server_start(Function *global_funcs)
   cfg_noshare = 1;
   set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders.");
   cfg_noshare = 0;
-  return NULL;
 }
 #endif /* LEAF */

@@ -28,22 +28,15 @@
 # endif /* S_AUTOLOCK */
 #endif /* HUB */
 
-extern int			dcc_total, backgrd, connect_timeout, max_dcc,
-				cfg_count;
-extern struct userrec		*userlist;
-extern struct dcc_t		*dcc;
-extern time_t 			now, buildts;
-extern struct cfg_entry 	**cfg;
-
-
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
 party_t			*party = NULL;			/* Keep track of people on the botnet */
+int			tands = 0;			/* Number of bots on the botnet */
+
 static int 		maxparty = 100;			/* Maximum space for party line members
 							   currently */
-int			tands = 0;			/* Number of bots on the botnet */
-int			parties = 0;			/* Number of people on the botnet */
-int			share_unlinks = 1;		/* Allow remote unlinks of my
+static int		parties = 0;			/* Number of people on the botnet */
+static int		share_unlinks = 1;		/* Allow remote unlinks of my
 							   sharebots? */
 
 void init_bots()

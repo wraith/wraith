@@ -12,11 +12,14 @@
 #include "src/misc.h"
 #include "src/chanprog.h"
 #include "src/auth.h"
+//#include "src/userrec.h"
 #include "src/salt.h"
 #include "src/egg_timer.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
+
+extern int strict_host;
 
 #define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
 #define IN_BOTS (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
@@ -56,7 +59,6 @@ static Function *global = NULL;
 
 
 static int net_type = 0;
-static int strict_host;
 static int wait_split = 300;		/* Time to wait for user to return from
 					   net-split. */
 static int max_bans = 25;		/* Modified by net-type 1-4 */

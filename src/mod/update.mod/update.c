@@ -38,11 +38,6 @@ static void cancel_user_xfer(int, void *);
 
 #include "update.h"
 
-extern struct userrec	*userlist;
-extern tand_t		*tandbot;
-extern int 		localhub, max_dcc;
-extern char		tempdir[], natip[], egg_version[];
-extern time_t		buildts;
 extern struct dcc_table DCC_FORK_SEND, DCC_GET;
 
 

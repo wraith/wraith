@@ -195,6 +195,9 @@ void tell_users_match(int, char *, int, int, int, char *);
 int readuserfile(char *, struct userrec **);
 void check_pmode();
 void link_pref_val(struct userrec *u, char *lval);
+
+extern char			natip[], userfile[];
+extern int			ignore_time;
 #endif /* !MAKING_MODS */
 
 #endif				/* _EGG_USERS_H */

@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "chanprog.h"
+#include "settings.h"
 #include "src/mod/channels.mod/channels.h"
 #include "rfc1459.h"
 #include "net.h"
@@ -29,18 +30,6 @@
 #endif
 #include <sys/utsname.h>
 #include "modules.h"
-
-extern struct userrec	*userlist;
-extern char		 ver[], firewall[],  
-			 motdfile[], userfile[], tempdir[],
-			 owner[], 
-                         botuser[], *owners, *hubs;
-
-extern time_t		 now, online_since;
-extern int		 backgrd, term_z, cache_hit, cache_miss,
-			 firewallport, default_flags, conmask,
-			 noshare, localhub,
-			 ignore_time, loading;
 
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/

@@ -44,11 +44,6 @@ typedef struct bind_entry_b {
 	int id;
 } bind_entry_t;
 
-typedef struct {
-	char *name;
-	struct flag_record     flags;
-} mycmds;
-
 /* This is the highest-level structure. It's like the "msg" table
    or the "pubm" table. */
 typedef struct bind_table_b {

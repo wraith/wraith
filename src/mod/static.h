@@ -9,7 +9,6 @@ char *channels_start();
 char *compress_start();
 #ifdef LEAF
 char *irc_start();
-char *server_start();
 #endif /* LEAF */
 char *share_start();
 char *transfer_start();
@@ -19,6 +18,9 @@ void console_init();
 void ctcp_init();
 void update_init();
 void notes_init();
+#ifdef LEAF
+void server_init();
+#endif /* LEAF */
 
 static void link_statics()
 {
@@ -26,7 +28,6 @@ static void link_statics()
   check_static("compress", compress_start);
 #ifdef LEAF
   check_static("irc", irc_start);
-  check_static("server", server_start);
 #endif /* LEAF */
   check_static("share", share_start);
   check_static("transfer", transfer_start);

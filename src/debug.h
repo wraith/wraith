@@ -54,6 +54,8 @@
 
 
 #ifndef MAKING_MODS
+extern int		sdebug;
+
 void sdprintf (char *, ...);
 void init_signals();
 void init_debug();

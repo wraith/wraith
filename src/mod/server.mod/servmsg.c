@@ -1238,6 +1238,7 @@ static void connect_server(void)
 
 static void server_resolve_failure(int idx)
 {
+/* FIXME, server_trying = 0???? */
   serv = -1;
   /* servidx = -1; */
   resolvserv = 0;
@@ -1262,6 +1263,7 @@ static void server_resolve_success(int idx)
 #endif /* USE_IPV6 */
   if (serv < 0) {
     neterror(s);
+/* FIXME server_trying = 0?? */
     putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, s);
     lostdcc(idx);
     /* servidx = -1; */

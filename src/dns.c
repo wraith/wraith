@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "dccutil.h"
+#include "main.h"
 #include "net.h"
 #include "misc.h"
 #include "src/mod/dns.mod/dns.h"
@@ -18,12 +19,6 @@
 #include <arpa/inet.h>
 
 #include "dns.h"
-
-extern struct dcc_t	*dcc;
-extern int		 dcc_total;
-extern int		 resolve_timeout;
-extern time_t		 now;
-extern jmp_buf		 alarmret;
 
 devent_t	*dns_events = NULL;
 

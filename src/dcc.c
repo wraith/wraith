@@ -8,7 +8,9 @@
 
 #include "common.h"
 #include "dcc.h"
+#include "settings.h"
 #include "tclhash.h"
+#include "main.h"
 #include "cmds.h"
 #include "color.h"
 #include "salt.h"
@@ -38,38 +40,24 @@
 #include "core_binds.h"
 
 
-extern struct userrec	*userlist;
-extern struct chanset_t	*chanset;
-extern time_t		 now, buildts;
-extern int		 connect_timeout, conmask, backgrd,
-			 max_dcc, default_flags, debug_output,
-			 ignore_time;
-extern char		 ver[], origbotname[], bdhash[],
-                         dcc_prefix[];
-
-extern sock_list 	*socklist;
-extern int 		MAXSOCKS;
-
 struct dcc_t *dcc = NULL;	/* DCC list				   */
 int	timesync = 0;
 int	dcc_total = 0;		/* Total dcc's				   */
-int	allow_new_telnets = 0;	/* Allow people to introduce themselves
-				   via telnet				   */
-int	use_telnet_banner = 0;	/* Display telnet banner?		   */
 char	network[41] = "EFnet"; /* Name of the IRC network you're on  */
-int	password_timeout = 20;	/* Time to wait for a password from a user */
-int     auth_timeout = 40;
-int	bot_timeout = 15;	/* Bot timeout value			   */
-int	identtimeout = 15;	/* Timeout value for ident lookups	   */
-int	dupwait_timeout = 5;	/* Timeout for rejecting duplicate entries */
+
+static int	password_timeout = 20;	/* Time to wait for a password from a user */
+static int     auth_timeout = 40;
+static int	bot_timeout = 15;	/* Bot timeout value			   */
+static int	identtimeout = 15;	/* Timeout value for ident lookups	   */
+static int	dupwait_timeout = 5;	/* Timeout for rejecting duplicate entries */
 #ifdef LEAF
-int	protect_telnet = 0;	/* Even bother with ident lookups :)	   */
+static int	protect_telnet = 0;	/* Even bother with ident lookups :)	   */
 #else /* !LEAF */
-int     protect_telnet = 1;
+static int     protect_telnet = 1;
 #endif /* LEAF */
-int	flood_telnet_thr = 10;	/* Number of telnet connections to be
-				   considered a flood			   */
-int	flood_telnet_time = 5;	/* In how many seconds?			   */
+static int	flood_telnet_thr = 10;	/* Number of telnet connections to be
+					   considered a flood			   */
+static int	flood_telnet_time = 5;	/* In how many seconds?			   */
 
 static void dcc_telnet_hostresolved(int);
 static void dcc_telnet_got_ident(int, char *);

@@ -7,6 +7,7 @@
 #include "common.h"
 #include "auth.h"
 #include "misc.h"
+#include "main.h"
 #include "types.h"
 #include "egg_timer.h"
 #include "users.h"
@@ -30,20 +31,15 @@
 
 #include "stat.h"
 
-extern struct userrec 		*userlist;
-extern struct dcc_t		*dcc;
-extern struct chanset_t		*chanset;
-extern time_t			 now;
-
-
-#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-extern char 			authkey[];
-#endif /* S_AUTHHASH || S_DCCAUTH */
 #ifdef S_AUTHCMDS
 int 				auth_total = 0;
-int 				max_auth = 100;
+static int 			max_auth = 100;
 struct auth_t 			*auth = NULL;
 #endif /* S_AUTHCMDS */
+
+#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
+char                            authkey[121] = "";      /* This is one of the keys used in the auth hash */
+#endif /* S_AUTHHASH || S_DCCAUTH */
 
 #ifdef S_AUTHCMDS
 void init_auth_max()

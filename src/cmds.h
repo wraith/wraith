@@ -11,6 +11,11 @@ typedef struct {
 } cmd_t;
 
 typedef struct {
+        char *name;
+        struct flag_record     flags;
+} mycmds;
+
+typedef struct {
   char *name;
   Function func;
 } botcmd_t;
@@ -25,6 +30,11 @@ typedef struct cmd_pass {
 
 
 #ifndef MAKING_MODS
+
+extern mycmds 		cmdlist[]; 
+extern int		cmdi;
+
+
 int check_dcc_attrs(struct userrec *, int);
 int check_dcc_chanattrs(struct userrec *, char *, int, int);
 int stripmodes(char *);

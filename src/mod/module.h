@@ -226,7 +226,7 @@
 /* 96 - 99 */
 #define global_bans (*(maskrec **)(global[96]))
 #define global_ign (*(struct igrec **)(global[97]))
-#define password_timeout (*(int *)(global[98]))
+/* UNUSED 98 */
 #define md5 ((char *(*)(const char *))global[99])
 /* 100 - 103 */
 #define max_dcc (*(int *)global[100])
@@ -463,7 +463,7 @@
 #define quit_msg ((char *)(global[273]))
 #define module_load ((char *(*)(char *))global[274])
 #define module_unload ((char *(*)(char *, char *))global[275])
-#define parties (*(int *)global[276])
+/* UNUSED 276 */
 /* 277 - 280 */
 #define ischanhub ((int (*)(void))global[277])
 #define rand_dccresp ((char *(*)(void))global[278])
