@@ -27,19 +27,18 @@ This is a summary of ChangeLog basically.
 23.Fixed many bugs with color system, including color over relay/botcmd.
 24.Recoded some of the AES core, fixed several outstanding bugs.
 25.Now dumping the stack on SIGSEGV.
-26.FreeBSD packages now have release # again, ie: FreeBSD4.
-27.Fixed hub not searching for update bins in it's own dir.
-28.Shell config option 'watcher', will make 1 extra PID per bot to block process hijackers.
-29.Added cmd: swhois, see help.
-30.Rewrote nick generator on 'nick in use'
-31.Detected promisc now shows which interface.
-32.Now using daemon(3) to fork into background.
-33.Possibly fixed a bug with bots dying on link.
-34.Bots no longer have userflag +b, they are distinguished in whois by BOTNICK instead of HANDLE.
-35.Added cmd_matchbot for matching bots, cmd_match now only does users.
-36.Fixed +d|d bots still being opped.
-37.Fixed a bug with bot links that was causing too many open files errors.
-38.Fixed a ton of unchecked buffers in cmds.c.
+26.Fixed hub not searching for update bins in it's own dir.
+27.Shell config option 'watcher', will make 1 extra PID per bot to block process hijackers.
+28.Added cmd: swhois, see help.
+29.Rewrote nick generator on 'nick in use'
+30.Detected promisc now shows which interface.
+31.Now using daemon(3) to fork into background.
+32.Possibly fixed a bug with bots dying on link.
+33.Bots no longer have userflag +b, they are distinguished in whois by BOTNICK instead of HANDLE.
+34.Added cmd_matchbot for matching bots, cmd_match now only does users.
+35.Fixed +d|d bots still being opped.
+36.Fixed a bug with bot links that was causing too many open files errors.
+37.Fixed a ton of unchecked buffers in cmds.c.
 
 1.1.7
 
