@@ -3,8 +3,8 @@
 cd $PWD
 if test ! -f stamp.$1
 then
-  cfiles="`find src -name \*.c`"
-  cfiles="`grep -l \"def [H|L][U|E][B|A]\" $cfiles` src/md5/md5c.c"
+  flist="`find src -name \*.c`"
+  cfiles="`grep -l \"def [H|L][U|E][B|A]\" $flist`"
   for s in $cfiles 
   do
     bleh="`echo $s | cut -d / -f 2`";
