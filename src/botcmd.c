@@ -1364,7 +1364,8 @@ botcmd_t C_bot[] =
 void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {
   char msg[SGRAB-110];
-  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, dcc[idx].u.chat->con_chan, cmd, par);
+  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %lu %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, 
+               dcc[idx].u.chat->con_chan, dcc[idx].status, cmd, par);
 
   putbot(bot, msg);
 }
@@ -1373,12 +1374,15 @@ void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 static void bot_rsim(char *botnick, char *code, char *par)
 {
   int ridx = -1, idx = -1, i = 0, rconmask;
+  unsigned long status = 0;
   char *nick = NULL, *cmd = NULL, *rconchan = NULL, buf[UHOSTMAX];
 
   ridx = atoi(newsplit(&par));
   nick = newsplit(&par);
   rconmask = atoi(newsplit(&par));
   rconchan = newsplit(&par);
+  if (egg_isdigit(par[0]))
+    status = (unsigned long) atoi(newsplit(&par));
   cmd = newsplit(&par);
   if (ridx < 0 || !nick || !cmd)
     return;
@@ -1399,6 +1403,7 @@ static void bot_rsim(char *botnick, char *code, char *par)
     dcc[idx].timeval = now;
     dcc[idx].simultime = now;
     dcc[idx].simul = ridx;
+    dcc[idx].status = status;
     strcpy(dcc[idx].simulbot, botnick);
     dcc[idx].status = STAT_ECHO;
     dcc[idx].u.chat->con_flags = rconmask;
