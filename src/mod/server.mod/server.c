@@ -44,6 +44,8 @@ int flud_ctcp_thr = 3;	/* ctcp flood threshold */
 time_t flud_ctcp_time = 60;	/* ctcp flood time */
 char botuserhost[UHOSTLEN] = "";	/* bot's user@host (refreshed whenever the bot joins a channel) */
 					/* may not be correct user@host BUT it's how the server sees it */
+char botuserip[UHOSTLEN] = "";		/* bot's user@host with the ip. */
+
 static bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
@@ -991,6 +993,7 @@ void server_report(int idx, int details)
     dprintf(idx, "    Online as: %s%s%s (%s)\n", botname,
 	    botuserhost[0] ? "!" : "", botuserhost[0] ? botuserhost : "",
 	    botrealname);
+    dprintf(idx, "    My userip: %s!%s\n", botname, botuserip);
     if (nick_juped)
       dprintf(idx, "    NICK IS JUPED: %s %s\n", origbotname,
 	      keepnick ? "(trying)" : "");

@@ -690,16 +690,17 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 static void
 got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 {
-  char me[UHOSTLEN] = "", s[UHOSTLEN] = "";
+  char me[UHOSTLEN] = "", meip[UHOSTLEN] = "", s[UHOSTLEN] = "";
 
-  egg_snprintf(me, sizeof me, "%s!%s", botname, botuserhost);
+  simple_sprintf(me, "%s!%s", botname, botuserhost);
+  simple_sprintf(meip, "%s!%s", botname, botuserip);
   egg_snprintf(s, sizeof s, "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
   newban(chan, mask, s);
 
   if (channel_pending(chan) || !me_op(chan))
     return;
 
-  if ((wild_match(mask, me) || match_cidr(mask, me)) && !isexempted(chan, me)) {
+  if ((wild_match(mask, me) || match_cidr(mask, meip)) && !isexempted(chan, me)) {
     add_mode(chan, '-', 'b', mask);
     reversing = 1;
     return;
@@ -738,7 +739,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     /* The point of this cycle crap is to first check chan->bans then global_bans for a reason */
     for (int cycle = 0; cycle < 2; cycle++) {
       for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
-        if (wild_match(b->mask, mask)) {
+        if (wild_match(b->mask, mask) || match_cidr(b->mask, mask)) {
           if (b->desc && b->desc[0] != '@')
             egg_snprintf(resn, sizeof resn, "banned: %s", b->desc);
           else

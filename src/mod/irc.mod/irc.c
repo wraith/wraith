@@ -336,8 +336,8 @@ getin_request(char *botnick, char *code, char *par)
 
   struct userrec *u = NULL;
   memberlist *mem = NULL;
-  char *hst = newsplit(&par), *ip4 = NULL, *ip6 = NULL, *tmp = NULL;
-  char nick[NICKLEN] = "", host[UHOSTLEN] = "", ip4host[UHOSTLEN] = "", ip6host[UHOSTLEN] = "";
+  char *hst = newsplit(&par), *ip = NULL, *tmp = NULL;
+  char nick[NICKLEN] = "", uhost[UHOSTLEN] = "", uip[UHOSTLEN];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   if (nck[0]) {
@@ -346,31 +346,20 @@ getin_request(char *botnick, char *code, char *par)
     nick[0] = 0;
 
   if (hst[0]) {
-    strlcpy(host, hst, sizeof(host));
-    ip4 = newsplit(&par);
-    if (ip4[0]) {
+    strlcpy(uhost, hst, sizeof(uhost));
+    ip = newsplit(&par);
+    if (ip[0]) {
       char *tmp2 = NULL;
 
-      tmp = strdup(host);
+      tmp = strdup(uhost);
       tmp2 = strtok(tmp, "@");
-      egg_snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2, "@"), ip4);
+      egg_snprintf(uip, sizeof uip, "%s@%s", strtok(tmp2, "@"), ip);
       free(tmp);
     } else {
-      ip4host[0] = 0;
-    }
-    ip6 = newsplit(&par);
-    if (ip6[0]) {
-      char *tmp2 = NULL;
-
-      tmp = strdup(host);
-      tmp2 = strtok(tmp, "@");
-      egg_snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2, "@"), ip6);
-      free(tmp);
-    } else {
-      ip6host[0] = 0;
+      uip[0] = 0;
     }
   } else
-    host[0] = 0;
+    uhost[0] = 0;
   /*
    * if (!ismember(chan, botname)) {
    * putlog(LOG_GETIN, "*", "getin req from %s for %s - I'm not on %s!", botnick, chname, chname);
@@ -516,8 +505,9 @@ getin_request(char *botnick, char *code, char *par)
 
     mr = &global_bans;
     while (*mr) {
-      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) || wild_match((*mr)->mask, ip6host) || 
-          match_cidr((*mr)->mask, ip4host) || match_cidr((*mr)->mask, ip6host)) {
+      if (wild_match((*mr)->mask, uhost) || 
+          wild_match((*mr)->mask, uip) || 
+          match_cidr((*mr)->mask, uip)) {
         if (!noshare) {
           shareout("-m b %s\n", (*mr)->mask);
         }
@@ -538,8 +528,9 @@ getin_request(char *botnick, char *code, char *par)
     }
     mr = &chan->bans;
     while (*mr) {
-      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, ip4host) || wild_match((*mr)->mask, ip6host) ||
-          match_cidr((*mr)->mask, ip4host) || match_cidr((*mr)->mask, ip6host)) {
+      if (wild_match((*mr)->mask, uhost) || 
+          wild_match((*mr)->mask, uip) || 
+          match_cidr((*mr)->mask, uip)) {
         if (!noshare) {
           shareout("-mc b %s %s\n", chan->dname, (*mr)->mask);
         }
@@ -558,8 +549,9 @@ getin_request(char *botnick, char *code, char *par)
       }
     }
     for (struct maskstruct *b = chan->channel.ban; b->mask[0]; b = b->next) {
-      if (wild_match(b->mask, host) || wild_match(b->mask, ip4host) || wild_match(b->mask, ip6host) ||
-          match_cidr(b->mask, ip4host) || match_cidr(b->mask, ip6host)) {
+      if (wild_match(b->mask, uhost) || 
+          wild_match(b->mask, uip) || 
+          match_cidr(b->mask, uip)) {
         add_mode(chan, '-', 'b', b->mask);
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed active ban %s", botnick, nick, chan->dname,
                b->mask);
@@ -773,8 +765,7 @@ request_in(struct chanset_t *chan)
 
   if (!checked_hostmask)
     check_hostmask();           /* check, and update hostmask */
-  sprintf(s, "gi i %s %s %s!%s %s %s", chan->dname, botname, botname, botuserhost,
-          myipstr(4) ? myipstr(4) : ".", myipstr(6) ? myipstr(6) : ".");
+  sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
   while (cnt) {
     n = randint(i);
     if (botops[n]) {

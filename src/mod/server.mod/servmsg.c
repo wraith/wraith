@@ -158,6 +158,7 @@ static int got001(char *from, char *msg)
   strlcpy(cursrvname, from, sizeof(cursrvname));
 
   dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
+  dprintf(DP_SERVER, "USERHOST %s\n", botname); /* get user@ip */
   dprintf(DP_SERVER, "MODE %s +iws\n", botname);
   x = serverlist;
   if (x == NULL)
@@ -923,6 +924,7 @@ static void disconnect_server(int idx, int dolost)
   checked_hostmask = 0;
   floodless = 0;
   botuserhost[0] = 0;
+  botuserip[0] = 0;
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;

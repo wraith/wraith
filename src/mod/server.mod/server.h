@@ -50,7 +50,7 @@ extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp, serv;
 extern port_t		default_port, newserverport;
 extern time_t		server_online, cycle_time, flud_time, flud_ctcp_time;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
-			newserver[], newserverpass[], curnetwork[];
+			newserver[], newserverpass[], curnetwork[], botuserip[];
 extern struct server_list *serverlist;
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);

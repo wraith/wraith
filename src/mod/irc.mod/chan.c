@@ -598,7 +598,7 @@ static void refresh_ban_kick(struct chanset_t *chan, char *user, char *nick)
      in second cycle. */
   for (int cycle = 0; cycle < 2; cycle++) {
     for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
-      if (wild_match(b->mask, user) || match_dir(b->mask, user)) {
+      if (wild_match(b->mask, user) || match_cidr(b->mask, user)) {
 	struct flag_record	fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 	char c[512] = "";		/* The ban comment.	*/
 	char s[UHOSTLEN] = "";
@@ -676,12 +676,14 @@ static void enforce_bans(struct chanset_t *chan)
   if (!me_op(chan))
     return;			/* Can't do it :( */
 
-  char me[UHOSTLEN] = "";
+  char me[UHOSTLEN] = "", meip[UHOSTLEN] = "";
 
   simple_sprintf(me, "%s!%s", botname, botuserhost);
+  simple_sprintf(meip, "%s!%s", botname, botuserip);
+
   /* Go through all bans, kicking the users. */
   for (masklist *b = chan->channel.ban; b && b->mask[0]; b = b->next) {
-    if (!wild_match(b->mask, me))
+    if (!(wild_match(b->mask, me) || match_cidr(b->mask, meip)))
       if (!isexempted(chan, b->mask) && !(chan->ircnet_status & CHAN_ASKED_EXEMPTS))
 	kick_all(chan, b->mask, IRC_YOUREBANNED, 1);
   }
@@ -1267,15 +1269,16 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   stacking--;
 }
 
-#ifdef CACHE
 /* got 302: userhost
  * <server> 302 <to> :<nick??user@host>
  */
 static int got302(char *from, char *msg)
 {
   char *p = NULL, *nick = NULL, *uhost = NULL;
+#ifdef CACHE
   cache_t *cache = NULL;
   cache_chan_t *cchan = NULL;
+#endif
 
   newsplit(&msg);
   fixcolon(msg);
@@ -1293,6 +1296,13 @@ static int got302(char *from, char *msg)
   if ((p = strchr(uhost, ' ')))
     *p = 0;
 
+  if (match_my_nick(nick)) {
+    strlcpy(botuserip, uhost, UHOSTLEN);
+    sdprintf("botuserip: %s", botuserip);
+    return 0;
+  }
+
+#ifdef CACHE
   if ((cache = cache_find(nick))) {
     if (!cache->uhost[0])
     strcpy(cache->uhost, uhost);
@@ -1320,10 +1330,11 @@ static int got302(char *from, char *msg)
       }
     }
   }
-
+#endif
   return 0;
 }
 
+#ifdef CACHE
 /* got341 invited
  * <server> 341 <to> <nick> <channel>
  */
@@ -3024,8 +3035,8 @@ static int gotnotice(char *from, char *msg)
 
 static cmd_t irc_raw[] =
 {
-#ifdef CACHE
   {"302",       "",     (Function) got302,      "irc:302", LEAF},
+#ifdef CACHE
   {"341",       "",     (Function) got341,      "irc:341", LEAF},
 #endif /* CACHE */
   {"324",	"",	(Function) got324,	"irc:324", LEAF},
