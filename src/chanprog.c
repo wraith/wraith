@@ -25,7 +25,7 @@ extern struct userrec	*userlist;
 extern log_t		*logs;
 extern Tcl_Interp	*interp;
 extern char		 ver[], botnetnick[], firewall[], myip[], origbotname[],
-			 motdfile[], userfile[], helpdir[], tempdir[],
+			 motdfile[], userfile[], tempdir[],
 			 notify_new[], owner[], configfile[],
                          netpass[], botuser[], owners[], hubs[];
 
@@ -362,7 +362,6 @@ void tell_settings(int idx)
   dprintf(idx, "Userfile: %s   \n", userfile);
 #endif
   dprintf(idx, "Directories:\n");
-  dprintf(idx, "  Help    : %s\n", helpdir);
   dprintf(idx, "  Temp    : %s\n", tempdir);
   fr.global = default_flags;
 
@@ -568,7 +567,6 @@ void chanprog()
 
 
   admin[0] = 0;
-  helpdir[0] = 0;
 
   /* cache our ip on load instead of every 30 seconds -zip */
   cache_my_ip();
@@ -656,11 +654,6 @@ void chanprog()
   trigger_cfg_changed();
 
   /* We should be safe now */
-
-
-  if (helpdir[0])
-    if (helpdir[strlen(helpdir) - 1] != '/')
-      strcat(helpdir, "/");
 
   if (tempdir[0])
     if (tempdir[strlen(tempdir) - 1] != '/')

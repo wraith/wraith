@@ -252,7 +252,7 @@
 #define ver ((char *)global[119])
 /* 120 - 123 */
 #define notify_new ((char *)global[120])
-//#define helpdir ((char *)global[121])
+/* 121 helpdir -- UNUSED */
 #define Version ((char *)global[122])
 #define botnetnick ((char *)global[123])
 /* 124 - 127 */

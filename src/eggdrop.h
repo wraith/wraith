@@ -435,6 +435,10 @@ struct script_info {
 #endif /* !defined(IN6_IS_ADDR_V4MAPPED) */
 
 #include <netinet/in.h>
+#include <netinet/socket.h>
+#ifdef __FreeBSD__
+# include <netinet6/in6.h>
+#endif
 union sockaddr_union {
   struct sockaddr sa;
   struct sockaddr_in sin;

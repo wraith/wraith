@@ -106,7 +106,6 @@ char tempdir[DIRMAX] = "";
 char lock_file[40] = "";
 char *binname;
 char	configfile[121] = ""; /* Name of the config file */
-char	helpdir[121];		/* Directory of help files (if used) */
 char	textdir[121] = "";	/* Directory for text files that get dumped */
 int	keep_all_logs = 0;	/* Never erase logfiles, no matter how old
 				   they are? */
@@ -1007,38 +1006,38 @@ static void check_crontab()
 static void gotspawn(char *filename)
 {
   FILE *fp;
-  char templine[8192], *nick, *host, *ip, *temps, *ipsix;
+  char templine[8192], *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps;
 
   if (!(fp = fopen(filename, "r")))
     fatal("Cannot read from local config (2)", 0);
 
-  //link_statics();
   check_static("blowfish", blowfish_start);
-  Context;
   module_load(ENCMOD);
-
 
   while(fscanf(fp,"%[^\n]\n",templine) != EOF) 
   {
     Context;
     temps = (char *) decrypt_string(netpass, decryptit(templine));
 
-    pscloak = atoi(newsplit(&temps));
 #ifdef S_PSCLOAK
     if (SDEBUG)
-      printf("GOTSPAWN, NOT CLOAKING\n");
+      printf("GOTSPAWN: %s\n", temps);
 #endif /* S_PSCLOAK */
-    nick = newsplit(&temps);
+
+    pscloak = atoi(newsplit(&temps));
+    if (temps[0])
+      nick = newsplit(&temps);
     if (!nick)
       fatal("invalid config (2).",0);
+    if (temps[0])
+      ip = newsplit(&temps);
+    if (temps[0])
+      host = newsplit(&temps);
+    if (temps[0])
+      ipsix = newsplit(&temps);
 
-    ip = newsplit(&temps);
-    if (!ip)
-      fatal("invalid config (2).",0);
+    snprintf(origbotname, 10, "%s", nick);
 
-    host = newsplit(&temps);
-    if (!host && (ip[0] != '!'))
-      fatal("invalid config (2).",0);
     if (ip[1]) {
       if (ip[0] == '!') { //natip
         ip++;
@@ -1048,8 +1047,6 @@ static void gotspawn(char *filename)
       }
     }
 
-    snprintf(origbotname, 10, "%s", nick);
-
     if (host && host[1]) {
       if (host[0] == '+') { //ip6 host
         host++;
@@ -1058,12 +1055,12 @@ static void gotspawn(char *filename)
         sprintf(hostname,"%s",host);
       }
     }
-    ipsix = newsplit(&temps);
 
     if (ipsix && ipsix[1]) {
       snprintf(myip6, 120, "%s", ipsix);
     }
   }
+
   fclose(fp);
   unlink(filename);
 }
@@ -1082,7 +1079,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
   if (!(fp = fopen(buf, "w")))
     fatal("Cannot create spawnfiles...", 0);
 
-  lfprintf(fp, "%d %s %s %s %s\n", cloak, nick, ip, host ? host : ".", ipsix ? ipsix : ".");
+  lfprintf(fp, "%d %s %s %s %s\n", cloak, nick, ip ? ip : ".", host ? host : ".", ipsix ? ipsix : ".");
 
   fflush(fp);
   fclose(fp);
@@ -1482,7 +1479,7 @@ Context;
     if (!(f = fopen(cfile, "r")))
       fatal(STR("the local config is missing."),0);
     while(fscanf(f,"%[^\n]\n",templine) != EOF) {
-      char *nick=NULL,*host=NULL,*ip=NULL,*ipsix=NULL;
+      char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
       int skip = 0;
       Context;
       if (templine[0] != '+') {
@@ -1532,57 +1529,42 @@ Context;
         //we have the right uname/uid, safe to setup crontab now.
         i++;
         nick = newsplit(&temps);
-        if (!nick)
+        if (!nick || !nick[0])
           fatal("invalid config.",0);
         if (SDEBUG)
           printf("Read nick from config: %s\n", nick);
-
         if (temps[0])
           ip = newsplit(&temps);
-        if (!ip)
-          fatal("invalid config..",0);
         if (temps[0])
           host = newsplit(&temps);
-//        if (!host && (ip[0] != '!'))
-//          fatal("invalid config...",0);
-        if (host && !host[1] && (ip && ip[0] != '!'))
-          host[0] = '.';
-
         if (temps[0])
           ipsix = newsplit(&temps);
-
-        if (ipsix && !ipsix[1])
-          ipsix[0] = '.';
 
         if (i == 1) { //this is the first bot ran/parsed
           strncpyz(s, ctime(&now), sizeof s);
           strcpy(&s[11], &s[20]);
           printf("--- Loading %s (%s)\n\n", ver, s);
-#ifdef LEAF
+
           if (ip[0] == '!') { //natip
             ip++;
             sprintf(natip, "%s",ip);
           } else {
-#endif
-            snprintf(myip, 120, "%s", ip);
-#ifdef LEAF
+            if (ip && ip[1]) //only copy ip if it is longer than 1 char (.)
+              snprintf(myip, 120, "%s", ip);
           }
-#endif
           snprintf(origbotname, 10, "%s", nick);
 #ifdef HUB
           sprintf(userfile, "%s/.%s.user", confdir, nick);
 #endif
 
-          if (host && host[1]) {
-#ifdef LEAF
+          if (host && host[1]) { //only copy host if it is longer than 1 char (.)
             if (host[0] == '+') { //ip6 host
               host++;
               sprintf(hostname6, "%s",host);
             } else  //normal ip4 host
-#endif
               sprintf(hostname, "%s",host);
           }
-          if (ipsix && ipsix[1]) {
+          if (ipsix && ipsix[1]) { //only copy ipsix if it is longer than 1 char (.)
             snprintf(myip6, 120, "%s",ipsix);
           }
         } 

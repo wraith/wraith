@@ -1274,7 +1274,6 @@ Context;
   while (ul) {
     get_user_flagrec(ul, &fr, NULL);
 
-//printf("connect to? %s %s %d\n", ul->handle, u->handle, bot_hublevel(ul));
     if (glob_bot(fr) && 
         strcmp(ul->handle, botnetnick) && 
         strcmp(u->handle, avoidbot) && 

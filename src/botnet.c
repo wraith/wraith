@@ -1011,7 +1011,11 @@ int botlink(char *linker, int idx, char *nick)
       dcc[i].u.dns->dns_failure = botlink_resolve_failure;
       dcc[i].u.dns->dns_type = RES_IPBYHOST;
       dcc[i].u.dns->type = &DCC_FORK_BOT;
+#ifdef USE_IPV6
+      botlink_resolve_success(i);
+#else
       dcc_dnsipbyhost(bi->address);
+#endif /* USE_IPV6 */
       return 1;
     }
   }
@@ -1020,13 +1024,13 @@ int botlink(char *linker, int idx, char *nick)
 
 static void botlink_resolve_failure(int i)
 {
-  char s[81];
+//  char s[81];
 
 //  putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[i].nick);
-  strcpy(s, dcc[i].nick);
+//  strcpy(s, dcc[i].nick);
   nfree(dcc[i].u.dns->cptr);
   lostdcc(i);
-  autolink_cycle(s);          /* Check for more auto-connections */
+//  autolink_cycle(s);          /* Check for more auto-connections */
 }
 
 static void botlink_resolve_success(int i)
@@ -1048,8 +1052,13 @@ static void botlink_resolve_success(int i)
   dcc[i].sock = getsock(SOCK_STRONGCONN);
 #endif /* USE_IPV6 */
   nfree(linker);
+
   if (dcc[i].sock < 0 ||
+#ifdef USE_IPV6
+      open_telnet_raw(dcc[i].sock, dcc[i].host,
+#else
       open_telnet_raw(dcc[i].sock, iptostr(htonl(dcc[i].addr)),
+#endif /* USE_IPV6 */
 		      dcc[i].port) < 0)
     failed_link(i);
 }

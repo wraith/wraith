@@ -388,6 +388,7 @@
 
 #define DCC_NOSTRANGERS		STR("I don't accept DCC chats from strangers.")
 #define DCC_REFUSED		STR("Refused DCC chat (no access)")
+#define DCC_REFUSEDNC		STR("Refused DCC chat (I'm not a chathub (+c))")
 #define DCC_REFUSED2		STR("No access")
 #define DCC_REFUSED3		STR("You must have a password set.")
 #define DCC_REFUSED4		STR("Refused DCC chat (no password)")

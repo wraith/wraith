@@ -17,6 +17,9 @@
 #  include <sys/select.h>
 #endif
 #include <netinet/in.h>
+#ifdef ___FreeBSD___
+# include <netinet6/in6.h>
+#endif
 #include <arpa/inet.h>		/* is this really necessary? */
 #include <errno.h>
 
@@ -650,6 +653,7 @@ int open_address_listen(IP addr, int *port)
   }
 #ifdef USE_IPV6
   if (af_def == AF_INET6) {
+debug0("Opening listen socket with AF_INET6");
       sock = getsock(SOCK_LISTEN, af_def);
       bzero((char *) &name6, sizeof(name6));
       name6.sin6_family = af_def;
@@ -677,6 +681,7 @@ int open_address_listen(IP addr, int *port)
     if (sock < 1)
       return -1;
 
+debug0("Opening listen socket with AF_INET");
     egg_bzero((char *) &name, sizeof(struct sockaddr_in));
     name.sin_family = AF_INET;
     name.sin_port = htons(*port); /* 0 = just assign us a port */
