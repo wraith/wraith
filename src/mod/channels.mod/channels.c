@@ -711,8 +711,10 @@ void remove_channel(struct chanset_t *chan)
    user_del_chan(chan->dname);
    noshare = 0;
    free(chan->channel.key);
-   for (i = 0; i < 6 && chan->cmode[i].op; i++)
+   for (i = 0; i < MODES_PER_LINE_MAX && chan->cmode[i].op; i++)
      free(chan->cmode[i].op);
+   for (i = 0; i < (MODES_PER_LINE_MAX - 1) && chan->ccmode[i].op; i++)
+     free(chan->ccmode[i].op);
    if (chan->key)
      free(chan->key);
    if (chan->rmkey)

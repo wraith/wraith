@@ -30,23 +30,84 @@ static int do_op(char *nick, struct chanset_t *chan, int delay, int force)
 
   if (channel_fastop(chan) || channel_take(chan)) {
     add_mode(chan, '+', 'o', nick);
+//    add_cookie(chan, nick);
   } else {
-    char *tmp = NULL;
-    
-    tmp = calloc(1, strlen(chan->name) + 200);
-    makeopline(chan, nick, tmp);
-    dprintf(DP_MODE, tmp);
-    free(tmp);
+    add_cookie(chan, nick);
   }
   return 1;
 }
 
-static void flush_mode(struct chanset_t *chan, int pri)
+static void
+flush_cookies(struct chanset_t *chan, int pri)
+{
+  char *p = NULL, out[512] = "", post[512] = "";
+  size_t postsize = sizeof(post);
+  unsigned int i = 0;
+
+  p = out;
+  post[0] = 0, postsize--;
+
+  chan->cbytes = 0;
+
+  for (i = 0; i < (modesperline - 1); i++) {
+    if (chan->ccmode[i].op && postsize > strlen(chan->ccmode[i].op)) {
+
+      *p++ = '+';
+      *p++ = 'o';
+      postsize -= egg_strcatn(post, chan->ccmode[i].op, sizeof(post));
+      postsize -= egg_strcatn(post, " ", sizeof(post));
+
+      free(chan->ccmode[i].op), chan->ccmode[i].op = NULL;
+    }
+  }
+
+  /* remember to terminate the buffer ('out')... */
+  if (out[0]) {
+    *p++ = '-';
+    *p++ = 'b';
+  }
+  *p = 0;
+
+  if (post[0]) {
+    /* remove the trailing space... */
+    size_t myindex = (sizeof(post) - 1) - postsize;
+
+    if (myindex > 0 && post[myindex - 1] == ' ')
+      post[myindex - 1] = 0;
+
+    egg_strcatn(out, " ", sizeof(out));
+    egg_strcatn(out, post, sizeof(out));
+    egg_strcatn(out, " ", sizeof(out));
+    egg_strcatn(out, "*!*@NEW.MULTI.BOT.COOKIE.OPS.COMING.SOON", sizeof(out));
+/*    char *tmp = NULL;
+
+    tmp = calloc(1, strlen(chan->name) + 200);
+    makeopline(chan, nick, tmp);
+    dprintf(DP_MODE, tmp);
+    free(tmp);
+*/
+  }
+  if (out[0]) {
+    if (pri == QUICK) {
+      char outbuf[201] = "";
+ 
+      sprintf(outbuf, "MODE %s %s\n", chan->name, out);
+      tputs(serv, outbuf, strlen(outbuf));
+      /* dprintf(DP_MODE, "MODE %s %s\n", chan->name, out); */
+    } else
+      dprintf(DP_SERVER, "MODE %s %s\n", chan->name, out);
+  }
+}
+
+static void 
+flush_mode(struct chanset_t *chan, int pri)
 {
   char *p = NULL, out[512] = "", post[512] = "";
   size_t postsize = sizeof(post);
   int plus = 2;              /* 0 = '-', 1 = '+', 2 = none */
   unsigned int i = 0;
+
+  flush_cookies(chan, pri);
 
 /* dequeue_op_deop(chan); */
   p = out;
@@ -114,8 +175,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
   /* Do -{b,e,I} before +{b,e,I} to avoid the server ignoring overlaps */
   for (i = 0; i < modesperline; i++) {
-    if ((chan->cmode[i].type & MINUS) && 
-        postsize > strlen(chan->cmode[i].op)) {
+    if ((chan->cmode[i].type & MINUS) && postsize > strlen(chan->cmode[i].op)) {
       if (plus) {
         *p++ = '-', plus = 0;
       }
@@ -135,8 +195,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
   /* now do all the + modes... */
   for (i = 0; i < modesperline; i++) {
-    if ((chan->cmode[i].type & PLUS) && 
-        postsize > strlen(chan->cmode[i].op)) {
+    if ((chan->cmode[i].type & PLUS) && postsize > strlen(chan->cmode[i].op)) {
       if (plus != 1) {
         *p++ = '+', plus = 1;
       }
@@ -182,7 +241,8 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
 /* Queue a channel mode change
  */
-void add_mode(struct chanset_t *chan, const char plus, const char mode, const char *op)
+void 
+real_add_mode(struct chanset_t *chan, const char plus, const char mode, const char *op, int cookie)
 {
   int type, modes, l;
   unsigned int i;
@@ -278,21 +338,38 @@ void add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
     }
 
     /* op-type mode change */
-    for (i = 0; i < modesperline; i++)
-      if (chan->cmode[i].type == type && chan->cmode[i].op != NULL &&
-          !rfc_casecmp(chan->cmode[i].op, op))
-        return;                 /* Already in there :- duplicate */
-    l = strlen(op) + 1;
-    if (chan->bytes + l > mode_buf_len)
-      flush_mode(chan, NORMAL);
-    for (i = 0; i < modesperline; i++)
-      if (chan->cmode[i].type == 0) {
-        chan->cmode[i].type = type;
-        chan->cmode[i].op = (char *) calloc(1, l);
-        chan->bytes += l;       /* Add 1 for safety */
-        strcpy(chan->cmode[i].op, op);
-        break;
-      }
+
+    /* for cookie ops, use ccmode instead of cmode */
+    if (cookie) {
+      for (i = 0; i < (modesperline - 1); i++)
+        if (chan->ccmode[i].op != NULL && !rfc_casecmp(chan->ccmode[i].op, op))
+          return;                 /* Already in there :- duplicate */
+      l = strlen(op) + 1;
+      if (chan->cbytes + l > mode_buf_len)
+        flush_mode(chan, NORMAL);
+      for (i = 0; i < (modesperline - 1); i++)
+        if (!chan->ccmode[i].op) {
+          chan->ccmode[i].op = (char *) calloc(1, l);
+          chan->cbytes += l;       /* Add 1 for safety */
+          strcpy(chan->ccmode[i].op, op);
+          break;
+        }
+    } else {
+      for (i = 0; i < modesperline; i++)
+        if (chan->cmode[i].type == type && chan->cmode[i].op != NULL && !rfc_casecmp(chan->cmode[i].op, op))
+          return;                 /* Already in there :- duplicate */
+      l = strlen(op) + 1;
+      if (chan->bytes + l > mode_buf_len)
+        flush_mode(chan, NORMAL);
+      for (i = 0; i < modesperline; i++)
+        if (chan->cmode[i].type == 0) {
+          chan->cmode[i].type = type;
+          chan->cmode[i].op = (char *) calloc(1, l);
+          chan->bytes += l;       /* Add 1 for safety */
+          strcpy(chan->cmode[i].op, op);
+          break;
+        }
+    }
   }
 
   /* +k ? store key */

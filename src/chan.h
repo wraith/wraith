@@ -133,6 +133,9 @@ struct chanset_t {
     char *op;
     int type;
   } cmode[MODES_PER_LINE_MAX];                 /* parameter-type mode changes -        */
+  struct {
+    char *op;
+  } ccmode[MODES_PER_LINE_MAX];                 /* parameter-type mode changes -        */
   /* detect floods */
   time_t floodtime[FLOOD_CHAN_MAX];
   uint32_t status;
@@ -174,6 +177,7 @@ struct chanset_t {
   /* queued mode changes: */
   int limit;			/* new limit to set			*/
   int bytes;			/* total bytes so far			*/
+  int cbytes;
   int compat;			/* to prevent mixing old/new modes	*/
   int floodnum[FLOOD_CHAN_MAX];
   int opreqtime[5];             /* remember when ops was requested */

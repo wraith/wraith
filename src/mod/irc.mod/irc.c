@@ -1252,6 +1252,9 @@ flush_modes()
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
 
+  if (!modesperline)		/* Haven't received 005 yet :) */
+    return;
+
   if (modesperline > MODES_PER_LINE_MAX)
     modesperline = MODES_PER_LINE_MAX;
   for (chan = chanset; chan; chan = chan->next) {

@@ -59,7 +59,9 @@ static int gotmode(char *, char *);
 
 #endif /* MAKING_IRC */
 
-void add_mode(struct chanset_t *, const char, const char, const char *);
+void real_add_mode(struct chanset_t *, const char, const char, const char *, int);
+#define add_mode(chan, pls, mode, nick) real_add_mode(chan, pls, mode, nick, 0)
+#define add_cookie(chan, nick) real_add_mode(chan, '+', 'o', nick, 1)
 int me_op(struct chanset_t *);
 void check_this_ban(struct chanset_t *, char *, int);
 void check_this_exempt(struct chanset_t *, char *, int);
