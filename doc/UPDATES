@@ -12,6 +12,7 @@ This is a summary of ChangeLog basically.
 * Bots now unban bans that match *linked* bots, +m bans besides this will not be unset auto.
 * Fixed typo in help file (botconfig)
 * Fixed a leaked socket on failed address bind.
+* Removed compatability support for <= 1.1.9 userfiles (bot records).
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -926,7 +926,6 @@ int readuserfile(const char *file, struct userrec **ret)
             fclose(f);
             return 0;
 	  } else {
-/* FIXME: remove after 1.2 */
             int isbot = 0;
 
             if (code[0] == '-') {
@@ -944,11 +943,6 @@ int readuserfile(const char *file, struct userrec **ret)
 	      break_down_flags(attr, &fr, 0);
 	      strcpy(lasthand, code);
 	      cst = NULL;
-/* FIXME: remove after 1.2 */
-              if (fr.global & USER_BOT) {	/* this should pick up the old +b flag for now */
-                isbot++;
-                fr.global &= ~USER_BOT;
-              }
               
 	      if (strlen(code) > HANDLEN)
 		code[HANDLEN] = 0;
@@ -985,7 +979,6 @@ int readuserfile(const char *file, struct userrec **ret)
     if (!u->bot && !egg_strcasecmp (u->handle, conf.bot->nick)) {
       putlog(LOG_MISC, "*", "(!) I have a user record, but am not classified as a BOT!");
       u->bot = 1;
-      /* u->flags |= USER_BOT; */
     }
 
     for (e = u->entries; e; e = e->next)

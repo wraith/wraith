@@ -389,11 +389,6 @@ share_newuser(int idx, char *par)
 
       fr.match = FR_GLOBAL;
       build_flags(s, &fr, 0);
-/* FIXME: remove after 1.2 */
-      if (fr.global & USER_BOT) {
-        isbot = 1;
-        fr.global &= ~USER_BOT;
-      }
 
       userlist = adduser(userlist, nick, host, pass, 0, isbot);
 
