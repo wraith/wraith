@@ -376,7 +376,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
   if (ip && strcmp(ip, ".") && is_dotted_ip(ip) == AF_INET)
     bot->net.ip = strdup(ip);
-  if (ip6 && strcmp(ip6, ".") && is_dotted_ip(ip) == AF_INET6)
+  if (ip6 && strcmp(ip6, ".") && is_dotted_ip(ip6) == AF_INET6)
     bot->net.ip6 = strdup(ip6);
 
   if (bot->net.ip6 || bot->net.host6)
