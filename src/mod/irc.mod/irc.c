@@ -42,8 +42,6 @@ struct cfg_entry CFG_OPBOTS,
 
   CFG_OPREQUESTS;
 
-static p_tcl_bind_list H_topc, H_splt, H_sign, H_rejn, H_part, H_pub, H_pubm;
-static p_tcl_bind_list H_nick, H_mode, H_kick, H_join, H_need;
 static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL,
                 *encryption_funcs = NULL;
 
@@ -180,20 +178,24 @@ void getin_request(char *botnick, char *code, char *par)
     ip4 = newsplit(&par);
     if (ip4[0]) {
       char *tmp2;
-      tmp=nmalloc(strlen(host)+1);
+
+      tmp = nmalloc(strlen(host)+1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
       snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2,"@") , ip4);
+      nfree(tmp);
     } else {
       ip4host[0] = 0;
     }
     ip6 = newsplit(&par);
     if (ip6[0]) {
       char *tmp2;
-      tmp=nmalloc(strlen(host)+1);
+
+      tmp = nmalloc(strlen(host)+1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
       snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2,"@") , ip6);
+      nfree(tmp);
     } else {
       ip6host[0] = 0;
     }
@@ -406,7 +408,7 @@ Context;
       putlog(LOG_GETIN, "*", STR("Got key for nonexistant channel %s from %s"), chname, botnick);
       return;
     }
-    if (channel_inactive(chan)) {
+    if (!shouldjoin(chan)) {
       putlog(LOG_GETIN, "*", STR("Got key for %s from %s - I shouldn't be on that chan?!?"), chan->dname, botnick);
     } else {
       if (!(channel_pending(chan) || channel_active(chan))) {
@@ -462,7 +464,7 @@ static void request_op(struct chanset_t *chan)
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
 
 Context;
-  if (channel_pending(chan) || channel_inactive(chan) || !channel_active(chan))
+  if (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan))
     return;
   chan->channel.do_opreq = 0;
   if (me_op(chan))
@@ -924,7 +926,7 @@ static void reset_chan_info(struct chanset_t *chan)
 {
   int opped = 0;
   /* Don't reset the channel if we're already resetting it */
-  if (channel_inactive(chan)) {
+  if (!shouldjoin(chan)) {
     dprintf(DP_MODE,"PART %s\n", chan->name);
     return;
   }
@@ -973,13 +975,12 @@ putlog(LOG_DEBUG, "@", "I AM NOW CHECKING +e for %s", chan->dname);
  */
 static void do_channel_part(struct chanset_t *chan)
 {
-  if (!channel_inactive(chan) && chan->name[0]) {
+  if (shouldjoin(chan) && chan->name[0]) {
     /* Using chan->name is important here, especially for !chans <cybah> */
     dprintf(DP_SERVER, "PART %s\n", chan->name);
 
     /* As we don't know of this channel anymore when we receive the server's
        ack for the above PART, we have to notify about it _now_. */
-    check_tcl_part(botname, botuserhost, NULL, chan->dname, NULL);
   }
 }
 
@@ -996,7 +997,7 @@ static void check_lonely_channel(struct chanset_t *chan)
   static int whined = 0;
 
   if (channel_pending(chan) || !channel_active(chan) || me_op(chan) ||
-      channel_inactive(chan) || (chan->channel.mode & CHANANON))
+      !shouldjoin(chan) || (chan->channel.mode & CHANANON))
     return;
   /* Count non-split channel members */
   for (m = chan->channel.member; m && m->nick[0]; m = m->next)
@@ -1014,11 +1015,7 @@ static void check_lonely_channel(struct chanset_t *chan)
   } else if (any_ops(chan)) {
     whined = 0;
     request_op(chan);
-/* need
-    check_tcl_need(chan->dname, "op");
-    if (chan->need_op[0])
-      do_tcl("need-op", chan->need_op);
-*/
+/* need: op */
   } else {
     /* Other people here, but none are ops. If there are other bots make
      * them LEAVE!
@@ -1052,11 +1049,7 @@ static void check_lonely_channel(struct chanset_t *chan)
     } else {
       /* Some humans on channel, but still op-less */
       request_op(chan);
-/* need
-      check_tcl_need(chan->dname, "op");
-      if (chan->need_op[0])
-	do_tcl("need-op", chan->need_op);
-*/
+/* need: op */
     }
   }
 }
@@ -1199,9 +1192,6 @@ static void check_expired_chanstuff()
 	n = m->next;
 	if (m->split && now - m->split > wait_split) {
 	  sprintf(s, "%s!%s", m->nick, m->userhost);
-	  check_tcl_sign(m->nick, m->userhost,
-			 m->user ? m->user : get_user_by_host(s),
-			 chan->dname, "lost in the netsplit");
 	  putlog(LOG_JOIN, chan->dname,
 		 "%s (%s) got lost in the net-split.",
 		 m->nick, m->userhost);
@@ -1242,7 +1232,7 @@ static void check_expired_chanstuff()
       }
       check_lonely_channel(chan);
     }
-    else if (!channel_inactive(chan) && !channel_pending(chan))
+    else if (shouldjoin(chan) && !channel_pending(chan))
       dprintf(DP_MODE, "JOIN %s %s\n",
               (chan->name[0]) ? chan->name : chan->dname,
               chan->channel.key[0] ? chan->channel.key : chan->key_prot);
@@ -1291,111 +1281,6 @@ static int channels_2char STDVAR
   return TCL_OK;
 }
 
-static void check_tcl_joinspltrejn(char *nick, char *uhost, struct userrec *u,
-			       char *chname, p_tcl_bind_list table)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char args[1024];
-
-  simple_sprintf(args, "%s %s!%s", chname, nick, uhost);
-  get_user_flagrec(u, &fr, chname);
-  Tcl_SetVar(interp, "_jp1", nick, 0);
-  Tcl_SetVar(interp, "_jp2", uhost, 0);
-  Tcl_SetVar(interp, "_jp3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_jp4", chname, 0);
-  check_tcl_bind(table, args, &fr, " $_jp1 $_jp2 $_jp3 $_jp4",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
-
-/* we handle part messages now *sigh* (guppy 27Jan2000) */
-
-static void check_tcl_part(char *nick, char *uhost, struct userrec *u,
-			       char *chname, char *text)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char args[1024];
-
-  simple_sprintf(args, "%s %s!%s", chname, nick, uhost);
-  get_user_flagrec(u, &fr, chname);
-  Tcl_SetVar(interp, "_p1", nick, 0);
-  Tcl_SetVar(interp, "_p2", uhost, 0);
-  Tcl_SetVar(interp, "_p3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_p4", chname, 0);
-  Tcl_SetVar(interp, "_p5", text ? text : "", 0);
-  check_tcl_bind(H_part, args, &fr, " $_p1 $_p2 $_p3 $_p4 $_p5",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
-
-static void check_tcl_signtopcnick(char *nick, char *uhost, struct userrec *u,
-				   char *chname, char *reason,
-				   p_tcl_bind_list table)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char args[1024];
-
-  if (table == H_sign)
-    simple_sprintf(args, "%s %s!%s", chname, nick, uhost);
-  else
-    simple_sprintf(args, "%s %s", chname, reason);
-  get_user_flagrec(u, &fr, chname);
-  Tcl_SetVar(interp, "_stnm1", nick, 0);
-  Tcl_SetVar(interp, "_stnm2", uhost, 0);
-  Tcl_SetVar(interp, "_stnm3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_stnm4", chname, 0);
-  Tcl_SetVar(interp, "_stnm5", reason, 0);
-  check_tcl_bind(table, args, &fr, " $_stnm1 $_stnm2 $_stnm3 $_stnm4 $_stnm5",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
-
-static void check_tcl_kickmode(char *nick, char *uhost, struct userrec *u,
-			       char *chname, char *dest, char *reason,
-			       p_tcl_bind_list table)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char args[512];
-
-  get_user_flagrec(u, &fr, chname);
-  if (table == H_mode)
-    simple_sprintf(args, "%s %s", chname, dest);
-  else
-    simple_sprintf(args, "%s %s %s", chname, dest, reason);
-  Tcl_SetVar(interp, "_kick1", nick, 0);
-  Tcl_SetVar(interp, "_kick2", uhost, 0);
-  Tcl_SetVar(interp, "_kick3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_kick4", chname, 0);
-  Tcl_SetVar(interp, "_kick5", dest, 0);
-  Tcl_SetVar(interp, "_kick6", reason, 0);
-  check_tcl_bind(table, args, &fr, " $_kick1 $_kick2 $_kick3 $_kick4 $_kick5 $_kick6",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
-
-static int check_tcl_pub(char *nick, char *from, char *chname, char *msg)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  int x;
-  char buf[512], *args = buf, *cmd, host[161], *hand;
-  struct userrec *u;
-
-  strcpy(args, msg);
-  cmd = newsplit(&args);
-  simple_sprintf(host, "%s!%s", nick, from);
-  u = get_user_by_host(host);
-  hand = u ? u->handle : "*";
-  get_user_flagrec(u, &fr, chname);
-  Tcl_SetVar(interp, "_pub1", nick, 0);
-  Tcl_SetVar(interp, "_pub2", from, 0);
-  Tcl_SetVar(interp, "_pub3", hand, 0);
-  Tcl_SetVar(interp, "_pub4", chname, 0);
-  Tcl_SetVar(interp, "_pub5", args, 0);
-  x = check_tcl_bind(H_pub, cmd, &fr, " $_pub1 $_pub2 $_pub3 $_pub4 $_pub5",
-		     MATCH_EXACT | BIND_USE_ATTR | BIND_HAS_BUILTINS);
-  if (x == BIND_NOMATCH)
-    return 0;
-  if (x == BIND_EXEC_LOG)
-    putlog(LOG_CMDS, chname, "<<%s>> !%s! %s %s", nick, hand, cmd, args);
-  return 1;
-}
-
 #ifdef S_AUTH
 static int check_tcl_pubc(char *cmd, char *nick, char *uhost,
                          struct userrec *u, char *args, char *chan)
@@ -1419,25 +1304,6 @@ static int check_tcl_pubc(char *cmd, char *nick, char *uhost,
 
 }
 #endif /* S_AUTH */
-
-static void check_tcl_pubm(char *nick, char *from, char *chname, char *msg)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char buf[1024], host[161];
-  struct userrec *u;
-
-  simple_sprintf(buf, "%s %s", chname, msg);
-  simple_sprintf(host, "%s!%s", nick, from);
-  u = get_user_by_host(host);
-  get_user_flagrec(u, &fr, chname);
-  Tcl_SetVar(interp, "_pubm1", nick, 0);
-  Tcl_SetVar(interp, "_pubm2", from, 0);
-  Tcl_SetVar(interp, "_pubm3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_pubm4", chname, 0);
-  Tcl_SetVar(interp, "_pubm5", msg, 0);
-  check_tcl_bind(H_pubm, buf, &fr, " $_pubm1 $_pubm2 $_pubm3 $_pubm4 $_pubm5",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
 
 static tcl_ints myints[] =
 {
@@ -1514,7 +1380,7 @@ static void irc_report(int idx, int details)
     if (!private(fr, chan, PRIV_OP) &&
         (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
       p = NULL;
-      if (!channel_inactive(chan)) {
+      if (shouldjoin(chan)) {
 	if (chan->status & CHAN_JUPED)
 	  p = MISC_JUPED;
 	else if (!(chan->status & CHAN_ACTIVE))
@@ -1687,24 +1553,24 @@ static Function irc_table[] =
   (Function) irc_expmem,
   (Function) irc_report,
   /* 4 - 7 */
-  (Function) & H_splt,		/* p_tcl_bind_list		*/
-  (Function) & H_rejn,		/* p_tcl_bind_list		*/
-  (Function) & H_nick,		/* p_tcl_bind_list		*/
-  (Function) & H_sign,		/* p_tcl_bind_list		*/
+  (Function) 0,		
+  (Function) 0,		
+  (Function) 0,
+  (Function) 0,
   /* 8 - 11 */
-  (Function) & H_join,		/* p_tcl_bind_list		*/
-  (Function) & H_part,		/* p_tcl_bind_list		*/
-  (Function) & H_mode,		/* p_tcl_bind_list		*/
-  (Function) & H_kick,		/* p_tcl_bind_list		*/
+  (Function) 0,		
+  (Function) 0,		
+  (Function) 0,		
+  (Function) 0,		
   /* 12 - 15 */
-  (Function) & H_pubm,		/* p_tcl_bind_list		*/
-  (Function) & H_pub,		/* p_tcl_bind_list		*/
-  (Function) & H_topc,		/* p_tcl_bind_list		*/
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   (Function) recheck_channel,
   /* 16 - 19 */
   (Function) me_op,
   (Function) recheck_channel_modes,
-  (Function) & H_need,		/* p_tcl_bind_list		*/
+  (Function) 0,
   (Function) do_channel_part,
   /* 20 - 23 */
   (Function) check_this_ban,
@@ -1863,7 +1729,7 @@ char *irc_start(Function * global_funcs)
 #endif
 
   for (chan = chanset; chan; chan = chan->next) {
-    if (!channel_inactive(chan))
+    if (shouldjoin(chan))
       dprintf(DP_MODE, "JOIN %s %s\n",
               (chan->name[0]) ? chan->name : chan->dname, chan->key_prot);
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_ASKEDBANS);
@@ -1896,18 +1762,6 @@ char *irc_start(Function * global_funcs)
 #endif /* S_AUTH */
   add_builtins(H_raw, irc_raw);
   add_tcl_commands(tclchan_cmds);
-  H_topc = add_bind_table("topc", HT_STACKABLE, channels_5char);
-  H_splt = add_bind_table("splt", HT_STACKABLE, channels_4char);
-  H_sign = add_bind_table("sign", HT_STACKABLE, channels_5char);
-  H_rejn = add_bind_table("rejn", HT_STACKABLE, channels_4char);
-  H_part = add_bind_table("part", HT_STACKABLE, channels_5char);
-  H_nick = add_bind_table("nick", HT_STACKABLE, channels_5char);
-  H_mode = add_bind_table("mode", HT_STACKABLE, channels_6char);
-  H_kick = add_bind_table("kick", HT_STACKABLE, channels_6char);
-  H_join = add_bind_table("join", HT_STACKABLE, channels_4char);
-  H_pubm = add_bind_table("pubm", HT_STACKABLE, channels_5char);
-  H_pub = add_bind_table("pub", 0, channels_5char);
-  H_need = add_bind_table("need", HT_STACKABLE, channels_2char);
   do_nettype();
   return NULL;
 }

@@ -136,21 +136,6 @@ static int check_tcl_msgc(char *cmd, char *nick, char *uhost,
 }
 #endif /* S_AUTH */
 
-static void check_tcl_notc(char *nick, char *uhost, struct userrec *u,
-	       		   char *dest, char *arg)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-
-  get_user_flagrec(u, &fr, NULL);
-  Tcl_SetVar(interp, "_notc1", nick, 0);
-  Tcl_SetVar(interp, "_notc2", uhost, 0);
-  Tcl_SetVar(interp, "_notc3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_notc4", arg, 0);
-  Tcl_SetVar(interp, "_notc5", dest, 0);
-  check_tcl_bind(H_notc, arg, &fr, " $_notc1 $_notc2 $_notc3 $_notc4 $_notc5",
-		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
-
 static void check_tcl_msgm(char *cmd, char *nick, char *uhost,
 			   struct userrec *u, char *arg)
 {
@@ -180,13 +165,14 @@ Context;
   Tcl_SetVar(interp, "_raw2", code, 0);
   Tcl_SetVar(interp, "_raw3", msg, 0);
   x = check_tcl_bind(H_raw, code, 0, " $_raw1 $_raw2 $_raw3",
-		     MATCH_EXACT | BIND_STACKABLE | BIND_WANTRET);
+                    MATCH_EXACT | BIND_STACKABLE | BIND_WANTRET);
   return (x == BIND_EXEC_LOG);
 }
 
+
 static int check_tcl_ctcpr(char *nick, char *uhost, struct userrec *u,
-			   char *dest, char *keyword, char *args,
-			   p_tcl_bind_list table)
+                          char *dest, char *keyword, char *args,
+                          p_tcl_bind_list table)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
   int x;
@@ -199,41 +185,10 @@ static int check_tcl_ctcpr(char *nick, char *uhost, struct userrec *u,
   Tcl_SetVar(interp, "_ctcpr5", keyword, 0);
   Tcl_SetVar(interp, "_ctcpr6", args, 0);
   x = check_tcl_bind(table, keyword, &fr,
-		     " $_ctcpr1 $_ctcpr2 $_ctcpr3 $_ctcpr4 $_ctcpr5 $_ctcpr6",
-		     MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE |
-		     ((table == H_ctcp) ? BIND_WANTRET : 0));
+                    " $_ctcpr1 $_ctcpr2 $_ctcpr3 $_ctcpr4 $_ctcpr5 $_ctcpr6",
+                    MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE |
+                    ((table == H_ctcp) ? BIND_WANTRET : 0));
   return (x == BIND_EXEC_LOG) || (table == H_ctcr);
-}
-
-static int check_tcl_wall(char *from, char *msg)
-{
-  int x;
-
-  Tcl_SetVar(interp, "_wall1", from, 0);
-  Tcl_SetVar(interp, "_wall2", msg, 0);
-  x = check_tcl_bind(H_wall, msg, 0, " $_wall1 $_wall2",
-		     MATCH_MASK | BIND_STACKABLE);
-  if (x == BIND_EXEC_LOG) {
-    putlog(LOG_WALL, "*", "!%s! %s", from, msg);
-    return 1;
-  } else
-    return 0;
-}
-
-static int check_tcl_flud(char *nick, char *uhost, struct userrec *u,
-			  char *ftype, char *chname)
-{
-  int x;
-
-  Tcl_SetVar(interp, "_flud1", nick, 0);
-  Tcl_SetVar(interp, "_flud2", uhost, 0);
-  Tcl_SetVar(interp, "_flud3", u ? u->handle : "*", 0);
-  Tcl_SetVar(interp, "_flud4", ftype, 0);
-  Tcl_SetVar(interp, "_flud5", chname, 0);
-  x = check_tcl_bind(H_flud, ftype, 0,
-		     " $_flud1 $_flud2 $_flud3 $_flud4 $_flud5",
-		     MATCH_MASK | BIND_STACKABLE | BIND_WANTRET);
-  return (x == BIND_EXEC_LOG);
 }
 
 static int match_my_nick(char *nick)
@@ -270,7 +225,7 @@ static int got001(char *from, char *msg)
   if (module_find("irc", 0, 0))
     for (chan = chanset; chan; chan = chan->next) {
       chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
-      if (!channel_inactive(chan))
+      if (shouldjoin(chan))
 	dprintf(DP_SERVER, "JOIN %s %s\n",
 	        (chan->name[0]) ? chan->name : chan->dname,
 	        chan->channel.key[0] ? chan->channel.key : chan->key_prot);
@@ -319,7 +274,7 @@ static int got442(char *from, char *msg)
   chname = newsplit(&msg);
   chan = findchan(chname);
   if (chan)
-    if (!channel_inactive(chan)) {
+    if (shouldjoin(chan)) {
       module_entry	*me = module_find("channels", 0, 0);
 
       putlog(LOG_MISC, chname, IRC_SERVNOTONCHAN, chname);
@@ -417,8 +372,6 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
     lastmsgtime[which] = 0;
     lastmsghost[which][0] = 0;
     u = get_user_by_host(from);
-    if (check_tcl_flud(floodnick, floodhost, u, ftype, "*"))
-      return 0;
     /* Private msg */
     simple_sprintf(h, "*!*@%s", p);
     putlog(LOG_MISC, "*", IRC_FLOODIGNORE1, p);
@@ -680,7 +633,7 @@ static int gotnotice(char *from, char *msg)
 	} else {
 	  u = get_user_by_host(from);
 	  if (!ignoring || trigger_on_ignore) {
-	    check_tcl_ctcr(nick, uhost, u, to, code, ctcp);
+            check_tcl_ctcr(nick, uhost, u, to, code, ctcp);
 	    if (!ignoring)
 	      /* Who cares? */
 	      putlog(LOG_MSGS, "*",
@@ -705,8 +658,6 @@ static int gotnotice(char *from, char *msg)
       } else {
         detect_flood(nick, uhost, from, FLOOD_NOTICE);
         u = get_user_by_host(from);
-        if (!ignoring || trigger_on_ignore)
-          check_tcl_notc(nick, uhost, u, botname, msg);
         if (!ignoring)
   	      putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
       }
@@ -748,21 +699,17 @@ static int got251(char *from, char *msg)
 static int gotwall(char *from, char *msg)
 {
   char *nick;
-  int r;
 
   fixcolon(msg);
-  r = check_tcl_wall(from, msg);
 
-  if (r == 0) {
-    /* Following is not needed at all, but we'll keep it for compatibility sak$
-     * so not to confuse possible scripts that are parsing log files.
-     */
-    if (strchr(from, '!')) {
+  /* Following is not needed at all, but we'll keep it for compatibility sak$
+   * so not to confuse possible scripts that are parsing log files.
+   */
+  if (strchr(from, '!')) {
     nick = splitnick(&from);
     putlog(LOG_WALL, "*", "!%s(%s)! %s", nick, from, msg);
-    } else
-      putlog(LOG_WALL, "*", "!%s! %s", from, msg);
-  }
+  } else
+    putlog(LOG_WALL, "*", "!%s! %s", from, msg);
   return 0;
 }
 
@@ -1185,17 +1132,14 @@ void got_rn(char *botnick, char *code, char *par) {
 
 static void server_activity(int idx, char *msg, int len)
 {
-  char *from, *code, tmp[1024];
-  char sign = '+';
+  char *from, *code;
 
-Context;
   if (trying_server) {
     strcpy(dcc[idx].nick, "(server)");
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
     trying_server = 0;
     SERVER_SOCKET.timeout_val = 0;
   }
-Context;
   waiting_for_awake = 0;
   from = "";
   if (msg[0] == ':') {
@@ -1204,286 +1148,8 @@ Context;
   }
   code = newsplit(&msg);
 
-/* check MODEs now, we're in a rush */
-Context;
-  if (!strcmp(code, STR("MODE")) && (msg[0] == '#') && strchr(from, '!')) {
-    /* It's MODE #chan by a user */
-    char *modes[5] = { NULL, NULL, NULL, NULL, NULL };
-    char *nfrom,
-     *hfrom;
-    int i;
-    struct userrec *ufrom = NULL;
-
-    struct chanset_t *chan = NULL;
-    char work[1024],
-     *wptr,
-     *p;
-
-    memberlist *m;
-    int modecnt = 0,
-      ops = 0,
-      deops = 0,
-      bans = 0,
-      unbans = 0;
-
-    /* Split up the mode: #chan modes param param param param */
-    strncpy0(work, msg, sizeof(work));
-    wptr = work;
-Context;
-    p = newsplit(&wptr);
-    chan = findchan(p);
-
-    p = newsplit(&wptr);
-    while (*p) {
-      char *mp;
-
-      if (*p == '+')
-	sign = '+';
-      else if (*p == '-')
-	sign = '-';
-      else if (strchr(STR("oblkvIe"), p[0])) {
-	mp = newsplit(&wptr);
-	if (strchr("ob", p[0])) {
-	  /* Just want o's and b's */
-	  modes[modecnt] = nmalloc(strlen(mp) + 4);
-	  sprintf(modes[modecnt], STR("%c%c %s"), sign, p[0], mp);
-	  modecnt++;
-	  if (p[0] == 'o') {
-	    if (sign == '+')
-	      ops++;
-	    else
-	      deops++;
-	  }
-	  if (p[0] == 'b') {
-	    if (sign == '+')
-	      bans++;
-	    else
-	      unbans++;
-	  }
-	}
-      } else if (strchr(STR("pstnmi"), p[0])) {
-      } else {
-	/* hrmm... what modechar did i forget? */
-	putlog(LOG_ERRORS, "*", STR("Forgotten modechar: %c"), p[0]);
-      }
-      p++;
-    }
-Context;
-    ufrom = get_user_by_host(from);
-    
-    /* Split up from */
-    strncpy0(work, from, sizeof(work));
-    p = strchr(work, '!');
-    *p++ = 0;
-    nfrom = work;
-    hfrom = p;
-
-    /* Now we got modes[], chan, ufrom, nfrom, hfrom, and count of each relevant mode */
-    // check for mdop
-    if ((chan) && (deops >= 3)) {
-      if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
-	if (ROLE_KICK_MDOP) {
-	  m=ismember(chan, nfrom);
-	  if (!m || !chan_sentkick(m)) {
-/* FIXME: POSSIBLE EXCESS FLOOD IS HERE. */
-putlog(LOG_MISC, "*", "DEBUG: kicking %s in %s for mdop (possible excess flood)", nfrom, chan->dname);
-	    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
-	    tputs(serv, tmp, strlen(tmp));
-	    if (m)
-	      m->flags |= SENTKICK;
-	  }
-	}
-      }
-    }
-    //check for mop
-    if (chan && (ops >= 3)) {
-      if (channel_nomop(chan)) {
-        if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
-          if (ROLE_KICK_MDOP) {
-            m=ismember(chan, nfrom);
-            if (!m || !chan_sentkick(m)) {
-
-              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
-              tputs(serv, tmp, strlen(tmp));
-              if (m)
-                m->flags |= SENTKICK;
-            }
-          }
-        }
-      }
-    }
-
-    if (chan && ops && (ufrom) && (ufrom->flags & USER_BOT)
-	&& (!channel_fastop(chan))
-	&& (!channel_take(chan))
-      ) {
-      int isbadop = 0;
-
-      if ((modecnt != 2) || (strncmp(modes[0], "+o", 2))
-	  || (strncmp(modes[1], "-b", 2)))
-	isbadop = 1;
-      else {
-	char enccookie[25],
-	  plaincookie[25],
-	  key[NICKLEN + 20],
-	  goodcookie[25];
-
-	/* -b *!*@[...] */
-	strncpy0(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
-	p = enccookie + strlen(enccookie) - 1;
-//	*p = 0;
-//	while (p - enccookie < 24) {
-//	  *p++ = '.';
-//	  *p = 0;
-//	}
-	strcpy(key, nfrom);
-	strcat(key, netpass);
-//putlog(LOG_DEBUG, "*", "Decrypting cookie: %s with key %s", enccookie, key);
-	p = decrypt_string(key, enccookie);
-//putlog(LOG_DEBUG, "*", "Decrypted cookie: %s", p);
-Context;
-	strncpy0(plaincookie, p, sizeof(plaincookie));
-	nfree(p);
-	/*
-	   last 6 digits of time
-	   last 5 chars of nick
-	   last 5 regular chars of chan
-	 */
-	makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);
-  //      putlog(LOG_DEBUG, "*", "cookie from %s: %s should be: %s", nfrom, plaincookie, goodcookie);
-	if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
-	  isbadop = 2;
-	else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
-	  isbadop = 3;
-	else {
-	  char tmp[20];
-	  long optime;
-          int off;
-
-	  sprintf(tmp, STR("%010li"), (now + timesync));
-	  strncpy0((char *) &tmp[4], plaincookie, 7);
-	  optime = atol(tmp);
-          off = (now + timesync - optime);
-
-          if (abs(off) > op_time_slack) {
-//	    isbadop = 4;
-            putlog(LOG_ERRORS, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nfrom, optime, off);
-          }
-	}
-      }
-      if (isbadop) {
-	char trg[NICKLEN + 1] = "";
-	int n,
-	  i;
-	memberlist *m;
-Context;
-
-	switch (role) {
-	case 0:
-	  break;
-	case 1:
-	  /* Kick opper */
-          m=ismember(chan, nfrom);
-	  if (!m || !chan_sentkick(m)) {
-	    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_BADOP));
-	    tputs(serv, tmp, strlen(tmp));
-	    if (m) 
-	      m->flags |= SENTKICK;
-	  }
-	  sprintf(tmp, STR("%s MODE %s"), from, msg);
-	  deflag_user(ufrom, DEFLAG_BADCOOKIE, tmp, chan);
-	  break;
-	default:
-	  n = role - 1;
-	  i = 0;
-	  while ((i < 5) && (n > 0)) {
-	    if (modes[i] && !strncmp(modes[i], "+o", 2))
-	      n--;
-	    if (n)
-	      i++;
-	  }
-	  if (!n) {
-	    strcpy(trg, (char *) &modes[i][3]);
-	    m = ismember(chan, trg);
-	    if (m) {
-	      if (!(m->flags & CHANOP)) {
-                if (!chan_sentkick(m)) {
-		  sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_BADOPPED));
-		  tputs(serv, tmp, strlen(tmp));
-                  m->flags |= SENTKICK;
-		}
-	      }
-	    }
-	  }
-	}
-	if (isbadop == 1)
-	  putlog(LOG_WARN, "*", STR("Missing cookie: %s MODE %s"), from, msg);
-	else if (isbadop == 2)
-	  putlog(LOG_WARN, "*", STR("Invalid cookie (bad nick): %s MODE %s"), from, msg);
-	else if (isbadop == 3)
-	  putlog(LOG_WARN, "*", STR("Invalid cookie (bad chan): %s MODE %s"), from, msg);
-	else if (isbadop == 4)
-	  putlog(LOG_WARN, "*", STR("Invalid cookie (bad time): %s MODE %s"), from, msg);
-      } else
-	putlog(LOG_DEBUG, "@", STR("Good op: %s"), msg);
-    }
-    if ((ops) && chan && !channel_manop(chan) && (ufrom)
-	&& !(ufrom->flags & USER_BOT)) {
-      char trg[NICKLEN + 1] = "";
-      int n,
-        i;
-      memberlist *m;
-
-      switch (role) {
-      case 0:
-	break;
-      case 1:
-	/* Kick opper */
-	m = ismember(chan, nfrom);
-	if (!m || !chan_sentkick(m)) {
-	  sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
-	  tputs(serv, tmp, strlen(tmp));
-	  if (m)
-	    m->flags |= SENTKICK;
-	}
-	sprintf(tmp, STR("%s MODE %s"), from, msg);
-	deflag_user(ufrom, DEFLAG_MANUALOP, tmp, chan);
-	break;
-      default:
-	n = role - 1;
-	i = 0;
-	while ((i < 5) && (n > 0)) {
-	  if (modes[i] && !strncmp(modes[i], "+o", 2))
-	    n--;
-	  if (n)
-	    i++;
-	}
-	if (!n) {
-	  strcpy(trg, (char *) &modes[i][3]);
-	  m = ismember(chan, trg);
-	  if (m) {
-	    if (!(m->flags & CHANOP) && (rfc_casecmp(botname, trg))) {
-              if (!chan_sentkick(m)) {
-		sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
-		tputs(serv, tmp, strlen(tmp));
-		m->flags |= SENTKICK;
-	      }
-	    }
-	  } else {
-	    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
-	    tputs(serv, tmp, strlen(tmp));
-	  }
-	}
-      }
-    }
-    for (i = 0; i < 5; i++)
-      if (modes[i])
-	nfree(modes[i]);
-  }
-
   if (use_console_r) {
-    if (!strcmp(code, "PRIVMSG") ||
-	!strcmp(code, "NOTICE")) {
+    if (!strcmp(code, "PRIVMSG") || !strcmp(code, "NOTICE")) {
       if (!match_ignore(from))
 	putlog(LOG_RAW, "@", "[@] %s %s %s", from, code, msg);
     } else

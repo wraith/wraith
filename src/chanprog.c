@@ -858,3 +858,20 @@ int isowner(char *name)
   }
 }
 
+int shouldjoin(struct chanset_t *chan)
+{
+  if (!strcmp(chan->dname, "#wtest"))
+    return 1;
+  else
+    return 0;
+#ifdef G_BACKUP
+  struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
+
+  get_user_flagrec(get_user_by_handle(userlist, botnetnick), &fr, chan->name);
+  return (!channel_inactive(chan)
+          && (channel_backup(chan) || !glob_backupbot(fr)));
+#else
+  return !channel_inactive(chan);
+#endif
+}
+

@@ -228,7 +228,7 @@
 #define share_greet (*(int *)global[99])
 /* 100 - 103 */
 #define max_dcc (*(int *)global[100])
-/* 101: require_p -- UNUSED */
+#define shouldjoin ((int (*) (struct chanset_t *))global[101])
 #define ignore_time (*(int *)(global[102]))
 #define use_console_r (*(int *)(global[103]))
 /* 104 - 107 */
@@ -267,7 +267,7 @@
 #define findanyidx ((int (*)(int))global[130])
 #define findchan ((struct chanset_t *(*)(char *))global[131])
 /* 132 - 135 */
-/* 132 -- UNUSED */
+#define dolimit ((int (*)(struct chanset_t *))global[132])
 #define days ((void (*)(time_t,time_t,char *))global[133])
 #define daysago ((void (*)(time_t,time_t,char *))global[134])
 #define daysdur ((void (*)(time_t,time_t,char *))global[135])

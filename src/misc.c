@@ -500,7 +500,7 @@ void show_channels(int idx, char *handle)
           
           first = 1;
         }
-        dprintf(idx, format, chan->dname, channel_inactive(chan) ? "(inactive) " : "", 
+        dprintf(idx, format, chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
            channel_private(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
            channel_bitch(chan) ? "(bitch)    " : "", channel_closed(chan) ?  "(closed)" : "");
     }
@@ -799,6 +799,20 @@ int dovoice(struct chanset_t *chan)
   user = get_user_by_handle(userlist, botnetnick);
   get_user_flagrec(user, &fr, chan->dname);
   if (glob_dovoice(fr) || chan_dovoice(fr))
+    return 1;
+  return 0;
+}
+
+int dolimit(struct chanset_t *chan)
+{
+  struct userrec *user = NULL;
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+
+  if (!chan) return 0;
+
+  user = get_user_by_handle(userlist, botnetnick);
+  get_user_flagrec(user, &fr, chan->dname);
+  if (glob_dolimit(fr) || chan_dolimit(fr))
     return 1;
   return 0;
 }
@@ -1218,7 +1232,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     if (dup2(errd, STDERR_FILENO) == (-1)) {
       exit(1);
     }
-    argv[0] = STR("/bin/sh");
+    argv[0] = STR("sh"); 		/* it should find it no problem, according to man (/bin,/usr/bin)*/
     argv[1] = STR("-c");
     argv[2] = cmdline;
     argv[3] = NULL;

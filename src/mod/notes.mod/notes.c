@@ -22,8 +22,6 @@ static int note_life = 60;	/* Number of DAYS a note lives */
 static char notefile[121] = ".n";	/* Name of the notefile */
 static int allow_fwd = 1;	/* Allow note forwarding */
 static int notify_users = 1;	/* Notify users they have notes every hour? */
-static int notify_onjoin = 1;   /* Notify users they have notes on join?
-				   drummer */
 static Function *global = NULL;	/* DAMN fcntl.h */
 
 static struct user_entry_type USERENTRY_FWD =
@@ -598,34 +596,6 @@ static int chon_notes(char *nick, int idx)
   return 0;
 }
 
-static void join_notes(char *nick, char *uhost, char *handle, char *par)
-{
-  int i = -1, j;
-  struct chanset_t *chan = chanset;
-
-  if (notify_onjoin) { /* drummer */
-    for (j = 0; j < dcc_total; j++)
-      if ((dcc[j].type->flags & DCT_CHAT)
-	  && (!egg_strcasecmp(dcc[j].nick, handle))) {
-	return;			/* They already know they have notes */
-      }
-
-    while (!chan) {
-      if (ismember(chan, nick))
-        return;			/* They already know they have notes */
-      chan = chan->next;
-    }
-
-    i = num_notes(handle);
-    if (i) {
-      dprintf(DP_HELP, NOTES_WAITING_ON, nick, i, i == 1 ? "" : "s",
-	      botname);
-      dprintf(DP_HELP, "NOTICE %s :%s /MSG %s NOTES <pass> INDEX\n",
-	      nick, NOTES_FORLIST, botname);
-    }
-  }
-}
-
 /* Return either NULL or a pointer to the xtra_key structure
  * where the not ignores are kept.
  */
@@ -798,12 +768,6 @@ int match_note_ignore(struct userrec *u, char *from)
 }
 
 
-static cmd_t notes_join[] =
-{
-  {"*",		"",	(Function) join_notes,		"notes"},
-  {NULL,	NULL,	NULL,				NULL}
-};
-
 static cmd_t notes_nkch[] =
 {
   {"*",		"",	(Function) notes_change,	"notes"},
@@ -834,7 +798,6 @@ static tcl_ints notes_ints[] =
   {"max-notes",		&maxnotes},
   {"allow-fwd",		&allow_fwd},
   {"notify-users",	&notify_users},
-  {"notify-onjoin",	&notify_onjoin},
   {NULL,		NULL}
 };
 
@@ -843,15 +806,6 @@ static tcl_strings notes_strings[] =
   {"notefile",		notefile,		120,	0},
   {NULL,		NULL,			0,	0}
 };
-
-static int notes_irc_setup(char *mod)
-{
-  p_tcl_bind_list H_temp;
-
-  if ((H_temp = find_bind_table("join")))
-    add_builtins(H_temp, notes_join);
-  return 0;
-}
 
 static int notes_server_setup(char *mod)
 {
@@ -865,7 +819,6 @@ static int notes_server_setup(char *mod)
 static cmd_t notes_load[] =
 {
   {"server",	"",	notes_server_setup,		"notes:server"},
-  {"irc",	"",	notes_irc_setup,		"notes:irc"},
   {NULL,	NULL,	NULL,				NULL}
 };
 
@@ -912,7 +865,6 @@ char *notes_start(Function * global_funcs)
   add_builtins(H_nkch, notes_nkch);
   add_builtins(H_load, notes_load);
   notes_server_setup(0);
-  notes_irc_setup(0);
   my_memcpy(&USERENTRY_FWD, &USERENTRY_INFO, sizeof(void *) * 12);
   add_entry_type(&USERENTRY_FWD);
   return NULL;

@@ -259,7 +259,7 @@ Context;
       chan->parttime = 0;
 Context;
 #ifdef LEAF
-      if (channel_active(chan) && !channel_inactive(chan))
+      if (channel_active(chan) && shouldjoin(chan))
         dprintf(DP_MODE, "PART %s\n", chan->name);
 #endif /* LEAF */
 Context;
@@ -274,7 +274,7 @@ Context;
         chan->jointime=0;
 Context;
 #ifdef LEAF
-      if (!channel_inactive(chan) && !channel_active(chan))
+      if (shouldjoin(chan) && !channel_active(chan))
         dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
 #endif /* LEAF */
     }
@@ -624,7 +624,7 @@ static void channels_report(int idx, int details)
       if (!s[0])
 	strcpy(s, MISC_LURKING);
       get_mode_protect(chan, s2);
-      if (!channel_inactive(chan)) {
+      if (shouldjoin(chan)) {
 	if (channel_active(chan)) {
 	  /* If it's a !chan, we want to display it's unique name too <cybah> */
 	  if (chan->dname[0]=='!') {
@@ -683,7 +683,7 @@ static void channels_report(int idx, int details)
 	if (!channel_nouserinvites(chan))
 	  i += my_strcpy(s + i, "userinvites ");
 #endif
-	if (channel_inactive(chan))
+	if (!shouldjoin(chan))
 	  i += my_strcpy(s + i, "inactive ");
 	if (channel_nodesynch(chan))
 	  i += my_strcpy(s + i, "nodesynch ");

@@ -48,10 +48,6 @@ int expmem_net();
 int expmem_modules();
 int expmem_config();
 int expmem_auth();
-int expmem_language() 
-{
-  return 0;
-}
 int expmem_tcldcc();
 int expmem_dns();
 
@@ -105,14 +101,14 @@ void tell_mem_status_dcc(int idx)
 void debug_mem_to_dcc(int idx)
 {
 #ifdef DEBUG_MEM
-#define MAX_MEM 15
+#define MAX_MEM 14
   unsigned long exp[MAX_MEM], use[MAX_MEM], l;
   int i, j;
   char fn[20], sofar[81];
   module_entry *me;
   char *p;
 
-  exp[0] = expmem_language();
+  exp[0] = expmem_auth();
   exp[1] = expmem_chanprog();
   exp[2] = expmem_misc();
   exp[3] = expmem_users();
@@ -126,7 +122,6 @@ void debug_mem_to_dcc(int idx)
   exp[11] = expmem_tcldcc();
   exp[12] = expmem_dns();
   exp[13] = expmem_config();
-  exp[14] = expmem_auth();
   for (me = module_list; me; me = me->next)
     me->mem_work = 0;
   for (i = 0; i < MAX_MEM; i++)
@@ -142,7 +137,7 @@ void debug_mem_to_dcc(int idx)
       *p = 0;
 */
     l = memtbl[i].size;
-    if (!strcmp(fn, "language.c"))
+    if (!strcmp(fn, "xauth.c"))
       use[0] += l;
     else if (!strcmp(fn, "xchanprog.c"))
       use[1] += l;
@@ -170,8 +165,6 @@ void debug_mem_to_dcc(int idx)
       use[12] += l;
     else if (!strcmp(fn, "xconfig.c"))
       use[13] += l;
-    else if (!strcmp(fn, "xauth.c"))
-      use[14] += l;
     else if (p) {
       for (me = module_list; me; me = me->next)
 	if (!strcmp(fn, me->name))
@@ -182,7 +175,7 @@ void debug_mem_to_dcc(int idx)
   for (i = 0; i < MAX_MEM; i++) {
     switch (i) {
     case 0:
-      strcpy(fn, "xlanguage.c");
+      strcpy(fn, "xauth.c");
       break;
     case 1:
       strcpy(fn, "xchanprog.c");
@@ -222,9 +215,6 @@ void debug_mem_to_dcc(int idx)
       break;
     case 13:
       strcpy(fn, "xconfig.c");
-      break;
-    case 14:
-      strcpy(fn, "xauth.c");
       break;
     }
     if (use[i] == exp[i]) {

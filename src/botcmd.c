@@ -335,7 +335,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
   putlog(LOG_BOTS, "*", "#%s# who", realnick);
   strcpy(s, "Channels: ");
   for (c = chanset; c; c = c->next)
-    if (!channel_secret(c) && !channel_inactive(c)) {
+    if (!channel_secret(c) && shouldjoin(c)) {
       l = strlen(c->name);
       if (i + l < 1021) {
 	if (i > 10)

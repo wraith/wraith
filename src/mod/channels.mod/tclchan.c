@@ -77,7 +77,7 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement(irp, "+dontkickops");
   else
     Tcl_AppendElement(irp, "-dontkickops");
-  if (chan->status& CHAN_INACTIVE)
+  if (chan->status & CHAN_INACTIVE)
     Tcl_AppendElement(irp, "+inactive");
   else
     Tcl_AppendElement(irp, "-inactive");
@@ -723,10 +723,10 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
   if (protect_readonly || loading) {
     if (((old_status ^ chan->status) & CHAN_INACTIVE) &&
 	module_find("irc", 0, 0)) {
-      if (channel_inactive(chan) &&
+      if (!shouldjoin(chan) &&
 	  (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
 	dprintf(DP_SERVER, "PART %s\n", chan->name);
-      if (!channel_inactive(chan) &&
+      if (shouldjoin(chan) &&
 	  !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
 	dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
 					   chan->name : chan->dname,
@@ -1050,7 +1050,7 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
   }
   Tcl_Free((char *) item);
 #ifdef LEAF
-  if (join && !channel_inactive(chan) && module_find("irc", 0, 0))
+  if (join && shouldjoin(chan) && module_find("irc", 0, 0))
     dprintf(DP_SERVER, "JOIN %s %s\n", chan->dname, chan->key_prot);
 #endif
   return ret;

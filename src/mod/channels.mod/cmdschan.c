@@ -1007,7 +1007,8 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
   chan->status &= ~CHAN_INACTIVE;
 #ifdef LEAF
-  dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
+  if (shouldjoin(chan)) 
+    dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
 #endif /* LEAF */
 }
 

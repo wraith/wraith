@@ -266,9 +266,10 @@ static void real_add_mode(struct chanset_t *chan,
   memberlist *mx;
   char s[21];
 
-Context;
   if (!me_op(chan))
     return;			/* No point in queueing the mode */
+
+putlog(LOG_DEBUG, "@", "add_mode for %s, %c%c %s", chan->dname, plus, mode, op);
 
   if (mode == 'o') {
     if (plus=='+')
@@ -458,7 +459,6 @@ static void got_op(struct chanset_t *chan, char *nick, char *from,
   int check_chan = 0;
   int snm = chan->stopnethack_mode;
 
-Context;
   m = ismember(chan, who);
   if (!m) {
     if (channel_pending(chan))
@@ -482,7 +482,6 @@ Context;
    * add_mode() doesn't get irritated.
    */
   m->flags |= CHANOP;
-  check_tcl_mode(nick, from, opu, chan->dname, "+o", who);
   /* Added new meaning of WASOP:
    * in mode binds it means: was he op before get (de)opped
    * (stupid IrcNet allows opped users to be opped again and
@@ -512,8 +511,6 @@ Context;
   } else if (reversing && !match_my_nick(who))
     add_mode(chan, '-', 'o', who);
   if (!nick[0] && me_op(chan) && !match_my_nick(who)) {
-
-Context;
     if (chk_deop(victim, chan)) {
       m->flags |= FAKEOP;
       add_mode(chan, '-', 'o', who);
@@ -570,7 +567,6 @@ static void got_deop(struct chanset_t *chan, char *nick, char *from,
    * add_mode() doesn't get irritated.
    */
   m->flags &= ~(CHANOP | SENTDEOP | FAKEOP);
-  check_tcl_mode(nick, from, opu, chan->dname, "-o", who);
   /* Check comments in got_op()  (drummer) */
   m->flags &= ~WASOP;
 
@@ -622,11 +618,7 @@ static void got_deop(struct chanset_t *chan, char *nick, char *from,
 
     chan->channel.do_opreq=1;
 //    request_op(chan);
-/* need
-    check_tcl_need(chan->dname, "op");
-    if (chan->need_op[0])
-      do_tcl("need-op", chan->need_op);
-*/
+/* need: op */
     if (!nick[0])
       putlog(LOG_MODES, chan->dname, "TS resync deopped me on %s :(",
 	     chan->dname);
@@ -883,35 +875,281 @@ static void got_uninvite(struct chanset_t *chan, char *nick, char *from,
   }
 }
 #endif
-static int gotmode(char *from, char *origmsg)
+
+static int gotmode(char *from, char *msg)
 {
-  char *nick, *ch, *op, *chg, *msg;
-  char s[UHOSTLEN], buf[511];
+  char *nick, *ch, *op, *chg;
+  char s[UHOSTLEN];
   char ms2[3];
   int z;
-  struct userrec *u, *my_u;
+  struct userrec *u;
   memberlist *m;
   struct chanset_t *chan;
-  struct flag_record my_fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
 
-Context;
-  strncpy(buf, origmsg, 510);
-  buf[510] = 0;
-  msg = buf;
   /* Usermode changes? */
   if (msg[0] && (strchr(CHANMETA, msg[0]) != NULL)) {
     ch = newsplit(&msg);
     if (match_my_nick(ch))
 	return 0;
-    chg = newsplit(&msg);
-    reversing = 0;
     chan = findchan(ch);
-Context;
     if (!chan) {
       putlog(LOG_MISC, "*", CHAN_FORCEJOIN, ch);
       dprintf(DP_SERVER, "PART %s\n", ch);
-    } else if (channel_active(chan) || channel_pending(chan)) {
-Context;
+      return 0;
+    }
+
+    /* let's pre-emptively check for mass op/deop, manual ops and cookieops */
+
+    if (strchr(from, '!')) {
+      char *modes[5] = { NULL, NULL, NULL, NULL, NULL };
+      char tmp[1024], sign = '+', *nfrom, *hfrom, *wptr, *p, work[1024];
+      struct userrec *ufrom = NULL;
+      memberlist *m;
+      int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
+
+      /* Split up the mode: #chan modes param param param param */
+      strncpy0(work, msg, sizeof(work));
+      wptr = work;
+      p = newsplit(&wptr);
+      while (*p) {
+        char *mp;
+        if (*p == '+')
+          sign = '+';
+        else if (*p == '-')
+          sign = '-';
+        else if (strchr(STR("oblkvIe"), p[0])) {
+          mp = newsplit(&wptr);
+          if (strchr("ob", p[0])) {
+            /* Just want o's and b's */
+            modes[modecnt] = nmalloc(strlen(mp) + 4);
+            sprintf(modes[modecnt], STR("%c%c %s"), sign, p[0], mp);
+            modecnt++;
+            if (p[0] == 'o') {
+              if (sign == '+')
+                ops++;
+              else
+                deops++;
+            }
+            if (p[0] == 'b') {
+              if (sign == '+')
+                bans++;
+              else
+                unbans++;
+            }
+          }
+        } else if (strchr(STR("pstnmi"), p[0])) {
+        } else {
+          /* hrmm... what modechar did i forget? */
+          putlog(LOG_ERRORS, "*", STR("Forgotten modechar in irc:gotmode: %c"), p[0]);
+        }
+        p++;
+      }
+
+      /* Split up from */
+      ufrom = get_user_by_host(from);
+      strncpy0(work, from, sizeof(work));
+      p = strchr(work, '!');
+      *p++ = 0;
+      nfrom = work; 		/* nick */
+      hfrom = p; 		/* host */
+
+      /* Now we got modes[], chan, ufrom, nfrom, hfrom, and count of each relevant mode */
+
+      /* check for mdop */
+      if ((chan) && (deops >= 3)) {
+        if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
+          if (ROLE_KICK_MDOP) {
+            m=ismember(chan, nfrom);
+            if (!m || !chan_sentkick(m)) {
+/* FIXME: A COMMON EXCESS FLOOD */
+              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
+              tputs(servi, tmp, strlen(tmp));
+              if (m)
+                m->flags |= SENTKICK;
+            }
+          }
+        }
+      }
+
+      /* check for mop */
+      if (chan && (ops >= 3)) {
+        if (channel_nomop(chan)) {
+          if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
+            if (ROLE_KICK_MDOP) {
+              m=ismember(chan, nfrom);
+              if (!m || !chan_sentkick(m)) {
+                sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+                tputs(servi, tmp, strlen(tmp));
+                if (m)
+                  m->flags |= SENTKICK;
+              }
+            }
+          }
+        }
+      }
+
+      if (chan && ops && (ufrom) && (ufrom->flags & USER_BOT) && !channel_fastop(chan) && !channel_take(chan)) {
+        int isbadop = 0;
+        if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) ||
+            (strncmp(modes[1], "-b", 2)))
+          isbadop = 1;
+        else {
+          char enccookie[25], plaincookie[25], key[NICKLEN + 20], goodcookie[25];
+
+          /* -b *!*@[...] */
+          strncpy0(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
+          p = enccookie + strlen(enccookie) - 1;
+/* old shit 
+          *p = 0;
+          while (p - enccookie < 24) {
+            *p++ = '.';
+            *p = 0;
+          }
+*/
+          strcpy(key, nfrom);
+          strcat(key, netpass);
+/* putlog(LOG_DEBUG, "*", "Decrypting cookie: %s with key %s", enccookie, key); */
+          p = decrypt_string(key, enccookie);
+/* putlog(LOG_DEBUG, "*", "Decrypted cookie: %s", p); */
+          strncpy0(plaincookie, p, sizeof(plaincookie));
+          nfree(p);
+          /*
+           * last 6 digits of time
+           * last 5 chars of nick
+           * last 5 regular chars of chan
+           */
+          makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);
+/* putlog(LOG_DEBUG, "*", "cookie from %s: %s should be: %s", nfrom, plaincookie, goodcookie); */
+          if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
+            isbadop = 2;
+          else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
+            isbadop = 3;
+          else {
+            char ltmp[20];
+            long optime;
+            int off;
+
+            sprintf(ltmp, STR("%010li"), (now + timesync));
+            strncpy0((char *) &ltmp[4], plaincookie, 7);
+            optime = atol(ltmp);
+            off = (now + timesync - optime);
+
+            if (abs(off) > op_time_slack) {
+/*            isbadop = 4; */
+              putlog(LOG_ERRORS, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nfrom, optime, off);
+            }
+          }
+        }
+        if (isbadop) {
+          char trg[NICKLEN + 1] = "";
+
+          n = i = 0;
+          switch (role) {
+          case 0:
+            break;
+          case 1:
+            /* Kick opper */
+            m = ismember(chan, nfrom);
+            if (!m || !chan_sentkick(m)) {
+              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_BADOP));
+              tputs(servi, tmp, strlen(tmp));
+              if (m)
+                m->flags |= SENTKICK;
+            }
+            sprintf(tmp, STR("%s MODE %s"), from, msg);
+            deflag_user(ufrom, DEFLAG_BADCOOKIE, tmp, chan);
+            break;
+          default:
+            n = role - 1;
+            i = 0;
+            while ((i < 5) && (n > 0)) {
+              if (modes[i] && !strncmp(modes[i], "+o", 2))
+                n--;
+              if (n)
+                i++;
+            }
+            if (!n) {
+              strcpy(trg, (char *) &modes[i][3]);
+              m = ismember(chan, trg);
+              if (m) {
+                if (!(m->flags & CHANOP)) {
+                  if (!chan_sentkick(m)) {
+                    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_BADOPPED));
+                    tputs(servi, tmp, strlen(tmp));
+                    m->flags |= SENTKICK;
+                  }
+                }
+              }
+            }
+          }
+          if (isbadop == 1)
+            putlog(LOG_WARN, "*", STR("Missing cookie: %s MODE %s"), from, msg);
+          else if (isbadop == 2)
+            putlog(LOG_WARN, "*", STR("Invalid cookie (bad nick): %s MODE %s"), from, msg);
+          else if (isbadop == 3)
+            putlog(LOG_WARN, "*", STR("Invalid cookie (bad chan): %s MODE %s"), from, msg);
+          else if (isbadop == 4)
+            putlog(LOG_WARN, "*", STR("Invalid cookie (bad time): %s MODE %s"), from, msg);
+        } else
+          putlog(LOG_DEBUG, "@", STR("Good op: %s"), msg);
+      }
+      if ((ops) && chan && !channel_manop(chan) && (ufrom) &&
+          !(ufrom->flags & USER_BOT)) {
+        char trg[NICKLEN + 1] = "";
+        n = i = 0;
+
+        switch (role) {
+        case 0:
+          break;
+        case 1:
+          /* Kick opper */
+          m = ismember(chan, nfrom);
+          if (!m || !chan_sentkick(m)) {
+            sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+            tputs(servi, tmp, strlen(tmp));
+            if (m)
+              m->flags |= SENTKICK;
+          }
+          sprintf(tmp, STR("%s MODE %s"), from, msg);
+          deflag_user(ufrom, DEFLAG_MANUALOP, tmp, chan);
+          break;
+        default:
+          n = role - 1;
+          i = 0;
+          while ((i < 5) && (n > 0)) {
+            if (modes[i] && !strncmp(modes[i], "+o", 2))
+              n--;
+            if (n)
+              i++;
+          }
+          if (!n) {
+            strcpy(trg, (char *) &modes[i][3]);
+            m = ismember(chan, trg);
+            if (m) {
+              if (!(m->flags & CHANOP) && (rfc_casecmp(botname, trg))) {
+                if (!chan_sentkick(m)) {
+                  sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+                  tputs(servi, tmp, strlen(tmp));
+                  m->flags |= SENTKICK;
+                }
+              }
+            } else {
+              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+              tputs(servi, tmp, strlen(tmp));
+            }
+          }
+        }
+      }
+      for (i = 0; i < 5; i++)
+        if (modes[i])
+          nfree(modes[i]);
+    }
+
+    /* Now do the modes again, this time throughly... */
+    chg = newsplit(&msg);
+    reversing = 0;
+
+    if (channel_active(chan) || channel_pending(chan)) {
       z = strlen(msg);
       if (msg[--z] == ' ')	/* I hate cosmetic bugs :P -poptix */
 	msg[z] = 0;
@@ -919,10 +1157,7 @@ Context;
 	     ch, chg, msg, from);
       u = get_user_by_host(from);
       get_user_flagrec(u, &user, ch);
-      my_u = get_user_by_handle(userlist, botnetnick);
-      get_user_flagrec(my_u, &my_fr, ch);
       nick = splitnick(&from);
-Context;
       m = ismember(chan, nick);
       if (m)
 	m->last = now;
@@ -946,7 +1181,6 @@ Context;
       }
       ms2[0] = '+';
       ms2[2] = 0;
-Context;
       while ((ms2[1] = *chg)) {
 	int todo = 0;
 
@@ -1026,7 +1260,6 @@ Context;
 	  if ((!nick[0]) && (bounce_modes))
 	    reversing = 1;
 	  if (ms2[0] == '-') {
-	    check_tcl_mode(nick, from, u, chan->dname, ms2, "");
 	    if (channel_active(chan)) {
 	      if ((reversing) && (chan->channel.maxmembers != 0)) {
 		simple_sprintf(s, "%d", chan->channel.maxmembers);
@@ -1035,7 +1268,7 @@ Context;
 		simple_sprintf(s, "%d", chan->limit_prot);
 		add_mode(chan, '+', 'l', s);
 	      } else {
-                if ((chan_dolimit(my_fr) || glob_dolimit(my_fr)) && 
+                if (dolimit(chan) && 
                    (!chan_master(user) && !glob_master(user) && !glob_bot(user))) {
                   if (chan->limitraise) {
                     chan->channel.maxmembers = 0;		/* set this to 0 so a new limit is generated */
@@ -1051,8 +1284,6 @@ Context;
 	    if (op == '\0')
 	      break;
 	    chan->channel.maxmembers = atoi(op);
-	    check_tcl_mode(nick, from, u, chan->dname, ms2,
-			   int_to_base10(chan->channel.maxmembers));
 	    if (channel_pending(chan))
 	      break;
 	    if (((reversing) &&
@@ -1068,7 +1299,7 @@ Context;
 	      add_mode(chan, '+', 'l', s);
             } 
             if (!glob_bot(user))
-              if ((chan_dolimit(my_fr) || glob_dolimit(my_fr)) && (!chan_master(user) && !glob_master(user)))
+              if (dolimit(chan) && (!chan_master(user) && !glob_master(user)))
                 if (chan->limitraise)
                   raise_limit(chan);
 
@@ -1084,7 +1315,6 @@ Context;
 	  if (op == '\0') {
 	    break;
 	  }
-	  check_tcl_mode(nick, from, u, chan->dname, ms2, op);
 	  if (ms2[0] == '+') {
 	    my_setkey(chan, op);
 	    if (channel_active(chan))
@@ -1135,7 +1365,6 @@ Context;
               }
  	      m->flags &= ~SENTVOICE;
  	      m->flags |= CHANVOICE;
- 	      check_tcl_mode(nick, from, u, chan->dname, ms2, op);
               if (channel_active(chan) && dovoice(chan)) {
                 if (dv || chk_devoice(victim, chan)) {
 		  add_mode(chan, '-', 'v', op);
@@ -1146,7 +1375,6 @@ Context;
 	    } else if (ms2[0] == '-') {
 	      m->flags &= ~SENTDEVOICE;
 	      m->flags &= ~CHANVOICE;
-	      check_tcl_mode(nick, from, u, chan->dname, ms2, op);
               if (channel_active(chan) && dovoice(chan)) {
                 /* revoice +v users */
                 if (chk_voice(victim, chan)) {
@@ -1171,7 +1399,6 @@ Context;
 	case 'b':
 	  op = newsplit(&msg);
 	  fixcolon(op);
-	  check_tcl_mode(nick, from, u, chan->dname, ms2, op);
 	  if (ms2[0] == '+')
 	    got_ban(chan, nick, from, op);
 	  else
@@ -1181,7 +1408,6 @@ Context;
 	case 'e':
 	  op = newsplit(&msg);
 	  fixcolon(op);
-	  check_tcl_mode(nick, from, u, chan->dname, ms2, op);
 	  if (ms2[0] == '+')
 	    got_exempt(chan, nick, from, op);
 	  else
@@ -1190,7 +1416,6 @@ Context;
 	case 'I':
 	  op = newsplit(&msg);
 	  fixcolon(op);
-	  check_tcl_mode(nick, from, u, chan->dname, ms2, op);
 	  if (ms2[0] == '+')
 	    got_invite(chan, nick, from, op);
 	  else
@@ -1199,7 +1424,6 @@ Context;
 	}
 #endif
 	if (todo) {
-	  check_tcl_mode(nick, from, u, chan->dname, ms2, "");
 	  if (ms2[0] == '+')
 	    chan->channel.mode |= todo;
 	  else
@@ -1217,7 +1441,6 @@ Context;
 	}
 	chg++;
       }
-Context;
       if (chan->channel.do_opreq)
         request_op(chan);
       if (!me_op(chan) && !nick[0])

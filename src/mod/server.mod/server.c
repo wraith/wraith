@@ -80,7 +80,7 @@ static int kick_method;
 static int optimize_kicks;
 
 
-static p_tcl_bind_list H_wall, H_raw, H_notc, H_msgm, H_msg, H_flud,
+static p_tcl_bind_list H_raw, H_msgm, H_msg, 
 		       H_ctcr, H_ctcp;
 #ifdef S_AUTH
 static p_tcl_bind_list H_msgc;
@@ -1920,7 +1920,7 @@ static Function server_table[] =
   (Function) & flud_ctcp_time,	/* int					*/
   /* 12 - 15 */
   (Function) match_my_nick,
-  (Function) check_tcl_flud,
+  (Function) 0,
   (Function) NULL,		/* fixfrom - moved to the core (drummer) */
   (Function) & answer_ctcp,	/* int					*/
   /* 16 - 19 */
@@ -1939,19 +1939,19 @@ static Function server_table[] =
   (Function) & min_servs,	/* int					*/
   (Function) & H_raw,		/* p_tcl_bind_list			*/
   /* 28 - 31 */
-  (Function) & H_wall,		/* p_tcl_bind_list			*/
+  (Function) 0,
   (Function) & H_msg,		/* p_tcl_bind_list			*/
   (Function) & H_msgm,		/* p_tcl_bind_list			*/
-  (Function) & H_notc,		/* p_tcl_bind_list			*/
+  (Function) 0,
   /* 32 - 35 */
-  (Function) & H_flud,		/* p_tcl_bind_list			*/
+  (Function) 0,
   (Function) & H_ctcp,		/* p_tcl_bind_list			*/
   (Function) & H_ctcr,		/* p_tcl_bind_list			*/
   (Function) ctcp_reply,
   /* 36 - 38 */
   (Function) get_altbotnick,	/* char *				*/
   (Function) & nick_len,	/* int					*/
-  (Function) check_tcl_notc,
+  (Function) 0,
   (Function) & server_lag, /* int */
   (Function) & curserv,
   (Function) cursrvname,
@@ -2060,15 +2060,12 @@ char *server_start(Function *global_funcs)
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_nicklen, NULL);
 
-  H_wall = add_bind_table("wall", HT_STACKABLE, server_2char);
   H_raw = add_bind_table("raw", HT_STACKABLE, server_raw);
-  H_notc = add_bind_table("notc", HT_STACKABLE, server_5char);
   H_msgm = add_bind_table("msgm", HT_STACKABLE, server_msg);
 #ifdef S_AUTH
   H_msgc = add_bind_table("msgc", 0, server_msgc);
 #endif /* S_AUTH */
   H_msg = add_bind_table("msg", 0, server_msg);
-  H_flud = add_bind_table("flud", HT_STACKABLE, server_5char);
   H_ctcr = add_bind_table("ctcr", HT_STACKABLE, server_6char);
   H_ctcp = add_bind_table("ctcp", HT_STACKABLE, server_6char);
   add_builtins(H_raw, my_raw_binds);

@@ -45,7 +45,7 @@ void *_user_malloc(int size, const char *file, int line)
   const char	*p;
 
   p = strrchr(file, '/');
-  simple_sprintf(x, "userrec.c:%s", p ? p + 1 : file);
+  simple_sprintf(x, "xuserrec.c:%s", p ? p + 1 : file);
   return n_malloc(size, x, line);
 #else
   return nmalloc(size);
@@ -59,7 +59,7 @@ void *_user_realloc(void *ptr, int size, const char *file, int line)
   const char	*p;
 
   p = strrchr(file, '/');
-  simple_sprintf(x, "userrec.c:%s", p ? p + 1 : file);
+  simple_sprintf(x, "xuserrec.c:%s", p ? p + 1 : file);
   return n_realloc(ptr, size, x, line);
 #else
   return nrealloc(ptr, size);

@@ -23,7 +23,6 @@
 #define flud_ctcp_time (*(int*)(server_funcs[11]))
 /* 12 - 15 */
 #define match_my_nick ((int(*)(char *))server_funcs[12])
-#define check_tcl_flud ((int (*)(char *,char *,struct userrec *,char *,char *))server_funcs[13])
 /* #define fixfrom ((void (*)(char *))server_funcs[14]) -- moved to core */
 #define answer_ctcp (*(int *)(server_funcs[15]))
 /* 16 - 19 */
@@ -42,19 +41,15 @@
 #define min_servs (*(int *)(server_funcs[26]))
 /* 27 - 30 */
 #define H_raw (*(p_tcl_bind_list *)(server_funcs[27]))
-#define H_wall (*(p_tcl_bind_list *)(server_funcs[28]))
 #define H_msg (*(p_tcl_bind_list *)(server_funcs[29]))
 #define H_msgm (*(p_tcl_bind_list *)(server_funcs[30]))
 /* 31 - 34 */
-#define H_notc (*(p_tcl_bind_list *)(server_funcs[31]))
-#define H_flud (*(p_tcl_bind_list *)(server_funcs[32]))
 #define H_ctcp (*(p_tcl_bind_list *)(server_funcs[33]))
 #define H_ctcr (*(p_tcl_bind_list *)(server_funcs[34]))
 /* 35 - 38 */
 #define ctcp_reply ((char *)(server_funcs[35]))
 #define get_altbotnick ((char *(*)(void))(server_funcs[36]))
 #define nick_len (*(int *)(server_funcs[37]))
-#define check_tcl_notc ((int (*)(char *,char *,struct userrec *,char *,char *))server_funcs[38])
 #define server_lag (*(int *)(server_funcs[39]))
 #define curserv (*(int *)(server_funcs[40))
 #define cursrvname ((char *)(server_funcs[41]))

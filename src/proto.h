@@ -114,6 +114,7 @@ void rmspace(char *s);
 void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
+int shouldjoin(struct chanset_t *);
 
 /* cmds.c */
 int check_dcc_attrs(struct userrec *, int);
@@ -256,6 +257,7 @@ int my_strcpy(char *, char *);
 void putlog EGG_VARARGS(int, arg1);
 int ischanhub();
 int dovoice(struct chanset_t *);
+int dolimit(struct chanset_t *);
 void maskhost(const char *, char *);
 char *stristr(char *, char *);
 void splitc(char *, char *, char);

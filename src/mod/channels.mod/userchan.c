@@ -1490,13 +1490,10 @@ int checklimit = 1;
 void check_limitraise() {
   int i=0;
   struct chanset_t * chan;
-  struct userrec *u;
-  u=get_user_by_handle(userlist, botnetnick);
   for (chan=chanset;chan;chan=chan->next,i++) {
     if (i % 2 == checklimit) {
       if (chan->limitraise) {
-        get_user_flagrec(u, &user, chan->dname);
-        if (glob_dolimit(user) || (chan_dolimit(user)))
+        if (dolimit(chan)) 
           raise_limit(chan);
       }
     }
