@@ -42,7 +42,7 @@ OWNEREMAIL <some@email.com>
 /* HUB <nick host port host> 
  * Hubs are ranked by the order they are listed (previously was hublevel in settings.c)
  * nick: nick of hub
- * host: hostname or ip of hub
+ * host: hostname or ip of hub (A 'dynamic' OR 'changeable' HOSTNAME IS RECOMMENDED)
  * port: port the hub listens on
  * ident: ident of the hub (list as many as needed) 
  */
