@@ -683,8 +683,15 @@ int updatebin(int idx, char *par, int secs)
   egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
   copyfile(binname, old);
 
-  write_settings(path, -1, 1);	/* re-write the binary with our data */
-  
+  write_settings(path, -1, 0);	/* re-write the binary with our packdata */
+
+  Tempfile *conffile = new Tempfile("conf");
+
+  if (writeconf(NULL, conffile->f, CONF_ENC)) {
+    putlog(LOG_MISC, "*", "Failed to write temporary config file for update.");
+    delete conffile;
+    return 1;
+  }
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
@@ -694,9 +701,24 @@ int updatebin(int idx, char *par, int secs)
   if (i == -1 || WEXITSTATUS(i) != 2) {
     dprintf(idx, "Couldn't restart new binary (error %d)\n", i);
     putlog(LOG_MISC, "*", "Couldn't restart new binary (error %d)", i);
+    delete conffile;
     return i;
   }
 #endif /* !CYGWIN_HACKS */
+
+  /* now to send our config to the new binary */
+  egg_snprintf(testbuf, sizeof testbuf, "%s -4 %s", path, conffile->file);
+#ifndef CYGWIN_HACKS
+  putlog(LOG_DEBUG, "*", "Running for update conf: %s", testbuf);
+  i = system(testbuf);
+  delete conffile;
+  if (i == -1 || WEXITSTATUS(i) != 6) { /* 6 for successfull config read/write */
+    dprintf(idx, "Couldn't pass config to new binary (error %d)\n", i);
+    putlog(LOG_MISC, "*", "Couldn't pass config to new binary (error %d)", i);
+    return i;
+  }
+#endif /* !CYGWIN_HACKS */
+
 #ifdef CYGWIN_HACKS
   {
     size_t binsize = strlen(tmpdir) + 7 + 1;
