@@ -826,7 +826,7 @@ void channels_report(int idx, int details)
 	  i += my_strcpy(s + i, "nodesynch ");
         if (channel_closed(chan))
           i += my_strcpy(s + i, "closed ");
-        if (channel_take(chan))
+        if (have_take && channel_take(chan))
           i += my_strcpy(s + i, "take ");
         if (channel_voice(chan))
           i += my_strcpy(s + i, "voice ");

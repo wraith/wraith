@@ -525,9 +525,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       chan->status |= CHAN_CLOSED;
     else if (!strcmp(item[i], "-closed"))
       chan->status &= ~CHAN_CLOSED;
-    else if (!strcmp(item[i], "+take"))
+    else if (have_take && !strcmp(item[i], "+take"))
       chan->status |= CHAN_TAKE;
-    else if (!strcmp(item[i], "-take"))
+    else if (have_take && !strcmp(item[i], "-take"))
       chan->status &= ~CHAN_TAKE;
     else if (!strcmp(item[i], "+voice"))
       chan->status |= CHAN_VOICE;

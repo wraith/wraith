@@ -10,7 +10,7 @@ enum {
 
 extern int		role, default_flags, default_uflags,
 			updating;
-extern bool		use_stderr, backgrd, localhub, term_z, loading;
+extern bool		use_stderr, backgrd, localhub, term_z, loading, have_take;
 extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[];
 extern time_t		online_since, now;
 extern uid_t		myuid;

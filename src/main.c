@@ -73,6 +73,7 @@ bool 	localhub = 1; 		/* we set this to 0 if we get a -B */
 bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
 bool 	loading = 0;
+bool	have_take = 1;
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */

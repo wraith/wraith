@@ -1223,7 +1223,8 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_FLAG("protectops",	channel_protectops(chan));
     SHOW_FLAG("revenge",	channel_revenge(chan));
     SHOW_FLAG("revengebot",	channel_revengebot(chan));
-    SHOW_FLAG("take",		channel_take(chan));
+    if (have_take)
+      SHOW_FLAG("take",		channel_take(chan));
     SHOW_FLAG("voice",		channel_voice(chan));
     SHOW_FLAG("", 0);
     SHOW_FLAG("dynamicbans",	channel_dynamicbans(chan));
