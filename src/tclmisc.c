@@ -371,6 +371,8 @@ static int tcl_duration STDVAR
     tmp = (sec);
     sprintf(&s[strlen(s)], "%lu second%s", tmp, (tmp == 1) ? "" : "s");
   }
+  if (strlen(s) > 0 && s[strlen(s) - 1] == ' ')
+    s[strlen(s) - 1] = 0;
   Tcl_AppendResult(irp, s, NULL);
   return TCL_OK;
 }

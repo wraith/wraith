@@ -82,12 +82,16 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
       if (!quiet_reject)
 	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_DENYACCESS);
     } else if (u == u2) {
-      if (!quiet_reject)
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_RECOGNIZED);
+      /*
+       * NOTE: Checking quiet_reject *after* u_pass_match()
+       * verifies the password makes NO sense!
+       * (Broken since 1.3.0+bel17)  Bad Beldin! No Cookie!
+       *   -Toth  [July 30, 2003]
+       */
+      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_RECOGNIZED);
       return 1;
     } else if (u) {
-      if (!quiet_reject)
-	dprintf(DP_HELP, IRC_MISIDENT, nick, who, u->handle);
+      dprintf(DP_HELP, IRC_MISIDENT, nick, who, u->handle);
       return 1;
     } else {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);

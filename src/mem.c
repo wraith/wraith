@@ -325,7 +325,7 @@ void *n_realloc(void *ptr, int size, const char *file, int line)
     return n_malloc(size, file, line);
 
   x = (void *) realloc(ptr, size);
-  if (x == NULL) {
+  if (x == NULL && size > 0) {
     i = i;
     putlog(LOG_MISC, "*", "*** FAILED REALLOC %s (%d)", file, line);
     return NULL;

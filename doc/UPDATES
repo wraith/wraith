@@ -20,6 +20,7 @@
 + 9.Specifying ipv6 ip as last param in conf now supported.
 @ 10.Cmdline params -e/-d now except STDOUT as the outfile (echos to terminal).
 @ 11.Pscloak can be disabled by putting "!-" as the third line in the local conf.
+@ 12.Applied fixes for eggdrop1.6.15 from eggcvs.
 
 1.0.1
 ! 1.Fixed a cosmetic bug in show_channels

@@ -1027,7 +1027,6 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   time_t now2 = time(NULL);
 #endif
   struct tm *t;
-  t = 0;
   type = EGG_VARARGS_START(int, arg1, va);
   chname = va_arg(va, char *);
   format = va_arg(va, char *);
@@ -1035,8 +1034,8 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   if ((chname[0] == '*'))
     dohl = 1;
 #ifdef HUB
+  t = localtime(&now2);
   if (shtime) {
-    t = localtime(&now2);
     egg_strftime(stamp, sizeof(stamp) - 2, LOG_TS, t);
     strcat(stamp, " ");
    tsl = strlen(stamp);

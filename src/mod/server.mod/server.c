@@ -1234,7 +1234,7 @@ static int server_6char STDVAR
   Function F = (Function) cd;
   char x[20];
 
-  BADARGS(7, 7, " nick user@host handle desto/chan keyword/nick text");
+  BADARGS(7, 7, " nick user@host handle dest/chan keyword/nick text");
   CHECKVALIDITY(server_6char);
   egg_snprintf(x, sizeof x, "%d",
 	       F(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]));
@@ -1246,7 +1246,7 @@ static int server_5char STDVAR
 {
   Function F = (Function) cd;
 
-  BADARGS(6, 6, " nick user@host handle channel text");
+  BADARGS(6, 6, " nick user@host handle dest/channel text");
   CHECKVALIDITY(server_5char);
   F(argv[1], argv[2], argv[3], argv[4], argv[5]);
   return TCL_OK;
@@ -2052,7 +2052,7 @@ char *server_start(Function *global_funcs)
 
   H_wall = add_bind_table("wall", HT_STACKABLE, server_2char);
   H_raw = add_bind_table("raw", HT_STACKABLE, server_raw);
-  H_notc = add_bind_table("notc", HT_STACKABLE, server_6char);
+  H_notc = add_bind_table("notc", HT_STACKABLE, server_5char);
   H_msgm = add_bind_table("msgm", HT_STACKABLE, server_msg);
   H_msgc = add_bind_table("msgc", 0, server_msgc);
   H_msg = add_bind_table("msg", 0, server_msg);
