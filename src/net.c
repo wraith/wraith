@@ -737,7 +737,7 @@ int open_telnet(char *server, port_t port)
 #ifdef USE_IPV6
 int open_address_listen(IP addr, int af_def, port_t *port)
 #else
-int open_address_listen(IP addr, port_t int *port)
+int open_address_listen(IP addr, port_t *port)
 #endif /* USE_IPV6 */
  {
   int sock = 0;

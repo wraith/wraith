@@ -52,7 +52,6 @@
 #include "core_binds.h"
 
 #ifdef CYGWIN_HACKS
-#include <windows.h>
 #include <getopt.h>
 #endif /* CYGWIN_HACKS */
 
@@ -504,10 +503,9 @@ static void startup_checks() {
 #ifdef HUB
   egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
 #endif /* HUB */
-
 #ifdef CYGWIN_HACKS
   egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
-  enc =~ CONF_ENC;
+  enc = 0;
 #endif /* CYGWIN_HACKS */
 
   if (!can_stat(confdir())) {
@@ -568,8 +566,10 @@ static void startup_checks() {
     readconf(cfile, enc);
       
 #ifdef S_CONFEDIT
+#ifndef CYGWIN_HACKS
   if (do_confedit)
     confedit(cfile);		/* this will exit() */
+#endif /* !CYGWIN_HACKS */
 #endif /* S_CONFEDIT */
   parseconf();
 
@@ -682,7 +682,10 @@ int tracecheck_breakpoint() {
 int main(int argc, char **argv)
 {
   egg_timeval_t egg_timeval_now;
-
+//  char *out = NULL;
+//printf("ret: %d\n", system("c:/wraith/leaf.exe"));
+//  shell_exec("c:\\windows\\notepad.exe", NULL, &out, &out);
+//printf("out: %s\n", out);
   setlimits();
   init_debug();
   init_signals();		

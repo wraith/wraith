@@ -49,6 +49,33 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#ifdef WIN32
+int
+my_system(const char *run)
+{
+  int ret = -1;
+  PROCESS_INFORMATION pinfo;
+  STARTUPINFO sinfo;
+
+  memset(&sinfo, 0, sizeof(STARTUPINFO));
+  sinfo.cb = sizeof(sinfo);
+
+  sinfo.wShowWindow = SW_HIDE;
+  sinfo.dwFlags |= STARTF_USESTDHANDLES;
+  sinfo.hStdInput =
+  sinfo.hStdOutput =
+  sinfo.hStdError =
+
+  ret =
+    CreateProcess(NULL, (char *) run, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS | DETACHED_PROCESS, NULL, NULL,
+                  &sinfo, &pinfo);
+
+  if (ret == 0)
+    return -1;
+  else
+    return 0;
+}
+#endif /* WIN32 */
 
 int clear_tmp()
 {

@@ -30,6 +30,9 @@
 #include "chan.h"
 #include "compat/compat.h"
 
+#ifdef CYGWIN_HACKS
+#  include <windows.h>
+#endif /* CYGWIN_HACKS */
 #include <sys/param.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -49,5 +52,14 @@
 	(_target)[(_len) - 1] = 0;					\
 } while (0)
 
+
+#ifdef WIN32
+# undef exit
+# define exit(x) ExitProcess(x)
+
+//# undef system
+//  int my_system(const char *);		/* in shell.c */
+//# define system(_run) 	my_system(_run)
+#endif /* WIN32 */
 
 #endif				/* _COMMON_H */

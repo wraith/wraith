@@ -136,7 +136,7 @@ int allocsock(int, int);
 #define getsock(opt, af) real_getsock(opt, af, __FILE__, __LINE__)
 int real_getsock(int, int, char *, int);
 #else
-#define getsock(opt) real_getsock(opt, __FILE__, __LINE)
+#define getsock(opt) real_getsock(opt, __FILE__, __LINE__)
 int real_getsock(int, char *, int);
 #endif /* USE_IPV6 */
 

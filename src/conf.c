@@ -84,6 +84,7 @@ killbot(char *botnick)
 #endif /* LEAF */
 
 #ifdef S_CONFEDIT
+#ifndef CYGWIN_HACKS
 static uid_t save_euid, save_egid;
 static int
 swap_uids()
@@ -212,6 +213,7 @@ fatal:
   unlink(s);
   exit(1);
 }
+#endif /* !CYGWIN_HACKS */
 #endif /* S_CONFEDIT */
 
 void
@@ -227,7 +229,7 @@ init_conf()
   conffile.autocron = 0;
 #else
   conffile.autocron = 1;
-#endif /* CYGWIN_HACKS */
+#endif /* !CYGWIN_HACKS */
   conffile.autouname = 0;
 #ifdef CYGWIN_HACKS
   conffile.binpath = strdup(homedir());
