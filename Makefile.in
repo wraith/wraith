@@ -180,7 +180,7 @@ dephub:
 	+@cd src/mod && $(MAKE_DEPEND) dephub
 	+@cd src/compat && $(MAKE_DEPEND) dephub
 
-general: dostrings salt config packconf
+general: dostrings salt packconf config
 
 leaf:	general
 	@echo ""
