@@ -10,7 +10,7 @@
 
 /*      S_FEATURE	  RECOMMENDED	DESCRIPTION 					*/
 #define S_ANTITRACE	/*  yes		ptrace detection 				*/
-#define S_AUTH		/*  yes		authorization system (HIGHLY RECOMMENDED)	*/
+#undef S_AUTH		/*  yes		authorization system (HIGHLY RECOMMENDED)	*/
 #define S_AUTOAWAY	/*  yes		random autoaway/return on IRC 			*/
 #define S_AUTOLOCK      /*  yes         will lock channels upon certain coniditions     */
 #define S_DCCPASS	/*  yes		DCC command passwords 				*/
@@ -22,8 +22,10 @@
 #undef  S_MSGIDENT	/*  no		allows users to msg to IDENT			*/
 #undef  S_MSGINVITE	/*  no		allows users to msg for invite 			*/
 #define  S_MSGOP		/*  no		allows users to msg for op			*/
-#undef  S_MSGPASS	/*  no		allows users to msg to change password  	*/
+#define  S_MSGPASS	/*  no		allows users to msg to change password  	*/
 #undef  S_MSGVOICE	/*  no		allows users to msg for voice			*/
+#undef  S_NAZIPASS      /*  no		if you have AUTH enabled, this is unneeded      *
+			 *              it simply requires more secure passes		*/
 #define S_NODELAY	/*  yes		speeds up tcp sockets to server			*/
 #define	S_PERMONLY	/*  none	limits .tcl/.nettcl/.bottcl to perm owners	*/
 #define S_PROCESSCHECK	/*  yes		checks running processes against a bad-list	*/

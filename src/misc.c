@@ -455,14 +455,16 @@ void show_banner(int idx)
 /* show motd to dcc chatter */
 void show_motd(int idx)
 {
+  
   if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
-    /* char *buf; 
-
-    * buf = nmalloc(strlen((char *)CFG_MOTD.gdata) + 1);
-    * strcpy(buf, (char *)CFG_MOTD.gdata);
-    */
-    dumplots(idx, "Motd: ", (char *)CFG_MOTD.gdata);
-    /* nfree(buf); */
+    char *who, *buf;
+    void *buf_ptr;
+    buf = buf_ptr = nmalloc(strlen((char *) CFG_MOTD.gdata) + 1);
+    strcpy(buf, (char *) CFG_MOTD.gdata);
+    who = newsplit(&buf);
+    dprintf(idx, "Motd set by \002%s\002\n", who);
+    dumplots(idx, "* ", replace(buf, "\\n", "\n"));
+    nfree(buf_ptr);
   } else
     dprintf(idx, STR("Motd: none\n"));
 }
@@ -1708,13 +1710,16 @@ void makeplaincookie(char *chname, char *nick, char *buf)
 
 int goodpass(char *pass, int idx, char *nick)
 {
-  int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
   char *tell;
+#ifdef S_NAZIPASS
+  int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
+#endif /* S_NAZIPASS */
   tell = nmalloc(300);
 
   if (!pass[0]) 
     return 0;
 
+#ifdef S_NAZIPASS
   for (i = 0; i < strlen(pass); i++) {
     tc = (int) pass[i];
     if (tc < 58 && tc > 47)
@@ -1729,9 +1734,12 @@ int goodpass(char *pass, int idx, char *nick)
 
 /*  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) { */
   if (ocase < 1 || lcase < 2 || ucase < 2 || strlen(pass) < 8) {
+#else /* !S_NAZIPASS */
+  if (strlen(pass) < 8) {
+#endif /* S_NAZIPASS */
 
     sprintf(tell, "Insecure pass, must be: ");
-
+#ifdef S_NAZIPASS 
     if (ocase < 1)
       strcat(tell, "\002>= 1 number\002, ");
     else
@@ -1752,6 +1760,7 @@ int goodpass(char *pass, int idx, char *nick)
     else
       strcat(tell, ">= 1 non-alpha/num, ");
 */
+#endif /* S_NAZIPASS */
     if (strlen(pass) < 8)
       strcat(tell, "\002>= 8 chars.\002");
     else

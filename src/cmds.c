@@ -573,8 +573,8 @@ static void cmd_motd(struct userrec *u, int idx, char *par)
   if (par[0] && (u->flags & USER_MASTER)) {
     char *s;
 
-    s = nmalloc(strlen(par) + 1 + HANDLEN + 3); /* +3: '() ' */
-    sprintf(s, STR("(%s) %s"), dcc[idx].nick, par);
+    s = nmalloc(strlen(par) + 1 + HANDLEN + 1); /* +1: ' ' */
+    sprintf(s, STR("%s %s"), dcc[idx].nick, par);
     set_cfg_str(NULL, "motd", s);
     nfree(s);
     dprintf(idx, STR("Motd set\n"));
