@@ -12,10 +12,6 @@
 #include "server.mod/server.h"
 #undef serv
 #include "channels.mod/channels.h"
-#ifdef HAVE_UNAME
-#include <sys/utsname.h>
-#endif
-
 
 #define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
 #define IN_BOTS (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)

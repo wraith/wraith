@@ -17,10 +17,7 @@
 #include <netdb.h>
 #include <setjmp.h>
 #include <unistd.h>
-
-#ifdef HAVE_UNAME
 #include <sys/utsname.h>
-#endif
 
 #ifdef STOP_UAC				/* osf/1 complains a lot */
 #include <sys/sysinfo.h>
@@ -1378,14 +1375,11 @@ char *my_uname()
 {
   static char os_uname[250];
   char *unix_n, *vers_n;
-#ifdef HAVE_UNAME
   struct utsname un;
 
     if (uname(&un) < 0) {
-#endif /* HAVE_UNAME */
       unix_n = "*unkown*";
       vers_n = "";
-#ifdef HAVE_UNAME
     } else {
       unix_n = un.nodename;
 #ifdef __FreeBSD__
@@ -1394,7 +1388,6 @@ char *my_uname()
       vers_n = un.version;
 #endif /* __FreeBSD__ */
     }
-#endif /* HAVE_UNAME */
   egg_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
   return os_uname;
 }

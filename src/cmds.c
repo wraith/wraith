@@ -14,10 +14,7 @@
 #include <stdlib.h>
 #include <pwd.h>
 #include <sys/types.h>
-       
-#ifdef HAVE_UNAME
 #include <sys/utsname.h>
-#endif
 
 extern struct chanset_t	 *chanset;
 extern struct dcc_t	 *dcc;
@@ -3539,19 +3536,13 @@ static void cmd_botversion(struct userrec * u, int idx, char * par) {
 
 void rcmd_ver(char * fbot, char * fhand, char * fidx) {
   char tmp[2048];
-#ifdef HAVE_UNAME
   struct utsname un;
-#endif /* HAVE_UNAME */
   sprintf(tmp, STR("%s "), version);
-#ifdef HAVE_UNAME
   if (uname(&un) < 0) {
-#endif /* HAVE_UNAME */
     strcat(tmp, STR("(unknown OS)"));
-#ifdef HAVE_UNAME
   } else {
     sprintf(tmp + strlen(tmp), STR("%s %s (%s)"), un.sysname, un.release, un.machine);
   }
-#endif /* HAVE_UNAME */
   botnet_send_cmdreply(botnetnick, fbot, fhand, fidx, tmp);
 }
 

@@ -13,9 +13,7 @@
 #include "server.mod/server.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef HAVE_UNAME
 #include <sys/utsname.h>
-#endif /* HAVE_UNAME */
 #include <pwd.h>
 #include <ctype.h>
 
@@ -744,9 +742,7 @@ char *ctcp_start(Function * global_funcs)
 {
 #ifdef LEAF
   char *p;
-#ifdef HAVE_UNAME
   struct utsname un;
-#endif /* HAVE_UNAME */
 #endif /* LEAF */
   global = global_funcs;
 
@@ -756,14 +752,12 @@ char *ctcp_start(Function * global_funcs)
     module_undepend(MODULE_NAME);
     return "This module requires server module 1.0 or later.";
   }
-#ifdef HAVE_UNAME
   egg_bzero(&un, sizeof(un));
   if (!uname(&un)) {
     strncpyz(cloak_os, un.sysname, sizeof(cloak_os));
     strncpyz(cloak_osver, un.release, sizeof(cloak_osver));
     strncpyz(cloak_host, un.nodename, sizeof(cloak_host));
   } else {
-#endif /* HAVE_UNAME */
 /* shit, we have to come up with something ourselves.. */
     switch (random() % 2) {
     case 0:
@@ -776,9 +770,7 @@ char *ctcp_start(Function * global_funcs)
       break;
     }
     strcpy(cloak_host, STR("login"));
-#ifdef HAVE_UNAME
   }
-#endif /* HAVE_UNAME */
   if ((p = strchr(cloak_host, '.')))
     *p = 0;
 

@@ -13,13 +13,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
-#ifdef HAVE_UNAME
 #include <sys/utsname.h>
-#endif
-
-#include "tandem.h"
 #include <sys/stat.h>
+#include "tandem.h"
 
 
 extern struct userrec	*userlist;
@@ -217,9 +213,7 @@ static void greet_new_bot(int idx)
 {
   int i;
   char *sysname = NULL;
-#ifdef HAVE_UNAME
   struct utsname un;
-#endif /* HAVE_UNAME */
 
   dcc[idx].timeval = now;
   dcc[idx].u.bot->version[0] = 0;
@@ -240,12 +234,11 @@ static void greet_new_bot(int idx)
   if (bot_hublevel(dcc[idx].user) == 999)
    dcc[idx].status |= STAT_LEAF;
   dcc[idx].status |= STAT_LINKING;
-#ifdef HAVE_UNAME
+
   if (uname(&un) < 0)
     sysname = "*";
   else
     sysname = un.sysname;
-#endif /* HAVE_UNAME */
 
   dprintf(idx, "v %d %d %s <%s>\n", egg_numver, HANDLEN, ver, network);
   dprintf(idx, "vs %s\n", sysname);

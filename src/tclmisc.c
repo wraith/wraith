@@ -8,9 +8,6 @@
 #include "main.h"
 #include "modules.h"
 #include "tandem.h"
-#ifdef HAVE_UNAME
-#include <sys/utsname.h>
-#endif
 
 extern p_tcl_bind_list	 bind_table_list;
 extern tcl_timer_t	*timer, *utimer;

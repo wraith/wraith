@@ -23,16 +23,11 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #endif /* S_ANTITRACE */
-
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <signal.h>
-
-
-#ifdef HAVE_UNAME
-#  include <sys/utsname.h>
-#endif /* HAVE_UNAME */
+#include <sys/utaname.h>
 #include "stat.h"
 #include "bg.h"
 
