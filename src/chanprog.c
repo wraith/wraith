@@ -792,9 +792,10 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int lo
 char *
 samechans(const char *nick, const char *delim)
 {
-  static char ret[1024];
+  static char ret[1024] = "";
   struct chanset_t *chan = NULL;
 
+  ret[0] = 0;		/* may be filled from last time */
   for (chan = chanset; chan; chan = chan->next) {
     if (ismember(chan, nick)) {
       strcat(ret, chan->dname);
