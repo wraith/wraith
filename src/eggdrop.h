@@ -725,28 +725,28 @@ enum {
 /* This is used by the net module to keep track of sockets and what's
  * queued on them
  */
+#define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
 typedef struct {
   int		 sock;
   short		 flags;
   char		*inbuf;
   char		*outbuf;
-  unsigned long  outbuflen;	/* Outbuf could be binary data	*/
-  int encstatus,		/* encrypted botlink */
-    oseed,
-    iseed;
+  unsigned long  outbuflen;		/* Outbuf could be binary data	*/
+  int encstatus;			/* encrypted botlink */
+  int oseed;				/* botlink out seed */
+  int iseed;				/* botlink in seed */
+  char okey[32];		/* botlink enckey: out */
+  char ikey[32];		/* botlink enckey: in  */
   int gz; /* gzip compression */
-  char okey[17];
-  char ikey[17];
-
-  unsigned long	 inbuflen;	/* Inbuf could be binary data	*/
+  unsigned long	 inbuflen;		/* Inbuf could be binary data	*/
 #ifdef USE_IPV6
   unsigned int af;
 #endif /* USE_IPV6 */
 #ifdef HAVE_SSL
   SSL 		*ssl;
 #endif /* HAVE_SSL */
-
 } sock_list;
+
 #ifdef S_DCCPASS
 typedef struct cmd_pass {
   struct cmd_pass *next;
@@ -765,7 +765,6 @@ enum {
  */
 
 #define TLN_AYT		246		/* Are You There	*/
-
 #define TLN_WILL	251		/* Will			*/
 #define TLN_WILL_C	"\373"
 #define TLN_WONT	252		/* Won't		*/
@@ -776,7 +775,6 @@ enum {
 #define TLN_DONT_C	"\376"
 #define TLN_IAC		255		/* Interpret As Command	*/
 #define TLN_IAC_C	"\377"
-
 #define TLN_ECHO	1		/* Echo			*/
 #define TLN_ECHO_C	"\001"
 

@@ -1185,7 +1185,7 @@ void autolink_cycle(char *start)
   my_u = get_user_by_handle(userlist, botnetnick);
   my_ba = get_user(&USERENTRY_BOTADDR, my_u);
   if (my_ba && (my_ba->uplink[0])) {
-    strncpy0(uplink, my_ba->uplink, sizeof(uplink));
+    strncpyz(uplink, my_ba->uplink, sizeof(uplink));
   } else {
     uplink[0] = 0;
   }

@@ -333,8 +333,8 @@ static void cont_link(int idx, char *buf, int ii)
 {
   /* Now set the initial link key (incoming only, we're not sending more until we get an OK)... */
   struct sockaddr_in sa;
-  char tmp[256];
-  MD5_CTX ctx;
+  char tmp[256], bufout[SHA_HASH_LENGTH];
+  SHA_CTX ctx;
   int i;
   int snum = -1;
 
@@ -363,13 +363,17 @@ static void cont_link(int idx, char *buf, int ii)
     dprintf(idx, "%s\n", botnetnick);
     i = sizeof(sa);
 
-    /* initkey-gen */
+    /* initkey-gen leaf */
     /* bdhash myport hubnick mynick */
     getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
     sprintf(tmp,"%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, botnetnick);
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, tmp, strlen(tmp));
-    MD5_Final(socklist[snum].ikey, &ctx);
+    SHA1_Init(&ctx);
+    SHA1_Update(&ctx, tmp, strlen(tmp));
+    SHA1_Final(bufout, &ctx);
+    strncpyz(socklist[snum].ikey, btoh(bufout, SHA_HASH_LENGTH), 32 + 1);
+    putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
+    putlog(LOG_DEBUG, "@", "initkey (%d): %s", strlen(socklist[snum].ikey), socklist[snum].ikey);
+    /* We've send our botnetnick and set the key for the link on the sock, wait for 'elink' back to verify key */
     socklist[snum].encstatus = 1;
     socklist[snum].gz = 1;
   } else {
@@ -384,7 +388,6 @@ static void dcc_bot_new(int idx, char *buf, int x)
 /*  struct userrec *u = get_user_by_handle(userlist, dcc[idx].nick); */
   char *code;
   int i;
-  
   strip_telnet(dcc[idx].sock, buf, &x);
   code = newsplit(&buf);
   if (!egg_strcasecmp(code, "goodbye!")) {
@@ -403,25 +406,25 @@ static void dcc_bot_new(int idx, char *buf, int x)
     }
 
     if (snum >= 0) {
-      char *tmp,
-       *p;
+      char *tmp, *p;
 
+Context;
       p = newsplit(&buf);
       tmp = decrypt_string(SALT2, p);
-      strncpy0(socklist[snum].okey, tmp, 17);
-      strcpy(socklist[snum].ikey, socklist[snum].okey);
-      nfree(tmp);
+      strncpyz(socklist[snum].okey, tmp, sizeof(socklist[snum].okey) + 1);
+      strncpyz(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey) + 1);
       socklist[snum].iseed = atoi(buf);
       socklist[snum].oseed = atoi(buf);
       dprintf(idx, "elinkdone\n");
       putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
+      nfree(tmp);
     }
   } else if (!egg_strcasecmp(code, "error")) {
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
     killsock(dcc[idx].sock);
     lostdcc(idx);
   } else if (strcmp(code, "")) {
-      /* Invalid password/digest */
+      /* Invalid password/digest on leaf */
       putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
       killsock(dcc[idx].sock);
       lostdcc(idx);
@@ -654,8 +657,6 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     return;
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-
-  /* Check for MD5 digest from remote _bot_. <cybah> */
   if (atr & USER_BOT) {
     if (!egg_strcasecmp(buf, "elinkdone")) {
       nfree(dcc[idx].u.chat);
@@ -666,7 +667,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
       greet_new_bot(idx);
       send_timesync(idx);
     } else {
-      /* Invalid password/digest */
+      /* Invalid password/digest on hub */
       putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
       killsock(dcc[idx].sock);
       lostdcc(idx);
@@ -1608,43 +1609,34 @@ static void dcc_telnet_pass(int idx, int atr)
       }
     }
     if (snum >= 0) {
-      char initkey[17],
-       *tmp2;
-      char tmp[256];
-      MD5_CTX ctx;
+      char initkey[32], *tmp2;
+      char tmp[256], buf[40];
+      SHA_CTX ctx;
       
-      /* initkey-gen */
+      /* initkey-gen hub */
       /* bdhash port mynick botnetnick */
       sprintf(tmp, "%s@%4x@%s@%s", bdhash, htons(dcc[idx].port), botnetnick, dcc[idx].nick);
-      MD5_Init(&ctx);
-      MD5_Update(&ctx, tmp, strlen(tmp));
-      MD5_Final(socklist[snum].okey, &ctx);
-      *(dword *) & initkey[0] = rand();
-      *(dword *) & initkey[4] = rand();
-      *(dword *) & initkey[8] = rand();
-      *(dword *) & initkey[12] = rand();
-      for (i = 0; i <= 15; i++) {
-       if (!socklist[snum].okey[i])
-         socklist[snum].okey[i] = 1;
-       if (!initkey[i])
-         initkey[i] = 1;
-      }
-      socklist[snum].okey[16] = 0;
-      socklist[snum].oseed = rand();
+      SHA1_Init(&ctx);
+      SHA1_Update(&ctx, tmp, strlen(tmp));
+      SHA1_Final(buf, &ctx);
+      strncpyz(socklist[snum].okey, btoh(buf, SHA_HASH_LENGTH), 32 + 1);
+      putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
+      putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(socklist[snum].okey), socklist[snum].okey);
+
+      make_rand_str(initkey, 32);		/* set the initial out/in link key to random chars. */
+      initkey[32] = 0;
+      socklist[snum].oseed = random();
       socklist[snum].iseed = socklist[snum].oseed;
-      initkey[16] = 0;
       tmp2 = encrypt_string(SALT2, initkey);
       putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;
       dprintf(idx, "elink %s %lu\n", tmp2, socklist[snum].oseed);
+      nfree(tmp2);
       strcpy(socklist[snum].okey, initkey);
       strcpy(socklist[snum].ikey, initkey);
-      nfree(tmp2);
     } else {
-
       putlog(LOG_MISC, "*", "Couldn't find socket for %s connection?? Shouldn't happen :/", dcc[idx].nick);
-
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }

@@ -231,7 +231,7 @@ void added_display(int idx, struct user_entry *e, struct userrec *u)
      *hnd;
     time_t tm;
 
-    strncpy0(tmp, e->u.string, sizeof(tmp));
+    strncpyz(tmp, e->u.string, sizeof(tmp));
     hnd = strchr(tmp, ' ');
     if (hnd)
       *hnd++ = 0;
@@ -541,7 +541,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
   if (l > 1500)
     l = 1500;
   xk->key = user_malloc(l + 1);
-  strncpy0(xk->key, arg, l + 1);
+  strncpyz(xk->key, arg, l + 1);
 
   if (buf[0]) {
     int k = strlen(buf);
@@ -549,7 +549,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
     if (k > 1500 - l)
       k = 1500 - l;
     xk->data = user_malloc(k + 1);
-    strncpy0(xk->data, buf, k + 1);
+    strncpyz(xk->data, buf, k + 1);
   }
   config_set(u, e, xk);
 
@@ -625,7 +625,7 @@ void stats_add(struct userrec *u, int login, int op)
     return;
   s = get_user(&USERENTRY_STATS, u);
   if (s) {
-    strncpy0(s2, s, sizeof(s2));
+    strncpyz(s2, s, sizeof(s2));
   } else
     strcpy(s2, STR("0 0"));
   s = strchr(s2, ' ');
@@ -990,13 +990,13 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
    *q1,
    *q2;
   struct bot_addr *bi = user_malloc(sizeof(struct bot_addr));
-  bzero(bi, sizeof(struct bot_addr));
+  egg_bzero(bi, sizeof(struct bot_addr));
 
   /* address:port/port:hublevel:uplink */
   Context;
   Assert(e);
   Assert(e->name);
-  bzero(bi, sizeof(struct bot_addr));
+  egg_bzero(bi, sizeof(struct bot_addr));
 
   strcpy(p, e->u.list->extra);
   q1 = strchr(p, ':');
@@ -1186,7 +1186,7 @@ static int botaddr_gotshare(struct userrec *u, struct user_entry *e,
   struct bot_addr *bi = user_malloc(sizeof(struct bot_addr));
   char *arg;
 
-  bzero(bi, sizeof(struct bot_addr));
+  egg_bzero(bi, sizeof(struct bot_addr));
 
   arg = newsplit(&buf);
   bi->address = user_malloc(strlen(arg) + 1);

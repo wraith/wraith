@@ -87,23 +87,15 @@ void init_auth()
 #ifdef S_AUTH
 char *makehash(struct userrec *u, char *rand)
 {
-  int i = 0;
   MD5_CTX ctx;
   unsigned char md5out[33];
   char md5string[33], hash[500], *ret = NULL;
-Context;
   sprintf(hash, "%s%s%s", rand, (char *) get_user(&USERENTRY_SECPASS, u), authkey ? authkey : "");
-
-//  putlog(LOG_DEBUG, "*", STR("Making hash from %s %s: %s"), rand, get_user(&USERENTRY_SECPASS, u), hash);
-
   MD5_Init(&ctx);
   MD5_Update(&ctx, hash, strlen(hash));
   MD5_Final(md5out, &ctx);
-
-  for(i=0; i<16; i++)
-    sprintf(md5string + (i*2), "%.2x", md5out[i]);
+  strcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH));
    
-//  putlog(LOG_DEBUG, "*", STR("MD5 of hash: %s"), md5string);
   ret = md5string;
   return ret;
 }

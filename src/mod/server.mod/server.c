@@ -10,7 +10,7 @@
 #include "src/mod/module.h"
 #include "server.h"
 
-static Function *global = NULL, *encryption_funcs;
+static Function *global = NULL;
 extern struct cfg_entry CFG_OPTIMESLACK;
 static int ctcp_mode;
 static int serv;		/* sock # of server currently */
@@ -1139,10 +1139,10 @@ void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   else
     p=NULL;
   if (p && p[0]) {
-        strncpy0(origbotname, p, NICKMAX+1);
+        strncpyz(origbotname, p, NICKMAX+1);
 //        dprintf(DP_MODE, STR("NICK %s\n"), p);
   } else {
-    strncpy0(origbotname, botnetnick, NICKMAX+1);
+    strncpyz(origbotname, botnetnick, NICKMAX+1);
   }
 #endif
 }
@@ -1152,9 +1152,9 @@ void realname_describe(struct cfg_entry * entry, int idx) {
 void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   if (entry->ldata) {
-    strncpy0(botrealname, (char *) entry->ldata, 120);
+    strncpyz(botrealname, (char *) entry->ldata, 120);
   } else if (entry->gdata) {
-    strncpy0(botrealname, (char *) entry->gdata, 120);
+    strncpyz(botrealname, (char *) entry->gdata, 120);
   }
 #endif
 }
@@ -1969,11 +1969,6 @@ char *server_start(Function *global_funcs)
 
   server_table[4] = (Function) botname;
   module_register(MODULE_NAME, server_table, 1, 2);
-  if (!(encryption_funcs = module_depend(MODULE_NAME, "encryption", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires an encryption modules.";
-  }
-
 
   /* Fool bot in reading the values. */
   s = Tcl_GetVar(interp, "nick", TCL_GLOBAL_ONLY);

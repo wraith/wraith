@@ -268,7 +268,7 @@ void write_debug()
   } else
     nested_debug = 1;
 
-  snprintf(tmpout, sizeof tmpout, STR("* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]"),
+  snprintf(tmpout, sizeof tmpout, "* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]",
                                   cx_file[cx_ptr-2], cx_line[cx_ptr-2], cx_note[cx_ptr-2][0] ? cx_note[cx_ptr-2] : "",
                                   cx_file[cx_ptr-1], cx_line[cx_ptr-1], cx_note[cx_ptr-1][0] ? cx_note[cx_ptr-1] : "",
                                   cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
@@ -278,11 +278,10 @@ void write_debug()
   x = creat("DEBUG", 0600);
   setsock(x, SOCK_NONSOCK); 
   if (x < 0) {
-    putlog(LOG_MISC, "*", STR("* Failed to write DEBUG"));
+    putlog(LOG_MISC, "*", "* Failed to write DEBUG");
   } else {
     strncpyz(s, ctime(&now), sizeof s);
-    dprintf(-x, STR("Debug (%s) written %s\n"), ver, s);
-    dprintf(-x, STR("STATICALLY LINKED\n"));
+    dprintf(-x, "Debug (%s) written %s\n", ver, s);
 
     /* info library */
     dprintf(-x, "Tcl library: %s\n",
@@ -297,20 +296,20 @@ void write_debug()
      "*unknown*");
 
 #if HAVE_TCL_THREADS
-    dprintf(-x, STR("Tcl is threaded\n"));
+    dprintf(-x, "Tcl is threaded\n");
 #endif
 
 #ifdef CCFLAGS
-    dprintf(-x, STR("Compile flags: %s\n"), CCFLAGS);
+    dprintf(-x, "Compile flags: %s\n", CCFLAGS);
 #endif
 #ifdef LDFLAGS
-    dprintf(-x, STR("Link flags: %s\n"), LDFLAGS);
+    dprintf(-x, "Link flags: %s\n", LDFLAGS);
 #endif
 #ifdef STRIPFLAGS
-    dprintf(-x, STR("Strip flags: %s\n"), STRIPFLAGS);
+    dprintf(-x, "Strip flags: %s\n", STRIPFLAGS);
 #endif
 
-    dprintf(-x, STR("Context: "));
+    dprintf(-x, "Context: ");
     cx_ptr = cx_ptr & 15;
     for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
       dprintf(-x, "%s/%d, [%s]\n         ", cx_file[y], cx_line[y],
@@ -322,7 +321,7 @@ void write_debug()
     debug_mem_to_dcc(-x);
     killsock(x);
     close(x);
-    putlog(LOG_MISC, "*", STR("* Emailed DEBUG to bryan."));
+    putlog(LOG_MISC, "*", "* Emailed DEBUG to development team.");
     if (1) {
 /* FIXME: make into temp file.. */
       char buff[255];
@@ -505,14 +504,12 @@ void checkpass()
   if (!checkedpass) {
     char *gpasswd;
     MD5_CTX ctx;
-    int i = 0;
 
     gpasswd = (char *) getpass("");
     MD5_Init(&ctx);
     MD5_Update(&ctx, gpasswd, strlen(gpasswd));
     MD5_Final(md5out, &ctx);
-    for(i=0; i<16; i++)
-      sprintf(md5string + (i*2), "%.2x", md5out[i]);
+    strcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH));
     if (strcmp(shellhash, md5string)) {
       fatal(STR("incorrect password."), 0);
     }
@@ -671,6 +668,7 @@ static void dtx_arg(int argc, char *argv[])
         break; /* this should never be reached */
       case 'v':
 	printf("Wraith %s\nBuild Date: (%lu) %s\n", egg_version, buildts, ctime(&buildts));
+        printf("SALTS\nfiles: %s\nbotlink: %s\n", SALT1, SALT2);
 	bg_send_quit(BG_ABORT);
 	exit(0);
         break; /* this should never be reached */
@@ -1104,7 +1102,7 @@ static void gotspawn(char *filename)
 
   if (!(fp = fopen(filename, "r")))
     fatal(STR("Cannot read from local config (2)"), 0);
-
+Context;
   while(fscanf(fp,"%[^\n]\n",templine) != EOF) {
     void *my_ptr;
     temps = my_ptr = decrypt_string(SALT1, templine);
@@ -1766,7 +1764,7 @@ Context;
     int on = 0;
     strncpy(argv[0],progname(),strlen(argv[0]));
     //this clears all the params..
-    for (on=1;on<argc;on++) memset(argv[on],0,strlen(argv[on]));
+    for (on=1;on<argc;on++) egg_memset(argv[on],0,strlen(argv[on]));
   }
 #endif /* PSCLOAK */
 #endif /* LEAF */

@@ -561,11 +561,11 @@ Context;
 
 Context;
   targets = nmalloc(chan->channel.members * sizeof(memberlist *));
-  bzero(targets, chan->channel.members * sizeof(memberlist *));
+  egg_bzero(targets, chan->channel.members * sizeof(memberlist *));
 
 Context;
   chanbots = nmalloc(chan->channel.members * sizeof(memberlist *));
-  bzero(chanbots, chan->channel.members * sizeof(memberlist *));
+  egg_bzero(chanbots, chan->channel.members * sizeof(memberlist *));
 
 ContextNote("!mdop!");
   for (m = chan->channel.member; m; m = m->next)

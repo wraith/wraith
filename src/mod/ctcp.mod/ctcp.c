@@ -463,7 +463,7 @@ static int ctcp_ECHO(char *nick, char *uhost, char *handle, char *object, char *
 {
   char reply[60];
 
-  strncpy0(reply, text, sizeof(reply));
+  strncpyz(reply, text, sizeof(reply));
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, reply);
   return 1;
 }
@@ -526,7 +526,7 @@ static int ctcp_OP(char *nick, char *uhost, char *handle, char *object, char *ke
    *p;
 
   if (text[0]) {
-    strncpy0(chan, text, sizeof(chan));
+    strncpyz(chan, text, sizeof(chan));
     p = strchr(chan, ' ');
     if (p)
       *p = 0;
@@ -541,7 +541,7 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, char *handle, char *object
    *p;
 
   if (text[0] == '#') {
-    strncpy0(chname, text, sizeof(chname));
+    strncpyz(chname, text, sizeof(chname));
     p = strchr(chname, ' ');
     if (p)
       *p = 0;
@@ -636,7 +636,7 @@ static int ctcp_TIME(char *nick, char *uhost, char *handle, char *object, char *
 {
   char tms[81];
 
-  strncpy0(tms, ctime(&now), sizeof(tms));
+  strncpyz(tms, ctime(&now), sizeof(tms));
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, tms);
   return 1;
 }
@@ -756,9 +756,9 @@ char *ctcp_start(Function * global_funcs)
 #ifdef HAVE_UNAME
   egg_bzero(&un, sizeof(un));
   if (!uname(&un)) {
-    strncpy0(cloak_os, un.sysname, sizeof(cloak_os));
-    strncpy0(cloak_osver, un.release, sizeof(cloak_osver));
-    strncpy0(cloak_host, un.nodename, sizeof(cloak_host));
+    strncpyz(cloak_os, un.sysname, sizeof(cloak_os));
+    strncpyz(cloak_osver, un.release, sizeof(cloak_osver));
+    strncpyz(cloak_host, un.nodename, sizeof(cloak_host));
   } else {
 #endif /* HAVE_UNAME */
 /* shit, we have to come up with something ourselves.. */

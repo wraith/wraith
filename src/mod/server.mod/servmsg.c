@@ -210,7 +210,7 @@ static int got001(char *from, char *msg)
   fixcolon(msg);
   strncpyz(botname, msg, NICKLEN);
   altnick_char = 0;
-  strncpy0(cursrvname, from, sizeof(cursrvname));
+  strncpyz(cursrvname, from, sizeof(cursrvname));
 
   dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
   dprintf(DP_SERVER, "MODE %s +iws\n");
@@ -1082,10 +1082,10 @@ void got_rsn(char *botnick, char *code, char *par) {
 }
 
 void got_rn(char *botnick, char *code, char *par) {
-  int l = (rand() % 4) + 6, i;
+  int l = (random() % 4) + 6, i;
   char newnick[NICKLEN+1];
   for (i=0;i<l;i++)
-    newnick[i]=(rand() % 2) * 32 + 65 + rand() % 26;
+    newnick[i]=(random() % 2) * 32 + 65 + random() % 26;
   newnick[l]=0;
   randuse = 1;
   //havealt = 1;

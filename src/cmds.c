@@ -796,7 +796,6 @@ Context;
       i = 0;
       first = 1;
       for (n = 0; n < o ; n++) { /* loop each command */
-printf("parsing: cmd[%d].name = %s\n", n, cmds[n].name);
         if (!flagrec_ok(&cmds[n].flags, &fr))
           continue;
         flg[0] = '\0';
@@ -2488,11 +2487,11 @@ static void cmd_last(struct userrec *u, int idx, char *par) {
     return;
   }
   if (par[0]) {
-    strncpy0(user, par, sizeof(user));
+    strncpyz(user, par, sizeof(user));
   } else {
     pw = getpwuid(geteuid());
     if (!pw) return;
-    strncpy0(user, pw->pw_name, sizeof(user));
+    strncpyz(user, pw->pw_name, sizeof(user));
   }
   if (!user[0]) {
     dprintf(idx, STR("Can't determine user id for process\n"));
@@ -3662,11 +3661,11 @@ void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
   } else if (!strcmp(cmd, STR("last"))) {
     char user[20];
     if (par[0]) {
-      strncpy0(user, par, sizeof(user));
+      strncpyz(user, par, sizeof(user));
     } else {
       pw = getpwuid(geteuid());
       if (!pw) return;
-      strncpy0(user, pw->pw_name, sizeof(user));
+      strncpyz(user, pw->pw_name, sizeof(user));
     }
     if (!user[0]) {
       botnet_send_cmdreply(botnetnick, frombot, fromhand, fromidx, STR("Can't determine user id for process"));
@@ -3774,9 +3773,9 @@ void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
     port = atoi(newsplit(&par));
     if (!port)
       port = default_port;
-    strncpy0(((char *)(func[20])), other, 120); //newserver
+    strncpyz(((char *)(func[20])), other, 120); //newserver
     (*(int *)(func[21])) = port; //newserverport
-    strncpy0(((char *)(func[22])), par, 120); //newserverpass
+    strncpyz(((char *)(func[22])), par, 120); //newserverpass
   }
   botnet_send_cmdreply(botnetnick, frombot, fromhand, fromidx, STR("Jumping..."));
 

@@ -14,14 +14,19 @@ int expmem_crypt()
 }
 
 #define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
-#define CRYPT_KEYSIZE 256
+#define CRYPT_KEYBITS 256
+#define CRYPT_KEYSIZE (CRYPT_KEYBITS / 8)
 
 AES_KEY e_key, d_key;
+#ifdef PAD
+int nopad = 0;		/* dont pad keys? */
+#else /* !PAD */
+int nopad = 1;
+#endif /* PAD */
 
 char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
 {
-  int newdatalen = *datalen;
-  int blockcount = 0, blockndx = 0;
+  int newdatalen = *datalen, blockcount = 0, blockndx = 0;
   unsigned char *newdata = NULL;
 
 /* First pad indata to CRYPT_BLOCKSIZE multiplum */
@@ -38,13 +43,24 @@ char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
     /* No key, no encryption */
     egg_memcpy(newdata, data, newdatalen);
   } else {
+    char key[CRYPT_KEYSIZE];
+    /* pad key in case it is too short */
+//    egg_memset(key, 'a', sizeof(key));
+    if (nopad)
+      strncpy(key, keydata, sizeof(key));
+#ifdef PAD
+    else
+      strncpyz(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
+#endif /* PAD */
+    key[CRYPT_KEYSIZE] = 0;
     /* Init/fetch key */
-    AES_set_encrypt_key(keydata, CRYPT_KEYSIZE, &e_key);
+//printf("encrypting with key (%d): %s\n", strlen(key), key);
+    AES_set_encrypt_key(key, CRYPT_KEYBITS, &e_key);
 
     /* Now loop through the blocks and crypt them */
     blockcount = newdatalen / CRYPT_BLOCKSIZE;
     for (blockndx = blockcount - 1; blockndx >= 0; blockndx--) {
-      AES_encrypt((void *) &newdata[blockndx * CRYPT_BLOCKSIZE], (void *) &newdata[blockndx * CRYPT_BLOCKSIZE], &e_key);
+      AES_encrypt(&newdata[blockndx * CRYPT_BLOCKSIZE], &newdata[blockndx * CRYPT_BLOCKSIZE], &e_key);
     }
   }
   return newdata;
@@ -63,8 +79,19 @@ char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
     /* No key, no decryption */
   } else {
     /* Init/fetch key */
-    AES_set_decrypt_key(keydata, CRYPT_KEYSIZE, &d_key);
-
+    char key[CRYPT_KEYSIZE];
+    /* pad key in case it is too short */
+//    egg_memset(key, 'a', sizeof(key));
+//    strncpyz(key, keydata, sizeof(key) + 1);
+    if (nopad)
+      strncpy(key, keydata, sizeof(key));
+#ifdef PAD
+    else
+      strncpy(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
+#endif /* PAD */
+    key[CRYPT_KEYSIZE] = 0;
+//printf("decrypting with key (%d): %s\n", strlen(key), key);
+    AES_set_decrypt_key(key, CRYPT_KEYBITS, &d_key);
 
     /* Now loop through the blocks and crypt them */
     blockcount = datalen / CRYPT_BLOCKSIZE;
@@ -154,12 +181,18 @@ void encrypt_pass(char *s1, char *s2)
   /* fix this, standard eggs don't allow this long password hashes */
   char *tmp;
 
-  if (strlen(s1) > 16)
-    s1[16] = 0;
+  if (strlen(s1) > 15)
+    s1[15] = 0;
+#ifdef PAD
+  nopad = 1;
+#endif /* PAD */
   tmp = encrypt_string(s1, s1);
+#ifdef PAD
+  nopad = 0;
+#endif /* PAD */
   strcpy(s2, "+");
-  strncat(s2, tmp, 16);
-  s2[16] = 0;
+  strncat(s2, tmp, 15);
+  s2[15] = 0;
   nfree(tmp);
 }
 
@@ -223,7 +256,7 @@ void EncryptFile(char *infile, char *outfile)
       lfprintf(f2, "%s\n", buf);
   }
   if (std)
-    printf("-----------------------------------ENF-----------------------------------\n");
+    printf("-----------------------------------END-----------------------------------\n");
 
   fclose(f);
   if (f2)

@@ -1305,7 +1305,7 @@ static int write_chans(FILE *f, int idx)
 
      putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
 
-     memset(udefs,'\0',2048);
+     egg_memset(udefs,'\0',2048);
      convert_element(chan->dname, name);
      get_mode_protect(chan, w);
      convert_element(w, w2);
@@ -1313,7 +1313,7 @@ static int write_chans(FILE *f, int idx)
  *   convert_element(chan->temp, temp);
  */
      for (ul = udef; ul; ul = ul->next) { //put the udefs into one string
-       memset(buf,'\0',2048);
+       egg_memset(buf,'\0',2048);
        if (ul->defined && ul->name) { 
 	if (ul->type == UDEF_FLAG)
 	 sprintf(buf, "%c%s%s ", getudef(ul->values, chan->dname) ? '+' : '-', "udef-flag-", ul->name);

@@ -1224,7 +1224,7 @@ static int gotmode(char *from, char *msg)
       int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
 
       /* Split up the mode: #chan modes param param param param */
-      strncpy0(work, msg, sizeof(work));
+      strncpyz(work, msg, sizeof(work));
       wptr = work;
       p = newsplit(&wptr);
       while (*p) {
@@ -1263,7 +1263,7 @@ static int gotmode(char *from, char *msg)
 
       /* Split up from */
       ufrom = get_user_by_host(from);
-      strncpy0(work, from, sizeof(work));
+      strncpyz(work, from, sizeof(work));
       p = strchr(work, '!');
       *p++ = 0;
       nfrom = work; 		/* nick */
@@ -1317,7 +1317,7 @@ static int gotmode(char *from, char *msg)
           char enccookie[25], plaincookie[25], key[NICKLEN + 20], goodcookie[25];
 
           /* -b *!*@[...] */
-          strncpy0(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
+          strncpyz(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
           p = enccookie + strlen(enccookie) - 1;
 /* old shit 
           *p = 0;
@@ -1331,7 +1331,7 @@ static int gotmode(char *from, char *msg)
 /* putlog(LOG_DEBUG, "*", "Decrypting cookie: %s with key %s", enccookie, key); */
           p = decrypt_string(key, enccookie);
 /* putlog(LOG_DEBUG, "*", "Decrypted cookie: %s", p); */
-          strncpy0(plaincookie, p, sizeof(plaincookie));
+          strncpyz(plaincookie, p, sizeof(plaincookie));
           nfree(p);
           /*
            * last 6 digits of time
@@ -1350,7 +1350,7 @@ static int gotmode(char *from, char *msg)
             int off;
 
             sprintf(ltmp, STR("%010li"), (now + timesync));
-            strncpy0((char *) &ltmp[4], plaincookie, 7);
+            strncpyz((char *) &ltmp[4], plaincookie, 7);
             optime = atol(ltmp);
             off = (now + timesync - optime);
 

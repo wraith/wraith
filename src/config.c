@@ -43,9 +43,9 @@ void authkey_describe(struct cfg_entry * entry, int idx) {
 
 void authkey_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   if (entry->ldata) {
-    strncpy0(authkey, (char *) entry->ldata, sizeof authkey);
+    strncpyz(authkey, (char *) entry->ldata, sizeof authkey);
   } else if (entry->gdata) {
-    strncpy0(authkey, (char *) entry->gdata, sizeof authkey);
+    strncpyz(authkey, (char *) entry->gdata, sizeof authkey);
   }
 }
 
@@ -61,9 +61,9 @@ void cmdprefix_describe(struct cfg_entry *entry, int idx) {
 
 void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   if (entry->ldata) {
-    strncpy0(cmdprefix, (char *) entry->ldata, sizeof cmdprefix);
+    strncpyz(cmdprefix, (char *) entry->ldata, sizeof cmdprefix);
   } else if (entry->gdata) {
-    strncpy0(cmdprefix, (char *) entry->gdata, sizeof cmdprefix);
+    strncpyz(cmdprefix, (char *) entry->gdata, sizeof cmdprefix);
   }
 }
 

@@ -858,7 +858,7 @@ Context;
   pw = getpwuid(geteuid());
   if (!pw) return;
 
-  strncpy0(user, pw->pw_name ? pw->pw_name : "" , sizeof(user));
+  strncpyz(user, pw->pw_name ? pw->pw_name : "" , sizeof(user));
   if (user[0]) {
     char *out;
     char buf[50];
@@ -882,7 +882,7 @@ Context;
               detected(DETECT_LOGIN, wrk);
             }
           }
-          strncpy0(last_buf, out, sizeof(last_buf));
+          strncpyz(last_buf, out, sizeof(last_buf));
         }
         nfree(out);
       }
@@ -914,11 +914,11 @@ void check_processes()
     return;
 
   /* Get this binary's filename */
-  strncpy0(buf, binname, sizeof(buf));
+  strncpyz(buf, binname, sizeof(buf));
   p = strrchr(buf, '/');
   if (p) {
     p++;
-    strncpy0(bin, p, sizeof(bin));
+    strncpyz(bin, p, sizeof(bin));
   } else {
     bin[0] = 0;
   }
@@ -942,14 +942,14 @@ void check_processes()
         cmd[512],
         line[2048];
 
-      strncpy0(line, curp, sizeof(line));
+      strncpyz(line, curp, sizeof(line));
       /* it's a process line */
       /* Assuming format: pid tty stat time cmd */
       pid = newsplit(&curp);
       tty = newsplit(&curp);
       stat = newsplit(&curp);
       time = newsplit(&curp);
-      strncpy0(cmd, curp, sizeof(cmd));
+      strncpyz(cmd, curp, sizeof(cmd));
       /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff */
       if (!strstr(cmd, STR("<defunct>")) && !strncmp(cmd, STR("/bin/sh -c"), 10)
           && !strncmp(cmd, binname, strlen(binname))) {
@@ -2025,3 +2025,26 @@ void local_check_should_lock()
     (func[51]) ();
   }
 }
+
+/* convert binary hashes to hex */
+char *btoh(const unsigned char *md, int len)
+{
+  int i;
+  char buf[100], *ret;
+
+  for (i = 0; i < len; i++)
+    sprintf(&(buf[i*2]), "%02x", md[i]);
+  ret = buf;
+  return ret;
+}
+
+
+void fix_md5(char *s) {
+  int len = strlen(s), i = 0;
+  for (i = 0; i < len; i++)
+    if (!s[i])
+      printf("hash place %d is NULL\n", i);
+//      s[i]=1;
+  s[len]=0;
+}
+

@@ -361,7 +361,7 @@ Function global_table[] =
   (Function) in_chain,
   /* 164 - 167 */
   (Function) add_note,
-  (Function) 0,
+  (Function) btoh,
   (Function) detect_dcc_flood,
   (Function) flush_lines,
   /* 168 - 171 */

@@ -129,8 +129,6 @@ extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_SCRIPT, DCC_BOT_NEW,
 #  define O_NONBLOCK	00000004    /* POSIX non-blocking I/O		   */
 #endif				/* BORGUBES */
 
-#define strncpy0(a,b,c) { strncpy(a, b, c-1); (a)[c-1]=0; }
-
 #ifdef strncpy
 #undef strncpy
 #endif

@@ -997,7 +997,7 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
       if (bot_hublevel(ubot) < 999) {
 	sprintf(tmp, "sj %s 0\n", chan->dname);
       } else {
-	int v = (rand() % (intvl / 2)) - (intvl / 4);
+	int v = (random() % (intvl / 2)) - (intvl / 4);
 	delay += intvl;
 	sprintf(tmp, "sj %s %i\n", chan->dname, delay + v);
 	count++;
@@ -1064,7 +1064,7 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
         if (bot_hublevel(ubot) < 999) {
   	  sprintf(tmp, "sp %s 0\n", chname);
         } else {
-  	  int v = (rand() % (intvl / 2)) - (intvl / 4);
+  	  int v = (random() % (intvl / 2)) - (intvl / 4);
   	  delay += intvl;
   	  sprintf(tmp, "sp %s %i\n", chname, delay + v);
   	  count++;

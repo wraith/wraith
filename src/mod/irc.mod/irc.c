@@ -38,8 +38,7 @@ struct cfg_entry CFG_OPBOTS,
 #endif /* S_AUTOLOCK */
   CFG_OPREQUESTS;
 
-static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL,
-                *encryption_funcs = NULL;
+static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL;
 
 
 static int ctcp_mode;
@@ -192,12 +191,12 @@ void getin_request(char *botnick, char *code, char *par)
   hst = newsplit(&par);
 
   if (nck[0]) {
-    strncpy0(nick, nck, sizeof(nick));
+    strncpyz(nick, nck, sizeof(nick));
   } else
     nick[0] = 0;
 
   if (hst[0]) {
-    strncpy0(host, hst, sizeof(host));
+    strncpyz(host, hst, sizeof(host));
     ip4 = newsplit(&par);
     if (ip4[0]) {
       char *tmp2;
@@ -1732,10 +1731,6 @@ char *irc_start(Function * global_funcs)
   if (!(channels_funcs = module_depend(MODULE_NAME, "channels", 1, 0))) {
     module_undepend(MODULE_NAME);
     return "This module requires channels module 1.0 or later.";
-  }
-  if (!(encryption_funcs = module_depend(MODULE_NAME, "encryption", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires an encryption modules.";
   }
   add_cfg(&CFG_OPBOTS);
   add_cfg(&CFG_INBOTS);

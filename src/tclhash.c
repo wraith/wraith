@@ -849,11 +849,11 @@ Context;
       p = strchr(args, ' ');
       if (p)
         *p = 0;
-      strncpy0(pass, args, sizeof(pass));
+      strncpyz(pass, args, sizeof(pass));
       if (check_cmd_pass(cmd, pass)) {
         if (p)
           *p = ' ';
-        strncpy0(work, args, sizeof(work));
+        strncpyz(work, args, sizeof(work));
         p = work;
         newsplit(&p);
         strcpy(args, p);

@@ -230,6 +230,8 @@ void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 
 /* misc.c */
+void fix_md5(char *);
+char *btoh(const unsigned char *, int);
 void local_check_should_lock();
 void werr(int);
 char *werr_tostr(int);

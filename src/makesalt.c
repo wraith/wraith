@@ -20,17 +20,12 @@ char *randstring(int len)
 
   for (j = 0; j < len; j++) {
     r = random();
-    if (r % 4 == 0)
+    if (r % 3 == 0)
       s[j] = '0' + (random() % 10);
-    else if (r % 4 == 1)
+    else if (r % 3 == 1)
       s[j] = 'a' + (random() % 26);
-    else if (r % 4 == 2)
+    else if (r % 3 == 2)
       s[j] = 'A' + (random() % 26);
-    else
-      s[j] = '!' + (random() % 15);
-
-    if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) //no % ( ) &
-      s[j] = 35;
   }
   s[len] = '\0';
   return s;
@@ -44,7 +39,7 @@ int main(void)
   time_t now = time(NULL);
   srandom(now % (getpid() + getppid()));
   saltlen1 = 32;
-  saltlen2 = 32;
+  saltlen2 = 16;
 
   if ((saltfd = fopen("pack/salt.h", "r"))!= NULL) {
     fclose(saltfd);
