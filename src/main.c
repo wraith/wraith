@@ -1033,7 +1033,7 @@ printf("out: %s\n", out);
     } else if (xx == -2 && errno != EINTR) {	/* select() error */
       putlog(LOG_MISC, "*", "* Socket error #%d; recovering.", errno);
       for (i = 0; i < dcc_total; i++) {
-	if ((fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
+	if (dcc[i].sock != -1 && (fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
 	  putlog(LOG_MISC, "*",
 		 "DCC socket %d (type %s, name '%s') expired -- pfft",
 		 dcc[i].sock, dcc[i].type->name, dcc[i].nick);
