@@ -47,6 +47,10 @@ char *homedir();
 char *my_username();
 char *my_uname();
 char *confdir();
+#ifndef CYGWIN_HACKS 
+char *move_bin(const char *, const char *, bool);
+#endif /* !CYGWIN_HACKS */
+void fix_tilde(char **);
 void baduname(char *, char *);
 int email(char *, char *, int);
 int shell_exec(char *, char *, char **, char **);

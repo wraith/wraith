@@ -880,6 +880,23 @@ char *confdir()
   return confdir_buf;
 }
 
+void fix_tilde(char **binptr)
+{
+  char *binpath = binptr ? *binptr : NULL;
+
+  if (binpath && strchr(binpath, '~')) {
+    char *p = NULL;
+
+    if (binpath[strlen(binpath) - 1] == '/')
+      binpath[strlen(binpath) - 1] = 0;
+
+    if ((p = replace(binpath, "~", homedir())))
+      str_redup(binptr, p);
+    else
+      fatal("Unforseen error expanding '~'", 0);
+  }
+}
+
 char *my_uname()
 {
   static char os_uname[250] = "";
@@ -905,6 +922,57 @@ char *my_uname()
 }
 
 #ifndef CYGWIN_HACKS
+char *move_bin(const char *path, const char *file, bool run)
+{
+  /* move the binary to the correct place */
+  static char newbin[DIRMAX] = "";
+  char real[DIRMAX] = "";
+
+  egg_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
+  sdprintf("newbin: %s", newbin);
+
+  ContextNote("realpath()");
+  realpath(binname, real);            /* get the realpath of binname */
+  ContextNote("realpath(): Success");
+  /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
+  if (strcmp(binname, newbin) && strcmp(newbin, real)) {              /* if wrong path and new path != current */
+    bool ok = 1;
+
+    sdprintf("real: %s", real);
+    sdprintf("wrong dir, is: %s :: %s", binname, newbin);
+
+    unlink(newbin);
+    if (copyfile(binname, newbin))
+      ok = 0;
+
+    if (ok && !can_stat(newbin)) {
+       unlink(newbin);
+       ok = 0;
+    }
+
+    if (ok && fixmod(newbin)) {
+        unlink(newbin);
+        ok = 0;
+    }
+
+    if (ok) {
+      sdprintf("Binary successfully moved to: %s", newbin);
+      unlink(binname);
+      if (run) {
+        system(newbin);
+        sdprintf("exiting to let new binary run...");
+        exit(0);
+      }
+    } else {
+      if (run)
+        werr(ERR_WRONGBINDIR);
+      sdprintf("Binary move failed to: %s", newbin);
+      return binname;
+    }
+  }
+  return newbin;
+}
+
 void check_crontab()
 {
   int i = 0;

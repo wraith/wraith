@@ -231,6 +231,7 @@ confedit()
     fatal("Error reading new config file", 0);
   readconf(tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   unlink(tmpconf.file);
+  fix_tilde(&conffile.binpath);
   conf_to_bin(&conffile);       /* will exit */
   exit(0);                      /* never reached */
 
@@ -480,17 +481,8 @@ parseconf()
     conffile.homedir = strdup(homedir());
   }
 
-  if (strchr(conffile.binpath, '~')) {
-    char *p = NULL;
+  fix_tilde(&conffile.binpath);
 
-    if (conffile.binpath[strlen(conffile.binpath) - 1] == '/')
-      conffile.binpath[strlen(conffile.binpath) - 1] = 0;
-
-    if ((p = replace(conffile.binpath, "~", homedir())))
-      str_redup(&conffile.binpath, p);
-    else
-      fatal("Unforseen error expanding '~'", 0);
-  }
 #endif /* !CYGWIN_HACKS */
   return 0;
 }

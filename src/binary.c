@@ -352,7 +352,8 @@ clear_settings(void)
 void conf_to_bin(conf_t *in)
 {
   conf_bot *bot = NULL;
-  
+  char *newbin = NULL;
+
   clear_settings();
   sdprintf("converting conf to bin\n");
   sprintf(settings.uid, "%d", in->uid);
@@ -378,6 +379,7 @@ void conf_to_bin(conf_t *in)
                            bot->ip6 ? bot->ip6 : "");
     }
 
+  newbin = move_bin(in->binpath, in->binname, 0);
   /* tellconfig(&settings); */
-  write_settings(binname, 1);
+  write_settings(newbin, 1);
 }

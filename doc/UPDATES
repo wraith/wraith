@@ -52,6 +52,7 @@ This is a summary of ChangeLog basically.
 * Raised max dcc/fd to 300.
 * Bots will auto-restart if 150 or more bogus fd are detected.
 * Conf/uname email now includes binary path.
+* After changing conf with -C, binary is now moved to binpath/binname.
 
 1.1.9
 

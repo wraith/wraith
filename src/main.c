@@ -622,52 +622,9 @@ static void startup_checks() {
    werr(ERR_BINSTAT);
   else if (fixmod(binname))
    werr(ERR_BINMOD);
-
+  
 #ifndef CYGWIN_HACKS
-  /* move the binary to the correct place */
-  {
-    char newbin[DIRMAX] = "", real[DIRMAX] = "";
-
-    sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", geteuid(), myuid, getppid(), getpid());
-    egg_snprintf(newbin, sizeof newbin, "%s%s%s", conffile.binpath, 
-                 conffile.binpath[strlen(conffile.binpath) - 1] == '/' ? "" : "/",
-                 conffile.binname);
-    sdprintf("newbin at: %s", newbin);
-    
-    ContextNote("realpath()");
-    realpath(binname, real);		/* get the realpath of binname */
-    ContextNote("realpath(): Success");
-    /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
-    if (strcmp(binname, newbin) && strcmp(newbin, real)) { 		/* if wrong path and new path != current */
-      bool ok = 1;
-
-      sdprintf("real: %s", real);
-      sdprintf("wrong dir, is: %s :: %s", binname, newbin);
-
-      unlink(newbin);
-      if (copyfile(binname, newbin))
-        ok = 0;
-
-      if (ok && !can_stat(newbin)) {
-         unlink(newbin);
-         ok = 0;
-      }
-
-      if (ok && fixmod(newbin)) {
-          unlink(newbin);
-          ok = 0;
-      }
-
-      if (!ok) {
-        werr(ERR_WRONGBINDIR);
-      } else {
-        unlink(binname);
-        system(newbin);
-        sdprintf("exiting to let new binary run...");
-        exit(0);
-      }
-    }
-  }
+  move_bin(conffile.binpath, conffile.binname, 1);
 #endif /* !CYGWIN_HACKS */
 
   fillconf(&conf);
@@ -805,6 +762,9 @@ printf("out: %s\n", out);
     sdprintf("Calling dtx_arg with %d params.", argc);
     dtx_arg(argc, argv);
   }
+
+  sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", geteuid(), myuid, getppid(), getpid());
+
 #ifndef CYGWIN_HACKS
   if (checktrace)
     check_trace(1);
