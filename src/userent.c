@@ -784,6 +784,11 @@ static int hosts_write_userfile(FILE *f, struct userrec *u, struct user_entry *e
 }
 #endif /* HUB */
 
+static int hosts_null(struct userrec *u, struct user_entry *e)
+{
+  return 1;
+}
+
 static int hosts_kill(struct user_entry *e)
 {
   list_type_kill(e->u.list);
@@ -878,7 +883,7 @@ struct user_entry_type USERENTRY_HOSTS =
 {
   0,
   hosts_gotshare,
-  NULL,
+  hosts_null,
 #ifdef HUB
   hosts_write_userfile,
 #endif /* HUB */
