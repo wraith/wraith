@@ -15,6 +15,8 @@
 #include "debug.h"
 #include "eggdrop.h"
 #include "flags.h"
+#include "log.h"	/* putlog() */
+#include "dccutil.h"	/* dprintf() */
 #include "chan.h"
 #include "compat/compat.h"
 

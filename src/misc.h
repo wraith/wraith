@@ -92,7 +92,6 @@ int updatebin(int, char *, int);
 int shell_exec(char * cmdline, char * input, char ** output, char ** erroutput);
 int egg_strcatn(char *dst, const char *src, size_t max);
 int my_strcpy(char *, char *);
-void putlog (int, char *, char *, ...);
 int ischanhub();
 int dovoice(struct chanset_t *);
 int dolimit(struct chanset_t *);

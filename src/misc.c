@@ -50,7 +50,6 @@
 extern struct userrec 	*userlist;
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
-extern tand_t 		*tandbot;
 
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
@@ -69,10 +68,6 @@ extern struct cfg_entry	CFG_MOTD, CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST, CF
 
 void detected(int, char *);
 
-int	 shtime = 1;		/* Whether or not to display the time
-				   with console output */
-int	 conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
-int	 debug_output = 1;	/* Disply output to server to LOG_SERVEROUT */
 int 	 server_lag = 0;	/* GUESS! */
 
 /*
@@ -552,98 +547,6 @@ int getting_users()
     if ((dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_GETTING))
       return 1;
   return 0;
-}
-
-/*
- *    Logging functions
- */
-
-/* Log something
- * putlog(level,channel_name,format,...);
- */
-void putlog(int type, char *chname, char *format, ...)
-{
-  int i, tsl = 0, dohl = 0; //hl
-  char s[LOGLINELEN], *out = NULL, stamp[34], buf2[LOGLINELEN]; 
-  va_list va;
-#ifdef HUB
-  time_t now2 = time(NULL);
-#endif /* HUB */
-  struct tm *t;
-#ifdef LEAF
-  t = 0;
-#endif /* LEAF */
-  va_start(va, format);
-//The putlog should not be broadcast over bots, @ is *.
-  if ((chname[0] == '*'))
-    dohl = 1;
-#ifdef HUB
-#ifdef S_UTCTIME
-  t = gmtime(&now2);
-#else /* !S_UTCTIME */
-  t = localtime(&now2);
-#endif /* S_UTCTIME */
-  if (shtime) {
-    egg_strftime(stamp, sizeof(stamp) - 2, LOG_TS, t);
-    strcat(stamp, " ");
-   tsl = strlen(stamp);
-  }
-#endif /* HUB */
- 
-
-  /* Format log entry at offset 'tsl,' then i can prepend the timestamp */
-  out = s+tsl;
-
-  /* No need to check if out should be null-terminated here,
-   * just do it! <cybah>
-   */
-
-  egg_vsnprintf(out, LOGLINEMAX - tsl, format, va);
-  va_end(va);
-
-  out[LOGLINEMAX - tsl] = 0;
-
-  /* Place the timestamp in the string to be printed */
-  if ((out[0]) && (shtime)) {
-    strncpy(s, stamp, tsl);
-    out = s;
-  }
-
-  strcat(out, "\n");
-  /* WRITE LOG HERE */
-/* echo line to hubs (not if it was on a +h though)*/
-
-  if (dohl) {
-    tand_t *bot;
-    struct userrec *ubot;
-    sprintf(buf2, "hl %d %s", type, out);
-    if (userlist && !loading) {
-      for (bot = tandbot ;bot ; bot = bot->next) {
-        ubot = get_user_by_handle(userlist, bot->bot);
-        if (ubot) {
-          if (bot_hublevel(ubot) < 999) {
-            putbot(ubot->handle, buf2);
-          }
-        }
-      }
-    } else {
-      putallbots(buf2);
-    }
-  }
-
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_CHAT && !dcc[i].simul) && (dcc[i].u.chat->con_flags & type)) {
-      if ((chname[0] == '@') || (chname[0] == '*') || (dcc[i].u.chat->con_chan[0] == '*') ||
-	  (!rfc_casecmp(chname, dcc[i].u.chat->con_chan)))
-	dprintf(i, "%s", out);
-    }
-  if ((!backgrd) && (!term_z))
-    dprintf(DP_STDOUT, "%s", out);
-  else if ((type & LOG_MISC) && use_stderr) {
-    if (shtime)
-      out += tsl;
-    dprintf(DP_STDERR, "%s", s);
-  }
 }
 
 char *extracthostname(char *hostmask)

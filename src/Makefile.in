@@ -28,6 +28,7 @@ OBJS = auth.o \
 	egg_timer.o \
 	flags.o \
 	garble.o \
+	log.o \
 	main.o \
 	match.o \
 	misc.o \
