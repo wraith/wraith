@@ -321,6 +321,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 #ifdef LEAF
   if (bot == conffile.bots) {
     bot->localhub = 1;          /* first bot */
+    conffile.localhub = strdup(nick ? nick : origbotname);
     /* perhaps they did -B localhub-bot ? */
     if (origbotname[0] && !strcmp(origbotname, bot->nick))
       localhub = 1;
@@ -350,34 +351,31 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
 
 void
-showconf()
+showconf(int idx)
 {
   conf_bot *bot = NULL;
 
-  sdprintf("---------------------------CONF START---------------------------");
 #ifndef CYGWIN_HACKS
-  sdprintf("uid      : %d", conffile.uid);
-  sdprintf("uname    : %s", conffile.uname);
-  sdprintf("username : %s", conffile.username);
-  sdprintf("homedir  : %s", conffile.homedir);
-  sdprintf("binpath  : %s", conffile.binpath);
-  sdprintf("binname  : %s", conffile.binname);
-  sdprintf("portmin  : %d", conffile.portmin);
-  sdprintf("portmax  : %d", conffile.portmax);
-  sdprintf("pscloak  : %d", conffile.pscloak);
-  sdprintf("autocron : %d", conffile.autocron);
-  sdprintf("autouname: %d", conffile.autouname);
+  dprintf(idx, "uid      : %d\n", conffile.uid);
+  dprintf(idx, "uname    : %s\n", conffile.uname);
+  dprintf(idx, "username : %s\n", conffile.username);
+  dprintf(idx, "homedir  : %s\n", conffile.homedir);
+  dprintf(idx, "binpath  : %s\n", conffile.binpath);
+  dprintf(idx, "binname  : %s\n", conffile.binname);
+  dprintf(idx, "portmin  : %d\n", conffile.portmin);
+  dprintf(idx, "portmax  : %d\n", conffile.portmax);
+  dprintf(idx, "pscloak  : %d\n", conffile.pscloak);
+  dprintf(idx, "autocron : %d\n", conffile.autocron);
+  dprintf(idx, "autouname: %d\n", conffile.autouname);
 #endif /* !CYGWIN_HACKS */
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next)
-    sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d PID_FILE: %s LOCALHUB %d", bot->nick, bot->ip, bot->host,
-             bot->ip6, bot->host6, bot->pid, bot->pid_file,
-#ifdef LEAF
-             bot->localhub
-#else
-             0
-#endif /* LEAF */
-      );
-  sdprintf("----------------------------CONF END----------------------------");
+    dprintf(idx, "%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n",
+             bot->nick, 
+             bot->ip ? bot->ip : "",
+             bot->host ? bot->host : "",
+             bot->ip6 ? bot->ip6 : "", 
+             bot->host6 ? bot->host6 : "", 
+             bot->pid);
 }
 
 void
@@ -413,6 +411,12 @@ parseconf()
   if (!conffile.bots->nick && !conffile.bots->next)     /* no bots ! */
     werr(ERR_NOBOTS);
 
+  if (conffile.username) {
+    str_redup(&conffile.username, my_username());
+  } else {
+    conffile.username = strdup(my_username());
+  }
+
 #ifndef CYGWIN_HACKS
   if (conffile.uid && conffile.uid != myuid) {
     sdprintf("wrong uid, conf: %d :: %d", conffile.uid, myuid);
@@ -428,12 +432,6 @@ parseconf()
     str_redup(&conffile.uname, my_uname());
   } else if (!conffile.uname) { /* if not set, then just set it, wont happen again next time... */
     conffile.uname = strdup(my_uname());
-  }
-
-  if (conffile.username) {
-    str_redup(&conffile.username, my_username());
-  } else {
-    conffile.username = strdup(my_username());
   }
 
   if (conffile.homedir) {
@@ -741,6 +739,7 @@ fillconf(conf_t * inconf)
   free(mynick);
   inconf->bot = (conf_bot *) calloc(1, sizeof(conf_bot));
   conf_bot_dup(inconf->bot, bot);
+  inconf->localhub = conffile.localhub ? strdup(conffile.localhub) : NULL;
   inconf->binpath = conffile.binpath ? strdup(conffile.binpath) : NULL;
   inconf->binname = conffile.binname ? strdup(conffile.binname) : NULL;
   inconf->uname = conffile.uname ? strdup(conffile.uname) : NULL;

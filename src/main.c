@@ -711,6 +711,7 @@ int main(int argc, char **argv)
 #endif /* CYGWIN_HACKS */
   clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
+  init_flags();
   init_settings();
   binds_init();
   core_binds_init();

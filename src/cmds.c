@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "cmds.h"
+#include "conf.h"
 #include "color.h"
 #include "settings.h"
 #include "salt.h"
@@ -1843,6 +1844,45 @@ static void cmd_sha1(struct userrec *u, int idx, char *par)
   dprintf(idx, "SHA1(%s) = %s\n", par, SHA1(par));
 }
 
+static void cmd_conf(struct userrec *u, int idx, char *par)
+{
+  char *cmd = NULL;
+
+  if (!localhub) {
+    dprintf(idx, "Please use '%s%s%s' for this login/shell.\n", RED(idx), conf.localhub, COLOR_END(idx));
+    return;
+  }
+
+  if (par[0])
+    cmd = newsplit(&par);
+
+  /* del/change should restart the specified bot ;) */
+
+  if (!cmd) {
+    dprintf(idx, "Usage: conf <add|del|list|change|set> [options]\n");
+    return;
+  }
+  
+  putlog(LOG_CMDS, "*", "#%s# conf %s %s", dcc[idx].nick, cmd, par[0] ? par : "");
+
+  if (!egg_strcasecmp(cmd, "list")) {
+    conf_bot *bot = NULL;
+    unsigned int i = 0;
+
+    for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
+      i++;
+      dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
+                    bot->nick,
+                    bot->ip ? bot->ip : "",
+                    bot->host ? bot->host : "",
+                    bot->ip6 ? bot->ip6 : "",
+                    bot->host6 ? bot->host6 : "",
+                    bot->pid);
+    }
+  }
+  /* showconf(idx); */
+}
+
 static void cmd_encrypt(struct userrec *u, int idx, char *par)
 {
   char *key = NULL, *buf = NULL;
@@ -2312,7 +2352,8 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
 		     user = {0, 0, 0, 0},
 		     ouser = {0, 0, 0, 0};
   /*int fl = -1, of = 0, ocf = 0;*/
-  flag_t fl = -1, of = 0, ocf = 0;
+/* FIXME: fl WAS -1 */
+  flag_t of = 0, ocf = 0;
 
   if (!par[0]) {
     dprintf(idx, "Usage: chattr <handle> [changes] [channel]\n");
@@ -2393,7 +2434,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
       return;
     }
 /* FIXME: POSSIBLY WRONG BECAUSE OF SIGNNES CHANGE OF fl */
-  user.match &= fl;
+  user.match &= -1;
 
   if (chg) {
     pls.match = user.match;
@@ -4213,6 +4254,7 @@ cmd_t C_dcc[] =
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL},
   {"md5",		"",	(Function) cmd_md5,		NULL},
   {"sha1",		"",	(Function) cmd_sha1,		NULL},
+  {"conf",		"",	(Function) cmd_conf,		NULL},
   {"encrypt",		"",	(Function) cmd_encrypt,		NULL},
   {"decrypt",		"",	(Function) cmd_decrypt,		NULL},
 #ifdef HUB

@@ -24,6 +24,7 @@ typedef struct conf_bot_b {
 typedef struct conf_b {
   conf_bot *bots;       /* the list of bots */
   conf_bot *bot;        /* single bot (me) */
+  char *localhub;	/* my localhub */
   uid_t uid;
   char *uname;
   char *username;       /* shell username */
@@ -54,7 +55,7 @@ int killbot(char *);
 void confedit(char *);
 #endif /* S_CONFEDIT */
 pid_t checkpid(char *, conf_bot *);
-void showconf();
+void showconf(int);
 void init_conf();
 void free_conf();
 int readconf(char *, int);
