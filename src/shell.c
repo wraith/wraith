@@ -107,8 +107,13 @@ void check_maxfiles()
 {
   int sock = -1, sock1 = -1 , bogus = 0, failed_close = 0;
 
+#ifdef USE_IPV6
   sock1 = getsock(0, AF_INET);		/* fill up any lower avail */
   sock = getsock(0, AF_INET);
+#else
+  sock1 = getsock(0);
+  sock = getsock(0);
+#endif
 
   if (sock1 != -1)
     killsock(sock1);
