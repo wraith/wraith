@@ -939,6 +939,7 @@ static void disconnect_server(int idx, int dolost)
   serv = -1;
   servidx = -1;
   server_online = 0;
+  checked_hostmask = 0;
   floodless = 0;
   botuserhost[0] = 0;
   if (dolost) {
