@@ -284,6 +284,8 @@ console_chon(char *handle, int idx)
         dcc[idx].status |= STAT_WHOM;
       else
         dcc[idx].status &= ~STAT_WHOM;
+/* FIXME: Remove this after 1.1.8 */
+      dcc[idx].status |= STAT_BANNER | STAT_CHANNELS | STAT_BOTS | STAT_WHOM;
 
     }
     if ((dcc[idx].u.chat->channel >= 0) && (dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
