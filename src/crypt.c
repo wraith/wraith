@@ -265,7 +265,7 @@ void DecryptFile(char *infile, char *outfile)
 }
 
 
-char *md5(const char *string) 
+char *MD5(const char *string) 
 {
   static char	  md5string[MD5_HASH_LENGTH + 1] = "";
   unsigned char   md5out[MD5_HASH_LENGTH + 1] = "";
@@ -275,5 +275,20 @@ char *md5(const char *string)
   MD5_Update(&ctx, string, strlen(string));
   MD5_Final(md5out, &ctx);
   strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
   return md5string;
+}
+
+char *SHA1(const char *string)
+{
+  static char	  sha1string[SHA_HASH_LENGTH + 1] = "";
+  unsigned char   sha1out[SHA_HASH_LENGTH + 1] = "";
+  SHA_CTX ctx;
+
+  SHA1_Init(&ctx);
+  SHA1_Update(&ctx, string, strlen(string));
+  SHA1_Final(sha1out, &ctx);
+  strncpyz(sha1string, btoh(sha1out, SHA_DIGEST_LENGTH), sizeof(sha1string));
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
+  return sha1string;
 }

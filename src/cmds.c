@@ -8,6 +8,7 @@
 #include "common.h"
 #include "cmds.h"
 #include "settings.h"
+#include "salt.h"
 #include "debug.h"
 #include "dcc.h"
 #include "shell.h"
@@ -1282,6 +1283,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
   }
   console_dostore(dest);
 }
+
 static void cmd_date(struct userrec *u, int idx, char *par)
 {
   char date[50] = "", utctime[50] = "", ltime[50] = "";
@@ -1756,6 +1758,76 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
     free(rand);
   } else 
     dprintf(idx, "Too long, must be <= 300\n");
+}
+
+static void cmd_md5(struct userrec *u, int idx, char *par)
+{
+  if (!par[0]) {
+    dprintf(idx, "Usage: md5 <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", STR("#%s# md5 ..."), dcc[idx].nick);
+  dprintf(idx, "MD5(%s) = %s\n", par, MD5(par));
+}
+
+static void cmd_sha1(struct userrec *u, int idx, char *par)
+{
+  if (!par[0]) {
+    dprintf(idx, "Usage: sha1 <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", STR("#%s# sha1 ..."), dcc[idx].nick);
+  dprintf(idx, "SHA1(%s) = %s\n", par, SHA1(par));
+}
+
+static void cmd_encrypt(struct userrec *u, int idx, char *par)
+{
+  char *key = NULL, *buf = NULL;
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: encrypt <key> <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", STR("#%s# encrypt ..."), dcc[idx].nick);
+  
+  key = newsplit(&par);
+  if (!par[0]) {
+    dprintf(idx, "Usage: encrypt <key> <string>\n");
+    return;
+
+  }
+
+  buf = encrypt_string(key ? key : SALT2, par);
+
+  dprintf(idx, "encrypt(%s) = %s\n", par, buf);
+  free(buf);
+}
+
+static void cmd_decrypt(struct userrec *u, int idx, char *par)
+{
+  char *key = NULL, *buf = NULL;
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: decrypt <key> <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", STR("#%s# decrypt ..."), dcc[idx].nick);
+  
+  key = newsplit(&par);
+  if (!par[0]) {
+    dprintf(idx, "Usage: decrypt <key> <string>\n");
+    return;
+
+  }
+
+  buf = decrypt_string(key ? key : SALT2, par);
+
+  dprintf(idx, "decrypt(%s) = %s\n", par, buf);
+  free(buf);
 }
 
 static void cmd_restart(struct userrec *u, int idx, char *par)
@@ -4073,6 +4145,10 @@ cmd_t C_dcc[] =
   {"w", 		"n", 	(Function) cmd_w, 		NULL},
   {"channels", 		"", 	(Function) cmd_channels, 	NULL},
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL},
+  {"md5",		"",	(Function) cmd_md5,		NULL},
+  {"sha1",		"",	(Function) cmd_sha1,		NULL},
+  {"encrypt",		"",	(Function) cmd_encrypt,		NULL},
+  {"decrypt",		"",	(Function) cmd_decrypt,		NULL},
 #ifdef HUB
   {"botcmd",		"i",	(Function) cmd_botcmd, 		NULL},
   {"bc",		"i",	(Function) cmd_botcmd, 		NULL},

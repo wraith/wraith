@@ -18,11 +18,12 @@
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)
-#define md5cmp(hash, string)            strcmp(hash, md5(string))
+#define md5cmp(hash, string)            strcmp(hash, MD5(string))
 
 
 #ifndef MAKING_MODS
-char *md5(const char *);
+char *MD5(const char *);
+char *SHA1(const char *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 void encrypt_pass(char *, char *);

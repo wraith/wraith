@@ -451,9 +451,6 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
   int force = 0;
   memberlist *m = NULL;
 
-  if (match_my_nick(nick))
-    return BIND_RET_BREAK;
-
   if (chname && chname[0]) {
     chan = findchan_by_dname(chname);
     if (chan) 
@@ -504,9 +501,6 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
   int force = 0;
   memberlist *m = NULL;
 
-  if (match_my_nick(nick))
-    return BIND_RET_BREAK;
-
   if (chname && chname[0]) {
     chan = findchan_by_dname(chname);
     if (chan) 
@@ -554,9 +548,6 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   char list[1024] = "";
 
-  if (match_my_nick(nick))
-    return BIND_RET_BREAK;
-
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sCHANNELS %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
   for (chan = chanset; chan; chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
@@ -580,9 +571,6 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
 {
   struct chanset_t *chan = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  if (match_my_nick(nick))
-    return BIND_RET_BREAK;
 
   if (chname && chname[0]) 
     return 0;
@@ -613,14 +601,43 @@ static int msgc_help(char *nick, char *host, struct userrec *u, char *par, char 
   return BIND_RET_BREAK;
 }
 
+static int msgc_md5(char *nick, char *host, struct userrec *u, char *par, char *chname)
+{
+  struct chanset_t *chan = NULL;
+
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sMD5 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  
+  if (chname && chname[0])
+    chan = findchan_by_dname(chname);  
+
+  if (chan)
+    dprintf(DP_HELP, "PRIVMSG %s :MD5(%s) = %s\n", chan->dname, par, MD5(par));
+  else
+    dprintf(DP_HELP, "NOTICE %s :MD5(%s) = %s\n", nick, par, MD5(par));
+  return BIND_RET_BREAK;
+}
+
+static int msgc_sha1(char *nick, char *host, struct userrec *u, char *par, char *chname)
+{
+  struct chanset_t *chan = NULL;
+
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sSHA1 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  
+  if (chname && chname[0])
+    chan = findchan_by_dname(chname);  
+
+  if (chan)
+    dprintf(DP_HELP, "PRIVMSG %s :SHA1(%s) = %s\n", chan->dname, par, SHA1(par));
+  else
+    dprintf(DP_HELP, "NOTICE %s :SHA1(%s) = %s\n", nick, par, SHA1(par));
+  return BIND_RET_BREAK;
+}
+
 static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
   struct chanset_t *chan = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int force = 0;
-
-  if (match_my_nick(nick))
-    return BIND_RET_BREAK;
 
   if (chname && chname[0])
     return 0;
@@ -675,6 +692,8 @@ static cmd_t C_msgc[] =
   {"getkey",		"",	(Function) msgc_getkey,		NULL},
   {"invite",		"",	(Function) msgc_invite,		NULL},
   {"help",		"",	(Function) msgc_help,		NULL},
+  {"md5",		"",	(Function) msgc_md5,		NULL},
+  {"sha1",		"",	(Function) msgc_sha1,		NULL},
   {NULL,		NULL,	NULL,				NULL}
 };
 #endif /* S_AUTHCMDS */

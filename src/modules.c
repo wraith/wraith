@@ -245,7 +245,7 @@ Function global_table[] =
   (Function) & global_bans,	 /* struct banrec *			*/
   (Function) & global_ign,	 /* struct igrec *			*/
   (Function) 0,
-  (Function) md5,
+  (Function) MD5,
   /* 100 - 103 */
   (Function) & max_dcc,		 /* int					*/
   (Function) shouldjoin, 

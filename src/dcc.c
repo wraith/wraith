@@ -329,10 +329,8 @@ static void cont_link(int idx, char *buf, int ii)
 {
   /* Now set the initial link key (incoming only, we're not sending more until we get an OK)... */
   struct sockaddr_in sa;
-  char tmp[256] = "", bufout[SHA_HASH_LENGTH + 1] = "";
-  SHA_CTX ctx;
-  int i;
-  int snum = -1;
+  char tmp[301] = "";
+  int i, snum = -1;
 
   for (i = 0; i < MAXSOCKS; i++) {
     if ((socklist[i].sock == dcc[idx].sock) && !(socklist[i].flags & SOCK_UNUSED)) {
@@ -363,10 +361,7 @@ static void cont_link(int idx, char *buf, int ii)
     /* bdhash myport hubnick mynick */
     getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
     egg_snprintf(tmp, sizeof tmp, "%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
-    SHA1_Init(&ctx);
-    SHA1_Update(&ctx, tmp, strlen(tmp));
-    SHA1_Final(bufout, &ctx);
-    strncpyz(socklist[snum].ikey, btoh(bufout, SHA_DIGEST_LENGTH), sizeof(socklist[snum].ikey));
+    strncpyz(socklist[snum].ikey, SHA1(tmp), sizeof(socklist[snum].ikey));
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "initkey (%d): %s", strlen(socklist[snum].ikey), socklist[snum].ikey);
     /* We've send our conf.bot->nick and set the key for the link on the sock, wait for 'elink' back to verify key */

@@ -9,7 +9,7 @@ Wraith botpack by bryan, with credits and thanks to the following:
 * passwd for beta testing, and his dedication to finding bugs.
 * extort for finding misc bugs.
 * pgpkeys for finding bugs, and providing input.
-* qFox for providing an mIRC $md5() alias, not requiring a dll or >6.03
+* qFox for providing an mIRC $MD5() alias, not requiring a dll or >6.03
 * Sith_Lord helping test ipv6 on the bot (admin@elitepackets.com)
 * Excelsior for finding a bug on BSD with the ipv6, and for celdrop which inspired many features.
 * syt for giving me inspiration to code a more secure bot.

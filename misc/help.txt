@@ -1,3 +1,4 @@
+
 ::+ban
 ###  %b+ban%b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds a ban to the list of bans stored on the bot, with optional comment and
@@ -1108,6 +1109,26 @@ See also: unlink, newleaf%{+a}, -bot%{-}
      .match *.edu 16 25
    This would show results 16 through 25 matching any users with a hostmask
    that ends with ".edu".
+::encrypt
+###  %bencrypt%b <key> <string>
+   Encrypts the string using the specified key.
+
+See also: decrypt, randstring, md5, sha1
+::decrypt
+###  %decrypt%b <key> <string>
+   Decrypts the string using the specified key.
+
+See also: encrypt, randstring, md5, sha1
+::sha1
+###  %bsha1%b <string>
+   Returns the SHA1 hash of the specified string.
+
+See also: randstring, md5, encrypt, decrypt
+::md5
+###  %bmd5%b <string>
+   Returns the MD5 hash of the specified string.
+ 
+See also: randstring, sha1, encrypt, decrypt
 :leaf:mdop:
 ###  %bmdop%b <#channel> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]
    For those of us who do not wish to be rocket scientists in the mdop department, 
@@ -1279,6 +1300,8 @@ See also: echo, color
 ::randstring
 ###  %brandstring%b <len>
    Displays a random string of length 'len' up to 300 chars.
+
+See also: md5, sha1, encrypt, decrypt
 ::relay
 ###  %brelay%b <bot>
    Relays you via telnet to another bot, whether or not it is currently linked.

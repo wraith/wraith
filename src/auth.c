@@ -89,7 +89,7 @@ char *makehash(struct userrec *u, char *randstring)
   if (secpass)
     free(secpass);
 
-  return md5(hash);
+  return MD5(hash);
 }
 #endif /* S_AUTHHASH || S_DCCAUTH */
 
