@@ -784,6 +784,7 @@ void mdop_request(char *botnick, char *code, char *par)
       strcat(work, p);
       cnt++;
     }
+    strcat(work, "\r");
     strcat(work, "\n");
   }
   tputs(serv, work, strlen(work));

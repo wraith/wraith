@@ -1065,7 +1065,7 @@ do_take(struct chanset_t *chan)
   register unsigned int lines_max = 5, lines = 0, deopn, i;
 
   if (floodless)
-    lines_max = 10;
+    lines_max = 15;
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     hasop = (m->flags & CHANOP);
@@ -1117,6 +1117,7 @@ do_take(struct chanset_t *chan)
     else
       modeline = take_massopline(op, &to_op);
     strcat(work, modeline);
+    strcat(work, "\r");
     strcat(work, "\n");
     lines++;
     free(modeline);

@@ -35,6 +35,7 @@ static void cmd_servers(int idx, char *par)
 static void cmd_dump(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# dump %s", dcc[idx].nick, par);
+
   if (!isowner(dcc[idx].nick)) {
     dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
     return;
@@ -44,7 +45,7 @@ static void cmd_dump(int idx, char *par)
     return;
   }
 
-  tputs(serv, par, strlen(par));
+  dprintf(DP_DUMP, "%s\n", par);
 }
 
 static void cmd_jump(int idx, char *par)

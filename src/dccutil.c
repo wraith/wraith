@@ -157,14 +157,13 @@ colorbuf(char *buf, size_t len, int idx)
 void
 dprintf(int idx, const char *format, ...)
 {
-  static char buf[1024] = "";
+  char buf[1024] = "";
   size_t len;
   va_list va;
 
   va_start(va, format);
   egg_vsnprintf(buf, 1023, format, va);
   va_end(va);
-
   /* We can not use the return value vsnprintf() to determine where
    * to null terminate. The C99 standard specifies that vsnprintf()
    * shall return the number of bytes that would be written if the
@@ -199,9 +198,13 @@ dprintf(int idx, const char *format, ...)
       case DP_SERVER_NEXT:
       case DP_HELP_NEXT:
       case DP_DUMP:
-        if ((idx == DP_DUMP || floodless) && server_online && serv != -1)
-          tputs(serv, buf, len);
-        else
+        len -= remove_crlf_r(buf);
+
+        if ((idx == DP_DUMP || floodless) && server_online && serv != -1) {
+          if (debug_output)
+            putlog(LOG_SRVOUT, "@", "[m->] %s", buf);
+          write_to_server(buf, len);
+        } else
           queue_server(idx, buf, len);
         break;
 #endif /* LEAF */
