@@ -2126,6 +2126,10 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
         putlog(LOG_MISC, "*", "%s attempted to give %s hub connect access", dcc[idx].nick, u2->handle);
       if (mns.global & USER_HUBA)
         putlog(LOG_MISC, "*", "%s attempted to take away hub connect access from %s", dcc[idx].nick, u2->handle);
+      if (pls.global & USER_UPDATEHUB)
+        putlog(LOG_MISC, "*", "%s attempted to make %s the updatehub", dcc[idx].nick, u2->handle);
+      if (mns.global & USER_UPDATEHUB)
+        putlog(LOG_MISC, "*", "%s attempted to take away updatehub status from %s", dcc[idx].nick, u2->handle);
       if (pls.global & USER_ADMIN)
         putlog(LOG_MISC, "*", "%s attempted to give %s admin access", dcc[idx].nick, u2->handle);
       if (mns.global & USER_ADMIN)
@@ -2134,8 +2138,8 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
         putlog(LOG_MISC, "*", "%s attempted to give owner to %s", dcc[idx].nick, u2->handle);
       if (mns.global & USER_OWNER)
         putlog(LOG_MISC, "*", "%s attempted to take owner away from %s", dcc[idx].nick, u2->handle);
-      pls.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER);
-      mns.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER);
+      pls.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | USER_UPDATEHUB);
+      mns.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | USER_UPDATEHUB);
     }
     if (chan) {
       pls.chan &= ~(BOT_SHARE);
