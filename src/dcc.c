@@ -312,8 +312,7 @@ cont_link(int idx, char *buf, int ii)
     socklist[snum].encstatus = 1;
     socklist[snum].gz = 1;
   } else {
-/* FIXME: This seems unnecesary, we didnt find a socket yet we are killing one.. ?*/
-  /*  killsock(dcc[idx].sock); */
+    killsock(dcc[idx].sock); 
     lostdcc(idx);
   }
   return;
