@@ -45,7 +45,7 @@
 
 extern egg_traffic_t 	traffic;
 
-mycmds 			 cmdlist[500]; /* the list of dcc cmds for help system */
+mycmds 			 cmdlist[300]; /* the list of dcc cmds for help system */
 int    			 cmdi = 0;
 
 static char		 *btos(unsigned long);

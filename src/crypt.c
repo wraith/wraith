@@ -59,7 +59,7 @@ char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
   unsigned char *newdata = NULL;
 
   datalen -= datalen % CRYPT_BLOCKSIZE;
-  newdata = (unsigned char *) calloc(1, datalen);
+  newdata = calloc(1, datalen);
   egg_memcpy(newdata, data, datalen);
 
   if ((!keydata) || (!keydata[0])) {
@@ -170,15 +170,14 @@ void encrypt_pass(char *s1, char *s2)
   free(tmp);
 }
 
-int lfprintf (FILE *stream, ...)
+int lfprintf (FILE *stream, char *format, ...)
 {
   va_list va;
-  char buf[8192], *ln = NULL, *nln = NULL, *tmp = NULL, *format = NULL;
+  char buf[8192], *ln = NULL, *nln = NULL, *tmp = NULL;
   int res;
 
   buf[0] = 0;
-  va_start(va, stream);
-  format = va_arg(va, char *);
+  va_start(va, format);
   egg_vsnprintf(buf, sizeof buf, format, va);
   va_end(va);
 

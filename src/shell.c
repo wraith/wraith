@@ -237,18 +237,22 @@ void check_promisc()
 #ifdef SIOCGIFCONF
   struct ifreq ifreq, *ifr = NULL;
   struct ifconf ifcnf;
-  char *cp = NULL, *cplim = NULL, buf[8192] = "";
+  char *cp = NULL, *cplim = NULL, *buf = NULL;
   int sock;
 
   if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", "ignore"))
     return;
+
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0)
     return;
+  buf = calloc(1, 8192);
+
   ifcnf.ifc_len = 8191;
   ifcnf.ifc_buf = buf;
   if (ioctl(sock, SIOCGIFCONF, (char *) &ifcnf) < 0) {
     close(sock);
+    free(buf);
     return;
   }
   ifr = ifcnf.ifc_req;
@@ -260,10 +264,13 @@ void check_promisc()
       if (ifreq.ifr_flags & IFF_PROMISC) {
         close(sock);
         detected(DETECT_PROMISC, "Detected promiscuous mode");
+        free(buf);
         return;
       }
     }
   }
+  if (buf)
+    free(buf);
   close(sock);
 #endif /* SIOCGIFCONF */
 #endif /* S_PROMISC */

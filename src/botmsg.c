@@ -277,18 +277,13 @@ void botnet_send_pong(int idx)
   tputs(dcc[idx].sock, "po\n", 3);
 }
 
-void botnet_send_priv (int idx, ...)
+void botnet_send_priv (int idx, char *from, char *to, char *tobot, char *format, ...)
 {
   size_t len;
-  char *from = NULL, *to = NULL, *tobot = NULL, *format = NULL;
   char tbuf[1024] = "";
   va_list va;
 
-  va_start(va, idx);
-  from = va_arg(va, char *);
-  to = va_arg(va, char *);
-  tobot = va_arg(va, char *);
-  format = va_arg(va, char *);
+  va_start(va, format);
   egg_vsnprintf(tbuf, 450, format, va);
   va_end(va);
   tbuf[sizeof(tbuf)-1] = 0;

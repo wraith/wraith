@@ -19,6 +19,8 @@ time_t  lastfork = 0;
  * process to the background. This includes writing a PID file
  * and informing the user of the split.
  */
+static void bg_do_detach(pid_t) __attribute__((noreturn));
+
 static void bg_do_detach(pid_t p)
 {
   FILE *fp = NULL;

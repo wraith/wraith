@@ -31,8 +31,8 @@ int		sdebug = 0;             /* enable debug output? */
 
 #ifdef DEBUG_CONTEXT
 /* Context storage for fatal crashes */
-char    cx_file[16][30]; 
-char    cx_note[16][256];
+char    cx_file[16][15]; 
+char    cx_note[16][21];
 int     cx_line[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 int     cx_ptr = 0;
 #endif /* DEBUG_CONTEXT */

@@ -49,7 +49,7 @@ static struct delay_mode *start_delay = NULL;
 #ifdef HUB
 static void start_sending_users(int);
 #endif /* HUB */
-static void shareout_but(struct chanset_t *, ...);
+static void shareout_but(struct chanset_t *chan, int, char *, ...) __attribute__((format(printf, 3, 4)));
 static void cancel_user_xfer(int, void *);
 
 #include "share.h"
@@ -1157,45 +1157,44 @@ sharein(int idx, char *msg)
 }
 
 void
-shareout(struct chanset_t *chan, ...)
+shareout(struct chanset_t *chan, char *format, ...)
 {
   int i, l;
-  char *format = NULL, s[601] = "";
+  char s[601] = "";
   va_list va;
 
-  va_start(va, chan);
-  format = va_arg(va, char *);
+  va_start(va, format);
 
   strcpy(s, "s ");
   if ((l = egg_vsnprintf(s + 2, 509, format, va)) < 0)
     s[2 + (l = 509)] = 0;
+  va_end(va);
+
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
-  va_end(va);
 }
 
 static void
-shareout_but(struct chanset_t *chan, ...)
+shareout_but(struct chanset_t *chan, int x, char *format, ...)
 {
-  int i, x, l;
-  char *format = NULL, s[601] = "";
+  int i, l;
+  char s[601] = "";
   va_list va;
 
-  va_start(va, chan);
-  x = va_arg(va, int);
-  format = va_arg(va, char *);
+  va_start(va, format);
 
   strcpy(s, "s ");
   if ((l = egg_vsnprintf(s + 2, 509, format, va)) < 0)
     s[2 + (l = 509)] = 0;
+  va_end(va);
+
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type->flags & DCT_BOT) && (i != x) &&
         (dcc[i].status & STAT_SHARE) && (!(dcc[i].status & STAT_GETTING)) && (!(dcc[i].status & STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
-  va_end(va);
 }
 
 #ifdef HUB

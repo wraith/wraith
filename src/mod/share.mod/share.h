@@ -11,7 +11,7 @@
 #define UFF_EXEMPT	BIT2	/* Send exempts in user file	    */
 
 void sharein(int, char *);
-void shareout(struct chanset_t *, ...);
+void shareout(struct chanset_t *, char *, ...) __attribute__((format(printf, 2, 3)));
 void finish_share(int);
 void dump_resync(int);
 void share_report(int, int);

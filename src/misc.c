@@ -1076,14 +1076,14 @@ char *replace(const char *string, const char *oldie, const char *newbie)
 #define HELP_UNDER 4
 #define HELP_FLASH 8
 
-/* so many string++ is making the problem */
-void showhelp (int idx, struct flag_record *flags, char *string)
+void showhelp(int idx, struct flag_record *flags, char *string)
 {
   static int help_flags;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
-  char helpstr[12288] = "", tmp[2] = "", flagstr[10] = "";
+  char *helpstr = NULL, tmp[2] = "", flagstr[10] = "";
   int ok = 1;
 
+  helpstr = calloc(1, strlen(string) + 1000 + 1);
   while (string && string[0]) {
     if (*string == '%') {
       if (!strncmp(string + 1, "{+", 2)) {
@@ -1167,6 +1167,7 @@ void showhelp (int idx, struct flag_record *flags, char *string)
   }
   helpstr[strlen(helpstr)] = 0;
   if (helpstr[0]) dumplots(idx, "", helpstr);
+  free(helpstr);
 }
 
 /* Arrange the N elements of ARRAY in random order. */

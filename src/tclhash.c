@@ -358,7 +358,7 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 	return ret;
 }
 
-int check_bind_hits(bind_table_t *table, const char *match, struct flag_record *flags, int *hits,...)
+int check_bind_hits(bind_table_t *table, const char *match, struct flag_record *flags, int *hits, ...)
 {
         va_list args;
         int ret;
