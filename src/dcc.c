@@ -1262,8 +1262,6 @@ dcc_telnet(int idx, char *buf, int ii)
 
 static void dcc_telnet_dns_callback(void *client_data, const char *ip, char **hosts)
 {
-sdprintf("hosts[0]: %s, ip: %s", hosts[0], ip);
-
   int idx = -1, i = (int) client_data;
   int j = 0, sock;
   char s2[UHOSTLEN + 20] = "";
@@ -1272,12 +1270,6 @@ sdprintf("hosts[0]: %s, ip: %s", hosts[0], ip);
     idx = (int) dcc[i].u.other;
 
   dcc[i].u.other = NULL;
-
-//#ifdef USE_IPV6
-//  if (sockprotocol(dcc[i].sock) == AF_INET6 && dcc[i].host6[0])
-//    strncpyz(dcc[i].host, dcc[i].host6, UHOSTLEN);
-//  else
-//#endif /* USE_IPV6 */
 
   strncpyz(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
 
