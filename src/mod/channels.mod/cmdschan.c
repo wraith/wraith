@@ -1201,9 +1201,11 @@ static void cmd_chaninfo(int idx, char *par)
       return;
     }
   }
-  if (!(chan = findchan_by_dname(chname)))
-    dprintf(idx, "No such channel defined.\n");
-  else {
+  chan = findchan_by_dname(chname);
+  if (!chan || (chan && privchan(user, chan, PRIV_OP))) {
+    dprintf(idx, "No such channel.\n");
+    return;
+  } else {
     char nick[NICKLEN] = "", date[81] = "";
     int deflag = 0;
 
