@@ -120,7 +120,7 @@ typedef struct {
 
 # define killsock(x)     	real_killsock((x),__FILE__,__LINE__)
 
-IP my_atoul(char *);
+unsigned long my_atoul(char *);
 #ifdef HAVE_SSL
 int ssl_cleanup();
 #endif /* HAVE_SSL */

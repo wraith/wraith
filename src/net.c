@@ -64,9 +64,9 @@ static int	dcc_sanitycheck = 0;	/* We should do some sanity checking on dcc conn
 
 /* I need an UNSIGNED long for dcc type stuff
  */
-IP my_atoul(char *s)
+unsigned long my_atoul(char *s)
 {
-  IP ret = 0;
+  unsigned long ret = 0;
 
   while ((*s >= '0') && (*s <= '9')) {
     ret *= 10;
