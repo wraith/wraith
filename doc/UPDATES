@@ -12,6 +12,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Fixed '+ban' not showing up in help system.
 * Fixed double cmd log with cmd_whom.
 * The mode queue being flushed could cause excess flood, reverted back to eggdrop code for flushing the mode queue.
+* Added errno output to "Can't create new socket" error.
 
 1.2.1
 

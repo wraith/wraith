@@ -418,7 +418,7 @@ int real_getsock(int options, char *fname, int line)
   if (sock >= 0)
     setsock(sock, options);
   else if (!identd_hack)
-    putlog(LOG_WARNING, "*", "Warning: Can't create new socket! (%s:%d)", fname, line);
+    putlog(LOG_WARNING, "*", "Warning: Can't create new socket! (%s:%d): %s", fname, line, strerror(errno));
   else if (identd_hack)
     identd_hack = 0;
   return sock;
