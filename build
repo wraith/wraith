@@ -102,8 +102,6 @@ if [ $all = "1" ]; then
  hub=1
 fi
 
-# FIXME: We need to check for the proper pack/ files no? 
-
 # Figure what bins we're making
 case `uname` in
   Linux) os=Linux;;
