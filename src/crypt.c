@@ -127,6 +127,37 @@ void encrypt_pass(char *s1, char *s2)
   free(tmp);
 }
 
+/*
+static char *passkey()
+{
+  static char key[SHA1_HASH_LENGTH + 1] = "";
+
+  if (key[0])
+    return key;
+
+  char *tmp = calloc(1, 512);
+
+  sprintf(tmp, "%s-%s.%s!%s", settings.salt1, settings.salt2, settings.packname, settings.bdhash);
+  key = SHA1(tmp);
+  free(tmp);
+  egg_bzero(tmp, 512);
+
+  return key;
+}
+
+void encrypt_pass_new(char *s1, char *s2)
+{
+  char *tmp = NULL;
+
+  if (strlen(s1) > MAXPASSLEN)
+    s1[MAXPASSLEN] = 0;
+  tmp = encrypt_string(s1, passkey);
+  strcpy(s2, "+");
+  strncat(s2, tmp, MAXPASSLEN);
+  s2[MAXPASSLEN] = 0;
+  free(tmp);
+}
+*/
 int lfprintf (FILE *stream, const char *format, ...)
 {
   va_list va;
