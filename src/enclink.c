@@ -251,8 +251,10 @@ void link_send(int idx, char *format, ...)
   va_end(va);
   remove_crlf(s);
 
-
-  dprintf(idx, "neg! %s\n", s);
+  if (dcc[idx].newbot) 
+    dprintf(idx, "neg! %s\n", s);
+  else
+    dprintf(idx, "%s\n", s);
 }
 
 void link_done(int idx)
