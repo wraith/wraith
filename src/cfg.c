@@ -39,72 +39,84 @@ struct cmd_pass 		*cmdpass = NULL;
 #endif /* S_DCCPASS */
 
 
-void chanset_describe(struct cfg_entry * entry, int idx) {
 #ifdef HUB
+static void chanset_describe(struct cfg_entry * entry, int idx) {
   dprintf(idx, STR("chanset is a list of default options for when a channel is added. Same format as .chanset.\n"));
+}
 #endif /* HUB */
-}
 
-void chanset_changed(struct cfg_entry *entry, char *olddata, int *valid) {
-  if (entry->ldata) {
+#ifdef LEAF
+static void chanset_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+  if (entry->ldata)
     strncpyz(cfg_glob_chanset, (char *) entry->ldata, 512);
-  } else if (entry->gdata) {
+  else if (entry->gdata)
     strncpyz(cfg_glob_chanset, (char *) entry->gdata, 512);
-  }
 }
+#endif /* LEAF */
 
 struct cfg_entry CFG_CHANSET = {
 	"chanset", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL, 
-	chanset_changed, chanset_changed, chanset_describe
+#ifdef LEAF
+	chanset_changed, chanset_changed
+#else
+	NULL, NULL, chanset_describe
+#endif /* LEAF */
 };
 
-void servport_describe(struct cfg_entry * entry, int idx) {
 #ifdef HUB
+static void servport_describe(struct cfg_entry * entry, int idx) {
   dprintf(idx, STR("servport is the default port to use for server connections.\n"));
+}
 #endif /* HUB */
-}
 
-void servport_changed(struct cfg_entry *entry, char *olddata, int *valid) {
 #ifdef LEAF
-  if (entry->ldata) {
+static void servport_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+  if (entry->ldata)
     default_port = atoi(entry->ldata);
-  } else if (entry->gdata) {
+  else if (entry->gdata)
     default_port = atoi(entry->gdata);
-  }
-#endif /* LEAF */
 }
+#endif /* LEAF */
 
 struct cfg_entry CFG_SERVPORT = {
 	"servport", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL, 
-	servport_changed, servport_changed, servport_describe
+#ifdef LEAF
+	servport_changed, servport_changed
+#else
+	NULL, NULL, servport_describe
+#endif /* LEAF */
 };
 
-
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-void authkey_describe(struct cfg_entry *entry, int idx) {
 #ifdef HUB
+static void authkey_describe(struct cfg_entry *entry, int idx) {
   dprintf(idx, 
   STR("authkey is used for authing, give to your users if they are to use DCC chat or IRC cmds. (can be bot specific)\n"));
+}
 #endif /* HUB */
-}
 
-void authkey_changed(struct cfg_entry *entry, char *olddata, int *valid) {
-  if (entry->ldata) {
+#ifdef LEAF
+static void authkey_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+  if (entry->ldata)
     strncpyz(authkey, (char *) entry->ldata, sizeof authkey);
-  } else if (entry->gdata) {
+  else if (entry->gdata)
     strncpyz(authkey, (char *) entry->gdata, sizeof authkey);
-  }
 }
+#endif /* LEAF */
 
 struct cfg_entry CFG_AUTHKEY = {
 	"authkey", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL, 
-	authkey_changed, authkey_changed, authkey_describe
+#ifdef LEAF
+	authkey_changed, authkey_changed
+#else
+	NULL, NULL, authkey_describe
+#endif /* LEAF */
 };
 #endif /* S_AUTHHASH || S_DCCAUTH */
 
 #ifdef S_MSGCMDS
-void msgcmds_describe(struct cfg_entry *entry, int idx) {
 #ifdef HUB
+static void msgcmds_describe(struct cfg_entry *entry, int idx) {
   if (entry == &CFG_MSGOP)
     dprintf(idx, STR("msgop defines the cmd for opping via msging the bot (leave blank to disable)\n"));
   else if (entry == &CFG_MSGPASS)
@@ -113,52 +125,70 @@ void msgcmds_describe(struct cfg_entry *entry, int idx) {
     dprintf(idx, STR("msginvite defines the cmd for requesting invite via msging the bot (leave blank to disable)\n"));
   else if (entry == &CFG_MSGIDENT)
     dprintf(idx, STR("msgident defines the cmd for identing via msging the bot (leave blank to disable)\n"));
-#endif /* HUB */
 }
+#endif /* HUB */
 
 struct cfg_entry CFG_MSGOP = {
 	"msgop", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-	NULL, NULL, msgcmds_describe
+	NULL, NULL
+#ifdef HUB
+	, msgcmds_describe
+#endif /* HUB */
+
 };
 
 struct cfg_entry CFG_MSGPASS = {
 	"msgpass", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-	NULL, NULL, msgcmds_describe
+	NULL, NULL
+#ifdef HUB
+	, msgcmds_describe
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_MSGINVITE = {
 	"msginvite", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-	NULL, NULL, msgcmds_describe
+	NULL, NULL
+#ifdef HUB
+	, msgcmds_describe
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_MSGIDENT = {
 	"msgident", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-	NULL, NULL, msgcmds_describe
+	NULL, NULL
+#ifdef HUB
+	, msgcmds_describe
+#endif /* HUB */
 };
 #endif /* S_MSGCMDS */
 
-void cmdprefix_describe(struct cfg_entry *entry, int idx) {
 #ifdef HUB
+static void cmdprefix_describe(struct cfg_entry *entry, int idx) {
   dprintf(idx, STR("cmdprefix is the prefix character used for msg cmds, ie: !op or .op\n"));
-#endif /* HUB */
 }
+#endif /* HUB */
 
-void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+#ifdef LEAF
+static void cmdprefix_changed(struct cfg_entry *entry, char *olddata, int *valid) {
   if (entry->ldata)
     cmdprefix = entry->ldata[0];
   else if (entry->gdata)
     cmdprefix = entry->gdata[0];
 }
+#endif /* LEAF */
 
 struct cfg_entry CFG_CMDPREFIX = {
 	"cmdprefix", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
-	cmdprefix_changed, cmdprefix_changed, cmdprefix_describe
+#ifdef LEAF
+	cmdprefix_changed, cmdprefix_changed
+#else
+	NULL, NULL, cmdprefix_describe
+#endif /* LEAF */
 };
 
-
-void deflag_describe(struct cfg_entry *cfgent, int idx)
-{
 #ifdef HUB
+static void deflag_describe(struct cfg_entry *cfgent, int idx)
+{
   if (cfgent == &CFG_BADCOOKIE)
     dprintf(idx, STR("bad-cookie decides what happens to a bot if it does an illegal op (no/incorrect op cookie)\n"));
   else if (cfgent == &CFG_MANUALOP)
@@ -177,10 +207,10 @@ void deflag_describe(struct cfg_entry *cfgent, int idx)
     dprintf(idx, STR("mop decides what happens to a user doing a mass op\n"));
   dprintf(idx, 
   STR("Valid settings are: ignore (No flag changes), deop (set flags to +d), kick (set flags to +dk) or delete (remove from userlist)\n"));
-#endif /* HUB */
 }
+#endif /* HUB */
 
-void deflag_changed(struct cfg_entry *entry, char *oldval, int *valid) 
+static void deflag_changed(struct cfg_entry *entry, char *oldval, int *valid) 
 {
   char *p = NULL;
 
@@ -188,45 +218,66 @@ void deflag_changed(struct cfg_entry *entry, char *oldval, int *valid)
     return;
 
   if (strcmp(p, "ignore") && strcmp(p, "deop") && strcmp(p, "kick") && strcmp(p, "delete"))
-    *valid=0;
+    *valid = 0;
 }
 
 struct cfg_entry CFG_BADCOOKIE = {
 	"bad-cookie", CFGF_GLOBAL, NULL, NULL,
-	deflag_changed, NULL, deflag_describe
+	deflag_changed, NULL
+#ifdef HUB
+	, deflag_describe
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_MANUALOP = {
 	"manop", CFGF_GLOBAL, NULL, NULL,
-	deflag_changed, NULL, deflag_describe
+	deflag_changed, NULL
+#ifdef HUB
+	, deflag_describe
+#endif /* HUB */
 };
 
 #ifdef G_MEAN
 struct cfg_entry CFG_MEANDEOP = {
 	"mean-deop", CFGF_GLOBAL, NULL, NULL,
-	deflag_changed, NULL, deflag_describe
+	deflag_changed, NULL
+#ifdef HUB
+	, deflag_describe
+#endif /* HUB */
 };
 
 
 struct cfg_entry CFG_MEANKICK = {
 	"mean-kick", CFGF_GLOBAL, NULL, NULL,
-	deflag_changed, NULL, deflag_describe
+	deflag_changed, NULL
+#ifdef HUB
+	, deflag_describe
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_MEANBAN = {
 	"mean-ban", CFGF_GLOBAL, NULL, NULL,
-	deflag_changed, NULL, deflag_describe
+	deflag_changed, NULL
+#ifdef HUB
+	, deflag_describe
+#endif /* HUB */
 };
 #endif /* G_MEAN */
 
 struct cfg_entry CFG_MDOP = {
 	"mdop", CFGF_GLOBAL, NULL, NULL,
-	deflag_changed, NULL, deflag_describe
+	deflag_changed, NULL
+#ifdef HUB
+	, deflag_describe
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_MOP = {
 	"mop", CFGF_GLOBAL, NULL, NULL,
-	deflag_changed, NULL, deflag_describe
+	deflag_changed, NULL
+#ifdef HUB
+	, deflag_describe
+#endif /* HUB */
 };
 
 void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
@@ -299,9 +350,9 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
   }
 }
 
-void misc_describe(struct cfg_entry *cfgent, int idx)
-{
 #ifdef HUB
+static void misc_describe(struct cfg_entry *cfgent, int idx)
+{
   int i = 0;
 
   if (!strcmp(cfgent->name, "fork-interval")) {
@@ -333,91 +384,110 @@ void misc_describe(struct cfg_entry *cfgent, int idx)
   }
   if (!i)
     dprintf(idx, "Valid settings are: ignore, warn, die, reject, suicide\n");
-#endif /* HUB */
 }
+#endif /* HUB */
 
-void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
   if (!cfgent->ldata)
     return;
   if (atoi(cfgent->ldata) <= 0)
     *valid = 0;
 }
 
-void fork_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void fork_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
   if (!cfgent->gdata)
     return;
   if (atoi(cfgent->gdata) <= 0)
     *valid = 0;
 }
 
-void fork_describe(struct cfg_entry * cfgent, int idx) {
 #ifdef HUB
+static void fork_describe(struct cfg_entry * cfgent, int idx) {
   dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
-#endif /* HUB */
 }
+#endif /* HUB */
 
 struct cfg_entry CFG_FORKINTERVAL = {
 	"fork-interval", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-	fork_gchanged, fork_lchanged, fork_describe
+	fork_gchanged, fork_lchanged
+#ifdef HUB
+	, fork_describe
+#endif /* HUB */
 };
 
-void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
   char *p = NULL;
 
   if (!(p = (char *) cfgent->ldata))
     *valid = 1;
-  else if (strcmp(p, "ignore") && strcmp(p, "die") && strcmp(p, "reject")
-           && strcmp(p, "suicide") && strcmp(p, "warn"))
+  else if (strcmp(p, "ignore") && strcmp(p, "die") && strcmp(p, "reject") && strcmp(p, "suicide") && strcmp(p, "warn"))
     *valid = 0;
 }
 
-void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+static void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
   char *p = (char *) cfgent->ldata;
   if (!p)
     *valid=1;
-  else if (strcmp(p, "ignore") && strcmp(p, "die") && strcmp(p, "reject")
-           && strcmp(p, "suicide") && strcmp(p, "warn"))
+  else if (strcmp(p, "ignore") && strcmp(p, "die") && strcmp(p, "reject") && strcmp(p, "suicide") && strcmp(p, "warn"))
     *valid=0;
 }
 
 #ifdef S_LASTCHECK
 struct cfg_entry CFG_LOGIN = {
 	"login", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-	detect_gchanged, detect_lchanged, misc_describe
+	detect_gchanged, detect_lchanged
+#ifdef HUB
+	, misc_describe
+#endif /* HUB */
 };
 #endif /* S_LASTCHECK */
 #ifdef S_HIJACKCHECK
 struct cfg_entry CFG_HIJACK = {
 	"hijack", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-	detect_gchanged, detect_lchanged, misc_describe
+	detect_gchanged, detect_lchanged
+#ifdef HUB
+	, misc_describe
+#endif /* HUB */
 };
 #endif /* S_HIJACKCHECK */
 #ifdef S_ANTITRACE
 struct cfg_entry CFG_TRACE = {
 	"trace", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-	detect_gchanged, detect_lchanged, misc_describe
+	detect_gchanged, detect_lchanged
+#ifdef HUB
+	, misc_describe
+#endif /* HUB */
 };
 #endif /* S_ANTITRACE */
 #ifdef S_PROMISC
 struct cfg_entry CFG_PROMISC = {
 	"promisc", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-	detect_gchanged, detect_lchanged, misc_describe
+	detect_gchanged, detect_lchanged
+#ifdef HUB
+	, misc_describe
+#endif /* HUB */
 };
 #endif /* S_PROMISC */
 #ifdef S_PROCESSCHECK
 struct cfg_entry CFG_BADPROCESS = {
 	"bad-process", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-	detect_gchanged, detect_lchanged, misc_describe
+	detect_gchanged, detect_lchanged
+#ifdef HUB
+	, misc_describe
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_PROCESSLIST = {
 	"process-list", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-	NULL, NULL, misc_describe
+	NULL, NULL
+#ifdef HUB
+	, misc_describe
+#endif /* HUB */
 };
 #endif /* S_PROCESSCHECK */
 
 #ifdef LEAF
-void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+static void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   char *slist = NULL, *p = NULL;
 
   if (!strcmp(entry->name, "servers")) {
@@ -442,7 +512,7 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #endif /* LEAF */
 
 #ifdef HUB
-void servers_describe(struct cfg_entry * entry, int idx) {
+static void servers_describe(struct cfg_entry * entry, int idx) {
   if (!strcmp(entry->name, "servers")) 
     dprintf(idx, STR("servers is a comma-separated list of servers the bot will use\n"));
   else
@@ -453,7 +523,7 @@ void servers_describe(struct cfg_entry * entry, int idx) {
 struct cfg_entry CFG_SERVERS = {
 	"servers", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
 #ifdef LEAF
-	servers_changed, servers_changed, NULL
+	servers_changed, servers_changed
 #else
 	NULL, NULL, servers_describe
 #endif /* LEAF */
@@ -462,14 +532,14 @@ struct cfg_entry CFG_SERVERS = {
 struct cfg_entry CFG_SERVERS6 = {
 	"servers6", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
 #ifdef LEAF
-	servers_changed, servers_changed, NULL
+	servers_changed, servers_changed
 #else
 	NULL, NULL, servers_describe
 #endif /* LEAF */
 };
 
 #ifdef LEAF
-void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+static void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   char *p = NULL;
 
   if (entry->ldata)
@@ -488,7 +558,7 @@ void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #endif /* LEAF */
 
 #ifdef HUB
-void nick_describe(struct cfg_entry * entry, int idx) {
+static void nick_describe(struct cfg_entry * entry, int idx) {
   dprintf(idx, STR("nick is the bots preferred nick when connecting/using .resetnick\n"));
 }
 #endif /* HUB */
@@ -496,39 +566,38 @@ void nick_describe(struct cfg_entry * entry, int idx) {
 struct cfg_entry CFG_NICK = {
 	"nick", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
 #ifdef LEAF
-	nick_changed, nick_changed, NULL
+	nick_changed, nick_changed
 #else
 	NULL, NULL, nick_describe
 #endif /* LEAF */
 };
 
 #ifdef HUB
-void realname_describe(struct cfg_entry * entry, int idx) {
+static void realname_describe(struct cfg_entry * entry, int idx) {
   dprintf(idx, STR("realname is the bots \"real name\" when connecting\n"));
 }
 #endif /* HUB */
 
 #ifdef LEAF
-void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-  if (entry->ldata) {
+static void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+  if (entry->ldata)
     strncpyz(botrealname, (char *) entry->ldata, 121);
-  } else if (entry->gdata) {
+  else if (entry->gdata)
     strncpyz(botrealname, (char *) entry->gdata, 121);
-  }
 }
 #endif /* LEAF */
 
 struct cfg_entry CFG_REALNAME = {
 	"realname", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
 #ifdef LEAF
-	realname_changed, realname_changed, NULL
+	realname_changed, realname_changed
 #else
 	NULL, NULL, realname_describe
 #endif /* LEAF */
 };
 
 #ifdef HUB
-void getin_describe(struct cfg_entry *cfgent, int idx)
+static void getin_describe(struct cfg_entry *cfgent, int idx)
 {
   if (!strcmp(cfgent->name, "op-bots"))
     dprintf(idx, STR("op-bots is number of bots to ask every time a oprequest is to be made\n"));
@@ -553,7 +622,7 @@ void getin_describe(struct cfg_entry *cfgent, int idx)
 }
 #endif /* HUB */
 
-void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+static void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 {
   int i;
 
@@ -628,63 +697,51 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 
 struct cfg_entry CFG_OPBOTS = {
 	"op-bots", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL,
+	getin_changed, NULL
 #ifdef HUB
-	getin_describe
-#else
-	NULL
+	, getin_describe
 #endif /* HUB */
 };
 
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_FIGHTTHRESHOLD = {
 	"fight-threshold", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL,
+	getin_changed, NULL
 #ifdef HUB
-	getin_describe
-#else
-	NULL
+	, getin_describe
 #endif /* HUB */
 };
 #endif /* S_AUTOLOCK */
 
 struct cfg_entry CFG_INBOTS = {
 	"in-bots", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL,
+	getin_changed, NULL
 #ifdef HUB
-	getin_describe
-#else
-	NULL
+	, getin_describe
 #endif /* HUB */
 };
 
 struct cfg_entry CFG_LAGTHRESHOLD = {
 	"lag-threshold", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL,
+	getin_changed, NULL
 #ifdef HUB
-	getin_describe
-#else
-	NULL
+	, getin_describe
 #endif /* HUB */
 };
 
 struct cfg_entry CFG_OPREQUESTS = {
 	"op-requests", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL,
+	getin_changed, NULL
 #ifdef HUB
-	getin_describe
-#else
-	NULL
+	, getin_describe
 #endif /* HUB */
 };
 
 struct cfg_entry CFG_OPTIMESLACK = {
 	"op-time-slack", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL,
+	getin_changed, NULL
 #ifdef HUB
-	getin_describe
-#else
-	NULL
+	, getin_describe
 #endif /* HUB */
 };
 
@@ -697,7 +754,7 @@ void add_cfg(struct cfg_entry *entry)
   entry->gdata = NULL;
 }
 
-struct cfg_entry *check_can_set_cfg(char *target, char *entryname)
+static struct cfg_entry *check_can_set_cfg(char *target, char *entryname)
 {
   int i;
   struct userrec *u = NULL;
@@ -792,7 +849,10 @@ void set_cfg_str(char *target, char *entryname, char *data)
 
 struct cfg_entry CFG_MOTD = { 
 	"motd", CFGF_GLOBAL, NULL, NULL, 
-	NULL, NULL, NULL 
+	NULL, NULL
+#ifdef HUB
+	, NULL
+#endif /* HUB */
 };
 
 void init_config()

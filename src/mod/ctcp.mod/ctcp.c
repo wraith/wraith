@@ -672,13 +672,15 @@ static cmd_t myctcp[] =
 };
 #endif /* LEAF */
 
-void cloak_describe(struct cfg_entry *cfgent, int idx)
+#ifdef HUB
+static void cloak_describe(struct cfg_entry *cfgent, int idx)
 {
   dprintf(idx, STR("cloak-script decides which BitchX script the bot cloaks. If set to 0, a random script will be cloaked.\n"));
   dprintf(idx, STR("Available: 1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC\n"));
 }
+#endif /* HUB */
 
-void cloak_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+static void cloak_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 {
   char *p = NULL;
   int i;
@@ -698,8 +700,11 @@ void cloak_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 }
 
 struct cfg_entry CFG_CLOAK_SCRIPT = {
-  "cloak-script", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
-  cloak_changed, cloak_changed, cloak_describe
+	"cloak-script", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+	cloak_changed, cloak_changed
+#ifdef HUB
+	, cloak_describe
+#endif /* HUB */
 };
 
 

@@ -15,13 +15,15 @@ typedef struct cfg_entry {
   char *ldata;
   void (*globalchanged) (struct cfg_entry *, char *oldval, int *valid);
   void (*localchanged) (struct cfg_entry *, char *oldval, int *valid);
+#ifdef HUB
   void (*describe) (struct cfg_entry *, int idx);
+#endif /* HUB */
 } cfg_entry_T;
 
 extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_BADCOOKIE, CFG_MANUALOP, CFG_MDOP, 
                         CFG_MOP, CFG_FORKINTERVAL, CFG_CHANSET, CFG_SERVERS, CFG_SERVERS6, 
                         CFG_NICK, CFG_REALNAME, CFG_INBOTS, CFG_LAGTHRESHOLD, CFG_OPREQUESTS, CFG_OPTIMESLACK,
-                        CFG_OPBOTS, CFG_INBOTS;
+                        CFG_OPBOTS, CFG_INBOTS, CFG_SERVPORT;
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 extern struct cfg_entry CFG_AUTHKEY;
 #endif /* S_AUTHHASH || S_DCCAUTH */
