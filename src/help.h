@@ -41,7 +41,7 @@ blah blah blah blah \n \
       o global op (bot will op this user on any channel upon request) \n \
       p party-line (user has party-line chat access [Not required for dcc, see: +j]) \n \
       q quiet (user never gets +v on channels) \n \
-      v global voice (user get +v automatically on +autovoice channels - CelBots delayed) \n \
+      v global voice (user get +v automatically) \n \
       w wasop-test (needs wasop test for +stopnethack procedure) \n \
       x flood exempt (user will not be punished for flooding) \n \
       y bot flag - voices users (bot will voice +v users in all chans) \n \
@@ -55,7 +55,7 @@ blah blah blah blah \n \
       n owner (user is an owner for the channel) \n \
       o op (bot will give this user chanop) \n \
       q quiet (user never gets +v in chan) \n \
-      v voice (user gets +v automatically on +autovoice channels - CelBots delayed) \n \
+      v voice (user gets +v automatically on chan) \n \
       w wasop-test (needs wasop test for +stopnethack procedure) \n \
       x flood exempt (user will not be punished for flooding) \n \
       y bot flag - voices users (bot will voice +v users in all chans) \n \
