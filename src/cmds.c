@@ -910,7 +910,7 @@ static void cmd_update(int idx, char *par)
 #endif /* LEAF */
   if (!par[0])
     dprintf(idx, "Usage: update <binname>\n");
-  updatebin(idx, par, 20);
+  updatebin(idx, par, 1);
 }
 
 static void cmd_uptime(int idx, char *par)

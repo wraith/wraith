@@ -355,7 +355,10 @@ static void dtx_arg(int argc, char *argv[])
       case 'U':
         if (optarg) {
           update_bin = strdup(optarg);
-          updating = (i == 'u' ? 1 : 2);	/* use 2 if 'U' to not kill/spawn bots. */
+          if (i == 'u')
+            updating = UPDATE_AUTO;
+          else
+            updating = UPDATE_EXIT;
           break;
         } else
           exit(0);
@@ -384,7 +387,7 @@ static void dtx_arg(int argc, char *argv[])
         else
           sdprintf("Updating...");
         localhub = 1;
-        updating = 1;
+        updating = UPDATE_AUTO;
         break;
 #endif
       case '?':
@@ -614,21 +617,23 @@ static void startup_checks(int hack) {
   if (localhub && !used_B) {
     if (do_killbot[0]) {
       if (killbot(do_killbot) == 0)
-          printf("'%s' successfully killed.\n", do_killbot);
+        printf("'%s' successfully killed.\n", do_killbot);
       else
         printf("Error killing '%s'\n", do_killbot);
       exit(0);
     } else {
 #endif /* LEAF */
       /* this needs to be both hub/leaf */
-      if (update_bin)	{			/* invoked with -u bin */
-        if (updating != 2 && conf.bot->pid) {
+      if (update_bin) {					/* invokved with -u/-U */
+        if (updating == UPDATE_AUTO && conf.bot->pid) {		/* invoked with -u bin, so kill  */
+          
           kill(conf.bot->pid, SIGKILL);
           unlink(conf.bot->pid_file);
           writepid(conf.bot->pid_file, getpid());
         }
         updatebin(DP_STDOUT, update_bin, 1);	/* will call restart all bots */
         /* never reached */
+        exit(0);
       }
 #ifdef LEAF
       spawnbots();

@@ -619,7 +619,8 @@ restart(int idx)
 {
   char buf[1024] = "";
   const char *reason = updating ? "Updating..." : "Restarting...";
- 
+
+  sdprintf("restarting [%s]", reason); 
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
@@ -723,26 +724,24 @@ int updatebin(int idx, char *par, int secs)
     free(path);
     return 1;
   }
-  if (updating == 2)
-    printf("* Moved binary to: %s\n", binname);
 
-  /* safe to run new binary.. */
-  
-  if (updating == 2) /* dont restart/kill/spawn bots, just die ! */
+  if (updating == UPDATE_EXIT) {	  /* dont restart/kill/spawn bots, just die ! */
+    printf("* Moved binary to: %s\n", binname);
     fatal("Binary updated.", 0);
+  }
 
 #ifdef LEAF
   if (secs > 0) {
     char buf[DIRMAX] = "";
 
-    /* will exit after run, cron will restart us later */
+    /* this forces all running bots to be restarted (except localhub/me) */
     egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());
     putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
     system(buf);	/* restarts other bots running, removes pid files */
     
     /* this odd statement makes it so specifying 1 sec will restart other bots running
      * and then just restart with no delay */
-    updating = 1;
+    updating = UPDATE_AUTO;
     if (secs > 1) {
       egg_timeval_t howlong;
       howlong.sec = secs;
@@ -750,6 +749,7 @@ int updatebin(int idx, char *par, int secs)
       timer_create_complex(&howlong, "restarting for update", (Function) restart, (void *) idx, 0);
     } else
       restart(idx);
+
     return 0;
   } else
 #endif /* LEAF */

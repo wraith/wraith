@@ -61,7 +61,8 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Added a (temporarily) static auto-op delay of 6 seconds.
 * Added primitive CIDR ban support (enforcebans/kickban/getop).
 * Fixed cookie/manop protections to kick all opped nicks.
-* Internal userlist adding misc bug fixes.
+* Misc bug fixes/improvements to internal userlist adding (perm owners/hubs).
+* Fixed bots not updating/restarting correctly (being killed before finishing process of restart/update)
 
 1.2
 * No longer displaying SALTS on ./bin -v

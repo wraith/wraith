@@ -69,26 +69,36 @@ tellconf(conf_t * inconf)
 }
 
 #ifdef LEAF
+/* spawn and kill bots accordingly
+ * bots prefixxed with '/' will be killed auto if running.
+ * if (updating) then we were called with -L and -P, we need to restart all running bots except our parent and localhub */
 void
 spawnbots()
 {
   conf_bot *bot = NULL;
 
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
+    sdprintf("checking bot: %s", bot->nick);
     if (bot->nick[0] == '/') {
       /* kill it if running */
       if (bot->pid)
         kill(bot->pid, SIGKILL);
       else
         continue;
-    } else if (bot->pid && !updating) {
+    /* if we're updating automatically, we were called with -L -P, and are only supposed to kill non-localhubs
+      -if updating and we find our nick, skip
+      -if pid exists and not updating, bot is running and we have nothing more to do, skip.
+     */
+    } else if ((!strcmp(bot->nick, conf.bot->nick) && updating == UPDATE_AUTO) || (bot->pid && !updating)) {
+      sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
       continue;
     } else {
       int status = 0;
       char *run = NULL;
       size_t size = 0;
 
-      if (updating && bot->pid) {
+      /* if we are updating with -L -P, then we need to restart ALL bots */
+      if (updating == UPDATE_AUTO && bot->pid) {
         kill(bot->pid, SIGKILL);
         /* remove the pid incase we start the new bot before the old dies */
         unlink(bot->pid_file);

@@ -334,7 +334,8 @@ void write_settings(const char *fname, int die)
   MD5_Init(&ctx);
   if ((hash = bin_checksum(fname, WRITE_CHECKSUM, &ctx))) {
     printf("* Wrote settings to: %s.\n", fname);
-    edpack(&settings, hash, PACK_DEC);
+    if (die == -1)			/* only bother decrypting if we aren't about to exit */
+      edpack(&settings, hash, PACK_DEC);
   }
 
   if (die >= 0)

@@ -3,6 +3,11 @@
 
 #include <sys/types.h>
 
+enum {
+  UPDATE_AUTO = 1,
+  UPDATE_EXIT
+};
+
 extern int		role, default_flags, default_uflags,
 			updating;
 extern bool		use_stderr, backgrd, localhub, term_z, loading;
