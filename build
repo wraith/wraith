@@ -11,9 +11,10 @@ echo "*** wraith v${ver}/${numver} builder ***"
 
 usage() 
 {
-    echo "Usage: $0 [-d] [-c] type"
-    echo "	-c	   - Cleans up old binaries/files before compile (default: off)"
-    echo "	-d	   - Builds a debug package. (default: off)"
+    echo "Usage: $0 [-d] [-c] [-t dir] type"
+    echo "	-c	   - Cleans up old binaries/files before compile 	(default: off)"
+    echo "	-d	   - Builds a debug package. 				(default: off)"
+    echo "	-t dir	   - Where to search for TCL libraries. 		(usually not needed)"
     echo "	type	   - One of the following: all, leaf, hub."
 }
 
@@ -23,12 +24,13 @@ hub=0
 leaf=0
 clean=0
 type=
+tcldir=
 
-while getopts cdh opt ; do
+while getopts t:cdh opt ; do
         case "$opt" in
-#        m) mode="$OPTARG" ;;
 	c) clean=1 ;;
         d) debug=1 ;;
+	t) tcldir="$OPTARG" ;;
 	h) usage; exit 0 ;;
         *) usage; exit 1 ;;
 
@@ -92,15 +94,15 @@ echo "[*] Building ${PACKNAME}::${type} for $os"
 # Run ./configure, then verify it's ok
 echo "[*] Configuring..."
 umask 077 >/dev/null
-TCLDIR=`cat pack/conf.h 2>&1 | grep "//" | awk '/TCLDIR/ {print $2}' |  sed -e 's/\"//g'`
-if test -z ${TCLDIR}
-then
-  echo "[*] Searching for TCL in default dirs (edit ${PACKNAME} to change)"
+
+if test -z "$tcldir"; then
+  echo "[*] Searching for TCL in default paths (use '-t dir' to change)"
   ./configure --silent --disable-tcl-threads
 else
-  echo "[*] Searching for TCL in: $TCLDIR"
-  ./configure --silent --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h
+  echo "[*] Searching for TCL in: $tcldir"
+  ./configure --silent --disable-tcl-threads --with-tcllib=${tcldir}/lib/libtcl8.4.a --with-tclinc=${tcldir}/include/tcl.h
 fi
+
 
 # make clean, just in case
 if [ $clean = "1" ]; then

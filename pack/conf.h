@@ -3,10 +3,6 @@
 
  */
 
-/* The next line defines where the custom TCL build's prefix is.. */
-/* It MUST stay in the provided syntax. */
-//TCLDIR "/home/wheel/bryan"
-
 
 /* Change "define" to "undef" to disable a feature
  * Change "undef" to "define" to enable a feature

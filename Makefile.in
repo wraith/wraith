@@ -15,6 +15,7 @@ PACKNAME = @PACKNAME@
 LEAFEXEC = leaf
 HUBEXEC = hub
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
+EXCLUDES = pack/salt.h pack/pack.cfg misc/ind doc/DEVEL
 
 # defaults
 CC = @CC@
@@ -98,6 +99,10 @@ distrib: distclean
 distro: distrib
 	@mkdir wraith-$(VERSION); \
 	cp -r $(DISTROFILES) wraith-$(VERSION); \
+	for s in $(EXCLUDES); \
+	do \
+	 rm -rf wraith-$(VERSION)/$$s; \
+	done; \
 	tar -czvf wraith-$(VERSION).tgz wraith-$(VERSION)/; \
 	rm -rf wraith-$(VERSION)/
 
