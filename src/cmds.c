@@ -695,7 +695,7 @@ static void cmd_nohelp(int idx, char *par)
   qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)(const void *, const void *)) &my_cmp);
   
   for (int i = 0; i < cmdi; i++) {
-    if (findhelp(cmdlist[i].name) != -1) {
+    if (findhelp(cmdlist[i].name) == -1) {
       buf = (char *) my_realloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
       strcat(buf, cmdlist[i].name);
       strcat(buf, ", ");
