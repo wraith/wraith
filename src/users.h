@@ -156,11 +156,8 @@ int def_kill(struct user_entry *e);
 int def_write_userfile(FILE *f, struct userrec *u, struct user_entry *e);
 void *def_get(struct userrec *u, struct user_entry *e);
 int def_set(struct userrec *u, struct user_entry *e, void *buf);
-int def_gotshare(struct userrec *u, struct user_entry *e,
-		 char *data, int idx);
+int def_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx);
 void def_display(int idx, struct user_entry *e, struct userrec *u);
-int def_dupuser(struct userrec *new, struct userrec *old,
-		struct user_entry *e);
 
 
 #ifdef HUB

@@ -22,15 +22,15 @@ init_flags()
   unsigned char i;
 
   for (i = 0; i < 'A'; i++)
-    FLAG[i] = 0;
+    FLAG[(int) i] = 0;
   for (; i <= 'Z'; i++)
-    FLAG[i] = (flag_t) 1 << (26 + (i - 'A'));
+    FLAG[(int) i] = (flag_t) 1 << (26 + (i - 'A'));
   for (; i < 'a'; i++)
-    FLAG[i] = 0;
+    FLAG[(int) i] = 0;
   for (; i <= 'z'; i++)
-    FLAG[i] = (flag_t) 1 << (i - 'a');
+    FLAG[(int) i] = (flag_t) 1 << (i - 'a');
   for (; i < 128; i++)
-    FLAG[i] = 0;
+    FLAG[(int) i] = 0;
 }
 
 /* Some flags are mutually exclusive -- this roots them out
@@ -163,7 +163,7 @@ break_down_flags(const char *string, struct flag_record *plus, struct flag_recor
         break;                  /* switch() */
       default:
       {
-        flag_t flagbit = FLAG[(unsigned char) *string];
+        flag_t flagbit = FLAG[(int) *string];
 
         if (flagbit) {
           switch (chan) {
@@ -203,7 +203,7 @@ flag2str(char *string, flag_t flag)
   char *old = string;
 
   for (c = 0; c < 128; c++)
-    if (flag & FLAG[c])
+    if (flag & FLAG[(int) c])
       *string++ = c;
 
   if (string == old)

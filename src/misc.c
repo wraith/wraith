@@ -406,7 +406,7 @@ void daysdur(time_t mynow, time_t then, char *out)
 
 /* show l33t banner */
 static char *fuckyou = " _   _ _      __            _                            ____\n| | | (_)    / _|_   _  ___| | __  _   _  ___  _   _   _|  _ \\\n| |_| | |   | |_| | | |/ __| |/ / | | | |/ _ \\| | | | (_) | | |\n|  _  | |_  |  _| |_| | (__|   <  | |_| | (_) | |_| |  _| |_| |\n|_| |_|_( ) |_|  \\__,_|\\___|_|\\_\\  \\__, |\\___/ \\__,_| (_)____/\n        |/                         |___/\n";
-char *wbanner() {
+char *wbanner(void) {
   if (fuckyou) { ; } /* gcc warnings */
 
   switch (randint(9)) {

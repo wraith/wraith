@@ -12,7 +12,7 @@
 #define LOG_TS "[%H:%M]"
 
 
-char *wbanner();
+char *wbanner(void);
 void restart(int) __attribute__((noreturn));
 int coloridx(int);
 char *color(int, int, int);

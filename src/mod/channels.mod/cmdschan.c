@@ -10,14 +10,14 @@ static struct flag_record user	 = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
 
-static void cmd_pls_mask(char type, int idx, char *par)
+static void cmd_pls_mask(const char type, int idx, char *par)
 {
-  char *chname = NULL, *who = NULL, s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *p = NULL, *p_expire = NULL, *cmd = NULL;
+  char *chname = NULL, *who = NULL, s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *p = NULL, *p_expire = NULL;
+  const char *cmd = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
   unsigned long int expire_time = 0, expire_foo;
   int sticky = 0;
   struct chanset_t *chan = NULL;
 
-  cmd = type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite";
   if (!par[0]) {
     dprintf(idx, "Usage: +%s <hostmask> [channel] [%%<XdXhXm>] [reason]\n", cmd);
     return;

@@ -15,7 +15,7 @@
 
 typedef uint64_t flag_t;
 
-extern flag_t	FLAG[128];
+extern flag_t FLAG[128];
 
 struct flag_record {
   flag_t match;
@@ -60,27 +60,27 @@ struct flag_record {
 #define USER_VALID (flag_t) 0xfffffffffffff
 #define CHAN_VALID (flag_t) 0xfffffffffffff
 
-#define USER_ADMIN	FLAG['a']
+#define USER_ADMIN	FLAG[(int) 'a']
 /* FIXME; REMOVE AFTER 1.2 */
-#define USER_BOT	FLAG['b']
-#define USER_CHANHUB	FLAG['c']
-#define USER_DEOP	FLAG['d']
-#define USER_EXEMPT	FLAG['e']
-#define USER_HUBA	FLAG['i']
-#define USER_CHUBA	FLAG['j']
-#define USER_KICK	FLAG['k']
-#define USER_DOLIMIT	FLAG['l']
-#define USER_MASTER	FLAG['m']
-#define USER_OWNER	FLAG['n']
-#define USER_OP		FLAG['o']
-#define USER_AUTOOP	FLAG['O']
-#define USER_PARTY	FLAG['p']
-#define USER_QUIET	FLAG['q']
-#define USER_UPDATEHUB	FLAG['u']
-#define USER_VOICE	FLAG['v']
-#define USER_WASOPTEST	FLAG['w']
-#define USER_NOFLOOD	FLAG['x']
-#define USER_DOVOICE	FLAG['y']
+#define USER_BOT	FLAG[(int) 'b']
+#define USER_CHANHUB	FLAG[(int) 'c']
+#define USER_DEOP	FLAG[(int) 'd']
+#define USER_EXEMPT	FLAG[(int) 'e']
+#define USER_HUBA	FLAG[(int) 'i']
+#define USER_CHUBA	FLAG[(int) 'j']
+#define USER_KICK	FLAG[(int) 'k']
+#define USER_DOLIMIT	FLAG[(int) 'l']
+#define USER_MASTER	FLAG[(int) 'm']
+#define USER_OWNER	FLAG[(int) 'n']
+#define USER_OP		FLAG[(int) 'o']
+#define USER_AUTOOP	FLAG[(int) 'O']
+#define USER_PARTY	FLAG[(int) 'p']
+#define USER_QUIET	FLAG[(int) 'q']
+#define USER_UPDATEHUB	FLAG[(int) 'u']
+#define USER_VOICE	FLAG[(int) 'v']
+#define USER_WASOPTEST	FLAG[(int) 'w']
+#define USER_NOFLOOD	FLAG[(int) 'x']
+#define USER_DOVOICE	FLAG[(int) 'y']
 #define USER_DEFAULT	0
 
 
@@ -125,7 +125,7 @@ struct flag_record {
 #define chan_noflood(x)                        ((x).chan & USER_NOFLOOD)
 #define glob_chanhub(x)                        ((x).global & USER_CHANHUB)
 
-void init_flags();
+void init_flags(void);
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void set_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void break_down_flags(const char *, struct flag_record *, struct flag_record *);
@@ -142,8 +142,8 @@ int chk_deop(struct flag_record);
 int chk_voice(struct flag_record, struct chanset_t *);
 int chk_devoice(struct flag_record);
 int chk_noflood(struct flag_record);
-int ischanhub();
-int isupdatehub();
+int ischanhub(void);
+int isupdatehub(void);
 int dovoice(struct chanset_t *);
 int dolimit(struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);
