@@ -351,7 +351,8 @@ void dcc_remove_lost(void)
     }
   }
 #ifdef LEAF
-  servidx = findanyidx(serv);		/* servidx may have moved :\ */
+  if (serv >= 0)
+    servidx = findanyidx(serv);		/* servidx may have moved :\ */
 #endif /* LEAF */
 }
 
@@ -698,7 +699,7 @@ void identd_open()
   i = open_listen(&port);
 #endif /* USE_IPV6 */
   identd_hack = 0;
-  if (i > 0) {
+  if (i >= 0) {
     idx = new_dcc(&DCC_IDENTD_CONNECT, 0);
     if (idx >= 0) {
       egg_timeval_t howlong;
@@ -713,7 +714,8 @@ void identd_open()
       howlong.sec = 15;
       howlong.usec = 0;
       timer_create(&howlong, "identd_close()", (Function) identd_close);
-    }
+    } else
+      killsock(i);
   }
 }
 
@@ -729,5 +731,4 @@ void identd_close()
       break;
     }
   }
-
 }

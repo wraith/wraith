@@ -761,7 +761,7 @@ int open_address_listen(IP addr, port_t *port)
     sock = getsock(SOCK_LISTEN, af_def);
 
     if (sock < 1)
-    return -1;
+      return -1;
 
     debug2("Opening listen socket on port %d with AF_INET6, sock: %d", *port, sock);
     egg_bzero((char *) &name6, sizeof(name6));
@@ -784,9 +784,9 @@ int open_address_listen(IP addr, port_t *port)
       return -1;
     }
   } else {
-      sock = getsock(SOCK_LISTEN, AF_INET);
+    sock = getsock(SOCK_LISTEN, AF_INET);
 #else
-      sock = getsock(SOCK_LISTEN);
+    sock = getsock(SOCK_LISTEN);
 #endif /* USE_IPV6 */
 
     if (sock < 1)
@@ -839,7 +839,7 @@ inline int open_listen_by_af(port_t *port, int af_def)
 #ifdef USE_IPV6
   return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, af_def, port);
 #else
-  return 0;
+  return -1;
 #endif /* USE_IPV6 */
 }
 

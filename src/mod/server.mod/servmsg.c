@@ -954,8 +954,11 @@ static int gotmode(char *from, char *msg)
 
 static void disconnect_server(int idx, int dolost)
 {
+  if ((serv != dcc[idx].sock) && serv >= 0)
+    killsock(serv);
   if (dcc[idx].sock >= 0)
     killsock(dcc[idx].sock);
+
   dcc[idx].sock = -1;
   serv = -1;
   servidx = -1;
@@ -969,18 +972,15 @@ static void disconnect_server(int idx, int dolost)
 
 static void eof_server(int idx)
 {
-
-  putlog(LOG_SERV, "*", "%s %s", IRC_DISCONNECTED, dcc[idx].host);
+  putlog(LOG_SERV, "*", "Disconnected from %s", dcc[idx].host);
 #ifdef S_AUTHCMDS
-{
-  int i = 0;
-
   if (ischanhub() && auth_total > 0) {
+    int i = 0;
+
     putlog(LOG_DEBUG, "*", "Removing %d auth entries.", auth_total);
     for (i = 0; i < auth_total; i++)
       removeauth(i);  
   }
-}
 #endif /* S_AUTHCMDS */
   disconnect_server(idx, DO_LOST);
 }
@@ -1069,8 +1069,11 @@ static void server_activity(int idx, char *msg, int len)
     strcpy(dcc[idx].nick, "(server)");
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
 
-    /* servidx = idx; */
     trying_server = 0;
+    /*
+    servidx = idx;
+    serv = dcc[idx].sosck;
+    */
     SERVER_SOCKET.timeout_val = 0;
   }
   waiting_for_awake = 0;
@@ -1377,27 +1380,20 @@ static void server_resolve_failure(int);
 static void connect_server(void)
 {
   char pass[121] = "", botserver[UHOSTLEN] = "";
-  static int oldserv = -1;
   int newidx;
   port_t botserverport = 0;
 
   waiting_for_awake = 0;
   /* trying_server = now; */
   empty_msgq();
-  /* Start up the counter (always reset it if "never-give-up" is on) */
-  if ((oldserv < 0) || (never_give_up))
-    oldserv = curserv;
-  if (newserverport) {		/* Jump to specified server */
-    curserv = (-1);		/* Reset server list */
+
+  if (newserverport) {		/* cmd_jump was used; connect specified server */
+    curserv = -1;		/* Reset server list */
     strcpy(botserver, newserver);
     botserverport = newserverport;
     strcpy(pass, newserverpass);
-    newserver[0] = 0;
-    newserverport = 0;
-    newserverpass[0] = 0;
-    oldserv = (-1);
-  } else
-    pass[0] = 0;
+    newserver[0] = newserverport = newserverpass[0] = 0;
+  } 
 
   if (!cycle_time) {
     struct chanset_t *chan = NULL;
@@ -1411,11 +1407,12 @@ static void connect_server(void)
     newidx = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
     if (newidx < 0) {
       putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create server connection.");
+      trying_server = 0;
       return;
     }
 
     next_server(&curserv, botserver, &botserverport, pass);
-    putlog(LOG_SERV, "*", "%s %s:%d", IRC_SERVERTRY, botserver, botserverport);
+    putlog(LOG_SERV, "*", "Trying server %s:%d", botserver, botserverport);
 
     dcc[newidx].port = botserverport;
     strcpy(dcc[newidx].nick, "(server)");
@@ -1429,8 +1426,8 @@ static void connect_server(void)
 
     dcc[newidx].timeval = now;
     dcc[newidx].sock = -1;
-    dcc[newidx].u.dns->host = calloc(1, strlen(dcc[newidx].host) + 1);
-    strcpy(dcc[newidx].u.dns->host, dcc[newidx].host);
+    dcc[newidx].u.dns->host = calloc(1, strlen(botserver) + 1);
+    strcpy(dcc[newidx].u.dns->host, botserver);
     dcc[newidx].u.dns->cbuf = calloc(1, strlen(pass) + 1);
     strcpy(dcc[newidx].u.dns->cbuf, pass);
     dcc[newidx].u.dns->dns_success = server_resolve_success;
@@ -1438,13 +1435,8 @@ static void connect_server(void)
     dcc[newidx].u.dns->dns_type = RES_IPBYHOST;
     dcc[newidx].u.dns->type = &SERVER_SOCKET;
 
-    if (server_cycle_wait)
-      /* Back to 1st server & set wait time.
-       * Note: Put it here, just in case the server quits on us quickly
-       */
-      cycle_time = server_cycle_wait;
-    else
-      cycle_time = 0;
+
+    cycle_time = 15;		/* wait 15 seconds before attempting next server connect */
 
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;
@@ -1452,21 +1444,21 @@ static void connect_server(void)
 #ifdef USE_IPV6
     server_resolve_success(newidx);
 #else
-    dcc_dnsipbyhost(dcc[newidx].host);
+    dcc_dnsipbyhost(botserver);
 #endif /* USE_IPV6 */
   }
 }
 
 static void server_resolve_failure(int idx)
 {
+  putlog(LOG_SERV, "*", "Failed connect to %s (DNS lookup failed)", dcc[idx].host);
   resolvserv = 0;
-  putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, IRC_DNSFAILED);
-  disconnect_server(idx, DO_LOST);
+  trying_server = 0;
+  lostdcc(idx);
 }
 
 static void server_resolve_success(int idx)
 {
-  int oldserv = dcc[idx].u.dns->ibuf;
   char s[121] = "", pass[121] = "";
 
   resolvserv = 0;
@@ -1479,37 +1471,21 @@ static void server_resolve_success(int idx)
 #else
   serv = open_telnet(iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
 #endif /* USE_IPV6 */
-
-  /* set these now so if we fail disconnect_server() can cleanup right. */
-  dcc[idx].sock = serv;
-  servidx = idx;
-
   if (serv < 0) {
     neterror(s);
 
-    putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, s);
-    disconnect_server(idx, DO_LOST);
-
-    if (oldserv == curserv && !never_give_up)
-      fatal("NO SERVERS WILL ACCEPT MY CONNECTION.", 0);
-
+    putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, s);
+    trying_server = 0;
+    lostdcc(idx);
   } else {
-
-#ifdef HAVE_SSL
-    if (!ssl_link(dcc[idx].sock, CONNECT_SSL)) {
-      dcc[idx].ssl = 0;
-      putlog(LOG_SERV, "*", "SSL for '%s' failed", dcc[idx].host);
-    } else {
-      putlog(LOG_SERV, "*", "SSL for '%s' successful", dcc[idx].host);
-      dcc[idx].ssl = 1;
-    }
-#else
-      dcc[idx].ssl = 0;
-#endif /* HAVE_SSL */
+    /* set these now so if we fail disconnect_server() can cleanup right. */
+    dcc[idx].sock = serv;
+    servidx = idx;
 #ifdef S_NODELAY
     {
       int i = 1;
-      setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(i));
+
+      setsockopt(serv, SOL_TCP, TCP_NODELAY, &i, sizeof(int));
     }
 #endif /* S_NODELAY */
     /* Queue standard login */
@@ -1520,7 +1496,8 @@ static void server_resolve_success(int idx)
     /* Start alternate nicks from the beginning */
     altnick_char = 0;
 
-    if (pass[0]) dprintf(DP_MODE, "PASS %s\n", pass);
+    if (pass[0]) 
+      dprintf(DP_MODE, "PASS %s\n", pass);
     dprintf(DP_MODE, "NICK %s\n", botname);
     dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, botrealname);
     /* Wait for async result now */

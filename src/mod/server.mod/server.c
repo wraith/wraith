@@ -52,11 +52,8 @@ int quiet_reject;	/* Quietly reject dcc chat or sends from
 static int waiting_for_awake;	/* set when i unidle myself, cleared when
 				   i get the response */
 time_t server_online;	/* server connection time */
-static time_t server_cycle_wait;	/* seconds to wait before
-					   re-beginning the server list */
 char botrealname[121] = "";	/* realname of bot */
 static int server_timeout;	/* server timeout for connecting */
-static int never_give_up;	/* never give up when connecting to servers? */
 static int strict_servernames;	/* don't update server list */
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
@@ -1086,10 +1083,8 @@ void server_init()
   quiet_reject = 1;
   waiting_for_awake = 0;
   server_online = 0;
-  server_cycle_wait = 15;
   strcpy(botrealname, "A deranged product of evil coders");
   server_timeout = 15;
-  never_give_up = 1;
   strict_servernames = 1;
   serverlist = NULL;
   cycle_time = 0;
