@@ -3706,7 +3706,7 @@ static void cmd_crontab(struct userrec *u, int idx, char *par) {
   int i;
   putlog(LOG_CMDS, "*", STR("#%s# crontab %s"), dcc[idx].nick, par);
   if (!par[0]) {
-    dprintf(idx, STR("Usage: crontab status|delete|show|new [interval]\n"));
+    dprintf(idx, STR("Usage: crontab <status|delete|show|new> [interval]\n"));
     return;
   }
   code=newsplit(&par);
