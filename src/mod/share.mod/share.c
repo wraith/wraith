@@ -382,7 +382,7 @@ share_newuser(int idx, char *par)
       break_down_flags(par, &fr, NULL);
 
       /* If user already exists, ignore command */
-      shareout_but(idx, "n %s %s %s %s\n", nick, host, pass, par);
+      shareout_but(idx, "n %s%s %s %s %s\n", isbot ? "-" : "", nick, host, pass, par);
 
       noshare = 1;
       if (strlen(nick) > HANDLEN)
