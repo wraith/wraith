@@ -404,12 +404,12 @@ void dcc_remove_lost(void)
     servidx = findanyidx(serv);		
     sdprintf("...      serv: %d servidx: %d", serv, servidx);
   }
+#endif /* LEAF */
   if (dns_sock >= 0 && (dns_idx >= 0 && dns_idx < dcc_total && dcc[dns_idx].sock != dns_sock) || (dns_idx >= dcc_total)) {
     sdprintf("changing dns_sock: %d dns_idx: %d to ...", dns_sock, dns_idx);
     dns_idx = findanyidx(dns_sock);	
     sdprintf("...      dns_sock: %d dns_idx: %d", dns_sock, dns_idx);
   }
-#endif /* LEAF */
 }
 
 /* Show list of current dcc's to a dcc-chatter
@@ -436,7 +436,9 @@ void tell_dcc(int idx)
 
   egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5ud %%-%us %%-40s %%s\n", nicklen);
 
+#ifdef LEAF
   dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
+#endif /* LEAF */
   for (i = 0; i < dcc_total; i++) {
    if (dcc[i].type) {
     j = strlen(dcc[i].host);
