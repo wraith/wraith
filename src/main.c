@@ -513,11 +513,17 @@ static void check_autoaway()
 }
 */
 
+static int washub = -1;
+
 static void core_minutely()
 {
   if (conf.bot->hub) 
     send_timesync(-1);
   else {
+    if (washub == -1)
+      washub = conf.bot->hub;
+    else if (washub != conf.bot->hub)
+      fatal("MEMORY HACKED", 0);
     check_maxfiles();
     check_mypid();
   }
