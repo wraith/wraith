@@ -28,7 +28,7 @@ hub=0
 leaf=0
 #if test $# -lt 1; then
 if test -z "$1"; then
- echo "Usage: $0 -d all|leaf|hub pack.conf -c"
+ echo "Usage: $0 -d all|leaf|hub pack.cfg -c"
  echo "   -d: Builds a debug package."
 # echo "   -c: Does not erase previously compiled files unless *necessary* (faster)"
  echo ""
@@ -90,7 +90,7 @@ fi
 # Verify we got the config file
 origpack=$packname
 if ! test -f $packname; then
-  packname=$packname.conf
+  packname=$packname.cfg
 fi
 if ! test -f $packname; then
   echo "[!] Can't find pack configuration file $origpack"
@@ -177,7 +177,7 @@ fi
 
 # Wrap it nicely up into an archive
 echo "[*] Packaging..."
-packname=`basename $packname .conf`
+packname=`basename $packname .cfg`
 if [ $all = "1" ]; then
  fls="leaf hub"
 elif [ $leaf = "1" ]; then

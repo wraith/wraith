@@ -14,8 +14,8 @@ next, gcc -o makesalt makesalt.c
 ./makesalt
 mv salt.h src/
 edit src/settings.c
-Edit pack.conf (dont change anything in this actually.)
-Now, ./bldall pack
+Edit pack.cfg (dont change anything in this actually.)
+Now, ./build all pack
 Ignore any warnings, any errors report to bryan
 There are your binaries for the OS you compiled on..: leaf, hub
 
