@@ -73,7 +73,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
   if (todo & WRITE_CHECKSUM) {
     Tempfile *newbin = new Tempfile("bin");
     char *fname_bak = NULL;
-    size_t size = 0, skip_write = 0, newpos = 0;
+    size_t size = 0, skip_read = 0, newpos = 0;
 
     size = strlen(fname) + 2;
     fname_bak = (char *) my_calloc(1, size);
@@ -89,8 +89,8 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
     newpos = 0;
 
     while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
-      if (skip_write) {                  /* to skip bytes for pack data */
-        skip_write -= len;
+      if (skip_read) {                  /* to skip bytes for pack data */
+        skip_read -= len;
         continue;
       }
 
@@ -115,7 +115,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
         todo |= WRITE_PACK|WRITE_CONF;
 
         if (todo & WRITE_PACK) {
-          skip_write += SIZE_PACK;
+          skip_read += SIZE_PACK;
           fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
           sdprintf("writing pack: %d\n", SIZE_PACK);
         } else {
@@ -127,7 +127,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
         newpos += SIZE_PACK;
 
         if (todo & WRITE_CONF) {
-          skip_write += SIZE_CONF;
+          skip_read += SIZE_CONF;
           fwrite(&settings.bots, SIZE_CONF, 1, newbin->f);
           sdprintf("writing conf: %d\n", SIZE_CONF);
         } else {
@@ -137,7 +137,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
 //          fseek(newbin->f, newpos + SIZE_CONF, SEEK_SET);
         newpos += SIZE_CONF;
 
-        skip_write += SIZE_PAD;
+        skip_read += SIZE_PAD;
         fseek(newbin->f, newpos + SIZE_PAD, SEEK_SET);
         newpos += SIZE_PAD;
       } else if (!hash[0])
