@@ -12,6 +12,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Added cmdline option '-r <botname>' for restarting/starting specified bot.
 * Typos in help for 'info'
 * Removed compatability code left from 1.2->1.2.1 switch
+* Removed/cleaned up more code left from eggdrop/modules
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
