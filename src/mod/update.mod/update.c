@@ -166,10 +166,8 @@ static void got_nu(char *botnick, char *code, char *par)
 /* needupdate? curver */
   time_t newts;
 #ifdef LEAF
-  tand_t *bot = NULL;
 
-  bot = tandbot;
-  if (bot->bot && !strcmp(bot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
+  if (tandbot && tandbot->bot && !strcmp(tandbot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
     return;
 
   if (!localhub)
@@ -178,7 +176,8 @@ static void got_nu(char *botnick, char *code, char *par)
   if (localhub && updated)
     return;
 #endif /* LEAF */
-   if (!par || (par && !par[0])) return;
+   if (!par || !*par) 
+     return;
    newts = atol(newsplit(&par));
    if (newts > buildts) {
 #ifdef LEAF
@@ -197,7 +196,7 @@ static void got_nu(char *botnick, char *code, char *par)
    /* Change our uplink to them */
    /* let cont_link restructure us.. */
      putlog(LOG_MISC, "*", "Changed uplink to %s for update.", botnick);
-     botunlink(-2, bot->bot, "Restructure for update.");
+     botunlink(-2, tandbot->bot, "Restructure for update.");
      usleep(1000 * 500);
      botlink("", -3, botnick);
 #else

@@ -112,7 +112,6 @@ void write_debug()
   int y;
 
   if (nested_debug) {
-    signal(SIGSEGV, SIG_DFL);
     /* Yoicks, if we have this there's serious trouble!
      * All of these are pretty reliable, so we'll try these.
      *
@@ -259,9 +258,16 @@ stackdump(int idx)
 {
   __asm__("movl %EBP, %EAX");
   __asm__("movl %EAX, sf");
-  dprintf(idx, "STACK DUMP (%%ebp)\n");
+  if (idx == -1)
+    putlog(LOG_MISC, "*", "STACK DUMP (%%ebp)");
+  else
+    dprintf(idx, "STACK DUMP (%%ebp)\n");
+
   while (canaccess(sf) && stackdepth < 20) {
-    dprintf(idx, " %02d: 0x%08lx/0x%08lx\n", stackdepth, (unsigned long) sf->ebp, sf->addr);
+    if (idx == -1)
+      putlog(LOG_MISC, "*", " %02d: 0x%08lx/0x%08lx", stackdepth, (unsigned long) sf->ebp, sf->addr);
+    else
+      dprintf(idx, " %02d: 0x%08lx/0x%08lx\n", stackdepth, (unsigned long) sf->ebp, sf->addr);
     sf = sf->ebp;
     stackdepth++;
   }
@@ -271,6 +277,7 @@ stackdump(int idx)
 
 static void got_segv(int z)
 {
+  signal(SIGSEGV, SIG_DFL);
   stackdump(-1);
 #ifdef DEBUG_CONTEXT
   write_debug();

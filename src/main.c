@@ -667,6 +667,11 @@ void compress_init();
 void share_init();
 void transfer_init();
 
+void _start();
+int tracecheck_breakpoint() {
+  unsigned char * u = (unsigned char *) _start;
+  return (*u == 0xCC);
+}
 
 int main(int argc, char **argv)
 {
@@ -895,6 +900,8 @@ int main(int argc, char **argv)
   debug0("main: entering loop");
 
   while (1) {
+//if (tracecheck_breakpoint())
+//exit(0);
     int socket_cleanup = 0, i, xx;
     char buf[SGRAB + 10] = "";
 
