@@ -49,6 +49,9 @@
 /* Defines the current eggdrop version  */
 #undef EGG_VERSION
 
+/* Define if you have the `ipv6' support. */
+#define USE_IPV6
+
 @BOTTOM@
 
 #endif /* !_EGG_CONFIG_H */
