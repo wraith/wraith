@@ -534,14 +534,15 @@ static int gotmsg(char *from, char *msg)
           int doit = 1, result = 0;
 #ifdef S_MSGCMDS
           if (!egg_strcasecmp(code, "op") || !egg_strcasecmp(code, "pass") || !egg_strcasecmp(code, "invite")
-             || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) {
+             || !egg_strcasecmp(code, msgop) || !egg_strcasecmp(code, msgpass) || !egg_strcasecmp(code, msgop)) {
+/*             || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) { */
             char buf[10];
             doit = 0;
-            if (!strcmp(code, msgop))
+            if (!egg_strcasecmp(code, msgop))
               sprintf(buf, "op");
-            if (!strcmp(code, msgpass))
+            if (!egg_strcasecmp(code, msgpass))
               sprintf(buf, "pass");
-            if (!strcmp(code, msginvite))
+            if (!egg_strcasecmp(code, msginvite))
               sprintf(buf, "invite");
             if (buf[0])
               result = check_tcl_msg(buf, nick, uhost, u, msg);
