@@ -1239,7 +1239,7 @@ static void cmd_authed(int idx, char *par)
   dprintf(idx, "Authed:\n");
   for (int i = 0; i < auth_total; i++) {
    if (auth[i].authed)
-     dprintf(idx, " %d. %s!%s at %li\n", i, auth[i].nick, auth[i].host, auth[i].authtime);
+     dprintf(idx, " %d%s. %s!%s at %li\n", i, auth[i].bd ? "x", "", auth[i].nick, auth[i].host, auth[i].authtime);
   }
 }
 
