@@ -239,7 +239,7 @@
 #define debug_output (*(int *)(global[106]))
 #define noshare (*(int *)(global[107]))
 /* 108 - 111 */
-#define do_chanset ((void (*)(struct chanset_t *, char *, int))global[108])
+#define do_chanset ((int (*)(char *, struct chanset_t *, char *, int))global[108])
 #define str_isdigit ((int (*) (const char *))global[109])
 #define default_flags (*(int*)global[110])
 #define dcc_total (*(int*)global[111])

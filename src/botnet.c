@@ -91,7 +91,7 @@ void check_should_backup()
 
   for (chan = chanset; chan; chan = chan->next) {
     if (chan->channel.backup_time && (chan->channel.backup_time < now) && !channel_backup(chan)) {
-      do_chanset(chan, STR("+backup"), DO_LOCAL | DO_NET);
+      do_chanset(NULL, chan, STR("+backup"), DO_LOCAL | DO_NET);
       chan->channel.backup_time = 0;
     }
   }

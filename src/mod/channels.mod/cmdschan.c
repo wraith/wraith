@@ -1353,7 +1353,7 @@ static void cmd_cycle(struct userrec *u, int idx, char *par)
   sprintf(buf2, "cycle %s %d", chname, delay); //this just makes the bot PART
   putallbots(buf2);
 #ifdef LEAF
-  do_chanset(chan, "+inactive", DO_LOCAL);
+  do_chanset(NULL, chan, "+inactive", DO_LOCAL);
   dprintf(DP_SERVER, "PART %s\n", chan->name);
   chan->channel.jointime = ((now + delay) - server_lag);
 #endif /* LEAF */
@@ -1427,12 +1427,12 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
 
       tmp = calloc(1, 7 + 1 + strlen(dcc[idx].nick) + 1);
       sprintf(tmp, "addedby %s", dcc[idx].nick);
-      do_chanset(chan, tmp, DO_LOCAL | DO_NET );
+      do_chanset(NULL, chan, tmp, DO_LOCAL | DO_NET );
       free(tmp);
 
       tmp = calloc(1, 7 + 1 + 10 + 1);
       sprintf(tmp, "addedts %lu", now);
-      do_chanset(chan, tmp, DO_LOCAL | DO_NET );
+      do_chanset(NULL, chan, tmp, DO_LOCAL | DO_NET );
       free(tmp);
     }
 #ifdef HUB
@@ -1711,123 +1711,69 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 
 static void cmd_chanset(struct userrec *u, int idx, char *par)
 {
-  char *chname = NULL, answers[512] = "", *parcpy = NULL;
-  char *list[2] = { NULL, NULL }, *bak = NULL, *buf = NULL;
+  char *chname = NULL, result[1024] = "";
   struct chanset_t *chan = NULL;
   int all = 0;
 
   putlog(LOG_CMDS, "*", "#%s# chanset %s", dcc[idx].nick, par);
 
-  if (!par[0])
+  if (!par[0]) {
     dprintf(idx, "Usage: chanset [%schannel|*] <settings>\n", CHANMETA);
-  else {
-    if (strlen(par) > 2 && par[0] == '*' && par[1] == ' ') {
-      all = 1;
-      get_user_flagrec(u, &user, chanset ? chanset->dname : "");
-      if (!glob_master(user)) {
-	dprintf(idx, "You need to be a global master to use %schanset *.\n", dcc_prefix);
-	return;
-      }
-      newsplit(&par);
-    } else {
-      if (strchr(CHANMETA, par[0])) {
-        chname = newsplit(&par);
-        get_user_flagrec(u, &user, chname);
-        if (!glob_master(user) && !chan_master(user)) {
-	  dprintf(idx, "You don't have access to %s. \n", chname);
-	  return;
-	} else if (!(chan = findchan_by_dname(chname)) && (chname[0] != '+')) {
-	  dprintf(idx, "That channel doesn't exist!\n");
-	  return;
-	} else if ((strstr(par, "+private") || strstr(par, "-private")) && (!glob_owner(user))) {
-	  dprintf(idx, "You don't have access to set +/-private on %s (halting command due to lazy coder).\n", chname);
-	  return;
-	} else if ((strstr(par, "+inactive") || strstr(par, "-inactive")) && (!glob_owner(user))) {
-	  dprintf(idx, "You don't have access to set +/-inactive on %s (halting command due to lazy coder).\n", chname);
-	  return;
-        }
-	if (!chan) {
-	  if (par[0])
-	    *--par = ' ';
-	  par = chname;
-	}
-      }
-      if (!par[0] || par[0] == '*') {
-        dprintf(idx, "Usage: chanset [%schannel] <settings>\n", CHANMETA);
-        return;
-      }
-      if (!chan && !(chan = findchan_by_dname(chname = dcc[idx].u.chat->con_chan))) {
-        dprintf(idx, "Invalid console channel.\n");
-        return;
-      }
-    }
-    if (all)
-      chan = chanset;
-    bak = par;
-    buf = calloc(1, strlen(par) + 1);
-    while (chan) {
-      chname = chan->dname;
-      strcpy(buf, bak);
-      par = buf;
-      list[0] = newsplit(&par);
-      answers[0] = 0;
-      while (list[0][0]) {
-	if (list[0][0] == '+' || list[0][0] == '-' ||
-	    (!strcmp(list[0], "dont-idle-kick"))) {
-	  if (channel_modify(0, chan, 1, list) == OK) {
-	    strcat(answers, list[0]);
-	    strcat(answers, " ");
-	  } else if (!all || !chan->next)
-	    dprintf(idx, "Error trying to set %s for %s, invalid mode.\n",
-		    list[0], all ? "all channels" : chname);
-	  list[0] = newsplit(&par);
-	  continue;
-	}
-	/* The rest have an unknown amount of args, so assume the rest of the
-	 * line is args. Woops nearly made a nasty little hole here :) we'll
-	 * just ignore any non global +n's trying to set the need-commands.
-	 */
-	/* chanints */
-	list[1] = par;
-	/* Par gets modified in tcl channel_modify under some
-  	 * circumstances, so save it now.
-	 */
-        parcpy = strdup(par);
-        if (channel_modify(0, chan, 2, list) == OK) {
-	  strcat(answers, list[0]);
-	  strcat(answers, " { ");
-	  strcat(answers, parcpy);
-	  strcat(answers, " }");
-	} else if (!all || !chan->next)
-	  dprintf(idx, "Error trying to set %s for %s, invalid option\n", list[0], all ? "all channels" : chname);
-        free(parcpy);
-	break;
-      }
-      if (!all && answers[0]) {
-        struct chanset_t *my_chan = NULL;
-
-        if ((my_chan = findchan_by_dname(chname)))
-          do_chanset(my_chan, bak, DO_NET);
-	dprintf(idx, "Successfully set modes { %s } on %s.\n", answers, chname);
-#ifdef HUB
-        write_userfile(idx);
-#endif /* HUB */
-      }
-      if (!all)
-        chan = NULL;
-      else
-        chan = chan->next;
-    }
-    if (all && answers[0]) {
-      do_chanset(NULL, bak, DO_NET);		
-      dprintf(idx, "Successfully set modes { %s } on all channels.\n", answers);
-#ifdef HUB
-        write_userfile(idx);
-#endif /* HUB */
-
-    }
-    free(buf);
+    return;
   }
+
+  if (strlen(par) > 2 && par[0] == '*' && par[1] == ' ') {
+    all = 1;
+    get_user_flagrec(u, &user, chanset ? chanset->dname : "");
+    if (!glob_master(user)) {
+      dprintf(idx, "You need to be a global master to use %schanset *.\n", dcc_prefix);
+      return;
+    }
+    newsplit(&par);
+  } else {
+    if (strchr(CHANMETA, par[0])) {
+      chname = newsplit(&par);
+      get_user_flagrec(u, &user, chname);
+      if (!glob_master(user) && !chan_master(user)) {
+        dprintf(idx, "You don't have access to %s. \n", chname);
+	return;
+      } else if (!(chan = findchan_by_dname(chname)) && (chname[0] != '+')) {
+        dprintf(idx, "That channel doesn't exist!\n");
+	return;
+      } else if ((strstr(par, "+private") || strstr(par, "-private")) && (!glob_owner(user))) {
+        dprintf(idx, "You don't have access to set +/-private on %s (halting command due to lazy coder).\n", chname);
+	return;
+      } else if ((strstr(par, "+inactive") || strstr(par, "-inactive")) && (!glob_owner(user))) {
+        dprintf(idx, "You don't have access to set +/-inactive on %s (halting command due to lazy coder).\n", chname);
+        return;
+      }
+      if (!chan) {
+        if (par[0])
+	  *--par = ' ';
+	par = chname;
+      }
+    }
+    if (!par[0] || par[0] == '*') {
+      dprintf(idx, "Usage: chanset [%schannel] <settings>\n", CHANMETA);
+      return;
+    }
+    if (!chan && !(chan = findchan_by_dname(chname = dcc[idx].u.chat->con_chan))) {
+      dprintf(idx, "Invalid console channel.\n");
+      return;
+    }
+  }
+  if (do_chanset(result, all ? chan : NULL, par, DO_LOCAL) == ERROR) {
+    dprintf(idx, "Error trying to set { %s } on %s: %s\n", par, all ? "all channels" : chan->dname, result);
+    return;
+  }
+  if (all)
+    dprintf(idx, "Successfully set modes { %s } on all channels.\n", par);
+  else
+    dprintf(idx, "Successfully set modes { %s } on %s\n", par, chan->dname);
+
+#ifdef HUB
+  write_userfile(idx);
+#endif /* HUB */
 }
 
 /* DCC CHAT COMMANDS

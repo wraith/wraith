@@ -93,7 +93,7 @@ static void check_should_lock()
   if ((hc >= H) && (lc <= L)) {
     for (chan = chanset; chan; chan = chan->next) {
       if (!channel_closed(chan)) {
-        do_chanset(chan, STR("+closed chanmode +stni"), DO_LOCAL | DO_NET);
+        do_chanset(NULL, chan, STR("+closed chanmode +stni"), DO_LOCAL | DO_NET);
 #ifdef G_BACKUP
         chan->channel.backup_time = now + 30;
 #endif /* G_BACKUP */
@@ -132,7 +132,7 @@ static void got_cset(char *botnick, char *code, char *par)
 
   while (chan) {
     chname = chan->dname;
-    do_chanset(chan, par, DO_LOCAL);
+    do_chanset(NULL, chan, par, DO_LOCAL);
     if (chan->status & CHAN_BITCH) {
       module_entry *me;
       if ((me = module_find("irc", 0, 0)))
@@ -200,7 +200,7 @@ static void got_cycle(char *botnick, char *code, char *par)
   if (par[0])
     delay = atoi(newsplit(&par));
   
-  do_chanset(chan, "+inactive", DO_LOCAL);
+  do_chanset(NULL, chan, "+inactive", DO_LOCAL);
   dprintf(DP_SERVER, "PART %s\n", chan->name);
   chan->channel.jointime = ((now + delay) - server_lag); 		/* rejoin in 10 seconds */
 }
@@ -242,7 +242,7 @@ void got_kl(char *botnick, char *code, char *par)
     struct chanset_t *ch = NULL;
 
     for (ch = chanset; ch; ch = ch->next)
-      do_chanset(ch, STR("+closed +backup +bitch"), DO_LOCAL | DO_NET);
+      do_chanset(NULL, ch, STR("+closed +backup +bitch"), DO_LOCAL | DO_NET);
   /* FIXME: we should randomize nick here ... */
   }
 #endif /* S_AUTOLOCK */

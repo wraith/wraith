@@ -706,8 +706,9 @@ int shouldjoin(struct chanset_t *chan)
 /* do_chanset() set (options) on (chan)
  * USES DO_LOCAL|DO_NET bits.
  */
-void do_chanset(struct chanset_t *chan, char *options, int local)
+int do_chanset(char *result, struct chanset_t *chan, char *options, int local)
 {
+  int ret = OK;
 
   if (local & DO_NET) {
     char *buf = NULL;
@@ -731,56 +732,35 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
   }
 
   if (local & DO_LOCAL) {
-    char *buf2 = NULL, *bak = NULL; 
     struct chanset_t *ch = NULL;
-    int all = 0;
+    int all = chan ? 0 : 1;
 
-    if (!chan) {
-      ch = chanset;
-      all++;
-    } else
+    if (chan)
       ch = chan;
-
-    bak = options;
-    buf2 = malloc(strlen(options) + 1); 
+    else
+      ch = chanset;
 
     while (ch) {
-/* expiremental code 
-      const char **list = NULL;
+      const char **item = NULL;
       int items = 0;
-      char result[1024] = "";
 
-      if (SplitList(result, options, &items, &item) != OK) {
-        putlog(LOG_MISC, "*", "Error parsing channel options: %s", result);
-        return ERROR;
-
-      if ((channel_modify(result, chan, items, (char **) item) != OK) && !loading) {
+      if (SplitList(result, options, &items, &item) == OK) {
+        ret = channel_modify(result, ch, items, (char **) item);
+      } else 
         ret = ERROR;
-      }
 
-  free(item);
-*/
-      char *list[2] = { NULL, NULL };
 
-      strcpy(buf2, bak);
-      options = buf2;
-      list[0] = newsplit(&options);
-      while (list[0][0]) {
-        if (list[0][0] == '+' || list[0][0] == '-' || (!strcmp(list[0], "dont-idle-kick"))) {
-          channel_modify(NULL, ch, 1, list);
-          list[0] = newsplit(&options);
-          continue;
-        }
-        /* chanints */
-        list[1] = options;
-        channel_modify(NULL, ch, 2, list);
-        break;
-      }
-      if (all)
+      free(item);
+
+      if (all) {
+        if (ret == ERROR) /* just bail if there was an error, no sense in trying more */
+          return ret;
+
         ch = ch->next;
-      else
+      } else {
         ch = NULL;
+      }
     }
-    free(buf2);
   }
+  return ret;
 }

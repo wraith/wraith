@@ -1097,7 +1097,7 @@ void check_netfight()
       if ((chan->channel.fighting) && (chan->channel.fighting > limit)) {
         if (!channel_bitch(chan) || !channel_closed(chan)) {
           putlog(LOG_WARN, "*", STR("Auto-closed %s - channel fight\n"), chan->dname);
-          do_chanset(chan, STR("+bitch +closed"), DO_LOCAL | DO_NET);
+          do_chanset(NULL, chan, STR("+bitch +closed"), DO_LOCAL | DO_NET);
           enforce_closed(chan);
           dprintf(DP_MODE, STR("TOPIC %s :Auto-closed - channel fight\n"), chan->name);
         }
