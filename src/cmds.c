@@ -44,6 +44,7 @@ extern module_entry	*module_list;
 extern struct cfg_entry CFG_MOTD;
 extern struct cfg_entry **cfg;
 extern int cfg_count;
+extern tand_t             *tandbot;
 
 static char	*btos(unsigned long);
 mycmds cmds[500]; //the list of dcc cmds for help system
@@ -1456,15 +1457,15 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", STR("#%s# botcmd %s %s ..."), dcc[idx].nick, botm, cmd);		/* the rest of the cmd will be logged remotely */
 
-  for (bot = tandbot; bot; bot = bot->next) {
-    if (wild_match(botm, bot->bot)) {
+  for (tbot = tandbot; tbot; tbot = tbot->next) {
+    if (wild_match(botm, tbot->bot)) {
       cnt++;
-      send_remote_simul(idx, bot->bot, cmd, par ? par : "");
+      send_remote_simul(idx, tbot->bot, cmd, par ? par : "");
     }
   }
    
   if (!cnt) {
-    dprintf(idx, STR("No bot matching '%s' linked\n", botm));
+    dprintf(idx, STR("No bot matching '%s' linked\n"), botm);
     return;
   }
 }
