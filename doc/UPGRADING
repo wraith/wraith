@@ -1,11 +1,8 @@
 
-Get the new src from bryan.
-Copy your salt.h, settings.c and bldall files and put them in their respect directories in the untarred newsrc..
-./bldall pack
-./leaf -v
-(uname -s)
-cp leaf leaf.Os.ver
-cp hub hub.Os.hub
+Get the new src.
+Copy your pack/* to the new pack/
+./build all
+untar the package that is created
 Set a hub +U
 Then on that hub, copy all the binaries for the new version to it's dir..
 whatever os you are in, copy the appropiate new hub binary to 'newhub', then on the hub, type .update newhub

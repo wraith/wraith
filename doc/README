@@ -15,34 +15,8 @@ Warnings:
 
 
 
-Memorize these:
-
 Only +a can give certain flags, I forget which ones, but you'll figure that out ;)
 Execute the cmd 'help' to view which cmds these flags give access to.
-
-   Global  Chan    Does
-   --------------------------------------------------
-   a               administrator
-   b               bot
-   c               leaf chat hub (leaf that accepts /dcc chat or /ctcp chat)
-                   There is no limit to chat hubs, set all leafs +c if you want.
-                   Better idea to just set a few leafs +c and tell your users.
-   d       d       auto deop (never +o)
-   e       e       exempt from stopnethack //useless
-   i               hub access
-   j               leaf chat hub access
-   k       k       autokick (never on chan)
-   l       l       bot sets limit
-   m       m       master
-   n       n       owner
-   o       o       op
-   p               partyline chat access (-p wont be able to talk)
-   q       q       quiet (never +v)
-   u               bot is the updatehub (MAKE SURE IT HAS OOGLES OF BW)
-   v       v       auto-voice
-   x       x       user is exempt from flood kicks
-   y       y       bot gives out voices
-
 
 Important console modes:
 	+m msgs
