@@ -36,12 +36,15 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   } else {
     new = old;
   }
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS...", nick, host, u->handle);
   if (strlen(new) > 16)
     new[16] = 0;
 
-  if (!goodpass(new, 0, nick))
+  if (!goodpass(new, 0, nick)) {
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! \002!\002PASS...", nick, host, u->handle);
     return 1;
+  }
+
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS...", nick, host, u->handle);
 
   set_user(&USERENTRY_PASS, u, new);
   dprintf(DP_HELP, "NOTICE %s :%s '%s'.\n", nick,
