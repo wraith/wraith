@@ -11,8 +11,8 @@
 #include <signal.h>
 
 
-extern char	pid_file[], botnetnick[];
 extern time_t	lastfork, now;
+extern conf_t	conf;
 
 /* Do everything we normally do after we have split off a new
  * process to the background. This includes writing a PID file
@@ -23,26 +23,27 @@ static void bg_do_detach(pid_t p)
   FILE	*fp;
 
   /* Need to attempt to write pid now, not later. */
-  unlink(pid_file);
-  fp = fopen(pid_file, "w");
+  unlink(conf.bot->pid_file);
+  fp = fopen(conf.bot->pid_file, "w");
   if (fp != NULL) {
     fprintf(fp, "%u\n", p);
     if (fflush(fp)) {
       /* Kill bot incase a botchk is run from crond. */
-      printf(EGG_NOWRITE, pid_file);
+      printf(EGG_NOWRITE, conf.bot->pid_file);
       printf("  Try freeing some disk space\n");
       fclose(fp);
-      unlink(pid_file);
+      unlink(conf.bot->pid_file);
       exit(1);
     }
     fclose(fp);
   } else
-    printf(EGG_NOWRITE, pid_file);
+    printf(EGG_NOWRITE, conf.bot->pid_file);
 #ifdef HUB
   printf("Launched into the background  (pid: %d)\n\n", p);
-#else
-  printf("%s launched into the background  (pid: %d ppid: %d)\n\n", botnetnick, p, getpid());
-#endif
+#else /* LEAF */
+  printf("%s launched into the background  (pid: %d ppid: %d)\n\n", conf.bot->nick, p, getpid());
+#endif /* HUB */
+
 #if HAVE_SETPGID
   setpgid(p, p);
 #endif
@@ -69,8 +70,8 @@ void do_fork() {
     return;
   if (xx != 0) {
       FILE *fp;
-      unlink(pid_file);
-      fp = fopen(pid_file, "w");
+      unlink(conf.bot->pid_file);
+      fp = fopen(conf.bot->pid_file, "w");
       if (fp != NULL) {
         fprintf(fp, "%u\n", xx);
         fclose(fp);
@@ -82,6 +83,7 @@ void do_fork() {
 #endif
     exit(0);
   }
+
   lastfork = now;
 }
 

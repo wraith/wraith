@@ -22,6 +22,7 @@ OBJS = auth.o \
 	cmds.o \
 	cfg.o \
 	core_binds.o \
+	conf.o \
 	crypt.o \
 	dcc.o \
 	dccutil.o \

@@ -45,7 +45,7 @@ extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
                 firewall[], notify_new[], hostname[], hostname6[], myip[], myip6[],
 		tempdir[], owner[], network[], botnetnick[],
 		egg_version[], natip[], 
-		pid_file[], dcc_prefix[];
+		dcc_prefix[];
 
 extern struct dcc_t	*dcc;
 

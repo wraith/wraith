@@ -1,7 +1,6 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-
 #ifndef MAKING_MODS
 extern int use_stderr;
 extern time_t now;

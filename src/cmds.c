@@ -47,12 +47,13 @@ extern int		 dcc_total, remote_boots, backgrd,
 extern egg_traffic_t traffic;
 extern Tcl_Interp 	 *interp;
 extern char		 botnetnick[], origbotname[], ver[], network[],
-			 owner[], quit_msg[], dcc_prefix[], pid_file[],
+			 owner[], quit_msg[], dcc_prefix[], 
                          botname[], *binname, version[], egg_version[];
 extern time_t		 now, online_since, buildts;
-extern module_entry	 *module_list;
-extern struct cfg_entry  CFG_MOTD, **cfg;
-extern tand_t             *tandbot;
+extern module_entry	*module_list;
+extern struct cfg_entry	CFG_MOTD, **cfg;
+extern tand_t		*tandbot;
+extern conf_t		conf;
 
 static char		 *btos(unsigned long);
 mycmds 			 cmdlist[500]; //the list of dcc cmds for help system
@@ -1825,7 +1826,7 @@ static void cmd_restart(struct userrec *u, int idx, char *par)
 
   fatal("Restarting...", 1);
   usleep(2000 * 500);
-  unlink(pid_file); //if this fails it is ok, cron will restart the bot, *hopefully*
+  unlink(conf.bot->pid_file); //if this fails it is ok, cron will restart the bot, *hopefully*
   system(binname); //start new bot.
   exit(0);
 }

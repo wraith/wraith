@@ -43,8 +43,8 @@ extern int		 backgrd, term_z, cache_hit, cache_miss,
 
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/
-char 			origbotname[NICKLEN + 1];
-char 			botname[NICKLEN + 1];	/* Primary botname		*/
+char 			origbotname[NICKLEN + 1] = "";
+char 			botname[NICKLEN + 1] = "";	/* Primary botname		*/
 
 #ifdef HUB
 int     		my_port;

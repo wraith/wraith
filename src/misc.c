@@ -38,7 +38,7 @@ extern struct chanset_t	*chanset;
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
 			 userfile[], dcc_prefix[],
-                         *binname, pid_file[], tempdir[], *owneremail;
+                         *binname, tempdir[], *owneremail;
 
 extern int		 backgrd, term_z, use_stderr, dcc_total, timesync,  
 #ifdef HUB
@@ -48,6 +48,7 @@ extern int		 backgrd, term_z, use_stderr, dcc_total, timesync,
                          localhub;
 extern time_t		 now;
 extern struct cfg_entry	CFG_MOTD;
+extern conf_t		conf;
 
 void detected(int, char *);
 
@@ -555,7 +556,7 @@ void make_rand_str(char *s, int len)
     else
       s[j] = '!' + (random() % 15);
 
-    if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) //no % ( ) & 
+    if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) /* no % ( ) & */
       s[j] = 35;
   }
 
@@ -772,8 +773,8 @@ void updatelocal(void)
 
   fatal("Updating...", 1);
   usleep(2000 * 500);
-  unlink(pid_file); //if this fails it is ok, cron will restart the bot, *hopefully*
-  system(binname); //start new bot. 
+  unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
+  system(binname); /* start new bot. */
   exit(0);
 }
 
@@ -866,11 +867,11 @@ int updatebin(int idx, char *par, int autoi)
 
   /* safe to run new binary.. */
 #ifdef LEAF
-  if (!autoi && !localhub) //dont delete pid for auto update!!!
+  if (!autoi && !localhub) /* dont delete pid for auto update!!! */
 #endif /* LEAF */
-    unlink(pid_file); //delete pid so new binary doesnt exit.
+    unlink(conf.bot->pid_file); /* delete pid so new binary doesnt exit. */
 #ifdef HUB
-  listen_all(my_port, 1); //close the listening port...
+  listen_all(my_port, 1); /* close the listening port... */
   usleep(5000);
 #endif /* HUB */
   putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
@@ -1117,13 +1118,13 @@ int goodpass(char *pass, int idx, char *nick)
   for (i = 0; i < strlen(pass); i++) {
     tc = (int) pass[i];
     if (tc < 58 && tc > 47)
-      ocase++; //number
+      ocase++; /* number */
     else if (tc < 91 && tc > 64)
-      ucase++; //upper case
+      ucase++; /* upper case */
     else if (tc < 123 && tc > 96)
-      lcase++; //lower case
+      lcase++; /* lower case */
     else
-       nalpha++; //non-alphabet/number
+       nalpha++; /* non-alphabet/number */
   }
 
 /*  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) { */

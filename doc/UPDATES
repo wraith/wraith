@@ -25,6 +25,7 @@ This is a summary of ChangeLog basically.
 22.Bots now do NOT check for tracing/promisc/login/etc... unless something is SET.
 23.Removed note ignore commands, ie .+/-noteign .noteigns
 24.Removed define: AUTH, added: AUTHCMDS, AUTHHASH, DCCAUTH, see pack.cfg for details.
+25.Leaf binary now accepts -B <botnick>
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.
