@@ -15,6 +15,7 @@
 #include "cfg.h"
 #include "settings.h"
 #include "userrec.h"
+#include "net.h"
 #include "flags.h"
 #include "tandem.h"
 #include "main.h"
@@ -107,9 +108,9 @@ int clear_tmp()
 void check_maxfiles()
 {
   char file[DIRMAX] = "";
-  int fd;
+  int fd, nondcc = 0, failed_close = 0;
 
-  sprintf(file, "%s.%d", tempdir, randint(10000));
+  sprintf(file, "%s.%lu", tempdir, randint(10000));
 
   fd = open(file, O_WRONLY | O_CREAT, 0);
 
@@ -120,13 +121,19 @@ void check_maxfiles()
     unlink(file);
   }
 
-  if (fd >= 100 && fd <= 130)		/* a warning range */
-    putlog(LOG_MISC, "*", "* Warning, FD:%d, at >=180, the bot will auto restart", fd);
+  nondcc = fd - dcc_total;		/* nondcc will be the total of BOGUS fd */
 
-  if (fd >= 180) {
-    nuke_server("Max FD reached, restarting...");
-    cycle_time = 0;
-    restart(-1);
+  if (nondcc >= 50) {			/* Attempt to close them */
+    for (int i = 0; i < fd; i++)
+      if (!findanyidx(i))
+        if ((close(i)) == -1)			/* try to close the BOGUS fd (likely a KQUEUE) */
+          failed_close++;
+
+    if (failed_close >= 50) {
+      nuke_server("Max FD reached, restarting...");
+      cycle_time = 0;
+      restart(-1);
+    }
   }
 }
 
