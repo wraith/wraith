@@ -668,7 +668,6 @@ int init_dcc_max(), init_userent(), init_auth(), init_config(), init_party(),
 
 static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
 
-void dns_init();
 void console_init();
 void ctcp_init();
 void update_init();
@@ -787,7 +786,6 @@ printf("out: %s\n", out);
     }
   }
 
-  dns_init();
   egg_dns_init();
 
   channels_init();

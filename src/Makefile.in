@@ -52,7 +52,6 @@ OBJS = auth.o \
 MODOBJS = mod/channels.o \
         mod/console.o \
         mod/ctcp.o \
-        mod/dns.o \
         mod/irc.o \
         mod/notes.o \
         mod/server.o \

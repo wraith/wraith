@@ -49,7 +49,6 @@ AC_CHECK_PROG(DISTCC, distcc, distcc)
 
 # Test the os and set the module linking settings
 EGG_CHECK_OS
-EGG_CHECK_DNS
 
 # Check for IPv6 support
 #EGG_IPV6_SUPPORTED
@@ -157,5 +156,5 @@ EGG_SUBST_VERSION
 EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
-AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/mod/dns.mod/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile])
 AC_OUTPUT

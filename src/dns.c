@@ -11,7 +11,6 @@
 #include "main.h"
 #include "net.h"
 #include "misc.h"
-#include "src/mod/dns.mod/dns.h"
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -150,7 +149,7 @@ void dcc_dnsipbyhost(char *hostn)
   de->res_data.hostname = strdup(hostn);
 
   /* Send request. */
-  dns_ipbyhost(hostn);
+//  dns_ipbyhost(hostn);
 }
 
 void dcc_dnshostbyip(in_addr_t ip)
@@ -177,7 +176,7 @@ void dcc_dnshostbyip(in_addr_t ip)
   de->res_data.ip_addr = ip;
 
   /* Send request. */
-  dns_hostbyip(ip);
+//  dns_hostbyip(ip);
 }
 
 
