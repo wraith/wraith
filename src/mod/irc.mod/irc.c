@@ -63,10 +63,6 @@ static int bounce_bans = 0;
 static int bounce_exempts = 0;
 static int bounce_invites = 0;
 static int bounce_modes = 0;
-static int learn_users = 0;
-static int wait_info = 180;
-static int invite_key = 1;
-static int no_chanrec_info = 0;
 static int modesperline = 4;		/* Number of modes per line to send. */
 static int mode_buf_len = 200;		/* Maximum bytes to send in 1 mode. */
 static int use_354 = 0;			/* Use ircu's short 354 /who
@@ -1285,37 +1281,6 @@ static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u,
 }
 #endif /* S_AUTH */
 
-static tcl_ints myints[] =
-{
-  {"learn-users",		&learn_users,		0},	/* arthur2 */
-  {"wait-split",		&wait_split,		0},
-  {"wait-info",			&wait_info,		0},
-  {"bounce-bans",		&bounce_bans,		0},
-  {"bounce-exempts",		&bounce_exempts,	0},
-  {"bounce-invites",		&bounce_invites,	0},
-  {"bounce-modes",		&bounce_modes,		0},
-  {"modes-per-line",		&modesperline,		0},
-  {"mode-buf-length",		&mode_buf_len,		0},
-  {"use-354",			&use_354,		0},
-  {"kick-method",		&kick_method,		0},
-  {"kick-fun",			&kick_fun,		0},
-  {"ban-fun",			&ban_fun,		0},
-  {"invite-key",		&invite_key,		0},
-  {"no-chanrec-info",		&no_chanrec_info,	0},
-  {"max-bans",			&max_bans,		0},
-  {"max-exempts",		&max_exempts,		0},
-  {"max-invites",		&max_invites,		0},
-  {"max-modes",			&max_modes,		0},
-  {"net-type",			&net_type,		0},
-  {"strict-host",		&strict_host,		0},	/* arthur2 */
-  {"ctcp-mode",			&ctcp_mode,		0},	/* arthur2 */
-  {"keep-nick",			&keepnick,		0},	/* guppy */
-  {"prevent-mixing",		&prevent_mixing,	0},
-  {"rfc-compliant",		&rfc_compliant,		0},
-  {"include-lk",		&include_lk,		0},
-  {NULL,			NULL,			0}	/* arthur2 */
-};
-
 /* Flush the modes for EVERY channel.
  */
 static void flush_modes()
@@ -1451,41 +1416,11 @@ static void do_nettype()
   add_hook(HOOK_RFC_CASECMP, (Function) rfc_compliant);
 }
 
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *traced_nettype(ClientData cdata, Tcl_Interp *irp,
-                            CONST char *name1, CONST char *name2, int flags)
-#else
-static char *traced_nettype(ClientData cdata, Tcl_Interp *irp, char *name1,
-                            char *name2, int flags)
-#endif
-{
-  do_nettype();
-  return NULL;
-}
-
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *traced_rfccompliant(ClientData cdata, Tcl_Interp *irp,
-                                 CONST char *name1, CONST char *name2,
-                                 int flags)
-#else
-static char *traced_rfccompliant(ClientData cdata, Tcl_Interp *irp,
-                                 char *name1, char *name2, int flags)
-#endif
-{
-  /* This hook forces eggdrop core to change the rfc_ match function
-   * links to point to the rfc compliant versions if rfc_compliant
-   * is 1, or to the normal version if it's 0.
-   */
-  add_hook(HOOK_RFC_CASECMP, (Function) rfc_compliant);
-  return NULL;
-}
-
 static cmd_t irc_bot[] = {
   {"dp", "", (Function) mdop_request, NULL},
   {"gi", "", (Function) getin_request, NULL},
   {0, 0, 0, 0}
 };
-
 
 static void getin_5secondly()
 {
@@ -1665,13 +1600,6 @@ char *irc_start(Function * global_funcs)
 #ifdef S_AUTOLOCK
   add_hook(HOOK_MINUTELY, (Function) check_netfight);
 #endif /* S_AUTOLOCK */
-  Tcl_TraceVar(interp, "net-type",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       traced_nettype, NULL);
-  Tcl_TraceVar(interp, "rfc-compliant",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       traced_rfccompliant, NULL);
-  add_tcl_ints(myints);
 
   BT_ctcp = bind_table_lookup("ctcp");
   BT_ctcr = bind_table_lookup("ctcr");

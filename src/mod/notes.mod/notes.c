@@ -906,21 +906,6 @@ static cmd_t notes_msgs[] =
   {NULL,	NULL,	NULL,				NULL}
 };
 
-static tcl_ints notes_ints[] =
-{
-  {"note-life",		&note_life},
-  {"max-notes",		&maxnotes},
-  {"allow-fwd",		&allow_fwd},
-  {"notify-users",	&notify_users},
-  {NULL,		NULL}
-};
-
-static tcl_strings notes_strings[] =
-{
-  {"notefile",		notefile,		120,	0},
-  {NULL,		NULL,			0,	0}
-};
-
 static int notes_server_setup(char *mod)
 {
   add_builtins("msg", notes_msgs);
@@ -964,8 +949,6 @@ char *notes_start(Function * global_funcs)
   add_hook(HOOK_HOURLY, (Function) notes_hourly);
   add_hook(HOOK_MATCH_NOTEREJ, (Function) match_note_ignore);
   add_hook(HOOK_STORENOTE, (Function) storenote);
-  add_tcl_ints(notes_ints);
-  add_tcl_strings(notes_strings);
 
   add_builtins("dcc", notes_cmds);
   add_builtins("load", notes_load);

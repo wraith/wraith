@@ -390,14 +390,6 @@ static int console_dostore(int idx)
   return 0;
 }
 
-static tcl_ints myints[] =
-{
-  {"console-autosave",	&console_autosave,	0},
-  {"force-channel",	&force_channel,		0},
-  {"info-party",	&info_party,		0},
-  {NULL,		NULL,			0}
-};
-
 static cmd_t mychon[] =
 {
   {"*",		"",	console_chon,		"console:chon"},
@@ -430,7 +422,6 @@ char *console_start(Function * global_funcs)
   add_builtins("dcc", mydcc);
   add_builtins("chon", mychon);
 
-  add_tcl_ints(myints);
   USERENTRY_CONSOLE.get = def_get;
   add_entry_type(&USERENTRY_CONSOLE);
   return NULL;

@@ -117,7 +117,6 @@ egg_traffic_t traffic;
 
 void fatal(const char *s, int recoverable)
 {
-  int i;
 #ifdef LEAF
   module_entry *me;
 
@@ -129,13 +128,9 @@ void fatal(const char *s, int recoverable)
   if (s[0])
     putlog(LOG_MISC, "*", "* %s", s);
 /*  flushlogs(); */
-  for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].sock >= 0)
-      killsock(dcc[i].sock);
 #ifdef HAVE_SSL
-      ssl_cleanup();
+    ssl_cleanup();
 #endif /* HAVE_SSL */
-  }
   if (!recoverable) {
     unlink(pid_file);
     exit(1);

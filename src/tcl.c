@@ -282,50 +282,6 @@ static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
   }
 }
 
-/* Strings */
-static tcl_strings def_tcl_strings[] =
-{
-  {"botnet-nick",	botnetnick,	HANDLEN,	0},
-  {"origbotname",       origbotname,    HANDLEN,        0},
-  {"userfile",		userfile,	120,		STR_PROTECT},
-  {"admin",		admin,		120,		0},
-  {"owner",		owner,		120,		STR_PROTECT},
-  {"my-ip",		myip,		120,		0},
-  {"my-hostname",       hostname,       120,            0},
-  {"my-ip6",            myip6,          120,            0},
-  {"my-hostname6",      hostname6,      120,            0},
-  {"nat-ip",		natip,		120,		0},
-  {"username",		botuser,	10,		0},
-  {"version",		egg_version,	0,		STR_PROTECT},
-  {"firewall",		firewall,	120,		0},
-  {"pidfile",		pid_file,       120,		STR_PROTECT},
-  {"dcc_prefix",	dcc_prefix,	1,		0},
-  {NULL,		NULL,		0,		0}
-};
-
-/* Ints */
-static tcl_ints def_tcl_ints[] =
-{
-  {"localhub",			&localhub,		2},
-  {"handlen",			&handlen,		2},
-  {"dcc-flood-thr",		&dcc_flood_thr,		0},
-  {"reserved-port",		&reserved_port_min,		0},
-  /* booleans (really just ints) */
-  {"console",			&conmask,		0},
-  {"default-flags",		&default_flags,		0},
-  /* moved from eggdrop.h */
-  {"numversion",		&egg_numver,		2},
-  {"remote-boots",		&remote_boots,		1},
-  {"debug-output",		&debug_output,		1},
-  {"protect-telnet",		&protect_telnet,	0},
-  {"sort-users",		&sort_users,		0},
-  {"ident-timeout",		&identtimeout,		0},
-  {"resolve-timeout",		&resolve_timeout,	0},
-  {"dupwait-timeout",		&dupwait_timeout,	0},
-  {"strict-host",		&strict_host,		0}, 			/* drummer */
-  {NULL,			NULL,			0}	/* arthur2 */
-};
-
 static tcl_coups def_tcl_coups[] =
 {
   {"telnet-flood",	&flood_telnet_thr,	&flood_telnet_time},
@@ -336,14 +292,14 @@ static tcl_coups def_tcl_coups[] =
 /* Set up Tcl variables that will hook into eggdrop internal vars via
  * trace callbacks.
  */
+
+void add_tcl_coups(tcl_coups *); 		/* prototype */
+
 static void init_traces()
 {
   add_tcl_coups(def_tcl_coups);
-  add_tcl_strings(def_tcl_strings);
-  add_tcl_ints(def_tcl_ints);
 }
 
-extern tcl_cmds tcluser_cmds[], tcldcc_cmds[], tclmisc_cmds[], tclmisc_objcmds[];
 
 /* Not going through Tcl's crazy main() system (what on earth was he
  * smoking?!) so we gotta initialize the Tcl interpreter
@@ -456,92 +412,6 @@ resetPath:
 
   init_traces();
   Context;
-}
-
-void add_tcl_strings(tcl_strings *list)
-{
-  int i;
-  strinfo *st;
-  int tmp;
-
-  for (i = 0; list[i].name; i++) {
-    st = (strinfo *) malloc(sizeof(strinfo));
-    strtot += sizeof(strinfo);
-    st->max = list[i].length - (list[i].flags & STR_DIR);
-    if (list[i].flags & STR_PROTECT)
-      st->max = -st->max;
-    st->str = list[i].buf;
-    st->flags = (list[i].flags & STR_DIR);
-    tmp = protect_readonly;
-    protect_readonly = 0;
-    tcl_eggstr((ClientData) st, interp, list[i].name, NULL, TCL_TRACE_WRITES);
-    tcl_eggstr((ClientData) st, interp, list[i].name, NULL, TCL_TRACE_READS);
-    Tcl_TraceVar(interp, list[i].name, TCL_TRACE_READS | TCL_TRACE_WRITES |
-		 TCL_TRACE_UNSETS, tcl_eggstr, (ClientData) st);
-  }
-}
-
-void rem_tcl_strings(tcl_strings *list)
-{
-  int i;
-  strinfo *st;
-
-  for (i = 0; list[i].name; i++) {
-    st = (strinfo *) Tcl_VarTraceInfo(interp, list[i].name,
-				      TCL_TRACE_READS |
-				      TCL_TRACE_WRITES |
-				      TCL_TRACE_UNSETS,
-				      tcl_eggstr, NULL);
-    Tcl_UntraceVar(interp, list[i].name,
-		   TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		   tcl_eggstr, st);
-    if (st != NULL) {
-      strtot -= sizeof(strinfo);
-      free(st);
-    }
-  }
-}
-
-void add_tcl_ints(tcl_ints *list)
-{
-  int i, tmp;
-  intinfo *ii;
-
-  for (i = 0; list[i].name; i++) {
-    ii = malloc(sizeof(intinfo));
-    strtot += sizeof(intinfo);
-    ii->var = list[i].val;
-    ii->ro = list[i].readonly;
-    tmp = protect_readonly;
-    protect_readonly = 0;
-    tcl_eggint((ClientData) ii, interp, list[i].name, NULL, TCL_TRACE_WRITES);
-    protect_readonly = tmp;
-    tcl_eggint((ClientData) ii, interp, list[i].name, NULL, TCL_TRACE_READS);
-    Tcl_TraceVar(interp, list[i].name,
-		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		 tcl_eggint, (ClientData) ii);
-  }
-}
-
-void rem_tcl_ints(tcl_ints *list)
-{
-  int i;
-  intinfo *ii;
-
-  for (i = 0; list[i].name; i++) {
-    ii = (intinfo *) Tcl_VarTraceInfo(interp, list[i].name,
-				      TCL_TRACE_READS |
-				      TCL_TRACE_WRITES |
-				      TCL_TRACE_UNSETS,
-				      tcl_eggint, NULL);
-    Tcl_UntraceVar(interp, list[i].name,
-		   TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-		   tcl_eggint, (ClientData) ii);
-    if (ii) {
-      strtot -= sizeof(intinfo);
-      free(ii);
-    }
-  }
 }
 
 /* Allocate couplet space for tracing couplets

@@ -112,10 +112,10 @@
 /* UNUSED 14 */
 /* UNUSED 15 */
 /* 16 - 19 */
-#define add_tcl_ints ((void (*) (tcl_ints *))global[16])
-#define rem_tcl_ints ((void (*) (tcl_ints *))global[17])
-#define add_tcl_strings ((void (*) (tcl_strings *))global[18])
-#define rem_tcl_strings ((void (*) (tcl_strings *))global[19])
+/* UNUSED 16 */
+/* UNUSED 17 */
+/* UNUSED 18 */
+/* UNUSED 19 */
 /* 20 - 23 */
 #define base64_to_int ((int (*) (char *))global[20])
 #define int_to_base64 ((char * (*) (int))global[21])
@@ -357,8 +357,8 @@
 #define check_dcc_attrs ((int (*)(struct userrec *,int))global[207])
 /* 208 - 211 */
 #define check_dcc_chanattrs ((int (*)(struct userrec *,char *,int,int))global[208])
-#define add_tcl_coups ((void (*) (tcl_coups *))global[209])
-#define rem_tcl_coups ((void (*) (tcl_coups *))global[210])
+/* UNUSED 209 */
+/* UNUSED 210 */
 #define botname ((char *)(global[211]))
 /* 212 - 215 */
 /* 212: remove_gunk() -- UNUSED (drummer) */

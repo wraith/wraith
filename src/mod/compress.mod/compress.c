@@ -48,8 +48,8 @@ static Function *global = NULL,
 
 static unsigned int compressed_files;	/* Number of files compressed.      */
 static unsigned int uncompressed_files;	/* Number of files uncompressed.    */
-static unsigned int share_compressed = 1;	/* Compress userfiles when sharing? */
-static unsigned int compress_level = 9;	/* Default compression used.	    */
+static unsigned int share_compressed;	/* Compress userfiles when sharing? */
+static unsigned int compress_level;	/* Default compression used.	    */
 
 
 static int uncompress_to_file(char *f_src, char *f_target);
@@ -363,12 +363,6 @@ static uff_table_t compress_uff_table[] = {
  *    Compress module related code
  */
 
-static tcl_ints my_tcl_ints[] = {
-  {"share-compressed",  	&share_compressed},
-  {"compress-level",		&compress_level},
-  {NULL,                	NULL}
-};
-
 static int compress_report(int idx, int details)
 {
   if (details) {
@@ -416,6 +410,5 @@ char *compress_start(Function *global_funcs)
   }
 
   uff_addtable(compress_uff_table);
-  add_tcl_ints(my_tcl_ints);
   return NULL;
 }

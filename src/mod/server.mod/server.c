@@ -1194,39 +1194,6 @@ static void do_nettype(void)
   }
 }
 
-static tcl_ints my_tcl_ints[] =
-{
-  {"use-console-r",		NULL,				1},
-  {"server-timeout",		&server_timeout,		0},
-  {"lowercase-ctcp",		&lowercase_ctcp,		0},
-  {"server-online",		(int *) &server_online,		2},
-  {"never-give-up",		&never_give_up,			0},
-  {"keep-nick",			&keepnick,			0},
-  {"strict-servernames",	&strict_servernames,		0},
-  {"check-stoned",		&check_stoned,			0},
-  {"serverror-quit",		&serverror_quit,		0},
-  {"quiet-reject",		&quiet_reject,			0},
-  {"max-queue-msg",		&maxqmsg,			0},
-  {"trigger-on-ignore",		&trigger_on_ignore,		0},
-  {"answer-ctcp",		&answer_ctcp,			0},
-  {"server-cycle-wait",		(int *) &server_cycle_wait,	0},
-  {"default-port",		&default_port,			0},
-  {"check-mode-r",		&check_mode_r,			0},
-  {"net-type",			&net_type,			0},
-  {"ctcp-mode",			&ctcp_mode,			0},
-  {"double-mode",		&double_mode,			0},/* G`Quann */
-  {"double-server",		&double_server,			0},
-  {"double-help",		&double_help,			0},
-  {"use-penalties",		&use_penalties,			0},
-  {"use-fastdeq",		&use_fastdeq,			0},
-  {"nicklen",			&nick_len,			0},
-  {"nick-len",			&nick_len,			0},
-  {"optimize-kicks",		&optimize_kicks,		0},
-  {"isjuped",			&nick_juped,			0},
-  {"stack-limit",               &stack_limit,                   0},
-  {NULL,			NULL,				0}
-};
-
 /*
  *     CTCP DCC CHAT functions
  */
@@ -1638,8 +1605,6 @@ char *server_start(Function *global_funcs)
   add_builtins("dcc", C_dcc_serv);
   add_builtins("ctcp", my_ctcps);
 
-  my_tcl_ints[0].val = &use_console_r;
-  add_tcl_ints(my_tcl_ints);
   add_hook(HOOK_SECONDLY, (Function) server_secondly);
   add_hook(HOOK_10SECONDLY, (Function) server_10secondly);
   add_hook(HOOK_5MINUTELY, (Function) server_5minutely);

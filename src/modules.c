@@ -176,10 +176,10 @@ Function global_table[] =
   (Function) 0,
   (Function) 0,
   /* 16 - 19 */
-  (Function) add_tcl_ints,
-  (Function) rem_tcl_ints,
-  (Function) add_tcl_strings,
-  (Function) rem_tcl_strings,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   /* 20 - 23 */
   (Function) base64_to_int,
   (Function) int_to_base64,
@@ -417,8 +417,8 @@ Function global_table[] =
   (Function) check_dcc_attrs,
   /* 208 - 211 */
   (Function) check_dcc_chanattrs,
-  (Function) add_tcl_coups,
-  (Function) rem_tcl_coups,
+  (Function) 0,
+  (Function) 0,
   (Function) botname,
   /* 212 - 215 */
   (Function) 0,			/* remove_gunk() -- UNUSED! (drummer)	*/
