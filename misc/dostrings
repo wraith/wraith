@@ -1,0 +1,26 @@
+#!/bin/sh
+#DO NOT RUN THIS FILE AT ALL.
+
+hfiles="`find src/strings/ -name \*.h`"
+for s in $hfiles
+do
+ if test -z "$1"; then
+  cp -f $s src/`basename $s`
+#  echo "copying $s to src/`basename $s`"
+  ./stringfix src/`basename $s`
+ else
+  rm -f src/`basename $s`
+#  echo "removing src/`basename $s`"
+ fi
+done
+
+
+
+
+
+
+
+
+
+
+
