@@ -1392,7 +1392,7 @@ static void cont_tandem_relay(int idx, char *buf, register int i)
     check_tcl_chpt(botnetnick, dcc[uidx].nick, dcc[uidx].sock,
 		   dcc[uidx].u.chat->channel);
   }
-  check_tcl_chof(dcc[uidx].nick, dcc[uidx].sock);
+  check_tcl_chof(dcc[uidx].nick, uidx);
   dcc[uidx].type = &DCC_RELAYING;
   dcc[uidx].u.relay = ri;
 }
@@ -1427,7 +1427,7 @@ static void eof_dcc_relay(int idx)
     if (dcc[j].u.chat->channel < GLOBAL_CHANS)
       botnet_send_join_idx(j, -1);
   }
-  check_tcl_chon(dcc[j].nick, dcc[j].sock);
+  check_tcl_chon(dcc[j].nick, j);
   check_tcl_chjn(botnetnick, dcc[j].nick, dcc[j].u.chat->channel,
 		 geticon(j), dcc[j].sock, dcc[j].host);
   killsock(dcc[idx].sock);
@@ -1522,7 +1522,7 @@ static void dcc_relaying(int idx, char *buf, int j)
   nfree(dcc[idx].u.relay);
   dcc[idx].u.chat = ci;
   dcc[idx].type = &DCC_CHAT;
-  check_tcl_chon(dcc[idx].nick, dcc[idx].sock);
+  check_tcl_chon(dcc[idx].nick, idx);
   if (dcc[idx].u.chat->channel >= 0)
     check_tcl_chjn(botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel,
 		   geticon(idx), dcc[idx].sock, dcc[idx].host);
@@ -1737,7 +1737,7 @@ void restart_chons()
   /* Dump party line members */
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_CHAT) {
-      check_tcl_chon(dcc[i].nick, dcc[i].sock);
+      check_tcl_chon(dcc[i].nick, i);
       check_tcl_chjn(botnetnick, dcc[i].nick, dcc[i].u.chat->channel,
 		     geticon(i), dcc[i].sock, dcc[i].host);
     }

@@ -4044,7 +4044,7 @@ static void cmd_quit(struct userrec *u, int idx, char *text)
 	if (dcc[idx].u.chat->channel >= 0 && dcc[idx].u.chat->channel < GLOBAL_CHANS) {
 		check_tcl_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock, dcc[idx].u.chat->channel);
 	}
-	check_tcl_chof(dcc[idx].nick, dcc[idx].sock);
+	check_tcl_chof(dcc[idx].nick, idx);
 	dprintf(idx, "*** See you later cowboy!\n\n");
 	flush_lines(idx, dcc[idx].u.chat);
 	putlog(LOG_MISC, "*", "DCC connection closed (%s!%s)", dcc[idx].nick, dcc[idx].host);

@@ -985,7 +985,7 @@ static void eof_dcc_chat(int idx)
     check_tcl_chpt(botnetnick, dcc[idx].nick, dcc[idx].sock,
 		   dcc[idx].u.chat->channel);
   }
-  check_tcl_chof(dcc[idx].nick, dcc[idx].sock);
+  check_tcl_chof(dcc[idx].nick, idx);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
