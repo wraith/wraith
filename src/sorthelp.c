@@ -10,12 +10,14 @@ typedef struct {
   char *txt;
 } cmds;
 
+#define BUFSIZE 20240
+
 cmds cmdlist[900];
 int cmdi = 0;
 
 char *replace(char *string, char *oldie, char *newbie)
 {
-  static char newstring[12048] = "";
+  static char newstring[BUFSIZE] = "";
   int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
   char *c = NULL;
 
@@ -44,7 +46,7 @@ char *replace(char *string, char *oldie, char *newbie)
 
 char *step_thru_file(FILE *fd)
 {
-  char tempBuf[12048] = "", *retStr = NULL;
+  char tempBuf[BUFSIZE] = "", *retStr = NULL;
 
   if (fd == NULL) {
     return NULL;
@@ -106,7 +108,6 @@ int skipline (char *line, int *skip) {
   return (*skip);
 }
 
-
 int my_cmp (const cmds *c1, const cmds *c2)
 {
   return strcmp (c1->name, c2->name);
@@ -114,7 +115,7 @@ int my_cmp (const cmds *c1, const cmds *c2)
 
 int parse_help(char *infile, char *outfile) {
   FILE *in = NULL, *out = NULL;
-  char *buffer = NULL, my_buf[12048] = "", *fulllist = (char *) calloc(1, 1);
+  char *buffer = NULL, my_buf[BUFSIZE] = "", *fulllist = (char *) calloc(1, 1);
   int skip = 0, line = 0, i = 0, leaf = 0, hub = 0;
 
   if (!(in = fopen(infile, "r"))) {
@@ -123,6 +124,7 @@ int parse_help(char *infile, char *outfile) {
   }
   printf("Sorting help file '%s'", infile);
   while ((!feof(in)) && ((buffer = step_thru_file(in)) != NULL) ) {
+
     line++;
     if ((*buffer)) {
       if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
@@ -182,7 +184,7 @@ int parse_help(char *infile, char *outfile) {
     printf("Error: Cannot open '%s' for writing\n", outfile);
     return 1;
   }
-  qsort(cmdlist, cmdi, sizeof(cmds), (int (*)()) &my_cmp);
+  qsort(cmdlist, cmdi, sizeof(cmds), (int (*)(const void *, const void *)) &my_cmp);
 
   for (i = 0; i < cmdi; i++ ) {
     fulllist = (char *) realloc(fulllist, strlen(fulllist) + strlen(cmdlist[i].name) + 2);
@@ -217,3 +219,4 @@ int main(int argc, char **argv) {
   free(out);
   return ret;
 }
+
