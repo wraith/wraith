@@ -1548,7 +1548,7 @@ void check_trace(int n)
   } else
     waitpid(x, NULL, 0);
 #endif /* __FreeBSD__ */
-#ifdef __OpenBD__
+#ifdef __OpenBSD__
   x = fork();
   if (x == -1)
     return;

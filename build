@@ -152,7 +152,7 @@ elif [ $hub = "1" ]; then
  fls="hub"
 fi
 
-if [ $d = "d" ]; then
+if test -n "$d"; then
  d="-debug"
 fi
 
