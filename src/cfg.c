@@ -473,9 +473,7 @@ static void servers_changed(struct cfg_entry * entry, char * olddata, int * vali
     clearq(serverlist);
     serverlist = NULL;
   }
-#ifdef S_RANDSERVERS
   shuffle(slist, ",");
-#endif /* S_RANDSERVERS */
   p = strdup(slist);
   add_server(p);
   free(p);
