@@ -25,7 +25,7 @@
 
 extern char             origbotname[], tempdir[],
                         userfile[], natip[], *binname;
-extern int              localhub;
+extern int              localhub, updating;
 extern uid_t		myuid;
 extern conf_t           conf;
 
@@ -42,12 +42,18 @@ void spawnbots() {
       /* kill it if running */
       if (bot->pid) kill(bot->pid, SIGKILL);
       else continue;
-    } else if (!strcmp(bot->nick, conf.bot->nick) || bot->pid) {
+    } else if (!strcmp(bot->nick, conf.bot->nick) || (bot->pid && !updating)) {
       continue;
     } else {
       char *run = NULL;
       size_t size = 0;
-  
+
+      if (updating && bot->pid) {
+        kill(bot->pid, SIGKILL);
+        /* remove the pid incase we start the new bot before the old dies */
+        unlink(bot->pid_file);		
+      }
+
       size = strlen(bot->nick) + strlen(binname) + 20;
       run = calloc(1, size);
       egg_snprintf(run, size, "%s -B %s", binname, bot->nick);

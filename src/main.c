@@ -347,16 +347,7 @@ static void dtx_arg(int argc, char *argv[])
 #ifdef LEAF
       case 'L':
       {
-        FILE *fp = NULL;
-        char buf2[DIRMAX] = "", s[11] = "";
-
-        egg_snprintf(buf2, sizeof buf2, "%s/.../.pid.%s", confdir(), optarg);
-        if ((fp = fopen(buf2, "r"))) {
-          fgets(s, 10, fp);
-          localhub_pid = atoi(s);
-          fclose(fp);
-          /* printf("LOCALHUB PID: %d\n", localhub_pid); */
-        }
+        localhub_pid = checkpid(optarg, NULL);
         break;
       }
       case 'P':
@@ -730,7 +721,7 @@ int main(int argc, char **argv)
       exit(0);
     } else {
       spawnbots();
-      if (updating) exit(0); /* just let cron restart us bleh */
+      if (updating) exit(0); /* just let the timer restart us (our parent) */
     }
   }
 #endif /* LEAF */

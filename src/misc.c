@@ -809,20 +809,10 @@ int updatebin(int idx, char *par, int autoi)
     return 1;
   }
 
-  sprintf(buf, "%s", binname);
-#ifdef LEAF
-  if (localhub) {
-    /* if localhub = 1, this is the spawn bot and controls
-     * the spawning of new bots. */
-     sprintf(buf, "%s -L %s -P %d", buf, conf.bot->nick, getpid());
-  } 
-#endif /* LEAF */
+  egg_snprintf(buf, sizeof buf, "%s", binname);
 
   /* safe to run new binary.. */
-#ifdef LEAF
-  if (!autoi && !localhub) /* dont delete pid for auto update!!! */
-#endif /* LEAF */
-    unlink(conf.bot->pid_file); /* delete pid so new binary doesnt exit. */
+
 #ifdef HUB
   listen_all(my_port, 1); /* close the listening port... */
   usleep(5000);
@@ -843,10 +833,13 @@ int updatebin(int idx, char *par, int autoi)
     botnet_send_bye();
     fatal("Updating...", 1);
     usleep(2000 * 500);
+    unlink(conf.bot->pid_file); /* delete pid so new binary doesnt exit. */
     system(buf);		/* run the binary, it SHOULD work from earlier tests.. */
     exit(0);
 #ifdef LEAF
   } else if (localhub && autoi) {
+    egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());	
+    /* will exit after run, cron will restart us later */
     system(buf);
     add_hook(HOOK_SECONDLY, (Function) updatelocal);
     return 0;
