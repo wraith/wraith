@@ -551,7 +551,7 @@ tell_bots(int idx, int up)
   for (u = userlist; u; u = u->next) {
     if (u->bot) {
       if (egg_strcasecmp(u->handle, conf.bot->nick)) {
-        if ((!up && nextbot(u->handle) == -1) || (up && nextbot(u->handle))) {
+        if ((!up && !findbot(u->handle)) || (up && findbot(u->handle))) {
           strcat(work, u->handle);
           cnt++;
           tot++;
