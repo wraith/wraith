@@ -14,19 +14,24 @@
 #include "misc_file.h"
 
 #ifndef CYGWIN_HACKS
-encdata_t encdata = {
+
+typedef struct encdata_struct {
+  char prefix[16];
+  char data[512];
+} encdata_t;
+
+static encdata_t encdata = {
   "AAAAAAAAAAAAAAAA",
   ""
 };
 
 int checked_bin_buf = 0;
 
-char *
+static char *
 bin_md5(const char *fname, int todo)
 {
   static char hash[MD5_HASH_LENGTH + 1] = "";
-  unsigned char md5out[MD5_HASH_LENGTH + 1] = "";
-  char buf[17] = "";
+  unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[17] = "";
   FILE *f = NULL;
   size_t len = 0;
   MD5_CTX ctx;
@@ -37,7 +42,7 @@ bin_md5(const char *fname, int todo)
 
   MD5_Init(&ctx);
   while ((len = fread(buf, 1, sizeof buf - 1, f))) {
-    if (!strncmp(buf, STR("AAAAAAAAAAAAAAAA"), 16)) {
+    if (!memcmp(buf, &encdata.prefix, 16)) {
       break;
     }
     MD5_Update(&ctx, buf, len);
@@ -88,7 +93,7 @@ bin_md5(const char *fname, int todo)
         werr(ERR_BINSTAT);
       }
 
-      if (!strncmp(buf, STR("AAAAAAAAAAAAAAAA"), 16)) {
+      if (!memcmp(buf, &encdata.prefix, 16)) {
         /* now we have 512 for data :D */
         char *enc_hash = NULL;
 
@@ -114,5 +119,25 @@ bin_md5(const char *fname, int todo)
   }
 
   return hash;
+}
+
+
+void
+check_sum(const char *fname)
+{
+  if (!encdata.data[0]) {
+    printf("* Wrote checksum to binary. (%s)\n", bin_md5(fname, WRITE_MD5));
+  } else {
+    char *hash = NULL;
+
+    hash = decrypt_string(SALT1, encdata.data);
+
+    if (strcmp(bin_md5(fname, GET_MD5), hash)) {
+      free(hash);
+      unlink(fname);
+      fatal("!! Invalid binary", 0);
+    }
+    free(hash);
+  }
 }
 #endif /* !CYGWIN_HACKS */

@@ -695,20 +695,7 @@ int main(int argc, char **argv)
   binname = getfullbinname(argv[0]);
 
 #ifndef CYGWIN_HACKS
-  if (!encdata.data[1]) {
-    printf("* Wrote checksum to binary. (%s)\n", bin_md5(binname, WRITE_MD5));
-  } else {
-    char *hash = NULL;
-
-    hash = decrypt_string(SALT1, encdata.data);
-
-    if (strcmp(bin_md5(binname, GET_MD5), hash)) {
-      free(hash);
-      unlink(argv[0]);
-      fatal("!! Invalid binary", 0);
-    }
-    free(hash);
-  }
+  check_sum(binname);
   if (!checked_bin_buf)
     exit(1);
 #endif /* !CYGWIN_HACKS */
