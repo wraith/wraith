@@ -469,7 +469,7 @@ conf_delbot(char *botn)
 #endif /* LEAF */
 
 static void
-free_conf_bots(void)
+free_conffile_bots(void)
 {
   conf_bot *bot = NULL, *bot_n = NULL;
 
@@ -479,9 +479,9 @@ free_conf_bots(void)
   }
 }
 
-void free_conf(void)
+void free_conffile(void)
 {
-  free_conf_bots();
+  free_conffile_bots();
   free(conffile.uname);
   free(conffile.username);
   free(conffile.homedir);

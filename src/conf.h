@@ -67,7 +67,7 @@ int conf_delbot(char *);
 #endif /* LEAF */
 pid_t checkpid(char *, conf_bot *);
 void init_conf();
-void free_conf();
+void free_conffile();
 int readconf(const char *, int);
 int parseconf(bool);
 int writeconf(char *, FILE *, int);

@@ -655,7 +655,7 @@ static void startup_checks(int hack) {
     }
   }
   if (!conf.bot->localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
-    free_conf();
+    free_conffile();
 #endif /* LEAF */
 }
 
@@ -693,7 +693,7 @@ printf("out: %s\n", out);
 */
   setlimits();
   init_debug();
-  init_signals();		
+  init_signals();
 
   if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a"))) {
     unlink(argv[0]);
@@ -711,11 +711,10 @@ printf("out: %s\n", out);
   }
 
   check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
+  // Now settings struct is decrypted
 
   if (!checked_bin_buf)
     exit(1);
-//  }
-  /* Now settings struct is filled */
 
 
 #ifdef STOP_UAC
