@@ -1170,7 +1170,8 @@ static int gotmode(char *from, char *msg)
 		  CHAN_FAKEMODE_KICK);
 	  m->flags |= SENTKICK;
 	  reversing = 1;
-	} else if (!chan_hasop(m) &&
+	} else if (m->nick && !strchr(m->nick, '.') &&		/* HOW ABOUT IF THEY ARENT A FUCKING SERVER? */
+                   !chan_hasop(m) &&
 		   !channel_nodesynch(chan)) {
 	  putlog(LOG_MODES, ch, CHAN_DESYNCMODE, ch);
 	  dprintf(DP_MODE, "KICK %s %s :%s%s\n", ch, nick, kickprefix, 

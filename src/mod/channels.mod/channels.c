@@ -1149,7 +1149,7 @@ char *channels_start(Function * global_funcs)
 	 "+userinvites "
 	 "-dynamicinvites "
 	 "-revengebot "
-	 "+nodesynch "
+	 "-nodesynch "
 	 "-closed "
 	 "-take "
 	 "+manop "
