@@ -55,7 +55,7 @@ ALIAS -l psy {
 ON *:CHAT:*:{
   var %c = %auth. [ $+ [ $nick ] ]
   if (($1 === -Auth || $1 === ÿû-Auth) && $len($2) == 50) {
-    msg =$nick +Auth $wMD5($2 $+ $wsecpass($3) $+ $wauthkey($3))
+    msg =$nick +Auth $wmd5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
 }
 
@@ -79,7 +79,7 @@ ON *:TEXT:*:?:{
   var %c = %auth. [ $+ [ $nick ] ]
   if (!$psy($left($nick, 1)) && !%c) { return }
   if (($1 === -Auth || $1 === ÿû-Auth) && $len($2) == 50) {
-    msg $nick +Auth $wMD5($2 $+ $wsecpass($3) $+ $wauthkey($3))
+    msg $nick +Auth $wmd5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
 }
 
@@ -101,7 +101,7 @@ alias -l wmd5 {
     echo 8 -a This script will only work for mIRC 5.8 and up.
   }
   if ($version >= 6.03) {
-    return $MD5($1)
+    return $md5($1)
   } 
   else {
     if (!$exists($nofile($script) $+ /md5.dll)) { 
@@ -118,7 +118,7 @@ ALIAS auth {
     echo 8 -a botname is optional. 
   }
   else {
-    echo +Auth $wMD5($2 $+ $wsecpass($3) $+ $wauthkey($3))
+    echo +Auth $wmd5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
 }
 ALIAS msg { 
