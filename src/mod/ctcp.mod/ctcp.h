@@ -33,5 +33,6 @@
 #define CLOAK_CYPRESS           8 /* Now with full theme and customization support */
 #define CLOAK_MIRC              9
 
+void ctcp_init();
 
 #endif				/* _EGG_MOD_CTCP_CTCP_H */

@@ -32,6 +32,8 @@
 #ifdef LEAF
 #include "src/mod/server.mod/server.h"
 #endif /* LEAF */
+/* FIXME: REMOVE AFTER 1.1.4 */
+#include "src/mod/channels.mod/channels.h"
 #include <time.h>
 #include <errno.h>
 #include <unistd.h>
@@ -696,6 +698,7 @@ int main(int argc, char **argv)
   binname = getfullbinname(argv[0]);
 
 #ifndef CYGWIN_HACKS
+if (0) {
   /*printf("Verifying Binary MD5 HASH\n"); */
   if (!encdata.data[1]) {
     /* printf("Generated Hash (First time ran)\n"); */
@@ -716,6 +719,7 @@ int main(int argc, char **argv)
   printf("Internal HASH: %s\nShould be: %s\n", encdata.data, bin_md5(binname, GET_MD5));
   printf("Verified.\n");
   */
+}
 #endif /* !CYGWIN_HACKS */
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
@@ -766,7 +770,6 @@ int main(int argc, char **argv)
     }
   }
 
-  chanprog();
   dns_init();
   channels_init();
 #ifdef LEAF
@@ -779,6 +782,16 @@ int main(int argc, char **argv)
   notes_init();
   console_init();
   ctcp_init();
+  chanprog();
+#ifdef HUB
+/* FIXME: Remove after 1.1.4 */
+  /* this should only happen while upgrading to 1.1.4 */
+  if (!CFG_CHANSET.gdata) {
+    cfg_noshare++;
+    set_cfg_str(NULL, "chanset", glob_chanset);
+    cfg_noshare--;
+  }
+#endif /* HUB */
 
   strcpy(botuser, origbotname);
   trigger_cfg_changed();
