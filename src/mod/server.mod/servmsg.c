@@ -979,11 +979,6 @@ static void server_activity(int idx, char *msg, int len)
     strcpy(dcc[idx].nick, "(server)");
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
 
-    if (serverpass[0])
-      dprintf(DP_MODE, "PASS %s\n", serverpass);
-    dprintf(DP_MODE, "NICK %s\n", botname);
-    dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, botrealname);
-
     trying_server = 0;
     /*
     servidx = idx;
@@ -1426,6 +1421,10 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     /* Start alternate nicks from the beginning */
     altnick_char = 0;
 
-    /* Wait for async connect now */
+    if (serverpass[0])
+      dprintf(DP_MODE, "PASS %s\n", serverpass);
+    dprintf(DP_MODE, "NICK %s\n", botname);
+    dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, botrealname);
+    /* Wait for async result now */
   }
 }

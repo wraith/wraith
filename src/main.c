@@ -593,7 +593,7 @@ static void startup_checks(int hack) {
     } else {
       /* this needs to be both hub/leaf */
       if (update_bin) {					/* invokved with -u/-U */
-        if (updating == UPDATE_AUTO && conf.bot->pid) {		/* invoked with -u bin, so kill  */
+        if (updating == UPDATE_AUTO && conf.bot && conf.bot->pid) {		/* invoked with -u bin, so kill  */
           
           kill(conf.bot->pid, SIGKILL);
           unlink(conf.bot->pid_file);
