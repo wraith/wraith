@@ -272,8 +272,12 @@ void dcc_chatter(int idx)
   show_banner(idx);
   show_motd(idx);
 Context;
-  if (glob_master(fr))
-    dprintf(idx, STR("There are \002-%d- bot(s)\002 currently linked.\n"), tands + 1);
+  if (glob_master(fr)) {
+    if ((tands+1) > 1)
+      dprintf(idx, STR("There is \002-%d- bot\002 currently linked.\n"), tands + 1);
+    else
+      dprintf(idx, STR("There are \002-%d- bots\002 currently linked.\n"), tands + 1);
+  }
   show_channels(idx, NULL);
 Context;
 
@@ -283,7 +287,6 @@ Context;
      dprintf(idx, "You don't have partyline chat access; commands only.\n\n");
      i = -1;
   }
-//somewhere here, it lets the -p user have partyline access ??
 
   j = dcc[idx].sock;
   strcpy(dcc[idx].u.chat->con_chan, "***");

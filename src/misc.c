@@ -934,7 +934,7 @@ void show_banner(int idx)
   dprintf(idx, STR(" \\ V  V /| | | (_| | | |_| | | |\n"));
   dprintf(idx, STR("  \\_/\\_/ |_|  \\__,_|_|\\__|_| |_|\n"));
   dprintf(idx, STR("           by bryan          \n"));
-  dprintf(idx, STR("info, bugs, suggestions, comments:\nhttp://www.shatow.net/wraith/\n"));
+  dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://www.shatow.net/wraith/ -\n"));
 }
 
 /* show motd to dcc chatter */

@@ -1793,9 +1793,6 @@ Context;
   then = now;
   online_since = now;
   autolink_cycle(NULL);		/* Hurry and connect to tandem bots */
-  //add_help_reference("cmds1.help");
-  //add_help_reference("cmds2.help");
-  //add_help_reference("core.help");
   add_hook(HOOK_SECONDLY, (Function) core_secondly);
   add_hook(HOOK_10SECONDLY, (Function) core_10secondly);
   add_hook(HOOK_MINUTELY, (Function) core_minutely);

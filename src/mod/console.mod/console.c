@@ -411,7 +411,6 @@ char *console_start(Function * global_funcs)
   add_builtins(H_chon, mychon);
   add_builtins_dcc(H_dcc, mydcc);
   add_tcl_ints(myints);
-  //add_help_reference("console.help");
   USERENTRY_CONSOLE.get = def_get;
   add_entry_type(&USERENTRY_CONSOLE);
   add_lang_section("console");
