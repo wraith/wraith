@@ -10,6 +10,7 @@
 #define SOCKET_TCP      16
 #define SOCKET_UDP      32
 
+int get_addr(const char *, addr_t *);
 
 /* can be static if ever combined with net.h or a more integrated 1.9 is used ... */
 typedef struct {

@@ -1320,8 +1320,9 @@ static cmd_t my_raw_binds[] =
   {NULL,	NULL,	NULL,				NULL}
 };
 
-static void server_resolve_success(int);
-static void server_resolve_failure(int);
+//static void server_resolve_success(int);
+//static void server_resolve_failure(int);
+static void server_dns_callback(void *, const char *, char **);
 
 /* Hook up to a server
  */
@@ -1352,7 +1353,7 @@ static void connect_server(void)
  
     trying_server = now;
 
-    newidx = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
+    newidx = new_dcc(&SERVER_SOCKET, sizeof(struct dns_info));
     if (newidx < 0) {
       putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create server connection.");
       trying_server = 0;
@@ -1374,7 +1375,9 @@ static void connect_server(void)
 
     dcc[newidx].timeval = now;
     dcc[newidx].sock = -1;
-    dcc[newidx].u.dns->host = (char *) calloc(1, strlen(botserver) + 1);
+    strcpy(dcc[newidx].u.buf, pass);
+
+/*    dcc[newidx].u.dns->host = (char *) calloc(1, strlen(botserver) + 1);
     strcpy(dcc[newidx].u.dns->host, botserver);
     dcc[newidx].u.dns->cbuf = (char *) calloc(1, strlen(pass) + 1);
     strcpy(dcc[newidx].u.dns->cbuf, pass);
@@ -1382,21 +1385,75 @@ static void connect_server(void)
     dcc[newidx].u.dns->dns_failure = server_resolve_failure;
     dcc[newidx].u.dns->dns_type = RES_IPBYHOST;
     dcc[newidx].u.dns->type = &SERVER_SOCKET;
-
+*/
 
     cycle_time = 15;		/* wait 15 seconds before attempting next server connect */
 
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;
     /* Resolve the hostname. */
-#ifdef USE_IPV6
-    server_resolve_success(newidx);
-#else
-    dcc_dnsipbyhost(botserver);
-#endif /* USE_IPV6 */
+    egg_dns_lookup(botserver, 20, server_dns_callback, (void *) newidx);
+    /* wait for async reply */
   }
 }
 
+static void server_dns_callback(void *client_data, const char *host, char **ips)
+{
+  int idx = (int) client_data;
+
+  resolvserv = 0;
+
+  if (!ips) {
+    putlog(LOG_SERV, "*", "Failed connect to %s (DNS lookup failed)", host);
+    trying_server = 0;
+    lostdcc(idx);
+    return;
+  }
+
+  addr_t addr;
+
+  get_addr(ips[0], &addr);
+ 
+  if (addr.family == AF_INET)
+    dcc[idx].addr = htonl(addr.u.addr.s_addr);
+
+  strcpy(serverpass, dcc[idx].u.buf);
+//  changeover_dcc(idx, &SERVER_SOCKET, 0);
+  identd_open();
+
+  serv = open_telnet(ips[0], dcc[idx].port);
+
+
+//#ifdef USE_IPV6
+//  serv = open_telnet(dcc[idx].host, dcc[idx].port);
+//#else
+//  serv = open_telnet(iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
+//#endif /* USE_IPV6 */
+
+  if (serv < 0) {
+    putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, strerror(errno));
+    trying_server = 0;
+    lostdcc(idx);
+  } else {
+    int i = 1;
+
+    /* set these now so if we fail disconnect_server() can cleanup right. */
+    dcc[idx].sock = serv;
+    servidx = idx;
+    setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(int));
+    /* Queue standard login */
+    dcc[idx].timeval = now;
+    SERVER_SOCKET.timeout_val = &server_timeout;
+    /* Another server may have truncated it, so use the original */
+    strcpy(botname, origbotname);
+    /* Start alternate nicks from the beginning */
+    altnick_char = 0;
+
+    /* Wait for async connect now */
+  }
+}
+
+#ifdef NO
 static void server_resolve_failure(int idx)
 {
   putlog(LOG_SERV, "*", "Failed connect to %s (DNS lookup failed)", dcc[idx].host);
@@ -1439,4 +1496,5 @@ static void server_resolve_success(int idx)
     /* Wait for async result now */
   }
 }
+#endif /* NO */
 #endif /* LEAF */

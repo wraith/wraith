@@ -20,6 +20,8 @@
 #include "src/net.h"
 #include "src/auth.h"
 #include "src/dns.h"
+#include "src/adns.h"
+#include "src/socket.h"
 #include "src/egg_timer.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/irc.mod/irc.h"
@@ -873,8 +875,8 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
 #ifdef USE_IPV6
     if (hostprotocol(ip) == AF_INET6 && sockprotocol(dcc[i].sock) == AF_INET6) {
       debug1("ipv6 addr: %s",ip);
-      strcpy(dcc[i].addr6,ip);
-      debug1("ipv6 addr: %s",dcc[i].addr6);
+      strcpy(dcc[i].host6,ip);
+      debug1("ipv6 addr: %s",dcc[i].host6);
     } else
 #endif /* USE_IPV6 */
       dcc[i].addr = my_atoul(ip);
@@ -911,14 +913,14 @@ static void dcc_chat_hostresolved(int i)
   egg_snprintf(buf, sizeof buf, "%d", dcc[i].port);
 #ifdef USE_IPV6
   if (sockprotocol(dcc[i].sock) == AF_INET6) {
-    strcpy(ip, dcc[i].addr6); /* safe, addr6 is 121 */
+    strcpy(ip, dcc[i].host6); /* safe, host6 is 121 */
   } else
 #endif /* !USE_IPV6 */
   egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
 #ifdef USE_IPV6
   if (sockprotocol(dcc[i].sock) == AF_INET6) {
 #  ifdef IPV6_DEBUG
-    debug2("af_inet6 %s / %s", dcc[i].addr6, ip);
+    debug2("af_inet6 %s / %s", dcc[i].host6, ip);
 #  endif /* IPV6_DEBUG */
     dcc[i].sock = getsock(0, AF_INET6);
   } else {

@@ -7,7 +7,7 @@
 
 #define DNS_PORT 53
 
-typedef int (*dns_callback_t)(void *client_data, const char *query, char **result);
+typedef void (*dns_callback_t)(void *client_data, const char *query, char **result);
 
 int egg_dns_init(void);
 //int egg_dns_shutdown(void);

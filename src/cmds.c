@@ -3915,7 +3915,7 @@ static void cmd_crontab(int idx, char *par) {
 }
 #endif /* !CYGWIN_HACKS */
 
-static int my_dns_callback(void *client_data, const char *host, char **ips)
+static void my_dns_callback(void *client_data, const char *host, char **ips)
 {
   int idx = (int) client_data;
 if (ips)
@@ -3926,7 +3926,7 @@ sdprintf("CALLBACK WITH IDX: %d and ip[0]: %s (msgc: %d)", idx, ips[0], dcc[idx]
   else
     dprintf(idx, "Failed to lookup via (%s): %s\n", dns_ip, host);
 
-  return 0;
+  return;
 }
 
 static void cmd_dns(int idx, char *par)

@@ -237,3 +237,20 @@ int socket_ipv6_to_dots(const char *ip, char *dots)
 #endif
 }
 
+int get_addr(const char *ip, addr_t *addr)
+{
+  if (inet_pton(AF_INET, ip, &addr->u.addr) > 0) {
+    addr->family = AF_INET;
+    return AF_INET;
+  }
+
+#ifdef USE_IPV6
+  if (inet_pton(AF_INET6, ip, &addr->u.addr6) > 0) {
+    addr->family = AF_INET6;
+    return AF_INET6;
+  }
+#endif /* USE_IPV6 */
+
+  return 0;
+}
+

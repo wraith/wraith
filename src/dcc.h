@@ -39,9 +39,11 @@ struct dcc_t {
     int ident_sock;
     int dns_id;
     void *other;
+    char buf[101];
   } u;                          /* Special use depending on type        */
 
   in_addr_t addr;                      /* IP address in host byte order         */
+  addr_t addru;
   time_t simultime;             /* the time when the simul dcc is initiated, expires after a number of seconds */
   time_t timeval;               /* Use for any timing stuff
                                    - this is used for timeout checking  */
@@ -54,14 +56,14 @@ struct dcc_t {
   int msgc;			/* forward the output back to irc? */
   int whowas;
   port_t port;
-#ifdef USE_IPV6
-  char addr6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */
-#endif /* USE_IPV6 */
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
   char nick[NICKLEN];
   char whois[UHOSTLEN];
   char host[UHOSTLEN];
+#ifdef USE_IPV6
+  char host6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */
+#endif /* USE_IPV6 */
 };
 
 

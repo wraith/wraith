@@ -691,7 +691,7 @@ port_t listen_all(port_t lport, bool off)
       } else {
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = 0L;
-        strcpy(dcc[idx].addr6, myipstr(6));
+        strcpy(dcc[idx].host6, myipstr(6));
         dcc[idx].port = port;
         dcc[idx].sock = i6;
         dcc[idx].timeval = now;

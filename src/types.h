@@ -39,4 +39,12 @@ typedef u_int32_t 		dword;
 /* port */
 typedef in_port_t		port_t;
 
+typedef struct {
+  int family;
+  union {
+    struct in_addr addr;
+    struct in6_addr addr6;
+  } u;
+} addr_t;
+
 #endif /* !_TYPES_H */

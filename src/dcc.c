@@ -485,7 +485,7 @@ display_dcc_bot(int idx, char *buf)
   buf[i++] = b_status(idx) & STAT_SENDINGU ? 'D' : 'd';
   buf[i++] = b_status(idx) & STAT_GETTINGU ? 'E' : 'e';
 #ifdef USE_IPV6
-  if (sockprotocol(dcc[idx].sock) == AF_INET6 && dcc[idx].addr6[0])
+  if (sockprotocol(dcc[idx].sock) == AF_INET6 && dcc[idx].host6[0])
     buf[i++] = '6';
 #endif /* USE_IPV6 */
   buf[i++] = 0;
@@ -1133,7 +1133,7 @@ display_dcc_chat(int idx, char *buf)
   if ((colori = coloridx(idx)))
     buf[i++] = colori == 1 ? 'A' : 'M';
 #ifdef USE_IPV6
-  if (sockprotocol(dcc[idx].sock) == AF_INET6 && dcc[idx].addr6[0])
+  if (sockprotocol(dcc[idx].sock) == AF_INET6 && dcc[idx].host6[0])
     buf[i++] = '6';
 #endif /* USE_IPV6 */
   simple_sprintf(buf + i, "/%d", dcc[idx].u.chat->channel);
@@ -1246,7 +1246,7 @@ dcc_telnet(int idx, char *buf, int ii)
   dcc[i].addr = ip;
 #ifdef USE_IPV6
   if (sockprotocol(sock) == AF_INET6)
-    strcpy(dcc[i].addr6, s);
+    strcpy(dcc[i].host6, s);
 #endif /* USE_IPV6 */
   dcc[i].port = port;
   dcc[i].timeval = now;
@@ -1273,8 +1273,8 @@ dcc_telnet_hostresolved(int i)
   char s2[UHOSTLEN + 20] = "";
 
 #ifdef USE_IPV6
-  if (sockprotocol(dcc[i].sock) == AF_INET6 && dcc[i].addr6[0])
-    strncpyz(dcc[i].host, dcc[i].addr6, UHOSTLEN);
+  if (sockprotocol(dcc[i].sock) == AF_INET6 && dcc[i].host6[0])
+    strncpyz(dcc[i].host, dcc[i].host6, UHOSTLEN);
   else
 #endif /* USE_IPV6 */
     strncpyz(dcc[i].host, dcc[i].u.dns->host, UHOSTLEN);
