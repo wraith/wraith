@@ -8,7 +8,7 @@ numver=`grep "int" src/main.c | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;/
 PACKNAME=`grep "PACKNAME " pack/pack.cfg | awk '/PACKNAME/ {print $2}'`
 
 clear
-case $[(`date '+%s'` % 3)] in
+case $[(`date '+%s'` % 6)] in
 	0) echo "@@@  @@@  @@@  @@@@@@@    @@@@@@   @@@  @@@@@@@  @@@  @@@"
            echo "@@@  @@@  @@@  @@@@@@@@  @@@@@@@@  @@@  @@@@@@@  @@@  @@@"
            echo "@@!  @@!  @@!  @@!  @@@  @@!  @@@  @@!    @@!    @@!  @@@"
@@ -45,6 +45,39 @@ case $[(`date '+%s'` % 3)] in
            echo " ===  ===  === =======  ======== ===   ===   ========"
            echo "  ===========  === ===  ===  === ===   ===   ===  ==="
            echo "   ==== ====   ===  === ===  === ===   ===   ===  ===" ;;
+
+	3) echo "                       .__  __  .__"
+           echo '__  _  ______________  |__|/  |_|  |__'
+           echo '\ \/ \/ /\_  __ \__  \ |  \   __\  |  \'
+           echo ' \     /  |  | \// __ \|  ||  | |   Y  \'
+           echo '  \/\_/   |__|  (____  /__||__| |___|  /'
+           echo "                     \/              \/" ;;
+
+	4) echo "     dBPdBPdBP dBBBBBb dBBBBBb     dBP dBBBBBBP dBP dBP"
+           echo "                   dBP      BB"
+           echo "   dBPdBPdBP   dBBBBK   dBP BB   dBP    dBP   dBBBBBP"  
+           echo "  dBPdBPdBP   dBP  BB  dBP  BB  dBP    dBP   dBP dBP"
+           echo " dBBBBBBBP   dBP  dB' dBBBBBBB dBP    dBP   dBP dBP" ;;
+
+	5) echo "                                                            /"
+           echo "                                             #            #/"
+           echo "                                            ###     #     ##"
+           echo "##                                           #     ##     ##"
+           echo "##                                                 ##     ##"
+           echo " ##    ###    ####    ###  /###     /###   ###   ######## ##  /##"
+           echo "  ##    ###     ###  / ###/ #### / / ###  / ### ########  ## / ###"
+           echo "  ##     ###     ###/   ##   ###/ /   ###/   ##    ##     ##/   ###"
+           echo "  ##      ##      ##    ##       ##    ##    ##    ##     ##     ##"
+           echo "  ##      ##      ##    ##       ##    ##    ##    ##     ##     ##"
+           echo "  ##      ##      ##    ##       ##    ##    ##    ##     ##     ##"
+           echo "  ##      ##      ##    ##       ##    ##    ##    ##     ##     ##"
+           echo "  ##      /#      /     ##       ##    /#    ##    ##     ##     ##"
+           echo "   ######/ ######/      ###       ####/ ##   ### / ##     ##     ##"
+           echo "    #####   #####        ###       ###   ##   ##/   ##     ##    ##"
+           echo "                                                                 /"
+           echo "                                                                /"
+           echo "                                                               /"
+           echo "                                                              /" ;;
 esac
 
 usage() 
