@@ -150,37 +150,47 @@ int fixmod(const char *s)
 
 Tempfile::Tempfile()
 {
-  file = new char[strlen(tempdir) + 7 + 1];
-  sprintf(file, "%s.XXXXXX", tempdir);
+  len = strlen(tempdir) + 1 + 6 + 1;
+  file = new char[len];
+  sprintf(file, "%s.XXXXXX", tempdir[0] ? tempdir : "");
 
   MakeTemp();
 }
 
 Tempfile::Tempfile(const char *prefix)
 {
-  file = new char[strlen(tempdir) + strlen(prefix) + 7 + 1];
-  sprintf(file, "%s.%s-XXXXXX", tempdir, prefix);
+  len = strlen(tempdir) + strlen(prefix) + 8;
+  file = new char[len + 45];
+  sprintf(this->file, "%s.%s-XXXXXX", tempdir[0] ? tempdir : "", prefix);
 
   MakeTemp();
 }
 
 void Tempfile::MakeTemp()
 {
-  fd = -1;
+  if ((fd = mkstemp(file)) < 0)
+    goto error;    
 
-  if ((fd = mkstemp(file)) == -1 || (f = fdopen(fd, "wb")) == NULL) {
-    if (fd != -1) {
-      unlink(file);
-      close(fd);
-    }
-    fatal("Cannot create temporary file!", 0);
-  }
+  if ((f = fdopen(fd, "w+b")) == NULL)
+    goto error;
+  
+  chmod(file, S_IRUSR | S_IWUSR);
+
+  return;
+
+error:
+  putlog(LOG_ERRORS, "Couldn't create temporary file '%s': %s", file, strerror(errno));
+  delete this;
+  fatal("Cannot create tempory file!", 0);
 }
 
 Tempfile::~Tempfile()
 {
-  fclose(f);
   unlink(file);
+  if (f)
+    fclose(f);
+  else
+    close(fd);
   delete[] file;
 }
 
