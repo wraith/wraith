@@ -1076,27 +1076,24 @@ check_netfight(struct chanset_t *chan)
 void
 raise_limit(struct chanset_t *chan)
 {
-  int nl, cl, i, mem, ul, ll;
-  char s[50] = "";
+  int nl, i, ul, ll;
 
-  if (!chan || !me_op(chan)) {
+  if (!chan || !me_op(chan))
     return;
-  }
 
-  mem = chan->channel.members;  /* members */
-  nl = mem + chan->limitraise;  /* new limit */
-  cl = chan->channel.maxmembers;        /* current limit */
+  nl = chan->channel.members + chan->limitraise;  /* new limit */
 
-  i = chan->limitraise / 4;
+  i = chan->limitraise >> 2;		/* DIV 4 */
 
   /* if the newlimit will be in the range made by these vars, dont change. */
   ul = nl + i;                  /* upper limit range */
   ll = nl - i;                  /* lower limit range */
-  if (cl > ll && cl < ul) {
+  if ((chan->channel.maxmembers > ll) && (chan->channel.maxmembers < ul))
     return;                     /* the current limit is in the range, so leave it. */
-  }
 
   if (nl != chan->channel.maxmembers) {
+    char s[5] = "";
+
     sprintf(s, "%d", nl);
     add_mode(chan, '+', 'l', s);
   }
