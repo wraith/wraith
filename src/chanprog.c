@@ -53,22 +53,22 @@ char 			botname[NICKLEN + 1];	/* Primary botname		*/
 void rmspace(char *s)
 {
 #define whitespace(c) (((c) == 32) || ((c) == 9) || ((c) == 13) || ((c) == 10))
-  char *p;
+  char *p, *end;
   int len;
 
   if (!*s)
     return;
 
   /* Wipe end of string */
-  for (p = s + strlen(s) - 1; ((whitespace(*p)) && (p >= s)); p--);
-  if (p != s + strlen(s) - 1)
-    *(p + 1) = 0;
+  end = s + strlen(s) - 1;
+  for (p = end; ((whitespace(*p)) && (p >= s)); p--);
+  if (p != end) *(p + 1) = 0;
   len = p+1 - s;
   for (p = s; ((whitespace(*p)) && (*p)); p++);
   len -= (p - s);
   if (p != s) {
     /* +1 to include the null in the copy */
-    memmove(s, p, len+1);
+    memmove(s, p, len + 1);
   }
 }
 
