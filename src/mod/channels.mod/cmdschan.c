@@ -1287,9 +1287,8 @@ static void cmd_chanset(int idx, char *par)
   struct chanset_t *chan = NULL;
   int all = 0;
 
-  putlog(LOG_CMDS, "*", "#%s# chanset %s", dcc[idx].nick, par);
-
   if (!par[0]) {
+    putlog(LOG_CMDS, "*", "#%s# chanset %s", dcc[idx].nick, par);
     dprintf(idx, "Usage: chanset [%schannel|*] <settings>\n", CHANMETA);
     return;
   }
@@ -1336,6 +1335,9 @@ static void cmd_chanset(int idx, char *par)
       return;
     }
   }
+
+  putlog(LOG_CMDS, "*", "#%s# chanset (%s) %s", dcc[idx].nick, chan->dname, par);
+  
   if (do_chanset(result, all ? NULL : chan, par, DO_LOCAL | DO_NET) == ERROR) {
     dprintf(idx, "Error trying to set { %s } on %s: %s\n", par, all ? "all channels" : chan->dname, result);
     return;
