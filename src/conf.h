@@ -61,6 +61,7 @@ void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
 pid_t checkpid(char *, conf_bot *);
 void init_conf();
+void free_conf();
 void free_conf_bots();
 int readconf(const char *, int);
 int parseconf(bool);

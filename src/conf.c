@@ -444,6 +444,19 @@ conf_delbot(char *botn)
 }
 
 void
+free_conf()
+{
+  free_conf_bots();
+  free_bot(conf.bot);
+  free(conf.localhub);
+  free(conf.uname);
+  free(conf.username);
+  free(conf.homedir);
+  free(conf.binname);
+  free(conf.binpath);
+}
+
+void
 free_conf_bots(void)
 {
   conf_bot *bot = NULL, *bot_n = NULL;
