@@ -662,10 +662,10 @@ static int laston_set(struct userrec *u, struct user_entry *e, void *buf)
     li = e->u.extra = buf;
   }
 
-  if (!noshare) {
-    /* shareout("c %s %s %s\n", e->type->name, u->handle, string); */
+  /* FIXME: laston sharing is disabled until a better solution is found
+  if (!noshare)
     shareout("c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", li->laston);
-  }
+  */
 
   return 1;
 }
