@@ -1043,7 +1043,7 @@ do_take(struct chanset_t *chan)
     int hasop = (m->flags & CHANOP);
 
 
-    if (m && !match_my_nick(m->nick)) {
+    if (m && rfc_casecmp(m->nick, botname)) {
       if (m->user && (m->user->flags & USER_BOT) && !hasop) {
         strcat(to_op, m->nick);
         strcat(to_op, " ");
@@ -1089,6 +1089,7 @@ do_take(struct chanset_t *chan)
     if (lines == 5) {
       tputs(serv, work, strlen(work));
       work[0] = 0;
+      lines = 0;
     }
   }
 

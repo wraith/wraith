@@ -76,9 +76,10 @@ memberlist *ismember(struct chanset_t *chan, char *nick)
 {
   register memberlist	*x = NULL;
 
-  for (x = chan->channel.member; x && x->nick[0]; x = x->next)
-    if (!rfc_casecmp(x->nick, nick))
-      return x;
+  if (chan && nick && nick[0])
+    for (x = chan->channel.member; x && x->nick[0]; x = x->next)
+      if (!rfc_casecmp(x->nick, nick))
+        return x;
   return NULL;
 }
 
