@@ -414,14 +414,17 @@ void write_settings(const char *fname, int die, bool conf)
   if (conf)
     bits |= WRITE_CONF;
 
-  if ((hash = bin_checksum(fname, bits, &ctx))) {
-    printf("* Wrote %ssettings to: %s.\n", ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :
-                                           ((bits & WRITE_CONF) && !(bits & WRITE_PACK)) ? "conf " :
-                                           ((bits & WRITE_PACK) && (bits & WRITE_CONF))  ? "pack/conf "  :
-                                           "",
-                                           fname);
-    if (die == -1)			/* only bother decrypting if we aren't about to exit */
-      edpack(&settings, hash, PACK_DEC);
+  /* only bother writing anything if we have pack or conf, checksum is worthless to write out */
+  if (bits & (WRITE_PACK|WRITE_CONF)) {
+    if ((hash = bin_checksum(fname, bits, &ctx))) {
+      printf("* Wrote %ssettings to: %s.\n", ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :
+                                             ((bits & WRITE_CONF) && !(bits & WRITE_PACK)) ? "conf " :
+                                             ((bits & WRITE_PACK) && (bits & WRITE_CONF))  ? "pack/conf "  :
+                                             "",
+                                             fname);
+      if (die == -1)			/* only bother decrypting if we aren't about to exit */
+        edpack(&settings, hash, PACK_DEC);
+    }
   }
 
   if (die >= 0)
