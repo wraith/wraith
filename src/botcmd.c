@@ -863,6 +863,13 @@ static void bot_traced(int idx, char *par)
       botnet_send_traced(i, to, par);
   }
 }
+
+void bot_buildts(int idx, char *par)
+{
+  if (par && par[0])
+    dcc[idx].u.bot->bts = atoi(par);
+}
+
 void bot_timesync(int idx, char *par)
 {
   putlog(LOG_DEBUG, "@", "Got timesync from %s: %s\n", dcc[idx].nick, par);
@@ -1341,6 +1348,7 @@ botcmd_t C_bot[] =
   {"t",			(Function) bot_trace},
   {"tb",		(Function) bot_thisbot},
   {"td",		(Function) bot_traced},
+  {"bts",		(Function) bot_buildts},
   {"ts", 		(Function) bot_timesync},
   {"u",			(Function) bot_update},
   {"ul",		(Function) bot_unlink},

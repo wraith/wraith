@@ -25,7 +25,7 @@
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
 extern Tcl_Interp	*interp;
-extern time_t		 now;
+extern time_t		 now, buildts;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
 			 ignore_time;
@@ -224,6 +224,7 @@ static void greet_new_bot(int idx)
 
   dcc[idx].timeval = now;
   dcc[idx].u.bot->version[0] = 0;
+  dcc[idx].u.bot->bts = 0;
   dcc[idx].u.bot->sysname[0] = 0;
   dcc[idx].u.bot->numver = 0;
 #ifdef HUB
@@ -249,6 +250,7 @@ static void greet_new_bot(int idx)
 
   dprintf(idx, "v %d %d %s <%s>\n", egg_numver, HANDLEN, ver, network);
   dprintf(idx, "vs %s\n", sysname);
+  dprintf(idx, "bts %lu\n", buildts);
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].type == &DCC_FORK_BOT) {
       killsock(dcc[i].sock);

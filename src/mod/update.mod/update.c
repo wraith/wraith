@@ -133,11 +133,8 @@ return;
 #ifdef HUB
   if (bupdating) return;
 
-  dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU |
-                       STAT_OFFEREDU);
-
-  if ((dcc[idx].u.bot->buildts < buildts)
-      && (isupdatehub())) {
+  dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
+  if ((dcc[idx].u.bot->bts < buildts) && (isupdatehub())) {
     dprintf(idx, "sb u?\n");
     dcc[idx].status |= STAT_OFFEREDU;
   }
@@ -196,7 +193,7 @@ static void got_nu(char *botnick, char *code, char *par)
      usleep(1000 * 500);
      botlink("", -3, botnick);
 #else
-     putlog(LOG_MISC, "*", "I need to be updated with %d", newver);
+     putlog(LOG_MISC, "*", "I need to be updated with %lu", newts);
 #endif /* LEAF */
    }  
 }
@@ -425,8 +422,7 @@ static void check_updates()
       dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU |
                        STAT_OFFEREDU);
 
-      if ((dcc[i].u.bot->buildts < buildts)
-        && (isupdatehub())) {
+      if ((dcc[i].u.bot->bts < buildts) && (isupdatehub())) {
         dprintf(i, "sb u?\n");
         dcc[i].status |= STAT_OFFEREDU;
       }
@@ -434,7 +430,7 @@ static void check_updates()
   }
 
   //send out notice to update remote bots ...
-  sprintf(buf, "nu? %d", buildts);
+  sprintf(buf, "nu? %lu", buildts);
   putallbots(buf);
 }
 #endif

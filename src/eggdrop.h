@@ -431,6 +431,7 @@ enum {
 
 struct bot_info {
   char version[121];		/* channel/version info			*/
+  time_t bts;			/* build timestamp */
   char linker[NOTENAMELEN + 1];	/* who requested this link		*/
   int  numver;
   char sysname[121];
