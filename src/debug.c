@@ -28,7 +28,6 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <sys/mman.h>
-#define PAGESIZE 4096
 
 bool		sdebug = 0;             /* enable debug output? */
 
@@ -138,6 +137,10 @@ static void got_bus(int z)
 
 #ifndef CYGWIN_HACKS
 #ifdef __i386__
+#ifndef PAGESIZE
+#define PAGESIZE 4096
+#endif
+
 struct stackframe {
   struct stackframe *ebp;
   unsigned long addr;
