@@ -31,8 +31,8 @@ CFLGS = -fno-strict-aliasing
 # btw to turn STRIP off, do 'STRIP = touch' not 'STRIP ='
 
 # defaults
-#CC = @CC@
-CC = gcc-2.95
+CC = @CC@
+#CC = gcc-2.95
 LD = @CC@
 STRIP = @STRIP@
 RANLIB = @RANLIB@

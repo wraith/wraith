@@ -4,7 +4,7 @@
 
 #add in 'cont' support for NOT using make clean.
 
-TCLDIR="/home/wheel/bryan"
+TCLDIR="/home/bryan"
 
 #change this to 0 to not clean previously compiled files (faster/for dev)
 clean=1
@@ -119,7 +119,12 @@ echo "[*] Building pack for $os"
 # Run ./configure, then verify it's ok
 echo "[*] Configuring..."
 umask 077 >/dev/null
-./configure --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
+if test -z ${TCLDIR}
+then
+  ./configure --disable-tcl-threads > /dev/null 2>configure.temp
+else
+  ./configure --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
+fi
 #if test "`cat configure.temp`"
 #then
 #  echo "Configure error'd"
