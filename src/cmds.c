@@ -462,7 +462,7 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
       return;
     }
     encrypt_pass(pass, epass);
-    sprintf(tmp, "%s %s", cmd, epass);
+    egg_snprintf(tmp, sizeof tmp, "%s %s", cmd, epass);
     if (has_cmd_pass(cmd))
       dprintf(idx, "Changed command password for %s\n", cmd);
     else
@@ -525,10 +525,12 @@ static void cmd_motd(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# motd %s", dcc[idx].nick, par);
   if (par[0] && (u->flags & USER_MASTER)) {
     char *s = NULL;
+    size_t size;
+  
+    size = strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1;
+    s = calloc(1, size); /* +2: ' 'x2 */
 
-    s = calloc(1, strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1); /* +2: ' 'x2 */
-
-    sprintf(s, "%s %li %s", dcc[idx].nick, now, par);
+    egg_snprintf(s, size, "%s %li %s", dcc[idx].nick, now, par);
     set_cfg_str(NULL, "motd", s);
     free(s);
     dprintf(idx, "Motd set\n");
@@ -643,7 +645,7 @@ static void cmd_newpass(struct userrec *u, int idx, char *par)
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      sprintf(pass, "%s", new);
+      egg_snprintf(pass, sizeof pass, "%s", new);
     }
   }
   if (strlen(pass) > 15)
@@ -677,7 +679,7 @@ static void cmd_secpass(struct userrec *u, int idx, char *par)
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      sprintf(pass, "%s", new);
+      egg_snprintf(pass, sizeof pass, "%s", new);
     }
   }
   if (strlen(pass) > 15)
@@ -791,7 +793,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   } else {
     if (!strchr(par, '*') && !strchr(par, '?'))
       nowild++;
-    sprintf(match, "%s", newsplit(&par));
+    egg_snprintf(match, sizeof match, "%s", newsplit(&par));
   }
   if (!nowild)
     dprintf(idx, "Showing help topics matching '%s' for flags: (%s)\n", match, flg);
@@ -1485,7 +1487,7 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
         good = 1;
       } else {
         if (goodpass(new, idx, NULL)) {
-          sprintf(pass, "%s", new);
+          egg_snprintf(pass, sizeof pass, "%s", new);
           good = 1;
         }
       }
@@ -1542,7 +1544,7 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
           dprintf(idx, "Please use at least 6 characters.\n");
           return;
         } else {
-          sprintf(pass, "%s", new);
+          egg_snprintf(pass, sizeof pass, "%s", new);
         }
       }
       if (strlen(pass) > 15)
@@ -2543,6 +2545,11 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     pls.match = user.match;
     break_down_flags(chg, &pls, &mns);
 
+/* FIXME: Remove after 1.1.8 */
+    pls.global &=~(USER_BOT);
+    mns.global &=~(USER_BOT);
+
+
     if ((pls.global & USER_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
       dprintf(idx, "Only a hub can be set as the updatehub.\n");
       pls.global &= ~(USER_UPDATEHUB);
@@ -2815,6 +2822,7 @@ static void cmd_w(struct userrec *u, int idx, char *par) {
 
 static void cmd_ps(struct userrec *u, int idx, char *par) {
   char *buf = NULL;
+  size_t size;
 
   putlog(LOG_CMDS, "*", "#%s# ps %s", dcc[idx].nick, par);
   if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
@@ -2822,8 +2830,9 @@ static void cmd_ps(struct userrec *u, int idx, char *par) {
     dprintf(idx, "No.");
     return;
   }
-  buf = calloc(1, strlen(par) + 10);
-  sprintf(buf, "ps %s", par);
+  size = strlen(par) + 9 + 1;
+  buf = calloc(1, size);
+  egg_snprintf(buf, size, "ps %s", par);
   if (!exec_str(idx, buf))
     dprintf(idx, "Exec failed\n");
   free(buf);
@@ -2847,7 +2856,7 @@ static void cmd_last(struct userrec *u, int idx, char *par) {
     dprintf(idx, "Can't determine user id for process\n");
     return;
   }
-  sprintf(buf, "last %s", user);
+  egg_snprintf(buf, sizeof buf, "last %s", user);
   if (!exec_str(idx, buf))
     dprintf(idx, "Failed to execute /bin/sh last\n");
 }
@@ -3740,7 +3749,7 @@ static void cmd_botmsg(struct userrec * u, int idx, char * par) {
     dprintf(idx, "No such bot linked\n");
     return;
   }
-  sprintf(tmp, "msg %s %s", tnick, par);
+  egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
   botnet_send_cmd(conf.bot->nick, tbot, u->handle, idx, tmp);
 }
 
@@ -3753,7 +3762,7 @@ static void cmd_netmsg(struct userrec * u, int idx, char * par) {
     dprintf(idx, "Usage: netmsg <nick|#channel> <message>\n");
     return;
   }
-  sprintf(tmp, "msg %s %s", tnick, par);
+  egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
   botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
 }
 
@@ -3764,7 +3773,7 @@ void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, cha
   nick = newsplit(&par);
   dprintf(DP_SERVER, "PRIVMSG %s :%s\n", nick, par);
   if (!strcmp(tobot, conf.bot->nick)) {
-    sprintf(buf, "Sent message to %s", nick);
+    egg_snprintf(buf, sizeof buf, "Sent message to %s", nick);
     botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, buf);
   }
 #endif /* LEAF */
@@ -3790,7 +3799,7 @@ static void cmd_netlag(struct userrec * u, int idx, char * par) {
 void rcmd_ping(char * frombot, char *fromhand, char * fromidx, char * par) {
   char tmp[64] = "";
 
-  sprintf(tmp, "pong %s", par);
+  egg_snprintf(tmp, sizeof tmp, "pong %s", par);
   botnet_send_cmd(conf.bot->nick, frombot, fromhand, atoi(fromidx), tmp);
 }
 
@@ -3826,7 +3835,7 @@ static void cmd_netps(struct userrec * u, int idx, char * par) {
     dprintf(idx, "No.");
     return;
   }
-  sprintf(buf, "exec ps %s", par);
+  egg_snprintf(buf, sizeof par, "exec ps %s", par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 
@@ -3839,7 +3848,7 @@ static void cmd_netlast(struct userrec * u, int idx, char * par) {
     dprintf(idx, "No.");
     return;
   }
-  sprintf(buf, "exec last %s", par);
+  egg_snprintf(buf, sizeof par, "exec last %s", par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 #endif /* HUB */
@@ -3930,13 +3939,13 @@ void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
       botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, "Can't determine user id for process");
       return;
     }
-    sprintf(scmd, "last %s", user);
+    egg_snprintf(scmd, sizeof scmd, "last %s", user);
   } else if (!strcmp(cmd, "ps")) {
-    sprintf(scmd, "ps %s", par);
+    egg_snprintf(scmd, sizeof scmd, "ps %s", par);
   } else if (!strcmp(cmd, "raw")) {
-    sprintf(scmd, "%s", par);
+    egg_snprintf(scmd, sizeof scmd, "%s", par);
   } else if (!strcmp(cmd, "kill")) {
-    sprintf(scmd, "kill %s", par);
+    egg_snprintf(scmd, sizeof scmd, "kill %s", par);
   } else if (!strcmp(cmd, "crontab")) {
     char *code = newsplit(&par);
 
@@ -4014,7 +4023,7 @@ static void cmd_botjump(struct userrec * u, int idx, char * par) {
     dprintf(idx, "No such linked bot\n");
     return;
   }
-  sprintf(buf, "jump %s", par);
+  egg_snprintf(buf, sizeof buf, "jump %s", par);
   botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, buf);
 }
 
