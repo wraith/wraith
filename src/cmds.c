@@ -2938,7 +2938,7 @@ static void cmd_nettcl(struct userrec *u, int idx, char *msg)
 #endif /* S_PERMONLY */
   putlog(LOG_CMDS, "*", STR("#%s# nettcl %s"), dcc[idx].nick, msg);
   egg_snprintf(buf, sizeof buf, "mt %d %s", idx, msg);
-  botnet_send_zapf_broad(-1, botnetnick, NULL, buf);
+  putallbots(buf);
 
   debug1(STR("tcl: evaluate (.tcl): %s"), msg);
   code = Tcl_GlobalEval(interp, msg);

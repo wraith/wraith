@@ -33,10 +33,10 @@ static void cancel_user_xfer(int, void *);
 
 #ifdef HUB
 int bupdating = 0;
-#endif
+#endif /* HUB */
 #ifdef LEAF
 int updated = 0;
-#endif
+#endif /* LEAF */
 
 /*
  *   Botnet commands
@@ -435,7 +435,7 @@ static void check_updates()
 
   //send out notice to update remote bots ...
   sprintf(buf, "nu? %d", egg_numver);
-  botnet_send_zapf_broad(-1, botnetnick, NULL, buf);
+  putallbots(buf);
 }
 #endif
 

@@ -620,7 +620,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
         }
       }
     } else {
-      botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+      putallbots(buf2);
     }
   }
 
