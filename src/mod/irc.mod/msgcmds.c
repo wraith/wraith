@@ -123,6 +123,7 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
     return 1;
 
   i = findauth(host);
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! AUTH?", nick, host, u->handle);
 
   if (i != -1) {
     if (auth[i].authed) {
