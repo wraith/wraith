@@ -294,7 +294,7 @@ void putlog(int type, char *chname, char *format, ...)
 
   if ((!backgrd) && (!term_z)) {
     dprintf(DP_STDOUT, "%s", out);
-  } else if ((type & LOG_ERRORS) && use_stderr) {
+  } else if ((type & LOG_ERRORS || type & LOG_MISC) && use_stderr) {
     out += tsl;
     dprintf(DP_STDERR, "%s", s);
   }
