@@ -52,10 +52,6 @@ unsigned int modesperline;	/* Number of modes per line to send. */
 static int mode_buf_len = 200;		/* Maximum bytes to send in 1 mode. */
 int use_354 = 0;			/* Use ircu's short 354 /who
 					   responses. */
-static int kick_method = 1;		/* How many kicks does the irc network
-					   support at once?
-					   0 = as many as possible.
-					       (Ernst 18/3/1998) */
 static int kick_fun = 0;
 static int ban_fun = 1;
 static int keepnick = 1;		/* Keep nick */
@@ -1318,23 +1314,18 @@ static void do_nettype()
 {
   switch (net_type) {
   case 0:		/* Efnet */
-    kick_method = 1;
     include_lk = 0;
     break;
   case 1:		/* Ircnet */
-    kick_method = 4;
     include_lk = 1;
     break;
   case 2:		/* Undernet */
-    kick_method = 1;
     include_lk = 1;
     break;
   case 3:		/* Dalnet */
-    kick_method = 1;
     include_lk = 1;
     break;
   case 4:		/* hybrid-6+ */
-    kick_method = 1;
     include_lk = 0;
     break;
   default:

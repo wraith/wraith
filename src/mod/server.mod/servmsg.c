@@ -900,7 +900,7 @@ static int gotnick(char *from, char *msg)
   u = get_user_by_host(buf);
   nick = splitnick(&buf);
   fixcolon(msg);
-  check_queues(nick, msg);
+
   if (match_my_nick(nick)) {
     /* Regained nick! */
     strncpyz(botname, msg, NICKLEN);

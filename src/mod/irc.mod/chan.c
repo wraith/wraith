@@ -553,16 +553,15 @@ static char *quickban(struct chanset_t *chan, char *uhost)
 static void kick_all(struct chanset_t *chan, char *hostmask, char *comment, int bantype)
 {
   memberlist *m = NULL;
-  char kicknick[512] = "", s[UHOSTLEN] = "";
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
-  int k, l, flushed;
+  int flushed;
 
   if (!me_op(chan))
     return;
-  k = 0;
   flushed = 0;
-  kicknick[0] = 0;
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    char s[UHOSTLEN] = "";
+    struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+
     sprintf(s, "%s!%s", m->nick, m->userhost);
     get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
     if (me_op(chan) &&
@@ -578,20 +577,8 @@ static void kick_all(struct chanset_t *chan, char *hostmask, char *comment, int 
 	flushed += 1;
       }
       m->flags |= SENTKICK;	/* Mark as pending kick */
-      if (kicknick[0])
-	strcat(kicknick, ",");
-      strcat(kicknick, m->nick);
-      k += 1;
-      l = strlen(chan->name) + strlen(kicknick) + strlen(comment) + 5;
-      if ((kick_method != 0 && k == kick_method) || (l > 480)) {
-	dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, kicknick, kickprefix, comment);
-	k = 0;
-	kicknick[0] = 0;
-      }
+      dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, comment);
     }
-  }
-  if (k > 0) {
-    dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, kicknick, kickprefix, comment);
   }
 }
 
