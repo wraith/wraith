@@ -715,7 +715,7 @@ int main(int argc, char **argv)
   }
 
   dns_init();
-  module_load("channels");
+  channels_init();
 #ifdef LEAF
   server_init();
   irc_init();

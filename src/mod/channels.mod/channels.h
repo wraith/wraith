@@ -17,6 +17,8 @@
 
 #ifdef MAKING_CHANNELS
 
+#define add_mode real_add_mode
+
 /* Structure for udef channel values. Udef setting have one such
  * structure for each channel where they have a defined value.
  */
@@ -90,7 +92,7 @@ int u_match_mask(struct maskrec *, char *);
 int ismasked(masklist *, char *);
 int ismodeline(masklist *, char *);
 
-extern int		use_info, global_ban_time, global_exempt_time, global_invite_time;
+void channels_report(int, int);
 
 /* Macro's here because their functions were replaced by something more
  * generic. <cybah>

@@ -5,11 +5,7 @@
 #ifndef _EGG_MOD_STATIC_H
 #define _EGG_MOD_STATIC_H
 
-char *channels_start();
 char *compress_start();
-#ifdef LEAF
-char *irc_start();
-#endif /* LEAF */
 char *share_start();
 char *transfer_start();
 
@@ -22,10 +18,10 @@ void notes_init();
 void server_init();
 void irc_init();
 #endif /* LEAF */
+void channels_init();
 
 static void link_statics()
 {
-  check_static("channels", channels_start);
   check_static("compress", compress_start);
   check_static("share", share_start);
   check_static("transfer", transfer_start);

@@ -22,7 +22,6 @@
 #ifdef S_AUTHCMDS
 
 #define add_mode real_add_mode
-static void real_add_mode(struct chanset_t *, char, char, char *);
 
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
 #endif /* S_AUTHCMDS */
@@ -64,6 +63,7 @@ static int gotmode(char *, char *);
 
 #endif /* MAKING_IRC */
 
+void real_add_mode(struct chanset_t *, char, char, char *);
 int me_op(struct chanset_t *);
 void check_this_ban(struct chanset_t *, char *, int);
 void check_this_user(char *, int, char *);

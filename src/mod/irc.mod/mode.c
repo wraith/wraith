@@ -277,7 +277,7 @@ void queue_deop(struct chanset_t *chan, char *op) {
 
 /* Queue a channel mode change
  */
-static void real_add_mode(struct chanset_t *chan, char plus, char mode, char *op)
+void real_add_mode(struct chanset_t *chan, char plus, char mode, char *op)
 {
   int i, type, modes, l;
   masklist *m = NULL;
@@ -575,7 +575,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
 /* Queue a channel mode change
  */
-static void real_add_mode(struct chanset_t *chan, char plus, char mode, char *op)
+void real_add_mode(struct chanset_t *chan, char plus, char mode, char *op)
 {
   int i, type, modes, l;
   masklist *m = NULL;

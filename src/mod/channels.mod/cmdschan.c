@@ -254,7 +254,9 @@ static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
 	       dcc[idx].u.chat->con_chan, s, chan->dname, par);
 	dprintf(idx, "New %s exempt: %s (%s)\n", chan->dname, s, par);
       }
+#ifdef LEAF
       add_mode(chan, '+', 'e', s);
+#endif /* LEAF */
     } else {
       u_addexempt(NULL, s, dcc[idx].nick, par,
 		  expire_time ? now + expire_time : 0, 0);
@@ -268,8 +270,10 @@ static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
 	       s, par);
 	dprintf(idx, "New exempt: %s (%s)\n", s, par);
       }
+#ifdef LEAF
       for (chan = chanset; chan != NULL; chan = chan->next)
 	add_mode(chan, '+', 'e', s);
+#endif /* LEAF */
     }
   }
 }
@@ -383,7 +387,9 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
 	       dcc[idx].u.chat->con_chan, s, chan->dname, par);
 	dprintf(idx, "New %s invite: %s (%s)\n", chan->dname, s, par);
       }
+#ifdef LEAF
       add_mode(chan, '+', 'I', s);
+#endif /* LEAF */
     } else {
       u_addinvite(NULL, s, dcc[idx].nick, par,
 		  expire_time ? now + expire_time : 0, 0);
@@ -397,8 +403,10 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
 	       s, par);
 	dprintf(idx, "New invite: %s (%s)\n", s, par);
       }
+#ifdef LEAF
       for (chan = chanset; chan != NULL; chan = chan->next)
 	add_mode(chan, '+', 'I', s);
+#endif /* LEAF */
     }
   }
 }
@@ -446,8 +454,10 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
         mask = s;
       putlog(LOG_CMDS, "*", "#%s# -ban %s", dcc[idx].nick, mask);
       dprintf(idx, "%s: %s\n", IRC_REMOVEDBAN, mask);
+#ifdef LEAF
       for (chan = chanset; chan != NULL; chan = chan->next)
         add_mode(chan, '-', 'b', mask);
+#endif /* LEAF */
       return;
     }
   }
@@ -471,10 +481,11 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
           mask = lastdeletedmask;
         else
           mask = s;
-        putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s", dcc[idx].nick, chan->dname,
-               mask);
+        putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s", dcc[idx].nick, chan->dname, mask);
         dprintf(idx, "Removed %s channel ban: %s\n", chan->dname, mask);
+#ifdef LEAF
         add_mode(chan, '-', 'b', mask);
+#endif /* LEAF */
         return;
       }
     }
@@ -484,11 +495,11 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
           (!u_equals_mask(chan->bans, b->mask))) {
         i++;
         if (i == -j) {
+#ifdef LEAF
           add_mode(chan, '-', 'b', b->mask);
-          dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDBAN,
-                  b->mask, chan->dname);
-          putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s [on channel]",
-                 dcc[idx].nick, dcc[idx].u.chat->con_chan, ban);
+#endif /* LEAF */
+          dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDBAN, b->mask, chan->dname);
+          putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s [on channel]", dcc[idx].nick, dcc[idx].u.chat->con_chan, ban);
           return;
         }
       }
@@ -496,18 +507,20 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
   } else {
     j = u_delban(chan, ban, 1);
     if (j > 0) {
-      putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s", dcc[idx].nick,
-             dcc[idx].u.chat->con_chan, ban);
+      putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s", dcc[idx].nick, dcc[idx].u.chat->con_chan, ban);
       dprintf(idx, "Removed %s channel ban: %s\n", chname, ban);
+#ifdef LEAF
       add_mode(chan, '-', 'b', ban);
+#endif /* LEAF */
       return;
     }
     for (b = chan->channel.ban; b && b->mask && b->mask[0]; b = b->next) {
       if (!rfc_casecmp(b->mask, ban)) {
+#ifdef LEAF
         add_mode(chan, '-', 'b', b->mask);
+#endif /* LEAF */
         dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDBAN, b->mask, chan->dname);
-        putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s [on channel]",
-               dcc[idx].nick, dcc[idx].u.chat->con_chan, ban);
+        putlog(LOG_CMDS, "*", "#%s# (%s) -ban %s [on channel]", dcc[idx].nick, dcc[idx].u.chat->con_chan, ban);
         return;
       }
     }
@@ -562,8 +575,10 @@ static void cmd_mns_exempt(struct userrec *u, int idx, char *par)
         mask = s;
       putlog(LOG_CMDS, "*", "#%s# -exempt %s", dcc[idx].nick, mask);
       dprintf(idx, "%s: %s\n", IRC_REMOVEDEXEMPT, mask);
+#ifdef LEAF
       for (chan = chanset; chan != NULL; chan = chan->next)
         add_mode(chan, '-', 'e', mask);
+#endif /* LEAF */
       return;
     }
   }
@@ -587,10 +602,11 @@ static void cmd_mns_exempt(struct userrec *u, int idx, char *par)
           mask = lastdeletedmask;
         else
           mask = s;
-        putlog(LOG_CMDS, "*", "#%s# (%s) -exempt %s", dcc[idx].nick,
-               chan->dname, mask);
+        putlog(LOG_CMDS, "*", "#%s# (%s) -exempt %s", dcc[idx].nick, chan->dname, mask);
         dprintf(idx, "Removed %s channel exempt: %s\n", chan->dname, mask);
+#ifdef LEAF
         add_mode(chan, '-', 'e', mask);
+#endif /* LEAF */
         return;
       }
     }
@@ -600,9 +616,10 @@ static void cmd_mns_exempt(struct userrec *u, int idx, char *par)
           !u_equals_mask(chan->exempts, e->mask)) {
         i++;
         if (i == -j) {
+#ifdef LEAF
           add_mode(chan, '-', 'e', e->mask);
-          dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDEXEMPT,
-                  e->mask, chan->dname);
+#endif /* LEAF */
+          dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDEXEMPT, e->mask, chan->dname);
           putlog(LOG_CMDS, "*", "#%s# (%s) -exempt %s [on channel]",
                  dcc[idx].nick, dcc[idx].u.chat->con_chan, exempt);
           return;
@@ -612,19 +629,20 @@ static void cmd_mns_exempt(struct userrec *u, int idx, char *par)
   } else {
     j = u_delexempt(chan, exempt, 1);
     if (j > 0) {
-      putlog(LOG_CMDS, "*", "#%s# (%s) -exempt %s", dcc[idx].nick,
-             dcc[idx].u.chat->con_chan, exempt);
+      putlog(LOG_CMDS, "*", "#%s# (%s) -exempt %s", dcc[idx].nick, dcc[idx].u.chat->con_chan, exempt);
       dprintf(idx, "Removed %s channel exempt: %s\n", chname, exempt);
+#ifdef LEAF
       add_mode(chan, '-', 'e', exempt);
+#endif /* LEAF */
       return;
     }
     for (e = chan->channel.exempt; e && e->mask && e->mask[0]; e = e->next) {
       if (!rfc_casecmp(e->mask, exempt)) {
+#ifdef LEAF
         add_mode(chan, '-', 'e', e->mask);
-        dprintf(idx, "%s '%s' on %s.\n",
-                IRC_REMOVEDEXEMPT, e->mask, chan->dname);
-        putlog(LOG_CMDS, "*", "#%s# (%s) -exempt %s [on channel]",
-               dcc[idx].nick, dcc[idx].u.chat->con_chan, exempt);
+#endif /* LEAF */
+        dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDEXEMPT, e->mask, chan->dname);
+        putlog(LOG_CMDS, "*", "#%s# (%s) -exempt %s [on channel]", dcc[idx].nick, dcc[idx].u.chat->con_chan, exempt);
         return;
       }
     }
@@ -679,8 +697,10 @@ static void cmd_mns_invite(struct userrec *u, int idx, char *par)
         mask = s;
       putlog(LOG_CMDS, "*", "#%s# -invite %s", dcc[idx].nick, mask);
       dprintf(idx, "%s: %s\n", IRC_REMOVEDINVITE, mask);
+#ifdef LEAF
       for (chan = chanset; chan != NULL; chan = chan->next)
         add_mode(chan, '-', 'I', mask);
+#endif /* LEAF */
       return;
     }
   }
@@ -704,10 +724,11 @@ static void cmd_mns_invite(struct userrec *u, int idx, char *par)
           mask = lastdeletedmask;
         else
           mask = s;
-        putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s", dcc[idx].nick,
-               chan->dname, mask);
+        putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s", dcc[idx].nick, chan->dname, mask);
         dprintf(idx, "Removed %s channel invite: %s\n", chan->dname, mask);
+#ifdef LEAF
         add_mode(chan, '-', 'I', mask);
+#endif /* LEAF */
         return;
       }
     }
@@ -718,11 +739,11 @@ static void cmd_mns_invite(struct userrec *u, int idx, char *par)
           !u_equals_mask(chan->invites, inv->mask)) {
         i++;
         if (i == -j) {
+#ifdef LEAF
           add_mode(chan, '-', 'I', inv->mask);
-          dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDINVITE,
-                  inv->mask, chan->dname);
-          putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s [on channel]",
-                 dcc[idx].nick, dcc[idx].u.chat->con_chan, invite);
+#endif /* LEAF */
+          dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDINVITE, inv->mask, chan->dname);
+          putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s [on channel]", dcc[idx].nick, dcc[idx].u.chat->con_chan, invite);
           return;
         }
       }
@@ -730,20 +751,21 @@ static void cmd_mns_invite(struct userrec *u, int idx, char *par)
   } else {
     j = u_delinvite(chan, invite, 1);
     if (j > 0) {
-      putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s", dcc[idx].nick,
-             dcc[idx].u.chat->con_chan, invite);
+      putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s", dcc[idx].nick, dcc[idx].u.chat->con_chan, invite);
       dprintf(idx, "Removed %s channel invite: %s\n", chname, invite);
+#ifdef LEAF
       add_mode(chan, '-', 'I', invite);
+#endif /* LEAF */
       return;
     }
     for (inv = chan->channel.invite; inv && inv->mask && inv->mask[0];
          inv = inv->next) {
       if (!rfc_casecmp(inv->mask, invite)) {
+#ifdef LEAF
         add_mode(chan, '-', 'I', inv->mask);
-        dprintf(idx, "%s '%s' on %s.\n",
-                IRC_REMOVEDINVITE, inv->mask, chan->dname);
-        putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s [on channel]",
-               dcc[idx].nick, dcc[idx].u.chat->con_chan, invite);
+#endif /* LEAF */
+        dprintf(idx, "%s '%s' on %s.\n", IRC_REMOVEDINVITE, inv->mask, chan->dname);
+        putlog(LOG_CMDS, "*", "#%s# (%s) -invite %s [on channel]", dcc[idx].nick, dcc[idx].u.chat->con_chan, invite);
         return;
       }
     }

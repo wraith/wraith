@@ -4,30 +4,46 @@
  *
  */
 
-#define MODULE_NAME "channels"
+#undef MAKING_MODS
 #define MAKING_CHANNELS
-#include <sys/stat.h>
-#include "src/mod/module.h"
-#include "src/mod/irc.mod/irc.h"
+#include "src/common.h"
+#include "src/modules.h"
 #include "src/mod/share.mod/share.h"
 #ifdef LEAF
+#include "src/mod/irc.mod/irc.h"
 #include "src/mod/server.mod/server.h"
 #endif /* LEAF */
 #include "src/chanprog.h"
 #include "src/egg_timer.h"
+#include "src/misc.h"
+#include "src/main.h"
+#include "src/color.h"
+#include "src/userrec.h"
+#include "src/users.h"
+#include "src/cfg.h"
+#include "src/rfc1459.h"
+#include "src/match.h"
+#include "src/settings.h"
+#include "src/tandem.h"
+#include "src/botnet.h"
+#include "src/botmsg.h"
+#include "src/net.h"
+#include "src/tclhash.h"
+#include "src/cmds.h"
 
-static Function *global = NULL;
 
-int 			use_info;
+#include <sys/stat.h>
+
+static int 			use_info;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
 static char 			*lastdeletedmask = NULL;
 static struct udef_struct 	*udef = NULL;
 static int 			global_stopnethack_mode;
 static int 			global_revenge_mode;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
-int 			global_ban_time;
-int 			global_exempt_time;
-int 			global_invite_time;
+static int 			global_ban_time;
+static int 			global_exempt_time;
+static int 			global_invite_time;
 
 /* Global channel settings (drummer/dw) */
 static char 			glob_chanset[512] = "";
@@ -661,7 +677,7 @@ static cmd_t my_chon[] =
   {NULL,	NULL,	NULL,				NULL}
 };
 
-static void channels_report(int idx, int details)
+void channels_report(int idx, int details)
 {
   struct chanset_t *chan = NULL;
   int i;
@@ -784,18 +800,18 @@ static void channels_report(int idx, int details)
 }
 
 cmd_t channels_bot[] = {
-  {"cjoin",    "", (Function) got_cjoin, NULL},
-  {"cpart",    "", (Function) got_cpart, NULL},
-  {"cset",     "", (Function) got_cset,  NULL},
+  {"cjoin",	"", 	(Function) got_cjoin, 	NULL},
+  {"cpart",	"", 	(Function) got_cpart, 	NULL},
+  {"cset",	"", 	(Function) got_cset,  	NULL},
 #ifdef LEAF
-  {"cycle",    "", (Function) got_cycle, NULL},
-  {"down",     "", (Function) got_down,  NULL},
+  {"cycle",	"", 	(Function) got_cycle, 	NULL},
+  {"down",	"", 	(Function) got_down,  	NULL},
 #endif /* LEAF */
-  {"rl",       "", (Function) got_role,  NULL},
-  {"kl",       "", (Function) got_kl,    NULL},
-  {"sj",       "", (Function) got_sj,    NULL},
-  {"sp",       "", (Function) got_sp,    NULL},
-  {"jn",       "", (Function) got_jn,    NULL},
+  {"rl",	"", 	(Function) got_role,  	NULL},
+  {"kl",	"", 	(Function) got_kl,    	NULL},
+  {"sj",	"", 	(Function) got_sj,    	NULL},
+  {"sp",	"", 	(Function) got_sp,    	NULL},
+  {"jn",	"", 	(Function) got_jn,    	NULL},
 /*
 #ifdef HUB
   {"o1", "", (Function) got_o1, NULL},
@@ -803,18 +819,7 @@ cmd_t channels_bot[] = {
 #endif
   {"ltp", "", (Function) got_locktopic, NULL},
 */
-  {NULL, NULL, NULL, NULL}
-};
-
-EXPORT_SCOPE char *channels_start();
-
-static Function channels_table[] =
-{
-  /* 0 - 3 */
-  (Function) channels_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) channels_report,
+  {NULL, 	NULL, 	NULL, 			NULL}
 };
 
 void channels_describe(struct cfg_entry *cfgent, int idx)
@@ -864,21 +869,21 @@ void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_LOCKTHRESHOLD = {
-  "lock-threshold", CFGF_GLOBAL, NULL, NULL,
-  channels_changed, NULL, channels_describe
+	"lock-threshold", CFGF_GLOBAL, NULL, NULL,
+	channels_changed, NULL, channels_describe
 };
 
 struct cfg_entry CFG_KILLTHRESHOLD = {
-  "kill-threshold", CFGF_GLOBAL, NULL, NULL,
-  channels_changed, NULL, channels_describe
+	"kill-threshold", CFGF_GLOBAL, NULL, NULL,
+	channels_changed, NULL, channels_describe
 };
 #endif /* S_AUTOLOCK */
 
 
 #ifdef LEAF
-int checklimit = 1;
 static void check_limitraise() {
   int i = 0;
+  static int checklimit = 1;
   struct chanset_t *chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next, i++) {
@@ -893,11 +898,8 @@ static void check_limitraise() {
 #endif /* LEAF */
 
 
-char *channels_start(Function * global_funcs)
+void channels_init()
 {
-  global = global_funcs;
-
-
   gfld_chan_thr = 0;
   gfld_chan_time = 0;
   gfld_deop_thr = 8;
@@ -939,7 +941,6 @@ char *channels_start(Function * global_funcs)
 	 "-voice "
          "-private "
 	 "-fastop ");
-  module_register(MODULE_NAME, channels_table, 1, 0);
 #ifdef LEAF
   timer_create_secs(60, "check_limitraise", (Function) check_limitraise);
 #endif /* LEAF */
@@ -960,6 +961,5 @@ char *channels_start(Function * global_funcs)
   add_cfg(&CFG_LOCKTHRESHOLD);
   add_cfg(&CFG_KILLTHRESHOLD);
 #endif /* S_AUTOLOCK */
-  return NULL;
 }
 
