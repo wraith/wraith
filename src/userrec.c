@@ -38,9 +38,7 @@ int		userfile_perm = 0600;	/* Userfile permissions,
 					   default rw-------		    */
 
 
-#ifdef HUB
 static bool		 sort_users = 1;	/* sort the userlist when saving    */
-#endif /* HUB */
 
 int count_users(struct userrec *bu)
 {
@@ -249,7 +247,6 @@ int u_pass_match(struct userrec *u, char *in)
   return 0;
 }
 
-#ifdef HUB
 bool write_user(struct userrec *u, FILE * f, int idx)
 {
   char s[181] = "";
@@ -283,8 +280,10 @@ bool write_user(struct userrec *u, FILE * f, int idx)
 	if (lfprintf(f, "--%s %s\n", ue->name, lt->extra) == EOF)
 	  return 0;
     } else {
+#ifdef HUB
       if (!ue->type->write_userfile(f, u, ue))
 	return 0;
+#endif /* HUB */
     }
   }
   return 1;
@@ -410,7 +409,6 @@ int write_userfile(int idx)
   free(new_userfile);
   return 0;
 }
-#endif /* HUB */
 
 int change_handle(struct userrec *u, char *newh)
 {

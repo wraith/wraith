@@ -52,9 +52,7 @@ bool u_match_mask(struct maskrec *, char *);
 bool ismasked(masklist *, const char *);
 bool ismodeline(masklist *, const char *);
 void channels_report(int, int);
-#ifdef HUB
 void channels_writeuserfile();
-#endif /* HUB */
 
 extern char		glob_chanset[], cfg_glob_chanset[];
 

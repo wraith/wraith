@@ -474,18 +474,16 @@ chk_noflood(struct flag_record fr)
 int
 isupdatehub()
 {
-#ifdef HUB
-  if (conf.bot->u && (conf.bot->u->flags & USER_UPDATEHUB))
+  if (conf.bot->hub && conf.bot->u && (conf.bot->u->flags & USER_UPDATEHUB))
     return 1;
   else
-#endif /* HUB */
     return 0;
 }
 
 int
 ischanhub()
 {
-  if (conf.bot->u && (conf.bot->u->flags & USER_CHANHUB))
+  if (!conf.bot->hub && conf.bot->u && (conf.bot->u->flags & USER_CHANHUB))
     return 1;
   else
     return 0;

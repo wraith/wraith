@@ -15,8 +15,6 @@ void shareout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void finish_share(int);
 void dump_resync(int);
 void share_report(int, int);
-#ifdef HUB
 void hook_read_userfile();
-#endif /* HUB */
 
 #endif				/* _EGG_MOD_SHARE_SHARE_H */

@@ -1166,7 +1166,6 @@ share_version(int idx, char *par)
   // else higher_bot_linked(idx);
 }
 
-#ifdef HUB
 void
 hook_read_userfile()
 {
@@ -1183,16 +1182,14 @@ hook_read_userfile()
     }
   }
 }
-#endif /* HUB */
 
 static void
 share_endstartup(int idx, char *par)
 {
   dcc[idx].status &= ~STAT_GETTING;
   /* Send to any other sharebots */
-#ifdef HUB
-  hook_read_userfile();
-#endif /* HUB */
+  if (conf.bot->hub)
+    hook_read_userfile();
 }
 
 static void

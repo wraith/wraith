@@ -1069,7 +1069,6 @@ exempt-time %lu invite-time %lu \
   return 1;
 }
 
-#ifdef HUB
 void channels_writeuserfile()
 {
   char s[1024] = "";
@@ -1090,7 +1089,6 @@ void channels_writeuserfile()
   if (ret < 5)
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
 }
-#endif /* HUB */
 
 /* Expire mask originally set by `who' on `chan'?
  *

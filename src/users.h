@@ -161,9 +161,7 @@ bool def_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx);
 void def_display(int idx, struct user_entry *e, struct userrec *u);
 
 
-#ifdef HUB
 void backup_userfile();
-#endif /* HUB */
 void addignore(char *, char *, const char *, time_t);
 int delignore(char *);
 void tell_ignores(int, char *);

@@ -26,10 +26,8 @@
 #include "bg.h"	
 #include "chan.h"
 #include "tandem.h"
-#ifdef LEAF
 #include "src/mod/server.mod/server.h"
 #include "src/mod/irc.mod/irc.h"
-#endif /* LEAF */
 #include "userrec.h"
 #include "stat.h"
 
@@ -450,11 +448,6 @@ void show_channels(int idx, char *handle)
   egg_snprintf(format, sizeof format, "  %%c%%-%us %%-s%%-s%%-s%%-s%%-s\n", (l+2));
 
   for (chan = chanset;chan;chan = chan->next) {
-    int opped = 0;
-
-#ifdef LEAF
-    opped = me_op(chan);
-#endif /* LEAF */
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
         if (!first) { 
@@ -462,7 +455,7 @@ void show_channels(int idx, char *handle)
           
           first = 1;
         }
-        dprintf(idx, format, opped ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
+        dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
            channel_privchan(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
            channel_bitch(chan) ? "(bitch)    " : "", channel_closed(chan) ?  "(closed)" : "");
     }
@@ -599,12 +592,9 @@ void str_unescape(char *str, register const char esc_char)
  */
 void kill_bot(char *s1, char *s2)
 {
-#ifdef HUB
   write_userfile(-1);
-#endif /* HUB */
-#ifdef LEAF
-  server_die();
-#endif /* LEAF */
+  if (!conf.bot->hub)
+    server_die();
   chatout("*** %s\n", s1);
   botnet_send_chat(-1, conf.bot->nick, s1);
   botnet_send_bye();
@@ -621,13 +611,11 @@ restart(int idx)
   const char *reason = updating ? "Updating..." : "Restarting...";
 
   sdprintf("restarting [%s]", reason); 
-#ifdef HUB
   write_userfile(idx);
-#endif /* HUB */
-#ifdef LEAF
-  nuke_server((char *) reason);		/* let's drop the server connection ASAP */
-  cycle_time = 0;
-#endif /* LEAF */
+  if (!conf.bot->hub) {
+    nuke_server((char *) reason);		/* let's drop the server connection ASAP */
+    cycle_time = 0;
+  }
   if (tands > 0) {
     botnet_send_chat(-1, conf.bot->nick, (char *) reason);
     botnet_send_bye();
@@ -730,8 +718,7 @@ int updatebin(int idx, char *par, int secs)
     fatal("Binary updated.", 0);
   }
 
-#ifdef LEAF
-  if (secs > 0) {
+  if (!conf.bot->hub && secs > 0) {
     char buf[DIRMAX] = "";
 
     /* this forces all running bots to be restarted (except localhub/me) */
@@ -752,7 +739,6 @@ int updatebin(int idx, char *par, int secs)
 
     return 0;
   } else
-#endif /* LEAF */
     restart(idx);	/* no timer */
 
  /* this should never be reached */

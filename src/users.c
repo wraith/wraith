@@ -33,9 +33,7 @@
 #include "src/mod/notes.mod/notes.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef HUB
 #include "misc_file.h"
-#endif /* HUB */
 
 char userfile[121] = "";	/* where the user records are stored */
 time_t ignore_time = 10;		/* how many minutes will ignores last? */
@@ -607,7 +605,6 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
   dprintf(idx, MISC_FOUNDMATCH, cnt, cnt == 1 ? "" : MISC_MATCH_PLURAL);
 }
 
-#ifdef HUB
 void backup_userfile()
 {
   char s[DIRMAX] = "", s2[DIRMAX] = "";
@@ -618,7 +615,6 @@ void backup_userfile()
   movefile(s, s2);
   copyfile(userfile, s);
 }
-#endif /* HUB */
 
 /*
  * tagged lines in the user file:

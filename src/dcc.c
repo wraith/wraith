@@ -634,7 +634,8 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       dprintf(idx, "%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n", FLASH(-1), FLASH_END(-1));
       make_rand_str(pass, MAXPASSLEN);
       set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
-      write_userfile(idx);
+      if (conf.bot->hub)
+        write_userfile(idx);
       dprintf(idx, "Your secpass is now: %s%s%s\n", pass, BOLD(-1), BOLD_END(-1));
       dprintf(idx, "Make sure you do not lose this, as it is needed to login for now on.\n \n");
       dprintf(idx, "********************************************************************\n");

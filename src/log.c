@@ -160,17 +160,16 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   int idx = 0;
   char out[LOGLINEMAX + 1] = "";
-#ifdef HUB
-  char stamp[34] = "";
-  struct tm *t = gmtime(&now);
 
-  egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
-  /* Place the timestamp in the string to be printed */
-  egg_snprintf(out, sizeof out, "%s %s", stamp, va_out);
-#endif /* HUB */
-#ifdef LEAF
-  egg_snprintf(out, sizeof out, "%s", va_out);
-#endif /* LEAF */
+  if (conf.bot->hub) {
+    char stamp[34] = "";
+    struct tm *t = gmtime(&now);
+
+    egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
+    /* Place the timestamp in the string to be printed */
+    egg_snprintf(out, sizeof out, "%s %s", stamp, va_out);
+  } else
+    egg_snprintf(out, sizeof out, "%s", va_out);
 
   /* strcat(out, "\n"); */
 

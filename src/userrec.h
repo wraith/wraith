@@ -12,10 +12,8 @@ int count_users(struct userrec *);
 int deluser(char *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
-#ifdef HUB
 bool write_user(struct userrec *u, FILE * f, int shr);
 int write_userfile(int);
-#endif /* HUB */
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
 
