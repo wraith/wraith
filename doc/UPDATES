@@ -53,6 +53,7 @@ This is a summary of ChangeLog basically.
 * Bots will auto-restart if 150 or more bogus fd are detected.
 * Conf/uname email now includes binary path.
 * After changing conf with -C, binary is now moved to binpath/binname.
+* 'strict-host' is now '1'; ident is now parsed CORRECTLY, *!ident@host will no longer match *!~ident@host.
 
 1.1.9
 

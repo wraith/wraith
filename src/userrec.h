@@ -19,9 +19,8 @@ int write_userfile(int);
 #endif /* HUB */
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
-char *fixfrom(char *);
 
 extern struct userrec  		*userlist, *lastuser;
 extern int			cache_hit, cache_miss, userfile_perm;
-extern bool			strict_host, noshare;
+extern bool			noshare;
 #endif /* !_USERREC_H */

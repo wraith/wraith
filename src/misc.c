@@ -177,13 +177,10 @@ void maskhost(const char *s, char *nw)
     } else
       i = 0;
     while (*p != '@') {
-      if (!fl && strchr("~+-^=", *p)) {
-        if (strict_host)
-	  nw[i] = '?';
-	else
-	  i--;
-      } else
-	nw[i] = *p;
+      if (!fl && strchr("~+-^=", *p))
+       nw[i] = '?';
+      else
+        nw[i] = *p;
       fl++;
       p++;
       i++;

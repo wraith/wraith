@@ -966,7 +966,7 @@ void check_this_user(char *hand, int del, char *host)
       sprintf(s, "%s!%s", m->nick, m->userhost);
       u = m->user ? m->user : get_user_by_host(s);
       if ((u && !egg_strcasecmp(u->handle, hand) && del < 2) ||
-	  (!u && del == 2 && wild_match(host, fixfrom(s)))) {
+	  (!u && del == 2 && wild_match(host, s))) {
 	u = del ? NULL : u;
 	get_user_flagrec(u, &fr, chan->dname);
 	check_this_member(chan, m->nick, &fr);
