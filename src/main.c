@@ -267,18 +267,13 @@ static void show_help()
   exit(0);
 }
 
-#ifdef LEAF
-# define PARSE_FLAGS "0234:B:Cd:De:Eg:G:k:L:P:hnr:stu:U:v"
-#else /* !LEAF */
-# define PARSE_FLAGS "0234:Cd:De:Eg:G:hnr:stu:U:v"
-#endif /* HUB */
+// leaf: BkLP
+#define PARSE_FLAGS "0234:B:Cd:De:Eg:G:k:L:P:hnr:stu:U:v"
 #define FLAGS_CHECKPASS "CdDeEgGhknrtuUv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;
-#ifdef LEAF
   int localhub_pid = 0;
-#endif /* LEAF */
   char *p = NULL;
   
   opterr = 0;
@@ -297,24 +292,20 @@ static void dtx_arg(int argc, char *argv[])
         readconf(optarg, CONF_ENC);
         parseconf(0);
         conf_to_bin(&conf, 1);		/* this will exit() in write_settings() */
-#ifdef LEAF
       case 'B':
         localhub = 0;
         used_B = 1;
         strlcpy(origbotname, optarg, NICKLEN + 1);
         break;
-#endif /* LEAF */
       case 'C':
         do_confedit = 1;
         break;
       case 'h':
         show_help();
-#ifdef LEAF
       case 'k':		/* kill bot */
         kill_sig = SIGKILL;
         strlcpy(do_killbot, optarg, sizeof do_killbot);
         break;
-#endif /* LEAF */
       case 'r':
         kill_sig = SIGHUP;
         strlcpy(do_killbot, optarg, sizeof do_killbot);
@@ -380,7 +371,6 @@ static void dtx_arg(int argc, char *argv[])
         }
 	exit(0);
       }
-#ifdef LEAF
       case 'L':
       {
         localhub_pid = checkpid(optarg, NULL);
@@ -394,7 +384,6 @@ static void dtx_arg(int argc, char *argv[])
         localhub = 1;
         updating = UPDATE_AUTO;
         break;
-#endif
       case '?':
       default:
         break;
