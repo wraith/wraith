@@ -912,7 +912,7 @@ static void cmd_update(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# update %s", dcc[idx].nick, par);
 #ifdef LEAF
-  if (!localhub) {
+  if (!conf.bot->localhub) {
     dprintf(idx, "Please use '%s%s%s' for this login/shell.\n", RED(idx), conf.localhub, COLOR_END(idx));
     return;
   }
@@ -1734,7 +1734,7 @@ static void cmd_sha1(int idx, char *par)
 
 static void cmd_conf(int idx, char *par)
 {
-  if (!localhub) {
+  if (!conf.bot->localhub) {
     dprintf(idx, "Please use '%s%s%s' for this login/shell.\n", RED(idx), conf.localhub, COLOR_END(idx));
     return;
   }

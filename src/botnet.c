@@ -609,7 +609,7 @@ void tell_bottree(int idx)
 
   if (bot_hublevel(conf.bot->u) < 999)
     color_str = (char *) YELLOW(idx);
-  else if (localhub)
+  else if (conf.bot->localhub)
     color_str = (char *) RED(idx);
   else
     color_str = (char *) NULL;

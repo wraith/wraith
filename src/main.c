@@ -419,7 +419,7 @@ void core_10secondly()
     check_trace(0);
 
 #ifdef LEAF
-  if (localhub) {
+  if (conf.bot->localhub) {
 #endif /* LEAF */
     check_promisc();
 
@@ -620,7 +620,7 @@ static void startup_checks(int hack) {
 
   fillconf(&conf);
 #ifdef LEAF
-  if (localhub && !used_B) {
+  if (conf.bot->localhub && !used_B) {
     if (do_killbot[0]) {
       const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
 
@@ -651,7 +651,7 @@ static void startup_checks(int hack) {
       exit(0); /* our job is done! */
     }
   }
-  if (!localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
+  if (!conf.bot->localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
     free_conf();
 #endif /* LEAF */
 }
@@ -778,7 +778,7 @@ printf("out: %s\n", out);
   /* Check and load conf file */
   startup_checks(0);
 
-  if ((localhub && !updating) || !localhub) {
+  if ((conf.bot->localhub && !updating) || !conf.bot->localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
       sdprintf("%s is already running, pid: %d", conf.bot->nick, conf.bot->pid);
       exit(1);
@@ -814,7 +814,7 @@ printf("out: %s\n", out);
   trigger_cfg_changed();
 
 #ifdef LEAF
-  if (localhub) {
+  if (conf.bot->localhub) {
     sdprintf("I am localhub (%s)", conf.bot->nick);
 #endif /* LEAF */
 #ifndef CYGWIN_HACKS
@@ -848,7 +848,7 @@ printf("out: %s\n", out);
 
 /*
     printf("  |- %-10s (%d)\n", conf.bot->nick, pid);
-    if (localhub) {
+    if (conf.bot->localhub) {
       if (bots_ran)
         printf("  `- %d bots launched\n", bots_ran + 1);
       else

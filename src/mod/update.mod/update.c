@@ -65,7 +65,7 @@ static void update_fileq(int idx, char *par)
   if (dcc[idx].status & STAT_GETTINGU) return;
 #ifdef LEAF
   if (updated) return;
-  if (localhub) {
+  if (conf.bot->localhub) {
 #else
   if (!isupdatehub()) {
 #endif /* LEAF */
@@ -165,19 +165,16 @@ static botcmd_t C_update[] =
 
 static void got_nu(char *botnick, char *code, char *par)
 {
-  if (!par || !*par) 
+  if (!par || !*par || updated) 
     return;
 #ifdef LEAF
+  if (!conf.bot->localhub)
+    return;
+
   if (!conf.bot->u || !userlist || !get_user_by_handle(userlist, botnick))	/* probably still getting userfile */
     return;
 
   if (tandbot && tandbot->bot && !strcmp(tandbot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
-    return;
-
-  if (!localhub)
-    return;
-
-  if (localhub && updated)
     return;
 #endif /* LEAF */
 
