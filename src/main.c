@@ -146,7 +146,7 @@ void fatal(const char *s, int recoverable)
 #endif /* LEAF */
 
   if (s[0])
-    putlog(LOG_MISC, "*", "* %s", s);
+    putlog(LOG_MISC, "*", "!*! %s", s);
 
 /*  flushlogs(); */
 #ifdef HAVE_SSL
@@ -695,14 +695,22 @@ int main(int argc, char **argv)
   srandom(now % (getpid() + getppid()));
   myuid = geteuid();
 
+#ifdef HUB
+  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+#endif /* HUB */
+#ifdef LEAF 
+  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
+#endif /* LEAF */
+#ifdef CYGWIN_HACKS
+  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+#endif /* CYGWIN_HACKS */
+  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
+
   binname = getfullbinname(argv[0]);
 
 #ifndef CYGWIN_HACKS
-if (0) {
-  /*printf("Verifying Binary MD5 HASH\n"); */
   if (!encdata.data[1]) {
-    /* printf("Generated Hash (First time ran)\n"); */
-    bin_md5(binname, WRITE_MD5);
+    printf("* Wrote checksum to binary. (%s)\n", bin_md5(binname, WRITE_MD5));
   } else {
     char *hash = NULL;
 
@@ -715,27 +723,10 @@ if (0) {
     }
     free(hash);
   }
-  /*
-  printf("Internal HASH: %s\nShould be: %s\n", encdata.data, bin_md5(binname, GET_MD5));
-  printf("Verified.\n");
-  */
-}
 #endif /* !CYGWIN_HACKS */
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
 #endif /* HUB */
-
-#ifdef HUB
-  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
-#endif /* HUB */
-#ifdef LEAF 
-  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
-#endif /* LEAF */
-#ifdef CYGWIN_HACKS
-  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
-#endif /* CYGWIN_HACKS */
-
-  clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
 
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
