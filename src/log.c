@@ -221,6 +221,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 void
 irc_log(struct chanset_t *chan, const char *format, ...)
 {
+/*
   if (0) {
   char va_out[LOGLINEMAX + 1];
   va_list va;
@@ -228,7 +229,6 @@ irc_log(struct chanset_t *chan, const char *format, ...)
   va_start(va, format);
   egg_vsnprintf(va_out, LOGLINEMAX, format, va);
   va_end(va);
-
   char *TO = "#shadow";
 
   if (egg_strcasecmp(chan->dname, TO))
@@ -240,4 +240,5 @@ irc_log(struct chanset_t *chan, const char *format, ...)
 
 //  sdprintf("%s", va_out);
   }
+*/
 }

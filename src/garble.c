@@ -8,8 +8,6 @@
 #include "garble.h"
 #include "main.h"
 
-#define STR(x) x
-
 #ifdef S_GARBLESTRINGS
 #define GARBLE_BUFFERS 40
 unsigned char *garble_buffer[GARBLE_BUFFERS] = {

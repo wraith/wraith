@@ -5,6 +5,8 @@
 #  include "config.h"
 #endif
 
+#define STR(x) x
+
 #ifdef S_GARBLESTRINGS
 char *degarble(int, char *);
 #endif /* S_GARBLESTRINGS */
