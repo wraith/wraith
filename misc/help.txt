@@ -278,7 +278,7 @@ See also: bc, cmdpass
    the bot will use the 'botconfig' entry. Otherwise, the 'config' entry
    will be used for all options.
  
-See also: botconfig
+See also: config
 ::botjoin
 ###  $bbotjoin$b <bot> <channel> [options]
     Adds a channel to the bot's channel list. If options are specified, the 

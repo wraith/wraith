@@ -10,6 +10,7 @@ This is a summary of ChangeLog basically.
   -telnet!telnet@ip -telnet!telnet@HOST -telnet!IDENT@IP -telnet!IDENT@HOST
 * Fixed cmd_comment bug with changing comment on lower level users.
 * Bots now unban bans that match *linked* bots, +m bans besides this will not be unset auto.
+* Fixed typo in help file (botconfig)
 
 1.2
 * No longer displaying SALTS on ./bin -v
