@@ -63,8 +63,8 @@ int leaf = 1;
 
 int localhub = 1; //we set this to 0 if we have -c, later.
 
-extern char		 origbotname[], userfile[], botnetnick[], 
-                         thekey[], netpass[], shellpass[], myip6[], myip[], hostname[],
+extern char		 origbotname[], userfile[], botnetnick[], packname[],
+                         *netpass, shellhash[], myip6[], myip[], hostname[],
                          hostname6[], natip[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
 			 fork_interval, 
@@ -88,6 +88,7 @@ time_t lastfork=0;
 int my_port;
 #endif
 
+char enetpass[16] = ""; /* cheap fucking hack */
 char	notify_new[121] = "";	/* Person to send a note to for new users */
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
@@ -513,7 +514,7 @@ void checkpass()
     MD5_Final(md5out, &ctx);
     for(i=0; i<16; i++)
       sprintf(md5string + (i*2), "%.2x", md5out[i]);
-    if (strcmp(shellpass, md5string)) {
+    if (strcmp(shellhash, md5string)) {
       fatal(STR("incorrect password."), 0);
     }
     gpasswd = 0;
@@ -948,7 +949,7 @@ void check_static(char *, char *(*)());
 
 #include "mod/static.h"
 int init_userrec(), init_mem(), init_dcc_max(), init_userent(), init_misc(), init_auth(), init_config(), init_bots(),
- init_net(), init_modules(), init_tcl(int, char **), init_botcmd();
+ init_net(), init_modules(), init_tcl(int, char **), init_botcmd(), init_settings();
 
 void got_ed(char *which, char *in, char *out)
 {
@@ -1405,6 +1406,8 @@ int main(int argc, char **argv)
   binname = getfullbinname(argv[0]);
 
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
+  init_settings();
+  egg_snprintf(enetpass, sizeof enetpass, netpass);
   init_auth();
   init_config();
   init_dcc_max();
@@ -1413,7 +1416,6 @@ int main(int argc, char **argv)
   init_bots();
   init_net();
   init_modules();
-  init_settings();
   init_userrec();
   if (backgrd)
     bg_prepare_split();
@@ -1588,7 +1590,7 @@ int main(int argc, char **argv)
         nick = newsplit(&temps);
         if (!nick || !nick[0])
           werr(ERR_BADCONF);
-          sdprintf(STR("Read nick from config: %s"), nick);
+        sdprintf(STR("Read nick from config: %s"), nick);
         if (temps[0])
           ip = newsplit(&temps);
         if (temps[0])

@@ -26,7 +26,7 @@ extern Tcl_Interp	*interp;
 extern char		 ver[], botnetnick[], firewall[], myip[], origbotname[],
 			 motdfile[], userfile[], tempdir[],
 			 notify_new[], owner[], 
-                         netpass[], botuser[], owners[], hubs[];
+                         *netpass, botuser[], *owners, *hubs;
 
 extern time_t		 now, online_since;
 extern int		 backgrd, term_z, con_chan, cache_hit, cache_miss,
@@ -444,13 +444,12 @@ void load_internal_users()
    *hand,
    *ip,
    *port,
-   *hublevel = NULL,
    *pass,
    *hosts,
     host[250],
     buf[2048];
   char *attr;
-  int i;
+  int i, hublevel = 0;
   struct bot_addr *bi;
   struct userrec *u;
   //struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
@@ -479,9 +478,6 @@ void load_internal_users()
 	port = ln;
 	break;
       case 3:
-        hublevel = ln;
-        break;
-      case 4:
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
 	  bi = user_malloc(sizeof(struct bot_addr));
@@ -489,7 +485,8 @@ void load_internal_users()
 	  strcpy(bi->address, ip);
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
-          bi->hublevel = atoi(hublevel);
+          hublevel++;
+          bi->hublevel = hublevel;
 #ifdef HUB
 	  if ((!bi->hublevel) && (!strcmp(hand, botnetnick)))
 	    bi->hublevel = 99;

@@ -228,6 +228,7 @@ typedef int socklen_t;
  *    Handy aliases for memory tracking and core dumps
  */
 
+#define my_bzero(a, b) { char *x = (char *) a; int y = (int) b; while (y--) *x++ = 0; }
 #define nmalloc(x)	n_malloc((x),__FILE__,__LINE__)
 #define nrealloc(x,y)	n_realloc((x),(y),__FILE__,__LINE__)
 #define nfree(x)	n_free((x),__FILE__,__LINE__)

@@ -17,8 +17,12 @@ static: ../irc.o
 	@rm -f ../irc.o
 	@mv irc.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/irc.c > .depend
+
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/irc.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/irc.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

@@ -199,8 +199,11 @@ int _wild_match_per(register unsigned char *, register unsigned char *);
 #define wild_match_per(a,b) _wild_match_per((unsigned char *)(a),(unsigned char *)(b))
 
 /* mem.c */
+void *my_malloc(int);
 void *n_malloc(int, const char *, int);
+void *my_realloc(void *, int);
 void *n_realloc(void *, int, const char *, int);
+void my_free(void *);
 void n_free(void *, const char *, int);
 void tell_mem_status(char *);
 void tell_mem_status_dcc(int);
@@ -208,7 +211,6 @@ void debug_mem_to_dcc(int);
 
 /* settings.c */
 char *progname();
-void init_settings();
 
 /* auth.c */
 int new_auth();

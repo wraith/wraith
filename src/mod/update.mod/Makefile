@@ -17,8 +17,11 @@ static: ../update.o
 	@rm -f ../update.o
 	@mv update.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/update.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/update.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/update.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

@@ -43,7 +43,7 @@ extern tand_t *tandbot;
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
 			 bannerfile[], textdir[], userfile[],  
-                         *binname, pid_file[], netpass[], tempdir[];
+                         *binname, pid_file[], *netpass, tempdir[];
 
 extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug, 
 #ifdef HUB

@@ -17,8 +17,11 @@ static: ../compress.o
 	@rm -f ../compress.o
 	@mv compress.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/compress.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/compress.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/compress.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

@@ -503,7 +503,7 @@
 #define rem_builtins_dcc ((int (*) (tcl_bind_list_t *, dcc_cmd_t *))global[303])
 #define USERENTRY_ADDED (*(struct user_entry_type *)(global[304]))
 /* 305 - 308 */
-#define thepass ((char *)(global[305]))
+#define bdhash ((char *)(global[305]))
 #define isupdatehub ((int (*)(void))global[306])
 #define norestruct (*(int*)global[307])
 #define botlink ((int (*)(char *, int, char *))global[308])

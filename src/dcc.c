@@ -21,9 +21,6 @@
 #include "tandem.h"
 #include <sys/stat.h>
 
-extern char netpass[9];
-
-
 
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
@@ -32,7 +29,7 @@ extern time_t		 now;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
 			 ignore_time;
-extern char		 botnetnick[], ver[], origbotname[], notify_new[], thepass[];
+extern char		 botnetnick[], ver[], origbotname[], notify_new[], bdhash[], *netpass;
 
 
 extern sock_list *socklist;
@@ -370,9 +367,9 @@ static void cont_link(int idx, char *buf, int ii)
     i = sizeof(sa);
 
     /* initkey-gen */
-    /* thepass myport hubnick mynick */
+    /* bdhash myport hubnick mynick */
     getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
-    sprintf(tmp,"%s@%4x@%s@%s", thepass, sa.sin_port, dcc[idx].nick, botnetnick);
+    sprintf(tmp,"%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, botnetnick);
     MD5_Init(&ctx);
     MD5_Update(&ctx, tmp, strlen(tmp));
     MD5_Final(socklist[snum].ikey, &ctx);
@@ -1620,8 +1617,8 @@ static void dcc_telnet_pass(int idx, int atr)
       MD5_CTX ctx;
       
       /* initkey-gen */
-      /* thepass port mynick botnetnick */
-      sprintf(tmp, "%s@%4x@%s@%s", thepass, htons(dcc[idx].port), botnetnick, dcc[idx].nick);
+      /* bdhash port mynick botnetnick */
+      sprintf(tmp, "%s@%4x@%s@%s", bdhash, htons(dcc[idx].port), botnetnick, dcc[idx].nick);
       MD5_Init(&ctx);
       MD5_Update(&ctx, tmp, strlen(tmp));
       MD5_Final(socklist[snum].okey, &ctx);

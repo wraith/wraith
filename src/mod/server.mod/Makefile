@@ -17,8 +17,11 @@ static: ../server.o
 	@rm -f ../server.o
 	@mv server.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/server.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/server.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/server.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

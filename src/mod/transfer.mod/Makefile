@@ -17,8 +17,11 @@ static: ../transfer.o
 	@rm -f ../transfer.o
 	@mv transfer.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/transfer.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/transfer.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/transfer.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

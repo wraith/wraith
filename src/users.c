@@ -25,7 +25,7 @@ extern struct dcc_t *dcc;
 extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
 extern int dcc_total, noshare, egg_numver, norestruct;
-extern char botnetnick[], netpass[];
+extern char botnetnick[], *netpass;
 extern Tcl_Interp *interp;
 extern time_t now;
 

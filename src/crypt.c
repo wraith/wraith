@@ -146,7 +146,7 @@ unsigned int unhashdot(unsigned char *hash)
 }
 
 /* end pcrypt */
-extern char netpass[];
+extern char *netpass;
 
 int lfprintf(FILE *f, char *fmt, ...) {
   va_list va;

@@ -17,8 +17,11 @@ static: ../share.o
 	@rm -f ../share.o
 	@mv share.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/share.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/share.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/share.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

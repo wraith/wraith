@@ -18,7 +18,7 @@ extern struct dcc_t	*dcc;
 extern int		 dcc_total, backgrd, parties,
 			 do_restart, remote_boots, max_dcc, hub, leaf;
 
-extern char		 botnetnick[], netpass[], *binname;
+extern char		 botnetnick[], *binname;
 extern party_t		*party;
 extern tand_t		*tandbot;
 extern time_t		 now;

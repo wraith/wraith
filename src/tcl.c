@@ -42,7 +42,7 @@ extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
 		tempdir[], owner[], network[], botnetnick[],
 		bannerfile[], egg_version[], natip[], 
 		textdir[], pid_file[], dcc_prefix[], 
-		netpass[];
+		*netpass;
 
 extern int	die_on_sighup, die_on_sigterm,
 		enable_simul, dcc_total, debug_output, identtimeout,

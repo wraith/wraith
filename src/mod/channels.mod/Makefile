@@ -17,8 +17,11 @@ static: ../channels.o
 	@rm -f ../channels.o
 	@mv channels.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/channels.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/channels.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/channels.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

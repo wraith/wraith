@@ -17,8 +17,11 @@ static: ../console.o
 	@rm -f ../console.o
 	@mv console.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/console.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/console.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/console.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

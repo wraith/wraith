@@ -136,8 +136,13 @@ void debug_mem_to_dcc(int idx)
     p = strchr(fn, ':');
     if (p)
       *p = 0;
+/*  this might be used to eliminate the pesky 'x'
+    p = strchr(fn, 'x');
+    if (p)
+      *p = 0;
+*/
     l = memtbl[i].size;
-    if (!strcmp(fn, "xlanguage.c"))
+    if (!strcmp(fn, "language.c"))
       use[0] += l;
     else if (!strcmp(fn, "xchanprog.c"))
       use[1] += l;
@@ -297,6 +302,16 @@ void debug_mem_to_dcc(int idx)
   tell_netdebug(idx);
 }
 
+void *my_malloc(int size)
+{
+  void *x;
+
+  x = (void *) malloc(size);
+  if (x == NULL) 
+    fatal("Memory allocation failed", 0);
+  return x;
+}
+
 void *n_malloc(int size, const char *file, int line)
 {
   void	*x;
@@ -326,6 +341,19 @@ void *n_malloc(int size, const char *file, int line)
   memused += size;
   lastused++;
 #endif
+  return x;
+}
+
+void *my_realloc(void *ptr, int size)
+{
+  void *x;
+
+  if (!ptr)
+    return my_malloc(size);
+
+  x = (void *) realloc(ptr, size);
+  if (x == NULL && size > 0)
+    return NULL;
   return x;
 }
 
@@ -364,6 +392,13 @@ void *n_realloc(void *ptr, int size, const char *file, int line)
   memused += size;
 #endif
   return x;
+}
+
+void my_free(void *ptr)
+{
+  if (ptr == NULL)
+    return;
+  free(ptr);
 }
 
 void n_free(void *ptr, const char *file, int line)

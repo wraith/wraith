@@ -23,7 +23,7 @@ extern struct userrec	*userlist, *lastuser;
 extern char		 tempdir[], botnetnick[], botname[], natip[], cmdprefix[],
 			 hostname[], origbotname[], botuser[], admin[],
 			 userfile[], ver[], notify_new[], kickprefix[], bankickprefix[],
-			 version[], quit_msg[], hostname6[], netpass[], thepass[], dcc_prefix[],
+			 version[], quit_msg[], hostname6[], bdhash[], dcc_prefix[], enetpass[],
 #ifdef S_AUTH
                          authkey[], 
 #endif /* S_AUTH */
@@ -555,13 +555,13 @@ Function global_table[] =
   (Function) botunlink,
   (Function) hostname6,		 /* char *				*/
   (Function) & timesync, /* int					*/
-  (Function) netpass,  	/* char *				*/
+  (Function) enetpass,  	/* char *				*/
   (Function) kickreason,
   (Function) getting_users,
   (Function) add_builtins_dcc,
   (Function) rem_builtins_dcc,
   (Function) & USERENTRY_ADDED,	/* struct user_entry_type *	*/
-  (Function) thepass,
+  (Function) bdhash,
   (Function) isupdatehub,
   (Function) & norestruct,
   (Function) botlink,

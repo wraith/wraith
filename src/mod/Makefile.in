@@ -58,13 +58,22 @@ static: $(mod_objs)
 	fi; \
 	cd $*.mod && $(MAKE_MOD) 'VPATH=$(MOD_UPDIR)$(srcdir)/$*.mod' 'srcdir=$(MOD_UPDIR)$(srcdir)/$*.mod' 'MAKE=$(MAKE)' static;
 
-depend:
+depleaf:
 	@for i in $(mods); do \
 		if test ! -d $$i; then mkdir $$i; fi; \
 		if test ! -r $$i/Makefile; then \
 			cp $(srcdir)/$$i/Makefile $$i/Makefile; \
 		fi; \
-		(cd $$i && $(MAKE_MOD) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" depend); \
+		(cd $$i && $(MAKE_MOD) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" depleaf); \
+	done
+
+dephub:
+	@for i in $(mods); do \
+		if test ! -d $$i; then mkdir $$i; fi; \
+		if test ! -r $$i/Makefile; then \
+			cp $(srcdir)/$$i/Makefile $$i/Makefile; \
+		fi; \
+		(cd $$i && $(MAKE_MOD) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" dephub); \
 	done
 
 config:

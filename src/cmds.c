@@ -37,7 +37,7 @@ extern unsigned long	 otraffic_irc, otraffic_irc_today,
 			 itraffic_unknown, itraffic_unknown_today;
 extern Tcl_Interp	*interp;
 extern char		 botnetnick[], origbotname[], ver[], network[],
-			 owner[], quit_msg[], dcc_prefix[], netpass[],
+			 owner[], quit_msg[], dcc_prefix[], *netpass,
                          botname[], *binname, egg_version[];
 extern time_t		 now, online_since;
 extern module_entry	*module_list;

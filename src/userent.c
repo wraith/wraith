@@ -6,7 +6,7 @@
 
 #include "main.h"
 #include "users.h"
-#define my_free(ptr) nfree(ptr) 
+
 extern int		 noshare, cfg_noshare, cfg_count;
 extern struct cfg_entry **cfg;
 extern struct userrec	*userlist;
@@ -280,10 +280,10 @@ int config_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   if (!old && (!new->data || !new->data[0])) {
     /* delete non-existant entry -- doh ++rtc */
-    my_free(new->key);
+    nfree(new->key);
     if (new->data)
-      my_free(new->data);
-    my_free(new);
+      nfree(new->data);
+    nfree(new);
     return 1;
   }
 
@@ -294,17 +294,17 @@ int config_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   if ((old && old != new) || !new->data || !new->data[0]) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
-    my_free(old->key);
-    my_free(old->data);
-    my_free(old);
+    nfree(old->key);
+    nfree(old->data);
+    nfree(old);
   }
   if (old != new && new->data) {
     if (new->data[0]) {
       list_insert((&e->u.extra), new);
     } else {
-      my_free(new->data);
-      my_free(new->key);
-      my_free(new);
+      nfree(new->data);
+      nfree(new->key);
+      nfree(new);
     }
   }
   return 1;
@@ -353,9 +353,9 @@ int config_pack(struct userrec *u, struct user_entry *e)
     sprintf(t->extra, STR("%s %s"), curr->key, curr->data);
     list_insert((&e->u.list), t);
     next = curr->next;
-    my_free(curr->key);
-    my_free(curr->data);
-    my_free(curr);
+    nfree(curr->key);
+    nfree(curr->data);
+    nfree(curr);
     curr = next;
   }
   return 1;
@@ -456,11 +456,11 @@ int config_kill(struct user_entry *e)
 
   for (x = e->u.extra; x; x = y) {
     y = x->next;
-    my_free(x->key);
-    my_free(x->data);
-    my_free(x);
+    nfree(x->key);
+    nfree(x->data);
+    nfree(x);
   }
-  my_free(e);
+  nfree(e);
   return 1;
 }
 

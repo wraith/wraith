@@ -21,8 +21,11 @@ doofus:
 	@echo ""
 	@cd ../.. && $(MAKE)
 
-depend:
-	@$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -MM $(srcdir)/*.c > .depend
+depleaf:
+	@$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -DHUB -MM $(srcdir)/*.c > .depend
+
+dephub:
+	@$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -DHUB -MM $(srcdir)/*.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

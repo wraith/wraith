@@ -17,8 +17,11 @@ static: ../notes.o
 	@rm -f ../notes.o
 	@mv notes.o ../
 
-depend:
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/notes.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/notes.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/notes.c > .depend
 
 clean:
 	@rm -f .depend *.o *~
