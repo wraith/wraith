@@ -31,6 +31,7 @@
 #include "botnet.h"
 #include "tandem.h"
 #include "help.h"
+#include "socket.h"
 #include "traffic.h" /* egg_traffic_t */
 #include "core_binds.h"
 #include "src/mod/console.mod/console.h"
@@ -3939,8 +3940,14 @@ static void cmd_dns(int idx, char *par)
     dns_cache_flush();
     return;
   }
-  dprintf(idx, "Looking up %s ...\n", par);
-  egg_dns_lookup(par, 0, my_dns_callback, (void *) idx);
+  if (is_dotted_ip(par)) {
+    dprintf(idx, "Reversing %s ...\n", par);
+    egg_dns_reverse(par, 0, my_dns_callback, (void *) idx);
+
+  } else {
+    dprintf(idx, "Looking up %s ...\n", par);
+    egg_dns_lookup(par, 0, my_dns_callback, (void *) idx);
+  }
 }
 
 #ifdef HUB
