@@ -44,7 +44,6 @@ extern int		 dcc_total, remote_boots, backgrd,
 			 server_lag, localhub;
 
 extern egg_traffic_t traffic;
-extern Tcl_Interp 	 *interp;
 extern char		 origbotname[], ver[], network[],
 			 owner[], quit_msg[], dcc_prefix[], 
                          botname[], *binname, version[], egg_version[];
@@ -64,25 +63,15 @@ static void tell_who(struct userrec *u, int idx, int chan)
   int i, k, ok = 0, atr = u ? u->flags : 0;
   int nicklen;
   char format[81] = "";
-  char s[1024] = "";			/* temp fix - 1.4 has a better one */
 
   if (!chan)
-    dprintf(idx, "%s  (* = %s, + = %s, @ = %s)\n",
-		BOT_PARTYMEMBS, MISC_OWNER, MISC_MASTER, MISC_OP);
+    dprintf(idx, "%s  (* = %s, + = %s, @ = %s)\n", BOT_PARTYMEMBS, MISC_OWNER, MISC_MASTER, MISC_OP);
   else {
-    simple_sprintf(s, "assoc %d", chan);
-    if ((Tcl_Eval(interp, s) != TCL_OK) || !interp->result[0])
       dprintf(idx, "%s %s%d:  (* = %s, + = %s, @ = %s)\n",
-		       BOT_PEOPLEONCHAN,
-		       (chan < GLOBAL_CHANS) ? "" : "*",
-		       chan % GLOBAL_CHANS,
-		       MISC_OWNER, MISC_MASTER, MISC_OP);
-    else
-      dprintf(idx, "%s '%s' (%s%d):  (* = %s, + = %s, @ = %s)\n",
-		       BOT_PEOPLEONCHAN, interp->result,
-		       (chan < GLOBAL_CHANS) ? "" : "*",
-		       chan % GLOBAL_CHANS,
-		       MISC_OWNER, MISC_MASTER, MISC_OP);
+                      BOT_PEOPLEONCHAN,
+                      (chan < GLOBAL_CHANS) ? "" : "*",
+                      chan % GLOBAL_CHANS,
+                      MISC_OWNER, MISC_MASTER, MISC_OP);
   }
 
   /* calculate max nicklen */
@@ -289,11 +278,6 @@ static void cmd_whom(struct userrec *u, int idx, char *par)
     int chan = -1;
 
     if ((par[0] < '0') || (par[0] > '9')) {
-      Tcl_SetVar(interp, "chan", par, 0);
-      if ((Tcl_VarEval(interp, "assoc ", "$chan", NULL) == TCL_OK) &&
-	  interp->result[0]) {
-	chan = atoi(interp->result);
-      }
       if (chan <= 0) {
 	dprintf(idx, STR("No such channel exists.\n"));
 	return;
@@ -2458,12 +2442,7 @@ static void cmd_chat(struct userrec *u, int idx, char *par)
 	if (!arg[1])
 	  newchan = 0;
 	else {
-	  Tcl_SetVar(interp, "chan", arg, 0);
-	  if ((Tcl_VarEval(interp, "assoc ", "$chan", NULL) == TCL_OK) &&
-	      interp->result[0])
-	    newchan = atoi(interp->result);
-	  else
-	    newchan = -1;
+          newchan = -1;
 	}
 	if (newchan < 0) {
 	  dprintf(idx, STR("No channel exists by that name.\n"));
@@ -2480,12 +2459,7 @@ static void cmd_chat(struct userrec *u, int idx, char *par)
 	if (!egg_strcasecmp(arg, "on"))
 	  newchan = 0;
 	else {
-	  Tcl_SetVar(interp, "chan", arg, 0);
-	  if ((Tcl_VarEval(interp, "assoc ", "$chan", NULL) == TCL_OK) &&
-	      interp->result[0])
-	    newchan = atoi(interp->result);
-	  else
-	    newchan = -1;
+          newchan = -1;
 	}
 	if (newchan < 0) {
 	  dprintf(idx, STR("No channel exists by that name.\n"));
@@ -2962,53 +2936,7 @@ static void cmd_page(struct userrec *u, int idx, char *par)
   console_dostore(idx);
 }
 
-/* Evaluate a Tcl command, send output to a dcc user.
- */
-#ifdef S_TCLCMDS
-static void cmd_tcl(struct userrec *u, int idx, char *msg)
-{
-  int code;
-#ifdef S_TCLPERMONLY
-  if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
-    dprintf(idx, STR("What?  You need '%shelp'\n"), dcc_prefix);
-    return;
-  }
-#endif /* S_TCLPERMONLY */
-  putlog(LOG_CMDS, "*", STR("#%s# tcl %s"), dcc[idx].nick, msg);
-  debug1(STR("tcl: evaluate (.tcl): %s"), msg);
-  code = Tcl_GlobalEval(interp, msg);
-  if (code == TCL_OK)
-    dumplots(idx, STR("Tcl: "), interp->result);
-  else
-    dumplots(idx, STR("Tcl error: "), interp->result);
-}
-#endif /* S_TCLCMDS */
-
 #ifdef HUB
-#ifdef S_TCLCMDS
-static void cmd_nettcl(struct userrec *u, int idx, char *msg)
-{
-  int code;
-  char buf[2000] = "";
-#ifdef S_TCLPERMONLY
-  if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
-    dprintf(idx, STR("What?  You need '%shelp'\n"), dcc_prefix);
-    return;
-  }
-#endif /* S_TCLPERMONLY */
-  putlog(LOG_CMDS, "*", STR("#%s# nettcl %s"), dcc[idx].nick, msg);
-  egg_snprintf(buf, sizeof buf, "mt %d %s", idx, msg);
-  putallbots(buf);
-
-  debug1(STR("tcl: evaluate (.tcl): %s"), msg);
-  code = Tcl_GlobalEval(interp, msg);
-  if (code == TCL_OK)
-    dumplots(idx, STR("Tcl: "), interp->result);
-  else
-    dumplots(idx, STR("Tcl error: "), interp->result);
-}
-#endif /* S_TCLCMDS */
-
 static void cmd_newleaf(struct userrec *u, int idx, char *par)
 {
   char *handle = NULL, *host = NULL;
@@ -4142,9 +4070,6 @@ cmd_t C_dcc[] =
   {"me",		"",	(Function) cmd_me,		NULL,   0},
   {"motd",		"",	(Function) cmd_motd,		NULL,   0},
 #ifdef HUB
-#ifdef S_TCLCMDS
-  {"nettcl",		"a",	(Function) cmd_nettcl,		NULL,   0},
-#endif /* S_TCLCMDS */
   {"newleaf",		"n",	(Function) cmd_newleaf,		NULL,   0},
   {"nopass",		"m",	(Function) cmd_nopass,		NULL,   0},
 #endif /* HUB */
@@ -4165,9 +4090,6 @@ cmd_t C_dcc[] =
   {"status",		"m|m",	(Function) cmd_status,		NULL,   0},
   {"strip",		"",	(Function) cmd_strip,		NULL,   0},
   {"su",		"a",	(Function) cmd_su,		NULL,   0},
-#ifdef S_TCLCMDS 
-  {"tcl",		"a",	(Function) cmd_tcl,		NULL,   0},
-#endif /* S_TCLCMDS */
 #ifdef HUB
   {"trace",		"n",	(Function) cmd_trace,		NULL,   0},
 #endif /* HUB */

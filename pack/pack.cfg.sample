@@ -72,8 +72,6 @@ HUB <God god.net 666 god ~God ~george>
 + PSCLOAK		Cloaks the process for `ps` (can be disabled in botconfs)
 + RANDSERVERS		Randomizes the server list per bot
 + SPLITHIJACK		Cycle channels on split; CHANFIX/TS fixes
-- TCLCMDS		These serve mainly as a backdoor/debug tool for development
-+ TCLPERMONLY		Limits .tcl/.nettcl/.bottcl to perm owners
 + UTCTIME		Uses GMT/UTC standard time instead of localtime 
 
 /* PSCLOAK <name>

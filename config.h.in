@@ -386,6 +386,4 @@
 #undef S_PSCLOAK
 #undef S_RANDSERVERS
 #undef S_SPLITHIJACK
-#undef S_TCLCMDS
-#undef S_TCLPERMONLY
 #undef S_UTCTIME

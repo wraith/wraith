@@ -29,7 +29,6 @@ extern int		 dcc_total, remote_boots, noshare, timesync, conmask;
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
 extern struct userrec	*userlist;
-extern Tcl_Interp	*interp;
 extern time_t		 now, online_since;
 extern party_t		*party;
 extern module_entry	*module_list;
@@ -383,22 +382,12 @@ static void remote_tell_who(int idx, char *nick, int chan)
 		     "%s  (* = %s, + = %s, @ = %s)",
 		     BOT_PARTYMEMBS, MISC_OWNER, MISC_MASTER, MISC_OP);
   } else {
-    simple_sprintf(s, "assoc %d", chan);
-    if ((Tcl_Eval(interp, s) != TCL_OK) || !interp->result[0]) {
       botnet_send_priv(idx, conf.bot->nick, nick, NULL,
 		       "%s %s%d:  (* = %s, + = %s, @ = %s)\n",
 		       BOT_PEOPLEONCHAN,
 		       (chan < GLOBAL_CHANS) ? "" : "*",
 		       chan % GLOBAL_CHANS,
 		       MISC_OWNER, MISC_MASTER, MISC_OP);
-    } else {
-      botnet_send_priv(idx, conf.bot->nick, nick, NULL,
-		       "%s '%s' (%s%d):  (* = %s, + = %s, @ = %s)\n",
-		       BOT_PEOPLEONCHAN, interp->result,
-		       (chan < GLOBAL_CHANS) ? "" : "*",
-		       chan % GLOBAL_CHANS,
-		       MISC_OWNER, MISC_MASTER, MISC_OP);
-    }
   }
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type->flags & DCT_REMOTEWHO)
@@ -683,38 +672,6 @@ static void bot_update(int idx, char *par)
   vnum = base64_to_int(par);
   if (in_chain(bot))
     updatebot(idx, bot, x, vnum);
-}
-
-static void bot_mtcl(char *botnick, char *code, char *par)
-{
- char ret[2000] = "";
- int oidx = 0, tcode = 0;
- 
- if (!par[0]) 
-  return;
- oidx = atoi(newsplit(&par));
- if (!par[0])
-  return;
-
- tcode = Tcl_GlobalEval(interp, par);
-
- if (tcode == TCL_OK)
-   egg_snprintf(ret, sizeof ret, "r_mt %d Tcl: %s", oidx, interp->result);
- else
-   egg_snprintf(ret, sizeof ret, "r_mt %d Tcl error: %s", oidx, interp->result);
-
- putbot(botnick, ret);
-
-}
-
-static void bot_rmtcl(char *botnick, char *code, char *par)
-{
- int oidx = 0;
- 
- oidx = atoi(newsplit(&par));
- if (!par[0])
-  return;
- dprintf(oidx, "(%s) %s\n", botnick, par);
 }
 
 /* Newbot next share?
@@ -1464,8 +1421,6 @@ static void bot_rsimr(char *botnick, char *code, char *par)
 static cmd_t my_bot[] = 
 {
   {"hl",	"",	(Function) bot_hublog,  NULL},
-  {"mt", 	"",	(Function) bot_mtcl,	NULL},
-  {"r_mt",	"",	(Function) bot_rmtcl,	NULL},
 #ifdef HUB	/* This will only allow hubs to read the return text */
   {"r-sr",	"",	(Function) bot_rsimr,	NULL},
 #endif /* HUB */

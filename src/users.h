@@ -173,10 +173,6 @@ void *def_get(struct userrec *u, struct user_entry *e);
 int def_set(struct userrec *u, struct user_entry *e, void *buf);
 int def_gotshare(struct userrec *u, struct user_entry *e,
 		 char *data, int idx);
-int def_tcl_get(Tcl_Interp *interp, struct userrec *u,
-		struct user_entry *e, int argc, char **argv);
-int def_tcl_set(Tcl_Interp *irp, struct userrec *u,
-		struct user_entry *e, int argc, char **argv);
 void def_display(int idx, struct user_entry *e, struct userrec *u);
 int def_dupuser(struct userrec *new, struct userrec *old,
 		struct user_entry *e);

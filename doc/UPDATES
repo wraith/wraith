@@ -10,6 +10,7 @@ This is a summary of ChangeLog basically.
 7.Removed define: AUTH, added: AUTHCMDS, AUTHHASH, DCCAUTH, see pack.cfg for details.
 8.Leaf binary now accepts -B <botnick>
 9.Bot is now much more portable.
+10.Removed defines: TCLPERMONLY, TCLCMDS.
 
 
 1.0.15 (Non-Release Version)

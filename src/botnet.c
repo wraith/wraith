@@ -27,7 +27,6 @@ extern int			dcc_total, backgrd, connect_timeout, max_dcc,
 extern struct userrec		*userlist;
 extern struct dcc_t		*dcc;
 extern time_t 			now, buildts;
-extern Tcl_Interp		*interp;
 extern struct cfg_entry 	**cfg;
 
 
@@ -437,13 +436,7 @@ void answer_local_whom(int idx, int chan)
     dprintf(idx, "%s (+: %s, *: %s)\n", BOT_BOTNETUSERS, BOT_PARTYLINE,
 	    BOT_LOCALCHAN);
   else if (chan > 0) {
-    simple_sprintf(idle, "assoc %d", chan);
-    if ((Tcl_Eval(interp, idle) != TCL_OK) || !interp->result[0])
       dprintf(idx, "%s %s%d:\n", BOT_USERSONCHAN,
-	      (chan < GLOBAL_CHANS) ? "" : "*", chan % GLOBAL_CHANS);
-    else
-      dprintf(idx, "%s '%s%s' (%s%d):\n", BOT_USERSONCHAN,
-	      (chan < GLOBAL_CHANS) ? "" : "*", interp->result,
 	      (chan < GLOBAL_CHANS) ? "" : "*", chan % GLOBAL_CHANS);
   }
   /* Find longest nick and botnick */
@@ -837,7 +830,6 @@ int botunlink(int idx, char *nick, char *reason)
 {
   register int i;
   int bots, users;
-  char s[20] = "";
   tand_t *bot = NULL;
 
   if (nick[0] == '*')
@@ -931,8 +923,6 @@ int botunlink(int idx, char *nick, char *reason)
         check_bind_chpt(party[i].bot, party[i].nick, party[i].sock,
 		       party[i].chan);
     }
-    strcpy(s, "killassoc &");
-    Tcl_Eval(interp, s);
   }
   return 0;
 }
