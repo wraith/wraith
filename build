@@ -104,10 +104,17 @@ else
 fi
 
 
+MAKE="`which gmake`"
+if test -z "${MAKE}"; then
+ MAKE="`which make`"
+fi
+
+echo "[*] Using '${MAKE}'"
+
 # make clean, just in case
 if [ $clean = "1" ]; then
  echo "[*] Cleaning up old binaries/files..."
- make clean > /dev/null
+ ${MAKE} clean > /dev/null
 fi
 
 _leaf()
@@ -115,7 +122,7 @@ _leaf()
   if [ $leaf = "1" ]; then
    # Build leaf and check
    echo "[*] Building ${d}leaf..."
-   make ${d}leaf -s
+   ${MAKE} ${d}leaf -s
    if ! test -f leaf
    then
      echo "[!] ${d}leaf build failed"
@@ -129,7 +136,7 @@ _hub()
   if [ $hub = "1" ]; then
    # Build hub and check
    echo "[*] Building ${d}hub..."
-   make ${d}hub -s
+   ${MAKE} ${d}hub -s
    if ! test -f hub
    then
      echo "[!] ${d}hub build failed"
