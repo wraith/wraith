@@ -9,6 +9,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 - Change user system to hash table with uids
 - Change userentry system around to use strings ?
 - Fixed bot's not being able to link when the botnick case did not match (userlist vs binary -C).
+- Remove bot_hublog
 
 1.2.3
 * HUB/LEAF binaries have been combined into 1 binary named 'wraith'

@@ -509,13 +509,18 @@ static void bot_log(int idx, char *par)
   if (egg_isdigit(par[0])) {
     int type = atoi(newsplit(&par));
 
+    if (conf.bot->hub) {
+      size_t len = simple_sprintf(OBUF, "lo %s %s\n", from, par);
+     
+      send_hubs_but(idx, OBUF, len);
+    }
+
     putlog(type, "@", "(%s) %s", from, par);
+
   } else {
     putlog(LOG_ERRORS, "*", "Malformed HL line from %s: %s", from, par);
   }
 
-  if (conf.bot->hub)
-    send_hubs_but(idx, par, strlen(par));
 } 
 
 
