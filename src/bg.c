@@ -10,8 +10,10 @@
 #include "thread.h"
 #include "main.h"
 #include <signal.h>
+#ifdef HAVE_SYS_PTRACE_H
+# include <sys/ptrace.h>
+#endif /* HAVE_SYS_PTRACE_H */
 #ifndef CYGWIN_HACKS
-#  include <sys/ptrace.h>
 #  include <sys/wait.h>
 #endif /* !CYGWIN_HACKS */
 #include <sys/types.h>

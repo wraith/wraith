@@ -30,9 +30,9 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <signal.h>
-#ifndef CYGWIN_HACKS
+#ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
-#endif /* !CYGWIN_HACKS */
+#endif /* HAVE_SYS_PTRACE_H */
 #include <sys/wait.h>
 #include <sys/utsname.h>
 #include <pwd.h>

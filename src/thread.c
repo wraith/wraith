@@ -3,10 +3,12 @@
  *
  * threads
  */
-
+#include "common.h"
 #include <pthread.h>
 #include <stdio.h>
-#include <sys/ptrace.h>
+#ifdef HAVE_SYS_PTRACE_H
+# include <sys/ptrace.h>
+#endif /* HAVE_SYS_PTRACE_H */
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <errno.h>
