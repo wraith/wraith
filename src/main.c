@@ -566,7 +566,7 @@ static void startup_checks(int hack) {
 #endif /* !CYGWIN_HACKS */
 
   fill_conf_bot();
-  if (!conf.bot->hub && conf.bot->localhub && !used_B) {
+  if (((!conf.bot || !conf.bot->nick) || (!conf.bot->hub && conf.bot->localhub)) && !used_B) {
     if (do_killbot[0]) {
       const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
 
@@ -591,6 +591,9 @@ static void startup_checks(int hack) {
         /* never reached */
         exit(0);
       }
+      if (!conf.bots || !conf.bots->nick)     /* no bots ! */
+        werr(ERR_NOBOTS);
+
       spawnbots();
       exit(0); /* our job is done! */
     }

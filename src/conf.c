@@ -473,9 +473,6 @@ free_conf_bots(void)
 int
 parseconf(bool error)
 {
-  if (error && !conf.bots->nick && !conf.bots->next)     /* no bots ! */
-    werr(ERR_NOBOTS);
-
   if (conf.username) {
     str_redup(&conf.username, my_username());
   } else {
@@ -788,6 +785,9 @@ fill_conf_bot()
 {
   conf_bot *me = NULL;
   char *mynick = NULL;
+
+  if (!conf.bots || !conf.bots->nick)
+    return;
 
   if (localhub && conf.bots && conf.bots->nick) {
     mynick = strdup(conf.bots->nick);
