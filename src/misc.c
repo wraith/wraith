@@ -650,7 +650,7 @@ int updatebin(int idx, char *par, int secs)
   }
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
-  egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
+  egg_snprintf(testbuf, sizeof testbuf, STR("%s -2"), path);
 #ifndef CYGWIN_HACKS
   putlog(LOG_DEBUG, "*", "Running for update binary test: %s", testbuf);
   i = system(testbuf);
@@ -663,7 +663,7 @@ int updatebin(int idx, char *par, int secs)
 #endif /* !CYGWIN_HACKS */
 
   /* now to send our config to the new binary */
-  egg_snprintf(testbuf, sizeof testbuf, "%s -4 %s", path, conffile->file);
+  egg_snprintf(testbuf, sizeof testbuf, STR("%s -4 %s"), path, conffile->file);
 #ifndef CYGWIN_HACKS
   putlog(LOG_DEBUG, "*", "Running for update conf: %s", testbuf);
   i = system(testbuf);
@@ -701,7 +701,7 @@ int updatebin(int idx, char *par, int secs)
     char buf[DIRMAX] = "";
 
     /* this forces all running bots to be restarted (except localhub/me) */
-    egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());
+    egg_snprintf(buf, sizeof buf, STR("%s -L %s -P %d"), binname, conf.bot->nick, getpid());
     putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
     system(buf);	/* restarts other bots running, removes pid files */
     

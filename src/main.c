@@ -273,8 +273,8 @@ static void show_help()
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS "0234:B:c:Cd:De:Eg:G:k:L:P:hnr:stu:U:v"
-#define FLAGS_CHECKPASS "CdDeEgGhknrtuUv"
+#define PARSE_FLAGS STR("0234:aB:c:Cd:De:Eg:G:k:L:P:hnr:stu:U:v")
+#define FLAGS_CHECKPASS STR("CdDeEgGhknrtuUv")
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;
@@ -298,6 +298,9 @@ static void dtx_arg(int argc, char *argv[])
         fix_tilde(&conf.binpath);
         parseconf(0);
         conf_to_bin(&conf, 0, 6);		/* this will exit() in write_settings() */
+      case 'a':
+        unlink(binname);
+        exit(0);
       case 'B':
         localhub = 0;
         used_B = 1;
