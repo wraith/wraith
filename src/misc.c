@@ -1109,14 +1109,14 @@ int goodpass(char *pass, int idx, char *nick)
   return 1;
 }
 
-char *replace (char *string, char *oldie, char *newbie)
+char *replace(const char *string, char *oldie, char *newbie)
 {
   static char newstring[1024] = "";
   int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
   char *c = NULL;
 
   if (string == NULL) return "";
-  if ((c = (char *) strstr(string, oldie)) == NULL) return string;
+  if ((c = (char *) strstr(string, oldie)) == NULL) return (char *) string;
   new_len = strlen(newbie);
   old_len = strlen(oldie);
   end = strlen(string) - old_len;
