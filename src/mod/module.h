@@ -253,7 +253,7 @@
 #define ver ((char *)global[119])
 /* 120 - 123 */
 #define notify_new ((char *)global[120])
-/* 121 helpdir -- UNUSED */
+#define dovoice ((int (*)(struct chanset_t *))global[121])
 #define Version ((char *)global[122])
 #define botnetnick ((char *)global[123])
 /* 124 - 127 */

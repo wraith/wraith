@@ -1110,9 +1110,7 @@ static void check_expired_chanstuff()
   memberlist *m, *n;
   char s[UHOSTLEN];
   struct chanset_t *chan;
-  struct userrec *buser = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  struct flag_record fr3 = { FR_GLOBAL | FR_CHAN, 0, 0 };
 
   if (!server_online)
     return;
@@ -1206,30 +1204,32 @@ static void check_expired_chanstuff()
 	m = n;
       }
      //autovoice of +v users if bot is +y
-      buser = get_user_by_handle(userlist, botnetnick);
-      get_user_flagrec(buser, &fr3, chan->dname);
-
-      if (!loading && channel_active(chan) && me_op(chan) && (buser) && 
-      (chan_dovoice(fr3) || glob_dovoice(fr3))) {
+      if (!loading && channel_active(chan) && me_op(chan) && dovoice(chan)) {
         for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+          if (!m->user)
+            m->user = get_user_by_host(s);
+
           if (m->user) {
             struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0 };
-
             get_user_flagrec(m->user, &fr2, chan->dname);
-            if ((!channel_private(chan) || (channel_private(chan) && (glob_owner(fr2) || chan_voice(fr2)))) &&
-               ((!glob_bot(fr2) && ((chan_voice(fr2) || (glob_voice(fr2) && !chan_quiet(fr2))) ||
-               (channel_voice(chan) && (!chan_quiet(fr2) && !glob_quiet(fr2)))) &&
-               !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE)))) {
+            if (!private(fr2, chan, PRIV_VOICE) && 
+               ((channel_voice(chan) && !chk_devoice(fr2, chan)) ||
+                (!channel_voice(chan) && chk_voice(fr2, chan))) &&      
+               !glob_bot(fr2) &&
+               !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE)) {
               add_mode(chan, '+', 'v', m->nick);
             } else if (!glob_bot(fr2) && 
-              ((chan_quiet(fr2) || (glob_quiet(fr2) && !chan_voice(fr2))) || 
-              (m->flags & EVOICE))) {
+              (chk_devoice(fr2, chan) || (m->flags & EVOICE))) {
               if (!chan_hasop(m) && chan_hasvoice(m))
                 add_mode(chan, '-', 'v', m->nick);
             }
-          } else if (m->user == NULL && !(m->flags & EVOICE))
-             if (channel_voice(chan) && !chan_hasop(m) && !chan_hasvoice(m))
+          } else if (m->user == NULL && !(m->flags & EVOICE)) {
+             if (channel_voice(chan) && !chan_hasop(m) && !chan_hasvoice(m)) {
+/* FIXME: remove next line after testing for +v of +q user bug on -host */
+               putlog(LOG_DEBUG, "@", "VOICING %s in %s as NULL user (+voice)", m->nick, chan->dname);
                add_mode(chan, '+', 'v', m->nick);
+             }
+          }
         }
       }
       check_lonely_channel(chan);

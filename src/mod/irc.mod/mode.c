@@ -1141,8 +1141,8 @@ Context;
  	      m->flags &= ~SENTVOICE;
  	      m->flags |= CHANVOICE;
  	      check_tcl_mode(nick, from, u, chan->dname, ms2, op);
-              if ((channel_active(chan)) && (chan_dovoice(my_fr) || glob_dovoice(my_fr))) {
-                if (dv || (chan_quiet(victim) || (glob_quiet(victim) && !chan_voice(victim)))) {
+              if (channel_active(chan) && dovoice(chan)) {
+                if (dv || chk_devoice(victim, chan)) {
 		  add_mode(chan, '-', 'v', op);
 		} else if (reversing) {
 		  add_mode(chan, '-', 'v', op);
@@ -1152,9 +1152,9 @@ Context;
 	      m->flags &= ~SENTDEVOICE;
 	      m->flags &= ~CHANVOICE;
 	      check_tcl_mode(nick, from, u, chan->dname, ms2, op);
-              if ((channel_active(chan)) && (chan_dovoice(my_fr) || glob_dovoice(my_fr))) {
+              if (channel_active(chan) && dovoice(chan)) {
                 /* revoice +v users */
-                if ((chan_voice(victim) || (glob_voice(victim) && !chan_quiet(victim)))) {
+                if (chk_voice(victim, chan)) {
                   add_mode(chan, '+', 'v', op);
 		} else if (reversing) {
 		  add_mode(chan, '+', 'v', op);

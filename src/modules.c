@@ -309,7 +309,7 @@ Function global_table[] =
   (Function) ver,		 /* char *				*/
   /* 120 - 123 */
   (Function) notify_new,	 /* char *				*/
-  (Function) 0,		 /* char *				*/
+  (Function) dovoice,
   (Function) version,		 /* char *				*/
   (Function) botnetnick,	 /* char *				*/
   /* 124 - 127 */

@@ -1437,18 +1437,18 @@ int main(int argc, char **argv)
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
   egg_snprintf(enetpass, sizeof enetpass, netpass);
-  init_auth();
-  init_config();
   init_dcc_max();
   init_userent();
   init_misc();
   init_bots();
   init_net();
   init_modules();
+  init_tcl(argc, argv);
+  init_auth();
+  init_config();
   init_userrec();
   if (backgrd)
     bg_prepare_split();
-  init_tcl(argc, argv);
   init_botcmd();
   link_statics();
   module_load(ENCMOD);

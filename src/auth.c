@@ -140,6 +140,7 @@ Context;
 void removeauth(int n)
 {
 Context;
+  putlog(LOG_DEBUG, "*", "Removing %s from auth list.", auth[n].host);
   auth_total--;
   if (n < auth_total)
     egg_memcpy(&auth[n], &auth[auth_total], sizeof(struct auth_t));

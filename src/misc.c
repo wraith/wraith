@@ -789,6 +789,20 @@ int ischanhub()
     return 0;
 }
 
+int dovoice(struct chanset_t *chan)
+{
+  struct userrec *user = NULL;
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+
+  if (!chan) return 0;
+
+  user = get_user_by_handle(userlist, botnetnick);
+  get_user_flagrec(user, &fr, chan->dname);
+  if (glob_dovoice(fr) || chan_dovoice(fr))
+    return 1;
+  return 0;
+}
+
 #ifdef S_LASTCHECK
 char last_buf[128]="";
 #endif /* S_LASTCHECK */

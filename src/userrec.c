@@ -17,7 +17,7 @@ extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
 extern int		 default_flags, default_uflags, quiet_save,
 			 dcc_total, share_greet;
-extern char		 userfile[], ver[], botnetnick[];
+extern char		 userfile[], ver[], botnetnick[], tempdir[];
 extern time_t		 now;
 
 int		 noshare = 1;		/* don't send out to sharebots	    */

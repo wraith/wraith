@@ -255,6 +255,7 @@ int egg_strcatn(char *dst, const char *src, size_t max);
 int my_strcpy(char *, char *);
 void putlog EGG_VARARGS(int, arg1);
 int ischanhub();
+int dovoice(struct chanset_t *);
 void maskhost(const char *, char *);
 char *stristr(char *, char *);
 void splitc(char *, char *, char);
