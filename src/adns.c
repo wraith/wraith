@@ -879,7 +879,7 @@ static int parse_reply(char *response, size_t nbytes)
 		case DNS_PTR:
 			r = my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result));
 
-			if (r != -1)
+			if (r != -1 && result[0])
 				answer_add(&q->answer, result);
 			break;
 		default:
