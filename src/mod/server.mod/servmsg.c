@@ -1424,6 +1424,7 @@ static void server_dns_callback(void *client_data, const char *host, char **ips)
     /* set these now so if we fail disconnect_server() can cleanup right. */
     dcc[idx].sock = serv;
     servidx = idx;
+    sdprintf("Connecting to '%s' (serv: %d, servidx: %d)", dcc[idx].host, serv, servidx);
     setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(int));
     /* Queue standard login */
     dcc[idx].timeval = now;

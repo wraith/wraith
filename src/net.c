@@ -740,11 +740,13 @@ intt open_address_listen(in_addr_t addr, port_t *port)
     /* memcpy(&name6.sin6_addr, &in6addr_any, 16); */ /* this is the only way to get ipv6+ipv4 in 1 socket */
     memcpy(&name6.sin6_addr, &cached_myip6_so.sin6.sin6_addr, 16);
     if (bind(sock, (struct sockaddr *) &name6, sizeof(name6)) < 0) {
+      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
       killsock(sock);
       return -1;
     }
     addrlen = sizeof(name6);
     if (getsockname(sock, (struct sockaddr *) &name6, &addrlen) < 0) {
+      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
       killsock(sock);
       return -1;
     }
@@ -769,12 +771,14 @@ intt open_address_listen(in_addr_t addr, port_t *port)
     name.sin_port = htons(*port); /* 0 = just assign us a port */
     name.sin_addr.s_addr = addr;
     if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0) {
+      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
       killsock(sock);
       return -1;
     }
     /* what port are we on? */
     addrlen = sizeof(name);
     if (getsockname(sock, (struct sockaddr *) &name, &addrlen) < 0) {
+      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
       killsock(sock);
       return -1;
     }
