@@ -196,11 +196,11 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
             i->conchan % GLOBAL_CHANS);
     snprintf(tmp, sizeof tmp, "    Color:");
     if (i->color == 1)
-     snprintf(tmp, sizeof tmp, " mIRC");
+     snprintf(tmp, sizeof tmp, "%s mIRC", tmp);
     else if (i->color == 2)
-     snprintf(tmp, sizeof tmp, " ANSI");
+     snprintf(tmp, sizeof tmp, "%s ANSI", tmp);
     else
-     snprintf(tmp, sizeof tmp, " off");
+     snprintf(tmp, sizeof tmp, "%s off", tmp);
     dprintf(idx, "%s\n", tmp);
   }
 }
@@ -342,11 +342,11 @@ static int console_store(struct userrec *u, int idx, char *par)
             CONSOLE_CHANNEL2, i->conchan);
     snprintf(tmp, sizeof tmp, "    Color:");
     if (i->color == 1)
-     snprintf(tmp, sizeof tmp, " mIRC");
+     snprintf(tmp, sizeof tmp, "%s mIRC", tmp);
     else if (i->color == 2)
-     snprintf(tmp, sizeof tmp, " ANSI");
+     snprintf(tmp, sizeof tmp, "%s ANSI", tmp);
     else
-     snprintf(tmp, sizeof tmp, " off");
+     snprintf(tmp, sizeof tmp, "%s off", tmp);
     dprintf(idx, "%s\n", tmp);
   }
   set_user(&USERENTRY_CONSOLE, u, i);
