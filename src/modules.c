@@ -579,7 +579,9 @@ Function global_table[] =
   (Function) egg_inet_ntop,
   (Function) open_listen,
   (Function) hostprotocol,
-  (Function) sdprintf
+  (Function) sdprintf,
+  (Function) putbot,
+  (Function) putallbots
 
 
 };

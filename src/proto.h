@@ -94,6 +94,7 @@ int getparty(char *, int);
 void botnet_send_cfg(int idx, struct cfg_entry *entry);
 void botnet_send_cfg_broad(int idx, struct cfg_entry *entry);
 void putbot(char *, char *);
+void putallbots(char *);
 int add_note(char *, char *, char *, int, int);
 int simple_sprintf EGG_VARARGS(char *, arg1);
 void tandout_but EGG_VARARGS(int, arg1);

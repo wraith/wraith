@@ -536,6 +536,9 @@
 #define egg_inet_ntop ((int (*)(int af, const void *src, char *dst, socklen_t size))global[329])
 #define hostprotocol ((int (*) (char *))global[330])
 #define sdprintf (global[331])
+#define putbot ((void (*)(char *, char *))global[332])
+/* 333 - 335 */
+#define putallbots ((void (*)(char *))global[333])
 
 
 

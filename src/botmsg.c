@@ -398,6 +398,16 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top,
     tputs(dcc[idx].sock, OBUF, l);
   }
 }
+
+void putallbots(char *par)
+{ 
+  char msg[sgrab-110];
+  if (!par || !par[0])
+    return;
+  strncpyz(msg, par, sizeof msg);
+  botnet_send_zapf_broad(-1, botnetnick, NULL, msg);
+}
+
 void putbot(char *bot, char *par)
 {
   int i;
@@ -410,6 +420,7 @@ void putbot(char *bot, char *par)
   strncpyz(msg, par, sizeof msg);
   botnet_send_zapf(i, botnetnick, bot, msg);
 }
+
 void botnet_send_zapf(int idx, char *a, char *b, char *c)
 {
   int l;

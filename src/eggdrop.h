@@ -322,6 +322,7 @@ struct dcc_t {
 #endif /* USE_IPV6 */
   unsigned int port;
   struct userrec *user;
+  char simul[NICKLEN];		/* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[33];                /* used for dcc authing */
   char nick[NICKLEN];
   char host[UHOSTLEN];
