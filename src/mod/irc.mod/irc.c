@@ -404,6 +404,10 @@ getin_request(char *botnick, char *code, char *par)
              chan->dname, botnick);
       return;
     }
+    if (chan_kick(fr) || glob_kick(fr)) {
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s is set to auto kickban.", botnick, nick, chan->dname, botnick);
+      return;
+    }
     if (chan_hasop(mem)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s already has ops", botnick, nick, chan->dname, nick);
       return;
