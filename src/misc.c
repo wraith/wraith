@@ -702,19 +702,16 @@ void kill_bot(char *s1, char *s2)
 
 /* Update system code
  */
+#ifdef LEAF
 static void updatelocal(void)
 {
   /* let's drop the server connection ASAP */
-#ifdef LEAF
-{
   module_entry *me = NULL;
 
   if ((me = module_find("server", 0, 0))) {
     Function *func = me->funcs;
     (func[SERVER_NUKESERVER]) ("Updating...");
   }
-}
-#endif /* LEAF */
 
   botnet_send_chat(-1, conf.bot->nick, "Updating...");
   botnet_send_bye();
@@ -725,6 +722,7 @@ static void updatelocal(void)
   system(binname); /* start new bot. */
   exit(0);
 }
+#endif /* LEAF */
 
 int updatebin(int idx, char *par, int autoi)
 {
