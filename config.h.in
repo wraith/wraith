@@ -344,4 +344,3 @@
 #undef S_MESSUPTERM
 #undef S_NAZIPASS
 #undef S_SPLITHIJACK
-#undef S_UTCTIME

@@ -429,11 +429,7 @@ static void core_secondly()
     cnt = 0;
   }
 
-#ifdef S_UTCTIME
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
-#else /* !S_UTCTIME */
-  egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
-#endif /* S_UTCTIME */
   if (nowtm.tm_min != lastmin) {
     int i = 0;
 
@@ -707,11 +703,7 @@ int main(int argc, char **argv)
   timer_update_now(&egg_timeval_now);
   now = egg_timeval_now.sec;
 
-#ifdef S_UTCTIME
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
-#else /* !S_UTCTIME */
-  egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
-#endif /* S_UTCTIME */
   lastmin = nowtm.tm_min;
   srandom(now % (getpid() + getppid()) * randint(1000));
   myuid = geteuid();

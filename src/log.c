@@ -146,11 +146,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   va_start(va, format);
 #ifdef HUB
-# ifdef S_UTCTIME
   t = gmtime(&now);
-# else /* !S_UTCTIME */
-  t = localtime(&now);
-# endif /* S_UTCTIME */
 
   egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
 #endif /* HUB */

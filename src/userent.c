@@ -181,11 +181,7 @@ void added_display(int idx, struct user_entry *e, struct userrec *u)
       *hnd++ = 0;
     tm = atoi(tmp);
 
-#ifdef S_UTCTIME
     egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
-#else /* !S_UTCTIME */
-    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", localtime(&tm));
-#endif /* S_UTCTIME */
     if (hnd)
       dprintf(idx, "  -- Added %s by %s\n", tmp2, hnd);
     else
@@ -512,11 +508,7 @@ void modified_display(int idx, struct user_entry *e, struct userrec *u)
     if (hnd)
       *hnd++ = 0;
     tm = atoi(tmp);
-#ifdef S_UTCTIME
     egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
-#else /* !S_UTCTIME */
-    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", localtime(&tm));
-#endif /* S_UTCTIME */
     if (hnd)
       dprintf(idx, "  -- Modified %s by %s\n", tmp2, hnd);
     else

@@ -363,11 +363,7 @@ void daysago(time_t mynow, time_t then, char *out)
     sprintf(out, "%d day%s ago", mydays, (mydays == 1) ? "" : "s");
     return;
   }
-#ifdef S_UTCTIME
   egg_strftime(out, 6, "%H:%M", gmtime(&then));
-#else /* !S_UTCTIME */
-  egg_strftime(out, 6, "%H:%M", localtime(&then));
-#endif /* S_UTCTIME */
 }
 
 /* Convert an interval (in seconds) to one of:
@@ -381,11 +377,7 @@ void days(time_t mynow, time_t then, char *out)
     sprintf(out, "in %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
-#ifdef S_UTCTIME
   egg_strftime(out, 9, "at %H:%M", gmtime(&now));
-#else /* !S_UTCTIME */
-  egg_strftime(out, 9, "at %H:%M", localtime(&now));
-#endif /* S_UTCTIME */
 }
 
 /* Convert an interval (in seconds) to one of:
@@ -453,11 +445,7 @@ void show_motd(int idx)
     buf = buf_ptr = strdup(CFG_MOTD.gdata);
     who = newsplit(&buf);
     when = atoi(newsplit(&buf));
-#ifdef S_UTCTIME
     egg_strftime(date, sizeof date, "%c %Z", gmtime(&when));
-#else /* !S_UTCTIME */
-    egg_strftime(date, sizeof date, "%c %Z", localtime(&when));
-#endif /* S_UTCTIME */
     dprintf(idx, "Motd set by %s%s%s (%s)\n", BOLD(idx), who, BOLD_END(idx), date);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
     dprintf(idx, " \n");

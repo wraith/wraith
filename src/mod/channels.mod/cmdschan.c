@@ -1193,11 +1193,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     char nick[NICKLEN] = "", date[81] = "";
 
     if (chan->added_ts) {
-#ifndef S_UTCTIME
-      egg_strftime(date, sizeof date, "%c %Z", localtime(&(chan->added_ts)));
-#else /* !S_UTCTIME */
       egg_strftime(date, sizeof date, "%c %Z", gmtime(&(chan->added_ts)));
-#endif /* S_UTCTIME */
     } else
       date[0] = 0;
     if (chan->added_by && chan->added_by[0])

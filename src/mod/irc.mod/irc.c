@@ -651,11 +651,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
   get_user_flagrec(u, &fr, chan->dname);
 
   /* Get current time into a string */
-#ifdef S_UTCTIME
   egg_strftime(ct, sizeof ct, "%d %b %Z", gmtime(&now));
-#else /* !S_UTCTIME */
-  egg_strftime(ct, sizeof ct, "%d %b %Z", localtime(&now));
-#endif /* S_UTCTIME */
 
   /* Put together log and kick messages */
   reason[0] = 0;

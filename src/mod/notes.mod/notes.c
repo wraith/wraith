@@ -401,11 +401,7 @@ void notes_read(const char *hand, const char *nick, const char *srd, int idx)
 	  from = newsplit(&s1);
 	  dt = newsplit(&s1);
 	  tt = atoi(dt);
-#ifdef S_UTCTIME
 	  egg_strftime(wt, sizeof wt, "%b %d %H:%M %Z", gmtime(&tt));
-#else /* !S_UTCTIME */
-	  egg_strftime(wt, sizeof wt, "%b %d %H:%M %Z", localtime(&tt));
-#endif /* S_UTCTIME */
 	  dt = wt;
 	  lapse = (int) ((now - tt) / 86400);
 	  if (lapse > note_life - 7) {
