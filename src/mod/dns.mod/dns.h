@@ -19,6 +19,9 @@
 #ifndef _EGG_MOD_DNS_DNS_H
 #define _EGG_MOD_DNS_DNS_H
 
+#include "src/common.h"
+#include "src/types.h"
+
 struct resolve {
     struct resolve	*next;
     struct resolve	*previous;
@@ -59,5 +62,9 @@ enum resolve_states {
 # define ddebug3(x, x1, x2, x3)
 # define ddebug4(x, x1, x2, x3, x4)
 #endif	/* !DEBUG_DNS */
+
+int dns_report(int, int);
+void dns_hostbyip(IP);
+void dns_ipbyhost(char *);
 
 #endif	/* _EGG_MOD_DNS_DNS_H */

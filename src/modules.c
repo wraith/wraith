@@ -150,8 +150,6 @@ int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
 int (*rfc_ncasecmp) (const char *, const char *, int) = _rfc_ncasecmp;
 int (*rfc_toupper) (int) = _rfc_toupper;
 int (*rfc_tolower) (int) = _rfc_tolower;
-void (*dns_hostbyip) (IP) = block_dns_hostbyip;
-void (*dns_ipbyhost) (char *) = block_dns_ipbyhost;
 
 module_entry *module_list;
 dependancy *dependancy_list = NULL;
@@ -825,14 +823,6 @@ void add_hook(int hook_num, Function func)
 	rfc_toupper = _rfc_toupper;
       }
       break;
-    case HOOK_DNS_HOSTBYIP:
-      if (dns_hostbyip == block_dns_hostbyip)
-	dns_hostbyip = (void (*)(IP)) func;
-      break;
-    case HOOK_DNS_IPBYHOST:
-      if (dns_ipbyhost == block_dns_ipbyhost)
-	dns_ipbyhost = (void (*)(char *)) func;
-      break;
     }
 }
 
@@ -874,14 +864,6 @@ void del_hook(int hook_num, Function func)
     case HOOK_ADD_MODE:
       if (add_mode == (void (*)()) func)
 	add_mode = null_func;
-      break;
-    case HOOK_DNS_HOSTBYIP:
-      if (dns_hostbyip == (void (*)(IP)) func)
-	dns_hostbyip = block_dns_hostbyip;
-      break;
-    case HOOK_DNS_IPBYHOST:
-      if (dns_ipbyhost == (void (*)(char *)) func)
-	dns_ipbyhost = block_dns_ipbyhost;
       break;
     }
 }

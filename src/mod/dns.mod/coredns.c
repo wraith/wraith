@@ -824,7 +824,7 @@ static void parserespacket(u_8bit_t *s, int l)
 				ddebug1(RES_ERR "Unsupported rdata format for \"A\" type. (%u bytes)", rdatalength);
 				return;
 			    }
-			    my_memcpy(&rp->ip, (IP *) c, sizeof(IP));
+			    egg_memcpy(&rp->ip, (IP *) c, sizeof(IP));
 			    linkresolveip(rp);
 			    passrp(rp, ttl, T_A);
 			    return;
@@ -985,7 +985,7 @@ static void dns_check_expires(void)
 
 /* Start searching for a host-name, using it's ip-address.
  */
-static void dns_lookup(IP ip)
+void dns_hostbyip(IP ip)
 {
     struct resolve *rp;
 
@@ -1015,7 +1015,7 @@ static void dns_lookup(IP ip)
 
 /* Start searching for an ip-address, using it's host-name.
  */
-static void dns_forward(char *hostn)
+void dns_ipbyhost(char *hostn)
 {
     struct resolve *rp;
     struct in_addr inaddr;

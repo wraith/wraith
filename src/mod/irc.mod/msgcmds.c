@@ -263,7 +263,6 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
       make_rand_str(rand, 50);
       strncpyz(auth[i].hash, makehash(u, rand), sizeof auth[i].hash);
       dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, rand, botnetnick);
-    }
   } else {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed -AUTH", nick, host, u->handle);
     removeauth(i);

@@ -50,8 +50,6 @@ typedef struct devent_str {
   void		*other;		/* Data specific to the event type */
 } devent_t;
 
-extern void (*dns_hostbyip) (IP);
-extern void (*dns_ipbyhost) (char *);
 void block_dns_hostbyip(IP);
 void block_dns_ipbyhost(char *);
 void call_hostbyip(IP, char *, int);

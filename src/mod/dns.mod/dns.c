@@ -6,16 +6,17 @@
  *
  */
 
-#define MODULE_NAME "dns"
-
-#include "src/mod/module.h"
+#undef MAKING_MODS
 #include "dns.h"
+#include "src/common.h"
+#include "src/dccutil.h"
+#include "src/modules.h"
+#include "src/main.h"
+#include "src/types.h"
 
 static void dns_event_success(struct resolve *rp, int type);
 static void dns_event_failure(struct resolve *rp, int type);
 
-
-static Function *global = NULL;
 
 #include "coredns.c"
 
@@ -105,7 +106,7 @@ static struct dcc_table DCC_DNS =
  *    DNS module related code
  */
 
-static int dns_report(int idx, int details)
+int dns_report(int idx, int details)
 {
   if (details) {
     dprintf(idx, "    DNS resolver is active.\n");
@@ -113,38 +114,20 @@ static int dns_report(int idx, int details)
   return 0;
 }
 
-EXPORT_SCOPE char *dns_start();
-
-static Function dns_table[] =
-{
-  /* 0 - 3 */
-  (Function) dns_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) dns_report,
-  /* 4 - 7 */
-};
-
-char *dns_start(Function *global_funcs)
+void dns_init()
 {
   int idx;
 
-  global = global_funcs;
-  module_register(MODULE_NAME, dns_table, 1, 0);
-
   idx = new_dcc(&DCC_DNS, 0);
   if (idx < 0)
-    return "NO MORE DCC CONNECTIONS -- Can't create DNS socket.";
+    fatal("NO MORE DCC CONNECTIONS -- Can't create DNS socket.", 1);
   if (!init_dns_core()) {
     lostdcc(idx);
-    return "DNS initialisation failed.";
+    fatal("DNS initialisation failed.", 1);
   }
   dcc[idx].sock = resfd;
   dcc[idx].timeval = now;
   strcpy(dcc[idx].nick, "(dns)");
 
   add_hook(HOOK_SECONDLY, (Function) dns_check_expires);
-  add_hook(HOOK_DNS_HOSTBYIP, (Function) dns_lookup);
-  add_hook(HOOK_DNS_IPBYHOST, (Function) dns_forward);
-  return NULL;
 }
