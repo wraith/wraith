@@ -8,7 +8,7 @@ This is a summary of ChangeLog basically.
 * Fixed segfault while relaying.
 * Telnet host matching is now fixed to match these hosts against the userfile (ONLY FOR ACCESS):
   -telnet!telnet@ip -telnet!telnet@HOST -telnet!IDENT@IP -telnet!IDENT@HOST
-
+* Fixed cmd_comment bug with changing comment on lower level users.
 
 
 1.2
