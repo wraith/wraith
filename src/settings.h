@@ -41,7 +41,7 @@ typedef struct settings_struct {
   char padding[4];
 } settings_t;
 
-#define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
+/* #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \ */
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix)
 
