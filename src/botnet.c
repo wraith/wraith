@@ -268,10 +268,11 @@ void partyaway(char *bot, int sock, char *msg)
 
 /* Remove a tandem bot from the chain list
  */
-void rembot(const char *who)
+void rembot(const char *whoin)
 {
   tand_t **ptr = &tandbot, *ptr2 = NULL;
   struct userrec *u = NULL;
+  char *who = strdup(whoin);
 
   while (*ptr) {
     if (!egg_strcasecmp((*ptr)->bot, who))
@@ -292,6 +293,7 @@ void rembot(const char *who)
   tands--;
 
   dupwait_notify(who);
+  free(who);
 }
 
 void remparty(char *bot, int sock)
