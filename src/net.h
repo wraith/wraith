@@ -105,18 +105,18 @@ typedef struct {
   int encstatus;                        /* encrypted botlink */
   int oseed;                            /* botlink out seed */
   int iseed;                            /* botlink in seed */
-  int            sock;
+  int sock;
   int gz; /* gzip compression */
 #ifdef HAVE_SSL
   SSL           *ssl;
 #endif /* HAVE_SSL */
+  char *inbuf;
+  char *outbuf;
+  char *host;
   port_t port;
   short          flags;
   char okey[33];                        /* botlink enckey: out */
   char ikey[33];                        /* botlink enckey: in  */
-  char          *inbuf;
-  char          *outbuf;
-  char *host;
 } sock_list;
 
 
