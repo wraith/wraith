@@ -69,7 +69,6 @@ extern int		optind;
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	*egg_version = "1.2.3-cvs";
 
-bool 	localhub = 1; 		/* we set this to 0 if we get a -B */
 bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
 bool 	loading = 0;
@@ -303,7 +302,6 @@ static void dtx_arg(int argc, char *argv[])
         unlink(binname);
         exit(0);
       case 'B':
-        localhub = 0;
         used_B = 1;
         strlcpy(origbotname, optarg, NICKLEN + 1);
         break;
@@ -398,7 +396,6 @@ static void dtx_arg(int argc, char *argv[])
           exit(3);
         else
           sdprintf("Updating...");
-        localhub = 1;
         updating = UPDATE_AUTO;
         break;
       case '?':
@@ -614,6 +611,13 @@ static void startup_checks(int hack) {
       exit(0); /* our job is done! */
     }
   }
+
+  if (!conf.bot)
+    werr(ERR_NOBOT);
+
+  if (conf.bot->disabled)
+    werr(ERR_BOTDISABLED);
+
   if (!conf.bot->localhub)
     free_conf_bots();			/* not a localhub, so no need to store all bot info */
 }

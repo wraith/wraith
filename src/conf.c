@@ -36,7 +36,7 @@ conf_t conf;                    /* global conf struct */
 static void
 tellconf()
 {
-  conf_bot *bot;
+  conf_bot *bot = NULL;
   int i = 0;
 
   sdprintf("tempdir: %s\n", tempdir);
@@ -54,8 +54,9 @@ tellconf()
   sdprintf("bots:\n");
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     i++;
-    sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n", i,
+    sdprintf("%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n", i,
              bot->nick,
+             bot->disabled ? "/" : "",
              bot->net.ip ? bot->net.ip : "",
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
@@ -64,8 +65,9 @@ tellconf()
   }
   if (conf.bot && ((bot = conf.bot))) {
     sdprintf("me:\n");
-    sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n",
+    sdprintf("%s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n",
              bot->nick,
+             bot->disabled ? "/" : "",
              bot->net.ip ? bot->net.ip : "",
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
@@ -99,7 +101,7 @@ spawnbots()
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     sdprintf("checking bot: %s", bot->nick);
 
-    if (bot->nick[0] == '/') {
+    if (bot->disabled) {
       /* kill it if running */
       if (bot->pid)
         kill(bot->pid, SIGKILL);
@@ -131,9 +133,7 @@ killbot(char *botnick, int signal)
   conf_bot *bot = NULL;
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    if (bot->nick[0] == '/')
-      continue;
-    else if (!egg_strcasecmp(botnick, bot->nick)) {
+    if (!egg_strcasecmp(botnick, bot->nick)) {
       if (bot->pid)
         return kill(bot->pid, signal);
     }
@@ -321,15 +321,12 @@ void conf_checkpids()
  */
 
 pid_t
-checkpid(char *nick, conf_bot *bot)
+checkpid(const char *nick, conf_bot *bot)
 {
   FILE *f = NULL;
   char buf[DIRMAX] = "", s[11] = "", *tmpnick = NULL, *tmp_ptr = NULL;
 
   tmpnick = tmp_ptr = strdup(nick);
-
-  if (tmpnick[0] == '/')
-    tmpnick++;
 
   simple_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, tmpnick);
   free(tmp_ptr);
@@ -369,6 +366,10 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
   bot->next = NULL;
   bot->pid_file = NULL;
+  if (nick[0] == '/') {
+    bot->disabled = 1;
+    nick++;
+  }
   bot->nick = strdup(nick);
   bot->net.ip = NULL;
   bot->net.host = NULL;
@@ -410,16 +411,18 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
     }
   }
 
-  if (!bot->hub && !conf.bots) {
+  /* not a hub 
+   AND
+   * no bots added yet (first bot) yet, not disabled.
+   OR
+   * bots already listed but we dont have a localhub yet, so we're it!
+   */
+  if (!bot->hub && ((!conf.bots && !bot->disabled) || (conf.bots && !conf.localhub))) {
     bot->localhub = 1;          /* first bot */
-    conf.localhub = strdup(nick ? nick : origbotname);
-    /* perhaps they did -B localhub-bot ? */
-    if (origbotname[0] && !strcmp(origbotname, bot->nick))
-      localhub = 1;
+    conf.localhub = strdup(bot->nick);
   }
 
   list_append((struct list_type **) &(conf.bots), (struct list_type *) bot);
-//  list_append((struct list_type **) &(cache->cchan), (struct list_type *) cchan);
 }
 
 void
@@ -778,52 +781,53 @@ writeconf(char *filename, FILE * stream, int bits)
 }
 
 static void
-conf_bot_dup(conf_bot * dest, conf_bot * src)
+conf_bot_dup(conf_bot *dest, conf_bot *src)
 {
-  dest->nick = src->nick ? strdup(src->nick) : NULL;
-  dest->pid_file = src->pid_file ? strdup(src->pid_file) : NULL;
-  dest->net.ip = src->net.ip ? strdup(src->net.ip) : NULL;
-  dest->net.host = src->net.host ? strdup(src->net.host) : NULL;
-  dest->net.ip6 = src->net.ip6 ? strdup(src->net.ip6) : NULL;
-  dest->net.host6 = src->net.host6 ? strdup(src->net.host6) : NULL;
-  dest->net.v6 = src->net.v6;
-  dest->u = src->u ? src->u : NULL;
-  dest->pid = src->pid;
-  dest->hub = src->hub;
-  dest->localhub = src->localhub;
-  dest->next = NULL;
+  if (dest && src) {
+    dest->nick = src->nick ? strdup(src->nick) : NULL;
+    dest->pid_file = src->pid_file ? strdup(src->pid_file) : NULL;
+    dest->net.ip = src->net.ip ? strdup(src->net.ip) : NULL;
+    dest->net.host = src->net.host ? strdup(src->net.host) : NULL;
+    dest->net.ip6 = src->net.ip6 ? strdup(src->net.ip6) : NULL;
+    dest->net.host6 = src->net.host6 ? strdup(src->net.host6) : NULL;
+    dest->net.v6 = src->net.v6;
+    dest->u = src->u ? src->u : NULL;
+    dest->pid = src->pid;
+    dest->hub = src->hub;
+    dest->localhub = src->localhub;
+    dest->next = NULL;
+  }
 }
 
 
 void
 fill_conf_bot()
 {
-  conf_bot *me = NULL;
-  char *mynick = NULL;
-
   if (!conf.bots || !conf.bots->nick)
     return;
 
-  if (localhub && conf.bots && conf.bots->nick) {
+  char *mynick = NULL;
+  conf_bot *me = NULL;
+
+  if (!used_B && conf.bots && conf.bots->nick) {
     mynick = strdup(conf.bots->nick);
     strlcpy(origbotname, conf.bots->nick, NICKLEN + 1);
   } else
     mynick = strdup(origbotname);
 
-  for (me = conf.bots; me && me->nick; me = me->next)
-    if (!strcmp(me->nick, mynick))
+  for (me = conf.bots; me && me->nick; me = bot->next)
+    if (!egg_strcasecmp(me->nick, mynick))
       break;
 
-  if (me->nick && me->nick[0] == '/')
-    werr(ERR_BOTDISABLED);
-
-  if (!me->nick || (me->nick && strcmp(me->nick, mynick)))
+  if (!me || (me->nick && egg_strcasecmp(me->nick, mynick)))
     werr(ERR_BADBOT);
 
   free(mynick);
   /* for future, we may just want to make this a pointer to ->bots if we do an emech style currentbot-> */
-  conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
-  conf_bot_dup(conf.bot, me);
+  if (bot) {
+    conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+    conf_bot_dup(conf.bot, bot);
+  }
 }
 
 void

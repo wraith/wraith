@@ -648,6 +648,8 @@ char *werr_tostr(int errnum)
     return STR("Bot is disabled, remove '/' in config");
   case ERR_NOBOTS:
     return STR("There are no bots in the binary! Please use ./binary -C to edit");
+  case ERR_NOBOT:
+    return STR("I have no bot record but received -B???");
   default:
     return "Unforseen error";
   }

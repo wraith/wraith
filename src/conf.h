@@ -22,6 +22,7 @@ typedef struct conf_bot_b {
   pid_t pid;              /* contains the PID for the bot (read for the pidfile) */
   int localhub;         /* bot is localhub */
   bool hub;		/* should bot behave as a hub? */
+  bool disabled;	/* is bot disabled in the conf? */
   char *nick;
   char *pid_file;       /* path and filename of the .pid file */
 } conf_bot;
@@ -58,7 +59,7 @@ int killbot(char *, int);
 void confedit() __attribute__((noreturn));
 void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
-pid_t checkpid(char *, conf_bot *);
+pid_t checkpid(const char *, conf_bot *);
 void init_conf();
 void free_conf();
 void free_conf_bots();
