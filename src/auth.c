@@ -84,7 +84,8 @@ char *makehash(struct userrec *u, char *randstring)
     secpass = strdup(get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
-  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "" , (authkey && authkey[0]) ? authkey : "");
+  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "" , 
+                                                        (authkey && authkey[0]) ? authkey : "");
   if (secpass)
     free(secpass);
 
@@ -116,7 +117,6 @@ int findauth(char *host)
       putlog(LOG_MISC, "*", "AUTH ENTRY: %d HAS NO HOST??", i);
       continue;
     }
-    putlog(LOG_DEBUG, "*", STR("Debug for findauth: checking: %s i: %d :: %s"), host, i, auth[i].host);
     if (auth[i].host && !strcmp(auth[i].host, host)) {
       return i;
     }

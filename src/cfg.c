@@ -226,28 +226,28 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     ent = NULL;
     sprintf(tmp, STR("Reason #%i"), why);
   }
-  if (ent && ent->gdata && !strcmp(ent->gdata, STR("deop"))) {
-    putlog(LOG_WARN, "*",  STR("Setting %s +d (%s): %s"), u->handle, tmp, msg);
+  if (ent && ent->gdata && !strcmp(ent->gdata, "deop")) {
+    putlog(LOG_WARN, "*",  "Setting %s +d (%s): %s", u->handle, tmp, msg);
     sprintf(tmp2, STR("+d: %s (%s)"), tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
     get_user_flagrec(u, &fr, chan->dname);
     fr.global = USER_DEOP;
     fr.chan = USER_DEOP;
     set_user_flagrec(u, &fr, chan->dname);
-  } else if (ent && ent->gdata && !strcmp(ent->gdata, STR("kick"))) {
-    putlog(LOG_WARN, "*",  STR("Setting %s +dk (%s): %s"), u->handle, tmp, msg);
-    sprintf(tmp2, STR("+dk: %s (%s)"), tmp, msg);
+  } else if (ent && ent->gdata && !strcmp(ent->gdata, "kick")) {
+    putlog(LOG_WARN, "*",  "Setting %s +dk (%s): %s", u->handle, tmp, msg);
+    sprintf(tmp2, "+dk: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
     get_user_flagrec(u, &fr, chan->dname);
     fr.global = USER_DEOP | USER_KICK;
     fr.chan = USER_DEOP | USER_KICK;
     set_user_flagrec(u, &fr, chan->dname);
-  } else if (ent && ent->gdata && !strcmp(ent->gdata, STR("delete"))) {
-    putlog(LOG_WARN, "*",  STR("Deleting %s (%s): %s"), u->handle, tmp, msg);
+  } else if (ent && ent->gdata && !strcmp(ent->gdata, "delete")) {
+    putlog(LOG_WARN, "*",  "Deleting %s (%s): %s", u->handle, tmp, msg);
     deluser(u->handle);
   } else {
-    putlog(LOG_WARN, "*",  STR("No user flag effects for %s (%s): %s"), u->handle, tmp, msg);
-    sprintf(tmp2, STR("Warning: %s (%s)"), tmp, msg);
+    putlog(LOG_WARN, "*",  "No user flag effects for %s (%s): %s", u->handle, tmp, msg);
+    sprintf(tmp2, "Warning: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
   }
 }

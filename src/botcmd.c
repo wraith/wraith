@@ -71,10 +71,8 @@ static void fake_alert(int idx, char *item, char *extra)
 
   if (now - lastfake > 10) {	
     /* Don't fake_alert more than once every 10secs */
-    dprintf(idx, "ct %s NOTICE: %s (%s != %s).\n",
-	    conf.bot->nick, NET_FAKEREJECT, item, extra);
-    putlog(LOG_BOTS, "*", "%s %s (%s != %s).", dcc[idx].nick, NET_FAKEREJECT,
-	 item, extra);
+    dprintf(idx, STR("ct %s NOTICE: %s (%s != %s).\n"), conf.bot->nick, NET_FAKEREJECT, item, extra);
+    putlog(LOG_BOTS, "*", "%s %s (%s != %s).", dcc[idx].nick, NET_FAKEREJECT, item, extra);
     lastfake = now;
   }
 }
@@ -392,8 +390,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type->flags & DCT_REMOTEWHO)
       if (dcc[i].u.chat->channel == chan) {
-	k = sprintf(s, "  %c%-15s %s",
-		    (geticon(i) == '-' ? ' ' : geticon(i)),
+	k = sprintf(s, "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)),
 		    dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
 	  unsigned long days, hrs, mins;
@@ -402,27 +399,22 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	  hrs = ((now - dcc[i].timeval) - (days * 86400)) / 3600;
 	  mins = ((now - dcc[i].timeval) - (hrs * 3600)) / 60;
 	  if (days > 0)
-	    sprintf(s + k, " (%s %lud%luh)",
-		    MISC_IDLE, days, hrs);
+	    sprintf(s + k, " (%s %lud%luh)", MISC_IDLE, days, hrs);
 	  else if (hrs > 0)
-	    sprintf(s + k, " (%s %luh%lum)",
-		    MISC_IDLE, hrs, mins);
+	    sprintf(s + k, " (%s %luh%lum)", MISC_IDLE, hrs, mins);
 	  else
-	    sprintf(s + k, " (%s %lum)",
-		    MISC_IDLE, mins);
+	    sprintf(s + k, " (%s %lum)", MISC_IDLE, mins);
 	}
 	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s", s);
 	if (dcc[i].u.chat->away != NULL)
-	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "      %s: %s",
-			   MISC_AWAY, dcc[i].u.chat->away);
+	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "      %s: %s", MISC_AWAY, dcc[i].u.chat->away);
       }
   }
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT) {
       if (!ok) {
 	ok = 1;
-	botnet_send_priv(idx, conf.bot->nick, nick, NULL,
-			 "%s:", BOT_BOTSCONNECTED);
+	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", BOT_BOTSCONNECTED);
       }
       sprintf(s, "  %s%c%-15s %s",
 	      dcc[i].status & STAT_CALLED ? "<-" : "->",
@@ -437,11 +429,9 @@ static void remote_tell_who(int idx, char *nick, int chan)
       if (dcc[i].u.chat->channel != chan) {
 	if (!ok) {
 	  ok = 1;
-	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:",
-			   BOT_OTHERPEOPLE);
+	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", BOT_OTHERPEOPLE);
 	}
-	l = sprintf(s, "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)),
-		    dcc[i].nick, dcc[i].host);
+	l = sprintf(s, "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
 	  k = (now - dcc[i].timeval) / 60;
 	  if (k < 60)
@@ -451,9 +441,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	}
 	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s", s);
 	if (dcc[i].u.chat->away != NULL)
-	  botnet_send_priv(idx, conf.bot->nick, nick, NULL,
-			   "      %s: %s", MISC_AWAY,
-			   dcc[i].u.chat->away);
+	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "      %s: %s", MISC_AWAY, dcc[i].u.chat->away);
       }
     }
   }
@@ -461,7 +449,6 @@ static void remote_tell_who(int idx, char *nick, int chan)
 
 static void bot_sysname(int idx, char *par)
 {
-  putlog(LOG_DEBUG, "@", "%s is using %s", dcc[idx].nick, par);
   dcc[idx].u.bot->sysname[0] = 0;
   strcpy(dcc[idx].u.bot->sysname, par);
 }
@@ -588,11 +575,9 @@ static void bot_link(int idx, char *par)
       rfrom = from;
     putlog(LOG_CMDS, "*", "#%s# link %s", rfrom, par);
     if (botlink(from, -1, par))
-      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s ...",
-		       BOT_LINKATTEMPT, par);
+      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s ...", BOT_LINKATTEMPT, par);
     else
-      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s.",
-		       BOT_CANTLINKTHERE);
+      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s.", BOT_CANTLINKTHERE);
   } else {
     i = nextbot(bot);
     if (i >= 0)
@@ -615,8 +600,7 @@ static void bot_unlink(int idx, char *par)
       rfrom++;
     else
       rfrom = from;
-    putlog(LOG_CMDS, "*", "#%s# unlink %s (%s)", rfrom, undes, par[0] ? par :
-	   "No reason");
+    putlog(LOG_CMDS, "*", "#%s# unlink %s (%s)", rfrom, undes, par[0] ? par : "No reason");
     i = botunlink(-3, undes, par[0] ? par : NULL);
     if (i == 1) {
       p = strchr(from, '@');
@@ -628,8 +612,7 @@ static void bot_unlink(int idx, char *par)
 	 */
 	i = nextbot(p + 1);
 	if (i >= 0)
-	  botnet_send_priv(i, conf.bot->nick, from, NULL,
-			   "Unlinked from %s.", undes);
+	  botnet_send_priv(i, conf.bot->nick, from, NULL, "Unlinked from %s.", undes);
       }
     } else if (i == 0) {
       botnet_send_unlinked(-1, undes, "");
@@ -638,16 +621,14 @@ static void bot_unlink(int idx, char *par)
 	/* Ditto above, about idx */
 	i = nextbot(p + 1);
 	if (i >= 0)
-	  botnet_send_priv(i, conf.bot->nick, from, NULL,
-			   "%s %s.", BOT_CANTUNLINK, undes);
+	  botnet_send_priv(i, conf.bot->nick, from, NULL, "%s %s.", BOT_CANTUNLINK, undes);
       }
     } else {
       p = strchr(from, '@');
       if (p) {
 	i = nextbot(p + 1);
 	if (i >= 0)
-	  botnet_send_priv(i, conf.bot->nick, from, NULL,
-			   "Can't remotely unlink sharebots.");
+	  botnet_send_priv(i, conf.bot->nick, from, NULL, "Can't remotely unlink sharebots.");
       }
     }
   } else {
@@ -685,17 +666,13 @@ static void bot_nlinked(int idx, char *par)
   next = newsplit(&par);
   s[0] = 0;
   if (!next[0]) {
-    putlog(LOG_BOTS, "*", "Invalid eggnet protocol from %s (zapfing)",
-	   dcc[idx].nick);
-    simple_sprintf(s, "%s %s (%s)", MISC_DISCONNECTED, dcc[idx].nick,
-		   MISC_INVALIDBOT);
+    putlog(LOG_BOTS, "*", "Invalid eggnet protocol from %s (zapfing)", dcc[idx].nick);
+    simple_sprintf(s, "%s %s (%s)", MISC_DISCONNECTED, dcc[idx].nick, MISC_INVALIDBOT);
     dprintf(idx, "error invalid eggnet protocol for 'nlinked'\n");
   } else if ((in_chain(newbot)) || (!egg_strcasecmp(newbot, conf.bot->nick))) {
     /* Loop! */
-    putlog(LOG_BOTS, "*", "%s %s (mutual: %s)",
-	   BOT_LOOPDETECT, dcc[idx].nick, newbot);
-    simple_sprintf(s, "%s %s: disconnecting %s", MISC_LOOP, newbot,
-        dcc[idx].nick);
+    putlog(LOG_BOTS, "*", "%s %s (mutual: %s)", BOT_LOOPDETECT, dcc[idx].nick, newbot);
+    simple_sprintf(s, "%s %s: disconnecting %s", MISC_LOOP, newbot, dcc[idx].nick);
     dprintf(idx, "error Loop (%s)\n", newbot);
   }
   if (!s[0]) {

@@ -1200,8 +1200,8 @@ static void share_version(int idx, char *par)
     else
       dprintf(idx, "s u?\n");
     dcc[idx].status |= STAT_OFFERED;
-  } else
-    higher_bot_linked(idx);
+  } /*else
+    higher_bot_linked(idx);*/
 }
 
 static void hook_read_userfile()
