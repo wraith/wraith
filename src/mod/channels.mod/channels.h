@@ -17,9 +17,7 @@
 
 static void tell_bans(int idx, int show_inact, char *match);
 
-static void check_expired_bans(void);
-static void check_expired_exempts(void);
-static void check_expired_invites(void);
+static void check_expired_masks(void);
 static void tell_exempts (int idx, int show_inact, char * match);
 static void tell_invites (int idx, int show_inact, char * match);
 static void get_mode_protect(struct chanset_t *chan, char *s);

@@ -396,6 +396,44 @@ static void channels_10secondly() {
   }
 }
 
+#ifdef LEAF
+static void 
+check_limitraise(struct chanset_t *chan) {
+  /* only check every other time for now */
+  static int checklimit = 0;
+
+  checklimit++;
+  if (checklimit == 2) {
+    checklimit = 0;
+    if (chan->limitraise && dolimit(chan))
+      raise_limit(chan);
+  }
+}
+#endif /* LEAF */
+
+static void
+channels_timers()
+{
+  static int cnt = 0;
+  struct chanset_t *chan = NULL;
+
+  cnt += 10;		/* function is called every 10 seconds */
+
+  for (chan = chanset; chan; chan = chan->next) {
+    if ((cnt % 10) == 0) {
+      /* 10 seconds */
+    }
+    if ((cnt % 30) == 0) {
+      /* 30 seconds */
+    }
+    if ((cnt % 60) == 0) {
+      /* 60 seconds */
+      cnt = 0;
+      check_limitraise(chan);
+    }
+  }
+}
+
 static void got_sj(int idx, char *code, char *par) 
 {
   char *chname = NULL;
@@ -877,23 +915,6 @@ cmd_t channels_bot[] = {
   {NULL, 	NULL, 	NULL, 			NULL}
 };
 
-#ifdef LEAF
-static void check_limitraise() {
-  int i = 0;
-  static int checklimit = 1;
-  struct chanset_t *chan = NULL;
-
-  for (chan = chanset; chan; chan = chan->next, i++) {
-    if (i % 2 == checklimit && chan->limitraise && dolimit(chan))
-          raise_limit(chan);
-  }
-  if (checklimit)
-    checklimit = 0;
-  else
-    checklimit = 1;
-}
-#endif /* LEAF */
-
 
 void channels_init()
 {
@@ -937,13 +958,8 @@ void channels_init()
 	 "-voice "
          "-private "
 	 "-fastop ");
-#ifdef LEAF
-  timer_create_secs(60, "check_limitraise", (Function) check_limitraise);
-#endif /* LEAF */
   /* FIXME: combine all of these into one function, check_expired_masks('e') */
-  timer_create_secs(60, "check_expired_bans", (Function) check_expired_bans);
-  timer_create_secs(60, "check_expired_exempts", (Function) check_expired_exempts);
-  timer_create_secs(60, "check_expired_invites", (Function) check_expired_invites);
+  timer_create_secs(60, "check_expired_masks", (Function) check_expired_masks);
 #ifdef HUB
   timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
   timer_create_secs(30, "check_should_close", (Function) check_should_close);

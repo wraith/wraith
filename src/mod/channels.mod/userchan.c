@@ -1317,3 +1317,10 @@ static void check_expired_invites(void)
     }
   }
 }
+
+void check_expired_masks()
+{
+  check_expired_bans();
+  check_expired_exempts();
+  check_expired_invites();
+}
