@@ -661,14 +661,36 @@ static int laston_set(struct userrec *u, struct user_entry *e, void *buf)
 
     li = e->u.extra = buf;
   }
-  /* donut share laston info */
+
+  if (!noshare) {
+    /* shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string); */
+    shareout(NULL, "c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", li->laston);
+  }
+
   return 1;
 }
+
+static int laston_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
+{
+  char *where = NULL;
+  time_t timeval = 0;
+
+  if (par[0])
+    where = newsplit(&par);
+  if (!strcmp(where, "-"))
+    where = NULL;
+  if (par[0])
+    timeval = atol(newsplit(&par));
+  touch_laston(u, where, timeval);
+
+  return 1;
+}
+
 
 struct user_entry_type USERENTRY_LASTON =
 {
   0,				/* always 0 ;) */
-  0,
+  laston_gotshare,
   laston_unpack,
 #ifdef HUB
   laston_write_userfile,
