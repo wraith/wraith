@@ -313,10 +313,8 @@ check_sum(const char *fname, const char *cfgfile)
       printf("* Wrote settings to binary.\n"); 
     exit(0);
   } else {
-    char *hash = NULL;
+    char *hash = bin_md5(fname, GET_MD5, &ctx);
 
-
-    hash = bin_md5(fname, GET_MD5, &ctx);
 /* tellconfig(&settings); */
     edpack(&settings, hash, PACK_DEC);
 /* tellconfig(&settings); */
