@@ -1280,6 +1280,30 @@ char *confdir()
   return conf;
 }
 
+char *my_uname() 
+{
+  static char os_uname[250];
+#ifdef HAVE_UNAME
+  struct utsname un;
+
+    if (uname(&un) < 0) {
+#endif /* HAVE_UNAME */
+      unix_n = "*unkown*";
+      vers_n = "";
+#ifdef HAVE_UNAME
+    } else {
+      unix_n = un.nodename;
+#ifdef __FreeBSD__
+      vers_n = un.release;
+#else
+      vers_n = un.version;
+#endif /* __FreeBSD__ */
+    }
+#endif /* HAVE_UNAME */
+  snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
+  return os_uname;
+}
+
 int main(int argc, char **argv)
 {
   int xx, i;
@@ -1300,10 +1324,6 @@ int main(int argc, char **argv)
   char tmp[DIRMAX], cfile[DIRMAX], templine[8192], *temps;
 #endif
   char c[1024], *vers_n, *unix_n;
-#ifdef HAVE_UNAME
-  struct utsname un;
-#endif
-  char check[100];
 
 #ifdef DEBUG_MEM
   /* Make sure it can write core, if you make debug. Else it's pretty
@@ -1523,21 +1543,6 @@ int main(int argc, char **argv)
 #ifdef LEAF
   if (localhub) { //we only want to read the config if we are the spawn bot..
 #endif /* LEAF */
-#ifdef HAVE_UNAME
-    if (uname(&un) < 0) {
-#endif /* HAVE_UNAME */
-      unix_n = "*unkown*";
-      vers_n = "";
-#ifdef HAVE_UNAME
-    } else {
-      unix_n = un.nodename;
-#ifdef __FreeBSD__
-      vers_n = un.release;
-#else
-      vers_n = un.version;
-#endif /* __FreeBSD__ */
-    }
-#endif /* HAVE_UNAME */
     i = 0;
     if (!(f = fopen(cfile, "r")))
        werr(0);
@@ -1569,9 +1574,8 @@ int main(int argc, char **argv)
       } else if (c[0] == '+' && !skip) { //this is the uname
         int r = 0;
         newsplit(&temps);
-        snprintf(check, sizeof check, "%s %s", unix_n, vers_n);
-        if ((r = strcmp(temps, check))) {
-          sdprintf(STR("wrong uname, conf: %s :: %s"), check, temps);
+        if ((r = strcmp(temps, my_uname()))) {
+          sdprintf(STR("wrong uname, conf: %s :: %s"), temps, my_uname());
           werr(ERR_WRONGUNAME);
         }
       } else if (c[0] == '!') { //local tcl exploit
