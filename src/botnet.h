@@ -6,6 +6,7 @@
 #endif
 
 #ifndef MAKING_MODS
+void restart_chons();
 void lower_bot_linked(int idx);
 void higher_bot_linked(int idx);
 void answer_local_whom(int, int);

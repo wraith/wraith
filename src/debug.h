@@ -56,6 +56,7 @@
 #ifndef MAKING_MODS
 void sdprintf (char *, ...);
 void init_signals();
+void init_debug();
 void eggContext(const char *, int, const char *);
 void eggContextNote(const char *, int, const char *, const char *);
 void eggAssert(const char *, int, const char *);

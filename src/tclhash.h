@@ -66,6 +66,7 @@ typedef struct bind_table_b {
 
 
 void kill_binds(void);
+void binds_init();
 
 int check_bind(bind_table_t *table, const char *match, struct flag_record *_flags, ...);
 bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, int match_type, int flags);
