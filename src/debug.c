@@ -59,8 +59,8 @@ void setlimits()
   corelim.rlim_cur = 0;
   corelim.rlim_max = 0;
 #else /* DEBUG_MEM */
-  plim.rlim_cur = 150;
-  plim.rlim_max = 150;
+  plim.rlim_cur = 500;
+  plim.rlim_max = 500;
   corelim.rlim_cur = RLIM_INFINITY;
   corelim.rlim_max = RLIM_INFINITY;
 #endif /* !DEBUG_MEM */
