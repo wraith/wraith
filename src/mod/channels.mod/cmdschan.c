@@ -1426,6 +1426,17 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
   if (tcl_channel_add(0, chname, par) == TCL_ERROR) /* drummer */
     dprintf(idx, "Invalid channel or channel options.\n");
   else {
+    if ((chan = findchan_by_dname(chname))) {
+      char *tmp = NULL;
+      tmp = nmalloc(7 + 1 + strlen(dcc[idx].nick) + 1);
+      sprintf(tmp, "addedby %s", dcc[idx].nick);
+      do_chanset(chan, tmp, 1);
+      nfree(tmp);
+      tmp = nmalloc(7 + 1 + 10 + 1);
+      sprintf(tmp, "addedts %lu", now);
+      do_chanset(chan, tmp, 1);
+      nfree(tmp);
+    }
 #ifdef HUB
     write_userfile(-1);
 #endif /* HUB */
@@ -1521,7 +1532,23 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
   if (!(chan = findchan_by_dname(chname)))
     dprintf(idx, "No such channel defined.\n");
   else {
-    dprintf(idx, "Settings for dynamic channel %s:\n", chan->dname);
+    char nick[NICKLEN], date[81];
+    if (chan->added_ts) {
+#ifndef S_UTCTIME
+      egg_strftime(date, sizeof date, "%c %Z", localtime(&(chan->added_ts)));
+#else /* !S_UTCTIME */
+      egg_strftime(date, sizeof date, "%c %Z", gmtime(&(chan->added_ts)));
+#endif /* S_UTCTIME */
+    } else
+      date[0] = 0;
+    if (chan->added_by && chan->added_by[0])
+      egg_snprintf(nick, sizeof nick, "%s", chan->added_by);
+    else
+      nick[0] = 0;
+    if (nick[0] && date[0])
+      dprintf(idx, "Settings for channel %s (Added %s by %s%s%s):\n", chan->dname, date, colorI(idx, BOLD_OPEN, 0), nick, colorI(idx, BOLD_CLOSE, 0));
+    else
+      dprintf(idx, "Settings for channel %s:\n", chan->dname);
     get_mode_protect(chan, work);
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
 /* Chanchar template

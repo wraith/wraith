@@ -1321,7 +1321,7 @@ static int write_chans(FILE *f, int idx)
    //insert the ending character into a string
      sprintf(sadd, "}\n");
 
-     if (lfprintf(f, "+ channel %s %s%schanmode %s idle-kick %d limit %d stopnethack-mode %d \
+     if (lfprintf(f, "+ channel %s %s%schanmode %s addedby %s addedts %lu idle-kick %d limit %d stopnethack-mode %d \
 revenge-mode %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
@@ -1337,6 +1337,8 @@ ban-time %d exempt-time %d invite-time %d \
 	name,
 	" { ",
 	w2,
+        chan->added_by,
+        chan->added_ts,
 /* Chanchar template
  *      temp,
  * also include temp %s in dprintf.

@@ -169,6 +169,8 @@ struct chanset_t {
 /* Chanchar template
  *char temp[121];
  */
+  char added_by[NICKLEN];	/* who added the channel? */
+  time_t added_ts;		/* ..and when? */
   /* queued mode changes: */
   char pls[21];			/* positive mode changes		*/
   char mns[21];			/* negative mode changes		*/

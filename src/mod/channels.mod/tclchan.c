@@ -183,7 +183,9 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
                             else simple_sprintf(s, "%d", 1); }
 
   if      (CHECK("chanmode"))      get_mode_protect(chan, s);
-
+  
+  else if (CHECK("addedby"))	   simple_sprintf(s, "%s", chan->added_by);
+  else if (CHECK("addedts"))       simple_sprintf(s, "%lu", chan->added_ts);
   else if (CHECK("idle-kick"))     simple_sprintf(s, "%d", chan->idle_kick);
   else if (CHECK("limit"))         simple_sprintf(s, "%d", chan->limitraise);
   else if (CHECK("stop-net-hack")) simple_sprintf(s, "%d", chan->stopnethack_mode);
@@ -346,6 +348,22 @@ Context;
       strncpy(s, item[i], 120);
       s[120] = 0;
       set_mode_protect(chan, s);
+    } else if (!strcmp(item[i], "addedby")) {
+      i++;
+      if (i >= items) {
+	if (irp)
+	  Tcl_AppendResult(irp, "addedby chanmode needs argument", NULL);
+	return TCL_ERROR;
+      }
+      strncpyz(chan->added_by, item[i], NICKLEN);
+    } else if (!strcmp(item[i], "addedts")) {
+      i++;
+      if (i >= items) {
+	if (irp)
+	  Tcl_AppendResult(irp, "addedby chanmode needs argument", NULL);
+	return TCL_ERROR;
+      }
+      chan->added_ts = atoi(item[i]);
     } else if (!strcmp(item[i], "idle-kick")) {
       i++;
       if (i >= items) {
