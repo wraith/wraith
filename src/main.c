@@ -115,9 +115,7 @@ static char *getfullbinname(const char *argv_zero)
     return bin;
 
   if (!getcwd(cwd, DIRMAX))
-    fatal("BABY JESUS IS CRYING", 0);
-
-printf("%s\n", cwd);
+    fatal("getcwd() failed", 0);
 
   if (cwd[strlen(cwd) - 1] == '/')
     cwd[strlen(cwd) - 1] = 0;
@@ -140,7 +138,6 @@ printf("%s\n", cwd);
       p2 = strchr(p, '/');
   }
   str_redup(&bin, cwd);
-printf("bin: %s\n", bin);
   return bin;
 }
 
@@ -276,9 +273,9 @@ static void dtx_arg(int argc, char *argv[])
   int localhub_pid = 0;
 #endif /* LEAF */
   char *p = NULL;
-printf("PARSE_FLAGS: %s\n", PARSE_FLAGS);
+  
+  opterr = 0;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
-printf("i: %c\n", i);
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
     switch (i) {
@@ -582,11 +579,7 @@ int main(int argc, char **argv)
   srandom(now % (getpid() + getppid()));
   myuid = geteuid();
 
-printf("%d: argc: %d %d\n", getpid(), argc, __LINE__);
-printf("argv[0]: %s\n", argv[0]);
   binname = getfullbinname(argv[0]);
-printf("argv[0]: %s :: binname: %s\n", argv[0], binname);
-printf("%d: argc: %d %d\n", getpid(), argc, __LINE__);
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
   egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
