@@ -61,7 +61,8 @@ void rmspace(char *s)
 
   /* Wipe end of string */
   for (p = s + strlen(s) - 1; ((whitespace(*p)) && (p >= s)); p--);
-  *(p + 1) = 0;
+  if (p != s + strlen(s) - 1)
+    *(p + 1) = 0;
   len = p+1 - s;
   for (p = s; ((whitespace(*p)) && (*p)); p++);
   len -= (p - s);
