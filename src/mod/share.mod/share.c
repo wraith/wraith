@@ -1145,13 +1145,9 @@ static botcmd_t C_share[] = {
   {"se", share_stick_exempt, 0},
   {"sInv", share_stick_invite, 0},
   {"u?", share_userfileq, 0},
-#ifdef HUB
   {"un", share_ufno, HUB},
-#endif /* HUB */
   {"us", share_ufsend, 0},
-#ifdef HUB
   {"uy", share_ufyes, HUB},
-#endif /* HUB */
   {"v", share_version, 0},
   {NULL, NULL, 0}
 };

@@ -1290,10 +1290,8 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
 
 static cmd_t my_bot[] = 
 {
-#ifdef HUB	/* This will only allow hubs to read the return text */
   {"hl",	"",	(Function) bot_hublog,  NULL, HUB},
   {"r-sr",	"",	(Function) bot_rsimr,	NULL, HUB},
-#endif /* HUB */
   {"r-s",	"",	(Function) bot_rsim,	NULL, 0},
   {NULL, 	NULL, 	NULL, 			NULL, 0}
 };

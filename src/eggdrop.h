@@ -129,4 +129,7 @@ enum {		/* TAKE A GUESS */
 #define FLOOD_GLOBAL_MAX 3
 
 
+#define HUB  1
+#define LEAF 2
+
 #endif				/* _EGG_EGGDROP_H */

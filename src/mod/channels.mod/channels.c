@@ -864,10 +864,8 @@ cmd_t channels_bot[] = {
   {"cjoin",	"", 	(Function) got_cjoin, 	NULL, 0},
   {"cpart",	"", 	(Function) got_cpart, 	NULL, 0},
   {"cset",	"", 	(Function) got_cset,  	NULL, 0},
-#ifdef LEAF
   {"cycle",	"", 	(Function) got_cycle, 	NULL, LEAF},
   {"down",	"", 	(Function) got_down,  	NULL, LEAF},
-#endif /* LEAF */
   {"rl",	"", 	(Function) got_role,  	NULL, 0},
   {"kl",	"", 	(Function) got_kl,    	NULL, 0},
   {"sj",	"", 	(Function) got_sj,    	NULL, 0},

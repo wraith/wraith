@@ -710,7 +710,7 @@ findhelp(const char *cmd)
 {
   for (int hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
     if (!egg_strcasecmp(cmd, help[hi].cmd) &&
-      (!help[hi].cmd || (conf.bot->hub && help[hi].type == 1) || (!conf.bot->hub && help[hi].type == 2)))
+      (!help[hi].cmd || (help[hi].type == HUB && conf.bot->hub) || (help[hi].type == LEAF && !conf.bot->hub)))
       return hi;
 
   return -1;
@@ -4198,9 +4198,7 @@ cmd_t C_dcc[] =
   {"+host",		"o|o",	(Function) cmd_pls_host,	NULL, 0},
   {"+ignore",		"m",	(Function) cmd_pls_ignore,	NULL, 0},
   {"+user",		"m",	(Function) cmd_pls_user,	NULL, 0},
-#ifdef HUB
   {"-bot",		"a",	(Function) cmd_mns_user,	NULL, HUB},
-#endif /* HUB */
   {"-host",		"",	(Function) cmd_mns_host,	NULL, 0},
   {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL, 0},
   {"-user",		"m",	(Function) cmd_mns_user,	NULL, 0},
@@ -4210,7 +4208,6 @@ cmd_t C_dcc[] =
   {"addline",		"",	(Function) cmd_addline,		NULL, 0},
   {"away",		"",	(Function) cmd_away,		NULL, 0},
   {"back",		"",	(Function) cmd_back,		NULL, 0},
-#ifdef HUB
   {"backup",		"m|m",	(Function) cmd_backup,		NULL, HUB},
   {"boot",		"m",	(Function) cmd_boot,		NULL, HUB},
   {"botconfig",		"n",	(Function) cmd_botconfig,	NULL, HUB},
@@ -4218,21 +4215,16 @@ cmd_t C_dcc[] =
   {"downbots",		"m",	(Function) cmd_downbots,	NULL, HUB},
   {"bottree",		"n",	(Function) cmd_bottree,		NULL, HUB},
   {"chaddr",		"a",	(Function) cmd_chaddr,		NULL, HUB},
-#endif /* HUB */
   {"chat",		"",	(Function) cmd_chat,		NULL, 0},
   {"chattr",		"m|m",	(Function) cmd_chattr,		NULL, 0},
-#ifdef HUB
   {"chhandle",		"m",	(Function) cmd_chhandle,	NULL, HUB},
 /*  {"chnick",		"m",	(Function) cmd_chhandle,	NULL, HUB}, */
   {"chpass",		"m",	(Function) cmd_chpass,		NULL, HUB},
   {"chsecpass",		"n",	(Function) cmd_chsecpass,	NULL, HUB},
   {"cmdpass",           "a",    (Function) cmd_cmdpass,         NULL, HUB},
-#endif /* HUB */
   {"color",		"",     (Function) cmd_color,           NULL, 0},
   {"comment",		"m|m",	(Function) cmd_comment,		NULL, 0},
-#ifdef HUB
   {"config",		"n",	(Function) cmd_config,		NULL, HUB},
-#endif /* HUB */
   {"console",		"-|-",	(Function) cmd_console,		NULL, 0},
   {"date",		"",	(Function) cmd_date,		NULL, 0},
   {"dccstat",		"a",	(Function) cmd_dccstat,		NULL, 0},
@@ -4246,51 +4238,37 @@ cmd_t C_dcc[] =
   {"nohelp",		"-|-",	(Function) cmd_nohelp,		NULL, 0},
   {"help",		"-|-",	(Function) cmd_help,		NULL, 0},
   {"ignores",		"m",	(Function) cmd_ignores,		NULL, 0},
-#ifdef HUB
   {"link",		"n",	(Function) cmd_link,		NULL, HUB},
-#endif /* HUB */
   {"match",		"m|m",	(Function) cmd_match,		NULL, 0},
   {"matchbot",		"m|m",	(Function) cmd_matchbot,	NULL, 0},
   {"me",		"",	(Function) cmd_me,		NULL, 0},
   {"motd",		"",	(Function) cmd_motd,		NULL, 0},
-#ifdef HUB
   {"newleaf",		"n",	(Function) cmd_newleaf,		NULL, HUB},
   {"nopass",		"m",	(Function) cmd_nopass,		NULL, HUB},
-#endif /* HUB */
   {"newpass",		"",	(Function) cmd_newpass,		NULL, 0},
   {"secpass",		"",	(Function) cmd_secpass,		NULL, 0},
 /*  {"nick",		"",	(Function) cmd_handle,		NULL, 0}, */
   {"page",		"",	(Function) cmd_page,		NULL, 0},
   {"quit",		"",	(Function) cmd_quit,		NULL, 0},
   {"relay",		"i",	(Function) cmd_relay,		NULL, 0},
-#ifdef HUB
   {"reload",		"m|m",	(Function) cmd_reload,		NULL, HUB},
-#endif /* HUB */
   {"restart",		"m",	(Function) cmd_restart,		NULL, 0},
-#ifdef HUB
   {"save",		"m|m",	(Function) cmd_save,		NULL, HUB},
-#endif /* HUB */
   {"simul",		"a",	(Function) cmd_simul,		NULL, 0},
   {"status",		"m|m",	(Function) cmd_status,		NULL, 0},
   {"strip",		"",	(Function) cmd_strip,		NULL, 0},
   {"su",		"a",	(Function) cmd_su,		NULL, 0},
-#ifdef HUB
   {"trace",		"n",	(Function) cmd_trace,		NULL, HUB},
-#endif /* HUB */
   {"traffic",		"m",	(Function) cmd_traffic,		NULL, 0},
   {"unlink",		"m",	(Function) cmd_unlink,		NULL, 0},
   {"update",		"a",	(Function) cmd_update,		NULL, 0},
-#ifdef HUB
   {"netcrontab",	"a",	(Function) cmd_netcrontab,	NULL, HUB},
-#endif /* HUB */
   {"uptime",		"m|m",	(Function) cmd_uptime,		NULL, 0},
 #ifndef CYGWIN_HACKS
   {"crontab",		"a",	(Function) cmd_crontab,		NULL, 0},
 #endif /* !CYGWIN_HACKS */
   {"dns",		"",	(Function) cmd_dns,             NULL, 0},
-#ifdef HUB
   {"who",		"n",	(Function) cmd_who,		NULL, HUB},
-#endif /* HUB */
   {"whois",		"",	(Function) cmd_whois,		NULL, 0},
   {"whom",		"",	(Function) cmd_whom,		NULL, 0},
   {"whoami",		"",	(Function) cmd_whoami,		NULL, 0},
@@ -4299,19 +4277,15 @@ cmd_t C_dcc[] =
   {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL, 0},
   {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL, 0},
   {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL, 0},
-#ifdef HUB
   {"netw", 		"n", 	(Function) cmd_netw, 		NULL, HUB},
   {"netps", 		"n", 	(Function) cmd_netps, 		NULL, HUB},
   {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL, HUB},
   {"netlag", 		"m", 	(Function) cmd_netlag, 		NULL, HUB},
-#endif /* HUB */
   {"botserver",		"m",	(Function) cmd_botserver,	NULL, 0},
   {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL, 0},
   {"timesync",		"a",	(Function) cmd_timesync,	NULL, 0},
-#ifdef HUB
   {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL, HUB},
   {"netversion", 	"o", 	(Function) cmd_netversion, 	NULL, HUB},
-#endif /* HUB */
   {"userlist", 		"m", 	(Function) cmd_userlist, 	NULL, 0},
   {"ps", 		"n", 	(Function) cmd_ps, 		NULL, 0},
   {"last", 		"n", 	(Function) cmd_last, 		NULL, 0},
@@ -4324,12 +4298,10 @@ cmd_t C_dcc[] =
   {"conf",		"a",	(Function) cmd_conf,		NULL, 0},
   {"encrypt",		"",	(Function) cmd_encrypt,		NULL, 0},
   {"decrypt",		"",	(Function) cmd_decrypt,		NULL, 0},
-#ifdef HUB
   {"botcmd",		"i",	(Function) cmd_botcmd, 		NULL, HUB},
   {"bc",		"i",	(Function) cmd_botcmd, 		NULL, HUB},
   {"hublevel", 		"a", 	(Function) cmd_hublevel, 	NULL, HUB},
   {"lagged", 		"m", 	(Function) cmd_lagged, 		NULL, HUB},
   {"uplink", 		"a", 	(Function) cmd_uplink, 		NULL, HUB},
-#endif /* HUB */
   {NULL,		NULL,	NULL,				NULL, 0}
 };
