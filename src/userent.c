@@ -30,6 +30,7 @@ void init_userent()
   add_entry_type(&USERENTRY_NODENAME);
   add_entry_type(&USERENTRY_USERNAME);
   add_entry_type(&USERENTRY_PASS);
+  add_entry_type(&USERENTRY_TMPPASS);
   add_entry_type(&USERENTRY_SECPASS);
   add_entry_type(&USERENTRY_HOSTS);
   add_entry_type(&USERENTRY_STATS);
@@ -550,6 +551,9 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
     else
       encrypt_pass(pass, newpass);
     e->u.extra = strdup(newpass);
+    /* save for later */
+    set_user(&USERENTRY_TMPPASS, u, pass);
+
   }
   if (!noshare)
     shareout("c PASS %s %s\n", u->handle, pass ? pass : "");
@@ -569,6 +573,48 @@ struct user_entry_type USERENTRY_PASS =
   pass_set,
   NULL,
   "PASS"
+};
+
+
+static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
+{
+  register char *pass = (char *) buf;
+
+  if (e->u.extra)
+    free(e->u.extra);
+  if (!pass || !pass[0] || (pass[0] == '-'))
+    e->u.extra = NULL;
+  else {
+    unsigned char *p = (unsigned char *) pass;
+
+    while (*p) {
+      if ((*p <= 32) || (*p == 127))
+	*p = '?';
+      p++;
+    }
+    if (u->bot || (pass[0] == '+'))
+      strcpy(newpass, pass);
+    else
+      e->u.extra = encrypt_string(get_user(&USERENTRY_ADDED, u), pass);
+  }
+  if (!noshare)
+    shareout("c TMPPASS %s %s\n", u->handle, pass ? pass : "");
+  return 1;
+}
+
+struct user_entry_type USERENTRY_TMPPASS =
+{
+  0,
+  def_gotshare,
+  def_unpack,
+#ifdef HUB
+  def_write_userfile,
+#endif /* HUB */
+  def_kill,
+  def_get,
+  tmppass_set,
+  NULL,
+  "TMPPASS"
 };
 
 

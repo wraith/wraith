@@ -240,8 +240,11 @@ int u_pass_match(struct userrec *u, char *in)
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
     encrypt_pass(pass, newpass);
-    if (!strcmp(cmp, newpass))
+    if (!strcmp(cmp, newpass)) {
+      /* save for later */
+      set_user(&USERENTRY_TMPPASS, u, in);
       return 1;
+    }
   }
   return 0;
 }
