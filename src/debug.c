@@ -308,8 +308,6 @@ static void got_cont(int z)
   detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED");
 }
 
-/* A call to resolver (gethostbyname, etc) timed out
- */
 static void got_alarm(int) __attribute__((noreturn));
 
 static void got_alarm(int z)

@@ -328,7 +328,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 
 	/* Ok, now see if it's in our host cache. */
 	for (i = 0; i < nhosts; i++) {
-		if (!strcasecmp(host, hosts[i].host)) {
+		if (!egg_strcasecmp(host, hosts[i].host)) {
 			dns_answer_t answer;
 
 			answer_init(&answer);
@@ -380,7 +380,7 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 
 	/* Ok, see if we have it in our host cache. */
 	for (i = 0; i < nhosts; i++) {
-		if (!strcasecmp(hosts[i].ip, ip)) {
+		if (!egg_strcasecmp(hosts[i].ip, ip)) {
 			dns_answer_t answer;
 
 			answer_init(&answer);
@@ -574,7 +574,7 @@ static int read_thing(char *buf, char *ip)
 	skip = strspn(buf, separators);
 	buf += skip;
 	len = strcspn(buf, separators);
-	memcpy(ip, buf, len);
+	egg_memcpy(ip, buf, len);
 	ip[len] = 0;
 	return(skip + len);
 }
@@ -620,7 +620,7 @@ static int make_header(char *buf, int id)
 {
 	_dns_header.question_count = htons(1);
 	_dns_header.id = htons(id);
-	memcpy(buf, &_dns_header, 12);
+	egg_memcpy(buf, &_dns_header, 12);
 	return(12);
 }
 
@@ -634,14 +634,14 @@ static int cut_host(const char *host, char *query)
 		len = period - host;
 		if (len > 63) return(-1);
 		*query++ = len;
-		memcpy(query, host, len);
+		egg_memcpy(query, host, len);
 		query += len;
 		host = period+1;
 	}
 	len = strlen(host);
 	if (len) {
 		*query++ = len;
-		memcpy(query, host, len);
+		egg_memcpy(query, host, len);
 		query += len;
 	}
 	*query++ = 0;
@@ -656,14 +656,14 @@ static int reverse_ip(const char *host, char *reverse)
 	period = strchr(host, '.');
 	if (!period) {
 		len = strlen(host);
-		memcpy(reverse, host, len);
+		egg_memcpy(reverse, host, len);
 		return(len);
 	}
 	else {
 		len = period - host;
 		offset = reverse_ip(host+len+1, reverse);
 		reverse[offset++] = '.';
-		memcpy(reverse+offset, host, len);
+		egg_memcpy(reverse+offset, host, len);
 		reverse[offset+len] = 0;
 		return(offset+len);
 	}
@@ -714,7 +714,7 @@ static void parse_reply(char *response, int nbytes)
 	int i;
 
 	ptr = (unsigned char *) response;
-	memcpy(&header, ptr, 12);
+	egg_memcpy(&header, ptr, 12);
 	ptr += 12;
 
 	header.id = ntohs(header.id);
@@ -743,7 +743,7 @@ static void parse_reply(char *response, int nbytes)
 		result[0] = 0;
 		/* Read in the answer. */
 		ptr += skip_name(ptr);
-		memcpy(&reply, ptr, 10);
+		egg_memcpy(&reply, ptr, 10);
 		reply.type = ntohs(reply.type);
 		reply.rdlength = ntohs(reply.rdlength);
 		reply.ttl = ntohl(reply.ttl);
