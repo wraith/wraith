@@ -117,7 +117,7 @@ int sockprotocol(int sock)
 }
 
 /* AF_INET-independent resolving routine */
-int get_ip(char *hostname, union sockaddr_union *so)
+static int get_ip(char *hostname, union sockaddr_union *so)
 {
   if (!hostname || (hostname && !hostname[0]))
     return 1;
