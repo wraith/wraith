@@ -260,8 +260,13 @@ failed_link(int idx)
   if (dcc[idx].u.bot->numver >= (-1))
     putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[idx].nick);
   if (dcc[idx].sock != -1) {
-    killsock(dcc[idx].sock);
-    dcc[idx].sock = -1; 
+    int i = 0;
+    
+    for (i = 0; i < MAXSOCKS; i++)
+      if (dcc[idx].sock == socklist[i].sock) {
+        killsock(dcc[idx].sock);
+        dcc[idx].sock = -1; 
+      }
   }
   strcpy(s, dcc[idx].nick);
   lostdcc(idx);
