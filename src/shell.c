@@ -187,8 +187,7 @@ void check_processes()
       time = newsplit(&curp);
       strncpyz(cmd, curp, sizeof(cmd));
       /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff */
-      if (!strstr(cmd, "<defunct>" && !strncmp(cmd, "/bin/sh -c", 10)
-          && !strncmp(cmd, binname, strlen(binname))) {
+      if (!strstr(cmd, "<defunct>") && !strncmp(cmd, "/bin/sh -c", 10) && !strncmp(cmd, binname, strlen(binname))) {
         /* get rid of any args */
         if ((p = strchr(cmd, ' ')))
           *p = 0;
