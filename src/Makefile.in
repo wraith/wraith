@@ -43,6 +43,19 @@ OBJS = auth.o \
 	userrec.o \
 	users.o
 
+MODOBJS = mod/channels.o \
+        mod/compress.o \
+        mod/console.o \
+        mod/ctcp.o \
+        mod/dns.o \
+        mod/irc.o \
+        mod/notes.o \
+        mod/server.o \
+        mod/share.o \
+        mod/transfer.o \
+        mod/update.o
+
+
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
 
 blah:
@@ -74,8 +87,7 @@ stringfix: stringfix.c common.h ../config.h ../pack/pack.cfg eggdrop.h
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-	@touch mod/mod.xlibs
-	@$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(XLIBS) compat/*.o `cat mod/mod.xlibs`
+	@$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(XLIBS) compat/*.o
 	@$(STRIP) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
 	@echo ""

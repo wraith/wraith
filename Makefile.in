@@ -31,11 +31,9 @@ STRIP = @STRIP@
 
 # stuff for Tcl
 XREQS = @TCL_REQS@
-XLIBS = @TCL_LIBS@ @LIBS@ @ZLIB@ @SSL@
+XLIBS = @TCL_LIBS@ @LIBS@ @ZLIB@ @SSL@  -lresolv
 TCLLIB = @TCLLIB@
 TCLLIBFN = @TCLLIBFN@
-
-modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
 CFLGS = -fno-strict-aliasing
@@ -45,27 +43,25 @@ MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DLEAF' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)' \
-'MODOBJS=mod/*.o' 
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)'
 
 MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DLEAF $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
-'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 'MODOBJS=mod/*.o'
+'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 
 
 MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DHUB' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' \
-'MODOBJS=mod/*.o'
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' 
 
 MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DHUB $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
-'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'MODOBJS=mod/*.o'
+'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
@@ -90,17 +86,17 @@ clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ src/*~ key configure.temp .mangled
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp *~ src/*~ configure.temp .mangled
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h src/help.h utctime
 
-distclean: clean clean-modconfig
+distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h stamp.*
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan src/salt.h.tmp
 	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/
 
 
-distrib: clean clean-modconfig
+distrib: clean
 	@rm -rf $(DISTRIB)/
 	@mkdir $(DISTRIB) && cp -r $(DISTROFILES) $(DISTRIB)
 	@rm -f `find $(DISTRIB)/ \( -name '*~' -o -name '*#' -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' \) -print`
@@ -120,9 +116,6 @@ tar: distrib
 	ls -al $(DISTRIB).tgz
 #	rm -rf $(DISTRIB)/
 #	cd ../ && rm -rf distrib/
-
-eggautoconf:
-	@$(modconf) eggautoconf
 
 packconf: makesettings pack/pack.cfg
 	@src/makesettings pack/pack.cfg src/settings.c~
@@ -165,20 +158,6 @@ help: packconf makehelp stringfix
 	cp -f src/help.h~ src/help.h; \
 	fi)
 
-config:
-	@$(modconf) modules-still-exist
-	@$(modconf) detect-modules
-	@$(modconf) update-depends
-	@$(modconf) Makefile
-	+@cd src/mod && $(MAKE_CONFIG) config
-	@$(modconf) Makefile
-
-clean-modconfig:
-	@rm -f .modules .known_modules
-
-reconfig: clean-modconfig config
-
-
 stringfix: packconf src/stringfix.c pack/pack.cfg
 	+@cd src && ${MAKE_UTILS} stringfix
 
@@ -196,13 +175,13 @@ utils: makesettings stringfix makehelp
 dostrings: stringfix
 	@misc/dostrings
 
-general: makesettings packconf salt help dostrings config
+general: makesettings packconf salt help dostrings
+	+@cd src/mod && $(MAKE_CONFIG) config
 
 leaf:	general
 	@echo ""
 	@echo "Making leaf"
 	@echo ""
-	@rm -f src/mod/mod.xlibs
 	@./misc/maketype leaf
 	@echo ""
 	+@cd src/mod && $(MAKE_LEAF) static
@@ -214,7 +193,6 @@ dleaf:  general
 	@echo ""
 	@echo "Making debug leaf"
 	@echo ""
-	@rm -f src/mod/mod.xlibs
 	@./misc/maketype leaf
 	@echo ""
 	+@cd src/mod && $(MAKE_DLEAF) static
@@ -226,8 +204,6 @@ hub:	general
 	@echo ""
 	@echo "Making hub"
 	@echo ""
-	@rm -f src/mod/mod.xlibs
-	@rm -f src/mod/mod.xlibs
 	@./misc/maketype hub
 	@echo ""
 	+@cd src/mod && $(MAKE_HUB) static
@@ -239,7 +215,6 @@ dhub:   general
 	@echo ""
 	@echo "Making debug hub"
 	@echo ""
-	@rm -f src/mod/mod.xlibs
 	@./misc/maketype hub
 	@echo ""
 	+@cd src/mod && $(MAKE_DHUB) static

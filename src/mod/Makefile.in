@@ -18,13 +18,31 @@ MOD_CFLAGS = @CFLAGS@ -I. -I../../.. -I$(MOD_UPDIR)$(top_srcdir) \
 MOD_CPPFLAGS = @CPPFLAGS@
 XLIBS = @XLIBS@
 
-# Note: The following three lines are automatically adjusted by
-#       misc/modconfig. They have to be present here.
-mods =
-mod_objs =
+mods = channels.mod \
+	compress.mod \
+	console.mod \
+	ctcp.mod \
+	dns.mod \
+	irc.mod \
+	notes.mod \
+	server.mod \
+	share.mod \
+	transfer.mod \
+	update.mod
 
-modconfig = $(top_srcdir)/misc/modconfig --bindir=../.. \
-  --top_srcdir=$(top_srcdir)
+mod_objs = channels.mod_o \
+	compress.mod_o \
+	console.mod_o \
+	ctcp.mod_o \
+	dns.mod_o \
+	irc.mod_o \
+	notes.mod_o \
+	server.mod_o \
+	share.mod_o \
+	transfer.mod_o \
+	update.mod_o
+
+
 egg_ac_parameters = @egg_ac_parameters@
 
 MAKE_MOD = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
@@ -40,7 +58,6 @@ doofus:
 	@cd ../.. && $(MAKE)
 
 static: build_msg $(mod_objs)
-	@$(modconfig) static.h
 
 build_msg:
 	@echo "[*] Building modules"
@@ -69,7 +86,7 @@ config:
 	echo ""
 
 clean:
-	@rm -f *.o *~ static.h mod.xlibs
+	@rm -f *.o *~
 	@for i in *.mod; do \
 		if test ! -d $$i; then mkdir $$i; fi; \
 		if (test ! -r $$i/Makefile) && \
@@ -82,7 +99,7 @@ clean:
 	done
 
 distclean:
-	@rm -f *.o *~ static.h mod.xlibs
+	@rm -f *.o *~
 	@for i in *.mod; do \
 		if test ! -d $$i; then mkdir $$i; fi; \
 		if (test ! -r $$i/Makefile) && \

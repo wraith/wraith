@@ -17,7 +17,6 @@ doofus:
 	@cd ../../../ && make
 
 static: ../dns.o
-	@echo "$(RESLIB)" >> ../mod.xlibs
 
 ../dns.o:
 	@echo -e "Compiling: \033[1mdns\033[0m"
