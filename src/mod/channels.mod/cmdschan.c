@@ -1756,6 +1756,9 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
         if ((my_chan = findchan_by_dname(chname)))
           do_chanset(my_chan, bak, 0);
 	dprintf(idx, "Successfully set modes { %s } on %s.\n", answers, chname);
+#ifdef HUB
+        write_userfile(idx);
+#endif /* HUB */
       }
       if (!all)
         chan = NULL;
@@ -1765,6 +1768,10 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
     if (all && answers[0]) {
       do_chanset(NULL, bak, 0);		/* NULL does all */
       dprintf(idx, "Successfully set modes { %s } on all channels.\n", answers);
+#ifdef HUB
+        write_userfile(idx);
+#endif /* HUB */
+
     }
     nfree(buf);
   }
