@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "dcc.h"
+#include "auth.h"
 
 #define dprintf dprintf_eggdrop
 
@@ -52,7 +53,6 @@ void identd_open();
 void identd_close();
 port_t listen_all(port_t, bool);
 bool valid_idx(int);
-bool irc_idx(const char *, const char *, const char *, const char *, int);
 extern int		max_dcc;
 extern time_t		connect_timeout;
 

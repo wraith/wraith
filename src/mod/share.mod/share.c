@@ -1120,8 +1120,7 @@ finish_share(int idx)
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].type)
       dcc[i].user = NULL;
-  for (i = 0; i < auth_total; i++)
-    auth[i].user = NULL;
+  Auth::NullUsers();
 
   if (conf.bot->u)
     conf.bot->u = NULL;
@@ -1144,14 +1143,13 @@ finish_share(int idx)
     for (i = 0; i < dcc_total; i++)
       if (dcc[i].type)
         dcc[i].user = get_user_by_handle(ou, dcc[i].nick);
-    for (i = 0; i < auth_total; i++)
-      if (auth[i].hand[0])
-        auth[i].user = get_user_by_handle(ou, auth[i].hand);
 
     conf.bot->u = get_user_by_handle(ou, conf.bot->nick);
 
     userlist = ou;              /* Revert to old user list.             */
     lastuser = NULL;            /* Reset last accessed user ptr.        */
+
+    Auth::FillUsers();
 
     checkchans(2);              /* un-flag the channels, we are keeping them.. */
 
@@ -1186,9 +1184,7 @@ finish_share(int idx)
   clear_userlist(ou);
 
   /* copy over any auth users */
-  for (i = 0; i < auth_total; i++)
-    if (auth[i].hand[0])
-      auth[i].user = get_user_by_handle(userlist, auth[i].hand);
+  Auth::FillUsers();
 
   checkchans(1);                /* remove marked channels */
   trigger_cfg_changed();

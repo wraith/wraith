@@ -4270,7 +4270,7 @@ cmd_t C_dcc[] =
   {"who",		"n",	(Function) cmd_who,		NULL, HUB},
   {"whois",		"",	(Function) cmd_whois,		NULL, AUTH},
   {"whom",		"",	(Function) cmd_whom,		NULL, 0},
-  {"whoami",		"",	(Function) cmd_whoami,		NULL, 0},
+  {"whoami",		"",	(Function) cmd_whoami,		NULL, AUTH},
   {"botjump",           "m",    (Function) cmd_botjump,         NULL, 0},
   {"botmsg",		"o",    (Function) cmd_botmsg,          NULL, 0},
   {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL, 0},

@@ -11,10 +11,12 @@
 #include "main.h"
 #include "settings.h"
 #include "types.h"
+#include "userrec.h"
 #include "core_binds.h"
 #include "egg_timer.h"
 #include "users.h"
 #include "crypt.h"
+#include "hash_table.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -22,6 +24,7 @@
 #include <fcntl.h>
 #include "chan.h"
 #include "tandem.h"
+#include "src/mod/server.mod/server.h"
 #include <pwd.h>
 #include <errno.h>
 
@@ -33,52 +36,232 @@
 
 #include "stat.h"
 
-int auth_total = 0;
-static int max_auth = 50;
-struct auth_t *auth = NULL;
+hash_table_t *Auth::ht_handle = NULL, *Auth::ht_host = NULL;
 
-static void
-expire_auths()
+Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
+{
+  Status(AUTHING);
+  strlcpy(nick, _nick, nick_len + 1);
+  strlcpy(host, _host, UHOSTLEN);
+  if (u) {
+    user = u;
+    strlcpy(handle, u->handle, sizeof(handle));
+  } else {
+    user = NULL;
+    handle[0] = '*';
+    handle[1] = 0;
+  }
+
+  if (!ht_host)
+    ht_host = hash_table_create(NULL, NULL, 50, HASH_TABLE_STRINGS);
+  if (!ht_handle)
+    ht_handle = hash_table_create(NULL, NULL, 50, HASH_TABLE_STRINGS);
+
+  hash_table_insert(ht_host, host, this);
+  if (user)
+    hash_table_insert(ht_handle, handle, this);
+
+  sdprintf("New auth created! (%s!%s) [%s]", nick, host, handle);
+  authtime = atime = now;
+  bd = 0;
+  idx = -1;
+}
+
+Auth::~Auth()
+{
+  sdprintf("Removing auth: (%s!%s) [%s]", nick, host, handle);
+  if (user)
+    hash_table_remove(ht_handle, handle, this);
+  hash_table_remove(ht_host, host, this);
+}
+
+void Auth::MakeHash(bool bd)
+{
+ make_rand_str(rand, 50);
+ if (bd)
+   strlcpy(hash, makebdhash(rand), sizeof hash);
+ else
+   makehash(user, rand, hash, 50);
+}
+
+void Auth::Done(bool _bd)
+{
+  Status(AUTHED);
+  bd = _bd;
+}
+
+Auth *Auth::Find(const char *_host)
+{
+  if (ht_host) {
+    Auth *auth = NULL;
+
+    hash_table_find(ht_host, _host, &auth);
+    if (auth)
+      sdprintf("Found auth: (%s!%s) [%s]", auth->nick, auth->host, auth->handle);
+    return auth;
+  }
+  return NULL;
+}
+Auth *Auth::Find(const char *handle, bool _hand)
+{
+  if (ht_handle) {
+    Auth *auth = NULL;
+
+    hash_table_find(ht_handle, handle, &auth);
+    if (auth)
+      sdprintf("Found auth (by handle): %s (%s!%s)", handle, auth->nick, auth->host);
+    return auth;
+  }
+  return NULL;
+}
+
+static int auth_clear_users_walk(const void *key, void *data, void *param)
+{
+  Auth *auth = *(Auth **)data;
+
+  if (auth->user) {
+    sdprintf("Clearing USER for auth: (%s!%s) [%s]", auth->nick, auth->host, auth->handle);
+    auth->user = NULL;
+  }
+  return 0;
+}
+
+void Auth::NullUsers()
+{
+  hash_table_walk(ht_host, auth_clear_users_walk, NULL);
+}
+
+static int auth_fill_users_walk(const void *key, void *data, void *param)
+{
+  Auth *auth = *(Auth **)data;
+  
+  if (strcmp(auth->handle, "*")) {
+    sdprintf("Filling USER for auth: (%s!%s) [%s]", auth->nick, auth->host, auth->handle);
+    auth->user = get_user_by_handle(userlist, auth->handle);
+  }
+
+  return 0;
+}
+
+void Auth::FillUsers()
+{
+  hash_table_walk(ht_host, auth_fill_users_walk, NULL);
+}
+
+
+static int auth_expire_walk(const void *key, void *data, void *param)
+{
+  Auth *auth = *(Auth **)data;
+
+  if (auth->Authed() && ((now - auth->atime) >= (60 * 60)))
+    delete auth;
+
+  return 0;
+}
+
+void Auth::ExpireAuths()
 {
   if (!ischanhub())
     return;
 
-  time_t idle = 0;
+  hash_table_walk(ht_host, auth_expire_walk, NULL);
+}
 
-  for (int i = 0; i < auth_total; i++) {
-    if (auth[i].authed) {
-      idle = now - auth[i].atime;
-      if (idle >= (60 * 60)) {
-        removeauth(i);
-      }
-    }
+static int auth_delete_all_walk(const void *key, void *data, void *param)
+{
+  Auth *auth = *(Auth **)data;
+
+  putlog(LOG_DEBUG, "*", "Removing (%s!%s) [%s], from auth list.", auth->nick, auth->host, auth->handle);
+  delete auth;
+
+  return 0;
+}
+
+void Auth::DeleteAll()
+{
+  if (ischanhub()) {
+    putlog(LOG_DEBUG, "*", "Removing auth entries.");
+    hash_table_walk(ht_host, auth_delete_all_walk, NULL);
   }
 }
 
-void
-init_auth()
+void Auth::InitTimer()
 {
-  if (max_auth < 1)
-    max_auth = 1;
-  if (auth)
-    auth = (struct auth_t *) my_realloc(auth, sizeof(struct auth_t) * max_auth);
-  else
-    auth = (struct auth_t *) my_calloc(1, sizeof(struct auth_t) * max_auth);
-
-  timer_create_secs(60, "expire_auths", (Function) expire_auths);
+  timer_create_secs(60, "Auth::ExpireAuths", (Function) Auth::ExpireAuths);
 }
 
-void makehash(int idx, int authi, char *randstring)
+bool Auth::GetIdx(const char *chname)
+{
+  if (idx != -1) {
+    strlcpy(dcc[idx].simulbot, chname ? chname : nick, NICKLEN);
+    strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", 81);
+    return 1;
+  }
+
+  int i = -1;
+
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && dcc[i].irc &&
+    (((chname && chname[0]) && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, handle)) ||
+    (!(chname && chname[0]) && !strcmp(dcc[i].simulbot, nick)))) {
+      putlog(LOG_DEBUG, "*", "Simul found old idx for %s/%s: (%s!%s)", nick, chname, nick, host);
+      dcc[i].simultime = now;
+      idx = i;
+// FIXME: THIS NEEDS TO BE UPDATED FOR CLASS
+//      dcc[idx].auth = authi;
+
+      strlcpy(dcc[idx].simulbot, chname ? chname : nick, NICKLEN);
+      strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", 81);
+
+      return 1;
+    }
+  }
+
+  if (idx == -1) {
+    idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
+    dcc[idx].sock = serv;
+    dcc[idx].timeval = now;
+    dcc[idx].irc = 1;
+    dcc[idx].simultime = now;
+    dcc[idx].simul = 1;
+    dcc[idx].status = STAT_COLOR;
+    dcc[idx].u.chat->con_flags = 0;
+    strlcpy(dcc[idx].simulbot, chname ? chname : nick, NICKLEN);
+    strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", 81);
+    dcc[idx].u.chat->strip_flags = STRIP_ALL;
+    strlcpy(dcc[idx].nick, handle, NICKLEN);
+    strlcpy(dcc[idx].host, host, UHOSTLEN);
+    dcc[idx].addr = 0L;
+    dcc[idx].user = user ? user : get_user_by_handle(userlist, handle);
+// FIXME: THIS NEEDS TO BE UPDATED FOR CLASS
+//    dcc[idx].auth = authi;
+    return 1;
+  }
+
+  return 0;
+}
+
+static int auth_tell_walk(const void *key, void *data, void *param)
+{
+  Auth *auth = *(Auth **)data;
+  int idx = (int) param;
+
+  dprintf(idx, "%s(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->bd ? "x " : "", auth->nick, 
+        auth->host, auth->handle, auth->authtime, auth->atime, auth->Status());
+  
+  return 0;
+}
+
+void Auth::TellAuthed(int idx)
+{
+  hash_table_walk(ht_host, auth_tell_walk, (void *) idx);
+}
+
+void makehash(struct userrec *u, const char *randstring, char *out, size_t out_size)
 {
   char hash[256] = "", *secpass = NULL;
-  struct userrec *u = NULL;
 
-  if (idx != -1)
-    u = dcc[idx].user;
-  else if (authi != -1)
-    u = auth[authi].user;
-
-  if (get_user(&USERENTRY_SECPASS, u)) {
+  if (u && get_user(&USERENTRY_SECPASS, u)) {
     secpass = strdup((char *) get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
@@ -86,11 +269,7 @@ void makehash(int idx, int authi, char *randstring)
   if (secpass)
     free(secpass);
 
-  if (idx != -1) 
-    strlcpy(dcc[idx].hash, MD5(hash), sizeof dcc[idx].hash);
-  else if (authi != -1)
-    strlcpy(auth[authi].hash, MD5(hash), sizeof auth[authi].hash);
-
+  strlcpy(out, MD5(hash), out_size);
   egg_bzero(hash, sizeof(hash));
 }
 
@@ -105,48 +284,7 @@ makebdhash(char *randstring)
   return MD5(hash);
 }
 
-int
-new_auth(void)
+void check_auth_dcc(Auth *auth, const char *cmd, const char *par)
 {
-  if (auth_total == max_auth)
-    return -1;
-
-  egg_bzero((struct auth_t *) &auth[auth_total], sizeof(struct auth_t));
-  auth[auth_total].idx = -1;
-  return auth_total++;
-}
-
-/* returns 0 if not found, -1 if problem, and > 0 if found. */
-int
-findauth(char *host)
-{
-  if (!host || !host[0])
-    return -1;
-
-  for (int i = 0; i < auth_total; i++) {
-    if (!auth[i].host) {
-      putlog(LOG_MISC, "*", "AUTH ENTRY: %d HAS NO HOST??", i);
-      continue;
-    }
-    if (auth[i].host && !strcmp(auth[i].host, host)) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-void
-removeauth(int n)
-{
-  putlog(LOG_DEBUG, "*", "Removing %s from auth list.", auth[n].host);
-  auth_total--;
-  if (n < auth_total)
-    egg_memcpy(&auth[n], &auth[auth_total], sizeof(struct auth_t));
-  else
-    egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
-}
-
-void check_auth_dcc(int authi, const char *cmd, const char *par)
-{
-  real_check_bind_dcc(cmd, auth[authi].idx, par, authi);
+  real_check_bind_dcc(cmd, auth->idx, par, auth);
 }

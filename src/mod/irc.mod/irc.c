@@ -1401,18 +1401,24 @@ irc_minutely()
   }
 }
 
-static int
-check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u, char *args, char *chname)
+
+int check_bind_authc(char *cmd, Auth *auth, char *chname, char *args)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int x = 0;
 
-  get_user_flagrec(u, &fr, chname);
-  x = check_bind(BT_msgc, cmd, &fr, nick, from, u, chname, args);
+  get_user_flagrec(auth->user, &fr, chname);
+  x = check_bind(BT_msgc, cmd, &fr, auth, chname, args);
 
-  if (x & BIND_RET_LOG)
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", nick, from, u ? u->handle : "*", chname, cmdprefix, cmd,
-           args);
+
+  if (x & BIND_RET_LOG) {
+    if (chname)
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", auth->nick, auth->host, 
+                            auth->handle, chname, cmdprefix, cmd, args);
+    else
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", auth->nick, auth->host, auth->handle, cmdprefix, cmd, args);
+  }
+
   if (x & BIND_RET_BREAK)
     return (1);
   return (0);

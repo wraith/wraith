@@ -930,7 +930,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       char randstr[51] = "";
 
       make_rand_str(randstr, 50);
-      makehash(idx, -1, randstr);
+      makehash(dcc[idx].user, randstr, dcc[idx].hash, sizeof(dcc[idx].hash));
 
       dcc[idx].type = &DCC_CHAT_SECPASS;
       dcc[idx].timeval = now;

@@ -192,11 +192,11 @@ int hash_table_remove(hash_table_t *ht, const void *key, void *dataptr)
 
 int hash_table_walk(hash_table_t *ht, hash_table_node_func callback, void *param)
 {
+	if (!ht) return(-1);
+
 	hash_table_row_t *row = NULL;
 	hash_table_entry_t *entry = NULL, *next = NULL;
 	int i;
-
-	if (!ht) return(-1);
 
 	for (i = 0; i < ht->max_rows; i++) {
 		row = ht->rows+i;

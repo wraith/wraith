@@ -2876,7 +2876,7 @@ static int gotmsg(char *from, char *msg)
     }
   }
   if (msg[0]) {
-    int botmatch = 0, i = 0;
+    int botmatch = 0;
     char *my_msg = NULL, *my_ptr = NULL, *fword = NULL;
 
     /* Check even if we're ignoring the host. (modified by Eule 17.7.99) */
@@ -2894,13 +2894,13 @@ static int gotmsg(char *from, char *msg)
       fword = newsplit(&my_msg);	/* now this will be the command */
     /* is it a cmd? */
     if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != cmdprefix) || (fword[0] == cmdprefix))) {
-      i = findauth(uhost);
-      if (i > -1 && auth[i].authed) {
+      Auth *auth = Auth::Find(uhost);
+
+      if (auth && auth->Authed()) {
         if (fword[0] == cmdprefix)
           fword++;
-        if (check_bind_pubc(fword, nick, uhost, auth[i].user, my_msg, chan->dname)) {
-          auth[i].atime = now;
-        }
+        auth->atime = now;
+        check_bind_authc(fword, auth, chan->dname, my_msg);
       }
     }
     free(my_ptr);

@@ -6,6 +6,8 @@
 #ifndef _EGG_MOD_IRC_IRC_H
 #define _EGG_MOD_IRC_IRC_H
 
+#include "src/auth.h"
+
 enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH };
 
 #define REVENGE_KICK 1		/* Kicked victim	*/
@@ -56,7 +58,6 @@ static void cache_debug(void);
 #endif /* CACHE */
 static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool);
 
-static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
 static char *makecookie(char *, char *);
 static int checkcookie(char *, char *, char *);
 static bool me_voice(struct chanset_t *);
@@ -93,6 +94,7 @@ static int gotmode(char *, char *);
 
 #endif /* MAKING_IRC */
 
+int check_bind_authc(char *, Auth *, char *, char *);
 void notice_invite(struct chanset_t *, char *, char *, char *, bool);
 void real_add_mode(struct chanset_t *, const char, const char, const char *, bool);
 #define add_mode(chan, pls, mode, nick) real_add_mode(chan, pls, mode, nick, 0)

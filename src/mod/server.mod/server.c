@@ -1029,7 +1029,7 @@ void server_init()
    * globally.
    */
 
-  BT_msgc = bind_table_add("msgc", 5, "ssUss", MATCH_FLAGS, 0); 
+  BT_msgc = bind_table_add("msgc", 3, "Ass", MATCH_FLAGS, 0); // Auth, chname, par
   BT_msg = bind_table_add("msg", 4, "ssUs", MATCH_FLAGS, 0);
   BT_raw = bind_table_add("raw", 2, "ss", 0, BIND_STACKABLE);
   BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", 0, BIND_STACKABLE);

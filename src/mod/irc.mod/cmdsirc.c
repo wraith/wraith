@@ -1251,10 +1251,7 @@ static void cmd_authed(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# authed", dcc[idx].nick);
 
   dprintf(idx, "Authed:\n");
-  for (int i = 0; i < auth_total; i++) {
-   if (auth[i].authed)
-     dprintf(idx, " %d%s. %s!%s at %li\n", i, auth[i].bd ? "x" : "", auth[i].nick, auth[i].host, auth[i].authtime);
-  }
+  Auth::TellAuthed(idx);
 }
 
 static void cmd_channel(int idx, char *par)

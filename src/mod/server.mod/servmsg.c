@@ -111,21 +111,6 @@ static void check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u
     putlog(LOG_MSGS, "*", "[%s!%s] %s %s", nick, uhost, cmd, args);
 }
 
-static int check_bind_msgc(char *cmd, char *nick, char *from, struct userrec *u, char *args)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
-  int x = 0;
-
-  get_user_flagrec(u, &fr, NULL);
-  x = check_bind(BT_msgc, cmd, &fr, nick, from, u, NULL, args);
-
-  if (x & BIND_RET_LOG)
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
-
-  if (x & BIND_RET_BREAK) return(1);
-  return(0);
-}
-
 /* Return 1 if processed.
  */
 static int check_bind_raw(char *from, char *code, char *msg)
@@ -322,9 +307,6 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   if ((u && u->bot) || (atr & USER_NOFLOOD))
     return 0;
 
-  if (findauth(floodhost) > -1) 
-    return 0;
-
   char *p = NULL, ftype[10] = "", h[1024] = "";
   int thr = 0;
   time_t lapse = 0;
@@ -410,7 +392,7 @@ static int gotmsg(char *from, char *msg)
   char *to = NULL, buf[UHOSTLEN] = "", *nick = NULL, ctcpbuf[512] = "", *uhost = buf, 
        *ctcp = NULL, *p = NULL, *p1 = NULL, *code = NULL;
   struct userrec *u = NULL;
-  int ctcp_count = 0, i = 0;
+  int ctcp_count = 0;
   bool ignoring = match_ignore(from);
 
   to = newsplit(&msg);
@@ -530,51 +512,47 @@ static int gotmsg(char *from, char *msg)
       }
     } else {
       char *my_code = NULL;
-      struct userrec *my_u = NULL;
+      Auth *auth = Auth::Find(uhost);
 
-      detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
-      my_u = get_user_by_host(from);
+      if (!auth)
+        detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
       my_code = newsplit(&msg);
       rmspace(msg);
-      i = findauth(uhost);
       /* is it a cmd? */
 
-      if (my_code && my_code[0] && my_code[1] && i > -1 && auth[i].authed && my_code[0] == cmdprefix) {
-        my_code++;
-        my_u = auth[i].user;
+      if (my_code && my_code[0] && my_code[1] && auth && auth->Authed() && my_code[0] == cmdprefix) {
+        my_code++;		//eliminate the cmdprefix
+        auth->atime = now;
 
-        if (check_bind_msgc(my_code, nick, uhost, my_u, msg))
-          auth[i].atime = now;
-        else
+        if (!check_bind_authc(my_code, auth, NULL, msg))
           putlog(LOG_MSGS, "*", "[%s] %c%s %s", from, cmdprefix, my_code, msg);
-      } else if ((my_code[0] != cmdprefix || !my_code[1] || i == -1 || !(auth[i].authed))) {
-        if (!ignoring) {
-          bool doit = 1;
+      } else if (!ignoring && (my_code[0] != cmdprefix || !my_code[1] || !auth || !auth->Authed())) {
+        struct userrec *my_u = get_user_by_host(from);
+        bool doit = 1;
 
-          if (!egg_strcasecmp(my_code, "op") || !egg_strcasecmp(my_code, "pass") || !egg_strcasecmp(my_code, "invite") 
-              || !egg_strcasecmp(my_code, "ident")
-               || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
-               || !egg_strcasecmp(my_code, msginvite) || !egg_strcasecmp(my_code, msgident)) {
-            char buf2[10] = "";
+        if (!egg_strcasecmp(my_code, "op") || !egg_strcasecmp(my_code, "pass") || !egg_strcasecmp(my_code, "invite") 
+            || !egg_strcasecmp(my_code, "ident")
+            || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
+            || !egg_strcasecmp(my_code, msginvite) || !egg_strcasecmp(my_code, msgident)) {
+          char buf2[10] = "";
 
-            doit = 0;
-            if (!egg_strcasecmp(my_code, msgop))
-              sprintf(buf2, "op");
-            else if (!egg_strcasecmp(my_code, msgpass))
-              sprintf(buf2, "pass");
-            else if (!egg_strcasecmp(my_code, msginvite))
-              sprintf(buf2, "invite");
-            else if (!egg_strcasecmp(my_code, msgident))
-              sprintf(buf2, "ident");
+          doit = 0;
+          if (!egg_strcasecmp(my_code, msgop))
+            sprintf(buf2, "op");
+          else if (!egg_strcasecmp(my_code, msgpass))
+            sprintf(buf2, "pass");
+          else if (!egg_strcasecmp(my_code, msginvite))
+            sprintf(buf2, "invite");
+          else if (!egg_strcasecmp(my_code, msgident))
+            sprintf(buf2, "ident");
 
-            if (buf2[0])
-              check_bind_msg(buf2, nick, uhost, my_u, msg);
-            else
-              putlog(LOG_MSGS, "*", "(%s!%s) attempted to use invalid msg cmd '%s'", nick, uhost, my_code);
-          }
-          if (doit)
-            check_bind_msg(my_code, nick, uhost, my_u, msg);
+          if (buf2[0])
+            check_bind_msg(buf2, nick, uhost, my_u, msg);
+          else
+            putlog(LOG_MSGS, "*", "(%s!%s) attempted to use invalid msg cmd '%s'", nick, uhost, my_code);
         }
+        if (doit)
+          check_bind_msg(my_code, nick, uhost, my_u, msg);
       }
     }
   }
@@ -943,6 +921,7 @@ static void disconnect_server(int idx, int dolost)
   floodless = 0;
   botuserhost[0] = 0;
   if (dolost) {
+    Auth::DeleteAll();
     trying_server = 0;
     lostdcc(idx);
   }
@@ -951,11 +930,6 @@ static void disconnect_server(int idx, int dolost)
 static void eof_server(int idx)
 {
   putlog(LOG_SERV, "*", "Disconnected from %s", dcc[idx].host);
-  if (ischanhub() && auth_total > 0) {
-    putlog(LOG_DEBUG, "*", "Removing %d auth entries.", auth_total);
-    for (int i = 0; i < auth_total; i++)
-      removeauth(i);  
-  }
   disconnect_server(idx, DO_LOST);
 }
 
