@@ -362,141 +362,48 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
 
 /* Take host entry from ban list and display it ban-style.
  */
-static void display_ban(int idx, int number, maskrec *ban, struct chanset_t *chan, bool show_inact)
+static void display_mask(const char type, int idx, int number, maskrec *mask, struct chanset_t *chan, bool show_inact)
 {
   char dates[81] = "", s[41] = "";
+  const char *str_type = (type == 'b' ? "BAN" : type == 'e' ? "EXEMPT" : "INVITE");
 
-  if (ban->added) {
-    daysago(now, ban->added, s);
+  if (mask->added) {
+    daysago(now, mask->added, s);
     sprintf(dates, "%s %s", MODES_CREATED, s);
-    if (ban->added < ban->lastactive) {
+    if (mask->added < mask->lastactive) {
       strcat(dates, ", ");
       strcat(dates, MODES_LASTUSED);
       strcat(dates, " ");
-      daysago(now, ban->lastactive, s);
+      daysago(now, mask->lastactive, s);
       strcat(dates, s);
     }
   } else
     dates[0] = 0;
-  if (ban->flags & MASKREC_PERM)
+  if (mask->flags & MASKREC_PERM)
     strcpy(s, "(perm)");
   else {
     char s1[41] = "";
 
-    days(ban->expire, now, s1);
+    days(mask->expire, now, s1);
     sprintf(s, "(expires %s)", s1);
   }
-  if (ban->flags & MASKREC_STICKY)
+  if (mask->flags & MASKREC_STICKY)
     strcat(s, " (sticky)");
-  if (!chan || ischanban(chan, ban->mask)) {
+  if (!chan || ischanmask(type, chan, mask->mask)) {
     if (number >= 0) {
-      dprintf(idx, "  [%3d] %s %s\n", number, ban->mask, s);
+      dprintf(idx, "  [%3d] %s %s\n", number, mask->mask, s);
     } else {
-      dprintf(idx, "BAN: %s %s\n", ban->mask, s);
+      dprintf(idx, "%s: %s %s\n", str_type, mask->mask, s);
     }
   } else if (show_inact) {
     if (number >= 0) {
-      dprintf(idx, "! [%3d] %s %s\n", number, ban->mask, s);
+      dprintf(idx, "! [%3d] %s %s\n", number, mask->mask, s);
     } else {
-      dprintf(idx, "BAN (%s): %s %s\n", MODES_INACTIVE, ban->mask, s);
+      dprintf(idx, "%s (inactive): %s %s\n", str_type, mask->mask, s);
     }
   } else
     return;
-  dprintf(idx, "        %s: %s\n", ban->user, ban->desc);
-  if (dates[0])
-    dprintf(idx, "        %s\n", dates);
-}
-
-/* Take host entry from exempt list and display it ban-style.
- */
-static void display_exempt(int idx, int number, maskrec *exempt, struct chanset_t *chan, bool show_inact)
-{
-  char dates[81] = "", s[41] = "";
-
-  if (exempt->added) {
-    daysago(now, exempt->added, s);
-    sprintf(dates, "%s %s", MODES_CREATED, s);
-    if (exempt->added < exempt->lastactive) {
-      strcat(dates, ", ");
-      strcat(dates, MODES_LASTUSED);
-      strcat(dates, " ");
-      daysago(now, exempt->lastactive, s);
-      strcat(dates, s);
-    }
-  } else
-    dates[0] = 0;
-  if (exempt->flags & MASKREC_PERM)
-    strcpy(s, "(perm)");
-  else {
-    char s1[41] = "";
-
-    days(exempt->expire, now, s1);
-    sprintf(s, "(expires %s)", s1);
-  }
-  if (exempt->flags & MASKREC_STICKY)
-    strcat(s, " (sticky)");
-  if (!chan || ischanexempt(chan, exempt->mask)) {
-    if (number >= 0) {
-      dprintf(idx, "  [%3d] %s %s\n", number, exempt->mask, s);
-    } else {
-      dprintf(idx, "EXEMPT: %s %s\n", exempt->mask, s);
-    }
-  } else if (show_inact) {
-    if (number >= 0) {
-      dprintf(idx, "! [%3d] %s %s\n", number, exempt->mask, s);
-    } else {
-      dprintf(idx, "EXEMPT (%s): %s %s\n", MODES_INACTIVE, exempt->mask, s);
-    }
-  } else
-    return;
-  dprintf(idx, "        %s: %s\n", exempt->user, exempt->desc);
-  if (dates[0])
-    dprintf(idx, "        %s\n", dates);
-}
-
-/* Take host entry from invite list and display it ban-style.
- */
-static void display_invite (int idx, int number, maskrec *invite, struct chanset_t *chan, bool show_inact)
-{
-  char dates[81] = "", s[41] = "";
-
-  if (invite->added) {
-    daysago(now, invite->added, s);
-    sprintf(dates, "%s %s", MODES_CREATED, s);
-    if (invite->added < invite->lastactive) {
-      strcat(dates, ", ");
-      strcat(dates, MODES_LASTUSED);
-      strcat(dates, " ");
-      daysago(now, invite->lastactive, s);
-      strcat(dates, s);
-    }
-  } else
-    dates[0] = 0;
-  if (invite->flags & MASKREC_PERM)
-    strcpy(s, "(perm)");
-  else {
-    char s1[41] = "";
-
-    days(invite->expire, now, s1);
-    sprintf(s, "(expires %s)", s1);
-  }
-  if (invite->flags & MASKREC_STICKY)
-    strcat(s, " (sticky)");
-  if (!chan || ischaninvite(chan, invite->mask)) {
-    if (number >= 0) {
-      dprintf(idx, "  [%3d] %s %s\n", number, invite->mask, s);
-    } else {
-      dprintf(idx, "INVITE: %s %s\n", invite->mask, s);
-    }
-  } else if (show_inact) {
-    if (number >= 0) {
-      dprintf(idx, "! [%3d] %s %s\n", number, invite->mask, s);
-    } else {
-      dprintf(idx, "INVITE (%s): %s %s\n", MODES_INACTIVE, invite->mask, s);
-    }
-  } else
-    return;
-  dprintf(idx, "        %s: %s\n", invite->user, invite->desc);
+  dprintf(idx, "        %s: %s\n", mask->user, mask->desc);
   if (dates[0])
     dprintf(idx, "        %s\n", dates);
 }
@@ -509,9 +416,6 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
   maskrec *global_masks = (type == 'b' ? global_bans : type == 'e' ? global_exempts : global_invites);
   struct chanset_t *chan = NULL;
   maskrec *mr = NULL;
-  void (*display_mask) (int, int, maskrec *, struct chanset_t *, bool) = NULL;
-
-  display_mask = (type == 'b' ? display_ban : type == 'e' ? display_exempt : display_invite);
 
   /* Was a channel given? */
   if (match[0]) {
@@ -545,10 +449,10 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
       if ((wild_match(match, mr->mask)) ||
 	  (wild_match(match, mr->desc)) ||
 	  (wild_match(match, mr->user)))
-	display_mask(idx, k, mr, chan, 1);
+	display_mask(type, idx, k, mr, chan, 1);
       k++;
     } else
-      display_mask(idx, k++, mr, chan, show_inact);
+      display_mask(type, idx, k++, mr, chan, show_inact);
   }
 
   if (chan) {
@@ -563,10 +467,10 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
 	if ((wild_match(match, mr->mask)) ||
 	    (wild_match(match, mr->desc)) ||
 	    (wild_match(match, mr->user)))
-	  display_mask(idx, k, mr, chan, 1);
+	  display_mask(type, idx, k, mr, chan, 1);
 	k++;
       } else
-	display_mask(idx, k++, mr, chan, show_inact);
+	display_mask(type, idx, k++, mr, chan, show_inact);
     }
     if (chan->status & CHAN_ACTIVE) {
       masklist *ml = NULL;

@@ -64,6 +64,7 @@ extern char		glob_chanset[], cfg_glob_chanset[];
 #define ischanban(chan, user)    ismodeline((chan)->channel.ban, user)
 #define ischanexempt(chan, user) ismodeline((chan)->channel.exempt, user)
 #define ischaninvite(chan, user) ismodeline((chan)->channel.invite, user)
+#define ischanmask(type, chan, user) ismodeline(type == 'b' ? (chan)->channel.ban : type == 'e' ? (chan)->channel.exempt : (chan)->channel.invite, user)
 
 #define u_setsticky_ban(chan, host, sticky)     u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->bans : global_bans, host, sticky, "s")
 #define u_setsticky_exempt(chan, host, sticky)  u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->exempts : global_exempts, host, sticky, "se")
