@@ -738,9 +738,9 @@ sock_t open_address_listen(in_addr_t addr, port_t *port)
 sock_t open_listen(port_t *port)
 {
 #ifdef USE_IPV6
-  return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, AF_INET, port);
+  return open_address_listen(getmyip(), AF_INET, port);
 #else
-  return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, port);
+  return open_address_listen(getmyip(), port);
 #endif /* USE_IPV6 */
 }
 
@@ -751,7 +751,7 @@ sock_t open_listen(port_t *port)
 sock_t open_listen_by_af(port_t *port, int af_def)
 {
 #ifdef USE_IPV6
-  return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, af_def, port);
+  return open_address_listen(getmyip(), af_def, port);
 #else
   return -1;
 #endif /* USE_IPV6 */
