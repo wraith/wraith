@@ -561,7 +561,8 @@ Function global_table[] =
   (Function) myip,
   (Function) myip6,
   (Function) cmdprefix,
-  (Function) replace
+  (Function) replace,
+  (Function) degarble
 
 
 };

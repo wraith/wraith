@@ -200,7 +200,7 @@ dephub:
 	@cd src/compat && $(MAKE_DEPEND) dephub
 
 
-leaf:	packconf salt config
+leaf:	utils salt config
 	@echo ""
 	@echo "Making leaf"
 	@echo ""
@@ -212,7 +212,7 @@ leaf:	packconf salt config
 	@cd src && $(MAKE_LEAF) $(LEAFEXEC)
 	@echo ""
 
-dleaf:  packconf salt config
+dleaf:  utils salt config
 	@echo ""
 	@echo "Making debug leaf"
 	@echo ""
@@ -224,7 +224,7 @@ dleaf:  packconf salt config
 	@cd src; $(MAKE_DLEAF) $(LEAFEXEC)
 	@echo ""
 
-hub:	packconf salt config
+hub:	utils salt config
 	@echo ""
 	@echo "Making hub"
 	@echo ""
@@ -237,7 +237,7 @@ hub:	packconf salt config
 	@cd src && $(MAKE_HUB) $(HUBEXEC)
 	@echo ""
 
-dhub:   packconf salt config
+dhub:   utils salt config
 	@echo ""
 	@echo "Making debug hub"
 	@echo ""

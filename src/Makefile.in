@@ -65,7 +65,7 @@ build_msg:
 
 
 main.o: ../stringfix
-	cp -f main.c xmain.c
+	@cp -f main.c xmain.c
 	../stringfix xmain.c
 	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
 	'-DLDFLAGS="$(LD)"' '-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/xmain.c -o main.o
@@ -93,7 +93,7 @@ eggdrop.h:
 
 
 .c.o:   ../stringfix
-	cp -f $< x$<
+	@cp -f $< x$<
 	../stringfix x$<
 	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) -I$(top_srcdir) \
         $(CPPFLAGS)"' '-DLDFLAGS="$(LD)"' \

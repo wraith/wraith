@@ -522,6 +522,7 @@
 /* 325 - 328 */
 #define cmdprefix ((char *)(global[325]))
 #define replace ((char*(*)(char *, char *, char *))global[326])
+#define degarble ((char *(*)(int, char *))global[327])
 
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
