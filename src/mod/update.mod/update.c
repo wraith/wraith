@@ -8,6 +8,7 @@
 #include "src/dcc.h"
 #include "src/botnet.h"
 #include "src/main.h"
+#include "src/userrec.h"
 #include "src/botmsg.h"
 #include "src/tandem.h"
 #include "src/misc_file.h"
