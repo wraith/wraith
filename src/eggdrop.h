@@ -22,16 +22,6 @@
 #endif /* HAVE_OPENSSL_SSL_H */
 
 
-/*
- * Enable IPv6 support?
- */
-#define USE_IPV6
-
-/*
- * Enable IPv6 debugging?
- */
-#define DEBUG_IPV6
-
 // If you undefine this, be ready for a good novel of errors. (Not Finished)
 #ifndef S_IRCNET
 #define S_IRCNET
@@ -137,6 +127,12 @@
 #if !HAVE_VSPRINTF
 #  include "error_you_need_vsprintf_to_compile_eggdrop"
 #endif
+
+/*
+ * Enable IPv6 debugging?
+ */
+#define DEBUG_IPV6 1
+#define HAVE_IPV6 1
 
 /* IPv6 sanity checks. */
 #ifdef USE_IPV6

@@ -97,10 +97,10 @@ umask 077 >/dev/null
 
 if test -z "$tcldir"; then
   echo "[*] Searching for TCL in default paths (use '-t dir' to change)"
-  ./configure --silent --disable-tcl-threads
+  ./configure -C --silent --disable-tcl-threads
 else
   echo "[*] Searching for TCL in: $tcldir"
-  ./configure --silent --disable-tcl-threads --with-tcllib=${tcldir}/lib/libtcl8.4.a --with-tclinc=${tcldir}/include/tcl.h
+  ./configure -C --silent --disable-tcl-threads --with-tcllib=${tcldir}/lib/libtcl8.4.a --with-tclinc=${tcldir}/include/tcl.h
 fi
 
 
