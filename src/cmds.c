@@ -3980,32 +3980,32 @@ static void cmd_quit(struct userrec *u, int idx, char *text)
 		check_bind_chpt(conf.bot->nick, dcc[idx].nick, dcc[idx].sock, dcc[idx].u.chat->channel);
 	}
 	check_bind_chof(dcc[idx].nick, idx);
-	dprintf(idx, "*** See you later cowboy!\n\n");
+	dprintf(idx, "*** Ja Mata\n");
 	flush_lines(idx, dcc[idx].u.chat);
 	putlog(LOG_MISC, "*", "DCC connection closed (%s!%s)", dcc[idx].nick, dcc[idx].host);
 	if (dcc[idx].u.chat->channel >= 0) {
 		chanout_but(-1, dcc[idx].u.chat->channel, "*** %s left the party line%s%s\n", dcc[idx].nick, text[0] ? ": " : ".", text);
-		if (dcc[idx].u.chat->channel < 100000) {
+		if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
 			botnet_send_part_idx(idx, text);
 		}
 	}
 
 	if (dcc[idx].u.chat->su_nick) {
 		dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
+		strcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick);
 		dcc[idx].type = &DCC_CHAT;
 		dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);
 		free(dcc[idx].u.chat->su_nick);
 		dcc[idx].u.chat->su_nick = NULL;
 		dcc_chatter(idx);
-		if (dcc[idx].u.chat->channel < 100000 && dcc[idx].u.chat->channel >= 0) {
+
+		if (dcc[idx].u.chat->channel < GLOBAL_CHANS && dcc[idx].u.chat->channel >= 0) {
 			botnet_send_join_idx(idx, -1);
 		}
-	}
-	else if ((dcc[idx].sock != STDOUT) || backgrd) {
+	} else if ((dcc[idx].sock != STDOUT) || backgrd) {
 		killsock(dcc[idx].sock);
 		lostdcc(idx);
-	}
-	else {
+	} else {
 		dprintf(DP_STDOUT, "\n### SIMULATION RESET\n\n");
 		dcc_chatter(idx);
 	}

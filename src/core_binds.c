@@ -99,9 +99,12 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
   putlog(LOG_DEBUG, "*", "%s RETURNED: %d", cmd, x);
   if (x == -1)
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
+
+  /* I doubt we'll want this.. 
   else if (x & BIND_RET_LOG) {
      putlog(LOG_CMDS, "*", "#%s# %s %s", dcc[idx].nick, cmd, text);
   }
+  */
 }
 
 void check_bind_bot(const char *nick, const char *code, const char *param)
