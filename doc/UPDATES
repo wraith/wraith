@@ -10,6 +10,7 @@ This is a summary of ChangeLog basically.
 * All dates are UTC (GMT) now.
 * cmd_newleaf was sharing the new bot incorrectly.
 * Fixed a cosmetic/memory bug in cmd_who.
+* cmd_bots was displaying the wrong number of bots up.
 
 1.1.9
 
