@@ -1185,14 +1185,19 @@ static void cmd_console(struct userrec *u, int idx, char *par)
   if ((nick [0] == '+' && findchan_by_dname(nick)) ||
       (nick [0] != '+' && strchr(CHANMETA "*", nick[0]))) {
     chan = findchan_by_dname(nick);
-    if (strcmp(nick, "*") && !chan) { 
+    if (strcmp(nick, "*") && !chan) {
       dprintf(idx, STR("Invalid console channel: %s.\n"), nick);
       return;
     }
 
     get_user_flagrec(u, &fr, nick);
 
-    if (!chan_op(fr) && !(glob_op(fr) && !chan_deop(fr))) {
+    if (private(fr, findchan_by_dname(nick), PRIV_OP)) {
+      dprintf(idx, STR("Invalid console channel: %s.\n"), nick);
+      return;
+    }
+
+    if (!chk_op(fr, findchan_by_dname(nick))) {
       dprintf(idx, STR("You don't have op or master access to channel %s.\n"), nick);
       return;
     }
