@@ -178,7 +178,7 @@ static bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *
 	return(entry);
 }
 
-int bind_entry_del(bind_table_t *table, int id, const char *mask, const char *function_name, Function callback)
+static int bind_entry_del(bind_table_t *table, int id, const char *mask, const char *function_name, Function callback)
 {
 	bind_entry_t *entry = NULL;
 
@@ -206,6 +206,7 @@ static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry)
 	free(entry);
 }
 
+#ifdef NO
 /* Modify a bind entry's flags and mask. */
 int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char *function_name, const char *newflags, const char *newmask)
 {
@@ -224,7 +225,6 @@ int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char 
 
 	return(0);
 }
-
 /* void blah()
 {
   bind_entry_t *entry = NULL;
@@ -250,8 +250,9 @@ int bind_entry_overwrite(bind_table_t *table, int id, const char *mask, const ch
 	entry->client_data = client_data;
 	return(0);
 }
+#endif
 
-int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
+int bind_entry_add(bind_table_t *table, const char *flags, int cflags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
 	bind_entry_t *entry = NULL, *old_entry = bind_entry_lookup(table, -1, mask, function_name, NULL);
 
@@ -284,6 +285,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 		entry->user_flags.match = FR_GLOBAL | FR_CHAN;
 		break_down_flags(flags, &entry->user_flags, NULL);
 	}
+        entry->cflags = cflags;
 	if (mask) entry->mask = strdup(mask);
 	if (function_name) entry->function_name = strdup(function_name);
 	entry->callback = (HashFunc) callback;
@@ -459,7 +461,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
                   cmdi++;
                 } 
 		egg_snprintf(name, sizeof name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
-		bind_entry_add(table, cmds->flags, cmds->name, name, 0, cmds->func, NULL);
+		bind_entry_add(table, cmds->flags, cmds->type, cmds->name, name, 0, cmds->func, NULL);
           }
 	}
 }

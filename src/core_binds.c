@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "dccutil.h"
+#include "core_binds.h"
 #include "userrec.h"
 #include "main.h"
 #include "settings.h"
@@ -37,6 +38,11 @@ void core_binds_init()
 }
 
 void check_bind_dcc(const char *cmd, int idx, const char *text)
+{
+  real_check_bind_dcc(cmd, idx, text, -1);
+}
+
+void real_check_bind_dcc(const char *cmd, int idx, const char *text, int authi)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   bind_entry_t *entry = NULL;
@@ -83,6 +89,10 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
     }
   }
 
+  if (entry && authi != -1) {
+    if (!(entry->cflags & AUTH))
+      return;
+  }
   int hits = 0;
 
   check_bind_hits(BT_dcc, cmd, &fr, &hits, idx, args);

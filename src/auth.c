@@ -11,6 +11,7 @@
 #include "main.h"
 #include "settings.h"
 #include "types.h"
+#include "core_binds.h"
 #include "egg_timer.h"
 #include "users.h"
 #include "crypt.h"
@@ -111,6 +112,7 @@ new_auth(void)
     return -1;
 
   egg_bzero((struct auth_t *) &auth[auth_total], sizeof(struct auth_t));
+  auth[auth_total].idx = -1;
   return auth_total++;
 }
 
@@ -142,4 +144,9 @@ removeauth(int n)
     egg_memcpy(&auth[n], &auth[auth_total], sizeof(struct auth_t));
   else
     egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
+}
+
+void check_auth_dcc(int authi, const char *cmd, const char *par)
+{
+  real_check_bind_dcc(cmd, auth[authi].idx, par, authi);
 }

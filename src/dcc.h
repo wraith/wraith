@@ -50,6 +50,7 @@ struct dcc_t {
   int ssl;                      /* use ssl on this dcc? */
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   bool irc;			/* forward the output back to irc? */
+  int auth;
   int whowas;
   int dns_id;
   port_t port;

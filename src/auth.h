@@ -11,6 +11,7 @@ struct auth_t {
   int authed;
   int authing;
   int bd;                       /* is this auth a backdoor access? */
+  int idx;			/* do they have an associated idx? */
   char hash[MD5_HASH_LENGTH + 1];       /* used for dcc authing */
   char rand[50];
   char nick[NICKLEN];
@@ -24,7 +25,7 @@ void removeauth(int);
 char *makebdhash(char *);
 void makehash(int, int, char *);
 void init_auth(void);
-
+void check_auth_dcc(int, const char *, const char *);
 extern int auth_total;
 extern struct auth_t *auth;
 

@@ -196,6 +196,8 @@ static void expire_simuls() {
     if (dcc[idx].type && dcc[idx].simul > 0) {
       if ((now - dcc[idx].simultime) >= 100) { /* expire simuls after 100 seconds (re-uses idx, so it wont fill up) */
         dcc[idx].simul = -1;
+        if (dcc[idx].irc)
+          auth[dcc[idx].auth].idx = -1;
         lostdcc(idx);
         return;		/* only safe to do one at a time */
       }

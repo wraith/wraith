@@ -1355,16 +1355,16 @@ static void cmd_chanset(int idx, char *par)
  */
 static cmd_t C_dcc_channels[] =
 {
-  {"+ban",	"o|o",	(Function) cmd_pls_ban,		NULL, 0},
-  {"+exempt",	"o|o",	(Function) cmd_pls_exempt,	NULL, 0},
-  {"+invite",	"o|o",	(Function) cmd_pls_invite,	NULL, 0},
+  {"+ban",	"o|o",	(Function) cmd_pls_ban,		NULL, AUTH},
+  {"+exempt",	"o|o",	(Function) cmd_pls_exempt,	NULL, AUTH},
+  {"+invite",	"o|o",	(Function) cmd_pls_invite,	NULL, AUTH},
   {"+chan",	"n",	(Function) cmd_pls_chan,	NULL, 0},
   {"+chrec",	"m|m",	(Function) cmd_pls_chrec,	NULL, 0},
-  {"-ban",	"o|o",	(Function) cmd_mns_ban,		NULL, 0},
+  {"-ban",	"o|o",	(Function) cmd_mns_ban,		NULL, AUTH},
   {"-chan",	"n",	(Function) cmd_mns_chan,	NULL, 0},
   {"-chrec",	"m|m",	(Function) cmd_mns_chrec,	NULL, 0},
-  {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL, 0},
-  {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL, 0},
+  {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL, AUTH},
+  {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL, AUTH},
   {"bans",	"o|o",	(Function) cmd_bans,		NULL, 0},
   {"botjoin",	"n",	(Function) cmd_botjoin,		NULL, 0},
   {"botpart",	"n",	(Function) cmd_botpart,		NULL, 0},
@@ -1378,7 +1378,7 @@ static cmd_t C_dcc_channels[] =
   {"info",	"",	(Function) cmd_info,		NULL, 0},
   {"slowjoin",  "n",    (Function) cmd_slowjoin,	NULL, 0},
   {"slowpart",  "n|n",  (Function) cmd_slowpart,  	NULL, 0},
-  {"stick",	"o|o",	(Function) cmd_stick,		NULL, 0},
-  {"unstick",	"o|o",	(Function) cmd_unstick,		NULL, 0},
+  {"stick",	"o|o",	(Function) cmd_stick,		NULL, AUTH},
+  {"unstick",	"o|o",	(Function) cmd_unstick,		NULL, AUTH},
   {NULL,	NULL,	NULL,			NULL, 0}
 };

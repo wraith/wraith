@@ -467,44 +467,17 @@ static cmd_t C_msg[] =
 static int msgc_test(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   char *cmd = NULL;
-  int idx = -1, i = 0, chan = 0;
+  int i = 0;
 
   LOGC("TEST");
 
   cmd = newsplit(&par);
-  if (chname)
-    chan++;
 
-  for (i = 0; i < dcc_total; i++) {
-   if (dcc[i].type && dcc[i].irc && ((chan && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, u->handle)) || 
-      (!chan && !strcmp(dcc[i].simulbot, nick)))) {
-     putlog(LOG_DEBUG, "*", "Simul found old idx for %s/%s: %d", nick, chname, i);
-     dcc[i].simultime = now;
-     idx = i;
-     break;
-   }
+  i = findauth(host);
+
+  if (irc_idx(nick, host, u->handle, chname, i)) {
+    check_auth_dcc(i, cmd, par);
   }
-
-  if (idx < 0) {
-    idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
-    dcc[idx].sock = serv;
-    dcc[idx].timeval = now;
-    dcc[idx].irc = 1;
-    dcc[idx].simultime = now;
-    dcc[idx].simul = 1;
-    dcc[idx].status = STAT_COLOR;
-    strcpy(dcc[idx].simulbot, chname ? chname : nick);
-    dcc[idx].u.chat->con_flags = 0;
-    strcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*");
-    dcc[idx].u.chat->strip_flags = STRIP_ALL;
-    strcpy(dcc[idx].nick, u->handle);
-    strcpy(dcc[idx].host, host);
-    dcc[idx].addr = 0L;
-    dcc[idx].user = u;
-  }
-  /* rmspace(par); */
-
-  check_bind_dcc(cmd, idx, par);
 
   return BIND_RET_BREAK;
 }
