@@ -1140,7 +1140,7 @@ static void server_resolve_failure(int);
  */
 static void connect_server(void)
 {
-  char pass[121], botserver[UHOSTLEN];
+  char pass[121] = "", botserver[UHOSTLEN] = "";
   static int oldserv = -1;
   unsigned int botserverport = 0;
 

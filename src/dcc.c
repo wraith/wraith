@@ -344,7 +344,7 @@ static void cont_link(int idx, char *buf, int ii)
 {
   /* Now set the initial link key (incoming only, we're not sending more until we get an OK)... */
   struct sockaddr_in sa;
-  char tmp[256], bufout[SHA_HASH_LENGTH + 1];
+  char tmp[256] = "", bufout[SHA_HASH_LENGTH + 1] = "";
   SHA_CTX ctx;
   int i;
   int snum = -1;
@@ -377,7 +377,7 @@ static void cont_link(int idx, char *buf, int ii)
     /* initkey-gen leaf */
     /* bdhash myport hubnick mynick */
     getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
-    sprintf(tmp,"%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
+    egg_snprintf(tmp, sizeof tmp, "%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
     SHA1_Init(&ctx);
     SHA1_Update(&ctx, tmp, strlen(tmp));
     SHA1_Final(bufout, &ctx);

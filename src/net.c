@@ -99,7 +99,8 @@ int hostprotocol(char *host)
 #  ifndef HAVE_GETHOSTBYNAME2
   int error_num;
 #  endif /* !HAVE_GETHOSTBYNAME2 */
-
+  if (!host || (host && !host[0]))
+    return 0;
   if (!setjmp(alarmret)) {
     alarm(resolve_timeout);
 

@@ -81,8 +81,8 @@ extern void (*qserver) (int, char *, int);
 
 void dprintf (int idx, ...)
 {
-  static char buf[1024];
-  char *format; 
+  static char buf[1024] = "";
+  char *format = NULL;
   int len;
   va_list va;
 
@@ -147,7 +147,7 @@ void dprintf (int idx, ...)
   } else { /* normal chat text */
     if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type == &DCC_CHAT)) {
       int i;
-      char buf3[1024], buf2[1024], c;
+      char buf3[1024] = "", buf2[1024] = "", c;
 
       buf3[0] = buf2[0] = 0;
       for (i = 0 ; i < len ; i++) {
@@ -206,7 +206,7 @@ void dprintf (int idx, ...)
 void chatout (char *format, ...)
 {
   int i, len;
-  char s[601];
+  char s[601] = "";
   va_list va;
 
   va_start(va, format);
@@ -230,7 +230,7 @@ void chanout_but (int x, ...)
 {
   int i, chan, len;
   char *format;
-  char s[601];
+  char s[601] = "";
   va_list va;
 
   va_start(va, x);

@@ -461,7 +461,7 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
   int items;
   int ret = TCL_OK;
   int join = 0;
-  char buf[2048], buf2[256];
+  char buf[2048] = "", buf2[256] = "";
 #if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
   CONST char **item;
 #else
