@@ -73,7 +73,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
   if (todo & WRITE_CHECKSUM) {
     Tempfile *newbin = new Tempfile("bin");
     char *fname_bak = NULL;
-    size_t size = 0, skip_read = 0, newpos = 0;
+    size_t size = 0, newpos = 0;
 
     size = strlen(fname) + 2;
     fname_bak = (char *) my_calloc(1, size);
@@ -81,7 +81,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
     size = 0;
 
     if (!(f = fopen(fname, "rb")))
-      werr(ERR_BINSTAT);
+      goto fatal;
 
     fseek(f, 0, SEEK_END);
     size = ftell(f);
@@ -89,17 +89,8 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
     newpos = 0;
 
     while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
-      if (skip_read) {                  /* to skip bytes for pack data */
-        skip_read -= len;
-        continue;
-      }
-
-//      if (fwrite(buf, sizeof(buf) - 1, 1, newbin->f) != 1) {
-      if (fwrite(buf, 1, len, newbin->f) != len) {
-        fclose(f);
-        delete newbin;
-        werr(ERR_BINSTAT);
-      }
+      if (fwrite(buf, 1, len, newbin->f) != len)
+        goto fatal;
 
       newpos += len;
 
@@ -111,50 +102,76 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
         strlcpy(settings.hash, hash, 65);
         edpack(&settings, hash, PACK_ENC);		/* encrypt the entire struct with the hash (including hash) */
 
-        /* just write both for now */
-        todo |= WRITE_PACK|WRITE_CONF;
-
         if (todo & WRITE_PACK) {
-          skip_read += SIZE_PACK;
           fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
           sdprintf("writing pack: %d\n", SIZE_PACK);
         } else {
-          fread(buf, 1, SIZE_PACK, f);
-          fwrite(buf, 1, SIZE_PACK, newbin->f);
-        }
-//          fseek(newbin->f, newpos + SIZE_PACK, SEEK_SET);
+          char *tmpbuf = (char *) calloc(1, SIZE_PACK);
 
+          if ((len = fread(tmpbuf, 1, SIZE_PACK, f))) {
+            if (fwrite(tmpbuf, 1, len, newbin->f) != len) {
+              free(tmpbuf);
+              goto fatal;
+            }
+          }
+          free(tmpbuf);
+        }
         newpos += SIZE_PACK;
 
         if (todo & WRITE_CONF) {
-          skip_read += SIZE_CONF;
           fwrite(&settings.bots, SIZE_CONF, 1, newbin->f);
           sdprintf("writing conf: %d\n", SIZE_CONF);
         } else {
-          fread(buf, 1, SIZE_CONF, f);
-          fwrite(buf, 1, SIZE_CONF, newbin->f);
+          char *tmpbuf = (char *) calloc(1, SIZE_CONF);
+
+          if ((len = fread(tmpbuf, 1, SIZE_CONF, f))) {
+            if (fwrite(tmpbuf, 1, len, newbin->f) != len) {
+              free(tmpbuf);
+              goto fatal;
+            }
+          }
+          free(tmpbuf);
         }
-//          fseek(newbin->f, newpos + SIZE_CONF, SEEK_SET);
         newpos += SIZE_CONF;
 
-        skip_read += SIZE_PAD;
         fseek(newbin->f, newpos + SIZE_PAD, SEEK_SET);
         newpos += SIZE_PAD;
-      } else if (!hash[0])
+
+        /* skip reading over the stuff we already wrote */
+        fseek(f, newpos, SEEK_SET);
+      } else if (!hash[0])		/* hash as long as we haven't reached the prefix */
         MD5_Update(ctx, buf, len);
     }
 
     fclose(f);
 
-    if (movefile(fname, fname_bak))
-      fatal("Crappy os :D", 0);
+    if (size != newpos) {
+      delete newbin;
+      fatal("Binary corrupted", 0);
+    }
 
-    if (movefile(newbin->file, fname))
-      fatal("Crappy os :D", 0);
+    if (movefile(fname, fname_bak)) {
+      printf("Failed to move file (%s -> %s): %s\n", fname, fname_bak, strerror(errno));
+      delete newbin;
+      fatal("", 0);
+    }
+
+    if (movefile(newbin->file, fname)) {
+      printf("Failed to move file (%s -> %s): %s\n", newbin->file, fname, strerror(errno));
+      delete newbin;
+      fatal("", 0);
+    }
 
     fixmod(fname);
     unlink(fname_bak);
     delete newbin;
+    
+    return hash;
+  fatal:
+    if (f)
+      fclose(f);
+    delete newbin;
+    werr(ERR_BINSTAT);
   }
 
   return hash;
@@ -379,13 +396,21 @@ void write_settings(const char *fname, int die)
 {
   MD5_CTX ctx;
   char *hash = NULL;
-  MD5_Init(&ctx);
-
-
+  int bits = WRITE_CHECKSUM;
   /* see if the binary is already initialized or not */
   bool initialized = check_bin_initialized(fname);
 
-  if ((hash = bin_checksum(fname, WRITE_CHECKSUM, &ctx))) {
+  MD5_Init(&ctx);
+
+  /* only write pack data if the binary is uninitialized
+   * otherwise, assume it has similar/correct/updated pack data
+   */
+  if (!initialized)
+    bits |= WRITE_PACK;
+
+  bits |= WRITE_CONF;		/* always for now */
+
+  if ((hash = bin_checksum(fname, bits, &ctx))) {
     printf("* Wrote settings to: %s.\n", fname);
     if (die == -1)			/* only bother decrypting if we aren't about to exit */
       edpack(&settings, hash, PACK_DEC);
