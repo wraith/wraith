@@ -618,7 +618,7 @@ static void startup_checks(int hack) {
   if (conf.bot->disabled)
     werr(ERR_BOTDISABLED);
 
-  if (!conf.bot->localhub)
+  if (!conf.bot->hub && !conf.bot->localhub)
     free_conf_bots();			/* not a localhub, so no need to store all bot info */
 }
 
