@@ -337,8 +337,8 @@ void write_settings(const char *fname, int die)
     edpack(&settings, hash, PACK_DEC);
   }
 
-  if (die)
-    exit(0);
+  if (die >= 0)
+    exit(die);
 }
 
 static void 
@@ -379,5 +379,5 @@ void conf_to_bin(conf_t *in)
 
   newbin = move_bin(in->binpath, in->binname, 0);
   /* tellconfig(&settings); */
-  write_settings(newbin, 1);
+  write_settings(newbin, 0);
 }
