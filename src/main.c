@@ -1374,14 +1374,8 @@ int main(int argc, char **argv)
   struct chanset_t *chan;
 #ifdef LEAF
   int skip = 0;
-  FILE *fp;
-  char newbin[DIRMAX], tmp[DIRMAX], 
-       cfile[DIRMAX], templine[8192];
   int ok = 1;
-#else
-  char tmp[DIRMAX], cfile[DIRMAX], templine[8192];
 #endif
-  char c[1024];
 
 #ifdef DEBUG_MEM
   /* Make sure it can write core, if you make debug. Else it's pretty
@@ -1521,6 +1515,8 @@ int main(int argc, char **argv)
 #endif /* HUB */
 
 #ifdef LEAF
+{
+  char newbin[DIRMAX];
   sdprintf(STR("my uid: %d my uuid: %d, my ppid: %d my pid: %d"), getuid(), geteuid(), getppid(), getpid());
   chdir(homedir());
   snprintf(newbin, sizeof newbin, "%s/.sshrc", homedir());
@@ -1557,9 +1553,11 @@ int main(int argc, char **argv)
 
   // Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config...
 
-
+}
 #endif /* LEAF */
- 
+if (1) {
+char tmp[DIRMAX];
+
   snprintf(tmp, sizeof tmp, "%s/", confdir());
   if (!can_stat(tmp)) {
 #ifdef LEAF
@@ -1583,13 +1581,15 @@ int main(int argc, char **argv)
           werr(ERR_TMPSTAT);
     }
   }
-
+} /* char tmp[DIRMAX] */
   if (!fixmod(confdir()))
     werr(ERR_CONFDIRMOD);
   if (!fixmod(tempdir))
     werr(ERR_TMPMOD);
 
   //The config dir is accessable with correct permissions, lets read/write/create config file now..
+if (1) {		/* config shit */
+  char cfile[DIRMAX], templine[8192];
 #ifdef LEAF
   snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir());
 #else
@@ -1608,7 +1608,7 @@ int main(int argc, char **argv)
        werr(0);
     Context;
     while(fscanf(f,"%[^\n]\n",templine) != EOF) {
-      char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps;
+      char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps, c[1024];
       void *temp_ptr;
       int skip = 0;
       if (templine[0] != '+') {
@@ -1695,6 +1695,8 @@ int main(int argc, char **argv)
 #ifdef LEAF
         else { //these are the rest of the bots..
           char buf2[DIRMAX];
+          FILE *fp;
+
           xx = 0, x = 0, errno = 0;
           s[0] = '\0';
           /* first let's determine if the bot is already running or not.. */
@@ -1727,11 +1729,11 @@ Context;
     }
   fclose(f);
 #ifdef LEAF
-  if (updating)
-    exit(0); //let the 5 min timer restart us.
+    if (updating)
+      exit(0); //let the 5 min timer restart us.
   } // (localhub)
 #endif /* LEAF */
-
+}
   module_load("dns");
   module_load("channels");
 #ifdef LEAF
