@@ -742,6 +742,30 @@ int my_cmp (const mycmds *c1, const mycmds *c2)
   return strcmp (c1->name, c2->name);
 }
 
+static void cmd_nohelp(struct userrec *u, int idx, char *par)
+{
+  int i;
+  char *buf = nmalloc(1);
+  buf[0] = 0;
+
+  qsort(cmds, cmdi - 1, sizeof(mycmds), (int (*)()) &my_cmp);
+  
+  for (i = 0; i < (cmdi - 1); i++) {
+    int o, found = 0;
+    for (o = 0; (help[o].cmd) && (help[o].desc); o++)
+      if (!egg_strcasecmp(help[o].cmd, cmds[i].name)) found++;
+    if (!found) {
+      buf = nrealloc(buf, strlen(buf) + 2 + strlen(cmds[i].name) + 1);
+      strcat(buf, cmds[i].name);
+      strcat(buf, ", ");
+    }
+  }
+  buf[strlen(buf) - 1] = 0;
+
+  dumplots(idx, "", buf);
+
+}
+
 static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100];
@@ -3997,6 +4021,7 @@ cmd_t C_dcc[] =
   {"echo",		"",	(Function) cmd_echo,		NULL},
   {"fixcodes",		"",	(Function) cmd_fixcodes,	NULL},
   {"handle",		"",	(Function) cmd_handle,		NULL},
+  {"nohelp",		"-|-",	(Function) cmd_nohelp,		NULL, 		1},
   {"help",		"-|-",	(Function) cmd_help,		NULL},
   {"ignores",		"m",	(Function) cmd_ignores,		NULL},
 #ifdef HUB

@@ -8,10 +8,11 @@
 #define _EGG_CMDT_H
 
 typedef struct {
-  char *name;
-  char *flags;
-  Function func;
-  char *funcname;
+  char 		*name;
+  char 		*flags;
+  Function 	func;
+  char 		*funcname;
+  int		nohelp;
 } cmd_t;
 
 typedef struct {
