@@ -13,12 +13,8 @@
 #include "chanprog.h"
 #include "settings.h"
 #include "src/mod/channels.mod/channels.h"
-#ifdef LEAF
 #include "src/mod/server.mod/server.h"
-#endif /* LEAF */
-#ifdef HUB
 #include "src/mod/share.mod/share.h"
-#endif /* HUB */
 #include "rfc1459.h"
 #include "net.h"
 #include "misc.h"
@@ -40,11 +36,7 @@ struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/
 char 			origbotname[NICKLEN + 1] = "";
 char 			botname[NICKLEN + 1] = "";	/* Primary botname		*/
-
-#ifdef HUB
-int     		my_port;
-#endif /* HUB */
-
+port_t     		my_port = 0;
 
 /* Remove leading and trailing whitespaces.
  */
@@ -283,10 +275,8 @@ void tell_verbose_status(int idx)
   dprintf(idx, "I am %s, running %s:  %d user%s\n", conf.bot->nick, ver, i, i == 1 ? "" : "s");
   if (conf.bot->localhub)
     dprintf(idx, "I am a localhub.\n");
-#ifdef HUB
-  if (isupdatehub())
+  if (conf.bot->hub && isupdatehub())
     dprintf(idx, "I am an update hub.\n");
-#endif /* HUB */
   now2 = now - online_since;
   s[0] = 0;
   if (now2 > 86400) {
@@ -346,19 +336,16 @@ void tell_settings(int idx)
   dprintf(idx, "Botnet Nickname: %s\n", conf.bot->nick);
   if (firewall[0])
     dprintf(idx, "Firewall: %s, port %d\n", firewall, firewallport);
-#ifdef HUB
-  dprintf(idx, "Userfile: %s   \n", userfile);
-#endif /* HUB */
+  if (conf.bot->hub)
+    dprintf(idx, "Userfile: %s   \n", userfile);
   dprintf(idx, "Directories:\n");
   dprintf(idx, "  Temp    : %s\n", tempdir);
   fr.global = default_flags;
 
   build_flags(s, &fr, NULL);
   dprintf(idx, "%s [%s]\n", MISC_NEWUSERFLAGS, s);
-#ifdef HUB
-  if (owner[0])
+  if (conf.bot->hub && owner[0])
     dprintf(idx, "%s: %s\n", MISC_PERMOWNER, owner);
-#endif /* HUB */
   dprintf(idx, "Ignores last %li mins\n", ignore_time);
 }
 
@@ -433,10 +420,8 @@ void load_internal_users()
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
           bi->hublevel = hublevel;
-#ifdef HUB
-	  if ((!bi->hublevel) && (!strcmp(hand, conf.bot->nick)))
+	  if (conf.bot->hub && (!bi->hublevel) && (!strcmp(hand, conf.bot->nick)))
 	    bi->hublevel = 99;
-#endif /* HUB */
           bi->uplink = (char *) my_calloc(1, 1);
 	  set_user(&USERENTRY_BOTADDR, u, bi);
 	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
@@ -538,14 +523,14 @@ void chanprog()
   sdprintf("ip4: %s", myipstr(4));
   sdprintf("ip6: %s", myipstr(6));
   sdprintf("I am: %s", conf.bot->nick);
-#ifdef HUB
-  egg_snprintf(userfile, 121, "%s/.u", conf.binpath);
-  loading = 1;
-  checkchans(0);
-  readuserfile(userfile, &userlist);
-  checkchans(1);
-  loading = 0;
-#endif /* HUB */
+  if (conf.bot->hub) {
+    egg_snprintf(userfile, 121, "%s/.u", conf.binpath);
+    loading = 1;
+    checkchans(0);
+    readuserfile(userfile, &userlist);
+    checkchans(1);
+    loading = 0;
+  }
 
   load_internal_users();
 
@@ -557,11 +542,10 @@ void chanprog()
     if (conf.bot->net.ip)
       bi->address = strdup(conf.bot->net.ip);
     bi->telnet_port = bi->relay_port = 3333;
-#ifdef HUB
-    bi->hublevel = 99;
-#else /* !HUB */
-    bi->hublevel = 999;
-#endif /* HUB */
+    if (conf.bot->hub)
+      bi->hublevel = 99;
+    else
+      bi->hublevel = 999;
     bi->uplink = (char *) my_calloc(1, 1);
     set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
   } else {
@@ -570,11 +554,9 @@ void chanprog()
 
   if (!bi)
     fatal("I'm added to userlist but without a bot record!", 0);
-  if (bi->telnet_port != 3333) {
-#ifdef HUB
+  if (conf.bot->hub) {
     listen_all(bi->telnet_port, 0);
     my_port = bi->telnet_port;
-#endif /* HUB */
   }
 
   /* set our shell info */
@@ -590,7 +572,6 @@ void chanprog()
   reaffirm_owners();
 }
 
-#ifdef HUB
 /* Reload the user file from disk
  */
 void reload()
@@ -615,7 +596,6 @@ void reload()
   reaffirm_owners();
   hook_read_userfile();
 }
-#endif /* HUB */
 
 /* Oddly enough, written by proton (Emech's coder)
  */

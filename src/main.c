@@ -162,10 +162,8 @@ void fatal(const char *s, int recoverable)
     ssl_cleanup();
 #endif /* HAVE_SSL */
 
-#ifdef HUB
   if (my_port)
     listen_all(my_port, 1); /* close the listening port... */
-#endif /* HUB */
 
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && dcc[i].sock >= 0)

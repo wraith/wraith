@@ -27,8 +27,6 @@ char *samechans(const char *, const char *);
 
 extern struct chanset_t		*chanset;
 extern char			admin[], origbotname[], botname[];
-#ifdef HUB
-extern int			my_port;
-#endif /* HUB */
+extern port_t			my_port;
 
 #endif /* !_CHANPROG_H */
