@@ -1341,6 +1341,11 @@ static void cmd_chhandle(int idx, char *par)
     dprintf(idx, "Somebody is already using %s.\n", newhand);
   else {
     struct userrec *u2 = get_user_by_handle(userlist, hand);
+
+    if (!u2) {
+      dprintf(idx, "No such handle!\n");
+      return;
+    }
     int atr = dcc[idx].user ? dcc[idx].user->flags : 0, atr2 = u2 ? u2->flags : 0;
 
     if (!(atr & USER_MASTER) && !u2->bot)

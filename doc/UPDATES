@@ -42,6 +42,7 @@ This is a summary of ChangeLog basically.
 * closed-private and ban-time were mixed up in the saving/loading process.
 * cmd_swhois now shows matching username
 * cmd_botcmd * is now limited to +n only
+* cmd_chhandle did not check if the old handle existed!
 
 1.1.9
 
