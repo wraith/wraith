@@ -108,6 +108,9 @@ flush_mode(struct chanset_t *chan, int pri)
   int plus = 2;                 /* 0 = '-', 1 = '+', 2 = none */
   unsigned int i = 0;
 
+  if (!modesperline)            /* Haven't received 005 yet :) */
+    return;
+
   flush_cookies(chan, pri);
 
 /* dequeue_op_deop(chan); */
