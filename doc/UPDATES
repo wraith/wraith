@@ -66,6 +66,7 @@ This is a summary of ChangeLog basically.
 * cmd_bottree now shows HUBS as yellow.
 * Added cmd_login to change login display settings seen in .whois for a few versions
 * pscloak is now default 0.
+* cmd_bots now takes an optional parameter. A nodename (hostname) to match for bots. Down bots are prepended with a *.
 
 1.1.9
 

@@ -16,6 +16,7 @@
 #include "net.h"
 #include "socket.h"
 #include "adns.h"
+#include "match.h"
 #include "users.h"
 #include "misc.h"
 #include "userrec.h"
@@ -522,32 +523,41 @@ void answer_local_whom(int idx, int chan)
 /* Show z a list of all bots connected
  */
 void
-tell_bots(int idx, int up)
+tell_bots(int idx, int up, char *nodename)
 {
   struct userrec *u = NULL;
   int cnt = 0, tot = 0;
-  char work[128] = "";
+  char work[128] = "", *node = NULL;
 
   if (up) {
-    strcat(work, conf.bot->nick);
-    strcat(work, " ");
-    cnt++;
-    tot++;
+    node = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);    
+    if (!nodename || (nodename && node && wild_match(nodename, node))) {
+      strcat(work, conf.bot->nick);
+      strcat(work, " ");
+      cnt++;
+      tot++;
+    }
   }
 
   for (u = userlist; u; u = u->next) {
     if (u->bot) {
       if (egg_strcasecmp(u->handle, conf.bot->nick)) {
-        if ((!up && !findbot(u->handle)) || (up && findbot(u->handle))) {
-          strcat(work, u->handle);
-          cnt++;
-          tot++;
-          if (cnt == 11) {
-            dprintf(idx, "%s bots: %s\n", up ? "Up" : "Down", work);
-            work[0] = 0;
-            cnt = 0;
-          } else
-            strcat(work, " ");
+        if (nodename || (!nodename && ((!up && !findbot(u->handle)) || (up && findbot(u->handle))))) {
+          node = (char *) get_user(&USERENTRY_NODENAME, u);
+          if (!nodename || (nodename && node && wild_match(nodename, node))) {
+            if (nodename && !findbot(u->handle))
+              strcat(work, "*");
+            strcat(work, u->handle);
+            cnt++;
+            tot++;
+            if (cnt == 11) {
+              dprintf(idx, "%s bots: %s\n", up ? "Up" : "Down", work);
+              work[0] = 0;
+              cnt = 0;
+            } else {
+              strcat(work, " ");
+            }
+          }
         }
       }
     }

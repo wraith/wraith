@@ -311,13 +311,16 @@ See also: netnick
     Removes bot from the specified channel
  
 See also: botjoin, +chan, -chan, chanset, chaninfo
-:hub:bots
+:hub:bots [nodename]
 ###  $bbots$b
    Shows the list of bots currently on the botnet.
    Example:
       Bots: cEvin, ruthie, Killa1
    There is no indication of which bots are directly connected to this current
    bot. %{+n}Use $b'%dwho'$b or $b'%dbottree'$b for that information.%{-}
+
+   Specifying a nodename will display all bots up/down on that nodename.
+   Bots with a * preceeding it's name is down.
  
 See also: downbots%{+n}, bottree%{-}
 ::botserver:
@@ -900,7 +903,7 @@ See also: cycle
  
    Example:
       Down bots: cEvin, ruthie, Killa1
- 
+
 See also: bots
 :leaf:dump
 ###  $bdump$b <text>

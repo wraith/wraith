@@ -685,14 +685,14 @@ static void cmd_secpass(int idx, char *par)
 #ifdef HUB
 static void cmd_bots(int idx, char *par)
 {
-  putlog(LOG_CMDS, "*", "#%s# bots", dcc[idx].nick);
-  tell_bots(idx, 1);
+  putlog(LOG_CMDS, "*", "#%s# bots %s", dcc[idx].nick, par ? par : "");
+  tell_bots(idx, 1, par);
 }
 
 static void cmd_downbots(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# downbots", dcc[idx].nick);
-  tell_bots(idx, 0);
+  tell_bots(idx, 0, NULL);
 }
 
 
