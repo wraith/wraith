@@ -11,7 +11,6 @@ extern tand_t		*tandbot;
 extern party_t		*party;
 extern int		tands;
 
-void restart_chons();
 void lower_bot_linked(int idx);
 void answer_local_whom(int, int);
 char *lastbot(char *);

@@ -1673,18 +1673,6 @@ void zapfbot(int idx)
   lostdcc(idx);
 }
 
-void restart_chons()
-{
-  int i;
-
-  /* Dump party line members */
-  for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_CHAT) {
-      check_bind_chon(dcc[i].nick, i);
-    }
-  }
-}
-
 static int get_role(char *bot)
 {
   int rl, i;

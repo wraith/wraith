@@ -304,14 +304,6 @@ void botnet_send_who(int idx, char *from, char *to, int chan)
   tputs(dcc[idx].sock, OBUF, len);
 }
 
-void botnet_send_infoq(int idx, char *par)
-{
-  size_t len;
-
-  len = simple_sprintf(OBUF, "i? %s\n", par);
-  send_tand_but(idx, OBUF, len);
-}
-
 void botnet_send_unlink(int idx, char *who, char *via, char *bot, char *reason)
 {
   size_t len;

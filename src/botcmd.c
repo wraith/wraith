@@ -501,65 +501,6 @@ static void bot_endlink(int idx, char *par)
   dcc[idx].status &= ~STAT_LINKING;
 }
 
-/* info? <from@bot>   -> send priv
- */
-static void bot_infoq(int idx, char *par)
-{
-#ifdef LEAF
-  char s[200] = "";
-  struct chanset_t *chan = NULL;
-#endif /* LEAF */
-  char s2[32] = "", *realnick = NULL;
-  time_t now2;
-  int hr, min;
-
-  /* Strip the idx from user@bot */
-  realnick = strchr(par, ':');
-  if (realnick)
-    realnick++;
-  else
-    realnick = par;
-  putlog(LOG_BOTS, "@", "#%s# botinfo", realnick);
-
-  now2 = now - online_since;
-  s2[0] = 0;
-  if (now2 > 86400) {
-    int mydays = now2 / 86400;
-
-    /* Days */
-    sprintf(s2, "%d day", mydays);
-    if (mydays >= 2)
-      strcat(s2, "s");
-    strcat(s2, ", ");
-    now2 -= mydays * 86400;
-  }
-  hr = (time_t) ((int) now2 / 3600);
-  now2 -= (hr * 3600);
-  min = (time_t) ((int) now2 / 60);
-  sprintf(&s2[strlen(s2)], "%02d:%02d", (int) hr, (int) min);
-#ifdef LEAF
-  s[0] = 0;
-  for (chan = chanset; chan; chan = chan->next) {
-    if (!channel_secret(chan)) {
-      if ((strlen(s) + strlen(chan->dname) + strlen(network) + strlen(conf.bot->nick) + strlen(ver) + 1) >= 200) {
-        strcat(s,"++  ");
-        break; /* Yegads..! */
-      }
-      strcat(s, chan->dname);
-      strcat(s, ", ");
-    }
-  }
-  if (s[0]) {
-    s[strlen(s) - 2] = 0;
-    botnet_send_priv(idx, conf.bot->nick, par, NULL, "%s <%s> (%s) [UP %s]", ver, network, s, s2);
-  } else
-    botnet_send_priv(idx, conf.bot->nick, par, NULL, "%s <%s> (%s) [UP %s]", ver, network, BOT_NOCHANNELS, s2);
-#else /* !HUB */
-  botnet_send_priv(idx, conf.bot->nick, par, NULL, "%s <NO_IRC> [UP %s]", ver, s2);
-#endif /* LEAF */
-  botnet_send_infoq(idx, par);
-}
-
 static void bot_ping(int idx, char *par)
 {
   botnet_send_pong(idx);
@@ -1274,7 +1215,6 @@ botcmd_t C_bot[] =
   {"e",			(Function) bot_error},
   {"el",		(Function) bot_endlink},
   {"i",			(Function) bot_idle},
-  {"i?",		(Function) bot_infoq},
   {"j",			(Function) bot_join},
   {"l",			(Function) bot_link},
   {"n",			(Function) bot_nlinked},

@@ -204,37 +204,6 @@ static void tell_who(struct userrec *u, int idx, int chan)
   }
 }
 
-static void cmd_botinfo(struct userrec *u, int idx, char *par)
-{
-  char s[512] = "", s2[32] = "";
-  time_t now2;
-  int hr, min;
-
-  putlog(LOG_CMDS, "*", "#%s# botinfo", dcc[idx].nick);
-
-  now2 = now - online_since;
-  s2[0] = 0;
-  if (now2 > 86400) {
-    int mydays = now2 / 86400;
-
-    /* mydays */
-    sprintf(s2, "%d day", mydays);
-    if (mydays >= 2)
-      strcat(s2, "s");
-    strcat(s2, ", ");
-    now2 -= mydays * 86400;
-  }
-  hr = (time_t) ((int) now2 / 3600);
-  now2 -= (hr * 3600);
-  min = (time_t) ((int) now2 / 60);
-  sprintf(&s2[strlen(s2)], "%02d:%02d", (int) hr, (int) min);
-  simple_sprintf(s, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
-  botnet_send_infoq(-1, s);
-
-  dprintf(idx, "*** [%s] %s <NO_IRC> [UP %s]\n", conf.bot->nick, ver, s2);
-}
-#endif /* HUB */
-
 static void cmd_whom(struct userrec *u, int idx, char *par)
 {
   if (par[0] == '*') {
@@ -4254,7 +4223,6 @@ cmd_t C_dcc[] =
   {"backup",		"m|m",	(Function) cmd_backup,		NULL},
   {"boot",		"m",	(Function) cmd_boot,		NULL},
   {"botconfig",		"n",	(Function) cmd_botconfig,	NULL},
-  {"botinfo",		"",	(Function) cmd_botinfo,		NULL},
   {"bots",		"m",	(Function) cmd_bots,		NULL},
   {"downbots",		"m",	(Function) cmd_downbots,	NULL},
   {"bottree",		"n",	(Function) cmd_bottree,		NULL},

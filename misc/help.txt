@@ -279,13 +279,6 @@ See also: bc, cmdpass
    will be used for all options.
  
 See also: botconfig
-:hub:botinfo
-###  %bbotinfo%b
-   Requests information from every bot currently on the botnet. Each bot should
-   eventually send you one line containing its version, network setting,
-   channels, and uptime.
- 
-See also: %{+n}bottree %{-}%{+m}, bots%{-}
 ::botjoin
 ###  %bbotjoin%b <bot> <channel> [options]
     Adds a channel to the bot's channel list. If options are specified, the 
@@ -326,7 +319,7 @@ See also: botjoin, +chan, -chan, chanset, chaninfo
    There is no indication of which bots are directly connected to this current
    bot. %{+n}Use %b'%dwho'%b or %b'%dbottree'%b for that information.%{-}
  
-See also: downbots%{+n}, bottree%{-}, botinfo
+See also: downbots%{+n}, bottree%{-}
 ::botserver:
 ###  %bbotserver%b <bot>
    The bot will display it's current server and lag over DCC.
@@ -338,7 +331,7 @@ See also: netserver, servers%{+n}, config%{-}
    nice way to get a feel for how the bots are physically connected. If 2 bots
    are sharing, a + will be indicated, or a ? if nothing is known.
  
-See also: bots, downbots, botinfo
+See also: bots, downbots
 ::botversion:
 ###  %bbotversion%b <bot>
    The bot will display it's pack version and uname.
