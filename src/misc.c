@@ -1409,8 +1409,7 @@ int updatebin (int idx, char *par, int autoi)
   listen_all(my_port, 1); //close the listening port...
   usleep(5000);
 #endif /* HUB */
-  i = system(buf);
-  if (i == -1 || i == 1) {
+  if ((i = system(buf))) {
     if (idx)
       dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
       putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)\n"), i);
