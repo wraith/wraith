@@ -457,14 +457,17 @@ check_hostmask()
     return;
 
   char s[UHOSTLEN + 2] = "", *tmp = botuserhost;
+  struct userrec *u = NULL;
 
   checked_hostmask = 1;
 
   sprintf(s, "*!%s", tmp);		/* just add actual user@ident, regardless of ~ */
 
-  for (struct list_type *q = (struct list_type *) get_user(&USERENTRY_HOSTS, conf.bot->u); q; q = q->next) {
-    if (!egg_strcasecmp(q->extra, s))
-      return;
+  /* dont add the host if it conflicts with another in the userlist */
+  if (u = get_user_by_host(s)) {
+    if (u != conf.bot->u)
+      putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
+    return;
   }
 
   addhost_by_handle(conf.bot->nick, s);

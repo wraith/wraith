@@ -70,6 +70,7 @@ This is a summary of ChangeLog basically.
 * Recoded and spiffed up cmd_userlist.
 * When connecting with a floodless iline, bot will now dump msgs instead of queueing them to server.
 * Removed the checks for duplicate msgs in the queue, they're there for a reason. (also is slow)
+* Don't auto add a hostmask that would conflict with another user.
 
 1.1.9
 
