@@ -161,7 +161,8 @@ void fatal(const char *s, int recoverable)
 #endif /* HAVE_SSL */
 
 #ifdef HUB
-  listen_all(my_port, 1); /* close the listening port... */
+  if (my_port)
+    listen_all(my_port, 1); /* close the listening port... */
 #endif /* HUB */
 
   for (int i = 0; i < dcc_total; i++)
