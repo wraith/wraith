@@ -19,7 +19,7 @@
 
 extern cmd_t 		C_dcc[];
 
-static bind_table_t *BT_link = NULL, *BT_disc = NULL, *BT_away = NULL, *BT_dcc = NULL;
+static bind_table_t *BT_away = NULL, *BT_dcc = NULL;
 static bind_table_t *BT_chat = NULL, *BT_act = NULL, *BT_bcst = NULL, *BT_note = NULL;
 static bind_table_t *BT_bot = NULL, *BT_nkch = NULL, *BT_chon = NULL, *BT_chof = NULL;
 static bind_table_t *BT_chpt = NULL, *BT_chjn = NULL, *BT_time = NULL;
@@ -37,8 +37,6 @@ void core_binds_init()
         BT_chpt = bind_table_add("chpt", 4, "ssii", MATCH_MASK, BIND_STACKABLE);
         BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_PARTIAL | MATCH_FLAGS, 0);
         add_builtins("dcc", C_dcc);
-        BT_disc = bind_table_add("disc", 1, "s", MATCH_MASK, BIND_STACKABLE);
-        BT_link = bind_table_add("link", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);
 	BT_time = bind_table_add("time", 5, "iiiii", MATCH_MASK, BIND_STACKABLE);
@@ -154,16 +152,6 @@ void check_bind_bcst(const char *from, int chan, const char *text)
 void check_bind_nkch(const char *ohand, const char *nhand)
 {
   check_bind(BT_nkch, ohand, NULL, ohand, nhand);
-}
-
-void check_bind_link(const char *bot, const char *via)
-{
-  check_bind(BT_link, bot, NULL, bot, via);
-}
-
-void check_bind_disc(const char *bot)
-{
-  check_bind(BT_disc, bot, NULL, bot);
 }
 
 int check_bind_note(const char *from, const char *to, const char *text)

@@ -26,7 +26,7 @@ int botlink(char *, int, char *);
 int botunlink(int, char *, char *);
 void addbot(char *, char *, char *, char, int, time_t, char *);
 void updatebot(int, char *, char, int, time_t, char *);
-void rembot(char *);
+void rembot(const char *);
 struct tand_t_struct *findbot(char *);
 void unvia(int, struct tand_t_struct *);
 void check_botnet_pings();

@@ -752,7 +752,6 @@ static void bot_nlinked(int idx, char *par)
     x = '-';
   }
   addbot(newbot, dcc[idx].nick, next, x, vlocalhub, vbuildts, vversion ? vversion : "");
-  check_bind_link(newbot, next);
 }
 
 static void bot_unlinked(int idx, char *par)

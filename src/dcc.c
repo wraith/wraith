@@ -315,7 +315,6 @@ static void bot_version(int idx, char *par)
   touch_laston(dcc[idx].user, "linked", now);
   dcc[idx].type = &DCC_BOT;
   addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vversion);
-  check_bind_link(dcc[idx].nick, conf.bot->nick);
   egg_snprintf(x, sizeof x, "v 1001500");
   bot_shareupdate(idx, x);
   bot_share(idx, x);
@@ -1481,7 +1480,7 @@ struct dcc_table DCC_DUPWAIT =
  * wether we have a pending duplicate connection for that bot and continues
  * with the login in that case.
  */
-void dupwait_notify(char *who)
+void dupwait_notify(const char *who)
 {
   register int idx;
 

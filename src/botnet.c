@@ -288,7 +288,7 @@ void partyaway(char *bot, int sock, char *msg)
 
 /* Remove a tandem bot from the chain list
  */
-void rembot(char *who)
+void rembot(const char *who)
 {
   tand_t **ptr = &tandbot, *ptr2 = NULL;
   struct userrec *u = NULL;
@@ -301,9 +301,8 @@ void rembot(char *who)
   if (!*ptr)
     /* May have just .unlink *'d */
     return;
-  check_bind_disc(who);
 
-  u = get_user_by_handle(userlist, who);
+  u = get_user_by_handle(userlist, (char *) who);
   if (u != NULL)
     touch_laston(u, "unlinked", now);
 
@@ -358,7 +357,7 @@ void rempartybot(char *bot)
 
 /* Remove every bot linked 'via' bot <x>
  */
-void unvia(int idx, tand_t * who)
+void unvia(int idx, tand_t *who)
 {
   tand_t *bot = NULL, *bot2 = NULL;
 
@@ -555,37 +554,40 @@ void answer_local_whom(int idx, int chan)
  */
 void tell_bots(int idx)
 {
-  char *up = NULL, *down = NULL;
+  char format[81] = "";
   int upi = 1, downi = 0;
-  size_t ulen = 0, dlen = 0;
+  size_t len;
   struct userrec *u = NULL;
 
-  ulen = strlen(conf.bot->nick);
-  up = calloc(1, ulen + 1);
-  strcpy(up, conf.bot->nick);
-  down = calloc(1, 1);
+  len = strlen(conf.bot->nick);
+  //up = calloc(1, ulen + 1);
+  //strcpy(up, conf.bot->nick);
+  //down = calloc(1, 1);
 
+  egg_snprintf(format, sizeof format, "%%s%%-11s%%s %%-5s %%-10s %%-11s %%s\n");
+  dprintf(idx, format, "", "Bot", "", "OS", "Username", "Shell");
+  dprintf(idx, format, "", "-----------", "", "----------", "-----------", "-----------------------");
+  
+/* FIXME: NEED ME! */
   for (u = userlist; u; u = u->next) {
     if ((u->flags & USER_BOT) && (egg_strcasecmp(u->handle, conf.bot->nick))) {
       size_t hlen = strlen(u->handle);
+      int up = 0;
 
       if (findbot(u->handle)) {
         upi++;
-        up = realloc(up, ulen + hlen + /*', '*/ + 2 + 1);
-        strcat(up, ", ");
-        strcat(up, u->handle);
-        ulen += hlen + 3;
-      } else {
-        down = realloc(down, dlen + hlen + /*', '*/ + 2 + 1);
-        if (downi)
-          strcat(down, ", ");
+        up = 1;
+      } else
         downi++;
-        strcat(down, u->handle);
-        dlen += hlen + 3;
-      }
+
+      dprintf(idx, format, up ? GREEN(idx) : RED(idx), u->handle, COLOR_END(idx), 
+              get_user(&USERENTRY_OS, u), get_user(&USERENTRY_USERNAME, u), 
+              get_user(&USERENTRY_NODENAME, u));
+
+//      if (up) {
     }
   }
-
+/*
   if (!downi)
     dprintf(idx, "Bots up (%d) [%sall%s]: %s\n", upi, BOLD(idx), BOLD_END(idx), up);
   else
@@ -598,6 +600,7 @@ void tell_bots(int idx)
                COLOR_END(idx), RED(idx), (100 * downi / (upi + downi)), COLOR_END(idx));
   free(up);
   free(down);
+*/
 }
 
 /* Show a simpleton bot tree
