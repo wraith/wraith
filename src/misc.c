@@ -489,9 +489,10 @@ int expmem_misc()
 #endif
   tot += sizeof(struct auth_t) * max_auth;
 
-  for (i = 0; i < auth_total; i++) {
-    tot += sizeof(struct userrec);
-  }
+//  Wtf is this?
+//  for (i = 0; i < auth_total; i++) {
+//    tot += sizeof(struct userrec);
+//  }
 
   tot += strlen(binname) + 1;
   return tot + (max_logs * sizeof(log_t));
