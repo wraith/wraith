@@ -319,6 +319,24 @@ static void cmd_config(struct userrec *u, int idx, char *par)
     dprintf(idx, "No such config entry\n");
     return;
   }
+  if (!isowner(u->handle)) {
+    int no = 0;
+    if (!egg_strcasecmp(name, "authkey"))
+      no++;
+    if (!egg_strcasecmp(name, "cmdprefix"))
+      no++;
+    if (!egg_strcasecmp(name, "hijack"))
+      no++;
+    if (!egg_strcasecmp(name, "bad-cookie"))
+      no++;
+    if (!egg_strcasecmp(name, "manop"))
+      no++;
+
+    if (no) {
+      dprintf(idx, "Only permanent owners may change '%s'.\n", name);
+      return;
+    }
+  }
   if (!par[0]) {
     cfgent->describe(cfgent, idx);
     if (!cfgent->gdata)
