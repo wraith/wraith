@@ -2742,10 +2742,10 @@ static int gotmsg(char *from, char *msg)
     if (botmatch && strcmp(fword, "*"))	
       fword = newsplit(&my_msg);	/* now this will be the command */
     /* is it a cmd? */
-    if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != cmdprefix[0]) || (fword[0] == cmdprefix[0]))) {
+    if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != cmdprefix) || (fword[0] == cmdprefix))) {
       i = findauth(uhost);
       if (i > -1 && auth[i].authed) {
-        if (fword[0] == cmdprefix[0])
+        if (fword[0] == cmdprefix)
           fword++;
         my_u = auth[i].user;
         if (check_bind_pubc(fword, nick, uhost, my_u, my_msg, chan->dname)) {

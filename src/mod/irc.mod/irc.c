@@ -1273,7 +1273,7 @@ static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u,
   int x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, chan);
 
   if (x & BIND_RET_LOG)
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s%s %s", nick, from, u ? u->handle : "*", chan, cmdprefix, cmd, args);
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", nick, from, u ? u->handle : "*", chan, cmdprefix, cmd, args);
   if (x & BIND_RET_BREAK) return(1);
   return(0);
 }

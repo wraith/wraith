@@ -314,7 +314,7 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
     auth[i].authing = 0;
     auth[i].authtime = now;
     auth[i].atime = now;
-    dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %shelp\n", nick, cmdprefix);
+    dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %chelp\n", nick, cmdprefix);
   } else { /* bad hash! */
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed +AUTH", nick, host, u->handle);
 #ifdef S_AUTHHASH
@@ -476,7 +476,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
       m = ismember(chan, nick);
   }
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sOP %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cOP %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
 
   if (par[0] == '-') { /* we have an option! */
     char *tmp = NULL;
@@ -526,7 +526,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
       m = ismember(chan, nick);
   }
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sVOICE %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cVOICE %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
 
   if (par[0] == '-') { /* we have an option! */
     char *tmp = NULL;
@@ -567,7 +567,7 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
   char list[1024] = "";
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sCHANNELS %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cCHANNELS %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
   for (chan = chanset; chan; chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
@@ -597,7 +597,7 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
   if (!par[0])
     return 0;
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %sGETKEY %s", nick, host, u->handle, cmdprefix, par);
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %cGETKEY %s", nick, host, u->handle, cmdprefix, par);
 
   chan = findchan_by_dname(par);
   if (chan && channel_active(chan) && !channel_pending(chan)) {
@@ -619,7 +619,7 @@ static int msgc_help(char *nick, char *host, struct userrec *u, char *par, char 
   bind_table_t *table = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %sHELP %s", nick, host, u->handle, cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %cHELP %s", nick, host, u->handle, cmdprefix, par ? par : "");
 
 
   get_user_flagrec(u, &fr, chname);
@@ -638,7 +638,7 @@ static int msgc_md5(char *nick, char *host, struct userrec *u, char *par, char *
 {
   struct chanset_t *chan = NULL;
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sMD5 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cMD5 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
   
   if (chname && chname[0])
     chan = findchan_by_dname(chname);  
@@ -651,7 +651,7 @@ static int msgc_sha1(char *nick, char *host, struct userrec *u, char *par, char 
 {
   struct chanset_t *chan = NULL;
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sSHA1 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cSHA1 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
   
   if (chname && chname[0])
     chan = findchan_by_dname(chname);  
@@ -669,7 +669,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
   if (chname && chname[0])
     return 0;
  
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %sINVITE %s", nick, host, u->handle, cmdprefix, par ? par : "");
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %cINVITE %s", nick, host, u->handle, cmdprefix, par ? par : "");
 
   if (par[0] == '-') {
     char *tmp = NULL;

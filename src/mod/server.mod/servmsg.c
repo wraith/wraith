@@ -125,7 +125,7 @@ static int check_bind_msgc(char *cmd, char *nick, char *from, struct userrec *u,
   x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, NULL);
 
   if (x & BIND_RET_LOG)
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);
 
   if (x & BIND_RET_BREAK) return(1);
   return(0);
@@ -496,15 +496,15 @@ static int gotmsg(char *from, char *msg)
       i = findauth(uhost);
       /* is it a cmd? */
 
-      if (i > -1 && auth[i].authed && my_code[0] == cmdprefix[0] && my_code[1]) {
+      if (my_code && my_code[0] && my_code[1] && i > -1 && auth[i].authed && my_code[0] == cmdprefix) {
         my_code++;
         my_u = auth[i].user;
 
         if (check_bind_msgc(my_code, nick, uhost, my_u, msg))
           auth[i].atime = now;
         else
-          putlog(LOG_MSGS, "*", "[%s] %c%s %s", from, cmdprefix[0], my_code, msg);
-      } else if ((my_code[0] != cmdprefix[0] || !my_code[1] || i == -1 || !(auth[i].authed))) {
+          putlog(LOG_MSGS, "*", "[%s] %c%s %s", from, cmdprefix, my_code, msg);
+      } else if ((my_code[0] != cmdprefix || !my_code[1] || i == -1 || !(auth[i].authed))) {
 #endif /* S_AUTHCMDS */
         if (!ignoring) {
           int doit = 1;

@@ -29,7 +29,7 @@
 
 int 				cfg_count = 0, cfg_noshare = 0;
 struct cfg_entry 		**cfg = NULL;
-char 				cmdprefix[1] = "+";	/* This is the prefix for msg/channel cmds */
+char 				cmdprefix = '+';	/* This is the prefix for msg/channel cmds */
 #ifdef S_DCCPASS
 struct cmd_pass 		*cmdpass = NULL;
 #endif /* S_DCCPASS */
@@ -113,19 +113,15 @@ struct cfg_entry CFG_MSGIDENT = {
 
 void cmdprefix_describe(struct cfg_entry *entry, int idx) {
 #ifdef HUB
-  dprintf(idx, STR("cmdprefix is the prefix used for msg cmds, ie: !op or .op\n"));
+  dprintf(idx, STR("cmdprefix is the prefix character used for msg cmds, ie: !op or .op\n"));
 #endif /* HUB */
 }
 
 void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
-  if (entry->ldata) {
-    cmdprefix[0] = entry->ldata[0];
-    /* strncpyz(cmdprefix, (char *) entry->ldata, 2); */
-  } else if (entry->gdata) {
-    cmdprefix[0] = entry->gdata[0];
-    /* strncpyz(cmdprefix, (char *) entry->gdata, 2); */
-  }
-  cmdprefix[1] = 0;
+  if (entry->ldata)
+    cmdprefix = entry->ldata[0];
+  else if (entry->gdata)
+    cmdprefix = entry->gdata[0];
 }
 
 struct cfg_entry CFG_CMDPREFIX = {
@@ -721,12 +717,12 @@ void init_config()
   add_cfg(&CFG_MSGINVITE);
   add_cfg(&CFG_MSGIDENT);
 #endif /* S_MSGCMDS */
+  add_cfg(&CFG_CMDPREFIX);
 #ifdef HUB
   add_cfg(&CFG_NICK);
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
-  add_cfg(&CFG_CMDPREFIX);
   cfg_noshare = 1;
   set_cfg_str(NULL, "realname", "A deranged product of evil coders");
   cfg_noshare = 0;

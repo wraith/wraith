@@ -65,7 +65,7 @@ void set_cmd_pass(char *, int);
 extern struct cmd_pass            *cmdpass;
 #endif /* S_DCCPASS */
 
-extern char			cmdprefix[];
+extern char			cmdprefix;
 extern int			cfg_count, cfg_noshare;
 extern struct cfg_entry		**cfg;
 
