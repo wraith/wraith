@@ -1177,17 +1177,14 @@ static void pre_relay(int idx, char *buf, register int len)
   register int tidx = (-1), i;
 
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && (dcc[i].type == &DCC_FORK_RELAY) &&
-	(dcc[i].u.relay->sock == dcc[idx].sock)) {
+    if (dcc[i].type && !dcc[i].addr && (dcc[i].u.relay->sock == dcc[idx].sock)) {
       tidx = i;
       break;
     }
   }
   if (tidx < 0) {
-    /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT) &&
-	  (dcc[i].sock == dcc[idx].u.relay->sock)) {
+      if (dcc[i].type && !dcc[i].addr && (dcc[i].sock == dcc[idx].u.relay->sock)) {
 	tidx = i;
 	break;
       }
@@ -1232,10 +1229,8 @@ static void failed_pre_relay(int idx)
     }
   }
   if (tidx < 0) {
-    /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT) &&
-	  (dcc[i].sock == dcc[idx].u.relay->sock)) {
+      if (dcc[i].type && !dcc[i].addr && (dcc[i].sock == dcc[idx].u.relay->sock)) {
 	tidx = i;
 	break;
       }
