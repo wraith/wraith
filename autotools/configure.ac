@@ -77,7 +77,7 @@ AC_HEADER_STAT
 #checkpoint
 AC_CACHE_SAVE 
 AC_CHECK_HEADERS([stdarg.h std_arg.h arpa/inet.h fcntl.h limits.h locale.h netdb.h netinet/in.h])
-AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/param.h sys/socket.h wchar.h src/ptrace.h paths.h])
+AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/param.h sys/socket.h wchar.h sys/ptrace.h paths.h])
 
 #checkpoint
 AC_CACHE_SAVE

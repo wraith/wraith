@@ -119,9 +119,6 @@
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
 
-/* Define to 1 if you have the <src/ptrace.h> header file. */
-#undef HAVE_SRC_PTRACE_H
-
 /* Define to 1 if `stat' has the bug that it succeeds when given the
    zero-length file name argument. */
 #undef HAVE_STAT_EMPTY_STRING_BUG
@@ -172,6 +169,9 @@
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
+
+/* Define to 1 if you have the <sys/ptrace.h> header file. */
+#undef HAVE_SYS_PTRACE_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H
