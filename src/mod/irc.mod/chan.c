@@ -1046,7 +1046,8 @@ do_take(struct chanset_t *chan)
       if (m->user && m->user->flags & USER_BOT && !hasop) {
         strcat(to_op, m->nick);
         strcat(to_op, " ");
-      } else if (hasop && !(m->user && m->user->flags & USER_OP)) {
+/*      } else if (hasop && !(m->user && m->user->flags & USER_OP)) { */
+      } else if (hasop) {
         strcat(to_deop, m->nick);
         strcat(to_deop, " ");
       }
