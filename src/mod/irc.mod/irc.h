@@ -71,6 +71,7 @@ void recheck_channel(struct chanset_t *, int);
 void recheck_channel_modes(struct chanset_t *);
 void do_channel_part(struct chanset_t *);
 void irc_report(int, int);
+void flush_modes();
 
 #endif				/* _EGG_MOD_IRC_IRC_H */
 

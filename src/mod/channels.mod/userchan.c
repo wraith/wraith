@@ -1338,9 +1338,9 @@ exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans \
   return 1;
 }
 
-static void channels_writeuserfile(void)
-{
 #ifdef HUB
+void channels_writeuserfile()
+{
   char s[1024] = "";
   FILE *f = NULL;
   int  ret = 0;
@@ -1358,8 +1358,8 @@ static void channels_writeuserfile(void)
   }
   if (ret < 5)
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
-#endif /* HUB */
 }
+#endif /* HUB */
 
 /* Expire mask originally set by `who' on `chan'?
  *

@@ -45,5 +45,8 @@ void finish_share(int);
 void dump_resync(int);
 void uff_addtable(uff_table_t *);
 void share_report(int, int);
+#ifdef HUB
+void hook_read_userfile();
+#endif /* HUB */
 
 #endif				/* _EGG_MOD_SHARE_SHARE_H */

@@ -14,12 +14,12 @@
 #include "rfc1459.h"
 #include "dcc.h"
 #include "src/mod/share.mod/share.h"
+#include "src/mod/channels.mod/channels.h"
 #include "main.h"
 #include "users.h"
 #include "chan.h"
 #include "match.h"
 #include "dccutil.h"
-#include "hooks.h"
 #include "tandem.h"
 #include "chanprog.h"
 #include "crypt.h"
@@ -39,7 +39,9 @@ int		userfile_perm = 0600;	/* Userfile permissions,
 					   default rw-------		    */
 
 
+#ifdef HUB
 static int		 sort_users = 1;	/* sort the userlist when saving    */
+#endif /* HUB */
 
 int count_users(struct userrec *bu)
 {
@@ -280,6 +282,7 @@ int u_pass_match(struct userrec *u, char *in)
   return 0;
 }
 
+#ifdef HUB
 int write_user(struct userrec *u, FILE * f, int idx)
 {
   char s[181] = "";
@@ -326,7 +329,7 @@ int write_user(struct userrec *u, FILE * f, int idx)
   return 1;
 }
 
-int sort_compare(struct userrec *a, struct userrec *b)
+static int sort_compare(struct userrec *a, struct userrec *b)
 {
   /* Order by flags, then alphabetically
    * first bots: +h / +a / +l / other bots
@@ -365,7 +368,7 @@ int sort_compare(struct userrec *a, struct userrec *b)
   return (egg_strcasecmp(a->handle, b->handle) > 0);
 }
 
-void sort_userlist()
+static void sort_userlist()
 {
   int again = 1;
   struct userrec *last = NULL, *p = NULL, *c = NULL, *n = NULL;
@@ -426,7 +429,7 @@ int write_userfile(int idx)
   lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
   ok = 1;
   fclose(f);
-  call_hook(HOOK_USERFILE);
+  channels_writeuserfile();
   f = fopen(new_userfile, "a");
   putlog(LOG_DEBUG, "@", "Writing user entries.");
   for (u = userlist; u && ok; u = u->next)
@@ -445,6 +448,7 @@ int write_userfile(int idx)
   free(new_userfile);
   return 0;
 }
+#endif /* HUB */
 
 int change_handle(struct userrec *u, char *newh)
 {

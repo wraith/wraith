@@ -6,7 +6,6 @@
 
 #define MAKING_CHANNELS
 #include "src/common.h"
-#include "src/hooks.h"
 #include "src/mod/share.mod/share.h"
 #ifdef LEAF
 #include "src/mod/irc.mod/irc.h"
@@ -953,7 +952,6 @@ void channels_init()
   timer_create_secs(60, "check_expired_exempts", (Function) check_expired_exempts);
   timer_create_secs(60, "check_expired_invites", (Function) check_expired_invites);
   timer_create_secs(10, "channels_10secondly", (Function) channels_10secondly);
-  add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
 
   add_builtins("dcc", C_dcc_irc);
   add_builtins("bot", channels_bot);

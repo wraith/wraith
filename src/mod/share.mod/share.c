@@ -13,7 +13,6 @@
 #include "src/users.h"
 #include "src/userrec.h"
 #include "src/botnet.h"
-#include "src/hooks.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -75,7 +74,9 @@ typedef struct tandbuf_t {
 tandbuf *tbuf;
 
 /* Prototypes */
+#ifdef HUB
 static void start_sending_users(int);
+#endif /* HUB */
 static void shareout_but (struct chanset_t *, ...);
 static int flush_tbuf(char *);
 static int can_resync(char *);
@@ -1036,6 +1037,7 @@ static void share_pls_ignore(int idx, char *par)
   }
 }
 
+#ifdef HUB
 static void share_ufno(int idx, char *par)
 {
   putlog(LOG_BOTS, "@", "User file rejected by %s: %s",
@@ -1059,6 +1061,7 @@ static void share_ufyes(int idx, char *par)
 	   dcc[idx].nick);
   }
 }
+#endif /* HUB */
 
 static void share_userfileq(int idx, char *par)
 {
@@ -1204,7 +1207,8 @@ static void share_version(int idx, char *par)
     higher_bot_linked(idx);*/
 }
 
-static void hook_read_userfile()
+#ifdef HUB
+void hook_read_userfile()
 {
   int i;
 
@@ -1221,12 +1225,15 @@ static void hook_read_userfile()
       }
   }
 }
+#endif /* HUB */
 
 static void share_endstartup(int idx, char *par)
 {
   dcc[idx].status &= ~STAT_GETTING;
   /* Send to any other sharebots */
+#ifdef HUB
   hook_read_userfile();
+#endif /* HUB */
 }
 
 static void share_end(int idx, char *par)
@@ -1282,9 +1289,13 @@ static botcmd_t C_share[] =
   {"se",	(Function) share_stick_exempt},
   {"sInv",	(Function) share_stick_invite},
   {"u?",	(Function) share_userfileq},
+#ifdef HUB
   {"un",	(Function) share_ufno},
+#endif /* HUB */
   {"us",	(Function) share_ufsend},
+#ifdef HUB
   {"uy",	(Function) share_ufyes},
+#endif /* HUB */
   {"v",		(Function) share_version},
   {NULL,	NULL}
 };
@@ -1484,6 +1495,7 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq,
   return qq;
 }
 
+#ifdef HUB
 /* Add stuff to a specific bot's tbuf.
  */
 static void q_tbuf(char *bot, char *s, struct chanset_t *chan)
@@ -1503,6 +1515,7 @@ static void q_tbuf(char *bot, char *s, struct chanset_t *chan)
       break;
     }
 }
+#endif /* HUB */
 
 /* Add stuff to the resync buffers.
  */
@@ -1576,6 +1589,7 @@ static void status_tbufs(int idx)
   }
 }
 
+#ifdef HUB
 static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
 {
   FILE *f = NULL;
@@ -1614,6 +1628,7 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
     putlog(LOG_MISC, "@", USERF_ERRWRITE2);
   return ok;
 }
+#endif /* HUB */
 
 
 /* Create a copy of the entire userlist (for sending user lists to clone
@@ -1903,6 +1918,7 @@ Context;
   updatebot(-1, dcc[j].nick, '+', 0);
 }
 
+#ifdef HUB
 /* Begin the user transfer process.
  */
 static void start_sending_users(int idx)
@@ -2007,6 +2023,7 @@ static void start_sending_users(int idx)
     unlink(share_file);
   }
 }
+#endif /* HUB */
 
 static void (*def_dcc_bot_kill) (int, void *) = 0;
 
@@ -2115,7 +2132,6 @@ void share_init()
 
   timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
   timer_create_secs(1, "check_delay", (Function) check_delay);
-  add_hook(HOOK_READ_USERFILE, (Function) hook_read_userfile);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
   uff_init();

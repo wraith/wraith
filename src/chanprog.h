@@ -16,7 +16,6 @@ void tell_verbose_status(int);
 void tell_settings(int);
 int isowner(char *);
 void reaffirm_owners();
-void rehash();
 void reload();
 void chanprog();
 void check_timers();

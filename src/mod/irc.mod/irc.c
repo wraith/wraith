@@ -8,7 +8,6 @@
 #include "src/common.h"
 #define MAKING_IRC
 #include "irc.h"
-#include "src/hooks.h"
 #include "src/match.h"
 #include "src/settings.h"
 #include "src/tandem.h"
@@ -1293,7 +1292,7 @@ static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u,
 
 /* Flush the modes for EVERY channel.
  */
-static void flush_modes()
+void flush_modes()
 {
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
@@ -1553,7 +1552,6 @@ void irc_init()
   timer_create_secs(60, "warn_pls_take", (Function) warn_pls_take);
   timer_create_secs(60, "check_servers", (Function) check_servers);
   timer_create_secs(5, "getin_5secondly", (Function) getin_5secondly);
-  add_hook(HOOK_IDLE, (Function) flush_modes);
 #ifdef S_AUTOLOCK
   timer_create_secs(60, "check_netfight", (Function) check_netfight);
 #endif /* S_AUTOLOCK */

@@ -157,6 +157,7 @@ void uff_addtable(uff_table_t *ut)
  *    Userfile feature parsing functions
  */
 
+#ifdef HUB
 /* Parse the given features string, set internal flags apropriately and
  * eventually respond with all features we will use.
  */
@@ -190,6 +191,7 @@ static void uf_features_parse(int idx, char *par)
   if (uff_sbuf[0])
     dprintf(idx, "s feats %s\n", uff_sbuf);
 }
+#endif /* HUB */
 
 /* Return a list of features we are supporting.
  */
@@ -246,6 +248,7 @@ static int uf_features_check(int idx, char *par)
   return 1;
 }
 
+#ifdef HUB
 /* Call all active feature functions, sorted by their priority. This
  * should be called when we're about to send a user file.
  */
@@ -260,6 +263,7 @@ static int uff_call_sending(int idx, char *user_file)
 	return 0;	/* Failed! */
   return 1;
 }
+#endif /* HUB */
 
 /* Call all active feature functions, sorted by their priority. This
  * should be called when we've received a user file and are about to

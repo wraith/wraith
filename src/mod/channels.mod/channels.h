@@ -89,8 +89,10 @@ int u_equals_mask(maskrec *, char *);
 int u_match_mask(struct maskrec *, char *);
 int ismasked(masklist *, char *);
 int ismodeline(masklist *, char *);
-
 void channels_report(int, int);
+#ifdef HUB
+void channels_writeuserfile();
+#endif /* HUB */
 
 extern char		glob_chanset[], cfg_glob_chanset[];
 

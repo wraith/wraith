@@ -14,8 +14,10 @@ int deluser(char *);
 void freeuser(struct userrec *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
+#ifdef HUB
 int write_user(struct userrec *u, FILE * f, int shr);
 int write_userfile(int);
+#endif /* HUB */
 struct userrec *check_dcclist_hand(char *);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);

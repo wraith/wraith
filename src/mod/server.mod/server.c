@@ -16,7 +16,6 @@
 #include "src/main.h"
 #include "src/misc.h"
 #include "src/chanprog.h"
-#include "src/hooks.h"
 #include "src/net.h"
 #include "src/auth.h"
 #include "src/dns.h"
@@ -1388,25 +1387,6 @@ static void server_5minutely()
   }
 }
 
-static void server_prerehash()
-{
-  strcpy(oldnick, botname);
-}
-
-void server_postrehash()
-{
-  strncpyz(botname, origbotname, NICKLEN);
-  if (oldnick[0] && !rfc_casecmp(oldnick, botname)) {
-    /* Change botname back, don't be premature. */
-    strcpy(botname, oldnick);
-    if (server_online)
-      dprintf(DP_SERVER, "NICK %s\n", origbotname);
-  }
-  /* Change botname back incase we were using altnick previous to rehash. */
-  else if (oldnick[0])
-    strcpy(botname, oldnick);
-}
-
 void server_die()
 {
   cycle_time = 100;
@@ -1552,7 +1532,6 @@ void server_init()
   timer_create_secs(10, "server_10secondly", (Function) server_10secondly);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
-  add_hook(HOOK_PRE_REHASH, (Function) server_prerehash);
   mq.head = hq.head = modeq.head = NULL;
   mq.last = hq.last = modeq.last = NULL;
   mq.tot = hq.tot = modeq.tot = 0;

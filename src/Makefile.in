@@ -32,7 +32,6 @@ OBJS = auth.o \
 	egg_timer.o \
 	flags.o \
 	garble.o \
-	hooks.o \
 	log.o \
 	main.o \
 	match.o \

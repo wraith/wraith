@@ -9,7 +9,6 @@
 #include "common.h"
 #include "main.h"
 #include "binary.h"
-#include "hooks.h"
 #include "dcc.h"
 #include "misc.h"
 #include "settings.h"
@@ -30,6 +29,7 @@
 #include "botnet.h"
 #include "build.h"
 #ifdef LEAF
+#include "src/mod/irc.mod/irc.h"
 #include "src/mod/server.mod/server.h"
 #endif /* LEAF */
 /* FIXME: REMOVE AFTER 1.1.4 */
@@ -82,7 +82,6 @@ char	owner[121] = "";	/* Permanent owner(s) of the bot */
 char	version[81] = "";	/* Version info (long form) */
 char	ver[41] = "";		/* Version info (short form) */
 int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
-int	do_restart = 0;		/* .restart has been called, restart asap */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
@@ -729,7 +728,6 @@ int main(int argc, char **argv)
   clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_settings();
-  hooks_init();
   binds_init();
   core_binds_init();
   init_dcc_max();
@@ -983,13 +981,10 @@ int main(int argc, char **argv)
 	}
       }
     } else if (xx == -3) {
-      call_hook(HOOK_IDLE);
+#ifdef LEAF
+      flush_modes();
+#endif /* LEAF */
       socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
-    }
-
-    if (do_restart) {
-      rehash();
-      do_restart = 0;
     }
   }
 }
