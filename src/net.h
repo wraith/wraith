@@ -130,7 +130,6 @@ int ssl_link(int, int);
 char *myipstr(int);
 IP getmyip();
 void cache_my_ip();
-void neterror(char *);
 void setsock(int, int);
 int allocsock(int, int);
 

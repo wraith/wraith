@@ -927,7 +927,7 @@ static void dcc_chat_hostresolved(int i)
 #  endif /* IPV6_DEBUG */
 #endif /* USE_IPV6 */
   if (dcc[i].sock < 0 || open_telnet_dcc(dcc[i].sock, ip, buf) < 0) {
-    neterror(buf);
+    strcpy(buf, strerror(errno));
     if (!quiet_reject)
       dprintf(DP_HELP, "NOTICE %s :%s (%s)\n", dcc[i].nick, DCC_CONNECTFAILED1, buf);
     putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED2, dcc[i].nick, dcc[i].host);

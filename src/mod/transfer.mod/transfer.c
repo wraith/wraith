@@ -308,7 +308,7 @@ void eof_dcc_fork_send(int idx)
     putlog(LOG_BOTS, "*", "Failed binary transfer.");
     unlink(dcc[idx].u.xfer->filename);
   } else {
-    neterror(s1);
+    strcpy(s1, strerror(errno));
     if (!quiet_reject)
       dprintf(DP_HELP, "NOTICE %s :%s (%s)\n", dcc[idx].nick,
 	      DCC_CONNECTFAILED1, s1);
@@ -1028,8 +1028,7 @@ static void dcc_get_pending(int idx, char *buf, int len)
   dcc[idx].addr = ip;
   dcc[idx].port = (int) port;
   if (dcc[idx].sock == -1) {
-    neterror(s);
-    dprintf(DP_HELP, TRANSFER_NOTICE_BAD_CONN, dcc[idx].nick, s);
+    dprintf(DP_HELP, TRANSFER_NOTICE_BAD_CONN, dcc[idx].nick, strerror(errno));
     putlog(LOG_FILES, "*", TRANSFER_LOG_BAD_CONN,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);

@@ -1441,7 +1441,7 @@ static void server_resolve_failure(int idx)
 
 static void server_resolve_success(int idx)
 {
-  char s[121] = "", pass[121] = "";
+  char pass[121] = "";
 
   resolvserv = 0;
   dcc[idx].addr = dcc[idx].u.dns->ip;
@@ -1454,9 +1454,7 @@ static void server_resolve_success(int idx)
   serv = open_telnet(iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
 #endif /* USE_IPV6 */
   if (serv < 0) {
-    neterror(s);
-
-    putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, s);
+    putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, strerror(errno));
     trying_server = 0;
     lostdcc(idx);
   } else {

@@ -324,84 +324,6 @@ void cache_my_ip()
   }
 }
 
-void neterror(char *s)
-{
-  switch (errno) {
-  case EADDRINUSE:
-    strcpy(s, "Address already in use");
-    break;
-  case EADDRNOTAVAIL:
-    strcpy(s, "Cannot assign requested address");
-    break;
-  case EAFNOSUPPORT:
-    strcpy(s, "Address family not supported");
-    break;
-  case EALREADY:
-    strcpy(s, "Socket already in use");
-    break;
-  case EBADF:
-    strcpy(s, "Socket descriptor is bad");
-    break;
-  case ECONNREFUSED:
-    strcpy(s, "Connection refused");
-    break;
-  case EFAULT:
-    strcpy(s, "Bad address");
-    break;
-  case EINPROGRESS:
-    strcpy(s, "Operation in progress");
-    break;
-  case EINTR:
-    strcpy(s, "Timeout");
-    break;
-  case EINVAL:
-    strcpy(s, "Invalid argument");
-    break;
-  case EISCONN:
-    strcpy(s, "Socket already connected");
-    break;
-  case ENETUNREACH:
-    strcpy(s, "Network unreachable");
-    break;
-  case ENOTSOCK:
-    strcpy(s, "Socket operation on non-socket");
-    break;
-  case ETIMEDOUT:
-    strcpy(s, "Connection timed out");
-    break;
-  case ENOTCONN:
-    strcpy(s, "Socket is not connected");
-    break;
-  case EHOSTUNREACH:
-    strcpy(s, "No route to host");
-    break;
-  case EPIPE:
-    strcpy(s, "Broken pipe");
-    break;
-#ifdef ECONNRESET
-  case ECONNRESET:
-    strcpy(s, "Connection reset by peer");
-    break;
-#endif /* ECONNRESET */
-#ifdef EACCES
-  case EACCES:
-    strcpy(s, "Permission denied");
-    break;
-#endif /* EACCESS */
-#ifdef EMFILE
-  case EMFILE:
-    strcpy(s, "Too many open files");
-    break;
-#endif /* EMFILE */
-  case 0:
-    strcpy(s, "Error 0");
-    break;
-  default:
-    sprintf(s, "Unforseen error %d", errno);
-    break;
-  }
-}
-
 /* Sets/Unsets options for a specific socket.
  * 
  * Returns:  0   - on success
@@ -630,7 +552,7 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
  * instead and then call this function with the IP address to avoid blocking.
  * 
  * returns <0 if connection refused:
- *   -1  neterror() type error
+ *   -1  strerror()/errno type error
  *   -2  can't resolve hostname
  */
 int open_telnet_raw(int sock, char *server, port_t sport)
