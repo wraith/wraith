@@ -415,16 +415,15 @@ void load_internal_users()
    *port,
    *pass,
    *hosts,
-    host[250],
-    buf[2048];
+    host[UHOSTMAX] = "",
+    buf[2048] = "";
   char *attr;
   int i, hublevel = 0;
   struct bot_addr *bi;
   struct userrec *u;
-  //struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
 
   /* hubs */
-  sprintf(buf, "%s", hubs);
+  snprintf(buf, sizeof buf, "%s", hubs);
   p = buf;
   while (p) {
     ln = p;
@@ -465,13 +464,13 @@ void load_internal_users()
 	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
 	}
       default:
-//	ln = userids for hostlist, add them all 
+	/* ln = userids for hostlist, add them all */
 	hosts = ln;
 	ln = strchr(ln, ' ');
 	if (ln)
 	  *ln++ = 0;
 	while (hosts) {
-	  sprintf(host, "*!%s@%s", hosts, ip);
+	  snprintf(host, sizeof host, "*!%s@%s", hosts, ip);
 	  set_user(&USERENTRY_HOSTS, get_user_by_handle(userlist, hand), host);
 	  hosts = ln;
 	  if (ln)
@@ -492,7 +491,7 @@ void load_internal_users()
   /* perm owners */
   owner[0] = 0;
 
-  sprintf(buf, "%s", owners);
+  snprintf(buf, sizeof buf, "%s", owners);
   p = buf;
   while (p) {
     ln = p;
@@ -541,13 +540,13 @@ void load_internal_users()
 
 void chanprog()
 {
-  char buf[2048];
+  /* char buf[2048] = ""; */
   struct bot_addr *bi;
   struct userrec *u;
 
 
   admin[0] = 0;
-  /* cache our ip on load instead of every 30 seconds -zip */
+  /* cache our ip on load instead of every 30 seconds */
   cache_my_ip();
   sdprintf("ip4: %s", myipstr(4));
   sdprintf("ip6: %s", myipstr(6));
@@ -576,13 +575,13 @@ void chanprog()
 
   if (!(u = get_user_by_handle(userlist, botnetnick))) {
     /* I need to be on the userlist... doh. */
-    userlist = adduser(userlist, botnetnick, STR("none"), "-", USER_BOT | USER_OP );
+    userlist = adduser(userlist, botnetnick, "none", "-", USER_BOT | USER_OP );
     u = get_user_by_handle(userlist, botnetnick);
     bi = malloc(sizeof(struct bot_addr));
 
     bi->address = strdup(myip);
-    bi->telnet_port = atoi(buf) ? atoi(buf) : 3333;
-    bi->relay_port = bi->telnet_port;
+    /* bi->telnet_port = atoi(buf) ? atoi(buf) : 3333; */
+    bi->telnet_port = bi->relay_port = 3333;
 #ifdef HUB
     bi->hublevel = 99;
 #else
@@ -612,10 +611,10 @@ void chanprog()
   /* test tempdir: it's vital */
   {
     FILE *f = NULL;
-    char s[161];
+    char s[DIRMAX] = "";
     int fd;
 
-    sprintf(s, STR("%s.test-XXXXXX"), tempdir);
+    snprintf(s, sizeof s, STR("%s.test-XXXXXX"), tempdir);
     if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
       if (fd != -1) {
         unlink(s);

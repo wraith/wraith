@@ -652,8 +652,8 @@ int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
 void binds_init();
 
 int crontab_exists() {
-  char buf[2048], *out=NULL;
-  sprintf(buf, STR("crontab -l | grep \"%s\" | grep -v \"^#\""), binname);
+  char buf[2048] = "", *out = NULL;
+  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep \"%s\" | grep -v \"^#\""), binname);
   if (shell_exec(buf, NULL, &out, NULL)) {
 
     if (out && strstr(out, binname)) {
@@ -669,19 +669,18 @@ int crontab_exists() {
 }
 
 void crontab_create(int interval) {
-  char tmpfile[161],
-    buf[256];
+  char tmpfile[161] = "", buf[256] = "";
   FILE *f;
   int fd;
 
   /* always use mkstemp() when handling temp files! -dizz */
-  sprintf(tmpfile, "%s.crontab-XXXXXX", tempdir);
+  egg_snprintf(tmpfile, sizeof tmpfile, "%s.crontab-XXXXXX", tempdir);
   if ((fd = mkstemp(tmpfile)) == -1) {
     unlink(tmpfile);
     return;
   } 
 
-  sprintf(buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), binname, tmpfile);
+  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), binname, tmpfile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
     buf[0] = 0;
     if (interval == 1)
@@ -698,7 +697,7 @@ void crontab_create(int interval) {
         i += interval;
       }
     }
-    sprintf(buf + strlen(buf), STR(" * * * * %s > /dev/null 2>&1"), binname);
+    egg_snprintf(buf + strlen(buf), sizeof buf, STR(" * * * * %s > /dev/null 2>&1"), binname);
     fseek(f, 0, SEEK_END);
     fprintf(f, STR("\n%s\n"), buf);
     fclose(f);
@@ -786,13 +785,13 @@ static void gotspawn(char *filename)
 
 static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, int cloak)
 {
-  char buf[DIRMAX], bindir[DIRMAX], bufrun[DIRMAX];
+  char buf[DIRMAX] = "", bindir[DIRMAX] = "", bufrun[DIRMAX] = "";
   FILE *fp;
 
-  sprintf(buf, "%s", bin);
-  sprintf(bindir, "%s", dirname(buf));
+  egg_snprintf(buf, sizeof buf, "%s", bin);
+  egg_snprintf(bindir, sizeof bindir, "%s", dirname(buf));
 
-  sprintf(buf, "%s/.wraith-%s", bindir, nick);
+  egg_snprintf(buf, sizeof buf, "%s/.wraith-%s", bindir, nick);
 
 
   if (!(fp = fopen(buf, "w")))
@@ -803,7 +802,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
   fflush(fp);
   fclose(fp);
 
-  sprintf(bufrun, "%s -c %s", bin, buf);
+  egg_snprintf(bufrun, sizeof bufrun, "%s -c %s", bin, buf);
   return system(bufrun);
 }
 #endif /* LEAF */
@@ -920,7 +919,7 @@ int main(int argc, char **argv)
 #ifdef LEAF
   int x = 1;
 #endif
-  char buf[SGRAB + 9], s[25];
+  char buf[SGRAB + 9] = "", s[25] = "";
   FILE *f;
 #ifdef LEAF
   int skip = 0;
@@ -1063,7 +1062,7 @@ int main(int argc, char **argv)
 
   //The config dir is accessable with correct permissions, lets read/write/create config file now..
   {		/* config shit */
-    char cfile[DIRMAX], templine[8192];
+    char cfile[DIRMAX] = "", templine[8192] = "";
 #ifdef LEAF
     egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
 #else /* HUB */
@@ -1161,7 +1160,7 @@ int main(int argc, char **argv)
           } //First bot in conf
 #ifdef LEAF
           else { //these are the rest of the bots..
-            char buf2[DIRMAX];
+            char buf2[DIRMAX] = "";
             FILE *fp;
 
             xx = 0, x = 0, errno = 0;
@@ -1212,7 +1211,9 @@ int main(int argc, char **argv)
   console_init();
   ctcp_init();
   module_load("compress");
+
   chanprog();
+
   clear_tmp();
 #ifdef LEAF
   if (localhub) {
@@ -1370,6 +1371,7 @@ int main(int argc, char **argv)
 
     buf[0] = 0;
     xx = sockgets(buf, &i); 
+    /* "chanprog()" bug is down here somewhere.... */
     if (xx >= 0) {		/* Non-error */
       int idx;
 
