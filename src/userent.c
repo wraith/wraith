@@ -681,7 +681,7 @@ struct user_entry_type USERENTRY_STATS = {
 void update_mod(char *handle, char *nick, char *cmd, char *par)
 {
   char tmp[100];
-  snprintf(tmp, sizeof tmp, "%lu, %s (%s %s)", now, nick, cmd, par);
+  snprintf(tmp, sizeof tmp, "%lu, %s (%s %s)", now, nick, cmd, par[0] ? par : "");
   set_user(&USERENTRY_MODIFIED, get_user_by_handle(userlist, handle), tmp);
 }
 
