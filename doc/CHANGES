@@ -13,6 +13,7 @@ Wraith - CHANGES
 @ 1.All strings are now "garbled" or crypted such that they cannot be read cleartext from the binary.
 @ 2.Source code now in CVS.
 @ 3.bldall has been moved to build, type ./build for usage.
+@ 4.Makefiles are improved greatly.
 
 1.0.1
 ! 1.Fixed a cosmetic bug in show_channels
