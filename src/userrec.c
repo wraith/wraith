@@ -266,6 +266,9 @@ int u_pass_match(struct userrec *u, char *in)
   return 0;
 }
 
+/* FIXME: REMOVE AFTER 1.1.8 */
+#include "botnet.h"
+
 #ifdef HUB
 int write_user(struct userrec *u, FILE * f, int idx)
 {
@@ -274,10 +277,21 @@ int write_user(struct userrec *u, FILE * f, int idx)
   struct chanset_t *cst = NULL;
   struct user_entry *ue = NULL;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
+/* FIXME: REMOVE AFTER 1.1.8 */
+  tand_t *bot = NULL;
+  int old = 0;
 
   fr.global = u->flags;
+
+/* FIXME: REMOVE AFTER 1.1.18 */
+  bot = findbot(u->handle);
+  if (bot && bot->buildts < 1091201080) {
+    fr.global |= USER_BOT;
+    old++;
+  }
+  
   build_flags(s, &fr, NULL);
-  if (lfprintf(f, "%c%-10s - %-24s\n", u->bot ? '-' : 0, u->handle, s) == EOF)
+  if (lfprintf(f, "%s%-10s - %-24s\n", (u->bot && !old) ? "-" : "", u->handle, s) == EOF)
     return 0;
   for (ch = u->chanrec; ch; ch = ch->next) {
     cst = findchan_by_dname(ch->channel);
