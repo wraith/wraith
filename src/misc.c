@@ -19,6 +19,7 @@
 #include "modules.h"
 #include <pwd.h>
 #include <errno.h>
+#include <libgen.h>
 #ifdef S_ANTITRACE
 #include <sys/ptrace.h>
 #include <sys/wait.h>

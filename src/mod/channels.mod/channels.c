@@ -321,9 +321,9 @@ static void channels_10secondly() {
 #ifdef LEAF
       if (shouldjoin(chan) && !channel_active(chan))
         dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-#endif /* LEAF */
     } else if (channel_closed(chan)) {
       enforce_closed(chan);
+#endif /* LEAF */
     }
   }
 }

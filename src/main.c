@@ -305,7 +305,10 @@ void show_help()
 #define FLAGS_CHECKPASS "dDeEgGhntv"
 static void dtx_arg(int argc, char *argv[])
 {
-  int i, localhub_pid = 0;
+  int i;
+#ifdef LEAF
+  int localhub_pid = 0;
+#endif /* LEAF */
   char *p = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i))

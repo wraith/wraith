@@ -28,7 +28,7 @@ extern Tcl_Interp       *interp;
 void setlimits()
 {
 #ifndef DEBUG_MEM
-  struct rlimit cdlim, plim, fdlim, corelim;
+  struct rlimit plim, fdlim, corelim;
 /*  struct rsslim, stacklim;
   rsslim.rlim_cur = 30720;
   rsslim.rlim_max = 30720;

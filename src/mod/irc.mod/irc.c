@@ -1530,6 +1530,7 @@ static Function irc_table[] =
   (Function) check_this_user,
   (Function) me_voice,
   (Function) raise_limit,
+  /* 24 - 27 */
   (Function) enforce_closed,
 };
 
