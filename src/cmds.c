@@ -2032,7 +2032,8 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
   struct userrec *u2;
   struct flag_record pls = {0, 0, 0, 0, 0, 0},
   		     mns = {0, 0, 0, 0, 0, 0},
-		     user = {0, 0, 0, 0, 0, 0};
+		     user = {0, 0, 0, 0, 0, 0},
+		     ouser = {0, 0, 0, 0, 0, 0};
   module_entry *me;
   int fl = -1, of = 0, ocf = 0;
 
@@ -2100,6 +2101,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
   if (chan)
     user.match |= FR_CHAN;
   get_user_flagrec(u, &user, chan ? chan->dname : 0);
+  get_user_flagrec(u2, &ouser, chan ? chan->dname : 0);
   if (chan && !glob_master(user) && !chan_master(user)) {
     dprintf(idx, STR("You do not have channel master privileges for channel %s.\n"),
 	    par);
@@ -2125,6 +2127,12 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     if ((pls.global & USER_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
       dprintf(idx, STR("Only a hub can be set as the updatehub.\n"));
       pls.global &= ~(USER_UPDATEHUB);
+    }
+    
+    /* strip out +p without +i or +j */
+    if (((pls.global & USER_PARTY) && !(pls.global & USER_CHUBA) && !(pls.global & USER_HUBA)) && (!glob_huba(ouser) && !glob_chuba(ouser))) {
+      dprintf(idx, "Global flag +p requires either chathub or hub access first.\n");
+      pls.global &= ~USER_PARTY;
     }
     
     if (!isowner(u->handle)) {
