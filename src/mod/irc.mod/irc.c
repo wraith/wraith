@@ -44,9 +44,9 @@ struct cfg_entry CFG_OPBOTS,
 
 
 /* Import some bind tables from the server module. */
-static bind_table_t *BT_ctcp, *BT_ctcr;
+static bind_table_t *BT_ctcp = NULL, *BT_ctcr =  NULL;
 #ifdef S_AUTHCMDS
-static bind_table_t *BT_msgc;
+static bind_table_t *BT_msgc = NULL;
 #endif /* S_AUTHCMDS */
 
 
@@ -127,10 +127,10 @@ dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
 
 void makeopline(struct chanset_t *chan, char *nick, char *buf)
 {
-  char plaincookie[20], enccookie[48], *p, nck[20], key[200];
-  memberlist * m;
-  m=ismember(chan, nick);
-  if (m)
+  char plaincookie[20] = "", enccookie[48] = "", *p = NULL, nck[20] = "", key[200] = "";
+  memberlist *m = NULL;
+
+  if ((m = ismember(chan, nick)))
     strcpy(nck, m->nick);
   else
     strcpy(nck, nick);
@@ -144,40 +144,39 @@ void makeopline(struct chanset_t *chan, char *nick, char *buf)
   sprintf(buf, STR("MODE %s +o-b %s *!*@<%s>\n"), chan->name, nck, enccookie);
 }
 
+/*
+   opreq = o #chan nick
+   inreq = i #chan nick uhost 
+   inreq keyreply = K #chan key
+ */
 void getin_request(char *botnick, char *code, char *par)
 {
 
-  /*
-     opreq = o #chan nick
-     inreq = i #chan nick uhost 
-     inreq keyreply = K #chan key
-   */
-
   char *tmp = NULL,
-   *chname,
+   *chname = NULL,
    *nck = NULL,
    *hst = NULL,
    *ip4 = NULL,
    *ip6 = NULL,
    *what = NULL,
-   *p,
-   *p2,
-   *p3;
-  struct chanset_t *chan;
+   *p = NULL,
+   *p2 = NULL,
+   *p3 = NULL;
+  struct chanset_t *chan = NULL;
   memberlist *mem = NULL;
-  struct userrec *user;
-  char nick[NICKLEN];
-  char host[UHOSTLEN];
-  char ip4host[UHOSTLEN];
-  char ip6host[UHOSTLEN];
-  char s[256],
-    s2[16];
+  struct userrec *user = NULL;
+  char nick[NICKLEN] = "";
+  char host[UHOSTLEN] = "";
+  char ip4host[UHOSTLEN] = "";
+  char ip6host[UHOSTLEN] = "";
+  char s[256] = "",
+    s2[16] = "";
   int lim,
     curlim,
     sendi = 0;
-  struct maskrec **mr,
-   *tmr;
-  struct maskstruct *b;
+  struct maskrec **mr = NULL,
+   *tmr = NULL;
+  struct maskstruct *b = NULL;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
 
   if (!server_online) 
@@ -213,7 +212,7 @@ void getin_request(char *botnick, char *code, char *par)
     strncpyz(host, hst, sizeof(host));
     ip4 = newsplit(&par);
     if (ip4[0]) {
-      char *tmp2;
+      char *tmp2 = NULL;
 
       tmp = strdup(host);
       tmp2 = strtok(tmp, "@");
@@ -224,7 +223,7 @@ void getin_request(char *botnick, char *code, char *par)
     }
     ip6 = newsplit(&par);
     if (ip6[0]) {
-      char *tmp2;
+      char *tmp2 = NULL;
 
       tmp = strdup(host);
       tmp2 = strtok(tmp, "@");
@@ -369,7 +368,7 @@ void getin_request(char *botnick, char *code, char *par)
 	  shareout(NULL, STR("-b %s\n"), (*mr)->mask);
 	}
 	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Removed permanent global ban %s"), botnick, nick, chan->dname, (*mr)->mask);
-	//gban_total--;
+	/*gban_total--;*/
 	free((*mr)->mask);
 	if ((*mr)->desc)
 	  free((*mr)->desc);
@@ -410,7 +409,7 @@ void getin_request(char *botnick, char *code, char *par)
     }
     if (strchr(p2, 'k')) {
       sendi = 0;
-      tmp = malloc(strlen(chan->dname) + strlen(p3) + 7);
+      tmp = calloc(1, strlen(chan->dname) + strlen(p3) + 7);
       sprintf(tmp, STR("gi K %s %s"), chan->dname, p3);
       botnet_send_zapf(nextbot(botnick), conf.bot->nick, botnick, tmp);
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Sent key (%s)"), botnick, nick, chan->dname, p3);
@@ -446,8 +445,8 @@ void getin_request(char *botnick, char *code, char *par)
 
 void check_hostmask()
 {
-  char s[UHOSTLEN + 2], *tmp = NULL;
-  struct list_type *q;
+  char s[UHOSTLEN + 2] = "", *tmp = NULL;
+  struct list_type *q = NULL;
 
   checked_hostmask = 1;
   if (!server_online || !botuserhost[0])
@@ -473,10 +472,11 @@ void check_hostmask()
 static void request_op(struct chanset_t *chan)
 {
   int i = 0, exp = 0, first = 100, n, cnt, i2;
-  memberlist *ml;
+  memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
-  char s[100], *l, myserv[SERVLEN];
+  char s[100] = "", *l = NULL, myserv[SERVLEN] = "";
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
+
   if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan))))
     return;
 
@@ -533,8 +533,7 @@ static void request_op(struct chanset_t *chan)
   /* first scan for bots on my server, ask first found for ops */
   cnt = OP_BOTS;
   sprintf(s, "gi o %s %s", chan->dname, botname);
-  l = malloc(cnt * 50);
-  l[0] = 0;
+  l = calloc(1, cnt * 50);
   for (i2 = 0; i2 < i; i2++) {
     if (botops[i2]->server && (!strcmp(botops[i2]->server, myserv))) {
       putbot(botops[i2]->user->handle, s);
@@ -580,10 +579,10 @@ static void request_op(struct chanset_t *chan)
 
 static void request_in(struct chanset_t *chan)
 {
-  char s[255], *l;
+  char s[255] = "", *l = NULL;
   int i = 0;
   int cnt, n;
-  struct userrec *botops[MAX_BOTS], *user;
+  struct userrec *botops[MAX_BOTS], *user = NULL;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
 
   for (user = userlist; user && (i < MAX_BOTS); user = user->next) {
@@ -604,8 +603,7 @@ static void request_in(struct chanset_t *chan)
   cnt = IN_BOTS;
   sprintf(s, "gi i %s %s %s!%s %s %s", chan->dname, botname, botname, botuserhost, myipstr(4) ? myipstr(4) : "."
                                           , myipstr(6) ? myipstr(6) : ".");
-  l = malloc(cnt * 30);
-  l[0] = 0;
+  l = calloc(1, cnt * 30);
   while (cnt) {
     n = random() % i;
     if (botops[n]) {
@@ -672,8 +670,8 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
 			  struct userrec *u, char *badnick, char *victim,
 			  int mevictim, int type)
 {
-  char reason[1024], ct[81], *kick_msg;
-  memberlist *m;
+  char reason[1024] = "", ct[81] = "", *kick_msg = NULL;
+  memberlist *m = NULL;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0 };
 
   m = ismember(chan, badnick);
@@ -768,7 +766,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
     add_mode(chan, '-', 'o', badnick);
   /* Ban. Should be done before kicking. */
   if (chan->revenge_mode > 2) {
-    char s[UHOSTLEN], s1[UHOSTLEN];
+    char s[UHOSTLEN] = "", s1[UHOSTLEN] = "";
 
     splitnick(&whobad);
     maskhost(whobad, s1);
@@ -795,9 +793,9 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
 static void maybe_revenge(struct chanset_t *chan, char *whobad,
 			  char *whovictim, int type)
 {
-  char *badnick, *victim;
+  char *badnick = NULL, *victim = NULL;
   int mevictim;
-  struct userrec *u, *u2;
+  struct userrec *u = NULL, *u2 = NULL;
 
   if (!chan || (type < 0))
     return;
@@ -858,9 +856,8 @@ static void newmask(masklist *m, char *s, char *who)
  */
 static int real_killmember(struct chanset_t *chan, char *nick, const char *file, int line)
 {
-  memberlist *x, *old;
+  memberlist *x = NULL, *old = NULL;
 
-  old = NULL;
   for (x = chan->channel.member; x && x->nick[0]; old = x, x = x->next)
     if (!rfc_casecmp(x->nick, nick))
       break;
@@ -911,7 +908,7 @@ static int me_op(struct chanset_t *chan)
  */
 static int me_voice(struct chanset_t *chan)
 {
-  memberlist *mx;
+  memberlist *mx = NULL;
 
   mx = ismember(chan, botname);
   if (!mx)
@@ -927,7 +924,7 @@ static int me_voice(struct chanset_t *chan)
  */
 static int any_ops(struct chanset_t *chan)
 {
-  memberlist *x;
+  memberlist *x = NULL;
 
   for (x = chan->channel.member; x && x->nick[0]; x = x->next)
     if (chan_hasop(x))
@@ -941,6 +938,7 @@ static int any_ops(struct chanset_t *chan)
 static void reset_chan_info(struct chanset_t *chan)
 {
   int opped = 0;
+
   /* Don't reset the channel if we're already resetting it */
   if (!shouldjoin(chan)) {
     dprintf(DP_MODE,"PART %s\n", chan->name);
@@ -1002,8 +1000,8 @@ static void do_channel_part(struct chanset_t *chan)
  */
 static void check_lonely_channel(struct chanset_t *chan)
 {
-  memberlist *m;
-  char s[UHOSTLEN];
+  memberlist *m = NULL;
+  char s[UHOSTLEN] = "";
   int i = 0;
   static int whined = 0;
 
@@ -1032,7 +1030,7 @@ static void check_lonely_channel(struct chanset_t *chan)
      * them LEAVE!
      */
     int ok = 1;
-    struct userrec *u;
+    struct userrec *u = NULL;
 
     if (!whined) {
       /* + is opless. Complaining about no ops when without special
@@ -1067,7 +1065,8 @@ static void check_lonely_channel(struct chanset_t *chan)
 
 static void warn_pls_take()
 {
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
+
   for (chan = chanset; chan; chan = chan->next)
     if (channel_take(chan) && me_op(chan))
       putlog(LOG_WARN, "*", "%s is set +take, and I'm already opped! +take is insecure, try +bitch instead", chan->dname);
@@ -1075,9 +1074,11 @@ static void warn_pls_take()
 
 
 void check_servers() {
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
+
   for (chan = chanset; chan; chan = chan->next) {
-    memberlist *m;
+    memberlist *m = NULL;
+
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       if (chan_hasop(m) && ((!m->server || !m->server[0]) || !m->hops)) {
         dprintf(DP_HELP, STR("WHO %s\n"), chan->name);
@@ -1092,7 +1093,8 @@ void check_netfight()
 {
   int limit = atoi(CFG_FIGHTTHRESHOLD.gdata ? CFG_FIGHTTHRESHOLD.gdata : "0");
   if (limit) {
-    struct chanset_t *chan;
+    struct chanset_t *chan = NULL;
+
     for (chan = chanset; chan; chan = chan->next) {
       if ((chan->channel.fighting) && (chan->channel.fighting > limit)) {
         if (!channel_bitch(chan) || !channel_closed(chan)) {
@@ -1111,7 +1113,7 @@ void check_netfight()
 
 void raise_limit(struct chanset_t * chan) {
   int nl, cl, i, mem, ul, ll;
-  char s[50];
+  char s[50] = "";
   
   if (!chan || !me_op(chan)) {
     return;
@@ -1139,9 +1141,9 @@ void raise_limit(struct chanset_t * chan) {
 
 static void check_expired_chanstuff()
 {
-  masklist *b, *e;
-  memberlist *m, *n;
-  char s[UHOSTLEN];
+  masklist *b = NULL, *e = NULL;
+  memberlist *m = NULL, *n = NULL;
+  char s[UHOSTLEN] = "";
   struct chanset_t *chan;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 
@@ -1286,8 +1288,8 @@ static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u,
  */
 static void flush_modes()
 {
-  struct chanset_t *chan;
-  memberlist *m;
+  struct chanset_t *chan = NULL;
+  memberlist *m = NULL;
 
   if (modesperline > MODES_PER_LINE_MAX)
     modesperline = MODES_PER_LINE_MAX;
@@ -1313,9 +1315,9 @@ static void flush_modes()
 static void irc_report(int idx, int details)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char ch[1024], q[160], *p;
+  char ch[1024] = "", q[160] = "", *p = NULL;
   int k, l;
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
 
   strcpy(q, "Channels: ");
   k = 10;
@@ -1426,7 +1428,8 @@ static cmd_t irc_bot[] = {
 static void getin_5secondly()
 {
   if (server_online) {
-    struct chanset_t *chan;
+    struct chanset_t *chan = NULL;
+
     for (chan = chanset; chan; chan = chan->next) {
       if ((channel_pending(chan) || channel_active(chan)) && !me_op(chan))
         request_op(chan);
@@ -1484,8 +1487,7 @@ void irc_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
     return;
   *valid = 0;
   if (!strcmp(cfgent->name, STR("op-requests"))) {
-    int L,
-      R;
+    int L, R;
     char *value = cfgent->gdata;
 
     L = atoi(value);
@@ -1564,7 +1566,7 @@ struct cfg_entry CFG_FIGHTTHRESHOLD = {
 
 char *irc_start(Function * global_funcs)
 {
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
 
   global = global_funcs;
 

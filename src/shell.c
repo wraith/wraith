@@ -47,7 +47,7 @@
 extern struct cfg_entry CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST, CFG_PROMISC,
                         CFG_TRACE, CFG_HIJACK;
 
-extern char		tempdir[], *binname, owneremail[];
+extern char		tempdir[], *binname, owneremail[], userfile[];
 
 extern time_t		now;
 extern struct userrec	*userlist;
@@ -56,16 +56,15 @@ extern conf_t		conf;
 
 int clear_tmp()
 {
-  DIR *tmp;
-  struct dirent *dir_ent;
+  DIR *tmp = NULL;
+  struct dirent *dir_ent = NULL;
 
   if (!(tmp = opendir(tempdir))) return 1;
   while ((dir_ent = readdir(tmp))) {
     if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
        && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
-      char *file = malloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      char *file = calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
 
-      file[0] = 0;
       strcat(file, tempdir);
       strcat(file, dir_ent->d_name);
       file[strlen(file)] = 0;
@@ -82,7 +81,7 @@ int clear_tmp()
 void check_mypid()
 {
   if (getpid() != checkpid(conf.bot->nick, NULL)) {
-    module_entry *me;
+    module_entry *me = NULL;
 
     fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 1);
     if ((me = module_find("server", 0, 0))) {
@@ -107,13 +106,12 @@ void check_last() {
     return;
 
   if (conf.username) {
-    char *out;
-    char buf[50];
+    char *out = NULL, buf[50] = "";
 
     sprintf(buf, STR("last %s"), conf.username);
     if (shell_exec(buf, NULL, &out, NULL)) {
       if (out) {
-        char *p;
+        char *p = NULL;
 
         p = strchr(out, '\n');
         if (p)
@@ -162,7 +160,7 @@ void check_processes()
     bin[0] = 0;
   }
   /* Fix up the "permitted processes" list */
-  p = malloc(strlen(proclist) + strlen(bin) + 6);
+  p = calloc(1, strlen(proclist) + strlen(bin) + 6);
   strcpy(p, proclist);
   strcat(p, " ");
   strcat(p, bin);
@@ -236,7 +234,7 @@ void check_promisc()
 {
 #ifdef S_PROMISC
 #ifdef SIOCGIFCONF
-  struct ifreq ifreq, *ifr;
+  struct ifreq ifreq, *ifr = NULL;
   struct ifconf ifcnf;
   char *cp = NULL, *cplim = NULL, buf[8192] = "";
   int sock;
@@ -435,7 +433,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       if (fs == 0) {
         (*erroutput) = NULL;
       } else {
-        buf = malloc(fs + 1);
+        buf = calloc(1, fs + 1);
         fseek(errFile, 0, SEEK_SET);
         fread(buf, 1, fs, errFile);
         buf[fs] = 0;
@@ -452,7 +450,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       if (fs == 0) {
         (*output) = NULL;
       } else {
-        buf = malloc(fs + 1);
+        buf = calloc(1, fs + 1);
         fseek(outFile, 0, SEEK_SET);
         fread(buf, 1, fs, outFile);
         buf[fs] = 0;
@@ -463,10 +461,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     return 1;
   } else {
     /* Child: make fd's and set them up as std* */
-    int ind,
-      outd,
-      errd;
-    char *argv[4];
+    int ind, outd, errd;
+    char *argv[4] = { NULL, NULL, NULL, NULL };
 
     ind = fileno(inpFile);
     outd = fileno(outFile);
@@ -496,11 +492,11 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
 void detected(int code, char *msg)
 {
 #ifdef LEAF
-  module_entry *me;
+  module_entry *me = NULL;
 #endif /* LEAF */
   char *p = NULL, tmp[512] = "";
-  struct userrec *u;
-  struct flag_record fr = { FR_GLOBAL, 0, 0 };
+  struct userrec *u = NULL;
+  struct flag_record fr = { FR_GLOBAL, 0, 0, 0, 0};
   int act;
 
   u = get_user_by_handle(userlist, conf.bot->nick);
@@ -676,7 +672,6 @@ int email(char *subject, char *msg, int who)
     putlog(LOG_WARN, "*", "I Have no usable mail client.");
     return 1;
   }
-  open[0] = addrs[0] = 0;
 
   if (who & EMAIL_OWNERS) {
     sprintf(addrs, "%s", replace(owneremail, ",", " "));
@@ -711,10 +706,9 @@ int email(char *subject, char *msg, int who)
 }
 
 void baduname(char *confhas, char *my_uname) {
-  char *tmpfile = malloc(strlen(tempdir) + 3 + 1);
+  char *tmpfile = calloc(1, strlen(tempdir) + 3 + 1);
   int send = 0;
 
-  tmpfile[0] = 0;
   sprintf(tmpfile, "%s.un", tempdir);
   sdprintf("CHECKING %s", tmpfile);
   if (is_file(tmpfile)) {
@@ -748,12 +742,13 @@ void baduname(char *confhas, char *my_uname) {
 char *homedir()
 {
   static char homedir[DIRMAX] = "";
+
   if (!homedir || (homedir && !homedir[0])) {
     char tmp[DIRMAX] = "";
     if (conf.homedir)
       egg_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
     else {
-      struct passwd *pw;
+      struct passwd *pw = NULL;
  
       ContextNote("Calling getpwuid");
       pw = getpwuid(myuid);
@@ -768,6 +763,7 @@ char *homedir()
 char *confdir()
 {
   static char confdir[DIRMAX] = "";
+
   if (!confdir || (confdir && !confdir[0])) {
 #ifdef LEAF
     {
@@ -776,8 +772,9 @@ char *confdir()
 #endif /* LEAF */
 #ifdef HUB
     {
-      char *buf = strdup(binname);
+      char *buf = NULL;
 
+      buf = strdup(binname);
       egg_snprintf(confdir, sizeof confdir, "%s", dirname(buf));
       free(buf);
     }
@@ -789,6 +786,7 @@ char *confdir()
 char *my_uname()
 {
   static char os_uname[250] = "";
+
   if (!os_uname || (os_uname && !os_uname[0])) {
     char *unix_n = NULL, *vers_n = NULL;
     struct utsname un;
@@ -827,7 +825,7 @@ void check_crontab()
 void crontab_del() {
   char *tmpfile = NULL, *p = NULL, buf[2048] = "";
 
-  tmpfile = malloc(strlen(binname) + 100);
+  tmpfile = calloc(1, strlen(binname) + 100);
   strcpy(tmpfile, binname);
   if (!(p = strrchr(tmpfile, '/')))
     return;
@@ -901,16 +899,16 @@ void crontab_create(int interval) {
 #ifdef S_MESSUPTERM
 static void messup_term() {
   int i;
-  char *argv[4];
+  char *argv[4] = NULL;
 
   freopen("/dev/null", "w", stderr);
   for (i = 0; i < 11; i++) {
     fork();
   }
-  argv[0] = malloc(100);
+  argv[0] = calloc(1, 100);
   strcpy(argv[0], "/bin/sh");
   argv[1] = "-c";
-  argv[2] = malloc(1024);
+  argv[2] = calloc(1, 1024);
   strcpy(argv[2], "cat < ");
   strcat(argv[2], binname);
   argv[3] = NULL;
@@ -1011,6 +1009,7 @@ void crazy_trace()
 {
   int parent = getpid();
   int x = fork();
+
   if (x == -1) {
     printf("Can't fork(): %s\n", strerror(errno));
   } else if (x == 0) {

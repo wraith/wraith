@@ -51,7 +51,7 @@ extern struct cmd_pass *cmdpass;
 int count_users(struct userrec *bu)
 {
   int tot = 0;
-  struct userrec *u;
+  struct userrec *u = NULL;
 
   for (u = bu; u; u = u->next)
     tot++;
@@ -63,8 +63,8 @@ int count_users(struct userrec *bu)
  */
 char *fixfrom(char *s)
 {
-  char *p;
-  static char buf[512];
+  static char buf[512] = "";
+  char *p = NULL;
 
   if (s == NULL)
     return NULL;
@@ -96,7 +96,7 @@ struct userrec *check_dcclist_hand(char *handle)
 
 struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
 {
-  struct userrec *u, *ret;
+  struct userrec *u = NULL, *ret = NULL;
 
   if (!handle)
     return NULL;
@@ -134,7 +134,7 @@ struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
  */
 void correct_handle(char *handle)
 {
-  struct userrec *u;
+  struct userrec *u = NULL;
 
   u = get_user_by_handle(userlist, handle);
   if (u == NULL || handle == u->handle)
@@ -163,7 +163,7 @@ void clear_masks(maskrec *m)
 
 void clear_userlist(struct userrec *bu)
 {
-  struct userrec *u, *v;
+  struct userrec *u = NULL, *v = NULL;
   int i;
 
   for (u = bu; u; u = v) {
@@ -171,7 +171,7 @@ void clear_userlist(struct userrec *bu)
     freeuser(u);
   }
   if (userlist == bu) {
-    struct chanset_t *cst;
+    struct chanset_t *cst = NULL;
 
     for (i = 0; i < dcc_total; i++)
       dcc[i].user = NULL;
@@ -207,10 +207,10 @@ void clear_userlist(struct userrec *bu)
  */
 struct userrec *get_user_by_host(char *host)
 {
-  struct userrec *u, *ret;
-  struct list_type *q;
+  struct userrec *u = NULL, *ret = NULL;
+  struct list_type *q = NULL;
   int cnt, i;
-  char host2[UHOSTLEN];
+  char host2[UHOSTLEN] = "";
 
   if (host == NULL)
     return NULL;
@@ -247,8 +247,8 @@ struct userrec *get_user_by_host(char *host)
  */
 struct userrec *get_user_by_equal_host(char *host)
 {
-  struct userrec *u;
-  struct list_type *q;
+  struct userrec *u = NULL;
+  struct list_type *q = NULL;
 
   for (u = userlist; u; u = u->next)
     for (q = get_user(&USERENTRY_HOSTS, u); q; q = q->next)
@@ -262,7 +262,7 @@ struct userrec *get_user_by_equal_host(char *host)
  */
 int u_pass_match(struct userrec *u, char *in)
 {
-  char *cmp, new[32], pass[16];
+  char *cmp = NULL, new[32] = "", pass[16] = "";
 
   if (!u)
     return 0;
@@ -286,12 +286,13 @@ int u_pass_match(struct userrec *u, char *in)
   }
   return 0;
 }
+
 int write_user(struct userrec *u, FILE * f, int idx)
 {
-  char s[181];
-  struct chanuserrec *ch;
-  struct chanset_t *cst;
-  struct user_entry *ue;
+  char s[181] = "";
+  struct chanuserrec *ch = NULL;
+  struct chanset_t *cst = NULL;
+  struct user_entry *ue = NULL;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
 
   fr.global = u->flags;
@@ -312,15 +313,14 @@ int write_user(struct userrec *u, FILE * f, int idx)
 	fr.chan = ch->flags;
 	fr.udef_chan = ch->flags_udef;
 	build_flags(s, &fr, NULL);
-	if (lfprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s,
-		    ch->info ? ch->info : "") == EOF)
+	if (lfprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s, ch->info ? ch->info : "") == EOF)
 	  return 0;
       }
     }
   }
   for (ue = u->entries; ue; ue = ue->next) {
     if (ue->name) {
-      struct list_type *lt;
+      struct list_type *lt = NULL;
 
       for (lt = ue->u.list; lt; lt = lt->next)
 	if (lfprintf(f, "--%s %s\n", ue->name, lt->extra) == EOF)
@@ -332,6 +332,7 @@ int write_user(struct userrec *u, FILE * f, int idx)
   }
   return 1;
 }
+
 int sort_compare(struct userrec *a, struct userrec *b)
 {
   /* Order by flags, then alphabetically
@@ -373,11 +374,9 @@ int sort_compare(struct userrec *a, struct userrec *b)
 
 void sort_userlist()
 {
-  int again;
-  struct userrec *last, *p, *c, *n;
+  int again = 1;
+  struct userrec *last = NULL, *p = NULL, *c = NULL, *n = NULL;
 
-  again = 1;
-  last = NULL;
   while ((userlist != last) && (again)) {
     p = NULL;
     c = userlist;
@@ -406,17 +405,16 @@ void sort_userlist()
  */
 int write_userfile(int idx)
 {
-  FILE *f;
-  char *new_userfile;
-  char s1[81], backup[DIRMAX];
+  FILE *f = NULL;
+  char *new_userfile = NULL, s1[81] = "", backup[DIRMAX] = "";
   time_t tt;
-  struct userrec *u;
+  struct userrec *u = NULL;
   int ok;
 
   if (userlist == NULL)
     return 1;			/* No point in saving userfile */
 
-  new_userfile = malloc(strlen(userfile) + 5);
+  new_userfile = calloc(1, strlen(userfile) + 5);
   sprintf(new_userfile, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");
@@ -454,10 +452,11 @@ int write_userfile(int idx)
   free(new_userfile);
   return 0;
 }
+
 int change_handle(struct userrec *u, char *newh)
 {
   int i;
-  char s[HANDLEN + 1];
+  char s[HANDLEN + 1] = "";
 
   if (!u)
     return 0;
@@ -484,14 +483,13 @@ int change_handle(struct userrec *u, char *newh)
 }
 
 
-struct userrec *adduser(struct userrec *bu, char *handle, char *host,
-			char *pass, int flags)
+struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass, int flags)
 {
-  struct userrec *u, *x;
+  struct userrec *u = NULL, *x = NULL;
   int oldshare = noshare;
 
   noshare = 1;
-  u = (struct userrec *) malloc(sizeof(struct userrec));
+  u = (struct userrec *) calloc(1, sizeof(struct userrec));
 
   /* u->next=bu; bu=u; */
   strncpyz(u->handle, handle, sizeof u->handle);
@@ -508,7 +506,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
   set_user(&USERENTRY_PASS, u, pass);
   /* Strip out commas -- they're illegal */
   if (host && host[0]) {
-    char *p;
+    char *p = NULL;
 
     /* About this fixfrom():
      *   We should use this fixfrom before every call of adduser()
@@ -528,16 +526,14 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
   if (bu == userlist)
     clear_chanlist();
   noshare = oldshare;
-  if ((!noshare) && (handle[0] != '*') && (!(flags & USER_UNSHARED)) &&
-      (bu == userlist)) {
+  if ((!noshare) && (handle[0] != '*') && (!(flags & USER_UNSHARED)) && (bu == userlist)) {
     struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
-    char x[100];
+    char x[100] = "";
 
     fr.global = u->flags;
     fr.udef_global = u->flags_udef;
     build_flags(x, &fr, 0);
-    shareout(NULL, "n %s %s %s %s\n", handle, host && host[0] ? host : "none",
-             pass, x);
+    shareout(NULL, "n %s %s %s %s\n", handle, host && host[0] ? host : "none", pass, x);
   }
   if (bu == NULL)
     bu = u;
@@ -557,8 +553,8 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
 
 void freeuser(struct userrec *u)
 {
-  struct user_entry *ue, *ut;
-  struct chanuserrec *ch, *z;
+  struct user_entry *ue = NULL, *ut = NULL;
+  struct chanuserrec *ch = NULL, *z = NULL;
 
   if (u == NULL)
     return;
@@ -623,8 +619,8 @@ int deluser(char *handle)
 
 int delhost_by_handle(char *handle, char *host)
 {
-  struct userrec *u;
-  struct list_type *q, *qnext, *qprev;
+  struct userrec *u = NULL;
+  struct list_type *q = NULL, *qnext = NULL, *qprev = NULL;
   struct user_entry *e = NULL;
   int i = 0;
 
@@ -689,11 +685,10 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
   if (!u)
     return;
   if (timeval > 1) {
-    struct laston_info *li =
-    (struct laston_info *) get_user(&USERENTRY_LASTON, u);
+    struct laston_info *li = (struct laston_info *) get_user(&USERENTRY_LASTON, u);
 
     if (!li)
-      li = malloc(sizeof(struct laston_info));
+      li = calloc(1, sizeof(struct laston_info));
 
     else if (li->lastonplace)
       free(li->lastonplace);
@@ -716,13 +711,13 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
  */
 struct userrec *get_user_by_nick(char *nick)
 {
-  struct chanset_t *chan;
-  memberlist *m;
+  struct chanset_t *chan = NULL;
+  memberlist *m = NULL;
 
   for (chan = chanset; chan; chan = chan->next) {
     for (m = chan->channel.member; m && m->nick[0] ;m = m->next) {
       if (!rfc_casecmp(nick, m->nick)) {
-  	char word[512];
+  	char word[512] = "";
 
 	egg_snprintf(word, sizeof word, "%s!%s", m->nick, m->userhost);
 	/* No need to check the return value ourself */
@@ -736,8 +731,8 @@ struct userrec *get_user_by_nick(char *nick)
 
 void user_del_chan(char *dname)
 {
-  struct chanuserrec *ch, *och;
-  struct userrec *u;
+  struct chanuserrec *ch = NULL, *och = NULL;
+  struct userrec *u = NULL;
 
   for (u = userlist; u; u = u->next) {
     ch = u->chanrec;
@@ -759,4 +754,3 @@ void user_del_chan(char *dname)
     }
   }
 }
-

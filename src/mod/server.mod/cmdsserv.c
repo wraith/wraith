@@ -8,7 +8,7 @@ static void cmd_servers(struct userrec *u, int idx, char *par)
 {
   struct server_list *x = serverlist;
   int i;
-  char s[1024];
+  char s[1024] = "";
 
   putlog(LOG_CMDS, "*", "#%s# servers", dcc[idx].nick);
   if (!x) {
@@ -48,7 +48,7 @@ static void cmd_dump(struct userrec *u, int idx, char *par)
 
 static void cmd_jump(struct userrec *u, int idx, char *par)
 {
-  char *other;
+  char *other = NULL;
   int port;
 
   if (par[0]) {
@@ -69,7 +69,7 @@ static void cmd_jump(struct userrec *u, int idx, char *par)
 
 static void cmd_clearqueue(struct userrec *u, int idx, char *par)
 {
-  int	msgs;
+  int msgs;
 
   putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
   if (!par[0]) {

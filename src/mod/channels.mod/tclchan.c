@@ -6,18 +6,18 @@
 
 /* Parse options for a channel.
  */
-static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
-			      int items, char **item)
+static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan, int items, char **item)
 {
   int i, x = 0, found;
 #ifdef LEAF
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
-  module_entry *me;
+  module_entry *me = NULL;
 #endif /* LEAF */
   struct udef_struct *ul = udef;
-  char s[121];
+  char s[121] = "";
+
   for (i = 0; i < items; i++) {
     if (!strcmp(item[i], "chanmode")) {
       i++;
@@ -260,8 +260,8 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
     else if (!strcmp(item[i], "-clearbans"))  ;
     else if (!strncmp(item[i], "need-", 5))   ;
     else if (!strncmp(item[i], "flood-", 6)) {
-      int *pthr = 0, *ptime;
-      char *p;
+      int *pthr = NULL, *ptime = NULL;
+      char *p = NULL;
 
       if (!strcmp(item[i] + 6, "chan")) {
 	pthr = &chan->flood_pub_thr;
@@ -382,8 +382,7 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
 
 static void init_masklist(masklist *m)
 {
-  m->mask = (char *)malloc(1);
-  m->mask[0] = 0;
+  m->mask = (char *)calloc(1, 1);
   m->who = NULL;
   m->next = NULL;
 }
@@ -396,20 +395,19 @@ static void init_channel(struct chanset_t *chan, int reset)
   chan->channel.mode = 0;
   chan->channel.members = 0;
   if (!reset) {
-    chan->channel.key = (char *) malloc(1);
-    chan->channel.key[0] = 0;
+    chan->channel.key = (char *) calloc(1, 1);
   }
 
-  chan->channel.ban = (masklist *) malloc(sizeof(masklist));
+  chan->channel.ban = (masklist *) calloc(1, sizeof(masklist));
   init_masklist(chan->channel.ban);
 
-  chan->channel.exempt = (masklist *) malloc(sizeof(masklist));
+  chan->channel.exempt = (masklist *) calloc(1, sizeof(masklist));
   init_masklist(chan->channel.exempt);
 
-  chan->channel.invite = (masklist *) malloc(sizeof(masklist));
+  chan->channel.invite = (masklist *) calloc(1, sizeof(masklist));
   init_masklist(chan->channel.invite);
 
-  chan->channel.member = (memberlist *) malloc(sizeof(memberlist));
+  chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
   chan->channel.member->nick[0] = 0;
   chan->channel.member->next = NULL;
   chan->channel.topic = NULL;
@@ -433,7 +431,7 @@ static void clear_masklist(masklist *m)
  */
 static void clear_channel(struct chanset_t *chan, int reset)
 {
-  memberlist *m, *m1;
+  memberlist *m = NULL, *m1 = NULL;
 
   if (chan->channel.topic)
     free(chan->channel.topic);
@@ -457,7 +455,7 @@ static void clear_channel(struct chanset_t *chan, int reset)
  */
 static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
 {
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
   int items;
   int ret = TCL_OK;
   int join = 0;
@@ -465,7 +463,7 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
 #if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
   CONST char **item;
 #else
-  char **item;
+  char **item = NULL;
 #endif
 
   if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
@@ -492,10 +490,11 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
     /* Already existing channel, maybe a reload of the channel file */
     chan->status &= ~CHAN_FLAGGED;	/* don't delete me! :) */
   } else {
-    chan = (struct chanset_t *) malloc(sizeof(struct chanset_t));
+    chan = (struct chanset_t *) calloc(1, sizeof(struct chanset_t));
 
     /* Hells bells, why set *every* variable to 0 when we have bzero? */
-    egg_bzero(chan, sizeof(struct chanset_t));
+/* not needed..    egg_bzero(chan, sizeof(struct chanset_t)); */
+
     /* These are defaults, bzero already set them 0, but we set them for future reference */
     chan->limit_prot = 0;
     chan->limit = 0;
@@ -561,4 +560,3 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
 #endif
   return ret;
 }
-

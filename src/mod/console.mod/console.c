@@ -36,11 +36,10 @@ struct console_info {
 
 static struct user_entry_type USERENTRY_CONSOLE;
 
-
 static int console_unpack(struct userrec *u, struct user_entry *e)
 {
-  struct console_info *ci = malloc(sizeof(struct console_info));
-  char *par, *arg;
+  struct console_info *ci = calloc(1, sizeof(struct console_info));
+  char *par = NULL, *arg = NULL;
 
   par = e->u.list->extra;
   arg = newsplit(&par);
@@ -64,8 +63,8 @@ static int console_unpack(struct userrec *u, struct user_entry *e)
 
 static int console_pack(struct userrec *u, struct user_entry *e)
 {
-  char work[1024];
-  struct console_info *ci;
+  char work[1024] = "";
+  struct console_info *ci = NULL;
   int l;
 
   ci = (struct console_info *) e->u.extra;
@@ -75,9 +74,9 @@ static int console_pack(struct userrec *u, struct user_entry *e)
 		     stripmasktype(ci->stripflags), ci->echoflags,
 		     ci->page, ci->conchan, ci->colour);
 
-  e->u.list = malloc(sizeof(struct list_type));
+  e->u.list = calloc(1, sizeof(struct list_type));
   e->u.list->next = NULL;
-  e->u.list->extra = malloc(l + 1);
+  e->u.list->extra = calloc(1, l + 1);
   strcpy(e->u.list->extra, work);
 
   free(ci->channel);
@@ -137,7 +136,7 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
 static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
 {
   struct console_info *ci = (struct console_info *) e->u.extra;
-  char *arg;
+  char *arg = NULL;
   int i;
 
   arg = newsplit(&par);
@@ -145,7 +144,7 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
     free(ci->channel);
     free(ci);
   }
-  ci = malloc(sizeof(struct console_info));
+  ci = calloc(1, sizeof(struct console_info));
   ci->channel = strdup(arg);
   arg = newsplit(&par);
   ci->conflags = logmodes(arg);
@@ -189,7 +188,8 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
 static void console_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct console_info *i = e->u.extra;
-  char tmp[100];
+  char tmp[100] = "";
+
   if (dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
     dprintf(idx, "  %s\n", CONSOLE_SAVED_SETTINGS);
     dprintf(idx, "    %s %s\n", CONSOLE_CHANNEL, i->channel);
@@ -209,12 +209,11 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
   }
 }
 
-static int console_dupuser(struct userrec *new, struct userrec *old,
-			   struct user_entry *e)
+static int console_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
 {
-  struct console_info *i = e->u.extra, *j;
+  struct console_info *i = e->u.extra, *j = NULL;
 
-  j = malloc(sizeof(struct console_info));
+  j = calloc(1, sizeof(struct console_info));
   egg_memcpy(j, i, sizeof(struct console_info));
 
   j->channel = strdup(i->channel);
@@ -272,13 +271,11 @@ static int console_chon(char *handle, int idx)
 
       if (p) {
 	if (dcc[idx].u.chat->channel >= 0) {
-	    char x[1024];
+	    char x[1024] = "";
 
-	    chanout_but(-1, dcc[idx].u.chat->channel,
-			"*** [%s] %s\n", dcc[idx].nick, p);
+	    chanout_but(-1, dcc[idx].u.chat->channel, "*** [%s] %s\n", dcc[idx].nick, p);
 	    simple_sprintf(x, "[%s] %s", dcc[idx].nick, p);
-	    botnet_send_chan(-1, conf.bot->nick, NULL,
-			     dcc[idx].u.chat->channel, x);
+	    botnet_send_chan(-1, conf.bot->nick, NULL, dcc[idx].u.chat->channel, x);
 	}
       }
     }
@@ -291,8 +288,7 @@ static int console_store(struct userrec *u, int idx, char *par)
   struct console_info *i = get_user(&USERENTRY_CONSOLE, u);
 
   if (!i) {
-    i = malloc(sizeof(struct console_info));
-    egg_bzero(i, sizeof(struct console_info));
+    i = calloc(1, sizeof(struct console_info));
   }
   if (i->channel)
     free(i->channel);
@@ -310,7 +306,8 @@ static int console_store(struct userrec *u, int idx, char *par)
     i->colour = 0;
   i->conchan = dcc[idx].u.chat->channel;
   if (par) {
-    char tmp[100];
+    char tmp[100] = "";
+
     dprintf(idx, "%s\n", CONSOLE_SAVED_SETTINGS2);
     dprintf(idx, "  %s %s\n", CONSOLE_CHANNEL, i->channel);
     dprintf(idx, "  %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,

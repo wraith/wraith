@@ -18,8 +18,8 @@ static int getudef(struct udef_chans *ul, char *name)
 
 static int ngetudef(char *name, char *chan)
 {
-  struct udef_struct *l;
-  struct udef_chans *ll;
+  struct udef_struct *l = NULL;
+  struct udef_chans *ll = NULL;
 
   for (l = udef; l; l = l->next)
     if (!egg_strcasecmp(l->name, name)) {
@@ -33,7 +33,7 @@ static int ngetudef(char *name, char *chan)
 
 static void setudef(struct udef_struct *us, char *name, int value)
 {
-  struct udef_chans *ul, *ul_last = NULL;
+  struct udef_chans *ul = NULL, *ul_last = NULL;
 
   for (ul = us->values; ul; ul_last = ul, ul = ul->next)
     if (!egg_strcasecmp(ul->chan, name)) {
@@ -41,7 +41,7 @@ static void setudef(struct udef_struct *us, char *name, int value)
       return;
     }
 
-  ul = malloc(sizeof(struct udef_chans));
+  ul = calloc(1, sizeof(struct udef_chans));
   ul->chan = strdup(name);
   ul->value = value;
   ul->next = NULL;
@@ -53,7 +53,7 @@ static void setudef(struct udef_struct *us, char *name, int value)
 
 static void initudef(int type, char *name, int defined)
 {
-  struct udef_struct *ul, *ul_last = NULL;
+  struct udef_struct *ul = NULL, *ul_last = NULL;
 
   if (strlen(name) < 1)
     return;
@@ -67,7 +67,7 @@ static void initudef(int type, char *name, int defined)
     }
 
   debug2("Creating %s (type %d)", name, type);
-  ul = malloc(sizeof(struct udef_struct));
+  ul = calloc(1, sizeof(struct udef_struct));
   ul->name = strdup(name);
   if (defined)
     ul->defined = 1;

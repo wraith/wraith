@@ -20,16 +20,16 @@ static int ctcp_mode;
 static int serv;		/* sock # of server currently */
 static int servidx;		/* idx of server */
 static int strict_host;		/* strict masking of hosts ? */
-static char newserver[121];	/* new server? */
+static char newserver[121] = "";	/* new server? */
 static int newserverport;	/* new server port? */
-static char newserverpass[121];	/* new server password? */
+static char newserverpass[121] = "";	/* new server password? */
 static time_t trying_server;	/* trying to connect to a server right now? */
 static int curserv;		/* current position in server list: */
 static int flud_thr;		/* msg flood threshold */
 static int flud_time;		/* msg flood time */
 static int flud_ctcp_thr;	/* ctcp flood threshold */
 static int flud_ctcp_time;	/* ctcp flood time */
-char botuserhost[121];	/* bot's user@host (refreshed whenever the
+char botuserhost[121] = "";	/* bot's user@host (refreshed whenever the
 				   bot joins a channel) */
 				/* may not be correct user@host BUT it's
 				   how the server sees it */
@@ -46,15 +46,15 @@ static int waiting_for_awake;	/* set when i unidle myself, cleared when
 static time_t server_online;	/* server connection time */
 static time_t server_cycle_wait;	/* seconds to wait before
 					   re-beginning the server list */
-char botrealname[121];	/* realname of bot */
+char botrealname[121] = "";	/* realname of bot */
 static int server_timeout;	/* server timeout for connecting */
 static int never_give_up;	/* never give up when connecting to servers? */
 static int strict_servernames;	/* don't update server list */
-static struct server_list *serverlist;	/* old-style queue, still used by
+static struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 static int cycle_time;		/* cycle time till next server connect */
 static int default_port;	/* default IRC port */
-static char oldnick[NICKLEN];	/* previous nickname *before* rehash */
+static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
 static int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 static int answer_ctcp;		/* answer how many stacked ctcp's ? */
 static int lowercase_ctcp;	/* answer lowercase CTCP's (non-standard) */
@@ -66,8 +66,8 @@ static int double_server;
 static int double_help;
 static int double_warned;
 static int lastpingtime;	/* IRCNet LAGmeter support -- drummer */
-static char stackablecmds[511];
-static char stackable2cmds[511];
+static char stackablecmds[511] = "";
+static char stackable2cmds[511] = "";
 static time_t last_time;
 static int use_penalties;
 static int use_fastdeq;
@@ -91,9 +91,9 @@ static void msgq_clear(struct msgq_head *qh);
 static int stack_limit;
 
 /* New bind tables. */
-static bind_table_t *BT_raw, *BT_msg, *BT_ctcr, *BT_ctcp;
+static bind_table_t *BT_raw = NULL, *BT_msg = NULL, *BT_ctcr = NULL, *BT_ctcp = NULL;
 #ifdef S_AUTHCMDS
-static bind_table_t *BT_msgc;
+static bind_table_t *BT_msgc = NULL;
 #endif /* S_AUTHCMDS */
 
 #include "servmsg.c"
@@ -130,7 +130,7 @@ static int burst;
  */
 static void deq_msg()
 {
-  struct msgq *q;
+  struct msgq *q = NULL;
   int ok = 0;
 
   /* now < last_time tested 'cause clock adjustments could mess it up */
@@ -222,7 +222,7 @@ static void deq_msg()
 
 static int calc_penalty(char * msg)
 {
-  char *cmd, *par1, *par2, *par3;
+  char *cmd = NULL, *par1 = NULL, *par2 = NULL, *par3 = NULL;
   register int penalty, i, ii;
 
   if (!use_penalties &&
@@ -353,7 +353,7 @@ static int calc_penalty(char * msg)
 
 char *splitnicks(char **rest)
 {
-  register char *o, *r;
+  register char *o = NULL, *r = NULL;
 
   if (!rest)
     return *rest = "";
@@ -371,11 +371,11 @@ char *splitnicks(char **rest)
 
 static int fast_deq(int which)
 {
-  struct msgq_head *h;
-  struct msgq *m, *nm;
-  char msgstr[511], nextmsgstr[511], tosend[511], victims[511], stackable[511],
-       *msg, *nextmsg, *cmd, *nextcmd, *to, *nextto, *stckbl;
-  int len, doit = 0, found = 0, cmd_count =0, stack_method = 1;
+  struct msgq_head *h = NULL;
+  struct msgq *m = NULL, *nm = NULL;
+  char msgstr[511] = "", nextmsgstr[511] = "", tosend[511] = "", victims[511] = "", stackable[511] = "",
+       *msg = NULL, *nextmsg = NULL, *cmd = NULL, *nextcmd = NULL, *to = NULL, *nextto = NULL, *stckbl = NULL;
+  int len, doit = 0, found = 0, cmd_count = 0, stack_method = 1;
 
   if (!use_fastdeq)
     return 0;
@@ -503,8 +503,8 @@ static void check_queues(char *oldnick, char *newnick)
 
 static void parse_q(struct msgq_head *q, char *oldnick, char *newnick)
 {
-  struct msgq *m, *lm = NULL;
-  char buf[511], *msg, *nicks, *nick, *chan, newnicks[511], newmsg[511];
+  struct msgq *m = NULL, *lm = NULL;  char buf[511] = "", *msg = NULL, *nicks = NULL, 
+              *nick = NULL, *chan = NULL, newnicks[511] = "", newmsg[511] = "";
   int changed;
 
   for (m = q->head; m;) {
@@ -561,10 +561,10 @@ static void parse_q(struct msgq_head *q, char *oldnick, char *newnick)
 static void purge_kicks(struct msgq_head *q)
 {
   struct msgq *m, *lm = NULL;
-  char buf[511], *reason, *nicks, *nick, *chan, newnicks[511],
-       newmsg[511], chans[511], *chns, *ch;
+  char buf[511] = "", *reason = NULL, *nicks = NULL, *nick = NULL, *chan = NULL,
+       newnicks[511] = "", newmsg[511] = "", chans[511] = "", *chns, *ch;
   int changed, found;
-  struct chanset_t *cs;
+  struct chanset_t *cs = NULL;
 
   for (m = q->head; m;) {
     if (!egg_strncasecmp(m->msg, "KICK", 4)) {
@@ -629,10 +629,11 @@ static void purge_kicks(struct msgq_head *q)
 
 static int deq_kick(int which)
 {
-  struct msgq_head *h;
-  struct msgq *msg, *m, *lm;
-  char buf[511], buf2[511], *reason2, *nicks, *chan, *chan2, *reason, *nick,
-       newnicks[511], newnicks2[511], newmsg[511];
+  struct msgq_head *h = NULL;
+  struct msgq *msg = NULL, *m = NULL, *lm = NULL;
+  char buf[511] = "", buf2[511] = "", *reason2 = NULL, *nicks = NULL, *chan = NULL,
+       *chan2 = NULL, *reason = NULL, *nick = NULL, newnicks[511] = "", newnicks2[511] = "",
+        newmsg[511] = "";
   int changed = 0, nr = 0;
 
   if (!optimize_kicks)
@@ -722,8 +723,7 @@ static int deq_kick(int which)
     else
       m = h->head->next;
   }
-  egg_snprintf(newmsg, sizeof newmsg, "KICK %s %s %s\n", chan, newnicks + 1,
-	       reason);
+  egg_snprintf(newmsg, sizeof newmsg, "KICK %s %s %s\n", chan, newnicks + 1, reason);
   tputs(serv, newmsg, strlen(newmsg));
   if (debug_output) {
     newmsg[strlen(newmsg) - 1] = 0;
@@ -765,11 +765,9 @@ static void empty_msgq()
  */
 static void queue_server(int which, char *buf, int len)
 {
-  struct msgq_head *h = NULL,
-  		    tempq;
-  struct msgq	   *q, *tq, *tqq;
-  int		    doublemsg = 0,
-  		    qnext = 0;
+  struct msgq_head *h = NULL, tempq;
+  struct msgq *q = NULL, *tq = NULL, *tqq = NULL;
+  int doublemsg = 0, qnext = 0;
 
   /* Don't even BOTHER if there's no server online. */
   if (serv < 0)
@@ -839,7 +837,7 @@ static void queue_server(int which, char *buf, int len)
 	}
       }
 
-    q = malloc(sizeof(struct msgq));
+    q = calloc(1, sizeof(struct msgq));
     if (qnext)
       q->next = h->head;
     else
@@ -853,7 +851,7 @@ static void queue_server(int which, char *buf, int len)
        h->head = q;
     h->last = q;
     q->len = len;
-    q->msg = malloc(len + 1);
+    q->msg = calloc(1, len + 1);
     strncpyz(q->msg, buf, len + 1);
     h->tot++;
     h->warned = 0;
@@ -917,19 +915,18 @@ static void queue_server(int which, char *buf, int len)
  */
 static void add_server(char *ss)
 {
-  struct server_list *x, *z;
+  struct server_list *x = NULL, *z = NULL;
 #ifdef USE_IPV6
-  char *p, *q, *r;
-#else
-  char *p, *q;
+  char *r = NULL;
 #endif /* USE_IPV6 */
+  char *p = NULL, *q = NULL;
 
   for (z = serverlist; z && z->next; z = z->next);
   while (ss) {
     p = strchr(ss, ',');
     if (p)
       *p++ = 0;
-    x = malloc(sizeof(struct server_list));
+    x = calloc(1, sizeof(struct server_list));
 
     x->next = 0;
     x->realname = 0;
@@ -956,7 +953,7 @@ static void add_server(char *ss)
       }
 #endif /* USE_IPV6 */
       *q++ = 0;
-      x->name = malloc(q - ss);
+      x->name = calloc(1, q - ss);
       strcpy(x->name, ss);
       ss = q;
       q = strchr(ss, ':');
@@ -982,7 +979,7 @@ static void add_server(char *ss)
  */
 static void clearq(struct server_list *xx)
 {
-  struct server_list *x;
+  struct server_list *x = NULL;
 
   while (xx) {
     x = xx->next;
@@ -1004,7 +1001,7 @@ void servers6_describe(struct cfg_entry * entry, int idx) {
 
 void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
-  char *slist, *p;
+  char *slist = NULL, *p = NULL;
 
   if (conf.bot->host6 || conf.bot->ip6) /* we want to use the servers6 entry. */
     return;
@@ -1025,7 +1022,7 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 
 void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
-  char *slist, *p;
+  char *slist = NULL, *p = NULL;
 
   if (!conf.bot->host6 && !conf.bot->ip6) /* we probably want to use the normal server list.. */
     return;
@@ -1049,7 +1046,8 @@ void nick_describe(struct cfg_entry * entry, int idx) {
 
 void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
-  char * p;
+  char *p = NULL;
+
   if (entry->ldata)
     p = entry->ldata;
   else if (entry->gdata)
@@ -1126,7 +1124,7 @@ static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
       i++;
     }
     /* Gotta add it: */
-    x = malloc(sizeof(struct server_list));
+    x = calloc(1, sizeof(struct server_list));
 
     x->next = 0;
     x->realname = 0;
@@ -1208,7 +1206,7 @@ static void dcc_chat_hostresolved(int);
  */
 static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char *action, *param, *ip, *prt;
+  char *action = NULL, *param = NULL, *ip = NULL, *prt = NULL;
   int i, ok;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
   
@@ -1286,14 +1284,13 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
 
 static void dcc_chat_hostresolved(int i)
 {
-  char buf[512], ip[512];
+  char buf[512] = "", ip[512] = "";
   int ok;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
 
   egg_snprintf(buf, sizeof buf, "%d", dcc[i].port);
 #ifndef USE_IPV6
-  if (!hostsanitycheck_dcc(dcc[i].nick, dcc[i].host, dcc[i].addr,
-                           dcc[i].u.dns->host, buf)) {
+  if (!hostsanitycheck_dcc(dcc[i].nick, dcc[i].host, dcc[i].addr, dcc[i].u.dns->host, buf)) {
     lostdcc(i);
     return;
   }
@@ -1325,10 +1322,8 @@ static void dcc_chat_hostresolved(int i)
   if (dcc[i].sock < 0 || open_telnet_dcc(dcc[i].sock, ip, buf) < 0) {
     neterror(buf);
     if (!quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :%s (%s)\n", dcc[i].nick,
-	      DCC_CONNECTFAILED1, buf);
-    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED2,
-	   dcc[i].nick, dcc[i].host);
+      dprintf(DP_HELP, "NOTICE %s :%s (%s)\n", dcc[i].nick, DCC_CONNECTFAILED1, buf);
+    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED2, dcc[i].nick, dcc[i].host);
     putlog(LOG_MISC, "*", "    (%s)", buf);
     killsock(dcc[i].sock);
     lostdcc(i);
@@ -1347,8 +1342,7 @@ static void dcc_chat_hostresolved(int i)
     strcpy(dcc[i].u.chat->con_chan, (chanset) ? chanset->dname : "*");
     dcc[i].timeval = now;
     /* Ok, we're satisfied with them now: attempt the connect */
-    putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick,
-	   dcc[i].host);
+    putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick, dcc[i].host);
     dprintf(i, "%s", rand_dccresp());
   }
   return;
@@ -1417,7 +1411,7 @@ static void server_die()
  */
 static void server_report(int idx, int details)
 {
-  char s1[64], s[128];
+  char s1[64] = "", s[128] = "";
 
   if (server_online) {
     dprintf(idx, "    Online as: %s%s%s (%s)\n", botname,
@@ -1460,7 +1454,7 @@ static void server_report(int idx, int details)
 
 static void msgq_clear(struct msgq_head *qh)
 {
-  register struct msgq	*q, *qq;
+  register struct msgq	*q = NULL, *qq = NULL;
 
   for (q = qh->head; q; q = qq) {
     qq = q->next;

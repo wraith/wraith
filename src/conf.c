@@ -80,7 +80,7 @@ int checkpid(char *nick, conf_bot *bot) {
 }
 
 static void conf_addbot(char *nick, char *ip, char *host, char *ip6) {
-  conf_bot *bot;
+  conf_bot *bot = NULL;
 
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next)
     ;
@@ -119,7 +119,8 @@ static void conf_addbot(char *nick, char *ip, char *host, char *ip6) {
 
 
 void showconf() {
-  conf_bot *bot;
+  conf_bot *bot = NULL;
+
   sdprintf("---------------------------CONF START---------------------------");
   sdprintf("uid      : %d", conffile.uid);
   sdprintf("uname    : %s", conffile.uname);
@@ -136,12 +137,18 @@ void showconf() {
   sdprintf("autouname: %d", conffile.autouname);
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next)
     sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d PID_FILE: %s LOCALHUB %d", bot->nick, bot->ip, bot->host,
-                 bot->ip6, bot->host6, bot->pid, bot->pid_file, bot->localhub);
+                 bot->ip6, bot->host6, bot->pid, bot->pid_file, 
+#ifdef LEAF
+bot->localhub
+#else
+0
+#endif /* LEAF */
+);
   sdprintf("----------------------------CONF END----------------------------");
 }
 
 void free_conf() {
-  conf_bot *bot, *bot_n;
+  conf_bot *bot = NULL, *bot_n = NULL;
 
   for (bot = conffile.bots; bot; bot = bot_n) {
     bot_n = bot->next;
@@ -163,7 +170,7 @@ void free_conf() {
 }
 
 int parseconf() {
-  struct passwd *pw;
+  struct passwd *pw = NULL;
 
   if (conffile.uid && conffile.uid != myuid) {
     sdprintf("wrong uid, conf: %d :: %d", conffile.uid, myuid);
@@ -328,7 +335,7 @@ int readconf(char *cfile)
 
 int writeconf(char *filename) {
   FILE *f = NULL;
-  conf_bot *bot;
+  conf_bot *bot = NULL;
 
   if (!(f = fopen(filename, "w"))) {
     return 1;
@@ -385,7 +392,7 @@ static void conf_bot_dup(conf_bot *dest, conf_bot *src) {
 }
 
 void fillconf(conf_t *inconf) {
-  conf_bot *bot;
+  conf_bot *bot = NULL;
   char *mynick = NULL;
 
   if (localhub) {

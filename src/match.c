@@ -37,7 +37,7 @@
 
 int _wild_match_per(register unsigned char *m, register unsigned char *n)
 {
-  unsigned char *ma = m, *lsm = 0, *lsn = 0, *lpm = 0, *lpn = 0;
+  unsigned char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
   int match = 1, saved = 0, space;
   register unsigned int sofar = 0;
 
@@ -132,7 +132,7 @@ int _wild_match_per(register unsigned char *m, register unsigned char *n)
 
 int _wild_match(register unsigned char *m, register unsigned char *n)
 {
-  unsigned char *ma = m, *na = n, *lsm = 0, *lsn = 0;
+  unsigned char *ma = m, *na = n, *lsm = NULL, *lsn = NULL;
   int match = 1;
   register int sofar = 0;
 

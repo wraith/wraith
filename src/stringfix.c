@@ -17,14 +17,10 @@ int help = 0;
 #ifdef S_GARBLESTRINGS
 void garble(char **inptr, char **outptr)
 {
-  char *in = *inptr,
-   *out,
-   *p = NULL;
-  char obuf[WTF];
+  char *in = *inptr, *out = NULL, *p = NULL, obuf[WTF] = "";
   int chars = 0;
-  unsigned char x;
+  unsigned char x = 0;
 
-  obuf[0] = 0;
   p = in + 5;
   if (*p == '"') {
     sprintf((*outptr), "\"\"");
@@ -103,12 +99,9 @@ char *outbuf = NULL;
 
 void processline(char *line)
 {
-  char tmpin[WTF],
-    tmpout[WTF];
-  char *in,
-   *out;
+  char tmpin[WTF] = "", tmpout[WTF] = "", *in = NULL, *out = NULL;
 
-  strcpy(tmpin, line);
+  strcpy(tmpin, line); 
   memset((char *) &tmpin[strlen(tmpin)], 20, 0);
   in = tmpin;
   out = tmpout;
@@ -128,8 +121,7 @@ void processline(char *line)
   if (outbuf)
     outbuf = realloc(outbuf, strlen(outbuf) + strlen(tmpout) + 10);
   else {
-    outbuf = malloc(strlen(tmpout) + 10);
-    outbuf[0] = 0;
+    outbuf = calloc(1, strlen(tmpout) + 10);
   }
   strcat(outbuf, tmpout);
   strcat(outbuf, "\n");
@@ -139,11 +131,9 @@ void processline(char *line)
 int main(int argc, char *argv[0])
 {
 #ifdef S_GARBLESTRINGS
-  FILE *f;
-  char *ln,
-   *nln;
+  FILE *f = NULL;
+  char *ln = NULL, *nln = NULL, *buf = NULL;
   int insize;
-  char *buf;
 
   if (argc != 3 && argc != 4)
     return 1;
@@ -154,7 +144,7 @@ int main(int argc, char *argv[0])
   fseek(f, 0, SEEK_END);
   insize = ftell(f);
   fseek(f, 0, SEEK_SET);
-  buf = malloc(insize + 1);
+  buf = calloc(1, insize + 1);
   fread(buf, 1, insize, f);
   fclose(f);
   buf[insize] = 0;

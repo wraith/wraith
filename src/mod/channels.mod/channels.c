@@ -15,8 +15,8 @@ static Function *global = NULL, *irc_funcs = NULL;
 static int 			use_info;
 static int			quiet_save;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
-static char 			*lastdeletedmask;
-static struct udef_struct 	*udef;
+static char 			*lastdeletedmask = NULL;
+static struct udef_struct 	*udef = NULL;
 static int 			global_stopnethack_mode;
 static int 			global_revenge_mode;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
@@ -25,7 +25,7 @@ static int 			global_exempt_time;
 static int 			global_invite_time;
 
 /* Global channel settings (drummer/dw) */
-static char 			glob_chanset[512];
+static char 			glob_chanset[512] = "";
 
 /* Global flood settings */
 static int 			gfld_chan_thr;
@@ -64,9 +64,9 @@ static void check_should_lock()
 #ifdef S_AUTOLOCK
 #ifdef HUB
   char *p = CFG_LOCKTHRESHOLD.gdata;
-  tand_t *bot;
+  tand_t *bot = NULL;
   int H, L, hc, lc;
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
 
   if (!p)
     return;
@@ -147,8 +147,8 @@ static void got_cset(char *botnick, char *code, char *par)
 
 static void got_cpart(char *botnick, char *code, char *par)
 {
-  char *chname;
-  struct chanset_t *chan;
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
 
   if (!par[0])
    return;
@@ -162,8 +162,8 @@ static void got_cpart(char *botnick, char *code, char *par)
 
 static void got_cjoin(char *botnick, char *code, char *par)
 {
-  char *chname;
-  struct chanset_t *chan;
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
 
   if (!par[0])
    return;
@@ -187,8 +187,8 @@ static void got_cjoin(char *botnick, char *code, char *par)
 #ifdef LEAF
 static void got_cycle(char *botnick, char *code, char *par)
 {
-  char *chname;
-  struct chanset_t *chan;
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
   int delay = 10;
 
   if (!par[0])
@@ -207,8 +207,8 @@ static void got_cycle(char *botnick, char *code, char *par)
 
 static void got_down(char *botnick, char *code, char *par)
 {
-  char *chname;
-  struct chanset_t *chan;
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
 
   if (!par[0])
    return;
@@ -224,7 +224,7 @@ static void got_down(char *botnick, char *code, char *par)
 
 static void got_role(char *botnick, char *code, char *par)
 {
-  char *tmp;
+  char *tmp = NULL;
 
   tmp = newsplit(&par);
   role = atoi(tmp);
@@ -239,7 +239,8 @@ void got_kl(char *botnick, char *code, char *par)
 #ifdef S_AUTOLOCK
   killed_bots++;
   if (kill_threshold && (killed_bots = kill_threshold)) {
-    struct chanset_t *ch;
+    struct chanset_t *ch = NULL;
+
     for (ch = chanset; ch; ch = ch->next)
       do_chanset(ch, STR("+closed +backup +bitch"), 1);
   /* FIXME: we should randomize nick here ... */
@@ -251,10 +252,10 @@ void got_kl(char *botnick, char *code, char *par)
 #ifdef HUB
 void rebalance_roles()
 {
-  struct bot_addr *ba;
+  struct bot_addr *ba = NULL;
   int r[5] = { 0, 0, 0, 0, 0 }, hNdx, lNdx, i;
-  char tmp[10];
-  tmp[0] = 0;
+  char tmp[10] = "";
+
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].user && (dcc[i].user->flags & USER_BOT)) {
       ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
@@ -303,7 +304,8 @@ void rebalance_roles()
 
 /* FIXME: needs more testing */
 static void channels_10secondly() {
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
+
   for (chan = chanset; chan; chan = chan->next) {
     /* slowpart */
     if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
@@ -330,9 +332,9 @@ static void channels_10secondly() {
 
 static void got_sj(int idx, char *code, char *par) 
 {
-  char *chname;
+  char *chname = NULL;
   time_t delay;
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
 
   chname = newsplit(&par);
   delay = ((atoi(par) + now) - server_lag);
@@ -343,9 +345,9 @@ static void got_sj(int idx, char *code, char *par)
 
 static void got_sp(int idx, char *code, char *par) 
 {
-  char *chname;
+  char *chname = NULL;
   time_t delay;
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
 
   chname = newsplit(&par);
   delay = ((atoi(par) + now) - server_lag);
@@ -360,8 +362,9 @@ static void got_sp(int idx, char *code, char *par)
 
 static void got_jn(int idx, char *code, char *par)
 {
-  struct chanset_t *chan;
-  char *chname;
+  struct chanset_t *chan = NULL;
+  char *chname = NULL;
+
   chname = newsplit(&par);
   if (!chname || !chname[0]) return;
   if (!(chan = findchan_by_dname(chname))) return;
@@ -378,7 +381,7 @@ static void got_jn(int idx, char *code, char *par)
 static void set_mode_protect(struct chanset_t *chan, char *set)
 {
   int i, pos = 1;
-  char *s, *s1;
+  char *s = NULL, *s1 = NULL;
 
   /* Clear old modes */
   chan->mode_mns_prot = chan->mode_pls_prot = 0;
@@ -468,10 +471,9 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
 
 static void get_mode_protect(struct chanset_t *chan, char *s)
 {
-  char *p = s, s1[121];
+  char *p = s, s1[121] = "";
   int ok = 0, i, tst;
 
-  s1[0] = 0;
   for (i = 0; i < 2; i++) {
     ok = 0;
     if (i == 0) {
@@ -554,7 +556,7 @@ static int ismasked(masklist *m, char *user)
  */
 inline static int chanset_unlink(struct chanset_t *chan)
 {
-  struct chanset_t	*c, *c_old = NULL;
+  struct chanset_t *c = NULL, *c_old = NULL;
 
   for (c = chanset; c; c_old = c, c = c->next) {
     if (c == chan) {
@@ -576,7 +578,7 @@ inline static int chanset_unlink(struct chanset_t *chan)
 static void remove_channel(struct chanset_t *chan)
 {
    int		 i;
-   module_entry	*me;
+   module_entry	*me = NULL;
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_part() call. */
    (void) chanset_unlink(chan);
@@ -666,16 +668,18 @@ static cmd_t my_chon[] =
 
 static void channels_report(int idx, int details)
 {
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
   int i;
-  char s[1024], s2[100];
+  char s[1024] = "", s2[100] = "";
   struct flag_record fr = {FR_CHAN | FR_GLOBAL, 0, 0, 0, 0, 0};
 
   for (chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
     if (!private(fr, chan, PRIV_OP) && ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr))) {
+
       s[0] = 0;
+
       if (channel_bitch(chan))
 	strcat(s, "bitch, ");
       if (s[0])
@@ -801,7 +805,7 @@ cmd_t channels_bot[] = {
 #endif
   {"ltp", "", (Function) got_locktopic, NULL},
 */
-  {0, 0, 0, 0}
+  {NULL, NULL, NULL, NULL}
 };
 
 EXPORT_SCOPE char *channels_start();
@@ -897,8 +901,7 @@ void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
     return;
   *valid = 0;
   if (!strcmp(cfgent->name, STR("lock-threshold"))) {
-    int L,
-      R;
+    int L, R;
     char *value = cfgent->gdata;
 
     L = atoi(value);
@@ -938,12 +941,14 @@ struct cfg_entry CFG_KILLTHRESHOLD = {
 int checklimit = 1;
 static void check_limitraise() {
   int i = 0;
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
+
   for (chan = chanset; chan; chan = chan->next, i++) {
     if (i % 2 == checklimit) {
       if (chan->limitraise) {
         if (dolimit(chan)) {
-          module_entry *me;
+          module_entry *me = NULL;
+
           if ((me = module_find("irc", 0, 0)))
             (me->funcs[23])(chan);             /* raise_limit(chan) */
         }
@@ -951,9 +956,9 @@ static void check_limitraise() {
     }
   }
   if (checklimit)
-    checklimit=0;
+    checklimit = 0;
   else
-    checklimit=1;
+    checklimit = 1;
 }
 #endif /* LEAF */
 

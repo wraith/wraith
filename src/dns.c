@@ -136,7 +136,7 @@ devent_type DNS_DCCEVENT_IPBYHOST = {
 
 void dcc_dnsipbyhost(char *hostn)
 {
-  devent_t *de;
+  devent_t *de = NULL;
 
   for (de = dns_events; de; de = de->next) {
     if (de->type && (de->type == &DNS_DCCEVENT_IPBYHOST) &&
@@ -148,8 +148,7 @@ void dcc_dnsipbyhost(char *hostn)
     }
   }
 
-  de = malloc(sizeof(devent_t));
-  egg_bzero(de, sizeof(devent_t));
+  de = calloc(1, sizeof(devent_t));
 
   /* Link into list. */
   de->next = dns_events;
@@ -165,7 +164,7 @@ void dcc_dnsipbyhost(char *hostn)
 
 void dcc_dnshostbyip(IP ip)
 {
-  devent_t *de;
+  devent_t *de = NULL;
 
   for (de = dns_events; de; de = de->next) {
     if (de->type && (de->type == &DNS_DCCEVENT_HOSTBYIP) &&
@@ -176,8 +175,7 @@ void dcc_dnshostbyip(IP ip)
     }
   }
 
-  de = malloc(sizeof(devent_t));
-  egg_bzero(de, sizeof(devent_t));
+  de = calloc(1, sizeof(devent_t));
 
   /* Link into list. */
   de->next = dns_events;
@@ -264,9 +262,9 @@ void call_ipbyhost(char *hostn, IP ip, int ok)
 
 void block_dns_hostbyip(IP ip)
 {
-  struct hostent *hp;
+  struct hostent *hp = NULL;
   unsigned long addr = htonl(ip);
-  static char s[UHOSTLEN];
+  static char s[UHOSTLEN] = "";
 
   if (!setjmp(alarmret)) {
     alarm(resolve_timeout);
@@ -295,9 +293,10 @@ void block_dns_ipbyhost(char *host)
     return;
   }
   if (!setjmp(alarmret)) {
-    struct hostent *hp;
-    struct in_addr *in;
+    struct hostent *hp = NULL;
+    struct in_addr *in = NULL;
     IP ip = 0;
+
     alarm(resolve_timeout);
     hp = gethostbyname(host);
     alarm(0);

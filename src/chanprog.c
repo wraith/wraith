@@ -56,7 +56,7 @@ int     		my_port;
  */
 void rmspace(char *s)
 {
-  char *p, *end;
+  char *p = NULL, *end = NULL;
   int len;
 
   if (!s || (s && !*s))
@@ -79,7 +79,7 @@ void rmspace(char *s)
  */
 memberlist *ismember(struct chanset_t *chan, char *nick)
 {
-  register memberlist	*x;
+  register memberlist	*x = NULL;
 
   for (x = chan->channel.member; x && x->nick[0]; x = x->next)
     if (!rfc_casecmp(x->nick, nick))
@@ -91,7 +91,7 @@ memberlist *ismember(struct chanset_t *chan, char *nick)
  */
 struct chanset_t *findchan(const char *name)
 {
-  register struct chanset_t	*chan;
+  register struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     if (!rfc_casecmp(chan->name, name))
@@ -103,7 +103,7 @@ struct chanset_t *findchan(const char *name)
  */
 struct chanset_t *findchan_by_dname(const char *name)
 {
-  register struct chanset_t	*chan;
+  register struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     if (!rfc_casecmp(chan->dname, name))
@@ -120,9 +120,9 @@ struct chanset_t *findchan_by_dname(const char *name)
  */
 struct userrec *check_chanlist(const char *host)
 {
-  char				*nick, *uhost, buf[UHOSTLEN];
-  register memberlist		*m;
-  register struct chanset_t	*chan;
+  char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
+  register memberlist		*m = NULL;
+  register struct chanset_t	*chan = NULL;
 
   strncpyz(buf, host, sizeof buf);
   uhost = buf;
@@ -138,8 +138,8 @@ struct userrec *check_chanlist(const char *host)
  */
 struct userrec *check_chanlist_hand(const char *hand)
 {
-  register struct chanset_t	*chan;
-  register memberlist		*m;
+  register struct chanset_t	*chan = NULL;
+  register memberlist		*m = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
@@ -155,8 +155,8 @@ struct userrec *check_chanlist_hand(const char *hand)
  */
 void clear_chanlist(void)
 {
-  register memberlist		*m;
-  register struct chanset_t	*chan;
+  register memberlist		*m = NULL;
+  register struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
@@ -173,8 +173,8 @@ void clear_chanlist(void)
  */
 void clear_chanlist_member(const char *nick)
 {
-  register memberlist		*m;
-  register struct chanset_t	*chan;
+  register memberlist		*m = NULL;
+  register struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
@@ -189,9 +189,9 @@ void clear_chanlist_member(const char *nick)
  */
 void set_chanlist(const char *host, struct userrec *rec)
 {
-  char				*nick, *uhost, buf[UHOSTLEN];
-  register memberlist		*m;
-  register struct chanset_t	*chan;
+  char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
+  register memberlist		*m = NULL;
+  register struct chanset_t	*chan = NULL;
 
   strncpyz(buf, host, sizeof buf);
   uhost = buf;
@@ -209,9 +209,9 @@ void set_chanlist(const char *host, struct userrec *rec)
 
 void checkchans(int which)
 {
-  struct chanset_t *chan, *chan_next;
+  struct chanset_t *chan = NULL, *chan_next = NULL;
 
-  sdprintf(STR("checkchans(%d)"), which);
+  sdprintf("checkchans(%d)", which);
   if (which == 0 || which == 2) {
     for (chan = chanset; chan; chan = chan->next) {
       if (which == 0) {
@@ -221,7 +221,8 @@ void checkchans(int which)
       }
     }
   } else if (which == 1) {
-    module_entry *me;
+    module_entry *me = NULL;
+
     for (chan = chanset; chan; chan = chan_next) {
       chan_next = chan->next;
       if (chan->status & CHAN_FLAGGED) {
@@ -241,7 +242,7 @@ void checkchans(int which)
  */
 void tell_verbose_uptime(int idx)
 {
-  char s[256], s1[121];
+  char s[256] = "", s1[121] = "";
   time_t now2, hr, min;
 
   now2 = now - online_since;
@@ -274,8 +275,7 @@ void tell_verbose_uptime(int idx)
  */
 void tell_verbose_status(int idx)
 {
-  char s[256], s1[121], s2[81];
-  char *vers_t, *uni_t;
+  char s[256] = "", s1[121] = "", s2[81] = "", *vers_t = NULL, *uni_t = NULL;
 #ifdef HUB
   int i;
 #endif /* HUB */
@@ -358,7 +358,7 @@ void tell_verbose_status(int idx)
  */
 void tell_settings(int idx)
 {
-  char s[1024];
+  char s[1024] = "";
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
 
   dprintf(idx, "Botnet Nickname: %s\n", conf.bot->nick);
@@ -382,10 +382,10 @@ void tell_settings(int idx)
 
 void reaffirm_owners()
 {
-  char *p, *q, s[121];
-  struct userrec *u;
+  char *p = NULL, *q = NULL, s[121] = "";
+  struct userrec *u = NULL;
 
-  /* Make sure default owners are +a */
+  /* Make sure perm owners are +a */
   if (owner[0]) {
     q = owner;
     p = strchr(q, ',');
@@ -408,19 +408,11 @@ void reaffirm_owners()
 
 void load_internal_users()
 {
-  char *p = NULL,
-   *ln,
-   *hand,
-   *ip,
-   *port,
-   *pass,
-   *hosts,
-    host[UHOSTMAX] = "",
-    buf[2048] = "";
-  char *attr;
+  char *p = NULL, *ln = NULL, *hand = NULL, *ip = NULL, *port = NULL, *pass = NULL;
+  char *hosts = NULL, host[UHOSTMAX] = "", buf[2048] = "", *attr = NULL;
   int i, hublevel = 0;
-  struct bot_addr *bi;
-  struct userrec *u;
+  struct bot_addr *bi = NULL;
+  struct userrec *u = NULL;
 
   /* hubs */
   egg_snprintf(buf, sizeof buf, "%s", hubs);
@@ -449,7 +441,8 @@ void load_internal_users()
         hublevel++;		/* We must increment this even if it is already added */
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
-	  bi = malloc(sizeof(struct bot_addr));
+	  bi = calloc(1, sizeof(struct bot_addr));
+
           bi->address = strdup(ip);
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
@@ -458,8 +451,7 @@ void load_internal_users()
 	  if ((!bi->hublevel) && (!strcmp(hand, conf.bot->nick)))
 	    bi->hublevel = 99;
 #endif /* HUB */
-          bi->uplink = malloc(1);
-          bi->uplink[0] = 0;
+          bi->uplink = calloc(1, 1);
 	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
 	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
 	}
@@ -541,7 +533,7 @@ void load_internal_users()
 void chanprog()
 {
   /* char buf[2048] = ""; */
-  struct bot_addr *bi;
+  struct bot_addr *bi = NULL;
 
   admin[0] = 0;
   /* cache our ip on load instead of every 30 seconds */
@@ -574,7 +566,7 @@ void chanprog()
     /* I need to be on the userlist... doh. */
     userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_BOT | USER_OP );
     conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
-    bi = malloc(sizeof(struct bot_addr));
+    bi = calloc(1, sizeof(struct bot_addr));
 
     bi->address = strdup(conf.bot->ip);
     /* bi->telnet_port = atoi(buf) ? atoi(buf) : 3333; */
@@ -584,8 +576,7 @@ void chanprog()
 #else
     bi->hublevel = 0;
 #endif /* HUB */
-    bi->uplink = malloc(1);
-    bi->uplink[0] = 0;
+    bi->uplink = calloc(1, 1);
     set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
   } else {
     bi = get_user(&USERENTRY_BOTADDR, conf.bot->u);
@@ -630,7 +621,7 @@ void chanprog()
  */
 void reload()
 {
-  FILE *f;
+  FILE *f = NULL;
 
   f = fopen(userfile, "r");
   if (f == NULL) {
@@ -667,7 +658,7 @@ void rehash()
  */
 int isowner(char *name)
 {
-  char *pa, *pb;
+  char *pa = NULL, *pb = NULL;
   char nl, pl;
 
   if (!owner || !*owner)
@@ -721,17 +712,17 @@ int shouldjoin(struct chanset_t *chan)
  */
 void do_chanset(struct chanset_t *chan, char *options, int local)
 {
-  char *buf;
-  module_entry *me;
+  char *buf = NULL;
+  module_entry *me = NULL;
 
   /* send out over botnet. */
   if (local != 2) {
-         /* malloc(options,chan,'cset ',' ',+ 1) */
+         /* calloc(1, options,chan,'cset ',' ',+ 1) */
     if (chan)
-      buf = malloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+      buf = calloc(1, strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
     else
-      buf = malloc(strlen(options) + 1 + 5 + 1 + 1);
-    buf[0] = 0;
+      buf = calloc(1, strlen(options) + 1 + 5 + 1 + 1);
+
     strcat(buf, "cset ");
     if (chan)
       strcat(buf, chan->dname);
@@ -744,12 +735,13 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
     putallbots(buf); 
     free(buf);
   }
+
   /* now set locally, hopefully it works */
   if (local && (me = module_find("channels", 0, 0))) {
   /* tcl_channel_modify(0, chan, 1, options) */
     Function *func = me->funcs;
-    char *buf2, *bak;
-    struct chanset_t *ch;
+    char *buf2 = NULL, *bak = NULL;
+    struct chanset_t *ch = NULL;
     int all = 0;
 
     if (!chan) {
@@ -759,10 +751,11 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
       ch = chan;
 
     bak = options;
-    buf2 = malloc(strlen(options) + 1);
+    buf2 = calloc(1, strlen(options) + 1);
 
     while (ch) {
-      char *list[2];
+      char *list[2] = { NULL, NULL };
+
       strcpy(buf2, bak);
       options = buf2;
       list[0] = newsplit(&options);

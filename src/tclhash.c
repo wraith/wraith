@@ -40,8 +40,8 @@ void binds_init(void)
 
 static int internal_bind_cleanup()
 {
-	bind_table_t *table, *next_table;
-	bind_entry_t *entry, *next_entry;
+	bind_table_t *table = NULL, *next_table = NULL;
+	bind_entry_t *entry = NULL, *next_entry = NULL;
 
 	for (table = bind_table_list_head; table; table = next_table) {
 		next_table = table->next;
@@ -78,7 +78,7 @@ void kill_binds(void)
 
 bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, int match_type, int flags)
 {
-	bind_table_t *table;
+	bind_table_t *table = NULL;
 
 	for (table = bind_table_list_head; table; table = table->next) {
 		if (!strcmp(table->name, name)) break;
@@ -101,7 +101,7 @@ bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, in
 
 void bind_table_del(bind_table_t *table)
 {
-	bind_table_t *cur, *prev;
+	bind_table_t *cur = NULL, *prev = NULL;
 
 	for (prev = NULL, cur = bind_table_list_head; cur; prev = cur, cur = cur->next) {
 		if (!strcmp(table->name, cur->name)) break;
@@ -125,7 +125,7 @@ void bind_table_del(bind_table_t *table)
 
 static void bind_table_really_del(bind_table_t *table)
 {
-	bind_entry_t *entry, *next;
+	bind_entry_t *entry = NULL, *next = NULL;
 
 	free(table->name);
 	for (entry = table->entries; entry; entry = next) {
@@ -139,7 +139,7 @@ static void bind_table_really_del(bind_table_t *table)
 
 bind_table_t *bind_table_lookup(const char *name)
 {
-	bind_table_t *table;
+	bind_table_t *table = NULL;
 
 	for (table = bind_table_list_head; table; table = table->next) {
 		if (!(table->flags & BIND_DELETED) && !strcmp(table->name, name)) break;
@@ -149,7 +149,7 @@ bind_table_t *bind_table_lookup(const char *name)
 
 bind_table_t *bind_table_lookup_or_fake(const char *name)
 {
-	bind_table_t *table;
+	bind_table_t *table = NULL;
 
 	table = bind_table_lookup(name);
 	if (!table) table = bind_table_add(name, 0, NULL, 0, BIND_FAKE);
@@ -160,7 +160,7 @@ bind_table_t *bind_table_lookup_or_fake(const char *name)
 /* Look up a bind entry based on either function name or id. */
 bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, const char *function_name)
 {
-	bind_entry_t *entry;
+	bind_entry_t *entry = NULL;
 
 	for (entry = table->entries; entry; entry = entry->next) {
 		if (entry->flags & BIND_DELETED) continue;
@@ -171,7 +171,7 @@ bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, c
 
 int bind_entry_del(bind_table_t *table, int id, const char *mask, const char *function_name, void *cdata)
 {
-	bind_entry_t *entry;
+	bind_entry_t *entry = NULL;
 
 	entry = bind_entry_lookup(table, id, mask, function_name);
 	if (!entry) return(-1);
@@ -200,7 +200,7 @@ static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry)
 /* Modify a bind entry's flags and mask. */
 int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char *function_name, const char *newflags, const char *newmask)
 {
-	bind_entry_t *entry;
+	bind_entry_t *entry = NULL;
 
 	entry = bind_entry_lookup(table, id, mask, function_name);
 	if (!entry) return(-1);
@@ -216,7 +216,7 @@ int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char 
 
 int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
-	bind_entry_t *entry, *old_entry;
+	bind_entry_t *entry = NULL, *old_entry = NULL;
 
 	old_entry = bind_entry_lookup(table, -1, mask, function_name);
 
@@ -259,7 +259,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 /* Execute a bind entry with the given argument list. */
 static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 {
-	bind_entry_t *prev;
+	bind_entry_t *prev = NULL;
 
 	/* Give this entry a hit. */
 	entry->nhits++;
@@ -302,8 +302,8 @@ static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 
 int check_bind(bind_table_t *table, const char *match, struct flag_record *flags, ...)
 {
-	void *args[11];
-	bind_entry_t *entry, *next;
+	void *args[11] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+	bind_entry_t *entry = NULL, *next = NULL;
 	int i, cmp, retval;
 	va_list ap;
 
@@ -380,8 +380,8 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 
 void add_builtins(const char *table_name, cmd_t *cmds)
 {
-	char name[50];
-	bind_table_t *table;
+	char name[50] = "";
+	bind_table_t *table = NULL;
 
 	table = bind_table_lookup_or_fake(table_name);
 
@@ -400,8 +400,8 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 
 void rem_builtins(const char *table_name, cmd_t *cmds)
 {
-	char name[50];
-	bind_table_t *table;
+	char name[50] = "";
+	bind_table_t *table = NULL;
 
 	table = bind_table_lookup(table_name);
 	if (!table) return;

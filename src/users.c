@@ -40,7 +40,7 @@ extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
 extern int 		dcc_total, noshare;
 extern char 		tempdir[];
-extern time_t now;
+extern time_t 		now, buildts;
 
 char natip[121] = "";
 char userfile[121] = "";	/* where the user records are stored */
@@ -49,7 +49,7 @@ int ignore_time = 10;		/* how many minutes will ignores last? */
 /* is this nick!user@host being ignored? */
 int match_ignore(char *uhost)
 {
-  struct igrec *ir;
+  struct igrec *ir = NULL;
 
   for (ir = global_ign; ir; ir = ir->next)
     if (wild_match(ir->igmask, uhost))
@@ -74,10 +74,8 @@ int equals_ignore(char *uhost)
 int delignore(char *ign)
 {
   int i, j;
-  struct igrec **u;
-  struct igrec *t;
-  char temp[256];
-
+  struct igrec **u = NULL, *t = NULL;
+  char temp[256] = "";
 
   i = 0;
   if (!strchr(ign, '!') && (j = atoi(ign))) {
@@ -118,7 +116,7 @@ int delignore(char *ign)
 
 void addignore(char *ign, char *from, char *mnote, time_t expire_time)
 {
-  struct igrec *p = NULL, *l;
+  struct igrec *p = NULL, *l = NULL;
 
   for (l = global_ign; l; l = l->next)
     if (!rfc_casecmp(l->igmask, ign)) {
@@ -127,7 +125,7 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
     }
 
   if (p == NULL) {
-    p = malloc(sizeof(struct igrec));
+    p = calloc(1, sizeof(struct igrec));
     p->next = global_ign;
     global_ign = p;
   } else {
@@ -156,7 +154,7 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
 /* take host entry from ignore list and display it ignore-style */
 void display_ignore(int idx, int number, struct igrec *ignore)
 {
-  char dates[81], s[41];
+  char dates[81] = "", s[41] = "";
 
   if (ignore->added) {
     daysago(now, ignore->added, s);
@@ -166,7 +164,7 @@ void display_ignore(int idx, int number, struct igrec *ignore)
   if (ignore->flags & IGREC_PERM)
     strcpy(s, STR("(perm)"));
   else {
-    char s1[41];
+    char s1[41] = "";
 
     days(ignore->expire, now, s1);
     sprintf(s, STR("(expires %s)"), s1);
@@ -232,7 +230,7 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
 			 char *note, time_t expire_time, int flags,
 			 time_t added, time_t last)
 {
-  maskrec *p = malloc(sizeof(maskrec));
+  maskrec *p = calloc(1, sizeof(maskrec));
   maskrec **u = (chan) ? m : global;
 
   p->next = *u;
@@ -248,7 +246,7 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
 
 static void restore_chanban(struct chanset_t *chan, char *host)
 {
-  char *expi, *add, *last, *user, *desc;
+  char *expi = NULL, *add = NULL, *last = NULL, *user = NULL, *desc = NULL;
   int flags = 0;
 
   expi = strchr_unescape(host, ':', '\\');
@@ -296,13 +294,12 @@ static void restore_chanban(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", STR("*** Malformed banline for %s."),
-	 chan ? chan->dname : STR("global_bans"));
+  putlog(LOG_MISC, "*", STR("*** Malformed banline for %s."), chan ? chan->dname : STR("global_bans"));
 }
 
 static void restore_chanexempt(struct chanset_t *chan, char *host)
 {
-  char *expi, *add, *last, *user, *desc;
+  char *expi = NULL, *add = NULL, *last = NULL, *user = NULL, *desc = NULL;
   int flags = 0;
 
   expi = strchr_unescape(host, ':', '\\');
@@ -350,13 +347,12 @@ static void restore_chanexempt(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", STR("*** Malformed exemptline for %s."),
-	 chan ? chan->dname : STR("global_exempts"));
+  putlog(LOG_MISC, "*", STR("*** Malformed exemptline for %s."), chan ? chan->dname : STR("global_exempts"));
 }
 
 static void restore_chaninvite(struct chanset_t *chan, char *host)
 {
-  char *expi, *add, *last, *user, *desc;
+  char *expi = NULL, *add = NULL, *last = NULL, *user = NULL, *desc = NULL;
   int flags = 0;
 
   expi = strchr_unescape(host, ':', '\\');
@@ -397,22 +393,20 @@ static void restore_chaninvite(struct chanset_t *chan, char *host)
 	if (desc) {
 	  *desc = 0;
 	  desc++;
-	  addmask_fully(chan, &chan->invites, &global_invites, host, add,
-			desc, atoi(expi), flags, now, 0);
+	  addmask_fully(chan, &chan->invites, &global_invites, host, add, desc, atoi(expi), flags, now, 0);
 	  return;
 	}
       }
     }
   }
-  putlog(LOG_MISC, "*", STR("*** Malformed inviteline for %s."),
-	 chan ? chan->dname : STR("global_invites"));
+  putlog(LOG_MISC, "*", STR("*** Malformed inviteline for %s."), chan ? chan->dname : STR("global_invites"));
 }
 
 static void restore_ignore(char *host)
 {
-  char *expi, *user, *added, *desc;
+  char *expi = NULL, *user = NULL, *added = NULL, *desc = NULL;
   int flags = 0;
-  struct igrec *p;
+  struct igrec *p = NULL;
 
   expi = strchr_unescape(host, ':', '\\');
   if (expi) {
@@ -438,7 +432,7 @@ static void restore_ignore(char *host)
 	added = "0";
 	desc = NULL;
       }
-      p = malloc(sizeof(struct igrec));
+      p = calloc(1, sizeof(struct igrec));
 
       p->next = global_ign;
       global_ign = p;
@@ -459,17 +453,17 @@ static void restore_ignore(char *host)
 
 void tell_user(int idx, struct userrec *u, int master)
 {
-  char s[81], s1[81];
-  char format[81];
+  char s[81] = "", s1[81] = "", format[81];
   int n = 0;
   time_t now2;
-  struct chanuserrec *ch;
-  struct chanset_t *chan;
-  struct user_entry *ue;
-  struct laston_info *li;
+  struct chanuserrec *ch = NULL;
+  struct chanset_t *chan = NULL;
+  struct user_entry *ue = NULL;
+  struct laston_info *li = NULL;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
-  module_entry *me = module_find("notes", 0, 0);
-  if (me) {
+  module_entry *me = NULL;
+
+  if ((me = module_find("notes", 0, 0))) {
     Function *func = me->funcs;
     n = (func[5]) (u->handle);
   }
@@ -496,11 +490,8 @@ void tell_user(int idx, struct userrec *u, int master)
       egg_strftime(s1, 6, "%H:%M", localtime(&li->laston));
 #endif /* S_UTCTIME */
   }
-  egg_snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)", 
-                          HANDLEN);
-  dprintf(idx, format, u->handle, 
-	  get_user(&USERENTRY_PASS, u) ? "yes" : "no", n, s, s1,
-	  (li && li->lastonplace) ? li->lastonplace : "nowhere");
+  egg_snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)", HANDLEN);
+  dprintf(idx, format, u->handle, get_user(&USERENTRY_PASS, u) ? "yes" : "no", n, s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
   dprintf(idx, "\n");
   /* channel flags? */
   for (ch = u->chanrec; ch; ch = ch->next) {
@@ -546,8 +537,8 @@ void tell_user(int idx, struct userrec *u, int master)
 /* show user by ident */
 void tell_user_ident(int idx, char *id, int master)
 {
-  char format[81];
-  struct userrec *u;
+  char format[81] = "";
+  struct userrec *u = NULL;
   struct flag_record user = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &user, NULL);
@@ -569,19 +560,17 @@ void tell_user_ident(int idx, char *id, int master)
 /* match string:
  * wildcard to match nickname or hostmasks
  * +attr to find all with attr */
-void tell_users_match(int idx, char *mtch, int start, int limit,
-		      int master, char *chname)
+void tell_users_match(int idx, char *mtch, int start, int limit, int master, char *chname)
 {
-  char format[81];
-  struct userrec *u;
+  char format[81] = "";
+  struct userrec *u = NULL;
   int fnd = 0, cnt, nomns = 0, flags = 0;
-  struct list_type *q;
+  struct list_type *q = NULL;
   struct flag_record user, pls, mns;
 
   dprintf(idx, STR("*** %s '%s':\n"), MISC_MATCHING, mtch);
   cnt = 0;
-  egg_snprintf(format, sizeof format, STR("%%-%us PASS NOTES FLAGS           LAST\n"), 
-                      HANDLEN);
+  egg_snprintf(format, sizeof format, STR("%%-%us PASS NOTES FLAGS           LAST\n"), HANDLEN);
   dprintf(idx, format, STR("HANDLE"));
   if (start > 1)
     dprintf(idx, STR("(%s %d)\n"), MISC_SKIPPING, start - 1);
@@ -644,7 +633,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
 #ifdef HUB
 void backup_userfile()
 {
-  char s[DIRMAX], s2[DIRMAX];
+  char s[DIRMAX] = "", s2[DIRMAX] = "";
 
   putlog(LOG_MISC, "*", USERF_BACKUP);
   egg_snprintf(s, sizeof s, "%s.u.0", tempdir);
@@ -653,7 +642,6 @@ void backup_userfile()
   copyfile(userfile, s);
 }
 #endif /* HUB */
-
 
 /*
  * tagged lines in the user file:
@@ -690,14 +678,14 @@ void backup_userfile()
 
 int readuserfile(char *file, struct userrec **ret)
 {
-  char *p, buf[1024], lasthand[512], *attr, *pass, *code, s1[1024], *s, cbuf[1024], *temps;
-  FILE *f;
-  struct userrec *bu, *u = NULL;
+  char *p = NULL, buf[1024] = "", lasthand[512] = "", *attr = NULL, *pass = NULL;
+  char *code = NULL, s1[1024] = "", *s = NULL, cbuf[1024] = "", *temps = NULL, ignored[512] = "";
+  FILE *f = NULL;
+  struct userrec *bu = NULL, *u = NULL;
   struct chanset_t *cst = NULL;
-  int i, line = 0;
-  char ignored[512];
   struct flag_record fr;
-  struct chanuserrec *cr;
+  struct chanuserrec *cr = NULL;
+  int i, line = 0;
 
   bu = (*ret);
   ignored[0] = 0;
@@ -792,7 +780,7 @@ int readuserfile(char *file, struct userrec **ret)
 	  }
 	} else if (!strcmp(code, "!")) {
 	  /* ! #chan laston flags [info] */
-	  char *chname, *st, *fl;
+	  char *chname = NULL, *st = NULL, *fl = NULL;
 
 	  if (u) {
 	    chname = newsplit(&s);
@@ -806,8 +794,7 @@ int readuserfile(char *file, struct userrec **ret)
 		if (!rfc_casecmp(cr->channel, chname))
 		  break;
 	      if (!cr) {
-		cr = (struct chanuserrec *)
-		  malloc(sizeof(struct chanuserrec));
+		cr = (struct chanuserrec *) calloc(1, sizeof(struct chanuserrec));
 
 		cr->next = u->chanrec;
 		u->chanrec = cr;
@@ -824,11 +811,13 @@ int readuserfile(char *file, struct userrec **ret)
 	  }
         } else if (!strcmp(code, "+")) {
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
-           module_entry *me = module_find("channels", 0, 0);
-           if (me) {
+           module_entry *me = NULL;
+
+           if ((me = module_find("channels", 0, 0))) {
              Function *func = me->funcs;
-             char *options = strdup(s), *chan = NULL, *my_ptr = NULL;
-             my_ptr = options;
+             char *options = NULL, *chan = NULL, *my_ptr = NULL;
+
+             options = my_ptr = strdup(s);
 
              newsplit(&options);
              newsplit(&options);
@@ -926,14 +915,14 @@ int readuserfile(char *file, struct userrec **ret)
 	} else if (!strncmp(code, "--", 2)) {
 	  if (u) {
 	    /* new format storage */
-	    struct user_entry *ue;
+	    struct user_entry *ue = NULL;
 	    int ok = 0;
 
 	    for (ue = u->entries; ue && !ok; ue = ue->next)
 	      if (ue->name && !egg_strcasecmp(code + 2, ue->name)) {
 		struct list_type *list;
 
-		list = malloc(sizeof(struct list_type));
+		list = calloc(1, sizeof(struct list_type));
 
 		list->next = NULL;
                 list->extra = strdup(s);
@@ -941,12 +930,12 @@ int readuserfile(char *file, struct userrec **ret)
 		ok = 1;
 	      }
 	    if (!ok) {
-	      ue = malloc(sizeof(struct user_entry));
+	      ue = calloc(1, sizeof(struct user_entry));
 
-	      ue->name = malloc(strlen(code + 1));
+	      ue->name = calloc(1, strlen(code + 1));
 	      ue->type = NULL;
 	      strcpy(ue->name, code + 2);
-	      ue->u.list = malloc(sizeof(struct list_type));
+	      ue->u.list = calloc(1, sizeof(struct list_type));
 
 	      ue->u.list->next = NULL;
               ue->u.list->extra = strdup(s);
@@ -1027,7 +1016,7 @@ int readuserfile(char *file, struct userrec **ret)
   }
   putlog(LOG_MISC, "*", "Userfile loaded, unpacking...");
   for (u = bu; u; u = u->next) {
-    struct user_entry *e;
+    struct user_entry *e = NULL;
 
     if (!(u->flags & USER_BOT) && !egg_strcasecmp (u->handle, conf.bot->nick)) {
       putlog(LOG_MISC, "*", "(!) I have a user record, but without +b");
@@ -1063,7 +1052,7 @@ void link_pref_val(struct userrec *u, char *val)
 {
 
 /* val must be HANDLEN + 4 chars minimum */
-  struct bot_addr *ba;
+  struct bot_addr *ba = NULL;
 
   val[0] = 'Z';
   val[1] = 0;
@@ -1079,8 +1068,6 @@ void link_pref_val(struct userrec *u, char *val)
   sprintf(val, STR("%02d%s"), ba->hublevel, u->handle);
 
 }
-struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
-{
 
 /*
   starting at "current" or "userlist" if NULL, find next bot with a
@@ -1088,12 +1075,10 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
   If none found return bot with best overall link_pref_val
   If still not found return NULL
 */
-  char thisval[NICKLEN + 4],
-    bestmatchval[NICKLEN + 4] = "z",
-    bestallval[NICKLEN + 4] = "z";
-  struct userrec *cur = NULL,
-   *bestmatch = NULL,
-   *bestall = NULL;
+struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
+{
+  char thisval[NICKLEN + 4] = "", bestmatchval[NICKLEN + 4] = "z", bestallval[NICKLEN + 4] = "z";
+  struct userrec *cur = NULL, *bestmatch = NULL, *bestall = NULL;
 
   if (current)
     cur = current->next;
@@ -1128,9 +1113,9 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
 #ifdef HUB
 void autolink_cycle(char *start)
 {
+  char bestval[HANDLEN + 4] = "", curval[HANDLEN + 4] = "", myval[HANDLEN + 4] = "";
   struct userrec *u = NULL;
   int i;
-  char bestval[HANDLEN + 4] = "", curval[HANDLEN + 4] = "", myval[HANDLEN + 4] = "";
 
   link_pref_val(conf.bot->u, myval);
   strcpy(bestval, myval);
@@ -1210,7 +1195,7 @@ void autolink_cycle(char *start)
 {
   struct userrec *u = NULL;
   struct hublist_entry *hl = NULL, *hl2 = NULL;
-  struct bot_addr *my_ba;
+  struct bot_addr *my_ba = NULL;
   char uplink[HANDLEN + 1] = "", avoidbot[HANDLEN + 1] = "", curhub[HANDLEN + 1] = "";
   int i, hlc;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};

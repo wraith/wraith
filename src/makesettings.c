@@ -40,31 +40,30 @@ struct cfg_struct {
 } cfg;
 
 void mallocstruct() {
-  cfg.owners = malloc(1);
-  cfg.hubs = malloc(1);
-  cfg.owneremail = malloc(1);
-  cfg.pscloak = malloc(1);
-  cfg.salt1 = malloc(1);
-  cfg.salt2 = malloc(1);
-  cfg.defines = malloc(1);
+  cfg.owners = calloc(1, 1);
+  cfg.hubs = calloc(1, 1);
+  cfg.owneremail = calloc(1, 1);
+  cfg.pscloak = calloc(1, 1);
+  cfg.salt1 = calloc(1, 1);
+  cfg.salt2 = calloc(1, 1);
+  cfg.defines = calloc(1, 1);
   cfg.pscloakn = 0;
   cfg.definesn = 0;
 }
 
 char *step_thru_file(FILE *fd)
 {
-  const int tempBufSize = 1024;
-  char tempBuf[tempBufSize];
-  char *retStr = NULL;
+  char tempBuf[1024] = "", *retStr = NULL;
+
   if (fd == NULL) {
     return NULL;
   }
   retStr = NULL;
   while (!feof(fd)) {
-    fgets(tempBuf, tempBufSize, fd);
+    fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = malloc(strlen(tempBuf) + 2);
+        retStr = calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);
       } else {
         retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
@@ -81,7 +80,8 @@ char *step_thru_file(FILE *fd)
 
 char *trim(char *string)
 {
-  char *ibuf, *obuf;
+  char *ibuf = NULL, *obuf = NULL;
+
   if (string) {
     for (ibuf = obuf = string; *ibuf; ) {
       while (*ibuf && (isspace (*ibuf)))
@@ -98,9 +98,10 @@ char *trim(char *string)
 
 char *lcase(char *string)
 {
+  static char *tmp = NULL;
   int x = 0, length=(strlen(string) + 1);
-  static char *tmp;
-  tmp = (char *)malloc(length);
+
+  tmp = calloc(1, length);
   strcpy(tmp, string);
   tmp[length] = 0;
   for(x=0;x<=length;x++)
@@ -129,6 +130,7 @@ char *newsplit(char **rest)
 
 int skipline (char *line, int *skip) {
   static int multi = 0;
+
   if ( (!strncmp(line, "#", 1)) || (!strncmp(line, ";", 1)) || (!strncmp(line, "//", 2)) ) {
     (*skip)++;
   } else if ( (strstr(line, "/*")) && (strstr(line, "*/")) ) {
@@ -148,6 +150,7 @@ int skipline (char *line, int *skip) {
 int isnumeric(char *string)
 {
   char *p = string;
+
   while ((p) && *p) {
     if ((!isdigit(((char)toupper(*p)))) && (((char)toupper(*p)) != '.')) return 0;
     p++;
@@ -157,6 +160,7 @@ int isnumeric(char *string)
 
 int validhandle(char *handle) {
   char *p = NULL;
+
   for (p = handle; *p; p++) {
     if (strchr(BADNICKCHARS, *p)) {
       return 0;
@@ -166,8 +170,7 @@ int validhandle(char *handle) {
 }
 
 int validport(char *port) {
-  int p = 0;
-  p = atoi(port);
+  int p = atoi(port);
   if ( (p < 1024) || (p > 65535) ) {
     return 0;
   }
@@ -176,6 +179,7 @@ int validport(char *port) {
 
 int validip (char *ip) {
   int c = 0;
+
   while (*ip) {
     if ( (*ip == '.') || (*ip == ':') ) c++;
     ip++;
@@ -200,7 +204,7 @@ int validuserid (char * uid) {
 char *randstring(int len)
 {
   int j, r = 0;
-  static char s[100];
+  static char s[100] = "";
 
   for (j = 0; j < len; j++) {
     r = rand();
@@ -217,6 +221,7 @@ char *randstring(int len)
 
 void dosalt(char *salt1, char *salt2) {
   FILE *f = NULL;
+
   f = fopen("src/salt.h.tmp", "w");
   fprintf(f, "#define STR(x) x\n");
   fprintf(f, "#define SALT1 STR(\"%s\")\n", salt1);
@@ -229,6 +234,7 @@ int loadconfig(char **argv) {
   FILE *f = NULL;
   char *buffer = NULL, *p = NULL;
   int skip = 0, line = 0;
+
   f = fopen(argv[1], "r");
   if (!f) {
     printf("Error: Can't open '\%s' for reading\n", argv[1]);
@@ -301,7 +307,8 @@ int loadconfig(char **argv) {
           printf(".");
         } else if (!strcmp(lcase(buffer), "-")) {
         } else if (!strcmp(lcase(buffer), "+")) {
-          char *define;
+          char *define = NULL;
+
           if (cfg.defines && strlen(cfg.defines))
             size += strlen(cfg.defines);
           trim(p);
@@ -313,11 +320,11 @@ int loadconfig(char **argv) {
           cfg.definesn++;
           printf(".");
         } else if (!strcmp(lcase(buffer), "salt1")) {
-          cfg.salt1 = malloc(strlen(trim(p)) + 1);
+          cfg.salt1 = calloc(1, strlen(trim(p)) + 1);
           strcat(cfg.salt1, trim(p));
           printf(".");
         } else if (!strcmp(lcase(buffer), "salt2")) {
-          cfg.salt2 = malloc(strlen(trim(p)) + 1);
+          cfg.salt2 = calloc(1, strlen(trim(p)) + 1);
           strcat(cfg.salt2, trim(p));
           printf(".");
         } else {
@@ -392,7 +399,6 @@ void freecfg()
 
 int checkconfig()
 {
-
   return 1;
 }
 
@@ -411,6 +417,7 @@ int writeconfig(char **argv)
 {
   FILE *f = NULL;
   int i = 0;
+
   f = fopen(argv[2], "w");
   if (!f) {
     printf("Error: Can't open '\%s' for writing\n", argv[1]);
@@ -424,7 +431,8 @@ fprintf(f, " \
 #include \"common.h\"\n\
 #include \"debug.h\"\n\
 \n\
-char packname[512], shellhash[33], bdhash[33], dcc_prefix[2], *owners, *hubs, *owneremail;\n\n\
+char packname[512] = \"\", shellhash[33] = \"\", bdhash[33] = \"\", dcc_prefix[2] = \"\", \
+*owners = NULL, *hubs = NULL, *owneremail = NULL;\n\n\
 char *progname() {\n\
 #ifdef S_PSCLOAK\n");
 fprintf(f," \
@@ -451,9 +459,9 @@ fprintf(f, " \
 fprintf(f, " \n\n\
 int init_settings()\n\
 {\n\
-  owners = malloc(strlen(_OWNERS) + 1);\n\
-  hubs = malloc(strlen(_HUBS) + 1);\n\
-  owneremail = malloc(strlen(_OWNEREMAIL) + 1);\n\
+  owners = calloc(1, strlen(_OWNERS) + 1);\n\
+  hubs = calloc(1, strlen(_HUBS) + 1);\n\
+  owneremail = calloc(1, strlen(_OWNEREMAIL) + 1);\n\
 \n\
   sprintf(owners, _OWNERS);\n\
   sprintf(hubs, _HUBS);\n\

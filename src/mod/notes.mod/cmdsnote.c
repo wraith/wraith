@@ -6,8 +6,8 @@
 
 static void cmd_fwd(struct userrec *u, int idx, char *par)
 {
-  char *handle;
-  struct userrec *u1;
+  char *handle = NULL;
+  struct userrec *u1 = NULL;
 
   if (!par[0]) {
     dprintf(idx, "%s: fwd <handle> [user@bot]\n", NOTES_USAGE);
@@ -41,7 +41,7 @@ static void cmd_fwd(struct userrec *u, int idx, char *par)
 
 static void cmd_notes(struct userrec *u, int idx, char *par)
 {
-  char *fcn;
+  char *fcn = NULL;
 
   if (!par[0]) {
     dprintf(idx, "%s: notes index\n", NOTES_USAGE);
@@ -73,7 +73,7 @@ static void cmd_notes(struct userrec *u, int idx, char *par)
 
 static void cmd_note(struct userrec *u, int idx, char *par)
 {
-  char handle[512], *p;
+  char handle[512] = "", *p = NULL;
   int echo;
 
   p = newsplit(&par);

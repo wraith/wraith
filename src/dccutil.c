@@ -65,8 +65,8 @@ void init_dcc_max()
 /* Replace \n with \r\n */
 char *add_cr(char *buf)
 {
-  static char WBUF[1024];
-  char *p, *q;
+  static char WBUF[1024] = "";
+  char *p = NULL, *q = NULL;
 
   for (p = buf, q = WBUF; *p; p++, q++) {
     if (*p == '\n')
@@ -98,7 +98,7 @@ void dprintf (int idx, ...)
   /* We actually can, since if it's < 0 or >= sizeof(buf), we know it wrote
    * sizeof(buf) bytes. But we're not doing that anyway.
   */
-  buf[sizeof(buf)-1] = 0;
+  buf[sizeof(buf) - 1] = 0;
   len = strlen(buf);
 
 /* this is for color on dcc :P */
@@ -147,9 +147,8 @@ void dprintf (int idx, ...)
   } else { /* normal chat text */
     if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type == &DCC_CHAT)) {
       int i;
-      char buf3[1024] = "", buf2[1024] = "", c;
+      char buf3[1024] = "", buf2[1024] = "", c = 0;
 
-      buf3[0] = buf2[0] = 0;
       for (i = 0 ; i < len ; i++) {
 /* FIXME: Trying to fix bug where you do .color on ANSI, then .bc <bot> help help OVER TELNET
         if (buf[i] == '\033') {
@@ -229,7 +228,7 @@ void chatout (char *format, ...)
 void chanout_but (int x, ...)
 {
   int i, chan, len;
-  char *format;
+  char *format = NULL;
   char s[601] = "";
   va_list va;
 
@@ -282,7 +281,6 @@ void dcc_chatter(int idx)
   if ((idx >= dcc_total) || (dcc[idx].sock != j))
     return;			/* Nope */
 
-  /* Tcl script may have taken control */
   if (dcc[idx].type == &DCC_CHAT) {
     if (!strcmp(dcc[idx].u.chat->con_chan, "***"))
       strcpy(dcc[idx].u.chat->con_chan, "*");
@@ -328,6 +326,7 @@ void lostdcc(int n)
     dcc[n].type->kill(n, dcc[n].u.other);
   else if (dcc[n].u.other)
     free(dcc[n].u.other);
+
   egg_bzero(&dcc[n], sizeof(struct dcc_t));
 
   dcc[n].sock = -1;
@@ -376,13 +375,10 @@ void dcc_remove_lost(void)
  */
 void tell_dcc(int zidx)
 {
-  int i, j;
-  char other[160];
-  char format[81];
-  int nicklen;
+  int i, j, nicklen = 0;
+  char other[160] = "", format[81] = "";
 
   /* calculate max nicklen */
-  nicklen = 0;
   for (i = 0; i < dcc_total; i++) {
       if(strlen(dcc[i].nick) > nicklen)
           nicklen = strlen(dcc[i].nick);
@@ -465,10 +461,7 @@ void set_away(int idx, char *s)
  */
 void makepass(char *s)
 {
-  int i;
-
-  i = 10 + (random() % 6);
-  make_rand_str(s, i);
+  make_rand_str(s, 10 + (random() % 6));
 }
 
 void flush_lines(int idx, struct chat_info *ci)
@@ -523,10 +516,8 @@ void changeover_dcc(int i, struct dcc_table *type, int xtra_size)
     dcc[i].u.other = NULL;
   }
   dcc[i].type = type;
-  if (xtra_size) {
-    dcc[i].u.other = malloc(xtra_size);
-    egg_bzero(dcc[i].u.other, xtra_size);
-  }
+  if (xtra_size)
+    dcc[i].u.other = calloc(1, xtra_size);
 }
 
 int detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
@@ -575,17 +566,14 @@ void do_boot(int idx, char *by, char *reason)
   int files = (dcc[idx].type != &DCC_CHAT);
 
   dprintf(idx, DCC_BOOTED1);
-  dprintf(idx, DCC_BOOTED2, files ? "file section" : "bot",
-          by, reason[0] ? ": " : ".", reason);
+  dprintf(idx, DCC_BOOTED2, files ? "file section" : "bot", by, reason[0] ? ": " : ".", reason);
   /* If it's a partyliner (chatterer :) */
   /* Horrible assumption that DCT_CHAT using structure uses same format
    * as DCC_CHAT */
-  if ((dcc[idx].type->flags & DCT_CHAT) &&
-      (dcc[idx].u.chat->channel >= 0)) {
-    char x[1024];
+  if ((dcc[idx].type->flags & DCT_CHAT) && (dcc[idx].u.chat->channel >= 0)) {
+    char x[1024] = "";
 
-    egg_snprintf(x, sizeof x, DCC_BOOTED3, by, dcc[idx].nick,
-		 reason[0] ? ": " : "", reason);
+    egg_snprintf(x, sizeof x, DCC_BOOTED3, by, dcc[idx].nick, reason[0] ? ": " : "", reason);
     chanout_but(idx, dcc[idx].u.chat->channel, "*** %s.\n", x);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, x);
@@ -604,15 +592,11 @@ void do_boot(int idx, char *by, char *reason)
 
 int listen_all(int lport, int off)
 {
-  int i,
-    idx = (-1),
-    port,
+  int i, idx = (-1), port, realport;
 #ifdef USE_IPV6
-    i6 = 0,
+  int i6 = 0;
 #endif /* USE_IPV6 */
-    realport;
-  struct portmap *pmap = NULL,
-   *pold = NULL;
+  struct portmap *pmap = NULL, *pold = NULL;
 
   port = realport = lport;
   for (pmap = root; pmap; pold = pmap, pmap = pmap->next)
@@ -656,10 +640,10 @@ int listen_all(int lport, int off)
     } else {
 #ifdef USE_IPV6
       i6 = open_listen_by_af(&port, AF_INET6);
-      if (i6 < 0)
+      if (i6 < 0) {
         putlog(LOG_ERRORS, "*", STR("Can't open IPv6 listening port %d - %s"), port, 
                i6 == -1 ? "it's taken." : "couldn't assign ip.");
-      else {
+      } else {
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = notalloc;
         strcpy(dcc[idx].addr6, myipstr(6));
@@ -674,10 +658,10 @@ int listen_all(int lport, int off)
 #else
       i = open_listen(&port);
 #endif /* USE_IPV6 */
-      if (i < 0)
+      if (i < 0) {
         putlog(LOG_ERRORS, "*", STR("Can't open IPv4 listening port %d - %s"), port,
                i == -1 ? "it's taken." : "couldn't assign ip.");
-      else {
+      } else {
 	idx = (-1); /* now setup ipv4 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = iptolong(getmyip());
@@ -694,7 +678,7 @@ int listen_all(int lport, int off)
       if (i > 0) {
 #endif /* USE_IPV6 */
         if (!pmap) {
-          pmap = malloc(sizeof(struct portmap));
+          pmap = calloc(1, sizeof(struct portmap));
           pmap->next = root;
           root = pmap;
         }

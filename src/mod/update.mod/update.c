@@ -90,10 +90,9 @@ static void update_fileq(int idx, char *par)
 static void update_ufsend(int idx, char *par)
 {
 
-  char *ip=NULL, *port;
-  char s[1024];
+  char *ip = NULL, *port = NULL, s[1024] = "";
   int i, sock;
-  FILE *f;
+  FILE *f = NULL;
   putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
 #ifdef HUB
   egg_snprintf(s, sizeof s, "%s.update.%s.hub", tempdir, conf.bot->nick);
@@ -171,9 +170,9 @@ static void got_nu(char *botnick, char *code, char *par)
 /* needupdate? curver */
   time_t newts;
 #ifdef LEAF
-  tand_t *bot;
-  struct bot_addr *bi,
-   *obi;
+  tand_t *bot = NULL;
+  struct bot_addr *bi = NULL, *obi = NULL;
+
   bot = tandbot;
   if (!strcmp(bot->bot, botnick)) //dont listen to our uplink.. use normal upate system..
     return;
@@ -187,7 +186,7 @@ static void got_nu(char *botnick, char *code, char *par)
    if (newts > buildts) {
 #ifdef LEAF
      obi = get_user(&USERENTRY_BOTADDR, conf.bot->u);
-     bi = malloc(sizeof(struct bot_addr));
+     bi = calloc(1, sizeof(struct bot_addr));
 
      bi->uplink = strdup(botnick);
      bi->address = strdup(obi->address);
@@ -216,7 +215,7 @@ static cmd_t update_bot[] = {
 
 static void updatein_mod(int idx, char *msg)
 {
-  char *code;
+  char *code = NULL;
   int f, i;
 
   code = newsplit(&msg);
@@ -235,8 +234,7 @@ static void updatein_mod(int idx, char *msg)
 void finish_update(int idx)
 {
   /* module_entry *me; */
-  char buf[1024] = "";
-  char *buf2 = NULL;
+  char buf[1024] = "", *buf2 = NULL;
   int i, j = -1;
 
   for (i = 0; i < dcc_total; i++)
@@ -290,8 +288,7 @@ static void start_sending_binary(int idx)
 {
   /* module_entry *me; */
 #ifdef HUB
-  char update_file[1024];
-  char buf2[1024], buf3[1024];
+  char update_file[1024] = "", buf2[1024] = "", buf3[1024] = "";
   struct stat sb;
   int i = 1;
 
@@ -357,7 +354,7 @@ static void start_sending_binary(int idx)
 	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()),
 	    dcc[i].port, dcc[i].u.xfer->length);
   }
-#endif
+#endif /* HUB */
 }
 
 static void (*def_dcc_bot_kill) (int, void *) = 0;
@@ -411,7 +408,7 @@ static void check_updates()
 {
   if (isupdatehub()) {
     int i;
-    char buf[1024];
+    char buf[1024] = "";
 
     cnt++;
     if ((cnt > 5) && bupdating)  bupdating = 0; //2 minutes should be plenty.
@@ -495,4 +492,3 @@ void update_init()
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
 }
-

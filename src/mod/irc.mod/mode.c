@@ -32,7 +32,7 @@ static int do_op(char *nick, struct chanset_t *chan, int force)
   if (channel_fastop(chan) || channel_take(chan)) {
     add_mode(chan, '+', 'o', nick);
   } else {
-    char *tmp = malloc(strlen(chan->name) + 200);
+    char *tmp = calloc(1, strlen(chan->name) + 200);
     makeopline(chan, nick, tmp);
     dprintf(DP_MODE, tmp);
     free(tmp);
@@ -46,9 +46,9 @@ void dequeue_op_deop(struct chanset_t * chan);
 
 static void flush_mode(struct chanset_t *chan, int pri)
 {
-  char		*p, out[512], post[512];
-  size_t	postsize = sizeof(post);
-  int		i, plus = 2;		/* 0 = '-', 1 = '+', 2 = none */
+  char *p = NULL, out[512] = "", post[512] = "";
+  size_t postsize = sizeof(post);
+  int i, plus = 2;		/* 0 = '-', 1 = '+', 2 = none */
 
   dequeue_op_deop(chan);
   p = out;
@@ -179,13 +179,9 @@ static void flush_mode(struct chanset_t *chan, int pri)
 }
 
 void dequeue_op_deop(struct chanset_t * chan) {
-  char lines[4096];
-  char modechars[10];
-  char nicks[128];
+  char lines[4096] = "", modechars[10] = "", nicks[128] = "";
   int i = 0, cnt = 0;
-  lines[0] = 0;
-  modechars[0] = 0;
-  nicks[0] = 0;
+
   while ((i < 20) && (chan->opqueue[i].target)) {
     strcat(nicks, " ");
     strcat(nicks, chan->opqueue[i].target);
@@ -245,7 +241,8 @@ void dequeue_op_deop(struct chanset_t * chan) {
 }
 void queue_op(struct chanset_t *chan, char *op) {
   int n;
-  memberlist *m;
+  memberlist *m = NULL;
+
   for (n = 0; n < 20; n++) {
     if (!chan->opqueue[n].target) {
       chan->opqueue[n].target = strdup(op);
@@ -261,8 +258,9 @@ void queue_op(struct chanset_t *chan, char *op) {
 
 void queue_deop(struct chanset_t *chan, char *op) {
   int n;
-  memberlist *m;
-  for (n = 0; n<20; n++) {
+  memberlist *m = NULL;
+
+  for (n = 0; n < 20; n++) {
     if (!chan->deopqueue[n].target) {
       chan->deopqueue[n].target = strdup(op);
       m = ismember(chan, op);
@@ -277,13 +275,12 @@ void queue_deop(struct chanset_t *chan, char *op) {
 
 /* Queue a channel mode change
  */
-static void real_add_mode(struct chanset_t *chan,
-			  char plus, char mode, char *op)
+static void real_add_mode(struct chanset_t *chan, char plus, char mode, char *op)
 {
   int i, type, modes, l;
-  masklist *m;
-  memberlist *mx;
-  char s[21];
+  masklist *m = NULL;
+  memberlist *mx = NULL;
+  char s[21] = "";
 
   if (!me_op(chan))
     return;			/* No point in queueing the mode */
@@ -447,7 +444,7 @@ static void real_add_mode(struct chanset_t *chan,
 
 static void flush_mode(struct chanset_t *chan, int pri)
 {
-  char *p, out[512], post[512];
+  char *p = NULL, out[512] = "", post[512] = "";
   size_t postsize = sizeof(post);
   int i, plus = 2;              /* 0 = '-', 1 = '+', 2 = none */
   p = out;
@@ -576,13 +573,12 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
 /* Queue a channel mode change
  */
-static void real_add_mode(struct chanset_t *chan,
-                          char plus, char mode, char *op)
+static void real_add_mode(struct chanset_t *chan, char plus, char mode, char *op)
 {
   int i, type, modes, l;
-  masklist *m;
-  memberlist *mx;
-  char s[21];
+  masklist *m = NULL;
+  memberlist *mx = NULL;
+  char s[21] = "";
 
   /* Some IRCds do not allow halfops to set certian modes. The modes halfops
    * are not allowed to set can be changed in chan.h. */
@@ -759,8 +755,8 @@ static void got_key(struct chanset_t *chan, char *nick, char *from,
 static void got_op(struct chanset_t *chan, char *nick, char *from,
 		   char *who, struct userrec *opu, struct flag_record *opper)
 {
-  memberlist *m;
-  char s[UHOSTLEN];
+  memberlist *m = NULL;
+  char s[UHOSTLEN] = "";
   struct userrec *u;
   int check_chan = 0;
   int snm = chan->stopnethack_mode;
@@ -847,7 +843,8 @@ flush_mode(chan, QUICK);
   m->flags |= WASOP;
   if (check_chan) {
     /* tell other bots to set jointime to 0 and join */
-    char *buf = malloc(strlen(chan->dname) + 3 + 1);
+    char *buf = calloc(1, strlen(chan->dname) + 3 + 1);
+
     sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);
     free(buf);
@@ -858,9 +855,9 @@ flush_mode(chan, QUICK);
 static void got_deop(struct chanset_t *chan, char *nick, char *from,
 		     char *who, struct userrec *opu)
 {
-  memberlist *m;
-  char s[UHOSTLEN], s1[UHOSTLEN];
-  struct userrec *u;
+  memberlist *m = NULL;
+  char s[UHOSTLEN] = "", s1[UHOSTLEN] = "";
+  struct userrec *u = NULL;
 
   m = ismember(chan, who);
   if (!m) {
@@ -942,9 +939,9 @@ static void got_deop(struct chanset_t *chan, char *nick, char *from,
 
 static void got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
 {
-  char me[UHOSTLEN], s[UHOSTLEN], s1[UHOSTLEN];
-  memberlist *m;
-  struct userrec *u;
+  char me[UHOSTLEN] = "", s[UHOSTLEN] = "", s1[UHOSTLEN] = "";
+  memberlist *m = NULL;
+  struct userrec *u = NULL;
 
   egg_snprintf(me, sizeof me, "%s!%s", botname, botuserhost);
   egg_snprintf(s, sizeof s, "%s!%s", nick, from);
@@ -1008,9 +1005,8 @@ static void got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
 static void got_unban(struct chanset_t *chan, char *nick, char *from,
 		      char *who, struct userrec *u)
 {
-  masklist *b, *old;
+  masklist *b = NULL, *old = NULL;
 
-  old = NULL;
   for (b = chan->channel.ban; b->mask[0] && rfc_casecmp(b->mask, who);
        old = b, b = b->next)
     ;
@@ -1045,7 +1041,7 @@ static void got_unban(struct chanset_t *chan, char *nick, char *from,
 static void got_exempt(struct chanset_t *chan, char *nick, char *from,
 		       char *who)
 {
-  char s[UHOSTLEN];
+  char s[UHOSTLEN] = "";
 
   simple_sprintf(s, "%s!%s", nick, from);
   newexempt(chan, who, s);
@@ -1073,7 +1069,7 @@ static void got_unexempt(struct chanset_t *chan, char *nick, char *from,
 			 char *who, struct userrec *u)
 {
   masklist *e = chan->channel.exempt, *old = NULL;
-  masklist *b ;
+  masklist *b = NULL;
   int match = 0;
 
   while (e && e->mask[0] && rfc_casecmp(e->mask, who)) {
@@ -1123,7 +1119,7 @@ static void got_unexempt(struct chanset_t *chan, char *nick, char *from,
 static void got_invite(struct chanset_t *chan, char *nick, char *from,
 		       char *who)
 {
-  char s[UHOSTLEN];
+  char s[UHOSTLEN] = "";
 
   simple_sprintf(s, "%s!%s", nick, from);
   newinvite(chan, who, s);
@@ -1190,13 +1186,11 @@ static void got_uninvite(struct chanset_t *chan, char *nick, char *from,
 
 static int gotmode(char *from, char *msg)
 {
-  char *nick, *ch, *op, *chg;
-  char s[UHOSTLEN];
-  char ms2[3];
+  char *nick = NULL, *ch = NULL, *op = NULL, *chg = NULL, s[UHOSTLEN] = "", ms2[3] = "";
   int z;
-  struct userrec *u;
-  memberlist *m;
-  struct chanset_t *chan;
+  struct userrec *u = NULL;
+  memberlist *m = NULL;
+  struct chanset_t *chan = NULL;
 
   /* Usermode changes? */
   if (msg[0] && (strchr(CHANMETA, msg[0]) != NULL)) {
@@ -1214,9 +1208,9 @@ static int gotmode(char *from, char *msg)
 
     if (strchr(from, '!')) {
       char *modes[5] = { NULL, NULL, NULL, NULL, NULL };
-      char tmp[1024], sign = '+', *nfrom, *hfrom, *wptr, *p, work[1024];
+      char tmp[1024] = "", sign = '+', *nfrom = NULL, *hfrom = NULL, *wptr = NULL, *p = NULL, work[1024] = "";
       struct userrec *ufrom = NULL;
-      memberlist *m;
+      memberlist *m = NULL;
       int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
 
       /* Split up the mode: #chan modes param param param param */
@@ -1224,7 +1218,8 @@ static int gotmode(char *from, char *msg)
       wptr = work;
       p = newsplit(&wptr);
       while (*p) {
-        char *mp;
+        char *mp = NULL;
+
         if (*p == '+')
           sign = '+';
         else if (*p == '-')
@@ -1233,7 +1228,7 @@ static int gotmode(char *from, char *msg)
           mp = newsplit(&wptr);
           if (strchr("ob", p[0])) {
             /* Just want o's and b's */
-            modes[modecnt] = malloc(strlen(mp) + 4);
+            modes[modecnt] = calloc(1, strlen(mp) + 4);
             sprintf(modes[modecnt], STR("%c%c %s"), sign, p[0], mp);
             modecnt++;
             if (p[0] == 'o') {
@@ -1310,7 +1305,7 @@ static int gotmode(char *from, char *msg)
             (strncmp(modes[1], "-b", 2))) {
           isbadop = 1;
         } else {
-          char enccookie[25], plaincookie[25], key[NICKLEN + 20], goodcookie[25];
+          char enccookie[25] = "", plaincookie[25] = "", key[NICKLEN + 20] = "", goodcookie[25] = "";
 
           /* -b *!*@[...] */
           strncpyz(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
@@ -1341,7 +1336,7 @@ static int gotmode(char *from, char *msg)
           else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
             isbadop = 3;
           else {
-            char ltmp[20];
+            char ltmp[20] = "";
             long optime;
             int off;
 
@@ -1412,6 +1407,7 @@ static int gotmode(char *from, char *msg)
       if ((ops) && chan && me_op(chan) && !channel_manop(chan) && (ufrom) &&
           !(ufrom->flags & USER_BOT)) {
         char trg[NICKLEN] = "";
+
         n = i = 0;
 
         switch (role) {

@@ -12,10 +12,10 @@
 #include "misc.h"
 #include "tclhash.h"
 
-extern cmd_t C_dcc[];
-extern struct dcc_t *dcc;
-extern struct userrec *userlist;
-extern time_t now;
+extern cmd_t 		C_dcc[];
+extern struct dcc_t 	*dcc;
+extern struct userrec 	*userlist;
+extern time_t 		now;
 extern char             dcc_prefix[];
 
 
@@ -67,9 +67,8 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
   }
   if (found) {
     if (has_cmd_pass(cmd)) {
-      char *p,
-        work[1024],
-        pass[128];
+      char *p = NULL, work[1024] = "", pass[128] = "";
+
       p = strchr(args, ' ');
       if (p)
         *p = 0;
@@ -106,7 +105,7 @@ void check_bind_bot(const char *nick, const char *code, const char *param)
 void check_bind_chon(char *hand, int idx)
 {
   struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  struct userrec        *u;
+  struct userrec        *u = NULL;
 
   u = get_user_by_handle(userlist, hand);
   touch_laston(u, "partyline", now);
@@ -117,7 +116,7 @@ void check_bind_chon(char *hand, int idx)
 void check_bind_chof(char *hand, int idx)
 {
   struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  struct userrec        *u;
+  struct userrec        *u = NULL;
 
   u = get_user_by_handle(userlist, hand);
   touch_laston(u, "partyline", now);
@@ -164,7 +163,7 @@ void check_bind_chjn(const char *bot, const char *nick, int chan,
                     const char type, int sock, const char *host)
 {
   struct flag_record    fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
-  char                  s[11], t[2];
+  char                  s[11] = "", t[2] = "";
 
   t[0] = type;
   t[1] = 0;
@@ -188,7 +187,7 @@ void check_bind_chjn(const char *bot, const char *nick, int chan,
 
 void check_bind_chpt(const char *bot, const char *hand, int sock, int chan)
 {
-  char  v[11];
+  char  v[11] = "";
 
   egg_snprintf(v, sizeof v, "%d", chan);
   check_bind(BT_chpt, v, NULL, bot, hand, sock, chan);
@@ -201,7 +200,7 @@ void check_bind_away(const char *bot, int idx, const char *msg)
 
 void check_bind_time(struct tm *tm)
 {
-	char full[32];
+	char full[32] = "";
 	egg_snprintf(full, sizeof(full), "%02d %02d %02d %02d %04d", tm->tm_min, tm->tm_hour, tm->tm_mday, tm->tm_mon, tm->tm_year + 1900);
 	check_bind(BT_time, full, NULL, tm->tm_min, tm->tm_hour, tm->tm_mday, tm->tm_mon, tm->tm_year + 1900);
 }

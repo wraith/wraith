@@ -251,7 +251,7 @@ static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
          len = 0;
          bytes = Tcl_GetByteArrayFromObj(obj, &len);
          if (!bytes) return(NULL);
-         s = malloc(len+1);
+         s = calloc(1, len+1);
          memcpy(s, bytes, len);
          s[len] = 0;
     }
@@ -423,7 +423,7 @@ void add_tcl_coups(tcl_coups *list)
   int i;
 
   for (i = 0; list[i].name; i++) {
-    cp = (coupletinfo *) malloc(sizeof(coupletinfo));
+    cp = (coupletinfo *) calloc(1, sizeof(coupletinfo));
     strtot += sizeof(coupletinfo);
     cp->left = list[i].lptr;
     cp->right = list[i].rptr;

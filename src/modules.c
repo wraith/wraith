@@ -81,7 +81,7 @@ struct static_list {
 
 void check_static(char *name, char *(*func) ())
 {
-  struct static_list *p = malloc(sizeof(struct static_list));
+  struct static_list *p = calloc(1, sizeof(struct static_list));
 
   p->name = strdup(name);
   p->func = func;
@@ -91,7 +91,7 @@ void check_static(char *name, char *(*func) ())
 
 void *mod_killsock(int size, const char *modname, const char *filename, int line)
 {
-  char x[100], *p;
+  char x[100] = "", *p = NULL;
 
   p = strrchr(filename, '/');
   egg_snprintf(x, sizeof x, "%s:%s", modname, p ? p + 1 : filename);
@@ -105,14 +105,17 @@ void *mod_killsock(int size, const char *modname, const char *filename, int line
 void null_func()
 {
 }
+
 char *charp_func()
 {
   return NULL;
 }
+
 int minus_func()
 {
   return -1;
 }
+
 int false_func()
 {
   return 0;
@@ -634,7 +637,7 @@ void init_modules(void)
 
   BT_load = bind_table_add("load", 1, "s", MATCH_MASK, 0);
 
-  module_list = malloc(sizeof(module_entry));
+  module_list = calloc(1, sizeof(module_entry));
   module_list->name = strdup("eggdrop");
   module_list->major = 100;
   module_list->minor = 15;
@@ -662,7 +665,7 @@ int module_register(char *name, Function * funcs,
 const char *module_load(char *name)
 {
   module_entry *p;
-  char *e;
+  char *e = NULL;
   Function f;
   struct static_list *sl;
 
@@ -674,7 +677,7 @@ const char *module_load(char *name)
   if (!sl)
     return "Unknown module.";
   f = (Function) sl->func;
-  p = malloc(sizeof(module_entry));
+  p = calloc(1, sizeof(module_entry));
   if (p == NULL)
     return "Malloc error";
   p->name = strdup(name);
@@ -735,7 +738,7 @@ Function *module_depend(char *name1, char *name2, int major, int minor)
   }
   if (!p || !o)
     return 0;
-  d = malloc(sizeof(dependancy));
+  d = calloc(1, sizeof(dependancy));
 
   d->needed = p;
   d->needing = o;
@@ -785,7 +788,7 @@ void add_hook(int hook_num, Function func)
     for (p = hook_list[hook_num]; p; p = p->next)
       if (p->func == func)
 	return;			/* Don't add it if it's already there */
-    p = malloc(sizeof(struct hook_entry));
+    p = calloc(1, sizeof(struct hook_entry));
 
     p->next = hook_list[hook_num];
     hook_list[hook_num] = p;

@@ -66,8 +66,8 @@ void fwd_display(int idx, struct user_entry *e, struct userrec *u)
 int num_notes(char *user)
 {
   int tot = 0;
-  FILE *f;
-  char s[513], *to, *s1;
+  FILE *f = NULL;
+  char s[513] = "", *to = NULL, *s1 = NULL;
 
   if (!notefile[0])
     return 0;
@@ -96,8 +96,8 @@ int num_notes(char *user)
  */
 static void notes_change(char *oldnick, char *newnick)
 {
-  FILE *f, *g;
-  char s[513], *to, *s1;
+  FILE *f = NULL, *g = NULL;
+  char s[513] = "", *to = NULL, *s1 = NULL;
   int tot = 0;
 
   if (!egg_strcasecmp(oldnick, newnick))
@@ -145,8 +145,8 @@ static void notes_change(char *oldnick, char *newnick)
  */
 static void expire_notes()
 {
-  FILE *f, *g;
-  char s[513], *to, *from, *ts, *s1;
+  FILE *f = NULL, *g = NULL;
+  char s[513] = "", *to = NULL, *from = NULL, *ts = NULL, *s1 = NULL;
   int tot = 0, lapse;
 
   if (!notefile[0])
@@ -196,10 +196,9 @@ static void expire_notes()
  */
 int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int bufsize)
 {
-  FILE *f;
-  char u[20], *f1, *to = NULL, work[1024];
-  struct userrec *ur;
-  struct userrec *ur2;
+  FILE *f = NULL;
+  char u[20] = "", *f1 = NULL, *to = NULL, work[1024] = "";
+  struct userrec *ur = NULL, *ur2 = NULL;
 
   if (who && bufsize > 0) who[0] = 0;
   ur = get_user_by_handle(userlist, argv2);
@@ -364,8 +363,8 @@ static int notes_in(int dl[], int in)
  */
 void notes_read(char *hand, char *nick, char *srd, int idx)
 {
-  FILE *f;
-  char s[601], *to, *dt, *from, *s1, wt[100];
+  FILE *f = NULL;
+  char s[601] = "", *to = NULL, *dt = NULL, *from = NULL, *s1 = NULL, wt[100] = "";
   time_t tt;
   int ix = 1;
   int ir = 0;
@@ -476,8 +475,8 @@ void notes_read(char *hand, char *nick, char *srd, int idx)
  */
 void notes_del(char *hand, char *nick, char *sdl, int idx)
 {
-  FILE *f, *g;
-  char s[513], *to, *s1;
+  FILE *f = NULL, *g = NULL;
+  char s[513] = "", *to = NULL, *s1 = NULL;
   int in = 1;
   int er = 0;
   int dl[128];			/* Is it enough ? */
@@ -568,7 +567,7 @@ void notes_del(char *hand, char *nick, char *sdl, int idx)
  */
 static int msg_notes(char *nick, char *host, struct userrec *u, char *par)
 {
-  char *pwd, *fcn;
+  char *pwd = NULL, *fcn = NULL;
 
   if (!u)
     return 0;
@@ -603,10 +602,10 @@ static int msg_notes(char *nick, char *host, struct userrec *u, char *par)
     else
       notes_del(u->handle, nick, par, -1);
   } else if (!egg_strcasecmp(fcn, "TO")) {
-    char *to;
+    char *to = NULL;
     int i;
-    FILE *f;
-    struct userrec *u2;
+    FILE *f = NULL;
+    struct userrec *u2 = NULL;
 
     to = newsplit(&par);
     if (!par[0]) {
@@ -669,12 +668,12 @@ static void notes_hourly()
 {
   expire_notes();
   if (notify_users) {
-    register struct chanset_t	*chan;
-    register memberlist		*m;
-    int				 k;
-    register int		 l;
-    char			 s1[256];
-    struct userrec		*u;
+    register struct chanset_t	*chan = NULL;
+    register memberlist	*m = NULL;
+    int k;
+    register int l;
+    char s1[256] = "";
+    struct userrec *u = NULL;
 
     for (chan = chanset; chan; chan = chan->next) {
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
@@ -772,8 +771,6 @@ void notes_report(int idx, int details)
 
 void notes_init()
 {
-
-  notefile[0] = 0;
   add_hook(HOOK_HOURLY, (Function) notes_hourly);
 
   add_builtins("dcc", notes_cmds);

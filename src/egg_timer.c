@@ -33,7 +33,7 @@ int timer_get_time(egg_timeval_t *curtime)
 
 int timer_create_complex(egg_timeval_t *howlong, Function callback, void *client_data, int flags)
 {
-	egg_timer_t *timer, *prev;
+	egg_timer_t *timer = NULL, *prev = NULL;
 	egg_timeval_t trigger_time;
 
 	timer_get_time(&trigger_time);
@@ -49,7 +49,7 @@ int timer_create_complex(egg_timeval_t *howlong, Function callback, void *client
 	}
 
 	/* Fill out a new timer. */
-	timer = (egg_timer_t *)malloc(sizeof(*timer));
+	timer = (egg_timer_t *) calloc(1, sizeof(*timer));
 	timer->callback = callback;
 	timer->client_data = client_data;
 	timer->flags = flags;
@@ -75,7 +75,7 @@ int timer_create_complex(egg_timeval_t *howlong, Function callback, void *client
 /* Destroy a timer, given an id. */
 int timer_destroy(int timer_id)
 {
-	egg_timer_t *prev, *timer;
+	egg_timer_t *prev = NULL, *timer = NULL;
 
 	prev = NULL;
 	for (timer = timer_list_head; timer; timer = timer->next) {
@@ -94,7 +94,7 @@ int timer_destroy(int timer_id)
 
 int timer_destroy_all()
 {
-	egg_timer_t *timer;
+	egg_timer_t *timer = NULL;
 
 	for (timer = timer_list_head; timer; timer = timer->next) {
 		free(timer);
@@ -125,9 +125,9 @@ int timer_get_shortest(egg_timeval_t *howlong)
 int timer_run()
 {
 	egg_timeval_t curtime;
-	egg_timer_t *timer;
+	egg_timer_t *timer = NULL;
 	Function callback;
-	void *client_data;
+	void *client_data = NULL;
 
 	while ((timer = timer_list_head)) {
 		timer_get_time(&curtime);

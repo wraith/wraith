@@ -136,7 +136,7 @@ int get_ip(char *hostname, union sockaddr_union *so)
   struct addrinfo hints, *ai = NULL, *res = NULL;
   int error = 0;
 #else
-  struct hostent *hp;
+  struct hostent *hp = NULL;
 #endif /* USE_IPV6 */
 
   egg_memset(so, 0, sizeof(union sockaddr_union));
@@ -176,9 +176,10 @@ int get_ip(char *hostname, union sockaddr_union *so)
 #ifdef HAVE_SSL
 int seed_PRNG(void)
 {
-  char stackdata[1024];
-  static char rand_file[300];
-  FILE *fh = 0;
+  char stackdata[1024] = "";
+  static char rand_file[300] = "";
+  FILE *fh = NULL;
+
 #if OPENSSL_VERSION_NUMBER >= 0x00905100
   if (RAND_status()) return 0;
 #endif /* OPENSSL_VERSION_NUMBER */
@@ -250,17 +251,18 @@ int ssl_cleanup() {
  */
 char *myipstr(int af_type)
 {
-
 #ifdef USE_IPV6
   if (af_type == 6) {
-    static char s[UHOSTLEN + 1];
+    static char s[UHOSTLEN + 1] = "";
+
     egg_inet_ntop(AF_INET6, &cached_myip6_so.sin6.sin6_addr, s, 119);
     s[120] = 0;
     return s;
   } else
 #endif /* USE_IPV6 */
     if (af_type == 4) {
-      static char s[UHOSTLEN + 1];
+      static char s[UHOSTLEN + 1] = "";
+
       egg_inet_ntop(AF_INET, &cached_myip4_so.sin.sin_addr, s, 119);
       s[120] = 0;
       return s;
@@ -278,7 +280,7 @@ IP getmyip() {
 /* see if it's necessary to set inaddr_any... because if we can't resolve, we die anyway */
 void cache_my_ip()
 {
-  char s[121];
+  char s[121] = "";
   int error;
 #ifdef USE_IPV6
   int any = 0;
@@ -557,13 +559,13 @@ void real_killsock(register int sock, const char *file, int line)
 static int proxy_connect(int sock, char *host, int port, int proxy)
 {
 #ifdef USE_IPV6
-  unsigned char x[32];
+  unsigned char x[32] = "";
   int af_ty;
 #else
-  unsigned char x[10];
+  unsigned char x[10] = "";
 #endif /* USE_IPV6 */
-  struct hostent *hp;
-  char s[256];
+  struct hostent *hp = NULL;
+  char s[256] = "";
   int i;
 
 #ifdef USE_IPV6
@@ -914,10 +916,10 @@ int ssl_link(register int sock, int state)
  */
 char *hostnamefromip(unsigned long ip)
 {
-  struct hostent *hp;
+  struct hostent *hp = NULL;
   unsigned long addr = ip;
-  unsigned char *p;
-  static char s[UHOSTLEN];
+  unsigned char *p = NULL;
+  static char s[UHOSTLEN] = "";
 
   if (!setjmp(alarmret)) {
     alarm(resolve_timeout);
@@ -1026,8 +1028,8 @@ int open_telnet_dcc(int sock, char *server, char *port)
 {
   int p;
   unsigned long addr;
-  char sv[500];
-  unsigned char c[4];
+  char sv[500] = "";
+  unsigned char c[4] = "";
 
 #ifdef DEBUG_IPV6
   debug1(STR("open_telnet_dcc %s"), server);
@@ -1091,7 +1093,7 @@ static int sockread(char *s, int *len)
     /* No timer, default to 1 second. */
     t.tv_sec = 1;
     t.tv_usec = 0;
-  }
+  } 
   else {
     t.tv_sec = howlong.sec;
     t.tv_usec = howlong.usec;
@@ -1265,7 +1267,7 @@ char *botlink_encrypt(int snum, char *src)
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
   int bufpos = 0, i = 0;
   
-  srcbuf = malloc(strlen(src) + 9 + 1);
+  srcbuf = calloc(1, strlen(src) + 9 + 1);
   strcpy(srcbuf, src);
   line = srcbuf;
   if (!line) {
@@ -1348,7 +1350,7 @@ int sockgets(char *s, int *len)
 	  if (strlen(socklist[i].inbuf) > (grab - 2))
 	    socklist[i].inbuf[(grab - 2)] = 0;
 	  strcpy(s, socklist[i].inbuf);
-	  px = (char *) malloc(strlen(p + 1) + 1);
+	  px = (char *) calloc(1, strlen(p + 1) + 1);
 	  strcpy(px, p + 1);
 	  free(socklist[i].inbuf);
 	  if (px[0])
@@ -1405,7 +1407,7 @@ int sockgets(char *s, int *len)
       socklist[ret].flags &= ~SOCK_STRONGCONN;
       /* Buffer any data that came in, for future read. */
       socklist[ret].inbuflen = *len;
-      socklist[ret].inbuf = (char *) malloc(*len + 1);
+      socklist[ret].inbuf = (char *) calloc(1, *len + 1);
       /* It might be binary data. You never know. */
       egg_memcpy(socklist[ret].inbuf, xx, *len);
       socklist[ret].inbuf[*len] = 0;
@@ -1433,7 +1435,7 @@ int sockgets(char *s, int *len)
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
-    socklist[ret].inbuf = (char *) malloc(strlen(p) + strlen(xx) + 1);
+    socklist[ret].inbuf = (char *) calloc(1, strlen(p) + strlen(xx) + 1);
     strcpy(socklist[ret].inbuf, p);
     strcat(socklist[ret].inbuf, xx);
     free(p);
@@ -1445,7 +1447,7 @@ int sockgets(char *s, int *len)
     } else {
       p = socklist[ret].inbuf;
       socklist[ret].inbuflen = strlen(p) - (grab - 2);
-      socklist[ret].inbuf = (char *) malloc(socklist[ret].inbuflen + 1); 
+      socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1); 
       strcpy(socklist[ret].inbuf, p + (grab - 2));
       *(p + (grab - 2)) = 0;
       strcpy(xx, p);
@@ -1490,13 +1492,13 @@ int sockgets(char *s, int *len)
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
     socklist[ret].inbuflen = strlen(p) + strlen(xx);
-    socklist[ret].inbuf = (char *) malloc(socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
     strcat(socklist[ret].inbuf, p);
     free(p);
   } else {
     socklist[ret].inbuflen = strlen(xx);
-    socklist[ret].inbuf = (char *) malloc(socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
   }
   if (data) {
@@ -1512,7 +1514,7 @@ int sockgets(char *s, int *len)
 void tputs(register int z, char *s, unsigned int len)
 {
   register int i, x, idx;
-  char *p;
+  char *p = NULL;
   static int inhere = 0;
 
   if (z < 0)			/* um... HELLO?!  sanity check please! */
@@ -1596,7 +1598,7 @@ void tputs(register int z, char *s, unsigned int len)
 	x = 0;
       if (x < len) {
 	/* Socket is full, queue it */
-	socklist[i].outbuf = (char *) malloc(len - x);
+	socklist[i].outbuf = (char *) calloc(1, len - x);
 	egg_memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }
@@ -1720,7 +1722,7 @@ void dequeue_sockets()
 	char *p = socklist[i].outbuf;
 
 	/* This removes any sent bytes from the beginning of the buffer */
-	socklist[i].outbuf = (char *) malloc(socklist[i].outbuflen - x);
+	socklist[i].outbuf = (char *) calloc(1, socklist[i].outbuflen - x);
 	egg_memcpy(socklist[i].outbuf, p + x, socklist[i].outbuflen - x);
 	socklist[i].outbuflen -= x;
 	free(p);
@@ -1749,7 +1751,7 @@ void dequeue_sockets()
 void tell_netdebug(int idx)
 {
   int i;
-  char s[80];
+  char s[80] = "";
 
   dprintf(idx, "Open sockets:");
   for (i = 0; i < MAXSOCKS; i++) {
@@ -1796,7 +1798,7 @@ int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
    * currently harm them (afaik)
    */
 
-  char badaddress[16];
+  char badaddress[16] = "";
   IP ip = my_atoul(ipaddy);
   int prt = atoi(port);
 
@@ -1825,7 +1827,7 @@ int hostsanitycheck_dcc(char *nick, char *from, IP ip, char *dnsname,
   /* According to the latest RFC, the clients SHOULD be able to handle
    * DNS names that are up to 255 characters long.  This is not broken.
    */
-  char hostn[256], badaddress[16];
+  char hostn[256] = "", badaddress[16] = "";
 
   /* It is disabled HERE so we only have to check in *one* spot! */
   if (!dcc_sanitycheck)
@@ -1890,7 +1892,7 @@ int sock_has_data(int type, int sock)
 int flush_inbuf(int idx)
 {
   int i, len;
-  char *inbuf;
+  char *inbuf = NULL;
 
   Assert((idx >= 0) && (idx < dcc_total));
   for (i = 0; i < MAXSOCKS; i++) {

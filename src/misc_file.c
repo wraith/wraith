@@ -22,7 +22,7 @@
 int copyfile(char *oldpath, char *newpath)
 {
   int fi, fo, x;
-  char buf[512];
+  char buf[512] = "";
   struct stat st;
 
 #ifndef CYGWIN_HACKS

@@ -42,17 +42,17 @@ int cloak_script = CLOAK_PLAIN;
 int cloak_awaytime = 0;
 int cloak_heretime = 0;
 int listen_time = 0;
-char cloak_bxver[10];
-char cloak_os[20];
-char cloak_osver[100];
-char cloak_host[161];
-char ctcpversion[400];
-char ctcpuserinfo[400];
-char autoaway[100];
+char cloak_bxver[10] = "";
+char cloak_os[20] = "";
+char cloak_osver[100] = "";
+char cloak_host[161] = "";
+char ctcpversion[400] = "";
+char ctcpuserinfo[400] = "";
+char autoaway[100] = "";
 
 char *strtolower(char *s)
 {
-  char *p, *p2 = strdup(s); 
+  char *p = NULL, *p2 = strdup(s); 
 
   p = p2;
   while (*p) {
@@ -128,7 +128,7 @@ void scriptchanged()
     break;
   case CLOAK_MIRC:
   {
-    char mircver[4];
+    char mircver[4] = "";
 
     switch (random() % 7) {
       case 0:
@@ -167,7 +167,7 @@ void scriptchanged()
   }
   case CLOAK_CYPRESS:
   {
-    char theme[30];
+    char theme[30] = "";
 
     switch (random() % 25) { /* 0-19 = script, 20-24 = plain */
     case 0:
@@ -432,9 +432,9 @@ static void ctcp_minutely()
 
 static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char *p;
+  char *p = NULL;
   int idletime;
-  struct passwd *pwd;
+  struct passwd *pwd = NULL;
 
   if (cloak_awaytime)
     idletime = now - cloak_awaytime;
@@ -455,7 +455,7 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
 
 static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char reply[60];
+  char reply[60] = "";
 
   strncpyz(reply, text, sizeof(reply));
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, reply);
@@ -516,8 +516,7 @@ static int ctcp_WHOAMI(char *nick, char *uhost, struct userrec *u, char *object,
 
 static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char chan[256],
-   *p;
+  char chan[256] = "", *p = NULL;
 
   if (text[0]) {
     strncpyz(chan, text, sizeof(chan));
@@ -532,8 +531,7 @@ static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, cha
 static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   struct chanset_t *chan = chanset;
-  char chname[256],
-   *p;
+  char chname[256] = "", *p = NULL;
 
   if (text[0] == '#') {
     strncpyz(chname, text, sizeof(chname));
@@ -556,7 +554,6 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
 
 static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-
   if (cloak_script == CLOAK_TUNNELVISION)
     strcpy(ctcpuserinfo, botname);
   else if (cloak_script == CLOAK_PREVAIL) {
@@ -569,7 +566,7 @@ static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *objec
 
 static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char buf[256];
+  char buf[256] = "";
 
   if (!text[0]) {
     strcpy(buf, STR("SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information"));
@@ -629,7 +626,7 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *obj
 
 static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char tms[81];
+  char tms[81] = "";
 
   strncpyz(tms, ctime(&now), sizeof(tms));
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, tms);
@@ -694,7 +691,7 @@ void cloak_describe(struct cfg_entry *cfgent, int idx)
 
 void cloak_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 {
-  char *p;
+  char *p = NULL;
   int i;
 
   if (!(p = cfgent->ldata ? cfgent->ldata : cfgent->gdata))
@@ -720,7 +717,7 @@ struct cfg_entry CFG_CLOAK_SCRIPT = {
 void ctcp_init()
 {
 #ifdef LEAF
-  char *p;
+  char *p = NULL;
   struct utsname un;
 
   egg_bzero(&un, sizeof(un));
@@ -767,4 +764,3 @@ void ctcp_init()
 #endif /* LEAF */
   add_cfg(&CFG_CLOAK_SCRIPT);
 }
-

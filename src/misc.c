@@ -50,8 +50,6 @@ extern time_t		 now;
 extern struct cfg_entry	CFG_MOTD;
 extern conf_t		conf;
 
-void detected(int, char *);
-
 int 	 server_lag = 0;	/* GUESS! */
 
 /*
@@ -124,7 +122,9 @@ int my_strcpy(register char *a, register char *b)
  */
 void splitc(char *first, char *rest, char divider)
 {
-  char *p = strchr(rest, divider);
+  char *p = NULL;
+
+  p = strchr(rest, divider);
 
   if (p == NULL) {
     if (first != rest && first)
@@ -155,7 +155,9 @@ void splitc(char *first, char *rest, char divider)
  */
 void splitcn(char *first, char *rest, char divider, size_t max)
 {
-  char *p = strchr(rest, divider);
+  char *p = NULL;
+
+  p = strchr(rest, divider);
 
   if (p == NULL) {
     if (first != rest && first)
@@ -175,7 +177,9 @@ void splitcn(char *first, char *rest, char divider, size_t max)
 
 char *splitnick(char **blah)
 {
-  char *p = strchr(*blah, '!'), *q = *blah;
+  char *p = NULL, *q = *blah;
+
+  p = strchr(*blah, '!');
 
   if (p) {
     *p = 0;
@@ -187,7 +191,7 @@ char *splitnick(char **blah)
 
 void remove_crlf(char **line)
 {
-  char *p;
+  char *p = NULL;
 
   p = strchr(*line, '\n');
   if (p != NULL)
@@ -199,7 +203,7 @@ void remove_crlf(char **line)
 
 char *newsplit(char **rest)
 {
-  register char *o, *r;
+  register char *o = NULL, *r = NULL;
 
   if (!rest)
     return *rest = "";
@@ -319,7 +323,7 @@ void maskhost(const char *s, char *nw)
  */
 void dumplots(int idx, const char *prefix, char *data)
 {
-  char		*p = data, *q, *n, c;
+  char		*p = data, *q = NULL, *n = NULL, c = 0;
   const int	 max_data_len = 500 - strlen(prefix);
 
   if (!*data) {
@@ -405,7 +409,7 @@ void days(time_t now, time_t then, char *out)
  */
 void daysdur(time_t now, time_t then, char *out)
 {
-  char s[81];
+  char s[81] = "";
   int hrs, mins;
 
   if (now - then > 86400) {
@@ -425,8 +429,8 @@ void daysdur(time_t now, time_t then, char *out)
 /* show l33t banner */
 
 char *wbanner() {
-  int r;
-  r = random();
+  int r = random();
+
   switch (r % 9) {
    case 0: return STR("                       .__  __  .__\n__  _  ______________  |__|/  |_|  |__\n\\ \\/ \\/ /\\_  __ \\__  \\ |  \\   __\\  |  \\\n \\     /  |  | \\// __ \\|  ||  | |   Y  \\\n  \\/\\_/   |__|  (____  /__||__| |___|  /\n                     \\/              \\/\n");
    case 1: return STR("                    _ _   _     \n__      ___ __ __ _(_) |_| |__  \n\\ \\ /\\ / / '__/ _` | | __| '_ \\ \n \\ V  V /| | | (_| | | |_| | | |\n  \\_/\\_/ |_|  \\__,_|_|\\__|_| |_|\n");
@@ -453,11 +457,10 @@ void show_motd(int idx)
 {
   
   if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
-    char *who, *buf, date[50];
+    char *who = NULL, *buf = NULL, *buf_ptr = NULL, date[50] = "";
     time_t time;
-    void *buf_ptr;
 
-    buf = buf_ptr = strdup((char *) CFG_MOTD.gdata);
+    buf = buf_ptr = strdup(CFG_MOTD.gdata);
     who = newsplit(&buf);
     time = atoi(newsplit(&buf));
 #ifdef S_UTCTIME
@@ -475,11 +478,11 @@ void show_motd(int idx)
 
 void show_channels(int idx, char *handle)
 {
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
   struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0, 0 };
-  struct userrec *u;
+  struct userrec *u = NULL;
   int first = 0, l = 0, total = 0;
-  char format[120];
+  char format[120] = "";
 #ifdef LEAF
   module_entry *me = module_find("irc", 0, 0);
   Function *func = me->funcs;
@@ -535,7 +538,9 @@ int getting_users()
 
 char *extracthostname(char *hostmask)
 {
-  char *p = strrchr(hostmask, '@');
+  char *p = NULL;
+
+  p = strrchr(hostmask, '@');
   return p ? p + 1 : "";
 }
 
@@ -589,7 +594,7 @@ char *str_escape(const char *str, const char div, const char mask)
 {
   const int	 len = strlen(str);
   int		 buflen = (2 * len), blen = 0;
-  char		*buf = malloc(buflen + 1), *b = buf;
+  char		*buf = calloc(1, buflen + 1), *b = buf;
   const char	*s;
 
   if (!buf)
@@ -620,7 +625,7 @@ char *str_escape(const char *str, const char div, const char mask)
 /* Is every character in a string a digit? */
 int str_isdigit(const char *str)
 {
-  if (!*str)
+  if (!str || (str && !*str))
     return 0;
 
   for(; *str; ++str) {
@@ -650,10 +655,9 @@ int str_isdigit(const char *str)
  */
 char *strchr_unescape(char *str, const char div, register const char esc_char)
 {
-  char		 buf[3];
-  register char	*s, *p;
+  char buf[3] = "";
+  register char	*s = NULL, *p = NULL;
 
-  buf[3] = 0;
   for (s = p = str; *s; s++, p++) {
     if (*s == esc_char) {	/* Found escape character.		*/
       /* Convert code to character. */
@@ -729,16 +733,14 @@ void updatelocal(void)
 
 int updatebin(int idx, char *par, int autoi)
 {
-  char *path = NULL,
-   *newbin;
-  char buf[DIRMAX], old[DIRMAX], testbuf[DIRMAX];
+  char *path = NULL, *newbin = NULL;
+  char buf[DIRMAX] = "", old[DIRMAX] = "", testbuf[DIRMAX] = "";
   struct stat sb;
   int i;
 #ifdef LEAF
-  module_entry *me;
+  module_entry *me = NULL;
 #endif /* LEAF */
 
-  buf[0] = testbuf[0] = old[0] = 0;
   path = newsplit(&par);
   par = path;
   if (!par[0]) {
@@ -746,7 +748,7 @@ int updatebin(int idx, char *par, int autoi)
       dprintf(idx, STR("Not enough parameters.\n"));
     return 1;
   }
-  path = malloc(strlen(binname) + strlen(par) + 2);
+  path = calloc(1, strlen(binname) + strlen(par) + 2);
   strcpy(path, binname);
   newbin = strrchr(path, '/');
   if (!newbin) {
@@ -854,8 +856,7 @@ int updatebin(int idx, char *par, int autoi)
 
 int bot_aggressive_to(struct userrec *u)
 {
-  char mypval[20],
-    botpval[20];
+  char mypval[20] = "", botpval[20] = "";
 
   link_pref_val(u, botpval);
   link_pref_val(conf.bot->u, mypval);
@@ -868,9 +869,9 @@ int bot_aggressive_to(struct userrec *u)
 
 char kickprefix[25] = "";
 char bankickprefix[25] = "";
-char * kickreason(int kind) {
-  int r;
-  r=random();
+char *kickreason(int kind) {
+  int r = random();
+
   switch (kind) {
   case KICK_BANNED:
     switch (r % 6) {
@@ -1017,18 +1018,16 @@ char * kickreason(int kind) {
 
 }
 
+/*
+   plain cookie:
+   Last 6 digits of time
+   Last 5 chars of nick
+   Last 4 regular chars of chan
+ */
 void makeplaincookie(char *chname, char *nick, char *buf)
 {
-  /*
-     plain cookie:
-     Last 6 digits of time
-     Last 5 chars of nick
-     Last 4 regular chars of chan
-   */
-  char work[256],
-    work2[256];
-  int i,
-    n;
+  char work[256] = "", work2[256] = "";
+  int i, n;
 
   sprintf(work, STR("%010li"), (now + timesync));
   strcpy(buf, (char *) &work[4]);
@@ -1054,14 +1053,13 @@ void makeplaincookie(char *chname, char *nick, char *buf)
 
 int goodpass(char *pass, int idx, char *nick)
 {
-  char *tell;
+  char tell[501] = "";
 #ifdef S_NAZIPASS
   int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
 #endif /* S_NAZIPASS */
+
   if (!pass[0]) 
     return 0;
-
-  tell = malloc(300);
 
 #ifdef S_NAZIPASS
   for (i = 0; i < strlen(pass); i++) {
@@ -1114,10 +1112,8 @@ int goodpass(char *pass, int idx, char *nick)
       dprintf(idx, "%s\n", tell);
     else if (nick[0])
       dprintf(DP_HELP, STR("NOTICE %s :%s\n"), nick, tell);
-    free(tell);
     return 0;
   }
-  free(tell);
   return 1;
 }
 
@@ -1125,7 +1121,8 @@ char *replace (char *string, char *oldie, char *newbie)
 {
   static char newstring[1024] = "";
   int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
-  char *c;
+  char *c = NULL;
+
   if (string == NULL) return "";
   if ((c = (char *) strstr(string, oldie)) == NULL) return string;
   new_len = strlen(newbie);
@@ -1151,15 +1148,14 @@ char *replace (char *string, char *oldie, char *newbie)
 
 char *getfullbinname(char *argv0)
 {
-  char *cwd, *bin, *p, *p2;
+  char cwd[DIRMAX] = "", *bin = NULL, *p = NULL, *p2 = NULL;
 
   bin = strdup(argv0);
   if (bin[0] == '/') {
     return bin;
   }
-  cwd = malloc(8192);
-  getcwd(cwd, 8191);
-  cwd[8191] = 0;
+  getcwd(cwd, DIRMAX);
+  cwd[DIRMAX] = 0;
   if (cwd[strlen(cwd) - 1] == '/')
     cwd[strlen(cwd) - 1] = 0;
 
@@ -1182,13 +1178,13 @@ char *getfullbinname(char *argv0)
   }
   free(bin);
   bin = strdup(cwd);
-  free(cwd);
   return bin;
 }
 
 void local_check_should_lock()
 {
-  module_entry *me;
+  module_entry *me = NULL;
+
   if ((me = module_find("channels", 0, 0))) {
     Function *func = me->funcs;
     /* check_should_lock() */
@@ -1200,10 +1196,11 @@ void local_check_should_lock()
 char *btoh(const unsigned char *md, int len)
 {
   int i;
-  char buf[100], *ret;
+  char buf[100] = "", *ret = NULL;
 
   for (i = 0; i < len; i++)
     sprintf(&(buf[i*2]), "%02x", md[i]);
+
   ret = buf;
   return ret;
 }
@@ -1218,9 +1215,9 @@ void showhelp (int idx, struct flag_record *flags, char *string)
 {
   static int help_flags;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char helpstr[12288], tmp[2] = "", flagstr[10] = "";
+  char helpstr[12288] = "", tmp[2] = "", flagstr[10] = "";
   int ok = 1;
-  helpstr[0] = 0;
+
   while (string && string[0]) {
     if (*string == '%') {
       if (!strncmp(string + 1, "{+", 2)) {
@@ -1310,6 +1307,7 @@ void showhelp (int idx, struct flag_record *flags, char *string)
 static void shuffleArray(char *array[], int n)
 {
   int i;
+
   for (i = 0; i < n; i++) {
     int j = i + random() / (RAND_MAX / (n - i) + 1);
     char *t = array[j];
@@ -1320,9 +1318,10 @@ static void shuffleArray(char *array[], int n)
 
 void shuffle(char *string, char *delim)
 {
-  char *array[501], *str, *work;
+  char *array[501], *str = NULL, *work = NULL;
   int len = 0, i = 0;
 
+  egg_bzero(&array, sizeof array);
   work = strdup(string);
 
   str = strtok(work, delim);
@@ -1390,5 +1389,3 @@ char *color(int idx, int type, int color)
   /* This should never be reached.. */
   return "";
 }
-
-

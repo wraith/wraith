@@ -158,12 +158,12 @@ static long aseed;
 
 static int resfd;
 
-static char tempstring[512];
-static char namestring[1024 + 1];
-static char stackstring[1024 + 1];
+static char tempstring[512] = "";
+static char namestring[1024 + 1] = "";
+static char stackstring[1024 + 1] = "";
 
 #ifdef DEBUG_DNS
-static char sendstring[1024 + 1];
+static char sendstring[1024 + 1] = "";
 #endif /* DEBUG_DNS */
 
 static const char nullstring[] = "";
@@ -209,13 +209,11 @@ static char *strtdiff(char *d, long signeddiff)
  */
 static struct resolve *allocresolve()
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
 
-    rp = (struct resolve *) malloc(sizeof(struct resolve));
-    egg_bzero(rp, sizeof(struct resolve));
+    rp = (struct resolve *) calloc(1, sizeof(struct resolve));
     return rp;
 }
-
 
 /*
  *    Hash and linked-list related functions
@@ -252,7 +250,7 @@ static u_32bit_t gethostbash(char *host)
  */
 static void linkresolveid(struct resolve *addrp)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
     u_32bit_t bashnum;
 
     bashnum = getidbash(addrp->id);
@@ -304,7 +302,7 @@ static void unlinkresolveid(struct resolve *rp)
  */
 static void linkresolvehost(struct resolve *addrp)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
     u_32bit_t bashnum;
     int ret;
 
@@ -361,7 +359,7 @@ static void unlinkresolvehost(struct resolve *rp)
  */
 static void linkresolveip(struct resolve *addrp)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
     u_32bit_t bashnum;
 
     bashnum = getipbash(addrp->ip);
@@ -414,7 +412,7 @@ static void unlinkresolveip(struct resolve *rp)
  */
 static void linkresolve(struct resolve *rp)
 {
-    struct resolve *irp;
+    struct resolve *irp = NULL;
 
     if (expireresolves) {
 	irp = expireresolves;
@@ -471,7 +469,7 @@ static void unlinkresolve(struct resolve *rp)
  */
 static struct resolve *findid(u_16bit_t id)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
     int bashnum;
 
     bashnum = getidbash(id);
@@ -494,7 +492,7 @@ static struct resolve *findid(u_16bit_t id)
  */
 static struct resolve *findhost(char *hostn)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
     int bashnum;
 
     bashnum = gethostbash(hostn);
@@ -520,7 +518,7 @@ static struct resolve *findhost(char *hostn)
  */
 static struct resolve *findip(IP ip)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
     u_32bit_t bashnum;
 
     bashnum = getipbash(ip);
@@ -548,7 +546,7 @@ static struct resolve *findip(IP ip)
  */
 static void dorequest(char *s, int type, u_16bit_t id)
 {
-    packetheader *hp;
+    packetheader *hp = NULL;
     int r, i;
     u_8bit_t buf[(MAX_PACKETSIZE / sizeof(char)) + 1];
 
@@ -649,10 +647,10 @@ static void passrp(struct resolve *rp, long ttl, int type)
  */
 static void parserespacket(u_8bit_t *s, int l)
 {
-    struct resolve *rp;
-    packetheader *hp;
-    u_8bit_t *eob;
-    u_8bit_t *c;
+    struct resolve *rp = NULL;
+    packetheader *hp = NULL;
+    u_8bit_t *eob = NULL;
+    u_8bit_t *c = NULL;
     long ttl;
     int r, usefulanswer;
     u_16bit_t rr, datatype, class, qdatatype, qclass;
@@ -942,7 +940,7 @@ static void dns_ack(void)
  */
 static void dns_check_expires(void)
 {
-    struct resolve *rp, *nextrp;
+    struct resolve *rp = NULL, *nextrp = NULL;
 
     /* Walk through sorted list ... */
     for (rp = expireresolves; (rp) && (now >= rp->expiretime);
@@ -987,7 +985,7 @@ static void dns_check_expires(void)
  */
 void dns_hostbyip(IP ip)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
 
     ip = htonl(ip);
     if ((rp = findip(ip))) {
@@ -1017,7 +1015,7 @@ void dns_hostbyip(IP ip)
  */
 void dns_ipbyhost(char *hostn)
 {
-    struct resolve *rp;
+    struct resolve *rp = NULL;
     struct in_addr inaddr;
 
     /* Check if someone passed us an IP address as hostname

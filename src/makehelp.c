@@ -7,7 +7,8 @@ char *replace(char *string, char *oldie, char *newbie)
 {
   static char newstring[1024] = "";
   int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
-  char *c;
+  char *c = NULL;
+
   if (string == NULL) return "";
   if ((c = (char *) strstr(string, oldie)) == NULL) return string;
   new_len = strlen(newbie);
@@ -34,18 +35,18 @@ char *replace(char *string, char *oldie, char *newbie)
 
 char *step_thru_file(FILE *fd)
 {
-  const int tempBufSize = 1024;
-  char tempBuf[tempBufSize];
+  char tempBuf[1024] = "";
   char *retStr = NULL;
+
   if (fd == NULL) {
     return NULL;
   }
   retStr = NULL;
   while (!feof(fd)) {
-    fgets(tempBuf, tempBufSize, fd);
+    fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = malloc(strlen(tempBuf) + 2);
+        retStr = calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);
       } else {
         retStr = realloc(retStr, strlen(retStr) + strlen(tempBuf));
@@ -100,6 +101,7 @@ int parse_help(char *infile, char *outfile) {
   FILE *in = NULL, *out = NULL;
   char *buffer = NULL, *cmd = NULL;
   int skip = 0, line = 0, leaf = 0, hub = 0;
+
   if (!(in = fopen(infile, "r"))) {
     printf("Error: Cannot open '%s' for reading\n", infile);
     return 1;
@@ -127,11 +129,10 @@ help_t help[] = \n\
       if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
       if ((skipline(buffer, &skip))) continue;
       if (buffer[0] == ':') { /* New cmd */
-        char *ifdef = malloc(strlen(buffer) + 1), *p;
+        char *ifdef = calloc(1, strlen(buffer) + 1), *p = NULL;
         int cl = 0, doleaf = 0, dohub = 0;
 
         buffer++;
-        ifdef[0] = 0;
         strcpy(ifdef, buffer);
         p = strchr(ifdef, ':');
         *p = 0;
@@ -162,13 +163,15 @@ help_t help[] = \n\
         p = strchr(buffer, ':');
         p++;
         if (strcmp(p, "end")) {		/* NEXT CMD */
-          cmd = malloc(strlen(p) + 1);
+          cmd = calloc(1, strlen(p) + 1);
+
           strcpy(cmd, p);
           printf(".");
           if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
           else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
           if (strchr(cmd, ':')) {
-            char *p2, *cmdn = malloc(strlen(cmd) + 1);
+            char *p2 = NULL, *cmdn = calloc(1,strlen(cmd) + 1);
+
             strcpy(cmdn, cmd);
             p2 = strchr(cmdn, ':');
             *p2 = 0;
@@ -192,13 +195,13 @@ help_t help[] = \n\
 }
 
 int main(int argc, char **argv) {
-  char *in, *out;
+  char *in = NULL, *out = NULL;
   int ret = 0;
 
   if (argc < 3) return 1;
-  in = malloc(strlen(argv[1]) + 1);
+  in = calloc(1, strlen(argv[1]) + 1);
   strcpy(in, argv[1]);
-  out = malloc(strlen(argv[2]) + 1);
+  out = calloc(1, strlen(argv[2]) + 1);
   strcpy(out, argv[2]);
   ret = parse_help(in, out);
   free(in);

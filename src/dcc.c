@@ -50,7 +50,7 @@ extern char		 ver[], origbotname[], bdhash[],
 extern sock_list 	*socklist;
 extern int 		MAXSOCKS;
 
-struct dcc_t *dcc = 0;	/* DCC list				   */
+struct dcc_t *dcc = NULL;	/* DCC list				   */
 int	timesync = 0;
 int	dcc_total = 0;		/* Total dcc's				   */
 int	allow_new_telnets = 0;	/* Allow people to introduce themselves
@@ -210,10 +210,10 @@ void send_timesync(int idx)
     dprintf(idx, "ts %li\n", (timesync + now));
   else {
 #ifdef HUB
-    char s[30];
+    char s[30] = "";
     int i;
 
-    sprintf(s, STR("ts %li\n"), (timesync + now));
+    sprintf(s, ("ts %li\n"), (timesync + now));
     for (i = 0; i < dcc_total; i++) {
       if ((dcc[i].type == &DCC_BOT) && (bot_aggressive_to(dcc[i].user))) {
         dprintf(i, s);
@@ -261,16 +261,17 @@ static void greet_new_bot(int idx)
   dprintf(idx, "v 1001500 %d %s <%s>\n", HANDLEN, ver, network);
   dprintf(idx, "vs %s\n", sysname);
   dprintf(idx, "bts %lu\n", buildts);
-  for (i = 0; i < dcc_total; i++)
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_FORK_BOT) {
       killsock(dcc[i].sock);
       lostdcc(i);
     }
+  }
 }
 
 static void bot_version(int idx, char *par)
 {
-  char x[1024];
+  char x[1024] = "";
   int l;
 
   dcc[idx].timeval = now;
@@ -282,7 +283,7 @@ static void bot_version(int idx, char *par)
     return;
   }
   if ((par[0] >= '0') && (par[0] <= '9')) {
-    char *work;
+    char *work = NULL;
 
     work = newsplit(&par);
     dcc[idx].u.bot->numver = atoi(work);
@@ -321,7 +322,7 @@ static void bot_version(int idx, char *par)
 
 void failed_link(int idx)
 {
-  char s[81], s1[512];
+  char s[81] = "", s1[512] = "";
 
   if (dcc[idx].u.bot->linker[0]) {
      egg_snprintf(s, sizeof s, "Couldn't link to %s.", dcc[idx].nick);
@@ -393,8 +394,9 @@ static void cont_link(int idx, char *buf, int ii)
 static void dcc_bot_new(int idx, char *buf, int x)
 {
 /*  struct userrec *u = get_user_by_handle(userlist, dcc[idx].nick); */
-  char *code;
+  char *code = NULL;
   int i;
+
   strip_telnet(dcc[idx].sock, buf, &x);
   code = newsplit(&buf);
   if (!egg_strcasecmp(code, "goodbye!")) {
@@ -403,6 +405,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
     bot_version(idx, buf);
   } else if (!egg_strcasecmp(code, "elink")) {
     int snum = -1;
+
     putlog(LOG_DEBUG, "*", "Got elink: %s %s", code, buf);
     /* Set the socket key and we're linked */
     for (i = 0; i < MAXSOCKS; i++) {
@@ -413,7 +416,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
     }
 
     if (snum >= 0) {
-      char *tmp, *p;
+      char *tmp = NULL, *p = NULL;
 
       p = newsplit(&buf);
       tmp = decrypt_string(SALT2, p);
@@ -488,7 +491,7 @@ extern botcmd_t C_bot[];
 
 static void dcc_bot(int idx, char *code, int i)
 {
-  char *msg;
+  char *msg = NULL;
   int f;
 
   strip_telnet(dcc[idx].sock, code, &i);
@@ -520,7 +523,7 @@ static void dcc_bot(int idx, char *code, int i)
 
 static void eof_dcc_bot(int idx)
 {
-  char x[1024];
+  char x[1024] = "";
   int bots, users;
 
   bots = bots_in_subtree(findbot(dcc[idx].nick));
@@ -595,15 +598,13 @@ struct dcc_table DCC_FORK_BOT =
 static void dcc_chat_secpass(int idx, char *buf, int atr)
 {
 #ifdef S_DCCAUTH
-  char check[MD5_HASH_LENGTH + 7];
+  char check[MD5_HASH_LENGTH + 7] = "";
 
   if (!atr)
     return;
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-  check[0] = 0;
   egg_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
-  check[MD5_HASH_LENGTH + 6] = 0;
 
   /* +secpass */
   if (!strcmp(check, buf)) {
@@ -622,13 +623,12 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
 	dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
       stats_add(dcc[idx].user, 1, 0);
       if (!get_user(&USERENTRY_SECPASS, dcc[idx].user)) {
-        char pass[17];
+        char pass[17] = "";
 
         dprintf(idx, "******************************************************************** \
                       \n \n \n%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n",
                      FLASH(idx), FLASH_END(idx));
         make_rand_str(pass, 16);
-        pass[16] = 0;
         set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
 #ifdef HUB
         write_userfile(idx);
@@ -691,7 +691,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
   }
   if (u_pass_match(dcc[idx].user, buf)) {
 #ifdef S_DCCAUTH
-    char rand[51];
+    char rand[51] = "";
 
     make_rand_str(rand, 50);
     strncpyz(dcc[idx].hash, makehash(dcc[idx].user, rand), sizeof dcc[idx].hash);
@@ -727,16 +727,14 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
 
 static void eof_dcc_general(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_LOSTDCC, dcc[idx].nick,
-	 dcc[idx].host, dcc[idx].port);
+  putlog(LOG_MISC, "*", DCC_LOSTDCC, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
 
 static void tout_dcc_chat_secpass(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_SPWDTIMEOUT, dcc[idx].nick,
-         dcc[idx].host);
+  putlog(LOG_MISC, "*", DCC_SPWDTIMEOUT, dcc[idx].nick, dcc[idx].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -748,8 +746,7 @@ static void display_dcc_chat_secpass(int idx, char *buf)
 
 static void tout_dcc_chat_pass(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_PWDTIMEOUT, dcc[idx].nick,
-	 dcc[idx].host);
+  putlog(LOG_MISC, "*", DCC_PWDTIMEOUT, dcc[idx].nick, dcc[idx].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -854,9 +851,8 @@ static void strip_mirc_codes(int flags, char *text)
 static void append_line(int idx, char *line)
 {
   int l = strlen(line);
-  struct msgq *p, *q;
-  struct chat_info *c = (dcc[idx].type == &DCC_CHAT) ? dcc[idx].u.chat :
-  dcc[idx].u.file->chat;
+  struct msgq *p = NULL, *q = NULL;
+  struct chat_info *c = (dcc[idx].type == &DCC_CHAT) ? dcc[idx].u.chat : dcc[idx].u.file->chat;
 
   if (c->current_lines > 1000) {
     /* They're probably trying to fill up the bot nuke the sods :) */
@@ -958,15 +954,13 @@ static int check_ansi(char *v)
 
 static void eof_dcc_chat(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_LOSTDCC, dcc[idx].nick,
-	 dcc[idx].host, dcc[idx].port);
+  putlog(LOG_MISC, "*", DCC_LOSTDCC, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
   if (dcc[idx].u.chat->channel >= 0) {
     chanout_but(idx, dcc[idx].u.chat->channel, "*** %s lost dcc link.\n",
 		dcc[idx].nick);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, "lost dcc link");
-    check_bind_chpt(conf.bot->nick, dcc[idx].nick, dcc[idx].sock,
-		   dcc[idx].u.chat->channel);
+    check_bind_chpt(conf.bot->nick, dcc[idx].nick, dcc[idx].sock, dcc[idx].u.chat->channel);
   }
   check_bind_chof(dcc[idx].nick, idx);
   killsock(dcc[idx].sock);
@@ -1163,7 +1157,7 @@ static void dcc_telnet(int idx, char *buf, int i)
   unsigned long ip;
   unsigned short port;
   int j = 0, sock;
-  char s[UHOSTLEN + 1];
+  char s[UHOSTLEN + 1] = "";
 
   if (dcc_total + 1 > max_dcc) {
     j = answer(dcc[idx].sock, s, &ip, &port, 0);
@@ -1219,7 +1213,7 @@ static void dcc_telnet_hostresolved(int i)
 {
   int idx;
   int j = 0, sock;
-  char s[UHOSTLEN], s2[UHOSTLEN + 20];
+  char s[UHOSTLEN] = "", s2[UHOSTLEN + 20] = "";
 
 #ifdef USE_IPV6
   if (sockprotocol(dcc[i].sock) == AF_INET6 && dcc[i].addr6[0])
@@ -1234,8 +1228,7 @@ static void dcc_telnet_hostresolved(int i)
        break;
     }
   if (dcc_total == idx) {
-    putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s",
-	   dcc[i].host);
+    putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", dcc[i].host);
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
@@ -1297,16 +1290,14 @@ static void dcc_telnet_hostresolved(int i)
 }
 static void eof_dcc_telnet(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_PORTDIE,
-	 dcc[idx].port);
+  putlog(LOG_MISC, "*", DCC_PORTDIE, dcc[idx].port);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
 
 static void display_telnet(int idx, char *buf)
 {
-  sprintf(buf, "lstn  %d%s", dcc[idx].port,
-	  (dcc[idx].status & LSTN_PUBLIC) ? " pub" : "");
+  sprintf(buf, "lstn  %d%s", dcc[idx].port, (dcc[idx].status & LSTN_PUBLIC) ? " pub" : "");
 }
 
 struct dcc_table DCC_TELNET =
@@ -1341,7 +1332,7 @@ static void dcc_dupwait(int idx, char *buf, int i)
  */
 static void timeout_dupwait(int idx)
 {
-  char x[100];
+  char x[100] = "";
 
   /* Still duplicate? */
   if (in_chain(dcc[idx].nick)) {
@@ -1536,8 +1527,8 @@ static void dcc_telnet_pass(int idx, int atr)
       }
     }
     if (snum >= 0) {
-      char initkey[33], *tmp2;
-      char tmp[256], buf[SHA_HASH_LENGTH + 1];
+      char initkey[33] = "", *tmp2 = NULL;
+      char tmp[256] = "", buf[SHA_HASH_LENGTH + 1] = "";
       SHA_CTX ctx;
       
       /* initkey-gen hub */
@@ -1578,8 +1569,7 @@ static void dcc_telnet_pass(int idx, int atr)
 
 static void eof_dcc_telnet_id(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_LOSTCON, dcc[idx].host,
-	 dcc[idx].port);
+  putlog(LOG_MISC, "*", DCC_LOSTCON, dcc[idx].host, dcc[idx].port);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1701,7 +1691,7 @@ struct dcc_table DCC_IDENTWAIT =
 
 void dcc_ident(int idx, char *buf, int len)
 {
-  char response[512], uid[512], buf1[UHOSTLEN];
+  char response[512] = "", uid[512] = "", buf1[UHOSTLEN] = "";
   int i;
 
   sscanf(buf, "%*[^:]:%[^:]:%*[^:]:%[^\n]\n", response, uid);
@@ -1725,7 +1715,7 @@ void dcc_ident(int idx, char *buf, int len)
 
 void eof_dcc_ident(int idx)
 {
-  char buf[UHOSTLEN];
+  char buf[UHOSTLEN] = "";
   int i;
 
   for (i = 0; i < dcc_total; i++)
@@ -1762,7 +1752,7 @@ struct dcc_table DCC_IDENT =
 static void dcc_telnet_got_ident(int i, char *host)
 {
   int idx;
-  char x[1024];
+  char x[1024] = "";
 
   for (idx = 0; idx < dcc_total; idx++)
     if ((dcc[idx].type == &DCC_TELNET) &&

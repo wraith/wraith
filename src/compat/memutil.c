@@ -18,7 +18,7 @@ void str_redup(char **str, const char *newstr)
 
 char *strdup(const char *entry)
 {
-  char *target = (char*)malloc(strlen(entry) + 1);
+  char *target = (char*)calloc(1, strlen(entry) + 1);
   if (target == 0) return 0;
   strcpy(target, entry);
   return target;

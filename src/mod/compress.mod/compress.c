@@ -46,8 +46,7 @@
 
 #define BUFLEN	512
 
-static Function *global = NULL,
-		*share_funcs = NULL;
+static Function *global = NULL, *share_funcs = NULL;
 
 static unsigned int compressed_files;	/* Number of files compressed.      */
 static unsigned int uncompressed_files;	/* Number of files uncompressed.    */
@@ -68,12 +67,10 @@ static int is_compressedfile(char *filename);
 
 static int is_compressedfile(char *filename)
 {
-  char		  buf1[50], buf2[50];
-  FILE		 *fin;
-  register int    len1, len2, i;
+  char buf1[50] = "", buf2[50] = "";
+  FILE *fin = NULL;
+  register int len1, len2, i;
 
-  egg_memset(buf1, 0, 50);
-  egg_memset(buf2, 0, 50);
   if (!is_file(filename))
     return COMPF_FAILED;
 
@@ -117,9 +114,9 @@ static int is_compressedfile(char *filename)
  */
 static int uncompress_to_file(char *f_src, char *f_target)
 {
-  char buf[BUFLEN];
+  char buf[BUFLEN] = "";
   int len;
-  FILE *fin, *fout;
+  FILE *fin = NULL, *fout = NULL;
 
   if (!is_file(f_src)) {
     putlog(LOG_MISC, "*", "Failed to uncompress file `%s': not a file.",
@@ -184,9 +181,9 @@ inline static void adjust_mode_num(int *mode)
  */
 static int compress_to_file_mmap(FILE *fout, FILE *fin)
 {
-    int		  len, ifd = fileno(fin);
-    char	 *buf;
-    struct stat	  st;
+    int	len, ifd = fileno(fin);
+    char *buf = NULL;
+    struct stat st;
 
     /* Find out size of file */
     if (fstat(ifd, &st) < 0)
@@ -216,9 +213,9 @@ static int compress_to_file_mmap(FILE *fout, FILE *fin)
  */
 static int compress_to_file(char *f_src, char *f_target, int mode_num)
 {
-  char  buf[BUFLEN], mode[5];
-  FILE *fin, *fout;
-  int   len;
+  char buf[BUFLEN] = "", mode[5] = "";
+  FILE *fin = NULL, *fout = NULL;
+  int len;
 
   adjust_mode_num(&mode_num);
   egg_snprintf(mode, sizeof mode, "wb%d", mode_num);
@@ -284,11 +281,11 @@ static int compress_to_file(char *f_src, char *f_target, int mode_num)
  */
 static int compress_file(char *filename, int mode_num)
 {
-  char *temp_fn, randstr[5];
-  int   ret;
+  char *temp_fn = NULL, randstr[5] = "";
+  int ret;
 
   /* Create temporary filename. */
-  temp_fn = malloc(strlen(filename) + 5);
+  temp_fn = calloc(1, strlen(filename) + 5);
   make_rand_str(randstr, 4);
   strcpy(temp_fn, filename);
   strcat(temp_fn, randstr);
@@ -310,11 +307,11 @@ static int compress_file(char *filename, int mode_num)
  */
 static int uncompress_file(char *filename)
 {
-  char *temp_fn, randstr[5];
-  int   ret;
+  char *temp_fn = NULL, randstr[5] = "";
+  int ret;
 
   /* Create temporary filename. */
-  temp_fn = malloc(strlen(filename) + 5);
+  temp_fn = calloc(1, strlen(filename) + 5);
   make_rand_str(randstr, 4);
   strcpy(temp_fn, filename);
   strcat(temp_fn, randstr);

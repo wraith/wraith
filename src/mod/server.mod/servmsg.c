@@ -39,7 +39,7 @@ static int gotfake433(char *from)
 {
   int l = strlen(botname) - 1;
   int use_chr = 1;
-  char *altchrs = STR("-_\\`^[]");
+  char *altchrs = "-_\\`^[]";
 
   /* First run? */
   if (altnick_char == 0) {
@@ -54,9 +54,11 @@ static int gotfake433(char *from)
       botname[l + 1] = 0;
     }
   } else {
-    char *p = strchr(altchrs, altnick_char);
-    p++;
-    if (!*p) {
+    char *p = NULL;
+ 
+    if ((p = strchr(altchrs, altnick_char)))
+      p++;
+    if (!p || (p && !*p)) {
       /* fun BX style rolling, WEEEE */
       if (rolls < 10) {
         char tmp;
@@ -158,9 +160,9 @@ static int match_my_nick(char *nick)
  */
 static int got001(char *from, char *msg)
 {
-  struct server_list *x;
+  struct server_list *x = NULL;
   int i;
-  struct chanset_t *chan;
+  struct chanset_t *chan = NULL;
 
   /* Ok...param #1 of 001 = what server thinks my nick is */
   server_online = now;
@@ -185,8 +187,7 @@ static int got001(char *from, char *msg)
 	        chan->channel.key[0] ? chan->channel.key : chan->key_prot);
     }
   if (egg_strcasecmp(from, dcc[servidx].host)) {
-    putlog(LOG_MISC, "*", "(%s claims to be %s; updating server list)",
-	   dcc[servidx].host, from);
+    putlog(LOG_MISC, "*", "(%s claims to be %s; updating server list)", dcc[servidx].host, from);
     for (i = curserv; i > 0 && x != NULL; i--)
       x = x->next;
     if (x == NULL) {
@@ -211,10 +212,10 @@ static int got001(char *from, char *msg)
  */
 static int got442(char *from, char *msg)
 {
-  char			*chname;
-  struct chanset_t	*chan;
-  struct server_list	*x;
-  int			 i;
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
+  struct server_list *x = NULL;
+  int i;
 
   for (x = serverlist, i = 0; x; x = x->next, i++)
     if (i == curserv) {
@@ -227,7 +228,7 @@ static int got442(char *from, char *msg)
   chan = findchan(chname);
   if (chan)
     if (shouldjoin(chan)) {
-      module_entry	*me = module_find("channels", 0, 0);
+      module_entry *me = module_find("channels", 0, 0);
 
       putlog(LOG_MISC, chname, IRC_SERVNOTONCHAN, chname);
       if (me && me->funcs)
@@ -261,8 +262,8 @@ static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
  */
 static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
 {
-  char *p, ftype[10], h[1024];
-  struct userrec *u;
+  char *p = NULL, ftype[10] = "", h[1024] = "";
+  struct userrec *u = NULL;
   int thr = 0, lapse = 0, atr;
 
   u = get_user_by_host(from);
@@ -324,8 +325,7 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
     /* Private msg */
     simple_sprintf(h, "*!*@%s", p);
     putlog(LOG_MISC, "*", IRC_FLOODIGNORE1, p);
-    addignore(h, conf.bot->nick, (which == FLOOD_CTCP) ? "CTCP flood" :
-	      "MSG/NOTICE flood", now + (60 * ignore_time));
+    addignore(h, conf.bot->nick, (which == FLOOD_CTCP) ? "CTCP flood" : "MSG/NOTICE flood", now + (60 * ignore_time));
   }
   return 0;
 }
@@ -336,7 +336,7 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
 static int detect_avalanche(char *msg)
 {
   int count = 0;
-  unsigned char *p;
+  unsigned char *p = NULL;
 
   for (p = (unsigned char *) msg; (*p) && (count < 8); p++)
     if ((*p == 7) || (*p == 1))
@@ -351,9 +351,9 @@ static int detect_avalanche(char *msg)
  */
 static int gotmsg(char *from, char *msg)
 {
-  char *to, buf[UHOSTLEN], *nick, ctcpbuf[512], *uhost = buf, *ctcp;
-  char *p, *p1, *code;
-  struct userrec *u;
+  char *to = NULL, buf[UHOSTLEN] = "", *nick = NULL, ctcpbuf[512] = "", *uhost = buf, 
+       *ctcp = NULL, *p = NULL, *p1 = NULL, *code = NULL;
+  struct userrec *u = NULL;
   int ctcp_count = 0;
 #ifdef S_AUTHCMDS
   int i = 0;
@@ -379,95 +379,86 @@ static int gotmsg(char *from, char *msg)
       else
 	p = uhost;
       simple_sprintf(ctcpbuf, "*!*@%s", p);
-      addignore(ctcpbuf, conf.bot->nick, "ctcp avalanche",
-		now + (60 * ignore_time));
+      addignore(ctcpbuf, conf.bot->nick, "ctcp avalanche", now + (60 * ignore_time));
     }
   }
 
-
-    /* Check for CTCP: */
-    ctcp_reply[0] = 0;
-    p = strchr(msg, 1);
-    while ((p != NULL) && (*p)) {
+  /* Check for CTCP: */
+  ctcp_reply[0] = 0;
+  p = strchr(msg, 1);
+  while ((p != NULL) && (*p)) {
+    p++;
+    p1 = p;
+    while ((*p != 1) && (*p != 0))
       p++;
-      p1 = p;
-      while ((*p != 1) && (*p != 0))
-        p++;
-      if (*p == 1) {
-        *p = 0;
-        ctcp = strcpy(ctcpbuf, p1);
-        strcpy(p1 - 1, p + 1);
-        if (!ignoring)
-	  detect_flood(nick, uhost, from,
-		     strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
-        /* Respond to the first answer_ctcp */
-        p = strchr(msg, 1);
-        if (ctcp_count < answer_ctcp) {
-	  ctcp_count++;
-	  if (ctcp[0] != ' ') {
-	    code = newsplit(&ctcp);
-	    if ((to[0] == '$') || strchr(to, '.')) {
-	      if (!ignoring)
-	        /* Don't interpret */
-	        putlog(LOG_PUBLIC, to, "CTCP %s: %s from %s (%s) to %s",
-		     code, ctcp, nick, uhost, to);
-	    } else {
-	      u = get_user_by_host(from);
-	      if (!ignoring || trigger_on_ignore) {
-	        if (!check_bind_ctcp(nick, uhost, u, to, code, ctcp) &&
-		    !ignoring) {
-		  if ((lowercase_ctcp && !egg_strcasecmp(code, "DCC")) ||
-		      (!lowercase_ctcp && !strcmp(code, "DCC"))) {
-		    /* If it gets this far unhandled, it means that
-		     * the user is totally unknown.
-		     */
-		    code = newsplit(&ctcp);
-		    if (!strcmp(code, "CHAT")) {
-		      if (!quiet_reject) {
-		        if (u)
-			  dprintf(DP_HELP, "NOTICE %s :%s\n", nick,
-				"I'm not accepting call at the moment.");
-		        else
-			  dprintf(DP_HELP, "NOTICE %s :%s\n",
-				nick, DCC_NOSTRANGERS);
-		      }
-                      if (!ischanhub())
-                        putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
-                      else
-                        putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSED, from);
-		    } else
-		      putlog(LOG_MISC, "*", "Refused DCC %s: %s",
-			   code, from);
-		  }
-	        }
-	        if (!strcmp(code, "ACTION")) {
-		  putlog(LOG_MSGS, "*", "Action to %s: %s %s",
-		       to, nick, ctcp);
-	        } else {
-		  putlog(LOG_MSGS, "*", "CTCP %s: %s from %s (%s)",
-		       code, ctcp, nick, uhost);
-	        }			/* I love a good close cascade ;) */
+    if (*p == 1) {
+      *p = 0;
+      ctcp = strcpy(ctcpbuf, p1);
+      strcpy(p1 - 1, p + 1);
+      if (!ignoring)
+        detect_flood(nick, uhost, from, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
+      /* Respond to the first answer_ctcp */
+      p = strchr(msg, 1);
+      if (ctcp_count < answer_ctcp) {
+        ctcp_count++;
+	if (ctcp[0] != ' ') {
+	  code = newsplit(&ctcp);
+	  if ((to[0] == '$') || strchr(to, '.')) {
+	    if (!ignoring) {
+	      /* Don't interpret */
+	      putlog(LOG_PUBLIC, to, "CTCP %s: %s from %s (%s) to %s", code, ctcp, nick, uhost, to);
+            }
+          } else {
+	    u = get_user_by_host(from);
+	    if (!ignoring || trigger_on_ignore) {
+	      if (!check_bind_ctcp(nick, uhost, u, to, code, ctcp) && !ignoring) {
+                if ((lowercase_ctcp && !egg_strcasecmp(code, "DCC")) || (!lowercase_ctcp && !strcmp(code, "DCC"))) {
+                  /* If it gets this far unhandled, it means that
+                   * the user is totally unknown.
+                   */
+                  code = newsplit(&ctcp);
+                  if (!strcmp(code, "CHAT")) {
+                    if (!quiet_reject) {
+                      if (u)
+                        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, "I'm not accepting call at the moment.");
+                       else
+                        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_NOSTRANGERS);
+                    }
+                    if (!ischanhub())
+                      putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
+                    else
+                      putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSED, from);
+                  } else {
+                    putlog(LOG_MISC, "*", "Refused DCC %s: %s", code, from);
+                  }
+		}
 	      }
+	      if (!strcmp(code, "ACTION")) {
+                putlog(LOG_MSGS, "*", "Action to %s: %s %s", to, nick, ctcp);
+              } else {
+                putlog(LOG_MSGS, "*", "CTCP %s: %s from %s (%s)", code, ctcp, nick, uhost);
+              }			/* I love a good close cascade ;) */
 	    }
 	  }
-        }
+	}
       }
     }
-    /* Send out possible ctcp responses */
-    if (ctcp_reply[0]) {
-      if (ctcp_mode != 2) {
+  }
+  /* Send out possible ctcp responses */
+  if (ctcp_reply[0]) {
+    if (ctcp_mode != 2) {
+      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+    } else {
+      if (now - last_ctcp > flud_ctcp_time) {
         dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
-      } else {
-        if (now - last_ctcp > flud_ctcp_time) {
-	  dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
-	  count_ctcp = 1;
-        } else if (count_ctcp < flud_ctcp_thr) {
-	  dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
-	  count_ctcp++;
-        }
-        last_ctcp = now;
+	count_ctcp = 1;
+      } else if (count_ctcp < flud_ctcp_thr) {
+        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+	count_ctcp++;
       }
+      last_ctcp = now;
     }
+  }
   if (msg[0]) {
     if ((to[0] == '$') || (strchr(to, '.') != NULL)) {
       /* Msg from oper */
@@ -477,8 +468,8 @@ static int gotmsg(char *from, char *msg)
 	putlog(LOG_MSGS | LOG_SERV, "*", "[%s!%s to %s] %s",nick, uhost, to, msg);
       }
     } else {
-      char *code;
-      struct userrec *u;
+      char *code = NULL;
+      struct userrec *u = NULL;
 
       detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
       u = get_user_by_host(from);
@@ -506,9 +497,9 @@ static int gotmsg(char *from, char *msg)
                || !egg_strcasecmp(code, msgop) || !egg_strcasecmp(code, msgpass) 
                || !egg_strcasecmp(code, msginvite) || !egg_strcasecmp(code, msgident)) {
 /*           || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) { */
-            char buf[10];
+            char buf[10] = "";
+
             doit = 0;
-            buf[0] = 0;
             if (!egg_strcasecmp(code, msgop))
               sprintf(buf, "op");
             else if (!egg_strcasecmp(code, msgpass))
@@ -539,8 +530,9 @@ static int gotmsg(char *from, char *msg)
  */
 static int gotnotice(char *from, char *msg)
 {
-  char *to, *nick, ctcpbuf[512], *p, *p1, buf[512], *uhost = buf, *ctcp;
-  struct userrec *u;
+  char *to = NULL, *nick = NULL, ctcpbuf[512] = "", *p = NULL, *p1 = NULL, buf[512] = "", 
+       *uhost = buf, *ctcp = NULL;
+  struct userrec *u = NULL;
   int ignoring;
 
   if (msg[0] && ((strchr(CHANMETA, *msg) != NULL) ||
@@ -577,17 +569,14 @@ static int gotnotice(char *from, char *msg)
 	if ((to[0] == '$') || strchr(to, '.')) {
 	  if (!ignoring)
 	    putlog(LOG_PUBLIC, "*",
-		   "CTCP reply %s: %s from %s (%s) to %s", code, ctcp,
-		   nick, uhost, to);
+		   "CTCP reply %s: %s from %s (%s) to %s", code, ctcp, nick, uhost, to);
 	} else {
 	  u = get_user_by_host(from);
 	  if (!ignoring || trigger_on_ignore) {
             check_bind_ctcr(nick, uhost, u, to, code, ctcp);
 	    if (!ignoring)
 	      /* Who cares? */
-	      putlog(LOG_MSGS, "*",
-		     "CTCP reply %s: %s from %s (%s) to %s",
-		     code, ctcp, nick, uhost, to);
+	      putlog(LOG_MSGS, "*", "CTCP reply %s: %s from %s (%s) to %s", code, ctcp, nick, uhost, to);
 	  }
 	}
       }
@@ -596,8 +585,7 @@ static int gotnotice(char *from, char *msg)
   if (msg[0]) {
     if (((to[0] == '$') || strchr(to, '.')) && !ignoring) {
       detect_flood(nick, uhost, from, FLOOD_NOTICE);
-      putlog(LOG_MSGS | LOG_SERV, "*", "-%s (%s) to %s- %s",
-	     nick, uhost, to, msg);
+      putlog(LOG_MSGS | LOG_SERV, "*", "-%s (%s) to %s- %s", nick, uhost, to, msg);
     } else {
       /* Server notice? */
       if ((nick[0] == 0) || (uhost[0] == 0)) {
@@ -619,7 +607,7 @@ static int gotnotice(char *from, char *msg)
  */
 static int gotwall(char *from, char *msg)
 {
-  char *nick;
+  char *nick = NULL;
 
   fixcolon(msg);
 
@@ -655,7 +643,7 @@ static void minutely_checks()
   if (server_online) {
     static int count = 4;
     int ok = 0;
-    struct chanset_t *chan;
+    struct chanset_t *chan = NULL;
 
     for (chan = chanset; chan; chan = chan->next) {
       if (channel_active(chan) && chan->channel.members == 1) {
@@ -691,7 +679,7 @@ static int gotpong(char *from, char *msg)
  */
 static void got303(char *from, char *msg)
 {
-  char *tmp;
+  char *tmp = NULL;
   int ison_orig = 0;
 
   if (!keepnick ||
@@ -718,7 +706,7 @@ static void got303(char *from, char *msg)
  */
 static int got432(char *from, char *msg)
 {
-  char *erroneus;
+  char *erroneus = NULL;
 
   newsplit(&msg);
   erroneus = newsplit(&msg);
@@ -742,7 +730,8 @@ static int got432(char *from, char *msg)
  */
 static int got433(char *from, char *msg)
 {
-  char *tmp;
+  char *tmp = NULL;
+
   if (server_online) {
     /* We are online and have a nickname, we'll keep it */
     newsplit(&msg);
@@ -759,8 +748,8 @@ static int got433(char *from, char *msg)
  */
 static int got437(char *from, char *msg)
 {
-  char *s;
-  struct chanset_t *chan;
+  char *s = NULL;
+  struct chanset_t *chan = NULL;
 
   newsplit(&msg);
   s = newsplit(&msg);
@@ -835,8 +824,8 @@ static int goterror(char *from, char *msg)
  */
 static int gotnick(char *from, char *msg)
 {
-  char *nick, *buf, *buf_ptr;
-  struct userrec *u;
+  char *nick = NULL, *buf = NULL, *buf_ptr = NULL;
+  struct userrec *u = NULL;
 
   buf = buf_ptr = strdup(from);
   u = get_user_by_host(buf);
@@ -871,8 +860,9 @@ static int gotnick(char *from, char *msg)
 
 static int gotmode(char *from, char *msg)
 {
-  char *ch, *buf = strdup(msg), *buf_ptr;
-  buf_ptr = buf;
+  char *ch = NULL, *buf = NULL, *buf_ptr = NULL;
+
+  buf_ptr = buf = strdup(msg);
 
   ch = newsplit(&buf);
   /* Usermode changes? */
@@ -911,6 +901,7 @@ static void eof_server(int idx)
 #ifdef S_AUTHCMDS
 {
   int i = 0;
+
   if (ischanhub() && auth_total > 0) {
     putlog(LOG_DEBUG, "*", "Removing %d auth entries.", auth_total);
     for (i = 0; i < auth_total; i++)
@@ -930,7 +921,7 @@ static void connect_server(void);
 
 static void kill_server(int idx, void *x)
 {
-  module_entry *me;
+  module_entry *me = NULL;
 
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
   if ((me = module_find("channels", 0, 0)) && me->funcs) {
@@ -968,9 +959,8 @@ static struct dcc_table SERVER_SOCKET =
 
 int isop(char *mode)
 {
-  int state = 0,
-    cnt = 0;
-  char *p;
+  int state = 0, cnt = 0;
+  char *p = NULL;
 
   p = mode;
   while ((*p) && (*p != ' ')) {
@@ -987,9 +977,8 @@ int isop(char *mode)
 
 int ismdop(char *mode)
 {
-  int state = 0,
-    cnt = 0;
-  char *p;
+  int state = 0, cnt = 0;
+  char *p = NULL;
 
   p = mode;
   while ((*p) && (*p != ' ')) {
@@ -1006,7 +995,7 @@ int ismdop(char *mode)
 
 static void server_activity(int idx, char *msg, int len)
 {
-  char *from, *code;
+  char *from = NULL, *code = NULL;
 
   if (trying_server) {
     strcpy(dcc[idx].nick, "(server)");
@@ -1045,7 +1034,7 @@ static int gotping(char *from, char *msg)
 
 static int gotkick(char *from, char *msg)
 {
-  char *nick;
+  char *nick = NULL;
 
   nick = from;
   if (rfc_casecmp(nick, botname))
@@ -1091,7 +1080,7 @@ static int whoispenalty(char *from, char *msg)
 
 static int got311(char *from, char *msg)
 {
-  char *n1, *n2, *u, *h;
+  char *n1 = NULL, *n2 = NULL, *u = NULL, *h = NULL;
   
   n1 = newsplit(&msg);
   n2 = newsplit(&msg);
@@ -1162,7 +1151,7 @@ static void connect_server(void)
   } else
     pass[0] = 0;
   if (!cycle_time) {
-    struct chanset_t *chan;
+    struct chanset_t *chan = NULL;
     struct server_list *x = serverlist;
 
     if (!x)
@@ -1233,7 +1222,7 @@ static void server_resolve_success(int idx)
 #ifdef S_NODELAY
   int i = 0;
 #endif
-  char s[121], pass[121];
+  char s[121] = "", pass[121] = "";
 
   resolvserv = 0;
   dcc[idx].addr = dcc[idx].u.dns->ip;
@@ -1246,8 +1235,7 @@ static void server_resolve_success(int idx)
 #endif /* USE_IPV6 */
   if (serv < 0) {
     neterror(s);
-    putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host,
-	   s);
+    putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, s);
     lostdcc(idx);
     servidx = -1;
     if (oldserv == curserv && !never_give_up)

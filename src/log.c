@@ -117,7 +117,7 @@ int logmodes(char *s)
 
 char *masktype(int x)
 {
-  static char s[24];		/* Change this if you change the levels */
+  static char s[24] = "";		/* Change this if you change the levels */
   char *p = s;
 
   if (x & LOG_MSGS)
@@ -164,7 +164,7 @@ char *masktype(int x)
 
 char *maskname(int x)
 {
-  static char s[207];		/* Change this if you change the levels */
+  static char s[207] = "";		/* Change this if you change the levels */
   int i = 0;
 
   s[0] = 0;
@@ -223,14 +223,13 @@ char *maskname(int x)
 void putlog(int type, char *chname, char *format, ...)
 {
   int idx, tsl = 0;
-  char s[LOGLINELEN], *out = NULL, stamp[34];
+  char s[LOGLINELEN] = "", *out = NULL, stamp[34] = "";
   va_list va;
 #ifdef HUB
-  struct tm *t;
+  struct tm *t = NULL;
 #endif /* HUB */
 
   va_start(va, format);
-
 #ifdef HUB
 #ifdef S_UTCTIME
   t = gmtime(&now);
