@@ -4,8 +4,8 @@
 #include "types.h"
 
 typedef struct egg_timeval_b {
-	int sec;
-	int usec;
+	long sec;
+	long usec;
 } egg_timeval_t;
 
 #define TIMER_REPEAT 1
