@@ -128,12 +128,23 @@ int findauth(char *host)
 Context;
   if (!host || !host[0])
     return -1;
+Context;
   for (i = 0; i < auth_total; i++) {
-    if (auth[i].host[0] && !strcmp(auth[i].host, host)) {
-      putlog(LOG_DEBUG, "*", STR("Debug for findauth: checking: %s i: %d :: %s"), host, i, auth[i].host);
+Context;
+    if (!auth[i].host) {
+Context;
+      putlog(LOG_MISC, "*", "AUTH ENTRY: %d HAS NO HOST??", i);
+      continue;
+    }
+Context;
+    putlog(LOG_DEBUG, "*", STR("Debug for findauth: checking: %s i: %d :: %s"), host, i, auth[i].host);
+Context;
+    if (auth[i].host && !strcmp(auth[i].host, host)) {
+Context;
       return i;
     }
   }
+Context;
   return -1;
 }
   

@@ -1404,7 +1404,7 @@ static int check_tcl_pubc(char *cmd, char *nick, char *uhost,
   char *hand = u ? u->handle : "*";
   int x;
 
-  get_user_flagrec(u, &fr, NULL);
+  get_user_flagrec(u, &fr, chan);
   Tcl_SetVar(interp, "_msgc1", nick, 0);
   Tcl_SetVar(interp, "_msgc2", uhost, 0);
   Tcl_SetVar(interp, "_msgc3", hand, 0);
