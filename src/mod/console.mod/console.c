@@ -85,6 +85,9 @@ console_kill(struct user_entry *e)
 static bool
 console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 {
+  if (u->bot)
+    return 1;
+
   struct console_info *i = (struct console_info *) e->u.extra;
 
   if (lfprintf(f, "--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
