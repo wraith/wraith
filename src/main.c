@@ -67,6 +67,8 @@ extern int		optind;
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.2";
 
+/* FIXME: remove after 1.2 ??? OR NOT */
+bool old_hack = 0;
 bool 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
 bool 	loading = 0;
@@ -265,7 +267,8 @@ static void show_help()
   printf(format, "-v", "Displays bot version");
   exit(0);
 }
-
+/* FIXME: remove after 1.2 */
+static void startup_checks(int);
 
 #ifdef LEAF
 # define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
@@ -289,6 +292,11 @@ static void dtx_arg(int argc, char *argv[])
       case '0':
         exit(0);
       case '2':		/* used for testing new binary through update */
+        if (settings.uname[0])		/* we're already initialized with data, just exit! */
+          exit(2);
+	/* FIXME: remove after 1.2 */
+	/* ... otherwise, we need to check if ~/.ssh/.known_hosts exists and write to our binary */
+        startup_checks(2);
         exit(2);
 #ifdef LEAF
       case 'B':
@@ -520,10 +528,9 @@ static void core_halfhourly()
 #endif /* HUB */
 }
 
-/* FIXME: Remove after 1.2 */
-static void startup_checks() {
+/* FIXME: Remove after 1.2 (the hacks) */
+static void startup_checks(int hack) {
   int enc = CONF_ENC;
-  bool old_hack = 0;
 
   /* for compatability with old conf files 
    * only check/use conf file if it exists and settings.uname is empty.
@@ -547,7 +554,7 @@ static void startup_checks() {
     if (mkdir(confdir(),  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(confdir());
       if (!can_stat(confdir()))
-        if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR))
+        if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR) && !hack)
 #endif /* LEAF */
           werr(ERR_CONFSTAT);
 #ifdef LEAF
@@ -555,7 +562,7 @@ static void startup_checks() {
 #endif /* LEAF */
   }
 
-  if (fixmod(confdir()))
+  if (fixmod(confdir()) && !hack)
     werr(ERR_CONFDIRMOD);
  
   if (can_stat(cfile) && !settings.uname[0])
@@ -563,21 +570,25 @@ static void startup_checks() {
   if (can_stat(cfile) && settings.uname[0])
     unlink(cfile);		/* kill the old one! */
 
-  if (old_hack && can_stat(cfile) && fixmod(cfile))
+  if (old_hack && hack)
+    old_hack = 2;		/* this is so write_settings() will exit(2); */
+
+  if (old_hack && can_stat(cfile) && fixmod(cfile) && !hack)
     werr(ERR_CONFMOD);
 
   if (!can_stat(tempdir)) {
     if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(tempdir);
       if (!can_stat(tempdir))
-        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
+        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR) && !hack)
           werr(ERR_TMPSTAT);
     }
   }
-  if (fixmod(tempdir))
+  if (fixmod(tempdir) && !hack)
     werr(ERR_TMPMOD);
 
   /* test tempdir: it's vital */
+  if (!hack)
   {
     Tempfile *testdir = new Tempfile("test");
     int result;
@@ -592,7 +603,7 @@ static void startup_checks() {
   if (old_hack && can_stat(cfile))
     readconf(cfile, enc);	/* will read into &conffile struct */
   else if (settings.uname[0])
-    bin_to_conf();
+    bin_to_conf();		/* read our memory from settings[] into conf[] */
 
 #ifndef CYGWIN_HACKS
   if (do_confedit)
@@ -601,23 +612,7 @@ static void startup_checks() {
   parseconf();
 
   if (old_hack)
-    conf_to_bin(&conffile);
-/* -- */
-//exit(1);
-
-/* NO?
-  if (old_hack) {
-#ifdef LEAF
-    if (localhub)
-#endif
-      writeconf(cfile, NULL, enc);
-  } else if (!old_hack) {
-#ifdef LEAF
-    if (localhub)
-#endif
-    write_settings(binname);
-  }
-*/
+    conf_to_bin(&conffile);	/* this will exit() in write_settings() */
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
@@ -771,11 +766,8 @@ printf("out: %s\n", out);
     check_trace(1);
 #endif /* !CYGWIN_HACKS */
 
-//  strcpy(settings.username, "bryan");
-//  write_settings(binname);
-
   /* Check and load conf file */
-  startup_checks();
+  startup_checks(0);
 
   if ((localhub && !updating) || !localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {

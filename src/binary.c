@@ -339,8 +339,12 @@ void write_settings(const char *fname, int die)
     edpack(&settings, hash, PACK_DEC);
   }
 
-  if (die)
-    exit(0);
+  if (die) {
+    if (old_hack == 2)
+      exit(2);			/* we were called with -2 so exit with 2 ! */
+    else
+      exit(0);
+  }
 }
 
 static void 
