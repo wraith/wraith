@@ -40,5 +40,6 @@ distclean: clean
  ../../../src/compat/strcasecmp.h ../../../src/compat/strftime.h \
  ../../../src/mod/modvals.h ../../../src/tandem.h \
  ../../../src/mod/transfer.mod/transfer.h \
+ ../../../src/mod/irc.mod/irc.h \
  ../../../src/mod/channels.mod/channels.h ../share.mod/share.h \
  ../share.mod/uf_features.c

@@ -66,8 +66,8 @@ static int gotmode(char *, char *);
 /* recheck_channel_modes is here */
 /* do_channel_part is here. */
 /* 20 - 23 */
-/* check_this_ban is here. */
-/* check_this_user is here. */
+#define check_this_ban ((void (*)(struct chanset_t *, char *, int))irc_funcs[20])
+#define check_this_user ((void(*)(char *, int, char *))irc_funcs[21])
 #define me_voice ((int(*)(struct chanset_t *))irc_funcs[22])
 //#define getchanmode ((char *(*)(struct chanset_t *))irc_funcs[23])
 
