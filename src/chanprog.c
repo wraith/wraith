@@ -193,15 +193,6 @@ void set_chanlist(const char *host, struct userrec *rec)
 	m->user = rec;
 }
 
-/* Calculate the memory we should be using
- */
-int expmem_chanprog()
-{
-  register int		 tot = 0;
-
-  return tot;
-}
-
 /* 0 marks all channels
  * 1 removes marked channels
  * 2 unmarks all channels

@@ -33,36 +33,13 @@ struct {
 } memtbl[MEMTBLSIZE];
 #endif
 
-/* Prototypes */
-int expmem_chanprog();
-int expmem_misc();
-int expmem_fileq();
-int expmem_users();
-int expmem_dccutil();
-int expmem_botnet();
-int expmem_tcl();
-int expmem_tclhash();
-int expmem_tclmisc();
-int expmem_net();
-int expmem_modules();
-int expmem_config();
-int expmem_auth();
-int expmem_tcldcc();
-int expmem_dns();
-int expmem_crypt();
-
-
 /* calculate memory we SHOULD be using
  */
 
 int expected_memory(void)
 {
-  int tot;
+  int tot = 0;
 
-  tot = expmem_chanprog() + expmem_users() + expmem_config() + expmem_misc() +
-    expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() +
-    expmem_net() + expmem_modules(0) + expmem_tcldcc() + expmem_auth() +
-    expmem_tclmisc();
   return tot;
 }
 
@@ -123,21 +100,21 @@ void debug_mem_to_dcc(int idx)
   module_entry *me;
   char *p;
 
-  exp[0] = expmem_auth();
-  exp[1] = expmem_chanprog();
-  exp[2] = expmem_misc();
-  exp[3] = expmem_users();
-  exp[4] = expmem_net();
-  exp[5] = expmem_dccutil();
-  exp[6] = expmem_botnet();
-  exp[7] = expmem_tcl();
-  exp[8] = expmem_tclhash();
-  exp[9] = expmem_tclmisc();
-  exp[10] = expmem_modules(1);
-  exp[11] = expmem_tcldcc();
-  exp[12] = expmem_dns();
-  exp[13] = expmem_config();
-  exp[14] = expmem_crypt();
+  exp[0] = 0;
+  exp[1] = 0;
+  exp[2] = 0;
+  exp[3] = 0;
+  exp[4] = 0;
+  exp[5] = 0;
+  exp[6] = 0;
+  exp[7] = 0;
+  exp[8] = 0;
+  exp[9] = 0;
+  exp[10] = 0;
+  exp[11] = 0;
+  exp[12] = 0;
+  exp[13] = 0;
+  exp[14] = 0;
   for (me = module_list; me; me = me->next)
     me->mem_work = 0;
   for (i = 0; i < MAX_MEM; i++)

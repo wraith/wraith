@@ -55,25 +55,6 @@ void init_dcc_max()
 
 }
 
-int expmem_dccutil()
-{
-  int tot, i;
-  struct portmap *pmap;
-
-  tot = sizeof(struct dcc_t) * max_dcc + sizeof(sock_list) * MAXSOCKS;
-
-
-  for (pmap = root; pmap; pmap = pmap->next)
-    tot += sizeof(struct portmap);
-
-  for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type->expmem)
-      tot += dcc[i].type->expmem(dcc[i].u.other);
-  }
-  return tot;
-}
-
-
 /* Replace \n with \r\n */
 char *add_cr(char *buf)
 {

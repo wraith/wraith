@@ -18,12 +18,6 @@ extern module_entry	*module_list;
 extern int timesync;
 extern Tcl_Interp *interp;
 
-int expmem_tclmisc()
-{
-  int tot = 0;
-  return tot;
-}
-
 static int tcl_putlog STDVAR
 {
   char logtext[501];

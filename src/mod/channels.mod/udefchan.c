@@ -4,29 +4,6 @@
  *
  */
 
-static int expmem_udef(struct udef_struct *ul)
-{
-  int i = 0;
-
-  for (; ul; ul = ul->next) {
-    i += sizeof(struct udef_struct);
-    i += strlen(ul->name) + 1;
-    i += expmem_udef_chans(ul->values);
-  }
-  return i;
-}
-
-static int expmem_udef_chans(struct udef_chans *ul)
-{
-  int i = 0;
-
-  for (; ul; ul = ul->next) {
-    i += sizeof(struct udef_chans);
-    i += strlen(ul->chan) + 1;
-  }
-  return i;
-}
-
 static int getudef(struct udef_chans *ul, char *name)
 {
   int val = 0;

@@ -8,11 +8,6 @@
 
 #include "main.h"
 
-int expmem_crypt()
-{
-  return 0;
-}
-
 #define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
 #define CRYPT_KEYBITS 256
 #define CRYPT_KEYSIZE (CRYPT_KEYBITS / 8)

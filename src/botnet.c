@@ -32,24 +32,6 @@ char			botnetnick[HANDLEN + 1] = "";	/* Botnet nickname */
 int			share_unlinks = 1;		/* Allow remote unlinks of my
 							   sharebots? */
 
-
-int expmem_botnet()
-{
-  int size = 0, i;
-  tand_t *bot;
-
-  for (bot = tandbot; bot; bot = bot->next)
-    size += sizeof(tand_t);
-  size += (maxparty * sizeof(party_t));
-  for (i = 0; i < parties; i++) {
-    if (party[i].away)
-      size += strlen(party[i].away) + 1;
-    if (party[i].from)
-      size += strlen(party[i].from) + 1;
-  }
-  return size;
-}
-
 void init_bots()
 {
   tandbot = NULL;
@@ -1550,16 +1532,6 @@ static void display_pre_relay(int i, char *other)
   strcpy(other, "other  >rly");
 }
 
-static int expmem_relay(void *x)
-{
-  register struct relay_info *p = (struct relay_info *) x;
-  int tot = sizeof(struct relay_info);
-
-  if (p->chat)
-    tot += DCC_CHAT.expmem(p->chat);
-  return tot;
-}
-
 static void kill_relay(int idx, void *x)
 {
   register struct relay_info *p = (struct relay_info *) x;
@@ -1578,7 +1550,6 @@ struct dcc_table DCC_RELAY =
   NULL,
   NULL,
   display_relay,
-  expmem_relay,
   kill_relay,
   NULL
 };
@@ -1602,7 +1573,6 @@ struct dcc_table DCC_RELAYING =
   NULL,
   NULL,
   display_relaying,
-  expmem_relay,
   kill_relay,
   out_relay
 };
@@ -1616,7 +1586,6 @@ struct dcc_table DCC_FORK_RELAY =
   &connect_timeout,
   failed_tandem_relay,
   display_tandem_relay,
-  expmem_relay,
   kill_relay,
   NULL
 };
@@ -1630,7 +1599,6 @@ struct dcc_table DCC_PRE_RELAY =
   NULL,
   NULL,
   display_pre_relay,
-  expmem_relay,
   kill_relay,
   NULL
 };

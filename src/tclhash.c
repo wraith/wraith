@@ -14,7 +14,6 @@
 #include "users.h"
 #include "match.c"
 
-extern Tcl_Interp	*interp;
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern int		 dcc_total;
@@ -42,8 +41,6 @@ static bind_table_t *BT_chpt;
 static bind_table_t *BT_chjn;
 
 
-p_tcl_bind_list		bind_table_list;
-
 static char *my_strdup(const char *s)
 {
 	char *t;
@@ -69,14 +66,6 @@ static inline void *n_malloc_null(int size, const char *file, int line)
   egg_memset(ptr, 0, size);
   return ptr;
 }
-
-int expmem_tclhash(void)
-{
-  int			 tot = 0;
-
-  return tot;
-}
-
 
 extern cmd_t C_dcc[];
 

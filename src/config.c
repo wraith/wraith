@@ -655,29 +655,6 @@ void set_cfg_str(char *target, char *entryname, char *data)
   }
 }
 
-/* Expected memory usage
- */
-int expmem_config()
-{
-  int tot = 0, i;
-#ifdef S_DCCPASS
-{
-  struct cmd_pass *cp = NULL;
-  for (cp = cmdpass; cp; cp = cp->next) {
-    tot += sizeof(struct cmd_pass) + strlen(cp->name) + 1;
-  }
-}
-#endif /* S_DCCPASS */
-  for (i = 0; i < cfg_count; i++) {
-    tot += sizeof(void *);
-    if (cfg[i]->gdata)
-      tot += strlen(cfg[i]->gdata) + 1;
-    if (cfg[i]->ldata)
-      tot += strlen(cfg[i]->ldata) + 1;
-  }
-  return tot;
-}
-
 void init_config()
 {
 #ifdef S_AUTH

@@ -47,21 +47,6 @@ static void display_dcc_dnswait(int idx, char *buf)
   sprintf(buf, "dns   waited %lus", now - dcc[idx].timeval);
 }
 
-static int expmem_dcc_dnswait(void *x)
-{
-  register struct dns_info *p = (struct dns_info *) x;
-  int size = 0;
-
-  if (p) {
-    size = sizeof(struct dns_info);
-    if (p->host)
-      size += strlen(p->host) + 1;
-    if (p->cbuf)
-      size += strlen(p->cbuf) + 1;
-  }
-  return size;
-}
-
 static void kill_dcc_dnswait(int idx, void *x)
 {
   register struct dns_info *p = (struct dns_info *) x;
@@ -84,7 +69,6 @@ struct dcc_table DCC_DNSWAIT =
   0,
   0,
   display_dcc_dnswait,
-  expmem_dcc_dnswait,
   kill_dcc_dnswait,
   0
 };
@@ -137,20 +121,13 @@ static void dns_dccipbyhost(IP ip, char *hostn, int ok, void *other)
   }
 }
 
-static int dns_dccexpmem(void *other)
-{
-  return 0;
-}
-
 devent_type DNS_DCCEVENT_HOSTBYIP = {
   "DCCEVENT_HOSTBYIP",
-  dns_dccexpmem,
   dns_dcchostbyip
 };
 
 devent_type DNS_DCCEVENT_IPBYHOST = {
   "DCCEVENT_IPBYHOST",
-  dns_dccexpmem,
   dns_dccipbyhost
 };
 
@@ -232,30 +209,13 @@ static void dns_tcl_iporhostres(IP ip, char *hostn, int ok, void *other)
   nfree(tclinfo);
 }
 
-static int dns_tclexpmem(void *other)
-{
-  devent_tclinfo_t *tclinfo = (devent_tclinfo_t *) other;
-  int l = 0;
-
-  if (tclinfo) {
-    l = sizeof(devent_tclinfo_t);
-    if (tclinfo->proc)
-      l += strlen(tclinfo->proc) + 1;
-    if (tclinfo->paras)
-      l += strlen(tclinfo->paras) + 1;
-  }
-  return l;
-}
-
 devent_type DNS_TCLEVENT_HOSTBYIP = {
   "TCLEVENT_HOSTBYIP",
-  dns_tclexpmem,
   dns_tcl_iporhostres
 };
 
 devent_type DNS_TCLEVENT_IPBYHOST = {
   "TCLEVENT_IPBYHOST",
-  dns_tclexpmem,
   dns_tcl_iporhostres
 };
 
@@ -263,21 +223,6 @@ devent_type DNS_TCLEVENT_IPBYHOST = {
 /*
  *    Event functions
  */
-
-inline static int dnsevent_expmem(void)
-{
-  devent_t *de;
-  int tot = 0;
-
-  for (de = dns_events; de; de = de->next) {
-    tot += sizeof(devent_t);
-    if ((de->lookup == RES_IPBYHOST) && de->res_data.hostname)
-      tot += strlen(de->res_data.hostname) + 1;
-    if (de->type && de->type->expmem)
-      tot += de->type->expmem(de->other);
-  }
-  return tot;
-}
 
 void call_hostbyip(IP ip, char *hostn, int ok)
 {
@@ -394,15 +339,4 @@ void block_dns_ipbyhost(char *host)
   }
   call_ipbyhost(host, 0, 0);
 }
-
-
-/*
- *   Misc functions
- */
-
-int expmem_dns(void)
-{
-  return dnsevent_expmem();
-}
-
 

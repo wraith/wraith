@@ -105,28 +105,9 @@ static struct dcc_table DCC_DNS =
  *    DNS module related code
  */
 
-static int dns_cache_expmem(void)
-{
-  struct resolve *rp;
-  int size = 0;
-
-  for (rp = expireresolves; rp; rp = rp->next) {
-    size += sizeof(struct resolve);
-    if (rp->hostn)
-      size += strlen(rp->hostn) + 1;
-  }
-  return size;
-}
-
-static int dns_expmem(void)
-{
-  return dns_cache_expmem();
-}
-
 static int dns_report(int idx, int details)
 {
   if (details) {
-    dprintf(idx, "    (cache uses %d bytes of memory)\n", dns_cache_expmem());
     dprintf(idx, "    DNS resolver is active.\n");
   }
   return 0;
@@ -139,7 +120,7 @@ static Function dns_table[] =
   /* 0 - 3 */
   (Function) dns_start,
   (Function) NULL,
-  (Function) dns_expmem,
+  (Function) 0,
   (Function) dns_report,
   /* 4 - 7 */
 };

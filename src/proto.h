@@ -357,7 +357,6 @@ int findanyidx(int);
 /* userent.c */
 void update_mod(char *, char *, char *, char *);
 void list_type_kill(struct list_type *);
-int list_type_expmem(struct list_type *);
 int xtra_set();
 void stats_add(struct userrec *, int, int);
 

@@ -117,8 +117,6 @@ typedef struct tcl_bind_list_b {
 
 
 void kill_binds(void);
-int expmem_tclhash(void);
-
 
 
 void check_dcc(const char *, int, const char *);

@@ -242,21 +242,6 @@ int ssl_cleanup() {
 #endif /* HAVE_SSL */
 
 
-int expmem_net()
-{
-  int i, tot = 0;
-
-  for (i = 0; i < MAXSOCKS; i++) {
-    if (!(socklist[i].flags & SOCK_UNUSED)) {
-      if (socklist[i].inbuf != NULL)
-	tot += strlen(socklist[i].inbuf) + 1;
-      if (socklist[i].outbuf != NULL)
-	tot += socklist[i].outbuflen;
-    }
-  }
-  return tot;
-}
-
 /* Get my ipv? ip
  */
 char *myipstr(int af_type)

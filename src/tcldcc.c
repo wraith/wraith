@@ -26,12 +26,6 @@ extern unsigned long otraffic_irc, otraffic_irc_today, itraffic_irc, itraffic_ir
 
 int			 enable_simul = 0;
 
-int expmem_tcldcc(void)
-{
-  int tot = 0;
-  return tot;
-}
-
 /***********************************************************************/
 
 static int tcl_putdcc STDVAR

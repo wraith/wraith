@@ -1514,38 +1514,6 @@ static void msgq_clear(struct msgq_head *qh)
   qh->tot = qh->warned = 0;
 }
 
-static int msgq_expmem(struct msgq_head *qh)
-{
-  register int		 tot = 0;
-  register struct msgq	*m;
-
-  for (m = qh->head; m; m = m->next) {
-    tot += m->len + 1;
-    tot += sizeof(struct msgq);
-  }
-  return tot;
-}
-
-static int server_expmem()
-{
-  int			 tot = 0;
-  struct server_list	*s = serverlist;
-
-  for (; s; s = s->next) {
-    if (s->name)
-      tot += strlen(s->name) + 1;
-    if (s->pass)
-      tot += strlen(s->pass) + 1;
-    if (s->realname)
-      tot += strlen(s->realname) + 1;
-    tot += sizeof(struct server_list);
-  }
-
-  tot += msgq_expmem(&mq) + msgq_expmem(&hq) + msgq_expmem(&modeq);
-
-  return tot;
-}
-
 static cmd_t my_ctcps[] =
 {
   {"DCC",	"",	ctcp_DCC_CHAT,		"server:DCC"},
@@ -1558,7 +1526,7 @@ static Function server_table[] =
 {
   (Function) server_start,
   (Function) NULL,
-  (Function) server_expmem,
+  (Function) 0,
   (Function) server_report,
   /* 4 - 7 */
   (Function) NULL,		/* char * (points to botname later on)	*/

@@ -139,19 +139,6 @@ static void check_delay()
   }
 }
 
-static int delay_expmem()
-{
-  int size = 0;
-  struct delay_mode *d = NULL;
-
-  for (d = start_delay; d; d = d->next) {
-    if (d->mask)
-      size += strlen(d->mask) + 1;
-    size += sizeof(struct delay_mode);
-  }
-  return size;
-}
-
 /*
  *   Botnet commands
  */
@@ -2076,30 +2063,11 @@ static void cancel_user_xfer(int idx, void *x)
     def_dcc_bot_kill(idx, x);
 }
 
-static int share_expmem()
-{
-  int tot = 0;
-  struct share_msgq *q;
-  tandbuf *t;
-
-  for (t = tbuf; t && t->bot[0]; t = t->next) {
-    tot += sizeof(tandbuf);
-    for (q = t->q; q; q = q->next) {
-	tot += sizeof(struct share_msgq);
-	tot += strlen(q->msg) + 1;
-      }
-  }
-  tot += uff_expmem();
-  tot += delay_expmem();
-  return tot;
-}
-
 static void share_report(int idx, int details)
 {
   int i, j;
 
   if (details) {
-    dprintf(idx, "    Share module, using %d bytes.\n", share_expmem());
     dprintf(idx, "    Private owners: %3s   Allow resync: %3s\n",
 	    (private_global || (private_globals_bitmask() & USER_OWNER)) ?
 	    "yes" : "no", allow_resync ? "yes" : "no");
@@ -2155,7 +2123,7 @@ static Function share_table[] =
   /* 0 - 3 */
   (Function) share_start,
   (Function) NULL,
-  (Function) share_expmem,
+  (Function) 0,
   (Function) share_report,
   /* 4 - 7 */
   (Function) finish_share,

@@ -36,17 +36,6 @@ int 				max_auth = 100;
 struct auth_t 			*auth = 0;
 #endif /* S_AUTH */
 
-/* Expected memory usage
- */
-int expmem_auth()
-{
-  int tot = 0;
-#ifdef S_AUTH
-  tot += sizeof(struct auth_t) * max_auth;
-#endif /* S_AUTH */
-  return tot;
-}
-
 #ifdef S_AUTH
 void init_auth_max()
 {

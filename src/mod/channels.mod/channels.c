@@ -794,50 +794,6 @@ static void channels_report(int idx, int details)
   }
 }
 
-static int expmem_masklist(masklist *m)
-{
-  int result = 0;
-
-  for (; m; m = m->next) {
-    result += sizeof(masklist);
-    if (m->mask)
-        result += strlen(m->mask) + 1;
-    if (m->who)
-        result += strlen(m->who) + 1;
-  }
-  return result;
-}
-
-static int channels_expmem()
-{
-  int tot = 0, i;
-  struct chanset_t *chan;
-
-  for (chan = chanset; chan; chan = chan->next) {
-    tot += sizeof(struct chanset_t);
-
-    tot += strlen(chan->channel.key) + 1;
-    if (chan->channel.topic)
-      tot += strlen(chan->channel.topic) + 1;
-    tot += (sizeof(struct memstruct) * (chan->channel.members + 1));
-
-    tot += expmem_masklist(chan->channel.ban);
-    tot += expmem_masklist(chan->channel.exempt);
-    tot += expmem_masklist(chan->channel.invite);
-
-    for (i = 0; i < 6 && chan->cmode[i].op; i++)
-      tot += strlen(chan->cmode[i].op) + 1;
-    if (chan->key)
-      tot += strlen(chan->key) + 1;
-    if (chan->rmkey)
-      tot += strlen(chan->rmkey) + 1;
-  }
-  tot += expmem_udef(udef);
-  if (lastdeletedmask)
-    tot += strlen(lastdeletedmask) + 1;
-  return tot;
-}
-
 cmd_t channels_bot[] = {
   {"cjoin",    "", (Function) got_cjoin, NULL},
   {"cpart",    "", (Function) got_cpart, NULL},
@@ -868,7 +824,7 @@ static Function channels_table[] =
   /* 0 - 3 */
   (Function) channels_start,
   (Function) NULL,
-  (Function) channels_expmem,
+  (Function) 0,
   (Function) channels_report,
   /* 4 - 7 */
   (Function) u_setsticky_mask,

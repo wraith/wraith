@@ -633,36 +633,6 @@ void init_modules(void)
     hook_list[i] = NULL;
 }
 
-int expmem_modules(int y)
-{
-  int c = 0;
-  int i;
-  module_entry *p;
-  dependancy *d;
-  struct hook_entry *q;
-  struct static_list *s;
-  Function *f;
-
-  for (s = static_modules; s; s = s->next)
-    c += sizeof(struct static_list) + strlen(s->name) + 1;
-
-  for (i = 0; i < REAL_HOOKS; i++)
-    for (q = hook_list[i]; q; q = q->next)
-      c += sizeof(struct hook_entry);
-
-  for (d = dependancy_list; d; d = d->next)
-    c += sizeof(dependancy);
-
-  for (p = module_list; p; p = p->next) {
-    c += sizeof(module_entry);
-    c += strlen(p->name) + 1;
-    f = p->funcs;
-    if (f && f[MODCALL_EXPMEM] && !y)
-      c += (int) (f[MODCALL_EXPMEM] ());
-  }
-  return c;
-}
-
 int module_register(char *name, Function * funcs,
 		    int major, int minor)
 {

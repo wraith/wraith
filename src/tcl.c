@@ -70,11 +70,6 @@ int	    clientdata_stuff = 0;
 /* Prototypes for tcl */
 Tcl_Interp *Tcl_CreateInterp();
 
-int expmem_tcl()
-{
-  return strtot + utftot + clientdata_stuff;
-}
-
 int findidx(int z)
 {
   int j;
@@ -106,7 +101,7 @@ static void botnet_change(char *new)
  *     Vars, traces, misc
  */
 
-int init_dcc_max(), init_misc();
+int init_dcc_max();
 
 /* Used for read/write to integer couplets */
 typedef struct {

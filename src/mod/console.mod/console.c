@@ -234,13 +234,6 @@ static int console_tcl_set(Tcl_Interp *irp, struct userrec *u,
   return TCL_OK;
 }
 
-static int console_expmem(struct user_entry *e)
-{
-  struct console_info *i = e->u.extra;
-
-  return sizeof(struct console_info) + strlen(i->channel) + 1;
-}
-
 static void console_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct console_info *i = e->u.extra;
@@ -290,7 +283,6 @@ static struct user_entry_type USERENTRY_CONSOLE =
   console_set,
   console_tcl_get,
   console_tcl_set,
-  console_expmem,
   console_display,
   "CONSOLE"
 };

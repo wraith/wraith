@@ -447,11 +447,6 @@ static void display_dcc_bot_new(int idx, char *buf)
   sprintf(buf, "bot*  waited %lus", now - dcc[idx].timeval);
 }
 
-static int expmem_dcc_bot_(void *x)
-{
-  return sizeof(struct bot_info);
-}
-
 static void free_dcc_bot_(int n, void *x)
 {
   if (dcc[n].type == &DCC_BOT) {
@@ -470,7 +465,6 @@ struct dcc_table DCC_BOT_NEW =
   &bot_timeout,
   timeout_dcc_bot_new,
   display_dcc_bot_new,
-  expmem_dcc_bot_,
   free_dcc_bot_,
   NULL
 };
@@ -566,7 +560,6 @@ struct dcc_table DCC_BOT =
   NULL,
   NULL,
   display_dcc_bot,
-  expmem_dcc_bot_,
   free_dcc_bot_,
   NULL
 };
@@ -580,7 +573,6 @@ struct dcc_table DCC_FORK_BOT =
   &connect_timeout,
   failed_link,
   display_dcc_fork_bot,
-  expmem_dcc_bot_,
   free_dcc_bot_,
   NULL
 };
@@ -752,28 +744,6 @@ static void display_dcc_chat_pass(int idx, char *buf)
   sprintf(buf, "pass  waited %lus", now - dcc[idx].timeval);
 }
 
-static int expmem_dcc_general(void *x)
-{
-  register struct chat_info *p = (struct chat_info *) x;
-  int tot = sizeof(struct chat_info);
-
-  if (p->away)
-    tot += strlen(p->away) + 1;
-  if (p->buffer) {
-    struct msgq *q = p->buffer;
-
-    while (q) {
-      tot += sizeof(struct list_type);
-
-      tot += q->len + 1;
-      q = q->next;
-    }
-  }
-  if (p->su_nick)
-    tot += strlen(p->su_nick) + 1;
-  return tot;
-}
-
 static void kill_dcc_general(int idx, void *x)
 {
   register struct chat_info *p = (struct chat_info *) x;
@@ -931,7 +901,6 @@ struct dcc_table DCC_CHAT_SECPASS =
   &auth_timeout,
   tout_dcc_chat_secpass,
   display_dcc_chat_secpass,
-  expmem_dcc_general,
   kill_dcc_general,
   out_dcc_general
 };
@@ -945,7 +914,6 @@ struct dcc_table DCC_CHAT_PASS =
   &password_timeout,
   tout_dcc_chat_pass,
   display_dcc_chat_pass,
-  expmem_dcc_general,
   kill_dcc_general,
   out_dcc_general
 };
@@ -1133,7 +1101,6 @@ struct dcc_table DCC_CHAT =
   NULL,
   NULL,
   display_dcc_chat,
-  expmem_dcc_general,
   kill_dcc_general,
   out_dcc_general
 };
@@ -1380,16 +1347,6 @@ static void display_dupwait(int idx, char *buf)
   sprintf(buf, "wait  duplicate?");
 }
 
-static int expmem_dupwait(void *x)
-{
-  register struct dupwait_info *p = (struct dupwait_info *) x;
-  int tot = sizeof(struct dupwait_info);
-
-  if (p && p->chat && DCC_CHAT.expmem)
-    tot += DCC_CHAT.expmem(p->chat);
-  return tot;
-}
-
 static void kill_dupwait(int idx, void *x)
 {
   register struct dupwait_info *p = (struct dupwait_info *) x;
@@ -1410,7 +1367,6 @@ struct dcc_table DCC_DUPWAIT =
   &dupwait_timeout,
   timeout_dupwait,
   display_dupwait,
-  expmem_dupwait,
   kill_dupwait,
   NULL
 };
@@ -1635,7 +1591,6 @@ struct dcc_table DCC_TELNET_ID =
   &password_timeout,
   timeout_dcc_telnet_id,
   display_dcc_telnet_id,
-  expmem_dcc_general,
   kill_dcc_general,
   out_dcc_general
 };

@@ -1483,11 +1483,6 @@ static char *traced_rfccompliant(ClientData cdata, Tcl_Interp *irp,
   return NULL;
 }
 
-static int irc_expmem()
-{
-  return 0;
-}
-
 static cmd_t irc_bot[] = {
   {"dp", "", (Function) mdop_request, NULL},
   {"gi", "", (Function) getin_request, NULL},
@@ -1513,7 +1508,7 @@ static Function irc_table[] =
   /* 0 - 3 */
   (Function) irc_start,
   (Function) NULL,
-  (Function) irc_expmem,
+  (Function) 0,
   (Function) irc_report,
   /* 4 - 7 */
   (Function) 0,		

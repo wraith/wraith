@@ -204,16 +204,6 @@ static void check_toutlost(struct userrec *u, char *nick, char *path,
  *    File queue functions
  */
 
-static int expmem_fileq()
-{
-  fileq_t *q;
-  int tot = 0;
-
-  for (q = fileq; q; q = q->next)
-    tot += strlen(q->dir) + strlen(q->file) + 2 + sizeof(fileq_t);
-  return tot;
-}
-
 static void queue_file(char *dir, char *file, char *from, char *to)
 {
   fileq_t *q = fileq;
@@ -1210,22 +1200,6 @@ static void display_dcc_fork_send(int idx, char *buf)
   sprintf(buf,TRANSFER_CONN_SEND);
 }
 
-static int expmem_dcc_xfer(void *x)
-{
-  register struct xfer_info *p = (struct xfer_info *) x;
-  int tot;
-
-  tot = sizeof(struct xfer_info);
-  if (p->filename)
-    tot += strlen(p->filename) + 1;
-  /* We need to check if origname points to filename before
-   * accounting for the memory.
-   */
-  if (p->origname && p->filename != p->origname)
-    tot += strlen(p->origname) + 1;
-  return tot;
-}
-
 static void kill_dcc_xfer(int idx, void *x)
 {
   register struct xfer_info *p = (struct xfer_info *) x;
@@ -1261,7 +1235,6 @@ static struct dcc_table DCC_SEND =
   &wait_dcc_xfer,
   tout_dcc_send,
   display_dcc_send,
-  expmem_dcc_xfer,
   kill_dcc_xfer,
   out_dcc_xfer
 };
@@ -1277,7 +1250,6 @@ static struct dcc_table DCC_FORK_SEND =
   &wait_dcc_xfer,
   eof_dcc_fork_send,
   display_dcc_fork_send,
-  expmem_dcc_xfer,
   kill_dcc_xfer,
   out_dcc_xfer
 };
@@ -1304,7 +1276,6 @@ static struct dcc_table DCC_GET =
   &wait_dcc_xfer,
   transfer_get_timeout,
   display_dcc_get,
-  expmem_dcc_xfer,
   kill_dcc_xfer,
   out_dcc_xfer,
   outdone_dcc_xfer
@@ -1319,7 +1290,6 @@ static struct dcc_table DCC_GET_PENDING =
   &wait_dcc_xfer,
   transfer_get_timeout,
   display_dcc_get_p,
-  expmem_dcc_xfer,
   kill_dcc_xfer,
   out_dcc_xfer
 };
@@ -1612,11 +1582,6 @@ static int fstat_kill(struct user_entry *e)
   return 1;
 }
 
-static int fstat_expmem(struct user_entry *e)
-{
-  return sizeof(struct filesys_stats);
-}
-
 static void fstat_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct filesys_stats *fs;
@@ -1649,7 +1614,6 @@ static struct user_entry_type USERENTRY_FSTAT =
   fstat_set,
   fstat_tcl_get,
   fstat_tcl_set,
-  fstat_expmem,
   fstat_display,
   "FSTAT"
 };
@@ -1848,18 +1812,11 @@ static cmd_t transfer_load[] =
  *   Module functions
  */
 
-
-static int transfer_expmem()
-{
-  return expmem_fileq();
-}
-
 static void transfer_report(int idx, int details)
 {
   if (details) {
     dprintf(idx,TRANSFER_STAT_BLOCK,
 	    dcc_block, (dcc_block == 0) ? " (turbo dcc)" : "", dcc_limit);
-    dprintf(idx,TRANSFER_STAT_MEMORY, transfer_expmem());
   }
 }
 
@@ -1869,7 +1826,7 @@ static Function transfer_table[] =
 {
   (Function) transfer_start,
   (Function) NULL,
-  (Function) transfer_expmem,
+  (Function) 0,
   (Function) transfer_report,
   /* 4- 7 */
   (Function) & DCC_FORK_SEND,		/* struct dcc_table		*/

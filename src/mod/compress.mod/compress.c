@@ -371,22 +371,14 @@ static tcl_ints my_tcl_ints[] = {
   {NULL,                	NULL}
 };
 
-static int compress_expmem(void)
-{
-  return 0;
-}
-
 static int compress_report(int idx, int details)
 {
   if (details) {
-    int size = compress_expmem();
 
     dprintf(idx, "    %u file%s compressed\n", compressed_files,
             (compressed_files != 1) ? "s" : "");
     dprintf(idx, "    %u file%s uncompressed\n", uncompressed_files,
             (uncompressed_files != 1) ? "s" : "");
-    dprintf(idx, "    Using %d byte%s of memory\n", size,
-            (size != 1) ? "s" : "");
   }
 
   return 0;
@@ -399,7 +391,7 @@ static Function compress_table[] =
   /* 0 - 3 */
   (Function) compress_start,
   (Function) NULL,
-  (Function) compress_expmem,
+  (Function) 0,
   (Function) compress_report,
   /* 4 - 7 */
   (Function) compress_to_file,

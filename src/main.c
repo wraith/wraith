@@ -631,7 +631,7 @@ void restart_chons();
 void check_static(char *, char *(*)());
 
 #include "mod/static.h"
-int init_mem(), init_dcc_max(), init_userent(), init_misc(), init_auth(), init_config(), init_bots(),
+int init_mem(), init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
  init_net(), init_modules(), init_tcl(int, char **), init_botcmd(), init_settings();
 
 void binds_init();
@@ -981,7 +981,6 @@ int main(int argc, char **argv)
   core_binds_init();
   init_dcc_max();
   init_userent();
-  init_misc();
   init_bots();
   init_net();
   init_modules();

@@ -746,11 +746,6 @@ static int botfl_tcl_set(Tcl_Interp *irp, struct userrec *u,
   return TCL_OK;
 }
 
-static int botfl_expmem(struct user_entry *e)
-{
-  return 0;
-}
-
 static void botfl_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
@@ -774,7 +769,6 @@ struct user_entry_type USERENTRY_BOTFL =
   botfl_set,
   botfl_tcl_get,
   botfl_tcl_set,
-  botfl_expmem,
   botfl_display,
   "BOTFL"
 };

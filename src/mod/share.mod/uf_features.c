@@ -66,18 +66,6 @@ static void uff_init(void)
   egg_bzero(&uff_list, sizeof(uff_head_t));
 }
 
-/* Calculate memory used for list.
- */
-static int uff_expmem(void)
-{
-  uff_list_t *ul;
-  int tot = 0;
-
-  for (ul = uff_list.start; ul; ul = ul->next)
-    tot += sizeof(uff_list_t);
-  return tot;
-}
-
 /* Search for a feature in the uff feature list that matches a supplied
  * feature flag. Returns a pointer to the entry in the list or NULL if
  * no feature uses the flag.

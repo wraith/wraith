@@ -49,16 +49,6 @@ void list_type_kill(struct list_type *t)
   }
 }
 
-int list_type_expmem(struct list_type *t)
-{
-  int tot = 0;
-
-  for (; t; t = t->next)
-    tot += sizeof(struct list_type) + strlen(t->extra) + 1;
-
-  return tot;
-}
-
 int def_unpack(struct userrec *u, struct user_entry *e)
 {
   char *tmp;
@@ -161,11 +151,6 @@ int def_tcl_set(Tcl_Interp * irp, struct userrec *u,
   return TCL_OK;
 }
 
-int def_expmem(struct user_entry *e)
-{
-  return strlen(e->u.string) + 1;
-}
-
 void def_display(int idx, struct user_entry *e, struct userrec *u)
 {
   dprintf(idx, "  %s: %s\n", e->type->name, e->u.string);
@@ -197,7 +182,6 @@ struct user_entry_type USERENTRY_COMMENT =
   def_set,
   def_tcl_get,
   def_tcl_set,
-  def_expmem,
   comment_display,
   "COMMENT"
 };
@@ -215,7 +199,6 @@ struct user_entry_type USERENTRY_INFO =
   def_set,
   def_tcl_get,
   def_tcl_set,
-  def_expmem,
   def_display,
   "INFO"
 };
@@ -258,24 +241,9 @@ struct user_entry_type USERENTRY_ADDED = {
   def_set,
   0,
   0,
-  def_expmem,
   added_display,
   "ADDED"
 };
-
-int config_expmem(struct user_entry *e)
-{
-  struct xtra_key *x;
-  int tot = 0;
-
-  for (x = e->u.extra; x; x = x->next) {
-    tot += sizeof(struct xtra_key);
-
-    tot += strlen(x->key) + 1;
-    tot += strlen(x->data) + 1;
-  }
-  return tot;
-}
 
 int config_set(struct userrec *u, struct user_entry *e, void *buf)
 {
@@ -486,7 +454,6 @@ struct user_entry_type USERENTRY_CONFIG = {
   config_set,
   0,
   0,
-  config_expmem,
   config_display,
   "CONFIG"
 };
@@ -544,7 +511,6 @@ struct user_entry_type USERENTRY_STATS = {
   def_set,
   0,
   0,
-  def_expmem,
   stats_display,
   "STATS"
 };
@@ -593,7 +559,6 @@ struct user_entry_type USERENTRY_MODIFIED =
   def_set,
   0,
   0,
-  def_expmem,
   modified_display,
   "MODIFIED"
 };
@@ -650,7 +615,6 @@ struct user_entry_type USERENTRY_PASS =
   pass_set,
   def_tcl_get,
   pass_tcl_set,
-  def_expmem,
   0,
   "PASS"
 };
@@ -688,7 +652,6 @@ struct user_entry_type USERENTRY_SECPASS =
   def_set,
   0,
   0,
-  def_expmem,
   secpass_display,
   "SECPASS"
 };
@@ -819,12 +782,6 @@ static int laston_tcl_set(Tcl_Interp * irp, struct userrec *u,
   return TCL_OK;
 }
 
-static int laston_expmem(struct user_entry *e)
-{
-  return sizeof(struct laston_info) +
-    strlen(((struct laston_info *) (e->u.extra))->lastonplace) + 1;
-}
-
 static int laston_dupuser(struct userrec *new, struct userrec *old,
 			  struct user_entry *e)
 {
@@ -854,7 +811,6 @@ struct user_entry_type USERENTRY_LASTON =
   laston_set,
   laston_tcl_get,
   laston_tcl_set,
-  laston_expmem,
   0,
   "LASTON"
 };
@@ -1026,14 +982,6 @@ static int botaddr_tcl_set(Tcl_Interp *irp, struct userrec *u,
   return TCL_OK;
 }
 
-static int botaddr_expmem(struct user_entry *e)
-{
-  register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
-
-  Context;
-  return strlen(bi->address) + 1 + strlen(bi->uplink) + 1 + sizeof(struct bot_addr);
-}
-
 static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
 {
 #ifdef HUB
@@ -1114,7 +1062,6 @@ struct user_entry_type USERENTRY_BOTADDR =
   botaddr_set,
   botaddr_tcl_get,
   botaddr_tcl_set,
-  botaddr_expmem,
   botaddr_display,
   "BOTADDR"
 };
@@ -1358,20 +1305,6 @@ static int xtra_tcl_get(Tcl_Interp *irp, struct userrec *u,
   return TCL_OK;
 }
 
-static int xtra_expmem(struct user_entry *e)
-{
-  struct xtra_key *x;
-  int tot = 0;
-
-  for (x = e->u.extra; x; x = x->next) {
-    tot += sizeof(struct xtra_key);
-
-    tot += strlen(x->key) + 1;
-    tot += strlen(x->data) + 1;
-  }
-  return tot;
-}
-
 struct user_entry_type USERENTRY_XTRA =
 {
   0,
@@ -1385,7 +1318,6 @@ struct user_entry_type USERENTRY_XTRA =
   xtra_set,
   xtra_tcl_get,
   xtra_tcl_set,
-  xtra_expmem,
   xtra_display,
   "XTRA"
 };
@@ -1421,11 +1353,6 @@ static int hosts_kill(struct user_entry *e)
   list_type_kill(e->u.list);
   nfree(e);
   return 1;
-}
-
-static int hosts_expmem(struct user_entry *e)
-{
-  return list_type_expmem(e->u.list);
 }
 
 static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
@@ -1549,7 +1476,6 @@ struct user_entry_type USERENTRY_HOSTS =
   hosts_set,
   hosts_tcl_get,
   hosts_tcl_set,
-  hosts_expmem,
   hosts_display,
   "HOSTS"
 };
