@@ -635,9 +635,6 @@ do_boot(int idx, char *by, char *reason)
 port_t
 listen_all(port_t lport, bool off)
 {
-  if (!lport)
-    return 0;
-
   int idx = (-1);
   port_t port, realport;
 

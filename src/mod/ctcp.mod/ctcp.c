@@ -580,9 +580,9 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
       return BIND_RET_BREAK;
     }
 
-    int ix = -1;
+    int ix = -1, i = 0;
 
-    for (int i = 0; i < dcc_total; i++) {
+    for (i = 0; i < dcc_total; i++) {
       if (dcc[i].type && (dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)")))
         ix = i;
     }
