@@ -485,13 +485,13 @@ void eggContextNote(const char *file, int line, const char *module,
  */
 void eggAssert(const char *file, int line, const char *module)
 {
-#ifdef DEBUG_CONTEXT
-  write_debug();
-#endif /* DEBUG_CONTEXT */
   if (!module)
     putlog(LOG_MISC, "*", STR("* In file %s, line %u"), file, line);
   else
     putlog(LOG_MISC, "*", STR("* In file %s:%s, line %u"), module, file, line);
+#ifdef DEBUG_CONTEXT
+  write_debug();
+#endif /* DEBUG_CONTEXT */
   fatal(STR("ASSERT FAILED -- CRASHING!"), 1);
 }
 #endif /* DEBUG_ASSERT */
