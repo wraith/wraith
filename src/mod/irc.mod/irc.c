@@ -596,6 +596,7 @@ getin_request(char *botnick, char *code, char *par)
       if (!(channel_pending(chan) || channel_active(chan))) {
         putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, nick);
         dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, nick);
+        chan->status |= CHAN_JOINING;
       } else {
         putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);
       }
@@ -1118,7 +1119,7 @@ reset_chan_info(struct chanset_t *chan)
     chan->channel.key = (char *) my_calloc(1, 1);
     clear_channel(chan, 1);
     chan->status |= CHAN_PEND;
-    chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES);
+    chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);
     if (!(chan->status & CHAN_ASKEDBANS)) {
       chan->status |= CHAN_ASKEDBANS;
       dprintf(DP_MODE, "MODE %s +b\n", chan->name);
@@ -1169,6 +1170,7 @@ check_lonely_channel(struct chanset_t *chan)
       dprintf(DP_MODE, "PART %s\n", chan->name);
       /* If it's a !chan, we need to recreate the channel with !!chan <cybah> */
       dprintf(DP_MODE, "JOIN %s%s %s\n", (chan->dname[0] == '!') ? "!" : "", chan->dname, chan->key_prot);
+      chan->status |= CHAN_JOINING;
       whined = 0;
     }
   } else if (any_ops(chan)) {
@@ -1381,10 +1383,11 @@ check_expired_chanstuff(struct chanset_t *chan)
       m = n;
     }
     check_lonely_channel(chan);
-  } else if (shouldjoin(chan) && !channel_pending(chan)) {
+  } else if (shouldjoin(chan) && !channel_pending(chan) && !channel_joining(chan)) {
     dprintf(DP_MODE, "JOIN %s %s\n",
             (chan->name[0]) ? chan->name : chan->dname,
             chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+    chan->status |= CHAN_JOINING;
   }
 }
 
@@ -1471,6 +1474,8 @@ irc_report(int idx, int details)
       if (shouldjoin(chan)) {
         if (chan->status & CHAN_JUPED)
           p = MISC_JUPED;
+        else if (channel_joining(chan))
+          p = MISC_JOINING;
         else if (!(chan->status & CHAN_ACTIVE))
           p = MISC_TRYING;
         else if (chan->status & CHAN_PEND)

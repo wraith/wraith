@@ -546,8 +546,10 @@ static void cmd_slowjoin(int idx, char *par)
   }
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
   chan->status &= ~CHAN_INACTIVE;
-  if (!conf.bot->hub && shouldjoin(chan)) 
+  if (!conf.bot->hub && shouldjoin(chan) && !channel_joining(chan)) {
     dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+    chan->status |= CHAN_JOINING;
+  }
 }
 
 static void cmd_slowpart(int idx, char *par)

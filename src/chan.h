@@ -231,6 +231,7 @@ struct chanset_t {
 #define CHAN_JUPED          BIT23	/* Is channel juped                   */
 #define CHAN_STOP_CYCLE     BIT24	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
 #define CHAN_AUTOOP         BIT25
+#define CHAN_JOINING        BIT26	/* attempting to join, dont flood with JOIN #chan */
 
 #define CHAN_ASKED_EXEMPTS  BIT0
 #define CHAN_ASKED_INVITES  BIT1
@@ -249,6 +250,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_optopic(chan) (chan->channel.mode & CHANTOPIC)
 
 #define channel_active(chan)  (chan->status & CHAN_ACTIVE)
+#define channel_joining(chan) (chan->status & CHAN_JOINING)
 #define channel_pending(chan)  (chan->status & CHAN_PEND)
 #define channel_bitch(chan) (chan->status & CHAN_BITCH)
 #define chan_bitch(chan) (chan->status & (CHAN_BITCH|CHAN_BOTBITCH))

@@ -368,8 +368,10 @@ check_slowjoinpart(struct chanset_t *chan)
   } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
       chan->status &= ~CHAN_INACTIVE;
       chan->channel.jointime = 0;
-    if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan))
+    if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan) && !channel_joining(chan)) {
       dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+      chan->status |= CHAN_JOINING;
+    }
   } else if (channel_closed(chan)) {
     enforce_closed(chan);
   }
@@ -449,8 +451,10 @@ static void got_jn(int idx, char *code, char *par)
   if (chan->channel.jointime && channel_inactive(chan)) {
     chan->status &= ~CHAN_INACTIVE;
     chan->channel.jointime = 0;
-    if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan))
-     dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+    if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan) && !channel_joining(chan)) {
+      dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+      chan->status |= CHAN_JOINING;
+    }
   }
 }
 

@@ -164,10 +164,12 @@ static int got001(char *from, char *msg)
     return 0;			/* Uh, no server list */
 
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
-    if (shouldjoin(chan))
+    chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
+    if (shouldjoin(chan)) {
       dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
                                          chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+      chan->status |= CHAN_JOINING;
+    }
   }
   if (egg_strcasecmp(from, dcc[servidx].host)) {
     putlog(LOG_MISC, "*", "(%s claims to be %s; updating server list)", dcc[servidx].host, from);
@@ -267,10 +269,11 @@ static int got442(char *from, char *msg)
   chname = newsplit(&msg);
   chan = findchan(chname);
   if (chan)
-    if (shouldjoin(chan)) {
+    if (shouldjoin(chan) && !channel_joining(chan)) {
       putlog(LOG_MISC, chname, IRC_SERVNOTONCHAN, chname);
       clear_channel(chan, 1);
       chan->status &= ~CHAN_ACTIVE;
+      chan->status |= CHAN_JOINING;
       dprintf(DP_MODE, "JOIN %s %s\n", chan->name,
 	      chan->channel.key[0] ? chan->channel.key : chan->key_prot);
     }
@@ -774,7 +777,7 @@ static int got433(char *from, char *msg)
   return 0;
 }
 
-/* 437 : Nickname juped (IRCnet)
+/* 437 : Channel/Nickname juped (IRCnet)
  */
 static int got437(char *from, char *msg)
 {

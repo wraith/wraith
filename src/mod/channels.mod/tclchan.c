@@ -637,11 +637,13 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
     if ((old_status ^ chan->status) & CHAN_INACTIVE) {
       if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
         dprintf(DP_SERVER, "PART %s\n", chan->name);
-      if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+      if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
         dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
   			   chan->name : chan->dname,
   			   chan->channel.key[0] ?
     			   chan->channel.key : chan->key_prot);
+        chan->status |= CHAN_JOINING;
+      }
     }
     if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH | CHAN_BOTBITCH | CHAN_CLOSED | CHAN_PRIVATE)) {
       recheck_channel(chan, 1);

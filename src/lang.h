@@ -80,6 +80,7 @@
 /* was: MISC_CHANNELS - 0x524 */
 /* was: MISC_TRYINGMISTAKE - 0x525 */
 #define MISC_PENDING		"pending"
+#define MISC_JOINING            "joining"
 #define MISC_WANTOPS		"want ops!"
 #define MISC_LURKING		"lurking"
 #define MISC_BACKGROUND		"background"
