@@ -1062,10 +1062,10 @@ do_take(struct chanset_t *chan)
   char *to_op = (char *) calloc(1, 2048), *to_op_ptr = to_op;
   char *to_deop = (char *) calloc(1, 2048), *to_deop_ptr = to_deop;
   register bool hasop, isbot;
-  register unsigned int lines_max = 5, lines, deopn, i;
+  register unsigned int lines_max = 5, lines = 0, deopn, i;
 
   if (floodless)
-    lines = 10;
+    lines_max = 10;
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     hasop = (m->flags & CHANOP);
