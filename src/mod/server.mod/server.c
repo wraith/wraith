@@ -1056,7 +1056,7 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef S_RANDSERVERS
   char *new;
 
-  if (hostname6[0]) //we want to use the servers6 entry.
+  if (hostname6[0] || myip6[0]) //we want to use the servers6 entry.
     return;
 #endif
 
@@ -1087,7 +1087,7 @@ void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef S_RANDSERVERS
   char *new;
 
-  if (!hostname6[0]) //we probably want to use the normal server list..
+  if (!hostname6[0] && !myip6[0]) //we probably want to use the normal server list..
     return;
 #endif
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));

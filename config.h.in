@@ -72,7 +72,7 @@
 #undef HAVE_FSYNC
 
 /* Define if you have the `ipv6' support. */
-#define IPV6
+#define USE_IPV6
 
 /* Define if you have the `getdtablesize' function. */
 #undef HAVE_GETDTABLESIZE
