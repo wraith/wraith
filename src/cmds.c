@@ -1421,7 +1421,7 @@ static void cmd_botcmd(int idx, char *par)
     if (!egg_strncasecmp(cmd, "di", 2) || !egg_strncasecmp(cmd, "res", 3)) {
       dprintf(idx, "Not a good idea.\n");
       return;
-    } else if (!dcc[idx].user->flags & USER_OWNER) {
+    } else if (!(dcc[idx].user->flags & USER_OWNER)) {
       dprintf(idx, "'botcmd *' is limited to +n only.\n");
       return;
     }
