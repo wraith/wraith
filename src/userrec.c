@@ -895,7 +895,7 @@ void deflag_describe(struct cfg_entry *cfgent, int idx)
 #endif
   else if (cfgent==&CFG_MDOP)
     dprintf(idx, STR("mdop decides what happens to a user doing a mass deop\n"));
-  dprintf(idx, STR("Valid settings are: ignore (No flag changes), deop (give -afmnop+d), kick (give -afmnop+dk) or delete (remove from userlist)\n"));
+  dprintf(idx, STR("Valid settings are: ignore (No flag changes), deop (set flags to +d), kick (set flags to +dk) or delete (remove from userlist)\n"));
 }
 
 void deflag_changed(struct cfg_entry * entry, char * oldval, int * valid) {
