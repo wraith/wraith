@@ -1043,8 +1043,7 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
   dprintf(idx, "Channel %s removed from the bot.\n", chname);
   dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
 
-  chan = findchan_by_dname(chname);
-  if (chan) {
+  if (findchan_by_dname(chname)) {
     dprintf(idx, "Hmmm... Channel didn't get removed. Weird *shrug*\n");
     return;
   }

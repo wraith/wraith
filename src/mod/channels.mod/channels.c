@@ -254,16 +254,19 @@ static void channels_checkslowjoin() {
 Context;
   for (chan=chanset;chan;chan=chan->next) {
 Context;
+    /* slowpart */
     if ((chan->parttime) && (chan->parttime < now)) {
       chan->parttime = 0;
 Context;
 #ifdef LEAF
       if (channel_active(chan) && !channel_inactive(chan))
-        dprintf(DP_MODE, "PART %s\n", chan->dname);
+        dprintf(DP_MODE, "PART %s\n", chan->name);
 #endif /* LEAF */
 Context;
-      remove_channel(chan);
+      if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
+        remove_channel(chan);
 Context;
+    /* slowjoin */
     } else if ((chan->jointime) && (chan->jointime < now)) {
 Context;
         chan->status &= ~CHAN_INACTIVE;
@@ -271,8 +274,8 @@ Context;
         chan->jointime=0;
 Context;
 #ifdef LEAF
-      if (!channel_inactive(chan))
-        dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
+      if (!channel_inactive(chan) && !channel_active(chan))
+        dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
 #endif /* LEAF */
     }
   }
