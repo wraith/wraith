@@ -289,21 +289,22 @@ check_sum(const char *fname, const char *cfgfile)
   MD5_CTX ctx;
 
   MD5_Init(&ctx);
-
+ 
   if (!settings.hash[0]) {
-    if (cfgfile) {
-      printf("* CFGFILE: %s\n", cfgfile);
-      readcfg(cfgfile);
-    }
-    printf("* Wrote checksum to binary. (%s)\n", bin_md5(fname, WRITE_MD5, &ctx));
-tellconfig(&settings);
+
+    if (!cfgfile)
+      fatal("Binary not initialized.", 0);
+
+    readcfg(cfgfile);
+    if (bin_md5(fname, WRITE_MD5, &ctx))
+      printf("* Wrote settings to binary.\n"); 
+    exit(0);
   } else {
     char *hash = NULL;
 
 
     hash = bin_md5(fname, GET_MD5, &ctx);
 
-tellconfig(&settings);
     edpack(&settings, hash, PACK_DEC);
 
     if (strcmp(settings.hash, hash)) {

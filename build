@@ -36,7 +36,7 @@ usage()
     echo "    -C        Preforms a distclean before making."
     echo "    -d        Builds a debug package."
     echo "    -n        Do not package the binaries."
-    echo "    -p  FILE  Used for development."
+    echo "    -p  FILE  What file to use as the cfg file."
 }
 
 debug=0
@@ -140,7 +140,7 @@ fi
 echo "[*] Configuring..."
 umask 077 >/dev/null
 
-./configure --silent --with-cfg=${pack}
+./configure --silent
 
 if [ $clean = "1" ]; then
  echo "[*] Cleaning up old binaries/files..."
@@ -156,6 +156,8 @@ _build()
     echo "[!] ${d}${tb} build failed"
     exit 1
   fi
+  echo "[*] Hashing and initializing settings in binary"
+  ${d}${tb} -p ${pack}
  fi
 }
 

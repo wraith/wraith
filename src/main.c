@@ -704,6 +704,14 @@ int main(int argc, char **argv)
     unlink(argv[0]);
     fatal("!! Invalid binary", 0);
   }
+
+  binname = getfullbinname(argv[0]);
+
+  check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
+
+  if (!checked_bin_buf)
+    exit(1);
+
 #ifdef STOP_UAC
   {
     int nvpair[2];
@@ -728,11 +736,6 @@ int main(int argc, char **argv)
   srandom(now % (getpid() + getppid()) * randint(1000));
   myuid = geteuid();
 
-  binname = getfullbinname(argv[0]);
-
-  check_sum(binname, argc >= 3 ? argv[2] : NULL);
-  if (!checked_bin_buf)
-    exit(1);
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
 #endif /* HUB */
