@@ -561,6 +561,7 @@ Context;
       if (i > -1 && auth[i].authed && code[0] == cmdprefix[0] && code[1]) {
         code++;        
 Context;
+        u = auth[i].user;
         if (check_tcl_msgc(code, nick, uhost, u, msg))
           auth[i].atime = now;
         else

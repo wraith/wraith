@@ -2746,12 +2746,16 @@ Context;
 int isauthed(char *host)
 {
   int i = 0;
+  if (!host || !host[0])
+    return -1;
 Context;
   for (i = 0; i < auth_total; i++) {
 Context;
-    if (auth[i].host[0] && host[0] && !strcmp(auth[i].host, host))
-Context;
+    if (auth[i].host[0] && !strcmp(auth[i].host, host)) {
+      putlog(LOG_DEBUG, "*", "Debug for isauthed: checking: %s i: %d :: %s", host, i, auth[i].host);
       return i;
+    }
+Context;
   }
 Context;
   return -1;
