@@ -724,8 +724,6 @@ int main(int argc, char **argv)
   console_init();
   ctcp_init();
   chanprog();
-  open_identd();
-
 
 #ifdef LEAF
   if (localhub) {

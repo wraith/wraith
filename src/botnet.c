@@ -1023,7 +1023,8 @@ static void botlink_resolve_success(int i)
   dcc[i].sock = getsock(SOCK_STRONGCONN);
 #endif /* USE_IPV6 */
   free(linker);
-
+  if (dcc[i].sock > 0)
+    identd_open();			/* will be closed when an ident is replied. */
   if (dcc[i].sock < 0 ||
 #ifdef USE_IPV6
       open_telnet_raw(dcc[i].sock, dcc[i].host,

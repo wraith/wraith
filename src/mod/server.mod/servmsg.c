@@ -1248,6 +1248,7 @@ static void server_resolve_success(int idx)
   dcc[idx].addr = dcc[idx].u.dns->ip;
   strcpy(pass, dcc[idx].u.dns->cbuf);
   changeover_dcc(idx, &SERVER_SOCKET, 0);
+  identd_open();
 #ifdef USE_IPV6
   serv = open_telnet(dcc[idx].host, dcc[idx].port);
 #else

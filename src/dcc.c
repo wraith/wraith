@@ -583,6 +583,9 @@ static void dcc_identd(int idx, char *buf, int atr)
 
   egg_snprintf(outbuf, sizeof outbuf, "%s : USERID : UNIX : %s\n", buf, conf.bot->nick);
   tputs(dcc[idx].sock, outbuf, strlen(outbuf));
+
+  /* just close it, functions neededing it will open it. */
+  identd_close();
 }
 
 static void eof_dcc_identd(int idx)
