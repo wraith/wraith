@@ -59,7 +59,7 @@ See also: -noteign noteigns
    Creates a new user record for the handle given. The new user record will
    have no flags, an optional hostmask, and a random pass/secpass.
  
-See also: -user, +host, -host%(hub)%{+n}, newleaf
+See also: -user, +host, -host%{+ni}, newleaf
 ::-ban
 ###  %b-ban%b <banmask or number> [channel]
    Removes the specified ban from the list of bans stored on the bot. You may
@@ -129,7 +129,7 @@ See also: +noteign noteigns
 ###  %b-user%b <handle>
    Removes the specified handle's user record.
  
-See also: +user%(hub)%{+a}, -bot%{+n}, newleaf
+See also: +user%{+ai}, -bot%{+n}, newleaf
 ::about:
 ###  %babout%b
    If you feel you are missing from the list feel free to contact bryan.
@@ -653,7 +653,7 @@ See also: chhandle, chpass
    color codes in mIRC format using ^K^B, etc.. while ANSI will use escape
    chars to generate the color output.
  
-See also: echo, page
+See also: echo, page, strip
 ::comment
 ###  %bcomment%b <user> <comment>
    Creates or changes the comment field for a user. The comment field can only
@@ -842,7 +842,7 @@ See also: bots
    then when you say something on the party line, it will be displayed to you
    just like everyone else will see it. If it's off, then it won't happen.
  
-See also: color, page
+See also: color, page, strip
 ::exec:
 ###  %bexec%b <params>
    The bot will execute the specified program with each param specified,
@@ -918,7 +918,7 @@ See also: console, channels%{+m}, status
    bot will know you as from this point forward. It is used to log into the
    bot.
  
-See also: newpass%{+m}, %(hub)chhand, chpass%{+n}, chsecpass
+See also: newpass%{+m}, %{+i}chhand, chpass%{+n}, chsecpass
 ::help:
 ###  %bhelp%b [cmd]
    Alone, will show all cmds that match your flags. With a cmd it will show
@@ -1070,7 +1070,7 @@ See also: netlag
    Displays the 'last' output from the shell the bot is running on,
    for the user it is running as.
  
-%{hub}See also: netlast
+%{+i}See also: netlast
 :hub:link
 ###  %blink%b [via-bot] <bot-to-link>
    Attempts to link to another hub.  This command is deprecated and not 
@@ -1182,7 +1182,7 @@ See also: last
 ###  %bnetmsg%b <nickname|#chan> <text>
    All bots on the botnet will send a msg to the specified target.
  
-See also: botmsg%{leaf}, msg
+See also: botmsg, msg
 ::netnick:
 ###  %bnetnick%b 
    All bots on the botnet will display their nick over DCC.
@@ -1228,7 +1228,7 @@ See also: w
    newpassword is 'rand', a random password will be used.
  
  
-%(hub)%{+m}See also: chpass%{+n}, chsecpass
+%{+mi}See also: chpass%{+n}, chsecpass
 ::nick
 See: handle
 ::note
@@ -1280,7 +1280,7 @@ See also: echo, color
    Will run 'ps' on the bot's shell and display any results. If
    any params are specified, they will be used.
  
-%{hub}See also: netps
+%{+i}See also: netps
 ::quit
 ###  %bquit%b [comment]
    This disconnects you from the partyline. If you specify a comment, it will
@@ -1355,7 +1355,7 @@ See also: reload, backup
    Changes your secpass on the bot. This is used for Authing via /msg
    and for DCC. If the password is 'rand', a random password will be used.
  
-%(hub)%{+m}See also: chpass%{+n}, chsecpass
+%{+mi}See also: chpass%{+n}, chsecpass
 :leaf:servers
 ###  %bservers%b
    lists the servers that the bot has in its server list.  this is
@@ -1449,7 +1449,7 @@ See also: console
    The mode can also be a modifier like '+c' or '-bu' or '+ru-c'. If
    you omit modes, it will show your current setting.
  
-See also: fixcodes, color, echo
+See also: fixcodes, color, echo, page
 %{+m}
 ###  %bstrip%b <user> [modes]
    Set the strip level of another user. A master can't set their own strip
@@ -1536,7 +1536,7 @@ See also: devoice
    The output of 'w' will be displayed over DCC, bot the shell
    the bot is running on.
  
-%{hub}See also: netw
+%{+i}See also: netw
 ::who
 ###  %bwho%b [bot]
    Displays a list of users on the local bot.

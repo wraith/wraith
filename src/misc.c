@@ -43,7 +43,7 @@ extern tand_t 		*tandbot;
 
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
-			 bannerfile[], textdir[], userfile[],  
+			 bannerfile[], textdir[], userfile[], dcc_prefix[],
                          *binname, pid_file[], tempdir[];
 
 extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug, 
@@ -2059,21 +2059,29 @@ char *btoh(const unsigned char *md, int len)
   return ret;
 }
 
+#define HELP_BOLD  1
+#define HELP_REV   2
+#define HELP_UNDER 4
+#define HELP_FLASH 8
+#define HELP_IRC   16
+
 void showhelp (int idx, struct flag_record *flags, char *string)
 {
+  static int help_flags;
   struct flag_record tr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   static char helpstr[8092] = "", tmp[2] = "", flagstr[10] = "";
   int ok = 1;
+  if (!help_flags) help_flags = (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC;
 Context;
   helpstr[0] = 0;
-  while ( (string) && (string[0]) ) {
-    if ( (*string == '%') ) {
-      if ( !strncmp(string + 1, "{+", 2) ) {
-        while ( (*string) && (*string != '+') ) {
+  while ((string) && (string[0])) {
+    if ((*string == '%')) {
+      if (!strncmp(string + 1, "{+", 2)) {
+        while ((*string) && (*string != '+')) {
           string++;
         }
         flagstr[0] = 0;
-        while ( (*string) && (*string != '}') ) {
+        while ((*string) && (*string != '}')) {
           sprintf(tmp, "%c", *string);
           strcat(flagstr, tmp);
           string++;
@@ -2082,14 +2090,14 @@ Context;
         break_down_flags(flagstr, &tr, NULL);
         if (flagrec_ok(&tr, flags)) {
           ok = 1;
-          while ( (*string) && (*string != '%') ) {
+          while ((*string) && (*string != '%')) {
             sprintf(tmp, "%c", *string);
             strcat(helpstr, tmp);
             string++;
           }
-          if ( !strncmp(string + 1, "{-", 2) ) {
+          if (!strncmp(string + 1, "{-", 2)) {
             ok = 1;
-            while ( (*string) && (*string != '}') ) {
+            while ((*string) && (*string != '}')) {
               string++;
             }
           }
@@ -2097,16 +2105,51 @@ Context;
         } else {
           ok = 0;
         }
-      } else if ( !strncmp(string + 1, "{-", 2) ) {
+      } else if (!strncmp(string + 1, "{-", 2)) {
         ok = 1;
-        while ( (*string) && (*string != '}') ) {
+        while ((*string) && (*string != '}')) {
           string++;
         }
         string++;
-      } else if ( (*string == '{') ) {
-        while ( (*string) && (*string != '}') ) {
+      } else if (*string == '{') {
+        while ((*string) && (*string != '}')) {
           string++;
         }
+      } else if (*(string + 1) == 'b') {
+        string += 2;
+        if (help_flags & HELP_IRC) {
+          sprintf(tmp, "\002");
+        } else if (help_flags & HELP_BOLD) {
+          help_flags &= ~HELP_BOLD;
+         sprintf(tmp, "\033[0m");
+        } else {
+          help_flags |= HELP_BOLD;
+          sprintf(tmp, "\033[1m");
+        }
+        strcat(helpstr, tmp);
+      } else if (*(string + 1) == 'f') {
+        string += 2;
+        
+        if (help_flags & HELP_FLASH) {
+          if (help_flags & HELP_IRC)
+            sprintf(tmp, "\002\037");
+          else
+            sprintf(tmp, "\033[0m");
+          help_flags &= ~HELP_FLASH;
+        } else {
+          help_flags |= HELP_FLASH;
+          if (help_flags & HELP_IRC)
+            sprintf(tmp, "\002\037");
+          else
+            sprintf(tmp, "\033[5m");
+        }
+        strcat(helpstr, tmp);
+      } else if (*(string + 1) == 'd') {
+        string += 2;
+        strcat(helpstr, dcc_prefix);        
+      } else if (*(string + 1) == '%') {
+        string += 2;
+        strcat(helpstr, "%");        
       } else {
         if (ok) {
           sprintf(tmp, "%c", *string);
