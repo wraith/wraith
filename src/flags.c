@@ -75,11 +75,15 @@ sanity_check(flag_t atr, int bot)
 /* Sanity check on channel attributes
  */
 flag_t
-chan_sanity_check(flag_t chatr)
+chan_sanity_check(flag_t chatr, int bot)
 {
-  /* admin for chan does shit.. */
-  if (chatr & USER_ADMIN)
-    chatr &= ~(USER_ADMIN);
+  /* these should only be global */
+  if (chatr & (USER_PARTY | USER_ADMIN | USER_HUBA | USER_CHUBA | USER_UPDATEHUB))
+    chatr &= ~(USER_PARTY | USER_ADMIN | USER_HUBA | USER_CHUBA | USER_UPDATEHUB);
+  /* these should only be set on bots */
+  if (!bot && (chatr & (USER_DOLIMIT | USER_DOVOICE | USER_CHANHUB)))
+    chatr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_CHANHUB);
+
   if ((chatr & USER_OP) && (chatr & USER_DEOP))
     chatr &= ~(USER_OP | USER_DEOP);
   if ((chatr & USER_AUTOOP) && (chatr & USER_DEOP))

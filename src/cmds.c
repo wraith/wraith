@@ -2489,7 +2489,7 @@ static void cmd_chattr(int idx, char *par)
     }
     if (chan) {
       ocf = user.chan;
-      user.chan = chan_sanity_check((user.chan | pls.chan) & ~mns.chan);
+      user.chan = chan_sanity_check((user.chan | pls.chan) & ~mns.chan, u2->bot);
     }
     set_user_flagrec(u2, &user, par);
   }
