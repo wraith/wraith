@@ -220,7 +220,6 @@ AC_DEFUN(EGG_CHECK_OS, [dnl
 LINUX=no
 IRIX=no
 SUNOS=no
-HPUX=no
 EGG_CYGWIN=no
 
 AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNAME -s`)
@@ -257,17 +256,6 @@ case "$egg_cv_var_system_type" in
     esac
     EGG_CYGWIN=yes
     AC_DEFINE(CYGWIN_HACKS, 1, [Define if running under cygwin])
-  ;;
-  HP-UX)
-    HPUX=yes
-    AC_DEFINE(HPUX_HACKS, 1, [Define if running on hpux that supports dynamic linking])dnl
-    if test "`echo $egg_cv_var_system_release | cut -d . -f 2`" = "10"
-    then
-      AC_DEFINE(HPUX10_HACKS, 1, [Define if running on hpux 10.x])dnl
-    fi
-  ;;
-  dell)
-    AC_MSG_RESULT(Dell SVR4)
   ;;
   IRIX)
     IRIX=yes

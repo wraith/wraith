@@ -90,10 +90,6 @@
 #define COMPRESS_CFILE		  5
 #define COMPRESS_UFILE		  7
 
-#ifdef HPUX_HACKS
-#  include <dl.h>
-#endif
-
 typedef struct _module_entry {
   struct _module_entry	*next;
   char			*name;	/* Name of the module (without .so)	*/

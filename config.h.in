@@ -35,9 +35,6 @@
 /* Define to 1 if you have the `fsync' function. */
 #undef HAVE_FSYNC
 
-/* Define to 1 if you have the `getdtablesize' function. */
-#undef HAVE_GETDTABLESIZE
-
 /* Define to 1 if you have the `gethostbyname2' function. */
 #undef HAVE_GETHOSTBYNAME2
 
@@ -228,12 +225,6 @@
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
-
-/* Define if running on hpux 10.x */
-#undef HPUX10_HACKS
-
-/* Define if running on hpux that supports dynamic linking */
-#undef HPUX_HACKS
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */

@@ -123,7 +123,7 @@ AC_FUNC_STRFTIME
 
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([clock fsync getdtablesize getrusage inet_aton isascii gethostbyname2])
+AC_CHECK_FUNCS([clock fsync getrusage inet_aton isascii gethostbyname2])
 AC_CHECK_FUNCS([getipnodebyname memcpy memset random rename setpgid sigaction sigemptyset snprintf srandom])
 #checkpoint
 AC_CACHE_SAVE

@@ -3552,7 +3552,6 @@ fi
 LINUX=no
 IRIX=no
 SUNOS=no
-HPUX=no
 EGG_CYGWIN=no
 
 echo "$as_me:$LINENO: checking system type" >&5
@@ -3736,24 +3735,6 @@ cat >>confdefs.h <<\_ACEOF
 #define CYGWIN_HACKS 1
 _ACEOF
 
-  ;;
-  HP-UX)
-    HPUX=yes
-
-cat >>confdefs.h <<\_ACEOF
-#define HPUX_HACKS 1
-_ACEOF
-    if test "`echo $egg_cv_var_system_release | cut -d . -f 2`" = "10"
-    then
-
-cat >>confdefs.h <<\_ACEOF
-#define HPUX10_HACKS 1
-_ACEOF
-    fi
-  ;;
-  dell)
-    echo "$as_me:$LINENO: result: Dell SVR4" >&5
-echo "${ECHO_T}Dell SVR4" >&6
   ;;
   IRIX)
     IRIX=yes
@@ -10924,8 +10905,7 @@ rm -f confcache
 
 
 
-
-for ac_func in clock fsync getdtablesize getrusage inet_aton isascii gethostbyname2
+for ac_func in clock fsync getrusage inet_aton isascii gethostbyname2
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5

@@ -35,14 +35,6 @@
 #include <setjmp.h>
 #include "egg_timer.h"
 
-#if !HAVE_GETDTABLESIZE
-#  ifdef FD_SETSIZE
-#    define getdtablesize() FD_SETSIZE
-#  else
-#    define getdtablesize() 200
-#  endif
-#endif /* !HAVE_GETDTABLESIZE */
-
 extern struct dcc_t	*dcc;
 extern int		 backgrd, use_stderr, dcc_total;
 extern egg_traffic_t traffic;
@@ -1080,16 +1072,11 @@ int open_telnet_dcc(int sock, char *server, char *port)
 static int sockread(char *s, int *len)
 {
   fd_set fd;
-  int fds, i, x, fdtmp;
+  int fds = 0, i, x, fdtmp;
   struct timeval t;
   int grab = SGRAB;
   egg_timeval_t howlong;
 
-  fds = getdtablesize();
-#ifdef FD_SETSIZE
-  if (fds > FD_SETSIZE)
-    fds = FD_SETSIZE;		/* Fixes YET ANOTHER freebsd bug!!! */
-#endif /* FD_SETSIZE */
   if (timer_get_shortest(&howlong)) {
     /* No timer, default to 1 second. */
     t.tv_sec = 1;
@@ -1102,32 +1089,23 @@ static int sockread(char *s, int *len)
 
   FD_ZERO(&fd);
   
-  for (i = 0; i < MAXSOCKS; i++)
+  for (i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & (SOCK_UNUSED | SOCK_VIRTUAL))) {
       if ((socklist[i].sock == STDOUT) && !backgrd)
 	fdtmp = STDIN;
       else
 	fdtmp = socklist[i].sock;
-      /* 
-       * Looks like that having more than a call, in the same
-       * program, to the FD_SET macro, triggers a bug in gcc.
-       * SIGBUS crashing binaries used to be produced on a number
-       * (prolly all?) of 64 bits architectures.
-       * Make your best to avoid to make it happen again.
-       * 
-       * ITE
-       */
+
+      if (fdtmp > fds)
+        fds = fdtmp;
       FD_SET(fdtmp, &fd);
     }
-#ifdef HPUX_HACKS
-#ifndef HPUX10_HACKS
-  x = select(fds, (int *) &fd, (int *) NULL, (int *) NULL, &t);
-#else /* !HPUX10_HACKS */
+  }
+
+  fds++;
+
   x = select(fds, &fd, NULL, NULL, &t);
-#endif /* HPUX10_HACKS */
-#else /* !HPUX_HACKS */
-  x = select(fds, &fd, NULL, NULL, &t);
-#endif /* HPUX_HACKS */
+
   if (x > 0) {
     /* Something happened */
     for (i = 0; i < MAXSOCKS; i++) {
@@ -1642,37 +1620,26 @@ void dequeue_sockets()
 {
   int i, x;
 
-  int z = 0, fds;
+  int z = 0, fds = 0;
   fd_set wfds;
   struct timeval tv;
 
 /* ^-- start poptix test code, this should avoid writes to sockets not ready to be written to. */
-  fds = getdtablesize();
-
-#ifdef FD_SETSIZE
-  if (fds > FD_SETSIZE)
-    fds = FD_SETSIZE;           /* Fixes YET ANOTHER freebsd bug!!! */
-#endif /* FD_SETSIZE */
   FD_ZERO(&wfds);
   tv.tv_sec = 0;
   tv.tv_usec = 0; 		/* we only want to see if it's ready for writing, no need to actually wait.. */
   for (i = 0; i < MAXSOCKS; i++) { 
     if (!(socklist[i].flags & SOCK_UNUSED) && socklist[i].outbuf != NULL) {
       FD_SET(socklist[i].sock, &wfds);
+      if (socklist[i].sock > fds)
+        fds = socklist[i].sock;
       z = 1; 
     }
   }
   if (!z)
     return; 			/* nothing to write */
-#ifdef HPUX_HACKS
- #ifndef HPUX10_HACKS
-  select(fds, (int *) NULL, (int *) &wfds, (int *) NULL, &tv);
- #else /* !HPUX10_HACKS */
+  fds++;
   select(fds, NULL, &wfds, NULL, &tv);
- #endif /* HPUX10_HACKS */
-#else /* !HPUX_HACKS */
-  select(fds, NULL, &wfds, NULL, &tv);
-#endif /* HPUX_HACKS */
 
 /* end poptix */
 
