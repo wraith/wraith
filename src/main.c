@@ -242,7 +242,7 @@ static int	nested_debug = 0;
 void write_debug()
 {
   int x;
-  char s[25];
+  char s[25], tmpout[150];
   int y;
 
   if (nested_debug) {
@@ -272,8 +272,14 @@ void write_debug()
 				   have caused the fault last time. */
   } else
     nested_debug = 1;
-  putlog(LOG_MISC, "*", "* Last context: %s/%d [%s]", cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
-  printf("* Last context: %s/%d [%s]\n", cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
+
+  snprintf(tmpout, sizeof tmpout, STR("* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]"),
+                                  cx_file[cx_ptr-2], cx_line[cx_ptr-2], cx_note[cx_ptr-2][0] ? cx_note[cx_ptr-2] : ""
+                                  cx_file[cx_ptr-1], cx_line[cx_ptr-1], cx_note[cx_ptr-1][0] ? cx_note[cx_ptr-1] : "",
+                                  cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
+  putlog(LOG_MISC, "*", "%s", tmpout);
+  printf("%s\n", tmpout);
+
   x = creat("DEBUG", 0600);
   setsock(x, SOCK_NONSOCK);
   if (x < 0) {
@@ -545,7 +551,7 @@ void show_help()
 
   egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
 
-  printf(STR("Wraith %s (%d)\n\n"), egg_version, egg_numver);
+  printf(STR("Wraith %s\n\n"), egg_version);
   printf(format, STR("Option"), STR("Description"));
   printf(format, STR("------"), STR("-----------"));
   printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
