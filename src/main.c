@@ -654,9 +654,6 @@ void core_10secondly()
 #endif
     curcheck=0;
   }
-
-  Context;
-  autolink_cycle(NULL);         /* attempt autolinks */
 }
 
 void do_fork() {
@@ -712,6 +709,7 @@ static void core_secondly()
     }
   }
   if ((cnt % 30) == 0) {
+    autolink_cycle(NULL);         /* attempt autolinks */
     call_hook(HOOK_30SECONDLY);
     cnt = 0;
   }
