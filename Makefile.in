@@ -82,7 +82,7 @@ clean:  cleanutils
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c utctime
 
 distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
