@@ -8,9 +8,9 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
-CC = @CC@
-LD = @CC@
-STRIP = @STRIP@
+#CC = @CC@
+#LD = @CC@
+#STRIP = @STRIP@
 CFLAGS = @CFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 

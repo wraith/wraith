@@ -24,6 +24,8 @@ EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src
 # defaults
 CC = @CC@
 LD = @CC@
+CCDEBUG = @CCDEBUG@
+LDDEBUG = @CCDEBUG@
 STRIP = @STRIP@
 
 # stuff for Tcl
@@ -44,7 +46,7 @@ MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)' \
 'MODOBJS=mod/*.o' 
 
-MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
+MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DLEAF $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 'MODOBJS=mod/*.o'
@@ -55,13 +57,13 @@ MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' \
 'MODOBJS=mod/*.o'
 
-MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
+MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'STRIP=touch' 'CFLGS=$(DEBCFLAGS) -DHUB $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'MODOBJS=mod/*.o'
 
-MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
-'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD) -g'
+MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CCDEBUG)' 'STRIP=touch' \
+'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LDDEBUG) -g'
 
 MAKE_UTILS_NR = $(MAKE) 'CC=$(CC)' 'STRIP=touch' \
 'CFLGS=$(DEBCFLAGS) $(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD) -g'

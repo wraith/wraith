@@ -106,9 +106,11 @@ then
       CC="$CC -static"
       AC_TRY_COMPILE(,, egg_cv_var_ccstatic="yes", egg_cv_var_ccstatic="no")
       CC="$ac_old_CC"
+      
     ])
     if test "$egg_cv_var_ccstatic" = "yes"
     then
+      CCDEBUG="$CC"
       CC="$CC -static"
     else
       cat << 'EOF' >&2

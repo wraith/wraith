@@ -28,6 +28,7 @@ EGG_CHECK_CCPIPE
 
 # Create static binaries
 EGG_CHECK_CCSTATIC
+AC_SUBST(CCDEBUG)dnl
 
 # Checks for programs
 AC_PROG_MAKE_SET
