@@ -2141,9 +2141,10 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
 
   for (int i = 0; i < dcc_total; i++) {
    if (dcc[i].type && !dcc[i].simul) {
-    if (dcc[i].type && dcc[i].type == &DCC_CHAT && !conf.bot->hub && !ischanhub() && u == conf.bot->u) {
+    if (dcc[i].type == &DCC_CHAT && !conf.bot->hub && !ischanhub() && u == conf.bot->u) {
       dprintf(i, "I am no longer a chathub..\n\n");
       do_boot(i, conf.bot->nick, "I am no longer a chathub.\n\n");
+      continue;
     }
 
     if ((dcc[i].type->flags & DCT_MASTER) && (!egg_strcasecmp(u->handle, dcc[i].nick))) {
@@ -2223,12 +2224,14 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
         dprintf(i, "-+- POOF! -+-\n");
         dprintf(i, "You no longer have hub access.\n\n");
         do_boot(i, conf.bot->nick, "No hub access.\n\n");
+        continue;
       }     
       if (!conf.bot->hub && ischanhub() && !(u->flags & (USER_CHUBA))) {
         /* no chanhub access, drop them. */
         dprintf(i, "-+- POOF! -+-\n");
         dprintf(i, "You no longer have chathub access.\n\n");
         do_boot(i, conf.bot->nick, "No chathub access.\n\n");
+        continue;
       }
     }
    }
