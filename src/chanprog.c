@@ -22,7 +22,6 @@
 #include "modules.h"
 
 extern struct userrec	*userlist;
-extern log_t		*logs;
 extern Tcl_Interp	*interp;
 extern char		 ver[], botnetnick[], firewall[], myip[], origbotname[],
 			 motdfile[], userfile[], tempdir[],
@@ -31,7 +30,7 @@ extern char		 ver[], botnetnick[], firewall[], myip[], origbotname[],
 
 extern time_t		 now, online_since;
 extern int		 backgrd, term_z, con_chan, cache_hit, cache_miss,
-			 firewallport, default_flags, max_logs, conmask,
+			 firewallport, default_flags, conmask,
 			 protect_readonly, noshare,
 #ifdef HUB
 			 my_port,
@@ -352,7 +351,6 @@ void tell_verbose_status(int idx)
 void tell_settings(int idx)
 {
   char s[1024];
-  int i;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
 
   dprintf(idx, "Botnet Nickname: %s\n", botnetnick);
@@ -372,12 +370,6 @@ void tell_settings(int idx)
   if (owner[0])
     dprintf(idx, "%s: %s\n", MISC_PERMOWNER, owner);
 #endif
-  for (i = 0; i < max_logs; i++)
-    if (logs[i].filename != NULL) {
-      dprintf(idx, "Logfile #%d: %s on %s (%s: %s)\n", i + 1,
-	      logs[i].filename, logs[i].chname,
-	      masktype(logs[i].mask), maskname(logs[i].mask));
-    }
   dprintf(idx, "Ignores last %d mins\n", ignore_time);
 }
 
@@ -546,7 +538,6 @@ void load_internal_users()
 
 void chanprog()
 {
-  int i;
   char buf[2048];
   struct bot_addr *bi;
   struct userrec *u;
@@ -556,8 +547,6 @@ void chanprog()
 
   /* cache our ip on load instead of every 30 seconds -zip */
   cache_my_ip();
-  for (i = 0; i < max_logs; i++)
-    logs[i].flags |= LF_EXPIRING;
   conmask = 0;
   /* Turn off read-only variables (make them write-able) for rehash */
   protect_readonly = 0;
@@ -605,25 +594,6 @@ void chanprog()
     set_user(&USERENTRY_BOTADDR, u, bi);
   } else {
     bi = get_user(&USERENTRY_BOTADDR, u);
-  }
-
-  for (i = 0; i < max_logs; i++) {
-    if (logs[i].flags & LF_EXPIRING) {
-      if (logs[i].filename != NULL) {
-        nfree(logs[i].filename);
-        logs[i].filename = NULL;
-      }
-      if (logs[i].chname != NULL) {
-        nfree(logs[i].chname);
-        logs[i].chname = NULL;
-      }
-      if (logs[i].f != NULL) {
-        fclose(logs[i].f);
-        logs[i].f = NULL;
-      }
-      logs[i].mask = 0;
-      logs[i].flags = 0;
-    }
   }
 
   bi = get_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, botnetnick));

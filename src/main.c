@@ -67,12 +67,11 @@ extern char		 origbotname[], userfile[], botnetnick[],
                          thekey[], netpass[], shellpass[], myip6[], myip[], hostname[],
                          hostname6[], natip[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
-			 max_logs, quick_logs, fork_interval, 
+			 fork_interval, 
                          local_fork_interval;
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
-extern log_t		*logs;
 extern Tcl_Interp	*interp;
 extern tcl_timer_t	*timer,
 			*utimer;
@@ -108,9 +107,6 @@ char *binname;
 int     sdebug = 0;		/* enable debug output? */
 char	configfile[121] = ""; /* Name of the config file */
 char	textdir[121] = "";	/* Directory for text files that get dumped */
-int	keep_all_logs = 0;	/* Never erase logfiles, no matter how old
-				   they are? */
-char	logfile_suffix[21] = ".%d%b%Y"; /* Format of logfile suffix. */
 time_t	online_since;		/* Unix-time that the bot loaded up */
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
@@ -120,7 +116,6 @@ int	save_users_at = 0;	/* How many minutes past the hour to
 				   save the userfile? */
 int	notify_users_at = 0;	/* How many minutes past the hour to
 				   notify users of notes? */
-int	switch_logfiles_at = 300; /* When (military time) to switch logfiles */
 char	version[81];		/* Version info (long form) */
 char	ver[41];		/* Version info (short form) */
 int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
@@ -185,7 +180,7 @@ void fatal(const char *s, int recoverable)
 #endif /* LEAF */
   if (s[0])
     putlog(LOG_MISC, "*", "* %s", s);
-  flushlogs();
+/*  flushlogs(); */
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].sock >= 0)
       killsock(dcc[i].sock);
@@ -733,25 +728,15 @@ static void core_secondly()
     miltime = (nowtm.tm_hour * 100) + (nowtm.tm_min);
     if (((int) (nowtm.tm_min / 5) * 5) == (nowtm.tm_min)) {	/* 5 min */
       call_hook(HOOK_5MINUTELY);
-      if (!quick_logs) {
-	flushlogs();
-	check_logsize();
-      }
+/* 	flushlogs(); */
       if (!miltime) {	/* At midnight */
 	char s[25];
-	int j;
 
 	strncpyz(s, ctime(&now), sizeof s);
 #ifdef HUB
 	putlog(LOG_ALL, "*", "--- %.11s%s", s, s + 20);
 	call_hook(HOOK_BACKUP);
 #endif
-	for (j = 0; j < max_logs; j++) {
-	  if (logs[j].filename != NULL && logs[j].f != NULL) {
-	    fclose(logs[j].f);
-	    logs[j].f = NULL;
-	  }
-	}
       }
     }
     if (nowtm.tm_min == notify_users_at)
@@ -760,23 +745,8 @@ static void core_secondly()
      * settings and we only get this far on the minute.
      */
 #ifdef HUB
-    if (miltime == switch_logfiles_at) {
+    if (miltime == 300) {
       call_hook(HOOK_DAILY);
-      if (!keep_all_logs) {
-	putlog(LOG_MISC, "*", MISC_LOGSWITCH);
-	for (i = 0; i < max_logs; i++)
-	  if (logs[i].filename) {
-	    char s[1024];
-
-	    if (logs[i].f) {
-	      fclose(logs[i].f);
-	      logs[i].f = NULL;
-	    }
-	    egg_snprintf(s, sizeof s, "%s.yesterday", logs[i].filename);
-	    unlink(s);
-	    movefile(logs[i].filename, s);
-	  }
-      }
     }
 #endif
   }
@@ -820,10 +790,7 @@ static void core_minutely()
 
   check_tcl_time(&nowtm);
   do_check_timers(&timer);
-  if (quick_logs != 0) {
-    flushlogs();
-    check_logsize();
-  }
+/*     flushlogs(); */
 }
 
 static void core_hourly()
@@ -846,11 +813,6 @@ static void event_prerehash()
 static void event_save()
 {
   check_tcl_event("save");
-}
-
-static void event_logfile()
-{
-  check_tcl_event("logfile");
 }
 
 static void event_resettraffic()
@@ -1546,7 +1508,7 @@ Context;
 #ifdef HUB
           sprintf(userfile, "%s/.%s.user", confdir, nick);
 #endif /* HUB */
-
+/* log          sprintf(logfile, "%s/.%s.log", confdir, nick); */
           if (host && host[1]) { //only copy host if it is longer than 1 char (.)
             if (host[0] == '+') { //ip6 host
               host++;
@@ -1743,7 +1705,6 @@ Context;
 #ifdef HUB
   add_hook(HOOK_BACKUP, (Function) backup_userfile);  
 #endif /* HUB */
-  add_hook(HOOK_DAILY, (Function) event_logfile);
   add_hook(HOOK_DAILY, (Function) event_resettraffic);
   add_hook(HOOK_LOADED, (Function) event_loaded);
 
@@ -1900,7 +1861,7 @@ Context;
 	  /* Should be only 3 modules now - eggdrop, encryption, and uptime */
 	  putlog(LOG_MISC, "*", MOD_STAGNANT);
 
-	flushlogs();
+/* 	flushlogs(); */
 	kill_tcl();
 	init_tcl(argc, argv);
 

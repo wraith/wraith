@@ -19,91 +19,15 @@ extern char		 origbotname[], botnetnick[], quit_msg[];
 extern struct userrec	*userlist;
 extern time_t		 now;
 extern module_entry	*module_list;
-extern int max_logs, timesync;
-extern log_t *logs;
+extern int timesync;
 extern Tcl_Interp *interp;
 
 int expmem_tclmisc()
 {
   int i, tot = 0;
-
-  for (i = 0; i < max_logs; i++)
-    if (logs[i].filename != NULL) {
-      tot += strlen(logs[i].filename) + 1;
-      tot += strlen(logs[i].chname) + 1;
-    }
   return tot;
 }
 
-/*
- *      Logging
- */
-
-/* logfile [<modes> <channel> <filename>] */
-#ifdef HUB
-static int tcl_logfile STDVAR
-{
-  int i;
-  char s[151];
-
-  BADARGS(1, 4, " ?logModes channel logFile?");
-  if (argc == 1) {
-    /* They just want a list of the logfiles and modes */
-    for (i = 0; i < max_logs; i++)
-      if (logs[i].filename != NULL) {
-	strcpy(s, masktype(logs[i].mask));
-	strcat(s, " ");
-	strcat(s, logs[i].chname);
-	strcat(s, " ");
-	strcat(s, logs[i].filename);
-	Tcl_AppendElement(interp, s);
-      }
-    return TCL_OK;
-  }
-  BADARGS(4, 4, " ?logModes channel logFile?");
-  for (i = 0; i < max_logs; i++)
-    if ((logs[i].filename != NULL) && (!strcmp(logs[i].filename, argv[3]))) {
-      logs[i].flags &= ~LF_EXPIRING;
-      logs[i].mask = logmodes(argv[1]);
-      nfree(logs[i].chname);
-      logs[i].chname = NULL;
-      if (!logs[i].mask) {
-	/* ending logfile */
-	nfree(logs[i].filename);
-	logs[i].filename = NULL;
-	if (logs[i].f != NULL) {
-	  fclose(logs[i].f);
-	  logs[i].f = NULL;
-	}
-        logs[i].flags = 0;
-      } else {
-	logs[i].chname = (char *) nmalloc(strlen(argv[2]) + 1);
-	strcpy(logs[i].chname, argv[2]);
-      }
-      Tcl_AppendResult(interp, argv[3], NULL);
-      return TCL_OK;
-    }
-  /* Do not add logfiles without any flags to log ++rtc */
-  if (!logmodes (argv [1])) {
-    Tcl_AppendResult (interp, "can't remove \"", argv[3],
-                     "\" from list: no such logfile", NULL);
-    return TCL_ERROR;
-  }
-  for (i = 0; i < max_logs; i++)
-    if (logs[i].filename == NULL) {
-      logs[i].flags = 0;
-      logs[i].mask = logmodes(argv[1]);
-      logs[i].filename = (char *) nmalloc(strlen(argv[3]) + 1);
-      strcpy(logs[i].filename, argv[3]);
-      logs[i].chname = (char *) nmalloc(strlen(argv[2]) + 1);
-      strcpy(logs[i].chname, argv[2]);
-      Tcl_AppendResult(interp, argv[3], NULL);
-      return TCL_OK;
-    }
-  Tcl_AppendResult(interp, "reached max # of logfiles", NULL);
-  return TCL_ERROR;
-}
-#endif
 static int tcl_putlog STDVAR
 {
   char logtext[501];
@@ -113,60 +37,7 @@ static int tcl_putlog STDVAR
   putlog(LOG_MISC, "*", "%s", logtext);
   return TCL_OK;
 }
-static int tcl_putlogl STDVAR
-{
-  char logtext[501];
 
-  BADARGS(2, 2, " text");
-  strncpyz(logtext, argv[1], sizeof logtext);
-  putlog(LOG_MISC, "@", "%s", logtext);
-  return TCL_OK;
-}
-
-static int tcl_putcmdlog STDVAR
-{
-  char logtext[501];
-
-  BADARGS(2, 2, " text");
-  strncpyz(logtext, argv[1], sizeof logtext);
-  putlog(LOG_CMDS, "*", "%s", logtext);
-  return TCL_OK;
-}
-static int tcl_putcmdlogl STDVAR
-{
-  char logtext[501];
-
-  BADARGS(2, 2, " text");
-  strncpyz(logtext, argv[1], sizeof logtext);
-  putlog(LOG_CMDS, "@", "%s", logtext);
-  return TCL_OK;
-}
-
-static int tcl_putxferlog STDVAR
-{
-  char logtext[501];
-
-  BADARGS(2, 2, " text");
-  strncpyz(logtext, argv[1], sizeof logtext);
-  putlog(LOG_FILES, "*", "%s", logtext);
-  return TCL_OK;
-}
-
-static int tcl_putloglev STDVAR
-{
-  int lev = 0;
-  char logtext[501];
-
-  BADARGS(4, 4, " level channel text");
-  lev = logmodes(argv[1]);
-  if (!lev) {
-    Tcl_AppendResult(irp, "No valid log-level given", NULL);
-    return TCL_ERROR;
-  }
-  strncpyz(logtext, argv[3], sizeof logtext);
-  putlog(lev, argv[2], "%s", logtext);
-  return TCL_OK;
-}
 static int tcl_binds STDVAR
 {
   tcl_bind_list_t	*tl, *tl_kind;
@@ -217,6 +88,7 @@ static int tcl_binds STDVAR
   }
   return TCL_OK;
 }
+
 static int tcl_timer STDVAR
 {
   unsigned long x;
@@ -564,15 +436,7 @@ tcl_cmds tclmisc_objcmds[] =
 
 tcl_cmds tclmisc_cmds[] =
 {
-#ifdef HUB
-  {"logfile",           tcl_logfile},
-#endif
   {"putlog",		tcl_putlog},
-  {"putlogl",		tcl_putlogl},
-  {"putcmdlog",		tcl_putcmdlog},
-  {"putcmdlogl",	tcl_putcmdlogl},
-  {"putxferlog",	tcl_putxferlog},
-  {"putloglev",		tcl_putloglev},
   {"timer",		tcl_timer},
   {"utimer",		tcl_utimer},
   {"killtimer",		tcl_killtimer},

@@ -1,7 +1,6 @@
 /*
  * misc.c -- handles:
  *   split() maskhost() dumplots() daysago() days() daysdur()
- *   logging things
  *   queueing output for the bot (msg and help)
  *   resync buffers for sharebots
  *   motd display and %var substitution
@@ -43,14 +42,14 @@ extern tand_t *tandbot;
 
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
-			 bannerfile[], logfile_suffix[], textdir[], userfile[],  
+			 bannerfile[], textdir[], userfile[],  
                          *binname, pid_file[], netpass[], tempdir[];
 
 extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug, 
 #ifdef HUB
                          my_port,
 #endif
-			 keep_all_logs, quick_logs, strict_host, loading,
+			 strict_host, loading,
                          localhub;
 extern time_t		 now;
 extern Tcl_Interp	*interp;
@@ -59,9 +58,6 @@ void detected(int, char *);
 
 int	 shtime = 1;		/* Whether or not to display the time
 				   with console output */
-log_t	*logs = 0;		/* Logfiles */
-int	 max_logs = 5;		/* Current maximum log files */
-int	 max_logsize = 0;	/* Maximum logfile size, 0 for no limit */
 int	 conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
 int	 debug_output = 1;	/* Disply output to server to LOG_SERVEROUT */
 
@@ -454,7 +450,7 @@ int expmem_misc()
   tot += sizeof(struct auth_t) * max_auth;
   tot += strlen(binname) + 1;
 
-  return tot + (max_logs * sizeof(log_t));
+  return tot;
 }
 
 void init_auth_max()
@@ -469,26 +465,8 @@ void init_auth_max()
 
 void init_misc()
 {
-  static int last = 0;
 
   init_auth_max();
-
-  if (max_logs < 1)
-    max_logs = 1;
-  if (logs)
-    logs = nrealloc(logs, max_logs * sizeof(log_t));
-  else
-    logs = nmalloc(max_logs * sizeof(log_t));
-  for (; last < max_logs; last++) {
-    logs[last].filename = logs[last].chname = NULL;
-    logs[last].mask = 0;
-    logs[last].f = NULL;
-    /* Added by cybah  */
-    logs[last].szlast[0] = 0;
-    logs[last].repeats = 0;
-    /* Added by rtc  */
-    logs[last].flags = 0;
-  }
 
   add_cfg(&CFG_AUTHKEY);
   add_cfg(&CFG_MOTD);
@@ -986,7 +964,7 @@ int prand(int *seed, int range)
 void putlog EGG_VARARGS_DEF(int, arg1)
 {
   int i, type, tsl = 0, dohl = 0; //hl
-  char *format, *chname, s[LOGLINELEN], s1[256], *out, ct[81], *s2, stamp[34], buf2[LOGLINELEN]; 
+  char *format, *chname, s[LOGLINELEN], *out, stamp[34], buf2[LOGLINELEN]; 
   va_list va;
 #ifdef HUB
   time_t now2 = time(NULL);
@@ -1021,21 +999,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   egg_vsnprintf(out, LOGLINEMAX - tsl, format, va);
 
   out[LOGLINEMAX - tsl] = 0;
-  if (keep_all_logs) {
-    if (!logfile_suffix[0])
-      egg_strftime(ct, 12, ".%d%b%Y", t);
-    else {
-      egg_strftime(ct, 80, logfile_suffix, t);
-      ct[80] = 0;
-      s2 = ct;
-      /* replace spaces by underscores */
-      while (s2[0]) {
-	if (s2[0] == ' ')
-	  s2[0] = '_';
-	s2++;
-      }
-    }
-  }
+
   /* Place the timestamp in the string to be printed */
   if ((out[0]) && (shtime)) {
     strncpy(s, stamp, tsl);
@@ -1043,50 +1007,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   }
 
   strcat(out, "\n");
-  if (!use_stderr) {
-    for (i = 0; i < max_logs; i++) {
-      if ((logs[i].filename != NULL) && (logs[i].mask & type) &&
-	  ((chname[0] == '@') || (chname[0] == '*') || (logs[i].chname[0] == '*') ||
-	   (!rfc_casecmp(chname, logs[i].chname)))) {
-	if (logs[i].f == NULL) {
-	  /* Open this logfile */
-	  if (keep_all_logs) {
-	    egg_snprintf(s1, 256, "%s%s", logs[i].filename, ct);
-	    logs[i].f = fopen(s1, "a+");
-	  } else
-	    logs[i].f = fopen(logs[i].filename, "a+");
-	}
-	if (logs[i].f != NULL) {
-	  /* Check if this is the same as the last line added to
-	   * the log. <cybah>
-	   */
-          if (!egg_strcasecmp(out + tsl, logs[i].szlast))
-	    /* It is a repeat, so increment repeats */
-	    logs[i].repeats++;
-	  else {
-	    /* Not a repeat, check if there were any repeat
-	     * lines previously...
-	     */
-	    if (logs[i].repeats > 0) {
-	      /* Yep.. so display 'last message repeated x times'
-	       * then reset repeats. We want the current time here,
-	       * so put that in the file first.
-	       */
-              fprintf(logs[i].f, stamp);
-	      fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
-	      
-	      logs[i].repeats = 0;
-	      /* No need to reset logs[i].szlast here
-	       * because we update it later on...
-	       */
-	    }
-	    fputs(out, logs[i].f);
-           strncpyz(logs[i].szlast, out + tsl, LOGLINEMAX);
-	  }
-	}
-      }
-    }
-  }
+  /* WRITE LOG HERE */
 /* echo line to hubs (not if it was on a +h though)*/
 
   if (dohl) {
@@ -1122,94 +1043,6 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   }
   va_end(va);
 }
-
-/* Called as soon as the logfile suffix changes. All logs are closed
- * and the new suffix is stored in `logfile_suffix'.
- */
-void logsuffix_change(char *s)
-{
-  int	 i;
-  char	*s2 = logfile_suffix;
-
-  debug0("Logfile suffix changed. Closing all open logs.");
-  strcpy(logfile_suffix, s);
-  while (s2[0]) {
-    if (s2[0] == ' ')
-      s2[0] = '_';
-    s2++;
-  }
-  for (i = 0; i < max_logs; i++) {
-    if (logs[i].f) {
-      fflush(logs[i].f);
-      fclose(logs[i].f);
-      logs[i].f = NULL;
-    }
-  }
-}
-
-void check_logsize()
-{
-  struct stat ss;
-  int i;
-/* int x=1; */
-  char buf[1024];		/* Should be plenty */
-
-  if (!keep_all_logs && max_logsize > 0) {
-    for (i = 0; i < max_logs; i++) {
-      if (logs[i].filename) {
-	if (stat(logs[i].filename, &ss) != 0) {
-	  break;
-	}
-	if ((ss.st_size >> 10) > max_logsize) {
-	  if (logs[i].f) {
-	    /* write to the log before closing it huh.. */
-	    putlog(LOG_MISC, "*", MISC_CLOGS, logs[i].filename, ss.st_size);
-	    fflush(logs[i].f);
-	    fclose(logs[i].f);
-	    logs[i].f = NULL;
-	  }
-
-	  egg_snprintf(buf, sizeof buf, "%s.yesterday", logs[i].filename);
-	  buf[1023] = 0;
-	  unlink(buf);
-	  movefile(logs[i].filename, buf);
-	}
-      }
-    }
-  }
-}
-
-/* Flush the logfiles to disk
- */
-void flushlogs()
-{
-  int i;
-
-  /* Logs may not be initialised yet. */
-  if (!logs)
-    return;
-
-  /* Now also checks to see if there's a repeat message and
-   * displays the 'last message repeated...' stuff too <cybah>
-   */
-  for (i = 0; i < max_logs; i++) {
-    if (logs[i].f != NULL) {
-      if ((logs[i].repeats > 0) && quick_logs) {
-         /* Repeat.. if quicklogs used then display 'last message
-          * repeated x times' and reset repeats.
-	  */
-         char stamp[32];
-         egg_strftime(&stamp[0], 32, LOG_TS, localtime(&now));
-         fprintf(logs[i].f, "%s ", stamp);
-	 fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
-	/* Reset repeats */
-	logs[i].repeats = 0;
-      }
-      fflush(logs[i].f);
-    }
-  }
-}
-
 
 char *extracthostname(char *hostmask)
 {

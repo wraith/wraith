@@ -804,6 +804,7 @@ If you have flags on a channel, type %sconsole #chan to see more commands.\n"), 
 
 static void cmd_addlog(struct userrec *u, int idx, char *par)
 {
+  putlog(LOG_CMDS, "*", "#%s# addlog %s", dcc[idx].nick, par);
   putlog(LOG_MISC, "*", "%s: %s", dcc[idx].nick, par);
   if (!par[0]) {
     dprintf(idx, "Usage: addlog <message>\n");
@@ -4024,6 +4025,7 @@ dcc_cmd_t C_dcc[] =
   {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL,    NULL},
   {"-user",		"m",	(Function) cmd_mns_user,	NULL,    NULL},
   {"addlog",		"mo|o",	(Function) cmd_addlog,		NULL,    NULL},
+  {"putlog",		"mo|o",	(Function) cmd_addlog,		NULL,	 NULL},
   {"about",		"",	(Function) cmd_about,		NULL,    NULL},
   {"away",		"",	(Function) cmd_away,		NULL,    NULL},
   {"back",		"",	(Function) cmd_back,		NULL,    NULL},
