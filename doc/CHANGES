@@ -14,8 +14,12 @@ Wraith - CHANGES
 @ 2.Source code now in CVS.
 @ 3.bldall has been moved to build, type ./build for usage.
 @ 4.Makefiles are improved greatly.
-@ 5.Organized all files more effeciently
+@ 5.Organized all files better.
 + 6.Created TODO file.
++ 7.Cmdline params: -n/-t now work with password. See Eggdrop help.
+@ 8.Passwords are no longer echoed back to terminal.
++ 9.Specifying ipv6 ip as last param in conf now supported.
+@ 10.Cmdline params -e/-d now except STDOUT as the outfile (echos to terminal).
 
 1.0.1
 ! 1.Fixed a cosmetic bug in show_channels

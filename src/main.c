@@ -15,6 +15,8 @@
 #include <signal.h>
 #include <netdb.h>
 #include <setjmp.h>
+#include <unistd.h>
+
 #ifdef HAVE_UNAME
 #include <sys/utsname.h>
 #endif
@@ -62,7 +64,7 @@ int leaf = 1;
 int localhub = 0;
 
 extern char		 origbotname[], userfile[], botnetnick[], 
-                         thekey[], netpass[], thepass[], myip[], hostname[],
+                         thekey[], netpass[], thepass[], myip6[], myip[], hostname[],
                          hostname6[], natip[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
 			 max_logs, quick_logs, fork_interval, 
@@ -91,12 +93,14 @@ char	notify_new[121] = "";	/* Person to send a note to for new users */
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
-int	backgrd = 0;		/* Run in the background? */
+int	backgrd = 1;		/* Run in the background? */
 int	con_chan = 0;		/* Foreground: constantly display channel
 				   stats? */
 uid_t   myuid;
 int	term_z = 1;		/* Foreground: use the terminal as a party
 				   line? */
+
+int cpass = 0; /* check pass ? */
 int updating = 0; /* this is set when the binary is called from itself. */
 char tempdir[DIRMAX] = "";
 char lock_file[40] = "";
@@ -535,69 +539,81 @@ void eggAssert(const char *file, int line, const char *module)
 
 #ifdef LEAF
 static void gotspawn(char *);
+#endif
 
-//#define PARSE_FLAGS "HlinvPc"
+
+void checkpass() 
+{
+  char *gpasswd;
+  MD5_CTX ctx;
+  int i = 0;
+
+  gpasswd = (char *) getpass(STR("* Enter password: "));
+  MD5_Init(&ctx);
+  MD5_Update(&ctx, gpasswd, strlen(gpasswd));
+  MD5_Final(md5out, &ctx);
+  for(i=0; i<16; i++)
+    sprintf(md5string + (i*2), "%.2x", md5out[i]);
+  if (strcmp(thepass, md5string)) {
+    fatal("incorrect password.",0);
+    exit(1); //this shouldn't be reached..
+  }
+  gpasswd = 0;
+}
+
+
+#ifdef LEAF
 #define PARSE_FLAGS "nvPct"
+#endif
+#ifdef HUB
+#define PARSE_FLAGS "ntv"
+#endif
 static void dtx_arg(int argc, char *argv[])
 {
   int i;
+#ifdef LEAF
   char *p = NULL;
+#endif
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     switch (i) {
-      case 'i':
-        if (localhub) break;
-        p = argv[optind];
-        if (p[0] == '!') {
-          p++;
-          sprintf(natip, "%s",p);
-        } else {
-          snprintf(myip, 121, "%s", p);
-        }
-        break;
+#ifdef LEAF
       case 'c':
         p = argv[optind];
         if (!localhub)
           gotspawn(p);
         break;
-      case 'H':
-        if (localhub) break;
-	Context;
-        p = argv[optind];
-        if (p[0] == '+') {
-          p++;
-          sprintf(hostname6, "%s", p);
-        } else
-          sprintf(hostname, "%s", p);
-        break;
-      case 'l':
-        if (localhub) break;
-        localhub = 0; //a respawn.
-        snprintf(origbotname, 10, "%s", argv[optind]);
-        break;
+#endif
       case 'n':
+        cpass = 1;
 	backgrd = 0;
 	break;
       case 't':
         term_z = 0;
         break;
       case 'v':
+	checkpass();
 	printf("%d\n", egg_numver);
 	bg_send_quit(BG_ABORT);
 	exit(0);
  	  break; /* this should never be reached */
+#ifdef LEAF
       case 'P':
         if (getppid() != atoi(argv[optind]))
-          fatal("LIES",0);
+          exit(0);
+        else {
+          if (SDEBUG)
+            printf("Updating...\n");
+        }
         localhub = 1;
         updating = 1;
         break;
+#endif
       default:
         exit(1);
         break;
     }
   }
 }
-#endif
 
 #ifdef HUB
 void backup_userfile()
@@ -1002,7 +1018,7 @@ static void check_crontab()
 static void gotspawn(char *filename)
 {
   FILE *fp;
-  char templine[8192], *nick, *host, *ip, *temps;
+  char templine[8192], *nick, *host, *ip, *temps, *ipsix;
 
   if (!(fp = fopen(filename, "r")))
     fatal("Cannot read from local config (2)", 0);
@@ -1029,17 +1045,18 @@ static void gotspawn(char *filename)
     host = newsplit(&temps);
     if (!host && (ip[0] != '!'))
       fatal("invalid config (2).",0);
-
-    if (ip[0] == '!') { //natip
-      ip++;
-      sprintf(natip,"%s",ip);
-    } else {
-      snprintf(myip, 121, "%s", ip);
+    if (ip[1]) {
+      if (ip[0] == '!') { //natip
+        ip++;
+        sprintf(natip,"%s",ip);
+      } else {
+        snprintf(myip, 120, "%s", ip);
+      }
     }
 
     snprintf(origbotname, 10, "%s", nick);
 
-    if (host[0]) {
+    if (host && host[1]) {
       if (host[0] == '+') { //ip6 host
         host++;
         sprintf(hostname6,"%s",host);
@@ -1047,11 +1064,17 @@ static void gotspawn(char *filename)
         sprintf(hostname,"%s",host);
       }
     }
+    ipsix = newsplit(&temps);
+
+    if (ipsix && ipsix[1]) {
+      snprintf(myip6, 120, "%s", ipsix);
+    }
   }
   fclose(fp);
-  unlink(filename);
+//  unlink(filename);
 }
-static int spawnbot(char *bin, char *nick, char *ip, char *host)
+
+static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix)
 {
   char buf[DIRMAX], bindir[DIRMAX], bufrun[DIRMAX];
   FILE *fp;
@@ -1065,7 +1088,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host)
   if (!(fp = fopen(buf, "w")))
     fatal("Cannot create spawnfiles...", 0);
 
-  lfprintf(fp, "%s %s %s\n", nick, ip, host[0] ? host : "");
+  lfprintf(fp, "%s %s %s %s\n", nick, ip, host, ipsix);
 
   fflush(fp);
   fclose(fp);
@@ -1075,6 +1098,8 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host)
   return system(bufrun);
 }
 #endif
+
+
 int main(int argc, char **argv)
 {
   int xx, i;
@@ -1082,12 +1107,10 @@ int main(int argc, char **argv)
   int x = 1;
 #endif
   char buf[sgrab + 9], s[25];
-  char gpasswd[121];
   FILE *f;
   struct sigaction sv;
   struct chanset_t *chan;
   struct stat sb;
-  MD5_CTX ctx;
 #ifdef LEAF
   struct stat ss;
   int skip = 0;
@@ -1109,7 +1132,6 @@ int main(int argc, char **argv)
   struct utsname un;
 #endif
   char check[100];
-  char *nick,*host,*ip;
 
 #ifdef DEBUG_MEM
   /* Make sure it can write core, if you make debug. Else it's pretty
@@ -1192,8 +1214,6 @@ int main(int argc, char **argv)
   Context;
   binname = getfullbinname(argv[0]);
   Context;
-  if (SDEBUG)
-    printf("degarble from lang.h test: %s\n", DETEST);
 #ifdef S_ANTITRACE
   {
     int parent = getpid();
@@ -1272,46 +1292,31 @@ int main(int argc, char **argv)
   init_settings();
 
   if (argc >= 2) {
-      if (!strcmp(argv[1], "-v") || !strcmp(argv[1],"-d") || !strcmp(argv[1],"-e")) {
-      //lets parse -v/-e/-d before checking anything else.
-        if (!strcmp(argv[1], "-v")) {
-          printf("%d\n", egg_numver);
-        } else {  //encrypt/decrypt file
-            if (argc != 4) 
-              fatal("Wrong number of arguments: -e/-d <infile> <outfile>",0);
-            printf("* Enter password: ");
-            fgets(gpasswd, sizeof(gpasswd), stdin);
-            if (strchr(gpasswd, '\n'))
-              *strchr(gpasswd, '\n') = 0;
-            printf("\n");
-            MD5_Init(&ctx);
-            MD5_Update(&ctx, gpasswd, strlen(gpasswd));
-            MD5_Final(md5out, &ctx);
-            for(i=0; i<16; i++)
-              sprintf(md5string + (i*2), "%.2x", md5out[i]);
-            if (strcmp(thepass, md5string))
-              fatal("incorrect password.",0);
-            init_tcl(argc, argv);
-            check_static("blowfish", blowfish_start);
-            //link_statics();
+      if (!strcmp(argv[1],"-d") || !strcmp(argv[1],"-e")) {
+          //lets parse -e/-d before checking anything else.
+          if (argc != 4) 
+            fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
+          checkpass();
+          init_tcl(argc, argv);
+          check_static("blowfish", blowfish_start);
+          Context;
+          module_load(ENCMOD);
+          if (!strcmp(argv[1], "-e")) {
             Context;
-            module_load(ENCMOD);
-            if (!strcmp(argv[1], "-e")) {
-              Context;
-              EncryptFile(argv[2],argv[3]);
-              fatal("File Encryption complete",3);
-            } else if (!strcmp(argv[1], "-d")) {
-              Context;
-              DecryptFile(argv[2],argv[3]);
-              fatal("File Decryption complete",3);
-            }
-        }
+            EncryptFile(argv[2],argv[3]);
+            fatal("File Encryption complete",3);
+          } else if (!strcmp(argv[1], "-d")) {
+            Context;
+            DecryptFile(argv[2],argv[3]);
+            fatal("File Decryption complete",3);
+          }
       exit(0); 
       }
   }
 
 
 #ifdef LEAF
+
 /* not needed
   id = geteuid();
   if (!id) 
@@ -1405,19 +1410,32 @@ Context;
   }
 
   // Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config...
+
+  /* this code checks for -c, if not present assume we are a localhub. -c is gotspawn from a localhub. */  
+  localhub=1;
+  for (i=0;i<argc;i++) {
+    if (!strcmp(argv[i], "-c"))
+      localhub=0;
+  }
+/* obsolete
   if (argc == 1) {
-    /* if we get here, the lockfile was just made
-     * which means this is the first binary running, so 
-     * lets make it the spawn bot and spawn the other bots
-     * I am the first running bot*/ 
+    // I am the first running bot
     localhub = 1; //we will use this after checking for config access
   }
+*/
 
   init_tcl(argc, argv);
 
-  if (argc)
-    dtx_arg(argc, argv);
 #endif
+
+  if (argc) {
+    if (SDEBUG)
+      printf("Calling dtx_arg with %d params.\n", argc);
+    dtx_arg(argc, argv);
+  }
+  if (cpass)
+    checkpass();
+  cpass = 0;
  
   snprintf(tmp, sizeof tmp, "%s/", confdir);
   if (stat(tmp, &sb)) {
@@ -1505,14 +1523,24 @@ Context;
 #endif /* HAVE_UNAME */
     i = 0;
     if (!(f = fopen(cfile, "r")))
-      fatal("the local config is missing.\n",0);
+      fatal(STR("the local config is missing."),0);
     while(fscanf(f,"%[^\n]\n",templine) != EOF) {
+      char *nick=NULL,*host=NULL,*ip=NULL,*ipsix=NULL;
       int skip = 0;
       Context;
+      if (templine[0] != '+') {
+        printf(STR("%d: "), i);
+        fatal(STR("conf not encrypted correctly."), 0);
+      }
+
       temps = (char *) decrypt_string(netpass, decryptit(templine));
+      if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
+        printf(STR("%d: "), i);
+        fatal(STR("Invalid config or encryption."),0);
+      }
+
       snprintf(c, sizeof c, "%s",temps);
-      if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), templine[0]))
-        fatal("Invalid config or encryption.",0);
+
       if (c[0] == '*')
         skip = 1;
       else if (c[0] == '-' && !skip) { //this is the uid
@@ -1541,12 +1569,26 @@ Context;
         nick = newsplit(&temps);
         if (!nick)
           fatal("invalid config.",0);
-        ip = newsplit(&temps);
+        if (SDEBUG)
+          printf("Read nick from config: %s\n", nick);
+
+        if (temps[0])
+          ip = newsplit(&temps);
         if (!ip)
           fatal("invalid config..",0);
-        host = newsplit(&temps);
-        if (!host && (ip[0] != '!'))
-          fatal("invalid config...",0);
+        if (temps[0])
+          host = newsplit(&temps);
+//        if (!host && (ip[0] != '!'))
+//          fatal("invalid config...",0);
+        if (host && !host[1] && (ip && ip[0] != '!'))
+          host[0] = '.';
+
+        if (temps[0])
+          ipsix = newsplit(&temps);
+
+        if (ipsix && !ipsix[1])
+          ipsix[0] = '.';
+
         if (i == 1) { //this is the first bot ran/parsed
           strncpyz(s, ctime(&now), sizeof s);
           strcpy(&s[11], &s[20]);
@@ -1557,7 +1599,7 @@ Context;
             sprintf(natip, "%s",ip);
           } else {
 #endif
-            snprintf(myip, 121, "%s", ip);
+            snprintf(myip, 120, "%s", ip);
 #ifdef LEAF
           }
 #endif
@@ -1566,7 +1608,7 @@ Context;
           sprintf(userfile, "%s/.%s.user", confdir, nick);
 #endif
 
-          if (host[0]) {
+          if (host && host[1]) {
 #ifdef LEAF
             if (host[0] == '+') { //ip6 host
               host++;
@@ -1574,6 +1616,9 @@ Context;
             } else  //normal ip4 host
 #endif
               sprintf(hostname, "%s",host);
+          }
+          if (ipsix && ipsix[1]) {
+            snprintf(myip6, 120, "%s",ipsix);
           }
         } 
 #ifdef LEAF
@@ -1595,15 +1640,11 @@ Context;
             kill(xx, SIGCHLD);
             if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
 
-            if (spawnbot(binname, nick, ip, host))
-//              snprintf(buf2, sizeof buf2, "%s -l %s -i %s %s %s", binname, nick, ip, host[0] ? "-H" : "", host[0] ? host : "");   
-//              if (system(buf2))
+            if (spawnbot(binname, nick, ip, host, ipsix))
                 printf("* Failed to spawn %s\n", nick); //This probably won't ever happen.
             } 
           } else {
-            if (spawnbot(binname, nick, ip, host))
-//            snprintf(buf2, sizeof buf2, "%s -l %s -i %s %s %s", binname, nick, ip, host[0] ? "-H" : "", host[0] ? host : "");   
-//            if (system(buf2))
+            if (spawnbot(binname, nick, ip, host, ipsix))
               printf("* Failed to spawn %s\n", nick); //This probably won't ever happen.
           }
         }
@@ -1670,13 +1711,14 @@ Context;
       }
     }
   }
+
 #ifdef LEAF
 {
   long test = iptolong(getmyip(1));
-  if (!test && strcmp(myip,"0.0.0.0"))
-    fatal("no ip?",0);
+  test = 0;
 }
 #endif
+
 
   i = 0;
   for (chan = chanset; chan; chan = chan->next)

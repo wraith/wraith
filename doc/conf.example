@@ -6,7 +6,9 @@
 #The second must be the output from uname -nv (-nr on FBSD)
 #+ somebox #1 SMP Thu May 29 06:55:05 EDT 2003
 #any lines after should be in this format:
-#botnick [!]ip4 [+]hostname (the + means ipv6) (the ! means internal NAT ip address, IE: 10.10.0.3, Hostname REQUIRED)
+#botnick [!]ip4 [+]hostname IPv6-ip (the + means ipv6) 
+#If there is no hostname for the ipv6 ip, just put a "." in place of hostname.
+#(the ! means internal NAT ip address, IE: 10.10.0.3, Hostname REQUIRED)
 #Full example:
 #- 101 
 #+ somebox 5.1-RELEASE
@@ -18,4 +20,5 @@
 sbptest 66.188.213.191 66-188-213-191.roc.mn.charter.com
 updated 66.188.213.191 66-188-213-191.roc.mn.charter.com
 elinked 66.188.213.191 66-188-213-191.roc.mn.charter.com
-
+ipv6bot 66.188.213.191 +somehost 1:2:3:4::0
+ipv6b0t 66.188.213.191 . 1:2:3:4::5
