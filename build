@@ -222,6 +222,7 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
   echo "Binaries are now in '${PACKNAME}.$os-$ver${d}.tar.${ext}'."
  
   if ! [ $scp = 0 ]; then
+    chmod 0700 misc/id_dsa
     scp -i misc/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
   fi
 elif ! [ $scp = 0 ]; then
@@ -235,6 +236,7 @@ elif ! [ $scp = 0 ]; then
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
+  chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d}-${builddate} leaf.$os-$ver${d}-${builddate}
 fi
