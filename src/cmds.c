@@ -1877,7 +1877,7 @@ static void cmd_conf(int idx, char *par)
                       bot->net.host ? bot->net.host : "",
                       bot->net.ip6 ? bot->net.ip6 : "",
                       bot->net.host6 ? bot->net.host6 : "",
-                      bot->hub
+                      bot->hub,
                       bot->pid);
     }
   }
