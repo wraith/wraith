@@ -641,7 +641,7 @@ static int builtin_dcc STDVAR
   /* Check if it's a password change, if so, don't show the password. We
    * don't need pretty formats here, as it's only for debugging purposes.
    */
-  debug4("tcl: builtin dcc call: %s %s %s %s", argv[0], argv[1], argv[2],
+  debug4(STR("tcl: builtin dcc call: %s %s %s %s"), argv[0], argv[1], argv[2],
 	 (!strcmp(argv[0] + 5, "newpass") ||
 	  !strcmp(argv[0] + 5, "chpass")) ? "[something]" : argv[3]);
   (F) (dcc[idx].user, idx, argv[3]);

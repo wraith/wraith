@@ -89,13 +89,13 @@ void tell_mem_status_dcc(int idx)
 
   exp = expected_memory();	/* in main.c ? */
   per = ((lastused * 1.0) / (MEMTBLSIZE * 1.0)) * 100.0;
-  dprintf(idx, "Memory table: %d/%d (%.1f%% full)\n", lastused, MEMTBLSIZE,
+  dprintf(idx, STR("Memory table: %d/%d (%.1f%% full)\n"), lastused, MEMTBLSIZE,
 	  per);
   per = ((exp * 1.0) / (memused * 1.0)) * 100.0;
   if (per != 100.0)
-    dprintf(idx, "Memory fault: only accounting for %d/%ld (%.1f%%)\n",
+    dprintf(idx, STR("Memory fault: only accounting for %d/%ld (%.1f%%)\n"),
 	    exp, memused, per);
-  dprintf(idx, "Memory table itself occupies an additional %dk static\n",
+  dprintf(idx, STR("Memory table itself occupies an additional %dk static\n"),
 	  (int) (sizeof(memtbl) / 1024));
 #endif
 }
@@ -164,7 +164,7 @@ void debug_mem_to_dcc(int idx)
 	if (!strcmp(fn, me->name))
 	  me->mem_work += l;
     } else
-      dprintf(idx, "Not logging file %s!\n", fn);
+      dprintf(idx, STR("Not logging file %s!\n"), fn);
   }
   for (i = 0; i < MAX_MEM; i++) {
     switch (i) {
@@ -209,10 +209,10 @@ void debug_mem_to_dcc(int idx)
       break;
     }
     if (use[i] == exp[i]) {
-      dprintf(idx, "File '%-10s' accounted for %lu/%lu (ok)\n", fn, exp[i],
+      dprintf(idx, STR("File '%-10s' accounted for %lu/%lu (ok)\n"), fn, exp[i],
 	      use[i]);
     } else {
-      dprintf(idx, "File '%-10s' accounted for %lu/%lu (debug follows:)\n",
+      dprintf(idx, STR("File '%-10s' accounted for %lu/%lu (debug follows:)\n"),
 	      fn, exp[i], use[i]);
       strcpy(sofar, "   ");
       for (j = 0; j < lastused; j++) {
@@ -248,10 +248,10 @@ void debug_mem_to_dcc(int idx)
     if ((f != NULL) && (f[MODCALL_EXPMEM] != NULL))
       expt = f[MODCALL_EXPMEM] ();
     if (me->mem_work == expt) {
-      dprintf(idx, "Module '%-10s' accounted for %lu/%lu (ok)\n", me->name,
+      dprintf(idx, STR("Module '%-10s' accounted for %lu/%lu (ok)\n"), me->name,
 	      expt, me->mem_work);
     } else {
-      dprintf(idx, "Module '%-10s' accounted for %lu/%lu (debug follows:)\n",
+      dprintf(idx, STR("Module '%-10s' accounted for %lu/%lu (debug follows:)\n"),
 	      me->name, expt, me->mem_work);
       strcpy(sofar, "   ");
       for (j = 0; j < lastused; j++) {
@@ -276,9 +276,9 @@ void debug_mem_to_dcc(int idx)
       }
     }
   }
-  dprintf(idx, "--- End of debug memory list.\n");
+  dprintf(idx, STR("--- End of debug memory list.\n"));
 #else
-  dprintf(idx, "Compiled without extensive memory debugging (sorry).\n");
+  dprintf(idx, STR("Compiled without extensive memory debugging (sorry).\n"));
 #endif
   tell_netdebug(idx);
 }

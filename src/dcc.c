@@ -70,25 +70,25 @@ char *rand_dccresp()
 {
   switch (random() % 10) { /* 0-5: random response, 6-9: none */
   case 0:
-    return "sup\n";
+    return STR("sup\n");
   case 1:
-    return "a/s/l?\ni'm 17/f/ca ;)\n";
+    return STR("a/s/l?\ni'm 17/f/ca ;)\n");
   case 2:
-    return "who are you?\n";
+    return STR("who are you?\n");
   case 3:
-    return "uhhh do i know you?\n";
+    return STR("uhhh do i know you?\n");
   case 4:
-    return "what?\n";
+    return STR("what?\n");
   case 5:
-    return "wtf do you want?\n";
+    return STR("wtf do you want?\n");
   case 6:
-    return "hold on a second, I am sort of busy..\n";
+    return STR("hold on a second, I am sort of busy..\n");
   case 7:
-    return "mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]\n";
+    return STR("mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]\n");
   case 8:
-    return "got any porn?\n";
+    return STR("got any porn?\n");
   case 9:
-    return "?\n";
+    return STR("?\n");
   default:
     return "";
     /* there's intentionally no newline in this response. You go figure out why :) */
@@ -99,21 +99,21 @@ char *rand_dccresppass()
 {
   switch (random() % 10) { /* 0-5: random response, 6-9: none */
   case 0:
-    return "what?\n";
+    return STR("what?\n");
   case 1:
-    return "huh?\n";
+    return STR("huh?\n");
   case 2:
-    return "no.\n";
+    return STR("no.\n");
   case 3:
-    return "thats great..\n";
+    return STR("thats great..\n");
   case 4:
-    return "hmm, ok..I've got a better idea, check this out: http://peeldmonkeys.8k.com/images/keza-_middle_finger.jpg\n";
+    return STR("hmm, ok..I've got a better idea, check this out: http://peeldmonkeys.8k.com/images/keza-_middle_finger.jpg\n");
   case 5:
-    return "I don't remember caring..\n";
+    return STR("I don't remember caring..\n");
   case 6:
-    return "good for you.\n";
+    return STR("good for you.\n");
   case 7:
-    return "I'm going to report you to the RIAA!!!\n";
+    return STR("I'm going to report you to the RIAA!!!\n");
   default:
     return "";
   }
@@ -122,21 +122,21 @@ char *rand_dccrespbye()
 {
   switch (random() % 10) { /* 0-5: random response, 6-9: none */
   case 0:
-    return "stop wasting my time.\n";
+    return STR("stop wasting my time.\n");
   case 1:
-    return "gtg\n";
+    return STR("gtg\n");
   case 2:
-    return "go away\n";
+    return STR("go away\n");
   case 3:
-    return "fuck off already\n";
+    return STR("fuck off already\n");
   case 4:
-    return "ehh..no, bye.\n";
+    return STR("ehh..no, bye.\n");
   case 5:
-    return "hey I'm late for a date with your mom, cya..\n";
+    return STR("hey I'm late for a date with your mom, cya..\n");
   case 6:
-    return "you're still here?\n";
+    return STR("you're still here?\n");
   case 7:
-    return "jesus loves you, but I ain't jesus. \002FUCK OFF\002\n";
+    return STR("jesus loves you, but I ain't jesus. \002FUCK OFF\002\n");
   default:
     return "";
   }
