@@ -590,7 +590,7 @@ void dcc_get(int idx, char *buf, int len)
   } else if (cmp > dcc[idx].status) {
     /* Attempt to resume */
     if (!strcmp(dcc[idx].nick, "*users")) {
-      putlog(LOG_BOTS, "*",TRANSFER_TRY_SKIP_AHEAD);
+      putlog(LOG_BOTS, "*", TRANSFER_TRY_SKIP_AHEAD);
     } else if (!strcmp(dcc[idx].nick, "*binary")) {
       putlog(LOG_BOTS, "*","!!! Trying to skip ahead on binary transfer");
     } else {
@@ -1124,7 +1124,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
  
   sdprintf("raw_dcc_resend_send()");
   zz = (-1);
-  dccfile = fopen(filename,"r");
+  dccfile = fopen(filename,"rb");
   fseek(dccfile, 0, SEEK_END);
   dccfilesize = ftell(dccfile);
   fclose(dccfile);
@@ -1156,7 +1156,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
     nfn = dir;
   else
     nfn++;
-  f = fopen(filename, "r");
+  f = fopen(filename, "rb");
   if (!f)
     return DCCSEND_BADFN;
   if ((i = new_dcc(&DCC_GET_PENDING, sizeof(struct xfer_info))) == -1)
