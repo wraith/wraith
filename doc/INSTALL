@@ -31,10 +31,26 @@ After the compile process is finished, the binaries will be placed in wraith.OS.
 
 Step 3: Making bots
 
-simply do ./binary -C
-You may need to 'export EDITOR=pico' or to whatever editor you prefer.
+Simply do ./binary -C
+You may need to 'export EDITOR=pico' or 'setenv EDITOR pico' to whatever editor you prefer first (probably defaults to vi).
 Make sure you check all settings presented.
 
-If you were updating an old bot on the shell:
+At the bottom list bots like:
+bot1 ip host
+bot2 . +host (for ipv6 host)
+bot3 . . ipv6ip
+bot4 . .
+--
+Then save and exit.
+The binary will auto move to binpath/binname.
+
+Then on the hub do for every bot you added:
+.newleaf bot *!ident@host *!ident@ip
+
+Then just run the binary!
+All bots within the binary will be spawned with it's own PID.
+
+
+UPDATING BOTS:
 ./old_binary -U new_binary
 If you want bots to auto restart use '-u' instead

@@ -1,12 +1,7 @@
 
-Get the new src.
-Copy your pack/* to the new pack/
-./build all
-untar the package that is created
-Set a hub +U
-Then on that hub, copy all the binaries for the new version to it's dir..
+Set a hub +u
+Download new binaries to hub shell.
+Then, copy all the binaries (untarred) for the new version to it's dir..
 whatever os you are in, copy the appropiate new hub binary to 'newhub', then on the hub, type .update newhub
-Sit back and cry as all the bots die probably.. nah j/k
-
-This will all be improved over time, and you won't need to redo your entire net ever...
+Sit back and relay while your net is updated :)
 
