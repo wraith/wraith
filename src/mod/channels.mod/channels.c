@@ -34,7 +34,6 @@
 
 static int 			use_info;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
-static struct udef_struct 	*udef = NULL;
 static int 			global_stopnethack_mode;
 static int 			global_revenge_mode;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
@@ -68,7 +67,6 @@ int 				killed_bots = 0;
 #include "cmdschan.c"
 #include "tclchan.c"
 #include "userchan.c"
-#include "udefchan.c"
 
 #ifdef S_AUTOLOCK
 #define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
@@ -915,7 +913,6 @@ void channels_init()
   lastdeletedmask = 0;
   use_info = 1;
   strcpy(glob_chanmode, "nt");
-  udef = NULL;
   global_stopnethack_mode = 0;
   global_revenge_mode = 3;
   global_ban_time = 0;

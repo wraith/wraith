@@ -2473,16 +2473,10 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     if (user.match & FR_GLOBAL) {
       of = user.global;
       user.global = sanity_check((user.global |pls.global) &~mns.global);
-
-      user.udef_global = (user.udef_global | pls.udef_global)
-	& ~mns.udef_global;
     }
     if (chan) {
       ocf = user.chan;
-      user.chan = chan_sanity_check((user.chan | pls.chan) & ~mns.chan,
-				    user.global);
-
-      user.udef_chan = (user.udef_chan | pls.udef_chan) & ~mns.udef_chan;
+      user.chan = chan_sanity_check((user.chan | pls.chan) & ~mns.chan, user.global);
     }
     set_user_flagrec(u2, &user, par);
   }

@@ -6,38 +6,12 @@
 #ifndef _EGG_MOD_CHANNELS_CHANNELS_H
 #define _EGG_MOD_CHANNELS_CHANNELS_H
 
-/* User defined chanmodes/settings */
-#define UDEF_FLAG 1
-#define UDEF_INT 2
-
 #define MASKREASON_MAX	307	/* Max length of ban/invite/exempt/etc.
 				   reasons.				*/
 #define MASKREASON_LEN	(MASKREASON_MAX + 1)
 
 
 #ifdef MAKING_CHANNELS
-
-/* Structure for udef channel values. Udef setting have one such
- * structure for each channel where they have a defined value.
- */
-struct udef_chans {
-  struct udef_chans *next;	/* Ptr to next value.			*/
-  char *chan;			/* Dname of channel name.		*/
-  int value;			/* Actual value.			*/
-};
-
-/* Structure for user defined channel settings.
- */
-struct udef_struct {
-  struct udef_struct *next;	/* Ptr to next setting.			*/
-  char *name;			/* Name of setting.			*/
-  int defined;			/* Boolean that specifies whether this
-				   flag was defined by, e.g. a Tcl
-				   script yet.				*/
-  int type;			/* Type of setting: UDEF_FLAG, UDEF_INT	*/
-  struct udef_chans *values;	/* Ptr to linked list of udef channel
-				   structures.				*/
-};
 
 #define PLSMNS(x) (x ? '+' : '-')
 
@@ -50,14 +24,10 @@ static void tell_exempts (int idx, int show_inact, char * match);
 static void tell_invites (int idx, int show_inact, char * match);
 static void get_mode_protect(struct chanset_t *chan, char *s);
 static void set_mode_protect(struct chanset_t *chan, char *set);
-static int getudef(struct udef_chans *, char *);
-static void setudef(struct udef_struct *, char *, int);
 inline static int chanset_unlink(struct chanset_t *chan);
 
 #endif				/* MAKING_CHANNELS */
 
-int ngetudef(char *, char *);
-void initudef(int type, char *, int);
 void remove_channel(struct chanset_t *);
 void add_chanrec_by_handle(struct userrec *, char *, char *);
 void get_handle_chaninfo(char *, char *, char *);

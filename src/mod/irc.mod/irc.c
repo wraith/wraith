@@ -757,7 +757,6 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
       userlist = adduser(userlist, s1, s, "-", 0);
       fr.match = FR_CHAN;
       fr.chan = USER_DEOP;
-      fr.udef_chan = 0;
       u = get_user_by_handle(userlist, s1);
       if ((mx = ismember(chan, badnick)))
         mx->user = u;

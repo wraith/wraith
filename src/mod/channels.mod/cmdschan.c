@@ -1114,8 +1114,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 {
   char *chname = NULL, work[512] = "";
   struct chanset_t *chan = NULL;
-  int ii, tmp, cnt = 0;
-  struct udef_struct *ul = NULL;
+  int cnt = 0;
 
   if (!par[0]) {
     chname = dcc[idx].u.chat->con_chan;
@@ -1190,54 +1189,6 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
  *          (chan->status & CHAN_TEMP) ? '+' : '-',
  * also include %ctemp in dprintf.
  */
-
-    ii = 1;
-    tmp = 0;
-    for (ul = udef; ul; ul = ul->next)
-      if (ul->defined && ul->type == UDEF_FLAG) {
-	int	work_len;
-
-        if (!tmp) {
-          dprintf(idx, "User defined channel flags:\n");
-          tmp = 1;
-        }
-	if (ii == 1)
-	  egg_snprintf(work, sizeof work, "    ");
-	work_len = strlen(work);
-        egg_snprintf(work + work_len, sizeof(work) - work_len, " %c%s",
-		     getudef(ul->values, chan->dname) ? '+' : '-', ul->name);
-        ii++;
-        if (ii > 4) {
-          dprintf(idx, "%s\n", work);
-          ii = 1;
-        }
-      }
-    if (ii > 1)
-      dprintf(idx, "%s\n", work);
-
-    work[0] = 0;
-    ii = 1;
-    tmp = 0;
-    for (ul = udef; ul; ul = ul->next)
-      if (ul->defined && ul->type == UDEF_INT) {
-	int	work_len = strlen(work);
-
-        if (!tmp) {
-          dprintf(idx, "User defined channel settings:\n");
-          tmp = 1;
-        }
-        egg_snprintf(work + work_len, sizeof(work) - work_len, "%s: %d   ",
-		     ul->name, getudef(ul->values, chan->dname));
-        ii++;
-        if (ii > 4) {
-          dprintf(idx, "%s\n", work);
-	  work[0] = 0;
-          ii = 1;
-        }
-      }
-    if (ii > 1)
-      dprintf(idx, "%s\n", work);
-
 
     work[0] = cnt = 0;
 /* Chanint template

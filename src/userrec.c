@@ -292,7 +292,6 @@ int write_user(struct userrec *u, FILE * f, int idx)
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
 
   fr.global = u->flags;
-  fr.udef_global = u->flags_udef;
   build_flags(s, &fr, NULL);
   if (lfprintf(f, "%-10s - %-24s\n", u->handle, s) == EOF)
     return 0;
@@ -307,7 +306,6 @@ int write_user(struct userrec *u, FILE * f, int idx)
       if ((fr.chan & BOT_SHARE) || (1)) {
 	fr.match = FR_CHAN;
 	fr.chan = ch->flags;
-	fr.udef_chan = ch->flags_udef;
 	build_flags(s, &fr, NULL);
 	if (lfprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s, ch->info ? ch->info : "") == EOF)
 	  return 0;
@@ -495,10 +493,8 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
   u->entries = NULL;
   if (flags != USER_DEFAULT) { /* drummer */
     u->flags = flags;
-    u->flags_udef = 0;
   } else {
     u->flags = default_flags;
-    u->flags_udef = default_uflags;
   }
   set_user(&USERENTRY_PASS, u, pass);
   /* Strip out commas -- they're illegal */
@@ -528,7 +524,6 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
     char x[100] = "";
 
     fr.global = u->flags;
-    fr.udef_global = u->flags_udef;
     build_flags(x, &fr, 0);
     shareout(NULL, "n %s %s %s %s\n", handle, host && host[0] ? host : "none", pass, x);
   }

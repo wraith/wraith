@@ -458,7 +458,6 @@ void tell_user(int idx, struct userrec *u, int master)
   n = num_notes(u->handle);
 
   fr.global = u->flags;
-  fr.udef_global = u->flags_udef;
   build_flags(s, &fr, NULL);
   li = get_user(&USERENTRY_LASTON, u);
   if (!li || !li->laston)
@@ -507,7 +506,6 @@ void tell_user(int idx, struct userrec *u, int master)
         }
         fr.match = FR_CHAN;
         fr.chan = ch->flags;
-        fr.udef_chan = ch->flags_udef;
         build_flags(s, &fr, NULL);
         egg_snprintf(format, sizeof format, "%%%us  %%-18s %%-15s %%s\n", HANDLEN-9);
         dprintf(idx, format, " ", ch->channel, s, s1);
@@ -565,11 +563,9 @@ void tell_users_match(int idx, char *mtch, int start, int limit, int master, cha
     user.match = pls.match = FR_GLOBAL | FR_BOT | FR_CHAN;
     break_down_flags(mtch, &pls, &mns);
     mns.match = pls.match ^ (FR_AND | FR_OR);
-    if (!mns.global && !mns.udef_global && !mns.chan && !mns.udef_chan &&
-	!mns.bot) {
+    if (!mns.global && !mns.chan && !mns.bot) {
       nomns = 1;
-      if (!pls.global && !pls.udef_global && !pls.chan && !pls.udef_chan &&
-	  !pls.bot) {
+      if (!pls.global && !pls.chan && !pls.bot) {
 	/* happy now BB you weenie :P */
 	dprintf(idx, "Unknown flag specified for matching!!\n");
 	return;
@@ -788,7 +784,6 @@ int readuserfile(char *file, struct userrec **ret)
 		strncpyz(cr->channel, chname, 80);
 		cr->laston = atoi(st);
 		cr->flags = fr.chan;
-		cr->flags_udef = fr.udef_chan;
 		if (s[0]) {
                   cr->info = strdup(s);
 		} else
@@ -985,7 +980,6 @@ int readuserfile(char *file, struct userrec **ret)
               if (!egg_strcasecmp(code, conf.bot->nick))
                 conf.bot->u = u;
 
-	      u->flags_udef = fr.udef_global;
 	      /* if s starts with '/' it's got file info */
 	    }
 	  }

@@ -30,7 +30,6 @@ struct chanuserrec *add_chanrec(struct userrec *u, char *chname)
     u->chanrec = ch;
     ch->info = NULL;
     ch->flags = 0;
-    ch->flags_udef = 0;
     ch->laston = 0;
     strncpy(ch->channel, chname, 81);
     ch->channel[80] = 0;

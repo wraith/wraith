@@ -285,13 +285,12 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
  */
 int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 {
-  int i, x = 0, found;
+  int i, x = 0;
 #ifdef LEAF
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
 #endif /* LEAF */
-  struct udef_struct *ul = udef;
   char s[121] = "";
 
   for (i = 0; i < items; i++) {
@@ -589,46 +588,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 	*ptime = 1;
       }
     } else {
-      if (!strncmp(item[i] + 1, "udef-flag-", 10))
-        initudef(UDEF_FLAG, item[i] + 11, 0);
-      else if (!strncmp(item[i], "udef-int-", 9))
-        initudef(UDEF_INT, item[i] + 9, 0);
-      found = 0;
-      for (ul = udef; ul; ul = ul->next) {
-        if (ul->type == UDEF_FLAG &&
-	     /* Direct match when set during .chanset ... */
-	    (!egg_strcasecmp(item[i] + 1, ul->name) ||
-	     /* ... or with prefix when set during chanfile load. */
-	     (!strncmp(item[i] + 1, "udef-flag-", 10) &&
-	      !egg_strcasecmp(item[i] + 11, ul->name)))) {
-          if (item[i][0] == '+')
-            setudef(ul, chan->dname, 1);
-          else
-            setudef(ul, chan->dname, 0);
-          found = 1;
-	  break;
-        } else if (ul->type == UDEF_INT &&
-		    /* Direct match when set during .chanset ... */
-		   (!egg_strcasecmp(item[i], ul->name) ||
-		    /* ... or with prefix when set during chanfile load. */
-		    (!strncmp(item[i], "udef-int-", 9) &&
-		     !egg_strcasecmp(item[i] + 9, ul->name)))) {
-          i++;
-          if (i >= items) {
-            if (result)
-              sprintf(result, "this setting needs an argument");
-            return ERROR;
-          }
-          setudef(ul, chan->dname, atoi(item[i]));
-          found = 1;
-	  break;
-        }
-      }
-      if (!found) {
-        if (result && item[i][0]) /* ignore "" */
-      	  sprintf(result, "illegal channel option: %s", item[i]);
-      	x++;
-      }
+      if (result && item[i][0]) /* ignore "" */
+        sprintf(result, "illegal channel option: %s", item[i]);
+      x++;
     }
   }
 #ifdef LEAF

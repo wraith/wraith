@@ -121,7 +121,7 @@ struct chanuserrec {
   char channel[81];
   time_t laston;
   unsigned long flags;
-  unsigned long flags_udef;
+  /* FIXME:rem unsigned long flags_udef; */
   char *info;
 };
 
@@ -131,7 +131,7 @@ struct userrec {
   struct userrec *next;
   char handle[HANDLEN + 1];
   unsigned long flags;
-  unsigned long flags_udef;
+  /* FIXME: rem unsigned long flags_udef; */
   struct chanuserrec *chanrec;
   struct user_entry *entries;
 };

@@ -16,6 +16,8 @@
 struct flag_record {
   int match;
   int global;
+/* FIXME: STRIP OUT UDEF FROM ALL FLAG_RECORD STRUCTS */
+/* FIXME: ALSO MAKE THESE LONG */
   int udef_global;
   int bot;
   int chan;
