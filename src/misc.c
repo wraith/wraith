@@ -989,7 +989,8 @@ color(int idx, int type, int which)
   if (type == BOLD_OPEN) {
     return ansi ? "\033[1m" : "\002";
   } else if (type == BOLD_CLOSE) {
-    return ansi ? "\033[22m" : "\002";
+//    return ansi ? "\033[22m" : "\002";
+    return ansi ? "\033[0m" : "\002";
   } else if (type == UNDERLINE_OPEN) {
     return ansi ? "\033[4m" : "\037";
   } else if (type == UNDERLINE_CLOSE) {
