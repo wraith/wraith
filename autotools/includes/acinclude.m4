@@ -351,7 +351,7 @@ then
   AC_MSG_WARN(Skipping library tests because they CONFUSE Irix.)
 else
   AC_CHECK_LIB(socket, socket)
-  AC_CHECK_LIB(nsl, connect)
+#  AC_CHECK_LIB(nsl, connect)
   AC_CHECK_LIB(dns, gethostbyname)
   AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
 #  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lssl -lcrypto", SSL="", -lcrypto) 
