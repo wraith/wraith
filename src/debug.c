@@ -235,6 +235,7 @@ stackdump(int idx)
 
 static void got_segv(int z)
 {
+  alarm(0);		/* dont let anything jump out of this signal! */
   signal(SIGSEGV, SIG_DFL);
   /* stackdump(0); */
 #ifdef DEBUG_CONTEXT
