@@ -403,6 +403,9 @@ static int console_store(struct userrec *u, int idx, char *par)
   }
   set_user(&USERENTRY_CONSOLE, u, i);
   dprintf(idx, "Console setting stored.\n");
+#ifdef HUB
+  write_userfile(idx);
+#endif /* HUB */
   return 0;
 }
 
