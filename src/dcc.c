@@ -1238,13 +1238,13 @@ dcc_telnet(int idx, char *buf, int ii)
   char x[1024] = "";
   int i;
 
+  putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
+
   sprintf(x, "-telnet!telnet@%s", iptostr(htonl(ip)));
   if (match_ignore(x) || detect_telnet_flood(x)) {
     killsock(sock);
     return;
   }
-
-  putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
 
   i = new_dcc(&DCC_IDENTWAIT, 0);
 

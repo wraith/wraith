@@ -373,6 +373,7 @@ int allocsock(int sock, int options)
       socklist[i].okey[0] = 0;
       socklist[i].ikey[0] = 0;
       socks_total++;
+      sdprintf("allocsock(%d) = %d", sock, i);
       return i;
     }
   }

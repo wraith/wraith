@@ -367,6 +367,8 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 	char buf[512], *reversed_ip;
 	int i, len, cache_id;
 
+	sdprintf("egg_dns_reverse(%s, %d)", ip, timeout);
+
 	if (!is_dotted_ip(ip)) {
 		/* If it's not a valid ip, don't even make the request. */
 		callback(-1, client_data, ip, NULL);
