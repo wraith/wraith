@@ -530,19 +530,13 @@ void load_internal_users()
 
 void chanprog()
 {
-  /* char buf[2048] = ""; */
-  struct bot_addr *bi = NULL;
   struct utsname un;
+  struct bot_addr *bi = NULL;
 
-  admin[0] = 0;
   /* cache our ip on load instead of every 30 seconds */
   cache_my_ip();
   sdprintf("ip4: %s", myipstr(4));
   sdprintf("ip6: %s", myipstr(6));
-  conmask = 0;
-
-  if (!conf.bot->nick)
-    fatal("I don't have a nickname!!\n", 0);
   sdprintf("I am: %s", conf.bot->nick);
 #ifdef HUB
   loading = 1;
@@ -561,12 +555,11 @@ void chanprog()
     bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
     if (conf.bot->net.ip)
       bi->address = strdup(conf.bot->net.ip);
-    /* bi->telnet_port = atoi(buf) ? atoi(buf) : 3333; */
     bi->telnet_port = bi->relay_port = 3333;
 #ifdef HUB
     bi->hublevel = 99;
 #else /* !HUB */
-    bi->hublevel = 0;
+    bi->hublevel = 999;
 #endif /* HUB */
     bi->uplink = (char *) my_calloc(1, 1);
     set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
@@ -574,7 +567,6 @@ void chanprog()
     bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
   }
 
-  bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, conf.bot->nick));
   if (!bi)
     fatal("I'm added to userlist but without a bot record!", 0);
   if (bi->telnet_port != 3333) {
