@@ -10,7 +10,7 @@
 #include "common.h"
 #include "debug.h"
 #include "net.h"
-#include "misc.h"
+#include "shell.h"
 #include "userrec.h"
 #include "main.h"
 #include "dccutil.h"

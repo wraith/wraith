@@ -7,6 +7,8 @@
 #ifndef _EGG_STAT_H
 #define _EGG_STAT_H
 
+#include <sys/stat.h>
+
 #ifndef S_ISDIR
 #  ifndef S_IFMT
 #    define S_IFMT	0170000	    /* Bitmask for the file type bitfields */
