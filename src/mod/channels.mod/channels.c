@@ -68,13 +68,6 @@ int 				killed_bots = 0;
 #include "tclchan.c"
 #include "userchan.c"
 
-#ifdef S_AUTOLOCK
-#define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
-#endif /* S_AUTOLOCK */
-#ifdef S_AUTOLOCK
-struct cfg_entry CFG_LOCKTHRESHOLD, CFG_KILLTHRESHOLD;
-#endif /* S_AUTOLOCK */
-
 /* This will close channels if the HUB:leaf count is skewed from config setting */
 void check_should_lock()
 {
@@ -882,64 +875,6 @@ cmd_t channels_bot[] = {
   {NULL, 	NULL, 	NULL, 			NULL}
 };
 
-void channels_describe(struct cfg_entry *cfgent, int idx)
-{
-#ifdef HUB
-  if (!strcmp(cfgent->name, "close-threshold")) {
-    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, close all channels\n"));
-  } else if (!strcmp(cfgent->name, "kill-threshold")) {
-    dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
-  } else {
-    dprintf(idx, "No description for %s ???\n", cfgent->name);
-    putlog(LOG_ERRORS, "*", "channels_describe() called with unknown config entry %s", cfgent->name);
-  }
-#endif /* HUB */
-}
-
-void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
-{
-  int i;
-
-  if (!cfgent->gdata)
-    return;
-  *valid = 0;
-  if (!strcmp(cfgent->name, "close-threshold")) {
-    int L, R;
-    char *value = cfgent->gdata;
-
-    L = atoi(value);
-    value = strchr(value, ':');
-    if (!value)
-      return;
-    value++;
-    R = atoi(value);
-    if ((R >= 1000) || (R < 0) || (L < 0) || (L > 100))
-      return;
-    *valid = 1;
-    return;
-  }
-  i = atoi(cfgent->gdata);
-  if (!strcmp(cfgent->name, "kill-threshold")) {
-    if ((i < 0) || (i >= 200))
-      return;
-  } 
-  *valid = 1;
-  return;
-}
-
-#ifdef S_AUTOLOCK
-struct cfg_entry CFG_LOCKTHRESHOLD = {
-	"close-threshold", CFGF_GLOBAL, NULL, NULL,
-	channels_changed, NULL, channels_describe
-};
-
-struct cfg_entry CFG_KILLTHRESHOLD = {
-	"kill-threshold", CFGF_GLOBAL, NULL, NULL,
-	channels_changed, NULL, channels_describe
-};
-#endif /* S_AUTOLOCK */
-
-
 #ifdef LEAF
 static void check_limitraise() {
   int i = 0;
@@ -1014,10 +949,5 @@ void channels_init()
   add_builtins("dcc", C_dcc_irc);
   add_builtins("bot", channels_bot);
   add_builtins("chon", my_chon);
-
-#ifdef S_AUTOLOCK
-  add_cfg(&CFG_LOCKTHRESHOLD);
-  add_cfg(&CFG_KILLTHRESHOLD);
-#endif /* S_AUTOLOCK */
 }
 

@@ -530,7 +530,6 @@ struct cfg_entry CFG_REALNAME = {
 #ifdef HUB
 void getin_describe(struct cfg_entry *cfgent, int idx)
 {
-#ifdef HUB
   if (!strcmp(cfgent->name, "op-bots"))
     dprintf(idx, STR("op-bots is number of bots to ask every time a oprequest is to be made\n"));
   else if (!strcmp(cfgent->name, "in-bots"))
@@ -551,8 +550,8 @@ void getin_describe(struct cfg_entry *cfgent, int idx)
     dprintf(idx, STR("No description for %s ???\n"), cfgent->name);
     putlog(LOG_ERRORS, "*", STR("getin_describe() called with unknown config entry %s"), cfgent->name);
   }
-#endif /* HUB */
 }
+#endif /* HUB */
 
 void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 {
@@ -629,37 +628,65 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 
 struct cfg_entry CFG_OPBOTS = {
 	"op-bots", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL, getin_describe
+	getin_changed, NULL,
+#ifdef HUB
+	getin_describe
+#else
+	NULL
+#endif /* HUB */
 };
 
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_FIGHTTHRESHOLD = {
 	"fight-threshold", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL, getin_describe
+	getin_changed, NULL,
+#ifdef HUB
+	getin_describe
+#else
+	NULL
+#endif /* HUB */
 };
 #endif /* S_AUTOLOCK */
 
 struct cfg_entry CFG_INBOTS = {
 	"in-bots", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL, getin_describe
+	getin_changed, NULL,
+#ifdef HUB
+	getin_describe
+#else
+	NULL
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_LAGTHRESHOLD = {
 	"lag-threshold", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL, getin_describe
+	getin_changed, NULL,
+#ifdef HUB
+	getin_describe
+#else
+	NULL
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_OPREQUESTS = {
 	"op-requests", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL, getin_describe
+	getin_changed, NULL,
+#ifdef HUB
+	getin_describe
+#else
+	NULL
+#endif /* HUB */
 };
 
 struct cfg_entry CFG_OPTIMESLACK = {
 	"op-time-slack", CFGF_GLOBAL, NULL, NULL,
-	getin_changed, NULL, getin_describe
-};
+	getin_changed, NULL,
+#ifdef HUB
+	getin_describe
+#else
+	NULL
 #endif /* HUB */
-
+};
 
 void add_cfg(struct cfg_entry *entry)
 {
@@ -813,7 +840,6 @@ void init_config()
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
-#ifdef HUB
   add_cfg(&CFG_OPBOTS);
   add_cfg(&CFG_INBOTS);
   add_cfg(&CFG_LAGTHRESHOLD);
@@ -822,7 +848,6 @@ void init_config()
 #ifdef S_AUTOLOCK
   add_cfg(&CFG_FIGHTTHRESHOLD);
 #endif /* S_AUTOLOCK */
-#endif /* HUB */
 }
 
 #ifdef S_DCCPASS

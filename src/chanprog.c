@@ -643,13 +643,67 @@ int isowner(char *name)
   }
 }
 
+/* this method is slow, but is only called when sharing and adding/removing chans */
 
 int 
 botshouldjoin(struct userrec *u, struct chanset_t *chan)
 {
   /* just return 1 for now */
   return 1;
+/*
+  char *chans = NULL;
+  struct userrec *u = NULL;
+ 
+  u = get_user_by_handle(userlist, bot);
+  if (!u)
+    return;
+  chans = get_user(&USERENTRY_CHANS, u);
+*/
 }
+/* future use ?
+void
+chans_addbot(const char *bot, struct chanset_t *chan)
+{
+  char *chans = NULL;
+  struct userrec *u = NULL;
+ 
+  u = get_user_by_handle(userlist, bot);
+  if (!u)
+    return;
+  chans = get_user(&USERENTRY_CHANS, u);
+  if (!botshouldjoin(u, chan)) {		
+    size_t size;
+    char *buf = NULL;
+   
+    size = strlen(chans) + strlen(chan->dname) + 2;
+    buf = calloc(1, size);
+    egg_snprintf(buf, size, "%s %s", chans, chan->dname);
+    set_user(&USERENTRY_CHANS, u, buf);
+    free(buf);
+  }
+}
+
+void 
+chans_delbot(const char *bot, struct chanset_t *chan)
+{
+  char *chans = NULL;
+  struct userrec *u = NULL;
+ 
+  u = get_user_by_handle(userlist, bot);
+  if (!u)
+    return;
+ 
+  if (botshouldjoin(u, chan)) {			
+    char *chans = NULL, *buf = NULL;
+    size_t size;
+
+    chans = get_user(&USERENTRY_CHANS, u);
+    size = strlen(chans) - strlen(chan->dname) + 2;
+
+    
+  }
+}
+*/
 
 int shouldjoin(struct chanset_t *chan)
 {

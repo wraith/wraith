@@ -18,7 +18,10 @@ typedef struct cfg_entry {
   void (*describe) (struct cfg_entry *, int idx);
 } cfg_entry_T;
 
-extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_BADCOOKIE, CFG_MANUALOP, CFG_MDOP, CFG_MOP, CFG_FORKINTERVAL, CFG_CHANSET;
+extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_BADCOOKIE, CFG_MANUALOP, CFG_MDOP, 
+                        CFG_MOP, CFG_FORKINTERVAL, CFG_CHANSET, CFG_SERVERS, CFG_SERVERS6, 
+                        CFG_NICK, CFG_REALNAME, CFG_INBOTS, CFG_LAGTHRESHOLD, CFG_OPREQUESTS, CFG_OPTIMESLACK,
+                        CFG_OPBOTS, CFG_INBOTS;
 #if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 extern struct cfg_entry CFG_AUTHKEY;
 #endif /* S_AUTHHASH || S_DCCAUTH */
@@ -43,14 +46,9 @@ extern struct cfg_entry CFG_PROMISC;
 #ifdef S_PROCESSCHECK
 extern struct cfg_entry CFG_BADPROCESS, CFG_PROCESSLIST;
 #endif /* S_PROCESSCHECK */
-
-#ifdef HUB
-extern struct cfg_entry CFG_SERVERS, CFG_SERVERS6, CFG_NICK, CFG_REALNAME,
-	CFG_INBOTS, CFG_LAGTHRESHOLD, CFG_OPREQUESTS, CFG_OPTIMESLACK;
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_FIGHTTHRESHOLD;
 #endif /* S_AUTOLOCK */
-#endif /* HUB */
 
 void set_cfg_str(char *, char *, char *);
 void add_cfg(struct cfg_entry *);
@@ -68,5 +66,19 @@ extern struct cmd_pass            *cmdpass;
 extern char			cmdprefix;
 extern int			cfg_count, cfg_noshare;
 extern struct cfg_entry		**cfg;
+
+#define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
+#define IN_BOTS (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
+#define LAG_THRESHOLD (CFG_LAGTHRESHOLD.gdata ? atoi(CFG_LAGTHRESHOLD.gdata) : 15)
+#define OPREQ_COUNT (CFG_OPREQUESTS.gdata ? atoi( CFG_OPREQUESTS.gdata ) : 2)
+#define OPREQ_SECONDS (CFG_OPREQUESTS.gdata ? atoi( strchr(CFG_OPREQUESTS.gdata, ':') + 1 ) : 5)
+#define OP_TIME_SLACK (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
+#define msgop CFG_MSGOP.ldata ? CFG_MSGOP.ldata : CFG_MSGOP.gdata ? CFG_MSGOP.gdata : ""
+#define msgpass CFG_MSGPASS.ldata ? CFG_MSGPASS.ldata : CFG_MSGPASS.gdata ? CFG_MSGPASS.gdata : ""
+#define msginvite CFG_MSGINVITE.ldata ? CFG_MSGINVITE.ldata : CFG_MSGINVITE.gdata ? CFG_MSGINVITE.gdata : ""
+#define msgident CFG_MSGIDENT.ldata ? CFG_MSGIDENT.ldata : CFG_MSGIDENT.gdata ? CFG_MSGIDENT.gdata : ""
+#ifdef S_AUTOLOCK
+#define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
+#endif /* S_AUTOLOCK */
 
 #endif /* !_CFG_H */

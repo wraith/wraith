@@ -23,8 +23,6 @@
 #include "src/mod/channels.mod/channels.h"
 #include "server.h"
 
-extern struct cfg_entry CFG_OPTIMESLACK;
-
 int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;
 int serv;		/* sock # of server currently */

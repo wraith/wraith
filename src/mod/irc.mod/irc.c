@@ -32,31 +32,10 @@
 
 #include <stdarg.h>
 
-#define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
-#define IN_BOTS (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
-#define LAG_THRESHOLD (CFG_LAGTHRESHOLD.gdata ? atoi(CFG_LAGTHRESHOLD.gdata) : 15)
-#define OPREQ_COUNT (CFG_OPREQUESTS.gdata ? atoi( CFG_OPREQUESTS.gdata ) : 2)
-#define OPREQ_SECONDS (CFG_OPREQUESTS.gdata ? atoi( strchr(CFG_OPREQUESTS.gdata, ':') + 1 ) : 5)
-#define OP_TIME_SLACK (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
-
-#define msgop CFG_MSGOP.ldata ? CFG_MSGOP.ldata : CFG_MSGOP.gdata ? CFG_MSGOP.gdata : ""
-#define msgpass CFG_MSGPASS.ldata ? CFG_MSGPASS.ldata : CFG_MSGPASS.gdata ? CFG_MSGPASS.gdata : ""
-#define msginvite CFG_MSGINVITE.ldata ? CFG_MSGINVITE.ldata : CFG_MSGINVITE.gdata ? CFG_MSGINVITE.gdata : ""
-#define msgident CFG_MSGIDENT.ldata ? CFG_MSGIDENT.ldata : CFG_MSGIDENT.gdata ? CFG_MSGIDENT.gdata : ""
-
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
 int host_synced = 0;
-
-struct cfg_entry CFG_OPBOTS,
-  CFG_INBOTS,
-  CFG_LAGTHRESHOLD,
-  CFG_OPTIMESLACK,
-#ifdef S_AUTOLOCK
-  CFG_FIGHTTHRESHOLD,
-#endif /* S_AUTOLOCK */
-  CFG_OPREQUESTS;
 
 static int net_type = 0;
 static int wait_split = 300;		/* Time to wait for user to return from
@@ -1436,103 +1415,10 @@ static void getin_5secondly()
   }
 }
 
-void irc_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
-{
-  int i;
-
-  if (!cfgent->gdata)
-    return;
-  *valid = 0;
-  if (!strcmp(cfgent->name, "op-requests")) {
-    int L, R;
-    char *value = cfgent->gdata;
-
-    L = atoi(value);
-    value = strchr(value, ':');
-    if (!value)
-      return;
-    value++;
-    R = atoi(value);
-    if ((R >= 60) || (R <= 3) || (L < 1) || (L > R))
-      return;
-    *valid = 1;
-    return;
-  }
-  i = atoi(cfgent->gdata);
-  if (!strcmp(cfgent->name, "op-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "invite-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "key-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "limit-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "unban-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "lag-threshold")) {
-    if ((i < 3) || (i > 60))
-      return;
-  } else if (!strcmp(cfgent->name, "fight-threshold")) {
-    if (i && ((i < 50) || (i > 1000)))
-      return;
-  } else if (!strcmp(cfgent->name, "op-time-slack")) {
-    if ((i < 30) || (i > 1200))
-      return;
-  }
-  *valid = 1;
-  return;
-}
-
-
-struct cfg_entry CFG_OPBOTS = {
-	"op-bots", CFGF_GLOBAL, NULL, NULL,
-	irc_changed, NULL, NULL
-};
-
-struct cfg_entry CFG_INBOTS = {
-	"in-bots", CFGF_GLOBAL, NULL, NULL,
-	irc_changed, NULL, NULL
-};
-
-struct cfg_entry CFG_LAGTHRESHOLD = {
-	"lag-threshold", CFGF_GLOBAL, NULL, NULL,
-	irc_changed, NULL, NULL
-};
-
-struct cfg_entry CFG_OPREQUESTS = {
-	"op-requests", CFGF_GLOBAL, NULL, NULL,
-	irc_changed, NULL, NULL
-};
-
-struct cfg_entry CFG_OPTIMESLACK = {
-	"op-time-slack", CFGF_GLOBAL, NULL, NULL,
-	irc_changed, NULL, NULL
-};
-
-#ifdef S_AUTOLOCK
-struct cfg_entry CFG_FIGHTTHRESHOLD = {
-	"fight-threshold", CFGF_GLOBAL, NULL, NULL,
-	irc_changed, NULL, NULL
-};
-#endif /* S_AUTOLOCK */
-
 void irc_init()
 {
   struct chanset_t *chan = NULL;
 
-  add_cfg(&CFG_OPBOTS);
-  add_cfg(&CFG_INBOTS);
-  add_cfg(&CFG_LAGTHRESHOLD);
-  add_cfg(&CFG_OPREQUESTS);
-  add_cfg(&CFG_OPTIMESLACK);
-#ifdef S_AUTOLOCK
-  add_cfg(&CFG_FIGHTTHRESHOLD);
-#endif /* S_AUTOLOCK */
   for (chan = chanset; chan; chan = chan->next) {
     if (shouldjoin(chan))
       dprintf(DP_MODE, "JOIN %s %s\n",
