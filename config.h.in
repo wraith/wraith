@@ -10,9 +10,6 @@
 /* Define if running under cygwin */
 #undef CYGWIN_HACKS
 
-/* Define if running on sunos 4.0 *sigh* */
-#undef DLOPEN_1
-
 /* Defines the current pack version */
 #undef EGG_VERSION
 
@@ -28,9 +25,6 @@
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
-
-/* Define if we need dlopen (for module support) */
-#undef HAVE_DLOPEN
 
 /* Define to 1 if you have the `dprintf' function. */
 #undef HAVE_DPRINTF
