@@ -684,8 +684,8 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
       if (wild_match(mask, s1) && !isexempted(chan, s1)) {
         if (m2->user || (!m2->user && (m2->user = get_user_by_host(s1)))) {
           get_user_flagrec(m2->user, &victim, chan->dname);
-          if (chk_op(victim, chan) && !chan_master(user) && !glob_master(user) &&
-              !glob_bot(user) && !isexempted(chan, s1)) {
+          if (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) &&
+              !glob_bot(user)) || (m2->user->bot && findbot(m2->user->handle))) && !isexempted(chan, s1)) {
             /* if (target_priority(chan, m, 0)) */
             add_mode(chan, '-', 'b', mask);
             return;

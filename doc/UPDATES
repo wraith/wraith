@@ -9,6 +9,7 @@ This is a summary of ChangeLog basically.
 * Telnet host matching is now fixed to match these hosts against the userfile (ONLY FOR ACCESS):
   -telnet!telnet@ip -telnet!telnet@HOST -telnet!IDENT@IP -telnet!IDENT@HOST
 * Fixed cmd_comment bug with changing comment on lower level users.
+* Bots now unban bans that match *linked* bots, +m bans besides this will not be unset auto.
 
 
 1.2
