@@ -10,7 +10,7 @@
 #include "main.h"
 #include "responses.h"
 
-static int response_totals[RES_TYPES + 1];
+static response_t response_totals[RES_TYPES + 1];
 
 void
 init_responses()
@@ -22,7 +22,7 @@ init_responses()
 }
 
 static void
-count_responses(int type)
+count_responses(response_t type)
 {
   unsigned int total = 0;
 
@@ -34,7 +34,7 @@ count_responses(int type)
 }
 
 char *
-response(int type)
+response(response_t type)
 {
   if (!type)
     type = randint(RES_TYPES) + 1;
