@@ -109,7 +109,7 @@ int delignore(char *ign)
   return i;
 }
 
-void addignore(char *ign, char *from, char *mnote, time_t expire_time)
+void addignore(char *ign, char *from, const char *mnote, time_t expire_time)
 {
   struct igrec *p = NULL, *l = NULL;
 

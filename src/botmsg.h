@@ -18,7 +18,7 @@ void botnet_send_cfg_broad(int idx, struct cfg_entry *entry);
 void putbot(char *, char *);
 void putallbots(char *);
 int add_note(char *, char *, char *, int, int);
-size_t simple_sprintf (char *, ...);
+size_t simple_sprintf (char *, const char *, ...);
 char *int_to_base10(int);
 char *unsigned_int_to_base10(unsigned int);
 char *int_to_base64(unsigned int);

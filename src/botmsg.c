@@ -102,21 +102,20 @@ char *unsigned_int_to_base10(unsigned int val)
   return buf_base10 + i;
 }
 
-size_t simple_sprintf (char *buf, ...)
+size_t simple_sprintf (char *buf, const char *format, ...)
 {
-  char *format = NULL;
-  unsigned char *s = NULL;
+  char *s = NULL;
+  char *fp = (char *) format;
   size_t c = 0;
   unsigned int i;
   va_list va;
   
-  va_start(va, buf);
-  format = va_arg(va, char *);
+  va_start(va, format);
 
-  while (*format && c < 1023) {
-    if (*format == '%') {
-      format++;
-      switch (*format) {
+  while (*fp && c < 1023) {
+    if (*fp == '%') {
+      fp++;
+      switch (*fp) {
       case 's':
 	s = va_arg(va, char *);
 	break;
@@ -134,11 +133,11 @@ size_t simple_sprintf (char *buf, ...)
         s = unsigned_int_to_base10(i);
 	break;
       case '%':
-	buf[c++] = *format++;
+	buf[c++] = *fp++;
 	continue;
       case 'c':
 	buf[c++] = (char) va_arg(va, int);
-	format++;
+	fp++;
 	continue;
       default:
 	continue;
@@ -146,9 +145,9 @@ size_t simple_sprintf (char *buf, ...)
       if (s)
 	while (*s && c < 1023)
 	  buf[c++] = *s++;
-      format++;
+      fp++;
     } else
-      buf[c++] = *format++;
+      buf[c++] = *fp++;
   }
   va_end(va);
   buf[c] = 0;

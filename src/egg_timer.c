@@ -4,6 +4,8 @@
 
 #include "egg_timer.h"
 
+typedef int (*TimerFunc) (void *);
+
 /* From main.c */
 static egg_timeval_t now;
 
@@ -12,7 +14,7 @@ typedef struct egg_timer_b {
 	struct egg_timer_b *next;
 	int id;
 	char *name;
-	int (*callback) (void *);
+        TimerFunc callback;
 	void *client_data;
 	egg_timeval_t howlong;
 	egg_timeval_t trigger_time;
@@ -113,7 +115,7 @@ int timer_create_secs(int secs, const char *name, Function callback)
 	howlong.sec = secs;
 	howlong.usec = 0;
 
-	return timer_create_repeater(&howlong, name, (Function) callback);
+	return timer_create_repeater(&howlong, name, callback);
 }
 
 int timer_create_complex(egg_timeval_t *howlong, const char *name, Function callback, void *client_data, int flags)
@@ -125,7 +127,7 @@ int timer_create_complex(egg_timeval_t *howlong, const char *name, Function call
 	timer->id = timer_next_id++;
 	if (name) timer->name = strdup(name);
 	else timer->name = NULL;
-	timer->callback = callback;
+	timer->callback = (TimerFunc) callback;
 	timer->client_data = client_data;
 	timer->flags = flags;
 	timer->howlong.sec = howlong->sec;
@@ -186,7 +188,7 @@ int timer_get_shortest(egg_timeval_t *howlong)
 int timer_run()
 {
 	egg_timer_t *timer = NULL;
-	int (*callback) (void *);
+        TimerFunc callback;
 	void *client_data = NULL;
 
 	while (timer_list_head) {

@@ -87,13 +87,13 @@ char *encrypt_string(const char *keydata, char *in)
   char *res = NULL;
 
   len = strlen(in) + 1;
-  bdata = encrypt_binary(keydata, in, &len);
+  bdata = encrypt_binary(keydata, (unsigned char *) in, &len);
   if (keydata && *keydata) {
     res = b64enc(bdata, len);
     free(bdata);
     return res;
   } else {
-    return bdata;
+    return (char *) bdata;
   }
 }
 
@@ -104,8 +104,8 @@ char *decrypt_string(const char *keydata, char *in)
 
   len = strlen(in);
   if (keydata && *keydata) {
-    buf = b64dec(in, &len);
-    res = decrypt_binary(keydata, buf, len);
+    buf = b64dec((const unsigned char *) in, &len);
+    res = (char *) decrypt_binary(keydata, (unsigned char *) buf, len);
     free(buf);
     return res;
   } else {

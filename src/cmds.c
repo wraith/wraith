@@ -3297,7 +3297,7 @@ static void cmd_pls_ignore(int idx, char *par)
     dprintf(idx, "That already matches an existing ignore.\n");
   else {
     dprintf(idx, "Now ignoring: %s (%s)\n", s, par);
-    addignore(s, dcc[idx].nick, par, expire_time ? now + expire_time : 0L);
+    addignore(s, dcc[idx].nick, (const char *) par, expire_time ? now + expire_time : 0L);
     putlog(LOG_CMDS, "*", "#%s# +ignore %s %s", dcc[idx].nick, s, par);
 #ifdef HUB
     write_userfile(idx);

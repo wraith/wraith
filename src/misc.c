@@ -773,7 +773,7 @@ int updatebin(int idx, char *par, int secs)
       egg_timeval_t howlong;
       howlong.sec = secs;
       howlong.usec = 0;
-      timer_create_complex(&howlong, "restarting for update", (int (*)(int)) restart, (void *) idx, 0);
+      timer_create_complex(&howlong, "restarting for update", (Function) restart, (void *) idx, 0);
     } else
       restart(idx);
     return 0;

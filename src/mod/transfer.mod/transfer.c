@@ -353,7 +353,7 @@ static void eof_dcc_send(int idx)
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     egg_snprintf(s, sizeof s, "%s!%s", dcc[idx].nick, dcc[idx].host);
     u = get_user_by_host(s);
-    hand = u ? u->handle : "*";
+    hand = u ? u->handle : (char *) "*";
 
     l = strlen(dcc[idx].u.xfer->filename);
     if (l > NAME_MAX) {

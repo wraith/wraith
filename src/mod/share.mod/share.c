@@ -980,7 +980,7 @@ share_pls_ignore(int idx, char *par)
       from[HANDLEN + 1] = 0;
     par[65] = 0;
     putlog(LOG_CMDS, "@", "%s: ignore %s (%s: %s)", dcc[idx].nick, ign, from, par);
-    addignore(ign, from, par, expire_time);
+    addignore(ign, from, (const char *) par, expire_time);
     noshare = 0;
   }
 }

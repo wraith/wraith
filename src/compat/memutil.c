@@ -3,6 +3,7 @@
 #include "memcpy.h"
 #include "src/main.h"
 
+/*
 extern void * __real_malloc(size_t);
 extern void * __real_realloc(void *, size_t);
 
@@ -44,11 +45,12 @@ __wrap_calloc(size_t nmemb, size_t size)
 
   return x;
 }
+*/
 
 void 
-__wrap_str_redup(char **str, const char *newstr)
+str_redup(char **str, const char *newstr)
 {
-        int len;
+        size_t len;
 
         if (!newstr) {
                 if (*str) free(*str);

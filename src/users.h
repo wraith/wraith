@@ -163,7 +163,7 @@ void def_display(int idx, struct user_entry *e, struct userrec *u);
 #ifdef HUB
 void backup_userfile();
 #endif /* HUB */
-void addignore(char *, char *, char *, time_t);
+void addignore(char *, char *, const char *, time_t);
 int delignore(char *);
 void tell_ignores(int, char *);
 int match_ignore(char *);

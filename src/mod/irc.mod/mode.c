@@ -674,7 +674,7 @@ got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
   refresh_exempt(chan, who);
   /* This looks for bans added through bot and tacks on banned: if a description is found */
   if (nick[0] && channel_enforcebans(chan)) {
-    register maskrec *b;
+    register maskrec *b = NULL;
     int cycle;
     char resn[512] = "";
 
@@ -689,7 +689,7 @@ got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
         }
       }
     }
-    kick_all(chan, who, resn[0] ? resn : response(RES_BANNED), match_my_nick(nick) ? 0 : 1);
+    kick_all(chan, who, resn[0] ? (const char *) resn : response(RES_BANNED), match_my_nick(nick) ? 0 : 1);
   }
   if (!nick[0] && (bounce_bans || bounce_modes) &&
       (!u_equals_mask(global_bans, who) || !u_equals_mask(chan->bans, who)))

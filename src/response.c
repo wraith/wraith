@@ -10,21 +10,21 @@
 #include "main.h"
 #include "responses.h"
 
-static Response response_totals[RES_TYPES + 1];
+static response_t response_totals[RES_TYPES + 1];
 
 void
 init_responses()
 {
-  unsigned int i = 0;
+  response_t i = 0;
   
   for (i = 0; i <= RES_TYPES; i++)
     response_totals[i] = 0;
 }
 
 static void
-count_responses(Response type)
+count_responses(response_t type)
 {
-  unsigned int total = 0;
+  response_t total = 0;
 
   for (total = 0; res[type][total]; total++) 
     ;
@@ -33,8 +33,8 @@ count_responses(Response type)
   /* printf("Type: %d has %d total responses!\n", type, response_totals[type]); */
 }
 
-char *
-response(Response type)
+const char *
+response(response_t type)
 {
   if (!type)
     type = randint(RES_TYPES) + 1;

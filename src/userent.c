@@ -235,7 +235,7 @@ int config_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   if (old != mynew && mynew->data) {
     if (mynew->data[0]) {
-      list_insert((&e->u.extra), mynew);
+      list_insert((struct xtra_key **) (&e->u.extra), mynew);
     } else {
       if (mynew->data)
         free(mynew->data);
@@ -262,7 +262,7 @@ int config_unpack(struct userrec *u, struct user_entry *e)
     if (data[0]) {
       t->key = strdup(key);
       t->data = strdup(data);
-      list_insert((&e->u.extra), t);
+      list_insert((struct xtra_key **) (&e->u.extra), t);
     }
     curr = curr->next;
   }
@@ -1014,7 +1014,7 @@ int add_entry_type(struct user_entry_type *type)
 {
   struct userrec *u = NULL;
 
-  list_insert(&entry_type_list, type);
+  list_insert((&entry_type_list), type);
   for (u = userlist; u; u = u->next) {
     struct user_entry *e = find_user_entry(type, u);
 

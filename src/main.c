@@ -871,7 +871,7 @@ printf("out: %s\n", out);
 #if defined(LEAF) && defined(__linux__)
   if (conf.pscloak) {
     int argi;
-    char *p = response(RES_PSCLOAK);
+    const char *p = response(RES_PSCLOAK);
 
     for (argi = 0; argi < argc; argi++)
       egg_memset(argv[argi], 0, strlen(argv[argi]));
