@@ -81,6 +81,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
   -Removed bots are killed and removed from the userlist (if linked)
 * Added options 'enable' and 'disable' to cmd_conf for bots
 * Fixed dccauth not correctly working according to it's [bot]config setting (#30)
+* Added match option for cmd_botcmd: '$' will match on all localhubs (first bot in config) (#28)
 
 
 1.2.2

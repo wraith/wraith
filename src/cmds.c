@@ -1401,6 +1401,7 @@ static void cmd_chsecpass(int idx, char *par)
 static void cmd_botcmd(int idx, char *par)
 {
   char *botm = newsplit(&par), *cmd = NULL;
+  bool rand_leaf = 0, all_localhub = 0;
   
   if (par[0])
     cmd = newsplit(&par);
@@ -1415,8 +1416,9 @@ static void cmd_botcmd(int idx, char *par)
 
   /* the rest of the cmd will be logged remotely */
   putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);	
+
   if (!strcmp(botm, "*")) {
-    if (!strcmp(cmd, "di") || !strcmp(cmd, "die")) {
+    if (!egg_strncasecmp(cmd, "di", 2) || !egg_strncasecmp(cmd, "res", 3)) {
       dprintf(idx, "Not a good idea.\n");
       return;
     } else if (!dcc[idx].user->flags & USER_OWNER) {
@@ -1425,7 +1427,9 @@ static void cmd_botcmd(int idx, char *par)
     }
   }
 
+  /* random leaf */
   if (!strcmp(botm, "?")) {
+    rand_leaf++;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999)
         tbots++;
@@ -1433,12 +1437,22 @@ static void cmd_botcmd(int idx, char *par)
     if (tbots)
       rleaf = 1 + randint(tbots);		/* 1 <--> tbots */
   }
+
+  /* localhubs */
+  if (!strcmp(botm, "&")) {
+    all_localhub++;
+    for (tbot = tandbot; tbot; tbot = tbot->next) {
+      if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999 && tbot->localhub)
+        tbots++;
+    }
+  }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
-    if (!strcmp(botm, "?") && bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999)
+    if ((rand_leaf && bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999) ||
+        (all_localhub && (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999 || !tbot->localhub)))
       continue;
     cnt++;
-    if ((rleaf != -1 && cnt == rleaf) || (rleaf == -1 && wild_match(botm, tbot->bot))) {
+    if ((rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
       send_remote_simul(idx, tbot->bot, cmd, par ? par : (char *) "");
       found++;
     }
