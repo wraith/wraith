@@ -42,7 +42,7 @@ enum {
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern size_t		nick_len;
-extern bool		checked_hostmask, quiet_reject, trigger_on_ignore;
+extern bool		checked_hostmask, quiet_reject, trigger_on_ignore, floodless;
 extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp, serv;
 extern port_t		default_port, newserverport;
 extern time_t		server_online, cycle_time, flud_time, flud_ctcp_time;

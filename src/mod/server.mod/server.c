@@ -27,6 +27,7 @@
 #include "server.h"
 #include <stdarg.h>
 
+bool floodless = 0;		/* floodless iline? */
 bool strict_servernames;
 bool checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;

@@ -198,7 +198,10 @@ dprintf(int idx, const char *format, ...)
       case DP_MODE_NEXT:
       case DP_SERVER_NEXT:
       case DP_HELP_NEXT:
-        queue_server(idx, buf, len);
+        if (floodless && server_online && serv != -1)
+          tputs(serv, buf, len);
+        else
+          queue_server(idx, buf, len);
         break;
 #endif /* LEAF */
     }

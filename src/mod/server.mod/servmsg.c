@@ -656,6 +656,10 @@ static int gotnotice(char *from, char *msg)
     } else {
       /* Server notice? */
       if ((nick[0] == 0) || (uhost[0] == 0)) {
+        if (!server_online && 
+           (!strcmp(msg, "*** You are exempt from flood limits.") || 
+            !strcmp(msg, "*** You are exempt from user limits. congrats.")))
+          floodless = 1;
 	/* Hidden `250' connection count message from server */
 	if (strncmp(msg, "Highest connection count:", 25))
 	  putlog(LOG_SERV, "*", "-NOTICE- %s", msg);
@@ -948,6 +952,7 @@ static void disconnect_server(int idx, int dolost)
   serv = -1;
   servidx = -1;
   server_online = 0;
+  floodless = 0;
   botuserhost[0] = 0;
   if (dolost) {
     trying_server = 0;
