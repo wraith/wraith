@@ -78,7 +78,7 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
   }
 #endif /* S_DCCPASS */
   x = check_bind(BT_dcc, cmd, &fr, dcc[idx].user, idx, text);
-  if (x == 0)
+  if (x == -1)
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
   else if (x & BIND_RET_LOG) {
      putlog(LOG_CMDS, "*", "#%s# %s %s", dcc[idx].nick, cmd, text);
