@@ -7,6 +7,8 @@
 #ifndef _EGG_MOD_IRC_IRC_H
 #define _EGG_MOD_IRC_IRC_H
 
+enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH };
+
 #define REVENGE_KICK 1		/* Kicked victim	*/
 #define REVENGE_DEOP 2		/* Took op		*/
 
@@ -23,7 +25,6 @@
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
 static char *makecookie(char *, char *);
 static int checkcookie(char *, char *, char *);
-static void makeplaincookie(char *, char *, char *);
 static int me_voice(struct chanset_t *);
 static int any_ops(struct chanset_t *);
 static char *getchanmode(struct chanset_t *);

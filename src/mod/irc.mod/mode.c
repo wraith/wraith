@@ -985,47 +985,15 @@ gotmode(char *from, char *msg)
 
               /* If no unbans or the -b is not the LAST mode, it's bad. */
               if (unbans != 1 || (strncmp(modes[modecnt - 1], "-b", 2))) {
-                isbadop = 1;
+                isbadop = BC_NOCOOKIE;
               } else {
-                char cookie[20] = "", *goodcookie = NULL;
-
-                /* -b hash!rand@time */
-                strncpyz(cookie, (char *) &(modes[modecnt - 1][3]), sizeof(cookie));
-                checkcookie(chan->dname, nick, cookie);
-
-                /*
-                 * last 6 digits of time
-                 * last 5 chars of nick
-                 * last 5 regular chars of chan
-                 */
-/*
-                makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);	
-                if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
-                  isbadop = 2;
-                else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
-                  isbadop = 3;
-                else {
-                  char ltmp[20] = "";
-                  time_t optime, off;
-
-                  sprintf(ltmp, "%010li", now + timesync);
-                  strncpyz((char *) &ltmp[4], plaincookie, 7);
-                  optime = atol(ltmp);
-                  off = (now + timesync - optime);
-
-                  if (chan->cookie_time_slack && (abs(off) > chan->cookie_time_slack)) {
-                    // isbadop = 4;
-                    putlog(LOG_DEBUG, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nick,
-                           optime, off);
-                  }
-                }
-*/
+					                 /* hash!rand@time */
+                isbadop = checkcookie(chan->dname, nick, &(modes[modecnt - 1][3]));
               }
               if (isbadop) {
                 char trg[NICKLEN] = "";
 
-                putlog(LOG_DEBUG, "*", "%s opped in %s with bad cookie(%d): %s", nick, chan->dname, isbadop,
-                       msg);
+                putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", nick, chan->dname, isbadop, msg);
                 n = i = 0;
                 switch (role) {
                   case 0:
@@ -1058,8 +1026,7 @@ gotmode(char *from, char *msg)
                       if (mo) {
                         if (!(mo->flags & CHANOP)) {
                           if (!chan_sentkick(mo)) {
-                            sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix,
-                                    response(RES_BADOPPED));
+                            sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, response(RES_BADOPPED));
                             tputs(serv, tmp, strlen(tmp));
                             mo->flags |= SENTKICK;
                           }
@@ -1068,13 +1035,11 @@ gotmode(char *from, char *msg)
                     }
                 }
 
-                if (isbadop == 1)
+                if (isbadop == BC_NOCOOKIE)
                   putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s", nick, from, msg);
-                else if (isbadop == 2)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad nick): %s!%s MODE %s", nick, from, msg);
-                else if (isbadop == 3)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad chan): %s!%s MODE %s", nick, from, msg);
-                else if (isbadop == 4)
+                else if (isbadop == BC_HASH)
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s", nick, from, msg);
+                else if (isbadop == BC_SLACK)
                   putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s", nick, from, msg);
               } else
                 putlog(LOG_DEBUG, "@", "Good op: %s", msg);

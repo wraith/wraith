@@ -139,7 +139,7 @@ checkcookie(char *chn, char *bnick, char *cookie)
 {
   char randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "", *p = NULL;
   time_t optime = 0;
-  int goodhash = 0, goodts = 0, goodobscure = 0;
+
   if (!salt2)
     salt2 = strdup(SALT2);
 
@@ -156,61 +156,15 @@ checkcookie(char *chn, char *bnick, char *cookie)
   if (strlen(chname) > 2)
     chname[3] = 0;
   strtoupper(chname);
-  putlog(LOG_MISC, "*", "randstring: %s ts: %s", randstring, ts);
   /* hash!rand@ts */
   sprintf(tohash, "%c%s%s%s%s%c", salt2[0], bnick, chname, &ts[4], randstring, salt2[15]);
-  putlog(LOG_MISC, "*", "tohash: %s", tohash);
   hash = MD5(tohash);
-  if (hash[8] == cookie[0] && hash[16] == cookie[1] && hash[18] == cookie[2])
-    goodhash = 1;
-  else
-    return 1;
-  putlog(LOG_MISC, "*", "slack: %d", ((now + timesync) - optime));
-  if (((now + timesync) - optime) < 300)
-    goodts = 1;
-  else
-    return 2;
-  goodobscure = 1;
-  if (goodhash && goodts && goodobscure)
-    putlog(LOG_MISC, "*", "GOOD COOKIE!");
-
+  if (!(hash[8] == cookie[0] && hash[16] == cookie[1] && hash[18] == cookie[2]))
+    return BC_HASH;
+  if (((now + timesync) - optime) > 300)
+    return BC_SLACK;
   return 0;
 }
-
-/*
-   plain cookie:
-   Last 6 digits of time
-   Last 5 chars of nick
-   Last 4 regular chars of chan
- */
-static void 
-makeplaincookie(char *chname, char *nick, char *buf)
-{
-  char work[256] = "", work2[256] = "";
-  int i, n;
-
-  sprintf(work, "%010li", (now + timesync));
-  strcpy(buf, (char *) &work[4]);
-  work[0] = 0;
-  if (strlen(nick) < 5)
-    while (strlen(work) + strlen(nick) < 5)
-      strcat(work, " ");
-  else
-    strcpy(work, (char *) &nick[strlen(nick) - 5]);
-  strcat(buf, work);
-
-  n = 3;
-  for (i = strlen(chname) - 1; (i >= 0) && (n >= 0); i--)
-    if (((unsigned char) chname[i] < 128) && ((unsigned char) chname[i] > 32)) {
-      work2[n] = tolower(chname[i]);
-      n--;
-    }
-  while (n >= 0)
-    work2[n--] = ' ';
-  work2[4] = 0;
-  strcat(buf, work2);
-}
-
 
 /*
    opreq = o #chan nick
