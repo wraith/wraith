@@ -1440,21 +1440,30 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
 
 static void cmd_botcmd(struct userrec *u, int idx, char *par)
 {
-  char *bot = NULL, *cmd = NULL;
+  tand_t *tbot;
+  int cnt = 0;
+  char *botm = NULL, *cmd = NULL;
   
-  bot = newsplit(&par);
+  botm = newsplit(&par);
   cmd = newsplit(&par);
-  if (!bot[0] || !cmd[0]) {
+  if (!botm[0] || !cmd[0]) {
     dprintf(idx, STR("Usage: botcmd bot cmd params\n"));
     return;
   }
 
-  putlog(LOG_CMDS, "*", STR("#%s# botcmd %s %s ..."), dcc[idx].nick, bot, cmd);		/* the rest of the cmd will be logged remotely */
-  if (nextbot(bot) < 0) {
-    dprintf(idx, STR("No such bot linked\n"));
+  putlog(LOG_CMDS, "*", STR("#%s# botcmd %s %s ..."), dcc[idx].nick, botm, cmd);		/* the rest of the cmd will be logged remotely */
+
+  for (bot = tandbot; bot; bot = bot->next) {
+    if (wild_match(botm, bot->bot)) {
+      cnt++;
+      send_remote_simul(idx, bot->bot, cmd, par ? par : "");
+    }
+  }
+   
+  if (!cnt) {
+    dprintf(idx, STR("No bot matching '%s' linked\n", botm));
     return;
   }
-  send_remote_simul(idx, bot, cmd, par ? par : "");
 }
 
 static void cmd_hublevel(struct userrec *u, int idx, char *par)
