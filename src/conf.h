@@ -25,6 +25,7 @@ typedef struct conf_bot_b {
 #endif /* LEAF */
   char *nick;
   char *pid_file;       /* path and filename of the .pid file */
+  bool hub;		/* should bot behave as a hub? */
 } conf_bot;
 
 typedef struct conf_b {

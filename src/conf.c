@@ -50,20 +50,22 @@ tellconf(conf_t * inconf)
   sdprintf("bots:\n");
   for (bot = inconf->bots; bot && bot->nick; bot = bot->next) {
     i++;
-    sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d PID: %d\n", i,
+    sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n", i,
              bot->nick,
              bot->net.ip ? bot->net.ip : "",
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
+             bot->hub,
              bot->pid);
   }
   if (inconf->bot && ((bot = inconf->bot))) {
     sdprintf("me:\n");
-    sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d PID: %d\n",
+    sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n",
              bot->nick,
              bot->net.ip ? bot->net.ip : "",
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
+             bot->hub,
              bot->pid);
   }
 }
@@ -400,6 +402,23 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
   bot->u = NULL;
   bot->pid = checkpid(nick, bot);
+
+  if (settings.hubs) {
+    char *p = settings.hubs, *p2 = NULL;
+    size_t len = 0;
+
+    while (p && *p) {
+      if ((p2 = strchr(p, ' '))) {
+        len = p2 - p;
+        if (!egg_strncasecmp(p, bot->nick, len)) {
+          bot->hub = 1;
+          break;
+        }
+      }
+      if ((p = strchr(p, ',')))
+        p++;
+    }
+  }
 }
 
 void
@@ -777,6 +796,7 @@ conf_bot_dup(conf_bot * dest, conf_bot * src)
   dest->net.v6 = src->net.v6;
   dest->u = src->u ? src->u : NULL;
   dest->pid = src->pid;
+  dest->hub = src->hub;
 #ifdef LEAF
   dest->localhub = src->localhub;
 #endif /* LEAF */
