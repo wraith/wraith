@@ -586,7 +586,6 @@ static void check_tempdir()
   }
 }
 
-/* FIXME: Remove after 1.2 (the hacks) */
 static void startup_checks(int hack) {
   /* for compatability with old conf files 
    * only check/use conf file if it exists and settings.uname is empty.
@@ -688,7 +687,6 @@ int main(int argc, char **argv)
 
   srandom(now % (mypid + getppid()) * randint(1000));
 
-  Context;		/* FIXME: wtf is this here for?, probably some old hack to fix a corrupt heap */
 /*
   char *out = NULL;
 printf("ret: %d\n", system("c:/wraith/leaf.exe"));
