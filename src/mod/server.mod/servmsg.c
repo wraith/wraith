@@ -186,14 +186,12 @@ static int got001(char *from, char *msg)
   if (x == NULL)
     return 0;			/* Uh, no server list */
   /* Only join if the IRC module is loaded. */
-  if (module_find("irc", 0, 0))
-    for (chan = chanset; chan; chan = chan->next) {
-      chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
-      if (shouldjoin(chan))
-	dprintf(DP_SERVER, "JOIN %s %s\n",
-	        (chan->name[0]) ? chan->name : chan->dname,
-	        chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    }
+  for (chan = chanset; chan; chan = chan->next) {
+    chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
+    if (shouldjoin(chan))
+      dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
+                                         chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+  }
   if (egg_strcasecmp(from, dcc[servidx].host)) {
     putlog(LOG_MISC, "*", "(%s claims to be %s; updating server list)", dcc[servidx].host, from);
     for (i = curserv; i > 0 && x != NULL; i--)

@@ -18,11 +18,15 @@
 #define QUICK           1
 
 #ifdef MAKING_IRC
+
 #ifdef S_AUTHCMDS
+
+#define add_mode real_add_mode
+static void real_add_mode(struct chanset_t *, char, char, char *);
+
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
 #endif /* S_AUTHCMDS */
 static void makeopline(struct chanset_t *, char *, char *);
-static int me_op(struct chanset_t *);
 static int me_voice(struct chanset_t *);
 static int any_ops(struct chanset_t *);
 static char *getchanmode(struct chanset_t *);
@@ -31,12 +35,9 @@ static void flush_mode(struct chanset_t *, int);
 /* reset(bans|exempts|invites) are now just macros that call resetmasks
  * in order to reduce the code duplication. <cybah>
  */
-#define resetbans(chan)	    resetmasks((chan), (chan)->channel.ban,	\
-				       (chan)->bans, global_bans, 'b')
-#define resetexempts(chan)  resetmasks((chan), (chan)->channel.exempt,	\
-				       (chan)->exempts, global_exempts, 'e')
-#define resetinvites(chan)  resetmasks((chan), (chan)->channel.invite,	\
-				       (chan)->invites, global_invites, 'I')
+#define resetbans(chan)	    resetmasks((chan), (chan)->channel.ban, (chan)->bans, global_bans, 'b')
+#define resetexempts(chan)  resetmasks((chan), (chan)->channel.exempt, (chan)->exempts, global_exempts, 'e')
+#define resetinvites(chan)  resetmasks((chan), (chan)->channel.invite, (chan)->invites, global_invites, 'I')
 
 static void detect_autokick(char *, char *, struct chanset_t *, char *);
 /* static int target_priority(struct chanset_t *, memberlist *, int); */
@@ -44,7 +45,6 @@ static int do_op(char *, struct chanset_t *, int);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
 static void reset_chan_info(struct chanset_t *);
-static void recheck_channel(struct chanset_t *, int);
 static void my_setkey(struct chanset_t *, char *);
 static void maybe_revenge(struct chanset_t *, char *, char *, int);
 static int detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
@@ -58,30 +58,21 @@ static int real_killmember(struct chanset_t *chan, char *nick, const char *file,
 #define killmember(chan, nick)        real_killmember((chan), (nick), __FILE__,__LINE__)
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
-void raise_limit(struct chanset_t *);
 #define newban(chan, mask, who)         newmask((chan)->channel.ban, mask, who)
-#define newexempt(chan, mask, who)      newmask((chan)->channel.exempt, mask, \
-						who)
-#define newinvite(chan, mask, who)      newmask((chan)->channel.invite, mask, \
-						who)
+#define newexempt(chan, mask, who)      newmask((chan)->channel.exempt, mask, who)
+#define newinvite(chan, mask, who)      newmask((chan)->channel.invite, mask, who)
 
-#else
-/* 4 - 7 */
-/* 8 - 11 */
-/* 12 - 15 */
-/* recheck_channel is here */
-/* 16 - 19 */
-#define me_op ((int(*)(struct chanset_t *))irc_funcs[16])
-/* recheck_channel_modes is here */
-/* do_channel_part is here. */
-/* 20 - 23 */
-#define check_this_ban ((void (*)(struct chanset_t *, char *, int))irc_funcs[20])
-#define check_this_user ((void(*)(char *, int, char *))irc_funcs[21])
-#define me_voice ((int(*)(struct chanset_t *))irc_funcs[22])
-#define raise_limit ((void (*)(struct chanset_t *))irc_funcs[23])
-#define enforce_closed ((void (*)(struct chanset_t *))irc_funcs[24])
+#endif /* MAKING_IRC */
 
-#endif				/* MAKING_IRC */
+int me_op(struct chanset_t *);
+void check_this_ban(struct chanset_t *, char *, int);
+void check_this_user(char *, int, char *);
+void raise_limit(struct chanset_t *);
+void enforce_closed(struct chanset_t *);
+void recheck_channel(struct chanset_t *, int);
+void recheck_channel_modes(struct chanset_t *);
+void do_channel_part(struct chanset_t *);
+void irc_report(int, int);
 
 #endif				/* _EGG_MOD_IRC_IRC_H */
 

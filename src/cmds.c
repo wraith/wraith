@@ -33,6 +33,7 @@
 #include "src/mod/console.mod/console.h"
 #ifdef LEAF
 #include "src/mod/server.mod/server.h"
+#include "src/mod/irc.mod/irc.h"
 #endif /* LEAF */
 
 #include <ctype.h>
@@ -2170,7 +2171,6 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
   		     mns = {0, 0, 0, 0, 0, 0},
 		     user = {0, 0, 0, 0, 0, 0},
 		     ouser = {0, 0, 0, 0, 0, 0};
-  module_entry *me = NULL;
   int fl = -1, of = 0, ocf = 0;
 
   if (!par[0]) {
@@ -2369,11 +2369,10 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     else
       dprintf(idx, STR("No flags for %s on %s.\n"), hand, chan->dname);
   }
-  if (chg && (me = module_find("irc", 0, 0))) {
-    Function *func = me->funcs;
-
-    (func[IRC_CHECK_THIS_USER]) (hand, 0, NULL);
-  }
+#ifdef LEAF
+  if (chg)
+    check_this_user(hand, 0, NULL);
+#endif /* LEAF */
   if (tmpchg)
     free(tmpchg);
 #ifdef HUB
@@ -3140,7 +3139,6 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
   int idx2;
   char *handle = NULL;
   struct userrec *u2 = NULL;
-  module_entry *me = NULL;
 
   putlog(LOG_CMDS, "*", STR("#%s# -user %s"), dcc[idx].nick, par);
 
@@ -3185,11 +3183,9 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("You can't remove users who aren't bots!\n"));
     return;
   }
-  if ((me = module_find("irc", 0, 0))) {
-    Function *func = me->funcs;
-
-   (func[IRC_CHECK_THIS_USER]) (handle, 1, NULL);
-  }
+#ifdef LEAF
+  check_this_user(handle, 1, NULL);
+#endif /* LEAF */
   if (deluser(handle)) {
     dprintf(idx, STR("Deleted %s.\n"), handle);
 #ifdef HUB
@@ -3206,7 +3202,6 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
   struct list_type *q = NULL;
   struct flag_record fr2 = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0},
                      fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  module_entry *me = NULL;
 
   putlog(LOG_CMDS, "*", STR("#%s# +host %s"), dcc[idx].nick, par);
 
@@ -3271,11 +3266,9 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
   addhost_by_handle(handle, host);
   update_mod(handle, dcc[idx].nick, "+host", host);
   dprintf(idx, STR("Added '%s' to %s.\n"), host, handle);
-  if ((me = module_find("irc", 0, 0))) {
-    Function *func = me->funcs;
-
-   (func[IRC_CHECK_THIS_USER]) (handle, 0, NULL);
-  }
+#ifdef LEAF
+  check_this_user(handle, 0, NULL);
+#endif /* LEAF */
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
@@ -3287,7 +3280,6 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
   struct userrec *u2 = NULL;
   struct flag_record fr2 = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0},
                      fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  module_entry *me = NULL;
 
   putlog(LOG_CMDS, "*", STR("#%s# -host %s"), dcc[idx].nick, par);
   if (!par[0]) {
@@ -3346,11 +3338,9 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
   if (delhost_by_handle(handle, host)) {
     dprintf(idx, STR("Removed '%s' from %s.\n"), host, handle);
     update_mod(handle, dcc[idx].nick, "-host", host);
-    if ((me = module_find("irc", 0, 0))) {
-      Function *func = me->funcs;
-
-     (func[IRC_CHECK_THIS_USER]) (handle, 2, host);
-    }
+#ifdef LEAF
+    check_this_user(handle, 2, host);
+#endif /* LEAF */
 #ifdef HUB
     write_userfile(idx);
 #endif /* HUB */

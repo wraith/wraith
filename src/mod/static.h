@@ -20,15 +20,13 @@ void update_init();
 void notes_init();
 #ifdef LEAF
 void server_init();
+void irc_init();
 #endif /* LEAF */
 
 static void link_statics()
 {
   check_static("channels", channels_start);
   check_static("compress", compress_start);
-#ifdef LEAF
-  check_static("irc", irc_start);
-#endif /* LEAF */
   check_static("share", share_start);
   check_static("transfer", transfer_start);
 }

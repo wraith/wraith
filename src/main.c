@@ -718,7 +718,7 @@ int main(int argc, char **argv)
   module_load("channels");
 #ifdef LEAF
   server_init();
-  module_load("irc");
+  irc_init();
 #endif /* LEAF */
   module_load("transfer");
   module_load("share");

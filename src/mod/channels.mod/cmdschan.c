@@ -16,7 +16,6 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
   unsigned long int expire_time = 0, expire_foo;
   int sticky = 0;
   struct chanset_t *chan = NULL;
-  module_entry *me = NULL;
 
   if (!par[0]) {
     dprintf(idx, "Usage: +ban <hostmask> [channel] [%%<XdXhXm>] [reason]\n");
@@ -123,8 +122,9 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
 	/* Avoid unnesessary modes if you got +dynamicbans, and there is
 	 * no reason to set mode if irc.mod aint loaded. (dw 001120)
 	 */
-	if ((me = module_find("irc", 0, 0)))
-	  (me->funcs[IRC_CHECK_THIS_BAN])(chan, s, sticky);
+#ifdef LEAF
+        check_this_ban(chan, s, sticky);
+#endif /* LEAF */
         
       } else {
 	u_addban(NULL, s, dcc[idx].nick, par, expire_time ? now + expire_time : 0, 0);
@@ -137,9 +137,10 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
 	  putlog(LOG_CMDS, "*", "#%s# (GLOBAL) +ban %s (%s)", dcc[idx].nick, s, par);
 	  dprintf(idx, "New ban: %s (%s)\n", s, par);
 	}
-	if ((me = module_find("irc", 0, 0)))
-	  for (chan = chanset; chan != NULL; chan = chan->next)
-	    (me->funcs[IRC_CHECK_THIS_BAN])(chan, s, sticky);
+#ifdef LEAF
+        for (chan = chanset; chan != NULL; chan = chan->next)
+          check_this_ban(chan, s, sticky);
+#endif /* LEAF */
       }
     }
   }
@@ -1072,9 +1073,8 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
 static void cmd_stick_yn(int idx, char *par, int yn)
 {
   int i = 0, j;
-  struct chanset_t *chan = NULL, *achan = NULL;
+  struct chanset_t *chan = NULL;
   char *stick_type = NULL, s[UHOSTLEN] = "", chname[81] = "";
-  module_entry *me = NULL;
 
   stick_type = newsplit(&par);
   strncpyz(s, newsplit(&par), sizeof s);
@@ -1179,9 +1179,14 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     if (i > 0) {
       putlog(LOG_CMDS, "*", "#%s# %sstick ban %s", dcc[idx].nick, yn ? "" : "un", s);
       dprintf(idx, "%stuck ban: %s\n", yn ? "S" : "Uns", s);
-      if ((me = module_find("irc", 0, 0)))
-	for (achan = chanset; achan != NULL; achan = achan->next)
-	  (me->funcs[IRC_CHECK_THIS_BAN])(achan, s, yn);
+#ifdef LEAF
+    {
+      struct chanset_t *achan = NULL;
+ 
+      for (achan = chanset; achan != NULL; achan = achan->next)
+        check_this_ban(achan, s, yn);
+    }
+#endif /* LEAF */
       return;
     }
     strncpyz(chname, dcc[idx].u.chat->con_chan, sizeof chname);
@@ -1206,8 +1211,9 @@ static void cmd_stick_yn(int idx, char *par, int yn)
   if (j > 0) {
     putlog(LOG_CMDS, "*", "#%s# %sstick ban %s %s", dcc[idx].nick, yn ? "" : "un", s, chname);
     dprintf(idx, "%stuck %s ban: %s\n", yn ? "S" : "Uns", chname, s);
-    if ((me = module_find("irc", 0, 0)))
-      (me->funcs[IRC_CHECK_THIS_BAN])(chan, s, yn);
+#ifdef LEAF
+    check_this_ban(chan, s, yn);
+#endif /* LEAF */
     return;
   }
   dprintf(idx, "No such ban.\n");

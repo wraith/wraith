@@ -27,6 +27,7 @@
 #include "modules.h"
 #ifdef LEAF
 #include "src/mod/server.mod/server.h"
+#include "src/mod/irc.mod/irc.h"
 #endif /* LEAF */
 #include "userrec.h"
 #include "stat.h"
@@ -467,10 +468,6 @@ void show_channels(int idx, char *handle)
   struct userrec *u = NULL;
   int first = 0, l = 0, total = 0;
   char format[120] = "";
-#ifdef LEAF
-  module_entry *me = module_find("irc", 0, 0);
-  Function *func = me->funcs;
-#endif /* LEAF */
 
   if (handle)
     u = get_user_by_handle(userlist, handle);
@@ -489,10 +486,10 @@ void show_channels(int idx, char *handle)
   egg_snprintf(format, sizeof format, "  %%c%%-%us %%-s%%-s%%-s%%-s%%-s\n", (l+2));
 
   for (chan = chanset;chan;chan = chan->next) {
-#ifdef LEAF
-    int opped = (func[16] (chan));
-#else /* !LEAF */
     int opped = 0;
+
+#ifdef LEAF
+    opped = me_op(chan);
 #endif /* LEAF */
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {

@@ -17,9 +17,6 @@
 #include "src/egg_timer.h"
 
 static Function *global = NULL;
-#ifdef LEAF
-static Function *irc_funcs = NULL;
-#endif /* LEAF */
 
 int 			use_info;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
@@ -141,11 +138,10 @@ static void got_cset(char *botnick, char *code, char *par)
   while (chan) {
     chname = chan->dname;
     do_chanset(NULL, chan, par, DO_LOCAL);
-    if (chan->status & CHAN_BITCH) {
-      module_entry *me = NULL;
-      if ((me = module_find("irc", 0, 0)))
-        (me->funcs[IRC_RECHECK_CHANNEL])(chan, 0);
-    }
+#ifdef LEAF
+    if (chan->status & CHAN_BITCH)
+      recheck_channel(chan, 0);
+#endif /* LEAF */
     if (!all)
       chan = NULL;
     else
@@ -586,13 +582,13 @@ inline static int chanset_unlink(struct chanset_t *chan)
 void remove_channel(struct chanset_t *chan)
 {
    int		 i;
-   module_entry	*me = NULL;
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_part() call. */
    (void) chanset_unlink(chan);
 
-   if ((me = module_find("irc", 0, 0)) != NULL)
-     (me->funcs[IRC_DO_CHANNEL_PART])(chan);
+#ifdef LEAF
+   do_channel_part(chan);
+#endif /* LEAF */
 
    clear_channel(chan, 0);
    noshare = 1;
@@ -886,16 +882,8 @@ static void check_limitraise() {
   struct chanset_t *chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next, i++) {
-    if (i % 2 == checklimit) {
-      if (chan->limitraise) {
-        if (dolimit(chan)) {
-          module_entry *me = NULL;
-
-          if ((me = module_find("irc", 0, 0)))
-            (me->funcs[23])(chan);             /* raise_limit(chan) */
-        }
-      }
-    }
+    if (i % 2 == checklimit && chan->limitraise && dolimit(chan))
+          raise_limit(chan);
   }
   if (checklimit)
     checklimit = 0;
@@ -952,13 +940,6 @@ char *channels_start(Function * global_funcs)
          "-private "
 	 "-fastop ");
   module_register(MODULE_NAME, channels_table, 1, 0);
-#ifdef LEAF
-  if (!(irc_funcs = module_depend(MODULE_NAME, "irc", 1, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires irc module 1.0 or later.";
-  }
-#endif /* LEAF */
-
 #ifdef LEAF
   timer_create_secs(60, "check_limitraise", (Function) check_limitraise);
 #endif /* LEAF */

@@ -290,7 +290,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
-  module_entry *me = NULL;
 #endif /* LEAF */
   struct udef_struct *ul = udef;
   char s[121] = "";
@@ -531,7 +530,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
     else if (!strcmp(item[i], "-seen"))  ;
     else if (!strcmp(item[i], "+secret"))  ;
     else if (!strcmp(item[i], "-secret"))  ;
-      else if (!strcmp(item[i], "-stopnethack"))  ;
+    else if (!strcmp(item[i], "-stopnethack"))  ;
     else if (!strcmp(item[i], "+stopnethack"))  ;
     else if (!strcmp(item[i], "-wasoptest"))  ;
     else if (!strcmp(item[i], "+wasoptest"))  ;  /* Eule 01.2000 */
@@ -626,7 +625,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
   }
 #ifdef LEAF
   if (1 || loading) {
-    if (((old_status ^ chan->status) & CHAN_INACTIVE) && module_find("irc", 0, 0)) {
+    if ((old_status ^ chan->status) & CHAN_INACTIVE) {
       if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
         dprintf(DP_SERVER, "PART %s\n", chan->name);
       if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
@@ -636,11 +635,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 					   chan->channel.key : chan->key_prot);
     }
     if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
-      if ((me = module_find("irc", 0, 0)))
-        (me->funcs[IRC_RECHECK_CHANNEL])(chan, 1);
+      recheck_channel(chan, 1);
     } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
-      if ((me = module_find("irc", 0, 0)))
-        (me->funcs[IRC_RECHECK_CHANNEL_MODES])(chan);
+      recheck_channel_modes(chan);
     }
   }
 #endif /* LEAF */
@@ -816,8 +813,8 @@ int channel_add(char *result, char *newname, char *options)
 
   free(item);
 #ifdef LEAF
-  if (join && shouldjoin(chan) && module_find("irc", 0, 0))
-    dprintf(DP_SERVER, "JOIN %s %s\n", chan->dname, chan->key_prot);
+  if (join && shouldjoin(chan))
+    dprintf(DP_SERVER, "JOIN %s %s\n", chan->name, chan->key_prot);
 #endif /* LEAF */
   return ret;
 }

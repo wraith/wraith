@@ -5,21 +5,32 @@
  *
  */
 
-#define MODULE_NAME "irc"
+#undef MAKING_MODS
+#include "src/common.h"
 #define MAKING_IRC
-#include "src/mod/module.h"
 #include "irc.h"
+#include "src/modules.h"
+#include "src/match.h"
+#include "src/settings.h"
+#include "src/tandem.h"
+#include "src/net.h"
+#include "src/botnet.h"
+#include "src/botmsg.h"
+#include "src/main.h"
+#include "src/cfg.h"
+#include "src/userrec.h"
 #include "src/misc.h"
+#include "src/rfc1459.h"
 #include "src/chanprog.h"
 #include "src/auth.h"
-//#include "src/userrec.h"
+#include "src/userrec.h"
 #include "src/salt.h"
+#include "src/tclhash.h"
+#include "src/userent.h"
 #include "src/egg_timer.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
-
-extern int strict_host;
 
 #define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
 #define IN_BOTS (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
@@ -47,9 +58,6 @@ struct cfg_entry CFG_OPBOTS,
 #endif /* S_AUTOLOCK */
   CFG_OPREQUESTS;
 
-
-
-static Function *global = NULL;
 
 
 static int net_type = 0;
@@ -887,7 +895,7 @@ static int real_killmember(struct chanset_t *chan, char *nick, const char *file,
 
 /* Check if I am a chanop. Returns boolean 1 or 0.
  */
-static int me_op(struct chanset_t *chan)
+int me_op(struct chanset_t *chan)
 {
   memberlist *mx = NULL;
 
@@ -976,7 +984,7 @@ static void reset_chan_info(struct chanset_t *chan)
 /* Leave the specified channel and notify registered Tcl procs. This
  * should not be called by itsself.
  */
-static void do_channel_part(struct chanset_t *chan)
+void do_channel_part(struct chanset_t *chan)
 {
   if (shouldjoin(chan) && chan->name[0]) {
     /* Using chan->name is important here, especially for !chans <cybah> */
@@ -1308,7 +1316,7 @@ static void flush_modes()
   }
 }
 
-static void irc_report(int idx, int details)
+void irc_report(int idx, int details)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   char ch[1024] = "", q[160] = "", *p = NULL;
@@ -1416,9 +1424,9 @@ static void do_nettype()
 }
 
 static cmd_t irc_bot[] = {
-  {"dp", "", (Function) mdop_request, NULL},
-  {"gi", "", (Function) getin_request, NULL},
-  {0, 0, 0, 0}
+  {"dp", 	"", 	(Function) mdop_request, 	NULL},
+  {"gi", 	"", 	(Function) getin_request, 	NULL},
+  {NULL, 	NULL, 	NULL, 				NULL}
 };
 
 static void getin_5secondly()
@@ -1431,48 +1439,6 @@ static void getin_5secondly()
         request_op(chan);
     }
   }
-}
-
-EXPORT_SCOPE char *irc_start();
-
-static Function irc_table[] =
-{
-  /* 0 - 3 */
-  (Function) irc_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) irc_report,
-  /* 4 - 7 */
-  (Function) 0,		
-  (Function) 0,		
-  (Function) 0,
-  (Function) 0,
-  /* 8 - 11 */
-  (Function) 0,		
-  (Function) 0,		
-  (Function) 0,		
-  (Function) 0,		
-  /* 12 - 15 */
-  (Function) 0,
-  (Function) 0,
-  (Function) 0,
-  (Function) recheck_channel,
-  /* 16 - 19 */
-  (Function) me_op,
-  (Function) recheck_channel_modes,
-  (Function) 0,
-  (Function) do_channel_part,
-  /* 20 - 23 */
-  (Function) check_this_ban,
-  (Function) check_this_user,
-  (Function) me_voice,
-  (Function) raise_limit,
-  /* 24 - 27 */
-  (Function) enforce_closed,
-};
-
-void irc_describe(struct cfg_entry *cfgent, int idx)
-{
 }
 
 void irc_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
@@ -1529,44 +1495,40 @@ void irc_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 
 
 struct cfg_entry CFG_OPBOTS = {
-  "op-bots", CFGF_GLOBAL, NULL, NULL,
-  irc_changed, NULL, irc_describe
+	"op-bots", CFGF_GLOBAL, NULL, NULL,
+	irc_changed, NULL, NULL
 };
 
 struct cfg_entry CFG_INBOTS = {
-  "in-bots", CFGF_GLOBAL, NULL, NULL,
-  irc_changed, NULL, irc_describe
+	"in-bots", CFGF_GLOBAL, NULL, NULL,
+	irc_changed, NULL, NULL
 };
 
 struct cfg_entry CFG_LAGTHRESHOLD = {
-  "lag-threshold", CFGF_GLOBAL, NULL, NULL,
-  irc_changed, NULL, irc_describe
+	"lag-threshold", CFGF_GLOBAL, NULL, NULL,
+	irc_changed, NULL, NULL
 };
 
 struct cfg_entry CFG_OPREQUESTS = {
-  "op-requests", CFGF_GLOBAL, NULL, NULL,
-  irc_changed, NULL, irc_describe
+	"op-requests", CFGF_GLOBAL, NULL, NULL,
+	irc_changed, NULL, NULL
 };
 
 struct cfg_entry CFG_OPTIMESLACK = {
-  "op-time-slack", CFGF_GLOBAL, NULL, NULL,
-  irc_changed, NULL, irc_describe
+	"op-time-slack", CFGF_GLOBAL, NULL, NULL,
+	irc_changed, NULL, NULL
 };
 
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_FIGHTTHRESHOLD = {
-  "fight-threshold", CFGF_GLOBAL, NULL, NULL,
-  irc_changed, NULL, irc_describe
+	"fight-threshold", CFGF_GLOBAL, NULL, NULL,
+	irc_changed, NULL, NULL
 };
 #endif /* S_AUTOLOCK */
 
-char *irc_start(Function * global_funcs)
+void irc_init()
 {
   struct chanset_t *chan = NULL;
-
-  global = global_funcs;
-
-  module_register(MODULE_NAME, irc_table, 1, 3);
 
   add_cfg(&CFG_OPBOTS);
   add_cfg(&CFG_INBOTS);
@@ -1603,6 +1565,5 @@ char *irc_start(Function * global_funcs)
 #endif /* S_AUTHCMDS */
 
   do_nettype();
-  return NULL;
 }
-#endif
+#endif /* LEAF */

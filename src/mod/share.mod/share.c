@@ -20,7 +20,7 @@
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/channels.mod/channels.h"
 #ifdef LEAF
-#  include "irc.mod/irc.h"
+#include "src/mod/irc.mod/irc.h"
 #endif /* LEAF */
 
 /* Minimum version I will share with. */
@@ -31,9 +31,6 @@ static const int min_exemptinvite	= 1000000;
 static const int min_uffeature		= 1000000;
 
 static Function *global = NULL, *transfer_funcs = NULL;
-#ifdef LEAF
-static Function *irc_funcs = NULL;
-#endif /* LEAF */
 
 static int private_global = 0;
 static int private_user = 0;
@@ -286,7 +283,6 @@ static void share_chattr(int idx, char *par)
   struct userrec *u = NULL;
   struct flag_record fr2;
   int bfl, ofl;
-  module_entry *me = NULL;
 
   if ((dcc[idx].status & STAT_SHARE) && !private_user) {
     hand = newsplit(&par);
@@ -313,13 +309,10 @@ static void share_chattr(int idx, char *par)
 	    noshare = 0;
 	    build_flags(s, &fr, 0);
 	    if (!(dcc[idx].status & STAT_GETTING))
-	      putlog(LOG_CMDS, "@", "%s: chattr %s %s %s",
-		     dcc[idx].nick, hand, s, par);
-	    if ((me = module_find("irc", 0, 0))) {
-	      Function *func = me->funcs;
-
-	      (func[IRC_RECHECK_CHANNEL]) (cst, 0);
-	    }
+	      putlog(LOG_CMDS, "@", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
+#ifdef LEAF
+            recheck_channel(cst, 0);
+#endif /* LEAF */
 	  } else
 	    putlog(LOG_CMDS, "*",
 		   "Rejected flags for unshared channel %s from %s",
@@ -344,16 +337,14 @@ static void share_chattr(int idx, char *par)
 	  noshare = 0;
 	  build_flags(s, &fr, 0);
 	  fr.match = FR_CHAN;
-#ifndef LEAF
+#ifdef HUB
 	  if (!(dcc[idx].status & STAT_GETTING))
 	    putlog(LOG_CMDS, "@", "%s: chattr %s %s", dcc[idx].nick, hand, s);
+#endif /* HUB */
+#ifdef LEAF
+          for (cst = chanset; cst; cst = cst->next)
+            recheck_channel(cst, 0);
 #endif /* LEAF */
-	  if ((me = module_find("irc", 0, 0))) {
-	    Function *func = me->funcs;
-
-	    for (cst = chanset; cst; cst = cst->next)
-	      (func[IRC_RECHECK_CHANNEL]) (cst, 0);
-	  }
 	} else
 	  putlog(LOG_CMDS, "@", "Rejected global flags for %s from %s",
 		 hand, dcc[idx].nick);
@@ -2139,12 +2130,6 @@ char *share_start(Function *global_funcs)
     return "This module requires transfer module 2.0 or later.";
   }
 
-#ifdef LEAF
-  if (!(irc_funcs = module_depend(MODULE_NAME, "irc", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires channels module 1.0 or later.";
-  }
-#endif /* LEAF */
   timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
   timer_create_secs(1, "check_delay", (Function) check_delay);
   add_hook(HOOK_READ_USERFILE, (Function) hook_read_userfile);
