@@ -51,6 +51,7 @@ struct dcc_t {
                                    machines sane                         */
   int ssl;                      /* use ssl on this dcc? */
   int simul;                    /* this will hold the idx on the remote bot to return result. */
+  int msgc;			/* forward the output back to irc? */
   port_t port;
 #ifdef USE_IPV6
   char addr6[121];              /* easier.. ipv6 address in regular notation (3ffe:80c0:225::) */

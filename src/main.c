@@ -175,6 +175,7 @@ static void check_expired_dcc()
     }
 }
 
+/* this also expires irc dcc_cmd auths */
 static void expire_simuls() {
   int idx = 0;
 

@@ -2723,7 +2723,6 @@ static int gotmsg(char *from, char *msg)
     int dolog = 1, botmatch = 0;
 #ifdef S_AUTHCMDS
     int i = 0;
-    struct userrec *my_u = NULL;
     char *my_msg = NULL, *my_ptr = NULL, *fword = NULL;
 #endif /* S_AUTHCMDS */
     /* Check even if we're ignoring the host. (modified by Eule 17.7.99) */
@@ -2747,8 +2746,7 @@ static int gotmsg(char *from, char *msg)
       if (i > -1 && auth[i].authed) {
         if (fword[0] == cmdprefix)
           fword++;
-        my_u = auth[i].user;
-        if (check_bind_pubc(fword, nick, uhost, my_u, my_msg, chan->dname)) {
+        if (check_bind_pubc(fword, nick, uhost, auth[i].user, my_msg, chan->dname)) {
           auth[i].atime = now;
           dolog--; 		/* don't log */
         }

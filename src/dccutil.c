@@ -160,8 +160,17 @@ void dprintf(int idx, const char *format, ...)
       strcat(buf, "\n");
       len = 1001;
     }
-    if (dcc[idx].simul > 0) {
+    if (dcc[idx].simul > 0 && !dcc[idx].msgc) {
       bounce_simul(idx, buf);
+    } else if (dcc[idx].msgc > 0) {
+      char *ircbuf = NULL;
+      size_t size = 0;
+      
+      size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
+      ircbuf = calloc(1, size);
+      egg_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
+      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
+      free(ircbuf);
     } else {
       if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {
         char *p = add_cr(buf);
@@ -691,7 +700,7 @@ void identd_open()
   identd_hack = 0;
   if (i > 0) {
     idx = new_dcc(&DCC_IDENTD_CONNECT, 0);
-    if (idx > 0) {
+    if (idx >= 0) {
       egg_timeval_t howlong;
 
       dcc[idx].addr = iptolong(getmyip());

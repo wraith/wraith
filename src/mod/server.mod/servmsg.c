@@ -119,10 +119,11 @@ static void check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u
 #ifdef S_AUTHCMDS
 static int check_bind_msgc(char *cmd, char *nick, char *from, struct userrec *u, char *args)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
-  int x;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
+  int x = 0;
 
-  x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, NULL);
+  get_user_flagrec(u, &fr, NULL);
+  x = check_bind(BT_msgc, cmd, &fr, nick, from, u, NULL, args);
 
   if (x & BIND_RET_LOG)
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", nick, from, u ? u->handle : "*", cmdprefix, cmd, args);

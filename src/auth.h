@@ -14,6 +14,7 @@ struct auth_t {
   char hash[MD5_HASH_LENGTH + 1];       /* used for dcc authing */
 #    endif                      /* S_AUTHHASH */
   char nick[NICKLEN];
+  char hand[NICKLEN];
   char host[UHOSTLEN];
 };
 #  endif

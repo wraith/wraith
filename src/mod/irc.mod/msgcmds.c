@@ -5,6 +5,8 @@
  *
  */
 
+#include "src/core_binds.h"
+
 #ifdef S_MSGCMDS
 static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
 {
@@ -192,7 +194,6 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 #endif /* S_MSGCMDS */
 
 #ifdef S_AUTHCMDS
-
 static void reply(char *, struct chanset_t *, char *, ...) __attribute__((format(printf, 3, 4)));
 
 static void reply(char *nick, struct chanset_t *chan, char *format, ...)
@@ -209,6 +210,15 @@ static void reply(char *nick, struct chanset_t *chan, char *format, ...)
   else
     dprintf(DP_HELP, "NOTICE %s :%s", nick, buf);
 }
+
+static void logc(const char *cmd, char *nick, char *host, char *hand, char *chname, char *par)
+{
+  if (chname && chname[0])
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", nick, host, hand, chname, cmdprefix, cmd, par ? par : "");
+  else
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", nick, host, hand, cmdprefix, cmd, par ? par : "");
+}
+#define LOGC(cmd) logc(cmd, nick, host, u->handle, chname, par)
 
 static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 {
@@ -240,8 +250,10 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
   auth[i].authed = 0;
   strcpy(auth[i].nick, nick);
   strcpy(auth[i].host, host);
-  if (u)
+  if (u) {
     auth[i].user = u;
+    strcpy(auth[i].hand, u->handle);
+  }
 
   dprintf(DP_HELP, "PRIVMSG %s :auth%s %s\n", nick, u ? "." : "!", conf.bot->nick);
 
@@ -274,6 +286,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 
   if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
       auth[i].user = u;
+      strcpy(auth[i].hand, u->handle);
 #ifdef S_AUTHHASH
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! -AUTH", nick, host, u->handle);
 
@@ -441,29 +454,52 @@ static cmd_t C_msg[] =
 };
 
 #ifdef S_AUTHCMDS
-/*
-static int msgc_test(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_test(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
-  char *chn, *hand;
-  struct chanset_t *chan;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
-  struct userrec *user;
-  
-  hand = newsplit(&par);
-  user = get_user_by_handle(userlist, hand);
-  chn = newsplit(&par);
-  chan = findchan_by_dname(chn);
-  get_user_flagrec(user, &fr, chan->dname);
+  char *cmd = NULL;
+  int idx = -1, i = 0, chan = 0;
 
-  dprintf(DP_HELP, "PRIVMSG %s :Private-o: %d Private-v: %d canop: %d canvoice: %d deop: %d devoice: %d\n", nick, 
-  private(fr, chan, 1), private(fr, chan, 2), 
-  chk_op(fr, chan), chk_voice(fr, chan), chk_deop(fr, chan), chk_devoice(fr, chan));
+  LOGC("TEST");
 
-  dprintf(DP_HELP, "NOTICE %s :Works :)\n", nick);
-  return 0;
+  cmd = newsplit(&par);
+  if (chname)
+    chan++;
+
+  for (i = 0; i < dcc_total; i++) {
+   if (dcc[i].msgc && ((chan && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, u->handle)) || 
+      (!chan && !strcmp(dcc[i].simulbot, nick)))) {
+     putlog(LOG_MISC, "*", "Simul found old idx for %s/%s: %d", nick, chname, i);
+     dcc[i].simultime = now;
+     idx = i;
+     break;
+   }
+  }
+
+  if (idx < 0) {
+    idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
+    dcc[idx].sock = serv;
+    dcc[idx].timeval = now;
+    dcc[idx].msgc = 1;
+    dcc[idx].simultime = now;
+    dcc[idx].simul = 1;
+    dcc[idx].status = STAT_COLOR;
+    strcpy(dcc[idx].simulbot, chname ? chname : nick);
+    dcc[idx].u.chat->con_flags = 0;
+    strcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*");
+    dcc[idx].u.chat->strip_flags = STRIP_ALL;
+    strcpy(dcc[idx].nick, u->handle);
+    strcpy(dcc[idx].host, host);
+    dcc[idx].addr = 0L;
+    dcc[idx].user = u;
+  }
+//  rmspace(par);
+
+  check_bind_dcc(cmd, idx, par);
+
+  return BIND_RET_BREAK;
 }
-*/
-static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *chname)
+
+static int msgc_op(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
@@ -476,7 +512,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
       m = ismember(chan, nick);
   }
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cOP %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  LOGC("OP");
 
   if (par[0] == '-') { /* we have an option! */
     char *tmp = NULL;
@@ -513,7 +549,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
   return BIND_RET_BREAK;
 }
 
-static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_voice(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
@@ -525,8 +561,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
     if (chan) 
       m = ismember(chan, nick);
   }
-
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cVOICE %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  LOGC("VOICE");
 
   if (par[0] == '-') { /* we have an option! */
     char *tmp = NULL;
@@ -561,13 +596,13 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
   return BIND_RET_BREAK;
 }
 
-static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_channels(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
   char list[1024] = "";
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cCHANNELS %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
+  LOGC("CHANNELS");
   for (chan = chanset; chan; chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
@@ -586,7 +621,7 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
   return BIND_RET_BREAK;
 }
 
-static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_getkey(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
@@ -597,8 +632,7 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
   if (!par[0])
     return 0;
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %cGETKEY %s", nick, host, u->handle, cmdprefix, par);
-
+  LOGC("GETKEY");
   chan = findchan_by_dname(par);
   if (chan && channel_active(chan) && !channel_pending(chan)) {
     get_user_flagrec(u, &fr, chan->dname);
@@ -613,33 +647,19 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
   return BIND_RET_BREAK;
 }
 
-static int msgc_help(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_help(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
-  bind_entry_t *entry = NULL;
-  bind_table_t *table = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
+  LOGC("HELP");
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %cHELP %s", nick, host, u->handle, cmdprefix, par ? par : "");
-
-
-  get_user_flagrec(u, &fr, chname);
-  /* build_flags(flg, &fr, NULL); */
-
-
-  table = bind_table_lookup("msgc");
-  for (entry = table->entries; entry && entry->next; entry = entry->next) {
-  }
-  
-  dprintf(DP_HELP, "NOTICE %s :op invite getkey voice test\n", nick);
+  reply(nick, NULL, "op invite getkey voice test\n");
   return BIND_RET_BREAK;
 }
 
-static int msgc_md5(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_md5(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cMD5 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
-  
+  LOGC("MD5");
   if (chname && chname[0])
     chan = findchan_by_dname(chname);  
 
@@ -647,12 +667,12 @@ static int msgc_md5(char *nick, char *host, struct userrec *u, char *par, char *
   return BIND_RET_BREAK;
 }
 
-static int msgc_sha1(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_sha1(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %cSHA1 %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
-  
+  LOGC("SHA1");  
+
   if (chname && chname[0])
     chan = findchan_by_dname(chname);  
 
@@ -660,7 +680,7 @@ static int msgc_sha1(char *nick, char *host, struct userrec *u, char *par, char 
   return BIND_RET_BREAK;
 }
 
-static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, char *chname)
+static int msgc_invite(char *nick, char *host, struct userrec *u, char *chname, char *par)
 {
   struct chanset_t *chan = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
@@ -669,8 +689,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
   if (chname && chname[0])
     return 0;
  
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! %cINVITE %s", nick, host, u->handle, cmdprefix, par ? par : "");
-
+  LOGC("INVITE");
   if (par[0] == '-') {
     char *tmp = NULL;
 
@@ -712,7 +731,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
 
 static cmd_t C_msgc[] =
 {
-/*  {"test",		"a",	(Function) msgc_test,		NULL}, */
+  {"test",		"a",	(Function) msgc_test,		NULL},
   {"channels",		"",	(Function) msgc_channels,	NULL},
   {"getkey",		"",	(Function) msgc_getkey,		NULL},
   {"help",		"",	(Function) msgc_help,		NULL},
