@@ -1391,7 +1391,7 @@ static void memberlist_reposition(struct chanset_t *chan, memberlist *target) {
 }
 
 
-static int got352or4(struct chanset_t *chan, char *user, char *host, char *server, char *nick, char *flags, int hops)
+static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick, char *flags, int hops)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   char userhost[UHOSTLEN] = "";
@@ -1408,23 +1408,8 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serve
   }
   strcpy(m->nick, nick);	/* Store the nick in list */
 
-  if (server) {
-    strncpyz(m->server, server, SERVLEN);
-    /* Propagate server to other channel memlists... might save us a WHO #chan */
-    for (ch = chanset; ch; ch = ch->next) {
-      if (ch != chan) {
-        for (ml = ch->channel.member; ml && ml->nick[0]; ml = ml->next) {
-          if (!strcmp(ml->nick, m->nick)) {
-            strcpy(ml->server, m->server);
-            break;
-          }
-        }
-      }
-    }
-  } else
-    m->server[0] = 0;
-
   m->hops = hops;
+
   /* Propagate hops to other channel memlists... might save us a WHO #chan */
   for (ch = chanset; ch; ch = ch->next) {
     if (ch != chan) {
@@ -1514,16 +1499,16 @@ static int got352(char *from, char *msg)
   chname = newsplit(&msg);	/* Grab the channel */
   chan = findchan(chname);	/* See if I'm on channel */
   if (chan) {			/* Am I? */
-    char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *server = NULL, *hops = NULL;
+    char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *hops = NULL;
 
     user = newsplit(&msg);	/* Grab the user */
     host = newsplit(&msg);	/* Grab the host */
-    server = newsplit(&msg);    /* And the server */
+    newsplit(&msg);		/* skip the server */
     nick = newsplit(&msg);	/* Grab the nick */
     flags = newsplit(&msg);	/* Grab the flags */
     hops = newsplit(&msg);	/* grab server hops */
     hops++;
-    got352or4(chan, user, host, server, nick, flags, atoi(hops));
+    got352or4(chan, user, host, nick, flags, atoi(hops));
   }
   return 0;
 }
@@ -1547,7 +1532,7 @@ static int got354(char *from, char *msg)
 	flags = newsplit(&msg);	/* Grab the flags */
         hops = newsplit(&msg);  /* yay for hops, does iru even have hops?? */
         hops++;
-	got352or4(chan, user, host, NULL, nick, flags, atoi(hops));
+	got352or4(chan, user, host, nick, flags, atoi(hops));
       }
     }
   }

@@ -519,7 +519,6 @@ request_op(struct chanset_t *chan)
   int cnt = OP_BOTS, i2;
   memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
-  char myserv[SERVLEN] = "";
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   for (i = 0, ml = chan->channel.member; (i < MAX_BOTS) && ml && ml->nick[0]; ml = ml->next) {
@@ -531,9 +530,6 @@ request_op(struct chanset_t *chan)
       if (chk_op(fr, chan))
         botops[i++] = ml;
     }
-    if (!strcmp(ml->nick, botname))
-      if (ml->server)
-        strcpy(myserv, ml->server);
   }
   if (!i) {
     if (channel_active(chan) && !channel_pending(chan))
@@ -546,8 +542,9 @@ request_op(struct chanset_t *chan)
   /* first scan for bots on my server, ask first found for ops */
   sprintf(s, "gi o %s %s", chan->dname, botname);
 
+  /* look for bots 0-1 hops away */
   for (i2 = 0; i2 < i; i2++) {
-    if (botops[i2]->server && (!strcmp(botops[i2]->server, myserv))) {
+    if (botops[i2]->hops < 2) {
       putbot(botops[i2]->user->handle, s);
       chan->opreqtime[first] = n;
       if (l[0]) {
@@ -1071,8 +1068,7 @@ static void
 check_servers(struct chanset_t *chan)
 {
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!match_my_nick(m->nick) && chan_hasop(m) &&
-        (!m->server || (m->server && !m->server[0]) || (m->hops == -1))) {
+    if (!match_my_nick(m->nick) && chan_hasop(m) && (m->hops == -1)) {
       putlog(LOG_DEBUG, "*", "Updating WHO for '%s' because '%s' is missing data.", chan->dname, m->nick);
       dprintf(DP_HELP, "WHO %s\n", chan->name);
       break;                    /* lets just do one chan at a time to save from flooding */
