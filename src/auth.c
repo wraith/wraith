@@ -93,7 +93,7 @@ char *makehash(struct userrec *u, char *rand)
     strcpy(secpass, (char *) get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
-  sprintf(hash, "%s%s%s", rand, (secpass && secpass[0]) ? secpass : "" , authkey[0] ? authkey : "");
+  sprintf(hash, "%s%s%s", rand, (secpass && secpass[0]) ? secpass : "" , (authkey && authkey[0]) ? authkey : "");
   if (secpass)
     nfree(secpass);
   MD5_Init(&ctx);

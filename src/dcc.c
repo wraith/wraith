@@ -627,14 +627,17 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
         char pass[17];
 
         dprintf(idx, "******************************************************************** \
-                      \n \n \n WARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....\n");
+                      \n \n \n%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n",
+                     color(idx, FLASH_OPEN, 0), color(idx, FLASH_CLOSE, 0));
         make_rand_str(pass, 16);
         pass[16] = 0;
         set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
 #ifdef HUB
         write_userfile(idx);
-#endif
-        dprintf(idx, "Your secpass is now '%s'\nMake sure you do not lose this, as it is needed to login for now on.\n \n*******************************************************\n", pass);
+#endif /* HUB */
+        dprintf(idx, "Your secpass is now: %s%s%s\nMake sure you do not lose this, as it is \
+                     needed to login for now on.\n \n*******************************************************\n", 
+                    color(idx, BOLD_OPEN, 0), pass, color(idx, BOLD_CLOSE, 0));
       }
       dcc_chatter(idx);
 #ifdef S_AUTH
@@ -1050,7 +1053,8 @@ static void dcc_chat(int idx, char *buf, int i)
 
       if (u_pass_match(dcc[idx].user, buf)) { //user said their password :)
         dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
-      } else if ((!strncmp(buf,dcc_prefix,strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
+      } else if (!strncmp(buf, "+Auth ", 6)) {              /* ignore extra +Auth lines */
+      } else if ((!strncmp(buf, dcc_prefix, strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
 
 	if (!strncmp(buf, dcc_prefix,strlen(dcc_prefix)))
 	  buf++;
