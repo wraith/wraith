@@ -1054,7 +1054,7 @@ gotmode(char *from, char *msg)
 
             /* check for mop */
             if (ops >= 3) {
-              if (channel_nomop(chan)) {
+              if (chan->mop) {
                 m->flags |= SENTKICK;
                 sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
                 tputs(serv, tmp, strlen(tmp));

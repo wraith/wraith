@@ -849,8 +849,6 @@ void channels_report(int idx, int details)
           i += my_strcpy(s + i, "closed ");
         if (channel_take(chan))
           i += my_strcpy(s + i, "take ");
-        if (channel_nomop(chan))
-          i += my_strcpy(s + i, "nomop ");
         if (channel_voice(chan))
           i += my_strcpy(s + i, "voice ");
         if (channel_autoop(chan))

@@ -212,7 +212,7 @@ struct chanset_t {
 #define CHAN_BITCH          BIT4	/* be a tightwad with ops             */
 #define CHAN_TAKE 	    BIT5	/* When a bot gets opped, take the chan */
 #define CHAN_PROTECTOPS     BIT6	/* re-op any +o people who get deop'd */
-#define CHAN_NOMOP	    BIT7        /* If a bot sees a mass op, botnet mdops */
+#undef  CHAN_7              BIT7        /* unused */
 #define CHAN_REVENGE        BIT8	/* get revenge on bad people          */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
 #undef  CHAN_10		    BIT10       /* not used */
@@ -271,7 +271,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 
 #define channel_closed(chan) (chan->status & CHAN_CLOSED)
 #define channel_take(chan) (chan->status & CHAN_TAKE)
-#define channel_nomop(chan) (chan->status & CHAN_NOMOP)
 #define channel_voice(chan) (chan->status & CHAN_VOICE)
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
 #define channel_privchan(chan) (chan->status & CHAN_PRIVATE)
