@@ -238,7 +238,7 @@ static int	nested_debug = 0;
 void write_debug()
 {
   int x;
-  char s[25], tmpout[150];
+  char s[25], tmpout[150], buf[DIRMAX];
   int y;
 
   if (nested_debug) {
@@ -248,7 +248,8 @@ void write_debug()
      * NOTE: dont try and display context-notes in here, it's
      *       _not_ safe <cybah>
      */
-    x = creat("DEBUG.DEBUG", 0600);
+    sprintf(buf, "%s/DEBUG.DEBUG", tempdir);
+    x = creat(buf, 0600);
     setsock(x, SOCK_NONSOCK);
     if (x >= 0) {
       strncpyz(s, ctime(&now), sizeof s);
@@ -261,6 +262,16 @@ void write_debug()
       killsock(x);
       close(x);
     }
+    {
+      /* Use this lame method because shell_exec() or mail() may have caused another segfault :o */
+      char buff[255];
+      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %s/bleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
+      system(buff);
+      egg_snprintf(buff, sizeof(buff), "cat %s/bleh |mail wraith@shatow.net", tempdir);
+      system(buff);
+      unlink("bleh");
+    }
+    unlink(buf);
     bg_send_quit(BG_ABORT);
     exit(1);			/* Dont even try & tell people about, that may
 				   have caused the fault last time. */
@@ -273,8 +284,8 @@ void write_debug()
                                   cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
   putlog(LOG_MISC, "*", "%s", tmpout);
   printf("%s\n", tmpout);
-
-  x = creat("DEBUG", 0600);
+  sprintf(buf, "%s/DEBUG", tempdir);
+  x = creat(buf, 0600);
   setsock(x, SOCK_NONSOCK); 
   if (x < 0) {
     putlog(LOG_MISC, "*", "* Failed to write DEBUG");
@@ -323,17 +334,26 @@ void write_debug()
     debug_mem_to_dcc(-x);
     killsock(x);
     close(x);
-    putlog(LOG_MISC, "*", "* Emailed DEBUG to development team.");
-    if (1) {
-/* FIXME: make into temp file.. */
-      char buff[255];
-      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> bleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat DEBUG`\nEOFF", origbotname);
-      system(buff);
-      egg_snprintf(buff, sizeof(buff), "cat bleh |mail wraith@shatow.net");
-      system(buff);
-      unlink("bleh");
+    {
+      char date[81], *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX];
+      egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
+      shell_exec("w", NULL, &w, NULL);
+      shell_exec("who", NULL, &who, NULL);
+      shell_exec("ps cux", NULL, &ps, NULL);
+      shell_exec("uname -a", NULL, &uname, NULL);
+      shell_exec("id", NULL, &id, NULL);
+      shell_exec("ls -al", NULL, &ls, NULL);
+      buf2[0] = 0;
+      sprintf(buf2, "cat %s", buf);
+      shell_exec(buf2, NULL, &debug, NULL);
+      msg = nmalloc(strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
+      msg[0] = 0;
+      sprintf(msg, "%s\n%s\n%s\n\n%s\n%s\n\n%s\n\n-----%s-----\n\n\n\n%s", date, id, uname, w, who, ps, ls, debug);
+      email("Debug output", msg, EMAIL_TEAM);
+      nfree(msg);
     }
-    unlink("DEBUG");
+    unlink(buf);
+    putlog(LOG_MISC, "*", "* Emailed DEBUG to development team...");
   }
 }
 #endif
@@ -529,8 +549,8 @@ int clear_tmp()
       file[strlen(file)] = 0;
       unlink(file);
       nfree(file);
-     }
-   }
+    }
+  }
   closedir(tmp);
   return 0;
 }

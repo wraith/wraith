@@ -44,7 +44,7 @@ extern tand_t 		*tandbot;
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
 			 bannerfile[], textdir[], userfile[], dcc_prefix[],
-                         *binname, pid_file[], tempdir[];
+                         *binname, pid_file[], tempdir[], *owneremail;
 
 extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug, 
 #ifdef HUB
@@ -2220,5 +2220,54 @@ char *color(int idx, int type, int color)
   } 
   /* This should never be reached.. */
   return "";
+}
+
+int email(char *subject, char *msg, int who)
+{
+  struct utsname un;
+  char open[2048], addrs[1024];
+  int mail = 0, sendmail = 0;
+  FILE *f;
+  
+  uname(&un);
+  if (is_file("/usr/sbin/sendmail"))
+    sendmail++;
+  else if (is_file("/usr/bin/mail"))
+    mail++;
+  else {
+    putlog(LOG_WARN, "*", "I Have no usable mail client.");
+    return 1;
+  }
+  open[0] = addrs[0] = 0;
+
+  if (who & EMAIL_OWNERS) {
+    sprintf(addrs, "%s", replace(owneremail, ",", " "));
+  }
+  if (who & EMAIL_TEAM) {
+    if (addrs[0])
+      sprintf(addrs, "%s wraith@shatow.net", addrs);
+    else 
+      sprintf(addrs, "wraith@shatow.net");
+  }
+
+  if (sendmail)
+    sprintf(open, "/usr/sbin/sendmail -t");
+  else if (mail)
+    sprintf(open, "/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\"", addrs, (origbotname && origbotname[0]) ? origbotname : "none", un.nodename, subject);
+  if ((f = popen(open, "w"))) {
+    if (sendmail) {
+      fprintf(f, "To: %s\n", addrs);
+      fprintf(f, "From: %s@%s\n", (origbotname && origbotname[0]) ? origbotname : "none", un.nodename);
+      fprintf(f, "Subject: %s\n", subject);
+      fprintf(f, "Content-Type: text/plain\n");
+    }
+    fprintf(f, "%s\n", msg);
+    if (fflush(f))
+      return 1;
+    if (pclose(f))
+      return 1;
+  } else
+    return 1;
+  return 0;
 }
 

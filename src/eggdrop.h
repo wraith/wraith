@@ -129,6 +129,9 @@
 #define FLASH_OPEN              7
 #define FLASH_CLOSE             8
 
+#define EMAIL_OWNERS    0x1
+#define EMAIL_TEAM      0x2
+
 
 /*
  *     The 'configure' script should make this next part automatic,
