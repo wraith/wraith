@@ -562,7 +562,7 @@ static int builtin_idxchar STDVAR
   Function F = (Function) cd;
   int idx;
   char *r;
-
+Context;
   BADARGS(3, 3, " idx args");
   CHECKVALIDITY(builtin_idxchar);
   if (atoi(argv[1]) < 0) { /* this is a remote-simul idx */
@@ -623,7 +623,7 @@ static int builtin_dcc STDVAR
 {
   int idx;
   Function F = (Function) cd;
-
+Context;
   BADARGS(4, 4, " hand idx param");
   if (atoi(argv[2]) < 0) { /* this is a remote-simul idx */
     idx = atoi(argv[2]) * -1;
@@ -825,7 +825,7 @@ int check_tcl_dcc(char *cmd, int idx, char *args)
   int found = 0;
 #endif
   char			s[11];
-
+Context;
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
   if (dcc[idx].simul) {
     egg_snprintf(s, sizeof s, "-%d", idx);
