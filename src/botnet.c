@@ -1001,57 +1001,6 @@ static void botlink_dns_callback(void *client_data, const char *host, char **ips
   /* wait for async reply */
 }
 
-#ifdef UNF
-static void botlink_resolve_failure(int i)
-{
-  free(dcc[i].u.dns->cptr);
-  lostdcc(i);
-}
-
-static void botlink_resolve_success(int i)
-{
-  int idx = dcc[i].u.dns->ibuf;
-  char *linker = dcc[i].u.dns->cptr;
-
-  dcc[i].addr = dcc[i].u.dns->ip;
-  changeover_dcc(i, &DCC_FORK_BOT, sizeof(struct bot_info));
-  dcc[i].timeval = now;
-  strcpy(dcc[i].u.bot->linker, linker);
-  strcpy(dcc[i].u.bot->version, "(primitive bot)");
-  strcpy(dcc[i].u.bot->sysname, "*");
-  dcc[i].u.bot->numver = idx;
-  dcc[i].u.bot->port = dcc[i].port;		/* Remember where i started */
-#ifdef USE_IPV6
-  dcc[i].sock = getsock(SOCK_STRONGCONN, hostprotocol(dcc[i].host));
-#else
-  dcc[i].sock = getsock(SOCK_STRONGCONN);
-#endif /* USE_IPV6 */
-  free(linker);
-  if (dcc[i].sock > 0)
-    identd_open();			/* will be closed when an ident is replied. */
-  if (dcc[i].sock < 0 ||
-#ifdef USE_IPV6
-      open_telnet_raw(dcc[i].sock, dcc[i].host,
-#else
-      open_telnet_raw(dcc[i].sock, iptostr(htonl(dcc[i].addr)),
-#endif /* USE_IPV6 */
-		      dcc[i].port) < 0)
-    failed_link(i);
-  else { /* let's attempt to initiate SSL before ANYTHING else... */
-#ifdef HAVE_SSL
-/*    if (!ssl_link(dcc[i].sock, CONNECT_SSL)) {
-      debug2("back from ssl_link(%d, %d) for botlink (failed)", dcc[i].sock, CONNECT_SSL);
-      dcc[i].ssl = 0;
-      putlog(LOG_BOTS, "*", "SSL link for '%s' failed", dcc[i].nick); 
-    } else */
-      dcc[i].ssl = 1;
-#else
-      dcc[i].ssl = 0;
-#endif /* HAVE_SSL */
-  }
-}
-#endif /* UNF */
-
 static void failed_tandem_relay(int idx)
 {
   int uidx = (-1), i;
@@ -1101,9 +1050,7 @@ static void failed_tandem_relay(int idx)
     failed_tandem_relay(idx);
 }
 
-
-static void tandem_relay_resolve_failure(int);
-static void tandem_relay_resolve_success(int);
+static void tandem_relay_dns_callback(void *, const char *, char **);
 
 /* Relay to another tandembot
  */
@@ -1130,23 +1077,14 @@ void tandem_relay(int idx, char *nick, register int i)
 
     return;
   }
-  i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
+
+  i = new_dcc(&DCC_FORK_RELAY, sizeof(struct relay_info));
+
   if (i < 0) {
     dprintf(idx, "%s\n", DCC_TOOMANYDCCS1);
     return;
   }
 
-#ifdef USE_IPV6
-  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL, hostprotocol(bi->address));
-#else
-  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL);
-#endif /* USE_IPV6 */
-
-  if (dcc[i].sock < 0) {
-    lostdcc(i);
-    dprintf(idx, "%s\n", MISC_NOFREESOCK);
-    return;
-  }
 
   dcc[i].port = bi->relay_port;
   dcc[i].addr = 0L;
@@ -1164,62 +1102,61 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[idx].u.relay = (struct relay_info *) calloc(1, sizeof(struct relay_info));
   dcc[idx].u.relay->chat = ci;
   dcc[idx].u.relay->old_status = dcc[idx].status;
-  dcc[idx].u.relay->sock = dcc[i].sock;
-  dcc[i].timeval = now;
-  dcc[i].u.dns->ibuf = dcc[idx].sock;
-  dcc[i].u.dns->host = (char *) calloc(1, strlen(bi->address) + 1);
-  strcpy(dcc[i].u.dns->host, bi->address);
-  dcc[i].u.dns->dns_success = tandem_relay_resolve_success;
-  dcc[i].u.dns->dns_failure = tandem_relay_resolve_failure;
-  dcc[i].u.dns->dns_type = RES_IPBYHOST;
-  dcc[i].u.dns->type = &DCC_FORK_RELAY;
-#ifdef USE_IPV6
-  tandem_relay_resolve_success(i);
-#else
-  dcc_dnsipbyhost(bi->address);
-#endif /* USE_IPV6 */
 
+
+  dcc[i].timeval = now;
+  dcc[i].u.relay->sock = dcc[idx].sock;
+  dcc[i].u.relay->idx = idx;
+
+  egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
+
+  return;
+  /* wait for async reply */
 }
 
-static void tandem_relay_resolve_failure(int idx)
+static void tandem_relay_dns_callback(void *client_data, const char *host, char **ips)
 {
-  register int uidx = (-1), i;
+  int i = (int) client_data, idx = -1;
 
-  for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && (dcc[i].type == &DCC_PRE_RELAY) &&
-	(dcc[i].u.relay->sock == dcc[idx].sock)) {
-      uidx = i;
-      break;
-    }
-  }
-  if (uidx < 0) {
-    putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
-	   dcc[idx].sock, dcc[idx].u.relay->sock);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
+  if (dcc[i].type)
+    idx = dcc[i].u.relay->idx;
+  
+  if (idx < 0) {
+    putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER, i, idx);
+    lostdcc(i);
     return;
   }
 
-  struct chat_info *ci = dcc[uidx].u.relay->chat;
+  if (!ips) {
+    struct chat_info *ci = dcc[idx].u.relay->chat;
 
-  dprintf(uidx, "%s %s.\n", BOT_CANTLINKTO, dcc[idx].nick);
-  dcc[uidx].status = dcc[uidx].u.relay->old_status;
-  free(dcc[uidx].u.relay);
-  dcc[uidx].u.chat = ci;
-  dcc[uidx].type = &DCC_CHAT;
-  killsock(dcc[idx].sock);
-  lostdcc(idx);
-}
+    dprintf(idx, "%s %s.\n", BOT_CANTLINKTO, dcc[i].nick);
+    dcc[idx].status = dcc[idx].u.relay->old_status;
+    free(dcc[idx].u.relay);
+    dcc[idx].u.chat = ci;
+    dcc[idx].type = &DCC_CHAT;
+    lostdcc(i);
+    return;
+  }
 
-static void tandem_relay_resolve_success(int i)
-{
-  int sock = dcc[i].u.dns->ibuf;
+#ifdef USE_IPV6
+  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL, is_dotted_ip(ips[0]));
+#else
+  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL);
+#endif /* USE_IPV6 */
 
-  dcc[i].addr = dcc[i].u.dns->ip;
-  changeover_dcc(i, &DCC_FORK_RELAY, sizeof(struct relay_info));
+  if (dcc[i].sock < 0) {
+    lostdcc(i);
+    dprintf(idx, "%s\n", MISC_NOFREESOCK);
+    return;
+  }
+
+  dcc[idx].u.relay->sock = dcc[i].sock;
+
+  dcc[i].addr = inet_addr(ips[0]);
+
+/*changeover*/
   dcc[i].u.relay->chat = (struct chat_info *) calloc(1, sizeof(struct chat_info));
-
-  dcc[i].u.relay->sock = sock;
   dcc[i].u.relay->port = dcc[i].port;
   dcc[i].u.relay->chat->away = NULL;
   dcc[i].u.relay->chat->msgs_per_sec = 0;
@@ -1229,12 +1166,8 @@ static void tandem_relay_resolve_success(int i)
   dcc[i].u.relay->chat->line_count = 0;
   dcc[i].u.relay->chat->current_lines = 0;
   dcc[i].timeval = now;
-#ifdef USE_IPV6
-  if (open_telnet_raw(dcc[i].sock, dcc[i].host,
-#else
-  if (open_telnet_raw(dcc[i].sock, iptostr(htonl(dcc[i].addr)),
-#endif /* USE_IPV6 */
-		      dcc[i].port) < 0)
+
+  if (open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port) < 0) 
     failed_tandem_relay(i);
 }
 

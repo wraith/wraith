@@ -118,6 +118,7 @@ struct relay_info {
   struct chat_info *chat;
   int sock;
   int old_status;
+  int idx;
   port_t port;
 };
 
