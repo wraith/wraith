@@ -502,12 +502,14 @@ static void core_secondly()
   }
 }
 
+/*
 static void check_autoaway()
 {
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && dcc[i].type == &DCC_CHAT && !(dcc[i].u.chat->away) && ((now - dcc[i].timeval) >= 600))
       set_away(i, "Auto away after 10 minutes.");
 }
+*/
 
 static void core_minutely()
 {
@@ -519,7 +521,7 @@ static void core_minutely()
   check_mypid();
 #endif
   check_bind_time(&nowtm);
-  check_autoaway();
+//  check_autoaway();
 /*     flushlogs(); */
 }
 
