@@ -2169,7 +2169,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
   int stat;
 
   for (int i = 0; i < dcc_total; i++) {
-   if (dcc[i].type) {
+   if (dcc[i].type && !dcc[i].simul) {
 #ifdef LEAF
     if (dcc[i].type && dcc[i].type == &DCC_CHAT && !ischanhub() && u == conf.bot->u) {
       dprintf(i, "I am no longer a chathub..\n\n");
