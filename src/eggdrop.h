@@ -87,6 +87,9 @@
 #define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
 #endif
 
+#define PRIV_OP 1
+#define PRIV_VOICE 2
+
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 #define KICK_BANNED 1

@@ -122,7 +122,7 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
   if (u && (u->flags & USER_BOT))
     return 1;
 
-  i = isauthed(host);
+  i = findauth(host);
 
   if (i != -1) {
     if (auth[i].authed) {
@@ -158,7 +158,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
   if (u && (u->flags & USER_BOT))
     return 1;
 
-  i = isauthed(host);
+  i = findauth(host);
 
   if (i == -1) 
     return 1;
@@ -196,7 +196,7 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
   if (u && (u->flags & USER_BOT))
     return 1;
 
-  i = isauthed(host);
+  i = findauth(host);
 
   if (i == -1)
     return 1;
@@ -231,7 +231,7 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
   if (u && (u->flags & USER_BOT))
     return 1;
 
-  i = isauthed(host);
+  i = findauth(host);
 
   if (i == -1)
     return 1;
@@ -477,7 +477,22 @@ static cmd_t C_msg[] =
 #ifdef S_AUTH
 static int msgc_test(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
-  dprintf(DP_HELP, "NOTICE %s :Works :)\n", nick);
+  char *chn, *hand;
+  struct chanset_t *chan;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct userrec *user;
+  
+  hand = newsplit(&par);
+  user = get_user_by_handle(userlist, hand);
+  chn = newsplit(&par);
+  chan = findchan_by_dname(chn);
+  get_user_flagrec(user, &fr, chan->dname);
+
+  dprintf(DP_HELP, "PRIVMSG %s :Private-o: %d Private-v: %d canop: %d canvoice: %d deop: %d devoice: %d\n", nick, 
+  private(fr, chan, 1), private(fr, chan, 2), 
+  chk_op(fr, chan), chk_voice(fr, chan), chk_deop(fr, chan), chk_devoice(fr, chan));
+
+//  dprintf(DP_HELP, "NOTICE %s :Works :)\n", nick);
   return 0;
 }
 
@@ -499,7 +514,7 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
 
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sOP %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
 
-  if (par[0] == '-') { //we have an option!
+  if (par[0] == '-') { /* we have an option! */
     char *tmp;
     par++;
     tmp = newsplit(&par);
@@ -637,20 +652,17 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
   chan = findchan_by_dname(par);
   if (chan && channel_active(chan) && !channel_pending(chan)) {
     get_user_flagrec(u, &fr, chan->dname);
-    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
-       (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) {
-      char s[256];
-      char *p, *p2, *p3;
+/*    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+       (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) { */
+    if (chk_op(fr, chan)) {
+/*      char buf[512];
+      if (chan->key_prot[0])
+        snprintf(buf, sizeof buf, "Enforcing +k %s", chan->key_prot); */
 
-      strcpy(s, getchanmode(chan));
-      p = (char *) &s;
-      p2 = newsplit(&p);
-      p3 = newsplit(&p);
-
-      if (p3[0]) {
-        dprintf(DP_HELP, "NOTICE %s :key for %s is: %s\n", nick, chan->dname, p3);
+      if (chan->channel.key[0]) {
+        dprintf(DP_HELP, "NOTICE %s :Key for %s is: %s\n", nick, chan->dname, chan->channel.key);
       } else {
-        dprintf(DP_HELP, "NOTICE %s :No key set in %s\n", nick, chan->dname);
+        dprintf(DP_HELP, "NOTICE %s :%s has no key set.\n", nick, chan->dname);
       }
     }
   }
@@ -720,7 +732,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
 
 static cmd_t C_msgc[] =
 {
-  {"test",		"",	(Function) msgc_test,		NULL},
+  {"test",		"a",	(Function) msgc_test,		NULL},
   {"op",		"",	(Function) msgc_op,		NULL},
   {"voice",		"",	(Function) msgc_voice,		NULL},
   {"channels",		"",	(Function) msgc_channels,	NULL},

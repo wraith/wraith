@@ -1055,6 +1055,15 @@ static void check_lonely_channel(struct chanset_t *chan)
   }
 }
 
+static void warn_pls_take()
+{
+  struct chanset_t *chan;
+  for (chan = chanset; chan; chan = chan->next)
+    if (channel_take(chan) && me_op(chan))
+      putlog(LOG_WARN, "*", "%s is set +take, and I'm already opped! Try +bitch instead", chan->dname);
+}
+
+
 void check_servers() {
   struct chanset_t * chan;
   memberlist * m;
@@ -1865,6 +1874,7 @@ char *irc_start(Function * global_funcs)
 #endif
   }
   add_hook(HOOK_MINUTELY, (Function) check_expired_chanstuff);
+  add_hook(HOOK_MINUTELY, (Function) warn_pls_take);
   add_hook(HOOK_MINUTELY, (Function) check_servers);
   add_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   add_hook(HOOK_IDLE, (Function) flush_modes);

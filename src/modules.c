@@ -351,12 +351,12 @@ Function global_table[] =
   (Function) makepass,
   (Function) _wild_match,
   (Function) maskhost,
-  (Function) show_motd,
+  (Function) private,
   /* 156 - 159 */
-  (Function) 0,
-  (Function) 0,
-  (Function) 0,
-  (Function) 0,
+  (Function) chk_op,
+  (Function) chk_deop,
+  (Function) chk_voice,
+  (Function) chk_devoice,
   /* 160 - 163 */
   (Function) touch_laston,
   (Function) & add_mode,	/* Function *				*/
@@ -575,7 +575,7 @@ Function global_table[] =
   (Function) & auth, /* struct auth_t *auth */
   (Function) & auth_total,
   (Function) new_auth,
-  (Function) isauthed,
+  (Function) findauth,
   (Function) removeauth,
   (Function) makehash,
   (Function) & USERENTRY_SECPASS,

@@ -253,32 +253,31 @@ ContextNote("rebalance_roles");
 }
 #endif
 
-static void warn_pls_take() 
-{
-  struct chanset_t *chan;
-  for (chan = chanset; chan; chan = chan->next)
-    if (channel_take(chan))
-      putlog(LOG_WARN, "@", "%s is set +take!", chan->dname);
-}
-
 static void channels_checkslowjoin() {
   struct chanset_t * chan;
-  Context;
+Context;
   for (chan=chanset;chan;chan=chan->next) {
+Context;
     if ((chan->parttime) && (chan->parttime < now)) {
       chan->parttime = 0;
+Context;
 #ifdef LEAF
       if (channel_active(chan) && !channel_inactive(chan))
         dprintf(DP_MODE, "PART %s\n", chan->dname);
-#endif
+#endif /* LEAF */
+Context;
       remove_channel(chan);
+Context;
     } else if ((chan->jointime) && (chan->jointime < now)) {
+Context;
         chan->status &= ~CHAN_INACTIVE;
+Context;
         chan->jointime=0;
+Context;
 #ifdef LEAF
       if (!channel_inactive(chan))
         dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
-#endif
+#endif /* LEAF */
     }
   }
 }
@@ -519,7 +518,7 @@ static void remove_channel(struct chanset_t *chan)
 {
    int		 i;
    module_entry	*me;
-
+Context;
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_tcl_part() call. */
    (void) chanset_unlink(chan);
@@ -1020,16 +1019,15 @@ char *channels_start(Function * global_funcs)
   module_register(MODULE_NAME, channels_table, 1, 0);
 #ifdef LEAF
   add_hook(HOOK_MINUTELY, (Function) check_limitraise);
-#endif
+#endif /* LEAF */
 #ifdef HUB
   add_hook(HOOK_30SECONDLY, (Function) rebalance_roles);
-#endif
-  add_hook(HOOK_HOURLY, (Function) warn_pls_take);
+#endif /* HUB */
   add_hook(HOOK_MINUTELY, (Function) check_expired_bans);
 #ifdef S_IRCNET
   add_hook(HOOK_MINUTELY, (Function) check_expired_exempts);
   add_hook(HOOK_MINUTELY, (Function) check_expired_invites);
-#endif
+#endif /* S_IRCNET */
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
   add_hook(HOOK_3SECONDLY, (Function) channels_checkslowjoin);
   Tcl_TraceVar(interp, "global-chanset",

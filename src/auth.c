@@ -121,7 +121,8 @@ Context;
   return i;
 }
 
-int isauthed(char *host)
+/* returns 0 if not found, -1 if problem, and > 0 if found. */
+int findauth(char *host)
 {
   int i = 0;
 Context;
@@ -129,7 +130,7 @@ Context;
     return -1;
   for (i = 0; i < auth_total; i++) {
     if (auth[i].host[0] && !strcmp(auth[i].host, host)) {
-      putlog(LOG_DEBUG, "*", STR("Debug for isauthed: checking: %s i: %d :: %s"), host, i, auth[i].host);
+      putlog(LOG_DEBUG, "*", STR("Debug for findauth: checking: %s i: %d :: %s"), host, i, auth[i].host);
       return i;
     }
   }

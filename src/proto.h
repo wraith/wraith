@@ -214,7 +214,7 @@ char *progname();
 
 /* auth.c */
 int new_auth();
-int isauthed(char *);
+int findauth(char *);
 void removeauth(int);
 char *makehash(struct userrec *, char *);
 
@@ -281,6 +281,11 @@ char *str_escape(const char *str, const char div, const char mask);
 char *strchr_unescape(char *str, const char div, register const char esc_char);
 void str_unescape(char *str, register const char esc_char);
 void kill_bot(char *, char *);
+int private(struct flag_record, struct chanset_t *, int);
+int chk_op(struct flag_record, struct chanset_t *);
+int chk_deop(struct flag_record, struct chanset_t *);
+int chk_voice(struct flag_record, struct chanset_t *);
+int chk_devoice(struct flag_record, struct chanset_t *);
 
 /* net.c */
 #ifdef HAVE_SSL

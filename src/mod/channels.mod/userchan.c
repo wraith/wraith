@@ -789,6 +789,11 @@ static void tell_bans(int idx, int show_inact, char *match)
   if (!chan && !(chan = findchan_by_dname(dcc[idx].u.chat->con_chan)) &&
       !(chan = chanset))
     chan = NULL;
+  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+  if (private(user, chan, PRIV_OP)) {
+    dprintf(idx, "%s.\n", CHAN_NOSUCH);
+    return;
+  }
 
   if (chan && show_inact)
     dprintf(idx, "%s:   (! = %s %s)\n", BANS_GLOBAL,
@@ -883,6 +888,11 @@ static void tell_exempts(int idx, int show_inact, char *match)
       && !(chan = chanset))
     chan = NULL;
 
+  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+  if (private(user, chan, PRIV_OP)) {
+    dprintf(idx, "%s.\n", CHAN_NOSUCH);
+    return;
+  }
   if (chan && show_inact)
     dprintf(idx, "%s:   (! = %s %s)\n", EXEMPTS_GLOBAL,
 	    MODES_NOTACTIVE, chan->dname);
@@ -977,6 +987,11 @@ static void tell_invites(int idx, int show_inact, char *match)
       && !(chan = chanset))
     chan = NULL;
 
+  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+  if (private(user, chan, PRIV_OP)) {
+    dprintf(idx, "%s.\n", CHAN_NOSUCH);
+    return;
+  }
   if (chan && show_inact)
     dprintf(idx, "%s:   (! = %s %s)\n", INVITES_GLOBAL,
 	    MODES_NOTACTIVE, chan->dname);

@@ -239,7 +239,7 @@ void chatout EGG_VARARGS_DEF(char *, arg1)
   s[len + 1] = 0;
 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type == &DCC_CHAT)
+    if ((dcc[i].type == &DCC_CHAT) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel >= 0)
         dprintf(i, "%s", s);
 
@@ -265,7 +265,7 @@ void chanout_but EGG_VARARGS_DEF(int, arg1)
   s[len + 1] = 0;
 
   for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_CHAT) && (i != x))
+    if ((dcc[i].type == &DCC_CHAT) && (i != x) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel == chan)
         dprintf(i, "%s", s);
 }

@@ -295,9 +295,12 @@
 #define makepass ((void (*) (char *))global[152])
 #define wild_match ((int (*)(const char *, const char *))global[153])
 #define maskhost ((void (*)(const char *, char *))global[154])
-#define show_motd ((void(*)(int))global[155])
+#define private ((int (*)(struct flag_record, struct chanset_t *, int))global[155])
 /* 156 - 159 */
-
+#define chk_op ((int (*)(struct flag_record, struct chanset_t *))global[156])
+#define chk_deop ((int (*)(struct flag_record, struct chanset_t *))global[157])
+#define chk_voice ((int (*)(struct flag_record, struct chanset_t *))global[158])
+#define chk_devoice ((int (*)(struct flag_record, struct chanset_t *))global[159])
 /* 160 - 163 */
 #define touch_laston ((void (*)(struct userrec *,char *,time_t))global[160])
 #define add_mode ((void (*)(struct chanset_t *,char,char,char *))(*(Function**)(global[161])))
@@ -520,7 +523,7 @@
 #define auth_total (*(int*)global[316])
 /* 317 - 320 */
 #define new_auth ((int (*) (void))global[317])
-#define isauthed ((int (*) (char *))global[318])
+#define findauth ((int (*) (char *))global[318])
 #define removeauth ((void (*)(int))global[319])
 #define makehash ((char *(*)(struct userrec *, char *))global[320])
 /* 321 - 324 */

@@ -35,6 +35,9 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
       if (!chan) {
         dprintf(idx, "That channel doesn't exist!\n");
         return;
+      } else if (private(user, chan, PRIV_OP)) {
+        dprintf(idx, "No such channel.\n");
+        return;
       } else if (!((glob_op(user) && !chan_deop(user)) || chan_op(user))) {
         dprintf(idx, "You don't have access to set bans on %s.\n", chname);
         return;
@@ -172,6 +175,9 @@ static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
       if (!chan) {
         dprintf(idx, "That channel doesn't exist!\n");
 	return;
+      } else if (private(user, chan, PRIV_OP)) {
+        dprintf(idx, "No such channel.\n");
+        return;
       } else if (!((glob_op(user) && !chan_deop(user)) || chan_op(user))) {
         dprintf(idx, "You don't have access to set exempts on %s.\n", chname);
         return;
@@ -299,6 +305,9 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
       if (!chan) {
 	dprintf(idx, "That channel doesn't exist!\n");
 	return;
+      } else if (private(user, chan, PRIV_OP)) {
+        dprintf(idx, "No such channel.\n");
+        return;
       } else if (!((glob_op(user) && !chan_deop(user)) || chan_op(user))) {
         dprintf(idx, "You don't have access to set invites on %s.\n", chname);
         return;
@@ -421,6 +430,11 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
       chname = dcc[idx].u.chat->con_chan;
     get_user_flagrec(u, &user, chname);
 
+    if (private(user, chan, PRIV_OP)) {
+      dprintf(idx, "No such channel.\n");
+      return;
+    }
+
     if ((!chan_op(user) && (!glob_op(user) || chan_deop(user)))) {
       dprintf(idx, "You don't have access to remove bans on %s.\n", chname);
       return;
@@ -531,6 +545,12 @@ static void cmd_mns_exempt (struct userrec *u, int idx, char *par)
     if (!chname)
       chname = dcc[idx].u.chat->con_chan;
     get_user_flagrec(u, &user, chname);
+
+    if (private(user, chan, PRIV_OP)) {
+      dprintf(idx, "No such channel.\n");
+      return;
+    }
+
     if ((!chan_op(user) && (!glob_op(user) || chan_deop(user)))) {
       dprintf(idx, "You don't have access to remove exempts on %s.\n", chname);
       return;
@@ -642,6 +662,12 @@ static void cmd_mns_invite (struct userrec *u, int idx, char *par)
     if (!chname)
       chname = dcc[idx].u.chat->con_chan;
     get_user_flagrec(u, &user, chname);
+
+    if (private(user, chan, PRIV_OP)) {
+      dprintf(idx, "No such channel.\n");
+      return;
+    }
+
     if ((!chan_op(user) && (!glob_op(user) || chan_deop(user)))) {
       dprintf(idx, "You don't have access to remove invites on %s.\n", chname);
       return;
@@ -909,6 +935,7 @@ static void cmd_chinfo(struct userrec *u, int idx, char *par)
       dprintf(idx, "Wiped default info for %s\n", handle);
   }
 }
+
 static void cmd_slowjoin(struct userrec *u, int idx, char *par)
 {
   int intvl=0, delay=0, count=1;
@@ -958,7 +985,7 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
   count=0;
 #else
   count=1;
-#endif
+#endif /* HUB */
   for (bot=tandbot;bot;bot=bot->next) {
     struct userrec *ubot;
     char tmp[100];
@@ -981,7 +1008,7 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
   chan->status &= ~CHAN_INACTIVE;
 #ifdef LEAF
   dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
-#endif
+#endif /* LEAF */
 }
 
 static void cmd_slowpart(struct userrec *u, int idx, char *par)
@@ -1012,7 +1039,7 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
   remove_channel(chan);
 #ifdef HUB
   write_userfile(-1);
-#endif
+#endif /* HUB */
   dprintf(idx, "Channel %s removed from the bot.\n", chname);
   dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
 
@@ -1025,7 +1052,7 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
   count=0;
 #else
   count=1;
-#endif
+#endif /* HUB */
   for (bot=tandbot;bot;bot=bot->next) {
     char tmp[100];
     struct userrec *ubot;
@@ -1047,7 +1074,7 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
   dprintf(idx, "%i bots parting %s during the next %i seconds\n", count, chname, delay);
 #ifdef LEAF
   dprintf(DP_MODE, "PART %s\n", chname);
-#endif
+#endif /* LEAF */
 }
 
 static void cmd_stick_yn(int idx, char *par, int yn)
@@ -1102,6 +1129,11 @@ static void cmd_stick_yn(int idx, char *par, int yn)
       dprintf(idx, "No such channel.\n");
       return;
     }
+    get_user_flagrec(dcc[idx].user, &user, chan->dname);
+    if (private(user, chan, PRIV_OP)) {
+      dprintf(idx, "No such channel.\n");
+      return;
+    }
     if (i)
       egg_snprintf(s, sizeof s, "%d", -i);
     j = u_setsticky_exempt(chan, s, yn);
@@ -1135,6 +1167,11 @@ static void cmd_stick_yn(int idx, char *par, int yn)
       dprintf(idx, "No such channel.\n");
       return;
     }
+    get_user_flagrec(dcc[idx].user, &user, chan->dname);
+    if (private(user, chan, PRIV_OP)) {
+      dprintf(idx, "No such channel.\n");
+      return;
+    }
     if (i)
       egg_snprintf(s, sizeof s, "%d", -i);
     j = u_setsticky_invite(chan, s, yn);
@@ -1147,7 +1184,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     dprintf(idx, "No such invite.\n");
     return;
   }
-#endif
+#endif /* S_IRCNET */
   if (!chname[0]) {
     i = u_setsticky_ban(NULL, s,
                         (dcc[idx].user->flags & USER_MASTER) ? yn : -1);
@@ -1164,6 +1201,11 @@ static void cmd_stick_yn(int idx, char *par, int yn)
   }
   /* Channel-specific ban? */
   if (!(chan = findchan_by_dname(chname))) {
+    dprintf(idx, "No such channel.\n");
+    return;
+  }
+  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+  if (private(user, chan, PRIV_OP)) {
     dprintf(idx, "No such channel.\n");
     return;
   }
@@ -1221,6 +1263,10 @@ static void cmd_pls_chrec(struct userrec *u, int idx, char *par)
   }
   get_user_flagrec(u, &user, chan->dname);
   get_user_flagrec(u1, &victim, chan->dname);
+  if (private(user, chan, PRIV_OP)) {
+    dprintf(idx, "No such channel.\n");
+    return;
+  }
   if ((!glob_master(user) && !chan_master(user)) ||  /* drummer */
       (chan_owner(victim) && !chan_owner(user) && !glob_owner(user)) ||
       (glob_owner(victim) && !glob_owner(user))) {
@@ -1269,6 +1315,10 @@ static void cmd_mns_chrec(struct userrec *u, int idx, char *par)
     chn = newsplit(&par);
   get_user_flagrec(u, &user, chn);
   get_user_flagrec(u1, &victim, chn);
+  if (private(user, findchan_by_dname(chn), PRIV_OP)) {
+    dprintf(idx, "No such channel.\n");
+    return;
+  }
   if ((!glob_master(user) && !chan_master(user)) ||  /* drummer */
       (chan_owner(victim) && !chan_owner(user) && !glob_owner(user)) ||
       (glob_owner(victim) && !glob_owner(user))) {
@@ -1410,7 +1460,7 @@ static void cmd_mns_chan(struct userrec *u, int idx, char *par)
   remove_channel(chan);
 #ifdef HUB
   write_userfile(-1);
-#endif
+#endif /* HUB */
   dprintf(idx, "Channel %s removed from the bot.\n", chname);
   dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
 }
@@ -1480,7 +1530,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
       dprintf(idx, "invite-time: %d\n", chan->invite_time);
     else
       dprintf(idx, "invite-time: 0\n");
-#endif
+#endif /* S_IRCNET */
     /* Only bot owners can see/change these (they're TCL commands) */
     if (u->flags & USER_OWNER) {
       if (chan->need_op[0])
@@ -1517,7 +1567,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 	    (chan->ircnet_status & CHAN_NOUSEREXEMPTS) ? '-' : '+',
 	    (chan->ircnet_status & CHAN_DYNAMICINVITES) ? '+' : '-',
 	    (chan->ircnet_status & CHAN_NOUSERINVITES) ? '-' : '+');
-#endif
+#endif /* S_IRCNET */
     dprintf(idx, "     %cclosed         %ctake           %cnomop          %cmanop\n",
 	    (chan->status & CHAN_CLOSED) ? '+' : '-',
 	    (chan->status & CHAN_TAKE) ? '+' : '-',
