@@ -27,7 +27,7 @@ typedef unsigned char u8;
 #define MAXNR   14
 
 /* This controls loop-unrolling in aes.c */
-#undef FULL_UNROLL
+#define FULL_UNROLL
 
 int AES_set_encrypt_key(const unsigned char *, const int, AES_KEY *);
 int AES_set_decrypt_key(const unsigned char *, const int, AES_KEY *);
