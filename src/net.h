@@ -85,7 +85,7 @@ enum {
          (((u_int32_t *) (a))[2] == htonl (0xffff)))
 #endif /* !defined(IN6_IS_ADDR_V4MAPPED) */
 
-union sockaddr_union {
+union sockaddr_union {			/* replaced by sockname_t */
   struct sockaddr sa;
   struct sockaddr_in sin;
 #ifdef USE_IPV6
@@ -129,6 +129,7 @@ int ssl_link(int, int);
 #endif /* HAVE_SSL */
 char *myipstr(int);
 in_addr_t getmyip();
+in_addr_t getmyip6();
 void cache_my_ip();
 void setsock(int, int);
 int allocsock(int, int);

@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include "common.h"
 #include "net.h"
+#include "socket.h"
 #include "misc.h"
 #include "main.h"
 #include "debug.h"
@@ -266,6 +267,11 @@ char *myipstr(int af_type)
 in_addr_t getmyip() {
   return natip[0] ? inet_addr(natip) : cached_myip4_so.sin.sin_addr.s_addr;
 }
+
+in_addr_t getmyip6() {
+  return cached_myip6_so.sin.sin_addr.s_addr;
+}
+
 
 /* see if it's necessary to set inaddr_any... because if we can't resolve, we die anyway */
 void cache_my_ip()
@@ -540,6 +546,34 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
   return sock;
 }
 
+/* FIXME: REPLACE WITH SOCK_NAME() */
+void initialize_sockaddr(int af_type, const char *host, port_t port, union sockaddr_union *so)
+{
+    egg_bzero(so, sizeof(*so));
+
+    so->sa.sa_family = af_type;
+
+    if (af_type == AF_INET) {
+      so->sin.sin_family = AF_INET;
+      if (host) {
+        inet_pton(AF_INET, host, &so->sin.sin_addr);
+        so->sin.sin_port = htons(port);
+      } else {
+        so->sin.sin_addr.s_addr = getmyip();
+      }
+#ifdef USE_IPV6
+    } else {
+      so->sin6.sin6_family = AF_INET6;
+      if (host) {
+        inet_pton(AF_INET6, host, &so->sin6.sin6_addr);
+        so->sin6.sin6_port = htons(port);
+      } else {
+        memcpy(&so->sin6.sin6_addr, &cached_myip6_so.sin6.sin6_addr, 16);
+       }
+#endif /* USE_IPV6 */
+    }
+}
+
 /* Starts a connection attempt to a socket
  * 
  * If given a normal hostname, this will be resolved to the corresponding
@@ -556,6 +590,7 @@ int open_telnet_raw(int sock, char *server, port_t sport)
   union sockaddr_union so;
   char host[121] = "";
   volatile int proxy;
+  int is_resolved = 0;
 
   /* firewall?  use socks */
   if (firewall[0]) {
@@ -576,36 +611,48 @@ int open_telnet_raw(int sock, char *server, port_t sport)
     port = sport;
   }
 
-  if (!setjmp(alarmret)) {
-    alarm(resolve_timeout);
+  /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
+  if ((is_resolved = is_dotted_ip(server))) {	/* already resolved */
+    sdprintf("IP addr passed to open_telnet");
+    initialize_sockaddr(is_resolved, NULL, 0, &so);
 
-    if (!get_ip(host, &so)) {
-      alarm(0);
-      /* ok, we resolved it, bind an appropriate ip */
+    if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0)
+      return -1;
+
+    initialize_sockaddr(is_resolved, host, port, &so);
+
+  } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
+    sdprintf("WARNING: open_telnet_raw() is about to block in get_ip()!");
+
+    if (!setjmp(alarmret)) {
+      alarm(resolve_timeout);
+      if (!get_ip(host, &so)) {
+        alarm(0);
+        /* ok, we resolved it, bind an appropriate ip */
 #ifdef USE_IPV6
-      if (so.sa.sa_family == AF_INET6) {
-        if (bind(sock, &cached_myip6_so.sa, SIZEOF_SOCKADDR(cached_myip6_so)) < 0) {
-          killsock(sock);
-          return -1;
+        if (so.sa.sa_family == AF_INET6) {
+          if (bind(sock, &cached_myip6_so.sa, SIZEOF_SOCKADDR(cached_myip6_so)) < 0) {
+            killsock(sock);
+            return -1;
+          }
+        } else {
+#endif /* USE_IPV6 */
+          if (bind(sock, &cached_myip4_so.sa, SIZEOF_SOCKADDR(cached_myip4_so)) < 0) {
+            killsock(sock);
+            return -3;
+          }
+#ifdef USE_IPV6
         }
+        if (so.sa.sa_family == AF_INET6)
+          so.sin6.sin6_port = htons(port);
+        else
+#endif /* USE_IPV6 */
+          so.sin.sin_port = htons(port);
       } else {
-#endif /* USE_IPV6 */
-        if (bind(sock, &cached_myip4_so.sa, SIZEOF_SOCKADDR(cached_myip4_so)) < 0) {
-          killsock(sock);
-          return -3;
-        }
-#ifdef USE_IPV6
+        alarm(0);
+        killsock(sock);
+        return -2;
       }
-      if (so.sa.sa_family == AF_INET6)
-        so.sin6.sin6_port = htons(port);
-      else
-#endif /* USE_IPV6 */
-        so.sin.sin_port = htons(port);
-
-    } else {
-      alarm(0);
-      killsock(sock);
-      return -2;
     }
   }
 

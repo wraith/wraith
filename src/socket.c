@@ -97,20 +97,8 @@ int egg_client(int idx, const char *host, int port, const char *vip, int vport, 
 }
 */
 
-typedef struct {
-        int len;
-        int family;
-        union {
-                struct sockaddr addr;
-                struct sockaddr_in ipv4;
-#ifdef USE_IPV6
-                struct sockaddr_in6 ipv6;
-#endif
-        } u;
-} sockname_t;
 
-
-static int socket_name(sockname_t *name, const char *ipaddr, int port)
+int socket_name(sockname_t *name, const char *ipaddr, int port)
 {
         egg_bzero(name, sizeof(*name));
 

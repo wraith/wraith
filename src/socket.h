@@ -1,6 +1,8 @@
 #ifndef _SOCKET_H
 #define _SOCKET_H
 
+#include "types.h"
+
 #define SOCKET_CLIENT   1
 #define SOCKET_SERVER   2
 #define SOCKET_BIND     4
@@ -8,6 +10,23 @@
 #define SOCKET_TCP      16
 #define SOCKET_UDP      32
 
+
+/* can be static if ever combined with net.h or a more integrated 1.9 is used ... */
+typedef struct {
+        int len;
+        int family;
+        union {
+                struct sockaddr addr;
+                struct sockaddr_in ipv4;
+#ifdef USE_IPV6
+                struct sockaddr_in6 ipv6;
+#endif
+        } u;
+} sockname_t;
+int socket_name(sockname_t *name, const char *ipaddr, port_t port);
+
+
+/* globals */
 
 int socket_create(const char *dest_ip, int dest_port, const char *src_ip, int src_port, int flags);
 //int socket_close(int sock);
