@@ -345,6 +345,7 @@ Context;
 Context;
       if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
         remove_channel(chan);
+      break;    /* if we keep looping, we'll segfault. */
 Context;
     /* slowjoin */
     } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
