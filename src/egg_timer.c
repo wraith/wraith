@@ -220,7 +220,7 @@ int timer_run()
 			free(timer);
 		}
 
-		timer->called++;
+		if (timer) timer->called++;
 		callback(client_data);
 	}
 	return(0);
