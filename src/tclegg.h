@@ -1,9 +1,11 @@
+
 /* 
  * tclegg.h
  *   stuff used by tcl.c and tclhash.c
  * 
  * $Id: tclegg.h,v 1.6 2000/01/08 21:23:14 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -26,8 +28,10 @@
 #ifndef _EGG_TCLEGG_H
 #define _EGG_TCLEGG_H
 
-#include "../lush.h"		/* include this here, since it's needed
-				 * in this file */
+#ifdef G_USETCL
+#include "../lush.h"		/* include this here, since it's needed in this file */
+#endif
+
 #ifndef MAKING_MODS
 #  include "proto.h"		/* this file needs this */
 #endif
@@ -92,6 +96,8 @@
 #define BIND_EXEC_LOG   4	/* proc returned 1 -> wants to be logged */
 #define BIND_EXEC_BRK   5	/* proc returned BREAK (quit) */
 
+#ifdef G_USETCL
+
 /* extra commands are stored in Tcl hash tables (one hash table for each type
  * of command: msg, dcc, etc) */
 typedef struct timer_str {
@@ -149,5 +155,6 @@ void add_tcl_coups(tcl_coups *);
 void rem_tcl_coups(tcl_coups *);
 void add_tcl_ints(tcl_ints *);
 void rem_tcl_ints(tcl_ints *);
+#endif
 
-#endif				/* _EGG_TCLEGG_H */
+#endif /* _EGG_TCLEGG_H */

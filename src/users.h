@@ -1,9 +1,11 @@
+
 /* 
  * users.h
  *   structures and definitions used by users.c and userrec.c
  * 
  * $Id: users.h,v 1.10 2000/01/08 21:23:15 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -43,27 +45,33 @@ struct user_entry;
 struct user_entry_type {
   struct user_entry_type *next;
   int (*got_share) (struct userrec *, struct user_entry *, char *, int);
-  int (*dup_user) (struct userrec *, struct userrec *,
-		   struct user_entry *);
+  int (*dup_user) (struct userrec *, struct userrec *, struct user_entry *);
   int (*unpack) (struct userrec *, struct user_entry *);
   int (*pack) (struct userrec *, struct user_entry *);
-  int (*write_userfile) (FILE *, struct userrec *, struct user_entry *);
+  int (*write_userfile) (stream, char *, struct userrec *, struct user_entry *);
   int (*kill) (struct user_entry *);
   void *(*get) (struct userrec *, struct user_entry *);
   int (*set) (struct userrec *, struct user_entry *, void *);
-  int (*tcl_get) (Tcl_Interp *, struct userrec *, struct user_entry *,
-		  int, char **);
-  int (*tcl_set) (Tcl_Interp *, struct userrec *, struct user_entry *,
-		  int, char **);
+#ifdef G_USETCL
+  int (*tcl_get) (Tcl_Interp *, struct userrec *, struct user_entry *, int, char **);
+  int (*tcl_set) (Tcl_Interp *, struct userrec *, struct user_entry *, int, char **);
+#endif
   int (*expmem) (struct user_entry *);
   void (*display) (int idx, struct user_entry *);
   char *name;
 };
 
 #ifndef MAKING_MODS
-extern struct user_entry_type USERENTRY_EMAIL, USERENTRY_COMMENT, USERENTRY_LASTON,
- USERENTRY_XTRA, USERENTRY_INFO, USERENTRY_BOTADDR, USERENTRY_HOSTS,
- USERENTRY_PASS, USERENTRY_BOTFL, USERENTRY_URL;
+extern struct user_entry_type USERENTRY_COMMENT,
+  USERENTRY_LASTON,
+  USERENTRY_XTRA,
+  USERENTRY_INFO,
+  USERENTRY_BOTADDR,
+  USERENTRY_HOSTS,
+  USERENTRY_PASS,
+  USERENTRY_STATS,
+  USERENTRY_ADDED,
+  USERENTRY_CONFIG;
 
 #endif
 
@@ -75,7 +83,10 @@ struct laston_info {
 struct bot_addr {
   int telnet_port;
   int relay_port;
+  int hublevel;
   char *address;
+  char *uplink;
+  int roleid;
 };
 
 struct user_entry {
@@ -117,7 +128,6 @@ struct user_entry *find_user_entry(struct user_entry_type *, struct userrec *);
 void *get_user(struct user_entry_type *, struct userrec *);
 int set_user(struct user_entry_type *, struct userrec *, void *);
 
-#define bot_flags(u) ((long)get_user(&USERENTRY_BOTFL,u))
 #define is_bot(u) (u && (u->flags & USER_BOT))
 #define is_master(u) (u && (u->flags & USER_MASTER))
 #define is_owner(u) (u && (u->flags & USER_OWNER))
@@ -127,6 +137,7 @@ int set_user(struct user_entry_type *, struct userrec *, void *);
 #define BAN_NAME    "*ban"
 #define EXEMPT_NAME "*exempt"
 #define INVITE_NAME "*Invite"
+#define CONFIG_NAME "*Config"
 
 /* channel-specific info */
 struct chanuserrec {
@@ -174,18 +185,17 @@ struct userrec *check_chanlist_hand();
 int def_unpack(struct userrec *u, struct user_entry *e);
 int def_pack(struct userrec *u, struct user_entry *e);
 int def_kill(struct user_entry *e);
-int def_write_userfile(FILE * f, struct userrec *u, struct user_entry *e);
+int def_write_userfile(stream s, char *, struct userrec *u, struct user_entry *e);
 void *def_get(struct userrec *u, struct user_entry *e);
 int def_set(struct userrec *u, struct user_entry *e, void *buf);
-int def_gotshare(struct userrec *u, struct user_entry *e,
-		 char *data, int idx);
-int def_tcl_get(Tcl_Interp * interp, struct userrec *u,
-		struct user_entry *e, int argc, char **argv);
-int def_tcl_set(Tcl_Interp * irp, struct userrec *u,
-		struct user_entry *e, int argc, char **argv);
+int def_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx);
+
+#ifdef G_USETCL
+int def_tcl_get(Tcl_Interp * interp, struct userrec *u, struct user_entry *e, int argc, char **argv);
+int def_tcl_set(Tcl_Interp * irp, struct userrec *u, struct user_entry *e, int argc, char **argv);
+#endif
 int def_expmem(struct user_entry *e);
 void def_display(int idx, struct user_entry *e);
-int def_dupuser(struct userrec *new, struct userrec *old,
-		struct user_entry *e);
+int def_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e);
 
-#endif				/* _EGG_USERS_H */
+#endif /* _EGG_USERS_H */

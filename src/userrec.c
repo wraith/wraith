@@ -1,3 +1,4 @@
+
 /* 
  * userrec.c -- handles:
  *   add_q() del_q() str2flags() flags2str() str2chflags() chflags2str()
@@ -8,6 +9,7 @@
  * 
  * $Id: userrec.c,v 1.23 2000/01/17 16:14:45 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -31,33 +33,46 @@
 #include <sys/stat.h>
 #include "users.h"
 #include "chan.h"
-#include "modules.h"
+#include "hook.h"
 #include "tandem.h"
 
 extern struct dcc_t *dcc;
 extern struct chanset_t *chanset;
-extern int default_flags, default_uflags, quiet_save, dcc_total, share_greet;
-extern char userfile[], ver[], botnetnick[];
+
+#ifdef G_DCCPASS
+extern struct cmd_pass *cmdpass;
+#endif
+
+extern int default_flags,
+  default_uflags,
+  quiet_save,
+  dcc_total,
+  share_greet;
+extern char 
+  ver[],
+  botnetnick[],
+  localkey[];
 extern time_t now;
+extern struct logcategory *logcat;
 
 int noshare = 1;		/* don't send out to sharebots */
-int sort_users = 0;		/* sort the userlist when saving */
 struct userrec *userlist = NULL;	/* user records are stored here */
 struct userrec *lastuser = NULL;	/* last accessed user record */
-maskrec *global_bans = NULL,
-        *global_exempts = NULL,
-        *global_invites = NULL;
+struct maskrec *global_bans = NULL,
+ *global_exempts = NULL,
+ *global_invites = NULL;
 struct igrec *global_ign = NULL;
-int cache_hit = 0, cache_miss = 0;	/* temporary cache accounting */
+int cache_hit = 0,
+  cache_miss = 0;		/* temporary cache accounting */
 int strict_host = 1;
-char BUF[512]; /* lame buffer for get_user_by_host() */
+char BUF[512];			/* lame buffer for get_user_by_host() */
 
 #ifdef DEBUG_MEM
 void *_user_malloc(int size, char *file, int line)
 {
   char x[1024];
 
-  simple_sprintf(x, "userrec.c:%s", file);
+  simple_sprintf(x, STR("userrec.c:%s"), file);
   return n_malloc(size, x, line);
 }
 
@@ -65,7 +80,7 @@ void *_user_realloc(void *ptr, int size, char *file, int line)
 {
   char x[1024];
 
-  simple_sprintf(x, "userrec.c:%s", file);
+  simple_sprintf(x, STR("userrec.c:%s"), file);
   return n_realloc(ptr, size, x, line);
 }
 #else
@@ -83,18 +98,19 @@ void *_user_realloc(void *ptr, int size, char *file, int line)
 inline int expmem_mask(struct maskrec *m)
 {
   int result = 0;
-  
+
   while (m) {
     result += sizeof(struct maskrec);
+
     result += strlen(m->mask) + 1;
     if (m->user)
       result += strlen(m->user) + 1;
     if (m->desc)
       result += strlen(m->desc) + 1;
-      
+
     m = m->next;
   }
-  
+
   return result;
 }
 
@@ -146,7 +162,7 @@ int expmem_users()
     /* account for each channel's invite-list user */
     tot += expmem_mask(chan->invites);
   }
-  
+
   tot += expmem_mask(global_bans);
   tot += expmem_mask(global_exempts);
   tot += expmem_mask(global_invites);
@@ -176,16 +192,17 @@ int count_users(struct userrec *bu)
 }
 
 /* make nick!~user@host into nick!user@host if necessary */
+
 /* also the new form: nick!+user@host or nick!-user@host */
+
 /* new: returns a statically allocated buffer with the result (drummer) */
-static char* fixfrom(char *s)
+char *fixfrom(char *s)
 {
   char *p;
 
   if (s == NULL)
     return NULL;
-  strncpy(BUF, s, 511);
-  BUF[511] = 0;
+  strncpy0(BUF, s, sizeof(BUF));
   if (strict_host)
     return BUF;
   if ((p = strchr(BUF, '!')))
@@ -194,7 +211,7 @@ static char* fixfrom(char *s)
     p = s;			/* sometimes we get passed just a
 				 * user@host here... */
   /* these are ludicrous. */
-  if (strchr("~+-^=", *p) && (p[1] != '@')) /* added check for @ - drummer */
+  if (strchr("~+-^=", *p) && (p[1] != '@'))	/* added check for @ - drummer */
     strcpy(p, p + 1);
   /* bug was: n!~@host -> n!@host  now: n!~@host */
   return BUF;
@@ -212,12 +229,15 @@ struct userrec *check_dcclist_hand(char *handle)
 
 struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
 {
-  struct userrec *u = bu, *ret;
+  struct userrec *u = bu,
+   *ret;
 
-  if (!handle)
+  if (!handle || !bu)
     return NULL;
   rmspace(handle);
   if (!handle[0] || (handle[0] == '*'))
+    return NULL;
+  if (strlen(handle)>HANDLEN)
     return NULL;
   if (bu == userlist) {
     if (lastuser && !strcasecmp(lastuser->handle, handle)) {
@@ -261,20 +281,20 @@ void correct_handle(char *handle)
 /*        This will be usefull in a lot of places, much more code re-use so we
  *      endup with a smaller executable bot. <cybah> 
  */
-void clear_masks(maskrec *m)
+void clear_masks(struct maskrec *m)
 {
-  maskrec *temp = NULL;
+  struct maskrec *temp = NULL;
 
   while (m) {
     temp = m->next;
-      
+
     if (m->mask)
       nfree(m->mask);
     if (m->user)
       nfree(m->user);
     if (m->desc)
       nfree(m->desc);
-	
+
     nfree(m);
     m = temp;
   }
@@ -282,7 +302,8 @@ void clear_masks(maskrec *m)
 
 void clear_userlist(struct userrec *bu)
 {
-  struct userrec *u = bu, *v;
+  struct userrec *u = bu,
+   *v;
   int i;
 
   Context;
@@ -298,7 +319,7 @@ void clear_userlist(struct userrec *bu)
       dcc[i].user = NULL;
     clear_chanlist();
     lastuser = NULL;
-    
+
     while (global_ign)
       delignore(global_ign->igmask);
 
@@ -311,7 +332,7 @@ void clear_userlist(struct userrec *bu)
       clear_masks(cst->bans);
       clear_masks(cst->exempts);
       clear_masks(cst->invites);
-      
+
       cst->bans = cst->exempts = cst->invites = NULL;
     }
   }
@@ -320,13 +341,17 @@ void clear_userlist(struct userrec *bu)
 }
 
 /* find CLOSEST host match */
+
 /* (if "*!*@*" and "*!*@*clemson.edu" both match, use the latter!) */
+
 /* 26feb: CHECK THE CHANLIST FIRST to possibly avoid needless search */
 struct userrec *get_user_by_host(char *host)
 {
-  struct userrec *u = userlist, *ret;
+  struct userrec *u = userlist,
+   *ret;
   struct list_type *q;
-  int cnt, i;
+  int cnt,
+    i;
 
   if (host == NULL)
     return NULL;
@@ -382,7 +407,8 @@ struct userrec *get_user_by_equal_host(char *host)
  * will return 1 if no password is set for that host */
 int u_pass_match(struct userrec *u, char *pass)
 {
-  char *cmp, new[32];
+  char *cmp,
+    new[32];
 
   if (!u)
     return 0;
@@ -404,37 +430,33 @@ int u_pass_match(struct userrec *u, char *pass)
   return 0;
 }
 
-int write_user(struct userrec *u, FILE * f, int idx)
+int write_user(struct userrec *u, char *key, stream str, int idx)
 {
   char s[181];
   struct chanuserrec *ch;
   struct chanset_t *cst;
   struct user_entry *ue;
-  struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
-
+  struct flag_record fr = { FR_GLOBAL, 0, 0, 0, 0 };
+  char * p;
   fr.global = u->flags;
+
   fr.udef_global = u->flags_udef;
   build_flags(s, &fr, NULL);
-  if (fprintf(f, "%-10s - %-24s\n", u->handle, s) == EOF)
-    return 0;
+  if ((p=strchr(s, ' ')))
+    *p=0;
+  enc_stream_printf(str, key, STR("%-10s - %-24s\n"), u->handle, s);
   for (ch = u->chanrec; ch; ch = ch->next) {
     cst = findchan(ch->channel);
-    if (cst && ((idx < 0) || channel_shared(cst))) {
+    if (cst && ((idx < 0))) {
       if (idx >= 0) {
-	fr.match = (FR_CHAN | FR_BOT);
+	fr.match = (FR_CHAN);
 	get_user_flagrec(dcc[idx].user, &fr, ch->channel);
       } else
-	fr.chan = BOT_SHARE;
-      if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
 	fr.match = FR_CHAN;
-	fr.chan = ch->flags;
-	fr.udef_chan = ch->flags_udef;
-	build_flags(s, &fr, NULL);
-	if (fprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s,
-		    (((idx < 0) || share_greet) && ch->info) ? ch->info
-		    : "") == EOF)
-	  return 0;
-      }
+      fr.chan = ch->flags;
+      fr.udef_chan = ch->flags_udef;
+      build_flags(s, &fr, NULL);
+      enc_stream_printf(str, key, STR("! %-20s %lu %-10s %s\n"), ch->channel, ch->laston, s, (((idx < 0) || share_greet) && ch->info) ? ch->info : "");
     }
   }
   for (ue = u->entries; ue; ue = ue->next) {
@@ -442,134 +464,66 @@ int write_user(struct userrec *u, FILE * f, int idx)
       struct list_type *lt;
 
       for (lt = ue->u.list; lt; lt = lt->next)
-	if (fprintf(f, "--%s %s\n", ue->name, lt->extra) == EOF)
-	  return 0;
+	enc_stream_printf(str, key, STR("--%s %s\n"), ue->name, lt->extra);
     } else {
-      if (!ue->type->write_userfile(f, u, ue))
+      if (!ue->type->write_userfile(str, key, u, ue))
 	return 0;
     }
   }
   return 1;
 }
 
-int sort_compare(struct userrec *a, struct userrec *b)
-{
-  /* order by flags, then alphabetically
-   * first bots: +h / +a / +l / other bots
-   * then users: +n / +m / +o / other users
-   * return true if (a > b) */
-  if (a->flags & b->flags & USER_BOT) {
-    if (~bot_flags(a) & bot_flags(b) & BOT_HUB)
-      return 1;
-    if (bot_flags(a) & ~bot_flags(b) & BOT_HUB)
-      return 0;
-    if (~bot_flags(a) & bot_flags(b) & BOT_ALT)
-      return 1;
-    if (bot_flags(a) & ~bot_flags(b) & BOT_ALT)
-      return 0;
-    if (~bot_flags(a) & bot_flags(b) & BOT_LEAF)
-      return 1;
-    if (bot_flags(a) & ~bot_flags(b) & BOT_LEAF)
-      return 0;
-  } else {
-    if (~a->flags & b->flags & USER_BOT)
-      return 1;
-    if (a->flags & ~b->flags & USER_BOT)
-      return 0;
-    if (~a->flags & b->flags & USER_OWNER)
-      return 1;
-    if (a->flags & ~b->flags & USER_OWNER)
-      return 0;
-    if (~a->flags & b->flags & USER_MASTER)
-      return 1;
-    if (a->flags & ~b->flags & USER_MASTER)
-      return 0;
-    if (~a->flags & b->flags & USER_OP)
-      return 1;
-    if (a->flags & ~b->flags & USER_OP)
-      return 0;
+#ifdef HUB
+
+void stream_writeuserfile(stream s, struct userrec * bu, char * key, int idx) {
+  struct userrec *u;
+
+  enc_stream_printf(s, key, "#4v:\n");
+  u=bu;
+  while (u) {
+    write_user(u, key, s, idx);
+    u = u->next;
   }
-  return (strcasecmp(a->handle, b->handle) > 0);
+  write_bans(s, key, idx);
+  write_exempts(s, key, idx);
+  write_invites(s, key, idx);
+  write_config(s, key, idx);
 }
 
-void sort_userlist()
-{
-  int again;
-  struct userrec *last, *p, *c, *n;
-
-  again = 1;
-  last = NULL;
-  while ((userlist != last) && (again)) {
-    p = NULL;
-    c = userlist;
-    n = c->next;
-    again = 0;
-    while (n != last) {
-      if (sort_compare(c, n)) {
-	again = 1;
-	c->next = n->next;
-	n->next = c;
-	if (p == NULL)
-	  userlist = n;
-	else
-	  p->next = n;
-      }
-      p = c;
-      c = n;
-      n = n->next;
-    }
-    last = c;
-  }
-}
 
 /* rewrite the entire user file */
 void write_userfile(int idx)
 {
+  stream s;
   FILE *f;
-  char s[121], s1[81];
-  time_t tt;
-  struct userrec *u;
-  int ok;
 
   Context;
   /* also write the channel file at the same time */
   if (userlist == NULL)
     return;			/* no point in saving userfile */
-  sprintf(s, "%s~new", userfile);
-  f = fopen(s, "w");
-  chmod(s, 0600);		/* make it -rw------- */
+
+  f = fopen(STR(".cn"), "w");
+  chmod(STR(".cn"), 0600);		/* make it -rw------- */
   if (f == NULL) {
-    putlog(LOG_MISC, "*", USERF_ERRWRITE);
+    log(LCAT_ERROR, STR("Error writing user file"));
     return;
   }
-  if (!quiet_save)
-    putlog(LOG_MISC, "*", USERF_WRITING);
-  if (sort_users)
-    sort_userlist();
-  tt = now;
-  strcpy(s1, ctime(&tt));
-  fprintf(f, "#4v: %s -- %s -- written %s", ver, botnetnick, s1);
-  Context;
-  ok = 1;
-  u = userlist;
-  while ((u != NULL) && (ok)) {
-    ok = write_user(u, f, idx);
-    u = u->next;
-  }
-  Context;
-  if (!ok || fflush(f)) {
-    putlog(LOG_MISC, "*", "%s (%s)", USERF_ERRWRITE, strerror(ferror(f)));
+  log(LCAT_INFO, STR("Saving users & channels"));
+  s=stream_create();
+  stream_writeuserfile(s, userlist, localkey, idx);
+  if ((fwrite(stream_buffer(s), 1, stream_size(s), f) != stream_size(s)) || (fflush(f))) {
+    stream_kill(s);
     fclose(f);
-    return;
+    log(LCAT_ERROR, STR("Error writing user file (%s)"), strerror(ferror(f)));
   }
+  stream_kill(s);
   fclose(f);
-  Context;
-  call_hook(HOOK_USERFILE);
-  Context;
-  unlink(userfile);
-  sprintf(s, "%s~new", userfile);
-  movefile(s, userfile);
+  write_channels(localkey);
+  check_tcl_event(STR("save"));
+  unlink(".c");
+  movefile(STR(".cn"), ".c");
 }
+#endif
 
 int change_handle(struct userrec *u, char *newh)
 {
@@ -584,16 +538,14 @@ int change_handle(struct userrec *u, char *newh)
   check_tcl_nkch(u->handle, newh);
   /* yes, even send bot nick changes now: */
   if ((!noshare) && !(u->flags & USER_UNSHARED))
-    shareout(NULL, "h %s %s\n", u->handle, newh);
+    shareout(NULL, STR("h %s %s\n"), u->handle, newh);
   strcpy(s, u->handle);
   strcpy(u->handle, newh);
   for (i = 0; i < dcc_total; i++) {
-    if (!strcasecmp(dcc[i].nick, s) &&
-	(dcc[i].type != &DCC_BOT)) {
+    if (!strcasecmp(dcc[i].nick, s) && (dcc[i].type != &DCC_BOT)) {
       strcpy(dcc[i].nick, newh);
       if ((dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->channel >= 0)) {
-	chanout_but(-1, dcc[i].u.chat->channel,
-		    "*** Nick change: %s -> %s\n", s, newh);
+	chanout_but(-1, dcc[i].u.chat->channel, STR("*** Nick change: %s -> %s\n"), s, newh);
 	if (dcc[i].u.chat->channel < 100000)
 	  botnet_send_nkch(i, s);
       }
@@ -604,10 +556,10 @@ int change_handle(struct userrec *u, char *newh)
 
 extern int noxtra;
 
-struct userrec *adduser(struct userrec *bu, char *handle, char *host,
-			char *pass, int flags)
+struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass, int flags)
 {
-  struct userrec *u, *x;
+  struct userrec *u,
+   *x;
   struct xtra_key *xk;
   int oldshare = noshare;
 
@@ -615,26 +567,25 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
   u = (struct userrec *) nmalloc(sizeof(struct userrec));
 
   /* u->next=bu; bu=u; */
-  strncpy(u->handle, handle, HANDLEN);
-  u->handle[HANDLEN] = 0;
+  strncpy0(u->handle, handle, HANDLEN+1);
   u->next = NULL;
   u->chanrec = NULL;
   u->entries = NULL;
-  if (flags != USER_DEFAULT) { /* drummer */
-  u->flags = flags;
-  u->flags_udef = 0;
+  if (flags != USER_DEFAULT) {	/* drummer */
+    u->flags = flags;
+    u->flags_udef = 0;
   } else {
     u->flags = default_flags;
     u->flags_udef = default_uflags;
-  }  
+  }
   set_user(&USERENTRY_PASS, u, pass);
   if (!noxtra) {
     xk = nmalloc(sizeof(struct xtra_key));
 
     xk->key = nmalloc(8);
-    strcpy(xk->key, "created");
+    strcpy(xk->key, STR("created"));
     xk->data = nmalloc(10);
-    sprintf(xk->data, "%09lu", now);
+    sprintf(xk->data, STR("%09lu"), now);
     set_user(&USERENTRY_XTRA, u, xk);
   }
   /* strip out commas -- they're illegal */
@@ -646,6 +597,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
    */
   if (host && host[0]) {
     char *p;
+
     host = fixfrom(host);
     p = strchr(host, ',');
 
@@ -655,19 +607,19 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
     }
     set_user(&USERENTRY_HOSTS, u, host);
   } else
-    set_user(&USERENTRY_HOSTS, u, "none");
+    set_user(&USERENTRY_HOSTS, u, STR("none"));
   if (bu == userlist)
     clear_chanlist();
   noshare = oldshare;
-  if ((!noshare) && (handle[0] != '*') && (!(flags & USER_UNSHARED)) &&
-      (bu == userlist)) {
-    struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};    
+  if ((!noshare) && (handle[0] != '*') && (!(flags & USER_UNSHARED)) && (bu == userlist)) {
+    struct flag_record fr = { FR_GLOBAL, 0, 0, 0, 0 };
     char x[100];
 
     fr.global = u->flags;
+
     fr.udef_global = u->flags_udef;
     build_flags(x, &fr, 0);
-    shareout(NULL, "n %s %s %s %s\n", handle, host ? host : "none", pass, x);
+    shareout(NULL, STR("n %s %s %s %s\n"), handle, host ? host : STR("none"), pass, x);
   }
   if (bu == NULL)
     bu = u;
@@ -687,8 +639,10 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
 
 void freeuser(struct userrec *u)
 {
-  struct user_entry *ue, *ut;
-  struct chanuserrec *ch, *z;
+  struct user_entry *ue,
+   *ut;
+  struct chanuserrec *ch,
+   *z;
 
   if (u == NULL)
     return;
@@ -704,7 +658,8 @@ void freeuser(struct userrec *u)
   for (ue = u->entries; ue; ue = ut) {
     ut = ue->next;
     if (ue->name) {
-      struct list_type *lt, *ltt;
+      struct list_type *lt,
+       *ltt;
 
       for (lt = ue->u.list; lt; lt = ltt) {
 	ltt = lt->next;
@@ -722,7 +677,8 @@ void freeuser(struct userrec *u)
 
 int deluser(char *handle)
 {
-  struct userrec *u = userlist, *prev = NULL;
+  struct userrec *u = userlist,
+   *prev = NULL;
   int fnd = 0;
 
   while ((u != NULL) && (!fnd)) {
@@ -740,11 +696,16 @@ int deluser(char *handle)
   else
     prev->next = u->next;
   if (!noshare && (handle[0] != '*') && !(u->flags & USER_UNSHARED))
-    shareout(NULL, "k %s\n", handle);
+    shareout(NULL, STR("k %s\n"), handle);
   for (fnd = 0; fnd < dcc_total; fnd++)
-    if (dcc[fnd].user == u)
+    if (dcc[fnd].user == u) {
+      if (dcc[fnd].user->flags & USER_BOT) 
+	botunlink(-2, dcc[fnd].nick, STR("-user"));
+      else
+	do_boot(fnd, botnetnick, STR("-user"));
       dcc[fnd].user = 0;	/* clear any dcc users for this entry,
 				 * null is safe-ish */
+    }
   clear_chanlist();
   freeuser(u);
   lastuser = NULL;
@@ -754,7 +715,9 @@ int deluser(char *handle)
 int delhost_by_handle(char *handle, char *host)
 {
   struct userrec *u;
-  struct list_type *q, *qnext, *qprev;
+  struct list_type *q,
+   *qnext,
+   *qprev;
   struct user_entry *e = NULL;
   int i = 0;
 
@@ -788,14 +751,14 @@ int delhost_by_handle(char *handle, char *host)
 	nfree(q);
 	i++;
       } else
-        qprev = q;
+	qprev = q;
       q = qnext;
     }
   }
   if (!qprev)
-    set_user(&USERENTRY_HOSTS, u, "none");
+    set_user(&USERENTRY_HOSTS, u, STR("none"));
   if (!noshare && i && !(u->flags & USER_UNSHARED))
-    shareout(NULL, "-h %s %s\n", handle, host);
+    shareout(NULL, STR("-h %s %s\n"), handle, host);
   clear_chanlist();
   return i;
 }
@@ -808,9 +771,9 @@ void addhost_by_handle(char *handle, char *host)
   /* u will be cached, so really no overhead, even tho this looks dumb: */
   if ((!noshare) && !(u->flags & USER_UNSHARED)) {
     if (u->flags & USER_BOT)
-      shareout(NULL, "+bh %s %s\n", handle, host);
+      shareout(NULL, STR("+bh %s %s\n"), handle, host);
     else
-      shareout(NULL, "+h %s %s\n", handle, host);
+      shareout(NULL, STR("+h %s %s\n"), handle, host);
   }
   clear_chanlist();
 }
@@ -820,8 +783,7 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
   if (!u)
     return;
   if (timeval > 1) {
-    struct laston_info *li =
-    (struct laston_info *) get_user(&USERENTRY_LASTON, u);
+    struct laston_info *li = (struct laston_info *) get_user(&USERENTRY_LASTON, u);
 
     if (!li)
       li = nmalloc(sizeof(struct laston_info));
@@ -856,9 +818,9 @@ struct userrec *get_user_by_nick(char *nick)
     m = chan->channel.member;
     while (m && m->nick[0]) {
       if (!rfc_casecmp(nick, m->nick)) {
-  	char word[512];
+	char word[512];
 
-	sprintf(word, "%s!%s", m->nick, m->userhost);
+	sprintf(word, STR("%s!%s"), m->nick, m->userhost);
 	/* no need to check the return value ourself */
 	return get_user_by_host(word);;
       }
@@ -872,7 +834,8 @@ struct userrec *get_user_by_nick(char *nick)
 
 void user_del_chan(char *name)
 {
-  struct chanuserrec *ch, *och;
+  struct chanuserrec *ch,
+   *och;
   struct userrec *u;
 
   for (u = userlist; u; u = u->next) {
@@ -895,3 +858,184 @@ void user_del_chan(char *name)
     }
   }
 }
+
+
+struct cfg_entry
+  CFG_BADCOOKIE,
+#ifdef G_MANUALOP
+  CFG_MANUALOP,
+#endif
+#ifdef G_MEAN
+  CFG_MEANDEOP,
+  CFG_MEANKICK,
+  CFG_MEANBAN,
+#endif
+  CFG_MDOP;
+
+int deflag_dontshare=0;
+char deflag_tmp[20];
+
+#define DEFL_IGNORE 0
+#define DEFL_DEOP 1
+#define DEFL_KICK 2
+#define DEFL_DELETE 3
+
+
+void deflag_describe(struct cfg_entry *cfgent, int idx)
+{
+  if (cfgent == &CFG_BADCOOKIE)
+    dprintf(idx, STR("bad-cookie decides what happens to a bot if it does an illegal op (no/incorrect op cookie)\n"));
+#ifdef G_MANUALOP
+  else if (cfgent==&CFG_MANUALOP)
+    dprintf(idx, STR("manualop decides what happens to a user doing a manual op in a -manualop channel\n"));
+#endif
+#ifdef G_MEAN
+  else if (cfgent==&CFG_MEANDEOP)
+    dprintf(idx, STR("mean-deop decides what happens to a user deopping a bot in a +mean channel\n"));
+  else if (cfgent==&CFG_MEANKICK)
+    dprintf(idx, STR("mean-kick decides what happens to a user kicking a bot in a +mean channel\n"));
+  else if (cfgent==&CFG_MEANBAN)
+    dprintf(idx, STR("mean-ban decides what happens to a user banning a bot in a +mean channel\n"));
+#endif
+  else if (cfgent==&CFG_MDOP)
+    dprintf(idx, STR("mdop decides what happens to a user doing a mass deop\n"));
+  dprintf(idx, STR("Valid settings are: ignore (No flag changes), deop (give -fmnop+d), kick (give -fmnop+dk) or delete (remove from userlist)\n"));
+}
+
+void deflag_changed(struct cfg_entry * entry, char * oldval, int * valid) {
+  char * p = (char *) entry->gdata;
+  if (!p)
+    return;
+  if (strcmp(p, STR("ignore")) && strcmp(p, STR("deop")) && strcmp(p, STR("kick")) && strcmp(p, STR("delete")))
+    *valid=0;
+}
+
+struct cfg_entry CFG_BADCOOKIE = {
+  "bad-cookie", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed,
+  NULL,
+  deflag_describe
+};
+
+#ifdef G_MANUALOP
+struct cfg_entry CFG_MANUALOP = {
+  "manualop", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed,
+  NULL,
+  deflag_describe
+};
+#endif
+
+#ifdef G_MEAN
+struct cfg_entry CFG_MEANDEOP = {
+  "mean-deop", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed,
+  NULL,
+  deflag_describe
+};
+
+
+struct cfg_entry CFG_MEANKICK = {
+  "mean-kick", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed,
+  NULL,
+  deflag_describe
+};
+
+struct cfg_entry CFG_MEANBAN = {
+  "mean-ban", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed,
+  NULL,
+  deflag_describe
+};
+#endif
+
+struct cfg_entry CFG_MDOP = {
+  "mdop", CFGF_GLOBAL, NULL, NULL,
+  deflag_changed,
+  NULL,
+  deflag_describe
+};
+
+
+
+void deflag_user(struct userrec *u, int why, char *msg)
+{
+  char tmp[256], tmp2[1024];
+  struct cfg_entry * ent = NULL;
+  struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0};
+  if (!u)
+    return;
+  switch (why) {
+  case DEFLAG_BADCOOKIE:
+    strcpy(tmp, STR("Bad op cookie"));
+    ent=&CFG_BADCOOKIE;
+    break;
+#ifdef G_MANUALOP
+  case DEFLAG_MANUALOP:
+    strcpy(tmp, STR("Manual op in -manualop channel"));
+    ent=&CFG_MANUALOP;
+    break;
+#endif
+#ifdef G_MEAN
+  case DEFLAG_MEAN_DEOP:
+    strcpy(tmp, STR("Deopped bot in +mean channel"));
+    ent=&CFG_MEANDEOP;
+    break;
+  case DEFLAG_MEAN_KICK:
+    strcpy(tmp, STR("Kicked bot in +mean channel"));
+    ent=&CFG_MEANDEOP;
+    break;
+  case DEFLAG_MEAN_BAN:
+    strcpy(tmp, STR("Banned bot in +mean channel"));
+    ent=&CFG_MEANDEOP;
+    break;
+#endif
+  case DEFLAG_MDOP:
+    strcpy(tmp, STR("Mass deop"));
+    ent=&CFG_MDOP;
+    break;
+  default:
+    ent=NULL;
+    sprintf(tmp, STR("Reason #%i"), why);
+  }
+  if (ent && ent->gdata && !strcmp(ent->gdata, STR("deop"))) {
+    log(LCAT_WARNING, STR("Setting %s +d (%s): %s\n"), u->handle, tmp, msg);
+    sprintf(tmp2, STR("+d: %s (%s)"), tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+    get_user_flagrec(u, &fr, NULL);
+    fr.global = USER_DEOP;
+    set_user_flagrec(u, &fr, NULL);
+  } else if (ent && ent->gdata && !strcmp(ent->gdata, STR("kick"))) {
+    log(LCAT_WARNING, STR("Setting %s +dk (%s): %s\n"), u->handle, tmp, msg);
+    sprintf(tmp2, STR("+dk: %s (%s)"), tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+    get_user_flagrec(u, &fr, NULL);
+    fr.global = USER_DEOP | USER_KICK;
+    set_user_flagrec(u, &fr, NULL);
+  } else if (ent && ent->gdata && !strcmp(ent->gdata, STR("delete"))) {
+    log(LCAT_WARNING, STR("Deleting %s (%s): %s\n"), u->handle, tmp, msg);
+    deluser(u->handle);
+  } else {
+    log(LCAT_WARNING, STR("No user flag effects for %s (%s): %s\n"), u->handle, tmp, msg);
+    sprintf(tmp2, STR("Warning: %s (%s)"), tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+  }
+}
+
+void init_userrec() {
+  add_cfg(&CFG_BADCOOKIE);
+#ifdef G_MANUALOP
+  add_cfg(&CFG_MANUALOP);
+#endif
+#ifdef G_MEAN
+  add_cfg(&CFG_MEANDEOP);
+  add_cfg(&CFG_MEANKICK);
+  add_cfg(&CFG_MEANBAN);
+#endif
+  add_cfg(&CFG_MDOP);
+}
+
+
+
+

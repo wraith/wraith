@@ -1,3 +1,4 @@
+
 /* 
  * match.c
  *   wildcard matching functions
@@ -5,6 +6,7 @@
  * 
  * $Id: match.c,v 1.5 1999/12/22 20:30:03 guppy Exp $
  */
+
 /* 
  * Once this code was working, I added support for % so that I could
  * use the same code both in Eggdrop and in my IrcII client.
@@ -29,6 +31,7 @@
  * This will get us around most of the mess and replace the chunk that
  * was removed from the middle of this file.   --+ Dagmar
  */
+
 /* 
  * You'll also want to grab the rfc1459.c file or change all rfc_*()
  * calls to the standard library call to make this work with ircII
@@ -97,13 +100,18 @@
  * Best use:  Generic string matching, such as in IrcII-esque bindings
  */
 #ifdef EGGDROP
-static int wild_match_per(register unsigned char *m, register unsigned char *n)
+int wild_match_per(register unsigned char *m, register unsigned char *n)
 #else
 int wild_match(register unsigned char *m, register unsigned char *n)
 #endif
 {
-  unsigned char *ma = m, *lsm = 0, *lsn = 0, *lpm = 0, *lpn = 0;
-  int match = 1, saved = 0;
+  unsigned char *ma = m,
+   *lsm = 0,
+   *lsn = 0,
+   *lpm = 0,
+   *lpn = 0;
+  int match = 1,
+    saved = 0;
   register unsigned int sofar = 0;
 
 #ifdef WILDT
@@ -178,7 +186,7 @@ int wild_match(register unsigned char *m, register unsigned char *n)
       case QUOTE:
 	m++;			/* Handle quoting */
       }
-      if (rfc_toupper(*m) == rfc_toupper(*n)) {		/* If matching */
+      if (rfc_toupper(*m) == rfc_toupper(*n)) {	/* If matching */
 	m++;
 	n++;
 	sofar++;
@@ -214,7 +222,8 @@ int wild_match(register unsigned char *m, register unsigned char *n)
 /* For IrcII compatibility */
 
 int _wild_match(ma, na)
-register unsigned char *ma, *na;
+     register unsigned char *ma,
+      *na;
 {
   return wild_match(ma, na) - 1;	/* Don't think IrcII's code
 					 * actually uses this directly,
@@ -222,7 +231,8 @@ register unsigned char *ma, *na;
 }
 
 int match(ma, na)
-register unsigned char *ma, *na;
+     register unsigned char *ma,
+      *na;
 {
   return wild_match(ma, na) ? 1 : 0;	/* Returns 1 for match,
 					 * 0 for non-match */
@@ -255,7 +265,10 @@ register unsigned char *ma, *na;
  */
 int _wild_match(register unsigned char *m, register unsigned char *n)
 {
-  unsigned char *ma = m, *na = n, *lsm = 0, *lsn = 0;
+  unsigned char *ma = m,
+   *na = n,
+   *lsm = 0,
+   *lsn = 0;
   int match = 1;
   register int sofar = 0;
 

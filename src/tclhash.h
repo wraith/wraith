@@ -1,8 +1,10 @@
+
 /* 
  * tclhash.h
  * 
  * $Id: tclhash.h,v 1.5 2000/01/08 21:23:14 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -30,6 +32,9 @@
 typedef struct tct {
   struct flag_record flags;
   char *func_name;
+#ifndef G_USETCL
+  void *func;
+#endif
   struct tct *next;
   int hits;
 } tcl_cmd_t;
@@ -91,9 +96,21 @@ void rem_builtins(p_tcl_bind_list, cmd_t *);
 void add_builtins(p_tcl_bind_list, cmd_t *);
 
 int check_validity(char *, Function);
-extern p_tcl_bind_list H_chat, H_act, H_bcst, H_chon, H_chof;
-extern p_tcl_bind_list H_load, H_unld, H_dcc, H_bot, H_link;
-extern p_tcl_bind_list H_away, H_nkch, H_filt, H_disc, H_event;
+extern p_tcl_bind_list H_chat,
+  H_act,
+  H_bcst,
+  H_chon,
+  H_chof;
+extern p_tcl_bind_list H_load,
+  H_unld,
+  H_dcc,
+  H_bot,
+  H_link;
+extern p_tcl_bind_list H_away,
+  H_nkch,
+  H_filt,
+  H_disc,
+  H_event;
 
 #endif
 
@@ -102,4 +119,4 @@ Tcl_AppendResult(irp, "bad builtin command call!", NULL); \
 return TCL_ERROR; \
 }
 
-#endif				/* _EGG_TCLHASH_H */
+#endif /* _EGG_TCLHASH_H */

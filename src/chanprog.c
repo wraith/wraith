@@ -1,3 +1,4 @@
+
 /* 
  * chanprog.c -- handles:
  *   rmspace()
@@ -12,6 +13,7 @@
  * 
  * $Id: chanprog.c,v 1.19 2000/01/08 21:23:13 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -41,29 +43,59 @@
 #ifdef HAVE_UNAME
 #include <sys/utsname.h>
 #endif
-#include "modules.h"
+#include "settings.h"
+#include "hook.h"
 
 extern struct userrec *userlist;
 extern log_t *logs;
-extern Tcl_Interp *interp;
-extern char ver[], botnetnick[], firewall[];
-extern char motdfile[], userfile[], helpdir[], tempdir[];
-extern char moddir[], notify_new[], owner[], configfile[];
-extern time_t now, online_since;
-extern int backgrd, term_z, con_chan, cache_hit, cache_miss, firewallport;
-extern int default_flags, max_logs, conmask, protect_readonly, make_userfile;
-extern int noshare, ignore_time;
 
-tcl_timer_t *timer = NULL, *utimer = NULL;	/* timers (minutely) and
-						 * utimers (secondly) */
+#ifdef G_USETCL
+extern Tcl_Interp *interp;
+#endif
+extern char ver[],
+  botnetnick[],
+  firewall[],
+  myip[],
+  botuser[],
+  hostname[];
+extern char 
+  helpdir[],
+  tempdir[],
+  ghostver[];
+extern char moddir[],
+  owner[],
+  configfile[],
+  netpass[],
+  localkey[];
+extern time_t now,
+  online_since;
+extern int backgrd,
+  cache_hit,
+  cache_miss,
+  firewallport;
+extern int default_flags,
+  max_logs,
+  conmask,
+  protect_readonly,
+  make_userfile;
+extern int noshare,
+  ignore_time;
+
+#ifdef G_USETCL
+tcl_timer_t *timer = NULL,
+ *utimer = NULL;		/* timers (minutely) and
+
+				 * utimers (secondly) */
 unsigned long timer_id = 1;	/* next timer of any sort will have this
+
 				 * number */
+#endif
 struct chanset_t *chanset = NULL;	/* channel list */
-char admin[121] = "";		/* admin info */
 char origbotname[NICKLEN + 1];
 char botname[NICKLEN + 1];	/* primary botname */
 
 /* remove space characters from beginning and end of string */
+
 /* (more efficent by Fred1) */
 void rmspace(char *s)
 {
@@ -71,7 +103,7 @@ void rmspace(char *s)
   char *p;
 
   if (*s == '\0')
-	return;
+    return;
 
   /* wipe end of string */
   for (p = s + strlen(s) - 1; ((whitespace(*p)) && (p >= s)); p--);
@@ -90,7 +122,7 @@ memberlist *ismember(struct chanset_t *chan, char *nick)
   x = chan->channel.member;
   while (x && x->nick[0] && rfc_casecmp(x->nick, nick))
     x = x->next;
-  if (!x->nick[0])
+  if (!x || !x->nick[0])
     return NULL;
   return x;
 }
@@ -109,24 +141,24 @@ struct chanset_t *findchan(char *name)
 }
 
 /* stupid "caching" functions */
+
 /* shortcut for get_user_by_host -- might have user record in one
  * of the channel caches */
 struct userrec *check_chanlist(char *host)
 {
-  char *nick, *uhost, buf[UHOSTLEN];
+  char *nick,
+   *uhost,
+    buf[UHOSTLEN];
   memberlist *m;
   struct chanset_t *chan;
 
-  strncpy(buf, host, UHOSTMAX);
-  buf[UHOSTMAX] = 0;	/* why is this case sanely done, when there
-			 * are so many others? */
+  strncpy0(buf, host, UHOSTMAX);
   uhost = buf;
   nick = splitnick(&uhost);
   for (chan = chanset; chan; chan = chan->next) {
     m = chan->channel.member;
     while (m && m->nick[0]) {
-      if (!rfc_casecmp(nick, m->nick) &&
-	  !strcasecmp(uhost, m->userhost))
+      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
 	return m->user;
       m = m->next;
     }
@@ -154,6 +186,7 @@ struct userrec *check_chanlist_hand(char *hand)
 }
 
 /* clear the user pointers in the chanlists */
+
 /* (necessary when a hostmask is added/removed or a user is added) */
 void clear_chanlist()
 {
@@ -173,20 +206,20 @@ void clear_chanlist()
 /* if this user@host is in a channel, set it (it was null) */
 void set_chanlist(char *host, struct userrec *rec)
 {
-  char *nick, *uhost, buf[UHOSTLEN];
+  char *nick,
+   *uhost,
+    buf[UHOSTLEN];
   memberlist *m;
   struct chanset_t *chan = chanset;
 
   Context;
-  strncpy(buf, host, UHOSTMAX);
-  buf[UHOSTMAX] = 0;
+  strncpy0(buf, host, UHOSTMAX);
   uhost = buf;
   nick = splitnick(&uhost);
   while (chan) {
     m = chan->channel.member;
     while (m && m->nick[0]) {
-      if (!rfc_casecmp(nick, m->nick) &&
-	  !strcasecmp(uhost, m->userhost))
+      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
 	m->user = rec;
       m = m->next;
     }
@@ -197,6 +230,7 @@ void set_chanlist(char *host, struct userrec *rec)
 /* memory we should be using */
 int expmem_chanprog()
 {
+#ifdef G_USETCL
   int tot;
   tcl_timer_t *t;
 
@@ -211,19 +245,25 @@ int expmem_chanprog()
     tot += strlen(t->cmd) + 1;
   }
   return tot;
+#else
+  return 0;
+#endif
 }
 
 /* dump uptime info out to dcc (guppy 9Jan99) */
 void tell_verbose_uptime(int idx)
 {
-  char s[256], s1[121];
-  time_t now2, hr, min;
+  char s[256],
+    s1[121];
+  time_t now2,
+    hr,
+    min;
 
   now2 = now - online_since;
   s[0] = 0;
   if (now2 > 86400) {
     /* days */
-    sprintf(s, "%d day", (int) (now2 / 86400));
+    sprintf(s, STR("%d day"), (int) (now2 / 86400));
     if ((int) (now2 / 86400) >= 2)
       strcat(s, "s");
     strcat(s, ", ");
@@ -232,28 +272,28 @@ void tell_verbose_uptime(int idx)
   hr = (time_t) ((int) now2 / 3600);
   now2 -= (hr * 3600);
   min = (time_t) ((int) now2 / 60);
-  sprintf(&s[strlen(s)], "%02d:%02d", (int) hr, (int) min);
+  sprintf(&s[strlen(s)], STR("%02d:%02d"), (int) hr, (int) min);
   s1[0] = 0;
   if (backgrd)
-    strcpy(s1, MISC_BACKGROUND);
+    strcpy(s1, STR("background"));
   else {
-    if (term_z)
-      strcpy(s1, MISC_TERMMODE);
-    else if (con_chan)
-      strcpy(s1, MISC_STATMODE);
-    else
-      strcpy(s1, MISC_LOGMODE);
+    strcpy(s1, STR("log dump mode"));
   }
-  dprintf(idx, "%s %s  (%s)\n", MISC_ONLINEFOR, s, s1);
+  dprintf(idx, STR("Online for %s  (%s)\n"), s, s1);
 }
 
 /* dump status info out to dcc */
 void tell_verbose_status(int idx)
 {
-  char s[256], s1[121], s2[81];
-  char *vers_t, *uni_t;
+  char s[256],
+    s1[121],
+    s2[81];
+  char *vers_t,
+   *uni_t;
   int i;
-  time_t now2, hr, min;
+  time_t now2,
+    hr,
+    min;
 
 #if HAVE_GETRUSAGE
   struct rusage ru;
@@ -270,7 +310,7 @@ void tell_verbose_status(int idx)
   if (!uname(&un) < 0) {
 #endif
     vers_t = " ";
-    uni_t = "*unknown*";
+    uni_t = STR("*unknown*");
 #ifdef HAVE_UNAME
   } else {
     vers_t = un.release;
@@ -279,17 +319,13 @@ void tell_verbose_status(int idx)
 #endif
 
   i = count_users(userlist);
-  dprintf(idx, "I am %s, running %s:  %d user%s (mem: %uk)\n",
-	  botnetnick, ver, i, i == 1 ? "" : "s",
-          (int) (expected_memory() / 1024));
-  dprintf(idx, "Running on %s %s\n", uni_t, vers_t);
-  if (admin[0])
-    dprintf(idx, "Admin: %s\n", admin);
+  dprintf(idx, STR("I am %s, running %s:  %d user%s (mem: %uk)\n"), botnetnick, ver, i, i == 1 ? "" : "s", (int) (expected_memory() / 1024));
+  dprintf(idx, STR("Running on %s %s\n"), uni_t, vers_t);
   now2 = now - online_since;
   s[0] = 0;
   if (now2 > 86400) {
     /* days */
-    sprintf(s, "%d day", (int) (now2 / 86400));
+    sprintf(s, STR("%d day"), (int) (now2 / 86400));
     if ((int) (now2 / 86400) >= 2)
       strcat(s, "s");
     strcat(s, ", ");
@@ -298,78 +334,60 @@ void tell_verbose_status(int idx)
   hr = (time_t) ((int) now2 / 3600);
   now2 -= (hr * 3600);
   min = (time_t) ((int) now2 / 60);
-  sprintf(&s[strlen(s)], "%02d:%02d", (int) hr, (int) min);
+  sprintf(&s[strlen(s)], STR("%02d:%02d"), (int) hr, (int) min);
   s1[0] = 0;
   if (backgrd)
-    strcpy(s1, MISC_BACKGROUND);
+    strcpy(s1, STR("background"));
   else {
-    if (term_z)
-      strcpy(s1, MISC_TERMMODE);
-    else if (con_chan)
-      strcpy(s1, MISC_STATMODE);
-    else
-      strcpy(s1, MISC_LOGMODE);
+    strcpy(s1, STR("log dump mode"));
   }
 #if HAVE_GETRUSAGE
   getrusage(RUSAGE_SELF, &ru);
   hr = (int) ((ru.ru_utime.tv_sec + ru.ru_stime.tv_sec) / 60);
   min = (int) ((ru.ru_utime.tv_sec + ru.ru_stime.tv_sec) - (hr * 60));
-  sprintf(s2, "CPU %02d:%02d", (int) hr, (int) min);	/* actally min/sec */
+  sprintf(s2, STR("CPU %02d:%02d"), (int) hr, (int) min);	/* actally min/sec */
 #else
 #if HAVE_CLOCK
   cl = (clock() / CLOCKS_PER_SEC);
   hr = (int) (cl / 60);
   min = (int) (cl - (hr * 60));
-  sprintf(s2, "CPU %02d:%02d", (int) hr, (int) min);	/* actually min/sec */
+  sprintf(s2, STR("CPU %02d:%02d"), (int) hr, (int) min);	/* actually min/sec */
 #else
-  sprintf(s2, "CPU ???");
+  sprintf(s2, STR("CPU ???"));
 #endif
 #endif
-  dprintf(idx, "%s %s  (%s)  %s  %s %4.1f%%\n", MISC_ONLINEFOR,
-	  s, s1, s2, MISC_CACHEHIT,
-       100.0 * ((float) cache_hit) / ((float) (cache_hit + cache_miss)));
-  strcpy(s, "info library");
+  dprintf(idx, STR("Online for %s  (%s)  %s  cache hit %4.1f%%\n"), s, s1, s2, 100.0 * ((float) cache_hit) / ((float) (cache_hit + cache_miss)));
+#ifdef G_USETCL
+  strcpy(s, STR("info library"));
   if ((interp) && (Tcl_Eval(interp, s) == TCL_OK))
-    dprintf(idx, "%s %s\n", MISC_TCLLIBVER, interp->result);
+    dprintf(idx, STR("Using TCL Library: %s\n"), interp->result);
+#endif
 }
 
 /* show all internal state variables */
 void tell_settings(int idx)
 {
-  char s[1024];
-  int i;
-  struct flag_record fr =
-  {FR_GLOBAL, 0, 0, 0, 0, 0};
 
-  dprintf(idx, "Botnet Nickname: %s\n", botnetnick);
+  struct flag_record fr = { FR_GLOBAL, 0, 0, 0, 0 };
+
+  dprintf(idx, STR("Botnet Nickname: %s\n"), botnetnick);
   if (firewall[0])
-    dprintf(idx, "Firewall: %s, port %d\n", firewall, firewallport);
-  dprintf(idx, "Userfile: %s   Motd: %s\n", userfile, motdfile);
-  dprintf(idx, "Directories:\n");
-  dprintf(idx, "  Help    : %s\n", helpdir);
-  dprintf(idx, "  Temp    : %s\n", tempdir);
-#ifndef STATIC
-  dprintf(idx, "  Modules : %s\n", moddir);
-#endif
+    dprintf(idx, STR("Firewall: %s, port %d\n"), firewall, firewallport);
+  dprintf(idx, STR("Directories:\n"));
+  dprintf(idx, STR("  Help    : %s\n"), helpdir);
+  dprintf(idx, STR("  Temp    : %s\n"), tempdir);
   fr.global = default_flags;
 
-  build_flags(s, &fr, NULL);
-  dprintf(idx, "%s [%s], %s: %s\n", MISC_NEWUSERFLAGS, s,
-	  MISC_NOTIFY, notify_new);
   if (owner[0])
-    dprintf(idx, "%s: %s\n", MISC_PERMOWNER, owner);
-  for (i = 0; i < max_logs; i++)
-    if (logs[i].filename != NULL) {
-      dprintf(idx, "Logfile #%d: %s on %s (%s: %s)\n", i + 1,
-	      logs[i].filename, logs[i].chname,
-	      masktype(logs[i].mask), maskname(logs[i].mask));
-    }
-  dprintf(idx, "Ignores last %d mins\n", ignore_time);
+    dprintf(idx, STR("Permanent owner(s): %s\n"), owner);
+  dprintf(idx, STR("Ignores last %d mins\n"), ignore_time);
 }
 
 void reaffirm_owners()
 {
-  char *p, *q, s[121];
+  char *p,
+   *q,
+    s[121];
   struct userrec *u;
 
   /* make sure default owners are +n */
@@ -377,8 +395,7 @@ void reaffirm_owners()
     q = owner;
     p = strchr(q, ',');
     while (p) {
-      strncpy(s, q, p - q);
-      s[p - q] = 0;
+      strncpy0(s, q, p - q);
       rmspace(s);
       u = get_user_by_handle(userlist, s);
       if (u)
@@ -394,61 +411,234 @@ void reaffirm_owners()
   }
 }
 
+#ifdef LEAF
+void leaf_startup()
+{
+}
+#endif
+
+#ifdef HUB
+void hub_startup()
+{
+
+}
+#endif
+
+void load_internal_users()
+{
+  char buf[2048],
+   *p,
+   *ln,
+   *hand,
+   *ip,
+   *port,
+   *hublevel,
+   *hosts,
+    host[250];
+  char *attr;
+  int i;
+  struct bot_addr *bi;
+  struct userrec *u;
+
+  get_setting(NAME_HUBLIST, buf, sizeof(buf));
+  p = buf;
+  while (p) {
+    ln = p;
+    p = strchr(p, '\n');
+    if (p)
+      *p++ = 0;
+    hand = ln;
+    ip = NULL;
+    port = NULL;
+    hublevel = NULL;
+    hosts = NULL;
+    for (i = 0; ln; i++) {
+      switch (i) {
+      case 0:
+	hand = ln;
+	break;
+      case 1:
+	ip = ln;
+	break;
+      case 2:
+	port = ln;
+	break;
+      case 3:
+	hublevel = ln;
+	break;
+      case 4:
+	if (!get_user_by_handle(userlist, hand)) {
+	  userlist = adduser(userlist, hand, STR("none"), "-", USER_BOT | USER_OP | USER_FRIEND);
+	  bi = user_malloc(sizeof(struct bot_addr));
+
+	  bi->address = user_malloc(strlen(ip) + 1);
+	  strcpy(bi->address, ip);
+	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
+	  bi->relay_port = bi->telnet_port;
+	  bi->hublevel = atoi(hublevel);
+#ifdef HUB
+	  if ((!bi->hublevel) && (!strcmp(hand, botnetnick)))
+	    bi->hublevel = 99;
+#endif
+	  bi->uplink = user_malloc(1);
+	  bi->uplink[0] = 0;
+	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
+	  set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), netpass);
+	}
+      default:
+	/* ln = userids for hostlist, add them all */
+	hosts = ln;
+	ln = strchr(ln, ' ');
+	if (ln)
+	  *ln++ = 0;
+	while (hosts) {
+	  sprintf(host, STR("*!%s@%s"), hosts, ip);
+	  set_user(&USERENTRY_HOSTS, get_user_by_handle(userlist, hand), host);
+	  hosts = ln;
+	  if (ln)
+	    ln = strchr(ln, ' ');
+	  if (ln)
+	    *ln++ = 0;
+	}
+	break;
+      }
+      if (ln)
+	ln = strchr(ln, ' ');
+      if (ln)
+	*ln++ = 0;
+    }
+  }
+
+  get_setting(NAME_USERLIST, buf, sizeof(buf));
+  owner[0] = 0;
+  p = buf;
+  while (p) {
+    ln = p;
+    p = strchr(p, '\n');
+    if (p)
+      *p++ = 0;
+    /* name pass hostlist */
+    hand = ln;
+    attr = NULL;
+    hosts = NULL;
+    for (i = 0; ln; i++) {
+      switch (i) {
+      case 0:
+	hand = ln;
+	break;
+      case 1:
+	hosts = ln;
+	if (owner[0])
+	  strncat(owner, ",", 120);
+	strncat(owner, hand, 120);
+	if (!get_user_by_handle(userlist, hand)) {
+	  userlist = adduser(userlist, hand, STR("none"), "-", USER_OWNER | USER_MASTER | USER_FRIEND | USER_OP | USER_PARTY | USER_SU | USER_HUB);
+	  u = get_user_by_handle(userlist, hand);
+	  set_user(&USERENTRY_PASS, u, hand);
+	  while (hosts) {
+	    ln = strchr(ln, ' ');
+	    if (ln)
+	      *ln++ = 0;
+	    set_user(&USERENTRY_HOSTS, u, hosts);
+	    hosts = ln;
+	  }
+	}
+	break;
+      }
+      if (ln)
+	ln = strchr(ln, ' ');
+      if (ln)
+	*ln++ = 0;
+    }
+  }
+
+}
+
 void chanprog()
 {
   int i;
+  char buf[2048];
+  struct bot_addr *bi;
+  struct userrec *u;
 
-  admin[0] = 0;
   helpdir[0] = 0;
   tempdir[0] = 0;
   for (i = 0; i < max_logs; i++)
     logs[i].flags |= LF_EXPIRING;
-  conmask = 0;
+  conmask = LOG_MODES | LOG_MISC | LOG_CMDS;
   /* turn off read-only variables (make them write-able) for rehash */
   protect_readonly = 0;
-  /* now read it */
   Context;
-  if (!readtclprog(configfile))
-    fatal(MISC_NOCONFIGFILE, 0);
+
+  get_setting(NAME_IP, myip, 120);
+  get_setting(NAME_HOST, hostname, 120);
+  if (!hostname[0])
+    strcpy(hostname, myip);
+
+#ifdef HUB
+  readuserfile(".c", localkey, &userlist);
+#endif
+  load_internal_users();
+
+  if (!(u = get_user_by_handle(userlist, botnetnick))) {
+    /* I need to be on the userlist... doh. */
+    userlist = adduser(userlist, botnetnick, STR("none"), "-", USER_BOT | USER_OP | USER_FRIEND);
+    u = get_user_by_handle(userlist, botnetnick);
+    bi = user_malloc(sizeof(struct bot_addr));
+
+    bi->address = user_malloc(strlen(myip) + 1);
+    strcpy(bi->address, myip);
+    bi->telnet_port = atoi(buf) ? atoi(buf) : 3333;
+    bi->relay_port = bi->telnet_port;
+#ifdef HUB
+    bi->hublevel = 99;
+#else
+    bi->hublevel = 0;
+#endif
+    bi->uplink = user_malloc(1);
+    bi->uplink[0] = 0;
+    set_user(&USERENTRY_BOTADDR, u, bi);
+  } else {
+    bi = get_user(&USERENTRY_BOTADDR, u);
+  }
+
+  if (!netpass[0])
+    log(LCAT_ERROR, STR("!!WARNING!! No netpass set - botnet links will NOT be encrypted."));
+
   for (i = 0; i < max_logs; i++) {
     if (logs[i].flags & LF_EXPIRING) {
       if (logs[i].filename != NULL) {
-        nfree(logs[i].filename);
-        logs[i].filename = NULL;
+	nfree(logs[i].filename);
+	logs[i].filename = NULL;
       }
       if (logs[i].chname != NULL) {
-        nfree(logs[i].chname);
-        logs[i].chname = NULL;
+	nfree(logs[i].chname);
+	logs[i].chname = NULL;
       }
       if (logs[i].f != NULL) {
-        fclose(logs[i].f);
-        logs[i].f = NULL;
+	fclose(logs[i].f);
+	logs[i].f = NULL;
       }
       logs[i].mask = 0;
       logs[i].flags = 0;
     }
   }
+
+  bi = get_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, botnetnick));
+  if (!bi)
+    fatal(STR("I'm added to userlist but without a bot record!"), 0);
+  if (bi->telnet_port != 3333) {
+    listen_all(bi->telnet_port);
+  }
+  trigger_cfg_changed();
   /* We should be safe now */
   call_hook(HOOK_REHASH);
   Context;
   protect_readonly = 1;
-  if (!userfile[0])
-    fatal(MISC_NOUSERFILE2, 0);
   if ((int) getuid() == 0) {
     /* perhaps you should make it run something innocent here ;)
      * like rm -rf /etc :) */
-    printf("\n\n%s\n", MISC_ROOTWARN);
-  }
-  if (!readuserfile(userfile, &userlist)) {
-    if (!make_userfile)
-      fatal(MISC_NOUSERFILE, 0);
-    printf("\n\n%s\n", MISC_USERFCREATE);
-    if (module_find("server", 0, 0))
-      printf(MISC_USERFCREATE1, origbotname);
-    printf("%s\n\n", MISC_USERFCREATE2);
-  } else if (make_userfile) {
-     make_userfile = 0;
-     printf("%s\n", MISC_USERFEXISTS);
+    printf(STR("\n\nWARNING! You are running eggdrop as root!\n"));
   }
   Context;
   if (helpdir[0])
@@ -457,25 +647,20 @@ void chanprog()
   if (tempdir[0])
     if (tempdir[strlen(tempdir) - 1] != '/')
       strcat(tempdir, "/");
-  if (!botnetnick[0]) {
-    strncpy(botnetnick, origbotname, HANDLEN);
-    botnetnick[HANDLEN] = 0;
-  }
-  if (!botnetnick[0])
-    fatal("I don't have a botnet nick!!\n", 0);
   Context;
   /* test tempdir: it's vital */
   {
     FILE *f;
-    char s[161], rands[8];
+    char s[161],
+      rands[8];
 
     /* possible file race condition solved by using a random string 
      * and the process id in the filename */
-    make_rand_str(rands, 7); /* create random string */
-    sprintf(s, "%s.test-%u-%s", tempdir, getpid(), rands);
+    make_rand_str(rands, 7);	/* create random string */
+    sprintf(s, STR("%s.test-%u-%s"), tempdir, getpid(), rands);
     f = fopen(s, "w");
     if (f == NULL)
-      fatal(MISC_CANTWRITETEMP, 0);
+      fatal(STR("CAN'T WRITE TO TEMP DIR"), 0);
     fclose(f);
     unlink(s);
   }
@@ -483,14 +668,16 @@ void chanprog()
   reaffirm_owners();
 }
 
+#ifdef HUB
+
 /* reload the user file from disk */
 void reload()
 {
   FILE *f;
 
-  f = fopen(userfile, "r");
+  f = fopen(".c", "r");
   if (f == NULL) {
-    putlog(LOG_MISC, "*", MISC_CANTRELOADUSER);
+    log(LCAT_ERROR, STR("Can't reload user file!"));
     return;
   }
   fclose(f);
@@ -498,28 +685,31 @@ void reload()
   clear_userlist(userlist);
   noshare = 0;
   userlist = NULL;
-  if (!readuserfile(userfile, &userlist))
-    fatal(MISC_MISSINGUSERF, 0);
+  if (!readuserfile(".c", localkey, &userlist))
+    fatal(STR("User file is missing!"), 0);
   Context;
   reaffirm_owners();
   call_hook(HOOK_READ_USERFILE);
 }
+#endif
 
 void rehash()
 {
   call_hook(HOOK_PRE_REHASH);
+#ifdef HUB
   noshare = 1;
   clear_userlist(userlist);
   noshare = 0;
   userlist = NULL;
+#endif
   chanprog();
 }
 
 /* brief venture into timers */
+#ifdef G_USETCL
 
 /* add a timer */
-unsigned long add_timer(tcl_timer_t ** stack, int elapse, char *cmd,
-			unsigned long prev_id)
+unsigned long add_timer(tcl_timer_t ** stack, int elapse, char *cmd, unsigned long prev_id)
 {
   tcl_timer_t *old = (*stack);
 
@@ -559,7 +749,8 @@ int remove_timer(tcl_timer_t ** stack, unsigned long id)
 /* check timers, execute the ones that have expired */
 void do_check_timers(tcl_timer_t ** stack)
 {
-  tcl_timer_t *mark = *stack, *old = NULL;
+  tcl_timer_t *mark = *stack,
+   *old = NULL;
   char x[30];
 
   /* new timers could be added by a Tcl script inside a current timer */
@@ -575,7 +766,7 @@ void do_check_timers(tcl_timer_t ** stack)
     mark = mark->next;
     if (old->mins == 0) {
       Context;
-      simple_sprintf(x, "timer%d", old->id);
+      simple_sprintf(x, STR("timer%d"), old->id);
       do_tcl(x, old->cmd);
       nfree(old->cmd);
       nfree(old);
@@ -586,11 +777,28 @@ void do_check_timers(tcl_timer_t ** stack)
     }
   }
 }
+#endif
+
+int shouldjoin(struct chanset_t *chan)
+{
+#ifdef G_BACKUP
+  struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
+
+  get_user_flagrec(get_user_by_handle(userlist, botnetnick), &fr, chan->name);
+  return (!channel_inactive(chan)
+	  && (channel_backup(chan) || !glob_backupbot(fr)));
+#else
+  return !channel_inactive(chan);
+#endif
+}
+
+#ifdef G_USETCL
 
 /* wipe all timers */
 void wipe_timers(Tcl_Interp * irp, tcl_timer_t ** stack)
 {
-  tcl_timer_t *mark = *stack, *old;
+  tcl_timer_t *mark = *stack,
+   *old;
 
   while (mark) {
     old = mark;
@@ -605,11 +813,14 @@ void wipe_timers(Tcl_Interp * irp, tcl_timer_t ** stack)
 void list_timers(Tcl_Interp * irp, tcl_timer_t * stack)
 {
   tcl_timer_t *mark = stack;
-  char mins[10], id[20], *argv[3], *x;
+  char mins[10],
+    id[20],
+   *argv[3],
+   *x;
 
   while (mark != NULL) {
     sprintf(mins, "%u", mark->mins);
-    sprintf(id, "timer%lu", mark->id);
+    sprintf(id, STR("timer%lu"), mark->id);
     argv[0] = mins;
     argv[1] = mark->cmd;
     argv[2] = id;
@@ -619,13 +830,16 @@ void list_timers(Tcl_Interp * irp, tcl_timer_t * stack)
     mark = mark->next;
   }
 }
+#endif
 
 /* Oddly enough, written by proton (Emech's coder) */
 
 int isowner(char *name)
 {
-  char *pa, *pb;
-  char nl, pl;
+  char *pa,
+   *pb;
+  char nl,
+    pl;
 
   if (!owner || !*owner)
     return (0);

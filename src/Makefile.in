@@ -10,10 +10,40 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 
-OBJS = botcmd.o botmsg.o botnet.o chanprog.o cmds.o dcc.o \
-dccutil.o flags.o language.o main.o mem.o misc.o \
-modules.o net.o rfc1459.o tcl.o tcldcc.o tclhash.o \
-tclmisc.o tcluser.o userent.o userrec.o users.o md5/md5c.o
+OBJS = botcmd.o \
+botmsg.o \
+botnet.o \
+channels.o \
+chanprog.o \
+cmds.o \
+ctcp.o \
+dcc.o \
+dccutil.o \
+flags.o \
+irc.o \
+log.o \
+main.o \
+md5/md5c.o \
+mem.o \
+misc.o \
+net.o \
+rfc1459.o \
+rijndael.o \
+server.o \
+settings.o \
+share.o \
+tcl.o \
+tcldcc.o \
+tclhash.o \
+tclmisc.o \
+tcluser.o \
+transfer.o \
+userent.o \
+userrec.o \
+users.o
+
+
+UOBJS = rijndael.o md5/md5c.o
 
 MAKE_MD5 = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLAGS=$(CFLAGS)' 'CPPFLAGS=$(CPPFLAGS)'
@@ -24,36 +54,47 @@ doofus:
 	@echo ""
 	@cd $(top_srcdir); $(MAKE)
 
+../makebot: $(UOBJS) makebot.o
+	$(LD) -static -o ../makebot rijndael.o md5/md5c.o makebot.o
+	$(STRIP) ../makebot
+
+../makepack: $(UOBJS) makepack.o
+	$(LD) -static -o ../makepack md5/md5c.o makepack.o rijndael.o
+	$(STRIP) ../makepack
+
+../readlog: $(UOBJS) readlog.o
+	$(LD) -static -o ../readlog readlog.o rijndael.o md5/md5c.o
+	$(STRIP) ../readlog
+
+../stringfix:
+	$(CC) $(CFLAGS) $(CPPFLAGS) stringfix.c -o ../stringfix
+	$(STRIP) ../stringfix
+
 ../$(EGGEXEC): $(OBJS) $(XREQS)
 	@echo ""
 	@echo "Linking eggdrop... $(EGGBUILD)"
 	@echo ""
-	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(XLIBS)
+	$(LD) -static -o ../$(EGGEXEC) $(OBJS) $(XLIBS)
 	$(STRIP) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
 	@echo ""
 
-$(EGGEXEC): ../$(EGGEXEC)
+$(EGGEXEC): ../stringfix ../$(EGGEXEC)
 
-depend:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MM *.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM *.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM *.c > .depend
 
 clean:
-	@rm -f .depend *.o *.a *~
-
-botcmd.o:
-	@echo "(This will take a while. Go make a pizza or something.)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c botcmd.c
+	@rm -f .depend *.o *.a *~ link.sh x*.c
 
 main.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) \
-'-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
-'-DLDFLAGS="$(LD)"' \
-'-DSTRIPFLAGS="$(STRIP)"' -c main.c
 
 md5/md5c.o:
 	@cd md5; $(MAKE_MD5) md5
-	@echo "---------- Yeah! that's the compiling, now the linking! ----------"
+
 
 libtcle.a: $(TCLLIB)/lib$(TCLLIBFN)
 	@echo "[ Fixing lib$(TCLLIBFN) -> libtcle.a ]"
@@ -69,64 +110,122 @@ eggdrop.h:
 .SUFFIXES:
 .SUFFIXES: .c .h .o .a
 
-.c.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+.c.o:	../stringfix
+	cp -f $< x$<
+	../stringfix x$<
+	$(CC) $(CFLAGS) $(CPPFLAGS) \
+'-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
+'-DLDFLAGS="$(LD)"' \
+'-DSTRIPFLAGS="$(STRIP)"' -c x$< -o `basename $< .c`.o
+
 
 #safety hash
-botcmd.o: botcmd.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h tandem.h modules.h \
- mod/modvals.h
-botmsg.o: botmsg.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h tandem.h
-botnet.o: botnet.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h tandem.h
-chanprog.o: chanprog.c main.h lang.h eggdrop.h flags.h proto.h \
- ../lush.h cmdt.h tclegg.h tclhash.h chan.h users.h modules.h \
- mod/modvals.h
-cmds.o: cmds.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h tandem.h modules.h \
- mod/modvals.h
-dcc.o: dcc.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h cmdt.h \
- tclegg.h tclhash.h chan.h users.h modules.h mod/modvals.h tandem.h \
- md5/global.h md5/md5.h
-dccutil.o: dccutil.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h modules.h mod/modvals.h \
- tandem.h
-flags.o: flags.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h
-language.o: language.c main.h lang.h eggdrop.h flags.h proto.h \
- ../lush.h cmdt.h tclegg.h tclhash.h chan.h users.h
-main.o: main.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h modules.h mod/modvals.h \
- tandem.h patch.h
+
+
+../stringfix: stringfix.c
+botcmd.o: botcmd.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h tandem.h
+botmsg.o: botmsg.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h tandem.h
+botnet.o: botnet.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h tandem.h
+cfgbot.o: cfgbot.c settings.h main.h ../config.h log.h eggdrop.h \
+ flags.h proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h rijndael.h
+channels.o: channels.c main.h ../config.h log.h eggdrop.h \
+ flags.h proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h tandem.h hook.h irc.h server.h channels.h
+chanprog.o: chanprog.c main.h ../config.h log.h eggdrop.h \
+ flags.h proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h settings.h hook.h
+cmds.o: cmds.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h tandem.h hook.h
+ctcp.o: ctcp.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h
+dcc.o: dcc.c main.h ../config.h log.h eggdrop.h flags.h proto.h \
+ cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h md5/md5.h \
+ hook.h tandem.h
+dccutil.o: dccutil.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h tandem.h
+flags.o: flags.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h
+irc.o: irc.c main.h ../config.h log.h eggdrop.h flags.h proto.h \
+ cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h md5/md5.h \
+ tandem.h irc.h server.h channels.h hook.h
+log.o: log.c main.h ../config.h log.h eggdrop.h flags.h proto.h \
+ cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h md5/md5.h \
+ hook.h tandem.h
+main.o: main.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h tandem.h settings.h
 match.o: match.c
-mem.o: mem.c mod/modvals.h
-misc.o: misc.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h
-modules.o: modules.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h modules.h mod/modvals.h \
- tandem.h
-net.o: net.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h cmdt.h \
- tclegg.h tclhash.h chan.h users.h
-rfc1459.o: rfc1459.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h
-tcl.o: tcl.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h cmdt.h \
- tclegg.h tclhash.h chan.h users.h
-tcldcc.o: tcldcc.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h tandem.h modules.h \
- mod/modvals.h
-tclhash.o: tclhash.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h match.c
-tclmisc.o: tclmisc.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h modules.h mod/modvals.h \
- tandem.h
-tcluser.o: tcluser.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h tandem.h
-userent.o: userent.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h
-userrec.o: userrec.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h modules.h mod/modvals.h \
- tandem.h
-users.o: users.c main.h lang.h eggdrop.h flags.h proto.h ../lush.h \
- cmdt.h tclegg.h tclhash.h chan.h users.h modules.h mod/modvals.h \
- tandem.h
+mem.o: mem.c hook.h
+misc.o: misc.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h
+mkbdh.o: mkbdh.c standalone.h ../config.h md5/global.h md5/md5.h
+net.o: net.c main.h ../config.h log.h eggdrop.h flags.h proto.h \
+ cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h md5/md5.h \
+ hook.h
+rfc1459.o: rfc1459.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h
+rijndael.o: rijndael.c rijndael.h main.h ../config.h log.h \
+ eggdrop.h flags.h proto.h cmdt.h tclegg.h tclhash.h chan.h users.h \
+ md5/global.h md5/md5.h
+server.o: server.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h settings.h server.h
+setkey.o: setkey.c
+settings.o: settings.c settings.h main.h ../config.h log.h \
+ eggdrop.h flags.h proto.h cmdt.h tclegg.h tclhash.h chan.h users.h \
+ md5/global.h md5/md5.h
+share.o: share.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h transfer.h channels.h tandem.h
+stringfix.o: stringfix.c
+tcl.o: tcl.c main.h ../config.h log.h eggdrop.h flags.h proto.h \
+ cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h md5/md5.h
+tcldcc.o: tcldcc.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h tandem.h hook.h
+tclhash.o: tclhash.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h match.c
+tclmisc.o: tclmisc.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h tandem.h
+tcluser.o: tcluser.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h tandem.h
+transfer.o: transfer.c main.h ../config.h log.h eggdrop.h \
+ flags.h proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h channels.h tandem.h transfer.h
+userent.o: userent.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h
+userrec.o: userrec.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h tandem.h
+users.o: users.c main.h ../config.h log.h eggdrop.h flags.h \
+ proto.h cmdt.h tclegg.h tclhash.h chan.h users.h md5/global.h \
+ md5/md5.h hook.h tandem.h
+
+
+
+
+
+
+
+
+
+
+
+

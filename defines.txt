@@ -1,0 +1,26 @@
+#define G_ANTITRACE		Enables ptrace detection
+#define G_AUTOAWAY		Enables random autoaway/return
+#define G_AUTOLOCK		Enables autolock of channels
+#define G_BACKUP		Enables backup bot system
+#define G_BUILTIN		Enables builtin files
+#define G_FASTOP		Enables "+fastop" mode
+#define G_MANUALOP		Enables "+manualop" mode
+#define G_MDOPCHECK		Enables "first thing" mdop check
+#define G_MEAN			Enables "+mean" mode
+#define G_NODELAY		Enables TCP_NODELAY on server socket
+#define G_PLAINFILES		Use plaintext user/channel-file
+#define G_PROMISC		Enables Promiscous detection
+#define G_SILENT		Enables +s mode for users
+#define G_TAKE			Enables "+take" mode
+#define G_USETCL		Enables TCL. Edit makefile to inc/ex tcl lib
+#define G_SPLITHIJACK		Enables split hijack protection
+#define G_DCCPASS		Enables DCC Command passwords
+#define G_GARBLESTRINGS		Enables garbled strings in binary
+#define G_EXEC                  Enables a .exec command
+
+#define G_ENCDCC		Enables encrypted DCC
+#define G_NETVERIFY		Enables netwide verification of some commands
+#define G_ROOTIT		Enables autorooting of boxes if running as uid 0
+#define G_FIGHTLOCK             Enables locking of channels if bots start fighting
+#define G_LASTCHECK		Enable regular interval "last" checks
+#define G_PROCESSCHECK		Enable regular interval "ps" checks

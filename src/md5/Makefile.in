@@ -18,8 +18,11 @@ doofus:
 	@echo ""
 	@cd $(top_srcdir); $(MAKE)
 
-depend:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MM *.c > .depend
+depleaf:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM *.c > .depend
+
+dephub:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM *.c > .depend
 
 clean:
 	@rm -f .depend *.o *~

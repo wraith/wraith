@@ -1,9 +1,11 @@
+
 /* 
  * cmdt.h
  *   stuff for builtin commands
  * 
  * $Id: cmdt.h,v 1.4 2000/01/08 21:23:13 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -39,4 +41,4 @@ typedef struct {
   Function func;
 } botcmd_t;
 
-#endif				/* _EGG_CMDT_H */
+#endif /* _EGG_CMDT_H */

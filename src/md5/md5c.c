@@ -28,13 +28,24 @@
  * documentation and/or software.
  */
 
+#ifndef MD5_STANDALONE
 #ifdef HAVE_CONFIG_H
 #  include "../../config.h"
 #endif
 #include "main.h"
 #include "eggdrop.h"
+
+#else
+#define nmalloc(x) malloc(x)
+#define nfree(x) free(x)
+#define nrealloc(x,y) realloc(x,y)
+typedef unsigned int u_32bit_t;
+
+
+#endif
 #include "global.h"
 #include "md5.h"
+
 
 /* 
  * Constants for MD5Transform routine.

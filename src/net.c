@@ -1,18 +1,24 @@
+
 /* 
  * net.c -- handles:
  *   all raw network i/o
  * 
  * $Id: net.c,v 1.17 2000/01/17 16:14:45 per Exp $
  */
+
 /* 
  * This is hereby released into the public domain.
  * Robey Pointer, robey@netcom.com
  */
 
 #include "main.h"
+#include "hook.h"
+#include "proto.h"
 #include <limits.h>
 #include <string.h>
 #include <netdb.h>
+#include <signal.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -34,18 +40,29 @@
 #endif
 #endif
 
-extern int backgrd, use_stderr, resolve_timeout;
+extern int backgrd,
+  use_stderr,
+  resolve_timeout;
 
 char hostname[121] = "";	/* hostname can be specified in the config
+
 				 * file */
 char myip[121] = "";		/* IP can be specified in the config file */
 char firewall[121] = "";	/* socks server for firewall */
+
+#ifdef HUB
+int dolookups = 0;
+#else
+int dolookups = 1;		/* Ghost: Default to lookup all connects */
+#endif
 int firewallport = 1080;	/* default port of Sock4/5 firewalls */
-char botuser[21] = "eggdrop";	/* username of the user running the bot */
+char botuser[21] = "nobody";	/* username of the user running the bot */
 int dcc_sanitycheck = 0;	/* we should do some sanity checking on dcc
+
 				 * connections. */
 sock_list *socklist = 0;	/* enough to be safe */
 int MAXSOCKS = 0;
+char netpass[128] = "";
 
 /* types of proxy */
 #define PROXY_SOCKS   1
@@ -71,7 +88,14 @@ IP my_atoul(char *s)
 #define my_ntohl(ln) swap_long(ln)
 #define my_htonl(ln) swap_long(ln)
 
+
+#ifdef G_ANTITRACE
+extern struct cfg_entry CFG_TRACE;
+#endif
+
+
 /* i read somewhere that memcpy() is broken on some machines */
+
 /* it's easy to replace, so i'm not gonna take any chances, because
  * it's pretty important that it work correctly here */
 void my_memcpy(char *dest, char *src, int len)
@@ -81,6 +105,7 @@ void my_memcpy(char *dest, char *src, int len)
 }
 
 #ifndef HAVE_BZERO
+
 /* bzero() is bsd-only, so here's one for non-bsd systems */
 void bzero(char *dest, int len)
 {
@@ -95,13 +120,15 @@ void init_net()
   int i;
 
   for (i = 0; i < MAXSOCKS; i++) {
+    bzero(&socklist[i], sizeof(socklist[i]));
     socklist[i].flags = SOCK_UNUSED;
   }
 }
 
 int expmem_net()
 {
-  int i, tot = 0;
+  int i,
+    tot = 0;
 
   Context;
   for (i = 0; i < MAXSOCKS; i++) {
@@ -133,10 +160,14 @@ IP getmyip()
     hp = gethostbyname(hostname);
   else {
     gethostname(s, 120);
+
     hp = gethostbyname(s);
   }
-  if (hp == NULL)
-    fatal("Hostname self-lookup failed.", 0);
+  if (hp == NULL) {
+    return inet_addr(STR("127.0.0.1"));
+
+/*    fatal("Hostname self-lookup failed.", 0); */
+  }
   in = (struct in_addr *) (hp->h_addr_list[0]);
   ip = (IP) (in->s_addr);
   return ip;
@@ -146,71 +177,71 @@ void neterror(char *s)
 {
   switch (errno) {
   case EADDRINUSE:
-    strcpy(s, "Address already in use");
+    strcpy(s, STR("Address already in use"));
     break;
   case EADDRNOTAVAIL:
-    strcpy(s, "Address invalid on remote machine");
+    strcpy(s, STR("Address invalid on remote machine"));
     break;
   case EAFNOSUPPORT:
-    strcpy(s, "Address family not supported");
+    strcpy(s, STR("Address family not supported"));
     break;
   case EALREADY:
-    strcpy(s, "Socket already in use");
+    strcpy(s, STR("Socket already in use"));
     break;
   case EBADF:
-    strcpy(s, "Socket descriptor is bad");
+    strcpy(s, STR("Socket descriptor is bad"));
     break;
   case ECONNREFUSED:
-    strcpy(s, "Connection refused");
+    strcpy(s, STR("Connection refused"));
     break;
   case EFAULT:
-    strcpy(s, "Namespace segment violation");
+    strcpy(s, STR("Namespace segment violation"));
     break;
   case EINPROGRESS:
-    strcpy(s, "Operation in progress");
+    strcpy(s, STR("Operation in progress"));
     break;
   case EINTR:
-    strcpy(s, "Timeout");
+    strcpy(s, STR("Timeout"));
     break;
   case EINVAL:
-    strcpy(s, "Invalid namespace");
+    strcpy(s, STR("Invalid namespace"));
     break;
   case EISCONN:
-    strcpy(s, "Socket already connected");
+    strcpy(s, STR("Socket already connected"));
     break;
   case ENETUNREACH:
-    strcpy(s, "Network unreachable");
+    strcpy(s, STR("Network unreachable"));
     break;
   case ENOTSOCK:
-    strcpy(s, "File descriptor, not a socket");
+    strcpy(s, STR("File descriptor, not a socket"));
     break;
   case ETIMEDOUT:
-    strcpy(s, "Connection timed out");
+    strcpy(s, STR("Connection timed out"));
     break;
   case ENOTCONN:
-    strcpy(s, "Socket is not connected");
+    strcpy(s, STR("Socket is not connected"));
     break;
   case EHOSTUNREACH:
-    strcpy(s, "Host is unreachable");
+    strcpy(s, STR("Host is unreachable"));
     break;
   case EPIPE:
-    strcpy(s, "Broken pipe");
+    strcpy(s, STR("Broken pipe"));
     break;
 #ifdef ECONNRESET
   case ECONNRESET:
-    strcpy(s, "Connection reset by peer");
+    strcpy(s, STR("Connection reset by peer"));
     break;
 #endif
 #ifdef EACCES
   case EACCES:
-    strcpy(s, "Permission denied");
+    strcpy(s, STR("Permission denied"));
     break;
 #endif
   case 0:
-    strcpy(s, "Error 0");
+    strcpy(s, STR("Error 0"));
     break;
   default:
-    sprintf(s, "Unforseen error %d", errno);
+    sprintf(s, STR("Unforseen error %d"), errno);
     break;
   }
 }
@@ -228,11 +259,12 @@ void setsock(int sock, int options)
       socklist[i].outbuflen = 0;
       socklist[i].flags = options;
       socklist[i].sock = sock;
-      if (((sock != STDOUT) || backgrd) &&
-	  !(socklist[i].flags & SOCK_NONSOCK)) {
+      socklist[i].encstatus = 0;
+      bzero(&socklist[i].okey, sizeof(socklist[i].okey));
+      bzero(&socklist[i].ikey, sizeof(socklist[i].ikey));
+      if (((sock != STDOUT) || backgrd) && !(socklist[i].flags & SOCK_NONSOCK)) {
 	parm = 1;
-	setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (void *) &parm,
-		   sizeof(int));
+	setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (void *) &parm, sizeof(int));
 
 	parm = 0;
 	setsockopt(sock, SOL_SOCKET, SO_LINGER, (void *) &parm, sizeof(int));
@@ -240,15 +272,14 @@ void setsock(int sock, int options)
       if (options & SOCK_LISTEN) {
 	/* Tris says this lets us grab the same port again next time */
 	parm = 1;
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *) &parm,
-		   sizeof(int));
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *) &parm, sizeof(int));
       }
       /* yay async i/o ! */
       fcntl(sock, F_SETFL, O_NONBLOCK);
       return;
     }
   }
-  fatal("Socket table is full!", 0);
+  fatal(STR("Socket table is full!"), 0);
 }
 
 int getsock(int options)
@@ -256,7 +287,7 @@ int getsock(int options)
   int sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock < 0)
-    fatal("Can't open a socket at all!", 0);
+    fatal(STR("Can't open a socket at all!"), 0);
   setsock(sock, options);
   return sock;
 }
@@ -278,26 +309,27 @@ void killsock(int sock)
 	socklist[i].outbuf = NULL;
 	socklist[i].outbuflen = 0;
       }
+      bzero(&socklist[i], sizeof(socklist[i]));
       socklist[i].flags = SOCK_UNUSED;
       return;
     }
   }
-  putlog(LOG_MISC, "*", "Attempt to kill un-allocated socket %d !!", sock);
+  log(LCAT_ERROR, STR("Attempt to kill un-allocated socket %d !!"), sock);
 }
 
 /* send connection request to proxy */
-static int proxy_connect(int sock, char *host, int port, int proxy)
+int proxy_connect(int sock, char *host, int port, int proxy)
 {
   unsigned char x[10];
   struct hostent *hp;
   char s[30];
-  int i;
 
   /* socks proxy */
   if (proxy == PROXY_SOCKS) {
     /* numeric IP? */
     if ((host[strlen(host) - 1] >= '0') && (host[strlen(host) - 1] <= '9')) {
-      IP ip = ((IP) inet_addr(host)); /* drummer */      
+      IP ip = ((IP) inet_addr(host));	/* drummer */
+
       my_memcpy((char *) x, (char *) &ip, 4);	/* Beige@Efnet */
     } else {
       /* no, must be host.domain */
@@ -314,19 +346,24 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
       }
       my_memcpy((char *) x, (char *) hp->h_addr, hp->h_length);
     }
+
+/*
     for (i = 0; i < MAXSOCKS; i++) {
       if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == sock))
-	socklist[i].flags |= SOCK_PROXYWAIT; /* drummer */
+	socklist[i].flags |= SOCK_PROXYWAIT;
     }
-    sprintf(s, "\004\001%c%c%c%c%c%c%s", (port >> 8) % 256, (port % 256),
-	    x[0], x[1], x[2], x[3], botuser);
-    tputs(sock, s, strlen(botuser) + 9); /* drummer */
+*/
+    sprintf(s, STR("\004\001%c%c%c%c%c%c%s"), (port >> 8) % 256, (port % 256), x[0], x[1], x[2], x[3], botuser);
+    tputs(sock, s, strlen(botuser) + 9);	/* drummer */
+    read(sock, s, 10);
+
   } else if (proxy == PROXY_SUN) {
-    sprintf(s, "%s %d\n", host, port);
-    tputs(sock, s, strlen(s)); /* drummer */
+    sprintf(s, STR("%s %d\n"), host, port);
+    tputs(sock, s, strlen(s));	/* drummer */
   }
   return sock;
 }
+
 
 /* starts a connection attempt to a socket
  * returns <0 if connection refused:
@@ -337,35 +374,42 @@ int open_telnet_raw(int sock, char *server, int sport)
   struct sockaddr_in name;
   struct hostent *hp;
   char host[121];
-  int i, port;
+  int i,
+    port,
+    socks = 0;
   volatile int proxy;
+  char *hpart;
 
-  /* firewall?  use socks */
-  if (firewall[0]) {
-    if (firewall[0] == '!') {
-      proxy = PROXY_SUN;
-      strcpy(host, &firewall[1]);
-    } else {
-      proxy = PROXY_SOCKS;
-      strcpy(host, firewall);
-    }
-    port = firewallport;
+/* If server matches *?*, use first as socks and second as server */
+  hpart = strchr(server, '?');
+  if (hpart) {
+    strcpy(host, server);
+    *strchr(host, '?') = 0;
+    hpart += 1;
+    strcpy(server, hpart);
+    socks = 1;
+    proxy = PROXY_SOCKS;
+    port = 1080;
   } else {
     proxy = 0;
     strcpy(host, server);
     port = sport;
   }
+
   /* patch by tris for multi-hosted machines: */
   bzero((char *) &name, sizeof(struct sockaddr_in));
 
   name.sin_family = AF_INET;
   name.sin_addr.s_addr = (myip[0] ? getmyip() : INADDR_ANY);
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0)
+  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0) {
+    log(LCAT_ERROR, STR("Error binding to ip: %s\n"), strerror(errno));
     return -1;
+  }
   bzero((char *) &name, sizeof(struct sockaddr_in));
 
   name.sin_family = AF_INET;
   name.sin_port = my_htons(port);
+
   /* numeric IP? */
   if ((host[strlen(host) - 1] >= '0') && (host[strlen(host) - 1] <= '9'))
     name.sin_addr.s_addr = inet_addr(host);
@@ -387,18 +431,18 @@ int open_telnet_raw(int sock, char *server, int sport)
     if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == sock))
       socklist[i].flags |= SOCK_CONNECT;
   }
-  if (connect(sock, (struct sockaddr *) &name,
-	      sizeof(struct sockaddr_in)) < 0) {
+  if (connect(sock, (struct sockaddr *) &name, sizeof(struct sockaddr_in)) < 0) {
     if (errno == EINPROGRESS) {
       /* firewall?  announce connect attempt to proxy */
-      if (firewall[0])
+      if (proxy) {
 	return proxy_connect(sock, server, sport, proxy);
+      }
       return sock;		/* async success! */
     } else
       return -1;
   }
   /* synchronous? :/ */
-  if (firewall[0])
+  if (proxy)
     return proxy_connect(sock, server, sport, proxy);
   return sock;
 }
@@ -407,7 +451,7 @@ int open_telnet_raw(int sock, char *server, int sport)
 int open_telnet(char *server, int port)
 {
   int sock = getsock(0),
-      ret = open_telnet_raw(sock, server, port);
+    ret = open_telnet_raw(sock, server, port);
 
   if (ret < 0)
     killsock(sock);
@@ -424,7 +468,7 @@ int open_listen(int *port)
 
   if (firewall[0]) {
     /* FIXME: can't do listen port thru firewall yet */
-    putlog(LOG_MISC, "*", "!! Cant open a listen port (you are using a firewall)");
+    log(LCAT_ERROR, STR("!! Cant open a listen port (you are using a firewall)"));
     return -1;
   }
   sock = getsock(SOCK_LISTEN);
@@ -452,6 +496,7 @@ int open_listen(int *port)
 }
 
 /* given network-style IP address, return hostname */
+
 /* hostname will be "##.##.##.##" format if there was an error */
 char *hostnamefromip(unsigned long ip)
 {
@@ -469,19 +514,28 @@ char *hostnamefromip(unsigned long ip)
   }
   if (hp == NULL) {
     p = (unsigned char *) &addr;
-    sprintf(s, "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
+    sprintf(s, STR("%u.%u.%u.%u"), p[0], p[1], p[2], p[3]);
     return s;
   }
-  strncpy(s, hp->h_name, 120);
-  s[120] = 0;
+  strncpy0(s, hp->h_name, 120);
+  return s;
+}
+
+char *stringip(unsigned long ip)
+{
+  unsigned long addr = ip;
+  unsigned char *p;
+  static char s[121];
+
+  p = (unsigned char *) &addr;
+  sprintf(s, STR("%u.%u.%u.%u"), p[0], p[1], p[2], p[3]);
   return s;
 }
 
 /* short routine to answer a connect received on a socket made previously
  * by open_listen ... returns hostname of the caller & the new socket
  * does NOT dispose of old "public" socket! */
-int answer(int sock, char *caller, unsigned long *ip,
-	   unsigned short *port, int binary)
+int answer(int sock, char *caller, unsigned long *ip, unsigned short *port, int binary)
 {
   int new_sock;
   unsigned int addrlen;
@@ -493,8 +547,11 @@ int answer(int sock, char *caller, unsigned long *ip,
     return -1;
   if (ip != NULL) {
     *ip = from.sin_addr.s_addr;
-    strncpy(caller, hostnamefromip(*ip), 120);
-    caller[120] = 0;
+    if (dolookups) {
+      strncpy0(caller, hostnamefromip(*ip), 120);
+    } else {
+      strncpy0(caller, stringip(*ip), 120);
+    }
     *ip = my_ntohl(*ip);
   }
   if (port != NULL)
@@ -526,7 +583,7 @@ int open_telnet_dcc(int sock, char *server, char *port)
   c[1] = (addr >> 16) & 0xff;
   c[2] = (addr >> 8) & 0xff;
   c[3] = addr & 0xff;
-  sprintf(sv, "%u.%u.%u.%u", c[0], c[1], c[2], c[3]);
+  sprintf(sv, STR("%u.%u.%u.%u"), c[0], c[1], c[2], c[3]);
   /* strcpy(sv,hostnamefromip(addr)); */
   p = open_telnet_raw(sock, sv, p);
   return p;
@@ -539,10 +596,12 @@ int open_telnet_dcc(int sock, char *server, char *port)
  * on EOF, returns -1, with socket in len
  * on socket error, returns -2
  * if nothing is ready, returns -3 */
-static int sockread(char *s, int *len)
+int sockread(char *s, int *len)
 {
   fd_set fd;
-  int fds, i, x;
+  int fds,
+    i,
+    x;
   struct timeval t;
   int grab = 511;
 
@@ -574,19 +633,16 @@ static int sockread(char *s, int *len)
   if (x > 0) {
     /* something happened */
     for (i = 0; i < MAXSOCKS; i++) {
-      if ((!(socklist[i].flags & SOCK_UNUSED)) &&
-	  ((FD_ISSET(socklist[i].sock, &fd)) ||
-	   ((socklist[i].sock == STDOUT) && (!backgrd) &&
-	    (FD_ISSET(STDIN, &fd))))) {
+      if ((!(socklist[i].flags & SOCK_UNUSED)) && ((FD_ISSET(socklist[i].sock, &fd)) || ((socklist[i].sock == STDOUT) && (!backgrd) && (FD_ISSET(STDIN, &fd))))) {
 	if (socklist[i].flags & (SOCK_LISTEN | SOCK_CONNECT)) {
 	  /* listening socket -- don't read, just return activity */
 	  /* same for connection attempt */
 	  /* (for strong connections, require a read to succeed first) */
-	  if (socklist[i].flags & SOCK_PROXYWAIT) { /* drummer */
+	  if (socklist[i].flags & SOCK_PROXYWAIT) {	/* drummer */
 	    /* hang around to get the return code from proxy */
 	    grab = 10;
 	  } else if (!(socklist[i].flags & SOCK_STRONGCONN)) {
-	    debug1("net: connect! sock %d", socklist[i].sock);
+	    debug1(STR("net: connect! sock %d"), socklist[i].sock);
 	    s[0] = 0;
 	    *len = 0;
 	    return i;
@@ -604,13 +660,13 @@ static int sockread(char *s, int *len)
 	  }
 	  *len = socklist[i].sock;
 	  socklist[i].flags &= ~SOCK_CONNECT;
-	  debug1("net: eof!(read) socket %d", socklist[i].sock);
+	  debug1(STR("net: eof!(read) socket %d"), socklist[i].sock);
 	  return -1;
 	}
 	s[x] = 0;
 	*len = x;
 	if (socklist[i].flags & SOCK_PROXYWAIT) {
-	  debug2("net: socket: %d proxy errno: %d", socklist[i].sock, s[1]);
+	  debug2(STR("net: socket: %d proxy errno: %d"), socklist[i].sock, s[1]);
 	  socklist[i].flags &= ~(SOCK_CONNECT | SOCK_PROXYWAIT);
 	  switch (s[1]) {
 	  case 90:		/* success */
@@ -642,6 +698,74 @@ static int sockread(char *s, int *len)
   return -3;
 }
 
+char *botlink_decrypt(int snum, char *src)
+{
+  char *line = NULL;
+  int i;
+
+  line = decrypt_string(socklist[snum].ikey, src);
+  if (socklist[snum].iseed) {
+    for (i = 0; i <= 3; i++)
+      *(dword *) & socklist[snum].ikey[i * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    if (!socklist[snum].iseed)
+      socklist[snum].iseed++;
+  }
+  strcpy(src, line);
+  nfree(line);
+  return src;
+}
+
+char *botlink_encrypt(int snum, char *src)
+{
+  char *srcbuf = NULL,
+   *buf = NULL,
+   *line = NULL,
+   *eol = NULL,
+   *eline = NULL;
+  int bufpos = 0,
+    i;
+
+  srcbuf = nmalloc(strlen(src) + 10);
+  strcpy(srcbuf, src);
+  line = srcbuf;
+  if (!line)
+    return NULL;
+
+  eol = strchr(line, '\n');
+  while (eol) {
+    *eol++ = 0;
+    eline = encrypt_string(socklist[snum].okey, line);
+    if (socklist[snum].oseed) {
+      for (i = 0; i <= 3; i++)
+	*(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      if (!socklist[snum].oseed)
+	socklist[snum].oseed++;
+    }
+    buf = nrealloc(buf, bufpos + strlen(eline) + 10);
+    strcpy((char *) &buf[bufpos], eline);
+    strcat(buf, "\n");
+    bufpos = strlen(buf);
+    line = eol;
+    eol = strchr(line, '\n');
+    nfree(eline);
+  }
+  if (line[0]) {
+    eline = encrypt_string(socklist[snum].okey, line);
+    if (socklist[snum].oseed) {
+      for (i = 0; i <= 3; i++)
+	*(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      if (!socklist[snum].oseed)
+	socklist[snum].oseed++;
+    }
+    buf = nrealloc(buf, bufpos + strlen(eline) + 10);
+    strcpy((char *) &buf[bufpos], eline);
+    strcat(buf, "\n");
+    nfree(eline);
+  }
+  nfree(srcbuf);
+  return buf;
+}
+
 /* sockgets: buffer and read from sockets
  * 
  * attempts to read from all registered sockets for up to one second.  if
@@ -663,8 +787,12 @@ static int sockread(char *s, int *len)
 
 int sockgets(char *s, int *len)
 {
-  char xx[514], *p, *px;
-  int ret, i, data = 0;
+  char xx[514],
+   *p,
+   *px;
+  int ret,
+    i,
+    data = 0;
 
   Context;
   for (i = 0; i < MAXSOCKS; i++) {
@@ -691,6 +819,8 @@ int sockgets(char *s, int *len)
 	/* strip CR if this was CR/LF combo */
 	if (s[strlen(s) - 1] == '\r')
 	  s[strlen(s) - 1] = 0;
+	if (socklist[i].encstatus)
+	  botlink_decrypt(i, s);
 	*len = strlen(s);
 	return socklist[i].sock;
       }
@@ -765,7 +895,9 @@ int sockgets(char *s, int *len)
       s[strlen(s) - 1] = 0;
     data = 1;			/* DCC_CHAT may now need to process a
 				 * blank line */
+
 /* NO! */
+
 /* if (!s[0]) strcpy(s," ");  */
   } else {
     s[0] = 0;
@@ -777,6 +909,8 @@ int sockgets(char *s, int *len)
     }
   }
   Context;
+  if (socklist[ret].encstatus)
+    botlink_decrypt(ret, s);
   *len = strlen(s);
   /* anything left that needs to be saved? */
   if (!xx[0]) {
@@ -810,10 +944,12 @@ int sockgets(char *s, int *len)
 }
 
 /* dump something to a socket */
+
 /* DO NOT PUT CONTEXTS IN HERE IF YOU WANT DEBUG TO BE MEANINGFUL!!! */
 void tputs(register int z, char *s, unsigned int len)
 {
-  register int i, x;
+  register int i,
+    x;
   char *p;
   static int inhere = 0;
 
@@ -825,12 +961,22 @@ void tputs(register int z, char *s, unsigned int len)
   }
   for (i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == z)) {
+      if (socklist[i].encstatus) {
+	if ((!s) || (!s[0])) {
+	  s = botlink_encrypt(i, s);
+	  len = strlen(s);
+	}
+	s = botlink_encrypt(i, s);
+	len = strlen(s);
+      }
       if (socklist[i].outbuf != NULL) {
 	/* already queueing: just add it */
 	p = (char *) nrealloc(socklist[i].outbuf, socklist[i].outbuflen + len);
 	my_memcpy(p + socklist[i].outbuflen, s, len);
 	socklist[i].outbuf = p;
 	socklist[i].outbuflen += len;
+	if (socklist[i].encstatus)
+	  nfree(s);
 	return;
       }
       /* try. */
@@ -843,31 +989,34 @@ void tputs(register int z, char *s, unsigned int len)
 	my_memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }
+      if (socklist[i].encstatus)
+	nfree(s);
       return;
     }
   }
   /* Make sure we don't cause a crash by looping here */
   if (!inhere) {
     inhere = 1;
-    putlog(LOG_MISC, "*", "!!! writing to nonexistent socket: %d", z);
+    log(LCAT_ERROR, STR("!!! writing to nonexistent socket: %d"), z);
     s[strlen(s) - 1] = 0;
-    putlog(LOG_MISC, "*", "!-> '%s'", s);
+    log(LCAT_ERROR, STR("!-> '%s'"), s);
     inhere = 0;
   }
+  if (socklist[i].encstatus)
+    nfree(s);
 }
 
 /* tputs might queue data for sockets, let's dump as much of it as
  * possible */
 void dequeue_sockets()
 {
-  int i, x;
+  int i,
+    x;
 
-  for (i = 0; i < MAXSOCKS; i++) { 
-    if (!(socklist[i].flags & SOCK_UNUSED) &&
-	(socklist[i].outbuf != NULL)) {
+  for (i = 0; i < MAXSOCKS; i++) {
+    if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].outbuf != NULL)) {
       /* trick tputs into doing the work */
-      x = write(socklist[i].sock, socklist[i].outbuf,
-		socklist[i].outbuflen);
+      x = write(socklist[i].sock, socklist[i].outbuf, socklist[i].outbuflen);
       if ((x < 0) && (errno != EAGAIN)
 #ifdef EBADSLT
 	  && (errno != EBADSLT)
@@ -877,8 +1026,7 @@ void dequeue_sockets()
 #endif
 	) {
 	/* this detects an EOF during writing */
-	debug3("net: eof!(write) socket %d (%s,%d)", socklist[i].sock,
-	       strerror(errno), errno);
+	debug3(STR("net: eof!(write) socket %d (%s,%d)"), socklist[i].sock, strerror(errno), errno);
 	socklist[i].flags |= SOCK_EOFD;
       } else if (x == socklist[i].outbuflen) {
 	/* if the whole buffer was sent, nuke it */
@@ -905,29 +1053,29 @@ void tell_netdebug(int idx)
   int i;
   char s[80];
 
-  dprintf(idx, "Open sockets:");
+  dprintf(idx, STR("Open sockets:"));
   for (i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED)) {
-      sprintf(s, " %d", socklist[i].sock);
+      sprintf(s, STR(" %d"), socklist[i].sock);
       if (socklist[i].flags & SOCK_BINARY)
-	strcat(s, " (binary)");
+	strcat(s, STR(" (binary)"));
       if (socklist[i].flags & SOCK_LISTEN)
-	strcat(s, " (listen)");
+	strcat(s, STR(" (listen)"));
       if (socklist[i].flags & SOCK_CONNECT)
-	strcat(s, " (connecting)");
+	strcat(s, STR(" (connecting)"));
       if (socklist[i].flags & SOCK_STRONGCONN)
-	strcat(s, " (strong)");
+	strcat(s, STR(" (strong)"));
       if (socklist[i].flags & SOCK_NONSOCK)
-	strcat(s, " (file)");
+	strcat(s, STR(" (file)"));
       if (socklist[i].inbuf != NULL)
-	sprintf(&s[strlen(s)], " (inbuf: %04X)", strlen(socklist[i].inbuf));
+	sprintf(&s[strlen(s)], STR(" (inbuf: %04X)"), strlen(socklist[i].inbuf));
       if (socklist[i].outbuf != NULL)
-	sprintf(&s[strlen(s)], " (outbuf: %06lX)", socklist[i].outbuflen);
+	sprintf(&s[strlen(s)], STR(" (outbuf: %06lX)"), socklist[i].outbuflen);
       strcat(s, ",");
       dprintf(idx, "%s", s);
     }
   }
-  dprintf(idx, " done.\n");
+  dprintf(idx, STR(" done.\n"));
 }
 
 /* Security-flavoured sanity checking on DCC connections of all sorts can be
@@ -941,7 +1089,9 @@ int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
 {
   /* According to the latest RFC, the clients SHOULD be able to handle
    * DNS names that are up to 255 characters long.  This is not broken.  */
-  char hostname[256], dnsname[256], badaddress[16];
+  char hostname[256],
+    dnsname[256],
+    badaddress[16];
   IP ip = my_atoul(ipaddy);
   int prt = atoi(port);
 
@@ -950,37 +1100,31 @@ int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
     return 1;
   Context;			/* This should be pretty solid, but
 				 * something _might_ break. */
-  sprintf(badaddress, "%u.%u.%u.%u", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
-	  (ip >> 8) & 0xff, ip & 0xff);
+  sprintf(badaddress, STR("%u.%u.%u.%u"), (ip >> 24) & 0xff, (ip >> 16) & 0xff, (ip >> 8) & 0xff, ip & 0xff);
   if (prt < 1) {
-    putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible port of %u!",
-	   nick, from, prt);
+    log(LCAT_WARNING, STR("ALERT: (%s!%s) specified an impossible port of %u!"), nick, from, prt);
     return 0;
   }
   if (ip < (1 << 24)) {
-    putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible IP of %s!",
-	   nick, from, badaddress);
+    log(LCAT_WARNING, STR("ALERT: (%s!%s) specified an impossible IP of %s!"), nick, from, badaddress);
     return 0;
   }
   /* These should pad like crazy with zeros, since 120 bytes or so is
    * where the routines providing our data currently lose interest. I'm
    * using the n-variant in case someone changes that... */
-  strncpy(hostname, extracthostname(from), 255);
-  hostname[255] = 0;
+  strncpy0(hostname, extracthostname(from), 255);
   /* But if they are changed one day, this might crash 
    * without [256] = 0; ++rtc
    */
-  strncpy(dnsname, hostnamefromip(my_htonl(ip)), 255);
-  dnsname[255] = 0;
+  strncpy0(dnsname, hostnamefromip(my_htonl(ip)), 255);
   if (!strcasecmp(hostname, dnsname)) {
-    putlog(LOG_DEBUG, "*", "DNS information for submitted IP checks out.");
+    log(LCAT_DEBUG, STR("DNS information for submitted IP checks out."));
     return 1;
   }
   if (!strcmp(badaddress, dnsname))
-    putlog(LOG_MISC, "*", "ALERT: (%s!%s) sent a DCC request with bogus IP information of %s port %u!",
-	   nick, from, badaddress, prt);
+    log(LCAT_WARNING, STR("ALERT: (%s!%s) sent a DCC request with bogus IP information of %s port %u!"), nick, from, badaddress, prt);
   else
-    return 1; /* <- usually happens when we have 
-			a user with an unresolved hostmask! */
+    return 1;			/* <- usually happens when we have 
+				   a user with an unresolved hostmask! */
   return 0;
 }

@@ -1,0 +1,5 @@
+#!/bin/sh
+for f in src/*.c src/*.h
+do
+  indent $f -bad -bap -bbb -bc -br -brs -lp -npsl -sob -ce -cs -npcs -l200
+done

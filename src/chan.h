@@ -1,3 +1,4 @@
+
 /* 
  * chan.h
  *   stuff common to chan.c and mode.c
@@ -5,6 +6,7 @@
  * 
  * $Id: chan.h,v 1.12 2000/01/08 21:23:13 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -30,6 +32,7 @@
 typedef struct memstruct {
   char nick[NICKLEN];		/* "dalnet" allows 30 */
   char userhost[UHOSTLEN];
+  char server[SERVLEN];
   time_t joined;
   unsigned short flags;
   time_t split;			/* in case they were just netsplit */
@@ -54,6 +57,7 @@ typedef struct memstruct {
 #define SENTDEVOICE 0x0080	/* a devoice has been sent */
 #define WASOP       0x0100	/* was an op before a split */
 #define STOPWHO     0x0200
+#define OPER        0x0400
 
 #define chan_hasvoice(x) (x->flags & CHANVOICE)
 #define chan_hasop(x) (x->flags & CHANOP)
@@ -69,40 +73,43 @@ typedef struct memstruct {
 /*        Why duplicate this struct for exempts and invites only under another
  *      name? <cybah>
  */
-typedef struct maskstruct {
+struct maskstruct {
   char *mask;
   char *who;
   time_t timer;
   struct maskstruct *next;
-} masklist;
+};
 
 /* used for temporary bans, exempts and invites */
-typedef struct maskrec {
+struct maskrec {
   struct maskrec *next;
   char *mask,
-       *desc,
-       *user;
+   *desc,
+   *user;
   time_t expire,
-         added,
-         lastactive;
+    added,
+    lastactive;
   int flags;
-} maskrec;
-extern maskrec *global_bans, *global_exempts, *global_invites;
+};
 
-#define MASKREC_STICKY 1
+extern struct maskrec *global_bans,
+ *global_exempts,
+ *global_invites;
+
 #define MASKREC_PERM   2
 
 /* for every channel i join */
 struct chan_t {
   memberlist *member;
-  masklist *ban;
-  masklist *exempt;
-  masklist *invite;
+  struct maskstruct *ban;
+  struct maskstruct *exempt;
+  struct maskstruct *invite;
   char *topic;
   char *key;
   unsigned short int mode;
   int maxmembers;
   int members;
+  int do_opreq;
 };
 
 #define CHANINV    0x0001	/* +i */
@@ -121,11 +128,6 @@ struct chanset_t {
   struct chanset_t *next;
   struct chan_t channel;	/* current information */
   char name[81];
-  char need_op[121];
-  char need_key[121];
-  char need_limit[121];
-  char need_unban[121];
-  char need_invite[121];
   int flood_pub_thr;
   int flood_pub_time;
   int flood_join_thr;
@@ -138,11 +140,13 @@ struct chanset_t {
   int flood_ctcp_time;
   int status;
   int ircnet_status;
+  int limitraise;
   int idle_kick;
+  int jointime;
   /* temporary channel bans, exempts and invites */
-  maskrec *bans,
-          *exempts,
-          *invites;
+  struct maskrec *bans,
+   *exempts,
+   *invites;
   /* desired channel modes: */
   int mode_pls_prot;		/* modes to enforce */
   int mode_mns_prot;		/* modes to reject */
@@ -155,7 +159,13 @@ struct chanset_t {
   char rmkey[81];		/* old key to remove */
   int limit;			/* new limit to set */
   int bytes;			/* total bytes so far */
-  int compat;           /* to prevent mixing old/new modes */
+  int compat;			/* to prevent mixing old/new modes */
+  struct {
+    char * target;
+  } opqueue[24];
+  struct {
+    char * target;
+  } deopqueue[24];
   struct {
     char *op;
     char type;
@@ -165,6 +175,16 @@ struct chanset_t {
   time_t floodtime[FLOOD_CHAN_MAX];
   int floodnum[FLOOD_CHAN_MAX];
   char deopd[NICKLEN];		/* last person deop'd (must change) */
+  int opreqtime[5];		/* remember when ops was requested */
+#ifdef G_AUTOLOCK
+  int fighting;
+#endif
+#ifdef G_BACKUP  
+  int backup_time;              /* If non-0, set +backup when now>backup_time */
+#endif
+#ifdef HUB
+  char topic[91];
+#endif
 };
 
 /* behavior modes for the channel */
@@ -172,35 +192,45 @@ struct chanset_t {
 #define CHAN_ENFORCEBANS    0x0002	/* kick people who match channel bans */
 #define CHAN_DYNAMICBANS    0x0004	/* only activate bans when needed */
 #define CHAN_NOUSERBANS     0x0008	/* don't let non-bots place bans */
-#define CHAN_OPONJOIN       0x0010	/* op +o people as soon as they join */
+#ifdef G_MANUALOP
+#define CHAN_MANOP          0x0010	/* Allow users to op */
+#endif
 #define CHAN_BITCH          0x0020	/* be a tightwad with ops */
-#define CHAN_GREET          0x0040	/* greet people with their info line */
-#define CHAN_PROTECTOPS     0x0080	/* re-op any +o people who get deop'd */
+
+#ifdef G_FASTOP
+#define CHAN_FASTOP	    0x0080	/* Allow bots to op without cookies */
+#endif
 #define CHAN_LOGSTATUS      0x0100	/* log channel status every 5 mins */
-#define CHAN_STOPNETHACK    0x0200	/* deop netsplit hackers */
-#define CHAN_REVENGE        0x0400	/* get revenge on bad people */
-#define CHAN_SECRET         0x0800	/* don't advertise channel on botnet */
-#define CHAN_AUTOVOICE      0x1000	/* dish out voice stuff automatically */
+#define	CHAN_LOCKED	    0x0200	/* Keep anyone but +o's out */
+#ifdef G_TAKE
+#define	CHAN_TAKE	    0x0400	/* Flood op & mdop when a bots get opped */
+#endif
+#ifdef G_BACKUP
+#define	CHAN_BACKUP	    0x0800	/* Backup bots should join here */
+#endif
+
 #define CHAN_CYCLE          0x2000	/* cycle the channel if possible */
-#define CHAN_DONTKICKOPS    0x4000	/* never kick +o flag people - arthur2 */
-#define CHAN_WASOPTEST      0x8000	/* wasop test for all +o user
-					 * when +stopnethack */
+#ifdef G_MEAN
+#define CHAN_MEAN	    0x4000	/* Be mean to users fucking with bots */
+#endif
+
 #define CHAN_INACTIVE       0x10000	/* no irc support for this channel - drummer */
-#define CHAN_PROTECTFRIENDS 0x20000     /* re-op any +f people who get deop'd */
-#define CHAN_SHARED         0x40000	/* channel is being shared */
+
 #define CHAN_SEEN           0x80000
-#define CHAN_REVENGEBOT     0x100000	/* revenge on actions against the bot */
+
 /*			    0x200000 */
+
 /*			    0x400000 */
+
 /*			    0x800000 */
 #define CHAN_ACTIVE         0x1000000	/* like i'm actually on the channel
 					 * and stuff */
 #define CHAN_PEND           0x2000000	/* just joined; waiting for end of
 					 * WHO list */
 #define CHAN_FLAGGED        0x4000000	/* flagged during rehash for delete */
-#define CHAN_STATIC         0x8000000	/* channels that are NOT dynamic */
+
 #define CHAN_ASKEDBANS      0x10000000
-#define CHAN_ASKEDMODES     0x20000000  /* find out key-info on IRCu */
+#define CHAN_ASKEDMODES     0x20000000	/* find out key-info on IRCu */
 
 #define CHAN_ASKED_EXEMPTS  0x0001
 #define CHAN_ASKED_INVITED  0x0002
@@ -216,32 +246,37 @@ struct chanset_t *findchan();
 
 /* is this channel +s/+p? */
 #define channel_hidden(chan) (chan->channel.mode & (CHANPRIV | CHANSEC))
+
 /* is this channel +t? */
 #define channel_optopic(chan) (chan->channel.mode & CHANTOPIC)
 #define channel_active(chan)  (chan->status & CHAN_ACTIVE)
 #define channel_pending(chan)  (chan->status & CHAN_PEND)
-#define channel_bitch(chan) (chan->status & CHAN_BITCH)
-#define channel_autoop(chan) (chan->status & CHAN_OPONJOIN)
-#define channel_wasoptest(chan) (chan->status & CHAN_WASOPTEST)
-#define channel_autovoice(chan) (chan->status & CHAN_AUTOVOICE)
-#define channel_greet(chan) (chan->status & CHAN_GREET)
+#ifdef G_MANUALOP
+#define channel_manop(chan) (chan->status & CHAN_MANOP)
+#endif
+#ifdef G_FASTOP
+#define channel_fastop(chan) (chan->status & CHAN_FASTOP)
+#endif
 #define channel_logstatus(chan) (chan->status & CHAN_LOGSTATUS)
+#define channel_locked(chan) (chan->status & CHAN_LOCKED)
+#ifdef G_TAKE
+#define channel_take(chan) (chan->status & CHAN_TAKE)
+#endif
+#define channel_bitch(chan) (chan->status & CHAN_BITCH)
+
+#ifdef G_BACKUP
+#define channel_backup(chan) (chan->status & CHAN_BACKUP)
+#endif
 #define channel_clearbans(chan) (chan->status & CHAN_CLEARBANS)
 #define channel_enforcebans(chan) (chan->status & CHAN_ENFORCEBANS)
-#define channel_revenge(chan) (chan->status & CHAN_REVENGE)
 #define channel_dynamicbans(chan) (chan->status & CHAN_DYNAMICBANS)
 #define channel_nouserbans(chan) (chan->status & CHAN_NOUSERBANS)
-#define channel_protectops(chan) (chan->status & CHAN_PROTECTOPS)
-#define channel_protectfriends(chan) (chan->status & CHAN_PROTECTFRIENDS)
-#define channel_dontkickops(chan) (chan->status & CHAN_DONTKICKOPS)
-#define channel_stopnethack(chan) (chan->status & CHAN_STOPNETHACK)
-#define channel_secret(chan) (chan->status & CHAN_SECRET)
-#define channel_shared(chan) (chan->status & CHAN_SHARED)
-#define channel_static(chan) (chan->status & CHAN_STATIC)
+#ifdef G_MEAN
+#define channel_mean(chan) (chan->status & CHAN_MEAN)
+#endif
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_seen(chan) (chan->status & CHAN_SEEN)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
-#define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
 #define channel_dynamicexempts(chan) (chan->ircnet_status & CHAN_DYNAMICEXEMPTS)
 #define channel_nouserexempts(chan) (chan->ircnet_status & CHAN_NOUSEREXEMPTS)
 #define channel_dynamicinvites(chan) (chan->ircnet_status & CHAN_DYNAMICINVITES)
@@ -269,4 +304,4 @@ struct msgq {
   char *msg;
 };
 
-#endif				/* _EGG_CHAN_H */
+#endif /* _EGG_CHAN_H */

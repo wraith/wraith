@@ -1,0 +1,153 @@
+Featurelist/Changes:
+
+! = Optional, might not be in your version.
+* = Implemented in all versions
+- = not finished yet (and won't be unless you do it yourself)
+
+* General
+  Bot is written in 100% C, there are no TCLs required. Base eggdrop version is
+  1.4.2, although it's rewritten so much it looks more like an inbetween of 1.1.x and
+  1.3/4.x. The "module" concept has been removed from sources. Hub and leaf binaries
+  differs. In addition to the listed changes, most commands have been modified
+  more or less, try them and they will complain if you use them wrong. I've most
+  likely left out some details in this .txt, tell me if so.
+
+* Misc
+  * All encryption uses 128-bit rijndael
+  * Botnet links are encrypted with dynamic keys, pseudo-randomly changed for each 
+    line of information sent from bot to bot.
+  * Channel and user files are encrypted
+  * Leafs do not store any channel or user files
+- ! DCC chats are encrypted and require mirc/bx plugins 
+  * Configuration files are encrypted
+  * Bots do selfchecks using md5 and will crash/not link if modified.
+  ! Configuration is written to the bot binary, no external files needed for leafs
+  ! All strings in the binary are garbled
+  ! local suid shell binaries created if bot is run as root. 
+  ! Bot detects attempts to trace/debug it. Configure with .config trace
+    and .botconfig botnick trace
+  ! Bot detects promiscous mode. Configure with .config promisc and
+    .botconfig botnick promisc
+  ! Bot watches user processes using an "allowed" list. .botconfig botnick process-list
+    and .botconfig botnick bad-process
+  ! Bot watches logins. .botconfig botnick login
+  * All hubs logs to file, logfiles are encrypted
+
+* New DCC Commands
+  * Some of these are hub only, some are leaf only
+  * mdop: botnet mass deop, configurable
+  * channels: lists channels accessible to the user
+  * downbots: lists unlinked bots
+  * ps: as shell ps. Also "botps" and "netps"
+  * w: as shell w. Also "botw" and "netw"
+  * last: as shell last. Also "botlast" and "netlast"
+  * crontab: set/delete/view bots crontab. Also "botcrontab" and "netcrontab"
+  * userlist: Lists owner/master/op/user nicks
+  * botmsg/netmsg: bot/net msg to chan/nick
+  * botnick/netnick: view bots/nets irc nicks  
+  * botserver/netserver: view bots/nets current servers
+  * botversion/netversion: view bots/nets eggdrop version & shell OS
+  * botjump: Jump specified bot
+- * wget: Get a file from a http:// URL
+  * update: Update binary
+  * randnicks: All bots change to random nicks
+  * resetnicks: All bots try to regain configured nicks
+  * slowjoin: Join with specified interval
+  * locktopic: Enforce a channel topic
+  * log: select which log categories to see in partyline
+  * logconfig: Set file/channel/broadcast settings for a log category
+  * uplink: Set preferred uplink for a bot
+  * hublevel: Set a hubs "link level"  
+  * config: Set global/default configuration values
+  * botconfig: Set botspecific configuration values
+  * motd: read/set one-line MOTD
+  * netlag: "ping" all bots to see botnet lag
+  ! cmdpass: Assign passwords to any dcc .command
+  * chops: list ops on a channel
+  * nops: list nonops on a channel
+  * find: Scan all channels for a specific nick!user@host mask
+
+* DCC
+  * Logging system redone, now uses named log categories where some are shown locally,
+    some are broadcast on botnet and some are shown in log channel.
+    Use command .log to select what log information to see
+    Use command .config logchan and .config logbot to set channel logging settings.
+    Use command .logconfig to setup a log category
+  ! New flag +s denies a user to chat/see chat on the bots partyline
+  * New flag +j required to access hubs. Only perm owners can (re)set this flag.
+  * New flag +i required to access ".su". Only perm owners can (re)set this flag.
+  * Several commands are removed/restricted on leafs.
+
+* IRC
+  * Bot simulates BitchX running any of 5 scripts. Configure with .config cloak-script
+  ! Bot does randomized autoaway/back
+  ! Bots will cycle channels to loose op if alone on a split
+  ! New channel mode +fastop permits opping without opcookies. 
+  ! New channel mode +mean punishes users deopping/kicking/banning bots.
+    Configurable with .config mean-deop, mean-kick, mean-ban
+  ! New channel mode +manualop allows users to op. Configure with .config manualop
+  ! "First thing" mass deop checks on everything from server.
+  * Configurable mass deop punishment, .config mdop
+  * Op cookies for botnet validation of any MODE +o
+  * Channel mode +locked will keep channel +i and kick any nonusers
+  ! Bot locks channels on low number of opped bots. .config lock-threshold
+  ! Bot locks channels on multiple oper /KILLs .config kill-threshold
+  ! New channel mode +backup. Designated backup bots (chattr +a) will only join
+    channels that are set +backup.
+  ! New channel mode +take. When a bot get +o on a +take channel it will massop
+    other bots and massdeop nonusers. This is hostbased, never leave a channel +take
+  ! If multiple botnets start fighting in a chan it will be set +locked. Detected
+    as "overall" mode/kick/ban floods. .config fight-threshold
+  * +f is no longer protected against flood triggers. permowner mdops, permowner gets
+    kicked and so on. 
+  * +bitch code rewritten so net will "distribute" nicks to deop among themselves
+  * Internal mode queueing rewritten to get more +/-o's sent to server.
+  * All kicks are cloaked according to "cloak-script" setting. Random kickreasons.
+  * "chanset #chan limit X" enables "userlimiter" for a channel. Set to 0 to disable
+  * +v users won't get +v on join but rather on the bots regular "recheck" of channels,
+    this prevents +v floods
+  * bantimes set to 60+random to prevent "unban floods" when a ban expires
+  * Bots prefer requesting op from other bots on same server, to speed up opping
+  * "role-based" actions. Each leaf has a role from 1-5 which decides what is targeted
+    first on e.g. manualop. (role 1 kicks opper, role 2 kicks first opped and so on)
+
+* Bot & Botnet 
+  * Bot forks at regular intervals. Use .config fork-interval and .botconfig botnick
+    fork-interval
+  * Bots will, when started, require to link to a hub before they attempt to go
+    online.  Once a bot has linked, it will stay on irc regardless of whether it keeps 
+    it link to the hub. 
+  * All channel settings are shared. +chan, -chan and chanset are broadcast to all
+    bots, and transmitted on link.
+  * "Botattr" and linking concept replaced with hublevels/uplinks. Best available hub
+    (lowest hublevel) will be the mainhub, other hubs will link to this. "uplink" 
+    sets a bots preferred uplink bot, if the uplink is not available bot will link in
+    somewhere else in net. +bot has been replaced with .newleaf
+  * Bots not set as +o will be rejected from net
+  ! TCL removed.
+  ! Bot reconfigures socket to server to decrease latency on sent data.
+  * Userlists are sent through primary link, no secondary connections or temp files are used.
+
+* Standard stuff removed
+  * Console concept. No commands have a "default" channel.
+  * File area, along with +x and +j standard flags
+  * +t flag (botmaster)
+  * Misc. useless channel modes (+autoop +revenge and similar)
+  * "sticky" bans
+
+
+* Info
+  * Pack is created for nets of AT LEAST 12 bots. The "role" mechanism will not work properly
+    on smaller nets.
+  * Use .config and .botconfig to read up on all config settings, most are important.
+  * If something's not covered, try figuring it out on your own first.
+
+
+
+
+
+
+
+
+
+

@@ -1,3 +1,4 @@
+
 /* 
  * patch.h
  *   header file for adding patches to Eggdrop's version string
@@ -12,6 +13,7 @@
  * 
  * $Id: patch.h,v 1.143 2000/01/29 12:45:28 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -32,166 +34,232 @@
  */
 #ifndef _EGG_PATCH_H
 #define _EGG_PATCH_H
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* PATCH GOES HERE */
+
 /*
  *
  *
  */
+
 /* if that's not enough, maybe you should release a new version :) */
-#endif				/* _EGG_PATCH_H */
+#endif /* _EGG_PATCH_H */

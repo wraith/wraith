@@ -1,9 +1,11 @@
+
 /* 
  * main.h
  *   include file to include most other include files
  * 
  * $Id: main.h,v 1.13 2000/01/29 12:45:28 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -63,7 +65,7 @@
 #  include <strings.h>
 #endif
 #include <sys/types.h>
-#include "lang.h"
+#include "log.h"
 #include "eggdrop.h"
 #include "flags.h"
 #ifndef MAKING_MODS
@@ -74,12 +76,28 @@
 #include "tclhash.h"
 #include "chan.h"
 #include "users.h"
+#include "log.h"
 
 #ifndef MAKING_MODS
-extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_SCRIPT, DCC_BOT_NEW,
- DCC_RELAY, DCC_RELAYING, DCC_FORK_RELAY, DCC_PRE_RELAY, DCC_CHAT_PASS,
- DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,
- DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT;
+extern struct dcc_table DCC_CHAT,
+  DCC_BOT,
+  DCC_LOST,
+  DCC_SCRIPT,
+  DCC_BOT_NEW,
+  DCC_RELAY,
+  DCC_RELAYING,
+  DCC_FORK_RELAY,
+  DCC_PRE_RELAY,
+  DCC_CHAT_PASS,
+  DCC_FORK_BOT,
+  DCC_SOCKET,
+  DCC_TELNET_ID,
+  DCC_TELNET_NEW,
+  DCC_TELNET_PW,
+  DCC_TELNET,
+  DCC_IDENT,
+  DCC_IDENTWAIT,
+  DCC_REMOTE;
 
 #endif
 
@@ -103,10 +121,24 @@ extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_SCRIPT, DCC_BOT_NEW,
 #define O_NONBLOCK      00000004	/* POSIX non-blocking I/O       */
 
 /* mod/filesys.mod/filedb.c needs this */
-#define _S_IFMT         0170000		/* type of file */
-#define _S_IFDIR        0040000		/*   directory */
+#define _S_IFMT         0170000	/* type of file */
+#define _S_IFDIR        0040000	/*   directory */
 #define S_ISDIR(m)      (((m)&(_S_IFMT)) == (_S_IFDIR))
 
-#endif				/* BORGCUBES */
+#endif /* BORGCUBES */
 
-#endif				/* _EGG_MAIN_H */
+#define strncpy0(a,b,c) { strncpy(a, b, c-1); (a)[c-1]=0; }
+
+#ifdef strncpy
+#undef strncpy
+#endif
+
+
+#define PACKVERSION "0.9.8.18"
+
+#include "md5/global.h"
+#include "md5/md5.h"
+
+#endif /* _EGG_MAIN_H */
+
+

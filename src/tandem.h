@@ -1,8 +1,10 @@
+
 /* 
  * tandem.h
  * 
  * $Id: tandem.h,v 1.5 2000/01/08 21:23:14 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -53,6 +55,7 @@ typedef struct {
 #define IS_PARTY      0x02
 
 /* minimum version that uses tokens & base64 ints */
+
 /* for channel msg's */
 #define NEAT_BOTNET 1029900
 #define GLOBAL_CHANS 100000
@@ -78,9 +81,7 @@ void botnet_send_reject(int, char *, char *, char *, char *, char *);
 void botnet_send_zapf(int, char *, char *, char *);
 void botnet_send_zapf_broad(int, char *, char *, char *);
 void botnet_send_motd(int, char *, char *);
-void botnet_send_filereq(int, char *, char *, char *);
 void botnet_send_filereject(int, char *, char *, char *);
-void botnet_send_filesend(int, char *, char *, char *);
 void botnet_send_away(int, char *, int, char *, int);
 void botnet_send_idle(int, char *, int, int, char *);
 void botnet_send_join_idx(int, int);
@@ -90,8 +91,14 @@ void botnet_send_part_party(int, int, char *, int);
 void botnet_send_bye();
 void botnet_send_nkch_part(int, int, char *);
 void botnet_send_nkch(int, char *);
+void botnet_send_log_broad(int, char *, struct logcategory *, char *);
+void botnet_send_log(char *, struct logcategory *, char *);
+int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cmd);
+void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char * cmd);
+void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
+void botnet_send_enforcetopic(struct chanset_t * chan);
 
-#endif				/* MAKING_MODS */
+#endif /* MAKING_MODS */
 
 #define b_status(a) (dcc[a].status)
 #define b_version(a) (dcc[a].u.bot->version)
@@ -100,4 +107,4 @@ void botnet_send_nkch(int, char *);
 
 #define safe_str(a) (a ? a : "")
 
-#endif				/* _EGG_TANDEM_H */
+#endif /* _EGG_TANDEM_H */

@@ -1,0 +1,32 @@
+#!/bin/sh
+# Read the config
+packname=default
+echo -n "Pack configuration:"
+for cnf in `cat $packname.conf | grep -v "^#"`
+do
+  defines="$defines -DG_$cnf"
+  echo -n "$cnf "
+done
+echo ""
+
+# Build leaf and check
+echo "Building leaf..."
+make leaf CFLGS="$defines" > /dev/null
+if ! test -f leaf
+then
+  echo "leaf build failed"
+  exit 1
+fi
+
+# Build hub and check
+echo "Building hub..."
+make hub CFLGS="$defines" > /dev/null
+if ! test -f hub
+then
+  echo "hub build failed"
+  exit 1
+fi
+
+
+
+

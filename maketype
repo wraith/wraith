@@ -1,0 +1,37 @@
+#!/bin/sh
+if test ! -f stamp.$1
+then
+  cfiles="`find src -name \*.c`"
+  cfiles="`grep -l \"def [H|L][U|E][B|A]\" $cfiles` src/rijndael.c src/md5/md5c.c"
+  for s in $cfiles 
+  do
+    os="`echo $s | sed s/\\\.c/\\\.o/g`";
+    if test -f $os
+    then
+      if test "`file $os | grep ELF`"
+      then
+        echo "Deleting $os"
+	rm -f $os
+      else
+        if test "`file $os | grep object`"
+        then
+          echo "Deleting $os"
+	  rm -f $os
+        fi
+      fi
+    fi
+  done
+fi
+rm -f stamp.*
+touch stamp.$1
+
+
+
+
+
+
+
+
+
+
+

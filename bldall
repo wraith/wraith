@@ -1,0 +1,111 @@
+#!/bin/sh
+
+# Figure out whether to use default or a specified config file
+if test $1
+then
+  packname=$1
+else
+  packname=default
+fi
+
+# Verify we got the config file
+if ! test -f $packname.conf
+then
+  echo "Can't find pack configuration file $packname.conf"
+  exit 1
+fi
+
+# Figure what bins we're making
+case `uname` in
+  Linux) prefix=linux;;
+  FreeBSD) case `uname -r` in
+    4*) prefix=freebsd4;;
+    3*) prefix=freebsd3;;
+  esac;;
+  OpenBSD) prefix=openbsd;;
+esac
+if test -z $prefix
+then
+  echo "Automated packing disabled, `uname` isn't recognized"
+fi
+
+# Run ./configure, then verify it's ok
+echo "Configuring..."
+./configure > /dev/null 2>configure.temp
+if test "`cat configure.temp`"
+then
+  echo "Configure error'd"
+  cat configure.temp
+  exit 1
+fi
+rm -f configure.temp
+
+# Remove the tcl refs from makefile
+echo "Fixing Makefile..."
+cat Makefile | awk -f fixmakefile.awk > Makefile.temp 
+mv Makefile.temp Makefile
+if test "`uname`" = "FreeBSD";
+then
+cat Makefile | awk -f fixmakefile2.awk > Makefile.temp
+mv Makefile.temp Makefile
+fi
+# make clean, just in case
+echo "Cleaning up old binaries..."
+make clean > /dev/null
+
+# Read the config
+echo -n "Pack configuration:"
+for cnf in `cat $packname.conf | grep -v "^#"`
+do
+  defines="$defines -DG_$cnf"
+  echo -n "$cnf "
+done
+echo ""
+
+
+# Build utils and check we got the bins
+echo "Building utils..."
+make utils CFLGS="$defines" > /dev/null
+if ! test -f readlog -a -f makebot -a -f makepack -a -f stringfix
+then
+  echo "Util build failed"
+  exit 1
+fi
+
+# Build leaf and check
+echo "Building leaf..."
+make leaf CFLGS="$defines" > /dev/null
+if ! test -f leaf
+then
+  echo "leaf build failed"
+  exit 1
+fi
+
+# Build hub and check
+echo "Building hub..."
+make hub CFLGS="$defines" > /dev/null
+if ! test -f hub
+then
+  echo "hub build failed"
+  exit 1
+fi
+
+if test $prefix
+then
+  echo "Packing..."
+
+  mv -f leaf $prefix.leaf
+  mv -f hub $prefix.hub
+  mv -f readlog $prefix.readlog
+  mv -f makebot $prefix.makebot
+
+  tar -zcf $packname.$prefix.tgz $prefix.leaf $prefix.hub $prefix.readlog $prefix.makebot
+  rm -f $prefix.leaf $prefix.hub $prefix.readlog $prefix.makebot
+
+  echo "Binaries in $packname.$prefix.tgz"
+else
+  echo "Not autopacking, unrecognized os"
+fi
+
+
+

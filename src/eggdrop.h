@@ -1,3 +1,4 @@
+
 /* 
  * eggdrop.h
  *   Eggdrop compile-time settings
@@ -6,6 +7,7 @@
  * 
  * $Id: eggdrop.h,v 1.18 2000/01/08 21:23:14 per Exp $
  */
+
 /* 
  * Copyright (C) 1997  Robey Pointer
  * Copyright (C) 1999, 2000  Eggheads
@@ -25,20 +27,18 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#ifdef STANDALONE
+#include "standalone.h"
+#else
 #ifndef _EGG_EGGDROP_H
 #define _EGG_EGGDROP_H
-
-/* 
- * If you're *only* going to link to new version bots (1.3.0 or higher)
- * then you can safely define this.
- */
-#undef NO_OLD_BOTNET
 
 /* 
  * Undefine this to completely disable context debugging.
  * WARNING: DO NOT send in bug reports if you undefine this!
  */
-#define DEBUG_CONTEXT
+#undef DEBUG_CONTEXT
+#undef DEBUG_ASSERT
 
 /* 
  * define the maximum length a handle on the bot can be.
@@ -51,12 +51,21 @@
 
 /* handy string lengths */
 
+#if HUB && LEAF
+#include "_can't_be_both_hub_and_leaf"
+#endif
+#if !HUB && !LEAF
+#include "_Must_define_hub_or_leaf"
+#endif
+
 #define HANDLEN		9	/* valid values 9->NICKMAX */
 #define BADHANDCHARS  "-,+*=:!.@#;$%&"
 #define NICKMAX        9	/* valid values HANDLEN->32 */
-#define UHOSTMAX     160        /* reasonable, i think? */
+#define UHOSTMAX     160	/* reasonable, i think? */
 #define DIRMAX       256	/* paranoia */
 #define MAX_LOG_LINE 767	/* for misc.c/putlog() <cybah> */
+#define MAX_BOTS     500
+#define SERVLEN      60
 
 /* language stuff */
 
@@ -66,7 +75,9 @@
 				   change this. */
 
 /***********************************************************************/
+
 /***** the 'configure' script should make this next part automatic *****/
+
 /***********************************************************************/
 
 #define NICKLEN         NICKMAX + 1
@@ -83,12 +94,6 @@
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-
-#ifndef STATIC
-#if (!defined(MODULES_OK) || !defined(HAVE_DLOPEN)) && !defined(HPUX_HACKS)
-#include "you_can't_compile_with_module_support_on_this_system_try_make_static"
-#endif
 #endif
 
 #if !defined(STDC_HEADERS)
@@ -137,14 +142,21 @@
 #endif
 
 #if !HAVE_SIGEMPTYSET
+
 /* and they probably won't have sigemptyset, dammit */
 #define sigemptyset(x) ((*(int *)(x))=0)
 #endif
 
 /* handy aliases for memory tracking and core dumps */
+#ifdef DEBUG_MEM
 #define nmalloc(x) n_malloc((x),__FILE__,__LINE__)
 #define nrealloc(x,y) n_realloc((x),(y),__FILE__,__LINE__)
 #define nfree(x) n_free((x),__FILE__,__LINE__)
+#else
+#define nmalloc(x) n_malloc((x))
+#define nrealloc(x,y) n_realloc((x),(y))
+#define nfree(x) n_free((x))
+#endif
 
 #ifdef DEBUG_CONTEXT
 #  define Context eggContext(__FILE__, __LINE__, NULL)
@@ -195,11 +207,11 @@ typedef u_32bit_t dword;
 /* IP type */
 typedef u_32bit_t IP;
 
-#define debug0(x) putlog(LOG_DEBUG,"*",x)
-#define debug1(x,a1) putlog(LOG_DEBUG,"*",x,a1)
-#define debug2(x,a1,a2) putlog(LOG_DEBUG,"*",x,a1,a2)
-#define debug3(x,a1,a2,a3) putlog(LOG_DEBUG,"*",x,a1,a2,a3)
-#define debug4(x,a1,a2,a3,a4) putlog(LOG_DEBUG,"*",x,a1,a2,a3,a4)
+#define debug0(x) log(LCAT_DEBUG,x)
+#define debug1(x,a1) log(LCAT_DEBUG,x,a1)
+#define debug2(x,a1,a2) log(LCAT_DEBUG,x,a1,a2)
+#define debug3(x,a1,a2,a3) log(LCAT_DEBUG,x,a1,a2,a3)
+#define debug4(x,a1,a2,a3,a4) log(LCAT_DEBUG,x,a1,a2,a3,a4)
 
 /***********************************************************************/
 
@@ -237,6 +249,7 @@ struct dcc_t {
   struct dcc_table *type;
   time_t timeval;		/* use for any timing stuff 
 				 * - this is used for timeout checking */
+  time_t pingtime;
   unsigned long status;		/* A LOT of dcc types have status thingos,
 				 * this makes it more avaliabe */
   union {
@@ -255,9 +268,7 @@ struct dcc_t {
 struct chat_info {
   char *away;			/* non-NULL if user is away */
   int msgs_per_sec;		/* used to stop flooding */
-  int con_flags;		/* with console: what to show */
   int strip_flags;		/* what codes to strip (b,r,u,c,a,g,*) */
-  char con_chan[81];		/* with console: what channel to view */
   int channel;			/* 0=party line, -1=off */
   struct msgq *buffer;		/* a buffer of outgoing lines (for .page cmd) */
   int max_line;			/* maximum lines at once */
@@ -315,7 +326,7 @@ struct script_info {
 #define DCT_SIMUL     0x00000020	/* can be tcl_simul'd */
 #define DCT_CANBOOT   0x00000040	/* can be booted */
 #define DCT_GETNOTES  DCT_CHAT	/* can receive notes */
-#define DCT_FILES     0x00000080	/* gratuitous hack ;) */
+#define DEL_DCT_FILES     0x00000080	/* gratuitous hack ;) */
 #define DCT_FORKTYPE  0x00000100	/* a forking type */
 #define DCT_BOT       0x00000200	/* a bot connection of some sort... */
 #define DCT_FILETRAN  0x00000400	/* a file transfer of some sort */
@@ -325,6 +336,7 @@ struct script_info {
 /* for dcc chat & files: */
 #define STAT_ECHO    1		/* echo commands back? */
 #define STAT_DENY    2		/* bad username (ignore password & deny access) */
+
 /*#define STAT_XFER    4       has 'x' flag on chat line */
 #define STAT_CHAT    8		/* in file-system but may return */
 #define STAT_TELNET  16		/* connected via telnet */
@@ -371,6 +383,27 @@ struct script_info {
 #define STDOUT     1
 #define STDERR     2
 
+
+#ifdef G_LASTCHECK
+#define DETECT_LOGIN 1
+#endif
+#ifdef G_ANTITRACE
+#define DETECT_TRACE 2
+#endif
+#ifdef G_PROMISC
+#define DETECT_PROMISC 3
+#endif
+#ifdef G_PROCESSCHECK
+#define DETECT_PROCESS 4
+#endif
+
+#define DET_IGNORE 0
+#define DET_WARN 1
+#define DET_REJECT 2
+#define DET_DIE 3
+#define DET_SUICIDE 4
+#define DET_NOCHECK 5
+
 /* structure for internal logs */
 typedef struct {
   char *filename;
@@ -408,6 +441,7 @@ typedef struct {
 #define LOG_BOTNET 0x200000	/* t   botnet traffic */
 #define LOG_BOTSHARE 0x400000	/* h   share traffic */
 #define LOG_ALL    0x7fffff	/* (dump to all logfiles) */
+
 /* internal logfile flags */
 #define LF_EXPIRING 0x000001	/* Logfile will be closed soon */
 
@@ -465,6 +499,66 @@ typedef struct {
   char *inbuf;
   char *outbuf;
   unsigned long outbuflen;	/* outbuf could be binary data */
+  int encstatus,
+    oseed,
+    iseed;
+  char okey[17];
+  char ikey[17];
 } sock_list;
 
-#endif				/* _EGG_EGGDROP_H */
+
+#define CFGF_GLOBAL  1    /* Accessible as .config */
+#define CFGF_LOCAL   2    /* Accessible as .botconfig */
+
+typedef struct cfg_entry {
+  char *name;
+  int  flags;
+  char * gdata;
+  char * ldata;
+  void (*globalchanged) (struct cfg_entry *, char * oldval, int * valid);
+  void (*localchanged) (struct cfg_entry *, char * oldval, int * valid);
+  void (*describe) (struct cfg_entry *, int idx);
+} cfg_entry_T;
+
+#ifdef G_DCCPASS
+typedef struct cmd_pass {
+  struct cmd_pass *next;
+  char *name;
+  char pass[25];
+} cmd_pass_t;
+#endif
+
+#define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
+#ifdef G_AUTOLOCK
+#define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
+#endif
+
+
+#define KICK_BANNED 1
+#define KICK_KUSER 2
+#define KICK_KICKBAN 3
+#define KICK_MASSDEOP 4
+#define KICK_BADOP 5
+#define KICK_BADOPPED 6
+#define KICK_MANUALOP 7
+#define KICK_MANUALOPPED 8
+#define KICK_LOCKED 9
+#define KICK_FLOOD 10
+#define KICK_NICKFLOOD 11
+#define KICK_KICKFLOOD 12
+#define KICK_BOGUSUSERNAME 13
+#define KICK_MEAN 14
+#define KICK_BOGUSKEY 15
+
+typedef struct {
+  char * data;
+  int position;
+  int size;
+  int alloc;
+} stream_record;
+
+typedef stream_record * stream;
+
+
+#endif /* _EGG_EGGDROP_H */
+#endif
