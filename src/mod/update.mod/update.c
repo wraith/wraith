@@ -122,7 +122,7 @@ static void update_ufsend(int idx, char *par)
       strcpy(dcc[i].nick, "*binary");
       dcc[i].u.xfer->filename = strdup(s);
       dcc[i].u.xfer->origname = dcc[i].u.xfer->filename;
-      dcc[i].u.xfer->length = atoi(par);
+      dcc[i].u.xfer->length = atol(par);
       dcc[i].u.xfer->f = f;
       dcc[i].sock = sock;
       strcpy(dcc[i].host, dcc[idx].nick);
