@@ -239,19 +239,21 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
     scp -i misc/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
   fi
 elif ! [ $scp = "0" ]; then
-  cp hub hub.$os-$ver${d}-${builddate} > /dev/null 2>&1
-  cp leaf leaf.$os-$ver${d}-${builddate} > /dev/null 2>&1
+  cp hub hub.$os-$ver${d} > /dev/null 2>&1
+  cp leaf leaf.$os-$ver${d} > /dev/null 2>&1
+  cp ChangeLog ChangeLog-${builddate}
+  gzip -9 ChangeLog-${builddate}
   #This MALLOC business is to not Abort 'tar' due to some bug it has.
   tmp=${MALLOC_CHECK_}
   unset MALLOC_CHECK_
-  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d}-${builddate} leaf.$os-$ver${d}-${builddate}
+  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d} leaf.$os-$ver${d} ChangeLog-${builddate}.gz
   chmod 0644 ${builddate}-$os-$ver${d}.tar.${ext}
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
   chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
-  rm -rf ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d}-${builddate} leaf.$os-$ver${d}-${builddate}
+  rm -rf ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d} leaf.$os-$ver${d} ChangeLog-${builddate}.gz
   ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
 fi
 
