@@ -215,7 +215,11 @@ static void got_bus(int z)
   write_debug();
 #endif
   fatal("BUS ERROR -- CRASHING!", 1);
+#ifdef DEBUG_MEM
   kill(getpid(), SIGBUS);
+#else
+  exit(1);
+#endif /* DEBUG_MEM */
 }
 
 
@@ -226,7 +230,11 @@ static void got_segv(int z)
   write_debug();
 #endif
   fatal("SEGMENT VIOLATION -- CRASHING!", 1);
+#ifdef DEBUG_MEM
   kill(getpid(), SIGSEGV);
+#else
+  exit(1);
+#endif /* DEBUG_MEM */
 }
 
 static void got_fpe(int z)
@@ -252,7 +260,11 @@ static void got_abort(int z)
   write_debug();
 #endif
   fatal("GOT SIGABRT -- CRASHING!", 1);
+#ifdef DEBUG_MEM
   kill(getpid(), SIGSEGV);
+#else
+  exit(1);
+#endif /* DEBUG_MEM */
 }
 
 #ifdef S_HIJACKCHECK
@@ -260,7 +272,7 @@ static void got_cont(int z)
 {
   detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED");
 }
-#endif
+#endif /* S_HIJACKCHECK */
 
 /* A call to resolver (gethostbyname, etc) timed out
  */
@@ -278,7 +290,7 @@ static void got_ill(int z)
 #ifdef DEBUG_CONTEXT
   putlog(LOG_MISC, "*", "* Context: %s/%d [%s]", cx_file[cx_ptr], cx_line[cx_ptr],
                          (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
-#endif
+#endif /* DEBUG_CONTEXT */
 }
 
 
