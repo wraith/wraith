@@ -19,7 +19,6 @@
 #include "src/chanprog.h"
 #include "src/net.h"
 #include "src/auth.h"
-#include "src/dns.h"
 #include "src/adns.h"
 #include "src/socket.h"
 #include "src/egg_timer.h"

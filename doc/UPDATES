@@ -59,6 +59,7 @@ This is a summary of ChangeLog basically.
 * Added chanint closed-invite, when set to 0, channel will NOT be +i.
 * cmd_su/cmd_relay no longer work through .botcmd
 * Added some simple dcc ip sanity checking back in.
+* All dns resolving is now asynchronous, all dns bugs now fixed.
 
 1.1.9
 

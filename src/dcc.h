@@ -8,7 +8,6 @@
 #include "types.h"
 #include "crypt.h"
 #include "eggdrop.h"
-#include "dns.h"
 
 /* Public structure of all the dcc connections */
 struct dcc_table {
@@ -34,10 +33,8 @@ struct dcc_t {
     struct xfer_info *xfer;
     struct bot_info *bot;
     struct relay_info *relay;
-    struct dns_info *dns;
     struct dupwait_info *dupwait;
     int ident_sock;
-    int dns_id;
     void *other;
   } u;                          /* Special use depending on type        */
 
@@ -221,7 +218,7 @@ extern char			network[];
 extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_BOT_NEW,
  DCC_RELAY, DCC_RELAYING, DCC_FORK_RELAY, DCC_PRE_RELAY, DCC_CHAT_PASS,
  DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,
- DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT, DCC_DNSWAIT, DCC_IDENTD, DCC_IDENTD_CONNECT;
+ DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT, DCC_IDENTD, DCC_IDENTD_CONNECT;
 
 #ifdef HUB
 void send_timesync(int);

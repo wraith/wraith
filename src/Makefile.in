@@ -29,7 +29,6 @@ OBJS = auth.o \
 	dcc.o \
 	dccutil.o \
 	debug.o \
-	dns.o \
 	egg_timer.o \
 	flags.o \
 	garble.o \

@@ -21,7 +21,6 @@
 #include "userrec.h"
 #include "userent.h"
 #include "match.h"
-#include "dns.h"
 #include "auth.h"
 #include "dccutil.h"
 #include "crypt.h"
