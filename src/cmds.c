@@ -2153,16 +2153,6 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
 	pls.chan &= ~USER_OWNER;
 	mns.chan &= ~USER_OWNER;
       }
-/* botmast
-      if (!glob_master(user)) {
-	pls.global &= USER_PARTY;
-	mns.global &= USER_PARTY;
-	if (!glob_botmast(user)) {
-	  pls.global = 0;
-	  mns.global = 0;
-	}
-      }
-*/
     }
     if (chan && !chan_owner(user) && !glob_owner(user) && !isowner(u->handle)) {
       pls.chan &= ~USER_MASTER;
@@ -2671,14 +2661,6 @@ static void cmd_strip(struct userrec *u, int idx, char *par)
   /* Set highlight flag here so user is able to control stripping of
    * bold also as intended -- dw 27/12/1999
    */
-/* uh... k?
-  if (dcc[dest].u.chat->strip_flags & STRIP_BOLD && u->flags & USER_HIGHLITE) {
-    u->flags &= ~USER_HIGHLITE;
-  } else if (!(dcc[dest].u.chat->strip_flags & STRIP_BOLD) &&
-	     !(u->flags & USER_HIGHLITE)) {
-    u->flags |= USER_HIGHLITE;
-  }
-*/
   /* New style autosave here too -- rtc, 09/28/1999*/
   if ((me = module_find("console", 0, 0))) {
     Function *func = me->funcs;
@@ -2825,12 +2807,12 @@ static void cmd_page(struct userrec *u, int idx, char *par)
 static void cmd_tcl(struct userrec *u, int idx, char *msg)
 {
   int code;
-#ifdef LEAF
+#ifdef S_PERMONLY
   if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
     return;
   }
-#endif
+#endif /* S_PERMONLY */
   putlog(LOG_CMDS, "*", "#%s# tcl %s", dcc[idx].nick, msg);
   debug1("tcl: evaluate (.tcl): %s", msg);
   code = Tcl_GlobalEval(interp, msg);
@@ -2847,12 +2829,12 @@ static void cmd_nettcl(struct userrec *u, int idx, char *msg)
 {
   int code;
   char buf[2000];
-/*
+#ifdef S_PERMONLY
   if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
     return;
   }
-*/
+#endif /* S_PERMONLY */
   putlog(LOG_CMDS, "*", "#%s# nettcl %s", dcc[idx].nick, msg);
   egg_snprintf(buf, sizeof buf, "mt %d %s", idx, msg);
   botnet_send_zapf_broad(-1, botnetnick, NULL, buf);
@@ -2868,12 +2850,12 @@ static void cmd_nettcl(struct userrec *u, int idx, char *msg)
 static void cmd_bottcl(struct userrec *u, int idx, char *msg)
 {
   char buf[2000], *bot;
-/*
+#ifdef S_PERMONLY
   if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
     return;
   }
-*/
+#endif /* S_PERMONLY */
   putlog(LOG_CMDS, "*", "#%s# bottcl %s", dcc[idx].nick, msg);
 
   if (!msg[0]) {
@@ -2938,12 +2920,12 @@ static void cmd_set(struct userrec *u, int idx, char *msg)
 {
   int code;
   char s[512];
-/*
+#ifdef S_PERMONLY
   if (!(isowner(dcc[idx].nick)) && (must_be_owner)) {
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
     return;
   }
-*/
+#endif /* S_PERMONLY */
   putlog(LOG_CMDS, "*", "#%s# set %s", dcc[idx].nick, msg);
   strcpy(s, "set ");
   if (!msg[0]) {
@@ -3348,17 +3330,7 @@ void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
     server_online = (*(int *)(func[25]));
     sprintf(cursrvname, "%s", ((char *)(func[41])));
   }
-/* not done yet
-  struct server_list * x = serverlist;
-  int i=curserv;
-  while ((i>0) && (x)) {
-    x=x->next;
-    i--;
-  }
-  if (server_online && x)
-    sprintf(tmp, STR("Currently: %s:%i"), x->name, x->port);
-  else */
-       if (server_online)
+  if (server_online)
     sprintf(tmp, STR("Currently: %s"), cursrvname);
   else
     sprintf(tmp, STR("Currently: none"));
@@ -3580,13 +3552,13 @@ static void cmd_botexec(struct userrec * u, int idx, char * par) {
   char * tbot, buf[1024];
 
   putlog(LOG_CMDS, "*", STR("#%s# botexec %s"), dcc[idx].nick, par);
-/*
+#ifdef S_PERMONLY
   if (!isowner(u->handle)) {
     putlog(LOG_WARN, "*", STR("%s attempted 'botexec' %s"), dcc[idx].nick, par);
     dprintf(idx, STR("botexec is only available to permanent owners\n"));
     return;
   }
-*/
+#endif /* S_PERMONLY */
   tbot=newsplit(&par);
   if (!tbot[0]) {
     dprintf(idx, STR("Usage: botexec <botname> [parameters]\n"));
@@ -3900,7 +3872,6 @@ void gotremotecmd (char * forbot, char * frombot, char * fromhand, char * fromid
   if (!strcmp(cmd, STR("exec"))) {
     rcmd_exec(frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, STR("curnick"))) {
-Context;
     rcmd_curnick(frombot, fromhand, fromidx);
   } else if (!strcmp(cmd, STR("cursrv"))) {
     rcmd_cursrv(frombot, fromhand, fromidx);

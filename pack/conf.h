@@ -26,6 +26,7 @@
 #undef  S_MSGPASS	/*  no		allows users to msg to change password  	*/
 #undef  S_MSGVOICE	/*  no		allows users to msg for voice			*/
 #define S_NODELAY	/*  yes		speeds up tcp sockets to server			*/
+#dfine	S_PERMONLY	/*  none	limits .tcl/.nettcl/.bottcl to perm owners	*/
 #define S_PROCESSCHECK	/*  yes		checks running processes against a bad-list	*/
 #define S_PROMISC	/*  yes		checks for sniffers running on the server	*/
 #define S_PSCLOAK	/*  yes		cloaks the process for `ps` (can be annoying)	*/

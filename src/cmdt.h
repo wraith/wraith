@@ -7,7 +7,6 @@
 #ifndef _EGG_CMDT_H
 #define _EGG_CMDT_H
 
-#define CMD_LEAVE    (Function)(-1)
 typedef struct {
   char *name;
   char *flags;
