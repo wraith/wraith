@@ -41,7 +41,6 @@ OBJS = auth.o \
 	net.o \
 	response.o \
 	rfc1459.o \
-	settings.o \
 	shell.o \
 	tclhash.o \
 	userent.o \
