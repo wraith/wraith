@@ -257,7 +257,7 @@ void detected(int, char *);
 int goodpass(char *, int, char *);
 void check_last();
 void check_promisc();
-void check_trace(int);
+void check_trace();
 void check_processes();
 void makeplaincookie(char *, char *, char *);
 int isupdatehub();

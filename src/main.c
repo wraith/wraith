@@ -449,7 +449,7 @@ void core_10secondly()
     check_promisc();
 
   if (curcheck == 1)
-    check_trace(0);
+    check_trace();
 
 #ifdef LEAF
   if (localhub) {

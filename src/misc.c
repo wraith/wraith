@@ -1058,13 +1058,13 @@ void got_trace(int z)
 }
 #endif /* S_ANTITRACE */
 
-void check_trace(int n)
+void check_trace()
 {
 #ifdef S_ANTITRACE
   int x, parent, i;
   struct sigaction sv, *oldsv = NULL;
 
-  if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
+  if (!strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
     return;
   parent = getpid();
 #ifdef __linux__
