@@ -52,6 +52,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * +m no longer implies +j.
 * Fixed irc authing only working on +c bots (should be like this, but isnt needed soon)
 * Fixed chanset limit not being set every 2 minutes.
+* '~' replacement is now internal for paths in config.
 
 1.2
 * No longer displaying SALTS on ./bin -v

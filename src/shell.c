@@ -904,8 +904,12 @@ char *my_uname()
 }
 
 #ifndef CYGWIN_HACKS
-char *move_bin(const char *path, const char *file, bool run)
+char *move_bin(const char *ipath, const char *file, bool run)
 {
+  char *path = strdup(ipath);
+
+  fix_tilde(&path);
+
   /* move the binary to the correct place */
   static char newbin[DIRMAX] = "";
   char real[DIRMAX] = "";

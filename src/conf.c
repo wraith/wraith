@@ -238,7 +238,6 @@ confedit()
     fatal("Error reading new config file", 0);
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   unlink(tmpconf.file);
-  fix_tilde(&conffile.binpath);
   conf_to_bin(&conffile);       /* will exit */
   exit(0);                      /* never reached */
 
@@ -491,8 +490,6 @@ parseconf(bool error)
   } else {
     conffile.homedir = strdup(homedir());
   }
-
-  fix_tilde(&conffile.binpath);
 
 #endif /* !CYGWIN_HACKS */
   return 0;
