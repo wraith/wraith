@@ -189,7 +189,7 @@ help_t help[] = \n\
     }
     buffer = NULL;
   }
-//  fprintf(out, "#endif /* HELP_H */\n");
+  fprintf(out, "#endif /* HELP_H */\n");
   printf(" Success\n");
   if (in) fclose(in);
   if (out) fclose(out);
