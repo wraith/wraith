@@ -26,6 +26,9 @@
  *
  */
 
+#ifdef EGG_SSL_EXT
+int clean_net();
+#endif
 
 #include "common.h"
 #include "main.h"
@@ -196,6 +199,10 @@ void fatal(const char *s, int recoverable)
       lostdcc(i);
     }
   }
+
+#ifdef EGG_SSL_EXT
+  clean_net();
+#endif
 
   if (!recoverable) {
 //    if (conf.bot && conf.bot->pid_file)

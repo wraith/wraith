@@ -83,6 +83,11 @@ port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
 #define PROXY_SUN     2
 #define PROXY_HTTP    3
 
+#ifdef EGG_SSL_EXT
+SSL_CTX *ssl_ctx = NULL;
+char	*tls_rand_file = NULL;
+int     ssl_use = 0; /* kyotou */
+#endif
 
 /* I need an UNSIGNED long for dcc type stuff
  */
@@ -139,6 +144,46 @@ static int get_ip(char *hostname, union sockaddr_union *so, int dns_type)
   return 0;
 }
 
+#ifdef EGG_SSL_EXT
+int seed_PRNG(void)
+{
+    char stackdata[1024];
+    static char rand_file[300];
+    FILE *fh;
+
+#if OPENSSL_VERSION_NUMBER >= 0x00905100
+    if (RAND_status())
+	return 0;     /* PRNG already good seeded */
+#endif
+    /* if the device '/dev/urandom' is present, OpenSSL uses it by default.
+     * check if it's present, else we have to make random data ourselfs.
+     */
+    if ((fh = fopen("/dev/urandom", "r"))) {
+	fclose(fh);
+	return 0;
+    }
+    if (RAND_file_name(rand_file, sizeof(rand_file)))
+	tls_rand_file = rand_file;
+    else
+	return 1;
+    if (!RAND_load_file(rand_file, 1024)) {
+	/* no .rnd file found, create new seed */
+	unsigned int c;
+	c = time(NULL);
+	RAND_seed(&c, sizeof(c));
+	c = getpid();
+	RAND_seed(&c, sizeof(c));
+	RAND_seed(stackdata, sizeof(stackdata));
+    }
+#if OPENSSL_VERSION_NUMBER >= 0x00905100
+    if (!RAND_status())
+	return 2;   /* PRNG still badly seeded */
+#endif
+    return 0;
+}
+#endif
+
+
 /* Initialize the socklist
  */
 void init_net()
@@ -153,9 +198,35 @@ void init_net()
   for (int i = 0; i < MAXSOCKS; i++) {
     bzero(&socklist[i], sizeof(socklist[i]));
     socklist[i].flags = SOCK_UNUSED;
+#ifdef EGG_SSL_EXT
+    socklist[i].ssl = NULL;
+#endif
     socklist[i].sock = -1;
   }
+#ifdef EGG_SSL_EXT
+  /* good place to init ssl stuff */
+  SSL_load_error_strings();
+  OpenSSL_add_ssl_algorithms();
+  ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+  if (!ssl_ctx)
+    fatal("SSL_CTX_new() failed",0);
+  if (seed_PRNG())
+    fatal("Wasn't able to properly seed the PRNG!",0);
+#endif
 }
+
+#ifdef EGG_SSL_EXT
+/* cleanup mess when quiting */
+int clean_net() {
+  if (ssl_ctx) {
+    SSL_CTX_free(ssl_ctx);
+    ssl_ctx = NULL;
+  }
+  if (tls_rand_file)
+    RAND_write_file(tls_rand_file);
+  return 0;
+}
+#endif
 
 /* Get my ipv? ip
  */
@@ -407,6 +478,13 @@ void real_killsock(register int sock, const char *file, int line)
 
   int i = -1;
   if ((i = findanysnum(sock)) != -1) {
+#ifdef EGG_SSL_EXT
+    if (socklist[i].ssl) {
+      SSL_shutdown(socklist[i].ssl);
+      SSL_free(socklist[i].ssl);
+      socklist[i].ssl = NULL;
+    }
+#endif
     close(socklist[i].sock);
     if (socklist[i].inbuf != NULL) {
       delete socklist[i].inbuf;
@@ -609,6 +687,59 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
 
   return sock;
 }
+
+#ifdef EGG_SSL_EXT
+int net_switch_to_ssl(int sock) {
+  int i = 0;
+
+  debug0("net_switch_to_ssl()");
+  for (i = 0; i < MAXSOCKS; ++i) {
+    if (socklist[i].sock == sock && !(socklist[i].flags & SOCK_UNUSED)) {
+      break;
+    }
+  }
+  if (i == MAXSOCKS) {
+    debug0("Error while swithing to SSL - sock not found in list");
+    return 0;
+  }
+
+  if (socklist[i].ssl) {
+    debug0("Error while swithing to SSL - already in ssl");
+    return 0;
+  }
+  socklist[i].ssl = SSL_new(ssl_ctx);
+  if (!socklist[i].ssl) {
+    debug0("Error while swithing to SSL - SSL_new() error");
+    return 0;
+  }
+
+  SSL_set_fd(socklist[i].ssl, socklist[i].sock);
+  int err = SSL_connect(socklist[i].ssl);
+
+  while (err <= 0) {
+    int errs = SSL_get_error(socklist[i].ssl,err);
+    if ((errs != SSL_ERROR_WANT_READ) && (errs != SSL_ERROR_WANT_WRITE) && (errs != SSL_ERROR_WANT_X509_LOOKUP)) {
+      putlog(LOG_DEBUG, "*", "SSL_connect() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
+      SSL_shutdown(socklist[i].ssl);
+      SSL_free(socklist[i].ssl);
+      socklist[i].ssl = NULL;
+      return 0;
+    }
+    usleep(1000);
+    err = SSL_connect(socklist[i].ssl);
+  }
+
+  if (err == 1) {
+    debug0("SSL_connect() success");
+    return 1;
+  }
+  debug0("Error while SSL_connect()");
+  SSL_shutdown(socklist[i].ssl);
+  SSL_free(socklist[i].ssl);
+  socklist[i].ssl = NULL;
+  return 0;
+}
+#endif
 
 /* Ordinary non-binary connection attempt */
 int open_telnet(const char *ip, port_t port, bool proxy, int identd)
@@ -970,6 +1101,9 @@ static int sockread(char *s, int *len)
     /* Something happened */
     for (i = 0; i < MAXSOCKS; i++) {
       if ((!(socklist[i].flags & SOCK_UNUSED)) && ((FD_ISSET(socklist[i].sock, &fd)) ||
+#ifdef EGG_SSL_EXT
+            ((socklist[i].ssl) && (SSL_pending(socklist[i].ssl))) ||
+#endif
 	  ((socklist[i].sock == STDOUT) && (!backgrd) && (FD_ISSET(STDIN, &fd))))) {
 	if (socklist[i].flags & (SOCK_LISTEN | SOCK_CONNECT)) {
 	  /* Listening socket -- don't read, just return activity */
@@ -990,9 +1124,28 @@ static int sockread(char *s, int *len)
 	  return i;
 	}
 	errno = 0;
-	if (unlikely((socklist[i].sock == STDOUT) && !backgrd))
+	if (unlikely((socklist[i].sock == STDOUT) && !backgrd)) {
 	  x = read(STDIN, s, grab);
-	else
+#ifdef EGG_SSL_EXT
+        } else if (socklist[i].ssl) {
+            x = SSL_read(socklist[i].ssl,s,grab);
+            if (x < 0) {
+              int err = SSL_get_error(socklist[i].ssl, x);
+              x = -1;
+              switch (err) {
+                case SSL_ERROR_WANT_READ:
+                  errno = EAGAIN;
+                  break;
+                case SSL_ERROR_WANT_WRITE:
+                  errno = EAGAIN;
+                  break;
+                case SSL_ERROR_WANT_X509_LOOKUP:
+                  errno = EAGAIN;
+                  break;
+              }
+            }
+#endif
+        } else
           x = read(socklist[i].sock, s, grab);
 
 	if (x <= 0) {		/* eof */
@@ -1279,8 +1432,28 @@ void tputs(register int z, const char *s, size_t len)
       *(socklist[i].outbuf) += bd::String(s, len);
       return;
     }
-    /* Try. */
-    x = write(z, s, len);
+#ifdef EGG_SSL_EXT
+    if (socklist[i].ssl) {
+      x = SSL_write(socklist[i].ssl,s,len);
+      if (x < 0) {
+        int err = SSL_get_error(socklist[i].ssl, x);
+        x = -1;
+        switch (err) {
+          case SSL_ERROR_WANT_READ:
+            errno = EAGAIN;
+            break;
+          case SSL_ERROR_WANT_WRITE:
+            errno = EAGAIN;
+            break;
+          case SSL_ERROR_WANT_X509_LOOKUP:
+            errno = EAGAIN;
+            break;
+        }
+      }
+    } else
+#endif
+      /* Try. */
+      x = write(z, s, len);
     if (x == -1)
       x = 0;
     if ((size_t) x < len) {
@@ -1369,7 +1542,27 @@ void dequeue_sockets()
 	(socklist[i].outbuf != NULL) && (FD_ISSET(socklist[i].sock, &wfds))) {
       /* Trick tputs into doing the work */
       errno = 0;
-      x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
+#ifdef EGG_SSL_EXT
+      if (socklist[i].ssl) {
+           x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
+           if (x < 0) {
+             int err = SSL_get_error(socklist[i].ssl, x);
+             x = -1;
+             switch (err) {
+               case SSL_ERROR_WANT_READ:
+                 errno = EAGAIN;
+                 break;
+               case SSL_ERROR_WANT_WRITE:
+                 errno = EAGAIN;
+                 break;
+               case SSL_ERROR_WANT_X509_LOOKUP:
+                 errno = EAGAIN;
+                 break;
+             }
+           }
+      } else
+#endif
+        x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
       if ((x < 0) && (errno != EAGAIN)
 #ifdef EBADSLT
 	  && (errno != EBADSLT)

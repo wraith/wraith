@@ -12,6 +12,15 @@
 #include <setjmp.h>
 #include <bdlib/src/String.h>
 
+#ifdef EGG_SSL_EXT
+# ifndef EGG_SSL_INCS
+#  include <openssl/ssl.h>
+#  include <openssl/err.h>
+#  include <openssl/rand.h>
+#  define EGG_SSL_INCS 1
+# endif
+#endif
+
 namespace bd {
   class Stream;
 }
@@ -84,6 +93,9 @@ typedef struct {
   int iseed;                            /* botlink in seed */
   int gz; /* gzip compression */
   int enclink;				/* new encrypted botlink */
+#ifdef EGG_SSL_EXT
+  SSL *ssl;
+#endif
   bd::String* inbuf;
   bd::String* outbuf;
   char *host;
@@ -139,6 +151,8 @@ void init_net(void);
 int sock_read(bd::Stream&);
 void sock_write(bd::Stream&, int);
 bool socket_run();
+int net_switch_to_ssl(int sock);
+int clean_net();
 
 extern union sockaddr_union 		cached_myip4_so;
 #ifdef USE_IPV6
@@ -147,7 +161,7 @@ extern unsigned long			notalloc;
 #endif /* USE_IPV6 */
 
 extern char				firewall[], botuser[21];
-extern int				MAXSOCKS, socks_total;
+extern int				MAXSOCKS, socks_total, ssl_use;
 extern bool				identd_hack, cached_ip;
 extern port_t				firewallport;
 extern jmp_buf				alarmret;

@@ -2027,6 +2027,15 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     servidx = idx;
     sdprintf("Connecting to '%s' (serv: %d, servidx: %d)", dcc[idx].host, serv, servidx);
     setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(int));
+#ifdef EGG_SSL_EXT
+    if (ssl_use) { /* kyotou */
+      if (net_switch_to_ssl(serv) == 0) {
+        putlog(LOG_SERV, "*", "SSL Failed to connect to %s (Error while switching to SSL)", dcc[servidx].host);
+        lostdcc(servidx);
+        return;
+      }
+    }
+#endif
     /* Queue standard login */
     dcc[idx].timeval = now;
     SERVER_SOCKET.timeout_val = &server_timeout;
