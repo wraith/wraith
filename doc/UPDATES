@@ -36,6 +36,7 @@ This is a summary of ChangeLog basically.
 * Fixed an obscure memory bug with the perm-owner list
 * Fixed /me over partyline; now auto changes into cmd_me
 * Fixed cosmetic error in cmd_mns/invite/ban/exempt regarding which chan was displayed in log
+* Ignores are now checked before host is checked for access for telnet
 
 1.1.9
 
