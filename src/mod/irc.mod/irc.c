@@ -824,7 +824,6 @@ static void my_setkey(struct chanset_t *chan, char *k)
   free(chan->channel.key);
   if (k == NULL) {
     chan->channel.key = (char *) calloc(1, 1);
-    chan->channel.key[0] = 0;
     return;
   }
   chan->channel.key = (char *) calloc(1, strlen(k) + 1);
@@ -843,7 +842,6 @@ static void newmask(masklist *m, char *s, char *who)
   m->next = (masklist *) calloc(1, sizeof(masklist));
   m->next->next = NULL;
   m->next->mask = (char *) calloc(1, 1);
-  m->next->mask[0] = 0;
   free(m->mask);
   m->mask = (char *) calloc(1, strlen(s) + 1);
   strcpy(m->mask, s);
@@ -949,7 +947,6 @@ static void reset_chan_info(struct chanset_t *chan)
       opped += 1;
     free(chan->channel.key);
     chan->channel.key = (char *) calloc(1, 1);
-    chan->channel.key[0] = 0;
     clear_channel(chan, 1);
     chan->status |= CHAN_PEND;
     chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES);

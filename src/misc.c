@@ -594,8 +594,10 @@ char *str_escape(const char *str, const char div, const char mask)
 {
   const int	 len = strlen(str);
   int		 buflen = (2 * len), blen = 0;
-  char		*buf = calloc(1, buflen + 1), *b = buf;
+  char		*buf = NULL, *b = NULL;
   const char	*s;
+
+  b = buf = malloc(buflen + 1);
 
   if (!buf)
     return NULL;

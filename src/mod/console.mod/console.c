@@ -38,8 +38,10 @@ static struct user_entry_type USERENTRY_CONSOLE;
 
 static int console_unpack(struct userrec *u, struct user_entry *e)
 {
-  struct console_info *ci = calloc(1, sizeof(struct console_info));
+  struct console_info *ci = NULL;
   char *par = NULL, *arg = NULL;
+
+  ci = calloc(1, sizeof(struct console_info));
 
   par = e->u.list->extra;
   arg = newsplit(&par);
@@ -123,7 +125,8 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
   }
 
   if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED))) {
-    char string[501];    
+    char string[501] = "";
+
     egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d", ci->channel, masktype(ci->conflags), 
                                     stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
                                     ci->colour);

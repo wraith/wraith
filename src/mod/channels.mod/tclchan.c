@@ -415,7 +415,7 @@ static void init_channel(struct chanset_t *chan, int reset)
 
 static void clear_masklist(masklist *m)
 {
-  masklist *temp;
+  masklist *temp = NULL;
 
   for (; m; m = temp) {
     temp = m->next;

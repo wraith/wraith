@@ -453,7 +453,7 @@ static void restore_ignore(char *host)
 
 void tell_user(int idx, struct userrec *u, int master)
 {
-  char s[81] = "", s1[81] = "", format[81];
+  char s[81] = "", s1[81] = "", format[81] = "";
   int n = 0;
   time_t now2;
   struct chanuserrec *ch = NULL;
@@ -920,7 +920,7 @@ int readuserfile(char *file, struct userrec **ret)
 
 	    for (ue = u->entries; ue && !ok; ue = ue->next)
 	      if (ue->name && !egg_strcasecmp(code + 2, ue->name)) {
-		struct list_type *list;
+		struct list_type *list = NULL;
 
 		list = calloc(1, sizeof(struct list_type));
 

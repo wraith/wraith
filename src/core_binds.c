@@ -20,10 +20,10 @@ extern char             dcc_prefix[];
 
 
 
-static bind_table_t *BT_link, *BT_disc, *BT_away, *BT_dcc;
-static bind_table_t *BT_chat, *BT_act, *BT_bcst, *BT_note;
-static bind_table_t *BT_bot, *BT_nkch, *BT_chon, *BT_chof;
-static bind_table_t *BT_chpt, *BT_chjn, *BT_time, *BT_event;
+static bind_table_t *BT_link = NULL, *BT_disc = NULL, *BT_away = NULL, *BT_dcc = NULL;
+static bind_table_t *BT_chat = NULL, *BT_act = NULL, *BT_bcst = NULL, *BT_note = NULL;
+static bind_table_t *BT_bot = NULL, *BT_nkch = NULL, *BT_chon = NULL, *BT_chof = NULL;
+static bind_table_t *BT_chpt = NULL, *BT_chjn = NULL, *BT_time = NULL, *BT_event = NULL;
 
 void core_binds_init()
 {

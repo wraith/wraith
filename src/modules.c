@@ -81,7 +81,9 @@ struct static_list {
 
 void check_static(char *name, char *(*func) ())
 {
-  struct static_list *p = calloc(1, sizeof(struct static_list));
+  struct static_list *p = NULL;
+
+  p = calloc(1, sizeof(struct static_list));
 
   p->name = strdup(name);
   p->func = func;
@@ -650,7 +652,7 @@ void init_modules(void)
 int module_register(char *name, Function * funcs,
 		    int major, int minor)
 {
-  module_entry *p;
+  module_entry *p = NULL;
 
   for (p = module_list; p && p->name; p = p->next)
     if (!egg_strcasecmp(name, p->name)) {
@@ -664,10 +666,10 @@ int module_register(char *name, Function * funcs,
 
 const char *module_load(char *name)
 {
-  module_entry *p;
+  module_entry *p = NULL;
   char *e = NULL;
   Function f;
-  struct static_list *sl;
+  struct static_list *sl = NULL;
 
   sdprintf("module_load(\"%s\")", name);
 
@@ -678,8 +680,6 @@ const char *module_load(char *name)
     return "Unknown module.";
   f = (Function) sl->func;
   p = calloc(1, sizeof(module_entry));
-  if (p == NULL)
-    return "Malloc error";
   p->name = strdup(name);
   p->major = 0;
   p->minor = 0;
@@ -729,7 +729,7 @@ Function *module_depend(char *name1, char *name2, int major, int minor)
 {
   module_entry *p = module_find(name2, major, minor);
   module_entry *o = module_find(name1, 0, 0);
-  dependancy *d;
+  dependancy *d = NULL;
 
   if (!p) {
     if (module_load(name2))
@@ -783,7 +783,7 @@ int module_undepend(char *name1)
 void add_hook(int hook_num, Function func)
 {
   if (hook_num < REAL_HOOKS) {
-    struct hook_entry *p;
+    struct hook_entry *p = NULL;
 
     for (p = hook_list[hook_num]; p; p = p->next)
       if (p->func == func)

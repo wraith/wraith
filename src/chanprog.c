@@ -717,11 +717,11 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
 
   /* send out over botnet. */
   if (local != 2) {
-         /* calloc(1, options,chan,'cset ',' ',+ 1) */
+         /* malloc(options,chan,'cset ',' ',+ 1) */
     if (chan)
-      buf = calloc(1, strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+      buf = malloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
     else
-      buf = calloc(1, strlen(options) + 1 + 5 + 1 + 1);
+      buf = malloc(strlen(options) + 1 + 5 + 1 + 1);
 
     strcat(buf, "cset ");
     if (chan)
@@ -751,7 +751,7 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
       ch = chan;
 
     bak = options;
-    buf2 = calloc(1, strlen(options) + 1);
+    buf2 = malloc(strlen(options) + 1);
 
     while (ch) {
       char *list[2] = { NULL, NULL };

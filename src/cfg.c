@@ -604,7 +604,7 @@ void set_cfg_str(char *target, char *entryname, char *data)
     data[1023] = 0;
   if (target) {
     struct userrec *u = get_user_by_handle(userlist, target);
-    struct xtra_key *xk;
+    struct xtra_key *xk = NULL;
     char *olddata = entry->ldata;
 
     if (u && !strcmp(conf.bot->nick, u->handle)) {

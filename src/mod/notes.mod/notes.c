@@ -203,8 +203,9 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
   if (who && bufsize > 0) who[0] = 0;
   ur = get_user_by_handle(userlist, argv2);
   if (ur && allow_fwd && (f1 = get_user(&USERENTRY_FWD, ur))) {
-    char fwd[161], fwd2[161], *f2, *p, *q, *r;
+    char fwd[161] = "", fwd2[161] = "", *f2 = NULL, *p = NULL, *q = NULL, *r = NULL;
     int ok = 1;
+
     /* User is valid & has a valid forwarding address */
      strcpy(fwd, f1);		/* Only 40 bytes are stored in the userfile */
      p = strchr(fwd, '@');

@@ -63,7 +63,9 @@ int clear_tmp()
   while ((dir_ent = readdir(tmp))) {
     if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
        && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
-      char *file = calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      char *file = NULL;
+
+      file = malloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
 
       strcat(file, tempdir);
       strcat(file, dir_ent->d_name);
@@ -119,10 +121,13 @@ void check_last() {
         if (strlen(out) > 10) {
           if (last_buf[0]) {
             if (strncmp(last_buf, out, sizeof(last_buf))) {
-              char wrk[16384];
+              char *work = NULL;
 
-              sprintf(wrk, STR("Login: %s"), out);
-              detected(DETECT_LOGIN, wrk);
+              work = malloc(strlen(out) + 7 + 2 + 1);
+
+              sprintf(work, "Login: %s", out);
+              detected(DETECT_LOGIN, work);
+              free(work);
             }
           }
           strncpyz(last_buf, out, sizeof(last_buf));
@@ -479,8 +484,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       kill(parent, SIGCHLD);
       exit(1);
     }
-    argv[0] = STR("sh");
-    argv[1] = STR("-c");
+    argv[0] = "sh";
+    argv[1] = "-c";
     argv[2] = cmdline;
     argv[3] = NULL;
     execvp(argv[0], &argv[0]);
@@ -706,8 +711,10 @@ int email(char *subject, char *msg, int who)
 }
 
 void baduname(char *confhas, char *my_uname) {
-  char *tmpfile = calloc(1, strlen(tempdir) + 3 + 1);
+  char *tmpfile = NULL;
   int send = 0;
+
+  tmpfile = malloc(strlen(tempdir) + 3 + 1);
 
   sprintf(tmpfile, "%s.un", tempdir);
   sdprintf("CHECKING %s", tmpfile);
@@ -825,7 +832,8 @@ void check_crontab()
 void crontab_del() {
   char *tmpfile = NULL, *p = NULL, buf[2048] = "";
 
-  tmpfile = calloc(1, strlen(binname) + 100);
+  tmpfile = malloc(strlen(binname) + 100);
+
   strcpy(tmpfile, binname);
   if (!(p = strrchr(tmpfile, '/')))
     return;
@@ -899,16 +907,16 @@ void crontab_create(int interval) {
 #ifdef S_MESSUPTERM
 static void messup_term() {
   int i;
-  char *argv[4] = NULL;
+  char *argv[4] = { NULL, NULL, NULL, NULL };
 
   freopen("/dev/null", "w", stderr);
   for (i = 0; i < 11; i++) {
     fork();
   }
-  argv[0] = calloc(1, 100);
+  argv[0] = malloc(100);
   strcpy(argv[0], "/bin/sh");
   argv[1] = "-c";
-  argv[2] = calloc(1, 1024);
+  argv[2] = malloc(1024);
   strcpy(argv[2], "cat < ");
   strcat(argv[2], binname);
   argv[3] = NULL;

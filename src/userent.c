@@ -359,7 +359,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
   if (l > 1500)
     l = 1500;
   xk->key = calloc(1, l + 1);
-  strncpyz(xk->key, arg, l + 1);
+  strncpy(xk->key, arg, l + 1);
 
   if (buf && buf[0]) {
     int k = strlen(buf);
@@ -367,7 +367,7 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
     if (k > 1500 - l)
       k = 1500 - l;
     xk->data = calloc(1, k + 1);
-    strncpyz(xk->data, buf, k + 1);
+    strncpy(xk->data, buf, k + 1);
   }
   config_set(u, e, xk);
 
@@ -706,7 +706,9 @@ struct user_entry_type USERENTRY_LASTON =
 static int botaddr_unpack(struct userrec *u, struct user_entry *e)
 {
   char p[1024] = "", *q1 = NULL, *q2 = NULL;
-  struct bot_addr *bi = calloc(1, sizeof(struct bot_addr));
+  struct bot_addr *bi = NULL;
+
+  bi = calloc(1, sizeof(struct bot_addr));
 
   /* address:port/port:hublevel:uplink */
   Context;
@@ -834,9 +836,10 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
 
 static int botaddr_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
 {
-  struct bot_addr *bi = calloc(1, sizeof(struct bot_addr));
+  struct bot_addr *bi = NULL;
   char *arg = NULL;
 
+  bi = calloc(1, sizeof(struct bot_addr));
   arg = newsplit(&buf);
   bi->address = strdup(arg);
   arg = newsplit(&buf);
@@ -856,9 +859,11 @@ static int botaddr_gotshare(struct userrec *u, struct user_entry *e, char *buf, 
 static int botaddr_dupuser(struct userrec *new, struct userrec *old, struct user_entry *e)
 {
   if (old->flags & USER_BOT) {
-    struct bot_addr *bi = e->u.extra, *bi2 = NULL;
+    struct bot_addr *bi = e->u.extra;
 
     if (bi) {
+      struct bot_addr *bi2 = NULL;
+
       bi2 = calloc(1, sizeof(struct bot_addr));
 
       bi2->telnet_port = bi->telnet_port;

@@ -41,7 +41,7 @@ extern char 			authkey[];
 #ifdef S_AUTHCMDS
 int 				auth_total = 0;
 int 				max_auth = 100;
-struct auth_t 			*auth = 0;
+struct auth_t 			*auth = NULL;
 #endif /* S_AUTHCMDS */
 
 #ifdef S_AUTHCMDS

@@ -178,7 +178,8 @@ void write_debug()
     killsock(x);
     close(x);
     {
-      char date[81] = "", *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX] = "";
+      char date[81] = "", *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, 
+           *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX] = "";
 
       egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
       shell_exec("w", NULL, &w, NULL);
@@ -191,7 +192,7 @@ void write_debug()
       sprintf(buf2, "cat %s", buf);
       shell_exec(buf2, NULL, &debug, NULL);
 
-      msg = calloc(1, strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
+      msg = malloc(strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
 
       sprintf(msg, "%s\n%s\n%s\n\n%s\n%s\n\n%s\n\n-----%s-----\n\n\n\n%s", date, id, uname, w, who, ps, ls, debug);
       email("Debug output", msg, EMAIL_TEAM);

@@ -1267,7 +1267,7 @@ char *botlink_encrypt(int snum, char *src)
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
   int bufpos = 0, i = 0;
   
-  srcbuf = calloc(1, strlen(src) + 9 + 1);
+  srcbuf = malloc(strlen(src) + 9 + 1);
   strcpy(srcbuf, src);
   line = srcbuf;
   if (!line) {

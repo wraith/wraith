@@ -1419,7 +1419,7 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
     if ((chan = findchan_by_dname(chname))) {
       char *tmp = NULL;
 
-      tmp = calloc(1, 7 + 1 + strlen(dcc[idx].nick) + 1);
+      tmp = malloc(7 + 1 + strlen(dcc[idx].nick) + 1);
       sprintf(tmp, "addedby %s", dcc[idx].nick);
       do_chanset(chan, tmp, 1);
       free(tmp);

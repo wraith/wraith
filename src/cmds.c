@@ -325,7 +325,9 @@ static void cmd_config(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", STR("#%s# config %s"), dcc[idx].nick, par);
   if (!par[0]) {
-    char *outbuf = calloc(1, 1);
+    char *outbuf = NULL;
+
+    outbuf = malloc(1);
 
     dprintf(idx, STR("Usage: config [name [value|-]]\n"));
     dprintf(idx, STR("Defined config entry names:\n"));
@@ -522,7 +524,8 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
     }
   }
   if (pass[0]) {
-    char epass[36], tmp[256];
+    char epass[36] = "", tmp[256] = "";
+
     if (!isowner(u->handle) && has_cmd_pass(cmd)) {
       putlog(LOG_MISC, "*", STR("%s attempted to change command password for %s - not perm owner"), dcc[idx].nick, cmd);
       dprintf(idx, STR("Perm owners only.\n"));
@@ -592,12 +595,14 @@ static void cmd_motd(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", STR("#%s# motd %s"), dcc[idx].nick, par);
   if (par[0] && (u->flags & USER_MASTER)) {
-    char *s = calloc(1, strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1); /* +2: ' 'x2 */
+    char *s = NULL;
 
-    sprintf(s, STR("%s %lu %s"), dcc[idx].nick, now, par);
+    s = malloc(strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1); /* +2: ' 'x2 */
+
+    sprintf(s, "%s %lu %s", dcc[idx].nick, now, par);
     set_cfg_str(NULL, "motd", s);
     free(s);
-    dprintf(idx, STR("Motd set\n"));
+    dprintf(idx, "Motd set\n");
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
@@ -774,7 +779,9 @@ int my_cmp (const mycmds *c1, const mycmds *c2)
 static void cmd_nohelp(struct userrec *u, int idx, char *par)
 {
   int i;
-  char *buf = calloc(1, 1);
+  char *buf = NULL;
+
+  buf = malloc(1);
 
   qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   
@@ -913,10 +920,9 @@ static void cmd_who(struct userrec *u, int idx, char *par)
       } else if (dcc[idx].u.chat->channel > 99999)
 	dprintf(idx, STR("You are on a local channel.\n"));
       else {
-	char s[40];
+	char s[40] = "";
 
-	simple_sprintf(s, "%d:%s@%s", dcc[idx].sock,
-		       dcc[idx].nick, conf.bot->nick);
+	simple_sprintf(s, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
 	botnet_send_who(i, s, par, dcc[idx].u.chat->channel);
       }
     }
@@ -1793,7 +1799,6 @@ static void cmd_comment(struct userrec *u, int idx, char *par)
 static void cmd_randstring(struct userrec *u, int idx, char *par)
 {
   int len;
-  char *rand = NULL;
 
   if (!par[0]) {
     dprintf(idx, "Usage: randstring <len>\n");
@@ -1804,7 +1809,9 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
 
   len = atoi(par);
   if (len < 301) {
-    rand = calloc(1, len + 1);
+    char *rand = NULL;
+
+    rand = malloc(len + 1);
     make_rand_str(rand, len);
     dprintf(idx, STR("string: %s\n"), rand);
     free(rand);
@@ -2372,7 +2379,8 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     set_user_flagrec(u2, &user, par);
   }
   if (chan) {
-    char tmp[100];
+    char tmp[100] = "";
+
     putlog(LOG_CMDS, "*", STR("#%s# (%s) chattr %s %s"), dcc[idx].nick, chan ? chan->dname : "*", hand, chg ? chg : "");
     egg_snprintf(tmp, sizeof tmp, "chattr %s", chg);
     update_mod(hand, dcc[idx].nick, tmp, chan->dname);
@@ -2597,7 +2605,7 @@ static void cmd_ps(struct userrec *u, int idx, char *par) {
     dprintf(idx, STR("No."));
     return;
   }
-  buf = calloc(1, strlen(par) + 10);
+  buf = malloc(strlen(par) + 10);
   sprintf(buf, STR("ps %s"), par);
   if (!exec_str(idx, buf))
     dprintf(idx, STR("Exec failed\n"));
@@ -3004,8 +3012,6 @@ static void cmd_nettcl(struct userrec *u, int idx, char *msg)
 static void cmd_newleaf(struct userrec *u, int idx, char *par)
 {
   char *handle = NULL, *host = NULL;
-  struct userrec *u1 = NULL;
-  struct bot_addr *bi = NULL;
 
   putlog(LOG_CMDS, "*", STR("#%s# newleaf %s"), dcc[idx].nick, par);
 
@@ -3021,7 +3027,10 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
     else if (strchr(BADHANDCHARS, handle[0]) != NULL)
       dprintf(idx, STR("You can't start a botnick with '%c'.\n"), handle[0]);
     else {
-      char tmp[81];
+      struct userrec *u1 = NULL;
+      struct bot_addr *bi = NULL;
+      char tmp[81] = "";
+
       userlist = adduser(userlist, handle, STR("none"), "-", USER_BOT | USER_OP);
       u1 = get_user_by_handle(userlist, handle);
       bi = calloc(1, sizeof(struct bot_addr));
@@ -3055,7 +3064,9 @@ static void cmd_nopass(struct userrec *u, int idx, char *par)
 {
   int cnt = 0;
   struct userrec *cu = NULL;
-  char *users = calloc(1, 1);
+  char *users = NULL;
+
+  user = malloc(1);
 
   putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
 
@@ -3913,7 +3924,9 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
   int idx = atoi(toidx);
 
   if ((idx >= 0) && (idx < dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {
-    char *buf = calloc(1, strlen(frombot) + 2 + 1);
+    char *buf = NULL;
+    
+    buf = malloc(strlen(frombot) + 2 + 1);
 
     sprintf(buf, "(%s)", frombot);
     dprintf(idx, STR("%-13s %s\n"), buf, ln);

@@ -174,10 +174,10 @@ void send_tand_but(int x, char *buf, int len)
 #ifdef S_DCCPASS
 void botnet_send_cmdpass(int idx, char *cmd, char *pass)
 {
-  char *buf = NULL;
-
   if (tands > 0) {
-    buf = calloc(1, strlen(cmd) + strlen(pass) + 5 + 1);
+    char *buf = NULL;
+
+    buf = malloc(strlen(cmd) + strlen(pass) + 5 + 1);
     sprintf(buf, "cp %s %s\n", cmd, pass);
     send_tand_but(idx, buf, strlen(buf));
     free(buf);
@@ -577,7 +577,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
   /* note length + PRIVMSG header + nickname + date  must be <512  */
   p = strchr(to, '@');
   if (p != NULL) {		/* Cross-bot note */
-    char x[21];
+    char x[21] = "";
 
     *p = 0;
     strncpy(x, to, 20);
@@ -660,9 +660,9 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
 	  status = NOTE_AWAY;
 	}
       if (aok) {
-	char *p, *fr = from;
+	char *p = NULL, *fr = from;
 	int l = 0;
-	char work[1024];
+	char work[1024] = "";
 
 	while ((*msg == '<') || (*msg == '>')) {
 	  p = newsplit(&msg);

@@ -33,7 +33,7 @@ extern struct cfg_entry 	**cfg;
 
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
-party_t			*party;				/* Keep track of people on the botnet */
+party_t			*party = NULL;			/* Keep track of people on the botnet */
 static int 		maxparty = 100;			/* Maximum space for party line members
 							   currently */
 int			tands = 0;			/* Number of bots on the botnet */
@@ -867,7 +867,7 @@ int botunlink(int idx, char *nick, char *reason)
 	if (nick[0] != '*')
 	  return 1;
       } else if (dcc[i].type == &DCC_BOT) {
-	char s[1024];
+	char s[1024] = "";
 
 	if (idx >= 0)
 	  dprintf(idx, "%s %s.\n", BOT_BREAKLINK, dcc[i].nick);
@@ -1609,7 +1609,7 @@ void check_botnet_pings()
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT)
       if (dcc[i].status & STAT_PINGED) {
-	char s[1024];
+	char s[1024] = "";
 
 	putlog(LOG_BOTS, "*", "%s: %s", BOT_PINGTIMEOUT, dcc[i].nick);
 	bot = findbot(dcc[i].nick);
@@ -1638,7 +1638,7 @@ void check_botnet_pings()
 	if ((via == bot->via) && (bot != via)) {
 	  /* Not leaflike behavior */
 	  if (dcc[i].status & STAT_WARNED) {
-	    char s[1024];
+	    char s[1024] = "";
 
 	    putlog(LOG_BOTS, "*", "%s %s (%s).", BOT_DISCONNECTED,
 		   dcc[i].nick, BOT_BOTNOTLEAFLIKE);
