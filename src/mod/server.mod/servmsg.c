@@ -1405,7 +1405,7 @@ static void server_dns_callback(void *client_data, const char *host, char **ips)
   if (addr.family == AF_INET)
     dcc[idx].addr = htonl(addr.u.addr.s_addr);
 
-  strcpy(serverpass, dcc[idx].u.other);
+  strcpy(serverpass, (char *) dcc[idx].u.other);
   changeover_dcc(idx, &SERVER_SOCKET, 0);
 
   identd_open();
