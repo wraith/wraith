@@ -31,8 +31,8 @@
 bool strict_servernames;
 bool checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;
-int serv;		/* sock # of server currently */
-int servidx;		/* idx of server */
+int serv = -1;		/* sock # of server currently */
+int servidx = -1;		/* idx of server */
 char newserver[121] = "";	/* new server? */
 port_t newserverport;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
@@ -1074,8 +1074,6 @@ void server_init()
    * Init of all the variables *must* be done in _start rather than
    * globally.
    */
-  serv = -1;
-  servidx = -1;
   botname[0] = 0;
   trying_server = 0;
   server_lag = 0;

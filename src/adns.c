@@ -676,7 +676,7 @@ int egg_dns_cancel(int id, int issue_callback)
 	if (!q) return(-1);
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
-sdprintf("Cancelling query: %s", q->query);
+	sdprintf("Cancelling query: %s", q->query);
 	if (issue_callback) q->callback(q->client_data, q->query, NULL);
 	free(q);
 	return(0);
