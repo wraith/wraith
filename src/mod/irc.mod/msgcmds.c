@@ -222,8 +222,6 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 {
   int i = 0;
 
-  if (!ischanhub()) 
-    return 0;
   if (!u) 
     return 0;
   if (match_my_nick(nick))

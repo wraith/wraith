@@ -48,6 +48,7 @@ This is a summary of ChangeLog basically.
 * Fixed NAT bug for botlinks.
 * All bots are now spawned with -B regardless of order in config.
 * +m no longer implies +j.
+* Fixed irc authing only working on +c bots (should be like this, but isnt needed soon)
 
 1.2
 * No longer displaying SALTS on ./bin -v
