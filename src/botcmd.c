@@ -765,7 +765,7 @@ static void bot_traced(int idx, char *par)
 
 static void bot_timesync(int idx, char *par)
 {
-  putlog(LOG_DEBUG, "@", "Got timesync from %s: %s (%li - %li)", dcc[idx].nick, par, atol(par), now);
+//  putlog(LOG_DEBUG, "@", "Got timesync from %s: %s (%li - %li)", dcc[idx].nick, par, atol(par), now);
   timesync = atol(par) - now;
 
 #ifdef HUB
