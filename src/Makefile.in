@@ -16,8 +16,8 @@ CPPFLAGS = @CPPFLAGS@
 eggdrop_objs = auth.o bg.o botcmd.o botmsg.o botnet.o \
 chanprog.o cmds.o config.o core_binds.o crypt.o dcc.o dccutil.o debug.o \
 dns.o egg_timer.o flags.o main.o mem.o misc.o misc_file.o modules.o net.o \
-rfc1459.o settings.o tcl.o tcldcc.o tclhash.o tclmisc.o \
-tcluser.o userent.o userrec.o users.o
+rfc1459.o settings.o tcl.o tclhash.o \
+userent.o userrec.o users.o
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
@@ -213,26 +213,11 @@ tcl.o: tcl.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h proto.
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h
-tcldcc.o: tcldcc.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h \
- proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
- users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
- compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
- compat/strftime.h tandem.h modules.h mod/modvals.h
 tclhash.o: tclhash.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
  compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
  compat/strftime.h match.c egg_timer.h egg_timer.c
-tclmisc.o: tclmisc.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h \
- proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
- users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
- compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
- compat/strftime.h modules.h mod/modvals.h tandem.h 
-tcluser.o: tcluser.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h \
- proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
- users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
- compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
- compat/strftime.h tandem.h
 userent.o: userent.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \

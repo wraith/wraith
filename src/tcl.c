@@ -555,22 +555,7 @@ resetPath:
   Context;
 
   init_traces();
-  /* Add new commands */
-  add_tcl_commands(tcluser_cmds);
-  add_tcl_commands(tcldcc_cmds);
-  add_tcl_commands(tclmisc_cmds);
   Context;
-}
-
-void do_tcl(char *whatzit, char *script)
-{
-  int code;
-
-  code = Tcl_Eval(interp, script);
-  if (code != TCL_OK) {
-    putlog(LOG_MISC, "*", "Tcl error in script for '%s':", whatzit);
-    putlog(LOG_MISC, "*", "%s", interp->result);
-  }
 }
 
 void add_tcl_strings(tcl_strings *list)

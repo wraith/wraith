@@ -341,7 +341,7 @@ Function global_table[] =
   (Function) movefile,
   (Function) copyfile,
   /* 148 - 151 */
-  (Function) do_tcl,
+  (Function) 0,
   (Function) encrypt_string,
   (Function) decrypt_string,
   (Function) def_get,

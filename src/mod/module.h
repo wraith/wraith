@@ -281,7 +281,7 @@
 #define movefile ((int (*) (char *, char *))global[146])
 #define copyfile ((int (*) (char *, char *))global[147])
 /* 148 - 151 */
-#define do_tcl ((void (*)(char *, char *))global[148])
+/* UNUSED 148 */
 #define encrypt_string ((char *(*)(const char *, char *))global[149])
 #define decrypt_string ((char *(*)(const char *, char *))global[150])
 #define def_get ((void *(*)(struct userrec *, struct user_entry *))global[151])
