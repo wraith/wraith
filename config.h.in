@@ -89,10 +89,7 @@
 /* Define for Tcl that has Tcl_Free() (7.5p1 and later)  */
 #undef HAVE_TCL_FREE
 
-/* Define for Tcl that has threads  */
-#undef HAVE_TCL_THREADS
-
-/* Defines the current eggdrop version  */
+/* Defines the current pack version  */
 #undef EGG_VERSION
 
 /* The number of bytes in a int.  */

@@ -3,9 +3,9 @@
 
 # Awk out the version from source
 ver="?.?.?"
-ver=`cat src/main.c 2>&1 | grep "char" | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
-numver=`cat src/main.c 2>&1 | grep "int" | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
-PACKNAME=`cat pack/pack.cfg | grep "PACKNAME" | grep -v "PACKNAME:" | awk '/PACKNAME/ {print $2}'`
+ver=`grep "char" src/main.c | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+numver=`grep "int" src/main.c | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
+PACKNAME=`grep "PACKNAME " pack/pack.cfg | awk '/PACKNAME/ {print $2}'`
 
 echo "*** wraith v${ver}/${numver} builder ***"
 
@@ -14,7 +14,7 @@ usage()
     echo "Usage: $0 [-d] [-c] type"
     echo "	-c	   - Cleans up old binaries/files before compile (default: off)"
     echo "	-d	   - Builds a debug package. (default: off)"
-    echo "	type	   - One of the following: all, leaf, hub. (default: all)"
+    echo "	type	   - One of the following: all, leaf, hub."
 }
 
 debug=0
@@ -69,8 +69,6 @@ if [ $all = "1" ]; then
  hub=1
 fi
 
-packname=${PACKNAME}
-
 ############# CHECK FOR pack/ FILES #################
 
 # Figure what bins we're making
@@ -97,7 +95,7 @@ umask 077 >/dev/null
 TCLDIR=`cat pack/conf.h 2>&1 | grep "//" | awk '/TCLDIR/ {print $2}' |  sed -e 's/\"//g'`
 if test -z ${TCLDIR}
 then
-  echo "[*] Searching for TCL in default dirs (edit $packname to change)"
+  echo "[*] Searching for TCL in default dirs (edit ${PACKNAME} to change)"
   ./configure --silent --disable-tcl-threads
 else
   echo "[*] Searching for TCL in: $TCLDIR"
@@ -148,7 +146,7 @@ fi
 
 # Wrap it nicely up into an archive
 echo "[*] Packaging..."
-packname=`basename $packname .cfg`
+
 if [ $all = "1" ]; then
  fls="leaf hub"
 elif [ $leaf = "1" ]; then
@@ -166,8 +164,8 @@ do
   mv -f $bin $bin.$os.$numver${d}
 done
 
-tar -zcf $packname.$os.$numver${d}.tgz *.$os.$numver${d}
-rm -f *.$os.$numver${d}
-echo "Binaries are now in '$packname.$os.$numver${d}.tgz'."
+tar -zcf ${PACKNAME}.$os.$numver${d}.tgz *.$os.$numver${d}
+rm -f *$os.$numver${d}
+echo "Binaries are now in '${PACKNAME}.$os.$numver${d}.tgz'."
 exit 0
 
