@@ -1560,7 +1560,7 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
 static void cmd_botcmd(struct userrec *u, int idx, char *par)
 {
   tand_t *tbot = NULL;
-  int cnt = 0, rleaf = (-1), tbots = 0, found = 0;
+  int cnt = 0, rleaf = -1, tbots = 0, found = 0;
   char *botm = NULL, *cmd = NULL;
   
   botm = newsplit(&par);
@@ -1586,18 +1586,17 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
         tbots++;
     }
     if (tbots)
-      rleaf = randint(tbots);
+      rleaf = 1 + randint(tbots + 1);		/* 1 <--> tbots */
   }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
     if (!strcmp(botm, "?") && bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999)
       continue;
-
-    if ((rleaf != (-1) && (cnt - 1) == rleaf) || ((rleaf == (-1) && wild_match(botm, tbot->bot)))) {
+    cnt++;
+    if ((rleaf != -1 && cnt == rleaf) || (rleaf == -1 && wild_match(botm, tbot->bot))) {
       send_remote_simul(idx, tbot->bot, cmd, par ? par : "");
       found++;
     }
-    cnt++;
   }
 
   if (!found)

@@ -12,6 +12,7 @@ This is a summary of ChangeLog basically.
 8.Fixed msg_invite spamming the password for non-users.
 9.Removed cmd_vbottree (cmd_bottree now shows the information).
 10.Fixed msgc_voice, was checking for +v instead of +q.
+11.Fixed cmd_botcmd not matching '?' correctly again!
 
 1.1.5
 
