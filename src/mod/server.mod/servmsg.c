@@ -28,45 +28,64 @@ static char   altnick_char = 0;
  *
  * fixed by guppy (1999/02/24) and Fabian (1999/11/26)
  */
+int rolls = 0;
 static int gotfake433(char *from)
 {
   int l = strlen(botname) - 1;
-  char *oknicks = "-_\\`^[]{}";
+  int use_chr = 1;
+  char *altchrs = STR("-_\\`^[]");
 
-Context;
   /* First run? */
   if (altnick_char == 0) {
-Context;
-    altnick_char = oknicks[0];
-Context;
-    if (l + 1 == NICKMAX) {
-Context;
+    altnick_char = altchrs[0];
+    /* the nick is already as long as it can be. */
+    if (l + 1 == nick_len) {
+      /* make the last char the altnick_char */
       botname[l] = altnick_char;
     } else {
-Context;
+      /* tack it on to the end */
       botname[++l] = altnick_char;
       botname[l + 1] = 0;
     }
   } else {
-    char *p = strchr(oknicks, altnick_char);
-Context;
+    char *p = strchr(altchrs, altnick_char);
     p++;
-Context;
     if (!*p) {
-Context;
-      altnick_char = 'a' + random() % 26;
+      /* fun BX style rolling, WEEEE */
+      if (rolls < 10) {
+        char tmp;
+        if (rolls == 0)
+          strcpy(botname, origbotname);
+        tmp = botname[8];
+        if (strchr(BADNICKCHARS, tmp))
+          tmp = '_';
+        altnick_char = 0;
+        use_chr = 0;
+            
+        rolls++;
+        botname[8] = botname[7];
+        botname[7] = botname[6];
+        botname[6] = botname[5];
+        botname[5] = botname[4];
+        botname[4] = botname[3];
+        botname[3] = botname[2];
+        botname[2] = botname[1];
+        botname[1] = botname[0];
+        botname[0] = tmp;
+      } else {
+        /* when we run out of 'altchrs', then make altnick_char a random alpha */
+        altnick_char = 'a' + random() % 26;
+      }
     } else {
-Context;
+      /* else, make altnick_char the 'oknick' */
       altnick_char = (*p);
     }
-Context;
-    botname[l] = altnick_char;
+    if (use_chr)
+      botname[l] = altnick_char;
   }
 
   putlog(LOG_SERV, "*", IRC_BOTNICKINUSE, botname);
-Context;
   dprintf(DP_MODE, "NICK %s\n", botname);
-Context;
   return 0;
 }
 
