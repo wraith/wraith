@@ -12,6 +12,7 @@
 #include "snprintf.h"
 #include "memset.h"
 #include "memcpy.h"
+#include "memutil.h"
 #include "strcasecmp.h"
 #include "strftime.h"
 
