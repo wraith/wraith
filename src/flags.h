@@ -18,7 +18,6 @@ typedef unsigned long flag_t;
 struct flag_record {
   flag_t match;
   flag_t global;
-/* FIXME: ALSO MAKE THESE LONG */
   flag_t  bot;
   flag_t chan;
 };
@@ -26,9 +25,9 @@ struct flag_record {
 #define FR_GLOBAL 0x00000001
 #define FR_BOT    0x00000002
 #define FR_CHAN   0x00000004
-#define FR_OR     0x40000000
-#define FR_AND    0x20000000
 #define FR_ANYWH  0x10000000
+#define FR_AND    0x20000000
+#define FR_OR     0x40000000
 #define FR_ALL    0x0fffffff
 
 /*

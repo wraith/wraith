@@ -10,13 +10,13 @@
 /* Reversing this mode? */
 static int reversing = 0;
 
-#define PLUS    0x01
-#define MINUS   0x02
-#define CHOP    0x04
-#define BAN     0x08
-#define VOICE   0x10
-#define EXEMPT  0x20
-#define INVITE  0x40
+#define PLUS    BIT0
+#define MINUS   BIT1
+#define CHOP    BIT2
+#define BAN     BIT3
+#define VOICE   BIT4
+#define EXEMPT  BIT5
+#define INVITE  BIT6
 
 static struct flag_record user   = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
 static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0};

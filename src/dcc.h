@@ -125,67 +125,67 @@ struct dupwait_info {
 
 /* Flags about dcc types
  */
-#define DCT_CHAT      0x00000001        /* this dcc type receives botnet
+#define DCT_CHAT      BIT0        /* this dcc type receives botnet
                                            chatter                          */
-#define DCT_MASTER    0x00000002        /* received master chatter          */
-#define DCT_SHOWWHO   0x00000004        /* show the user in .who            */
-#define DCT_REMOTEWHO 0x00000008        /* show in remote who               */
-#define DCT_VALIDIDX  0x00000010        /* valid idx for outputting to
-                                           in tcl                           */
-#define DCT_SIMUL     0x00000020        /* can be tcl_simul'd               */
-#define DCT_CANBOOT   0x00000040        /* can be booted                    */
 #define DCT_GETNOTES  DCT_CHAT          /* can receive notes                */
-#define DCT_          0x00000080        /* unused */
-#define DCT_FORKTYPE  0x00000100        /* a forking type                   */
-#define DCT_BOT       0x00000200        /* a bot connection of some sort... */
-#define DCT_FILETRAN  0x00000400        /* a file transfer of some sort     */
-#define DCT_FILESEND  0x00000800        /* a sending file transfer,
+#define DCT_MASTER    BIT1        /* received master chatter          */
+#define DCT_SHOWWHO   BIT2        /* show the user in .who            */
+#define DCT_REMOTEWHO BIT3        /* show in remote who               */
+#define DCT_VALIDIDX  BIT4        /* valid idx for outputting to
+                                           in tcl                           */
+#define DCT_SIMUL     BIT5        /* can be tcl_simul'd               */
+#define DCT_CANBOOT   BIT6        /* can be booted                    */
+#define DCT_          BIT7        /* unused */
+#define DCT_FORKTYPE  BIT8        /* a forking type                   */
+#define DCT_BOT       BIT9        /* a bot connection of some sort... */
+#define DCT_FILETRAN  BIT10       /* a file transfer of some sort     */
+#define DCT_FILESEND  BIT11       /* a sending file transfer,
                                            getting = !this                  */
-#define DCT_LISTEN    0x00001000        /* a listening port of some sort    */
+#define DCT_LISTEN    BIT12       /* a listening port of some sort    */
 
 /* For dcc chat & files:
  */
-#define STAT_ECHO    0x00001    /* echo commands back?                  */
-#define STAT_DENY    0x00002    /* bad username (ignore password & deny
+#define STAT_ECHO    BIT0    /* echo commands back?                  */
+#define STAT_DENY    BIT1    /* bad username (ignore password & deny
                                    access)                              */
-#define STAT_CHAT    0x00004    /* in file-system but may return        */
-#define STAT_TELNET  0x00008    /* connected via telnet                 */
-#define STAT_PARTY   0x00010    /* only on party line via 'p' flag      */
-#define STAT_BOTONLY 0x00020    /* telnet on bots-only connect          */
-#define STAT_USRONLY 0x00040    /* telnet on users-only connect         */
-#define STAT_PAGE    0x00080    /* page output to the user              */
-#define STAT_COLOR   0x00100    /* Color enabled for user */
+#define STAT_CHAT    BIT2    /* in file-system but may return        */
+#define STAT_TELNET  BIT3    /* connected via telnet                 */
+#define STAT_PARTY   BIT4    /* only on party line via 'p' flag      */
+#define STAT_BOTONLY BIT5    /* telnet on bots-only connect          */
+#define STAT_USRONLY BIT6    /* telnet on users-only connect         */
+#define STAT_PAGE    BIT7    /* page output to the user              */
+#define STAT_COLOR   BIT8    /* Color enabled for user */
 
 /* For stripping out mIRC codes
  */
-#define STRIP_COLOR  0x00001    /* remove mIRC color codes              */
-#define STRIP_BOLD   0x00002    /* remove bold codes                    */
-#define STRIP_REV    0x00004    /* remove reverse video codes           */
-#define STRIP_UNDER  0x00008    /* remove underline codes               */
-#define STRIP_ANSI   0x00010    /* remove ALL ansi codes                */
-#define STRIP_BELLS  0x00020    /* remote ctrl-g's                      */
-#define STRIP_ALL    0x00040    /* remove every damn thing!             */
+#define STRIP_COLOR  BIT0    /* remove mIRC color codes              */
+#define STRIP_BOLD   BIT1    /* remove bold codes                    */
+#define STRIP_REV    BIT2    /* remove reverse video codes           */
+#define STRIP_UNDER  BIT3    /* remove underline codes               */
+#define STRIP_ANSI   BIT4    /* remove ALL ansi codes                */
+#define STRIP_BELLS  BIT5    /* remote ctrl-g's                      */
+#define STRIP_ALL    BIT6    /* remove every damn thing!             */
 
 /* for dcc bot links: */
-#define STAT_PINGED  0x00001    /* waiting for ping to return            */
-#define STAT_SHARE   0x00002    /* sharing user data with the bot        */
-#define STAT_CALLED  0x00004    /* this bot called me                    */
-#define STAT_OFFERED 0x00008    /* offered her the user file             */
-#define STAT_SENDING 0x00010    /* in the process of sending a user list */
-#define STAT_GETTING 0x00020    /* in the process of getting a user list */
-#define STAT_WARNED  0x00040    /* warned him about unleaflike behavior  */
-#define STAT_LEAF    0x00080    /* this bot is a leaf only               */
-#define STAT_LINKING 0x00100    /* the bot is currently going through
+#define STAT_PINGED  BIT0    /* waiting for ping to return            */
+#define STAT_SHARE   BIT1    /* sharing user data with the bot        */
+#define STAT_CALLED  BIT2    /* this bot called me                    */
+#define STAT_OFFERED BIT3    /* offered her the user file             */
+#define STAT_SENDING BIT4    /* in the process of sending a user list */
+#define STAT_GETTING BIT5    /* in the process of getting a user list */
+#define STAT_WARNED  BIT6    /* warned him about unleaflike behavior  */
+#define STAT_LEAF    BIT7    /* this bot is a leaf only               */
+#define STAT_LINKING BIT8    /* the bot is currently going through
                                    the linking stage                     */
-#define STAT_AGGRESSIVE   0x00200 /* aggressively sharing with this bot    */
-#define STAT_OFFEREDU 0x00400
-#define STAT_SENDINGU 0x00800
-#define STAT_GETTINGU 0x01000
-#define STAT_UPDATED  0x02000
+#define STAT_AGGRESSIVE BIT9 /* aggressively sharing with this bot    */
+#define STAT_OFFEREDU BIT10
+#define STAT_SENDINGU BIT11
+#define STAT_GETTINGU BIT12
+#define STAT_UPDATED  BIT13
 
 /* Flags for listening sockets
  */
-#define LSTN_PUBLIC  0x000001   /* No access restrictions               */
+#define LSTN_PUBLIC  BIT0   /* No access restrictions               */
 
 /* Telnet codes.  See "TELNET Protocol Specification" (RFC 854) and
  * "TELNET Echo Option" (RFC 875) for details.

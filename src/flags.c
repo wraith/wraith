@@ -398,7 +398,7 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
     }
     if (cr && ch) {
       cr->flags = fr->chan;
-      if (!noshare && !(u->flags & USER_UNSHARED) && channel_shared(ch)) {
+      if (!noshare && !(u->flags & USER_UNSHARED)) {
 	fr->match = FR_CHAN;
 	build_flags(buffer, fr, NULL);
 	shareout(ch, "a %s %s %s\n", u->handle, buffer, chname);

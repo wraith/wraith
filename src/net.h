@@ -48,18 +48,17 @@ enum {
 
 /* Socket flags:
  */
-#define SOCK_UNUSED     0x0001  /* empty socket                         */
-#define SOCK_BINARY     0x0002  /* do not buffer input                  */
-#define SOCK_LISTEN     0x0004  /* listening port                       */
-#define SOCK_CONNECT    0x0008  /* connection attempt                   */
-#define SOCK_NONSOCK    0x0010  /* used for file i/o on debug           */
-#define SOCK_STRONGCONN 0x0020  /* don't report success until sure      */
-#define SOCK_EOFD       0x0040  /* it EOF'd recently during a write     */
-#define SOCK_PROXYWAIT  0x0080  /* waiting for SOCKS traversal          */
-#define SOCK_PASS       0x0100  /* passed on; only notify in case
-                                   of traffic                           */
-#define SOCK_VIRTUAL    0x0200  /* not-connected socket (dont read it!) */
-#define SOCK_BUFFER     0x0400  /* buffer data; don't notify dcc funcs  */
+#define SOCK_UNUSED     BIT0  /* empty socket                         */
+#define SOCK_BINARY     BIT1  /* do not buffer input                  */
+#define SOCK_LISTEN     BIT2  /* listening port                       */
+#define SOCK_CONNECT    BIT3  /* connection attempt                   */
+#define SOCK_NONSOCK    BIT4  /* used for file i/o on debug           */
+#define SOCK_STRONGCONN BIT5  /* don't report success until sure      */
+#define SOCK_EOFD       BIT6  /* it EOF'd recently during a write     */
+#define SOCK_PROXYWAIT  BIT7  /* waiting for SOCKS traversal          */
+#define SOCK_PASS       BIT8  /* passed on; only notify in case of traffic */
+#define SOCK_VIRTUAL    BIT9  /* not-connected socket (dont read it!) */
+#define SOCK_BUFFER     BIT10 /* buffer data; don't notify dcc funcs  */
 
 /* Flags to sock_has_data
  */

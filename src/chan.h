@@ -26,24 +26,20 @@ typedef struct memstruct {
 #define CHANMETA "#&!+"
 #define NICKVALID "[{}]^`|\\_-"
 
-#define CHANOP       0x00001 /* channel +o                                   */
-#define CHANVOICE    0x00002 /* channel +v                                   */
-#define FAKEOP       0x00004 /* op'd by server                               */
-#define SENTOP       0x00008 /* a mode +o was already sent out for this user */
-#define SENTDEOP     0x00010 /* a mode -o was already sent out for this user */
-#define SENTKICK     0x00020 /* a kick was already sent out for this user    */
-#define SENTVOICE    0x00040 /* a mode +v was already sent out for this user */
-#define SENTDEVOICE  0x00080 /* a devoice has been sent                      */
-#define WASOP        0x00100 /* was an op before a split                     */
-#define STOPWHO      0x00200
-#define FULL_DELAY   0x00400
-#define STOPCHECK    0x00800
-#define EVOICE       0x01000 /* keeps people -v */
-#define OPER         0x02000
-/*                   0x02000 */
-/*                   0x04000 */
-/*                   0x08000 */
-/*                   0x10000 */
+#define CHANOP       BIT0 /* channel +o                                   */
+#define CHANVOICE    BIT1 /* channel +v                                   */
+#define FAKEOP       BIT2 /* op'd by server                               */
+#define SENTOP       BIT3 /* a mode +o was already sent out for this user */
+#define SENTDEOP     BIT4 /* a mode -o was already sent out for this user */
+#define SENTKICK     BIT5 /* a kick was already sent out for this user    */
+#define SENTVOICE    BIT6 /* a mode +v was already sent out for this user */
+#define SENTDEVOICE  BIT7 /* a devoice has been sent                      */
+#define WASOP        BIT8 /* was an op before a split                     */
+#define STOPWHO      BIT9
+#define FULL_DELAY   BIT10
+#define STOPCHECK    BIT11
+#define EVOICE       BIT12 /* keeps people -v */
+#define OPER         BIT13
 
 #define chan_hasvoice(x) (x->flags & CHANVOICE)
 #define chan_hasop(x) (x->flags & CHANOP)
@@ -106,21 +102,22 @@ struct chan_t {
 
 };
 
-#define CHANINV    0x0001	/* +i					*/
-#define CHANPRIV   0x0002	/* +p					*/
-#define CHANSEC    0x0004	/* +s					*/
-#define CHANMODER  0x0008	/* +m					*/
-#define CHANTOPIC  0x0010	/* +t					*/
-#define CHANNOMSG  0x0020	/* +n					*/
-#define CHANLIMIT  0x0040	/* -l -- used only for protecting modes	*/
-#define CHANKEY    0x0080	/* +k					*/
-#define CHANANON   0x0100	/* +a -- ircd 2.9			*/
-#define CHANQUIET  0x0200	/* +q -- ircd 2.9			*/
-#define CHANNOCLR  0x0400	/* +c -- bahamut			*/
-#define CHANREGON  0x0800	/* +R -- bahamut			*/
-#define CHANMODR   0x1000	/* +M -- bahamut			*/
-#define CHANNOCTCP 0x2000      /* +C -- QuakeNet's ircu 2.10           */
-#define CHANLONLY  0x4000      /* +r -- ircu 2.10.11                   */
+#define CHANINV    BIT0		/* +i					*/
+#define CHANPRIV   BIT1		/* +p					*/
+#define CHANSEC    BIT2		/* +s					*/
+#define CHANMODER  BIT3		/* +m					*/
+#define CHANTOPIC  BIT4		/* +t					*/
+#define CHANNOMSG  BIT5		/* +n					*/
+#define CHANLIMIT  BIT6		/* -l -- used only for protecting modes	*/
+#define CHANKEY    BIT7		/* +k					*/
+/* FIXME: JUST REMOVE THESE :D */
+#define CHANANON   BIT8		/* +a -- ircd 2.9			*/
+#define CHANQUIET  BIT9		/* +q -- ircd 2.9			*/
+#define CHANNOCLR  BIT10	/* +c -- bahamut			*/
+#define CHANREGON  BIT11	/* +R -- bahamut			*/
+#define CHANMODR   BIT12	/* +M -- bahamut			*/
+#define CHANNOCTCP BIT13        /* +C -- QuakeNet's ircu 2.10           */
+#define CHANLONLY  BIT14        /* +r -- ircu 2.10.11                   */
 
 #define MODES_PER_LINE_MAX 6
 
@@ -208,46 +205,38 @@ struct chanset_t {
  * #define CHAN_TEMP           0x0000
  */
 
-#define CHAN_ENFORCEBANS    0x0001	   /* kick people who match channel bans */
-#define CHAN_DYNAMICBANS    0x0002	   /* only activate bans when needed     */
-#define CHAN_NOUSERBANS     0x0004	   /* don't let non-bots place bans      */
-#define CHAN_CLOSED         0x0008	   /* Only users +o can join */
-#define CHAN_BITCH          0x0010	   /* be a tightwad with ops             */
-#define CHAN_TAKE 	    0x0020         /* When a bot gets opped, take the chan */
-#define CHAN_PROTECTOPS     0x0040	   /* re-op any +o people who get deop'd */
-#define CHAN_NOMOP	    0x0080         /* If a bot sees a mass op, botnet mdops */
-#define CHAN_REVENGE        0x0100	   /* get revenge on bad people          */
-#define CHAN_SECRET         0x0200	   /* don't advertise channel on botnet  */
-#define CHAN_MANOP          0x0400         /* manual opping allowed? */
-#define CHAN_CYCLE          0x0800	   /* cycle the channel if possible      */
-/*#define CHAN_    0x1000	   */
-#define CHAN_INACTIVE       0x2000	   /* no irc support for this channel
-                                         - drummer                           */
-/* #define CHAN_               0x4000	   */
-#define CHAN_VOICE          0x8000	   /* a bot +y|y will voice *, except +q */
-/* #define CHAN_           0x10000 */
-#define CHAN_REVENGEBOT     0x20000	   /* revenge on actions against the bot */
-#define CHAN_NODESYNCH      0x40000
-#define CHAN_FASTOP         0x80000        /* Bots will not use +o-b to op (no cookies) */ 
-#define CHAN_PRIVATE         0x100000       /* users need |o to access chan */ 
-#define CHAN_ACTIVE         0x1000000  /* like i'm actually on the channel
-                                          and stuff                          */
-#define CHAN_PEND           0x2000000  /* just joined; waiting for end of
-                                          WHO list                           */
-#define CHAN_FLAGGED        0x4000000  /* flagged during rehash for delete   */
-/* #define CHAN_ 		    0x8000000  */
-#define CHAN_ASKEDBANS      0x10000000
-#define CHAN_ASKEDMODES     0x20000000 /* find out key-info on IRCu          */
-#define CHAN_JUPED          0x40000000 /* Is channel juped                   */
-#define CHAN_STOP_CYCLE     0x80000000 /* Some efnetservers have defined
-                                          NO_CHANOPS_WHEN_SPLIT              */
-#define CHAN_ASKED_EXEMPTS  0x0001
-#define CHAN_ASKED_INVITED  0x0002
+#define CHAN_ENFORCEBANS    BIT0	/* kick people who match channel bans */
+#define CHAN_DYNAMICBANS    BIT1	/* only activate bans when needed     */
+#define CHAN_NOUSERBANS     BIT2	/* don't let non-bots place bans      */
+#define CHAN_CLOSED         BIT3	/* Only users +o can join */
+#define CHAN_BITCH          BIT4	/* be a tightwad with ops             */
+#define CHAN_TAKE 	    BIT5	/* When a bot gets opped, take the chan */
+#define CHAN_PROTECTOPS     BIT6	/* re-op any +o people who get deop'd */
+#define CHAN_NOMOP	    BIT7        /* If a bot sees a mass op, botnet mdops */
+#define CHAN_REVENGE        BIT8	/* get revenge on bad people          */
+#define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
+#define CHAN_MANOP          BIT10       /* manual opping allowed? */
+#define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
+#define CHAN_INACTIVE       BIT12	/* no irc support for this channel */
+#define CHAN_VOICE          BIT13	/* a bot +y|y will voice *, except +q */
+#define CHAN_REVENGEBOT     BIT14	/* revenge on actions against the bot */
+#define CHAN_NODESYNCH      BIT15
+#define CHAN_FASTOP         BIT16	/* Bots will not use +o-b to op (no cookies) */ 
+#define CHAN_PRIVATE        BIT17	/* users need |o to access chan */ 
+#define CHAN_ACTIVE         BIT18	/* like i'm actually on the channel and stuff */
+#define CHAN_PEND           BIT19	/* just joined; waiting for end of WHO list */
+#define CHAN_FLAGGED        BIT20	/* flagged during rehash for delete   */
+#define CHAN_ASKEDBANS      BIT21
+#define CHAN_ASKEDMODES     BIT22	/* find out key-info on IRCu          */
+#define CHAN_JUPED          BIT23	/* Is channel juped                   */
+#define CHAN_STOP_CYCLE     BIT24	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
 
-#define CHAN_DYNAMICEXEMPTS 0x0004
-#define CHAN_NOUSEREXEMPTS  0x0008
-#define CHAN_DYNAMICINVITES 0x0010
-#define CHAN_NOUSERINVITES  0x0020
+#define CHAN_ASKED_EXEMPTS  BIT0
+#define CHAN_ASKED_INVITED  BIT1
+#define CHAN_DYNAMICEXEMPTS BIT2
+#define CHAN_NOUSEREXEMPTS  BIT3
+#define CHAN_DYNAMICINVITES BIT4
+#define CHAN_NOUSERINVITES  BIT5
 /* prototypes */
 memberlist *ismember(struct chanset_t *, char *);
 struct chanset_t *findchan(const char *name);
@@ -267,9 +256,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_dynamicbans(chan) (chan->status & CHAN_DYNAMICBANS)
 #define channel_nouserbans(chan) (chan->status & CHAN_NOUSERBANS)
 #define channel_protectops(chan) (chan->status & CHAN_PROTECTOPS)
-#define channel_autovoice(chan) (0)
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
-#define channel_shared(chan) (1)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
 #define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
@@ -291,8 +278,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */
-
-
 
 struct msgq_head {
   struct msgq *head;

@@ -6,11 +6,11 @@
 #ifndef _EGG_MOD_SHARE_SHARE_H
 #define _EGG_MOD_SHARE_SHARE_H
 
-#define	UFF_OVERRIDE	0x000001	/* Override existing bot entries    */
-#define UFF_INVITE	0x000002	/* Send invites in user file	    */
-#define UFF_EXEMPT	0x000004	/* Send exempts in user file	    */
-#define UFF_CHANS	0x000020	/* Send channels in user file */
-#define UFF_TCL		0x000040	/* Send tcl file with userfile */
+#define	UFF_OVERRIDE	BIT0	/* Override existing bot entries    */
+#define UFF_INVITE	BIT1	/* Send invites in user file	    */
+#define UFF_EXEMPT	BIT2	/* Send exempts in user file	    */
+#define UFF_CHANS	BIT3	/* Send channels in user file */
+#define UFF_TCL		BIT4	/* Send tcl file with userfile */
 
 /* Currently reserved flags for other modules:
  *      UFF_COMPRESS    0x000008	   Compress the user file

@@ -830,14 +830,8 @@ int readuserfile(char *file, struct userrec **ret)
 	    /* NOTE only remove bans for when getting a userfile
 	     * from another bot & that channel is shared */
 	    cst = findchan_by_dname(lasthand);
-	    if ((*ret == userlist) || channel_shared(cst)) {
-	      clear_masks(cst->bans);
-	      cst->bans = NULL;
-	    } else {
-	      /* otherwise ignore any bans for this channel */
-	      cst = NULL;
-	      lasthand[0] = 0;
-	    }
+            clear_masks(cst->bans);
+	    cst->bans = NULL;
 	  }
 	} else if (!strncmp(code, "&&", 2)) {
 	  /* channel-specific exempts */
@@ -856,14 +850,8 @@ int readuserfile(char *file, struct userrec **ret)
 	    /* NOTE only remove exempts for when getting a userfile
 	     * from another bot & that channel is shared */
 	    cst = findchan_by_dname(lasthand);
-	    if ((*ret == userlist) || channel_shared(cst)) {
-	      clear_masks(cst->exempts);
-	      cst->exempts = NULL;
-	    } else {
-	      /* otherwise ignore any exempts for this channel */
-	      cst = NULL;
-	      lasthand[0] = 0;
-	    }
+	    clear_masks(cst->exempts);
+	    cst->exempts = NULL;
 	  }
 	} else if (!strncmp(code, "$$", 2)) {
 	  /* channel-specific invites */
@@ -882,14 +870,8 @@ int readuserfile(char *file, struct userrec **ret)
 	    /* NOTE only remove invites for when getting a userfile
 	     * from another bot & that channel is shared */
 	    cst = findchan_by_dname(lasthand);
-	    if ((*ret == userlist) || channel_shared(cst)) {
-	      clear_masks(cst->invites);
-              cst->invites = NULL;
-	    } else {
-	      /* otherwise ignore any invites for this channel */
-	      cst = NULL;
-	      lasthand[0] = 0;
-	    }
+	    clear_masks(cst->invites);
+            cst->invites = NULL;
 	  }
 	} else if (!strncmp(code, "--", 2)) {
 	  if (u) {

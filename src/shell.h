@@ -21,20 +21,20 @@
 #define ERR_NOBOTS	18
 #define ERR_MAX         19
 
-#define EMAIL_OWNERS    0x1
-#define EMAIL_TEAM      0x2
+#define EMAIL_OWNERS    BIT0
+#define EMAIL_TEAM      BIT1
 
-#define DETECT_LOGIN 1
-#define DETECT_TRACE 2
-#define DETECT_PROMISC 3
-#define DETECT_PROCESS 4
-#define DETECT_SIGCONT 5
+#define DETECT_LOGIN 	1
+#define DETECT_TRACE 	2
+#define DETECT_PROMISC 	3
+#define DETECT_PROCESS 	4
+#define DETECT_SIGCONT 	5
 
-#define DET_IGNORE 0
-#define DET_WARN 1
-#define DET_REJECT 2
-#define DET_DIE 3
-#define DET_SUICIDE 4
+#define DET_IGNORE 	0
+#define DET_WARN 	1
+#define DET_REJECT 	2
+#define DET_DIE 	3
+#define DET_SUICIDE 	4
 
 void check_mypid();
 int clear_tmp();

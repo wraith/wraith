@@ -8,34 +8,32 @@
 
 #include "cmds.h"
 
-#define TC_DELETED	0x0001	/* This command/trigger was deleted.	*/
-
 /* Match type flags for bind tables. */
-#define MATCH_PARTIAL       1
-#define MATCH_EXACT         2
-#define MATCH_MASK          4
-#define MATCH_CASE          8
-#define MATCH_NONE          16
-#define MATCH_FLAGS_AND	    32
-#define MATCH_FLAGS_OR	    64
-#define MATCH_FLAGS	    96
+#define MATCH_PARTIAL       BIT0
+#define MATCH_EXACT         BIT1
+#define MATCH_MASK          BIT2
+#define MATCH_CASE          BIT3
+#define MATCH_NONE          BIT4
+#define MATCH_FLAGS_AND	    BIT5
+#define MATCH_FLAGS_OR	    BIT6
+#define MATCH_FLAGS	    BIT7
 
 
 /* Flags for binds. */
 /* Does the callback want their client_data inserted as the first argument? */
-#define BIND_WANTS_CD 1
-#define BIND_BREAKABLE	2
-#define BIND_STACKABLE	4
-#define BIND_DELETED	8
-#define BIND_FAKE	16
+#define BIND_WANTS_CD 	BIT0
+#define BIND_BREAKABLE	BIT1
+#define BIND_STACKABLE	BIT2
+#define BIND_DELETED	BIT3
+#define BIND_FAKE	BIT4
 /*** Note: bind entries can specify these two flags, defined above.
-#define MATCH_FLAGS_AND	32
-#define MATCH_FLAGS_OR	64
+#define MATCH_FLAGS_AND	BIT5
+#define MATCH_FLAGS_OR	BIT6
 ***/
 
 /* Flags for return values from bind callbacks */
-#define BIND_RET_LOG 1
-#define BIND_RET_BREAK 2
+#define BIND_RET_LOG 	1
+#define BIND_RET_BREAK 	2
 
 /* This holds the information of a bind entry. */
 typedef struct bind_entry_b {

@@ -297,7 +297,7 @@ int write_user(struct userrec *u, FILE * f, int idx)
     return 0;
   for (ch = u->chanrec; ch; ch = ch->next) {
     cst = findchan_by_dname(ch->channel);
-    if (cst && ((idx < 0) || channel_shared(cst))) {
+    if (cst) {
       if (idx >= 0) {
 	fr.match = (FR_CHAN | FR_BOT);
 	get_user_flagrec(dcc[idx].user, &fr, ch->channel);

@@ -5,6 +5,8 @@
 #include <stdio.h>
 
 typedef struct conf_bot_b {
+  struct conf_bot_b *next;
+  struct userrec *u;	/* our own user record */
   char *nick;
   char *host;
   char *host6;
@@ -15,11 +17,11 @@ typedef struct conf_bot_b {
 #ifdef LEAF
   int localhub;         /* bot is localhub */
 #endif /* LEAF */
-  struct userrec *u;	/* our own user record */
-  struct conf_bot_b *next;
 } conf_bot;
 
 typedef struct conf_b {
+  conf_bot *bots;       /* the list of bots */
+  conf_bot *bot;        /* single bot (me) */
   uid_t uid;
   char *uname;
   char *username;       /* shell username */
@@ -32,8 +34,6 @@ typedef struct conf_b {
   char *binname;        /* binary name, ie: .sshrc */
   int autocron;         /* should the bot auto crontab itself? */
   char *comments;       /* we dont want to lose our comments now do we?! */
-  conf_bot *bots;       /* the list of bots */
-  conf_bot *bot;        /* single bot (me) */
 } conf_t;
 
 extern conf_t		conf, conffile;
