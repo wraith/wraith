@@ -1515,7 +1515,7 @@ char * kickreason(int kind) {
     switch (r % 6) {
     case 0: return STR("bye");
     case 1: return STR("banned");
-    case 2: return STR("bummer");
+    case 2: return STR("see you in hell");
     case 3: return STR("go away");
     case 4: return STR("cya around looser");
     case 5: return STR("unwanted!");
@@ -1541,9 +1541,9 @@ char * kickreason(int kind) {
     case 2: return STR("mode this");
     case 3: return STR("nice try");
     case 4: return STR("really?");
-    case 5: return STR("mIRC sux for mdop kiddo");
+    case 5: return STR("you lose");
     case 6: return STR("scary... really scary...");
-    case 7: return STR("you lost the game!");
+    case 7: return STR("i win kthx");
     }
   case KICK_BADOP:
     switch (r % 5) {
@@ -1555,7 +1555,7 @@ char * kickreason(int kind) {
     }
   case KICK_BADOPPED:
     switch (r % 5) {
-    case 0: return STR("buggar off kid");
+    case 0: return STR("fuck off kid");
     case 1: return STR("asl?");
     case 2: return STR("whoa... what a hacker... skills!");
     case 3: return STR("yes! yes! yes! hit me baby one more time!");
@@ -1586,7 +1586,7 @@ char * kickreason(int kind) {
     case 0: return STR("locked");
     case 1: return STR("later");
     case 2: return STR("closed for now");
-    case 3: return STR("sorry, but it's getting late, locking channel. cya around");
+    case 3: return STR("come back later");
     case 4: return STR("better safe than sorry");
     case 5: return STR("cleanup, come back later");
     case 6: return STR("this channel is closed");
@@ -1917,14 +1917,18 @@ void werr(int errnum)
  */
 int private(struct flag_record fr, struct chanset_t *chan, int type)
 {
+Context;
   if (!channel_private(chan) || glob_bot(fr) || glob_owner(fr))
     return 0; /* user is implicitly not restricted by +private, they may however be lacking other flags */
+Context;
 
   if (type == PRIV_OP) {
     /* |o implies all flags above. n| has access to all +private. Bots are exempt. */
+Context;
     if (chan_op(fr))
       return 0;
   } else if (type == PRIV_VOICE) {
+Context;
     if (chan_voice(fr))
       return 0;
   }
