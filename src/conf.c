@@ -448,6 +448,7 @@ free_conf()
 {
   free_conf_bots();
   free_bot(conf.bot);
+  conf.bot = NULL;
   free(conf.localhub);
   free(conf.uname);
   free(conf.username);
@@ -804,7 +805,6 @@ fill_conf_bot()
     werr(ERR_BADBOT);
 
   free(mynick);
-
   /* for future, we may just want to make this a pointer to ->bots if we do an emech style currentbot-> */
   conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
   conf_bot_dup(conf.bot, me);

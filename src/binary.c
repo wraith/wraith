@@ -75,6 +75,30 @@ bin_checksum(const char *fname, int todo)
     OPENSSL_cleanse(&ctx, sizeof(ctx));
   }
 
+  if (todo == GET_CONF) {
+    char *oldhash = strdup(settings.hash);
+
+    if (!(f = fopen(fname, "rb")))
+      werr(ERR_BINSTAT);
+
+    while ((len = fread(buf, 1, sizeof buf - 1, f)))
+      if (!memcmp(buf, &settings.prefix, PREFIXLEN))
+        break;
+
+    char *tmpbuf = (char *) calloc(1, SIZE_PACK);
+ 
+    if ((len = fread(tmpbuf, 1, SIZE_PACK, f))) {
+      edpack(&settings, oldhash, PACK_ENC);
+      len = fread(&settings.bots, 1, SIZE_CONF, f);
+      edpack(&settings, oldhash, PACK_DEC);
+    } else
+      return NULL;
+
+    free(oldhash);
+    fclose(f);
+    return settings.hash;
+  }
+
   if (todo & WRITE_CHECKSUM) {
     Tempfile *newbin = new Tempfile("bin");
     char *fname_bak = NULL;
