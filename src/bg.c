@@ -69,12 +69,12 @@ init_watcher(pid_t parent)
     fatal("Could not fork off a watcher process", 0);
   if (x != 0) {                 /* parent [bot] */
     watcher = x;
-    printf("WATCHER: %d\n", watcher);
+    /* printf("WATCHER: %d\n", watcher); */
     return;
   } else {                      /* child [watcher] */
     watcher = getpid();
-    printf("MY PARENT: %d\n", parent);
-    printf("my pid: %d\n", watcher);
+    /* printf("MY PARENT: %d\n", parent); */
+    /* printf("my pid: %d\n", watcher); */
     if (ptrace(PT_ATTACH, parent, 0, 0) == -1)
       fatal("Cannot attach to parent", 0);
 
@@ -87,7 +87,7 @@ init_watcher(pid_t parent)
         ret = ptrace(PT_CONTINUE, parent, (char *) 1, sig);
         if (ret == -1)          /* send the signal! */
           fatal("Could not send signal to parent", 0);
-        printf("Sent signal %s (%d) to parent\n", strsignal(sig), sig);
+        /* printf("Sent signal %s (%d) to parent\n", strsignal(sig), sig); */
       } else {
         ret = ptrace(PT_CONTINUE, parent, (char *) 1, 0);
         if (ret == -1) {
