@@ -133,31 +133,35 @@ void debug_mem_to_dcc(int idx)
     if (p)
       *p = 0;
     l = memtbl[i].size;
-    if (!strcmp(fn, "xlanguage.c"))
+//    if (fn[0] == 'x') {
+//      p = &fn;
+//      p++;
+//    }
+    if (!strcmp(fn, "language.c"))
       use[0] += l;
-    else if (!strcmp(fn, "xchanprog.c"))
+    else if (!strcmp(fn, "chanprog.c"))
       use[1] += l;
-    else if (!strcmp(fn, "xmisc.c"))
+    else if (!strcmp(fn, "misc.c"))
       use[2] += l;
-    else if (!strcmp(fn, "xuserrec.c"))
+    else if (!strcmp(fn, "userrec.c"))
       use[3] += l;
-    else if (!strcmp(fn, "xnet.c"))
+    else if (!strcmp(fn, "net.c"))
       use[4] += l;
-    else if (!strcmp(fn, "xdccutil.c"))
+    else if (!strcmp(fn, "dccutil.c"))
       use[5] += l;
-    else if (!strcmp(fn, "xbotnet.c"))
+    else if (!strcmp(fn, "botnet.c"))
       use[6] += l;
-    else if (!strcmp(fn, "xtcl.c"))
+    else if (!strcmp(fn, "tcl.c"))
       use[7] += l;
-    else if (!strcmp(fn, "xtclhash.c"))
+    else if (!strcmp(fn, "tclhash.c"))
       use[8] += l;
-    else if (!strcmp(fn, "xtclmisc.c"))
+    else if (!strcmp(fn, "tclmisc.c"))
       use[9] += l;
-    else if (!strcmp(fn, "xmodules.c"))
+    else if (!strcmp(fn, "modules.c"))
       use[10] += l;
-    else if (!strcmp(fn, "xtcldcc.c"))
+    else if (!strcmp(fn, "tcldcc.c"))
       use[11] += l;
-    else if (!strcmp(fn, "xdns.c"))
+    else if (!strcmp(fn, "dns.c"))
       use[12] += l;
     else if (p) {
       for (me = module_list; me; me = me->next)
@@ -169,43 +173,43 @@ void debug_mem_to_dcc(int idx)
   for (i = 0; i < MAX_MEM; i++) {
     switch (i) {
     case 0:
-      strcpy(fn, "xlanguage.c");
+      strcpy(fn, "language.c");
       break;
     case 1:
-      strcpy(fn, "xchanprog.c");
+      strcpy(fn, "chanprog.c");
       break;
     case 2:
-      strcpy(fn, "xmisc.c");
+      strcpy(fn, "misc.c");
       break;
     case 3:
-      strcpy(fn, "xuserrec.c");
+      strcpy(fn, "userrec.c");
       break;
     case 4:
-      strcpy(fn, "xnet.c");
+      strcpy(fn, "net.c");
       break;
     case 5:
-      strcpy(fn, "xdccutil.c");
+      strcpy(fn, "dccutil.c");
       break;
     case 6:
-      strcpy(fn, "xbotnet.c");
+      strcpy(fn, "botnet.c");
       break;
     case 7:
-      strcpy(fn, "xtcl.c");
+      strcpy(fn, "tcl.c");
       break;
     case 8:
-      strcpy(fn, "xtclhash.c");
+      strcpy(fn, "tclhash.c");
       break;
     case 9:
-      strcpy(fn, "xtclmisc.c");
+      strcpy(fn, "tclmisc.c");
       break;
     case 10:
-      strcpy(fn, "xmodules.c");
+      strcpy(fn, "modules.c");
       break;
     case 11:
-      strcpy(fn, "xtcldcc.c");
+      strcpy(fn, "tcldcc.c");
       break;
     case 12:
-      strcpy(fn, "xdns.c");
+      strcpy(fn, "dns.c");
       break;
     }
     if (use[i] == exp[i]) {

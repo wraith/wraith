@@ -16,8 +16,7 @@ char netpass[16], thepass[33], dcc_prefix[1], owners[2048], hubs[2048];
 //Change everything..
 #define NETPASS STR("kd8e3nchasd93dk") //Just 15 random chars here..
 #define THEPASS STR("d166239eb0558fc14c25a0826d20286d") //this md5 hash will be used for various purposes..
-#define DCCPREFIX STR("!") //This is the cmd prefix for dcc, ie: .cmd could be "."
-
+#define DCCPREFIX "!" //This is the cmd prefix for dcc, ie: .cmd could be "."
 
 //You can define an infinite ammount of hubs/owners.
 //All hubs must be added/defined in this, owners can be later added via partyline.
@@ -81,7 +80,7 @@ void init_settings() {
   snprintf(hubs, sizeof hubs, HUBS);
   snprintf(netpass, sizeof netpass, NETPASS); 
   snprintf(thepass, sizeof thepass, THEPASS);
-  snprintf(dcc_prefix, sizeof dcc_prefix, DCCPREFIX);
+  sprintf(dcc_prefix, DCCPREFIX);
   if (SDEBUG)
-    printf(STR("netpass: %s thepass: %s\n"), netpass, thepass);
+    printf(STR("dcc_prefix: %s netpass: %s thepass: %s\n"), dcc_prefix, netpass, thepass);
 }

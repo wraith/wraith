@@ -368,12 +368,15 @@ struct userrec *get_user_by_equal_host(char *host)
 /* Try: pass_match_by_host("-",host)
  * will return 1 if no password is set for that host
  */
-int u_pass_match(struct userrec *u, char *pass)
+int u_pass_match(struct userrec *u, char *in)
 {
-  char *cmp, new[32];
+  char *cmp, new[32], pass[16];
 
   if (!u)
     return 0;
+
+  snprintf(pass, sizeof pass, "%s", in);
+
   cmp = get_user(&USERENTRY_PASS, u);
   if (!cmp && (!pass[0] || (pass[0] == '-')))
     return 1;

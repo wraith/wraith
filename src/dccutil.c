@@ -83,14 +83,14 @@ extern void (*qserver) (int, char *, int);
 
 void dprintf EGG_VARARGS_DEF(int, arg1)
 {
-  static char buf[1024];
-  char *format, buf3[1024] = "", buf2[1024] = "", c; 
+  static char buf[1624];
+  char *format, buf3[1624] = "", buf2[1624] = "", c; 
   int idx, len, id;
   va_list va;
 
   idx = EGG_VARARGS_START(int, arg1, va);
   format = va_arg(va, char *);
-  egg_vsnprintf(buf, 1023, format, va);
+  egg_vsnprintf(buf, 1623, format, va);
   va_end(va);
   /* We can not use the return value vsnprintf() to determine where
    * to null terminate. The C99 standard specifies that vsnprintf()
@@ -198,10 +198,10 @@ broke:
     }
     return;
   } else {
-    if (len > 500) {		/* Truncate to fit */
-      buf[500] = 0;
+    if (len > 1000) {		/* Truncate to fit */
+      buf[1000] = 0;
       strcat(buf, "\n");
-      len = 501;
+      len = 1001;
     }
 
     if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {
@@ -274,9 +274,9 @@ void dcc_chatter(int idx)
 Context;
   if (glob_master(fr)) {
     if ((tands+1) > 1)
-      dprintf(idx, STR("There is \002-%d- bot\002 currently linked.\n"), tands + 1);
-    else
       dprintf(idx, STR("There are \002-%d- bots\002 currently linked.\n"), tands + 1);
+    else
+      dprintf(idx, STR("There is \002-%d- bot\002 currently linked.\n"), tands + 1);
   }
   show_channels(idx, NULL);
 Context;

@@ -1044,16 +1044,12 @@ static void dcc_chat(int idx, char *buf, int i)
     else
       *d = 0;
     if (buf[0]) {		/* Nothing to say - maybe paging... */
-      char *tmppass;
 
-      tmppass = nmalloc(strlen(buf)+1);
-      strcpy(tmppass, buf);
-      if (u_pass_match(dcc[idx].user, tmppass)) { //user said their password :)
+      if (u_pass_match(dcc[idx].user, buf)) { //user said their password :)
         dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
-        if (tmppass)
-          nfree(tmppass);
       } else if ((!strncmp(buf,dcc_prefix,strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
-	if (!strncmp(buf,dcc_prefix,strlen(dcc_prefix)))
+
+	if (!strncmp(buf, dcc_prefix,strlen(dcc_prefix)))
 	  buf++;
 	v = newsplit(&buf);
 	rmspace(buf);
