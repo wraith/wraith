@@ -14,7 +14,8 @@ for mf in $files; do
   for file in `sed -n -e '
     /^OBJS = .*\\\\$/ {
       s/^OBJS = //
-      :loop   s/\\\\$//
+      :loop   
+        s/\\\\$//
         p
         n
         /\\\\$/ b loop
