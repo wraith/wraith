@@ -1,5 +1,9 @@
 This is a summary of ChangeLog basically.
 
+1.1.9
+
+1.Fixed cmd_help to display the proper entry.
+
 1.1.8
 
 1.Fixed cosmetic error in help:decrypt.

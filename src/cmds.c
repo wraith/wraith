@@ -749,7 +749,7 @@ findhelp(const char *cmd)
 
   for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
     if (!egg_strcasecmp(cmd, help[hi].cmd))
-      return 1;
+      return hi;
   return 0;
 }
 
