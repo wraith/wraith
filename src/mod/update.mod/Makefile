@@ -12,12 +12,13 @@ doofus:
 static: ../update.o
 
 ../update.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/update.c
+	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/update.c
 	@rm -f ../update.o
-	mv update.o ../
+	@mv update.o ../
 
 depend:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/update.c > .depend
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/update.c > .depend
 
 clean:
 	@rm -f .depend *.o *~
@@ -25,7 +26,7 @@ distclean: clean
 
 #safety hash
 ../update.o: .././update.mod/update.c ../../../src/mod/module.h \
- ../../../src/main.h ../../../config.h ../../../src/conf.h \
+ ../../../src/main.h ../../../config.h ../../../pack/conf.h \
  ../../../src/lang.h \
  ../../../src/eggdrop.h ../../../src/flags.h ../../../src/proto.h \
  ../../../lush.h ../../../src/misc_file.h ../../../src/cmdt.h \

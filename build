@@ -93,19 +93,11 @@ TCLDIR=`cat pack/conf.h 2>&1 | grep "//" | awk '/TCLDIR/ {print $2}' |  sed -e '
 if test -z ${TCLDIR}
 then
   echo "[*] Searching for TCL in default dirs (edit $packname to change)"
-  ./configure --disable-tcl-threads > /dev/null 2>configure.temp
+  ./configure --silent --disable-tcl-threads
 else
   echo "[*] Searching for TCL in: $TCLDIR"
-  ./configure --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
+  ./configure --silent --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h
 fi
-#if test "`cat configure.temp`"
-#then
-#  echo "Configure error'd"
-#  cat configure.temp
-#
-#  exit 1
-#fi
-#rm -f configure.temp
 
 # make clean, just in case
 if [ $clean = "1" ]; then
@@ -116,7 +108,7 @@ fi
 if [ $leaf = "1" ]; then
  # Build leaf and check
  echo "[*] Building ${d}leaf..."
- make ${d}leaf > /dev/null
+ make ${d}leaf -s
  if ! test -f leaf
  then
    echo "[!] ${d}leaf build failed"
@@ -126,7 +118,7 @@ fi
 if [ $hub = "1" ]; then
  # Build hub and check
  echo "[*] Building ${d}hub..."
- make ${d}hub > /dev/null
+ make ${d}hub -s
  if ! test -f hub
  then
    echo "[!] ${d}hub build failed"

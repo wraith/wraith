@@ -26,7 +26,7 @@ mc_top_srcdir=
 mc_srcdir=
 mc_bindir=.
 
-mc_flag_quiet=no
+mc_flag_quiet=yes
 mc_flag_onlynew=no
 
 
@@ -301,7 +301,6 @@ xMakefile)
 	fi
 
 	mc_mod_objs=`echo ${mc_sel_modules} | sed -e 's/\.mod/.mod_o/g'`
-	mc_mod_libs=`echo ${mc_sel_modules} | sed -e 's/\.mod/.mod_so/g'`
 
 	if test ! -f ${mc_fMakefile}; then
 		echo "failed." 1>&6
@@ -314,7 +313,6 @@ xMakefile)
 	if (cat "${mc_fMakefile}" | \
 	    sed -e "s/^\(mods =\).*$/\1 ${mc_sel_modules}/g"  \
 		-e "s/^\(mod_objs =\).*$/\1 ${mc_mod_objs}/g" \
-		-e "s/^\(mod_libs =\).*$/\1 ${mc_mod_libs}/g" \
 	    1> "${mc_fMakefile}_new"); then
 		mv "${mc_fMakefile}_new" "${mc_fMakefile}"
 	else

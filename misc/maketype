@@ -13,7 +13,7 @@ then
 #elif [ $1 = "binary" ]; then
       mod="`echo $s | cut -d / -f 3`";
       os="`echo src/mod/$mod | sed s/\\\.mod/\\\.o/g`";
-     echo "deleting $os"
+#     echo "deleting $os"
      rm -f $os
 #    fi
     else
@@ -22,12 +22,12 @@ then
       then
         if test "`file $os | grep ELF`"
         then
-          echo "Deleting $os"
+#          echo "Deleting $os"
   	  rm -f $os
         else
           if test "`file $os | grep object`"
           then
-            echo "Deleting $os"
+#            echo "Deleting $os"
     	    rm -f $os
           fi
         fi

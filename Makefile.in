@@ -32,7 +32,6 @@ CFLGS =
 
 # defaults
 CC = @CC@
-#CC = gcc-2.95
 LD = @CC@
 STRIP = @STRIP@
 RANLIB = @RANLIB@
@@ -76,35 +75,32 @@ egg_install_msg =  echo "" && \
 		   echo "Now run \"make install\" to install your bot." && \
 		   echo ""
 
-CFLAGS = @CFLAGS@ -I.. @DEFS@ $(CFLGS)
-DEBCFLAGS = @CFLAGS@ -I.. @DEFS@ -DDEBUG_ASSERT -DDEBUG_MEM $(CFLGS)
+DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM
 
-MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
-'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS) -DSTATIC -DLEAF' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)' 'LD=$(LD)' \
-'MODS=$(MODSALL) $(MODSLEAF)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DLEAF'
+MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
+'STRIP=$(STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -DLEAF' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)' \
+'MODOBJS=mod/*.o' 
 
-MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
-'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS) -DSTATIC -DHUB' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' 'LD=$(LD)' \
-'MODS=$(MODSALL) $(MODSHUB)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DHUB'
+MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
+'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) -DLEAF $(CFLGS)' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
+'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 'MODOBJS=mod/*.o'
 
-MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
-'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS) -DSTATIC -DLEAF' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 'LD=$(LD) -g' \
-'MODS=$(MODSALL) $(MODSLEAF)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DLEAF'
+MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
+'STRIP=$(STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -DLEAF' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
+'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' \
+'MODOBJS=mod/*.o'
 
-MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
-'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS) -DSTATIC -DHUB' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'LD=$(LD) -g' \
-'MODS=$(MODSALL) $(MODSHUB)' 'MODOBJS=mod/*.o' 'CFLGS=$(CFLGS) -DHUB'
+MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
+'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) -DLEAF $(CFLGS)' \
+'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
+'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'MODOBJS=mod/*.o'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
-'RANLIB=$(RANLIB)' 'CFLAGS=$(CFLAGS) -DSTATIC -DSTANDALONE' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'LD=$(LD)'
-
-MAKE_DUTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=touch' \
-'RANLIB=$(RANLIB)' 'CFLAGS=-g3 $(DEBCFLAGS) -DSTATIC -DSTANDALONE' 'XREQS=$(XREQS)' \
+'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -DSTANDALONE' 'XREQS=$(XREQS)' \
 'XLIBS=$(XLIBS)' 'LD=$(LD)'
 
 MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
@@ -121,13 +117,13 @@ cleanutils:
 	@rm -f stringfix
 
 cleanpack:
-	@rm -f src/settings.c src/salt.h src/conf.h
+	@rm -f src/settings.c
 
 clean:  cleanutils cleanpack
 	@cd src && $(MAKE) clean
 	@cd src/md5 && $(MAKE) clean
 	@cd src/compat && $(MAKE) clean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.so *.stamp core DEBUG *~ key configure.temp makesalt 
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp makesalt 
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/makesalt
 
 distclean: clean clean-modconfig
@@ -157,11 +153,6 @@ salt:
 	@./makesalt
 
 
-packconf:
-	@cp -f pack/settings.c src/settings.c
-	@cp -f pack/salt.h src/salt.h
-	@cp -f pack/conf.h src/conf.h
-
 config:
 	@$(modconf) modules-still-exist
 	@$(modconf) detect-modules
@@ -175,17 +166,21 @@ clean-modconfig:
 
 reconfig: clean-modconfig config
 
+packconf:
+	@cp -f pack/settings.c src/settings.c
+
 utils:  packconf
-	@./misc/maketype utils
+#	@./misc/maketype utils
 	@cd src; $(MAKE_UTILS) ../stringfix
 
-dutils:
-	@./misc/maketype utils
-	@cd src; $(MAKE_DUTILS) ../stringfix
-
-
-
 depleaf:
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "----------------------------------------WTF?_---------------------------------"
+	@echo ""
+	@echo ""
+	@echo ""
 	@cat /dev/null > lush.h
 	@cd src && $(MAKE_DEPEND) depleaf
 	@cd src/md5 && $(MAKE_DEPEND) depleaf

@@ -115,7 +115,6 @@ SHLIB_CC="$CC"
 SHLIB_LD="$CC"
 SHLIB_STRIP="$STRIP"
 NEED_DL=1
-DEFAULT_MAKE=eggdrop
 
 AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNAME -s`)
 AC_CACHE_CHECK(system release, egg_cv_var_system_release, egg_cv_var_system_release=`$UNAME -r`)
@@ -125,7 +124,6 @@ case "$egg_cv_var_system_type" in
     case "`echo $egg_cv_var_system_release | cut -d . -f 1`" in
       2)
         NEED_DL=0
-        DEFAULT_MAKE=static
       ;;
       3)
         MOD_CC=shlicc
@@ -167,7 +165,6 @@ case "$egg_cv_var_system_type" in
       ;;
       *)
         NEED_DL=0
-        DEFAULT_MAKE=static
         AC_MSG_WARN(Make sure the directory Eggdrop is installed into is mounted in binary mode.)
       ;;
     esac
@@ -198,24 +195,20 @@ case "$egg_cv_var_system_type" in
     IRIX=yes
     SHLIB_STRIP=touch
     NEED_DL=0
-    DEFAULT_MAKE=static
   ;;
   Ultrix)
     NEED_DL=0
     SHLIB_STRIP=touch
-    DEFAULT_MAKE=static
     SHELL=/bin/sh5
   ;;
   SINIX*)
     NEED_DL=0
     SHLIB_STRIP=touch
-    DEFAULT_MAKE=static
     SHLIB_CC="cc -G"
   ;;
   BeOS)
     NEED_DL=0
     SHLIB_STRIP=strip
-    DEFAULT_MAKE=static
   ;;
   Linux)
     LINUX=yes
@@ -227,12 +220,10 @@ case "$egg_cv_var_system_type" in
   ;;
   Lynx)
     NEED_DL=0
-    DEFAULT_MAKE=static
     SHLIB_STRIP=strip
   ;;
   QNX)
     NEED_DL=0
-    DEFAULT_MAKE=static
     SHLIB_LD="ld -shared"
     SHLIB_STRIP=strip
   ;;
@@ -265,7 +256,6 @@ case "$egg_cv_var_system_type" in
       ;;
       *)
         NEED_DL=0
-        DEFAULT_MAKE=static
       ;;
     esac
     AC_DEFINE(STOP_UAC)dnl
@@ -303,7 +293,6 @@ case "$egg_cv_var_system_type" in
     then
       AC_MSG_RESULT(yes)
       NEED_DL=0
-      DEFAULT_MAKE=static
       AC_DEFINE(BORGCUBES)dnl
     else
       AC_MSG_RESULT(no)
@@ -313,13 +302,11 @@ case "$egg_cv_var_system_type" in
         AC_MSG_RESULT(yes)
         SHLIB_STRIP=touch
         NEED_DL=0
-        DEFAULT_MAKE=static
       else
         AC_MSG_RESULT(no)
         AC_MSG_RESULT(Something unknown!)
         AC_MSG_RESULT([If you get dynamic modules to work, be sure to let the devel team know HOW :)])
         NEED_DL=0
-        DEFAULT_MAKE=static
       fi
     fi
   ;;
@@ -330,7 +317,6 @@ AC_SUBST(MOD_STRIP)dnl
 AC_SUBST(SHLIB_LD)dnl
 AC_SUBST(SHLIB_CC)dnl
 AC_SUBST(SHLIB_STRIP)dnl
-AC_SUBST(DEFAULT_MAKE)dnl
 ])dnl
 
 
@@ -995,24 +981,17 @@ then
 else
 if test ! "$TCLLIBEXT" = ".a"
 then
-  TCL_REQS="$TCLLIB/lib$TCLLIBFN"
-  TCL_LIBS="-L$TCLLIB -l$TCLLIBFNS $EGG_MATH_LIB"
-else
-
-  # Set default make as static for unshared Tcl library
-  if test ! "$DEFAULT_MAKE" = "static"
-  then
     cat << 'EOF' >&2
 configure: warning:
 
-  Your Tcl library is not a shared lib.
-  configure will now set default make type to static...
+  Your Tcl library is not compiled statically.
+  You will need to compile Tcl statically to successfully compile wraith.
 
 EOF
-    DEFAULT_MAKE=static
-    AC_SUBST(DEFAULT_MAKE)dnl
-  fi
-
+  exit 1
+#  TCL_REQS="$TCLLIB/lib$TCLLIBFN"
+#  TCL_LIBS="-L$TCLLIB -l$TCLLIBFNS $EGG_MATH_LIB"
+else
   # Are we using a pre 7.4 Tcl version ?
   TCL_VER_PRE74=`echo $egg_cv_var_tcl_version | $AWK '{split([$]1, i, "."); if (((i[[1]] == 7) && (i[[2]] < 4)) || (i[[1]] < 7)) print "yes"; else print "no"}'`
   if test "$TCL_VER_PRE74" = "no"
@@ -1079,7 +1058,6 @@ EOF
   static bot (I'll default your make to this version).
 
 EOF
-      DEFAULT_MAKE=static
     fi
   else
     cat << 'EOF' >&2
@@ -1090,7 +1068,6 @@ configure: warning:
   make to static linking.
 
 EOF
-    DEFAULT_MAKE=static
   fi
 fi
 ])dnl

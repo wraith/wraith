@@ -12,12 +12,13 @@ doofus:
 static: ../share.o
 
 ../share.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/share.c
+	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/share.c
 	@rm -f ../share.o
-	mv share.o ../
+	@mv share.o ../
 
 depend:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/share.c > .depend
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/share.c > .depend
 
 clean:
 	@rm -f .depend *.o *~
@@ -25,7 +26,7 @@ distclean: clean
 
 #safety hash
 ../share.o: .././share.mod/share.c ../../../src/mod/module.h \
- ../../../src/main.h ../../../config.h ../../../src/conf.h \
+ ../../../src/main.h ../../../config.h ../../../pack/conf.h \
  ../../../src/lang.h \
  ../../../src/eggdrop.h ../../../src/flags.h ../../../src/proto.h \
  ../../../lush.h ../../../src/misc_file.h ../../../src/cmdt.h \

@@ -18,7 +18,7 @@ STRIP = @STRIP@
 CFLAGS = @CFLAGS@ -I../.. -I$(top_srcdir) @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 MOD_CFLAGS = @CFLAGS@ -I. -I../../.. -I$(MOD_UPDIR)$(top_srcdir) \
-  -I$(MOD_UPDIR)$(top_srcdir)/src/mod @DEFS@ $(CFLGS)
+  -I$(MOD_UPDIR)$(top_srcdir)/src/mod -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
 MOD_CPPFLAGS = @CPPFLAGS@
 XLIBS = @XLIBS@
 
@@ -26,7 +26,6 @@ XLIBS = @XLIBS@
 #       misc/modconfig. They have to be present here.
 mods =
 mod_objs =
-mod_libs =
 
 modconfig = $(top_srcdir)/misc/modconfig --bindir=../.. \
   --top_srcdir=$(top_srcdir)
@@ -42,10 +41,6 @@ doofus:
 	@echo "Let's try this from the right directory..."
 	@echo ""
 	@cd ../.. && $(MAKE)
-
-modules: $(mod_libs)
-	@echo "All modules compiled."
-	@echo ""
 
 static: $(mod_objs)
 	@$(modconfig) static.h
@@ -84,7 +79,7 @@ config:
 			echo "Configuring module $${modname} ..."; \
 			echo ""; \
 			if test ! -d $$i; then mkdir $$i; fi; \
-			(cd $$i && $(MOD_UPDIR)$(srcdir)/$$i/configure $(egg_ac_parameters) --cache-file=../../../config.cache --srcdir=$(MOD_UPDIR)$(top_srcdir)/src/mod/$$i); \
+			(cd $$i && $(MOD_UPDIR)$(srcdir)/$$i/configure $(egg_ac_parameters) --silent --cache-file=../../../config.cache --srcdir=$(MOD_UPDIR)$(top_srcdir)/src/mod/$$i); \
 		fi; \
 	done; \
 	echo ""

@@ -12,12 +12,13 @@ doofus:
 static: ../console.o
 
 ../console.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/console.c
+	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/console.c
 	@rm -f ../console.o
-	mv console.o ../
+	@mv console.o ../
 
 depend:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/console.c > .depend
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/console.c > .depend
 
 clean:
 	@rm -f .depend *.o *~
@@ -25,7 +26,7 @@ distclean: clean
 
 #safety hash
 ../console.o: .././console.mod/console.c ../../../src/mod/module.h \
- ../../../src/main.h ../../../config.h ../../../src/conf.h \
+ ../../../src/main.h ../../../config.h ../../../pack/conf.h \
  ../../../src/lang.h \
  ../../../src/eggdrop.h ../../../src/flags.h ../../../src/proto.h \
  ../../../lush.h ../../../src/misc_file.h ../../../src/cmdt.h \

@@ -12,12 +12,13 @@ doofus:
 static: ../ctcp.o
 
 ../ctcp.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/ctcp.c
+	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/ctcp.c
 	@rm -f ../ctcp.o
-	mv ctcp.o ../
+	@mv ctcp.o ../
 
 depend:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/ctcp.c > .depend
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/ctcp.c > .depend
 
 clean:
 	@rm -f .depend *.o *~
@@ -26,7 +27,7 @@ distclean: clean
 #safety hash
 ../ctcp.o: .././ctcp.mod/ctcp.c ../ctcp.mod/ctcp.h \
  ../../../src/mod/module.h \
- ../../../src/main.h ../../../config.h ../../../src/conf.h \
+ ../../../src/main.h ../../../config.h ../../../pack/conf.h \
  ../../../src/lang.h ../../../src/eggdrop.h ../../../src/flags.h \
  ../../../src/proto.h ../../../lush.h ../../../src/misc_file.h \
  ../../../src/cmdt.h ../../../src/tclegg.h ../../../src/tclhash.h \
