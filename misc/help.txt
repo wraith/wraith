@@ -266,7 +266,8 @@ See also: tcl
    '?' for exactly 1 char. Use this cmd carefuly, and even think about placing
    a cmdpass on it.
  
-   Just using '?' for 'bot' will chose a random leaf bot.
+   Just using '?' for 'bot' will choose a random leaf bot.
+   Just using '&' for 'bot' will do the cmd on all localhub bots. (first bot in config).
  
 See also: bc, cmdpass
 :hub:botconfig:
