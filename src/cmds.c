@@ -2448,8 +2448,6 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
   		     mns = {0, 0, 0},
 		     user = {0, 0, 0},
 		     ouser = {0, 0, 0};
-  /*int fl = -1, of = 0, ocf = 0;*/
-/* FIXME: fl WAS -1 */
   flag_t of = 0, ocf = 0;
 
   if (!par[0]) {
@@ -2530,7 +2528,6 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
         free(tmpchg);
       return;
     }
-/* FIXME: POSSIBLY WRONG BECAUSE OF SIGNNES CHANGE OF fl */
   user.match &= -1;
 
   if (chg) {
@@ -2546,7 +2543,9 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     }
     
     /* strip out +p without +i or +j */
-    if (((pls.global & USER_PARTY) && !(pls.global & USER_CHUBA) && !(pls.global & USER_HUBA)) && (!glob_huba(ouser) && !glob_chuba(ouser))) {
+    if ((pls.global & USER_PARTY) && 
+        (!((pls.global & USER_CHUBA) || (pls.global & USER_HUBA)) || 
+          !(glob_huba(ouser) || glob_chuba(ouser)))) {
       dprintf(idx, "Global flag +p requires either chathub or hub access first.\n");
       pls.global &= ~USER_PARTY;
     }
