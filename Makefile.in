@@ -91,12 +91,12 @@ clean:  cleanutils
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp *~ src/*~ configure.temp .mangled
+	@rm -f $(HUBEXEC) $(LEAFEXEC) stamp.* *~ src/*~ configure.temp .mangled
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/help.h src/response.h src/responses.h utctime
 
 distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
-	@rm -f config.cache config.log config.status config.h stamp.*
+	@rm -f config.cache config.log config.status config.h 
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
 	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/ src/crypto/.deps
 
