@@ -843,54 +843,7 @@ static int channels_expmem()
     tot += strlen(lastdeletedmask) + 1;
   return tot;
 }
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-static char *traced_globchanset(ClientData cdata, Tcl_Interp * irp,
-                               CONST char *name1, CONST char *name2,
-                                int flags)
-#else
-static char *traced_globchanset(ClientData cdata, Tcl_Interp * irp, 
-                                char *name1, char *name2, int flags)
-#endif
-{
-  char *t, *s;
-  int i;
-  int items;
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-  CONST char **item, *s2;
-#else
-  char **item, *s2;
-#endif
 
-  if (flags & (TCL_TRACE_READS | TCL_TRACE_UNSETS)) {
-    Tcl_SetVar2(interp, name1, name2, glob_chanset, TCL_GLOBAL_ONLY);
-    if (flags & TCL_TRACE_UNSETS)
-      Tcl_TraceVar(interp, "global-chanset",
-	    TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	    traced_globchanset, NULL);
-  } else { /* Write */
-    s2 = Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
-    Tcl_SplitList(interp, s2, &items, &item);
-    for (i = 0; i<items; i++) {
-      if (!(item[i]) || (strlen(item[i]) < 2)) continue;
-      s = glob_chanset;
-      while (s[0]) {
-	t = strchr(s, ' '); /* Can't be NULL coz of the extra space */
-	t[0] = 0;
-	if (!strcmp(s + 1, item[i] + 1)) {
-	  s[0] = item[i][0]; /* +- */
-	  t[0] = ' ';
-	  break;
-	}
-	t[0] = ' ';
-	s = t + 1;
-      }
-    }
-    if (item) /* hmm it cant be 0 */
-      Tcl_Free((char *) item);
-    Tcl_SetVar2(interp, name1, name2, glob_chanset, TCL_GLOBAL_ONLY);
-  }
-  return NULL;
-}
 cmd_t channels_bot[] = {
   {"cjoin",    "", (Function) got_cjoin, NULL},
   {"cpart",    "", (Function) got_cpart, NULL},
@@ -911,45 +864,6 @@ cmd_t channels_bot[] = {
   {"ltp", "", (Function) got_locktopic, NULL},
 */
   {0, 0, 0, 0}
-};
-
-static tcl_ints my_tcl_ints[] =
-{
-  {"share-greet",		NULL,				0},
-  {"use-info",			&use_info,			0},
-  {"quiet-save",		&quiet_save,			0},
-  {"global-stopnethack-mode",	&global_stopnethack_mode,	0},
-  {"global-revenge-mode",       &global_revenge_mode,           0},
-  {"global-idle-kick",		&global_idle_kick,		0},
-  {"global-ban-time",           &global_ban_time,               0},
-#ifdef S_IRCNET
-  {"global-exempt-time",        &global_exempt_time,            0},
-  {"global-invite-time",        &global_invite_time,            0},
-#endif
-  /* keeping [ban|exempt|invite]-time for compatability <Wcc[07/20/02]> */
-  {"ban-time",                  &global_ban_time,               0},
-#ifdef S_IRCNET
-  {"exempt-time",               &global_exempt_time,            0},
-  {"invite-time",               &global_invite_time,            0},
-#endif
-  {NULL,			NULL,				0}
-};
-
-static tcl_coups mychan_tcl_coups[] =
-{
-  {"global-flood-chan",		&gfld_chan_thr,		&gfld_chan_time},
-  {"global-flood-deop",		&gfld_deop_thr,		&gfld_deop_time},
-  {"global-flood-kick",		&gfld_kick_thr,		&gfld_kick_time},
-  {"global-flood-join",		&gfld_join_thr,		&gfld_join_time},
-  {"global-flood-ctcp",		&gfld_ctcp_thr,		&gfld_ctcp_time},
-  {"global-flood-nick",		&gfld_nick_thr, 	&gfld_nick_time},
-  {NULL,			NULL,			NULL}
-};
-
-static tcl_strings my_tcl_strings[] =
-{
-  {"global-chanmode",	glob_chanmode,	64,	0},
-  {NULL,		NULL,		0,	0}
 };
 
 EXPORT_SCOPE char *channels_start();
@@ -1189,17 +1103,10 @@ char *channels_start(Function * global_funcs)
 #endif /* S_IRCNET */
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
   add_hook(HOOK_10SECONDLY, (Function) channels_checkslowjoin);
-  Tcl_TraceVar(interp, "global-chanset",
-	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
-	       traced_globchanset, NULL);
   add_builtins(H_chon, my_chon);
   add_builtins(H_dcc, C_dcc_irc);
   add_builtins(H_bot, channels_bot);
   add_tcl_commands(channels_cmds);
-  add_tcl_strings(my_tcl_strings);
-  my_tcl_ints[0].val = &share_greet;
-  add_tcl_ints(my_tcl_ints);
-  add_tcl_coups(mychan_tcl_coups);
 #ifdef S_AUTOLOCK
   add_cfg(&CFG_LOCKTHRESHOLD);
   add_cfg(&CFG_KILLTHRESHOLD);

@@ -16,7 +16,7 @@
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
 extern int		 default_flags, default_uflags, quiet_save,
-			 dcc_total, share_greet;
+			 dcc_total;
 extern char		 userfile[], ver[], botnetnick[], tempdir[];
 extern time_t		 now;
 
@@ -406,8 +406,7 @@ int write_user(struct userrec *u, FILE * f, int idx)
 	fr.udef_chan = ch->flags_udef;
 	build_flags(s, &fr, NULL);
 	if (lfprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s,
-		    (((idx < 0) || share_greet) && ch->info) ? ch->info
-		    : "") == EOF)
+		    ch->info ? ch->info : "") == EOF)
 	  return 0;
       }
     }

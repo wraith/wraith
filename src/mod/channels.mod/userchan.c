@@ -99,8 +99,7 @@ static void set_handle_chaninfo(struct userrec *bu, char *handle,
   } else
     ch->info = NULL;
   cst = findchan_by_dname(chname);
-  if ((!noshare) && (bu == userlist) &&
-      !(u->flags & (USER_UNSHARED | USER_BOT)) && share_greet) {
+  if ((!noshare) && (bu == userlist) && !(u->flags & (USER_UNSHARED | USER_BOT))) {
     shareout(cst, "chchinfo %s %s %s\n", handle, chname, info ? info : "");
   }
 }

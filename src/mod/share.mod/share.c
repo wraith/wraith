@@ -637,7 +637,7 @@ static void share_chchinfo(int idx, char *par)
   if ((dcc[idx].status & STAT_SHARE) && !private_user) {
     hand = newsplit(&par);
     if ((u = get_user_by_handle(userlist, hand)) &&
-	!(u->flags & USER_UNSHARED) && share_greet) {
+	!(u->flags & USER_UNSHARED)) {
       chan = newsplit(&par);
       cst = findchan_by_dname(chan);
       fr.match = (FR_CHAN | FR_BOT);

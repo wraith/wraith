@@ -226,7 +226,7 @@
 #define global_bans (*(maskrec **)(global[96]))
 #define global_ign (*(struct igrec **)(global[97]))
 #define password_timeout (*(int *)(global[98]))
-#define share_greet (*(int *)global[99])
+/* UNUSED -- 99 */
 /* 100 - 103 */
 #define max_dcc (*(int *)global[100])
 #define shouldjoin ((int (*) (struct chanset_t *))global[101])

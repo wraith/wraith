@@ -15,7 +15,6 @@ extern Tcl_Interp	*interp;
 extern char		 whois_fields[], botnetnick[];
 extern time_t            now;
 
-int share_greet = 0;		/* Share greeting info			*/
 static struct user_entry_type *entry_type_list;
 
 
@@ -132,9 +131,7 @@ int def_set(struct userrec *u, struct user_entry *e, void *buf)
     e->u.string = NULL;
   }
   if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED))) {
-    if (e->type != &USERENTRY_INFO || share_greet)
-      shareout(NULL, "c %s %s %s\n", e->type->name, u->handle,
-	       e->u.string ? e->u.string : "");
+    shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, e->u.string ? e->u.string : "");
   }
   return 1;
 }

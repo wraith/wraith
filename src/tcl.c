@@ -31,22 +31,21 @@ typedef struct {
 } intinfo;
 
 extern time_t	online_since;
-extern int	backgrd, flood_telnet_thr, flood_telnet_time;
-extern int	shtime, share_greet;
-extern int	allow_new_telnets, use_telnet_banner;
-extern int	default_flags, conmask, connect_timeout;
-extern int	firewallport, notify_users_at, flood_thr, ignore_time;
-extern int	reserved_port_min, reserved_port_max, localhub;
+extern int	backgrd, flood_telnet_thr, flood_telnet_time,
+		shtime, allow_new_telnets, use_telnet_banner,
+		default_flags, conmask, connect_timeout,
+		firewallport, notify_users_at, flood_thr, ignore_time,
+		reserved_port_min, reserved_port_max, localhub,
+		enable_simul, dcc_total, debug_output, identtimeout,
+		protect_telnet, dupwait_timeout, egg_numver, share_unlinks,
+		dcc_sanitycheck, sort_users, tands, resolve_timeout,
+		default_uflags, strict_host, userfile_perm;
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
                 firewall[], notify_new[], hostname[], hostname6[], myip[], myip6[],
 		tempdir[], owner[], network[], botnetnick[],
 		bannerfile[], egg_version[], natip[], 
 		textdir[], pid_file[], dcc_prefix[];
 
-extern int	enable_simul, dcc_total, debug_output, identtimeout,
-		protect_telnet, dupwait_timeout, egg_numver, share_unlinks,
-		dcc_sanitycheck, sort_users, tands, resolve_timeout,
-		default_uflags, strict_host, userfile_perm;
 extern struct dcc_t	*dcc;
 extern tcl_timer_t	*timer, *utimer;
 

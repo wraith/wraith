@@ -35,7 +35,7 @@ extern int	 	 noshare, loading, role, server_lag,
  			 dcc_total, egg_numver, userfile_perm,
 			 use_console_r, ignore_time, must_be_owner,
 			 debug_output, default_flags,  
-			 max_dcc, share_greet, password_timeout, localhub,
+			 max_dcc, password_timeout, localhub,
 #ifdef S_IRCNET
 			 use_invites, use_exempts, 
 #endif
@@ -278,7 +278,7 @@ Function global_table[] =
   (Function) & global_bans,	 /* struct banrec *			*/
   (Function) & global_ign,	 /* struct igrec *			*/
   (Function) & password_timeout, /* int					*/
-  (Function) & share_greet,	 /* int					*/
+  (Function) 0,
   /* 100 - 103 */
   (Function) & max_dcc,		 /* int					*/
   (Function) shouldjoin, 
