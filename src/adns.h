@@ -1,3 +1,7 @@
+/* new async dns
+ *
+ */
+
 #ifndef _ADNS_H_
 #define _ADNS_H_
 

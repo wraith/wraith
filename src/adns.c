@@ -1,3 +1,7 @@
+/* new async dns
+ *
+ */
+
 #include "common.h"
 #include "adns.h"
 #include "egg_timer.h"
