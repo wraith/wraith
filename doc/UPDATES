@@ -82,7 +82,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Added options 'enable' and 'disable' to cmd_conf for bots
 * Fixed dccauth not correctly working according to it's [bot]config setting (#30)
 * Added match option for cmd_botcmd: '$' will match on all localhubs (first bot in config) (#28)
-
+* Added some debug logging when a telnet connection is ignored.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

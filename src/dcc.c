@@ -1262,6 +1262,7 @@ dcc_telnet(int idx, char *buf, int ii)
   simple_sprintf(x, "-telnet!telnet@%s", iptostr(htonl(ip)));
 
   if (match_ignore(x) || detect_telnet_flood(x)) {
+    putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", x);
     killsock(sock);
     return;
   }
@@ -1310,6 +1311,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   simple_sprintf(s2, "-telnet!telnet@%s", dcc[i].host);
 
   if (match_ignore(s2)) {
+    putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", s2);
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
@@ -1801,6 +1803,7 @@ dcc_telnet_got_ident(int i, char *host)
   simple_snprintf(sip, sizeof(sip), "-telnet!%s@%s", host, iptostr(htonl(dcc[i].addr)));
 
   if (match_ignore(shost) || match_ignore(sip)) {
+    putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s[%s]",dcc[i].host, iptostr(htonl(dcc[i].addr)));
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
