@@ -198,10 +198,12 @@ int chk_op(struct flag_record, struct chanset_t *);
 int chk_deop(struct flag_record, struct chanset_t *);
 int chk_voice(struct flag_record, struct chanset_t *);
 int chk_devoice(struct flag_record, struct chanset_t *);
+int chk_noflood(struct flag_record, struct chanset_t *);
 int ischanhub();
 int isupdatehub();
 int dovoice(struct chanset_t *);
 int dolimit(struct chanset_t *);
+int whois_access(struct userrec *, struct userrec *);
 
 #endif				/* MAKING_MODS */
 

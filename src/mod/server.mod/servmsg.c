@@ -278,7 +278,7 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
 
   u = get_user_by_host(from);
   atr = u ? u->flags : 0;
-  if (atr & (USER_BOT))
+  if ((atr & USER_BOT) || (atr & USER_NOFLOOD))
     return 0;
 
 #ifdef S_AUTHCMDS

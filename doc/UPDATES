@@ -1,5 +1,8 @@
 This is a summary of ChangeLog basically.
 
+1.1.4
+1.+x is now correctly recognized in more places.
+
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.
 2.Fixed a bug in cmd_botcmd.
