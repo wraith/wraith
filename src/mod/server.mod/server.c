@@ -1023,20 +1023,19 @@ int count(const char *s)
   }
   return i-1;
 }
+
 int rrand(int a, int b)
 {
   b++;
   return ((random()%(b-a))+a);
 }
+
 char *randomize(char *line, char **new)
 {
   char *str, *words[1000], *bak;
   int i,o,b,r,u = 0;
-Context;
   bak = nmalloc(strlen(line)+1);
-Context;
   strcpy(bak, line);
-Context;
   i=count(line);
 
   b=i+1;
@@ -1627,9 +1626,9 @@ static int ctcp_DCC_CHAT(char *nick, char *from, char *handle,
       debug1("ipv6 addr: %s",ip);
       strcpy(dcc[i].addr6,ip);
       debug1("ipv6 addr: %s",dcc[i].addr6);
-    } else 
+    } else
 #endif /* USE_IPV6 */
-    dcc[i].addr = my_atoul(ip);
+      dcc[i].addr = my_atoul(ip);
     dcc[i].port = atoi(prt);
     dcc[i].sock = -1;
     strcpy(dcc[i].nick, u->handle);
