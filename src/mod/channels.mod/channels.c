@@ -189,7 +189,11 @@ static void got_cpart(char *botnick, char *code, char *par)
    return;
 
   bots = newsplit(&par);
-  match = parsebots(bots, conf.bot->nick);
+  /* if bots is '*' just remove_channel */
+  if (!strcmp(bots, "*"))
+    match = 0;
+  else
+    match = parsebots(bots, conf.bot->nick);
  
   if (match)
     do_chanset(NULL, chan, "+inactive", DO_LOCAL);
