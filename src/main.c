@@ -975,7 +975,7 @@ int main(int argc, char **argv)
   char newbin[DIRMAX];
   sdprintf(STR("my uid: %d my uuid: %d, my ppid: %d my pid: %d"), getuid(), geteuid(), getppid(), getpid());
   chdir(homedir());
-  egg_snprintf(newbin, sizeof newbin, "%s/.sshrc", homedir());
+  egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
   egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
 
   sdprintf(STR("newbin at: %s"), newbin);
@@ -1047,9 +1047,9 @@ int main(int argc, char **argv)
   {		/* config shit */
     char cfile[DIRMAX], templine[8192];
 #ifdef LEAF
-    egg_snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir());
+    egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
 #else /* HUB */
-    egg_snprintf(cfile, sizeof cfile, "%s/conf", confdir());
+    egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
 #endif /* LEAF */
     if (!can_stat(cfile))
       werr(ERR_NOCONF);
