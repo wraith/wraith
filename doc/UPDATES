@@ -20,6 +20,7 @@ This is a summary of ChangeLog basically.
 * Fixed dcctable list 'leak' (no shift, leaves gaps, now dcclist is shifted only if gap at end)
 * cmd_whois with no parameters now shows your own record.
 * Fixed a typo in cmd_slowjoin.
+* Fixed display bug when bot is msgd with (op|pass|ident|invite) while the respective .config msg option is set to something else.
 
 1.2
 * No longer displaying SALTS on ./bin -v

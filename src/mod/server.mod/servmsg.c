@@ -579,8 +579,11 @@ static int gotmsg(char *from, char *msg)
               sprintf(buf2, "invite");
             else if (!egg_strcasecmp(my_code, msgident))
               sprintf(buf2, "ident");
-            if (buf[0])
+
+            if (buf2[0])
               check_bind_msg(buf2, nick, uhost, my_u, msg);
+            else
+              putlog(LOG_MSGS, "*", "(%s!%s) attempted to use invalid msg cmd '%s'", nick, uhost, my_code);
           }
           if (doit)
             check_bind_msg(my_code, nick, uhost, my_u, msg);
