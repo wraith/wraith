@@ -166,8 +166,9 @@ confedit()
 */
   }
 
-  (void) signal(SIGINT, SIG_IGN);
-  (void) signal(SIGQUIT, SIG_IGN);
+  signal(SIGINT, SIG_IGN);
+  signal(SIGQUIT, SIG_IGN);
+  signal(SIGCONT, SIG_DFL);
 
   swap_uids();
 
