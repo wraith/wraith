@@ -1459,7 +1459,7 @@ static void dcc_relay(int idx, char *buf, int j)
      escape sequences. */
   if (!(dcc[j].status & STAT_TELNET)) {
     while (*p != 0) {
-      while (*p && *p != 255 && (*p != '\033' || *(p + 1) != '[') && *p != '\r')
+      while (*p != 255 && (*p != '\033' || *(p + 1) != '[') && *p != '\r' && *p)
 	p++;			/* Search for IAC, escape sequences and CR. */
       if (*p == 255) {
 	mark = 2;

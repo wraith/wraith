@@ -768,7 +768,7 @@ static void cmd_nohelp(struct userrec *u, int idx, char *par)
 
   qsort(cmds, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
   
-  for (i = 0; i < (cmdi - 1); i++) {
+  for (i = 0; i < cmdi; i++) {
     int o, found = 0;
     for (o = 0; (help[o].cmd) && (help[o].desc); o++)
       if (!egg_strcasecmp(help[o].cmd, cmds[i].name)) found++;
