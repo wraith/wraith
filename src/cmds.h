@@ -21,6 +21,7 @@ typedef struct {
   const char *name;
 //  Function func;
   void (*func) (int, char *);
+  int type;
 } botcmd_t;
 
 typedef struct cmd_pass {

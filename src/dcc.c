@@ -408,7 +408,6 @@ static void
 dcc_bot(int idx, char *code, int i)
 {
   char *msg = NULL;
-  int f;
 
   strip_telnet(dcc[idx].sock, code, &i);
   if (debug_output) {
@@ -426,15 +425,17 @@ dcc_bot(int idx, char *code, int i)
   } else
     msg = "";
 
-  for (f = i = 0; C_bot[i].name && !f; i++) {
+  for (i = 0; C_bot[i].name; i++) {
     int y = egg_strcasecmp(code, C_bot[i].name);
 
     if (!y) {
       /* Found a match */
-      (C_bot[i].func) (idx, msg);
-      f = 1;
+	/* FIXME: replace with HUB/leaf after being removed */
+      if (!C_bot[i].type || (C_bot[i].type == 1 && conf.bot->hub) || (C_bot[i].type == 2 && !conf.bot->hub))
+        (C_bot[i].func) (idx, msg);
+      break;
     } else if (y < 0)
-      return;
+      break;
   }
 }
 

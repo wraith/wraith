@@ -155,12 +155,12 @@ static void update_version(int idx, char *par)
 /* Note: these MUST be sorted. */
 static botcmd_t C_update[] =
 {
-  {"u?",	update_fileq},
-  {"un",	update_ufno},
-  {"us",	update_ufsend},
-  {"uy",	update_ufyes},
-  {"v",         update_version},
-  {NULL,	NULL}
+  {"u?",	update_fileq, 0},
+  {"un",	update_ufno, 0},
+  {"us",	update_ufsend, 0},
+  {"uy",	update_ufyes, 0},
+  {"v",         update_version, 0},
+  {NULL,	NULL, 0}
 };
 
 static void got_nu(char *botnick, char *code, char *par)
