@@ -109,7 +109,6 @@ struct chan_t {
 #define CHANNOMSG  BIT5		/* +n					*/
 #define CHANLIMIT  BIT6		/* -l -- used only for protecting modes	*/
 #define CHANKEY    BIT7		/* +k					*/
-/* FIXME: JUST REMOVE THESE :D */
 #define CHANANON   BIT8		/* +a -- ircd 2.9			*/
 #define CHANQUIET  BIT9		/* +q -- ircd 2.9			*/
 #define CHANNOCLR  BIT10	/* +c -- bahamut			*/

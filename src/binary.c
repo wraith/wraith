@@ -15,9 +15,11 @@
 
 #ifndef CYGWIN_HACKS
 
+#define PREFIXLEN 16
+
 typedef struct encdata_struct {
-  char prefix[16];
-  char data[512];
+  char prefix[PREFIXLEN];
+  char data[65];
 } encdata_t;
 
 static encdata_t encdata = {
@@ -42,7 +44,7 @@ bin_md5(const char *fname, int todo)
 
   MD5_Init(&ctx);
   while ((len = fread(buf, 1, sizeof buf - 1, f))) {
-    if (!memcmp(buf, &encdata.prefix, 16)) {
+    if (!memcmp(buf, &encdata.prefix, PREFIXLEN)) {
       break;
     }
     MD5_Update(&ctx, buf, len);
@@ -93,8 +95,8 @@ bin_md5(const char *fname, int todo)
         werr(ERR_BINSTAT);
       }
 
-      if (!memcmp(buf, &encdata.prefix, 16)) {
-        /* now we have 512 for data :D */
+      if (!memcmp(buf, &encdata.prefix, PREFIXLEN)) {
+        /* now we have 65 for data :D */
         char *enc_hash = NULL;
 
         enc_hash = encrypt_string(SALT1, hash);

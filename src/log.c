@@ -27,7 +27,7 @@ int 	use_console_r = 1;      /* Allow users to set their console +r  */
 
 typedef struct {
 	int flag;
-	char c;
+	unsigned char c;
 	char *type;
 } logmode_mapping_t;
 

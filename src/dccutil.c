@@ -70,7 +70,7 @@ char *add_cr(char *buf)
   return WBUF;
 }
 
-void dprintf (int idx, ...)
+void dprintf(int idx, ...)
 {
   static char buf[1024] = "";
   char *format = NULL;
@@ -81,6 +81,7 @@ void dprintf (int idx, ...)
   format = va_arg(va, char *);
   egg_vsnprintf(buf, 1023, format, va);
   va_end(va);
+
   /* We can not use the return value vsnprintf() to determine where
    * to null terminate. The C99 standard specifies that vsnprintf()
    * shall return the number of bytes that would be written if the
@@ -177,7 +178,7 @@ void dprintf (int idx, ...)
   }
 }
 
-void chatout (char *format, ...)
+void chatout(char *format, ...)
 {
   int i, len;
   char s[601] = "";
@@ -200,7 +201,7 @@ void chatout (char *format, ...)
 
 /* Print to all on this channel but one.
  */
-void chanout_but (int x, ...)
+void chanout_but(int x, ...)
 {
   int i, chan, len;
   char *format = NULL;
@@ -434,11 +435,11 @@ void set_away(int idx, char *s)
 }
 
 
-/* Make a password, 10-15 random letters and digits
+/* Make a password, 10-14 random letters and digits
  */
-void makepass(char *s)
+inline void makepass(char *s)
 {
-  make_rand_str(s, 10 + randint(6));
+  make_rand_str(s, 10 + randint(5));
 }
 
 void flush_lines(int idx, struct chat_info *ci)

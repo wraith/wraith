@@ -513,24 +513,6 @@ void show_channels(int idx, char *handle)
     dprintf(idx, "%s %s not have access to any channels.\n", handle ? u->handle : "You", handle ? "does" : "do");
 }
 
-int getting_users()
-{
-  int i;
-
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_GETTING))
-      return 1;
-  return 0;
-}
-
-char *extracthostname(char *hostmask)
-{
-  char *p = NULL;
-
-  p = strrchr(hostmask, '@');
-  return p ? p + 1 : "";
-}
-
 /* Create a string with random letters and digits
  */
 void make_rand_str(char *s, int len)
@@ -553,22 +535,6 @@ void make_rand_str(char *s, int len)
   }
 
   s[len] = '\0';
-}
-
-/* Convert an octal string into a decimal integer value.  If the string
- * is empty or contains non-octal characters, -1 is returned.
- */
-int oatoi(const char *octal)
-{
-  register int i;
-
-  if (!*octal)
-    return -1;
-  for (i = 0; ((*octal >= '0') && (*octal <= '7')); octal++)
-    i = (i * 8) + (*octal - '0');
-  if (*octal)
-    return -1;
-  return i;
 }
 
 /* Return an allocated buffer which contains a copy of the string
@@ -666,7 +632,7 @@ char *strchr_unescape(char *str, const char div, register const char esc_char)
 /* As strchr_unescape(), but converts the complete string, without
  * searching for a specific delimiter character.
  */
-void str_unescape(char *str, register const char esc_char)
+inline void str_unescape(char *str, register const char esc_char)
 {
   (void) strchr_unescape(str, 0, esc_char);
 }
@@ -1074,7 +1040,7 @@ int goodpass(char *pass, int idx, char *nick)
   return 1;
 }
 
-char *replace(const char *string, char *oldie, char *newbie)
+char *replace(const char *string, const char *oldie, const char *newbie)
 {
   static char newstring[1024] = "";
   int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;

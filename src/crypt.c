@@ -28,7 +28,7 @@ char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
   if (newdatalen % CRYPT_BLOCKSIZE)             /* more than 1 block? */
     newdatalen += (CRYPT_BLOCKSIZE - (newdatalen % CRYPT_BLOCKSIZE));
 
-  newdata = (unsigned char *) calloc(1, newdatalen);
+  newdata = calloc(1, newdatalen);
   egg_memcpy(newdata, data, *datalen);
   if (newdatalen != *datalen)
     egg_bzero((void *) &newdata[*datalen], (newdatalen - *datalen));
@@ -199,7 +199,7 @@ int lfprintf (FILE *stream, ...)
 
 void Encrypt_File(char *infile, char *outfile)
 {
-  char  buf[8192];
+  char  buf[1024];
   FILE *f = NULL, *f2 = NULL;
   int std = 0;
 
@@ -217,7 +217,7 @@ void Encrypt_File(char *infile, char *outfile)
   }
 
   buf[0] = 0;
-  while (fscanf(f, "%[^\n]\n", buf) != EOF) {
+  while (fgets(buf, sizeof buf, f) != NULL) {
     if (std)
       printf("%s\n", encrypt_string(SALT1, buf));
     else
@@ -251,7 +251,7 @@ void Decrypt_File(char *infile, char *outfile)
   }
   
   buf[0] = 0;
-  while (fscanf(f, "%[^\n]\n", buf) != EOF) {
+  while (fgets(buf, sizeof buf, f) != NULL) {
     temps = (char *) decrypt_string(SALT1, buf);
     if (!std)
       fprintf(f2, "%s\n",temps);
@@ -327,7 +327,7 @@ char *btoh(const unsigned char *md, int len)
   char buf[100] = "", *ret = NULL;
 
   for (i = 0; i < len; i++)
-    sprintf(&(buf[i*2]), "%02x", md[i]);
+    sprintf(&(buf[i*2]), "%02X", md[i]);
 
   ret = buf;
   return ret;

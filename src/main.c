@@ -32,7 +32,6 @@
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/server.mod/server.h"
 #endif /* LEAF */
-/* FIXME: REMOVE AFTER 1.1.4 */
 #include "src/mod/channels.mod/channels.h"
 #include <time.h>
 #include <errno.h>
@@ -759,8 +758,6 @@ int main(int argc, char **argv)
   ctcp_init();
   chanprog();
 #ifdef HUB
-/* FIXME: Remove after 1.1.4 */
-  /* this should only happen while upgrading to 1.1.4 */
   if (!CFG_CHANSET.gdata) {
     cfg_noshare++;
     set_cfg_str(NULL, "chanset", glob_chanset);
@@ -829,11 +826,9 @@ int main(int argc, char **argv)
 #ifndef CYGWIN_HACKS
     setpgid(0, 0);
 #endif /* !CYGWIN_HACKS */
-    /* fuck tcl.
     freopen("/dev/null", "r", stdin);
     freopen("/dev/null", "w", stdout);
     freopen("/dev/null", "w", stderr);
-    */
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif /* CYGWIN_HACKS */
@@ -901,7 +896,7 @@ int main(int argc, char **argv)
       socket_cleanup--;
 
     xx = sockgets(buf, &i); 
-//printf("BUF: %s\n", buf);
+
     if (xx >= 0) {		/* Non-error */
       int idx;
 

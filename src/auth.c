@@ -32,7 +32,7 @@
 
 #ifdef S_AUTHCMDS
 int auth_total = 0;
-static int max_auth = 100;
+static int max_auth = 50;
 struct auth_t *auth = NULL;
 #endif /* S_AUTHCMDS */
 

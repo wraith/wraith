@@ -295,10 +295,6 @@ void getin_request(char *botnick, char *code, char *par)
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - I'm too lagged", botnick, nick, chan->dname);
       return;
     }
-    if (getting_users()) {
-      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - I'm getting userlist right now", botnick, nick, chan->dname);
-      return;
-    }
     if (chan->channel.no_op) {
       if (chan->channel.no_op > now)                      /* dont op until this time has passed */
         return;
@@ -337,10 +333,6 @@ void getin_request(char *botnick, char *code, char *par)
     }
     if (server_lag > LAG_THRESHOLD) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I'm too lagged", botnick, nick, chan->dname);
-      return;
-    }
-    if (getting_users()) {
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I'm getting userlist right now", botnick, nick, chan->dname);
       return;
     }
     if (!(channel_pending(chan) || channel_active(chan))) {

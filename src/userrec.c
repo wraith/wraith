@@ -53,33 +53,29 @@ int count_users(struct userrec *bu)
   return tot;
 }
 
-/* Convert "nick!~user@host", "nick!+user@host" and "nick!-user@host"
- * to "nick!user@host" if necessary. (drummer)
+/* Removes a username prefix (~+-^=) from a userhost.
+ * e.g, "nick!~user@host" -> "nick!user@host"
  */
 char *fixfrom(char *s)
 {
-  static char buf[512] = "";
   char *p = NULL;
 
-  if (s == NULL)
-    return NULL;
-  strncpyz(buf, s, sizeof buf);
-  if (strict_host)
-    return buf;
-  if ((p = strchr(buf, '!')))
-    p++;
-  else
-    p = s;			/* Sometimes we get passed just a
-				 * user@host here... */
-  /* These are ludicrous. */
-  if (strchr("~+-^=", *p) && (p[1] != '@')) /* added check for @ - drummer */
-/*    strcpy(p, p + 1); */
-    sprintf(p, "%s", p + 1);
-  /* Bug was: n!~@host -> n!@host  now: n!~@host */
-  return buf;
+  if (!s || !*s || strict_host)
+    return s;
+
+  if ((p = strchr(s, '!'))) {
+    if (!*(++p))
+      return s; /* There's nothing following "!". */
+  } else
+    p = s; /* There's no nick. */
+
+  if (strchr("~+-^=", *p) && *(p + 1) != '@')
+    memmove(p, p + 1, strlen(p)); /* NUL is included without +1. */
+
+  return s;
 }
 
-struct userrec *check_dcclist_hand(char *handle)
+static struct userrec *check_dcclist_hand(char *handle)
 {
   int i;
 
@@ -155,6 +151,8 @@ void clear_masks(maskrec *m)
     free(m);
   }
 }
+
+static void freeuser(struct userrec *);
 
 void clear_userlist(struct userrec *bu)
 {
@@ -236,20 +234,6 @@ struct userrec *get_user_by_host(char *host)
     set_chanlist(host2, ret);
   }
   return ret;
-}
-
-/* use fixfrom() or dont? (drummer)
- */
-struct userrec *get_user_by_equal_host(char *host)
-{
-  struct userrec *u = NULL;
-  struct list_type *q = NULL;
-
-  for (u = userlist; u; u = u->next)
-    for (q = get_user(&USERENTRY_HOSTS, u); q; q = q->next)
-      if (!rfc_casecmp(q->extra, host))
-	return u;
-  return NULL;
 }
 
 /* Try: pass_match_by_host("-",host)
@@ -474,7 +458,6 @@ int change_handle(struct userrec *u, char *newh)
   return 1;
 }
 
-
 struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass, int flags)
 {
   struct userrec *u = NULL, *x = NULL;
@@ -540,7 +523,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
   return bu;
 }
 
-void freeuser(struct userrec *u)
+static void freeuser(struct userrec *u)
 {
   struct user_entry *ue = NULL, *ut = NULL;
   struct chanuserrec *ch = NULL, *z = NULL;
@@ -690,32 +673,6 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
   } else if (timeval == 1)
     set_user(&USERENTRY_LASTON, u, 0);
 
-}
-
-/*  Go through all channel records and try to find a matching
- *  nick. Will return the user's user record if that is known
- *  to the bot.  (Fabian)
- *
- *  Warning: This is unreliable by concept!
- */
-struct userrec *get_user_by_nick(char *nick)
-{
-  struct chanset_t *chan = NULL;
-  memberlist *m = NULL;
-
-  for (chan = chanset; chan; chan = chan->next) {
-    for (m = chan->channel.member; m && m->nick[0] ;m = m->next) {
-      if (!rfc_casecmp(nick, m->nick)) {
-  	char word[512] = "";
-
-	egg_snprintf(word, sizeof word, "%s!%s", m->nick, m->userhost);
-	/* No need to check the return value ourself */
-	return get_user_by_host(word);;
-      }
-    }
-  }
-  /* Sorry, no matches */
-  return NULL;
 }
 
 void user_del_chan(char *dname)

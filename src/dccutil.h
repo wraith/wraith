@@ -31,7 +31,7 @@ void chatout (char *, ...);
 void chanout_but (int, ...);
 void dcc_chatter(int);
 void lostdcc(int);
-void makepass(char *);
+inline void makepass(char *);
 void tell_dcc(int);
 void not_away(int);
 void set_away(int, char *);

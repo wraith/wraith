@@ -1236,12 +1236,12 @@ char *botlink_decrypt(int snum, char *src)
   return src;
 }
 
-char *botlink_encrypt(int snum, char *src)
+char *botlink_encrypt(int snum, char *src, size_t *len)
 {
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
   int bufpos = 0, i = 0;
 
-  srcbuf = calloc(1, strlen(src) + 9 + 1);
+  srcbuf = calloc(1, *len + 9 + 1);
   strcpy(srcbuf, src);
   line = srcbuf;
   if (!line) {
@@ -1280,6 +1280,8 @@ char *botlink_encrypt(int snum, char *src)
     strcat(buf, "\n");
   }
   free(srcbuf);
+
+  *len = strlen(buf);
   return buf;
 }
 
@@ -1335,7 +1337,7 @@ int sockgets(char *s, int *len)
 	  /* Strip CR if this was CR/LF combo */
 	  if (s[strlen(s) - 1] == '\r')
 	    s[strlen(s) - 1] = 0;
-          if (socklist[i].encstatus && (strlen(s) > 0))
+          if (socklist[i].encstatus && s[0])
             botlink_decrypt(i, s);
 	  *len = strlen(s);
 	  return socklist[i].sock;
@@ -1453,7 +1455,7 @@ int sockgets(char *s, int *len)
       data = 1;
     }
   }
-  if (socklist[ret].encstatus && (strlen(s) > 0))
+  if (socklist[ret].encstatus && s[0])
     botlink_decrypt(ret, s);
   *len = strlen(s);
   /* Anything left that needs to be saved? */
@@ -1522,10 +1524,8 @@ void tputs(register int z, char *s, size_t len)
         }
       }
 
-      if (socklist[i].encstatus && (strlen(s) > 0)) {
-        s = botlink_encrypt(i, s);
-        len = strlen(s);
-      }
+      if (socklist[i].encstatus && (len > 0))
+        s = botlink_encrypt(i, s, &len);		/* will modify len */
       
       if (socklist[i].outbuf != NULL) {
 	/* Already queueing: just add it */

@@ -34,7 +34,7 @@ tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 party_t			*party = NULL;			/* Keep track of people on the botnet */
 int			tands = 0;			/* Number of bots on the botnet */
 
-static int 		maxparty = 100;			/* Maximum space for party line members
+static int 		maxparty = 50;			/* Maximum space for party line members
 							   currently */
 static int		parties = 0;			/* Number of people on the botnet */
 static int		share_unlinks = 1;		/* Allow remote unlinks of my

@@ -46,28 +46,24 @@ int     		my_port;
 #endif /* HUB */
 
 
-/* Remove space characters from beginning and end of string
- * (more efficent by Fred1)
+/* Remove leading and trailing whitespaces.
  */
 void rmspace(char *s)
 {
-  char *p = NULL, *end = NULL;
-  int len;
+  register char *p = NULL, *q = NULL;
 
-  if (!s || (s && !*s))
+  if (!s || !*s)
     return;
 
-  /* Wipe end of string */
-  end = s + strlen(s) - 1;
-  for (p = end; ((egg_isspace(*p)) && (p >= s)); p--);
-  if (p != end) *(p + 1) = 0;
-  len = p+1 - s;
-  for (p = s; ((egg_isspace(*p)) && (*p)); p++);
-  len -= (p - s);
-  if (p != s) {
-    /* +1 to include the null in the copy */
-    memmove(s, p, len + 1);
-  }
+  /* Remove trailing whitespaces. */
+  for (q = s + strlen(s) - 1; q >= s && egg_isspace(*q); q--);
+  *(q + 1) = 0;
+
+  /* Remove leading whitespaces. */
+  for (p = s; egg_isspace(*p); p++);
+
+  if (p != s)
+    memmove(s, p, q - p + 2);
 }
 
 /* Returns memberfields if the nick is in the member list.
