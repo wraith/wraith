@@ -1324,11 +1324,13 @@ static void cmd_chanset(int idx, char *par)
     if (strchr(CHANMETA, par[0])) {
       chname = newsplit(&par);
       get_user_flagrec(dcc[idx].user, &user, chname);
+      chan = findchan_by_dname(chname);
+
       if (!glob_master(user) && !chan_master(user)) {
         dprintf(idx, "You don't have access to %s. \n", chname);
 	return;
-      } else if (!(chan = findchan_by_dname(chname)) && (chname[0] != '+')) {
-        dprintf(idx, "That channel doesn't exist!\n");
+      } else if ((!chan && (chname[0] != '+')) || (chan && privchan(user, chan, PRIV_OP))) {
+        dprintf(idx, "No such channel.\n");
 	return;
       } else if ((strstr(par, "+private") || strstr(par, "-private")) && (!glob_owner(user))) {
         dprintf(idx, "You don't have access to set +/-private on %s (halting command due to lazy coder).\n", chname);
