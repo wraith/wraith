@@ -1879,7 +1879,7 @@ static int got347(char *from, char *msg)
     chname = newsplit(&msg);
     chan = findchan(chname);
     if (chan) {
-      chan->ircnet_status &= ~CHAN_ASKED_INVITESD;
+      chan->ircnet_status &= ~CHAN_ASKED_INVITES;
 
       if (channel_nouserinvites(chan))
         resetinvites(chan);
