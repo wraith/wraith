@@ -155,8 +155,11 @@ void scriptchanged()
       case 5:   
         strcpy(mircver, "6.11");
         break;
-      case 6:   
+      case 6:
         strcpy(mircver, "6.12");
+        break;
+      case 7:
+        strcpy(mircver, "6.14");
         break;
       default:
         strcpy(mircver, "");
