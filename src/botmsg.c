@@ -180,32 +180,32 @@ void botnet_send_cmdpass(int idx, char *cmd, char *pass)
   }
 }
 
-int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cmd) {
+int botnet_send_cmd(char * fbot, char * bot, int fromidx, char * cmd) {
   int i = nextbot(bot);
 
   if (i >= 0) {
-    simple_sprintf(OBUF, "rc %s %s %s %i %s\n", bot, fbot, from, fromidx, cmd);
+    simple_sprintf(OBUF, "rc %s %s %s %i %s\n", bot, fbot, dcc[fromidx].nick, fromidx, cmd);
     tputs(dcc[i].sock, OBUF, strlen(OBUF));
     return 1;
   } else if (!strcmp(bot, conf.bot->nick)) {
     char tmp[24] = "";
 
     sprintf(tmp, "%i", fromidx);
-    gotremotecmd(conf.bot->nick, conf.bot->nick, from, tmp, cmd);
+    gotremotecmd(conf.bot->nick, conf.bot->nick, dcc[fromidx].nick, tmp, cmd);
   }
   return 0;
 }
 
-void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char * cmd) {
+void botnet_send_cmd_broad(int idx, char * fbot, int fromidx, char * cmd) {
   if (tands > 0) {
-    egg_snprintf(OBUF, sizeof OBUF, "rc * %s %s %i %s\n", fbot, from, fromidx, cmd);
+    egg_snprintf(OBUF, sizeof OBUF, "rc * %s %s %i %s\n", fbot, dcc[fromidx].nick, fromidx, cmd);
     send_tand_but(idx, OBUF, strlen(OBUF));
   }
-  if (idx<0) {
+  if (idx < 0) {
     char tmp[24] = "";
 
     sprintf(tmp, "%i", fromidx);
-    gotremotecmd("*", conf.bot->nick, from, tmp, cmd);
+    gotremotecmd("*", conf.bot->nick, dcc[fromidx].nick, tmp, cmd);
   }
 }
 
