@@ -21,6 +21,7 @@ enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH };
 
 #ifdef MAKING_IRC
 
+#ifdef CACHE
 typedef struct cache_chan_b {
   struct cache_chan_b *next;
   bool invite;		/* set to invite on userhost */
@@ -49,11 +50,12 @@ static void cache_chan_del(char *, char *);
 //static cache_chan_t *cache_chan_find(cache_t *, char *, char *);
 static void cache_chan_find(cache_t *, cache_chan_t *, char *, char *);
 static cache_chan_t *cache_chan_add(cache_t *, char *);
-static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool);
 static cache_t *cache_find(char *);
 static cache_t *cache_new(char *);
 static void cache_del(char *, cache_t *);
 static void cache_debug(void);
+#endif /* CACHE */
+static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool);
 
 static int check_bind_pubc(char *, char *, char *, struct userrec *, char *, char *);
 static char *makecookie(char *, char *);

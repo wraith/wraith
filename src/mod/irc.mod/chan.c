@@ -1266,6 +1266,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   stacking--;
 }
 
+#ifdef CACHE
 /* got 302: userhost
  * <server> 302 <to> :<nick??user@host>
  */
@@ -1383,7 +1384,7 @@ static int got341(char *from, char *msg)
   dprintf(DP_DUMP, "PRIVMSG %s :ALERT! \002%s was invited via a hijacked connection/process.\002\n", chan->name, nick);
   return 0;
 }
-
+#endif /* CACHE */
 
 /* got 324: mode status
  * <server> 324 <to> <channel> <mode>
@@ -2369,8 +2370,9 @@ static int gotjoin(char *from, char *chname)
 	    m->flags |= SENTKICK;
 	  }
 	}
-        cache_t *cache = cache_find(nick);
         bool op = 0;
+#ifdef CACHE
+        cache_t *cache = cache_find(nick);
 
         if (cache) {
           cache_chan_t *cchan = NULL;
@@ -2390,6 +2392,7 @@ static int gotjoin(char *from, char *chname)
             }
           }
         }
+#endif /* CACHE */
         if (!splitjoin && !chan_hasop(m) && (op || (dovoice(chan) && chk_autoop(fr, chan)))) {
           do_op(m->nick, chan, 1, 0);
         }
@@ -2722,11 +2725,13 @@ static int gotquit(char *from, char *msg)
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
     }
   }
+#ifdef CACHE
   /* see if they were in our cache at all */
   cache_t *cache = cache_find(nick);
 
   if (cache) 
     cache_del(nick, cache);
+#endif /* CACHE */
 
   return 0;
 }
@@ -3001,9 +3006,11 @@ static int gotnotice(char *from, char *msg)
 
 static cmd_t irc_raw[] =
 {
+#ifdef CACHE
   {"302",       "",     (Function) got302,      "irc:302"},
-  {"324",	"",	(Function) got324,	"irc:324"},
   {"341",       "",     (Function) got341,      "irc:341"},
+#endif /* CACHE */
+  {"324",	"",	(Function) got324,	"irc:324"},
   {"352",	"",	(Function) got352,	"irc:352"},
   {"354",	"",	(Function) got354,	"irc:354"},
   {"315",	"",	(Function) got315,	"irc:315"},

@@ -1239,10 +1239,12 @@ static void cmd_invite(int idx, char *par)
   do_invite(idx, par, 0);
 }
 
+#ifdef CACHE
 static void cmd_iop(int idx, char *par)
 {
   do_invite(idx, par, 1);
 }
+#endif /* CACHE */
 
 static void cmd_authed(int idx, char *par)
 {
@@ -1693,7 +1695,9 @@ static cmd_t irc_dcc[] =
   {"getkey",            "o|o",   (Function) cmd_getkey,         NULL},
   {"find",		"",	 (Function) cmd_find,		NULL},
   {"invite",		"o|o",	 (Function) cmd_invite,		NULL},
+#ifdef CACHE
   {"iop",		"o|o",	 (Function) cmd_iop,		NULL},
+#endif /* CACHE */
   {"kick",		"o|o",	 (Function) cmd_kick,		NULL},
   {"kickban",		"o|o",	 (Function) cmd_kickban,	NULL},
   {"mdop",              "n|n",	 (Function) cmd_mdop,		NULL},

@@ -36,7 +36,9 @@
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
+#ifdef CACHE
 static cache_t *irccache = NULL;
+#endif /* CACHE */
 
 static int net_type = 0;
 static time_t wait_split = 300;    /* Time to wait for user to return from
@@ -111,6 +113,7 @@ void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost
     chan->name, fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
 }
 
+#ifdef CACHE
 static cache_t *cache_new(char *nick)
 {
   cache_t *cache = (cache_t *) my_calloc(1, sizeof(cache_t));
@@ -203,9 +206,11 @@ static void cache_debug(void)
       dprintf(DP_MODE, "PRIVMSG #wraith :%s %d %d %d\n", cchan->dname, cchan->ban, cchan->invite, cchan->invited);
   }
 }
+#endif /* CACHE */
 
 static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *handle, bool op, bool bot)
 {
+#ifdef CACHE
   cache_t *cache = NULL;
 
   if ((cache = cache_find(nick)) == NULL)
@@ -240,6 +245,7 @@ static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *h
   /* if we have a uhost already, it's safe to invite them */
   cchan->invited = 1;
   cchan->invite = 0;
+#endif /* CACHE */
   dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
 }
 
