@@ -69,9 +69,9 @@ void bg_do_split(void)
 # ifdef __linux__
     ptrace(PTRACE_TRACEME, 0, NULL, NULL);
 # endif
-# ifdef __FreeBSD__
+# ifdef BSD
     ptrace(PT_TRACE_ME, 0, NULL, NULL);
-# endif
+# endif /* BSD */
 #endif /* CRAZY_TRACE */
 
 }
