@@ -263,128 +263,10 @@ struct user_entry_type USERENTRY_ADDED = {
   "ADDED"
 };
 
-void add_cfg(struct cfg_entry *entry)
-{
-  cfg = (void *) user_realloc(cfg, sizeof(void *) * (cfg_count + 1));
-  cfg[cfg_count] = entry;
-  cfg_count++;
-  entry->ldata = NULL;
-  entry->gdata = NULL;
-}
-
-struct cfg_entry *check_can_set_cfg(char *target, char *entryname)
-{
-  int i;
-  struct userrec *u;
-  struct cfg_entry *entry = NULL;
-
-  for (i = 0; i < cfg_count; i++)
-    if (!strcmp(cfg[i]->name, entryname)) {
-      entry = cfg[i];
-      break;
-    }
-  if (!entry)
-    return 0;
-  if (target) {
-    if (!(entry->flags & CFGF_LOCAL))
-      return 0;
-    if (!(u = get_user_by_handle(userlist, target)))
-      return 0;
-    if (!(u->flags & USER_BOT))
-      return 0;
-  } else {
-    if (!(entry->flags & CFGF_GLOBAL))
-      return 0;
-  }
-  return entry;
-}
-
-void set_cfg_str(char *target, char *entryname, char *data)
-{
-  struct cfg_entry *entry;
-
-  if (!(entry = check_can_set_cfg(target, entryname)))
-    return;
-  if (data && !strcmp(data, "-"))
-    data = NULL;
-  if (data && (strlen(data) >= 1024))
-    data[1023] = 0;
-  if (target) {
-    struct userrec *u = get_user_by_handle(userlist, target);
-    struct xtra_key *xk;
-    char *olddata = entry->ldata;
-
-    if (u && !strcmp(botnetnick, u->handle)) {
-      if (data) {
-        entry->ldata = user_malloc(strlen(data) + 1);
-        strcpy(entry->ldata, data);
-      } else
-        entry->ldata = NULL;
-      if (entry->localchanged) {
-        int valid = 1;
-
-        entry->localchanged(entry, olddata, &valid);
-        if (!valid) {
-          if (entry->ldata)
-            nfree(entry->ldata);
-          entry->ldata = olddata;
-          data = olddata;
-          olddata = NULL;
-        }
-      }
-    }
-/* FIXME: this next line is not free`d? */
-    xk = user_malloc(sizeof(struct xtra_key));
-    egg_bzero(xk, sizeof(struct xtra_key));
-    xk->key = user_malloc(strlen(entry->name) + 1);
-    strcpy(xk->key, entry->name);
-    if (data) {
-      xk->data = user_malloc(strlen(data) + 1);
-      strcpy(xk->data, data);
-    }
-    set_user(&USERENTRY_CONFIG, u, xk);
-    if (olddata)
-      nfree(olddata);
-  } else {
-    char *olddata = entry->gdata;
-
-    if (data) {
-      entry->gdata = user_malloc(strlen(data) + 1);
-      strcpy(entry->gdata, data);
-    } else
-      entry->gdata = NULL;
-    if (entry->globalchanged) {
-      int valid = 1;
-
-      entry->globalchanged(entry, olddata, &valid);
-      if (!valid) {
-        if (entry->gdata)
-          nfree(entry->gdata);
-        entry->gdata = olddata;
-        olddata = NULL;
-      }
-    }
-    if (!cfg_noshare)
-      botnet_send_cfg_broad(-1, entry);
-    if (olddata)
-      nfree(olddata);
-  }
-}
-
-/* FIXME: possible expmem leak here */
 int config_expmem(struct user_entry *e)
 {
   struct xtra_key *x;
-  int tot = 0, i;
-
-
-  for (i = 0; i < cfg_count; i++) {
-    tot += sizeof(void *);
-    if (cfg[i]->gdata)
-      tot += strlen(cfg[i]->gdata) + 1;
-    if (cfg[i]->ldata)
-      tot += strlen(cfg[i]->ldata) + 1;
-  }
+  int tot = 0;
 
   for (x = e->u.extra; x; x = x->next) {
     tot += sizeof(struct xtra_key);
@@ -503,7 +385,7 @@ void config_display(int idx, struct user_entry *e, struct userrec *u)
     if (glob_owner(fr))
       dprintf(idx, STR("  %s: %s\n"), xk->key, xk->data);
   }
-#endif
+#endif /* HUB */
 }
 
 int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
@@ -938,7 +820,6 @@ static int laston_tcl_set(Tcl_Interp * irp, struct userrec *u,
   return TCL_OK;
 }
 
-/* FIXME: possible expmem leak here */
 static int laston_expmem(struct user_entry *e)
 {
   return sizeof(struct laston_info) +
@@ -1146,7 +1027,6 @@ static int botaddr_tcl_set(Tcl_Interp *irp, struct userrec *u,
   return TCL_OK;
 }
 
-/* FIXME: possible expmem leak here */
 static int botaddr_expmem(struct user_entry *e)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
@@ -1482,9 +1362,6 @@ static int xtra_tcl_get(Tcl_Interp *irp, struct userrec *u,
   return TCL_OK;
 }
 
-/* FIXME: possible expmem leak here 
- * also, ghost does not have xtra_ it was changed to config
- */
 static int xtra_expmem(struct user_entry *e)
 {
   struct xtra_key *x;

@@ -217,9 +217,8 @@ void removeauth(int);
 char *makehash(struct userrec *, char *);
 
 /* config.c */
-void set_cfg_int(char *target, char *entryname, int data);
 void set_cfg_str(char *target, char *entryname, char *data);
-void add_cfg(struct cfg_entry *entry);
+void add_cfg(struct cfg_entry *);
 void got_config_share(int idx, char * ln);
 void userfile_cfg_line(char *ln);
 void trigger_cfg_changed();
@@ -344,7 +343,6 @@ int findanyidx(int);
 
 /* userent.c */
 void update_mod(char *, char *, char *, char *);
-void add_cfg(struct cfg_entry *);
 void list_type_kill(struct list_type *);
 int list_type_expmem(struct list_type *);
 int xtra_set();
