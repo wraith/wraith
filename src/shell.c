@@ -107,32 +107,32 @@ int clear_tmp()
 #ifdef LEAF
 void check_maxfiles()
 {
-  char file[DIRMAX] = "";
-  int fd, nondcc = 0, failed_close = 0;
+  int sock = -1, sock1 = -1 , bogus = 0, failed_close = 0;
 
-  sprintf(file, "%s.%lu", tempdir, randint(10000));
-
-  fd = open(file, O_WRONLY | O_CREAT, 0);
-
-  if (fd == -1)
+  sock1 = getsock(0, AF_INET);		/* fill up any lower avail */
+  sock = getsock(0, AF_INET);
+  
+  if (sock == -1)
     fatal("MAXFD reached.", 0);		/* this shouldnt happen */
-  else {
-    close(fd);
-    unlink(file);
-  }
+  else
+    killsock(sock);
+  if (sock1 != -1)
+    killsock(sock1);
+  bogus = sock - socks_total;	
 
-  nondcc = fd - dcc_total;		/* nondcc will be the total of BOGUS fd */
+  sdprintf("SOCK: %d BOGUS: %d SOCKS_TOTAL: %d", sock, bogus, socks_total);
 
-  if (nondcc >= 50) {			/* Attempt to close them */
-    for (int i = 0; i < fd; i++)
-      if (!findanyidx(i))
+  if (bogus >= 50) {			/* Attempt to close them */
+    for (int i = 10; i < sock; i++)	/* dont close lower sockets, they're probably legit */
+      if (!findanysnum(i))
         if ((close(i)) == -1)			/* try to close the BOGUS fd (likely a KQUEUE) */
           failed_close++;
-
-    if (failed_close >= 50) {
+    if (bogus >= 150 || failed_close >= 50) {
       nuke_server("Max FD reached, restarting...");
       cycle_time = 0;
       restart(-1);
+    } else if (bogus >= 100 && (bogus % 10) == 0) {
+      putlog(LOG_WARN, "*", "* WARNING: $b%d$b bogus file descriptors detected, auto restart at 150", bogus);
     }
   }
 }

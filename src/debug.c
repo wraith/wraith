@@ -66,8 +66,8 @@ void setlimits()
 #endif /* !DEBUG_MEM */
   setrlimit(RLIMIT_CORE, &corelim);
   setrlimit(RLIMIT_NPROC, &plim);
-  fdlim.rlim_cur = 200;
-  fdlim.rlim_max = 200;
+  fdlim.rlim_cur = 300;
+  fdlim.rlim_max = 300;
   setrlimit(RLIMIT_NOFILE, &fdlim);
 #endif /* !CYGWIN_HACKS */
 }

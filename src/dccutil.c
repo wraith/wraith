@@ -31,12 +31,7 @@ static struct portmap 	*root = NULL;
 
 time_t	connect_timeout = 15;		/* How long to wait before a telnet
 					   connection times out */
-#ifdef HUB
-int         max_dcc = 200;
-#endif /* HUB */
-#ifdef LEAF
-int         max_dcc = 30;
-#endif /* LEAF */
+int         max_dcc = 299;
 
 static int         dcc_flood_thr = 3;
 

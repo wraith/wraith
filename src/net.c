@@ -1511,7 +1511,7 @@ void tputs(register int z, char *s, size_t len)
 int findanysnum(register int sock)
 {
   if (sock != -1)
-    for (int i = 0; i < MAXSOCKS; i++)
+    for (int i = 0; i < socks_total; i++)
       if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED))
         return i;
 

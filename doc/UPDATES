@@ -49,6 +49,8 @@ This is a summary of ChangeLog basically.
 * cmd_chaninfo/chanset didn't check for +private access correctly.
 * hubs now enforce binpath/binname as leaf bots do.
 * Made a solution to what to do when the fds max, from 100-130, bot will WARN once a min, >=180 -> auto restart.
+* Raised max dcc/fd to 300.
+* Bots will auto-restart if 150 or more bogus fd are detected.
 
 1.1.9
 
