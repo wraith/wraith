@@ -68,6 +68,20 @@ static size_t egg_strcatn(char *dst, const char *src, size_t max)
   return tmpmax - max;
 }
 
+typedef struct autoop_b {
+  struct chanset_t *chan;
+  char *nick;
+} autoop_t;
+
+static void
+do_autoop(void *client_data)
+{
+  autoop_t *autoop = (autoop_t *) client_data;
+
+  do_op(autoop->nick, autoop->chan, 0, 1);
+  free(autoop->nick);
+  free(autoop);
+}
 
 static bool
 do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
@@ -76,6 +90,22 @@ do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
 
   if (!me_op(chan) || !m || (m && !force && chan_hasop(m)))
     return 0;
+
+  if (delay) {
+    egg_timeval_t howlong;
+    autoop_t *auto_op = (autoop_t *) calloc(1, sizeof(autoop_t));
+    char buf[51] = "";
+
+    howlong.sec = 6;
+    howlong.usec = 0;
+
+    auto_op->chan = chan;
+    auto_op->nick = strdup(nick);
+
+    egg_snprintf(buf, sizeof(buf), "AOp %s/%s", nick, chan->dname);
+
+    timer_create_complex(&howlong, buf, (Function) do_autoop, (void *) auto_op, 0);
+  }
 
   if (channel_fastop(chan) || channel_take(chan)) {
     add_mode(chan, '+', 'o', nick);
