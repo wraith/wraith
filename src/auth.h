@@ -36,7 +36,8 @@ extern struct auth_t *auth;
 #  endif
        /* S_AUTHCMDS */
 #  if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-extern char authkey[121];
+#include "cfg.h"
+#define authkey CFG_AUTHKEY.ldata ? CFG_AUTHKEY.ldata : CFG_AUTHKEY.gdata ? CFG_AUTHKEY.gdata : ""
 #  endif
        /* S_AUTHHASH || S_DCCAUTH */
 

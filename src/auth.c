@@ -36,10 +36,6 @@ static int max_auth = 50;
 struct auth_t *auth = NULL;
 #endif /* S_AUTHCMDS */
 
-#if defined(S_AUTHHASH) || defined(S_DCCAUTH)
-char authkey[121] = "";         /* This is one of the keys used in the auth hash */
-#endif /* S_AUTHHASH || S_DCCAUTH */
-
 #ifdef S_AUTHCMDS
 void
 init_auth_max()
@@ -89,7 +85,9 @@ makehash(struct userrec *u, char *randstring)
     secpass = strdup(get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
-  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", (authkey && authkey[0]) ? authkey : "");
+  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", authkey);
+
+  sdprintf("hash: %s", hash);
   if (secpass)
     free(secpass);
 

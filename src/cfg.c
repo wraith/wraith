@@ -95,19 +95,10 @@ static void authkey_describe(struct cfg_entry *entry, int idx) {
 }
 #endif /* HUB */
 
-#ifdef LEAF
-static void authkey_changed(struct cfg_entry *entry, char *olddata, int *valid) {
-  if (entry->ldata)
-    strncpyz(authkey, (char *) entry->ldata, sizeof authkey);
-  else if (entry->gdata)
-    strncpyz(authkey, (char *) entry->gdata, sizeof authkey);
-}
-#endif /* LEAF */
-
 struct cfg_entry CFG_AUTHKEY = {
-	"authkey", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL, 
+	"authkey", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
 #ifdef LEAF
-	authkey_changed, authkey_changed
+	NULL, NULL
 #else
 	NULL, NULL, authkey_describe
 #endif /* LEAF */
