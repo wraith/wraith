@@ -688,6 +688,7 @@ int readuserfile(const char *file, struct userrec **ret)
   /* read opening comment */
   s = buf;
   fgets(cbuf, 180, f);
+  remove_crlf(cbuf);
   temps = (char *) decrypt_string(SALT1, cbuf);
   egg_snprintf(s, 180, "%s", temps);
   free(temps);
@@ -699,6 +700,7 @@ int readuserfile(const char *file, struct userrec **ret)
   while (!feof(f)) {
     s = buf;
     fgets(cbuf, 1024, f);
+    remove_crlf(cbuf);
     temps = (char *) decrypt_string(SALT1, cbuf);
     egg_snprintf(s, 1024, "%s", temps);
     free(temps);

@@ -10,6 +10,7 @@
 #include "crypt.h"
 #include "salt.h"
 #include "misc.h"
+#include "base64.h"
 #include "src/crypto/crypto.h"
 #include <stdarg.h>
 
@@ -19,110 +20,74 @@
 
 AES_KEY e_key, d_key;
 
-char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
+char *encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
 {
-  int newdatalen = *datalen, blockcount = 0, blockndx = 0;
-  unsigned char *newdata = NULL;
+  size_t len = *inlen;
+  int blocks = 0, block = 0;
+  unsigned char *out = NULL;
 
-  /* First pad indata to CRYPT_BLOCKSIZE multiplum */
-  if (newdatalen % CRYPT_BLOCKSIZE)             /* more than 1 block? */
-    newdatalen += (CRYPT_BLOCKSIZE - (newdatalen % CRYPT_BLOCKSIZE));
+  /* First pad indata to CRYPT_BLOCKSIZE multiple */
+  if (len % CRYPT_BLOCKSIZE)             /* more than 1 block? */
+    len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
 
-  newdata = calloc(1, newdatalen);
-  egg_memcpy(newdata, data, *datalen);
-  if (newdatalen != *datalen)
-    egg_bzero((void *) &newdata[*datalen], (newdatalen - *datalen));
-  *datalen = newdatalen;
+  out = calloc(1, len + 1);
+  egg_memcpy(out, in, *inlen);
+  *inlen = len;
 
-  if ((!keydata) || (!keydata[0])) {
+  if (!keydata || !*keydata) {
     /* No key, no encryption */
-    egg_memcpy(newdata, data, newdatalen);
+    egg_memcpy(out, in, len);
   } else {
     char key[CRYPT_KEYSIZE + 1] = "";
 
     strncpyz(key, keydata, sizeof(key));
-/*      strncpyz(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key)); */
     AES_set_encrypt_key(key, CRYPT_KEYBITS, &e_key);
-
     /* Now loop through the blocks and crypt them */
-    blockcount = newdatalen / CRYPT_BLOCKSIZE;
-    for (blockndx = blockcount - 1; blockndx >= 0; blockndx--) {
-      AES_encrypt(&newdata[blockndx * CRYPT_BLOCKSIZE], &newdata[blockndx * CRYPT_BLOCKSIZE], &e_key);
-    }
+    blocks = len / CRYPT_BLOCKSIZE;
+    for (block = blocks - 1; block >= 0; block--)
+      AES_encrypt(&out[block * CRYPT_BLOCKSIZE], &out[block * CRYPT_BLOCKSIZE], &e_key);
   }
-  return newdata;
+  out[len] = 0;
+  return out;
 }
 
-char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
+char *decrypt_binary(const char *keydata, unsigned char *in, size_t len)
 {
-  int blockcount = 0, blockndx = 0;
-  unsigned char *newdata = NULL;
+  int blocks = 0, block = 0;
+  unsigned char *out = NULL;
 
-  datalen -= datalen % CRYPT_BLOCKSIZE;
-  newdata = calloc(1, datalen);
-  egg_memcpy(newdata, data, datalen);
+  len -= len % CRYPT_BLOCKSIZE;
+  out = calloc(1, len + 1);
+  egg_memcpy(out, in, len);
 
-  if ((!keydata) || (!keydata[0])) {
+  if (!keydata || !*keydata) {
     /* No key, no decryption */
   } else {
     /* Init/fetch key */
     char key[CRYPT_KEYSIZE + 1] = "";
 
     strncpyz(key, keydata, sizeof(key));
-/*      strncpy(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key)); */
     AES_set_decrypt_key(key, CRYPT_KEYBITS, &d_key);
-
     /* Now loop through the blocks and crypt them */
-    blockcount = datalen / CRYPT_BLOCKSIZE;
+    blocks = len / CRYPT_BLOCKSIZE;
 
-    for (blockndx = blockcount - 1; blockndx >= 0; blockndx--) {
-      AES_decrypt(&newdata[blockndx * CRYPT_BLOCKSIZE], &newdata[blockndx * CRYPT_BLOCKSIZE], &d_key);
-    }
-
+    for (block = blocks - 1; block >= 0; block--)
+      AES_decrypt(&out[block * CRYPT_BLOCKSIZE], &out[block * CRYPT_BLOCKSIZE], &d_key);
   }
 
-  return newdata;
+  return out;
 }
 
-const char base64[64] = ".\\0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-const char base64r[256] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 0, 0, 0, 0, 0,
-  0, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
-  27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 0, 1, 0, 0, 0,
-  0, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-  53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-char *encrypt_string(const char *keydata, char *data)
+char *encrypt_string(const char *keydata, char *in)
 {
-  int l, i, t;
+  size_t len = 0;
   unsigned char *bdata = NULL;
   char *res = NULL;
 
-  l = strlen(data) + 1;
-  bdata = encrypt_binary(keydata, data, &l);
-  if ((keydata) && (keydata[0])) {
-    res = calloc(1, (l * 4) / 3 + 5);
-#define DB(x) ((unsigned char) (x+i<l ? bdata[x+i] : 0))
-    for (i = 0, t = 0; i < l; i += 3, t += 4) {
-      res[t] = base64[DB(0) >> 2];
-      res[t + 1] = base64[((DB(0) & 3) << 4) | (DB(1) >> 4)];
-      res[t + 2] = base64[((DB(1) & 0x0F) << 2) | (DB(2) >> 6)];
-      res[t + 3] = base64[(DB(2) & 0x3F)];
-    }
-#undef DB
-    res[t] = 0;
+  len = strlen(in) + 1;
+  bdata = encrypt_binary(keydata, in, &len);
+  if (keydata && *keydata) {
+    res = b64enc(bdata, len);
     free(bdata);
     return res;
   } else {
@@ -130,29 +95,20 @@ char *encrypt_string(const char *keydata, char *data)
   }
 }
 
-char *decrypt_string(const char *keydata, char *data)
+char *decrypt_string(const char *keydata, char *in)
 {
-  int i, l, t;
+  size_t len = 0;
   char *buf = NULL, *res = NULL;
 
-  l = strlen(data);
-  if ((keydata) && (keydata[0])) {
-    buf = calloc(1, (l * 3) / 4 + 6);
-#define DB(x) ((unsigned char) (x+i<l ? base64r[(unsigned char) data[x+i]] : 0))
-    for (i = 0, t = 0; i < l; i += 4, t += 3) {
-      buf[t] = (DB(0) << 2) + (DB(1) >> 4);
-      buf[t + 1] = ((DB(1) & 0x0F) << 4) + (DB(2) >> 2);
-      buf[t + 2] = ((DB(2) & 3) << 6) + DB(3);
-    };
-#undef DB
-    t += 3;
-    t -= (t % 4);
-    res = decrypt_binary(keydata, buf, t);
+  len = strlen(in);
+  if (keydata && *keydata) {
+    buf = b64dec(in, &len);
+    res = decrypt_binary(keydata, buf, len);
     free(buf);
     return res;
   } else {
-    res = calloc(1, l + 1);
-    strcpy(res, data);
+    res = calloc(1, len + 1);
+    strcpy(res, in);
     return res;
   }
 }
@@ -173,7 +129,7 @@ void encrypt_pass(char *s1, char *s2)
 int lfprintf (FILE *stream, char *format, ...)
 {
   va_list va;
-  char buf[8192], *ln = NULL, *nln = NULL, *tmp = NULL;
+  char buf[2048], *ln = NULL, *nln = NULL, *tmp = NULL;
   int res;
 
   buf[0] = 0;
@@ -182,10 +138,10 @@ int lfprintf (FILE *stream, char *format, ...)
   va_end(va);
 
   ln = buf;
-  while ((ln) && (ln[0])) {
-    nln = strchr(ln, '\n');
-    if (nln)
+  while (ln && *ln) {
+    if ((nln = strchr(ln, '\n')))
       *nln++ = 0;
+
     tmp = encrypt_string(SALT1, ln);
     res = fprintf(stream, "%s\n", tmp);
     free(tmp);
@@ -198,7 +154,7 @@ int lfprintf (FILE *stream, char *format, ...)
 
 void Encrypt_File(char *infile, char *outfile)
 {
-  char  buf[1024];
+  char *buf = NULL;
   FILE *f = NULL, *f2 = NULL;
   int std = 0;
 
@@ -215,13 +171,17 @@ void Encrypt_File(char *infile, char *outfile)
     printf("----------------------------------START----------------------------------\n");
   }
 
-  buf[0] = 0;
-  while (fgets(buf, sizeof buf, f) != NULL) {
+  buf = calloc(1, 1024);
+  while (fgets(buf, 1024, f) != NULL) {
+    remove_crlf(buf);
+
     if (std)
       printf("%s\n", encrypt_string(SALT1, buf));
     else
       lfprintf(f2, "%s\n", buf);
+    buf[0] = 0;
   }
+  free(buf);
   if (std)
     printf("-----------------------------------END-----------------------------------\n");
 
@@ -232,7 +192,7 @@ void Encrypt_File(char *infile, char *outfile)
 
 void Decrypt_File(char *infile, char *outfile)
 {
-  char buf[8192], *temps = NULL;
+  char *buf = NULL;
   FILE *f = NULL, *f2 = NULL;
   int std = 0;
 
@@ -248,16 +208,21 @@ void Decrypt_File(char *infile, char *outfile)
   } else {
     printf("----------------------------------START----------------------------------\n");
   }
-  
-  buf[0] = 0;
-  while (fgets(buf, sizeof buf, f) != NULL) {
+
+  buf = calloc(1, 2048);
+  while (fgets(buf, 2048, f) != NULL) {
+    char *temps = NULL;
+
+    remove_crlf(buf);
     temps = (char *) decrypt_string(SALT1, buf);
     if (!std)
       fprintf(f2, "%s\n",temps);
     else
       printf("%s\n", temps);
     free(temps);
+    buf[0] = 0;
   }
+  free(buf);
   if (std)
     printf("-----------------------------------END-----------------------------------\n");
 

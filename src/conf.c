@@ -288,7 +288,7 @@ checkpid(char *nick, conf_bot * bot)
     pid_t xx = 0;
 
     fgets(s, 10, f);
-    s[10] = 0;
+    remove_crlf(s);
     fclose(f);
     xx = atoi(s);
     if (bot) {
@@ -470,23 +470,22 @@ readconf(char *fname, int bits)
 {
   FILE *f = NULL;
   int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
-  char inbuf[201] = "";
+  char *inbuf = NULL;
 
   sdprintf("readconf(%s, %d)", fname, enc);
   Context;
   if (!(f = fopen(fname, "r")))
     fatal("Cannot read config", 0);
 
-  while (fgets(inbuf, sizeof inbuf, f) != NULL) {
+  inbuf = calloc(1, 201);
+  while (fgets(inbuf, 201, f) != NULL) {
     char *line = NULL, *temp_ptr = NULL;
 
+    remove_crlf(inbuf);
     if (enc)
       line = temp_ptr = decrypt_string(SALT1, inbuf);
     else
       line = inbuf;
-
-    /* fucking DOS */
-    remove_crlf(&line);
 
     if ((line && !line[0]) || line[0] == '\n') {
       if (enc)
@@ -595,10 +594,12 @@ readconf(char *fname, int bits)
         conf_addbot(nick, ip, host, ipsix);
       }
     }
+    inbuf[0] = 0;
     if (enc)
       free(temp_ptr);
   }                             /* while(fgets()) */
   fclose(f);
+  free(inbuf);
 
   return 0;
 }

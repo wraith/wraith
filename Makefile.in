@@ -86,7 +86,6 @@ all:
 
 cleanutils:
 	@rm -f src/stringfix src/makesettings src/sorthelp src/makehelp
-	@misc/dostrings l
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
@@ -189,10 +188,7 @@ utils: makesettings stringfix makehelp
 crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
-dostrings: stringfix
-	@misc/dostrings
-
-general: makesettings packconf salt help dostrings
+general: makesettings packconf salt help 
 
 leaf:	general
 	@echo ""

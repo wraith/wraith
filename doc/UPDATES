@@ -25,6 +25,7 @@ This is a summary of ChangeLog basically.
 21.Unrolled some loops in the botlink encrypt.
 22.Added server 005 support, fixes many potential bugs.
 23.Fixed many bugs with color system, including color over relay/botcmd.
+24.Recoded some of the AES core, fixed several outstanding bugs.
 
 1.1.7
 

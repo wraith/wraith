@@ -175,15 +175,13 @@ char *splitnick(char **blah)
   return "";
 }
 
-void remove_crlf(char **line)
+void remove_crlf(char *line)
 {
   char *p = NULL;
 
-  p = strchr(*line, '\n');
-  if (p != NULL)
+  if ((p = strchr(line, '\n')))
     *p = 0;
-  p = strchr(*line, '\r');
-  if (p != NULL)
+  if ((p = strchr(line, '\r')))
     *p = 0;
 }
 
