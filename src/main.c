@@ -277,9 +277,12 @@ void write_debug()
   if (x < 0) {
     putlog(LOG_MISC, "*", "* Failed to write DEBUG");
   } else {
+    char date[80];
     strncpyz(s, ctime(&now), sizeof s);
     dprintf(-x, "Debug (%s) written %s\n", ver, s);
 
+    egg_stftime(date, sizeof date, "%c %Z", gmtime(&buildts));
+    dprintf(-x, "Build: %s (%lu)\n", date, buildts);
     /* info library */
     dprintf(-x, "Tcl library: %s\n",
 	    ((interp) && (Tcl_Eval(interp, "info library") == TCL_OK)) ?
@@ -667,7 +670,7 @@ static void dtx_arg(int argc, char *argv[])
       {
         char date[50];
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
-	printf("Wraith %s\nBuild Date: (%lu) %s\n", egg_version, buildts, date);
+	printf("Wraith %s\nBuild Date: %s (%lu)\n", egg_version, date, buildts);
         printf("SALTS\nfiles: %s\nbotlink: %s\n", SALT1, SALT2);
 	bg_send_quit(BG_ABORT);
 	exit(0);
@@ -1406,7 +1409,7 @@ int main(int argc, char **argv)
   egg_snprintf(ver, sizeof ver, "wraith %s", egg_version);
   egg_snprintf(version, sizeof version, "wraith %s", egg_version);
   /* Now add on the patchlevel (for Tcl) */
-  sprintf(&egg_version[strlen(egg_version)], " %u", egg_numver);
+  sprintf(&egg_version[strlen(egg_version)], " (%u)", egg_numver);
 #ifdef STOP_UAC
   {
     int nvpair[2];

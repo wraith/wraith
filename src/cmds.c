@@ -592,8 +592,11 @@ static void cmd_motd(struct userrec *u, int idx, char *par)
 
 static void cmd_about(struct userrec *u, int idx, char *par)
 {
+  char c[80];
   putlog(LOG_CMDS, "*", STR("#%s# about"), dcc[idx].nick);
-  dprintf(idx, STR("Wraith (%s) botpack by bryan, CVS date %lu"), buildts);
+  dprintf(idx, STR("Wraith by bryan\n"));
+  egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
+  dprintf(idx, STR("Version: %s\nBuild: %s (%lu)\n"), egg_version, c, buildts);
   dprintf(idx, STR("..with credits and thanks to the following:\n"), egg_version);
   dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n\n"));
   dprintf(idx, STR("Eggdrop team for developing such a great bot to code off of.\n"));
