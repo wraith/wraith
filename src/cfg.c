@@ -170,6 +170,24 @@ struct cfg_entry CFG_CMDPREFIX = {
 #endif /* LEAF */
 };
 
+int deflag_translate(const char *buf)
+{
+  int num = atoi(buf);
+
+  if (egg_isdigit(num))
+    return num;
+
+  if (!egg_strcasecmp(buf, "ignore"))
+    return P_IGNORE;
+  else if (!egg_strcasecmp(buf, "deop"))
+    return P_DEOP;
+  else if (!egg_strcasecmp(buf, "kick"))
+    return P_KICK;
+  else if (!egg_strcasecmp(buf, "delete") || !egg_strcasecmp(buf, "remove"))
+    return P_DELETE;  
+  return P_IGNORE;
+}
+
 void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
 {
   if (!u)

@@ -413,17 +413,16 @@ See also: link
                           channel is set to +i. Once the channel is -i then the
                           invite will be removed the next time the bot checks.
                           Please note that this is an IRCnet feature.
+        $bcookie-time-slack$b    How many seconds off of botnet timesync is allowed
+                                 in cookies.
      The following options chose how to respond to specific events.
-        Each can be set from 0-3.
-        0           Ignore
-        1           Deop (chattr +d)
-        2           Kick (chattr +k)
-        3           Remove user
+        Each can be set as any of the specified options.
+        ignore/0           Ignore
+        deop/1             Deop (chattr +d)
+        kick/2             Kick (chattr +k)
+        delete/remove/3    Remove user
       
       $bbad-cookie$b             Missing or invalid cookie in bot op line.
- 
-      $bcookie-time-slack$b      How many seconds off of botnet timesync is allowed
-                                 in cookies.
       $bmanop$b                  Users who op manually in a -manop chan.
       $bmdop$b                   Users who mass deop.
       $bmop$b                    Users who mass op in a -mop chan.

@@ -52,6 +52,7 @@ typedef struct memstruct {
 #define chan_wasop(x) (x->flags & WASOP)
 #define chan_stopcheck(x) (x->flags & STOPCHECK)
 
+#define P_IGNORE	0
 #define P_DEOP		1
 #define P_KICK		2
 #define P_DELETE	3

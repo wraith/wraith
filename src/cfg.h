@@ -29,7 +29,8 @@ extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_FORKINTERVAL, CFG_CHANSET, 
 #ifdef G_MEAN
 extern struct cfg_entry CFG_MEANDEOP, CFG_MEANKICK, CFG_MEANBAN;
 #endif /* G_MEAN */
-
+void deflag_user(struct userrec *, int, char *, struct chanset_t *);
+int deflag_translate(const char *);
 void set_cfg_str(char *, char *, char *);
 void add_cfg(struct cfg_entry *);
 void got_config_share(int, char *, int);
