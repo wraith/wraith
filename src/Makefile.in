@@ -70,7 +70,6 @@ build_msg:
 
 
 main.o: stringfix
-	@cp -f main.c xmain.c
 	@./stringfix main.c _main.c || cp -f main.c _main.c
 	@echo -e "Compiling: \033[1mmain\033[0m"
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
