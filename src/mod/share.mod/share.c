@@ -1230,8 +1230,7 @@ shareout(const char *format, ...)
   va_end(va);
 
   for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) &&
-        !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
+    if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
 }
