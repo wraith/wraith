@@ -683,6 +683,8 @@ static void startup_checks() {
         printf("Error killing '%s'\n", do_killbot);
       exit(0);
     } else {
+#endif /* LEAF */
+      /* this needs to be both hub/leaf */
       if (update_bin)	{			/* invoked with -u bin */
         if (updating != 2) {
           kill(conf.bot->pid, SIGKILL);
@@ -692,6 +694,7 @@ static void startup_checks() {
         updatebin(DP_STDOUT, update_bin, 1);	/* will call restart all bots */
         /* never reached */
       }
+#ifdef LEAF
       spawnbots();
       if (updating)
         exit(0); /* just let the timer restart us (our parent) */
