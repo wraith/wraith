@@ -171,14 +171,14 @@ static void cmd_pls_invite(int idx, char *par)
   cmd_pls_mask('I', idx, par);
 }
 
-static void cmd_mns_mask(char type, int idx, char *par)
+static void cmd_mns_mask(const char type, int idx, char *par)
 {
   int i = 0, j;
   struct chanset_t *chan = NULL;
-  char s[UHOSTLEN] = "", *who = NULL, *chname = NULL, *cmd = NULL, *mask = NULL;
+  char s[UHOSTLEN] = "", *who = NULL, *chname = NULL, *mask = NULL;
+  const char *cmd = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
   masklist *m = NULL;
 
-  cmd = type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite";
   if (!par[0]) {
     dprintf(idx, "Usage: -%s <hostmask> [channel]\n", cmd);
     return;
@@ -350,7 +350,7 @@ static void cmd_info(int idx, char *par)
     dprintf(idx, "Info storage is turned off.\n");
     return;
   }
-  s1 = get_user(&USERENTRY_INFO, dcc[idx].user);
+  s1 = (char *) get_user(&USERENTRY_INFO, dcc[idx].user);
   if (s1 && s1[0] == '@')
     locked = 1;
   if (par[0] && strchr(CHANMETA, par[0])) {
@@ -1362,29 +1362,29 @@ static void cmd_chanset(int idx, char *par)
 static cmd_t C_dcc_irc[] =
 {
   {"+ban",	"o|o",	(Function) cmd_pls_ban,		NULL},
-  {"+exempt",	"o|o",	(Function) cmd_pls_exempt,	NULL},
-  {"+invite",	"o|o",	(Function) cmd_pls_invite,	NULL},
-  {"+chan",	"n",	(Function) cmd_pls_chan,	NULL},
-  {"+chrec",	"m|m",	(Function) cmd_pls_chrec,	NULL},
+  {"+exempt",	"o|o",	(Function) cmd_pls_exempt,		NULL},
+  {"+invite",	"o|o",	(Function) cmd_pls_invite,		NULL},
+  {"+chan",	"n",	(Function) cmd_pls_chan,		NULL},
+  {"+chrec",	"m|m",	(Function) cmd_pls_chrec,		NULL},
   {"-ban",	"o|o",	(Function) cmd_mns_ban,		NULL},
-  {"-chan",	"n",	(Function) cmd_mns_chan,	NULL},
-  {"-chrec",	"m|m",	(Function) cmd_mns_chrec,	NULL},
-  {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL},
-  {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL},
+  {"-chan",	"n",	(Function) cmd_mns_chan,		NULL},
+  {"-chrec",	"m|m",	(Function) cmd_mns_chrec,		NULL},
+  {"-exempt",	"o|o",	(Function) cmd_mns_exempt,		NULL},
+  {"-invite",	"o|o",	(Function) cmd_mns_invite,		NULL},
   {"bans",	"o|o",	(Function) cmd_bans,		NULL},
   {"botjoin",	"n",	(Function) cmd_botjoin,		NULL},
   {"botpart",	"n",	(Function) cmd_botpart,		NULL},
   {"exempts",	"o|o",	(Function) cmd_exempts,		NULL},
   {"invites",	"o|o",	(Function) cmd_invites,		NULL},
-  {"chaninfo",	"m|m",	(Function) cmd_chaninfo,	NULL},
+  {"chaninfo",	"m|m",	(Function) cmd_chaninfo,		NULL},
   {"chanset",	"m|m",	(Function) cmd_chanset,		NULL},
   {"chinfo",	"m|m",	(Function) cmd_chinfo,		NULL},
   {"cycle", 	"n|n",	(Function) cmd_cycle,		NULL},
   {"down",	"n|n",	(Function) cmd_down,		NULL},
   {"info",	"",	(Function) cmd_info,		NULL},
-  {"slowjoin",  "n",    (Function) cmd_slowjoin,        NULL},
-  {"slowpart",  "n|n",  (Function) cmd_slowpart,        NULL},
+  {"slowjoin",  "n",    (Function) cmd_slowjoin,		NULL},
+  {"slowpart",  "n|n",  (Function) cmd_slowpart,  		NULL},
   {"stick",	"o|o",	(Function) cmd_stick,		NULL},
   {"unstick",	"o|o",	(Function) cmd_unstick,		NULL},
-  {NULL,	NULL,	NULL,				NULL}
+  {NULL,	NULL,	NULL,			NULL}
 };

@@ -482,7 +482,7 @@ tell_user(int idx, struct userrec *u)
     fr.match = FR_CHAN | FR_GLOBAL;
     chan = findchan_by_dname(ch->channel);
     get_user_flagrec(dcc[idx].user, &fr, ch->channel);
-    if (!channel_privchan(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) {
+    if (!channel_privchan(chan) || (channel_privchan(chan) && (chan_op(fr) || glob_owner(fr)))) {
       if (glob_op(fr) || chan_op(fr)) {
         if (ch->laston == 0L)
   	  strcpy(s1, "never");

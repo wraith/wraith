@@ -3,8 +3,8 @@
 #include "memcpy.h"
 #include "src/main.h"
 
-extern "C" void * __real_malloc(size_t);
-extern "C" void * __real_realloc(void *, size_t);
+extern void * __real_malloc(size_t);
+extern void * __real_realloc(void *, size_t);
 
 void *
 __wrap_malloc(size_t size)
