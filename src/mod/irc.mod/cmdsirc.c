@@ -1047,6 +1047,8 @@ static void cmd_mop(struct userrec *u, int idx, char *par)
           sprintf(s, "%s!%s", m->nick, m->userhost);
           m->user = get_user_by_host(s);
         }
+        if (m->user && u_pass_match(u, "-"))
+          continue;		/* dont op users without a pass */
         get_user_flagrec(m->user, &victim, chan->dname);
         if (!chan_hasop(m) && !glob_bot(victim) && chk_op(victim, chan)) {
           found++;

@@ -36,6 +36,7 @@ This is a summary of ChangeLog basically.
 * Fixed /me over partyline; now auto changes into cmd_me
 * Fixed cosmetic error in cmd_mns/invite/ban/exempt regarding which chan was displayed in log
 * Ignores are now checked before host is checked for access for telnet
+* cmd_mop no longer ops users without a pass set.
 
 1.1.9
 
