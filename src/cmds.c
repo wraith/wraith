@@ -1668,7 +1668,7 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
 
 static void cmd_restart(struct userrec *u, int idx, char *par)
 {
-return;
+
   putlog(LOG_CMDS, "*", STR("#%s# restart"), dcc[idx].nick);
   if (!backgrd) {
     dprintf(idx, STR("You cannot %srestart a bot when running -n (due to Tcl).\n"), dcc_prefix);
@@ -1677,10 +1677,13 @@ return;
   dprintf(idx, STR("Restarting.\n"));
 #ifdef HUB
   write_userfile(-1);
-#endif
+#endif /* HUB */
   putlog(LOG_MISC, "*", STR("Restarting ..."));
+Context;
   wipe_timers(interp, &utimer);
+Context;
   wipe_timers(interp, &timer);
+Context;
   do_restart = idx;
 }
 

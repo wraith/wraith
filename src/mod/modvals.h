@@ -42,7 +42,7 @@
 #define HOOK_DIE		 15
 #define HOOK_10SECONDLY          16
 #define HOOK_30SECONDLY          17
-#define HOOK_3SECONDLY		18
+#define HOOK_3SECONDLY           18
 #define REAL_HOOKS		 19
 //#define HOOK_CHANFILE            17
 #define HOOK_SHAREOUT		105

@@ -50,14 +50,6 @@ void bot_share(int, char *);
 void bot_shareupdate(int, char *);
 int base64_to_int(char *);
 
-
-/* pcrypt.c */
-char *cryptit (char *);
-char *decryptit (char *);
-int lfprintf(FILE *, char *, ...);
-void EncryptFile(char *, char *);
-void DecryptFile(char *, char *);
-
 /* botnet.c */
 void lower_bot_linked(int idx);
 void higher_bot_linked(int idx);
@@ -137,6 +129,13 @@ int stripmodes(char *);
 char *stripmasktype(int);
 void gotremotecmd(char * forbot, char * frombot, char * fromhand, char * fromidx, char * cmd);
 void gotremotereply(char * frombot, char * tohand, char * toidx, char * ln);
+
+/* crypt.c */
+char *cryptit (char *);
+char *decryptit (char *);
+int lfprintf(FILE *, char *, ...);
+void EncryptFile(char *, char *);
+void DecryptFile(char *, char *);
 
 /* dcc.c */
 void failed_link(int);

@@ -31,6 +31,7 @@ extern struct chanset_t	*chanset;
 extern time_t		 now;
 
 #ifdef S_AUTH
+extern char 		authkey[];
 int auth_total = 0;
 int max_auth = 100;
 struct auth_t *auth = 0;

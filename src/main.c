@@ -958,8 +958,6 @@ Context;
     fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
   if (!strcmp(in, out))
     fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
-  check_static("blowfish", blowfish_start);
-  module_load(ENCMOD);
   if (!strcmp(which, "e")) {
     EncryptFile(in, out);
     fatal(STR("File Encryption complete"),3);
@@ -1063,9 +1061,6 @@ static void gotspawn(char *filename)
 
   if (!(fp = fopen(filename, "r")))
     fatal(STR("Cannot read from local config (2)"), 0);
-
-  check_static("blowfish", blowfish_start);
-  module_load(ENCMOD);
 
   while(fscanf(fp,"%[^\n]\n",templine) != EOF) 
   {
@@ -1409,13 +1404,29 @@ int main(int argc, char **argv)
   myuid = geteuid();
   binname = getfullbinname(argv[0]);
 
+  /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
+  init_auth();
+  init_config();
+  init_dcc_max();
+  init_userent();
+  init_misc();
+  init_bots();
+  init_net();
+  init_modules();
+  init_settings();
+  init_userrec();
+  if (backgrd)
+    bg_prepare_split();
+  init_tcl(argc, argv);
+  init_botcmd();
+  link_statics();
+  module_load(ENCMOD);
+
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
   if (!fixmod(binname))
    werr(ERR_BINMOD);
 
-  init_settings();
-  init_tcl(argc, argv);
   if (argc) {
     sdprintf(STR("Calling dtx_arg with %d params."), argc);
     dtx_arg(argc, argv);
@@ -1506,21 +1517,6 @@ int main(int argc, char **argv)
     werr(ERR_NOCONF);
   if (!fixmod(cfile))
     werr(ERR_CONFMOD);
-
-  init_dcc_max();
-  init_userent();
-  init_misc();
-  init_auth();
-  init_config();
-  init_bots();
-  init_net();
-  init_modules();
-  init_userrec();
-  if (backgrd)
-    bg_prepare_split();
-  init_botcmd();
-  link_statics();
-  module_load(ENCMOD);
 
 #ifdef LEAF
   if (localhub) { //we only want to read the config if we are the spawn bot..
@@ -1688,8 +1684,7 @@ int main(int argc, char **argv)
     check_crontab();
 #ifdef LEAF
   }
-#endif
-
+#endif /* LEAF */
 
   if (!encrypt_pass) {
     sdprintf(MOD_NOCRYPT);

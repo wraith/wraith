@@ -707,12 +707,10 @@ void reload()
 void rehash()
 {
   call_hook(HOOK_PRE_REHASH);
-#ifdef HUB
   noshare = 1;
   clear_userlist(userlist);
   noshare = 0;
   userlist = NULL;
-#endif /* HUB */
   chanprog();
 }
 
