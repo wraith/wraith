@@ -412,7 +412,7 @@ Function global_table[] =
   /* 204 - 207 */
   (Function) & online_since,	/* time_t *				*/
   (Function) & buildts,		/* time_t *				*/
-  (Function) 0,
+  (Function) color,
   (Function) check_dcc_attrs,
   /* 208 - 211 */
   (Function) check_dcc_chanattrs,
