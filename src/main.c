@@ -576,24 +576,14 @@ static void startup_checks() {
 
   /* test tempdir: it's vital */
   {
-    FILE *f = NULL;
-    char s[DIRMAX] = "";
-    int fd;
-
-    egg_snprintf(s, sizeof s, "%s.test-XXXXXX", tempdir);
-    if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
-      if (fd != -1) {
-        unlink(s);
-        close(fd);
-      }
-      fatal("Can't write to tempdir!", 0);
-    }
-    fprintf(f, "\n");
-    if (fflush(f))
+    Tempfile *testdir = new Tempfile("test");
+    int result;
+   
+    fprintf(testdir->f, "\n");
+    result = fflush(testdir->f);
+    delete testdir;
+    if (result)
       fatal(strerror(errno), 0);
-
-    unlink(s);
-    fclose(f);
   }
 
   if (old_hack && can_stat(cfile))

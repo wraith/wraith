@@ -132,25 +132,20 @@ swap_uids_back()
 void
 confedit()
 {
-  FILE *f = NULL;
-  char s[DIRMAX] = "", *editor = NULL;
-  int fd;
+  Tempfile tmpconf = Tempfile("conf");
+  char *editor = NULL;
   mode_t um;
   int waiter;
   pid_t pid, xpid;
 
-  egg_snprintf(s, sizeof s, "%s.conf-XXXXXX", tempdir);
+
   um = umask(077);
 
-  if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
-    fatal("Can't create temp conffile!", 0);
-  }
-
-  writeconf(NULL, f, CONF_COMMENT);
-
+  writeconf(NULL, tmpconf.f, CONF_COMMENT);
+  fclose(tmpconf.f);
   (void) umask(um);
 
-  if (!can_stat(s))
+  if (!can_stat(tmpconf.file))
     fatal("Cannot stat tempfile", 0);
 
   /* Okay, edit the file */
@@ -169,7 +164,6 @@ confedit()
             #endif
 */
   }
-  fclose(f);
 
   (void) signal(SIGINT, SIG_IGN);
   (void) signal(SIGQUIT, SIG_IGN);
@@ -182,13 +176,13 @@ confedit()
     case 0:
     {
       char *run = NULL;
-      size_t size = strlen(s) + strlen(editor) + 5;
+      size_t size = tmpconf.len + strlen(editor) + 5;
 
       setgid(getgid());
       setuid(getuid());
       run = (char *) calloc(1, size);
       /* child */
-      egg_snprintf(run, size, "%s %s", editor, s);
+      egg_snprintf(run, size, "%s %s", editor, tmpconf.file);
       execlp("/bin/sh", "/bin/sh", "-c", run, NULL);
       perror(editor);
       exit(1);
@@ -231,15 +225,15 @@ confedit()
 
   swap_uids_back();
 
-  if (!can_stat(s))
+  if (!can_stat(tmpconf.file))
     fatal("Error reading new config file", 0);
-  readconf(s, 0);               /* read cleartext conf tmp into &settings */
-  unlink(s);
+  readconf(tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
+  unlink(tmpconf.file);
   conf_to_bin(&conffile);       /* will exit */
   exit(0);                      /* never reached */
 
 fatal:
-  unlink(s);
+  unlink(tmpconf.file);
   exit(1);
 }
 #endif /* !CYGWIN_HACKS */

@@ -67,11 +67,9 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
   if (todo == WRITE_MD5) {
-    char *fname_bak = NULL, s[DIRMAX] = "";
-    FILE *fn = NULL;            /* the new binary */
-    int i = 0, fd = -1;
-    size_t size = 0;
-
+    char *fname_bak = NULL;
+    size_t size = 0, i = 0;
+    Tempfile *newbin = new Tempfile("bin");
 
     size = strlen(fname) + 2;
     fname_bak = (char *) calloc(1, size);
@@ -85,24 +83,14 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
     size = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    egg_snprintf(s, sizeof s, ".bin-XXXXXX");
-    if ((fd = mkstemp(s)) == -1 || (fn = fdopen(fd, "wb")) == NULL) {
-      if (fd != -1) {
-        unlink(s);
-        close(fd);
-      }
-      fatal("Can't create temporary file!", 0);
-    }
-
     while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
       if (i) {                  /* to skip bytes for hash */
         i -= sizeof(buf) - 1;
         continue;
       }
-      if (fwrite(buf, sizeof(buf) - 1, 1, fn) != 1) {
+      if (fwrite(buf, sizeof(buf) - 1, 1, newbin->f) != 1) {
         fclose(f);
-        fclose(fn);
-        unlink(s);
+        delete newbin;
         werr(ERR_BINSTAT);
       }
 /*
@@ -119,23 +107,22 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
       if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {
         strncpyz(settings.hash, hash, 65);
         edpack(&settings, hash, PACK_ENC);
-        fwrite(&settings.hash, sizeof(settings_t) - PREFIXLEN, 1, fn);
+        fwrite(&settings.hash, sizeof(settings_t) - PREFIXLEN, 1, newbin->f);
         i = sizeof(settings_t) - PREFIXLEN;
       }
     }
 
     fclose(f);
-    fclose(fn);
 
     if (movefile(fname, fname_bak))
       fatal("Crappy os :D", 0);
 
-    if (movefile(s, fname))
+    if (movefile(newbin->file, fname))
       fatal("Crappy os :D", 0);
 
     fixmod(fname);
     unlink(fname_bak);
-    unlink(s);
+    delete newbin;
   }
   return hash;
 }
