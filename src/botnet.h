@@ -16,10 +16,8 @@ void answer_local_whom(int, int);
 char *lastbot(char *);
 int nextbot(char *);
 int in_chain(char *);
-#ifdef HUB
 void tell_bots(int, int, const char *);
 void tell_bottree(int);
-#endif /* HUB */
 void dump_links(int);
 int botlink(char *, int, char *);
 int botunlink(int, char *, char *);

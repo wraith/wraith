@@ -117,7 +117,6 @@ strip_telnet(int sock, char *buf, int *len)
   *o = *p;
 }
 
-#ifdef HUB
 void
 send_timesync(int idx)
 {
@@ -135,7 +134,6 @@ send_timesync(int idx)
     }
   }
 }
-#endif /* HUB */
 
 static void
 greet_new_bot(int idx)
@@ -900,9 +898,8 @@ dcc_chat_pass(int idx, char *buf, int atr)
       dcc[idx].status = STAT_CALLED;
       dprintf(idx, "goodbye!\n");
       greet_new_bot(idx);
-#ifdef HUB
-      send_timesync(idx);
-#endif /* HUB */
+      if (conf.bot->hub)
+        send_timesync(idx);
     } else if (!egg_strcasecmp(pass, "neg")) {
       int snum = findanysnum(dcc[idx].sock);
 

@@ -432,19 +432,17 @@ void answer_local_whom(int idx, int chan)
   if(nicklen < 9) nicklen = 9;
   if(botnicklen < 9) botnicklen = 9;
 
-#ifdef HUB
-  egg_snprintf(format, sizeof format, "%%-%us   %%-%us  %%s\n", 
-                                  nicklen, botnicklen);
-  dprintf(idx, format, " Nick", 	" Bot",      " Host");
-  dprintf(idx, format, "----------",	"---------", "--------------------");
-  egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%-%us  %%s%%s\n", 
-                                  nicklen, botnicklen);
-#else /* !HUB */
-  egg_snprintf(format, sizeof format, "%%-%us\n", nicklen);
-  dprintf(idx, format, " Nick");
-  dprintf(idx, format, "----------");
-  egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%s\n", nicklen);
-#endif /* HUB */
+  if (conf.bot->hub) {
+    egg_snprintf(format, sizeof format, "%%-%us   %%-%us  %%s\n", nicklen, botnicklen);
+    dprintf(idx, format, " Nick", 	" Bot",      " Host");
+    dprintf(idx, format, "----------",	"---------", "--------------------");
+    egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%-%us  %%s%%s\n", nicklen, botnicklen);
+  } else {
+    egg_snprintf(format, sizeof format, "%%-%us\n", nicklen);
+    dprintf(idx, format, " Nick");
+    dprintf(idx, format, "----------");
+    egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%s\n", nicklen);
+  }
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_CHAT) {
       if ((chan == (-1)) || ((chan >= 0) && (dcc[i].u.chat->channel == chan))) {
@@ -467,14 +465,17 @@ void answer_local_whom(int idx, int chan)
 	  idle[0] = 0;
 
         total++;
-	dprintf(idx, format, c, dcc[i].nick, 
-		(dcc[i].u.chat->channel == 0) && (chan == (-1)) ? '+' :
-		(dcc[i].u.chat->channel > GLOBAL_CHANS) &&
-#ifdef HUB
-		(chan == (-1)) ? '*' : ' ', conf.bot->nick, dcc[i].host, idle);
-#else /* !HUB */
-		(chan == (-1)) ? '*' : ' ', idle);
-#endif /* HUB */
+        if (conf.bot->hub)
+  	  dprintf(idx, format, c, dcc[i].nick, 
+		 (dcc[i].u.chat->channel == 0) && (chan == (-1)) ? '+' :
+		 (dcc[i].u.chat->channel > GLOBAL_CHANS) &&
+		 (chan == (-1)) ? '*' : ' ', conf.bot->nick, dcc[i].host, idle);
+        else
+          dprintf(idx, format, c, dcc[i].nick, 
+	         (dcc[i].u.chat->channel == 0) && (chan == (-1)) ? '+' :
+		 (dcc[i].u.chat->channel > GLOBAL_CHANS) &&
+		 (chan == (-1)) ? '*' : ' ', idle);
+
 	if (dcc[i].u.chat->away != NULL)
 	  dprintf(idx, "   AWAY: %s\n", dcc[i].u.chat->away);
       }
@@ -503,13 +504,11 @@ void answer_local_whom(int idx, int chan)
 	idle[0] = 0;
       total++;
 
-      dprintf(idx, format, c, party[i].nick, 
-	      (party[i].chan == 0) && (chan == (-1)) ? '+' : ' ',
-#ifdef HUB
-	      party[i].bot, party[i].from, idle);
-#else /* !HUB */
-	      idle);
-#endif /* HUB */
+      if (conf.bot->hub) 
+        dprintf(idx, format, c, party[i].nick, (party[i].chan == 0) && (chan == (-1)) ? '+' : ' ', 
+                                party[i].bot, party[i].from, idle);
+      else
+        dprintf(idx, format, c, party[i].nick, (party[i].chan == 0) && (chan == (-1)) ? '+' : ' ', idle);
 
       if (party[i].status & PLSTAT_AWAY)
 	dprintf(idx, "   %s: %s\n", MISC_AWAY,
@@ -519,7 +518,6 @@ void answer_local_whom(int idx, int chan)
   dprintf(idx, "Total users: %d\n", total);
 }
 
-#ifdef HUB
 /* Show z a list of all bots connected
  */
 void
@@ -754,7 +752,6 @@ void tell_bottree(int idx)
   /* Hop information: (9d) */
   dprintf(idx, "Average hops: %3.1f, total bots: %d\n", ((float) tothops) / ((float) tands), tands + 1);
 }
-#endif /* HUB */
 
 /* Dump list of links to a new bot
  */
@@ -763,21 +760,22 @@ void dump_links(int z)
   register int i;
   register size_t l;
   char x[1024] = "";
-#ifdef HUB
-  tand_t *bot = NULL;
-  char *p = NULL;
 
-  for (bot = tandbot; bot; bot = bot->next) {
-    if (bot->uplink == (tand_t *) 1)
-      p = conf.bot->nick;
-    else
-      p = bot->uplink->bot;
+  if (conf.bot->hub) {
+    tand_t *bot = NULL;
+    char *p = NULL;
 
-    l = simple_sprintf(x, "n %s %s %cD0gc %d %d %s\n", bot->bot, p, bot->share, bot->localhub, 
+    for (bot = tandbot; bot; bot = bot->next) {
+      if (bot->uplink == (tand_t *) 1)
+        p = conf.bot->nick;
+      else
+        p = bot->uplink->bot;
+
+      l = simple_sprintf(x, "n %s %s %cD0gc %d %d %s\n", bot->bot, p, bot->share, bot->localhub, 
                                                         bot->buildts, bot->version ? bot->version : "");
-    tputs(dcc[z].sock, x, l);
+      tputs(dcc[z].sock, x, l);
+    }
   }
-#endif /* HUB */
 
   /* Dump party line members */
   for (i = 0; i < dcc_total; i++) {
@@ -1159,9 +1157,8 @@ void tandem_relay(int idx, char *nick, register int i)
   strcpy(dcc[i].nick, nick);
   dcc[i].user = u;
   strcpy(dcc[i].host, bi->address);
-#ifdef HUB
-  dprintf(idx, "%s %s @ %s:%d ...\n", BOT_CONNECTINGTO, nick, bi->address, bi->relay_port);
-#endif /* HUB */
+  if (conf.bot->hub) 
+    dprintf(idx, "%s %s @ %s:%d ...\n", BOT_CONNECTINGTO, nick, bi->address, bi->relay_port);
   dprintf(idx, "%s\n", BOT_BYEINFO1);
   dcc[idx].type = &DCC_PRE_RELAY;
 

@@ -657,11 +657,10 @@ static void bot_nlinked(int idx, char *par)
   botnet_send_nlinked(idx, newbot, next, x, vlocalhub, vbuildts, vversion);
   
   if (x == '!') {
-#ifdef HUB
-    chatout("*** (%s) %s %s.\n", next, NET_LINKEDTO, newbot);
-#else
-    chatout("*** %s linked to botnet.\n", newbot);
-#endif
+    if (conf.bot->hub)
+      chatout("*** (%s) %s %s.\n", next, NET_LINKEDTO, newbot);
+    else
+      chatout("*** %s linked to botnet.\n", newbot);
     x = '-';
   }
   addbot(newbot, dcc[idx].nick, next, x, vlocalhub, vbuildts, vversion ? vversion : (char *) "");
@@ -769,9 +768,8 @@ static void bot_timesync(int idx, char *par)
 //  putlog(LOG_DEBUG, "@", "Got timesync from %s: %s (%li - %li)", dcc[idx].nick, par, atol(par), now);
   timesync = atol(par) - now;
 
-#ifdef HUB
-  send_timesync(-1);
-#endif /* HUB */
+  if (conf.bot->hub)
+    send_timesync(-1);
 }
 
 /* reject <from> <bot>

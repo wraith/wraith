@@ -526,9 +526,8 @@ static void check_autoaway()
 
 static void core_minutely()
 {
-#ifdef HUB
-  send_timesync(-1);
-#endif /* HUB */
+  if (conf.bot->hub) 
+    send_timesync(-1);
 #ifdef LEAF
   check_maxfiles();
   check_mypid();
