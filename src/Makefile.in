@@ -6,10 +6,6 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 @SET_MAKE@
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
 
 CC = @CC@
 LD = @CC@
@@ -37,12 +33,17 @@ doofus:
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) stringfix.c -o ../stringfix
 	@$(STRIP) ../stringfix
 
-../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compile_md5 compatability
+../makesalt:
+	@echo -e "Compiling: \033[1mmakesalt\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) makesalt.c -o ../makesalt
+	@$(STRIP) ../makesalt
+
+../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compatability
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
 	@touch mod/mod.xlibs
-	@$(LD) -static -o ../$(EGGEXEC) $(eggdrop_objs) $(MODOBJS) $(XLIBS) md5/md5c.o compat/*.o `cat mod/mod.xlibs`
+	@$(LD) -o ../$(EGGEXEC) $(eggdrop_objs) $(MODOBJS) $(XLIBS) compat/*.o `cat mod/mod.xlibs`
 	@$(STRIP) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
 	@echo ""
@@ -76,16 +77,6 @@ main.o: ../stringfix
 compatability:
 	@cd compat && $(MAKE_GENERIC) compat
 	@echo "---------- Yeah! that's the compiling, now the linking! ----------"
-
-compile_md5:
-	@cd md5 && $(MAKE_GENERIC) md5
-
-libtcle.a: $(TCLLIB)/lib$(TCLLIBFN)
-	@echo "[ Fixing lib$(TCLLIBFN) -> libtcle.a ]"
-	@cp $(TCLLIB)/lib$(TCLLIBFN) libtcle.a
-	@chmod u+rw libtcle.a
-	@ar d libtcle.a tclMain.o
-	@$(RANLIB) libtcle.a
 
 eggdrop.h:
 	@echo "You do not have the eggdrop source!"
@@ -137,7 +128,7 @@ dcc.o: dcc.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h 
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
- modules.h mod/modvals.h tandem.h md5/md5.h
+ modules.h mod/modvals.h tandem.h 
 dccutil.o: dccutil.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
@@ -156,7 +147,7 @@ main.o: main.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
- modules.h mod/modvals.h tandem.h bg.h md5/md5.h
+ modules.h mod/modvals.h tandem.h bg.h 
 match.o: match.c ./main.h
 mem.o: mem.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
@@ -206,7 +197,7 @@ tclmisc.o: tclmisc.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h 
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
  compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
- compat/strftime.h modules.h mod/modvals.h tandem.h md5/md5.h
+ compat/strftime.h modules.h mod/modvals.h tandem.h 
 tcluser.o: tcluser.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \

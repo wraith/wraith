@@ -35,7 +35,6 @@
 #include "src/mod/module.h"
 #include "share.mod/share.h"
 
-#include "compress_config.h"
 #ifdef HAVE_MMAP
 #  include <sys/types.h>
 #  include <sys/mman.h>

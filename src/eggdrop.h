@@ -128,6 +128,10 @@
 #  include "error_you_need_vsprintf_to_compile_eggdrop"
 #endif
 
+#ifdef HAVE_OPENSSL_SSL_H
+#  define HAVE_SSL
+#endif /* HAVE_OPENSSL_SSL_H */
+
 /* IPv6 sanity checks. */
 #ifdef USE_IPV6
 #  ifndef HAVE_IPV6

@@ -19,7 +19,6 @@
 #endif
 
 #include "tandem.h"
-#include "md5/md5.h"
 #include <sys/stat.h>
 
 extern char netpass[9];
@@ -377,6 +376,7 @@ static void cont_link(int idx, char *buf, int ii)
     MD5_Update(&ctx, tmp, strlen(tmp));
     MD5_Final(socklist[snum].ikey, &ctx);
     socklist[snum].encstatus = 1;
+    socklist[snum].gz = 1;
   } else {
     lostdcc(idx);
     killsock(dcc[idx].sock);
@@ -1633,6 +1633,7 @@ static void dcc_telnet_pass(int idx, int atr)
       tmp2 = encrypt_string(netpass, initkey);
       putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
       socklist[snum].encstatus = 1;
+      socklist[snum].gz = 1;
       dprintf(idx, "elink %s %lu\n", tmp2, socklist[snum].oseed);
       strcpy(socklist[snum].okey, initkey);
       strcpy(socklist[snum].ikey, initkey);

@@ -10,8 +10,6 @@ VPATH = @srcdir@
 
 @SET_MAKE@
 prefix = @prefix@
-DEST = @DEST@
-EGGEXEC = @EGGEXEC@
 EGGVERSION = @EGGVERSION@
 LEAFEXEC = leaf
 HUBEXEC = hub
@@ -34,24 +32,6 @@ CFLGS =
 CC = @CC@
 LD = @CC@
 STRIP = @STRIP@
-RANLIB = @RANLIB@
-
-# make eggmod
-MOD_CC = @MOD_CC@
-MOD_LD = @MOD_LD@
-MOD_STRIP = @MOD_STRIP@
-
-# make modules
-SHLIB_CC = @SHLIB_CC@
-SHLIB_LD = @SHLIB_LD@
-SHLIB_STRIP = @SHLIB_STRIP@
-
-# programs make install uses
-LN_S = @LN_S@
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
 
 # STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP #
 # - - - - - - - - do not edit anything below this line. - - - - - - - - #
@@ -60,7 +40,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 
 # stuff for Tcl
 XREQS = @TCL_REQS@
-XLIBS = @TCL_LIBS@ @LIBS@
+XLIBS = @TCL_LIBS@ @LIBS@ @ZLIB@ @SSL@
 TCLLIB = @TCLLIB@
 TCLLIBFN = @TCLLIBFN@
 
@@ -78,29 +58,29 @@ egg_install_msg =  echo "" && \
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM
 
 MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
-'STRIP=$(STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -DLEAF' \
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DLEAF' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
 'XLIBS=$(XLIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)' \
 'MODOBJS=mod/*.o' 
 
 MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
-'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) -DLEAF $(CFLGS)' \
+'STRIP=touch' 'CFLGS=-g3 $(DEBCFLAGS) -DLEAF $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 'MODOBJS=mod/*.o'
 
 MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
-'STRIP=$(STRIP)' 'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -CHUB' \
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -CHUB' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' \
 'XLIBS=$(XLIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' \
 'MODOBJS=mod/*.o'
 
 MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
-'STRIP=touch' 'RANLIB=$(RANLIB)' 'CFLGS=-g3 $(DEBCFLAGS) -DHUB $(CFLGS)' \
+'STRIP=touch' 'CFLGS=-g3 $(DEBCFLAGS) -DHUB $(CFLGS)' \
 'TCLLIB=$(TCLLIB)' 'TCLLIBFN=$(TCLLIBFN)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' \
 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'MODOBJS=mod/*.o'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
-'RANLIB=$(RANLIB)' 'CFLGS=$(CFLGS) -DSTANDALONE' 'XREQS=$(XREQS)' \
+'CFLGS=$(CFLGS) -DSTANDALONE' 'XREQS=$(XREQS)' \
 'XLIBS=$(XLIBS)' 'LD=$(LD)'
 
 MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
@@ -121,14 +101,13 @@ cleanpack:
 
 clean:  cleanutils cleanpack
 	@cd src && $(MAKE) clean
-	@cd src/md5 && $(MAKE) clean
 	@cd src/compat && $(MAKE) clean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp makesalt 
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/makesalt
 
 distclean: clean clean-modconfig
 	@cd src/mod && $(MAKE) distclean
-	@rm -f Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile
+	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h stamp.*
 	@rm -rf autom4te.cache
 
@@ -140,18 +119,14 @@ distrib: distclean
 depend:
 	@cat /dev/null > lush.h
 	@cd src && $(MAKE_DEPEND) depend
-	@cd src/md5 && $(MAKE_DEPEND) depend
 	@cd src/mod && $(MAKE_DEPEND) depend
 	@cd src/compat && $(MAKE_DEPEND) depend
 
 eggautoconf:
 	@$(modconf) eggautoconf
 
-salt:
-	@echo [*] Compiling MakeSalt for Encryption..
-	@$(CC) -I. -o makesalt src/makesalt.c
+salt:	utils
 	@./makesalt
-
 
 config:
 	@$(modconf) modules-still-exist
@@ -170,8 +145,8 @@ packconf:
 	@cp -f pack/settings.c src/settings.c
 
 utils:  packconf
-#	@./misc/maketype utils
-	@cd src; $(MAKE_UTILS) ../stringfix
+	@cd src && $(MAKE_UTILS) ../stringfix
+	@cd src && $(MAKE_UTILS) ../makesalt
 
 depleaf:
 	@echo ""
@@ -183,14 +158,12 @@ depleaf:
 	@echo ""
 	@cat /dev/null > lush.h
 	@cd src && $(MAKE_DEPEND) depleaf
-	@cd src/md5 && $(MAKE_DEPEND) depleaf
 	@cd src/mod && $(MAKE_DEPEND) depleaf
 	@cd src/compat && $(MAKE_DEPEND) depleaf
 
 dephub:
 	@cat /dev/null > lush.h
 	@cd src && $(MAKE_DEPEND) dephub
-	@cd src/md5 && $(MAKE_DEPEND) dephub
 	@cd src/mod && $(MAKE_DEPEND) dephub
 	@cd src/compat && $(MAKE_DEPEND) dephub
 

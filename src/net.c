@@ -1379,7 +1379,15 @@ void tputs(register int z, char *s, unsigned int len)
 	return;
       }
       /* Try. */
-      x = write(z, s, len);
+#ifdef HAVE_ZLIB_H
+//      if (socklist[i].gz) { 		/* gzipped links */
+//        FILE *fp;
+//        fp = gzdopen(z, "wb0");
+//        x = gzwrite(fp, s, len);
+//        
+//      } else
+#endif /* HAVE_ZLIB_H */
+        x = write(z, s, len);
       if (x == (-1))
 	x = 0;
       if (x < len) {

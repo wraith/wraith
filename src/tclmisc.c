@@ -8,7 +8,6 @@
 #include "main.h"
 #include "modules.h"
 #include "tandem.h"
-#include "md5/md5.h"
 #ifdef HAVE_UNAME
 #include <sys/utsname.h>
 #endif

@@ -137,7 +137,6 @@ extern struct cfg_entry CFG_FORKINTERVAL;
 
 unsigned char md5out[33];
 char md5string[33];
-#include "md5/md5.h"
 
 /* Traffic stats
  */
