@@ -822,9 +822,16 @@ void recheck_channel_modes(struct chanset_t *chan)
   int cur = chan->channel.mode,
       mns = chan->mode_mns_prot,
       pls = chan->mode_pls_prot;
+
   if (channel_closed(chan)) {
-    pls |= CHANINV;
-    mns &= ~CHANINV;
+    if (chan->closed_invite) {
+      pls |= CHANINV;
+      mns &= ~CHANINV;
+    }
+    if (chan->closed_private) {
+      pls |= CHANPRIV;
+      mns &= ~CHANPRIV;
+    }
   }
 
   if (!(chan->status & CHAN_ASKEDMODES)) {
@@ -985,7 +992,7 @@ void enforce_closed(struct chanset_t *chan) {
   if (!chan || !me_op(chan)) 
     return;
 
-  char buf[1024] = "";
+  char buf[3] = "";
 
   if (chan->closed_invite && !(chan->channel.mode & CHANINV))
     strcat(buf, "i");
