@@ -941,27 +941,6 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         while (*string && *string != '}') {
           string++;
         }
-/*
-      } else if (*(string + 1) == 'b') {
-        string += 2;
-        if (help_flags & CFLGS_BOLD) {
-          help_flags &= ~CFLGS_BOLD;
-          strcat(helpstr, color(idx, BOLD_CLOSE, 0));
-        } else {
-          help_flags |= CFLGS_BOLD;
-          strcat(helpstr, color(idx, BOLD_OPEN, 0));
-        }
-      } else if (*(string + 1) == 'f') {
-        string += 2;
-        
-        if (help_flags & CFLGS_FLASH) {
-          strcat(helpstr, color(idx, FLASH_CLOSE, 0));
-          help_flags &= ~CFLGS_FLASH;
-        } else {
-          help_flags |= CFLGS_FLASH;
-          strcat(helpstr, color(idx, FLASH_OPEN, 0));
-        }
-*/
       } else if (*(string + 1) == 'd') {
         string += 2;
         strcat(helpstr, settings.dcc_prefix);        
