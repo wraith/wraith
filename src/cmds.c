@@ -754,8 +754,10 @@ Context;
     return;
   }
 
+  for (o = 0; o < cmdi; o++)
+  ;
   /* this displays help for old system
-  for (o = 0; o < cmdi; o++) {			
+  {
     if (!flagrec_ok(&cmds[o].flags, &fr))
       continue;
     if (!showall && !egg_strcasecmp(par, cmds[o].name)) {
@@ -781,6 +783,7 @@ Context;
       i = 0;
       first = 1;
       for (n = 0; n < o ; n++) { /* loop each command */
+printf("parsing: cmd[%d].name = %s\n", n, cmds[n].name);
         if (!flagrec_ok(&cmds[n].flags, &fr))
           continue;
         flg[0] = '\0';
