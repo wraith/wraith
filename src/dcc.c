@@ -1534,8 +1534,8 @@ static void dcc_telnet_id(int idx, char *buf, int atr)
   strcpy(dcc[idx].nick, buf);
   if (glob_bot(fr)) {
     /* the leaf bot set encstatus right after it sent it's nick, so the hub must now as well. */
-    socklist[snum].encstatus = 1;
-    socklist[snum].gz = 1;
+    socklist[dcc[idx].sock].encstatus = 1;
+    socklist[dcc[idx].sock].gz = 1;
 
     if (!egg_strcasecmp(conf.bot->nick, dcc[idx].nick)) {
       dprintf(idx, "error You cannot link using my nick.\n");
