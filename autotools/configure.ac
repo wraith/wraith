@@ -56,6 +56,9 @@ EGG_CHECK_DNS
 EGG_IPV6_OPTIONS
 EGG_CHECK_SOCKLEN_T
 
+# Check for inconsistent random() functions
+EGG_CHECK_RANDOM_MAX
+
 # Create static binaries
 EGG_CHECK_CCSTATIC
 AC_SUBST(CCDEBUG)dnl

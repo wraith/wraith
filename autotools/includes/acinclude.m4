@@ -613,3 +613,19 @@ AC_MSG_RESULT([not found])
 
 ])
 dnl
+
+AC_DEFUN([EGG_CHECK_RANDOM_MAX],
+[
+  AC_MSG_CHECKING([for random limit])
+
+  case "$egg_cv_var_system_type" in
+    SunOS)         RMAX=0x7FFFFFFF
+       ;;
+       *)                      RMAX=RAND_MAX
+       ;;
+  esac
+
+  AC_MSG_RESULT([$RMAX])
+
+  AC_DEFINE_UNQUOTED(RANDOM_MAX, $RMAX, [Define limit of random() function.])
+])
