@@ -555,7 +555,9 @@ static void check_tempdir()
 
 /* FIXME: Remove after 1.2 (the hacks) */
 static void startup_checks(int hack) {
+#ifdef CYGWIN_HACKS
   int enc = CONF_ENC;
+#endif /* CYGWIN_HACKS */
 
   /* for compatability with old conf files 
    * only check/use conf file if it exists and settings.uname is empty.
