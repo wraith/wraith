@@ -10,6 +10,7 @@
 #include "crypt.h"
 #include "salt.h"
 #include "misc.h"
+#include "src/crypto/crypto.h"
 #include <stdarg.h>
 
 #define CRYPT_BLOCKSIZE AES_BLOCK_SIZE

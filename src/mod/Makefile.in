@@ -60,7 +60,7 @@ doofus:
 static: build_msg $(mod_objs)
 
 build_msg:
-	@echo "[*] Building modules"
+	@echo "[*] Compiling modules"
 
 .SUFFIXES:
 .SUFFIXES: .mod .mod_o

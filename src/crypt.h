@@ -6,11 +6,13 @@
 #  include "config.h"
 #endif
 
+#include "src/crypto/crypto.h"
+
 #ifdef HAVE_OPENSSL_SSL_H
 #  include <openssl/crypto.h>
 #  include <openssl/aes.h>
 #  include <openssl/sha.h>
-#  include <openssl/md5.h>
+//#  include <openssl/md5.h>
 #endif /* HAVE_OPENSSL_SSL_H */
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)

@@ -148,5 +148,5 @@ DO_PACK_CFG
 EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
-AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/mod/dns.mod/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/mod/dns.mod/Makefile])
 AC_OUTPUT

@@ -17,6 +17,7 @@ LEAFEXEC = leaf
 HUBEXEC = hub
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
 EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
+           src/crypto/Makefile src/crypto/.deps src/crypto/.cvsignore \
            src/mod/dns.mod/Makefile src/mod/*.mod/.deps/ src/mod/*.mod/.cvsignore \
            src/.deps src/compat/.deps misc/commit misc/grep autotools/ \
            config.cache config.log config.status config.h stamp.* misc/.cvsignore src/compat/.cvsignore \
@@ -80,15 +81,16 @@ cleanutils:
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	+@cd src/compat && $(MAKE) clean
+	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp *~ src/*~ configure.temp .mangled
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h src/help.h utctime
 
 distclean: clean
-	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
+	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
 	@rm -f config.cache config.log config.status config.h stamp.*
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan src/salt.h.tmp
-	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/
+	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/ src/crypto/.deps
 
 
 distrib: clean
@@ -167,6 +169,9 @@ sorthelp: src/sorthelp.c
 
 utils: makesettings stringfix makehelp
 
+crypto:
+	+@cd src/crypto && ${MAKE_UTILS} crypto
+
 dostrings: stringfix
 	@misc/dostrings
 
@@ -179,7 +184,6 @@ leaf:	general
 	@./misc/maketype leaf
 	@echo ""
 	+@cd src/mod && $(MAKE_LEAF) static
-	@echo ""
 	+@cd src && $(MAKE_LEAF) $(LEAFEXEC)
 	@echo ""
 
@@ -190,7 +194,6 @@ dleaf:  general
 	@./misc/maketype leaf
 	@echo ""
 	+@cd src/mod && $(MAKE_DLEAF) static
-	@echo ""
 	+@cd src && $(MAKE_DLEAF) $(LEAFEXEC)
 	@echo ""
 
@@ -201,7 +204,6 @@ hub:	general
 	@./misc/maketype hub
 	@echo ""
 	+@cd src/mod && $(MAKE_HUB) static
-	@echo ""
 	+@cd src && $(MAKE_HUB) $(HUBEXEC)
 	@echo ""
 
@@ -212,7 +214,6 @@ dhub:   general
 	@./misc/maketype hub
 	@echo ""
 	+@cd src/mod && $(MAKE_DHUB) static
-	@echo ""
 	+@cd src && $(MAKE_DHUB) $(HUBEXEC)
 	@echo ""
 
