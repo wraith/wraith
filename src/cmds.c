@@ -860,8 +860,10 @@ static void cmd_help(struct userrec *u, int idx, char *par)
       }
     }
   }
-  dprintf(idx, "%s\n", buf[0] ? buf : "");
-  dprintf(idx, STR("--End help listing\n"));
+  if (buf && buf[0])
+    dprintf(idx, "%s\n", buf);
+  if (fnd) 
+    dprintf(idx, STR("--End help listing\n"));
   if (!strcmp(match, "*")) {
     dprintf(idx, STR("For individual command help, type: %shelp <command>\n"), dcc_prefix);
   } else if (!fnd) {
