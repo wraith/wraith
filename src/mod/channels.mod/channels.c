@@ -650,15 +650,6 @@ static int channels_chon(char *handle, int idx)
   return 0;
 }
 
-static char *convert_element(char *src, char *dst)
-{
-  int flags;
-
-  Tcl_ScanElement(src, &flags);
-  Tcl_ConvertElement(src, dst, flags);
-  return dst;
-}
-
 static cmd_t my_chon[] =
 {
   {"*",		"",	(Function) channels_chon,	"channels:chon"},

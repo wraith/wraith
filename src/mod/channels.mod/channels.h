@@ -82,7 +82,6 @@ static int ismasked(masklist *m, char *user);
 static int ismodeline(masklist *m, char *user);
 static int tcl_channel_modify(char *result, struct chanset_t *chan, int items, char **item);
 static int tcl_channel_add(char *result, char *, char *);
-static char *convert_element(char *src, char *dst);
 static int getudef(struct udef_chans *, char *);
 static void initudef(int type, char *, int);
 static void setudef(struct udef_struct *, char *, int);

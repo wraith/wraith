@@ -1258,13 +1258,8 @@ static int write_invites(FILE *f, int idx)
  */
 static int write_chans(FILE *f, int idx)
 {
-  char w[1024] = "", w2[1024] = "", name[163] = "";
-/*  char udefs[2048] = "", buf[2048]; */
-/* Chanchar template
- *char temp[121];
- */
+  char w[1024] = "";
   struct chanset_t *chan = NULL;
-/*  struct udef_struct *ul; */
 
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
@@ -1281,41 +1276,18 @@ static int write_chans(FILE *f, int idx)
 
      putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
 
-/*     egg_memset(udefs,'\0',2048); */
-     convert_element(chan->dname, name);
      get_mode_protect(chan, w);
-     convert_element(w, w2);
-/* Chanchar template
- *   convert_element(chan->temp, temp);
- */
-/* fuck these for now
-     for (ul = udef; ul; ul = ul->next) { //put the udefs into one string
-       egg_memset(buf,'\0',2048);
-       if (ul->defined && ul->name) { 
-	if (ul->type == UDEF_FLAG)
-	 sprintf(buf, "%c%s%s ", getudef(ul->values, chan->dname) ? '+' : '-', "udef-flag-", ul->name);
-	else if (ul->type == UDEF_INT)
-	  sprintf(buf, "%s%s %d ", "udef-int-", ul->name, getudef(ul->values, chan->dname));
-	else
-	  debug1("UDEF-ERROR: unknown type %d", ul->type);
-        strcat(udefs,buf);
-       }
-     }
-*/
-     if (lfprintf(f, "+ channel add %s { chanmode %s addedby %s addedts %lu idle-kick %d limit %d stopnethack-mode %d \
-revenge-mode %d \
-flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
-flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
-closed-ban %d \
-ban-time %d exempt-time %d invite-time %d \
-%cenforcebans %cdynamicbans %cuserbans %cbitch \
-%cprotectops %crevenge %crevengebot \
-%cprivate %ccycle %cinactive %cdynamicexempts \
-%cuserexempts %cdynamicinvites %cuserinvites \
-%cnodesynch %cclosed %ctake %cmanop %cvoice \
-%cfastop }\n",
-	name,
-	w2,
+
+     if (lfprintf(f, "+ channel add %s { chanmode %s addedby %s addedts %lu idle-kick %d \
+                      limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d \
+                      flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d \
+                      flood-nick %d:%d closed-ban %d ban-time %d exempt-time %d invite-time %d \
+                      %cenforcebans %cdynamicbans %cuserbans %cbitch %cprotectops %crevenge \
+                      %crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
+                      %cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cmanop %cvoice \
+                      %cfastop }\n",
+	chan->dname,
+	w,
         chan->added_by,
         chan->added_ts,
 /* Chanchar template

@@ -459,10 +459,8 @@ static int tcl_channel_add(char *result, char *newname, char *options)
   int items;
   int ret = TCL_OK;
   int join = 0;
-  char buf[2048] = "", buf2[256] = "";
-//  char **item = NULL;
-  CONST char **item;
-
+  char buf[3001] = "";
+  CONST char **item = NULL;
 
   if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
     if (result)
@@ -476,14 +474,14 @@ static int tcl_channel_add(char *result, char *newname, char *options)
     return TCL_ERROR;
   }
 
-  convert_element(glob_chanmode, buf2);
-  simple_sprintf(buf, "chanmode %s ", buf2);
-  strncat(buf, glob_chanset, 2047 - strlen(buf));
-  strncat(buf, options, 2047 - strlen(buf));
-  buf[2047] = 0;
+  simple_sprintf(buf, "chanmode %s ", glob_chanmode);
+  strcat(buf, glob_chanset);
+  strcat(buf, options);
+  buf[sizeof(buf) - 1] = 0;
 
   if (Tcl_SplitList(NULL, buf, &items, &item) != TCL_OK)
     return TCL_ERROR;
+
   if ((chan = findchan_by_dname(newname))) {
     /* Already existing channel, maybe a reload of the channel file */
     chan->status &= ~CHAN_FLAGGED;	/* don't delete me! :) */
@@ -530,8 +528,7 @@ static int tcl_channel_add(char *result, char *newname, char *options)
      * any code later on. chan->name gets updated with the channel name as
      * the server knows it, when we join the channel. <cybah>
      */
-    strncpy(chan->dname, newname, 81);
-    chan->dname[80] = 0;
+    strncpyz(chan->dname, newname, 81);
 
     /* Initialize chan->channel info */
     init_channel(chan, 0);
@@ -551,6 +548,6 @@ static int tcl_channel_add(char *result, char *newname, char *options)
 #ifdef LEAF
   if (join && shouldjoin(chan) && module_find("irc", 0, 0))
     dprintf(DP_SERVER, "JOIN %s %s\n", chan->dname, chan->key_prot);
-#endif
+#endif /* LEAF */
   return ret;
 }
