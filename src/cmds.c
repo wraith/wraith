@@ -1343,7 +1343,7 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
     handle = newsplit(&par);
     u = get_user_by_handle(userlist, handle);
     if (!u)
-      dprintf(idx, STR("No such user.\n");
+      dprintf(idx, STR("No such user.\n"));
     else if (!(atr & USER_MASTER) && !(u->flags & USER_BOT))
       dprintf(idx, STR("You can't change passwords for non-bots.\n"));
     else if ((bot_flags(u) & BOT_SHARE) && !(atr & USER_OWNER))
@@ -1396,7 +1396,7 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
     handle = newsplit(&par);
     u = get_user_by_handle(userlist, handle);
     if (!u)
-      dprintf(idx, STR("No such user.\n");
+      dprintf(idx, STR("No such user.\n"));
     else if (!(atr & USER_MASTER) && !(u->flags & USER_BOT))
       dprintf(idx, STR("You can't change passwords for non-bots.\n"));
     else if ((bot_flags(u) & BOT_SHARE) && !(atr & USER_OWNER))

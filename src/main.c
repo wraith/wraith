@@ -278,7 +278,7 @@ void write_debug()
   printf("%s\n", tmpout);
 
   x = creat("DEBUG", 0600);
-  setsock(x, SOCK_NONSOCK);
+  setsock(x, SOCK_NONSOCK); 
   if (x < 0) {
     putlog(LOG_MISC, "*", STR("* Failed to write DEBUG"));
   } else {
@@ -1247,13 +1247,15 @@ char *homedir()
 {
   static char home[DIRMAX], tmp[DIRMAX];
   struct passwd *pw;
-
+Context;
   pw = getpwuid(geteuid());
 
   if (!pw)
    werr(ERR_PASSWD);
 
+Context;
   snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
+Context;
   realpath(tmp, home); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
 
   return home;
@@ -1272,7 +1274,7 @@ char *confdir()
 {
   char *tmpdir;
 
-  tmpdir = nmalloc(sizeof(binname)+1);
+  tmpdir = nmalloc(strlen(binname)+1);
   strcpy(tmpdir, binname);
   snprintf(conf, sizeof conf, "%s", dirname(tmpdir));
   nfree(tmpdir);
@@ -1505,7 +1507,6 @@ int main(int argc, char **argv)
   if (!fixmod(cfile))
     werr(ERR_CONFMOD);
 
-Context;
   init_dcc_max();
   init_userent();
   init_misc();

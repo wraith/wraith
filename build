@@ -152,13 +152,15 @@ elif [ $hub = "1" ]; then
  fls="hub"
 fi
 
-for bin in $fls
-do
-  mv -f $bin $bin.$os.$numver
-done
 if [ $d = "d" ]; then
  d="-debug"
 fi
+
+for bin in $fls
+do
+  mv -f $bin $bin.$os.$numver${d}
+done
+
 tar -zcf $packname.$os.$numver${d}.tgz *.$os.$numver
 rm -f *.$os.$numver
 echo "Binaries are now in '$packname.$os.$numver${d}.tgz'."

@@ -37,22 +37,22 @@ int reserved_port_max = 0;
 void init_dcc_max()
 {
   int osock = MAXSOCKS;
-
   if (max_dcc < 1)
     max_dcc = 1;
   if (dcc)
     dcc = nrealloc(dcc, sizeof(struct dcc_t) * max_dcc);
-  else
+  else 
     dcc = nmalloc(sizeof(struct dcc_t) * max_dcc);
 
   MAXSOCKS = max_dcc + 10;
   if (socklist)
-    socklist = (sock_list *) nrealloc((void *) socklist,
-				      sizeof(sock_list) * MAXSOCKS);
+    socklist = (sock_list *) nrealloc((void *) socklist, sizeof(sock_list) * MAXSOCKS);
   else
     socklist = (sock_list *) nmalloc(sizeof(sock_list) * MAXSOCKS);
+
   for (; osock < MAXSOCKS; osock++)
     socklist[osock].flags = SOCK_UNUSED;
+
 }
 
 int expmem_dccutil()
