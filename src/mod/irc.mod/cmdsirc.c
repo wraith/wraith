@@ -1005,13 +1005,15 @@ static void cmd_getkey(int idx, char *par)
     return;
   }
 
+  char outbuf[201] = "";
+
   if (!chan->channel.key[0])
-    dprintf(idx, "%s has no key set.", chan->dname);
+    simple_snprintf(outbuf, sizeof(outbuf), "%s has no key set.", chan->dname);
   else
-    dprintf(idx, "Key for %s is: %s", chan->dname, chan->channel.key);
+    simple_snprintf(outbuf, sizeof(outbuf), "Key for %s is: %s", chan->dname, chan->channel.key);
   if (chan->key_prot[0])
-    dprintf(idx, " (Enforcing +k %s)", chan->key_prot);
-  dprintf(idx, "\n");
+    simple_snprintf(outbuf, sizeof(outbuf), "%s (Enforcing +k %s)", outbuf, chan->key_prot);
+  dprintf(idx, "%s\n", outbuf);
 }
 
 static void cmd_mop(int idx, char *par)
