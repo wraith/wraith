@@ -726,8 +726,10 @@ void dcc_send(int idx, char *buf, int len)
 {
   char s[SGRAB + 2] = "", *b = NULL;
   unsigned long sent;
+  int ret = 0;
 
-  fwrite(buf, len, 1, dcc[idx].u.xfer->f);
+  if ((ret = fwrite(buf, 1, len, dcc[idx].u.xfer->f)) != len)
+    putlog(LOG_MISC, "*", "fwrite() only wrote %d bytes and we expected to write %d bytes", ret, len);
 
 //  if (len != strlen(buf))
 //;
@@ -1053,6 +1055,7 @@ static void dcc_get_pending(int idx, char *buf, int len)
     }
 
     /* Seek forward ... */
+putlog(LOG_MISC, "*", "!! Resuming on transfer");
     fseek(dcc[idx].u.xfer->f, dcc[idx].u.xfer->offset, SEEK_SET);
     dcc[idx].u.xfer->block_pending = pump_file_to_sock(dcc[idx].u.xfer->f,
 						       dcc[idx].sock, l);
