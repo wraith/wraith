@@ -1136,27 +1136,27 @@ See also: unlink, newleaf%{+a}, -bot%{-}
    "attr" is of the form:  <+/-><global>[&/|<channel>[&/|<bot>]]
    Specifying "&" as the separator will cause AND style matching.
    For example:
-      .match p&o
+      %dmatch p&o
    This will match all users with both the "p" global flag and the "o" channel
    flag on your current console channel.
    Specifying "|" as the separator will cause OR style matching.
    For example:
-     .match p|o
+     %dmatch p|o
    This will match all users with either the "p" global flag or the "o" channel
    flag on your current console channel. If you specify a channel, it will be
    used instead of the current console channel.
    For example:
-     .match p|o #eggdrop
+     %dmatch p|o #eggdrop
    This will match all users with either the "p" global flag or the "o" channel
    flag on the channel #eggdrop. You can also match bot flags.
    For example:
-     .match o|o|h
+     %dmatch o|o|h
    This will match all bots with either the "o" global flag, the "o" channel
    flag on the current console channel, or the "h" botflag. You can also limit
    the number of total results returned by specifying a limit at the end of the
    command. A starting point can also be specified.
    For example:
-     .match p&o #eggdrop 16 25
+     %dmatch p&o #eggdrop 16 25
    This would show results 16 through 25 matching any users with the "p" global
    flag or the "o" channel flag on #eggdrop.
 ###  %bmatch%b <wildcard-string> [[start] limit]
@@ -1165,9 +1165,14 @@ See also: unlink, newleaf%{+a}, -bot%{-}
    of total results returned by specifying a limit at the end of the command. A
    starting point can also be specified.
    For example:
-     .match *.edu 16 25
+     %dmatch *.edu 16 25
    This would show results 16 through 25 matching any users with a hostmask
    that ends with ".edu".
+See also: matchbot
+::matchbot
+###  %bmatchbot%b 
+   Matches bots.
+   See: match
 ::md5
 ###  %bmd5%b <string>
    Returns the MD5 hash of the specified string.

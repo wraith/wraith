@@ -920,16 +920,18 @@ static void cmd_whois(struct userrec *u, int idx, char *par)
   tell_user_ident(idx, par, u ? (u->flags & USER_MASTER) : 0);
 }
 
-static void cmd_match(struct userrec *u, int idx, char *par)
+static void match(struct userrec *u, int idx, char *par, int isbot)
 {
   int start = 1, limit = 20;
   char *s = NULL, *s1 = NULL, *chname = NULL;
 
+  putlog(LOG_CMDS, "*", "#%s# match%s %s", dcc[idx].nick, isbot ? "bot" : "", par);
+
   if (!par[0]) {
-    dprintf(idx, "Usage: match <nick/host> [[skip] count]\n");
+    dprintf(idx, "Usage: match%s <%snick/host> [[skip] count]\n", isbot ? "bot" : "", isbot ? "bot" : "");
     return;
   }
-  putlog(LOG_CMDS, "*", "#%s# match %s", dcc[idx].nick, par);
+
   s = newsplit(&par);
   if (strchr(CHANMETA, par[0]) != NULL)
     chname = newsplit(&par);
@@ -943,8 +945,17 @@ static void cmd_match(struct userrec *u, int idx, char *par)
     } else
       limit = atoi(s1);
   }
-  tell_users_match(idx, s, start, limit, u ? (u->flags & USER_MASTER) : 0,
-		   chname);
+  tell_users_match(idx, s, start, limit, u ? (u->flags & USER_MASTER) : 0, chname, isbot);
+}
+
+static void cmd_matchbot(struct userrec *u, int idx, char *par)
+{
+  match(u, idx, par, 1);
+}
+
+static void cmd_match(struct userrec *u, int idx, char *par)
+{
+  match(u, idx, par, 0);
 }
 
 static void cmd_update(struct userrec *u, int idx, char *par)
@@ -4272,6 +4283,7 @@ cmd_t C_dcc[] =
   {"link",		"n",	(Function) cmd_link,		NULL},
 #endif /* HUB */
   {"match",		"m|m",	(Function) cmd_match,		NULL},
+  {"matchbot",		"m|m",	(Function) cmd_matchbot,	NULL},
   {"me",		"",	(Function) cmd_me,		NULL},
   {"motd",		"",	(Function) cmd_motd,		NULL},
 #ifdef HUB

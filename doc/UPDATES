@@ -35,6 +35,8 @@ This is a summary of ChangeLog basically.
 31.Detected promisc now shows which interface.
 32.Now using daemon(3) to fork into background.
 33.Possibly fixed a bug with bots dying on link.
+34.Bots no longer have userflag +b, they are distinguished in whois by BOTNICK instead of HANDLE.
+35.Added cmd_matchbot for matching bots, cmd_match now only does users.
 
 1.1.7
 

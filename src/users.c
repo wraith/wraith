@@ -477,9 +477,13 @@ void tell_user(int idx, struct userrec *u, int master)
       egg_strftime(s1, 6, "%H:%M", localtime(&li->laston));
 #endif /* S_UTCTIME */
   }
-  egg_snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)", HANDLEN);
-  dprintf(idx, format, u->handle, get_user(&USERENTRY_PASS, u) ? "yes" : "no", n, s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
-  dprintf(idx, "\n");
+  if (!u->bot) {
+    egg_snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)\n", HANDLEN);
+    dprintf(idx, format, u->handle, get_user(&USERENTRY_PASS, u) ? "yes" : "no", n, s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
+  } else {	/* BOT */
+    egg_snprintf(format, sizeof format, "%%-%us %%-8s %%s (%%-10.10s)\n", HANDLEN);
+    dprintf(idx, format, u->handle, s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
+  }  
   /* channel flags? */
   for (ch = u->chanrec; ch; ch = ch->next) {
     fr.match = FR_CHAN | FR_GLOBAL;
@@ -537,15 +541,20 @@ void tell_user_ident(int idx, char *id, int master)
     dprintf(idx, "%s.\n", USERF_NOMATCH);
     return;
   }
-  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
-  dprintf(idx, format, "HANDLE");
+  if (u->bot) {
+    egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
+    dprintf(idx, format, "BOTNICK");
+  } else {
+    egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
+    dprintf(idx, format, "HANDLE");
+  }
   tell_user(idx, u, master);
 }
 
 /* match string:
  * wildcard to match nickname or hostmasks
  * +attr to find all with attr */
-void tell_users_match(int idx, char *mtch, int start, int limit, int master, char *chname)
+void tell_users_match(int idx, char *mtch, int start, int limit, int master, char *chname, int isbot)
 {
   char format[81] = "";
   struct userrec *u = NULL;
@@ -555,8 +564,13 @@ void tell_users_match(int idx, char *mtch, int start, int limit, int master, cha
 
   dprintf(idx, "*** %s '%s':\n", MISC_MATCHING, mtch);
   cnt = 0;
-  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
-  dprintf(idx, format, "HANDLE");
+  if (isbot) {
+    egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
+    dprintf(idx, format, "BOTNICK");
+  } else {
+    egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
+    dprintf(idx, format, "HANDLE");
+  }
   if (start > 1)
     dprintf(idx, "(%s %d)\n", MISC_SKIPPING, start - 1);
   if (strchr("+-&|", *mtch)) {
@@ -576,7 +590,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, int master, cha
     flags = 1;
   }
   for (u = userlist; u; u = u->next) {
-    if (!whois_access(dcc[idx].user, u)) {
+    if (!whois_access(dcc[idx].user, u) || (isbot && !u->bot) || (!isbot && u->bot)) {
       continue;
     } else if (flags) {
       get_user_flagrec(u, &user, chname);
