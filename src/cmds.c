@@ -3613,6 +3613,7 @@ void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, cha
 #endif /* LEAF */
 }
 
+#ifdef HUB
 /* netlag */
 static void cmd_netlag(struct userrec * u, int idx, char * par) {
   struct timeval tv;
@@ -3625,6 +3626,7 @@ static void cmd_netlag(struct userrec * u, int idx, char * par) {
   dprintf(idx, STR("Sent ping to all linked bots\n"));
   botnet_send_cmd_broad(-1, botnetnick, u->handle, idx, tmp);
 }
+#endif /* HUB */
 
 void rcmd_ping(char * frombot, char *fromhand, char * fromidx, char * par) {
   char tmp[64];
@@ -4155,8 +4157,8 @@ cmd_t C_dcc[] =
   {"netw", 		"n", 	(Function) cmd_netw, 		NULL},
   {"netps", 		"n", 	(Function) cmd_netps, 		NULL},
   {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL},
-#endif /* HUB */
   {"netlag", 		"m", 	(Function) cmd_netlag, 		NULL},
+#endif /* HUB */
   {"botserver",		"m",	(Function) cmd_botserver,	NULL},
   {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL},
   {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL},
