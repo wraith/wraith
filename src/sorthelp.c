@@ -122,7 +122,6 @@ int parse_help(char *infile, char *outfile) {
   printf("Sorting help file '%s'", infile);
   while ((!feof(in)) && ((buffer = step_thru_file(in)) != NULL) ) {
     line++;
-//printf("Read:%s|\n", buffer);
     if ((*buffer)) {
       if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
       if ((skipline(buffer, &skip))) continue;
@@ -143,12 +142,6 @@ int parse_help(char *infile, char *outfile) {
 
         /* finish last command */
         if (my_buf && my_buf[0]) {
-//          if (p) {	/* delete the newline for the last line */
-//            char *newline;
-//            my_buf[strlen(my_buf) - 2] = 0;
-//            newline = strrchr(my_buf, '\n');
-//            if (newline) *newline = 0;
-//          } else	/* I don't think this is ever true */
           my_buf[strlen(my_buf)] = 0;
           cmdlist[cmdi].txt = malloc(strlen(my_buf) + 1);
           strcpy(cmdlist[cmdi].txt, my_buf);
@@ -165,15 +158,18 @@ int parse_help(char *infile, char *outfile) {
           cmdlist[cmdi].hub = hub;
           hub = leaf = 0;
           for (i = 0; i < cmdi; i++ )	/* Eliminate duplicates */
-            if (!strcmp(cmdlist[i].name, p))
+            if (!strcmp(cmdlist[i].name, p)) {
+              printf("\b[%s]", p);
+              cmdi--;
+              my_buf[0] = 0;
               continue;
+            }
           cmdlist[cmdi].name = malloc(strlen(p) + 1);
           strcpy(cmdlist[cmdi].name, p);
         } else {			/* END */
           break;
         }
       } else {				/* CMD HELP INFO */
-/*        strcat(my_buf, replace(buffer, "\"", "\\\"")); */
         strcat(my_buf, buffer);
         strcat(my_buf, "\\n");
       }
@@ -188,8 +184,6 @@ int parse_help(char *infile, char *outfile) {
   qsort(cmdlist, cmdi, sizeof(cmds), (int (*)()) &my_cmp);
 
   for (i = 0; i < cmdi; i++ ) {
-//    char *txt, *p;
-
     fulllist = realloc(fulllist, strlen(fulllist) + strlen(cmdlist[i].name) + 2);
     strcat(fulllist, cmdlist[i].name);
     strcat(fulllist, " ");
@@ -197,16 +191,9 @@ int parse_help(char *infile, char *outfile) {
     if (cmdlist[i].leaf) fprintf(out, "leaf");
     else if (cmdlist[i].hub) fprintf(out, "hub");
     fprintf(out, ":%s\n", cmdlist[i].name);
-//    txt = malloc(strlen(replace(cmdlist[i].txt, "\\n", "\n")) + 1);
-//    strcpy(txt, replace(cmdlist[i].txt, "\\n", "\n"));
-//    if (txt[strlen(txt)] == ' ')
-//      txt[strlen(txt)] = 0;
-//    p = strrchr(txt, ' ');
-//    *p = 0;
-//    fprintf(out, "%s", txt);
     fprintf(out, "%s", replace(cmdlist[i].txt, "\\n", "\n"));
-//    free(txt);
   }
+
   fprintf(out, "::end\n");
   if (out) fclose(out);
   printf(" Success\n");
