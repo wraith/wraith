@@ -4,6 +4,7 @@ SHELL = @SHELL@
 top_srcdir = @top_srcdir@
 srcdir = @srcdir@
 VPATH = @srcdir@
+depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
@@ -21,85 +22,20 @@ doofus:
 	@echo ""
 	@cd ../.. && $(MAKE)
 
-depleaf:
-	@$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -DHUB -MM $(srcdir)/*.c > .depend
-
-dephub:
-	@$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -DHUB -MM $(srcdir)/*.c > .depend
-
 clean:
 	@rm -f .depend *.o *~
 
 compat: $(OBJS)
+
+include ./.deps/includes
 
 .SUFFIXES:
 .SUFFIXES: .c .o .h
 
 .c.o:
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	@$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -c $<
+	@source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=gcc3 $(depcomp) \
+	$(CC) $(CFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -c $< 
+
 
 #safety hash
-gnu_strftime.o: ./gnu_strftime.c
-inet_aton.o: ./inet_aton.c ../../src/main.h ../../src/conf.h ../../config.h \
- ../../src/lang.h ../../src/eggdrop.h ../../src/flags.h \
- ../../src/proto.h ../../lush.h ../../src/misc_file.h ../../src/cmdt.h \
- ../../src/tclegg.h ../../src/tclhash.h ../../src/chan.h \
- ../../src/users.h ../../src/compat/compat.h \
- ../../src/compat/inet_aton.h ../../src/compat/snprintf.h \
- ../../src/compat/memset.h ../../src/compat/memcpy.h \
- ../../src/compat/strcasecmp.h ../../src/compat/strftime.h inet_aton.h \
- ../../src/compat/inet_ntop.h
- inet_ntop.o: ./inet_ntop.c ../../src/main.h ../../src/conf.h ../../config.h \
- ../../src/lang.h ../../src/eggdrop.h ../../src/flags.h \
- ../../src/proto.h ../../lush.h ../../src/misc_file.h ../../src/cmdt.h \
- ../../src/tclegg.h ../../src/tclhash.h ../../src/chan.h \
- ../../src/users.h ../../src/compat/compat.h \
- ../../src/compat/inet_ntop.h ../../src/compat/snprintf.h \
- ../../src/compat/memset.h ../../src/compat/memcpy.h \
- ../../src/compat/strcasecmp.h ../../src/compat/strftime.h inet_ntop.h \
- ../../src/compat/inet_aton.h
-memcpy.o: ./memcpy.c ../../src/main.h ../../src/conf.h ../../config.h ../../src/lang.h \
- ../../src/eggdrop.h ../../src/flags.h ../../src/proto.h ../../lush.h \
- ../../src/misc_file.h ../../src/cmdt.h ../../src/tclegg.h \
- ../../src/tclhash.h ../../src/chan.h ../../src/users.h \
- ../../src/compat/compat.h ../../src/compat/inet_aton.h \
- ../../src/compat/snprintf.h ../../src/compat/memset.h \
- ../../src/compat/memcpy.h ../../src/compat/strcasecmp.h \
- ../../src/compat/strftime.h memcpy.h  ../../src/compat/inet_ntop.h
-memset.o: ./memset.c ../../src/main.h ../../src/conf.h ../../config.h ../../src/lang.h \
- ../../src/eggdrop.h ../../src/flags.h ../../src/proto.h ../../lush.h \
- ../../src/misc_file.h ../../src/cmdt.h ../../src/tclegg.h \
- ../../src/tclhash.h ../../src/chan.h ../../src/users.h \
- ../../src/compat/compat.h ../../src/compat/inet_aton.h \
- ../../src/compat/snprintf.h ../../src/compat/memset.h \
- ../../src/compat/memcpy.h ../../src/compat/strcasecmp.h \
- ../../src/compat/strftime.h memset.h  ../../src/compat/inet_ntop.h
-snprintf.o: ./snprintf.c ../../src/main.h ../../src/conf.h ../../config.h \
- ../../src/lang.h ../../src/eggdrop.h ../../src/flags.h \
- ../../src/proto.h ../../lush.h ../../src/misc_file.h ../../src/cmdt.h \
- ../../src/tclegg.h ../../src/tclhash.h ../../src/chan.h \
- ../../src/users.h ../../src/compat/compat.h \
- ../../src/compat/inet_aton.h ../../src/compat/snprintf.h \
- ../../src/compat/memset.h ../../src/compat/memcpy.h \
- ../../src/compat/strcasecmp.h   ../../src/compat/inet_ntop.h \
- ../../src/compat/strftime.h snprintf.h
-strcasecmp.o: ./strcasecmp.c ../../src/main.h ../../src/conf.h ../../config.h \
- ../../src/lang.h ../../src/eggdrop.h ../../src/flags.h \
- ../../src/proto.h ../../lush.h ../../src/misc_file.h ../../src/cmdt.h \
- ../../src/tclegg.h ../../src/tclhash.h ../../src/chan.h \
- ../../src/users.h ../../src/compat/compat.h \
- ../../src/compat/inet_aton.h ../../src/compat/snprintf.h \
- ../../src/compat/memset.h ../../src/compat/memcpy.h \
- ../../src/compat/strcasecmp.h   ../../src/compat/inet_ntop.h \
- ../../src/compat/strftime.h memcpy.h
-strftime.o: ./strftime.c ../../src/main.h ../../src/conf.h ../../config.h \
- ../../src/lang.h ../../src/eggdrop.h ../../src/flags.h \
- ../../src/proto.h ../../lush.h ../../src/misc_file.h ../../src/cmdt.h \
- ../../src/tclegg.h ../../src/tclhash.h ../../src/chan.h \
- ../../src/users.h ../../src/compat/compat.h \
- ../../src/compat/inet_aton.h ../../src/compat/snprintf.h \
- ../../src/compat/memset.h ../../src/compat/memcpy.h \
- ../../src/compat/strcasecmp.h   ../../src/compat/inet_ntop.h \
- ../../src/compat/strftime.h strftime.h
-

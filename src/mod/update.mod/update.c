@@ -18,8 +18,8 @@
 #include <unistd.h>
 
 
-#include "transfer.mod/transfer.h"
-#include "compress.mod/compress.h"
+#include "src/mod/transfer.mod/transfer.h"
+#include "src/mod/compress.mod/compress.h"
 
 static Function *global = NULL, *transfer_funcs = NULL, *compress_funcs = NULL,
                 *uncompress_funcs = NULL;

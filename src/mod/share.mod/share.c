@@ -14,8 +14,8 @@
 
 #include "src/chan.h"
 #include "src/users.h"
-#include "transfer.mod/transfer.h"
-#include "channels.mod/channels.h"
+#include "src/mod/transfer.mod/transfer.h"
+#include "src/mod/channels.mod/channels.h"
 #ifdef LEAF
 #  include "irc.mod/irc.h"
 #endif /* LEAF */

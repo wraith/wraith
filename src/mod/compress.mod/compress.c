@@ -32,7 +32,7 @@
 #include <errno.h>
 
 #include "src/mod/module.h"
-#include "share.mod/share.h"
+#include "src/mod/share.mod/share.h"
 
 #ifdef HAVE_MMAP
 #  include <sys/types.h>

@@ -8,7 +8,7 @@
 #define MAKING_CHANNELS
 #include <sys/stat.h>
 #include "src/mod/module.h"
-#include "irc.mod/irc.h"
+#include "src/mod/irc.mod/irc.h"
 
 static Function *global = NULL, *irc_funcs = NULL;
 

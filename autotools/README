@@ -1,0 +1,6 @@
+Type 'make' whenever one of these conditions are met:
+
+- Any files in bootstrap/ are modified.
+- Any files are added or removed in src/
+- Any files change their dependancies (#include "file.h")
+

@@ -1,6 +1,7 @@
 # Makefile for src/mod/irc.mod/
 
 srcdir = .
+depcomp = /bin/sh ../../../autotools/depcomp
 
 
 doofus:
@@ -13,33 +14,14 @@ static: ../irc.o
 
 ../irc.o:
 	@echo -e "Compiling: \033[1mirc\033[0m"
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/irc.c
+	@source='irc.c' object='$@' depfile='.deps/irc.Po' tmpdepfile='.deps/irc.TPo' depmode=gcc3 $(depcomp) \
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/irc.c
 	@rm -f ../irc.o
 	@mv irc.o ../
 
 
-depleaf:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/irc.c > .depend
-
-dephub:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DHUB -MM $(srcdir)/irc.c > .depend
-
 clean:
 	@rm -f .depend *.o *~
+
 distclean: clean
 
-#safety hash
-../irc.o: .././irc.mod/irc.c ../../../src/mod/module.h \
- ../../../src/main.h ../../../config.h ../../../src/conf.h \
- ../../../src/lang.h \
- ../../../src/eggdrop.h ../../../src/flags.h ../../../src/proto.h \
- ../../../lush.h ../../../src/misc_file.h ../../../src/cmdt.h \
- ../../../src/tclegg.h ../../../src/tclhash.h ../../../src/chan.h \
- ../../../src/users.h ../../../src/compat/compat.h ../../../src/compat/inet_ntop.h \
- ../../../src/compat/inet_aton.h ../../../src/compat/snprintf.h \
- ../../../src/compat/memset.h ../../../src/compat/memcpy.h \
- ../../../src/compat/strcasecmp.h ../../../src/compat/strftime.h \
- ../../../src/mod/modvals.h ../../../src/tandem.h ../irc.mod/irc.h \
- ../../../src/mod/server.mod/server.h \
- ../../../src/mod/channels.mod/channels.h ../irc.mod/chan.c \
- ../irc.mod/mode.c ../irc.mod/cmdsirc.c ../irc.mod/msgcmds.c 

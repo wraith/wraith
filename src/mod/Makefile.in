@@ -54,24 +54,6 @@ build_msg:
 	fi; \
 	cd $*.mod && $(MAKE_MOD) 'VPATH=$(MOD_UPDIR)$(srcdir)/$*.mod' 'srcdir=$(MOD_UPDIR)$(srcdir)/$*.mod' static;
 
-depleaf:
-	@for i in $(mods); do \
-		if test ! -d $$i; then mkdir $$i; fi; \
-		if test ! -r $$i/Makefile; then \
-			cp $(srcdir)/$$i/Makefile $$i/Makefile; \
-		fi; \
-		(cd $$i && $(MAKE_MOD) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" depleaf); \
-	done
-
-dephub:
-	@for i in $(mods); do \
-		if test ! -d $$i; then mkdir $$i; fi; \
-		if test ! -r $$i/Makefile; then \
-			cp $(srcdir)/$$i/Makefile $$i/Makefile; \
-		fi; \
-		(cd $$i && $(MAKE_MOD) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" dephub); \
-	done
-
 config:
 	@for i in $(mods); do \
 		if test -f $(srcdir)/$$i/configure; then \
