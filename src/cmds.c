@@ -84,7 +84,7 @@ static void tell_who(int idx, int chan)
     if (dcc[i].type && dcc[i].type == &DCC_CHAT)
       if (dcc[i].u.chat->channel == chan) {
 	if (atr & USER_OWNER) {
-	  egg_snprintf(format, sizeof format, "  [%%.2lu]  %%c%%-%us %%s", nicklen);
+	  egg_snprintf(format, sizeof format, "  [%%.2li]  %%c%%-%us %%s", nicklen);
 	  sprintf(s, format,
 		  dcc[i].sock, (geticon(i) == '-' ? ' ' : geticon(i)),
 		  dcc[i].nick, dcc[i].host);
