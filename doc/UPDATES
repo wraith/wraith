@@ -37,6 +37,7 @@ This is a summary of ChangeLog basically.
 * Now making a small attempt to auto make the tmpdir.
 * Increased password timeout to 40 seconds and auth timeout to 80 seconds.
 * Quietly ignore/drop invalid nicks for telnet login.
+* Detect botcmds from leaf bots (hijack).
 
 1.2
 * No longer displaying SALTS on ./bin -v
