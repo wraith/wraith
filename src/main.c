@@ -1023,11 +1023,6 @@ static void event_resettraffic()
   itraffic_trans_today = otraffic_trans_today = 0;
 }
 
-static void event_loaded()
-{
-  check_tcl_event("loaded");
-}
-
 void kill_tcl();
 extern module_entry *module_list;
 void restart_chons();
@@ -1575,180 +1570,176 @@ int main(int argc, char **argv)
 
 }
 #endif /* LEAF */
-if (1) {
-char tmp[DIRMAX];
+  {
+    char tmp[DIRMAX];
 
-  egg_snprintf(tmp, sizeof tmp, "%s/", confdir());
-  if (!can_stat(tmp)) {
+    egg_snprintf(tmp, sizeof tmp, "%s/", confdir());
+    if (!can_stat(tmp)) {
 #ifdef LEAF
-    if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
-      unlink(confdir());
-      if (!can_stat(confdir()))
-        if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR))
+      if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
+        unlink(confdir());
+        if (!can_stat(confdir()))
+          if (mkdir(confdir(), S_IRUSR | S_IWUSR | S_IXUSR))
 #endif /* LEAF */
-          werr(ERR_CONFSTAT);
+            werr(ERR_CONFSTAT);
 #ifdef LEAF
+      }
+#endif /* LEAF */
     }
-#endif /* LEAF */
-  }
 
-  egg_snprintf(tmp, sizeof tmp, "%s", tempdir);
-  if (!can_stat(tmp)) {
-    if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
-      unlink(tempdir);
-      if (!can_stat(tempdir))
-        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
-          werr(ERR_TMPSTAT);
+    egg_snprintf(tmp, sizeof tmp, "%s", tempdir);
+    if (!can_stat(tmp)) {
+      if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
+        unlink(tempdir);
+        if (!can_stat(tempdir))
+          if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
+            werr(ERR_TMPSTAT);
+      }
     }
   }
-} /* char tmp[DIRMAX] */
   if (!fixmod(confdir()))
     werr(ERR_CONFDIRMOD);
   if (!fixmod(tempdir))
     werr(ERR_TMPMOD);
 
   //The config dir is accessable with correct permissions, lets read/write/create config file now..
-if (1) {		/* config shit */
-  char cfile[DIRMAX], templine[8192];
+  {		/* config shit */
+    char cfile[DIRMAX], templine[8192];
 #ifdef LEAF
-  egg_snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir());
+    egg_snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir());
 #else
-  egg_snprintf(cfile, sizeof cfile, "%s/conf", confdir());
+    egg_snprintf(cfile, sizeof cfile, "%s/conf", confdir());
 #endif /* LEAF */
-  if (!can_stat(cfile))
-    werr(ERR_NOCONF);
-  if (!fixmod(cfile))
-    werr(ERR_CONFMOD);
-
+    if (!can_stat(cfile))
+      werr(ERR_NOCONF);
+    if (!fixmod(cfile))
+      werr(ERR_CONFMOD);
 #ifdef LEAF
-  if (localhub) { 
+    if (localhub) { 
 #endif /* LEAF */
-    i = 0;
-    if (!(f = fopen(cfile, "r")))
-       werr(0);
-    Context;
-    while(fscanf(f,"%[^\n]\n",templine) != EOF) {
-      char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps, c[1024];
-      void *temp_ptr;
-      int skip = 0;
+      i = 0;
+      if (!(f = fopen(cfile, "r")))
+         werr(0);
+      Context;
+      while(fscanf(f,"%[^\n]\n",templine) != EOF) {
+        char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL, *temps, c[1024];
+        void *temp_ptr;
+        int skip = 0;
 
-      temps = temp_ptr = decrypt_string(SALT1, templine);
-      if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
-        sdprintf(STR("line %d, char %c "), i, temps[0]);
-        werr(ERR_CONFBADENC);
-      }
-      egg_snprintf(c, sizeof c, "%s", temps);
+        temps = temp_ptr = decrypt_string(SALT1, templine);
+        if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
+          sdprintf(STR("line %d, char %c "), i, temps[0]);
+          werr(ERR_CONFBADENC);
+        }
+        egg_snprintf(c, sizeof c, "%s", temps);
 
-      if (c[0] == '*')
-        skip = 1;
-      else if (c[0] == '-' && !skip) { /* uid */
-        newsplit(&temps);
-        if (geteuid() != atoi(temps)) {
-          sdprintf(STR("wrong uid, conf: %d :: %d"), atoi(temps), geteuid());
-          werr(ERR_WRONGUID);
-        }
-      } else if (c[0] == '+' && !skip) { /* uname */
-        int r = 0;
-        newsplit(&temps);
-        if ((r = strcmp(temps, my_uname()))) {
-          baduname(temps, my_uname());
-          sdprintf(STR("wrong uname, conf: %s :: %s"), temps, my_uname());
-          werr(ERR_WRONGUNAME);
-        }
-      } else if (c[0] == '!') { //local tcl exploit
-        if (c[1] == '-') { //dont use pscloak
-#ifdef S_PSCLOAK
-          sdprintf(STR("NOT CLOAKING"));
-#endif /* S_PSCLOAK */
-          pscloak = 0;
-        } else {
+        if (c[0] == '*') {
+          skip = 1;
+        } else if (c[0] == '-' && !skip) { /* uid */
           newsplit(&temps);
-          Tcl_Eval(interp, temps);
-        }
-      } else if (c[0] != '#') {  //now to parse nick/hosts
-        //we have the right uname/uid, safe to setup crontab now.
-        i++;
-        nick = newsplit(&temps);
-        if (!nick || !nick[0])
-          werr(ERR_BADCONF);
-        sdprintf(STR("Read nick from config: %s"), nick);
-        if (temps[0])
-          ip = newsplit(&temps);
-        if (temps[0])
-          host = newsplit(&temps);
-        if (temps[0])
-          ipsix = newsplit(&temps);
-
-        if (i == 1) { //this is the first bot ran/parsed
-          strncpyz(s, ctime(&now), sizeof s);
-          strcpy(&s[11], &s[20]);
-          /* printf(STR("--- Loading %s (%s)\n\n"), ver, s); */
-
-          if (ip && ip[0] == '!') { //natip
-            ip++;
-            sprintf(natip, "%s",ip);
-          } else {
-            if (ip && ip[1]) //only copy ip if it is longer than 1 char (.)
-              egg_snprintf(myip, 120, "%s", ip);
+          if (geteuid() != atoi(temps)) {
+            sdprintf(STR("wrong uid, conf: %d :: %d"), atoi(temps), geteuid());
+            werr(ERR_WRONGUID);
           }
-          egg_snprintf(origbotname, 10, "%s", nick);
+        } else if (c[0] == '+' && !skip) { /* uname */
+          int r = 0;
+          newsplit(&temps);
+          if ((r = strcmp(temps, my_uname()))) {
+            baduname(temps, my_uname());
+            sdprintf(STR("wrong uname, conf: %s :: %s"), temps, my_uname());
+            werr(ERR_WRONGUNAME);
+          }
+        } else if (c[0] == '!') { //local tcl exploit
+          if (c[1] == '-') { //dont use pscloak
+#ifdef S_PSCLOAK
+            sdprintf(STR("NOT CLOAKING"));
+#endif /* S_PSCLOAK */
+            pscloak = 0;
+          } else {
+            newsplit(&temps);
+            Tcl_Eval(interp, temps);
+          }
+        } else if (c[0] != '#') {  //now to parse nick/hosts
+          //we have the right uname/uid, safe to setup crontab now.
+          i++;
+          nick = newsplit(&temps);
+          if (!nick || !nick[0])
+            werr(ERR_BADCONF);
+          sdprintf(STR("Read nick from config: %s"), nick);
+          if (temps[0])
+            ip = newsplit(&temps);
+          if (temps[0])
+            host = newsplit(&temps);
+          if (temps[0])
+            ipsix = newsplit(&temps);
+
+          if (i == 1) { //this is the first bot ran/parsed
+            strncpyz(s, ctime(&now), sizeof s);
+            strcpy(&s[11], &s[20]);
+
+            if (ip && ip[0] == '!') { //natip
+              ip++;
+              sprintf(natip, "%s",ip);
+            } else {
+              if (ip && ip[1]) //only copy ip if it is longer than 1 char (.)
+                egg_snprintf(myip, 120, "%s", ip);
+            }
+            egg_snprintf(origbotname, 10, "%s", nick);
 #ifdef HUB
-          sprintf(userfile, "%s/.u", confdir());
+            sprintf(userfile, "%s/.u", confdir());
 #endif /* HUB */
 /* log          sprintf(logfile, "%s/.%s.log", confdir(), nick); */
-          if (host && host[1]) { //only copy host if it is longer than 1 char (.)
-            if (host[0] == '+') { //ip6 host
+            if (host && host[1]) { //only copy host if it is longer than 1 char (.)
+              if (host[0] == '+') { //ip6 host
               host++;
               sprintf(hostname6, "%s",host);
             } else  //normal ip4 host
               sprintf(hostname, "%s",host);
-          }
-          if (ipsix && ipsix[1]) { //only copy ipsix if it is longer than 1 char (.)
-            egg_snprintf(myip6, 120, "%s",ipsix);
-          }
-        } 
-#ifdef LEAF
-        else { //these are the rest of the bots..
-          char buf2[DIRMAX];
-          FILE *fp;
-
-          xx = 0, x = 0, errno = 0;
-          s[0] = '\0';
-          /* first let's determine if the bot is already running or not.. */
-          egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, nick);
-          fp = fopen(buf2, "r");
-          if (fp != NULL) {
-            fgets(s, 10, fp);
-            fclose(fp);
-            xx = atoi(s);
-            if (updating) {
-              x = kill(xx, SIGKILL); //try to kill the pid if we are updating.
-              unlink(buf2);
             }
-            kill(xx, SIGCHLD);
-            if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
+            if (ipsix && ipsix[1]) { //only copy ipsix if it is longer than 1 char (.)
+              egg_snprintf(myip6, 120, "%s",ipsix);
+            }
+          } //First bot in conf
+#ifdef LEAF
+          else { //these are the rest of the bots..
+            char buf2[DIRMAX];
+            FILE *fp;
+
+            xx = 0, x = 0, errno = 0;
+            s[0] = '\0';
+            /* first let's determine if the bot is already running or not.. */
+            egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, nick);
+            fp = fopen(buf2, "r");
+            if (fp != NULL) {
+              fgets(s, 10, fp);
+              fclose(fp);
+              xx = atoi(s);
+              if (updating) {
+                x = kill(xx, SIGKILL); //try to kill the pid if we are updating.
+                unlink(buf2);
+              }
+              kill(xx, SIGCHLD);
+              if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
+                if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
+                  printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
+              } else if (!x)
+                sdprintf(STR("%s is already running, pid: %d"), nick, xx);
+            } else {
               if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
                 printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
-            } else if (!x)
-              sdprintf(STR("%s is already running, pid: %d"), nick, xx);
-  
-          } else {
-            if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
-              printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
+            }
           }
-        }
 #endif /* LEAF */
-      } // if read in[0] != #
-//      if (temps)
-      nfree(temp_ptr);
-    }
-  fclose(f);
+        } 
+        nfree(temp_ptr);
+      } /* while(fscan) */
+      fclose(f);
 #ifdef LEAF
-    if (updating)
-      exit(0); //let the 5 min timer restart us.
-  } // (localhub)
+      if (updating)
+        exit(0); /* let cron restart us. */
+    } /* localhub */
 #endif /* LEAF */
-}
+  }
   module_load("dns");
   module_load("channels");
 #ifdef LEAF
@@ -1773,11 +1764,6 @@ if (1) {		/* config shit */
   }
 #endif /* LEAF */
 
-  if (!encrypt_pass) {
-    sdprintf(MOD_NOCRYPT);
-    bg_send_quit(BG_ABORT);
-    exit(1);
-  }
 
   cache_miss = 0;
   cache_hit = 0;
@@ -1803,6 +1789,7 @@ if (1) {		/* config shit */
   if (pscloak) {
     int on = 0;
     char *p = progname();
+
     egg_memset(argv[0], 0, strlen(argv[0]));
     strncpyz(argv[0], p, strlen(p) + 1);
     for (on = 1; on < argc; on++) egg_memset(argv[on], 0, strlen(argv[on]));
@@ -1810,11 +1797,7 @@ if (1) {		/* config shit */
 #endif /* PSCLOAK */
 #endif /* LEAF */
 
-  i = 0;
-  for (chan = chanset; chan; chan = chan->next)
-    i++;
-  putlog(LOG_MISC, "*", STR("=== %s: %d channels, %d users."),
-	 botnetnick, i, count_users(userlist));
+  putlog(LOG_MISC, "*", STR("=== %s: %d users."), botnetnick, count_users(userlist));
   /* Move into background? */
 
   if (backgrd) {
@@ -1895,9 +1878,6 @@ if (1) {		/* config shit */
   add_hook(HOOK_PRE_REHASH, (Function) event_prerehash);
   add_hook(HOOK_USERFILE, (Function) event_save);
   add_hook(HOOK_DAILY, (Function) event_resettraffic);
-  add_hook(HOOK_LOADED, (Function) event_loaded);
-
-  call_hook(HOOK_LOADED);
 
   debug0(STR("main: entering loop"));
   while (1) {
@@ -1910,7 +1890,6 @@ if (1) {		/* config shit */
      * calls to periodic_timers
      */
     now = time(NULL);
-    random();			/* Woop, lets really jumble things */
     if (now != then) {		/* Once a second */
       call_hook(HOOK_SECONDLY);
       then = now;

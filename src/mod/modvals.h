@@ -37,6 +37,7 @@
 #define HOOK_PRE_REHASH		 10
 #define HOOK_IDLE		 11
 #define HOOK_5MINUTELY		 12
+/* HOOK_LOADED IS OBSOLETE */
 #define HOOK_LOADED		 13
 #define HOOK_BACKUP     	 14
 #define HOOK_DIE		 15
