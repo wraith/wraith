@@ -1088,7 +1088,7 @@ void check_servers() {
   for (chan = chanset; chan; chan = chan->next) {
     memberlist *m;
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (chan_hasop(m) && (!m->server || !m->server[0]) || !m->hops) {
+      if (chan_hasop(m) && ((!m->server || !m->server[0]) || !m->hops)) {
         dprintf(DP_HELP, STR("WHO %s\n"), chan->name);
         return;
       }

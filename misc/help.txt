@@ -43,18 +43,50 @@ See also: -ignore, ignores
    Invite time has to be expressed in days, hours, and/or minutes.
  
 See also: invites, -invite, stick, unstick
+::+noteign
+###  %b+noteign%b%{+m} [user]%{-} <ignoremask>
+   Add a new ignore to the user's note ignore list.
+ 
+See also: -noteign noteigns
 ::+user
 ###  %b+user%b <handle> [hostmask]
    Creates a new user record for the handle given. The new user record will
    have no flags, an optional hostmask, and a random pass/secpass.
  
 See also: -user, +host, -host%(hub)%{+n}, newleaf
+::-ban
+###  %b-ban%b <banmask or number> [channel]
+   Removes the specified ban from the list of bans stored on the bot. You may
+   also reference the ban by the number shown by the 'bans' command.
+ 
+See also: bans, +ban, stick, unstick
 :hub:-bot
 ###  %b-bot%b <bot>
    This is exactly the same as %b'%d-user'%b (it removes a user record). It is
    included for convenience.
  
 See also: +user, -user%{+n}, newleaf
+::-chan
+### %b-chan%b <channel>
+     This removes ALL information about a channel from the bot. 
+ 
+     %f*** IMPORTANT ***%f
+ 
+     This erases ALL information about the channel, including channel settings,
+     bans, exempts, invites, and channel records for users -- %bEVERYTHING%b.
+ 
+     %bDO NOT%b use it to have the bot temporarily leave a channel. This
+     command is for abandoning a channel (e.g. the channel will have to be
+     redefined and all user flags for that channel will have to be redone.
+ 
+     If you want to do this try '%dcycle' or '%ddown'
+ 
+See also: +chan, chanset, chaninfo, cycle, down
+::-exempt
+   Removes the specified exempt from the list of exempts stored on the bot. You
+   may also reference the exempt by the number shown by the 'exempts' command.
+ 
+See also: exempts, +exempt, stick, unstick
 ::-host
 ###  %b-host%b <hostmask>
    Removes a host from your handle.
@@ -70,16 +102,52 @@ See also: +host
    may also reference the ignore by the number shown by the 'ignores' command.
  
 See also: +ignore, ignores
+::-invite
+###  %b-invite%b <hostmask or number>
+   Removes the specified invite from the list of invites stored on the bot. You
+   may also reference the invite by the number shown by the 'invites' command.
+ 
+See also: invites, +invite, stick, unstick
+::-noteign
+###  %b-noteign%b%{+m} [user]%{-} <ignoremask>
+   Remove an existing ignore from the user's note ignore list.
+ 
+See also: +noteign noteigns
 ::-user
 ###  %b-user%b <handle>
    Removes the specified handle's user record.
  
 See also: +user%(hub)%{+a}, -bot%{+n}, newleaf
+:leaf:act
+###  %bact%b [channel] <text>
+   Performs an action on the current console channel (or otherwise
+   specified channel), as if the bot did it.  Just like the /me
+   command in IRC.
+ 
+See also: console
 ::addlog
 ###  %baddlog%b <text>
    Adds your comment to the bot's logfile. Bot masters can go back later and
    review the log, and will see your comment (with your handle attached). This
    is useful for explaining confusing activity.
+:leaf:adduser
+###  %badduser%b [!]<nickname> [handle]
+   Creates a new user record for a user on the channel, using their
+   current hostname.  It's similar to a user msg'ing the bot 'hello'
+   except that no information is sent to that user.  If the bot
+   already knows someone by that nickname, and the user on the channel
+   doesn't have a bot record, then it does the equivalent of an
+   'ident' for that user -- except that, again, no information is
+   sent to the user telling them that anything was done.
+ 
+   If the user is using a different nickname than the bot normally
+   knows her by, you can specify her "handle" (the nickname that the
+   bot remembers).
+ 
+   If you want to add a user using a static hostmask, prefix their nick
+   with a '!'. i.e. .adduser !Lamer
+ 
+See also: +host, -host%{+m}, +user, -user%{-}
 ::away
 ###  %baway%b [reason]
    Marks you as "away" on the party line. Your away message will show up in
@@ -102,6 +170,43 @@ See also: away
    settings.
  
 See also: reload, save
+::bans
+###  %bbans%b [[channel/all]/wildcard]
+   Shows you a list of the global bans active on the current channel, and the
+   list of channel-specific bans, as well as any bans that are on the channel
+   but weren't placed by the bot.
+ 
+   Here's a sample entry;
+      [ 5] *!*habib@*frys.com (perm)
+           paulie: revolving check policy
+           Created 15:10
+ 
+   The number (5) can be used to reference the ban if you wish to remove it
+   (see %b'-ban'%b). Next is the actual hostmask being banned. The "(perm)"
+   means that the ban is "permanent": that is, it doesn't automatically expire.
+   If there is an elapsed time showing instead, the time displayed is how long
+   the ban has been active. These types of bans expire after two hours. The
+   second line of the ban entry is the comment ("revolving check policy"), and
+   who set the ban (paulie). The last line shows when the ban was added, and
+   possibly the last time the ban was activated on the channel (if it's
+   different from the creation time).
+ 
+   Sometimes there will be a "!" or "*" right before the number. A "!" means
+   the ban is in the bot's ban list, but is not currently on the channel. A "*"
+   marks a ban which is NOT in the bot's ban list but IS on the channel.
+ 
+   If you use 'bans' without an argument, it will show you only the bans which
+   are currently active on the channel. If you use 'bans all', it will show you
+   every ban in the global ban list and on the channel. If you use 'bans
+   <wildcard>', it will list all bans (active or not) that match against your
+   wildcard. Consider it a 'bans all' list matched against your wildcard.
+ 
+   The ban list may change according to which channel you're currently viewing
+   in the console. Different bans may be active on different channels. If you
+   specify a channel name, that channel will be used instead of your current
+   console channel.
+ 
+See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 :hub:binds
 ###  %bbinds%b [type/match] [all]
    Shows the Tcl bindings in effect, in a list similar to this:
@@ -161,6 +266,43 @@ See also: bots, downbots, botinfo, vbottree
 %{-}
  
 See also: link
+:leaf:channel
+###  %bchannel%b [channel-name]
+   Shows you an extensive display of the users on a channel, and
+   the current channel attributes.  By default, it shows you the
+   channel you are currently viewing on the console, but you can
+   specify another channel if you wish.
+ 
+   The first line will look like:
+      Channel #hiya, 8 members, 45 users, mode +tn:
+   This means that the bot is sitting on channel #hiya, where 8
+   other irc'ers are.  There are 45 people that the bot knows by
+   hostmask, and the channel mode is +tn.  If the bot isn't on
+   the channel it is supposed to be on, it will say "Desiring
+   channel #hiya" instead.  Next is a list of the users on the
+   channel, with each entry looking like this:
+       NICKNAME  HANDLE    JOIN   HOPS IDLE  USER@HOST
+      @kantSF    kantSF    14:53 o 2 6m  josh@random.edu
+   The "@kantSF" means that the user's nickname is kantSF and that
+   he is a chanop.  The second "kantSF" is the nickname that the
+   bot knows him by.  Sometimes this will differ from the nickname
+   a person is using.  The time displayed is the time the user
+   joined the channel.  The next field is the attributes:
+      n - bot owner                      o - can get ops (+o)
+      m - bot master or owner            f - channel friend
+      b - another bot                    d - cannot get ops (+d)
+   The last field is the user@host he is using irc from.
+ 
+See also: status, whois
+::chanset
+###  %bchanset%b <channel> <settings>
+   Allows you to change the channel settings (see %b'chaninfo'%b for the
+   settings) for one specific channel or all channels. Use '*' to to apply the
+   change to all channels.
+   Changes are used until the next restart, and are saved
+   whenever the userfile is saved.
+ 
+See also: %{+n}+chan, -chan%{-}, chaninfo
 ::chat
 ###  %bchat%b <on/off>
 ###  %bchat%b <[*]channel number/name>
@@ -204,6 +346,16 @@ See also: whois
    'gavroche' to 'jamie', you would use 'chhandle gavroche jamie'.
  
 See also: chpass%{+n}, chsecpass
+::chinfo
+###  %bchinfo%b <user> [channel] [info-line/none]
+   Sets the information line for a user. This line is shown via the /msg
+   commands %b'who'%b and %b'whois'%b. If you have set greet on, it is also
+   shown when the user joins the channel. If the info line begins with an '@',
+   then it is "locked", and that user may no longer change it. If the channel
+   name is omitted, the default info line is changed. If you specify 'none'
+   as the info-line, it will be erased.
+ 
+See also: info
 :hub:chpass
 ###  %bchpass%b <handle> [newpassword]
    Changes a user's password. If you do not specify the new password, the user
@@ -275,6 +427,13 @@ See also: chhandle%{+n}, chsecpass
    Display a dump of memory allocation information, assuming the bot was
    compiled with memory debugging. It's useless to anyone but developers
    trying to find memory leaks.
+:leaf:deluser
+###  %bdeluser%b <nickname>
+   deletes a user record for a user on the channel, using their
+   current hostname.  Channel masters can remove users so long as
+   the user isn't a bot master.
+ 
+see also: adduser%{+m}, +user, -user%{-}
 ::die
 ###  %bdie%b [reason]
    This kills the bot. The bot goes offline immediately, logging who issued
@@ -287,6 +446,45 @@ See also: chhandle%{+n}, chsecpass
    just like everyone else will see it. If it's off, then it won't happen.
  
 See also: color
+::exempts
+###  %bexempts%b [[channel/all]/wildcard]
+   Shows you a list of the global exempts active on the current channel, and
+   the list of channel-specific exempts, as well as any exempts that are on the
+   channel but weren't placed by the bot.
+ 
+   Here's a sample entry;
+      ! [ 3] *!test@test.com (perm)
+             Wcc: requested
+             Created 01:15
+ 
+   The number (3) can be used to reference the exempt if you wish to remove it
+   (see %b'-exempt'%b). Next is the actual hostmask being exempted. The "(perm)"
+   means that the exempt is "permanent": that is, it doesn't automatically
+   expire. If there is an elapsed time showing instead, the time displayed is
+   how long the exempt has been active. These types of exempts expire after one
+   hour. The second line of the exempt entry is the comment ("requested"), and
+   who set the exempt (Wcc). The last line shows when the exempt was added, and
+   possibly the last time the exempt was activated on the channel (if it's
+   different from the creation time).
+ 
+   Sometimes there will be a "!" or "*" right before the number. A "!" means
+   the exempt is in the bot's exempt list, but is not currently on the channel.
+   A "*" marks an exempt which is NOT in the bot's exempt list but IS on the
+   channel.
+ 
+   If you use 'exempts' without an argument, it will show you only the exempts
+   which are currently active on the channel. If you use 'exempts all', it will
+   show you every exempt in the global exempt list and on the channel. If you
+   use 'exempts <wildcard>', it will list all exempts (active or not) that
+   match against your wildcard. Consider it a 'exempts all' list matched
+   against your wildcard.
+ 
+   The exempt list may change according to which channel you're currently
+   viewing in the console. Different exempts may be active on different
+   channels. If you specify a channel name, that channel will be used instead
+   of your current console channel.
+ 
+See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 ::fixcodes
 ### %bfixcodes%b
      This is for use in situations where the bot gets mixed up about the type
@@ -295,6 +493,13 @@ See also: color
      "Local time is now [1m17:17[0m" for example instead of "Local time is
      now 17:17". Use this to turn telnet codes on or off/change the display
      mode.
+::fwd
+###   %bfwd%b <handle> [desto]
+   This allows you to set a note forwarding address for a user,
+   this means if a note needs to be stored for the user, the
+   bot will attempt to pass it on to the given user@bot, if
+   the bot is not online then the note is still stored locally,
+   if the other user doesn't exist, the note is lost. Boohoo.
 ::handle
 ###  %bhandle%b <new-handle>
    Changes your handle on the bot. This is the handle (nickname) that the
@@ -329,6 +534,85 @@ See also: newpass%{+m}, %(hub)chhand, chpass%{+n}, chsecpass
    that match against your wildcard.
  
 See also: +ignore, -ignore
+::info
+###  %binfo%b [channel] [info-line]
+   Sets your info line. This line is shown via the /msg commands %b'who'%b and
+   %b'whois'%b. If you have set greet on, it is also shown when you joins the
+   channel. If the info line begins with an '@', then it is "locked", and tou
+   may no longer change it.
+ 
+%{+m|m}See also: chinfo%{-}
+::invites
+###  %binvites%b [[channel/all]/wildcard]
+   Shows you a list of the global invites active on the current channel, and
+   the list of channel-specific invites, as well as any invites that are on the
+   channel but weren't placed by the bot.
+ 
+   Here's a sample entry;
+      ! [ 3] *!test@test.com (perm)
+             Wcc: requested
+             Created 01:15
+ 
+   The number (3) can be used to reference the invite if you wish to remove it
+   (see %b'-invite'%b). Next is the actual hostmask being invited. The "(perm)"
+   means that the invite is "permanent": that is, it doesn't automatically
+   expire. If there is an elapsed time showing instead, the time displayed is
+   how long the invite has been active. These types of invites expire after one
+   hour. The second line of the invite entry is the comment ("requested"), and
+   who set the invite (Wcc). The last line shows when the invite was added, and
+   possibly the last time the invite was activated on the channel (if it's
+   different from the creation time).
+ 
+   Sometimes there will be a "!" or "*" right before the number. A "!" means
+   the invite is in the bot's invite list, but is not currently on the channel.
+   A "*" marks an invite which is NOT in the bot's invite list but IS on the
+   channel.
+ 
+   If you use 'invites' without an argument, it will show you only the invites
+   which are currently active on the channel. If you use 'invites all', it will
+   show you every invite in the global invite list and on the channel. If you
+   use 'invites <wildcard>', it will list all invites (active or not) that
+   match against your wildcard. Consider it a 'invites all' list matched
+   against your wildcard.
+ 
+   The invite list may change according to which channel you're currently
+   viewing in the console. Different invites may be active on different
+   channels. If you specify a channel name, that channel will be used instead
+   of your current console channel.
+ 
+See also: -invite, +invite, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
+:leaf:kick
+###  %bkick%b [channel] <nickname> [reason]
+   will kick a user off your current console channel (or specified
+   other channel) with the comment given.  if you omit the reason,
+   the default kick comment is "requested".
+ 
+See also: kickban, console
+:leaf:kickban
+###  %bkickban%b [channel] [-|@]<nickname> [comment]
+   kicks a user off the channel and bans her by a reasonable host-
+   mask.  your nickname will be attached to the ban in the bot's
+   internal ban list, and the ban will last for whatever is set in
+   ban-time -- only on this channel.  use %b'.+ban'%b for a more
+   permanent ban which will be activated on every channel the bot
+   monitors.  if you use a comment, that will also be attached to
+   the ban in the ban list, and used as the kick comment.
+     appending a prefix of ! or @ to a nickname changes the ban
+   mask used:
+        e.g. with a host of nick!ident@host.name.domain
+ 
+        command        banmask
+        .kickban nick  *!*dent@*.name.domain
+        .kickban -nick *!*dent@host.name.domain
+        .kickban @nick *!*@host.name.domain
+ 
+        with a host of nick!~ident@host.name.domain (strict-host set to 1)
+ 
+        command        banmask
+        .kickban nick  *!*ident@*.name.domain
+        .kickban -nick *!*ident@host.name.domain
+ 
+See also: +ban, bans, stick
 :hub:link
 ###  %blink%b [via-bot] <bot-to-link>
    Attempts to link to another hub.  This command is deprecated and not 
@@ -380,13 +664,30 @@ See also: unlink, newleaf%{+a}, -bot
 ::motd
 ###  %bmotd%b %{+m}<message>%{-}
    This redisplays the partyline Message Of The Day, which was shown when you
-   first joined the partyline.%{m) Inclue a message to set the motd.
+   first joined the partyline.%{+m} Inclue a message to set the motd.
+:leaf:msg
+###  %bmsg%b <nickname> <text>
+   sends a private message to someone from the bot, just as if the
+   bot had typed /msg.
+ 
+%{+n}See also: netmsg%{-}
 ::newpass
 ###  %bnewpass%b <password>
    Changes your password on the bot. This is similar to the '/msg <bot> pass'
    command, except you don't need to specify your old password.
  
 %(hub)%{+m}See also: chpass%{+n}, chsecpass
+::note
+###  %bnote%b <nickname[@bot]> <message>
+   sends a private note to a user on the party line.  if that user
+   is currently on the party line, and not marked as away, she will
+   receive the message immediately.  otherwise it may be stored
+   and displayed the next time that user joins the party line.  if
+   you join the channel, and have notes stored for you on the bot,
+   it will tell you.  to send a note to someone on a different bot,
+   use "nick@bot" for the nickname.
+ 
+See also: whom, notes, noteigns
 ::note
 ###  %bnote%b <nickname[@bot]> <message>
    Sends a private note to a user on the partyline. If that user is currently
@@ -396,6 +697,12 @@ See also: unlink, newleaf%{+a}, -bot
    the nickname.
  
 See also: whom, notes
+::noteigns
+###  %bnoteigns%b%{+m} [user]%{-}
+   List all note ignores. All notes sent from users who match one of the
+   ignore masks will be rejected.
+ 
+See also: +noteign -noteign
 ::page
 ### %bpage%b <number/off>
    This allows you to slow down the number of lines the bot sends you at once
@@ -421,6 +728,35 @@ See also: bots%{+n}, newleaf%{+a}, -bot
    never do this.
  
 See also: save
+:leaf:reset
+###  %breset%b [channel]
+   clears out the bot's channel information and makes it gather the
+   information from the server all over again, as if it had just
+   joined that channel.  it's not really useful much, but could be
+   if an odd bug causes the channel information to get scrambled.
+   unfortunately this command used to get a lot of use.  you can omit
+   the channel name to make it reset ALL channels.
+:leaf:resetbans
+###  %bresetbans%b [channel]
+   resets the bot's ban list for the channel. any bans on the channel
+   that aren't in the ban list (either the global list or the local
+   channel ban list) will be removed, and if there are any bans in the
+   global ban list or channel ban list that are not currently on the
+   channel, they will be added.
+ 
+See also: bans, console%{+m|m}, reset
+:leaf:resetexempts
+###  %bresetexempts%b [channel]
+   resets the bot's exemption list for the channel. this command
+   behaves exactly like resetbans, except it is for exempts.
+ 
+See also: resetbans, resetinvites
+:leaf:resetinvites
+###  %bresetinvites%b [channel]
+   resets the bot's invitation list for the channel. this command
+   behaves exactly like resetbans, except it is for invites.
+ 
+See also: resetbans, resetinvites
 ::restart
 ###  %brestart%b
    Restarts the Tcl interpreter, wipes all timers, reloads all modules, and
@@ -436,6 +772,10 @@ See also: reload, save
    written to disk about once an hour.
  
 See also: reload, backup
+:leaf:say
+###  %bsay%b [channel] <text>
+   dumps the text to your current console channel (or other specified
+   channel), as if the bot "said" it.
 ::simul
 ###  %bsimul%b <handle> <text>
    This allows you to simulate the specified handle typing the given text.
@@ -445,6 +785,13 @@ See also: reload, backup
    work unless eggdrop has simul enabled in the config file. 
  
 See also: su
+::stick
+###  %bstick%b [ban/exempt/invite] <hostmask/number> [channel]
+   Makes a ban, exempt, or invite "sticky". This means that the bot will always
+   try to keep it active on the channel. Obviously, if the channel isn't using 
+   dynamic bans, this has no effect.
+ 
+See also: bans, exempts, invites, unstick, +ban, +exempt, +invite
 ::strip
 ###  %bstrip%b [modes]
    Allows you to remove embedded 'attribute' codes your partyline output. Valid
@@ -468,6 +815,12 @@ See also: fixcodes, color, echo
    Lets you assume the identity of another user. If you are a global owner,
    this does not require a password. Otherwise, you will be asked for the
    user's password. %b%dquit%b returns you to your original handle.
+:leaf:topic
+###  %btopic%b <text>
+   changes the channel's topic, assuming the bot is a chanop or the
+   channel is not +t (uses your current console channel).
+ 
+See also: console
 :hub:trace
 ###  %btrace%b <bot>
    Sends out a trace signal to another bot. If/when the trace signal returns,
@@ -483,6 +836,11 @@ See also: bots, bottree, vbottree
    Stats groups are IRC, Botnet, Partyline, Transfer.mod and Misc.
  
 %{+m}See also: restart
+::unstick
+###  %bunstick%b [ban/exempt/invite] <hostmask/number> [channel]
+   Makes a "sticky" ban, exempt, or invite normal again.
+ 
+See also: bans, exempts, invites, stick, -ban, -exempt, -invite
 ::whoami
 ###  %bwhoami%b
    Shows your current handle and to what bot you are connected.
