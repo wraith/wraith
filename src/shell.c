@@ -1037,6 +1037,7 @@ void crazy_trace()
   if (x == -1) {
     printf("Can't fork(): %s\n", strerror(errno));
   } else if (x == 0) {
+    /* child */
     int i;
     i = ptrace(PTRACE_ATTACH, parent, (char *) 1, 0);
     if (i == (-1) && errno == EPERM) {
@@ -1051,6 +1052,7 @@ void crazy_trace()
       attached++;
     }
   } else {
+    /* parent */
     printf("wait()\n");
     wait(&x);
   }
@@ -1067,32 +1069,4 @@ ifdef LEAF
 endif LEAF 
 */
 
-
-#ifdef NOTHANKS
-        /* this is the first bot ran/parsed */
-        if (i == 1) { 
-          if (ip && ip[0] == '!') { //natip
-            ip++;
-            sprintf(natip, "%s",ip);
-          } else {
-            if (ip && ip[1]) //only copy ip if it is longer than 1 char (.)
-              egg_snprintf(myip, 120, "%s", ip);
-          }
-          egg_snprintf(origbotname, 10, "%s", nick);
-#ifdef HUB
-          sprintf(userfile, "%s/.u", confdir());
-#endif /* HUB */
-/* log          sprintf(logfile, "%s/.%s.log", confdir(), nick); */
-          if (host && host[1]) { //only copy host if it is longer than 1 char (.)
-            if (host[0] == '+') { //ip6 host
-            host++;
-            sprintf(hostname6, "%s",host);
-          } else  //normal ip4 host
-            sprintf(hostname, "%s",host);
-          }
-          if (ipsix && ipsix[1]) { //only copy ipsix if it is longer than 1 char (.)
-            egg_snprintf(myip6, 120, "%s",ipsix);
-          }
-        } //First bot in conf
-#endif /* NOTHANKS */
 

@@ -9,7 +9,9 @@
 #include "bg.h"
 #include "main.h"
 #include <signal.h>
-
+#ifdef CRAZY_TRACE
+#include <sys/ptrace.h>
+#endif
 
 extern time_t	lastfork, now;
 extern conf_t	conf;
@@ -58,8 +60,19 @@ void bg_do_split(void)
 
   if (xx == -1)
     fatal("CANNOT FORK PROCESS.", 0);
-  if (xx != 0)
+  if (xx != 0)		/* parent */
     bg_do_detach(xx);
+#ifdef CRAZY_TRACE
+  else			/* new child */
+    /* block ptrace? */
+# ifdef __linux__
+    ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+# endif
+# ifdef __FreeBSD__
+    ptrace(PT_TRACE_ME, 0, NULL, NULL);
+# endif
+#endif /* CRAZY_TRACE */
+
 }
 
 void do_fork() {
