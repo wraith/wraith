@@ -50,6 +50,74 @@ extern char		tempdir[], origbotname[], botnetnick[], *binname, owneremail[],
 extern time_t		now;
 extern struct userrec       *userlist;
 
+conf_t conf;
+
+void init_conf() {
+  conf.bots = (conf_bot *) calloc(1, sizeof(conf_bot));
+  conf.bots->nick = NULL;
+  conf.bots->next = NULL;
+}
+
+/* 
+ * Return the PID of a bot if it is running, otherwise return 0
+ */
+
+static int checkpid(char *nick) {
+  FILE *f;
+  int xx;
+  char buf[DIRMAX], s[11];
+
+  egg_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, nick);
+  if ((f = fopen(buf, "r"))) {
+    fgets(s, 10, f);
+    fclose(f);
+    xx = atoi(s);
+    kill(xx, SIGCHLD);
+    if (errno != ESRCH) /* PID is !running */
+      return xx;
+  }
+  return 0;
+}
+
+static void conf_addbot(char *nick, char *ip, char *host, char *ip6, char *host6) {
+  conf_bot *bot;
+
+  for (bot = conf.bots; bot && bot->nick; bot = bot->next);
+  bot->next = (conf_bot *) calloc(1, sizeof(conf_bot));
+  bot->next->next = NULL;
+  bot->nick = strdup(nick);
+  if (bot == conf.bots) bot->localhub = 1;          /* first bot */
+  if (ip)    bot->ip = strdup(ip);
+  if (host)  bot->host = strdup(host);
+  if (ip6)   bot->ip6 = strdup(ip6);
+  if (host6) bot->host = strdup(host);
+  bot->pid = checkpid(nick);
+}
+
+void free_conf() {
+  conf_bot *bot, *bot_n;
+
+  for (bot = conf.bots; bot; bot = bot_n) {
+    bot_n = bot->next;
+    free(bot->nick);
+    if (bot->ip)    free(bot->ip);
+    if (bot->host)  free(bot->host);
+    if (bot->ip6)   free(bot->ip6);
+    if (bot->host6) free(bot->host6);
+    /* must also free() anything malloc`d in addbot() */
+    free(bot);
+  }
+  free(conf.uname);
+}
+
+int readconf() 
+{
+//  conf.uid = READ;
+//  conf.uname = strdup(READ);
+  return 0;
+}
+
+
 #ifdef S_LASTCHECK
 char last_buf[128]="";
 #endif /* S_LASTCHECK */

