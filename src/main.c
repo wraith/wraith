@@ -759,10 +759,8 @@ int main(int argc, char **argv)
 
   /* Move into background? */
   if (backgrd) {
-//#ifndef CYGWIN_HACKS
     bg_do_split();
   } else {
-//#endif /* CYGWIN_HACKS */
     FILE *f = NULL;
     int xx;
 
@@ -779,9 +777,6 @@ int main(int argc, char **argv)
     } else
       printf(EGG_NOWRITE, conf.bot->pid_file);
 
-#ifdef CYGWIN_HACKS
-      printf(STR("Launched into the background  (pid: %d)\n\n"), xx);
-#endif /* CYGWIN_HACKS */
   }
 
   use_stderr = 0;		/* Stop writing to stderr now */
