@@ -195,7 +195,7 @@ dprintf(int idx, const char *format, ...)
         if ((idx == DP_DUMP || floodless)) {
          if (serv != -1) {
            if (debug_output)
-             putlog(LOG_SRVOUT, "@", "[m->] %s", buf);
+             putlog(LOG_SRVOUT, "@", "[d->] %s", buf);
            write_to_server(buf, len);
          }
         } else
