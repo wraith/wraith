@@ -42,16 +42,6 @@ typedef struct {
 	 			   to TRANSFER_REGET_PACKETID		*/
   u_8bit_t  byte_order;		/* Byte ordering, see byte_order_test()	*/
 } transfer_reget;
-
-typedef struct zarrf {
-  struct zarrf *next;
-  char *dir;			/* Absolute dir if it starts with '*',
-				   otherwise dcc dir.			*/
-  char *file;
-  char nick[NICKLEN];		/* Who queued this file			*/
-  char to[NICKLEN];		/* Who will it be sent to		*/
-} fileq_t;
-
 #endif				/* MAKING_TRANSFER */
 
 /* Language file additions */
