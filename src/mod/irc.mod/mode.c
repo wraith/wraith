@@ -123,7 +123,7 @@ flush_cookies(struct chanset_t *chan, int pri)
     egg_strcatn(out, post, sizeof(out));
     egg_strcatn(out, " ", sizeof(out));
     
-    cookie = makecookie(chan->dname, botname);
+    cookie = makecookie(chan->dname, conf.bot->nick);
     egg_strcatn(out, cookie, sizeof(out));
     free(cookie);
   }
@@ -1040,7 +1040,7 @@ gotmode(char *from, char *msg)
                 isbadop = BC_NOCOOKIE;
               } else {
 					                 /* hash!rand@time */
-                isbadop = checkcookie(chan->dname, m->nick, &(modes[modecnt - 1][3]));
+                isbadop = checkcookie(chan->dname, u->handle, &(modes[modecnt - 1][3]));
               }
               if (isbadop) {
                 char trg[NICKLEN] = "";
@@ -1088,13 +1088,13 @@ gotmode(char *from, char *msg)
                 }
 
                 if (isbadop == BC_NOCOOKIE)
-                  putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s", m->nick, m->userhost, msg);
+                  putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
                 else if (isbadop == BC_HASH)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s", m->nick, m->userhost, msg);
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
                 else if (isbadop == BC_SLACK)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s", m->nick, m->userhost, msg);
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
               } else
-                putlog(LOG_DEBUG, "@", "Good op: %s", msg);
+                putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
             }
 
             if (!channel_manop(chan) && !u->bot) {
