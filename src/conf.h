@@ -7,18 +7,23 @@
 #include "eggdrop.h"
 #include "settings.h"
 
+typedef struct conf_net_b {
+  char *host;
+  char *host6;
+  char *ip;
+  char *ip6;
+  int family;
+} conf_net;  
+
 typedef struct conf_bot_b {
   struct conf_bot_b *next;
   struct userrec *u;	/* our own user record */
+  struct conf_net_b net;
   pid_t pid;              /* contains the PID for the bot (read for the pidfile) */
 #ifdef LEAF
   int localhub;         /* bot is localhub */
 #endif /* LEAF */
   char *nick;
-  char *host;
-  char *host6;
-  char *ip;
-  char *ip6;
   char *pid_file;       /* path and filename of the .pid file */
 } conf_bot;
 

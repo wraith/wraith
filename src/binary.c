@@ -371,10 +371,10 @@ void conf_to_bin(conf_t *in)
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
     sprintf(settings.bots, "%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
                            bot->nick,
-                           bot->ip ? bot->ip : ".", 
-                           bot->host6 ? "+" : "", 
-                           bot->host ? bot->host : (bot->host6 ? bot->host6 : "."),
-                           bot->ip6 ? bot->ip6 : "");
+                           bot->net.ip ? bot->net.ip : ".", 
+                           bot->net.host6 ? "+" : "", 
+                           bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "."),
+                           bot->net.ip6 ? bot->net.ip6 : "");
     }
 
   newbin = move_bin(in->binpath, in->binname, 0);

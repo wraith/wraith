@@ -15,6 +15,7 @@
 #include "settings.h"
 #include "misc.h"
 #include "misc_file.h"
+#include "socket.h"
 
 #include <errno.h>
 #include <paths.h>
@@ -49,15 +50,15 @@ tellconf(conf_t * inconf)
     i++;
     sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
              bot->nick,
-             bot->ip ? bot->ip : "",
-             bot->host ? bot->host : "", bot->ip6 ? bot->ip6 : "", bot->host6 ? bot->host6 : "", bot->pid);
+             bot->net.ip ? bot->net.ip : "",
+             bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", bot->pid);
   }
   sdprintf("bot:\n");
   if (inconf->bot && ((bot = inconf->bot)))
     sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n",
              bot->nick,
-             bot->ip ? bot->ip : "",
-             bot->host ? bot->host : "", bot->ip6 ? bot->ip6 : "", bot->host6 ? bot->host6 : "", bot->pid);
+             bot->net.ip ? bot->net.ip : "",
+             bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", bot->pid);
 }
 
 #ifdef LEAF
@@ -357,22 +358,22 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   }
 #endif /* LEAF */
 
-  bot->ip = NULL;
-  bot->host = NULL;
-  bot->ip6 = NULL;
-  bot->host6 = NULL;
+  bot->net.ip = NULL;
+  bot->net.host = NULL;
+  bot->net.ip6 = NULL;
+  bot->net.host6 = NULL;
 
   if (host && host[0] == '+') {
     host++;
-    bot->host6 = strdup(host);
+    bot->net.host6 = strdup(host);
   } else if (host && strcmp(host, ".")) {
-    bot->host = strdup(host);
+    bot->net.host = strdup(host);
   }
 
-  if (ip && strcmp(ip, "."))
-    bot->ip = strdup(ip);
-  if (ip6 && strcmp(ip6, "."))
-    bot->ip6 = strdup(ip6);
+  if (ip && strcmp(ip, ".") && is_dotted_ip(ip) == AF_INET)
+    bot->net.ip = strdup(ip);
+  if (ip6 && strcmp(ip6, ".") && is_dotted_ip(ip) == AF_INET6)
+    bot->net.ip6 = strdup(ip6);
 
   bot->u = NULL;
   bot->pid = checkpid(nick, bot);
@@ -387,14 +388,14 @@ free_bot(char *botn)
     if (!strcmp(botn, bot->nick)) {
       free(bot->nick);
       free(bot->pid_file);
-      if (bot->ip)
-        free(bot->ip);
-      if (bot->host)
-        free(bot->host);
-      if (bot->ip6)
-        free(bot->ip6);
-      if (bot->host6)
-        free(bot->host6);
+      if (bot->net.ip)
+        free(bot->net.ip);
+      if (bot->net.host)
+        free(bot->net.host);
+      if (bot->net.ip6)
+        free(bot->net.ip6);
+      if (bot->net.host6)
+        free(bot->net.host6);
 
       if (old)
         old->next = bot->next;
@@ -731,8 +732,8 @@ writeconf(char *filename, FILE * stream, int bits)
 #endif /* CYGWIN_HACKS */
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
     my_write(f, "%s %s %s%s %s\n", bot->nick,
-             bot->ip ? bot->ip : ".", bot->host6 ? "+" : "",
-             bot->host ? bot->host : (bot->host6 ? bot->host6 : "."), bot->ip6 ? bot->ip6 : "");
+             bot->net.ip ? bot->net.ip : ".", bot->net.host6 ? "+" : "",
+             bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "."), bot->net.ip6 ? bot->net.ip6 : "");
   }
 
   fflush(f);
@@ -747,10 +748,10 @@ conf_bot_dup(conf_bot * dest, conf_bot * src)
 {
   dest->nick = src->nick ? strdup(src->nick) : NULL;
   dest->pid_file = src->pid_file ? strdup(src->pid_file) : NULL;
-  dest->ip = src->ip ? strdup(src->ip) : NULL;
-  dest->host = src->host ? strdup(src->host) : NULL;
-  dest->ip6 = src->ip6 ? strdup(src->ip6) : NULL;
-  dest->host6 = src->host6 ? strdup(src->host6) : NULL;
+  dest->net.ip = src->net.ip ? strdup(src->net.ip) : NULL;
+  dest->net.host = src->net.host ? strdup(src->net.host) : NULL;
+  dest->net.ip6 = src->net.ip6 ? strdup(src->net.ip6) : NULL;
+  dest->net.host6 = src->net.host6 ? strdup(src->net.host6) : NULL;
   dest->u = src->u ? src->u : NULL;
   dest->pid = src->pid;
 #ifdef LEAF

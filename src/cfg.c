@@ -358,10 +358,10 @@ struct cfg_entry CFG_PROCESSLIST = {
 #ifdef LEAF
 static void servers_changed(struct cfg_entry * entry, int * valid) {
   if (!strcmp(entry->name, "servers")) {
-    if (conf.bot->host6 || conf.bot->ip6) /* we want to use the servers6 entry. */
+    if (conf.bot->net.host6 || conf.bot->net.ip6) /* we want to use the servers6 entry. */
       return;
   } else if (!strcmp(entry->name, "servers6")) {
-    if (!conf.bot->host6 && !conf.bot->ip6) /* we probably want to use the normal server list.. */
+    if (!conf.bot->net.host6 && !conf.bot->net.ip6) /* we probably want to use the normal server list.. */
       return;
   }
 

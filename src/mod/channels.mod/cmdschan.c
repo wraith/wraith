@@ -95,7 +95,7 @@ static void cmd_pls_mask(const char type, int idx, char *par)
 #ifdef LEAF
     egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
 #else
-    egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->host);
+    egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
 #endif /* LEAF */
   if (type == 'b' && s1[0] && wild_match(s, s1)) {
     dprintf(idx, "I'm not going to ban myself.\n");

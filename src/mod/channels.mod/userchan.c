@@ -296,7 +296,7 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
 #ifdef LEAF
     simple_sprintf(s, "%s!%s", botname, botuserhost);
 #else
-    simple_sprintf(s, "%s!%s@%s", origbotname, botuser, conf.bot->host);
+    simple_sprintf(s, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
 #endif /* LEAF */
   if (s[0] && type == 'b' && wild_match(host, s)) {
     putlog(LOG_MISC, "*", IRC_IBANNEDME);

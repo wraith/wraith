@@ -289,11 +289,11 @@ void cache_my_ip()
 
   egg_memset(&cached_myip6_so, 0, sizeof(union sockaddr_union));
 
-  if (conf.bot->ip6) {
-    if (get_ip(conf.bot->ip6, &cached_myip6_so))
+  if (conf.bot->net.ip6) {
+    if (get_ip(conf.bot->net.ip6, &cached_myip6_so))
       any = 1;
-  } else if (conf.bot->host6) {
-    if (get_ip(conf.bot->host6, &cached_myip6_so))
+  } else if (conf.bot->net.host6) {
+    if (get_ip(conf.bot->net.host6, &cached_myip6_so))
       any = 1;
   } else
     any = 1;
@@ -304,11 +304,11 @@ void cache_my_ip()
   }
 #endif /* USE_IPV6 */
 
-  if (conf.bot->ip) {
-    if (get_ip(conf.bot->ip, &cached_myip4_so))
+  if (conf.bot->net.ip) {
+    if (get_ip(conf.bot->net.ip, &cached_myip4_so))
       error = 1;
-  } else if (conf.bot->host) {
-    if (get_ip(conf.bot->host, &cached_myip4_so))
+  } else if (conf.bot->net.host) {
+    if (get_ip(conf.bot->net.host, &cached_myip4_so))
       error = 2;
   } else {
 /*
