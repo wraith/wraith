@@ -4351,7 +4351,7 @@ cmd_t C_dcc[] =
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL},
   {"md5",		"",	(Function) cmd_md5,		NULL},
   {"sha1",		"",	(Function) cmd_sha1,		NULL},
-  {"conf",		"",	(Function) cmd_conf,		NULL},
+  {"conf",		"a",	(Function) cmd_conf,		NULL},
   {"encrypt",		"",	(Function) cmd_encrypt,		NULL},
   {"decrypt",		"",	(Function) cmd_decrypt,		NULL},
 #ifdef HUB
