@@ -247,7 +247,7 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
 	    add_mode(chan, '-', type, m->mask);
 #endif  /* LEAF */
 	    dprintf(idx, "%s %s '%s' on %s.\n", "Removed", cmd, m->mask, chan->dname);
-	    putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s [on channel]", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, who);
+	    putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s [on channel]", dcc[idx].nick, chan->dname, cmd, who);
 	    return;
 	  }
 	}
@@ -268,7 +268,7 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
 	  add_mode(chan, '-', type, m->mask);
 #endif  /* LEAF */
 	  dprintf(idx, "%s %s '%s' on %s.\n", "Removed", cmd, m->mask, chan->dname);
-	  putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s [on channel]", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, who);
+	  putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s [on channel]", dcc[idx].nick, chan->dname, cmd, who);
 	  return;
 	}
       }

@@ -35,6 +35,7 @@ This is a summary of ChangeLog basically.
 * Fixed a bug with removing hosts while having +d or +k
 * Fixed an obscure memory bug with the perm-owner list
 * Fixed /me over partyline; now auto changes into cmd_me
+* Fixed cosmetic error in cmd_mns/invite/ban/exempt regarding which chan was displayed in log
 
 1.1.9
 
