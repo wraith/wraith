@@ -121,10 +121,8 @@ include ./.deps/includes
 .c.o: stringfix
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
 	@./stringfix $< _$< || cp -f $< _$<
-	@source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c _$<  -o `basename $< .c`.o
-#        $(COMPILE) -c `test -f '$<' || echo '$(srcdir)/'`$<
-
 
 #safety hash
 

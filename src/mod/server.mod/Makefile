@@ -18,7 +18,7 @@ static: ../server.o
 
 ../server.o:
 	@echo -e "Compiling: \033[1mserver\033[0m"
-	@source='server.c' object='$@' depfile='.deps/server.Po' tmpdepfile='.deps/server.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	source='server.c' object='$@' depfile='.deps/server.Po' tmpdepfile='.deps/server.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/server.c
 	@rm -f ../server.o
 	@mv server.o ../

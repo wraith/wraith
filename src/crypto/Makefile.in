@@ -37,7 +37,7 @@ include ./.deps/includes
 
 .c.o:
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	@source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) $(CXXFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -c $<
 
 

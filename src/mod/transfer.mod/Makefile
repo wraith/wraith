@@ -18,7 +18,7 @@ static: ../transfer.o
 
 ../transfer.o:
 	@echo -e "Compiling: \033[1mtransfer\033[0m"
-	@source='transfer.c' object='$@' depfile='.deps/transfer.Po' tmpdepfile='.deps/transfer.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	source='transfer.c' object='$@' depfile='.deps/transfer.Po' tmpdepfile='.deps/transfer.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/transfer.c
 	@rm -f ../transfer.o
 	@mv transfer.o ../
