@@ -459,12 +459,16 @@ void show_motd(int idx)
 {
   
   if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
-    char *who, *buf;
+    char *who, *buf, day[50], hour[50];
+    time_t time;
     void *buf_ptr;
     buf = buf_ptr = nmalloc(strlen((char *) CFG_MOTD.gdata) + 1);
     strcpy(buf, (char *) CFG_MOTD.gdata);
     who = newsplit(&buf);
-    dprintf(idx, "Motd set by \002%s\002\n", who);
+    time = atoi(newsplit(&buf));
+    egg_strftime(day, sizeof day, "%A %m/%d/%Y", localtime(&time));
+    egg_strftime(hour, sizeof hour, "%r (%Z)", localtime(&time));
+    dprintf(idx, "Motd set by \002%s\002 on %s at %s\n", who, day, hour);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
     nfree(buf_ptr);
   } else
