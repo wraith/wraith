@@ -16,6 +16,7 @@ This is a summary of ChangeLog basically.
 * Now compiling all x86 binaries as i486 (as opposed to pentium binaries on FreeBSD like before).
 * cmd_conf now correctly writes new data to binary (not tested)
 * Fixed stdin/stdout/stderr not being closed when bot is forked into background.
+* Fixed cmd_dns not displaying results.
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -831,7 +831,6 @@ static void cmd_help(int idx, char *par)
   } else if (!fnd) {
     dprintf(idx, "No match for '%s'.\n", match);
   }
-  dprintf(idx, "Some commands may require you to '%sconsole #chan' to a chan you have flags on first.\n", settings.dcc_prefix);
 }
 
 static void cmd_addlog(int idx, char *par)
@@ -3912,11 +3911,12 @@ static void my_dns_callback(int id, void *client_data, const char *host, char **
 {
   int idx = (int) client_data;
 
+  if (valid_idx(idx))
+    dcc[idx].dns_id = 0;
+
   if (!valid_dns_id(idx, id))
     return;
 
-if (ips)
-sdprintf("CALLBACK WITH IDX: %d and ip[0]: %s (msgc: %d)", idx, ips[0], dcc[idx].msgc);
   if (ips)
     for (int i = 0; ips[i]; i++)
       dprintf(idx, "Resolved %s using (%s) to: %s\n", host, dns_ip, ips[i]);
@@ -3928,6 +3928,11 @@ sdprintf("CALLBACK WITH IDX: %d and ip[0]: %s (msgc: %d)", idx, ips[0], dcc[idx]
 
 static void cmd_dns(int idx, char *par)
 {
+  if (dcc[idx].dns_id) {
+    dprintf(idx, "Currently looking up your previous request.\n");
+    return;
+  }
+
   putlog(LOG_CMDS, "*", "#%s# dns %s", dcc[idx].nick, par);
 
   if (!egg_strcasecmp(par, "flush")) {
@@ -3937,11 +3942,11 @@ static void cmd_dns(int idx, char *par)
   }
   if (is_dotted_ip(par)) {
     dprintf(idx, "Reversing %s ...\n", par);
-    egg_dns_reverse(par, 20, my_dns_callback, (void *) idx);
+    dcc[idx].dns_id = egg_dns_reverse(par, 20, my_dns_callback, (void *) idx);
 
   } else {
     dprintf(idx, "Looking up %s ...\n", par);
-    egg_dns_lookup(par, 20, my_dns_callback, (void *) idx);
+    dcc[idx].dns_id = egg_dns_lookup(par, 20, my_dns_callback, (void *) idx);
   }
 }
 
