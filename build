@@ -46,12 +46,12 @@ case $[(`date '+%s'` % 6)] in
            echo "  ===========  === ===  ===  === ===   ===   ===  ==="
            echo "   ==== ====   ===  === ===  === ===   ===   ===  ===" ;;
 
-	3) echo "                       .__  __  .__"
-           echo '__  _  ______________  |__|/  |_|  |__'
-           echo '\ \/ \/ /\_  __ \__  \ |  \   __\  |  \'
-           echo ' \     /  |  | \// __ \|  ||  | |   Y  \'
-           echo '  \/\_/   |__|  (____  /__||__| |___|  /'
-           echo "                     \/              \/" ;;
+	3) echo "                            .__  __  .__"
+           echo '     __  _  ______________  |__|/  |_|  |__'
+           echo '     \ \/ \/ /\_  __ \__  \ |  \   __\  |  \'
+           echo '      \     /  |  | \// __ \|  ||  | |   Y  \'
+           echo '       \/\_/   |__|  (____  /__||__| |___|  /'
+           echo "                          \/              \/" ;;
 
 	4) echo "     dBPdBPdBP dBBBBBb dBBBBBb     dBP dBBBBBBP dBP dBP"
            echo "                   dBP      BB"
@@ -83,12 +83,13 @@ echo
 
 usage() 
 {
-    echo "Usage: $0 [-d] [-c] [-T] [-t dir] type"
-    echo "	-c	   - Cleans up old binaries/files before compile 	(default: off)"
-    echo "	-d	   - Builds a debug package. 				(default: off)"
-    echo "	-t dir	   - Where to search for TCL libraries. 		(usually not needed)"
-    echo "	-T	   - Builds TCL if it is not on the system		(default: off)"
-    echo "	type	   - One of the following: all, leaf, hub."
+    echo "Usage: $0 [-c] [-d] [-t dir] [-T] [all|hub|leaf]"
+    echo
+    echo "    The options are as follows:"
+    echo "    -c        Cleans up old binaries/files before compile."
+    echo "    -d        Builds a debug package."
+    echo "    -t dir    Where to search for TCL libraries."
+    echo "    -T        Builds TCL if it is not on the system."
 }
 
 debug=0
