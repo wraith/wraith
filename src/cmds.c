@@ -189,33 +189,28 @@ static void tell_who(int idx, int chan)
 
 static void cmd_whom(int idx, char *par)
 {
-  if (par[0] == '*') {
-    putlog(LOG_CMDS, "*", "#%s# whom %s", dcc[idx].nick, par);
+  putlog(LOG_CMDS, "*", "#%s# whom %s", dcc[idx].nick, par);
+
+  if (par[0] == '*' || !par[0]) {
+    putlog(LOG_CMDS, "*", "#%s# whom", dcc[idx].nick, par);
     answer_local_whom(idx, -1);
     return;
-  } else if (dcc[idx].u.chat->channel < 0) {
-    dprintf(idx, "You have chat turned off.\n");
-    return;
   }
-  putlog(LOG_CMDS, "*", "#%s# whom %s", dcc[idx].nick, par);
-  if (!par[0]) {
-    answer_local_whom(idx, dcc[idx].u.chat->channel);
-  } else {
-    int chan = -1;
 
-    if ((par[0] < '0') || (par[0] > '9')) {
-      if (chan <= 0) {
-	dprintf(idx, "No such channel exists.\n");
-	return;
-      }
-    } else
-      chan = atoi(par);
-    if ((chan < 0) || (chan > 99999)) {
-      dprintf(idx, "Channel number out of range: must be between 0 and 99999.\n");
+  int chan = -1;
+
+  if ((par[0] < '0') || (par[0] > '9')) {
+    if (chan <= 0) {
+      dprintf(idx, "No such channel exists.\n");
       return;
     }
-    answer_local_whom(idx, chan);
+  } else
+    chan = atoi(par);
+  if ((chan < 0) || (chan > 99999)) {
+    dprintf(idx, "Channel number out of range: must be between 0 and 99999.\n");
+    return;
   }
+  answer_local_whom(idx, chan);
 }
 
 #ifdef HUB

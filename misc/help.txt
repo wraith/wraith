@@ -1759,7 +1759,8 @@ See also: whom
 See also: match, who, whom%{+m|m}, chattr, chaninfo%{-}
 ::whom
 ###  $bwhom$b [channel|*]
-   Displays a list of users on the current partyline channel.
+   Displays a list of users on the botnet.
+   '*' is assumed if no parameters are given.
  
    For example:
       [23:12] #Wcc# whom
