@@ -37,6 +37,7 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <signal.h>
 #ifdef S_ANTITRACE
 #include <sys/ptrace.h>
 #include <sys/wait.h>
