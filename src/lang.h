@@ -95,7 +95,6 @@
 #define MISC_NOTIFY		STR("notify")
 #define MISC_PERMOWNER		STR("Permanent owner(s)")
 /* was: MISC_ROOTWARN - 0x533 */
-#define MISC_NOCONFIGFILE	STR("CONFIG FILE NOT LOADED (NOT FOUND, OR ERROR)")
 #define MISC_NOUSERFILE		STR("USER FILE NOT FOUND!  (try './eggdrop -m %s' to make one)\n")
 #define MISC_NOUSERFILE2	STR("STARTING BOT IN USERFILE CREATION MODE.\nTelnet to the bot and enter 'NEW' as your nickname.")
 #define MISC_USERFCREATE1	STR("OR go to IRC and type:  /msg %s hello\n")

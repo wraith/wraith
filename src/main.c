@@ -105,7 +105,6 @@ char tempdir[DIRMAX] = "";
 char lock_file[40] = "";
 char *binname;
 int     sdebug = 0;		/* enable debug output? */
-char	configfile[121] = ""; /* Name of the config file */
 char	textdir[121] = "";	/* Directory for text files that get dumped */
 time_t	online_since;		/* Unix-time that the bot loaded up */
 

@@ -25,7 +25,7 @@ extern struct userrec	*userlist;
 extern Tcl_Interp	*interp;
 extern char		 ver[], botnetnick[], firewall[], myip[], origbotname[],
 			 motdfile[], userfile[], tempdir[],
-			 notify_new[], owner[], configfile[],
+			 notify_new[], owner[], 
                          netpass[], botuser[], owners[], hubs[];
 
 extern time_t		 now, online_since;
@@ -591,10 +591,6 @@ void chanprog()
   conmask = 0;
   /* Turn off read-only variables (make them write-able) for rehash */
   protect_readonly = 0;
-  /* Now read it */
-  if (configfile[0])
-    if (!readtclprog(configfile))
-      fatal(MISC_NOCONFIGFILE, 0);
 
 //now this only checks server shit. (no channels)
   call_hook(HOOK_REHASH);
