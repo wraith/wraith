@@ -20,12 +20,11 @@
 #  endif
 #endif
 
-
 /* Use the system libraries version of vsnprintf() if available. Otherwise
  * use our own.
  */
 #ifndef HAVE_VSNPRINTF
-int egg_vsnprintf(char *str, size_t count, const char *fmt, va_list ap) __attribute__((format(printf, 3, 0)));
+int egg_vsnprintf(char *, size_t, const char *, va_list) __attribute__((format(printf, 3, 0)));
 #else
 #  define egg_vsnprintf	vsnprintf
 #endif
@@ -35,7 +34,7 @@ int egg_vsnprintf(char *str, size_t count, const char *fmt, va_list ap) __attrib
  */
 #ifndef HAVE_SNPRINTF
 #  ifdef __STDC__
-int egg_snprintf(char *str, size_t count, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
+int egg_snprintf(char *, size_t, const char *, ...) __attribute__((format(printf, 3, 4)));
 #  else
 int egg_snprintf();
 #  endif
