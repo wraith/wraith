@@ -1646,4 +1646,28 @@ See also: whom
    Masters: if the user has a comment, you will see it under "COMMENT:".%{-}
  
 See also: match, who, whom%{+m|m}, chattr, chaninfo%{-}
+::whom
+###  %bwhom%b [channel|*]
+   Displays a list of users on the current partyline channel.
+ 
+   For example:
+      [23:12] #Wcc# whom
+       Nick        Bot        Host
+      ----------   ---------  --------------------
+      *Wcc         Anakha     telnet@xxx.atlaga.adelphia.net [idle 8m]
+      *BitchSmack  Anakha     telnet@xxx.atlaga.adelphia.net
+      Total users: 2
+ 
+   Each user's nickname will be listed in the first column, preceded by a "*"
+   if they are a bot owner, "+" if they are a master, "%%" if they are a botnet
+   master, or "@" if they are an op. In the next column, the bot the user is
+   connected to will be displayed. In the third column, the host is shown. If
+   the user is away, the away message will be shown. Likewise, if they are
+   idle, their idle time will be displayed.
+ 
+   To see what users are on a different channel, you may specify a channel
+   number/name. If you specify "*" as the channel, all users on all botnet
+   channels will be shown.
+ 
+See also: who, chat%{+m}bots%{-}
 ::end

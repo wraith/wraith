@@ -19,6 +19,7 @@ This is a summary of ChangeLog basically.
 16.Added info in cmd_chaninfo for when a channel was added and by whom.
 17.Log order in cmd_chaninfo was wrong.
 18.cmd_mop didn't check for n| with '*' as a chan.
+19.Added help entry for cmd_whom.
 
 1.0.13
 1.Fixed a fatal bug in console_gotshare()
