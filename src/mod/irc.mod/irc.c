@@ -204,12 +204,14 @@ static void cache_debug(void)
   }
 }
 
-static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *handle, bool op)
+static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *handle, bool op, bool bot)
 {
   cache_t *cache = NULL;
 
   if ((cache = cache_find(nick)) == NULL)
     cache = cache_new(nick);
+
+  cache->bot = bot;
 
   /* if we find they have a host but it doesnt match the new host, wipe it */
   if (host && cache->uhost[0] && egg_strcasecmp(cache->uhost, host))

@@ -1224,7 +1224,7 @@ static void do_invite(int idx, char *par, bool op)
       return;
     }
 
-    cache_invite(chan, nick, NULL, NULL, op);
+    cache_invite(chan, nick, NULL, NULL, op, 0);
     dprintf(idx, "Inviting %s to %s.\n", nick, chan->dname);
     next:;
     if (!all)

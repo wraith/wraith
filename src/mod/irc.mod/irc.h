@@ -39,6 +39,7 @@ typedef struct cache_b {
 //  bool invite;			/* INVITE ON USERHOST */
 //  bool ban;			/* BAN ON USERHOST */
 //  bool invited;			/* INVITED - CLEARED */
+  bool bot;
   char nick[NICKLEN];
   char handle[NICKLEN];
   char uhost[UHOSTLEN];
@@ -48,7 +49,7 @@ static void cache_chan_del(char *, char *);
 //static cache_chan_t *cache_chan_find(cache_t *, char *, char *);
 static void cache_chan_find(cache_t *, cache_chan_t *, char *, char *);
 static cache_chan_t *cache_chan_add(cache_t *, char *);
-static void cache_invite(struct chanset_t *, char *, char *, char *, bool);
+static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool);
 static cache_t *cache_find(char *);
 static cache_t *cache_new(char *);
 static void cache_del(char *, cache_t *);
