@@ -616,7 +616,6 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 
   /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
   if ((is_resolved = is_dotted_ip(server))) {	/* already resolved */
-    sdprintf("IP addr passed to open_telnet");
     initialize_sockaddr(is_resolved, NULL, 0, &so);
 
     if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0)
