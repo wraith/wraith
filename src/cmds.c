@@ -1194,8 +1194,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
   if ((nick [0] == '+' && findchan_by_dname(nick)) ||
       (nick [0] != '+' && strchr(CHANMETA "*", nick[0]))) {
     chan = findchan_by_dname(nick);
-    if ((strcmp(nick, "*") && !chan) ||
-      (channel_private(chan) && !chan_op(fr) && !glob_owner(fr))) {
+    if ((strcmp(nick, "*") && !chan) { 
       dprintf(idx, "Invalid console channel: %s.\n", nick);
       return;
     }
