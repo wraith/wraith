@@ -359,8 +359,10 @@ static void cont_link(int idx, char *buf, int ii)
     getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
     egg_snprintf(tmp, sizeof tmp, "%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
     strncpyz(socklist[snum].ikey, SHA1(tmp), sizeof(socklist[snum].ikey));
+    /*
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "initkey (%d): %s", strlen(socklist[snum].ikey), socklist[snum].ikey);
+    */
     /* We've send our conf.bot->nick and set the key for the link on the sock, wait for 'elink' back to verify key */
     socklist[snum].encstatus = 1;
     socklist[snum].gz = 1;
@@ -386,7 +388,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
   } else if (!egg_strcasecmp(code, "elink")) {
     int snum = -1;
 
-    putlog(LOG_DEBUG, "*", "Got elink: %s %s", code, buf);
+    /* putlog(LOG_DEBUG, "*", "Got elink: %s %s", code, buf); */
     /* Set the socket key and we're linked */
     for (i = 0; i < MAXSOCKS; i++) {
       if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == dcc[idx].sock)) {

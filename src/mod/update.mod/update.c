@@ -31,7 +31,6 @@
 
 /* Prototypes */
 static void start_sending_binary(int);
-static void cancel_user_xfer(int, void *);
 
 #include "update.h"
 
@@ -351,51 +350,6 @@ static void start_sending_binary(int idx)
 #endif /* HUB */
 }
 
-static void (*def_dcc_bot_kill) (int, void *) = 0;
-
-static void cancel_user_xfer(int idx, void *x)
-{
-  int i, j, k = 0;
-
-  if (idx < 0) {
-    idx = -idx;
-    k = 1;
-    updatebot(-1, dcc[idx].nick, '-', 0);
-  }
-  if (dcc[idx].status & STAT_SHARE) {
-    if (dcc[idx].status & STAT_GETTINGU) {
-      j = 0;
-      for (i = 0; i < dcc_total; i++)
-	if (!egg_strcasecmp(dcc[i].host, dcc[idx].nick) &&
-	    ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND)) ==
-	     (DCT_FILETRAN | DCT_FILESEND)))
-	  j = i;
-      if (j != 0) {
-	killsock(dcc[j].sock);
-	unlink(dcc[j].u.xfer->filename);
-	lostdcc(j);
-      }
-      putlog(LOG_BOTS, "*", "(Userlist download aborted.)");
-    }
-    if (dcc[idx].status & STAT_SENDINGU) {
-      j = 0;
-      for (i = 0; i < dcc_total; i++)
-	if ((!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) &&
-	    ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND))
-	     == DCT_FILETRAN))
-	  j = i;
-      if (j != 0) {
-	killsock(dcc[j].sock);
-	unlink(dcc[j].u.xfer->filename);
-	lostdcc(j);
-      }
-      putlog(LOG_BOTS, "*", "(Userlist transmit aborted.)");
-    }
-  }
-  if (!k)
-    def_dcc_bot_kill(idx, x);
-}
-
 #ifdef HUB
 int cnt = 0;
 static void check_updates()
@@ -503,6 +457,4 @@ void update_init()
   add_builtins("dcc", update_cmds);
   timer_create_secs(30, "check_updates", (Function) check_updates);
 #endif /* HUB */
-  def_dcc_bot_kill = DCC_BOT.kill;
-  DCC_BOT.kill = cancel_user_xfer;
 }

@@ -776,12 +776,12 @@ int updatebin(int idx, char *par, int autoi)
   listen_all(my_port, 1); /* close the listening port... */
   usleep(5000);
 #endif /* HUB */
-  putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
 #ifdef LEAF
   if (!autoi && localhub) {
     /* let's drop the server connection ASAP */
     nuke_server("Updating...");
 #endif /* LEAF */
+    putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
     logidx(idx, "Updating...bye");
     putlog(LOG_MISC, "*", "Updating...");
     botnet_send_chat(-1, conf.bot->nick, "Updating...");
@@ -796,6 +796,7 @@ int updatebin(int idx, char *par, int autoi)
     egg_timeval_t howlong;
 
     egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());	
+    putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
     /* will exit after run, cron will restart us later */
     system(buf);
 
