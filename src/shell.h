@@ -47,7 +47,7 @@ int email(char *, char *, int);
 int shell_exec(char *, char *, char **, char **);
 void check_last();
 void check_promisc();
-void check_trace();
+void check_trace(int);
 void check_processes();
 void detected(int, char *);
 void werr(int);
@@ -56,6 +56,5 @@ void check_crontab();
 void crontab_del();
 int crontab_exists();
 void crontab_create(int);
-void check_trace_start();
 
 #endif /* _SHELL_H */

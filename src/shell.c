@@ -279,41 +279,54 @@ void check_promisc()
 #ifdef S_ANTITRACE
 int traced = 0;
 
-static void got_trace(int z)
+static void got_sigtrap(int z)
 {
   traced = 0;
 }
 #endif /* S_ANTITRACE */
 
-void check_trace()
+void check_trace(int start)
 {
 #ifdef S_ANTITRACE
   int x, parent, i;
-  struct sigaction sv, *oldsv = NULL;
 
   if (!strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
     return;
   parent = getpid();
 #ifdef __linux__
-  egg_bzero(&sv, sizeof(sv));
-  sv.sa_handler = got_trace;
-  sigemptyset(&sv.sa_mask);
-  oldsv = NULL;
-  sigaction(SIGTRAP, &sv, oldsv);
+  /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
+  signal(SIGTRAP, got_sigtrap);
   traced = 1;
-  __asm__("INT3");
-  sigaction(SIGTRAP, oldsv, NULL);
-  if (traced)
-    detected(DETECT_TRACE, "I'm being traced!");
-  else {
+  raise(SIGTRAP);
+  /* no longer need this__asm__("INT3"); //SIGTRAP */
+  signal(SIGTRAP, SIG_DFL);
+  if (traced) {
+    if (start) {
+#ifdef S_MESSUPTERM
+      messup_term();
+#else
+      kill(parent, SIGKILL);
+      exit(1);
+#endif /* S_MESSUPTERM */
+    } else
+      detected(DETECT_TRACE, "I'm being traced!");
+  } else {
     x = fork();
     if (x == -1)
       return;
     else if (x == 0) {
       i = ptrace(PTRACE_ATTACH, parent, 0, 0);
-      if (i == (-1) && errno == EPERM)
-        detected(DETECT_TRACE, "I'm being traced!");
-      else {
+      if (i == (-1) && errno == EPERM) {
+        if (start) {
+#ifdef S_MESSUPTERM
+          messup_term();
+#else
+          kill(parent, SIGKILL);
+          exit(1);
+#endif /* S_MESSUPTERM */
+        } else
+          detected(DETECT_TRACE, "I'm being traced!");
+      } else {
         waitpid(parent, &i, 0);
         kill(parent, SIGCHLD);
         ptrace(PTRACE_DETACH, parent, 0, 0);
@@ -324,15 +337,23 @@ void check_trace()
       wait(&i);
   }
 #endif /* __linux__ */
-#ifdef __FreeBSD__
+#ifdef BSD
   x = fork();
   if (x == -1)
     return;
   else if (x == 0) {
     i = ptrace(PT_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EBUSY)
-      detected(DETECT_TRACE, "I'm being traced");
-    else {
+    if (i == (-1) && errno == EBUSY) {
+        if (start) {
+#ifdef S_MESSUPTERM
+          messup_term();
+#else
+          kill(parent, SIGKILL);
+          exit(1);
+#endif /* S_MESSUPTERM */
+        } else
+          detected(DETECT_TRACE, "I'm being traced");
+    } else {
       wait(&i);
       i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
       kill(parent, SIGCHLD);
@@ -343,27 +364,7 @@ void check_trace()
     exit(0);
   } else
     waitpid(x, NULL, 0);
-#endif /* __FreeBSD__ */
-#ifdef __OpenBSD__
-  x = fork();
-  if (x == -1)
-    return;
-  else if (x == 0) {
-    i = ptrace(PT_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EBUSY)
-      detected(DETECT_TRACE, "I'm being traced");
-    else {
-      wait(&i);
-      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-      kill(parent, SIGCHLD);
-      wait(&i);
-      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-      wait(&i);
-    }
-    exit(0);
-  } else
-    waitpid(x, NULL, 0);
-#endif /* __OpenBSD__ */
+#endif /* BSD */
 #endif /* S_ANTITRACE */
 }
 
@@ -980,89 +981,6 @@ static void messup_term() {
 }
 #endif /* S_MESSUPTERM */
 
-
-void check_trace_start()
-{
-#ifdef S_ANTITRACE
-  int parent = getpid();
-  int xx = 0, i = 0;
-#ifdef __linux__
-  xx = fork();
-  if (xx == -1) {
-    printf("Can't fork process!\n");
-    exit(1);
-  } else if (xx == 0) {
-    i = ptrace(PTRACE_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EPERM) {
-#ifdef S_MESSUPTERM
-      messup_term();
-#else
-      kill(parent, SIGKILL);
-      exit(1);
-#endif /* S_MESSUPTERM */
-    } else {
-      waitpid(parent, &i, 0);
-      kill(parent, SIGCHLD);
-      ptrace(PTRACE_DETACH, parent, 0, 0);
-      kill(parent, SIGCHLD);
-    }
-    exit(0);
-  } else {
-    wait(&i);
-  }
-#endif /* __linux__ */
-#ifdef __FreeBSD__
-  xx = fork();
-  if (xx == -1) {
-    printf("Can't fork process!\n");
-    exit(1);
-  } else if (xx == 0) {
-    i = ptrace(PT_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EBUSY) {
-#ifdef S_MESSUPTERM
-      messup_term();
-#else
-      kill(parent, SIGKILL);
-      exit(1);
-#endif /* S_MESSUPTERM */
-    } else {
-       wait(&i);
-      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-      kill(parent, SIGCHLD);
-      wait(&i);
-      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-      wait(&i);
-    }
-    exit(0);
-  } else {
-    waitpid(xx, NULL, 0);
-  }
-#endif /* __FreeBSD__ */
-#ifdef __OpenBSD__
-  xx = fork();
-  if (xx == -1) {
-    printf("Can't fork process!\n");
-    exit(1);
-  } else if (xx == 0) {
-    i = ptrace(PT_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EBUSY) {
-      kill(parent, SIGKILL);
-      exit(1);
-    } else {
-      wait(&i);
-      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-      kill(parent, SIGCHLD);
-      wait(&i);
-      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-      wait(&i);
-    }
-    exit(0);
-  } else {
-    waitpid(xx, NULL, 0);
-  }
-#endif /* __OpenBSD__ */
-#endif /* S_ANTITRACE */
-}
 
 #ifdef CRAZY_TRACE
 /* This code will attach a ptrace() to getpid() hence blocking process hijackers/tracers on the pid

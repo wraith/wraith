@@ -40,7 +40,7 @@ static int		parties = 0;			/* Number of people on the botnet */
 static int		share_unlinks = 1;		/* Allow remote unlinks of my
 							   sharebots? */
 
-void init_bots()
+void init_party()
 {
   party = (party_t *) calloc(1, maxparty * sizeof(party_t));
 }

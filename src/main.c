@@ -373,7 +373,7 @@ void core_10secondly()
   check_promisc();
 
   if (curcheck == 1)
-    check_trace();
+    check_trace(0);
 
 #ifdef LEAF
   if (localhub) {
@@ -648,7 +648,7 @@ static void startup_checks() {
 #endif /* LEAF */
 }
 
-int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
+int init_dcc_max(), init_userent(), init_auth(), init_config(), init_party(),
  init_net(), init_botcmd();
 
 static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
@@ -736,7 +736,7 @@ int main(int argc, char **argv)
   core_binds_init();
   init_dcc_max();
   init_userent();
-  init_bots();
+  init_party();
   init_net();
   init_auth();
   init_config();
@@ -749,7 +749,7 @@ int main(int argc, char **argv)
   }
 
   if (checktrace)
-    check_trace_start();
+    check_trace(1);
 
   startup_checks();
 
