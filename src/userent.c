@@ -522,14 +522,14 @@ int config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
     struct cfg_entry *cfgent = NULL;
     int i;
 
-    cfg_noshare++;
+    cfg_noshare = 1;
     for (i = 0; !cfgent && (i < cfg_count); i++)
       if (!strcmp(arg, cfg[i]->name) && (cfg[i]->flags & CFGF_LOCAL))
 	cfgent = cfg[i];
     if (cfgent) {
       set_cfg_str(botnetnick, cfgent->name, buf[0] ? buf : NULL);
     }
-    cfg_noshare--;
+    cfg_noshare = 0;
     return 1;
   }
 
