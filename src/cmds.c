@@ -1942,7 +1942,7 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
       if (!what || !egg_strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conffile.binname);
       if (!what || !egg_strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conffile.portmin);
       if (!what || !egg_strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conffile.portmax);
-      if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spsclaok: %d\n", ss, conffile.pscloak);
+      if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spscloak: %d\n", ss, conffile.pscloak);
       if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conffile.autocron);
       if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conffile.autouname);
     }
