@@ -263,9 +263,9 @@ dprintf(int idx, const char *format, ...)
       strcat(buf, "\n");
       len = 1001;
     }
-    if (dcc[idx].simul > 0 && !dcc[idx].msgc) {
+    if (dcc[idx].simul > 0 && !dcc[idx].irc) {
       bounce_simul(idx, buf);
-    } else if (dcc[idx].msgc > 0) {
+    } else if (dcc[idx].irc) {
 //      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
 //      char *ircbuf = (char *) my_calloc(1, size);
 
