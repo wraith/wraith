@@ -19,7 +19,7 @@ DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build config
 EXCLUDES = pack/salt.h pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
            config.cache config.log config.status config.h lush.h stamp.* misc/.cvsignore src/compat/.cvsignore \
            src/mod/dns.mod/.cvsignore src/mod/.cvsignore src/.cvsignore .cvsignore misc/commit misc/fstrings \
-           misc/plainh
+           misc/plainh misc/grep
 
 # defaults
 CC = @CC@

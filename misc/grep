@@ -1,0 +1,3 @@
+#!/bin/sh
+grep=`which grep`
+grep "$@" | grep -v "^Binary" | grep -v "src/_"
