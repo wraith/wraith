@@ -155,6 +155,10 @@ struct dupwait_info {
 #define STAT_USRONLY BIT6    /* telnet on users-only connect         */
 #define STAT_PAGE    BIT7    /* page output to the user              */
 #define STAT_COLOR   BIT8    /* Color enabled for user */
+#define STAT_BANNER  BIT9    /* show banner on login? */
+#define STAT_CHANNELS BIT10  /* show channels on login? */
+#define STAT_BOTS    BIT11   /* Show bots linked on login? */
+#define STAT_WHOM    BIT12   /* show .whom on login? */
 
 /* For stripping out mIRC codes
  */

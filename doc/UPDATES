@@ -13,6 +13,7 @@ This is a summary of ChangeLog basically.
 9.Removed cmd_vbottree (cmd_bottree now shows the information).
 10.Fixed msgc_voice, was checking for +v instead of +q.
 11.Fixed cmd_botcmd not matching '?' correctly again!
+12.Added console settings for what to show on login: banner, channels, bots, whom.
 
 1.1.5
 
