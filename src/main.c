@@ -378,8 +378,8 @@ static void dtx_arg(int argc, char *argv[])
         break;
       }
       case 'P':
-        if (atoi(optarg) && (atoi(optarg) != localhub_pid))
-          exit(2);
+        if (atoi(optarg) && localhub_pid && (atoi(optarg) != localhub_pid))
+          exit(3);
         else
           sdprintf("Updating...");
         localhub = 1;
@@ -644,7 +644,7 @@ static void startup_checks(int hack) {
 #endif /* LEAF */
       /* this needs to be both hub/leaf */
       if (update_bin)	{			/* invoked with -u bin */
-        if (updating != 2) {
+        if (updating != 2 && conf.bot->pid) {
           kill(conf.bot->pid, SIGKILL);
           unlink(conf.bot->pid_file);
           writepid(conf.bot->pid_file, getpid());
