@@ -521,6 +521,24 @@ void checkpass()
 void got_ed(char *, char *, char *);
 extern int optind;
 
+void gen_conf(char *filename)
+{
+  FILE *fp;
+
+  if (is_file(filename) || is_dir(filename))
+    fatal("File already exists..", 0);
+  
+  fp = fopen(filename, "w+");
+  fprintf(fp, "#Template config file, not too hard to memorize!\n#Do not put the '//comments' into the actual config..\n");
+  fprintf(fp, "- uid //obtained by running 'id'\n");
+  fprintf(fp, "+ uname //obtained by running 'uname -nr' (freebsd) or 'uname -nv' (linux)\n");
+  fprintf(fp, "botname ip4 +host ip6 //use + for ipv6 hostname, ip/host can be replaced with '.' if needed\n");
+  fflush(fp);
+  fclose(fp);
+  printf("Template config created as '%s'\n", filename);
+  exit(0);
+}
+
 void show_help()
 {
   char format[81];
@@ -534,6 +552,7 @@ void show_help()
   printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
   printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
   printf(format, STR("-E [#/all]"), STR("Display Error codes english translation (use 'all' to display all)"));
+  printf(format, STR("-g <file>"), STR("Generates a template config file"));
   printf(format, STR("-h"), STR("Display this help listing"));
 /*   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
@@ -544,12 +563,12 @@ void show_help()
 
 
 #ifdef LEAF
-#define PARSE_FLAGS "cedhntvPDE"
+#define PARSE_FLAGS "cedghntvPDE"
 #endif /* LEAF */
 #ifdef HUB
-#define PARSE_FLAGS "edhntvDE"
+#define PARSE_FLAGS "edghntvDE"
 #endif /* HUB */
-#define FLAGS_CHECKPASS "edhntDEv"
+#define FLAGS_CHECKPASS "edhgntDEv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i;
@@ -568,6 +587,13 @@ static void dtx_arg(int argc, char *argv[])
 #endif /* LEAF */
       case 'h':
         show_help();
+        break; /* never reached */
+      case 'g':
+        p = argv[optind];
+        if (p)
+          gen_conf(p);
+        else
+          fatal("You must specify a filename after -g", 0);
         break; /* never reached */
       case 'k':
         p = argv[optind];
