@@ -226,7 +226,7 @@ struct chanset_t {
 #define CHAN_SECRET         0x0200	   /* don't advertise channel on botnet  */
 #define CHAN_MANOP          0x0400         /* manual opping allowed? */
 #define CHAN_CYCLE          0x0800	   /* cycle the channel if possible      */
-#define CHAN_DONTKICKOPS    0x1000	   /* never kick +o flag people -arthur2 */
+//#define CHAN_    0x1000	   /* unused*/
 #define CHAN_INACTIVE       0x2000	   /* no irc support for this channel
                                          - drummer                           */
 //#define CHAN_               0x4000	   /* unused */
@@ -276,7 +276,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_nouserbans(chan) (chan->status & CHAN_NOUSERBANS)
 #define channel_protectops(chan) (chan->status & CHAN_PROTECTOPS)
 #define channel_autovoice(chan) (0)
-#define channel_dontkickops(chan) (chan->status & CHAN_DONTKICKOPS)
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
 #define channel_shared(chan) (1)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)

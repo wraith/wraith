@@ -781,10 +781,6 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
   }
   /* Kick the offender */
   if ((chan->revenge_mode > 1) &&
-      /* ... or don't we kick ops? */
-      (!channel_dontkickops(chan) ||
-        !(chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))) &&
-      /* ... or have we sent the kick already? */
       !chan_sentkick(m) &&
       /* ... and can I actually do anything about it? */
       me_op(chan) && !mevictim) {

@@ -1584,7 +1584,6 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     MSET("bitch",		channel_bitch(chan));
     MSET("closed",		channel_closed(chan));
     MSET("cycle",		channel_cycle(chan));
-    MSET("dontkickops",		channel_dontkickops(chan));
     MSET("enforcebans", 	channel_enforcebans(chan));
     MSET("fastop",		channel_fastop(chan));
     MSET("inactive",		channel_inactive(chan));

@@ -1477,9 +1477,7 @@ static int gotmode(char *from, char *msg)
       m = ismember(chan, nick);
       if (m)
 	m->last = now;
-      if (channel_active(chan) && m && me_op(chan) &&
-	  !((channel_dontkickops(chan) && (chan_op(user) || (glob_op(user) &&
-	  !chan_deop(user)))))) {
+      if (channel_active(chan) && m && me_op(chan)) {
 	if (chan_fakeop(m)) {
 	  putlog(LOG_MODES, ch, CHAN_FAKEMODE, ch);
 	  dprintf(DP_MODE, "KICK %s %s :%s%s\n", ch, nick, kickprefix, 

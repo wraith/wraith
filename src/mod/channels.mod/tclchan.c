@@ -68,10 +68,6 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement(irp, "+protectops");
   else
     Tcl_AppendElement(irp, "-protectops");
-  if (chan->status & CHAN_DONTKICKOPS)
-    Tcl_AppendElement(irp, "+dontkickops");
-  else
-    Tcl_AppendElement(irp, "-dontkickops");
   if (chan->status & CHAN_INACTIVE)
     Tcl_AppendElement(irp, "+inactive");
   else
@@ -213,7 +209,6 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
   else if CHKFLAG_NEG(CHAN_NOUSERBANS,     "userbans",       chan->status)
   else if CHKFLAG_POS(CHAN_BITCH,          "bitch",          chan->status)
   else if CHKFLAG_POS(CHAN_PROTECTOPS,     "protectops",     chan->status)
-  else if CHKFLAG_POS(CHAN_DONTKICKOPS,    "dontkickops",    chan->status)
   else if CHKFLAG_POS(CHAN_INACTIVE,       "inactive",       chan->status)
   else if CHKFLAG_POS(CHAN_REVENGE,        "revenge",        chan->status)
   else if CHKFLAG_POS(CHAN_REVENGEBOT,     "revengebot",     chan->status)
@@ -471,10 +466,6 @@ Context;
       chan->status |= CHAN_PROTECTOPS;
     else if (!strcmp(item[i], "-protectops"))
       chan->status &= ~CHAN_PROTECTOPS;
-    else if (!strcmp(item[i], "+dontkickops"))
-      chan->status |= CHAN_DONTKICKOPS;
-    else if (!strcmp(item[i], "-dontkickops"))
-      chan->status &= ~CHAN_DONTKICKOPS;
     else if (!strcmp(item[i], "+inactive"))
       chan->status |= CHAN_INACTIVE;
     else if (!strcmp(item[i], "-inactive"))
@@ -543,7 +534,7 @@ Context;
       chan->status |= CHAN_FASTOP;
     }
     else if (!strcmp(item[i], "-fastop"))
-      chan->status &= ~(CHAN_FASTOP | CHAN_PROTECTOPS | CHAN_DONTKICKOPS);
+      chan->status &= ~(CHAN_FASTOP | CHAN_PROTECTOPS);
     else if (!strcmp(item[i], "+private")) {
       chan->status |= CHAN_PRIVATE;
     }
@@ -552,10 +543,10 @@ Context;
 
     /* ignore wasoptest, stopnethack and clearbans in chanfile, remove
        this later */
+    else if (!strcmp(item[i], "+dontkickops")) ;
+    else if (!strcmp(item[i], "-dontkickops")) ;
     else if (!strcmp(item[i], "+nomdop"))  ;
     else if (!strcmp(item[i], "-nomdop"))  ;
-    else if (!strcmp(item[i], "+nomop"))  ;
-    else if (!strcmp(item[i], "-nomop"))  ;
     else if (!strcmp(item[i], "+protectfriends"))  ;
     else if (!strcmp(item[i], "-protectfriends"))  ;
     else if (!strcmp(item[i], "+punish"))  ;

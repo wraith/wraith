@@ -1328,7 +1328,7 @@ flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
 ban-time %d exempt-time %d invite-time %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
-%cprotectops %cdontkickops %crevenge %crevengebot \
+%cprotectops %crevenge %crevengebot \
 %cprivate %ccycle %cinactive %cdynamicexempts \
 %cuserexempts %cdynamicinvites %cuserinvites \
 %cnodesynch %cclosed %ctake %cmanop %cvoice \
@@ -1365,7 +1365,6 @@ ban-time %d exempt-time %d invite-time %d \
 	PLSMNS(!channel_nouserbans(chan)),
 	PLSMNS(channel_bitch(chan)),
 	PLSMNS(channel_protectops(chan)),
-	PLSMNS(channel_dontkickops(chan)),
 	PLSMNS(channel_revenge(chan)),
 	PLSMNS(channel_revengebot(chan)),
 	PLSMNS(channel_private(chan)),
