@@ -67,30 +67,6 @@ char *strtolower(char *s)
   return p2;
 }
 
-/* HAH
-char *underscoredots(char *s) // amazingly silly function...
-{
-  int size = strlen(s) + 1;
-  char *p, *p2;
-
-Context;
-  p = nmalloc(size);
-  p2 = nmalloc(size);
-  strcpy(p, s);
-  while (p && *p) {
-    if (!strncmp(p, ".", 1)) {
-      size += 2;
-Context;
-      p2 = nrealloc(p2, size);
-      strcat(p2, STR("\037.\037"));
-    } else
-      strncat(p2, p, 1);
-    p++;
-  }
-  return p2;
-}
-*/
-
 void scriptchanged()
 {
   char tmp[200],
@@ -284,28 +260,25 @@ void scriptchanged()
       sprintf(ctcpversion, STR("%s\002/\002%s: BitchX-%s \002[\002cypress\002]\002 v01i%s"), cloak_os, cloak_osver, cloak_bxver, theme);
       break;
     case 5:
-//      p = underscoredots(cloak_osver);
-//      sprintf(tmp, STR("%s %s"), cloak_os, p);
-//      nfree(p);
-      sprintf(tmp, STR("%s"), cloak_os);
+      p = replace(cloak_osver, ".", "\037.\037");
+      sprintf(tmp, STR("%s %s"), cloak_os, p);
+      nfree(p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("\037.\037.cypress\037.\03701i%s %s\037(\037%s\037)\037 bitchx\037/\037%s"),theme, p, cloak_host, cloak_bxver);
       nfree(p);
       break;
     case 6:
-//      p = underscoredots(cloak_osver);
-//      sprintf(tmp, STR("%s %s"), cloak_os, p);
-//      nfree(p);
-      sprintf(tmp, STR("%s"), cloak_os);
+      p = replace(cloak_osver, ".", "\037.\037");
+      sprintf(tmp, STR("%s %s"), cloak_os, p);
+      nfree(p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("cypress\002.\00201i%s\037(\037bitchx\002.\002%s\037)\037\002.\002. %s\037(\037%s\037)\037"),theme, cloak_bxver, p, cloak_host);
       nfree(p);
       break;
     case 7:
-//      p = underscoredots(cloak_osver);
-//      sprintf(tmp, STR("%s %s"), cloak_os, p);
-//      nfree(p);
-      sprintf(tmp, STR("%s"), cloak_os);
+      p = replace(cloak_osver, ".", "\037.\037");
+      sprintf(tmp, STR("%s %s"), cloak_os, p);
+      nfree(p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("\037.\037.cypress\037.\03701i%s - bitchx\037.\037%s\002/\002%s"), theme, cloak_bxver, p);
       nfree(p);

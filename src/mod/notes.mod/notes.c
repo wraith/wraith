@@ -184,124 +184,6 @@ static void expire_notes()
     putlog(LOG_MISC, "*", NOTES_EXPIRED, tot, tot == 1 ? "" : "s");
 }
 
-/* Add note to notefile.
- */
-static int tcl_storenote STDVAR
-{
-  FILE *f;
-  int idx;
-  char u[20], *f1, *to = NULL, work[1024];
-  struct userrec *ur;
-  struct userrec *ur2;
-
-  BADARGS(5, 5, " from to msg idx");
-  idx = findanyidx(atoi(argv[4]));
-  ur = get_user_by_handle(userlist, argv[2]);
-  if (ur && allow_fwd && (f1 = get_user(&USERENTRY_FWD, ur))) {
-    char fwd[161], fwd2[161], *f2, *p, *q, *r;
-    int ok = 1;
-    /* User is valid & has a valid forwarding address */
-     strcpy(fwd, f1);		/* Only 40 bytes are stored in the userfile */
-     p = strchr(fwd, '@');
-    if (p && !egg_strcasecmp(p + 1, botnetnick)) {
-      *p = 0;
-      if (!egg_strcasecmp(fwd, argv[2]))
-	/* They're forwarding to themselves on the same bot, llama's */
-	ok = 0;
-      strcpy(fwd2, fwd);
-      splitc(fwd2, fwd2, '@');
-      /* Get the user record of the user that we're forwarding to locally */
-      ur2 = get_user_by_handle(userlist, fwd2);
-      if (!ur2)
-	ok = 0;
-      if ((f2 = get_user(&USERENTRY_FWD, ur2))) {
-	strcpy(fwd2, f2);
-	splitc(fwd2, fwd2, '@');
-	if (!egg_strcasecmp(fwd2, argv[2]))
-	/* They're forwarding to someone who forwards back to them! */
-	ok = 0;
-      }
-      p = NULL;
-    }
-    if ((argv[1][0] != '@') && ((argv[3][0] == '<') || (argv[3][0] == '>')))
-       ok = 0;			/* Probablly fake pre 1.3 hax0r */
-
-    if (ok && (!p || in_chain(p + 1))) {
-      if (p)
-	p++;
-      q = argv[3];
-      while (ok && q && (q = strchr(q, '<'))) {
-	q++;
-	if ((r = strchr(q, ' '))) {
-	  *r = 0;
-	  if (!egg_strcasecmp(fwd, q))
-	    ok = 0;
-	  *r = ' ';
-	}
-      }
-      if (ok) {
-	if (p && strchr(argv[1], '@')) {
-	  simple_sprintf(work, "<%s@%s >%s %s", argv[2], botnetnick,
-			 argv[1], argv[3]);
-	  simple_sprintf(u, "@%s", botnetnick);
-	  p = u;
-	} else {
-	  simple_sprintf(work, "<%s@%s %s", argv[2], botnetnick,
-			 argv[3]);
-	  p = argv[1];
-	}
-      }
-    } else
-      ok = 0;
-    if (ok) {
-      if ((add_note(fwd, p, work, idx, 0) == NOTE_OK) && (idx >= 0))
-	dprintf(idx, NOTES_FORWARD_NOTONLINE, f1);
-      Tcl_AppendResult(irp, f1, NULL);
-      to = NULL;
-    } else {
-      strcpy(work, argv[3]);
-      to = argv[2];
-    }
-  } else
-    to = argv[2];
-  if (to) {
-    if (notefile[0] == 0) {
-      if (idx >= 0)
-	dprintf(idx, "%s\n", NOTES_UNSUPPORTED);
-    } else if (num_notes(to) >= maxnotes) {
-      if (idx >= 0)
-	dprintf(idx, "%s\n", NOTES_NOTES2MANY);
-    } else {			/* Time to unpack it meaningfully */
-      f = fopen(notefile, "a");
-      if (f == NULL)
-	f = fopen(notefile, "w");
-      if (f == NULL) {
-	if (idx >= 0)
-	  dprintf(idx, "%s\n", NOTES_NOTEFILE_FAILED);
-	putlog(LOG_MISC, "*", "%s", NOTES_NOTEFILE_UNREACHABLE);
-      } else {
-	char *p, *blah = argv[3], *from = argv[1];
-	int l = 0;
-
-	chmod(notefile, userfile_perm);	/* Use userfile permissions. */
-	while ((blah[0] == '<') || (blah[0] == '>')) {
-	  p = newsplit(&blah);
-	  if (*p == '<')
-	    l += simple_sprintf(work + l, "via %s, ", p + 1);
-	  else if (argv[1][0] == '@')
-	    from = p + 1;
-	}
-	fprintf(f, "%s %s %lu %s%s\n", to, from, now,
-		l ? work : "", blah);
-	fclose(f);
-	if (idx >= 0)
-	  dprintf(idx, "%s.\n", NOTES_STORED_MESSAGE);
-      }
-    }
-  }
-  return TCL_OK;
-}
-
 /* Convert a string like "2-4;8;16-"
  * in an array {2, 4, 8, 8, 16, maxnotes, -1}
  */
@@ -348,92 +230,6 @@ static int notes_in(int dl[], int in)
     i += 2;
   }
   return 0;
-}
-
-static int tcl_erasenotes STDVAR
-{
-  FILE *f, *g;
-  char s[601], *to, *s1;
-  int read, erased;
-  int nl[128];			/* Is it enough ? */
-
-  BADARGS(3, 3, " handle noteslist#");
-  if (!get_user_by_handle(userlist, argv[1])) {
-    Tcl_AppendResult(irp, "-1", NULL);
-    return TCL_OK;
-  }
-  if (!notefile[0]) {
-    Tcl_AppendResult(irp, "-2", NULL);
-    return TCL_OK;
-  }
-  f = fopen(notefile, "r");
-  if (f == NULL) {
-    Tcl_AppendResult(irp, "-2", NULL);
-    return TCL_OK;
-  }
-  sprintf(s, "%s~new", notefile);
-  g = fopen(s, "w");
-  if (g == NULL) {
-    fclose(f);
-    Tcl_AppendResult(irp, "-2", NULL);
-    return TCL_OK;
-  }
-  chmod(s, userfile_perm);	/* Use userfile permissions. */
-  read = 0;
-  erased = 0;
-  notes_parse(nl, (argv[2][0] == 0) ? "-" : argv[2]);
-  while (!feof(f)) {
-    fgets(s, 600, f);
-    if (s[strlen(s) - 1] == '\n')
-      s[strlen(s) - 1] = 0;
-    if (!feof(f)) {
-      rmspace(s);
-      if ((s[0]) && (s[0] != '#') && (s[0] != ';')) {	/* Not comment */
-	s1 = s;
-	to = newsplit(&s1);
-	if (!egg_strcasecmp(to, argv[1])) {
-	  read++;
-	  if (!notes_in(nl, read)) {
-	    fprintf(g, "%s %s\n", to, s1);
-	  } else {
-	    erased++;
-	  }
-	} else {
-	  fprintf(g, "%s %s\n", to, s1);
-	}
-      }
-    }
-  }
-  sprintf(s, "%d", erased);
-  Tcl_AppendResult(irp, s, NULL);
-  fclose(f);
-  fclose(g);
-  unlink(notefile);
-  sprintf(s, "%s~new", notefile);
-  movefile(s, notefile);
-  return TCL_OK;
-}
-
-static int tcl_listnotes STDVAR
-{
-  int i, numnotes;
-  int ln[128];			/* Is it enough? */
-  char s[8];
-
-  BADARGS(3, 3, " handle noteslist#");
-  if (!get_user_by_handle(userlist, argv[1])) {
-    Tcl_AppendResult(irp, "-1", NULL);
-    return TCL_OK;
-  }
-  numnotes = num_notes(argv[1]);
-  notes_parse(ln, argv[2]);
-  for (i = 1; i <= numnotes; i++) {
-    if (notes_in(ln, i)) {
-      sprintf(s, "%d", i);
-      Tcl_AppendElement(irp, s);
-    }
-  }
-  return TCL_OK;
 }
 
 /*
@@ -639,73 +435,6 @@ static void notes_del(char *hand, char *nick, char *sdl, int idx)
     }
   }
 }
-
-static int tcl_notes STDVAR
-{
-  FILE *f;
-  char s[601], *to, *from, *dt, *s1;
-  int count, read, nl[128];	/* Is it enough? */
-  char *p;
-#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-  CONST char *list[3];
-#else
-  char *list[3];
-#endif
-
-  BADARGS(2, 3, " handle ?noteslist#?");
-  if (!get_user_by_handle(userlist, argv[1])) {
-    Tcl_AppendResult(irp, "-1", NULL);
-    return TCL_OK;
-  }
-  if (argc == 2) {
-    sprintf(s, "%d", num_notes(argv[1]));
-    Tcl_AppendResult(irp, s, NULL);
-    return TCL_OK;
-  }
-  if (!notefile[0]) {
-    Tcl_AppendResult(irp, "-2", NULL);
-    return TCL_OK;
-  }
-  f = fopen(notefile, "r");
-  if (f == NULL) {
-    Tcl_AppendResult(irp, "-2", NULL);
-    return TCL_OK;
-  }
-  count = 0;
-  read = 0;
-  notes_parse(nl, (argv[2][0] == 0) ? "-" : argv[2]);
-  while (!feof(f)) {
-    fgets(s, 600, f);
-    if (s[strlen(s) - 1] == '\n')
-      s[strlen(s) - 1] = 0;
-    if (!feof(f)) {
-      rmspace(s);
-      if ((s[0]) && (s[0] != '#') && (s[0] != ';')) {	/* Not comment */
-	s1 = s;
-	to = newsplit(&s1);
-	if (!egg_strcasecmp(to, argv[1])) {
-	  read++;
-	  if (notes_in(nl, read)) {
-	    count++;
-	    from = newsplit(&s1);
-	    dt = newsplit(&s1);
-	    list[0] = from;
-	    list[1] = dt;
-	    list[2] = s1;
-	    p = Tcl_Merge(3, list);
-	    Tcl_AppendElement(irp, p);
-	    Tcl_Free((char *) p);
-	  }
-	}
-      }
-    }
-  }
-  if (count == 0)
-    Tcl_AppendResult(irp, "0", NULL);
-  fclose(f);
-  return TCL_OK;
-}
-
 
 /* notes <pass> <func>
  */
@@ -1115,15 +844,6 @@ static tcl_strings notes_strings[] =
   {NULL,		NULL,			0,	0}
 };
 
-static tcl_cmds notes_tcls[] =
-{
-  {"notes",		tcl_notes},
-  {"erasenotes",	tcl_erasenotes},
-  {"listnotes",		tcl_listnotes},
-  {"storenote",		tcl_storenote},
-  {NULL,		NULL}
-};
-
 static int notes_irc_setup(char *mod)
 {
   p_tcl_bind_list H_temp;
@@ -1186,7 +906,6 @@ char *notes_start(Function * global_funcs)
   add_hook(HOOK_MATCH_NOTEREJ, (Function) match_note_ignore);
   add_tcl_ints(notes_ints);
   add_tcl_strings(notes_strings);
-  add_tcl_commands(notes_tcls);
   add_builtins_dcc(H_dcc, notes_cmds);
   add_builtins(H_chon, notes_chon);
   add_builtins(H_away, notes_away);

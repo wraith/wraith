@@ -505,15 +505,11 @@ static Function update_table[] =
   (Function) update_report,
   /* 4 - 7 */
   (Function) finish_update,
-  (Function) 0,
-  (Function) 0,
-#ifdef LEAF
-  (Function) 0
-#else
-  (Function) 0,
+#ifdef HUB
   (Function) & bupdating
-#endif
-  /* 8 - 11 */
+#else
+  (Function) 0
+#endif /* HUB */
 };
 
 char *update_start(Function *global_funcs)
@@ -541,8 +537,6 @@ char *update_start(Function *global_funcs)
   add_hook(HOOK_SHAREUPDATEIN, (Function) updatein_mod);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
-  //uff_init();
-  //uff_addtable(internal_uff_table);
   return NULL;
 }
 

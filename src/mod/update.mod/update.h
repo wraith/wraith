@@ -33,12 +33,8 @@ typedef struct {
 #ifndef MAKING_update
 /* 4 - 7 */
 #define finish_update ((void (*) (int))update_funcs[4])
-//#define dump_resync ((void (*) (int))update_funcs[5])
-//#define uff_addtable ((void (*) (uff_table_t *))update_funcs[6])
-//#define uff_deltable ((void (*) (uff_table_t *))update_funcs[7])
-/* 8 - 11 */
 #ifdef HUB
-#define bupdating (*(int*)update_funcs[8])
+#define bupdating (*(int*)update_funcs[5])
 #endif /* HUB */
 #endif				/* !MAKING_update */
 

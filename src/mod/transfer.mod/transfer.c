@@ -528,122 +528,6 @@ static void fileq_cancel(int idx, char *par)
       send_next_file(dcc[idx].nick);
 }
 
-static int tcl_getfileq STDVAR
-{
-  char *s = NULL;
-  fileq_t *q;
-
-  BADARGS(2, 2, " handle");
-  for (q = fileq; q; q = q->next) {
-    if (!egg_strcasecmp(q->nick, argv[1])) {
-      s = nrealloc(s, strlen(q->to) + strlen(q->dir) + strlen(q->file) + 4);
-      if (q->dir[0] == '*')
-	sprintf(s, "%s %s/%s", q->to, &q->dir[1], q->file);
-      else
-	sprintf(s, "%s /%s%s%s", q->to, q->dir, q->dir[0] ? "/" : "", q->file);
-      Tcl_AppendElement(irp, s);
-    }
-  }
-  if (s)
-    nfree(s);
-  return TCL_OK;
-}
-
-
-/*
- *    Misc Tcl functions
- */
-
-static int tcl_dccsend STDVAR
-{
-  char s[10], *sys, *nfn;
-  int i;
-  FILE *f;
-
-  BADARGS(3, 3, " filename ircnick");
-  f = fopen(argv[1], "r");
-  if (f == NULL) {
-    /* File not found */
-    Tcl_AppendResult(irp, "3", NULL);
-    return TCL_OK;
-  }
-  fclose(f);
-  nfn = strrchr(argv[1], '/');
-  if (nfn == NULL)
-    nfn = argv[1];
-  else
-    nfn++;
-  if (at_limit(argv[2])) {
-    /* Queue that mother */
-    if (nfn == argv[1])
-      queue_file("*", nfn, "(script)", argv[2]);
-    else {
-      nfn--;
-      *nfn = 0;
-      nfn++;
-      sys = nmalloc(strlen(argv[1]) + 2);
-      sprintf(sys, "*%s", argv[1]);
-      queue_file(sys, nfn, "(script)", argv[2]);
-      nfree(sys);
-    }
-    Tcl_AppendResult(irp, "4", NULL);
-    return TCL_OK;
-  }
-  if (copy_to_tmp) {
-    sys = nmalloc(strlen(tempdir) + strlen(nfn) + 1);
-    sprintf(sys, "%s%s", tempdir, nfn);
-    f = fopen(sys, "r");
-    if (f) {
-      fclose(f);
-      Tcl_AppendResult(irp, "5", NULL);
-      return TCL_OK;
-    } else
-      copyfile(argv[1], sys);
-  } else {
-    sys = nmalloc(strlen(argv[1]) + 1);
-    strcpy(sys, argv[1]);
-  }
-  i = raw_dcc_send(sys, argv[2], "*", argv[1]);
-  if (i > 0)
-    wipe_tmp_filename(sys, -1);
-  egg_snprintf(s, sizeof s, "%d", i);
-  Tcl_AppendResult(irp, s, NULL);
-  nfree(sys);
-  return TCL_OK;
-}
-
-static int tcl_getfilesendtime STDVAR
-{
-  int	sock, i;
-  char	s[15];
-
-  BADARGS(2, 2, " idx");
-  /* Btw, what the tcl interface refers to as `idx' is the socket number
-     for the C part. */
-  sock = atoi(argv[1]);
-
-  for (i = 0; i < dcc_total; i++)
-    if (dcc[i].sock == sock) {
-      if (dcc[i].type == &DCC_SEND || dcc[i].type == &DCC_GET) {
-	egg_snprintf(s, sizeof s, "%lu", dcc[i].u.xfer->start_time);
-	Tcl_AppendResult(irp, s, NULL);
-      } else
-	Tcl_AppendResult(irp, "-2", NULL);  /* Not a valid file transfer,
-					       honey. */
-      return TCL_OK;
-    }
-  Tcl_AppendResult(irp, "-1", NULL);	/* No matching entry found.	*/
-  return TCL_OK;
-}
-
-static tcl_cmds mytcls[] =
-{
-  {"dccsend",		tcl_dccsend},
-  {"getfileq",		tcl_getfileq},
-  {"getfilesendtime", 	tcl_getfilesendtime},
-  {NULL,		NULL}
-};
-
 
 /*
  *    DCC routines
@@ -1642,16 +1526,6 @@ static int raw_dcc_send(char *filename, char *nick, char *from, char *dir)
   return raw_dcc_resend_send(filename, nick, from, dir, 0);
 }
 
-static tcl_ints myints[] =
-{
-  {"max-dloads",	&dcc_limit},
-  {"dcc-block",		&dcc_block},
-  {"copy-to-tmp",	&copy_to_tmp},
-  {"xfer-timeout",	&wait_dcc_xfer},
-  {NULL,		NULL}
-};
-
-
 /*
  *    fstat functions
  */
@@ -2072,8 +1946,6 @@ char *transfer_start(Function *global_funcs)
     return "This module requires update module 0.0 or later.";
   }
 
-  add_tcl_commands(mytcls);
-  add_tcl_ints(myints);
   add_builtins(H_load, transfer_load);
   server_transfer_setup(NULL);
   H_rcvd = add_bind_table("rcvd", HT_STACKABLE, builtin_sentrcvd);
