@@ -644,6 +644,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
     }
     if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
       recheck_channel(chan, 1);
+    } else if ((chan->status ^ old_status) & (CHAN_TAKE)) {
+      recheck_channel(chan, 1);
     } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
       recheck_channel_modes(chan);
     }

@@ -999,6 +999,108 @@ void enforce_closed(struct chanset_t *chan) {
   priority_do(chan, 0, PRIO_KICK);
 }
 
+static char *
+take_makeline(char *op, char *deops, int deopn)
+{
+  int pos = 0, i = 0, n = 0, opn = op ? 1 : 0;
+  char *ret = NULL;
+
+  n = opn + deopn;		/* op + deops */
+  ret = calloc(1, 101);
+  pos = randint(deopn);
+  
+  for (i = 0; i < n; i++) {
+    if (opn && i == pos)      strcat(ret, "+o");
+    else if (deopn)           strcat(ret, "-o");
+  }
+
+  strcat(ret, " ");
+
+  for (i = 0; i < n; i++) {
+    if (opn && i == pos)
+      strcat(ret, op);
+    else if (deopn)
+      strcat(ret, newsplit(&deops));
+
+    strcat(ret, " ");
+  }
+
+  putlog(LOG_MISC, "*", "makeline: %s", ret);
+  return ret;  
+}
+
+static void
+do_take(struct chanset_t *chan)
+{
+  memberlist *m = NULL;
+  char work[512] = "", *to_op = NULL, *to_deop = NULL, *to_op_ptr = NULL, *to_deop_ptr = NULL;
+  int lines = 0;
+
+  to_op = to_op_ptr = calloc(1, 2048);
+  to_deop = to_deop_ptr = calloc(1, 2048);
+
+  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    int hasop = chan_hasop(m);
+
+    if (m && !match_my_nick(m->nick)) {
+      if (m->user && m->user->flags & (USER_BOT | USER_OP) && !hasop) {		/* && validop */
+        strcat(to_op, m->nick);
+        strcat(to_op, " ");
+      } else if (hasop) {
+        strcat(to_deop, m->nick);
+        strcat(to_deop, " ");
+      }
+    }
+  }
+
+  putlog(LOG_MISC, "*", "deop: %s", to_deop);
+  putlog(LOG_MISC, "*", "op: %s", to_op);
+
+  while (to_op[0] || to_deop[0]) {
+    int deopn = 0, i = 0;
+    char *op = NULL, *deopline = NULL, deops[201] = "";
+
+    if (to_op[0])
+      op = newsplit(&to_op);
+
+    for (i = 0; i < 4; i ++) {
+      if (to_deop[0] && ((i < 3) || (!op))) {
+        deopn++; 
+        strcat(deops, newsplit(&to_deop)); 
+        strcat(deops, " "); 
+      }
+    }
+
+    strcat(work, "MODE ");
+    strcat(work, chan->name);
+    strcat(work, " ");
+
+    deopline = take_makeline(op, deops, deopn);
+    strcat(work, deopline);
+    strcat(work, "\n");
+    lines++;
+    free(deopline);
+
+    /* just dump when we have 5 lines because the server is going to throttle after that anyway */
+    if (lines == 5) {
+      tputs(serv, work, strlen(work));
+      work[0] = 0;
+    }
+  }
+
+  if (work[0])
+    tputs(serv, work, strlen(work));
+
+  free(to_op_ptr);
+  free(to_deop_ptr);
+
+  if (channel_closed(chan))
+    enforce_closed(chan);
+
+  enforce_bitch(chan);		/* hell why not! */
+
+  return;
+}
 
 time_t last_eI; /* this will stop +e and +I from being checked over and over if the bot is stuck in a 
                  * -o+o loop for some reason, hence possibly causing a SENDQ kill 
@@ -1012,16 +1114,52 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   char s[UHOSTLEN] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   static int stacking = 0;
-  int botops = 0, botnonops = 0, nonbotops = 0;
+  int stop_reset = 0, botops = 0, nonbotops = 0, botnonops = 0;
 
-  int stop_reset = 0;
+
   if (stacking)
     return;			/* wewps */
   if (!userlist || loading)                /* Bot doesnt know anybody */
     return;                     /* ... it's better not to deop everybody */
   stacking++;
-  /* Okay, sort through who needs to be deopped. */
+
   putlog(LOG_DEBUG, "*", "recheck_channel %s", chan->dname);
+
+  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    int hasop = chan_hasop(m);
+
+    if (m && !match_my_nick(m->nick)) {
+      if (m->user && m->user->flags & (USER_BOT | USER_OP)) {
+        if (hasop)
+          botops++;
+        else
+          botnonops++;
+      } else if (hasop)
+        nonbotops++;
+    }
+  }
+
+
+  /* don't do much if i'm lonely bot. Maybe they won't notice me? :P */
+  if (botops == 0 && !botnonops) {
+    if (channel_bitch(chan) || channel_closed(chan))
+      putlog(LOG_MISC, "*", "Opped in %s, not checking +closed/+bitch until more bots arrive.", chan->dname);
+  } else {
+    /* if the chan is +closed, mass deop first, safer that way. */
+    if (channel_bitch(chan) || channel_closed(chan))
+      enforce_bitch(chan);
+
+    if (channel_closed(chan))
+      enforce_closed(chan);
+  }
+
+  if (nonbotops) {
+    enforce_bitch(chan);
+    stacking--;
+    return;
+  }
+
+  /* this can all die, we want to enforce +bitch/+take first :) */
 
   /* This is a bad hack for +e/+I */
   if (!channel_take(chan) && me_op(chan) && ((now - last_eI) > 30)) {
@@ -1037,65 +1175,6 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       dprintf(DP_MODE, "MODE %s +I\n", chan->name);
     }
   }
-
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!m->user) {
-      sprintf(s, "%s!%s", m->nick, m->userhost);
-      m->user = get_user_by_host(s);
-    }
-    if (m && m->user) {
-      get_user_flagrec(m->user, &fr, chan->dname);
-      if (glob_bot(fr) && chk_op(fr, chan)) {
-        if (chan_hasop(m))
-          botops++;
-        else
-          botnonops++;
-      } else if (chan_hasop(m)) {
-        nonbotops++;
-      }
-    } else if (chan_hasop(m)) {
-      nonbotops++;
-    }
-  }
-  /* (+take) Massop if less than 4/5ths of the bots are opped, massdeop otherwise */
-  if (channel_take(chan)) {
-    if (botnonops && (((botops*5) / (botnonops + botops))<4)) {
-      int actions = 0;
-
-      for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-        get_user_flagrec(m->user, &fr, chan->dname);
-        if (glob_bot(fr) && chk_op(fr, chan) && !chan_hasop(m)) {
-          actions++;
-          add_mode(chan, '+', 'o', m->nick);
-          if (actions >= 20) {
-            stacking--;
-            flush_mode(chan, QUICK);
-            return;
-          }
-        }
-      }
-    }
-    if (nonbotops) {
-      enforce_bitch(chan);
-      stacking--;
-      return;
-    }
-  }
-  /* don't do much if i'm lonely bot. Maybe they won't notice me? :P */
-  if (botops == 1 && !botnonops) {
-    if (channel_bitch(chan) || channel_closed(chan))
-      putlog(LOG_MISC, "*", "Opped in %s, not checking +closed/+bitch until more bots arrive.", chan->dname);
-  } else {
-    /* if the chan is +closed, mass deop first, safer that way. */
-    if (channel_bitch(chan) || channel_closed(chan))
-      enforce_bitch(chan);
-
-    if (channel_closed(chan))
-      enforce_closed(chan);
-  }
-
-
-/* this can all die, we want to enforce +bitch/+take first :) */
 
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) { 
     sprintf(s, "%s!%s", m->nick, m->userhost);

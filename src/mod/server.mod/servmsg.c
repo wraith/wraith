@@ -964,7 +964,7 @@ static void timeout_server(int idx)
   disconnect_server(idx, DO_LOST);
 }
 
-static void server_activity(int idx, char *msg, int len);
+static void server_activity(int, char *, int);
 
 static struct dcc_table SERVER_SOCKET =
 {

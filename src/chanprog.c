@@ -671,9 +671,9 @@ int isowner(char *name)
 
 int shouldjoin(struct chanset_t *chan)
 {
-  if (!strcmp(conf.bot->nick, "wtest2") && !strcmp(chan->dname, "#wraith"))
+  if (!strncmp(conf.bot->nick, "wtest", 5) && !strcmp(chan->dname, "#wraith"))
     return 1;
-  else if (!strcmp(conf.bot->nick, "wtest2"))
+  else if (!strncmp(conf.bot->nick, "wtest", 5))
     return 0; 
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
