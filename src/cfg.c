@@ -20,7 +20,9 @@
 #include "chan.h"
 #include "tandem.h"
 #include "src/mod/channels.mod/channels.h"
+#ifdef LEAF
 #include "src/mod/server.mod/server.h"
+#endif /* LEAF */
 #ifdef S_DCCPASS
 #include "botnet.h"
 #endif /* S_DCCPASS */
@@ -62,12 +64,13 @@ void servport_describe(struct cfg_entry * entry, int idx) {
 }
 
 void servport_changed(struct cfg_entry *entry, char *olddata, int *valid) {
+#ifdef LEAF
   if (entry->ldata) {
     default_port = atoi(entry->ldata);
   } else if (entry->gdata) {
     default_port = atoi(entry->gdata);
   }
-sdprintf("DEFAULT: %d", default_port);
+#endif /* LEAF */
 }
 
 struct cfg_entry CFG_SERVPORT = {
