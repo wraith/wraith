@@ -34,7 +34,6 @@ extern int (*rfc_casecmp) (const char *, const char *);
 extern int (*rfc_ncasecmp) (const char *, const char *, int);
 extern int (*rfc_toupper) (int);
 extern int (*rfc_tolower) (int);
-extern int (*match_noterej) (struct userrec *, char *);
 extern int (*storenote)(char *from, char *to, char *msg, int idx, char *who, int bufsize);
 #endif /* !MAKING_MODS */
 
@@ -342,7 +341,6 @@ int flush_inbuf(int idx);
 /* userent.c */
 void update_mod(char *, char *, char *, char *);
 void list_type_kill(struct list_type *);
-int xtra_set();
 void stats_add(struct userrec *, int, int);
 
 

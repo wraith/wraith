@@ -49,8 +49,6 @@ extern sock_list        *socklist;
 #ifdef S_MSGCMDS
 extern struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE, CFG_MSGIDENT;
 #endif /* S_MSGCMDS */
-int xtra_kill();
-int xtra_unpack();
 static int module_rename(char *name, char *newname);
 
 
@@ -131,7 +129,6 @@ void (*sharein) (int, char *) = null_share;
 void (*shareupdatein) (int, char *) = null_share;
 void (*qserver) (int, char *, int) = (void (*)(int, char *, int)) null_func;
 void (*add_mode) () = null_func;
-int (*match_noterej) (struct userrec *, char *) = (int (*)(struct userrec *, char *)) false_func;
 int (*storenote)(char *from, char *to, char *msg, int idx, char *who, int bufsize) = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
 int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
 int (*rfc_ncasecmp) (const char *, const char *, int) = _rfc_ncasecmp;
@@ -336,8 +333,8 @@ Function global_table[] =
   (Function) delignore,
   (Function) fatal,
   /* 144 - 147 */
-  (Function) xtra_kill, 
-  (Function) xtra_unpack,
+  (Function) 0, 
+  (Function) 0,
   (Function) movefile,
   (Function) copyfile,
   /* 148 - 151 */
@@ -396,7 +393,7 @@ Function global_table[] =
   (Function) & USERENTRY_HOSTS,		/* struct user_entry_type *	*/
   (Function) & USERENTRY_PASS,		/* struct user_entry_type *	*/
   /* 192 - 195 */
-  (Function) & USERENTRY_XTRA,		/* struct user_entry_type *	*/
+  (Function) 0,
   (Function) user_del_chan,
   (Function) & USERENTRY_INFO,		/* struct user_entry_type *	*/
   (Function) & USERENTRY_COMMENT,	/* struct user_entry_type *	*/
@@ -444,7 +441,7 @@ Function global_table[] =
   (Function) 0,
   (Function) 0,
   (Function) 0,
-  (Function) xtra_set, 
+  (Function) 0, 
   /* 232 - 235 */
 #ifdef DEBUG_CONTEXT
   (Function) eggContextNote,
@@ -810,10 +807,6 @@ void add_hook(int hook_num, Function func)
 	rfc_toupper = _rfc_toupper;
       }
       break;
-    case HOOK_MATCH_NOTEREJ:
-      if (match_noterej == (int (*)(struct userrec *, char *))false_func)
-	match_noterej = func;
-      break;
     case HOOK_STORENOTE:
 	if (func == NULL) storenote = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
 	else storenote = func;
@@ -867,10 +860,6 @@ void del_hook(int hook_num, Function func)
     case HOOK_ADD_MODE:
       if (add_mode == (void (*)()) func)
 	add_mode = null_func;
-      break;
-    case HOOK_MATCH_NOTEREJ:
-      if (match_noterej == (int (*)(struct userrec *, char *))func)
-	match_noterej = false_func;
       break;
     case HOOK_STORENOTE:
 	if (storenote == func) storenote = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;

@@ -49,11 +49,6 @@ See also: -ignore, ignores
    Invite time has to be expressed in days, hours, and/or minutes.
  
 See also: invites, -invite, stick, unstick
-::+noteign
-###  %b+noteign%b%{+m} [user]%{-} <ignoremask>
-   Add a new ignore to the user's note ignore list.
- 
-See also: -noteign noteigns
 ::+user
 ###  %b+user%b <handle> [hostmask]
    Creates a new user record for the handle given. The new user record will
@@ -120,11 +115,6 @@ See also: +ignore, ignores
    may also reference the invite by the number shown by the 'invites' command.
  
 See also: invites, +invite, stick, unstick
-::-noteign
-###  %b-noteign%b%{+m} [user]%{-} <ignoremask>
-   Remove an existing ignore from the user's note ignore list.
- 
-See also: +noteign noteigns
 ::-user
 ###  %b-user%b <handle>
    Removes the specified handle's user record.
@@ -1246,12 +1236,6 @@ See: handle
    the nickname.
  
 See also: whom, notes
-::noteigns
-###  %bnoteigns%b%{+m} [user]%{-}
-   List all note ignores. All notes sent from users who match one of the
-   ignore masks will be rejected.
- 
-See also: +noteign -noteign
 ::notes
 ###  %bnotes index%b
 ###  %bnotes read%b <# or ALL>

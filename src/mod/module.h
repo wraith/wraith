@@ -276,8 +276,8 @@
 #define delignore ((int (*)(char *))global[142])
 #define fatal (global[143])
 /* 144 - 147 */
-#define xtra_kill ((void (*)(struct user_entry *))global[144])
-#define xtra_unpack ((void (*)(struct userrec *, struct user_entry *))global[145])
+/* UNUSED 144 */
+/* UNUSED 145 */
 #define movefile ((int (*) (char *, char *))global[146])
 #define copyfile ((int (*) (char *, char *))global[147])
 /* 148 - 151 */
@@ -336,7 +336,7 @@
 #define USERENTRY_HOSTS (*(struct user_entry_type *)(global[190]))
 #define USERENTRY_PASS (*(struct user_entry_type *)(global[191]))
 /* 192 - 195 */
-#define USERENTRY_XTRA (*(struct user_entry_type *)(global[192]))
+/* UNUSED 192 */
 #define user_del_chan ((void(*)(char *))(global[193]))
 #define USERENTRY_INFO (*(struct user_entry_type *)(global[194]))
 #define USERENTRY_COMMENT (*(struct user_entry_type *)(global[195]))
@@ -384,7 +384,7 @@
 /* 228 */
 /* UNUSED 229 */
 /* UNUSED 230 */
-#define xtra_set ((int(*)(struct userrec *,struct user_entry *, void *))global[231])
+/* UNUSED 231 */
 /* 232 - 235 */
 #ifdef DEBUG_CONTEXT
 #  define ContextNote(note) (global[232](__FILE__, __LINE__, MODULE_NAME, note))

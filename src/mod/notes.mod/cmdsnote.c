@@ -4,125 +4,6 @@
  *
  */
 
-static void cmd_pls_noteign(struct userrec *u, int idx, char *par)
-{
-  struct userrec *u2;
-  char *handle, *mask, *buf, *p;
-  if (!par[0]) {
-    dprintf(idx, "%s: +noteign [handle] <ignoremask>\n", NOTES_USAGE);
-    return;
-  }
-  putlog(LOG_CMDS, "*", "#%s# +noteign %s", dcc[idx].nick, par);
-
-  p = buf = strdup(par);
-  handle = newsplit(&p);
-  mask = newsplit(&p);
-  if (mask[0]) {
-    u2 = get_user_by_handle(userlist, handle);
-    if (u != u2) {
-      struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-      get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
-      if (!(glob_master(fr) || glob_owner(fr))) {
-	dprintf(idx, NOTES_IGN_OTHERS, handle);
-	free(buf);
-        return;
-      }
-    }
-    if (!u2) {
-      dprintf(idx, NOTES_UNKNOWN_USER, handle);
-      free(buf);
-      return;
-    }
-  } else {
-    u2 = u;
-    mask = handle;
-  }
-  if (add_note_ignore(u2, mask))
-    dprintf(idx, NOTES_IGN_NEW, mask);
-  else
-    dprintf(idx, NOTES_IGN_ALREADY, mask);
-  free(buf);
-  return;
-}
-
-static void cmd_mns_noteign(struct userrec *u, int idx, char *par)
-{
-  struct userrec *u2;
-  char *handle, *mask, *buf, *p;
-  if (!par[0]) {
-    dprintf(idx, "%s: -noteign [handle] <ignoremask>\n", NOTES_USAGE);
-    return;
-  }
-  putlog(LOG_CMDS, "*", "#%s# -noteign %s", dcc[idx].nick, par);
-  p = buf = strdup(par);
-  handle = newsplit(&p);
-  mask = newsplit(&p);
-  if (mask[0]) {
-    u2 = get_user_by_handle(userlist, handle);
-    if (u != u2) {
-      struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-      get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
-      if (!(glob_master(fr) || glob_owner(fr))) {
-	dprintf(idx, NOTES_IGN_OTHERS, handle);
-	free(buf);
-        return;
-      }
-    }
-    if (!u2) {
-      dprintf(idx, NOTES_UNKNOWN_USER, handle);
-      free(buf);
-      return;
-    }
-  } else {
-    u2 = u;
-    mask = handle;
-  }
-
-  if (del_note_ignore(u2, mask))
-    dprintf(idx, NOTES_IGN_REM, mask);
-  else
-    dprintf(idx, NOTES_IGN_NOTFOUND, mask);
-  free(buf);
-  return;
-}
-
-static void cmd_noteigns(struct userrec *u, int idx, char *par)
-{
-  struct userrec *u2;
-  char **ignores;
-  int ignoresn, i;
-
-  if (par[0]) {
-    u2 = get_user_by_handle(userlist, par);
-    if (u != u2) {
-      struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-      get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
-      if (!(glob_master(fr) || glob_owner(fr))) {
-	dprintf(idx, NOTES_IGN_OTHERS, par);
-        return;
-      }
-    }
-    if (!u2) {
-      dprintf(idx, NOTES_UNKNOWN_USER, par);
-      return;
-    }
-  } else
-    u2 = u;
-
-  ignoresn = get_note_ignores(u2, &ignores);
-  if (!ignoresn) {
-    dprintf(idx, "%s", NOTES_IGN_NONE);
-    return;
-  }
-  putlog(LOG_CMDS, "*", "#%s# noteigns %s", dcc[idx].nick, par);
-  dprintf(idx, NOTES_IGN_FOR, u2->handle);
-  for (i = 0; i < ignoresn; i++)
-    dprintf(idx, " %s", ignores[i]);
-  dprintf(idx, "\n");
-  free(ignores[0]);		/* Free the string buffer	*/
-  free(ignores);		/* Free the ptr array		*/
-}
-
 static void cmd_fwd(struct userrec *u, int idx, char *par)
 {
   char *handle;
@@ -218,9 +99,6 @@ static cmd_t notes_cmds[] =
 {
   {"fwd",	"m",	(Function) cmd_fwd,		NULL},
   {"notes",	"",	(Function) cmd_notes,		NULL},
-  {"+noteign",	"",	(Function) cmd_pls_noteign,	NULL},
-  {"-noteign",	"",	(Function) cmd_mns_noteign,	NULL},
-  {"noteigns",	"",	(Function) cmd_noteigns,	NULL},
   {"note",	"",	(Function) cmd_note,		NULL},
   {NULL,	NULL,	NULL,				NULL}
 };

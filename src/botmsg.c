@@ -621,11 +621,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
       dprintf(idx, BOT_NONOTES);
     return NOTE_ERROR;
   }
-  if (match_noterej(u, from)) {
-    if (idx >= 0)
-       dprintf(idx, "%s %s\n", u->handle, "rejected your note.");
-    return NOTE_REJECT;
-  }
+
   status = NOTE_STORED;
   iaway = 0;
   /* Online right now? */
