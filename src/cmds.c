@@ -1242,7 +1242,7 @@ static void cmd_date(int idx, char *par)
   egg_strftime(date, sizeof date, "%c %Z", localtime(&now));
   dprintf(idx, "%s (local shell time)\n", date);
   egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
-  dprintf(idx, "%s <-- This time is use don the bot.\n", date);
+  dprintf(idx, "%s <-- This time is used on the bot.\n", date);
   
   hub = now + timesync;
   egg_strftime(date, sizeof date, "%c %Z", gmtime(&hub));
