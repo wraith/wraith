@@ -45,6 +45,7 @@ struct dcc_t *dcc = NULL;       /* DCC list                                */
 time_t timesync = 0;
 int dcc_total = 0;              /* size of dcc table                             */
 int dccn = 0;			/* actual number of dcc entries */
+int uplink_idx = -1;
 
 static time_t password_timeout = 40;       /* Time to wait for a password from a user */
 static time_t auth_timeout = 80;
@@ -225,10 +226,15 @@ bot_version(int idx, char *par)
     putlog(LOG_BOTS, "*", DCC_LINKED, dcc[idx].nick);
     chatout("*** Linked to %s\n", dcc[idx].nick);
 
+    if (bot_hublevel(dcc[idx].user) < 999)
+      dcc[idx].hub = 1;
+
     botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vversion);
   } else {
     putlog(LOG_BOTS, "*", "Linked to botnet.");
     chatout("*** Linked to botnet.\n");
+    uplink_idx = idx;
+    dcc[idx].hub = 1;
   }
 
   dump_links(idx);
@@ -376,6 +382,7 @@ static void
 free_dcc_bot_(int n, void *x)
 {
   if (dcc[n].type == &DCC_BOT) {
+    uplink_idx = -1;
     unvia(n, findbot(dcc[n].nick));
     rembot(dcc[n].nick);
   }

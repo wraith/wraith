@@ -173,24 +173,8 @@ void putlog(int type, const char *chname, const char *format, ...)
   /* FIXME: WRITE LOG HERE */
 
   /* broadcast to hubs */
-  if (chname[0] == '*' && conf.bot && conf.bot->nick) {
-    char outbuf[LOGLINEMAX + 1] = "";
-
-    simple_snprintf(outbuf, sizeof outbuf, "hl %d %s", type, out);
-    if (userlist && !loading) {
-      tand_t *bot = NULL;
-      struct userrec *ubot = NULL;
-
-      for (bot = tandbot; bot; bot = bot->next) {
-        if ((ubot = get_user_by_handle(userlist, bot->bot))) {
-          if (bot_hublevel(ubot) < 999)
-            putbot(ubot->handle, outbuf);
-        }
-      }
-    } else {
-      putallbots(outbuf);
-    }
-  }
+  if (chname[0] == '*' && conf.bot && conf.bot->nick)
+    botnet_send_log(type, out);
 
   for (idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].type && (dcc[idx].type == &DCC_CHAT && !dcc[idx].simul) && (dcc[idx].u.chat->con_flags & type)) {

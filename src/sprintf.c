@@ -101,7 +101,7 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
     } else
       buf[c++] = *fp++;
   }
-  buf[c] = 0;
+  buf[c] = '\0';
 
   return c;
 }

@@ -50,6 +50,7 @@ struct dcc_t {
   int ssl;                      /* use ssl on this dcc? */
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   bool irc;			/* forward the output back to irc? */
+  bool hub;			// is this bot a hub?
   int auth;
   int whowas;
   int dns_id;
@@ -216,7 +217,7 @@ struct dupwait_info {
 #define TLN_ECHO_C      "\001"
 
 extern struct dcc_t 		*dcc;
-extern int 			dcc_total, dccn;
+extern int 			dcc_total, dccn, uplink_idx;
 extern time_t			timesync;
 extern char			network[];
 extern bool			protect_telnet;

@@ -58,6 +58,7 @@ void botnet_send_link(int, char *, char *, char *);
 void botnet_send_update(int, tand_t *);
 void botnet_send_nlinked(int, char *, char *, char, int, time_t, char *);
 void botnet_send_reject(int, char *, char *, char *, char *, char *);
+void botnet_send_log(int, const char *);
 void botnet_send_zapf(int, char *, char *, char *);
 void botnet_send_zapf_broad(int, char *, char *, char *);
 void botnet_send_away(int, char *, int, char *, int);
@@ -74,6 +75,10 @@ int users_in_subtree(tand_t *);
 int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd);
 void botnet_send_cmd_broad(int idx, char * fbot, char *fhnd, int fromidx, char * cmd);
 void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
+void send_uplink(const char *, size_t);
+inline void send_hubs(const char *, size_t);
+void send_hubs_but(int , const char *, size_t);
+
 
 #define b_status(a)	(dcc[a].status)
 

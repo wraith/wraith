@@ -491,6 +491,34 @@ static void bot_link(int idx, char *par)
   }
 }
 
+/*
+	bot_log
+	 - forwards to all hubs linked directly if a hub (excluding the one who sent it)
+	 - leaf bots display and do not pass along.
+*/
+static void bot_log(int idx, char *par)
+{
+  char *from = newsplit(&par);
+  int i = nextbot(from);
+
+  if (i != idx) {
+    fake_alert(idx, "direction", from);
+    return;
+  }
+
+  if (egg_isdigit(par[0])) {
+    int type = atoi(newsplit(&par));
+
+    putlog(type, "@", "(%s) %s", from, par);
+  } else {
+    putlog(LOG_ERRORS, "*", "Malformed HL line from %s: %s", from, par);
+  }
+
+  if (conf.bot->hub)
+    send_hubs_but(idx, par, strlen(par));
+} 
+
+
 /* unlink <from@bot> <linking-bot> <undesired-bot> <reason>
  */
 static void bot_unlink(int idx, char *par)
@@ -816,6 +844,7 @@ static void bot_thisbot(int idx, char *par)
   strcpy(dcc[idx].nick, par);
 }
 
+/* FIXME: remove after 1.2.3 */
 static void bot_hublog(char *botnick, char *code, char *msg)
 {
   char *par = NULL, *parp;
@@ -1119,6 +1148,7 @@ botcmd_t C_bot[] =
   {"i",			bot_idle, 0},
   {"j",			bot_join, 0},
   {"l",			bot_link, 0},
+  {"lo",                bot_log, 0},
   {"n",			bot_nlinked, 0},
   {"nc",		bot_nickchange, 0},
   {"p",			bot_priv, 0},

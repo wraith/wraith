@@ -28,11 +28,38 @@
 
 static char	OBUF[SGRAB - 110] = "";
 
+void send_uplink(const char *msg, size_t len)
+{
+  if (uplink_idx == -1 || !valid_idx(uplink_idx) || dcc[uplink_idx].sock == -1 || 
+     (dcc[uplink_idx].type != &DCC_BOT) || !dcc[uplink_idx].hub)
+    return;
+
+  tputs(dcc[uplink_idx].sock, (char *) msg, len);
+}
+
+void send_hubs(const char *msg, size_t len)
+{
+  send_hubs_but(-1, msg, len);
+}
+
+void send_hubs_but(int idx, const char *msg, size_t len)
+{
+  int i = 0;
+
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type == &DCC_BOT) && i != idx && dcc[i].hub) {
+      tputs(dcc[i].sock, (char *) msg, len);
+    }
+  }
+}
+
 /* Ditto for tandem bots
  */
 static void send_tand_but(int x, char *buf, size_t len)
 {
-  for (int i = 0; i < dcc_total; i++) {
+  int i = 0;
+
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && (dcc[i].type == &DCC_BOT) && i != x) {
       tputs(dcc[i].sock, buf, len);
     }
@@ -263,6 +290,22 @@ void putbot(char *bot, char *par)
     return;
 
   botnet_send_zapf(i, conf.bot->nick, bot, par);
+}
+
+/*
+	botnet_send_log(...)
+	 - sends to uplink if a leaf
+	 - sends to all linked hubs if a hub
+*/
+void botnet_send_log(int type, const char *msg)
+{
+  size_t len = simple_sprintf(OBUF, "lo %s %d %s\n", conf.bot->nick, type, msg);
+
+  if (conf.bot->hub) {
+    send_hubs(OBUF, len);
+  } else {
+    send_uplink(OBUF, len);
+  }
 }
 
 void botnet_send_zapf(int idx, char *a, char *b, char *c)
