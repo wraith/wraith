@@ -63,7 +63,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
 
   fclose(f);
   MD5_Final(md5out, ctx);
-  strncpyz(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
+  strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
   if (todo == WRITE_CHECKSUM) {
@@ -105,7 +105,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
       }
 */
       if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {
-        strncpyz(settings.hash, hash, 65);
+        strlcpy(settings.hash, hash, 65);
         edpack(&settings, hash, PACK_ENC);
         fwrite(&settings.hash, sizeof(settings_t) - PREFIXLEN, 1, newbin->f);
         i = sizeof(settings_t) - PREFIXLEN;
@@ -158,16 +158,16 @@ readcfg(const char *cfgfile)
         *p++ = 0;
       if (p) {
         if (!egg_strcasecmp(buffer, "packname")) {
-          strncpyz(settings.packname, trim(p), sizeof settings.packname);
+          strlcpy(settings.packname, trim(p), sizeof settings.packname);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "shellhash")) {
-          strncpyz(settings.shellhash, trim(p), sizeof settings.shellhash);
+          strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "bdhash")) {
-          strncpyz(settings.bdhash, trim(p), sizeof settings.bdhash);
+          strlcpy(settings.bdhash, trim(p), sizeof settings.bdhash);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "dccprefix")) {
-          strncpyz(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
+          strlcpy(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "owner")) {
           strcat(settings.owners, trim(p));
@@ -362,12 +362,12 @@ void conf_to_bin(conf_t *in, bool move)
   sprintf(settings.portmax, "%d", in->portmax);
   sprintf(settings.pscloak, "%d", in->pscloak);
 
-  strncpyz(settings.binname, in->binname, 16);
-  strncpyz(settings.username, in->username, 16);
+  strlcpy(settings.binname, in->binname, 16);
+  strlcpy(settings.username, in->username, 16);
 
-  strncpyz(settings.uname, in->uname, 350);
-  strncpyz(settings.homedir, in->homedir, 350);
-  strncpyz(settings.binpath, in->binpath, 350);
+  strlcpy(settings.uname, in->uname, 350);
+  strlcpy(settings.homedir, in->homedir, 350);
+  strlcpy(settings.binpath, in->binpath, 350);
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
     sprintf(settings.bots, "%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
                            bot->nick,

@@ -31,7 +31,7 @@ static memberlist *newmember(struct chanset_t *chan, char * nick)
   }
 
   n->next = NULL;
-  strncpyz(n->nick, nick, sizeof(n->nick));
+  strlcpy(n->nick, nick, sizeof(n->nick));
   n->split = 0L;
   n->last = 0L;
   n->delay = 0L;
@@ -1728,7 +1728,7 @@ static int got367(char *from, char *origmsg)
   char *chname = NULL, buf[511] = "", *msg = NULL;
   struct chanset_t *chan = NULL;
 
-  strncpyz(buf, origmsg, sizeof(buf));
+  strlcpy(buf, origmsg, sizeof(buf));
   msg = buf;
   newsplit(&msg);
   chname = newsplit(&msg);
@@ -1777,7 +1777,7 @@ static int got348(char *from, char *origmsg)
   char *chname = NULL, buf[511] = "", *msg = NULL;
   struct chanset_t *chan = NULL;
 
-  strncpyz(buf, origmsg, sizeof(buf));
+  strlcpy(buf, origmsg, sizeof(buf));
   msg = buf;
   newsplit(&msg);
   chname = newsplit(&msg);
@@ -1841,7 +1841,7 @@ static int got346(char *from, char *origmsg)
   char *chname = NULL, buf[511] = "", *msg = NULL;
   struct chanset_t *chan = NULL;
 
-  strncpyz(buf, origmsg, sizeof(buf));
+  strlcpy(buf, origmsg, sizeof(buf));
   msg = buf;
   newsplit(&msg);
   chname = newsplit(&msg);
@@ -2467,7 +2467,7 @@ static int gotkick(char *from, char *origmsg)
   char buf2[511], *msg = buf2, *chname = NULL;
   struct chanset_t *chan = NULL;
 
-  strncpyz(buf2, origmsg, sizeof(buf2));
+  strlcpy(buf2, origmsg, sizeof(buf2));
   msg = buf2;
   chname = newsplit(&msg);
   chan = findchan(chname);

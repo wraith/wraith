@@ -41,7 +41,7 @@ encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
   } else {
     char key[CRYPT_KEYSIZE + 1] = "";
 
-    strncpyz(key, keydata, sizeof(key));
+    strlcpy(key, keydata, sizeof(key));
     AES_set_encrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &e_key);
     /* Now loop through the blocks and crypt them */
     blocks = len / CRYPT_BLOCKSIZE;
@@ -68,7 +68,7 @@ decrypt_binary(const char *keydata, unsigned char *in, size_t len)
     /* Init/fetch key */
     char key[CRYPT_KEYSIZE + 1] = "";
 
-    strncpyz(key, keydata, sizeof(key));
+    strlcpy(key, keydata, sizeof(key));
     AES_set_decrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &d_key);
     /* Now loop through the blocks and crypt them */
     blocks = len / CRYPT_BLOCKSIZE;
@@ -270,7 +270,7 @@ char *MD5(const char *string)
   MD5_Init(&ctx);
   MD5_Update(&ctx, string, strlen(string));
   MD5_Final(md5out, &ctx);
-  strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  strlcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
   OPENSSL_cleanse(&ctx, sizeof(ctx));
   return md5string;
 }
@@ -294,7 +294,7 @@ MD5FILE(const char *bin)
     MD5_Update(&ctx, buffer, len);
   }
   MD5_Final(md5out, &ctx);
-  strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  strlcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
   return md5string;
@@ -309,7 +309,7 @@ char *SHA1(const char *string)
   SHA1_Init(&ctx);
   SHA1_Update(&ctx, string, strlen(string));
   SHA1_Final(sha1out, &ctx);
-  strncpyz(sha1string, btoh(sha1out, SHA_DIGEST_LENGTH), sizeof(sha1string));
+  strlcpy(sha1string, btoh(sha1out, SHA_DIGEST_LENGTH), sizeof(sha1string));
   OPENSSL_cleanse(&ctx, sizeof(ctx));
   return sha1string;
 }

@@ -394,7 +394,7 @@ static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, c
 {
   char reply[60] = "";
 
-  strncpyz(reply, text, sizeof(reply));
+  strlcpy(reply, text, sizeof(reply));
   dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, reply);
   return BIND_RET_BREAK;
 }
@@ -454,7 +454,7 @@ static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, cha
   if (text[0]) {
     char chan[256] = "", *p = NULL;
 
-    strncpyz(chan, text, sizeof(chan));
+    strlcpy(chan, text, sizeof(chan));
     p = strchr(chan, ' ');
     if (p)
       *p = 0;
@@ -469,7 +469,7 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
     struct chanset_t *chan = chanset;
     char chname[256] = "", *p = NULL;
 
-    strncpyz(chname, text, sizeof(chname));
+    strlcpy(chname, text, sizeof(chname));
     p = strchr(chname, ' ');
     if (p)
       *p = 0;
@@ -563,7 +563,7 @@ static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, c
 {
   char tms[81] = "";
 
-  strncpyz(tms, ctime(&now), sizeof(tms));
+  strlcpy(tms, ctime(&now), sizeof(tms));
   dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, tms);
   return BIND_RET_BREAK;
 }
@@ -665,9 +665,9 @@ void ctcp_init()
 
   egg_bzero(&un, sizeof(un));
   if (!uname(&un)) {
-    strncpyz(cloak_os, un.sysname, sizeof(cloak_os));
-    strncpyz(cloak_osver, un.release, sizeof(cloak_osver));
-    strncpyz(cloak_host, un.nodename, sizeof(cloak_host));
+    strlcpy(cloak_os, un.sysname, sizeof(cloak_os));
+    strlcpy(cloak_osver, un.release, sizeof(cloak_osver));
+    strlcpy(cloak_host, un.nodename, sizeof(cloak_host));
   } else {
 #endif /* !CYGWIN_HACKS */
     /* shit, we have to come up with something ourselves.. */

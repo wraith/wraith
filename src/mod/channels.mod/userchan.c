@@ -223,7 +223,7 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
     j--;
     for (; (*u) && j; u = &((*u)->next), j--);
     if (*u) {
-      strncpyz(temp, (*u)->mask, sizeof temp);
+      strlcpy(temp, (*u)->mask, sizeof temp);
       i = 1;
     } else
       return -j - 1;
@@ -231,7 +231,7 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
     /* Find matching host, if there is one */
     for (; *u && !i; u = &((*u)->next))
       if (!rfc_casecmp((*u)->mask, who)) {
-        strncpyz(temp, who, sizeof temp);
+        strlcpy(temp, who, sizeof temp);
 	i = 1;
 	break;
       }

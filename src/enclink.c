@@ -44,7 +44,7 @@ static void ghost_link_nat(int idx, direction_t direction)
     /* initkey-gen */
     /* bdhash port mynick conf.bot->nick */
     sprintf(tmp, "%s@%4x@%s@%s", settings.bdhash, port, nick1, nick2);
-    strncpyz(keyp, SHA1(tmp), key_len);
+    strlcpy(keyp, SHA1(tmp), key_len);
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(keyp), keyp);
 
@@ -107,7 +107,7 @@ static void ghost_link(int idx, direction_t direction)
     /* initkey-gen */
     /* bdhash port mynick conf.bot->nick */
     sprintf(tmp, "%s@%4x@%s@%s", settings.bdhash, port, nick1, nick2);
-    strncpyz(keyp, SHA1(tmp), key_len);
+    strlcpy(keyp, SHA1(tmp), key_len);
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(keyp), keyp);
 
@@ -227,8 +227,8 @@ void ghost_parse(int idx, int snum, char *buf)
   if (!egg_strcasecmp(code, "elink")) {
     char *tmp = decrypt_string(settings.salt2, newsplit(&buf));
 
-    strncpyz(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
-    strncpyz(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
+    strlcpy(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
+    strlcpy(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
     socklist[snum].iseed = atoi(buf);
     socklist[snum].oseed = atoi(buf);
     putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
@@ -315,7 +315,7 @@ void link_hash(int idx, char *rand)
   char hash[256] = "";
 
   egg_snprintf(hash, sizeof(hash), "%s.%s.%s", MD5(settings.salt2), settings.salt1, rand);
-  strncpyz(dcc[idx].shahash, SHA1(hash), sizeof(dcc[idx].shahash));
+  strlcpy(dcc[idx].shahash, SHA1(hash), sizeof(dcc[idx].shahash));
   egg_bzero(hash, sizeof(hash));
   return;
 }

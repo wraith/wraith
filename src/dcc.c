@@ -217,7 +217,7 @@ bot_version(int idx, char *par)
   int vlocalhub = 0;
   time_t vbuildts = 0;
 
-  strncpyz(dcc[idx].u.bot->version, par, 120);
+  strlcpy(dcc[idx].u.bot->version, par, 120);
   newsplit(&par);               /* 'ver' */
   newsplit(&par);               /* handlen */
   newsplit(&par);               /* network */
@@ -341,8 +341,8 @@ dcc_bot_new(int idx, char *buf, int x)
     if (snum >= 0) {
       char *tmp = decrypt_string(settings.salt2, newsplit(&buf));
 
-      strncpyz(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
-      strncpyz(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
+      strlcpy(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
+      strlcpy(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
       socklist[snum].iseed = atoi(buf);
       socklist[snum].oseed = atoi(buf);
       dprintf(idx, "elinkdone\n");
@@ -1349,7 +1349,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   if (valid_idx(i))
     idx = dcc[i].u.dns->ibuf;
 
-  strncpyz(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
+  strlcpy(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
 
   sprintf(s2, "-telnet!telnet@%s", dcc[i].host);
 
@@ -1856,7 +1856,7 @@ dcc_telnet_got_ident(int i, char *host)
     return;
   }
 
-  strncpyz(dcc[i].host, host, UHOSTLEN);
+  strlcpy(dcc[i].host, host, UHOSTLEN);
 
   char shost[UHOSTLEN + 20] = "", sip[UHOSTLEN + 20] = "";
   char *p = strchr(host, '@');
@@ -1917,7 +1917,7 @@ dcc_telnet_got_ident(int i, char *host)
   dcc[i].status = (STAT_TELNET | STAT_ECHO | STAT_COLOR | STAT_BANNER | STAT_CHANNELS | STAT_BOTS | STAT_WHOM);
 
   /* Copy acceptable-nick/host mask */
-  strncpyz(dcc[i].nick, dcc[idx].host, HANDLEN);
+  strlcpy(dcc[i].nick, dcc[idx].host, HANDLEN);
   dcc[i].timeval = now;
   strcpy(dcc[i].u.chat->con_chan, chanset ? chanset->dname : "*");
   /* This is so we dont tell someone doing a portscan anything

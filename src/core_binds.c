@@ -59,12 +59,12 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
       p = strchr(args, ' ');
       if (p)
         *p = 0;
-      strncpyz(pass, args, sizeof(pass));
+      strlcpy(pass, args, sizeof(pass));
 
       if (check_cmd_pass(cmd, pass)) {
         if (p)
           *p = ' ';
-        strncpyz(work, args, sizeof(work));
+        strlcpy(work, args, sizeof(work));
         p = work;
         newsplit(&p);
         strcpy(args, p);

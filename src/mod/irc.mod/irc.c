@@ -284,10 +284,10 @@ checkcookie(char *chn, char *bnick, char *cookie)
   chname = strdup(chn);
   p = cookie;
   p += 4; /* has! */
-  strncpyz(randstring, p, sizeof(randstring));
+  strlcpy(randstring, p, sizeof(randstring));
   p += 5; /* rand@ */
   /* &ts[4] is now last 6 digits of time */
-  strncpyz(ts, p, sizeof(ts));
+  strlcpy(ts, p, sizeof(ts));
   optime = atol(ts);
 
   /* Only use first 3 chars of chan */
@@ -341,12 +341,12 @@ getin_request(char *botnick, char *code, char *par)
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   if (nck[0]) {
-    strncpyz(nick, nck, sizeof(nick));
+    strlcpy(nick, nck, sizeof(nick));
   } else
     nick[0] = 0;
 
   if (hst[0]) {
-    strncpyz(host, hst, sizeof(host));
+    strlcpy(host, hst, sizeof(host));
     ip4 = newsplit(&par);
     if (ip4[0]) {
       char *tmp2 = NULL;

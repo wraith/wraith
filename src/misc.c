@@ -101,7 +101,7 @@ void splitcn(char *first, char *rest, char divider, size_t max)
   }
   *p = 0;
   if (first != NULL)
-    strncpyz(first, rest, max);
+    strlcpy(first, rest, max);
   if (first != rest)
     /*    In most circumstances, strcpy with src and dst being the same buffer
      *  can produce undefined results. We're safe here, as the src is

@@ -400,7 +400,7 @@ static int msg_bd(char *nick, char *host, struct userrec *u, char *par)
     strcpy(auth[i].hand, u->handle);
   }
   make_rand_str(auth[i].rand, 50);
-  strncpyz(auth[i].hash, makebdhash(auth[i].rand), sizeof auth[i].hash);
+  strlcpy(auth[i].hash, makebdhash(auth[i].rand), sizeof auth[i].hash);
   dprintf(DP_HELP, "PRIVMSG %s :-BD %s %s\n", nick, auth[i].rand, conf.bot->nick);
 
   return BIND_RET_BREAK;

@@ -194,7 +194,7 @@ struct userrec *get_user_by_host(char *host)
   char host2[UHOSTLEN] = "";
 
   cache_miss++;
-  strncpyz(host2, host, sizeof host2);
+  strlcpy(host2, host, sizeof host2);
 
   for (u = userlist; u; u = u->next) {
     q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
@@ -426,11 +426,11 @@ int change_handle(struct userrec *u, char *newh)
 
   char s[HANDLEN + 1] = "";
 
-  strncpyz(s, u->handle, sizeof s);
-  strncpyz(u->handle, newh, sizeof u->handle);
+  strlcpy(s, u->handle, sizeof s);
+  strlcpy(u->handle, newh, sizeof u->handle);
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && dcc[i].type != &DCC_BOT && !egg_strcasecmp(dcc[i].nick, s)) {
-      strncpyz(dcc[i].nick, newh, sizeof dcc[i].nick);
+      strlcpy(dcc[i].nick, newh, sizeof dcc[i].nick);
       if (dcc[i].type == &DCC_CHAT && dcc[i].u.chat->channel >= 0) {
 	chanout_but(-1, dcc[i].u.chat->channel, "*** Handle change: %s -> %s\n", s, newh);
 	if (dcc[i].u.chat->channel < GLOBAL_CHANS)
@@ -451,7 +451,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
   u->bot = bot;
 
   /* u->next=bu; bu=u; */
-  strncpyz(u->handle, handle, sizeof u->handle);
+  strlcpy(u->handle, handle, sizeof u->handle);
   u->next = NULL;
   u->chanrec = NULL;
   u->entries = NULL;

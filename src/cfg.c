@@ -45,9 +45,9 @@ static void chanset_describe(struct cfg_entry * entry, int idx) {
 #ifdef LEAF
 static void chanset_changed(struct cfg_entry *entry, int *valid) {
   if (entry->ldata)
-    strncpyz(cfg_glob_chanset, (char *) entry->ldata, 512);
+    strlcpy(cfg_glob_chanset, (char *) entry->ldata, 512);
   else if (entry->gdata)
-    strncpyz(cfg_glob_chanset, (char *) entry->gdata, 512);
+    strlcpy(cfg_glob_chanset, (char *) entry->gdata, 512);
 }
 #endif /* LEAF */
 
@@ -417,9 +417,9 @@ static void nick_changed(struct cfg_entry * entry, int * valid) {
   else
     p = NULL;
   if (p && p[0])
-    strncpyz(origbotname, p, NICKLEN + 1);
+    strlcpy(origbotname, p, NICKLEN + 1);
   else
-    strncpyz(origbotname, conf.bot->nick, NICKLEN + 1);
+    strlcpy(origbotname, conf.bot->nick, NICKLEN + 1);
   if (server_online)
     dprintf(DP_SERVER, "NICK %s\n", origbotname);
 }
@@ -449,9 +449,9 @@ static void realname_describe(struct cfg_entry * entry, int idx) {
 #ifdef LEAF
 static void realname_changed(struct cfg_entry * entry, int * valid) {
   if (entry->ldata)
-    strncpyz(botrealname, (char *) entry->ldata, 121);
+    strlcpy(botrealname, (char *) entry->ldata, 121);
   else if (entry->gdata)
-    strncpyz(botrealname, (char *) entry->gdata, 121);
+    strlcpy(botrealname, (char *) entry->gdata, 121);
 }
 #endif /* LEAF */
 

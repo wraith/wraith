@@ -168,9 +168,9 @@ static int got001(char *from, char *msg)
   checked_hostmask = 0;
   fixcolon(msg);
   /* Ok...param #1 of 001 = what server thinks my nick is */
-  strncpyz(botname, msg, NICKLEN);
+  strlcpy(botname, msg, NICKLEN);
   altnick_char = 0;
-  strncpyz(cursrvname, from, sizeof(cursrvname));
+  strlcpy(cursrvname, from, sizeof(cursrvname));
 
   dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
   dprintf(DP_SERVER, "MODE %s +iws\n", botname);
@@ -229,7 +229,7 @@ got005(char *from, char *msg)
     } else if (!egg_strcasecmp(tmp, "NICKLEN"))
       nick_len = atoi(p);
     else if (!egg_strcasecmp(tmp, "NETWORK"))
-      strncpyz(curnetwork, p, 120);
+      strlcpy(curnetwork, p, 120);
     else if (!egg_strcasecmp(tmp, "PENALTY"))
       use_penalties = 1;
     else if (!egg_strcasecmp(tmp, "WHOX"))
@@ -891,7 +891,7 @@ static int gotnick(char *from, char *msg)
 
   if (match_my_nick(nick)) {
     /* Regained nick! */
-    strncpyz(botname, msg, NICKLEN);
+    strlcpy(botname, msg, NICKLEN);
     altnick_char = 0;
     if (!strcmp(msg, origbotname)) {
       putlog(LOG_SERV | LOG_MISC, "*", "Regained nickname '%s'.", msg);
@@ -1366,7 +1366,7 @@ static void connect_server(void)
 
     dcc[newidx].port = botserverport;
     strcpy(dcc[newidx].nick, "(server)");
-    strncpyz(dcc[newidx].host, botserver, UHOSTLEN);
+    strlcpy(dcc[newidx].host, botserver, UHOSTLEN);
 
     botuserhost[0] = 0;
 

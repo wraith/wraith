@@ -91,7 +91,7 @@ static void cmd_pls_mask(const char type, int idx, char *par)
   } else if (!strchr(who, '@'))
     egg_snprintf(s, sizeof s, "%s@*", who);	/* brain-dead? */
   else
-    strncpyz(s, who, sizeof s);
+    strlcpy(s, who, sizeof s);
 #ifdef LEAF
     egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
 #else
@@ -204,7 +204,7 @@ static void cmd_mns_mask(const char type, int idx, char *par)
     if (!chk_op(user, findchan_by_dname(chname)))
       return;
   }
-  strncpyz(s, who, sizeof s);
+  strlcpy(s, who, sizeof s);
   i = u_delmask(type, NULL, s, (dcc[idx].user->flags & USER_MASTER));
   if (i > 0) {
     if (lastdeletedmask)
@@ -635,13 +635,13 @@ static void cmd_stick_yn(int idx, char *par, int yn)
   char *stick_type = NULL, s[UHOSTLEN] = "", chname[81] = "";
 
   stick_type = newsplit(&par);
-  strncpyz(s, newsplit(&par), sizeof s);
-  strncpyz(chname, newsplit(&par), sizeof chname);
+  strlcpy(s, newsplit(&par), sizeof s);
+  strlcpy(chname, newsplit(&par), sizeof chname);
   if (egg_strcasecmp(stick_type, "exempt") &&
       egg_strcasecmp(stick_type, "invite") &&
       egg_strcasecmp(stick_type, "ban")) {
-    strncpyz(chname, s, sizeof chname);
-    strncpyz(s, stick_type, sizeof s);
+    strlcpy(chname, s, sizeof chname);
+    strlcpy(s, stick_type, sizeof s);
   }
   if (!s[0]) {
     dprintf(idx, "Usage: %sstick [ban/exempt/invite] <hostmask or number> [channel]\n", yn ? "" : "un");
@@ -662,7 +662,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
         dprintf(idx, "%stuck exempt: %s\n", yn ? "S" : "Uns", s);
         return;
       }
-      strncpyz(chname, dcc[idx].u.chat->con_chan, sizeof chname);
+      strlcpy(chname, dcc[idx].u.chat->con_chan, sizeof chname);
     }
     /* Channel-specific exempt? */
     if (!(chan = findchan_by_dname(chname))) {
@@ -704,7 +704,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
         dprintf(idx, "%stuck invite: %s\n", yn ? "S" : "Uns", s);
         return;
       }
-      strncpyz(chname, dcc[idx].u.chat->con_chan, sizeof chname);
+      strlcpy(chname, dcc[idx].u.chat->con_chan, sizeof chname);
     }
     /* Channel-specific invite? */
     if (!(chan = findchan_by_dname(chname))) {
@@ -747,7 +747,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
 #endif /* LEAF */
       return;
     }
-    strncpyz(chname, dcc[idx].u.chat->con_chan, sizeof chname);
+    strlcpy(chname, dcc[idx].u.chat->con_chan, sizeof chname);
   }
   /* Channel-specific ban? */
   if (!(chan = findchan_by_dname(chname))) {

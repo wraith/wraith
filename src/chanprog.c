@@ -116,7 +116,7 @@ struct userrec *check_chanlist(const char *host)
   register memberlist		*m = NULL;
   register struct chanset_t	*chan = NULL;
 
-  strncpyz(buf, host, sizeof buf);
+  strlcpy(buf, host, sizeof buf);
   uhost = buf;
   nick = splitnick(&uhost);
   for (chan = chanset; chan; chan = chan->next)
@@ -185,7 +185,7 @@ void set_chanlist(const char *host, struct userrec *rec)
   register memberlist		*m = NULL;
   register struct chanset_t	*chan = NULL;
 
-  strncpyz(buf, host, sizeof buf);
+  strlcpy(buf, host, sizeof buf);
   uhost = buf;
   nick = splitnick(&uhost);
   for (chan = chanset; chan; chan = chan->next)
@@ -370,7 +370,7 @@ void reaffirm_owners()
     struct userrec *u = NULL;
 
     while (p) {
-      strncpyz(s, q, (p - q) + 1);
+      strlcpy(s, q, (p - q) + 1);
       rmspace(s);
       u = get_user_by_handle(userlist, s);
       if (u)

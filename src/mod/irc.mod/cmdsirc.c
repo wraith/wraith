@@ -166,7 +166,7 @@ static void cmd_swhois(int idx, char *par)
   if (par[0])
     nick = newsplit(&par);
 
-  strncpyz(dcc[idx].whois, nick ? nick : server, UHOSTLEN);
+  strlcpy(dcc[idx].whois, nick ? nick : server, UHOSTLEN);
   dprintf(DP_SERVER, "WHOIS %s %s\n", server, nick ? nick : "");
 }
 
@@ -1273,7 +1273,7 @@ static void cmd_channel(int idx, char *par)
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
   putlog(LOG_CMDS, "*", "#%s# (%s) channel", dcc[idx].nick, chan->dname);
-  strncpyz(s, getchanmode(chan), sizeof s);
+  strlcpy(s, getchanmode(chan), sizeof s);
   if (channel_pending(chan)) {
     egg_snprintf(s1, sizeof s1, "%s %s", IRC_PROCESSINGCHAN, chan->dname);
   } else if (channel_active(chan)) {
@@ -1309,15 +1309,15 @@ static void cmd_channel(int idx, char *par)
 	else
 	  egg_strftime(s, 6, "%H:%M", gmtime(&(m->joined)));
       } else
-	strncpyz(s, " --- ", sizeof s);
+	strlcpy(s, " --- ", sizeof s);
       if (m->user == NULL) {
 	egg_snprintf(s1, sizeof s1, "%s!%s", m->nick, m->userhost);
 	m->user = get_user_by_host(s1);
       }
       if (m->user == NULL)
-	strncpyz(handle, "*", sizeof handle);
+	strlcpy(handle, "*", sizeof handle);
        else
-       	strncpyz(handle, m->user->handle, sizeof handle);
+       	strlcpy(handle, m->user->handle, sizeof handle);
       get_user_flagrec(m->user, &user, chan->dname);
       /* Determine status char to use */
       if (glob_bot(user) && (glob_op(user)|| chan_op(user)))
@@ -1398,7 +1398,7 @@ static void cmd_channel(int idx, char *par)
 	else if (now - (m->last) > 180)
 	  egg_snprintf(s1, sizeof s1, "%2lim", ((now - (m->last)) / 60));
 	else
-	  strncpyz(s1, "   ", sizeof s1);
+	  strlcpy(s1, "   ", sizeof s1);
 	egg_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c   %%d %%s  %%s\n", 
 			maxnicklen, maxhandlen);
 	dprintf(idx, format, chanflag[0], chanflag[1], m->nick,	handle, s, atrflag, m->hops,
@@ -1562,7 +1562,7 @@ static void cmd_adduser(int idx, char *par)
   if (!statichost)
     maskhost(s, s1);
   else {
-    strncpyz(s1, s, sizeof s1);
+    strlcpy(s1, s, sizeof s1);
     p1 = strchr(s1, '!');
     if (strchr("~^+=-", p1[1]))
       p1[1] = '?';
@@ -1637,7 +1637,7 @@ static void cmd_deluser(int idx, char *par)
   } else {
     char buf[HANDLEN + 1] = "";
 
-    strncpyz(buf, u->handle, sizeof buf);
+    strlcpy(buf, u->handle, sizeof buf);
     buf[HANDLEN] = 0;
     if (deluser(u->handle)) {
       dprintf(idx, "Deleted %s.\n", buf); /* ?!?! :) */

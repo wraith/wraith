@@ -11,7 +11,7 @@ dirname(const char *path)
 
         /* Empty or NULL string gets treated as "." */
         if (path == NULL || *path == '\0') {
-                strncpyz(bname, ".", sizeof bname);
+                strlcpy(bname, ".", sizeof bname);
                 return(bname);
         }
 
@@ -26,7 +26,7 @@ dirname(const char *path)
 
         /* Either the dir is "/" or there are no slashes */
         if (endp == path) {
-                strncpyz(bname, *endp == '/' ? "/" : ".", sizeof bname);
+                strlcpy(bname, *endp == '/' ? "/" : ".", sizeof bname);
                 return(bname);
         } else {
                 do {
@@ -38,7 +38,7 @@ dirname(const char *path)
                 errno = ENAMETOOLONG;
                 return(NULL);
         }
-        strncpyz(bname, path, endp - path + 2);
+        strlcpy(bname, path, endp - path + 2);
         return(bname);
 }
 

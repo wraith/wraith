@@ -777,7 +777,7 @@ fillconf(conf_t * inconf)
 
   if (localhub && conffile.bots && conffile.bots->nick) {
     mynick = strdup(conffile.bots->nick);
-    strncpyz(origbotname, conffile.bots->nick, NICKLEN + 1);
+    strlcpy(origbotname, conffile.bots->nick, NICKLEN + 1);
   } else
     mynick = strdup(origbotname);
 

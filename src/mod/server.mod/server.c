@@ -374,11 +374,11 @@ static bool fast_deq(int which)
       return 0;
   }
   m = h->head;
-  strncpyz(msgstr, m->msg, sizeof msgstr);
+  strlcpy(msgstr, m->msg, sizeof msgstr);
   msg = msgstr;
   cmd = newsplit(&msg);
   if (use_fastdeq > 1) {
-    strncpyz(stackable, stackablecmds, sizeof stackable);
+    strlcpy(stackable, stackablecmds, sizeof stackable);
     stckbl = stackable;
     while (strlen(stckbl) > 0)
       if (!egg_strcasecmp(newsplit(&stckbl), cmd)) {
@@ -394,7 +394,7 @@ static bool fast_deq(int which)
     if (use_fastdeq == 3 && found)
       return 0;
     /* we check for the stacking method (default=1) */
-    strncpyz(stackable, stackable2cmds, sizeof stackable);
+    strlcpy(stackable, stackable2cmds, sizeof stackable);
     stckbl = stackable;
     while (strlen(stckbl) > 0)
       if (!egg_strcasecmp(newsplit(&stckbl), cmd)) {
@@ -409,7 +409,7 @@ static bool fast_deq(int which)
     nm = m->next;
     if (!nm)
       break;
-    strncpyz(nextmsgstr, nm->msg, sizeof nextmsgstr);
+    strlcpy(nextmsgstr, nm->msg, sizeof nextmsgstr);
     nextmsg = nextmsgstr;
     nextcmd = newsplit(&nextmsg);
     nextto = newsplit(&nextmsg);
@@ -532,7 +532,7 @@ void queue_server(int which, char *buf, int len)
     h->last = q;
     q->len = len;
     q->msg = (char *) my_calloc(1, len + 1);
-    strncpyz(q->msg, buf, len + 1);
+    strlcpy(q->msg, buf, len + 1);
     h->tot++;
     h->warned = 0;
   } else {
@@ -693,7 +693,7 @@ static void next_server(int *ptr, char *servname, port_t *port, char *pass)
 	  return;
 	} else if (x->realname && !egg_strcasecmp(x->realname, servname)) {
 	  *ptr = i;
-	  strncpyz(servname, x->realname, sizeof servname);
+	  strlcpy(servname, x->realname, sizeof servname);
 	  return;
 	}
       }

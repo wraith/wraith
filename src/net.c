@@ -613,7 +613,7 @@ int open_telnet_raw(int sock, char *server, port_t sport)
     port = firewallport;
   } else {
     proxy = 0;
-    strncpyz(host, server, sizeof host);
+    strlcpy(host, server, sizeof host);
     port = sport;
   }
 
@@ -951,12 +951,12 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
       memcpy(&from4->sin_addr, &addr, sizeof(addr));
 
       *ip = from4->sin_addr.s_addr;
-      strncpyz(caller, iptostr(*ip), 121);
+      strlcpy(caller, iptostr(*ip), 121);
       *ip = ntohl(*ip);
     } else {
 #endif /* USE_IPV6 */
       *ip = from.sin_addr.s_addr;
-      strncpyz(caller, iptostr(*ip), 121);
+      strlcpy(caller, iptostr(*ip), 121);
       *ip = ntohl(*ip);
 #ifdef USE_IPV6 
     }
@@ -997,7 +997,7 @@ int open_telnet_dcc(int sock, char *server, char *port)
 #  ifdef DEBUG_IPV6
     debug0("open_telnet_dcc, af_inet6!");
 #  endif /* DEBUG_IPV6 */
-    strncpyz(sv, server, sizeof sv);
+    strlcpy(sv, server, sizeof sv);
     debug2("%s should be %s",sv,server);
   } else {
 #endif /* USE_IPV6 */

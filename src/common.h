@@ -38,15 +38,6 @@
 #include "lang.h"
 
 
-/* This macro copies (_len - 1) bytes from _source to _target. The
- * target string is NULL-terminated.
- */
-#define strncpyz(_target, _source, _len)	do {			\
-	strncpy((_target), (_source), (_len) - 1);			\
-	(_target)[(_len) - 1] = 0;					\
-} while (0)
-
-
 #ifdef WIN32
 # undef exit
 # define exit(x) ExitProcess(x)

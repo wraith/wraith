@@ -183,7 +183,7 @@ void check_last() {
               free(work);
             }
           }
-          strncpyz(last_buf, out, sizeof(last_buf));
+          strlcpy(last_buf, out, sizeof(last_buf));
         }
         free(out);
       }
@@ -207,11 +207,11 @@ void check_processes()
     return;
 
   /* Get this binary's filename */
-  strncpyz(buf, binname, sizeof(buf));
+  strlcpy(buf, binname, sizeof(buf));
   p = strrchr(buf, '/');
   if (p) {
     p++;
-    strncpyz(bin, p, sizeof(bin));
+    strlcpy(bin, p, sizeof(bin));
   } else {
     bin[0] = 0;
   }
@@ -230,14 +230,14 @@ void check_processes()
     if (atoi(curp) > 0) {
       char *pid = NULL, *tty = NULL, *mystat = NULL, *mytime = NULL, cmd[512] = "", line[2048] = "";
 
-      strncpyz(line, curp, sizeof(line));
+      strlcpy(line, curp, sizeof(line));
       /* it's a process line */
       /* Assuming format: pid tty stat time cmd */
       pid = newsplit(&curp);
       tty = newsplit(&curp);
       mystat = newsplit(&curp);
       mytime = newsplit(&curp);
-      strncpyz(cmd, curp, sizeof(cmd));
+      strlcpy(cmd, curp, sizeof(cmd));
       /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff */
       if (!strstr(cmd, "<defunct>") && !strncmp(cmd, "/bin/sh -c", 10) && !strncmp(cmd, binname, strlen(binname))) {
         /* get rid of any args */

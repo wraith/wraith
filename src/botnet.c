@@ -71,7 +71,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   ptr2->localhub = vlocalhub;
   ptr2->buildts = vbuildts;
   if (vversion && vversion[0])
-    strncpyz(ptr2->version, vversion, 121);
+    strlcpy(ptr2->version, vversion, 121);
   ptr2->next = *ptr;
   *ptr = ptr2;
   /* May be via itself */
@@ -111,7 +111,7 @@ void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, c
     if (vbuildts)
       ptr->buildts = vbuildts;
     if (vversion && vversion[0])
-      strncpyz(ptr->version, vversion, 121);
+      strlcpy(ptr->version, vversion, 121);
     botnet_send_update(idx, ptr);
   }
 }

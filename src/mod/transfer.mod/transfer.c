@@ -1155,8 +1155,8 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
     nfn = buf = replace_spaces(nfn);
   dcc[i].u.xfer->origname = (char *) my_calloc(1, strlen(nfn) + 1);
   strcpy(dcc[i].u.xfer->origname, nfn);
-  strncpyz(dcc[i].u.xfer->from, from, NICKLEN);
-  strncpyz(dcc[i].u.xfer->dir, dir, DIRLEN);
+  strlcpy(dcc[i].u.xfer->from, from, NICKLEN);
+  strlcpy(dcc[i].u.xfer->dir, dir, DIRLEN);
   dcc[i].u.xfer->length = dccfilesize;
   dcc[i].timeval = now;
   dcc[i].u.xfer->f = f;

@@ -90,9 +90,9 @@ void makehash(int idx, int authi, char *randstring)
     free(secpass);
 
   if (idx != -1) 
-    strncpyz(dcc[idx].hash, MD5(hash), sizeof dcc[idx].hash);
+    strlcpy(dcc[idx].hash, MD5(hash), sizeof dcc[idx].hash);
   else if (authi != -1)
-    strncpyz(auth[authi].hash, MD5(hash), sizeof auth[authi].hash);
+    strlcpy(auth[authi].hash, MD5(hash), sizeof auth[authi].hash);
 
   egg_bzero(hash, sizeof(hash));
 }

@@ -1149,7 +1149,7 @@ static void cmd_console(int idx, char *par)
       dprintf(idx, "You don't have op or master access to channel %s.\n", nick);
       return;
     }
-    strncpyz(dcc[dest].u.chat->con_chan, nick, 81);
+    strlcpy(dcc[dest].u.chat->con_chan, nick, 81);
     nick[0] = 0;
     if ((dest == idx) && !glob_master(fr) && !chan_master(fr))
       /* Consoling to another channel for self */
@@ -1229,8 +1229,8 @@ static void cmd_chhandle(int idx, char *par)
 {
   char hand[HANDLEN + 1] = "", newhand[HANDLEN + 1] = "";
 
-  strncpyz(hand, newsplit(&par), sizeof hand);
-  strncpyz(newhand, newsplit(&par), sizeof newhand);
+  strlcpy(hand, newsplit(&par), sizeof hand);
+  strlcpy(newhand, newsplit(&par), sizeof newhand);
 
   if (!hand[0] || !newhand[0]) {
     dprintf(idx, "Usage: chhandle <oldhandle> <newhandle>\n");
@@ -1302,7 +1302,7 @@ static void cmd_handle(int idx, char *par)
   } else {
     char oldhandle[HANDLEN + 1] = "";
 
-    strncpyz(oldhandle, dcc[idx].nick, sizeof oldhandle);
+    strlcpy(oldhandle, dcc[idx].nick, sizeof oldhandle);
     if (change_handle(dcc[idx].user, newhandle)) {
       putlog(LOG_CMDS, "*", "#%s# handle %s", oldhandle, newhandle);
       dprintf(idx, "Okay, changed.\n");
@@ -1619,13 +1619,13 @@ static void cmd_chaddr(int idx, char *par)
       r = strchr(addr, ']');			/* pointer to the ending ']' */
 
       bi->address = (char *) my_calloc(1, r - addr + 1);	/* alloc and copy the addr */
-      strncpyz(bi->address, addr, r - addr + 1);
+      strlcpy(bi->address, addr, r - addr + 1);
 
       q = r + 1;				/* set q to ':' at addr */
     } else {
 #endif /* !USE_IPV6 */
       bi->address = (char *) my_calloc(1, q - addr + 1);
-      strncpyz(bi->address, addr, q - addr + 1);
+      strlcpy(bi->address, addr, q - addr + 1);
 #ifdef USE_IPV6
     }
 #endif /* USE_IPV6 */
@@ -1937,11 +1937,11 @@ static void cmd_die(int idx, char *par)
   if (par[0]) {
     egg_snprintf(s1, sizeof s1, "BOT SHUTDOWN (%s: %s)", dcc[idx].nick, par);
     egg_snprintf(s2, sizeof s2, "DIE BY %s!%s (%s)", dcc[idx].nick, dcc[idx].host, par);
-    strncpyz(quit_msg, par, 1024);
+    strlcpy(quit_msg, par, 1024);
   } else {
     egg_snprintf(s1, sizeof s1, "BOT SHUTDOWN (Authorized by %s)", dcc[idx].nick);
     egg_snprintf(s2, sizeof s2, "DIE BY %s!%s (request)", dcc[idx].nick, dcc[idx].host);
-    strncpyz(quit_msg, dcc[idx].nick, 1024);
+    strlcpy(quit_msg, dcc[idx].nick, 1024);
   }
   kill_bot(s1, s2);
 }
@@ -2729,9 +2729,9 @@ static void cmd_last(int idx, char *par) {
   char user[20] = "";
 
   if (par && par[0]) {
-    strncpyz(user, par, sizeof(user));
+    strlcpy(user, par, sizeof(user));
   } else if (conf.username) {
-    strncpyz(user, conf.username, sizeof(user));
+    strlcpy(user, conf.username, sizeof(user));
   }
   if (!user[0]) {
     dprintf(idx, "Can't determine user id for process\n");
@@ -3289,7 +3289,7 @@ static void cmd_mns_ignore(int idx, char *par)
 
   char buf[UHOSTLEN] = "";
 
-  strncpyz(buf, par, sizeof buf);
+  strlcpy(buf, par, sizeof buf);
   if (delignore(buf)) {
     putlog(LOG_CMDS, "*", "#%s# -ignore %s", dcc[idx].nick, buf);
     dprintf(idx, "No longer ignoring: %s\n", buf);
@@ -3945,9 +3945,9 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
     char user[20] = "";
 
     if (par[0]) {
-      strncpyz(user, par, sizeof(user));
+      strlcpy(user, par, sizeof(user));
     } else if (conf.username) {
-      strncpyz(user, conf.username, sizeof(user));
+      strlcpy(user, conf.username, sizeof(user));
     }
     if (!user[0]) {
       botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, "Can't determine user id for process");
@@ -4053,9 +4053,9 @@ static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * pa
 
     if (!port)
       port = default_port;
-    strncpyz(newserver, other, 120); 
+    strlcpy(newserver, other, 120); 
     newserverport = port; 
-    strncpyz(newserverpass, par, 120); 
+    strlcpy(newserverpass, par, 120); 
   }
   botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, "Jumping...");
 
