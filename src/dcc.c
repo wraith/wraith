@@ -167,7 +167,7 @@ greet_new_bot(int idx)
   else
     sysname = un.sysname;
 
-  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s\n", HANDLEN, egg_version, "-", localhub, buildts, egg_version);
+  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s\n", HANDLEN, egg_version, "-", conf.bot->localhub, buildts, egg_version);
 
   dprintf(idx, "si %s %s %s", conf.username ? conf.username : "*", un.sysname ? un.sysname : "*",
           un.nodename ? un.nodename : "*");
