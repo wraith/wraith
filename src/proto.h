@@ -284,8 +284,8 @@ void set_cmd_pass(char *, int);
 /* net.c */
 #ifdef HAVE_SSL
 int ssl_cleanup();
-int ssl_link(int, int);
 #endif /* HAVE_SSL */
+int ssl_link(int, int);
 IP my_atoul(char *);
 unsigned long iptolong(IP);
 char *myipstr(int);

@@ -17,7 +17,8 @@
 #  include <openssl/md5.h>
 #  define SSL_INC
 # endif /* ! SSL_INC */
-# define HAVE_SSL 1
+# undef HAVE_SSL
+/* Disabled for now # define HAVE_SSL 1 */
 #endif /* HAVE_OPENSSL_SSL_H */
 
 

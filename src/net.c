@@ -850,9 +850,9 @@ inline int open_listen_by_af(int *port, int af_def)
 #endif /* USE_IPV6 */
 }
 
-#ifdef HAVE_SSL
 int ssl_link(register int sock, int state)
 {
+#ifdef HAVE_SSL
   int err = 0, i = 0, errs = 0;
 
   debug2("ssl_link(%d, %d)", sock, state);
@@ -913,9 +913,9 @@ int ssl_link(register int sock, int state)
     putlog(LOG_ERROR, "*", "SSL_link(%d, %d) failed", sock, state);
     dropssl(socklist[i].sock);
   }
+#endif /* HAVE_SSL */
   return 0;
 }
-#endif /* HAVE_SSL */
 
 
 /* Given a network-style IP address, returns the hostname. The hostname
