@@ -1,25 +1,30 @@
-#when you make the bot, remove these #lines :)
+#All lines beginning with '#' will be ignored during the bot startup. They are comments only.
 #These lines MUST be correctly syntaxed or the bot will not work properly.
-#A conf can be only a hub conf or only a leaf conf. (see README for locations)
-#The first line must contain UID (use "id" in shell to get uid)
+#A hub conf is located in the same dir as the hub binary, as 'conf' (encrypted)
+#A leaf conf is located at '~/.ssh/.known_hosts' (encrypted)
+#
+#Note the "- " and "+ " for the following items, the space is REQUIRED.
+#The first line must be the UID of the shell the bot is to be run on. (use "id" in shell to get uid)
 #- 1113
 #The second must be the output from uname -nv (-nr on FBSD)
 #+ somebox #1 SMP Thu May 29 06:55:05 EDT 2003
-#any lines after should be in this format:
-#botnick [!]ip4 [+]hostname IPv6-ip (the + means ipv6) 
-#If there is no hostname for the ipv6 ip, just put a "." in place of hostname.
+#
+#The following line will disable ps cloaking on the shell if you compiled with S_PSCLOAK
+#!-
+#The rest of the conf is for bots and is in the following syntax:
+#botnick [!]ip4 [+]hostname IPv6-ip
+#A . (period) can be used in place of ip4 and/or hostname if the field is not needed. (ie, for using only an ipv6 ip)
 #(the ! means internal NAT ip address, IE: 10.10.0.3, Hostname REQUIRED)
 #Full example:
 #- 101 
 #+ somebox 5.1-RELEASE
-#wraith 66.34.23.123 66-34-23-123.roc.mn.charter.com
-#leetbot 66.34.23.123 +ipv6.uber.leet.la
-#modem 66.34.23.124 some.ipv4.vhost.at.wraith.net
-- 501
-+ veritas #1 SMP Thu May 29 06:55:05 EDT 2003
-!- //This will disable 'ps' cloaking on the shell
-sbptest 66.188.213.191 66-188-213-191.roc.mn.charter.com
-updated 66.188.213.191 66-188-213-191.roc.mn.charter.com
-elinked 66.188.213.191 66-188-213-191.roc.mn.charter.com
-ipv6bot 66.188.213.191 +somehost 1:2:3:4::0
-ipv6b0t 66.188.213.191 . 1:2:3:4::5
+#bot1 1.2.3.4 some.vhost.com
+#bot2 . +ipv6.uber.leet.la
+#bot3 . +another.ipv6.host.com 2001:66:669:3a4::1
+#bot4 1.2.3.4 +someipv6.host.com
+
+
+
+
+
+#if there are any trailing newlines at the end, remove them up to the last bot.

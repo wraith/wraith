@@ -1,69 +1,10 @@
-wraith by bryan (see CREDITS)
-
-This was rushed, so its not as simple as I'd like it to be..
-Read all of this through, then try what it says, if you fail, try again and make sure you are doing it correctly, if so
-then ask bryan: AIM: Bryan M Drewery
-
-First, get tcl 8.4..
-	http://www.tcl.tk/software/tcltk/download84.html
-	http://aleron.dl.sourceforge.net/sourceforge/tcl/tcl8.4.4-src.tar.gz
-Then, untar it, cd to the dir, cd unix, ./configure --prefix=/home/YOU --exec-prefix=/home/YOU --disable-shared
-
-Now, go back to the pack dir..
-Edit bldall, at the top change the directory to your homedir
-next, gcc -o makesalt makesalt.c
-./makesalt
-mv salt.h src/
-edit src/settings.c
-Edit pack.cfg (dont change anything in this actually.)
-Now, ./build all pack
-Ignore any warnings, any errors report to bryan
-There are your binaries for the OS you compiled on..: leaf, hub
-
-DONT LOSE: settings.c salt.h
-
-
-Making bots:
-edit conf, (it has instructions in it)
-then, ./binary -e conf .known_hosts (either binary is fine, -d would decrypt.)
-tar -czvf somebot.tgz .known_hosts binary
-then upload somebot.tgz to whatever shell..
-LEAF:
-untar, mkdir ~/.ssh;mv .known_hosts ~/.ssh
-Binary: ~/.sshrc
-Conf: ~/.ssh/.known_hosts
-./leaf
-HUB:
-untar, mv .known_hosts conf;./hub
-Binary: /wheverever/you/want // just make sure the file conf is in the same dir
-Conf: /where/you/put/your/hub/conf
-
-You can do ./binary -d /path/to/conf somefile, and edit it on the shell of course to add more bots or change vhosts...
-The hub conf is /path/to/hubdir/conf
-the leaf conf is /home/you/.ssh/.known_hosts
-Dont forget to encrypt them :)
-
-UPDATING:
-Get the new src from bryan.
-Copy your salt.h, settings.c and bldall files and put them in their respect directories in the untarred newsrc..
-./bldall pack
-./leaf -v
-(uname -s)
-cp leaf leaf.Os.ver
-cp hub hub.Os.hub
-Set a hub +U 
-Then on that hub, copy all the binaries for the new version to it's dir..
-whatever os you are in, copy the appropiate new hub binary to 'newhub', then on the hub, type .update newhub
-Sit back and cry as all the bots die probably.. nah j/k
-
-This will all be improved over time, and you won't need to redo your entire net ever...
 
 Channel modes:
 	Read eggdrop docs.
 	Additions:
 	+/-fastop, -fastop does cookieops
-	+voice voices all except +q users and people that > |+m devoice
-	+closed is like +locked (kicks all non-users and keeps +i set)
+	+voice voices all except +q users and people that > m|+m devoice
+	+closed is like ghost's +locked (kicks all non-users and keeps +i set)
         +nomop Kicks users who set +ooo*
 	Anything not listed here or in eggdrop docs is not finished.
 
@@ -89,8 +30,6 @@ Only +a can give certain flags, I forget which ones, but you'll figure that out 
                    Better idea to just set a few leafs +c and tell your users.
    d       d       auto deop (never +o)
    e       e       exempt from stopnethack //useless
-   f       f       friend
-   h               highlighting //useless
    i               hub access
    j               leaf chat hub access
    k       k       autokick (never on chan)
@@ -100,11 +39,9 @@ Only +a can give certain flags, I forget which ones, but you'll figure that out 
    o       o       op
    p               partyline chat access (-p wont be able to talk)
    q       q       quiet (never +v)
-   s               bot is sec hub (NOT FUNCTIONAL YET, DO NOT SET)
    u               bot is the updatehub (MAKE SURE IT HAS OOGLES OF BW)
    v       v       auto-voice
-   w       w       bot gives autovoice
-   x       x       users is exempt for flood kicks
+   x       x       user is exempt from flood kicks
    y       y       bot gives out voices
 
 
@@ -117,6 +54,5 @@ important console modes:
 	+w wallops
 	+c cmds
 	+b bots
-set with !console +abcde...
-
-
+	+d debug (You probably won't want to see all of this)
+set with .console +abcde

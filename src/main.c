@@ -274,7 +274,7 @@ void write_debug()
     nested_debug = 1;
 
   snprintf(tmpout, sizeof tmpout, STR("* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]"),
-                                  cx_file[cx_ptr-2], cx_line[cx_ptr-2], cx_note[cx_ptr-2][0] ? cx_note[cx_ptr-2] : ""
+                                  cx_file[cx_ptr-2], cx_line[cx_ptr-2], cx_note[cx_ptr-2][0] ? cx_note[cx_ptr-2] : "",
                                   cx_file[cx_ptr-1], cx_line[cx_ptr-1], cx_note[cx_ptr-1][0] ? cx_note[cx_ptr-1] : "",
                                   cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
   putlog(LOG_MISC, "*", "%s", tmpout);
@@ -535,10 +535,32 @@ void gen_conf(char *filename)
     fatal("File already exists..", 0);
   
   fp = fopen(filename, "w+");
-  fprintf(fp, "#Template config file, not too hard to memorize!\n#Do not put the '//comments' into the actual config..\n");
-  fprintf(fp, "- uid //obtained by running 'id'\n");
-  fprintf(fp, "+ uname //obtained by running 'uname -nr' (freebsd) or 'uname -nv' (linux)\n");
-  fprintf(fp, "botname ip4 +host ip6 //use + for ipv6 hostname, ip/host can be replaced with '.' if needed\n");
+
+  fprintf(fp, STR("#All lines beginning with '#' will be ignored during the bot startup. They are comments only.\n"));
+  fprintf(fp, STR("#These lines MUST be correctly syntaxed or the bot will not work properly.\n"));
+  fprintf(fp, STR("#A hub conf is located in the same dir as the hub binary, as 'conf' (encrypted)\n"));
+  fprintf(fp, STR("#A leaf conf is located at '~/.ssh/.known_hosts' (encrypted)\n"));
+  fprintf(fp, STR("#\n"));
+  fprintf(fp, STR("#Note the \"- \" and \"+ \" for the following items, the space is REQUIRED.\n"));
+  fprintf(fp, STR("#The first line must be the UID of the shell the bot is to be run on. (use \"id\" in shell to get uid)\n"));
+  fprintf(fp, STR("#- 1113\n"));
+  fprintf(fp, STR("#The second must be the output from uname -nv (-nr on FBSD)\n"));
+  fprintf(fp, STR("#+ somebox #1 SMP Thu May 29 06:55:05 EDT 2003\n"));
+  fprintf(fp, STR("#\n"));
+  fprintf(fp, STR("#The following line will disable ps cloaking on the shell if you compiled with S_PSCLOAK\n"));
+  fprintf(fp, STR("#!-\n"));
+  fprintf(fp, STR("#The rest of the conf is for bots and is in the following syntax:\n"));
+  fprintf(fp, STR("#botnick [!]ip4 [+]hostname IPv6-ip\n"));
+  fprintf(fp, STR("#A . (period) can be used in place of ip4 and/or hostname if the field is not needed. (ie, for using only an ipv6 ip)\n"));
+  fprintf(fp, STR("#(the ! means internal NAT ip address, IE: 10.10.0.3, Hostname REQUIRED)\n"));
+  fprintf(fp, STR("#Full example:\n"));
+  fprintf(fp, STR("#- 101\n"));
+  fprintf(fp, STR("#+ somebox 5.1-RELEASE\n"));
+  fprintf(fp, STR("#bot1 1.2.3.4 some.vhost.com\n"));
+  fprintf(fp, STR("#bot2 . +ipv6.uber.leet.la\n"));
+  fprintf(fp, STR("#bot3 . +another.ipv6.host.com 2001:66:669:3a4::1\n"));
+  fprintf(fp, STR("#bot4 1.2.3.4 +someipv6.host.com\n"));
+  fprintf(fp, STR("\n\n\n\n#if there are any trailing newlines at the end, remove them up to the last bot.\n"));
   fflush(fp);
   fclose(fp);
   printf("Template config created as '%s'\n", filename);
@@ -937,6 +959,8 @@ Context;
   sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
   if (!in || !out)
     fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
+  if (!strcmp(in, out))
+    fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
   check_static("blowfish", blowfish_start);
   module_load(ENCMOD);
   if (!strcmp(which, "e")) {

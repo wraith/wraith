@@ -1,0 +1,70 @@
+
+* The installation process has changed starting at version 1.0.11. 
+* The build currently requires a static TCL 8.0 or newer library. (TCL will be stripped soon)
+
+1. TCL
+2. Pack settings
+3. Compiling
+4. Making bots
+
+Step 1: TCL
+
+If you have already made a static TCL build proceed to Step 2. If you are unsure then keep reading...
+The download website is at:
+	http://www.tcl.tk/software/tcltk/download84.html
+A nice direct link for the tarball is:
+	http://aleron.dl.sourceforge.net/sourceforge/tcl/tcl8.4.4-src.tar.gz
+Once you have it, untar -zxf tcl8.4.4-src.tar.gz
+Then, cd tcl8.4.4/unix
+./configure --disable-shared --prefix=/path/to/your/home --exec-prefix=/path/to/your/home
+Then: make; make install
+
+Step 2: Pack settings
+
+The files listed here are all located in pack/, and will need to be saved for future compiles.
+If you have settings.c, conf.h, or salt.h, place them in pack/
+NOTE: conf.h (pack.conf) from verions previous to 1.0.11 are NOT compatable with 1.0.11 and higher.
+
+conf.h:
+ If you have an older pack.conf, print it out and edit the template pack/conf.h and change accordingly.
+salt.h:
+ This file is generated automatically, if you do not already have one, during compilation
+settings.c:
+ Edit the template pack/settings.c if you don't already have one.
+
+
+Step 3: Compiling
+
+For leaf build: ./build leaf
+For hub build: ./build hub
+To build both: ./build all
+To compile a debug version of the pack, add -d in as a option before the type.
+ ie, ./build -d leaf
+
+During the compile process many warnings may appear on screen, ignore them. Only report ERRORS please.
+After the compile process is finished, the binaries will be placed in wraith.OS.version.tgz.
+ The OS and version are dynamic depending on the pack build, type 'ls' to find exact name.
+
+
+Step 4: Making bots
+
+NOTE: conf files from versions older than 1.0.11 still work, but improvements have been made.
+
+read over doc/conf.example.
+This file can be made by the bot binary with ./binary -g filename
+Edit the conf (conf.example or the generated one, doesnt matter)
+For leaf bots, encrypt the conf as '.known_hosts'
+For hub bots, encrypt the conf as 'conf'
+Thie is done by: ./binary -e infile outfile
+tar -czvf somebot.tgz .known_hosts binary
+(or for hub): tar -czvf somehub.tgz conf binary
+then upload somebot.tgz to whatever shell..
+
+LEAF:
+untar, mkdir ~/.ssh;mv .known_hosts ~/.ssh/.known_hosts
+then just run the leaf binary, it will move itself to: ~/.sshrc
+
+HUB:
+untar, ./binary 
+This is assuming the conf is already encrypted as 'conf', if not, move it to 'conf'.
+The binary can be named ANYTHING, just as long as the encrypted conf is known as 'conf' in the same dir
