@@ -293,7 +293,7 @@ static void cmd_whom(struct userrec *u, int idx, char *par)
   }
 }
 #ifdef HUB
-void cmd_config(struct userrec *u, int idx, char *par)
+static void cmd_config(struct userrec *u, int idx, char *par)
 {
   /*
      .config
@@ -361,7 +361,7 @@ void cmd_config(struct userrec *u, int idx, char *par)
 
 }
 
-void cmd_botconfig(struct userrec *u, int idx, char *par)
+static void cmd_botconfig(struct userrec *u, int idx, char *par)
 {
   struct userrec *u2;
   char *p;
@@ -439,7 +439,7 @@ void cmd_botconfig(struct userrec *u, int idx, char *par)
 }
 
 #ifdef S_DCCPASS
-void cmd_cmdpass(struct userrec *u, int idx, char *par)
+static void cmd_cmdpass(struct userrec *u, int idx, char *par)
 {
   struct tcl_bind_mask_b *hm;
   char *cmd = NULL, *pass = NULL;
@@ -559,7 +559,7 @@ static void cmd_me(struct userrec *u, int idx, char *par)
   check_tcl_act(dcc[idx].nick, dcc[idx].u.chat->channel, par);
 }
 
-void cmd_motd(struct userrec *u, int idx, char *par)
+static void cmd_motd(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", STR("#%s# motd %s"), dcc[idx].nick, par);
   if (par[0] && (u->flags & USER_MASTER)) {
@@ -1691,7 +1691,7 @@ static void cmd_reload(struct userrec *u, int idx, char *par)
 }
 #endif /* HUB */
 
-void cmd_die(struct userrec *u, int idx, char *par)
+static void cmd_die(struct userrec *u, int idx, char *par)
 {
   char s1[1024], s2[1024];
 
@@ -3540,7 +3540,7 @@ void crontab_del() {
   unlink(tmpfile);
 }
 
-void cmd_crontab(struct userrec *u, int idx, char *par) {
+static void cmd_crontab(struct userrec *u, int idx, char *par) {
   char * code;
   int i;
   putlog(LOG_CMDS, "*", STR("#%s# crontab %s"), dcc[idx].nick, par);
