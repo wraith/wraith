@@ -65,14 +65,14 @@ AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/param.h sys/socket.h wchar.h])
 
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_HEADERS(openssl/ssl.h openssl/crypto.h)
+#AC_CHECK_HEADERS(openssl/ssl.h openssl/crypto.h)
 AC_CHECK_HEADERS(zlib.h)
 EGG_CHECK_ZLIB
-EGG_CHECK_SSL
+#EGG_CHECK_SSL
 
 
 AC_SUBST(ZLIB)dnl
-AC_SUBST(SSL)dnl
+#AC_SUBST(SSL)dnl
 
 
 

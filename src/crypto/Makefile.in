@@ -14,7 +14,8 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
-OBJS = cleanse.o \
+OBJS = aes.o \
+	cleanse.o \
 	md5.o \
 	sha.o
 

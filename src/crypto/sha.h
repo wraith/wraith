@@ -63,10 +63,10 @@ typedef struct SHAstate_st
         int num;
         } SHA_CTX;
 
-int SHA1_Init(SHA_CTX *c);
-int SHA1_Update(SHA_CTX *c, const void *data, unsigned long len);
-int SHA1_Final(unsigned char *md, SHA_CTX *c);
-unsigned char *SHA1(const unsigned char *d, unsigned long n, unsigned char *md);
-void SHA1_Transform(SHA_CTX *c, const unsigned char *data);
+int SHA1_Init(SHA_CTX *);
+int SHA1_Update(SHA_CTX *, const void *, unsigned long);
+int SHA1_Final(unsigned char *, SHA_CTX *);
+unsigned char *SHA1(const unsigned char *, unsigned long, unsigned char *);
+void SHA1_Transform(SHA_CTX *, const unsigned char *);
 
 #endif /* !_SHA_H */

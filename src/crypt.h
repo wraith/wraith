@@ -1,6 +1,7 @@
 #ifndef _CRYPT_H
 #define _CRYPT_H
 
+#include <stdio.h>
 
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
@@ -8,12 +9,12 @@
 
 #include "src/crypto/crypto.h"
 
-#ifdef HAVE_OPENSSL_SSL_H
-#  include <openssl/crypto.h>
-#  include <openssl/aes.h>
+//#ifdef HAVE_OPENSSL_SSL_H
+//#  include <openssl/crypto.h>
+//#  include <openssl/aes.h>
 //#  include <openssl/sha.h>
 //#  include <openssl/md5.h>
-#endif /* HAVE_OPENSSL_SSL_H */
+//#endif /* HAVE_OPENSSL_SSL_H */
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)

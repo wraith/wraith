@@ -4,6 +4,6 @@
 #include "cleanse.h"
 #include "md5.h"
 #include "sha.h"
-//#include "aes.h"
+#include "aes.h"
 
 #endif /* !_CRYPTO_H */
