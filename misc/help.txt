@@ -1,5 +1,5 @@
 ::+ban
-###  %b+ban%b <hostmask> [channel] [%%<XdXhXm>] [comment]
+###  $b+ban$b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds a ban to the list of bans stored on the bot, with optional comment and
    ban time. This ban is stored with your handle as the creator, and will be
    in effect for every channel if no channel is specified. Prefixing a comment
@@ -8,19 +8,19 @@
  
 See also: bans, -ban, stick, unstick
 ::+chan
-###  %b+chan%b <channel> [options]
+###  $b+chan$b <channel> [options]
     Adds a channel to the bot's channel list. If options are specified, the 
     channel will be configured with the options.
  
 See also: -chan, chanset, chaninfo
 ::+chrec
-###  %b+chrec%b <handle> [channel]
+###  $b+chrec$b <handle> [channel]
    Adds an empty channel record for the specified user so that channel lastons
    and info lines can be saved. No flags are associated with the channel.
  
 See also: -chrec, chattr%{+n}, +chan, -chan%{-}
 ::+exempt
-###  %b+exempt%b <hostmask> [channel] [%%<XdXhXm>] [comment]
+###  $b+exempt$b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds an exempt to the list of exempts stored on the bot, with optional
    comment and exempt time. This exempt is stored with your handle as the
    creator, and will be in effect for every channel if no channel is specified.
@@ -28,21 +28,21 @@ See also: -chrec, chattr%{+n}, +chan, -chan%{-}
  
 See also: exempts, -exempt, stick, unstick
 ::+host
-###  %b+host%b [handle] <hostmask> [anotherhost] ...
+###  $b+host$b [handle] <hostmask> [anotherhost] ...
    Adds a hostmask to a user's user record. Hostmasks are used to identify your
    handle on IRC. If a handle is not specified, the hostmask will be added to
    YOUR user record. List as many hosts as wanted.
  
 See also: -host
 ::+ignore
-###  %b+ignore%b <hostmask> [%%<XdXhXm>] [comment]
+###  $b+ignore$b <hostmask> [%%<XdXhXm>] [comment]
    Adds an ignore to the list of ignores stored on the bot, with optional
    comment and ignore time. This ignore is stored with your handle as the
    creator. Ignore time has to be expressed in days, hours, and/or minutes.
  
 See also: -ignore, ignores
 ::+invite
-###  %b+invite%b <hostmask> [channel] [%%<XdXhXm>] [comment]
+###  $b+invite$b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds an invite to the list of invites stored on the bot, with optional
    comment and invite time. This invite is stored with your handle as the
    creator, and will be in effect for every channel if no channel is specified.
@@ -50,34 +50,34 @@ See also: -ignore, ignores
  
 See also: invites, -invite, stick, unstick
 ::+user
-###  %b+user%b <handle> [host] [anotherhost] ...
+###  $b+user$b <handle> [host] [anotherhost] ...
    Creates a new user record for the handle given. The new user record will
    have no flags, an optional hostmask, and a random pass/secpass.
    List as many hosts as needed.
  
 See also: -user, +host, -host%{+ni}, newleaf%{-}
 ::-ban
-###  %b-ban%b <banmask or number> [channel]
+###  $b-ban$b <banmask or number> [channel]
    Removes the specified ban from the list of bans stored on the bot. You may
    also reference the ban by the number shown by the 'bans' command.
  
 See also: bans, +ban, stick, unstick
 :hub:-bot
-###  %b-bot%b <bot>
-   This is exactly the same as %b'%d-user'%b (it removes a user record). It is
+###  $b-bot$b <bot>
+   This is exactly the same as $b'%d-user'$b (it removes a user record). It is
    included for convenience.
  
 See also: +user, -user%{+n}, newleaf%{-}
 ::-chan
-### %b-chan%b <channel>
+### $b-chan$b <channel>
      This removes ALL information about a channel from the bot. 
  
-     %f*** IMPORTANT ***%f
+     $f*** IMPORTANT ***$f
  
      This erases ALL information about the channel, including channel settings,
-     bans, exempts, invites, and channel records for users -- %bEVERYTHING%b.
+     bans, exempts, invites, and channel records for users -- $bEVERYTHING$b.
  
-     %bDO NOT%b use it to have the bot temporarily leave a channel. This
+     $bDO NOT$b use it to have the bot temporarily leave a channel. This
      command is for abandoning a channel (e.g. the channel will have to be
      redefined and all user flags for that channel will have to be redone.
  
@@ -85,7 +85,7 @@ See also: +user, -user%{+n}, newleaf%{-}
  
 See also: +chan, chanset, chaninfo, cycle, down
 ::-chrec
-###  %b-chrec%b <handle> [channel]
+###  $b-chrec$b <handle> [channel]
    Removes a channel record for the specified user, including channel lastons,
    info lines, and flags.
  
@@ -96,54 +96,54 @@ See also: +chrec, chattr
  
 See also: exempts, +exempt, stick, unstick
 ::-host
-###  %b-host%b <hostmask>
+###  $b-host$b <hostmask>
    Removes a host from your handle.
 %{+m|m}
-###  %b-host%b <handle> <hostmask> [anotherhost] ...
+###  $b-host$b <handle> <hostmask> [anotherhost] ...
    Removes a hostmask from a user's user record.
 %{-}
  
 See also: +host
 ::-ignore
-###  %b-ignore%b <hostmask/number>
+###  $b-ignore$b <hostmask/number>
    Removes the specified ignore from the list of ignores stored on the bot. You
    may also reference the ignore by the number shown by the 'ignores' command.
  
 See also: +ignore, ignores
 ::-invite
-###  %b-invite%b <hostmask or number>
+###  $b-invite$b <hostmask or number>
    Removes the specified invite from the list of invites stored on the bot. You
    may also reference the invite by the number shown by the 'invites' command.
  
 See also: invites, +invite, stick, unstick
 ::-user
-###  %b-user%b <handle>
+###  $b-user$b <handle>
    Removes the specified handle's user record.
  
 See also: +user%{+ai}, -bot%{-}%{+nai}, newleaf%{-}
 ::about:
-###  %babout%b
+###  $babout$b
    If you feel you are missing from the list feel free to contact bryan.
 :leaf:act
-###  %bact%b [channel] <text>
+###  $bact$b [channel] <text>
    Performs an action on the current console channel (or otherwise
    specified channel), as if the bot did it.  Just like the /me
    command in IRC.
  
 See also: console
 ::addline
-###  %baddline%b <username>
+###  $baddline$b <username>
    Shows you a simple line for adding a user to another botnet with the
    same hostmasks.
  
 See also: whois
 ::addlog
-###  %baddlog%b <text>
+###  $baddlog$b <text>
    Adds your comment to the bot's logfile. Bot masters can go back later and
    review the log, and will see your comment (with your handle attached). This
    is useful for explaining confusing activity.
 :leaf:adduser
-###  %badduser%b [!]<nickname> [handle]
+###  $badduser$b [!]<nickname> [handle]
    Creates a new user record for a user on the channel, using their
    current hostname.  It's similar to a user msg'ing the bot 'hello'
    except that no information is sent to that user.  If the bot
@@ -161,32 +161,32 @@ See also: whois
  
 See also: +host, -host%{+m}, +user, -user%{-}
 :leaf:authed:
-###  %bauthed%b
+###  $bauthed$b
    Displays users who are authed on the bot for chan/msg cmds.
 ::away
-###  %baway%b [reason]
+###  $baway$b [reason]
    Marks you as "away" on the party line. Your away message will show up in
-   the %b'%dwho'%b list, and will be displayed to anyone who tries to send you
+   the $b'%dwho'$b list, and will be displayed to anyone who tries to send you
    a note. Your notes will be stored, and then displayed to you as soon as you
    are no longer away. Saying something on the party line will automatically
-   remove your "away" status, or you can type %b'%dback'%b or %b'%daway'%b by
+   remove your "away" status, or you can type $b'%dback'$b or $b'%daway'$b by
    itself.
  
 See also: back
 ::back
-###  %bback%b
+###  $bback$b
    This marks you as no longer away on the party line.
  
 See also: away
 :hub:backup
-###  %bbackup%b
+###  $bbackup$b
    This makes the bot write a backup of its entire user list to the disk. 
    This is useful if you feel the need to backup the userfile and channel
    settings.
  
 See also: reload, save
 ::bans
-###  %bbans%b [[channel/all]/wildcard]
+###  $bbans$b [[channel/all]/wildcard]
    Shows you a list of the global bans active on the current channel, and the
    list of channel-specific bans, as well as any bans that are on the channel
    but weren't placed by the bot.
@@ -197,7 +197,7 @@ See also: reload, save
            Created 15:10
  
    The number (5) can be used to reference the ban if you wish to remove it
-   (see %b'-ban'%b). Next is the actual hostmask being banned. The "(perm)"
+   (see $b'-ban'$b). Next is the actual hostmask being banned. The "(perm)"
    means that the ban is "permanent": that is, it doesn't automatically expire.
    If there is an elapsed time showing instead, the time displayed is how long
    the ban has been active. These types of bans expire after two hours. The
@@ -223,10 +223,10 @@ See also: reload, save
  
 See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 :hub:bc:
-###  %bbc%b <bot> <cmd> [params]
+###  $bbc$b <bot> <cmd> [params]
    See: botcmd
 :hub:binds
-###  %bbinds%b [type/match] [all]
+###  $bbinds$b [type/match] [all]
    Shows the Tcl bindings in effect, in a list similar to this:
       Command bindings:
         TYPE FLGS COMMAND              HITS BINDING (TCL)
@@ -236,22 +236,22 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
         pub  -|-  gross                   0 pub_gross
    The fields should be self-explanatory, except for HITS, which records the
    number of times that binding has been called. If not, go read the file
-   %b'doc/tcl-commands.doc'%b for help on the Tcl bind command. Note that the
+   $b'doc/tcl-commands.doc'$b for help on the Tcl bind command. Note that the
    builtin commands are now shown. You may also specify a type of binding to
-   show (i.e. %b'%dbinds msg'%b) or you can specify a wild card match (i.e.
-   %b'%dbinds *seen*'%b) if you want to narrow the field a bit. The wild card
+   show (i.e. $b'%dbinds msg'$b) or you can specify a wild card match (i.e.
+   $b'%dbinds *seen*'$b) if you want to narrow the field a bit. The wild card
    matches will match against the TYPE, COMMAND and BINDING fields. You can
    view more binds by adding 'all' to the end of the command.
  
 See also: tcl
 :hub:boot
-###  %bboot%b <handle[@bot]> [reason]
+###  $bboot$b <handle[@bot]> [reason]
    Kicks a user off the party line and displays the reason, if you specify
    one. You can also specify a bot, and attempt to boot someone from another
    bot on the botnet, though it may be rejected if that bot does not allow
    remote boots. You can not boot a bot owner.
 :hub:botcmd:
-###  %bbotcmd%b <bot> <cmd> [params]
+###  $bbotcmd$b <bot> <cmd> [params]
    The specified cmd and optional parameters are executed on the specified bot, 
    all results are displayed back on DCC. For example:
      [19:29] #bryan# botcmd wtest whom ...
@@ -271,7 +271,7 @@ See also: tcl
  
 See also: bc, cmdpass
 :hub:botconfig:
-###  %bbotconfig%b <bot> [name [value|-]]
+###  $bbotconfig$b <bot> [name [value|-]]
    Set's a bot specific entry.
    NOTE: 'config' and 'botconfig' have different entries. 
    If there is a botconfig entry for 'name' and a config entry for 'name', 
@@ -280,65 +280,65 @@ See also: bc, cmdpass
  
 See also: botconfig
 ::botjoin
-###  %bbotjoin%b <bot> <channel> [options]
+###  $bbotjoin$b <bot> <channel> [options]
     Adds a channel to the bot's channel list. If options are specified, the 
     channel will be configured with the options.
  
 See also: botpart, +chan, -chan, chanset, chaninfo
 ::botjump:
-###  %bbotjump%b <bot> [server [port [pass]]]
+###  $bbotjump$b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
    server, it will jump to the next server in it's internal list (see
-   %b'help config'%b). If you specify a server, it will jump to that
+   $b'help config'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
    Jumping servers ALWAYS makes the bot lose ops! be careful!
  
 See also: jump, servers, botserver
 ::botmsg:
-###  %bbotmsg%b <bot> <nickname|#chan> <text>
+###  $bbotmsg$b <bot> <nickname|#chan> <text>
    sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
 See also: msg%{+n}, netmsg%{-}
 ::botnick:
-###  %bbotnick%b <bot>
+###  $bbotnick$b <bot>
    The bot will display it's current nick over DCC.
  
 See also: netnick
 ::botpart
-###  %bbotjoin%b <bot> <channel> [options]
+###  $bbotjoin$b <bot> <channel> [options]
     Removes bot from the specified channel
  
 See also: botjoin, +chan, -chan, chanset, chaninfo
 :hub:bots
-###  %bbots%b
+###  $bbots$b
    Shows the list of bots currently on the botnet.
    Example:
       Bots: cEvin, ruthie, Killa1
    There is no indication of which bots are directly connected to this current
-   bot. %{+n}Use %b'%dwho'%b or %b'%dbottree'%b for that information.%{-}
+   bot. %{+n}Use $b'%dwho'$b or $b'%dbottree'$b for that information.%{-}
  
 See also: downbots%{+n}, bottree%{-}
 ::botserver:
-###  %bbotserver%b <bot>
+###  $bbotserver$b <bot>
    The bot will display it's current server and lag over DCC.
  
 See also: netserver, servers%{+n}, config%{-}
 :hub:bottree
-###  %bbottree%b
+###  $bbottree$b
    Shows a tree-format diagram of the bots currently on the botnet. It's just a
    nice way to get a feel for how the bots are physically connected. If 2 bots
    are sharing, a + will be indicated, or a ? if nothing is known.
  
 See also: bots, downbots
 ::botversion:
-###  %bbotversion%b <bot>
+###  $bbotversion$b <bot>
    The bot will display it's pack version and uname.
  
 See also: netversion, about%{+m|m}, status%{-}
 :hub:chaddr
-###  %bchaddr%b <bot> <address[:bot port[/user port]]>
+###  $bchaddr$b <bot> <address[:bot port[/user port]]>
    Changes the address for a bot. This is the address your bot will try to
    connect to when linking. If the bot has a separate port for bots and users,
    they should be separated  by a slash (/).
@@ -349,18 +349,18 @@ See also: netversion, about%{+m|m}, status%{-}
  
 See also: link
 ::chaninfo:
-###  %bchaninfo%b <channel>
+###  $bchaninfo$b <channel>
      This lists all the settings for the bot on the given channel.
      It shows any of the following:
-        %bchanmode%b   These modes are enforced on the channel. Both + and -
+        $bchanmode$b   These modes are enforced on the channel. Both + and -
                    modes can be enforced.
-        %bidle-kick%b  Kick idle users that are not +f or above on the channel
+        $bidle-kick$b  Kick idle users that are not +f or above on the channel
                    after how many minutes (set this to 0 to disable).
 %{+m|m}
-        %blimit-raise%b       If this is set, the +l bot will raise the limit 
+        $blimit-raise$b       If this is set, the +l bot will raise the limit 
                           to the users in the channel + this ammount. Set to 
                           0 to disable.
-        %bstopnethack-mode%b  This setting will make the bot de-op anyone who
+        $bstopnethack-mode$b  This setting will make the bot de-op anyone who
                           enters the channel with serverops. There are seven
                           different modes for this settings:
                             0 turn off
@@ -373,7 +373,7 @@ See also: link
                               If the channel is +bitch, see stopnethack-mode 1
                             6 If the channel is -bitch, see stopnethack-mode 2
                               If the channel is +bitch, see stopnethack-mode 4
-        %brevenge-mode%b      This settings defines how the bot should punish
+        $brevenge-mode$b      This settings defines how the bot should punish
                           bad users when revenging. There are four possible
                           settings:
                             0 Deop the user.
@@ -383,17 +383,17 @@ See also: link
                               channel, and kick them.
                             3 Deop the user, give them the +d flag for the
                               channel, kick, and ban them.
-        %bclosed-ban%b        Set this to 1 to ban users who join +closed 
+        $bclosed-ban$b        Set this to 1 to ban users who join +closed 
                           channels. This is probably not needed though, as
                           +closed maintains +i.
-        %bclosed-private%b    If a channel is set +closed, the bots will
+        $bclosed-private$b    If a channel is set +closed, the bots will
                           enforce +p as well. The point is to notice the chan
                           and bots when an /invite is done. This is useful in 
                           seeing when a shell is hijacked ;)
-        %bban-time%b          Set here how long temporary bans will last (in
+        $bban-time$b          Set here how long temporary bans will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them.
-        %bexempt-time%b       Set here how long temporary exempts will last (in
+        $bexempt-time$b       Set here how long temporary exempts will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. The bot will check the exempts
                           every X minutes, but will not remove the exempt if a
@@ -401,7 +401,7 @@ See also: link
                           Once the ban is removed, then the exempt will be
                           removed the next time the bot checks. Please note
                           that this is an IRCnet feature.
-        %binvite-time%b       Set here how long temporary invites will last (in
+        $binvite-time$b       Set here how long temporary invites will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. The bot will check the invites
                           every X minutes, but will not remove the invite if a
@@ -415,26 +415,26 @@ See also: link
         2           Kick (chattr +k)
         3           Remove user
       
-      %bbad-cookie%b             Missing or invalid cookie in bot op line.
+      $bbad-cookie$b             Missing or invalid cookie in bot op line.
 
-      %bcookie-time-slack%b      How many seconds off of botnet timesync is allowed
+      $bcookie-time-slack$b      How many seconds off of botnet timesync is allowed
                                  in cookies.
-      %bmanop%b                  Users who op manually in a -manop chan.
-      %bmdop%b                   Users who mass deop.
-      %bmop%b                    Users who mass op in a -mop chan.
+      $bmanop$b                  Users who op manually in a -manop chan.
+      $bmdop$b                   Users who mass deop.
+      $bmop$b                    Users who mass op in a -mop chan.
 
      The following can be set + or - (e.g. .chanset #channel -enforcebans)
-        %bautoop%b         Bots that are +y will auto-op all users with 
+        $bautoop$b         Bots that are +y will auto-op all users with 
                        op access to the channel.
-        %bbitch%b          Only let users with the +o flag have op on the
+        $bbitch$b          Only let users with the +o flag have op on the
                        channel?
-        %bclosed%b         Kick all people who join channel unless they have
+        $bclosed$b         Kick all people who join channel unless they have
                        op access for the channel.
-        %bcycle%b          Bot will attempt to cycle the channel when opless
+        $bcycle$b          Bot will attempt to cycle the channel when opless
                        or during splits to gain ops.
-        %benforcebans%b    When a ban is set, kick people who are on the channel
+        $benforcebans$b    When a ban is set, kick people who are on the channel
                        and match the ban?
-        %bfastop%b         Setting this will disable cookie-ops. You may
+        $bfastop$b         Setting this will disable cookie-ops. You may
                        know cookie-ops as an annoying way of bots opping 
                        themselves with +o-b bot *!*@fjdifgjdsgiufufdhgfudghfdgfdg,
                        but, with -fastop (cookie-ops enabled), opping is much
@@ -443,23 +443,23 @@ See also: link
                        highly recommened to always be set. 
                        See '%dconfig bad-cookie' for punishment options.
                        
-        %binactive%b       This prevents the bot from joining the channel (or
+        $binactive$b       This prevents the bot from joining the channel (or
                        makes it leave the channel if it is already there). It
                        can be useful to make the bot leave a channel without
                        losing its settings, channel-specific user flags,
                        channel bans, and without affecting sharing.
-        %bmanop%b          With this set, users will be able to op anyone
+        $bmanop$b          With this set, users will be able to op anyone
                        in the channel manually (as opposed to through the bot.)
                        With this unset, users are forced to op through the bot.
                        See '%dconfig manop' for punishment options.
-        %bnodesynch%b      Allow non-ops to perform channel modes? This can stop
+        $bnodesynch$b      Allow non-ops to perform channel modes? This can stop
                        the bot from fighting with services such as ChanServ, or
                        from kicking IRCops when setting channel modes without
                        having ops.
-        %bnomop%b          Users will not be allowed to set more than 3 +o 
+        $bnomop$b          Users will not be allowed to set more than 3 +o 
                        modes at any given time.
                        See '%dconfig mop' for punishment options.
-        %bprivate%b        This by far is probably the single most unique and
+        $bprivate$b        This by far is probably the single most unique and
                        important feature of this pack. With this set, users with
                        global +o will not implicitly have access to the channel.
                        They will need to have channel |o flag to have access.
@@ -467,46 +467,46 @@ See also: link
                        control over the entire botnet and where it goes.
                        Users who lose access to a channel because of this setting
                        will see no reference to it over the botnet in any place.
-        %bprotectops%b     Re-op a user with the +o flag if they get deopped?
+        $bprotectops$b     Re-op a user with the +o flag if they get deopped?
                        DON'T USE THIS.
-        %brevenge%b        Remember people who deop/kick/ban the bot, valid ops,
+        $brevenge$b        Remember people who deop/kick/ban the bot, valid ops,
                        or friends and punish them? 
-        %brevengebot%b     This is similar to to the 'revenge' option, but it
+        $brevengebot$b     This is similar to to the 'revenge' option, but it
                        only triggers if a bot gets deopped, kicked or banned.
-        %btake%b           Once a bot is opped, it will mass op all other bots
+        $btake$b           Once a bot is opped, it will mass op all other bots
                        in the channel. After that, they will all attempt to 
                        mass deop in hopes 'taking' the channel. :)
-        %bvoice%b          This feature is somewhat experimental. With it set
+        $bvoice$b          This feature is somewhat experimental. With it set
                        the +y bot will voice ALL people who join the channel
                        unless they are +q globally or +q for the channel.
                        If a botnet master devoices them, they will remain 
                        devoiced no matter who voices them.
-        %bdynamicbans%b    Only activate bans on the channel when necessary?
+        $bdynamicbans$b    Only activate bans on the channel when necessary?
                        This keeps the channel's ban list from getting
                        excessively long. The bot still remembers every ban,
                        but it only activates a ban on the channel when it sees
                        someone join who matches that ban.
-        %buserbans%b       Allow bans to be made by users directly? If turned
+        $buserbans$b       Allow bans to be made by users directly? If turned
                        off, the bot will require all bans to be made through
                        the bot's console.
-        %bdynamicexempts%b Only activate exempts on the channel when
+        $bdynamicexempts$b Only activate exempts on the channel when
                        necessary? This keeps the channel's exempt list from
                        getting excessively long. The bot still remembers every
                        exempt, but it only activates a exempt on the channel
                        when it sees a ban set that matches the exempt. The
                        exempt remains active on the channel for as long as the
                        ban is still active.
-        %buserexempts%b    Allow exempts to be made by users directly? If
+        $buserexempts$b    Allow exempts to be made by users directly? If
                        turned off, the bot will require all exempts to be made
                        through the bot's console.
-        %bdynamicinvites%b Only activate invites on the channel when necessary?
+        $bdynamicinvites$b Only activate invites on the channel when necessary?
                        This keeps the channel's invite list from getting
                        excessively long. The bot still remembers every invite,
                        but the invites are only activated when the channel is
                        set to invite only and a user joins after requesting an
                        invite. Once set, the invite remains until the channel
                        goes to -i.
-        %buserinvites%b    Allow invites to be made by users directly? If turned
+        $buserinvites$b    Allow invites to be made by users directly? If turned
                        off, the bot will require all invites to be made through
                        the bot's console.
      The following are flood settings, they are set via "%dchanset <channel>
@@ -514,28 +514,28 @@ See also: link
      indicating the number of times in how many seconds the flood will be
      triggered. Setting one of these to 0:0, 0:1, or 1:0 will deactivate the
      respective flood setting.
-        %bflood-chan%b  Set here how many channel messages in how many seconds
+        $bflood-chan$b  Set here how many channel messages in how many seconds
                     from one host constitutes a flood. Setting this to 0 or 0:0
                     disables text flood protection for the channel.
-        %bflood-ctcp%b  Set here how many channel ctcps in how many seconds from
+        $bflood-ctcp$b  Set here how many channel ctcps in how many seconds from
                     one host constitutes a flood. Setting this to 0 or 0:0
                     disables ctcp flood protection for the channel.
-        %bflood-join%b  Set here how many joins in how many seconds from one
+        $bflood-join$b  Set here how many joins in how many seconds from one
                     host constitutes a flood. Setting this to 0 or 0:0 disables
                     join flood protection for the channel.
-        %bflood-kick%b   Set here how many kicks in how many seconds from one
+        $bflood-kick$b   Set here how many kicks in how many seconds from one
                     host constitutes a flood. Setting this to 0 or 0:0 disables
                     kick flood protection for the channel.
-        %bflood-deop%b   Set here how many deops in how many seconds from one
+        $bflood-deop$b   Set here how many deops in how many seconds from one
                     host constitutes a flood. Setting this to 0 or 0:0 disables
                     deop flood protection for the channel.
-        %bflood-nick%b   Set here how many nick changes in how many seconds from
+        $bflood-nick$b   Set here how many nick changes in how many seconds from
                     one host constitutes a flood. Setting this to 0 or 0:0
                     disables nick flood protection for the channel.
  
 See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
 :leaf:channel
-###  %bchannel%b [channel-name]
+###  $bchannel$b [channel-name]
    Shows you an extensive display of the users on a channel, and
    the current channel attributes.  By default, it shows you the
    channel you are currently viewing on the console, but you can
@@ -563,7 +563,7 @@ See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
  
 See also: status, whois
 ::channels:
-###  %bchannels%b %{+m}[user]%{-}
+###  $bchannels$b %{+m}[user]%{-}
    Displays channels that you have access to, and any important 
    flags that are set on them.
 %{+m}
@@ -571,8 +571,8 @@ See also: status, whois
             flags grant them access to.%{-}
 See also: whois%{+m}, chattr, chaninfo%{-}
 ::chanset
-###  %bchanset%b <channel> <settings>
-   Allows you to change the channel settings (see %b'chaninfo'%b for the
+###  $bchanset$b <channel> <settings>
+   Allows you to change the channel settings (see $b'chaninfo'$b for the
    settings) for one specific channel or all channels. Use '*' to to apply the
    change to all channels.
    Changes are used until the next restart, and are saved
@@ -580,22 +580,22 @@ See also: whois%{+m}, chattr, chaninfo%{-}
  
 See also: %{+n}+chan, -chan%{-}, chaninfo
 ::chat
-###  %bchat%b <on/off>
-###  %bchat%b <[*]channel number/name>
+###  $bchat$b <on/off>
+###  $bchat$b <[*]channel number/name>
    Changes your current channel on the partyline. When you first connect to
    the partyline, it places you on channel 0 (the main party line).
    Some channels may have assigned names if the assoc module is loaded. For
    these, you can specify the channel by name instead of channel number if
    you wish.
-   %b'%dchat off'%b removes you from all channels, including the main party line.
+   $b'%dchat off'$b removes you from all channels, including the main party line.
    You can still use bot commands and see the console, but you can't talk to
-   anyone except via %b'%dnote'%b. %b'%dchat on'%b returns you to the main party
+   anyone except via $b'%dnote'$b. $b'%dchat on'$b returns you to the main party
    line (channel 0) if you were elsewhere.
    If you prefix the channel with a '*', you will join a local channel.
  
 See also: console
 ::chattr
-###  %bchattr%b <handle> [flags] [channel]
+###  $bchattr$b <handle> [flags] [channel]
    This lets you view and change the flags for a user.
    For example, to give Lamer the p and f flags:
       .chattr Lamer +pf
@@ -610,22 +610,22 @@ See also: console
    also possible (global +f, +o #lamer):
       .chattr Bill f|o #lamer
    Whether or not you change any flags, it will show you the user's attributes
-   afterwards. To get a list of all possible flags, see %b'%dhelp whois'%b.
-   %bNOTES:%b Only the owner may add or remove the 'a' (admin) or 'n' (owner) flags.
+   afterwards. To get a list of all possible flags, see $b'%dhelp whois'$b.
+   $bNOTES:$b Only the owner may add or remove the 'a' (admin) or 'n' (owner) flags.
           It is pointless to -a a permanent owner.
           You must remove the permanent owner in the binary.
  
 See also: whois
 :hub:chhandle
-###  %bchhandle%b <oldhandle> <newhandle>
+###  $bchhandle$b <oldhandle> <newhandle>
    Changes the handle of a user. For example, to change the handle of user
    'gavroche' to 'jamie', you would use 'chhandle gavroche jamie'.
  
 See also: chpass%{+n}, chsecpass%{-}
 ::chinfo
-###  %bchinfo%b <user> [channel] [info-line/none]
+###  $bchinfo$b <user> [channel] [info-line/none]
    Sets the information line for a user. This line is shown via the /msg
-   commands %b'who'%b and %b'whois'%b. If you have set greet on, it is also
+   commands $b'who'$b and $b'whois'$b. If you have set greet on, it is also
    shown when the user joins the channel. If the info line begins with an '@',
    then it is "locked", and that user may no longer change it. If the channel
    name is omitted, the default info line is changed. If you specify 'none'
@@ -635,7 +635,7 @@ See also: info
 :hub:chnick
 See: chhandle
 :hub:chpass
-###  %bchpass%b <handle> [newpassword|rand]
+###  $bchpass$b <handle> [newpassword|rand]
    Changes a user's password. If you do not specify the new password, the user
    effectively no longer has a password set. A password is needed to get ops,
    join the party line, etc. If the newpassword is 'rand', a random password
@@ -643,7 +643,7 @@ See: chhandle
  
 See also: chhandle%{+n}, chsecpass%{-}
 :hub:chsecpass:
-###  %bchsecpass%b <handle> [newpassword|rand]
+###  $bchsecpass$b <handle> [newpassword|rand]
    Changes a user's secpass. If you do not specify the new password, the user
    effectively no longer has a password set. A secpass is needed to auth and
    login via DCC chat. If the newpassword is 'rand', a random password
@@ -651,10 +651,10 @@ See also: chhandle%{+n}, chsecpass%{-}
  
 See also: chhandle, chpass
 :leaf:clearqueue
-###  %bclearqueue%b <queue>
+###  $bclearqueue$b <queue>
    removes all msgs from the specified queue (mode/server/help/all)
 :hub:cmdpass:
-###  %bcmdpass%b <command> <pass>
+###  $bcmdpass$b <command> <pass>
    Places the specified pass on the cmd so that the cmd will need to be 
    followed by the specified pass whenever it is called. For example:
     !cmdpass whoami BLAH
@@ -673,18 +673,18 @@ See also: chhandle, chpass
    ** Only permanent owners specified in the binary COMPILE config file **
    ** can use this cmd.                                                 **
 ::color:
-###  %bcolor%b <on/off>
+###  $bcolor$b <on/off>
    Enables or disables misc coloring over DCC. mIRC or ANSI method is
    chosen automatically.
  
 See also: echo, page, strip
 ::comment
-###  %bcomment%b <user> <comment>
+###  $bcomment$b <user> <comment>
    Creates or changes the comment field for a user. The comment field can only
    be seen via 'whois' or 'match'. Non-masters cannot see the comment field.
    Using the comment 'none' will clear a user's comment.
 ::conf:
-###  %bconf%b <add|del|list|set> [options]
+###  $bconf$b <add|del|list|set> [options]
  
    This command is used to modify the bot's local shell config. Only
    the first bot listed will be able to perform this command. Using the cmd
@@ -713,57 +713,57 @@ See also: echo, page, strip
       WARNING: Options changed MAY OR MAY not affect bots already running,
                it is a good idea to restart all bots on the shell
                if you change any of the following: 
-    %bhomedir%b, %bbinpath%b, %bbinname%b, %bportmin%b, %bportmax%b, %bpscloak%b
+    $bhomedir$b, $bbinpath$b, $bbinname$b, $bportmin$b, $bportmax$b, $bpscloak$b
  
 See also: newleaf
 :hub:config:
-###  %bconfig%b [name [value|-]]
+###  $bconfig$b [name [value|-]]
    Sets various config options. Type alone to see all config entries. To set
    an entry do 'config name VALUE'. Use '-' as a value to clear an entry.
  
 See also: botconfig
 ::console:
-###  %bconsole%b [channel] [modes]
+###  $bconsole$b [channel] [modes]
    Changes your console level so that you will see only the types of console
    messages that you want to. Your current console channel is the channel (that
    the bot is on) from which you can view from the party line, and which
    channel-specific commands (like 'say' and 'op') take affect on.
  
    Valid flags are:
-     %bj%b  joins, parts, quits, and netsplits on the channel
-     %bk%b  kicks, bans, and mode changes on the channel
-     %bm%b  private msgs, notices and ctcps to the bot
-     %bp%b  public text on the channel
-     %bs%b  server connects, disconnects, and notices
+     $bj$b  joins, parts, quits, and netsplits on the channel
+     $bk$b  kicks, bans, and mode changes on the channel
+     $bm$b  private msgs, notices and ctcps to the bot
+     $bp$b  public text on the channel
+     $bs$b  server connects, disconnects, and notices
  
 %{+m}
    Masters only:
-     %bb%b  information about bot linking and userfile sharing
-     %bd%b  misc debug information
-     %bc%b  commands
-     %bo%b  misc info, etc (IMPORTANT STUFF)
-     %bw%b  wallops
+     $bb$b  information about bot linking and userfile sharing
+     $bd$b  misc debug information
+     $bc$b  commands
+     $bo$b  misc info, etc (IMPORTANT STUFF)
+     $bw$b  wallops
 %{-} 
 %{+n}
    Owners only (these have to be enabled in the config file via "set raw-log"):
-     %be%b  errors
-     %bg%b  (getin) botnet op/invite/key requests
-     %bh%b  raw share traffic
-     %br%b  raw incoming server traffic
-     %bt%b  raw botnet traffic
-     %bu%b  warnings
-     %bv%b  raw outgoing server traffic
+     $be$b  errors
+     $bg$b  (getin) botnet op/invite/key requests
+     $bh$b  raw share traffic
+     $br$b  raw incoming server traffic
+     $bt$b  raw botnet traffic
+     $bu$b  warnings
+     $bv$b  raw outgoing server traffic
 %{-} 
 %{+o|o}
    The mode can also be a modifier like '+p' or '-jk' or '+mp-b'. If you omit
    the channel and modes, your current console channel and flags will be shown.
 %{-} 
 %{+m|m}
-###  %bconsole%b <user> [channel] [modes]
+###  $bconsole$b <user> [channel] [modes]
    This is used to set the console level of another user. This can even be used
    on users who normally would not be able to set their own console mode.%{-}
 ::crontab:
-###  %bcrontab%b <status|delete|show|new> [interval]
+###  $bcrontab$b <status|delete|show|new> [interval]
    This command is used to manipulate the crontab entries for the user
    that the bot is running on.
  
@@ -782,88 +782,88 @@ See also: botconfig
    'new' will make the bot add it's self to the crontab list, although this is done
      automatically on startup.
 ::cycle:
-###  %bcycle%b <channel> [delay]
+###  $bcycle$b <channel> [delay]
    Makes all linked bots cycle the specified channel. Delay defaults to 10
    seconds, which means bots will part and not rejoin for that time.
  
 See also: down
 ::date
-###  %bdate%b
+###  $bdate$b
    Displays the time/date in local and GMT. Also displays which time zone
    is being used by the bot for internal logging.
 :hub:dccstat
-###  %bdccstat%b
+###  $bdccstat$b
    Displays a table-format list of all "dcc" connections in use on the bot.
    Dcc stands for "Direct Client-to-client Communication", and Eggdrop expands
    this to cover every open socket. Any type of network connection to the bot
    is considered a "dcc" connection.
    The headings of the table are:
-     %bSOCK%b  the socket number of this connection (always unique)
-     %bADDR%b  the ip address mask of the host the bot is connected to, if
+     $bSOCK$b  the socket number of this connection (always unique)
+     $bADDR$b  the ip address mask of the host the bot is connected to, if
            applicable
-     %bPORT%b  the port number being used for this connection
-     %bNICK%b  the handle of the user or bot, if applicable
-     %bHOST%b  the hostname corresponding to the IP address, if available
-     %bTYPE%b  the type of dcc connection (see below)
+     $bPORT$b  the port number being used for this connection
+     $bNICK$b  the handle of the user or bot, if applicable
+     $bHOST$b  the hostname corresponding to the IP address, if available
+     $bTYPE$b  the type of dcc connection (see below)
    The types of connections currently possible are as follows (but more are
    being added all the time):
-     %bCHAT%b  dcc-chat partyline user
-     %bPASS%b  user entering dcc chat (being asked for password)
-     %bSEND%b  user sending a file
-     %bGET%b   sending a file to a user
-     %bGETP%b  pending get (waiting for the user to acknowledge)
-     %bLSTN%b  telnet listening port (in place of a hostname, it will show the
+     $bCHAT$b  dcc-chat partyline user
+     $bPASS$b  user entering dcc chat (being asked for password)
+     $bSEND$b  user sending a file
+     $bGET$b   sending a file to a user
+     $bGETP$b  pending get (waiting for the user to acknowledge)
+     $bLSTN$b  telnet listening port (in place of a hostname, it will show the
            callback procedure name, or a mask of acceptable handles)
-     %bT-IN%b  incoming telnet user (being asked for handle)
-     %bFILE%b  user in dcc-chat file area
-     %bBOT%b   connected bot (botnet connection)
-     %bBOT*%b  pending bot link (waiting for acknowledgement)
-     %bRELA%b  user in relay connection to another bot
-     %b>RLY%b  bot being relay'd to (one for each "RELA")
-     %bCONN%b  pending telnet connection (chat, relay, bot-link, etc)
-     %bNEW%b   new user via telnet (entering a handle)
-     %bNEWP%b  new user via telnet (entering a password)
+     $bT-IN$b  incoming telnet user (being asked for handle)
+     $bFILE$b  user in dcc-chat file area
+     $bBOT$b   connected bot (botnet connection)
+     $bBOT*$b  pending bot link (waiting for acknowledgement)
+     $bRELA$b  user in relay connection to another bot
+     $b>RLY$b  bot being relay'd to (one for each "RELA")
+     $bCONN$b  pending telnet connection (chat, relay, bot-link, etc)
+     $bNEW$b   new user via telnet (entering a handle)
+     $bNEWP$b  new user via telnet (entering a password)
    In addition, 'CHAT' and 'BOT' have flags listed for each connection. Capital
    letters mean that the flag is on, and lowercase letters mean that the flag
    is off. The flags for 'CHAT' are:
-     %bC%b  in file area, but allowed to return to party line
-     %bK%b  color is on
-     %bP%b  party line access only
-     %bT%b  telnet connection (instead of dcc chat)
-     %bE%b  echo is on
-     %bP%b  paging is on
-     %b6%b  socket is ipv6
+     $bC$b  in file area, but allowed to return to party line
+     $bK$b  color is on
+     $bP$b  party line access only
+     $bT$b  telnet connection (instead of dcc chat)
+     $bE$b  echo is on
+     $bP$b  paging is on
+     $b6$b  socket is ipv6
    The flags for 'BOT' are:
-     %bP%b  ping sent, waiting for reply
-     %bU%b  user-file sharing is active
-     %bC%b  local bot initiated the connection
-     %bO%b  user-file offered, waiting for reply
-     %bS%b  in the process of sending the user-file
-     %bG%b  in the process of getting the user-file
-     %bW%b  warned this bot to stop hubbing
-     %bL%b  leaf-only bot (not allowed to be a hub)
-     %bI%b  bot is currently in the 'linking' stage
-     %bA%b  bot is being aggressively shared with
+     $bP$b  ping sent, waiting for reply
+     $bU$b  user-file sharing is active
+     $bC$b  local bot initiated the connection
+     $bO$b  user-file offered, waiting for reply
+     $bS$b  in the process of sending the user-file
+     $bG$b  in the process of getting the user-file
+     $bW$b  warned this bot to stop hubbing
+     $bL$b  leaf-only bot (not allowed to be a hub)
+     $bI$b  bot is currently in the 'linking' stage
+     $bA$b  bot is being aggressively shared with
    For 'CHAT' users, the party-line channel is also listed.
 ::debug
-###  %bdebug%b
+###  $bdebug$b
    Display a dump of memory allocation information, assuming the bot was
    compiled with memory debugging. It's useless to anyone but developers
    trying to find memory leaks.
 ::decrypt
-###  %bdecrypt%b <key> <string>
+###  $bdecrypt$b <key> <string>
    Decrypts the string using the specified key.
  
 See also: encrypt, randstring, md5, sha1
 :leaf:deluser
-###  %bdeluser%b <nickname>
+###  $bdeluser$b <nickname>
    deletes a user record for a user on the channel, using their
    current hostname.  Channel masters can remove users so long as
    the user isn't a bot master.
  
 see also: adduser%{+m}, +user, -user%{-}
 :leaf:deop
-###  %bdeop%b <nickname> [channel|*]
+###  $bdeop$b <nickname> [channel|*]
    will remove chanop from the person you specify, so long as the
    bot is opped on that channel, and the person you specify isn't
    on the bot's list of authorized chanops. Specify * for all
@@ -871,22 +871,22 @@ see also: adduser%{+m}, +user, -user%{-}
  
 See also: op, console
 :leaf:devoice
-### %bdevoice%b <nickname> [channel|*]
+### $bdevoice$b <nickname> [channel|*]
     will remove the +v voice from the person you specify, so long as
     the bot is opped on that channel. Specify * for all channels.
 ::die
-###  %bdie%b [reason]
+###  $bdie$b [reason]
    This kills the bot. The bot goes offline immediately, logging who issued
    the 'die' command. You shouldn't have to use this too often. If you specify
    a reason, it is logged, otherwise the reason is "authorized by <handle>".
 ::down:
-###  %bdown%b <channel>
+###  $bdown$b <channel>
    All linked bots will deop themselves in the specified channel. They
    will not reop for 10 seconds.
  
 See also: cycle
 :hub:downbots
-###  %bdownbots%b
+###  $bdownbots$b
    Shows the list of bots that are NOT currently linked to the botnet.
  
    Example:
@@ -894,29 +894,29 @@ See also: cycle
  
 See also: bots
 :leaf:dump
-###  %bdump%b <text>
+###  $bdump$b <text>
    dumps the text to the server.  keep in mind that this bot doesn't
    run through ircII, so ircII commands will most likely not work this
    way.  they need to be raw irc codes. read rfc1459 from ftp.internic.net
    for more help.
 ::echo
-###  %becho%b <on/off>
+###  $becho$b <on/off>
    Specifies whether you want your messages echoed back to you. If it's on,
    then when you say something on the party line, it will be displayed to you
    just like everyone else will see it. If it's off, then it won't happen.
  
 See also: color, page, strip
 ::encrypt
-###  %bencrypt%b <key> <string>
+###  $bencrypt$b <key> <string>
    Encrypts the string using the specified key.
  
 See also: decrypt, randstring, md5, sha1
 ::exec:
-###  %bexec%b <params>
+###  $bexec$b <params>
    The bot will execute the specified program with each param specified,
    and display the results over DCC.
 ::exempts
-###  %bexempts%b [[channel/all]/wildcard]
+###  $bexempts$b [[channel/all]/wildcard]
    Shows you a list of the global exempts active on the current channel, and
    the list of channel-specific exempts, as well as any exempts that are on the
    channel but weren't placed by the bot.
@@ -927,7 +927,7 @@ See also: decrypt, randstring, md5, sha1
              Created 01:15
  
    The number (3) can be used to reference the exempt if you wish to remove it
-   (see %b'-exempt'%b). Next is the actual hostmask being exempted. The "(perm)"
+   (see $b'-exempt'$b). Next is the actual hostmask being exempted. The "(perm)"
    means that the exempt is "permanent": that is, it doesn't automatically
    expire. If there is an elapsed time showing instead, the time displayed is
    how long the exempt has been active. These types of exempts expire after one
@@ -955,12 +955,12 @@ See also: decrypt, randstring, md5, sha1
  
 See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 :leaf:find:
-###  %bfind%b  <nick!ident@host.com>
+###  $bfind$b  <nick!ident@host.com>
    The bot will search through all of it's channel records and look
    for the specified hostmask.  Wildcards are accepted; '*' for 1 or more
    characters, or '?' for exactly 1 character.
 ::fixcodes
-### %bfixcodes%b
+### $bfixcodes$b
      This is for use in situations where the bot gets mixed up about the type
      of connection you have with it. For example, you /CTCP CHAT the bot and
      it thinks you are connecting via telnet, and you see text displayed as
@@ -968,50 +968,50 @@ See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstic
      now 17:17". Use this to turn telnet codes on or off/change the display
      mode.
 ::fwd
-###  %bfwd%b <handle> [desto]
+###  $bfwd$b <handle> [desto]
    This allows you to set a note forwarding address for a user,
    this means if a note needs to be stored for the user, the
    bot will attempt to pass it on to the given user@bot, if
    the bot is not online then the note is still stored locally,
    if the other user doesn't exist, the note is lost. Boohoo.
 :leaf:getkey:
-###  %bgetkey%b [channel]
+###  $bgetkey$b [channel]
    If there is a key set for channel, it is displayed. If channel is not
    specified, your console channel is used.
  
 See also: console, channels%{+m}, status%{-}
 ::handle
-###  %bhandle%b <new-handle>
+###  $bhandle$b <new-handle>
    Changes your handle on the bot. This is the handle (nickname) that the
    bot will know you as from this point forward. It is used to log into the
    bot.
  
 See also: newpass%{+mi}, chhand, chpass%{-}%{+n}, chsecpass%{-}
 ::help:
-###  %bhelp%b [cmd]
+###  $bhelp$b [cmd]
    Alone, will show all cmds that match your flags. With a cmd it will show
    the help entry, such as you see here. Specifying a wildcard will display
    a list of cmds (matching your flags) that match that wildcard. Use '*'
    to match 1 or more characters, and '?' to match exactly one character.
 :hub:hublevel:
-###  %bhublevel%b <hub-bot> <level>
+###  $bhublevel$b <hub-bot> <level>
    Sets the hublevel for the specified hub. This command is not recommended
    for use by anyone. Instead you should change your COMPILE config file
    and update your net with new binaries.
  
 See also: uplink, chaddr
 ::ignores
-###  %bignores%b [wildcard]
+###  $bignores$b [wildcard]
    Shows a list of hostmasks from which the bot is currently ignoring msgs,
    notices, etc. There are two types of ignores: permanent and temporary.
-   Permanent ignores never automatically expire. You must use %b'%d-ignore'%b
+   Permanent ignores never automatically expire. You must use $b'%d-ignore'$b
    to remove them.
    Here is a sample permanent ignore:
       [  1] *!*@217.156.44.184 (perm)
             Wcc: go away
             Started 523 days ago
    The number (1) can be used to reference the ignore if you wish to remove it
-   (see %b'%dhelp -ignore'%b). Next is the actual hostmask being ignored. The
+   (see $b'%dhelp -ignore'$b). Next is the actual hostmask being ignored. The
    "(perm)" means that the ignore is "permanent": that is, it doesn't
    automatically expire. The second line of the ignore entry is the comment
    ("go away"), and who set the ban (Wcc). The last line shows when the ignore
@@ -1023,20 +1023,20 @@ See also: uplink, chaddr
    Here, you see the "perm" in the parentheses next to the hostmask is instead
    an expire time. This means that the ignore will expire automatically in one
    day.
-   If you use %b'%dignores <wildcard>'%b, it will list all the ignores
+   If you use $b'%dignores <wildcard>'$b, it will list all the ignores
    that match against your wildcard.
  
 See also: +ignore, -ignore
 ::info
-###  %binfo%b [channel] [info-line]
-   Sets your info line. This line is shown via the /msg commands %b'who'%b and
-   %b'whois'%b. If you have set greet on, it is also shown when you joins the
+###  $binfo$b [channel] [info-line]
+   Sets your info line. This line is shown via the /msg commands $b'who'$b and
+   $b'whois'$b. If you have set greet on, it is also shown when you joins the
    channel. If the info line begins with an '@', then it is "locked", and tou
    may no longer change it.
  
 %{+m|m}See also: chinfo%{-}
 :leaf:invite
-###  %binvite%b <nickname> [channel|*]
+###  $binvite$b <nickname> [channel|*]
    invites someone from irc into your current console channel (or
    specified other channel).  This is most useful when the channel
    is +i.  a user with the +o flag can also request an invite from
@@ -1044,7 +1044,7 @@ See also: +ignore, -ignore
  
 See also: console
 ::invites
-###  %binvites%b [[channel/all]/wildcard]
+###  $binvites$b [[channel/all]/wildcard]
    Shows you a list of the global invites active on the current channel, and
    the list of channel-specific invites, as well as any invites that are on the
    channel but weren't placed by the bot.
@@ -1055,7 +1055,7 @@ See also: console
              Created 01:15
  
    The number (3) can be used to reference the invite if you wish to remove it
-   (see %b'-invite'%b). Next is the actual hostmask being invited. The "(perm)"
+   (see $b'-invite'$b). Next is the actual hostmask being invited. The "(perm)"
    means that the invite is "permanent": that is, it doesn't automatically
    expire. If there is an elapsed time showing instead, the time displayed is
    how long the invite has been active. These types of invites expire after one
@@ -1083,17 +1083,17 @@ See also: console
  
 See also: -invite, +invite, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 :leaf:jump
-###  %bjump%b [server [port [pass]]]
+###  $bjump$b [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
    server, it will jump to the next server in it'ss internal list (see
-   %b'help config'%b). If you specify a server, it will jump to that
+   $b'help config'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
    Jumping servers ALWAYS makes the bot lose ops! be careful!
  
 See also: botjump, servers, botserver
 :leaf:kick
-###  %bkick%b [channel|*] <nickname> [reason]
+###  $bkick$b [channel|*] <nickname> [reason]
    Will kick a user off your current console channel (or specified
    other channel) with the comment given.  if you omit the reason,
    the default kick comment is "requested". Specify * for all 
@@ -1101,11 +1101,11 @@ See also: botjump, servers, botserver
  
 See also: kickban, console
 :leaf:kickban
-###  %bkickban%b [channel|*] [-|@]<nickname> [comment]
+###  $bkickban$b [channel|*] [-|@]<nickname> [comment]
    kicks a user off the channel and bans her by a reasonable host-
    mask.  your nickname will be attached to the ban in the bot's
    internal ban list, and the ban will last for whatever is set in
-   ban-time -- only on this channel.  use %b'%d+ban'%b for a more
+   ban-time -- only on this channel.  use $b'%d+ban'$b for a more
    permanent ban which will be activated on every channel the bot
    monitors.  if you use a comment, that will also be attached to
    the ban in the ban list, and used as the kick comment. Specify 
@@ -1127,26 +1127,26 @@ See also: kickban, console
  
 See also: +ban, bans, stick
 :hub:lagged:
-###  %blagged%b
+###  $blagged$b
    Displays the bot's internal ping list of bots linked to it.
    If a pingtime goes over 30 seconds, it is delinked for
    ping timeout.
  
 See also: netlag
 ::last:
-###  %blast%b 
+###  $blast$b 
    Displays the 'last' output from the shell the bot is running on,
    for the user it is running as.
  
 %{+i}See also: netlast%{-}
 :hub:link
-###  %blink%b [via-bot] <bot-to-link>
+###  $blink$b [via-bot] <bot-to-link>
    Attempts to link to another hub.  This command is deprecated and not 
    recommended for use.
  
 See also: unlink, newleaf%{+a}, -bot%{-}
 ::match
-###  %bmatch%b <attr> [channel] [[start] limit]
+###  $bmatch$b <attr> [channel] [[start] limit]
    This displays all user records with the attributes requested.
    "attr" is of the form:  <+/-><global>[&/|<channel>[&/|<bot>]]
    Specifying "&" as the separator will cause AND style matching.
@@ -1174,7 +1174,7 @@ See also: unlink, newleaf%{+a}, -bot%{-}
      %dmatch p&o #eggdrop 16 25
    This would show results 16 through 25 matching any users with the "p" global
    flag or the "o" channel flag on #eggdrop.
-###  %bmatch%b <wildcard-string> [[start] limit]
+###  $bmatch$b <wildcard-string> [[start] limit]
    This displays all user records where the user's handle or any of the user's
    hostmasks match the specified wildcard string. You can also limit the number
    of total results returned by specifying a limit at the end of the command. A
@@ -1185,34 +1185,34 @@ See also: unlink, newleaf%{+a}, -bot%{-}
    that ends with ".edu".
 See also: matchbot
 ::matchbot
-###  %bmatchbot%b 
+###  $bmatchbot$b 
    Matches bots.
    See: match
 ::md5
-###  %bmd5%b <string>
+###  $bmd5$b <string>
    Returns the MD5 hash of the specified string.
  
 See also: randstring, sha1, encrypt, decrypt
 :leaf:mdop:
-###  %bmdop%b <#channel> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]
+###  $bmdop$b <#channel> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]
    For those of us who do not wish to be rocket scientists in the mdop department, 
    a simple '%dmdop #channel' will suffice.
    **Remember, the bot you mdop on will never participate in the deopping**
  
    options:
  
-     %bbitch%b   - set +bitch after finished with mdop.
-     %bsimul%b   - Simulates the mdop. IE: Gives you a practice run, will show who 
+     $bbitch$b   - set +bitch after finished with mdop.
+     $bsimul$b   - Simulates the mdop. IE: Gives you a practice run, will show who 
                    does what in the dcc chat window.
  
      =============================================================================
      don't bother setting the following options unless you REALLY know what you're 
      doing, and don't bother messaging me asking me how to use them if you don't.
      =============================================================================
-     %bbots%b    - Number of bots to use for mdop.
-     %balines%b  - Number of MODE lines to assume each participating bot will get through.
-     %bslines%b  - Number of MODE lines each participating bot will send.
-     %boverlap%b - Number of times to deop each target nick (using alines for calc).
+     $bbots$b    - Number of bots to use for mdop.
+     $balines$b  - Number of MODE lines to assume each participating bot will get through.
+     $bslines$b  - Number of MODE lines each participating bot will send.
+     $boverlap$b - Number of times to deop each target nick (using alines for calc).
  
    bots, alines, slines and overlap are dependant on each other, set them wrong and
    the bot will complain. 
@@ -1220,11 +1220,11 @@ See also: randstring, sha1, encrypt, decrypt
    Defaults are alines=3, slines=5, overlap=2. alines will be increased up to 5 if 
    there are not enough bots available.
 ::me
-###  %bme%b <text>
+###  $bme$b <text>
    Performs an action on the party line. This appears as "* Wcc is leaving",
    etc.
 :leaf:mop:
-###  %bmop%b [channel|*]
+###  $bmop$b [channel|*]
    Bot will op all users in the specified channel that are valid ops
    for the channel. If '*' is specified, the bot will scan all channels
    and op all users in all channels that are valid ops in each chan. If 
@@ -1232,76 +1232,76 @@ See also: randstring, sha1, encrypt, decrypt
  
 See also: whois, console
 ::motd
-###  %bmotd%b %{+m}<message>%{-}
+###  $bmotd$b %{+m}<message>%{-}
    This redisplays the partyline Message Of The Day, which was shown when you
    first joined the partyline.
 %{+m}+m: Inclue a message to set the motd.%{-}
 :leaf:msg
-###  %bmsg%b <nickname> <text>
+###  $bmsg$b <nickname> <text>
    Sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
 See also: botmsg%{+n}, netmsg%{-}
 :hub:netcrontab:
-###  %bnetcrontab%b <status|delete|show|new> [interval]
+###  $bnetcrontab$b <status|delete|show|new> [interval]
    Runs the specified command on all linked bots.
    See: crontab
 :hub:netlag:
-###  %bnetlag%b
+###  $bnetlag$b
    Pings all bots over botnet, and displays results.
  
 See also: lagged
 :hub:netlast:
-###  %bnetlast%b
+###  $bnetlast$b
    All bots on the botnet will display an output from 'last' on 
    the user that they are currently running as.
  
 See also: last
 ::netmsg:
-###  %bnetmsg%b <nickname|#chan> <text>
+###  $bnetmsg$b <nickname|#chan> <text>
    All bots on the botnet will send a msg to the specified target.
  
 See also: botmsg, msg
 ::netnick:
-###  %bnetnick%b 
+###  $bnetnick$b 
    All bots on the botnet will display their nick over DCC.
  
 See also: botnick
 :hub:netps:
-###  %bnetps%b [ps-param]
+###  $bnetps$b [ps-param]
    Will run 'ps' on each bot on the botnet and returned the
    results. If a params are specified, each bot will use those
    on 'ps'.
  
 See also: ps
 :hub:netrontab:
-###  %bnetcrontab%b <status|delete|show|new> [interval]
+###  $bnetcrontab$b <status|delete|show|new> [interval]
    Runs the specified crontab command on all linked bots.
    See: crontab
 ::netserver:
-###  %bnetservers%b 
+###  $bnetservers$b 
    All bots on the botnet will display their current server and lag
    to that server over DCC.
  
 See also: botserver, servers%{+n}, config%{-}
 ::netversion:
-###  %bnetversion%b <bot>
+###  $bnetversion$b <bot>
    All bots on the botnet will display their pack version, and uname.
  
 See also: botversion, about%{+m|m}, status%{-}
 :hub:netw:
-###  %bnetw%b
+###  $bnetw$b
    All bots on the botnet will run 'w' on their shell and display
    the results over DCC.
  
 See also: w
 :hub:newleaf:
-###  %bnewleaf%b <handle> [host] [anotherhost] ...
+###  $bnewleaf$b <handle> [host] [anotherhost] ...
    Adds a new leaf to the botnet with the specified handle and hostname.
    Any number of hosts can be specified in the cmd. You will need to
    add a hostmask for the bot's ip for it to connect over DCC.
 ::newpass
-###  %bnewpass%b <password|rand>
+###  $bnewpass$b <password|rand>
    Changes your password on the bot. This is similar to the '/msg <bot> pass'
    command, except you don't need to specify your old password. If the 
    newpassword is 'rand', a random password will be used.
@@ -1311,10 +1311,10 @@ See also: w
 ::nick
 See: handle
 :hub:nopass
-###  %bnohelp%b
+###  $bnohelp$b
    Displays all users who do not have a password set.
 ::note
-###  %bnote%b <nickname[@bot]> <message>
+###  $bnote$b <nickname[@bot]> <message>
    Sends a private note to a user on the partyline. If that user is currently
    logged in and not marked as away, the message will be received immediately.
    Otherwise, it will be stored and displayed the next time that user joins the
@@ -1323,27 +1323,27 @@ See: handle
  
 See also: whom, notes
 ::notes
-###  %bnotes index%b
-###  %bnotes read%b <# or ALL>
-###  %bnotes erase%b <# or ALL>
+###  $bnotes index$b
+###  $bnotes read$b <# or ALL>
+###  $bnotes erase$b <# or ALL>
    lets you manipulate notes that have been stored up for you while
-   you were gone.  %b'notes index'%b gives a listing of all the notes
+   you were gone.  $b'notes index'$b gives a listing of all the notes
    stored up: who they are from, and when they were left.
-   %b'notes read'%b lets you read some or all notes, according to a
+   $b'notes read'$b lets you read some or all notes, according to a
    list of numbers and/or intervals separated by semicolon.
-   and %b'notes erase'%b erases notes after you are done with them.
+   and $b'notes erase'$b erases notes after you are done with them.
      ex: notes erase 2-4;8;16-
  
 See also: note, whom, noteigns
 :leaf:op
-###  %bop%b <nickname> [channel|*]
+###  $bop$b <nickname> [channel|*]
    will grant chanop to the person you specify, so long as the bot
    is opped on that channel, and the person you specify isn't being
    actively deopped by the bot. Specify * for all channels.
  
 See also: deop, console
 ::page
-### %bpage%b <number/off>
+### $bpage$b <number/off>
    This allows you to slow down the number of lines the bot sends you at once
    via the partyline. When enabled, any commands that send greater than the
    specified number of lines will stop when that number is reached and wait for
@@ -1352,36 +1352,36 @@ See also: deop, console
  
 See also: echo, color
 ::ps:
-###  %bps%b [ps-param]
+###  $bps$b [ps-param]
    Will run 'ps' on the bot's shell and display any results. If
    any params are specified, they will be used.
  
 %{+i}See also: netps%{-}
 ::quit
-###  %bquit%b [comment]
+###  $bquit$b [comment]
    This disconnects you from the partyline. If you specify a comment, it will
    be displayed to other partyline users as you leave.
 ::randstring
-###  %brandstring%b <len>
+###  $brandstring$b <len>
    Displays a random string of length 'len' up to 300 chars.
  
 See also: md5, sha1, encrypt, decrypt
 ::relay
-###  %brelay%b <bot>
+###  $brelay$b <bot>
    Relays you via telnet to another bot, whether or not it is currently linked.
    The local bot must, however, have a bot record for the bot you wish to
    relay to. Typing .quit or "*bye*" on a line by itself will end the relay.
  
 See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
 ::reload
-###  %breload%b
+###  $breload$b
    Reloads the bot's user file, discarding any changes made since the last
-   %b'%dsave'%b command or hourly user file save. Sharebots should probably
+   $b'%dsave'$b command or hourly user file save. Sharebots should probably
    never do this.
  
 See also: save
 :leaf:reset
-###  %breset%b [channel]
+###  $breset$b [channel]
    clears out the bot's channel information and makes it gather the
    information from the server all over again, as if it had just
    joined that channel.  it's not really useful much, but could be
@@ -1389,7 +1389,7 @@ See also: save
    unfortunately this command used to get a lot of use.  you can omit
    the channel name to make it reset ALL channels.
 :leaf:resetbans
-###  %bresetbans%b [channel]
+###  $bresetbans$b [channel]
    resets the bot's ban list for the channel. any bans on the channel
    that aren't in the ban list (either the global list or the local
    channel ban list) will be removed, and if there are any bans in the
@@ -1398,57 +1398,57 @@ See also: save
  
 See also: bans, console%{+m|m}, reset%{-}
 :leaf:resetexempts
-###  %bresetexempts%b [channel]
+###  $bresetexempts$b [channel]
    resets the bot's exemption list for the channel. this command
    behaves exactly like resetbans, except it is for exempts.
  
 See also: resetbans, resetinvites
 :leaf:resetinvites
-###  %bresetinvites%b [channel]
+###  $bresetinvites$b [channel]
    resets the bot's invitation list for the channel. this command
    behaves exactly like resetbans, except it is for invites.
  
 See also: resetbans, resetinvites
 ::restart
-###  %brestart%b
+###  $brestart$b
    Restarts the Tcl interpreter, wipes all timers, reloads all modules, and
    reloads the config file for the bot (which resets any changes made via the
-   %b'%dset'%b command and reloads any Tcl scripts your config loads). As with
-   the %b'%drehash'%b command, it also saves and reloads the user file from disk.
+   $b'%dset'$b command and reloads any Tcl scripts your config loads). As with
+   the $b'%drehash'$b command, it also saves and reloads the user file from disk.
  
 See also: reload, save
 :hub:save
-###  %bsave%b
+###  $bsave$b
    This makes the bot write its entire userfile to disk. This is useful if you
    think the bot is about to crash or something, since the user file is only
    written to disk about once an hour.
  
 See also: reload, backup
 :leaf:say
-###  %bsay%b [channel] <text>
+###  $bsay$b [channel] <text>
    dumps the text to your current console channel (or other specified
    channel), as if the bot "said" it.
 ::secpass:
-###  %bsecpass%b <password|rand>
+###  $bsecpass$b <password|rand>
    Changes your secpass on the bot. This is used for Authing via /msg
    and for DCC. If the password is 'rand', a random password will be used.
  
 %{+mi}See also: chpass%{-}%{+n}, chsecpass%{-}
 :leaf:servers
-###  %bservers%b
+###  $bservers$b
    lists the servers that the bot has in its server list.  this is
    the list it rotates through when changing servers.  it starts
    with a static list which it loads from its config-file when the
    bot is booted up.  after that, you can add servers with the
-   %b'%djump'%b command.  the server list will indicate which server the
+   $b'%djump'$b command.  the server list will indicate which server the
    bot is currently on.
 ::sha1
-###  %bsha1%b <string>
+###  $bsha1$b <string>
    Returns the SHA1 hash of the specified string.
  
 See also: randstring, md5, encrypt, decrypt
 ::simul
-###  %bsimul%b <handle> <text>
+###  $bsimul$b <handle> <text>
    This allows you to simulate the specified handle typing the given text.
    For example:
       %dsimul dweeb%d.quit
@@ -1457,7 +1457,7 @@ See also: randstring, md5, encrypt, decrypt
  
 See also: su
 ::slowjoin:
-###  %bslowjoin%b <channel> <interval-seconds> [channel-options]
+###  $bslowjoin$b <channel> <interval-seconds> [channel-options]
    All bots on the botnet will join the channel at the rate of one bot
    per 'interval-seconds'. If any channel-options are specified, the 
    channel will be added with those options.  If the channel is set
@@ -1466,14 +1466,14 @@ See also: su
  
 See also: slowpart, chanset, chaninfo
 ::slowpart:
-###  %bslowpart%b <channel> <interval-seconds>
+###  $bslowpart$b <channel> <interval-seconds>
    All bots on the botnet will part the specified channel at the rate
    of one bot per 'interval-seconds'
  
 %{+n}See also: slowjoin%{-}
 ::status
-###  %bstatus%b
-###  %bstatus all%b
+###  $bstatus$b
+###  $bstatus all$b
    Displays a condensed block of status information about the bot.
    is running. For example:
       [01:15] #Wcc# status
@@ -1502,48 +1502,48 @@ See also: slowpart, chanset, chaninfo
    will also be shown if it's being used.
  
    Select information from modules will be displayed after the core
-   information. If you use %b'%dstatus all'%b instead, you will see all status
+   information. If you use $b'%dstatus all'$b instead, you will see all status
    information available from loaded modules.
  
 See also: channel, channels%{+a}, debug%{-}
 ::stick
-###  %bstick%b [ban/exempt/invite] <hostmask/number> [channel]
+###  $bstick$b [ban/exempt/invite] <hostmask/number> [channel]
    Makes a ban, exempt, or invite "sticky". This means that the bot will always
    try to keep it active on the channel. Obviously, if the channel isn't using 
    dynamic bans, this has no effect.
  
 See also: bans, exempts, invites, unstick, +ban, +exempt, +invite
 ::store
-###  %bstore%b
+###  $bstore$b
    Stores your console settings so that they are restored automatically the
    next time you join the party line. ('console' calls this auto)
  
 See also: console
 ::strip
-###  %bstrip%b [modes]
+###  $bstrip$b [modes]
    Allows you to remove embedded 'attribute' codes your partyline output. Valid
    options are:
-      %bb%b - remove all boldface codes
-      %bc%b - remove all color codes
-      %br%b - remove all reverse video codes
-      %bu%b - remove all underline codes
-      %ba%b - remove all ANSI codes
-      %bg%b - remove all ctrl-g (bell) codes
+      $bb$b - remove all boldface codes
+      $bc$b - remove all color codes
+      $br$b - remove all reverse video codes
+      $bu$b - remove all underline codes
+      $ba$b - remove all ANSI codes
+      $bg$b - remove all ctrl-g (bell) codes
    The mode can also be a modifier like '+c' or '-bu' or '+ru-c'. If
    you omit modes, it will show your current setting.
  
 See also: fixcodes, color, echo, page
 %{+m}
-###  %bstrip%b <user> [modes]
+###  $bstrip$b <user> [modes]
    Set the strip level of another user. A master can't set their own strip
    flags without prefixing the modes with a '+' or '-'.%{-}
 ::su
-###  %bsu%b <user>
+###  $bsu$b <user>
    Lets you assume the identity of another user. If you are a global owner,
    this does not require a password. Otherwise, you will be asked for the
-   user's password. %b%dquit%b returns you to your original handle.
+   user's password. $b%dquit$b returns you to your original handle.
 :leaf:swhois
-###  %bswhois%b [server/nick] <nick>
+###  $bswhois$b [server/nick] <nick>
    Displays a server /whois for the specified nick. Specifying
    the nick twice will display idle time. Specifying a server will 
    display the whois as viewed by that server.
@@ -1551,13 +1551,13 @@ See also: fixcodes, color, echo, page
  
 See also: find
 :leaf:topic
-###  %btopic%b <text>
+###  $btopic$b <text>
    changes the channel's topic, assuming the bot is a chanop or the
    channel is not +t (uses your current console channel).
  
 See also: console
 :hub:trace
-###  %btrace%b <bot>
+###  $btrace$b <bot>
    Sends out a trace signal to another bot. If/when the trace signal returns,
    (and it should!) you will get an output that looks something like this:
       Trace result -> Valis:Stonewall:NoBoty:SomeBoty
@@ -1567,13 +1567,13 @@ See also: console
  
 See also: bots, bottree
 ::traffic
-###  %btraffic%b
-   Shows total and daily net traffic stats since the last %b'%drestart'%b.
+###  $btraffic$b
+   Shows total and daily net traffic stats since the last $b'%drestart'$b.
    Stats groups are IRC, Botnet, Partyline, Transfer.mod and Misc.
  
 %{+m}See also: restart%{-}
 ::unlink
-###  %bunlink%b <bot|*>
+###  $bunlink$b <bot|*>
    This disconnects the specified bot from the botnet (assuming it was linked
    in the first place). Some bots (sharebots in particular) might not allow you
    to unlink them. If "*" is specified as the parameter, all bots will be
@@ -1581,49 +1581,49 @@ See also: bots, bottree
  
 See also: %{+n}link, %{-}bots, downbots%{+n}, newleaf, bottree%{-}
 ::unstick
-###  %bunstick%b [ban/exempt/invite] <hostmask/number> [channel]
+###  $bunstick$b [ban/exempt/invite] <hostmask/number> [channel]
    Makes a "sticky" ban, exempt, or invite normal again.
  
 See also: bans, exempts, invites, stick, -ban, -exempt, -invite
 ::update:
-###  %bupdate%b <binary>
+###  $bupdate$b <binary>
    The bot will attempt to start the new binary and kill itself.
    The specified binary will need to be in the same directory
    as the bot is running in.
  
 See also: whois
 :hub:uplink:
-###  %buplink%b <bot> [uplink]
+###  $buplink$b <bot> [uplink]
    Changed a bot's preferred botnet uplink. Leave 'uplink' blank
    to clear a bot's uplink, which will make it stay on any hub
    that it can connect to. An uplink must be a hub-bot.
  
 See also: hublevel, chaddr
 ::uptime
-###  %buptime%b
+###  $buptime$b
    Displays the bot's current uptime.
  
 See also: status
 ::userlist:
-###  %buserlist%b
+###  $buserlist$b
    A list of all users is displayed. Users with higher flags than you 
    will not appear in the list.
  
 See also: match, whois
 :leaf:voice
-###  %bvoice%b <nickname> [channel|*]
+###  $bvoice$b <nickname> [channel|*]
     will give a +v voice to a person you specify, so long as the
     bot is opped on that channel. Specify * for all channels.
  
 See also: devoice
 ::w:
-###  %bw%b
+###  $bw$b
    The output of 'w' will be displayed over DCC, bot the shell
    the bot is running on.
  
 %{+i}See also: netw%{-}
 ::who
-###  %bwho%b [bot]
+###  $bwho$b [bot]
    Displays a list of users on the local bot.
  
    For example:
@@ -1652,12 +1652,12 @@ See also: devoice
    The final section (not shown in example above) is a list of users on the
    local bot who are not on your channel. This will be omitted if there are no
    users on other channels. If you specify the name of a remote bot, for
-   example %b'%dwho valis'%b, the who request will be sent to that bot instead.
+   example $b'%dwho valis'$b, the who request will be sent to that bot instead.
    The remote bot must be linked to the botnet.
 %{+m}
  
    Masters may also see "(con <flags>)" after a user's entry, which shows the
-   user's console flags/modes (see %b'%dhelp console'%b).
+   user's console flags/modes (see $b'%dhelp console'$b).
  
    In the final section (users that aren't on the current channel), masters
    will see the actual channels other users are on. Also, people in the
@@ -1667,59 +1667,59 @@ See also: devoice
  
 See also: whom
 ::whoami
-###  %bwhoami%b
+###  $bwhoami$b
    Shows your current handle and to what bot you are connected.
  
 See also: whom
 ::whois:
-###  %bwhois%b <nickname>
+###  $bwhois$b <nickname>
    Shows you stored information about a user record. Five headings are
    displayed:
-      %bHANDLE%b - the handle (nickname) of the user
-      %bPASS%b   - "yes" if she has a password set; "no" otherwise 
+      $bHANDLE$b - the handle (nickname) of the user
+      $bPASS$b   - "yes" if she has a password set; "no" otherwise 
                    (bots dont use passwords)
-      %bNOTES%b  - number of stored notes waiting for the user
-      %bFLAGS%b  - the list of flags for this user (see below)
-      %bLAST%b   - the time or date that the user was last on irc or the partyline
+      $bNOTES$b  - number of stored notes waiting for the user
+      $bFLAGS$b  - the list of flags for this user (see below)
+      $bLAST$b   - the time or date that the user was last on irc or the partyline
  
    Valid global flags:
-      %ba%b - admin (user has absolute control over botnet minus a few perm-owner only cmds)
+      $ba$b - admin (user has absolute control over botnet minus a few perm-owner only cmds)
               Be careful who you give this to, only the perm-owner of the net should even have it.
-      %bb%b - bot (user is a bot)
-      %bc%b - chat-bot (bot accepts DCC chat on irc)
-      %bd%b - deop (user cannot gain ops in any channel)
-      %be%b - nethack-exempt (user is exempted from stopnethack protection)
-      %bi%b - hub access (user has hub DCC access)
-      %bj%b - leaf access (user has leaf DCC access)
-      %bk%b - autokick (user is kicked and banned automatically)
-      %bl%b - limit-bot (bot sets limit in all channels, see '%dhelp chaninfo') [%bCPU INTENSIVE%b]
-      %bm%b - master (user has more access to the botnet cmds than a normal user)
-      %bn%b - owner (user has just about full access to bot)
-      %bo%b - op (user has op access to all of the bot's channels)
-      %bO%b - autoop (user is auto-opped in all channels)
-      %bp%b - party-line (user has access to the partyline)
-      %bq%b - quiet (user cannot gain voice on any channel)
-      %bu%b - update-bot (see doc/UPGRADING)
-      %bv%b - voice (user gets +v automatically from +y bots)
-      %bw%b - wasop-test (needs wasop test for +stopnethack procedure)
-      %bx%b - flood-exempt (user is exempt from flood kicks)
-      %by%b - voice-bot (bot gives out voices/auto-ops in chans) [%bCPU INTENSIVE%b]
+      $bb$b - bot (user is a bot)
+      $bc$b - chat-bot (bot accepts DCC chat on irc)
+      $bd$b - deop (user cannot gain ops in any channel)
+      $be$b - nethack-exempt (user is exempted from stopnethack protection)
+      $bi$b - hub access (user has hub DCC access)
+      $bj$b - leaf access (user has leaf DCC access)
+      $bk$b - autokick (user is kicked and banned automatically)
+      $bl$b - limit-bot (bot sets limit in all channels, see '%dhelp chaninfo') [$bCPU INTENSIVE$b]
+      $bm$b - master (user has more access to the botnet cmds than a normal user)
+      $bn$b - owner (user has just about full access to bot)
+      $bo$b - op (user has op access to all of the bot's channels)
+      $bO$b - autoop (user is auto-opped in all channels)
+      $bp$b - party-line (user has access to the partyline)
+      $bq$b - quiet (user cannot gain voice on any channel)
+      $bu$b - update-bot (see doc/UPGRADING)
+      $bv$b - voice (user gets +v automatically from +y bots)
+      $bw$b - wasop-test (needs wasop test for +stopnethack procedure)
+      $bx$b - flood-exempt (user is exempt from flood kicks)
+      $by$b - voice-bot (bot gives out voices/auto-ops in chans) [$bCPU INTENSIVE$b]
  
    Users can also have flags specific to a channel:
  
-      %bd%b - deop (user cannot gain ops on the channel)
-      %be%b - nethack-exempt (user is exempted from stopnethack protection)
-      %bk%b - autokick (user is kicked and banned automatically)
-      %bl%b - limit-bot (bot sets limit in the channel) [%bCPU INTENSIVE%b]
-      %bm%b - master (user is a channel master)
-      %bn%b - owner (user is a channel owner)
-      %bo%b - op (user has op access to the channel)
-      %bO%b - autoop (user is auto-opped in channel)
-      %bq%b - quiet (user cannot gain voice on the channel)
-      %bv%b - voice (user gets +v automatically)
-      %bw%b - wasop-test (needs wasop test for +stopnethack procedure)
-      %by%b - voice-bot (bot gives out voices/auto-ops in the channel) [%bCPU INTENSIVE%b]
-      %bz%b - washalfop-test (needs washalfop test for +stopnethack procedure)
+      $bd$b - deop (user cannot gain ops on the channel)
+      $be$b - nethack-exempt (user is exempted from stopnethack protection)
+      $bk$b - autokick (user is kicked and banned automatically)
+      $bl$b - limit-bot (bot sets limit in the channel) [$bCPU INTENSIVE$b]
+      $bm$b - master (user is a channel master)
+      $bn$b - owner (user is a channel owner)
+      $bo$b - op (user has op access to the channel)
+      $bO$b - autoop (user is auto-opped in channel)
+      $bq$b - quiet (user cannot gain voice on the channel)
+      $bv$b - voice (user gets +v automatically)
+      $bw$b - wasop-test (needs wasop test for +stopnethack procedure)
+      $by$b - voice-bot (bot gives out voices/auto-ops in the channel) [$bCPU INTENSIVE$b]
+      $bz$b - washalfop-test (needs washalfop test for +stopnethack procedure)
  
    Hostmasks for the user are displayed on the following lines. If the user is
    a bot, there will be a line below which says "ADDRESS:" and gives the bot's
@@ -1733,7 +1733,7 @@ See also: whom
  
 See also: match, who, whom%{+m|m}, chattr, chaninfo%{-}
 ::whom
-###  %bwhom%b [channel|*]
+###  $bwhom$b [channel|*]
    Displays a list of users on the current partyline channel.
  
    For example:

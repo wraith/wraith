@@ -893,14 +893,8 @@ char *replace(const char *string, const char *oldie, const char *newbie)
   return (newstring);
 }
 
-#define HELP_BOLD  1
-#define HELP_REV   2
-#define HELP_UNDER 4
-#define HELP_FLASH 8
-
 void showhelp(int idx, struct flag_record *flags, char *string)
 {
-  static int help_flags;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   char *helpstr = NULL, tmp[2] = "", flagstr[10] = "";
   int ok = 1;
@@ -947,25 +941,27 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         while (*string && *string != '}') {
           string++;
         }
+/*
       } else if (*(string + 1) == 'b') {
         string += 2;
-        if (help_flags & HELP_BOLD) {
-          help_flags &= ~HELP_BOLD;
+        if (help_flags & CFLGS_BOLD) {
+          help_flags &= ~CFLGS_BOLD;
           strcat(helpstr, color(idx, BOLD_CLOSE, 0));
         } else {
-          help_flags |= HELP_BOLD;
+          help_flags |= CFLGS_BOLD;
           strcat(helpstr, color(idx, BOLD_OPEN, 0));
         }
       } else if (*(string + 1) == 'f') {
         string += 2;
         
-        if (help_flags & HELP_FLASH) {
+        if (help_flags & CFLGS_FLASH) {
           strcat(helpstr, color(idx, FLASH_CLOSE, 0));
-          help_flags &= ~HELP_FLASH;
+          help_flags &= ~CFLGS_FLASH;
         } else {
-          help_flags |= HELP_FLASH;
+          help_flags |= CFLGS_FLASH;
           strcat(helpstr, color(idx, FLASH_OPEN, 0));
         }
+*/
       } else if (*(string + 1) == 'd') {
         string += 2;
         strcat(helpstr, settings.dcc_prefix);        

@@ -3,6 +3,12 @@
 
 #include "misc.h"
 
+#define CFLGS_BOLD 	 	BIT0
+#define CFLGS_REV   		BIT1
+#define CFLGS_UNDERLINE 	BIT2
+#define CFLGS_FLASH 		BIT3
+
+
 #define C_BLACK                 1
 #define C_BLUE                  2
 #define C_GREEN                 3

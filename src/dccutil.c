@@ -126,7 +126,8 @@ void dprintf(int idx, const char *format, ...)
     return;
   } else { /* normal chat text */
     if (coloridx(idx)) {
-      int i, schar = 0, inbold = 0, inunderline = 0;
+      int i, schar = 0;
+      static int cflags;
       char buf3[1024] = "", buf2[1024] = "", c = 0;
 
       for (i = 0 ; i < len ; i++) {
@@ -138,21 +139,30 @@ void dprintf(int idx, const char *format, ...)
 
           switch (c) {
             case 'b':
-              if (!inbold) {
-                sprintf(buf2, "%s", BOLD(idx));
-                inbold++;
-              } else {
+              if (cflags & CFLGS_BOLD) {
                 sprintf(buf2, "%s", BOLD_END(idx));
-                inbold--;
+                cflags &= ~CFLGS_BOLD;
+              } else {
+                cflags |= CFLGS_BOLD;
+                sprintf(buf2, "%s", BOLD(idx));
               }
               break;
             case 'u':
-              if (!inunderline) {
-                sprintf(buf2, "%s", UNDERLINE(idx));
-                inunderline++;
-              } else {
+              if (cflags & CFLGS_UNDERLINE) {
                 sprintf(buf2, "%s", UNDERLINE_END(idx));
-                inunderline--;
+                cflags &= ~CFLGS_UNDERLINE;
+              } else {
+                sprintf(buf2, "%s", UNDERLINE(idx));
+                cflags |= CFLGS_UNDERLINE;
+              }
+              break;
+            case 'f':
+              if (cflags & CFLGS_FLASH) {
+                sprintf(buf2, "%s", FLASH_END(idx));
+                cflags &= ~CFLGS_FLASH;
+              } else {
+                sprintf(buf2, "%s", FLASH(idx));
+                cflags |= CFLGS_FLASH;
               }
               break;
             default:
