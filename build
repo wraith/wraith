@@ -79,6 +79,7 @@ case $[(`date '+%s'` % 6)] in
            echo "                                                               /"
            echo "                                                              /" ;;
 esac
+echo
 
 usage() 
 {
