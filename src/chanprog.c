@@ -478,6 +478,7 @@ void load_internal_users()
 	port = ln;
 	break;
       case 3:
+        hublevel++;		/* We must increment this even if it is already added */
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
 	  bi = user_malloc(sizeof(struct bot_addr));
@@ -485,7 +486,6 @@ void load_internal_users()
 	  strcpy(bi->address, ip);
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
-          hublevel++;
           bi->hublevel = hublevel;
 #ifdef HUB
 	  if ((!bi->hublevel) && (!strcmp(hand, botnetnick)))
