@@ -2,6 +2,8 @@
 
 #edit this to your homedir (no trailing slash)
 
+#add in 'cont' support for NOT using make clean.
+
 TCLDIR="/home/wheel/bryan"
 
 

@@ -14,6 +14,8 @@ Wraith - CHANGES
 @ 2.Source code now in CVS.
 @ 3.bldall has been moved to build, type ./build for usage.
 @ 4.Makefiles are improved greatly.
+@ 5.Organized all files more effeciently
++ 6.Created TODO file.
 
 1.0.1
 ! 1.Fixed a cosmetic bug in show_channels
