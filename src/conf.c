@@ -216,7 +216,6 @@ void init_conf() {
   conffile.uname = NULL;
   conffile.username = NULL;
   conffile.homedir = NULL;
-  conffile.md5 = NULL;
 }
 /*
  * Return the PID of a bot if it is running, otherwise return 0
@@ -305,7 +304,6 @@ void showconf() {
   conf_bot *bot = NULL;
 
   sdprintf("---------------------------CONF START---------------------------");
-  sdprintf("md5      : %s", conffile.md5);
   sdprintf("uid      : %d", conffile.uid);
   sdprintf("uname    : %s", conffile.uname);
   sdprintf("username : %s", conffile.username);
@@ -343,7 +341,6 @@ void free_conf() {
     /* must also free() anything malloc`d in conf_addbot() */
     free(bot);
   }
-  free(conffile.md5);
   free(conffile.uname);
   free(conffile.username);
   free(conffile.homedir);
@@ -352,15 +349,6 @@ void free_conf() {
 }
 
 int parseconf() {
-  char *md5 = MD5FILE(binname);
-
-  if (!conffile.md5) {
-    conffile.md5 = strdup(md5);
-  } 
-  /* fuck it
-  else if (conffile.md5 && strcmp(conffile.md5, md5))
-    fatal("Nice try :)", 0);
-  */
   if (!conffile.bots->nick && !conffile.bots->next) /* no bots ! */
     werr(ERR_NOBOTS);
 
@@ -475,9 +463,6 @@ int readconf(char *cfile)
 
         } else if (!strcmp(option, "binname")) {        /* filename of the binary? */
           str_redup(&conffile.binname, line);
-
-        } else if (!strcmp(option, "binmd5")) {        	/* binary hash */
-          str_redup(&conffile.md5, line);
 
         } else if (!strcmp(option, "portmin")) {
           if (egg_isdigit(line[0]))
@@ -594,9 +579,6 @@ int writeconf(char *filename, FILE *stream, int bits) {
 
   comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
   my_write(f, "! binname %s\n", conffile.binname);
-
-  comment("# DO NOT TOUCH THIS.");
-  my_write(f, "! binmd5 %s\n", conffile.md5);
 
   comment("");
 
