@@ -949,16 +949,6 @@ static void bot_hublog(char *botnick, char *code, char *msg)
 #endif /* HUB */
 }
 
-static void bot_handshake(int idx, char *par)
-{
-  struct userrec *u = get_user_by_handle(userlist, dcc[idx].nick);
-
-  /* We *don't* want botnet passwords migrating */
-  noshare = 1;
-  set_user(&USERENTRY_PASS, u, par);
-  noshare = 0;
-}
-
 /* Used to send a direct msg from Tcl on one bot to Tcl on another
  * zapf <frombot> <tobot> <code [param]>
  */
@@ -1266,7 +1256,6 @@ botcmd_t C_bot[] =
   {"ct",		(Function) bot_chat},
   {"e",			(Function) bot_error},
   {"el",		(Function) bot_endlink},
-  {"hs",		(Function) bot_handshake},
   {"i",			(Function) bot_idle},
   {"i?",		(Function) bot_infoq},
   {"j",			(Function) bot_join},

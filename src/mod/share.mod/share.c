@@ -1481,7 +1481,7 @@ finish_share(int idx)
   unlink(dcc[idx].u.xfer->filename);    //I mean really, shit fills up the quota fast.
 
   loading = 0;
-  putlog(LOG_BOTS, "@", "%s.", USERF_XFERDONE);
+  putlog(LOG_BOTS, "*", "%s.", USERF_XFERDONE);
 
   clear_chanlist();             /* Remove all user references from the
                                  * channel lists.                       */
@@ -1494,6 +1494,7 @@ finish_share(int idx)
    *   - unshared (got_share == 0) user entries
    *   - old bot flags and passwords
    */
+  noshare = 1;
   fr.match = (FR_CHAN | FR_BOT);
   for (u = userlist; u; u = u->next) {
     struct userrec *u2 = get_user_by_handle(ou, u->handle);
@@ -1510,7 +1511,6 @@ finish_share(int idx)
       struct chanuserrec *cr = NULL, *cr_next = NULL, *cr_old = NULL;
       struct user_entry *ue = NULL;
 
-      noshare = 1;
       for (cr = u2->chanrec; cr; cr = cr_next) {
         struct chanset_t *mychan = findchan_by_dname(cr->channel);
 
@@ -1526,15 +1526,16 @@ finish_share(int idx)
           }
         cr_old = cr;
       }
-      noshare = 0;
+
       /* Any unshared user entries need copying over */
       for (ue = u2->entries; ue; ue = ue->next)
         if (ue->type && !ue->type->got_share && ue->type->dup_user)
           ue->type->dup_user(u, u2, ue);
     }
   }
+  noshare = 0;
   clear_userlist(ou);
-
+  
   unlink(dcc[idx].u.xfer->filename);    /* Done with you!               */
 
   checkchans(1);                /* remove marked channels */
