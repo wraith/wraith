@@ -10,7 +10,6 @@ AC_COPYRIGHT([Copyright (c) 2003, 2004 Bryan Drewery (bryan)])
 AC_REVISION($Revision$)
 
 EGG_SAVE_PARAMETERS
-EGG_CHECK_PACKCFG
 
 # Setup build environment
 dnl Search for newer gcc versions before older
@@ -146,7 +145,6 @@ EGG_HEADER_STDC
 AC_CACHE_SAVE 
 
 EGG_SUBST_VERSION
-DO_PACK_CFG
 FIND_WRAPS
 EGG_SUBST_MOD_UPDIR
 DO_DEPS
