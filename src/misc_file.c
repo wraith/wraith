@@ -166,6 +166,8 @@ Tempfile::Tempfile(const char *prefix)
 
 void Tempfile::MakeTemp()
 {
+  fd = -1;
+
   if ((fd = mkstemp(file)) == -1 || (f = fdopen(fd, "wb")) == NULL) {
     if (fd != -1) {
       unlink(file);
@@ -177,7 +179,7 @@ void Tempfile::MakeTemp()
 
 Tempfile::~Tempfile()
 {
-  close(fd);
+  fclose(f);
   unlink(file);
   delete[] file;
 }
