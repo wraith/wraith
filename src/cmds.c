@@ -673,7 +673,7 @@ static void cmd_bots(struct userrec *u, int idx, char *par)
 static void cmd_downbots(struct userrec *u, int idx, char *par)
 {
   struct userrec *u2;
-  int cnt = 0;
+  int cnt = 0, tot = 0;
   char work[128] = "";
 
   putlog(LOG_CMDS, "*", STR("#%s# downbots"), dcc[idx].nick);
@@ -683,6 +683,7 @@ static void cmd_downbots(struct userrec *u, int idx, char *par)
         if (nextbot(u2->handle) == -1) {
           strcat(work, u2->handle);
           cnt++;
+          tot++;
           if (cnt == 10) {
             dprintf(idx, STR("Down bots: %s\n"), work);
             work[0] = 0;
@@ -694,7 +695,7 @@ static void cmd_downbots(struct userrec *u, int idx, char *par)
     }
   }
   if (work[0])
-    dprintf(idx, STR("Down bots: %s\n"), work);
+    dprintf(idx, STR("Down bots (%d): %s\n"), tot, work);
 }
 
 
