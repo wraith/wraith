@@ -822,6 +822,33 @@ static void do_nettype(void)
  *     CTCP DCC CHAT functions
  */
 
+
+static int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
+{
+  /* According to the latest RFC, the clients SHOULD be able to handle
+   * DNS names that are up to 255 characters long.  This is not broken.
+   */
+
+  char badaddress[16];
+  in_addr_t ip = my_atoul(ipaddy);
+  int prt = atoi(port);
+
+  if (prt < 1) {
+    putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible port of %u!",
+           nick, from, prt);
+    return 0;
+  }
+  sprintf(badaddress, "%u.%u.%u.%u", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
+          (ip >> 8) & 0xff, ip & 0xff);
+  if (ip < (1 << 24)) {
+    putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible IP of %s!",
+           nick, from, badaddress);
+    return 0;
+  }
+  return 1;
+}
+
+
 static void dcc_chat_hostresolved(int);
 
 /* This only handles CHAT requests, otherwise it's handled in filesys.
@@ -867,43 +894,31 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
       dprintf(DP_HELP, "NOTICE %s :%s (invalid port)\n", nick, DCC_CONNECTFAILED1);
     putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED3, nick, from);
   } else {
-    i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
+    if (!sanitycheck_dcc(nick, from, ip, prt))
+      return 1;
+
+    i = new_dcc(&DCC_CHAT_PASS, sizeof(struct chat_info));
+
     if (i < 0) {
-      putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick, ip);
+      putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", nick, ip);
       return BIND_RET_BREAK;
     }
-#ifdef USE_IPV6
-    if (hostprotocol(ip) == AF_INET6 && sockprotocol(dcc[i].sock) == AF_INET6) {
-      debug1("ipv6 addr: %s",ip);
-      strcpy(dcc[i].host6,ip);
-      debug1("ipv6 addr: %s",dcc[i].host6);
-    } else
-#endif /* USE_IPV6 */
-      dcc[i].addr = my_atoul(ip);
+    dcc[i].addr = my_atoul(ip);
     dcc[i].port = atoi(prt);
     dcc[i].sock = -1;
     strcpy(dcc[i].nick, u->handle);
     strcpy(dcc[i].host, from);
     dcc[i].timeval = now;
     dcc[i].user = u;
-#ifdef USE_IPV6
-    if (sockprotocol(dcc[i].sock) != AF_INET6) {
-#endif /* USE_IPV6 */
-/* remove me? */
-      dcc[i].addr = my_atoul(ip);
-      dcc[i].u.dns->ip = dcc[i].addr;
-      dcc[i].u.dns->dns_type = RES_HOSTBYIP;
-      dcc[i].u.dns->dns_success = dcc_chat_hostresolved;
-      dcc[i].u.dns->dns_failure = dcc_chat_hostresolved;
-      dcc[i].u.dns->type = &DCC_CHAT_PASS;
-      dcc_dnshostbyip(dcc[i].addr);
-#ifdef USE_IPV6
-    } else
-      dcc_chat_hostresolved(i); /* Don't try to look it up */
-#endif /* USE_IPV6 */
+
+    dcc_chat_hostresolved(i);
+
+//    egg_dns_reverse(dcc[i].addr, 20, dcc_chat_dns_callback, (void *) i);
   }
   return BIND_RET_BREAK;
 }
+
+//static void tandem_relay_dns_callback(void *client_data, const char *host, char **ips)
 
 static void dcc_chat_hostresolved(int i)
 {
@@ -911,29 +926,12 @@ static void dcc_chat_hostresolved(int i)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   egg_snprintf(buf, sizeof buf, "%d", dcc[i].port);
-#ifdef USE_IPV6
-  if (sockprotocol(dcc[i].sock) == AF_INET6) {
-    strcpy(ip, dcc[i].host6); /* safe, host6 is 121 */
-  } else
-#endif /* !USE_IPV6 */
+
   egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
 #ifdef USE_IPV6
-  if (sockprotocol(dcc[i].sock) == AF_INET6) {
-#  ifdef IPV6_DEBUG
-    debug2("af_inet6 %s / %s", dcc[i].host6, ip);
-#  endif /* IPV6_DEBUG */
-    dcc[i].sock = getsock(0, AF_INET6);
-  } else {
-#  ifdef IPV6_DEBUG
-    debug0("af_inet");
-#  endif /* IPV6_DEBUG */
-    dcc[i].sock = getsock(0, AF_INET);
-  }
+  dcc[i].sock = getsock(0, AF_INET);
 #else
   dcc[i].sock = getsock(0);
-#  ifdef IPV6_DEBUG
-  debug2("sock: %d %s", dcc[i].sock, ip);
-#  endif /* IPV6_DEBUG */
 #endif /* USE_IPV6 */
   if (dcc[i].sock < 0 || open_telnet_dcc(dcc[i].sock, ip, buf) < 0) {
     strcpy(buf, strerror(errno));
@@ -948,7 +946,8 @@ static void dcc_chat_hostresolved(int i)
 #ifdef HAVE_SSL
     ssl_link(dcc[i].sock, CONNECT_SSL);
 #endif /* HAVE_SSL */
-    changeover_dcc(i, &DCC_CHAT_PASS, sizeof(struct chat_info));
+
+/*changeover*/
     dcc[i].status = STAT_ECHO;
     get_user_flagrec(dcc[i].user, &fr, 0);
     if (ischanhub() && !glob_chuba(fr))

@@ -1155,7 +1155,6 @@ static void tandem_relay_dns_callback(void *client_data, const char *host, char 
 
   dcc[i].addr = inet_addr(ips[0]);
 
-/*changeover*/
   dcc[i].u.relay->chat = (struct chat_info *) calloc(1, sizeof(struct chat_info));
   dcc[i].u.relay->port = dcc[i].port;
   dcc[i].u.relay->chat->away = NULL;
