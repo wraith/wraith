@@ -461,7 +461,7 @@ void show_banner(int idx)
 {
   dumplots(-dcc[idx].sock, "", wbanner()); /* we use sock so that colors aren't applied to banner */
   dprintf(idx, "\n \n");
-  dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://www.shatow.net/wraith/private.html -\n"));
+  dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://www.shatow.net/wraith/ -\n"));
 }
 
 /* show motd to dcc chatter */

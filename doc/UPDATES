@@ -2,7 +2,7 @@ This is a summary of ChangeLog basically.
 
 1.0.11
 
-1.Fixed countless various bugs. (see ChangeLog)
+1.Fixed countless various bugs. (see ChangeLog for full list)
 2.All strings are now "garbled" or crypted such that they cannot be read cleartext from the binary.
 4.Source code now in CVS.
 5.bldall has been moved to build, type ./build for usage.
@@ -13,8 +13,8 @@ This is a summary of ChangeLog basically.
 10.Specifying ipv6 ip as last param in conf now supported. As well as blanking ip4/host with a "."
 11.Cmdline params -e/-d now except STDOUT as the outfile (echos to terminal).
 12.Pscloak can be disabled by putting "!-" as the third line in the local conf.
-13.Applied fixes for eggdrop1.6.15 from eggcvs.
-14.Pack now uses openssl for MD5.
+13.Applied fixes from eggdrop1.6 CVS.
+14.Pack now uses and requires openssl for MD5, SHA1, and AES-256.
 15.Finished auth scripts for mIRC/BitchX/Xchat/irssi.
 16.Re-wrote settings system, see doc/INSTALL.
 17.Re-wrote pack.conf into conf.h, see doc/INSTALL.
@@ -28,7 +28,16 @@ This is a summary of ChangeLog basically.
 25.Added hub->leaf/hub cmd relaying. .botcmd (or .bc) bot cmd ...
 26.Fixed bug with symlinked homedirs. (/home/user -> /usr/home/user)
 27.Passwords no longer require a special character.
-28.Login now shows channels, banner, link to wraith's site.
+28.Login now shows channels, banner, link to site.
+29.New install system, uses conf.h, salt.h and pack.cfg
+30.Added a script to download/build/install TCL if needed.
+31.More cmds now accept *; kick, kickban.
+32.Bot will now "roll" it's nick if needed, ie: nick_ -> _nick -> k_nic.
+33.Added some new defines to disable features.
+34.Fixed ipv6 ban saving/loading bug.
+35.Fixed and improved cmds: slowjoin/slowpart/down/cycle.
+36.Added cmd_mop <#chan|*>.
+37.Added help info for all cmds.
 
 1.0.10
 

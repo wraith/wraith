@@ -6,7 +6,8 @@ ver="?.?.?"
 ver=`grep "char" src/main.c | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 numver=`grep "int" src/main.c | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
 PACKNAME=`grep "PACKNAME " pack/pack.cfg | awk '/PACKNAME/ {print $2}'`
-
+BUILDTS=`cat src/build.h | awk '{print $3}'`
+builddate=`perl -e "use POSIX 'strftime';print strftime(\"%m.%d.%Y\n\",gmtime(${BUILDTS}));"`
 
 clear
 #Display a banner
@@ -14,6 +15,9 @@ btotal=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*
 bnum=$[(`date '+%s'` % ${btotal})]
 banner=`grep -A 15 "char \*wbanner() {" src/misc.c | grep "case ${bnum}:" | sed -e "s/.*case ${bnum}: return STR(\"\(.*\)\");/\1/"`
 echo -e "${banner}"
+echo -e "Version:   ${ver} (${numver})\nBuild:     ${builddate}"
+echo -e `grep -r "http://" src/misc.c | sed -e "s/dprintf(idx, STR(\"\(.*\)\"));/\1/"`
+echo
 
 usage() 
 {
