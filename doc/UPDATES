@@ -89,6 +89,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * cmd_getkey over .botcmd was displaying excess newlines.
 * Rewrote how logs are shared over botnet, now uses much less bw and resources. (#31)
   -[will break logging during update]
+* Added some missing logging for msg_pass
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

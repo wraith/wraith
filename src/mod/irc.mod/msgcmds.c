@@ -18,18 +18,19 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   if (u->bot)
     return BIND_RET_BREAK;
   if (!par[0]) {
-    dprintf(DP_HELP, "NOTICE %s :%s\n", nick,
-	    u_pass_match(u, "-") ? IRC_NOPASS : IRC_PASS);
+    dprintf(DP_HELP, "NOTICE %s :%s\n", nick, u_pass_match(u, "-") ? IRC_NOPASS : IRC_PASS);
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS?", nick, host, u->handle);
     return BIND_RET_BREAK;
   }
   old = newsplit(&par);
   if (!u_pass_match(u, "-") && !par[0]) {
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
     dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_EXISTPASS);
     return BIND_RET_BREAK;
   }
   if (par[0]) {
     if (!u_pass_match(u, old)) {
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
       dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_FAILPASS);
       return BIND_RET_BREAK;
     }
