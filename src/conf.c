@@ -163,7 +163,7 @@ confedit()
   char *editor = NULL;
   mode_t um;
   int waiter;
-  pid_t pid, xpid;
+  pid_t pid, xpid, localhub_pid = 0;
 
 
   um = umask(077);
@@ -255,11 +255,17 @@ confedit()
 
   if (!can_stat(tmpconf.file))
     fatal("Error reading new config file", 0);
+
+  if (conf.bots && conf.bots->pid)
+    localhub_pid = conf.bots->pid;
+
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   fix_tilde(&conf.binpath);
   unlink(tmpconf.file);
-  conf_to_bin(&conf, 0, 1, 1);	/* will exit */
-  exit(0);                      /* never reached */
+  conf_to_bin(&conf, 0, -1);
+  if (localhub_pid)
+    kill(localhub_pid, SIGUSR1);
+  exit(0);
 
 fatal:
   unlink(tmpconf.file);
