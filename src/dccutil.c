@@ -117,8 +117,6 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
 id = idx;
 if (id < 0) { id = idx + 7; id = -id; }
 
-//printf("hm idx: %d id: %d\n", idx, id);
-
 if ((id < 0x7FF0) && (dcc[id].status & STAT_COLOR) && 
  (dcc[id].type == &DCC_CHAT)) {
  int i, a = 0, m = 0;
@@ -126,7 +124,6 @@ if ((id < 0x7FF0) && (dcc[id].status & STAT_COLOR) &&
   m = 1;
  else if (dcc[id].status & STAT_COLORA)
   a = 1;
-//printf("a: %i m: %i\n", a, m);
 if (!a && !m) { goto broke; }
  buf3[0] = '\0';
  for (i = 0 ; i < len ; i++) {
@@ -281,7 +278,6 @@ void dcc_chatter(int idx)
   dprintf(idx, "Connected to %s, running %s\n", botnetnick, version);
   show_banner(idx);
   show_motd(idx);
-Context;
   if (glob_master(fr)) {
     if ((tands+1) > 1)
       dprintf(idx, STR("There are \002-%d- bots\002 currently linked.\n"), tands + 1);
@@ -289,7 +285,6 @@ Context;
       dprintf(idx, STR("There is \002-%d- bot\002 currently linked.\n"), tands + 1);
   }
   show_channels(idx, NULL);
-Context;
 
   if (glob_party(fr)) {
      i = dcc[idx].u.chat->channel;
@@ -358,7 +353,6 @@ Context;
 
   dcc[n].sock = (-1);
   dcc[n].type = &DCC_LOST;
-Context;
 }
 
 /* Remove entry from dcc list. Think twice before using this function,
@@ -375,7 +369,7 @@ Context;
     dcc[n].type->kill(n, dcc[n].u.other);
   else if (dcc[n].u.other)
     nfree(dcc[n].u.other);
-Context;
+
   dcc_total--;
   if (n < dcc_total)
     egg_memcpy(&dcc[n], &dcc[dcc_total], sizeof(struct dcc_t));
@@ -570,7 +564,6 @@ Context;
     nfree(dcc[i].u.other);
     dcc[i].u.other = NULL;
   }
-Context;
   dcc[i].type = type;
   if (xtra_size) {
     dcc[i].u.other = nmalloc(xtra_size);
@@ -630,35 +623,25 @@ Context;
   /* If it's a partyliner (chatterer :) */
   /* Horrible assumption that DCT_CHAT using structure uses same format
    * as DCC_CHAT */
-Context;
   if ((dcc[idx].type->flags & DCT_CHAT) &&
       (dcc[idx].u.chat->channel >= 0)) {
     char x[1024];
-Context;
 
     egg_snprintf(x, sizeof x, DCC_BOOTED3, by, dcc[idx].nick,
 		 reason[0] ? ": " : "", reason);
-Context;
     chanout_but(idx, dcc[idx].u.chat->channel, "*** %s.\n", x);
-Context;
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, x);
   }
-Context;
   check_tcl_chof(dcc[idx].nick, dcc[idx].sock);
-Context;
   if ((dcc[idx].sock != STDOUT) || backgrd) {
-Context;
     killsock(dcc[idx].sock);
-Context;
     lostdcc(idx);
     /* Entry must remain in the table so it can be logged by the caller */
   } else {
-Context;
     dprintf(DP_STDOUT, "\n### SIMULATION RESET\n\n");
     dcc_chatter(idx);
   }
-Context;
   return;
 }
 

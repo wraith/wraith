@@ -354,9 +354,9 @@
 #define stripmodes ((int(*)(char *))global[202])
 #define stripmasktype ((const char *(*)(int))global[203])
 /* 204 - 207 */
-//#define sub_lang ((void(*)(int,char *))global[204])
+/* 204: sub_lang -- UNUSED (bryan) */
 #define online_since (*(int *)(global[205]))
-//#define cmd_loadlanguage ((int (*)(struct userrec *,int,char *))global[206])
+/* 206: cmd_loadlanguage -- UNUSED (bryan) */
 #define check_dcc_attrs ((int (*)(struct userrec *,int))global[207])
 /* 208 - 211 */
 #define check_dcc_chanattrs ((int (*)(struct userrec *,char *,int,int))global[208])
@@ -488,7 +488,6 @@
 #define add_cfg ((void (*)(struct cfg_entry *))global[291])
 #define set_cfg_str ((void (*)(char *, char *, char *))global[292])
 /* 293 - 296 */
-//#define trigger_cfg_changed ((void (*)(void))global[293])
 #define trigger_cfg_changed (global[293])
 #define higher_bot_linked ((void (*)(int))global[294])
 #define bot_aggressive_to ((int (*)(struct userrec *))global[295])

@@ -703,7 +703,6 @@ int check_tcl_bind(tcl_bind_list_t *tl, const char *match,
       break;
     case MATCH_MASK:
       ok = wild_match_per((unsigned char *) tm->mask, (unsigned char *) match);
-//      ok = wild_match_per(tm->mask, match);
       break;
     default:
       ok = 0;

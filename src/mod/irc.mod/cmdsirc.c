@@ -919,52 +919,41 @@ static void cmd_getkey(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s getkey %s", dcc[idx].nick, par);
 
-Context;
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-Context;
   if (channel_private(chan) && !chan_op(user) && !glob_owner(user)) {
     dprintf(idx, "No such channel.\n");
     return;
   }
 
-Context;
   if (!glob_op(user) && !chan_op(user)) {
     dprintf(idx, "You do not have access for %s\n");
     return;
   }
 
-Context;
   if (!(channel_pending(chan) || channel_active(chan))) {
     dprintf(idx, "I'm not on %s right now.\n", chan->dname);
     return;
   }
 
-Context;
   strcpy(s, getchanmode(chan));
-Context;
   p = (char *) &s;
-Context;
   p2 = newsplit(&p);
-Context;
   p3 = newsplit(&p);
 
 
   if (!strchr(p2, 'k'))
     dprintf(idx, "%s has no key set\n", chan->dname);
   else {
-Context;
     if (p3[0])
       dprintf(idx, "Key for %s is: %s\n", chan->dname, p3);
     else
       dprintf(idx, "No key set in %s\n", chan->dname);
-Context;
   }
   if (chan->key_prot[0])
     dprintf(idx, " Enforcing +k %s\n", chan->key_prot);
-Context;
-
 }
+
 static void cmd_find(struct userrec *u, int idx, char *par)
 {
   struct chanset_t *chan;
@@ -1038,6 +1027,7 @@ static void cmd_find(struct userrec *u, int idx, char *par)
     dprintf(idx, "(more than 100 matches; list truncated)\n");
   dprintf(idx, "--- Found %d matches.\n", fcount);
 }
+
 static void cmd_invite(struct userrec *u, int idx, char *par)
 {
   struct chanset_t *chan = NULL;

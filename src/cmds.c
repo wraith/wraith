@@ -17,8 +17,6 @@
 #include <sys/utsname.h>
 #endif
 
-//extern struct server_list * serverlist;
-
 extern struct chanset_t	*chanset;
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
@@ -426,9 +424,7 @@ void cmd_botconfig(struct userrec *u, int idx, char *par)
   if (par[0]) {
     set_cfg_str(u2->handle, cfgent->name, (strcmp(par, "-")) ? par : NULL);
     dprintf(idx, STR("Now: "));
-#ifdef HUB
     write_userfile(idx);
-#endif
   } else {
     if (cfgent->describe)
       cfgent->describe(cfgent, idx);
@@ -450,16 +446,8 @@ void cmd_cmdpass(struct userrec *u, int idx, char *par)
   int i, l = 0;
 
   /* cmdpass [command [newpass]] */
-//  putlog(LOG_CMDS, "*", "#%s# cmdpass %s ...", dcc[idx].nick, cmd[0] ? cmd : "");
-  putlog(LOG_CMDS, "*", "#%s# cmdpass ...", dcc[idx].nick);
-/*
-  if (!isowner(u->handle)) {
-    putlog(LOG_MISC, "*", STR("%s attempted to set a command password - not perm owner"), dcc[idx].nick);
-    dprintf(idx, STR("Perm owners only.\n"));
-    return;
-  }
-*/
   cmd = newsplit(&par);
+  putlog(LOG_CMDS, "*", "#%s# cmdpass %s ...", dcc[idx].nick, cmd[0] ? cmd : "");
   pass = newsplit(&par);
   if (!cmd[0] || par[0]) {
     dprintf(idx, STR("Usage: %scmdpass command [password]\n"), dcc_prefix);
@@ -508,20 +496,31 @@ void cmd_cmdpass(struct userrec *u, int idx, char *par)
   if (pass[0]) {
     char epass[36],
       tmp[256];
-
+    if (!isowner(u->handle) && has_cmd_pass(cmd)) {
+      putlog(LOG_MISC, "*", STR("%s attempted to change command password for %s - not perm owner"), dcc[idx].nick, cmd);
+      dprintf(idx, STR("Perm owners only.\n"));
+      return;
+    }
     encrypt_pass(pass, epass);
     sprintf(tmp, STR("%s %s"), cmd, epass);
+    if (has_cmd_pass(cmd))
+      dprintf(idx, STR("Changed command password for %s\n"), cmd);
+    else
+      dprintf(idx, STR("Set command password for %s\n"), cmd);
     set_cmd_pass(tmp, 1);
-    dprintf(idx, STR("Set command password for %s\n"), cmd);
   } else {
+    if (!isowner(u->handle)) {
+      putlog(LOG_MISC, "*", STR("%s attempted to remove command password for %s - not perm owner"), dcc[idx].nick, cmd);
+      dprintf(idx, STR("Perm owners only.\n"));
+      return;
+    }
     set_cmd_pass(cmd, 1);
     dprintf(idx, STR("Removed command password for %s\n"), cmd);
   }
-#ifdef HUB
     write_userfile(idx);
-#endif
 }
-#endif
+#endif /* S_DCCPASS */
+
 static void cmd_lagged(struct userrec *u, int idx, char *par)
 {
   /* Lists botnet lag to *directly connected* bots */
@@ -715,7 +714,6 @@ static void cmd_vbottree(struct userrec *u, int idx, char *par)
 
 int my_cmp (const mycmds *c1, const mycmds *c2)
 {
-//printf("comparing: %s and %s\n", c1->name, c2->name);
   return strcmp (c1->name, c2->name);
 }
 
@@ -743,7 +741,6 @@ Context;
     showall = 1;
     build_flags(flg, &fr, NULL);
     dprintf(idx, "Showing help topics matching your flags: (%s)\n  ", flg);
-//    dprintf(idx, STR("Help overview:\n  "));
   }
 
   for (o = 0; o < cmdi; o++) {
@@ -778,9 +775,7 @@ Context;
         build_flags(flg, &(cmds[n].flags), NULL);
         if (!strcmp(flg, flag)) {
           if (first) {
-//            dprintf(idx, "%s## DCC (%s)\n  ", end ? "" : "\n", flag);
             dprintf(idx, "%s## DCC (%s)\n  ", "\n", flag);
-//            dprintf(idx, "## DCC (%s)\n  ", flag);
           }
 
           if (end && !first) {
@@ -793,7 +788,6 @@ Context;
           i++;
         }
         if (i >= 5) {
-//          dprintf(idx, "\n");
           end = 1;
           i = 0;
         } 
@@ -806,14 +800,6 @@ Context;
 If you have flags on a channel, type %sconsole #chan to see more commands.\n"), dcc_prefix, dcc_prefix);
   else if (!fnd)
     dprintf(idx, STR("No help for nonexistant command '%s'.\n"), par);
-Context;
-//  for (n = 0; n < o ; n++) {
-//    nfree(cmds[n].name);
-//  }
-
-//cmds[0].name = NULL;
-//garbage_collect_tclhash();
-Context;
 }
 
 #ifdef HUB
@@ -921,7 +907,6 @@ void cmd_botupdate(struct userrec *u, int idx, char *par)
 
 static void rcmd_update(char *fbot, char *fhand, char *fidx, char *par)
 {
-//  putlog(LOG_CMDS, "*", STR("#%s# update %s"), dcc[idx].nick, par);
   if (!par[0])
     return;
   updatebin(0, par, 0);
@@ -2130,14 +2115,12 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     /* No-one can change these flags on-the-fly */
     pls.global &= ~(USER_BOT);
     mns.global &= ~(USER_BOT);
-//only THE owner can add these flags
-
 
     if ((pls.global & USER_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
       dprintf(idx, "Only a hub can be set as the updatehub.\n");
       pls.global &= ~(USER_UPDATEHUB);
     }
-
+    
     if (!isowner(u->handle)) {
       if (pls.global & USER_HUBA)
         putlog(LOG_MISC, "*", "%s attempted to give %s hub connect access", dcc[idx].nick, u2->handle);
@@ -3171,11 +3154,10 @@ static void cmd_mns_user(struct userrec *u, int idx, char *par)
    (func[IRC_CHECK_THIS_USER]) (handle, 1, NULL);
   }
   if (deluser(handle)) {
-//    putlog(LOG_CMDS, "*", "#%s# -user %s", dcc[idx].nick, handle);
     dprintf(idx, "Deleted %s.\n", handle);
 #ifdef HUB
     write_userfile(idx);
-#endif
+#endif /* HUB */
   } else
     dprintf(idx, "Failed.\n");
 }
@@ -3943,8 +3925,6 @@ void gotremotereply (char * frombot, char * tohand, char * toidx, char * ln) {
     dprintf(idx, STR("(%s) %s\n"), frombot, ln);
   }
 }
-
-//#endif /* HUB */
 
 static void cmd_traffic(struct userrec *u, int idx, char *par)
 {

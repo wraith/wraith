@@ -33,7 +33,7 @@ static int gotfake433(char *from)
   int l = strlen(botname) - 1;
   char *oknicks = "-_\\`^[]{}";
 
-  Context;
+Context;
   /* First run? */
   if (altnick_char == 0) {
 Context;

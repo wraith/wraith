@@ -432,20 +432,15 @@ void check_hostmask()
   struct userrec *u = get_user_by_handle(userlist, botnetnick);
   struct list_type *q;
 
+Context;
   if (!server_online || !botuserhost[0])
     return;
-Context;
   tmp = botuserhost;
-//  strcpy(tmp, botuserhost);
-//  sprintf(tmp, "%s", botuserhost);
 
-Context;
   if (!tmp[0] || !tmp[1]) return;
-Context;
   if (tmp[0] != '~')
     sprintf(s, STR("*!%s"), tmp);
   else {
-Context;
     tmp++;
     sprintf(s, STR("*!*%s"), tmp);
   }
@@ -454,7 +449,6 @@ Context;
       return;
   }
 
-/*   set_user(&USERENTRY_HOSTS, u, s); */
   addhost_by_handle(botnetnick, s);
   putlog(LOG_GETIN, "*", STR("Updated my hostmask: %s"), s);
 }

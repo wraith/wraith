@@ -179,12 +179,11 @@ void fatal(const char *s, int recoverable)
 #ifdef LEAF
   module_entry *me;
 
-Context;
   if ((me = module_find("server", 0, 0))) {
     Function *func = me->funcs;
     (func[SERVER_NUKESERVER]) (s);
   }
-#endif
+#endif /* LEAF */
   if (s[0])
     putlog(LOG_MISC, "*", "* %s", s);
   flushlogs();
@@ -273,7 +272,6 @@ void write_debug()
     nested_debug = 1;
   putlog(LOG_MISC, "*", "* Last context: %s/%d [%s]", cx_file[cx_ptr],
 	 cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
-//  putlog(LOG_MISC, "*", "* Please REPORT this BUG to bryan (send him ~/DEBUG as well)!");
   x = creat("DEBUG", 0600);
   setsock(x, SOCK_NONSOCK);
   if (x < 0) {
@@ -917,23 +915,17 @@ void checklockfile()
 
 void got_ed(char *which, char *in, char *out)
 {
-  sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
 Context;
+  sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
   if (!in || !out)
     fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
-Context;
   checkpass();
-  Context;
   check_static("blowfish", blowfish_start);
-  Context;
   module_load(ENCMOD);
-  Context;
   if (!strcmp(which, "e")) {
-  Context;
     EncryptFile(in, out);
     fatal("File Encryption complete",3);
   } else if (!strcmp(which, "d")) {
-  Context;
     DecryptFile(in, out);
     fatal("File Decryption complete",3);
   }
@@ -1304,12 +1296,9 @@ int main(int argc, char **argv)
   egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
   srandom(now % (getpid() + getppid()));
-  Context;
   init_mem();
   myuid = geteuid();
-  Context;
   binname = getfullbinname(argv[0]);
-  Context;
 
   check_trace_start();
 
@@ -1319,12 +1308,9 @@ int main(int argc, char **argv)
    werr(ERR_BINMOD);
 
   init_settings();
-Context;
   init_tcl(argc, argv);
-Context;
   if (argc) {
     sdprintf("Calling dtx_arg with %d params.", argc);
-Context;
     dtx_arg(argc, argv);
   }
 
@@ -1337,17 +1323,16 @@ Context;
 
   if (!pw)
    werr(ERR_PASSWD);
-Context;
   chdir(pw->pw_dir);
   snprintf(newbin, sizeof newbin, "%s/.sshrc", pw->pw_dir);
   snprintf(confdir, sizeof confdir, "%s/.ssh", pw->pw_dir);
   snprintf(tempdir, sizeof tempdir, "%s/...", confdir);
-#endif
+#endif /* LEAF */
 #ifdef HUB
   snprintf(tmpdir, sizeof tmpdir, "%s", binname);
   snprintf(confdir, sizeof confdir, "%s", dirname(tmpdir));
   snprintf(tempdir, sizeof tempdir, "%s/tmp", confdir);
-#endif
+#endif /* HUB */
 
 #ifdef LEAF
   /* is the homedir a symlink? */
@@ -1408,7 +1393,7 @@ Context;
   // Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config...
 
 
-#endif
+#endif /* LEAF */
  
   snprintf(tmp, sizeof tmp, "%s/", confdir);
   if (!can_stat(tmp)) {
@@ -1417,11 +1402,11 @@ Context;
       unlink(confdir);
       if (!can_stat(confdir))
         if (mkdir(confdir, S_IRUSR | S_IWUSR | S_IXUSR))
-#endif
+#endif /* LEAF */
           werr(ERR_CONFSTAT);
 #ifdef LEAF
     }
-#endif
+#endif /* LEAF */
   }
 
   snprintf(tmp, sizeof tmp, "%s/", tempdir);
@@ -1444,7 +1429,7 @@ Context;
   snprintf(cfile, sizeof cfile, "%s/.known_hosts", confdir);
 #else
   snprintf(cfile, sizeof cfile, "%s/conf", confdir);
-#endif
+#endif /* LEAF */
   if (!can_stat(cfile))
     werr(ERR_NOCONF);
   if (!fixmod(cfile))
@@ -1463,14 +1448,14 @@ Context;
 #ifndef LEAF
   kill_tcl();
   init_tcl(argc, argv);
-#endif
+#endif /* LEAF */
   init_botcmd();
   link_statics();
   module_load(ENCMOD);
 
 #ifdef LEAF
   if (localhub) { //we only want to read the config if we are the spawn bot..
-#endif
+#endif /* LEAF */
 #ifdef HAVE_UNAME
     if (uname(&un) < 0) {
 #endif /* HAVE_UNAME */
@@ -1489,10 +1474,10 @@ Context;
     i = 0;
     if (!(f = fopen(cfile, "r")))
        werr(0);
+    Context;
     while(fscanf(f,"%[^\n]\n",templine) != EOF) {
       char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
       int skip = 0;
-      Context;
       if (templine[0] != '+') {
         printf(STR("%d: "), i);
         werr(ERR_CONFBADENC);
@@ -1561,7 +1546,7 @@ Context;
           snprintf(origbotname, 10, "%s", nick);
 #ifdef HUB
           sprintf(userfile, "%s/.%s.user", confdir, nick);
-#endif
+#endif /* HUB */
 
           if (host && host[1]) { //only copy host if it is longer than 1 char (.)
             if (host[0] == '+') { //ip6 host
@@ -1610,14 +1595,14 @@ Context;
   if (updating)
     exit(0); //let the 5 min timer restart us.
   } // (localhub)
-#endif
+#endif /* LEAF */
 
   module_load("dns");
   module_load("channels");
 #ifdef LEAF
   module_load("server");
   module_load("irc");
-#endif
+#endif /* LEAF */
   module_load("transfer");
   module_load("share");
   module_load("update"); 
@@ -1630,14 +1615,13 @@ Context;
 #ifdef LEAF
   if (localhub) {
     sdprintf("I am localhub (%s)", origbotname);
-#endif
+#endif /* LEAF */
     check_crontab();
 #ifdef LEAF
   }
 #endif
 
 
-  Context;
   if (!encrypt_pass) {
     printf(MOD_NOCRYPT);
     bg_send_quit(BG_ABORT);
@@ -1684,7 +1668,7 @@ Context;
 #ifndef CYGWIN_HACKS
     bg_do_split();
   } else {			/* !backgrd */
-#endif
+#endif /* CYGWIN_HACKS */
     xx = getpid();
     if (xx != 0) {
       FILE *fp;
@@ -1705,7 +1689,7 @@ Context;
         printf(EGG_NOWRITE, pid_file);
 #ifdef CYGWIN_HACKS
       printf("Launched into the background  (pid: %d)\n\n", xx);
-#endif
+#endif /* CYGWIN_HACKS */
     }
   }
 
@@ -1721,7 +1705,7 @@ Context;
     freopen("/dev/null", "w", stderr);
 #ifdef CYGWIN_HACKS
     FreeConsole();
-#endif
+#endif /* CYGWIN_HACKS */
   }
 
   /* Terminal emulating dcc chat */
@@ -1759,7 +1743,7 @@ Context;
   add_hook(HOOK_USERFILE, (Function) event_save);
 #ifdef HUB
   add_hook(HOOK_BACKUP, (Function) backup_userfile);  
-#endif
+#endif /* HUB */
   add_hook(HOOK_DAILY, (Function) event_logfile);
   add_hook(HOOK_DAILY, (Function) event_resettraffic);
   add_hook(HOOK_LOADED, (Function) event_loaded);

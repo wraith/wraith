@@ -453,25 +453,13 @@ void load_internal_users()
       case 4:
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
-/* no thanks.
-          if (atoi(hublevel) < 999 && strcmp(hand, origbotname)) {
-            u = get_user_by_handle(userlist, hand);
-            fr.bot |= (BOT_PASSIVE | BOT_GLOBAL);
-//            set_user(&USERENTRY_BOTFL, u, (void *) fr.bot);
-            set_user_flagrec(u, &fr, NULL);
-          }
-//          user.bot = BITS;
-*/
 	  bi = user_malloc(sizeof(struct bot_addr));
-
 	  bi->address = user_malloc(strlen(ip) + 1);
 	  strcpy(bi->address, ip);
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
           bi->hublevel = atoi(hublevel);
 #ifdef HUB
-//printf("adding %s with hublevel: %d\n", hand, bi->hublevel ? bi->hublevel : 99);
-
 	  if ((!bi->hublevel) && (!strcmp(hand, botnetnick)))
 	    bi->hublevel = 99;
 #endif
@@ -507,9 +495,7 @@ void load_internal_users()
 
 //owners..
   owner[0] = 0;
-//  strcpy(p, owners);
 
-// buf = get_setting(1);
   sprintf(buf, "%s", owners);
   p = buf;
   while (p) {
@@ -592,11 +578,10 @@ void chanprog()
 #ifdef HUB
   if (!userfile[0])
     fatal(MISC_NOUSERFILE2, 0);
-  //setstatic = 0;
   loading = 1;
   readuserfile(userfile, &userlist);
   loading = 0;
-#endif
+#endif /* HUB */
 
   load_internal_users();
 
@@ -614,7 +599,7 @@ void chanprog()
     bi->hublevel = 99;
 #else
     bi->hublevel = 0;
-#endif
+#endif /* HUB */
     bi->uplink = user_malloc(1);
     bi->uplink[0] = 0;
     set_user(&USERENTRY_BOTADDR, u, bi);
@@ -648,7 +633,7 @@ void chanprog()
 #ifdef HUB
     listen_all(bi->telnet_port, 0);
     my_port = bi->telnet_port;
-#endif
+#endif /* HUB */
   }
 
   trigger_cfg_changed();
@@ -681,8 +666,8 @@ void chanprog()
   }
   reaffirm_owners();
 }
-#ifdef HUB
 
+#ifdef HUB
 /* Reload the user file from disk
  */
 void reload()
@@ -699,17 +684,14 @@ void reload()
   clear_userlist(userlist);
   noshare = 0;
   userlist = NULL;
-  //setstatic = 0;
   loading = 1;
   if (!readuserfile(userfile, &userlist))
     fatal(MISC_MISSINGUSERF, 0);
   loading = 0;
-  //setstatic = 1;
   reaffirm_owners();
   call_hook(HOOK_READ_USERFILE);
 }
-#endif
-
+#endif /* HUB */
 
 void rehash()
 {
@@ -719,7 +701,7 @@ void rehash()
   clear_userlist(userlist);
   noshare = 0;
   userlist = NULL;
-#endif
+#endif /* HUB */
   chanprog();
 }
 

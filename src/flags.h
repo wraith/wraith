@@ -51,10 +51,8 @@ struct flag_record {
 #endif
 #define DEFLAG_MDOP        6
 
-//#define USER_VALID 0x03fbfeff /* all USER_ flags in use              */
-//#define CHAN_VALID 0x03777c79 /* all flags that can be chan specific */
-#define USER_VALID 0x03ffffff
-#define CHAN_VALID 0x03ffffff
+#define USER_VALID 0x03ffffff	/* all USER_ flags in use              */
+#define CHAN_VALID 0x03ffffff	/* all flags that can be chan specific */
 #define BOT_VALID  0x7fe689C1 /* all BOT_ flags in use               */
 
 
@@ -171,7 +169,6 @@ struct flag_record {
 #define chan_noflood(x)			((x).chan & USER_NOFLOOD)
 #define glob_chanhub(x)			((x).global & USER_CHANHUB)
 
-//#define bot_global(x)		((x).bot & BOT_GLOBAL)
 #define bot_global(x)		(1)
 #define bot_chan(x)		((x).chan & BOT_AGGRESSIVE)
 #define bot_shared(x)		((x).bot & BOT_SHARE)

@@ -444,7 +444,7 @@ static void bot_sysname(int idx, char *par)
 {
  //simply copy it all to the string pointer.
 
-//  putlog(LOG_MISC, "*", "%s is using %s", dcc[idx].nick, par);
+  putlog(LOG_DEBUG, "@", "%s is using %s", dcc[idx].nick, par);
   dcc[idx].u.bot->sysname[0] = 0;
   strcpy(dcc[idx].u.bot->sysname, par);
 }

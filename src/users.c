@@ -525,7 +525,6 @@ void tell_user_ident(int idx, char *id, int master)
 {
   char format[81];
   struct userrec *u;
-//  struct chanset_t *chan;
   struct flag_record user = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int noax = 0;
@@ -957,7 +956,7 @@ Context;
 	  } else {
 	    u = get_user_by_handle(bu, code);
 	    if (u && !(u->flags & USER_UNSHARED)) {
-//	      putlog(LOG_MISC, "*", "* %s '%s'!", USERF_DUPE, code);
+	      putlog(LOG_ERROR, "@", "* %s '%s'!", USERF_DUPE, code);
 	      lasthand[0] = 0;
 	      u = NULL;
 	    } else if (u) {
@@ -1200,13 +1199,11 @@ void autolink_cycle(char *start)
     botlinkcount = 0;
   u = get_user_by_handle(userlist, botnetnick);
   ba = get_user(&USERENTRY_BOTADDR, u);
-Context;
   if (ba && (ba->uplink[0])) {
     strncpy0(uplink, ba->uplink, sizeof(uplink));
   } else {
     uplink[0] = 0;
   }
-Context;
   curhub[0] = 0;
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT_NEW)
@@ -1220,35 +1217,28 @@ Context;
   }
 
   if (curhub[0]) {
-Context;
     /* we got a hub */
     if (uplink[0] && !strcmp(curhub, uplink))
       /* Connected to uplink, nothing more to do */
       return;
 
-Context;
     if (start)
       /* Failed a link... let's just wait for next regular call */
       return;
 
-Context;
     if (uplink[0]) {
       /* Trying the uplink */
-Context;
       botlink("", -3, uplink);
       return;
     }
     /* we got a hub currently, and no set uplink. Stay here */
     return;
-Context;
   } else {
-Context;
     /* no hubs connected... pick one */
     if (!start) {
       /* Regular interval call, no previous failed link */
       if (uplink[0]) {
 	/* We have a set uplink, try it */
-Context;
 	botlink("", -3, uplink);
 	return;
       }
@@ -1256,21 +1246,17 @@ Context;
       avoidbot[0] = 0;
     } else {
       /* We got a failed link... */
-Context;
       botlinkcount++;
       if (botlinkcount >= 3)
 	/* tried 3+ random hubs without success, wait for next regular interval call */
 	return;
       /* We need a random bot but *not* the last we tried */
-Context;
       strcpy(avoidbot, start);
     }
   }
   /* Pick a random hub, but avoid 'avoidbot' */
-Context;
   ul = userlist;
   hlc = 0;
-Context;
   while (ul) {
     get_user_flagrec(ul, &fr, NULL);
 
@@ -1287,22 +1273,15 @@ Context;
     }
     ul = ul->next;
   }
-Context;
-//wtf?  if (!hlc) return; //no bots were found..just wait till next cycle..
   hlc = random() % hlc;
-Context;
   while (hl) {
-Context;
-    if (!hlc) {
-Context;
+    if (!hlc)
       botlink("", -3, hl->u->handle);
-    }
     hlc--;
     hl2 = hl->next;
     nfree(hl);
     hl = hl2;
   }
-Context;
 }
 #endif /* LEAF */
 

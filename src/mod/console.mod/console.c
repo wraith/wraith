@@ -255,8 +255,6 @@ static int console_chon(char *handle, int idx)
 	if (!dcc[idx].u.chat->line_count)
 	  dcc[idx].u.chat->current_lines = 0;
       }
-//putlog(LOG_MISC, "*", "UH: %s color: %d", handle, i->color);
-//      dcc[idx].status &= ~(STAT_COLOR | STAT_COLORA | STAT_COLORM);
       if (i->color) {
         if (i->color == 1) {
          dcc[idx].status &= ~STAT_COLORA;

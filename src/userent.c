@@ -628,7 +628,7 @@ void secpass_display(int idx, struct user_entry *e, struct userrec *u)
 #ifdef HUB
     dprintf(idx, "  %s: %s\n", e->type->name, e->u.string);
 #else
-//    dprintf(idx, "  %s: Hidden on leaf bots.\n", e->type->name);
+    dprintf(idx, "  %s: Hidden on leaf bots.\n", e->type->name);
 #endif    
   }
 
@@ -896,15 +896,10 @@ static int botaddr_pack(struct userrec *u, struct user_entry *e)
 
 static int botaddr_kill(struct user_entry *e)
 {
-  Context;
   nfree(((struct bot_addr *) (e->u.extra))->address);
-  Context;
   nfree(((struct bot_addr *) (e->u.extra))->uplink);
-  Context;
   nfree(e->u.extra);
-  Context;
   nfree(e);
-  Context;
   return 1;
 }
 
@@ -1587,12 +1582,9 @@ struct user_entry_type *find_entry_type(char *name)
   struct user_entry_type *p;
 
   for (p = entry_type_list; p; p = p->next) {
-Context;
     if (!egg_strcasecmp(name, p->name))
       return p;
-Context;
   }
-Context;
   return NULL;
 }
 

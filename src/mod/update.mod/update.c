@@ -6,10 +6,6 @@
 #define MODULE_NAME "update"
 #define MAKING_update
 
-//#ifdef HAVE_UNAME
-//#include <sys/utsname.h>
-//#endif
-
 #include "src/mod/module.h"
 
 #include <netinet/in.h>
@@ -64,14 +60,13 @@ static void update_ufyes(int idx, char *par)
 
 static void update_fileq(int idx, char *par)
 {
-//  int bfl = bot_flags(dcc[idx].user);
   if (dcc[idx].status & STAT_GETTINGU) return;
 #ifdef LEAF
   if (updated) return;
   if (localhub) {
 #else
   if (!isupdatehub()) {
-#endif
+#endif /* LEAF */
     dprintf(idx, "sb uy\n");
   } else if (isupdatehub()) {
     dprintf(idx, "sb un I am the update hub, NOT YOU.\n");
@@ -182,7 +177,6 @@ static void got_nu(char *botnick, char *code, char *par)
    if (!par[0]) return;
    newver = atoi(newsplit(&par));
    if (newver > egg_numver) {
-Context;
 #ifdef LEAF
      u1 = get_user_by_handle(userlist, botnetnick);
      obi = get_user(&USERENTRY_BOTADDR, u1);
@@ -205,7 +199,7 @@ Context;
      botlink("", -3, botnick);
 #else
      putlog(LOG_MISC, "*", "I need to be updated with %d", newver);
-#endif
+#endif /* LEAF */
    }  
 }
 
@@ -424,7 +418,6 @@ static void check_updates()
   if ((cnt > 5) && bupdating)  bupdating = 0; //2 minutes should be plenty.
   if (bupdating) return;
   cnt = 0;
-//  tand_t *bot;
 
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE) &&

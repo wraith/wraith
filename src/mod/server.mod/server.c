@@ -2080,10 +2080,6 @@ char *server_start(Function *global_funcs)
 
 
   /* Fool bot in reading the values. */
-/* NO
-  tcl_eggserver(NULL, interp, "servers", NULL, 0);
-  tcl_traceserver("servers", NULL);
-*/
   s = Tcl_GetVar(interp, "nick", TCL_GLOBAL_ONLY);
   if (s)
     strncpyz(origbotname, s, NICKLEN);

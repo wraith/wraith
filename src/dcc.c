@@ -19,14 +19,12 @@
 #endif
 
 #include "tandem.h"
-
+#include "md5/md5.h"
 #include <sys/stat.h>
 
 extern char netpass[9];
 
 
-/* Includes for botnet md5 challenge/response code <cybah> */
-#include "md5/md5.h"
 
 extern struct userrec	*userlist;
 extern struct chanset_t	*chanset;
@@ -216,7 +214,7 @@ void send_timesync(idx)
     }
 #else
     putlog(LOG_ERRORS, "*", "I'm a leaf - where should i send timesync?");
-#endif
+#endif /* HUB */
   }
 }
 
@@ -227,7 +225,7 @@ static void greet_new_bot(int idx)
   char *sysname = NULL;
 #ifdef HAVE_UNAME
   struct utsname un;
-#endif
+#endif /* HAVE_UNAME */
 
   dcc[idx].timeval = now;
   dcc[idx].u.bot->version[0] = 0;
@@ -242,10 +240,9 @@ static void greet_new_bot(int idx)
     lostdcc(idx);
     return;
   }
-#endif
+#endif /* HUB */
 
-//  if (bot_hublevel(dcc[idx].user) == 999)
-  if (0 == 999)
+  if (bot_hublevel(dcc[idx].user) == 999)
    dcc[idx].status |= STAT_LEAF;
   dcc[idx].status |= STAT_LINKING;
 #ifdef HAVE_UNAME
@@ -253,13 +250,9 @@ static void greet_new_bot(int idx)
     sysname = "*";
   else
     sysname = un.sysname;
-#endif
+#endif /* HAVE_UNAME */
 
-Context;
   dprintf(idx, "v %d %d %s <%s>\n", egg_numver, HANDLEN, ver, network);
-Context;
-//putlog(LOG_MISC, "*", "SEnding os: %s", sysname);
-Context;
   dprintf(idx, "vs %s\n", sysname);
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].type == &DCC_FORK_BOT) {
@@ -435,7 +428,6 @@ static void dcc_bot_new(int idx, char *buf, int x)
   } else if (strcmp(code, "")) {
       /* Invalid password/digest */
       putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
-//      putlog(LOG_ERRORS, "*", "Expected elink, got %s %s", code, buf);
       killsock(dcc[idx].sock);
       lostdcc(idx);
   }
@@ -613,12 +605,8 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
 
-Context;
   sprintf(check, "+Auth %s", dcc[idx].hash);
 
-  putlog(LOG_DEBUG, "*", "got: %s, should be: %s", buf, check);
-
-Context;
   if (!strcmp(check, buf)) {
 //+secpass
       putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick,
@@ -683,23 +671,17 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     } else {
       /* Invalid password/digest */
       putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
-//      putlog(LOG_ERRORS, "*", "Expected elinkdone, got %s", buf);
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }
     return;
   }
-Context;
-
   if (u_pass_match(dcc[idx].user, buf)) {
     char rand[50];
 
-Context;
     make_rand_str(rand, 50);
 
-Context;
     strcpy(dcc[idx].hash, makehash(dcc[idx].user, rand));
-Context;
     dcc[idx].type = &DCC_CHAT_SECPASS;
     dcc[idx].timeval = now;
     dprintf(idx, "-Auth %s %s\n", rand, botnetnick);
@@ -1270,7 +1252,6 @@ static void dcc_telnet(int idx, char *buf, int i)
   dcc[i].sock = sock;
   dcc[i].addr = ip;
 #ifdef USE_IPV6
-Context;
   if (sockprotocol(sock) == AF_INET6)
     strcpy(dcc[i].addr6, s);
 #endif /* USE_IPV6 */
@@ -1283,7 +1264,6 @@ Context;
   dcc[i].u.dns->dns_type = RES_HOSTBYIP;
   dcc[i].u.dns->ibuf = dcc[idx].sock;
   dcc[i].u.dns->type = &DCC_IDENTWAIT;
-Context;
 #ifdef USE_IPV6
   if (sockprotocol(sock) == AF_INET6)
     dcc_telnet_hostresolved(i);
@@ -1615,8 +1595,6 @@ static void dcc_telnet_pass(int idx, int atr)
   }
 
   if (glob_bot(fr)) {
-//    putlog(LOG_BOTS, "*", "Challenging %s...", dcc[idx].nick);
-//    dprintf(idx, "elink <%x%x@%s>\n", getpid(), dcc[idx].timeval, botnetnick);
     int snum = -1;
 
     for (i = 0; i < MAXSOCKS; i++) {
@@ -1667,14 +1645,6 @@ static void dcc_telnet_pass(int idx, int atr)
       lostdcc(idx);
     }
   } else {
-    /* NOTE: The MD5 digest used above to prevent cleartext passwords being
-     *       sent across the net will _only_ work when we have the cleartext
-     *       password. User passwords are encrypted (with blowfish usually)
-     *       so the same thing cant be done. Botnet passwords are always
-     *       stored in cleartext, or at least something that can be reversed.
-     *       <Cybah>
-     */
-
     /* Turn off remote telnet echo (send IAC WILL ECHO). */
 #ifdef HUB
     dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
@@ -1787,7 +1757,6 @@ static void eof_dcc_script(int idx)
   call_tcl_func(dcc[idx].u.script->command, dcc[idx].sock, "");
   /* restore the flags */
   dcc[idx].type->flags = oldflags;
-  Context;
   old = dcc[idx].u.script->u.other;
   dcc[idx].type = dcc[idx].u.script->type;
   nfree(dcc[idx].u.script);
@@ -1821,12 +1790,10 @@ static int expmem_dcc_script(void *x)
 static void kill_dcc_script(int idx, void *x)
 {
   register struct script_info *p = (struct script_info *) x;
-
 Context;
   if (p->type && p->u.other)
     p->type->kill(idx, p->u.other);
   nfree(p);
-Context;
 }
 
 static void out_dcc_script(int idx, char *buf, void *x)
