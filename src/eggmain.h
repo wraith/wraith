@@ -13,7 +13,6 @@
 #endif
 
 #include "conf.h"
-#include "salt.h"
 #include "color.h"
 #include "garble.h"
 

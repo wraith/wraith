@@ -8,6 +8,7 @@
 
 #include "eggmain.h"
 #include "main.h"
+#include "salt.h"
 #include "misc_file.h"
 #include "net.h"
 #include "users.h"

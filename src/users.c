@@ -13,11 +13,9 @@
  */
 
 #include "eggmain.h"
-#ifdef HUB
-#include "misc_file.h"
-#endif
 #include "users.h"
 #include "rfc1459.h"
+#include "salt.h"
 #include "userrec.h"
 #include "misc.h"
 #include "cfg.h"
@@ -30,9 +28,11 @@
 #include "chan.h"
 #include "modules.h"
 #include "tandem.h"
-char natip[121] = "";
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifdef HUB
+#include "misc_file.h"
+#endif /* HUB */
 
 extern struct dcc_t *dcc;
 extern struct userrec *userlist, *lastuser;
@@ -41,6 +41,7 @@ extern int dcc_total, noshare, egg_numver;
 extern char botnetnick[], tempdir[];
 extern time_t now;
 
+char natip[121] = "";
 char userfile[121] = "";	/* where the user records are stored */
 int ignore_time = 10;		/* how many minutes will ignores last? */
 

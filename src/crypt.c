@@ -8,6 +8,7 @@
 
 #include "eggmain.h"
 #include "crypt.h"
+#include "salt.h"
 #include "misc.h"
 
 #define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
