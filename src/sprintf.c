@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "sprintf.h"
+#include "base64.h"
 #include <stdarg.h>
 
 static char *int_to_base10(int val)
@@ -75,6 +76,9 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
         i = va_arg(va, int);
         s = int_to_base10(i);
         break;
+      case 'D':
+        i = va_arg(va, int);
+        s = int_to_base64((unsigned int) i);
       case 'u':
         i = va_arg(va, unsigned int);
         s = unsigned_int_to_base10(i);
@@ -104,6 +108,17 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
 size_t simple_vsprintf(char *buf, const char *format, va_list va)
 {
   return simple_vsnprintf(buf, VSPRINTF_MAXSIZE, format, va);
+}
+
+size_t simple_sprintf2 (char *buf, const char *format, ...)
+{
+  size_t ret = 0;
+
+  va_list va;
+  va_start(va, format);
+  ret = simple_vsprintf(buf, format, va);
+  va_end(va);
+  return ret;
 }
 
 size_t simple_sprintf (char *buf, const char *format, ...)
