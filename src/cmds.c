@@ -1889,7 +1889,7 @@ int check_dcc_attrs(struct userrec *u, int oatr)
 	if (!chan_master(fr))
 	  dcc[i].u.chat->con_flags |= (LOG_MISC | LOG_CMDS);
 	dprintf(i, STR("*** POOF! ***\n"));
-	dprintf(i, STR("You are no longer a master on this bot.\n");
+	dprintf(i, STR("You are no longer a master on this bot.\n"));
       }
       if (!(oatr & USER_MASTER) && (u->flags & USER_MASTER)) {
 	dcc[i].u.chat->con_flags |= conmask;
