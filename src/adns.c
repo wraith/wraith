@@ -17,9 +17,9 @@ typedef struct dns_query {
 	struct dns_query *next;
 	dns_answer_t answer;
 	dns_callback_t callback;
-	time_t time;
+	time_t expiretime;
 	int id;
-        int timer_id;
+	bool ip;
 	int remaining;
 	char *query;
 	void *client_data;
@@ -84,6 +84,7 @@ static int reverse_ip(const char *host, char *reverse);
 static void read_resolv(char *fname);
 static void read_hosts(char *fname);
 static int get_dns_idx();
+static void dns_resend_queries();
 static int cache_find(const char *);
 //static int dns_on_read(void *client_data, int idx, char *buf, int len);
 //static int dns_on_eof(void *client_data, int idx, int err, const char *errmsg);
@@ -93,6 +94,7 @@ static const char *dns_next_server();
 static void parse_reply(char *response, int nbytes);
 
 time_t async_resolve_timeout = 30;
+//int resend_on_read = 0;
 
 static void 
 dns_display(int idx, char *buf)
@@ -121,7 +123,10 @@ dns_timeout(int idx)
 {
   sdprintf("DNS socket timed out");
   /*egg_dns_cancel(dcc[idx].u.dns_id, 1);*/
+//  resend_on_read = 1;
   dns_reinit(idx);  
+//  sleep(2);
+//  dns_resend_queries();
 }
 
 static struct dcc_table dns_handler = {
@@ -180,7 +185,7 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 	q->query = strdup(query);
 	q->callback = callback;
 	q->client_data = client_data;
-	q->time = now;
+	q->expiretime = now + async_resolve_timeout;
 	q->next = query_head;
 	query_head = q;
 
@@ -212,6 +217,7 @@ static int get_dns_idx()
         dcc[dns_idx].sock = sock;
         dns_sock = sock;
         sdprintf("dns_sock: %d", dcc[dns_idx].sock);
+        strcpy(dcc[dns_idx].host, dns_ip);
         strcpy(dcc[dns_idx].nick, "(new_dns)");
         sdprintf("dns_ip: %s", dns_ip);
         dcc[dns_idx].timeval = now;
@@ -233,14 +239,63 @@ void egg_dns_send(char *query, int len)
 //	sockbuf_write(dns_idx, query, len);
 }
 
+dns_query_t *find_query(const char *host)
+{
+  dns_query_t *q = NULL;
+
+  for (q = query_head; q; q = q->next)
+    if (!egg_strcasecmp(q->query, host))
+      return q;
+  return NULL;
+}
+
+void dns_send_query(dns_query_t *q)
+{
+  char buf[512] = "";
+  int len;
+
+  if (!q->ip) {
+    /* Send the ipv4 query. */
+    q->remaining = 1;
+    len = make_header(buf, q->id);
+    len += cut_host(q->query, buf + len);
+    buf[len] = 0; len++; buf[len] = 1; len++;
+    buf[len] = 0; len++; buf[len] = 1; len++;
+
+    egg_dns_send(buf, len);
+
+#ifdef USE_IPV6
+    /* Now send the ipv6 query. */
+    q->remaining++;
+    len = make_header(buf, q->id);
+    len += cut_host(q->query, buf + len);
+    buf[len] = 0; len++; buf[len] = 28; len++;
+    buf[len] = 0; len++; buf[len] = 1; len++;
+
+    egg_dns_send(buf, len);
+#endif
+  }
+}
+
+void dns_resend_queries()
+{
+  dns_query_t *q = NULL;
+
+  for (q = query_head; q; q = q->next) {
+    if (now >=  q->expiretime) {
+sdprintf("RESENDING: %s", q->query);
+      dns_send_query(q);
+    }
+  }
+}
+
 /* Perform an async dns lookup. This is host -> ip. For ip -> host, use
  * egg_dns_reverse(). We return a dns id that you can use to cancel the
  * lookup. */
 int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void *client_data)
 {
-	char buf[512] = "";
 	dns_query_t *q = NULL;
-	int i, len, cache_id;
+	int i, cache_id;
 
 	if (is_dotted_ip(host)) {
 		/* If it's already an ip, we're done. */
@@ -272,8 +327,14 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 		return(-1);
 	}
 
+	/* check if the query was already made */
+        if (find_query(host))
+          return(-1);
+
 	/* Allocate our query struct. */
         q = alloc_query(client_data, callback, host);
+
+        dns_send_query(q);
 
         /* setup a timer to detect dead ns */
 //        egg_timeval_t howlong;
@@ -284,24 +345,6 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 //        q->timer_id = timer_create_complex(&howlong, host, (Function) async_timeout, (void *) q->id, 0);
 
 	/* Send the ipv4 query. */
-	q->remaining = 1;
-	len = make_header(buf, q->id);
-	len += cut_host(host, buf + len);
-	buf[len] = 0; len++; buf[len] = 1; len++;
-	buf[len] = 0; len++; buf[len] = 1; len++;
-
-	egg_dns_send(buf, len);
-
-#ifdef USE_IPV6
-	/* Now send the ipv6 query. */
-	q->remaining++;
-	len = make_header(buf, q->id);
-	len += cut_host(host, buf + len);
-	buf[len] = 0; len++; buf[len] = 28; len++;
-	buf[len] = 0; len++; buf[len] = 1; len++;
-
-	egg_dns_send(buf, len);
-#endif
 
 	return(q->id);
 }
@@ -340,6 +383,10 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 		return(-1);
 	}
 
+	/* check if the query was already made */
+        if (find_query(ip))
+          return(-1);
+
 	/* We need to transform the ip address into the proper form
 	 * for reverse lookup. */
 	if (strchr(ip, ':')) {
@@ -365,6 +412,7 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 
 	q = alloc_query(client_data, callback, ip);
 
+	q->ip = 1;
 	egg_dns_send(buf, len);
 
 	return(q->id);
@@ -375,6 +423,13 @@ static void dns_on_read(int idx, char *buf, int atr)
 {
         dcc[idx].timeval = now;
         dns_handler.timeout_val = 0;
+
+//	if (resend_on_read) {
+//		resend_on_read = 0;
+//		dns_resend_queries();
+//		return;
+//	}
+
         atr = read(dcc[idx].sock, buf, 512);
 
 	parse_reply(buf, atr);
@@ -465,6 +520,7 @@ static void cache_add(const char *query, dns_answer_t *answer, time_t ttl)
 	int i;
 
 	cache = (dns_cache_t *) realloc(cache, (ncache+1)*sizeof(*cache));
+	egg_bzero(&cache[ncache], sizeof(cache[ncache]));
 	cache[ncache].query = strdup(query);
 	answer_init(&cache[ncache].answer);
         for (i = 0; i < answer->len; i++)
@@ -731,10 +787,10 @@ void tell_dnsdebug(int idx)
 
 
 	for (q = query_head; q; q = q->next)
-		dprintf(idx, "DNS (%d) (%lis): %s\n", q->id, now - q->time, q->query);
+		dprintf(idx, "DNS (%d) (%lis): %s\n", q->id, q->expiretime - now, q->query);
 
-	for (i = 0; i < nhosts; i++)
-           dprintf(idx, "HOST #%d: %s/%s\n", i, hosts[i].host, hosts[i].ip);
+//	for (i = 0; i < nhosts; i++)
+//           dprintf(idx, "HOST #%d: %s/%s\n", i, hosts[i].host, hosts[i].ip);
 
 	for (i = 0; i < ncache; i++) {
 		dprintf(idx, "cache(%d) %s expires in %lis\n", i, cache[i].query, cache[i].expiretime - now);
@@ -745,7 +801,7 @@ void tell_dnsdebug(int idx)
 
 static void expire_queries()
 {
-  dns_query_t *q = NULL;
+//  dns_query_t *q = NULL;
   int i = 0;
 
   /* need to check for expired queries and either:
@@ -753,14 +809,13 @@ static void expire_queries()
     b) expire due to ttl
     */
 
-  for (q = query_head; q; q = q->next) {
-
-
-  }
+//  for (q = query_head; q; q = q->next) {
+//  }
 
   for (i = 0; i < ncache; i++) {
     if (cache_expired(i)) {
       cache_del(i);
+      if (i == ncache) break;
       i--;
     }
   }
