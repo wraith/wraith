@@ -352,7 +352,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
       ((which == FLOOD_KICK) &&
        (glob_master(fr) || chan_master(fr))) ||
       ((which != FLOOD_DEOP) && (which != FLOOD_KICK) && 
-       (glob_noflood(fr) || chan_noflood(fr))))
+       (chk_noflood(fr))))
     return 0;
 
   /* Determine how many are necessary to make a flood. */
@@ -917,7 +917,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     /* +d or bitch and not an op
      * we dont check private because +private does not imply bitch. */
     if (chan_hasop(m) && 
-        (chk_deop(*fr, chan) ||
+        (chk_deop(*fr) ||
          (!loading && userlist && channel_bitch(chan) && !chk_op(*fr, chan)) ) ) {
       /* if (target_priority(chan, m, 1)) */
         add_mode(chan, '-', 'o', m->nick);
@@ -927,7 +927,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     if (dovoice(chan)) {
       if (chan_hasvoice(m) && !chan_hasop(m)) {
         /* devoice +q users .. */
-        if (chk_devoice(*fr, chan))
+        if (chk_devoice(*fr))
           add_mode(chan, '-', 'v', m->nick);
       } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
         /* voice +v users */
@@ -1479,7 +1479,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serve
   get_user_flagrec(m->user, &fr, chan->dname);
   /* are they a chanop, and me too */
       /* are they a channel or global de-op */
-  if (chan_hasop(m) && me_op(chan) && chk_deop(fr, chan) && !match_my_nick(nick)) 
+  if (chan_hasop(m) && me_op(chan) && chk_deop(fr) && !match_my_nick(nick)) 
       /* && target_priority(chan, m, 1) */
     add_mode(chan, '-', 'o', nick);
 

@@ -28,6 +28,7 @@ This is a summary of ChangeLog basically.
 * +take is now enforced much quicker (take() moved up ~300 lines of code)
 * +take now uses MAXMODES-1 deops
 * LAST info for .whois is now properly shared
+* Optimized lots of code to use less CPU
 
 1.1.9
 

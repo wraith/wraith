@@ -489,7 +489,7 @@ static void cmd_op(struct userrec *u, int idx, char *par)
   egg_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
   u = get_user_by_host(s);
   get_user_flagrec(u, &victim, chan->dname);
-  if (chk_deop(victim, chan)) {
+  if (chk_deop(victim)) {
     dprintf(idx, "%s is currently being auto-deopped  on %s.\n", m->nick, chan->dname);
     if (all) goto next;
     return;

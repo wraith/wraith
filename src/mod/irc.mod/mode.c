@@ -490,7 +490,7 @@ got_op(struct chanset_t *chan, char *nick, char *from,
       nick[0]) {
     /* Channis is +bitch, and the opper isn't a global master or a bot */
     /* deop if they are +d or it is +bitch */
-    if (chk_deop(victim, chan) || (!loading && userlist && channel_bitch(chan) && !chk_op(victim, chan))) {     /* chk_op covers +private */
+    if (chk_deop(victim) || (!loading && userlist && channel_bitch(chan) && !chk_op(victim, chan))) {     /* chk_op covers +private */
 /*      char outbuf[101] = ""; */
 
       /* if (target_priority(chan, m, 1)) */
@@ -506,7 +506,7 @@ got_op(struct chanset_t *chan, char *nick, char *from,
   } else if (reversing && !match_my_nick(who))
     add_mode(chan, '-', 'o', who);
   if (!nick[0] && me_op(chan) && !match_my_nick(who)) {
-    if (chk_deop(victim, chan)) {
+    if (chk_deop(victim)) {
       m->flags |= FAKEOP;
       add_mode(chan, '-', 'o', who);
     } else if (snm > 0 && snm < 7 && !((0 || 0 ||
@@ -1341,7 +1341,7 @@ gotmode(char *from, char *msg)
                 m->flags &= ~SENTVOICE;
                 m->flags |= CHANVOICE;
                 if (channel_active(chan) && dovoice(chan)) {
-                  if (dv || chk_devoice(victim, chan)) {
+                  if (dv || chk_devoice(victim)) {
                     add_mode(chan, '-', 'v', op);
                   } else if (reversing) {
                     add_mode(chan, '-', 'v', op);

@@ -589,7 +589,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *chname, c
       chan = findchan_by_dname(par);
     if (chan && channel_active(chan)) {
       get_user_flagrec(u, &fr, chan->dname);
-      if (!chk_devoice(fr, chan)) {		/* dont voice +q */
+      if (!chk_devoice(fr)) {		/* dont voice +q */
         add_mode(chan, '+', 'v', nick);
       }
       return BIND_RET_BREAK;
@@ -597,7 +597,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *chname, c
   } else {
     for (chan = chanset; chan; chan = chan->next) {
       get_user_flagrec(u, &fr, chan->dname);
-      if (!chk_devoice(fr, chan)) {		/* dont voice +q */
+      if (!chk_devoice(fr)) {		/* dont voice +q */
         add_mode(chan, '+', 'v', nick);
       }
     }

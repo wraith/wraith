@@ -1189,12 +1189,12 @@ check_expired_chanstuff(struct chanset_t *chan)
           struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
           get_user_flagrec(m->user, &fr2, chan->dname);
           if (!private(fr2, chan, PRIV_VOICE) &&
-              ((channel_voice(chan) && !chk_devoice(fr2, chan)) ||
+              ((channel_voice(chan) && !chk_devoice(fr2)) ||
                (!channel_voice(chan) && chk_voice(fr2, chan))) &&
               !glob_bot(fr2) && !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE)) {
             putlog(LOG_DEBUG, "@", "VOICING %s in %s as '%s'", m->nick, chan->dname, m->user->handle);
             add_mode(chan, '+', 'v', m->nick);
-          } else if (!glob_bot(fr2) && (chk_devoice(fr2, chan) || (m->flags & EVOICE))) {
+          } else if (!glob_bot(fr2) && (chk_devoice(fr2) || (m->flags & EVOICE))) {
             if (!chan_hasop(m) && chan_hasvoice(m))
               add_mode(chan, '-', 'v', m->nick);
           }
