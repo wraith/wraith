@@ -1475,7 +1475,7 @@ static void cmd_adduser(struct userrec *u, int idx, char *par)
   char *nick = NULL, *hand = NULL;
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
-  char s[UHOSTLEN] = "", s1[UHOSTLEN] = "", s2[16] = "", s3[17] = "", tmp[50] = "";
+  char s[UHOSTLEN] = "", s1[UHOSTLEN] = "", s2[MAXPASSLEN + 1] = "", s3[MAXPASSLEN + 1] = "", tmp[50] = "";
   int atr = u ? u->flags : 0;
   int statichost = 0;
   char *p1 = s1;
@@ -1556,10 +1556,10 @@ static void cmd_adduser(struct userrec *u, int idx, char *par)
     u = get_user_by_handle(userlist, hand);
     sprintf(tmp, "%li %s", now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u, tmp);
-    make_rand_str(s2, 15);
+    make_rand_str(s2, MAXPASSLEN);
     set_user(&USERENTRY_PASS, u, s2);
 
-    make_rand_str(s3, 16);
+    make_rand_str(s3, MAXPASSLEN);
     set_user(&USERENTRY_SECPASS, u, s3);
 
     dprintf(idx, "Added [%s]%s with no flags.\n", hand, p1);

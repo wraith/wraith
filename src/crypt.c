@@ -119,12 +119,12 @@ void encrypt_pass(char *s1, char *s2)
 {
   char *tmp = NULL;
 
-  if (strlen(s1) > 15)
-    s1[15] = 0;
+  if (strlen(s1) > MAXPASSLEN)
+    s1[MAXPASSLEN] = 0;
   tmp = encrypt_string(s1, s1);
   strcpy(s2, "+");
-  strncat(s2, tmp, 15);
-  s2[15] = 0;
+  strncat(s2, tmp, MAXPASSLEN);
+  s2[MAXPASSLEN] = 0;
   free(tmp);
 }
 

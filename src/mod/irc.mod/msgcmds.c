@@ -37,8 +37,8 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   } else {
     new = old;
   }
-  if (strlen(new) > 16)
-    new[16] = 0;
+  if (strlen(new) > MAXPASSLEN)
+    new[MAXPASSLEN] = 0;
 
   if (!goodpass(new, 0, nick)) {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! \002!\002PASS...", nick, host, u->handle);

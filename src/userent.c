@@ -543,8 +543,8 @@ int pass_set(struct userrec *u, struct user_entry *e, void *buf)
   else {
     unsigned char *p = (unsigned char *) pass;
 
-    if (strlen(pass) > 15)
-      pass[15] = 0;
+    if (strlen(pass) > MAXPASSLEN)
+      pass[MAXPASSLEN] = 0;
     while (*p) {
       if ((*p <= 32) || (*p == 127))
 	*p = '?';

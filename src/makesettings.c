@@ -1,3 +1,4 @@
+#include "common.h"
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -15,19 +16,12 @@ char *cfgfile = NULL;
 
 
 #define LISTSEPERATORS  ",=:; "
-#define BADNICKCHARS  ",+*=:!.@#;$%&"
 #define SWITCHMETA    "+-"
-#define HANDLEN         9
-#define NICKMAX         32
-#define UHOSTMAX        160
-#define MAXPASSLEN      25
-#define NETKEYLEN       33
-#define PACKNAMELEN     40
 
 struct cfg_struct {
-  char packname[PACKNAMELEN];
-  char shellhash[33];
-  char bdhash[33];
+  char packname[PACKNAMELEN + 1];
+  char shellhash[MD5_HASH_LENGTH + 1];
+  char bdhash[MD5_HASH_LENGTH + 1];
   char dccprefix[2];
   char *owners;
   char *hubs;

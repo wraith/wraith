@@ -30,6 +30,9 @@
 
 /* Handy string lengths */
 
+#define MAXPASSLEN      15
+#define PACKNAMELEN     40
+
 #define UHOSTMAX    291 + NICKMAX /* 32 (ident) + 3 (\0, !, @) + NICKMAX */
 #define DIRMAX		512	/* paranoia				*/
 #define BADHANDCHARS	"-,+*=:!.@#;$%&"

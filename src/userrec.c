@@ -241,7 +241,7 @@ struct userrec *get_user_by_host(char *host)
  */
 int u_pass_match(struct userrec *u, char *in)
 {
-  char *cmp = NULL, new[32] = "", pass[16] = "";
+  char *cmp = NULL, new[32] = "", pass[MAXPASSLEN + 1] = "";
 
   if (!u)
     return 0;
@@ -257,8 +257,8 @@ int u_pass_match(struct userrec *u, char *in)
     if (!strcmp(cmp, pass))
       return 1;
   } else {
-    if (strlen(pass) > 15)
-      pass[15] = 0;
+    if (strlen(pass) > MAXPASSLEN)
+      pass[MAXPASSLEN] = 0;
     encrypt_pass(pass, new);
     if (!strcmp(cmp, new))
       return 1;
