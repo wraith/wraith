@@ -457,7 +457,7 @@ clear_settings(void)
   memset(&settings.bots, 0, sizeof(settings_t) - 3467);
 }
 
-void conf_to_bin(conf_t *in, bool move, int die)
+void conf_to_bin(conf_t *in, bool move, int die, bool refresh)
 {
   conf_bot *bot = NULL;
   char *newbin = NULL;
@@ -492,7 +492,14 @@ void conf_to_bin(conf_t *in, bool move, int die)
   else
     newbin = binname;
   /* tellconfig(&settings); */
-  write_settings(newbin, die, 1);
+  write_settings(newbin, -1, 1);
+
+  /* alert the localhub of changes */
+  if (refresh && conf.bots && conf.bots->pid)
+    kill(conf.bots->pid, SIGUSR1);
+
+  if (die >= 0)
+    exit(die);
 }
 
 void reload_bin_data() {
