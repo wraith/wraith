@@ -1698,7 +1698,7 @@ static void cmd_comment(struct userrec *u, int idx, char *par)
   handle = newsplit(&par);
 
   if (!par[0]) {
-    dprintf(idx, STR("Usage: comment <handle> <newcomment>\n"));
+    dprintf(idx, STR("Usage: comment <handle> <newcomment/none>\n"));
     return;
   }
   u1 = get_user_by_handle(userlist, handle);
