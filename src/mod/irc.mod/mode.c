@@ -932,6 +932,9 @@ static memberlist *assert_ismember(struct chanset_t *chan, const char *nick)
 static int
 gotmode(char *from, char *msg)
 {
+#define msign	modes[i][0]
+#define mmode	modes[i][1]
+#define mparam	&modes[i][3]
   /* Usermode changes? */
   if (msg[0] && (strchr(CHANMETA, msg[0]) != NULL)) {
     char *ch = newsplit(&msg);
@@ -1073,8 +1076,6 @@ gotmode(char *from, char *msg)
                 isbadop = checkcookie(chan->dname, u->handle, &(modes[modecnt - 1][3]));
               }
               if (isbadop) {
-                char trg[NICKLEN] = "";
-
                 putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", m->nick, chan->dname, isbadop, msg);
                 n = i = 0;
                 switch (role) {
@@ -1082,11 +1083,10 @@ gotmode(char *from, char *msg)
                     break;
                   case 1:
                     /* Kick opper */
-                    if (!m || !chan_sentkick(m)) {
+                    if (!chan_sentkick(m)) {
+                      m->flags |= SENTKICK;
                       sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
                       tputs(serv, tmp, strlen(tmp));
-                      if (m)
-                        m->flags |= SENTKICK;
                     }
                     sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, msg);
                     deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
@@ -1101,16 +1101,14 @@ gotmode(char *from, char *msg)
                         i++;
                     }
                     if (!n) {
-                      memberlist *mo = NULL;
-
-                      strlcpy(trg, (char *) &modes[i][3], NICKLEN);
-                      mo = ismember(chan, trg);
-                      if (mo) {
-                        if (!(mo->flags & CHANOP)) {
-                          if (!chan_sentkick(mo)) {
-                            sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, trg, kickprefix, response(RES_BADOPPED));
+                      for (i = 0; i < modecnt; i++) {
+                        if (msign == '+' && mmode == 'o') {
+                          mv = ismember(chan, mparam);
+                          if (!mv || !chan_sentkick(mv)) {
+                            if (mv)
+                              mv->flags |= SENTKICK;
+                            sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
                             tputs(serv, tmp, strlen(tmp));
-                            mo->flags |= SENTKICK;
                           }
                         }
                       }
@@ -1128,8 +1126,6 @@ gotmode(char *from, char *msg)
             }
 
             if (!channel_manop(chan) && !u->bot) {
-              char trg[NICKLEN] = "";
-
               n = i = 0;
 
               switch (role) {
@@ -1156,19 +1152,16 @@ gotmode(char *from, char *msg)
                       i++;
                   }
                   if (!n) {
-                    strlcpy(trg, (char *) &modes[i][3], NICKLEN);
-                    mv = ismember(chan, trg);
-                    if (mv) {
-                      if (!(mv->flags & CHANOP) && !match_my_nick(mv->nick)) {
-                        if (!chan_sentkick(mv)) {
-                          sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mv->nick, kickprefix, response(RES_MANUALOPPED));
+                    for (i = 0; i < modecnt; i++) {
+                      if (msign == '+' && mmode == 'o' && !match_my_nick(mparam)) {
+                        mv = ismember(chan, mparam);
+                        if (!mv || !chan_sentkick(mv)) {
+                          if (mv)
+                            mv->flags |= SENTKICK;
+                          sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
                           tputs(serv, tmp, strlen(tmp));
-                          mv->flags |= SENTKICK;
                         }
                       }
-                    } else {
-                      sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, trg, kickprefix, response(RES_MANUALOPPED));
-                      tputs(serv, tmp, strlen(tmp));
                     }
                   }
               }
@@ -1191,9 +1184,6 @@ gotmode(char *from, char *msg)
           reversing = 1;
         }
       }
-#define msign	modes[i][0]
-#define mmode	modes[i][1]
-#define mparam	&modes[i][3]
 
       for (i = 0; i < modecnt; i++) {
         int todo = 0;
