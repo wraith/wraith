@@ -11,7 +11,7 @@
 #ifdef HAVE_OPENSSL_SSL_H
 #  include <openssl/crypto.h>
 #  include <openssl/aes.h>
-#  include <openssl/sha.h>
+//#  include <openssl/sha.h>
 //#  include <openssl/md5.h>
 #endif /* HAVE_OPENSSL_SSL_H */
 
