@@ -120,7 +120,10 @@ MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 cleanutils:
 	@rm -f stringfix
 
-clean:  cleanutils
+cleanpack:
+	@rm -f src/settings.c src/salt.h src/conf.h
+
+clean:  cleanutils cleanpack
 	@cd src && $(MAKE) clean
 	@cd src/md5 && $(MAKE) clean
 	@cd src/compat && $(MAKE) clean
@@ -162,6 +165,11 @@ salt:
 	@./makesalt
 
 
+packconf:
+	@cp -f pack/settings.c src/settings.c
+	@cp -f pack/salt.h src/salt.h
+	@cp -f pack/conf.h src/conf.h
+
 config:
 	@$(modconf) modules-still-exist
 	@$(modconf) detect-modules
@@ -176,7 +184,7 @@ clean-modconfig:
 
 reconfig: clean-modconfig config
 
-utils:
+utils:  packconf
 	@./misc/maketype utils
 	@cd src; $(MAKE_UTILS) ../stringfix
 
@@ -201,7 +209,7 @@ dephub:
 	@cd src/compat && $(MAKE_DEPEND) dephub
 
 
-leaf:	salt config
+leaf:	packconf salt config
 	@echo ""
 	@echo "Making leaf"
 	@echo ""
@@ -213,7 +221,7 @@ leaf:	salt config
 	@cd src && $(MAKE_LEAF) $(LEAFEXEC)
 	@echo ""
 
-dleaf:  salt config
+dleaf:  packconf salt config
 	@echo ""
 	@echo "Making debug leaf"
 	@echo ""
@@ -225,7 +233,7 @@ dleaf:  salt config
 	@cd src; $(MAKE_DLEAF) $(LEAFEXEC)
 	@echo ""
 
-hub:	salt config
+hub:	packconf salt config
 	@echo ""
 	@echo "Making hub"
 	@echo ""
@@ -238,7 +246,7 @@ hub:	salt config
 	@cd src && $(MAKE_HUB) $(HUBEXEC)
 	@echo ""
 
-dhub:   salt config
+dhub:   packconf salt config
 	@echo ""
 	@echo "Making debug hub"
 	@echo ""

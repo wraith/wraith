@@ -12,6 +12,8 @@
 #  include "config.h"
 #endif
 
+#include "conf.h"
+
 #include "lush.h" /* We seem to need this everywhere... */
 
 #if (((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION >= 5)) || (TCL_MAJOR_VERSION > 7))

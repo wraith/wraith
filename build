@@ -3,7 +3,7 @@
 #add in 'cont' support for NOT using make clean.
 
 #change this to 0 to not clean previously compiled files (faster/for dev)
-clean=1
+clean=0
 
 
 #### DO NOT EDIT BELOW THIS LINE #####
@@ -24,7 +24,7 @@ hub=0
 leaf=0
 #if test $# -lt 1; then
 if test -z "$1"; then
- echo "Usage: $0 -d all|leaf|hub pack.cfg -c"
+ echo "Usage: $0 -d all|leaf|hub"
  echo "   -d: Builds a debug package."
 # echo "   -c: Does not erase previously compiled files unless *necessary* (faster)"
  echo ""
@@ -47,14 +47,12 @@ elif [ $1 = "-d" ]; then
    hub=1
   else
    all=1
-   pack=$2
   fi
  else
   all=1
  fi
 else
  all=1
- pack=$1
 fi
 
 d=""
@@ -62,38 +60,14 @@ if [ $debug = "1" ]; then
  d="d"
 fi
 
-if ! test $pack
- then
- if [ $debug = "1" ]; then
-  pack=$3
- else
-  pack=$2
- fi
-fi
-
 if [ $all = "1" ]; then
  leaf=1
  hub=1
 fi
 
-if test $pack
-then
-  packname=$pack
-else
-  packname=default
-fi
+packname=wraith
 
-# Verify we got the config file
-origpack=$packname
-if ! test -f $packname; then
-  packname=$packname.cfg
-fi
-if ! test -f $packname; then
-  echo "[!] Can't find pack configuration file $origpack"
-  exit 1
-else
-  echo "[*] Using pack configuration file: $packname"
-fi
+############# CHECK FOR pack/ FILES #################
 
 # Figure what bins we're making
 case `uname` in
@@ -115,7 +89,7 @@ echo "[*] Building pack for $os"
 # Run ./configure, then verify it's ok
 echo "[*] Configuring..."
 umask 077 >/dev/null
-TCLDIR=`cat $packname | grep "^\/"`
+TCLDIR=`cat pack/conf.h 2>&1 | grep "define" | awk '/TCLDIR/ {print $3}' |  sed -e 's/\"//g'`
 if test -z ${TCLDIR}
 then
   echo "[*] Searching for TCL in default dirs (edit $packname to change)"
@@ -139,18 +113,9 @@ if [ $clean = "1" ]; then
  make clean > /dev/null
 fi
 
-# Read the config
-echo -n "[*] Compiling with:"
-for cnf in `cat $packname | grep -v "^#" | grep -v "^\/"`
-do
-  defines="$defines -DS_$cnf"
-  echo -n "$cnf "
-done
-echo ""
-
 # Build utils and check we got the bins
 echo "[*] Building utils..."
-make utils CFLGS="$defines" > /dev/null
+make utils > /dev/null
 if ! test -f stringfix
 then
   echo "[!] Util build failed"
@@ -160,7 +125,7 @@ fi
 if [ $leaf = "1" ]; then
  # Build leaf and check
  echo "[*] Building ${d}leaf..."
- make ${d}leaf CFLGS="$defines" > /dev/null
+ make ${d}leaf > /dev/null
  if ! test -f leaf
  then
    echo "[!] ${d}leaf build failed"
@@ -170,7 +135,7 @@ fi
 if [ $hub = "1" ]; then
  # Build hub and check
  echo "[*] Building ${d}hub..."
- make ${d}hub CFLGS="$defines" > /dev/null
+ make ${d}hub > /dev/null
  if ! test -f hub
  then
    echo "[!] ${d}hub build failed"

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "conf.h"
 
 char tmp[] = { 0x0, 0x1 };
 
