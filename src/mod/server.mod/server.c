@@ -1483,7 +1483,6 @@ void server_init()
   strict_servernames = 1;
   serverlist = NULL;
   cycle_time = 0;
-  default_port = 6667;
   oldnick[0] = 0;
   trigger_on_ignore = 0;
   answer_ctcp = 1;
@@ -1538,11 +1537,10 @@ void server_init()
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
-
-  if (!CFG_REALNAME.gdata) {
     cfg_noshare = 1;
+  if (!CFG_REALNAME.gdata)
     set_cfg_str(NULL, "realname", "A deranged product of evil coders.");
-    cfg_noshare = 0;
-  }
+  set_cfg_str(NULL, "servport", "6667");
+  cfg_noshare = 0;
 }
 #endif /* LEAF */
