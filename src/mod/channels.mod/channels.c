@@ -7,10 +7,8 @@
 #define MAKING_CHANNELS
 #include "src/common.h"
 #include "src/mod/share.mod/share.h"
-#ifdef LEAF
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/server.mod/server.h"
-#endif /* LEAF */
 #include "src/chanprog.h"
 #include "src/egg_timer.h"
 #include "src/misc.h"
@@ -67,7 +65,6 @@ static int 			killed_bots = 0;
 #include "tclchan.c"
 #include "userchan.c"
 
-#ifdef HUB
 /* This will close channels if the HUB:leaf count is skewed from config setting */
 static void 
 check_should_close()
@@ -112,7 +109,6 @@ check_should_close()
     }
   }
 }
-#endif /* HUB */
 
 static void got_cset(char *botnick, char *code, char *par)
 {
@@ -142,10 +138,8 @@ static void got_cset(char *botnick, char *code, char *par)
   while (chan) {
     chname = chan->dname;
     do_chanset(NULL, chan, par, DO_LOCAL);
-#ifdef LEAF
-    if (chan->status & CHAN_BITCH)
+    if (!conf.bot->hub && chan->status & CHAN_BITCH)
       recheck_channel(chan, 0);
-#endif /* LEAF */
     if (!all)
       chan = NULL;
     else
@@ -197,9 +191,8 @@ static void got_cpart(char *botnick, char *code, char *par)
   else
     remove_channel(chan);
 
-#ifdef HUB
-  write_userfile(-1);
-#endif /* HUB */
+  if (conf.bot->hub)
+    write_userfile(-1);
 }
 
 static void got_cjoin(char *botnick, char *code, char *par)
@@ -209,34 +202,36 @@ static void got_cjoin(char *botnick, char *code, char *par)
 
   char *chname = newsplit(&par), *options = NULL;
   struct chanset_t *chan = findchan_by_dname(chname);
+  int match = 0;
 
-  /* ALL hubs should add the channel, leaf should check the list for a match */
-#ifdef LEAF
-  bool inactive = 0;
-  char *bots = newsplit(&par);
-  int match = parsebots(bots, conf.bot->nick);
-
-  if (strstr(par, "+inactive"))
-    inactive = 1;
-
-  if (chan && !match)
-    return;
-
-  if (!match) {
-    size_t size = strlen(par) + 12 + 1;
-
-    options = (char *) my_calloc(1, size);
-    egg_snprintf(options, size, "%s +inactive", par);
-  } else if (match && chan && !shouldjoin(chan)) {
-    if (!inactive)
-      do_chanset(NULL, chan, "-inactive", DO_LOCAL);
-    return;
-  } else
-#endif /* LEAF */
-#ifdef HUB
+  if (conf.bot->hub) {
     newsplit(&par);	/* hubs ignore the botmatch param */
-#endif /* HUB */
     options = par;
+  } else {
+    /* ALL hubs should add the channel, leaf should check the list for a match */
+    bool inactive = 0;
+    char *bots = newsplit(&par);
+    match = parsebots(bots, conf.bot->nick);
+
+    if (strstr(par, "+inactive"))
+      inactive = 1;
+
+    if (chan && !match)
+      return;
+
+    if (!match) {
+      size_t size = strlen(par) + 12 + 1;
+
+      options = (char *) my_calloc(1, size);
+      egg_snprintf(options, size, "%s +inactive", par);
+    } else if (match && chan && !shouldjoin(chan)) {
+      if (!inactive)
+        do_chanset(NULL, chan, "-inactive", DO_LOCAL);
+      return;
+    } else
+      options = par;
+  }
+
   if (chan)
     return;
 sdprintf("OPTIONS: %s", options);
@@ -244,17 +239,14 @@ sdprintf("OPTIONS: %s", options);
 
   if (channel_add(result, chname, options) == ERROR) /* drummer */
     putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s: %s", botnick, chname, result);
-#ifdef HUB
-  else
-    write_userfile(-1);
-#endif /* HUB */
-#ifdef LEAF
-  if (!match)
+  else { 
+    if (conf.bot->hub)
+      write_userfile(-1);
+  }
+  if (!match && !conf.bot->hub)
     free(options);
-#endif /* LEAF */
 }
 
-#ifdef LEAF
 static void got_cycle(char *botnick, char *code, char *par)
 {
   if (!par[0])
@@ -290,7 +282,6 @@ static void got_down(char *botnick, char *code, char *par)
   chan->channel.no_op = (now + 10);
   add_mode(chan, '-', 'o', botname);
 }
-#endif /* LEAF */
 
 static void got_role(char *botnick, char *code, char *par)
 {
@@ -309,7 +300,6 @@ void got_kl(char *botnick, char *code, char *par)
 }
 
 
-#ifdef HUB
 static void rebalance_roles()
 {
   struct bot_addr *ba = NULL;
@@ -361,7 +351,6 @@ static void rebalance_roles()
     }
   }
 }
-#endif /* HUB */
 
 static int
 check_slowjoinpart(struct chanset_t *chan)
@@ -369,9 +358,8 @@ check_slowjoinpart(struct chanset_t *chan)
   /* slowpart */
   if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
     chan->channel.parttime = 0;
-#ifdef LEAF
-    dprintf(DP_MODE, "PART %s\n", chan->name);
-#endif /* LEAF */
+    if (!conf.bot->hub)
+      dprintf(DP_MODE, "PART %s\n", chan->name);
     if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
       remove_channel(chan);
     return 1;		/* if we keep looping, we'll segfault. */
@@ -379,17 +367,14 @@ check_slowjoinpart(struct chanset_t *chan)
   } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
       chan->status &= ~CHAN_INACTIVE;
       chan->channel.jointime = 0;
-#ifdef LEAF
-    if (shouldjoin(chan) && !channel_active(chan))
+    if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan))
       dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
   } else if (channel_closed(chan)) {
     enforce_closed(chan);
-#endif /* LEAF */
   }
   return 0;
 }
 
-#ifdef LEAF
 static void 
 check_limitraise(struct chanset_t *chan) {
   /* only check every other time for now */
@@ -400,7 +385,6 @@ check_limitraise(struct chanset_t *chan) {
       raise_limit(chan);
   }
 }
-#endif /* LEAF */
 
 static void
 channels_timers()
@@ -422,9 +406,8 @@ channels_timers()
     if ((cnt % 60) == 0) {
       /* 60 seconds */
       reset = 1;
-#ifdef LEAF
-      check_limitraise(chan);
-#endif /* LEAF */
+      if (!conf.bot->hub)
+        check_limitraise(chan);
     }
   }
 
@@ -465,10 +448,8 @@ static void got_jn(int idx, char *code, char *par)
   if (chan->channel.jointime && channel_inactive(chan)) {
     chan->status &= ~CHAN_INACTIVE;
     chan->channel.jointime = 0;
-#ifdef LEAF
-    if (shouldjoin(chan) && !channel_active(chan))
+    if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan))
      dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-#endif /* LEAF */
   }
 }
 
@@ -679,11 +660,9 @@ void remove_channel(struct chanset_t *chan)
       away from under our feet during the check_part() call. */
    chanset_unlink(chan);
 
-#ifdef LEAF
   /* Using chan->name is important here, especially for !chans <cybah> */
-  if (shouldjoin(chan) && chan->name[0])
+  if (!conf.bot->hub && shouldjoin(chan) && chan->name[0])
     dprintf(DP_SERVER, "PART %s\n", chan->name);
-#endif /* LEAF */
 
    clear_channel(chan, 0);
    noshare = 1;
@@ -799,13 +778,12 @@ void channels_report(int idx, int details)
 	            chan->channel.members == 1 ? "," : "s,", s2, s);
 	  }
 	} else {
-#ifdef LEAF
-	  dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
+          if (!conf.bot->hub)
+            dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
 		  channel_pending(chan) ? "pending" : "not on channel", s2, s);
-#else /* !LEAF */
-	  dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
+          else
+            dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
 		  "limbo", s2, s);
-#endif /* LEAF */
 	}
       } else {
 	dprintf(idx, "    %-10s: channel is set +inactive\n",
@@ -931,13 +909,13 @@ void channels_init()
 	 "-fastop ");
   /* FIXME: combine all of these into one function, check_expired_masks('e') */
   timer_create_secs(60, "check_expired_masks", (Function) check_expired_masks);
-#ifdef HUB
-  timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
-  timer_create_secs(30, "check_should_close", (Function) check_should_close);
+  if (conf.bot->hub) {
+    timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
+    timer_create_secs(30, "check_should_close", (Function) check_should_close);
 #ifdef G_BACKUP
-  timer_create_secs(30, "check_should_backup", (Function) check_should_backup);
+    timer_create_secs(30, "check_should_backup", (Function) check_should_backup);
 #endif /* G_BACKUP */
-#endif /* HUB */
+  }
   timer_create_secs(10, "channels_timers", (Function) channels_timers);
 
   add_builtins("dcc", C_dcc_channels);
