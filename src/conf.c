@@ -30,24 +30,24 @@ char cfile[DIRMAX] = "";
 conf_t conf;                    /* global conf struct */
 
 static void
-tellconf(conf_t * inconf)
+tellconf()
 {
   conf_bot *bot;
   int i = 0;
 
-  sdprintf("uid: %d\n", inconf->uid);
-  sdprintf("uname: %s\n", inconf->uname);
-  sdprintf("homedir: %s\n", inconf->homedir);
-  sdprintf("binpath: %s\n", inconf->binpath);
-  sdprintf("binname: %s\n", inconf->binname);
-  sdprintf("portmin: %d\n", inconf->portmin);
-  sdprintf("portmax: %d\n", inconf->portmax);
-  sdprintf("pscloak: %d\n", inconf->pscloak);
-  sdprintf("autocron: %d\n", inconf->autocron);
-  sdprintf("autouname: %d\n", inconf->autouname);
-  sdprintf("watcher: %d\n", inconf->watcher);
+  sdprintf("uid: %d\n", conf.uid);
+  sdprintf("uname: %s\n", conf.uname);
+  sdprintf("homedir: %s\n", conf.homedir);
+  sdprintf("binpath: %s\n", conf.binpath);
+  sdprintf("binname: %s\n", conf.binname);
+  sdprintf("portmin: %d\n", conf.portmin);
+  sdprintf("portmax: %d\n", conf.portmax);
+  sdprintf("pscloak: %d\n", conf.pscloak);
+  sdprintf("autocron: %d\n", conf.autocron);
+  sdprintf("autouname: %d\n", conf.autouname);
+  sdprintf("watcher: %d\n", conf.watcher);
   sdprintf("bots:\n");
-  for (bot = inconf->bots; bot && bot->nick; bot = bot->next) {
+  for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     i++;
     sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n", i,
              bot->nick,
@@ -57,7 +57,7 @@ tellconf(conf_t * inconf)
              bot->hub,
              bot->pid);
   }
-  if (inconf->bot && ((bot = inconf->bot))) {
+  if (conf.bot && ((bot = conf.bot))) {
     sdprintf("me:\n");
     sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n",
              bot->nick,
@@ -852,5 +852,5 @@ bin_to_conf(void)
     }
     free(tmpp);
   }
-  tellconf(&conf);
+  tellconf();
 }
