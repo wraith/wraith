@@ -677,7 +677,7 @@ static void cmd_newpass(struct userrec *u, int idx, char *par)
 
 static void cmd_secpass(struct userrec *u, int idx, char *par)
 {
-  char *new, pass[17];
+  char *new, pass[16];
 
   putlog(LOG_CMDS, "*", STR("#%s# secpass..."), dcc[idx].nick);
   if (!par[0]) {
@@ -687,7 +687,7 @@ static void cmd_secpass(struct userrec *u, int idx, char *par)
   new = newsplit(&par);
 
   if (!strcmp(new, "rand")) {
-    make_rand_str(pass, 16);
+    make_rand_str(pass, 15);
   } else {
     if (strlen(new) < 6) {
       dprintf(idx, STR("Please use at least 6 characters.\n"));
@@ -696,8 +696,8 @@ static void cmd_secpass(struct userrec *u, int idx, char *par)
       sprintf(pass, "%s", new);
     }
   }
-  if (strlen(pass) > 16)
-    pass[16] = 0;
+  if (strlen(pass) > 15)
+    pass[15] = 0;
   set_user(&USERENTRY_SECPASS, u, pass);
   dprintf(idx, STR("Changed your secpass to: %s.\n"), pass);
 #ifdef HUB
@@ -1258,7 +1258,7 @@ static void cmd_console(struct userrec *u, int idx, char *par)
 
     get_user_flagrec(u, &fr, nick);
 
-    if (private(fr, findchan_by_dname(nick), PRIV_OP)) {
+    if (strcmp(nick, "*") && private(fr, findchan_by_dname(nick), PRIV_OP)) {
       dprintf(idx, STR("Invalid console channel: %s.\n"), nick);
       return;
     }
@@ -1474,7 +1474,7 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
         }
       }
       if (strlen(pass) > 15)
-      pass[15] = 0;
+        pass[15] = 0;
 
       if (good) {
         set_user(&USERENTRY_PASS, u, pass);
@@ -1490,7 +1490,7 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
 
 static void cmd_chsecpass(struct userrec *u, int idx, char *par)
 {
-  char *handle, *new, pass[17];
+  char *handle, *new, pass[16];
   int atr = u ? u->flags : 0, l;
   if (!par[0])
     dprintf(idx, STR("Usage: chsecpass <handle> [secpass/rand]\n"));
@@ -1516,10 +1516,10 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
     } else {
 
       l = strlen(new = newsplit(&par));
-      if (l > 16)
-	new[16] = 0;
+      if (l > 15)
+	new[15] = 0;
       if (!strcmp(new, "rand")) {
-        make_rand_str(pass, 16);
+        make_rand_str(pass, 15);
       } else {
         if (strlen(new) < 6) {
           dprintf(idx, STR("Please use at least 6 characters.\n"));
@@ -1528,8 +1528,8 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
           sprintf(pass, "%s", new);
         }
       }
-      if (strlen(pass) > 16)
-        pass[16] = 0;
+      if (strlen(pass) > 15)
+        pass[15] = 0;
       set_user(&USERENTRY_SECPASS, u, pass);
       putlog(LOG_CMDS, "*", STR("#%s# chsecpass %s [something]"), dcc[idx].nick, handle);
       dprintf(idx, STR("Secpass for '%s' changed to: %s\n"), handle, pass);
