@@ -44,8 +44,7 @@ extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
 		textdir[], pid_file[], dcc_prefix[], 
 		*netpass;
 
-extern int	die_on_sighup, die_on_sigterm,
-		enable_simul, dcc_total, debug_output, identtimeout,
+extern int	enable_simul, dcc_total, debug_output, identtimeout,
 		protect_telnet, dupwait_timeout, egg_numver, share_unlinks,
 		dcc_sanitycheck, sort_users, tands, resolve_timeout,
 		default_uflags, strict_host, userfile_perm;
@@ -457,8 +456,6 @@ static tcl_ints def_tcl_ints[] =
   {"default-flags",		&default_flags,		0},
   /* moved from eggdrop.h */
   {"numversion",		&egg_numver,		2},
-  {"die-on-sighup",		&die_on_sighup,		1},
-  {"die-on-sigterm",		&die_on_sigterm,	1},
   {"remote-boots",		&remote_boots,		1},
   {"debug-output",		&debug_output,		1},
   {"protect-telnet",		&protect_telnet,	0},

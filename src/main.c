@@ -120,8 +120,6 @@ char	version[81];		/* Version info (long form) */
 char	ver[41];		/* Version info (short form) */
 int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 int	do_restart = 0;		/* .restart has been called, restart asap */
-int	die_on_sighup = 0;	/* die if bot receives SIGHUP */
-int	die_on_sigterm = 0;	/* die if bot receives SIGTERM */
 int	resolve_timeout = 10;	/* hostname/address lookup timeout */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
@@ -381,13 +379,7 @@ static void got_term(int z)
 #ifdef HUB
   write_userfile(-1);
 #endif
-  check_tcl_event("sigterm");
-  if (die_on_sigterm) {
-    botnet_send_chat(-1, botnetnick, "ACK, I've been terminated!");
-    fatal(STR("TERMINATE SIGNAL -- SIGNING OFF"), 0);
-  } else {
-    putlog(LOG_MISC, "*", STR("RECEIVED TERMINATE SIGNAL (IGNORING)"));
-  }
+  putlog(LOG_MISC, "*", STR("RECEIVED TERMINATE SIGNAL (IGNORING)"));
 }
 
 static void got_stop(int z) 
@@ -419,7 +411,6 @@ static void got_cont(int z)
 
 static void got_quit(int z)
 {
-  check_tcl_event("sigquit");
   putlog(LOG_MISC, "*", STR("RECEIVED QUIT SIGNAL (IGNORING)"));
   return;
 }
@@ -429,11 +420,7 @@ static void got_hup(int z)
 #ifdef HUB
   write_userfile(-1);
 #endif
-  check_tcl_event("sighup");
-  if (die_on_sighup) {
-    fatal(STR("HANGUP SIGNAL -- SIGNING OFF"), 0);
-  } else
-    putlog(LOG_MISC, "*", STR("Received HUP signal: rehashing..."));
+  putlog(LOG_MISC, "*", STR("Received HUP signal: rehashing..."));
   do_restart = -2;
   return;
 }
@@ -451,7 +438,6 @@ static void got_alarm(int z)
  */
 static void got_ill(int z)
 {
-  check_tcl_event("sigill");
 #ifdef DEBUG_CONTEXT
   putlog(LOG_MISC, "*", STR("* Context: %s/%d [%s]"), cx_file[cx_ptr], cx_line[cx_ptr],
                          (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
