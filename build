@@ -73,7 +73,7 @@ shift $(($OPTIND - 1))
 
 PACKNAME=`grep "PACKNAME " ${pack} | $AWK '/PACKNAME/ {print $2}'`
 echo "Packname:  ${PACKNAME} (${pack})"
-echo -e `grep -r "http://" src/misc.c | sed -e "s/.*\- \(.*\) \-.*/\1/"`
+echo -e `grep "http://" src/misc.c | sed -e "s/.*\- \(.*\) \-.*/\1/"`
 echo
 
 if test -z "$1"; then
