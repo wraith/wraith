@@ -793,55 +793,31 @@ static void bot_reject(int idx, char *par)
     return;
   }
   who = newsplit(&par);
-  if (!(destbot = strchr(who, '@'))) {
-    /* Rejecting a bot */
-    i = nextbot(who);
-    if (i < 0) {
-      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s (%s)",
-		       BOT_CANTUNLINK, who, BOT_DOESNTEXIST);
-    } else if (!egg_strcasecmp(dcc[i].nick, who)) {
-      char s[1024] = "";
+  destbot = strchr(who, '@');
+  *destbot++ = 0;
+  if (!egg_strcasecmp(destbot, conf.bot->nick)) {
+    /* Kick someone here! */
+    int ok = 0;
 
-      /* I'm the connection to the rejected bot */
-      putlog(LOG_BOTS, "*", "%s %s %s", from, MISC_REJECTED, dcc[i].nick);
-      dprintf(i, "bye %s\n", par[0] ? par : MISC_REJECTED);
-      simple_sprintf(s, "%s %s (%s: %s)",
-		     MISC_DISCONNECTED, dcc[i].nick, from,
-		     par[0] ? par : MISC_REJECTED);
-      chatout("*** %s\n", s);
-      botnet_send_unlinked(i, dcc[i].nick, s);
-      killsock(dcc[i].sock);
-      lostdcc(i);
-    } else {
-      if (i >= 0)
-	botnet_send_reject(i, from, NULL, who, NULL, par);
-    }
-  } else {			/* Rejecting user */
-    *destbot++ = 0;
-    if (!egg_strcasecmp(destbot, conf.bot->nick)) {
-      /* Kick someone here! */
-      int ok = 0;
-
-      for (i = 0; (i < dcc_total) && (!ok); i++) {
-        if (dcc[i].type && (!egg_strcasecmp(who, dcc[i].nick)) && (dcc[i].type->flags & DCT_CHAT)) {
-          u = get_user_by_handle(userlist, from);
-          if (u) {
-            if (!whois_access(u, dcc[idx].user)) {
-              add_note(from, conf.bot->nick, "Sorry, you cannot boot them.", -1, 0);
-              return;
-            }
-            do_boot(i, from, par);
-            ok = 1;
-            putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
+    for (i = 0; (i < dcc_total) && (!ok); i++) {
+      if (dcc[i].type && (!egg_strcasecmp(who, dcc[i].nick)) && (dcc[i].type->flags & DCT_CHAT)) {
+        u = get_user_by_handle(userlist, from);
+        if (u) {
+          if (!whois_access(u, dcc[idx].user)) {
+            add_note(from, conf.bot->nick, "Sorry, you cannot boot them.", -1, 0);
+            return;
           }
+          do_boot(i, from, par);
+          ok = 1;
+          putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
         }
       }
-    } else {
-      i = nextbot(destbot);
-      *--destbot = '@';
-      if (i >= 0)
-	botnet_send_reject(i, from, NULL, who, NULL, par);
     }
+  } else {
+    i = nextbot(destbot);
+    *--destbot = '@';
+    if (i >= 0)
+      botnet_send_reject(i, from, NULL, who, NULL, par);
   }
 }
 
