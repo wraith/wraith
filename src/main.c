@@ -719,7 +719,8 @@ int main(int argc, char **argv)
   if (localhub) {
     sdprintf(STR("I am localhub (%s)"), conf.bot->nick);
 #endif /* LEAF */
-    check_crontab();
+    if (conffile.autocron)
+      check_crontab();
 #ifdef LEAF
   }
 #endif /* LEAF */
