@@ -69,6 +69,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Fixed bots unbanning bots via botnet requests when the bot is set +k for the chan.
 * Fixed a bunch of lame bugs in the getop system
 * Now using ANSI color code *0* to close bold (as opposed to new standard: 22)
+* Fixed some excess newlines when a user is booted for losing hub/leaf access.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
