@@ -15,7 +15,7 @@ int cmdi = 0;
 
 char *replace(char *string, char *oldie, char *newbie)
 {
-  static char newstring[6024] = "";
+  static char newstring[12048] = "";
   int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
   char *c;
   if (string == NULL) return "";
@@ -43,7 +43,7 @@ char *replace(char *string, char *oldie, char *newbie)
 
 char *step_thru_file(FILE *fd)
 {
-  const int tempBufSize = 6024;
+  const int tempBufSize = 12048;
   char tempBuf[tempBufSize];
   char *retStr = NULL;
   if (fd == NULL) {
@@ -113,7 +113,7 @@ int my_cmp (const cmds *c1, const cmds *c2)
 
 int parse_help(char *infile, char *outfile) {
   FILE *in = NULL, *out = NULL;
-  char *buffer = NULL, my_buf[6024], *fulllist = malloc(1);
+  char *buffer = NULL, my_buf[12048], *fulllist = malloc(1);
   int skip = 0, line = 0, i = 0, leaf = 0, hub = 0;
   if (!(in = fopen(infile, "r"))) {
     printf("Error: Cannot open '%s' for reading\n", infile);

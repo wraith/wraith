@@ -541,17 +541,7 @@ Context;
   }
 Context;
   if (!chan || !chname[0]) {
-    dprintf(idx, "Usage: mdop #channel [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
-    dprintf(idx, "  bots    : Number of bots to use for mdop.\n");
-    dprintf(idx, "  alines  : Number of MODE lines to assume each participating bot will get through.\n");
-    dprintf(idx, "  slines  : Number of MODE lines each participating bot will send.\n");
-    dprintf(idx, "  overlap : Number of times to deop each target nick (using alines for calc).\n");
-    dprintf(idx, "  bitch   : Set the channel +bitch after mdop.\n");
-    dprintf(idx, "  simul   : Simulate the mdop. Who would do what will be shown in DCC\n");
-    dprintf(idx, "bots, alines, slines and overlap are dependant on each other, set them wrong and\n");
-    dprintf(idx, "the bot will complain. Defaults are alines=3, slines=5, overlap=2. alines will be\n");
-    dprintf(idx, "increased up to 5 if there are not enough bots available.\n");
-    dprintf(idx, "The bot you mdop on will never participate in the deopping\n");
+    dprintf(idx, "Usage: mdop <#channel> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
     return;
   }
 
