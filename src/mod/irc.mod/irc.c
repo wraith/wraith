@@ -416,20 +416,21 @@ void check_hostmask()
   char s[UHOSTLEN + 2] = "", *tmp = NULL;
   struct list_type *q = NULL;
 
-  checked_hostmask = 1;
   if (!server_online || !botuserhost[0])
     return;
+
+  checked_hostmask = 1;
+
   tmp = botuserhost;
 
-  if (!tmp[0] || !tmp[1]) return;
-  if (tmp[0] != '~')
-    sprintf(s, "*!%s", tmp);
-  else {
+  if (tmp[0] == '~') {
     tmp++;
     sprintf(s, "*!*%s", tmp);
-  }
+  } else 
+    sprintf(s, "*!%s", tmp);
+
   for (q = get_user(&USERENTRY_HOSTS, conf.bot->u); q; q = q->next) {
-    if (!strcasecmp(q->extra, s))
+    if (!egg_strcasecmp(q->extra, s))
       return;
   }
 
