@@ -132,15 +132,16 @@ void cache_my_ip();
 void neterror(char *);
 void setsock(int, int);
 int allocsock(int, int);
-#ifdef CYGWIN_HACKS
-#  define getsock cygwin_sucks
-#endif /* CYGWIN_HACKS */
 
 #ifdef USE_IPV6
-int getsock(int, int);
+#define getsock(opt, af) real_getsock(opt, af, __FILE__, __LINE__)
+int real_getsock(int, int, char *, int);
 #else
-int getsock(int);
+#define getsock(opt) real_getsock(opt, __FILE__, __LINE)
+int real_getsock(int, char *, int);
 #endif /* USE_IPV6 */
+
+
 int sockprotocol(int);
 int hostprotocol(char *);
 char *hostnamefromip(unsigned long);

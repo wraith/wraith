@@ -476,10 +476,10 @@ void setsock(int sock, int options)
 }
 
 #ifdef USE_IPV6
-int getsock(int options, int af_def)
+int real_getsock(int options, int af_def, char *fname, int line)
 {
 #else
-int getsock(int options)
+int real_getsock(int options, char *fname, int line)
 {
   int af_def = AF_INET;
 #endif /* USE_IPV6 */
@@ -490,7 +490,7 @@ int getsock(int options)
   if (sock >= 0)
     setsock(sock, options);
   else
-    putlog(LOG_MISC, "*", "Warning: Can't create new socket!");
+    putlog(LOG_MISC, "*", "Warning: Can't create new socket! (%s:%d)", fname, line);
   return sock;
 }
 
