@@ -467,21 +467,6 @@ static void core_halfhourly()
 #endif /* HUB */
 }
 
-static void event_rehash()
-{
-  check_bind_event("rehash");
-}
-
-static void event_prerehash()
-{
-  check_bind_event("prerehash");
-}
-
-static void event_save()
-{
-  check_bind_event("save");
-}
-
 static void event_resettraffic()
 {
 	traffic.out_total.irc += traffic.out_today.irc;
@@ -830,9 +815,6 @@ int main(int argc, char **argv)
   timer_create_secs(3600, "core_hourly", (Function) core_hourly);
   timer_create_secs(1800, "core_halfhourly", (Function) core_halfhourly);
 
-  add_hook(HOOK_REHASH, (Function) event_rehash);
-  add_hook(HOOK_PRE_REHASH, (Function) event_prerehash);
-  add_hook(HOOK_USERFILE, (Function) event_save);
   add_hook(HOOK_DAILY, (Function) event_resettraffic);
 
   debug0("main: entering loop");

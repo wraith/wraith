@@ -22,7 +22,7 @@ extern cmd_t 		C_dcc[];
 static bind_table_t *BT_link = NULL, *BT_disc = NULL, *BT_away = NULL, *BT_dcc = NULL;
 static bind_table_t *BT_chat = NULL, *BT_act = NULL, *BT_bcst = NULL, *BT_note = NULL;
 static bind_table_t *BT_bot = NULL, *BT_nkch = NULL, *BT_chon = NULL, *BT_chof = NULL;
-static bind_table_t *BT_chpt = NULL, *BT_chjn = NULL, *BT_time = NULL, *BT_event = NULL;
+static bind_table_t *BT_chpt = NULL, *BT_chjn = NULL, *BT_time = NULL;
 
 void core_binds_init()
 {
@@ -38,13 +38,10 @@ void core_binds_init()
         BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_PARTIAL, BIND_USE_ATTR);
         add_builtins("dcc", C_dcc);
         BT_disc = bind_table_add("disc", 1, "s", MATCH_MASK, BIND_STACKABLE);
-	BT_event = bind_table_add("event", 1, "s", MATCH_MASK, BIND_STACKABLE);
         BT_link = bind_table_add("link", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);
 	BT_time = bind_table_add("time", 5, "iiiii", MATCH_MASK, BIND_STACKABLE);
-
-
 }
 
 void check_bind_dcc(const char *cmd, int idx, const char *text)
@@ -172,8 +169,7 @@ int check_bind_note(const char *from, const char *to, const char *text)
   return check_bind(BT_note, to, NULL, from, to, text);
 }
 
-void check_bind_chjn(const char *bot, const char *nick, int chan,
-                    const char type, int sock, const char *host)
+void check_bind_chjn(const char *bot, const char *nick, int chan, const char type, int sock, const char *host)
 {
   struct flag_record    fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
   char                  s[11] = "", t[2] = "";
@@ -218,7 +214,3 @@ void check_bind_time(struct tm *tm)
 	check_bind(BT_time, full, NULL, tm->tm_min, tm->tm_hour, tm->tm_mday, tm->tm_mon, tm->tm_year + 1900);
 }
 
-void check_bind_event(char *event)
-{
-	check_bind(BT_event, event, NULL, event);
-}

@@ -232,7 +232,7 @@ Function global_table[] =
   (Function) 0,
   (Function) open_telnet,
   /* 88 - 91 */
-  (Function) check_bind_event,
+  (Function) 0,
   (Function) egg_memcpy,
   (Function) my_atoul,
   (Function) my_strcpy,

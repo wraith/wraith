@@ -1210,7 +1210,7 @@ static void bot_away(int idx, char *par)
   sock = base64_to_int(etc);
   if (sock == 0)
     sock = partysock(bot, etc);
-  check_bind_away(bot, sock, par);
+  check_bind_away(bot, idx, par);
   if (par[0]) {
     partystat(bot, sock, PLSTAT_AWAY, 0);
     partyaway(bot, sock, par);

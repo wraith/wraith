@@ -214,7 +214,7 @@
 /* UNUSED 86 */
 #define open_telnet ((int (*) (char *, int))global[87])
 /* 88 - 91 */
-#define check_bind_event ((void * (*) (const char *))global[88])
+/* UNUSED 88 */
 #define my_memcpy ((void * (*) (void *, const void *, size_t))global[89])
 #define my_atoul ((IP(*)(char *))global[90])
 #define my_strcpy ((int (*)(char *, const char *))global[91])

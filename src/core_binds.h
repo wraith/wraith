@@ -4,7 +4,6 @@
 #ifndef MAKING_MODS
 void core_binds_init();
 void check_bind_time(struct tm *tm);
-void check_bind_event(char *event);
 void check_bind_dcc(const char *, int, const char *);
 void check_bind_chjn(const char *, const char *, int, char, int, const char *);
 void check_bind_chpt(const char *, const char *, int, int);

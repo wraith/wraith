@@ -425,7 +425,7 @@ void not_away(int idx)
   dprintf(idx, "You're not away any more.\n");
   free(dcc[idx].u.chat->away);
   dcc[idx].u.chat->away = NULL;
-  check_bind_away(conf.bot->nick, dcc[idx].sock, NULL);
+  check_bind_away(conf.bot->nick, idx, NULL);
 }
 
 void set_away(int idx, char *s)
@@ -442,14 +442,13 @@ void set_away(int idx, char *s)
     free(dcc[idx].u.chat->away);
   dcc[idx].u.chat->away = strdup(s);
   if (dcc[idx].u.chat->channel >= 0) {
-    chanout_but(-1, dcc[idx].u.chat->channel,
-		"*** %s is now away: %s\n", dcc[idx].nick, s);
+    chanout_but(-1, dcc[idx].u.chat->channel, "*** %s is now away: %s\n", dcc[idx].nick, s);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
       botnet_send_away(-1, conf.bot->nick, dcc[idx].sock, s, idx);
     }
   }
   dprintf(idx, "You are now away.\n");
-  check_bind_away(conf.bot->nick, dcc[idx].sock, s);
+  check_bind_away(conf.bot->nick, idx, s);
 }
 
 
