@@ -38,6 +38,7 @@ usage()
     echo "    -n        Do not package the binaries."
     echo "    -p  FILE  What file to use as the cfg file."
     echo "    -P        For development (Don't compile/rm binaries)"
+    echo "    -s        scp target."
 }
 
 debug=0
@@ -49,9 +50,10 @@ type=
 nopkg=0
 bzip=0
 pkg=0
+scp=0
 pack=pack/pack.cfg
 
-while getopts bCcdhnPp: opt ; do
+while getopts bCcdhnPp:s: opt ; do
         case "$opt" in
         b) bzip=1 ;;
 	c) clean=1 ;;
@@ -61,6 +63,7 @@ while getopts bCcdhnPp: opt ; do
         n) nopkg=1 ;;
 	p) pack="$OPTARG" ;;
         P) pkg=1 ;;
+	s) scp="$OPTARG" ;;
         *) usage; exit 1 ;;
 
         esac
@@ -215,6 +218,10 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
     rm -f *$os-$ver${d}
   fi
   echo "Binaries are now in '${PACKNAME}.$os-$ver${d}.tar.${ext}'."
+ 
+  if ! [ $scp = 0 ]; then
+    scp -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
+  fi
 fi
   exit 0
 
