@@ -20,6 +20,7 @@
 #include "chan.h"
 #include "tandem.h"
 #include "src/mod/channels.mod/channels.h"
+#include "src/mod/ctcp.mod/ctcp.h"
 #ifdef LEAF
 #include "src/chanprog.h"
 #include "src/mod/server.mod/server.h"
@@ -745,39 +746,40 @@ struct cfg_entry CFG_MOTD = {
 
 void init_config()
 {
-  add_cfg(&CFG_SERVPORT);
-  add_cfg(&CFG_CHANSET);
   add_cfg(&CFG_AUTHKEY);
-  add_cfg(&CFG_MOTD);
-  add_cfg(&CFG_FORKINTERVAL);
-  add_cfg(&CFG_LOGIN);
-  add_cfg(&CFG_HIJACK);
-  add_cfg(&CFG_TRACE);
-  add_cfg(&CFG_PROMISC);
   add_cfg(&CFG_BADPROCESS);
-  add_cfg(&CFG_PROCESSLIST);
+  add_cfg(&CFG_DCCAUTH);
+  add_cfg(&CFG_CHANSET);
+  add_cfg(&CFG_CLOAK_SCRIPT);
+  add_cfg(&CFG_CLOSETHRESHOLD);
+  add_cfg(&CFG_CMDPREFIX);
+  add_cfg(&CFG_FIGHTTHRESHOLD);
+  add_cfg(&CFG_FORKINTERVAL);
+  add_cfg(&CFG_HIJACK);
+  add_cfg(&CFG_INBOTS);
+  add_cfg(&CFG_KILLTHRESHOLD);
+  add_cfg(&CFG_LAGTHRESHOLD);
+  add_cfg(&CFG_LOGIN);
+  add_cfg(&CFG_MOTD);
 #ifdef G_MEAN
+  add_cfg(&CFG_MEANBAN);
   add_cfg(&CFG_MEANDEOP);
   add_cfg(&CFG_MEANKICK);
-  add_cfg(&CFG_MEANBAN);
 #endif /* G_MEAN */
+  add_cfg(&CFG_MSGIDENT);
+  add_cfg(&CFG_MSGINVITE);
   add_cfg(&CFG_MSGOP);
   add_cfg(&CFG_MSGPASS);
-  add_cfg(&CFG_MSGINVITE);
-  add_cfg(&CFG_MSGIDENT);
-  add_cfg(&CFG_CMDPREFIX);
   add_cfg(&CFG_NICK);
+  add_cfg(&CFG_OPBOTS);
+  add_cfg(&CFG_OPREQUESTS);
+  add_cfg(&CFG_PROCESSLIST);
+  add_cfg(&CFG_PROMISC);
+  add_cfg(&CFG_REALNAME);
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
-  add_cfg(&CFG_REALNAME);
-  add_cfg(&CFG_OPBOTS);
-  add_cfg(&CFG_INBOTS);
-  add_cfg(&CFG_LAGTHRESHOLD);
-  add_cfg(&CFG_OPREQUESTS);
-  add_cfg(&CFG_FIGHTTHRESHOLD);
-  add_cfg(&CFG_CLOSETHRESHOLD);
-  add_cfg(&CFG_KILLTHRESHOLD);
-  add_cfg(&CFG_DCCAUTH);
+  add_cfg(&CFG_SERVPORT);
+  add_cfg(&CFG_TRACE);
 }
 
 int check_cmd_pass(const char *cmd, char *pass)
