@@ -974,6 +974,7 @@ printf("out: %s\n", out);
 	fatal("END OF FILE ON TERMINAL", 0);
       for (idx = 0; idx < dcc_total; idx++) {
 	if (dcc[idx].type && dcc[idx].sock == i) {
+          sdprintf("EOF on '%s' idx: %d", dcc[idx].type ? dcc[idx].type->name : "unknown", idx);
 	  if (dcc[idx].type->eof)
 	    dcc[idx].type->eof(idx);
 	  else {

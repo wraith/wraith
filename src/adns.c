@@ -605,7 +605,9 @@ static int cache_find(const char *query)
 
 void dns_cache_flush()
 {
-  for (int i = 0; i < ncache; i++) {
+  int i = 0;
+
+  for (i = 0; i < ncache; i++) {
     cache_del(i);
     if (i == ncache) break;
     i--;
