@@ -21,7 +21,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <paths.h>
+#ifdef HAVE_PATHS_H
+# include <paths.h>
+#endif /* HAVE_PATHS_H */
 #include <unistd.h>
 #include <sys/stat.h>
 

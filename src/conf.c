@@ -19,7 +19,9 @@
 #include "socket.h"
 
 #include <errno.h>
-#include <paths.h>
+#ifdef HAVE_PATHS_H
+#  include <paths.h>
+#endif /* HAVE_PATHS_H */
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
