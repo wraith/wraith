@@ -195,7 +195,7 @@ static void check_expired_dcc()
 static void expire_simuls() {
   for (int idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].simul > 0) {
-      if ((now - dcc[idx].simultime) >= 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
+      if ((now - dcc[idx].simultime) >= 100) { /* expire simuls after 100 seconds (re-uses idx, so it wont fill up) */
         dcc[idx].simul = -1;
         lostdcc(idx);
         return;		/* only safe to do one at a time */
