@@ -71,17 +71,17 @@ AC_CHECK_FUNC(__res_mkquery, ,
 )
 fi
 
-if test "$ac_cv_cygwin" = "yes"
-then
-  AC_MSG_CHECKING(for /usr/local/bind/lib/libbind.a)
-  if test -r /usr/local/bind/lib/libbind.a
-  then
-    AC_MSG_RESULT(yes)
-    RESLIB="${RESLIB} /usr/local/bind/lib/libbind.a"
-    RESINCLUDE="-I/usr/local/bind/include"
-    dns_reslib_avail="true" 
-  else
-    AC_MSG_RESULT(no)
+if test "${dns_reslib_avail}" = false; then
+  if test "$ac_cv_cygwin" = "yes"; then
+    AC_MSG_CHECKING(for /usr/local/bind/lib/libbind.a)
+    if test -r /usr/local/bind/lib/libbind.a; then
+      AC_MSG_RESULT(yes)
+      RESLIB="${RESLIB} -L/usr/local/bind/lib -lbind"
+      RESINCLUDE="-I/usr/local/bind/include"
+      dns_reslib_avail="true"
+    else
+      AC_MSG_RESULT(no)
+    fi
   fi
 fi
 
