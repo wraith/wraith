@@ -7,15 +7,29 @@
  *
  */
 
-#define MODULE_NAME "notes"
-#define MAKING_NOTES
+#undef MAKING_MODS
+#include "notes.h"
+#include "src/common.h"
+#include "src/chanprog.h"
+#include "src/botnet.h"
+#include "src/userrec.h"
+#include "src/userent.h"
+#include "src/misc_file.h"
+#include "src/modules.h"
+#include "src/misc.h"
+#include "src/users.h"
+
+#include "src/tandem.h"
+#include "src/tclhash.h"
+#include "src/botmsg.h" /* NOTE DEFINES */
+
 #include <fcntl.h>
 #include <sys/stat.h> /* chmod(..) */
-#include "src/mod/module.h"
-#include "src/tandem.h"
-#include "src/botmsg.h" /* NOTE DEFINES */
-#undef global
-#include "notes.h"
+
+extern struct userrec	*userlist;
+extern time_t now;
+extern char botnetnick[];
+extern int userfile_perm;
 
 static int maxnotes = 50;	/* Maximum number of notes to allow stored
 				 * for each user */
@@ -23,7 +37,6 @@ static int note_life = 60;	/* Number of DAYS a note lives */
 static char notefile[121] = ".n";	/* Name of the notefile */
 static int allow_fwd = 1;	/* Allow note forwarding */
 static int notify_users = 1;	/* Notify users they have notes every hour? */
-static Function *global = NULL;	/* DAMN fcntl.h */
 
 static struct user_entry_type USERENTRY_FWD =
 {
@@ -43,7 +56,7 @@ static struct user_entry_type USERENTRY_FWD =
 #include "cmdsnote.c"
 
 
-static void fwd_display(int idx, struct user_entry *e, struct userrec *u)
+void fwd_display(int idx, struct user_entry *e, struct userrec *u)
 {
   if (dcc[idx].user && (dcc[idx].user->flags & USER_MASTER))
     dprintf(idx, NOTES_FORWARD_TO, e->u.string);
@@ -51,7 +64,7 @@ static void fwd_display(int idx, struct user_entry *e, struct userrec *u)
 
 /* Determine how many notes are waiting for a user.
  */
-static int num_notes(char *user)
+int num_notes(char *user)
 {
   int tot = 0;
   FILE *f;
@@ -182,7 +195,7 @@ static void expire_notes()
 
 /* Add note to notefile.
  */
-static int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int bufsize)
+int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int bufsize)
 {
   FILE *f;
   char u[20], *f1, *to = NULL, work[1024];
@@ -350,7 +363,7 @@ static int notes_in(int dl[], int in)
  * else    : read msg in list : (ex: .notes read 5-9;12;13;18-)
  * idx=-1  : /msg
  */
-static void notes_read(char *hand, char *nick, char *srd, int idx)
+void notes_read(char *hand, char *nick, char *srd, int idx)
 {
   FILE *f;
   char s[601], *to, *dt, *from, *s1, wt[100];
@@ -462,7 +475,7 @@ static void notes_read(char *hand, char *nick, char *srd, int idx)
  * else    : erase msg in list : (ex: .notes erase 2-4;8;16-)
  * idx=-1  : /msg
  */
-static void notes_del(char *hand, char *nick, char *sdl, int idx)
+void notes_del(char *hand, char *nick, char *sdl, int idx)
 {
   FILE *f, *g;
   char s[513], *to, *s1;
@@ -748,7 +761,7 @@ static cmd_t notes_load[] =
   {NULL,	NULL,	NULL,				NULL}
 };
 
-static void notes_report(int idx, int details)
+void notes_report(int idx, int details)
 {
   if (details) {
     if (notefile[0])
@@ -758,27 +771,11 @@ static void notes_report(int idx, int details)
   }
 }
 
-EXPORT_SCOPE char *notes_start();
-
-static Function notes_table[] =
+void notes_init()
 {
-  (Function) notes_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) notes_report,
-  (Function) cmd_note,
-  (Function) num_notes,
-};
-
-char *notes_start(Function * global_funcs)
-{
-
-  global = global_funcs;
 
   notefile[0] = 0;
-  module_register(MODULE_NAME, notes_table, 2, 1);
   add_hook(HOOK_HOURLY, (Function) notes_hourly);
-  add_hook(HOOK_STORENOTE, (Function) storenote);
 
   add_builtins("dcc", notes_cmds);
   add_builtins("load", notes_load);
@@ -787,7 +784,6 @@ char *notes_start(Function * global_funcs)
   add_builtins("nkch", notes_nkch);
 
   notes_server_setup(0);
-  my_memcpy(&USERENTRY_FWD, &USERENTRY_INFO, sizeof(void *) * 12);
+  egg_memcpy(&USERENTRY_FWD, &USERENTRY_INFO, sizeof(void *) * 12);
   add_entry_type(&USERENTRY_FWD);
-  return NULL;
 }

@@ -146,7 +146,6 @@ void (*sharein) (int, char *) = null_share;
 void (*shareupdatein) (int, char *) = null_share;
 void (*qserver) (int, char *, int) = (void (*)(int, char *, int)) null_func;
 void (*add_mode) () = null_func;
-int (*storenote)(char *from, char *to, char *msg, int idx, char *who, int bufsize) = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
 int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
 int (*rfc_ncasecmp) (const char *, const char *, int) = _rfc_ncasecmp;
 int (*rfc_toupper) (int) = _rfc_toupper;
@@ -824,10 +823,6 @@ void add_hook(int hook_num, Function func)
 	rfc_toupper = _rfc_toupper;
       }
       break;
-    case HOOK_STORENOTE:
-	if (func == NULL) storenote = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
-	else storenote = func;
-	break;
     case HOOK_DNS_HOSTBYIP:
       if (dns_hostbyip == block_dns_hostbyip)
 	dns_hostbyip = (void (*)(IP)) func;
@@ -878,9 +873,6 @@ void del_hook(int hook_num, Function func)
       if (add_mode == (void (*)()) func)
 	add_mode = null_func;
       break;
-    case HOOK_STORENOTE:
-	if (storenote == func) storenote = (int (*)(char *from, char *to, char *msg, int idx, char *who, int bufsize)) minus_func;
-	break;
     case HOOK_DNS_HOSTBYIP:
       if (dns_hostbyip == (void (*)(IP)) func)
 	dns_hostbyip = block_dns_hostbyip;

@@ -20,6 +20,7 @@
 #include "botnet.h"
 #include "tandem.h"
 #include "core_binds.h"
+#include "src/mod/notes.mod/notes.h"
 #include <stdarg.h>
 
 extern struct dcc_t	*dcc;
@@ -561,7 +562,6 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
 /* This part of add_note is more relevant to the botnet than
  * to the notes file
  */
-extern int (*storenote)(char *from, char *to, char *msg, int idx, char *who, int bufsize);
 int add_note(char *to, char *from, char *msg, int idx, int echo)
 {
   int status, i, iaway, sock;

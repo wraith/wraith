@@ -6,6 +6,9 @@
 #ifndef _EGG_MOD_NOTES_NOTES_H
 #define _EGG_MOD_NOTES_NOTES_H
 
+#include "src/common.h"
+#include "src/users.h"
+
 #define NOTES_IGNKEY "NOTESIGNORE"
 
 /* language #define's */
@@ -56,13 +59,11 @@
 #define NOTES_FWD_CHANGED		"Changed notes forwarding for %s to: %s\n"
 #define NOTES_MUSTBE			"Function must be one of INDEX, READ, or ERASE."
 
-#ifdef MAKING_NOTES
-static void notes_read(char *, char *, char *, int);
-static void notes_del(char *, char *, char *, int);
-static void fwd_display(int, struct user_entry *, struct userrec *);
-#else
-#define num_notes ((int(*)(char *user))notes_funcs[5])
-
-#endif				/* MAKING_NOTES */
+void notes_read(char *, char *, char *, int);
+void notes_del(char *, char *, char *, int);
+void fwd_display(int, struct user_entry *, struct userrec *);
+int num_notes(char *);
+void notes_report(int, int);
+int storenote(char *, char *, char *, int, char *, int);
 
 #endif				/* _EGG_MOD_NOTES_H */

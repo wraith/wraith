@@ -1207,7 +1207,7 @@ int main(int argc, char **argv)
   module_load("transfer");
   module_load("share");
   update_init();
-  module_load("notes");
+  notes_init();
   console_init();
   ctcp_init();
   module_load("compress");
