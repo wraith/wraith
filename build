@@ -1,10 +1,7 @@
 #! /bin/sh
-#This is a crappy hack
-#better to use first arg check
-if ! test -f /tmp/.sh; then
-  touch /tmp/.sh
+# We want to use BASH, not whatever /bin/sh points to.
+if test -z "$BASH"; then
   bash $0 ${1+"$@"}
-  rm /tmp/.sh
   exit 0
 fi
 
@@ -25,11 +22,7 @@ builddate=`perl -e "use POSIX 'strftime';print strftime(\"%m.%d.%Y\n\",gmtime(${
 clear
 #Display a banner
 bt=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*switch (r % \(.\)) {/\1/"`
-if test -f /proc/self/stat; then
-  bn=$[(`cat /proc/self/stat | $AWK '{print $1}'` % ${bt})]
-else
-  bn=$[(`date +%s` % ${bt})]
-fi
+bn=$[($RANDOM % ${bt})]
 banner=`grep -A 15 "char \*wbanner() {" src/misc.c | grep "case ${bn}:" | sed -e "s/.*case ${bn}: return STR(\"\(.*\)\");/\1/"`
 echo -e "${banner}"
 echo -e "Version:   ${ver}\nBuild:     ${builddate}"
