@@ -15,7 +15,7 @@ usage()
     echo "	-c	   - Cleans up old binaries/files before compile 	(default: off)"
     echo "	-d	   - Builds a debug package. 				(default: off)"
     echo "	-t dir	   - Where to search for TCL libraries. 		(usually not needed)"
-    echo "	-T	   - Builds TCL if it is not on the system		(defauly: off)"
+    echo "	-T	   - Builds TCL if it is not on the system		(default: off)"
     echo "	type	   - One of the following: all, leaf, hub."
 }
 
