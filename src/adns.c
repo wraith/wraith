@@ -257,7 +257,7 @@ static int get_dns_idx()
 
         if (dns_idx < 0) {
          putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create dns connection.");
-         return;
+         return 1;
         }
         sdprintf("dns_idx: %d", dns_idx);
         dcc[dns_idx].sock = sock;
