@@ -36,26 +36,14 @@ int max_dcc = 200;
 static int dcc_flood_thr = 3;
 
 void
-init_dcc_max()
+init_dcc()
 {
-  int osock = MAXSOCKS;
-
   if (max_dcc < 1)
     max_dcc = 1;
   if (dcc)
     dcc = (struct dcc_t *) my_realloc(dcc, sizeof(struct dcc_t) * max_dcc);
   else
     dcc = (struct dcc_t *) my_calloc(1, sizeof(struct dcc_t) * max_dcc);
-
-  MAXSOCKS = max_dcc + 10;
-  if (socklist)
-    socklist = (sock_list *) my_realloc((void *) socklist, sizeof(sock_list) * MAXSOCKS);
-  else
-    socklist = (sock_list *) my_calloc(1, sizeof(sock_list) * MAXSOCKS);
-
-  for (; osock < MAXSOCKS; osock++)
-    socklist[osock].flags = SOCK_UNUSED;
-
 }
 
 /* Replace \n with \r\n */

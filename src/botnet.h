@@ -40,5 +40,5 @@ void botnet_send_cmdpass(int, char *, char *);
 void zapfbot(int);
 void tandem_relay(int, char *, int);
 int getparty(char *, int);
-
+void init_party(void);
 #endif /* !_BOTNET_H */

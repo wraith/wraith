@@ -35,17 +35,6 @@ int auth_total = 0;
 static int max_auth = 50;
 struct auth_t *auth = NULL;
 
-void
-init_auth_max()
-{
-  if (max_auth < 1)
-    max_auth = 1;
-  if (auth)
-    auth = (struct auth_t *) my_realloc(auth, sizeof(struct auth_t) * max_auth);
-  else
-    auth = (struct auth_t *) my_calloc(1, sizeof(struct auth_t) * max_auth);
-}
-
 static void
 expire_auths()
 {
@@ -67,7 +56,13 @@ expire_auths()
 void
 init_auth()
 {
-  init_auth_max();
+  if (max_auth < 1)
+    max_auth = 1;
+  if (auth)
+    auth = (struct auth_t *) my_realloc(auth, sizeof(struct auth_t) * max_auth);
+  else
+    auth = (struct auth_t *) my_calloc(1, sizeof(struct auth_t) * max_auth);
+
   timer_create_secs(60, "expire_auths", (Function) expire_auths);
 }
 

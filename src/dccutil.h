@@ -27,6 +27,7 @@ struct portmap {
 #define DP_DUMP		0x8000
 
 
+void init_dcc(void);
 void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
 void chatout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void chanout_but(int, int, const char *, ...) __attribute__((format(printf, 3, 4)));

@@ -8,7 +8,10 @@
 
 #include "common.h"
 #include "main.h"
+#include "userent.h"
+#include "auth.h"
 #include "adns.h"
+#include "botcmd.h"
 #include "color.h"
 #include "dcc.h"
 #include "misc.h"
@@ -656,9 +659,6 @@ static void startup_checks(int hack) {
 #endif /* LEAF */
 }
 
-int init_dcc_max(), init_userent(), init_auth(), init_config(), init_party(),
- init_net(), init_botcmd();
-
 static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
 
 void console_init();
@@ -749,20 +749,8 @@ printf("out: %s\n", out);
   egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
 #endif /* CYGWIN_HACKS */
   clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
-  /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
-  init_flags();
-  binds_init();
-  core_binds_init();
-  init_dcc_max();
-  init_userent();
-  init_party();
-  init_net();
-  init_auth();
-  init_config();
-  init_botcmd();
-  init_conf();
-  init_responses();
 
+  init_conf();			/* establishes conffile and sets to defaults */
   if (argc) {
     sdprintf("Calling dtx_arg with %d params.", argc);
     dtx_arg(argc, argv);
@@ -785,8 +773,19 @@ printf("out: %s\n", out);
     }
   }
 
-  egg_dns_init();
 
+  init_flags();			/* needed to establish FLAGS[] */
+  core_binds_init();
+  init_dcc();			/* needed if we are going to make any dcc */
+  init_net();			/* needed for socklist[] */
+  init_userent();		/* needed before loading userfile */
+  init_party();			/* creates party[] */
+  init_auth();			/* creates auth[] */
+  init_cfg();			/* needed for cfg */
+  init_botcmd();
+  init_responses();		/* zeros out response[] */
+
+  egg_dns_init();
   channels_init();
 #ifdef LEAF
   server_init();

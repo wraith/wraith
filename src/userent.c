@@ -17,11 +17,10 @@
 #include "crypt.h"
 #include "botmsg.h"
 
-static struct user_entry_type *entry_type_list;
+static struct user_entry_type *entry_type_list = NULL;
 
 void init_userent()
 {
-  entry_type_list = NULL;
   add_entry_type(&USERENTRY_COMMENT);
   add_entry_type(&USERENTRY_INFO);
   add_entry_type(&USERENTRY_LASTON);

@@ -211,10 +211,17 @@ int seed_PRNG(void)
  */
 void init_net()
 {
+  MAXSOCKS = max_dcc + 10;
+
+  if (socklist)
+    socklist = (sock_list *) my_realloc((void *) socklist, sizeof(sock_list) * MAXSOCKS);
+  else
+    socklist = (sock_list *) my_calloc(1, sizeof(sock_list) * MAXSOCKS);
+
   for (int i = 0; i < MAXSOCKS; i++) {
     egg_bzero(&socklist[i], sizeof(socklist[i]));
 #ifdef HAVE_SSL
-    socklist[i].ssl=NULL;
+    socklist[i].ssl = NULL;
 #endif /* HAVE_SSL */
     socklist[i].flags = SOCK_UNUSED;
   }

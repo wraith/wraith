@@ -39,6 +39,7 @@ void trigger_cfg_changed();
 int check_cmd_pass(const char *, char *);
 int has_cmd_pass(const char *);
 void set_cmd_pass(char *, int);
+void init_cfg(void);
 
 extern struct cmd_pass            *cmdpass;
 

@@ -766,7 +766,7 @@ struct cfg_entry CFG_MOTD = {
 #endif /* HUB */
 };
 
-void init_config()
+void init_cfg()
 {
   add_cfg(&CFG_AUTHKEY);
   add_cfg(&CFG_BADPROCESS);
