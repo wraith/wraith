@@ -466,9 +466,9 @@ void show_motd(int idx)
     strcpy(buf, (char *) CFG_MOTD.gdata);
     who = newsplit(&buf);
     time = atoi(newsplit(&buf));
-    egg_strftime(day, sizeof day, "%A %m/%d/%Y", localtime(&time));
-    egg_strftime(hour, sizeof hour, "%r (%Z)", localtime(&time));
-    dprintf(idx, "Motd set by \002%s\002 on %s at %s\n", who, day, hour);
+    egg_strftime(day, sizeof day, "%A %m/%d/%Y", gmtime(&time));
+    egg_strftime(hour, sizeof hour, "%r (%Z)", gmtime(&time));
+    dprintf(idx, "Motd set by \002%s\002 on %s at %s GMT\n", who, day, hour);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
     nfree(buf_ptr);
   } else
