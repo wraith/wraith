@@ -540,21 +540,21 @@ static int proxy_connect(int sock, const char *host, port_t port, int proxy_type
         socklist[i].flags |= SOCK_PROXYWAIT;    /* drummer */
 #ifdef USE_IPV6
     if (af_ty == AF_INET6)
-      egg_snprintf(s, sizeof s,
+      simple_snprintf(s, sizeof s,
                    "\004\001%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%s",
                    (port >> 8) % 256, (port % 256), x[0], x[1], x[2], x[3],
                    x[4], x[5], x[6], x[7], x[9], x[9], x[10], x[11],  x[12],
                    x[13], x[14], x[15], botuser);
     else
 #endif /* USE_IPV6 */
-      egg_snprintf(s, sizeof s, "\004\001%c%c%c%c%c%c%s", (port >> 8) % 256,
+      simple_snprintf(s, sizeof s, "\004\001%c%c%c%c%c%c%s", (port >> 8) % 256,
                    (port % 256), x[0], x[1], x[2], x[3], botuser);
     tputs(sock, s, strlen(botuser) + 9);        /* drummer */
   } else if (proxy_type == PROXY_SUN) {
-    egg_snprintf(s, sizeof s, "%s %d\n", host, port);
+    simple_snprintf(s, sizeof s, "%s %d\n", host, port);
     tputs(sock, s, strlen(s));  /* drummer */
   } else if (proxy_type == PROXY_HTTP) {
-    egg_snprintf(s, sizeof s, "CONNECT %s:%d\n\n", host, port);
+    simple_snprintf(s, sizeof s, "CONNECT %s:%d\n\n", host, port);
     tputs(sock, s, strlen(s));
   }
 

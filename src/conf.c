@@ -80,7 +80,7 @@ void spawnbot(const char *nick)
   char *run = (char *) my_calloc(1, size);
   int status = 0;
 
-  egg_snprintf(run, size, "%s -B %s", binname, nick);
+  simple_snprintf(run, size, "%s -B %s", binname, nick);
   sdprintf("Spawning '%s': %s", nick, run);
   status = system(run);
   if (status == -1 || WEXITSTATUS(status))
@@ -210,7 +210,7 @@ confedit()
       setuid(getuid());
       run = (char *) my_calloc(1, size);
       /* child */
-      egg_snprintf(run, size, "%s %s", editor, tmpconf.file);
+      simple_snprintf(run, size, "%s %s", editor, tmpconf.file);
       execlp("/bin/sh", "/bin/sh", "-c", run, NULL);
       perror(editor);
       exit(1);
@@ -331,7 +331,7 @@ checkpid(char *nick, conf_bot *bot)
   if (tmpnick[0] == '/')
     tmpnick++;
 
-  egg_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, tmpnick);
+  simple_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, tmpnick);
   free(tmp_ptr);
 
   if (bot && !(bot->pid_file))
@@ -875,12 +875,12 @@ bin_to_conf(void)
 
   /* this is temporary until we make tmpdir customizable */
   if (conf.bots && conf.bots->nick && conf.bots->hub)
-    egg_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
+    simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
   else
-    egg_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
+    simple_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
 
 #ifdef CYGWIN_HACKS
-  egg_snprintf(tempdir, DIRMAX, "tmp/");
+  simple_snprintf(tempdir, DIRMAX, "tmp/");
 #endif /* CYGWIN_HACKS */
 
   check_tempdir();      /* ensure we can access tmpdir if it changed */

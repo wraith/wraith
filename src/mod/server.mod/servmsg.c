@@ -1121,13 +1121,13 @@ static int got311(char *from, char *msg)
   fixcolon(msg);
     
   if (match_my_nick(nick)) {
-    egg_snprintf(botuserhost, sizeof botuserhost, "%s@%s", username, address);
+    simple_snprintf(botuserhost, sizeof botuserhost, "%s@%s", username, address);
     check_hostmask();
   }
 
   irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);
 
-  egg_snprintf(uhost, sizeof uhost, "%s!%s@%s", nick, username, address);
+  simple_snprintf(uhost, sizeof uhost, "%s!%s@%s", nick, username, address);
   if ((u = get_user_by_host(uhost))) 
     irc_whois(nick, " username : $u%s$u", u->handle);
 

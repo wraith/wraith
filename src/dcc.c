@@ -236,7 +236,7 @@ bot_version(int idx, char *par)
   touch_laston(dcc[idx].user, "linked", now);
   dcc[idx].type = &DCC_BOT;
   addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vversion);
-  egg_snprintf(x, sizeof x, "v 1001500");
+  simple_snprintf(x, sizeof x, "v 1001500");
   bot_shareupdate(idx, x);
   bot_share(idx, x);
   dprintf(idx, "el\n");
@@ -248,7 +248,7 @@ failed_link(int idx)
   char s[81] = "", s1[512] = "";
 
   if (dcc[idx].u.bot->linker[0]) {
-    egg_snprintf(s, sizeof s, "Couldn't link to %s.", dcc[idx].nick);
+    simple_snprintf(s, sizeof s, "Couldn't link to %s.", dcc[idx].nick);
     strcpy(s1, dcc[idx].u.bot->linker);
     add_note(s1, conf.bot->nick, s, -2, 0);
   }
@@ -440,7 +440,7 @@ eof_dcc_bot(int idx)
 
   bots = bots_in_subtree(findbot(dcc[idx].nick));
   users = users_in_subtree(findbot(dcc[idx].nick));
-  egg_snprintf(x, sizeof x,
+  simple_snprintf(x, sizeof x,
                "Lost bot: %s (lost %d bot%s and %d user%s)",
                dcc[idx].nick, bots, (bots != 1) ? "s" : "", users, (users != 1) ? "s" : "");
   putlog(LOG_BOTS, "*", "%s.", x);
@@ -513,7 +513,7 @@ dcc_identd(int idx, char *buf, int atr)
 {
   char outbuf[1024] = "";
 
-  egg_snprintf(outbuf, sizeof outbuf, "%s : USERID : UNIX : %s\n", buf, conf.bot->nick);
+  simple_snprintf(outbuf, sizeof outbuf, "%s : USERID : UNIX : %s\n", buf, conf.bot->nick);
   tputs(dcc[idx].sock, outbuf, strlen(outbuf));
 
   /* just close it, functions neededing it will open it. */
@@ -610,7 +610,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
   if (dccauth) {
     char check[MD5_HASH_LENGTH + 7] = "";
 
-    egg_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
+    simple_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
     badauth = strcmp(check, buf);
     /* +secpass */
   }
@@ -1431,7 +1431,7 @@ timeout_dupwait(int idx)
   if (in_chain(dcc[idx].nick)) {
     char x[UHOSTLEN] = "";
 
-    egg_snprintf(x, sizeof x, "%s!%s", dcc[idx].nick, dcc[idx].host);
+    simple_snprintf(x, sizeof x, "%s!%s", dcc[idx].nick, dcc[idx].host);
     putlog(LOG_BOTS, "*", DCC_DUPLICATE, x);
     killsock(dcc[idx].sock);
     lostdcc(idx);
@@ -1797,8 +1797,8 @@ dcc_telnet_got_ident(int i, char *host)
   char *p = strchr(host, '@');
   *p = 0;
 
-  egg_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[i].host);
-  egg_snprintf(sip, sizeof(sip), "-telnet!%s@%s", host, iptostr(htonl(dcc[i].addr)));
+  simple_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[i].host);
+  simple_snprintf(sip, sizeof(sip), "-telnet!%s@%s", host, iptostr(htonl(dcc[i].addr)));
 
   if (match_ignore(shost) || match_ignore(sip)) {
     killsock(dcc[i].sock);

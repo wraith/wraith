@@ -1234,7 +1234,7 @@ finish_share(int idx)
     unlink(dcc[idx].u.xfer->filename);
 
     dprintf(j, "bye\n");
-    egg_snprintf(xx, sizeof xx, "Disconnected %s (uff error)", dcc[j].nick);
+    simple_snprintf(xx, sizeof xx, "Disconnected %s (uff error)", dcc[j].nick);
     botnet_send_unlinked(j, dcc[j].nick, xx);
     chatout("*** %s\n", xx);
 
@@ -1317,7 +1317,7 @@ finish_share(int idx)
     loading = 0;
     putlog(LOG_MISC, "*", "%s", USERF_CANTREAD);
     dprintf(idx, "bye\n");
-    egg_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[j].nick);
+    simple_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[j].nick);
     botnet_send_unlinked(j, dcc[j].nick, xx);
     chatout("*** %s\n", xx);
 

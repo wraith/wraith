@@ -265,7 +265,7 @@ void makehash(struct userrec *u, const char *randstring, char *out, size_t out_s
     secpass = strdup((char *) get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
-  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", authkey);
+  simple_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", authkey);
   if (secpass)
     free(secpass);
 
@@ -279,7 +279,7 @@ makebdhash(char *randstring)
   char hash[256] = "";
   char *bdpass = "bdpass";
 
-  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, settings.packname);
+  simple_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, settings.packname);
   sdprintf("bdhash: %s", hash);
   return MD5(hash);
 }

@@ -68,7 +68,7 @@ int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd
 
 void botnet_send_cmd_broad(int idx, char * fbot, char *fhnd, int fromidx, char * cmd) {
   if (tands > 0) {
-    egg_snprintf(OBUF, sizeof OBUF, "rc * %s %s %i %s\n", fbot, fhnd, fromidx, cmd);
+    simple_snprintf(OBUF, sizeof OBUF, "rc * %s %s %i %s\n", fbot, fhnd, fromidx, cmd);
     send_tand_but(idx, OBUF, strlen(OBUF));
   }
   if (idx < 0) {
@@ -83,7 +83,7 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
   int i = nextbot(bot);
 
   if (i >= 0) {
-    egg_snprintf(OBUF, sizeof OBUF, "rr %s %s %s %s %s\n", bot, fbot, to, toidx, ln);
+    simple_snprintf(OBUF, sizeof OBUF, "rr %s %s %s %s %s\n", bot, fbot, to, toidx, ln);
     tputs(dcc[i].sock, OBUF, strlen(OBUF));
   } else if (!strcmp(bot, conf.bot->nick)) {
     gotremotereply(conf.bot->nick, to, toidx, ln);

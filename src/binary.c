@@ -109,7 +109,7 @@ bin_checksum(const char *fname, int todo)
 
     size = strlen(fname) + 2;
     fname_bak = (char *) my_calloc(1, size);
-    egg_snprintf(fname_bak, size, "%s~", fname);
+    simple_snprintf(fname_bak, size, "%s~", fname);
     size = 0;
 
     if (!(f = fopen(fname, "rb")))
@@ -310,12 +310,12 @@ static void edpack(settings_t *incfg, const char *hash, int what)
   else
     enc_dec_string = decrypt_string;
 
-#define dofield(_field) 		do {		\
-	if (_field && _field[0]) {			\
-		tmp = enc_dec_string(hash, _field);		\
-		egg_snprintf(_field, sizeof(_field), tmp);	\
-		free(tmp);					\
-	}						\
+#define dofield(_field) 		do {				\
+	if (_field && _field[0]) {					\
+		tmp = enc_dec_string(hash, _field);			\
+		simple_snprintf(_field, sizeof(_field), "%s", tmp);	\
+		free(tmp);						\
+	}								\
 } while (0)
 
   /* -- STATIC -- */
@@ -412,7 +412,7 @@ static bool check_bin_initialized(const char *fname)
   size_t len = strlen(fname) + 3 + 1;
   char *path = (char *) my_calloc(1, len);
 
-  egg_snprintf(path, len, "%s -p", fname);
+  simple_snprintf(path, len, "%s -p", fname);
 
   i = system(path);
   free(path);

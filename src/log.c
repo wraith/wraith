@@ -168,9 +168,9 @@ void putlog(int type, const char *chname, const char *format, ...)
 
     egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
     /* Place the timestamp in the string to be printed */
-    egg_snprintf(out, sizeof out, "%s %s", stamp, va_out);
+    simple_snprintf(out, sizeof out, "%s %s", stamp, va_out);
   } else
-    egg_snprintf(out, sizeof out, "%s", va_out);
+    simple_snprintf(out, sizeof out, "%s", va_out);
 
   /* strcat(out, "\n"); */
 
@@ -180,7 +180,7 @@ void putlog(int type, const char *chname, const char *format, ...)
   if (chname[0] == '*' && conf.bot && conf.bot->nick) {
     char outbuf[LOGLINEMAX + 1] = "";
 
-    egg_snprintf(outbuf, sizeof outbuf, "hl %d %s", type, out);
+    simple_snprintf(outbuf, sizeof outbuf, "hl %d %s", type, out);
     if (userlist && !loading) {
       tand_t *bot = NULL;
       struct userrec *ubot = NULL;

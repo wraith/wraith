@@ -85,7 +85,7 @@ static void update_ufsend(int idx, char *par)
   FILE *f = NULL;
 
   putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
-  egg_snprintf(s, sizeof s, "%s.update.%s", tempdir, conf.bot->nick);
+  simple_snprintf(s, sizeof s, "%s.update.%s", tempdir, conf.bot->nick);
   unlink(s); /* make sure there isnt already a new binary here.. */
   if (dcc_total == max_dcc) {
     putlog(LOG_MISC, "*", "NO MORE DCC CONNECTIONS -- can't grab new binary");
@@ -290,8 +290,8 @@ static void start_sending_binary(int idx)
     return;
   }
 
-  egg_snprintf(update_file, sizeof update_file, "wraith.%s-%s", sysname, egg_version);
-  egg_snprintf(update_fpath, sizeof update_fpath, "%s/%s", conf.binpath, update_file);
+  simple_snprintf(update_file, sizeof update_file, "wraith.%s-%s", sysname, egg_version);
+  simple_snprintf(update_fpath, sizeof update_fpath, "%s/%s", conf.binpath, update_file);
 
   if (!can_stat(update_fpath)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s but there was an error: %s", dcc[idx].nick, update_fpath,

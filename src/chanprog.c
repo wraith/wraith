@@ -381,7 +381,7 @@ void load_internal_users()
   struct userrec *u = NULL;
 
   /* hubs */
-  egg_snprintf(buf, sizeof buf, "%s", settings.hubs);
+  simple_snprintf(buf, sizeof buf, "%s", settings.hubs);
   p = buf;
   while (p) {
     ln = p;
@@ -437,13 +437,13 @@ void load_internal_users()
           u = get_user_by_handle(userlist, hand);
 
         while (hosts) {
-          egg_snprintf(host, sizeof host, "-telnet!%s@%s", hosts, ip);
+          simple_snprintf(host, sizeof host, "-telnet!%s@%s", hosts, ip);
           set_user(&USERENTRY_HOSTS, u, host);
           hosts = ln;
           if (ln && (ln = strchr(ln, ' ')))
             *ln++ = 0;
         }
-        egg_snprintf(host, sizeof host, "-telnet!telnet@%s", ip);
+        simple_snprintf(host, sizeof host, "-telnet!telnet@%s", ip);
         set_user(&USERENTRY_HOSTS, u, host);
         break;
       }
@@ -455,7 +455,7 @@ void load_internal_users()
   /* perm owners */
   owner[0] = 0;
 
-  egg_snprintf(buf, sizeof buf, "%s", settings.owners);
+  simple_snprintf(buf, sizeof buf, "%s", settings.owners);
   p = buf;
   while (p) {
     ln = p;
@@ -523,7 +523,7 @@ void chanprog()
   sdprintf("ip6: %s", myipstr(6));
   sdprintf("I am: %s", conf.bot->nick);
   if (conf.bot->hub) {
-    egg_snprintf(userfile, 121, "%s/.u", conf.binpath);
+    simple_snprintf(userfile, 121, "%s/.u", conf.binpath);
     loading = 1;
     checkchans(0);
     readuserfile(userfile, &userlist);
@@ -663,7 +663,7 @@ chans_addbot(const char *bot, struct chanset_t *chan)
    
     size = strlen(chans) + strlen(chan->dname) + 2;
     buf = (char *) my_calloc(1, size);
-    egg_snprintf(buf, size, "%s %s", chans, chan->dname);
+    simple_snprintf(buf, size, "%s %s", chans, chan->dname);
     set_user(&USERENTRY_CHANS, u, buf);
     free(buf);
   }

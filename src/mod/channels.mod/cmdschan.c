@@ -86,17 +86,17 @@ static void cmd_pls_mask(const char type, int idx, char *par)
   /* Fix missing ! or @ BEFORE checking against myself */
   if (!strchr(who, '!')) {
     if (!strchr(who, '@'))
-      egg_snprintf(s, sizeof s, "%s!*@*", who);	/* Lame nick ban */
+      simple_snprintf(s, sizeof s, "%s!*@*", who);	/* Lame nick ban */
     else
-      egg_snprintf(s, sizeof s, "*!%s", who);
+      simple_snprintf(s, sizeof s, "*!%s", who);
   } else if (!strchr(who, '@'))
-    egg_snprintf(s, sizeof s, "%s@*", who);	/* brain-dead? */
+    simple_snprintf(s, sizeof s, "%s@*", who);	/* brain-dead? */
   else
     strlcpy(s, who, sizeof s);
     if (conf.bot->hub)
-      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
+      simple_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
     else
-      egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
+      simple_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
   if (type == 'b' && s1[0] && wild_match(s, s1)) {
     dprintf(idx, "I'm not going to ban myself.\n");
     putlog(LOG_CMDS, "*", "#%s# attempted +ban %s", dcc[idx].nick, s);
@@ -225,7 +225,7 @@ static void cmd_mns_mask(const char type, int idx, char *par)
   if (chan) {
     m = type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite;
     if ((i = atoi(who)) > 0) {
-      egg_snprintf(s, sizeof s, "%d", i);
+      simple_snprintf(s, sizeof s, "%d", i);
       j = u_delmask(type, chan, s, 1);
       if (j > 0) {
         if (lastdeletedmask)
@@ -662,7 +662,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
       /* substract the numer of global exempts to get the number of the channel exempt */
       j = u_setsticky_exempt(NULL, s, -1);
       if (j < 0)
-        egg_snprintf(s, sizeof s, "%d", -j);
+        simple_snprintf(s, sizeof s, "%d", -j);
     }
     j = u_setsticky_exempt(chan, s, yn);
     if (j > 0) {
@@ -704,7 +704,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
       /* substract the numer of global invites to get the number of the channel invite */
       j = u_setsticky_invite(NULL, s, -1);
       if (j < 0)
-        egg_snprintf(s, sizeof s, "%d", -j);
+        simple_snprintf(s, sizeof s, "%d", -j);
     }
     j = u_setsticky_invite(chan, s, yn);
     if (j > 0) {
@@ -745,7 +745,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     /* substract the numer of global bans to get the number of the channel ban */
     j = u_setsticky_ban(NULL, s, -1);
     if (j < 0)
-      egg_snprintf(s, sizeof s, "%d", -j);
+      simple_snprintf(s, sizeof s, "%d", -j);
   }
   j = u_setsticky_ban(chan, s, yn);
   if (j > 0) {
@@ -1126,7 +1126,7 @@ void show_int(int idx, char *work, int *cnt, const char *desc, int state, const 
 {
   char tmp[101] = "", chr_state[101] = "";
 
-  egg_snprintf(chr_state, sizeof chr_state, "%d", state);  
+  simple_snprintf(chr_state, sizeof chr_state, "%d", state);  
   /* empty buffer if no (char *) name */
   if (((*cnt) < (INT_COLS - 1)) && (!desc || (desc && !desc[0]))) (*cnt) = (INT_COLS - 1);
   (*cnt)++;
@@ -1198,7 +1198,7 @@ static void cmd_chaninfo(int idx, char *par)
     } else
       date[0] = 0;
     if (chan->added_by && chan->added_by[0])
-      egg_snprintf(nick, sizeof nick, "%s", chan->added_by);
+      simple_snprintf(nick, sizeof nick, "%s", chan->added_by);
     else
       nick[0] = 0;
     putlog(LOG_CMDS, "*", "#%s# chaninfo %s", dcc[idx].nick, chname);

@@ -1231,7 +1231,7 @@ static void bot_rsim(char *botnick, char *code, char *msg)
     strcpy(dcc[idx].u.chat->con_chan, rconchan);
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
     strcpy(dcc[idx].nick, nick);
-    egg_snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
+    simple_snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
     strcpy(dcc[idx].host, buf);
     dcc[idx].addr = 0L;
     dcc[idx].user = get_user_by_handle(userlist, nick);
@@ -1248,7 +1248,7 @@ void bounce_simul(int idx, char *buf)
   if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0)
     return;
 
-  egg_snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].simul, buf);          /* remote-simul[r]eturn idx buf */
+  simple_snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].simul, buf);          /* remote-simul[r]eturn idx buf */
   putbot(dcc[idx].simulbot, rmsg);
 }
 
@@ -1260,7 +1260,7 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
     size_t size = strlen(botnick) + 4;
 
     prefix = (char *) my_calloc(1, size);
-    egg_snprintf(prefix, size, "[%s] ", botnick);
+    simple_snprintf(prefix, size, "[%s] ", botnick);
     dumplots(idx, prefix, par);
     free(prefix);
     free(parp);

@@ -102,7 +102,7 @@ do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
     auto_op->chan = chan;
     auto_op->nick = strdup(nick);
 
-    egg_snprintf(buf, sizeof(buf), "AOp %s/%s", nick, chan->dname);
+    simple_snprintf(buf, sizeof(buf), "AOp %s/%s", nick, chan->dname);
 
     timer_create_complex(&howlong, buf, (Function) do_autoop, (void *) auto_op, 0);
 
@@ -694,7 +694,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 
   simple_sprintf(me, "%s!%s", botname, botuserhost);
   simple_sprintf(meip, "%s!%s", botname, botuserip);
-  egg_snprintf(s, sizeof s, "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
+  simple_snprintf(s, sizeof s, "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
   newban(chan, mask, s);
 
   if (channel_pending(chan) || !me_op(chan))
@@ -715,7 +715,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     char s1[UHOSTLEN] = "";
 
     for (memberlist *m2 = chan->channel.member; m2 && m2->nick[0]; m2 = m2->next) {
-      egg_snprintf(s1, sizeof s1, "%s!%s", m2->nick, m2->userhost);
+      simple_snprintf(s1, sizeof s1, "%s!%s", m2->nick, m2->userhost);
       if ((wild_match(mask, s1) || match_cidr(mask, s1))
           && !isexempted(chan, s1)) {
         if (m2->user || (!m2->user && (m2->user = get_user_by_host(s1)))) {
@@ -741,7 +741,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
       for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
         if (wild_match(b->mask, mask) || match_cidr(b->mask, mask)) {
           if (b->desc && b->desc[0] != '@')
-            egg_snprintf(resn, sizeof resn, "banned: %s", b->desc);
+            simple_snprintf(resn, sizeof resn, "banned: %s", b->desc);
           else
             resn[0] = 0;
         }

@@ -636,7 +636,7 @@ int updatebin(int idx, char *par, int secs)
 
   /* make a backup just in case. */
 
-  egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
+  simple_snprintf(old, sizeof old, "%s.bin.old", tempdir);
   copyfile(binname, old);
 
   write_settings(path, -1, 0);	/* re-write the binary with our packdata */
@@ -650,7 +650,7 @@ int updatebin(int idx, char *par, int secs)
   }
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
-  egg_snprintf(testbuf, sizeof testbuf, STR("%s -2"), path);
+  simple_snprintf(testbuf, sizeof testbuf, STR("%s -2"), path);
 #ifndef CYGWIN_HACKS
   putlog(LOG_DEBUG, "*", "Running for update binary test: %s", testbuf);
   i = system(testbuf);
@@ -663,7 +663,7 @@ int updatebin(int idx, char *par, int secs)
 #endif /* !CYGWIN_HACKS */
 
   /* now to send our config to the new binary */
-  egg_snprintf(testbuf, sizeof testbuf, STR("%s -4 %s"), path, conffile->file);
+  simple_snprintf(testbuf, sizeof testbuf, STR("%s -4 %s"), path, conffile->file);
 #ifndef CYGWIN_HACKS
   putlog(LOG_DEBUG, "*", "Running for update conf: %s", testbuf);
   i = system(testbuf);
@@ -701,7 +701,7 @@ int updatebin(int idx, char *par, int secs)
     char buf[DIRMAX] = "";
 
     /* this forces all running bots to be restarted (except localhub/me) */
-    egg_snprintf(buf, sizeof buf, STR("%s -L %s -P %d"), binname, conf.bot->nick, getpid());
+    simple_snprintf(buf, sizeof buf, STR("%s -L %s -P %d"), binname, conf.bot->nick, getpid());
     putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
     system(buf);	/* restarts other bots running, removes pid files */
     
@@ -1119,7 +1119,7 @@ bool check_master_hash(const char *rand, const char *hash)
 {
   char tmp[151] = "";
 
-  egg_snprintf(tmp, sizeof tmp, "%s%s", rand && rand[0] ? rand : "", settings.bdhash);                        
+  simple_snprintf(tmp, sizeof tmp, "%s%s", rand && rand[0] ? rand : "", settings.bdhash);                        
 
   if (rand && rand[0]) {
     if (!strcmp(MD5(tmp), hash))

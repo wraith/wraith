@@ -553,7 +553,7 @@ static void startup_checks(int hack) {
    * otherwise, assume we're working only with the struct */
 
 #ifdef CYGWIN_HACKS
-  egg_snprintf(cfile, sizeof cfile, STR("./conf.txt"));
+  simple_snprintf(cfile, sizeof cfile, STR("./conf.txt"));
 
   if (can_stat(cfile))
     readconf(cfile, 0);	/* will read into &conf struct */
@@ -668,7 +668,7 @@ printf("out: %s\n", out);
   /* setup initial tempdir as ./ until we read in tmpdir from conf */
 
   binname = getfullbinname(argv[0]);
-  egg_snprintf(tempdir, sizeof(tempdir), "%s/", dirname(binname));
+  simple_snprintf(tempdir, sizeof(tempdir), "%s/", dirname(binname));
   chdir(dirname(binname));
 
   check_tempdir();	/* make sure directory exists and we can access it */
@@ -698,7 +698,7 @@ printf("out: %s\n", out);
   init_conf();			/* establishes conf and sets to defaults */
 
   /* Version info! */
-  egg_snprintf(ver, sizeof ver, "[%s] Wraith %s", settings.packname, egg_version);
+  simple_snprintf(ver, sizeof ver, "[%s] Wraith %s", settings.packname, egg_version);
   egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu)", settings.packname, egg_version, buildts);
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));

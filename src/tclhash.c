@@ -460,7 +460,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
                   break_down_flags(cmds->flags, &(cmdlist[cmdi].flags), NULL);
                   cmdi++;
                 } 
-		egg_snprintf(name, sizeof name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
+		simple_snprintf(name, sizeof name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
 		bind_entry_add(table, cmds->flags, cmds->type, cmds->name, name, 0, cmds->func, NULL);
           }
 	}

@@ -278,7 +278,7 @@ void check_processes()
 
             size = strlen(line) + 22;
             work = (char *) my_calloc(1, size);
-            egg_snprintf(work, size, "Unexpected process: %s", line);
+            simple_snprintf(work, size, "Unexpected process: %s", line);
             detected(DETECT_PROCESS, work);
             free(work);
           }
@@ -766,8 +766,8 @@ void baduname(char *confhas, char *myuname) {
     char msg[1024] = "", subject[31] = "";
 
     uname(&un);
-    egg_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
-    egg_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nMy binary is: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
+    simple_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
+    simple_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nMy binary is: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
                                   conf.username ? conf.username : "unknown", 
                                   binname,
                                   confhas, myuname, un.nodename);
@@ -784,16 +784,16 @@ char *homedir()
     char tmp[DIRMAX] = "";
 
     if (conf.homedir)
-      egg_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
+      simple_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
     else {
 #ifdef CYGWIN_HACKS
-      egg_snprintf(tmp, sizeof tmp, "%s", dirname(binname));
+      simple_snprintf(tmp, sizeof tmp, "%s", dirname(binname));
 #else /* !CYGWIN_HACKS */
       struct passwd *pw = NULL;
  
       ContextNote("getpwuid()");
       pw = getpwuid(myuid);
-      egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
+      simple_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
       ContextNote("getpwuid(): Success");
 #endif /* CYGWIN_HACKS */
     }
@@ -810,17 +810,17 @@ char *my_username()
 
   if (!username || (username && !username[0])) {
     if (conf.username)
-      egg_snprintf(username, sizeof username, "%s", conf.username);
+      simple_snprintf(username, sizeof username, "%s", conf.username);
     else {
 #ifdef CYGWIN_HACKS
-      egg_snprintf(username, sizeof username, "cygwin");
+      simple_snprintf(username, sizeof username, "cygwin");
 #else /* !CYGWIN_HACKS */
       struct passwd *pw = NULL;
 
       ContextNote("getpwuid()");
       pw = getpwuid(myuid);
       ContextNote("getpwuid(): Success");
-      egg_snprintf(username, sizeof username, "%s", pw->pw_name);
+      simple_snprintf(username, sizeof username, "%s", pw->pw_name);
 #endif /* CYGWIN_HACKS */
     }
   }
@@ -863,7 +863,7 @@ char *my_uname()
       vers_n = un.version;
 #endif /* __FreeBSD__ */
     }
-    egg_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
+    simple_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
   }
   return os_uname;
 }
@@ -879,7 +879,7 @@ char *move_bin(const char *ipath, const char *file, bool run)
   static char newbin[DIRMAX] = "";
   char real[DIRMAX] = "";
 
-  egg_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
+  simple_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
 
   ContextNote("realpath()");
   realpath(binname, real);            /* get the realpath of binname */
@@ -959,7 +959,7 @@ void crontab_del() {
 int crontab_exists() {
   char buf[2048] = "", *out = NULL;
 
-  egg_snprintf(buf, sizeof buf, "crontab -l | grep \"%s\" | grep -v \"^#\"", binname);
+  simple_snprintf(buf, sizeof buf, "crontab -l | grep \"%s\" | grep -v \"^#\"", binname);
   if (shell_exec(buf, NULL, &out, NULL)) {
     if (out && strstr(out, binname)) {
       free(out);
@@ -978,7 +978,7 @@ void crontab_create(int interval) {
   FILE *f = NULL;
   int fd;
 
-  egg_snprintf(tmpFile, sizeof tmpFile, "%s.crontab-XXXXXX", tempdir);
+  simple_snprintf(tmpFile, sizeof tmpFile, "%s.crontab-XXXXXX", tempdir);
   if ((fd = mkstemp(tmpFile)) == -1) {
     unlink(tmpFile);
     return;
@@ -986,7 +986,7 @@ void crontab_create(int interval) {
 
   char buf[256] = "";
 
-  egg_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", binname, tmpFile);
+  simple_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
     buf[0] = 0;
     if (interval == 1)
@@ -1003,7 +1003,7 @@ void crontab_create(int interval) {
         i += interval;
       }
     }
-    egg_snprintf(buf + strlen(buf), sizeof buf, " * * * * %s > /dev/null 2>&1", binname);
+    simple_snprintf(buf + strlen(buf), sizeof buf, " * * * * %s > /dev/null 2>&1", binname);
     fseek(f, 0, SEEK_END);
     fprintf(f, "\n%s\n", buf);
     fclose(f);

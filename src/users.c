@@ -611,8 +611,8 @@ void backup_userfile()
   char s[DIRMAX] = "", s2[DIRMAX] = "";
 
   putlog(LOG_MISC, "*", USERF_BACKUP);
-  egg_snprintf(s, sizeof s, "%s.u.0", tempdir);
-  egg_snprintf(s2, sizeof s2, "%s.u.1", tempdir);
+  simple_snprintf(s, sizeof s, "%s.u.0", tempdir);
+  simple_snprintf(s2, sizeof s2, "%s.u.1", tempdir);
   movefile(s, s2);
   copyfile(userfile, s);
 }
@@ -678,7 +678,7 @@ int readuserfile(const char *file, struct userrec **ret)
   fgets(cbuf, 180, f);
   remove_crlf(cbuf);
   temps = (char *) decrypt_string(settings.salt1, cbuf);
-  egg_snprintf(s, 180, "%s", temps);
+  simple_snprintf(s, 180, "%s", temps);
   free(temps);
   if (s[1] < '4') {
     fatal(USERF_OLDFMT, 0);
@@ -690,7 +690,7 @@ int readuserfile(const char *file, struct userrec **ret)
     fgets(cbuf, 1024, f);
     remove_crlf(cbuf);
     temps = (char *) decrypt_string(settings.salt1, cbuf);
-    egg_snprintf(s, 1024, "%s", temps);
+    simple_snprintf(s, 1024, "%s", temps);
     free(temps);
     if (!feof(f)) {
       line++;

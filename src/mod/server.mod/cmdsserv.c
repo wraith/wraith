@@ -19,11 +19,11 @@ static void cmd_servers(int idx, char *par)
     i = 0;
     for (; x; x = x->next) {
       if (x->realname)
-	egg_snprintf(s, sizeof s, "  %s:%d (%s) %s", x->name,
+	simple_snprintf(s, sizeof s, "  %s:%d (%s) %s", x->name,
                      x->port ? x->port : default_port, x->realname,
                      (i == curserv) ? "<- I am here" : "");
       else 
-        egg_snprintf(s, sizeof s, "  %s:%d %s", x->name, 
+        simple_snprintf(s, sizeof s, "  %s:%d %s", x->name, 
 		     x->port ? x->port : default_port, 
 		     (i == curserv) ? "<- I am here" : "");
       dprintf(idx, "%s\n", s);

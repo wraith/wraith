@@ -903,7 +903,7 @@ static void dcc_chat_hostresolved(int i)
   char buf[512] = "", ip[512] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
-  egg_snprintf(buf, sizeof buf, "%d", dcc[i].port);
+  simple_snprintf(buf, sizeof buf, "%d", dcc[i].port);
 
   egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
 #ifdef USE_IPV6
@@ -999,12 +999,12 @@ void server_report(int idx, int details)
 	      keepnick ? "(trying)" : "");
     nick_juped = 0; /* WHY?? -- drummer */
     daysdur(now, server_online, s1);
-    egg_snprintf(s, sizeof s, "(connected %s)", s1);
+    simple_snprintf(s, sizeof s, "(connected %s)", s1);
     if (server_lag && !waiting_for_awake) {
       if (server_lag == (-1))
-	egg_snprintf(s1, sizeof s1, " (bad pong replies)");
+	simple_snprintf(s1, sizeof s1, " (bad pong replies)");
       else
-	egg_snprintf(s1, sizeof s1, " (lag: %ds)", server_lag);
+	simple_snprintf(s1, sizeof s1, " (lag: %ds)", server_lag);
       strcat(s, s1);
     }
   }

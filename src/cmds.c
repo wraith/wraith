@@ -235,10 +235,10 @@ static void cmd_config(int idx, char *par)
       if (conf.bot->hub && (cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
 	if (!cnt) {
           outbuf = (char *) my_realloc(outbuf, 2 + 1);
-	  sprintf(outbuf, "  ");
+	  simple_sprintf(outbuf, "  ");
         }
         outbuf = (char *) my_realloc(outbuf, strlen(outbuf) + strlen(cfg[i]->name) + 1 + 1);
-	sprintf(outbuf, "%s%s ", outbuf, cfg[i]->name);
+	simple_sprintf(outbuf, "%s%s ", outbuf, cfg[i]->name);
 	cnt++;
 	if (cnt == 10) {
 	  dprintf(idx, "%s\n", outbuf);
@@ -373,7 +373,7 @@ static void cmd_botconfig(int idx, char *par)
         char tmp[100] = "";
 
         set_cfg_str(u2->handle, cfgent->name, (strcmp(par, "-")) ? par : NULL);
-        egg_snprintf(tmp, sizeof tmp, "%s %s", cfgent->name, par);
+        simple_snprintf(tmp, sizeof tmp, "%s %s", cfgent->name, par);
         update_mod(u2->handle, dcc[idx].nick, "botconfig", tmp);
         dprintf(idx, "Now: ");
         write_userfile(idx);
@@ -454,7 +454,7 @@ static void cmd_cmdpass(int idx, char *par)
       return;
     }
     encrypt_pass(pass, epass);
-    egg_snprintf(tmp, sizeof tmp, "%s %s", cmd, epass);
+    simple_snprintf(tmp, sizeof tmp, "%s %s", cmd, epass);
     if (has_cmd_pass(cmd))
       dprintf(idx, "Changed command password for %s\n", cmd);
     else
@@ -580,7 +580,7 @@ static void cmd_addline(int idx, char *par)
     strcat(hostbuf, " ");
   }
   outbuf = (char *) my_calloc(1, strlen(hostbuf) + strlen(u->handle) + 20);
-  sprintf(outbuf, "Addline: +user %s %s", u->handle, hostbuf);
+  simple_sprintf(outbuf, "Addline: +user %s %s", u->handle, hostbuf);
   dumplots(idx, "", outbuf);
   free(hostbuf);
   free(outbuf);
@@ -616,7 +616,7 @@ static void cmd_newpass(int idx, char *par)
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      egg_snprintf(pass, sizeof pass, "%s", newpass);
+      simple_snprintf(pass, sizeof pass, "%s", newpass);
     }
   }
   if (strlen(pass) > MAXPASSLEN)
@@ -649,7 +649,7 @@ static void cmd_secpass(int idx, char *par)
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      egg_snprintf(pass, sizeof pass, "%s", newpass);
+      simple_snprintf(pass, sizeof pass, "%s", newpass);
     }
   }
   if (strlen(pass) > MAXPASSLEN)
@@ -722,7 +722,7 @@ static void cmd_help(int idx, char *par)
   int fnd = 0, done = 0, nowild = 0;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYCH, 0, 0, 0 };
 
-  egg_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
+  simple_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
   fcats = temp;
 
   putlog(LOG_CMDS, "*", "#%s# help %s", dcc[idx].nick, par);
@@ -730,11 +730,11 @@ static void cmd_help(int idx, char *par)
 
   build_flags(flg, &fr, NULL);
   if (!par[0]) {
-    sprintf(match, "*");
+    simple_sprintf(match, "*");
   } else {
     if (!strchr(par, '*') && !strchr(par, '?'))
       nowild++;
-    egg_snprintf(match, sizeof match, "%s", newsplit(&par));
+    simple_snprintf(match, sizeof match, "%s", newsplit(&par));
   }
   if (!nowild)
     dprintf(idx, "Showing help topics matching '%s' for flags: (%s)\n", match, flg);
@@ -773,12 +773,12 @@ static void cmd_help(int idx, char *par)
           if (first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
             dprintf(idx, "# DCC (%s)\n", flag);
-            sprintf(buf, "  ");
+            simple_sprintf(buf, "  ");
           }
           if (end && !first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
             /* we dumped the buf to dprintf, now start a new one... */
-            sprintf(buf, "  ");
+            simple_sprintf(buf, "  ");
           }
           sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmdlist[n].name);
           first = 0;
@@ -922,7 +922,7 @@ static void print_users(char *work, int idx, int *cnt, int *tt, bool bot, int fl
       if (!*cnt)
         sprintf(work, "%-10s: ", str); 
       else
-        sprintf(work, "%s, ", work[0] ? work : "");
+        simple_sprintf(work, "%s, ", work[0] ? work : "");
 
       strcat(work, u->handle);
       (*cnt)++;
@@ -1330,7 +1330,7 @@ static void cmd_chpass(int idx, char *par)
       good = 1;
     } else {
       if (goodpass(newpass, idx, NULL)) {
-        egg_snprintf(pass, sizeof pass, "%s", newpass);
+        simple_snprintf(pass, sizeof pass, "%s", newpass);
         good = 1;
       }
     }
@@ -1386,7 +1386,7 @@ static void cmd_chsecpass(int idx, char *par)
         dprintf(idx, "Please use at least 6 characters.\n");
         return;
       } else {
-        egg_snprintf(pass, sizeof pass, "%s", newpass);
+        simple_snprintf(pass, sizeof pass, "%s", newpass);
       }
     }
     if (strlen(pass) > MAXPASSLEN)
@@ -1903,12 +1903,12 @@ static void cmd_die(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# die %s", dcc[idx].nick, par);
   if (par[0]) {
-    egg_snprintf(s1, sizeof s1, "BOT SHUTDOWN (%s: %s)", dcc[idx].nick, par);
-    egg_snprintf(s2, sizeof s2, "DIE BY %s!%s (%s)", dcc[idx].nick, dcc[idx].host, par);
+    simple_snprintf(s1, sizeof s1, "BOT SHUTDOWN (%s: %s)", dcc[idx].nick, par);
+    simple_snprintf(s2, sizeof s2, "DIE BY %s!%s (%s)", dcc[idx].nick, dcc[idx].host, par);
     strlcpy(quit_msg, par, 1024);
   } else {
-    egg_snprintf(s1, sizeof s1, "BOT SHUTDOWN (Authorized by %s)", dcc[idx].nick);
-    egg_snprintf(s2, sizeof s2, "DIE BY %s!%s (request)", dcc[idx].nick, dcc[idx].host);
+    simple_snprintf(s1, sizeof s1, "BOT SHUTDOWN (Authorized by %s)", dcc[idx].nick);
+    simple_snprintf(s2, sizeof s2, "DIE BY %s!%s (request)", dcc[idx].nick, dcc[idx].host);
     strlcpy(quit_msg, dcc[idx].nick, 1024);
   }
   kill_bot(s1, s2);
@@ -2065,7 +2065,7 @@ static void cmd_save(int idx, char *par)
   int i = 0;
 
   putlog(LOG_CMDS, "*", "#%s# save", dcc[idx].nick);
-  sprintf(buf, "Saving user file...");
+  simple_sprintf(buf, "Saving user file...");
   i = write_userfile(-1);
   if (i == 0)
     strcat(buf, "success.");
@@ -2461,7 +2461,7 @@ static void cmd_chattr(int idx, char *par)
     char tmp[100] = "";
 
     putlog(LOG_CMDS, "*", "#%s# (%s) chattr %s %s", dcc[idx].nick, chan ? chan->dname : "*", hand, chg ? chg : "");
-    egg_snprintf(tmp, sizeof tmp, "chattr %s", chg);
+    simple_snprintf(tmp, sizeof tmp, "chattr %s", chg);
     update_mod(hand, dcc[idx].nick, tmp, chan->dname);
   } else {
     putlog(LOG_CMDS, "*", "#%s# chattr %s %s", dcc[idx].nick, hand, chg ? chg : "");
@@ -2665,7 +2665,7 @@ static void cmd_ps(int idx, char *par) {
   size_t size = strlen(par) + 9 + 1;
   char *buf = (char *) my_calloc(1, size);
 
-  egg_snprintf(buf, size, "ps %s", par);
+  simple_snprintf(buf, size, "ps %s", par);
   if (!exec_str(idx, buf))
     dprintf(idx, "Exec failed\n");
   free(buf);
@@ -2693,7 +2693,7 @@ static void cmd_last(int idx, char *par) {
   
   char buf[30] = "";
 
-  egg_snprintf(buf, sizeof buf, "last %s", user);
+  simple_snprintf(buf, sizeof buf, "last %s", user);
   if (!exec_str(idx, buf))
     dprintf(idx, "Failed to execute /bin/sh last\n");
 }
@@ -3550,7 +3550,7 @@ static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
     if (server_online)
       sprintf(tmp, "Currently: %-40s Lag: %ds", cursrvname, server_lag);
     else
-      sprintf(tmp, "Currently: none");
+      simple_sprintf(tmp, "Currently: none");
 
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
   }
@@ -3596,11 +3596,11 @@ static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
   char tmp[2048] = "";
   struct utsname un;
 
-  sprintf(tmp, "%s ", version);
+  simple_sprintf(tmp, "%s ", version);
   if (uname(&un) < 0) {
     strcat(tmp, "(unknown OS)");
   } else {
-    sprintf(tmp + strlen(tmp), "%s %s (%s)", un.sysname, un.release, un.machine);
+    simple_sprintf(tmp + strlen(tmp), "%s %s (%s)", un.sysname, un.release, un.machine);
   }
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 }
@@ -3636,9 +3636,9 @@ static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
     if (server_online)
       sprintf(tmp, "Currently: %-20s ", botname);
     if (strncmp(botname, origbotname, strlen(botname)))
-      sprintf(tmp, "%sWant: %s", tmp, origbotname);
+      simple_sprintf(tmp, "%sWant: %s", tmp, origbotname);
     if (!server_online)
-      sprintf(tmp, "%s(not online)", tmp);
+      simple_sprintf(tmp, "%s(not online)", tmp);
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
   }
 }
@@ -3662,7 +3662,7 @@ static void cmd_botmsg(int idx, char * par) {
   
   char tmp[1024] = "";
 
-  egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
+  simple_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
   botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, tmp);
 }
 
@@ -3678,7 +3678,7 @@ static void cmd_netmsg(int idx, char * par) {
 
   char tmp[1024] = "";
 
-  egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
+  simple_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
@@ -3690,7 +3690,7 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
     if (!strcmp(tobot, conf.bot->nick)) {
       char buf[1024] = "";
 
-      egg_snprintf(buf, sizeof buf, "Sent message to %s", nick);
+      simple_snprintf(buf, sizeof buf, "Sent message to %s", nick);
       botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, buf);
     }
   }
@@ -3714,7 +3714,7 @@ static void cmd_netlag(int idx, char * par) {
 static void rcmd_ping(char * frombot, char *fromhand, char * fromidx, char * par) {
   char tmp[64] = "";
 
-  egg_snprintf(tmp, sizeof tmp, "pong %s", par);
+  simple_snprintf(tmp, sizeof tmp, "pong %s", par);
   botnet_send_cmd(conf.bot->nick, frombot, fromhand, atoi(fromidx), tmp);
 }
 
@@ -3750,7 +3750,7 @@ static void cmd_netps(int idx, char * par) {
 
   char buf[1024] = "";
 
-  egg_snprintf(buf, sizeof par, "exec ps %s", par);
+  simple_snprintf(buf, sizeof par, "exec ps %s", par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 
@@ -3764,7 +3764,7 @@ static void cmd_netlast(int idx, char * par) {
 
   char buf[1024] = "";
 
-  egg_snprintf(buf, sizeof par, "exec last %s", par);
+  simple_snprintf(buf, sizeof par, "exec last %s", par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 
@@ -3870,7 +3870,7 @@ static void cmd_netcrontab(int idx, char * par) {
 
   char buf[1024] = "";
 
-  egg_snprintf(buf, sizeof buf, "exec crontab %s %s", cmd, par);
+  simple_snprintf(buf, sizeof buf, "exec crontab %s %s", cmd, par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 
@@ -3892,13 +3892,13 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
       botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, "Can't determine user id for process");
       return;
     }
-    egg_snprintf(scmd, sizeof scmd, "last %s", user);
+    simple_snprintf(scmd, sizeof scmd, "last %s", user);
   } else if (!strcmp(cmd, "ps")) {
-    egg_snprintf(scmd, sizeof scmd, "ps %s", par);
+    simple_snprintf(scmd, sizeof scmd, "ps %s", par);
   } else if (!strcmp(cmd, "raw")) {
-    egg_snprintf(scmd, sizeof scmd, "%s", par);
+    simple_snprintf(scmd, sizeof scmd, "%s", par);
   } else if (!strcmp(cmd, "kill")) {
-    egg_snprintf(scmd, sizeof scmd, "kill %s", par);
+    simple_snprintf(scmd, sizeof scmd, "kill %s", par);
 #ifndef CYGWIN_HACKS
   } else if (!strcmp(cmd, "crontab")) {
     char *code = newsplit(&par);
@@ -3918,11 +3918,11 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
       int i = crontab_exists();
 
       if (!i)
-        sprintf(s, "No crontab");
+        simple_sprintf(s, "No crontab");
       else if (i == 1)
-        sprintf(s, "Crontabbed");
+        simple_sprintf(s, "Crontabbed");
       else
-        sprintf(s, "Error checking crontab status");
+        simple_sprintf(s, "Error checking crontab status");
       botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, s);
     }
 #endif /* !CYGWIN_HACKS */
@@ -3980,7 +3980,7 @@ static void cmd_botjump(int idx, char * par) {
 
   char buf[1024] = "";
 
-  egg_snprintf(buf, sizeof buf, "jump %s", par);
+  simple_snprintf(buf, sizeof buf, "jump %s", par);
   botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, buf);
 }
 
@@ -4041,7 +4041,7 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
     
     buf = (char *) my_calloc(1, strlen(frombot) + 2 + 1);
 
-    sprintf(buf, "(%s)", frombot);
+    simple_sprintf(buf, "(%s)", frombot);
     dprintf(idx, "%-13s %s\n", buf, ln);
     free(buf);
   }
@@ -4119,22 +4119,22 @@ static char *btos(unsigned long  bytes)
   char unit[10] = "";
   float xbytes;
 
-  sprintf(unit, "Bytes");
+  simple_sprintf(unit, "Bytes");
   xbytes = bytes;
   if (xbytes > 1024.0) {
-    sprintf(unit, "KBytes");
+    simple_sprintf(unit, "KBytes");
     xbytes = xbytes / 1024.0;
   }
   if (xbytes > 1024.0) {
-    sprintf(unit, "MBytes");
+    simple_sprintf(unit, "MBytes");
     xbytes = xbytes / 1024.0;
   }
   if (xbytes > 1024.0) {
-    sprintf(unit, "GBytes");
+    simple_sprintf(unit, "GBytes");
     xbytes = xbytes / 1024.0;
   }
   if (xbytes > 1024.0) {
-    sprintf(unit, "TBytes");
+    simple_sprintf(unit, "TBytes");
     xbytes = xbytes / 1024.0;
   }
   if (bytes > 1024)

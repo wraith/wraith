@@ -222,7 +222,7 @@ int u_pass_match(struct userrec *u, char *in)
 
   char *cmp = (char *) get_user(&USERENTRY_PASS, u), pass[MAXPASSLEN + 1] = "";
 
-  egg_snprintf(pass, sizeof pass, "%s", in);
+  simple_snprintf(pass, sizeof pass, "%s", in);
 
   if (!cmp && (!pass[0] || (pass[0] == '-')))
     return 1;
@@ -402,7 +402,7 @@ int write_userfile(int idx)
   }
   fclose(f);
   putlog(LOG_DEBUG, "@", "Done writing userfile.");
-  egg_snprintf(backup, sizeof backup, "%s%s~", tempdir, userfile);
+  simple_snprintf(backup, sizeof backup, "%s%s~", tempdir, userfile);
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
   free(new_userfile);

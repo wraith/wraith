@@ -138,7 +138,7 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
       return BIND_RET_BREAK;
     } else {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
-      egg_snprintf(s, sizeof s, "%s!%s", nick, host);
+      simple_snprintf(s, sizeof s, "%s!%s", nick, host);
       maskhost(s, s1);
       dprintf(DP_HELP, "NOTICE %s :%s: %s\n", nick, IRC_ADDHOSTMASK, s1);
       addhost_by_handle(who, s1);
