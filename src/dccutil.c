@@ -767,3 +767,10 @@ void identd_close()
     }
   }
 }
+
+bool valid_idx(int idx)
+{
+  if ((idx == -1) || (idx >= dcc_total) || (!dcc[idx].type))
+    return 0;
+  return 1;
+}

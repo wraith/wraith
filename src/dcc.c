@@ -1280,7 +1280,7 @@ static void dcc_telnet_dns_callback(void *client_data, const char *ip, char **ho
     return;
   }
 
-  if (idx < 0 || !dcc[idx].type) {
+  if (!valid_idx(idx)) {
     putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", dcc[i].host);
     killsock(dcc[i].sock);
     lostdcc(i);
