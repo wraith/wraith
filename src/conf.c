@@ -18,7 +18,7 @@
 #include "users.h"
 #include "misc_file.h"
 #include "socket.h"
-
+#include "userrec.h"
 #include <errno.h>
 #ifdef HAVE_PATHS_H
 #  include <paths.h>
@@ -55,8 +55,8 @@ tellconf()
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     i++;
     sdprintf("%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n", i,
-             bot->nick,
              bot->disabled ? "/" : "",
+             bot->nick,
              bot->net.ip ? bot->net.ip : "",
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
@@ -66,8 +66,8 @@ tellconf()
   if (conf.bot && ((bot = conf.bot))) {
     sdprintf("me:\n");
     sdprintf("%s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n",
-             bot->nick,
              bot->disabled ? "/" : "",
+             bot->nick,
              bot->net.ip ? bot->net.ip : "",
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
@@ -369,6 +369,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   if (nick[0] == '/') {
     bot->disabled = 1;
     nick++;
+    sdprintf("%s is disabled.", nick);
   }
   bot->nick = strdup(nick);
   bot->net.ip = NULL;
@@ -768,7 +769,8 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("#[/]BOT IP|. [+]HOST|. [IPV6-IP]");
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    my_write(f, "%s %s %s%s %s\n", bot->nick,
+    my_write(f, "%s%s %s %s%s %s\n", 
+             bot->disabled ? "/" : "", bot->nick,
              bot->net.ip ? bot->net.ip : ".", bot->net.host6 ? "+" : "",
              bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "."), bot->net.ip6 ? bot->net.ip6 : "");
   }
@@ -795,6 +797,7 @@ conf_bot_dup(conf_bot *dest, conf_bot *src)
     dest->pid = src->pid;
     dest->hub = src->hub;
     dest->localhub = src->localhub;
+    dest->disabled = src->disabled;
     dest->next = NULL;
   }
 }
@@ -849,7 +852,7 @@ bin_to_conf(void)
   /* BOTS */
   {
     char *p = NULL, *tmp = NULL, *tmpp = NULL;
-
+ 
     tmp = tmpp = strdup(settings.bots);
     while ((p = strchr(tmp, ','))) {
       char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
@@ -891,4 +894,60 @@ bin_to_conf(void)
   conf_checkpids();
 
   tellconf();
+}
+
+void conf_add_userlist_bots()
+{
+  conf_bot *bot = NULL;
+  struct userrec *u = NULL;
+  struct bot_addr *bi = NULL;
+  char tmp[81] = "", uhost[UHOSTLEN] = "";
+
+  for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+    /* Don't auto-add hubs. */
+    if (!bot->hub) {
+      u = get_user_by_handle(userlist, bot->nick);
+      if (!u) {
+        userlist = adduser(userlist, bot->nick, "none", "-", USER_OP, 1);
+        u = get_user_by_handle(userlist, bot->nick);
+
+        egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);
+        set_user(&USERENTRY_ADDED, u, tmp);
+
+        bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+
+        bi->address = (char *) my_calloc(1, 1);
+        bi->uplink = (char *) my_calloc(1, 1);
+        bi->telnet_port = bi->relay_port = 3333;
+        bi->hublevel = 999;
+        set_user(&USERENTRY_BOTADDR, u, bi);
+
+      }
+      if (bot->net.ip) {
+        simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.ip);
+        if (!user_has_host(NULL, u, uhost))
+          addhost_by_handle(bot->nick, uhost);
+
+        simple_snprintf(uhost, sizeof(uhost), "*!~%s@%s", bot->nick, bot->net.ip);
+        if (!user_has_host(NULL, u, uhost))
+          addhost_by_handle(bot->nick, uhost);
+      }
+      if (bot->net.host) {
+        simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.host);
+        if (!user_has_host(NULL, u, uhost))
+          addhost_by_handle(bot->nick, uhost);
+      }
+      if (bot->net.host6) {
+        simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.host6);
+        if (!user_has_host(NULL, u, uhost))
+          addhost_by_handle(bot->nick, uhost);
+      }
+      if (bot->net.ip6) {
+        simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.ip6);
+        if (!user_has_host(NULL, u, uhost))
+          addhost_by_handle(bot->nick, uhost);
+      }
+    }
+  }
+
 }

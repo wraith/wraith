@@ -7,7 +7,6 @@ void clear_masks(struct maskrec *);
 void clear_userlist(struct userrec *);
 int u_pass_match(struct userrec *, char *);
 int delhost_by_handle(char *, char *);
-int ishost_for_handle(char *, char *);
 int count_users(struct userrec *);
 int deluser(char *);
 int change_handle(struct userrec *, char *);

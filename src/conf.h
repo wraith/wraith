@@ -69,6 +69,7 @@ int writeconf(char *, FILE *, int);
 void fill_conf_bot();
 void bin_to_conf(void);
 void conf_checkpids();
+void conf_add_userlist_bots();
 
 #ifdef CYGWIN_HACKS
 extern char		cfile[DIRMAX];

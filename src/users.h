@@ -92,6 +92,7 @@ bool add_entry_type(struct user_entry_type *);
 struct user_entry_type *find_entry_type(char *);
 struct user_entry *find_user_entry(struct user_entry_type *, struct userrec *);
 void *get_user(struct user_entry_type *, struct userrec *);
+bool user_has_host(const char *, struct userrec *, char *);
 bool set_user(struct user_entry_type *, struct userrec *, void *);
 
 #define is_bot(u)	((u) && (u)->bot)

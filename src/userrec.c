@@ -212,6 +212,29 @@ struct userrec *get_user_by_host(char *host)
   return ret;
 }
 
+bool user_has_host(const char *handle, struct userrec *u, char *host)
+{
+  if (host == NULL)
+    return 0;
+  rmspace(host);
+  if (!host[0])
+    return 0;
+
+  if (!u && handle)
+    get_user_by_handle(userlist, (char *) handle);
+
+  if (!u)
+    return 0;
+
+  struct list_type *q = NULL;
+
+  for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, u); q; q = q->next)
+    if (!egg_strcasecmp(q->extra, host))
+      return 1;
+
+  return 0;
+}
+
 /* Try: pass_match_by_host("-",host)
  * will return 1 if no password is set for that host
  */

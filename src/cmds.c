@@ -1706,7 +1706,7 @@ static void cmd_conf(int idx, char *par)
 
   if (!cmd) {
     if (!conf.bot->hub)
-      dprintf(idx, "Usage: conf <add|del|change|list|set> [options]\n");
+      dprintf(idx, "Usage: conf <add|del|change|disable|enable|list|set> [options]\n");
     else
       dprintf(idx, "Usage: conf <set> [options]\n");
     return;
@@ -1759,6 +1759,28 @@ static void cmd_conf(int idx, char *par)
       save++;
     } else
       dprintf(idx, "Error trying to remove bot '%s'\n", par);
+  } else if (!egg_strcasecmp(cmd, "disable") || !egg_strcasecmp(cmd, "enable")) {
+    conf_bot *bot = NULL;
+
+    for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+      if (!egg_strcasecmp(bot->nick, par)) {
+        if (!egg_strcasecmp(cmd, "enable")) {
+          if (bot->disabled) {
+            dprintf(idx, "Enabled '%s'.\n", bot->nick);
+            bot->disabled = 0;
+            save++;
+          } else
+            dprintf(idx, "'%s' was already enabled!\n", bot->nick);            
+        } else {
+          if (!bot->disabled) {
+            dprintf(idx, "Disabled '%s'.\n", bot->nick);
+            bot->disabled = 1;
+            save++;
+          } else
+            dprintf(idx, "'%s' was already disabled!\n", bot->nick);
+        }
+      }
+    }
   }
 #ifndef CYGWIN_HACKS
   if (!egg_strcasecmp(cmd, "set")) {
@@ -1817,7 +1839,7 @@ static void cmd_conf(int idx, char *par)
 
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
       i++;
-      if (!listbot || (listbot && !strcmp(listbot, bot->nick)))
+      if (!listbot || (listbot && !egg_strcasecmp(listbot, bot->nick)))
         dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s HUB: %d PID: %d\n", i,
                       bot->nick,
                       bot->net.ip ? bot->net.ip : "",
@@ -1832,7 +1854,7 @@ static void cmd_conf(int idx, char *par)
     free(listbot);
 
   if (save) {
-    write_settings(binname, -1, 1);
+    conf_to_bin(&conf, 0, -1);
     if (!conf.bot->hub)
       spawnbots();			/* parse conf struct and spawn/kill as needed */
   }
@@ -3115,7 +3137,7 @@ static void cmd_newleaf(int idx, char *par)
     bi->address = (char *) my_calloc(1, 1);
     bi->telnet_port = 3333;
     bi->relay_port = 3333;
-    bi->hublevel = 0;
+    bi->hublevel = 999;
     set_user(&USERENTRY_BOTADDR, u1, bi);
     /* set_user(&USERENTRY_PASS, u1, settings.salt2); */
     sprintf(tmp, "%li %s", now, dcc[idx].nick);
@@ -3420,13 +3442,10 @@ static void cmd_pls_host(int idx, char *par)
     return;
   }
   
-  struct list_type *q = NULL;
-
-  for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, dcc[idx].user); q; q = q->next)
-    if (!egg_strcasecmp(q->extra, host)) {
-      dprintf(idx, "That hostmask is already there.\n");
-      return;
-    }
+  if (user_has_host(NULL, dcc[idx].user, host)) {
+    dprintf(idx, "That hostmask is already there.\n");
+    return;
+  }
   addhost_by_handle(handle, host);
   update_mod(handle, dcc[idx].nick, "+host", host);
   dprintf(idx, "Added host '%s' to %s.\n", host, handle);

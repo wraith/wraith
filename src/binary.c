@@ -482,7 +482,8 @@ void conf_to_bin(conf_t *in, bool move, int die)
   strlcpy(settings.homedir, in->homedir, 350);
   strlcpy(settings.binpath, in->binpath, 350);
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
-    simple_sprintf(settings.bots, "%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
+    simple_sprintf(settings.bots, "%s%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
+                           bot->disabled ? "/" : "",
                            bot->nick,
                            bot->net.ip ? bot->net.ip : ".", 
                            bot->net.host6 ? "+" : "", 
@@ -508,6 +509,10 @@ void reload_bin_data() {
     fill_conf_bot();
     if (!conf.bot->localhub)
       free_conf_bots();
+    else {
+      conf_add_userlist_bots();
+      spawnbots();
+    }
   }
 }
 
