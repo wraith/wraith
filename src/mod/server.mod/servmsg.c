@@ -1125,8 +1125,10 @@ static int got311(char *from, char *msg)
   newsplit(&msg);
   fixcolon(msg);
     
-  if (match_my_nick(nick))
+  if (match_my_nick(nick)) {
     egg_snprintf(botuserhost, sizeof botuserhost, "%s@%s", username, address);
+    checked_hostmask = 0;
+  }
 
   irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);
 
