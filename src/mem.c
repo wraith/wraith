@@ -381,3 +381,35 @@ void n_free(void *ptr, const char *file, int line)
 #endif
   free(ptr);
 }
+
+
+#ifdef S_GARBLESTRINGS
+#define GARBLE_BUFFERS 40
+unsigned char *garble_buffer[GARBLE_BUFFERS] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+int garble_ptr = (-1);
+
+char *degarble(int len, char *g)
+{
+  int i;
+  unsigned char x;
+
+  garble_ptr++;
+  if (garble_ptr == GARBLE_BUFFERS)
+    garble_ptr = 0;
+  if (garble_buffer[garble_ptr])
+    free(garble_buffer[garble_ptr]);
+  garble_buffer[garble_ptr] = malloc(len + 1);
+  x = 0xFF;
+  for (i = 0; i < len; i++) {
+    garble_buffer[garble_ptr][i] = g[i] ^ x;
+    x = garble_buffer[garble_ptr][i];
+  }
+  garble_buffer[garble_ptr][len] = 0;
+  return (char *) garble_buffer[garble_ptr];
+}
+#endif /* S_GARBLESTRINGS */
+

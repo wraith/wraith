@@ -2786,37 +2786,6 @@ Context;
     egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
 }
 
-#ifdef S_GARBLESTRINGS
-#define GARBLE_BUFFERS 40
-unsigned char *garble_buffer[GARBLE_BUFFERS] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-int garble_ptr = (-1);
-
-char *degarble(int len, char *g)
-{
-  int i;
-  unsigned char x;
-
-  garble_ptr++;
-  if (garble_ptr == GARBLE_BUFFERS)
-    garble_ptr = 0;
-  if (garble_buffer[garble_ptr])
-    nfree(garble_buffer[garble_ptr]);
-  garble_buffer[garble_ptr] = nmalloc(len + 1);
-  x = 0xFF;
-  for (i = 0; i < len; i++) {
-    garble_buffer[garble_ptr][i] = g[i] ^ x;
-    x = garble_buffer[garble_ptr][i];
-  }
-  garble_buffer[garble_ptr][len] = 0;
-  return (char *) garble_buffer[garble_ptr];
-}
-#endif
-
-
 char *replace (char *string, char *oldie, char *newbie)
 {
   static char newstring[1024] = "";

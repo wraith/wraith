@@ -802,11 +802,9 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
     } else
       li->lastonplace = NULL;
     set_user(&USERENTRY_LASTON, u, li);
-//    if(li->lastonplace)
-//      nfree(li->lastonplace);
-  } else if (timeval == 1) {
+  } else if (timeval == 1)
     set_user(&USERENTRY_LASTON, u, 0);
-  }
+
 }
 
 /*  Go through all channel records and try to find a matching
