@@ -185,9 +185,10 @@ static void flush_mode(struct chanset_t *chan, int pri)
 }
 
 void dequeue_op_deop(struct chanset_t * chan) {
-  char lines[4096] = "", modechars[10] = "", nicks[128] = "";
+  char lines[4096], modechars[10] = "", nicks[128] = "";
   int i = 0, cnt = 0;
 
+  lines[0] = 0;
   while ((i < 20) && (chan->opqueue[i].target)) {
     strcat(nicks, " ");
     strcat(nicks, chan->opqueue[i].target);

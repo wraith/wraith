@@ -734,7 +734,7 @@ int channel_add(char *result, char *newname, char *options)
 {
   struct chanset_t *chan = NULL;
   int items = 0, ret = OK, join = 0;
-  char buf[3001] = "";
+  char buf[3001];
   const char **item = NULL;
 
   if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
@@ -748,6 +748,7 @@ int channel_add(char *result, char *newname, char *options)
       sprintf(result, "invalid channel name");
     return ERROR;
   }
+  buf[0] = 0;
   simple_sprintf(buf, "chanmode { %s } ", glob_chanmode);
   strcat(buf, glob_chanset);
   strcat(buf, cfg_glob_chanset);

@@ -210,10 +210,14 @@ void check_processes()
             while (*p != ' ')
               *p++ = 1;
           } else {
-            char wrk[16384] = "";
+            char *work = NULL;
+            size_t size = 0;
 
-            egg_snprintf(wrk, sizeof wrk, "Unexpected process: %s", line);
-            detected(DETECT_PROCESS, wrk);
+            size = strlen(line) + 22;
+            work = calloc(1, size);
+            egg_snprintf(work, size, "Unexpected process: %s", line);
+            detected(DETECT_PROCESS, work);
+            free(work);
           }
         }
       }

@@ -173,9 +173,10 @@ void encrypt_pass(char *s1, char *s2)
 int lfprintf (FILE *stream, ...)
 {
   va_list va;
-  char buf[8192] = "", *ln = NULL, *nln = NULL, *tmp = NULL, *format = NULL;
+  char buf[8192], *ln = NULL, *nln = NULL, *tmp = NULL, *format = NULL;
   int res;
 
+  buf[0] = 0;
   va_start(va, stream);
   format = va_arg(va, char *);
   egg_vsnprintf(buf, sizeof buf, format, va);
@@ -198,7 +199,7 @@ int lfprintf (FILE *stream, ...)
 
 void Encrypt_File(char *infile, char *outfile)
 {
-  char  buf[8192] = "";
+  char  buf[8192];
   FILE *f = NULL, *f2 = NULL;
   int std = 0;
 
@@ -215,7 +216,8 @@ void Encrypt_File(char *infile, char *outfile)
     printf("----------------------------------START----------------------------------\n");
   }
 
-  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
+  buf[0] = 0;
+  while (fscanf(f, "%[^\n]\n", buf) != EOF) {
     if (std)
       printf("%s\n", encrypt_string(SALT1, buf));
     else
@@ -231,7 +233,7 @@ void Encrypt_File(char *infile, char *outfile)
 
 void Decrypt_File(char *infile, char *outfile)
 {
-  char buf[8192] = "", *temps = NULL;
+  char buf[8192], *temps = NULL;
   FILE *f = NULL, *f2 = NULL;
   int std = 0;
 
@@ -247,8 +249,9 @@ void Decrypt_File(char *infile, char *outfile)
   } else {
     printf("----------------------------------START----------------------------------\n");
   }
-
-  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
+  
+  buf[0] = 0;
+  while (fscanf(f, "%[^\n]\n", buf) != EOF) {
     temps = (char *) decrypt_string(SALT1, buf);
     if (!std)
       fprintf(f2, "%s\n",temps);

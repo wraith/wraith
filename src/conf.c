@@ -416,7 +416,7 @@ int readconf(char *cfile, int bits)
 {
   FILE *f = NULL;
   int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
-  char inbuf[8192] = "";
+  char inbuf[201] = "";
 
   sdprintf("readconf(%s, %d)", cfile, enc);
   Context;
