@@ -157,7 +157,7 @@ void debug_mem_to_dcc(int idx)
       use[10] += l;
     else if (!strcmp(fn, "xtcldcc.c"))
       use[11] += l;
-    else if (!strcmp(fn, "dns.c"))
+    else if (!strcmp(fn, "xdns.c"))
       use[12] += l;
     else if (p) {
       for (me = module_list; me; me = me->next)
@@ -205,7 +205,7 @@ void debug_mem_to_dcc(int idx)
       strcpy(fn, "xtcldcc.c");
       break;
     case 12:
-      strcpy(fn, "dns.c");
+      strcpy(fn, "xdns.c");
       break;
     }
     if (use[i] == exp[i]) {
