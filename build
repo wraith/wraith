@@ -105,27 +105,41 @@ if [ $clean = "1" ]; then
  make clean > /dev/null
 fi
 
-if [ $leaf = "1" ]; then
- # Build leaf and check
- echo "[*] Building ${d}leaf..."
- make ${d}leaf -s
- if ! test -f leaf
- then
-   echo "[!] ${d}leaf build failed"
-   exit 1
- fi
-fi
-if [ $hub = "1" ]; then
- # Build hub and check
- echo "[*] Building ${d}hub..."
- make ${d}hub -s
- if ! test -f hub
- then
-   echo "[!] ${d}hub build failed"
-   exit 1
- fi
-fi
+_leaf()
+{
+  if [ $leaf = "1" ]; then
+   # Build leaf and check
+   echo "[*] Building ${d}leaf..."
+   make ${d}leaf -s
+   if ! test -f leaf
+   then
+     echo "[!] ${d}leaf build failed"
+     exit 1
+   fi
+  fi
+}
 
+_hub()
+{
+  if [ $hub = "1" ]; then
+   # Build hub and check
+   echo "[*] Building ${d}hub..."
+   make ${d}hub -s
+   if ! test -f hub
+   then
+     echo "[!] ${d}hub build failed"
+     exit 1
+   fi
+  fi
+}
+
+if [ -f stamp.hub ]; then
+ _hub
+ _leaf
+else
+ _leaf
+ _hub
+fi
 
 # Wrap it nicely up into an archive
 echo "[*] Packaging..."
