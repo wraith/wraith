@@ -26,9 +26,9 @@ struct portmap {
 #define DP_HELP_NEXT    0x7FF9
 
 
-void dprintf(int, char *, ...) __attribute__((format(printf, 2, 3)));
-void chatout(char *, ...) __attribute__((format(printf, 1, 2)));
-void chanout_but(int, int, char *, ...) __attribute__((format(printf, 3, 4)));
+void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
+void chatout(const char *, ...) __attribute__((format(printf, 1, 2)));
+void chanout_but(int, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 void dcc_chatter(int);
 void lostdcc(int);
 __inline__ void makepass(char *);

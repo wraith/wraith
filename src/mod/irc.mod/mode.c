@@ -182,7 +182,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
 
 /* Queue a channel mode change
  */
-void add_mode(struct chanset_t *chan, unsigned char plus, unsigned char mode, char *op)
+void add_mode(struct chanset_t *chan, const unsigned char plus, const unsigned char mode, const char *op)
 {
   int type, modes, l;
   unsigned int i;

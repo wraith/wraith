@@ -227,7 +227,7 @@ struct chanset_t {
 #define CHAN_DYNAMICINVITES BIT4
 #define CHAN_NOUSERINVITES  BIT5
 /* prototypes */
-memberlist *ismember(struct chanset_t *, char *);
+memberlist *ismember(struct chanset_t *, const char *);
 struct chanset_t *findchan(const char *name);
 struct chanset_t *findchan_by_dname(const char *name);
 

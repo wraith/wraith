@@ -59,10 +59,10 @@
 #define NOTES_FWD_CHANGED		"Changed notes forwarding for %s to: %s\n"
 #define NOTES_MUSTBE			"Function must be one of INDEX, READ, or ERASE."
 
-void notes_read(char *, char *, char *, int);
-void notes_del(char *, char *, char *, int);
+void notes_read(const char *, const char *, const char *, int);
+void notes_del(const char *, const char *, const char *, int);
 void fwd_display(int, struct user_entry *, struct userrec *);
-int num_notes(char *);
+int num_notes(const char *);
 void notes_report(int, int);
 int storenote(char *, char *, char *, int, char *, int);
 

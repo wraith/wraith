@@ -49,7 +49,7 @@ static struct delay_mode *start_delay = NULL;
 #ifdef HUB
 static void start_sending_users(int);
 #endif /* HUB */
-static void shareout_but(struct chanset_t *chan, int, char *, ...) __attribute__((format(printf, 3, 4)));
+static void shareout_but(struct chanset_t *chan, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 static void cancel_user_xfer(int, void *);
 
 #include "share.h"
@@ -1157,7 +1157,7 @@ sharein(int idx, char *msg)
 }
 
 void
-shareout(struct chanset_t *chan, char *format, ...)
+shareout(struct chanset_t *chan, const char *format, ...)
 {
   int i, l;
   char s[601] = "";
@@ -1177,7 +1177,7 @@ shareout(struct chanset_t *chan, char *format, ...)
 }
 
 static void
-shareout_but(struct chanset_t *chan, int x, char *format, ...)
+shareout_but(struct chanset_t *chan, int x, const char *format, ...)
 {
   int i, l;
   char s[601] = "";

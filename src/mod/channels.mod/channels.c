@@ -551,7 +551,7 @@ static void get_mode_protect(struct chanset_t *chan, char *s)
 
 /* Returns true if this is one of the channel masks
  */
-int ismodeline(masklist *m, char *username)
+int ismodeline(masklist *m, const char *username)
 {
   for (; m && m->mask[0]; m = m->next)  
     if (!rfc_casecmp(m->mask, username))
@@ -561,10 +561,10 @@ int ismodeline(masklist *m, char *username)
 
 /* Returns true if user matches one of the masklist -- drummer
  */
-int ismasked(masklist *m, char *username)
+int ismasked(masklist *m, const char *username)
 {
   for (; m && m->mask[0]; m = m->next)
-    if (wild_match(m->mask, username))
+    if (wild_match(m->mask, (char *) username))
       return 1;
   return 0;
 }
@@ -597,7 +597,7 @@ void remove_channel(struct chanset_t *chan)
    int		 i;
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_part() call. */
-   (void) chanset_unlink(chan);
+   chanset_unlink(chan);
 
 #ifdef LEAF
    do_channel_part(chan);

@@ -59,7 +59,7 @@ void fwd_display(int idx, struct user_entry *e, struct userrec *u)
 
 /* Determine how many notes are waiting for a user.
  */
-int num_notes(char *user)
+int num_notes(const char *user)
 {
   int tot = 0;
   FILE *f = NULL;
@@ -90,7 +90,7 @@ int num_notes(char *user)
 
 /* Change someone's handle.
  */
-static void notes_change(char *oldnick, char *newnick)
+static void notes_change(const char *oldnick, const char *newnick)
 {
   FILE *f = NULL, *g = NULL;
   char s[513] = "", *to = NULL, *s1 = NULL;
@@ -306,7 +306,7 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
 /* Convert a string like "2-4;8;16-"
  * in an array {2, 4, 8, 8, 16, maxnotes, -1}
  */
-static void notes_parse(int dl[], char *s)
+static void notes_parse(int dl[], const char *s)
 {
   int i = 0;
   int idl = 0;
@@ -357,7 +357,7 @@ static int notes_in(int dl[], int in)
  * else    : read msg in list : (ex: .notes read 5-9;12;13;18-)
  * idx=-1  : /msg
  */
-void notes_read(char *hand, char *nick, char *srd, int idx)
+void notes_read(const char *hand, const char *nick, const char *srd, int idx)
 {
   FILE *f = NULL;
   char s[601] = "", *to = NULL, *dt = NULL, *from = NULL, *s1 = NULL, wt[100] = "";
@@ -469,7 +469,7 @@ void notes_read(char *hand, char *nick, char *srd, int idx)
  * else    : erase msg in list : (ex: .notes erase 2-4;8;16-)
  * idx=-1  : /msg
  */
-void notes_del(char *hand, char *nick, char *sdl, int idx)
+void notes_del(const char *hand, const char *nick, const char *sdl, int idx)
 {
   FILE *f = NULL, *g = NULL;
   char s[513] = "", *to = NULL, *s1 = NULL;

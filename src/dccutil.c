@@ -70,7 +70,7 @@ char *add_cr(char *buf)
   return WBUF;
 }
 
-void dprintf(int idx, char *format, ...)
+void dprintf(int idx, const char *format, ...)
 {
   static char buf[1024] = "";
   int len;
@@ -176,7 +176,7 @@ void dprintf(int idx, char *format, ...)
   }
 }
 
-void chatout(char *format, ...)
+void chatout(const char *format, ...)
 {
   int i, len;
   char s[601] = "";
@@ -185,6 +185,7 @@ void chatout(char *format, ...)
   va_start(va, format);
   egg_vsnprintf(s, 511, format, va);
   va_end(va);
+
   len = strlen(s);
   if (len > 511)
     len = 511;
@@ -199,7 +200,7 @@ void chatout(char *format, ...)
 
 /* Print to all on this channel but one.
  */
-void chanout_but(int x, int chan, char *format, ...)
+void chanout_but(int x, int chan, const char *format, ...)
 {
   int i, len;
   char s[601] = "";

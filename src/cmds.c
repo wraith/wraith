@@ -810,7 +810,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
       done = 1;
 
     for (n = 0; n < cmdi; n++) { /* loop each command */
-      if (!flagrec_ok(&cmdlist[n].flags, &fr) || !wild_match(match, cmdlist[n].name))
+      if (!flagrec_ok(&cmdlist[n].flags, &fr) || !wild_match(match, (char *) cmdlist[n].name))
         continue;
       fnd++;
       if (nowild) {

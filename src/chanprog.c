@@ -68,7 +68,7 @@ void rmspace(char *s)
 
 /* Returns memberfields if the nick is in the member list.
  */
-memberlist *ismember(struct chanset_t *chan, char *nick)
+memberlist *ismember(struct chanset_t *chan, const char *nick)
 {
   register memberlist	*x = NULL;
 
@@ -659,7 +659,7 @@ int shouldjoin(struct chanset_t *chan)
 /* do_chanset() set (options) on (chan)
  * USES DO_LOCAL|DO_NET bits.
  */
-int do_chanset(char *result, struct chanset_t *chan, char *options, int local)
+int do_chanset(char *result, struct chanset_t *chan, const char *options, int local)
 {
   int ret = OK;
 

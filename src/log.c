@@ -57,7 +57,7 @@ static logmode_mapping_t logmode_mappings[] = {
 #define NEEDS_DEBUG_OUTPUT (LOG_RAW|LOG_SRVOUT|LOG_BOTNET|LOG_BOTSHARE)
 
 
-int logmodes(char *s)
+int logmodes(const char *s)
 {
 	logmode_mapping_t *mapping = NULL;
 	int modes = 0;
@@ -114,7 +114,7 @@ char *maskname(int x)
  *    Logging functions
  */
 
-void logidx(int idx, char *format, ...)
+void logidx(int idx, const char *format, ...)
 {
   char va_out[LOGLINEMAX + 1];
   va_list va;
@@ -133,7 +133,7 @@ void logidx(int idx, char *format, ...)
  * putlog(level,channel_name,format,...);
  * Broadcast the log if chname is not '@'
  */
-void putlog(int type, char *chname, char *format, ...)
+void putlog(int type, const char *chname, const char *format, ...)
 {
   int idx = 0;
   char va_out[LOGLINEMAX + 1] = "", out[LOGLINEMAX + 1] = "", *p = NULL;

@@ -150,7 +150,7 @@ int u_sticky_mask(maskrec *u, char *uhost)
 
 /* Set sticky attribute for a mask.
  */
-int u_setsticky_mask(struct chanset_t *chan, maskrec *u, char *uhost, int sticky, char *botcmd)
+int u_setsticky_mask(struct chanset_t *chan, maskrec *u, char *uhost, int sticky, const char *botcmd)
 {
   int j;
 

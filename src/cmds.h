@@ -4,19 +4,19 @@
 #include "types.h"
 
 typedef struct {
-  char          *name;
-  char          *flags;
+  const char          *name;
+  const char          *flags;
   Function      func;
-  char          *funcname;
+  const char          *funcname;
 } cmd_t;
 
 typedef struct {
-        char *name;
+        const char *name;
         struct flag_record     flags;
 } mycmds;
 
 typedef struct {
-  char *name;
+  const char *name;
   Function func;
 } botcmd_t;
 
