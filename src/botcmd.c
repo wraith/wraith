@@ -442,12 +442,10 @@ static void bot_shellinfo(int idx, char *par)
   sysname = newsplit(&par);
   nodename = newsplit(&par);
 
-  dcc[idx].u.bot->sysname[0] = 0;
   set_user(&USERENTRY_USERNAME, dcc[idx].user, username);
-
   set_user(&USERENTRY_OS, dcc[idx].user, par);
+  dcc[idx].u.bot->sysname[0] = 0;
   strcpy(dcc[idx].u.bot->sysname, sysname); 
-
   set_user(&USERENTRY_NODENAME, dcc[idx].user, nodename);
 }
 
