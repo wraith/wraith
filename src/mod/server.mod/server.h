@@ -10,6 +10,14 @@
 #define check_bind_ctcp(a,b,c,d,e,f) check_bind_ctcpr(a,b,c,d,e,f,BT_ctcp)
 #define check_bind_ctcr(a,b,c,d,e,f) check_bind_ctcpr(a,b,c,d,e,f,BT_ctcr)
 
+#define fixcolon(x)             do {                                    \
+        if ((x)[0] == ':')                                              \
+                (x)++;                                                  \
+        else                                                            \
+                (x) = newsplit(&(x));                                   \
+} while (0)
+
+
 #ifndef MAKING_SERVER
 /* 4 - 7 */
 #define botuserhost ((char *)(server_funcs[5]))
