@@ -456,18 +456,25 @@ check_hostmask()
   if (!server_online || !botuserhost[0])
     return;
 
-  char s[UHOSTLEN + 2] = "", *tmp = botuserhost;
-  struct userrec *u = NULL;
+  char s[UHOSTLEN + 2] = "";
 
   checked_hostmask = 1;
 
-  sprintf(s, "*!%s", tmp);		/* just add actual user@ident, regardless of ~ */
+  sprintf(s, "*!%s", botuserhost);		/* just add actual user@ident, regardless of ~ */
 
   /* dont add the host if it conflicts with another in the userlist */
-  if ((u = get_user_by_host(s))) {
-    if (u != conf.bot->u)
-      putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
-    return;
+  struct userrec *u = NULL;
+  struct list_type *q = NULL;
+
+  for (u = userlist; u; u = u->next) {
+    q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
+    for (; q; q = q->next) {
+      if (wild_match(s, q->extra) || wild_match(q->extra, s)) {
+        if (u != conf.bot->u)
+          putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
+        return;
+      }
+    }
   }
 
   addhost_by_handle(conf.bot->nick, s);
