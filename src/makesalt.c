@@ -43,7 +43,7 @@ int main(void)
 
   if ((saltfd = fopen("pack/salt.h", "r"))!= NULL) {
     fclose(saltfd);
-    printf("Using existent Salt-File\n"); 
+    printf("[*] Using existent Salt-File\n"); 
     exit(0);
   }
   printf("Creating Salt File\n");

@@ -80,7 +80,7 @@ clean:  cleanutils
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/settings.tmp 
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c
 
 distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
@@ -117,20 +117,27 @@ depend:
 eggautoconf:
 	@$(modconf) eggautoconf
 
-packconf: makesettings
-	@src/makesettings pack/pack.cfg src/settings.tmp
+packconf: makesettings pack/pack.cfg
+	@src/makesettings pack/pack.cfg src/settings.c~
 	@(if [ ! -f src/settings.c ]; then \
 	touch src/settings.c; \
 	fi)
-	@(if test "x`diff -qurN src/settings.tmp src/settings.c`" != "x"; then \
-	cp -f src/settings.tmp src/settings.c; \
+	@(if test "x`diff -qurN src/settings.c~ src/settings.c`" != "x"; then \
+	cp -f src/settings.c~ src/settings.c; \
 	fi)
 
-salt:	makesalt src/makesalt.c stringfix
+
+salt: pack/salt.h makesalt stringfix
 	@src/makesalt
-	@echo -n "[*] Encrypting salts..."
-	@src/stringfix pack/salt.h src/salt.h || echo "FAILED"
-	@echo "done."
+	@(if [ ! -f src/salt.h ]; then \
+	touch src/salt.h; \
+	fi)
+	@src/stringfix pack/salt.h src/salt.h~
+	@(if test "x`diff -qurN src/salt.h~ src/salt.h`" != "x"; then \
+	echo -n "[*] Encrypting salts..."; \
+	src/stringfix pack/salt.h src/salt.h; \
+	echo "done."; \
+	fi)
 
 config:
 	@$(modconf) modules-still-exist
@@ -156,9 +163,6 @@ makesettings: src/makesettings.c
 	+@cd src && ${MAKE_UTILS} makesettings
 
 utils: makesettings makesalt stringfix
-
-#utils: src/stringfix.c src/makesalt.c src/makesettings.c
-#	+@cd src && ${MAKE_UTILS} utils
 
 dostrings: stringfix
 	@misc/dostrings

@@ -9,13 +9,15 @@
 #include <string.h>
 #include "conf.h"
 
+#define WTF 20000
+
 #ifdef S_GARBLESTRINGS
 void garble(char **inptr, char **outptr)
 {
   char *in = *inptr,
    *out,
    *p = NULL;
-  char obuf[1024];
+  char obuf[WTF];
   int chars = 0;
   unsigned char x;
 
@@ -94,8 +96,8 @@ char *outbuf = NULL;
 
 void processline(char *line)
 {
-  char tmpin[1024],
-    tmpout[1024];
+  char tmpin[WTF],
+    tmpout[WTF];
   char *in,
    *out;
 
