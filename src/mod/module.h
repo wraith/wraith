@@ -280,7 +280,7 @@
 /* 148 - 151 */
 #define do_tcl ((void (*)(char *, char *))global[148])
 #define readtclprog ((int (*)(const char *))global[149])
-#define get_language ((char *(*)(int))global[150])
+/* #define get_language ((char *(*)(int))global[150]) */
 #define def_get ((void *(*)(struct userrec *, struct user_entry *))global[151])
 /* 152 - 155 */
 #define makepass ((void (*) (char *))global[152])
@@ -288,12 +288,7 @@
 #define maskhost ((void (*)(const char *, char *))global[154])
 #define show_motd ((void(*)(int))global[155])
 /* 156 - 159 */
-/*
-#define tellhelp ((void(*)(int, char *, struct flag_record *, int))global[156])
-#define showhelp ((void(*)(char *, char *, struct flag_record *, int))global[157])
-#define add_help_reference ((void(*)(char *))global[158])
-#define rem_help_reference ((void(*)(char *))global[159])
-*/
+
 /* 160 - 163 */
 #define touch_laston ((void (*)(struct userrec *,char *,time_t))global[160])
 #define add_mode ((void (*)(struct chanset_t *,char,char,char *))(*(Function**)(global[161])))
@@ -301,7 +296,7 @@
 #define in_chain ((int (*)(char *))global[163])
 /* 164 - 167 */
 #define add_note ((int (*)(char *,char*,char*,int,int))global[164])
-#define del_lang_section ((int(*)(char *))global[165])
+/* 165 */
 #define detect_dcc_flood ((int (*) (time_t *,struct chat_info *,int))global[166])
 #define flush_lines ((void(*)(int,struct chat_info*))global[167])
 /* 168 - 171 */
@@ -384,7 +379,7 @@
 #endif
 #define force_expire (*(int *)(global[227]))	/* Rufus */
 /* 228 - 231 */
-#define add_lang_section ((void(*)(char *))global[228])
+/* 228 */
 #define user_realloc(x,y) ((void *(*)(void *,int,char *,int))global[229])((x),(y),__FILE__,__LINE__)
 #define nrealloc(x,y) ((void *)(global[230]((x),(y),MODULE_NAME,__FILE__,__LINE__)))
 #define xtra_set ((int(*)(struct userrec *,struct user_entry *, void *))global[231])

@@ -242,7 +242,7 @@ char *getfullbinname(char *argv0)
 
 int expmem_chanprog(), expmem_users(), expmem_misc(), expmem_dccutil(),
  expmem_botnet(), expmem_tcl(), expmem_tclhash(), expmem_net(),
- expmem_modules(int), expmem_language(), expmem_tcldcc(),
+ expmem_modules(int), expmem_tcldcc(),
  expmem_tclmisc();
 
 /* For mem.c : calculate memory we SHOULD be using
@@ -258,7 +258,7 @@ int expected_memory(void)
 
   tot = expmem_main() + expmem_chanprog() + expmem_users() + expmem_misc() +
     expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() +
-    expmem_net() + expmem_modules(0) + expmem_language() + expmem_tcldcc() +
+    expmem_net() + expmem_modules(0) + expmem_tcldcc() +
     expmem_tclmisc();
   return tot;
 }
@@ -906,8 +906,7 @@ void check_static(char *, char *(*)());
 
 #include "mod/static.h"
 int init_userrec(), init_mem(), init_dcc_max(), init_userent(), init_misc(), init_bots(),
- init_net(), init_modules(), init_tcl(int, char **),
- init_language(int), init_botcmd();
+ init_net(), init_modules(), init_tcl(int, char **), init_botcmd();
 
 void checklockfile()
 {
@@ -1467,8 +1466,6 @@ Context;
   chmod(cfile, S_IRUSR | S_IWUSR | S_IXUSR);
 
 Context;
-  init_language(1);
-
   init_dcc_max();
   init_userent();
   init_misc();
@@ -1482,7 +1479,6 @@ Context;
   kill_tcl();
   init_tcl(argc, argv);
 #endif
-  init_language(0);
   init_botcmd();
   link_statics();
   module_load(ENCMOD);
@@ -1963,7 +1959,6 @@ Context;
 	flushlogs();
 	kill_tcl();
 	init_tcl(argc, argv);
-	init_language(0);
 
 	/* this resets our modules which we didn't unload (encryption and uptime) */
 	for (p = module_list; p; p = p->next) {

@@ -177,12 +177,6 @@ void gotdcc(char *, char *, struct userrec *, char *);
 void do_boot(int, char *, char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
 
-/* language.c */
-char *get_language(int);
-void add_lang_section(char *);
-int del_lang_section(char *);
-int exist_lang_section(char *);
-
 /* main.c */
 void do_fork();
 int crontab_exists();
@@ -215,6 +209,7 @@ char *progname();
 void init_settings();
 
 /* misc.c */
+char *wbanner();
 char *replace(char *, char *, char *);
 #ifdef S_GARBLESTRINGS
 char *degarble(int, char *);

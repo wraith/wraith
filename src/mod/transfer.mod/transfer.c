@@ -2032,7 +2032,6 @@ Context;
     rem_builtins(H_ctcp, transfer_ctcps);
   rem_tcl_commands(mytcls);
   rem_tcl_ints(myints);
-  del_lang_section("transfer");
   module_undepend(MODULE_NAME);
   return NULL;
 }
@@ -2105,6 +2104,5 @@ char *transfer_start(Function *global_funcs)
 
   USERENTRY_FSTAT.get = def_get;
   add_entry_type(&USERENTRY_FSTAT);
-  add_lang_section("transfer");
   return NULL;
 }

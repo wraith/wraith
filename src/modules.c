@@ -324,7 +324,7 @@ Function global_table[] =
   /* 148 - 151 */
   (Function) do_tcl,
   (Function) readtclprog,
-  (Function) get_language,
+  (Function) 0,
   (Function) def_get,
   /* 152 - 155 */
   (Function) makepass,
@@ -343,7 +343,7 @@ Function global_table[] =
   (Function) in_chain,
   /* 164 - 167 */
   (Function) add_note,
-  (Function) del_lang_section,
+  (Function) 0,
   (Function) detect_dcc_flood,
   (Function) flush_lines,
   /* 168 - 171 */
@@ -432,7 +432,7 @@ Function global_table[] =
 #endif
   (Function) & force_expire,	/* int					*/
   /* 228 - 231 */
-  (Function) add_lang_section,
+  (Function) 0,
   (Function) _user_realloc,
   (Function) mod_realloc,
   (Function) xtra_set, 

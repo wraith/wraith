@@ -18,7 +18,7 @@ CFLAGS = @CFLAGS@ -I.. -I$(top_srcdir) @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 
 eggdrop_objs = pcrypt.o settings.o bg.o botcmd.o botmsg.o botnet.o chanprog.o cmds.o \
-dcc.o dccutil.o dns.o flags.o language.o main.o mem.o misc.o \
+dcc.o dccutil.o dns.o flags.o main.o mem.o misc.o \
 misc_file.o modules.o net.o rfc1459.o tcl.o tcldcc.o tclhash.o \
 tclmisc.o tcluser.o userent.o userrec.o users.o
 
@@ -150,11 +150,6 @@ flags.o: ./flags.c main.h ../config.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h
-language.o: ./language.c main.h ../config.h lang.h eggdrop.h flags.h \
- proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
- users.h compat/compat.h compat/inet_aton.h ../src/main.h \
- compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
- compat/strftime.h
 main.o: ./main.c main.h ../config.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h ../src/main.h compat/snprintf.h \

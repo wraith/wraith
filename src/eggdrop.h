@@ -52,20 +52,13 @@
 
 #define UHOSTMAX    291 + NICKMAX /* 32 (ident) + 3 (\0, !, @) + NICKMAX */
 #define DIRMAX		512	/* paranoia				*/
-#define LOGLINEMAX	767	/* for misc.c/putlog() <cybah>		*/
+#define LOGLINEMAX	867	/* for misc.c/putlog() <cybah>		*/
 #define BADHANDCHARS	"-,+*=:!.@#;$%&"
 
 #define MAX_BOTS     500
 #define SERVLEN      60
 
 #define sgrab 2011         /* How much data to allow through sockets. */
-
-/* Language stuff */
-
-#define LANGDIR	"./.language"	/* language file directory		*/
-#define BASELANG "english"	/* language which always gets loaded
-				   before all other languages. You do
-				   not want to change this.		*/
 
 #define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
 
