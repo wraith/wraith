@@ -28,7 +28,7 @@ See also: -chrec, chattr%{+n}, +chan, -chan%{-}
  
 See also: exempts, -exempt, stick, unstick
 ::+host
-###  $b+host$b [handle] <hostmask> [anotherhost] ...
+###  $b+host$b [handle] <hostmask> [anotherhostmask] ...
    Adds a hostmask to a user's user record. Hostmasks are used to identify your
    handle on IRC. If a handle is not specified, the hostmask will be added to
    YOUR user record. List as many hosts as wanted.
@@ -50,7 +50,7 @@ See also: -ignore, ignores
  
 See also: invites, -invite, stick, unstick
 ::+user
-###  $b+user$b <handle> [host] [anotherhost] ...
+###  $b+user$b <handle> [hostmask] [anotherhostmask] ...
    Creates a new user record for the handle given. The new user record will
    have no flags, an optional hostmask, and a random pass/secpass.
    List as many hosts as needed.
@@ -99,7 +99,7 @@ See also: exempts, +exempt, stick, unstick
 ###  $b-host$b <hostmask>
    Removes a host from your handle.
 %{+m|m}
-###  $b-host$b <handle> <hostmask> [anotherhost] ...
+###  $b-host$b <handle> <hostmask> [anotherhostmask] ...
    Removes a hostmask from a user's user record.
 %{-}
  
@@ -1315,7 +1315,7 @@ See also: botversion, about%{+m|m}, status%{-}
  
 See also: w
 :hub:newleaf:
-###  $bnewleaf$b <handle> [host] [anotherhost] ...
+###  $bnewleaf$b <handle> [hostmask] [anotherhostmask] ...
    Adds a new leaf to the botnet with the specified handle and hostname.
    Any number of hosts can be specified in the cmd. You will need to
    add a hostmask for the bot's ip for it to connect over DCC.
