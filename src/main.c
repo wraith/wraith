@@ -102,7 +102,11 @@ static char *getfullbinname(const char *argv_zero)
   bin = strdup(argv_zero);
 
   if (bin[0] == '/')
+#ifdef CYGWIN_HACKS
+    goto cygwin;
+#else
     return bin;
+#endif /* CYGWIN_HACKS */
 
   if (!getcwd(cwd, DIRMAX))
     fatal("getcwd() failed", 0);
@@ -128,6 +132,13 @@ static char *getfullbinname(const char *argv_zero)
       p2 = strchr(p, '/');
   }
   str_redup(&bin, cwd);
+#ifdef CYGWIN_HACKS
+  /* tack on the .exe */
+  cygwin:
+  bin = realloc(bin, strlen(bin) + 4 + 1);
+  strcat(bin, ".exe");
+  bin[strlen(bin)] = 0;
+#endif /* CYGWIN_HACKS */
   return bin;
 }
 

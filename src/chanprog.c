@@ -335,6 +335,7 @@ void tell_verbose_status(int idx)
     dprintf(idx, "Admin: %s\n", admin);
 
   dprintf(idx, "OS: %s %s\n", uni_t, vers_t);
+  dprintf(idx, "Running from: %s\n", binname);
 }
 
 /* Show all internal state variables

@@ -694,6 +694,14 @@ int updatebin(int idx, char *par, int autoi)
     return 1;
   }
   strcpy(newbin, par);
+#ifdef CYGWIN_HACKS
+  /* tack on the .exe */
+  if (!strstr(path, ".exe")) {
+    path = realloc(path, strlen(path) + 4 + 1);
+    strcat(path, ".exe");
+    path[strlen(path)] = 0;
+  }
+#endif /* CYGWIN_HACKS */
   if (!strcmp(path, binname)) {
     free(path);
     logidx(idx, "Can't update with the current binary");
@@ -717,13 +725,17 @@ int updatebin(int idx, char *par, int autoi)
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
+  putlog(LOG_DEBUG, "*", "Running for update binary test: %s", testbuf);
+#ifndef CYGWIN_HACKS
   i = system(testbuf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
     dprintf(idx, "Couldn't restart new binary (error %d)\n", i);
     putlog(LOG_MISC, "*", "Couldn't restart new binary (error %d)", i);
     return i;
   }
-
+#endif /* CYGWIN_HACKS */
+  
+  unlink(binname);		/* out with the old */
   if (movefile(path, binname)) {
     logidx(idx, "Can't rename %s to %s", path, binname);
     free(path);
