@@ -1403,10 +1403,9 @@ void tputs(register int z, char *s, unsigned int len)
 
     inhere = 0;
   }
-/* I dont think this is needed.. -bryan 
-  if (socklist[i].encstatus)
+
+  if (socklist[i].encstatus > 0)
     nfree(s);
-*/
 }
 
 /* tputs might queue data for sockets, let's dump as much of it as
