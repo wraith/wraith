@@ -106,7 +106,7 @@ check_delay()
 #  ifdef LEAF
       add_mode(d->chan, d->plsmns, d->mode, d->mask);
 #  endif
-       /* LEAF */
+      /* LEAF */
       del_delay(d);
     }
   }
@@ -381,21 +381,21 @@ share_newuser(int idx, char *par)
     /* If user already exists, ignore command */
     shareout_but(NULL, idx, "n %s %s %s %s\n", nick, host, pass, par);
 
-      noshare = 1;
-      if (strlen(nick) > HANDLEN)
-        nick[HANDLEN] = 0;
+    noshare = 1;
+    if (strlen(nick) > HANDLEN)
+      nick[HANDLEN] = 0;
 
-      fr.match = FR_GLOBAL;
-      build_flags(s, &fr, 0);
-      userlist = adduser(userlist, nick, host, pass, 0);
+    fr.match = FR_GLOBAL;
+    build_flags(s, &fr, 0);
+    userlist = adduser(userlist, nick, host, pass, 0);
 
-      /* Support for userdefinedflag share - drummer */
-      u = get_user_by_handle(userlist, nick);
-      set_user_flagrec(u, &fr, 0);
-      fr.match = FR_CHAN;       /* why?? */
-      noshare = 0;
+    /* Support for userdefinedflag share - drummer */
+    u = get_user_by_handle(userlist, nick);
+    set_user_flagrec(u, &fr, 0);
+    fr.match = FR_CHAN;         /* why?? */
+    noshare = 0;
 #ifndef LEAF
-      putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
+    putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
 #endif /* LEAF */
   }
 }
@@ -501,39 +501,39 @@ share_change(int idx, char *par)
 
     u = get_user_by_handle(userlist, hand);
 
-      if (!(uet = find_entry_type(key)))
-        /* If it's not a supported type, forget it */
-        putlog(LOG_ERROR, "*", "Ignore ch %s from %s (unknown type)", key, dcc[idx].nick);
-      else {
-        if (!(dcc[idx].status & STAT_GETTING))
-          shareout_but(NULL, idx, "c %s %s %s\n", key, hand, par);
-        noshare = 1;
-        if (!u && (uet == &USERENTRY_BOTADDR)) {
-          char pass[30] = "";
+    if (!(uet = find_entry_type(key)))
+      /* If it's not a supported type, forget it */
+      putlog(LOG_ERROR, "*", "Ignore ch %s from %s (unknown type)", key, dcc[idx].nick);
+    else {
+      if (!(dcc[idx].status & STAT_GETTING))
+        shareout_but(NULL, idx, "c %s %s %s\n", key, hand, par);
+      noshare = 1;
+      if (!u && (uet == &USERENTRY_BOTADDR)) {
+        char pass[30] = "";
 
-          makepass(pass);
-          userlist = adduser(userlist, hand, "none", pass, USER_BOT);
-          u = get_user_by_handle(userlist, hand);
-        } else if (!u)
-          return;
+        makepass(pass);
+        userlist = adduser(userlist, hand, "none", pass, USER_BOT);
+        u = get_user_by_handle(userlist, hand);
+      } else if (!u)
+        return;
 
-        if (uet->got_share) {
-          if (!(e = find_user_entry(uet, u))) {
-            e = calloc(1, sizeof(struct user_entry));
+      if (uet->got_share) {
+        if (!(e = find_user_entry(uet, u))) {
+          e = calloc(1, sizeof(struct user_entry));
 
-            e->type = uet;
-            e->name = NULL;
-            e->u.list = NULL;
-            list_insert((&(u->entries)), e);
-          }
-          uet->got_share(u, e, par, idx);
-          if (!e->u.list) {
-            list_delete((struct list_type **) &(u->entries), (struct list_type *) e);
-            free(e);
-          }
+          e->type = uet;
+          e->name = NULL;
+          e->u.list = NULL;
+          list_insert((&(u->entries)), e);
         }
-        noshare = 0;
+        uet->got_share(u, e, par, idx);
+        if (!e->u.list) {
+          list_delete((struct list_type **) &(u->entries), (struct list_type *) e);
+          free(e);
+        }
       }
+      noshare = 0;
+    }
   }
 }
 
