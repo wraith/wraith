@@ -112,7 +112,7 @@ static void write_debug()
 
   egg_snprintf(tmpout, sizeof tmpout, "* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]",
                                   CX(cx_ptr - 2), CX(cx_ptr - 1), CX(cx_ptr));
-  putlog(LOG_MISC, "*", "%s", tmpout);
+  putlog(LOG_MISC, "*", "%s (Paste to bryan)", tmpout);
   printf("%s\n", tmpout);
 }
 #endif /* DEBUG_CONTEXT */
