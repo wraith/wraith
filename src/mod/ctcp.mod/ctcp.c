@@ -338,8 +338,6 @@ void sendaway()
 
 static void ctcp_minutely()
 {
-  int i;
-
   if (server_online) {
     if ((cloak_awaytime == 0) && (cloak_heretime == 0)) {
       cloak_heretime = now;
@@ -364,7 +362,7 @@ static void ctcp_minutely()
   }
 
   if (listen_time <= 0) {
-    for (i = 0; i < dcc_total; i++) {
+    for (int i = 0; i < dcc_total; i++) {
       if ((dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)") || !strcmp(dcc[i].nick, "(telnet6)"))) {
         putlog(LOG_DEBUG, "*", "Closing listening port %d %s", dcc[i].port, dcc[i].nick);
 
@@ -379,14 +377,12 @@ static void ctcp_minutely()
 
 static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  time_t idletime;
+  time_t idletime = 0;
 
   if (cloak_awaytime)
     idletime = now - cloak_awaytime;
   else if (cloak_heretime)
     idletime = now - cloak_heretime;
-  else
-    idletime = 0;
   dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s@%s) Idle %li second%s\001\n", nick, keyword, "",
                    conf.username ? conf.username : conf.bot->nick, 
                    (strchr(botuserhost, '@') + 1), idletime, idletime == 1 ? "" : "s");
@@ -403,7 +399,6 @@ static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, c
 }
 static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-
   if (strlen(text) <= 80)       /* bitchx ignores > 80 */
     dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, text);
   return BIND_RET_BREAK;
@@ -449,16 +444,15 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
 
 static int ctcp_WHOAMI(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-
   dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: Access Denied\n", nick);
   return BIND_RET_BREAK;
 }
 
 static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char chan[256] = "", *p = NULL;
-
   if (text[0]) {
+    char chan[256] = "", *p = NULL;
+
     strncpyz(chan, text, sizeof(chan));
     p = strchr(chan, ' ');
     if (p)
@@ -470,10 +464,10 @@ static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, cha
 
 static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  struct chanset_t *chan = chanset;
-  char chname[256] = "", *p = NULL;
-
   if (text[0] == '#') {
+    struct chanset_t *chan = chanset;
+    char chname[256] = "", *p = NULL;
+
     strncpyz(chname, text, sizeof(chname));
     p = strchr(chname, ' ');
     if (p)
@@ -576,7 +570,6 @@ static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, c
 
 static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  int i, ix = (-1);
 
   if (!ischanhub()) 
     return BIND_RET_LOG;
@@ -586,7 +579,9 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
       return BIND_RET_BREAK;
     }
 
-    for (i = 0; i < dcc_total; i++) {
+    int ix = -1;
+
+    for (int i = 0; i < dcc_total; i++) {
       if ((dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)")))
         ix = i;
     }
@@ -634,11 +629,12 @@ static void cloak_describe(struct cfg_entry *cfgent, int idx)
 static void cloak_changed(struct cfg_entry *cfgent, int *valid)
 {
   char *p = NULL;
-  int i;
 
   if (!(p = cfgent->ldata ? cfgent->ldata : cfgent->gdata))
     return;
-  i = atoi(p);
+
+  int i = atoi(p);
+
 #ifdef LEAF
   if (i == 0)
     i = randint(CLOAK_COUNT) + 1;

@@ -61,13 +61,13 @@ static int internal_bind_cleanup()
 
 static void schedule_bind_cleanup()
 {
-	egg_timeval_t when;
+	if (already_scheduled) 
+          return;
 
-	if (already_scheduled) return;
 	already_scheduled = 1;
 
-	when.sec = 0;
-	when.usec = 0;
+	egg_timeval_t when = { 0, 0 };
+
 	timer_create(&when, "internal_bind_cleanup", internal_bind_cleanup);
 }
 
@@ -212,10 +212,10 @@ static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry)
 /* Modify a bind entry's flags and mask. */
 int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char *function_name, const char *newflags, const char *newmask)
 {
-	bind_entry_t *entry = NULL;
+	bind_entry_t *entry = bind_entry_lookup(table, id, mask, function_name, NULL);
 
-	entry = bind_entry_lookup(table, id, mask, function_name, NULL);
-	if (!entry) return(-1);
+	if (!entry) 
+          return(-1);
 
 	/* Modify it. */
 	if (newflags) {
@@ -244,10 +244,10 @@ int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char 
 /* Overwrite a bind entry's callback and client_data. */
 int bind_entry_overwrite(bind_table_t *table, int id, const char *mask, const char *function_name, Function callback, void *client_data)
 {
-	bind_entry_t *entry = NULL;
+	bind_entry_t *entry = bind_entry_lookup(table, id, mask, function_name, NULL);
 
-	entry = bind_entry_lookup(table, id, mask, function_name, NULL);
-	if (!entry) return(-1);
+	if (!entry) 
+          return(-1);
 
 	entry->callback = (HashFunc) callback;
 	entry->client_data = client_data;
@@ -256,9 +256,7 @@ int bind_entry_overwrite(bind_table_t *table, int id, const char *mask, const ch
 
 int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
-	bind_entry_t *entry = NULL, *old_entry = NULL;
-
-	old_entry = bind_entry_lookup(table, -1, mask, function_name, NULL);
+	bind_entry_t *entry = NULL, *old_entry = bind_entry_lookup(table, -1, mask, function_name, NULL);
 
 	if (old_entry) {
 		if (table->flags & BIND_STACKABLE) {
@@ -376,13 +374,13 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 {
 	void *args[11] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 	bind_entry_t *entry = NULL, *next = NULL, *winner = NULL;
-	int i, cmp, retval;
-	int tie = 0, matchlen = 0;
+	int cmp, retval, tie = 0;
+        size_t matchlen = 0;
 
 	Assert(table);
 	check_bind_executing++;
 
-	for (i = 1; i <= table->nargs; i++) {
+	for (int i = 1; i <= table->nargs; i++) {
 		args[i] = va_arg(ap, void *);
 	}
 
@@ -453,14 +451,12 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 void add_builtins(const char *table_name, cmd_t *cmds)
 {
 	char name[50] = "";
-	bind_table_t *table = NULL;
-
-	table = bind_table_lookup_or_fake(table_name);
+	bind_table_t *table = bind_table_lookup_or_fake(table_name);
 
 	for (; cmds->name; cmds++) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
                 if (!strcmp(table->name, "dcc") && findhelp(cmds->name)) {
-    cmdlist[cmdi].name = cmds->name;
+                  cmdlist[cmdi].name = cmds->name;
                   cmdlist[cmdi].flags.match = FR_GLOBAL | FR_CHAN;
                   break_down_flags(cmds->flags, &(cmdlist[cmdi].flags), NULL);
                   cmdi++;
@@ -472,11 +468,12 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 
 void rem_builtins(const char *table_name, cmd_t *cmds)
 {
-	char name[50] = "";
-	bind_table_t *table = NULL;
+	bind_table_t *table = bind_table_lookup(table_name);
 
-	table = bind_table_lookup(table_name);
-	if (!table) return;
+	if (!table) 
+          return;
+
+	char name[50] = "";
 
 	for (; cmds->name; cmds++) {
 		sprintf(name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);

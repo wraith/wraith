@@ -67,9 +67,9 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
   if (todo == WRITE_MD5) {
+    Tempfile *newbin = new Tempfile("bin");
     char *fname_bak = NULL;
     size_t size = 0, i = 0;
-    Tempfile *newbin = new Tempfile("bin");
 
     size = strlen(fname) + 2;
     fname_bak = (char *) calloc(1, size);
@@ -131,14 +131,15 @@ static int
 readcfg(const char *cfgfile)
 {
   FILE *f = NULL;
-  char *buffer = NULL, *p = NULL;
-  int skip = 0, line = 0;
 
-  f = fopen(cfgfile, "r");
-  if (!f) {
+  if ((f = fopen(cfgfile, "r")) == NULL) {
     printf("Error: Can't open '%s' for reading\n", cfgfile);
     exit(1);
   }
+
+  char *buffer = NULL, *p = NULL;
+  int skip = 0, line = 0;
+
   printf("Reading '%s' ", cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
     line++;
@@ -243,7 +244,9 @@ static void edpack(settings_t *incfg, const char *hash, int what)
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
   /* -- DYNAMIC -- */
+//printf("BOTS: %s\n", incfg->bots);
   dofield(incfg->bots);
+//printf("EBOTS: %s\n", incfg->bots);
   dofield(incfg->uid);
   dofield(incfg->autouname);
   dofield(incfg->pscloak);
@@ -304,6 +307,7 @@ check_sum(const char *fname, const char *cfgfile)
       fatal("Binary not initialized.", 0);
 
     readcfg(cfgfile);
+
 /* tellconfig(&settings); */
     if (bin_md5(fname, WRITE_MD5, &ctx))
       printf("* Wrote settings to binary.\n"); 

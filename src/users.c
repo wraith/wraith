@@ -39,14 +39,12 @@
 
 char natip[121] = "";
 char userfile[121] = "";	/* where the user records are stored */
-int ignore_time = 10;		/* how many minutes will ignores last? */
+time_t ignore_time = 10;		/* how many minutes will ignores last? */
 
 /* is this nick!user@host being ignored? */
-int match_ignore(char *uhost)
+bool match_ignore(char *uhost)
 {
-  struct igrec *ir = NULL;
-
-  for (ir = global_ign; ir; ir = ir->next)
+  for (struct igrec *ir = global_ign; ir; ir = ir->next)
     if (wild_match(ir->igmask, uhost))
       return 1;
   return 0;
@@ -68,11 +66,10 @@ int equals_ignore(char *uhost)
 
 int delignore(char *ign)
 {
-  int i, j;
+  int i = 0, j;
   struct igrec **u = NULL, *t = NULL;
   char temp[256] = "";
 
-  i = 0;
   if (!strchr(ign, '!') && (j = atoi(ign))) {
     for (u = &global_ign, j--; *u && j; u = &((*u)->next), j--);
     if (*u) {
@@ -153,8 +150,8 @@ void display_ignore(int idx, int number, struct igrec *ignore)
   if (ignore->added) {
     daysago(now, ignore->added, s);
     sprintf(dates, "Started %s", s);
-  } else
-    dates[0] = 0;
+  } 
+
   if (ignore->flags & IGREC_PERM)
     strcpy(s, "(perm)");
   else {
@@ -179,13 +176,15 @@ void display_ignore(int idx, int number, struct igrec *ignore)
 void tell_ignores(int idx, char *match)
 {
   struct igrec *u = global_ign;
-  int k = 1;
 
   if (u == NULL) {
     dprintf(idx, "No ignores.\n");
     return;
   }
   dprintf(idx, "%s:\n", IGN_CURRENT);
+
+  int k = 1;
+
   for (; u; u = u->next) {
     if (match[0]) {
       if (wild_match(match, u->igmask) ||
@@ -448,19 +447,16 @@ static void
 tell_user(int idx, struct userrec *u)
 {
   char s[81] = "", s1[81] = "", format[81] = "";
-  int n = 0;
+  int n = num_notes(u->handle);
   time_t now2;
   struct chanuserrec *ch = NULL;
   struct chanset_t *chan = NULL;
   struct user_entry *ue = NULL;
-  struct laston_info *li = NULL;
-  struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
+  struct laston_info *li = (struct laston_info *) get_user(&USERENTRY_LASTON, u);
+  struct flag_record fr = {FR_GLOBAL, u->flags, 0, 0 };
 
-  n = num_notes(u->handle);
-
-  fr.global = u->flags;
   build_flags(s, &fr, NULL);
-  li = (struct laston_info *) get_user(&USERENTRY_LASTON, u);
+
   if (!li || !li->laston)
     strcpy(s1, "never");
   else {
@@ -512,13 +508,11 @@ tell_user(int idx, struct userrec *u)
 /* show user by ident */
 void tell_user_ident(int idx, char *id)
 {
-  char format[81] = "";
-  struct userrec *u = NULL;
+  struct userrec *u = get_user_by_handle(userlist, id);
   struct flag_record user = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   get_user_flagrec(dcc[idx].user, &user, NULL);
 
-  u = get_user_by_handle(userlist, id);
   if (u == NULL)
     u = get_user_by_host(id);
 
@@ -526,6 +520,9 @@ void tell_user_ident(int idx, char *id)
     dprintf(idx, "%s.\n", USERF_NOMATCH);
     return;
   }
+
+  char format[81] = "";
+
   if (u->bot) {
     egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
@@ -543,12 +540,11 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
 {
   char format[81] = "";
   struct userrec *u = NULL;
-  int fnd = 0, cnt, nomns = 0, flags = 0;
+  int fnd = 0, cnt = 0, nomns = 0, flags = 0;
   struct list_type *q = NULL;
   struct flag_record user, pls, mns;
 
   dprintf(idx, "*** %s '%s':\n", MISC_MATCHING, mtch);
-  cnt = 0;
   if (isbot) {
     egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
@@ -661,7 +657,7 @@ void backup_userfile()
 int readuserfile(const char *file, struct userrec **ret)
 {
   char *p = NULL, buf[1024] = "", lasthand[512] = "", *attr = NULL, *pass = NULL;
-  char *code = NULL, s1[1024] = "", *s = NULL, cbuf[1024] = "", *temps = NULL, ignored[512] = "";
+  char *code = NULL, s1[1024] = "", *s = buf, cbuf[1024] = "", *temps = NULL, ignored[512] = "";
   FILE *f = NULL;
   struct userrec *bu = NULL, *u = NULL;
   struct chanset_t *cst = NULL;
@@ -670,7 +666,6 @@ int readuserfile(const char *file, struct userrec **ret)
   int i, line = 0;
 
   bu = (*ret);
-  ignored[0] = 0;
   if (bu == userlist) {
     clear_chanlist();
     lastuser = NULL;
@@ -679,13 +674,11 @@ int readuserfile(const char *file, struct userrec **ret)
     global_exempts = NULL;
     global_invites = NULL;
   }
-  lasthand[0] = 0;
   f = fopen(file, "r");
   if (f == NULL)
     return 0;
   noshare = 1;
   /* read opening comment */
-  s = buf;
   fgets(cbuf, 180, f);
   remove_crlf(cbuf);
   temps = (char *) decrypt_string(settings.salt1, cbuf);
@@ -1017,10 +1010,7 @@ int readuserfile(const char *file, struct userrec **ret)
 
 void link_pref_val(struct userrec *u, char *val)
 {
-
 /* val must be HANDLEN + 4 chars minimum */
-  struct bot_addr *ba = NULL;
-
   val[0] = 'Z';
   val[1] = 0;
   
@@ -1029,6 +1019,9 @@ void link_pref_val(struct userrec *u, char *val)
 
   if (!u->bot)
     return;
+
+  struct bot_addr *ba = NULL;
+
   if (!(ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u))) {
     return;
   }
@@ -1083,13 +1076,11 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
 void autolink_cycle(char *start)
 {
   char bestval[HANDLEN + 4] = "", curval[HANDLEN + 4] = "", myval[HANDLEN + 4] = "";
-  struct userrec *u = NULL;
   tand_t *bot = NULL;
-  int i;
 
   link_pref_val(conf.bot->u, myval);
   strcpy(bestval, myval);
-  for (i = 0; i < dcc_total; i++) {
+  for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT_NEW)
       return;
     if (dcc[i].type == &DCC_FORK_BOT)
@@ -1129,6 +1120,8 @@ void autolink_cycle(char *start)
     }
   }
 
+  struct userrec *u = NULL;
+
   if (start)
     u = get_user_by_handle(userlist, start);
   else
@@ -1163,25 +1156,19 @@ int botlinkcount = 0;
 
 void autolink_cycle(char *start)
 {
-  struct userrec *u = NULL;
-  struct hublist_entry *hl = NULL, *hl2 = NULL;
-  struct bot_addr *my_ba = NULL;
+  struct bot_addr *my_ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
   char uplink[HANDLEN + 1] = "", avoidbot[HANDLEN + 1] = "", curhub[HANDLEN + 1] = "";
-  int i, hlc;
   struct flag_record fr = { FR_GLOBAL, 0, 0, 0 };
 
   /* Reset connection attempts if we ain't called due to a failed link */
   if (!start)
     botlinkcount = 0;
 
-  my_ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
   if (my_ba && (my_ba->uplink[0])) {
     strncpyz(uplink, my_ba->uplink, sizeof(uplink));
-  } else {
-    uplink[0] = 0;
-  }
-  curhub[0] = 0;
-  for (i = 0; i < dcc_total; i++) {
+  } 
+
+  for (int i = 0; i < dcc_total; i++) {
     if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
       return;
     if (dcc[i].type == &DCC_BOT) {
@@ -1228,9 +1215,12 @@ void autolink_cycle(char *start)
       strcpy(avoidbot, start);
     }
   }
+
   /* Pick a random hub, but avoid 'avoidbot' */
-  hlc = 0;
-  for (u = userlist; u; u = u->next) {
+  int hlc = 0;
+  struct hublist_entry *hl = NULL, *hl2 = NULL;
+
+  for (struct userrec *u = userlist; u; u = u->next) {
     get_user_flagrec(u, &fr, NULL);
     if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
       putlog(LOG_DEBUG, "@", "Adding %s to hublist", u->handle);

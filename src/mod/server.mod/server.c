@@ -26,64 +26,62 @@
 #include "server.h"
 #include <stdarg.h>
 
-int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
+bool strict_servernames;
+bool checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;
-int serv;		/* sock # of server currently */
+sock_t serv;		/* sock # of server currently */
 int servidx;		/* idx of server */
 char newserver[121] = "";	/* new server? */
-int newserverport;		/* new server port? */
+port_t newserverport;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
 static char serverpass[121] = "";
 static time_t trying_server;	/* trying to connect to a server right now? */
 static int curserv;		/* current position in server list: */
 int flud_thr;		/* msg flood threshold */
-int flud_time;		/* msg flood time */
+time_t flud_time;		/* msg flood time */
 int flud_ctcp_thr;	/* ctcp flood threshold */
-int flud_ctcp_time;	/* ctcp flood time */
+time_t flud_ctcp_time;	/* ctcp flood time */
 char botuserhost[121] = "";	/* bot's user@host (refreshed whenever the
 				   bot joins a channel) */
 				/* may not be correct user@host BUT it's
 				   how the server sees it */
-static int keepnick;		/* keep trying to regain my intended
+static bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
-static int nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
-static int serverror_quit;	/* Disconnect from server if ERROR
-				   messages received? */
-int quiet_reject;	/* Quietly reject dcc chat or sends from
+static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
+bool quiet_reject;	/* Quietly reject dcc chat or sends from
 				   users without access? */
-static int waiting_for_awake;	/* set when i unidle myself, cleared when
+static time_t waiting_for_awake;	/* set when i unidle myself, cleared when
 				   i get the response */
 time_t server_online;	/* server connection time */
 char botrealname[121] = "";	/* realname of bot */
-static int server_timeout;	/* server timeout for connecting */
-static int strict_servernames;	/* don't update server list */
+static time_t server_timeout;	/* server timeout for connecting */
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
-int cycle_time;			/* cycle time till next server connect */
+time_t cycle_time;			/* cycle time till next server connect */
 port_t default_port;		/* default IRC port */
 static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
-int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
+bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp;		/* answer how many stacked ctcp's ? */
-static int check_mode_r;	/* check for IRCNET +r modes */
+static bool check_mode_r;	/* check for IRCNET +r modes */
 static int net_type;
-static int resolvserv;		/* in the process of resolving a server host */
-static int double_mode;		/* allow a msgs to be twice in a queue? */
-static int double_server;
-static int double_help;
-static int double_warned;
-static int lastpingtime;	/* IRCNet LAGmeter support -- drummer */
+static bool resolvserv;		/* in the process of resolving a server host */
+static bool double_mode;		/* allow a msgs to be twice in a queue? */
+static bool double_server;
+static bool double_help;
+static bool double_warned;
+static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
 static char stackable2cmds[511] = "";
 static time_t last_time;
-static int use_penalties;
+static bool use_penalties;
 static int use_fastdeq;
-int nick_len;			/* Maximal nick length allowed on the network. */
+size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 
 static void empty_msgq(void);
 static void next_server(int *, char *, port_t *, char *);
 static void disconnect_server(int, int);
 static int calc_penalty(char *);
-static int fast_deq(int);
+static bool fast_deq(int);
 static char *splitnicks(char **);
 static void msgq_clear(struct msgq_head *qh);
 static int stack_limit;
@@ -126,8 +124,7 @@ static int burst;
  */
 static void deq_msg()
 {
-  struct msgq *q = NULL;
-  int ok = 0;
+  bool ok = 0;
 
   /* now < last_time tested 'cause clock adjustments could mess it up */
   if ((now - last_time) >= msgrate || now < (last_time - 90)) {
@@ -138,6 +135,9 @@ static void deq_msg()
   }
   if (serv < 0)
     return;
+
+  struct msgq *q = NULL;
+
   /* Send upto 4 msgs to server if the *critical queue* has anything in it */
   if (modeq.head) {
     while (modeq.head && (burst < 4) && ((last_time - now) < MAXPENALTY)) {
@@ -210,12 +210,12 @@ static void deq_msg()
 
 static int calc_penalty(char * msg)
 {
+  if (!use_penalties && net_type != NETT_UNDERNET && net_type != NETT_HYBRID_EFNET)
+    return 0;
+
   char *cmd = NULL, *par1 = NULL, *par2 = NULL, *par3 = NULL;
   register int penalty, i, ii;
 
-  if (!use_penalties &&
-      net_type != NETT_UNDERNET && net_type != NETT_HYBRID_EFNET)
-    return 0;
   if (msg[strlen(msg) - 1] == '\n')
     msg[strlen(msg) - 1] = '\0';
   cmd = newsplit(&msg);
@@ -341,11 +341,11 @@ static int calc_penalty(char * msg)
 
 char *splitnicks(char **rest)
 {
-  register char *o = NULL, *r = NULL;
-
   if (!rest)
     return *rest = "";
-  o = *rest;
+
+  register char *o = *rest, *r = NULL;
+
   while (*o == ' ')
     o++;
   r = o;
@@ -357,16 +357,19 @@ char *splitnicks(char **rest)
   return r;
 }
 
-static int fast_deq(int which)
+static bool fast_deq(int which)
 {
+  if (!use_fastdeq)
+    return 0;
+
   struct msgq_head *h = NULL;
   struct msgq *m = NULL, *nm = NULL;
   char msgstr[511] = "", nextmsgstr[511] = "", tosend[511] = "", victims[511] = "", stackable[511] = "",
        *msg = NULL, *nextmsg = NULL, *cmd = NULL, *nextcmd = NULL, *to = NULL, *nextto = NULL, *stckbl = NULL;
-  int len, doit = 0, found = 0, cmd_count = 0, stack_method = 1;
+  int cmd_count = 0, stack_method = 1;
+  size_t len;
+  bool found = 0, doit = 0;
 
-  if (!use_fastdeq)
-    return 0;
   switch (which) {
     case DP_MODE:
       h = &modeq;
@@ -491,13 +494,14 @@ static void empty_msgq()
  */
 void queue_server(int which, char *buf, int len)
 {
+  /* Don't even BOTHER if there's no server online. */
+  if (serv < 0)
+    return;
+
   struct msgq_head *h = NULL, tempq;
   struct msgq *q = NULL, *tq = NULL, *tqq = NULL;
   int doublemsg = 0, qnext = 0;
 
-  /* Don't even BOTHER if there's no server online. */
-  if (serv < 0)
-    return;
   /* No queue for PING and PONG - drummer */
   if (!egg_strncasecmp(buf, "PING", 4) || !egg_strncasecmp(buf, "PONG", 4)) {
     if (buf[1] == 'I' || buf[1] == 'i')
@@ -727,10 +731,12 @@ void clearq(struct server_list *xx)
 static void next_server(int *ptr, char *servname, port_t *port, char *pass)
 {
   struct server_list *x = serverlist;
-  int i = 0;
 
   if (x == NULL)
     return;
+
+  int i = 0;
+
   /* -1  -->  Go to specified server */
   if (*ptr == (-1)) {
     for (; x; x = x->next) {
@@ -822,22 +828,25 @@ static void dcc_chat_hostresolved(int);
  */
 static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object, char *keyword, char *text)
 {
-  char *action = NULL, *param = NULL, *ip = NULL, *prt = NULL;
-  int i, ok;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
-  
   if (!ischanhub())
     return BIND_RET_LOG;
+
+  char *action = NULL, *param = NULL, *ip = NULL, *prt = NULL;
 
   action = newsplit(&text);
   param = newsplit(&text);
   ip = newsplit(&text);
   prt = newsplit(&text);
+
   if (egg_strcasecmp(action, "CHAT") || egg_strcasecmp(object, botname) || !u)
     return BIND_RET_LOG;
 
+  int i;
+  bool ok = 1;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+
   get_user_flagrec(u, &fr, 0);
-  ok = 1;
+
   if (ischanhub() && !glob_chuba(fr))
    ok = 0;
   if (dcc_total == max_dcc) {
@@ -899,7 +908,6 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
 static void dcc_chat_hostresolved(int i)
 {
   char buf[512] = "", ip[512] = "";
-  int ok;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   egg_snprintf(buf, sizeof buf, "%d", dcc[i].port);
@@ -936,13 +944,13 @@ static void dcc_chat_hostresolved(int i)
     killsock(dcc[i].sock);
     lostdcc(i);
   } else {
+    bool ok = 1;
 #ifdef HAVE_SSL
     ssl_link(dcc[i].sock, CONNECT_SSL);
 #endif /* HAVE_SSL */
     changeover_dcc(i, &DCC_CHAT_PASS, sizeof(struct chat_info));
     dcc[i].status = STAT_ECHO;
     get_user_flagrec(dcc[i].user, &fr, 0);
-    ok = 1;
     if (ischanhub() && !glob_chuba(fr))
      ok = 0;
     if (ok)
@@ -1036,16 +1044,16 @@ void server_report(int idx, int details)
     dprintf(idx, "    %s %d%%, %d msgs\n", IRC_HELPQUEUE,
            (int) ((float) (hq.tot * 100.0) / (float) maxqmsg), (int) hq.tot);
   if (details) {
-    dprintf(idx, "    Flood is: %d msg/%ds, %d ctcp/%ds\n",
+    dprintf(idx, "    Flood is: %d msg/%lus, %d ctcp/%lus\n",
 	    flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time);
   }
 }
 
 static void msgq_clear(struct msgq_head *qh)
 {
-  register struct msgq	*q = NULL, *qq = NULL;
+  register struct msgq *qq = NULL;
 
-  for (q = qh->head; q; q = qq) {
+  for (register struct msgq *q = qh->head; q; q = qq) {
     qq = q->next;
     free(q->msg);
     free(q);
@@ -1077,8 +1085,6 @@ void server_init()
   flud_ctcp_thr = 3;
   flud_ctcp_time = 60;
   botuserhost[0] = 0;
-  keepnick = 1;
-  serverror_quit = 1;
   quiet_reject = 1;
   waiting_for_awake = 0;
   server_online = 0;
@@ -1104,7 +1110,6 @@ void server_init()
   resolvserv = 0;
   lastpingtime = 0;
   last_time = 0;
-  nick_len = 9;
   stack_limit = 4;
 
   BT_msgc = bind_table_add("msgc", 5, "ssUss", MATCH_FLAGS, 0); 

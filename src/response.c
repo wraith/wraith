@@ -15,9 +15,7 @@ static response_t response_totals[RES_TYPES + 1];
 void
 init_responses()
 {
-  response_t i = 0;
-  
-  for (i = 0; i <= RES_TYPES; i++)
+  for (response_t i = 0; i <= RES_TYPES; i++)
     response_totals[i] = 0;
 }
 

@@ -102,10 +102,10 @@ typedef struct {
 #ifdef USE_IPV6
   unsigned int af;
 #endif /* USE_IPV6 */
+  sock_t sock;
   int encstatus;                        /* encrypted botlink */
   int oseed;                            /* botlink out seed */
   int iseed;                            /* botlink in seed */
-  int sock;
   int gz; /* gzip compression */
 #ifdef HAVE_SSL
   SSL           *ssl;
@@ -128,44 +128,44 @@ int ssl_cleanup();
 int ssl_link(int, int);
 #endif /* HAVE_SSL */
 char *myipstr(int);
-IP getmyip();
+in_addr_t getmyip();
 void cache_my_ip();
-void setsock(int, int);
-int allocsock(int, int);
+void setsock(sock_t, int);
+sock_t allocsock(sock_t, int);
 
 #ifdef USE_IPV6
 #define getsock(opt, af) real_getsock(opt, af, __FILE__, __LINE__)
-int real_getsock(int, int, char *, int);
+sock_t real_getsock(int, int, char *, int);
 #else
 #define getsock(opt) real_getsock(opt, __FILE__, __LINE__)
-int real_getsock(int, char *, int);
+sock_t real_getsock(int, char *, int);
 #endif /* USE_IPV6 */
 
 
-int sockprotocol(int);
+int sockprotocol(sock_t);
 int hostprotocol(char *);
-char *hostnamefromip(IP);
-void real_killsock(int, const char *, int);
-int answer(int, char *, IP *, port_t *, int);
-int findanyidx(register int);
-int open_listen(port_t *);
-int open_listen_by_af(port_t *, int);
+void real_killsock(sock_t, const char *, int);
+sock_t answer(sock_t, char *, in_addr_t *, port_t *, int);
+int findanyidx(register sock_t);
+sock_t findanysnum(register sock_t);
+sock_t open_listen(port_t *);
+sock_t open_listen_by_af(port_t *, int);
 #ifdef USE_IPV6
-int open_address_listen(IP, int, port_t *);
+sock_t open_address_listen(in_addr_t, int, port_t *);
 #else
-int open_address_listen(IP, port_t *);
+sock_t open_address_listen(in_addr_t, port_t *);
 #endif /* USE_IPV6 */
-int open_telnet(char *, port_t);
-int open_telnet_dcc(int, char *, char *);
-int open_telnet_raw(int, char *, port_t);
-void tputs(int, char *, size_t);
+sock_t open_telnet(char *, port_t);
+sock_t open_telnet_dcc(sock_t, char *, char *);
+sock_t open_telnet_raw(sock_t, char *, port_t);
+void tputs(sock_t, char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);
-char *iptostr(IP);
-int sock_has_data(int, int);
-int sockoptions(int sock, int operation, int sock_options);
-int flush_inbuf(int idx);
+char *iptostr(in_addr_t);
+bool sock_has_data(int, sock_t);
+int sockoptions(sock_t sock, int operation, int sock_options);
+ssize_t flush_inbuf(int idx);
 
 extern union sockaddr_union 		cached_myip4_so;
 #ifdef USE_IPV6
@@ -174,7 +174,8 @@ extern unsigned long			notalloc;
 #endif /* USE_IPV6 */
 
 extern char				firewall[], botuser[];
-extern int				resolve_timeout, MAXSOCKS, identd_hack;
+extern int				resolve_timeout, MAXSOCKS;
+extern bool				identd_hack;
 extern port_t				firewallport;
 extern jmp_buf				alarmret;
 extern sock_list			*socklist;

@@ -18,6 +18,6 @@
 #define CONSOLE_NO		"no"
 #define CONSOLE_COLOR		"Color:"
 
-int console_dostore(int);
+void console_dostore(int);
 
 #endif				/* _EGG_MOD_CONSOLE_CONSOLE_H */

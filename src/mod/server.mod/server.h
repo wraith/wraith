@@ -40,16 +40,13 @@ enum {
 #define IRC_CANTCHANGENICK "Can't change nickname on %s.  Is my nickname banned?"
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
-void nuke_server(char *);
-int match_my_nick(char *);
-
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
-extern int 		serv, servidx, cycle_time, newserverport,
-			nick_len, checked_hostmask, ctcp_mode, quiet_reject,
-			flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time,
-			answer_ctcp, trigger_on_ignore;
-extern port_t		default_port;
-extern time_t		server_online;
+extern sock_t		serv;
+extern size_t		nick_len;
+extern bool		checked_hostmask, quiet_reject, trigger_on_ignore;
+extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp;
+extern port_t		default_port, newserverport;
+extern time_t		server_online, cycle_time, flud_time, flud_ctcp_time;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[], curnetwork[];
 extern struct server_list *serverlist;
@@ -59,12 +56,14 @@ int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, b
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)
 #define check_bind_ctcr(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcr)
 
-int detect_avalanche(char *);
+bool detect_avalanche(char *);
 void server_report(int, int);
 void server_init();
 void queue_server(int, char *, int);
 void server_die();
 void add_server(char *);
 void clearq(struct server_list *);
+void nuke_server(char *);
+bool match_my_nick(char *);
 
 #endif /*leaf*/

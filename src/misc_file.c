@@ -24,9 +24,7 @@
  */
 int copyfile(const char *oldpath, const char *newpath)
 {
-  int fi, fo, x;
-  char buf[512] = "";
-  struct stat st;
+  sock_t fi;
 
 #ifndef CYGWIN_HACKS
   fi = open(oldpath, O_RDONLY, 0);
@@ -35,15 +33,24 @@ int copyfile(const char *oldpath, const char *newpath)
 #endif
   if (fi < 0)
     return 1;
+
+  struct stat st;
+
   fstat(fi, &st);
   if (!(st.st_mode & S_IFREG))
     return 3;
+
+  sock_t fo;
+
   fo = creat(newpath, (int) (st.st_mode & 0600));
   if (fo < 0) {
     close(fi);
     return 2;
   }
-  for (x = 1; x > 0;) {
+
+  char buf[512] = "";
+
+  for (ssize_t x = 1; x > 0;) {
     x = read(fi, buf, 512);
     if (x > 0) {
       if (write(fo, buf, x) < x) {	/* Couldn't write */
@@ -64,8 +71,6 @@ int copyfile(const char *oldpath, const char *newpath)
 
 int movefile(const char *oldpath, const char *newpath)
 {
-  int ret;
-
 #ifdef HAVE_RENAME
   /* Try to use rename first */
   if (!rename(oldpath, newpath))
@@ -75,7 +80,8 @@ int movefile(const char *oldpath, const char *newpath)
   /* If that fails, fall back to just copying and then
    * deleting the file.
    */
-  ret = copyfile(oldpath, newpath);
+  int ret = copyfile(oldpath, newpath);
+
   if (!ret)
     unlink(oldpath);
   return ret;
@@ -159,7 +165,7 @@ Tempfile::Tempfile()
 
 Tempfile::Tempfile(const char *prefix)
 {
-  len = strlen(tempdir) + 1 + strlen(prefix) + 6 + 1;
+  len = strlen(tempdir) + 1 + strlen(prefix) + 1 + 6 + 1;
   file = new char[len];
   sprintf(file, "%s.%s-XXXXXX", tempdir, prefix);
 

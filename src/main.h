@@ -3,8 +3,9 @@
 
 #include <sys/types.h>
 
-extern int		localhub, role, loading, default_flags, default_uflags,
-			backgrd, term_z, updating, use_stderr;
+extern int		role, default_flags, default_uflags,
+			updating;
+extern bool		use_stderr, backgrd, localhub, term_z, loading;
 extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[];
 extern char		*mymd5;
 extern time_t		online_since, now;

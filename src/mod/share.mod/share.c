@@ -39,8 +39,8 @@ struct delay_mode {
   struct chanset_t *chan;
   int plsmns;
   int mode;
-  char *mask;
   int seconds;
+  char *mask;
 };
 
 static struct delay_mode *start_delay = NULL;
@@ -63,9 +63,7 @@ static void cancel_user_xfer(int, void *);
 static void
 add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
 {
-  struct delay_mode *d = NULL;
-
-  d = (struct delay_mode *) calloc(1, sizeof(struct delay_mode));
+  struct delay_mode *d = (struct delay_mode *) calloc(1, sizeof(struct delay_mode));
 
   d->chan = chan;
   d->plsmns = plsmns;
@@ -81,9 +79,9 @@ add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
 static void
 del_delay(struct delay_mode *delay)
 {
-  struct delay_mode *d = NULL, *old = NULL;
+  struct delay_mode *old = NULL;
 
-  for (d = start_delay; d; old = d, d = d->next) {
+  for (struct delay_mode *d = start_delay; d; old = d, d = d->next) {
     if (d == delay) {
       if (old)
         old->next = d->next;
@@ -100,9 +98,9 @@ del_delay(struct delay_mode *delay)
 static void
 check_delay()
 {
-  struct delay_mode *d = NULL, *dnext = NULL;
+  struct delay_mode *dnext = NULL;
 
-  for (d = start_delay; d; d = dnext) {
+  for (struct delay_mode *d = start_delay; d; d = dnext) {
     dnext = d->next;
     if (d->seconds <= now) {
 #  ifdef LEAF
@@ -122,10 +120,10 @@ check_delay()
 static void
 share_stick_ban(int idx, char *par)
 {
-  char *host = NULL, *val = NULL;
-  int yn;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *host = NULL, *val = NULL;
+    bool yn;
+
     host = newsplit(&par);
     val = newsplit(&par);
     yn = atoi(val);
@@ -168,10 +166,10 @@ share_stick_ban(int idx, char *par)
 static void
 share_stick_exempt(int idx, char *par)
 {
-  char *host = NULL, *val = NULL;
-  int yn;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *host = NULL, *val = NULL;
+    bool yn;
+
     host = newsplit(&par);
     val = newsplit(&par);
     yn = atoi(val);
@@ -203,10 +201,10 @@ share_stick_exempt(int idx, char *par)
 static void
 share_stick_invite(int idx, char *par)
 {
-  char *host = NULL, *val = NULL;
-  int yn;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *host = NULL, *val = NULL;
+    bool yn;
+
     host = newsplit(&par);
     val = newsplit(&par);
     yn = atoi(val);
@@ -236,10 +234,10 @@ share_stick_invite(int idx, char *par)
 static void
 share_chhand(int idx, char *par)
 {
-  char *hand = NULL;
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *hand = NULL;
+    struct userrec *u = NULL;
+
     hand = newsplit(&par);
     u = get_user_by_handle(userlist, hand);
     if (u) {
@@ -255,13 +253,13 @@ share_chhand(int idx, char *par)
 static void
 share_chattr(int idx, char *par)
 {
-  char *hand = NULL, *atr = NULL, s[100] = "";
-  struct chanset_t *cst = NULL;
-  struct userrec *u = NULL;
-  struct flag_record fr2;
-  flag_t ofl;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *hand = NULL, *atr = NULL, s[100] = "";
+    struct chanset_t *cst = NULL;
+    struct userrec *u = NULL;
+    struct flag_record fr2;
+    flag_t ofl;
+
     hand = newsplit(&par);
     u = get_user_by_handle(userlist, hand);
     if (u) {
@@ -319,11 +317,11 @@ share_chattr(int idx, char *par)
 static void
 share_pls_chrec(int idx, char *par)
 {
-  char *user = NULL;
-  struct chanset_t *chan = NULL;
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *user = NULL;
+    struct chanset_t *chan = NULL;
+    struct userrec *u = NULL;
+
     user = newsplit(&par);
     if ((u = get_user_by_handle(userlist, user))) {
       chan = findchan_by_dname(par);
@@ -341,11 +339,11 @@ share_pls_chrec(int idx, char *par)
 static void
 share_mns_chrec(int idx, char *par)
 {
-  char *user = NULL;
-  struct chanset_t *chan = NULL;
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *user = NULL;
+    struct chanset_t *chan = NULL;
+    struct userrec *u = NULL;
+
     user = newsplit(&par);
     if ((u = get_user_by_handle(userlist, user))) {
       chan = findchan_by_dname(par);
@@ -361,21 +359,22 @@ share_mns_chrec(int idx, char *par)
 static void
 share_newuser(int idx, char *par)
 {
-  char *nick = NULL, *host = NULL, *pass = NULL, s[100] = "";
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
-    int isbot = 0;
+    char *nick = NULL, *host = NULL, *pass = NULL;
+    bool isbot = 0;
+    struct userrec *u = NULL;
 
     nick = newsplit(&par);
     host = newsplit(&par);
     pass = newsplit(&par);
     
     if (nick[0] == '-') {
-      isbot++;
+      isbot = 1;
       nick++;
     }    
     if (!(u = get_user_by_handle(userlist, nick))) {
+      char s[100] = "";
+
       fr.global = 0;
 
       fr.match = FR_GLOBAL;
@@ -392,7 +391,7 @@ share_newuser(int idx, char *par)
       build_flags(s, &fr, 0);
 /* FIXME: remove after 1.2 */
       if (fr.global & USER_BOT) {
-        isbot++;
+        isbot = 1;
         fr.global &= ~USER_BOT;
       }
 
@@ -432,10 +431,10 @@ share_killuser(int idx, char *par)
 static void
 share_pls_host(int idx, char *par)
 {
-  char *hand = NULL;
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *hand = NULL;
+    struct userrec *u = NULL;
+
     hand = newsplit(&par);
     if ((u = get_user_by_handle(userlist, hand))) {
       shareout_but(idx, "+h %s %s\n", hand, par);
@@ -478,10 +477,10 @@ share_pls_bothost(int idx, char *par)
 static void
 share_mns_host(int idx, char *par)
 {
-  char *hand = NULL;
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *hand = NULL;
+    struct userrec *u = NULL;
+
     hand = newsplit(&par);
     if ((u = get_user_by_handle(userlist, hand))) {
       shareout_but(idx, "-h %s %s\n", hand, par);
@@ -500,12 +499,12 @@ share_mns_host(int idx, char *par)
 static void
 share_change(int idx, char *par)
 {
-  char *key = NULL, *hand = NULL;
-  struct userrec *u = NULL;
-  struct user_entry_type *uet = NULL;
-  struct user_entry *e = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *key = NULL, *hand = NULL;
+    struct userrec *u = NULL;
+    struct user_entry_type *uet = NULL;
+    struct user_entry *e = NULL;
+
     key = newsplit(&par);
     hand = newsplit(&par);
 
@@ -550,11 +549,11 @@ share_change(int idx, char *par)
 static void
 share_chchinfo(int idx, char *par)
 {
-  char *hand = NULL, *chan = NULL;
-  struct chanset_t *cst = NULL;
-  struct userrec *u = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *hand = NULL, *chan = NULL;
+    struct chanset_t *cst = NULL;
+    struct userrec *u = NULL;
+
     hand = newsplit(&par);
     if ((u = get_user_by_handle(userlist, hand))) {
       chan = newsplit(&par);
@@ -631,10 +630,10 @@ share_mns_invite(int idx, char *par)
 static void
 share_mns_banchan(int idx, char *par)
 {
-  char *chname = NULL;
-  struct chanset_t *chan = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *chname = NULL;
+    struct chanset_t *chan = NULL;
+
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
     shareout_but(idx, "-bc %s %s\n", chname, par);
@@ -655,10 +654,10 @@ share_mns_banchan(int idx, char *par)
 static void
 share_mns_exemptchan(int idx, char *par)
 {
-  char *chname = NULL;
-  struct chanset_t *chan = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *chname = NULL;
+    struct chanset_t *chan = NULL;
+
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
     shareout_but(idx, "-ec %s %s\n", chname, par);
@@ -680,10 +679,10 @@ share_mns_exemptchan(int idx, char *par)
 static void
 share_mns_invitechan(int idx, char *par)
 {
-  char *chname = NULL;
-  struct chanset_t *chan = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    char *chname = NULL;
+    struct chanset_t *chan = NULL;
+
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
     shareout_but(idx, "-invc %s %s\n", chname, par);
@@ -718,15 +717,11 @@ share_mns_ignore(int idx, char *par)
 static void
 share_pls_ban(int idx, char *par)
 {
-#ifdef LEAF
-  struct chanset_t *chan = NULL;
-#endif /* LEAF */
-  time_t expire_time;
-  char *ban = NULL, *tm = NULL, *from = NULL;
-  int flags = 0;
-
   if (dcc[idx].status & STAT_SHARE) {
-    int stick = 0;
+    time_t expire_time;
+    char *ban = NULL, *tm = NULL, *from = NULL;
+    int flags = 0;
+    bool stick = 0;
 
     shareout_but(idx, "+b %s\n", par);
     noshare = 1;
@@ -748,7 +743,7 @@ share_pls_ban(int idx, char *par)
     putlog(LOG_CMDS, "@", "%s: global ban %s (%s:%s)", dcc[idx].nick, ban, from, par);
     noshare = 0;
 #ifdef LEAF
-    for (chan = chanset; chan != NULL; chan = chan->next)
+    for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
       check_this_ban(chan, ban, stick);
 #endif /* LEAF */
   }
@@ -757,13 +752,12 @@ share_pls_ban(int idx, char *par)
 static void
 share_pls_banchan(int idx, char *par)
 {
-  time_t expire_time;
-  int flags = 0;
-  struct chanset_t *chan = NULL;
-  char *ban = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
-    int stick = 0;
+    time_t expire_time;
+    int flags = 0;
+    char *ban = NULL, *tm = NULL, *chname = NULL, *from = NULL;
+    bool stick = 0;
+    struct chanset_t *chan = NULL;
 
     ban = newsplit(&par);
     tm = newsplit(&par);
@@ -797,15 +791,11 @@ share_pls_banchan(int idx, char *par)
 static void
 share_pls_exempt(int idx, char *par)
 {
-  time_t expire_time;
-  char *exempt = NULL, *tm = NULL, *from = NULL;
-  int flags = 0;
-
   if (dcc[idx].status & STAT_SHARE) {
-#ifdef LEAF
-    struct chanset_t *chan = NULL;
-#endif /* LEAF */
-    int stick = 0;
+    time_t expire_time;
+    char *exempt = NULL, *tm = NULL, *from = NULL;
+    int flags = 0;
+    bool stick = 0;
 
     shareout_but(idx, "+e %s\n", par);
     noshare = 1;
@@ -827,7 +817,7 @@ share_pls_exempt(int idx, char *par)
     putlog(LOG_CMDS, "@", "%s: global exempt %s (%s:%s)", dcc[idx].nick, exempt, from, par);
     noshare = 0;
 #ifdef LEAF
-    for (chan = chanset; chan != NULL; chan = chan->next)
+    for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
       check_this_exempt(chan, exempt, stick);
 #endif /* LEAF */
   }
@@ -838,13 +828,12 @@ share_pls_exempt(int idx, char *par)
 static void
 share_pls_exemptchan(int idx, char *par)
 {
-  time_t expire_time;
-  int flags = 0;
-  struct chanset_t *chan = NULL;
-  char *exempt = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
-    int stick = 0;
+    time_t expire_time;
+    int flags = 0;
+    struct chanset_t *chan = NULL;
+    char *exempt = NULL, *tm = NULL, *chname = NULL, *from = NULL;
+    bool stick = 0;
 
     exempt = newsplit(&par);
     tm = newsplit(&par);
@@ -878,15 +867,11 @@ share_pls_exemptchan(int idx, char *par)
 static void
 share_pls_invite(int idx, char *par)
 {
-  time_t expire_time;
-  char *invite = NULL, *tm = NULL, *from = NULL;
-  int flags = 0;
-
   if (dcc[idx].status & STAT_SHARE) {
-#ifdef LEAF
-    struct chanset_t *chan = NULL;
-#endif /* LEAF */
-    int stick = 0;
+    time_t expire_time;
+    char *invite = NULL, *tm = NULL, *from = NULL;
+    int flags = 0;
+    bool stick = 0;
 
     shareout_but(idx, "+inv %s\n", par);
     noshare = 1;
@@ -908,7 +893,7 @@ share_pls_invite(int idx, char *par)
     putlog(LOG_CMDS, "@", "%s: global invite %s (%s:%s)", dcc[idx].nick, invite, from, par);
     noshare = 0;
 #ifdef LEAF
-    for (chan = chanset; chan != NULL; chan = chan->next)
+    for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
       check_this_invite(chan, invite, stick);
 #endif /* LEAF */
   }
@@ -919,13 +904,12 @@ share_pls_invite(int idx, char *par)
 static void
 share_pls_invitechan(int idx, char *par)
 {
-  time_t expire_time;
-  int flags = 0;
-  struct chanset_t *chan = NULL;
-  char *invite = NULL, *tm = NULL, *chname = NULL, *from = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
-    int stick = 0;
+    time_t expire_time;
+    int flags = 0;
+    struct chanset_t *chan = NULL;
+    char *invite = NULL, *tm = NULL, *chname = NULL, *from = NULL;
+    bool stick = 0;
 
     invite = newsplit(&par);
     tm = newsplit(&par);
@@ -959,10 +943,10 @@ share_pls_invitechan(int idx, char *par)
 static void
 share_pls_ignore(int idx, char *par)
 {
-  time_t expire_time;
-  char *ign = NULL, *from = NULL, *ts = NULL;
-
   if (dcc[idx].status & STAT_SHARE) {
+    time_t expire_time;
+    char *ign = NULL, *from = NULL, *ts = NULL;
+
     shareout_but(idx, "+i %s\n", par);
     noshare = 1;
     ign = newsplit(&par);
@@ -1017,14 +1001,14 @@ share_ufyes(int idx, char *par)
 static void
 share_userfileq(int idx, char *par)
 {
-  int ok = 1, i;
-
   if (bot_aggressive_to(dcc[idx].user)) {
     putlog(LOG_ERRORS, "*", "%s offered user transfer - I'm supposed to be aggressive to it", dcc[idx].nick);
     dprintf(idx, "s un I have you marked for Agressive sharing.\n");
     botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
   } else {
-    for (i = 0; i < dcc_total; i++)
+    bool ok = 1;
+
+    for (int i = 0; i < dcc_total; i++)
       if (dcc[i].type->flags & DCT_BOT) {
         if ((dcc[i].status & STAT_SHARE) && (dcc[i].status & STAT_AGGRESSIVE) && (i != idx)) {
           ok = 0;
@@ -1054,7 +1038,8 @@ share_ufsend(int idx, char *par)
 {
   char *ip = NULL, *port = NULL;
   char s[1024] = "";
-  int i, sock;
+  int i;
+  sock_t sock;
   FILE *f = NULL;
 
   egg_snprintf(s, sizeof s, "%s.share.%s.%li.users", tempdir, conf.bot->nick, now);
@@ -1109,18 +1094,16 @@ share_version(int idx, char *par)
   if (bot_aggressive_to(dcc[idx].user)) {
     dprintf(idx, "s u?\n");
     dcc[idx].status |= STAT_OFFERED;
-  }                             /*else
-                                 * higher_bot_linked(idx); */
+  }
+  // else higher_bot_linked(idx);
 }
 
 #ifdef HUB
 void
 hook_read_userfile()
 {
-  int i;
-
   if (!noshare) {
-    for (i = 0; i < dcc_total; i++)
+    for (int i = 0; i < dcc_total; i++) {
       if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & STAT_AGGRESSIVE)
           && (1)) {
         /* Cancel any existing transfers */
@@ -1129,6 +1112,7 @@ hook_read_userfile()
         dprintf(i, "s u?\n");
         dcc[i].status |= STAT_OFFERED;
       }
+    }
   }
 }
 #endif /* HUB */
@@ -1200,12 +1184,11 @@ static botcmd_t C_share[] = {
 void
 sharein(int idx, char *msg)
 {
-  char *code = NULL;
-  int f, i;
+  char *code = newsplit(&msg);
+  int y, f = 0, i = 0;
 
-  code = newsplit(&msg);
   for (f = 0, i = 0; C_share[i].name && !f; i++) {
-    int y = egg_strcasecmp(code, C_share[i].name);
+    y = egg_strcasecmp(code, C_share[i].name);
 
     if (!y)
       /* Found a match */
@@ -1218,8 +1201,8 @@ sharein(int idx, char *msg)
 void
 shareout(const char *format, ...)
 {
-  int i, l;
   char s[601] = "";
+  int l;
   va_list va;
 
   va_start(va, format);
@@ -1229,16 +1212,17 @@ shareout(const char *format, ...)
     s[2 + (l = 509)] = 0;
   va_end(va);
 
-  for (i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++) {
     if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
+  }
 }
 
 static void
 shareout_but(int x, const char *format, ...)
 {
-  int i, l;
+  int l;
   char s[601] = "";
   va_list va;
 
@@ -1249,7 +1233,7 @@ shareout_but(int x, const char *format, ...)
     s[2 + (l = 509)] = 0;
   va_end(va);
 
-  for (i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++)
     if ((dcc[i].type->flags & DCT_BOT) && (i != x) &&
         (dcc[i].status & STAT_SHARE) && (!(dcc[i].status & STAT_GETTING)) &&
         (!(dcc[i].status & STAT_SENDING))) {
@@ -1263,10 +1247,8 @@ shareout_but(int x, const char *format, ...)
 static void
 check_expired_tbufs()
 {
-  int i;
-
   /* Resend userfile requests */
-  for (i = 0; i < dcc_total; i++) {
+  for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type->flags & DCT_BOT) {
       if (dcc[i].status & STAT_OFFERED) {
         if (now - dcc[i].timeval > 120) {
@@ -1285,19 +1267,17 @@ check_expired_tbufs()
   }
 }
 
-static int
+static bool
 write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
 {
   FILE *f = NULL;
-  struct userrec *u = NULL;
   int ok = 0;
 
   if ((f = fopen(fn, "wb"))) {
-    time_t tt;
+    time_t tt = now;
     char s1[81] = "";
 
     fixmod(fn);
-    tt = now;
     strcpy(s1, ctime(&tt));
     lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
 
@@ -1308,7 +1288,7 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
     ok += write_invites(f, idx);
     if (ok != 5)
       ok = 0;
-    for (u = (struct userrec *) bu; u && ok; u = u->next) {
+    for (struct userrec *u = (struct userrec *) bu; u && ok; u = u->next) {
       if (!write_user(u, f, idx))
         ok = 0;
     }
@@ -1499,7 +1479,7 @@ start_sending_users(int idx)
     dcc[idx].status |= STAT_SENDING;
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick); /* Store bot's nick */
-    dprintf(idx, "s us %lu %d %lu\n", iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()), dcc[i].port,
+    dprintf(idx, "s us %lu %d %u\n", iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()), dcc[i].port,
             dcc[i].u.xfer->length);
 
     /* Unlink the file. We don't really care whether this causes problems

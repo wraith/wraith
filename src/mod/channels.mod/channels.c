@@ -32,32 +32,32 @@
 
 #include <sys/stat.h>
 
-static int 			use_info;
+static bool 			use_info;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
 static int 			global_stopnethack_mode;
 static int 			global_revenge_mode;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
-static int 			global_ban_time;
-static int 			global_exempt_time;
-static int 			global_invite_time;
+static time_t 			global_ban_time;
+static time_t			global_exempt_time;
+static time_t 			global_invite_time;
 
 /* Global channel settings (drummer/dw) */
-char 				glob_chanset[512] = "", cfg_glob_chanset[512] = "";
+char glob_chanset[512] = "", cfg_glob_chanset[512] = "";
 static char *lastdeletedmask = NULL;
 
 /* Global flood settings */
 static int 			gfld_chan_thr;
-static int 			gfld_chan_time;
+static time_t 			gfld_chan_time;
 static int 			gfld_deop_thr;
-static int 			gfld_deop_time;
+static time_t 			gfld_deop_time;
 static int 			gfld_kick_thr;
-static int 			gfld_kick_time;
+static time_t 			gfld_kick_time;
 static int 			gfld_join_thr;
-static int 			gfld_join_time;
+static time_t 			gfld_join_time;
 static int 			gfld_ctcp_thr;
-static int 			gfld_ctcp_time;
-static int 			gfld_nick_thr;
-static int 			gfld_nick_time;
+static time_t 			gfld_ctcp_time;
+static int			gfld_nick_thr;
+static time_t 			gfld_nick_time;
 
 static int 			killed_bots = 0;
 
@@ -72,26 +72,28 @@ static void
 check_should_close()
 {
   char *p = CFG_CLOSETHRESHOLD.gdata;
-  tand_t *bot = NULL;
-  int H, L, hc, lc;
-  struct chanset_t *chan = NULL;
 
   if (!p)
     return;
-  H = atoi(p);
+
+  int H = atoi(p);
+
   p = strchr(p, ':');
   if (!p)
     return;
+
   p++;
-  L = atoi(p);
+
+  int L = atoi(p);
+
   if ((H <= 0) || (L <= 0))
     return;
-  hc = 1;
-  lc = 0;
-  for (bot = tandbot; bot; bot = bot->next) {
-    struct userrec *u = get_user_by_handle(userlist, bot->bot);
 
-    if (u) {
+  int hc = 1, lc = 0;
+  struct userrec *u = NULL;
+
+  for (tand_t *bot = tandbot; bot; bot = bot->next) {
+    if ((u = get_user_by_handle(userlist, bot->bot))) {
       if (bot_hublevel(u) < 999)
         hc++;
       else
@@ -99,7 +101,7 @@ check_should_close()
     }
   }
   if ((hc >= H) && (lc <= L)) {
-    for (chan = chanset; chan; chan = chan->next) {
+    for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
       if (!channel_closed(chan)) {
         do_chanset(NULL, chan, "+closed chanmode +stni", DO_LOCAL | DO_NET);
 #ifdef G_BACKUP
@@ -113,14 +115,14 @@ check_should_close()
 
 static void got_cset(char *botnick, char *code, char *par)
 {
-  int all = 0;
+  if (!par || !par[0])
+   return;
+
+  bool all = 0;
   char *chname = NULL;
   struct chanset_t *chan = NULL;
 
-  if (!par || !par[0])
-   return;
-  else {
-   if (par[0] == '*' && par[1] == ' ') {
+  if (par[0] == '*' && par[1] == ' ') {
     all = 1;
     newsplit(&par);
    } else {
@@ -132,7 +134,7 @@ static void got_cset(char *botnick, char *code, char *par)
     if (!(chan = findchan_by_dname(chname)))
       return;
    }
-  }
+
   if (all)
    chan = chanset;
 
@@ -157,10 +159,8 @@ parsebots(char *bots, char *botn) {
   if (!strcmp(bots, "*")) {
     return 1;
   } else {
-    char *list = NULL, *bot = NULL;
+    char *list = strdup(bots), *bot = strtok(list, ",");
 
-    list = strdup(bots);
-    bot = strtok(list, ",");
     while(bot && *bot) {
       if (!egg_strcasecmp(bot, botn))
         return 1;
@@ -173,18 +173,18 @@ parsebots(char *bots, char *botn) {
 
 static void got_cpart(char *botnick, char *code, char *par)
 {
-  char *chname = NULL, *bots = NULL;
-  struct chanset_t *chan = NULL;
-  int match = 0;
-
   if (!par[0])
    return;
 
-  chname = newsplit(&par);
+  char *chname = newsplit(&par);
+  struct chanset_t *chan = NULL;
+
   if (!(chan = findchan_by_dname(chname)))
    return;
 
-  bots = newsplit(&par);
+  char *bots = newsplit(&par);
+  int match = 0;
+
   /* if bots is '*' just remove_channel */
   if (!strcmp(bots, "*"))
     match = 0;
@@ -203,27 +203,24 @@ static void got_cpart(char *botnick, char *code, char *par)
 
 static void got_cjoin(char *botnick, char *code, char *par)
 {
-  char *chname = NULL, *options = NULL;
-#ifdef LEAF 
-  char *bots = NULL;
-  int match = 0, inactive = 0;
-#endif /* LEAF */
-  struct chanset_t *chan = NULL;
-
   if (!par[0])
    return;
 
-  chname = newsplit(&par);
-  chan = findchan_by_dname(chname);
-  
+  char *chname = newsplit(&par), *options = NULL;
+  struct chanset_t *chan = findchan_by_dname(chname);
+
   /* ALL hubs should add the channel, leaf should check the list for a match */
 #ifdef LEAF
-  bots = newsplit(&par);
+  bool inactive = 0;
+  char *bots = newsplit(&par);
+  int match = parsebots(bots, conf.bot->nick);
+
   if (strstr(par, "+inactive"))
     inactive = 1;
-  match = parsebots(bots, conf.bot->nick);
+
   if (chan && !match)
     return;
+
   if (!match) {
     size_t size = strlen(par) + 12 + 1;
 
@@ -235,12 +232,17 @@ static void got_cjoin(char *botnick, char *code, char *par)
     return;
   } else
 #endif /* LEAF */
+#ifdef HUB
+    newsplit(&par);	/* hubs ignore the botmatch param */
+#endif /* HUB */
     options = par;
   if (chan)
     return;
 sdprintf("OPTIONS: %s", options);
-  if (channel_add(NULL, chname, options) == ERROR) /* drummer */
-    putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s", botnick, chname);
+  char result[1024] = "";
+
+  if (channel_add(result, chname, options) == ERROR) /* drummer */
+    putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s: %s", botnick, chname, result);
 #ifdef HUB
   else
     write_userfile(-1);
@@ -254,16 +256,17 @@ sdprintf("OPTIONS: %s", options);
 #ifdef LEAF
 static void got_cycle(char *botnick, char *code, char *par)
 {
-  char *chname = NULL;
-  struct chanset_t *chan = NULL;
-  int delay = 10;
-
   if (!par[0])
    return;
 
-  chname = newsplit(&par);
+  char *chname = newsplit(&par);
+  struct chanset_t *chan = NULL;
+
   if (!(chan = findchan_by_dname(chname)))
    return;
+
+  time_t delay = 10;
+
   if (par[0])
     delay = atoi(newsplit(&par));
   
@@ -274,13 +277,12 @@ static void got_cycle(char *botnick, char *code, char *par)
 
 static void got_down(char *botnick, char *code, char *par)
 {
-  char *chname = NULL;
-  struct chanset_t *chan = NULL;
-
   if (!par[0])
    return;
 
-  chname = newsplit(&par);
+  char *chname = newsplit(&par);
+  struct chanset_t *chan = NULL;
+
   if (!(chan = findchan_by_dname(chname)))
    return;
  
@@ -291,17 +293,14 @@ static void got_down(char *botnick, char *code, char *par)
 
 static void got_role(char *botnick, char *code, char *par)
 {
-  role = atoi(newsplit(&par));
-  putlog(LOG_DEBUG, "@", "Got role index %d", role);
+  putlog(LOG_DEBUG, "@", "Got role index %d", atoi(newsplit(&par)));
 }
 
 void got_kl(char *botnick, char *code, char *par)
 {
   killed_bots++;
   if (kill_threshold && (killed_bots = kill_threshold)) {
-    struct chanset_t *ch = NULL;
-
-    for (ch = chanset; ch; ch = ch->next)
+    for (struct chanset_t *ch = chanset; ch; ch = ch->next)
       do_chanset(NULL, ch, "+closed +bitch +backup", DO_LOCAL | DO_NET);
   /* FIXME: we should randomize nick here ... */
   }
@@ -407,11 +406,11 @@ static void
 channels_timers()
 {
   static int cnt = 0;
-  struct chanset_t *chan = NULL, *chan_n = NULL;
+  struct chanset_t *chan_n = NULL;
 
   cnt += 10;		/* function is called every 10 seconds */
   
-  for (chan = chanset; chan; chan = chan_n) {
+  for (struct chanset_t *chan = chanset; chan; chan = chan_n) {
     chan_n = chan->next;
 
     if ((cnt % 10) == 0) {
@@ -431,28 +430,18 @@ channels_timers()
 
 static void got_sj(int idx, char *code, char *par) 
 {
-  char *chname = NULL;
-  time_t delay;
-  struct chanset_t *chan = NULL;
+  struct chanset_t *chan = findchan_by_dname(newsplit(&par));
 
-  chname = newsplit(&par);
-  delay = ((atoi(par) + now) - server_lag);
-  chan = findchan_by_dname(chname);
   if (chan)
-    chan->channel.jointime = delay;
+    chan->channel.jointime = ((atoi(par) + now) - server_lag);
 }
 
 static void got_sp(int idx, char *code, char *par) 
 {
-  char *chname = NULL;
-  time_t delay;
-  struct chanset_t *chan = NULL;
+  struct chanset_t *chan = findchan_by_dname(newsplit(&par));
 
-  chname = newsplit(&par);
-  delay = ((atoi(par) + now) - server_lag);
-  chan = findchan_by_dname(chname);
   if (chan)
-    chan->channel.parttime = delay;
+    chan->channel.parttime = ((atoi(par) + now) - server_lag);
 }
 /* got_jn
  * We get this when a bot is opped in a +take chan
@@ -461,11 +450,13 @@ static void got_sp(int idx, char *code, char *par)
 
 static void got_jn(int idx, char *code, char *par)
 {
-  struct chanset_t *chan = NULL;
-  char *chname = NULL;
+  char *chname = newsplit(&par);
 
-  chname = newsplit(&par);
-  if (!chname || !chname[0]) return;
+  if (!chname || !chname[0]) 
+    return;
+
+  struct chanset_t *chan = NULL;
+
   if (!(chan = findchan_by_dname(chname))) return;
   if (chan->channel.jointime && channel_inactive(chan)) {
     chan->status &= ~CHAN_INACTIVE;
@@ -571,9 +562,10 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
 static void get_mode_protect(struct chanset_t *chan, char *s)
 {
   char *p = s, s1[121] = "";
-  int ok = 0, i, tst;
+  int tst;
+  bool ok = 0;
 
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     ok = 0;
     if (i == 0) {
       tst = chan->mode_pls_prot;
@@ -633,7 +625,7 @@ static void get_mode_protect(struct chanset_t *chan, char *s)
 
 /* Returns true if this is one of the channel masks
  */
-int ismodeline(masklist *m, const char *username)
+bool ismodeline(masklist *m, const char *username)
 {
   for (; m && m->mask[0]; m = m->next)  
     if (!rfc_casecmp(m->mask, username))
@@ -643,7 +635,7 @@ int ismodeline(masklist *m, const char *username)
 
 /* Returns true if user matches one of the masklist -- drummer
  */
-int ismasked(masklist *m, const char *username)
+bool ismasked(masklist *m, const char *username)
 {
   for (; m && m->mask[0]; m = m->next)
     if (wild_match(m->mask, (char *) username))
@@ -653,11 +645,11 @@ int ismasked(masklist *m, const char *username)
 
 /* Unlink chanset element from chanset list.
  */
-static inline int chanset_unlink(struct chanset_t *chan)
+static inline bool chanset_unlink(struct chanset_t *chan)
 {
-  struct chanset_t *c = NULL, *c_old = NULL;
+  struct chanset_t *c_old = NULL;
 
-  for (c = chanset; c; c_old = c, c = c->next) {
+  for (struct chanset_t *c = chanset; c; c_old = c, c = c->next) {
     if (c == chan) {
       if (c_old)
 	c_old->next = c->next;
@@ -676,7 +668,7 @@ static inline int chanset_unlink(struct chanset_t *chan)
  */
 void remove_channel(struct chanset_t *chan)
 {
-   int		 i;
+   int i;
    
    irc_log(chan, "Parting");
    /* Remove the channel from the list, so that noone can pull it
@@ -721,7 +713,8 @@ void remove_channel(struct chanset_t *chan)
 static int channels_chon(char *handle, int idx)
 {
   struct flag_record fr = {FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0 };
-  int find, found = 0;
+  int find;
+  bool found = 0;
   struct chanset_t *chan = chanset;
 
   if (dcc[idx].type == &DCC_CHAT) {
@@ -764,12 +757,11 @@ static cmd_t my_chon[] =
 
 void channels_report(int idx, int details)
 {
-  struct chanset_t *chan = NULL;
   int i;
   char s[1024] = "", s2[100] = "";
   struct flag_record fr = {FR_CHAN | FR_GLOBAL, 0, 0, 0 };
 
-  for (chan = chanset; chan; chan = chan->next) {
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
     if (!privchan(fr, chan, PRIV_OP) && ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr))) {
@@ -881,9 +873,9 @@ void channels_report(int idx, int details)
         if (chan->revenge_mode)
           dprintf(idx, "      revenge-mode %d\n",
                   chan->revenge_mode);
-       dprintf(idx, "    Bans last %d mins.\n", chan->ban_time);
-       dprintf(idx, "    Exemptions last %d mins.\n", chan->exempt_time);
-       dprintf(idx, "    Invitations last %d mins.\n", chan->invite_time);
+       dprintf(idx, "    Bans last %lu mins.\n", chan->ban_time);
+       dprintf(idx, "    Exemptions last %lu mins.\n", chan->exempt_time);
+       dprintf(idx, "    Invitations last %lu mins.\n", chan->invite_time);
       }
     }
   }
@@ -970,4 +962,3 @@ void channels_init()
   add_builtins("bot", channels_bot);
   add_builtins("chon", my_chon);
 }
-

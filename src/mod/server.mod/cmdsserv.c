@@ -81,7 +81,8 @@ static void cmd_clearqueue(int idx, char *par)
     msgq_clear(&modeq);
     msgq_clear(&mq);
     msgq_clear(&hq);
-    double_warned = burst = 0;
+    double_warned = 0;
+    burst = 0;
     dprintf(idx, "Removed %d message%s from all queues.\n", msgs, 
         (msgs != 1) ? "s" : "");
   } else if (!egg_strcasecmp(par, "mode")) {

@@ -36,15 +36,12 @@ struct console_info {
   int whom;
 };
 
-static int
+static bool
 console_unpack(struct userrec *u, struct user_entry *e)
 {
-  struct console_info *ci = NULL;
-  char *par = NULL, *arg = NULL;
+  struct console_info *ci = (struct console_info *) calloc(1, sizeof(struct console_info));
+  char *par = e->u.list->extra, *arg = NULL;
 
-  ci = (struct console_info *) calloc(1, sizeof(struct console_info));
-
-  par = e->u.list->extra;
   arg = newsplit(&par);
   ci->channel = strdup(arg);
   arg = newsplit(&par);
@@ -73,7 +70,7 @@ console_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static int
+static bool
 console_kill(struct user_entry *e)
 {
   struct console_info *i = (struct console_info *) e->u.extra;
@@ -85,7 +82,7 @@ console_kill(struct user_entry *e)
 }
 
 #ifdef HUB
-static int
+static bool
 console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 {
   struct console_info *i = (struct console_info *) e->u.extra;
@@ -99,7 +96,7 @@ console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 }
 #endif /* HUB */
 
-static int
+static bool
 console_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   struct console_info *ci = (struct console_info *) e->u.extra;
@@ -128,12 +125,11 @@ console_set(struct userrec *u, struct user_entry *e, void *buf)
   return 1;
 }
 
-static int
+static bool
 console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
 {
   struct console_info *ci = (struct console_info *) e->u.extra;
   char *arg = NULL;
-  int i;
 
   arg = newsplit(&par);
   if (ci) {
@@ -165,7 +161,7 @@ console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
 
   e->u.extra = ci;
   /* now let's propogate to the dcc list */
-  for (i = 0; i < dcc_total; i++) {
+  for (int i = 0; i < dcc_total; i++) {
     if ((dcc[i].type == &DCC_CHAT) && !strcmp(dcc[i].user->handle, u->handle)) {
       if (ci->channel && ci->channel[0])
         strcpy(dcc[i].u.chat->con_chan, ci->channel);
@@ -245,9 +241,9 @@ static struct user_entry_type USERENTRY_CONSOLE = {
 static int
 console_chon(char *handle, int idx)
 {
-  struct console_info *i = (struct console_info *) get_user(&USERENTRY_CONSOLE, dcc[idx].user);
-
   if (dcc[idx].type == &DCC_CHAT) {
+    struct console_info *i = (struct console_info *) get_user(&USERENTRY_CONSOLE, dcc[idx].user);
+
     if (i) {
       if (i->channel && i->channel[0])
         strcpy(dcc[idx].u.chat->con_chan, i->channel);
@@ -312,9 +308,9 @@ console_store(int idx, char *par)
 {
   struct console_info *i = (struct console_info *) get_user(&USERENTRY_CONSOLE, dcc[idx].user);
 
-  if (!i) {
+  if (!i) 
     i = (struct console_info *) calloc(1, sizeof(struct console_info));
-  }
+  
   if (i->channel)
     free(i->channel);
   i->channel = strdup(dcc[idx].u.chat->con_chan);
@@ -370,12 +366,12 @@ console_store(int idx, char *par)
 }
 
 /* cmds.c:cmd_console calls this, better than chof bind - drummer,07/25/1999 */
-int
+void
 console_dostore(int idx)
 {
   if (console_autosave)
     console_store(idx, NULL);
-  return 0;
+  return;
 }
 
 static cmd_t mychon[] = {

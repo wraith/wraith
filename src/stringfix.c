@@ -18,7 +18,7 @@ int help = 0;
 void garble(char **inptr, char **outptr)
 {
   char *in = *inptr, *out = NULL, *p = NULL, obuf[WTF] = "";
-  int chars = 0;
+  size_t chars = 0;
   unsigned char x = 0;
 
   p = in + 5;
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 {
   FILE *f = NULL;
   char *ln = NULL, *nln = NULL, *buf = NULL;
-  int insize;
+  size_t insize;
 
   if (argc != 3 && argc != 4)
     return 1;

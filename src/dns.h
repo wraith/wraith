@@ -18,7 +18,7 @@
 struct dns_info {
   struct dcc_table *type;       /* type of the dcc table we are making the
                                    lookup for                              */
-  IP ip;                        /* IP address                              */
+  in_addr_t ip;                        /* IP address                              */
   int ibuf;                     /* temporary buffer for one integer        */
   void (*dns_success)(int);     /* is called if the dns request succeeds   */
   void (*dns_failure)(int);     /* is called if it fails                   */
@@ -31,7 +31,7 @@ struct dns_info {
 
 typedef struct {
   char *name;
-  void (*event)(IP, char *, int, void *);
+  void (*event)(in_addr_t, char *, int, void *);
 } devent_type;
 
 typedef struct {
@@ -43,18 +43,18 @@ typedef struct devent_str {
   struct devent_str *next;	/* Pointer to next dns_event	  */
   devent_type	*type;
   union {
-    IP		ip_addr;	/* IP address			  */
+    in_addr_t		ip_addr;	/* IP address			  */
     char	*hostname; 	/* Hostname			  */
   } res_data;
   void		*other;		/* Data specific to the event type */
   u_8bit_t	lookup;		/* RES_IPBYHOST or RES_HOSTBYIP	  */
 } devent_t;
 
-void block_dns_hostbyip(IP);
+void block_dns_hostbyip(in_addr_t);
 void block_dns_ipbyhost(char *);
-void call_hostbyip(IP, char *, int);
-void call_ipbyhost(char *, IP, int);
-void dcc_dnshostbyip(IP);
+void call_hostbyip(in_addr_t, char *, int);
+void call_ipbyhost(char *, in_addr_t, int);
+void dcc_dnshostbyip(in_addr_t);
 void dcc_dnsipbyhost(char *);
 
 

@@ -22,14 +22,14 @@ typedef struct tand_t_struct {
 /* Keep track of party-line members */
 typedef struct {
   time_t timer;			/* Track idle time */
-  int sock;
+  sock_t sock;
+  size_t status;
   int chan;
   char *from;
   char *away;
   char nick[HANDLEN + 1];
   char bot[HANDLEN + 1];
   char flag;
-  char status;
 } party_t;
 
 /* Status: */

@@ -29,12 +29,11 @@ static void init_watcher(pid_t);
 pid_t
 do_fork()
 {
-  pid_t pid = 0;
-
   if (daemon(1, 1))
     fatal(strerror(errno), 0);
 
-  pid = getpid();
+  pid_t pid = getpid();
+
   writepid(conf.bot->pid_file, pid);
   lastfork = now;
 #ifndef CYGWIN_HACKS

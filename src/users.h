@@ -21,9 +21,9 @@ struct list_type {
     	(b)->next = *(a);						\
 	*(a) = (b);							\
 }
-int list_append(struct list_type **, struct list_type *);
-int list_delete(struct list_type **, struct list_type *);
-int list_contains(struct list_type *, struct list_type *);
+bool list_append(struct list_type **, struct list_type *);
+bool list_delete(struct list_type **, struct list_type *);
+bool list_contains(struct list_type *, struct list_type *);
 
 
 /* New userfile format stuff
@@ -32,16 +32,16 @@ struct userrec;
 struct user_entry;
 struct user_entry_type {
   struct user_entry_type *next;
-  int (*got_share) (struct userrec *, struct user_entry *, char *, int);
-  int (*unpack) (struct userrec *, struct user_entry *);
+  bool (*got_share) (struct userrec *, struct user_entry *, char *, int);
+  bool (*unpack) (struct userrec *, struct user_entry *);
 #ifdef HUB
-  int (*write_userfile) (FILE *, struct userrec *, struct user_entry *);
+  bool (*write_userfile) (FILE *, struct userrec *, struct user_entry *);
 #endif /* HUB */
-  int (*kill) (struct user_entry *);
+  bool (*kill) (struct user_entry *);
   void *(*get) (struct userrec *, struct user_entry *);
-  int (*set) (struct userrec *, struct user_entry *, void *);
+  bool (*set) (struct userrec *, struct user_entry *, void *);
   void (*display) (int idx, struct user_entry *, struct userrec *);
-  char *name;
+  const char *name;
 };
 
 
@@ -89,11 +89,11 @@ struct filesys_stats {
   int dnload_ks;
 };
 
-int add_entry_type(struct user_entry_type *);
+bool add_entry_type(struct user_entry_type *);
 struct user_entry_type *find_entry_type(char *);
 struct user_entry *find_user_entry(struct user_entry_type *, struct userrec *);
 void *get_user(struct user_entry_type *, struct userrec *);
-int set_user(struct user_entry_type *, struct userrec *, void *);
+bool set_user(struct user_entry_type *, struct userrec *, void *);
 
 #define is_bot(u)	((u) && (u)->bot)
 
@@ -151,12 +151,12 @@ struct userrec *check_chanlist_hand(const char *);
 
 /* All the default userentry stuff, for code re-use
  */
-int def_unpack(struct userrec *u, struct user_entry *e);
-int def_kill(struct user_entry *e);
-int def_write_userfile(FILE *f, struct userrec *u, struct user_entry *e);
+bool def_unpack(struct userrec *u, struct user_entry *e);
+bool def_kill(struct user_entry *e);
+bool def_write_userfile(FILE *f, struct userrec *u, struct user_entry *e);
 void *def_get(struct userrec *u, struct user_entry *e);
-int def_set(struct userrec *u, struct user_entry *e, void *buf);
-int def_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx);
+bool def_set(struct userrec *u, struct user_entry *e, void *buf);
+bool def_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx);
 void def_display(int idx, struct user_entry *e, struct userrec *u);
 
 
@@ -166,7 +166,7 @@ void backup_userfile();
 void addignore(char *, char *, const char *, time_t);
 int delignore(char *);
 void tell_ignores(int, char *);
-int match_ignore(char *);
+bool match_ignore(char *);
 void check_expired_ignores();
 void autolink_cycle(char *);
 void tell_file_stats(int, char *);
@@ -177,6 +177,6 @@ void check_pmode();
 void link_pref_val(struct userrec *u, char *lval);
 
 extern char			natip[], userfile[];
-extern int			ignore_time;
+extern time_t			ignore_time;
 
 #endif				/* _EGG_USERS_H */

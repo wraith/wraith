@@ -53,7 +53,7 @@ static int gotfake433(char *from)
     } else if (rolls < len) {
         /* fun BX style rolling, WEEEE */
         char tmp = 0;
-        int i = 0;
+        size_t i = 0;
 
         altnick_char = 0;
         use_chr = 0;
@@ -159,7 +159,7 @@ int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
 }
 
 
-int match_my_nick(char *nick)
+bool match_my_nick(char *nick)
 {
   return (!rfc_casecmp(nick, botname));
 }
@@ -169,8 +169,6 @@ int match_my_nick(char *nick)
 static int got001(char *from, char *msg)
 {
   struct server_list *x = NULL;
-  int i;
-  struct chanset_t *chan = NULL;
 
   server_online = now;
   checked_hostmask = 0;
@@ -186,7 +184,7 @@ static int got001(char *from, char *msg)
   if (x == NULL)
     return 0;			/* Uh, no server list */
 
-  for (chan = chanset; chan; chan = chan->next) {
+  for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
     if (shouldjoin(chan))
       dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
@@ -194,7 +192,7 @@ static int got001(char *from, char *msg)
   }
   if (egg_strcasecmp(from, dcc[servidx].host)) {
     putlog(LOG_MISC, "*", "(%s claims to be %s; updating server list)", dcc[servidx].host, from);
-    for (i = curserv; i > 0 && x != NULL; i--)
+    for (int i = curserv; i > 0 && x != NULL; i--)
       x = x->next;
     if (x == NULL) {
       putlog(LOG_MISC, "*", "Invalid server list!");
@@ -218,20 +216,23 @@ static int got001(char *from, char *msg)
 static int
 got005(char *from, char *msg)
 {
-  char *tmp = NULL;
+  char *tmp = NULL, *p, *p2;
 
   newsplit(&msg); /* nick */
 
   while ((tmp = newsplit(&msg))[0]) {
-    char *p = NULL;
+    p = NULL;
 
     if ((p = strchr(tmp, '=')))
       *p++ = 0;
     if (!egg_strcasecmp(tmp, ":are"))
       break;
-    else if (!egg_strcasecmp(tmp, "MODES"))
+    else if (!egg_strcasecmp(tmp, "MODES")) {
       modesperline = atoi(p);
-    else if (!egg_strcasecmp(tmp, "NICKLEN"))
+
+      if (modesperline > MODES_PER_LINE_MAX)
+        modesperline = MODES_PER_LINE_MAX;
+    } else if (!egg_strcasecmp(tmp, "NICKLEN"))
       nick_len = atoi(p);
     else if (!egg_strcasecmp(tmp, "NETWORK"))
       strncpyz(curnetwork, p, 120);
@@ -250,7 +251,7 @@ got005(char *from, char *msg)
       max_invites = max_bans;
     }
     else if (!egg_strcasecmp(tmp, "MAXLIST")) {
-      char *p2 = NULL;
+      p2 = NULL;
       
       if ((p2 = strchr(p, ':'))) {
         *p2++ = 0;
@@ -281,8 +282,8 @@ static int got442(char *from, char *msg)
 {
   char *chname = NULL;
   struct chanset_t *chan = NULL;
-  struct server_list *x = NULL;
   int i;
+  struct server_list *x = NULL;
 
   for (x = serverlist, i = 0; x; x = x->next, i++)
     if (i == curserv) {
@@ -326,19 +327,20 @@ static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
 
 /* Do on NICK, PRIVMSG, NOTICE and JOIN.
  */
-static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
+static bool detect_flood(char *floodnick, char *floodhost, char *from, int which)
 {
-  char *p = NULL, ftype[10] = "", h[1024] = "";
-  struct userrec *u = NULL;
-  int thr = 0, lapse = 0, atr;
+  struct userrec *u = get_user_by_host(from);
+  int atr = u ? u->flags : 0;
 
-  u = get_user_by_host(from);
-  atr = u ? u->flags : 0;
   if ((u && u->bot) || (atr & USER_NOFLOOD))
     return 0;
 
   if (findauth(floodhost) > -1) 
     return 0;
+
+  char *p = NULL, ftype[10] = "", h[1024] = "";
+  int thr = 0;
+  time_t lapse = 0;
 
   /* Determine how many are necessary to make a flood */
   switch (which) {
@@ -397,12 +399,11 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
 /* Check for more than 8 control characters in a line.
  * This could indicate: beep flood CTCP avalanche.
  */
-int detect_avalanche(char *msg)
+bool detect_avalanche(char *msg)
 {
   int count = 0;
-  unsigned char *p = NULL;
 
-  for (p = (unsigned char *) msg; (*p) && (count < 8); p++)
+  for (unsigned char *p = (unsigned char *) msg; (*p) && (count < 8); p++)
     if ((*p == 7) || (*p == 1))
       count++;
   if (count >= 8)
@@ -415,17 +416,18 @@ int detect_avalanche(char *msg)
  */
 static int gotmsg(char *from, char *msg)
 {
-  char *to = NULL, buf[UHOSTLEN] = "", *nick = NULL, ctcpbuf[512] = "", *uhost = buf, 
-       *ctcp = NULL, *p = NULL, *p1 = NULL, *code = NULL;
-  struct userrec *u = NULL;
-  int ctcp_count = 0, i = 0, ignoring = 0;
-
   if (msg[0] && ((strchr(CHANMETA, *msg) != NULL) ||
      (*msg == '@')))           /* Notice to a channel, not handled here */
     return 0;
 
-  ignoring = match_ignore(from);
+  char *to = NULL, buf[UHOSTLEN] = "", *nick = NULL, ctcpbuf[512] = "", *uhost = buf, 
+       *ctcp = NULL, *p = NULL, *p1 = NULL, *code = NULL;
+  struct userrec *u = NULL;
+  int ctcp_count = 0, i = 0;
+  bool ignoring = match_ignore(from);
+
   to = newsplit(&msg);
+
   fixcolon(msg);
   /* Only check if flood-ctcp is active */
   strcpy(uhost, from);
@@ -560,7 +562,8 @@ static int gotmsg(char *from, char *msg)
           putlog(LOG_MSGS, "*", "[%s] %c%s %s", from, cmdprefix, my_code, msg);
       } else if ((my_code[0] != cmdprefix || !my_code[1] || i == -1 || !(auth[i].authed))) {
         if (!ignoring) {
-          int doit = 1;
+          bool doit = 1;
+
           if (!egg_strcasecmp(my_code, "op") || !egg_strcasecmp(my_code, "pass") || !egg_strcasecmp(my_code, "invite") 
               || !egg_strcasecmp(my_code, "ident")
                || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
@@ -592,15 +595,15 @@ static int gotmsg(char *from, char *msg)
  */
 static int gotnotice(char *from, char *msg)
 {
-  char *to = NULL, *nick = NULL, ctcpbuf[512] = "", *p = NULL, *p1 = NULL, buf[512] = "", 
-       *uhost = buf, *ctcp = NULL, *ctcpmsg = NULL, *ptr = NULL;
-  struct userrec *u = NULL;
-  int ignoring;
-
   if (msg[0] && ((strchr(CHANMETA, *msg) != NULL) ||
       (*msg == '@')))           /* Notice to a channel, not handled here */
     return 0;
-  ignoring = match_ignore(from);
+
+  char *to = NULL, *nick = NULL, ctcpbuf[512] = "", *p = NULL, *p1 = NULL, buf[512] = "", 
+       *uhost = buf, *ctcp = NULL, *ctcpmsg = NULL, *ptr = NULL;
+  struct userrec *u = NULL;
+  bool ignoring = match_ignore(from);
+
   to = newsplit(&msg);
   fixcolon(msg);
   strcpy(uhost, from);
@@ -696,10 +699,9 @@ static void minutely_checks()
   /* Only check if we have already successfully logged in.  */
   if (server_online) {
     static int count = 4;
-    int ok = 0;
-    struct chanset_t *chan = NULL;
+    bool ok = 0;
 
-    for (chan = chanset; chan; chan = chan->next) {
+    for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
       if (channel_active(chan) && chan->channel.members == 1) {
         ok = 1;
         break;
@@ -734,17 +736,17 @@ static int gotpong(char *from, char *msg)
  */
 static void got303(char *from, char *msg)
 {
-  char *tmp = NULL;
-  int ison_orig = 0;
-
-  if (!keepnick ||
-      !strncmp(botname, origbotname, strlen(botname))) {
+  if (!keepnick || !strncmp(botname, origbotname, strlen(botname)))
     return;
-  }
+
+  char *tmp = NULL;
+
   newsplit(&msg);
   fixcolon(msg);
   tmp = newsplit(&msg);
   if (tmp[0] && !rfc_casecmp(botname, tmp)) {
+    bool ison_orig = 0;
+
     while ((tmp = newsplit(&msg))[0]) { /* no, it's NOT == */
       if (!rfc_casecmp(tmp, origbotname))
         ison_orig = 1;
@@ -868,10 +870,8 @@ static int goterror(char *from, char *msg)
   if (msg[0] == ':')
     msg++;       
   putlog(LOG_SERV, "*", "-ERROR from server- %s", msg);
-  if (serverror_quit) {
-    putlog(LOG_SERV, "*", "Disconnecting from server.");
-    nuke_server("Bah, stupid error messages.");
-  }
+  putlog(LOG_SERV, "*", "Disconnecting from server.");
+  nuke_server("Bah, stupid error messages.");
   return 1;
 }
 
@@ -958,10 +958,8 @@ static void eof_server(int idx)
 {
   putlog(LOG_SERV, "*", "Disconnected from %s", dcc[idx].host);
   if (ischanhub() && auth_total > 0) {
-    int i = 0;
-
     putlog(LOG_DEBUG, "*", "Removing %d auth entries.", auth_total);
-    for (i = 0; i < auth_total; i++)
+    for (int i = 0; i < auth_total; i++)
       removeauth(i);  
   }
   disconnect_server(idx, DO_LOST);
@@ -976,10 +974,8 @@ static void connect_server(void);
 
 static void kill_server(int idx, void *x)
 {
-  struct chanset_t *chan = NULL;
-
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
-  for (chan = chanset; chan; chan = chan->next)
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
      clear_channel(chan, 1);
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
@@ -991,7 +987,7 @@ static void timeout_server(int idx)
   disconnect_server(idx, DO_LOST);
 }
 
-static void server_activity(int, char *, int);
+static void server_activity(int, char *, size_t);
 
 static struct dcc_table SERVER_SOCKET =
 {
@@ -1007,43 +1003,7 @@ static struct dcc_table SERVER_SOCKET =
   NULL
 };
 
-int isop(char *mode)
-{
-  int state = 0, cnt = 0;
-  char *p = NULL;
-
-  p = mode;
-  while ((*p) && (*p != ' ')) {
-    if (*p == '-')
-      state = 1;
-    else if (*p == '+')
-      state = 0;
-    else if ((!state) && (*p == 'o'))
-      cnt++;
-    p++;
-  }
-  return (cnt >= 1);
-}
-
-int ismdop(char *mode)
-{
-  int state = 0, cnt = 0;
-  char *p = NULL;
-
-  p = mode;
-  while ((*p) && (*p != ' ')) {
-    if (*p == '-')
-      state = 1;
-    else if (*p == '+')
-      state = 0;
-    else if ((state) && (*p == 'o'))
-      cnt++;
-    p++;
-  }
-  return (cnt >= 3);
-}
-
-static void server_activity(int idx, char *msg, int len)
+static void server_activity(int idx, char *msg, size_t len)
 {
   char *from = NULL, *code = NULL;
 
@@ -1064,11 +1024,12 @@ static void server_activity(int idx, char *msg, int len)
     SERVER_SOCKET.timeout_val = 0;
   }
   waiting_for_awake = 0;
-  from = "";
   if (msg[0] == ':') {
     msg++;
     from = newsplit(&msg);
-  }
+  } else
+    from = "";
+ 
   code = newsplit(&msg);
 
   if (use_console_r) {
@@ -1094,10 +1055,7 @@ static int gotping(char *from, char *msg)
 
 static int gotkick(char *from, char *msg)
 {
-  char *nick = NULL;
-
-  nick = from;
-  if (rfc_casecmp(nick, botname))
+  if (!match_my_nick(from))
     /* Not my kick, I don't need to bother about it. */
     return 0;
   if (use_penalties) {
@@ -1114,10 +1072,10 @@ static int got318_369(char *, char *, int);
 static int whoispenalty(char *from, char *msg)
 {
   struct server_list *x = serverlist;
-  int i, ii;
 
   if (x && use_penalties) {
-    i = ii = 0;
+    int i = 0, ii = 0;
+
     for (; x; x = x->next) {
       if (i == curserv) {
         if ((strict_servernames == 1) || !x->realname) {
@@ -1148,13 +1106,12 @@ irc_whois(char *nick, char *format, ...)
 {
   char va_out[2001] = "";
   va_list va;
-  int idx;
 
   va_start(va, format);
   egg_vsnprintf(va_out, sizeof(va_out) - 1, format, va);
   va_end(va);
 
-  for (idx = 0; idx < dcc_total; idx++)
+  for (int idx = 0; idx < dcc_total; idx++)
     if (dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois))
       dprintf(idx, "%s\n", va_out);
 }
@@ -1272,14 +1229,13 @@ static int got369(char *from, char *msg)
 static int got318_369(char *from, char *msg, int whowas)
 {
   char *nick = NULL;
-  int idx;
 
   newsplit(&msg);
   nick = newsplit(&msg);
   fixcolon(msg);
 
   irc_whois(nick, "%s", msg);
-  for (idx = 0; idx < dcc_total; idx++) {
+  for (int idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick) &&
        ((!whowas && !dcc[idx].whowas) || (whowas && dcc[idx].whowas))) {
       dcc[idx].whois[0] = 0;
@@ -1294,13 +1250,12 @@ static int got318_369(char *from, char *msg, int whowas)
 static int got401(char *from, char *msg)
 {
   char *nick = NULL;
-  int idx;
 
   newsplit(&msg);
   nick = newsplit(&msg);
   fixcolon(msg);
   irc_whois(nick, "%s", msg);
-  for (idx = 0; idx < dcc_total; idx++)
+  for (int idx = 0; idx < dcc_total; idx++)
     if (dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick))
       dcc[idx].whowas = 1;
 

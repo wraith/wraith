@@ -42,7 +42,8 @@ void set_cmd_pass(char *, int);
 extern struct cmd_pass            *cmdpass;
 
 extern char			cmdprefix;
-extern int			cfg_count, cfg_noshare;
+extern int			cfg_count;
+extern bool			cfg_noshare;
 extern struct cfg_entry		**cfg;
 
 #define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)

@@ -141,22 +141,22 @@ struct chanset_t {
   uint32_t status;
   uint32_t ircnet_status;
   int flood_pub_thr;
-  int flood_pub_time;
+  time_t flood_pub_time;
   int flood_join_thr;
-  int flood_join_time;
+  time_t flood_join_time;
   int flood_deop_thr;
-  int flood_deop_time;
+  time_t flood_deop_time;
   int flood_kick_thr;
-  int flood_kick_time;
+  time_t flood_kick_time;
   int flood_ctcp_thr;
-  int flood_ctcp_time;
+  time_t flood_ctcp_time;
   int flood_nick_thr;
-  int flood_nick_time;
+  time_t flood_nick_time;
   int limitraise;
   int closed_ban;
   int closed_private;
   int bad_cookie;
-  int cookie_time_slack;
+  time_t cookie_time_slack;
   int manop;
   int mdop;
   int mop;
@@ -166,9 +166,9 @@ struct chanset_t {
   int idle_kick;
   int stopnethack_mode;
   int revenge_mode;
-  int ban_time;
-  int invite_time;
-  int exempt_time;
+  time_t ban_time;
+  time_t invite_time;
+  time_t exempt_time;
 
   /* desired channel modes: */
   int mode_pls_prot;		/* modes to enforce			*/
@@ -176,8 +176,8 @@ struct chanset_t {
   int limit_prot;		/* desired limit			*/
   /* queued mode changes: */
   int limit;			/* new limit to set			*/
-  int bytes;			/* total bytes so far			*/
-  int cbytes;
+  size_t bytes;			/* total bytes so far			*/
+  size_t cbytes;
   int compat;			/* to prevent mixing old/new modes	*/
   int floodnum[FLOOD_CHAN_MAX];
   int opreqtime[5];             /* remember when ops was requested */
@@ -290,7 +290,7 @@ struct msgq_head {
 /* Used to queue a lot of things */
 struct msgq {
   struct msgq *next;
-  int len;
+  size_t len;
   char *msg;
 };
 

@@ -27,7 +27,7 @@ devent_t	*dns_events = NULL;
  *   DCC functions
  */
 
-void dcc_dnswait(int idx, char *buf, int len)
+void dcc_dnswait(int idx, char *buf, size_t len)
 {
   /* Ignore anything now. */
 }
@@ -80,11 +80,9 @@ struct dcc_table DCC_DNSWAIT =
 /* Walk through every dcc entry and look for waiting DNS requests
  * of RES_HOSTBYIP for our IP address.
  */
-static void dns_dcchostbyip(IP ip, char *hostn, int ok, void *other)
+static void dns_dcchostbyip(in_addr_t ip, char *hostn, int ok, void *other)
 {
-  int idx;
-
-  for (idx = 0; idx < dcc_total; idx++) {
+  for (int idx = 0; idx < dcc_total; idx++) {
     if ((dcc[idx].type == &DCC_DNSWAIT) &&
         (dcc[idx].u.dns->dns_type == RES_HOSTBYIP) &&
         (dcc[idx].u.dns->ip == ip)) {
@@ -103,11 +101,9 @@ static void dns_dcchostbyip(IP ip, char *hostn, int ok, void *other)
 /* Walk through every dcc entry and look for waiting DNS requests
  * of RES_IPBYHOST for our hostname.
  */
-static void dns_dccipbyhost(IP ip, char *hostn, int ok, void *other)
+static void dns_dccipbyhost(in_addr_t ip, char *hostn, int ok, void *other)
 {
-  int idx;
-
-  for (idx = 0; idx < dcc_total; idx++) {
+  for (int idx = 0; idx < dcc_total; idx++) {
     if ((dcc[idx].type == &DCC_DNSWAIT) &&
         (dcc[idx].u.dns->dns_type == RES_IPBYHOST) &&
         !egg_strcasecmp(dcc[idx].u.dns->host, hostn)) {
@@ -158,7 +154,7 @@ void dcc_dnsipbyhost(char *hostn)
   dns_ipbyhost(hostn);
 }
 
-void dcc_dnshostbyip(IP ip)
+void dcc_dnshostbyip(in_addr_t ip)
 {
   devent_t *de = NULL;
 
@@ -191,7 +187,7 @@ void dcc_dnshostbyip(IP ip)
  *    Event functions
  */
 
-void call_hostbyip(IP ip, char *hostn, int ok)
+void call_hostbyip(in_addr_t ip, char *hostn, int ok)
 {
   devent_t *de = dns_events, *ode = NULL, *nde = NULL;
 
@@ -219,7 +215,7 @@ void call_hostbyip(IP ip, char *hostn, int ok)
   }
 }
 
-void call_ipbyhost(char *hostn, IP ip, int ok)
+void call_ipbyhost(char *hostn, in_addr_t ip, int ok)
 {
   devent_t *de = dns_events, *ode = NULL, *nde = NULL;
 
@@ -256,10 +252,10 @@ void call_ipbyhost(char *hostn, IP ip, int ok)
  *    Async DNS emulation functions
  */
 
-void block_dns_hostbyip(IP ip)
+void block_dns_hostbyip(in_addr_t ip)
 {
   struct hostent *hp = NULL;
-  IP addr = htonl(ip);
+  in_addr_t addr = htonl(ip);
   static char s[UHOSTLEN] = "";
 
   if (!setjmp(alarmret)) {
@@ -291,7 +287,7 @@ void block_dns_ipbyhost(char *host)
   if (!setjmp(alarmret)) {
     struct hostent *hp = NULL;
     struct in_addr *in = NULL;
-    IP ip = 0;
+    in_addr_t ip = 0;
 
     alarm(resolve_timeout);
     hp = gethostbyname(host);
@@ -299,7 +295,7 @@ void block_dns_ipbyhost(char *host)
 
     if (hp) {
       in = (struct in_addr *) (hp->h_addr_list[0]);
-      ip = (IP) (in->s_addr);
+      ip = (in_addr_t) (in->s_addr);
       call_ipbyhost(host, ntohl(ip), 1);
       return;
     }

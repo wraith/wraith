@@ -49,11 +49,12 @@ init_auth_max()
 static void
 expire_auths()
 {
-  int i = 0, idle = 0;
-
   if (!ischanhub())
     return;
-  for (i = 0; i < auth_total; i++) {
+
+  time_t idle = 0;
+
+  for (int i = 0; i < auth_total; i++) {
     if (auth[i].authed) {
       idle = now - auth[i].atime;
       if (idle >= (60 * 60)) {
@@ -102,25 +103,21 @@ makebdhash(char *randstring)
 int
 new_auth(void)
 {
-  int i = auth_total;
-
   if (auth_total == max_auth)
     return -1;
 
-  auth_total++;
-  egg_bzero((char *) &auth[i], sizeof(struct auth_t));
-  return i;
+  egg_bzero((struct auth_t *) &auth[auth_total], sizeof(struct auth_t));
+  return auth_total++;
 }
 
 /* returns 0 if not found, -1 if problem, and > 0 if found. */
 int
 findauth(char *host)
 {
-  int i = 0;
-
   if (!host || !host[0])
     return -1;
-  for (i = 0; i < auth_total; i++) {
+
+  for (int i = 0; i < auth_total; i++) {
     if (!auth[i].host) {
       putlog(LOG_MISC, "*", "AUTH ENTRY: %d HAS NO HOST??", i);
       continue;

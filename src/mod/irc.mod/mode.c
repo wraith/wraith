@@ -8,7 +8,7 @@
  */
 
 /* Reversing this mode? */
-static int reversing = 0;
+static bool reversing = 0;
 
 #  define PLUS    BIT0
 #  define MINUS   BIT1
@@ -21,8 +21,8 @@ static int reversing = 0;
 static struct flag_record user = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 static struct flag_record victim = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-static int
-do_op(char *nick, struct chanset_t *chan, int delay, int force)
+static bool
+do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
 {
   memberlist *m = ismember(chan, nick);
 
@@ -40,16 +40,12 @@ do_op(char *nick, struct chanset_t *chan, int delay, int force)
 static void
 flush_cookies(struct chanset_t *chan, int pri)
 {
-  char *p = NULL, out[512] = "", post[512] = "";
-  size_t postsize = sizeof(post);
-  unsigned int i = 0;
-
-  p = out;
-  post[0] = 0, postsize--;
+  char out[512] = "", *p = out, post[512] = "";
+  size_t postsize = sizeof(post) - 1;
 
   chan->cbytes = 0;
 
-  for (i = 0; i < (modesperline - 1); i++) {
+  for (unsigned int i = 0; i < (modesperline - 1); i++) {
     if (chan->ccmode[i].op && postsize > strlen(chan->ccmode[i].op)) {
 
       *p++ = '+';
@@ -68,9 +64,9 @@ flush_cookies(struct chanset_t *chan, int pri)
   *p = 0;
 
   if (post[0]) {
-    char *cookie = NULL;
     /* remove the trailing space... */
     size_t myindex = (sizeof(post) - 1) - postsize;
+    char *cookie;
 
     if (myindex > 0 && post[myindex - 1] == ' ')
       post[myindex - 1] = 0;
@@ -78,7 +74,7 @@ flush_cookies(struct chanset_t *chan, int pri)
     egg_strcatn(out, " ", sizeof(out));
     egg_strcatn(out, post, sizeof(out));
     egg_strcatn(out, " ", sizeof(out));
-
+    
     cookie = makecookie(chan->dname, botname);
     egg_strcatn(out, cookie, sizeof(out));
     free(cookie);
@@ -98,19 +94,17 @@ flush_cookies(struct chanset_t *chan, int pri)
 static void
 flush_mode(struct chanset_t *chan, int pri)
 {
-  char *p = NULL, out[512] = "", post[512] = "";
-  size_t postsize = sizeof(post);
-  int plus = 2;                 /* 0 = '-', 1 = '+', 2 = none */
-  unsigned int i = 0;
-
   if (!modesperline)            /* Haven't received 005 yet :) */
     return;
+
+  char out[512] = "", *p = out, post[512] = "";
+  size_t postsize = sizeof(post) - 1;
+  int plus = 2;                 /* 0 = '-', 1 = '+', 2 = none */
+  unsigned int i = 0;
 
   flush_cookies(chan, pri);
 
 /* dequeue_op_deop(chan); */
-  p = out;
-  post[0] = 0, postsize--;
 
 /* now does +o first.. */
   if (chan->mns[0]) {
@@ -238,16 +232,12 @@ flush_mode(struct chanset_t *chan, int pri)
 /* Queue a channel mode change
  */
 void
-real_add_mode(struct chanset_t *chan, const char plus, const char mode, const char *op, int cookie)
+real_add_mode(struct chanset_t *chan, const char plus, const char mode, const char *op, bool cookie)
 {
-  int type, modes, l;
-  unsigned int i;
-  masklist *m = NULL;
-  memberlist *mx = NULL;
-  char s[21] = "";
-
   if (!me_op(chan))
     return;
+
+  memberlist *mx = NULL;
 
   if (mode == 'o' || mode == 'v') {
     mx = ismember(chan, op);
@@ -274,6 +264,11 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
       mx->flags |= SENTVOICE;
     }
   }
+
+  int type, modes, l;
+  unsigned int i;
+  masklist *m = NULL;
+  char s[21] = "";
 
   if (chan->compat == 0) {
     if (mode == 'e' || mode == 'I')
@@ -444,13 +439,7 @@ static void
 got_op(struct chanset_t *chan, char *nick, char *from,
        char *who, struct userrec *opu, struct flag_record *opper)
 {
-  memberlist *m = NULL;
-  char s[UHOSTLEN] = "";
-  struct userrec *u;
-  int check_chan = 0;
-  int snm = chan->stopnethack_mode;
-
-  m = ismember(chan, who);
+  memberlist *m = ismember(chan, who);
   if (!m) {
     if (channel_pending(chan))
       return;
@@ -458,6 +447,10 @@ got_op(struct chanset_t *chan, char *nick, char *from,
     dprintf(DP_MODE, "WHO %s\n", who);
     return;
   }
+
+  char s[UHOSTLEN] = "";
+  struct userrec *u;
+  bool check_chan = 0;
 
   /* Did *I* just get opped? */
   if (!me_op(chan) && match_my_nick(who))
@@ -508,6 +501,8 @@ got_op(struct chanset_t *chan, char *nick, char *from,
   } else if (reversing && !match_my_nick(who))
     add_mode(chan, '-', 'o', who);
   if (!nick[0] && me_op(chan) && !match_my_nick(who)) {
+    int snm = chan->stopnethack_mode;
+
     if (chk_deop(victim)) {
       m->flags |= FAKEOP;
       add_mode(chan, '-', 'o', who);
@@ -538,9 +533,7 @@ got_op(struct chanset_t *chan, char *nick, char *from,
   m->flags |= WASOP;
   if (check_chan) {
     /* tell other bots to set jointime to 0 and join */
-    char *buf = NULL;
-
-    buf = (char *) calloc(1, strlen(chan->dname) + 3 + 1);
+    char *buf = (char *) calloc(1, strlen(chan->dname) + 3 + 1);
 
     sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);
@@ -552,11 +545,8 @@ got_op(struct chanset_t *chan, char *nick, char *from,
 static void
 got_deop(struct chanset_t *chan, char *nick, char *from, char *who, struct userrec *opu)
 {
-  memberlist *m = NULL;
-  char s[UHOSTLEN] = "", s1[UHOSTLEN] = "";
-  struct userrec *u = NULL;
+  memberlist *m = ismember(chan, who);
 
-  m = ismember(chan, who);
   if (!m) {
     if (channel_pending(chan))
       return;
@@ -564,6 +554,9 @@ got_deop(struct chanset_t *chan, char *nick, char *from, char *who, struct userr
     dprintf(DP_MODE, "WHO %s\n", who);
     return;
   }
+
+  char s[UHOSTLEN] = "", s1[UHOSTLEN] = "";
+  struct userrec *u = NULL;
 
   simple_sprintf(s, "%s!%s", m->nick, m->userhost);
   simple_sprintf(s1, "%s!%s", nick, from);
@@ -582,7 +575,7 @@ got_deop(struct chanset_t *chan, char *nick, char *from, char *who, struct userr
 
   /* Deop'd someone on my oplist? */
   if (me_op(chan)) {
-    int ok = 1;
+    bool ok = 1;
 
     /* if they aren't d|d then check if they are something we should protect */
     if (!glob_deop(victim) && !chan_deop(victim)) {
@@ -633,9 +626,7 @@ got_deop(struct chanset_t *chan, char *nick, char *from, char *who, struct userr
 static void
 got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
 {
-  char me[UHOSTLEN] = "", s[UHOSTLEN] = "", s1[UHOSTLEN] = "";
-  memberlist *m = NULL;
-  struct userrec *u = NULL;
+  char me[UHOSTLEN] = "", s[UHOSTLEN] = "";
 
   egg_snprintf(me, sizeof me, "%s!%s", botname, botuserhost);
   egg_snprintf(s, sizeof s, "%s!%s", nick, from);
@@ -649,13 +640,18 @@ got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
     reversing = 1;
     return;
   }
+
+  struct userrec *u = NULL;
+
   if (!match_my_nick(nick)) {
     if (channel_nouserbans(chan) && nick[0] && !glob_bot(user)) {
       add_mode(chan, '-', 'b', who);
       return;
     }
     /* remove bans on ops unless a master/bot set it */
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    char s1[UHOSTLEN] = "";
+
+    for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
       egg_snprintf(s1, sizeof s1, "%s!%s", m->nick, m->userhost);
       if (wild_match(who, s1)) {
         u = get_user_by_host(s1);
@@ -862,18 +858,15 @@ got_uninvite(struct chanset_t *chan, char *nick, char *from, char *who, struct u
 static int
 gotmode(char *from, char *msg)
 {
-  char *nick = NULL, *ch = NULL, *op = NULL, *chg = NULL, s[UHOSTLEN] = "", ms2[3] = "";
-  int z, isserver = 0;
-  struct userrec *u = NULL;
-  memberlist *m = NULL;
-  struct chanset_t *chan = NULL;
-
   /* Usermode changes? */
   if (msg[0] && (strchr(CHANMETA, msg[0]) != NULL)) {
-    ch = newsplit(&msg);
+    char *ch = newsplit(&msg);
+
     if (match_my_nick(ch))
       return 0;
-    chan = findchan(ch);
+
+    struct chanset_t *chan = findchan(ch);
+
     if (!chan) {
       putlog(LOG_MISC, "*", CHAN_FORCEJOIN, ch);
       dprintf(DP_SERVER, "PART %s\n", ch);
@@ -882,11 +875,17 @@ gotmode(char *from, char *msg)
 
     /* let's pre-emptively check for mass op/deop, manual ops and cookieops */
 
-    if (!strchr(from, '!'))
-      isserver++;
-
     if ((channel_active(chan) || channel_pending(chan))) {
-      z = strlen(msg);
+
+      bool isserver = 0;
+      char *nick = NULL, *op = NULL, *chg = NULL, s[UHOSTLEN] = "", ms2[3] = "";
+      size_t z = strlen(msg);
+      struct userrec *u = NULL;
+      memberlist *m = NULL;
+
+      if (!strchr(from, '!'))
+        isserver = 1;
+
       if (msg[--z] == ' ')      /* I hate cosmetic bugs :P -poptix */
         msg[z] = 0;
 
@@ -900,17 +899,17 @@ gotmode(char *from, char *msg)
       }
 
       if (!isserver) {
-        char **modes = NULL;
-        char tmp[1024] = "", *wptr = NULL, *p = NULL, work[1024] = "", sign = '+';
-        int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0, me_opped = 0;
+        char **modes = (char **) calloc(modesperline + 1, sizeof(char *));
+        char tmp[1024] = "", *p = NULL, work[1024] = "", *wptr = work, sign = '+', *mp;
+        int modecnt = 0, i = 0, n = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
+        bool me_opped = 0;
 
         /* Split up the mode: #chan modes param param param param */
         strncpyz(work, msg, sizeof(work));
-        wptr = work;
         p = newsplit(&wptr);
-        modes = (char **) calloc(modesperline + 1, sizeof(char *));
         while (*p) {            /* +MODES PARAM PARAM PARAM ... */
-          char *mp = NULL;
+          mp = NULL;
+
           if (*p == '+')
             sign = '+';
           else if (*p == '-')
@@ -1288,7 +1287,7 @@ gotmode(char *from, char *msg)
               putlog(LOG_MISC, chan->dname, CHAN_BADCHANMODE, chan->dname, op);
               dprintf(DP_MODE, "WHO %s\n", op);
             } else {
-              int dv = 0;
+              bool dv = 0;
 
               simple_sprintf(s, "%s!%s", m->nick, m->userhost);
               get_user_flagrec(m->user ? m->user : get_user_by_host(s), &victim, chan->dname);
@@ -1297,7 +1296,7 @@ gotmode(char *from, char *msg)
                 if (m->flags & EVOICE) {
 /* FIXME: This is a lame check, we need to expand on this more */
                   if (!chan_master(user) && !glob_master(user)) {
-                    dv++;
+                    dv = 1;
                   } else {
                     m->flags &= ~EVOICE;
                   }

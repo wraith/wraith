@@ -33,7 +33,7 @@ int addparty(char *, char *, int, char, int, char *, int *);
 void remparty(char *, int);
 void partystat(char *, int, int, int);
 int partynick(char *, int, char *);
-int partyidle(char *, char *);
+bool partyidle(char *, char *);
 void partysetidle(char *, int, int);
 void partyaway(char *, int, char *);
 void botnet_send_cmdpass(int, char *, char *);

@@ -16,8 +16,8 @@
  *    Handy aliases for memory tracking and core dumps
  */
 #ifdef DEBUG_CONTEXT
-#  define Context               eggContext(__FILE__, __LINE__, NULL)
-#  define ContextNote(note)     eggContextNote(__FILE__, __LINE__, NULL, note)
+#  define Context               eggContext(__FILE__, __LINE__)
+#  define ContextNote(note)     eggContextNote(__FILE__, __LINE__, note)
 #else
 #  define Context               {}
 #  define ContextNote(note)     {}
@@ -26,7 +26,7 @@
 #ifdef DEBUG_ASSERT
 #  define Assert(expr)  do {                                            \
         if (!(expr))                                                    \
-                eggAssert(__FILE__, __LINE__, NULL);                    \
+                eggAssert(__FILE__, __LINE__);                          \
 } while (0)
 #else
 #  define Assert(expr)  do {    } while (0)
@@ -39,15 +39,15 @@
 #define debug4(x,a1,a2,a3,a4)   putlog(LOG_DEBUG,"*",x,a1,a2,a3,a4)
 
 
-extern int		sdebug;
+extern bool		sdebug;
 
 void stackdump(int);
 void setlimits();
 void sdprintf (char *, ...) __attribute__((format(printf, 1, 2)));
 void init_signals();
 void init_debug();
-void eggContext(const char *, int, const char *);
-void eggContextNote(const char *, int, const char *, const char *);
-void eggAssert(const char *, int, const char *);
+void eggContext(const char *, int);
+void eggContextNote(const char *, int, const char *);
+void eggAssert(const char *, int);
 
 #endif /* !_DEBUG_H */

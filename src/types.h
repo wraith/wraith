@@ -34,11 +34,10 @@ typedef unsigned long           u_32bit_t;
 typedef unsigned short int      u_16bit_t;
 typedef unsigned char           u_8bit_t;
 
-/* IP type */
-typedef in_addr_t		IP;
 typedef u_int32_t 		dword;
 
 /* port */
 typedef in_port_t		port_t;
+typedef long			sock_t;
 
 #endif /* !_TYPES_H */

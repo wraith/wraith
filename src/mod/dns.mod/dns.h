@@ -33,7 +33,7 @@ struct resolve {
     struct resolve	*previoushost;
     time_t		expiretime;
     char		*hostn;
-    IP			ip;
+    in_addr_t			ip;
     u_16bit_t		id;
     u_8bit_t		state;
     u_8bit_t		sends;
@@ -58,7 +58,7 @@ enum resolve_states {
 #define ddebug4(x, x1, x2, x3, x4) sdprintf(x, x1, x2, x3, x4)
 
 int dns_report(int, int);
-void dns_hostbyip(IP);
+void dns_hostbyip(in_addr_t);
 void dns_ipbyhost(char *);
 
 #endif	/* _EGG_MOD_DNS_DNS_H */

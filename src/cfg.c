@@ -30,7 +30,8 @@
 
 #include "stat.h"
 
-int 				cfg_count = 0, cfg_noshare = 0;
+int 				cfg_count = 0;
+bool				cfg_noshare = 0;
 struct cfg_entry 		**cfg = NULL;
 char 				cmdprefix = '+';	/* This is the prefix for msg/channel cmds */
 struct cmd_pass 		*cmdpass = NULL;
@@ -171,12 +172,12 @@ struct cfg_entry CFG_CMDPREFIX = {
 
 void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
 {
+  if (!u)
+    return;
+
   char tmp[256] = "", tmp2[1024] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int which = 0;
-
-  if (!u)
-    return;
 
   switch (why) {
   case DEFLAG_BADCOOKIE:
@@ -356,8 +357,6 @@ struct cfg_entry CFG_PROCESSLIST = {
 
 #ifdef LEAF
 static void servers_changed(struct cfg_entry * entry, int * valid) {
-  char *slist = NULL, *p = NULL;
-
   if (!strcmp(entry->name, "servers")) {
     if (conf.bot->host6 || conf.bot->ip6) /* we want to use the servers6 entry. */
       return;
@@ -365,6 +364,9 @@ static void servers_changed(struct cfg_entry * entry, int * valid) {
     if (!conf.bot->host6 && !conf.bot->ip6) /* we probably want to use the normal server list.. */
       return;
   }
+
+  char *slist = NULL, *p = NULL;
+
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
   if (serverlist) {
     clearq(serverlist);
@@ -505,10 +507,9 @@ static void getin_describe(struct cfg_entry *cfgent, int idx)
 
 static void getin_changed(struct cfg_entry *cfgent, int *valid)
 {
-  int i;
-
   if (!cfgent->gdata)
     return;
+
   *valid = 0;
   if (!strcmp(cfgent->name, "op-requests")) {
     int L,
@@ -543,7 +544,9 @@ static void getin_changed(struct cfg_entry *cfgent, int *valid)
     *valid = 1;
     return;
   }
-  i = atoi(cfgent->gdata);
+
+  int i = atoi(cfgent->gdata);
+
   if (!strcmp(cfgent->name, "op-bots")) {
     if ((i < 1) || (i > 10))
       return;
@@ -643,17 +646,18 @@ void add_cfg(struct cfg_entry *entry)
 
 static struct cfg_entry *check_can_set_cfg(char *target, char *entryname)
 {
-  int i;
-  struct userrec *u = NULL;
   struct cfg_entry *entry = NULL;
 
-  for (i = 0; i < cfg_count; i++)
+  for (int i = 0; i < cfg_count; i++)
     if (!strcmp(cfg[i]->name, entryname)) {
       entry = cfg[i];
       break;
     }
   if (!entry)
     return 0;
+
+  struct userrec *u = NULL;
+
   if (target) {
     if (!(entry->flags & CFGF_LOCAL))
       return 0;

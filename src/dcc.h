@@ -15,8 +15,8 @@ struct dcc_table {
   char *name;
   int flags;
   void (*eof) (int);
-  void (*activity) (int, char *, int);
-  int *timeout_val;
+  void (*activity) (int, char *, size_t);
+  time_t *timeout_val;
   void (*timeout) (int);
   void (*display) (int, char *);
   void (*kill) (int, void *);
@@ -36,18 +36,18 @@ struct dcc_t {
     struct relay_info *relay;
     struct dns_info *dns;
     struct dupwait_info *dupwait;
-    int ident_sock;
+    sock_t ident_sock;
     void *other;
   } u;                          /* Special use depending on type        */
 
-  IP addr;                      /* IP address in host byte order         */
+  in_addr_t addr;                      /* IP address in host byte order         */
   time_t simultime;             /* the time when the simul dcc is initiated, expires after a number of seconds */
   time_t timeval;               /* Use for any timing stuff
                                    - this is used for timeout checking  */
   time_t pingtime;
-  unsigned long status;         /* A LOT of dcc types have status
+  size_t status;         /* A LOT of dcc types have status
                                    thingos, this makes it more avaliabe */
-  long sock;                    /* This should be a long to keep 64-bit
+  sock_t sock;                    /* This should be a long to keep 64-bit
                                    machines sane                         */
   int ssl;                      /* use ssl on this dcc? */
   int simul;                    /* this will hold the idx on the remote bot to return result. */
@@ -87,18 +87,18 @@ struct file_info {
 
 struct xfer_info {
   FILE *f;                      /* pointer to file being sent/received     */
-  unsigned long int length;
-  unsigned long int acked;
-  unsigned long int offset;     /* offset from beginning of file, during
+  size_t length;
+  size_t acked;
+  size_t offset;     /* offset from beginning of file, during
+
                                    resend.                                 */
-  unsigned long int block_pending;  	/* bytes of this DCC block which weren't
-                                   sent yet.                               */
+  size_t block_pending;  	/* bytes of this DCC block which weren't sent yet. */
+  size_t sofar;          /* how much of the byte count received     */
   unsigned int type;            /* xfer connection type, see enum below    */
   time_t start_time;            /* Time when a xfer was started.           */
   char *filename;
   char *origname;
   unsigned short ack_type;      /* type of ack                             */
-  unsigned char sofar;          /* how much of the byte count received     */
   char dir[DIRLEN];             /* used when uploads go to the current dir */
   char from[NICKLEN];           /* [GET] user who offered the file         */
   char buf[4];                  /* you only need 5 bytes!                  */
@@ -115,7 +115,7 @@ struct bot_info {
 
 struct relay_info {
   struct chat_info *chat;
-  long sock;
+  sock_t sock;
   int old_status;
   port_t port;
 };

@@ -60,9 +60,9 @@ int base64_to_int(char *buf)
 
 static void fake_alert(int idx, char *item, char *extra)
 {
-  static unsigned long lastfake;	/* The last time fake_alert was used */
+  static time_t lastfake;	/* The last time fake_alert was used */
 
-  if (now - lastfake > 10) {	
+  if ((now - lastfake) > 10) {	
     /* Don't fake_alert more than once every 10secs */
     dprintf(idx, "ct %s NOTICE: %s (%s != %s).\n", conf.bot->nick, NET_FAKEREJECT, item, extra);
     putlog(LOG_BOTS, "*", "%s %s (%s != %s).", dcc[idx].nick, NET_FAKEREJECT, item, extra);
@@ -121,9 +121,8 @@ static void bot_chan2(int idx, char *msg)
 
 void bot_cmdpass(int idx, char *par)
 {
-  char *p = NULL;
+  char *p = strchr(par, ' ');
 
-  p = strchr(par, ' ');
   if (p) {
     *p++ = 0;
     botnet_send_cmdpass(idx, par, p);
@@ -1202,7 +1201,7 @@ void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {
   char msg[SGRAB - 110] = "";
 
-  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %lu %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, 
+  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %zu %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, 
                dcc[idx].u.chat->con_chan, dcc[idx].status, cmd, par);
   putbot(bot, msg);
 }

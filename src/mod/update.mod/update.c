@@ -164,8 +164,8 @@ static botcmd_t C_update[] =
 
 static void got_nu(char *botnick, char *code, char *par)
 {
-/* needupdate? curver */
-  time_t newts;
+  if (!par || !*par) 
+    return;
 #ifdef LEAF
   if (!conf.bot->u || !userlist || !get_user_by_handle(userlist, botnick))	/* probably still getting userfile */
     return;
@@ -179,9 +179,10 @@ static void got_nu(char *botnick, char *code, char *par)
   if (localhub && updated)
     return;
 #endif /* LEAF */
-   if (!par || !*par) 
-     return;
-   newts = atol(newsplit(&par));
+
+/* needupdate? curver */
+   time_t newts = atol(newsplit(&par));
+
    if (newts > buildts) {
 #ifdef LEAF
      struct bot_addr *bi = NULL, *obi = NULL;
@@ -216,12 +217,11 @@ static cmd_t update_bot[] = {
 
 void updatein(int idx, char *msg)
 {
-  char *code = NULL;
-  int f, i;
+  char *code = newsplit(&msg);
+  int y, f = 0, i = 0;
 
-  code = newsplit(&msg);
   for (f = 0, i = 0; C_update[i].name && !f; i++) {
-    int y = egg_strcasecmp(code, C_update[i].name);
+    y = egg_strcasecmp(code, C_update[i].name);
 
     if (!y)
       /* Found a match */
@@ -258,7 +258,7 @@ void finish_update(int idx)
     FILE *f = NULL;
     f = fopen(dcc[idx].u.xfer->filename, "rb");
     fseek(f, 0, SEEK_END);
-    putlog(LOG_DEBUG, "*", "Update binary is %lu bytes and its length: %lu status: %lu", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
+    putlog(LOG_DEBUG, "*", "Update binary is %li bytes and its length: %zu status: %zu", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
     fclose(f);
   }
 
@@ -350,8 +350,8 @@ static void start_sending_binary(int idx)
     dcc[idx].status |= STAT_SENDINGU;
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick);		/* Store bot's nick */
-    dprintf(idx, "sb us %lu %d %lu\n",
-	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()),
+    dprintf(idx, "sb us %lu %hd %zu\n",
+	    iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()),
 	    dcc[i].port, dcc[i].u.xfer->length);
   }
 #endif /* HUB */
@@ -443,9 +443,7 @@ void update_report(int idx, int details)
 #ifdef HUB
 static void cmd_bupdate(int idx, char *par)
 {
-  int i;
-
-  for (i = 0; i < dcc_total; i++) {
+  for (int i = 0; i < dcc_total; i++) {
     if (!egg_strcasecmp(dcc[i].nick, par)) {
       dprintf(i, "sb u?\n");
       dcc[i].status &= ~(STAT_SENDINGU | STAT_UPDATED);

@@ -67,15 +67,15 @@ char *mymd5 = bdhash;
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.2";
 
-int 	localhub = 1; 		/* we set this to 0 if we get a -B */
+bool 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
-int 	loading = 0;
+bool 	loading = 0;
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
-int	backgrd = 1;		/* Run in the background? */
+bool	backgrd = 1;		/* Run in the background? */
 uid_t   myuid;
-int	term_z = 0;		/* Foreground: use the terminal as a party line? */
+bool	term_z = 0;		/* Foreground: use the terminal as a party line? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
 char 	*binname = NULL;
@@ -84,24 +84,22 @@ time_t	online_since;		/* Unix-time that the bot loaded up */
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
 char	version[81] = "";	/* Version info (long form) */
 char	ver[41] = "";		/* Version info (short form) */
-int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
+bool	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
-static int	do_confedit = 0;		/* show conf menu if -C */
+static bool do_confedit = 0;		/* show conf menu if -C */
 #ifdef LEAF
-static char    do_killbot[21] = "";
+static char do_killbot[21] = "";
 #endif /* LEAF */
 static char *update_bin = NULL;
-static int 	checktrace = 1;		/* Check for trace when starting up? */
+static bool checktrace = 1;		/* Check for trace when starting up? */
 
 
 static char *getfullbinname(const char *argv_zero)
 {
-  char cwd[DIRMAX] = "", *bin = NULL, *p = NULL, *p2 = NULL;
-
-  bin = strdup(argv_zero);
+  char *bin = strdup(argv_zero);
 
   if (bin[0] == '/')
 #ifdef CYGWIN_HACKS
@@ -110,14 +108,16 @@ static char *getfullbinname(const char *argv_zero)
     return bin;
 #endif /* CYGWIN_HACKS */
 
+  char cwd[DIRMAX] = "";
+
   if (!getcwd(cwd, DIRMAX))
     fatal("getcwd() failed", 0);
 
   if (cwd[strlen(cwd) - 1] == '/')
     cwd[strlen(cwd) - 1] = 0;
 
-  p = bin;
-  p2 = strchr(p, '/');
+  char *p = bin, *p2 = strchr(p, '/');
+
   while (p) {
     if (p2)
       *p2++ = 0;
@@ -146,8 +146,6 @@ static char *getfullbinname(const char *argv_zero)
 
 void fatal(const char *s, int recoverable)
 {
-  int i = 0;
-
 #ifdef LEAF
   nuke_server((char *) s);
 #endif /* LEAF */
@@ -164,7 +162,7 @@ void fatal(const char *s, int recoverable)
   listen_all(my_port, 1); /* close the listening port... */
 #endif /* HUB */
 
-  for (i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++)
     if (dcc[i].sock >= 0)
       killsock(dcc[i].sock);
 
@@ -177,9 +175,7 @@ void fatal(const char *s, int recoverable)
 
 static void check_expired_dcc()
 {
-  int i;
-
-  for (i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && dcc[i].type->timeout_val &&
 	((now - dcc[i].timeval) > *(dcc[i].type->timeout_val))) {
       if (dcc[i].type->timeout)
@@ -195,9 +191,7 @@ static void check_expired_dcc()
 
 /* this also expires irc dcc_cmd auths */
 static void expire_simuls() {
-  int idx = 0;
-
-  for (idx = 0; idx < dcc_total; idx++) {
+  for (int idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].simul > 0) {
       if ((now - dcc[idx].simultime) >= 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
         dcc[idx].simul = -1;
@@ -388,7 +382,7 @@ static void dtx_arg(int argc, char *argv[])
 }
 
 /* Timer info */
-static int		lastmin = 99;
+static time_t		lastmin = 99;
 static struct tm	nowtm;
 
 void core_10secondly()
@@ -445,7 +439,7 @@ static void event_resettraffic()
 static void core_secondly()
 {
   static int cnt = 0;
-  int miltime;
+  time_t miltime;
 
 #ifdef CRAZY_TRACE 
   if (!attached) crazy_trace();
@@ -461,19 +455,19 @@ static void core_secondly()
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   if (nowtm.tm_min != lastmin) {
-    int i = 0;
+    time_t i = 0;
 
     /* Once a minute */
     lastmin = (lastmin + 1) % 60;
     /* In case for some reason more than 1 min has passed: */
     while (nowtm.tm_min != lastmin) {
       /* Timer drift, dammit */
-      debug2("timer: drift (lastmin=%d, now=%d)", lastmin, nowtm.tm_min);
+      debug2("timer: drift (lastmin=%lu, now=%d)", lastmin, nowtm.tm_min);
       i++;
       lastmin = (lastmin + 1) % 60;
     }
     if (i > 1)
-      putlog(LOG_MISC, "*", "(!) timer drift -- spun %d minutes", i);
+      putlog(LOG_MISC, "*", "(!) timer drift -- spun %lu minutes", i);
     miltime = (nowtm.tm_hour * 100) + (nowtm.tm_min);
     if (((int) (nowtm.tm_min / 5) * 5) == (nowtm.tm_min)) {	/* 5 min */
 /* 	flushlogs(); */
@@ -521,7 +515,7 @@ static void core_halfhourly()
 /* FIXME: Remove after 1.2 */
 static void startup_checks() {
   int enc = CONF_ENC;
-  int old_hack = 0;
+  bool old_hack = 0;
 
   /* for compatability with old conf files 
    * only check/use conf file if it exists and settings.uname is empty.
@@ -592,7 +586,6 @@ static void startup_checks() {
   else if (settings.uname[0])
     bin_to_conf();
 
-
 #ifndef CYGWIN_HACKS
   if (do_confedit)
     confedit();		/* this will exit() */
@@ -640,7 +633,7 @@ static void startup_checks() {
     ContextNote("realpath(): Success");
     /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
     if (strcmp(binname, newbin) && strcmp(newbin, real)) { 		/* if wrong path and new path != current */
-      int ok = 1;
+      bool ok = 1;
 
       sdprintf("real: %s", real);
       sdprintf("wrong dir, is: %s :: %s", binname, newbin);
@@ -724,11 +717,9 @@ void transfer_init();
 
 int main(int argc, char **argv)
 {
-//printf("YAY!\n\n\n\n\n\n\n\n");
-//exit(0);
   egg_timeval_t egg_timeval_now;
 
-  Context;
+  Context;		/* FIXME: wtf is this here for?, probably some old hack to fix a corrupt heap */
 /*
   char *out = NULL;
 printf("ret: %d\n", system("c:/wraith/leaf.exe"));
@@ -754,10 +745,8 @@ printf("out: %s\n", out);
 
 #ifdef STOP_UAC
   {
-    int nvpair[2];
+    int nvpair[2] = { SSIN_UACPROC, UAC_NOPRINT };
 
-    nvpair[0] = SSIN_UACPROC;
-    nvpair[1] = UAC_NOPRINT;
     setsysinfo(SSI_NVPAIRS, (char *) nvpair, 1, NULL, 0);
   }
 #endif
@@ -867,10 +856,9 @@ printf("out: %s\n", out);
 
 #if defined(LEAF) && defined(__linux__)
   if (conf.pscloak) {
-    int argi;
     const char *p = response(RES_PSCLOAK);
 
-    for (argi = 0; argi < argc; argi++)
+    for (int argi = 0; argi < argc; argi++)
       egg_memset(argv[argi], 0, strlen(argv[argi]));
 
     strcpy(argv[0], p);
@@ -953,7 +941,7 @@ printf("out: %s\n", out);
   debug0("main: entering loop");
 
   while (1) {
-    int socket_cleanup = 0, i, xx, status = 0;
+    int socket_cleanup = 0, status = 0, xx, i = 0;
     char buf[SGRAB + 10] = "";
 
 #ifndef CYGWIN_HACKS
@@ -981,12 +969,10 @@ printf("out: %s\n", out);
     } else
       socket_cleanup--;
 
-    xx = sockgets(buf, &i); 
+    xx = sockgets(buf, &i);
 
     if (xx >= 0) {		/* Non-error */
-      int idx;
-
-      for (idx = 0; idx < dcc_total; idx++)
+      for (int idx = 0; idx < dcc_total; idx++) {
 	if (dcc[idx].sock == xx) {
 	  if (dcc[idx].type && dcc[idx].type->activity) {
 	    /* Traffic stats */
@@ -1013,12 +999,13 @@ printf("out: %s\n", out);
 		   dcc[idx].type->name, dcc[idx].sock);
 	  break;
 	}
+      }
     } else if (xx == -1) {	/* EOF from someone */
       int idx;
 
       if (i == STDOUT && !backgrd)
 	fatal("END OF FILE ON TERMINAL", 0);
-      for (idx = 0; idx < dcc_total; idx++)
+      for (idx = 0; idx < dcc_total; idx++) {
 	if (dcc[idx].sock == i) {
 	  if (dcc[idx].type && dcc[idx].type->eof)
 	    dcc[idx].type->eof(idx);
@@ -1031,6 +1018,7 @@ printf("out: %s\n", out);
 	  }
 	  idx = dcc_total + 1;
 	}
+      }
       if (idx == dcc_total) {
 	putlog(LOG_MISC, "*", "(@) EOF socket %d, not a dcc socket, not anything.", i);
 	close(i);

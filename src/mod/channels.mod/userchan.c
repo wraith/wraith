@@ -5,13 +5,9 @@
 
 extern struct cmd_pass *cmdpass;
 
-int force_expire = 0;
-
 struct chanuserrec *get_chanrec(struct userrec *u, char *chname)
 {
-  struct chanuserrec *ch = NULL;
-
-  for (ch = u->chanrec; ch; ch = ch->next) 
+  for (register struct chanuserrec *ch = u->chanrec; ch; ch = ch->next) 
     if (!rfc_casecmp(ch->channel, chname))
       return ch;
   return NULL;
@@ -19,10 +15,8 @@ struct chanuserrec *get_chanrec(struct userrec *u, char *chname)
 
 struct chanuserrec *add_chanrec(struct userrec *u, char *chname)
 {
-  struct chanuserrec *ch = NULL;
-
   if (findchan_by_dname(chname)) {
-    ch = (struct chanuserrec *) calloc(1, sizeof(struct chanuserrec));
+    struct chanuserrec *ch = (struct chanuserrec *) calloc(1, sizeof(struct chanuserrec));
 
     ch->next = u->chanrec;
     u->chanrec = ch;
@@ -33,15 +27,15 @@ struct chanuserrec *add_chanrec(struct userrec *u, char *chname)
     ch->channel[80] = 0;
     if (!noshare)
       shareout("+cr %s %s\n", u->handle, chname);
+    return ch;
   }
-  return ch;
+  return NULL;
 }
 
 void add_chanrec_by_handle(struct userrec *bu, char *hand, char *chname)
 {
-  struct userrec *u = NULL;
+  struct userrec *u = get_user_by_handle(bu, hand);
 
-  u = get_user_by_handle(bu, hand);
   if (!u)
     return;
   if (!get_chanrec(u, chname))
@@ -50,15 +44,15 @@ void add_chanrec_by_handle(struct userrec *bu, char *hand, char *chname)
 
 void get_handle_chaninfo(char *handle, char *chname, char *s)
 {
-  struct userrec *u = NULL;
-  struct chanuserrec *ch = NULL;
+  struct userrec *u = get_user_by_handle(userlist, handle);
 
-  u = get_user_by_handle(userlist, handle);
   if (u == NULL) {
     s[0] = 0;
     return;
   }
-  ch = get_chanrec(u, chname);
+
+  struct chanuserrec *ch = get_chanrec(u, chname);
+
   if (ch == NULL) {
     s[0] = 0;
     return;
@@ -73,14 +67,13 @@ void get_handle_chaninfo(char *handle, char *chname, char *s)
 
 void set_handle_chaninfo(struct userrec *bu, char *handle, char *chname, char *info)
 {
-  struct userrec *u = NULL;
-  struct chanuserrec *ch = NULL;
-  struct chanset_t *cst = NULL;
+  struct userrec *u = get_user_by_handle(bu, handle);
 
-  u = get_user_by_handle(bu, handle);
   if (!u)
     return;
-  ch = get_chanrec(u, chname);
+
+  struct chanuserrec *ch = get_chanrec(u, chname);
+
   if (!ch) {
     add_chanrec_by_handle(bu, handle, chname);
     ch = get_chanrec(u, chname);
@@ -95,7 +88,7 @@ void set_handle_chaninfo(struct userrec *bu, char *handle, char *chname, char *i
     ch->info = strdup(info);
   } else
     ch->info = NULL;
-  cst = findchan_by_dname(chname);
+
   if ((!noshare) && (bu == userlist)) {
     shareout("chchinfo %s %s %s\n", handle, chname, info ? info : "");
   }
@@ -125,12 +118,12 @@ void del_chanrec(struct userrec *u, char *chname)
 
 void set_handle_laston(char *chan, struct userrec *u, time_t n)
 {
-  struct chanuserrec *ch = NULL;
-
   if (!u)
     return;
   touch_laston(u, chan, n);
-  ch = get_chanrec(u, chan);
+
+  struct chanuserrec *ch = get_chanrec(u, chan);
+
   if (!ch)
     return;
   ch->laston = n;
@@ -148,7 +141,7 @@ int u_sticky_mask(maskrec *u, char *uhost)
 
 /* Set sticky attribute for a mask.
  */
-int u_setsticky_mask(struct chanset_t *chan, maskrec *u, char *uhost, int sticky, const char *botcmd)
+int u_setsticky_mask(struct chanset_t *chan, maskrec *u, char *uhost, bool sticky, const char *botcmd)
 {
   int j;
 
@@ -204,7 +197,7 @@ int u_equals_mask(maskrec *u, char *mask)
   return 0;
 }
 
-int u_match_mask(maskrec *rec, char *mask)
+bool u_match_mask(maskrec *rec, char *mask)
 {
   for (; rec; rec = rec->next)
     if (wild_match(rec->mask, mask))
@@ -274,7 +267,7 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
 
 /* Note: If first char of note is '*' it's a sticky mask.
  */
-int u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *note, time_t expire_time, int flags)
+bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *note, time_t expire_time, int flags)
 {
   char host[1024] = "", s[1024] = "";
   maskrec *p = NULL, *l = NULL, **u = NULL;
@@ -369,7 +362,7 @@ int u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *no
 
 /* Take host entry from ban list and display it ban-style.
  */
-static void display_ban(int idx, int number, maskrec *ban, struct chanset_t *chan, int show_inact)
+static void display_ban(int idx, int number, maskrec *ban, struct chanset_t *chan, bool show_inact)
 {
   char dates[81] = "", s[41] = "";
 
@@ -416,7 +409,7 @@ static void display_ban(int idx, int number, maskrec *ban, struct chanset_t *cha
 
 /* Take host entry from exempt list and display it ban-style.
  */
-static void display_exempt(int idx, int number, maskrec *exempt, struct chanset_t *chan, int show_inact)
+static void display_exempt(int idx, int number, maskrec *exempt, struct chanset_t *chan, bool show_inact)
 {
   char dates[81] = "", s[41] = "";
 
@@ -463,7 +456,7 @@ static void display_exempt(int idx, int number, maskrec *exempt, struct chanset_
 
 /* Take host entry from invite list and display it ban-style.
  */
-static void display_invite (int idx, int number, maskrec *invite, struct chanset_t *chan, int show_inact)
+static void display_invite (int idx, int number, maskrec *invite, struct chanset_t *chan, bool show_inact)
 {
   char dates[81] = "", s[41] = "";
 
@@ -508,7 +501,7 @@ static void display_invite (int idx, int number, maskrec *invite, struct chanset
     dprintf(idx, "        %s\n", dates);
 }
 
-static void tell_bans(int idx, int show_inact, char *match)
+static void tell_bans(int idx, bool show_inact, char *match)
 {
   int k = 1;
   char *chname = NULL;
@@ -606,7 +599,7 @@ static void tell_bans(int idx, int show_inact, char *match)
     dprintf(idx, "%s.\n", BANS_USEBANSALL);
 }
 
-static void tell_exempts(int idx, int show_inact, char *match)
+static void tell_exempts(int idx, bool show_inact, char *match)
 {
   int k = 1;
   char *chname = NULL;
@@ -705,7 +698,7 @@ static void tell_exempts(int idx, int show_inact, char *match)
     dprintf(idx, "%s.\n", EXEMPTS_USEEXEMPTSALL);
 }
 
-static void tell_invites(int idx, int show_inact, char *match)
+static void tell_invites(int idx, bool show_inact, char *match)
 {
   int k = 1;
   char *chname = NULL;
@@ -804,21 +797,19 @@ static void tell_invites(int idx, int show_inact, char *match)
     dprintf(idx, "%s.\n", INVITES_USEINVITESALL);
 }
 
-int write_config(FILE *f, int idx)
+bool write_config(FILE *f, int idx)
 {
-  int i = 0;
-  struct cmd_pass *cp = NULL;
   putlog(LOG_DEBUG, "@", "Writing config entries...");
   if (lfprintf(f, CONFIG_NAME " - -\n") == EOF) /* Daemus */
       return 0;
-  for (i = 0; i < cfg_count; i++) {
+  for (int i = 0; i < cfg_count; i++) {
     if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->gdata)) {
       if (lfprintf(f, "@ %s %s\n", cfg[i]->name, cfg[i]->gdata ? cfg[i]->gdata : "") == EOF)
         return 0;
     }
   }
 
-  for (cp = cmdpass; cp; cp = cp->next)
+  for (struct cmd_pass *cp = cmdpass; cp; cp = cp->next)
     if (lfprintf(f, "- %s %s\n", cp->name, cp->pass) == EOF)
       return 0;
 
@@ -826,17 +817,15 @@ int write_config(FILE *f, int idx)
 }
 /* Write the ban lists and the ignore list to a file.
  */
-int write_bans(FILE *f, int idx)
+bool write_bans(FILE *f, int idx)
 {
-  struct chanset_t *chan = NULL;
-  maskrec *b = NULL;
-  struct igrec *i = NULL;
-  char *mask = NULL;
-
   if (global_ign)
     if (lfprintf(f, IGNORE_NAME " - -\n") == EOF)	/* Daemus */
       return 0;
-  for (i = global_ign; i; i = i->next) {
+
+  char *mask = NULL;
+
+  for (struct igrec *i = global_ign; i; i = i->next) {
     mask = str_escape(i->igmask, ':', '\\');
     if (!mask ||
 	lfprintf(f, "- %s:%s%lu:%s:%lu:%s\n", mask,
@@ -852,6 +841,9 @@ int write_bans(FILE *f, int idx)
   if (global_bans)
     if (lfprintf(f, BAN_NAME " - -\n") == EOF)	/* Daemus */
       return 0;
+
+  maskrec *b = NULL;
+
   for (b = global_bans; b; b = b->next) {
     mask = str_escape(b->mask, ':', '\\');
     if (!mask ||
@@ -866,7 +858,7 @@ int write_bans(FILE *f, int idx)
     }
     free(mask);
   }
-  for (chan = chanset; chan; chan = chan->next) {
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (lfprintf(f, "::%s bans\n", chan->dname) == EOF)
       return 0;
     for (b = chan->bans; b; b = b->next) {
@@ -888,15 +880,15 @@ int write_bans(FILE *f, int idx)
 }
 /* Write the exemptlists to a file.
  */
-int write_exempts(FILE *f, int idx)
+bool write_exempts(FILE *f, int idx)
 {
-  struct chanset_t *chan = NULL;
-  maskrec *e = NULL;
-  char *mask = NULL;
-
   if (global_exempts)
     if (lfprintf(f, EXEMPT_NAME " - -\n") == EOF) /* Daemus */
       return 0;
+
+  maskrec *e = NULL;
+  char *mask = NULL;
+
   for (e = global_exempts; e; e = e->next) {
     mask = str_escape(e->mask, ':', '\\');
     if (!mask ||
@@ -911,7 +903,7 @@ int write_exempts(FILE *f, int idx)
     }
     free(mask);
   }
-  for (chan = chanset;chan;chan=chan->next) {
+  for (struct chanset_t *chan = chanset;chan ;chan = chan->next) {
     if (lfprintf(f, "&&%s exempts\n", chan->dname) == EOF)
       return 0;
     for (e = chan->exempts; e; e = e->next) {
@@ -934,15 +926,16 @@ int write_exempts(FILE *f, int idx)
 
 /* Write the invitelists to a file.
  */
-int write_invites(FILE *f, int idx)
+bool write_invites(FILE *f, int idx)
 {
-  struct chanset_t *chan = NULL;
-  maskrec *ir = NULL;
-  char *mask = NULL;
 
   if (global_invites)
     if (lfprintf(f, INVITE_NAME " - -\n") == EOF) /* Daemus */
       return 0;
+
+  maskrec *ir = NULL;
+  char *mask = NULL;
+
   for (ir = global_invites; ir; ir = ir->next)  {
     mask = str_escape(ir->mask, ':', '\\');
     if (!mask ||
@@ -957,7 +950,7 @@ int write_invites(FILE *f, int idx)
     }
     free(mask);
   }
-  for (chan = chanset; chan; chan = chan->next) {
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (lfprintf(f, "$$%s invites\n", chan->dname) == EOF)
       return 0;
     for (ir = chan->invites; ir; ir = ir->next) {
@@ -980,17 +973,16 @@ int write_invites(FILE *f, int idx)
 
 /* Write the channels to the userfile
  */
-int write_chans(FILE *f, int idx)
+bool write_chans(FILE *f, int idx)
 {
-  char w[1024] = "";
-  struct chanset_t *chan = NULL;
-
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
   if (lfprintf(f, CHANS_NAME " - -\n") == EOF) /* Daemus */
     return 0;
 
-  for (chan = chanset; chan; chan = chan->next) {
+  char w[1024] = "";
+
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     char inactive = 0;
 
     putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
@@ -1005,11 +997,15 @@ int write_chans(FILE *f, int idx)
 
     if (lfprintf(f, "\
 + channel add %s { chanmode { %s } addedby %s addedts %lu idle-kick %d \
-bad-cookie %d cookie-time-slack %d manop %d mdop %d mop %d \
-limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d \
-flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d \
-flood-nick %d:%d closed-ban %d closed-private %d ban-time %d \
-exempt-time %d invite-time %d ",
+bad-cookie %d cookie-time-slack %lu manop %d mdop %d mop %d \
+limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%lu \
+flood-ctcp %d:%lu flood-join %d:%lu flood-kick %d:%lu flood-deop %d:%lu \
+flood-nick %d:%lu closed-ban %d closed-private %d ban-time %lu \
+exempt-time %lu invite-time %lu \
+%cenforcebans %cdynamicbans %cuserban %cbitch %cprotectops %crevenge \
+%crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
+%cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cmanop %cvoice \
+%cfastop %cautoop }\n",
 	chan->dname,
 	w,
         chan->added_by,
@@ -1038,18 +1034,10 @@ exempt-time %d invite-time %d ",
  *      chan->temp,
  * also include temp %d in dprintf
  */
-        chan->ban_time,
         chan->closed_private,
+        chan->ban_time,
         chan->exempt_time,
-        chan->invite_time
-        ) == EOF)
-          return 0;
-
-     if (lfprintf(f, "\
-%cenforcebans %cdynamicbans %cuserbans \
-%cbitch %cprotectops %crevenge %crevengebot %cprivate %ccycle \
-%cinactive %cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites \
-%cnodesynch %cclosed %ctake %cmanop %cvoice %cfastop %cautoop }\n",
+        chan->invite_time,
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),
@@ -1114,15 +1102,11 @@ void channels_writeuserfile()
  * Returns 1 if a mask on `chan' by `who' may be expired and 0 if
  * not.
  */
-int expired_mask(struct chanset_t *chan, char *who)
+bool expired_mask(struct chanset_t *chan, char *who)
 {
   memberlist *m = NULL, *m2 = NULL;
   char buf[UHOSTLEN] = "", *snick = NULL, *sfrom = NULL;
   struct userrec *u = NULL;
-
-  /* Always expire masks, regardless of who set it? */
-  if (force_expire)
-    return 1;
 
   strcpy(buf, who);
   sfrom = buf;
@@ -1207,13 +1191,14 @@ static void check_expired_bans(void)
  */
 static void check_expired_exempts(void)
 {
+  if (!use_exempts)
+    return;
+
   maskrec *u = NULL, *u2 = NULL;
   struct chanset_t *chan = NULL;
   masklist *b = NULL, *e = NULL;
   int match;
 
-  if (!use_exempts)
-    return;
   for (u = global_exempts; u; u = u2) {
     u2 = u->next;
     if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
@@ -1284,12 +1269,13 @@ static void check_expired_exempts(void)
  */
 static void check_expired_invites(void)
 {
+  if (!use_invites)
+    return;
+
   maskrec *u = NULL, *u2 = NULL;
   struct chanset_t *chan = NULL;
   masklist *b = NULL;
 
-  if (!use_invites)
-    return;
   for (u = global_invites; u; u = u2) {
     u2 = u->next;
     if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {

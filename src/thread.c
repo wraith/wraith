@@ -16,7 +16,7 @@ static pthread_mutex_t my_lock = PTHREAD_MUTEX_INITIALIZER;
 void *
 thread_main(void *arg)
 {
-  int pid = (int) arg;
+  pid_t pid = (pid_t) arg;
 
   printf("THREADED! MY PARENT: %d\n", pid);
 

@@ -28,9 +28,8 @@ static const char base64r[256] = {
 char *
 b64enc(const unsigned char *data, size_t len)
 {
-  char *dest = NULL;
+  char *dest = (char *) calloc(1, (len << 2) / 3 + 4 + 1);
 
-  dest = (char *) calloc(1, (len << 2) / 3 + 4 + 1);
   b64enc_buf(data, len, dest);
   return (dest);
 }
@@ -38,15 +37,15 @@ b64enc(const unsigned char *data, size_t len)
 void
 b64enc_buf(const unsigned char *data, size_t len, char *dest)
 {
-  size_t i, t;
-
 #define DB(x) ((unsigned char) (x + i < len ? data[x + i] : 0))
-    for (i = 0, t = 0; i < len; i += 3, t += 4) {
-      dest[t] = base64[DB(0) >> 2];
-      dest[t + 1] = base64[((DB(0) & 3) << 4) | (DB(1) >> 4)];
-      dest[t + 2] = base64[((DB(1) & 0x0F) << 2) | (DB(2) >> 6)];
-      dest[t + 3] = base64[(DB(2) & 0x3F)];
-    }
+  register size_t t, i;
+
+  for (i = 0, t = 0; i < len; i += 3, t += 4) {
+    dest[t] = base64[DB(0) >> 2];
+    dest[t + 1] = base64[((DB(0) & 3) << 4) | (DB(1) >> 4)];
+    dest[t + 2] = base64[((DB(1) & 0x0F) << 2) | (DB(2) >> 6)];
+    dest[t + 3] = base64[(DB(2) & 0x3F)];
+  }
 #undef DB
   dest[t] = 0;
 }
@@ -54,9 +53,8 @@ b64enc_buf(const unsigned char *data, size_t len, char *dest)
 char *
 b64dec(const unsigned char *data, size_t *len)
 {
-  char *dest = NULL;
+  char *dest = (char *) calloc(1, ((*len * 3) >> 2) + 6 + 1);
 
-  dest = (char *) calloc(1, ((*len * 3) >> 2) + 6 + 1);
   b64dec_buf(data, len, dest);
   return (dest);
 }
@@ -64,9 +62,9 @@ b64dec(const unsigned char *data, size_t *len)
 void
 b64dec_buf(const unsigned char *data, size_t *len, char *dest)
 {
-  size_t t, i;
-
 #define DB(x) ((unsigned char) (x + i < *len ? base64r[(unsigned char) data[x + i]] : 0))
+  register size_t t, i;
+
   for (i = 0, t = 0; i < *len; i += 4, t += 3) {
     dest[t] = (DB(0) << 2) + (DB(1) >> 4);
     dest[t + 1] = ((DB(1) & 0x0F) << 4) + (DB(2) >> 2);

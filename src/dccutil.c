@@ -29,7 +29,7 @@
 
 static struct portmap 	*root = NULL;
 
-int	connect_timeout = 15;		/* How long to wait before a telnet
+time_t	connect_timeout = 15;		/* How long to wait before a telnet
 					   connection times out */
 #ifdef HUB
 int         max_dcc = 200;
@@ -79,7 +79,7 @@ char *add_cr(char *buf)
 void dprintf(int idx, const char *format, ...)
 {
   static char buf[1024] = "";
-  int len;
+  size_t len;
   va_list va;
 
   va_start(va, format);
@@ -126,11 +126,11 @@ void dprintf(int idx, const char *format, ...)
     return;
   } else { /* normal chat text */
     if (coloridx(idx)) {
-      int i, schar = 0;
       static int cflags;
+      int schar = 0;
       char buf3[1024] = "", buf2[1024] = "", c = 0;
 
-      for (i = 0 ; i < len ; i++) {
+      for (size_t i = 0 ; i < len ; i++) {
         c = buf[i];
         buf2[0] = 0;
  
@@ -208,11 +208,9 @@ void dprintf(int idx, const char *format, ...)
     if (dcc[idx].simul > 0 && !dcc[idx].msgc) {
       bounce_simul(idx, buf);
     } else if (dcc[idx].msgc > 0) {
-      char *ircbuf = NULL;
-      size_t size = 0;
-      
-      size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
-      ircbuf = (char *) calloc(1, size);
+      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
+      char *ircbuf = (char *) calloc(1, size);
+
       egg_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
       tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
       free(ircbuf);
@@ -232,7 +230,6 @@ void dprintf(int idx, const char *format, ...)
 
 void chatout(const char *format, ...)
 {
-  int i;
   char s[1025] = "", *p = NULL;
   va_list va;
 
@@ -243,7 +240,7 @@ void chatout(const char *format, ...)
   if ((p = strrchr(s, '\n')))
     *p++ = 0;
 
-  for (i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_CHAT) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel >= 0)
         dprintf(i, "%s\n", s);
@@ -253,7 +250,6 @@ void chatout(const char *format, ...)
  */
 void chanout_but(int x, int chan, const char *format, ...)
 {
-  int i;
   char s[1025] = "", *p = NULL;
   va_list va;
 
@@ -264,7 +260,7 @@ void chanout_but(int x, int chan, const char *format, ...)
   if ((p = strrchr(s, '\n')))
     *p = 0;
 
-  for (i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_CHAT) && (i != x) && !(dcc[i].simul))
       if (dcc[i].u.chat->channel == chan)
         dprintf(i, "%s\n", s);
@@ -272,7 +268,8 @@ void chanout_but(int x, int chan, const char *format, ...)
 
 void dcc_chatter(int idx)
 {
-  int i, j;
+  int i;
+  sock_t j;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   strcpy(dcc[idx].u.chat->con_chan, "***");
@@ -311,6 +308,7 @@ void dcc_chatter(int idx)
   }
 
   j = dcc[idx].sock;
+
   dcc[idx].u.chat->channel = 234567;
   /* Still there? */
 
@@ -353,7 +351,8 @@ void lostdcc(int n)
 {
 
   /* Make sure it's a valid dcc index. */
-  if (n < 0 || n >= max_dcc) return;
+  if (n < 0 || n >= max_dcc) 
+    return;
 
   if (dcc[n].type && dcc[n].type->kill)
     dcc[n].type->kill(n, dcc[n].u.other);
@@ -392,9 +391,7 @@ void removedcc(int n)
  */
 void dcc_remove_lost(void)
 {
-  int i;
-
-  for (i = 0; i < dcc_total; i++) {
+  for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_LOST) {
       dcc[i].type = NULL;
       dcc[i].sock = -1;
@@ -413,7 +410,8 @@ void dcc_remove_lost(void)
  */
 void tell_dcc(int idx)
 {
-  int i, j, nicklen = 0;
+  int i;
+  size_t j, nicklen = 0;
   char other[160] = "", format[81] = "";
 
   /* calculate max nicklen */
@@ -421,7 +419,8 @@ void tell_dcc(int idx)
       if(strlen(dcc[i].nick) > (unsigned) nicklen)
           nicklen = strlen(dcc[i].nick);
   }
-  if(nicklen < 9) nicklen = 9;
+  if(nicklen < 9) 
+    nicklen = 9;
   
   egg_snprintf(format, sizeof format, "%%-4s %%-4s %%-8s %%-5s %%-%us %%-40s %%s\n", nicklen);
   dprintf(idx, format, "SOCK", "IDX", "ADDR",     "PORT",  "NICK", "HOST", "TYPE");
@@ -558,11 +557,11 @@ void changeover_dcc(int i, struct dcc_table *type, int xtra_size)
 
 int detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
 {
-  time_t t;
-
   if (!dcc_flood_thr)
     return 0;
-  t = now;
+
+  time_t t = now;
+
   if (*timer != t) {
     *timer = t;
     chat->msgs_per_sec = 0;
@@ -626,13 +625,17 @@ void do_boot(int idx, char *by, char *reason)
   return;
 }
 
-int listen_all(int lport, int off)
+port_t listen_all(port_t lport, bool off)
 {
-  int i, idx = (-1);
+  if (!lport)
+    return 0;
+
+  int idx = (-1);
   port_t port, realport;
 #ifdef USE_IPV6
-  int i6 = 0;
+  sock_t i6 = 0;
 #endif /* USE_IPV6 */
+  sock_t i;
   struct portmap *pmap = NULL, *pold = NULL;
 
   port = realport = lport;
@@ -642,9 +645,9 @@ int listen_all(int lport, int off)
       break;
     }
 
-  for (i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type == &DCC_TELNET) && (dcc[i].port == port)) {
-      idx = i;
+  for (int ii = 0; ii < dcc_total; ii++) {
+    if ((dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port)) {
+      idx = ii;
 
       if (off) {
         if (pmap) {
@@ -735,7 +738,8 @@ int listen_all(int lport, int off)
 
 void identd_open()
 {
-  int idx = -1, i = -1;
+  int idx;
+  sock_t i = -1;
   port_t port = 113;
 
   for (idx = 0; idx < dcc_total; idx++)
@@ -773,9 +777,7 @@ void identd_open()
 
 void identd_close()
 {
-  int idx;
-
-  for (idx = 0; idx < dcc_total; idx++) {
+  for (int idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].type == &DCC_IDENTD_CONNECT) {
       killsock(dcc[idx].sock);
       lostdcc(idx);

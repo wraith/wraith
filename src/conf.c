@@ -294,7 +294,6 @@ checkpid(char *nick, conf_bot * bot)
   FILE *f = NULL;
   char buf[DIRMAX] = "", s[11] = "", *tmpnick = NULL, *tmp_ptr = NULL;
 
-
   tmpnick = tmp_ptr = strdup(nick);
 
   if (tmpnick[0] == '/')

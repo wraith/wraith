@@ -67,12 +67,12 @@ static int is_compressedfile(char *filename);
 
 static int is_compressedfile(char *filename)
 {
+  if (!is_file(filename))
+    return COMPF_FAILED;
+
   char buf1[50] = "", buf2[50] = "";
   FILE *fin = NULL;
   register int len1, len2, i;
-
-  if (!is_file(filename))
-    return COMPF_FAILED;
 
   /* Read data with zlib routines.
    */
@@ -114,15 +114,16 @@ static int is_compressedfile(char *filename)
  */
 static int uncompress_to_file(char *f_src, char *f_target)
 {
-  char buf[BUFLEN] = "";
-  int len;
-  FILE *fin = NULL, *fout = NULL;
-
   if (!is_file(f_src)) {
     putlog(LOG_MISC, "*", "Failed to uncompress file `%s': not a file.",
 	   f_src);
     return COMPF_ERROR;
   }
+
+  char buf[BUFLEN] = "";
+  int len;
+  FILE *fin = NULL, *fout = NULL;
+
   fin = gzopen(f_src, "rb");
   if (!fin) {
     putlog(LOG_MISC, "*", "Failed to uncompress file `%s': gzopen failed.",
@@ -181,7 +182,8 @@ inline static void adjust_mode_num(int *mode)
  */
 static int compress_to_file_mmap(FILE *fout, FILE *fin)
 {
-    int	len, ifd = fileno(fin);
+    size_t len;
+    int ifd = fileno(fin);
     char *buf = NULL;
     struct stat st;
 
@@ -215,7 +217,7 @@ static int compress_to_file(char *f_src, char *f_target, int mode_num)
 {
   char buf[BUFLEN] = "", mode[5] = "";
   FILE *fin = NULL, *fout = NULL;
-  int len;
+  size_t len;
 
   adjust_mode_num(&mode_num);
   egg_snprintf(mode, sizeof mode, "wb%d", mode_num);

@@ -6,26 +6,25 @@
 
 static void cmd_fwd(int idx, char *par)
 {
-  char *handle = NULL;
-  struct userrec *u1 = NULL;
-
   if (!par[0]) {
     dprintf(idx, "%s: fwd <handle> [user@bot]\n", NOTES_USAGE);
     return;
   }
-  handle = newsplit(&par);
-  u1 = get_user_by_handle(userlist, handle);
+
+  struct userrec *u1 = get_user_by_handle(userlist, newsplit(&par));
+
   if (!u1) {
     dprintf(idx, "%s\n", NOTES_NO_SUCH_USER);
     return;
   }
-  if ((u1->flags & USER_OWNER) && egg_strcasecmp(handle, dcc[idx].nick)) {
+
+  if ((u1->flags & USER_OWNER) && egg_strcasecmp(u1->handle, dcc[idx].nick)) {
     dprintf(idx, "%s\n", NOTES_FWD_OWNER);
     return;
   }
   if (!par[0]) {
-    putlog(LOG_CMDS, "*", "#%s# fwd %s", dcc[idx].nick, handle);
-    dprintf(idx, NOTES_FWD_FOR, handle);
+    putlog(LOG_CMDS, "*", "#%s# fwd %s", dcc[idx].nick, u1->handle);
+    dprintf(idx, NOTES_FWD_FOR, u1->handle);
     set_user(&USERENTRY_FWD, u1, NULL);
     return;
   }
@@ -34,15 +33,13 @@ static void cmd_fwd(int idx, char *par)
     dprintf(idx, "%s\n", NOTES_FWD_BOTNAME);
     return;
   }
-  putlog(LOG_CMDS, "*", "#%s# fwd %s %s", dcc[idx].nick, handle, par);
-  dprintf(idx, NOTES_FWD_CHANGED, handle, par);
+  putlog(LOG_CMDS, "*", "#%s# fwd %s %s", dcc[idx].nick, u1->handle, par);
+  dprintf(idx, NOTES_FWD_CHANGED, u1->handle, par);
   set_user(&USERENTRY_FWD, u1, par);
 }
 
 static void cmd_notes(int idx, char *par)
 {
-  char *fcn = NULL;
-
   if (!par[0]) {
     dprintf(idx, "%s: notes index\n", NOTES_USAGE);
     dprintf(idx, "       notes read <# or ALL>\n");
@@ -51,7 +48,8 @@ static void cmd_notes(int idx, char *par)
     dprintf(idx, "       ex: notes erase 2-4;8;16-\n");
     return;
   }
-  fcn = newsplit(&par);
+  char *fcn = newsplit(&par);
+
   if (!egg_strcasecmp(fcn, "index"))
     notes_read(dcc[idx].nick, "", "+", idx);
   else if (!egg_strcasecmp(fcn, "read")) {
@@ -73,10 +71,9 @@ static void cmd_notes(int idx, char *par)
 
 static void cmd_note(int idx, char *par)
 {
-  char handle[512] = "", *p = NULL;
+  char handle[512] = "", *p = newsplit(&par);
   int echo;
 
-  p = newsplit(&par);
   if (!par[0]) {
     dprintf(idx, "%s: note <to-whom> <message>\n", NOTES_USAGE);
     return;

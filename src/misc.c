@@ -37,8 +37,8 @@
 #include <stdarg.h>
 
 int		server_lag = 0;	/* GUESS! */
-int		use_invites = 1;            /* Jason/drummer */
-int		use_exempts = 1;            /* Jason/drummer */
+bool		use_invites = 1;            /* Jason/drummer */
+bool		use_exempts = 1;            /* Jason/drummer */
 
 /*
  *    Misc functions
@@ -66,7 +66,7 @@ int		use_exempts = 1;            /* Jason/drummer */
  *
  *	<Cybah>
  */
-int egg_strcatn(char *dst, const char *src, size_t max)
+size_t egg_strcatn(char *dst, const char *src, size_t max)
 {
   size_t tmpmax = 0;
 
@@ -96,7 +96,7 @@ int egg_strcatn(char *dst, const char *src, size_t max)
   return tmpmax - max;
 }
 
-int my_strcpy(register char *a, register char *b)
+size_t my_strcpy(register char *a, register char *b)
 {
   register char *c = b;
 
@@ -110,9 +110,7 @@ int my_strcpy(register char *a, register char *b)
  */
 void splitc(char *first, char *rest, char divider)
 {
-  char *p = NULL;
-
-  p = strchr(rest, divider);
+  char *p = strchr(rest, divider);
 
   if (p == NULL) {
     if (first != rest && first)
@@ -143,9 +141,7 @@ void splitc(char *first, char *rest, char divider)
  */
 void splitcn(char *first, char *rest, char divider, size_t max)
 {
-  char *p = NULL;
-
-  p = strchr(rest, divider);
+  char *p = strchr(rest, divider);
 
   if (p == NULL) {
     if (first != rest && first)
@@ -189,11 +185,11 @@ void remove_crlf(char *line)
 
 char *newsplit(char **rest)
 {
-  register char *o = NULL, *r = NULL;
-
   if (!rest)
     return *rest = "";
-  o = *rest;
+
+  register char *o = *rest, *r = NULL;
+
   while (*o == ' ')
     o++;
   r = o;
@@ -309,13 +305,14 @@ void maskhost(const char *s, char *nw)
  */
 void dumplots(int idx, const char *prefix, char *data)
 {
-  char		*p = data, *q = NULL, *n = NULL, c = 0;
-  const size_t max_data_len = 500 - strlen(prefix);
-
   if (!*data) {
     dprintf(idx, "%s\n", prefix);
     return;
   }
+
+  char *p = data, *q = NULL, *n = NULL, c = 0;
+  const size_t max_data_len = 500 - strlen(prefix);
+
   while (strlen(p) > max_data_len) {
     q = p + max_data_len;
     /* Search for embedded linefeed first */
@@ -387,15 +384,16 @@ void days(time_t mynow, time_t then, char *out)
  */
 void daysdur(time_t mynow, time_t then, char *out)
 {
-  char s[81] = "";
-  int hrs, mins;
-
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
     sprintf(out, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
+
+  char s[81] = "";
+  int hrs, mins;
+
   strcpy(out, "for ");
   mynow -= then;
   hrs = (int) (mynow / 3600);
@@ -470,7 +468,7 @@ void show_channels(int idx, char *handle)
   else
     u = dcc[idx].user;
 
-  for (chan = chanset;chan;chan = chan->next) {
+  for (chan = chanset;chan ;chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
     if (l < strlen(chan->dname)) {
       l = strlen(chan->dname);
@@ -505,11 +503,11 @@ void show_channels(int idx, char *handle)
 
 /* Create a string with random letters and digits
  */
-void make_rand_str(char *s, int len)
+void make_rand_str(char *s, size_t len)
 {
-  int j, r = 0;
+  int r = 0;
 
-  for (j = 0; j < len; j++) {
+  for (size_t j = 0; j < len; j++) {
     r = randint(4);
     if (r == 0)
       s[j] = '0' + randint(10);
@@ -535,15 +533,13 @@ void make_rand_str(char *s, int len)
  */
 char *str_escape(const char *str, const char divc, const char mask)
 {
-  const int	 len = strlen(str);
-  int		 buflen = (2 * len), blen = 0;
+  const size_t	 len = strlen(str);
+  size_t	 buflen = (2 * len), blen = 0;
   char		*buf = NULL, *b = NULL;
   const char	*s = NULL;
 
   b = buf = (char *) calloc(1, buflen + 1);
 
-  if (!buf)
-    return NULL;
   for (s = str; *s; s++) {
     /* Resize buffer. */
     if ((buflen - blen) <= 3) {
@@ -625,7 +621,6 @@ char *strchr_unescape(char *str, const char divc, register const char esc_char)
 void str_unescape(char *str, register const char esc_char)
 {
   strchr_unescape(str, 0, esc_char);
-
   return;
 }
 
@@ -671,16 +666,15 @@ restart(int idx)
 
 int updatebin(int idx, char *par, int secs)
 {
-  char *path = NULL, *newbin = NULL, old[DIRMAX] = "", testbuf[DIRMAX] = "";
-  int i;
-
-  path = par;
-
   if (!par || !par[0]) {
     logidx(idx, "Not enough parameters.");
     return 1;
   }
-  path = (char *) calloc(1, strlen(binname) + strlen(par) + 2);
+
+  char *path = (char *) calloc(1, strlen(binname) + strlen(par) + 2);
+  char *newbin = NULL, old[DIRMAX] = "", testbuf[DIRMAX] = "";
+  int i;
+
   strcpy(path, binname);
   newbin = strrchr(path, '/');
   if (!newbin) {
@@ -803,13 +797,13 @@ int bot_aggressive_to(struct userrec *u)
 
 int goodpass(char *pass, int idx, char *nick)
 {
-  char tell[501] = "";
-  int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
-
   if (!pass[0]) 
     return 0;
 
-  for (i = 0; i < (signed) strlen(pass); i++) {
+  char tell[501] = "";
+  int nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
+
+  for (int i = 0; i < (signed) strlen(pass); i++) {
     tc = (int) pass[i];
     if (tc < 58 && tc > 47)
       ocase++; /* number */
@@ -861,19 +855,18 @@ int goodpass(char *pass, int idx, char *nick)
 
 char *replace(const char *string, const char *oldie, const char *newbie)
 {
-  static char newstring[1024] = "";
-  unsigned int str_index, newstr_index, oldie_index;
-  size_t new_len, old_len, end, cpy_len;
+  if (string == NULL) 
+    return "";
+
   char *c = NULL;
 
-  if (string == NULL) return "";
-  if ((c = (char *) strstr(string, oldie)) == NULL) return (char *) string;
-  new_len = strlen(newbie);
-  old_len = strlen(oldie);
-  end = strlen(string) - old_len;
-  oldie_index = c - string;
-  newstr_index = 0;
-  str_index = 0;
+  if ((c = (char *) strstr(string, oldie)) == NULL) 
+    return (char *) string;
+
+  static char newstring[1024] = "";
+  const size_t new_len = strlen(newbie), old_len = strlen(oldie), end = (strlen(string) - old_len);
+  size_t str_index = 0, newstr_index = 0, oldie_index = c - string, cpy_len;
+
   while(str_index <= end && c != NULL) {
     cpy_len = oldie_index-str_index;
     strncpy(newstring + newstr_index, string + str_index, cpy_len);
@@ -892,10 +885,10 @@ char *replace(const char *string, const char *oldie, const char *newbie)
 void showhelp(int idx, struct flag_record *flags, char *string)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  char *helpstr = NULL, tmp[2] = "", flagstr[10] = "";
-  int ok = 1;
+  char *helpstr = (char *) calloc(1, strlen(string) + 1000 + 1);
+  char tmp[2] = "", flagstr[10] = "";
+  bool ok = 1;
 
-  helpstr = (char *) calloc(1, strlen(string) + 1000 + 1);
   while (string && string[0]) {
     if (*string == '%') {
       if (!strncmp(string + 1, "{+", 2)) {
@@ -964,22 +957,23 @@ void showhelp(int idx, struct flag_record *flags, char *string)
 }
 
 /* Arrange the N elements of ARRAY in random order. */
-static void shuffleArray(char *array[], int n)
+static void shuffleArray(char *array[], size_t n)
 {
-  int i;
+  size_t j = 0;
+  char *temp = NULL;
 
-  for (i = 0; i < n; i++) {
-    int j = i + random() / (RAND_MAX / (n - i) + 1);
-    char *t = array[j];
+  for (size_t i = 0; i < n; i++) {
+    j = i + random() / (RAND_MAX / (n - i) + 1);
+    temp = array[j];
     array[j] = array[i];
-    array[i] = t;
+    array[i] = temp;
   }
 }
 
 void shuffle(char *string, char *delim)
 {
   char *array[501], *str = NULL, *work = NULL;
-  int len = 0, i = 0;
+  size_t len = 0;
 
   egg_bzero(&array, sizeof array);
   work = strdup(string);
@@ -993,7 +987,7 @@ void shuffle(char *string, char *delim)
   }
   shuffleArray(array, len);
   string[0] = 0;
-  for (i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     strcat(string, array[i]);
     if (i != len - 1)
       strcat(string, delim);
@@ -1082,9 +1076,8 @@ color(int idx, int type, int which)
 char *
 strtolower(char *s)
 {
-  char *p = NULL;
-  
-  p = s;
+  char *p = s;
+
   while (*p) {
     *p = tolower(*p);
     p++;
@@ -1095,9 +1088,8 @@ strtolower(char *s)
 char *
 strtoupper(char *s)
 {
-  char *p = NULL;
-  
-  p = s;
+  char *p = s;
+
   while (*p) {
     *p = toupper(*p);
     p++;
@@ -1108,12 +1100,12 @@ strtoupper(char *s)
   
 char *step_thru_file(FILE *fd)
 {
-  char tempBuf[1024] = "", *retStr = NULL;
-
   if (fd == NULL) {
     return NULL;
   }
-  retStr = NULL;
+
+  char tempBuf[1024] = "", *retStr = NULL;
+
   while (!feof(fd)) {
     fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
@@ -1135,9 +1127,9 @@ char *step_thru_file(FILE *fd)
 
 char *trim(char *string)
 {
-  char *ibuf = NULL, *obuf = NULL;
-
   if (string) {
+    char *ibuf = NULL, *obuf = NULL;
+
     for (ibuf = obuf = string; *ibuf; ) {
       while (*ibuf && (isspace (*ibuf)))
         ibuf++;

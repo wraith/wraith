@@ -3,16 +3,16 @@
  *
  */
 
-static int FindElement(char *resultBuf, const char *list, int listLength, 
+static int FindElement(char *resultBuf, const char *list, size_t listLength, 
                        const char **elementPtr, const char **nextPtr, 
-                       int *sizePtr, int *bracePtr)
+                       size_t *sizePtr, int *bracePtr)
 {
     const char *p = list;
     const char *elemStart = NULL;	/* Points to first byte of first element. */
-    const char *limit = NULL;		/* Points just after list's last byte. */
+    const char *limit = (list + listLength);		/* Points just after list's last byte. */
     int openBraces = 0;   	/* Brace nesting level during parse. */
     int inQuotes = 0;
-    int size = 0;               /* lint. */
+    size_t size = 0;               /* lint. */
     const char *p2 = NULL;
 
     /*
@@ -21,7 +21,6 @@ static int FindElement(char *resultBuf, const char *list, int listLength,
      * a list element.
      */
 
-    limit = (list + listLength);
     while ((p < limit) && egg_isspace(*p)) { /* INTL: ISO space. */
         p++;
     }
@@ -217,7 +216,9 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
     const char *l = NULL;
     const char *element = NULL;
     char *p = NULL;
-    int length, size, i = 0, result, elSize, brace;
+    int result, brace;
+    size_t size = 2;		/* initialized to 1 for NULL pointer */
+    size_t length, elSize, i = 0;
 
     /*
      * Figure out how much space to allocate.  There must be enough
@@ -226,12 +227,11 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
      * the number of space characters in the list.
      */
 
-    for (size = 1, l = list; *l != 0; l++) {
+    for (l = list; *l != 0; l++) {
         if (egg_isspace(*l)) { /* INTL: ISO space. */
             size++;
         }
     }
-    size++;                     /* Leave space for final NULL pointer. */
 
     argv = (const char **) calloc(1, (unsigned) ((size * sizeof(char *)) + (l - list) + 1 + 15));	/* 15 cuz the tcl src is hard to follow */
 
@@ -285,7 +285,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
  */
 int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 {
-  int i, x = 0;
+  bool error = 0;
 #ifdef LEAF
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
@@ -293,7 +293,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 #endif /* LEAF */
   char s[121] = "";
 
-  for (i = 0; i < items; i++) {
+  for (register int i = 0; i < items; i++) {
 /* Chanchar template
     } else if (!strcmp(item[i], "temp")) {
       i++;
@@ -593,7 +593,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
     else if (!strcmp(item[i], "-clearbans"))  ;
     else if (!strncmp(item[i], "need-", 5))   ;
     else if (!strncmp(item[i], "flood-", 6)) {
-      int *pthr = NULL, *ptime = NULL;
+      int *pthr = NULL;
+      time_t *ptime = NULL;
       char *p = NULL;
 
       if (!strcmp(item[i] + 6, "chan")) {
@@ -638,7 +639,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
     } else {
       if (result && item[i][0]) /* ignore "" */
         sprintf(result, "illegal channel option: %s", item[i]);
-      x++;
+      error = 1;
     }
   }
 #ifdef LEAF
@@ -660,7 +661,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
     recheck_channel_modes(chan);
   }
 #endif /* LEAF */
-  if (x > 0)
+  if (error)
     return ERROR;
   return OK;
 }
@@ -674,14 +675,14 @@ static void init_masklist(masklist *m)
 
 /* Initialize out the channel record.
  */
-static void init_channel(struct chanset_t *chan, int reset)
+static void init_channel(struct chanset_t *chan, bool reset)
 {
   chan->channel.maxmembers = 0;
   chan->channel.mode = 0;
   chan->channel.members = 0;
-  if (!reset) {
+
+  if (!reset)
     chan->channel.key = (char *) calloc(1, 1);
-  }
 
   chan->channel.ban = (masklist *) calloc(1, sizeof(masklist));
   init_masklist(chan->channel.ban);
@@ -714,7 +715,7 @@ static void clear_masklist(masklist *m)
 
 /* Clear out channel data from memory.
  */
-void clear_channel(struct chanset_t *chan, int reset)
+void clear_channel(struct chanset_t *chan, bool reset)
 {
   memberlist *m = NULL, *m1 = NULL;
 
@@ -740,11 +741,6 @@ void clear_channel(struct chanset_t *chan, int reset)
  */
 int channel_add(char *result, char *newname, char *options)
 {
-  struct chanset_t *chan = NULL;
-  int items = 0, ret = OK, join = 0;
-  char buf[3001] = "";
-  const char **item = NULL;
-
   if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
     if (result)
       sprintf(result, "invalid channel prefix");
@@ -756,6 +752,11 @@ int channel_add(char *result, char *newname, char *options)
       sprintf(result, "invalid channel name");
     return ERROR;
   }
+
+  const char **item = NULL;
+  int items = 0;
+  char buf[3001] = "";
+
   simple_sprintf(buf, "chanmode { %s } ", glob_chanmode);
   strcat(buf, glob_chanset);
   strcat(buf, cfg_glob_chanset);
@@ -765,6 +766,12 @@ int channel_add(char *result, char *newname, char *options)
 
   if (SplitList(result, buf, &items, &item) != OK)
     return ERROR;
+
+#ifdef LEAF
+  bool join = 0;
+#endif /* LEAF */
+  struct chanset_t *chan = NULL;
+  int ret = OK;
 
   if ((chan = findchan_by_dname(newname))) {
     /* Already existing channel, maybe a reload of the channel file */
@@ -813,17 +820,18 @@ int channel_add(char *result, char *newname, char *options)
     /* Initialize chan->channel info */
     init_channel(chan, 0);
     list_append((struct list_type **) &chanset, (struct list_type *) chan);
+#ifdef LEAF
     /* Channel name is stored in xtra field for sharebot stuff */
     join = 1;
+#endif /* LEAF */
   }
   /* If loading is set, we're loading the userfile. Ignore errors while
    * reading userfile and just return OK. This is for compatability
    * if a user goes back to an eggdrop that no-longer supports certain
    * (channel) options.
    */
-  if ((channel_modify(result, chan, items, (char **) item) != OK) && !loading) {
+  if ((channel_modify(result, chan, items, (char **) item) != OK) && !loading)
     ret = ERROR;
-  }
 
   free(item);
 #ifdef LEAF

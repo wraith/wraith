@@ -37,13 +37,13 @@
 
 int wild_match_per(register char *m, register char *n)
 {
-  char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
-  int match = 1, saved = 0, space;
-  register int sofar = 0;
-
   /* null strings should never match */
   if ((m == 0) || (n == 0) || (!*n))
     return NOMATCH;
+
+  char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
+  int match = 1, saved = 0, space;
+  register int sofar = 0;
 
   while (*n) {
     if (*m == WILDT) {          /* Match >=1 space */
@@ -132,13 +132,16 @@ int wild_match_per(register char *m, register char *n)
 
 int wild_match(register char *m, register char *n)
 {
-  char *ma = m, *na = n, *lsm = NULL, *lsn = NULL;
-  int match = 1;
-  register int sofar = 0;
+  char *ma = m, *na = n;
 
   /* null strings should never match */
   if ((ma == 0) || (na == 0) || (!*ma) || (!*na))
     return NOMATCH;
+
+  char *lsm = NULL, *lsn = NULL;
+  int match = 1;
+  register int sofar = 0;
+
   /* find the end of each string */
   while (*(++m));
   m--;

@@ -1,14 +1,16 @@
 #ifndef _TRAFFIC_H_
 #define _TRAFFIC_H_
 
+#include <sys/types.h>
+
 typedef struct {
 	struct {
-		unsigned long irc;
-		unsigned long bn;
-		unsigned long dcc;
-		unsigned long filesys;
-		unsigned long trans;
-		unsigned long unknown;
+		size_t irc;
+		size_t bn;
+		size_t dcc;
+		size_t filesys;
+		size_t trans;
+		size_t unknown;
 	} in_total, in_today, out_total, out_today;
 } egg_traffic_t;
 

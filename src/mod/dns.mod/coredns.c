@@ -152,7 +152,7 @@ static struct resolve *ipbash[BASH_SIZE];
 static struct resolve *hostbash[BASH_SIZE];
 static struct resolve *expireresolves = NULL;
 
-static IP localhost;
+static in_addr_t localhost;
 
 static long idseed = 0xdeadbeef;
 static long aseed;
@@ -229,7 +229,7 @@ inline static u_32bit_t getidbash(u_16bit_t id)
 
 /* Return the hash bucket number for ip.
  */
-inline static u_32bit_t getipbash(IP ip)
+inline static u_32bit_t getipbash(in_addr_t ip)
 {
     return (u_32bit_t) BASH_MODULO(ip);
 }
@@ -517,7 +517,7 @@ static struct resolve *findhost(char *hostn)
 
 /* Find request structure using the ip.
  */
-static struct resolve *findip(IP ip)
+static struct resolve *findip(in_addr_t ip)
 {
     struct resolve *rp = NULL;
     u_32bit_t bashnum;
@@ -823,7 +823,7 @@ static void parserespacket(u_8bit_t *s, size_t l)
 				ddebug1(RES_ERR "Unsupported rdata format for \"A\" type. (%u bytes)", rdatalength);
 				return;
 			    }
-			    egg_memcpy(&rp->ip, (IP *) c, sizeof(IP));
+			    egg_memcpy(&rp->ip, (in_addr_t *) c, sizeof(in_addr_t));
 			    linkresolveip(rp);
 			    passrp(rp, ttl, T_A);
 			    return;
@@ -985,7 +985,7 @@ static void dns_check_expires(void)
 
 /* Start searching for a host-name, using it's ip-address.
  */
-void dns_hostbyip(IP ip)
+void dns_hostbyip(in_addr_t ip)
 {
     struct resolve *rp = NULL;
 

@@ -139,7 +139,7 @@ static void dopr_outch(char *buffer, size_t * currlen, size_t maxlen,
 #define DP_C_LDOUBLE 3
 
 #define char_to_int(p) (p - '0')
-#define MAX(p,q) ((p >= q) ? p : q)
+#define MAXIMUM(p,q) ((p >= q) ? p : q)
 
 static void dopr(char *buffer, size_t maxlen, const char *format,
 		 va_list args)
@@ -233,6 +233,14 @@ static void dopr(char *buffer, size_t maxlen, const char *format,
     case DP_S_MOD:
       /* Currently, we don't support Long Long, bummer */
       switch (ch) {
+      case 'z':		/* size_t */
+      case 'Z':
+        if (sizeof (size_t) > sizeof (unsigned long int))
+          cflags = DP_C_LDOUBLE;
+        else if (sizeof (size_t) > sizeof (unsigned int))
+          cflags = DP_C_LONG;
+        ch = *format++;
+        break;
       case 'h':
 	cflags = DP_C_SHORT;
 	ch = *format++;
@@ -258,9 +266,15 @@ static void dopr(char *buffer, size_t maxlen, const char *format,
 	  value = va_arg(args, short int);
 	else if (cflags == DP_C_LONG)
 	  value = va_arg(args, long int);
+        else if (cflags == DP_C_LDOUBLE)
+          fvalue = va_arg(args, LDOUBLE);
 	else
 	  value = va_arg(args, int);
-	fmtint(buffer, &currlen, maxlen, value, 10, min, max, flags);
+
+        if (cflags == DP_C_LDOUBLE)
+          fmtfp(buffer, &currlen, maxlen, fvalue, min, max, flags);
+        else         
+          fmtint(buffer, &currlen, maxlen, value, 10, min, max, flags);
 	break;
       case 'o':
 	flags |= DP_F_UNSIGNED;
@@ -278,9 +292,16 @@ static void dopr(char *buffer, size_t maxlen, const char *format,
 	  value = va_arg(args, unsigned short int);
 	else if (cflags == DP_C_LONG)
 	  value = va_arg(args, unsigned long int);
+        else if (cflags == DP_C_LDOUBLE)
+          fvalue = (unsigned) va_arg(args, LDOUBLE);
 	else
 	  value = va_arg(args, unsigned int);
-	fmtint(buffer, &currlen, maxlen, value, 10, min, max, flags);
+
+        if (cflags == DP_C_LDOUBLE)
+          fmtfp(buffer, &currlen, maxlen, fvalue, min, max, flags);
+        else         
+          fmtint(buffer, &currlen, maxlen, value, 10, min, max, flags);
+
 	break;
       case 'X':
 	flags |= DP_F_UP;
@@ -328,9 +349,8 @@ static void dopr(char *buffer, size_t maxlen, const char *format,
 	fmtstr(buffer, &currlen, maxlen, strvalue, flags, min, max);
 	break;
       case 'p':
-	strvalue = va_arg(args, void *);
-	fmtint(buffer, &currlen, maxlen, (long) strvalue, 16, min, max,
-	       flags);
+	strvalue = (char *) va_arg(args, void *);
+	fmtint(buffer, &currlen, maxlen, (long) strvalue, 16, min, max, flags);
 	break;
       case 'n':
 	if (cflags == DP_C_SHORT) {
@@ -452,13 +472,13 @@ static void fmtint(char *buffer, size_t * currlen, size_t maxlen,
   convert[place] = 0;
 
   zpadlen = max - place;
-  spadlen = min - MAX(max, place) - (signvalue ? 1 : 0);
+  spadlen = min - MAXIMUM(max, place) - (signvalue ? 1 : 0);
   if (zpadlen < 0)
     zpadlen = 0;
   if (spadlen < 0)
     spadlen = 0;
   if (flags & DP_F_ZERO) {
-    zpadlen = MAX(zpadlen, spadlen);
+    zpadlen = MAXIMUM(zpadlen, spadlen);
     spadlen = 0;
   }
   if (flags & DP_F_MINUS)
@@ -523,14 +543,14 @@ static LDOUBLE pow10(int exp)
 
 static long round(LDOUBLE value)
 {
-  long intpart;
+  LDOUBLE intpart;
 
   intpart = value;
   value = value - intpart;
   if (value >= 0.5)
     intpart++;
 
-  return intpart;
+  return (long) intpart;
 }
 
 static void fmtfp(char *buffer, size_t * currlen, size_t maxlen,
@@ -569,7 +589,7 @@ static void fmtfp(char *buffer, size_t * currlen, size_t maxlen,
     caps = 1;			/* Should characters be upper case? */
 #endif
 
-  intpart = ufvalue;
+  intpart = (long) ufvalue;
 
   /*
    * Sorry, we only support 9 digits past the decimal because of our
@@ -585,7 +605,7 @@ static void fmtfp(char *buffer, size_t * currlen, size_t maxlen,
 
   if (fracpart >= pow10(max)) {
     intpart++;
-    fracpart -= pow10(max);
+    fracpart -= (long) pow10(max);
   }
 
   /* Convert integer part */

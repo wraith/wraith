@@ -103,10 +103,11 @@ chan_sanity_check(flag_t chatr)
 char
 geticon(int idx)
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
-
   if (!dcc[idx].user)
     return '-';
+
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+
   get_user_flagrec(dcc[idx].user, &fr, NULL);
   if (glob_admin(fr))
     return '^';
@@ -302,13 +303,15 @@ flagrec_eq(struct flag_record *req, struct flag_record *have)
 void
 set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 {
+  if (!u)
+    return;
+
   struct chanuserrec *cr = NULL;
-  int oldflags = fr->match;
+  flag_t oldflags = fr->match;
   char buffer[100] = "";
   struct chanset_t *ch;
 
-  if (!u)
-    return;
+
   if (oldflags & FR_GLOBAL) {
     u->flags = fr->global;
 
@@ -348,14 +351,13 @@ set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 void
 get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 {
-  struct chanuserrec *cr = NULL;
-
   fr->bot = 0;
   if (!u) {
     fr->global = fr->chan = 0;
 
     return;
   }
+
   if (u->bot)
     fr->bot = 1;
   if (fr->match & FR_GLOBAL) {
@@ -365,6 +367,8 @@ get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
   }
 
   if (fr->match & FR_CHAN) {
+    struct chanuserrec *cr = NULL;
+
     if ((fr->match & FR_ANYWH) || (fr->match & FR_ANYCH)) {
       if (fr->match & FR_ANYWH)
         fr->chan = u->flags;
@@ -490,10 +494,10 @@ ischanhub()
 int
 dovoice(struct chanset_t *chan)
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-
   if (!chan)
     return 0;
+
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
   if (glob_dovoice(fr) || chan_dovoice(fr))
@@ -504,10 +508,10 @@ dovoice(struct chanset_t *chan)
 int
 dolimit(struct chanset_t *chan)
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-
   if (!chan)
     return 0;
+
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
   if (glob_dolimit(fr) || chan_dolimit(fr))

@@ -23,35 +23,35 @@
 #include <stdarg.h>
 
 int	conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
-int	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
-int 	use_console_r = 1;      /* Allow users to set their console +r  */
+bool	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
+bool 	use_console_r = 1;      /* Allow users to set their console +r  */
 
 typedef struct {
 	int flag;
-	unsigned char c;
 	char *type;
+	unsigned char c;
 } logmode_mapping_t;
 
 static logmode_mapping_t logmode_mappings[] = {
-	{LOG_MSGS, 'm', "msgs"},
-	{LOG_PUBLIC, 'p', "public"},
-	{LOG_JOIN, 'j', "joins"},
-	{LOG_MODES, 'k', "kicks/modes"},
-	{LOG_CMDS, 'c', "cmds"},
-	{LOG_MISC, 'o', "misc"},
-	{LOG_BOTS, 'b', "bots"},
-	{LOG_RAW, 'r', "raw"},
-	{LOG_WALL, 'w', "wallops"},
-	{LOG_FILES, 'x', "files"},
-	{LOG_SERV, 's', "server"},
-	{LOG_DEBUG, 'd', "debug"},
-	{LOG_SRVOUT, 'v', "server output"},
-	{LOG_BOTNET, 't', "botnet traffic"},
-	{LOG_BOTSHARE, 'h', "share traffic"},
-	{LOG_ERRORS, 'e', "errors"},
-	{LOG_GETIN, 'g', "getin"},
-	{LOG_WARN, 'u', "warnings"},
-	{0, 0, NULL}
+	{LOG_MSGS, "msgs", 'm'},
+	{LOG_PUBLIC, "public", 'p'},
+	{LOG_JOIN, "joins", 'j'},
+	{LOG_MODES, "kicks/modes", 'k'},
+	{LOG_CMDS, "cmds", 'c'},
+	{LOG_MISC, "misc", 'o'},
+	{LOG_BOTS, "bots", 'b'},
+	{LOG_RAW, "raw", 'r'},
+	{LOG_WALL, "wallops", 'w'},
+	{LOG_FILES, "files", 'x'},
+	{LOG_SERV, "server", 's'},
+	{LOG_DEBUG, "debug", 'd'},
+	{LOG_SRVOUT, "server output", 'v'},
+	{LOG_BOTNET, "botnet traffic", 't'},
+	{LOG_BOTSHARE, "share traffic", 'h'},
+	{LOG_ERRORS, "errors", 'e'},
+	{LOG_GETIN, "getin", 'g'},
+	{LOG_WARN, "warnings", 'u'},
+	{0, NULL, 0}
 };
 #define LOG_LEVELS 18 		/* change this if you change the levels */
 
@@ -62,6 +62,7 @@ int logmodes(const char *s)
 {
 	logmode_mapping_t *mapping = NULL;
 	int modes = 0;
+
 	while (*s) {
 		if (*s == '*') return(LOG_ALL);
 		for (mapping = logmode_mappings; mapping->type; mapping++) {
@@ -136,20 +137,10 @@ void logidx(int idx, const char *format, ...)
  */
 void putlog(int type, const char *chname, const char *format, ...)
 {
-  int idx = 0;
-  char va_out[LOGLINEMAX + 1] = "", out[LOGLINEMAX + 1] = "", *p = NULL;
-#ifdef HUB
-  char stamp[34] = "";
-  struct tm *t = NULL;
-#endif /* HUB */
+  char va_out[LOGLINEMAX + 1] = "";
   va_list va;
 
   va_start(va, format);
-#ifdef HUB
-  t = gmtime(&now);
-
-  egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
-#endif /* HUB */
 
   /* No need to check if out should be null-terminated here,
    * just do it! <cybah>
@@ -162,14 +153,20 @@ void putlog(int type, const char *chname, const char *format, ...)
     return;
   }
 
+  char *p = NULL;
+
   if ((p = strchr(va_out, '\n')))		/* make sure no trailing newline */
      *p = 0;
 
-
+  int idx = 0;
+  char out[LOGLINEMAX + 1] = "";
 #ifdef HUB
+  char stamp[34] = "";
+  struct tm *t = gmtime(&now);
+
+  egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
   /* Place the timestamp in the string to be printed */
-  if (stamp[0])
-    egg_snprintf(out, sizeof out, "%s %s", stamp, va_out);
+  egg_snprintf(out, sizeof out, "%s %s", stamp, va_out);
 #endif /* HUB */
 #ifdef LEAF
   egg_snprintf(out, sizeof out, "%s", va_out);

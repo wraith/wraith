@@ -78,13 +78,16 @@ my_system(const char *run)
 int clear_tmp()
 {
   DIR *tmp = NULL;
-  struct dirent *dir_ent = NULL;
 
-  if (!(tmp = opendir(tempdir))) return 1;
+  if (!(tmp = opendir(tempdir))) 
+    return 1;
+
+  struct dirent *dir_ent = NULL;
+  char *file = NULL;
+
   while ((dir_ent = readdir(tmp))) {
     if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
        && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
-      char *file = NULL;
 
       file = (char *) calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
 
@@ -114,7 +117,6 @@ void check_mypid()
 char last_buf[128] = "";
 
 void check_last() {
-
   if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "ignore", "ignore"))
     return;
 
@@ -151,10 +153,10 @@ void check_last() {
 
 void check_processes()
 {
-  char *proclist = NULL, *out = NULL, *p = NULL, *np = NULL, *curp = NULL, buf[1024] = "", bin[128] = "";
-
   if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "ignore", "ignore"))
     return;
+
+  char *proclist = NULL, *out = NULL, *p = NULL, *np = NULL, *curp = NULL, buf[1024] = "", bin[128] = "";
 
   proclist = (char *) (CFG_PROCESSLIST.ldata && ((char *) CFG_PROCESSLIST.ldata)[0] ?
                        CFG_PROCESSLIST.ldata : CFG_PROCESSLIST.gdata && ((char *) CFG_PROCESSLIST.gdata)[0] ? CFG_PROCESSLIST.gdata : NULL);
@@ -249,22 +251,26 @@ void check_processes()
 void check_promisc()
 {
 #ifdef SIOCGIFCONF
-  struct ifconf ifcnf;
-  char *reqp = NULL, *end_req = NULL, buf[1024] = "";
-  int sock;
-
   if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", "ignore"))
     return;
 
-  sock = socket(AF_INET, SOCK_DGRAM, 0);
+  sock_t sock = socket(AF_INET, SOCK_DGRAM, 0);
+
   if (sock < 0)
     return;
+
+  struct ifconf ifcnf;
+  char buf[1024] = "";
+
   ifcnf.ifc_len = sizeof(buf);
   ifcnf.ifc_buf = buf;
   if (ioctl(sock, SIOCGIFCONF, &ifcnf) < 0) {
     close(sock);
     return;
   }
+
+  char *reqp = NULL, *end_req = NULL;
+
   reqp = buf;				/* pointer to start of array */
   end_req = buf + ifcnf.ifc_len;	/* pointer to end of array */
   while (reqp < end_req) { 
@@ -290,7 +296,7 @@ void check_promisc()
 #endif /* SIOCGIFCONF */
 }
 
-int traced = 0;
+bool traced = 0;
 
 static void got_sigtrap(int z)
 {
@@ -299,11 +305,12 @@ static void got_sigtrap(int z)
 
 void check_trace(int start)
 {
-  int x, parent, i;
-
   if (!strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
     return;
-  parent = getpid();
+
+  int x, i;
+  pid_t parent = getpid();
+
 #ifdef __linux__
   /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
   signal(SIGTRAP, got_sigtrap);
@@ -771,6 +778,7 @@ char *homedir()
 
   if (!homedir_buf || (homedir_buf && !homedir_buf[0])) {
     char tmp[DIRMAX] = "";
+
     if (conf.homedir)
       egg_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
     else {
@@ -909,7 +917,7 @@ int crontab_exists() {
 }
 
 void crontab_create(int interval) {
-  char tmpFile[161] = "", buf[256] = "";
+  char tmpFile[161] = "";
   FILE *f = NULL;
   int fd;
 
@@ -918,6 +926,8 @@ void crontab_create(int interval) {
     unlink(tmpFile);
     return;
   }
+
+  char buf[256] = "";
 
   egg_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
@@ -955,7 +965,7 @@ void crontab_create(int interval) {
 int attached = 0;
 void crazy_trace()
 {
-  int parent = getpid();
+  pid_t parent = getpid();
   int x = fork();
 
   if (x == -1) {
@@ -983,5 +993,3 @@ void crazy_trace()
   printf("end\n");
 }
 #endif /* CRAZY_TRACE */
-
-

@@ -12,16 +12,18 @@ static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
 static void cmd_pls_mask(const char type, int idx, char *par)
 {
-  char *chname = NULL, *who = NULL, s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *p = NULL, *p_expire = NULL;
   const char *cmd = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
-  unsigned long int expire_time = 0, expire_foo;
-  int sticky = 0;
-  struct chanset_t *chan = NULL;
 
   if (!par[0]) {
     dprintf(idx, "Usage: +%s <hostmask> [channel] [%%<XdXhXm>] [reason]\n", cmd);
     return;
   }
+
+  char *chname = NULL, *who = NULL, s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *p = NULL, *p_expire = NULL;
+  unsigned long int expire_time = 0, expire_foo;
+  int sticky = 0;
+  struct chanset_t *chan = NULL;
+
   who = newsplit(&par);
   if (par[0] && strchr(CHANMETA, par[0]))
     chname = newsplit(&par);
@@ -173,16 +175,18 @@ static void cmd_pls_invite(int idx, char *par)
 
 static void cmd_mns_mask(const char type, int idx, char *par)
 {
-  int i = 0, j;
-  struct chanset_t *chan = NULL;
-  char s[UHOSTLEN] = "", *who = NULL, *chname = NULL, *mask = NULL;
   const char *cmd = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
-  masklist *m = NULL;
 
   if (!par[0]) {
     dprintf(idx, "Usage: -%s <hostmask> [channel]\n", cmd);
     return;
   }
+
+  int i = 0, j;
+  struct chanset_t *chan = NULL;
+  char s[UHOSTLEN] = "", *who = NULL, *chname = NULL, *mask = NULL;
+  masklist *m = NULL;
+
   who = newsplit(&par);
   if (par[0] && strchr(CHANMETA, par[0]))
     chname = newsplit(&par);
@@ -343,14 +347,13 @@ static void cmd_invites(int idx, char *par)
 
 static void cmd_info(int idx, char *par)
 {
-  char s[512] = "", *chname = NULL, *s1 = NULL;
-  int locked = 0;
-
   if (!use_info) {
     dprintf(idx, "Info storage is turned off.\n");
     return;
   }
-  s1 = (char *) get_user(&USERENTRY_INFO, dcc[idx].user);
+  char s[512] = "", *chname = NULL, *s1 = (char *) get_user(&USERENTRY_INFO, dcc[idx].user);
+  bool locked = 0;
+
   if (s1 && s1[0] == '@')
     locked = 1;
   if (par[0] && strchr(CHANMETA, par[0])) {
@@ -413,23 +416,27 @@ static void cmd_info(int idx, char *par)
 
 static void cmd_chinfo(int idx, char *par)
 {
-  char *handle = NULL, *chname = NULL;
-  struct userrec *u1 = NULL;
-
   if (!use_info) {
     dprintf(idx, "Info storage is turned off.\n");
     return;
   }
-  handle = newsplit(&par);
+
+  char *handle = newsplit(&par);
+
   if (!handle[0]) {
     dprintf(idx, "Usage: chinfo <handle> [channel] <new-info>\n");
     return;
   }
-  u1 = get_user_by_handle(userlist, handle);
+
+  struct userrec *u1 = get_user_by_handle(userlist, handle);
+
   if (!u1) {
     dprintf(idx, "No such user.\n");
     return;
   }
+
+  char *chname = NULL;
+
   if (par[0] && strchr(CHANMETA, par[0])) {
     chname = newsplit(&par);
     if (!findchan_by_dname(chname)) {
@@ -953,8 +960,13 @@ static void pls_chan(int idx, char *par, char *bot)
   }
 
   chname = newsplit(&par);
-  sprintf(buf, "cjoin %s %s %s", chname, bot ? bot : "*", par);		/* +chan makes all bots join */
-
+  sprintf(buf, "cjoin %s %s", chname, bot ? bot : "*");		/* +chan makes all bots join */
+  if (par[0]) {
+    strcat(buf, " ");
+    strcat(buf, par);
+    strcat(buf, " ");
+  }
+    
   if (!bot && findchan_by_dname(chname)) {
     putallbots(buf);
     dprintf(idx, "That channel already exists!\n");
@@ -980,11 +992,11 @@ static void pls_chan(int idx, char *par, char *bot)
         char tmp[51] = "";
 
         sprintf(tmp, "addedby %s addedts %li", dcc[idx].nick, now);
-        if (buf[0])
-          sprintf(buf, "%s %s", buf, tmp);
-        else
-          sprintf(buf, "%s", tmp);
-        do_chanset(NULL, chan, tmp, DO_LOCAL);
+        if (buf[0]) {
+          strcat(buf, " ");
+          strcat(buf, tmp);
+        }
+        do_chanset(NULL, chan, buf[0] ? buf : tmp, DO_LOCAL);
         dprintf(idx, "Channel %s added to the botnet.\n", chname);
       } else {
         dprintf(idx, "Channel %s added to the bot: %s\n", chname, bot);
@@ -1278,7 +1290,7 @@ static void cmd_chaninfo(int idx, char *par)
 	    chan->flood_pub_thr, chan->flood_ctcp_thr,
 	    chan->flood_join_thr, chan->flood_kick_thr,
 	    chan->flood_deop_thr, chan->flood_nick_thr);
-    dprintf(idx, "  time  :          %3d  %3d  %3d  %3d  %3d  %3d\n",
+    dprintf(idx, "  time  :          %3lu  %3lu  %3lu  %3lu  %3lu  %3lu\n",
 	    chan->flood_pub_time, chan->flood_ctcp_time,
 	    chan->flood_join_time, chan->flood_kick_time,
 	    chan->flood_deop_time, chan->flood_nick_time);

@@ -61,15 +61,18 @@ void fwd_display(int idx, struct user_entry *e, struct userrec *u)
  */
 int num_notes(const char *user)
 {
-  int tot = 0;
-  FILE *f = NULL;
-  char s[513] = "", *to = NULL, *s1 = NULL;
-
   if (!notefile[0])
     return 0;
+
+  FILE *f = NULL;
+
   f = fopen(notefile, "r");
   if (f == NULL)
     return 0;
+
+  int tot = 0;
+  char s[513] = "", *to = NULL, *s1 = NULL;
+
   while (!feof(f)) {
     fgets(s, 512, f);
     if (!feof(f)) {
@@ -92,14 +95,15 @@ int num_notes(const char *user)
  */
 static void notes_change(const char *oldnick, const char *newnick)
 {
-  FILE *f = NULL, *g = NULL;
-  char s[513] = "", *to = NULL, *s1 = NULL;
-  int tot = 0;
-
   if (!egg_strcasecmp(oldnick, newnick))
     return;
   if (!notefile[0])
     return;
+
+  FILE *f = NULL, *g = NULL;
+  char s[513] = "", *to = NULL, *s1 = NULL;
+  int tot = 0;
+
   f = fopen(notefile, "r");
   if (f == NULL)
     return;
@@ -141,12 +145,13 @@ static void notes_change(const char *oldnick, const char *newnick)
  */
 static void expire_notes()
 {
+  if (!notefile[0])
+    return;
+
   FILE *f = NULL, *g = NULL;
   char s[513] = "", *to = NULL, *from = NULL, *ts = NULL, *s1 = NULL;
   int tot = 0, lapse;
 
-  if (!notefile[0])
-    return;
   f = fopen(notefile, "r");
   if (f == NULL)
     return;
@@ -559,8 +564,6 @@ void notes_del(const char *hand, const char *nick, const char *sdl, int idx)
  */
 static int msg_notes(char *nick, char *host, struct userrec *u, char *par)
 {
-  char *pwd = NULL, *fcn = NULL;
-
   if (!u)
     return 0;
   if (u->bot)
@@ -574,6 +577,9 @@ static int msg_notes(char *nick, char *host, struct userrec *u, char *par)
     dprintf(DP_HELP, "NOTICE %s :       ex: NOTES mypass ERASE 2-4;8;16-\n", nick);
     return 1;
   }
+
+  char *pwd = NULL, *fcn = NULL;
+
   if (!u_pass_match(u, "-")) {
     /* they have a password set */
     pwd = newsplit(&par);

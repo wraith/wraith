@@ -14,7 +14,7 @@ int deluser(char *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
 #ifdef HUB
-int write_user(struct userrec *u, FILE * f, int shr);
+bool write_user(struct userrec *u, FILE * f, int shr);
 int write_userfile(int);
 #endif /* HUB */
 void touch_laston(struct userrec *, char *, time_t);
@@ -22,6 +22,6 @@ void user_del_chan(char *);
 char *fixfrom(char *);
 
 extern struct userrec  		*userlist, *lastuser;
-extern int			noshare, cache_hit, cache_miss, strict_host,
-				userfile_perm;
+extern int			cache_hit, cache_miss, userfile_perm;
+extern bool			strict_host, noshare;
 #endif /* !_USERREC_H */

@@ -5449,7 +5449,9 @@ rm -f confcache
 
 
 
-for ac_header in arpa/inet.h fcntl.h limits.h locale.h netdb.h netinet/in.h
+
+
+for ac_header in stdarg.h std_arg.h arpa/inet.h fcntl.h limits.h locale.h netdb.h netinet/in.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then

@@ -33,13 +33,13 @@
 extern int		bupdating;
 
 #ifdef HUB
-static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
+static bool copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
 #endif /* HUB */
-static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
+static time_t wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
 static int dcc_limit = 4;	/* Maximum number of simultaneous file
 				   downloads allowed */
-static unsigned int dcc_block = 0;	/* Size of one dcc block */
-static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
+static size_t dcc_block = 0;	/* Size of one dcc block */
+static bool quiet_reject = 1;        /* Quietly reject dcc chat or sends from
                                    users without access? */
 
 /*
@@ -48,7 +48,7 @@ static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
 #ifdef HUB
 static void wipe_tmp_filename(char *, int);
 static int at_limit(char *);
-static void dcc_get_pending(int, char *, int);
+static void dcc_get_pending(int, char *, size_t);
 #endif /* HUB */
 
 static fileq_t *fileq = NULL;
@@ -501,12 +501,12 @@ inline static void handle_resend_packet(int idx, transfer_reget *reget_data)
  * Note: The first received packet during reget is a special 8 bit packet
  *       containing special information.
  */
-void dcc_get(int idx, char *buf, int len)
+void dcc_get(int idx, char *buf, size_t len)
 {
   char xnick[NICKLEN] = "";
   unsigned char bbuf[4] = "";
   unsigned long cmp, l;
-  int w = len + dcc[idx].u.xfer->sofar, p = 0;
+  size_t w = len + dcc[idx].u.xfer->sofar, p = 0;
 
   dcc[idx].timeval = now;		/* Mark as active		*/
 
@@ -723,10 +723,10 @@ void eof_dcc_get(int idx)
 }
 #endif /* HUB */
 
-void dcc_send(int idx, char *buf, int len)
+void dcc_send(int idx, char *buf, size_t len)
 {
   char s[SGRAB + 2] = "", *b = NULL;
-  unsigned long sent;
+  size_t sent;
 
   fwrite(buf, len, 1, dcc[idx].u.xfer->f);
 
@@ -895,8 +895,7 @@ void display_dcc_get(int idx, char *buf)
 
 void display_dcc_get_p(int idx, char *buf)
 {
-  sprintf(buf,TRANSFER_SEND_WAITED, now - dcc[idx].timeval,
-	  dcc[idx].u.xfer->origname);
+  sprintf(buf,TRANSFER_SEND_WAITED, now - dcc[idx].timeval, dcc[idx].u.xfer->origname);
 }
 #endif /* HUB */
 
@@ -953,7 +952,7 @@ struct dcc_table DCC_SEND =
   NULL
 };
 
-void dcc_fork_send(int idx, char *x, int y);
+void dcc_fork_send(int idx, char *x, size_t y);
 
 struct dcc_table DCC_FORK_SEND =
 {
@@ -969,12 +968,13 @@ struct dcc_table DCC_FORK_SEND =
   NULL
 };
 
-void dcc_fork_send(int idx, char *x, int y)
+void dcc_fork_send(int idx, char *x, size_t y)
 {
-  char s1[121] = "";
-
   if (dcc[idx].type != &DCC_FORK_SEND)
     return;
+
+  char s1[121] = "";
+
   dcc[idx].type = &DCC_SEND;
   dcc[idx].status = 0;
   dcc[idx].u.xfer->start_time = now;
@@ -1012,11 +1012,11 @@ struct dcc_table DCC_GET_PENDING =
   NULL
 };
 
-static void dcc_get_pending(int idx, char *buf, int len)
+static void dcc_get_pending(int idx, char *buf, size_t len)
 {
-  IP ip;
+  in_addr_t ip;
   port_t port;
-  int i;
+  sock_t i;
   char s[UHOSTLEN] = "";
 
   i = answer(dcc[idx].sock, s, &ip, &port, 1);
@@ -1043,7 +1043,7 @@ static void dcc_get_pending(int idx, char *buf, int len)
 
   /* Are we resuming? */
   if (dcc[idx].u.xfer->type == XFER_RESUME_PEND) {
-    long unsigned int l;
+    size_t l;
 
     if (dcc_block == 0 || dcc[idx].u.xfer->length < dcc_block) {
       l = dcc[idx].u.xfer->length - dcc[idx].u.xfer->offset;
@@ -1087,14 +1087,14 @@ static void dcc_get_pending(int idx, char *buf, int len)
 
 static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir, int resend)
 {
-  int zz, i;
+  sock_t zz = -1;
+  int i;
   port_t port;
   char *nfn = NULL, *buf = NULL;
   long dccfilesize;
   FILE *f = NULL, *dccfile = NULL;
  
   sdprintf("raw_dcc_resend_send()");
-  zz = (-1);
   dccfile = fopen(filename, "rb");
   if (!dccfile) {
     putlog(LOG_MISC, "*", "Failed to open %s: %s", filename, strerror(errno));
@@ -1137,7 +1137,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
   if ((i = new_dcc(&DCC_GET_PENDING, sizeof(struct xfer_info))) == -1)
      return DCCSEND_FULL;
   dcc[i].sock = zz;
-  dcc[i].addr = (IP) (-559026163);
+  dcc[i].addr = (in_addr_t) (-559026163);
   dcc[i].port = port;
   strcpy(dcc[i].nick, nick);
   strcpy(dcc[i].host, "irc");
@@ -1156,7 +1156,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
   if (nick[0] != '*') {
     dprintf(DP_HELP, "PRIVMSG %s :\001DCC %sSEND %s %lu %d %lu\001\n", nick,
 	    resend ? "RE" :  "", nfn,
-	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()), port,
+	    iptolong(natip[0] ? (in_addr_t) inet_addr(natip) : getmyip()), port,
 	    dccfilesize);
     putlog(LOG_FILES, "*",TRANSFER_BEGIN_DCC, resend ? TRANSFER_RE :  "",
 	   nfn, nick);

@@ -7,6 +7,7 @@
 #  include "config.h"
 #endif
 
+#include <sys/types.h>
 #include "src/crypto/crypto.h"
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
@@ -24,6 +25,6 @@ char *decryptit (char *);
 int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));
 void Encrypt_File(char *, char *);
 void Decrypt_File(char *, char *);
-char *btoh(const unsigned char *, int);
+char *btoh(const unsigned char *, size_t);
 
 #endif /* !_CRYPT_H */

@@ -50,10 +50,10 @@ int     		my_port;
  */
 void rmspace(char *s)
 {
-  register char *p = NULL, *q = NULL;
-
   if (!s || !*s)
     return;
+
+  register char *p = NULL, *q = NULL;
 
   /* Remove trailing whitespaces. */
   for (q = s + strlen(s) - 1; q >= s && egg_isspace(*q); q--);
@@ -203,7 +203,6 @@ void checkchans(int which)
 {
   struct chanset_t *chan = NULL, *chan_next = NULL;
 
-  sdprintf("checkchans(%d)", which);
   if (which == 0 || which == 2) {
     for (chan = chanset; chan; chan = chan->next) {
       if (which == 0) {
@@ -232,7 +231,6 @@ void tell_verbose_uptime(int idx)
   time_t now2, hr, min;
 
   now2 = now - online_since;
-  s[0] = 0;
   if (now2 > 86400) {
     /* days */
     sprintf(s, "%d day", (int) (now2 / 86400));
@@ -361,18 +359,16 @@ void tell_settings(int idx)
   if (owner[0])
     dprintf(idx, "%s: %s\n", MISC_PERMOWNER, owner);
 #endif /* HUB */
-  dprintf(idx, "Ignores last %d mins\n", ignore_time);
+  dprintf(idx, "Ignores last %li mins\n", ignore_time);
 }
 
 void reaffirm_owners()
 {
-  char *p = NULL, *q = NULL, s[121] = "";
-  struct userrec *u = NULL;
-
   /* Make sure perm owners are +a */
   if (owner[0]) {
-    q = owner;
-    p = strchr(q, ',');
+    char *q = owner, *p = strchr(q, ','), s[121] = "";
+    struct userrec *u = NULL;
+
     while (p) {
       strncpyz(s, q, (p - q) + 1);
       rmspace(s);
@@ -532,6 +528,7 @@ void chanprog()
 
   if (!conf.bot->nick)
     fatal("I don't have a nickname!!\n", 0);
+  sdprintf("I am: %s", conf.bot->nick);
 #ifdef HUB
   loading = 1;
   checkchans(0);
@@ -590,9 +587,8 @@ void chanprog()
  */
 void reload()
 {
-  FILE *f = NULL;
+  FILE *f = fopen(userfile, "r");
 
-  f = fopen(userfile, "r");
   if (f == NULL) {
     putlog(LOG_MISC, "*", MISC_CANTRELOADUSER);
     return;
@@ -617,23 +613,21 @@ void reload()
  */
 int isowner(char *name)
 {
-  char *pa = NULL, *pb = NULL;
-  char nl, pl;
-
   if (!owner || !*owner)
     return (0);
   if (!name || !*name)
     return (0);
-  nl = strlen(name);
-  pa = owner;
-  pb = owner;
+
+  char *pa = owner, *pb = owner;
+  size_t nl = strlen(name), pl;
+
   while (1) {
     while (1) {
       if ((*pb == 0) || (*pb == ',') || (*pb == ' '))
 	break;
       pb++;
     }
-    pl = (unsigned int) pb - (unsigned int) pa;
+    pl = pb - pa;
     if (pl == nl && !egg_strncasecmp(pa, name, nl))
       return (1);
     while (1) {
