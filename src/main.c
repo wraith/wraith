@@ -560,10 +560,6 @@ static void startup_checks() {
   if (can_stat(cfile))
     readconf(cfile, enc);
       
-#ifdef LEAF
-  if (localhub)
-#endif /* LEAF */
-    showconf();
 #ifdef S_CONFEDIT
   if (do_confedit)
     confedit(cfile);		/* this will exit() */
@@ -643,8 +639,9 @@ static void startup_checks() {
       if (updating) exit(0); /* just let the timer restart us (our parent) */
     }
   }
+  if (!localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
 #endif /* LEAF */
-  free_conf();
+    free_conf();
 }
 
 #include "mod/static.h"
