@@ -15,7 +15,7 @@ extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[];
 extern time_t		online_since, now;
 extern uid_t		myuid;
 extern const time_t	buildts;
-extern const char	egg_version[];
+extern const char	*egg_version;
 
 void fatal(const char *, int);
 
