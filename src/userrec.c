@@ -96,49 +96,36 @@ int expmem_users()
   struct user_entry *ue;
   struct igrec *i;
 
-  Context;
   tot = 0;
-  u = userlist;
-  while (u != NULL) {
-    ch = u->chanrec;
-  Context;
-    while (ch) {
+  for (u = userlist; u; u = u->next) {
+    for (ch = u->chanrec; ch; ch = ch->next) {
       tot += sizeof(struct chanuserrec);
 
       if (ch->info != NULL)
         tot += strlen(ch->info) + 1;
-      ch = ch->next;
     }
     tot += sizeof(struct userrec);
 
-  Context;
     for (ue = u->entries; ue; ue = ue->next) {
       tot += sizeof(struct user_entry);
 
-  Context;
       if (ue->name) {
-  Context;
         tot += strlen(ue->name) + 1;
         tot += list_type_expmem(ue->u.list);
-      } else {
-  Context;
+      } else
         tot += ue->type->expmem(ue);
-      }
     }
-    u = u->next;
   }
-  /* account for each channel's masks */
-  Context;
+  /* Account for each channel's masks */
   for (chan = chanset; chan; chan = chan->next) {
 
-  Context;
-    /* account for each channel's ban-list user */
+    /* Account for each channel's ban-list user */
     tot += expmem_mask(chan->bans);
 
-    /* account for each channel's exempt-list user */
+    /* Account for each channel's exempt-list user */
     tot += expmem_mask(chan->exempts);
 
-    /* account for each channel's invite-list user */
+    /* Account for each channel's invite-list user */
     tot += expmem_mask(chan->invites);
   }
 
@@ -146,7 +133,6 @@ int expmem_users()
   tot += expmem_mask(global_exempts);
   tot += expmem_mask(global_invites);
 
-  Context;
   for (i = global_ign; i; i = i->next) {
     tot += sizeof(struct igrec);
 
@@ -156,14 +142,13 @@ int expmem_users()
     if (i->msg)
       tot += strlen(i->msg) + 1;
   }
-  Context;
   return tot;
 }
 
 int count_users(struct userrec *bu)
 {
   int tot = 0;
-  struct userrec *u ;
+  struct userrec *u;
 
   for (u = bu; u; u = u->next)
     tot++;

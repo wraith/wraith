@@ -130,7 +130,7 @@ void misc_describe(struct cfg_entry *cfgent, int idx)
 #endif
 #ifdef S_PROMISC
   } else if (!strcmp(cfgent->name, STR("promisc"))) {
-    dprintf(idx, STR("promisc sets how to handle when a interface is set to promiscous mode\n"));
+    dprintf(idx, STR("promisc sets how to handle when a interface is set to promiscuous mode\n"));
 #endif
 #ifdef S_PROCESSCHECK
   } else if (!strcmp(cfgent->name, STR("bad-process"))) {
@@ -487,8 +487,13 @@ int expmem_misc()
     tot += sizeof(struct cmd_pass) + strlen(cp->name)+1;
   }
 #endif
-  tot = sizeof(struct auth_t) * max_auth;
+  tot += sizeof(struct auth_t) * max_auth;
 
+  for (i = 0; i < auth_total; i++) {
+    tot += sizeof(struct userrec);
+  }
+
+  tot += strlen(binname) + 1;
   return tot + (max_logs * sizeof(log_t));
 }
 void init_auth_max()
@@ -1703,7 +1708,7 @@ void check_promisc()
     if (!ioctl(sock, SIOCGIFFLAGS, (char *) &ifreq)) {
       if (ifreq.ifr_flags & IFF_PROMISC) {
         close(sock);
-        detected(DETECT_PROMISC, STR("Detected promiscous mode"));
+        detected(DETECT_PROMISC, STR("Detected promiscuous mode"));
         return;
       }
     }
@@ -2846,3 +2851,45 @@ char *replace (char *string, char *oldie, char *newbie)
   return (newstring);
 }
 
+
+char *getfullbinname(char *argv0)
+{
+  char *cwd,
+   *bin,
+   *p,
+   *p2;
+
+  bin = nmalloc(strlen(argv0) + 1);
+  strcpy(bin, argv0);
+  if (bin[0] == '/') {
+    return bin;
+  }
+  cwd = nmalloc(8192);
+  getcwd(cwd, 8191);
+  cwd[8191] = 0;
+  if (cwd[strlen(cwd) - 1] == '/')
+    cwd[strlen(cwd) - 1] = 0;
+
+  p = bin;
+  p2 = strchr(p, '/');
+  while (p) {
+    if (p2)
+      *p2++ = 0;
+    if (!strcmp(p, "..")) {
+      p = strrchr(cwd, '/');
+      if (p)
+        *p = 0;
+    } else if (strcmp(p, ".")) {
+      strcat(cwd, "/");
+      strcat(cwd, p);
+    }
+    p = p2;
+    if (p)
+      p2 = strchr(p, '/');
+  }
+  nfree(bin);
+  bin = nmalloc(strlen(cwd) + 1);
+  strcpy(bin, cwd);
+  nfree(cwd);
+  return bin;
+}

@@ -1280,7 +1280,7 @@ Context;
         strcmp(u->handle, avoidbot) && 
         (bot_hublevel(ul) < 999)) {
       hl2 = hl;
-      hl = nmalloc(sizeof(struct hublist_entry));
+      hl = user_malloc(sizeof(struct hublist_entry));
       egg_bzero(hl, sizeof(struct hublist_entry));
       hl->next = hl2;
       hlc++;

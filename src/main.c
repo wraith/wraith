@@ -198,47 +198,6 @@ Context;
     exit(1);
   }
 }
-char *getfullbinname(char *argv0)
-{
-  char *cwd,
-   *bin,
-   *p,
-   *p2;
-
-  bin = nmalloc(strlen(argv0) + 1);
-  strcpy(bin, argv0);
-  if (bin[0] == '/') {
-    return bin;
-  }
-  cwd = nmalloc(8192);
-  getcwd(cwd, 8191);
-  cwd[8191] = 0;
-  if (cwd[strlen(cwd) - 1] == '/')
-    cwd[strlen(cwd) - 1] = 0;
-
-  p = bin;
-  p2 = strchr(p, '/');
-  while (p) {
-    if (p2)
-      *p2++ = 0;
-    if (!strcmp(p, "..")) {
-      p = strrchr(cwd, '/');
-      if (p)
-        *p = 0;
-    } else if (strcmp(p, ".")) {
-      strcat(cwd, "/");
-      strcat(cwd, p);
-    }
-    p = p2;
-    if (p)
-      p2 = strchr(p, '/');
-  }
-  nfree(bin);
-  bin = nmalloc(strlen(cwd) + 1);
-  strcpy(bin, cwd);
-  nfree(cwd);
-  return bin;
-}
 
 int expmem_chanprog(), expmem_users(), expmem_misc(), expmem_dccutil(),
  expmem_botnet(), expmem_tcl(), expmem_tclhash(), expmem_net(),
@@ -247,16 +206,12 @@ int expmem_chanprog(), expmem_users(), expmem_misc(), expmem_dccutil(),
 
 /* For mem.c : calculate memory we SHOULD be using
  */
-int expmem_main() {
-  int tot = strlen(binname) + 1;
-  return tot;
-}
 
 int expected_memory(void)
 {
   int tot;
 
-  tot = expmem_main() + expmem_chanprog() + expmem_users() + expmem_misc() +
+  tot = expmem_chanprog() + expmem_users() + expmem_misc() +
     expmem_dccutil() + expmem_botnet() + expmem_tcl() + expmem_tclhash() +
     expmem_net() + expmem_modules(0) + expmem_tcldcc() +
     expmem_tclmisc();

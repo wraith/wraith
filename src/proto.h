@@ -209,6 +209,8 @@ char *progname();
 void init_settings();
 
 /* misc.c */
+int listen_all(int, int);
+char *getfullbinname(char *);
 char *replace(char *, char *, char *);
 #ifdef S_GARBLESTRINGS
 char *degarble(int, char *);
@@ -246,7 +248,6 @@ void putlog EGG_VARARGS(int, arg1);
 int ischanhub();
 int issechub();
 void flushlogs();
-int listen_all(int, int);
 void check_logsize();
 void maskhost(const char *, char *);
 char *stristr(char *, char *);

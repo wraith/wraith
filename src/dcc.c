@@ -64,7 +64,6 @@ int	flood_telnet_time = 5;	/* In how many seconds?			   */
 char	bannerfile[121] = ""; /* File displayed on telnet login */
 
 extern char dcc_prefix[];
-struct portmap *root = NULL;
 
 static void dcc_telnet_hostresolved(int);
 static void dcc_telnet_got_ident(int, char *);
@@ -2061,73 +2060,5 @@ void dcc_telnet_got_ident(int i, char *host)
 #else
   dprintf(i, "%s", rand_dccresp());
 #endif
-}
-
-int listen_all(int lport, int off)
-{
-  int i,
-    idx = (-1),
-    port,
-    realport;
-  struct portmap *pmap = NULL,
-   *pold = NULL;
-
-Context;
-  port = realport = lport;
-  for (pmap = root; pmap; pold = pmap, pmap = pmap->next)
-    if (pmap->realport == port) {
-      port = pmap->mappedto;
-      break;
-    }
-
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_TELNET) && (dcc[i].port == port))
-      idx = i;
-
-  if (off) {
-    if (pmap) {
-      if (pold)
-        pold->next = pmap->next;
-      else
-        root = pmap->next;
-      nfree(pmap);
-    }
-    if (idx < 0) {
-      putlog(LOG_ERRORS, "*", STR("No such listening port open - %d"), lport);
-      return idx;
-    }
-    putlog(LOG_DEBUG, "*", "Closing listening port %d", dcc[idx].port);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-    return idx;
-  }
-  if (idx < 0) {
-    /* make new one */
-    if (dcc_total >= max_dcc) {
-      putlog(LOG_ERRORS, "*", STR("Can't open listening port - no more DCC Slots"));
-    } else {
-      i = open_listen(&port);
-      if (i < 0)
-        putlog(LOG_ERRORS, "*", STR("Can't open listening port - it's taken"));
-      else {
-        idx = new_dcc(&DCC_TELNET, 0);
-        dcc[idx].addr = iptolong(getmyip(0));
-        dcc[idx].port = port;
-        dcc[idx].sock = i;
-        dcc[idx].timeval = now;
-        strcpy(dcc[idx].nick, STR("(telnet)"));
-        strcpy(dcc[idx].host, "*");
-        if (!pmap) {
-          pmap = nmalloc(sizeof(struct portmap));
-          pmap->next = root;
-          root = pmap;
-        }
-        pmap->realport = realport;
-        pmap->mappedto = port;
-        putlog(LOG_DEBUG, "*", STR("Listening at telnet port %d"), port);
-      }
-    }
-  }
-  return idx;
 }
 
