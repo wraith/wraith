@@ -1680,17 +1680,14 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
   char *chname = NULL, answers[512], *parcpy;
   char *list[2], *bak, *buf;
   struct chanset_t *chan = NULL;
-  int all = 0, items = 0;
+  int all = 0;
 
   putlog(LOG_CMDS, "*", "#%s# chanset %s", dcc[idx].nick, par);
 
   if (!par[0])
-    dprintf(idx, "Usage: chanset [%schannel] <settings>\n", CHANMETA);
+    dprintf(idx, "Usage: chanset [%schannel|*] <settings>\n", CHANMETA);
   else {
     if (strlen(par) > 2 && par[0] == '*' && par[1] == ' ') {
-      dprintf(idx, "currently chanset * does not work. use %stcl foreach chan [channels] { channel set $chan +mode }\n", dcc_prefix);
-      return;
-
       all = 1;
       get_user_flagrec(u, &user, chanset ? chanset->dname : "");
       if (!glob_master(user)) {
@@ -1744,7 +1741,6 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	  if (tcl_channel_modify(0, chan, 1, list) == TCL_OK) {
 	    strcat(answers, list[0]);
 	    strcat(answers, " ");
-            items++;
 	  } else if (!all || !chan->next)
 	    dprintf(idx, "Error trying to set %s for %s, invalid mode.\n",
 		    list[0], all ? "all channels" : chname);
@@ -1755,35 +1751,28 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	 * line is args. Woops nearly made a nasty little hole here :) we'll
 	 * just ignore any non global +n's trying to set the need-commands.
 	 */
-	if (strncmp(list[0], "need-", 5) || (u->flags & USER_OWNER)) {
-	  list[1] = par;
-	  /* Par gets modified in tcl channel_modify under some
-  	   * circumstances, so save it now.
-	   */
-	  parcpy = nmalloc(strlen(par) + 1);
-	  strcpy(parcpy, par);
-          if (tcl_channel_modify(0, chan, 2, list) == TCL_OK) {
-	    strcat(answers, list[0]);
-	    strcat(answers, " { ");
-	    strcat(answers, parcpy);
-	    strcat(answers, " }");
-	  } else if (!all || !chan->next)
-	    dprintf(idx, "Error trying to set %s for %s, invalid option\n",
-		    list[0], all ? "all channels" : chname);
-          nfree(parcpy);
-	}
+	/* chanints */
+	list[1] = par;
+	/* Par gets modified in tcl channel_modify under some
+  	 * circumstances, so save it now.
+	 */
+	parcpy = nmalloc(strlen(par) + 1);
+	strcpy(parcpy, par);
+        if (tcl_channel_modify(0, chan, 2, list) == TCL_OK) {
+	  strcat(answers, list[0]);
+	  strcat(answers, " { ");
+	  strcat(answers, parcpy);
+	  strcat(answers, " }");
+	} else if (!all || !chan->next)
+	  dprintf(idx, "Error trying to set %s for %s, invalid option\n", list[0], all ? "all channels" : chname);
+        nfree(parcpy);
 	break;
       }
       if (!all && answers[0]) {
         struct chanset_t *my_chan;
-        my_chan = findchan_by_dname(chname);
-        if (my_chan)
+        if ((my_chan = findchan_by_dname(chname)))
           do_chanset(my_chan, bak, 0);
-	dprintf(idx, "Successfully set modes { %s } on %s.\n",
-		answers, chname);
-#ifdef HUB
-        write_userfile(-1);
-#endif /* HUB */
+	dprintf(idx, "Successfully set modes { %s } on %s.\n", answers, chname);
       }
       if (!all)
         chan = NULL;
@@ -1792,11 +1781,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
     }
     if (all && answers[0]) {
       do_chanset(NULL, bak, 0);		/* NULL does all */
-      dprintf(idx, "Successfully set modes { %s } on all channels.\n",
-	      answers);
-#ifdef HUB
-      write_userfile(-1);
-#endif /* HUB */
+      dprintf(idx, "Successfully set modes { %s } on all channels.\n", answers);
     }
     nfree(buf);
   }

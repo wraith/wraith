@@ -867,6 +867,11 @@ int shouldjoin(struct chanset_t *chan)
 #endif /* G_BACKUP */
 }
 
+/* do_chanset() set (options) on (chan)
+ * local: 0 - send out over botnet only
+ * local: 1 - ALSO set locally
+ * local: 2 - ONLY set locally
+ */
 void do_chanset(struct chanset_t *chan, char *options, int local)
 {
   char *buf;
@@ -913,19 +918,17 @@ Context;
       options = buf2;
       list[0] = newsplit(&options);
       while (list[0][0]) {
-        if (list[0][0] == '+' || list[0][0] == '-' ||
-           (!strcmp(list[0], "dont-idle-kick"))) {
-          (func[38]) (0, ch, 1, list);
+        if (list[0][0] == '+' || list[0][0] == '-' || (!strcmp(list[0], "dont-idle-kick"))) {
+          (func[38]) (0, ch, 1, list);			/* tcl_channel_modify() */
           list[0] = newsplit(&options);
           continue;
         }
-        if (strncmp(list[0], "need-", 5)) {
-          list[1] = options;
-          /* Par gets modified in tcl channel_modify under some
-           * circumstances, so save it now.
-           */
-           (func[38]) (0, ch, 2, list);			/* tcl_channel_modify() */
-        }
+	/* chanints */
+        list[1] = options;
+        /* Par gets modified in tcl channel_modify under some
+         * circumstances, so save it now.
+         */
+         (func[38]) (0, ch, 2, list);			/* tcl_channel_modify() */
       }
       if (all)
         ch = ch->next;

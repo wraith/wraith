@@ -107,54 +107,27 @@ static void check_should_lock()
 static void got_cset(char *botnick, char *code, char *par)
 {
   int all = 0;
-  char *chname = NULL, *list[2], *buf, *bak;
+  char *chname = NULL;
   struct chanset_t *chan = NULL;
 
   if (!par[0])
    return;
   else {
    if (par[0] == '*' && par[1] == ' ') {
-    return;
     all = 1;
     newsplit(&par);
    } else {
     chname = newsplit(&par);
-    chan = findchan_by_dname(chname);
-    if (!chan)
+    if (!(chan = findchan_by_dname(chname)))
       return;
    }
   }
   if (all)
    chan = chanset;
 
-  /* copied from cmd_chanset */
-  bak = par;
-  buf = nmalloc(strlen(par) + 1);
   while (chan) {
     chname = chan->dname;
-    strcpy(buf, bak);
-    par = buf;
-    list[0] = newsplit(&par);
-    while (list[0][0]) {
-      if (list[0][0] == '+' || list[0][0] == '-' ||
-          (!strcmp(list[0], "dont-idle-kick"))) {
-        if (tcl_channel_modify(0, chan, 1, list) == TCL_OK) {
-        } else if (!all || !chan->next)
-          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid mode.", list[0], all ? "all channels" : chname);
-        list[0] = newsplit(&par);
-        continue;
-      }
-      if (strncmp(list[0], "need-", 5)) {
-        list[1] = par;
-        /* Par gets modified in tcl channel_modify under some
-         * circumstances, so save it now.
-         */
-        if (tcl_channel_modify(0, chan, 2, list) == TCL_OK) {
-        } else if (!all || !chan->next)
-          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid option\n", list[0], all ? "all channels" : chname);
-      }
-      break;
-    }
+    do_chanset(chan, par, 2);
     if (chan->status & CHAN_BITCH) {
       module_entry *me;
       if ((me = module_find("irc", 0, 0)))
@@ -165,8 +138,6 @@ static void got_cset(char *botnick, char *code, char *par)
     else
       chan = chan->next;
   }
-  if (buf)
-    nfree(buf);
 }
 
 static void got_cpart(char *botnick, char *code, char *par)
