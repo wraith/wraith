@@ -5,6 +5,7 @@ This is a summary of ChangeLog basically.
 * No longer reading in /etc/hosts, still reading .hosts though
 * Disabled all the DEBUG emailing and context shit, it was utterly pointless
 * Fixed closed-invite not being checked correctly.
+* Fixed segfault while relaying.
 
 1.2
 * No longer displaying SALTS on ./bin -v
