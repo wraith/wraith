@@ -263,7 +263,7 @@ static void cmd_kickban(struct userrec *u, int idx, char *par)
       do_mask(chan, chan->channel.ban, s1, 'b');
     if (!par[0])
       par = "requested";
-    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, par);
+    dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, par);
     m->flags |= SENTKICK;
     u_addban(chan, s1, dcc[idx].nick, par, now + (60 * chan->ban_time), 0);
     dprintf(idx, "Kick-banned %s on %s.\n", nick, chan->dname);
