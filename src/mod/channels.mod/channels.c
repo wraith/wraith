@@ -21,16 +21,16 @@ static Function *global = NULL;
 static Function *irc_funcs = NULL;
 #endif /* LEAF */
 
-static int 			use_info;
+int 			use_info;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
 static char 			*lastdeletedmask = NULL;
 static struct udef_struct 	*udef = NULL;
 static int 			global_stopnethack_mode;
 static int 			global_revenge_mode;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
-static int 			global_ban_time;
-static int 			global_exempt_time;
-static int 			global_invite_time;
+int 			global_ban_time;
+int 			global_exempt_time;
+int 			global_invite_time;
 
 /* Global channel settings (drummer/dw) */
 static char 			glob_chanset[512] = "";
@@ -67,7 +67,7 @@ struct cfg_entry CFG_LOCKTHRESHOLD, CFG_KILLTHRESHOLD;
 #endif /* S_AUTOLOCK */
 
 /* This will close channels if the HUB:leaf count is skewed from config setting */
-static void check_should_lock()
+void check_should_lock()
 {
 #ifdef S_AUTOLOCK
 #ifdef HUB
@@ -542,7 +542,7 @@ static void get_mode_protect(struct chanset_t *chan, char *s)
 
 /* Returns true if this is one of the channel masks
  */
-static int ismodeline(masklist *m, char *username)
+int ismodeline(masklist *m, char *username)
 {
   for (; m && m->mask[0]; m = m->next)  
     if (!rfc_casecmp(m->mask, username))
@@ -552,7 +552,7 @@ static int ismodeline(masklist *m, char *username)
 
 /* Returns true if user matches one of the masklist -- drummer
  */
-static int ismasked(masklist *m, char *username)
+int ismasked(masklist *m, char *username)
 {
   for (; m && m->mask[0]; m = m->next)
     if (wild_match(m->mask, username))
@@ -583,7 +583,7 @@ inline static int chanset_unlink(struct chanset_t *chan)
  * This includes the removal of all channel-bans, -exempts and -invites, as
  * well as all user flags related to the channel.
  */
-static void remove_channel(struct chanset_t *chan)
+void remove_channel(struct chanset_t *chan)
 {
    int		 i;
    module_entry	*me = NULL;
@@ -819,66 +819,6 @@ static Function channels_table[] =
   (Function) NULL,
   (Function) 0,
   (Function) channels_report,
-  /* 4 - 7 */
-  (Function) u_setsticky_mask,
-  (Function) u_delban,
-  (Function) u_addban,
-  (Function) write_bans,
-  /* 8 - 11 */
-  (Function) get_chanrec,
-  (Function) add_chanrec,
-  (Function) del_chanrec,
-  (Function) set_handle_chaninfo,
-  /* 12 - 15 */
-  (Function) 0,
-  (Function) u_match_mask,
-  (Function) u_equals_mask,
-  (Function) clear_channel,
-  /* 16 - 19 */
-  (Function) set_handle_laston,
-  (Function) NULL, /* [17] used to be ban_time <Wcc[07/19/02]> */
-  (Function) & use_info,
-  (Function) get_handle_chaninfo,
-  /* 20 - 23 */
-  (Function) u_sticky_mask,
-  (Function) ismasked,
-  (Function) add_chanrec_by_handle,
-  (Function) NULL, /* [23] used to be isexempted() <cybah> */
-  /* 24 - 27 */
-  (Function) NULL, /* [24] used to be exempt_time <Wcc[07/19/02]> */
-  (Function) NULL, /* [25] used to be isinvited() <cybah> */
-  (Function) NULL, /* [26] used to be ban_time <Wcc[07/19/02]> */
-  (Function) NULL,
-  /* 28 - 31 */
-  (Function) NULL, /* [28] used to be u_setsticky_exempt() <cybah> */
-  (Function) u_delexempt,
-  (Function) u_addexempt,
-  (Function) NULL,
-  /* 32 - 35 */
-  (Function) NULL,/* [32] used to be u_sticky_exempt() <cybah> */
-  (Function) NULL,
-  (Function) NULL,	/* [34] used to be killchanset().	*/
-  (Function) u_delinvite,
-  /* 36 - 39 */
-  (Function) u_addinvite,
-  (Function) channel_add,
-  (Function) channel_modify,
-  (Function) write_exempts,
-  /* 40 - 43 */
-  (Function) write_invites,
-  (Function) ismodeline,
-  (Function) initudef,
-  (Function) ngetudef,
-  /* 44 - 47 */
-  (Function) expired_mask,
-  (Function) remove_channel,
-  (Function) & global_ban_time,
-  (Function) & global_exempt_time,
-  /* 48 - 51 */
-  (Function) & global_invite_time,
-  (Function) write_chans,
-  (Function) write_config,
-  (Function) check_should_lock,
 };
 
 void channels_describe(struct cfg_entry *cfgent, int idx)

@@ -147,7 +147,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
 }
 
 
-static int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
+int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
                            char *dest, char *keyword, char *args,
                            bind_table_t *table)
 {
@@ -157,7 +157,7 @@ static int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
 }
 
 
-static int match_my_nick(char *nick)
+int match_my_nick(char *nick)
 {
   if (!rfc_casecmp(nick, botname))
     return 1;
@@ -236,11 +236,8 @@ static int got442(char *from, char *msg)
   chan = findchan(chname);
   if (chan)
     if (shouldjoin(chan)) {
-      module_entry *me = module_find("channels", 0, 0);
-
       putlog(LOG_MISC, chname, IRC_SERVNOTONCHAN, chname);
-      if (me && me->funcs)
-	(me->funcs[CHANNEL_CLEAR])(chan, 1);
+      clear_channel(chan, 1);
       chan->status &= ~CHAN_ACTIVE;
       dprintf(DP_MODE, "JOIN %s %s\n", chan->name,
 	      chan->channel.key[0] ? chan->channel.key : chan->key_prot);
@@ -346,7 +343,7 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
 /* Check for more than 8 control characters in a line.
  * This could indicate: beep flood CTCP avalanche.
  */
-static int detect_avalanche(char *msg)
+int detect_avalanche(char *msg)
 {
   int count = 0;
   unsigned char *p = NULL;
@@ -950,15 +947,13 @@ static void connect_server(void);
 
 static void kill_server(int idx, void *x)
 {
-  module_entry *me = NULL;
+  struct chanset_t *chan = NULL;
 
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
-  if ((me = module_find("channels", 0, 0)) && me->funcs) {
-    struct chanset_t *chan;
 
-    for (chan = chanset; chan; chan = chan->next)
-      (me->funcs[CHANNEL_CLEAR]) (chan, 1);
-  }
+  for (chan = chanset; chan; chan = chan->next)
+     clear_channel(chan, 1);
+
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }

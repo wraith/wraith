@@ -16,7 +16,7 @@ static int getudef(struct udef_chans *ul, char *name)
   return val;
 }
 
-static int ngetudef(char *name, char *chan)
+int ngetudef(char *name, char *chan)
 {
   struct udef_struct *l = NULL;
   struct udef_chans *ll = NULL;
@@ -51,7 +51,7 @@ static void setudef(struct udef_struct *us, char *name, int value)
     us->values = ul;
 }
 
-static void initudef(int type, char *name, int defined)
+void initudef(int type, char *name, int defined)
 {
   struct udef_struct *ul = NULL, *ul_last = NULL;
 

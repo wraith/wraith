@@ -30,6 +30,7 @@
 #include "chan.h"
 #include "modules.h"
 #include "tandem.h"
+#include "src/mod/channels.mod/channels.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef HUB
@@ -812,30 +813,24 @@ int readuserfile(char *file, struct userrec **ret)
 	  }
         } else if (!strcmp(code, "+")) {
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
-           module_entry *me = NULL;
+           char *options = NULL, *chan = NULL, *my_ptr = NULL;
+           char resultbuf[2048] = "";
 
-           if ((me = module_find("channels", 0, 0))) {
-             Function *func = me->funcs;
-             char *options = NULL, *chan = NULL, *my_ptr = NULL;
-             char resultbuf[2048] = "";
+           options = my_ptr = strdup(s);
 
-             options = my_ptr = strdup(s);
-
-             newsplit(&options);
-             newsplit(&options);
-             chan = newsplit(&options);
+           newsplit(&options);
+           newsplit(&options);
+           chan = newsplit(&options);
 /* FIXME: THIS HACK FOR { } REMOVAL SHOULD JUST NOT WRITE THEM? */
-             newsplit(&options);
-             options[strlen(options) - 1] = 0;
+           newsplit(&options);
+           options[strlen(options) - 1] = 0;
 /* Above is a hack to remove { } */
-             if ((func[37]) (resultbuf, chan, options) != OK) {	/* channel_add() */
-printf("BUF: %s\n", resultbuf);
-               putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
-               free(my_ptr);
-               return 0;
-             }
+           if (channel_add(resultbuf, chan, options) != OK) {
+             putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
              free(my_ptr);
+             return 0;
            }
+           free(my_ptr);
          }
 	} else if (!strncmp(code, "::", 2)) {
 	  /* channel-specific bans */

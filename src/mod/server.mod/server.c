@@ -12,13 +12,14 @@
 #include "src/auth.h"
 #include "src/dns.h"
 #include "src/egg_timer.h"
+#include "src/mod/channels.mod/channels.h"
 #include "server.h"
 
 static Function *global = NULL;
 extern struct cfg_entry CFG_OPTIMESLACK;
 extern int		cfg_noshare;
-static int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
-static int ctcp_mode;
+int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
+int ctcp_mode;
 int serv;		/* sock # of server currently */
 int servidx;		/* idx of server */
 static int strict_host;		/* strict masking of hosts ? */
@@ -27,10 +28,10 @@ int newserverport;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
 static time_t trying_server;	/* trying to connect to a server right now? */
 static int curserv;		/* current position in server list: */
-static int flud_thr;		/* msg flood threshold */
-static int flud_time;		/* msg flood time */
-static int flud_ctcp_thr;	/* ctcp flood threshold */
-static int flud_ctcp_time;	/* ctcp flood time */
+int flud_thr;		/* msg flood threshold */
+int flud_time;		/* msg flood time */
+int flud_ctcp_thr;	/* ctcp flood threshold */
+int flud_ctcp_time;	/* ctcp flood time */
 char botuserhost[121] = "";	/* bot's user@host (refreshed whenever the
 				   bot joins a channel) */
 				/* may not be correct user@host BUT it's
@@ -41,7 +42,7 @@ static int nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
 static int check_stoned;	/* Check for a stoned server? */
 static int serverror_quit;	/* Disconnect from server if ERROR
 				   messages received? */
-static int quiet_reject;	/* Quietly reject dcc chat or sends from
+int quiet_reject;	/* Quietly reject dcc chat or sends from
 				   users without access? */
 static int waiting_for_awake;	/* set when i unidle myself, cleared when
 				   i get the response */
@@ -57,8 +58,8 @@ static struct server_list *serverlist = NULL;	/* old-style queue, still used by
 int cycle_time;			/* cycle time till next server connect */
 int default_port;		/* default IRC port */
 static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
-static int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
-static int answer_ctcp;		/* answer how many stacked ctcp's ? */
+int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
+int answer_ctcp;		/* answer how many stacked ctcp's ? */
 static int lowercase_ctcp;	/* answer lowercase CTCP's (non-standard) */
 static int check_mode_r;	/* check for IRCNET +r modes */
 static int net_type;
@@ -73,8 +74,7 @@ static char stackable2cmds[511] = "";
 static time_t last_time;
 static int use_penalties;
 static int use_fastdeq;
-static int nick_len;		/* Maximal nick length allowed on the
-				   network. */
+int nick_len;			/* Maximal nick length allowed on the network. */
 static int kick_method;
 static int optimize_kicks;
 
@@ -1481,51 +1481,6 @@ static Function server_table[] =
   (Function) NULL,
   (Function) 0,
   (Function) server_report,
-  /* 4 - 7 */
-  (Function) NULL,		/* char * (points to botname later on)	*/
-  (Function) 0,
-  (Function) & quiet_reject,	/* int					*/
-  (Function) 0,
-  /* 8 - 11 */
-  (Function) & flud_thr,	/* int					*/
-  (Function) & flud_time,	/* int					*/
-  (Function) & flud_ctcp_thr,	/* int					*/
-  (Function) & flud_ctcp_time,	/* int					*/
-  /* 12 - 15 */
-  (Function) match_my_nick,
-  (Function) 0,
-  (Function) 0,
-  (Function) & answer_ctcp,	/* int					*/
-  /* 16 - 19 */
-  (Function) & trigger_on_ignore, /* int				*/
-  (Function) check_bind_ctcpr,
-  (Function) detect_avalanche,
-  (Function) 0,
-  /* 20 - 23 */
-  (Function) 0,
-  (Function) 0,
-  (Function) 0,
-  (Function) 0,
-  /* 24 - 27 */
-  (Function) 0,
-  (Function) 0,	
-  (Function) 0,	
-  (Function) 0,
-  /* 28 - 31 */
-  (Function) 0,
-  (Function) 0,
-  (Function) 0,
-  (Function) 0,
-  /* 32 - 35 */
-  (Function) 0,
-  (Function) 0,	
-  (Function) 0,
-  (Function) 0,
-  /* 36 - 38 */
-  (Function) 0,	
-  (Function) & nick_len,	/* int					*/
-  (Function) 0,
-  (Function) & checked_hostmask,
 };
 
 char *server_start(Function *global_funcs)

@@ -30,7 +30,7 @@ static const int min_exemptinvite	= 1000000;
 /* Minimum version that supports userfile features. */
 static const int min_uffeature		= 1000000;
 
-static Function *global = NULL, *transfer_funcs = NULL, *channels_funcs = NULL;
+static Function *global = NULL, *transfer_funcs = NULL;
 #ifdef LEAF
 static Function *irc_funcs = NULL;
 #endif /* LEAF */
@@ -2138,10 +2138,7 @@ char *share_start(Function *global_funcs)
     module_undepend(MODULE_NAME);
     return "This module requires transfer module 2.0 or later.";
   }
-  if (!(channels_funcs = module_depend(MODULE_NAME, "channels", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires channels module 1.0 or later.";
-  }
+
 #ifdef LEAF
   if (!(irc_funcs = module_depend(MODULE_NAME, "irc", 0, 0))) {
     module_undepend(MODULE_NAME);

@@ -7,6 +7,8 @@
 #ifndef _EGG_MOD_SERVER_SERVER_H
 #define _EGG_MOD_SERVER_SERVER_H
 
+#include "src/tclhash.h"
+
 #define DO_LOST 1
 #define NO_LOST 0
 
@@ -20,67 +22,6 @@
                 (x) = newsplit(&(x));                                   \
 } while (0)
 
-
-#ifndef MAKING_SERVER
-/* 4 - 7 */
-/* UNUSED 5 */
-#define quiet_reject (*(int *)(server_funcs[6]))
-/* UNUSED 7 */
-#define servi (*(int *)(server_funcs[7]))
-/* 8 - 11 */
-#define flud_thr (*(int*)(server_funcs[8]))
-#define flud_time (*(int*)(server_funcs[9]))
-#define flud_ctcp_thr (*(int*)(server_funcs[10]))
-#define flud_ctcp_time (*(int*)(server_funcs[11]))
-/* 12 - 15 */
-#define match_my_nick ((int(*)(char *))server_funcs[12])
-/* UNUSED 14 */
-#define answer_ctcp (*(int *)(server_funcs[15]))
-/* 16 - 19 */
-#define trigger_on_ignore (*(int *)(server_funcs[16]))
-#define check_bind_ctcpr ((int(*)(char*,char*,struct userrec*,char*,char*,char*,bind_table_t *))server_funcs[17])
-#define detect_avalanche ((int(*)(char *))server_funcs[18])
-/* 19 UNUSED */
-/* 20 - 22 */
-/* UNUSED 20 */
-/* UNUSED 21 */
-/* UNUSED 22 */
-/* 23 - 26 */
-/* UNUSED 23 */
-/* UNUSED 24 */
-/* UNUSED 25 */
-/* 26 -- UNUSED */
-/* 27 - 30 */
-/* UNUSED -- 28 */
-/* UNUSED -- 29 */
-/* UNUSED -- 30 */
-/* 31 - 34 */
-/* UNUSED -- 33 */
-/* UNUSED -- 34 */
-/* 35 - 38 */
-/* UNUSED 35 */
-/* 36 UNUSED */
-#define nick_len (*(int *)(server_funcs[37]))
-/* 38 UNUSED */
-#define checked_hostmask (*(int *)(server_funcs[39]))
-
-#else		/* MAKING_SERVER */
-
-/* Macros for commonly used commands.
- */
-
-#define free_null(ptr)	do {				\
-	free(ptr);					\
-	ptr = NULL;					\
-} while (0)
-
-#define write_to_server(x,y) do {                       \
-        tputs(serv, (x), (y));                          \
-        tputs(serv, "\r\n", 2);                         \
-} while (0)
-
-
-#endif		/* MAKING_SERVER */
 
 struct server_list {
   struct server_list	*next;
@@ -104,9 +45,17 @@ enum {
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
 void nuke_server(char *);
-extern int 		serv, servidx, cycle_time, default_port, newserverport;
+int match_my_nick(char *);
+
+extern int 		serv, servidx, cycle_time, default_port, newserverport,
+			nick_len, checked_hostmask, ctcp_mode, quiet_reject,
+			flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time,
+			answer_ctcp, trigger_on_ignore;
 extern time_t		server_online;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[];
+
+int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
+int detect_avalanche(char *);
 
 #endif /*leaf*/

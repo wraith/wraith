@@ -35,7 +35,6 @@ char *color(int, int, int);
 void shuffle(char *, char *);
 void showhelp(int, struct flag_record *, char *);
 char *btoh(const unsigned char *, int);
-void local_check_should_lock();
 int listen_all(int, int);
 char *replace(const char *, char *, char *);
 int goodpass(char *, int, char *);

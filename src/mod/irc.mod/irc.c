@@ -52,10 +52,9 @@ static bind_table_t *BT_msgc = NULL;
 #endif /* S_AUTHCMDS */
 
 
-static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL;
+static Function *global = NULL;
 
 
-static int ctcp_mode;
 static int net_type = 0;
 static int strict_host;
 static int wait_split = 300;		/* Time to wait for user to return from
@@ -1573,12 +1572,6 @@ char *irc_start(Function * global_funcs)
 
   module_register(MODULE_NAME, irc_table, 1, 3);
 
-  server_funcs = module_depend(MODULE_NAME, "server", 1, 0);
-
-  if (!(channels_funcs = module_depend(MODULE_NAME, "channels", 1, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires channels module 1.0 or later.";
-  }
   add_cfg(&CFG_OPBOTS);
   add_cfg(&CFG_INBOTS);
   add_cfg(&CFG_LAGTHRESHOLD);

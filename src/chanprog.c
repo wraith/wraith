@@ -222,17 +222,11 @@ void checkchans(int which)
       }
     }
   } else if (which == 1) {
-    module_entry *me = NULL;
-
     for (chan = chanset; chan; chan = chan_next) {
       chan_next = chan->next;
       if (chan->status & CHAN_FLAGGED) {
         putlog(LOG_MISC, "*", "No longer supporting channel %s", chan->dname);
-        /* remove_channel(chan); */
-        if ((me = module_find("channels", 0, 0))) {
-          Function *func = me->funcs;
-          (func[CHANNEL_REMOVE]) (chan);
-        }
+        remove_channel(chan);
       }
     }
   }

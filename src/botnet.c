@@ -22,6 +22,11 @@
 #include "botmsg.h"
 #include "tandem.h"
 #include "core_binds.h"
+#ifdef HUB
+# ifdef S_AUTOLOCK
+#  include "src/mod/channels.mod/channels.h"
+# endif /* S_AUTOLOCK */
+#endif /* HUB */
 
 extern int			dcc_total, backgrd, connect_timeout, max_dcc,
 				cfg_count;
@@ -1658,7 +1663,7 @@ void check_botnet_pings()
   }
 #ifdef HUB
 #ifdef S_AUTOLOCK
-  local_check_should_lock();
+  check_should_lock();
 #endif /* S_AUTOLOCK */
 #ifdef G_BACKUP
   check_should_backup();

@@ -1117,17 +1117,6 @@ char *replace(const char *string, char *oldie, char *newbie)
   return (newstring);
 }
 
-void local_check_should_lock()
-{
-  module_entry *me = NULL;
-
-  if ((me = module_find("channels", 0, 0))) {
-    Function *func = me->funcs;
-    /* check_should_lock() */
-    (func[51]) ();
-  }
-}
-
 /* convert binary hashes to hex */
 char *btoh(const unsigned char *md, int len)
 {

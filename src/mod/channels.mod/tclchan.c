@@ -698,7 +698,7 @@ static void clear_masklist(masklist *m)
 
 /* Clear out channel data from memory.
  */
-static void clear_channel(struct chanset_t *chan, int reset)
+void clear_channel(struct chanset_t *chan, int reset)
 {
   memberlist *m = NULL, *m1 = NULL;
 
@@ -722,7 +722,7 @@ static void clear_channel(struct chanset_t *chan, int reset)
 
 /* Create new channel and parse commands.
  */
-static int channel_add(char *result, char *newname, char *options)
+int channel_add(char *result, char *newname, char *options)
 {
   struct chanset_t *chan = NULL;
   int items = 0;
