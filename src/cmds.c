@@ -3491,11 +3491,11 @@ void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
     server_online = (*(int *)(func[25]));
   }
   tmp[0] = 0;
-  if (strncmp(botname, origbotname, strlen(botname)))
-    sprintf(tmp, STR("Want: %s, "), origbotname);
   if (server_online)
-    sprintf(tmp, STR("%sCurrently: %s "), tmp, botname);
-  else
+    sprintf(tmp, STR("Currently: %-20s "), botname);
+  if (strncmp(botname, origbotname, strlen(botname)))
+    sprintf(tmp, STR("%sWant: %s"), tmp, origbotname);
+  if (!server_online)
     sprintf(tmp, STR("%s(not online)"), tmp);
   botnet_send_cmdreply(botnetnick, fbot, fhand, fidx, tmp);
 #endif /* LEAF */
