@@ -1082,7 +1082,7 @@ static void warn_pls_take()
   struct chanset_t *chan;
   for (chan = chanset; chan; chan = chan->next)
     if (channel_take(chan) && me_op(chan))
-      putlog(LOG_WARN, "*", "%s is set +take, and I'm already opped! Try +bitch instead", chan->dname);
+      putlog(LOG_WARN, "*", "%s is set +take, and I'm already opped! +take is insecure, try +bitch instead", chan->dname);
 }
 
 

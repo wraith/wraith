@@ -850,8 +850,14 @@ flush_mode(chan, QUICK);
     }
   }
   m->flags |= WASOP;
-  if (check_chan)
+  if (check_chan) {
+    /* tell other bots to set jointime to 0 and join */
+    char *buf = nmalloc(strlen(chan->dname) + 3 + 1);
+    sprintf(buf, "jn %s", chan->dname);
+    putallbots(buf);
+    nfree(buf);
     recheck_channel(chan, 1);
+  }
 }
 
 static void got_deop(struct chanset_t *chan, char *nick, char *from,

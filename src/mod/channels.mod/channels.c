@@ -334,10 +334,10 @@ static void got_sj(int idx, char *code, char *par)
   struct chanset_t *chan;
 
   chname = newsplit(&par);
-  delay = atoi(par) + now;
+  delay = ((atoi(par) + now) - server_lag);
   chan = findchan_by_dname(chname);
   if (chan)
-    chan->channel.jointime = ((now + delay) - server_lag);
+    chan->channel.jointime = delay;
 }
 
 static void got_sp(int idx, char *code, char *par) 
@@ -347,10 +347,10 @@ static void got_sp(int idx, char *code, char *par)
   struct chanset_t *chan;
 
   chname = newsplit(&par);
-  delay = atoi(par) + now;
+  delay = ((atoi(par) + now) - server_lag);
   chan = findchan_by_dname(chname);
   if (chan)
-    chan->channel.parttime = ((now + delay) - server_lag);
+    chan->channel.parttime = delay;
 }
 /* got_jn
  * We get this when a bot is opped in a +take chan
