@@ -54,7 +54,7 @@ extern int 		serv, servidx, cycle_time, newserverport,
 extern port_t		default_port;
 extern time_t		server_online;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
-			newserver[], newserverpass[];
+			newserver[], newserverpass[], curnetwork[];
 extern struct server_list *serverlist;
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);

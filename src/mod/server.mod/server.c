@@ -21,6 +21,7 @@
 #include "src/dns.h"
 #include "src/egg_timer.h"
 #include "src/mod/channels.mod/channels.h"
+#include "src/mod/irc.mod/irc.h"
 #include "server.h"
 
 int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
@@ -64,7 +65,6 @@ port_t default_port;		/* default IRC port */
 static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
 int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp;		/* answer how many stacked ctcp's ? */
-static int lowercase_ctcp;	/* answer lowercase CTCP's (non-standard) */
 static int check_mode_r;	/* check for IRCNET +r modes */
 static int net_type;
 static int resolvserv;		/* in the process of resolving a server host */
@@ -1069,33 +1069,27 @@ static void do_nettype(void)
   switch (net_type) {
   case NETT_EFNET:
     check_mode_r = 0;
-    nick_len = 9;
     break;
   case NETT_IRCNET:
     check_mode_r = 1;
-    use_penalties = 1;
     use_fastdeq = 3;
-    nick_len = 9;
     simple_sprintf(stackablecmds, "INVITE AWAY VERSION NICK");
     kick_method = 4;
     break;
   case NETT_UNDERNET:
     check_mode_r = 0;
     use_fastdeq = 2;
-    nick_len = 9;
     simple_sprintf(stackablecmds, "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
     simple_sprintf(stackable2cmds, "USERHOST USERIP ISON");
     break;
   case NETT_DALNET:
     check_mode_r = 0;
     use_fastdeq = 2;
-    nick_len = 32;
     simple_sprintf(stackablecmds, "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
     simple_sprintf(stackable2cmds, "USERHOST ISON WATCH");
     break;
   case NETT_HYBRID_EFNET:
     check_mode_r = 0;
-    nick_len = 9;
     break;
   }
 }
@@ -1381,7 +1375,6 @@ void server_init()
   oldnick[0] = 0;
   trigger_on_ignore = 0;
   answer_ctcp = 1;
-  lowercase_ctcp = 0;
   check_mode_r = 0;
   maxqmsg = 300;
   burst = 0;

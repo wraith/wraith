@@ -42,7 +42,6 @@
 struct dcc_t *dcc = NULL;	/* DCC list				   */
 time_t	timesync = 0;
 int	dcc_total = 0;		/* Total dcc's				   */
-char	network[41] = "EFnet"; /* Name of the IRC network you're on  */
 
 static int	password_timeout = 20;	/* Time to wait for a password from a user */
 static int      auth_timeout = 40;
@@ -242,7 +241,7 @@ static void greet_new_bot(int idx)
   else
     sysname = un.sysname;
 
-  dprintf(idx, "v 1001500 %d %s <%s> %d %li %s\n", HANDLEN, ver, network, localhub, buildts, egg_version);
+  dprintf(idx, "v 1001500 %d %s <%s> %d %li %s\n", HANDLEN, ver, "-", localhub, buildts, egg_version);
 /* FIXME: remove after 1.1.8 */
   dprintf(idx, "vs %s\n", sysname);
   dprintf(idx, "username %s\n", conf.username ? conf.username : "");	/* username */

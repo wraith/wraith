@@ -23,6 +23,7 @@ This is a summary of ChangeLog basically.
 19.Annoying log -NOTICE- *** should be fixed.
 20.Removed cmd_botinfo.
 21.Unrolled some loops in the botlink encrypt.
+22.Added server 005 support, fixes many potential bugs.
 
 1.1.7
 

@@ -1,7 +1,10 @@
 #ifndef _RFC1459_H
 #define _RFC1459_H
 
-int rfc_casecmp(const char *, const char *);
-int rfc_toupper(int);
+int _rfc_casecmp(const char *, const char *);
+int _rfc_toupper(int);
+
+extern int (*rfc_casecmp) (const char *, const char *);
+extern int (*rfc_toupper) (int);
 
 #endif /* !_RFC1459_H */

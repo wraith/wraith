@@ -5,8 +5,11 @@
 #include "common.h"
 #include "rfc1459.h"
 
+int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
+int (*rfc_toupper) (int) = _rfc_toupper;
+
 int
-rfc_casecmp(const char *s1, const char *s2)
+_rfc_casecmp(const char *s1, const char *s2)
 {
   register unsigned char *str1 = (unsigned char *) s1;
   register unsigned char *str2 = (unsigned char *) s2;
@@ -24,7 +27,7 @@ rfc_casecmp(const char *s1, const char *s2)
 unsigned char rfc_touppertab[];
 
 int
-rfc_toupper(int c)
+_rfc_toupper(int c)
 {
   return rfc_touppertab[(unsigned char) (c)];
 }

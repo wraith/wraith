@@ -14,7 +14,8 @@
 #define msgident CFG_MSGIDENT.ldata ? CFG_MSGIDENT.ldata : CFG_MSGIDENT.gdata ? CFG_MSGIDENT.gdata : ""
 
 
-char cursrvname[120]="";
+char cursrvname[120] = "";
+char curnetwork[120] = "";
 static time_t last_ctcp    = (time_t) 0L;
 static int    count_ctcp   = 0;
 static char   altnick_char = 0;
@@ -210,6 +211,67 @@ static int got001(char *from, char *msg)
       x->name = strdup(from);
     } else {
       x->realname = strdup(from);
+    }
+  }
+  return 0;
+}
+
+/* <server> 005 <to> <option> <option> <... option> :are supported by this server */
+static int
+got005(char *from, char *msg)
+{
+  char *tmp = NULL;
+
+  newsplit(&msg); /* nick */
+
+  while ((tmp = newsplit(&msg))[0]) {
+    char *p = NULL;
+
+    if ((p = strchr(tmp, '=')))
+      *p++ = 0;
+    if (!egg_strcasecmp(tmp, ":are"))
+      break;
+    else if (!egg_strcasecmp(tmp, "MODES"))
+      modesperline = atoi(p);
+    else if (!egg_strcasecmp(tmp, "NICKLEN"))
+      nick_len = atoi(p);
+    else if (!egg_strcasecmp(tmp, "NETWORK"))
+      strncpyz(curnetwork, p, 120);
+    else if (!egg_strcasecmp(tmp, "PENALTY"))
+      use_penalties = 1;
+    else if (!egg_strcasecmp(tmp, "WHOX"))
+      use_354 = 1;
+    else if (!egg_strcasecmp(tmp, "EXCEPTS"))
+      use_exempts = 1;
+    else if (!egg_strcasecmp(tmp, "INVEX"))
+      use_invites = 1;
+    else if (!egg_strcasecmp(tmp, "MAXBANS")) {
+      max_bans = atoi(p);
+      max_modes = max_bans;
+      max_exempts = max_bans;
+      max_invites = max_bans;
+    }
+    else if (!egg_strcasecmp(tmp, "MAXLIST")) {
+      char *p2 = NULL;
+      
+      if ((p2 = strchr(p, ':'))) {
+        *p2++ = 0;
+        max_modes = atoi(p2);
+        if (strchr(p, 'e'))
+          max_exempts = max_modes;
+        if (strchr(p, 'b'))
+          max_bans = max_modes;
+        if (strchr(p, 'I'))
+          max_invites = max_modes;
+      
+      }
+    }
+    else if (!egg_strcasecmp(tmp, "CASEMAPPING")) {
+      /* we are default set to rfc1459, so only switch if NOT rfc1459 */
+      if (egg_strcasecmp(p, "rfc1459")) {
+        rfc_casecmp = egg_strcasecmp;
+        rfc_toupper = toupper;
+      }
     }
   }
   return 0;
@@ -418,7 +480,7 @@ static int gotmsg(char *from, char *msg)
 	    u = get_user_by_host(from);
 	    if (!ignoring || trigger_on_ignore) {
 	      if (check_bind_ctcp(nick, uhost, u, to, code, ctcp) == BIND_RET_LOG && !ignoring) {
-                if ((lowercase_ctcp && !egg_strcasecmp(code, "DCC")) || (!lowercase_ctcp && !strcmp(code, "DCC"))) {
+                if (!strcmp(code, "DCC")) {
                   /* If it gets this far unhandled, it means that
                    * the user is totally unknown.
                    */
@@ -437,7 +499,7 @@ static int gotmsg(char *from, char *msg)
                   } else {
                     putlog(LOG_MISC, "*", "Refused DCC %s: %s", code, from);
                   }
-                } else if ((lowercase_ctcp && !egg_strcasecmp(code, "CHAT")) || (!lowercase_ctcp && !strcmp(code, "CHAT"))) {
+                } else if (!strcmp(code, "CHAT")) {
                   if (!quiet_reject) {
                     if (u)
                       dprintf(DP_HELP, "NOTICE %s :%s\n", nick, "I'm not accepting call at the moment.");
@@ -1115,6 +1177,7 @@ static cmd_t my_raw_binds[] =
   {"PONG",	"",	(Function) gotpong,		NULL},
   {"WALLOPS",	"",	(Function) gotwall,		NULL},
   {"001",	"",	(Function) got001,		NULL},
+  {"005",	"",	(Function) got005,		NULL},
   {"303",	"",	(Function) got303,		NULL},
   {"432",	"",	(Function) got432,		NULL},
   {"433",	"",	(Function) got433,		NULL},

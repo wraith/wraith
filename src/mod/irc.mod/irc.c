@@ -40,17 +40,17 @@ int host_synced = 0;
 static int net_type = 0;
 static int wait_split = 300;		/* Time to wait for user to return from
 					   net-split. */
-static int max_bans = 25;		/* Modified by net-type 1-4 */
-static int max_exempts = 20;
-static int max_invites = 20;
-static int max_modes = 20;		/* Modified by net-type 1-4 */
+int max_bans;		/* Modified by net-type 1-4 */
+int max_exempts;
+int max_invites;
+int max_modes;		/* Modified by net-type 1-4 */
 static int bounce_bans = 0;
 static int bounce_exempts = 0;
 static int bounce_invites = 0;
 static int bounce_modes = 0;
-static unsigned int modesperline = 4;	/* Number of modes per line to send. */
+unsigned int modesperline;	/* Number of modes per line to send. */
 static int mode_buf_len = 200;		/* Maximum bytes to send in 1 mode. */
-static int use_354 = 0;			/* Use ircu's short 354 /who
+int use_354 = 0;			/* Use ircu's short 354 /who
 					   responses. */
 static int kick_method = 1;		/* How many kicks does the irc network
 					   support at once?
@@ -60,8 +60,6 @@ static int kick_fun = 0;
 static int ban_fun = 1;
 static int keepnick = 1;		/* Keep nick */
 static int prevent_mixing = 1;		/* To prevent mixing old/new modes */
-static int rfc_compliant = 1;		/* net-type changing modifies this */
-
 static int include_lk = 1;		/* For correct calculation
 					   in real_add_mode. */
 
@@ -1321,65 +1319,27 @@ static void do_nettype()
   switch (net_type) {
   case 0:		/* Efnet */
     kick_method = 1;
-    modesperline = 4;
-    use_354 = 0;
-    use_exempts = 1;
-    use_invites = 1;
-    max_bans = 100;
-    max_modes = 100;
-    rfc_compliant = 1;
     include_lk = 0;
     break;
   case 1:		/* Ircnet */
     kick_method = 4;
-    modesperline = 3;
-    use_354 = 0;
-    use_exempts = 1;
-    use_invites = 1;
-    max_bans = 30;
-    max_modes = 30;
-    rfc_compliant = 1;
     include_lk = 1;
     break;
   case 2:		/* Undernet */
     kick_method = 1;
-    modesperline = 6;
-    use_354 = 1;
-    use_exempts = 0;
-    use_invites = 0;
-    max_bans = 30;
-    max_modes = 30;
-    rfc_compliant = 1;
     include_lk = 1;
     break;
   case 3:		/* Dalnet */
     kick_method = 1;
-    modesperline = 6;
-    use_354 = 0;
-    use_exempts = 0;
-    use_invites = 0;
-    max_bans = 100;
-    max_modes = 100;
-    rfc_compliant = 0;
     include_lk = 1;
     break;
   case 4:		/* hybrid-6+ */
     kick_method = 1;
-    modesperline = 4;
-    use_354 = 0;
-    use_exempts = 1;
-    use_invites = 0;
-    max_bans = 20;
-    max_modes = 20;
-    rfc_compliant = 1;
     include_lk = 0;
     break;
   default:
     break;
   }
-
-  /* Update all rfc_ function pointers */
-  /* add_hook(HOOK_RFC_CASECMP, (Function) rfc_compliant); */
 }
 
 static cmd_t irc_bot[] = {
