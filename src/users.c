@@ -950,7 +950,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	      break_down_flags(attr, &fr, 0);
 	      strcpy(lasthand, code);
 	      cst = NULL;
-/* FIXME: remove after 1.1.8 */
+/* FIXME: remove after 1.2 */
               if (fr.global & USER_BOT) {	/* this should pick up the old +b flag for now */
                 isbot++;
                 fr.global &= ~USER_BOT;

@@ -391,7 +391,7 @@ share_newuser(int idx, char *par)
 
       fr.match = FR_GLOBAL;
       build_flags(s, &fr, 0);
-/* FIXME: remove after 1.1.8 */
+/* FIXME: remove after 1.2 */
       if (fr.global & USER_BOT) {
         isbot++;
         fr.global &= ~USER_BOT;

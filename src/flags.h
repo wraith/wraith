@@ -63,7 +63,7 @@ struct flag_record {
 #define CHAN_VALID (flag_t) 0xfffffffffffff
 
 #define USER_ADMIN	FLAG['a']
-/* FIXME; REMOVE AFTER 1.1.8 */
+/* FIXME; REMOVE AFTER 1.2 */
 #define USER_BOT	FLAG['b']
 #define USER_CHANHUB	FLAG['c']
 #define USER_DEOP	FLAG['d']

@@ -170,11 +170,7 @@ greet_new_bot(int idx)
   else
     sysname = un.sysname;
 
-  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s\n", HANDLEN, egg_version, "-", localhub, buildts,
-          egg_version);
-/* FIXME: remove after 1.1.8 */
-  dprintf(idx, "vs %s\n", sysname);
-  dprintf(idx, "bts %lu\n", buildts);
+  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s\n", HANDLEN, egg_version, "-", localhub, buildts, egg_version);
 
   dprintf(idx, "si %s %s %s", conf.username ? conf.username : "*", un.sysname ? un.sysname : "*",
           un.nodename ? un.nodename : "*");

@@ -2511,11 +2511,6 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     pls.match = user.match;
     break_down_flags(chg, &pls, &mns);
 
-/* FIXME: Remove after 1.1.8 */
-    pls.global &=~(USER_BOT);
-    mns.global &=~(USER_BOT);
-
-
     if ((pls.global & USER_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
       dprintf(idx, "Only a hub can be set as the updatehub.\n");
       pls.global &= ~(USER_UPDATEHUB);

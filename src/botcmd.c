@@ -447,14 +447,6 @@ static void bot_shellinfo(int idx, char *par)
   set_user(&USERENTRY_NODENAME, dcc[idx].user, nodename);
 }
 
-
-/* FIXME: remove after 1.1.8 */
-static void bot_sysname(int idx, char *par)
-{
-  dcc[idx].u.bot->sysname[0] = 0;
-  strcpy(dcc[idx].u.bot->sysname, par);
-}
-
 /* who <from@bot> <tobot> <chan#>
  */
 static void bot_who(int idx, char *par)
@@ -1200,7 +1192,6 @@ botcmd_t C_bot[] =
   {"ul",		(Function) bot_unlink},
   {"un",		(Function) bot_unlinked},
   {"v",			(Function) bot_versions},
-  {"vs",		(Function) bot_sysname},
   {"w",			(Function) bot_who},
   {"z",			(Function) bot_zapf},
   {"zb",		(Function) bot_zapfbroad},
