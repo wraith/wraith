@@ -378,8 +378,8 @@ static void cont_link(int idx, char *buf, int ii)
     socklist[snum].encstatus = 1;
     socklist[snum].gz = 1;
   } else {
-    lostdcc(idx);
     killsock(dcc[idx].sock);
+    lostdcc(idx);
   }
   return;
 }
