@@ -11,8 +11,7 @@ VPATH = @srcdir@
 VERSION = @VERSION@
 DISTRIB = wraith-@VERSION@
 CCDEPMODE = @CCDEPMODE@
-LEAFEXEC = leaf@EXEEXT@
-HUBEXEC = hub@EXEEXT@
+BINEXEC = wraith@EXEEXT@
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
 EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
            src/crypto/Makefile src/crypto/.deps src/crypto/.cvsignore \
@@ -48,25 +47,15 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 
 MAKEFLAGS = -s -j4
 
-MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
+MAKE_BIN = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DLEAF=2' \
-'LIBS=$(LIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(leaf)'
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' \
+'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
-MAKE_DLEAF = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
+MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'STRIP=touch' 'CFLGS=$(DEBCXXFLAGS) -DLEAF=2 $(CFLGS)' \
-'LIBS=$(LIBS)' 'EGGEXEC=$(LEAFEXEC)' 'EGGBUILD=(debug leaf)' 
-
-MAKE_HUB = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
-'CCDEPMODE=$(CCDEPMODE)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DHUB=1' \
-'LIBS=$(LIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(hub)' 
-
-MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
-'CCDEPMODE=$(CCDEPMODE)' \
-'STRIP=touch' 'CFLGS=$(DEBCXXFLAGS) -DHUB=1 $(CFLGS)' \
-'LIBS=$(LIBS)' 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)'
+'STRIP=touch' 'CFLGS=$(DEBCXXFLAGS) $(CFLGS)' \
+'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)' 
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
@@ -78,10 +67,7 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-all:
-	echo ""
-	echo "Use the build script"
-	echo ""
+default: wraith
 
 cleanutils:
 	@rm -f src/stringfix src/sorthelp src/makehelp
@@ -91,8 +77,8 @@ clean:  cleanutils
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) stamp.* *~ src/*~ configure.temp .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/help.h src/response.h src/responses.h utctime
+	@rm -f $(BINEXEC) stamp.* *~ src/*~ configure.temp .mangled
+	@rm -f src/help.h src/response.h src/responses.h utctime
 
 distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
@@ -184,44 +170,22 @@ crypto:
 
 general: help res
 
-leaf:	general
+wraith:	general
 	@echo ""
-	@echo "Making leaf"
+	@echo "Making binary"
 	@echo ""
-	@./misc/maketype leaf
 	@echo ""
-	+@cd src/mod && $(MAKE_LEAF) static
-	+@cd src && $(MAKE_LEAF) $(LEAFEXEC)
-	@echo ""
-
-dleaf:  general
-	@echo ""
-	@echo "Making debug leaf"
-	@echo ""
-	@./misc/maketype leaf
-	@echo ""
-	+@cd src/mod && $(MAKE_DLEAF) static
-	+@cd src && $(MAKE_DLEAF) $(LEAFEXEC)
+	+@cd src/mod && $(MAKE_BIN) static
+	+@cd src && $(MAKE_BIN) $(BINEXEC)
 	@echo ""
 
-hub:	general
+debug:  general
 	@echo ""
-	@echo "Making hub"
+	@echo "Making debug binary"
 	@echo ""
-	@./misc/maketype hub
 	@echo ""
-	+@cd src/mod && $(MAKE_HUB) static
-	+@cd src && $(MAKE_HUB) $(HUBEXEC)
-	@echo ""
-
-dhub:   general
-	@echo ""
-	@echo "Making debug hub"
-	@echo ""
-	@./misc/maketype hub
-	@echo ""
-	+@cd src/mod && $(MAKE_DHUB) static
-	+@cd src && $(MAKE_DHUB) $(HUBEXEC)
+	+@cd src/mod && $(MAKE_DBIN) static
+	+@cd src && $(MAKE_DBIN) $(BINEXEC)
 	@echo ""
 
 #safety hash
