@@ -280,8 +280,10 @@ int write_user(struct userrec *u, FILE * f, int idx)
   fr.global = u->flags;
 
 /* FIXME: REMOVE AFTER 1.1.8 */
-  fr.global |= USER_BOT;
-  old++;
+  if (u->bot || u->flags & USER_BOT) {
+    fr.global |= USER_BOT;
+    old++;
+  }
   
   build_flags(s, &fr, NULL);
   if (lfprintf(f, "%s%-10s - %-24s\n", (u->bot && !old) ? "-" : "", u->handle, s) == EOF)
