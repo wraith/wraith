@@ -104,6 +104,32 @@ int clear_tmp()
 }
 
 #ifdef LEAF
+void check_maxfiles()
+{
+  char file[DIRMAX] = "";
+  int fd;
+
+  sprintf(file, "%s.%d", tempdir, randint(10000));
+
+  fd = open(file, O_WRONLY | O_CREAT, 0);
+
+  if (fd == -1)
+    fatal("MAXFD reached.", 0);		/* this shouldnt happen */
+  else {
+    close(fd);
+    unlink(file);
+  }
+
+  if (fd >= 100 && fd <= 130)		/* a warning range */
+    putlog(LOG_MISC, "* Warning, FD:%d, at >=180, the bot will auto restart", fd);
+
+  if (fd >= 180) {
+    nuke_server("Max FD reached, restarting...");
+    cycle_time = 0;
+    restart(-1);
+  }
+}
+
 void check_mypid()
 { 
   pid_t pid = 0;

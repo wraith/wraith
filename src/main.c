@@ -500,6 +500,7 @@ static void core_minutely()
   send_timesync(-1);
 #endif /* HUB */
 #ifdef LEAF
+  check_maxfiles();
   check_mypid();
 #endif
   check_bind_time(&nowtm);

@@ -46,8 +46,9 @@ This is a summary of ChangeLog basically.
 * Simple autoaway on dcc after 10 minutes, will be customizable in the future.
 * Fixed a problem with what ip was bined when using '.' as the ip.
 * Fixed some problems with special characters in conf files.
-* cmd_chaninfo/chanset didn't check for +private access correctly
+* cmd_chaninfo/chanset didn't check for +private access correctly.
 * hubs now enforce binpath/binname as leaf bots do.
+* Made a solution to what to do when the fds max, from 100-130, bot will WARN once a min, >=180 -> auto restart.
 
 1.1.9
 

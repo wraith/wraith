@@ -40,6 +40,7 @@
 #define DET_DIE 	3
 #define DET_SUICIDE 	4
 
+void check_maxfiles();
 void check_mypid();
 int clear_tmp();
 char *homedir();

@@ -606,6 +606,7 @@ restart(int idx)
 #endif /* HUB */
 #ifdef LEAF
   nuke_server((char *) reason);		/* let's drop the server connection ASAP */
+  cycle_time = 0;
 #endif /* LEAF */
   if (tands > 0) {
     botnet_send_chat(-1, conf.bot->nick, (char *) reason);
