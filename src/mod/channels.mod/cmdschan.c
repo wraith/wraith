@@ -872,7 +872,6 @@ static void cmd_mns_chrec(int idx, char *par)
 static void cmd_cycle(int idx, char *par)
 {
   char *chname = NULL;
-  char buf2[1024] = "";
   int delay = 10;
   struct chanset_t *chan = NULL;
 
@@ -893,13 +892,17 @@ static void cmd_cycle(int idx, char *par)
   if (par[0])
     delay = atoi(newsplit(&par));
 
-  sprintf(buf2, "cycle %s %d", chname, delay); /* this just makes the bot PART */
-  putallbots(buf2);
-  if (!conf.bot->hub) {
+  if (conf.bot->hub) {
+    char buf2[1024] = "";
+
+    simple_sprintf(buf2, "cycle %s %d", chname, delay); /* this just makes the bot PART */
+    putallbots(buf2);
+  } else {
     do_chanset(NULL, chan, "+inactive", DO_LOCAL);
     dprintf(DP_SERVER, "PART %s\n", chan->name);
     chan->channel.jointime = ((now + delay) - server_lag);
   }
+  dprintf(idx, "Cycling %s for %d seconds.\n", chan->dname, delay);
 }
 
 static void cmd_down(int idx, char *par)

@@ -790,8 +790,10 @@ See also: color, echo, login, page, strip
      automatically on startup.
 ::cycle:
 ###  $bcycle$b <channel> [delay]
-   Makes all linked bots cycle the specified channel. Delay defaults to 10
-   seconds, which means bots will part and not rejoin for that time.
+   If done on the hub, makes all linked bots cycle the specified channel. 
+   Otherwise, only the bot it's done on will cycle.
+   Delay defaults to 10 seconds, which means bots will part and not rejoin
+   until that time has passed.
  
 See also: down
 ::date
