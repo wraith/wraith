@@ -1206,6 +1206,7 @@ static void check_expired_chanstuff()
      //autovoice of +v users if bot is +y
       if (!loading && channel_active(chan) && me_op(chan) && dovoice(chan)) {
         for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+          sprintf(s, "%s!%s", m->nick, m->userhost);
           if (!m->user)
             m->user = get_user_by_host(s);
 
@@ -1217,6 +1218,7 @@ static void check_expired_chanstuff()
                 (!channel_voice(chan) && chk_voice(fr2, chan))) &&      
                !glob_bot(fr2) &&
                !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE)) {
+              putlog(LOG_DEBUG, "@", "VOICING %s in %s as '%s'", m->nick, chan->dname, m->user->handle);
               add_mode(chan, '+', 'v', m->nick);
             } else if (!glob_bot(fr2) && 
               (chk_devoice(fr2, chan) || (m->flags & EVOICE))) {
