@@ -509,11 +509,8 @@ static void bot_log(int idx, char *par)
   if (egg_isdigit(par[0])) {
     int type = atoi(newsplit(&par));
 
-    if (conf.bot->hub) {
-      size_t len = simple_sprintf(OBUF, "lo %s %s\n", from, par);
-     
-      send_hubs_but(idx, OBUF, len);
-    }
+    if (conf.bot->hub)
+      botnet_send_log(idx, from, type, par);
 
     putlog(type, "@", "(%s) %s", from, par);
 

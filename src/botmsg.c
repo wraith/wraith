@@ -297,12 +297,12 @@ void putbot(char *bot, char *par)
 	 - sends to uplink if a leaf
 	 - sends to all linked hubs if a hub
 */
-void botnet_send_log(int type, const char *msg)
+void botnet_send_log(int idx, const char *from, int type, const char *msg)
 {
-  size_t len = simple_sprintf(OBUF, "lo %s %d %s\n", conf.bot->nick, type, msg);
+  size_t len = simple_sprintf(OBUF, "lo %s %d %s\n", from, type, msg);
 
   if (conf.bot->hub) {
-    send_hubs(OBUF, len);
+    send_hubs_but(idx, OBUF, len);
   } else {
     send_uplink(OBUF, len);
   }
