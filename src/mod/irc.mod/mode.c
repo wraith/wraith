@@ -894,12 +894,10 @@ static int gotmode(char *from, char *origmsg)
   char s[UHOSTLEN], buf[511];
   char ms2[3];
   int z;
-  int dv = 0;
-  struct userrec *u;
+  struct userrec *u, *my_u;
   memberlist *m;
   struct chanset_t *chan;
-  struct flag_record fr3 = { FR_GLOBAL | FR_CHAN, 0, 0 };
-  struct userrec *buser = NULL;
+  struct flag_record my_fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
 
 Context;
   strncpy(buf, origmsg, 510);
@@ -926,6 +924,8 @@ Context;
 	     ch, chg, msg, from);
       u = get_user_by_host(from);
       get_user_flagrec(u, &user, ch);
+      my_u = get_user_by_handle(userlist, botnetnick);
+      get_user_flagrec(my_u, &my_fr, ch);
       nick = splitnick(&from);
 Context;
       m = ismember(chan, nick);
@@ -1028,10 +1028,6 @@ Context;
 	    reversing = 1;
 	  break;
 	case 'l':
-
-          buser = get_user_by_handle(userlist, botnetnick);
-          get_user_flagrec(buser, &fr3, ch);
-
 	  if ((!nick[0]) && (bounce_modes))
 	    reversing = 1;
 	  if (ms2[0] == '-') {
@@ -1040,14 +1036,18 @@ Context;
 	      if ((reversing) && (chan->channel.maxmembers != 0)) {
 		simple_sprintf(s, "%d", chan->channel.maxmembers);
 		add_mode(chan, '+', 'l', s);
-	      } else if ((chan->limit_prot != 0) && !glob_master(user) &&
-			 !chan_master(user)) {
+	      } else if ((chan->limit_prot != 0) && !glob_master(user) && !chan_master(user)) {
 		simple_sprintf(s, "%d", chan->limit_prot);
 		add_mode(chan, '+', 'l', s);
-	      } else if (!glob_bot(user))
-                if (buser && (chan_dolimit(fr3) || glob_dolimit(fr3)) && (!chan_master(user) && !glob_master(user)))
-                 if (chan->limitraise)
-                   raise_limit(chan);
+	      } else {
+                if ((chan_dolimit(my_fr) || glob_dolimit(my_fr)) && 
+                   (!chan_master(user) && !glob_master(user) && !glob_bot(user))) {
+                  if (chan->limitraise) {
+                    chan->channel.maxmembers = 0;		/* set this to 0 so a new limit is generated */
+                    raise_limit(chan);
+                  }
+                }
+              }
 	    }
 	    chan->channel.maxmembers = 0;
 	  } else {
@@ -1073,7 +1073,7 @@ Context;
 	      add_mode(chan, '+', 'l', s);
             } 
             if (!glob_bot(user))
-              if (buser && (chan_dolimit(fr3) || glob_dolimit(fr3)) && (!chan_master(user) && !glob_master(user)))
+              if ((chan_dolimit(my_fr) || glob_dolimit(my_fr)) && (!chan_master(user) && !glob_master(user)))
                 if (chan->limitraise)
                   raise_limit(chan);
 
@@ -1124,43 +1124,51 @@ Context;
 		   CHAN_BADCHANMODE, chan->dname, op);
 	    dprintf(DP_MODE, "WHO %s\n", op);
 	  } else {
+	    int dv = 0;
 	    simple_sprintf(s, "%s!%s", m->nick, m->userhost);
 	    get_user_flagrec(m->user ? m->user : get_user_by_host(s),
 			     &victim, chan->dname);
+			     
  	    if (ms2[0] == '+') {
-
-              if (!chan_master(user) && !glob_master(user) && (m->flags & EVOICE))
-                dv = 1;
-              else
-                m->flags &= ~EVOICE;
+ 	      if (m->flags & EVOICE) {
+                if (!chan_master(user) && !glob_master(user)) {
+                  dv++;
+                } else {
+                  putlog(LOG_DEBUG, "@", "Stripping EVOICE flag from: %s (%s)", m->nick, chan->dname);
+                  m->flags &= ~EVOICE;
+                }
+              }
  	      m->flags &= ~SENTVOICE;
  	      m->flags |= CHANVOICE;
  	      check_tcl_mode(nick, from, u, chan->dname, ms2, op);
-              if ((buser) && (chan_dovoice(fr3) || glob_dovoice(fr3)))
-  	       if (channel_active(chan)) {
-		if (dv || (chan_quiet(victim) ||
-		     (glob_quiet(victim) && !chan_voice(victim)))) {
+              if ((channel_active(chan)) && (chan_dovoice(my_fr) || glob_dovoice(my_fr))) {
+                if (dv || (chan_quiet(victim) || (glob_quiet(victim) && !chan_voice(victim)))) {
 		  add_mode(chan, '-', 'v', op);
-		} else if (reversing)
+		} else if (reversing) {
 		  add_mode(chan, '-', 'v', op);
+		}
 	      }
-	    } else {
+	    } else if (ms2[0] == '-') {
 	      m->flags &= ~SENTDEVOICE;
 	      m->flags &= ~CHANVOICE;
 	      check_tcl_mode(nick, from, u, chan->dname, ms2, op);
-              if ((buser) && (chan_dovoice(fr3) || glob_dovoice(fr3))) {
-	       if (channel_active(chan) &&
-		  !glob_master(user) && !chan_master(user) && !glob_bot(user)) {
-                if ((chan_voice(victim) || (glob_voice(victim) && 
-                 !chan_quiet(victim)))) {
+              if ((channel_active(chan)) && (chan_dovoice(my_fr) || glob_dovoice(my_fr))) {
+                /* revoice +v users */
+                if ((chan_voice(victim) || (glob_voice(victim) && !chan_quiet(victim)))) {
+                  add_mode(chan, '+', 'v', op);
+		} else if (reversing) {
 		  add_mode(chan, '+', 'v', op);
-		} else if (reversing)
-		  add_mode(chan, '+', 'v', op);
-	       } else if (!match_my_nick(nick) && channel_active(chan) && channel_voice(chan) &&
-                  (glob_master(user) || chan_master(user) || glob_bot(user))) {
-                if (!chan_quiet(victim))  //if the user is not +q and not +v, set them NOREVOICE.
-                  m->flags |= EVOICE;
-               }
+		/* if they arent +v|v and VOICER is m+ then EVOICE them */
+		} else {
+  	          if (!match_my_nick(nick) && channel_voice(chan) &&
+                     (glob_master(user) || chan_master(user) || glob_bot(user))) {
+                    /* if the user is not +q set them norEVOICE. */
+                    if (!chan_quiet(victim) && !(m->flags & EVOICE)) { 
+                      putlog(LOG_DEBUG, "@", "Giving EVOICE flag to: %s (%s)", m->nick, chan->dname);
+                      m->flags |= EVOICE;
+                    }
+                  }
+                }
 	      }
             }
 	  }

@@ -1070,9 +1070,10 @@ void check_servers() {
 void raise_limit(struct chanset_t * chan) {
   int nl, cl, i, mem, ul, ll;
   char s[50];
-  if (!chan) return;
-  if (!me_op(chan))
+  
+  if (!chan || !me_op(chan)) {
     return;
+  }
 
   mem = chan->channel.members; //members
   nl = mem + chan->limitraise; //new limit
@@ -1080,11 +1081,12 @@ void raise_limit(struct chanset_t * chan) {
 
   i = chan->limitraise / 4;
 
-  //if the newlimit will be in the range made by these vars, dont change.
+  /* if the newlimit will be in the range made by these vars, dont change. */
   ul = nl + i; //upper limit range
   ll = nl - i; //lower limit range
-  if (cl > ll && cl < ul)
-    return; //the current limit is in the range, so leave it.
+  if (cl > ll && cl < ul) {
+    return; 			/* the current limit is in the range, so leave it. */
+  }
 
   if (nl != chan->channel.maxmembers) {
     sprintf(s, "%d", nl);
