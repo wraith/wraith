@@ -395,9 +395,9 @@ get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
  * restricted by +private for the channel
  */
 int
-private(struct flag_record fr, struct chanset_t *chan, int type)
+privchan(struct flag_record fr, struct chanset_t *chan, int type)
 {
-  if (!chan || !channel_private(chan) || glob_bot(fr) || glob_owner(fr))
+  if (!chan || !channel_privchan(chan) || glob_bot(fr) || glob_owner(fr))
     return 0;                   /* user is implicitly not restricted by +private, they may however be lacking other flags */
 
   if (type == PRIV_OP) {
@@ -414,7 +414,7 @@ private(struct flag_record fr, struct chanset_t *chan, int type)
 int
 chk_op(struct flag_record fr, struct chanset_t *chan)
 {
-  if (!chan || (!private(fr, chan, PRIV_OP) && !chk_deop(fr))) {
+  if (!chan || (!privchan(fr, chan, PRIV_OP) && !chk_deop(fr))) {
     if (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))
       return 1;
   }
@@ -426,7 +426,7 @@ chk_autoop(struct flag_record fr, struct chanset_t *chan)
 {
   if (glob_bot(fr))
     return 0;
-  if (!chan || (!channel_take(chan) && !private(fr, chan, PRIV_OP) && chk_op(fr, chan) && !chk_deop(fr))) {
+  if (!chan || (!channel_take(chan) && !privchan(fr, chan, PRIV_OP) && chk_op(fr, chan) && !chk_deop(fr))) {
     if (channel_autoop(chan) || chan_autoop(fr) || glob_autoop(fr))
       return 1;
   }
@@ -445,7 +445,7 @@ chk_deop(struct flag_record fr)
 int
 chk_voice(struct flag_record fr, struct chanset_t *chan)
 {
-  if (!chan || (!private(fr, chan, PRIV_VOICE) && !chk_devoice(fr))) {
+  if (!chan || (!privchan(fr, chan, PRIV_VOICE) && !chk_devoice(fr))) {
     if (chan_voice(fr) || (glob_voice(fr) && !chan_quiet(fr)))
       return 1;
   }

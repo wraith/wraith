@@ -274,7 +274,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_manop(chan) (chan->status & CHAN_MANOP)
 #define channel_voice(chan) (chan->status & CHAN_VOICE)
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
-#define channel_private(chan) (chan->status & CHAN_PRIVATE)
+#define channel_privchan(chan) (chan->status & CHAN_PRIVATE)
 #define channel_autoop(chan) (chan->status & CHAN_AUTOOP)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)

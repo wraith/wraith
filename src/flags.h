@@ -8,7 +8,7 @@
 
 #include "chan.h"
 
-/* For private() checking */
+/* For privchan() checking */
 #define PRIV_OP 1
 #define PRIV_VOICE 2
 
@@ -135,7 +135,7 @@ int flagrec_ok(struct flag_record *, struct flag_record *);
 flag_t sanity_check(flag_t, int);
 flag_t chan_sanity_check(flag_t);
 char geticon(int);
-int private(struct flag_record, struct chanset_t *, int);
+int privchan(struct flag_record, struct chanset_t *, int);
 int chk_op(struct flag_record, struct chanset_t *);
 int chk_autoop(struct flag_record, struct chanset_t *);
 int chk_deop(struct flag_record);

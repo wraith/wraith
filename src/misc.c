@@ -495,7 +495,7 @@ void show_channels(int idx, char *handle)
           first = 1;
         }
         dprintf(idx, format, opped ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
-           channel_private(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
+           channel_privchan(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
            channel_bitch(chan) ? "(bitch)    " : "", channel_closed(chan) ?  "(closed)" : "");
     }
   }

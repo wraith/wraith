@@ -155,8 +155,8 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
           get_user_flagrec(m->user, &fr, chan->dname);
 
         if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) || /* +d */
-           ((!channel_private(chan) && !chan_op(fr) && !glob_op(fr)) || /* simply no +o flag. */
-           (channel_private(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { /* private? */
+           ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || /* simply no +o flag. */
+           (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { /* private? */
           targets++;
         }
     }
@@ -181,8 +181,8 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
         get_user_flagrec(m->user, &fr, chan->dname);
  
       if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
-          ((!channel_private(chan) && !chan_op(fr) && !glob_op(fr)) ||
-           (channel_private(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) {
+          ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) ||
+           (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) {
 
         if (tpos >= ft) {
           if ((action == PRIO_DEOP) && !chan_sentdeop(m)) {
@@ -224,8 +224,8 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
         get_user_flagrec(m->user, &fr, chan->dname);
 
       if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
-          ((!channel_private(chan) && !chan_op(fr) && !glob_op(fr)) || 
-           (channel_private(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) {
+          ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || 
+           (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) {
 
         if (tpos >= ft) {
           if ((action == PRIO_DEOP) && !chan_sentdeop(m)) {
@@ -272,8 +272,8 @@ static int target_priority(struct chanset_t * chan, memberlist *target, int opso
         get_user_flagrec(m->user, &fr, chan->dname);
 
       if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
-         ((!channel_private(chan) && !chan_op(fr) && !glob_op(fr)) || 
-         (channel_private(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { 
+         ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || 
+         (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { 
         targets++;
       }
     }

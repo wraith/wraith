@@ -772,7 +772,7 @@ void channels_report(int idx, int details)
   for (chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
-    if (!private(fr, chan, PRIV_OP) && ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr))) {
+    if (!privchan(fr, chan, PRIV_OP) && ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr))) {
 
       s[0] = 0;
 
@@ -866,7 +866,7 @@ void channels_report(int idx, int details)
 */
         if (channel_fastop(chan))
           i += my_strcpy(s + i, "fastop ");
-        if (channel_private(chan))
+        if (channel_privchan(chan))
           i += my_strcpy(s + i, "private ");
 
 	dprintf(idx, "      Options: %s\n", s);

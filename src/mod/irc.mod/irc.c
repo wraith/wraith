@@ -1221,7 +1221,7 @@ check_expired_chanstuff(struct chanset_t *chan)
 
             get_user_flagrec(m->user, &fr2, chan->dname);
             if (!glob_bot(fr2)) {
-              if (!(m->flags & EVOICE) && !private(fr2, chan, PRIV_VOICE) &&
+              if (!(m->flags & EVOICE) && !privchan(fr2, chan, PRIV_VOICE) &&
                   ((channel_voice(chan) && !chk_devoice(fr2)) ||
                    (!channel_voice(chan) && chk_voice(fr2, chan)))) {
                 add_mode(chan, '+', 'v', m->nick);
@@ -1321,7 +1321,7 @@ irc_report(int idx, int details)
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
 
-    if (!private(fr, chan, PRIV_OP) && (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
+    if (!privchan(fr, chan, PRIV_OP) && (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
       p = NULL;
       if (shouldjoin(chan)) {
         if (chan->status & CHAN_JUPED)

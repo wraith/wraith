@@ -1246,7 +1246,7 @@ static void cmd_console(int idx, char *par)
 
     get_user_flagrec(dcc[idx].user, &fr, nick);
 
-    if (strcmp(nick, "*") && private(fr, findchan_by_dname(nick), PRIV_OP)) {
+    if (strcmp(nick, "*") && privchan(fr, findchan_by_dname(nick), PRIV_OP)) {
       dprintf(idx, "Invalid console channel: %s.\n", nick);
       return;
     }
@@ -2493,7 +2493,7 @@ static void cmd_chattr(int idx, char *par)
       free(tmpchg);
     return;
   }
-    if (chan && private(user, chan, PRIV_OP)) {
+    if (chan && privchan(user, chan, PRIV_OP)) {
       dprintf(idx, "You do not have access to change flags for %s\n", chan->dname);
       if (tmpchg)
         free(tmpchg);

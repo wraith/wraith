@@ -33,7 +33,7 @@ static struct chanset_t *get_channel(int idx, char *chname)
 static int has_op(int idx, struct chanset_t *chan)
 {
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
-  if (private(user, chan, PRIV_OP)) {
+  if (privchan(user, chan, PRIV_OP)) {
     dprintf(idx, "No such channel.\n");
     return 0;
   }
@@ -211,7 +211,7 @@ static void cmd_kickban(int idx, char *par)
 
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-    if (private(user, chan, PRIV_OP)) {
+    if (privchan(user, chan, PRIV_OP)) {
       if (all) goto next;
       dprintf(idx, "No such channel.\n");
       return;
@@ -323,7 +323,7 @@ static void cmd_voice(int idx, char *par)
     }
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-    if (private(user, chan, PRIV_VOICE)) {
+    if (privchan(user, chan, PRIV_VOICE)) {
       if (all) goto next;
       dprintf(idx, "No such channel.\n");
       return;
@@ -391,7 +391,7 @@ static void cmd_devoice(int idx, char *par)
   }
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_VOICE)) {
+  if (privchan(user, chan, PRIV_VOICE)) {
     if (all) goto next;
     dprintf(idx, "No such channel.\n");
     return;
@@ -461,7 +461,7 @@ static void cmd_op(int idx, char *par)
     return;
   }
 
-  if (private(user, chan, PRIV_OP)) {
+  if (privchan(user, chan, PRIV_OP)) {
     if (!all)
       dprintf(idx, "No such channel.\n");
     goto next;
@@ -808,7 +808,7 @@ static void cmd_deop(int idx, char *par)
       dprintf(idx, "Usage: deop <nick> [channel|*]\n");
       return;
     }
-    if (private(user, chan, PRIV_OP)) {
+    if (privchan(user, chan, PRIV_OP)) {
       if (all) goto next;
       dprintf(idx, "No such channel.\n");
     }
@@ -906,7 +906,7 @@ static void cmd_kick(int idx, char *par)
 
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-    if (private(user, chan, PRIV_OP)) {
+    if (privchan(user, chan, PRIV_OP)) {
       if (all) goto next;
       dprintf(idx, "No such channel.\n");
       return;
@@ -976,7 +976,7 @@ static void cmd_getkey(int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_OP)) {
+  if (privchan(user, chan, PRIV_OP)) {
     dprintf(idx, "No such channel.\n");
     return;
   }
@@ -1029,7 +1029,7 @@ static void cmd_mop(int idx, char *par)
     memberlist *m = NULL;
 
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
-    if (private(user, chan, PRIV_OP)) {
+    if (privchan(user, chan, PRIV_OP)) {
       if (all) goto next;
       dprintf(idx, "No such channel.\n");
       return;
@@ -1096,7 +1096,7 @@ static void cmd_find(int idx, char *par)
 
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-    if (!private(user, chan, PRIV_OP)) {
+    if (!privchan(user, chan, PRIV_OP)) {
 
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
         char tmp[256] = "";
@@ -1181,7 +1181,7 @@ static void cmd_invite(int idx, char *par)
   while (chan) {
 
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
-    if (private(user, chan, PRIV_OP)) {
+    if (privchan(user, chan, PRIV_OP)) {
       if (all) goto next;
       dprintf(idx, "No such channel.\n");
     }
@@ -1643,7 +1643,7 @@ static void cmd_reset(int idx, char *par)
 
     if (chan)
       get_user_flagrec(dcc[idx].user, &user, chan->dname);
-    if (!chan || private(user, chan, PRIV_OP)) {
+    if (!chan || privchan(user, chan, PRIV_OP)) {
       dprintf(idx, "%s\n", IRC_NOMONITOR);
     } else {
       get_user_flagrec(dcc[idx].user, &user, par);
