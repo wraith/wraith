@@ -70,15 +70,13 @@ char *add_cr(char *buf)
   return WBUF;
 }
 
-void dprintf(int idx, ...)
+void dprintf(int idx, char *format, ...)
 {
   static char buf[1024] = "";
-  char *format = NULL;
   int len;
   va_list va;
 
-  va_start(va, idx);
-  format = va_arg(va, char *);
+  va_start(va, format);
   egg_vsnprintf(buf, 1023, format, va);
   va_end(va);
 
@@ -201,16 +199,13 @@ void chatout(char *format, ...)
 
 /* Print to all on this channel but one.
  */
-void chanout_but(int x, ...)
+void chanout_but(int x, int chan, char *format, ...)
 {
-  int i, chan, len;
-  char *format = NULL;
+  int i, len;
   char s[601] = "";
   va_list va;
 
-  va_start(va, x);
-  chan = va_arg(va, int);
-  format = va_arg(va, char *);
+  va_start(va, format);
   egg_vsnprintf(s, 511, format, va);
   va_end(va);
   len = strlen(s);

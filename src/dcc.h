@@ -113,7 +113,7 @@ struct bot_info {
 
 struct relay_info {
   struct chat_info *chat;
-  int sock;
+  long sock;
   int old_status;
   port_t port;
 };

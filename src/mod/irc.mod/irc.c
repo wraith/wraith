@@ -352,7 +352,7 @@ void getin_request(char *botnick, char *code, char *par)
 	  sendi = 1;
 	  simple_sprintf(s2, "%d", lim);
 	  add_mode(chan, '+', 'l', s2);
-	  putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit to %d", botnick, nick, chan->dname, lim, nick);
+	  putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit to %d", botnick, nick, chan->dname, lim);
 	}
       }
     }

@@ -436,7 +436,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
 
 static void eof_dcc_bot_new(int idx)
 {
-  putlog(LOG_BOTS, "*", DCC_LOSTBOT, dcc[idx].nick, dcc[idx].port);
+  putlog(LOG_BOTS, "*", DCC_LOSTBOT, dcc[idx].nick);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1631,7 +1631,7 @@ static void dcc_telnet_pass(int idx, int atr)
       putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;
-      dprintf(idx, "elink %s %lu\n", tmp2, socklist[snum].oseed);
+      dprintf(idx, "elink %s %d\n", tmp2, socklist[snum].oseed);
       free(tmp2);
       strcpy(socklist[snum].okey, initkey);
       strcpy(socklist[snum].ikey, initkey);

@@ -828,13 +828,13 @@ char *confdir()
 
   if (!confdir_buf || (confdir_buf && !confdir_buf[0])) {
 #ifdef LEAF
-    egg_snprintf(confdir_buf, sizeof confdir, "%s/.ssh", homedir());
+    egg_snprintf(confdir_buf, sizeof confdir_buf, "%s/.ssh", homedir());
 #endif /* LEAF */
 #ifdef HUB
-    egg_snprintf(confdir_buf, sizeof confdir, "%s", dirname(binname));
+    egg_snprintf(confdir_buf, sizeof confdir_buf, "%s", dirname(binname));
 #endif /* HUB */
 #ifdef CYGWIN_HACKS
-    egg_snprintf(confdir_buf, sizeof confdir, "%s", homedir());
+    egg_snprintf(confdir_buf, sizeof confdir_buf, "%s", homedir());
 #endif /* CYGWIN_HACKS */
   }
   return confdir_buf;

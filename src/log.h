@@ -28,8 +28,8 @@
 #define LOG_BOTSHARE BIT22   /* h   share traffic                    */
 #define LOG_ALL      0xfffffff   /* (dump to all logfiles)               */
 
-__inline__ void logidx(int, char *, ...);
-void putlog (int, char *, char *, ...);
+void logidx(int, char *, ...) __attribute__((format(printf, 2, 3)));
+void putlog (int, char *, char *, ...) __attribute((format(printf, 3, 4)));
 int logmodes(char *);
 char *masktype(int);
 char *maskname(int);

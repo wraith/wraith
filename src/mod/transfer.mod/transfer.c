@@ -411,7 +411,7 @@ static void eof_dcc_send(int idx)
       egg_snprintf(s, sizeof s,TRANSFER_USERFILE_DISCON,
 		   dcc[y].nick);
       botnet_send_unlinked(y, dcc[y].nick, s);
-      chatout("*** %s\n", dcc[y].nick, s);
+      chatout("*** %s %s\n", dcc[y].nick, s);
 
       if (y < idx) {
        int t = y;

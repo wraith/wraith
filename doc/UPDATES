@@ -27,6 +27,7 @@ This is a summary of ChangeLog basically.
 22.Added channel flag +autoop (+o users only, +private accounted for). (+y bots op)
 23.Added user flag for autoop (+O). (+y bots op)
 24.Fixed a problem with my chmod() function.
+25.Fixed many various somewhat random bugs.
 
 1.1.5
 

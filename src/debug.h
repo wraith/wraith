@@ -56,7 +56,7 @@
 extern int		sdebug;
 
 void setlimits();
-void sdprintf (char *, ...);
+void sdprintf (char *, ...) __attribute__((format(printf, 1, 2)));
 void init_signals();
 void init_debug();
 void eggContext(const char *, int, const char *);

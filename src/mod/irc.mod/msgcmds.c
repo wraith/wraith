@@ -193,13 +193,14 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 
 #ifdef S_AUTHCMDS
 
-static void reply(char *nick, struct chanset_t *chan, ...)
+static void reply(char *, struct chanset_t *, char *, ...) __attribute__((format(printf, 3, 4)));
+
+static void reply(char *nick, struct chanset_t *chan, char *format, ...)
 {
   va_list va;
-  char buf[1024] = "", *format = NULL;
+  char buf[1024] = "";
 
-  va_start(va, chan);
-  format = va_arg(va, char *);
+  va_start(va, format);
   egg_vsnprintf(buf, sizeof buf, format, va);
   va_end(va);
 

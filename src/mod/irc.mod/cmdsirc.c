@@ -897,8 +897,7 @@ static void cmd_kick(struct userrec *u, int idx, char *par)
     }
     if (!me_op(chan)) {
       if (all) goto next;
-      dprintf(idx, "I can't help you now because I'm not a channel op %s",
-  	    "on %s.\n", chan->dname);
+      dprintf(idx, "I can't help you now because I'm not a channel op on %s.\n", chan->dname);
       return;
     }
 
@@ -955,7 +954,7 @@ static void cmd_getkey(struct userrec *u, int idx, char *par)
     return;
   }
   else if (!chk_op(user, chan)) {
-    dprintf(idx, "You don't have access for %s\n");
+    dprintf(idx, "You don't have access for %s\n", chan->dname);
     return;
   }
 

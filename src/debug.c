@@ -276,6 +276,8 @@ static void got_cont(int z)
 
 /* A call to resolver (gethostbyname, etc) timed out
  */
+static void got_alarm(int) __attribute__((noreturn));
+
 static void got_alarm(int z)
 {
   longjmp(alarmret, 1);

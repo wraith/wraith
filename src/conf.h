@@ -53,7 +53,7 @@ void spawnbots();
 int killbot(char *);
 #endif /* LEAF */
 #ifdef S_CONFEDIT
-void confedit(char *);
+void confedit(char *) __attribute__((noreturn));
 #endif /* S_CONFEDIT */
 pid_t checkpid(char *, conf_bot *);
 void init_conf();

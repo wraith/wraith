@@ -503,7 +503,7 @@ static void cmd_lagged(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# lagged %s", u->handle, par);
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT) {
-      dprintf(idx, "%9s - %i seconds\n", dcc[i].nick, (dcc[i].pingtime > 120) ? (now - dcc[i].pingtime) : dcc[i].pingtime);
+      dprintf(idx, "%9s - %li seconds\n", dcc[i].nick, (dcc[i].pingtime > 120) ? (now - dcc[i].pingtime) : dcc[i].pingtime);
     }
   }
 }
@@ -1974,6 +1974,8 @@ static void cmd_decrypt(struct userrec *u, int idx, char *par)
   dprintf(idx, "decrypt(%s) = %s\n", par, buf);
   free(buf);
 }
+
+static void cmd_restart(struct userrec *, int, char *) __attribute__((noreturn));
 
 static void cmd_restart(struct userrec *u, int idx, char *par)
 {
@@ -3748,7 +3750,7 @@ void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
 
     timer_get_now(&tv);
     tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - atoi(par);
-    dprintf(i, "Pong from %s: %i.%i seconds\n", frombot, (tm / 100), (tm % 100));
+    dprintf(i, "Pong from %s: %li.%li seconds\n", frombot, (tm / 100), (tm % 100));
   }
 }
 

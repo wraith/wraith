@@ -111,7 +111,7 @@ static void check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u
   x = check_bind(BT_msg, cmd, &fr, nick, uhost, u, args);
 
   if (x & BIND_RET_LOG) 
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , cmd, args);
   else if (x == 0)
     putlog(LOG_MSGS, "*", "[%s!%s] %s %s", nick, uhost, cmd, args);
 }
@@ -249,9 +249,6 @@ static int got442(char *from, char *msg)
 void nuke_server(char *reason)
 {
   if (serv >= 0 && servidx > 0) {
-    if (servidx > 0 && serv != dcc[servidx].sock)
-      putlog(LOG_MISC, "*", "Problem!! serv: %d dcc[%d].sock: %d", serv, servidx, dcc[servidx].sock);
-      
     if (reason)
       dprintf(servidx, "QUIT :%s\n", reason);
 

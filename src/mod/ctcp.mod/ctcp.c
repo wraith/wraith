@@ -32,9 +32,9 @@ int cloak_script = CLOAK_PLAIN;
 #define AVGAWAYTIME             60
 #define AVGHERETIME             5
 #endif /* S_AUTOAWAY */
-int cloak_awaytime = 0;
-int cloak_heretime = 0;
-int listen_time = 0;
+time_t cloak_awaytime = 0;
+time_t cloak_heretime = 0;
+time_t listen_time = 0;
 char cloak_bxver[10] = "";
 char cloak_os[20] = "";
 char cloak_osver[100] = "";
@@ -316,7 +316,8 @@ void scriptchanged()
 void sendaway()
 {
   char awtime[20] = "";
-  int hrs, min, sec, gt;
+  int hrs, min, sec;
+  time_t gt;
 
   gt = now - cloak_awaytime;
   hrs = gt / 3600;
@@ -427,7 +428,7 @@ static void ctcp_minutely()
 
 static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  int idletime;
+  time_t idletime;
 
   if (cloak_awaytime)
     idletime = now - cloak_awaytime;
@@ -435,7 +436,7 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
     idletime = now - cloak_heretime;
   else
     idletime = 0;
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s@%s) Idle %ld second%s\001\n", nick, keyword, "",
+  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s@%s) Idle %li second%s\001\n", nick, keyword, "",
                    conf.username ? conf.username : conf.bot->nick, 
                    (strchr(botuserhost, '@') + 1), idletime, idletime == 1 ? "" : "s");
   return BIND_RET_BREAK;

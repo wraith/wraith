@@ -256,7 +256,7 @@ void finish_update(int idx)
     FILE *f = NULL;
     f = fopen(dcc[idx].u.xfer->filename, "rb");
     fseek(f, 0, SEEK_END);
-    putlog(LOG_DEBUG, "*", "Update binary is %d bytes and its length: %li status: %li", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
+    putlog(LOG_DEBUG, "*", "Update binary is %lu bytes and its length: %lu status: %lu", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
     fclose(f);
   }
 
