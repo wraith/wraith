@@ -20,6 +20,7 @@ typedef struct conf_bot_b {
 } conf_bot;
 
 typedef struct conf_b {
+  char *md5;		/* md5 hash of the binary */
   uid_t uid;
   char *uname;
   char *username;       /* shell username */

@@ -279,6 +279,30 @@ char *MD5(const char *string)
   return md5string;
 }
 
+char *
+MD5FILE(const char *bin)
+{
+  static char     md5string[MD5_HASH_LENGTH + 1] = "";
+  unsigned char   md5out[MD5_HASH_LENGTH + 1] = "", buffer[1024] = "";
+  MD5_CTX ctx;
+  size_t binsize = 0, len = 0;
+  FILE *f = NULL;
+
+  if (!(f = fopen(bin, "rb")))
+    return "";
+
+  MD5_Init(&ctx);
+  while ((len = fread(buffer, 1, sizeof buffer, f))) {
+    binsize += len;
+    MD5_Update(&ctx, buffer, len);
+  }
+  MD5_Final(md5out, &ctx);
+  strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
+
+  return md5string;
+}
+
 char *SHA1(const char *string)
 {
   static char	  sha1string[SHA_HASH_LENGTH + 1] = "";
@@ -292,3 +316,17 @@ char *SHA1(const char *string)
   OPENSSL_cleanse(&ctx, sizeof(ctx));
   return sha1string;
 }
+
+/* convert binary hashes to hex */
+char *btoh(const unsigned char *md, int len)
+{
+  int i;
+  char buf[100] = "", *ret = NULL;
+
+  for (i = 0; i < len; i++)
+    sprintf(&(buf[i*2]), "%02x", md[i]);
+
+  ret = buf;
+  return ret;
+}
+

@@ -1094,19 +1094,6 @@ char *replace(const char *string, char *oldie, char *newbie)
   return (newstring);
 }
 
-/* convert binary hashes to hex */
-char *btoh(const unsigned char *md, int len)
-{
-  int i;
-  char buf[100] = "", *ret = NULL;
-
-  for (i = 0; i < len; i++)
-    sprintf(&(buf[i*2]), "%02x", md[i]);
-
-  ret = buf;
-  return ret;
-}
-
 #define HELP_BOLD  1
 #define HELP_REV   2
 #define HELP_UNDER 4

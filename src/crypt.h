@@ -21,6 +21,7 @@
 #define md5cmp(hash, string)            strcmp(hash, MD5(string))
 
 char *MD5(const char *);
+char *MD5FILE(const char *);
 char *SHA1(const char *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
@@ -30,5 +31,6 @@ char *decryptit (char *);
 int lfprintf (FILE *, ...);
 void EncryptFile(char *, char *);
 void DecryptFile(char *, char *);
+char *btoh(const unsigned char *, int);
 
 #endif /* !_CRYPT_H */
