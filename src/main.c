@@ -68,7 +68,7 @@ const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.2";
 
 /* FIXME: remove after 1.2 ??? OR NOT */
-bool old_hack = 0;
+int	old_hack = 0;
 bool 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
 bool 	loading = 0;
