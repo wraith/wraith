@@ -523,15 +523,16 @@ void answer_local_whom(int idx, int chan)
 /* Show z a list of all bots connected
  */
 void
-tell_bots(int idx, int up, char *nodename)
+tell_bots(int idx, int up, const char *nodename)
 {
   struct userrec *u = NULL;
   int cnt = 0, tot = 0, total = 1, mtot = 0;
-  char work[128] = "", *node = NULL;
+  char work[151] = "", *node = NULL;
 
   if (up) {
-    node = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);    
-    if (!nodename || (nodename && node && wild_match(nodename, node))) {
+    if (nodename)
+      node = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);    
+    if (!nodename || wild_match(nodename, node)) {
       strcat(work, conf.bot->nick);
       strcat(work, " ");
       cnt++;
@@ -550,14 +551,14 @@ tell_bots(int idx, int up, char *nodename)
           found = 1;
         total++;
         if (nodename || (!nodename && ((!up && !found) || (up && found)))) {
-          node = (char *) get_user(&USERENTRY_NODENAME, u);
-          if (!nodename || (nodename && node && wild_match(nodename, node))) {
+          if (nodename)
+            node = (char *) get_user(&USERENTRY_NODENAME, u);
+          if (!nodename || wild_match(nodename, node)) {
             if (nodename && !found)
               strcat(work, "*");
             strcat(work, u->handle);
-            if (!nodename && found)
-              cnt++;
-            else if (nodename)
+            cnt++;
+            if (nodename)
               mtot++;
             if (!nodename || (nodename && found))
               tot++;
