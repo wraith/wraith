@@ -1005,7 +1005,7 @@ exempt-time %lu invite-time %lu \
 %cenforcebans %cdynamicbans %cuserban %cbitch %cprotectops %crevenge \
 %crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cvoice \
-%cfastop %cautoop }\n",
+%cfastop %cautoop %cbotbitch }\n",
 	chan->dname,
 	w,
         chan->added_by,
@@ -1057,7 +1057,8 @@ exempt-time %lu invite-time %lu \
 	PLSMNS(channel_take(chan)),
 	PLSMNS(channel_voice(chan)),
 	PLSMNS(channel_fastop(chan)),
-        PLSMNS(channel_autoop(chan))
+        PLSMNS(channel_autoop(chan)),
+        PLSMNS(channel_botbitch(chan))
 /* Chanflag template
  * also include a %ctemp above.
  *      PLSMNS(channel_temp(chan)),

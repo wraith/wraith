@@ -921,8 +921,8 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     /* +d or bitch and not an op
      * we dont check private because +private does not imply bitch. */
     if (chan_hasop(m) && 
-        (chk_deop(*fr) ||
-         (!loading && userlist && channel_bitch(chan) && !chk_op(*fr, chan)) ) ) {
+        (chk_deop(*fr, chan) ||
+         (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
       /* if (target_priority(chan, m, 1)) */
         add_mode(chan, '-', 'o', m->nick);
     } else if (!chan_hasop(m) && dovoice(chan) && chk_autoop(*fr, chan)) {
@@ -1198,11 +1198,11 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
   /* don't do much if i'm lonely bot. Maybe they won't notice me? :P */
   if (botops == 1 && !botnonops) {
-    if (channel_bitch(chan) || channel_closed(chan))
+    if (chan_bitch(chan) || channel_closed(chan))
       putlog(LOG_MISC, "*", "Opped in %s, not checking +closed/+bitch until more bots arrive.", chan->dname);
   } else {
     /* if the chan is +closed, mass deop first, safer that way. */
-    if (channel_bitch(chan) || channel_closed(chan))
+    if (chan_bitch(chan) || channel_closed(chan))
       enforce_bitch(chan);
 
     if (channel_closed(chan))
@@ -1602,7 +1602,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (me_op(chan)) {
     /* are they a chanop, and me too */
         /* are they a channel or global de-op */
-    if (chan_hasop(m) && chk_deop(fr) && !match_my_nick(nick)) 
+    if (chan_hasop(m) && chk_deop(fr, chan) && !match_my_nick(nick)) 
         /* && target_priority(chan, m, 1) */
       add_mode(chan, '-', 'o', nick);
 

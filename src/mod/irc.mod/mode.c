@@ -544,7 +544,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
   /* I'm opped, and the opper isn't me, and it isn't a server op */
   if (m && me_op(chan) && !match_my_nick(mv->nick)) {
     /* deop if they are +d or it is +bitch */
-    if (reversing || chk_deop(victim) || (!loading && userlist && channel_bitch(chan) && !chk_op(victim, chan))) {     /* chk_op covers +private */
+    if (reversing || chk_deop(victim, chan) || (!loading && userlist && chan_bitch(chan) && !chk_op(victim, chan))) {     /* chk_op covers +private */
       int num = randint(10);
       char outbuf[101] = ""; 
 
@@ -571,7 +571,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
   if (!m && me_op(chan) && !match_my_nick(mv->nick)) {
     int snm = chan->stopnethack_mode;
 
-    if (chk_deop(victim)) {
+    if (chk_deop(victim, chan)) {
       mv->flags |= FAKEOP;
       add_mode(chan, '-', 'o', mv->nick);
     } else if (snm > 0 && snm < 7 && !((channel_autoop(chan) ||
@@ -580,9 +580,9 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
              !glob_exempt(victim) && !chan_exempt(victim)) {
 
       if (snm == 5)
-        snm = channel_bitch(chan) ? 1 : 3;
+        snm = chan_bitch(chan) ? 1 : 3;
       if (snm == 6)
-        snm = channel_bitch(chan) ? 4 : 2;
+        snm = chan_bitch(chan) ? 4 : 2;
       if (chan_wasoptest(victim) || glob_wasoptest(victim) || snm == 2) {
         if (!chan_wasop(mv)) {
           mv->flags |= FAKEOP;
@@ -648,7 +648,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
         !match_my_nick(mv->nick) &&
         /* Is the deopper NOT a master or bot? */
         !glob_master(user) && !chan_master(user) && !glob_bot(user) &&
-        ((chan_op(victim) || (glob_op(victim) && !chan_deop(victim))) || !channel_bitch(chan)))
+        (chk_op(victim, chan) || !chan_bitch(chan)))
       /* Then we'll bless the victim */
       do_op(mv->nick, chan, 0, 0);
   }
@@ -661,7 +661,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   /* Having op hides your +v and +h  status -- so now that someone's lost ops,
    * check to see if they have +v or +h
    */
-  if (!channel_take(chan) && !channel_bitch(chan) && !(mv->flags & (CHANVOICE | STOPWHO))) {
+  if (!channel_take(chan) && !chan_bitch(chan) && !(mv->flags & (CHANVOICE | STOPWHO))) {
     dprintf(DP_HELP, "WHO %s\n", mv->nick);
     mv->flags |= STOPWHO;
   }

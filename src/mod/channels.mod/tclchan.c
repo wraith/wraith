@@ -537,6 +537,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       chan->status |= CHAN_AUTOOP;
     else if (!strcmp(item[i], "-autoop"))
       chan->status &= ~CHAN_AUTOOP;
+    else if (!strcmp(item[i], "+botbitch"))
+      chan->status |= CHAN_BOTBITCH;
+    else if (!strcmp(item[i], "-botbitch"))
+      chan->status &= ~CHAN_BOTBITCH;
 /* Chanflag template
  *  else if (!strcmp(item[i], "+temp"))
  *    chan->status |= CHAN_TEMP;
@@ -635,10 +639,11 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
   			   chan->channel.key[0] ?
     			   chan->channel.key : chan->key_prot);
     }
-    if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
+    if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH | CHAN_BOTBITCH | CHAN_CLOSED | CHAN_PRIVATE)) {
       recheck_channel(chan, 1);
     /* if we -take, recheck the chan for modes and shit */
-    } else if ((chan->status ^ old_status) & (CHAN_TAKE)) {
+    /* also -[bot]bitch/-private might allow for auto-opping users */
+    } else if ((chan->status ^ old_status) & (CHAN_TAKE | CHAN_BITCH | CHAN_BOTBITCH | CHAN_PRIVATE)) {
       recheck_channel(chan, 1);
     } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
       recheck_channel_modes(chan);

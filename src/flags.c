@@ -419,7 +419,16 @@ privchan(struct flag_record fr, struct chanset_t *chan, int type)
 int
 chk_op(struct flag_record fr, struct chanset_t *chan)
 {
-  if (!chan || (!privchan(fr, chan, PRIV_OP) && !chk_deop(fr))) {
+  return real_chk_op(fr, chan, 1);
+}
+
+int
+real_chk_op(struct flag_record fr, struct chanset_t *chan, bool botbitch)
+{
+  if (!chan)
+    return 0;
+
+  if (!privchan(fr, chan, PRIV_OP) && !real_chk_deop(fr, chan, botbitch)) {
     if (chan_op(fr) || (glob_op(fr) && !chan_deop(fr)))
       return 1;
   }
@@ -431,16 +440,24 @@ chk_autoop(struct flag_record fr, struct chanset_t *chan)
 {
   if (glob_bot(fr))
     return 0;
-  if (!chan || (!channel_take(chan) && !privchan(fr, chan, PRIV_OP) && chk_op(fr, chan) && !chk_deop(fr))) {
+  if (!chan || (!channel_take(chan) && !privchan(fr, chan, PRIV_OP) && chk_op(fr, chan) && !chk_deop(fr, chan))) {
     if (channel_autoop(chan) || chan_autoop(fr) || glob_autoop(fr))
       return 1;
   }
   return 0;
 }
 
-int
-chk_deop(struct flag_record fr)
+int chk_deop(struct flag_record fr, struct chanset_t *chan)
 {
+  return real_chk_deop(fr, chan, 1);
+}
+
+int
+real_chk_deop(struct flag_record fr, struct chanset_t *chan, bool botbitch)
+{
+  if (chan && botbitch && channel_botbitch(chan) && !glob_bot(fr))
+    return 1;
+
   if (chan_deop(fr) || (glob_deop(fr) && !chan_op(fr)))
     return 1;
   else

@@ -442,7 +442,7 @@ void show_channels(int idx, char *handle)
     if (l < strlen(chan->dname)) {
       l = strlen(chan->dname);
     }
-    if (chk_op(fr, chan))
+    if (real_chk_op(fr, chan, 0))
       total++;
   }
 
@@ -450,7 +450,7 @@ void show_channels(int idx, char *handle)
 
   for (chan = chanset;chan;chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
-    if (chk_op(fr, chan)) {
+    if (real_chk_op(fr, chan, 0)) {
         if (!first) { 
           dprintf(idx, "%s %s access to %d channel%s:\n", handle ? u->handle : "You", handle ? "has" : "have", total, (total > 1) ? "s" : "");
           
@@ -458,7 +458,8 @@ void show_channels(int idx, char *handle)
         }
         dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
            channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 
-           channel_bitch(chan) ? "(bitch)    " : "", channel_closed(chan) ?  "(closed)" : "");
+           channel_bitch(chan) && !channel_botbitch(chan) ? "(bitch)    " : channel_botbitch(chan) ? "(botbitch) " : "",
+           channel_closed(chan) ?  "(closed)" : "");
     }
   }
   if (!first)

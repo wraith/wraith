@@ -1242,7 +1242,7 @@ check_netfight(struct chanset_t *chan)
 
   if (limit) {
     if ((chan->channel.fighting) && (chan->channel.fighting > limit)) {
-      if (!channel_bitch(chan) || !channel_closed(chan)) {
+      if (!chan_bitch(chan) || !channel_closed(chan)) {
         putlog(LOG_WARN, "*", "Auto-closed %s - channel fight", chan->dname);
         do_chanset(NULL, chan, "+bitch +closed +backup", DO_LOCAL | DO_NET);
         enforce_closed(chan);

@@ -319,7 +319,7 @@ See also: botjoin, +chan, -chan, chanset, chaninfo
       Bots: cEvin, ruthie, Killa1
    There is no indication of which bots are directly connected to this current
    bot. %{+n}Use $b'%dwho'$b or $b'%dbottree'$b for that information.%{-}
-
+ 
    Specifying a nodename will display all bots up/down on that nodename.
    Bots with a * preceeding it's name is down.
  
@@ -430,6 +430,8 @@ See also: link
         $bautoop$b         Bots that are +y will auto-op all users with 
                        op access to the channel.
         $bbitch$b          Only let users with the +o flag have op on the
+                       channel?
+        $bbotbitch$b       Only let $bbots$b with the +o flag have op on the
                        channel?
         $bclosed$b         Kick all people who join channel unless they have
                        op access for the channel.
@@ -902,7 +904,7 @@ See also: cycle
  
    Example:
       Down bots: cEvin, ruthie, Killa1
-
+ 
 See also: bots
 :leaf:dump
 ###  $bdump$b <text>
@@ -1054,11 +1056,6 @@ See also: +ignore, -ignore
    the bot with /MSG INVITE. Specify * for all channels.
  
 See also: console, iop
-:leaf:iop
-###  $biop$b <nickname> [channel|*]
-   same as normal invite, except auto-ops them when they join.
- 
-See also: console, invite
 ::invites
 ###  $binvites$b [[channel/all]/wildcard]
    Shows you a list of the global invites active on the current channel, and
@@ -1098,6 +1095,11 @@ See also: console, invite
    of your current console channel.
  
 See also: -invite, +invite, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
+:leaf:iop
+###  $biop$b <nickname> [channel|*]
+   same as normal invite, except auto-ops them when they join.
+ 
+See also: console, invite
 :leaf:jump
 ###  $bjump$b [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a

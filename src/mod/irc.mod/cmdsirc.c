@@ -37,7 +37,7 @@ static int has_op(int idx, struct chanset_t *chan)
     dprintf(idx, "No such channel.\n");
     return 0;
   }
-  if (chk_op(user, chan))
+  if (real_chk_op(user, chan, 0))
     return 1;
   dprintf(idx, "You are not a channel op on %s.\n", chan->dname);
   return 0;
@@ -503,12 +503,12 @@ static void cmd_op(int idx, char *par)
   egg_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
   u = get_user_by_host(s);
   get_user_flagrec(u, &victim, chan->dname);
-  if (chk_deop(victim)) {
+  if (chk_deop(victim, chan)) {
     dprintf(idx, "%s is currently being auto-deopped  on %s.\n", m->nick, chan->dname);
     if (all) goto next;
     return;
   }
-  if (channel_bitch(chan) && !chk_op(victim, chan)) {
+  if (chan_bitch(chan) && !chk_op(victim, chan)) {
     dprintf(idx, "%s is not a registered op on %s.\n", m->nick, chan->dname);
     if (all) goto next;
     return;
