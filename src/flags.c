@@ -384,7 +384,7 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
  */
 int private(struct flag_record fr, struct chanset_t *chan, int type)
 {
-  if (!channel_private(chan) || glob_bot(fr) || glob_owner(fr))
+  if (!chan || !channel_private(chan) || glob_bot(fr) || glob_owner(fr))
     return 0; /* user is implicitly not restricted by +private, they may however be lacking other flags */
 
   if (type == PRIV_OP) {

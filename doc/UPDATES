@@ -11,6 +11,7 @@ This is a summary of ChangeLog basically.
 7.Don't auto-op users in a +take chan.
 8.+take now does +oooo on remaining bots instead of individual +o lines.
 9.Bots now record: USERNAME, NODENAME (shell host), OS in .whois.
+10.+private checking was segfaulting some cmds under certain conditions.
 
 1.1.7
 
