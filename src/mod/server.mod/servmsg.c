@@ -725,6 +725,7 @@ static int gotpong(char *from, char *msg)
   fixcolon(msg);		/* Scrap server name */
 
   server_lag = now - my_atoul(msg);
+
   if (server_lag > 99999) {
     /* IRCnet lagmeter support by drummer */
     server_lag = now - lastpingtime;

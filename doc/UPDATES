@@ -60,6 +60,7 @@ This is a summary of ChangeLog basically.
 * cmd_su/cmd_relay no longer work through .botcmd
 * Added some simple dcc ip sanity checking back in.
 * All dns resolving is now asynchronous, all dns bugs now fixed.
+* Check server lag every 30 seconds, not every 5 minutes.
 
 1.1.9
 

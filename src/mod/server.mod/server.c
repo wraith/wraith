@@ -974,19 +974,22 @@ static void server_secondly()
     connect_server();
 }
 
+static void server_check_lag()
+{
+  if (server_online && !waiting_for_awake && !trying_server) {
+    dprintf(DP_MODE, "PING :%li\n", now);
+    waiting_for_awake = 1;
+  }
+}
+
 static void server_5minutely()
 {
-  if (server_online) {
-    if (waiting_for_awake) {
+  if (server_online && waiting_for_awake && ((now - lastpingtime) >= 300)) {
       /* Uh oh!  Never got pong from last time, five minutes ago!
        * Server is probably stoned.
        */
       disconnect_server(servidx, DO_LOST);
       putlog(LOG_SERV, "*", IRC_SERVERSTONED);
-    } else if (!trying_server) {
-      /* Check for server being stoned. */
-      dprintf(DP_MODE, "PING :%li\n", now);
-      waiting_for_awake = 1;
     }
   }
 }
@@ -1119,6 +1122,7 @@ void server_init()
 
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
   timer_create_secs(10, "server_10secondly", (Function) server_10secondly);
+  timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
   mq.head = hq.head = modeq.head = NULL;
