@@ -32,6 +32,8 @@
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
 
+#include <stdarg.h>
+
 #define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
 #define IN_BOTS (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
 #define LAG_THRESHOLD (CFG_LAGTHRESHOLD.gdata ? atoi(CFG_LAGTHRESHOLD.gdata) : 15)

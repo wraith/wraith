@@ -191,6 +191,23 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
 #endif /* S_MSGCMDS */
 
 #ifdef S_AUTHCMDS
+
+static void reply(char *nick, struct chanset_t *chan, ...)
+{
+  va_list va;
+  char buf[1024] = "", *format = NULL;
+
+  va_start(va, chan);
+  format = va_arg(va, char *);
+  egg_vsnprintf(buf, sizeof buf, format, va);
+  va_end(va);
+
+  if (chan)
+    dprintf(DP_HELP, "PRIVMSG %s :%s", chan->name, buf);
+  else
+    dprintf(DP_HELP, "NOTICE %s :%s", nick, buf);
+}
+
 static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 {
   int i = 0;
@@ -509,7 +526,7 @@ static int msgc_voice(char *nick, char *host, struct userrec *u, char *par, char
 
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %sVOICE %s", nick, host, u->handle, chname ? chname : "", cmdprefix, par ? par : "");
 
-  if (par[0] == '-') { //we have an option!
+  if (par[0] == '-') { /* we have an option! */
     char *tmp = NULL;
 
     par++;
@@ -560,9 +577,9 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
   }
 
   if (list[0]) 
-    dprintf(DP_HELP, "NOTICE %s :You have access to: %s\n", nick, list);
+    reply(nick, NULL, "You have access to: %s\n", nick, list);
   else
-    dprintf(DP_HELP, "NOTICE %s :You do not have access to any channels.\n", nick);
+    reply(nick, NULL, "You do not have access to any channels.\n", nick);
 
   return BIND_RET_BREAK;
 }
@@ -585,9 +602,9 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
       if (chan->channel.key[0]) {
-        dprintf(DP_HELP, "NOTICE %s :Key for %s is: %s\n", nick, chan->name, chan->channel.key);
+        reply(nick, NULL, "Key for %s is: %s\n", nick, chan->name, chan->channel.key);
       } else {
-        dprintf(DP_HELP, "NOTICE %s :%s has no key set.\n", nick, chan->name);
+        reply(nick, NULL, "%s has no key set.\n", nick, chan->name);
       }
     }
   }
@@ -596,7 +613,21 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
 
 static int msgc_help(char *nick, char *host, struct userrec *u, char *par, char *chname)
 {
+  bind_entry_t *entry = NULL;
+  bind_table_t *table = NULL;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %sHELP %s", nick, host, u->handle, cmdprefix, par ? par : "");
+
+
+  get_user_flagrec(u, &fr, chname);
+  /* build_flags(flg, &fr, NULL); */
+
+
+  table = bind_table_lookup("msgc");
+  for (entry = table->entries; entry && entry->next; entry = entry->next) {
+  }
+  
   dprintf(DP_HELP, "NOTICE %s :op invite getkey voice test\n", nick);
   return BIND_RET_BREAK;
 }
@@ -610,10 +641,7 @@ static int msgc_md5(char *nick, char *host, struct userrec *u, char *par, char *
   if (chname && chname[0])
     chan = findchan_by_dname(chname);  
 
-  if (chan)
-    dprintf(DP_HELP, "PRIVMSG %s :MD5(%s) = %s\n", chan->dname, par, MD5(par));
-  else
-    dprintf(DP_HELP, "NOTICE %s :MD5(%s) = %s\n", nick, par, MD5(par));
+  reply(nick, chan, "MD5(%s) = %s\n", par, MD5(par));
   return BIND_RET_BREAK;
 }
 
@@ -626,10 +654,7 @@ static int msgc_sha1(char *nick, char *host, struct userrec *u, char *par, char 
   if (chname && chname[0])
     chan = findchan_by_dname(chname);  
 
-  if (chan)
-    dprintf(DP_HELP, "PRIVMSG %s :SHA1(%s) = %s\n", chan->dname, par, SHA1(par));
-  else
-    dprintf(DP_HELP, "NOTICE %s :SHA1(%s) = %s\n", nick, par, SHA1(par));
+  reply(nick, chan, "SHA1(%s) = %s\n", nick, par, SHA1(par));
   return BIND_RET_BREAK;
 }
 
@@ -644,7 +669,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
  
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! %sINVITE %s", nick, host, u->handle, cmdprefix, par ? par : "");
 
-  if (par[0] == '-') { //we have an option!
+  if (par[0] == '-') {
     char *tmp = NULL;
 
     par++;
@@ -686,14 +711,14 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *par, cha
 static cmd_t C_msgc[] =
 {
 /*  {"test",		"a",	(Function) msgc_test,		NULL}, */
-  {"op",		"",	(Function) msgc_op,		NULL},
-  {"voice",		"",	(Function) msgc_voice,		NULL},
   {"channels",		"",	(Function) msgc_channels,	NULL},
   {"getkey",		"",	(Function) msgc_getkey,		NULL},
-  {"invite",		"",	(Function) msgc_invite,		NULL},
   {"help",		"",	(Function) msgc_help,		NULL},
+  {"invite",		"",	(Function) msgc_invite,		NULL},
   {"md5",		"",	(Function) msgc_md5,		NULL},
+  {"op",		"",	(Function) msgc_op,		NULL},
   {"sha1",		"",	(Function) msgc_sha1,		NULL},
+  {"voice",		"",	(Function) msgc_voice,		NULL},
   {NULL,		NULL,	NULL,				NULL}
 };
 #endif /* S_AUTHCMDS */
