@@ -107,7 +107,7 @@ geticon(int idx)
 
   if (!dcc[idx].user)
     return '-';
-  get_user_flagrec(dcc[idx].user, &fr, 0);
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
   if (glob_admin(fr))
     return '^';
   if (chan_owner(fr))
@@ -228,10 +228,6 @@ build_flags(char *string, struct flag_record *plus, struct flag_record *minus)
     }
   }
   if (plus->match & FR_CHAN) {
-/* FIXME: BLAH */
-/*    if (plus->match & (FR_GLOBAL | FR_BOT))
-      *string++ = (plus->match & FR_AND) ? '&' : '|';
-*/
     if (plus->match & FR_GLOBAL)
       *string++ = (plus->match & FR_AND) ? '&' : '|';
 
@@ -369,12 +365,14 @@ get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
   }
 
   if (fr->match & FR_CHAN) {
-    if (fr->match & FR_ANYWH) {
-      fr->chan = u->flags;
-      for (cr = u->chanrec; cr; cr = cr->next)
+    if ((fr->match & FR_ANYWH) || (fr->match & FR_ANYCH)) {
+      if (fr->match & FR_ANYWH)
+        fr->chan = u->flags;
+      for (cr = u->chanrec; cr; cr = cr->next) {
         if (findchan_by_dname(cr->channel)) {
           fr->chan |= cr->flags;
         }
+      }
     } else {
       if (chname) {
         for (cr = u->chanrec; cr; cr = cr->next) {

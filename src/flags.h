@@ -27,8 +27,9 @@ struct flag_record {
 #define FR_GLOBAL 0x00000001
 #define FR_CHAN   0x00000002
 #define FR_ANYWH  0x10000000
-#define FR_AND    0x20000000
-#define FR_OR     0x40000000
+#define FR_ANYCH  0x20000000
+#define FR_AND    0x40000000
+#define FR_OR     0x80000000
 
 /*
  * userflags:

@@ -750,13 +750,14 @@ static void cmd_help(int idx, char *par)
 {
   char flg[100] = "", *fcats = NULL, temp[100] = "", buf[2046] = "", match[20] = "";
   int fnd = 0, done = 0, nowild = 0;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYCH, 0, 0, 0 };
 
   egg_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
   fcats = temp;
 
   putlog(LOG_CMDS, "*", "#%s# help %s", dcc[idx].nick, par);
   get_user_flagrec(dcc[idx].user, &fr, NULL);
+
   build_flags(flg, &fr, NULL);
   if (!par[0]) {
     sprintf(match, "*");
