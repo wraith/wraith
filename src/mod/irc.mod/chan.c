@@ -540,7 +540,8 @@ static char *quickban(struct chanset_t *chan, char *uhost)
   static char s1[512] = "";
 
   maskhost(uhost, s1);
-  if ((strlen(s1) != 1) && (strict_host == 0))
+  /* this used to only happen with strict_host == 0 */
+  if (strlen(s1) != 1)
     s1[2] = '*';		/* arthur2 */
   do_mask(chan, chan->channel.ban, s1, 'b');
   return s1;
