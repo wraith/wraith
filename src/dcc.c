@@ -201,16 +201,17 @@ static void bot_version(int idx, char *par)
     /* old numver crap */
   } else
     dcc[idx].u.bot->numver = 0;
-    dprintf(idx, "tb %s\n", conf.bot->nick);
-    l = atoi(newsplit(&par));
-    if (l != HANDLEN) {
-      putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %d characters.", dcc[idx].nick, l);  
-      dprintf(idx, "error Non-matching handle length: mine %d, yours %d\n", HANDLEN, l);
-      dprintf(idx, "bye %s\n", "bad handlen");
-      killsock(dcc[idx].sock);
-      lostdcc(idx);
-      return;
-    }
+
+  dprintf(idx, "tb %s\n", conf.bot->nick);
+  l = atoi(newsplit(&par));
+  if (l != HANDLEN) {
+    putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %d characters.", dcc[idx].nick, l);  
+    dprintf(idx, "error Non-matching handle length: mine %d, yours %d\n", HANDLEN, l);
+    dprintf(idx, "bye %s\n", "bad handlen");
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
+    return;
+  }
   strncpyz(dcc[idx].u.bot->version, par, 120);
   newsplit(&par);	/* 'ver' */
   newsplit(&par);	/* handlen */

@@ -9,6 +9,7 @@ This is a summary of ChangeLog basically.
   -Moved PSCLOAK entries to misc/responses.txt
 * All dates are UTC (GMT) now.
 * cmd_newleaf was sharing the new bot incorrectly.
+* Fixed a cosmetic/memory bug in cmd_who.
 
 1.1.9
 

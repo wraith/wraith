@@ -120,7 +120,8 @@ static void tell_who(struct userrec *u, int idx, int chan)
 	ok = 1;
 	dprintf(idx, "Bots connected:\n");
       }
-      egg_strftime(s, 14, "%d %b %H:%M %Z", gmtime(&dcc[i].timeval));
+      egg_strftime(s, 20, "%d %b %H:%M %Z", gmtime(&dcc[i].timeval));
+      s[20] = 0;
       if (atr & USER_OWNER) {
         egg_snprintf(format, sizeof format, "  [%%.2lu]  %%s%%c%%-%us (%%s) %%s\n", 
 			    nicklen);
