@@ -17,7 +17,8 @@
 #define ERR_BADCONF     14
 #define ERR_BADBOT	15
 #define ERR_BADPASS	16
-#define ERR_MAX         17
+#define ERR_BOTDISABLED	17
+#define ERR_MAX         18
 
 #define EMAIL_OWNERS    0x1
 #define EMAIL_TEAM      0x2

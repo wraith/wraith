@@ -24,7 +24,7 @@
 #include <signal.h>
 
 extern char             origbotname[], tempdir[],
-                        userfile[], natip[];
+                        userfile[], natip[], *binname;
 extern int              localhub;
 extern uid_t		myuid;
 extern conf_t           conf;
@@ -32,6 +32,31 @@ extern conf_t           conf;
 conf_t		conf;		/* global conf struct */
 
 static conf_t conffile;
+
+#ifdef LEAF
+void spawnbots() {
+  conf_bot *bot = NULL;
+
+  for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
+    if (bot->nick[0] == '/') {
+      /* kill it if running */
+      if (bot->pid) kill(bot->pid, SIGKILL);
+      else continue;
+    } else if (!strcmp(bot->nick, conf.bot->nick) || bot->pid) {
+      continue;
+    } else {
+      char *run = NULL;
+      size_t size = 0;
+  
+      size = strlen(conf.bot->nick) + strlen(binname) + 10;
+      run = calloc(1, size);
+      egg_snprintf(run, size, "%s -B %s", binname, bot->nick);
+      system(run);
+      free(run);
+    }
+  }
+}
+#endif /* LEAF */
 
 #ifdef S_CONFEDIT
 static uid_t save_euid, save_egid;
@@ -182,26 +207,43 @@ void init_conf() {
  * Return the PID of a bot if it is running, otherwise return 0
  */
 
-int checkpid(char *nick, conf_bot *bot) {
+pid_t checkpid(char *nick, conf_bot *bot) {
   FILE *f = NULL;
-  int xx;
-  char buf[DIRMAX] = "", s[11] = "";
+  char buf[DIRMAX] = "", s[11] = "", *tmpnick = NULL, *tmp_ptr = NULL;
 
-  egg_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, nick);
+
+  tmpnick = tmp_ptr = strdup(nick);
+
+  if (tmpnick[0] == '/')
+    tmpnick++;
+
+  egg_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, tmpnick);
+  free(tmp_ptr);
+
   if (bot && !(bot->pid_file))
     bot->pid_file = strdup(buf);
   else if (bot && strcmp(bot->pid_file, buf))
     str_redup(&bot->pid_file, buf);
 
   if ((f = fopen(buf, "r"))) {
+    pid_t xx = 0;
+
     fgets(s, 10, f);
+    s[10] = 0;
     fclose(f);
     xx = atoi(s);
-    kill(xx, SIGCHLD);
-
-    if (errno != ESRCH) /* PID is !running */
-      return xx;
+    if (bot) {
+      int x = 0;
+      x = kill(xx, SIGCHLD);
+      if (x == -1 && errno == ESRCH) 
+        return 0;
+      else if (x == 0)
+        return xx;
+    } else {
+      return xx ? xx : 0;
+    }
   }
+
   return 0;
 }
 
@@ -347,7 +389,7 @@ int readconf(char *cfile)
     i++;
 
     sdprintf("CONF LINE: %s", line);
-    if (!strchr("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
+    if (!strchr("*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
       sdprintf(STR("line %d, char %c "), i, line[0]);
       werr(ERR_CONFBADENC);
     } else {                    /* line is good to parse */
@@ -571,6 +613,9 @@ void fillconf(conf_t *inconf) {
 
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next)
     if (!strcmp(bot->nick, mynick)) break;
+
+  if (bot->nick && bot->nick[0] == '/')
+    werr(ERR_BOTDISABLED);
 
   if (!bot->nick || (bot->nick && strcmp(bot->nick, mynick)))
     werr(ERR_BADBOT);

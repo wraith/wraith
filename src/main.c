@@ -674,6 +674,12 @@ int main(int argc, char **argv)
   }
 #endif /* LEAF */
   fillconf(&conf);
+#ifdef LEAF
+  if (localhub) {
+    spawnbots();
+    if (updating) exit(0); /* just let cron restart us bleh */
+  }
+#endif /* LEAF */
   free_conf();
 
   if ((localhub && !updating) || !localhub) {

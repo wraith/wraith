@@ -649,6 +649,8 @@ char *werr_tostr(int errnum)
     return STR("Config file is incomplete");
   case ERR_BADBOT:
     return STR("No such botnick");
+  case ERR_BOTDISABLED:
+    return STR("Bot is disabled, remove '/' in config");
   default:
     return STR("Unforseen error");
   }

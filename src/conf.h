@@ -10,7 +10,7 @@ typedef struct conf_bot_b {
   char *host6;
   char *ip;
   char *ip6;
-  int pid;              /* contains the PID for the bot (read for the pidfile) */
+  pid_t pid;              /* contains the PID for the bot (read for the pidfile) */
   char *pid_file;       /* path and filename of the .pid file */
 #ifdef LEAF
   int localhub;         /* bot is localhub */
@@ -46,10 +46,13 @@ enum {
 
 #ifndef MAKING_MODS
 
+#ifdef LEAF
+void spawnbots();
+#endif /* LEAF */
 #ifdef S_CONFEDIT
 void confedit(char *);
 #endif /* S_CONFEDIT */
-int checkpid(char *, conf_bot *);
+pid_t checkpid(char *, conf_bot *);
 void showconf();
 void init_conf();
 void free_conf();
