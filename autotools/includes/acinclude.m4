@@ -17,6 +17,11 @@ configure: error:
 EOF
   exit 1
 fi
+
+if test -n "$GCC"; then
+  CFLAGS="$CFLAGS -O3"
+fi
+
 ])dnl
 
 dnl  EGG_IPV6_OPTIONS()
@@ -71,28 +76,64 @@ fi
 ])dnl
 
 
-dnl  EGG_CHECK_CCPIPE()
+dnl EGG_CHECK_CCPIPE()
 dnl
-dnl  Checks whether the compiler supports the `-pipe' flag, which
-dnl  speeds up the compilation.
-AC_DEFUN(EGG_CHECK_CCPIPE, [dnl
-if test -z "$no_pipe"
-then
-  if test -n "$GCC"
-  then
-    AC_CACHE_CHECK(whether the compiler understands -pipe, egg_cv_var_ccpipe, [dnl
-      ac_old_CC="$CC"
-      CC="$CC -pipe"
-      AC_TRY_COMPILE(,, egg_cv_var_ccpipe="yes", egg_cv_var_ccpipe="no")
-      CC="$ac_old_CC"
+dnl This function checks whether or not the compiler supports the `-pipe' flag,
+dnl which speeds up the compilation.
+dnl
+AC_DEFUN([EGG_CHECK_CCPIPE],
+[
+  if test -n "$GCC" && test -z "$no_pipe"; then
+    AC_CACHE_CHECK([whether the compiler understands -pipe], egg_cv_var_ccpipe, [
+        ac_old_CC="$CC"
+        CC="$CC -pipe"
+        AC_COMPILE_IFELSE([[
+          int main ()
+          {
+            return(0);
+          }
+        ]], [
+          egg_cv_var_ccpipe="yes"
+        ], [
+          egg_cv_var_ccpipe="no"
+        ])
+        CC="$ac_old_CC"
     ])
-    if test "$egg_cv_var_ccpipe" = "yes"
-    then
+
+    if test "$egg_cv_var_ccpipe" = "yes"; then
       CC="$CC -pipe"
     fi
   fi
-fi
-])dnl
+])
+
+dnl EGG_CHECK_CCWALL()
+dnl
+dnl See if the compiler supports -Wall.
+dnl
+AC_DEFUN([EGG_CHECK_CCWALL],
+[
+  if test -n "$GCC" && test -z "$no_wall"; then
+    AC_CACHE_CHECK([whether the compiler understands -Wall], egg_cv_var_ccwall, [
+      ac_old_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS -Wall"
+       AC_COMPILE_IFELSE([[
+         int main ()
+         {
+           return(0);
+         }
+       ]], [
+         egg_cv_var_ccwall="yes"
+       ], [
+         egg_cv_var_ccwall="no"
+       ])
+      CFLAGS="$ac_old_CFLAGS"
+    ])
+
+    if test "$egg_cv_var_ccwall" = "yes"; then
+      CFLAGS="$CFLAGS -Wall"
+    fi
+  fi
+])
 
 dnl  EGG_CHECK_CCSTATIC()
 dnl
@@ -215,9 +256,6 @@ dnl  EGG_CHECK_OS()
 dnl
 dnl
 AC_DEFUN(EGG_CHECK_OS, [dnl
-LINUX=no
-IRIX=no
-SUNOS=no
 EGG_CYGWIN=no
 
 AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNAME -s`)
@@ -225,39 +263,16 @@ AC_CACHE_CHECK(system release, egg_cv_var_system_release, egg_cv_var_system_rele
 
 case "$egg_cv_var_system_type" in
   BSD/OS)
-    case "`echo $egg_cv_var_system_release | cut -d . -f 1`" in
-      2)
-      ;;
-      *)
-        CFLAGS="$CFLAGS -Wall"
-      ;;
-    esac
   ;;
   CYGWI*)
-    case "`echo $egg_cv_var_system_release | cut -c 1-3`" in
-      1.*)
-        AC_PROG_CC_WIN32
-        CC="$CC $WIN32FLAGS"
-        AC_MSG_CHECKING(for /usr/lib/binmode.o)
-        if test -r /usr/lib/binmode.o
-        then
-          AC_MSG_RESULT(yes)
-          LIBS="$LIBS /usr/lib/binmode.o"
-        else
-          AC_MSG_RESULT(no)
-          AC_MSG_WARN(Make sure the directory Eggdrop is installed into is mounted in binary mode.)
-        fi
-      ;;
-      *)
-        AC_MSG_WARN(Make sure the directory Eggdrop is installed into is mounted in binary mode.)
-      ;;
-    esac
-    EGG_CYGWIN=yes
+    AC_PROG_CC_WIN32
+    CC="$CC $WIN32FLAGS"
+    EGG_CYGWIN="yes"
+    EGG_CYGWIN_BINMODE
     AC_DEFINE(CYGWIN_HACKS, 1, [Define if running under cygwin])
     AC_DEFINE(WIN32_LEAN_AND_MEAN, 1, [Define if windows])
   ;;
   IRIX)
-    IRIX=yes
   ;;
   Ultrix)
     SHELL=/bin/sh5
@@ -267,8 +282,6 @@ case "$egg_cv_var_system_type" in
   BeOS)
   ;;
   Linux)
-    LINUX=yes
-    CFLAGS="$CFLAGS -Wall"
   ;;
   Lynx)
   ;;
@@ -295,11 +308,6 @@ case "$egg_cv_var_system_type" in
     AC_DEFINE(BROKEN_SNPRINTF, 1, [Define to use Eggdrop's snprintf functions without regard to HAVE_SNPRINTF])dnl
   ;;
   SunOS)
-    if ! test "`echo $egg_cv_var_system_release | cut -d . -f 1`" = "5"
-      then
-      # SunOS 4
-      SUNOS=yes
-    fi
   ;;
   *BSD)
     # FreeBSD/OpenBSD/NetBSD
@@ -326,6 +334,23 @@ case "$egg_cv_var_system_type" in
 esac
 ])dnl
 
+dnl EGG_CYGWIN_BINMODE
+dnl
+dnl Check for binmode.o on Cygwin.
+dnl
+AC_DEFUN([EGG_CYGWIN_BINMODE],
+[
+  if test $EGG_CYGWIN = "yes"; then
+    AC_MSG_CHECKING([for /usr/lib/binmode.o])
+    if test -r /usr/lib/binmode.o; then
+      AC_MSG_RESULT([yes])
+      LIBS="$LIBS /usr/lib/binmode.o"
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_WARN([Make sure the directory Eggdrop is installed into is mounted in binary mode.])
+    fi
+  fi
+])
 
 dnl  EGG_CHECK_LIBS()
 dnl

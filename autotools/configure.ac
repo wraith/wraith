@@ -13,7 +13,8 @@ EGG_SAVE_PARAMETERS
 EGG_CHECK_PACKCFG
 
 # Setup build environment
-AC_PROG_CC
+dnl Search for newer gcc versions before older
+AC_PROG_CC([gcc34 gcc33 gcc3 gcc-3.4 gcc-3.3 gcc cc c1])
 EGG_CHECK_CC
 
 # Crazy machines
@@ -25,6 +26,7 @@ AC_MINIX
 AC_CACHE_SAVE 
 
 # Speedup compile
+EGG_CHECK_CCWALL
 EGG_CHECK_CCPIPE
 
 EGG_CHECK_DEPMODE
