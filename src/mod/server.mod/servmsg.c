@@ -160,7 +160,7 @@ static int match_my_nick(char *nick)
 static int got001(char *from, char *msg)
 {
   struct server_list *x;
-  int i, servidx = findanyidx(serv);
+  int i;
   struct chanset_t *chan;
 
   /* Ok...param #1 of 001 = what server thinks my nick is */
@@ -246,12 +246,8 @@ static int got442(char *from, char *msg)
 static void nuke_server(char *reason)
 {
   if (serv >= 0) {
-    int servidx = findanyidx(serv);
-
-    if (reason && (servidx > 0))
-      dprintf(servidx, "QUIT :%s\n", reason);
-    disconnect_server(servidx);
-    lostdcc(servidx);
+    if (reason && (servidx > 0)) dprintf(servidx, "QUIT :%s\r\n", reason);
+    disconnect_server();
   }
 }
 
@@ -882,10 +878,7 @@ static int gotmode(char *from, char *msg)
       /* umode +r? - D0H dalnet uses it to mean something different */
       fixcolon(msg);
       if ((msg[0] == '+') && strchr(msg, 'r')) {
-	int servidx = findanyidx(serv);
-
-	putlog(LOG_MISC | LOG_JOIN, "*",
-	       "%s has me i-lined (jumping)", dcc[servidx].host);
+	putlog(LOG_MISC | LOG_JOIN, "*", "%s has me i-lined (jumping)", dcc[servidx].host);
 	nuke_server("i-lines suck");
       }
     }
@@ -893,14 +886,22 @@ static int gotmode(char *from, char *msg)
   return 0;
 }
 
-static void disconnect_server(int idx)
+static void disconnect_server()
 {
-  server_online = 0;
-  if (dcc[idx].sock >= 0)
-    killsock(dcc[idx].sock);
-  dcc[idx].sock = (-1);
-  serv = (-1);
-  botuserhost[0] = 0;
+	int idx;
+
+	if (server_online > 0) check_bind_event("disconnect-server");
+
+	server_online = 0;
+	if (servidx != -1 && dcc[servidx].sock >= 0) {
+		killsock(dcc[servidx].sock);
+		dcc[servidx].sock = (-1);
+	}
+	serv = -1;
+	botuserhost[0] = 0;
+	idx = servidx;
+	servidx = -1;
+	lostdcc(idx);
 }
 
 static void eof_server(int idx)
@@ -916,8 +917,7 @@ static void eof_server(int idx)
   }
 }
 #endif /* S_AUTH */
-  disconnect_server(idx);
-  lostdcc(idx);
+  disconnect_server();
 }
 
 static void display_server(int idx, char *buf)
@@ -932,7 +932,7 @@ static void kill_server(int idx, void *x)
 {
   module_entry *me;
 
-  disconnect_server(idx);
+  disconnect_server();
   if ((me = module_find("channels", 0, 0)) && me->funcs) {
     struct chanset_t *chan;
 
@@ -946,8 +946,7 @@ static void kill_server(int idx, void *x)
 static void timeout_server(int idx)
 {
   putlog(LOG_SERV, "*", "Timeout: connect to %s", dcc[idx].host);
-  disconnect_server(idx);
-  lostdcc(idx);
+  disconnect_server();
 }
 
 static void server_activity(int idx, char *msg, int len);
@@ -1141,7 +1140,6 @@ static void connect_server(void)
 {
   char pass[121], botserver[UHOSTLEN];
   static int oldserv = -1;
-  int servidx;
   unsigned int botserverport = 0;
 
   waiting_for_awake = 0;
@@ -1221,6 +1219,7 @@ static void connect_server(void)
 static void server_resolve_failure(int servidx)
 {
   serv = -1;
+  servidx = -1;
   resolvserv = 0;
   putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[servidx].host,
 	 IRC_DNSFAILED);
@@ -1249,6 +1248,7 @@ static void server_resolve_success(int servidx)
     putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[servidx].host,
 	   s);
     lostdcc(servidx);
+    servidx = -1;
     if (oldserv == curserv && !never_give_up)
       fatal("NO SERVERS WILL ACCEPT MY CONNECTION.", 0);
   } else {
@@ -1275,10 +1275,10 @@ static void server_resolve_success(int servidx)
     strcpy(botname, origbotname);
     /* Start alternate nicks from the beginning */
     altnick_char = 0;
-    if (pass[0])
-      dprintf(DP_MODE, "PASS %s\n", pass);
-    dprintf(DP_MODE, "NICK %s\n", botname);
-    dprintf(DP_MODE, "USER %s . . :%s\n", botuser, botrealname);
+
+    if (pass[0]) dprintf(DP_MODE, "PASS %s\r\n", pass);
+    dprintf(DP_MODE, "NICK %s\r\n", botname);
+    dprintf(DP_MODE, "USER %s localhost %s :%s\r\n", botuser, dcc[servidx].host, botrealname);
     /* Wait for async result now */
   }
 }

@@ -258,7 +258,7 @@
 /* 128 - 131 */
 #define interp (*(Tcl_Interp **)(global[128]))
 #define now (*(time_t*)global[129])
-#define findanyidx ((int (*)(int))global[130])
+/* UNUSED 130 */
 #define findchan ((struct chanset_t *(*)(char *))global[131])
 /* 132 - 135 */
 #define dolimit ((int (*)(struct chanset_t *))global[132])

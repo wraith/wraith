@@ -318,7 +318,7 @@ Function global_table[] =
   /* 128 - 131 */
   (Function) & interp,		 /* Tcl_Interp *			*/
   (Function) & now,		 /* time_t				*/
-  (Function) findanyidx,
+  (Function) 0,
   (Function) findchan,
   /* 132 - 135 */
   (Function) dolimit,

@@ -190,7 +190,6 @@ static int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, 
   struct userrec *ur;
   struct userrec *ur2;
 
-  idx = findanyidx(idx);
   if (who && bufsize > 0) who[0] = 0;
   ur = get_user_by_handle(userlist, argv2);
   if (ur && allow_fwd && (f1 = get_user(&USERENTRY_FWD, ur))) {
@@ -697,10 +696,8 @@ static void notes_hourly()
   }
 }
 
-static void away_notes(char *bot, int sock, char *msg)
+static void away_notes(char *bot, int idx, char *msg)
 {
-  int idx = findanyidx(sock);
-
   if (egg_strcasecmp(bot, botnetnick))
     return;
   if (msg && msg[0])

@@ -23,7 +23,7 @@
 #define flud_ctcp_time (*(int*)(server_funcs[11]))
 /* 12 - 15 */
 #define match_my_nick ((int(*)(char *))server_funcs[12])
-/* #define fixfrom ((void (*)(char *))server_funcs[14]) -- moved to core */
+#define servidx (*(int *)(server_funcs[14]))
 #define answer_ctcp (*(int *)(server_funcs[15]))
 /* 16 - 19 */
 #define trigger_on_ignore (*(int *)(server_funcs[16]))

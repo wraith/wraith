@@ -338,10 +338,6 @@ int sockoptions(int sock, int operation, int sock_options);
 int flush_inbuf(int idx);
 
 /* tcl.c */
-void protect_tcl();
-void unprotect_tcl();
-int findidx(int);
-int findanyidx(int);
 
 /* userent.c */
 void update_mod(char *, char *, char *, char *);

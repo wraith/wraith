@@ -1612,6 +1612,17 @@ void tputs(register int z, char *s, unsigned int len)
 //    free(s);
 }
 
+static int findanyidx(register int z)
+{
+  register int j;
+
+  for (j = 0; j < dcc_total; j++)
+    if (dcc[j].sock == z)
+      return j;
+  return -1;
+}
+
+
 /* tputs might queue data for sockets, let's dump as much of it as
  * possible.
  */

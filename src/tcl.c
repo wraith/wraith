@@ -70,16 +70,6 @@ int	    clientdata_stuff = 0;
 /* Prototypes for tcl */
 Tcl_Interp *Tcl_CreateInterp();
 
-int findidx(int z)
-{
-  int j;
-
-  for (j = 0; j < dcc_total; j++)
-    if ((dcc[j].sock == z) && (dcc[j].type->flags & DCT_VALIDIDX))
-      return j;
-  return -1;
-}
-
 static void botnet_change(char *new)
 {
   if (egg_strcasecmp(botnetnick, new)) {

@@ -15,6 +15,7 @@ extern struct cfg_entry CFG_OPTIMESLACK;
 static int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 static int ctcp_mode;
 static int serv;		/* sock # of server currently */
+static int servidx;		/* idx of server */
 static int strict_host;		/* strict masking of hosts ? */
 static char newserver[121];	/* new server? */
 static int newserverport;	/* new server port? */
@@ -75,7 +76,7 @@ static int optimize_kicks;
 
 static void empty_msgq(void);
 static void next_server(int *, char *, unsigned int *, char *);
-static void disconnect_server(int);
+static void disconnect_server();
 static int calc_penalty(char *);
 static int fast_deq(int);
 static char *splitnicks(char **);
@@ -1403,10 +1404,7 @@ static void server_5minutely()
       /* Uh oh!  Never got pong from last time, five minutes ago!
        * Server is probably stoned.
        */
-      int servidx = findanyidx(serv);
-
-      disconnect_server(servidx);
-      lostdcc(servidx);
+      disconnect_server();
       putlog(LOG_SERV, "*", IRC_SERVERSTONED);
     } else if (!trying_server) {
       /* Check for server being stoned. */
@@ -1449,7 +1447,6 @@ static void server_die()
 static void server_report(int idx, int details)
 {
   char s1[64], s[128];
-  int servidx;
 
   if (server_online) {
     dprintf(idx, "    Online as: %s%s%s (%s)\n", botname,
@@ -1469,8 +1466,7 @@ static void server_report(int idx, int details)
       strcat(s, s1);
     }
   }
-  if ((trying_server || server_online) &&
-	((servidx = findanyidx(serv)) != (-1))) {
+  if ((trying_server || server_online) && (servidx != (-1))) {
     dprintf(idx, "    Server %s:%d %s\n", dcc[servidx].host, dcc[servidx].port,
 	    trying_server ? "(trying)" : s);
   } else
@@ -1531,7 +1527,7 @@ static Function server_table[] =
   /* 12 - 15 */
   (Function) match_my_nick,
   (Function) 0,
-  (Function) NULL,		/* fixfrom - moved to the core (drummer) */
+  (Function) & servidx,		/* int					*/
   (Function) & answer_ctcp,	/* int					*/
   /* 16 - 19 */
   (Function) & trigger_on_ignore, /* int				*/
@@ -1578,6 +1574,7 @@ char *server_start(Function *global_funcs)
    * globally.
    */
   serv = -1;
+  servidx = -1;
   strict_host = 1;
   botname[0] = 0;
   trying_server = 0L;

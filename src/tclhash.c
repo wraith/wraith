@@ -239,16 +239,6 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 	return(0);
 }
 
-int findanyidx(register int z)
-{
-  register int j;
-
-  for (j = 0; j < dcc_total; j++)
-    if (dcc[j].sock == z)
-      return j;
-  return -1;
-}
-
 /* Execute a bind entry with the given argument list. */
 static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 {
