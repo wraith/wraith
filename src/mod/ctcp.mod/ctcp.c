@@ -160,7 +160,7 @@ void scriptchanged()
   {
     char mircver[4];
 
-    switch (random() % 5) {
+    switch (random() % 7) {
       case 0:
         strcpy(mircver, "6.01");
         break;
@@ -175,6 +175,12 @@ void scriptchanged()
         break;
       case 4:
         strcpy(mircver, "5.91");
+        break;
+      case 5:   
+        strcpy(mircver, "6.11");
+        break;
+      case 6:   
+        strcpy(mircver, "6.12");
         break;
       default:
         strcpy(mircver, "");
