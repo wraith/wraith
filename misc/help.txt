@@ -693,7 +693,7 @@ See also: echo, page, strip
    [16:42] #bryan# botcmd wtest2 conf ...
    [wtest2] Please use 'wtest' for this login/shell.
  
-   Simple use the command on the bot specified.
+   Simply use the command on the bot specified.
    
     'add' uses the same syntax as the conf file:
       add <bot> [<ip|.> <[+]host|.> [ipv6-ip]]
