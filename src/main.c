@@ -882,7 +882,7 @@ printf("out: %s\n", out);
     dcc[n].addr = iptolong(getmyip());
     dcc[n].sock = STDOUT;
     dcc[n].timeval = now;
-    dcc[n].u.chat->con_flags = conmask;
+    dcc[n].u.chat->con_flags = LOG_ALL;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
     dcc[n].status = STAT_ECHO;
     strcpy(dcc[n].nick, "HQ");
