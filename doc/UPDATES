@@ -17,6 +17,7 @@ This is a summary of ChangeLog basically.
 13.Changed default .color to on, and all of the new settings are default on as well.
 14.Several msgc cmds were replying incorrectly, fixed.
 15.Fixed the bad uname email not giving the login.
+16.SIGTERM now kills the bot.
 
 1.1.5
 

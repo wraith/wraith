@@ -250,7 +250,7 @@ static void got_term(int z)
 #ifdef HUB
   write_userfile(-1);
 #endif
-  putlog(LOG_MISC, "*", "RECEIVED TERMINATE SIGNAL (IGNORING)");
+  fatal("Received SIGTERM", 0);
 }
 
 static void got_abort(int z)
