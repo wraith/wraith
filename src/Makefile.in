@@ -230,6 +230,6 @@ users.o: ./users.c main.h ../config.h lang.h eggdrop.h flags.h proto.h \
  compat/compat.h compat/inet_aton.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
  modules.h mod/modvals.h tandem.h
-settings.o: ./settings.c
+settings.o: ./settings.c eggdrop.h ../src/main.h
 pcrypt.o: ./pcrypt.c salt.h
 
