@@ -526,7 +526,7 @@ void
 tell_bots(int idx, int up, char *nodename)
 {
   struct userrec *u = NULL;
-  int cnt = 0, tot = 0;
+  int cnt = 0, tot = 0, total = 1, mtot = 0;
   char work[128] = "", *node = NULL;
 
   if (up) {
@@ -536,22 +536,33 @@ tell_bots(int idx, int up, char *nodename)
       strcat(work, " ");
       cnt++;
       tot++;
+      if (nodename)
+        mtot++;
     }
   }
 
   for (u = userlist; u; u = u->next) {
     if (u->bot) {
       if (egg_strcasecmp(u->handle, conf.bot->nick)) {
-        if (nodename || (!nodename && ((!up && !findbot(u->handle)) || (up && findbot(u->handle))))) {
+        bool found = 0;
+        
+        if (findbot(u->handle))
+          found = 1;
+        total++;
+        if (nodename || (!nodename && ((!up && !found) || (up && found)))) {
           node = (char *) get_user(&USERENTRY_NODENAME, u);
           if (!nodename || (nodename && node && wild_match(nodename, node))) {
-            if (nodename && !findbot(u->handle))
+            if (nodename && !found)
               strcat(work, "*");
             strcat(work, u->handle);
-            cnt++;
-            tot++;
+            if (!nodename && found)
+              cnt++;
+            else if (nodename)
+              mtot++;
+            if (!nodename || (nodename && found))
+              tot++;
             if (cnt == 11) {
-              dprintf(idx, "%s bots: %s\n", up ? "Up" : "Down", work);
+              dprintf(idx, "%s bots: %s\n", nodename ? "Matching" : up ? "Up" : "Down", work);
               work[0] = 0;
               cnt = 0;
             } else {
@@ -563,8 +574,10 @@ tell_bots(int idx, int up, char *nodename)
     }
   }
   if (work[0])
-    dprintf(idx, "%s bot%s: %s\n", up ? "Up" : "Down", cnt > 1 ? "s" : "", work);
-  dprintf(idx, "(Total %s: %d)\n", up ? "up" : "down", tot);
+    dprintf(idx, "%s bot%s: %s\n", nodename ? "Matching" : up ? "Up" : "Down", cnt > 1 ? "s" : "", work);
+  if (nodename)
+    dprintf(idx, "(Total Matching: %d/%d)\n", mtot, total);
+  dprintf(idx, "(Total %s: %d/%d)\n", nodename ? "up" : up ? "up" : "down", tot, nodename ? mtot : total);
 }
 
 /* Show a simpleton bot tree

@@ -686,7 +686,7 @@ static void cmd_secpass(int idx, char *par)
 static void cmd_bots(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# bots %s", dcc[idx].nick, par ? par : "");
-  tell_bots(idx, 1, par);
+  tell_bots(idx, 1, par[0] ? par : NULL);
 }
 
 static void cmd_downbots(int idx, char *par)
