@@ -105,19 +105,6 @@ static struct dcc_table DCC_DNS =
  *    DNS module related code
  */
 
-static void dns_free_cache(void)
-{
-  struct resolve *rp, *rpnext;
-
-  for (rp = expireresolves; rp; rp = rpnext) {
-    rpnext = rp->next;
-    if (rp->hostn)
-      nfree(rp->hostn);
-    nfree(rp);
-  }
-  expireresolves = NULL;
-}
-
 static int dns_cache_expmem(void)
 {
   struct resolve *rp;

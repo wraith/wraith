@@ -133,19 +133,6 @@ static void check_delay()
     dnext = d->next;
     if (d->seconds <= now) {
       add_mode(d->chan, d->plsmns, d->mode, d->mask);
-static void delay_free_mem()
-{
-  struct delay_mode *d = NULL, *dnext = NULL;
-
-  for (d = start_delay; d; d = dnext) {
-    dnext = d->next;
-    if (d->mask)
-      nfree(d->mask);
-    nfree(d);
-  }
-  start_delay = NULL;
-}
-
       del_delay(d);
     }
   }

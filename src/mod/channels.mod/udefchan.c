@@ -107,18 +107,6 @@ static void initudef(int type, char *name, int defined)
     udef = ul;
 }
 
-static void free_udef(struct udef_struct *ul)
-{
-  struct udef_struct *ull;
-
-  for (; ul; ul = ull) {
-    ull = ul->next;
-    free_udef_chans(ul->values);
-    nfree(ul->name);
-    nfree(ul);
-  }
-}
-
 static void free_udef_chans(struct udef_chans *ul)
 {
   struct udef_chans *ull;

@@ -92,7 +92,6 @@ static int tcl_channel_add(Tcl_Interp * irp, char *, char *);
 static char *convert_element(char *src, char *dst);
 static int expmem_udef(struct udef_struct *);
 static int expmem_udef_chans (struct udef_chans *);
-static void free_udef(struct udef_struct *);
 static void free_udef_chans(struct udef_chans *);
 static int getudef(struct udef_chans *, char *);
 static void initudef(int type, char *, int);
