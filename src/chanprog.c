@@ -560,7 +560,7 @@ void chanprog()
 
   bi = get_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, conf.bot->nick));
   if (!bi)
-    fatal(STR("I'm added to userlist but without a bot record!"), 0);
+    fatal("I'm added to userlist but without a bot record!", 0);
   if (bi->telnet_port != 3333) {
 #ifdef HUB
     listen_all(bi->telnet_port, 0);

@@ -60,7 +60,7 @@ bin_md5(const char *fname, int todo)
 
   p += 16;
   size_p += 16;
-  /* now we have 4096 for data :D */
+  /* now we have 512 for data :D */
 
   MD5_Update(&ctx, buf, size_p);
   MD5_Final(md5out, &ctx);

@@ -1067,9 +1067,9 @@ static void share_userfileq(int idx, char *par)
   flush_tbuf(dcc[idx].nick);
 
   if (bot_aggressive_to(dcc[idx].user)) {
-    putlog(LOG_ERRORS, "*", STR("%s offered user transfer - I'm supposed to be aggressive to it"), dcc[idx].nick);
-    dprintf(idx, STR("s un I have you marked for Agressive sharing.\n"));
-    botunlink(-2, dcc[idx].nick, STR("I'm aggressive to you"));
+    putlog(LOG_ERRORS, "*", "%s offered user transfer - I'm supposed to be aggressive to it", dcc[idx].nick);
+    dprintf(idx, "s un I have you marked for Agressive sharing.\n");
+    botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
   }
   else {
     for (i = 0; i < dcc_total; i++)
@@ -1153,20 +1153,20 @@ static void share_resyncq(int idx, char *par)
     dprintf(idx, "s rn Not permitting resync.\n");
   else {
     if (can_resync(dcc[idx].nick)) {
-      dprintf(idx, STR("s r!\n"));
+      dprintf(idx, "s r!\n");
       dump_resync(idx);
       dcc[idx].status &= ~STAT_OFFERED;
       dcc[idx].status |= STAT_SHARE;
-      putlog(LOG_BOTS, "*", STR("Resync'd user file with %s"), dcc[idx].nick);
+      putlog(LOG_BOTS, "*", "Resync'd user file with %s", dcc[idx].nick);
       updatebot(-1, dcc[idx].nick, '+', 0);
     } else if (!bot_aggressive_to(dcc[idx].user)) {
-      dprintf(idx, STR("s r!\n"));
+      dprintf(idx, "s r!\n");
       dcc[idx].status &= ~STAT_OFFERED;
       dcc[idx].status |= STAT_SHARE;
       updatebot(-1, dcc[idx].nick, '+', 0);
-      putlog(LOG_BOTS, "@", STR("Resyncing user file from %s"), dcc[idx].nick);
+      putlog(LOG_BOTS, "@", "Resyncing user file from %s", dcc[idx].nick);
     } else
-      dprintf(idx, STR("s rn No resync buffer.\n"));
+      dprintf(idx, "s rn No resync buffer.\n");
   }
 }
 

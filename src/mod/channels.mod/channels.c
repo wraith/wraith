@@ -113,7 +113,7 @@ void check_should_lock()
   if ((hc >= H) && (lc <= L)) {
     for (chan = chanset; chan; chan = chan->next) {
       if (!channel_closed(chan)) {
-        do_chanset(NULL, chan, STR("+closed chanmode +stni"), DO_LOCAL | DO_NET);
+        do_chanset(NULL, chan, "+closed chanmode +stni", DO_LOCAL | DO_NET);
 #ifdef G_BACKUP
         chan->channel.backup_time = now + 30;
 #endif /* G_BACKUP */
@@ -262,7 +262,7 @@ void got_kl(char *botnick, char *code, char *par)
     struct chanset_t *ch = NULL;
 
     for (ch = chanset; ch; ch = ch->next)
-      do_chanset(NULL, ch, STR("+closed +backup +bitch"), DO_LOCAL | DO_NET);
+      do_chanset(NULL, ch, "+closed +backup +bitch", DO_LOCAL | DO_NET);
   /* FIXME: we should randomize nick here ... */
   }
 #endif /* S_AUTOLOCK */
@@ -827,13 +827,13 @@ cmd_t channels_bot[] = {
 void channels_describe(struct cfg_entry *cfgent, int idx)
 {
 #ifdef HUB
-  if (!strcmp(cfgent->name, STR("close-threshold"))) {
+  if (!strcmp(cfgent->name, "close-threshold")) {
     dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, close all channels\n"));
-  } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
+  } else if (!strcmp(cfgent->name, "kill-threshold")) {
     dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
   } else {
-    dprintf(idx, STR("No description for %s ???\n"), cfgent->name);
-    putlog(LOG_ERRORS, "*", STR("channels_describe() called with unknown config entry %s"), cfgent->name);
+    dprintf(idx, "No description for %s ???\n", cfgent->name);
+    putlog(LOG_ERRORS, "*", "channels_describe() called with unknown config entry %s", cfgent->name);
   }
 #endif /* HUB */
 }
@@ -845,7 +845,7 @@ void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
   if (!cfgent->gdata)
     return;
   *valid = 0;
-  if (!strcmp(cfgent->name, STR("close-threshold"))) {
+  if (!strcmp(cfgent->name, "close-threshold")) {
     int L, R;
     char *value = cfgent->gdata;
 
@@ -861,7 +861,7 @@ void channels_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
     return;
   }
   i = atoi(cfgent->gdata);
-  if (!strcmp(cfgent->name, STR("kill-threshold"))) {
+  if (!strcmp(cfgent->name, "kill-threshold")) {
     if ((i < 0) || (i >= 200))
       return;
   } 

@@ -140,7 +140,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
     if (!m->user) {
       char s[256] = "";
 
-      sprintf(s, STR("%s!%s"), m->nick, m->userhost);
+      sprintf(s, "%s!%s", m->nick, m->userhost);
       m->user = get_user_by_host(s);
     }
 
@@ -199,7 +199,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
             sent++;
             if (chan->closed_ban)
               doban(chan, m);
-            dprintf(DP_MODE, STR("KICK %s %s :%s%s\n"), chan->name, m->nick, kickprefix, kickreason(KICK_CLOSED));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, kickreason(KICK_CLOSED));
             m->flags |= SENTKICK;
             if (actions >= ct)
               return;
@@ -241,7 +241,7 @@ void priority_do(struct chanset_t * chan, int opsonly, int action)
             actions++;
             if (chan->closed_ban)
               doban(chan, m);
-            dprintf(DP_MODE, STR("KICK %s %s :%s%s\n"), chan->name, m->nick, kickprefix, kickreason(KICK_CLOSED));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, kickreason(KICK_CLOSED));
             m->flags |= SENTKICK;
             if ((actions >= ct) || (sent > 5))
               return;
@@ -444,7 +444,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
       /* Flooding chan! either by public or notice */
       if (!chan_sentkick(m) && me_op(chan)) {
 	putlog(LOG_MODES, chan->dname, IRC_FLOODKICK, floodnick);
-        dprintf(DP_MODE, STR("KICK %s %s :%s%s\n"), chan->name, floodnick, kickprefix, kickreason(KICK_FLOOD));
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, kickreason(KICK_FLOOD));
 	m->flags |= SENTKICK;
       }
       return 1;
@@ -480,7 +480,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
    	        dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick,
 		      kickprefix, IRC_JOIN_FLOOD);
 	      else
-                dprintf(DP_SERVER, STR("KICK %s %s :%s%s\n"), chan->name, m->nick, kickprefix, kickreason(KICK_NICKFLOOD));
+                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, kickreason(KICK_NICKFLOOD));
 	    }
 	  }
 	}
@@ -488,7 +488,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
     case FLOOD_KICK:
       if (me_op(chan) && !chan_sentkick(m)) {
 	putlog(LOG_MODES, chan->dname, "Kicking %s, for mass kick.", floodnick);
-        dprintf(DP_MODE, STR("KICK %s %s :%s%s\n"), chan->name, floodnick, kickprefix, kickreason(KICK_KICKFLOOD));
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, kickreason(KICK_KICKFLOOD));
 	m->flags |= SENTKICK;
       }
     return 1;
@@ -496,13 +496,13 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
       if (me_op(chan) && !chan_sentkick(m)) {
 	putlog(LOG_MODES, chan->dname,
 	       CHAN_MASSDEOP, chan->dname, from);
-        dprintf(DP_MODE, STR("KICK %s %s :%s%s\n"), chan->name, floodnick, kickprefix, kickreason(KICK_MASSDEOP));
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, kickreason(KICK_MASSDEOP));
 	m->flags |= SENTKICK;
       }
       if (u) {
         char s[256] = "";
 
-        sprintf(s, STR("Mass deop on %s by %s"), chan->dname, from);
+        sprintf(s, "Mass deop on %s by %s", chan->dname, from);
         deflag_user(u, DEFLAG_MDOP, s, chan);
       }
       return 1;
@@ -995,7 +995,7 @@ void enforce_closed(struct chanset_t *chan) {
   if (chan->closed_private && !(chan->channel.mode & CHANPRIV))
     strcat(buf, "p"); 
   if (buf && buf[0])
-    dprintf(DP_MODE, STR("MODE %s +%s\n"), chan->name, buf);
+    dprintf(DP_MODE, "MODE %s +%s\n", chan->name, buf);
   priority_do(chan, 0, PRIO_KICK);
 }
 
@@ -1449,7 +1449,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serv,
       /* and it's not me, and i'm an op */
       !match_my_nick(nick) && me_op(chan)) {
     /*  && target_priority(chan, m, 0) */
-    dprintf(DP_SERVER, STR("KICK %s %s :%s%s\n"), chan->name, nick, bankickprefix, kickreason(KICK_BANNED));
+    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, kickreason(KICK_BANNED));
     m->flags |= SENTKICK;
   }
   /* if the user is a +k */
@@ -1460,7 +1460,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *serv,
            /* && target_priority(chan, m, 0) */
     /* cya later! */
     quickban(chan, userhost);
-    dprintf(DP_SERVER, STR("KICK %s %s :%s%s\n"), chan->name, nick, bankickprefix, kickreason(KICK_KUSER));
+    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, kickreason(KICK_KUSER));
     m->flags |= SENTKICK;
   }
 
@@ -2181,7 +2181,7 @@ static int gotjoin(char *from, char *chname)
               me_op(chan)) {
             for (b = chan->channel.ban; b->mask[0]; b = b->next) {
               if (wild_match(b->mask, from)) {
-                dprintf(DP_SERVER, STR("KICK %s %s :%s%s\n"), chname, m->nick, bankickprefix, kickreason(KICK_BANNED));
+                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, kickreason(KICK_BANNED));
                 m->flags |= SENTKICK;
                 goto exit;
               }
@@ -2197,7 +2197,7 @@ static int gotjoin(char *from, char *chname)
 	    check_exemptlist(chan, from);
 	    quickban(chan, from);
 	    p = get_user(&USERENTRY_COMMENT, m->user);
-            dprintf(DP_MODE, STR("KICK %s %s :%s%s\n"), chname, nick, bankickprefix, kickreason(KICK_KUSER));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, nick, bankickprefix, kickreason(KICK_KUSER));
 	    m->flags |= SENTKICK;
 	  }
 	}
@@ -2454,11 +2454,11 @@ void check_should_cycle(struct chanset_t *chan)
     /* I'm only one opped here... and other side has some ops... so i'm cycling */
     if (localnonops) {
       /* need to unset any +kil first */
-      dprintf(DP_MODE, STR("MODE %s -ilk %s\nPART %s\nJOIN %s\n"), chan->name,
+      dprintf(DP_MODE, "MODE %s -ilk %s\nPART %s\nJOIN %s\n", chan->name,
                             (chan->channel.key && chan->channel.key[0]) ? chan->channel.key : "",
                              chan->name, chan->name);
     } else
-      dprintf(DP_MODE, STR("PART %s\nJOIN %s\n"), chan->name, chan->name);
+      dprintf(DP_MODE, "PART %s\nJOIN %s\n", chan->name, chan->name);
   }
 }
 #endif /* S_SPLITHIJACK */

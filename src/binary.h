@@ -3,7 +3,7 @@
 
 typedef struct encdata_struct {
   char prefix[16];
-  char data[4096];
+  char data[512];
 } encdata_t;
 
 

@@ -234,9 +234,9 @@ void dcc_chatter(int idx)
   show_motd(idx);
   if (glob_master(fr)) {
     if ((tands+1) > 1)
-      dprintf(idx, STR("There are \002-%d- bots\002 currently linked.\n"), tands + 1);
+      dprintf(idx, "There are %s-%d- bots%s currently linked.\n", BOLD(idx), tands + 1, BOLD_END(idx));
     else
-      dprintf(idx, STR("There is \002-%d- bot\002 currently linked.\n"), tands + 1);
+      dprintf(idx, "There is %s-%d- bot%s currently linked.\n", BOLD(idx), tands + 1, BOLD_END(idx));
   }
   show_channels(idx, NULL);
 
@@ -608,17 +608,17 @@ int listen_all(int lport, int off)
   }
   if (idx < 0) {
     if (off) {
-      putlog(LOG_ERRORS, "*", STR("No such listening port open - %d"), lport);
+      putlog(LOG_ERRORS, "*", "No such listening port open - %d", lport);
       return idx;
     }
     /* make new one */
     if (dcc_total >= max_dcc) {
-      putlog(LOG_ERRORS, "*", STR("Can't open listening port - no more DCC Slots"));
+      putlog(LOG_ERRORS, "*", "Can't open listening port - no more DCC Slots");
     } else {
 #ifdef USE_IPV6
       i6 = open_listen_by_af(&port, AF_INET6);
       if (i6 < 0) {
-        putlog(LOG_ERRORS, "*", STR("Can't open IPv6 listening port %d - %s"), port, 
+        putlog(LOG_ERRORS, "*", "Can't open IPv6 listening port %d - %s", port, 
                i6 == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
         idx = new_dcc(&DCC_TELNET, 0);
@@ -627,16 +627,16 @@ int listen_all(int lport, int off)
         dcc[idx].port = port;
         dcc[idx].sock = i6;
         dcc[idx].timeval = now;
-        strcpy(dcc[idx].nick, STR("(telnet6)"));
+        strcpy(dcc[idx].nick, "(telnet6)");
         strcpy(dcc[idx].host, "*");
-        putlog(LOG_DEBUG, "*", STR("Listening on IPv6 at telnet port %d"), port);
+        putlog(LOG_DEBUG, "*", "Listening on IPv6 at telnet port %d", port);
       }
       i = open_listen_by_af(&port, AF_INET);
 #else
       i = open_listen(&port);
 #endif /* USE_IPV6 */
       if (i < 0) {
-        putlog(LOG_ERRORS, "*", STR("Can't open IPv4 listening port %d - %s"), port,
+        putlog(LOG_ERRORS, "*", "Can't open IPv4 listening port %d - %s", port,
                i == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
 	idx = (-1); /* now setup ipv4 listening port */
@@ -645,9 +645,9 @@ int listen_all(int lport, int off)
         dcc[idx].port = port;
         dcc[idx].sock = i;
         dcc[idx].timeval = now;
-        strcpy(dcc[idx].nick, STR("(telnet)"));
+        strcpy(dcc[idx].nick, "(telnet)");
         strcpy(dcc[idx].host, "*");
-        putlog(LOG_DEBUG, "*", STR("Listening on IPv4 at telnet port %d"), port);
+        putlog(LOG_DEBUG, "*", "Listening on IPv4 at telnet port %d", port);
       }
 #ifdef USE_IPV6
       if (i > 0 || i6 > 0) {
@@ -697,9 +697,9 @@ void identd_open()
       dcc[idx].port = port;
       dcc[idx].sock = i;
       dcc[idx].timeval = now;
-      strcpy(dcc[idx].nick, STR("(identd)"));
+      strcpy(dcc[idx].nick, "(identd)");
       strcpy(dcc[idx].host, "*");
-      putlog(LOG_DEBUG, "*", STR("Identd daemon started."));
+      putlog(LOG_DEBUG, "*", "Identd daemon started.");
       howlong.sec = 15;
       howlong.usec = 0;
       timer_create(&howlong, "identd_close()", (Function) identd_close);
@@ -715,7 +715,7 @@ void identd_close()
     if (dcc[idx].type == &DCC_IDENTD_CONNECT) {
       killsock(dcc[idx].sock);
       lostdcc(idx);
-      putlog(LOG_DEBUG, "*", STR("Identd daemon stopped."));
+      putlog(LOG_DEBUG, "*", "Identd daemon stopped.");
       break;
     }
   }

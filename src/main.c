@@ -210,17 +210,17 @@ static void checkpass()
 
 static void got_ed(char *which, char *in, char *out)
 {
-  sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
+  sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
   if (!in || !out)
     fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
   if (!strcmp(in, out))
-    fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
+    fatal("<infile> should NOT be the same name as <outfile>", 0);
   if (!strcmp(which, "e")) {
     Encrypt_File(in, out);
-    fatal(STR("File Encryption complete"),3);
+    fatal("File Encryption complete",3);
   } else if (!strcmp(which, "d")) {
     Decrypt_File(in, out);
-    fatal(STR("File Decryption complete"),3);
+    fatal("File Decryption complete",3);
   }
   exit(0);
 }
@@ -232,8 +232,8 @@ static void show_help()
   egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
 
   printf(STR("Wraith %s\n\n"), egg_version);
-  printf(format, STR("Option"), STR("Description"));
-  printf(format, STR("------"), STR("-----------"));
+  printf(format, "Option", "Description");
+  printf(format, "------", "-----------");
   printf(format, STR("-B <botnick>"), STR("Starts the specified bot"));
   printf(format, STR("-C"), STR("Config file menu system"));
   printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
@@ -243,12 +243,12 @@ static void show_help()
 /*  printf(format, STR("-g <file>"), STR("Generates a template config file"));
   printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
 */
-  printf(format, STR("-h"), STR("Display this help listing"));
+  printf(format, "-h", "Display this help listing");
   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9"));
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
   printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -n)"));
-  printf(format, STR("-v"), STR("Displays bot version"));
+  printf(format, "-v", "Displays bot version");
   exit(0);
 }
 
@@ -302,18 +302,18 @@ static void dtx_arg(int argc, char *argv[])
         break;
       case 'D':
         sdebug = 1;
-        sdprintf(STR("debug enabled"));
+        sdprintf("debug enabled");
         break;
       case 'E':
         p = argv[optind];
         if (p && p[0]) {
           if (!strcmp(p, "all")) {
             int n;
-            putlog(LOG_MISC, "*", STR("Listing all errors"));
+            putlog(LOG_MISC, "*", "Listing all errors");
             for (n = 1; n < ERR_MAX; n++)
-            putlog(LOG_MISC, "*", STR("Error #%d: %s"), n, werr_tostr(n));
+            putlog(LOG_MISC, "*", "Error #%d: %s", n, werr_tostr(n));
           } else if (egg_isdigit(p[0])) {
-            putlog(LOG_MISC, "*", STR("Error #%d: %s"), atoi(p), werr_tostr(atoi(p)));
+            putlog(LOG_MISC, "*", "Error #%d: %s", atoi(p), werr_tostr(atoi(p)));
           }
           exit(0);
         } else {
@@ -347,7 +347,7 @@ static void dtx_arg(int argc, char *argv[])
         if (atoi(optarg) && (atoi(optarg) != localhub_pid))
           exit(2);
         else
-          sdprintf(STR("Updating..."));
+          sdprintf("Updating...");
         localhub = 1;
         updating = 1;
         break;
@@ -419,12 +419,12 @@ static void core_secondly()
     /* In case for some reason more than 1 min has passed: */
     while (nowtm.tm_min != lastmin) {
       /* Timer drift, dammit */
-      debug2(STR("timer: drift (lastmin=%d, now=%d)"), lastmin, nowtm.tm_min);
+      debug2("timer: drift (lastmin=%d, now=%d)", lastmin, nowtm.tm_min);
       i++;
       lastmin = (lastmin + 1) % 60;
     }
     if (i > 1)
-      putlog(LOG_MISC, "*", STR("(!) timer drift -- spun %d minutes"), i);
+      putlog(LOG_MISC, "*", "(!) timer drift -- spun %d minutes", i);
     miltime = (nowtm.tm_hour * 100) + (nowtm.tm_min);
     if (((int) (nowtm.tm_min / 5) * 5) == (nowtm.tm_min)) {	/* 5 min */
 /* 	flushlogs(); */
@@ -433,7 +433,7 @@ static void core_secondly()
 
 	strncpyz(s, ctime(&now), sizeof s);
 #ifdef HUB
-	putlog(LOG_ALL, "*", STR("--- %.11s%s"), s, s + 20);
+	putlog(LOG_ALL, "*", "--- %.11s%s", s, s + 20);
         backup_userfile();
 #endif /* HUB */
       }
@@ -542,13 +542,13 @@ static void startup_checks() {
     char s[DIRMAX] = "";
     int fd;
 
-    egg_snprintf(s, sizeof s, STR("%s.test-XXXXXX"), tempdir);
+    egg_snprintf(s, sizeof s, "%s.test-XXXXXX", tempdir);
     if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
       if (fd != -1) {
         unlink(s);
         close(fd);
       }
-      fatal(STR("Can't write to tempdir!"), 0);
+      fatal("Can't write to tempdir!", 0);
     }
     fprintf(f, "\n");
     if (fflush(f))
@@ -587,11 +587,11 @@ static void startup_checks() {
   {
     char newbin[DIRMAX] = "", real[DIRMAX] = "";
 
-    sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), geteuid(), myuid, getppid(), getpid());
-    egg_snprintf(newbin, sizeof newbin, STR("%s%s%s"), conffile.binpath, 
+    sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", geteuid(), myuid, getppid(), getpid());
+    egg_snprintf(newbin, sizeof newbin, "%s%s%s", conffile.binpath, 
                  conffile.binpath[strlen(conffile.binpath) - 1] == '/' ? "" : "/",
                  conffile.binname);
-    sdprintf(STR("newbin at: %s"), newbin);
+    sdprintf("newbin at: %s", newbin);
     
     ContextNote("realpath()");
     realpath(binname, real);		/* get the realpath of binname */
@@ -622,7 +622,7 @@ static void startup_checks() {
       } else {
         unlink(binname);
         system(newbin);
-        sdprintf(STR("exiting to let new binary run..."));
+        sdprintf("exiting to let new binary run...");
         exit(0);
       }
     }
@@ -746,7 +746,7 @@ int main(int argc, char **argv)
   init_conf();
 
   if (argc) {
-    sdprintf(STR("Calling dtx_arg with %d params."), argc);
+    sdprintf("Calling dtx_arg with %d params.", argc);
     dtx_arg(argc, argv);
   }
 
@@ -759,7 +759,7 @@ int main(int argc, char **argv)
 
   if ((localhub && !updating) || !localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
-      sdprintf(STR("%s is already running, pid: %d"), conf.bot->nick, conf.bot->pid);
+      sdprintf("%s is already running, pid: %d", conf.bot->nick, conf.bot->pid);
       exit(1);
     }
   }
@@ -783,7 +783,7 @@ int main(int argc, char **argv)
 
 #ifdef LEAF
   if (localhub) {
-    sdprintf(STR("I am localhub (%s)"), conf.bot->nick);
+    sdprintf("I am localhub (%s)", conf.bot->nick);
 #endif /* LEAF */
     if (conffile.autocron)
       check_crontab();
@@ -948,7 +948,7 @@ int main(int argc, char **argv)
       int idx;
 
       if (i == STDOUT && !backgrd)
-	fatal(STR("END OF FILE ON TERMINAL"), 0);
+	fatal("END OF FILE ON TERMINAL", 0);
       for (idx = 0; idx < dcc_total; idx++)
 	if (dcc[idx].sock == i) {
 	  if (dcc[idx].type && dcc[idx].type->eof)
@@ -968,7 +968,7 @@ int main(int argc, char **argv)
 	killsock(i);
       }
     } else if (xx == -2 && errno != EINTR) {	/* select() error */
-      putlog(LOG_MISC, "*", STR("* Socket error #%d; recovering."), errno);
+      putlog(LOG_MISC, "*", "* Socket error #%d; recovering.", errno);
       for (i = 0; i < dcc_total; i++) {
 	if ((fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
 	  putlog(LOG_MISC, "*",

@@ -129,7 +129,7 @@ int get_ip(char *hostname, union sockaddr_union *so)
 #endif /* USE_IPV6 */
 
   egg_memset(so, 0, sizeof(union sockaddr_union));
-  debug1(STR("get_ip(%s)"), hostname);
+  debug1("get_ip(%s)", hostname);
 
   if (!hostname || (hostname && !hostname[0]))
     return 1;
@@ -275,7 +275,7 @@ void cache_my_ip()
   int any = 0;
 #endif /* USE_IPV6 */
 
-  debug0(STR("cache_my_ip()"));
+  debug0("cache_my_ip()");
   egg_memset(&cached_myip4_so, 0, sizeof(union sockaddr_union));
 
 #ifdef USE_IPV6
@@ -317,8 +317,8 @@ void cache_my_ip()
   }
 
   if (error) {
-    putlog(LOG_DEBUG, "*", STR("Hostname self-lookup error: %d"), error);
-    fatal(STR("Hostname self-lookup failed."), 0);
+    putlog(LOG_DEBUG, "*", "Hostname self-lookup error: %d", error);
+    fatal("Hostname self-lookup failed.", 0);
   }
 }
 
@@ -749,7 +749,7 @@ int open_address_listen(IP addr, int *port)
     if (sock < 1)
     return -1;
 
-    debug2(STR("Opening listen socket on port %d with AF_INET6, sock: %d"), *port, sock);
+    debug2("Opening listen socket on port %d with AF_INET6, sock: %d", *port, sock);
     egg_bzero((char *) &name6, sizeof(name6));
     name6.sin6_family = af_def;
     name6.sin6_port = htons(*port); /* 0 = just assign us a port */
@@ -778,7 +778,7 @@ int open_address_listen(IP addr, int *port)
     if (sock < 1)
       return -1;
 
-    debug2(STR("Opening listen socket on port %d with AF_INET, sock: %d"), *port, sock);
+    debug2("Opening listen socket on port %d with AF_INET, sock: %d", *port, sock);
     egg_bzero((char *) &name, sizeof(struct sockaddr_in));
     name.sin_family = AF_INET;
     name.sin_port = htons(*port); /* 0 = just assign us a port */
@@ -834,7 +834,7 @@ int ssl_link(register int sock, int state)
 #ifdef HAVE_SSL
   int err = 0, i = 0, errs = 0;
 
-  debug2(STR("ssl_link(%d, %d)"), sock, state);
+  debug2("ssl_link(%d, %d)", sock, state);
   for (i = 0; (i < MAXSOCKS); i++) {		
     if (socklist[i].sock == sock) break;
   }
@@ -860,7 +860,7 @@ int ssl_link(register int sock, int state)
   } else if (state == ACCEPT_SSL) {
     SSL_set_accept_state(socklist[i].ssl);
   } else {
-    putlog(LOG_DEBUG, "*" STR("ssl_link(%d, 0?) NO STATE?"), sock);
+    putlog(LOG_DEBUG, "*", "ssl_link(%d, 0?) NO STATE?", sock);
     return 0;
   }
 
@@ -883,8 +883,8 @@ int ssl_link(register int sock, int state)
       alarm(0);
   }
       errs = SSL_get_error(socklist[i].ssl, err);
-        putlog(LOG_DEBUG, "*", STR("SSL_link(%d, %d) = %d, errs: %d (%d), %s"), sock, state, err, errs, errno, (char *)ERR_error_string(ERR_get_error(), NULL));
-        if (errno) putlog(LOG_DEBUG, "*", STR("errno %d: %s"), errno, strerror(errno));
+        putlog(LOG_DEBUG, "*", "SSL_link(%d, %d) = %d, errs: %d (%d), %s", sock, state, err, errs, errno, (char *)ERR_error_string(ERR_get_error(), NULL));
+        if (errno) putlog(LOG_DEBUG, "*", "errno %d: %s", errno, strerror(errno));
   if (err == 1) {
     putlog(LOG_ERROR, "*", "SSL_link(%d, %d) was successfull", sock, state);
     return 1;
@@ -1023,7 +1023,7 @@ int open_telnet_dcc(int sock, char *server, char *port)
   unsigned char c[4] = "";
 
 #ifdef DEBUG_IPV6
-  debug1(STR("open_telnet_dcc %s"), server);
+  debug1("open_telnet_dcc %s", server);
 #endif /* DEBUG_IPV6 */
   if (port != NULL)
     p = atoi(port);
@@ -1032,10 +1032,10 @@ int open_telnet_dcc(int sock, char *server, char *port)
 #ifdef USE_IPV6
   if (sockprotocol(sock) == AF_INET6) {
 #  ifdef DEBUG_IPV6
-    debug0(STR("open_telnet_dcc, af_inet6!"));
+    debug0("open_telnet_dcc, af_inet6!");
 #  endif /* DEBUG_IPV6 */
     strncpyz(sv, server, sizeof sv);
-    debug2(STR("%s should be %s"),sv,server);
+    debug2("%s should be %s",sv,server);
   } else {
 #endif /* USE_IPV6 */
     if (server != NULL)
@@ -1053,7 +1053,7 @@ int open_telnet_dcc(int sock, char *server, char *port)
     }
   /* strcpy(sv,hostnamefromip(addr)); */
 #  ifdef DEBUG_IPV6
-  debug3(STR("open_telnet_raw %s %d %d"), sv, sock,p);
+  debug3("open_telnet_raw %s %d %d", sv, sock,p);
 #  endif /* DEBUG_IPV6 */
 #endif /* USE_IPV6 */
   p = open_telnet_raw(sock, sv, p);
@@ -1120,14 +1120,14 @@ static int sockread(char *s, int *len)
 	    /* Hang around to get the return code from proxy */
 	    grab = 10;
 	  } else if (!(socklist[i].flags & SOCK_STRONGCONN)) {
-	    debug1(STR("net: connect! sock %d"), socklist[i].sock);
+	    debug1("net: connect! sock %d", socklist[i].sock);
 	    s[0] = 0;
 	    *len = 0;
 #ifdef HAVE_SSL
-/*            debug0(STR("CALLING SSL_LINK() FROM SOCKREAD"));
+/*            debug0("CALLING SSL_LINK() FROM SOCKREAD");
             if (!ssl_link(socklist[i].sock))
-              debug0(STR("SSL_LINK FAILED"));
-            debug0(STR("BACK FROM SSL_LINK()")); */
+              debug0("SSL_LINK FAILED");
+            debug0("BACK FROM SSL_LINK()"); */
 #endif /* HAVE_SSL */
 	    return i;
 	  }
@@ -1168,17 +1168,17 @@ static int sockread(char *s, int *len)
 				    to die, it will die later, otherwise it will connect */
 	    *len = socklist[i].sock;
 	    socklist[i].flags &= ~SOCK_CONNECT;
-	    debug1(STR("net: eof!(read) socket %d"), socklist[i].sock);
+	    debug1("net: eof!(read) socket %d", socklist[i].sock);
 	    return -1;
 	  } else {
-	    debug3(STR("sockread EAGAIN: %d %d (%s)"), socklist[i].sock, errno, strerror(errno));
+	    debug3("sockread EAGAIN: %d %d (%s)", socklist[i].sock, errno, strerror(errno));
 	    continue; /* EAGAIN */
 	  }
 	}
 	s[x] = 0;
 	*len = x;
 	if (socklist[i].flags & SOCK_PROXYWAIT) {
-	  debug2(STR("net: socket: %d proxy errno: %d"), socklist[i].sock, s[1]);
+	  debug2("net: socket: %d proxy errno: %d", socklist[i].sock, s[1]);
 	  socklist[i].flags &= ~(SOCK_CONNECT | SOCK_PROXYWAIT);
 	  switch (s[1]) {
 	  case 90:		/* Success */
@@ -1678,7 +1678,7 @@ void dequeue_sockets()
 #endif /* EBADSLT */
 	) {
 	/* This detects an EOF during writing */
-	debug3(STR("net: eof!(write) socket %d (%s,%d)"), socklist[i].sock,
+	debug3("net: eof!(write) socket %d (%s,%d)", socklist[i].sock,
 	       strerror(errno), errno);
 	socklist[i].flags |= SOCK_EOFD;
       } else if (x == socklist[i].outbuflen) {
@@ -1695,7 +1695,7 @@ void dequeue_sockets()
 	socklist[i].outbuflen -= x;
 	free(p);
       } else {
-	debug3(STR("dequeue_sockets(): errno = %d (%s) on %d"), errno,
+	debug3("dequeue_sockets(): errno = %d (%s) on %d", errno,
                strerror(errno), socklist[i].sock);
       }
       /* All queued data was sent. Call handler if one exists and the
@@ -1808,7 +1808,7 @@ int hostsanitycheck_dcc(char *nick, char *from, IP ip, char *dnsname,
    */
   strncpyz(hostn, extracthostname(from), sizeof hostn);
   if (!egg_strcasecmp(hostn, dnsname)) {
-    putlog(LOG_DEBUG, "*", STR("DNS information for submitted IP checks out."));
+    putlog(LOG_DEBUG, "*", "DNS information for submitted IP checks out.");
     return 1;
   }
   if (!strcmp(badaddress, dnsname))
@@ -1843,7 +1843,7 @@ int sock_has_data(int type, int sock)
 	break;
     }
   } else
-    debug1(STR("sock_has_data: could not find socket #%d, returning false."), sock);
+    debug1("sock_has_data: could not find socket #%d, returning false.", sock);
   return ret;
 }
 

@@ -93,7 +93,7 @@ int delignore(char *ign)
       char *mask = str_escape(temp, ':', '\\');
 
       if (mask) {
-	shareout(NULL, STR("-i %s\n"), mask);
+	shareout(NULL, "-i %s\n", mask);
 	free(mask);
       }
     }
@@ -139,7 +139,7 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
     char *mask = str_escape(ign, ':', '\\');
 
     if (mask) {
-      shareout(NULL, STR("+i %s %li %c %s %s\n"), mask, expire_time - now, (p->flags & IGREC_PERM) ? 'p' : '-', from, mnote);
+      shareout(NULL, "+i %s %li %c %s %s\n", mask, expire_time - now, (p->flags & IGREC_PERM) ? 'p' : '-', from, mnote);
       free(mask);
     }
   }
@@ -152,27 +152,27 @@ void display_ignore(int idx, int number, struct igrec *ignore)
 
   if (ignore->added) {
     daysago(now, ignore->added, s);
-    sprintf(dates, STR("Started %s"), s);
+    sprintf(dates, "Started %s", s);
   } else
     dates[0] = 0;
   if (ignore->flags & IGREC_PERM)
-    strcpy(s, STR("(perm)"));
+    strcpy(s, "(perm)");
   else {
     char s1[41] = "";
 
     days(ignore->expire, now, s1);
-    sprintf(s, STR("(expires %s)"), s1);
+    sprintf(s, "(expires %s)", s1);
   }
   if (number >= 0)
-    dprintf(idx, STR("  [%3d] %s %s\n"), number, ignore->igmask, s);
+    dprintf(idx, "  [%3d] %s %s\n", number, ignore->igmask, s);
   else
-    dprintf(idx, STR("IGNORE: %s %s\n"), ignore->igmask, s);
+    dprintf(idx, "IGNORE: %s %s\n", ignore->igmask, s);
   if (ignore->msg && ignore->msg[0])
-    dprintf(idx, STR("        %s: %s\n"), ignore->user, ignore->msg);
+    dprintf(idx, "        %s: %s\n", ignore->user, ignore->msg);
   else
-    dprintf(idx, STR("        %s %s\n"), MODES_PLACEDBY, ignore->user);
+    dprintf(idx, "        %s %s\n", MODES_PLACEDBY, ignore->user);
   if (dates[0])
-    dprintf(idx, STR("        %s\n"), dates);
+    dprintf(idx, "        %s\n", dates);
 }
 
 /* list the ignores and how long they've been active */
@@ -182,10 +182,10 @@ void tell_ignores(int idx, char *match)
   int k = 1;
 
   if (u == NULL) {
-    dprintf(idx, STR("No ignores.\n"));
+    dprintf(idx, "No ignores.\n");
     return;
   }
-  dprintf(idx, STR("%s:\n"), IGN_CURRENT);
+  dprintf(idx, "%s:\n", IGN_CURRENT);
   for (; u; u = u->next) {
     if (match[0]) {
       if (wild_match(match, u->igmask) ||
@@ -207,8 +207,7 @@ void check_expired_ignores()
     return;
   while (*u) {
     if (!((*u)->flags & IGREC_PERM) && (now >= (*u)->expire)) {
-      putlog(LOG_MISC, "*", STR("%s %s (%s)"), IGN_NOLONGER, (*u)->igmask,
-	     MISC_EXPIRED);
+      putlog(LOG_MISC, "*", "%s %s (%s)", IGN_NOLONGER, (*u)->igmask, MISC_EXPIRED);
       delignore((*u)->igmask);
     } else {
       u = &((*u)->next);
@@ -288,7 +287,7 @@ static void restore_chanban(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", STR("*** Malformed banline for %s."), chan ? chan->dname : STR("global_bans"));
+  putlog(LOG_MISC, "*", "*** Malformed banline for %s.", chan ? chan->dname : "global_bans");
 }
 
 static void restore_chanexempt(struct chanset_t *chan, char *host)
@@ -341,7 +340,7 @@ static void restore_chanexempt(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", STR("*** Malformed exemptline for %s."), chan ? chan->dname : STR("global_exempts"));
+  putlog(LOG_MISC, "*", "*** Malformed exemptline for %s.", chan ? chan->dname : "global_exempts");
 }
 
 static void restore_chaninvite(struct chanset_t *chan, char *host)
@@ -393,7 +392,7 @@ static void restore_chaninvite(struct chanset_t *chan, char *host)
       }
     }
   }
-  putlog(LOG_MISC, "*", STR("*** Malformed inviteline for %s."), chan ? chan->dname : STR("global_invites"));
+  putlog(LOG_MISC, "*", "*** Malformed inviteline for %s.", chan ? chan->dname : "global_invites");
 }
 
 static void restore_ignore(char *host)
@@ -442,7 +441,7 @@ static void restore_ignore(char *host)
       return;
     }
   }
-  putlog(LOG_MISC, "*", STR("*** Malformed ignore line."));
+  putlog(LOG_MISC, "*", "*** Malformed ignore line.");
 }
 
 void tell_user(int idx, struct userrec *u, int master)
@@ -540,9 +539,8 @@ void tell_user_ident(int idx, char *id, int master)
     dprintf(idx, "%s.\n", USERF_NOMATCH);
     return;
   }
-  egg_snprintf(format, sizeof format, STR("%%-%us PASS NOTES FLAGS           LAST\n"), 
-                          HANDLEN);
-  dprintf(idx, format, STR("HANDLE"));
+  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
+  dprintf(idx, format, "HANDLE");
   tell_user(idx, u, master);
 }
 
@@ -557,12 +555,12 @@ void tell_users_match(int idx, char *mtch, int start, int limit, int master, cha
   struct list_type *q = NULL;
   struct flag_record user, pls, mns;
 
-  dprintf(idx, STR("*** %s '%s':\n"), MISC_MATCHING, mtch);
+  dprintf(idx, "*** %s '%s':\n", MISC_MATCHING, mtch);
   cnt = 0;
-  egg_snprintf(format, sizeof format, STR("%%-%us PASS NOTES FLAGS           LAST\n"), HANDLEN);
-  dprintf(idx, format, STR("HANDLE"));
+  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
+  dprintf(idx, format, "HANDLE");
   if (start > 1)
-    dprintf(idx, STR("(%s %d)\n"), MISC_SKIPPING, start - 1);
+    dprintf(idx, "(%s %d)\n", MISC_SKIPPING, start - 1);
   if (strchr("+-&|", *mtch)) {
     user.match = pls.match = FR_GLOBAL | FR_BOT | FR_CHAN;
     break_down_flags(mtch, &pls, &mns);
@@ -573,7 +571,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, int master, cha
       if (!pls.global && !pls.udef_global && !pls.chan && !pls.udef_chan &&
 	  !pls.bot) {
 	/* happy now BB you weenie :P */
-	dprintf(idx, STR("Unknown flag specified for matching!!\n"));
+	dprintf(idx, "Unknown flag specified for matching!!\n");
 	return;
       }
     }
@@ -1120,24 +1118,24 @@ void autolink_cycle(char *start)
 	if (strcmp(myval, curval) < 0) {
 	  /* I should be aggressive to this one */
 	  if (dcc[i].status & STAT_AGGRESSIVE) {
-	    putlog(LOG_MISC, "*", STR("Passively sharing with %s but should be aggressive"), dcc[i].user->handle);
-	    putlog(LOG_DEBUG, "*", STR("My linkval: %s - %s linkval: %s"), myval, dcc[i].nick, curval);
-	    botunlink(-2, dcc[i].nick, STR("Marked passive, should be aggressive"));
+	    putlog(LOG_MISC, "*", "Passively sharing with %s but should be aggressive", dcc[i].user->handle);
+	    putlog(LOG_DEBUG, "*", "My linkval: %s - %s linkval: %s", myval, dcc[i].nick, curval);
+	    botunlink(-2, dcc[i].nick, "Marked passive, should be aggressive");
 	    return;
 	  }
 	} else {
 	  /* I should be passive to this one */
 	  if (!(dcc[i].status & STAT_AGGRESSIVE)) {
-	    putlog(LOG_MISC, "*", STR("Aggressively sharing with %s but should be passive"), dcc[i].user->handle);
-	    putlog(LOG_DEBUG, "*", STR("My linkval: %s - %s linkval: %s"), myval, dcc[i].nick, curval);
-	    botunlink(-2, dcc[i].nick, STR("Marked aggressive, should be passive"));
+	    putlog(LOG_MISC, "*", "Aggressively sharing with %s but should be passive", dcc[i].user->handle);
+	    putlog(LOG_DEBUG, "*", "My linkval: %s - %s linkval: %s", myval, dcc[i].nick, curval);
+	    botunlink(-2, dcc[i].nick, "Marked aggressive, should be passive");
 	    return;
 	  }
 	  if (strcmp(curval, bestval) < 0)
 	    strcpy(bestval, curval);
 	}
       } else {
-  	  botunlink(-2, dcc[i].nick, STR("Linked but not sharing?"));
+  	  botunlink(-2, dcc[i].nick, "Linked but not sharing?");
       }
     }
   }
@@ -1154,7 +1152,7 @@ void autolink_cycle(char *start)
          while a dcc scan indicates we *are* connected to a better bot than
          the one we failed a link to.
        */
-      putlog(LOG_BOTS, "*",  STR("Failed link attempt to %s but connected to %s already???"), u->handle, (char *) &bestval[2]);
+      putlog(LOG_BOTS, "*",  "Failed link attempt to %s but connected to %s already???", u->handle, (char *) &bestval[2]);
       return;
     }
   } else
@@ -1246,7 +1244,7 @@ void autolink_cycle(char *start)
   for (u = userlist; u; u = u->next) {
     get_user_flagrec(u, &fr, NULL);
     if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
-      putlog(LOG_DEBUG, "@", STR("Adding %s to hublist"), u->handle);
+      putlog(LOG_DEBUG, "@", "Adding %s to hublist", u->handle);
       hl2 = hl;
       hl = calloc(1, sizeof(struct hublist_entry));
 
@@ -1255,12 +1253,12 @@ void autolink_cycle(char *start)
       hl->u = u;
     }
   }
-  putlog(LOG_DEBUG, "@", STR("Picking random hub from %d hubs"), hlc);
+  putlog(LOG_DEBUG, "@", "Picking random hub from %d hubs", hlc);
   hlc = randint(hlc);
-  putlog(LOG_DEBUG, "@", STR("Picked #%d for hub"), hlc);
+  putlog(LOG_DEBUG, "@", "Picked #%d for hub", hlc);
   while (hl) {
     if (!hlc) {
-      putlog(LOG_DEBUG, "@", STR("Which is bot: %s"), hl->u->handle);
+      putlog(LOG_DEBUG, "@", "Which is bot: %s", hl->u->handle);
       botlink("", -3, hl->u->handle);
     }
     hlc--;

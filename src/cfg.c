@@ -165,7 +165,7 @@ void deflag_changed(struct cfg_entry *entry, char *oldval, int *valid)
   if (!(p = (char *) entry->gdata))
     return;
 
-  if (strcmp(p, STR("ignore")) && strcmp(p, STR("deop")) && strcmp(p, STR("kick")) && strcmp(p, STR("delete")))
+  if (strcmp(p, "ignore") && strcmp(p, "deop") && strcmp(p, "kick") && strcmp(p, "delete"))
     *valid=0;
 }
 
@@ -218,7 +218,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
 
   switch (why) {
   case DEFLAG_BADCOOKIE:
-    strcpy(tmp, STR("Bad op cookie"));
+    strcpy(tmp, "Bad op cookie");
     ent = &CFG_BADCOOKIE;
     break;
   case DEFLAG_MANUALOP:
@@ -240,20 +240,20 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     break;
 #endif /* G_MEAN */
   case DEFLAG_MDOP:
-    strcpy(tmp, STR("Mass deop"));
+    strcpy(tmp, "Mass deop");
     ent = &CFG_MDOP;
     break;
   case DEFLAG_MOP:
-    strcpy(tmp, STR("Mass op"));
+    strcpy(tmp, "Mass op");
     ent = &CFG_MOP;
     break;
   default:
     ent = NULL;
-    sprintf(tmp, STR("Reason #%i"), why);
+    sprintf(tmp, "Reason #%i", why);
   }
   if (ent && ent->gdata && !strcmp(ent->gdata, "deop")) {
     putlog(LOG_WARN, "*",  "Setting %s +d (%s): %s", u->handle, tmp, msg);
-    sprintf(tmp2, STR("+d: %s (%s)"), tmp, msg);
+    sprintf(tmp2, "+d: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
     get_user_flagrec(u, &fr, chan->dname);
     fr.global = USER_DEOP;
@@ -282,35 +282,35 @@ void misc_describe(struct cfg_entry *cfgent, int idx)
 #ifdef HUB
   int i = 0;
 
-  if (!strcmp(cfgent->name, STR("fork-interval"))) {
+  if (!strcmp(cfgent->name, "fork-interval")) {
     dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
     i = 1;
 #ifdef S_LASTCHECK
-  } else if (!strcmp(cfgent->name, STR("login"))) {
+  } else if (!strcmp(cfgent->name, "login")) {
     dprintf(idx, STR("login sets how to handle someone logging in to the shell\n"));
 #endif /* S_LASTCHECK */
 #ifdef S_ANTITRACE
-  } else if (!strcmp(cfgent->name, STR("trace"))) {
+  } else if (!strcmp(cfgent->name, "trace")) {
     dprintf(idx, STR("trace sets how to handle someone tracing/debugging the bot\n"));
 #endif /* S_ANTITRACE */
 #ifdef S_PROMISC
-  } else if (!strcmp(cfgent->name, STR("promisc"))) {
+  } else if (!strcmp(cfgent->name, "promisc")) {
     dprintf(idx, STR("promisc sets how to handle when a interface is set to promiscuous mode\n"));
 #endif /* S_PROMISC */
 #ifdef S_PROCESSCHECK
-  } else if (!strcmp(cfgent->name, STR("bad-process"))) {
+  } else if (!strcmp(cfgent->name, "bad-process")) {
     dprintf(idx, STR("bad-process sets how to handle when a running process not listed in process-list is detected\n"));
-  } else if (!strcmp(cfgent->name, STR("process-list"))) {
+  } else if (!strcmp(cfgent->name, "process-list")) {
     dprintf(idx, STR("process-list is a comma-separated list of \"expected processes\" running on the bots uid\n"));
     i = 1;
 #endif /* S_PROCESSCHECK */
 #ifdef S_HIJACKCHECK
-  } else if (!strcmp(cfgent->name, STR("hijack"))) {
+  } else if (!strcmp(cfgent->name, "hijack")) {
     dprintf(idx, STR("hijack sets how to handle when a commonly used hijack method attempt is detected. (recommended: die)\n"));
 #endif /* S_HIJACKCHECK */
   }
   if (!i)
-    dprintf(idx, STR("Valid settings are: ignore, warn, die, reject, suicide\n"));
+    dprintf(idx, "Valid settings are: ignore, warn, die, reject, suicide\n");
 #endif /* HUB */
 }
 
@@ -344,8 +344,8 @@ void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
 
   if (!(p = (char *) cfgent->ldata))
     *valid = 1;
-  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
-           && strcmp(p, STR("suicide")) && strcmp(p, STR("warn")))
+  else if (strcmp(p, "ignore") && strcmp(p, "die") && strcmp(p, "reject")
+           && strcmp(p, "suicide") && strcmp(p, "warn"))
     *valid = 0;
 }
 
@@ -353,8 +353,8 @@ void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
   char *p = (char *) cfgent->ldata;
   if (!p)
     *valid=1;
-  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
-           && strcmp(p, STR("suicide")) && strcmp(p, STR("warn")))
+  else if (strcmp(p, "ignore") && strcmp(p, "die") && strcmp(p, "reject")
+           && strcmp(p, "suicide") && strcmp(p, "warn"))
     *valid=0;
 }
 
@@ -445,21 +445,21 @@ struct cfg_entry CFG_REALNAME = {
 void getin_describe(struct cfg_entry *cfgent, int idx)
 {
 #ifdef HUB
-  if (!strcmp(cfgent->name, STR("op-bots")))
+  if (!strcmp(cfgent->name, "op-bots"))
     dprintf(idx, STR("op-bots is number of bots to ask every time a oprequest is to be made\n"));
-  else if (!strcmp(cfgent->name, STR("in-bots")))
+  else if (!strcmp(cfgent->name, "in-bots"))
     dprintf(idx, STR("in-bots is number of bots to ask every time a inrequest is to be made\n"));
-  else if (!strcmp(cfgent->name, STR("op-requests")))
+  else if (!strcmp(cfgent->name, "op-requests"))
     dprintf(idx, STR("op-requests (requests:seconds) limits how often the bot will ask for ops\n"));
-  else if (!strcmp(cfgent->name, STR("lag-threshold")))
+  else if (!strcmp(cfgent->name, "lag-threshold"))
     dprintf(idx, STR("lag-threshold is maximum acceptable server lag for the bot to send/honor requests\n"));
-  else if (!strcmp(cfgent->name, STR("op-time-slack")))
+  else if (!strcmp(cfgent->name, "op-time-slack"))
     dprintf(idx, STR("op-time-slack is number of seconds a opcookies encoded time value can be off from the bots current time\n"));
-  else if (!strcmp(cfgent->name, STR("close-threshold")))
+  else if (!strcmp(cfgent->name, "close-threshold"))
     dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, close all channels\n"));
-  else if (!strcmp(cfgent->name, STR("kill-threshold")))
+  else if (!strcmp(cfgent->name, "kill-threshold"))
     dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
-  else if (!strcmp(cfgent->name, STR("fight-threshold")))
+  else if (!strcmp(cfgent->name, "fight-threshold"))
     dprintf(idx, STR("When more than fight-threshold ops/deops/kicks/bans/unbans altogether have happened on a channel in one minute, the channel is locked\n"));
   else {
     dprintf(idx, STR("No description for %s ???\n"), cfgent->name);
@@ -475,7 +475,7 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
   if (!cfgent->gdata)
     return;
   *valid = 0;
-  if (!strcmp(cfgent->name, STR("op-requests"))) {
+  if (!strcmp(cfgent->name, "op-requests")) {
     int L,
       R;
     char *value = cfgent->gdata;
@@ -491,7 +491,7 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
     *valid = 1;
     return;
   }
-  if (!strcmp(cfgent->name, STR("close-threshold"))) {
+  if (!strcmp(cfgent->name, "close-threshold")) {
     int L, R;
     char *value = NULL;
 
@@ -509,31 +509,31 @@ void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
     return;
   }
   i = atoi(cfgent->gdata);
-  if (!strcmp(cfgent->name, STR("op-bots"))) {
+  if (!strcmp(cfgent->name, "op-bots")) {
     if ((i < 1) || (i > 10))
       return;
-  } else if (!strcmp(cfgent->name, STR("invite-bots"))) {
+  } else if (!strcmp(cfgent->name, "invite-bots")) {
     if ((i < 1) || (i > 10))
       return;
-  } else if (!strcmp(cfgent->name, STR("key-bots"))) {
+  } else if (!strcmp(cfgent->name, "key-bots")) {
     if ((i < 1) || (i > 10))
       return;
-  } else if (!strcmp(cfgent->name, STR("limit-bots"))) {
+  } else if (!strcmp(cfgent->name, "limit-bots")) {
     if ((i < 1) || (i > 10))
       return;
-  } else if (!strcmp(cfgent->name, STR("unban-bots"))) {
+  } else if (!strcmp(cfgent->name, "unban-bots")) {
     if ((i < 1) || (i > 10))
       return;
-  } else if (!strcmp(cfgent->name, STR("lag-threshold"))) {
+  } else if (!strcmp(cfgent->name, "lag-threshold")) {
     if ((i < 3) || (i > 60))
       return;
-  } else if (!strcmp(cfgent->name, STR("fight-threshold"))) {
+  } else if (!strcmp(cfgent->name, "fight-threshold")) {
     if (i && ((i < 50) || (i > 1000)))
       return;
-  } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
+  } else if (!strcmp(cfgent->name, "kill-threshold")) {
     if ((i < 0) || (i >= 200))
       return;
-  } else if (!strcmp(cfgent->name, STR("op-time-slack"))) {
+  } else if (!strcmp(cfgent->name, "op-time-slack")) {
     if ((i < 30) || (i > 1200))
       return;
   }
@@ -728,7 +728,7 @@ void init_config()
   add_cfg(&CFG_REALNAME);
   add_cfg(&CFG_CMDPREFIX);
   cfg_noshare = 1;
-  set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders");
+  set_cfg_str(NULL, "realname", "A deranged product of evil coders");
   cfg_noshare = 0;
   add_cfg(&CFG_OPBOTS);
   add_cfg(&CFG_INBOTS);
@@ -829,7 +829,7 @@ void userfile_cfg_line(char *ln)
     /* regardless of leaf/hub it is safe to set this to 0 */
     cfg_noshare = 0;
   } else
-    putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
+    putlog(LOG_ERRORS, "*", "Unrecognized config entry %s in userfile", name);
 
 }
 
@@ -849,7 +849,7 @@ void got_config_share(int idx, char *ln, int broad)
     if (broad)
       botnet_send_cfg_broad(idx, cfgent);
   } else
-    putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
+    putlog(LOG_ERRORS, "*", "Unrecognized config entry %s in userfile", name);
   cfg_noshare = 0;
 }
 
@@ -864,7 +864,7 @@ void trigger_cfg_changed()
       while (xk && strcmp(xk->key, cfg[i]->name))
 	xk = xk->next;
       if (xk) {
-	putlog(LOG_DEBUG, "*", STR("trigger_cfg_changed for %s"), cfg[i]->name ? cfg[i]->name : "(null)");
+	putlog(LOG_DEBUG, "*", "trigger_cfg_changed for %s", cfg[i]->name ? cfg[i]->name : "(null)");
 	if (!strcmp(cfg[i]->name, xk->key ? xk->key : "")) {
 	  set_cfg_str(conf.bot->nick, cfg[i]->name, xk->data);
 	}

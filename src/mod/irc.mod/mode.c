@@ -1250,12 +1250,12 @@ static int gotmode(char *from, char *msg)
           sign = '+';
         else if (*p == '-')
           sign = '-';
-        else if (strchr(STR("oblkvIe"), p[0])) {
+        else if (strchr("oblkvIe", p[0])) {
           mp = newsplit(&wptr);
           if (strchr("ob", p[0])) {
             /* Just want o's and b's */
             modes[modecnt] = calloc(1, strlen(mp) + 4);
-            sprintf(modes[modecnt], STR("%c%c %s"), sign, p[0], mp);
+            sprintf(modes[modecnt], "%c%c %s", sign, p[0], mp);
             modecnt++;
             if (p[0] == 'o') {
               if (sign == '+')
@@ -1270,10 +1270,10 @@ static int gotmode(char *from, char *msg)
                 unbans++;
             }
           }
-        } else if (strchr(STR("pstnmi"), p[0])) {
+        } else if (strchr("pstnmi", p[0])) {
         } else {
           /* hrmm... what modechar did i forget? */
-          putlog(LOG_ERRORS, "*", STR("Forgotten modechar in irc:gotmode: %c"), p[0]);
+          putlog(LOG_ERRORS, "*", "Forgotten modechar in irc:gotmode: %c", p[0]);
         }
         p++;
       }
@@ -1295,10 +1295,10 @@ static int gotmode(char *from, char *msg)
             m = ismember(chan, nfrom);
             if (m && !chan_sentkick(m)) {
               m->flags |= SENTKICK;
-              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
+              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
               tputs(serv, tmp, strlen(tmp));
               if (ufrom) {
-                sprintf(tmp, STR("Mass deop on %s by %s"), chan->dname, nfrom);
+                sprintf(tmp, "Mass deop on %s by %s", chan->dname, nfrom);
                 deflag_user(ufrom, DEFLAG_MDOP, tmp, chan);
               }
             }
@@ -1314,10 +1314,10 @@ static int gotmode(char *from, char *msg)
               m = ismember(chan, nfrom);
               if (m && !chan_sentkick(m)) {
                 m->flags |= SENTKICK;
-                sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+                sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
                 tputs(serv, tmp, strlen(tmp));
                 if (ufrom) {
-                  sprintf(tmp, STR("Mass op on %s by %s"), chan->dname, nfrom);
+                  sprintf(tmp, "Mass op on %s by %s", chan->dname, nfrom);
                   deflag_user(ufrom, DEFLAG_MOP, tmp, chan);
                 }
               }
@@ -1414,15 +1414,15 @@ static int gotmode(char *from, char *msg)
           }
 
           if (isbadop == 1)
-            putlog(LOG_WARN, "*", STR("Missing cookie: %s MODE %s"), from, msg);
+            putlog(LOG_WARN, "*", "Missing cookie: %s MODE %s", from, msg);
           else if (isbadop == 2)
-            putlog(LOG_WARN, "*", STR("Invalid cookie (bad nick): %s MODE %s"), from, msg);
+            putlog(LOG_WARN, "*", "Invalid cookie (bad nick): %s MODE %s", from, msg);
           else if (isbadop == 3)
-            putlog(LOG_WARN, "*", STR("Invalid cookie (bad chan): %s MODE %s"), from, msg);
+            putlog(LOG_WARN, "*", "Invalid cookie (bad chan): %s MODE %s", from, msg);
           else if (isbadop == 4)
-            putlog(LOG_WARN, "*", STR("Invalid cookie (bad time): %s MODE %s"), from, msg);
+            putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s MODE %s", from, msg);
         } else
-          putlog(LOG_DEBUG, "@", STR("Good op: %s"), msg);
+          putlog(LOG_DEBUG, "@", "Good op: %s", msg);
       }
 
       if ((ops) && chan && me_op(chan) && !channel_manop(chan) && (ufrom) && !(ufrom->flags & USER_BOT)) {
@@ -1437,12 +1437,12 @@ static int gotmode(char *from, char *msg)
           /* Kick opper */
           m = ismember(chan, nfrom);
           if (!m || !chan_sentkick(m)) {
-            sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+            sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
             tputs(serv, tmp, strlen(tmp));
             if (m)
               m->flags |= SENTKICK;
           }
-          sprintf(tmp, STR("%s MODE %s"), from, msg);
+          sprintf(tmp, "%s MODE %s", from, msg);
           deflag_user(ufrom, DEFLAG_MANUALOP, tmp, chan);
           break;
         default:
@@ -1460,13 +1460,13 @@ static int gotmode(char *from, char *msg)
             if (m) {
               if (!(m->flags & CHANOP) && (rfc_casecmp(botname, trg))) {
                 if (!chan_sentkick(m)) {
-                  sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
                   tputs(serv, tmp, strlen(tmp));
                   m->flags |= SENTKICK;
                 }
               }
             } else {
-              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
               tputs(serv, tmp, strlen(tmp));
             }
           }

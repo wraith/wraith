@@ -25,6 +25,7 @@ This is a summary of ChangeLog basically.
 22.Added config setting "chanset". Change to what flags new channels will have. 
    Original default list will apply for options you leave out.
 23.Bot now saves/checks it's binary md5 checksum.
+24.Removed the majority of the garblestrings. Was slowing the bot down.
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.

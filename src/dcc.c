@@ -66,25 +66,25 @@ char *rand_dccresp()
 {
   switch (randint(10)) { /* 0-5: random response, 6-9: none */
   case 0:
-    return STR("sup\n");
+    return "sup\n";
   case 1:
-    return STR("a/s/l?\ni'm 17/f/ca ;)\n");
+    return "a/s/l?\ni'm 17/f/ca ;)\n";
   case 2:
-    return STR("who are you?\n");
+    return "who are you?\n";
   case 3:
-    return STR("uhhh do i know you?\n");
+    return "uhhh do i know you?\n";
   case 4:
-    return STR("what?\n");
+    return "what?\n";
   case 5:
-    return STR("wtf do you want?\n");
+    return "wtf do you want?\n";
   case 6:
-    return STR("hold on a second, I am sort of busy..\n");
+    return "hold on a second, I am sort of busy..\n";
   case 7:
-    return STR("mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]\n");
+    return "mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]\n";
   case 8:
-    return STR("got any porn?\n");
+    return "got any porn?\n";
   case 9:
-    return STR("?\n");
+    return "?\n";
   default:
     return "";
     /* there's intentionally no newline in this response. You go figure out why :) */
@@ -95,21 +95,21 @@ char *rand_dccresppass()
 {
   switch (randint(10)) { /* 0-5: random response, 6-9: none */
   case 0:
-    return STR("what?\n");
+    return "what?\n";
   case 1:
-    return STR("huh?\n");
+    return "huh?\n";
   case 2:
-    return STR("no.\n");
+    return "no.\n";
   case 3:
-    return STR("thats great..\n");
+    return "thats great..\n";
   case 4:
-    return STR("hmm, ok..I've got a better idea, check this out: http://peeldmonkeys.8k.com/images/keza-_middle_finger.jpg\n");
+    return "hmm, ok..I've got a better idea, check this out: http://peeldmonkeys.8k.com/images/keza-_middle_finger.jpg\n";
   case 5:
-    return STR("I don't remember caring..\n");
+    return "I don't remember caring..\n";
   case 6:
-    return STR("good for you.\n");
+    return "good for you.\n";
   case 7:
-    return STR("I'm going to report you to the RIAA!!!\n");
+    return "I'm going to report you to the RIAA!!!\n";
   default:
     return "";
   }
@@ -118,21 +118,21 @@ char *rand_dccrespbye()
 {
   switch (randint(10)) { /* 0-5: random response, 6-9: none */
   case 0:
-    return STR("stop wasting my time.\n");
+    return "stop wasting my time.\n";
   case 1:
-    return STR("gtg\n");
+    return "gtg\n";
   case 2:
-    return STR("go away\n");
+    return "go away\n";
   case 3:
-    return STR("fuck off already\n");
+    return "fuck off already\n";
   case 4:
-    return STR("ehh..no, bye.\n");
+    return "ehh..no, bye.\n";
   case 5:
-    return STR("hey I'm late for a date with your mom, cya..\n");
+    return "hey I'm late for a date with your mom, cya..\n";
   case 6:
-    return STR("you're still here?\n");
+    return "you're still here?\n";
   case 7:
-    return STR("jesus loves you, but I ain't jesus. \002FUCK OFF\002\n");
+    return "jesus loves you, but I ain't jesus. \002FUCK OFF\002\n";
   default:
     return "";
   }
@@ -340,8 +340,8 @@ static void cont_link(int idx, char *buf, int ii)
     /* If we're already connected somewhere, unlink and idle a sec */
     for (i = 0; i < dcc_total; i++) {
       if ((dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user))) {
-        putlog(LOG_BOTS, "*", STR("Unlinking %s - restructure"), dcc[i].nick);
-        botnet_send_unlinked(i, dcc[i].nick, STR("Restructure"));
+        putlog(LOG_BOTS, "*", "Unlinking %s - restructure", dcc[i].nick);
+        botnet_send_unlinked(i, dcc[i].nick, "Restructure");
         killsock(dcc[i].sock);
         lostdcc(i);
         usleep(1000 * 500);

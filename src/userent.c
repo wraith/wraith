@@ -194,14 +194,14 @@ void added_display(int idx, struct user_entry *e, struct userrec *u)
     tm = atoi(tmp);
 
 #ifdef S_UTCTIME
-    egg_strftime(tmp2, sizeof(tmp2), STR("%a, %d %b %Y %H:%M:%S %Z"), gmtime(&tm));
+    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
 #else /* !S_UTCTIME */
-    egg_strftime(tmp2, sizeof(tmp2), STR("%a, %d %b %Y %H:%M:%S %Z"), localtime(&tm));
+    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", localtime(&tm));
 #endif /* S_UTCTIME */
     if (hnd)
-      dprintf(idx, STR("  -- Added %s by %s\n"), tmp2, hnd);
+      dprintf(idx, "  -- Added %s by %s\n", tmp2, hnd);
     else
-      dprintf(idx, STR("  -- Added %s\n"), tmp2);
+      dprintf(idx, "  -- Added %s\n", tmp2);
   }
 }
 
@@ -241,7 +241,7 @@ int config_set(struct userrec *u, struct user_entry *e, void *buf)
   /* we will possibly free new below, so let's send the information
    * to the botnet now */
   if (!noshare && !cfg_noshare)
-    shareout(NULL, STR("c CONFIG %s %s %s\n"), u->handle, new->key, new->data ? new->data : "");
+    shareout(NULL, "c CONFIG %s %s %s\n", u->handle, new->key, new->data ? new->data : "");
   if ((old && old != new) || !new->data || !new->data[0]) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
@@ -297,7 +297,7 @@ int config_pack(struct userrec *u, struct user_entry *e)
     t = calloc(1, sizeof(struct list_type));
 
     t->extra = calloc(1, strlen(curr->key) + strlen(curr->data) + 4);
-    sprintf(t->extra, STR("%s %s"), curr->key, curr->data);
+    sprintf(t->extra, "%s %s", curr->key, curr->data);
     list_insert((&e->u.list), t);
     next = curr->next;
     free(curr->key);
@@ -319,7 +319,7 @@ void config_display(int idx, struct user_entry *e, struct userrec *u)
   for (xk = e->u.extra; xk; xk = xk->next) {
     /* ok, it's a valid xtra field entry */
     if (glob_owner(fr))
-      dprintf(idx, STR("  %s: %s\n"), xk->key, xk->data);
+      dprintf(idx, "  %s: %s\n", xk->key, xk->data);
   }
 #endif /* HUB */
 }
@@ -388,7 +388,7 @@ int config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
   struct xtra_key *x = NULL;
 
   for (x = e->u.extra; x; x = x->next)
-    lfprintf(f, STR("--CONFIG %s %s\n"), x->key, x->data);
+    lfprintf(f, "--CONFIG %s %s\n", x->key, x->data);
   return 1;
 }
 
@@ -431,7 +431,7 @@ void stats_add(struct userrec *u, int login, int op)
   if (s) {
     strncpyz(s2, s, sizeof(s2));
   } else
-    strcpy(s2, STR("0 0"));
+    strcpy(s2, "0 0");
   s = strchr(s2, ' ');
   if (s) {
     s++;
@@ -443,7 +443,7 @@ void stats_add(struct userrec *u, int login, int op)
     sl++;
   if (op)
     so++;
-  sprintf(s2, STR("%i %i"), sl, so);
+  sprintf(s2, "%i %i", sl, so);
   set_user(&USERENTRY_STATS, u, s2);
 }
 
@@ -455,7 +455,7 @@ void stats_display(int idx, struct user_entry *e, struct userrec *u)
 
     p = strchr(e->u.string, ' ');
     if (p)
-      dprintf(idx, STR("  -- %i logins, %i ops\n"), atoi(e->u.string), atoi(p));
+      dprintf(idx, "  -- %i logins, %i ops\n", atoi(e->u.string), atoi(p));
   }
 }
 
@@ -493,9 +493,9 @@ void modified_display(int idx, struct user_entry *e, struct userrec *u)
       *hnd++ = 0;
     tm = atoi(tmp);
 #ifdef S_UTCTIME
-    egg_strftime(tmp2, sizeof(tmp2), STR("%a, %d %b %Y %H:%M:%S %Z"), gmtime(&tm));
+    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
 #else /* !S_UTCTIME */
-    egg_strftime(tmp2, sizeof(tmp2), STR("%a, %d %b %Y %H:%M:%S %Z"), localtime(&tm));
+    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", localtime(&tm));
 #endif /* S_UTCTIME */
     if (hnd)
       dprintf(idx, "  -- Modified %s by %s\n", tmp2, hnd);
@@ -756,7 +756,7 @@ static int botaddr_pack(struct userrec *u, struct user_entry *e)
   Assert(e);
   Assert(!e->name);
   bi = (struct bot_addr *) e->u.extra;
-  l = simple_sprintf(work, STR("%s:%u/%u:%u:%s"), bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
+  l = simple_sprintf(work, "%s:%u/%u:%u:%s", bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
   e->u.list = calloc(1, sizeof(struct list_type));
 
   e->u.list->next = NULL;
@@ -807,8 +807,8 @@ static int botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   Assert(u);
   if (bi && !noshare && !(u->flags & USER_UNSHARED)) {
-    shareout(NULL, STR("c BOTADDR %s %s %d %d %d %s\n"),u->handle, 
-            (bi->address && bi->address[0]) ? bi->address : STR("127.0.0.1"), 
+    shareout(NULL, "c BOTADDR %s %s %d %d %d %s\n",u->handle, 
+            (bi->address && bi->address[0]) ? bi->address : "127.0.0.1", 
             bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
   }
   return 1;
@@ -823,12 +823,12 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
   if (glob_admin(fr)) {
     register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
     if (bi->address && bi->hublevel && bi->hublevel != 0)
-      dprintf(idx, STR("  ADDRESS: %.70s\n"), bi->address);
-      dprintf(idx, STR("     port: %d\n"), bi->telnet_port);
+      dprintf(idx, "  ADDRESS: %.70s\n", bi->address);
+      dprintf(idx, "     port: %d\n", bi->telnet_port);
     if (bi->hublevel && bi->hublevel != 0)
-      dprintf(idx, STR("  HUBLEVEL: %d\n"), bi->hublevel);
+      dprintf(idx, "  HUBLEVEL: %d\n", bi->hublevel);
     if (bi->uplink && bi->uplink[0])
-      dprintf(idx, STR("  UPLINK: %s\n"), bi->uplink);
+      dprintf(idx, "  UPLINK: %s\n", bi->uplink);
   }
 #endif /* HUB */
 }

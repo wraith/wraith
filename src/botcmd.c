@@ -71,7 +71,7 @@ static void fake_alert(int idx, char *item, char *extra)
 
   if (now - lastfake > 10) {	
     /* Don't fake_alert more than once every 10secs */
-    dprintf(idx, STR("ct %s NOTICE: %s (%s != %s).\n"), conf.bot->nick, NET_FAKEREJECT, item, extra);
+    dprintf(idx, "ct %s NOTICE: %s (%s != %s).\n", conf.bot->nick, NET_FAKEREJECT, item, extra);
     putlog(LOG_BOTS, "*", "%s %s (%s != %s).", dcc[idx].nick, NET_FAKEREJECT, item, extra);
     lastfake = now;
   }

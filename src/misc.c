@@ -437,7 +437,7 @@ void show_banner(int idx)
 {
   dumplots(-dcc[idx].sock, "", wbanner()); /* we use sock so that colors aren't applied to banner */
   dprintf(idx, "\n \n");
-  dprintf(idx, STR("%sConributions welcomed by paypal: root@shatow.net%s\n"), BOLD(idx), BOLD_END(idx));
+  dprintf(idx, STR("%sConributions welcomed by paypal: bryan@shatow.net%s\n"), BOLD(idx), BOLD_END(idx));
   dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://wraith.shatow.net/ -\n \n"));
 }
 
@@ -462,7 +462,7 @@ void show_motd(int idx)
     dprintf(idx, " \n");
     free(buf_ptr);
   } else
-    dprintf(idx, STR("Motd: none\n"));
+    dprintf(idx, "Motd: none\n");
 }
 
 void show_channels(int idx, char *handle)
@@ -498,7 +498,7 @@ void show_channels(int idx, char *handle)
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
         if (!first) { 
-          dprintf(idx, STR("%s %s access to %d channel%s:\n"), handle ? u->handle : "You", handle ? "has" : "have", total, (total > 1) ? "s" : "");
+          dprintf(idx, "%s %s access to %d channel%s:\n", handle ? u->handle : "You", handle ? "has" : "have", total, (total > 1) ? "s" : "");
           
           first = 1;
         }
@@ -508,7 +508,7 @@ void show_channels(int idx, char *handle)
     }
   }
   if (!first)
-    dprintf(idx, STR("%s %s not have access to any channels.\n"), handle ? u->handle : "You", handle ? "does" : "do");
+    dprintf(idx, "%s %s not have access to any channels.\n", handle ? u->handle : "You", handle ? "does" : "do");
 }
 
 int getting_users()
@@ -713,7 +713,7 @@ int updatebin(int idx, char *par, int autoi)
   path = newsplit(&par);
   par = path;
   if (!par[0]) {
-    logidx(idx, STR("Not enough parameters."));
+    logidx(idx, "Not enough parameters.");
     return 1;
   }
   path = calloc(1, strlen(binname) + strlen(par) + 2);
@@ -721,29 +721,29 @@ int updatebin(int idx, char *par, int autoi)
   newbin = strrchr(path, '/');
   if (!newbin) {
     free(path);
-    logidx(idx, STR("Don't know current binary name"));
+    logidx(idx, "Don't know current binary name");
     return 1;
   }
   newbin++;
   if (strchr(par, '/')) {
     *newbin = 0;
-    logidx(idx, STR("New binary must be in %s and name must be specified without path information"), path);
+    logidx(idx, "New binary must be in %s and name must be specified without path information", path);
     free(path);
     return 1;
   }
   strcpy(newbin, par);
   if (!strcmp(path, binname)) {
     free(path);
-    logidx(idx, STR("Can't update with the current binary"));
+    logidx(idx, "Can't update with the current binary");
     return 1;
   }
   if (stat(path, &sb)) {
-    logidx(idx, STR("%s can't be accessed"), path);
+    logidx(idx, "%s can't be accessed", path);
     free(path);
     return 1;
   }
   if (chmod(path, S_IRUSR | S_IWUSR | S_IXUSR)) {
-    logidx(idx, STR("Can't set mode 0600 on %s"), path);
+    logidx(idx, "Can't set mode 0600 on %s", path);
     free(path);
     return 1;
   }
@@ -757,13 +757,13 @@ int updatebin(int idx, char *par, int autoi)
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
   i = system(testbuf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
-    dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
-    putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)"), i);
+    dprintf(idx, "Couldn't restart new binary (error %d)\n", i);
+    putlog(LOG_MISC, "*", "Couldn't restart new binary (error %d)", i);
     return i;
   }
 
   if (movefile(path, binname)) {
-    logidx(idx, STR("Can't rename %s to %s"), path, binname);
+    logidx(idx, "Can't rename %s to %s", path, binname);
     free(path);
     return 1;
   }
@@ -782,8 +782,8 @@ int updatebin(int idx, char *par, int autoi)
     /* let's drop the server connection ASAP */
     nuke_server("Updating...");
 #endif /* LEAF */
-    logidx(idx, STR("Updating...bye"));
-    putlog(LOG_MISC, "*", STR("Updating..."));
+    logidx(idx, "Updating...bye");
+    putlog(LOG_MISC, "*", "Updating...");
     botnet_send_chat(-1, conf.bot->nick, "Updating...");
     botnet_send_bye();
     fatal("Updating...", 1);
@@ -829,142 +829,142 @@ char *kickreason(int kind) {
   switch (kind) {
   case KICK_BANNED:
     switch (randint(6)) {
-    case 0: return STR("bye");
-    case 1: return STR("banned");
-    case 2: return STR("see you in hell");
-    case 3: return STR("go away");
-    case 4: return STR("cya around lewser");
-    case 5: return STR("unwanted!");
+    case 0: return "bye";
+    case 1: return "banned";
+    case 2: return "see you in hell";
+    case 3: return "go away";
+    case 4: return "cya around lewser";
+    case 5: return "unwanted!";
     }
   case KICK_KUSER:
     switch (randint(4)) {
-    case 0: return STR("not wanted");
-    case 1: return STR("something tells me you're annoying");
-    case 2: return STR("don't bug me lewser");
-    case 3: return STR("creep");
+    case 0: return "not wanted";
+    case 1: return "something tells me you're annoying";
+    case 2: return "don't bug me lewser";
+    case 3: return "creep";
     }
   case KICK_KICKBAN:
     switch (randint(4)) {
-    case 0: return STR("gone");
-    case 1: return STR("stupid");
-    case 2: return STR("lewser");
-    case 3: return STR("...");
+    case 0: return "gone";
+    case 1: return "stupid";
+    case 2: return "lewser";
+    case 3: return "...";
     }     
   case KICK_MASSDEOP:
     switch (randint(8)) {
-    case 0: return STR("spammer!");
-    case 1: return STR("easy on the modes now");
-    case 2: return STR("mode this");
-    case 3: return STR("nice try");
-    case 4: return STR("really?");
-    case 5: return STR("you lose");
-    case 6: return STR("scary... really scary...");
-    case 7: return STR("i win kthx");
+    case 0: return "spammer!";
+    case 1: return "easy on the modes now";
+    case 2: return "mode this";
+    case 3: return "nice try";
+    case 4: return "really?";
+    case 5: return "you lose";
+    case 6: return "scary... really scary...";
+    case 7: return "i win kthx";
     }
   case KICK_BADOP:
     switch (randint(5)) {
-    case 0: return STR("neat...");
-    case 1: return STR("oh, no you don't. go away.");
-    case 2: return STR("didn't you forget something now?");
-    case 3: return STR("no");
-    case 4: return STR("hijack this");
+    case 0: return "neat...";
+    case 1: return "oh, no you don't. go away.";
+    case 2: return "didn't you forget something now?";
+    case 3: return "no";
+    case 4: return "hijack this";
     }
   case KICK_BADOPPED:
     switch (randint(5)) {
-    case 0: return STR("fuck off kid");
-    case 1: return STR("asl?");
-    case 2: return STR("whoa... what a hacker... skills!");
-    case 3: return STR("yes! yes! yes! hit me baby one more time!");
-    case 4: return STR("with your skills, you're better off jacking off than hijacking");
+    case 0: return "fuck off kid";
+    case 1: return "asl?";
+    case 2: return "whoa... what a hacker... skills!";
+    case 3: return "yes! yes! yes! hit me baby one more time!";
+    case 4: return "with your skills, you're better off jacking off than hijacking";
     }
   case KICK_MANUALOP:
     switch (randint(6)) {
-    case 0: return STR("naughty kid");
-    case 1: return STR("didn't someone tell you that is bad?");
-    case 2: return STR("want perm?");
-    case 3: return STR("see how much good that did you?");
-    case 4: return STR("not a smart move...");
-    case 5: return STR("jackass!");
+    case 0: return "naughty kid";
+    case 1: return "didn't someone tell you that is bad?";
+    case 2: return "want perm?";
+    case 3: return "see how much good that did you?";
+    case 4: return "not a smart move...";
+    case 5: return "jackass!";
     }
   case KICK_MANUALOPPED:
     switch (randint(8)) {
-    case 0: return STR("your pal got mean friends. like me.");
-    case 1: return STR("uhh now.. don't wake me up...");
-    case 2: return STR("hi hun. missed me?");
-    case 3: return STR("spammer! die!");
-    case 4: return STR("boo!");
-    case 5: return STR("that @ was useful, don't ya think?");
-    case 6: return STR("not in my book");
-    case 7: return STR("lol, really?");
+    case 0: return "your pal got mean friends. like me.";
+    case 1: return "uhh now.. don't wake me up...";
+    case 2: return "hi hun. missed me?";
+    case 3: return "spammer! die!";
+    case 4: return "boo!";
+    case 5: return "that @ was useful, don't ya think?";
+    case 6: return "not in my book";
+    case 7: return "lol, really?";
     }
   case KICK_CLOSED:
     switch (randint(17)) {
-    case 0: return STR("locked");
-    case 1: return STR("later");
-    case 2: return STR("closed for now");
-    case 3: return STR("come back later");
-    case 4: return STR("better safe than sorry");
-    case 5: return STR("cleanup, come back later");
-    case 6: return STR("this channel is closed");
-    case 7: return STR("shutting down for now");
-    case 8: return STR("lockdown");
-    case 9: return STR("reopening later");
-    case 10: return STR("not for the public atm");
-    case 11: return STR("private channel for now");
-    case 12: return STR("might reopen soon, might reopen later");
-    case 13: return STR("you're not supposed to be here right now");
-    case 14: return STR("sorry, closed");
-    case 15: return STR("try us later, atm we're locked down");
-    case 16: return STR("closed. try tomorrow");
+    case 0: return "locked";
+    case 1: return "later";
+    case 2: return "closed for now";
+    case 3: return "come back later";
+    case 4: return "better safe than sorry";
+    case 5: return "cleanup, come back later";
+    case 6: return "this channel is closed";
+    case 7: return "shutting down for now";
+    case 8: return "lockdown";
+    case 9: return "reopening later";
+    case 10: return "not for the public atm";
+    case 11: return "private channel for now";
+    case 12: return "might reopen soon, might reopen later";
+    case 13: return "you're not supposed to be here right now";
+    case 14: return "sorry, closed";
+    case 15: return "try us later, atm we're locked down";
+    case 16: return "closed. try tomorrow";
     }
   case KICK_FLOOD:
     switch (randint(7)) {
-    case 0: return STR("so much bullshit in such a short time. amazing.");
-    case 1: return STR("slow down. i'm trying to read here.");
-    case 2: return STR("uhm... you actually think irc is for talking?");
-    case 3: return STR("talk talk talk");
-    case 4: return STR("blabbering are we?");
-    case 5: return STR("... and i don't even like you!");
-    case 6: return STR("and you're outa here...");
+    case 0: return "so much bullshit in such a short time. amazing.";
+    case 1: return "slow down. i'm trying to read here.";
+    case 2: return "uhm... you actually think irc is for talking?";
+    case 3: return "talk talk talk";
+    case 4: return "blabbering are we?";
+    case 5: return "... and i don't even like you!";
+    case 6: return "and you're outa here...";
 
     }
   case KICK_NICKFLOOD:
     switch (randint(7)) {
-    case 0: return STR("make up your mind?");
-    case 1: return STR("be schizofrenic elsewhere");
-    case 2: return STR("I'm loosing track of you... not!");
-    case 3: return STR("that is REALLY annoying");
-    case 4: return STR("try this: /NICK n00b");
-    case 5: return STR("playing hide 'n' seek?");
-    case 6: return STR("gotcha!");
+    case 0: return "make up your mind?";
+    case 1: return "be schizofrenic elsewhere";
+    case 2: return "I'm loosing track of you... not!";
+    case 3: return "that is REALLY annoying";
+    case 4: return "try this: /NICK n00b";
+    case 5: return "playing hide 'n' seek?";
+    case 6: return "gotcha!";
     }
   case KICK_KICKFLOOD:
     switch (randint(6)) {
-    case 0: return STR("easier to just leave if you wan't to be alone");
-    case 1: return STR("cool down");
-    case 2: return STR("don't be so damned aggressive. that's my job.");
-    case 3: return STR("kicking's fun, isn't it?");
-    case 4: return STR("what's the rush?");
-    case 5: return STR("next time you do that, i'll kick you again");
+    case 0: return "easier to just leave if you wan't to be alone";
+    case 1: return "cool down";
+    case 2: return "don't be so damned aggressive. that's my job.";
+    case 3: return "kicking's fun, isn't it?";
+    case 4: return "what's the rush?";
+    case 5: return "next time you do that, i'll kick you again";
     }
   case KICK_BOGUSUSERNAME:
-    return STR("bogus username");
+    return "bogus username";
   case KICK_MEAN:
     switch (randint(11)) {
-    case 0: return STR("hey! that wasn't very nice!");
-    case 1: return STR("don't fuck with my pals");
-    case 2: return STR("meanie!");
-    case 3: return STR("I can be a bitch too...");
-    case 4: return STR("leave the bots alone, will ya?");
-    case 5: return STR("not very clever");
-    case 6: return STR("watch it");
-    case 7: return STR("fuck off");
-    case 8: return STR("easy now. that's a friend.");
-    case 9: return STR("abuse of power. leave that to me, will ya?");      
-    case 10: return STR("there as some things you cannot do, and that was one of them...");
+    case 0: return "hey! that wasn't very nice!";
+    case 1: return "don't fuck with my pals";
+    case 2: return "meanie!";
+    case 3: return "I can be a bitch too...";
+    case 4: return "leave the bots alone, will ya?";
+    case 5: return "not very clever";
+    case 6: return "watch it";
+    case 7: return "fuck off";
+    case 8: return "easy now. that's a friend.";
+    case 9: return "abuse of power. leave that to me, will ya?";      
+    case 10: return "there as some things you cannot do, and that was one of them...";
     }
   case KICK_BOGUSKEY:
-    return STR("I have a really hard time reading that key");
+    return "I have a really hard time reading that key";
   default:
     return "OMFG@YUO";    
   }
@@ -981,7 +981,7 @@ void makeplaincookie(char *chname, char *nick, char *buf)
   char work[256] = "", work2[256] = "";
   int i, n;
 
-  sprintf(work, STR("%010li"), (now + timesync));
+  sprintf(work, "%010li", (now + timesync));
   strcpy(buf, (char *) &work[4]);
   work[0] = 0;
   if (strlen(nick) < 5)
@@ -1063,7 +1063,7 @@ int goodpass(char *pass, int idx, char *nick)
     if (idx)
       dprintf(idx, "%s\n", tell);
     else if (nick[0])
-      dprintf(DP_HELP, STR("NOTICE %s :%s\n"), nick, tell);
+      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, tell);
     return 0;
   }
   return 1;

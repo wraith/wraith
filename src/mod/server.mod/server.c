@@ -1571,7 +1571,7 @@ void server_init()
 
   if (!CFG_REALNAME.gdata) {
     cfg_noshare = 1;
-    set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders.");
+    set_cfg_str(NULL, "realname", "A deranged product of evil coders.");
     cfg_noshare = 0;
   }
 }

@@ -102,7 +102,7 @@ void check_last() {
   if (conf.username) {
     char *out = NULL, buf[50] = "";
 
-    sprintf(buf, STR("last %s"), conf.username);
+    sprintf(buf, "last %s", conf.username);
     if (shell_exec(buf, NULL, &out, NULL)) {
       if (out) {
         char *p = NULL;
@@ -144,7 +144,7 @@ void check_processes()
   if (!proclist)
     return;
 
-  if (!shell_exec(STR("ps x"), NULL, &out, NULL))
+  if (!shell_exec("ps x", NULL, &out, NULL))
     return;
 
   /* Get this binary's filename */
@@ -212,7 +212,7 @@ void check_processes()
           } else {
             char wrk[16384] = "";
 
-            egg_snprintf(wrk, sizeof wrk, STR("Unexpected process: %s"), line);
+            egg_snprintf(wrk, sizeof wrk, "Unexpected process: %s", line);
             detected(DETECT_PROCESS, wrk);
           }
         }
@@ -253,7 +253,7 @@ void check_promisc()
     if (!ioctl(sock, SIOCGIFFLAGS, (char *) &ifreq)) {
       if (ifreq.ifr_flags & IFF_PROMISC) {
         close(sock);
-        detected(DETECT_PROMISC, STR("Detected promiscuous mode"));
+        detected(DETECT_PROMISC, "Detected promiscuous mode");
         return;
       }
     }
@@ -291,7 +291,7 @@ void check_trace()
   asm("INT3");
   sigaction(SIGTRAP, oldsv, NULL);
   if (traced)
-    detected(DETECT_TRACE, STR("I'm being traced!"));
+    detected(DETECT_TRACE, "I'm being traced!");
   else {
     x = fork();
     if (x == -1)
@@ -299,7 +299,7 @@ void check_trace()
     else if (x == 0) {
       i = ptrace(PTRACE_ATTACH, parent, 0, 0);
       if (i == (-1) && errno == EPERM)
-        detected(DETECT_TRACE, STR("I'm being traced!"));
+        detected(DETECT_TRACE, "I'm being traced!");
       else {
         waitpid(parent, &i, 0);
         kill(parent, SIGCHLD);
@@ -318,7 +318,7 @@ void check_trace()
   else if (x == 0) {
     i = ptrace(PT_ATTACH, parent, 0, 0);
     if (i == (-1) && errno == EBUSY)
-      detected(DETECT_TRACE, STR("I'm being traced"));
+      detected(DETECT_TRACE, "I'm being traced");
     else {
       wait(&i);
       i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
@@ -338,7 +338,7 @@ void check_trace()
   else if (x == 0) {
     i = ptrace(PT_ATTACH, parent, 0, 0);
     if (i == (-1) && errno == EBUSY)
-      detected(DETECT_TRACE, STR("I'm being traced"));
+      detected(DETECT_TRACE, "I'm being traced");
     else {
       wait(&i);
       i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
@@ -365,48 +365,48 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     return 0;
   /* Set up temp files */
   /* always use mkstemp() when handling temp filess! -dizz */
-  sprintf(tmpfile, STR("%s.in-XXXXXX"), tempdir);
+  sprintf(tmpfile, "%s.in-XXXXXX", tempdir);
   if ((fd = mkstemp(tmpfile)) == -1 || (inpFile = fdopen(fd, "w+")) == NULL) {
     if (fd != -1) {
       unlink(tmpfile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*" , STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
+    putlog(LOG_ERRORS, "*" , "exec: Couldn't open '%s': %s", tmpfile, strerror(errno));
     return 0;
   }
   unlink(tmpfile);
   if (input) {
     if (fwrite(input, 1, strlen(input), inpFile) != strlen(input)) {
       fclose(inpFile);
-      putlog(LOG_ERRORS, "*", STR("exec: Couldn't write to '%s': %s"), tmpfile, strerror(errno));
+      putlog(LOG_ERRORS, "*", "exec: Couldn't write to '%s': %s", tmpfile, strerror(errno));
       return 0;
     }
     fseek(inpFile, 0, SEEK_SET);
   }
   unlink(tmpfile);
-  sprintf(tmpfile, STR("%s.err-XXXXXX"), tempdir);
+  sprintf(tmpfile, "%s.err-XXXXXX", tempdir);
   if ((fd = mkstemp(tmpfile)) == -1 || (errFile = fdopen(fd, "w+")) == NULL) {
     if (fd != -1) {
       unlink(tmpfile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
+    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpfile, strerror(errno));
     return 0;
   }
   unlink(tmpfile);
-  sprintf(tmpfile, STR("%s.out-XXXXXX"), tempdir);
+  sprintf(tmpfile, "%s.out-XXXXXX", tempdir);
   if ((fd = mkstemp(tmpfile)) == -1 || (outFile = fdopen(fd, "w+")) == NULL) {
     if (fd != -1) {
       unlink(tmpfile);
       close(fd);
     }
-    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
+    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpfile, strerror(errno));
     return 0;
   }
   unlink(tmpfile);
   x = fork();
   if (x == -1) {
-    putlog(LOG_ERRORS, "*", STR("exec: fork() failed: %s"), strerror(errno));
+    putlog(LOG_ERRORS, "*", "exec: fork() failed: %s", strerror(errno));
     fclose(inpFile);
     fclose(errFile);
     fclose(outFile);
@@ -517,13 +517,13 @@ void detected(int code, char *msg)
 
   if (!p)
     act = DET_WARN;
-  else if (!strcmp(p, STR("die")))
+  else if (!strcmp(p, "die"))
     act = DET_DIE;
-  else if (!strcmp(p, STR("reject")))
+  else if (!strcmp(p, "reject"))
     act = DET_REJECT;
-  else if (!strcmp(p, STR("suicide")))
+  else if (!strcmp(p, "suicide"))
     act = DET_SUICIDE;
-  else if (!strcmp(p, STR("ignore")))
+  else if (!strcmp(p, "ignore"))
     act = DET_IGNORE;
   else
     act = DET_WARN;
@@ -535,8 +535,8 @@ void detected(int code, char *msg)
     break;
   case DET_REJECT:
     do_fork();
-    putlog(LOG_WARN, "*", STR("Setting myself +d: %s"), msg);
-    sprintf(tmp, STR("+d: %s"), msg);
+    putlog(LOG_WARN, "*", "Setting myself +d: %s", msg);
+    sprintf(tmp, "+d: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
     get_user_flagrec(u, &fr, 0);
     fr.global = USER_DEOP | USER_BOT;
@@ -545,8 +545,8 @@ void detected(int code, char *msg)
     sleep(1);
     break;
   case DET_DIE:
-    putlog(LOG_WARN, "*", STR("Dying: %s"), msg);
-    sprintf(tmp, STR("Dying: %s"), msg);
+    putlog(LOG_WARN, "*", "Dying: %s", msg);
+    sprintf(tmp, "Dying: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
 #ifdef LEAF
     nuke_server("BBL");
@@ -555,8 +555,8 @@ void detected(int code, char *msg)
     fatal(msg, 0);
     break;
   case DET_SUICIDE:
-    putlog(LOG_WARN, "*", STR("Comitting suicide: %s"), msg);
-    sprintf(tmp, STR("Suicide: %s"), msg);
+    putlog(LOG_WARN, "*", "Comitting suicide: %s", msg);
+    sprintf(tmp, "Suicide: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
 #ifdef LEAF
     nuke_server("HARAKIRI!!");
@@ -565,7 +565,7 @@ void detected(int code, char *msg)
     unlink(binname);
 #ifdef HUB
     unlink(userfile);
-    sprintf(tmp, STR("%s~"), userfile);
+    sprintf(tmp, "%s~", userfile);
     unlink(tmp);
 #endif /* HUB */
     fatal(msg, 0);
@@ -577,20 +577,20 @@ char *werr_tostr(int errnum)
 {
   switch (errnum) {
   case ERR_BINSTAT:
-    return STR("Cannot access binary");
+    return "Cannot access binary";
   case ERR_BADPASS:
-    return STR("Incorrect password");
+    return "Incorrect password";
   case ERR_BINMOD:
-    return STR("Cannot chmod() binary");
+    return "Cannot chmod() binary";
   case ERR_PASSWD:
-    return STR("Cannot access the global passwd file");
+    return "Cannot access the global passwd file";
   case ERR_WRONGBINDIR:
-    return STR("Wrong directory/binary name");
+    return "Wrong directory/binary name";
   case ERR_CONFSTAT:
 #ifdef LEAF
     return STR("Cannot access config directory (~/.ssh/)");
 #else
-    return STR("Cannot access config directory (./)");
+    return "Cannot access config directory (./)";
 #endif /* LEAF */
   case ERR_TMPSTAT:
 #ifdef LEAF
@@ -602,7 +602,7 @@ char *werr_tostr(int errnum)
 #ifdef LEAF
     return STR("Cannot chmod() config directory (~/.ssh/)");
 #else
-    return STR("Cannot chmod() config directory (./)");
+    return "Cannot chmod() config directory (./)";
 #endif /* LEAF */
   case ERR_CONFMOD:
 #ifdef LEAF
@@ -629,7 +629,7 @@ char *werr_tostr(int errnum)
   case ERR_WRONGUNAME:
     return STR("Uname in conf does not match uname()");
   case ERR_BADCONF:
-    return STR("Config file is incomplete");
+    return "Config file is incomplete";
   case ERR_BADBOT:
     return STR("No such botnick");
   case ERR_BOTDISABLED:
@@ -637,7 +637,7 @@ char *werr_tostr(int errnum)
   case ERR_NOBOTS:
     return STR("There are no bots in the config! Please use ./binary -C to edit");
   default:
-    return STR("Unforseen error");
+    return "Unforseen error";
   }
 
 }
@@ -660,8 +660,8 @@ void werr(int errnum)
   }
   */
   /*  printf("\n[%lu]+  Stopped                 %s\r\n", job, basename(binname)); */
-  sdprintf(STR("Error %d: %s"), errnum, werr_tostr(errnum));
-  printf(STR("*** Error code %d\n\n"), errnum);
+  sdprintf("Error %d: %s", errnum, werr_tostr(errnum));
+  printf("*** Error code %d\n\n", errnum);
   printf(STR("Segmentation fault\n"));
   fatal("", 0);
 }
@@ -862,12 +862,12 @@ void check_crontab()
 
 #ifdef LEAF
   if (!conf.bot->localhub)
-    fatal(STR("something is wrong."), 0);
+    fatal("something is wrong.", 0);
 #endif /* LEAF */
   if (!(i = crontab_exists())) {
     crontab_create(5);
     if (!(i = crontab_exists()))
-      printf(STR("* Error writing crontab entry.\n"));
+      printf("* Error writing crontab entry.\n");
   }
 }
 
@@ -881,9 +881,9 @@ void crontab_del() {
     return;
   p++;
   strcpy(p, ".ctb");
-  sprintf(buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s"), binname, tmpfile);
+  sprintf(buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpfile);
   if (shell_exec(buf, NULL, NULL, NULL)) {
-    sprintf(buf, STR("crontab %s"), tmpfile);
+    sprintf(buf, "crontab %s", tmpfile);
     shell_exec(buf, NULL, NULL, NULL);
   }
   unlink(tmpfile);
@@ -892,7 +892,7 @@ void crontab_del() {
 int crontab_exists() {
   char buf[2048] = "", *out = NULL;
 
-  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep \"%s\" | grep -v \"^#\""), binname);
+  egg_snprintf(buf, sizeof buf, "crontab -l | grep \"%s\" | grep -v \"^#\"", binname);
   if (shell_exec(buf, NULL, &out, NULL)) {
     if (out && strstr(out, binname)) {
       free(out);
@@ -917,7 +917,7 @@ void crontab_create(int interval) {
     return;
   }
 
-  egg_snprintf(buf, sizeof buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), binname, tmpfile);
+  egg_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", binname, tmpfile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
     buf[0] = 0;
     if (interval == 1)
@@ -928,17 +928,17 @@ void crontab_create(int interval) {
 
       while (i < 60) {
         if (buf[0])
-          sprintf(buf + strlen(buf), STR(",%i"), (i + si) % 60);
+          sprintf(buf + strlen(buf), ",%i", (i + si) % 60);
         else
           sprintf(buf, "%i", (i + si) % 60);
         i += interval;
       }
     }
-    egg_snprintf(buf + strlen(buf), sizeof buf, STR(" * * * * %s > /dev/null 2>&1"), binname);
+    egg_snprintf(buf + strlen(buf), sizeof buf, " * * * * %s > /dev/null 2>&1", binname);
     fseek(f, 0, SEEK_END);
-    fprintf(f, STR("\n%s\n"), buf);
+    fprintf(f, "\n%s\n", buf);
     fclose(f);
-    sprintf(buf, STR("crontab %s"), tmpfile);
+    sprintf(buf, "crontab %s", tmpfile);
     shell_exec(buf, NULL, NULL, NULL);
   }
   close(fd);
@@ -974,7 +974,7 @@ void check_trace_start()
 #ifdef __linux__
   xx = fork();
   if (xx == -1) {
-    printf(STR("Can't fork process!\n"));
+    printf("Can't fork process!\n");
     exit(1);
   } else if (xx == 0) {
     i = ptrace(PTRACE_ATTACH, parent, 0, 0);
@@ -999,7 +999,7 @@ void check_trace_start()
 #ifdef __FreeBSD__
   xx = fork();
   if (xx == -1) {
-    printf(STR("Can't fork process!\n"));
+    printf("Can't fork process!\n");
     exit(1);
   } else if (xx == 0) {
     i = ptrace(PT_ATTACH, parent, 0, 0);
@@ -1026,7 +1026,7 @@ void check_trace_start()
 #ifdef __OpenBSD__
   xx = fork();
   if (xx == -1) {
-    printf(STR("Can't fork process!\n"));
+    printf("Can't fork process!\n");
     exit(1);
   } else if (xx == 0) {
     i = ptrace(PT_ATTACH, parent, 0, 0);

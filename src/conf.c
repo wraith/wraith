@@ -93,11 +93,11 @@ void confedit(char *cfile) {
     int waiter;
     pid_t pid, xpid;
 
-    egg_snprintf(s, sizeof s, STR("%s.conf-XXXXXX"), tempdir);
+    egg_snprintf(s, sizeof s, "%s.conf-XXXXXX", tempdir);
     um = umask(077);
 
     if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
-      fatal(STR("Can't create temp conffile!"), 0);
+      fatal("Can't create temp conffile!", 0);
     }
 
     writeconf(NULL, f, CONF_COMMENT);
@@ -447,7 +447,7 @@ int readconf(char *cfile, int bits)
 
     sdprintf("CONF LINE: %s", line);
     if (enc && !strchr("*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
-      sdprintf(STR("line %d, char %c "), i, line[0]);
+      sdprintf("line %d, char %c ", i, line[0]);
       werr(ERR_CONFBADENC);
     } else {                    /* line is good to parse */
       /* - uid */
