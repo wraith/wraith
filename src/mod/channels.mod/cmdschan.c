@@ -1478,11 +1478,34 @@ static void cmd_mns_chan(struct userrec *u, int idx, char *par)
   dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
 }
 
+/* thanks Excelsior */
+void modesetting(int idx, char *work, int *cnt, char *name, int state)
+{
+  char tmp[100];
+  if (!name || (name && !name[0])) (*cnt) = 3; 		/* empty buffer if no (char *) name */
+  (*cnt)++;
+  if (*cnt > 4) {
+    *cnt = 1;
+    work[0] = 0;
+  }
+  if (!work[0])
+    sprintf(work, "  ");
+  if (name && name[0]) {
+//    snprintf(tmp, sizeof tmp, "%s%-17s", state ? "\033[32m+\033[0m" : "\033[31m-\033[0m", name);
+    snprintf(tmp, sizeof tmp, "%s%-17s", state ? "\002+\002" : "\002-\002", name);
+    strcat(work, tmp);
+  }
+  if (*cnt >= 4)
+    dprintf(idx, "%s\n", work);
+}
+
+
+#define MSET(name, state) modesetting(idx, work, &cnt, name, state)
 static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 {
   char *chname, work[512];
   struct chanset_t *chan;
-  int ii, tmp;
+  int ii, tmp, cnt = 0;
   struct udef_struct *ul;
 
   if (!par[0]) {
@@ -1545,37 +1568,35 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
       dprintf(idx, "invite-time: 0\n");
 #endif /* S_IRCNET */
     dprintf(idx, "Other modes:\n");
-    dprintf(idx, "     %cinactive       %cprivate     %ccycle          %cdontkickops\n",
-	    (chan->status & CHAN_INACTIVE) ? '+' : '-',
-	    (chan->status & CHAN_PRIVATE) ? '+' : '-',
-	    (chan->status & CHAN_CYCLE) ? '+' : '-',
-	    (chan->status & CHAN_DONTKICKOPS) ? '+' : '-');
-    dprintf(idx, "     %cprotectops     %crevenge        %crevengebot\n",
-	    (chan->status & CHAN_PROTECTOPS) ? '+' : '-',
-	    (chan->status & CHAN_REVENGE) ? '+' : '-',
-	    (chan->status & CHAN_REVENGEBOT) ? '+' : '-');
-    dprintf(idx, "     %cbitch          %cnodesynch\n",
-	    (chan->status & CHAN_BITCH) ? '+' : '-',
-	    (chan->status & CHAN_NODESYNCH) ? '+' : '-');
-    dprintf(idx, "     %cenforcebans    %cdynamicbans    %cuserbans\n",
-	    (chan->status & CHAN_ENFORCEBANS) ? '+' : '-',
-	    (chan->status & CHAN_DYNAMICBANS) ? '+' : '-',
-	    (chan->status & CHAN_NOUSERBANS) ? '-' : '+');
+    work[0] = 0;
+    MSET("bitch",		channel_bitch(chan));
+    MSET("closed",		channel_closed(chan));
+    MSET("cycle",		channel_cycle(chan));
+    MSET("dontkickops",		channel_dontkickops(chan));
+    MSET("enforcebans", 	channel_enforcebans(chan));
+    MSET("fastop",		channel_fastop(chan));
+    MSET("inactive",		channel_inactive(chan));
+    MSET("manop",		channel_manop(chan));
+    MSET("nodesynch",		channel_nodesynch(chan));
+    MSET("nomop",		channel_nomop(chan));
+    MSET("private",		channel_private(chan));
+    MSET("protectops",		channel_protectops(chan));
+    MSET("revenge",		channel_revenge(chan));
+    MSET("revengebot",		channel_revengebot(chan));
+    MSET("take",		channel_take(chan));
+    MSET("voice",		channel_voice(chan));
+    MSET("", 0);
+    MSET("dynamicbans",		channel_dynamicbans(chan));
+    MSET("userbans",		!channel_nouserbans(chan));
 #ifdef S_IRCNET
-    dprintf(idx, "     %cdynamicexempts %cuserexempts    %cdynamicinvites %cuserinvites\n",
-	    (chan->ircnet_status & CHAN_DYNAMICEXEMPTS) ? '+' : '-',
-	    (chan->ircnet_status & CHAN_NOUSEREXEMPTS) ? '-' : '+',
-	    (chan->ircnet_status & CHAN_DYNAMICINVITES) ? '+' : '-',
-	    (chan->ircnet_status & CHAN_NOUSERINVITES) ? '-' : '+');
+    MSET("dynamicexempts",	channel_dynamicexempts(chan));
+    MSET("userexempts",		!channel_nouserexempts(chan));
+    MSET("dynamicinvites",	channel_dynamicinvites(chan));
+    MSET("userinvites",		!channel_nouserinvites(chan));
 #endif /* S_IRCNET */
-    dprintf(idx, "     %cclosed         %ctake           %cnomop          %cmanop\n",
-	    (chan->status & CHAN_CLOSED) ? '+' : '-',
-	    (chan->status & CHAN_TAKE) ? '+' : '-',
-	    (chan->status & CHAN_NOMOP) ? '+' : '-',
-	    (chan->status & CHAN_MANOP) ? '+' : '-');
-    dprintf(idx, "     %cvoice          %cfastop\n",
-	    (chan->status & CHAN_VOICE) ? '+' : '-',
-	    (chan->status & CHAN_FASTOP) ? '+' : '-');
+    MSET("", 0);
+    work[0] = 0;
+
 /* Chanflag template
  *          (chan->status & CHAN_TEMP) ? '+' : '-',
  * also include %ctemp in dprintf.
