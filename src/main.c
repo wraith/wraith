@@ -235,7 +235,7 @@ static void show_help()
 
   egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
 
-  printf(STR("Wraith %s\n\n"), egg_version);
+  printf(STR("%s\n\n"), version);
   printf(format, "Option", "Description");
   printf(format, "------", "-----------");
   printf(format, STR("-B <botnick>"), STR("Starts the specified bot"));
@@ -339,7 +339,7 @@ static void dtx_arg(int argc, char *argv[])
         char date[50] = "";
 
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
-	printf("Wraith %s\nBuild Date: %s (%lu)\n", egg_version, date, buildts);
+	printf("%s\nBuild Date: %s (%lu)\n", version, date, buildts);
         printf("SALTS\nfiles: %s\nbotlink: %s\n", SALT1, SALT2);
 	exit(0);
       }
@@ -686,6 +686,7 @@ int main(int argc, char **argv)
   setlimits();
   init_debug();
   init_signals();		
+  init_settings();
 
   if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a"))) {
     unlink(argv[0]);
@@ -702,8 +703,8 @@ int main(int argc, char **argv)
 #endif
 
   /* Version info! */
-  egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);
-  egg_snprintf(version, sizeof version, "Wraith %s (%lu)", egg_version, buildts);
+  egg_snprintf(ver, sizeof ver, "[%s] Wraith %s", packname, egg_version);
+  egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu)", packname, egg_version, buildts);
 
   Context;
   /* Initialize variables and stuff */
@@ -742,7 +743,6 @@ int main(int argc, char **argv)
   clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
   /* just load everything now, won't matter if it's loaded if the bot has to suicide on startup */
   init_flags();
-  init_settings();
   binds_init();
   core_binds_init();
   init_dcc_max();
