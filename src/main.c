@@ -92,9 +92,7 @@ time_t	now;			/* duh, now :) */
 
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
 static bool do_confedit = 0;		/* show conf menu if -C */
-#ifdef LEAF
 static char do_killbot[21] = "";
-#endif /* LEAF */
 static int kill_sig;
 static char *update_bin = NULL;
 static bool checktrace = 1;		/* Check for trace when starting up? */
