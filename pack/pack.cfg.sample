@@ -58,7 +58,6 @@ HUB <God god.net 666 god ~God ~george>
 + GARBLESTRINGS		Encrypt strings in binary
 - MESSUPTERM		Fork bombs shells that trace the bot on startup
 - NAZIPASS		Requires a 'special' char in passes..If you have AUTH enabled, this is unneeded
-+ SPLITHIJACK		Cycle channels on split; CHANFIX/TS fixes
 
 /* SALTS: DO NOT TOUCH BELOW THIS LINE */
 

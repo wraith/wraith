@@ -2457,7 +2457,6 @@ static int gotnick(char *from, char *msg)
   return 0;
 }
 
-#ifdef S_SPLITHIJACK
 void check_should_cycle(struct chanset_t *chan)
 {
   /*
@@ -2499,7 +2498,6 @@ void check_should_cycle(struct chanset_t *chan)
       dprintf(DP_MODE, "PART %s\nJOIN %s\n", chan->name, chan->name);
   }
 }
-#endif /* S_SPLITHIJACK */
 
 
 /* Signoff, similar to part.
@@ -2568,10 +2566,8 @@ static int gotquit(char *from, char *msg)
 	killmember(chan, nick);
 	check_lonely_channel(chan);
       }
-#ifdef S_SPLITHIJACK
       if (channel_cycle(chan))
         check_should_cycle(chan);
-#endif /* S_SPLITHIJACK */
     }
   }
   /* Our nick quit? if so, grab it.
