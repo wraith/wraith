@@ -214,6 +214,7 @@ extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_BOT_NEW,
  DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,
  DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT, DCC_DNSWAIT;
 
+void send_timesync(int);
 void failed_link(int);
 void dupwait_notify(char *);
 char *rand_dccresp();

@@ -159,7 +159,6 @@ void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);
 int sanitycheck_dcc(char *, char *, char *, char *);
-void send_timesync(int);
 int hostsanitycheck_dcc(char *, char *, IP, char *, char *);
 char *iptostr(IP);
 int sock_has_data(int, int);
