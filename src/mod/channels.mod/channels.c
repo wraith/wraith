@@ -323,7 +323,8 @@ ContextNote("slowpart");
   }
 }
 
-static void got_sj(int idx, char * code, char * par) {
+static void got_sj(int idx, char *code, char *par) 
+{
   char *chname;
   time_t delay;
   struct chanset_t *chan;
@@ -335,7 +336,8 @@ static void got_sj(int idx, char * code, char * par) {
     chan->channel.jointime = delay;
 }
 
-static void got_sp(int idx, char * code, char * par) {
+static void got_sp(int idx, char *code, char *par) 
+{
   char *chname;
   time_t delay;
   struct chanset_t *chan;
@@ -345,6 +347,26 @@ static void got_sp(int idx, char * code, char * par) {
   chan = findchan_by_dname(chname);
   if (chan)
     chan->channel.parttime = delay;
+}
+/* got_jn
+ * We get this when a bot is opped in a +take chan
+ * we are to set -inactive, jointime = 0, and join.
+ */
+
+static void got_jn(int idx, char *code, char *par)
+{
+  struct chanset_t *chan;
+  char *chname;
+  chname = newsplit(&par);
+  if (!chname || !chname[0]) return;
+  if (!(chan = findchan_by_dname(chname))) return;
+  
+  chan->status &= ~CHAN_INACTIVE;
+  chan->channel.jointime = 0;
+#ifdef LEAF
+  if (shouldjoin(chan) && !channel_active(chan))
+   dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+#endif /* LEAF */
 }
 
 static void *channel_malloc(int size, char *file, int line)
@@ -823,6 +845,7 @@ cmd_t channels_bot[] = {
   {"kl",       "", (Function) got_kl,    NULL},
   {"sj",       "", (Function) got_sj,    NULL},
   {"sp",       "", (Function) got_sp,    NULL},
+  {"jn",       "", (Function) got_jn,    NULL},
 /*
 #ifdef HUB
   {"o1", "", (Function) got_o1, NULL},
