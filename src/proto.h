@@ -108,6 +108,7 @@ void botnet_send_cmdpass(int, char *, char *);
 #endif
 
 /* chanprog.c */
+void checkchans(int);
 void tell_verbose_uptime(int);
 void tell_verbose_status(int);
 void tell_settings(int);

@@ -583,7 +583,8 @@ Function global_table[] =
   (Function) putallbots,
   (Function) ssl_link,
   (Function) dropssl,
-  (Function) myipstr
+  (Function) myipstr,
+  (Function) checkchans
 
 
 };

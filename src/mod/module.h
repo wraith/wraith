@@ -537,11 +537,13 @@
 #define hostprotocol ((int (*) (char *))global[330])
 #define sdprintf (global[331])
 #define putbot ((void (*)(char *, char *))global[332])
-/* 333 - 335 */
+/* 333 - 336 */
 #define putallbots ((void (*)(char *))global[333])
 #define ssl_link ((int (*) (int, int))global[334])
 #define dropssl ((void (*) (int))global[335])
 #define myipstr ((char*(*)(int))global[336])
+/* 337 - 340 */
+#define checkchans ((void (*) (int))global[340])
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
  * file for it ;)

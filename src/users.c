@@ -810,7 +810,6 @@ Context;
             Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
            return 0;
           }
-	 call_hook(HOOK_SWITCH_STATIC);
          }
 	} else if (!strncmp(code, "::", 2)) {
 	  /* channel-specific bans */
@@ -936,7 +935,6 @@ Context;
 	  strcpy(lasthand, code);
 	  u = NULL;
         } else if (!rfc_casecmp(code, CHANS_NAME)) {
-          call_hook(HOOK_SWITCH_STATIC);
           strcpy(lasthand, code);
           u = NULL;
         } else if (!rfc_casecmp(code, CONFIG_NAME)) {

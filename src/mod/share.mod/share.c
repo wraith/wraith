@@ -1807,13 +1807,14 @@ static void finish_share(int idx)
 	while (chan->exempts)
 	  u_delexempt(chan, chan->exempts->mask, 1);
 	while (chan->invites)
-  //setstatic = 0;
 	  u_delinvite(chan, chan->invites->mask, 1);
+  checkchans(0);
     }
   noshare = 0;
   ou = userlist;		/* Save old user list			*/
   userlist = (void *) -1;	/* Do this to prevent .user messups	*/
 
+    checkchans(2);
   /* Bot user pointers are updated to point to the new list, all others
    * are set to NULL. If our userfile will be overriden, just set _all_
    * to NULL directly.
@@ -1824,11 +1825,10 @@ static void finish_share(int idx)
   else
       dcc[i].user = get_user_by_handle(u, dcc[i].nick);
 
-
+  checkchans(1);
   /* Read the transferred userfile. Add entries to u, which already holds
    * the bot entries in non-override mode.
    */
-  //setstatic = 1;
   loading = 1;
   checkchans(0); /* flag all the channels.. */
 Context;

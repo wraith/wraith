@@ -70,7 +70,6 @@ static void tell_bans(int idx, int show_inact, char *match);
 static int write_bans(FILE * f, int idx);
 static int write_config (FILE * f, int idx);
 static void check_expired_bans(void);
-static void switch_static(void);
 #ifdef S_IRCNET
 static void tell_exempts (int idx, int show_inact, char * match);
 static int write_exempts (FILE * f, int idx);

@@ -1304,7 +1304,7 @@ static int write_chans(FILE *f, int idx)
        }
      }
    //insert the ending character into a string
-     sprintf(sadd, "%s\n", channel_static(chan) ? "" : "}");
+     sprintf(sadd, "}\n");
 
      if (lfprintf(f, "+ channel %s %s%schanmode %s idle-kick %d limit %d stopnethack-mode %d \
 revenge-mode %d \
@@ -1319,9 +1319,9 @@ exempt-time %d invite-time %d \
 %cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites \
 %cnodesynch \
 %cclosed %ctake %cmanop %cvoice %cfastop %s %s",
-	channel_static(chan) ? "set" : "add",
+	"add",
 	name,
-	channel_static(chan) ? " " : " { ",
+	" { ",
 	w2,
 /* Chanchar template
  *      temp,
@@ -1469,14 +1469,7 @@ static int expired_mask(struct chanset_t *chan, char *who)
   else
     return 1;
 }
-// cheap hack.
-static void switch_static(void)
-{
- if (setstatic)
-  setstatic = 0;
- else
-  setstatic = 1;
-}
+
 #ifdef LEAF
 int checklimit = 1;
 void check_limitraise() {

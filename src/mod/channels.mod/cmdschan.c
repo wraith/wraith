@@ -1439,8 +1439,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
   if (!(chan = findchan_by_dname(chname)))
     dprintf(idx, "No such channel defined.\n");
   else {
-    dprintf(idx, "Settings for %s channel %s:\n",
-	    channel_static(chan) ? "static" : "dynamic", chan->dname);
+    dprintf(idx, "Settings for dynamic channel %s:\n", chan->dname);
     get_mode_protect(chan, work);
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
 /* Chanchar template

@@ -56,7 +56,6 @@
 #define HOOK_DNS_IPBYHOST	113
 #define HOOK_ENCRYPT_STRING     114
 #define HOOK_DECRYPT_STRING     115
-#define HOOK_SWITCH_STATIC      116
 #define HOOK_SHAREUPDATEIN	117
 
 /* These are FIXED once they are in a release they STAY
@@ -76,6 +75,7 @@
 #define SHARE_DUMP_RESYNC	  5
 /* Channels */
 #define CHANNEL_CLEAR		 15
+#define CHANNEL_REMOVE		 45
 /* Server */
 #define SERVER_BOTNAME		  4
 #define SERVER_BOTUSERHOST	  5

@@ -1004,7 +1004,7 @@ static int tcl_channel STDVAR
     BADARGS(3, 999, " set channel-name ?options?");
     chan = findchan_by_dname(argv[2]);
     if (chan == NULL) {
-      if (chan_hack == 1)
+      if (loading == 1)
 	return TCL_OK;		/* Ignore channel settings for a static
 				 * channel which has been removed from
 				 * the config */
@@ -1423,14 +1423,14 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
       }
     }
   }
-  /* If protect_readonly == 0 and chan_hack == 0 then
+  /* If protect_readonly == 0 and loading == 0 then
    * bot is now processing the configfile, so dont do anything,
    * we've to wait the channelfile that maybe override these settings
    * (note: it may cause problems if there is no chanfile!)
    * <drummer/1999/10/21>
    */
 #ifdef LEAF
-  if (protect_readonly || chan_hack) {
+  if (protect_readonly || loading) {
     if (((old_status ^ chan->status) & CHAN_INACTIVE) &&
 	module_find("irc", 0, 0)) {
       if (channel_inactive(chan) &&
@@ -1565,11 +1565,10 @@ static int tcl_isdynamic STDVAR
 
   BADARGS(2, 2, " channel");
   chan = findchan_by_dname(argv[1]);
-  if (chan != NULL)
-    if (!channel_static(chan)) {
+  if (chan != NULL) {
       Tcl_AppendResult(irp, "1", NULL);
       return TCL_OK;
-    }
+  }
   Tcl_AppendResult(irp, "0", NULL);
   return TCL_OK;
 }
@@ -1852,17 +1851,15 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
     /* Channel name is stored in xtra field for sharebot stuff */
     join = 1;
   }
-  if (setstatic)
-    chan->status |= CHAN_STATIC;
-  /* If chan_hack is set, we're loading the userfile. Ignore errors while
+  /* If loading is set, we're loading the userfile. Ignore errors while
    * reading userfile and just return TCL_OK. This is for compatability
    * if a user goes back to an eggdrop that no-longer supports certain
    * (channel) options.
    */
 #if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
-  if ((tcl_channel_modify(irp, chan, items, (char **)item) != TCL_OK) && !chan_hack) {
+  if ((tcl_channel_modify(irp, chan, items, (char **)item) != TCL_OK) && !loading) {
 #else
-  if ((tcl_channel_modify(irp, chan, items, item) != TCL_OK) && !chan_hack) {
+  if ((tcl_channel_modify(irp, chan, items, item) != TCL_OK) && !loading) {
 #endif
     ret = TCL_ERROR;
   }

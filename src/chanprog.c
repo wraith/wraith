@@ -208,6 +208,41 @@ int expmem_chanprog()
   return tot;
 }
 
+/* 0 marks all channels
+ * 1 removes marked channels
+ * 2 unmarks all channels
+ */
+
+void checkchans(int which)
+{
+  struct chanset_t *chan, *chan_next;
+
+  if (which == 0 || which == 2) {
+    for (chan = chanset; chan; chan = chan->next)
+      if (which == 0)
+        chan->status |= CHAN_FLAGGED;
+      else
+        chan->statuc &= ~CHAN_FLAGGED;
+  } else if (which == 1) {
+#ifdef LEAF
+    module_entry *me;
+#endif /* LEAF */
+    for (chan = chanset; chan; chan = chan_next) {
+      chan_next = chan->next;
+      if (chan->status & CHAN_FLAGGED) {
+        putlog(LOG_MISC, "*", "No longer supporting channel %s", chan->dname);
+#ifdef LEAF
+        /* remove_channel(chan); */
+        if ((me = module_find("console", 0, 0))) {
+          Function *func = me->funcs;
+          (func[CHANNEL_REMOVE]) (chan);
+        }
+#endif /* LEAF */
+      }
+    }
+  }
+}
+
 /* Dump uptime info out to dcc (guppy 9Jan99)
  */
 void tell_verbose_uptime(int idx)
@@ -570,7 +605,9 @@ void chanprog()
   if (!userfile[0])
     fatal(MISC_NOUSERFILE2, 0);
   loading = 1;
+  checkchans(0);
   readuserfile(userfile, &userlist);
+  checkchans(1);
   loading = 0;
 #endif /* HUB */
 
@@ -657,8 +694,10 @@ void reload()
   noshare = 0;
   userlist = NULL;
   loading = 1;
+  checkchans(0);
   if (!readuserfile(userfile, &userlist))
     fatal(MISC_MISSINGUSERF, 0);
+  checkchans(1);
   loading = 0;
   reaffirm_owners();
   call_hook(HOOK_READ_USERFILE);

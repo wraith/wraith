@@ -245,7 +245,7 @@ struct chanset_t {
 #define CHAN_PEND           0x2000000  /* just joined; waiting for end of
                                           WHO list                           */
 #define CHAN_FLAGGED        0x4000000  /* flagged during rehash for delete   */
-#define CHAN_STATIC         0x8000000  /* channels that are NOT dynamic      */
+#define CHAN_ 		    0x8000000  /* unused      */
 #define CHAN_ASKEDBANS      0x10000000
 #define CHAN_ASKEDMODES     0x20000000 /* find out key-info on IRCu          */
 #define CHAN_JUPED          0x40000000 /* Is channel juped                   */
@@ -283,8 +283,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_dontkickops(chan) (chan->status & CHAN_DONTKICKOPS)
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
 #define channel_shared(chan) (1)
-//#define channel_static(chan) (chan->status & CHAN_STATIC)
-#define channel_static(chan) (0)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_seen(chan) (1)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
