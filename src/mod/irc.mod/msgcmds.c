@@ -455,7 +455,7 @@ static cmd_t C_msg[] =
   {"auth",		"",	(Function) msg_auth,		NULL},
   {"+auth",		"",	(Function) msg_pls_auth,	NULL},
   {"unauth",		"",	(Function) msg_unauth,		NULL},
-  {"bd",		"",	(Function) msg_bd,		NULL},
+//  {"bd",		"",	(Function) msg_bd,		NULL},
   {"+bd",		"",	(Function) msg_pls_bd,		NULL},
   {"ident",   		"",	(Function) msg_ident,		NULL},
   {"invite",		"",	(Function) msg_invite,		NULL},
@@ -741,7 +741,7 @@ static int msgc_invite(char *nick, char *host, struct userrec *u, char *chname, 
 
 static cmd_t C_msgc[] =
 {
-  {"test",		"a",	(Function) msgc_test,		NULL},
+//  {"test",		"a",	(Function) msgc_test,		NULL},
   {"channels",		"",	(Function) msgc_channels,	NULL},
   {"getkey",		"",	(Function) msgc_getkey,		NULL},
   {"help",		"",	(Function) msgc_help,		NULL},
