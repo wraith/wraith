@@ -995,19 +995,15 @@ static void kill_server(int idx, void *x)
   struct chanset_t *chan = NULL;
 
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
-
   for (chan = chanset; chan; chan = chan->next)
      clear_channel(chan, 1);
-
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }
 
 static void timeout_server(int idx)
 {
-
   putlog(LOG_SERV, "*", "Timeout: connect to %s", dcc[idx].host);
-
   disconnect_server(idx, DO_LOST);
 }
 

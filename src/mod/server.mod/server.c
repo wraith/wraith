@@ -45,7 +45,6 @@ char botuserhost[121] = "";	/* bot's user@host (refreshed whenever the
 static int keepnick;		/* keep trying to regain my intended
 				   nickname? */
 static int nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
-static int check_stoned;	/* Check for a stoned server? */
 static int serverror_quit;	/* Disconnect from server if ERROR
 				   messages received? */
 int quiet_reject;	/* Quietly reject dcc chat or sends from
@@ -976,7 +975,7 @@ static void server_secondly()
 
 static void server_5minutely()
 {
-  if (check_stoned && server_online) {
+  if (server_online) {
     if (waiting_for_awake) {
       /* Uh oh!  Never got pong from last time, five minutes ago!
        * Server is probably stoned.
@@ -1083,7 +1082,6 @@ void server_init()
   flud_ctcp_time = 60;
   botuserhost[0] = 0;
   keepnick = 1;
-  check_stoned = 1;
   serverror_quit = 1;
   quiet_reject = 1;
   waiting_for_awake = 0;
