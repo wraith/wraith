@@ -1,8 +1,6 @@
 #ifndef _BOTCMD_H
 #define _BOTCMD_H
 
-extern int		remote_boots;
-
 void bounce_simul(int, char *);
 void send_remote_simul(int, char *, char *, char *);
 void bot_share(int, char *);

@@ -26,8 +26,6 @@
 #include "chan.h"
 #include "core_binds.h"
 
-int remote_boots = 2;
-
 static char TBUF[1024] = "";		/* Static buffer for goofy bot stuff */
 
 static char base64to[256] =
@@ -852,18 +850,6 @@ static void bot_reject(int idx, char *par)
       /* Kick someone here! */
       int ok = 0;
 
-      if (remote_boots == 1) {
-	frombot = strchr(from, '@');
-	if (frombot == NULL)
-	  frombot = from;
-	else
-	  frombot++;
-	u = get_user_by_handle(userlist, frombot);
-      } else if (remote_boots == 0) {
-	botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s",
-			 BOT_NOREMOTEBOOT);
-	ok = 1;
-      }
       for (i = 0; (i < dcc_total) && (!ok); i++)
 	if ((!egg_strcasecmp(who, dcc[i].nick)) && (dcc[i].type->flags & DCT_CHAT)) {
 	  u = get_user_by_handle(userlist, dcc[i].nick);
