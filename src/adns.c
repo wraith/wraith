@@ -254,6 +254,11 @@ static int get_dns_idx()
 //        allocsock(sock, SOCK_CONNECT);
 
         dns_idx = new_dcc(&dns_handler, 0);
+
+        if (dns_idx < 0) {
+         putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create dns connection.");
+         return;
+        }
         sdprintf("dns_idx: %d", dns_idx);
         dcc[dns_idx].sock = sock;
         dns_sock = sock;
