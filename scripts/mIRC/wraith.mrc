@@ -25,17 +25,24 @@ alias setauth {
   }
 }
 
+ALIAS -l psy {
+  if ($1 != $chr(40) && $1 != $chr(41)) {
+    return 0
+  }
+}
+
 ON *:CHAT:*:{
   var %c = %auth. [ $+ [ $nick ] ]
   if (($1 === -Auth || $1 === ÿû-Auth) && $len($2) == 50) {
     msg =$nick +Auth $wmd5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
 }
+
 ON *:TEXT:auth*:?:{
   var %c = %auth. [ $+ [ $nick ] ]
   if (!$3) {
     ;if this is a MSG not psybnc DCC, and we arent cleared to auth with them, IGNORE.
-    if ($left($nick,1) != $chr(40) && !%c) {
+    if (!$psy($left($nick, 1) && !%c) {
       return
     }
     if ($right($1,1) == . && %c) {
@@ -46,13 +53,15 @@ ON *:TEXT:auth*:?:{
     }
   }
 }
+
 ON *:TEXT:*:?:{ 
   var %c = %auth. [ $+ [ $nick ] ]
-  if ($left($nick,1) != $chr(40) && !%c) { return }
+  if (!$psy($left($nick, 1) && !%c) { return }
   if (($1 === -Auth || $1 === ÿû-Auth) && $len($2) == 50) {
     msg $nick +Auth $wmd5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
 }
+
 ALIAS -l wraith {
   if ($eval(% $+ $1 $+ . $+ $2,2)) {
     return $ifmatch
@@ -92,7 +101,7 @@ ALIAS auth {
   }
 }
 ALIAS msg { 
-  if ($1 !ischan && $2 === auth? && $left($1,1) != $chr(40)) { set -u30 %auth. $+ $1 1 }
+  if ($1 !ischan && $2 === auth? && !$psy($left($1,1))) { set -u30 %auth. $+ $1 1 }
   msg $1-
 }
-ON *:INPUT:?:{ if ($1 === auth? && $left($target,1) != $chr(40)) { set -u30 %auth. $+ $target 1 } }
+ON *:INPUT:?:{ if ($1 === auth? && !$psy($left($target,1))) { set -u30 %auth. $+ $target 1 } }
