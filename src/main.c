@@ -1003,4 +1003,6 @@ int main(int argc, char **argv)
       socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
     }
   }
+
+  return 0;		/* never reached but what the hell */
 }
