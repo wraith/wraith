@@ -23,7 +23,8 @@ extern struct userrec	 *userlist;
 extern tcl_timer_t	 *timer, *utimer;
 extern int		 dcc_total, remote_boots, backgrd, 
 			 do_restart, conmask, must_be_owner,
-			 strict_host, quiet_save, cfg_count;
+			 strict_host, quiet_save, cfg_count,
+			 server_lag;
 
 extern unsigned long	 otraffic_irc, otraffic_irc_today,
 			 itraffic_irc, itraffic_irc_today,
@@ -1842,9 +1843,22 @@ static void cmd_relay(struct userrec *u, int idx, char *par)
 #ifdef HUB
 static void cmd_save(struct userrec *u, int idx, char *par)
 {
+  char buf[100], i = 0;
   putlog(LOG_CMDS, "*", STR("#%s# save"), dcc[idx].nick);
-  dprintf(idx, STR("Saving user file...\n"));
-  write_userfile(-1);
+  sprintf(buf, "Saving user file...");
+  i = write_userfile(-1);
+  if (i == 0)
+    sprintf(buf, "success.");
+  else if (i == 1)
+    sprintf(buf, "failed: No userlist.");
+  else if (i == 2)
+    sprintf(buf, "failed: Cannot open userfile for writing.");
+  else if (i == 3)
+    sprintf(buf, "failed: Problem writing users/chans (see debug).");
+  else		/* This can't happen. */
+    sprintf(buf, "failed: Unforseen error");
+  buf[99] = 0;
+  dprintf(idx, "%s\n", buf);
 }
 
 static void cmd_backup(struct userrec *u, int idx, char *par)
@@ -3339,7 +3353,6 @@ static void cmd_mns_host(struct userrec *u, int idx, char *par)
 }
 
 /* netserver */
-
 static void cmd_netserver(struct userrec * u, int idx, char * par) {
   putlog(LOG_CMDS, "*", STR("#%s# netserver"), dcc[idx].nick);
   botnet_send_cmd_broad(-1, botnetnick, u->handle, idx, STR("cursrv"));
@@ -3370,11 +3383,13 @@ void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
     sprintf(cursrvname, "%s", ((char *)(func[41])));
   }
   if (server_online)
-    sprintf(tmp, STR("Currently: %s"), cursrvname);
+    sprintf(tmp, "Currently: %-40s Lag: %d", cursrvname, server_lag);
+//    sprintf(tmp, STR("%-20s %d)"), cursrvname, server_lag);
   else
-    sprintf(tmp, STR("Currently: none"));
+    sprintf(tmp, "Currently: none");
+//    sprintf(tmp, STR("%-20s"), "none");
   botnet_send_cmdreply(botnetnick, fbot, fhand, fidx, tmp);
-#endif
+#endif /* LEAF */
 }
 
 /* netversion */
@@ -3802,11 +3817,14 @@ void gotremotecmd (char * forbot, char * frombot, char * fromhand, char * fromid
     botnet_send_cmdreply(botnetnick, frombot, fromhand, fromidx, STR("Unrecognized remote command"));
   }
 }
-
-void gotremotereply (char * frombot, char * tohand, char * toidx, char * ln) {
-  int idx=atoi(toidx);
-  if ((idx>=0) && (idx<dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {
-    dprintf(idx, STR("(%s) %s\n"), frombot, ln);
+    
+void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
+  int idx = atoi(toidx);
+  if ((idx >= 0) && (idx < dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {
+    char *buf = nmalloc(strlen(frombot) + 2 + 1);
+    sprintf(buf, "(%s)", frombot);
+    dprintf(idx, STR("%-13s %s\n"), buf, ln);
+    nfree(buf);
   }
 }
 

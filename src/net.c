@@ -1251,29 +1251,30 @@ char *botlink_decrypt(int snum, char *src)
   int i;
 
   line = decrypt_string(socklist[snum].ikey, src);
+  strcpy(src, line);
+  nfree(line);
   if (socklist[snum].iseed) {
     for (i = 0; i <= 3; i++)
       *(dword *) & socklist[snum].ikey[i * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
     if (!socklist[snum].iseed)
       socklist[snum].iseed++;
   }
-  strcpy(src, line);
-  nfree(line);
   return src;
 }
 
 char *botlink_encrypt(int snum, char *src)
 {
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
-  int bufpos = 0, i;
+  int bufpos = 0, i = 0;
   
-  srcbuf = nmalloc(strlen(src) + 10);
+  srcbuf = nmalloc(strlen(src) + 9 + 1);
   strcpy(srcbuf, src);
   line = srcbuf;
-  if (!line)
+  if (!line) {
+    nfree(srcbuf);
     return NULL;
+  }
   eol = strchr(line, '\n');
-  i = 0;
   while (eol) {
     *eol++ = 0;
     eline = encrypt_string(socklist[snum].okey, line);
@@ -1285,23 +1286,24 @@ char *botlink_encrypt(int snum, char *src)
     }
     buf = nrealloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
+    nfree(eline);
     strcat(buf, "\n");
     bufpos = strlen(buf);
     line = eol;
     eol = strchr(line, '\n');
-    nfree(eline);
   }
   if (line[0]) {
     eline = encrypt_string(socklist[snum].okey, line);
     if (socklist[snum].oseed) {
-       *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      for (i = 0; i <= 3; i++)
+        *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
       if (!socklist[snum].oseed)
-       socklist[snum].oseed++;
+        socklist[snum].oseed++;
     }
     buf = nrealloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
-    strcat(buf, "\n");
     nfree(eline);
+    strcat(buf, "\n");
   }
   nfree(srcbuf);
   return buf;
@@ -1360,7 +1362,7 @@ int sockgets(char *s, int *len)
 	  /* Strip CR if this was CR/LF combo */
 	  if (s[strlen(s) - 1] == '\r')
 	    s[strlen(s) - 1] = 0;
-          if (socklist[i].encstatus)
+          if (socklist[i].encstatus && (strlen(s) > 0))
             botlink_decrypt(i, s);
 	  *len = strlen(s);
 	  return socklist[i].sock;
@@ -1375,12 +1377,11 @@ int sockgets(char *s, int *len)
 	  socklist[i].inbuflen = 0;
 	} else {
 	  /* Split up into chunks of grab bytes. */
-	  *len = grab - 2;
+	  *len = (grab - 2);
 	  egg_memcpy(s, socklist[i].inbuf, *len);
 	  egg_memcpy(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
 	  socklist[i].inbuflen -= *len;
-	  socklist[i].inbuf = nrealloc(socklist[i].inbuf,
-				       socklist[i].inbuflen);
+	  socklist[i].inbuf = nrealloc(socklist[i].inbuf, socklist[i].inbuflen);
 	}
 	return socklist[i].sock;
       }
@@ -1419,8 +1420,7 @@ int sockgets(char *s, int *len)
     egg_memcpy(s, xx, *len);
     return socklist[ret].sock;
   }
-  if ((socklist[ret].flags & SOCK_LISTEN) ||
-      (socklist[ret].flags & SOCK_PASS))
+  if ((socklist[ret].flags & SOCK_LISTEN) || (socklist[ret].flags & SOCK_PASS))
     return socklist[ret].sock;
   if (socklist[ret].flags & SOCK_BUFFER) {
     socklist[ret].inbuf = (char *) nrealloc(socklist[ret].inbuf,
@@ -1430,7 +1430,7 @@ int sockgets(char *s, int *len)
     /* We don't know whether it's binary data. Make sure normal strings
        will be handled properly later on too. */
     socklist[ret].inbuf[socklist[ret].inbuflen] = 0;
-    return -4;	/* Ignore this one. */
+    return -4;			/* Ignore this one. */
   }
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
@@ -1446,9 +1446,8 @@ int sockgets(char *s, int *len)
       socklist[ret].inbuflen = 0;
     } else {
       p = socklist[ret].inbuf;
-    socklist[ret].inbuflen = strlen(p) - (grab - 2);
+      socklist[ret].inbuflen = strlen(p) - (grab - 2);
       socklist[ret].inbuf = (char *) nmalloc(socklist[ret].inbuflen + 1); 
-//      socklist[ret].inbuf = (char *) nmalloc(strlen(p) - (grab - 3));
       strcpy(socklist[ret].inbuf, p + (grab - 2));
       *(p + (grab - 2)) = 0;
       strcpy(xx, p);
@@ -1466,11 +1465,8 @@ int sockgets(char *s, int *len)
     strcpy(xx, p + 1);
     if (s[strlen(s) - 1] == '\r')
       s[strlen(s) - 1] = 0;
-    data = 1;			/* DCC_CHAT may now need to process a
-				   blank line */
-
+    data = 1;			/* DCC_CHAT may now need to process a blank line */
 /* NO! */
-
 /* if (!s[0]) strcpy(s," ");  */
   } else {
     s[0] = 0;
@@ -1481,7 +1477,7 @@ int sockgets(char *s, int *len)
       data = 1;
     }
   }
-  if (socklist[ret].encstatus)
+  if (socklist[ret].encstatus && (strlen(s) > 0))
     botlink_decrypt(ret, s);
   *len = strlen(s);
   /* Anything left that needs to be saved? */
@@ -1519,56 +1515,40 @@ void tputs(register int z, char *s, unsigned int len)
   register int i, x, idx;
   char *p;
   static int inhere = 0;
-  if (z < 0)
-    return;			/* um... HELLO?!  sanity check please! */
+
+  if (z < 0)			/* um... HELLO?!  sanity check please! */
+    return;			
+
   if (((z == STDOUT) || (z == STDERR)) && (!backgrd || use_stderr)) {
-#ifdef EUSE_COLORPUTS
-     colorputs(s);
-     x = len;
-#else /* !EUSE_COLORPUTS */
     write(z, s, len);
-#endif /* EUSE_COLORPUTS */
     return;
   }
+
   for (i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == z)) {
       for (idx = 0; idx < dcc_total; idx++) {
-        if (dcc[idx].sock == z) {
-          if (dcc[idx].type) {
-            if (dcc[idx].type->name) {
-              if (!strncmp(dcc[idx].type->name, "BOT", 3)) {
-                otraffic_bn_today += len;
-                break;
-              } else if (!strcmp(dcc[idx].type->name, "SERVER")) {
-                otraffic_irc_today += len;
-                break;
-              } else if (!strncmp(dcc[idx].type->name, "CHAT", 4)) {
-                otraffic_dcc_today += len;
-                break;
-              } else if (!strncmp(dcc[idx].type->name, "FILES", 5)) {
-                otraffic_filesys_today += len;
-                break;
-              } else if (!strcmp(dcc[idx].type->name, "SEND")) {
-                otraffic_trans_today += len;
-                break;
-              } else if (!strncmp(dcc[idx].type->name, "GET", 3)) {
-                otraffic_trans_today += len;
-                break;
-              } else {
-                otraffic_unknown_today += len;
-                break;
-              }
-            }
-          }
+        if ((dcc[idx].sock == z) && dcc[idx].type && dcc[idx].type->name) {
+          if (!strncmp(dcc[idx].type->name, "BOT", 3))
+            otraffic_bn_today += len;
+          else if (!strcmp(dcc[idx].type->name, "SERVER"))
+            otraffic_irc_today += len;
+          else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
+            otraffic_dcc_today += len;
+          else if (!strncmp(dcc[idx].type->name, "FILES", 5))
+            otraffic_filesys_today += len;
+          else if (!strcmp(dcc[idx].type->name, "SEND"))
+            otraffic_trans_today += len;
+          else if (!strncmp(dcc[idx].type->name, "GET", 3))
+            otraffic_trans_today += len;
+          else
+            otraffic_unknown_today += len;
+          break;
         }
       }
-      if (socklist[i].encstatus) {
-        if ((!s) || (!s[0])) {
-         s = botlink_encrypt(i, s);
-         len = strlen(s);
-       }
-       s = botlink_encrypt(i, s);
-       len = strlen(s);
+
+      if (socklist[i].encstatus && (strlen(s) > 0)) {
+        s = botlink_encrypt(i, s);
+        len = strlen(s);
       }
       
       if (socklist[i].outbuf != NULL) {
@@ -1577,8 +1557,8 @@ void tputs(register int z, char *s, unsigned int len)
 	egg_memcpy(p + socklist[i].outbuflen, s, len);
 	socklist[i].outbuf = p;
 	socklist[i].outbuflen += len;
-        if (socklist[i].encstatus)
-         nfree(s);
+        if (socklist[i].encstatus && s)
+          nfree(s);
 	return;
       }
       /* Try. */
@@ -1611,7 +1591,7 @@ void tputs(register int z, char *s, unsigned int len)
 //      } else
 //#endif /* HAVE_ZLIB_H */
         x = write(z, s, len);
-      if (x == (-1))
+      if (x == -1)
 	x = 0;
       if (x < len) {
 	/* Socket is full, queue it */
@@ -1619,8 +1599,8 @@ void tputs(register int z, char *s, unsigned int len)
 	egg_memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }
-      if (socklist[i].encstatus)
-       nfree(s);
+      if (socklist[i].encstatus && s)
+        nfree(s);
       return;
     }
   }

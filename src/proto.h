@@ -365,7 +365,7 @@ void freeuser(struct userrec *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
 int write_user(struct userrec *u, FILE * f, int shr);
-void write_userfile(int);
+int write_userfile(int);
 struct userrec *check_dcclist_hand(char *);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);

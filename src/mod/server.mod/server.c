@@ -19,7 +19,6 @@ static char newserver[121];	/* new server? */
 static int newserverport;	/* new server port? */
 static char newserverpass[121];	/* new server password? */
 static time_t trying_server;	/* trying to connect to a server right now? */
-static int server_lag;		/* how lagged (in seconds) is the server? */
 static int curserv;		/* current position in server list: */
 static int flud_thr;		/* msg flood threshold */
 static int flud_time;		/* msg flood time */
@@ -999,49 +998,50 @@ static void clearq(struct server_list *xx)
     xx = x;
   }
 }
+
 void servers_describe(struct cfg_entry * entry, int idx) {
 }
 void servers6_describe(struct cfg_entry * entry, int idx) {
 }
 
-int count(const char *s)
+int count(const char *s, const char *delim)
 {
   char *ele;
   int i = 0;
-  char count[1000];
+  char work[2000];
   
-  strcpy(count,s);
-  ele=strtok(count,",");
+  strncpyz(work, s, sizeof work);
+  ele = strtok(work, delim);
   while(ele && *ele)
   {
     i++;
-    ele=strtok((char*)NULL,",");
+    ele = strtok((char*) NULL, delim);
   }
-  return i-1;
+  return (i - 1);
 }
 
 int rrand(int a, int b)
 {
   b++;
-  return ((random()%(b-a))+a);
+  return ((random()%(b - a))+a);
 }
 
 char *randomize(char *line, char **new)
 {
-  char *str, *words[1000], *bak;
-  int i,o,b,r,u = 0;
-  bak = nmalloc(strlen(line)+1);
+  char *str, *words[2000], *bak;
+  int i, o, b, r, u = 0;
+  bak = nmalloc(strlen(line) + 1);
   strcpy(bak, line);
-  i=count(line);
+  i = count(line, ",");
 
-  b=i+1;
-  str=strtok(line,",");
-  o=0;
+  b = i + 1;
+  str = strtok(line, ",");
+  o = 0;
   while(str && *str)
   {
     words[o] = str;
     o++;
-    str=strtok((char*)NULL,",");
+    str=strtok((char*)NULL, ",");
   }
 
   while (b) {
@@ -1055,7 +1055,7 @@ char *randomize(char *line, char **new)
     r = rrand(0,i);
 
     if (strstr(*new,words[r]) == NULL) {
-      if (b == i+1) sprintf(*new,"%s",words[r]);
+      if (b == i + 1) sprintf(*new,"%s",words[r]);
       else sprintf(*new,"%s,%s", *new, words[r]);
       b--;
     } else 
@@ -1065,6 +1065,7 @@ char *randomize(char *line, char **new)
   nfree(bak);
   return *new;
 }
+
 void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   char *slist, *p;
@@ -1073,7 +1074,7 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 
   if (hostname6[0] || myip6[0]) //we want to use the servers6 entry.
     return;
-#endif
+#endif /* S_RANDSERVERS */
 
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
   if (serverlist) {
@@ -1087,13 +1088,13 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   randomize(p,&new);
   strcpy(p, new);
  
-#endif
+#endif /* S_RANDSERVERS */
   add_server(p);
   nfree(p);
 #ifdef S_RANDSERVERS
   nfree(new);
-#endif
-#endif
+#endif /* S_RANDSERVERS */
+#endif /* LEAF */
 }
 
 void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
@@ -1104,7 +1105,7 @@ void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 
   if (!hostname6[0] && !myip6[0]) //we probably want to use the normal server list..
     return;
-#endif
+#endif /* S_RANDSERVERS */
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
   if (serverlist) {
     clearq(serverlist);
@@ -1117,13 +1118,13 @@ void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   randomize(p,&new);
   strcpy(p, new);
  
-#endif
+#endif /* S_RANDSERVERS */
   add_server(p);
   nfree(p);
 #ifdef S_RANDSERVERS
   nfree(new);
-#endif
-#endif
+#endif /* S_RANDSERVERS */
+#endif /* LEAF */
 }
 
 void nick_describe(struct cfg_entry * entry, int idx) {
@@ -1133,18 +1134,19 @@ void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   char * p;
   if (entry->ldata)
-    p=entry->ldata;
+    p = entry->ldata;
   else if (entry->gdata)
-    p=entry->gdata;
+    p = entry->gdata;
   else
-    p=NULL;
+    p = NULL;
   if (p && p[0]) {
-        strncpyz(origbotname, p, NICKMAX+1);
-//        dprintf(DP_MODE, STR("NICK %s\n"), p);
+    strncpyz(origbotname, p, NICKLEN + 1);
+    if (server_online)
+      dprintf(DP_SERVER, "ISON :%s %s\n", botname, origbotname);
   } else {
-    strncpyz(origbotname, botnetnick, NICKMAX+1);
+    strncpyz(origbotname, botnetnick, NICKLEN + 1);
   }
-#endif
+#endif /* LEAF */
 }
 void realname_describe(struct cfg_entry * entry, int idx) {
 }
@@ -1152,17 +1154,18 @@ void realname_describe(struct cfg_entry * entry, int idx) {
 void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   if (entry->ldata) {
-    strncpyz(botrealname, (char *) entry->ldata, 120);
+    strncpyz(botrealname, (char *) entry->ldata, 121);
   } else if (entry->gdata) {
-    strncpyz(botrealname, (char *) entry->gdata, 120);
+    strncpyz(botrealname, (char *) entry->gdata, 121);
   }
-#endif
+#endif /* LEAF */
 }
 
 struct cfg_entry CFG_SERVERS = {
   "servers", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
   servers_changed, servers_changed, servers_describe
 };
+
 struct cfg_entry CFG_SERVERS6 = {
   "servers6", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
   servers6_changed, servers6_changed, servers6_describe
@@ -1470,22 +1473,6 @@ Context;
   }
   return NULL;
 }
-
-static tcl_strings my_tcl_strings[] =
-{
-  {"botnick",			NULL,		0,		STR_PROTECT},
-  {"realname",			botrealname,	80,		0},
-  {"stackable-commands",	stackablecmds,	510,		0},
-  {"stackable2-commands",	stackable2cmds,	510,		0},
-  {NULL,			NULL,		0,		0}
-};
-
-static tcl_coups my_tcl_coups[] =
-{
-  {"flood-msg",		&flud_thr,		&flud_time},
-  {"flood-ctcp",	&flud_ctcp_thr, 	&flud_ctcp_time},
-  {NULL,		NULL,			NULL}
-};
 
 static tcl_ints my_tcl_ints[] =
 {
@@ -1893,7 +1880,7 @@ static Function server_table[] =
   (Function) 0,	
   (Function) & nick_len,	/* int					*/
   (Function) 0,
-  (Function) & server_lag, /* int */
+  (Function) 0,
   (Function) & curserv,
   (Function) cursrvname,
   (Function) botrealname,
@@ -2001,12 +1988,9 @@ char *server_start(Function *global_funcs)
   add_builtins(H_raw, my_raw_binds);
   add_builtins(H_dcc, C_dcc_serv);
   add_builtins(H_ctcp, my_ctcps);
-  my_tcl_strings[0].buf = botname;
-  add_tcl_strings(my_tcl_strings);
   my_tcl_ints[0].val = &use_console_r;
   add_tcl_ints(my_tcl_ints);
   add_tcl_commands(my_tcl_cmds);
-  add_tcl_coups(my_tcl_coups);
   add_hook(HOOK_SECONDLY, (Function) server_secondly);
   add_hook(HOOK_10SECONDLY, (Function) server_10secondly);
   add_hook(HOOK_5MINUTELY, (Function) server_5minutely);
@@ -2028,7 +2012,7 @@ char *server_start(Function *global_funcs)
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
-  set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders");
+  set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders.");
   return NULL;
 }
-#endif
+#endif /* LEAF */

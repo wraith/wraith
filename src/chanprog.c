@@ -872,23 +872,25 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
   char *buf;
   module_entry *me;
 
+Context;
   /* send out over botnet. */
-  /* nmalloc(options,chan,'cset ',' ',+ 1) */
-  if (chan)
-    buf = nmalloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
-  else
-    buf = nmalloc(strlen(options) + 1 + 5 + 1 + 1);
-  buf[0] = 0;
-  strcat(buf, "cset ");
-  if (chan)
-    strcat(buf, chan->dname);
-  else
-    strcat(buf, "*");
-  strcat(buf, " ");
-  strcat(buf, options);
-  putallbots(buf);
-  nfree(buf);
-
+  if (local != 2) {
+         /* nmalloc(options,chan,'cset ',' ',+ 1) */
+    if (chan)
+      buf = nmalloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+    else
+      buf = nmalloc(strlen(options) + 1 + 5 + 1 + 1);
+    buf[0] = 0;
+    strcat(buf, "cset ");
+    if (chan)
+      strcat(buf, chan->dname);
+    else
+      strcat(buf, "*");
+    strcat(buf, " ");
+    strcat(buf, options);
+    putallbots(buf);
+    nfree(buf);
+  }
   /* now set locally, hopefully it works */
   if (local && (me = module_find("channels", 0, 0))) {
   /* tcl_channel_modify(0, chan, 1, options) */
@@ -922,7 +924,7 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
           /* Par gets modified in tcl channel_modify under some
            * circumstances, so save it now.
            */
-           (func[38]) (0, ch, 2, list);
+           (func[38]) (0, ch, 2, list);			/* tcl_channel_modify() */
         }
       }
       if (all)

@@ -17,12 +17,12 @@
 #endif
 
 
-#define op_bots (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
-#define in_bots (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
-#define lag_threshold (CFG_LAGTHRESHOLD.gdata ? atoi(CFG_LAGTHRESHOLD.gdata) : 15)
-#define opreq_count (CFG_OPREQUESTS.gdata ? atoi( CFG_OPREQUESTS.gdata ) : 2)
-#define opreq_seconds (CFG_OPREQUESTS.gdata ? atoi( strchr(CFG_OPREQUESTS.gdata, ':') + 1 ) : 5)
-#define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
+#define OP_BOTS (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
+#define IN_BOTS (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
+#define LAG_THRESHOLD (CFG_LAGTHRESHOLD.gdata ? atoi(CFG_LAGTHRESHOLD.gdata) : 15)
+#define OPREQ_COUNT (CFG_OPREQUESTS.gdata ? atoi( CFG_OPREQUESTS.gdata ) : 2)
+#define OPREQ_SECONDS (CFG_OPREQUESTS.gdata ? atoi( strchr(CFG_OPREQUESTS.gdata, ':') + 1 ) : 5)
+#define OP_TIME_SLACK (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
 
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
@@ -184,6 +184,11 @@ void getin_request(char *botnick, char *code, char *par)
   if (!chname[0] || !chname)
     return;
 
+  if (!(chan = findchan_by_dname(chname))) {
+    putlog(LOG_GETIN, "*", STR("getin req from %s for %s which is not a valid channel!"), botnick, chname);
+    return;
+  }
+
   nck = newsplit(&par);
   if (!nck[0])
     return;
@@ -201,10 +206,10 @@ void getin_request(char *botnick, char *code, char *par)
     if (ip4[0]) {
       char *tmp2;
 
-      tmp = nmalloc(strlen(host)+1);
+      tmp = nmalloc(strlen(host) + 1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
-      snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2,"@") , ip4);
+      snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2, "@") ,ip4);
       nfree(tmp);
     } else {
       ip4host[0] = 0;
@@ -213,10 +218,10 @@ void getin_request(char *botnick, char *code, char *par)
     if (ip6[0]) {
       char *tmp2;
 
-      tmp = nmalloc(strlen(host)+1);
+      tmp = nmalloc(strlen(host) + 1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
-      snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2,"@") , ip6);
+      snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2, "@") ,ip6);
       nfree(tmp);
     } else {
       ip6host[0] = 0;
@@ -226,13 +231,7 @@ void getin_request(char *botnick, char *code, char *par)
 
 
 Context;
-  if (!(chan = findchan_by_dname(chname)))
-    return;
 
-  if (!chan) {
-    putlog(LOG_GETIN, "*", STR("getin req from %s for %s which is not a valid channel!"), botnick, chname);
-    return;
-  }
 /*
   if (!ismember(chan, botname)) {
     putlog(LOG_GETIN, "*", STR("getin req from %s for %s - I'm not on %s!"), botnick, chname, chname);
@@ -287,7 +286,7 @@ Context;
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - Already sent a +o"), botnick, nick, chan->dname);
       return;
     }
-    if (server_lag > lag_threshold) {
+    if (server_lag > LAG_THRESHOLD) {
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - I'm too lagged"), botnick, nick, chan->dname);
       return;
     }
@@ -295,7 +294,12 @@ Context;
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - I'm getting userlist right now"), botnick, nick, chan->dname);
       return;
     }
-
+    if (chan->channel.no_op) {
+      if (chan->channel.no_op > now)                      /* dont op until this time has passed */
+        return;
+      else
+        chan->channel.no_op = 0;
+    }
     do_op(nick, chan, 1);
     mem->flags |= SENTOP;
 
@@ -327,7 +331,7 @@ Context;
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - %s doesn't have acces for chan."), botnick, nick, chan->dname, botnick);
       return;
     }
-    if (server_lag > lag_threshold) {
+    if (server_lag > LAG_THRESHOLD) {
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - I'm too lagged"), botnick, nick, chan->dname);
       return;
     }
@@ -444,7 +448,6 @@ void check_hostmask()
   struct userrec *u = get_user_by_handle(userlist, botnetnick);
   struct list_type *q;
 
-Context;
   if (!server_online || !botuserhost[0])
     return;
   tmp = botuserhost;
@@ -467,19 +470,12 @@ Context;
 
 static void request_op(struct chanset_t *chan)
 {
-  int i = 0,
-    exp = 0,
-    first = 100,
-    n,
-    cnt,
-    i2;
+  int i = 0, exp = 0, first = 100, n, cnt, i2;
   memberlist *ml;
   memberlist *botops[MAX_BOTS];
-  char s[100],
-   *l,
-    myserv[SERVLEN];
+  char s[100], *l, myserv[SERVLEN];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
-
+  
 Context;
   if (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan))
     return;
@@ -487,14 +483,14 @@ Context;
   if (me_op(chan))
     return;
   /* check server lag */
-  if (server_lag > lag_threshold) {
+  if (server_lag > LAG_THRESHOLD) {
     putlog(LOG_GETIN, "*", STR("Not asking for ops on %s - I'm too lagged"), chan->dname);
     return;
   }
-  /* max opreq_count requests per opreq_seconds sec */
+  /* max OPREQ_COUNT requests per OPREQ_SECONDS sec */
   n = time(NULL);
   while (i < 5) {
-    if (n - chan->opreqtime[i] > opreq_seconds) {
+    if (n - chan->opreqtime[i] > OPREQ_SECONDS) {
       if (first > i)
 	first = i;
       exp++;
@@ -502,8 +498,8 @@ Context;
     }
     i++;
   }
-  if ((5 - exp) >= opreq_count) {
-    putlog(LOG_GETIN, "*", STR("Delaying opreq for %s - Maximum of %d:%d reached"), chan->dname, opreq_count, opreq_seconds);
+  if ((5 - exp) >= OPREQ_COUNT) {
+    putlog(LOG_GETIN, "*", STR("Delaying opreq for %s - Maximum of %d:%d reached"), chan->dname, OPREQ_COUNT, OPREQ_SECONDS);
     return;
   }
   check_hostmask();		/* check, and update hostmask */
@@ -529,14 +525,21 @@ Context;
     putlog(LOG_GETIN, "@", STR("No one to ask for ops on %s"), chan->dname);
     return;
   }
+  if (chan->channel.no_op) {
+    if (chan->channel.no_op > now) 			/* dont op until this time has passed */
+      return;
+    else 
+      chan->channel.no_op = 0;
+  }
+
   /* first scan for bots on my server, ask first found for ops */
-  cnt = op_bots;
+  cnt = OP_BOTS;
   sprintf(s, STR("gi o %s %s"), chan->dname, botname);
   l = nmalloc(cnt * 50);
   l[0] = 0;
   for (i2 = 0; i2 < i; i2++) {
     if (botops[i2]->server && (!strcmp(botops[i2]->server, myserv))) {
-      botnet_send_zapf(nextbot(botops[i2]->user->handle), botnetnick, botops[i2]->user->handle, s);
+      putbot(botops[i2]->user->handle, s);
       chan->opreqtime[first] = n;
       if (l[0]) {
 	strcat(l, ", ");
@@ -551,11 +554,12 @@ Context;
       break;
     }
   }
+
   /* Pick random op and ask for ops */
   while (cnt) {
     i2 = random() % i;
     if (botops[i2]) {
-      botnet_send_zapf(nextbot(botops[i2]->user->handle), botnetnick, botops[i2]->user->handle, s);
+      putbot(botops[i2]->user->handle, s);
       chan->opreqtime[first] = n;
       if (l[0]) {
 	strcat(l, ", ");
@@ -568,7 +572,7 @@ Context;
       cnt--;
       botops[i2] = NULL;
     } else {
-      if (i < op_bots)
+      if (i < OP_BOTS)
 	cnt--;
     }
   }
@@ -601,7 +605,7 @@ static void request_in(struct chanset_t *chan)
     return;
   }
   check_hostmask();		/* check, and update hostmask */
-  cnt = in_bots;
+  cnt = IN_BOTS;
   sprintf(s, STR("gi i %s %s %s!%s %s %s"), chan->dname, botname, botname, botuserhost, myipstr(4) ? myipstr(4) : "."
                                           , myipstr(6) ? myipstr(6) : ".");
   l = nmalloc(cnt * 30);
@@ -619,7 +623,7 @@ static void request_in(struct chanset_t *chan)
       botops[n] = NULL;
       cnt--;
     } else {
-      if (i < in_bots)
+      if (i < IN_BOTS)
 	cnt--;
     }
   }

@@ -15,14 +15,14 @@
 #include <arpa/inet.h>
 #ifdef HAVE_UNAME
 #include <sys/utsname.h>
-#endif
+#endif /* HAVE_UNAME */
 #include <pwd.h>
 #include <ctype.h>
 
 static Function *global = NULL, *server_funcs = NULL;
-#else
+#else /* !LEAF */
 static Function *global = NULL;
-#endif
+#endif /* LEAF */
 
 #define CLOAK_COUNT             10 /* The number of scripts currently existing */
 #define CLOAK_PLAIN             1 /* This is your plain bitchx client behaviour */
@@ -41,7 +41,7 @@ int cloak_script = CLOAK_PLAIN;
 #ifdef S_AUTOAWAY
 #define AVGAWAYTIME             60
 #define AVGHERETIME             5
-#endif
+#endif /* S_AUTOAWAY */
 int cloak_awaytime = 0;
 int cloak_heretime = 0;
 int listen_time = 0;
@@ -390,7 +390,7 @@ void sendaway()
     break;
   }
 }
-#endif
+#endif /* S_AUTOAWAY */
 
 static void ctcp_minutely()
 {
@@ -419,7 +419,7 @@ static void ctcp_minutely()
     } else
       sendaway();
   }
-#endif
+#endif /* S_AUTOAWAY */
 
 
   if (listen_time <= 0) {
@@ -455,7 +455,7 @@ static int ctcp_FINGER(char *nick, char *uhost, char *handle, char *object, char
 #endif
   if ((p = strchr(pwd->pw_gecos, GECOS_DELIMITER)) != NULL)
     *p = 0;
-  dprintf(DP_HELP, STR("NOTICE %s :\001%s %s (%s@%s) Idle %ld second%c\001\n"), nick, keyword, pwd->pw_gecos, pwd->pw_name, (char *) (strchr(botuserhost, '@') + 1), idletime, (idletime == 1) ? "" : "s");
+  dprintf(DP_HELP, STR("NOTICE %s :\001%s %s (%s@%s) Idle %ld second%s\001\n"), nick, keyword, pwd->pw_gecos, pwd->pw_name, (char *) (strchr(botuserhost, '@') + 1), idletime, (idletime == 1) ? "" : "s");
   return 1;
 }
 
@@ -713,12 +713,12 @@ void cloak_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
 #ifdef LEAF
   if (i == 0)
     i = (random() % CLOAK_COUNT) + 1;
-#endif
+#endif /* LEAF */
   if ((*valid = ((i >= 0) && (i <= CLOAK_COUNT))))
     cloak_script = i;
 #ifdef LEAF
   scriptchanged();
-#endif
+#endif /* LEAF */
 }
 
 struct cfg_entry CFG_CLOAK_SCRIPT = {
@@ -743,8 +743,8 @@ char *ctcp_start(Function * global_funcs)
   char *p;
 #ifdef HAVE_UNAME
   struct utsname un;
-#endif
-#endif
+#endif /* HAVE_UNAME */
+#endif /* LEAF */
   global = global_funcs;
 
   module_register(MODULE_NAME, ctcp_table, 1, 0);
@@ -797,7 +797,7 @@ char *ctcp_start(Function * global_funcs)
 
   add_builtins(H_ctcp, myctcp);
   add_hook(HOOK_MINUTELY, (Function) ctcp_minutely);
-#endif
+#endif /* LEAF */
   add_cfg(&CFG_CLOAK_SCRIPT);
   return NULL;
 }

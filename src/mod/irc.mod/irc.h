@@ -49,7 +49,7 @@ static void got_op(struct chanset_t *chan, char *nick, char *from, char *who,
 static int killmember(struct chanset_t *chan, char *nick);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
-
+void raise_limit(struct chanset_t *);
 #define newban(chan, mask, who)         newmask((chan)->channel.ban, mask, who)
 #define newexempt(chan, mask, who)      newmask((chan)->channel.exempt, mask, \
 						who)

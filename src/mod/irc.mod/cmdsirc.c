@@ -1206,11 +1206,12 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
     if (maxnicklen < 9) maxnicklen = 9;
     if (maxhandlen < 9) maxhandlen = 9;
     
-    dprintf(idx, "(n = owner, m = master, o = op, d = deop, b = bot)\n");
-    egg_snprintf(format, sizeof format, " %%-%us %%-%us %%-6s %%-5s %%s\n", 
+    dprintf(idx, "(n = owner, m = master, o = op, d = deop, b = bot) CAP:global\n");
+    egg_snprintf(format, sizeof format, " %%-%us %%-%us %%-6s %%-4s %%-5s %%s\n", 
 			maxnicklen, maxhandlen);
-    dprintf(idx, format, "NICKNAME", "HANDLE", " JOIN", "IDLE", "USER@HOST");
+    dprintf(idx, format, "NICKNAME", "HANDLE", " JOIN", "  HOPS", "IDLE", "USER@HOST");
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      int hops = m->hops;
       if (m->joined > 0) {
 	if ((now - (m->joined)) > 86400)
 	  egg_strftime(s, 6, "%d%b", localtime(&(m->joined)));
@@ -1284,9 +1285,9 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
 
       if (chan_issplit(m)) {
         egg_snprintf(format, sizeof format, 
-			"%%c%%c%%-%us %%-%us %%s %%c     <- netsplit, %%lus\n", 
+			"%%c%%c%%-%us %%-%us   %%d %%s %%c     <- netsplit, %%lus\n", 
 			maxnicklen, maxhandlen);
-	dprintf(idx, format, chanflag[0],chanflag[1], m->nick, handle, s, atrflag,
+	dprintf(idx, format, chanflag[0],chanflag[1], m->nick, handle, s, hops, atrflag,
 		now - (m->split));
       } else if (!rfc_casecmp(m->nick, botname)) {
         egg_snprintf(format, sizeof format, 
@@ -1303,10 +1304,10 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
 	  egg_snprintf(s1, sizeof s1, "%2lum", ((now - (m->last)) / 60));
 	else
 	  strncpyz(s1, "   ", sizeof s1);
-	egg_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c %%s  %%s\n", 
+	egg_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c   %%d %%s  %%s\n", 
 			maxnicklen, maxhandlen);
-	dprintf(idx, format, chanflag[0], chanflag[1], m->nick,	handle, s, atrflag, s1, 
-		    m->userhost);
+	dprintf(idx, format, chanflag[0], chanflag[1], m->nick,	handle, s, atrflag, hops,
+                     s1, m->userhost);
       }
       if (chan_fakeop(m))
 	dprintf(idx, "    (%s)\n", IRC_FAKECHANOP);

@@ -363,7 +363,7 @@ static void share_chattr(int idx, char *par)
 #ifndef LEAF
 	  if (!(dcc[idx].status & STAT_GETTING))
 	    putlog(LOG_CMDS, "@", "%s: chattr %s %s", dcc[idx].nick, hand, s);
-#endif
+#endif /* LEAF */
 	  if ((me = module_find("irc", 0, 0))) {
 	    Function *func = me->funcs;
 
@@ -483,7 +483,7 @@ static void share_newuser(int idx, char *par)
 	noshare = 0;
 #ifndef LEAF
 	putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
-#endif
+#endif /* LEAF */
       }
     }
   }
@@ -503,7 +503,7 @@ static void share_killuser(int idx, char *par)
       shareout_but(NULL, idx, "k %s\n", par);
 #ifndef LEAF
       putlog(LOG_CMDS, "@", "%s: killuser %s", dcc[idx].nick, par);
-#endif
+#endif /* LEAF */
     }
     noshare = 0;
   }
@@ -522,10 +522,9 @@ static void share_pls_host(int idx, char *par)
       set_user(&USERENTRY_HOSTS, u, par);
 #ifdef LEAF
       check_this_user(u->handle, 0, NULL);
-#endif /* LEAF */
-#ifndef LEAF
+#else /* !LEAF */
       putlog(LOG_CMDS, "@", "%s: +host %s %s", dcc[idx].nick, hand, par);
-#endif
+#endif /* LEAF */
     }
   }
 }
@@ -553,7 +552,7 @@ static void share_pls_bothost(int idx, char *par)
 #ifndef LEAF
       if (!(dcc[idx].status & STAT_GETTING))
 	putlog(LOG_CMDS, "@", "%s: +host %s %s", dcc[idx].nick, hand, par);
-#endif
+#endif /* LEAF */
     }
   }
 }
@@ -573,10 +572,9 @@ static void share_mns_host(int idx, char *par)
       noshare = 0;
 #ifdef LEAF
       check_this_user(hand, 2, par);
-#endif /* LEAF */
-#ifndef LEAF
+#else /* !LEAF */
       putlog(LOG_CMDS, "@", "%s: -host %s %s", dcc[idx].nick, hand, par);
-#endif
+#endif /* LEAF */
     }
   }
 }
@@ -1087,11 +1085,9 @@ static void share_ufyes(int idx, char *par)
 static void share_userfileq(int idx, char *par)
 {
   int ok = 1, i;
-//  int bfl = bot_flags(dcc[idx].user);
 
   flush_tbuf(dcc[idx].nick);
 
-//  if (bfl & BOT_AGGRESSIVE)
   if (bot_aggressive_to(dcc[idx].user)) {
     putlog(LOG_ERRORS, "*", STR("%s offered user transfer - I'm supposed to be aggressive to it"), dcc[idx].nick);
     dprintf(idx, STR("s un I have you marked for Agressive sharing.\n"));
@@ -1117,9 +1113,9 @@ static void share_userfileq(int idx, char *par)
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
 #ifdef HUB
       putlog(LOG_BOTS, "@", "Downloading user file from %s", dcc[idx].nick);
-#else
+#else /* !HUB */
       putlog(LOG_BOTS, "@", "Downloading user file via uplink.");
-#endif
+#endif /* HUB */
     }
   }
 }
@@ -1224,8 +1220,6 @@ static void share_version(int idx, char *par)
   dcc[idx].status &= ~(STAT_SHARE | STAT_GETTING | STAT_SENDING |
 		       STAT_OFFERED | STAT_AGGRESSIVE);
   dcc[idx].u.bot->uff_flags = 0;
-//printf("idx: %d them: %d me: %d a? %d\n", idx, dcc[idx].u.bot->numver, egg_numver, bot_aggressive_to(dcc[idx].user));
-//  if ((dcc[idx].u.bot->numver == egg_numver) && //only share with same VER bots.
   if (1 && //only share with same VER bots.
       (bot_aggressive_to(dcc[idx].user))) {
     if (can_resync(dcc[idx].nick))
@@ -1245,7 +1239,6 @@ static void hook_read_userfile()
     for (i = 0; i < dcc_total; i++)
       if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE) &&
 	  !(dcc[i].status & STAT_AGGRESSIVE) &&
-//          (dcc[i].u.bot->numver == egg_numver)) { 
           (1)) { 
 	/* Cancel any existing transfers */
 	if (dcc[i].status & STAT_SENDING)
@@ -1286,7 +1279,6 @@ static botcmd_t C_share[] =
   {"+bc",	(Function) share_pls_banchan},
   {"+bh",	(Function) share_pls_bothost},
   {"+cr",	(Function) share_pls_chrec},
-//  {"+c",	(Function) share_pls_chan},
   {"+e",	(Function) share_pls_exempt},
   {"+ec",	(Function) share_pls_exemptchan},
   {"+h",	(Function) share_pls_host},
@@ -1304,7 +1296,6 @@ static botcmd_t C_share[] =
   {"-invc",	(Function) share_mns_invitechan},
   {"a",		(Function) share_chattr},
   {"c",		(Function) share_change},
-//  {"chan",	(Function) share_chan},
   {"chchinfo",	(Function) share_chchinfo},
   {"e",		(Function) share_end},
   {"feats",	(Function) share_feats},
@@ -1484,17 +1475,13 @@ static void check_expired_tbufs()
     if (dcc[i].type->flags & DCT_BOT) {
       if (dcc[i].status & STAT_OFFERED) {
 	if (now - dcc[i].timeval > 120) {
-	  if (dcc[i].user && (bot_aggressive_to(dcc[i].user)) &&
-             (1))
-//             (dcc[i].u.bot->numver == egg_numver))
+	  if (dcc[i].user && bot_aggressive_to(dcc[i].user))
 	    dprintf(i, "s u?\n");
 	  /* ^ send it again in case they missed it */
 	}
 	/* If it's a share bot that hasnt been sharing, ask again */
       } else if (!(dcc[i].status & STAT_SHARE)) {
-	if (dcc[i].user && (bot_aggressive_to(dcc[i].user)) &&
-           (1))
-//           (dcc[i].u.bot->numver == egg_numver))
+	if (dcc[i].user && bot_aggressive_to(dcc[i].user))
 	  dprintf(i, "s u?\n");
 	dcc[i].status |= STAT_OFFERED;
       }
@@ -1632,8 +1619,6 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
     chmod(fn, 0600);		/* make it -rw------- */
     lfprintf(f, "#4v: %s -- %s -- transmit\n", ver, botnetnick);
     ok = 1;
-//need chanhack for no support    
-    Context;
     if (!write_chans(f, idx))
      ok = 0;
     if (!write_bans(f, idx))
@@ -1659,13 +1644,10 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
     } else
       putlog(LOG_BOTS, "@", "%s is too old: not sharing exempts and invites.",
              dcc[idx].nick);
-    Context;
     for (u = bu; u && ok; u = u->next)
     if (!write_user(u, f, idx))
      ok = 0;
-    Context;
     lfprintf(f, "#DONT DELETE THIS LINE");
-    Context;
     fclose(f);
   }
   if (!ok)
@@ -2090,38 +2072,6 @@ static void cancel_user_xfer(int idx, void *x)
     def_dcc_bot_kill(idx, x);
 }
 
-static tcl_ints my_ints[] =
-{
-  {"allow-resync",	&allow_resync},
-  {"resync-time",	&resync_time},
-  {"private-global",	&private_global},
-  {"private-user",	&private_user},
-  {"override-bots",	&overr_local_bots},
-  {NULL,		NULL}
-};
-
-static tcl_strings my_strings[] =
-{
-  {"private-globals",	private_globals,	50,	0},
-  {NULL,		NULL,			0,	0}
-};
-
-static void cmd_flush(struct userrec *u, int idx, char *par)
-{
-  if (!par[0])
-    dprintf(idx, "Usage: flush <botname>\n");
-  else if (flush_tbuf(par))
-    dprintf(idx, "Flushed resync buffer for %s\n", par);
-  else
-    dprintf(idx, "There is no resync buffer for that bot.\n");
-}
-
-static cmd_t my_cmds[] =
-{
-  {"flush",	"n",	(Function) cmd_flush,		NULL},
-  {NULL,	NULL,	NULL,				NULL}
-};
-
 static int share_expmem()
 {
   int tot = 0;
@@ -2238,9 +2188,6 @@ char *share_start(Function *global_funcs)
   add_hook(HOOK_SECONDLY, (Function) check_delay);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
-  add_tcl_ints(my_ints);
-  add_tcl_strings(my_strings);
-  add_builtins(H_dcc, my_cmds);
   uff_init();
   uff_addtable(internal_uff_table);
   return NULL;

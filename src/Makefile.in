@@ -28,6 +28,23 @@ doofus:
 	@echo ""
 	@cd .. && $(MAKE)
 
+makesalt: makesalt.c
+	@echo -e "Compiling: \033[1mmakesalt\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makesalt.c -o makesalt
+	@$(STRIP) makesalt
+
+makesettings: makesettings.c
+	@echo -e "Compiling: \033[1mmakesettings\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makesettings.c -o makesettings
+	@$(STRIP) makesettings
+
+stringfix: stringfix.c
+	@echo -e "Compiling: \033[1mstringfix\033[0m"
+	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
+	@$(STRIP) stringfix
+
+utils: stringfix makesettings makesalt
+
 ../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compatability
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
@@ -38,7 +55,7 @@ doofus:
 	@echo "Successful compile: $(EGGEXEC)"
 	@echo ""
 
-$(EGGEXEC): ../stringfix ../$(EGGEXEC)
+$(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
 	@rm -f .depend *.o *.a *~ x*.c
@@ -54,10 +71,10 @@ build_msg:
 	@echo "[*] Compiling core components"
 
 
-main.o: ../stringfix
+main.o: stringfix
 	@cp -f main.c xmain.c
 	@echo -e "Compiling: \033[1mmain\033[0m"
-	@../stringfix xmain.c
+	@./stringfix xmain.c
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
 	'-DLDFLAGS="$(LD)"' '-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/xmain.c -o main.o
 
@@ -73,14 +90,14 @@ eggdrop.h:
 .SUFFIXES: .c .h .o .a
 
 
-.c.o:   ../stringfix
+.c.o:   stringfix
 	@cp -f $< x$<
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	@../stringfix x$<
+	@./stringfix x$<
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c x$< -o `basename $< .c`.o
+	@${STRIP} `basename $< .c`.o
 
 #safety hash
-../stringfix: stringfix.c
 auth.o: auth.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h chan.h users.h compat/compat.h compat/inet_aton.h \
  compat/inet_ntop.h ../src/main.h compat/snprintf.h  compat/memset.h \
@@ -119,7 +136,7 @@ config.o: config.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h pr
  ../lush.h misc_file.h cmdt.h chan.h users.h compat/compat.h compat/inet_aton.h \
  compat/inet_ntop.h ../src/main.h compat/snprintf.h  compat/memset.h \
  compat/memcpy.h compat/strcasecmp.h compat/strftime.h
-crypt.o: crypt.c main.h ../config.h ../pack/salt.h eggdrop.h proto.h \
+crypt.o: crypt.c main.h ../config.h salt.h eggdrop.h proto.h \
  ../lush.h misc_file.h compat/compat.h compat/inet_aton.h \
  compat/inet_ntop.h ../src/main.h compat/snprintf.h  compat/memset.h \
  compat/memcpy.h compat/strcasecmp.h compat/strftime.h

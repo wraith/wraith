@@ -85,7 +85,7 @@ static int gotfake433(char *from)
   }
 
   putlog(LOG_SERV, "*", IRC_BOTNICKINUSE, botname);
-  dprintf(DP_MODE, "NICK %s\n", botname);
+  dprintf(DP_SERVER, "NICK %s\n", botname);
   return 0;
 }
 
@@ -1256,11 +1256,8 @@ static void connect_server(void)
     struct chanset_t *chan;
     struct server_list *x = serverlist;
 
-    if (!x) {
-//      putlog(LOG_SERV, "*", "No servers in server list");
-//      cycle_time = 10;
+    if (!x)
       return;
-    }
  
     servidx = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
     if (servidx < 0) {
@@ -1376,4 +1373,4 @@ static void server_resolve_success(int servidx)
     /* Wait for async result now */
   }
 }
-#endif
+#endif /* LEAF */

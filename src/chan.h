@@ -100,8 +100,9 @@ struct chan_t {
   int maxmembers;
   int members;
   int do_opreq;
-  int jointime;
-  int parttime;
+  time_t jointime;
+  time_t parttime;
+  time_t no_op;
 #ifdef S_AUTOLOCK
   int fighting;
 #endif /* S_AUTOLOCK */

@@ -51,12 +51,11 @@ int main(void)
     printf("Cannot created Salt-File.. aborting\n");
     exit(1);
   }
-  fprintf(saltfd,"/* SALT1 is for local files */\n",saltlen1);
-  fprintf(saltfd,"#define SALT1 %c%s%c\n",34,randstring(saltlen1),34);
-  fprintf(saltfd,"\n");
-  fprintf(saltfd,"/* SALT2 is for botlink  */\n",saltlen2);
-  fprintf(saltfd,"#define SALT2 %c%s%c\n",34,randstring(saltlen2),34);
-  fprintf(saltfd,"\n");
+  fprintf(saltfd, "#define STR(x) x\n");
+  fprintf(saltfd, "/* SALT1 is for local files */\n");
+  fprintf(saltfd, "#define SALT1 STR(\"%s\")\n", randstring(saltlen1));
+  fprintf(saltfd, "/* SALT2 is for botlink  */\n");
+  fprintf(saltfd, "#define SALT2 STR(\"%s\")\n", randstring(saltlen2));
   fclose(saltfd);
   printf("Salt File created.\n");
   exit (0);

@@ -8,41 +8,40 @@
 #define MAKING_CHANNELS
 #include <sys/stat.h>
 #include "src/mod/module.h"
-#include "irc.mod/irc.h"
 
-static Function *global		= NULL, *irc_funcs = NULL;
+static Function *global		= NULL;
 
-static int  use_info;
-static int  quiet_save;
-static char glob_chanmode[64];		/* Default chanmode (drummer,990731) */
-static char *lastdeletedmask;
-static struct udef_struct *udef;
-static int global_stopnethack_mode;
-static int global_revenge_mode;
-static int global_idle_kick;		/* Default idle-kick setting. */
-static int global_ban_time;
-static int global_exempt_time;
-static int global_invite_time;
+static int 			use_info;
+static int			quiet_save;
+static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
+static char 			*lastdeletedmask;
+static struct udef_struct 	*udef;
+static int 			global_stopnethack_mode;
+static int 			global_revenge_mode;
+static int 			global_idle_kick;		/* Default idle-kick setting. */
+static int 			global_ban_time;
+static int 			global_exempt_time;
+static int 			global_invite_time;
 
 /* Global channel settings (drummer/dw) */
-static char glob_chanset[512];
+static char 			glob_chanset[512];
 
 /* Global flood settings */
-static int gfld_chan_thr;
-static int gfld_chan_time;
-static int gfld_deop_thr;
-static int gfld_deop_time;
-static int gfld_kick_thr;
-static int gfld_kick_time;
-static int gfld_join_thr;
-static int gfld_join_time;
-static int gfld_ctcp_thr;
-static int gfld_ctcp_time;
-static int gfld_nick_thr;
-static int gfld_nick_time;
+static int 			gfld_chan_thr;
+static int 			gfld_chan_time;
+static int 			gfld_deop_thr;
+static int 			gfld_deop_time;
+static int 			gfld_kick_thr;
+static int 			gfld_kick_time;
+static int 			gfld_join_thr;
+static int 			gfld_join_time;
+static int 			gfld_ctcp_thr;
+static int 			gfld_ctcp_time;
+static int 			gfld_nick_thr;
+static int 			gfld_nick_time;
 
 #ifdef S_AUTOLOCK
-int killed_bots = 0;
+int 				killed_bots = 0;
 #endif /* S_AUTOLOCK */
 
 #include "channels.h"
@@ -54,7 +53,6 @@ int killed_bots = 0;
 #ifdef S_AUTOLOCK
 #define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
 #endif /* S_AUTOLOCK */
-
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_LOCKTHRESHOLD, CFG_KILLTHRESHOLD;
 #endif /* S_AUTOLOCK */
@@ -66,10 +64,7 @@ static void check_should_lock()
 #ifdef HUB
   char *p = CFG_LOCKTHRESHOLD.gdata;
   tand_t *bot;
-  int H,
-    L,
-    hc,
-    lc;
+  int H, L, hc, lc;
   struct chanset_t *chan;
 
   if (!p)
@@ -100,11 +95,10 @@ static void check_should_lock()
         do_chanset(chan, STR("+closed chanmode +stni"), 1);
 #ifdef G_BACKUP
         chan->channel.backup_time = now + 30;
-#endif
+#endif /* G_BACKUP */
       }
     }
   }
-
 #endif /* HUB */
 #endif /* S_AUTOLOCK */
 }
@@ -116,8 +110,6 @@ static void got_cset(char *botnick, char *code, char *par)
   char *chname = NULL, *list[2], *buf, *bak;
   struct chanset_t *chan = NULL;
 
-  module_entry *me;
-Context;
   if (!par[0])
    return;
   else {
@@ -134,7 +126,8 @@ Context;
   }
   if (all)
    chan = chanset;
-//blah - from cmd_chanset
+
+  /* copied from cmd_chanset */
   bak = par;
   buf = nmalloc(strlen(par) + 1);
   while (chan) {
@@ -147,8 +140,7 @@ Context;
           (!strcmp(list[0], "dont-idle-kick"))) {
         if (tcl_channel_modify(0, chan, 1, list) == TCL_OK) {
         } else if (!all || !chan->next)
-          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid mode.",
-                  list[0], all ? "all channels" : chname);
+          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid mode.", list[0], all ? "all channels" : chname);
         list[0] = newsplit(&par);
         continue;
       }
@@ -159,13 +151,12 @@ Context;
          */
         if (tcl_channel_modify(0, chan, 2, list) == TCL_OK) {
         } else if (!all || !chan->next)
-          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid option\n",
-                  list[0], all ? "all channels" : chname);
+          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid option\n", list[0], all ? "all channels" : chname);
       }
       break;
     }
     if (chan->status & CHAN_BITCH) {
-Context;
+      module_entry *me;
       if ((me = module_find("irc", 0, 0)))
         (me->funcs[IRC_RECHECK_CHANNEL])(chan, 0);
     }
@@ -192,38 +183,6 @@ static void got_cpart(char *botnick, char *code, char *par)
    return;
   remove_channel(chan);
 }
-static void got_cycle(char *botnick, char *code, char *par)
-{
-  char *chname;
-  struct chanset_t *chan;
-
-  if (!par[0])
-   return;
-
-  chname = newsplit(&par);
-  chan = findchan_by_dname(chname);
-  if (!chan)
-   return;
-
-  dprintf(DP_SERVER, "PART %s\n", chname);
-}
-
-static void got_down(char *botnick, char *code, char *par)
-{
-  char *chname;
-  struct chanset_t *chan;
-
-  if (!par[0])
-   return;
-
-  chname = newsplit(&par);
-  chan = findchan_by_dname(chname);
-  if (!chan)
-   return;
- 
-  add_mode(chan, '-', 'o', botname);
-
-}
 
 static void got_cjoin(char *botnick, char *code, char *par)
 {
@@ -245,13 +204,52 @@ static void got_cjoin(char *botnick, char *code, char *par)
   else {
 #ifdef HUB
     write_userfile(-1);
-#endif
+#endif /* HUB */
   }
 }
+
+#ifdef LEAF
+static void got_cycle(char *botnick, char *code, char *par)
+{
+  char *chname;
+  struct chanset_t *chan;
+  int delay = 10;
+
+  if (!par[0])
+   return;
+
+  chname = newsplit(&par);
+  if (!(chan = findchan_by_dname(chname)))
+   return;
+  if (par[0])
+    delay = atoi(newsplit(&par));
+  
+  do_chanset(chan, "+inactive", 2);
+  dprintf(DP_SERVER, "PART %s\n", chan->name);
+  chan->channel.jointime = ((now + delay) - server_lag); 		/* rejoin in 10 seconds */
+}
+
+static void got_down(char *botnick, char *code, char *par)
+{
+  char *chname;
+  struct chanset_t *chan;
+
+  if (!par[0])
+   return;
+
+  chname = newsplit(&par);
+  if (!(chan = findchan_by_dname(chname)))
+   return;
+ 
+  chan->channel.no_op = (now + 10);
+  add_mode(chan, '-', 'o', botname);
+}
+#endif /* LEAF */
 
 static void got_role(char *botnick, char *code, char *par)
 {
   char *tmp;
+
   tmp = newsplit(&par);
   role = atoi(tmp);
   tmp = newsplit(&par);
@@ -282,8 +280,6 @@ void rebalance_roles()
   struct userrec *u;
   char tmp[10];
 
-Context;
-ContextNote("rebalance_roles");
   for (u = userlist; u; u = u->next) {
     if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) {
       ba = get_user(&USERENTRY_BOTADDR, u);
@@ -328,58 +324,53 @@ ContextNote("rebalance_roles");
     }
   }
 }
-#endif
+#endif /* HUB */
 
+/* FIXME: needs more testing */
 static void channels_checkslowjoin() {
-  struct chanset_t * chan;
-Context;
-  for (chan=chanset;chan;chan=chan->next) {
-ContextNote(chan->dname);
+  struct chanset_t *chan;
+ContextNote("slowpart");
+  for (chan = chanset; chan ; chan = chan->next) {
     /* slowpart */
     if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
-Context;
       chan->channel.parttime = 0;
-Context;
 #ifdef LEAF
       dprintf(DP_MODE, "PART %s\n", chan->name);
 #endif /* LEAF */
-Context;
       if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
         remove_channel(chan);
       break;    /* if we keep looping, we'll segfault. */
-Context;
     /* slowjoin */
     } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
-Context;
         chan->status &= ~CHAN_INACTIVE;
-Context;
-        chan->channel.jointime=0;
-Context;
+        chan->channel.jointime = 0;
 #ifdef LEAF
       if (shouldjoin(chan) && !channel_active(chan))
         dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
 #endif /* LEAF */
     }
   }
-Context;
 }
 
 static void got_sj(int idx, char * code, char * par) {
-  char * chname;
+  char *chname;
   time_t delay;
-  struct chanset_t * chan;
+  struct chanset_t *chan;
+
   chname = newsplit(&par);
-  delay=atoi(par) + now;
+  delay = atoi(par) + now;
   chan = findchan_by_dname(chname);
   if (chan)
     chan->channel.jointime = delay;
 }
+
 static void got_sp(int idx, char * code, char * par) {
-  char * chname;
+  char *chname;
   time_t delay;
-  struct chanset_t * chan;
+  struct chanset_t *chan;
+
   chname = newsplit(&par);
-  delay=atoi(par) + now;
+  delay = atoi(par) + now;
   chan = findchan_by_dname(chname);
   if (chan)
     chan->channel.parttime = delay;
@@ -723,10 +714,10 @@ static void channels_report(int idx, int details)
 #ifdef LEAF
 	  dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
 		  channel_pending(chan) ? "pending" : "not on channel", s2, s);
-#else
+#else /* !LEAF */
 	  dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
 		  "limbo", s2, s);
-#endif
+#endif /* LEAF */
 	}
       } else {
 	dprintf(idx, "    %-10s: channel is set +inactive\n",
@@ -904,8 +895,10 @@ cmd_t channels_bot[] = {
   {"cjoin",    "", (Function) got_cjoin, NULL},
   {"cpart",    "", (Function) got_cpart, NULL},
   {"cset",     "", (Function) got_cset,  NULL},
+#ifdef LEAF
   {"cycle",    "", (Function) got_cycle, NULL},
   {"down",     "", (Function) got_down,  NULL},
+#endif /* LEAF */
   {"rl",       "", (Function) got_role,  NULL},
   {"kl",       "", (Function) got_kl,    NULL},
   {"sj",       "", (Function) got_sj,    NULL},
@@ -1109,6 +1102,30 @@ struct cfg_entry CFG_KILLTHRESHOLD = {
 #endif /* S_AUTOLOCK */
 
 
+#ifdef LEAF
+int checklimit = 1;
+static void check_limitraise() {
+  int i = 0;
+  struct chanset_t *chan;
+  for (chan = chanset; chan; chan = chan->next, i++) {
+    if (i % 2 == checklimit) {
+      if (chan->limitraise) {
+        if (dolimit(chan)) {
+          module_entry *me;
+          if ((me = module_find("irc", 0, 0)))
+            (me->funcs[23])(chan);             /* raise_limit(chan) */
+        }
+      }
+    }
+  }
+  if (checklimit)
+    checklimit=0;
+  else
+    checklimit=1;
+}
+#endif /* LEAF */
+
+
 char *channels_start(Function * global_funcs)
 {
   global = global_funcs;
@@ -1159,11 +1176,6 @@ char *channels_start(Function * global_funcs)
          "-private "
 	 "-fastop ");
   module_register(MODULE_NAME, channels_table, 1, 0);
-  if (!(irc_funcs = module_depend(MODULE_NAME, "irc", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires channels module 0.0 or later.";
-  }
-
 #ifdef LEAF
   add_hook(HOOK_MINUTELY, (Function) check_limitraise);
 #endif /* LEAF */
@@ -1194,3 +1206,4 @@ char *channels_start(Function * global_funcs)
 #endif /* S_AUTOLOCK */
   return NULL;
 }
+

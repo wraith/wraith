@@ -500,7 +500,7 @@ void sort_userlist()
 /* Rewrite the entire user file. Call USERFILE hook as well, probably
  * causing the channel file to be rewritten as well.
  */
-void write_userfile(int idx)
+int write_userfile(int idx)
 {
   FILE *f;
   char *new_userfile;
@@ -510,7 +510,7 @@ void write_userfile(int idx)
   int ok;
 
   if (userlist == NULL)
-    return;			/* No point in saving userfile */
+    return 1;			/* No point in saving userfile */
 
   new_userfile = nmalloc(strlen(userfile) + 5);
   sprintf(new_userfile, "%s~new", userfile);
@@ -520,7 +520,7 @@ void write_userfile(int idx)
   if (f == NULL) {
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
     nfree(new_userfile);
-    return;
+    return 2;
   }
   if (!quiet_save)
     putlog(LOG_MISC, "*", USERF_WRITING);
@@ -540,7 +540,7 @@ void write_userfile(int idx)
     putlog(LOG_MISC, "*", "%s (%s)", USERF_ERRWRITE, strerror(ferror(f)));
     fclose(f);
     nfree(new_userfile);
-    return;
+    return 3;
   }
   lfprintf(f, "#DONT DELETE THIS LINE.");
   fclose(f);
@@ -549,6 +549,7 @@ void write_userfile(int idx)
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
   nfree(new_userfile);
+  return 0;
 }
 int change_handle(struct userrec *u, char *newh)
 {

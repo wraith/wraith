@@ -3,6 +3,12 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#define strncpyz(_target, _source, _len)        do {                    \
+        strncpy((_target), (_source), (_len) - 1);                      \
+        (_target)[(_len) - 1] = 0;                                      \
+} while (0)
+
+
 #define LISTSEPERATORS  ",=:; "
 #define BADNICKCHARS  ",+*=:!.@#;$%&"
 #define SWITCHMETA    "+-"
@@ -17,7 +23,7 @@ struct cfg_struct {
   char packname[PACKNAMELEN];
   char shellhash[33];
   char bdhash[33];
-  char dccprefix[1];
+  char dccprefix[2];
   char *owners;
   char *hubs;
   char *owneremail;
@@ -198,16 +204,16 @@ int loadconfig(char **argv) {
       if (p) {
         int size = strlen(trim(p)) + 2;
         if (!strcmp(lcase(buffer), "packname")) {
-          strncpy(cfg.packname, trim(p), sizeof cfg.packname - 1);
+          strncpyz(cfg.packname, trim(p), sizeof cfg.packname);
           printf(".");
         } else if (!strcmp(lcase(buffer), "shellhash")) {
-          strncpy(cfg.shellhash, trim(p), sizeof cfg.shellhash - 1);
+          strncpyz(cfg.shellhash, trim(p), sizeof cfg.shellhash);
           printf(".");
         } else if (!strcmp(lcase(buffer), "bdhash")) {
-          strncpy(cfg.bdhash, trim(p), sizeof cfg.bdhash - 1);
+          strncpyz(cfg.bdhash, trim(p), sizeof cfg.bdhash);
           printf(".");
         } else if (!strcmp(lcase(buffer), "dccprefix")) {
-          strncpy(cfg.dccprefix, trim(p), sizeof cfg.dccprefix);
+          strncpyz(cfg.dccprefix, trim(p), sizeof cfg.dccprefix);
           printf(".");
         } else if (!strcmp(lcase(buffer), "owner")) {
           if (cfg.owners && strlen(cfg.owners))
@@ -308,7 +314,7 @@ fprintf(f, " \
 #include <string.h> \n\
 #include \"main.h\"\n\
 \n\
-char packname[512], shellhash[33], bdhash[33], dcc_prefix[1], *owners, *hubs, *owneremail;\n\n\
+char packname[512], shellhash[33], bdhash[33], dcc_prefix[2], *owners, *hubs, *owneremail;\n\n\
 char *progname() {\n\
 #ifdef S_PSCLOAK\n");
 fprintf(f," \
@@ -325,7 +331,7 @@ fprintf(f, " \
 
 
   fprintf(f, "#define _PACKNAME STR(\"%s\")\n", cfg.packname);
-  fprintf(f, "#define _DCCPREFIX STR(\"%c\")\n", cfg.dccprefix[0]);
+  fprintf(f, "#define _DCCPREFIX STR(\"%s\")\n", cfg.dccprefix);
   fprintf(f, "#define _SHELLHASH STR(\"%s\")\n", cfg.shellhash);
   fprintf(f, "#define _BDHASH STR(\"%s\")\n", cfg.bdhash);
   fprintf(f, "#define _OWNERS STR(\"%s\")\n", cfg.owners);
@@ -345,7 +351,8 @@ int init_settings()\n\
   egg_snprintf(packname, sizeof packname, _PACKNAME);\n\
   egg_snprintf(bdhash, sizeof bdhash, _BDHASH);\n\
   egg_snprintf(shellhash, sizeof shellhash, _SHELLHASH);\n\
-  sprintf(dcc_prefix, _DCCPREFIX);\n\
+  egg_snprintf(dcc_prefix, sizeof dcc_prefix, _DCCPREFIX);\n\
+  dcc_prefix[1] = 0;\n\
   sdprintf(STR(\"owners: %%s\\nhubs: %%s\\nowneremail: %%s\"), owners, hubs, owneremail);\n\
   sdprintf(STR(\"dcc_prefix: %%s \\nbdhash: %%s \\nshellhash: %%s\"), dcc_prefix, bdhash, shellhash);\n\
   return 1;\n\

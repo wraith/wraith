@@ -135,7 +135,7 @@
 #define botnet_send_bye ((void(*)(void))global[27])
 /* 28 - 31 */
 #define botnet_send_chat ((void(*)(int,char*,char*))global[28])
-/* UNUSED 29 */
+#define server_lag (*(int *)global[29])
 /* UNUSED 30 */
 /* UNUSED 31 */
 /* 32 - 35 */

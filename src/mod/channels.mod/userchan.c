@@ -1292,16 +1292,12 @@ static int write_chans(FILE *f, int idx)
     return 0;
 
   for (chan = chanset; chan; chan = chan->next) {
-
-
     if ((idx < 0) || (1)) {
       struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0, 0, 0};
       if (idx >= 0)
         get_user_flagrec(dcc[idx].user,&fr,chan->dname);
       else
         fr.chan = BOT_SHARE;
-
-//    if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
 
      putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
 
@@ -1331,15 +1327,13 @@ static int write_chans(FILE *f, int idx)
 revenge-mode %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
-ban-time %d \
-exempt-time %d invite-time %d \
+ban-time %d exempt-time %d invite-time %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
-%cprotectops %cdontkickops \
-%crevenge %crevengebot %cprivate \
-%ccycle %cinactive \
-%cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites \
-%cnodesynch \
-%cclosed %ctake %cmanop %cvoice %cfastop %s %s",
+%cprotectops %cdontkickops %crevenge %crevengebot \
+%cprivate %ccycle %cinactive %cdynamicexempts \
+%cuserexempts %cdynamicinvites %cuserinvites \
+%cnodesynch %cclosed %ctake %cmanop %cvoice \
+%cfastop %s %s",
 	"add",
 	name,
 	" { ",
@@ -1433,7 +1427,7 @@ static void channels_writeuserfile(void)
 #endif
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
   //old .chan write_channels();
-#endif
+#endif /* HUB */
 }
 
 /* Expire mask originally set by `who' on `chan'?
@@ -1491,25 +1485,6 @@ static int expired_mask(struct chanset_t *chan, char *who)
     return 1;
 }
 
-#ifdef LEAF
-int checklimit = 1;
-void check_limitraise() {
-  int i=0;
-  struct chanset_t * chan;
-  for (chan=chanset;chan;chan=chan->next,i++) {
-    if (i % 2 == checklimit) {
-      if (chan->limitraise) {
-        if (dolimit(chan)) 
-          raise_limit(chan);
-      }
-    }
-  }
-  if (checklimit)
-    checklimit=0;
-  else
-    checklimit=1;
-}
-#endif
 /* Check for expired timed-bans.
  */
 

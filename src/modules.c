@@ -28,7 +28,7 @@ extern char		 tempdir[], botnetnick[], botname[], natip[], cmdprefix[],
                          authkey[], 
 #endif /* S_AUTH */
 			 myip[], myip6[];
-extern int	 noshare, loading, role, 
+extern int	 	 noshare, loading, role, server_lag, 
 #ifdef S_AUTH
 			 auth_total, 
 #endif /* S_AUTH */
@@ -191,7 +191,7 @@ Function global_table[] =
   (Function) botnet_send_bye,
   /* 28 - 31 */
   (Function) botnet_send_chat,
-  (Function) 0,
+  (Function) & server_lag, /* int					*/
   (Function) 0,
   (Function) 0,
   /* 32 - 35 */
@@ -672,6 +672,8 @@ const char *module_load(char *name)
   char *e;
   Function f;
   struct static_list *sl;
+
+  sdprintf("module_load(\"%s\")", name);
 
   if (module_find(name, 0, 0) != NULL)
     return MOD_ALREADYLOAD;

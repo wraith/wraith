@@ -146,6 +146,7 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
     }
   }
 }
+
 #ifdef S_IRCNET
 static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
 {
@@ -405,7 +406,7 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
     }
   }
 }
-#endif
+#endif /* S_IRCNET */
 
 static void cmd_mns_ban(struct userrec *u, int idx, char *par)
 {
@@ -520,7 +521,7 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
 }
 
 #ifdef S_IRCNET
-static void cmd_mns_exempt (struct userrec *u, int idx, char *par)
+static void cmd_mns_exempt(struct userrec *u, int idx, char *par)
 {
   int console = 0, i = 0, j;
   struct chanset_t *chan = NULL;
@@ -637,7 +638,7 @@ static void cmd_mns_exempt (struct userrec *u, int idx, char *par)
   dprintf(idx, "No such exemption.\n");
 }
 
-static void cmd_mns_invite (struct userrec *u, int idx, char *par)
+static void cmd_mns_invite(struct userrec *u, int idx, char *par)
 {
   int console = 0, i = 0, j;
   struct chanset_t *chan = NULL;
@@ -755,8 +756,8 @@ static void cmd_mns_invite (struct userrec *u, int idx, char *par)
   }
   dprintf(idx, "No such invite.\n");
 }
+#endif /* S_IRCNET */
 
-#endif
 static void cmd_bans(struct userrec *u, int idx, char *par)
 {
   if (!egg_strcasecmp(par, "all")) {
@@ -767,8 +768,9 @@ static void cmd_bans(struct userrec *u, int idx, char *par)
     tell_bans(idx, 0, par);
   }
 }
+
 #ifdef S_IRCNET
-static void cmd_exempts (struct userrec *u, int idx, char *par)
+static void cmd_exempts(struct userrec *u, int idx, char *par)
 {
   if (!use_exempts) {
     dprintf(idx, "This command can only be used with use-exempts enabled.\n");
@@ -783,7 +785,7 @@ static void cmd_exempts (struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_invites (struct userrec *u, int idx, char *par)
+static void cmd_invites(struct userrec *u, int idx, char *par)
 {
   if (!use_invites) {
     dprintf(idx, "This command can only be used with use-invites enabled.\n");
@@ -797,7 +799,7 @@ static void cmd_invites (struct userrec *u, int idx, char *par)
     tell_invites(idx, 0, par);
   }
 }
-#endif
+#endif /* S_IRCNET */
 
 static void cmd_info(struct userrec *u, int idx, char *par)
 {
@@ -829,10 +831,10 @@ static void cmd_info(struct userrec *u, int idx, char *par)
     if (s1 && s1[0]) {
       if (chname) {
 	dprintf(idx, "Info on %s: %s\n", chname, s1);
-	dprintf(idx, "Use '.info %s none' to remove it.\n", chname);
+	dprintf(idx, "Use 'info %s none' to remove it.\n", chname);
       } else {
 	dprintf(idx, "Default info: %s\n", s1);
-	dprintf(idx, "Use '.info none' to remove it.\n");
+	dprintf(idx, "Use 'info none' to remove it.\n");
       }
     } else
       dprintf(idx, "No info has been set for you.\n");
@@ -939,27 +941,27 @@ static void cmd_chinfo(struct userrec *u, int idx, char *par)
 
 static void cmd_slowjoin(struct userrec *u, int idx, char *par)
 {
-  int intvl=0, delay=0, count=1;
+  int intvl = 0, delay = 0, count = 1;
   char *chname;
   char buf[2048], buf2[1048];
-  struct chanset_t * chan;
+  struct chanset_t *chan;
   tand_t *bot;
   char *p;
 
-  /* .slowjoin #chan 60 */
+  /* slowjoin #chan 60 */
   putlog(LOG_CMDS, "*", "#%s# slowjoin %s", dcc[idx].nick, par);
   chname = newsplit(&par);
   p = newsplit(&par);
-  intvl=atoi(p);
+  intvl = atoi(p);
   if (!chname[0] || !p[0]) {
     dprintf(idx, "Usage: slowjoin channel interval-seconds [channel options]\n");
     return;
   }
-  if (intvl<10) {
+  if (intvl < 10) {
     dprintf(idx, "Interval must be at least 10 seconds\n");
     return;
   }
-  if ((chan=findchan_by_dname(chname))) {
+  if ((chan = findchan_by_dname(chname))) {
     dprintf(idx, "Already on %s\n", chan->dname);
     return;
   }
@@ -981,13 +983,13 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
     return;
   }
   sprintf(buf2, "cjoin %s %s", chan->dname, buf);
-  botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+  putallbots(buf2);
 #ifdef HUB
   count=0;
-#else
+#else /* !HUB */
   count=1;
 #endif /* HUB */
-  for (bot=tandbot;bot;bot=bot->next) {
+  for (bot = tandbot; bot; bot = bot->next) {
     struct userrec *ubot;
     char tmp[100];
     
@@ -1002,39 +1004,39 @@ static void cmd_slowjoin(struct userrec *u, int idx, char *par)
 	sprintf(tmp, "sj %s %i\n", chan->dname, delay + v);
 	count++;
       }
-      botnet_send_zapf(nextbot(ubot->handle), botnetnick, ubot->handle, tmp);
+      putbot(ubot->handle, tmp);
     }
   }
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
   chan->status &= ~CHAN_INACTIVE;
 #ifdef LEAF
   if (shouldjoin(chan)) 
-    dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
+    dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
 #endif /* LEAF */
 }
 
 static void cmd_slowpart(struct userrec *u, int idx, char *par)
 {
-  int intvl=0, delay=0, count=1;
+  int intvl = 0, delay = 0, count = 1;
   char *chname;
-  struct chanset_t * chan;
+  struct chanset_t *chan;
   tand_t *bot;
   char *p;
 
-  /* .slowpart #chan 60 */
+  /* slowpart #chan 60 */
   putlog(LOG_CMDS, "*", "#%s# slowpart %s", dcc[idx].nick, par);
   chname = newsplit(&par);
   p = newsplit(&par);
-  intvl=atoi(p);
+  intvl = atoi(p);
   if (!chname[0] || !p[0]) {
     dprintf(idx, "Usage: slowpart channel interval-seconds\n");
     return;
   }
-  if (intvl<10) {
+  if (intvl < 10) {
     dprintf(idx, "Interval must be at least 10 seconds\n");
     return;
   }
-  if (!(chan=findchan_by_dname(chname))) {
+  if (!(chan = findchan_by_dname(chname))) {
     dprintf(idx, "Not on %s\n", chan->dname);
     return;
   }
@@ -1051,10 +1053,10 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
   }
 #ifdef HUB
   count=0;
-#else
+#else /* !HUB */
   count=1;
 #endif /* HUB */
-  for (bot=tandbot;bot;bot=bot->next) {
+  for (bot = tandbot; bot; bot = bot->next) {
     char tmp[100];
     struct userrec *ubot;
 
@@ -1069,7 +1071,7 @@ static void cmd_slowpart(struct userrec *u, int idx, char *par)
   	  sprintf(tmp, "sp %s %i\n", chname, delay + v);
   	  count++;
         }
-        botnet_send_zapf(nextbot(ubot->handle), botnetnick, ubot->handle, tmp);
+        putbot(ubot->handle, tmp);
       }  
   }
   dprintf(idx, "%i bots parting %s during the next %i seconds\n", count, chname, delay);
@@ -1352,30 +1354,40 @@ static void cmd_cycle(struct userrec *u, int idx, char *par)
 {
   char *chname;
   char buf2[1024];
+  int delay = 10;
+  struct chanset_t *chan;
 
   putlog(LOG_CMDS, "*", "#%s# cycle %s", dcc[idx].nick, par);
 
   if (!par[0]) {
-    dprintf(idx, "Usage: cycle [%s]<channel>\n", CHANMETA);
+    dprintf(idx, "Usage: cycle [%s]<channel> [delay]\n", CHANMETA);
+    dprintf(idx, "rejoin delay defaults to '10'\n");
     return;
   }
 
   chname = newsplit(&par);
-  if (!findchan_by_dname(chname)) {
+  chan = findchan_by_dname(chname);
+  if (!chan) {
     dprintf(idx, "%s it not a valid channel.\n", chname);
     return;
   }
+  if (par[0])
+    delay = atoi(newsplit(&par));
 
-  sprintf(buf2, "cycle %s", chname); //this just makes the bot PART
-  botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+  sprintf(buf2, "cycle %s %d", chname, delay); //this just makes the bot PART
+  putallbots(buf2);
 #ifdef LEAF
-  dprintf(DP_SERVER, "PART %s\n", chname);
-#endif  
+  do_chanset(chan, "+inactive", 2);
+  dprintf(DP_SERVER, "PART %s\n", chan->name);
+  chan->channel.jointime = ((now + delay) - server_lag);
+#endif /* LEAF */
 }
+
 static void cmd_down(struct userrec *u, int idx, char *par)
 {
   char *chname;
   char buf2[1024];
+  struct chanset_t *chan;
 
   putlog(LOG_CMDS, "*", "#%s# down %s", dcc[idx].nick, par);
 
@@ -1385,17 +1397,18 @@ static void cmd_down(struct userrec *u, int idx, char *par)
   }
 
   chname = newsplit(&par);
-
-  if (!findchan_by_dname(chname)) {
+  chan = findchan_by_dname(chname);
+  if (!chan) {
     dprintf(idx, "%s it not a valid channel.\n", chname);
     return;
   }
   
-  sprintf(buf2, "down %s", chname);
-  botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+  sprintf(buf2, "down %s", chan->dname);
+  putallbots(buf2);
 #ifdef LEAF
-  add_mode(findchan_by_dname(chname), '-', 'o', botname);
-#endif
+  add_mode(chan, '-', 'o', botname);
+  chan->channel.no_op = (now + 10);
+#endif /* LEAF */
   
 }
 
@@ -1414,7 +1427,7 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
 
   chname = newsplit(&par);
   sprintf(buf2, "cjoin %s %s", chname, par);
-  botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+  putallbots(buf2);
   if (findchan_by_dname(chname)) {
     dprintf(idx, "That channel already exists!\n");
     return;
@@ -1431,7 +1444,7 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
   else {
 #ifdef HUB
     write_userfile(-1);
-#endif
+#endif /* HUB */
   }
 }
 
@@ -1451,7 +1464,7 @@ static void cmd_mns_chan(struct userrec *u, int idx, char *par)
   chname = newsplit(&par);
 
   sprintf(buf2, "cpart %s", chname);
-  botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+  putallbots(buf2);
 
   chan = findchan_by_dname(chname);
   if (!chan) {
@@ -1491,7 +1504,6 @@ void modesetting(int idx, char *work, int *cnt, char *name, int state)
   if (!work[0])
     sprintf(work, "  ");
   if (name && name[0]) {
-//    snprintf(tmp, sizeof tmp, "%s%-17s", state ? "\033[32m+\033[0m" : "\033[31m-\033[0m", name);
     snprintf(tmp, sizeof tmp, "%s%-17s", state ? "\002+\002" : "\002-\002", name);
     strcat(work, tmp);
   }
@@ -1771,7 +1783,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 		answers, chname);
 #ifdef HUB
         write_userfile(-1);
-#endif
+#endif /* HUB */
       }
       if (!all)
         chan = NULL;
@@ -1784,7 +1796,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	      answers);
 #ifdef HUB
       write_userfile(-1);
-#endif
+#endif /* HUB */
     }
     nfree(buf);
   }

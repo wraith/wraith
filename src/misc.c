@@ -63,6 +63,7 @@ int	 shtime = 1;		/* Whether or not to display the time
 				   with console output */
 int	 conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
 int	 debug_output = 1;	/* Disply output to server to LOG_SERVEROUT */
+int 	 server_lag = 0;	/* GUESS! */
 
 
 /* Expected memory usage

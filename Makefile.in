@@ -33,7 +33,7 @@ TCLLIBFN = @TCLLIBFN@
 modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
 
 DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM -g3 -ggdb3
-CFLGS = 
+CFLGS = -fno-strict-aliasing
 MAKEFLAGS = -s -j4
 
 MAKE_LEAF = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
@@ -59,8 +59,7 @@ MAKE_DHUB = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD) -g' \
 'EGGEXEC=$(HUBEXEC)' 'EGGBUILD=(debug hub)' 'MODOBJS=mod/*.o'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'STRIP=$(STRIP)' \
-'CFLGS=$(CFLGS)' 'XREQS=$(XREQS)' \
-'XLIBS=$(XLIBS)' 'LD=$(LD)'
+'CFLGS=$(CFLGS)' 'XREQS=$(XREQS)' 'XLIBS=$(XLIBS)' 'LD=$(LD)'
 
 MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
@@ -73,15 +72,15 @@ all:
 	@echo ""
 
 cleanutils:
-	@rm -f stringfix
+	@rm -f src/stringfix src/makesettings src/makesalt
 	@misc/dostrings l
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp makesalt makesettings .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/makesalt src/makesettings src/settings.c src/settings.tmp
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp core DEBUG *~ key configure.temp .mangled
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/settings.tmp 
 
 distclean: clean clean-modconfig
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile
@@ -119,14 +118,18 @@ eggautoconf:
 	@$(modconf) eggautoconf
 
 packconf: makesettings
-	@./makesettings pack/pack.cfg src/settings.tmp
-	@touch src/settings.c
+	@src/makesettings pack/pack.cfg src/settings.tmp
+	@(if [ ! -f src/settings.c ]; then \
+	touch src/settings.c; \
+	fi)
 	@(if test "x`diff -qurN src/settings.tmp src/settings.c`" != "x"; then \
 	cp -f src/settings.tmp src/settings.c; \
 	fi)
 
 salt:	makesalt
-	@./makesalt
+	@src/makesalt
+	@cp -f pack/salt.h src/salt.h
+	@src/stringfix src/salt.h
 
 config:
 	@$(modconf) modules-still-exist
@@ -142,21 +145,16 @@ clean-modconfig:
 reconfig: clean-modconfig config
 
 stringfix:
-	@echo -e "Compiling: \033[1mstringfix\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) src/stringfix.c -o stringfix
-	@$(STRIP) stringfix
+	+@cd src && ${MAKE_UTILS} stringfix
 
 makesalt:
-	@echo -e "Compiling: \033[1mmakesalt\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) src/makesalt.c -o makesalt
-	@$(STRIP) makesalt
+	+@cd src && ${MAKE_UTILS} makesalt
 
 makesettings:
-	@echo -e "Compiling: \033[1mmakesettings\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) src/makesettings.c -o makesettings
-	@$(STRIP) makesettings
+	+@cd src && ${MAKE_UTILS} makesettings
 
-utils:  stringfix makesalt makesettings
+utils:
+	+@cd src && ${MAKE_UTILS} utils
 
 dostrings: stringfix
 	@misc/dostrings

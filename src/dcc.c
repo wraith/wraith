@@ -667,7 +667,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
       send_timesync(idx);
     } else {
       /* Invalid password/digest on hub */
-      putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
+      putlog(LOG_WARN, "*", "%s failed encrypted link handshake.", dcc[idx].nick);
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }

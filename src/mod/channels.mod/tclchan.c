@@ -226,13 +226,13 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
   else if CHKFLAG_POS(CHAN_DYNAMICINVITES, "dynamicinvites", chan->ircnet_status)
   else if CHKFLAG_NEG(CHAN_NOUSERINVITES,  "userinvites",    chan->ircnet_status)
 #endif
-  else if CHKFLAG_POS(CHAN_CLOSED,          "closed",          chan->status)
-  else if CHKFLAG_POS(CHAN_TAKE,          "take",          chan->status)
-  else if CHKFLAG_POS(CHAN_NOMOP,          "nomop",          chan->status)
+  else if CHKFLAG_POS(CHAN_CLOSED,	   "closed",         chan->status)
+  else if CHKFLAG_POS(CHAN_TAKE,	   "take",           chan->status)
+  else if CHKFLAG_POS(CHAN_NOMOP,	   "nomop",          chan->status)
   else if CHKFLAG_POS(CHAN_MANOP,          "manop",          chan->status)
   else if CHKFLAG_POS(CHAN_VOICE,          "voice",          chan->status)
-  else if CHKFLAG_POS(CHAN_FASTOP,          "fastop",          chan->status)
-  else if CHKFLAG_POS(CHAN_PRIVATE,          "private",          chan->status)
+  else if CHKFLAG_POS(CHAN_FASTOP,         "fastop",         chan->status)
+  else if CHKFLAG_POS(CHAN_PRIVATE,        "private",        chan->status)
 /* Chanflag template
  *else if CHKFLAG_POS(CHAN_TEMP,	   "temp",		chan->status)
  */
@@ -270,12 +270,12 @@ static int tcl_channel STDVAR
       
       snprintf(buf2, sizeof buf2, "cjoin %s", argv[2]);
       if (!loading)
-        botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+        putallbots(buf2);
       return tcl_channel_add(irp, argv[2], "");
     }
     snprintf(buf2, sizeof buf2, "cjoin %s %s", argv[2], argv[3]);
     if (!loading)
-      botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+      putallbots(buf2);
     return tcl_channel_add(irp, argv[2], argv[3]);
   }
   if (!strcmp(argv[1], "set")) {
@@ -289,7 +289,9 @@ static int tcl_channel STDVAR
       Tcl_AppendResult(irp, "no such channel record", NULL);
       return TCL_ERROR;
     }
+Context;
     do_chanset(chan, argv[3], 0);
+Context;
     return tcl_channel_modify(irp, chan, argc - 3, &argv[3]);
   }
   if (!strcmp(argv[1], "get")) {
@@ -319,7 +321,7 @@ static int tcl_channel STDVAR
       return TCL_ERROR;
     }
     snprintf(buf2, sizeof buf2, "cpart %s", argv[2]);
-    botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+    putallbots(buf2);
     remove_channel(chan);
     return TCL_OK;
   }
@@ -338,12 +340,10 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
-#endif
+  module_entry *me;
+#endif /* LEAF */
   struct udef_struct *ul = udef;
   char s[121];
-#ifdef LEAF
-  module_entry *me;
-#endif
 Context;
   for (i = 0; i < items; i++) {
     if (!strcmp(item[i], "chanmode")) {
@@ -688,7 +688,7 @@ Context;
       (me->funcs[IRC_RECHECK_CHANNEL_MODES])(chan);
   }
 Context;
-#endif
+#endif /* LEAF */
   if (x > 0)
     return TCL_ERROR;
   return TCL_OK;

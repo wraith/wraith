@@ -13,7 +13,7 @@
 #endif
 
 #include "pack/conf.h"
-#include "pack/salt.h"
+#include "salt.h"
 
 #include "lush.h" /* We seem to need this everywhere... */
 
