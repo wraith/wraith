@@ -1,10 +1,13 @@
 This is a summary of ChangeLog basically.
 
-Lines prefixxed with '-' were disabled before release and are not finishsed.
+Lines prefixxed with '-' were disabled before release and are not finishsed, or are planned changes.
 
 1.2.4 (Planned updates)
-* Increased buffer size in -C for binname/binpath/homedir
-* Added tempdir option in config -C
+- Increased buffer size in -C for binname/binpath/homedir
+- Added tempdir option in config -C
+- Add back in uhost cache / hash table for invites
+- Change user system to hash table with uids
+- Change userentry system around to use strings ?
 
 1.2.3
 * HUB/LEAF binaries have been combined into 1 binary named 'wraith'

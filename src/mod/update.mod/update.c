@@ -85,10 +85,7 @@ static void update_ufsend(int idx, char *par)
   FILE *f = NULL;
 
   putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
-  if (conf.bot->hub)
-    egg_snprintf(s, sizeof s, "%s.update.%s.hub", tempdir, conf.bot->nick);
-  else
-    egg_snprintf(s, sizeof s, "%s.update.%s.leaf", tempdir, conf.bot->nick);
+  egg_snprintf(s, sizeof s, "%s.update.%s", tempdir, conf.bot->nick);
   unlink(s); /* make sure there isnt already a new binary here.. */
   if (dcc_total == max_dcc) {
     putlog(LOG_MISC, "*", "NO MORE DCC CONNECTIONS -- can't grab new binary");
@@ -285,20 +282,21 @@ static void start_sending_binary(int idx)
   dcc[idx].status |= STAT_SENDINGU;
 
   putlog(LOG_BOTS, "*", "Sending binary send request to %s", dcc[idx].nick);
+
   sysname = (char *) get_user(&USERENTRY_OS, dcc[idx].user);
 
   if (!sysname || !sysname[0] || !strcmp("*", sysname)) {
-    putlog(LOG_MISC, "*", "Cannot update \002%s\002 automatically, uname not returning os name.", dcc[idx].nick);
+    putlog(LOG_MISC, "*", "Cannot update \002%s\002 automatically, `uname` not returning os name.", dcc[idx].nick);
     return;
   }
 
-  egg_snprintf(update_file, sizeof update_file, "%s.%s-%s", 
-              (bot_hublevel(dcc[idx].user) == 999) ? "leaf" : "hub", sysname, egg_version);
-
+  egg_snprintf(update_file, sizeof update_file, "wraith.%s-%s", sysname, egg_version);
   egg_snprintf(update_fpath, sizeof update_fpath, "%s/%s", conf.binpath, update_file);
 
   if (!can_stat(update_fpath)) {
-    putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s, but it cannot be accessed", dcc[idx].nick, update_fpath);
+    putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s but there was an error: %s", dcc[idx].nick, update_fpath,
+                           strerror(errno));
+    dcc[idx].status &= ~(STAT_SENDINGU);
     bupdating = 0;
     return;
   }
@@ -335,6 +333,7 @@ static void start_sending_binary(int idx)
 	   i == DCCSEND_BADFN  ? "BAD FILE" :
 	   i == DCCSEND_FEMPTY ? "EMPTY FILE" : "UNKNOWN REASON!");
     dcc[idx].status &= ~(STAT_SENDINGU);
+    bupdating = 0;
   } else {
     dcc[idx].status |= STAT_SENDINGU;
     strcpy(dcc[j].host, dcc[idx].nick);		/* Store bot's nick */
