@@ -1058,11 +1058,14 @@ take_makeline(char *op, char *deops, unsigned int deopn)
 static void
 do_take(struct chanset_t *chan)
 {
-  char work[512] = "", *op, *modeline, deops[201] = "";;
-  unsigned int lines = 0, deopn, i;
+  char work[1024] = "", *op, *modeline, deops[512] = "";;
   char *to_op = (char *) calloc(1, 2048), *to_op_ptr = to_op;
   char *to_deop = (char *) calloc(1, 2048), *to_deop_ptr = to_deop;
   register bool hasop, isbot;
+  register unsigned int lines_max = 5, lines, deopn, i;
+
+  if (floodless)
+    lines = 10;
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     hasop = (m->flags & CHANOP);
@@ -1119,7 +1122,7 @@ do_take(struct chanset_t *chan)
     free(modeline);
 
     /* just dump when we have 5 lines because the server is going to throttle after that anyway */
-    if (lines == 5) {
+    if (lines == lines_max) {
       tputs(serv, work, strlen(work));
       work[0] = 0;
       lines = 0;
