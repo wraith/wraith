@@ -3876,6 +3876,11 @@ static void cmd_dns(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# dns %s", dcc[idx].nick, par);
 
+  if (!par[0]) {
+    dprintf(idx, "Usage: dns <hostname/ip/flush>\n");
+     return;
+  }
+
   if (!egg_strcasecmp(par, "flush")) {
     dprintf(idx, "Flushing cache...\n");
     dns_cache_flush();
