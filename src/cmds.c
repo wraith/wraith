@@ -2920,9 +2920,10 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
       u1 = get_user_by_handle(userlist, handle);
       bi = user_malloc(sizeof(struct bot_addr));
 
-/*      bi->uplink = user_malloc(strlen(botnetnick) + 1); 
-      strcpy(bi->uplink, botnetnick);
-*/
+      bi->uplink = user_malloc(strlen(botnetnick) + 1); 
+/*      strcpy(bi->uplink, botnetnick); */
+      strcpy(bi->uplink, "");
+
       bi->address = user_malloc(1);
       bi->address[0] = 0;
       bi->telnet_port = 3333;
