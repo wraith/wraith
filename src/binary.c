@@ -465,5 +465,5 @@ void conf_to_bin(conf_t *in, bool move, int die)
   else
     newbin = binname;
   /* tellconfig(&settings); */
-  write_settings(newbin, 1, die);
+  write_settings(newbin, die, 1);
 }
