@@ -1273,7 +1273,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   if (!valid_dns_id(i, id))
     return;
 
-  int j = 0, sock, idx = -1;
+  int j = -1, sock, idx = -1;
   char s2[UHOSTLEN + 20] = "";
 
   if (valid_idx(i))

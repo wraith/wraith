@@ -953,8 +953,6 @@ int egg_dns_init()
 
 bool valid_dns_id(int idx, int id)
 {
-
-sdprintf("valid_dns_id, idx: %d id: %d / dcc[idx].id... %d", idx, id, dcc[idx].u.dns->dns_id);
   if (id == -1)
     return 1;
   if (valid_idx(idx) && dcc[idx].u.dns && dcc[idx].u.dns->dns_id && dcc[idx].u.dns->dns_id == id)
