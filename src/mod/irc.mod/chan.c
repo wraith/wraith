@@ -1025,7 +1025,6 @@ take_makeline(char *op, char *deops, int deopn)
     strcat(ret, " ");
   }
 
-  putlog(LOG_MISC, "*", "makeline: %s", ret);
   return ret;  
 }
 
@@ -1052,9 +1051,6 @@ do_take(struct chanset_t *chan)
       }
     }
   }
-
-  putlog(LOG_MISC, "*", "deop: %s", to_deop);
-  putlog(LOG_MISC, "*", "op: %s", to_op);
 
   while (to_op[0] || to_deop[0]) {
     int deopn = 0, i = 0;
@@ -1151,12 +1147,6 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
     if (channel_closed(chan))
       enforce_closed(chan);
-  }
-
-  if (nonbotops) {
-    enforce_bitch(chan);
-    stacking--;
-    return;
   }
 
   /* this can all die, we want to enforce +bitch/+take first :) */
