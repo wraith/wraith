@@ -359,7 +359,7 @@
 #define stripmasktype ((const char *(*)(int))global[203])
 /* 204 - 207 */
 #define online_since (*(int *)(global[204]))
-/* 205 -- UNUSED */
+#define buildts (*(const int *)(global[205]))
 /* 206 -- UNUSED */
 #define check_dcc_attrs ((int (*)(struct userrec *,int))global[207])
 /* 208 - 211 */

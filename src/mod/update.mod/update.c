@@ -136,7 +136,7 @@ return;
   dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU |
                        STAT_OFFEREDU);
 
-  if ((dcc[idx].u.bot->numver < egg_numver)
+  if ((dcc[idx].u.bot->buildts < buildts)
       && (isupdatehub())) {
     dprintf(idx, "sb u?\n");
     dcc[idx].status |= STAT_OFFEREDU;
@@ -158,7 +158,7 @@ static botcmd_t C_update[] =
 static void got_nu(char *botnick, char *code, char *par)
 {
 /* needupdate? curver */
-  int newver = 0;
+  time_t newts;
 #ifdef LEAF
   tand_t *bot;
   struct bot_addr *bi,
@@ -171,10 +171,10 @@ static void got_nu(char *botnick, char *code, char *par)
     return;
   if (localhub && updated)
     return;
-#endif
+#endif /* LEAF */
    if (!par[0]) return;
-   newver = atoi(newsplit(&par));
-   if (newver > egg_numver) {
+   newts = atoi(newsplit(&par));
+   if (newts > buildts) {
 #ifdef LEAF
      u1 = get_user_by_handle(userlist, botnetnick);
      obi = get_user(&USERENTRY_BOTADDR, u1);
@@ -425,7 +425,7 @@ static void check_updates()
       dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU |
                        STAT_OFFEREDU);
 
-      if ((dcc[i].u.bot->numver < egg_numver)
+      if ((dcc[i].u.bot->buildts < buildts)
         && (isupdatehub())) {
         dprintf(i, "sb u?\n");
         dcc[i].status |= STAT_OFFEREDU;
@@ -434,7 +434,7 @@ static void check_updates()
   }
 
   //send out notice to update remote bots ...
-  sprintf(buf, "nu? %d", egg_numver);
+  sprintf(buf, "nu? %d", buildts);
   putallbots(buf);
 }
 #endif

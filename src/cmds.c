@@ -25,7 +25,7 @@ extern tcl_timer_t	 *timer, *utimer;
 extern int		 dcc_total, remote_boots, backgrd, 
 			 do_restart, conmask, must_be_owner,
 			 strict_host, quiet_save, cfg_count,
-			 server_lag;
+			 server_lag, egg_numver;
 
 extern unsigned long	 otraffic_irc, otraffic_irc_today,
 			 itraffic_irc, itraffic_irc_today,
@@ -40,7 +40,7 @@ extern unsigned long	 otraffic_irc, otraffic_irc_today,
 extern Tcl_Interp 	 *interp;
 extern char		 botnetnick[], origbotname[], ver[], network[],
 			 owner[], quit_msg[], dcc_prefix[], 
-                         botname[], *binname, egg_version[];
+                         botname[], *binname, version[], egg_version[];
 extern time_t		 now, online_since, buildts;
 extern module_entry	 *module_list;
 extern struct cfg_entry  CFG_MOTD, **cfg;
@@ -603,8 +603,9 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", STR("#%s# about"), dcc[idx].nick);
   dprintf(idx, STR("Wraith by bryan\n"));
   egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
-  dprintf(idx, STR("Version: %s\nBuild: %s (%lu)\n"), egg_version, c, buildts);
-  dprintf(idx, STR("..with credits and thanks to the following:\n"), egg_version);
+  dprintf(idx, STR("Version: %s (%d) \n"), egg_version, egg_numver);
+  dprintf(idx, STR("Build: %s (%lu)\n"), c, buildts);
+  dprintf(idx, STR("..with credits and thanks to the following:\n"));
   dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n\n"));
   dprintf(idx, STR("Eggdrop team for developing such a great bot to code off of.\n"));
   dprintf(idx, STR("Einride and ievil for taking eggdrop1.4.3 and making their very effecient botpack Ghost.\n"));
@@ -3506,7 +3507,7 @@ void rcmd_ver(char * fbot, char * fhand, char * fidx) {
 #ifdef HAVE_UNAME
   struct utsname un;
 #endif /* HAVE_UNAME */
-  sprintf(tmp, STR("%s "), ver);
+  sprintf(tmp, STR("%s "), version);
 #ifdef HAVE_UNAME
   if (uname(&un) < 0) {
 #endif /* HAVE_UNAME */

@@ -39,7 +39,7 @@ extern int	 	 noshare, loading, role, server_lag,
 			 use_invites, use_exempts, 
                          force_expire, do_restart, timesync,
 			 protect_readonly, reserved_port_min, reserved_port_max;
-extern time_t now, online_since;
+extern time_t now, online_since, buildts;
 extern struct chanset_t *chanset;
 extern tand_t *tandbot;
 extern party_t *party;
@@ -411,7 +411,7 @@ Function global_table[] =
   (Function) stripmasktype,
   /* 204 - 207 */
   (Function) & online_since,	/* time_t *				*/
-  (Function) 0,
+  (Function) & buildts,		/* time_t *				*/
   (Function) 0,
   (Function) check_dcc_attrs,
   /* 208 - 211 */

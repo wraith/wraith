@@ -2,20 +2,29 @@
 
 
 # Awk out the version from source
+AWK="`which awk`"
+if test -z "${AWK}"; then
+ AWK="`which gawk`"
+fi
+
 ver="?.?.?"
-ver=`grep "char" src/main.c | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
-numver=`grep "int" src/main.c | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
-PACKNAME=`grep "PACKNAME " pack/pack.cfg | awk '/PACKNAME/ {print $2}'`
-BUILDTS=`cat src/build.h | awk '{print $3}'`
+ver=`grep "char" src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+numver=`grep "int" src/main.c | $AWK '/egg_numver =/ {print $5}' |  sed -e 's/\;//g'`
+PACKNAME=`grep "PACKNAME " pack/pack.cfg | $AWK '/PACKNAME/ {print $2}'`
+BUILDTS=`cat src/build.h | $AWK '{print $3}'`
 builddate=`perl -e "use POSIX 'strftime';print strftime(\"%m.%d.%Y\n\",gmtime(${BUILDTS}));"`
 
 clear
 #Display a banner
 bt=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*switch (r % \(.\)) {/\1/"`
-bn=$[(`cat /proc/self/stat | awk '{print $1}'` % ${bt})]
+if test -f /proc/self/stat; then
+  bn=$[(`cat /proc/self/stat | $AWK '{print $1}'` % ${bt})]
+else
+  bn=$[(`date +%s` % ${bt})]
+fi
 banner=`grep -A 15 "char \*wbanner() {" src/misc.c | grep "case ${bn}:" | sed -e "s/.*case ${bn}: return STR(\"\(.*\)\");/\1/"`
 echo -e "${banner}"
-echo -e "Version:   ${ver} (${numver})\nBuild:     ${builddate}"
+echo -e "Version:   ${ver}\nBuild:     ${builddate}"
 echo -e `grep -r "http://" src/misc.c | sed -e "s/dprintf(idx, STR(\"\(.*\)\"));/\1/"`
 echo
 
@@ -134,7 +143,6 @@ if test -z "${MAKE}"; then
  MAKE="`which make`"
 fi
 
-echo "[*] Using '${MAKE}'"
 
 if [ $clean = "1" ]; then
  echo "[*] Cleaning up old binaries/files..."

@@ -79,9 +79,9 @@ extern jmp_buf		 alarmret;
 int 	role;
 int 	loading = 0;
 
-const time_t buildts = CVSBUILD;		/* build timestamp (UTC) */
-char	egg_version[1024] = "1.0.11";
-int	egg_numver = 1001100;
+const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
+const char	egg_version[1024] = "1.0.11";
+const int	egg_numver = 1001100;
 time_t 	lastfork=0;
 
 #ifdef HUB
@@ -1406,10 +1406,8 @@ int main(int argc, char **argv)
     Context;
 
   /* Version info! */
-  egg_snprintf(ver, sizeof ver, "wraith %s", egg_version);
-  egg_snprintf(version, sizeof version, "wraith %s", egg_version);
-  /* Now add on the patchlevel (for Tcl) */
-  sprintf(&egg_version[strlen(egg_version)], " (%u)", egg_numver);
+  egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);
+  egg_snprintf(version, sizeof version, "Wraith %s (%u/%lu)", egg_version, egg_numver, buildts);
 #ifdef STOP_UAC
   {
     int nvpair[2];
