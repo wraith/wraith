@@ -509,9 +509,7 @@ static int washub = -1;
 
 static void core_minutely()
 {
-  if (conf.bot->hub) 
-    send_timesync(-1);
-  else {
+  if (!conf.bot->hub) {
     if (washub == -1)
       washub = conf.bot->hub;
     else if (washub != conf.bot->hub)
