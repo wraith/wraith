@@ -137,7 +137,7 @@ void bot_cmdpass(int idx, char *par)
   }
   set_cmd_pass(par, 0);
 }
-#endif
+#endif /* S_DCCPASS */
 
 void bot_config(int idx, char *par)
 {
@@ -146,30 +146,32 @@ void bot_config(int idx, char *par)
 
 void bot_remotecmd(int idx, char *par) {
   char *tbot, *fbot, *fhnd, *fidx;
-  tbot=newsplit(&par);
-  fbot=newsplit(&par);
-  fhnd=newsplit(&par);
-  fidx=newsplit(&par);
+
+  tbot = newsplit(&par);
+  fbot = newsplit(&par);
+  fhnd = newsplit(&par);
+  fidx = newsplit(&par);
   if (!strcmp(tbot, botnetnick)) {
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else if (!strcmp(tbot, "*")) {
     botnet_send_cmd_broad(idx, fbot, fhnd, atoi(fidx), par);
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else {
-    if (nextbot(tbot)!=idx)
+    if (nextbot(tbot) != idx)
       botnet_send_cmd(fbot, tbot, fhnd, atoi(fidx), par);
   }
 }
+
 void bot_remotereply(int idx, char *par) {
   char *tbot, *fbot, *fhnd, *fidx;
-  tbot=newsplit(&par);
-  fbot=newsplit(&par);
-  fhnd=newsplit(&par);
-  fidx=newsplit(&par);
+  tbot = newsplit(&par);
+  fbot = newsplit(&par);
+  fhnd = newsplit(&par);
+  fidx = newsplit(&par);
   if (!strcmp(tbot, botnetnick)) {
     gotremotereply(fbot, fhnd, fidx, par);
   } else {
-    if (nextbot(tbot)!=idx)
+    if (nextbot(tbot)!= idx)
       botnet_send_cmdreply(fbot, tbot, fhnd, fidx, par);
   }
 }
@@ -338,9 +340,9 @@ static void remote_tell_who(int idx, char *nick, int chan)
     if (!channel_secret(c) && shouldjoin(c)) {
       l = strlen(c->dname);
       if (i + l < 1021) {
-	if (i > 10)
+	if (i > 10) {
           sprintf(s, "%s, %s", s, c->dname);
-	else {
+	} else {
           strcpy(s, c->dname);
 	  i += (l + 2);
         }
@@ -348,33 +350,34 @@ static void remote_tell_who(int idx, char *nick, int chan)
     }
   if (i > 10) {
     botnet_send_priv(idx, botnetnick, nick, NULL, "%s  (%s)", s, ver);
-  } else
-    botnet_send_priv(idx, botnetnick, nick, NULL, "%s  (%s)", BOT_NOCHANNELS,
-		     ver);
+  } else {
+    botnet_send_priv(idx, botnetnick, nick, NULL, "%s  (%s)", BOT_NOCHANNELS, ver);
+  }
   if (admin[0])
     botnet_send_priv(idx, botnetnick, nick, NULL, "Admin: %s", admin);
-  if (chan == 0)
+  if (chan == 0) {
     botnet_send_priv(idx, botnetnick, nick, NULL,
 		     "%s  (* = %s, + = %s, @ = %s)",
 		     BOT_PARTYMEMBS, MISC_OWNER, MISC_MASTER, MISC_OP);
-  else {
+  } else {
     simple_sprintf(s, "assoc %d", chan);
-    if ((Tcl_Eval(interp, s) != TCL_OK) || !interp->result[0])
+    if ((Tcl_Eval(interp, s) != TCL_OK) || !interp->result[0]) {
       botnet_send_priv(idx, botnetnick, nick, NULL,
 		       "%s %s%d:  (* = %s, + = %s, @ = %s)\n",
 		       BOT_PEOPLEONCHAN,
 		       (chan < GLOBAL_CHANS) ? "" : "*",
 		       chan % GLOBAL_CHANS,
 		       MISC_OWNER, MISC_MASTER, MISC_OP);
-    else
+    } else {
       botnet_send_priv(idx, botnetnick, nick, NULL,
 		       "%s '%s' (%s%d):  (* = %s, + = %s, @ = %s)\n",
 		       BOT_PEOPLEONCHAN, interp->result,
 		       (chan < GLOBAL_CHANS) ? "" : "*",
 		       chan % GLOBAL_CHANS,
 		       MISC_OWNER, MISC_MASTER, MISC_OP);
+    }
   }
-  for (i = 0; i < dcc_total; i++)
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type->flags & DCT_REMOTEWHO)
       if (dcc[i].u.chat->channel == chan) {
 	k = sprintf(s, "  %c%-15s %s",
@@ -401,7 +404,8 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	  botnet_send_priv(idx, botnetnick, nick, NULL, "      %s: %s",
 			   MISC_AWAY, dcc[i].u.chat->away);
       }
-  for (i = 0; i < dcc_total; i++)
+  }
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT) {
       if (!ok) {
 	ok = 1;
@@ -414,9 +418,10 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	      dcc[i].nick, dcc[i].u.bot->version);
       botnet_send_priv(idx, botnetnick, nick, NULL, "%s", s);
     }
+  }
   ok = 0;
-  for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type->flags & DCT_REMOTEWHO)
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type->flags & DCT_REMOTEWHO) {
       if (dcc[i].u.chat->channel != chan) {
 	if (!ok) {
 	  ok = 1;
@@ -438,12 +443,12 @@ static void remote_tell_who(int idx, char *nick, int chan)
 			   "      %s: %s", MISC_AWAY,
 			   dcc[i].u.chat->away);
       }
+    }
+  }
 }
 
 static void bot_sysname(int idx, char *par)
 {
- //simply copy it all to the string pointer.
-
   putlog(LOG_DEBUG, "@", "%s is using %s", dcc[idx].nick, par);
   dcc[idx].u.bot->sysname[0] = 0;
   strcpy(dcc[idx].u.bot->sysname, par);
@@ -679,6 +684,7 @@ static void bot_mtcl(char *botnick, char *code, char *par)
  putbot(botnick, ret);
 
 }
+
 static void bot_rmtcl(char *botnick, char *code, char *par)
 {
  int oidx = 0;
@@ -687,7 +693,6 @@ static void bot_rmtcl(char *botnick, char *code, char *par)
  if (!par[0])
   return;
  dprintf(oidx, "(%s) %s\n", botnick, par);
-
 }
 
 /* Newbot next share?
@@ -864,7 +869,7 @@ void bot_timesync(int idx, char *par)
   timesync = atoi(par) - now;
 #ifdef HUB
   send_timesync(-1);
-#endif
+#endif /* HUB */
 }
 
 /* reject <from> <bot>
@@ -985,10 +990,9 @@ static void bot_thisbot(int idx, char *par)
 static void bot_hublog(char *botnick, char *code, char *par)
 {
 #ifdef HUB
-  int type;
-  type = atoi(newsplit(&par));
+  int type = atoi(newsplit(&par));
   putlog(type, "@", "(%s) %s", botnick, par);
-#endif
+#endif /* HUB */
 }
 
 static void bot_handshake(int idx, char *par)
@@ -1047,112 +1051,6 @@ static void bot_zapfbroad(int idx, char *par)
   }
   check_tcl_bot(from, opcode, par);
   botnet_send_zapf_broad(idx, from, opcode, par);
-}
-
-/* These are still here, so that they will pass the relevant
- * requests through even if no filesys is loaded.
- *
- * filereject <bot:filepath> <sock:nick@bot> <reason...>
- */
-static void bot_filereject(int idx, char *par)
-{
-  char *path, *to, *tobot, *p;
-  int i;
-
-  path = newsplit(&par);
-  to = newsplit(&par);
-  if ((tobot = strchr(to, '@')))
-    tobot++;
-  else
-    tobot = to;			/* Bot wants a file?! :) */
-  if (egg_strcasecmp(tobot, botnetnick)) {	/* for me! */
-    p = strchr(to, ':');
-    if (p != NULL) {
-      *p = 0;
-      for (i = 0; i < dcc_total; i++) {
-	if (dcc[i].sock == atoi(to))
-	  dprintf(i, "%s (%s): %s\n", BOT_XFERREJECTED, path, par);
-      }
-      *p = ':';
-    }
-    /* No ':'? malformed */
-    putlog(LOG_FILES, "*", "%s %s: %s", path, MISC_REJECTED, par);
-  } else {			/* Pass it on */
-    i = nextbot(tobot);
-    if (i >= 0)
-      botnet_send_filereject(i, path, to, par);
-  }
-}
-
-/* filereq <sock:nick@bot> <bot:file>
- */
-static void bot_filereq(int idx, char *tobot)
-{
-  char *from, *path;
-  int i;
-
-  from = newsplit(&tobot);
-  if ((path = strchr(tobot, ':'))) {
-    *path++ = 0;
-
-    if (!egg_strcasecmp(tobot, botnetnick)) {	/* For me! */
-      /* Process this */
-      module_entry *fs = module_find("filesys", 0, 0);
-
-      if (fs == NULL)
-	botnet_send_priv(idx, botnetnick, from, NULL, MOD_NOFILESYSMOD);
-      else {
-	Function f = fs->funcs[FILESYS_REMOTE_REQ];
-
-	f(idx, from, path);
-      }
-    } else {			/* Pass it on */
-      i = nextbot(tobot);
-      if (i >= 0)
-	botnet_send_filereq(i, from, tobot, path);
-    }
-  }
-}
-
-/* filesend <bot:path> <sock:nick@bot> <IP#> <port> <size>
- */
-static void bot_filesend(int idx, char *par)
-{
-  char *botpath, *to, *tobot, *nick;
-  int i;
-  char *nfn;
-
-  botpath = newsplit(&par);
-  to = newsplit(&par);
-  if ((tobot = strchr(to, '@'))) {
-    *tobot = 0;
-    tobot++;
-  } else {
-    tobot = to;
-  }
-  if (!egg_strcasecmp(tobot, botnetnick)) {		/* For me! */
-    nfn = strrchr(botpath, '/');
-    if (nfn == NULL) {
-      nfn = strrchr(botpath, ':');
-      if (nfn == NULL)
-	nfn = botpath;		/* That's odd. */
-      else
-	nfn++;
-    } else
-      nfn++;
-    if ((nick = strchr(to, ':')))
-      nick++;
-    else
-      nick = to;
-    /* Send it to 'nick' as if it's from me */
-    dprintf(DP_SERVER, "PRIVMSG %s :\001DCC SEND %s %s\001\n", nick, nfn, par);
-  } else {
-    i = nextbot(tobot);
-    if (i >= 0) {
-      *--tobot = '@';
-      botnet_send_filesend(i, botpath, to, par);
-    }
-  }
 }
 
 static void bot_error(int idx, char *par)
@@ -1372,6 +1270,7 @@ void bot_share(int idx, char *par)
 {
   sharein(idx, par);
 }
+
 void bot_shareupdate(int idx, char *par)
 {
   shareupdatein(idx, par);
@@ -1423,9 +1322,6 @@ botcmd_t C_bot[] =
   {"ct",		(Function) bot_chat},
   {"e",			(Function) bot_error},
   {"el",		(Function) bot_endlink},
-  {"f!",		(Function) bot_filereject},
-  {"fr",		(Function) bot_filereq},
-  {"fs",		(Function) bot_filesend},
   {"hs",		(Function) bot_handshake},
   {"i",			(Function) bot_idle},
   {"i?",		(Function) bot_infoq},
@@ -1525,13 +1421,9 @@ void bounce_simul(int idx, char *buf)
 #ifdef HUB
 static void bot_rsimr(char *botnick, char *code, char *par)
 {
-  int idx;
-
-  idx = atoi(newsplit(&par));
-
+  int idx = atoi(newsplit(&par));
   if (!par[0])
     return;
-
   dprintf(idx, "[%s] %s\n", botnick, par);
 }
 #endif /* HUB */
@@ -1552,4 +1444,3 @@ void init_botcmd()
 {
   add_builtins(H_bot, my_bot);
 }
-

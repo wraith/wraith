@@ -168,13 +168,13 @@ void botnet_send_cmdpass(int idx, char *cmd, char *pass)
   char *buf;
 
   if (tands > 0) {
-    buf = nmalloc(strlen(cmd) + strlen(pass) + 10);
+    buf = nmalloc(strlen(cmd) + strlen(pass) + 5 + 1);
     sprintf(buf, "cp %s %s\n", cmd, pass);
     send_tand_but(idx, buf, strlen(buf));
     nfree(buf);
   }
 }
-#endif
+#endif /* S_DCCPASS */
 
 int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cmd) {
   int i = nextbot(bot);
@@ -218,13 +218,11 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
 
 void botnet_send_bye()
 {
-  if (tands > 0) {
+  if (tands > 0)
     send_tand_but(-1, "bye\n", 4);
-  }
 }
 
-void botnet_send_chan(int idx, char *botnick, char *user,
-		      int chan, char *data)
+void botnet_send_chan(int idx, char *botnick, char *user, int chan, char *data)
 {
   int i;
 
@@ -238,8 +236,7 @@ void botnet_send_chan(int idx, char *botnick, char *user,
   }
 }
 
-void botnet_send_act(int idx, char *botnick, char *user,
-		     int chan, char *data)
+void botnet_send_act(int idx, char *botnick, char *user, int chan, char *data)
 {
   int i;
 
@@ -377,8 +374,7 @@ void botnet_send_update(int idx, tand_t * ptr)
   }
 }
 
-void botnet_send_reject(int idx, char *fromp, char *frombot, char *top,
-			char *tobot, char *reason)
+void botnet_send_reject(int idx, char *fromp, char *frombot, char *top, char *tobot, char *reason)
 {
   int l;
   char to[NOTENAMELEN + 1], from[NOTENAMELEN + 1];
@@ -442,6 +438,7 @@ void botnet_send_cfg_broad(int idx, struct cfg_entry * entry) {
     send_tand_but(idx, OBUF, l);
   }
 }
+
 void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
 {
   int l;
@@ -450,29 +447,6 @@ void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
     l = simple_sprintf(OBUF, "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "", c);
     send_tand_but(idx, OBUF, l);
   }
-}
-void botnet_send_filereject(int idx, char *path, char *from, char *reason)
-{
-  int l;
-
-  l = simple_sprintf(OBUF, "f! %s %s %s\n", path, from, reason);
-  tputs(dcc[idx].sock, OBUF, l);
-}
-
-void botnet_send_filesend(int idx, char *path, char *from, char *data)
-{
-  int l;
-
-  l = simple_sprintf(OBUF, "fs %s %s %s\n", path, from, data);
-  tputs(dcc[idx].sock, OBUF, l);
-}
-
-void botnet_send_filereq(int idx, char *from, char *bot, char *path)
-{
-  int l;
-
-  l = simple_sprintf(OBUF, "fr %s %s:%s\n", from, bot, path);
-  tputs(dcc[idx].sock, OBUF, l);
 }
 
 void botnet_send_idle(int idx, char *bot, int sock, int idle, char *away)

@@ -1234,6 +1234,17 @@ static int sockread(char *s, int *len)
   return -3;
 }
 
+int prand(int *seed, int range)
+{
+  long long i1;
+
+  i1 = *seed;
+  i1 = (i1 * 0x08088405 + 1) & 0xFFFFFFFF;
+  *seed = i1;
+  i1 = (i1 * range) >> 32;
+  return i1;
+}
+
 char *botlink_decrypt(int snum, char *src)
 {
   char *line = NULL;

@@ -726,6 +726,7 @@ enum {
  * queued on them
  */
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
+#define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)
 typedef struct {
   int		 sock;
   short		 flags;
@@ -735,8 +736,8 @@ typedef struct {
   int encstatus;			/* encrypted botlink */
   int oseed;				/* botlink out seed */
   int iseed;				/* botlink in seed */
-  char okey[32];		/* botlink enckey: out */
-  char ikey[32];		/* botlink enckey: in  */
+  char okey[33];			/* botlink enckey: out */
+  char ikey[33];			/* botlink enckey: in  */
   int gz; /* gzip compression */
   unsigned long	 inbuflen;		/* Inbuf could be binary data	*/
 #ifdef USE_IPV6

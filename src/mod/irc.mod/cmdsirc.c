@@ -1410,8 +1410,7 @@ static void cmd_adduser(struct userrec *u, int idx, char *par)
   char *nick, *hand;
   struct chanset_t *chan;
   memberlist *m = NULL;
-  char s[UHOSTLEN], s1[UHOSTLEN], s3[20];
-  char tmp[50], s2[30];
+  char s[UHOSTLEN], s1[UHOSTLEN], s2[16], s3[17], tmp[50];
   int atr = u ? u->flags : 0;
   int statichost = 0;
   char *p1 = s1;
@@ -1488,20 +1487,19 @@ static void cmd_adduser(struct userrec *u, int idx, char *par)
     p1[0] = '*';
   }
   if (!u) {
-Context;
     userlist = adduser(userlist, hand, p1, "-", USER_DEFAULT);
     u = get_user_by_handle(userlist, hand);
     sprintf(tmp, STR("%lu %s"), time(NULL), dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u, tmp);
-    make_rand_str(s2,10);
+    make_rand_str(s2, 15);
     set_user(&USERENTRY_PASS, u, s2);
 
-    make_rand_str(s3,16);
+    make_rand_str(s3, 16);
     set_user(&USERENTRY_SECPASS, u, s3);
 
     dprintf(idx, "Added [%s]%s with no flags.\n", hand, p1);
-    dprintf(idx, STR("%s's password set to \002%s\002\n"), hand, s2);
-    dprintf(idx, STR("%s's secpass set to \002%s\002\n"), hand, s3);
+    dprintf(idx, STR("%s's initial password set to \002%s\002\n"), hand, s2);
+    dprintf(idx, STR("%s's initial secpass set to \002%s\002\n"), hand, s3);
   } else {
     dprintf(idx, "Added hostmask %s to %s.\n", p1, u->handle);
     addhost_by_handle(hand, p1);

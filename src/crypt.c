@@ -18,18 +18,13 @@ int expmem_crypt()
 #define CRYPT_KEYSIZE (CRYPT_KEYBITS / 8)
 
 AES_KEY e_key, d_key;
-#ifdef PAD
-int nopad = 0;		/* dont pad keys? */
-#else /* !PAD */
-int nopad = 1;
-#endif /* PAD */
 
 char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
 {
   int newdatalen = *datalen, blockcount = 0, blockndx = 0;
   unsigned char *newdata = NULL;
 
-/* First pad indata to CRYPT_BLOCKSIZE multiplum */
+  /* First pad indata to CRYPT_BLOCKSIZE multiplum */
   if (newdatalen % CRYPT_BLOCKSIZE)             /* more than 1 block? */
     newdatalen += (CRYPT_BLOCKSIZE - (newdatalen % CRYPT_BLOCKSIZE));
 
@@ -43,18 +38,9 @@ char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
     /* No key, no encryption */
     egg_memcpy(newdata, data, newdatalen);
   } else {
-    char key[CRYPT_KEYSIZE];
-    /* pad key in case it is too short */
-//    egg_memset(key, 'a', sizeof(key));
-    if (nopad)
-      strncpy(key, keydata, sizeof(key));
-#ifdef PAD
-    else
-      strncpyz(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
-#endif /* PAD */
-    key[CRYPT_KEYSIZE] = 0;
-    /* Init/fetch key */
-//printf("encrypting with key (%d): %s\n", strlen(key), key);
+    char key[CRYPT_KEYSIZE + 1];
+    strncpyz(key, keydata, sizeof(key));
+//      strncpyz(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
     AES_set_encrypt_key(key, CRYPT_KEYBITS, &e_key);
 
     /* Now loop through the blocks and crypt them */
@@ -79,18 +65,9 @@ char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
     /* No key, no decryption */
   } else {
     /* Init/fetch key */
-    char key[CRYPT_KEYSIZE];
-    /* pad key in case it is too short */
-//    egg_memset(key, 'a', sizeof(key));
-//    strncpyz(key, keydata, sizeof(key) + 1);
-    if (nopad)
-      strncpy(key, keydata, sizeof(key));
-#ifdef PAD
-    else
-      strncpy(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
-#endif /* PAD */
-    key[CRYPT_KEYSIZE] = 0;
-//printf("decrypting with key (%d): %s\n", strlen(key), key);
+    char key[CRYPT_KEYSIZE + 1];
+    strncpyz(key, keydata, sizeof(key));
+//      strncpy(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
     AES_set_decrypt_key(key, CRYPT_KEYBITS, &d_key);
 
     /* Now loop through the blocks and crypt them */
@@ -183,13 +160,7 @@ void encrypt_pass(char *s1, char *s2)
 
   if (strlen(s1) > 15)
     s1[15] = 0;
-#ifdef PAD
-  nopad = 1;
-#endif /* PAD */
   tmp = encrypt_string(s1, s1);
-#ifdef PAD
-  nopad = 0;
-#endif /* PAD */
   strcpy(s2, "+");
   strncat(s2, tmp, 15);
   s2[15] = 0;

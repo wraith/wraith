@@ -25,7 +25,7 @@ extern time_t		 now;
 extern sock_list	*socklist;
 extern Tcl_Interp	*interp;
 
-static struct portmap *root = NULL;
+static struct portmap 	*root = NULL;
 
 char	motdfile[121] = "text/motd";	/* File where the motd is stored */
 int	connect_timeout = 15;		/* How long to wait before a telnet
@@ -365,7 +365,6 @@ Context;
  */
 void removedcc(int n)
 {
-Context;
   if (dcc[n].type && dcc[n].type->kill)
     dcc[n].type->kill(n, dcc[n].u.other);
   else if (dcc[n].u.other)
@@ -557,7 +556,6 @@ int new_dcc(struct dcc_table *type, int xtra_size)
  */
 void changeover_dcc(int i, struct dcc_table *type, int xtra_size)
 {
-Context;
   /* Free old structure. */
   if (dcc[i].type && dcc[i].type->kill)
     dcc[i].type->kill(i, dcc[i].u.other);
@@ -617,7 +615,6 @@ void do_boot(int idx, char *by, char *reason)
 {
   int files = (dcc[idx].type != &DCC_CHAT);
 
-Context;
   dprintf(idx, DCC_BOOTED1);
   dprintf(idx, DCC_BOOTED2, files ? "file section" : "bot",
           by, reason[0] ? ": " : ".", reason);
@@ -658,7 +655,6 @@ int listen_all(int lport, int off)
   struct portmap *pmap = NULL,
    *pold = NULL;
 
-Context;
   port = realport = lport;
   for (pmap = root; pmap; pold = pmap, pmap = pmap->next)
     if (pmap->realport == port) {
@@ -756,4 +752,3 @@ Context;
    */
   return idx;
 }
-

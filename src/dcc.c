@@ -31,12 +31,11 @@ extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 ignore_time;
 extern char		 botnetnick[], ver[], origbotname[], notify_new[], bdhash[];
 
-
-extern sock_list *socklist;
-extern int MAXSOCKS;
-int timesync = 0;
+extern sock_list 	*socklist;
+extern int 		MAXSOCKS;
 
 struct dcc_t *dcc = 0;	/* DCC list				   */
+int	timesync = 0;
 int	dcc_total = 0;		/* Total dcc's				   */
 int	allow_new_telnets = 0;	/* Allow people to introduce themselves
 				   via telnet				   */
@@ -49,9 +48,9 @@ int	identtimeout = 15;	/* Timeout value for ident lookups	   */
 int	dupwait_timeout = 5;	/* Timeout for rejecting duplicate entries */
 #ifdef LEAF
 int	protect_telnet = 0;	/* Even bother with ident lookups :)	   */
-#else
+#else /* !LEAF */
 int     protect_telnet = 1;
-#endif
+#endif /* LEAF */
 int	flood_telnet_thr = 10;	/* Number of telnet connections to be
 				   considered a flood			   */
 int	flood_telnet_time = 5;	/* In how many seconds?			   */
@@ -208,7 +207,7 @@ void send_timesync(idx)
         lower_bot_linked(i);
       }
     }
-#else
+#else /* !HUB */
     putlog(LOG_ERRORS, "*", "I'm a leaf - where should i send timesync?");
 #endif /* HUB */
   }
@@ -294,10 +293,10 @@ static void bot_version(int idx, char *par)
 #ifdef HUB
   putlog(LOG_BOTS, "*", DCC_LINKED, dcc[idx].nick);
   chatout("*** Linked to %s\n", dcc[idx].nick);
-#else
+#else /* !HUB */
   putlog(LOG_BOTS, "*", "Linked to botnet.");
   chatout("*** Linked to botnet.\n");
-#endif
+#endif /* HUB */
   botnet_send_nlinked(idx, dcc[idx].nick, botnetnick, '!',
 		      dcc[idx].u.bot->numver);
   touch_laston(dcc[idx].user, "linked", now);
@@ -333,7 +332,7 @@ static void cont_link(int idx, char *buf, int ii)
 {
   /* Now set the initial link key (incoming only, we're not sending more until we get an OK)... */
   struct sockaddr_in sa;
-  char tmp[256], bufout[SHA_HASH_LENGTH];
+  char tmp[256], bufout[SHA_HASH_LENGTH + 1];
   SHA_CTX ctx;
   int i;
   int snum = -1;
@@ -370,7 +369,7 @@ static void cont_link(int idx, char *buf, int ii)
     SHA1_Init(&ctx);
     SHA1_Update(&ctx, tmp, strlen(tmp));
     SHA1_Final(bufout, &ctx);
-    strncpyz(socklist[snum].ikey, btoh(bufout, SHA_HASH_LENGTH), 32 + 1);
+    strncpyz(socklist[snum].ikey, btoh(bufout, SHA_DIGEST_LENGTH), sizeof(socklist[snum].ikey));
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "initkey (%d): %s", strlen(socklist[snum].ikey), socklist[snum].ikey);
     /* We've send our botnetnick and set the key for the link on the sock, wait for 'elink' back to verify key */
@@ -408,11 +407,10 @@ static void dcc_bot_new(int idx, char *buf, int x)
     if (snum >= 0) {
       char *tmp, *p;
 
-Context;
       p = newsplit(&buf);
       tmp = decrypt_string(SALT2, p);
-      strncpyz(socklist[snum].okey, tmp, sizeof(socklist[snum].okey) + 1);
-      strncpyz(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey) + 1);
+      strncpyz(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
+      strncpyz(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
       socklist[snum].iseed = atoi(buf);
       socklist[snum].oseed = atoi(buf);
       dprintf(idx, "elinkdone\n");
@@ -443,10 +441,10 @@ static void timeout_dcc_bot_new(int idx)
 {
 #ifdef LEAF
   putlog(LOG_BOTS, "*", "Timeout: bot link to %s", dcc[idx].nick);
-#else
+#else /* !LEAF */
   putlog(LOG_BOTS, "*", DCC_TIMEOUT, dcc[idx].nick,
 	 dcc[idx].host, dcc[idx].port);
-#endif
+#endif /* LEAF */
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -597,13 +595,13 @@ struct dcc_table DCC_FORK_BOT =
 static void dcc_chat_secpass(int idx, char *buf, int atr)
 {
 #ifdef S_AUTH
-  char check[50];
+  char *check;
 
   if (!atr)
     return;
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-
+  check = nmalloc(strlen(dcc[idx].hash) + 6 + 1);
   sprintf(check, "+Auth %s", dcc[idx].hash);
 
   if (!strcmp(check, buf)) {
@@ -647,6 +645,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
       lostdcc(idx);
     }
   }
+  nfree(check);
 #endif /* S_AUTH */
 }
 struct dcc_table DCC_CHAT_SECPASS;
@@ -676,21 +675,19 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
   }
   if (u_pass_match(dcc[idx].user, buf)) {
 #ifdef S_AUTH
-    char rand[50];
+    char rand[51];
 
     make_rand_str(rand, 50);
-
     strcpy(dcc[idx].hash, makehash(dcc[idx].user, rand));
     dcc[idx].type = &DCC_CHAT_SECPASS;
     dcc[idx].timeval = now;
     dprintf(idx, "-Auth %s %s\n", rand, botnetnick);
-#else
+#else /* !S_AUTH */
     dcc_chat_secpass(idx, buf, atr);
 #endif /* S_AUTH */
   } else {
     dprintf(idx, "%s", rand_dccrespbye());
-    putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick,
-	   dcc[idx].host, dcc[idx].port);
+    putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {	/* su from a dumb user */
       /* Turn echo back on for telnet sessions (send IAC WON'T ECHO). */
       if (dcc[idx].status & STAT_TELNET)
@@ -947,7 +944,6 @@ struct dcc_table DCC_CHAT_PASS =
 
 /* Make sure ansi code is just for color-changing
  */
-/* compat
 static int check_ansi(char *v)
 {
   int count = 2;
@@ -967,7 +963,6 @@ static int check_ansi(char *v)
   return count;
 }
 
-*/
 
 static void eof_dcc_chat(int idx)
 {
@@ -988,7 +983,7 @@ static void eof_dcc_chat(int idx)
 
 static void dcc_chat(int idx, char *buf, int i)
 {
-  int nathan = 0, fixed = 0;
+  int nathan = 0, doron = 0, fixed = 0;
   char *v, *d;
 
   strip_telnet(dcc[idx].sock, buf, &i);
@@ -1017,7 +1012,6 @@ static void dcc_chat(int idx, char *buf, int i)
 	}
 	v++;
 	break;
-/*
       case 27:			// ESC - ansi code?
 	doron = check_ansi(v);
 	// If it's valid, append a return-to-normal code at the end
@@ -1027,7 +1021,6 @@ static void dcc_chat(int idx, char *buf, int i)
 	} else
 	  v += doron;
 	break;
-*/
       case '\r':		/* Weird pseudo-linefeed */
 	v++;
 	break;
@@ -1512,14 +1505,13 @@ static void dcc_telnet_id(int idx, char *buf, int atr)
 #ifdef HUB
    if (!glob_huba(fr))
     ok = 0;
-#endif
-#ifdef LEAF
+#else /* !HUB */
   /* if I am a chanhub and they dont have +c then drop */
    if (ischanhub() && !glob_chuba(fr))
     ok = 0;
    if (!ischanhub())
     ok = 0;
-#endif
+#endif /* HUB */
   if (!ok && glob_bot(fr))
     ok = 1;
   if (!ok) {
@@ -1579,11 +1571,10 @@ static void dcc_telnet_pass(int idx, int atr)
 #ifdef HUB
   if (!glob_huba(fr)) 
    ok2 = 0;
-#endif
-#ifdef LEAF
+#else /* !HUB */
   if (ischanhub() && !glob_chuba(fr))
    ok2 = 0;
-#endif
+#endif /* HUB */
   if (ok2) {
     ok = 1;
     dcc[idx].status |= STAT_PARTY;
@@ -1609,8 +1600,8 @@ static void dcc_telnet_pass(int idx, int atr)
       }
     }
     if (snum >= 0) {
-      char initkey[32], *tmp2;
-      char tmp[256], buf[40];
+      char initkey[33], *tmp2;
+      char tmp[256], buf[SHA_HASH_LENGTH + 1];
       SHA_CTX ctx;
       
       /* initkey-gen hub */
@@ -1619,12 +1610,11 @@ static void dcc_telnet_pass(int idx, int atr)
       SHA1_Init(&ctx);
       SHA1_Update(&ctx, tmp, strlen(tmp));
       SHA1_Final(buf, &ctx);
-      strncpyz(socklist[snum].okey, btoh(buf, SHA_HASH_LENGTH), 32 + 1);
+      strncpyz(socklist[snum].okey, btoh(buf, SHA_DIGEST_LENGTH), sizeof(socklist[snum].okey));
       putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
       putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(socklist[snum].okey), socklist[snum].okey);
 
       make_rand_str(initkey, 32);		/* set the initial out/in link key to random chars. */
-      initkey[32] = 0;
       socklist[snum].oseed = random();
       socklist[snum].iseed = socklist[snum].oseed;
       tmp2 = encrypt_string(SALT2, initkey);
@@ -1644,9 +1634,9 @@ static void dcc_telnet_pass(int idx, int atr)
     /* Turn off remote telnet echo (send IAC WILL ECHO). */
 #ifdef HUB
     dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
-#else
+#else /* !HUB */
     dprintf(idx, "%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, rand_dccresppass());
-#endif
+#endif /* HUB */
   }
 }
 
@@ -1682,138 +1672,6 @@ struct dcc_table DCC_TELNET_ID =
   expmem_dcc_general,
   kill_dcc_general,
   out_dcc_general
-};
-
-static int call_tcl_func(char *name, int idx, char *args)
-{
-  char s[11];
-
-  sprintf(s, "%d", idx);
-  Tcl_SetVar(interp, "_n", s, 0);
-  Tcl_SetVar(interp, "_a", args, 0);
-  if (Tcl_VarEval(interp, name, " $_n $_a", NULL) == TCL_ERROR) {
-    putlog(LOG_MISC, "*", DCC_TCLERROR, name, interp->result);
-    return -1;
-  }
-  return (atoi(interp->result));
-}
-
-static void dcc_script(int idx, char *buf, int len)
-{
-  long oldsock;
-
-  strip_telnet(dcc[idx].sock, buf, &len);
-  if (!len)
-    return;
-
-  dcc[idx].timeval = now;
-  oldsock = dcc[idx].sock;	/* Remember the socket number.	*/
-  if (call_tcl_func(dcc[idx].u.script->command, dcc[idx].sock, buf)) {
-    void *old_other = NULL;
-
-    /* Check whether the socket and dcc entry are still valid. They
-       might have been killed by `killdcc'. */
-    if (dcc[idx].sock != oldsock || idx > max_dcc)
-      return;
-
-    old_other = dcc[idx].u.script->u.other;
-    dcc[idx].type = dcc[idx].u.script->type;
-    nfree(dcc[idx].u.script);
-    dcc[idx].u.other = old_other;
-    if (dcc[idx].type == &DCC_SOCKET) {
-      /* Kill the whole thing off */
-      killsock(dcc[idx].sock);
-      lostdcc(idx);
-      return;
-    }
-    if (dcc[idx].type == &DCC_CHAT) {
-      if (dcc[idx].u.chat->channel >= 0) {
-	chanout_but(-1, dcc[idx].u.chat->channel, DCC_JOIN, dcc[idx].nick);
-	if (dcc[idx].u.chat->channel < 10000)
-	  botnet_send_join_idx(idx, -1);
-	check_tcl_chjn(botnetnick, dcc[idx].nick, dcc[idx].u.chat->channel,
-		       geticon(idx), dcc[idx].sock, dcc[idx].host);
-      }
-      check_tcl_chon(dcc[idx].nick, dcc[idx].sock);
-    }
-  }
-}
-
-static void eof_dcc_script(int idx)
-{
-  void *old;
-  int oldflags;
-
-  Context;
-  /* This will stop a killdcc from working, incase the script tries
-   * to kill it's controlling socket while handling an EOF <cybah> */
-  oldflags = dcc[idx].type->flags;
-  dcc[idx].type->flags &= ~(DCT_VALIDIDX);
-  /* tell the script they're gone: */
-  call_tcl_func(dcc[idx].u.script->command, dcc[idx].sock, "");
-  /* restore the flags */
-  dcc[idx].type->flags = oldflags;
-  old = dcc[idx].u.script->u.other;
-  dcc[idx].type = dcc[idx].u.script->type;
-  nfree(dcc[idx].u.script);
-  dcc[idx].u.other = old;
-  /* then let it fall thru to the real one */
-  if (dcc[idx].type && dcc[idx].type->eof)
-    dcc[idx].type->eof(idx);
-  else {
-    putlog(LOG_DEBUG, "*", "*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED", dcc[idx].sock, dcc[idx].type->name);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-  }
-
-}
-
-static void display_dcc_script(int idx, char *buf)
-{
-  sprintf(buf, "scri  %s", dcc[idx].u.script->command);
-}
-
-static int expmem_dcc_script(void *x)
-{
-  register struct script_info *p = (struct script_info *) x;
-  int tot = sizeof(struct script_info);
-
-  if (p->type && p->u.other)
-    tot += p->type->expmem(p->u.other);
-  return tot;
-}
-
-static void kill_dcc_script(int idx, void *x)
-{
-  register struct script_info *p = (struct script_info *) x;
-Context;
-  if (p->type && p->u.other)
-    p->type->kill(idx, p->u.other);
-  nfree(p);
-}
-
-static void out_dcc_script(int idx, char *buf, void *x)
-{
-  register struct script_info *p = (struct script_info *) x;
-
-  if (p && p->type && p->u.other)
-    p->type->output(idx, buf, p->u.other);
-  else
-    tputs(dcc[idx].sock, buf, strlen(buf));
-}
-
-struct dcc_table DCC_SCRIPT =
-{
-  "SCRIPT",
-  DCT_VALIDIDX,
-  eof_dcc_script,
-  dcc_script,
-  NULL,
-  NULL,
-  display_dcc_script,
-  expmem_dcc_script,
-  kill_dcc_script,
-  out_dcc_script
 };
 
 static void dcc_socket(int idx, char *buf, int len)
@@ -1995,12 +1853,11 @@ static void dcc_telnet_got_ident(int i, char *host)
 #ifdef HUB
     if (ok && !(u->flags & USER_HUBA))
       ok = 0;
-#endif
-#ifdef LEAF
+#else /* !HUB */
   /* if I am a chanhub and they dont have +c then drop */
     if (ok && (ischanhub() && !(u->flags & USER_CHUBA)))
       ok = 0;
-#endif
+#endif /* HUB */
 /*    else if (!(u->flags & USER_PARTY))
       ok = 0; */
     if (!ok && u && (u->flags & USER_BOT))
@@ -2051,8 +1908,8 @@ static void dcc_telnet_got_ident(int i, char *host)
 //n  ssl_link(dcc[i].sock, ACCEPT_SSL);
 #ifdef HUB
   dprintf(i, "\n");
-#else
+#else /* !HUB */
   dprintf(i, "%s", rand_dccresp());
-#endif
+#endif /* HUB */
 }
 

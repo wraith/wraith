@@ -191,9 +191,9 @@ Function global_table[] =
   (Function) botnet_send_bye,
   /* 28 - 31 */
   (Function) botnet_send_chat,
-  (Function) botnet_send_filereject,
-  (Function) botnet_send_filesend,
-  (Function) botnet_send_filereq,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   /* 32 - 35 */
   (Function) botnet_send_join_idx,
   (Function) botnet_send_part_idx,

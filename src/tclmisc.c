@@ -60,36 +60,6 @@ static int tcl_ctime STDVAR
   return TCL_OK;
 }
 
-static int tcl_strftime STDVAR
-{
-  char buf[512];
-  struct tm *tm1;
-  time_t t;
-
-  BADARGS(2, 3, " format ?time?");
-  if (argc == 3)
-    t = atol(argv[2]);
-  else
-    t = now;
-    tm1 = localtime(&t);
-  if (egg_strftime(buf, sizeof(buf) - 1, argv[1], tm1)) {
-    Tcl_AppendResult(irp, buf, NULL);
-    return TCL_OK;
-  }
-  Tcl_AppendResult(irp, " error with strftime", NULL);
-  return TCL_ERROR;
-}
-
-static int tcl_myip STDVAR
-{
-  char s[16];
-
-  BADARGS(1, 1, "");
-  egg_snprintf(s, sizeof s, "%lu", iptolong(getmyip()));
-  Tcl_AppendResult(irp, s, NULL);
-  return TCL_OK;
-}
-
 static int tcl_rand STDVAR
 {
   unsigned long x;
@@ -135,9 +105,7 @@ tcl_cmds tclmisc_cmds[] =
 {
   {"putlog",		tcl_putlog},
   {"unixtime",		tcl_unixtime},
-  {"strftime",          tcl_strftime},
   {"ctime",		tcl_ctime},
-  {"myip",		tcl_myip},
   {"rand",		tcl_rand},
   {"timesync",		tcl_timesync},
   {"exit",		tcl_die},

@@ -25,16 +25,16 @@
 #include "stat.h"
 #include "bg.h"
 
-extern struct userrec *userlist;
-extern struct dcc_t	*dcc;
-extern struct chanset_t	*chanset;
-extern time_t		 now;
+extern struct userrec 		*userlist;
+extern struct dcc_t		*dcc;
+extern struct chanset_t		*chanset;
+extern time_t			 now;
 
 #ifdef S_AUTH
-extern char 		authkey[];
-int auth_total = 0;
-int max_auth = 100;
-struct auth_t *auth = 0;
+extern char 			authkey[];
+int 				auth_total = 0;
+int 				max_auth = 100;
+struct auth_t 			*auth = 0;
 #endif /* S_AUTH */
 
 /* Expected memory usage
@@ -68,7 +68,7 @@ static void expire_auths()
   for (i = 0; i < auth_total;i++) {
     if (auth[i].authed) {
       idle = now - auth[i].atime;
-      if (idle >= 60*60) {
+      if (idle >= (60 * 60)) {
         removeauth(i);
       }
     }
@@ -88,14 +88,14 @@ void init_auth()
 char *makehash(struct userrec *u, char *rand)
 {
   MD5_CTX ctx;
-  unsigned char md5out[33];
-  char md5string[33], hash[500], *ret = NULL;
+  unsigned char md5out[34];
+  char md5string[34], hash[500], *ret = NULL;
   sprintf(hash, "%s%s%s", rand, (char *) get_user(&USERENTRY_SECPASS, u), authkey ? authkey : "");
   MD5_Init(&ctx);
   MD5_Update(&ctx, hash, strlen(hash));
   MD5_Final(md5out, &ctx);
-  strcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH));
-   
+  strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof md5string);
+
   ret = md5string;
   return ret;
 }

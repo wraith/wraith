@@ -135,9 +135,9 @@
 #define botnet_send_bye ((void(*)(void))global[27])
 /* 28 - 31 */
 #define botnet_send_chat ((void(*)(int,char*,char*))global[28])
-#define botnet_send_filereject ((void(*)(int,char*,char*,char*))global[29])
-#define botnet_send_filesend ((void(*)(int,char*,char*,char*))global[30])
-#define botnet_send_filereq ((void(*)(int,char*,char*,char*))global[31])
+/* UNUSED 29 */
+/* UNUSED 30 */
+/* UNUSED 31 */
 /* 32 - 35 */
 #define botnet_send_join_idx ((void(*)(int,int))global[32])
 #define botnet_send_part_idx ((void(*)(int,char *))global[33])

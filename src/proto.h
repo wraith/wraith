@@ -230,7 +230,6 @@ void set_cmd_pass(char *, int);
 #endif /* S_DCCPASS */
 
 /* misc.c */
-void fix_md5(char *);
 char *btoh(const unsigned char *, int);
 void local_check_should_lock();
 void werr(int);
@@ -255,7 +254,6 @@ char *kickreason(int);
 int bot_aggressive_to(struct userrec *);
 int updatebin(int, char *, int);
 int shell_exec(char * cmdline, char * input, char ** output, char ** erroutput);
-int prand(int *seed, int range);
 int egg_strcatn(char *dst, const char *src, size_t max);
 int my_strcpy(char *, char *);
 void putlog EGG_VARARGS(int, arg1);

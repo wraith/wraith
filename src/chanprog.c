@@ -34,17 +34,17 @@ extern int		 backgrd, term_z, con_chan, cache_hit, cache_miss,
 			 protect_readonly, noshare,
 #ifdef HUB
 			 my_port,
-#endif
+#endif /* HUB */
 			 ignore_time, loading;
 
-tcl_timer_t	 *timer = NULL;		/* Minutely timer		*/
-tcl_timer_t	 *utimer = NULL;	/* Secondly timer		*/
-unsigned long	  timer_id = 1;		/* Next timer of any sort will
-					   have this number		*/
-struct chanset_t *chanset = NULL;	/* Channel list			*/
-char		  admin[121] = "";	/* Admin info			*/
-char		  origbotname[NICKLEN + 1];
-char		  botname[NICKLEN + 1];	/* Primary botname		*/
+tcl_timer_t		*timer = NULL;		/* Minutely timer		*/
+tcl_timer_t		*utimer = NULL;		/* Secondly timer		*/
+unsigned long 		timer_id = 1;		/* Next timer of any sort will
+						   have this number		*/
+struct chanset_t 	*chanset = NULL;	/* Channel list			*/
+char 			admin[121] = "";	/* Admin info			*/
+char 			origbotname[NICKLEN + 1];
+char 			botname[NICKLEN + 1];	/* Primary botname		*/
 
 
 /* Remove space characters from beginning and end of string
@@ -286,7 +286,7 @@ void tell_verbose_status(int idx)
   char *vers_t, *uni_t;
 #ifdef HUB
   int i;
-#endif
+#endif /* HUB */
   time_t now2, hr, min;
 #if HAVE_GETRUSAGE
   struct rusage ru;
@@ -294,12 +294,12 @@ void tell_verbose_status(int idx)
 # if HAVE_CLOCK
   clock_t cl;
 # endif
-#endif
+#endif /* HAVE_GETRUSAGE */
 #ifdef HAVE_UNAME
   struct utsname un;
 
   if (!uname(&un) < 0) {
-#endif
+#endif /* HAVE_UNAME */
     vers_t = " ";
     uni_t = "*unknown*";
 #ifdef HAVE_UNAME
@@ -307,14 +307,14 @@ void tell_verbose_status(int idx)
     vers_t = un.release;
     uni_t = un.sysname;
   }
-#endif
+#endif /* HAVE_UNAME */
 
 #ifdef HUB
   i = count_users(userlist);
   dprintf(idx, "I am %s, running %s:  %d user%s (mem: %uk)\n",
 	  botnetnick, ver, i, i == 1 ? "" : "s",
           (int) (expected_memory() / 1024));
-#endif
+#endif /* HUB */
   now2 = now - online_since;
   s[0] = 0;
   if (now2 > 86400) {
@@ -354,7 +354,7 @@ void tell_verbose_status(int idx)
 # else
   sprintf(s2, "CPU ???");
 # endif
-#endif
+#endif /* HAVE_GETRUSAGE */
   dprintf(idx, "%s %s  (%s)  %s  %s %4.1f%%\n", MISC_ONLINEFOR,
 	  s, s1, s2, MISC_CACHEHIT,
 	  100.0 * ((float) cache_hit) / ((float) (cache_hit + cache_miss)));
@@ -377,7 +377,7 @@ void tell_verbose_status(int idx)
 	  TCL_PATCH_LEVEL ? TCL_PATCH_LEVEL : "*unknown*");
 #if HAVE_TCL_THREADS
   dprintf(idx, "Tcl is threaded\n");
-#endif  
+#endif /* HAVE_TCL_THREADS */
 	  
 }
 
@@ -393,18 +393,17 @@ void tell_settings(int idx)
     dprintf(idx, "Firewall: %s, port %d\n", firewall, firewallport);
 #ifdef HUB
   dprintf(idx, "Userfile: %s   \n", userfile);
-#endif
+#endif /* HUB */
   dprintf(idx, "Directories:\n");
   dprintf(idx, "  Temp    : %s\n", tempdir);
   fr.global = default_flags;
 
   build_flags(s, &fr, NULL);
-  dprintf(idx, "%s [%s], %s: %s\n", MISC_NEWUSERFLAGS, s,
-	  MISC_NOTIFY, notify_new);
+  dprintf(idx, "%s [%s], %s: %s\n", MISC_NEWUSERFLAGS, s, MISC_NOTIFY, notify_new);
 #ifdef HUB
   if (owner[0])
     dprintf(idx, "%s: %s\n", MISC_PERMOWNER, owner);
-#endif
+#endif /* HUB */
   dprintf(idx, "Ignores last %d mins\n", ignore_time);
 }
 
@@ -433,6 +432,7 @@ void reaffirm_owners()
       u->flags = sanity_check(u->flags | USER_ADMIN);
   }
 }
+
 void load_internal_users()
 {
   char *p = NULL,
@@ -450,7 +450,7 @@ void load_internal_users()
   struct userrec *u;
   //struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
 
-//hubs..
+  /* hubs */
   sprintf(buf, "%s", hubs);
   p = buf;
   while (p) {
@@ -486,7 +486,7 @@ void load_internal_users()
 #ifdef HUB
 	  if ((!bi->hublevel) && (!strcmp(hand, botnetnick)))
 	    bi->hublevel = 99;
-#endif
+#endif /* HUB */
           bi->uplink = user_malloc(1);
           bi->uplink[0] = 0;
 	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
@@ -517,7 +517,7 @@ void load_internal_users()
     }
   }
 
-//owners..
+  /* perm owners */
   owner[0] = 0;
 
   sprintf(buf, "%s", owners);
@@ -527,7 +527,6 @@ void load_internal_users()
     p = strchr(p, ',');
     if (p)
       *p++ = 0;
-//     name pass hostlist 
     hand = ln;
     pass = NULL;
     attr = NULL;
@@ -576,7 +575,6 @@ void chanprog()
 
 
   admin[0] = 0;
-
   /* cache our ip on load instead of every 30 seconds -zip */
   cache_my_ip();
   sdprintf("ip4: %s", myipstr(4));
@@ -585,7 +583,7 @@ void chanprog()
   /* Turn off read-only variables (make them write-able) for rehash */
   protect_readonly = 0;
 
-//now this only checks server shit. (no channels)
+ /* now this only checks server shit. (no channels) */
   call_hook(HOOK_REHASH);
   protect_readonly = 1;
   if (!botnetnick[0]) {
@@ -595,8 +593,6 @@ void chanprog()
   if (!botnetnick[0])
     fatal("I don't have a botnet nick!!\n", 0);
 #ifdef HUB
-  if (!userfile[0])
-    fatal(MISC_NOUSERFILE2, 0);
   loading = 1;
   checkchans(0);
   readuserfile(userfile, &userlist);
@@ -876,7 +872,6 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
   char *buf;
   module_entry *me;
 
-Context;   
   /* send out over botnet. */
   /* nmalloc(options,chan,'cset ',' ',+ 1) */
   if (chan)
@@ -938,4 +933,3 @@ Context;
     nfree(buf2);
   }
 }
-

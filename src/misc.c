@@ -36,10 +36,10 @@
 #include "stat.h"
 #include "bg.h"
 
-extern struct userrec *userlist;
+extern struct userrec 	*userlist;
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
-extern tand_t *tandbot;
+extern tand_t 		*tandbot;
 
 extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
@@ -54,8 +54,8 @@ extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug,
                          localhub;
 extern time_t		 now;
 extern Tcl_Interp	*interp;
-extern struct cfg_entry			CFG_MOTD, CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST,
-					CFG_PROMISC, CFG_TRACE, CFG_HIJACK;
+extern struct cfg_entry	CFG_MOTD, CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST, CFG_PROMISC, 
+			CFG_TRACE, CFG_HIJACK;
 
 void detected(int, char *);
 
@@ -530,17 +530,6 @@ int getting_users()
   return 0;
 }
 
-int prand(int *seed, int range)
-{
-  long long i1;
-
-  i1 = *seed;
-  i1 = (i1 * 0x08088405 + 1) & 0xFFFFFFFF;
-  *seed = i1;
-  i1 = (i1 * range) >> 32;
-  return i1;
-}
-
 /*
  *    Logging functions
  */
@@ -555,11 +544,11 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   va_list va;
 #ifdef HUB
   time_t now2 = time(NULL);
-#endif
+#endif /* HUB */
   struct tm *t;
 #ifdef LEAF
   t = 0;
-#endif
+#endif /* LEAF */
   type = EGG_VARARGS_START(int, arg1, va);
   chname = va_arg(va, char *);
   format = va_arg(va, char *);
@@ -573,7 +562,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
     strcat(stamp, " ");
    tsl = strlen(stamp);
   }
-#endif
+#endif /* HUB */
  
 
   /* Format log entry at offset 'tsl,' then i can prepend the timestamp */
@@ -643,7 +632,6 @@ void make_rand_str(char *s, int len)
 {
   int j, r = 0;
 
-Context;
   for (j = 0; j < len; j++) {
     r = random();
     if (r % 4 == 0)
@@ -784,7 +772,7 @@ void kill_bot(char *s1, char *s2)
 {
 #ifdef HUB
   write_userfile(-1);
-#endif
+#endif /* HUB */
   call_hook(HOOK_DIE);
   chatout("*** %s\n", s1);
   botnet_send_chat(-1, botnetnick, s1);
@@ -800,7 +788,7 @@ int isupdatehub()
   if ((buser) && (buser->flags & USER_UPDATEHUB))
     return 1;
   else
-#endif
+#endif /* HUB */
     return 0;
 }
 
@@ -854,7 +842,6 @@ void check_last() {
   if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "", STR("nocheck")))
     return;
 
-Context;
   pw = getpwuid(geteuid());
   if (!pw) return;
 
@@ -865,11 +852,9 @@ Context;
 
     sprintf(buf, STR("last %s"), user);
     if (shell_exec(buf, NULL, &out, NULL)) {
-Context;
       if (out) {
         char *p;
 
-Context;
         p = strchr(out, '\n');
         if (p)
           *p = 0;
@@ -1139,7 +1124,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
   char tmpfile[161];
   int x,
     fd;
-Context;
+
   if (!cmdline)
     return 0;
   /* Set up temp files */
@@ -1150,7 +1135,6 @@ Context;
       unlink(tmpfile);
       close(fd);
     }
-    Context;
     putlog(LOG_ERRORS, "*" , STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
     return 0;
   }
@@ -1158,7 +1142,6 @@ Context;
   if (input) {
     if (fwrite(input, 1, strlen(input), inpFile) != strlen(input)) {
       fclose(inpFile);
-      Context;
       putlog(LOG_ERRORS, "*", STR("exec: Couldn't write to '%s': %s"), tmpfile, strerror(errno));
       return 0;
     }
@@ -1171,7 +1154,6 @@ Context;
       unlink(tmpfile);
       close(fd);
     }
-    Context;
     putlog(LOG_ERRORS, "*", STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
     return 0;
   }
@@ -1182,7 +1164,6 @@ Context;
       unlink(tmpfile);
       close(fd);
     }
-    Context;
     putlog(LOG_ERRORS, "*", STR("exec: Couldn't open '%s': %s"), tmpfile, strerror(errno));
     return 0;
   }
@@ -1737,10 +1718,10 @@ int goodpass(char *pass, int idx, char *nick)
 #ifdef S_NAZIPASS
   int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
 #endif /* S_NAZIPASS */
-  tell = nmalloc(300);
-
   if (!pass[0]) 
     return 0;
+
+  tell = nmalloc(300);
 
 #ifdef S_NAZIPASS
   for (i = 0; i < strlen(pass); i++) {
@@ -1793,11 +1774,10 @@ int goodpass(char *pass, int idx, char *nick)
       dprintf(idx, "%s\n", tell);
     else if (nick[0])
       dprintf(DP_HELP, STR("NOTICE %s :%s\n"), nick, tell);
-    
+    nfree(tell);
     return 0;
   }
-  
-
+  nfree(tell);
   return 1;
 }
 
@@ -1831,10 +1811,7 @@ char *replace (char *string, char *oldie, char *newbie)
 
 char *getfullbinname(char *argv0)
 {
-  char *cwd,
-   *bin,
-   *p,
-   *p2;
+  char *cwd, *bin, *p, *p2;
 
   bin = nmalloc(strlen(argv0) + 1);
   strcpy(bin, argv0);
@@ -1875,7 +1852,7 @@ void sdprintf EGG_VARARGS_DEF(char *, arg1)
 {
   if (sdebug) {
     char *format;
-    char s[601];
+    char s[2001];
     va_list va;
 
     format = EGG_VARARGS_START(char *, arg1, va);
@@ -1964,18 +1941,14 @@ void werr(int errnum)
  */
 int private(struct flag_record fr, struct chanset_t *chan, int type)
 {
-Context;
   if (!channel_private(chan) || glob_bot(fr) || glob_owner(fr))
     return 0; /* user is implicitly not restricted by +private, they may however be lacking other flags */
-Context;
 
   if (type == PRIV_OP) {
     /* |o implies all flags above. n| has access to all +private. Bots are exempt. */
-Context;
     if (chan_op(fr))
       return 0;
   } else if (type == PRIV_VOICE) {
-Context;
     if (chan_voice(fr))
       return 0;
   }
@@ -2036,15 +2009,5 @@ char *btoh(const unsigned char *md, int len)
     sprintf(&(buf[i*2]), "%02x", md[i]);
   ret = buf;
   return ret;
-}
-
-
-void fix_md5(char *s) {
-  int len = strlen(s), i = 0;
-  for (i = 0; i < len; i++)
-    if (!s[i])
-      printf("hash place %d is NULL\n", i);
-//      s[i]=1;
-  s[len]=0;
 }
 

@@ -76,16 +76,16 @@ extern tcl_timer_t	*timer,
 			*utimer;
 extern jmp_buf		 alarmret;
 
-int role;
-int loading = 0;
+int 	role;
+int 	loading = 0;
 
 const time_t buildts = CVSBUILD;		/* build timestamp (UTC) */
 char	egg_version[1024] = "1.0.11";
 int	egg_numver = 1001100;
-time_t lastfork=0;
+time_t 	lastfork=0;
 
 #ifdef HUB
-int my_port;
+int 	my_port;
 #endif
 
 char	notify_new[121] = "";	/* Person to send a note to for new users */
@@ -98,12 +98,12 @@ int	con_chan = 0;		/* Foreground: constantly display channel
 uid_t   myuid;
 int	term_z = 0;		/* Foreground: use the terminal as a party
 				   line? */
-int checktrace = 1;		/* Check for trace when starting up? */
-int pscloak = 1;
-int updating = 0; /* this is set when the binary is called from itself. */
-char tempdir[DIRMAX] = "";
-char lock_file[40] = "";
-char *binname;
+int 	checktrace = 1;		/* Check for trace when starting up? */
+int 	pscloak = 1;
+int 	updating = 0; 		/* this is set when the binary is called from itself. */
+char 	tempdir[DIRMAX] = "";
+char 	lock_file[40] = "";
+char 	*binname;
 int     sdebug = 0;		/* enable debug output? */
 char	textdir[121] = "";	/* Directory for text files that get dumped */
 time_t	online_since;		/* Unix-time that the bot loaded up */
@@ -130,8 +130,8 @@ extern struct cfg_entry CFG_FORKINTERVAL;
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
 
 
-unsigned char md5out[33];
-char md5string[33];
+unsigned char 	md5out[MD5_HASH_LENGTH + 1];
+char 		md5string[MD5_HASH_LENGTH + 1];
 
 /* Traffic stats
  */
@@ -509,7 +509,7 @@ void checkpass()
     MD5_Init(&ctx);
     MD5_Update(&ctx, gpasswd, strlen(gpasswd));
     MD5_Final(md5out, &ctx);
-    strcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH));
+    strncpyz(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
     if (strcmp(shellhash, md5string)) {
       fatal(STR("incorrect password."), 0);
     }
