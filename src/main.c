@@ -61,7 +61,7 @@
 extern int		optind;
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
-const char	egg_version[1024] = "1.1.6";
+const char	egg_version[1024] = "1.1.7";
 
 int 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
