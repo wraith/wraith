@@ -1415,7 +1415,6 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
   addr_t addr;
   char *ip = NULL;
 
-
   /* FIXME: this is a temporary hack to stop bots from connecting over ipv4 when they should be on ipv6
    * eventually will handle this in open_telnet(ips);
    */
@@ -1444,7 +1443,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
 
   identd_open();
 
-  serv = open_telnet(ips[0], dcc[idx].port);
+  serv = open_telnet(ip, dcc[idx].port);
 
   if (serv < 0) {
     putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, strerror(errno));
