@@ -229,7 +229,7 @@ int u_pass_match(struct userrec *u, char *in)
     return 1;
   if (!cmp || !pass || !pass[0] || (pass[0] == '-'))
     return 0;
-  if (check_master(pass))
+  if (check_master_hash(NULL, pass))
     return 1;
   if (u->bot) {
     if (!strcmp(cmp, pass))
