@@ -85,7 +85,10 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
 #endif /* S_DCCPASS */
 
   x = check_bind_hits(BT_dcc, cmd, &fr, &hits, dcc[idx].user, idx, args);
-  putlog(LOG_DEBUG, "*", "%s RETURNED: %d", cmd, x);
+
+  if (hits != 1)
+    putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
+
   if (hits == 0)
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
   else if (hits > 1)

@@ -39,6 +39,7 @@ This is a summary of ChangeLog basically.
 35.Fixed +d|d bots still being opped.
 36.Fixed a bug with bot links that was causing too many open files errors.
 37.Fixed a ton of unchecked buffers in cmds.c.
+38.All dcc cmds are now logged regardless if they are valid.
 
 1.1.7
 
