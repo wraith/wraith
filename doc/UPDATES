@@ -1,5 +1,4 @@
-Wraith - CHANGES
-
+-----------------------------
 + : Added
 - : Removed
 @ : Improved/Modified
@@ -7,7 +6,7 @@ Wraith - CHANGES
 / : Comment
 ? : Question to users...
 
-------------------------------
+-----------------------------
 
 1.0.11
 @ 1.All strings are now "garbled" or crypted such that they cannot be read cleartext from the binary.
