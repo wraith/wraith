@@ -2264,44 +2264,58 @@ int updatebin (int idx, char *par, int autoi)
 void EncryptFile(char *infile, char *outfile)
 {
   char  buf[8192];
-//  char *temps;
-  FILE *f, *f2;
-Context;
+  FILE *f, *f2 = NULL;
+  int std = 0;
+  if (!strcmp(outfile, "STDOUT"))
+    std = 1;
   f  = fopen(infile, "r");
   if(!f)
-    return;      
-  f2 = fopen(outfile, "w");
-  if (!f2)
-    return;
-Context;
+    return; 
+  if (!std) {     
+    f2 = fopen(outfile, "w");
+    if (!f2)
+      return;
+  }
 
   while (fscanf(f,"%[^\n]\n",buf) != EOF) {
-Context;
-    lfprintf(f2, "%s\n", buf);
-Context;
+    if (std)
+      printf("%s\n", cryptit(encrypt_string(netpass, buf)));
+//      printf("%s\n", buf);
+    else
+      lfprintf(f2, "%s\n", buf);
   }
   fclose(f);
-  fclose(f2);
+  if (f2)
+    fclose(f2);
 }
 void DecryptFile(char *infile, char *outfile)
 {
   char  buf[8192], *temps;
-  FILE *f, *f2;
+  FILE *f, *f2 = NULL;
+  int std = 0;
 
+  if (!strcmp(outfile, "STDOUT")) 
+    std = 1;
   f  = fopen(infile, "r");
   if (!f)
-    return;      
-  f2 = fopen(outfile, "w");
-  if (!f2)
-    return;
+    return; 
+  if (!std) {     
+    f2 = fopen(outfile, "w");
+    if (!f2)
+      return;
+  }
 
   while (fscanf(f,"%[^\n]\n",buf) != EOF) {
     temps = (char *) decrypt_string(netpass, decryptit(buf));
-    fprintf(f2, "%s\n",temps);
+    if (!std)
+      fprintf(f2, "%s\n",temps);
+    else
+      printf("%s\n", temps);
     nfree(temps);
   }
   fclose(f);
-  fclose(f2);
+  if (f2)
+    fclose(f2);
 }
 
 int bot_aggressive_to(struct userrec *u)
