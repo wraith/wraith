@@ -24,7 +24,7 @@ HUBEXEC = hub
 #   -DDEBUG_MEM      to be able to debug memory allocation (.debug)
 #                    These can both be set by using 'make debug'
 #                    or 'make sdebug'
-CFLGS = -fno-strict-aliasing 
+CFLGS = 
 
 # configure SHOULD set these...you may need to tweak them to get modules
 # to compile .. if you do...let the devel-team know the working settings
@@ -67,10 +67,6 @@ TCLLIB = @TCLLIB@
 TCLLIBFN = @TCLLIBFN@
 
 modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
-
-post_config  =  echo "" && \
-		echo "You can now compile the bot, using \"make\"." && \
-		echo ""
 
 post_iconfig =  $(modconf) update-depends && \
 		$(modconf) Makefile && \
@@ -116,6 +112,11 @@ MAKE_DEPEND = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)'
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
+
+all:
+	@echo ""
+	@echo "Use the build script doofus."
+	@echo ""
 
 cleanutils:
 	@rm -f stringfix
@@ -177,7 +178,6 @@ config:
 	@$(modconf) Makefile
 	@cd src/mod && $(MAKE_CONFIG) config
 	@$(modconf) Makefile
-	@$(post_config)
 
 clean-modconfig:
 	@rm -f .modules .known_modules
@@ -257,7 +257,6 @@ dhub:   packconf salt config
 	@echo ""
 	@cd src; $(MAKE_DHUB) $(HUBEXEC)
 	@echo ""
-
 
 #safety hash
 
