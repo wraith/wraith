@@ -295,8 +295,7 @@ cont_link(int idx, char *buf, int ii)
 
 /* FIXME: remove after 1.2.2 */
 /* need to support the posibility of old hubs being up */
-#ifdef READY
-  if (ii == 2) {
+  if (1 || ii == 2) {
     dprintf(idx, "%s\n", conf.bot->nick);
 
     int snum = findanysnum(dcc[idx].sock);
@@ -308,14 +307,11 @@ cont_link(int idx, char *buf, int ii)
 
     /* wait for "elink" now */
   } else if (ii == 3) {			/* new hub response */
-#endif
     dprintf(idx, "-%s\n", conf.bot->nick);
     dcc[idx].newbot = 1;
 
     /* wait for "neg?" now */
-#ifdef READY
   }
-#endif
 
 
   /* now we wait to negotiate an encryption */
@@ -644,14 +640,15 @@ dcc_chat_secpass(int idx, char *buf, int atr)
 {
   int badauth = 0;
 
-  if (dccauth) {
-    if (!atr)
-      return;
+  if (!atr)
+    return;
 
+  strip_telnet(dcc[idx].sock, buf, &atr);
+  atr = dcc[idx].user ? dcc[idx].user->flags : 0;
+
+  if (dccauth) {
     char check[MD5_HASH_LENGTH + 7] = "";
 
-    strip_telnet(dcc[idx].sock, buf, &atr);
-    atr = dcc[idx].user ? dcc[idx].user->flags : 0;
     egg_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
     badauth = strcmp(check, buf);
     /* +secpass */
