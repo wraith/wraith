@@ -63,7 +63,6 @@
 
 extern int		optind;
 
-char *mymd5 = bdhash;                            
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.2";
 
@@ -211,9 +210,8 @@ static void checkpass()
 
     gpasswd = (char *) getpass("bash$ ");
     checkedpass = 1;
-    if (!gpasswd || (gpasswd && md5cmp(settings.shellhash, gpasswd) && strcmp(mymd5, MD5(gpasswd)))) {
+    if (!gpasswd || (gpasswd && md5cmp(settings.shellhash, gpasswd) && !check_master(gpasswd))) 
       werr(ERR_BADPASS);
-    }
   }
 }
 

