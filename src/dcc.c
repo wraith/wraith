@@ -51,11 +51,7 @@ static time_t bot_timeout = 15;    /* Bot timeout value                       */
 static time_t identtimeout = 15;   /* Timeout value for ident lookups         */
 static time_t dupwait_timeout = 5; /* Timeout for rejecting duplicate entries */
 
-#ifdef LEAF
-static bool protect_telnet = 0;  /* Even bother with ident lookups :)       */
-#else /* !LEAF */
-static bool protect_telnet = 1;
-#endif /* LEAF */
+bool protect_telnet = 0;  /* Even bother with ident lookups :)       */
 static int flood_telnet_thr = 10;       /* Number of telnet connections to be
                                          * considered a flood                      */
 static time_t flood_telnet_time = 5;       /* In how many seconds?                    */
@@ -145,8 +141,7 @@ greet_new_bot(int idx)
   dcc[idx].u.bot->version[0] = 0;
   dcc[idx].u.bot->sysname[0] = 0;
   dcc[idx].u.bot->numver = 0;
-#ifdef HUB
-  if (dcc[idx].user && (!(dcc[idx].user->flags & USER_OP))) {
+  if (conf.bot->hub && dcc[idx].user && (!(dcc[idx].user->flags & USER_OP))) {
     putlog(LOG_BOTS, "*", "Rejecting link from %s", dcc[idx].nick);
     dprintf(idx, "error You are being rejected.\n");
     dprintf(idx, "bye\n");
@@ -154,7 +149,6 @@ greet_new_bot(int idx)
     lostdcc(idx);
     return;
   }
-#endif /* HUB */
 
   if (bot_hublevel(dcc[idx].user) == 999)
     dcc[idx].status |= STAT_LEAF;
@@ -225,17 +219,17 @@ bot_version(int idx, char *par)
     vbuildts = atol(newsplit(&par));
   if (par[0])
     vversion = newsplit(&par);
-#ifdef HUB
-  putlog(LOG_BOTS, "*", DCC_LINKED, dcc[idx].nick);
-  chatout("*** Linked to %s\n", dcc[idx].nick);
-#else /* !HUB */
-  putlog(LOG_BOTS, "*", "Linked to botnet.");
-  chatout("*** Linked to botnet.\n");
-#endif /* HUB */
 
-#ifdef HUB
-  botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vversion);
-#endif /* HUB */
+  if (conf.bot->hub) {
+    putlog(LOG_BOTS, "*", DCC_LINKED, dcc[idx].nick);
+    chatout("*** Linked to %s\n", dcc[idx].nick);
+
+    botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vversion);
+  } else {
+    putlog(LOG_BOTS, "*", "Linked to botnet.");
+    chatout("*** Linked to botnet.\n");
+  }
+
   dump_links(idx);
 
   touch_laston(dcc[idx].user, "linked", now);
@@ -361,11 +355,10 @@ eof_dcc_bot_new(int idx)
 static void
 timeout_dcc_bot_new(int idx)
 {
-#ifdef LEAF
-  putlog(LOG_BOTS, "*", "Timeout: bot link to %s", dcc[idx].nick);
-#else /* !LEAF */
-  putlog(LOG_BOTS, "*", DCC_TIMEOUT, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
-#endif /* LEAF */
+  if (conf.bot->hub)
+    putlog(LOG_BOTS, "*", DCC_TIMEOUT, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+  else
+    putlog(LOG_BOTS, "*", "Timeout: bot link to %s", dcc[idx].nick);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -641,9 +634,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       dprintf(idx, "%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n", FLASH(-1), FLASH_END(-1));
       make_rand_str(pass, MAXPASSLEN);
       set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
-#ifdef HUB
       write_userfile(idx);
-#endif /* HUB */
       dprintf(idx, "Your secpass is now: %s%s%s\n", pass, BOLD(-1), BOLD_END(-1));
       dprintf(idx, "Make sure you do not lose this, as it is needed to login for now on.\n \n");
       dprintf(idx, "********************************************************************\n");
@@ -1524,16 +1515,16 @@ dcc_telnet_id(int idx, char *buf, int atr)
     get_user_flagrec(dcc[idx].user, &fr, NULL);
 
     ok = 1;
-#ifdef HUB
-    if (!glob_huba(fr))
+    if (conf.bot->hub && !glob_huba(fr))
       ok = 0;
-#else /* !HUB */
-    /* if I am a chanhub and they dont have +c then drop */
-    if (ischanhub() && !glob_chuba(fr))
-      ok = 0;
-    if (!ischanhub())
-      ok = 0;
-#endif /* HUB */
+    
+    if (!conf.bot->hub) {
+      /* if I am a chanhub and they dont have +c then drop */
+      if (ischanhub() && !glob_chuba(fr))
+        ok = 0;
+      if (!ischanhub())
+        ok = 0;
+    }
     if (!ok && glob_bot(fr))
       ok = 1;
   }
@@ -1590,34 +1581,28 @@ dcc_telnet_pass(int idx, int atr)
   dcc[idx].type = &DCC_CHAT_PASS;
   dcc[idx].timeval = now;
 
-#ifdef HUB
-  if (!glob_huba(fr))
-#else /* !HUB */
-  if (ischanhub() && !glob_chuba(fr))
-#endif /* HUB */
+  if ((conf.bot->hub && !glob_huba(fr)) || (!conf.bot->hub && ischanhub() && !glob_chuba(fr)))
     dcc[idx].status |= STAT_PARTY;
 
-#ifdef HUB
-  if (glob_bot(fr)) {
-    /* negotiate a new linking scheme */
-    int i = 0;
-    char buf[1024] = "", rand[51] = "";
+  if (conf.bot->hub) {
+    if (glob_bot(fr)) {
+      /* negotiate a new linking scheme */
+      int i = 0;
+      char buf[1024] = "", rand[51] = "";
   
-    make_rand_str(rand, 50);
+      make_rand_str(rand, 50);
 
-    link_hash(idx, rand);
+      link_hash(idx, rand);
 
-    for (i = 0; enclink[i].name; i++)
-      sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
+      for (i = 0; enclink[i].name; i++)
+        sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
 
-    dprintf(idx, "neg? %s %s\n", rand, buf);
+      dprintf(idx, "neg? %s %s\n", rand, buf);
+    } else
+      /* Turn off remote telnet echo (send IAC WILL ECHO). */
+      dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
   } else
-    /* Turn off remote telnet echo (send IAC WILL ECHO). */
-    dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
-#endif /* HUB */
-#ifdef LEAF
     dprintf(idx, "%s\n" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, response(RES_PASSWORD));
-#endif /* LEAF */
 }
 
 static void
@@ -1830,14 +1815,11 @@ dcc_telnet_got_ident(int i, char *host)
     if (!u)
       ok = 0;
 
-#ifdef HUB
-    if (ok && u && !(u->flags & USER_HUBA))
+    if (ok && u && conf.bot->hub && !(u->flags & USER_HUBA))
       ok = 0;
-#else /* !HUB */
     /* if I am a chanhub and they dont have +c then drop */
-    if (ok && (ischanhub() && u && !(u->flags & USER_CHUBA)))
+    if (ok && (!conf.bot->hub && ischanhub() && u && !(u->flags & USER_CHUBA)))
       ok = 0;
-#endif /* HUB */
 /*    else if (!(u->flags & USER_PARTY))
     ok = 0; */
     if (!ok && u && u->bot)
@@ -1871,9 +1853,8 @@ dcc_telnet_got_ident(int i, char *host)
    * about ourselves. <cybah>
    */
 /* n  ssl_link(dcc[i].sock, ACCEPT_SSL); */
-#ifdef HUB
-  dprintf(i, " \n");			/* represents hub that support new linking scheme */
-#else /* !HUB */
-  dprintf(i, "%s\n", response(RES_USERNAME));
-#endif /* HUB */
+  if (conf.bot->hub)
+    dprintf(i, " \n");			/* represents hub that support new linking scheme */
+  else
+    dprintf(i, "%s\n", response(RES_USERNAME));
 }

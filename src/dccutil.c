@@ -38,6 +38,8 @@ static int dcc_flood_thr = 3;
 void
 init_dcc()
 {
+  if (!conf.bot->hub)
+    protect_telnet = 0;
   if (max_dcc < 1)
     max_dcc = 1;
   if (dcc)

@@ -362,7 +362,7 @@ static void sort_userlist()
  */
 int write_userfile(int idx)
 {
-  if (userlist == NULL)
+  if (userlist == NULL || !conf.bot->hub)
     return 1;			/* No point in saving userfile */
 
   FILE *f = NULL;
