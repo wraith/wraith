@@ -13,8 +13,10 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
-  if (!u)
+  if (!u) {
+    putlog(LOG_CMDS, "*", "(%s!%s) !*! PASS", nick, host);
     return BIND_RET_BREAK;
+  }
   if (u->bot)
     return BIND_RET_BREAK;
   if (!par[0]) {
