@@ -20,9 +20,7 @@ typedef struct conf_bot_b {
   struct userrec *u;	/* our own user record */
   struct conf_net_b net;
   pid_t pid;              /* contains the PID for the bot (read for the pidfile) */
-#ifdef LEAF
   int localhub;         /* bot is localhub */
-#endif /* LEAF */
   char *nick;
   char *pid_file;       /* path and filename of the .pid file */
   bool hub;		/* should bot behave as a hub? */
@@ -56,15 +54,11 @@ enum {
 
 
 void spawnbot(const char *);
-#ifdef LEAF
 void spawnbots();
 int killbot(char *, int);
-#endif /* LEAF */
 void confedit() __attribute__((noreturn));
-#ifdef LEAF
 void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
-#endif /* LEAF */
 pid_t checkpid(char *, conf_bot *);
 void init_conf();
 void free_conf_bots();
