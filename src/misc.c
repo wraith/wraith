@@ -1434,11 +1434,10 @@ int updatebin (int idx, char *par, int autoi)
     system(buf);		/* run the binary, it SHOULD work from earlier tests.. */
     exit(0);
 #ifdef LEAF
-  } else {
-    if (localhub && autoi) {
-      add_hook(HOOK_SECONDLY, (Function) updatelocal);
-      return 0;
-    }
+  } else if (localhub && autoi) {
+    system(buf);
+    add_hook(HOOK_SECONDLY, (Function) updatelocal);
+    return 0;
   }
 #endif /* LEAF */
  /* this should never be reached */
