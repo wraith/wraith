@@ -41,7 +41,7 @@ enum {
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
 void nuke_server(char *);
-inline int match_my_nick(char *);
+__inline__ int match_my_nick(char *);
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr;
 #ifdef S_MSGCMDS

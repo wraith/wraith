@@ -114,7 +114,7 @@ char *maskname(int x)
  *    Logging functions
  */
 
-inline void logidx(int idx, char *format, ...)
+__inline__ void logidx(int idx, char *format, ...)
 {
   char va_out[LOGLINEMAX + 1];
   va_list va;

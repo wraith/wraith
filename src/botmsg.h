@@ -16,7 +16,7 @@
 void botnet_send_cfg(int idx, struct cfg_entry *entry);
 void botnet_send_cfg_broad(int idx, struct cfg_entry *entry);
 void putbot(char *, char *);
-inline void putallbots(char *);
+__inline__ void putallbots(char *);
 int add_note(char *, char *, char *, int, int);
 size_t simple_sprintf (char *, ...);
 void tandout_but (int, ...);

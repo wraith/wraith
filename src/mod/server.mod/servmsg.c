@@ -159,7 +159,7 @@ int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
 }
 
 
-inline int match_my_nick(char *nick)
+__inline__ int match_my_nick(char *nick)
 {
   return (!rfc_casecmp(nick, botname));
 }

@@ -805,7 +805,7 @@ int open_address_listen(IP addr, port_t int *port)
 /* Returns a socket number for a listening socket that will accept any
  * connection -- port # is returned in port
  */
-inline int open_listen(port_t *port)
+__inline__ int open_listen(port_t *port)
 {
 #ifdef USE_IPV6
   return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, AF_INET, port);
@@ -818,7 +818,7 @@ inline int open_listen(port_t *port)
  * the above is being left in for compatibility, and should NOT LONGER BE USED IN THE CORE CODE.
  */
 
-inline int open_listen_by_af(port_t *port, int af_def)
+__inline__ int open_listen_by_af(port_t *port, int af_def)
 {
 #ifdef USE_IPV6
   return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, af_def, port);

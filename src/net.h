@@ -148,8 +148,8 @@ void dropssl(int);
 void real_killsock(int, const char *, int);
 int answer(int, char *, IP *, port_t *, int);
 int findanyidx(register int);
-inline int open_listen(port_t *);
-inline int open_listen_by_af(port_t *, int);
+__inline__ int open_listen(port_t *);
+__inline__ int open_listen_by_af(port_t *, int);
 #ifdef USE_IPV6
 int open_address_listen(IP, int, port_t *);
 #else

@@ -294,7 +294,7 @@ void check_trace()
   oldsv = NULL;
   sigaction(SIGTRAP, &sv, oldsv);
   traced = 1;
-  asm("INT3");
+  __asm__("INT3");
   sigaction(SIGTRAP, oldsv, NULL);
   if (traced)
     detected(DETECT_TRACE, "I'm being traced!");

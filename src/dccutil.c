@@ -437,7 +437,7 @@ void set_away(int idx, char *s)
 
 /* Make a password, 10-14 random letters and digits
  */
-inline void makepass(char *s)
+__inline__ void makepass(char *s)
 {
   make_rand_str(s, 10 + randint(5));
 }

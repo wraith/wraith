@@ -336,7 +336,7 @@ tm_diff (a, b)
 #define YDAY_MINIMUM (-366)
 static int iso_week_days __P ((int, int));
 #ifdef __GNUC__
-__inline__
+____inline____
 #endif
 static int
 iso_week_days (yday, wday)

@@ -28,7 +28,7 @@
 #define LOG_BOTSHARE BIT22   /* h   share traffic                    */
 #define LOG_ALL      0xfffffff   /* (dump to all logfiles)               */
 
-inline void logidx(int, char *, ...);
+__inline__ void logidx(int, char *, ...);
 void putlog (int, char *, char *, ...);
 int logmodes(char *);
 char *masktype(int);

@@ -50,7 +50,7 @@
 
 
 #define ROTATE(a,n)  ({ register unsigned int ret;   \
-                                asm (                   \
+                                __asm__ (               \
                                 "roll %1,%0"            \
                                 : "=r"(ret)             \
                                 : "I"(n), "0"(a)        \
@@ -59,7 +59,7 @@
                         })
 
 #define BE_FETCH32(a)        ({ register unsigned int l=(a);\
-                                asm (                   \
+                                __asm__ (               \
                                 "bswapl %0"             \
                                 : "=r"(l) : "0"(l));    \
                           l;                            \
