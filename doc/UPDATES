@@ -38,6 +38,7 @@ This is a summary of ChangeLog basically.
 * Increased password timeout to 40 seconds and auth timeout to 80 seconds.
 * Quietly ignore/drop invalid nicks for telnet login.
 * Detect botcmds from leaf bots (hijack).
+* WHO parsing was redundant and had a ton of inner loops per line, fixed.
 
 1.2
 * No longer displaying SALTS on ./bin -v

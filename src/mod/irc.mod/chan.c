@@ -1418,11 +1418,13 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->flags = 0;		/* No flags for now */
     m->last = now;		/* Last time I saw him */
   }
-  strcpy(m->nick, nick);	/* Store the nick in list */
+  if (!m->nick[0])
+    strcpy(m->nick, nick);	/* Store the nick in list */
 
   m->hops = hops;
 
   /* Propagate hops to other channel memlists... might save us a WHO #chan */
+/* FIXME: great concept, HORRIBLE CPU USAGE 
   for (ch = chanset; ch; ch = ch->next) {
     if (ch != chan) {
       for (ml = ch->channel.member; ml && ml->nick[0]; ml = ml->next) {
@@ -1433,14 +1435,16 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
       }
     }
   }
-
+*/
 
   /* Store the userhost */
-  simple_sprintf(m->userhost, "%s@%s", user, host);
+  if (!m->userhost[0])
+    simple_sprintf(m->userhost, "%s@%s", user, host);
   simple_sprintf(userhost, "%s!%s", nick, m->userhost);
   /* Combine n!u@h */
-  m->user = NULL;		/* No handle match (yet) */
-  m->tried_getuser = 0;
+//  m->user = NULL;		/* No handle match (yet) */
+  if (!m->user)
+    m->tried_getuser = 0;
   if (match_my_nick(nick)) {	/* Is it me? */
     strcpy(botuserhost, m->userhost);	/* Yes, save my own userhost */
     m->joined = now;		/* set this to keep the whining masses happy */
@@ -1461,40 +1465,44 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (!(m->flags & (CHANVOICE | CHANOP)))
     m->flags |= STOPWHO;
 
-  if (match_my_nick(nick) && !waschanop && me_op(chan))
+  if (!waschanop && me_op(chan) && match_my_nick(nick))
     recheck_channel(chan, 1);
-  if (match_my_nick(nick) && any_ops(chan) && !me_op(chan))
+  if (!me_op(chan) && match_my_nick(nick) && any_ops(chan))
     chan->channel.do_opreq = 1;
 
-  m->user = get_user_by_host(userhost);
+  if (!m->user)
+    m->user = get_user_by_host(userhost);
   m->tried_getuser = 1;
   get_user_flagrec(m->user, &fr, chan->dname);
-  /* are they a chanop, and me too */
-      /* are they a channel or global de-op */
-  if (chan_hasop(m) && me_op(chan) && chk_deop(fr) && !match_my_nick(nick)) 
-      /* && target_priority(chan, m, 1) */
-    add_mode(chan, '-', 'o', nick);
+  
+  if (me_op(chan)) {
+    /* are they a chanop, and me too */
+        /* are they a channel or global de-op */
+    if (chan_hasop(m) && chk_deop(fr) && !match_my_nick(nick)) 
+        /* && target_priority(chan, m, 1) */
+      add_mode(chan, '-', 'o', nick);
 
-  /* if channel is enforce bans */
-  if (channel_enforcebans(chan) &&
-      /* and user matches a ban */
-      (u_match_mask(global_bans, userhost) || u_match_mask(chan->bans, userhost)) &&
-      /* and it's not me, and i'm an op */
-      !match_my_nick(nick) && me_op(chan)) {
-    /*  && target_priority(chan, m, 0) */
-    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_BANNED));
-    m->flags |= SENTKICK;
-  }
-  /* if the user is a +k */
-  else if ((chan_kick(fr) || glob_kick(fr)) &&
+    /* if channel is enforce bans */
+    if (channel_enforcebans(chan) &&
+        /* and user matches a ban */
+        (u_match_mask(global_bans, userhost) || u_match_mask(chan->bans, userhost)) &&
+        /* and it's not me, and i'm an op */
+        !match_my_nick(nick)) {
+      /*  && target_priority(chan, m, 0) */
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_BANNED));
+      m->flags |= SENTKICK;
+    }
+    /* if the user is a +k */
+    else if ((chan_kick(fr) || glob_kick(fr)) &&
            /* and it's not me :) who'd set me +k anyway, a sicko? */
            /* and if im an op */
-           !match_my_nick(nick) && me_op(chan)) {
+           !match_my_nick(nick)) {
            /* && target_priority(chan, m, 0) */
-    /* cya later! */
-    quickban(chan, userhost);
-    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_KUSER));
-    m->flags |= SENTKICK;
+      /* cya later! */
+      quickban(chan, userhost);
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_KUSER));
+      m->flags |= SENTKICK;
+    }
   }
 
   return 0;
