@@ -209,5 +209,6 @@ void link_hash(int idx, char *rand)
 
 struct enc_link enclink[] = {
   { "ghost", LINK_GHOST, ghost_link, ghost_write, ghost_read },
+  { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL },
   { NULL, 0, NULL, NULL, NULL }
 };
