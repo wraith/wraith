@@ -2,6 +2,9 @@
 #define _CHANPROG_H
 
 #ifndef MAKING_MODS
+extern struct chanset_t *chanset;
+extern char botname[];
+
 void do_chanset(struct chanset_t *, char *, int);
 void checkchans(int);
 void tell_verbose_uptime(int);

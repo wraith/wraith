@@ -6,33 +6,32 @@
 
 #define MODULE_NAME "ctcp"
 #define MAKING_CTCP
+#undef MAKING_MODS /* TEMP HACK */
 #include "ctcp.h"
-#include "src/mod/module.h"
+#include "src/common.h"
+#include "src/main.h"
+#include "src/cfg.h"
+#include "src/chanprog.h"
+#include "src/cmds.h"
+#include "src/misc.h"
 #include "src/net.h"
+#include "src/userrec.h"
+#include "src/botmsg.h"
+#include "src/tclhash.h"
+#include "src/modules.h"
 
 #ifdef LEAF
-#include "server.mod/server.h"
+//#include "server.mod/server.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/utsname.h>
 #include <pwd.h>
 #include <ctype.h>
-
-static Function *global = NULL, *server_funcs = NULL;
-#else /* !LEAF */
-static Function *global = NULL;
 #endif /* LEAF */
 
-#define CLOAK_COUNT             10 /* The number of scripts currently existing */
-#define CLOAK_PLAIN             1 /* This is your plain bitchx client behaviour */
-#define CLOAK_CRACKROCK         2
-#define CLOAK_NEONAPPLE         3
-#define CLOAK_TUNNELVISION      4
-#define CLOAK_ARGON             5
-#define CLOAK_EVOLVER           6
-#define CLOAK_PREVAIL           7
-#define CLOAK_CYPRESS           8 /* Now with full theme and customization support */
-#define CLOAK_MIRC              9
+extern int 		max_dcc;
+extern char 		kickprefix[], bankickprefix[], botrealname[], botuserhost[],
+			ctcp_reply[];
 
 int cloak_script = CLOAK_PLAIN;
 
@@ -726,37 +725,19 @@ struct cfg_entry CFG_CLOAK_SCRIPT = {
 };
 
 
-EXPORT_SCOPE char *ctcp_start();
-
-static Function ctcp_table[] =
-{
-  (Function) ctcp_start,
-  (Function) NULL,
-  (Function) NULL,
-  (Function) NULL,
-};
-
-char *ctcp_start(Function * global_funcs)
+void ctcp_init()
 {
 #ifdef LEAF
   char *p;
   struct utsname un;
-#endif /* LEAF */
-  global = global_funcs;
 
-  module_register(MODULE_NAME, ctcp_table, 1, 0);
-#ifdef LEAF
-  if (!(server_funcs = module_depend(MODULE_NAME, "server", 1, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires server module 1.0 or later.";
-  }
   egg_bzero(&un, sizeof(un));
   if (!uname(&un)) {
     strncpyz(cloak_os, un.sysname, sizeof(cloak_os));
     strncpyz(cloak_osver, un.release, sizeof(cloak_osver));
     strncpyz(cloak_host, un.nodename, sizeof(cloak_host));
   } else {
-/* shit, we have to come up with something ourselves.. */
+    /* shit, we have to come up with something ourselves.. */
     switch (random() % 2) {
     case 0:
       strcpy(cloak_os, STR("Linux"));
@@ -793,6 +774,5 @@ char *ctcp_start(Function * global_funcs)
   add_hook(HOOK_MINUTELY, (Function) ctcp_minutely);
 #endif /* LEAF */
   add_cfg(&CFG_CLOAK_SCRIPT);
-  return NULL;
 }
 

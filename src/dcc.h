@@ -24,7 +24,6 @@ struct dcc_table {
   void (*outdone) (int);
 };
 
-
 struct dcc_t {
   long sock;                    /* This should be a long to keep 64-bit
                                    machines sane                         */
@@ -208,6 +207,8 @@ struct dupwait_info {
 
 #ifndef MAKING_MODS
 
+extern struct dcc_t *dcc;
+extern int dcc_total;
 extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_BOT_NEW,
  DCC_RELAY, DCC_RELAYING, DCC_FORK_RELAY, DCC_PRE_RELAY, DCC_CHAT_PASS,
  DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,

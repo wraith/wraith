@@ -8,7 +8,6 @@
 char *channels_start();
 char *compress_start();
 char *console_start();
-char *ctcp_start();
 char *dns_start();
 #ifdef LEAF
 char *irc_start();
@@ -21,12 +20,13 @@ char *share_start();
 char *transfer_start();
 char *update_start();
 
+void ctcp_init();
+
 static void link_statics()
 {
   check_static("channels", channels_start);
   check_static("compress", compress_start);
   check_static("console", console_start);
-  check_static("ctcp", ctcp_start);
   check_static("dns", dns_start);
 #ifdef LEAF
   check_static("irc", irc_start);

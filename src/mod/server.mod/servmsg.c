@@ -246,12 +246,13 @@ static int got442(char *from, char *msg)
 static void nuke_server(char *reason)
 {
   if (serv >= 0) {
-    if (reason && (servidx > 0)) dprintf(servidx, "QUIT :%s\r\n", reason);
-    disconnect_server(1);
+    if (reason && (servidx > 0)) 
+      dprintf(servidx, "QUIT :%s\r\n", reason);
+    disconnect_server(servidx, DO_LOST);
   }
 }
 
-static char ctcp_reply[1024] = "";
+char ctcp_reply[1024] = "";
 
 static int lastmsgs[FLOOD_GLOBAL_MAX];
 static char lastmsghost[FLOOD_GLOBAL_MAX][81];
@@ -891,23 +892,22 @@ static int gotmode(char *from, char *msg)
 }
 
 
-static void disconnect_server(int dolost)
+static void disconnect_server(int idx, int dolost)
 {
-	if (server_online > 0) check_bind_event("disconnect-server");
-	server_online = 0;
-
-	if (servidx != -1 && dcc[servidx].sock >= 0 && serv == dcc[servidx].sock) {
-		killsock(dcc[servidx].sock);
-		dcc[servidx].sock = -1;
-		if (dolost) lostdcc(servidx);
-	}
-	servidx = -1;
-	serv = -1;
-	botuserhost[0] = 0;
+  server_online = 0;
+  if (dcc[idx].sock >= 0)
+    killsock(dcc[idx].sock);
+  dcc[idx].sock = (-1);
+  serv = (-1);
+  servidx = (-1);
+  botuserhost[0] = 0;
+  if (dolost)
+    lostdcc(idx);
 }
 
 static void eof_server(int idx)
 {
+
   putlog(LOG_SERV, "*", "%s %s", IRC_DISCONNECTED, dcc[idx].host);
 #ifdef S_AUTH
 {
@@ -919,13 +919,12 @@ static void eof_server(int idx)
   }
 }
 #endif /* S_AUTH */
-  disconnect_server(1);
+  disconnect_server(idx, DO_LOST);
 }
 
 static void display_server(int idx, char *buf)
 {
-  sprintf(buf, "%s  (lag: %d)", trying_server ? "conn" : "serv",
-	  server_lag);
+  sprintf(buf, "%s  (lag: %d)", trying_server ? "conn" : "serv", server_lag);
 }
 
 static void connect_server(void);
@@ -934,7 +933,7 @@ static void kill_server(int idx, void *x)
 {
   module_entry *me;
 
-  disconnect_server(0);
+  disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
   if ((me = module_find("channels", 0, 0)) && me->funcs) {
     struct chanset_t *chan;
 
@@ -947,8 +946,10 @@ static void kill_server(int idx, void *x)
 
 static void timeout_server(int idx)
 {
+
   putlog(LOG_SERV, "*", "Timeout: connect to %s", dcc[idx].host);
-  disconnect_server(1);
+
+  disconnect_server(idx, DO_LOST);
 }
 
 static void server_activity(int idx, char *msg, int len);
@@ -1170,8 +1171,7 @@ static void connect_server(void)
  
     servidx = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
     if (servidx < 0) {
-      putlog(LOG_SERV, "*",
-	     "NO MORE DCC CONNECTIONS -- Can't create server connection.");
+      putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create server connection.");
       return;
     }
 
@@ -1218,60 +1218,60 @@ static void connect_server(void)
   }
 }
 
-static void server_resolve_failure(int servidx)
+static void server_resolve_failure(int idx)
 {
   serv = -1;
   servidx = -1;
   resolvserv = 0;
-  putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[servidx].host,
-	 IRC_DNSFAILED);
-  lostdcc(servidx);
+  putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, IRC_DNSFAILED);
+  lostdcc(idx);
+
 }
 
-static void server_resolve_success(int servidx)
+static void server_resolve_success(int idx)
 {
-  int oldserv = dcc[servidx].u.dns->ibuf;
+  int oldserv = dcc[idx].u.dns->ibuf;
 #ifdef S_NODELAY
   int i = 0;
 #endif
   char s[121], pass[121];
 
   resolvserv = 0;
-  dcc[servidx].addr = dcc[servidx].u.dns->ip;
-  strcpy(pass, dcc[servidx].u.dns->cbuf);
-  changeover_dcc(servidx, &SERVER_SOCKET, 0);
+  dcc[idx].addr = dcc[idx].u.dns->ip;
+  strcpy(pass, dcc[idx].u.dns->cbuf);
+  changeover_dcc(idx, &SERVER_SOCKET, 0);
 #ifdef USE_IPV6
-  serv = open_telnet(dcc[servidx].host, dcc[servidx].port);
+  serv = open_telnet(dcc[idx].host, dcc[idx].port);
 #else
-  serv = open_telnet(iptostr(htonl(dcc[servidx].addr)), dcc[servidx].port);
+  serv = open_telnet(iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
 #endif /* USE_IPV6 */
   if (serv < 0) {
     neterror(s);
-    putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[servidx].host,
+    putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host,
 	   s);
-    lostdcc(servidx);
+    lostdcc(idx);
     servidx = -1;
     if (oldserv == curserv && !never_give_up)
       fatal("NO SERVERS WILL ACCEPT MY CONNECTION.", 0);
   } else {
-    dcc[servidx].sock = serv;
+    dcc[idx].sock = serv;
 #ifdef HAVE_SSL
-    if (!ssl_link(dcc[servidx].sock, CONNECT_SSL)) {
-      dcc[servidx].ssl = 0;
-      putlog(LOG_SERV, "*", "SSL for '%s' failed", dcc[servidx].host);
+    if (!ssl_link(dcc[idx].sock, CONNECT_SSL)) {
+      dcc[idx].ssl = 0;
+      putlog(LOG_SERV, "*", "SSL for '%s' failed", dcc[idx].host);
     } else {
-      putlog(LOG_SERV, "*", "SSL for '%s' successful", dcc[servidx].host);
-      dcc[servidx].ssl = 1;
+      putlog(LOG_SERV, "*", "SSL for '%s' successful", dcc[idx].host);
+      dcc[idx].ssl = 1;
     }
 #else
-      dcc[servidx].ssl = 0;
+      dcc[idx].ssl = 0;
 #endif /* HAVE_SSL */
 #ifdef S_NODELAY
     i = 1;
     setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(i));
 #endif /* S_NODELAY */
     /* Queue standard login */
-    dcc[servidx].timeval = now;
+    dcc[idx].timeval = now;
     SERVER_SOCKET.timeout_val = &server_timeout;
     /* Another server may have truncated it, so use the original */
     strcpy(botname, origbotname);
@@ -1280,7 +1280,7 @@ static void server_resolve_success(int servidx)
 
     if (pass[0]) dprintf(DP_MODE, "PASS %s\r\n", pass);
     dprintf(DP_MODE, "NICK %s\r\n", botname);
-    dprintf(DP_MODE, "USER %s localhost %s :%s\r\n", botuser, dcc[servidx].host, botrealname);
+    dprintf(DP_MODE, "USER %s localhost %s :%s\r\n", botuser, dcc[idx].host, botrealname);
     /* Wait for async result now */
   }
 }

@@ -7,6 +7,9 @@
 #ifndef _EGG_MOD_SERVER_SERVER_H
 #define _EGG_MOD_SERVER_SERVER_H
 
+#define DO_LOST 1
+#define NO_LOST 0
+
 #define check_bind_ctcp(a,b,c,d,e,f) check_bind_ctcpr(a,b,c,d,e,f,BT_ctcp)
 #define check_bind_ctcr(a,b,c,d,e,f) check_bind_ctcpr(a,b,c,d,e,f,BT_ctcr)
 

@@ -1209,7 +1209,7 @@ int main(int argc, char **argv)
   module_load("update"); 
   module_load("notes");
   module_load("console");
-  module_load("ctcp");
+  ctcp_init();
   module_load("compress");
   chanprog();
   clear_tmp();
