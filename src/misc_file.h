@@ -26,6 +26,7 @@ class Tempfile
     Tempfile(const char *prefix);		//constructor with file prefix
     ~Tempfile();				//destructor
 
+    bool error;					//exceptions are lame.
     FILE *f;
     char *file;
     int fd;

@@ -420,123 +420,118 @@ void check_trace(int start)
 
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
 {
-  FILE *inpFile = NULL, *outFile = NULL, *errFile = NULL;
-  char tmpFile[161] = "";
-  int x, fd;
-  int parent = getpid();
-
   if (!cmdline)
     return 0;
+
+  Tempfile *in = NULL, *out = NULL, *err = NULL;
+  int x;
+  int parent = getpid();
+
   /* Set up temp files */
-  /* always use mkstemp() when handling temp filess! -dizz */
-  sprintf(tmpFile, "%s.in-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpFile)) == -1 || (inpFile = fdopen(fd, "w+")) == NULL) {
-    if (fd != -1) {
-      unlink(tmpFile);
-      close(fd);
-    }
-    putlog(LOG_ERRORS, "*" , "exec: Couldn't open '%s': %s", tmpFile, strerror(errno));
+  in = new Tempfile("in");
+  if (!in || in->error) {
+//    putlog(LOG_ERRORS, "*" , "exec: Couldn't open '%s': %s", in->file, strerror(errno)); 
+    if (in)
+      delete in;
     return 0;
   }
-  unlink(tmpFile);
+
   if (input) {
-    if (fwrite(input, strlen(input), 1, inpFile) != 1) {
-      fclose(inpFile);
-      putlog(LOG_ERRORS, "*", "exec: Couldn't write to '%s': %s", tmpFile, strerror(errno));
+    if (fwrite(input, strlen(input), 1, in->f) != 1) {
+//      putlog(LOG_ERRORS, "*", "exec: Couldn't write to '%s': %s", in->file, strerror(errno));
+      delete in;
       return 0;
     }
-    fseek(inpFile, 0, SEEK_SET);
+    fseek(in->f, 0, SEEK_SET);
   }
-  unlink(tmpFile);
-  sprintf(tmpFile, "%s.err-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpFile)) == -1 || (errFile = fdopen(fd, "w+")) == NULL) {
-    if (fd != -1) {
-      unlink(tmpFile);
-      close(fd);
-    }
-    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpFile, strerror(errno));
+
+  err = new Tempfile("err");
+  if (!err || err->error) {
+//    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", err->file, strerror(errno));
+    delete in;
+    if (err)
+      delete err;
     return 0;
   }
-  unlink(tmpFile);
-  sprintf(tmpFile, "%s.out-XXXXXX", tempdir);
-  if ((fd = mkstemp(tmpFile)) == -1 || (outFile = fdopen(fd, "w+")) == NULL) {
-    if (fd != -1) {
-      unlink(tmpFile);
-      close(fd);
-    }
-    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", tmpFile, strerror(errno));
+
+  out = new Tempfile("out");
+  if (!out || out->error) {
+//    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", out->file, strerror(errno));
+    delete in;
+    delete err;
+    if (out)
+      delete out;
     return 0;
   }
-  unlink(tmpFile);
+
   x = fork();
   if (x == -1) {
     putlog(LOG_ERRORS, "*", "exec: fork() failed: %s", strerror(errno));
-    fclose(inpFile);
-    fclose(errFile);
-    fclose(outFile);
+    delete in;
+    delete err;
+    delete out;
     return 0;
   }
-  if (x) {
-    /* Parent: wait for the child to complete */
+
+  if (x) {		/* Parent: wait for the child to complete */
     int st = 0;
+    size_t fs = 0;
 
     waitpid(x, &st, 0);
-    /* Now read the files into the buffers */
-    fclose(inpFile);
-    fflush(outFile);
-    fflush(errFile);
+    /* child is now complete, read the files into buffers */
+    delete in;
+    fflush(out->f);
+    fflush(err->f);
     if (erroutput) {
       char *buf = NULL;
-      int fs;
 
-      fseek(errFile, 0, SEEK_END);
-      fs = ftell(errFile);
+      fseek(err->f, 0, SEEK_END);
+      fs = ftell(err->f);
       if (fs == 0) {
         (*erroutput) = NULL;
       } else {
         buf = (char *) my_calloc(1, fs + 1);
-        fseek(errFile, 0, SEEK_SET);
-        fread(buf, 1, fs, errFile);
+        fseek(err->f, 0, SEEK_SET);
+        fread(buf, 1, fs, err->f);
         buf[fs] = 0;
         (*erroutput) = buf;
       }
     }
-    fclose(errFile);
+    delete err;
     if (output) {
       char *buf = NULL;
-      int fs;
 
-      fseek(outFile, 0, SEEK_END);
-      fs = ftell(outFile);
+      fseek(out->f, 0, SEEK_END);
+      fs = ftell(out->f);
       if (fs == 0) {
         (*output) = NULL;
       } else {
         buf = (char *) my_calloc(1, fs + 1);
-        fseek(outFile, 0, SEEK_SET);
-        fread(buf, 1, fs, outFile);
+        fseek(out->f, 0, SEEK_SET);
+        fread(buf, 1, fs, out->f);
         buf[fs] = 0;
         (*output) = buf;
       }
     }
-    fclose(outFile);
+    delete out;
     return 1;
   } else {
     /* Child: make fd's and set them up as std* */
-    int ind, outd, errd;
+//    int ind, outd, errd;
     char *argv[4] = { NULL, NULL, NULL, NULL };
 
-    ind = fileno(inpFile);
-    outd = fileno(outFile);
-    errd = fileno(errFile);
-    if (dup2(ind, STDIN_FILENO) == (-1)) {
+//    ind = fileno(inpFile);
+//    outd = fileno(outFile);
+//    errd = fileno(errFile);
+    if (dup2(in->fd, STDIN_FILENO) == (-1)) {
       kill(parent, SIGCHLD);
       exit(1);
     }
-    if (dup2(outd, STDOUT_FILENO) == (-1)) {
+    if (dup2(out->fd, STDOUT_FILENO) == (-1)) {
       kill(parent, SIGCHLD);
       exit(1);
     }
-    if (dup2(errd, STDERR_FILENO) == (-1)) {
+    if (dup2(err->fd, STDERR_FILENO) == (-1)) {
       kill(parent, SIGCHLD);
       exit(1);
     }

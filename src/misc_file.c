@@ -185,12 +185,13 @@ void Tempfile::MakeTemp()
   
   fchmod(fd, S_IRUSR | S_IWUSR);
 
+  error = 0;
   return;
 
 error:
   putlog(LOG_ERRORS, "*", "Couldn't create temporary file '%s': %s", file, strerror(errno));
-  delete this;
-  fatal("Cannot create tempory file!", 0);
+  error = 1;
+//  fatal("Cannot create temporary file!", 0);
 }
 
 Tempfile::~Tempfile()
