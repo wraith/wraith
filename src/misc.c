@@ -757,6 +757,9 @@ int updatebin(int idx, char *par, int secs)
   }
 
   /* safe to run new binary.. */
+  
+  if (updating == 2) /* dont restart/kill/spawn bots, just die ! */
+    fatal("Binary updated.", 0);
 
 #ifdef LEAF
   if (secs > 0) {

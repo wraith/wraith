@@ -266,17 +266,19 @@ static void show_help()
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
   printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -n)"));
+  printf(format, STR("-u <binary>"), STR("Update binary, Automatically kill/respawn bots"));
+  printf(format, STR("-U <binary>"), STR("Update binary"));
   printf(format, "-v", "Displays bot version");
   exit(0);
 }
 
 
 #ifdef LEAF
-# define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstu:v"
+# define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
 #else /* !LEAF */
-# define PARSE_FLAGS "02Cd:De:Eg:G:hnstu:v"
+# define PARSE_FLAGS "02Cd:De:Eg:G:hnstu:U:v"
 #endif /* HUB */
-#define FLAGS_CHECKPASS "CdDeEgGhkntuv"
+#define FLAGS_CHECKPASS "CdDeEgGhkntuUv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;
@@ -347,9 +349,10 @@ static void dtx_arg(int argc, char *argv[])
           p = argv[optind];
         got_ed("d", optarg, p);
       case 'u':
+      case 'U':
         if (optarg) {
           update_bin = strdup(optarg);
-          updating++;
+          updating = i == 'u' ? 1 : 2;	/* use 2 if 'U' to not kill/spawn bots. */
           break;
         } else
           exit(0);
@@ -691,10 +694,13 @@ static void startup_checks() {
       exit(0);
     } else {
       if (update_bin)	{			/* invoked with -u bin */
-        kill(conf.bot->pid, SIGKILL);
-        unlink(conf.bot->pid_file);
-        writepid(conf.bot->pid_file, getpid());
+        if (updating != 2) {
+          kill(conf.bot->pid, SIGKILL);
+          unlink(conf.bot->pid_file);
+          writepid(conf.bot->pid_file, getpid());
+        }
         updatebin(DP_STDOUT, update_bin, 1);	/* will call restart all bots */
+        /* never reached */
       }
       spawnbots();
       if (updating)
