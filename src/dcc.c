@@ -1256,7 +1256,7 @@ dcc_telnet(int idx, char *buf, int ii)
   dcc[i].timeval = now;
   strcpy(dcc[i].nick, "*");
   dcc[i].u.other = (void *) idx;
-
+sdprintf("setting dcc[%d].u.other = %d", i, idx);
   egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
 }
 
@@ -1268,7 +1268,7 @@ static void dcc_telnet_dns_callback(void *client_data, const char *ip, char **ho
 
   if (dcc[i].type)
     idx = (int) dcc[i].u.other;
-
+sdprintf("dcc[%d].u.other = %d", i, idx);
   dcc[i].u.other = NULL;
 
   strncpyz(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
