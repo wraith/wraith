@@ -345,7 +345,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
   if (ip && strcmp(ip, "."))
     bot->ip = strdup(ip);
-  if (ip6 && strcmp(ip, "."))
+  if (ip6 && strcmp(ip6, "."))
     bot->ip6 = strdup(ip6);
 
   bot->u = NULL;

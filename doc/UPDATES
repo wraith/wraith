@@ -4,6 +4,7 @@ This is a summary of ChangeLog basically.
 
 1.Fixed cosmetic error in help:decrypt.
 2.Fixed a chmod() problem when the config was missing.
+3.Fixed config file not saving/recognizing IPV6 ip.
 
 1.1.7
 
