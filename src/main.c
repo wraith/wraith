@@ -516,7 +516,8 @@ void checkpass()
   gpasswd = 0;
 }
 
-void got_ed(char *, char *);
+void got_ed(char *, char *, char *);
+extern int optind;
 
 #ifdef LEAF
 #define PARSE_FLAGS "edntvPc"
@@ -527,7 +528,7 @@ void got_ed(char *, char *);
 static void dtx_arg(int argc, char *argv[])
 {
   int i, cpass = 0;
-  char *p = NULL;
+  char *p = NULL, *p2 = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     switch (i) {
 #ifdef LEAF
@@ -546,11 +547,17 @@ static void dtx_arg(int argc, char *argv[])
         term_z = 0;
         break;
       case 'e':
-        p = argv[optind];
-        got_ed("e", p);
+        if (argv[optind])
+          p = argv[optind];
+        if (argv[optind+1])
+          p2 = argv[optind+1];
+        got_ed("e", p, p2);
       case 'd':
-        p = argv[optind];
-        got_ed("d", p);
+        if (argv[optind])
+          p = argv[optind];
+        if (argv[optind+1])
+          p2 = argv[optind+1];
+        got_ed("d", p, p2);
       case 'v':
 	checkpass();
 	printf("%d\n", egg_numver);
@@ -886,18 +893,20 @@ void checklockfile()
     exit(1);
 }
 
-void got_ed(char *which, char *p)
+void got_ed(char *which, char *in, char *out)
 {
-  char *in = NULL, *out = NULL;
-
-  in = newsplit(&p);
-  out = newsplit(&p);
+  if (SDEBUG)
+    printf("got_Ed called: -%s i: %s o: %s\n", which, in, out);
+Context;
   if (!in || !out)
     fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
+Context;
   checkpass();
+  Context;
   check_static("blowfish", blowfish_start);
   Context;
   module_load(ENCMOD);
+  Context;
   if (!strcmp(which, "e")) {
   Context;
     EncryptFile(in, out);
@@ -1282,11 +1291,13 @@ int main(int argc, char **argv)
    fatal("Cannot chmod binary.", 0);
 
   init_settings();
+Context;
   init_tcl(argc, argv);
-
+Context;
   if (argc) {
     if (SDEBUG)
       printf("Calling dtx_arg with %d params.\n", argc);
+Context;
     dtx_arg(argc, argv);
   }
 
