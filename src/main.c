@@ -527,9 +527,7 @@ void got_ed(char *, char *);
 static void dtx_arg(int argc, char *argv[])
 {
   int i, cpass = 0;
-#ifdef LEAF
   char *p = NULL;
-#endif
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     switch (i) {
 #ifdef LEAF
