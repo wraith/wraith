@@ -46,6 +46,10 @@ typedef struct {
 #define uff_addtable ((void (*) (uff_table_t *))share_funcs[6])
 #define uff_deltable ((void (*) (uff_table_t *))share_funcs[7])
 /* 8 - 11 */
+
+void sharein(int, char *);
+void shareout(struct chanset_t *, ...);
+
 #endif				/* !MAKING_SHARE */
 
 #endif				/* _EGG_MOD_SHARE_SHARE_H */

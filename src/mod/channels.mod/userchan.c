@@ -1278,14 +1278,15 @@ static int write_chans(FILE *f, int idx)
 
      get_mode_protect(chan, w);
 
-     if (lfprintf(f, "+ channel add %s { chanmode %s addedby %s addedts %lu idle-kick %d \
-                      limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d \
-                      flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d \
-                      flood-nick %d:%d closed-ban %d ban-time %d exempt-time %d invite-time %d \
-                      %cenforcebans %cdynamicbans %cuserbans %cbitch %cprotectops %crevenge \
-                      %crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
-                      %cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cmanop %cvoice \
-                      %cfastop }\n",
+     if (lfprintf(f, "\
++ channel add %s { chanmode %s addedby %s addedts %lu idle-kick %d \
+limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d \
+flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d \
+flood-nick %d:%d closed-ban %d ban-time %d exempt-time %d invite-time %d \
+%cenforcebans %cdynamicbans %cuserbans %cbitch %cprotectops %crevenge \
+%crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
+%cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cmanop %cvoice \
+%cfastop }\n",
 	chan->dname,
 	w,
         chan->added_by,

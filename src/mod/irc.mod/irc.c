@@ -13,6 +13,7 @@
 #include "src/chanprog.h"
 #include "src/auth.h"
 #include "src/salt.h"
+#include "src/mod/share.mod/share.h"
 #include "src/mod/server.mod/server.h"
 #undef serv
 #include "src/mod/channels.mod/channels.h"

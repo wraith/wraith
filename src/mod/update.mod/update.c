@@ -213,7 +213,7 @@ static cmd_t update_bot[] = {
 };
 
 
-static void updatein_mod(int idx, char *msg)
+void updatein(int idx, char *msg)
 {
   char *code = NULL;
   int f, i;
@@ -488,7 +488,6 @@ void update_init()
 #ifdef HUB
   add_hook(HOOK_30SECONDLY, (Function) check_updates);
 #endif /* HUB */
-  add_hook(HOOK_SHAREUPDATEIN, (Function) updatein_mod);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
 }

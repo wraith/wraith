@@ -48,17 +48,10 @@
 #define HOOK_5SECONDLY           18
 #define HOOK_HALFHOURLY		 19
 #define REAL_HOOKS		 20
-/* #define HOOK_CHANFILE            17 */
-#define HOOK_SHAREOUT		105
-#define HOOK_SHAREIN		106
+
 #define HOOK_QSERV		108
 #define HOOK_ADD_MODE		109
-#define HOOK_MATCH_NOTEREJ	110
 #define HOOK_RFC_CASECMP	111
-#define HOOK_DNS_HOSTBYIP	112
-#define HOOK_DNS_IPBYHOST	113
-#define HOOK_SHAREUPDATEIN	117
-#define HOOK_STORENOTE		116
 
 /* These are FIXED once they are in a release they STAY
  */

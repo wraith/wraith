@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include "src/mod/module.h"
 #include "src/tandem.h"
+#include "src/mod/share.mod/share.h"
 #include "src/net.h"
 
 #include "src/users.h"

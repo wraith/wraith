@@ -52,8 +52,6 @@ typedef struct _dependancy {
   struct _module_entry *needed;
   struct _module_entry *needing;
   struct _dependancy *next;
-  int major;
-  int minor;
 } dependancy;
 extern dependancy *dependancy_list;
 #endif				/* _EGG_MODULE_H */

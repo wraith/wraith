@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "users.h"
+#include "src/mod/share.mod/share.h"
 #include "misc.h"
 #include "debug.h"
 #include "match.h"

@@ -105,12 +105,12 @@ static void conf_addbot(char *nick, char *ip, char *host, char *ip6) {
   if (host && host[0] == '+') {
     host++;
     bot->host6 = strdup(host);
-  } else if (host) {
+  } else if (host && strcmp(host, ".")) {
     bot->host = strdup(host);
   }
 
-  if (ip)    bot->ip = strdup(ip);
-  if (ip6)   bot->ip6 = strdup(ip6);
+  if (ip && strcmp(ip, "."))    bot->ip = strdup(ip);
+  if (ip6 && strcmp(ip, "."))   bot->ip6 = strdup(ip6);
 
   bot->u = NULL;
   bot->pid = checkpid(nick, bot);

@@ -8,7 +8,6 @@ typedef struct {
   char          *flags;
   Function      func;
   char          *funcname;
-  int           nohelp;
 } cmd_t;
 
 typedef struct {

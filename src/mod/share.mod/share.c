@@ -1196,8 +1196,7 @@ static void share_version(int idx, char *par)
   dcc[idx].status &= ~(STAT_SHARE | STAT_GETTING | STAT_SENDING |
 		       STAT_OFFERED | STAT_AGGRESSIVE);
   dcc[idx].u.bot->uff_flags = 0;
-  if (1 && //only share with same VER bots.
-      (bot_aggressive_to(dcc[idx].user))) {
+  if (bot_aggressive_to(dcc[idx].user)) {
     if (can_resync(dcc[idx].nick))
       dprintf(idx, "s r?\n");
     else
@@ -1293,7 +1292,7 @@ static botcmd_t C_share[] =
 };
 
 
-static void sharein_mod(int idx, char *msg)
+void sharein(int idx, char *msg)
 {
   char *code = NULL;
   int f, i;
@@ -1310,7 +1309,7 @@ static void sharein_mod(int idx, char *msg)
   }
 }
 
-static void shareout_mod (struct chanset_t *chan, ...)
+void shareout(struct chanset_t *chan, ...)
 {
   int i, l;
   char *format = NULL, s[601] = "";
@@ -2138,8 +2137,6 @@ char *share_start(Function *global_funcs)
     return "This module requires channels module 1.0 or later.";
   }
 #endif /* LEAF */
-  add_hook(HOOK_SHAREOUT, (Function) shareout_mod);
-  add_hook(HOOK_SHAREIN, (Function) sharein_mod);
   add_hook(HOOK_MINUTELY, (Function) check_expired_tbufs);
   add_hook(HOOK_READ_USERFILE, (Function) hook_read_userfile);
   add_hook(HOOK_SECONDLY, (Function) check_delay);

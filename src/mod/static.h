@@ -10,7 +10,7 @@ char *compress_start();
 #ifdef LEAF
 char *irc_start();
 char *server_start();
-#endif
+#endif /* LEAF */
 char *share_start();
 char *transfer_start();
 
@@ -27,7 +27,7 @@ static void link_statics()
 #ifdef LEAF
   check_static("irc", irc_start);
   check_static("server", server_start);
-#endif
+#endif /* LEAF */
   check_static("share", share_start);
   check_static("transfer", transfer_start);
 }

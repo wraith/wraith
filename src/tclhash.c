@@ -387,13 +387,13 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 
 	for (; cmds->name; cmds++) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
-                if (!strcmp(table->name, "dcc") && !(cmds->nohelp)) {
+                if (!strcmp(table->name, "dcc")) {
 		  cmdlist[cmdi].name = cmds->name;
                   cmdlist[cmdi].flags.match = FR_GLOBAL | FR_CHAN;
                   break_down_flags(cmds->flags, &(cmdlist[cmdi].flags), NULL);
                   cmdi++;
-                }
-		egg_snprintf(name, 50, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
+                } 
+		egg_snprintf(name, sizeof name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
 		bind_entry_add(table, cmds->flags, cmds->name, name, 0, cmds->func, NULL);
 	}
 }

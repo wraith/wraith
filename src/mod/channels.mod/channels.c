@@ -9,9 +9,13 @@
 #include <sys/stat.h>
 #include "src/mod/module.h"
 #include "src/mod/irc.mod/irc.h"
+#include "src/mod/share.mod/share.h"
 #include "src/chanprog.h"
 
-static Function *global = NULL, *irc_funcs = NULL;
+static Function *global = NULL;
+#ifdef LEAF
+static Function *irc_funcs = NULL;
+#endif /* LEAF */
 
 static int 			use_info;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
@@ -1001,10 +1005,12 @@ char *channels_start(Function * global_funcs)
          "-private "
 	 "-fastop ");
   module_register(MODULE_NAME, channels_table, 1, 0);
+#ifdef LEAF
   if (!(irc_funcs = module_depend(MODULE_NAME, "irc", 1, 0))) {
     module_undepend(MODULE_NAME);
     return "This module requires irc module 1.0 or later.";
   }
+#endif /* LEAF */
 
 #ifdef LEAF
   add_hook(HOOK_MINUTELY, (Function) check_limitraise);

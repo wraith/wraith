@@ -185,7 +185,7 @@
 #define flagrec_eq ((int(*)(struct flag_record*,struct flag_record *))global[66])
 #define flagrec_ok ((int(*)(struct flag_record*,struct flag_record *))global[67])
 /* 68 - 71 */
-#define shareout (*(Function *)(global[68]))
+/* UNUSED 68 */
 #define dprintf (global[69])
 #define chatout (global[70])
 #define chanout_but ((void(*)())global[71])

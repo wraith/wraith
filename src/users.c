@@ -15,6 +15,7 @@
 #include "common.h"
 #include "users.h"
 #include "rfc1459.h"
+#include "src/mod/share.mod/share.h"
 #include "dcc.h"
 #include "salt.h"
 #include "userrec.h"
@@ -1045,11 +1046,6 @@ printf("BUF: %s\n", resultbuf);
   return 1;
 }
 
-/* New methodology - cycle through list 3 times
- * 1st time scan for +sh bots and link if none connected
- * 2nd time scan for +h bots
- * 3rd time scan for +a/+h bots */
-
 void link_pref_val(struct userrec *u, char *val)
 {
 
@@ -1058,17 +1054,19 @@ void link_pref_val(struct userrec *u, char *val)
 
   val[0] = 'Z';
   val[1] = 0;
+  
   if (!u)
     return;
+
   if (!(u->flags & USER_BOT))
     return;
-  ba = get_user(&USERENTRY_BOTADDR, u);
-  if (!ba)
+  if (!(ba = get_user(&USERENTRY_BOTADDR, u))) {
     return;
-  if (!ba->hublevel)
+  }
+  if (!ba->hublevel) {
     return;
-  sprintf(val, STR("%02d%s"), ba->hublevel, u->handle);
-
+  }
+  sprintf(val, "%02d%s", ba->hublevel, u->handle);
 }
 
 /*

@@ -132,22 +132,6 @@ int false_func()
  */
 struct hook_entry *hook_list[REAL_HOOKS];
 
-static void null_share(int idx, char *x)
-{
-  if ((x[0] == 'u') && (x[1] == 'n')) {
-    putlog(LOG_BOTS, "*", "User file rejected by %s: %s",
-	   dcc[idx].nick, x + 3);
-    dcc[idx].status &= ~STAT_OFFERED;
-    if (!(dcc[idx].status & STAT_GETTING)) {
-      dcc[idx].status &= ~STAT_SHARE;
-    }
-  } else if ((x[0] != 'v') && (x[0] != 'e'))
-    dprintf(idx, "s un Not sharing userfile.\n");
-}
-
-void (*shareout) () = null_func;
-void (*sharein) (int, char *) = null_share;
-void (*shareupdatein) (int, char *) = null_share;
 void (*qserver) (int, char *, int) = (void (*)(int, char *, int)) null_func;
 void (*add_mode) () = null_func;
 int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
@@ -256,7 +240,7 @@ Function global_table[] =
   (Function) flagrec_eq,
   (Function) flagrec_ok,
   /* 68 - 71 */
-  (Function) & shareout,
+  (Function) 0,
   (Function) dprintf,
   (Function) chatout,
   (Function) chanout_but,
@@ -630,7 +614,7 @@ Function global_table[] =
 
 };
 
-static bind_table_t *BT_load;
+static bind_table_t *BT_load = NULL;
 
 void init_modules(void)
 {
@@ -640,23 +624,18 @@ void init_modules(void)
 
   module_list = calloc(1, sizeof(module_entry));
   module_list->name = strdup("eggdrop");
-  module_list->major = 100;
-  module_list->minor = 15;
   module_list->next = NULL;
   module_list->funcs = NULL;
   for (i = 0; i < REAL_HOOKS; i++)
     hook_list[i] = NULL;
 }
 
-int module_register(char *name, Function * funcs,
-		    int major, int minor)
+int module_register(char *name, Function * funcs, int major, int minor)
 {
   module_entry *p = NULL;
 
   for (p = module_list; p && p->name; p = p->next)
     if (!egg_strcasecmp(name, p->name)) {
-      p->major = major;
-      p->minor = minor;
       p->funcs = funcs;
       return 1;
     }
@@ -673,15 +652,15 @@ const char *module_load(char *name)
   sdprintf("module_load(\"%s\")", name);
 
   if (module_find(name, 0, 0) != NULL)
-    return MOD_ALREADYLOAD;
+    return "Already loaded";
+
   for (sl = static_modules; sl && egg_strcasecmp(sl->name, name); sl = sl->next);
   if (!sl)
-    return "Unknown module.";
+    fatal("Unknown module.", 0);
+
   f = (Function) sl->func;
   p = calloc(1, sizeof(module_entry));
   p->name = strdup(name);
-  p->major = 0;
-  p->minor = 0;
   p->funcs = 0;
   p->next = module_list;
   module_list = p;
@@ -701,8 +680,7 @@ module_entry *module_find(char *name, int major, int minor)
   module_entry *p;
 
   for (p = module_list; p && p->name; p = p->next) 
-    if ((major == p->major || !major) && minor <= p->minor && 
-	!egg_strcasecmp(name, p->name))
+    if (!egg_strcasecmp(name, p->name))
       return p;
   return NULL;
 }
@@ -742,8 +720,6 @@ Function *module_depend(char *name1, char *name2, int major, int minor)
   d->needed = p;
   d->needing = o;
   d->next = dependancy_list;
-  d->major = major;
-  d->minor = minor;
   dependancy_list = d;
   return p->funcs ? p->funcs : (Function *) 1;
 }
@@ -794,15 +770,6 @@ void add_hook(int hook_num, Function func)
     p->func = func;
   } else
     switch (hook_num) {
-    case HOOK_SHAREOUT:
-      shareout = (void (*)()) func;
-      break;
-    case HOOK_SHAREIN:
-      sharein = (void (*)(int, char *)) func;
-      break;
-    case HOOK_SHAREUPDATEIN:
-      shareupdatein = (void (*)(int, char *)) func;
-      break;
     case HOOK_QSERV:
       if (qserver == (void (*)(int, char *, int)) null_func)
 	qserver = (void (*)(int, char *, int)) func;
@@ -847,18 +814,6 @@ void del_hook(int hook_num, Function func)
     }
   } else
     switch (hook_num) {
-    case HOOK_SHAREOUT:
-      if (shareout == (void (*)()) func)
-	shareout = null_func;
-      break;
-    case HOOK_SHAREIN:
-      if (sharein == (void (*)(int, char *)) func)
-	sharein = null_share;
-      break;
-    case HOOK_SHAREUPDATEIN:
-      if (shareupdatein == (void (*)(int, char *)) func)
-	shareupdatein = null_share;
-      break;
     case HOOK_QSERV:
       if (qserver == (void (*)(int, char *, int)) func)
 	qserver = null_func;
@@ -896,13 +851,12 @@ void do_module_report(int idx, int details, char *which)
       dependancy *d;
 
       if (details)
-	dprintf(idx, "Module: %s, v %d.%d\n", p->name ? p->name : "CORE",
-		p->major, p->minor);
+	dprintf(idx, "Module: %s\n", p->name ? p->name : "CORE");
+
       if (details > 1) {
 	for (d = dependancy_list; d; d = d->next) 
 	  if (d->needing == p)
-	    dprintf(idx, "    requires: %s, v %d.%d\n", d->needed->name,
-		    d->major, d->minor);
+	    dprintf(idx, "    requires: %s\n", d->needed->name);
       }
       if (p->funcs) {
 	Function f = p->funcs[MODCALL_REPORT];

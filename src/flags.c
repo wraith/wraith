@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "crypt.h"
+#include "src/mod/share.mod/share.h"
 #include "rfc1459.h"
 #include "misc.h"
 #include "dccutil.h"

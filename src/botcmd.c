@@ -7,6 +7,8 @@
 
 #include "common.h"
 #include "botcmd.h"
+#include "src/mod/share.mod/share.h"
+#include "src/mod/update.mod/update.h"
 #include "net.h"
 #include "tclhash.h"
 #include "misc.h"
@@ -1258,7 +1260,7 @@ void bot_share(int idx, char *par)
 
 void bot_shareupdate(int idx, char *par)
 {
-  shareupdatein(idx, par);
+  updatein(idx, par);
 }
 
 /* v <frombot> <tobot> <idx:nick>
@@ -1277,8 +1279,8 @@ static void bot_versions(int sock, char *par)
     from = newsplit(&par);
     botnet_send_priv(sock, conf.bot->nick, from, frombot, "Modules loaded:\n");
     for (me = module_list; me; me = me->next)
-      botnet_send_priv(sock, conf.bot->nick, from, frombot, "  Module: %s (v%d.%d)\n",
-		       me->name, me->major, me->minor);
+      botnet_send_priv(sock, conf.bot->nick, from, frombot, "  Module: %s\n",
+		       me->name);
     botnet_send_priv(sock, conf.bot->nick, from, frombot, "End of module list.\n");
   }
 }

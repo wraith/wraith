@@ -54,7 +54,7 @@ extern tand_t		*tandbot;
 extern conf_t		conf;
 
 static char		 *btos(unsigned long);
-mycmds 			 cmdlist[500]; //the list of dcc cmds for help system
+mycmds 			 cmdlist[500]; /* the list of dcc cmds for help system */
 int    			 cmdi = 0;
 int         		remote_boots = 2;
 
@@ -812,8 +812,9 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   }
   if (!nowild)
     dprintf(idx, STR("Showing help topics matching '%s' for flags: (%s)\n"), match, flg);
+
   qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
-  buf[0] = 0;
+
   /* even if we have nowild, we loop to conserve code/space */
   while (!done) {
     int i = 0, end = 0, first = 1, n, hi;
@@ -4016,134 +4017,134 @@ static void cmd_quit(struct userrec *u, int idx, char *text)
  */
 cmd_t C_dcc[] =
 {
-  {"+host",		"m|m",	(Function) cmd_pls_host,	NULL,	0},
-  {"+ignore",		"m",	(Function) cmd_pls_ignore,	NULL,   0},
-  {"+user",		"m",	(Function) cmd_pls_user,	NULL,   0},
+  {"+host",		"m|m",	(Function) cmd_pls_host,	NULL},
+  {"+ignore",		"m",	(Function) cmd_pls_ignore,	NULL},
+  {"+user",		"m",	(Function) cmd_pls_user,	NULL},
 #ifdef HUB
-  {"-bot",		"a",	(Function) cmd_mns_user,	NULL,   0},
+  {"-bot",		"a",	(Function) cmd_mns_user,	NULL},
 #endif /* HUB */
-  {"-host",		"",	(Function) cmd_mns_host,	NULL,   0},
-  {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL,   0},
-  {"-user",		"m",	(Function) cmd_mns_user,	NULL,   0},
-  {"addlog",		"mo|o",	(Function) cmd_addlog,		NULL,   0},
-/*  {"putlog",		"mo|o",	(Function) cmd_addlog,		NULL,   0}, */
-  {"about",		"",	(Function) cmd_about,		NULL,   0},
-  {"away",		"",	(Function) cmd_away,		NULL,   0},
-  {"back",		"",	(Function) cmd_back,		NULL,   0},
+  {"-host",		"",	(Function) cmd_mns_host,	NULL},
+  {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL},
+  {"-user",		"m",	(Function) cmd_mns_user,	NULL},
+  {"addlog",		"mo|o",	(Function) cmd_addlog,		NULL},
+/*  {"putlog",		"mo|o",	(Function) cmd_addlog,		NULL}, */
+  {"about",		"",	(Function) cmd_about,		NULL},
+  {"away",		"",	(Function) cmd_away,		NULL},
+  {"back",		"",	(Function) cmd_back,		NULL},
 #ifdef HUB
-  {"backup",		"m|m",	(Function) cmd_backup,		NULL,   0},
-  {"boot",		"m",	(Function) cmd_boot,		NULL,   0},
-  {"botconfig",		"n",	(Function) cmd_botconfig,	NULL,   0},
-  {"botinfo",		"",	(Function) cmd_botinfo,		NULL,   0},
-  {"bots",		"m",	(Function) cmd_bots,		NULL,   0},
-  {"downbots",		"m",	(Function) cmd_downbots,	NULL,   0},
-  {"bottree",		"n",	(Function) cmd_bottree,		NULL,   0},
-  {"chaddr",		"a",	(Function) cmd_chaddr,		NULL,   0},
+  {"backup",		"m|m",	(Function) cmd_backup,		NULL},
+  {"boot",		"m",	(Function) cmd_boot,		NULL},
+  {"botconfig",		"n",	(Function) cmd_botconfig,	NULL},
+  {"botinfo",		"",	(Function) cmd_botinfo,		NULL},
+  {"bots",		"m",	(Function) cmd_bots,		NULL},
+  {"downbots",		"m",	(Function) cmd_downbots,	NULL},
+  {"bottree",		"n",	(Function) cmd_bottree,		NULL},
+  {"chaddr",		"a",	(Function) cmd_chaddr,		NULL},
 #endif /* HUB */
-  {"chat",		"",	(Function) cmd_chat,		NULL,   0},
-  {"chattr",		"m|m",	(Function) cmd_chattr,		NULL,   0},
+  {"chat",		"",	(Function) cmd_chat,		NULL},
+  {"chattr",		"m|m",	(Function) cmd_chattr,		NULL},
 #ifdef HUB
-  {"chhandle",		"m",	(Function) cmd_chhandle,	NULL,   0},
-  {"chnick",		"m",	(Function) cmd_chhandle,	NULL,	1},
-  {"chpass",		"m",	(Function) cmd_chpass,		NULL,   0},
-  {"chsecpass",		"n",	(Function) cmd_chsecpass,	NULL,   0},
+  {"chhandle",		"m",	(Function) cmd_chhandle,	NULL},
+/*  {"chnick",		"m",	(Function) cmd_chhandle,	NULL}, */
+  {"chpass",		"m",	(Function) cmd_chpass,		NULL},
+  {"chsecpass",		"n",	(Function) cmd_chsecpass,	NULL},
 #ifdef S_DCCPASS
-  {"cmdpass",           "a",    (Function) cmd_cmdpass,         NULL,   0},
+  {"cmdpass",           "a",    (Function) cmd_cmdpass,         NULL},
 #endif /* S_DCCPASS */
 #endif /* HUB */
-  {"color",		"",     (Function) cmd_color,           NULL,   0},
-  {"comment",		"m|m",	(Function) cmd_comment,		NULL,   0},
+  {"color",		"",     (Function) cmd_color,           NULL},
+  {"comment",		"m|m",	(Function) cmd_comment,		NULL},
 #ifdef HUB
-  {"config",		"n",	(Function) cmd_config,		NULL,   0},
+  {"config",		"n",	(Function) cmd_config,		NULL},
 #endif /* HUB */
-  {"console",		"-|-",	(Function) cmd_console,		NULL,   0},
-  {"date",		"",	(Function) cmd_date,		NULL,   0},
+  {"console",		"-|-",	(Function) cmd_console,		NULL},
+  {"date",		"",	(Function) cmd_date,		NULL},
 #ifdef HUB
-  {"dccstat",		"a",	(Function) cmd_dccstat,		NULL,   0},
+  {"dccstat",		"a",	(Function) cmd_dccstat,		NULL},
 #endif /* HUB */
-  {"debug",		"a",	(Function) cmd_debug,		NULL,   0},
-  {"die",		"n",	(Function) cmd_die,		NULL,   0},
-  {"echo",		"",	(Function) cmd_echo,		NULL,   0},
-  {"fixcodes",		"",	(Function) cmd_fixcodes,	NULL,   0},
-  {"handle",		"",	(Function) cmd_handle,		NULL,   0},
-  {"nohelp",		"-|-",	(Function) cmd_nohelp,		NULL, 	1},
-  {"help",		"-|-",	(Function) cmd_help,		NULL,   0},
-  {"ignores",		"m",	(Function) cmd_ignores,		NULL,   0},
+  {"debug",		"a",	(Function) cmd_debug,		NULL},
+  {"die",		"n",	(Function) cmd_die,		NULL},
+  {"echo",		"",	(Function) cmd_echo,		NULL},
+  {"fixcodes",		"",	(Function) cmd_fixcodes,	NULL},
+  {"handle",		"",	(Function) cmd_handle,		NULL},
+  {"nohelp",		"-|-",	(Function) cmd_nohelp,		NULL},
+  {"help",		"-|-",	(Function) cmd_help,		NULL},
+  {"ignores",		"m",	(Function) cmd_ignores,		NULL},
 #ifdef HUB
-  {"link",		"n",	(Function) cmd_link,		NULL,   0},
+  {"link",		"n",	(Function) cmd_link,		NULL},
 #endif /* HUB */
-  {"match",		"m|m",	(Function) cmd_match,		NULL,   0},
-  {"me",		"",	(Function) cmd_me,		NULL,   0},
-  {"motd",		"",	(Function) cmd_motd,		NULL,   0},
+  {"match",		"m|m",	(Function) cmd_match,		NULL},
+  {"me",		"",	(Function) cmd_me,		NULL},
+  {"motd",		"",	(Function) cmd_motd,		NULL},
 #ifdef HUB
-  {"newleaf",		"n",	(Function) cmd_newleaf,		NULL,   0},
-  {"nopass",		"m",	(Function) cmd_nopass,		NULL,   0},
+  {"newleaf",		"n",	(Function) cmd_newleaf,		NULL},
+  {"nopass",		"m",	(Function) cmd_nopass,		NULL},
 #endif /* HUB */
-  {"newpass",		"",	(Function) cmd_newpass,		NULL,   0},
-  {"secpass",		"",	(Function) cmd_secpass,		NULL,   0},
-  {"nick",		"",	(Function) cmd_handle,		NULL,	1},
-  {"page",		"",	(Function) cmd_page,		NULL,   0},
-  {"quit",		"",	(Function) cmd_quit,		NULL,   0},
-  {"relay",		"i",	(Function) cmd_relay,		NULL,   0},
+  {"newpass",		"",	(Function) cmd_newpass,		NULL},
+  {"secpass",		"",	(Function) cmd_secpass,		NULL},
+/*  {"nick",		"",	(Function) cmd_handle,		NULL}, */
+  {"page",		"",	(Function) cmd_page,		NULL},
+  {"quit",		"",	(Function) cmd_quit,		NULL},
+  {"relay",		"i",	(Function) cmd_relay,		NULL},
 #ifdef HUB
-  {"reload",		"m|m",	(Function) cmd_reload,		NULL,   0},
+  {"reload",		"m|m",	(Function) cmd_reload,		NULL},
 #endif /* HUB */
-  {"restart",		"m",	(Function) cmd_restart,		NULL,   0},
+  {"restart",		"m",	(Function) cmd_restart,		NULL},
 #ifdef HUB
-  {"save",		"m|m",	(Function) cmd_save,		NULL,   0},
+  {"save",		"m|m",	(Function) cmd_save,		NULL},
 #endif /* HUB */
-  {"simul",		"a",	(Function) cmd_simul,		NULL,   0},
-  {"status",		"m|m",	(Function) cmd_status,		NULL,   0},
-  {"strip",		"",	(Function) cmd_strip,		NULL,   0},
-  {"su",		"a",	(Function) cmd_su,		NULL,   0},
+  {"simul",		"a",	(Function) cmd_simul,		NULL},
+  {"status",		"m|m",	(Function) cmd_status,		NULL},
+  {"strip",		"",	(Function) cmd_strip,		NULL},
+  {"su",		"a",	(Function) cmd_su,		NULL},
 #ifdef HUB
-  {"trace",		"n",	(Function) cmd_trace,		NULL,   0},
+  {"trace",		"n",	(Function) cmd_trace,		NULL},
 #endif /* HUB */
-  {"traffic",		"m",	(Function) cmd_traffic,		NULL,   0},
-  {"unlink",		"m",	(Function) cmd_unlink,		NULL,   0},
-  {"update",		"a",	(Function) cmd_update,		NULL,   0},
+  {"traffic",		"m",	(Function) cmd_traffic,		NULL},
+  {"unlink",		"m",	(Function) cmd_unlink,		NULL},
+  {"update",		"a",	(Function) cmd_update,		NULL},
 #ifdef HUB
-  {"netcrontab",	"a",	(Function) cmd_netcrontab,	NULL,   0},
+  {"netcrontab",	"a",	(Function) cmd_netcrontab,	NULL},
 #endif /* HUB */
-  {"uptime",		"m|m",	(Function) cmd_uptime,		NULL,   0},
-  {"crontab",		"a",	(Function) cmd_crontab,		NULL,   0},
+  {"uptime",		"m|m",	(Function) cmd_uptime,		NULL},
+  {"crontab",		"a",	(Function) cmd_crontab,		NULL},
 #ifdef HUB
-  {"vbottree",		"n",	(Function) cmd_vbottree,	NULL,   0},
-  {"who",		"n",	(Function) cmd_who,		NULL,   0},
+  {"vbottree",		"n",	(Function) cmd_vbottree,	NULL},
+  {"who",		"n",	(Function) cmd_who,		NULL},
 #endif /* HUB */
-  {"whois",		"",	(Function) cmd_whois,		NULL,   0},
-  {"whom",		"",	(Function) cmd_whom,		NULL,   0},
-  {"whoami",		"",	(Function) cmd_whoami,		NULL,   0},
-  {"botjump",           "m",    (Function) cmd_botjump,         NULL,   0},
-  {"botmsg",		"o",    (Function) cmd_botmsg,          NULL,   0},
-  {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL,   0},
-  {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL,   0},
-  {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL,   0},
+  {"whois",		"",	(Function) cmd_whois,		NULL},
+  {"whom",		"",	(Function) cmd_whom,		NULL},
+  {"whoami",		"",	(Function) cmd_whoami,		NULL},
+  {"botjump",           "m",    (Function) cmd_botjump,         NULL},
+  {"botmsg",		"o",    (Function) cmd_botmsg,          NULL},
+  {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL},
+  {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL},
+  {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL},
 #ifdef HUB
-  {"netw", 		"n", 	(Function) cmd_netw, 		NULL,   0},
-  {"netps", 		"n", 	(Function) cmd_netps, 		NULL,   0},
-  {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL,   0},
-  {"netlag", 		"m", 	(Function) cmd_netlag, 		NULL,   0},
+  {"netw", 		"n", 	(Function) cmd_netw, 		NULL},
+  {"netps", 		"n", 	(Function) cmd_netps, 		NULL},
+  {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL},
+  {"netlag", 		"m", 	(Function) cmd_netlag, 		NULL},
 #endif /* HUB */
-  {"botserver",		"m",	(Function) cmd_botserver,	NULL,   0},
-  {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL,   0},
+  {"botserver",		"m",	(Function) cmd_botserver,	NULL},
+  {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL},
 #ifdef HUB
-  {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL,   0},
-  {"netversion", 	"o", 	(Function) cmd_netversion, 	NULL,   0},
+  {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL},
+  {"netversion", 	"o", 	(Function) cmd_netversion, 	NULL},
 #endif /* HUB */
-  {"userlist", 		"m", 	(Function) cmd_userlist, 	NULL,   0},
-  {"ps", 		"n", 	(Function) cmd_ps, 		NULL,   0},
-  {"last", 		"n", 	(Function) cmd_last, 		NULL,   0},
-  {"exec", 		"a", 	(Function) cmd_exec, 		NULL,   0},
-  {"w", 		"n", 	(Function) cmd_w, 		NULL,   0},
-  {"channels", 		"", 	(Function) cmd_channels, 	NULL,   0},
-  {"randstring", 	"", 	(Function) cmd_randstring, 	NULL,   0},
+  {"userlist", 		"m", 	(Function) cmd_userlist, 	NULL},
+  {"ps", 		"n", 	(Function) cmd_ps, 		NULL},
+  {"last", 		"n", 	(Function) cmd_last, 		NULL},
+  {"exec", 		"a", 	(Function) cmd_exec, 		NULL},
+  {"w", 		"n", 	(Function) cmd_w, 		NULL},
+  {"channels", 		"", 	(Function) cmd_channels, 	NULL},
+  {"randstring", 	"", 	(Function) cmd_randstring, 	NULL},
 #ifdef HUB
-  {"botcmd",		"i",	(Function) cmd_botcmd, 		NULL,   0},
-  {"bc",		"i",	(Function) cmd_botcmd, 		NULL,   0},
-  {"hublevel", 		"a", 	(Function) cmd_hublevel, 	NULL,   0},
-  {"lagged", 		"m", 	(Function) cmd_lagged, 		NULL,   0},
-  {"uplink", 		"a", 	(Function) cmd_uplink, 		NULL,   0},
+  {"botcmd",		"i",	(Function) cmd_botcmd, 		NULL},
+  {"bc",		"i",	(Function) cmd_botcmd, 		NULL},
+  {"hublevel", 		"a", 	(Function) cmd_hublevel, 	NULL},
+  {"lagged", 		"m", 	(Function) cmd_lagged, 		NULL},
+  {"uplink", 		"a", 	(Function) cmd_uplink, 		NULL},
 #endif /* HUB */
-  {NULL,		NULL,	NULL,				NULL,   0}
+  {NULL,		NULL,	NULL,				NULL}
 };

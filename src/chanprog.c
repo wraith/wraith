@@ -571,7 +571,7 @@ void chanprog()
     bi->telnet_port = bi->relay_port = 3333;
 #ifdef HUB
     bi->hublevel = 99;
-#else
+#else /* !HUB */
     bi->hublevel = 0;
 #endif /* HUB */
     bi->uplink = calloc(1, 1);
