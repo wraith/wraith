@@ -11,7 +11,6 @@
 #define ERR_WRONGBINDIR 4
 #define ERR_TMPSTAT     6
 #define ERR_TMPMOD      9
-#define ERR_NOCONF      10
 #define ERR_WRONGUID    12
 #define ERR_WRONGUNAME  13
 #define ERR_BADCONF     14
@@ -42,7 +41,6 @@ int clear_tmp();
 char *homedir();
 char *my_username();
 char *my_uname();
-char *confdir();
 #ifndef CYGWIN_HACKS 
 char *move_bin(const char *, const char *, bool);
 #endif /* !CYGWIN_HACKS */

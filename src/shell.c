@@ -25,9 +25,7 @@
 #include "bg.h"
 #include "stat.h"
 #include "users.h"
-#ifdef LEAF
 #include "src/mod/server.mod/server.h"
-#endif /* LEAF */
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -104,7 +102,6 @@ int clear_tmp()
   return 0;
 }
 
-#ifdef LEAF
 void check_maxfiles()
 {
   int sock = -1, sock1 = -1 , bogus = 0, failed_close = 0;
@@ -149,7 +146,6 @@ void check_mypid()
   if (pid && (pid != getpid()))
     fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 0);
 }
-#endif /* LEAF */
 
 
 #ifndef CYGWIN_HACKS
@@ -597,9 +593,8 @@ void detected(int code, char *msg)
     putlog(LOG_WARN, "*", "Dying: %s", msg);
     sprintf(tmp, "Dying: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
-#ifdef LEAF
-    nuke_server("BBL");
-#endif /* LEAF */
+    if (!conf.bot->hub)
+      nuke_server("BBL");
     sleep(1);
     fatal(msg, 0);
     break;
@@ -607,16 +602,15 @@ void detected(int code, char *msg)
     putlog(LOG_WARN, "*", "Comitting suicide: %s", msg);
     sprintf(tmp, "Suicide: %s", msg);
     set_user(&USERENTRY_COMMENT, u, tmp);
-#ifdef LEAF
-    nuke_server("HARAKIRI!!");
-#endif /* LEAF */
-    sleep(1);
+    if (!conf.bot->hub) {
+      nuke_server("HARAKIRI!!");
+      sleep(1);
+    } else {
+      unlink(userfile);
+      sprintf(tmp, "%s~", userfile);
+      unlink(tmp);
+    }
     unlink(binname);
-#ifdef HUB
-    unlink(userfile);
-    sprintf(tmp, "%s~", userfile);
-    unlink(tmp);
-#endif /* HUB */
     fatal(msg, 0);
     break;
   }
@@ -636,23 +630,9 @@ char *werr_tostr(int errnum)
   case ERR_WRONGBINDIR:
     return "Wrong directory/binary name";
   case ERR_TMPSTAT:
-#ifdef LEAF
-    return STR("Cannot access tmp directory (~/.ssh/.../)");
-#else
-    return STR("Cannot access tmp directory (./tmp/)");
-#endif /* LEAF */
+    return STR("Cannot access tmp directory.");
   case ERR_TMPMOD:
-#ifdef LEAF
-    return STR("Cannot chmod() tmp directory (~/.ssh/.../)");
-#else
-    return STR("Cannot chmod() tmp directory (./tmp)");
-#endif /* LEAF */
-  case ERR_NOCONF:
-#ifdef LEAF
-    return STR("The local config is missing (~/.ssh/.known_hosts)");
-#else
-    return STR("The local config is missing (./conf)");
-#endif /* LEAF */
+    return STR("Cannot chmod() tmp directory.");
   case ERR_WRONGUID:
     return STR("UID in binary does not match geteuid()");
   case ERR_WRONGUNAME:
@@ -844,24 +824,6 @@ char *my_username()
   return username;
 }
 
-char *confdir()
-{
-  static char confdir_buf[DIRMAX] = "";
-
-  if (!confdir_buf || (confdir_buf && !confdir_buf[0])) {
-#ifdef LEAF
-    egg_snprintf(confdir_buf, sizeof confdir_buf, "%s/.ssh", homedir());
-#endif /* LEAF */
-#ifdef HUB
-    egg_snprintf(confdir_buf, sizeof confdir_buf, "%s", dirname(binname));
-#endif /* HUB */
-#ifdef CYGWIN_HACKS
-    egg_snprintf(confdir_buf, sizeof confdir_buf, "%s", homedir());
-#endif /* CYGWIN_HACKS */
-  }
-  return confdir_buf;
-}
-
 void fix_tilde(char **binptr)
 {
   char *binpath = binptr ? *binptr : NULL;
@@ -964,10 +926,8 @@ void check_crontab()
 {
   int i = 0;
 
-#ifdef LEAF
-  if (!conf.bot->localhub)
+  if (!conf.bot->hub && !conf.bot->localhub)
     fatal("something is wrong.", 0);
-#endif /* LEAF */
   if (!(i = crontab_exists())) {
     crontab_create(5);
     if (!(i = crontab_exists()))

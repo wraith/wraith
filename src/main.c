@@ -538,18 +538,6 @@ static void core_halfhourly()
 
 static void check_tempdir()
 {
-  char *_confdir = confdir();
-
-  if (_confdir && !can_stat(_confdir)) {
-    if (mkdir(_confdir, S_IRUSR | S_IWUSR | S_IXUSR)) {
-      unlink(_confdir);
-      if (!can_stat(_confdir))
-        mkdir(_confdir, S_IRUSR | S_IWUSR | S_IXUSR);
-    }
-  }
-
-  fixmod(_confdir);
-
   if (!can_stat(tempdir)) {
     if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(tempdir);
@@ -583,7 +571,7 @@ static void startup_checks(int hack) {
   check_tempdir();
 
 #ifdef CYGWIN_HACKS
-  egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
+  egg_snprintf(cfile, sizeof cfile, STR("./conf.txt"));
 
   if (can_stat(cfile))
     readconf(cfile, 0);	/* will read into &conf struct */
@@ -684,6 +672,9 @@ printf("out: %s\n", out);
     fatal("!! Invalid binary", 0);
   }
 
+  /* setup initial tempdir */
+  egg_snprintf(tempdir, sizeof(tempdir), "./");
+
   binname = getfullbinname(argv[0]);
 
   /* This allows -2/-0 to be used without an initialized binary */
@@ -718,7 +709,7 @@ printf("out: %s\n", out);
   lastmin = nowtm.tm_min;
 
 #ifdef CYGWIN_HACKS
-  egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+  egg_snprintf(tempdir, sizeof tempdir, "./tmp/");
 #endif /* CYGWIN_HACKS */
   clear_tmp();		/* clear out the tmp dir, no matter if we are localhub or not */
 
@@ -738,9 +729,9 @@ printf("out: %s\n", out);
   startup_checks(0);
 
   if (conf.bot->hub)
-    egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", confdir());
+    egg_snprintf(tempdir, sizeof tempdir, "%s/tmp/", conf.binpath);
   else
-    egg_snprintf(tempdir, sizeof tempdir, "%s/.../", confdir());
+    egg_snprintf(tempdir, sizeof tempdir, "%s/.ssh/.../", conf.homedir);
 
   if ((conf.bot->localhub && !updating) || !conf.bot->localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
