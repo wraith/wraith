@@ -64,8 +64,7 @@ void check_static(char *name, char *(*func) ())
 {
   struct static_list *p = malloc(sizeof(struct static_list));
 
-  p->name = malloc(strlen(name) + 1);
-  strcpy(p->name, name);
+  p->name = strdup(name);
   p->func = func;
   p->next = static_modules;
   static_modules = p;
@@ -623,8 +622,7 @@ void init_modules(void)
   BT_load = bind_table_add("load", 1, "s", MATCH_MASK, 0);
 
   module_list = malloc(sizeof(module_entry));
-  module_list->name = malloc(8);
-  strcpy(module_list->name, "eggdrop");
+  module_list->name = strdup("eggdrop");
   module_list->major = (egg_numver) / 10000;
   module_list->minor = ((egg_numver) / 100) % 100;
   module_list->next = NULL;
@@ -666,8 +664,7 @@ const char *module_load(char *name)
   p = malloc(sizeof(module_entry));
   if (p == NULL)
     return "Malloc error";
-  p->name = malloc(strlen(name) + 1);
-  strcpy(p->name, name);
+  p->name = strdup(name);
   p->major = 0;
   p->minor = 0;
   p->funcs = 0;
@@ -706,8 +703,7 @@ static int module_rename(char *name, char *newname)
   for (p = module_list; p && p->name; p = p->next)
     if (!egg_strcasecmp(name, p->name)) {
       free(p->name);
-      p->name = malloc(strlen(newname) + 1);
-      strcpy(p->name, newname);
+      p->name = strdup(newname);
       return 1;
     }
   return 0;

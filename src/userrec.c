@@ -686,8 +686,7 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
       free(li->lastonplace);
     li->laston = timeval;
     if (where) {
-      li->lastonplace = malloc(strlen(where) + 1);
-      strcpy(li->lastonplace, where);
+      li->lastonplace = strdup(where);
     } else
       li->lastonplace = NULL;
     set_user(&USERENTRY_LASTON, u, li);

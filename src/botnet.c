@@ -142,8 +142,7 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock,
 	party[i].flag = flag;
 	if (party[i].from)
 	  free(party[i].from);
-	party[i].from = malloc(strlen(from) + 1);
-	strcpy(party[i].from, from);
+        party[i].from = strdup(from);
       }
       *idx = i;
       return oldchan;
@@ -167,12 +166,10 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock,
     if (flag == ' ')
       flag = '-';
     party[parties].flag = flag;
-    party[parties].from = malloc(strlen(from) + 1);
-    strcpy(party[parties].from, from);
+    party[parties].from = strdup(from);
   } else {
     party[parties].flag = ' ';
-    party[parties].from = malloc(10);
-    strcpy(party[parties].from, "(unknown)");
+    party[parties].from = strdup("(unknown)");
   }
   *idx = parties;
   parties++;
@@ -270,8 +267,7 @@ void partyaway(char *bot, int sock, char *msg)
       if (party[i].away)
 	free(party[i].away);
       if (msg[0]) {
-	party[i].away = malloc(strlen(msg) + 1);
-	strcpy(party[i].away, msg);
+        party[i].away = strdup(msg);
       } else
 	party[i].away = 0;
     }

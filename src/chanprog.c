@@ -454,8 +454,7 @@ void load_internal_users()
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
 	  bi = malloc(sizeof(struct bot_addr));
-	  bi->address = malloc(strlen(ip) + 1);
-	  strcpy(bi->address, ip);
+          bi->address = strdup(ip);
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
           bi->hublevel = hublevel;
@@ -584,8 +583,7 @@ void chanprog()
     u = get_user_by_handle(userlist, botnetnick);
     bi = malloc(sizeof(struct bot_addr));
 
-    bi->address = malloc(strlen(myip) + 1);
-    strcpy(bi->address, myip);
+    bi->address = strdup(myip);
     bi->telnet_port = atoi(buf) ? atoi(buf) : 3333;
     bi->relay_port = bi->telnet_port;
 #ifdef HUB

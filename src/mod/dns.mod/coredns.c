@@ -842,8 +842,7 @@ static void parserespacket(u_8bit_t *s, int l)
 				return;
 			    }
 			    if (!rp->hostn) {
-				rp->hostn = (char *)malloc(strlen(namestring) + 1);
-				strcpy(rp->hostn, namestring);
+                                rp->hostn = strdup(namestring);
 				linkresolvehost(rp);
 				passrp(rp, ttl, T_PTR);
 				return;
@@ -1044,8 +1043,7 @@ static void dns_forward(char *hostn)
     rp = allocresolve();
     rp->state = STATE_AREQ;
     rp->sends = 1;
-    rp->hostn = (char *)malloc(strlen(hostn) + 1);
-    strcpy(rp->hostn, hostn);
+    rp->hostn = strdup(hostn);
     linkresolvehost(rp);
     sendrequest(rp, T_A);
 }

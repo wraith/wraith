@@ -248,8 +248,7 @@ void queue_op(struct chanset_t *chan, char *op) {
   memberlist *m;
   for (n = 0; n < 20; n++) {
     if (!chan->opqueue[n].target) {
-      chan->opqueue[n].target = malloc(strlen(op) + 1);
-      strcpy(chan->opqueue[n].target, op);
+      chan->opqueue[n].target = strdup(op);
       m = ismember(chan, op);
       if (m)
         m->flags |= SENTOP;
@@ -265,8 +264,7 @@ void queue_deop(struct chanset_t *chan, char *op) {
   memberlist *m;
   for (n = 0; n<20; n++) {
     if (!chan->deopqueue[n].target) {
-      chan->deopqueue[n].target = malloc(strlen(op)+1);
-      strcpy(chan->deopqueue[n].target, op);
+      chan->deopqueue[n].target = strdup(op);
       m = ismember(chan, op);
       if (m)
         m->flags |= SENTDEOP;
@@ -403,17 +401,13 @@ static void real_add_mode(struct chanset_t *chan,
   else if (plus == '+' && mode == 'k') {
     if (chan->key)
       free(chan->key);
-    chan->key = (char *) malloc(strlen(op) + 1);
-    if (chan->key)
-      strcpy(chan->key, op);
+    chan->key = strdup(op);
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
     if (chan->rmkey)
       free(chan->rmkey);
-    chan->rmkey = (char *) malloc(strlen(op) + 1);
-    if (chan->rmkey)
-      strcpy(chan->rmkey, op);
+    chan->rmkey = strdup(op);
   }
   /* +l ? store limit */
   else if (plus == '+' && mode == 'l')
@@ -695,17 +689,13 @@ static void real_add_mode(struct chanset_t *chan,
   else if (plus == '+' && mode == 'k') {
     if (chan->key)
       free(chan->key);
-    chan->key = (char *) malloc(strlen(op) + 1);
-    if (chan->key)
-      strcpy(chan->key, op);
+    chan->key = strdup(op);
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
     if (chan->rmkey)
       free(chan->rmkey);
-    chan->rmkey = (char *) malloc(strlen(op) + 1);
-    if (chan->rmkey)
-      strcpy(chan->rmkey, op);
+    chan->rmkey = strdup(op);
   }
   /* +l ? store limit */
   else if (plus == '+' && mode == 'l')

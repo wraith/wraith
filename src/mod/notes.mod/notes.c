@@ -754,8 +754,7 @@ int get_note_ignores(struct userrec *u, char ***ignores)
     return 0;
 
   rmspace(xk->data);
-  buf = malloc(strlen(xk->data) + 1);
-  strcpy(buf, xk->data);
+  buf = strdup(xk->data);
   p = buf;
 
   /* Split up the string into small parts */
@@ -801,10 +800,8 @@ int add_note_ignore(struct userrec *u, char *mask)
     if (!ue)
       return 0;
     mxk->next = 0;
-    mxk->data = malloc(strlen(mask) + 1);
-    strcpy(mxk->data, mask);
-    mxk->key = malloc(strlen(NOTES_IGNKEY) + 1);
-    strcpy(mxk->key, NOTES_IGNKEY);
+    mxk->data = strdup(mask);
+    mxk->key = strdup(NOTES_IGNKEY);
     xtra_set(u, ue, mxk);
   } else { /* ... else, we already have other entries. */
     xk->data = realloc(xk->data, strlen(xk->data) + strlen(mask) + 2);

@@ -170,8 +170,7 @@ static char *replace_spaces(char *fn)
 {
   register char *ret, *p;
 
-  p = ret = malloc(strlen(fn) + 1);
-  strcpy(ret, fn);
+  p = ret = strdup(fn);
   while ((p = strchr(p, ' ')) != NULL)
     *p = '_';
   return ret;
@@ -210,10 +209,8 @@ static void queue_file(char *dir, char *file, char *from, char *to)
 
   fileq = (fileq_t *) malloc(sizeof(fileq_t));
   fileq->next = q;
-  fileq->dir = (char *) malloc(strlen(dir) + 1);
-  fileq->file = (char *) malloc(strlen(file) + 1);
-  strcpy(fileq->dir, dir);
-  strcpy(fileq->file, file);
+  fileq->dir = strdup(dir);
+  fileq->file = strdup(file);
   strcpy(fileq->nick, from);
   strcpy(fileq->to, to);
 }
@@ -303,8 +300,7 @@ static void send_next_file(char *to)
       return;
     }
   } else {
-    s1 = malloc(strlen(s) + 1);
-    strcpy(s1, s);
+    s1 = strdup(s);
   }
   if (this->dir[0] == '*') {
     s = realloc(s, strlen(&this->dir[1]) + strlen(this->file) + 2);

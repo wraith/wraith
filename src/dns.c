@@ -154,8 +154,7 @@ void dcc_dnsipbyhost(char *hostn)
 
   de->type = &DNS_DCCEVENT_IPBYHOST;
   de->lookup = RES_IPBYHOST;
-  de->res_data.hostname = malloc(strlen(hostn) + 1);
-  strcpy(de->res_data.hostname, hostn);
+  de->res_data.hostname = strdup(hostn);
 
   /* Send request. */
   dns_ipbyhost(hostn);

@@ -75,8 +75,7 @@ char *makehash(struct userrec *u, char *rand)
 {
   char hash[256], *secpass = NULL;
   if (get_user(&USERENTRY_SECPASS, u)) {
-    secpass = malloc(strlen(get_user(&USERENTRY_SECPASS, u)) + 1);
-    strcpy(secpass, (char *) get_user(&USERENTRY_SECPASS, u));
+    secpass = strdup(get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
   sprintf(hash, "%s%s%s", rand, (secpass && secpass[0]) ? secpass : "" , (authkey && authkey[0]) ? authkey : "");

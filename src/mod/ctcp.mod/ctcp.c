@@ -53,10 +53,8 @@ char autoaway[100];
 
 char *strtolower(char *s)
 {
-  char *p,
-    *p2 = malloc(strlen(s) + 1);
+  char *p, *p2 = strdup(s); 
 
-  strcpy(p2, s);
   p = p2;
   while (*p) {
     *p = tolower(*p);

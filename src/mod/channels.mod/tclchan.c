@@ -1044,8 +1044,7 @@ static int tcl_renudef STDVAR
   for (ul = udef; ul; ul = ul->next) {
     if (ul->type == type && !egg_strcasecmp(ul->name, argv[2])) {
       free(ul->name);
-      ul->name = malloc(strlen(argv[3]) + 1);
-      strcpy(ul->name, argv[3]);
+      ul->name = strdup(argv[3]);
       found = 1;
     }
   }

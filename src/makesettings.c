@@ -397,8 +397,7 @@ int checkconfig()
 char *pscloak (int n)
 {
   int i = 0;
-  char *ps = malloc(strlen(cfg.pscloak) + 1), *p = NULL;
-  strcpy(ps, cfg.pscloak);
+  char *ps = strdup(cfg.pscloak), *p = NULL;
 
   for (i = 0; i < n; i++)
     p = newsplit(&ps);

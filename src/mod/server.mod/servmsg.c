@@ -200,11 +200,9 @@ static int got001(char *from, char *msg)
       x->realname = NULL;
       if (x->name)
 	free(x->name);
-      x->name = malloc(strlen(from) + 1);
-      strcpy(x->name, from);
+      x->name = strdup(from);
     } else {
-      x->realname = malloc(strlen(from) + 1);
-      strcpy(x->realname, from);
+      x->realname = strdup(from);
     }
   }
   return 0;

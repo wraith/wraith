@@ -215,8 +215,7 @@ void getin_request(char *botnick, char *code, char *par)
     if (ip4[0]) {
       char *tmp2;
 
-      tmp = malloc(strlen(host) + 1);
-      strcpy(tmp, host);
+      tmp = strdup(host);
       tmp2 = strtok(tmp, "@");
       egg_snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2, "@") ,ip4);
       free(tmp);
@@ -227,8 +226,7 @@ void getin_request(char *botnick, char *code, char *par)
     if (ip6[0]) {
       char *tmp2;
 
-      tmp = malloc(strlen(host) + 1);
-      strcpy(tmp, host);
+      tmp = strdup(host);
       tmp2 = strtok(tmp, "@");
       egg_snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2, "@") ,ip6);
       free(tmp);
@@ -832,8 +830,7 @@ static void my_setkey(struct chanset_t *chan, char *k)
     chan->channel.key[0] = 0;
     return;
   }
-  chan->channel.key = (char *) malloc(strlen(k) + 1);
-  strcpy(chan->channel.key, k);
+  chan->channel.key = strdup(k);
 }
 
 /* Adds a ban, exempt or invite mask to the list
@@ -850,10 +847,8 @@ static void newmask(masklist *m, char *s, char *who)
   m->next->mask = (char *) malloc(1);
   m->next->mask[0] = 0;
   free(m->mask);
-  m->mask = (char *) malloc(strlen(s) + 1);
-  strcpy(m->mask, s);
-  m->who = (char *) malloc(strlen(who) + 1);
-  strcpy(m->who, who);
+  m->mask = strdup(s);
+  m->who = strdup(who);
   m->timer = now;
 }
 

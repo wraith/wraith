@@ -125,12 +125,9 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
   p->expire = expire_time;
   p->added = now;
   p->flags = expire_time ? 0 : IGREC_PERM;
-  p->igmask = malloc(strlen(ign) + 1);
-  strcpy(p->igmask, ign);
-  p->user = malloc(strlen(from) + 1);
-  strcpy(p->user, from);
-  p->msg = malloc(strlen(mnote) + 1);
-  strcpy(p->msg, mnote);
+  p->igmask = strdup(ign);
+  p->user = strdup(from);
+  p->msg = strdup(mnote);
   if (!noshare) {
     char *mask = str_escape(ign, ':', '\\');
 
@@ -230,12 +227,9 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
   p->added = added;
   p->lastactive = last;
   p->flags = flags;
-  p->mask = malloc(strlen(mask) + 1);
-  strcpy(p->mask, mask);
-  p->user = malloc(strlen(from) + 1);
-  strcpy(p->user, from);
-  p->desc = malloc(strlen(note) + 1);
-  strcpy(p->desc, note);
+  p->mask = strdup(mask);
+  p->user = strdup(from);
+  p->desc = strdup(note);
 }
 
 static void restore_chanban(struct chanset_t *chan, char *host)
@@ -437,13 +431,10 @@ static void restore_ignore(char *host)
       p->expire = atoi(expi);
       p->added = atoi(added);
       p->flags = flags;
-      p->igmask = malloc(strlen(host) + 1);
-      strcpy(p->igmask, host);
-      p->user = malloc(strlen(user) + 1);
-      strcpy(p->user, user);
+      p->igmask = strdup(host);
+      p->user = strdup(user);
       if (desc) {
-	p->msg = malloc(strlen(desc) + 1);
-	strcpy(p->msg, desc);
+        p->msg = strdup(desc);
       } else
 	p->msg = NULL;
       return;
@@ -809,8 +800,7 @@ int readuserfile(char *file, struct userrec **ret)
 		cr->flags = fr.chan;
 		cr->flags_udef = fr.udef_chan;
 		if (s[0]) {
-		  cr->info = (char *) malloc(strlen(s) + 1);
-		  strcpy(cr->info, s);
+                  cr->info = strdup(s);
 		} else
 		  cr->info = NULL;
 	      }
@@ -915,8 +905,7 @@ int readuserfile(char *file, struct userrec **ret)
 		list = malloc(sizeof(struct list_type));
 
 		list->next = NULL;
-		list->extra = malloc(strlen(s) + 1);
-		strcpy(list->extra, s);
+                list->extra = strdup(s);
 		list_append((&ue->u.list), list);
 		ok = 1;
 	      }
@@ -929,8 +918,7 @@ int readuserfile(char *file, struct userrec **ret)
 	      ue->u.list = malloc(sizeof(struct list_type));
 
 	      ue->u.list->next = NULL;
-	      ue->u.list->extra = malloc(strlen(s) + 1);
-	      strcpy(ue->u.list->extra, s);
+              ue->u.list->extra = strdup(s);
 	      list_insert((&u->entries), ue);
 	    }
 	  }

@@ -42,8 +42,7 @@ static void setudef(struct udef_struct *us, char *name, int value)
     }
 
   ul = malloc(sizeof(struct udef_chans));
-  ul->chan = malloc(strlen(name) + 1);
-  strcpy(ul->chan, name);
+  ul->chan = strdup(name);
   ul->value = value;
   ul->next = NULL;
   if (ul_last)
@@ -69,8 +68,7 @@ static void initudef(int type, char *name, int defined)
 
   debug2("Creating %s (type %d)", name, type);
   ul = malloc(sizeof(struct udef_struct));
-  ul->name = malloc(strlen(name) + 1);
-  strcpy(ul->name, name);
+  ul->name = strdup(name);
   if (defined)
     ul->defined = 1;
   else

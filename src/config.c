@@ -601,8 +601,7 @@ void set_cfg_str(char *target, char *entryname, char *data)
 
     if (u && !strcmp(botnetnick, u->handle)) {
       if (data) {
-        entry->ldata = malloc(strlen(data) + 1);
-        strcpy(entry->ldata, data);
+        entry->ldata = strdup(data);
       } else
         entry->ldata = NULL;
       if (entry->localchanged) {
@@ -620,11 +619,9 @@ void set_cfg_str(char *target, char *entryname, char *data)
     }
     xk = malloc(sizeof(struct xtra_key));
     egg_bzero(xk, sizeof(struct xtra_key));
-    xk->key = malloc(strlen(entry->name) + 1);
-    strcpy(xk->key, entry->name);
+    xk->key = strdup(entry->name);
     if (data) {
-      xk->data = malloc(strlen(data) + 1);
-      strcpy(xk->data, data);
+      xk->data = strdup(data);
     }
     set_user(&USERENTRY_CONFIG, u, xk);
     if (olddata)
@@ -633,8 +630,7 @@ void set_cfg_str(char *target, char *entryname, char *data)
     char *olddata = entry->gdata;
 
     if (data) {
-      entry->gdata = malloc(strlen(data) + 1);
-      strcpy(entry->gdata, data);
+      entry->gdata = strdup(data);
     } else
       entry->gdata = NULL;
     if (entry->globalchanged) {
@@ -772,8 +768,7 @@ void set_cmd_pass(char *ln, int shareit)
     cp = malloc(sizeof(struct cmd_pass));
     cp->next = cmdpass;
     cmdpass = cp;
-    cp->name = malloc(strlen(cmd) + 1);
-    strcpy(cp->name, cmd);
+    cp->name = strdup(cmd);
     strcpy(cp->pass, ln);
     if (shareit)
       botnet_send_cmdpass(-1, cp->name, cp->pass);

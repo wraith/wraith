@@ -41,16 +41,6 @@ static bind_table_t *BT_chpt;
 static bind_table_t *BT_chjn;
 
 
-static char *my_strdup(const char *s)
-{
-	char *t;
-
-	t = (char *)malloc(strlen(s)+1);
-	strcpy(t, s);
-	return(t);
-}
-
-
 extern cmd_t C_dcc[];
 
 void binds_init(void)
@@ -89,9 +79,9 @@ bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, in
 	/* Nope, we have to create a new one. */
 	table = (bind_table_t *)malloc(sizeof(*table));
 	table->chains = NULL;
-	table->name = my_strdup(name);
+	table->name = strdup(name);
 	table->nargs = nargs;
-	table->syntax = my_strdup(syntax);
+	table->syntax = strdup(syntax);
 	table->match_type = match_type;
 	table->flags = flags;
 	table->next = bind_table_list_head;
@@ -178,7 +168,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 	if (!chain) {
 		chain = (bind_chain_t *)malloc(sizeof(*chain));
 		chain->entries = NULL;
-		chain->mask = my_strdup(mask);
+		chain->mask = strdup(mask);
 		chain->next = table->chains;
 		table->chains = chain;
 	}
@@ -204,7 +194,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 		chain->entries = entry;
 	}
 
-	entry->function_name = my_strdup(function_name);
+	entry->function_name = strdup(function_name);
 	entry->callback = callback;
 	entry->client_data = client_data;
 	entry->hits = 0;

@@ -543,9 +543,8 @@ static void parse_q(struct msgq_head *q, char *oldnick, char *newnick)
           q->last = 0;
       } else {
         free(m->msg);
-        m->msg = malloc(strlen(newmsg) + 1);
         m->len = strlen(newmsg);
-        strcpy(m->msg, newmsg);
+        m->msg = strdup(newmsg);
       }
     }
     lm = m;
@@ -612,9 +611,8 @@ static void purge_kicks(struct msgq_head *q)
           free(m->msg);
           egg_snprintf(newmsg, sizeof newmsg, "KICK %s %s %s\n", chan,
 		       newnicks + 1, reason);
-          m->msg = malloc(strlen(newmsg) + 1);
           m->len = strlen(newmsg);
-          strcpy(m->msg, newmsg);
+          m->msg = strdup(newmsg);
         }
       }
     }
@@ -710,9 +708,8 @@ static int deq_kick(int which)
           free(m->msg);
           egg_snprintf(newmsg, sizeof newmsg, "KICK %s %s %s\n", chan2,
 		       newnicks2 + 1, reason);
-          m->msg = malloc(strlen(newmsg) + 1);
           m->len = strlen(newmsg);
-          strcpy(m->msg, newmsg);
+          m->msg = strdup(newmsg);
         }
       }
     }
@@ -943,8 +940,7 @@ static void add_server(char *ss)
     if (!q) {
       x->port = default_port;
       x->pass = 0;
-      x->name = malloc(strlen(ss) + 1);
-      strcpy(x->name, ss);
+      x->name = strdup(ss);
     } else {
 #ifdef USE_IPV6
       if (ss[0] == '[') {
@@ -965,8 +961,7 @@ static void add_server(char *ss)
 	x->pass = 0;
       } else {
 	*q++ = 0;
-	x->pass = malloc(strlen(q) + 1);
-	strcpy(x->pass, q);
+        x->pass = strdup(q);
       }
 #ifdef USE_IPV6
       if (!x->port) {
@@ -1016,11 +1011,10 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
     clearq(serverlist);
     serverlist = NULL;
   }
-  p = malloc(strlen(slist) + 1);
 #ifdef S_RANDSERVERS
   shuffle(slist, ",");
 #endif /* S_RANDSERVERS */
-  strcpy(p, slist);
+  p = strdup(slist);
   add_server(p);
   free(p);
 #endif /* LEAF */
@@ -1037,11 +1031,10 @@ void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
     clearq(serverlist);
     serverlist = NULL;
   }
-  p = malloc(strlen(slist) + 1);
 #ifdef S_RANDSERVERS
   shuffle(slist, ",");
 #endif /* S_RANDSERVERS */
-  strcpy(p, slist);
+  p = strdup(slist);
   add_server(p);
   free(p);
 #endif /* LEAF */
@@ -1133,12 +1126,10 @@ static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
 
     x->next = 0;
     x->realname = 0;
-    x->name = malloc(strlen(serv) + 1);
-    strcpy(x->name, serv);
+    x->name = strdup(serv);
     x->port = *port ? *port : default_port;
     if (pass && pass[0]) {
-      x->pass = malloc(strlen(pass) + 1);
-      strcpy(x->pass, pass);
+      x->pass = strdup(pass);
     } else
       x->pass = NULL;
     list_append((struct list_type **) (&serverlist), (struct list_type *) x);

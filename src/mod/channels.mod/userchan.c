@@ -94,8 +94,7 @@ static void set_handle_chaninfo(struct userrec *bu, char *handle,
   if (ch->info != NULL)
     free(ch->info);
   if (info && info[0]) {
-    ch->info = (char *) malloc(strlen(info) + 1);
-    strcpy(ch->info, info);
+    ch->info = strdup(info);
   } else
     ch->info = NULL;
   cst = findchan_by_dname(chname);
@@ -259,8 +258,7 @@ static int u_delban(struct chanset_t *c, char *who, int doit)
     }
     if (lastdeletedmask)
       free(lastdeletedmask);
-    lastdeletedmask = malloc(strlen((*u)->mask) + 1);
-    strcpy(lastdeletedmask, (*u)->mask);
+    lastdeletedmask = strdup((*u)->mask);
     free((*u)->mask);
     if ((*u)->desc)
       free((*u)->desc);
@@ -438,12 +436,9 @@ static int u_addban(struct chanset_t *chan, char *ban, char *from, char *note,
   p->added = now;
   p->lastactive = 0;
   p->flags = flags;
-  p->mask = malloc(strlen(host) + 1);
-  strcpy(p->mask, host);
-  p->user = malloc(strlen(from) + 1);
-  strcpy(p->user, from);
-  p->desc = malloc(strlen(note) + 1);
-  strcpy(p->desc, note);
+  p->mask = strdup(host);
+  p->user = strdup(from);
+  p->desc = strdup(note);
   if (!noshare) {
     char *mask = str_escape(host, ':', '\\');
 
@@ -520,12 +515,9 @@ static int u_addinvite(struct chanset_t *chan, char *invite, char *from,
   p->added = now;
   p->lastactive = 0;
   p->flags = flags;
-  p->mask = malloc(strlen(host)+1);
-  strcpy(p->mask,host);
-  p->user = malloc(strlen(from)+1);
-  strcpy(p->user,from);
-  p->desc = malloc(strlen(note)+1);
-  strcpy(p->desc,note);
+  p->mask = strdup(host);
+  p->user = strdup(from);
+  p->desc = strdup(note);
   if (!noshare) {
     char *mask = str_escape(host, ':', '\\');
 
@@ -602,12 +594,9 @@ static int u_addexempt(struct chanset_t *chan, char *exempt, char *from,
   p->added = now;
   p->lastactive = 0;
   p->flags = flags;
-  p->mask = malloc(strlen(host)+1);
-  strcpy(p->mask,host);
-  p->user = malloc(strlen(from)+1);
-  strcpy(p->user,from);
-  p->desc = malloc(strlen(note)+1);
-  strcpy(p->desc,note);
+  p->mask = strdup(host);
+  p->user = strdup(from);
+  p->desc = strdup(note);
   if (!noshare) {
     char *mask = str_escape(host, ':', '\\');
 

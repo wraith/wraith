@@ -1145,8 +1145,7 @@ static void share_ufsend(int idx, char *par)
       dcc[i].addr = my_atoul(ip);
       dcc[i].port = atoi(port);
       strcpy(dcc[i].nick, "*users");
-      dcc[i].u.xfer->filename = malloc(strlen(s) + 1);
-      strcpy(dcc[i].u.xfer->filename, s);
+      dcc[i].u.xfer->filename = strdup(s);
       dcc[i].u.xfer->origname = dcc[i].u.xfer->filename;
       dcc[i].u.xfer->length = atoi(par);
       dcc[i].u.xfer->f = f;
@@ -1483,8 +1482,7 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq,
 
     q->chan = chan;
     q->next = NULL;
-    q->msg = (char *) malloc(strlen(s) + 1);
-    strcpy(q->msg, s);
+    q->msg = strdup(s);
     return q;
   }
   cnt = 0;
@@ -1497,8 +1495,7 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq,
   q = q->next;
   q->chan = chan;
   q->next = NULL;
-  q->msg = (char *) malloc(strlen(s) + 1);
-  strcpy(q->msg, s);
+  q->msg = strdup(s);
   return qq;
 }
 
@@ -1687,18 +1684,16 @@ static struct userrec *dup_userlist(int t)
 	  struct user_entry *nue;
 
 	  nue = malloc(sizeof(struct user_entry));
-	  nue->name = malloc(strlen(ue->name) + 1);
 	  nue->type = NULL;
 	  nue->u.list = NULL;
-	  strcpy(nue->name, ue->name);
+          nue->name = strdup(ue->name);
 	  list_insert((&nu->entries), nue);
 	  for (lt = ue->u.list; lt; lt = lt->next) {
 	    struct list_type *list;
 
 	    list = malloc(sizeof(struct list_type));
 	    list->next = NULL;
-	    list->extra = malloc(strlen(lt->extra) + 1);
-	    strcpy(list->extra, lt->extra);
+            list->extra = strdup(lt->extra);
 	    list_append((&nue->u.list), list);
 	  }
 	} else {

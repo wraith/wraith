@@ -304,10 +304,8 @@ int config_unpack(struct userrec *u, struct user_entry *e)
     data = curr->extra;
     key = newsplit(&data);
     if (data[0]) {
-      t->key = malloc(strlen(key) + 1);
-      strcpy(t->key, key);
-      t->data = malloc(strlen(data) + 1);
-      strcpy(t->data, data);
+      t->key = strdup(key);
+      t->data = strdup(data);
       list_insert((&e->u.extra), t);
     }
     curr = curr->next;
@@ -409,10 +407,8 @@ int config_dupuser(struct userrec *new, struct userrec *old, struct user_entry *
   for (x1 = e->u.extra; x1; x1 = x1->next) {
     x2 = malloc(sizeof(struct xtra_key));
 
-    x2->key = malloc(strlen(x1->key) + 1);
-    strcpy(x2->key, x1->key);
-    x2->data = malloc(strlen(x1->data) + 1);
-    strcpy(x2->data, x1->data);
+    x2->key = strdup(x1->key);
+    x2->data = strdup(x1->data);
     set_user(&USERENTRY_CONFIG, new, x2);
   }
   return 1;
@@ -586,8 +582,7 @@ int pass_set(struct userrec *u, struct user_entry *e, void *buf)
       strcpy(new, pass);
     else
       encrypt_pass(pass, new);
-    e->u.extra = malloc(strlen(new) + 1);
-    strcpy(e->u.extra, new);
+    e->u.extra = strdup(new);
   }
   if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED)))
     shareout(NULL, "c PASS %s %s\n", u->handle, pass ? pass : "");
@@ -666,9 +661,8 @@ static int laston_unpack(struct userrec *u, struct user_entry *e)
   if (!par[0])
     par = "???";
   li = malloc(sizeof(struct laston_info));
-  li->lastonplace = malloc(strlen(par) + 1);
   li->laston = atoi(arg);
-  strcpy(li->lastonplace, par);
+  li->lastonplace = strdup(par);
   list_type_kill(e->u.list);
   e->u.extra = li;
   return 1;
@@ -686,6 +680,7 @@ static int laston_pack(struct userrec *u, struct user_entry *e)
   e->u.list->next = NULL;
   e->u.list->extra = malloc(l + 1);
   strcpy(e->u.list->extra, work);
+  
   free(li->lastonplace);
   free(li);
   return 1;
@@ -771,8 +766,7 @@ static int laston_tcl_set(Tcl_Interp * irp, struct userrec *u,
   li = malloc(sizeof(struct laston_info));
 
   if (argc == 5) {
-    li->lastonplace = malloc(strlen(argv[4]) + 1);
-    strcpy(li->lastonplace, argv[4]);
+    li->lastonplace = strdup(argv[4]);
   } else {
     li->lastonplace = malloc(1);
     li->lastonplace[0] = 0;
@@ -791,8 +785,7 @@ static int laston_dupuser(struct userrec *new, struct userrec *old,
     li2 = malloc(sizeof(struct laston_info));
 
     li2->laston = li->laston;
-    li2->lastonplace = malloc(strlen(li->lastonplace) + 1);
-    strcpy(li2->lastonplace, li->lastonplace);
+    li2->lastonplace = strdup(li->lastonplace);
     return set_user(&USERENTRY_LASTON, new, li2);
   }
   return 0;
@@ -833,8 +826,7 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
   q1 = strchr(p, ':');
   if (q1)
     *q1++ = 0;
-  bi->address = malloc(strlen(p) + 1);
-  strcpy(bi->address, p);
+  bi->address = strdup(p);
   if (q1) {
     q2 = strchr(q1, ':');
     if (q2)
@@ -849,8 +841,7 @@ static int botaddr_unpack(struct userrec *u, struct user_entry *e)
       q1 = strchr(q2, ':');
       if (q1) {
         *q1++ = 0;
-        bi->uplink = malloc(strlen(q1) + 1);
-        strcpy(bi->uplink, q1);
+        bi->uplink = strdup(q1);
 
       }
       bi->hublevel = atoi(q2);
@@ -967,8 +958,7 @@ static int botaddr_tcl_set(Tcl_Interp *irp, struct userrec *u,
     } else {
       free(bi->address);
     }
-    bi->address = malloc(strlen(argv[3]) + 1);
-    strcpy(bi->address, argv[3]);
+    bi->address = strdup(argv[3]);
     if (argc > 4)
       bi->telnet_port = atoi(argv[4]);
     if (argc > 5)
@@ -1009,16 +999,14 @@ static int botaddr_gotshare(struct userrec *u, struct user_entry *e,
   egg_bzero(bi, sizeof(struct bot_addr));
 
   arg = newsplit(&buf);
-  bi->address = malloc(strlen(arg) + 1);
-  strcpy(bi->address, arg);
+  bi->address = strdup(arg);
   arg = newsplit(&buf);
   bi->telnet_port = atoi(arg);
   arg = newsplit(&buf);
   bi->relay_port = atoi(arg);
   arg = newsplit(&buf);
   bi->hublevel = atoi(arg);
-  bi->uplink = malloc(strlen(buf) + 1);
-  strcpy(bi->uplink, buf);
+  bi->uplink = strdup(buf);
   if (!bi->telnet_port)
     bi->telnet_port = 3333;
   if (!bi->relay_port)
@@ -1039,10 +1027,8 @@ static int botaddr_dupuser(struct userrec *new, struct userrec *old,
       bi2->telnet_port = bi->telnet_port;
       bi2->relay_port = bi->relay_port;
       bi2->hublevel = bi->hublevel;
-      bi2->address = malloc(strlen(bi->address) + 1);
-      bi2->uplink = malloc(strlen(bi->uplink) + 1);
-      strcpy(bi2->address, bi->address);
-      strcpy(bi2->uplink, bi->uplink);
+      bi2->address = strdup(bi->address);
+      bi2->uplink = strdup(bi->uplink);
       return set_user(&USERENTRY_BOTADDR, new, bi2);
     }
   }
@@ -1149,10 +1135,8 @@ int xtra_unpack(struct userrec *u, struct user_entry *e)
     data = curr->extra;
     key = newsplit(&data);
     if (data[0]) {
-      t->key = malloc(strlen(key) + 1);
-      strcpy(t->key, key);
-      t->data = malloc(strlen(data) + 1);
-      strcpy(t->data, data);
+      t->key = strdup(key);
+      t->data = strdup(data);
       list_insert((&e->u.extra), t);
     }
     curr = curr->next;
@@ -1243,10 +1227,8 @@ static int xtra_dupuser(struct userrec *new, struct userrec *old,
   for (x1 = e->u.extra; x1; x1 = x1->next) {
     x2 = malloc(sizeof(struct xtra_key));
 
-    x2->key = malloc(strlen(x1->key) + 1);
-    strcpy(x2->key, x1->key);
-    x2->data = malloc(strlen(x1->data) + 1);
-    strcpy(x2->data, x1->data);
+    x2->key = strdup(x1->key);
+    x2->data = strdup(x1->data);
     set_user(&USERENTRY_XTRA, new, x2);
   }
   return 1;
@@ -1428,8 +1410,7 @@ static int hosts_set(struct userrec *u, struct user_entry *e, void *buf)
     *t = malloc(sizeof(struct list_type));
 
     (*t)->next = NULL;
-    (*t)->extra = malloc(strlen(host) + 1);
-    strcpy((*t)->extra, host);
+    (*t)->extra = strdup(host);
   }
   return 1;
 }
@@ -1533,8 +1514,7 @@ int del_entry_type(struct user_entry_type *type)
 
     if (e && !e->name) {
       e->type->pack(u, e);
-      e->name = malloc(strlen(e->type->name) + 1);
-      strcpy(e->name, e->type->name);
+      e->name = strdup(e->type->name);
       e->type = NULL;
     }
   }

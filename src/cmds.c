@@ -1592,10 +1592,8 @@ static void cmd_hublevel(struct userrec *u, int idx, char *par)
   obi = get_user(&USERENTRY_BOTADDR, u1);
   bi = malloc(sizeof(struct bot_addr));
 
-  bi->uplink = malloc(strlen(obi->uplink) + 1);
-  strcpy(bi->uplink, obi->uplink);
-  bi->address = malloc(strlen(obi->address) + 1);
-  strcpy(bi->address, obi->address);
+  bi->uplink = strdup(obi->uplink);
+  bi->address = strdup(obi->address);
   bi->telnet_port = obi->telnet_port;
   bi->relay_port = obi->relay_port;
   bi->hublevel = atoi(level);
@@ -1632,10 +1630,8 @@ static void cmd_uplink(struct userrec *u, int idx, char *par)
   obi = get_user(&USERENTRY_BOTADDR, u1);
   bi = malloc(sizeof(struct bot_addr));
 
-  bi->uplink = malloc(strlen(uplink) + 1);
-  strcpy(bi->uplink, uplink);
-  bi->address = malloc(strlen(obi->address) + 1);
-  strcpy(bi->address, obi->address);
+  bi->uplink = strdup(uplink);
+  bi->address = strdup(obi->address);
   bi->telnet_port = obi->telnet_port;
   bi->relay_port = obi->relay_port;
   bi->hublevel = obi->hublevel;
@@ -1686,14 +1682,12 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
 
   bi = malloc(sizeof(struct bot_addr));
 
-  bi->uplink = malloc(strlen(obi->uplink) + 1);
-  strcpy(bi->uplink, obi->uplink);
+  bi->uplink = strdup(obi->uplink);
   bi->hublevel = obi->hublevel;
 
   q = strchr(addr, ':');
   if (!q) {
-    bi->address = malloc(strlen(addr) + 1);
-    strcpy(bi->address, addr);
+    bi->address = strdup(addr);
     bi->telnet_port = telnet_port;
     bi->relay_port = relay_port;
   } else {
@@ -3688,10 +3682,10 @@ void crontab_show(struct userrec * u, int idx) {
 }
 
 void crontab_del() {
-  char * tmpfile, *p, buf[2048];
-  tmpfile=malloc(strlen(binname)+100);
+  char *tmpfile, *p, buf[2048];
+  tmpfile = malloc(strlen(binname) + 100);
   strcpy(tmpfile, binname);
-  if (!(p=strrchr(tmpfile, '/')))
+  if (!(p = strrchr(tmpfile, '/')))
     return;
   p++;
   strcpy(p, STR(".ctb"));

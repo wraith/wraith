@@ -14,8 +14,7 @@ static void cmd_pls_noteign(struct userrec *u, int idx, char *par)
   }
   putlog(LOG_CMDS, "*", "#%s# +noteign %s", dcc[idx].nick, par);
 
-  p = buf = malloc(strlen(par)+1);
-  strcpy(p, par);
+  p = buf = strdup(par);
   handle = newsplit(&p);
   mask = newsplit(&p);
   if (mask[0]) {
@@ -55,8 +54,7 @@ static void cmd_mns_noteign(struct userrec *u, int idx, char *par)
     return;
   }
   putlog(LOG_CMDS, "*", "#%s# -noteign %s", dcc[idx].nick, par);
-  p = buf = malloc(strlen(par)+1);
-  strcpy(p, par);
+  p = buf = strdup(par);
   handle = newsplit(&p);
   mask = newsplit(&p);
   if (mask[0]) {
