@@ -1487,27 +1487,78 @@ static void cmd_mns_chan(struct userrec *u, int idx, char *par)
 }
 
 /* thanks Excelsior */
-void modesetting(int idx, char *work, int *cnt, char *name, int state)
+#define FLAG_COLS 4
+void show_flag(int idx, char *work, int *cnt, char *name, int state)
 {
-  char tmp[100];
-  if (((*cnt) < 3) && (!name || (name && !name[0]))) (*cnt) = 3; 		/* empty buffer if no (char *) name */
+  char tmp[101], chr_state[15];
+  /* empty buffer if no (char *) name */
+  if (((*cnt) < (FLAG_COLS - 1)) && (!name || (name && !name[0]))) (*cnt) = (FLAG_COLS - 1); 
   (*cnt)++;
-  if (*cnt > 4) {
+  if (*cnt > FLAG_COLS) {
     *cnt = 1;
     work[0] = 0;
   }
   if (!work[0])
     sprintf(work, "  ");
   if (name && name[0]) {
-    egg_snprintf(tmp, sizeof tmp, "%s%-17s", state ? "\002+\002" : "\002-\002", name);
+    chr_state[0] = 0;
+//    strcat(chr_state, BOLD(idx));
+    if (state) {
+      strcat(chr_state, GREEN(idx));
+      strcat(chr_state, "+");
+    } else {
+      strcat(chr_state, RED(idx));
+      strcat(chr_state, "-");
+    }
+//    strcat(chr_state, BOLD_END(idx));
+    strcat(chr_state, COLOR_END(idx));
+    egg_snprintf(tmp, sizeof tmp, "%s%-17s", chr_state, name);
     strcat(work, tmp);
   }
-  if (*cnt >= 4)
+  if (*cnt >= FLAG_COLS)
     dprintf(idx, "%s\n", work);
 }
 
+#define INT_COLS 1
+void show_int(int idx, char *work, int *cnt, char *desc, int state, char *yes, char *no)
+{
+  char tmp[101], chr_state[101];
 
-#define MSET(name, state) modesetting(idx, work, &cnt, name, state)
+  egg_snprintf(chr_state, sizeof chr_state, "%d", state);  
+  /* empty buffer if no (char *) name */
+  if (((*cnt) < (INT_COLS - 1)) && (!desc || (desc && !desc[0]))) (*cnt) = (INT_COLS - 1);
+  (*cnt)++;
+  if (*cnt > INT_COLS) {
+    *cnt = 1;
+    work[0] = 0;
+  }
+  if (!work[0])
+    sprintf(work, "  ");
+  if (desc && desc[0]) {
+//need to make next line all one char, and then put it into %-30s
+    char tmp2[50], tmp3[50];
+    tmp2[0] = tmp3[0] = 0;
+    strcat(tmp2, BOLD(idx));
+    if (state && yes) {
+      strcat(tmp2, yes);
+    } else if (!state && no) {
+      strcat(tmp2, no);
+      strcat(tmp3, " (");
+      strcat(tmp3, chr_state);
+      strcat(tmp3, ")");
+    } else if ((state && !yes) || (!state && !no)) {
+      strcat(tmp2, chr_state);
+    }
+    strcat(tmp2, BOLD_END(idx));
+    egg_snprintf(tmp, sizeof tmp, "%-30s %-20s %s", desc, tmp2, (tmp3 && tmp3[0]) ? tmp3 : "");
+    strcat(work, tmp);
+  }
+  if (*cnt >= INT_COLS)
+    dprintf(idx, "%s\n", work);
+}
+
+#define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state)
+#define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no)
 static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 {
   char *chname, work[512];
@@ -1547,77 +1598,40 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
       nick[0] = 0;
     putlog(LOG_CMDS, "*", "#%s# chaninfo %s", dcc[idx].nick, chname);
     if (nick[0] && date[0])
-      dprintf(idx, "Settings for channel %s (Added %s by %s%s%s):\n", chan->dname, date, colorI(idx, BOLD_OPEN, 0), nick, colorI(idx, BOLD_CLOSE, 0));
+      dprintf(idx, "Settings for channel %s (Added %s by %s%s%s):\n", chan->dname, date, BOLD(idx), nick, BOLD_END(idx));
     else
       dprintf(idx, "Settings for channel %s:\n", chan->dname);
+/* FIXME: SHOW_CHAR() here */
     get_mode_protect(chan, work);
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
 /* Chanchar template
  *  dprintf(idx, "String temp: %s\n", chan->temp[0] ? chan->temp : "NULL");
  */
-    if (chan->idle_kick)
-      dprintf(idx, "Idle Kick after (idle-kick): %d\n", chan->idle_kick);
-    else
-      dprintf(idx, "Idle Kick after (idle-kick): DON'T!\n");
-    if (chan->limitraise)
-      dprintf(idx, "Limit raise: %d\n", chan->limitraise);
-    else
-      dprintf(idx, "Limit raise: disabled\n");
-    if (chan->stopnethack_mode)
-      dprintf(idx, "stopnethack-mode: %d\n", chan->stopnethack_mode);
-    else
-      dprintf(idx, "stopnethack: DON'T!\n");
-    if (chan->revenge_mode)
-      dprintf(idx, "revenge-mode: %d\n", chan->revenge_mode);
-    else
-      dprintf(idx, "revenge-mode: 0\n");
-    if (chan->closed_ban)
-      dprintf(idx, "closed-ban: %d\n", chan->closed_ban);
-    else
-      dprintf(idx, "closed-ban: 0\n");
-/* Chanint template
- *  if (chan->temp)
- *   dprintf(idx, "temp: %d\n", chan->temp);
- * else
- *   dprintf(idx, temp: 0\n");
- */
-    if (chan->ban_time)
-      dprintf(idx, "ban-time: %d\n", chan->ban_time);
-    else
-      dprintf(idx, "ban-time: 0\n");
-    if (chan->exempt_time)
-      dprintf(idx, "exempt-time: %d\n", chan->exempt_time);
-    else
-      dprintf(idx, "exempt-time: 0\n");
-    if (chan->invite_time)
-      dprintf(idx, "invite-time: %d\n", chan->invite_time);
-    else
-      dprintf(idx, "invite-time: 0\n");
-    dprintf(idx, "Other modes:\n");
+    dprintf(idx, "Channel flags:\n");
     work[0] = 0;
-    MSET("bitch",		channel_bitch(chan));
-    MSET("closed",		channel_closed(chan));
-    MSET("cycle",		channel_cycle(chan));
-    MSET("enforcebans", 	channel_enforcebans(chan));
-    MSET("fastop",		channel_fastop(chan));
-    MSET("inactive",		channel_inactive(chan));
-    MSET("manop",		channel_manop(chan));
-    MSET("nodesynch",		channel_nodesynch(chan));
-    MSET("nomop",		channel_nomop(chan));
-    MSET("private",		channel_private(chan));
-    MSET("protectops",		channel_protectops(chan));
-    MSET("revenge",		channel_revenge(chan));
-    MSET("revengebot",		channel_revengebot(chan));
-    MSET("take",		channel_take(chan));
-    MSET("voice",		channel_voice(chan));
-    MSET("", 0);
-    MSET("dynamicbans",		channel_dynamicbans(chan));
-    MSET("userbans",		!channel_nouserbans(chan));
-    MSET("dynamicexempts",	channel_dynamicexempts(chan));
-    MSET("userexempts",		!channel_nouserexempts(chan));
-    MSET("dynamicinvites",	channel_dynamicinvites(chan));
-    MSET("userinvites",		!channel_nouserinvites(chan));
-    MSET("", 0);
+    SHOW_FLAG("bitch",		channel_bitch(chan));
+    SHOW_FLAG("closed",		channel_closed(chan));
+    SHOW_FLAG("cycle",		channel_cycle(chan));
+    SHOW_FLAG("enforcebans", 	channel_enforcebans(chan));
+    SHOW_FLAG("fastop",		channel_fastop(chan));
+    SHOW_FLAG("inactive",	channel_inactive(chan));
+    SHOW_FLAG("manop",		channel_manop(chan));
+    SHOW_FLAG("nodesynch",	channel_nodesynch(chan));
+    SHOW_FLAG("nomop",		channel_nomop(chan));
+    SHOW_FLAG("private",	channel_private(chan));
+    SHOW_FLAG("protectops",	channel_protectops(chan));
+    SHOW_FLAG("revenge",	channel_revenge(chan));
+    SHOW_FLAG("revengebot",	channel_revengebot(chan));
+    SHOW_FLAG("take",		channel_take(chan));
+    SHOW_FLAG("voice",		channel_voice(chan));
+    SHOW_FLAG("", 0);
+    SHOW_FLAG("dynamicbans",	channel_dynamicbans(chan));
+    SHOW_FLAG("userbans",	!channel_nouserbans(chan));
+    SHOW_FLAG("dynamicexempts",	channel_dynamicexempts(chan));
+    SHOW_FLAG("userexempts",	!channel_nouserexempts(chan));
+    SHOW_FLAG("dynamicinvites",	channel_dynamicinvites(chan));
+    SHOW_FLAG("userinvites",	!channel_nouserinvites(chan));
+    SHOW_FLAG("", 0);
     work[0] = 0;
 
 /* Chanflag template
@@ -1673,12 +1687,27 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     if (ii > 1)
       dprintf(idx, "%s\n", work);
 
-    dprintf(idx, "flood settings: chan ctcp join kick deop nick\n");
-    dprintf(idx, "number:          %3d  %3d  %3d  %3d  %3d  %3d\n",
+
+    work[0] = cnt = 0;
+/* Chanint template
+ * SHOW_INT("Desc: ", integer, "YES", "NO");
+ */
+    dprintf(idx, "Channel settings:\n");
+    SHOW_INT("Ban-time: ", chan->ban_time, NULL, "Forever");
+    SHOW_INT("Closed-ban: ", chan->closed_ban, NULL, "Don't!");
+    SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
+    SHOW_INT("Idle Kick after (idle-kick): ", chan->idle_kick, "", "Don't!");
+    SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");
+    SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");
+    SHOW_INT("Revenge-mode: ", chan->revenge_mode, NULL, NULL);
+    SHOW_INT("Stopnethack-mode: ", chan->stopnethack_mode, "", "Don't!");
+
+    dprintf(idx, "Flood settings:   chan ctcp join kick deop nick\n");
+    dprintf(idx, "  number:          %3d  %3d  %3d  %3d  %3d  %3d\n",
 	    chan->flood_pub_thr, chan->flood_ctcp_thr,
 	    chan->flood_join_thr, chan->flood_kick_thr,
 	    chan->flood_deop_thr, chan->flood_nick_thr);
-    dprintf(idx, "time  :          %3d  %3d  %3d  %3d  %3d  %3d\n",
+    dprintf(idx, "  time  :          %3d  %3d  %3d  %3d  %3d  %3d\n",
 	    chan->flood_pub_time, chan->flood_ctcp_time,
 	    chan->flood_join_time, chan->flood_kick_time,
 	    chan->flood_deop_time, chan->flood_nick_time);

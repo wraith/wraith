@@ -16,6 +16,7 @@ This is a summary of ChangeLog basically.
 13.Removed 98% of Debug Contexts; they were slowing the bot down and eating resources.
 14.Removed and reorganized some various excess system calls in the core.
 15.cmd_color now tells you which color mode you are shown.
+16.Changed some cosmetics in cmd_chaninfo.
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.
