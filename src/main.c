@@ -100,7 +100,6 @@ int	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 int	do_restart = 0;		/* .restart has been called, restart asap */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
-egg_timeval_t egg_timeval_now;	/* Same thing, but seconds and microseconds. */
 
 extern struct cfg_entry CFG_FORKINTERVAL;
 
@@ -530,7 +529,7 @@ static void event_resettraffic()
 	egg_memset(&traffic.in_today, 0, sizeof(traffic.in_today));
 }
 
-static void init_main() {
+static void startup_checks() {
   char cfile[DIRMAX] = "";
 
 #ifdef HUB
@@ -662,7 +661,7 @@ int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
 
 int main(int argc, char **argv)
 {
-  egg_timeval_t howlong;
+  egg_timeval_t howlong, egg_timeval_now;	
 
 #ifdef STOP_UAC
   {
@@ -728,7 +727,7 @@ int main(int argc, char **argv)
   if (checktrace)
     check_trace_start();
 
-  init_main();
+  startup_checks();
 
   /* if we are here, then all the necesary files/dirs are accesable, lets load the config now. */
 

@@ -199,7 +199,7 @@ if [ $nopkg = "0" ]; then
   #This MALLOC business is to not Abort 'tar' due to some bug it has.
   tmp=${MALLOC_CHECK_}
   unset MALLOC_CHECK_
-  tar -c${zip}f ${PACKNAME}.$os-$ver${d}.tar.${ext} *.$os.$ver${d}
+  tar -c${zip}f ${PACKNAME}.$os-$ver${d}.tar.${ext} *.$os-$ver${d}
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi

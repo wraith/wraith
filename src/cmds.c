@@ -49,7 +49,6 @@ extern char		 origbotname[], ver[], network[],
 			 owner[], quit_msg[], dcc_prefix[], 
                          botname[], *binname, version[], egg_version[];
 extern time_t		 now, online_since, buildts;
-extern egg_timeval_t egg_timeval_now;
 extern module_entry	*module_list;
 extern struct cfg_entry	CFG_MOTD, **cfg;
 extern tand_t		*tandbot;
@@ -3556,11 +3555,13 @@ void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, cha
 /* netlag */
 static void cmd_netlag(struct userrec * u, int idx, char * par) {
   time_t tm;
+  egg_timeval_t tv;
   char tmp[64] = "";
 
   putlog(LOG_CMDS, "*", STR("#%s# netlag"), dcc[idx].nick);
   
-  tm = (egg_timeval_now.sec % 10000) * 100 + (egg_timeval_now.usec * 100) / (1000000);
+  timer_get_now(&tv);
+  tm = (tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000);
   sprintf(tmp, STR("ping %lu"), tm);
   dprintf(idx, STR("Sent ping to all linked bots\n"));
   botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
@@ -3579,8 +3580,10 @@ void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
 
   if ((i >= 0) && (i < dcc_total) && (dcc[i].type == &DCC_CHAT) && (!strcmp(dcc[i].nick, fromhand))) {
     time_t tm;
+    egg_timeval_t tv;
 
-    tm = ((egg_timeval_now.sec % 10000) * 100 + (egg_timeval_now.usec * 100) / (1000000)) - atoi(par);
+    timer_get_now(&tv);
+    tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - atoi(par);
     dprintf(i, STR("Pong from %s: %i.%i seconds\n"), frombot, (tm / 100), (tm % 100));
   }
 }
