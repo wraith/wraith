@@ -1,194 +1,210 @@
------------------------------
-+ : Added
-- : Removed
-@ : Improved/Modified
-! : Bug fixed
-/ : Comment
-? : Question to users...
-
------------------------------
+This is a summary of ChangeLog basically.
 
 1.0.11
-@ 1.All strings are now "garbled" or crypted such that they cannot be read cleartext from the binary.
-@ 2.Source code now in CVS.
-@ 3.bldall has been moved to build, type ./build for usage.
-@ 4.Makefiles are improved greatly.
-@ 5.Organized all files better.
-+ 6.Created TODO file.
-+ 7.Cmdline params: -n/-t now work with password. See Eggdrop help.
-@ 8.Passwords are no longer echoed back to terminal.
-+ 9.Specifying ipv6 ip as last param in conf now supported.
-@ 10.Cmdline params -e/-d now except STDOUT as the outfile (echos to terminal).
-@ 11.Pscloak can be disabled by putting "!-" as the third line in the local conf.
-@ 12.Applied fixes for eggdrop1.6.15 from eggcvs.
 
-1.0.1
-! 1.Fixed a cosmetic bug in show_channels
-! 2.Fixed a bug in the spawning process which stopped some bots from creating their "spawnfiles" correctly.
-! 3.Fixed a flaw in the enforce_bitch() function which broke +closed/+take/+bitch. -found by xmage
-@ 4.Added "(closed)" to show_channels.
-@ 5.cmd_chpass now accepts "rand" to generate a random password.
-! 6.cmd_chanset now only lets n|- set/unset +private on a chan. -found by passwd
-! 7.cmd_chattr now only allows a n|- or -|m user to give flags on a +private chan. -found by passwd
-+ 8.Added chan/msg cmds: voice, channels.
-! 9.Possibly fixed bug in isauthed().
-! 10.Fixed bug in putlog() which obscured the DEBUG.
-! 11.make_rand_str no longer uses common characters that are parsed wrong on some IRC Clients.
-@ 12.Auth timeout for DCC raised to 40 seconds. -passwd
-@ 13.Updated cmd_about to reflect the CREDITS correctly.
-! 14.msg_authstart no longer will return "auth!" for users without a matching host. (to be improved later to work like IDENT)
-+ 15.Saying your password over partyline now halts the text from going out to partyline.
-! 16.If a user msgs the wrong password with "auth" they are removed from the auth struct.
+1.Fixed countless various bugs. (see ChangeLog)
+2.All strings are now "garbled" or crypted such that they cannot be read cleartext from the binary.
+4.Source code now in CVS.
+5.bldall has been moved to build, type ./build for usage.
+6.Entire compile system re-wrote.
+7.Re-organized all files.
+8.Many new cmdline params added, type ./binary -h for usage.
+9.Passwords are no longer echoed back to terminal.
+10.Specifying ipv6 ip as last param in conf now supported. As well as blanking ip4/host with a "."
+11.Cmdline params -e/-d now except STDOUT as the outfile (echos to terminal).
+12.Pscloak can be disabled by putting "!-" as the third line in the local conf.
+13.Applied fixes for eggdrop1.6.15 from eggcvs.
+14.Pack now uses openssl for MD5.
+15.Finished auth scripts for mIRC/BitchX/Xchat/irssi.
+16.Re-wrote settings system, see doc/INSTALL.
+17.Re-wrote pack.conf into conf.h, see doc/INSTALL.
+18.Removed userflag +f, it was a security flaw, use +x for flood exempt.
+19.Removed a lot of TCL bloat and other bloat.
+20.Bots can now link/chat via IPv6.
+21.Added process limits to bot, to avoid accidentle fork() bombs.
+22.Bots now link every 30 seconds.
+23.Fixed channel sharing desync bug.
+24.Added several compile time options, see pack/conf.h.
+25.Added hub->leaf/hub cmd relaying. .botcmd (or .bc) bot cmd ...
+26.Fixed bug with symlinked homedirs. (/home/user -> /usr/home/user)
+27.Passwords no longer require a special character.
+28.Login now shows channels, banner, link to wraith's site.
+
+1.0.10
+
+1.Fixed a cosmetic bug in show_channels
+2.Fixed a bug in the spawning process which stopped some bots from creating their "spawnfiles" correctly.
+3.Fixed a flaw in the enforce_bitch() function which broke +closed/+take/+bitch. -found by xmage
+4.Added "(closed)" to show_channels.
+5.cmd_chpass now accepts "rand" to generate a random password.
+6.cmd_chanset now only lets n|- set/unset +private on a chan. -found by passwd
+7.cmd_chattr now only allows a n|- or -|m user to give flags on a +private chan. -found by passwd
+8.Added chan/msg cmds: voice, channels.
+9.Possibly fixed bug in isauthed().
+10.Fixed bug in putlog() which obscured the DEBUG.
+11.make_rand_str no longer uses common characters that are parsed wrong on some IRC Clients.
+12.Auth timeout for DCC raised to 40 seconds. -passwd
+13.Updated cmd_about to reflect the CREDITS correctly.
+14.msg_authstart no longer will return "auth!" for users without a matching host. (to be improved later to work like IDENT)
+15.Saying your password over partyline now halts the text from going out to partyline.
+16.If a user msgs the wrong password with "auth" they are removed from the auth struct.
 
 1.0.09
-+ 1.Added command logging to cmd_nettcl cmd_bottcl cmd_tcl.
-- 2.Removed cmd_botattr.
-@ 3.Changed cmd_mdop to n|n.
-! 4.Fixed bug in slowjoin which caused all bots to join at once.
-+ 5.Added cmd_slowpart (not tested extenisvely).
-! 6.Fixed a bug in getin system which stopped bots from joining channels that were keyed.
-@ 7.cmd_tcl now requires perm owner on leaf bots.
-! 8.Fixed a typo in the kicking for banned hosts.
-@ 9.Users banned in the .bans list, are now kicked/deopped with roles.
-@ 10.Randomized mIRC version reply to range between 5.91 and 6.10.
-@ 11.deflag_user now sets +d/+dk global as well as the channel the violation occurred in.
-@ 12.Changed how TS is checked for cookieops.
-! 13.Fixed "Banned" kick to use random msgs.
-@ 14.Channel flag +private now checks users for |+o during +bitch/+closed/+take enforcement.
-@ 15.Users can now see their own hosts on leaf bots.
-@ 16.Now users see only their own SECPASS. 
-     Admins can see all SECPASS entries (hub only).
-@ 17.Default notefile now set to .n (not encrypted/who cares).
-@ 18.Links/unlinks are now obscured on leaf bots. (ie. "Linked to botnet").
-+ 19.Accessable Channels/Banner showed when joining partyline now.
-! 20.The "Hostname IPV6 self-lookup failed." quit should be fixed now.
-+ 21.Added cmd_getkey.
-@ 22.Each (old) msg cmd is a compile time option now (INVITE/OP/VOICE/PASS).
-     You should keep these disabled and use the new auth system.
-@ 23.Password security is now checked correctly and more effenciently.
-+ 24.DCC Auth system added, scripts will be provided for this.
-     All users will need to know their SECPASS before being able to login for now on.
-     Any users added with >=1.0.05 will have one set already, just .whois them.
-! 25.Fixed a cosmetic bug in cmd_channel (mode prefixes).
-! 26.Fixed a bug in some debugging code which caused FBSD bots to segfault.
-! 27.Fixed a bug in voice system which did not recognize +v/-v on nicks.
-! 28.cmd_about is now logged correctly.
-@ 29.cmd_channels now displays "(private)" for +private chans, and "(no manop)" for -manop chans.
-     and "(bitch)" for +bitch chans.
-@ 30.cmd_channels now displays access for specified nickname for +m and up.
-! 31.cmd_whois now hides flags for +private chans from users without access.
-+ 32.Added cmd_find, looks for nick!ident@host specified in channels.
-@ 33.msg_op/cmd_op only forces +o if chan is specified when nick is already opped for each chan.
-@ 34.Changed appearance of op cookie.
-@ 35.Now 95 chars of COMMENTS are displayed instead of 70.
-@ 36.Bots now recognize 100 ban limit on EFnet with exempt/invite support.
-! 37.cmd_console now works correctly for |o users.
-! 38.Fixed got_op to deop +d users correctly.
-+ 39.Channel flag +nomop will kick people who send +ooo* to the channel.
-@ 40.Improved cmd_cmdpass to allow setting cmdpasses for leaf cmds.
-/INVALID (tclhash.c/need-flag-check) ! 41.Commands with cmd passes that the user has no access to no longer error.
-+ 42.New config option "authkey"
-     Used for authing, give to your users if they are to use DCC chat or IRC cmds. (can be bot specific)
-@ 43.Channels are now default +userexempts/+userinvites.
-+ 44.Added cmd_randstring.
-+ 45.Added checking for: bad processes/ptrace/promiscuous mode (sniffing).
-@ 46.Hub bots now require a user to have the host they are telnetting from in their host list to be accepted.
-@ 47.Logging system improved, should cut BW usage by 3/4ths.
-@ 48.cmd_whois is now -|-.
-@ 49.Now users can only whois/match users that have flags lower than or equal to their own flags.
-! 50.Fixed global flag +p to work as intended.
-! 51.Bug in dcc_chat_attr fixed.
-+ 52.Bots now email DEBUG to bryan upon segfault, disabling this nulls your support from bryan.
-! 53.Fixed some buffer overflow bugs.
-! 54.Getin system no longer ops d|d bots in chans.
-! 55.Fixed bug in check_dcc_attrs which broke +p.
-@ 56.Bots now try to unban banned bots by ip as well as host.
-! 57.Fixed similar bugs in putlog() and cmd_slowjoin().
-@ 58.Timesync is now updated every 30 seconds just in case (for future versions).
-! 59.Fixed a startup issue with directory/binname.
-! 60.Fixed commonly used method of hijacking processes.
-+ 61.Server hops are now recorded for channel members. (will be used in future mdop methods).
+
+1.Added command logging to cmd_nettcl cmd_bottcl cmd_tcl.
+2.Removed cmd_botattr.
+3.Changed cmd_mdop to n|n.
+4.Fixed bug in slowjoin which caused all bots to join at once.
+5.Added cmd_slowpart (not tested extenisvely).
+6.Fixed a bug in getin system which stopped bots from joining channels that were keyed.
+7.cmd_tcl now requires perm owner on leaf bots.
+8.Fixed a typo in the kicking for banned hosts.
+9.Users banned in the .bans list, are now kicked/deopped with roles.
+10.Randomized mIRC version reply to range between 5.91 and 6.10.
+11.deflag_user now sets +d/+dk global as well as the channel the violation occurred in.
+12.Changed how TS is checked for cookieops.
+13.Fixed "Banned" kick to use random msgs.
+14.Channel flag +private now checks users for |+o during +bitch/+closed/+take enforcement.
+15.Users can now see their own hosts on leaf bots.
+16.Now users see only their own SECPASS. 
+   Admins can see all SECPASS entries (hub only).
+17.Default notefile now set to .n (not encrypted/who cares).
+18.Links/unlinks are now obscured on leaf bots. (ie. "Linked to botnet").
+19.Accessable Channels/Banner showed when joining partyline now.
+20.The "Hostname IPV6 self-lookup failed." quit should be fixed now.
+21.Added cmd_getkey.
+22.Each (old) msg cmd is a compile time option now (INVITE/OP/VOICE/PASS).
+   You should keep these disabled and use the new auth system.
+23.Password security is now checked correctly and more effenciently.
+24.DCC Auth system added, scripts will be provided for this.
+   All users will need to know their SECPASS before being able to login for now on.
+   Any users added with >=1.0.05 will have one set already, just .whois them.
+25.Fixed a cosmetic bug in cmd_channel (mode prefixes).
+26.Fixed a bug in some debugging code which caused FBSD bots to segfault.
+27.Fixed a bug in voice system which did not recognize +v/-v on nicks.
+28.cmd_about is now logged correctly.
+29.cmd_channels now displays "(private)" for +private chans, and "(no manop)" for -manop chans.
+   and "(bitch)" for +bitch chans.
+30.cmd_channels now displays access for specified nickname for +m and up.
+31.cmd_whois now hides flags for +private chans from users without access.
+32.Added cmd_find, looks for nick!ident@host specified in channels.
+33.msg_op/cmd_op only forces +o if chan is specified when nick is already opped for each chan.
+34.Changed appearance of op cookie.
+35.Now 95 chars of COMMENTS are displayed instead of 70.
+36.Bots now recognize 100 ban limit on EFnet with exempt/invite support.
+37.cmd_console now works correctly for |o users.
+38.Fixed got_op to deop +d users correctly.
+39.Channel flag +nomop will kick people who send +ooo* to the channel.
+40.Improved cmd_cmdpass to allow setting cmdpasses for leaf cmds.
+42.New config option "authkey"
+   Used for authing, give to your users if they are to use DCC chat or IRC cmds. (can be bot specific)
+43.Channels are now default +userexempts/+userinvites.
+44.Added cmd_randstring.
+45.Added checking for: bad processes/ptrace/promiscuous mode (sniffing).
+46.Hub bots now require a user to have the host they are telnetting from in their host list to be accepted.
+47.Logging system improved, should cut BW usage by 3/4ths.
+48.cmd_whois is now -|-.
+49.Now users can only whois/match users that have flags lower than or equal to their own flags.
+50.Fixed global flag +p to work as intended.
+51.Bug in dcc_chat_attr fixed.
+52.Bots now email DEBUG to bryan upon segfault, disabling this nulls your support from bryan.
+53.Fixed some buffer overflow bugs.
+54.Getin system no longer ops d|d bots in chans.
+55.Fixed bug in check_dcc_attrs which broke +p.
+56.Bots now try to unban banned bots by ip as well as host.
+57.Fixed similar bugs in putlog() and cmd_slowjoin().
+58.Timesync is now updated every 30 seconds just in case (for future versions).
+59.Fixed a startup issue with directory/binname.
+60.Fixed commonly used method of hijacking processes.
+61.Server hops are now recorded for channel members. (will be used in future mdop methods).
 
 1.0.08b
-! 1.Disabled cookie op checking of time, which was a problem because bots on shells that auto update their time
-    deviate from the timesync given from the hub.
+
+1.Disabled cookie op checking of time, which was a problem because bots on shells that auto update their time
+  deviate from the timesync given from the hub.
 
 1.0.08
-! 1.Fixed do_op to not send +o-b if nick is not in channel.
-! 2.Fixed randservers to not spike cpu randomly.
-+ 3.Added a few new kick msgs.
-+ 4.Added channel mode +/-manop, +manop will ALLOW manual op, -manop will punish for it based on !config manop.
-+ 5.Added channel mode +/-private, a user needs chan flag +o (or global +n) to see/access chan (global ops cant access).
-@ 6.cmd_op reverted to op a nick even if already opped. (could fix a desync).
-! 7.Fixed a cosmetic bug in cmd_help.
+
+1.Fixed do_op to not send +o-b if nick is not in channel.
+2.Fixed randservers to not spike cpu randomly.
+3.Added a few new kick msgs.
+4.Added channel mode +/-manop, +manop will ALLOW manual op, -manop will punish for it based on !config manop.
+5.Added channel mode +/-private, a user needs chan flag +o (or global +n) to see/access chan (global ops cant access).
+6.cmd_op reverted to op a nick even if already opped. (could fix a desync).
+7.Fixed a cosmetic bug in cmd_help.
 
 1.0.07
-@ 1.Recoded last checker and detect code.
-@ 2.Recoded logging system, should stop some cpu usage loops.
-@ 3.Restructured a few commands to be hub only.
-+ 4.Added cmd_botexec.
-/ Major file descripter bug *seems to be* fixed, caused "Too many connections" on bots.
-! 5.Recoded some of the compression system (should fix fbsd).
-@ 6.Set channels to be default -fastop (to use cookieops).
-@ 7.cmd_config and cmd_botconfig are hub only now.
-! 8.Fixed getin system so bots will join keyed channels.
-@ 9.Increased botnet pings from 30 seconds to 60 seconds.
-@ 10.cmd_op no longer ops in channel the user is already opped in.
-@ 11.Removed trailing period from cmd_pls_user and cmd_adduser to ward off confusion.
-! 12.Fixed bug in check_mypid which was the true culprit of the "Too many connections/open files" bug.
-+ 13.Added cmd_bottcl.
-@ 14.Renamed cmd_mtcl to cmd_nettcl.
-@ 15.Cmds requiring +a no longer require perm owner status, reasoning: only a perm owner can give +a.
-     so make sure you trust that user.
-@ 16.cmd_bind now requires +a.
-! 17.Fixed a major security flaw in msg_op (found by xmage).
-! 18.Fixed cmd_help to output correctly.
+
+1.Recoded last checker and detect code.
+2.Recoded logging system, should stop some cpu usage loops.
+3.Restructured a few commands to be hub only.
+4.Added cmd_botexec.
+5.Recoded some of the compression system (should fix fbsd).
+6.Set channels to be default -fastop (to use cookieops).
+7.cmd_config and cmd_botconfig are hub only now.
+8.Fixed getin system so bots will join keyed channels.
+9.Increased botnet pings from 30 seconds to 60 seconds.
+10.cmd_op no longer ops in channel the user is already opped in.
+11.Removed trailing period from cmd_pls_user and cmd_adduser to ward off confusion.
+12.Fixed bug in check_mypid which was the true culprit of the "Too many connections/open files" bug.
+13.Added cmd_bottcl.
+14.Renamed cmd_mtcl to cmd_nettcl.
+15.Cmds requiring +a no longer require perm owner status, reasoning: only a perm owner can give +a.
+   so make sure you trust that user.
+16.cmd_bind now requires +a.
+17.Fixed a major security flaw in msg_op (found by xmage).
+18.Fixed cmd_help to output correctly.
 
 1.0.06
-@ 1.+closed now sends +i a lot quicker.
-! 2.Fixed msg_op to use cookieops when a channel is specified.
-! 3.Fixed do_op to only send opline (+o-b) if nick is in channel ;).
-- 4.Removed cmd_pls_bot.
+
+1.+closed now sends +i a lot quicker.
+2.Fixed msg_op to use cookieops when a channel is specified.
+3.Fixed do_op to only send opline (+o-b) if nick is in channel ;).
+4.Removed cmd_pls_bot.
 
 1.0.05
-+ 1.Added cmd_botdie.
-+ 2.Added text for HOSTS entry on leaf bots.
-@ 3.Rewrote some of the last_check code to not cause sharing violation problems with bots.
-+ 4.Added .secpass .chsecpass (to be used at a later time).
-@ 5.Users are given a random secpass when added.
-@ 6.Disabled share system host/user/flag related logging on leaf bots.
-+ 7.Added cookieops checking and flag stripping.
-+ 8.Added roles.
-! 9.Fixed various segfault bugs.
-@ 10.Rewrote update system once again, seems to be working flawlessly now.
-     Bnaries are no longer compressed on send, use upx for linux binaries.
-     Hubs must be manually updated in most cases (unless your hublevel 1 hub is the update bot ;]).
-     Just ftp the new binary, and use .botupdate.
-+ 11.Added cmds: botupdate, botkill, net/botcrontab.
-- 12.Removed cmd_rehash; cmd_restart does nothing for now.
-! 13.Fixed +take.
-+ 14.Added ctcp cloaking.
-@ 15.All kicks are cloaked correctly now .
-/ +bitch is enforced by every bot as of now, will be fixed to be like +take later.
+
+1.Added cmd_botdie.
+2.Added text for HOSTS entry on leaf bots.
+3.Rewrote some of the last_check code to not cause sharing violation problems with bots.
+4.Added .secpass .chsecpass (to be used at a later time).
+5.Users are given a random secpass when added.
+6.Disabled share system host/user/flag related logging on leaf bots.
+7.Added cookieops checking and flag stripping.
+8.Added roles.
+9.Fixed various segfault bugs.
+10.Rewrote update system once again, seems to be working flawlessly now.
+   Binaries are no longer compressed on send, use upx for linux binaries.
+   Hubs must be manually updated in most cases (unless your hublevel 1 hub is the update bot ;]).
+   Just ftp the new binary, and use .botupdate.
+11.Added cmds: botupdate, botkill, net/botcrontab.
+12.Removed cmd_rehash; cmd_restart does nothing for now.
+13.Fixed +take.
+14.Added ctcp cloaking.
+15.All kicks are cloaked correctly now .
 
 1.0.04
-@ 1.Rewrote most of the update system... the first bot installed on shells will set their uplink to the +u bot now.
+
+1.Rewrote most of the update system... the first bot installed on shells will set their uplink to the +u bot now.
 
 1.0.03
-! 1.Fixed a bug in last checker which caused segfault.
-! 2.Fixed a bug in cmd_pls_user.
-! 3.Fixed FreeBSD compile errors. 
-@ 4.Improved 'last' checker functions.
+
+1.Fixed a bug in last checker which caused segfault.
+2.Fixed a bug in cmd_pls_user.
+3.Fixed FreeBSD compile errors. 
+4.Improved 'last' checker functions.
 
 1.0.02
-/ Various small bug fixes.
-@ 1.Update system is now compressed.
-@ 2.Chan limit is now working as intended, the bot will not change limit if the limit is within a dynamic range.
+
+1.Update system is now compressed.
+2.Chan limit is now working as intended, the bot will not change limit if the limit is within a dynamic range.
 
 1.0.01
-! 1.Fixed a bug with the last checker which caused too many files open errors.
-! 2.Fixed a few bugs here and there.
-@ 3.Made limit system marginal, don't ask, just makes less +l modes.
+
+1.Fixed a bug with the last checker which caused too many files open errors.
+2.Fixed a few bugs here and there.
+3.Made limit system marginal, don't ask, just makes less +l modes.
 
 1.0.0
-/ First private release.
+
+First private release.
