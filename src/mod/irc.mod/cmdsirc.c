@@ -1599,7 +1599,7 @@ static void cmd_deluser(int idx, char *par)
     return;
   }
 
-  char *nick = NULL, s[UHOSTLEN] = "";
+  char *nick = NULL, s[UHOSTLEN] = "", *added = NULL;
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
   struct userrec *u = NULL;
@@ -1621,6 +1621,9 @@ static void cmd_deluser(int idx, char *par)
     dprintf(idx, "%s is not a valid user.\n", nick);
     return;
   }
+  added = (char *) get_user(&USERENTRY_ADDED, u);
+  newsplit(&added);
+
   get_user_flagrec(u, &victim, NULL);
   if (isowner(u->handle)) {
     dprintf(idx, "You can't remove a permanent bot owner!\n");
@@ -1634,6 +1637,8 @@ static void cmd_deluser(int idx, char *par)
     dprintf(idx, "You can't remove a channel master!\n");
   } else if (glob_bot(victim) && !glob_owner(user)) {
     dprintf(idx, "You can't remove a bot!\n");
+  } else if (!glob_master(user) && egg_strcasecmp(dcc[idx].nick, added)) {
+    dprintf(idx, "Sorry, you may not delete this user as you did not add them.\n");
   } else {
     char buf[HANDLEN + 1] = "";
 

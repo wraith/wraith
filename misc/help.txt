@@ -868,6 +868,7 @@ See also: encrypt, randstring, md5, sha1
    current hostname.  Channel masters can remove users so long as
    the user isn't a bot master.
  
+   Channel masters may only delete users which they added.
 see also: adduser%{+m}, +user, -user%{-}
 :leaf:deop
 ###  $bdeop$b <nickname> [channel|*]

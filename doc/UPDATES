@@ -16,6 +16,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Fixed chanset (manop/mop/mdop/bad-cookie) to accept english parameters: ignore/deop/kick/delete/remove. 
 * cmd_cmdpass was not clear on usage.
 * Using a cmd with a cmdpass without proper flags now acts as if cmd is not valid (no longer spams wrong pass error)
+* cmd_deluser change: only allow a |m user to remove users whom they have added.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
