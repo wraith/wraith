@@ -20,6 +20,7 @@ This is a summary of ChangeLog basically.
 16.Bot specific channels (cmd_botjoin/cmd_botpart)
 17.Added CFG: servport.
 18.Fixed setting ban/invite/exempt on hub, and leafs not setting it.
+19.Annoying log -NOTICE- *** should be fixed.
 
 1.1.7
 
