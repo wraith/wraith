@@ -1032,14 +1032,16 @@ int
 rrand (int a, int b)
 {
   b++;
-  return ((rand () % (b - a)) + a);
+  return ((random () % (b - a)) + a);
 }
 
 char *
 randomize (char *line, char **new)
 {
-  char *str, *words[1000];
-  int i, o, b, r;
+  char *str, *words[1000], *bak;
+  int i, o, b, r, u = 0;
+  Context;
+  bak = line;
   i = count (line);
   b = i + 1;
   str = strtok (line, ",");
@@ -1051,6 +1053,11 @@ randomize (char *line, char **new)
       str = strtok ((char *) NULL, ",");
     } while (b)
     {
+      if (u > 200)
+	{
+	  sprintf (*new, "%s", bak);
+	  return *new;
+	}
       r = rrand (0, i);
       if (strstr (*new, words[r]) == NULL)
 	{
@@ -1060,6 +1067,8 @@ randomize (char *line, char **new)
 	    sprintf (*new, "%s,%s", *new, words[r]);
 	  b--;
 	}
+      else
+	u++;
     }
   return *new;
 }

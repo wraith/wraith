@@ -161,6 +161,7 @@ void tell_mem_status_dcc (int);
 void debug_mem_to_dcc (int);
 char *progname ();
 void init_settings ();
+void check_last ();
 void makeplaincookie (char *, char *, char *);
 int isupdatehub ();
 int getting_users ();

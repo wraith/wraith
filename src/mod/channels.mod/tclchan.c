@@ -857,10 +857,10 @@ tcl_channel_info (Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement (irp, "+nomop");
   else
     Tcl_AppendElement (irp, "-nomop");
-  if (chan->status & CHAN_NOMDOP)
-    Tcl_AppendElement (irp, "+nomdop");
+  if (chan->status & CHAN_MANOP)
+    Tcl_AppendElement (irp, "+manop");
   else
-    Tcl_AppendElement (irp, "-nomdop");
+    Tcl_AppendElement (irp, "-manop");
   if (chan->status & CHAN_VOICE)
     Tcl_AppendElement (irp, "+voice");
   else
@@ -869,10 +869,10 @@ tcl_channel_info (Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement (irp, "+fastop");
   else
     Tcl_AppendElement (irp, "-fastop");
-  if (chan->status & CHAN_PUNISH)
-    Tcl_AppendElement (irp, "+punish");
+  if (chan->status & CHAN_PRIVATE)
+    Tcl_AppendElement (irp, "+private");
   else
-    Tcl_AppendElement (irp, "-punish");
+    Tcl_AppendElement (irp, "-private");
   for (ul = udef; ul; ul = ul->next)
     {
       if (!ul->defined || !ul->name)
@@ -1001,9 +1001,6 @@ tcl_channel_get (Tcl_Interp * irp, struct chanset_t *chan, char *setting)
     (CHAN_CYCLE, "cycle", chan->status)
     else
   if CHKFLAG_POS
-    (CHAN_SEEN, "seen", chan->status)
-    else
-  if CHKFLAG_POS
     (CHAN_NODESYNCH, "nodesynch", chan->status)
 #ifdef S_IRCNET
       else
@@ -1027,10 +1024,10 @@ tcl_channel_get (Tcl_Interp * irp, struct chanset_t *chan, char *setting)
     (CHAN_TAKE, "take", chan->status)
     else
   if CHKFLAG_POS
-    (CHAN_NOMOP, "nomdop", chan->status)
+    (CHAN_NOMOP, "nomop", chan->status)
     else
   if CHKFLAG_POS
-    (CHAN_NOMDOP, "nomdop", chan->status)
+    (CHAN_MANOP, "manop", chan->status)
     else
   if CHKFLAG_POS
     (CHAN_VOICE, "voice", chan->status)
@@ -1039,7 +1036,7 @@ tcl_channel_get (Tcl_Interp * irp, struct chanset_t *chan, char *setting)
     (CHAN_FASTOP, "fastop", chan->status)
     else
   if CHKFLAG_POS
-    (CHAN_PUNISH, "punish", chan->status)
+    (CHAN_PRIVATE, "private", chan->status)
     else
     {
       for (ul = udef; ul && ul->name; ul = ul->next)
@@ -1412,10 +1409,10 @@ tcl_channel_modify (Tcl_Interp * irp, struct chanset_t *chan, int items,
 	chan->status |= CHAN_NOMOP;
       else if (!strcmp (item[i], "-nomop"))
 	chan->status &= ~CHAN_NOMOP;
-      else if (!strcmp (item[i], "+nomdop"))
-	chan->status |= CHAN_NOMDOP;
-      else if (!strcmp (item[i], "-nomdop"))
-	chan->status &= ~CHAN_NOMDOP;
+      else if (!strcmp (item[i], "+manop"))
+	chan->status |= CHAN_MANOP;
+      else if (!strcmp (item[i], "-manop"))
+	chan->status &= ~CHAN_MANOP;
       else if (!strcmp (item[i], "+voice"))
 	chan->status |= CHAN_VOICE;
       else if (!strcmp (item[i], "-voice"))
@@ -1423,19 +1420,27 @@ tcl_channel_modify (Tcl_Interp * irp, struct chanset_t *chan, int items,
       else if (!strcmp (item[i], "+fastop"))
 	{
 	  chan->status |= CHAN_FASTOP;
-	  chan->status &= ~CHAN_PUNISH;
 	}
       else if (!strcmp (item[i], "-fastop"))
 	chan->status &=
 	  ~(CHAN_FASTOP | CHAN_PROTECTFRIENDS | CHAN_PROTECTOPS |
 	    CHAN_DONTKICKOPS);
-      else if (!strcmp (item[i], "+punish"))
+      else if (!strcmp (item[i], "+private"))
 	{
-	  chan->status |= CHAN_PUNISH;
-	  chan->status &= ~CHAN_FASTOP;
+	  chan->status |= CHAN_PRIVATE;
 	}
-      else if (!strcmp (item[i], "-punish"))
-	chan->status &= ~CHAN_PUNISH;
+      else if (!strcmp (item[i], "-private"))
+	chan->status &= ~CHAN_PRIVATE;
+      else if (!strcmp (item[i], "+nomdop"));
+      else if (!strcmp (item[i], "-nomdop"));
+      else if (!strcmp (item[i], "+nomop"));
+      else if (!strcmp (item[i], "-nomop"));
+      else if (!strcmp (item[i], "+punish"));
+      else if (!strcmp (item[i], "-punish"));
+      else if (!strcmp (item[i], "+seen"));
+      else if (!strcmp (item[i], "-seen"));
+      else if (!strcmp (item[i], "+secret"));
+      else if (!strcmp (item[i], "-secret"));
       else if (!strcmp (item[i], "-stopnethack"));
       else if (!strcmp (item[i], "+stopnethack"));
       else if (!strcmp (item[i], "-wasoptest"));

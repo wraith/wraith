@@ -50,6 +50,7 @@ got_cset (char *botnick, char *code, char *par)
     {
       if (par[0] == '*' && par[1] == ' ')
 	{
+	  return;
 	  all = 1;
 	  newsplit (&par);
 	}
@@ -565,7 +566,9 @@ channels_report (int idx, int details)
     {
       if (idx != DP_STDOUT)
 	get_user_flagrec (dcc[idx].user, &fr, chan->dname);
-      if ((idx == DP_STDOUT) || glob_master (fr) || chan_master (fr))
+      if ((!channel_private (chan)
+	   || (channel_private (chan) && (chan_op (fr) || glob_owner (fr))))
+	  && ((idx == DP_STDOUT) || glob_master (fr) || chan_master (fr)))
 	{
 	  s[0] = 0;
 	  if (channel_bitch (chan))
@@ -599,10 +602,15 @@ channels_report (int idx, int details)
 		}
 	      else
 		{
+#ifdef LEAF
 		  dprintf (idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n",
 			   chan->dname,
 			   channel_pending (chan) ? "pending" :
 			   "not on channel", s2, s);
+#else
+		  dprintf (idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n",
+			   chan->dname, "limbo", s2, s);
+#endif
 		}
 	    }
 	  else
@@ -658,14 +666,14 @@ channels_report (int idx, int details)
 		i += my_strcpy (s + i, "take ");
 	      if (channel_nomop (chan))
 		i += my_strcpy (s + i, "nmop ");
-	      if (channel_nomdop (chan))
-		i += my_strcpy (s + i, "nomdop ");
+	      if (channel_manop (chan))
+		i += my_strcpy (s + i, "manop ");
 	      if (channel_voice (chan))
 		i += my_strcpy (s + i, "voice ");
 	      if (channel_fastop (chan))
 		i += my_strcpy (s + i, "fastop ");
-	      if (channel_punish (chan))
-		i += my_strcpy (s + i, "punish ");
+	      if (channel_private (chan))
+		i += my_strcpy (s + i, "private ");
 	      dprintf (idx, "      Options: %s\n", s);
 	      if (chan->idle_kick)
 		dprintf (idx, "      Kicking idle users after %d min\n",
@@ -913,21 +921,21 @@ channels_start (Function * global_funcs)
   udef = NULL;
   global_stopnethack_mode = 0;
   global_revenge_mode = 3;
-  global_ban_time = 120;
+  global_ban_time = 0;
 #ifdef S_IRCNET
-  global_exempt_time = 60;
-  global_invite_time = 60;
+  global_exempt_time = 0;
+  global_invite_time = 0;
 #endif
   strcpy (glob_chanset,
 	  "+enforcebans " "+dynamicbans " "+userbans " "-bitch "
-	  "-protectops " "-revenge " "+secret " "+cycle " "+dontkickops "
-	  "-inactive " "-protectfriends "
+	  "-protectops " "-revenge " "+cycle " "+dontkickops " "-inactive "
+	  "-protectfriends "
 #ifdef S_IRCNET
 	  "-userexempts " "-dynamicexempts " "-userinvites "
 	  "-dynamicinvites "
 #endif
-	  "-revengebot " "+nodesynch " "-closed " "-take " "-nomop "
-	  "-nomdop " "-voice " "+fastop " "-punish ");
+	  "-revengebot " "+nodesynch " "-closed " "-take " "+manop " "-voice "
+	  "-private " "-fastop ");
   module_register (MODULE_NAME, channels_table, 1, 0);
   add_hook (HOOK_SWITCH_STATIC, (Function) switch_static);
 #ifdef LEAF

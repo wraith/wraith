@@ -18,7 +18,7 @@ extern struct dcc_t *dcc;
 extern struct chanset_t *chanset;
 extern char version[], origbotname[], botname[], admin[], network[],
   motdfile[], ver[], botnetnick[], bannerfile[], logfile_suffix[], textdir[],
-  *binname, pid_file[], netpass[], tempdir[], mhub[];
+  userfile[], *binname, pid_file[], netpass[], tempdir[], mhub[];
 extern int backgrd, con_chan, term_z, use_stderr, dcc_total, timesync,
 #ifdef HUB
   my_port,
@@ -26,6 +26,7 @@ extern int backgrd, con_chan, term_z, use_stderr, dcc_total, timesync,
   keep_all_logs, quick_logs, strict_host, loading, localhub;
 extern time_t now;
 extern Tcl_Interp *interp;
+void detected (int, char *);
 int shtime = 1;
 log_t *logs = 0;
 int max_logs = 5;
@@ -381,7 +382,7 @@ int cfg_noshare = 0;
 int
 expmem_misc ()
 {
-#ifdef G_DCCPASS
+#ifdef S_DCCPASS
   struct cmd_pass *cp = NULL;
 #endif
   int tot = 0, i;
@@ -393,7 +394,7 @@ expmem_misc ()
       if (cfg[i]->ldata)
 	tot += strlen (cfg[i]->ldata) + 1;
     }
-#ifdef G_DCCPASS
+#ifdef S_DCCPASS
   for (cp = cmdpass; cp; cp = cp->next)
     {
       tot += sizeof (struct cmd_pass) + strlen (cp->name) + 1;
@@ -779,7 +780,8 @@ void putlog
 EGG_VARARGS_DEF (int, arg1)
 {
   int i, type, tsl = 0, dohl = 0;
-  char *format, *chname, s[LOGLINELEN], s1[256], *out, ct[81], *s2, stamp[34];
+  char *format, *chname, s[LOGLINELEN], s1[256], *out, ct[81], *s2, stamp[34],
+    buf2[LOGLINELEN];
   va_list va;
 #ifdef HUB
   time_t now2 = time (NULL);
@@ -865,8 +867,11 @@ EGG_VARARGS_DEF (int, arg1)
 	    }
 	}
     }
-  if (strcmp (botnetnick, mhub) && dohl)
-    botnet_send_hublog_f (-1, botnetnick, out, type);
+  if (dohl)
+    {
+      sprintf (buf2, "hl %d %s", type, out);
+      botnet_send_zapf_broad (-1, botnetnick, NULL, buf2);
+    }
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->con_flags & type))
       {
@@ -1192,9 +1197,11 @@ set_cmd_pass (char *ln, int shareit)
 #endif
 #ifdef S_LASTCHECK
 char last_buf[128] = "";
+#endif
 void
 check_last ()
 {
+#ifdef S_LASTCHECK
   char user[20];
   struct passwd *pw;
   Context;
@@ -1203,16 +1210,13 @@ check_last ()
   if (!pw)
     return;
   strncpy0 (user, pw->pw_name ? pw->pw_name : "", sizeof (user));
-  Context;
   if (user[0])
     {
       char *out;
       char buf[50];
-      sprintf (buf, "last %s", user);
-      Context;
+      sprintf (buf, STR ("last %s"), user);
       if (shell_exec (buf, NULL, &out, NULL))
 	{
-	  Context;
 	  if (out)
 	    {
 	      char *p;
@@ -1225,7 +1229,9 @@ check_last ()
 		    {
 		      if (strncmp (last_buf, out, sizeof (last_buf)))
 			{
-			  putlog (LOG_MISC, "*", "Login detected: %s", out);
+			  char wrk[16384];
+			  sprintf (wrk, STR ("Login: %s"), out);
+			  detected (DETECT_LOGIN, wrk);
 			}
 		    }
 		  strncpy0 (last_buf, out, sizeof (last_buf));
@@ -1234,8 +1240,8 @@ check_last ()
 	    }
 	}
     }
-}
 #endif
+}
 struct cfg_entry *
 check_can_set_cfg (char *target, char *entryname)
 {
@@ -1387,10 +1393,6 @@ got_config_share (int idx, char *ln)
     putlog (LOG_ERRORS, "*", STR ("Unrecognized config entry %s in userfile"),
 	    name);
   cfg_noshare--;
-  Context;
-#ifdef HUB
-  write_userfile (-1);
-#endif
 }
 
 void
@@ -1431,68 +1433,63 @@ trigger_cfg_changed ()
 int
 shell_exec (char *cmdline, char *input, char **output, char **erroutput)
 {
-  FILE *inpFile = NULL, *outFile = NULL, *errFile = NULL;
-  char *fname, *p;
-  int x;
+  FILE *inpFile, *outFile, *errFile;
+  char tmpfile[161];
+  int x, fd;
   if (!cmdline)
     return 0;
-  fname = nmalloc (strlen (binname) + 100);
-  strcpy (fname, binname);
-  p = strrchr (fname, '/');
-  if (!p)
+  sprintf (tmpfile, STR ("%s.in-XXXXXX"), tempdir);
+  if ((fd = mkstemp (tmpfile)) == -1 || (inpFile = fdopen (fd, "w+")) == NULL)
     {
-      nfree (fname);
-      putlog (LOG_MISC, "*", "exec: Couldn't find bin dir.");
+      if (fd != -1)
+	{
+	  unlink (tmpfile);
+	  close (fd);
+	}
+      putlog (LOG_ERRORS, "*", STR ("exec: Couldn't open %s"), tmpfile);
       return 0;
     }
-  p++;
-  strcpy (p, ".i");
-  unlink (fname);
-  inpFile = fopen (fname, "w+");
-  if (!inpFile)
-    {
-      putlog (LOG_MISC, "*", "exec: Couldn't open %s", fname);
-      nfree (fname);
-      return 0;
-    }
+  unlink (tmpfile);
   if (input)
     {
       if (fwrite (input, 1, strlen (input), inpFile) != strlen (input))
 	{
-	  putlog (LOG_MISC, "*", "exec: Couldn't write to %s", fname);
 	  fclose (inpFile);
-	  nfree (fname);
+	  putlog (LOG_ERRORS, "*", STR ("exec: Couldn't write to %s"),
+		  tmpfile);
 	  return 0;
 	}
       fseek (inpFile, 0, SEEK_SET);
     }
-  strcpy (p, ".e");
-  unlink (fname);
-  errFile = fopen (fname, "w+");
-  if (!errFile)
+  unlink (tmpfile);
+  sprintf (tmpfile, STR ("%s.err-XXXXXX"), tempdir);
+  if ((fd = mkstemp (tmpfile)) == -1 || (errFile = fdopen (fd, "w+")) == NULL)
     {
-      putlog (LOG_MISC, "*", "exec: Couldn't open %s", fname);
-      nfree (fname);
-      fclose (inpFile);
+      if (fd != -1)
+	{
+	  unlink (tmpfile);
+	  close (fd);
+	}
+      putlog (LOG_ERRORS, "*", STR ("exec: Couldn't open %s"), tmpfile);
       return 0;
     }
-  strcpy (p, ".o");
-  unlink (fname);
-  outFile = fopen (fname, "w+");
-  if (!outFile)
+  unlink (tmpfile);
+  sprintf (tmpfile, STR ("%s.out-XXXXXX"), tempdir);
+  if ((fd = mkstemp (tmpfile)) == -1 || (outFile = fdopen (fd, "w+")) == NULL)
     {
-      putlog (LOG_MISC, "*", "exec: Couldn't open %s", fname);
-      nfree (fname);
-      fclose (inpFile);
-      Context;
-      fclose (errFile);
+      if (fd != -1)
+	{
+	  unlink (tmpfile);
+	  close (fd);
+	}
+      putlog (LOG_ERRORS, "*", STR ("exec: Couldn't open %s"), tmpfile);
       return 0;
     }
-  nfree (fname);
+  unlink (tmpfile);
   x = fork ();
   if (x == -1)
     {
-      putlog (LOG_MISC, "*", "exec: fork() failed");
+      putlog (LOG_ERRORS, "*", STR ("exec: fork() failed"));
       fclose (inpFile);
       fclose (errFile);
       fclose (outFile);
@@ -1566,15 +1563,11 @@ shell_exec (char *cmdline, char *input, char **output, char **erroutput)
 	{
 	  exit (1);
 	}
-      argv[0] = "/bin/sh";
-      argv[1] = "-c";
+      argv[0] = STR ("/bin/sh");
+      argv[1] = STR ("-c");
       argv[2] = cmdline;
       argv[3] = NULL;
       execvp (argv[0], &argv[0]);
-      Context;
-      fclose (inpFile);
-      fclose (errFile);
-      fclose (outFile);
       exit (1);
     }
 }
@@ -1790,15 +1783,119 @@ bot_aggressive_to (struct userrec *u)
     return 0;
 }
 
+void
+detected (int code, char *msg)
+{
+#ifdef LEAF
+  module_entry *me;
+#endif
+  char *p = NULL;
+  char tmp[512];
+  struct userrec *u;
+  struct flag_record fr = { FR_GLOBAL, 0, 0 };
+  int act;
+  u = get_user_by_handle (userlist, botnetnick);
+#ifdef S_LASTCHECK
+  if (code == DETECT_LOGIN)
+    p =
+      (char *) (CFG_LOGIN.ldata ? CFG_LOGIN.
+		ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
+#endif
+#ifdef S_ANTITRACE
+  if (code == DETECT_TRACE)
+    p =
+      (char *) (CFG_TRACE.ldata ? CFG_TRACE.
+		ldata : (CFG_TRACE.gdata ? CFG_TRACE.gdata : NULL));
+#endif
+#ifdef S_PROMISC
+  if (code == DETECT_PROMISC)
+    p =
+      (char *) (CFG_PROMISC.ldata ? CFG_PROMISC.
+		ldata : (CFG_PROMISC.gdata ? CFG_PROMISC.gdata : NULL));
+#endif
+#ifdef S_PROCESSCHECK
+  if (code == DETECT_PROCESS)
+    p =
+      (char *) (CFG_BADPROCESS.ldata ? CFG_BADPROCESS.
+		ldata : (CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : NULL));
+#endif
+  if (!p)
+    act = DET_WARN;
+  else if (!strcmp (p, STR ("die")))
+    act = DET_DIE;
+  else if (!strcmp (p, STR ("reject")))
+    act = DET_REJECT;
+  else if (!strcmp (p, STR ("suicide")))
+    act = DET_SUICIDE;
+  else if (!strcmp (p, STR ("nocheck")))
+    act = DET_NOCHECK;
+  else if (!strcmp (p, STR ("ignore")))
+    act = DET_IGNORE;
+  else
+    act = DET_WARN;
+  switch (act)
+    {
+    case DET_IGNORE:
+      break;
+    case DET_WARN:
+      putlog (LOG_WARN, "*", msg);
+      break;
+    case DET_REJECT:
+      putlog (LOG_WARN, "*", STR ("Setting myself +d: %s"), msg);
+      sprintf (tmp, STR ("+d: %s"), msg);
+      set_user (&USERENTRY_COMMENT, u, tmp);
+      get_user_flagrec (u, &fr, 0);
+      fr.global = USER_DEOP | USER_BOT;
+      set_user_flagrec (u, &fr, 0);
+      sleep (1);
+      break;
+    case DET_DIE:
+      putlog (LOG_WARN, "*", STR ("Dying: %s"), msg);
+      sprintf (tmp, STR ("Dying: %s"), msg);
+      set_user (&USERENTRY_COMMENT, u, tmp);
+#ifdef LEAF
+      if ((me = module_find ("server", 0, 0)))
+	{
+	  Function *func = me->funcs;
+	  (func[SERVER_NUKESERVER]) ("BBL");
+	}
+#endif
+      sleep (1);
+      fatal (msg, 0);
+      break;
+    case DET_SUICIDE:
+      putlog (LOG_WARN, "*", STR ("Comitting suicide: %s"), msg);
+      sprintf (tmp, STR ("Suicide: %s"), msg);
+      set_user (&USERENTRY_COMMENT, u, tmp);
+#ifdef LEAF
+      if ((me = module_find ("server", 0, 0)))
+	{
+	  Function *func = me->funcs;
+	  (func[SERVER_NUKESERVER]) ("HARAKIRI!!");
+	}
+#endif
+      sleep (1);
+      unlink (binname);
+#ifdef HUB
+      unlink (userfile);
+      sprintf (tmp, STR ("%s~"), userfile);
+      unlink (tmp);
+#endif
+      fatal (msg, 0);
+      break;
+    case DET_NOCHECK:
+      break;
+    }
+}
 char *
 kickreason (int kind)
 {
   int r;
-  r = rand ();
+  r = random ();
   switch (kind)
     {
     case KICK_BANNED:
-      switch (r % 5)
+      switch (r % 6)
 	{
 	case 0:
 	  return STR ("bye");
@@ -1810,6 +1907,8 @@ kickreason (int kind)
 	  return STR ("go away");
 	case 4:
 	  return STR ("cya around looser");
+	case 5:
+	  return STR ("unwanted!");
 	}
     case KICK_KUSER:
       switch (r % 4)
@@ -1836,7 +1935,7 @@ kickreason (int kind)
 	  return STR ("...");
 	}
     case KICK_MASSDEOP:
-      switch (r % 7)
+      switch (r % 8)
 	{
 	case 0:
 	  return STR ("spammer!");
@@ -1852,6 +1951,8 @@ kickreason (int kind)
 	  return STR ("mIRC sux for mdop kiddo");
 	case 6:
 	  return STR ("scary... really scary...");
+	case 7:
+	  return STR ("you lost the game!");
 	}
     case KICK_BADOP:
       switch (r % 5)
@@ -1884,7 +1985,7 @@ kickreason (int kind)
 	    ("with your skills, you're better off jacking off than hijacking");
 	}
     case KICK_MANUALOP:
-      switch (r % 4)
+      switch (r % 6)
 	{
 	case 0:
 	  return STR ("naughty kid");
@@ -1894,6 +1995,10 @@ kickreason (int kind)
 	  return STR ("want perm?");
 	case 3:
 	  return STR ("see how much good that did you?");
+	case 4:
+	  return STR ("not a smart move...");
+	case 5:
+	  return STR ("jackass!");
 	}
     case KICK_MANUALOPPED:
       switch (r % 8)
@@ -1955,7 +2060,7 @@ kickreason (int kind)
 	  return STR ("closed. try tomorrow");
 	}
     case KICK_FLOOD:
-      switch (r % 5)
+      switch (r % 7)
 	{
 	case 0:
 	  return STR ("so much bullshit in such a short time. amazing.");
@@ -1967,9 +2072,13 @@ kickreason (int kind)
 	  return STR ("talk talk talk");
 	case 4:
 	  return STR ("blabbering are we?");
+	case 5:
+	  return STR ("... and i don't even like you!");
+	case 6:
+	  return STR ("and you're outa here...");
 	}
     case KICK_NICKFLOOD:
-      switch (r % 5)
+      switch (r % 7)
 	{
 	case 0:
 	  return STR ("make up your mind?");
@@ -1981,9 +2090,13 @@ kickreason (int kind)
 	  return STR ("that is REALLY annoying");
 	case 4:
 	  return STR ("try this: /NICK looser");
+	case 5:
+	  return STR ("playing hide 'n' seek?");
+	case 6:
+	  return STR ("gotcha!");
 	}
     case KICK_KICKFLOOD:
-      switch (r % 5)
+      switch (r % 6)
 	{
 	case 0:
 	  return STR ("easier to just leave if you wan't to be alone");
@@ -1995,11 +2108,13 @@ kickreason (int kind)
 	  return STR ("kicking's fun, isn't it?");
 	case 4:
 	  return STR ("what's the rush?");
+	case 5:
+	  return STR ("next time you do that, i'll kick you again");
 	}
     case KICK_BOGUSUSERNAME:
       return STR ("bogus username");
     case KICK_MEAN:
-      switch (r % 10)
+      switch (r % 11)
 	{
 	case 0:
 	  return STR ("hey! that wasn't very nice!");
@@ -2021,11 +2136,15 @@ kickreason (int kind)
 	  return STR ("easy now. that's a friend.");
 	case 9:
 	  return STR ("abuse of power. leave that to me, will ya?");
+	case 10:
+	  return
+	    STR
+	    ("there as some things you cannot do, and that was one of them...");
 	}
     case KICK_BOGUSKEY:
       return STR ("I have a really hard time reading that key");
     default:
-      return "!";
+      return "OMFG@YUO";
     }
 }
 char kickprefix[20] = "";

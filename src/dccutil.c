@@ -562,6 +562,7 @@ void
 do_boot (int idx, char *by, char *reason)
 {
   int files = (dcc[idx].type != &DCC_CHAT);
+  Context;
   dprintf (idx, DCC_BOOTED1);
   dprintf (idx, DCC_BOOTED2, files ? "file section" : "bot", by,
 	   reason[0] ? ": " : ".", reason);
@@ -577,6 +578,7 @@ do_boot (int idx, char *by, char *reason)
   check_tcl_chof (dcc[idx].nick, dcc[idx].sock);
   if ((dcc[idx].sock != STDOUT) || backgrd)
     {
+      Context;
       killsock (dcc[idx].sock);
       lostdcc (idx);
     }

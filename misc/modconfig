@@ -106,9 +106,6 @@ mc_fmodules=${mc_bindir}/.modules
 #  List of all modules we have detected so far.
 mc_fknownmods=${mc_bindir}/.known_modules
 
-#  List of modules disabled by default
-mc_fdisabledmods=${mc_top_srcdir}/disabled_modules
-
 mc_mod_dir=${mc_srcdir}/mod
 
 mc_mod_bin_dir=${mc_bindir}/src/mod
@@ -269,12 +266,7 @@ xdetect-modules)
 				fi
 			fi
 		else
-			if (sed s/\ //g ${mc_fdisabledmods} 2>&1 | grep "^${mc_mod}\$" 1>&7 2>&1)
-			then
-				:
-			else
 				mc_new_mod_state=enabled
-			fi
 		fi
 		if test "${mc_new_mod_state}" = enabled; then
 			${mc_self_call} -q add ${mc_mod}

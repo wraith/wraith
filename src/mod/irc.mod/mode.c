@@ -1023,14 +1023,12 @@ gotmode (char *from, char *origmsg)
 		    reversing = 1;
 		  break;
 		case 'l':
-		  Context;
 		  buser = get_user_by_handle (userlist, botnetnick);
 		  get_user_flagrec (buser, &fr3, ch);
 		  if ((!nick[0]) && (bounce_modes))
 		    reversing = 1;
 		  if (ms2[0] == '-')
 		    {
-		      Context;
 		      check_tcl_mode (nick, from, u, chan->dname, ms2, "");
 		      if (channel_active (chan))
 			{
@@ -1059,7 +1057,6 @@ gotmode (char *from, char *origmsg)
 		    }
 		  else
 		    {
-		      Context;
 		      op = newsplit (&msg);
 		      fixcolon (op);
 		      if (op == '\0')
@@ -1122,7 +1119,6 @@ gotmode (char *from, char *origmsg)
 		    }
 		  break;
 		case 'o':
-		  Context;
 		  op = newsplit (&msg);
 		  fixcolon (op);
 		  if (ms2[0] == '+')
@@ -1200,8 +1196,7 @@ gotmode (char *from, char *origmsg)
 					   || chan_master (user)
 					   || glob_bot (user)))
 				{
-				  if (!chan_quiet (victim)
-				      && !glob_quiet (victim))
+				  if (!chan_quiet (victim))
 				    m->flags |= EVOICE;
 				}
 			    }

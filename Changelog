@@ -47,3 +47,33 @@
  Fixed msg_op to use cookieops when a channel is specified
  Fixed do_op to only send opline (+o-b) if nick is in channel ;)
  Removed cmd_pls_bot
+
+1.0.07
+ Recoded last checker and detect code
+ Recoded logging system, should stop some cpu usage loops..
+ Restructured a few commands to be hub only
+ Added cmd_botexec
+ Major file descripter bug *seems to be* fixed, caused "Too many connections" on bots.
+ Recoded some of the compression system (should fix fbsd)
+ Set channels to be default -fastop (to use cookieops)
+ cmd_config and cmd_botconfig are hub only now
+ Fixed getin system so bots will join keyed channels
+ Increased botnet pings from 30 seconds to 60 seconds
+ cmd_op no longer ops in channel the user is already opped in
+ Removed trailing period from cmd_pls_user and cmd_adduser to ward off confusion
+ Fixed bug in check_mypid which was the true culprit of the "Too many connections/open files" bug
+ Added cmd_bottcl
+ Renamed cmd_mtcl to cmd_nettcl
+ Cmds requiring +a no longer require perm owner status, reasoning: only a perm owner can give +a, so make sure you trust that user...
+ cmd_bind now requires +a
+ Fixed a major security flaw in msg_op (found by xmage)
+ Fixed cmd_help to output correctly
+
+1.0.08
+ Fixed do_op to not send +o-b if nick is not in channel
+ Fixed randservers to not spike cpu randomly
+ Added a few new kick msgs 
+ Added channel mode +/-manop, +manop will ALLOW manual op, -manop will punish for it based on !config manop
+ Added channel mode +/-private, a user needs chan flag +o (or global +n) to see/access chan (global ops cant access)
+ cmd_op reverted to op a nick even if already opped. (could fix a desync)
+ Fixed a cosmetic bug in cmd_help

@@ -13,6 +13,7 @@
 #endif
 #include "compress.h"
 #define BUFLEN	512
+#undef HAVE_MMAP
 static Function *global = NULL, *share_funcs = NULL;
 static unsigned int compressed_files;
 static unsigned int uncompressed_files;

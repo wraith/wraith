@@ -1354,7 +1354,7 @@ write_chans (FILE * f, int idx)
 	  sprintf (sadd, "%s\n", channel_static (chan) ? "" : "}");
 	  if (lfprintf
 	      (f,
-	       "+ channel %s %s%schanmode %s topic %s idle-kick %d limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d ban-time %d exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans %cbitch %cprotectops %cprotectfriends %cdontkickops %crevenge %crevengebot %csecret %ccycle %cinactive %cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cnomop %cnomdop %cvoice %cfastop %cpunish %s %s",
+	       "+ channel %s %s%schanmode %s topic %s idle-kick %d limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d ban-time %d exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans %cbitch %cprotectops %cprotectfriends %cdontkickops %crevenge %crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites %cnodesynch %cclosed %ctake %cmanop %cvoice %cfastop %s %s",
 	       channel_static (chan) ? "set" : "add", name,
 	       channel_static (chan) ? " " : " { ", w2, topic,
 	       chan->idle_kick, chan->limitraise, chan->stopnethack_mode,
@@ -1376,7 +1376,7 @@ write_chans (FILE * f, int idx)
 	       PLSMNS (channel_dontkickops (chan)),
 	       PLSMNS (channel_revenge (chan)),
 	       PLSMNS (channel_revengebot (chan)),
-	       PLSMNS (channel_secret (chan)), PLSMNS (channel_cycle (chan)),
+	       PLSMNS (channel_private (chan)), PLSMNS (channel_cycle (chan)),
 	       PLSMNS (channel_inactive (chan)),
 #ifdef S_IRCNET
 	       PLSMNS (channel_dynamicexempts (chan)),
@@ -1386,9 +1386,8 @@ write_chans (FILE * f, int idx)
 #endif
 	       PLSMNS (channel_nodesynch (chan)),
 	       PLSMNS (channel_closed (chan)), PLSMNS (channel_take (chan)),
-	       PLSMNS (channel_nomop (chan)), PLSMNS (channel_nomdop (chan)),
-	       PLSMNS (channel_voice (chan)), PLSMNS (channel_fastop (chan)),
-	       PLSMNS (channel_punish (chan)), udefs, sadd) == EOF)
+	       PLSMNS (channel_manop (chan)), PLSMNS (channel_voice (chan)),
+	       PLSMNS (channel_fastop (chan)), udefs, sadd) == EOF)
 	    return 0;
 	}
     }

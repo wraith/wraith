@@ -181,7 +181,7 @@ struct chanset_t
 #define CHAN_NOMOP 0x0080
 #define CHAN_REVENGE 0x0100
 #define CHAN_SECRET 0x0200
-#define CHAN_NOMDOP 0x0400
+#define CHAN_MANOP 0x0400
 #define CHAN_CYCLE 0x0800
 #define CHAN_DONTKICKOPS 0x1000
 #define CHAN_INACTIVE 0x2000
@@ -191,7 +191,7 @@ struct chanset_t
 #define CHAN_REVENGEBOT 0x20000
 #define CHAN_NODESYNCH 0x40000
 #define CHAN_FASTOP 0x80000
-#define CHAN_PUNISH 0x100000
+#define CHAN_PRIVATE 0x100000
 #define CHAN_ACTIVE 0x1000000
 #define CHAN_PEND 0x2000000
 #define CHAN_FLAGGED 0x4000000
@@ -243,10 +243,10 @@ struct chanset_t *findchan_by_dname (const char *name);
 #define channel_closed(chan) (chan->status & CHAN_CLOSED)
 #define channel_take(chan) (chan->status & CHAN_TAKE)
 #define channel_nomop(chan) (chan->status & CHAN_NOMOP)
-#define channel_nomdop(chan) (chan->status & CHAN_NOMDOP)
+#define channel_manop(chan) (chan->status & CHAN_MANOP)
 #define channel_voice(chan) (chan->status & CHAN_VOICE)
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
-#define channel_punish(chan) (chan->status & CHAN_PUNISH)
+#define channel_private(chan) (chan->status & CHAN_PRIVATE)
 struct msgq_head
 {
   struct msgq *head;

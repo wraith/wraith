@@ -509,6 +509,8 @@
 #define kickprefix ((char *)(global[310]))
 #define bankickprefix ((char *)(global[311]))
 #define deflag_user ((void (*)(struct userrec *, int, char *))global[312])
+/* 313 - 316 */
+#define dcc_prefix ((char *)(global[313]))
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
  * file for it ;)

@@ -14,6 +14,7 @@
 #define BADHANDCHARS	"-,+*=:!.@#;$%&"
 #define MAX_BOTS 500
 #define SERVLEN 60
+#define sgrab 2011
 #define LANGDIR	"./.language"
 #define BASELANG "english"
 #define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
@@ -347,9 +348,18 @@ struct dupwait_info
 #ifdef S_ANTITRACE
 #define DETECT_TRACE 2
 #endif
-#ifdef GSPROMISC
+#ifdef S_PROMISC
 #define DETECT_PROMISC 3
 #endif
+#ifdef S_PROCESSCHECK
+#define DETECT_PROCESS 4
+#endif
+#define DET_IGNORE 0
+#define DET_WARN 1
+#define DET_REJECT 2
+#define DET_DIE 3
+#define DET_SUICIDE 4
+#define DET_NOCHECK 5
 typedef struct
 {
   char *filename;
@@ -434,6 +444,7 @@ typedef struct
   char *outbuf;
   unsigned long outbuflen;
   int encstatus, oseed, iseed;
+  int gz;
   char okey[17];
   char ikey[17];
   unsigned long inbuflen;

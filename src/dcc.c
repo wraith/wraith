@@ -469,13 +469,10 @@ dcc_bot (int idx, char *code, int i)
   strip_telnet (dcc[idx].sock, code, &i);
   if (debug_output)
     {
-      if (code[0] != 'h' && code[1] != 'l' && code[2] != ' ')
-	{
-	  if (code[0] == 's')
-	    putlog (LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code + 2);
-	  else
-	    putlog (LOG_BOTNET, "@", "[%s] %s", dcc[idx].nick, code);
-	}
+      if (code[0] == 's')
+	putlog (LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code + 2);
+      else
+	putlog (LOG_BOTNET, "@", "[%s] %s", dcc[idx].nick, code);
     }
   msg = strchr (code, ' ');
   if (msg)

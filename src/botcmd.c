@@ -494,7 +494,7 @@ bot_infoq (int idx, char *par)
     realnick++;
   else
     realnick = par;
-  putlog (LOG_BOTS, "*", "#%s# botinfo", realnick);
+  putlog (LOG_BOTS, "@", "#%s# botinfo", realnick);
   now2 = now - online_since;
   s2[0] = 0;
   if (now2 > 86400)
@@ -991,27 +991,14 @@ bot_thisbot (int idx, char *par)
   strcpy (dcc[idx].nick, par);
 }
 static void
-bot_hublog (int idx, char *par)
+bot_hublog (char *botnick, char *code, char *par)
 {
-  char *from;
 #ifdef HUB
   int type;
-#endif
-  int i;
-  from = newsplit (&par);
-  i = nextbot (from);
-  if (i != idx)
-    {
-      fake_alert (idx, "direction", from);
-      return;
-    }
-  botnet_send_hublog (idx, from, par);
-#ifdef HUB
   type = atoi (newsplit (&par));
-  putlog (type, "@", "(%s) %s", from, par);
+  putlog (type, "@", "(%s) %s", botnick, par);
 #endif
-}
-static void
+} static void
 bot_handshake (int idx, char *par)
 {
   struct userrec *u = get_user_by_handle (userlist, dcc[idx].nick);
@@ -1422,7 +1409,6 @@ botcmd_t C_bot[] = { {"a", (Function) bot_actchan}
 , {"f!", (Function) bot_filereject}
 , {"fr", (Function) bot_filereq}
 , {"fs", (Function) bot_filesend}
-, {"hl", (Function) bot_hublog}
 , {"hs", (Function) bot_handshake}
 , {"i", (Function) bot_idle}
 , {"i?", (Function) bot_infoq}
@@ -1454,8 +1440,11 @@ botcmd_t C_bot[] = { {"a", (Function) bot_actchan}
 , {NULL, NULL}
 };
 static cmd_t my_bot[] =
-  { {"mt", "", (Function) bot_mtcl, NULL}, {"r_mt", "", (Function) bot_rmtcl,
-					    NULL}, {NULL, NULL, NULL, NULL} };
+  { {"hl", "", (Function) bot_hublog, NULL}, {"mt", "", (Function) bot_mtcl,
+					      NULL}, {"r_mt", "",
+						      (Function) bot_rmtcl,
+						      NULL}, {NULL, NULL,
+							      NULL, NULL} };
 void
 init_botcmd ()
 {

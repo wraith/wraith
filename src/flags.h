@@ -19,9 +19,7 @@ struct flag_record
 #define ROLE_KICK_MDOP (role)
 #define ROLE_KICK_MEAN (role)
 #define DEFLAG_BADCOOKIE 1
-#ifdef G_MANUALOP
 #define DEFLAG_MANUALOP 2
-#endif
 #ifdef G_MEAN
 #define DEFLAG_MEAN_DEOP 3
 #define DEFLAG_MEAN_KICK 4

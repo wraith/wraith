@@ -152,7 +152,10 @@ msg_op (char *nick, char *host, struct userrec *u, char *par)
 	      if (chan && channel_active (chan))
 		{
 		  get_user_flagrec (u, &fr, par);
-		  if (chan_op (fr) || (glob_op (fr) && !chan_deop (fr)))
+		  if ((!channel_private (chan)
+		       || (channel_private (chan)
+			   && (chan_op (fr) || glob_owner (fr))))
+		      && (chan_op (fr) || (glob_op (fr) && !chan_deop (fr))))
 		    {
 		      stats_add (u, 0, 1);
 		      do_op (nick, chan);
@@ -167,9 +170,14 @@ msg_op (char *nick, char *host, struct userrec *u, char *par)
 	      for (chan = chanset; chan; chan = chan->next)
 		{
 		  get_user_flagrec (u, &fr, chan->dname);
-		  if (chan_op (fr) || (glob_op (fr) && !chan_deop (fr)))
-		    stats_add (u, 0, 1);
-		  do_op (nick, chan);
+		  if ((!channel_private (chan)
+		       || (channel_private (chan)
+			   && (chan_op (fr) || glob_owner (fr))))
+		      && (chan_op (fr) || (glob_op (fr) && !chan_deop (fr))))
+		    {
+		      stats_add (u, 0, 1);
+		      do_op (nick, chan);
+		    }
 		}
 	      putlog (LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host,
 		      u->handle);
@@ -199,8 +207,11 @@ msg_voice (char *nick, char *host, struct userrec *u, char *par)
 	      if (chan && channel_active (chan))
 		{
 		  get_user_flagrec (u, &fr, par);
-		  if (chan_voice (fr) || glob_voice (fr) || chan_op (fr)
-		      || glob_op (fr))
+		  if ((!channel_private (chan)
+		       || (channel_private (chan)
+			   && (chan_voice (fr) || glob_owner (fr))))
+		      && (chan_voice (fr) || glob_voice (fr) || chan_op (fr)
+			  || glob_op (fr)))
 		    {
 		      add_mode (chan, '+', 'v', nick);
 		      putlog (LOG_CMDS, "*", "(%s!%s) !%s! VOICE %s", nick,
@@ -217,8 +228,11 @@ msg_voice (char *nick, char *host, struct userrec *u, char *par)
 	      for (chan = chanset; chan; chan = chan->next)
 		{
 		  get_user_flagrec (u, &fr, chan->dname);
-		  if (chan_voice (fr) || glob_voice (fr) || chan_op (fr)
-		      || glob_op (fr))
+		  if ((!channel_private (chan)
+		       || (channel_private (chan)
+			   && (chan_voice (fr) || glob_owner (fr))))
+		      && (chan_voice (fr) || glob_voice (fr) || chan_op (fr)
+			  || glob_op (fr)))
 		    add_mode (chan, '+', 'v', nick);
 		}
 	      putlog (LOG_CMDS, "*", "(%s!%s) !%s! VOICE", nick, host,
@@ -318,7 +332,15 @@ msg_invite (char *nick, char *host, struct userrec *u, char *par)
 	  for (chan = chanset; chan; chan = chan->next)
 	    {
 	      get_user_flagrec (u, &fr, chan->dname);
-	      if ((chan_op (fr) || (glob_op (fr) && !chan_deop (fr)))
+	      if ((!channel_private (chan)
+		   || (channel_private (chan)
+		       && (chan_op (fr) || glob_owner (fr)))) && (chan_op (fr)
+								  ||
+								  (glob_op
+								   (fr)
+								   &&
+								   !chan_deop
+								   (fr)))
 		  && (chan->channel.mode & CHANINV))
 		dprintf (DP_SERVER, "INVITE %s %s\n", nick, chan->name);
 	    }
@@ -339,7 +361,9 @@ msg_invite (char *nick, char *host, struct userrec *u, char *par)
 	  return 1;
 	}
       get_user_flagrec (u, &fr, par);
-      if (chan_op (fr) || (glob_op (fr) && !chan_deop (fr)))
+      if ((!channel_private (chan)
+	   || (channel_private (chan) && (chan_op (fr) || glob_owner (fr))))
+	  && (chan_op (fr) || (glob_op (fr) && !chan_deop (fr))))
 	{
 	  dprintf (DP_SERVER, "INVITE %s %s\n", nick, chan->name);
 	  putlog (LOG_CMDS, "*", "(%s!%s) !%s! INVITE %s", nick, host,

@@ -10,7 +10,7 @@ static int
 gotfake433 (char *from)
 {
   int l = strlen (botname) - 1;
-  char *oknicks = "\\`-^_[]{}";
+  char *oknicks = "-_\\`^[]{}";
   Context;
   if (altnick_char == 0)
     {
@@ -829,7 +829,7 @@ goterror (char *from, char *msg)
 {
   if (msg[0] == ':')
     msg++;
-  putlog (LOG_SERV | LOG_MSGS, "*", "-ERROR from server- %s", msg);
+  putlog (LOG_SERV, "*", "-ERROR from server- %s", msg);
   if (serverror_quit)
     {
       putlog (LOG_SERV, "*", "Disconnecting from server.");
@@ -1135,7 +1135,7 @@ server_activity (int idx, char *msg, int len)
 		  strncpy0 ((char *) &tmp[4], plaincookie, 7);
 		  optime = atol (tmp);
 		  off = (now + timesync - optime);
-		  if (abs (off) > op_time_slack)
+		  if (abs (off) > op_time_slack && 0)
 		    {
 		      isbadop = 4;
 		      putlog (LOG_ERRORS, "*",
@@ -1216,7 +1216,6 @@ server_activity (int idx, char *msg, int len)
 	  else
 	    putlog (LOG_DEBUG, "*", STR ("Good op: %s"), msg);
 	}
-#ifdef G_MANUALOP
       if ((ops) && chan && !channel_manop (chan) && (ufrom)
 	  && !(ufrom->flags & USER_BOT))
 	{
@@ -1282,7 +1281,6 @@ server_activity (int idx, char *msg, int len)
       for (i = 0; i < 5; i++)
 	if (modes[i])
 	  nfree (modes[i]);
-#endif
     }
   if (use_console_r)
     {

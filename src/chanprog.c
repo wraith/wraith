@@ -216,9 +216,11 @@ tell_verbose_status (int idx)
       uni_t = un.sysname;
     }
 #endif
+#ifdef HUB
   i = count_users (userlist);
   dprintf (idx, "I am %s, running %s:  %d user%s (mem: %uk)\n", botnetnick,
 	   ver, i, i == 1 ? "" : "s", (int) (expected_memory () / 1024));
+#endif
   now2 = now - online_since;
   s[0] = 0;
   if (now2 > 86400)
@@ -265,7 +267,6 @@ tell_verbose_status (int idx)
 	   100.0 * ((float) cache_hit) / ((float) (cache_hit + cache_miss)));
   if (admin[0])
     dprintf (idx, "Admin: %s\n", admin);
-  dprintf (idx, "Config file: %s\n", configfile);
   dprintf (idx, "OS: %s %s\n", uni_t, vers_t);
   dprintf (idx, "%s %s\n", MISC_TCLLIBRARY,
 	   ((interp)
@@ -293,7 +294,9 @@ tell_settings (int idx)
   dprintf (idx, "Botnet Nickname: %s\n", botnetnick);
   if (firewall[0])
     dprintf (idx, "Firewall: %s, port %d\n", firewall, firewallport);
-  dprintf (idx, "Userfile: %s   Motd: %s\n", userfile, motdfile);
+#ifdef HUB
+  dprintf (idx, "Userfile: %s   \n", userfile);
+#endif
   dprintf (idx, "Directories:\n");
   dprintf (idx, "  Help    : %s\n", helpdir);
   dprintf (idx, "  Temp    : %s\n", tempdir);
@@ -301,8 +304,10 @@ tell_settings (int idx)
   build_flags (s, &fr, NULL);
   dprintf (idx, "%s [%s], %s: %s\n", MISC_NEWUSERFLAGS, s, MISC_NOTIFY,
 	   notify_new);
+#ifdef HUB
   if (owner[0])
     dprintf (idx, "%s: %s\n", MISC_PERMOWNER, owner);
+#endif
   for (i = 0; i < max_logs; i++)
     if (logs[i].filename != NULL)
       {

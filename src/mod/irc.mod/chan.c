@@ -893,6 +893,7 @@ check_this_member (struct chanset_t *chan, char *nick, struct flag_record *fr)
 	      add_mode (chan, '-', 'o', m->nick);
 	    }
 	}
+      Context;
       if (chan_hasvoice (m)
 	  && (chan_quiet (*fr) || (glob_quiet (*fr) && !chan_voice (*fr))))
 	add_mode (chan, '-', 'v', m->nick);

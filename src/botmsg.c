@@ -1,13 +1,13 @@
 #include "main.h"
 #include "tandem.h"
 extern struct dcc_t *dcc;
-extern int dcc_total, tands, sgrab;
+extern int dcc_total, tands;
 extern char botnetnick[];
 extern time_t now;
 extern party_t *party;
 extern Tcl_Interp *interp;
 extern struct userrec *userlist;
-static char OBUF[1024];
+static char OBUF[sgrab - 110];
 static char tobase64array[64] =
   { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
@@ -448,26 +448,6 @@ botnet_send_zapf_broad (int idx, char *a, char *b, char *c)
       l =
 	simple_sprintf (OBUF, "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "",
 			c);
-      send_tand_but (idx, OBUF, l);
-    }
-}
-void
-botnet_send_hublog_f (int idx, char *a, char *b, int type)
-{
-  int l;
-  if (tands > 0)
-    {
-      l = simple_sprintf (OBUF, "hl %s %i %s\n", a, type, b);
-      send_tand_but (idx, OBUF, l);
-    }
-}
-void
-botnet_send_hublog (int idx, char *a, char *b)
-{
-  int l;
-  if (tands > 0)
-    {
-      l = simple_sprintf (OBUF, "hl %s %s\n", a, b);
       send_tand_but (idx, OBUF, l);
     }
 }

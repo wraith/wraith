@@ -7,7 +7,7 @@ extern Tcl_Interp *interp;
 extern tcl_timer_t *timer, *utimer;
 extern struct dcc_t *dcc;
 extern int dcc_total, backgrd, parties, do_restart, remote_boots, max_dcc,
-  sgrab, hub, leaf;
+  hub, leaf;
 extern char botnetnick[], netpass[], *binname;
 extern party_t *party;
 extern tand_t *tandbot;

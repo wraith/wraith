@@ -120,13 +120,6 @@ getin_request (char *botnick, char *code, char *par)
 	      botnick, chname);
       return;
     }
-  if (!ismember (chan, botname))
-    {
-      putlog (LOG_GETIN, "*",
-	      STR ("getin req from %s for %s - I'm not on %s!"), botnick,
-	      chname, chname);
-      return;
-    }
   user = get_user_by_handle (userlist, botnick);
   if (nck)
     {
@@ -459,7 +452,7 @@ getin_request (char *botnick, char *code, char *par)
 	    }
 	}
       if (sendi)
-	dprintf (DP_MODE, STR ("INVITE %s %s\n"), nick, chan->dname);
+	dprintf (DP_MODE, STR ("INVITE %s %s\n"), nick, chan->name);
     }
   else if (par[0] == 'K')
     {
@@ -486,7 +479,7 @@ getin_request (char *botnick, char *code, char *par)
 	      putlog (LOG_GETIN, "*",
 		      STR ("Got key for %s from %s (%s) - Joining"),
 		      chan->dname, botnick, nick);
-	      dprintf (DP_MODE, STR ("JOIN %s %s\n"), chan->dname, nick);
+	      dprintf (DP_MODE, STR ("JOIN %s %s\n"), chan->name, nick);
 	    }
 	  else
 	    {
@@ -1488,7 +1481,9 @@ irc_report (int idx, int details)
     {
       if (idx != DP_STDOUT)
 	get_user_flagrec (dcc[idx].user, &fr, chan->dname);
-      if (idx == DP_STDOUT || glob_master (fr) || chan_master (fr))
+      if ((!channel_private (chan)
+	   || (channel_private (chan) && (chan_op (fr) || glob_owner (fr))))
+	  && (idx == DP_STDOUT || glob_master (fr) || chan_master (fr)))
 	{
 	  p = NULL;
 	  if (!channel_inactive (chan))

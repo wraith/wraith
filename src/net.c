@@ -28,7 +28,7 @@ extern char netpass[];
 #endif
 #endif
 extern struct dcc_t *dcc;
-extern int backgrd, use_stderr, resolve_timeout, dcc_total, sgrab;
+extern int backgrd, use_stderr, resolve_timeout, dcc_total;
 extern unsigned long otraffic_irc_today, otraffic_bn_today,
   otraffic_dcc_today, otraffic_filesys_today, otraffic_trans_today,
   otraffic_unknown_today;
@@ -273,8 +273,9 @@ allocsock (int sock, int options, int af_ty)
 	  socklist[i].sock = sock;
 	  socklist[i].af = af_ty;
 	  socklist[i].encstatus = 0;
-	  bzero (&socklist[i].okey, sizeof (socklist[i].okey));
-	  bzero (&socklist[i].ikey, sizeof (socklist[i].ikey));
+	  socklist[i].gz = 0;
+	  egg_bzero (&socklist[i].okey, sizeof (socklist[i].okey));
+	  egg_bzero (&socklist[i].ikey, sizeof (socklist[i].ikey));
 	  return i;
 	}
     }
@@ -335,7 +336,7 @@ killsock (register int sock)
 	      socklist[i].outbuf = NULL;
 	      socklist[i].outbuflen = 0;
 	    }
-	  bzero (&socklist[i], sizeof (socklist[i]));
+	  egg_bzero (&socklist[i], sizeof (socklist[i]));
 	  socklist[i].flags = SOCK_UNUSED;
 	  return;
 	}

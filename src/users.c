@@ -670,6 +670,7 @@ readuserfile (char *file, struct userrec **ret)
   char ignored[512];
   struct flag_record fr;
   struct chanuserrec *cr;
+  Context;
   bu = (*ret);
   ignored[0] = 0;
   if (bu == userlist)
@@ -739,6 +740,7 @@ readuserfile (char *file, struct userrec **ret)
 #ifdef S_DCCPASS
 			  else if (lasthand[1] == CONFIG_NAME[1])
 			    {
+			      Context;
 			      set_cmd_pass (s, 1);
 			    }
 #endif
@@ -827,6 +829,7 @@ readuserfile (char *file, struct userrec **ret)
 	      else if (!strcmp (code, "+"))
 		{
 		  int code2;
+		  Context;
 		  if (s[0] && lasthand[0] == '*'
 		      && lasthand[1] == CHANS_NAME[1])
 		    {
@@ -934,6 +937,7 @@ readuserfile (char *file, struct userrec **ret)
 		}
 	      else if (!strncmp (code, "--", 2))
 		{
+		  Context;
 		  if (u)
 		    {
 		      struct user_entry *ue;
@@ -1005,6 +1009,7 @@ readuserfile (char *file, struct userrec **ret)
 		  pass = newsplit (&s);
 		  attr = newsplit (&s);
 		  rmspace (s);
+		  Context;
 		  if (!attr[0] || !pass[0])
 		    {
 		      putlog (LOG_MISC, "*", "* %s '%s'!", USERF_CORRUPT,
@@ -1064,7 +1069,7 @@ readuserfile (char *file, struct userrec **ret)
       struct user_entry *e;
       if (!(u->flags & USER_BOT) && !egg_strcasecmp (u->handle, botnetnick))
 	{
-	  putlog (LOG_MISC, "*", "(!) I have an user record, but without +b");
+	  putlog (LOG_MISC, "*", "(!) I have a user record, but without +b");
 	}
       for (e = u->entries; e; e = e->next)
 	if (e->name)
@@ -1079,6 +1084,7 @@ readuserfile (char *file, struct userrec **ret)
 	      }
 	  }
     }
+  Context;
 #ifdef LEAF
   unlink (userfile);
 #endif

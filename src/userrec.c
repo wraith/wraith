@@ -827,10 +827,7 @@ user_del_chan (char *dname)
 	}
     }
 }
-struct cfg_entry CFG_BADCOOKIE,
-#ifdef G_MANUALOP
-  CFG_MANUALOP,
-#endif
+struct cfg_entry CFG_BADCOOKIE, CFG_MANUALOP,
 #ifdef G_MEAN
   CFG_MEANDEOP, CFG_MEANKICK, CFG_MEANBAN,
 #endif
@@ -848,12 +845,10 @@ deflag_describe (struct cfg_entry *cfgent, int idx)
     dprintf (idx,
 	     STR
 	     ("bad-cookie decides what happens to a bot if it does an illegal op (no/incorrect op cookie)\n"));
-#ifdef G_MANUALOP
   else if (cfgent == &CFG_MANUALOP)
     dprintf (idx,
 	     STR
-	     ("manualop decides what happens to a user doing a manual op in a -manualop channel\n"));
-#endif
+	     ("manop decides what happens to a user doing a manual op in a -manop channel\n"));
 #ifdef G_MEAN
   else if (cfgent == &CFG_MEANDEOP)
     dprintf (idx,
@@ -889,11 +884,8 @@ deflag_changed (struct cfg_entry *entry, char *oldval, int *valid)
 struct cfg_entry CFG_BADCOOKIE =
   { "bad-cookie", CFGF_GLOBAL, NULL, NULL, deflag_changed, NULL,
 deflag_describe };
-#ifdef G_MANUALOP
 struct cfg_entry CFG_MANUALOP =
-  { "manualop", CFGF_GLOBAL, NULL, NULL, deflag_changed, NULL,
-deflag_describe };
-#endif
+  { "manop", CFGF_GLOBAL, NULL, NULL, deflag_changed, NULL, deflag_describe };
 #ifdef G_MEAN
 struct cfg_entry CFG_MEANDEOP =
   { "mean-deop", CFGF_GLOBAL, NULL, NULL, deflag_changed, NULL,
@@ -921,12 +913,10 @@ deflag_user (struct userrec *u, int why, char *msg)
       strcpy (tmp, STR ("Bad op cookie"));
       ent = &CFG_BADCOOKIE;
       break;
-#ifdef G_MANUALOP
     case DEFLAG_MANUALOP:
-      strcpy (tmp, STR ("Manual op in -manualop channel"));
+      strcpy (tmp, STR ("Manual op in -manop channel"));
       ent = &CFG_MANUALOP;
       break;
-#endif
 #ifdef G_MEAN
     case DEFLAG_MEAN_DEOP:
       strcpy (tmp, STR ("Deopped bot in +mean channel"));
@@ -987,9 +977,7 @@ void
 init_userrec ()
 {
   add_cfg (&CFG_BADCOOKIE);
-#ifdef G_MANUALOP
   add_cfg (&CFG_MANUALOP);
-#endif
 #ifdef G_MEAN
   add_cfg (&CFG_MEANDEOP);
   add_cfg (&CFG_MEANKICK);
