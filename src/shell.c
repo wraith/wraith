@@ -452,7 +452,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     }
     fclose(errFile);
     if (output) {
-      char *buf;
+      char *buf = NULL;
       int fs;
 
       fseek(outFile, 0, SEEK_END);
@@ -752,7 +752,7 @@ void baduname(char *confhas, char *myuname) {
 
   if (tosend) {
     struct utsname un;
-    char msg[501] = "", subject[31] = "";
+    char msg[1024] = "", subject[31] = "";
 
     uname(&un);
     egg_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
