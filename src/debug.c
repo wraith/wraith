@@ -225,9 +225,9 @@ stackdump(int idx)
   __asm__("movl %EBP, %EAX");
   __asm__("movl %EAX, sf");
   if (idx == 0)
-    putlog(LOG_MISC, "*", "STACK DUMP (%%ebp)");
+    putlog(LOG_MISC, "*", "STACK DUMP");
   else
-    dprintf(idx, "STACK DUMP (%%ebp)\n");
+    dprintf(idx, "STACK DUMP\n");
 
   while (canaccess(sf) && stackdepth < 20 && sf->ebp) {
     if (idx == 0)

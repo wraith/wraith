@@ -1183,6 +1183,7 @@ check_expired_chanstuff(struct chanset_t *chan)
         sprintf(s, "%s!%s", m->nick, m->userhost);
         putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
         killmember(chan, m->nick);
+        continue;
       }
 
       if (me_op(chan)) {

@@ -608,7 +608,7 @@ static void refresh_ban_kick(struct chanset_t *chan, char *user, char *nick)
 	do_mask(chan, chan->channel.ban, b->mask, 'b');
 	b->lastactive = now;
 	if (b->desc && b->desc[0] != '@')
-	  egg_snprintf(c, sizeof c, "%s %s", IRC_PREBANNED, b->desc);
+	  egg_snprintf(c, sizeof c, "banned: %s", b->desc);
 	else
 	  c[0] = 0;
         if (role == 2)

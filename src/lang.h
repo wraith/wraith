@@ -209,7 +209,6 @@
 #define IRC_SERVNOTONCHAN	"Server says I'm not on channel: %s"
 #define IRC_BADCHANKEY		"Bad key--can't join: %s"
 #define IRC_TELNETFLOOD		"Telnet connection flood from %s!  Placing on ignore!"
-#define IRC_PREBANNED		"banned:"
 #define IRC_JOIN_FLOOD		"join flood"
 #define IRC_KICK_PROTECT	"don't kick my friends, bud"
 #define IRC_DEOP_PROTECT	"don't deop my friends, bud"

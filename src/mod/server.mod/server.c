@@ -41,10 +41,8 @@ int flud_thr;		/* msg flood threshold */
 time_t flud_time;		/* msg flood time */
 int flud_ctcp_thr;	/* ctcp flood threshold */
 time_t flud_ctcp_time;	/* ctcp flood time */
-char botuserhost[121] = "";	/* bot's user@host (refreshed whenever the
-				   bot joins a channel) */
-				/* may not be correct user@host BUT it's
-				   how the server sees it */
+char botuserhost[UHOSTLEN] = "";	/* bot's user@host (refreshed whenever the bot joins a channel) */
+					/* may not be correct user@host BUT it's how the server sees it */
 static bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
@@ -1084,7 +1082,6 @@ void server_init()
   flud_time = 60;
   flud_ctcp_thr = 3;
   flud_ctcp_time = 60;
-  botuserhost[0] = 0;
   quiet_reject = 1;
   waiting_for_awake = 0;
   server_online = 0;
