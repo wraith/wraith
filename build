@@ -107,7 +107,7 @@ fi
 # Figure what bins we're making
 case `uname` in
   Linux) os=Linux;;
-  FreeBSD) os=FreeBSD;
+  FreeBSD) os=FreeBSD;;
 
 #  FreeBSD) case `uname -r` in
 #    5*) os=FreeBSD5;;
