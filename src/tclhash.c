@@ -565,7 +565,11 @@ static int builtin_idxchar STDVAR
 
   BADARGS(3, 3, " idx args");
   CHECKVALIDITY(builtin_idxchar);
-  idx = findidx(atoi(argv[1]));
+  if (atoi(argv[1]) < 0) { /* this is a remote-simul idx */
+    idx = atoi(argv[1]) * -1;
+  } else {
+    idx = findidx(atoi(argv[1]));
+  }
   if (idx < 0) {
     Tcl_AppendResult(irp, "invalid idx", NULL);
     return TCL_ERROR;
@@ -621,7 +625,11 @@ static int builtin_dcc STDVAR
   Function F = (Function) cd;
 
   BADARGS(4, 4, " hand idx param");
-  idx = findidx(atoi(argv[2]));
+  if (atoi(argv[2]) < 0) { /* this is a remote-simul idx */
+    idx = atoi(argv[2]) * -1;
+  } else {
+    idx = findidx(atoi(argv[2]));
+  }
   if (idx < 0) {
     Tcl_AppendResult(irp, "invalid idx", NULL);
     return TCL_ERROR;
@@ -819,7 +827,11 @@ int check_tcl_dcc(char *cmd, int idx, char *args)
   char			s[11];
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  egg_snprintf(s, sizeof s, "%ld", dcc[idx].sock);
+  if (dcc[idx].simul) {
+    egg_snprintf(s, sizeof s, "-%d", idx);
+  } else {
+    egg_snprintf(s, sizeof s, "%ld", dcc[idx].sock);
+  }
 #ifdef S_DCCPASS
 
   for (hm = H_dcc->first; hm; hm = hm->next) {

@@ -1462,8 +1462,10 @@ void bounce_simul(int idx, char *buf)
 {
   char rmsg[SGRAB-110];
 
-  if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0)
+  if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0) {
+    debug0("returning from bounce_simul");
     return;
+  }
 
   snprintf(rmsg, sizeof rmsg, "r-sr %d %s", idx, buf);          /* remote-simul[r]eturn idx buf */
 
@@ -1473,23 +1475,21 @@ void bounce_simul(int idx, char *buf)
 void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {
   char msg[SGRAB-110];
-Context;
-  snprintf(msg, sizeof msg, "r-s %d %s %d %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, cmd, par);
+  snprintf(msg, sizeof msg, "r-s %d %s %d %s %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, dcc[idx].u.chat->con_chan, cmd, par);
 
-Context;
   putbot(bot, msg);
-Context;
 }
 
 /* idx nick conmask cmd par */
 static void bot_rsim(char *botnick, char *code, char *par)
 {
   int ridx = -1, idx = -1, i = 0, rconmask;
-  char *nick = NULL, *cmd = NULL, buf[UHOSTMAX];
+  char *nick = NULL, *cmd = NULL, *rconchan = NULL, buf[UHOSTMAX];
 
   ridx = atoi(newsplit(&par));
   nick = newsplit(&par);
   rconmask = atoi(newsplit(&par));
+  rconchan = newsplit(&par);
   cmd = newsplit(&par);
   if (ridx < 0 || !nick || !cmd)
     return;
@@ -1506,14 +1506,14 @@ static void bot_rsim(char *botnick, char *code, char *par)
   if (idx < 0) {
     idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
     putlog(LOG_DEBUG, "*", "Making new idx for %s@%s: %d ridx: %d", nick, botnick, idx, ridx);
-    dcc[idx].sock = STDOUT;
+/*    dcc[idx].sock = 666; */
     dcc[idx].timeval = now;
     dcc[idx].simultime = now;
-    dcc[idx].simul = 1;
+    dcc[idx].simul = ridx;
     strcpy(dcc[idx].simulbot, botnick);
     dcc[idx].status = STAT_ECHO;
     dcc[idx].u.chat->con_flags = rconmask;
-    strcpy(dcc[idx].u.chat->con_chan, "*");
+    strcpy(dcc[idx].u.chat->con_chan, rconchan);
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
     strcpy(dcc[idx].nick, nick);
     snprintf(buf, sizeof buf, "%s@%s", nick, botnick);

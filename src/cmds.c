@@ -729,12 +729,12 @@ static void cmd_help(struct userrec *u, int idx, char *par)
     o = 0,
     end;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char *fcats, *flag, temp[500];
+  char *fcats, *flag, temp[100], buf[2046];
 
+Context;
   egg_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
   fcats = temp;
 
-Context;
   putlog(LOG_CMDS, "*", STR("#%s# help %s"), dcc[idx].nick, par);
   get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
   if (!par[0]) {
@@ -758,8 +758,8 @@ Context;
 
   if (showall) {
     qsort(cmds, o, sizeof(mycmds), my_cmp);
-Context;
     end = 0;
+    buf[0] = '\0';
     while (!done) {
       flag = newsplit(&fcats);
       if (!flag[0]) 
@@ -767,22 +767,29 @@ Context;
 
       i = 0;
       first = 1;
-      for (n = 0; n < o ; n++) {
+      for (n = 0; n < o ; n++) { /* loop each command */
         if (!flagrec_ok(&cmds[n].flags, &fr))
           continue;
-
         flg[0] = '\0';
         build_flags(flg, &(cmds[n].flags), NULL);
         if (!strcmp(flg, flag)) {
           if (first) {
-            dprintf(idx, "%s## DCC (%s)\n  ", "\n", flag);
+            dprintf(idx, "%s\n", buf[0] ? buf : "");
+            dprintf(idx, "# DCC (%s)\n", flag);
+            sprintf(buf, "  ");
+            /* dprintf(idx, "%s## DCC (%s)\n  ", "\n", flag); */
           }
 
           if (end && !first) {
-            dprintf(idx, STR("\n  "));
+            dprintf(idx, "%s\n", buf[0] ? buf : "");
+            /* we dumped the buf to dprintf, now start a new one... */
+            sprintf(buf, "  ");
+            /* snprintf(buf, sizeof buf, "%s\n  ", buf); */
+            /* dprintf(idx, STR("\n  ")); */
           }
-
-          dprintf(idx, STR("%-14.14s"), cmds[n].name);
+        
+          sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmds[n].name);
+          /* dprintf(idx, STR("%-14.14s"), cmds[n].name); */
           first = 0;
           end = 0;
           i++;
@@ -793,12 +800,13 @@ Context;
         } 
       }
     }
+    dprintf(idx, "%s\n", buf[0] ? buf : "");
   }
 
-  if (showall)
-    dprintf(idx, STR("\nEnd of list. For individual command help, type: %shelp <command>\n\
-If you have flags on a channel, type %sconsole #chan to see more commands.\n"), dcc_prefix, dcc_prefix);
-  else if (!fnd)
+  if (showall) {
+    dprintf(idx, STR("End of list. For individual command help, type: %shelp <command>\n"), dcc_prefix);
+    dprintf(idx, STR("If you have flags on a channel, type %sconsole #chan to see more commands.\n"), dcc_prefix);
+  } else if (!fnd)
     dprintf(idx, STR("No help for nonexistant command '%s'.\n"), par);
 }
 
@@ -4044,7 +4052,7 @@ dcc_cmd_t C_dcc[] =
   {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL,    NULL},
   {"-user",		"m",	(Function) cmd_mns_user,	NULL,    NULL},
   {"addlog",		"mo|o",	(Function) cmd_addlog,		NULL,    NULL},
-  {"putlog",		"mo|o",	(Function) cmd_addlog,		NULL,	 NULL},
+/*  {"putlog",		"mo|o",	(Function) cmd_addlog,		NULL,	 NULL}, */
   {"about",		"",	(Function) cmd_about,		NULL,    NULL},
   {"away",		"",	(Function) cmd_away,		NULL,    NULL},
   {"back",		"",	(Function) cmd_back,		NULL,    NULL},
@@ -4172,6 +4180,7 @@ dcc_cmd_t C_dcc[] =
   {"randstring", 	"", 	(Function) cmd_randstring, NULL, NULL},
 #ifdef HUB
   {"botcmd",		"i",	(Function) cmd_botcmd, NULL, NULL},
+  {"bc",		"i",	(Function) cmd_botcmd, NULL, NULL},
   {"hublevel", 		"a", 	(Function) cmd_hublevel, NULL, NULL},
   {"lagged", 		"m", 	(Function) cmd_lagged, NULL, NULL},
   {"uplink", 		"a", 	(Function) cmd_uplink, NULL, NULL},

@@ -164,10 +164,7 @@ broke:
   len = strlen(buf);
 
   if (idx < 0) {
-    if (dcc[-idx].simul > 0)
-      bounce_simul(-idx, buf);
-    else
-      tputs(-idx, buf, len);
+    tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
     switch (idx) {
     case DP_LOG:
