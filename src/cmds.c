@@ -3556,7 +3556,7 @@ static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
     char tmp[2048] = "";
 
     if (server_online)
-      sprintf(tmp, "Currently: %-40s Lag: %d", cursrvname, server_lag);
+      sprintf(tmp, "Currently: %-40s Lag: %ds", cursrvname, server_lag);
     else
       sprintf(tmp, "Currently: none");
 
