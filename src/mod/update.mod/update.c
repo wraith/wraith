@@ -128,7 +128,6 @@ static void update_ufsend(int idx, char *par)
 
 static void update_version(int idx, char *par)
 {
-return;
   /* Cleanup any share flags */
 #ifdef HUB
   if (bupdating) return;
