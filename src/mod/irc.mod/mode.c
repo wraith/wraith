@@ -92,7 +92,7 @@ do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
 
   if (delay) {
     egg_timeval_t howlong;
-    autoop_t *auto_op = (autoop_t *) calloc(1, sizeof(autoop_t));
+    autoop_t *auto_op = (autoop_t *) my_calloc(1, sizeof(autoop_t));
     char buf[51] = "";
 
     howlong.sec = 6;

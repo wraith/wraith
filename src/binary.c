@@ -85,7 +85,7 @@ bin_checksum(const char *fname, int todo)
       if (!memcmp(buf, &settings.prefix, PREFIXLEN))
         break;
 
-    char *tmpbuf = (char *) calloc(1, SIZE_PACK);
+    char *tmpbuf = (char *) my_calloc(1, SIZE_PACK);
  
     if ((len = fread(tmpbuf, 1, SIZE_PACK, f))) {
       edpack(&settings, oldhash, PACK_ENC);
@@ -135,7 +135,7 @@ bin_checksum(const char *fname, int todo)
           fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
           sdprintf("writing pack: %d\n", SIZE_PACK);
         } else {
-          char *tmpbuf = (char *) calloc(1, SIZE_PACK);
+          char *tmpbuf = (char *) my_calloc(1, SIZE_PACK);
 
           if ((len = fread(tmpbuf, 1, SIZE_PACK, f))) {
             if (fwrite(tmpbuf, 1, len, newbin->f) != len) {
@@ -151,7 +151,7 @@ bin_checksum(const char *fname, int todo)
           fwrite(&settings.bots, SIZE_CONF, 1, newbin->f);
           sdprintf("writing conf: %d\n", SIZE_CONF);
         } else {
-          char *tmpbuf = (char *) calloc(1, SIZE_CONF);
+          char *tmpbuf = (char *) my_calloc(1, SIZE_CONF);
 
           if ((len = fread(tmpbuf, 1, SIZE_CONF, f))) {
             if (fwrite(tmpbuf, 1, len, newbin->f) != len) {
@@ -407,7 +407,7 @@ static bool check_bin_initialized(const char *fname)
 {
   int i = 0;
   size_t len = strlen(fname) + 3 + 1;
-  char *path = (char *) calloc(1, len);
+  char *path = (char *) my_calloc(1, len);
 
   egg_snprintf(path, len, "%s -p", fname);
 
