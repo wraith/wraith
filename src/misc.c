@@ -545,7 +545,7 @@ char *str_escape(const char *str, const char divc, const char mask)
   for (s = str; *s; s++) {
     /* Resize buffer. */
     if ((buflen - blen) <= 3) {
-      buflen = (buflen * 2);
+      buflen <<= 1;		/* * 2 */
       buf = realloc(buf, buflen + 1);
       if (!buf)
 	return NULL;

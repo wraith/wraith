@@ -9,8 +9,8 @@
 
 #include "src/crypto/crypto.h"
 
-#define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH * 2)
-#define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH * 2)
+#define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
+#define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH << 1)
 #define md5cmp(hash, string)            strcmp(hash, MD5(string))
 
 char *MD5(const char *);

@@ -45,7 +45,7 @@
 #define NICKLEN         NICKMAX + 1
 #define UHOSTLEN        UHOSTMAX + 1
 #define DIRLEN          DIRMAX + 1
-#define NOTENAMELEN     ((HANDLEN * 2) + 1)
+#define NOTENAMELEN     ((HANDLEN << 1) + 1)
 #define BADNICKCHARS	"-,+*=:!.@#;$%&"
 
 #if (NICKMAX < 9) || (NICKMAX > 32)

@@ -1173,10 +1173,10 @@ char *botlink_decrypt(int snum, char *src)
   strcpy(src, line);
   free(line);
   if (socklist[snum].iseed) {
-    *(dword *) & socklist[snum].ikey[0 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[1 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[2 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[3 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[0] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[8] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[12] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
 
     if (!socklist[snum].iseed)
       socklist[snum].iseed++;
@@ -1201,10 +1201,10 @@ char *botlink_encrypt(int snum, char *src, size_t *len)
     *eol++ = 0;
     eline = encrypt_string(socklist[snum].okey, line);
     if (socklist[snum].oseed) {
-      *(dword *) & socklist[snum].okey[0 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[1 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[2 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[3 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
 
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
@@ -1220,10 +1220,10 @@ char *botlink_encrypt(int snum, char *src, size_t *len)
   if (line[0]) {
     eline = encrypt_string(socklist[snum].okey, line);
     if (socklist[snum].oseed) {
-      *(dword *) & socklist[snum].okey[0 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[1 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[2 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[3 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
 
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
