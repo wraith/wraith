@@ -426,9 +426,12 @@ int readconf(char *cfile, int bits)
   while (fgets(inbuf, sizeof inbuf, f) != NULL) {
     char *line = NULL, *temp_ptr = NULL, *p = NULL;
 
+    /* fucking DOS */
     if ((p = strchr(inbuf, '\n')))
       *p = 0;
-
+    if ((p = strchr(inbuf, '\r')))
+      *p = 0;
+    
     if (enc)
       line = temp_ptr = decrypt_string(SALT1, inbuf);
     else
