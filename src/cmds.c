@@ -3911,11 +3911,15 @@ static void my_dns_callback(int id, void *client_data, const char *host, char **
 {
   int idx = (int) client_data;
 
+
+  if (!valid_dns_id(idx, id)) {
+    if (valid_idx(idx))
+      dcc[idx].dns_id = 0;
+    return;
+  }
+
   if (valid_idx(idx))
     dcc[idx].dns_id = 0;
-
-  if (!valid_dns_id(idx, id))
-    return;
 
   if (ips)
     for (int i = 0; ips[i]; i++)
