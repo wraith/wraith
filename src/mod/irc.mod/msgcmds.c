@@ -578,9 +578,9 @@ static int msgc_channels(char *nick, char *host, struct userrec *u, char *par, c
   }
 
   if (list[0]) 
-    reply(nick, NULL, "You have access to: %s\n", nick, list);
+    reply(nick, NULL, "You have access to: %s\n", list);
   else
-    reply(nick, NULL, "You do not have access to any channels.\n", nick);
+    reply(nick, NULL, "You do not have access to any channels.\n");
 
   return BIND_RET_BREAK;
 }
@@ -603,9 +603,9 @@ static int msgc_getkey(char *nick, char *host, struct userrec *u, char *par, cha
     get_user_flagrec(u, &fr, chan->dname);
     if (chk_op(fr, chan)) {
       if (chan->channel.key[0]) {
-        reply(nick, NULL, "Key for %s is: %s\n", nick, chan->name, chan->channel.key);
+        reply(nick, NULL, "Key for %s is: %s\n", chan->name, chan->channel.key);
       } else {
-        reply(nick, NULL, "%s has no key set.\n", nick, chan->name);
+        reply(nick, NULL, "%s has no key set.\n", chan->name);
       }
     }
   }
@@ -655,7 +655,7 @@ static int msgc_sha1(char *nick, char *host, struct userrec *u, char *par, char 
   if (chname && chname[0])
     chan = findchan_by_dname(chname);  
 
-  reply(nick, chan, "SHA1(%s) = %s\n", nick, par, SHA1(par));
+  reply(nick, chan, "SHA1(%s) = %s\n", par, SHA1(par));
   return BIND_RET_BREAK;
 }
 
