@@ -18,7 +18,7 @@
 #include "strcasecmp.h"
 #include "strftime.h"
 #include "makepath.h"
-
+#include "strlcpy.h"
 
 /* These apparently are unsafe without recasting. */
 #define egg_isdigit(x)  isdigit((int)  (unsigned char) (x))
