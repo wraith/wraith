@@ -61,6 +61,7 @@ This is a summary of ChangeLog basically.
 * Added some simple dcc ip sanity checking back in.
 * All dns resolving is now asynchronous, all dns bugs now fixed.
 * Check server lag every 30 seconds, not every 5 minutes.
+* +v users are no longer enforced if opped.
 
 1.1.9
 
