@@ -452,7 +452,7 @@ static void cmd_cmdpass(int idx, char *par)
   }
 
   if (pass[0]) {
-    if (!egg_strcasemp(par, "clear")) {
+    if (!egg_strcasecmp(par, "clear")) {
       if (!isowner(dcc[idx].nick)) {
         putlog(LOG_MISC, "*", "%s attempted to remove command password for %s - not perm owner", dcc[idx].nick, cmd);
         dprintf(idx, "Perm owners only.\n");
