@@ -926,6 +926,7 @@ int readuserfile(const char *file, struct userrec **ret)
             fclose(f);
             return 0;
 	  } else {
+/* FIXME: remove after 1.2 */
             int isbot = 0;
 
             if (code[0] == '-') {
