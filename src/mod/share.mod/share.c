@@ -51,6 +51,151 @@ static void cancel_user_xfer(int, void *);
 #include "share.h"
 
 /*
+ *    Resync buffers
+ */
+
+/* Store info for sharebots */
+struct share_msgq {
+  struct share_msgq *next;
+  char *msg;
+};
+
+typedef struct tandbuf_t {
+  struct tandbuf_t *next;
+  struct share_msgq *q;
+  time_t timer;
+  char bot[HANDLEN + 1];
+} tandbuf;
+
+tandbuf *tbuf = NULL;
+
+
+/* Create a tandem buffer for 'bot'.
+ */
+static void new_tbuf(char *bot)
+{
+  tandbuf **old = &tbuf, *newbuf = NULL;
+
+  newbuf = (tandbuf *) my_calloc(1, sizeof(tandbuf));
+  strcpy(newbuf->bot, bot);
+  newbuf->q = NULL;
+  newbuf->timer = now;
+  newbuf->next = *old;
+  *old = newbuf;
+  putlog(LOG_BOTS, "*", "Creating resync buffer for %s", bot);
+}
+
+static void del_tbuf(tandbuf *goner)
+{
+  struct share_msgq *q = NULL, *r = NULL;
+  tandbuf *t = NULL, *old = NULL;
+
+  for (t = tbuf; t; old = t, t = t->next) {
+    if (t == goner) {
+      if (old)
+        old->next = t->next;
+      else
+        tbuf = t->next;
+      for (q = t->q; q && q->msg[0]; q = r) {
+        r = q->next;
+        free(q->msg);
+        free(q);
+      }
+      free(t);
+      break;
+    }
+  }
+}
+
+/* Flush a certain bot's tbuf.
+ */
+static bool flush_tbuf(char *bot)
+{
+  tandbuf *t = NULL, *tnext = NULL;
+
+  for (t = tbuf; t; t = tnext) {
+    tnext = t->next;
+    if (!egg_strcasecmp(t->bot, bot)) {
+      del_tbuf(t);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static struct share_msgq *q_addmsg(struct share_msgq *qq, char *s)
+{
+  struct share_msgq *q = NULL;
+  int cnt;
+
+  if (!qq) {
+    q = (share_msgq *) my_calloc(1, sizeof *q);
+
+    q->next = NULL;
+    q->msg = (char *) my_calloc(1, strlen(s) + 1);
+    strcpy(q->msg, s);
+    return q;
+  }
+  cnt = 0;
+  for (q = qq; q->next; q = q->next)
+    cnt++;
+  if (cnt > 1000)
+    return NULL;                /* Return null: did not alter queue */
+  q->next = (share_msgq *) my_calloc(1, sizeof *q->next);
+
+  q = q->next;
+  q->next = NULL;
+  q->msg = (char *) my_calloc(1, strlen(s) + 1);
+  strcpy(q->msg, s);
+  return qq;
+}
+
+/* Add stuff to a specific bot's tbuf.
+ */
+static void q_tbuf(char *bot, char *s)
+{
+  struct share_msgq *q = NULL;
+  tandbuf *t = NULL;
+
+  for (t = tbuf; t && t->bot[0]; t = t->next)
+    if (!egg_strcasecmp(t->bot, bot)) {
+      if ((q = q_addmsg(t->q, s)))
+        t->q = q;
+      break;
+    }
+}
+
+/* Add stuff to the resync buffers.
+ */
+static void q_resync(char *s)
+{
+  struct share_msgq *q = NULL;
+  tandbuf *t = NULL;
+
+  for (t = tbuf; t && t->bot[0]; t = t->next) {
+    if ((q = q_addmsg(t->q, s)))
+      t->q = q;
+  }
+}
+
+/* Dump the resync buffer for a bot.
+ */
+void dump_resync(int idx)
+{
+  struct share_msgq *q = NULL;
+  tandbuf *t = NULL;
+
+  for (t = tbuf; t && t->bot[0]; t = t->next)
+    if (!egg_strcasecmp(dcc[idx].nick, t->bot)) {
+      for (q = t->q; q && q->msg[0]; q = q->next) {
+        dprintf(idx, "%s", q->msg);
+      }
+      flush_tbuf(dcc[idx].nick);
+      break;
+    }
+}
+
+/*
  *   Sup's delay code
  */
 
@@ -767,6 +912,8 @@ share_ufyes(int idx, char *par)
 static void
 share_userfileq(int idx, char *par)
 {
+  flush_tbuf(dcc[idx].nick);
+
   if (bot_aggressive_to(dcc[idx].user)) {
     putlog(LOG_ERRORS, "*", "%s offered user transfer - I'm supposed to be aggressive to it", dcc[idx].nick);
     dprintf(idx, "s un I have you marked for Agressive sharing.\n");
@@ -968,6 +1115,7 @@ shareout(const char *format, ...)
       tputs(dcc[i].sock, s, l + 2);
     }
   }
+  q_resync(s);
 }
 
 static void
@@ -984,12 +1132,14 @@ shareout_but(int x, const char *format, ...)
     s[2 + (l = 509)] = 0;
   va_end(va);
 
-  for (int i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) && (i != x) &&
         (dcc[i].status & STAT_SHARE) && (!(dcc[i].status & STAT_GETTING)) &&
         (!(dcc[i].status & STAT_SENDING))) {
       tputs(dcc[i].sock, s, l + 2);
     }
+  }
+  q_resync(s);
 }
 
 /* Flush all tbufs older than 15 minutes.
@@ -997,6 +1147,16 @@ shareout_but(int x, const char *format, ...)
 static void
 check_expired_tbufs()
 {
+  tandbuf *t = NULL, *tnext = NULL;
+
+  for (t = tbuf; t; t = tnext) {
+    tnext = t->next;
+    if ((now - t->timer) > 300) {
+      putlog(LOG_BOTS, "*", "Flushing resync buffer for clonebot %s.", t->bot);
+      del_tbuf(t);
+    }
+  }
+ 
   /* Resend userfile requests */
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type->flags & DCT_BOT) {
@@ -1227,7 +1387,12 @@ start_sending_users(int idx)
     dcc[idx].status |= STAT_SENDING;
     strcpy(dcc[j].host, dcc[idx].nick); /* Store bot's nick */
     dprintf(idx, "s us %lu %d %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
-
+    /* Start up a tbuf to queue outgoing changes for this bot until the
+     * userlist is done transferring.
+     */
+    new_tbuf(dcc[idx].nick);
+    /* override shit removed here */
+    q_tbuf(dcc[idx].nick, "s !\n");
     /* Unlink the file. We don't really care whether this causes problems
      * for NFS setups. It's not worth the trouble.
      */
@@ -1247,6 +1412,8 @@ cancel_user_xfer(int idx, void *x)
     k = 1;
     updatebot(-1, dcc[idx].nick, '-', 0, 0, NULL);
   }
+  flush_tbuf(dcc[idx].nick);
+
   if (dcc[idx].status & STAT_SHARE) {
     if (dcc[idx].status & STAT_GETTING) {
       for (i = 0; i < dcc_total; i++)
