@@ -710,8 +710,7 @@ int
 findhelp(const char *cmd)
 {
   for (int hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
-    if (!egg_strcasecmp(cmd, help[hi].cmd) &&
-      (!help[hi].type || (help[hi].type == HUB && conf.bot->hub) || (help[hi].type == LEAF && !conf.bot->hub)))
+    if (!egg_strcasecmp(cmd, help[hi].cmd) && have_cmd(help[hi].type))
       return hi;
 
   return -1;

@@ -422,7 +422,7 @@ dcc_bot(int idx, char *code, int i)
 
     if (!y) {
       /* Found a match */
-      if (!C_bot[i].type || (C_bot[i].type == HUB && conf.bot->hub) || (C_bot[i].type == LEAF && !conf.bot->hub))
+      if (have_cmd(C_bot[i].type))
         (C_bot[i].func) (idx, msg);
       break;
     } else if (y < 0)

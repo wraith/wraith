@@ -129,7 +129,8 @@ enum {		/* TAKE A GUESS */
 #define FLOOD_GLOBAL_MAX 3
 
 
-#define HUB  1
-#define LEAF 2
+#define HUB  BIT0
+#define LEAF BIT1
+#define have_cmd(flags) (!(flags & (HUB|LEAF)) || (flags & HUB && conf.bot->hub) || (flags & LEAF && !conf.bot->hub))
 
 #endif				/* _EGG_EGGDROP_H */
