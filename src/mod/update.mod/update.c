@@ -285,7 +285,7 @@ static void start_sending_binary(int idx)
 {
   /* module_entry *me; */
 #ifdef HUB
-  char update_file[DIRMAX] = "", tmpFile[1024] = "", *sysname = NULL;
+  char update_file[51] = "", update_fpath[DIRMAX] = "", tmpFile[1024] = "", *sysname = NULL;
   int i = 1;
 
   dcc[idx].status &= ~(STAT_OFFEREDU | STAT_SENDINGU);
@@ -305,11 +305,13 @@ static void start_sending_binary(int idx)
     return;
   }
 
-  sprintf(update_file, "%s%s.%s-%s", dirname(binname), (bot_hublevel(dcc[idx].user) == 999) ? "leaf" : "hub", 
-                                     sysname, egg_version);
+  egg_snprintf(update_file, sizeof update_file, "%s.%s-%s", 
+              (bot_hublevel(dcc[idx].user) == 999) ? "leaf" : "hub", sysname, egg_version);
 
-  if (!can_stat(update_file)) {
-    putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s, but it cannot be accessed", dcc[idx].nick, update_file);
+  egg_snprintf(update_fpath, sizeof update_fpath, "%s/%s", dirname(binname), update_file);
+
+  if (!can_stat(update_fpath)) {
+    putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s, but it cannot be accessed", dcc[idx].nick, update_fpath);
     bupdating = 0;
     return;
   }
@@ -317,7 +319,7 @@ static void start_sending_binary(int idx)
   /* copy the binary to our tempdir and send that one. */
   sprintf(tmpFile, "%s.%s", tempdir, update_file);
   unlink(tmpFile);
-  copyfile(update_file, tmpFile);
+  copyfile(update_fpath, tmpFile);
 
 /* NO
   ic = 0;

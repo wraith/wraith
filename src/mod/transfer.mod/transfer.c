@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <errno.h>
 
 extern int		bupdating;
 
@@ -1101,7 +1102,11 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
  
   sdprintf("raw_dcc_resend_send()");
   zz = (-1);
-  dccfile = fopen(filename,"rb");
+  dccfile = fopen(filename, "rb");
+  if (!dccfile) {
+    putlog(LOG_MISC, "*", "Failed to open %s: %s", filename, strerror(errno));
+    return DCCSEND_FEMPTY;
+  }
   fseek(dccfile, 0, SEEK_END);
   dccfilesize = ftell(dccfile);
   fclose(dccfile);
