@@ -10,6 +10,7 @@ This is a summary of ChangeLog basically.
 7.Fixed a segfault in cmd_chaddr (ipv6 ips still not supported)
 8.Changed format for ADDRESS display again.
 9.Fixed dcc cmdpasses.
+10.Fixed the annoying 'attempt to kill unallocated socket' log when a device is broken.
 
 1.1.1
 1.Fixed a problem with using /DCC CHAT <bot>

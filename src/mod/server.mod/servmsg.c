@@ -907,12 +907,12 @@ static int gotmode(char *from, char *msg)
 
 static void disconnect_server(int idx, int dolost)
 {
-  server_online = 0;
   if (dcc[idx].sock >= 0)
     killsock(dcc[idx].sock);
   dcc[idx].sock = -1;
   serv = -1;
   servidx = -1;
+  server_online = 0;
   botuserhost[0] = 0;
   if (dolost) {
     trying_server = 0;
@@ -1238,13 +1238,9 @@ static void connect_server(void)
 
 static void server_resolve_failure(int idx)
 {
-/* FIXME, server_trying = 0???? */
-  serv = -1;
-  /* servidx = -1; */
   resolvserv = 0;
   putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, IRC_DNSFAILED);
-  lostdcc(idx);
-
+  disconnect_server(idx, DO_LOST);
 }
 
 static void server_resolve_success(int idx)
@@ -1261,18 +1257,21 @@ static void server_resolve_success(int idx)
 #else
   serv = open_telnet(iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
 #endif /* USE_IPV6 */
+
+  /* set these now so if we fail disconnect_server() can cleanup right. */
+  dcc[idx].sock = serv;
+  servidx = idx;
+
   if (serv < 0) {
     neterror(s);
-/* FIXME server_trying = 0?? */
+
     putlog(LOG_SERV, "*", "%s %s (%s)", IRC_FAILEDCONNECT, dcc[idx].host, s);
-    lostdcc(idx);
-    /* servidx = -1; */
+    disconnect_server(idx, DO_LOST);
+
     if (oldserv == curserv && !never_give_up)
       fatal("NO SERVERS WILL ACCEPT MY CONNECTION.", 0);
-  } else {
-    dcc[idx].sock = serv;
 
-    servidx = idx; 		/* not sure about this, servidx serves as current server idx.. sooo... ? */
+  } else {
 
 #ifdef HAVE_SSL
     if (!ssl_link(dcc[idx].sock, CONNECT_SSL)) {

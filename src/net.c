@@ -717,8 +717,6 @@ int open_telnet(char *server, int port)
   int sock = getsock(0) , ret = open_telnet_raw(sock, server, port);
 #endif /* USE_IPV6 */
 
-  if (ret < 0)
-    killsock(sock);
   return ret;
 }
 
