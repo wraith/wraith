@@ -1,25 +1,6 @@
 /*
  * flags.h
  *
- * $Id: flags.h,v 1.10 2002/06/13 20:43:08 wcc Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_FLAGS_H
@@ -44,57 +25,75 @@ struct flag_record {
 
 /*
  * userflags:
- *   abcdefgh?jklmnopqr?tuvwxyz
+ *   abcdefgh?jklmnopqr?tuvwxy?
  *   + user defined A-Z
- *   unused letters: is
+ *   unused letters: isz
  *
  * botflags:
  *   0123456789ab????ghi??l???p?rs???????
  *   unused letters: cdefjkmnoqtuvwxyz
  *
  * chanflags:
- *   a??defg???klmno?qr??uv??yz
+ *   a??defg???klmno?qr??uv?xyz
  *   + user defined A-Z
- *   unused letters: bchijpstwx
+ *   unused letters: bchijpstw
  */
-#define USER_VALID 0x03fbfeff /* all USER_ flags in use              */
-#define CHAN_VALID 0x03777c79 /* all flags that can be chan specific */
+
+#define ROLE_KICK_MDOP     (role)
+#define ROLE_KICK_MEAN     (role)
+
+#define DEFLAG_BADCOOKIE   1
+#define DEFLAG_MANUALOP    2
+#ifdef G_MEAN
+#define DEFLAG_MEAN_DEOP   3
+#define DEFLAG_MEAN_KICK   4
+#define DEFLAG_MEAN_BAN    5
+#endif
+#define DEFLAG_MDOP        6
+
+//#define USER_VALID 0x03fbfeff /* all USER_ flags in use              */
+//#define CHAN_VALID 0x03777c79 /* all flags that can be chan specific */
+#define USER_VALID 0x03ffffff
+#define CHAN_VALID 0x03ffffff
 #define BOT_VALID  0x7fe689C1 /* all BOT_ flags in use               */
 
 
-#define USER_AUTOOP        0x00000001 /* a  auto-op                           */
+#define USER_ADMIN         0x00000001 /* a  user is an admin                  */
 #define USER_BOT           0x00000002 /* b  user is a bot                     */
-#define USER_COMMON        0x00000004 /* c  user is actually a public site    */
+#define USER_CHANHUB       0x00000004 /* c  bot is a chanhub    */
 #define USER_DEOP          0x00000008 /* d  user is global de-op              */
 #define USER_EXEMPT        0x00000010 /* e  exempted from stopnethack         */
 #define USER_FRIEND        0x00000020 /* f  user is global friend             */
-#define USER_GVOICE        0x00000040 /* g  auto-voice                        */
-#define USER_HIGHLITE      0x00000080 /* h  highlighting (bold)               */
-#define USER_I             0x00000100 /* i  unused                            */
-#define USER_JANITOR       0x00000200 /* j  user is file area master          */
+#define USER_G             0x00000040 /* g  unused                            */
+#define USER_H             0x00000080 /* h  unused                            */
+#define USER_HUBA          0x00000100 /* i  access to HUBS/SECHUBS(+s)        */
+#define USER_CHUBA         0x00000200 /* j  access to CHANHUBS(+c)            */
 #define USER_KICK          0x00000400 /* k  user is global auto-kick          */
-#define USER_HALFOP        0x00000800 /* l  user is +h on all channels        */
+#define USER_DOLIMIT       0x00000800 /* l  bot sets limit on channel(s)        */
 #define USER_MASTER        0x00001000 /* m  user has full bot access          */
 #define USER_OWNER         0x00002000 /* n  user is the bot owner             */
 #define USER_OP            0x00004000 /* o  user is +o on all channels        */
-#define USER_PARTY         0x00008000 /* p  user has party line access        */
+#define USER_PARTY         0x00008000 /* p  user can CHAT on partyline:*needs (+i or +j)    */
 #define USER_QUIET         0x00010000 /* q  user is global de-voice           */
-#define USER_DEHALFOP      0x00020000 /* r  user is global de-halfop          */
-#define USER_S             0x00040000 /* s  unused                            */
-#define USER_BOTMAST       0x00080000 /* t  user is botnet master             */
-#define USER_UNSHARED      0x00100000 /* u  not shared with sharebots         */
+#define USER_R  	   0x00020000 /* r  unused    */
+#define USER_SECHUB        0x00040000 /* s  bot is a sechub                 */
+#define USER_T             0x00080000 /* t  unused             */
+#define USER_UPDATEHUB     0x00100000 /* u  bot is the updatehub         */
 #define USER_VOICE         0x00200000 /* v  user is +v on all channels        */
 #define USER_WASOPTEST     0x00400000 /* w  wasop test needed for stopnethack */
-#define USER_XFER          0x00800000 /* x  user has file area access         */
-#define USER_AUTOHALFOP    0x01000000 /* y  auto-halfop                       */
-#define USER_WASHALFOPTEST 0x02000000 /* z  washalfop test needed for
-                                            stopnethack                       */
+#define USER_NOFLOOD       0x00800000 /* x  user is exempt from flood kicks   */
+#define USER_DOVOICE       0x01000000 /* y  bot gives voices                  */
+#define USER_UNSHARED      0x02000000 /* z  not shared with sharebots	      */
 #define USER_DEFAULT       0x40000000 /* use default-flags                    */
+
+#define bot_hublevel(x) ( ( (x) && (x->flags & USER_BOT) && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
+                          ( ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel ? \
+                            ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel : 999) \
+                         : 999)
 
 /* Flags specifically for bots
  */
-#define BOT_ALT       0x00000001	/* a  auto-link here if all +h's
-					      fail			 */
+#define BOT_A         0x00000001	/* a  unused			 */
 #define BOT_BOT       0x00000002	/* b  sanity bot flag		 */
 #define BOT_C         0x00000004	/* c  unused			 */
 #define BOT_D         0x00000008	/* d  unused			 */
@@ -142,46 +141,43 @@ struct flag_record {
  */
 #define chan_op(x)			((x).chan & USER_OP)
 #define glob_op(x)			((x).global & USER_OP)
-#define chan_halfop(x)			((x).chan & USER_HALFOP)
-#define glob_halfop(x)			((x).global & USER_HALFOP)
 #define chan_deop(x)			((x).chan & USER_DEOP)
 #define glob_deop(x)			((x).global & USER_DEOP)
-#define chan_dehalfop(x)		((x).chan & USER_DEHALFOP)
-#define glob_dehalfop(x)		((x).global & USER_DEHALFOP)
 #define glob_master(x)			((x).global & USER_MASTER)
 #define glob_bot(x)				((x).global & USER_BOT)
 #define glob_owner(x)			((x).global & USER_OWNER)
 #define chan_master(x)			((x).chan & USER_MASTER)
 #define chan_owner(x)			((x).chan & USER_OWNER)
-#define chan_autoop(x)			((x).chan & USER_AUTOOP)
-#define glob_autoop(x)			((x).global & USER_AUTOOP)
-#define chan_autohalfop(x)		((x).chan & USER_AUTOHALFOP)
-#define glob_autohalfop(x)		((x).global & USER_AUTOHALFOP)
-#define chan_gvoice(x)			((x).chan & USER_GVOICE)
-#define glob_gvoice(x)			((x).global & USER_GVOICE)
 #define chan_kick(x)			((x).chan & USER_KICK)
 #define glob_kick(x)			((x).global & USER_KICK)
 #define chan_voice(x)			((x).chan & USER_VOICE)
 #define glob_voice(x)			((x).global & USER_VOICE)
 #define chan_wasoptest(x)		((x).chan & USER_WASOPTEST)
 #define glob_wasoptest(x)		((x).global & USER_WASOPTEST)
-#define chan_washalfoptest(x)	((x).chan & USER_WASHALFOPTEST)
-#define glob_washalfoptest(x)	((x).global & USER_WASHALFOPTEST)
 #define chan_quiet(x)			((x).chan & USER_QUIET)
 #define glob_quiet(x)			((x).global & USER_QUIET)
 #define chan_friend(x)			((x).chan & USER_FRIEND)
 #define glob_friend(x)			((x).global & USER_FRIEND)
-#define glob_botmast(x)			((x).global & USER_BOTMAST)
 #define glob_party(x)			((x).global & USER_PARTY)
-#define glob_xfer(x)			((x).global & USER_XFER)
 #define glob_hilite(x) 			((x).global & USER_HIGHLITE)
 #define chan_exempt(x)			((x).chan & USER_EXEMPT)
 #define glob_exempt(x)			((x).global & USER_EXEMPT)
+#define glob_admin(x)			((x).global & USER_ADMIN)
+#define glob_huba(x)			((x).global & USER_HUBA)
+#define glob_chuba(x)			((x).global & USER_CHUBA)
+#define glob_dolimit(x)			((x).global & USER_DOLIMIT)
+#define chan_dolimit(x)			((x).chan & USER_DOLIMIT)
+#define glob_dovoice(x)			((x).global & USER_DOVOICE)
+#define chan_dovoice(x)			((x).chan & USER_DOVOICE)
+#define glob_noflood(x)			((x).global & USER_NOFLOOD)
+#define chan_noflood(x)			((x).chan & USER_NOFLOOD)
+#define glob_chanhub(x)			((x).global & USER_CHANHUB)
+#define glob_sechub(x)			((x).global & USER_SECHUB)
 
-#define bot_global(x)		((x).bot & BOT_GLOBAL)
+//#define bot_global(x)		((x).bot & BOT_GLOBAL)
+#define bot_global(x)		(1)
 #define bot_chan(x)		((x).chan & BOT_AGGRESSIVE)
 #define bot_shared(x)		((x).bot & BOT_SHARE)
-
 
 #ifndef MAKING_MODS
 

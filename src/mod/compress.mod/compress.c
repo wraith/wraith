@@ -6,7 +6,6 @@
  * Written by Fabian Knittel <fknittel@gmx.de>. Based on zlib examples
  * by Jean-loup Gailly and Miguel Albrecht.
  *
- * $Id: compress.c,v 1.14 2002/06/06 18:52:22 wcc Exp $
  */
 /*
  * Copyright (C) 2000, 2001, 2002 Eggheads Development Team
@@ -46,14 +45,15 @@
 
 #define BUFLEN	512
 
+#undef HAVE_MMAP
 
 static Function *global = NULL,
 		*share_funcs = NULL;
 
 static unsigned int compressed_files;	/* Number of files compressed.      */
 static unsigned int uncompressed_files;	/* Number of files uncompressed.    */
-static unsigned int share_compressed;	/* Compress userfiles when sharing? */
-static unsigned int compress_level;	/* Default compression used.	    */
+static unsigned int share_compressed = 1;	/* Compress userfiles when sharing? */
+static unsigned int compress_level = 9;	/* Default compression used.	    */
 
 
 static int uncompress_to_file(char *f_src, char *f_target);
@@ -390,7 +390,6 @@ static int compress_report(int idx, int details)
 
 static char *compress_close()
 {
-  rem_help_reference("compress.help");
   rem_tcl_commands(my_tcl_cmds);
   rem_tcl_ints(my_tcl_ints);
   uff_deltable(compress_uff_table);
@@ -426,10 +425,6 @@ char *compress_start(Function *global_funcs)
   compress_level	= 9;
 
   module_register(MODULE_NAME, compress_table, 1, 1);
-  if (!module_depend(MODULE_NAME, "eggdrop", 106, 0)) {
-    module_undepend(MODULE_NAME);
-    return "This module requires Eggdrop 1.6.0 or later.";
-  }
   share_funcs = module_depend(MODULE_NAME, "share", 2, 3);
   if (!share_funcs) {
     module_undepend(MODULE_NAME);
@@ -439,6 +434,5 @@ char *compress_start(Function *global_funcs)
   uff_addtable(compress_uff_table);
   add_tcl_ints(my_tcl_ints);
   add_tcl_commands(my_tcl_cmds);
-  add_help_reference("compress.help");
   return NULL;
 }

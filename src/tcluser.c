@@ -2,25 +2,6 @@
  * tcluser.c -- handles:
  *   Tcl stubs for the user-record-oriented commands
  *
- * $Id: tcluser.c,v 1.30 2002/07/18 19:01:44 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
@@ -354,6 +335,8 @@ static int tcl_userlist STDVAR
   return TCL_OK;
 }
 
+#ifdef HUB
+
 static int tcl_save STDVAR
 {
   write_userfile(-1);
@@ -365,6 +348,7 @@ static int tcl_reload STDVAR
   reload();
   return TCL_OK;
 }
+#endif
 
 static int tcl_chhandle STDVAR
 {
@@ -455,7 +439,7 @@ static int tcl_ignorelist STDVAR
 {
   struct igrec *i;
   char expire[11], added[11], *p;
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
     CONST char *list[5];
 #else
     char *list[5];
@@ -557,8 +541,10 @@ tcl_cmds tcluser_cmds[] =
   {"deluser",		tcl_deluser},
   {"delhost",		tcl_delhost},
   {"userlist",		tcl_userlist},
+#ifdef HUB
   {"save",		tcl_save},
   {"reload",		tcl_reload},
+#endif
   {"chhandle",		tcl_chhandle},
   {"chnick",		tcl_chhandle},
   {"getting-users",	tcl_getting_users},

@@ -2,25 +2,6 @@
  * tclmisc.c -- handles:
  *   Tcl stubs for everything else
  *
- * $Id: tclmisc.c,v 1.30 2002/07/18 19:01:44 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include <sys/stat.h>
@@ -39,7 +20,7 @@ extern char		 origbotname[], botnetnick[], quit_msg[];
 extern struct userrec	*userlist;
 extern time_t		 now;
 extern module_entry	*module_list;
-extern int max_logs;
+extern int max_logs, timesync;
 extern log_t *logs;
 extern Tcl_Interp *interp;
 extern char myipv6host[120];
@@ -47,7 +28,7 @@ extern char myipv6host[120];
 static int tcl_myip6 STDVAR      
 {
   char s[120];
-  getmyip();                     
+  getmyip(0);                     
   BADARGS(1, 1, "");
   s[0]=0;
   if(strlen(myipv6host)<120)
@@ -73,6 +54,7 @@ int expmem_tclmisc()
  */
 
 /* logfile [<modes> <channel> <filename>] */
+#ifdef HUB
 static int tcl_logfile STDVAR
 {
   int i;
@@ -135,7 +117,7 @@ static int tcl_logfile STDVAR
   Tcl_AppendResult(interp, "reached max # of logfiles", NULL);
   return TCL_ERROR;
 }
-
+#endif
 static int tcl_putlog STDVAR
 {
   char logtext[501];
@@ -143,6 +125,15 @@ static int tcl_putlog STDVAR
   BADARGS(2, 2, " text");
   strncpyz(logtext, argv[1], sizeof logtext);
   putlog(LOG_MISC, "*", "%s", logtext);
+  return TCL_OK;
+}
+static int tcl_putlogl STDVAR
+{
+  char logtext[501];
+
+  BADARGS(2, 2, " text");
+  strncpyz(logtext, argv[1], sizeof logtext);
+  putlog(LOG_MISC, "@", "%s", logtext);
   return TCL_OK;
 }
 
@@ -153,6 +144,15 @@ static int tcl_putcmdlog STDVAR
   BADARGS(2, 2, " text");
   strncpyz(logtext, argv[1], sizeof logtext);
   putlog(LOG_CMDS, "*", "%s", logtext);
+  return TCL_OK;
+}
+static int tcl_putcmdlogl STDVAR
+{
+  char logtext[501];
+
+  BADARGS(2, 2, " text");
+  strncpyz(logtext, argv[1], sizeof logtext);
+  putlog(LOG_CMDS, "@", "%s", logtext);
   return TCL_OK;
 }
 
@@ -181,7 +181,6 @@ static int tcl_putloglev STDVAR
   putlog(lev, argv[2], "%s", logtext);
   return TCL_OK;
 }
-
 static int tcl_binds STDVAR
 {
   tcl_bind_list_t	*tl, *tl_kind;
@@ -189,7 +188,7 @@ static int tcl_binds STDVAR
   tcl_cmd_t		*tc;
   char			*g, flg[100], hits[11];
   int			 matching = 0;
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
     CONST char *list[5];
 #else
     char *list[5];
@@ -213,9 +212,9 @@ static int tcl_binds STDVAR
 	if (tc->attributes & TC_DELETED)
 	  continue;
         if (matching &&
-	    !wild_match(argv[1], tl->name) &&
-            !wild_match(argv[1], tm->mask) &&
-            !wild_match(argv[1], tc->func_name))
+	    !wild_match_per(argv[1], tl->name) &&
+            !wild_match_per(argv[1], tm->mask) &&
+            !wild_match_per(argv[1], tc->func_name))
           continue;
 	build_flags(flg, &(tc->flags), NULL);
         egg_snprintf(hits, sizeof hits, "%i", (int) tc->hits);
@@ -232,7 +231,6 @@ static int tcl_binds STDVAR
   }
   return TCL_OK;
 }
-
 static int tcl_timer STDVAR
 {
   unsigned long x;
@@ -250,7 +248,30 @@ static int tcl_timer STDVAR
   }
   return TCL_OK;
 }
-
+static int tcl_ischanhub STDVAR
+{
+#ifdef HUB
+  Tcl_AppendResult(irp, "0", NULL);
+  return TCL_OK;
+#endif
+  if (ischanhub()) 
+    Tcl_AppendResult(irp, "1", NULL);
+  else 
+    Tcl_AppendResult(irp, "0", NULL);
+  return TCL_OK;
+}
+static int tcl_issechub STDVAR
+{
+#ifdef HUB
+  Tcl_AppendResult(irp, "0", NULL);
+  return TCL_OK;
+#endif
+  if (issechub()) 
+    Tcl_AppendResult(irp, "1", NULL);
+  else 
+    Tcl_AppendResult(irp, "0", NULL);
+  return TCL_OK;
+}
 static int tcl_utimer STDVAR
 {
   unsigned long x;
@@ -401,7 +422,7 @@ static int tcl_myip STDVAR
   char s[16];
 
   BADARGS(1, 1, "");
-  egg_snprintf(s, sizeof s, "%lu", iptolong(getmyip()));
+  egg_snprintf(s, sizeof s, "%lu", iptolong(getmyip(0)));
   Tcl_AppendResult(irp, s, NULL);
   return TCL_OK;
 }
@@ -416,7 +437,7 @@ static int tcl_rand STDVAR
     Tcl_AppendResult(irp, "random limit must be greater than zero", NULL);
     return TCL_ERROR;
   }
-  x = random() % (atol(argv[1]));
+  x = random() % (unsigned long) (atol(argv[1]));
   egg_snprintf(s, sizeof s, "%lu", x);
   Tcl_AppendResult(irp, s, NULL);
   return TCL_OK;
@@ -435,42 +456,22 @@ static int tcl_sendnote STDVAR
   return TCL_OK;
 }
 
-static int tcl_dumpfile STDVAR
-{
-  char nick[NICKLEN];
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  BADARGS(3, 3, " nickname filename");
-  strncpyz(nick, argv[1], sizeof nick);
-  get_user_flagrec(get_user_by_nick(nick), &fr, NULL);
-  showhelp(argv[1], argv[2], &fr, HELP_TEXT);
-  return TCL_OK;
-}
-
-static int tcl_dccdumpfile STDVAR
-{
-  int idx, i;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-
-  BADARGS(3, 3, " idx filename");
-  i = atoi(argv[1]);
-  idx = findidx(i);
-  if (idx < 0) {
-    Tcl_AppendResult(irp, "illegal idx", NULL);
-    return TCL_ERROR;
-  }
-  get_user_flagrec(get_user_by_handle(userlist, dcc[idx].nick), &fr, NULL);
-  tellhelp(idx, argv[2], &fr, HELP_TEXT);
-  return TCL_OK;
-}
-
+#ifdef HUB
 static int tcl_backup STDVAR
 {
   BADARGS(1, 1, "");
   call_hook(HOOK_BACKUP);
   return TCL_OK;
 }
+#endif
+static int tcl_timesync STDVAR
+{
+  char buf[20];
 
+  sprintf(buf, "%li %li %d", (now+timesync), now, timesync);
+  Tcl_AppendResult(irp, buf, NULL);
+  return TCL_OK;
+}
 static int tcl_die STDVAR
 {
   char s[1024];
@@ -523,66 +524,6 @@ static int tcl_unames STDVAR
   }
 #endif
   Tcl_AppendResult(irp, unix_n, " ", vers_n, NULL);
-  return TCL_OK;
-}
-
-static int tcl_modules STDVAR
-{
-  module_entry *current;
-  dependancy *dep;
-  char *p;
-  char s[24], s2[24];
-  int i;
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
-    CONST char *list[100], *list2[2];
-#else
-    char *list[100], *list2[2];
-#endif
-
-  BADARGS(1, 1, "");
-  for (current = module_list; current; current = current->next) {
-    list[0] = current->name;
-    egg_snprintf(s, sizeof s, "%d.%d", current->major, current->minor);
-    list[1] = s;
-    i = 2;
-    for (dep = dependancy_list; dep && (i < 100); dep = dep->next) {
-      if (dep->needing == current) {
-	list2[0] = dep->needed->name;
-	egg_snprintf(s2, sizeof s2, "%d.%d", dep->major, dep->minor);
-	list2[1] = s2;
-	list[i] = Tcl_Merge(2, list2);
-	i++;
-      }
-    }
-    p = Tcl_Merge(i, list);
-    Tcl_AppendElement(irp, p);
-    Tcl_Free((char *) p);
-    while (i > 2) {
-      i--;
-      Tcl_Free((char *) list[i]);
-    }
-  }
-  return TCL_OK;
-}
-
-static int tcl_loadhelp STDVAR
-{
-  BADARGS(2, 2, " helpfile-name");
-  add_help_reference(argv[1]);
-  return TCL_OK;
-}
-
-static int tcl_unloadhelp STDVAR
-{
-  BADARGS(2, 2, " helpfile-name");
-  rem_help_reference(argv[1]);
-  return TCL_OK;
-}
-
-static int tcl_reloadhelp STDVAR
-{
-  BADARGS(1, 1, "");
-  reload_help_data();
   return TCL_OK;
 }
 
@@ -646,9 +587,13 @@ tcl_cmds tclmisc_objcmds[] =
 
 tcl_cmds tclmisc_cmds[] =
 {
+#ifdef HUB
   {"logfile",           tcl_logfile},
+#endif
   {"putlog",		tcl_putlog},
+  {"putlogl",		tcl_putlogl},
   {"putcmdlog",		tcl_putcmdlog},
+  {"putcmdlogl",	tcl_putcmdlogl},
   {"putxferlog",	tcl_putxferlog},
   {"putloglev",		tcl_putloglev},
   {"timer",		tcl_timer},
@@ -664,19 +609,18 @@ tcl_cmds tclmisc_cmds[] =
   {"myip6",             tcl_myip6},
   {"rand",		tcl_rand},
   {"sendnote",		tcl_sendnote},
-  {"dumpfile",		tcl_dumpfile},
-  {"dccdumpfile",	tcl_dccdumpfile},
+#ifdef HUB
   {"backup",		tcl_backup},
+#endif
+  {"ischanhub",		tcl_ischanhub},
+  {"issechub",		tcl_issechub},
+  {"timesync",		tcl_timesync},
   {"exit",		tcl_die},
   {"die",		tcl_die},
   {"unames",		tcl_unames},
   {"unloadmodule",	tcl_unloadmodule},
   {"loadmodule",	tcl_loadmodule},
   {"checkmodule",	tcl_loadmodule},
-  {"modules",		tcl_modules},
-  {"loadhelp",		tcl_loadhelp},
-  {"unloadhelp",	tcl_unloadhelp},
-  {"reloadhelp",	tcl_reloadhelp},
   {"duration",		tcl_duration},
 #if (TCL_MAJOR_VERSION < 8)
   {"md5",		tcl_md5},

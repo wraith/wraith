@@ -2,25 +2,6 @@
  * blowfish.c -- part of blowfish.mod
  *   encryption and decryption of passwords
  *
- * $Id: blowfish.c,v 1.23 2002/06/06 18:52:22 wcc Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 /*
  * This code was originally in the public domain.
@@ -138,9 +119,9 @@ static void blowfish_decipher(u_32bit_t * xl, u_32bit_t * xr)
 
 static void blowfish_report(int idx, int details)
 {
-  int i, tot = 0;
 
   if (details) {
+    int i, tot = 0, size = blowfish_expmem();
     for (i = 0; i < BOXES; i++)
       if (box[i].P != NULL)
 	tot++;
@@ -151,6 +132,9 @@ static void blowfish_report(int idx, int details)
 	dprintf(idx, "(age: %d) ", now - box[i].lastuse);
       }
     dprintf(idx, "\n");
+    dprintf(idx, "  Using %d byte%s of memory\n", size,
+            (size != 1) ? "s" : "");
+
   }
 }
 
@@ -352,7 +336,10 @@ static char *encrypt_string(char *key, char *str)
 static char *decrypt_string(char *key, char *str)
 {
   u_32bit_t left, right;
-  char *p, *s, *dest, *d;
+  char *p, 
+     *s, 
+     *dest, 
+     *d;
   int i;
 
   /* Pad encoded string with 0 bits in case it's bogus */
@@ -470,10 +457,6 @@ char *blowfish_start(Function *global_funcs)
       box[i].lastuse = 0L;
     }
     module_register(MODULE_NAME, blowfish_table, 2, 1);
-    if (!module_depend(MODULE_NAME, "eggdrop", 106, 3)) {
-      module_undepend(MODULE_NAME);
-      return "This module requires Eggdrop 1.6.3 or later.";
-    }
     add_hook(HOOK_ENCRYPT_PASS, (Function) blowfish_encrypt_pass);
     add_hook(HOOK_ENCRYPT_STRING, (Function) encrypt_string);
     add_hook(HOOK_DECRYPT_STRING, (Function) decrypt_string);

@@ -5,25 +5,6 @@
  *
  * by Darrin Smith (beldin@light.iinet.net.au)
  *
- * $Id: botmsg.c,v 1.25 2002/01/02 03:46:35 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
@@ -32,37 +13,13 @@
 extern struct dcc_t	*dcc;
 extern int		 dcc_total, tands;
 extern char		 botnetnick[];
+extern time_t now;
 extern party_t		*party;
 extern Tcl_Interp	*interp;
 extern struct userrec	*userlist;
 
-static char	OBUF[1024];
+static char	OBUF[sgrab-110];
 
-
-#ifndef NO_OLD_BOTNET
-/* Ditto for tandem bots
- */
-void tandout_but EGG_VARARGS_DEF(int, arg1)
-{
-  int i, x, len;
-  char *format;
-  char s[601];
-  va_list va;
-
-  x = EGG_VARARGS_START(int, arg1, va);
-  format = va_arg(va, char *);
-  egg_vsnprintf(s, 511, format, va);
-  va_end(va);
-  s[sizeof(s)-1] = 0;
-
-  len = strlen(s);
-
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type == &DCC_BOT) && (i != x) &&
-        (b_numver(i) < NEAT_BOTNET))
-      tputs(dcc[i].sock, s, len);
-}
-#endif
 
 /* Thank you ircu :) */
 static char tobase64array[64] =
@@ -205,14 +162,64 @@ void send_tand_but(int x, char *buf, int len)
 	(!iso || !(bot_flags(dcc[i].user) & BOT_ISOLATE)))
       tputs(dcc[i].sock, buf, len);
 }
+#ifdef S_DCCPASS
+void botnet_send_cmdpass(int idx, char *cmd, char *pass)
+{
+  char *buf;
+
+  if (tands > 0) {
+    buf = nmalloc(strlen(cmd) + strlen(pass) + 10);
+    sprintf(buf, "cp %s %s\n", cmd, pass);
+    send_tand_but(idx, buf, strlen(buf));
+    nfree(buf);
+  }
+}
+#endif
+
+int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cmd) {
+  int i = nextbot(bot);
+  if (i>=0) {
+    char buf[2048];
+    sprintf(buf, STR("rc %s %s %s %i %s\n"), bot, fbot, from, fromidx, cmd);
+    tputs(dcc[i].sock, buf, strlen(buf));
+    return 1;
+  } else if (!strcmp(bot, botnetnick)) {
+    char tmp[24];
+    sprintf(tmp, "%i", fromidx);
+    gotremotecmd(botnetnick, botnetnick, from, tmp, cmd);
+  }
+  return 0;
+}
+
+void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char * cmd) {
+  if (tands > 0) {
+    char buf[2048];
+    sprintf(buf, STR("rc * %s %s %i %s\n"), fbot, from, fromidx, cmd);
+    send_tand_but(idx, buf, strlen(buf));
+  }
+  if (idx<0) {
+    char tmp[24];
+    sprintf(tmp, "%i", fromidx);
+    gotremotecmd("*", botnetnick, from, tmp, cmd);
+  }
+}
+
+void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln) {
+  int i = nextbot(bot);
+  if (i>=0) {
+    char buf[2048];
+    sprintf(buf, STR("rr %s %s %s %s %s\n"), bot, fbot, to, toidx, ln);
+    tputs(dcc[i].sock, buf, strlen(buf));
+  } else if (!strcmp(bot, botnetnick)) {
+    gotremotereply(botnetnick, to, toidx, ln);
+  }
+}
+
 
 void botnet_send_bye()
 {
   if (tands > 0) {
     send_tand_but(-1, "bye\n", 4);
-#ifndef NO_OLD_BOTNET
-    tandout_but(-1, "bye\n");
-#endif
   }
 }
 
@@ -228,10 +235,6 @@ void botnet_send_chan(int idx, char *botnick, char *user,
       i = simple_sprintf(OBUF, "c %s %D %s\n", botnick, chan, data);
     }
     send_tand_but(idx, OBUF, -i);
-#ifndef NO_OLD_BOTNET
-    tandout_but(idx, "chan %s%s%s %d %s\n", user ? user : "",
-		user ? "@" : "", botnick, chan, data);
-#endif
   }
 }
 
@@ -247,10 +250,6 @@ void botnet_send_act(int idx, char *botnick, char *user,
       i = simple_sprintf(OBUF, "a %s %D %s\n", botnick, chan, data);
     }
     send_tand_but(idx, OBUF, -i);
-#ifndef NO_OLD_BOTNET
-    tandout_but(idx, "actchan %s%s%s %d %s\n", user ? user : "",
-		user ? "@" : "", botnick, chan, data);
-#endif
   }
 }
 
@@ -261,30 +260,18 @@ void botnet_send_chat(int idx, char *botnick, char *data)
   if (tands > 0) {
     i = simple_sprintf(OBUF, "ct %s %s\n", botnick, data);
     send_tand_but(idx, OBUF, -i);
-#ifndef NO_OLD_BOTNET
-    tandout_but(idx, "chat %s %s\n", botnick, data);
-#endif
   }
 }
 
 void botnet_send_ping(int idx)
 {
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    tputs(dcc[idx].sock, "ping\n", 5);
-  else
-#endif
-    tputs(dcc[idx].sock, "pi\n", 3);
+  tputs(dcc[idx].sock, "pi\n", 3);
+  dcc[idx].pingtime = now;
 }
 
 void botnet_send_pong(int idx)
 {
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    tputs(dcc[idx].sock, "pong\n", 5);
-  else
-#endif
-    tputs(dcc[idx].sock, "po\n", 3);
+  tputs(dcc[idx].sock, "po\n", 3);
 }
 
 void botnet_send_priv EGG_VARARGS_DEF(int, arg1)
@@ -304,19 +291,9 @@ void botnet_send_priv EGG_VARARGS_DEF(int, arg1)
   tbuf[sizeof(tbuf)-1] = 0;
 
   if (tobot) {
-#ifndef NO_OLD_BOTNET
-    if (b_numver(idx) < NEAT_BOTNET)
-      l = simple_sprintf(OBUF, "priv %s %s@%s %s\n", from, to, tobot, tbuf);
-    else
-#endif
-      l = simple_sprintf(OBUF, "p %s %s@%s %s\n", from, to, tobot, tbuf);
+    l = simple_sprintf(OBUF, "p %s %s@%s %s\n", from, to, tobot, tbuf);
   } else {
-#ifndef NO_OLD_BOTNET
-    if (b_numver(idx) < NEAT_BOTNET)
-      l = simple_sprintf(OBUF, "priv %s %s %s\n", from, to, tbuf);
-    else
-#endif
-      l = simple_sprintf(OBUF, "p %s %s %s\n", from, to, tbuf);
+    l = simple_sprintf(OBUF, "p %s %s %s\n", from, to, tbuf);
   }
   tputs(dcc[idx].sock, OBUF, l);
 }
@@ -325,12 +302,7 @@ void botnet_send_who(int idx, char *from, char *to, int chan)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "who %s %s %d\n", from, to, chan);
-  else
-#endif
-    l = simple_sprintf(OBUF, "w %s %s %D\n", from, to, chan);
+  l = simple_sprintf(OBUF, "w %s %s %D\n", from, to, chan);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -339,9 +311,6 @@ void botnet_send_infoq(int idx, char *par)
   int i = simple_sprintf(OBUF, "i? %s\n", par);
 
   send_tand_but(idx, OBUF, i);
-#ifndef NO_OLD_BOTNET
-  tandout_but(idx, "info? %s\n", par);
-#endif
 }
 
 void botnet_send_unlink(int idx, char *who, char *via,
@@ -349,12 +318,7 @@ void botnet_send_unlink(int idx, char *who, char *via,
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "unlink %s %s %s %s\n", who, via, bot, reason);
-  else
-#endif
-    l = simple_sprintf(OBUF, "ul %s %s %s %s\n", who, via, bot, reason);
+  l = simple_sprintf(OBUF, "ul %s %s %s %s\n", who, via, bot, reason);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -362,12 +326,7 @@ void botnet_send_link(int idx, char *who, char *via, char *bot)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "link %s %s %s\n", who, via, bot);
-  else
-#endif
-    l = simple_sprintf(OBUF, "l %s %s %s\n", who, via, bot);
+  l = simple_sprintf(OBUF, "l %s %s %s\n", who, via, bot);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -378,11 +337,6 @@ void botnet_send_unlinked(int idx, char *bot, char *args)
   if (tands > 0) {
     l = simple_sprintf(OBUF, "un %s %s\n", bot, args ? args : "");
     send_tand_but(idx, OBUF, l);
-#ifndef NO_OLD_BOTNET
-    if ((idx >= 0) && (b_numver(idx) >= NEAT_BOTNET) && args && args[0])
-      tandout_but(idx, "chat %s %s\n", lastbot(bot), args);
-    tandout_but(idx, "unlinked %s\n", bot);
-#endif
   }
 }
 
@@ -394,13 +348,6 @@ void botnet_send_nlinked(int idx, char *bot, char *next, char flag,
   if (tands > 0) {
     l = simple_sprintf(OBUF, "n %s %s %c%D\n", bot, next, flag, vernum);
     send_tand_but(idx, OBUF, l);
-#ifndef NO_OLD_BOTNET
-    if (flag == '!') {
-      flag = '-';
-      tandout_but(idx, "chat %s %s %s\n", next, NET_LINKEDTO, bot);
-    }
-    tandout_but(idx, "nlinked %s %s %c%d\n", bot, next, flag, vernum);
-#endif
   }
 }
 
@@ -408,12 +355,7 @@ void botnet_send_traced(int idx, char *bot, char *buf)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "traced %s %s\n", bot, buf);
-  else
-#endif
-    l = simple_sprintf(OBUF, "td %s %s\n", bot, buf);
+  l = simple_sprintf(OBUF, "td %s %s\n", bot, buf);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -421,12 +363,7 @@ void botnet_send_trace(int idx, char *to, char *from, char *buf)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "trace %s %s %s:%s\n", to, from, buf, botnetnick);
-  else
-#endif
-    l = simple_sprintf(OBUF, "t %s %s %s:%s\n", to, from, buf, botnetnick);
+  l = simple_sprintf(OBUF, "t %s %s %s:%s\n", to, from, buf, botnetnick);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -437,9 +374,6 @@ void botnet_send_update(int idx, tand_t * ptr)
   if (tands > 0) {
     l = simple_sprintf(OBUF, "u %s %c%D\n", ptr->bot, ptr->share, ptr->ver);
     send_tand_but(idx, OBUF, l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(idx, "update %s %c%d\n", ptr->bot, ptr->share, ptr->ver);
-#endif
   }
 }
 
@@ -460,29 +394,43 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top,
     }
     if (!reason)
       reason = "";
-#ifndef NO_OLD_BOTNET
-    if (b_numver(idx) < NEAT_BOTNET)
-      l = simple_sprintf(OBUF, "reject %s %s %s\n", fromp, top, reason);
-    else
-#endif
-      l = simple_sprintf(OBUF, "r %s %s %s\n", fromp, top, reason);
+    l = simple_sprintf(OBUF, "r %s %s %s\n", fromp, top, reason);
     tputs(dcc[idx].sock, OBUF, l);
   }
 }
-
+void putbot(char *bot, char *par)
+{
+  int i;
+  char msg[sgrab-110];
+  if (!bot[0] || !par[0])
+    return;
+  i = nextbot(bot);
+  if (i < 0)
+    return;
+  strncpyz(msg, par, sizeof msg);
+  botnet_send_zapf(i, botnetnick, bot, msg);
+}
 void botnet_send_zapf(int idx, char *a, char *b, char *c)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "zapf %s %s %s\n", a, b, c);
-  else
-#endif
-    l = simple_sprintf(OBUF, "z %s %s %s\n", a, b, c);
+  l = simple_sprintf(OBUF, "z %s %s %s\n", a, b, c);
+  tputs(dcc[idx].sock, OBUF, l);
+}
+void botnet_send_cfg(int idx, struct cfg_entry * entry) {
+  int l;
+
+  l = simple_sprintf(OBUF, STR("cg %s %s\n"), entry->name, entry->gdata ? entry->gdata : "");
   tputs(dcc[idx].sock, OBUF, l);
 }
 
+void botnet_send_cfg_broad(int idx, struct cfg_entry * entry) {
+  int l;
+  if (tands > 0) {
+      l = simple_sprintf(OBUF, STR("cg %s %s\n"), entry->name, entry->gdata ? entry->gdata : "");
+    send_tand_but(idx, OBUF, l);
+  }
+}
 void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
 {
   int l;
@@ -490,35 +438,13 @@ void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
   if (tands > 0) {
     l = simple_sprintf(OBUF, "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "", c);
     send_tand_but(idx, OBUF, l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(idx, "zapf-broad %s\n", OBUF + 3);
-#endif
   }
 }
-
-void botnet_send_motd(int idx, char *from, char *to)
-{
-  int l;
-
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "motd %s %s\n", from, to);
-  else
-#endif
-    l = simple_sprintf(OBUF, "m %s %s\n", from, to);
-  tputs(dcc[idx].sock, OBUF, l);
-}
-
 void botnet_send_filereject(int idx, char *path, char *from, char *reason)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "filereject %s %s %s\n", path, from, reason);
-  else
-#endif
-    l = simple_sprintf(OBUF, "f! %s %s %s\n", path, from, reason);
+  l = simple_sprintf(OBUF, "f! %s %s %s\n", path, from, reason);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -526,12 +452,7 @@ void botnet_send_filesend(int idx, char *path, char *from, char *data)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "filesend %s %s %s\n", path, from, data);
-  else
-#endif
-    l = simple_sprintf(OBUF, "fs %s %s %s\n", path, from, data);
+  l = simple_sprintf(OBUF, "fs %s %s %s\n", path, from, data);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -539,12 +460,7 @@ void botnet_send_filereq(int idx, char *from, char *bot, char *path)
 {
   int l;
 
-#ifndef NO_OLD_BOTNET
-  if (b_numver(idx) < NEAT_BOTNET)
-    l = simple_sprintf(OBUF, "filereq %s %s:%s\n", from, bot, path);
-  else
-#endif
-    l = simple_sprintf(OBUF, "fr %s %s:%s\n", from, bot, path);
+  l = simple_sprintf(OBUF, "fr %s %s:%s\n", from, bot, path);
   tputs(dcc[idx].sock, OBUF, l);
 }
 
@@ -556,11 +472,6 @@ void botnet_send_idle(int idx, char *bot, int sock, int idle, char *away)
     l = simple_sprintf(OBUF, "i %s %D %D %s\n", bot, sock, idle,
 		       away ? away : "");
     send_tand_but(idx, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    if (away && away[0])
-      tandout_but(idx, "away %s %d %s\n", bot, sock, away);
-    tandout_but(idx, "idle %s %d %d\n", bot, sock, idle);
-#endif
   }
 }
 
@@ -574,37 +485,6 @@ void botnet_send_away(int idx, char *bot, int sock,
 		       ((idx >= 0) && linking) ? "!" : "",
 		       bot, sock, msg ? msg : "");
     send_tand_but(idx, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    if (msg) {
-      if (idx < 0) {
-	tandout_but(idx, "chan %s %d %s is now away: %s.\n", bot,
-		    dcc[linking].u.chat->channel, dcc[linking].nick,
-		    msg);
-      } else if ((b_numver(idx) >= NEAT_BOTNET)) {
-	int partyidx = getparty(bot, sock);
-
-	if (partyidx >= 0)
-	  tandout_but(idx, "chan %s %d %s %s: %s.\n", bot,
-		      party[partyidx].chan, party[partyidx].nick,
-		      NET_AWAY, msg);
-      }
-      tandout_but(idx, "away %s %d %s\n", bot, sock, msg);
-    } else {
-      if (idx < 0) {
-	tandout_but(idx, "chan %s %d %s %s.\n", bot,
-		    dcc[linking].u.chat->channel, dcc[linking].nick,
-		    NET_UNAWAY);
-      } else if (b_numver(idx) >= NEAT_BOTNET) {
-	int partyidx = getparty(bot, sock);
-
-	if (partyidx >= 0)
-	  tandout_but(idx, "chan %s %d %s %s.\n", bot,
-		      party[partyidx].chan, party[partyidx].nick,
-		      NET_UNAWAY);
-      }
-      tandout_but(idx, "unaway %s %d\n", bot, sock);
-    }
-#endif
   }
 }
 
@@ -618,21 +498,6 @@ void botnet_send_join_idx(int useridx, int oldchan)
 		       dcc[useridx].u.chat->channel, geticon(useridx),
 		       dcc[useridx].sock, dcc[useridx].host);
     send_tand_but(-1, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(-1, "join %s %s %d %c%d %s\n", botnetnick,
-		dcc[useridx].nick, dcc[useridx].u.chat->channel,
-		geticon(useridx), dcc[useridx].sock, dcc[useridx].host);
-    tandout_but(-1, "chan %s %d %s %s %s.\n",
-		botnetnick, dcc[useridx].u.chat->channel,
-		dcc[useridx].nick, NET_JOINEDTHE,
-		dcc[useridx].u.chat->channel ? "channel" : "party line");
-    if ((oldchan >= 0) && (oldchan < GLOBAL_CHANS)) {
-      tandout_but(-1, "chan %s %d %s %s %s.\n",
-		  botnetnick, oldchan,
-		  dcc[useridx].nick, NET_LEFTTHE,
-		  oldchan ? "channel" : "party line");
-    }
-#endif
   }
 }
 
@@ -647,25 +512,6 @@ void botnet_send_join_party(int idx, int linking, int useridx, int oldchan)
 		       party[useridx].sock,
 		       party[useridx].from ? party[useridx].from : "");
     send_tand_but(idx, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(idx, "join %s %s %d %c%d %s\n", party[useridx].bot,
-		party[useridx].nick, party[useridx].chan,
-		party[useridx].flag, party[useridx].sock,
-		party[useridx].from ? party[useridx].from : "");
-    if ((idx < 0) || (!linking && (b_numver(idx) >= NEAT_BOTNET))) {
-      tandout_but(idx, "chan %s %d %s %s %s.\n",
-		  party[useridx].bot, party[useridx].chan,
-		  party[useridx].nick, NET_JOINEDTHE,
-		  party[useridx].chan ? "channel" : "party line");
-    }
-    if ((oldchan >= 0) && (oldchan < GLOBAL_CHANS) &&
-	((idx < 0) || (b_numver(idx) >= NEAT_BOTNET))) {
-      tandout_but(idx, "chan %s %d %s %s %s.\n",
-		  party[useridx].bot, oldchan, party[useridx].nick,
-		  NET_LEFTTHE,
-		  party[useridx].chan ? "channel" : "party line");
-    }
-#endif
   }
 }
 
@@ -677,15 +523,6 @@ void botnet_send_part_idx(int useridx, char *reason)
 
   if (tands > 0) {
     send_tand_but(-1, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(-1, "part %s %s %d\n", botnetnick,
-		dcc[useridx].nick, dcc[useridx].sock);
-    tandout_but(-1, "chan %s %d %s has left the %s%s%s.\n",
-		botnetnick, dcc[useridx].u.chat->channel,
-		dcc[useridx].nick,
-		dcc[useridx].u.chat->channel ? "channel" : "party line",
-		reason ? ": " : "", reason ? reason : "");
-#endif
   }
 }
 
@@ -700,17 +537,6 @@ void botnet_send_part_party(int idx, int partyidx, char *reason,
 		       party[partyidx].nick, party[partyidx].sock,
 		       reason ? reason : "");
     send_tand_but(idx, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(idx, "part %s %s %d\n", party[partyidx].bot,
-		party[partyidx].nick, party[partyidx].sock);
-    if (((idx < 0) || (b_numver(idx) >= NEAT_BOTNET)) && !silent) {
-      tandout_but(idx, "chan %s %d %s has left the %s%s%s.\n",
-		  party[partyidx].bot, party[partyidx].chan,
-		  party[partyidx].nick,
-		  party[partyidx].chan ? "channel" : "party line",
-		  reason ? ": " : "", reason ? reason : "");
-    }
-#endif
   }
 }
 
@@ -722,16 +548,6 @@ void botnet_send_nkch(int useridx, char *oldnick)
     l = simple_sprintf(OBUF, "nc %s %D %s\n", botnetnick,
 		       dcc[useridx].sock, dcc[useridx].nick);
     send_tand_but(-1, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(-1, "part %s %s %d\n", botnetnick,
-		dcc[useridx].nick, dcc[useridx].sock);
-    tandout_but(-1, "join %s %s %d %c%d %s\n", botnetnick,
-		dcc[useridx].nick, dcc[useridx].u.chat->channel,
-		geticon(useridx), dcc[useridx].sock, dcc[useridx].host);
-    tandout_but(-1, "chan %s %d %s: %s -> %s.\n",
-		botnetnick, dcc[useridx].u.chat->channel,
-		oldnick, NET_NICKCHANGE, dcc[useridx].nick);
-#endif
   }
 }
 
@@ -743,18 +559,6 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
     l = simple_sprintf(OBUF, "nc %s %D %s\n", party[useridx].bot,
 		       party[useridx].sock, party[useridx].nick);
     send_tand_but(butidx, OBUF, -l);
-#ifndef NO_OLD_BOTNET
-    tandout_but(butidx, "part %s %s %d\n", party[useridx].bot,
-		party[useridx].nick, party[useridx].sock);
-    tandout_but(butidx, "join %s %s %d %c%d %s\n", party[useridx].bot,
-		party[useridx].nick, party[useridx].chan,
-		party[useridx].flag, party[useridx].sock,
-		party[useridx].from ? party[useridx].from : "");
-    tandout_but(butidx, "chan %s %d %s : %s -> %s.\n",
-		party[useridx].bot, party[useridx].chan,
-		NET_NICKCHANGE,
-		oldnick, party[useridx].nick);
-#endif
   }
 }
 

@@ -4,24 +4,6 @@
  *
  * Written by Fabian Knittel <fknittel@gmx.de>
  *
- * $Id: dns.c,v 1.27 2002/07/07 22:35:25 guppy Exp $
- */
-/*
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #define MODULE_NAME "dns"
@@ -203,10 +185,6 @@ char *dns_start(Function *global_funcs)
 
   global = global_funcs;
   module_register(MODULE_NAME, dns_table, 1, 0);
-  if (!module_depend(MODULE_NAME, "eggdrop", 106, 0)) {
-    module_undepend(MODULE_NAME);
-    return "This module requires Eggdrop 1.6.0 or later.";
-  }
 
   idx = new_dcc(&DCC_DNS, 0);
   if (idx < 0)

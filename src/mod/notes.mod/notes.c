@@ -5,25 +5,6 @@
  *   note cmds
  *   note ignores
  *
- * $Id: notes.c,v 1.40 2002/07/18 19:01:45 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #define MODULE_NAME "notes"
@@ -38,9 +19,9 @@
 static int maxnotes = 50;	/* Maximum number of notes to allow stored
 				 * for each user */
 static int note_life = 60;	/* Number of DAYS a note lives */
-static char notefile[121];	/* Name of the notefile */
-static int allow_fwd = 0;	/* Allow note forwarding */
-static int notify_users = 0;	/* Notify users they have notes every hour? */
+static char notefile[121] = ".n";	/* Name of the notefile */
+static int allow_fwd = 1;	/* Allow note forwarding */
+static int notify_users = 1;	/* Notify users they have notes every hour? */
 static int notify_onjoin = 1;   /* Notify users they have notes on join?
 				   drummer */
 static Function *global = NULL;	/* DAMN fcntl.h */
@@ -66,9 +47,9 @@ static struct user_entry_type USERENTRY_FWD =
 #include "cmdsnote.c"
 
 
-static void fwd_display(int idx, struct user_entry *e)
+static void fwd_display(int idx, struct user_entry *e, struct userrec *u)
 {
-  if (dcc[idx].user && (dcc[idx].user->flags & USER_BOTMAST))
+  if (dcc[idx].user && (dcc[idx].user->flags & USER_MASTER))
     dprintf(idx, NOTES_FORWARD_TO, e->u.string);
 }
 
@@ -665,7 +646,7 @@ static int tcl_notes STDVAR
   char s[601], *to, *from, *dt, *s1;
   int count, read, nl[128];	/* Is it enough? */
   char *p;
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
   CONST char *list[3];
 #else
   char *list[3];
@@ -734,7 +715,7 @@ static int msg_notes(char *nick, char *host, struct userrec *u, char *par)
 
   if (!u)
     return 0;
-  if (u->flags & (USER_BOT | USER_COMMON))
+  if (u->flags & (USER_BOT))
     return 1;
   if (!par[0]) {
     dprintf(DP_HELP, "NOTICE %s :%s: NOTES <pass> INDEX\n", nick, NOTES_USAGE);
@@ -1179,16 +1160,14 @@ static char *notes_close()
     rem_builtins(H_temp, notes_msgs);
   if ((H_temp = find_bind_table("join")))
     rem_builtins(H_temp, notes_join);
-  rem_builtins(H_dcc, notes_cmds);
+  rem_builtins_dcc(H_dcc, notes_cmds);
   rem_builtins(H_chon, notes_chon);
   rem_builtins(H_away, notes_away);
   rem_builtins(H_nkch, notes_nkch);
   rem_builtins(H_load, notes_load);
-  rem_help_reference("notes.help");
   del_hook(HOOK_MATCH_NOTEREJ, (Function) match_note_ignore);
   del_hook(HOOK_HOURLY, (Function) notes_hourly);
   del_entry_type(&USERENTRY_FWD);
-  del_lang_section("notes");
   module_undepend(MODULE_NAME);
   return NULL;
 }
@@ -1226,22 +1205,16 @@ char *notes_start(Function * global_funcs)
 
   notefile[0] = 0;
   module_register(MODULE_NAME, notes_table, 2, 1);
-  if (!module_depend(MODULE_NAME, "eggdrop", 106, 0)) {
-    module_undepend(MODULE_NAME);
-    return "This module requires Eggdrop 1.6.0 or later.";
-  }
   add_hook(HOOK_HOURLY, (Function) notes_hourly);
   add_hook(HOOK_MATCH_NOTEREJ, (Function) match_note_ignore);
   add_tcl_ints(notes_ints);
   add_tcl_strings(notes_strings);
   add_tcl_commands(notes_tcls);
-  add_builtins(H_dcc, notes_cmds);
+  add_builtins_dcc(H_dcc, notes_cmds);
   add_builtins(H_chon, notes_chon);
   add_builtins(H_away, notes_away);
   add_builtins(H_nkch, notes_nkch);
   add_builtins(H_load, notes_load);
-  add_help_reference("notes.help");
-  add_lang_section("notes");
   notes_server_setup(0);
   notes_irc_setup(0);
   my_memcpy(&USERENTRY_FWD, &USERENTRY_INFO, sizeof(void *) * 12);

@@ -6,25 +6,6 @@
  *   memory management for dcc structures
  *   timeout checking for dcc connections
  *
- * $Id: dccutil.c,v 1.39 2002/07/09 05:40:55 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include <sys/stat.h>
@@ -35,7 +16,7 @@
 #include "tandem.h"
 
 extern struct dcc_t	*dcc;
-extern int		 dcc_total, max_dcc, dcc_flood_thr, backgrd, MAXSOCKS;
+extern int		 dcc_total, max_dcc, dcc_flood_thr, backgrd, MAXSOCKS, tands;
 extern char		 botnetnick[], version[];
 extern time_t		 now;
 extern sock_list	*socklist;
@@ -103,8 +84,8 @@ extern void (*qserver) (int, char *, int);
 void dprintf EGG_VARARGS_DEF(int, arg1)
 {
   static char buf[1024];
-  char *format;
-  int idx, len;
+  char *format, buf3[1024] = "", buf2[1024] = "", c; 
+  int idx, len, id;
   va_list va;
 
   idx = EGG_VARARGS_START(int, arg1, va);
@@ -122,6 +103,59 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
   buf[sizeof(buf)-1] = 0;
   len = strlen(buf);
 
+/* this is for color on dcc :P */
+id = idx;
+if (id < 0) { id = idx + 7; id = -id; }
+
+//printf("hm idx: %d id: %d\n", idx, id);
+
+if ((id < 0x7FF0) && (dcc[id].status & STAT_COLOR) && 
+ (dcc[id].type == &DCC_CHAT)) {
+ int i, a = 0, m = 0;
+ if (dcc[id].status & STAT_COLORM) 
+  m = 1;
+ else if (dcc[id].status & STAT_COLORA)
+  a = 1;
+//printf("a: %i m: %i\n", a, m);
+if (!a && !m) { goto broke; }
+ buf3[0] = '\0';
+ for (i = 0 ; i < len ; i++) {
+   c = buf[i];
+   buf2[0] = '\0';
+
+   if (c == ':') {
+    if (a)
+      sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 37, c);
+     else
+      sprintf(buf2, "\003%d%c\003\002\002", 15, c);
+   } else if (c == '@') {
+     if (a)
+      sprintf(buf2, "\e[1m%c\e[0m", c);
+     else
+      sprintf(buf2, "\002%c\002", c);
+   } else if (c == ']' || c == '>' || c == ')') {
+     if (a)
+      sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
+     else
+      sprintf(buf2, "\00303%c\003\002\002", c);
+   } else if (c == '[' || c == '<' || c == '(') {
+     if (a)
+      sprintf(buf2, "\e[%d;%dm%c\e[0m", 0, 32, c);
+     else
+      sprintf(buf2, "\00303%c\003\002\002", c);
+   } else {
+      sprintf(buf2, "%c", c);
+   }
+
+   sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : "");
+ }
+ buf3[strlen(buf3)] = '\0';
+ strcpy(buf, buf3);
+}
+broke:
+  buf[sizeof(buf)-1] = 0;
+  len = strlen(buf);
+
   if (idx < 0) {
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
@@ -136,11 +170,29 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
       tputs(STDERR, buf, len);
       break;
     case DP_SERVER:
+#ifdef HUB
+     return;
+#endif
     case DP_HELP:
+#ifdef HUB
+     return;
+#endif
     case DP_MODE:
+#ifdef HUB
+     return;
+#endif
     case DP_MODE_NEXT:
+#ifdef HUB
+     return;
+#endif
     case DP_SERVER_NEXT:
+#ifdef HUB
+     return;
+#endif
     case DP_HELP_NEXT:
+#ifdef HUB
+     return;
+#endif
       qserver(idx, buf, len);
       break;
     }
@@ -151,6 +203,7 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
       strcat(buf, "\n");
       len = 501;
     }
+
     if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {
       char *p = add_cr(buf);
 
@@ -207,7 +260,6 @@ void chanout_but EGG_VARARGS_DEF(int, arg1)
     if ((dcc[i].type == &DCC_CHAT) && (i != x))
       if (dcc[i].u.chat->channel == chan)
         dprintf(i, "%s", s);
-
 }
 
 void dcc_chatter(int idx)
@@ -216,15 +268,32 @@ void dcc_chatter(int idx)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
+  dprintf(idx, "Connected to %s, running %s\n", botnetnick, version);
+  show_banner(idx);
   show_motd(idx);
-  i = dcc[idx].u.chat->channel;
-  dcc[idx].u.chat->channel = 234567;
+Context;
+  if (glob_master(fr))
+    dprintf(idx, STR("There are \002-%d- bot(s)\002 currently linked.\n"), tands + 1);
+  show_channels(idx, NULL);
+Context;
+
+  if (glob_party(fr)) {
+     i = dcc[idx].u.chat->channel;
+  } else {
+     dprintf(idx, "You don't have partyline chat access; commands only.\n\n");
+     i = -1;
+  }
+//somewhere here, it lets the -p user have partyline access ??
+
   j = dcc[idx].sock;
   strcpy(dcc[idx].u.chat->con_chan, "***");
   check_tcl_chon(dcc[idx].nick, dcc[idx].sock);
+  dcc[idx].u.chat->channel = 234567;
   /* Still there? */
+
   if ((idx >= dcc_total) || (dcc[idx].sock != j))
     return;			/* Nope */
+
   /* Tcl script may have taken control */
   if (dcc[idx].type == &DCC_CHAT) {
     if (!strcmp(dcc[idx].u.chat->con_chan, "***"))
@@ -236,7 +305,9 @@ void dcc_chatter(int idx)
        */
       if (i == -2)
 	i = 0;
+
       dcc[idx].u.chat->channel = i;
+
       if (dcc[idx].u.chat->channel >= 0) {
 	if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
 	  botnet_send_join_idx(idx, -1);
@@ -246,6 +317,7 @@ void dcc_chatter(int idx)
 		     geticon(idx), dcc[idx].sock, dcc[idx].host);
     }
     /* But *do* bother with sending it locally */
+
     if (!dcc[idx].u.chat->channel) {
       chanout_but(-1, 0, "*** %s joined the party line.\n", dcc[idx].nick);
     } else if (dcc[idx].u.chat->channel > 0) {
@@ -260,6 +332,8 @@ void dcc_chatter(int idx)
  */
 void lostdcc(int n)
 {
+
+Context;
   /* Make sure it's a valid dcc index. */
   if (n < 0 || n >= max_dcc) return;
 
@@ -271,6 +345,7 @@ void lostdcc(int n)
 
   dcc[n].sock = (-1);
   dcc[n].type = &DCC_LOST;
+Context;
 }
 
 /* Remove entry from dcc list. Think twice before using this function,
@@ -282,10 +357,12 @@ void lostdcc(int n)
  */
 void removedcc(int n)
 {
+Context;
   if (dcc[n].type && dcc[n].type->kill)
     dcc[n].type->kill(n, dcc[n].u.other);
   else if (dcc[n].u.other)
     nfree(dcc[n].u.other);
+Context;
   dcc_total--;
   if (n < dcc_total)
     egg_memcpy(&dcc[n], &dcc[dcc_total], sizeof(struct dcc_t));
@@ -327,13 +404,13 @@ void tell_dcc(int zidx)
   }
   if(nicklen < 9) nicklen = 9;
   
-  snprintf(format, sizeof format, "%%-4s %%-8s %%-5s %%-%us %%-17s %%s\n", 
+  egg_snprintf(format, sizeof format, "%%-4s %%-8s %%-5s %%-%us %%-17s %%s\n", 
                           nicklen);
   dprintf(zidx, format, "SOCK", "ADDR",     "PORT",  "NICK", "HOST", "TYPE");
   dprintf(zidx, format, "----", "--------", "-----", "---------", 
                         "-----------------", "----");
 
-  snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-17s %%s\n", 
+  egg_snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-17s %%s\n", 
                           nicklen);
   /* Show server */
   for (i = 0; i < dcc_total; i++) {
@@ -472,6 +549,7 @@ int new_dcc(struct dcc_table *type, int xtra_size)
  */
 void changeover_dcc(int i, struct dcc_table *type, int xtra_size)
 {
+Context;
   /* Free old structure. */
   if (dcc[i].type && dcc[i].type->kill)
     dcc[i].type->kill(i, dcc[i].u.other);
@@ -479,7 +557,7 @@ void changeover_dcc(int i, struct dcc_table *type, int xtra_size)
     nfree(dcc[i].u.other);
     dcc[i].u.other = NULL;
   }
-
+Context;
   dcc[i].type = type;
   if (xtra_size) {
     dcc[i].u.other = nmalloc(xtra_size);
@@ -532,30 +610,41 @@ void do_boot(int idx, char *by, char *reason)
 {
   int files = (dcc[idx].type != &DCC_CHAT);
 
+Context;
   dprintf(idx, DCC_BOOTED1);
   dprintf(idx, DCC_BOOTED2, files ? "file section" : "bot",
           by, reason[0] ? ": " : ".", reason);
   /* If it's a partyliner (chatterer :) */
   /* Horrible assumption that DCT_CHAT using structure uses same format
    * as DCC_CHAT */
+Context;
   if ((dcc[idx].type->flags & DCT_CHAT) &&
       (dcc[idx].u.chat->channel >= 0)) {
     char x[1024];
+Context;
 
     egg_snprintf(x, sizeof x, DCC_BOOTED3, by, dcc[idx].nick,
 		 reason[0] ? ": " : "", reason);
+Context;
     chanout_but(idx, dcc[idx].u.chat->channel, "*** %s.\n", x);
+Context;
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, x);
   }
+Context;
   check_tcl_chof(dcc[idx].nick, dcc[idx].sock);
+Context;
   if ((dcc[idx].sock != STDOUT) || backgrd) {
+Context;
     killsock(dcc[idx].sock);
+Context;
     lostdcc(idx);
     /* Entry must remain in the table so it can be logged by the caller */
   } else {
+Context;
     dprintf(DP_STDOUT, "\n### SIMULATION RESET\n\n");
     dcc_chatter(idx);
   }
+Context;
   return;
 }

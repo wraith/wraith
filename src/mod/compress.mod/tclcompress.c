@@ -4,7 +4,6 @@
  *
  * Written by Fabian Knittel <fknittel@gmx.de>
  *
- * $Id: tclcompress.c,v 1.5 2002/01/02 03:46:38 guppy Exp $
  */
 /*
  * Copyright (C) 2000, 2001, 2002 Eggheads Development Team

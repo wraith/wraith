@@ -2,35 +2,15 @@
  * flags.c -- handles:
  *   all the flag matching/conversion functions in one neat package :)
  *
- * $Id: flags.c,v 1.20 2002/06/13 20:43:07 wcc Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
 
-
-extern int		 use_console_r, debug_output, require_p, noshare,
+extern int		 use_console_r, debug_output, noshare,
 			 allow_dk_cmds;
 extern struct dcc_t	*dcc;
 
-int	use_console_r = 0;	/* Allow users to set their console +r	*/
+int	use_console_r = 1;	/* Allow users to set their console +r	*/
 
 
 int logmodes(char *s)
@@ -100,29 +80,17 @@ int logmodes(char *s)
     case 'H':
       res |= debug_output ? LOG_BOTSHARE : 0;
       break;
-    case '1':
-      res |= LOG_LEV1;
+    case 'e':
+    case 'E': 
+      res |= LOG_ERRORS;
       break;
-    case '2':
-      res |= LOG_LEV2;
+    case 'g':
+    case 'G':
+      res |= LOG_GETIN;
       break;
-    case '3':
-      res |= LOG_LEV3;
-      break;
-    case '4':
-      res |= LOG_LEV4;
-      break;
-    case '5':
-      res |= LOG_LEV5;
-      break;
-    case '6':
-      res |= LOG_LEV6;
-      break;
-    case '7':
-      res |= LOG_LEV7;
-      break;
-    case '8':
-      res |= LOG_LEV8;
+    case 'u':
+    case 'U':
+      res |= LOG_WARN;
       break;
     case '*':
       res |= LOG_ALL;
@@ -166,22 +134,12 @@ char *masktype(int x)
     *p++ = 't';
   if ((x & LOG_BOTSHARE) && debug_output)
     *p++ = 'h';
-  if (x & LOG_LEV1)
-    *p++ = '1';
-  if (x & LOG_LEV2)
-    *p++ = '2';
-  if (x & LOG_LEV3)
-    *p++ = '3';
-  if (x & LOG_LEV4)
-    *p++ = '4';
-  if (x & LOG_LEV5)
-    *p++ = '5';
-  if (x & LOG_LEV6)
-    *p++ = '6';
-  if (x & LOG_LEV7)
-    *p++ = '7';
-  if (x & LOG_LEV8)
-    *p++ = '8';
+  if (x & LOG_ERRORS)
+    *p++ = 'e';
+  if (x & LOG_GETIN)
+    *p++ = 'g';
+  if (x & LOG_WARN)
+    *p++ = 'u';
   if (p == s)
     *p++ = '-';
   *p = 0;
@@ -224,22 +182,12 @@ char *maskname(int x)
     i += my_strcpy(s + i, "botnet traffic, ");
   if ((x & LOG_BOTSHARE) && debug_output)
     i += my_strcpy(s + i, "share traffic, ");
-  if (x & LOG_LEV1)
-    i += my_strcpy(s + i, "level 1, ");
-  if (x & LOG_LEV2)
-    i += my_strcpy(s + i, "level 2, ");
-  if (x & LOG_LEV3)
-    i += my_strcpy(s + i, "level 3, ");
-  if (x & LOG_LEV4)
-    i += my_strcpy(s + i, "level 4, ");
-  if (x & LOG_LEV5)
-    i += my_strcpy(s + i, "level 5, ");
-  if (x & LOG_LEV6)
-    i += my_strcpy(s + i, "level 6, ");
-  if (x & LOG_LEV7)
-    i += my_strcpy(s + i, "level 7, ");
-  if (x & LOG_LEV8)
-    i += my_strcpy(s + i, "level 8, ");
+  if (x & LOG_ERRORS)
+    i += my_strcpy(s + i, "errors, ");
+  if (x & LOG_GETIN)
+    i += my_strcpy(s + i, "getin, ");
+  if (x & LOG_WARN)
+    i += my_strcpy(s + i, "warnings, ");
   if (i)
     s[i - 2] = 0;
   else
@@ -251,33 +199,35 @@ char *maskname(int x)
  */
 int sanity_check(int atr)
 {
+/* bots shouldnt have +pmcnaijlys */
   if ((atr & USER_BOT) &&
-      (atr & (USER_PARTY | USER_MASTER | USER_COMMON | USER_OWNER)))
-    atr &= ~(USER_PARTY | USER_MASTER | USER_COMMON | USER_OWNER);
+      (atr & (USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA)))
+    atr &= ~(USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA);
+// only bots should be there:
+  if (!(atr & USER_BOT) &&
+      (atr & (USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB | USER_SECHUB)))
+    atr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB | USER_SECHUB);
   if ((atr & USER_OP) && (atr & USER_DEOP))
     atr &= ~(USER_OP | USER_DEOP);
-  if ((atr & USER_HALFOP) && (atr & USER_DEHALFOP))
-    atr &= ~(USER_HALFOP | USER_DEHALFOP);
-  if ((atr & USER_AUTOOP) && (atr & USER_DEOP))
-    atr &= ~(USER_AUTOOP | USER_DEOP);
-  if ((atr & USER_AUTOHALFOP) && (atr & USER_DEHALFOP))
-    atr &= ~(USER_AUTOHALFOP | USER_DEHALFOP);
   if ((atr & USER_VOICE) && (atr & USER_QUIET))
     atr &= ~(USER_VOICE | USER_QUIET);
-  if ((atr & USER_GVOICE) && (atr & USER_QUIET))
-    atr &= ~(USER_GVOICE | USER_QUIET);
-  /* Can't be owner without also being master */
-  if (atr & USER_OWNER)
+ 
+  /* Can't be admin without also being owner and having hub access */
+  if (atr & USER_ADMIN)
+    atr |= USER_OWNER | USER_HUBA | USER_PARTY;
+  /* Hub access gets chanhub access */
+  if (atr & USER_HUBA)
+    atr |= USER_CHUBA;
+  if (atr & USER_OWNER) {
     atr |= USER_MASTER;
-  /* Master implies botmaster, op and janitor */
+  }
+  /* Master implies botmaster, op */
   if (atr & USER_MASTER)
-    atr |= USER_BOTMAST | USER_OP | USER_JANITOR;
+    atr |= USER_OP | USER_CHUBA;
   /* Can't be botnet master without party-line access */
-  if (atr & USER_BOTMAST)
+/*  if (atr & USER_BOTMAST)
     atr |= USER_PARTY;
-  /* Janitors can use the file area */
-  if (atr & USER_JANITOR)
-    atr |= USER_XFER;
+*/
   return atr;
 }
 
@@ -287,16 +237,8 @@ int chan_sanity_check(int chatr, int atr)
 {
   if ((chatr & USER_OP) && (chatr & USER_DEOP))
     chatr &= ~(USER_OP | USER_DEOP);
-  if ((chatr & USER_HALFOP) && (chatr & USER_DEHALFOP))
-    chatr &= ~(USER_HALFOP | USER_DEHALFOP);
-  if ((chatr & USER_AUTOOP) && (chatr & USER_DEOP))
-    chatr &= ~(USER_AUTOOP | USER_DEOP);
-  if ((chatr & USER_AUTOHALFOP) && (chatr & USER_DEHALFOP))
-    chatr &= ~(USER_AUTOHALFOP | USER_DEHALFOP);
   if ((chatr & USER_VOICE) && (chatr & USER_QUIET))
     chatr &= ~(USER_VOICE | USER_QUIET);
-  if ((chatr & USER_GVOICE) && (chatr & USER_QUIET))
-    chatr &= ~(USER_GVOICE | USER_QUIET);
   /* Can't be channel owner without also being channel master */
   if (chatr & USER_OWNER)
     chatr |= USER_MASTER;
@@ -315,7 +257,6 @@ int chan_sanity_check(int chatr, int atr)
  * (+) master on any channel
  * (%) botnet master
  * (@) op on any channel
- * (^) halfop on any channel
  * (-) other
  */
 char geticon(int idx)
@@ -325,16 +266,14 @@ char geticon(int idx)
   if (!dcc[idx].user)
     return '-';
   get_user_flagrec(dcc[idx].user, &fr, 0);
+  if (glob_admin(fr))
+    return '^';
   if (chan_owner(fr))
     return '*';
   if (chan_master(fr))
     return '+';
-  if (glob_botmast(fr))
-    return '%';
   if (chan_op(fr))
     return '@';
-  if (chan_halfop(fr))
-    return '^';
   return '-';
 }
 
@@ -556,8 +495,8 @@ int flagrec_ok(struct flag_record *req,
     /* The +n/+m checks arent needed anymore since +n/+m
      * automatically add lower flags
      */
-    if (!require_p && ((hav & USER_OP) || (have->chan & USER_OWNER)))
-      hav |= USER_PARTY;
+/*    if (!1 && ((hav & USER_OP) || (have->chan & USER_OWNER)))
+      hav |= USER_PARTY;*/
     if (hav & req->global)
       return 1;
     if (have->chan & req->chan)
@@ -747,7 +686,7 @@ static int botfl_write_userfile(FILE *f, struct userrec *u,
 
   fr.bot = e->u.ulong;
   build_flags(x, &fr, NULL);
-  if (fprintf(f, "--%s %s\n", e->type->name, x) == EOF)
+  if (lfprintf(f, "--%s %s\n", e->type->name, x) == EOF)
     return 0;
   return 1;
 }
@@ -760,15 +699,15 @@ static int botfl_set(struct userrec *u, struct user_entry *e, void *buf)
     return 1;			/* Don't even bother trying to set the
 				   flags for a non-bot */
 
-  if ((atr & BOT_HUB) && (atr & BOT_ALT))
-    atr &= ~BOT_ALT;
+/*  if ((atr & BOT_HUB) && (atr & BOT_ALT))
+    atr &= ~BOT_ALT;*/
   if (atr & BOT_REJECT) {
     if (atr & BOT_SHARE)
       atr &= ~(BOT_SHARE | BOT_REJECT);
     if (atr & BOT_HUB)
       atr &= ~(BOT_HUB | BOT_REJECT);
-    if (atr & BOT_ALT)
-      atr &= ~(BOT_ALT | BOT_REJECT);
+/*    if (atr & BOT_ALT)
+      atr &= ~(BOT_ALT | BOT_REJECT);*/
   }
   if (!(atr & BOT_SHARE))
     atr &= ~BOT_GLOBAL;
@@ -807,7 +746,7 @@ static int botfl_expmem(struct user_entry *e)
   return 0;
 }
 
-static void botfl_display(int idx, struct user_entry *e)
+static void botfl_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
   char x[100];
@@ -834,3 +773,4 @@ struct user_entry_type USERENTRY_BOTFL =
   botfl_display,
   "BOTFL"
 };
+

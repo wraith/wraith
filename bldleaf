@@ -1,0 +1,87 @@
+#!/bin/sh
+
+#edit this to your homedir (no trailing slash)
+
+TCLDIR="/home/bryan"
+
+
+#### DO NOT EDIT BELOW THIS LINE #####
+
+# Figure out whether to use default or a specified config file
+if test $1
+then
+  packname=$1
+else
+  packname=default
+fi
+
+# Verify we got the config file
+if ! test -f $packname.conf
+then
+  echo "Can't find pack configuration file $packname.conf"
+  exit 1
+fi
+
+# Figure what bins we're making
+case `uname` in
+  Linux) prefix=linux;;
+  FreeBSD) case `uname -r` in
+    4*) prefix=freebsd4;;
+    3*) prefix=freebsd3;;
+  esac;;
+  OpenBSD) prefix=openbsd;;
+esac
+if test -z $prefix
+then
+  echo "Automated packing disabled, `uname` isn't recognized"
+fi
+
+# make clean, just in case
+#echo "Cleaning up old binaries..."
+#make distclean > /dev/null
+
+# Run ./configure, then verify it's ok
+echo "Configuring..."
+#./configure > /dev/null 2>configure.temp
+./configure --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
+#if test "`cat configure.temp`"
+#then
+#  echo "Configure error'd"
+#  cat configure.temp
+#
+#  exit 1
+#fi
+#rm -f configure.temp
+
+
+
+# Read the config
+echo -n "Pack configuration:"
+for cnf in `cat $packname.conf | grep -v "^#"`
+do
+  defines="$defines -DS_$cnf"
+  echo -n "$cnf "
+done
+echo ""
+
+# Build utils and check we got the bins
+#echo "Building utils..."
+#make utils CFLGS="$defines" > /dev/null
+#if ! test -f readlog -a -f makebot -a -f makepack -a -f stringfix
+#then
+#  echo "Util build failed"
+#  exit 1
+#fi
+
+# Build leaf and check
+echo "Building leaf..."
+make config CFLGS="-DLEAF $defines" > /dev/null
+make sdebug CFLGS="-DLEAF $defines" > /dev/null
+#make static CFLGS="-DLEAF $defines" > /dev/null
+mv -f eggdrop leaf
+if ! test -f leaf
+then
+  echo "leaf build failed"
+  exit 1
+fi
+

@@ -1,7 +1,6 @@
 /*
  * module.h
  *
- * $Id: module.h,v 1.58 2002/02/24 07:17:57 guppy Exp $
  */
 /*
  * Copyright (C) 1997 Robey Pointer
@@ -51,6 +50,7 @@
 #undef dprintf
 #undef get_data_ptr
 #undef wild_match
+#undef wild_match_per
 #undef user_realloc
 #undef Context
 #undef ContextNote
@@ -189,7 +189,7 @@
 #define list_contains ((int (*) (struct list_type *, struct list_type *))global[75])
 /* 76 - 79 */
 #define answer ((int (*) (int,char *,unsigned long *,unsigned short *,int))global[76])
-#define getmyip ((IP (*) (void))global[77])
+#define getmyip ((IP (*) (int))global[77])
 #define neterror ((void (*) (char *))global[78])
 #define tputs ((void (*) (int, char *,unsigned int))global[79])
 /* 80 - 83 */
@@ -219,7 +219,7 @@
 #define share_greet (*(int *)global[99])
 /* 100 - 103 */
 #define max_dcc (*(int *)global[100])
-#define require_p (*(int *)global[101])
+/* 101: require_p -- UNUSED */
 #define ignore_time (*(int *)(global[102]))
 #define use_console_r (*(int *)(global[103]))
 /* 104 - 107 */
@@ -229,7 +229,7 @@
 #define noshare (*(int *)(global[107]))
 /* 108 - 111 */
 /* 108: gban_total -- UNUSED (Eule) */
-#define make_userfile (*(int*)global[109])
+/* 109: make_userfile -- UNUED (bryan) */
 #define default_flags (*(int*)global[110])
 #define dcc_total (*(int*)global[111])
 /* 112 - 115 */
@@ -244,7 +244,7 @@
 #define ver ((char *)global[119])
 /* 120 - 123 */
 #define notify_new ((char *)global[120])
-#define helpdir ((char *)global[121])
+//#define helpdir ((char *)global[121])
 #define Version ((char *)global[122])
 #define botnetnick ((char *)global[123])
 /* 124 - 127 */
@@ -288,10 +288,12 @@
 #define maskhost ((void (*)(const char *, char *))global[154])
 #define show_motd ((void(*)(int))global[155])
 /* 156 - 159 */
+/*
 #define tellhelp ((void(*)(int, char *, struct flag_record *, int))global[156])
 #define showhelp ((void(*)(char *, char *, struct flag_record *, int))global[157])
 #define add_help_reference ((void(*)(char *))global[158])
 #define rem_help_reference ((void(*)(char *))global[159])
+*/
 /* 160 - 163 */
 #define touch_laston ((void (*)(struct userrec *,char *,time_t))global[160])
 #define add_mode ((void (*)(struct chanset_t *,char,char,char *))(*(Function**)(global[161])))
@@ -348,9 +350,9 @@
 #define stripmodes ((int(*)(char *))global[202])
 #define stripmasktype ((const char *(*)(int))global[203])
 /* 204 - 207 */
-#define sub_lang ((void(*)(int,char *))global[204])
+//#define sub_lang ((void(*)(int,char *))global[204])
 #define online_since (*(int *)(global[205]))
-#define cmd_loadlanguage ((int (*)(struct userrec *,int,char *))global[206])
+//#define cmd_loadlanguage ((int (*)(struct userrec *,int,char *))global[206])
 #define check_dcc_attrs ((int (*)(struct userrec *,int))global[207])
 /* 208 - 211 */
 #define check_dcc_chanattrs ((int (*)(struct userrec *,char *,int,int))global[208])
@@ -358,7 +360,7 @@
 #define rem_tcl_coups ((void (*) (tcl_coups *))global[210])
 #define botname ((char *)(global[211]))
 /* 212 - 215 */
-/* 212: remove_gunk() -- UNUSED (drummer) */
+#define check_topic ((void (*)(struct chanset_t *))global[212])
 #define check_tcl_chjn ((void (*) (const char *,const char *,int,char,int,const char *))global[213])
 #define sanitycheck_dcc ((int (*)(char *, char *, char *, char *))global[214])
 #define isowner ((int (*)(char *))global[215])
@@ -368,14 +370,18 @@
 #define rfc_casecmp ((int(*)(char *, char *))(*(Function**)(global[218])))
 #define rfc_ncasecmp ((int(*)(char *, char *, int *))(*(Function**)(global[219])))
 /* 220 - 223 */
+#ifdef S_IRCNET
 #define global_exempts (*(maskrec **)(global[220]))
 #define global_invites (*(maskrec **)(global[221]))
+#endif
 /* 222: ginvite_total -- UNUSED (Eule) */
 /* 223: gexempt_total -- UNUSED (Eule) */
 /* 224 - 227 */
 #define H_event (*(p_tcl_bind_list *)(global[224]))
+#ifdef S_IRCNET
 #define use_exempts (*(int *)(global[225]))	/* drummer/Jason */
 #define use_invites (*(int *)(global[226]))	/* drummer/Jason */
+#endif
 #define force_expire (*(int *)(global[227]))	/* Rufus */
 /* 228 - 231 */
 #define add_lang_section ((void(*)(char *))global[228])
@@ -453,6 +459,74 @@
 #define module_load ((char *(*)(char *))global[274])
 #define module_unload ((char *(*)(char *, char *))global[275])
 #define parties (*(int *)global[276])
+/* 277 - 280 */
+#define ischanhub ((int (*)(void))global[277])
+#define rand_dccresp ((char *(*)(void))global[278])
+#define issechub ((int (*)(void))global[279])
+#ifdef LEAF
+#define listen_all ((int (*)(int, int))global[280])
+#endif
+/* 281 - 284 */
+/* gay
+#define MD5_Init ((void (*)(MD5_CTX))global[281])
+#define MD5_Update ((void (*)(MD5_CTX *, void *, unsigned long))global[282])
+#define MD5_Final ((void (*)(unsigned char *, MD5_CTX *))global[283])
+*/
+#define _wild_match_per ((int (*)(const char *, const char *))global[284])
+/* 285 - 288 */
+#define role (*(int*)global[285])
+#define loading (*(int*)global[286])
+#define localhub (*(int*)global[287])
+#define updatebin ((int (*)(int, char *, int))global[288])
+/* 289 - 292 */
+#define stats_add ((void (*)(struct userrec *, int, int))global[289])
+#define lower_bot_linked ((void (*)(int))global[290])
+#define add_cfg ((void (*)(struct cfg_entry *))global[291])
+#define set_cfg_str ((void (*)(char *, char *, char *))global[292])
+/* 293 - 296 */
+//#define trigger_cfg_changed ((void (*)(void))global[293])
+#define trigger_cfg_changed (global[293])
+#define higher_bot_linked ((void (*)(int))global[294])
+#define bot_aggressive_to ((int (*)(struct userrec *))global[295])
+#define botunlink ((int (*)(int, char *, char *))global[296])
+/* 297 - 300 */
+#define hostname6 ((char *)(global[297]))
+#define timesync (*(int*)global[298])
+#define netpass ((char *)(global[299]))
+#define kickreason ((char *(*)(int))global[300])
+/* 301 - 304 */
+#define getting_users ((int (*)())global[301])
+#define add_builtins_dcc ((int (*) (tcl_bind_list_t *, dcc_cmd_t *))global[302])
+#define rem_builtins_dcc ((int (*) (tcl_bind_list_t *, dcc_cmd_t *))global[303])
+#define USERENTRY_ADDED (*(struct user_entry_type *)(global[304]))
+/* 305 - 308 */
+#define thepass ((char *)(global[305]))
+#define isupdatehub ((int (*)(void))global[306])
+#define norestruct (*(int*)global[307])
+#define botlink ((int (*)(char *, int, char *))global[308])
+/* 309 - 312 */
+#define makeplaincookie ((void (*)(char *, char *, char *))global[309])
+#define kickprefix ((char *)(global[310]))
+#define bankickprefix ((char *)(global[311]))
+#define deflag_user ((void (*)(struct userrec *, int, char *, struct chanset_t *))global[312])
+/* 313 - 316 */
+#define dcc_prefix ((char *)(global[313]))
+#define goodpass ((int (*)(char *, int, char *))global[314])
+#define auth (*(struct auth_t **)global[315])
+#define auth_total (*(int*)global[316])
+/* 317 - 320 */
+#define new_auth ((int (*) (void))global[317])
+#define isauthed ((int (*) (char *))global[318])
+#define removeauth ((void (*)(int))global[319])
+#define makehash ((char *(*)(struct userrec *, char *))global[320])
+/* 321 - 324 */
+#define USERENTRY_SECPASS (*(struct user_entry_type *)(global[321]))
+#define authkey ((char *)(global[322]))
+#define myip ((char *)(global[323]))
+#define myip6 ((char *)(global[324]))
+/* 325 - 328 */
+#define cmdprefix ((char *)(global[325]))
+
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
  * file for it ;)
@@ -463,6 +537,13 @@
 	(((char *(*)(char *,char*))encryption_funcs[4])(a,b))
 #  define decrypt_string(a, b)						\
 	(((char *(*)(char *,char*))encryption_funcs[5])(a,b))
+
 #endif
 
+extern int lfprintf(FILE *, char *, ...);
+extern void raise_limit(struct chanset_t *);
+extern int egg_numver;
+extern int cfg_count;
+extern struct cfg_entry **cfg;
+#define STR(x) x
 #endif				/* _EGG_MOD_MODULE_H */

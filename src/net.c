@@ -2,18 +2,16 @@
  * net.c -- handles:
  *   all raw network i/o
  * 
- * $Id: net.c,v 1.42 2002/07/26 17:55:18 guppy Exp $
- */
-/* 
- * This is hereby released into the public domain.
- * Robey Pointer, robey@netcom.com
  */
 
 #include <fcntl.h>
 #include "main.h"
+#include "proto.h"
 #include <limits.h>
 #include <string.h>
 #include <netdb.h>
+#include <signal.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #if HAVE_SYS_SELECT_H
 #  include <sys/select.h>
@@ -21,6 +19,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>		/* is this really necessary? */
 #include <errno.h>
+
+#include "blowfish_conf.h"
+//#include "bf_conf_tab.h"
+#include <sys/stat.h>
+
+extern char netpass[];
+
+
 #if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
@@ -47,7 +53,7 @@ char    myip6[121] = "";        /* IP can be specified in the config file   */
 char    hostname6[121] = "";    /* Hostname can be specified in the config file */
 char	firewall[121] = "";	/* Socks server for firewall		    */
 int	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
-char	botuser[21] = "eggdrop"; /* Username of the user running the bot    */
+char	botuser[21] = "wraith"; /* Username of the user running the bot    */
 int	dcc_sanitycheck = 0;	/* We should do some sanity checking on dcc
 				   connections.				    */
 sock_list *socklist = NULL;	/* Enough to be safe			    */
@@ -81,8 +87,13 @@ int getprotocol(char *host)
 #else
   struct hostent *he;
   if (!setjmp(alarmret)) {
+    debug0("net.c:99 alarm with timeout");
+printf("the timeout is: %d\n", resolve_timeout);
     alarm(resolve_timeout);
+    debug0("net.c:99 alarm (Returned)");
+printf("RESOLVING %s\n", host);
     he = gethostbyname2(host,AF_INET6);
+    debug0("net.c:102 alarm(0)");
     alarm(0);
   } else
     he=NULL;
@@ -101,6 +112,7 @@ void init_net()
   int i;
 
   for (i = 0; i < MAXSOCKS; i++) {
+    bzero(&socklist[i], sizeof(socklist[i]));
     socklist[i].flags = SOCK_UNUSED;
   }
 }
@@ -124,7 +136,7 @@ struct hostent *myipv6he;
 char myipv6host[120];
 /* Get my ip number
  */
-IP getmyip()
+IP getmyip(int dfatal)
 {
   struct hostent *hp;
   char s[121];
@@ -133,26 +145,29 @@ IP getmyip()
 
   myipv6he=NULL;
   /* Could be pre-defined */
-  #ifdef IPV6
+#ifdef IPV6
     if (myip6[0]) {
       myipv6he=gethostbyname2(myip6,AF_INET6);
-      if(myipv6he==NULL)
+      if(myipv6he == NULL && dfatal)
         fatal("Hostname IPV6 self-lookup failed.", 0);
     }
     if (hostname6[0]) {
       myipv6he=gethostbyname2(hostname6,AF_INET6);
-      if(myipv6he==NULL)
+      if(myipv6he == NULL && dfatal)
          fatal("Hostname IPV6 self-lookup failed.", 0);
     }
-    if(myipv6he!=NULL)
+    if(myipv6he != NULL)
       {
         inet_ntop(AF_INET6,&myipv6he,myipv6host,119);
       }
-  #endif
+#endif
+
     if(myip[0]) {
-    if ((myip[strlen(myip) - 1] >= '0') && (myip[strlen(myip) - 1] <= '9'))
-      return (IP) inet_addr(myip);
+
+      if ((myip[strlen(myip) - 1] >= '0') && (myip[strlen(myip) - 1] <= '9'))
+        return (IP) inet_addr(myip);
   }
+
   /* Also could be pre-defined */
   if (hostname[0])
     hp = gethostbyname(hostname);
@@ -160,8 +175,9 @@ IP getmyip()
     gethostname(s, 120);
     hp = gethostbyname(s);
   }
-  if (hp == NULL && myipv6he==NULL)
-    fatal("Hostname self-lookup failed.", 0);
+  if (hp == NULL && myipv6he==NULL && dfatal)
+    fatal("Hostname self-lookup failed.  Set 'my-ip' in the config", 0);
+
   if(hp==NULL) return 0;
   in = (struct in_addr *) (hp->h_addr_list[0]);
   ip = (IP) (in->s_addr);
@@ -232,6 +248,11 @@ void neterror(char *s)
     strcpy(s, "Permission denied");
     break;
 #endif
+#ifdef EMFILE
+  case EMFILE:
+    strcpy(s, "Too many open files");
+    break;
+#endif
   case 0:
     strcpy(s, "Error 0");
     break;
@@ -278,6 +299,10 @@ int allocsock(int sock, int options,int af_ty)
       socklist[i].flags = options;
       socklist[i].sock = sock;
       socklist[i].af=af_ty;
+      socklist[i].encstatus = 0;
+      socklist[i].gz = 0;
+      egg_bzero(&socklist[i].okey, sizeof(socklist[i].okey));
+      egg_bzero(&socklist[i].ikey, sizeof(socklist[i].ikey));
       return i;
     }
   }
@@ -341,6 +366,7 @@ void killsock(register int sock)
 	socklist[i].outbuf = NULL;
 	socklist[i].outbuflen = 0;
       }
+      egg_bzero(&socklist[i],sizeof(socklist[i]));
       socklist[i].flags = SOCK_UNUSED;
       return;
     }
@@ -373,6 +399,7 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
       /* no, must be host.domain */
       if (!setjmp(alarmret)) {
 #ifdef IPV6
+    debug0("net.c:404 alarm");
 	alarm(resolve_timeout);
        if(af_ty==AF_INET6)
          {
@@ -382,6 +409,7 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
 	hp = gethostbyname(host);
 #ifdef IPV6
          }
+    debug0("net.c:413 alarm");
         alarm(0);
 #endif
       } else {
@@ -393,6 +421,7 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
       }
       egg_memcpy(x, hp->h_addr, hp->h_length);
     }
+
     for (i = 0; i < MAXSOCKS; i++)
       if (!(socklist[i].flags & SOCK_UNUSED) && socklist[i].sock == sock)
 	socklist[i].flags |= SOCK_PROXYWAIT; /* drummer */
@@ -408,6 +437,7 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
 #endif
     egg_snprintf(s, sizeof s, "\004\001%c%c%c%c%c%c%s", (port >> 8) % 256,
 		 (port % 256), x[0], x[1], x[2], x[3], botuser);
+
     tputs(sock, s, strlen(botuser) + 9); /* drummer */
   } else if (proxy == PROXY_SUN) {
     egg_snprintf(s, sizeof s, "%s %d\n", host, port);
@@ -473,7 +503,7 @@ int open_telnet_raw(int sock, char *server, int sport)
   af_ty=getprotocol(host);
   if(af_ty==AF_INET6)
     {
-      succ=getmyip();
+      succ=getmyip(0);
       bzero((char *) &name6, sizeof(struct sockaddr_in6));
       
       name6.sin6_family = AF_INET6;
@@ -496,8 +526,10 @@ int open_telnet_raw(int sock, char *server, int sport)
       name6.sin6_family = AF_INET6;
       name6.sin6_port = htons(port);
       if (!setjmp(alarmret)) {
+    debug0("net.c:530 alarm");
        alarm(resolve_timeout);
        hp = gethostbyname2(host,AF_INET6);
+    debug0("net.c:534 alarm");
        alarm(0);
       } else {
        hp = NULL;
@@ -514,9 +546,11 @@ int open_telnet_raw(int sock, char *server, int sport)
   egg_bzero((char *) &name, sizeof(struct sockaddr_in));
 
   name.sin_family = AF_INET;
-  name.sin_addr.s_addr = (myip[0] ? getmyip() : INADDR_ANY);
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0)
+  name.sin_addr.s_addr = (myip[0] ? getmyip(0) : INADDR_ANY);
+  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0) {
+    putlog(LOG_MISC, "*", "Error binding to ip: %s", strerror(errno));
     return -1;
+  }
   egg_bzero((char *) &name, sizeof(struct sockaddr_in));
 
   name.sin_family = AF_INET;
@@ -528,8 +562,10 @@ int open_telnet_raw(int sock, char *server, int sport)
     /* No, must be host.domain */
     debug0("WARNING: open_telnet_raw() is about to block in gethostbyname()!");
     if (!setjmp(alarmret)) {
+    debug0("net.c:567 alarm");
       alarm(resolve_timeout);
       hp = gethostbyname(host);
+    debug0("net.c:569 alarm");
       alarm(0);
     } else {
       hp = NULL;
@@ -593,14 +629,14 @@ int open_address_listen(IP addr, int *port)
   struct sockaddr_in6 name6;
 #endif
   struct sockaddr_in name;
-
+  
   if (firewall[0]) {
     /* FIXME: can't do listen port thru firewall yet */
     putlog(LOG_MISC, "*", "!! Cant open a listen port (you are using a firewall)");
     return -1;
   }
 
-  if(getmyip()>0) {
+  if(getmyip(0) > 0) {
     af_def=AF_INET;
     sock = getsock(SOCK_LISTEN,af_def);
   if (sock < 1)
@@ -629,7 +665,7 @@ int open_address_listen(IP addr, int *port)
 }
  tryv6:
 #ifdef IPV6
-  ipp=getmyip();
+  ipp = getmyip(0);
   af_def=AF_INET6;
   if(af_def==AF_INET6 && myipv6he!=NULL)
     {
@@ -662,7 +698,7 @@ int open_address_listen(IP addr, int *port)
  */
 inline int open_listen(int *port)
 {
-  return open_address_listen(myip[0] ? getmyip() : INADDR_ANY, port);
+  return open_address_listen(myip[0] ? getmyip(0) : INADDR_ANY, port);
 }
 
 /* Given a network-style IP address, returns the hostname. The hostname
@@ -679,8 +715,10 @@ char *hostnamefromip(unsigned long ip)
   static char s[UHOSTLEN];
 
   if (!setjmp(alarmret)) {
+    debug0("net.c:719 alarm");
     alarm(resolve_timeout);
     hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
+    debug0("net.c:723 alarm");
     alarm(0);
   } else {
     hp = NULL;
@@ -693,7 +731,18 @@ char *hostnamefromip(unsigned long ip)
   strncpyz(s, hp->h_name, sizeof s);
   return s;
 }
+/* einride's no resolving hub 
+char *stringip(unsigned long ip)
+{
+  unsigned long addr = ip;
+  unsigned char *p;
+  static char s[121];
 
+  p = (unsigned char *) &addr;
+  sprintf(s,"%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
+  return s;
+}
+*/
 /* Returns the given network byte order IP address in the
  * dotted format - "##.##.##.##"
  */
@@ -824,7 +873,7 @@ static int sockread(char *s, int *len)
   fd_set fd;
   int fds, i, x, fdtmp;
   struct timeval t;
-  int grab = 511;
+  int grab = sgrab;
 
   fds = getdtablesize();
 #ifdef FD_SETSIZE
@@ -941,6 +990,72 @@ static int sockread(char *s, int *len)
   return -3;
 }
 
+char *botlink_decrypt(int snum, char *src)
+{
+  char *line = NULL;
+  int i;
+
+  line = decrypt_string(socklist[snum].ikey, src);
+  if (socklist[snum].iseed) {
+    for (i = 0; i <= 3; i++)
+      *(dword *) & socklist[snum].ikey[i * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    if (!socklist[snum].iseed)
+      socklist[snum].iseed++;
+  }
+  strcpy(src, line);
+  nfree(line);
+  return src;
+}
+char *botlink_encrypt(int snum, char *src)
+{
+  char *srcbuf = NULL,   *buf = NULL,   *line = NULL,   *eol = NULL,   *eline = NULL;
+
+  int bufpos = 0, i;
+  
+
+  srcbuf = nmalloc(strlen(src) + 10);
+  strcpy(srcbuf, src);
+  line = srcbuf;
+  if (!line)
+    return NULL;
+  eol = strchr(line, '\n');
+  i = 0;
+  while (eol) {
+    *eol++ = 0;
+    eline = encrypt_string(socklist[snum].okey, line);
+    if (socklist[snum].oseed) {
+      for (i = 0; i <= 3; i++)
+       *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      if (!socklist[snum].oseed)
+       socklist[snum].oseed++;
+    }
+    buf = nrealloc(buf, bufpos + strlen(eline) + 10);
+    strcpy((char *) &buf[bufpos], eline);
+    strcat(buf, "\n");
+    bufpos = strlen(buf);
+    line = eol;
+    eol = strchr(line, '\n');
+    nfree(eline);
+  }
+  if (line[0]) {
+    eline = encrypt_string(socklist[snum].okey, line);
+    if (socklist[snum].oseed) {
+       *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      if (!socklist[snum].oseed)
+       socklist[snum].oseed++;
+    }
+    buf = nrealloc(buf, bufpos + strlen(eline) + 10);
+    strcpy((char *) &buf[bufpos], eline);
+    strcat(buf, "\n");
+    nfree(eline);
+  }
+  nfree(srcbuf);
+  return buf;
+}
+
+
+
+
 /* sockgets: buffer and read from sockets
  * 
  * Attempts to read from all registered sockets for up to one second.  if
@@ -965,8 +1080,8 @@ static int sockread(char *s, int *len)
 
 int sockgets(char *s, int *len)
 {
-  char xx[514], *p, *px;
-  int ret, i, data = 0;
+  char xx[sgrab+3], *p, *px;
+  int ret, i, data = 0, grab = sgrab+1;
 
   for (i = 0; i < MAXSOCKS; i++) {
     /* Check for stored-up data waiting to be processed */
@@ -979,8 +1094,8 @@ int sockgets(char *s, int *len)
 	  p = strchr(socklist[i].inbuf, '\r');
 	if (p != NULL) {
 	  *p = 0;
-	  if (strlen(socklist[i].inbuf) > 510)
-	    socklist[i].inbuf[510] = 0;
+	  if (strlen(socklist[i].inbuf) > (grab - 2))
+	    socklist[i].inbuf[(grab - 2)] = 0;
 	  strcpy(s, socklist[i].inbuf);
 	  px = (char *) nmalloc(strlen(p + 1) + 1);
 	  strcpy(px, p + 1);
@@ -994,20 +1109,22 @@ int sockgets(char *s, int *len)
 	  /* Strip CR if this was CR/LF combo */
 	  if (s[strlen(s) - 1] == '\r')
 	    s[strlen(s) - 1] = 0;
+          if (socklist[i].encstatus)
+            botlink_decrypt(i, s);
 	  *len = strlen(s);
 	  return socklist[i].sock;
 	}
       } else {
 	/* Handling buffered binary data (must have been SOCK_BUFFER before). */
-	if (socklist[i].inbuflen <= 510) {
+	if (socklist[i].inbuflen <= (grab - 2)) {
 	  *len = socklist[i].inbuflen;
 	  egg_memcpy(s, socklist[i].inbuf, socklist[i].inbuflen);
 	  nfree(socklist[i].inbuf);
           socklist[i].inbuf = NULL;
 	  socklist[i].inbuflen = 0;
 	} else {
-	  /* Split up into chunks of 510 bytes. */
-	  *len = 510;
+	  /* Split up into chunks of grab bytes. */
+	  *len = grab - 2;
 	  egg_memcpy(s, socklist[i].inbuf, *len);
 	  egg_memcpy(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
 	  socklist[i].inbuflen -= *len;
@@ -1071,17 +1188,18 @@ int sockgets(char *s, int *len)
     strcpy(socklist[ret].inbuf, p);
     strcat(socklist[ret].inbuf, xx);
     nfree(p);
-    if (strlen(socklist[ret].inbuf) < 512) {
+    if (strlen(socklist[ret].inbuf) < grab) {
       strcpy(xx, socklist[ret].inbuf);
       nfree(socklist[ret].inbuf);
       socklist[ret].inbuf = NULL;
       socklist[ret].inbuflen = 0;
     } else {
       p = socklist[ret].inbuf;
-      socklist[ret].inbuflen = strlen(p) - 510;
-      socklist[ret].inbuf = (char *) nmalloc(socklist[ret].inbuflen + 1);
-      strcpy(socklist[ret].inbuf, p + 510);
-      *(p + 510) = 0;
+    socklist[ret].inbuflen = strlen(p) - (grab - 2);
+      socklist[ret].inbuf = (char *) nmalloc(socklist[ret].inbuflen + 1); 
+//      socklist[ret].inbuf = (char *) nmalloc(strlen(p) - (grab - 3));
+      strcpy(socklist[ret].inbuf, p + (grab - 2));
+      *(p + (grab - 2)) = 0;
       strcpy(xx, p);
       nfree(p);
       /* (leave the rest to be post-pended later) */
@@ -1099,17 +1217,21 @@ int sockgets(char *s, int *len)
       s[strlen(s) - 1] = 0;
     data = 1;			/* DCC_CHAT may now need to process a
 				   blank line */
+
 /* NO! */
+
 /* if (!s[0]) strcpy(s," ");  */
   } else {
     s[0] = 0;
-    if (strlen(xx) >= 510) {
+    if (strlen(xx) >= (grab - 2)) {
       /* String is too long, so just insert fake \n */
       strcpy(s, xx);
       xx[0] = 0;
       data = 1;
     }
   }
+  if (socklist[ret].encstatus)
+    botlink_decrypt(ret, s);
   *len = strlen(s);
   /* Anything left that needs to be saved? */
   if (!xx[0]) {
@@ -1137,7 +1259,6 @@ int sockgets(char *s, int *len)
     return -3;
   }
 }
-
 /* Dump something to a socket
  * 
  * NOTE: Do NOT put Contexts in here if you want DEBUG to be meaningful!!
@@ -1147,11 +1268,15 @@ void tputs(register int z, char *s, unsigned int len)
   register int i, x, idx;
   char *p;
   static int inhere = 0;
-
   if (z < 0)
     return;			/* um... HELLO?!  sanity check please! */
   if (((z == STDOUT) || (z == STDERR)) && (!backgrd || use_stderr)) {
+#ifdef EUSE_COLORPUTS
+     colorputs(s);
+     x = len;
+#else
     write(z, s, len);
+#endif
     return;
   }
   for (i = 0; i < MAXSOCKS; i++) {
@@ -1186,6 +1311,14 @@ void tputs(register int z, char *s, unsigned int len)
           }
         }
       }
+      if (socklist[i].encstatus) {
+       if ((!s) || (!s[0])) {
+         s = botlink_encrypt(i, s);
+         len = strlen(s);
+       }
+       s = botlink_encrypt(i, s);
+       len = strlen(s);
+      }
       
       if (socklist[i].outbuf != NULL) {
 	/* Already queueing: just add it */
@@ -1193,6 +1326,8 @@ void tputs(register int z, char *s, unsigned int len)
 	egg_memcpy(p + socklist[i].outbuflen, s, len);
 	socklist[i].outbuf = p;
 	socklist[i].outbuflen += len;
+        if (socklist[i].encstatus)
+         nfree(s);
 	return;
       }
       /* Try. */
@@ -1205,6 +1340,8 @@ void tputs(register int z, char *s, unsigned int len)
 	egg_memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }
+      if (socklist[i].encstatus)
+       nfree(s);
       return;
     }
   }
@@ -1218,6 +1355,10 @@ void tputs(register int z, char *s, unsigned int len)
 
     inhere = 0;
   }
+/* I dont think this is needed.. -bryan 
+  if (socklist[i].encstatus)
+    nfree(s);
+*/
 }
 
 /* tputs might queue data for sockets, let's dump as much of it as

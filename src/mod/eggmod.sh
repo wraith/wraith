@@ -1,7 +1,6 @@
 # This is the original `configure' script modified for eggdrop use. All
 # changes are marked with `EGG-CHANGE-POINT'.
 #
-# $Id: eggmod.sh,v 1.1 2000/02/25 21:51:30 fabian Exp $
 #
 
 # Guess values for system-dependent variables and create Makefiles.

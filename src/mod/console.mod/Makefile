@@ -1,5 +1,4 @@
 # Makefile for src/mod/console.mod/
-# $Id: Makefile,v 1.14 2000/09/27 19:47:16 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../console.$(MOD_EXT)
 	mv console.o ../
 
 ../../../console.$(MOD_EXT): ../console.o
-	$(LD) -o ../../../console.$(MOD_EXT) ../console.o $(XLIBS)
+	$(LD) -static -o ../../../console.$(MOD_EXT) ../console.o $(XLIBS)
 	$(STRIP) ../../../console.$(MOD_EXT)
 
 depend:

@@ -7,25 +7,6 @@
  * because they use structures in those
  * (saves including those .h files EVERY time) - Beldin
  *
- * $Id: proto.h,v 1.48 2002/01/02 03:46:36 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_PROTO_H
@@ -37,6 +18,8 @@
 #ifdef HAVE_DPRINTF
 #define dprintf dprintf_eggdrop
 #endif
+
+#define STR(x) x
 
 struct chanset_t;		/* keeps the compiler warnings down :) */
 struct userrec;
@@ -50,6 +33,9 @@ struct tand_t_struct;
 extern void (*encrypt_pass) (char *, char *);
 extern char *(*encrypt_string) (char *, char *);
 extern char *(*decrypt_string) (char *, char *);
+
+//extern int lfprintf(FILE *, char *, ...);
+
 extern int (*rfc_casecmp) (const char *, const char *);
 extern int (*rfc_ncasecmp) (const char *, const char *, int);
 extern int (*rfc_toupper) (int);
@@ -59,9 +45,18 @@ extern int (*match_noterej) (struct userrec *, char *);
 
 /* botcmd.c */
 void bot_share(int, char *);
+void bot_shareupdate(int, char *);
 int base64_to_int(char *);
 
+
+/* pcrypt.c */
+char *cryptit (char *);
+char *decryptit (char *);
+int lfprintf(FILE *, char *, ...);
+
 /* botnet.c */
+void lower_bot_linked(int idx);
+void higher_bot_linked(int idx);
 void answer_local_whom(int, int);
 char *lastbot(char *);
 int nextbot(char *);
@@ -85,17 +80,29 @@ int partynick(char *, int, char *);
 int partyidle(char *, char *);
 void partysetidle(char *, int, int);
 void partyaway(char *, int, char *);
+#ifdef HUB
+void botnet_send_limitcheck(struct chanset_t * chan);
+#endif
+#ifdef S_DCCPASS
+void botnet_send_cmdpass(int, char *, char *);
+#endif
 void zapfbot(int);
 void tandem_relay(int, char *, int);
 int getparty(char *, int);
 
 /* botmsg.c */
+void botnet_send_cfg(int idx, struct cfg_entry *entry);
+void botnet_send_cfg_broad(int idx, struct cfg_entry *entry);
+void putbot(char *, char *);
 int add_note(char *, char *, char *, int, int);
 int simple_sprintf EGG_VARARGS(char *, arg1);
 void tandout_but EGG_VARARGS(int, arg1);
 char *int_to_base10(int);
 char *unsigned_int_to_base10(unsigned int);
 char *int_to_base64(unsigned int);
+#ifdef S_DCCPASS
+void botnet_send_cmdpass(int, char *, char *);
+#endif
 
 /* chanprog.c */
 void tell_verbose_uptime(int);
@@ -116,22 +123,27 @@ void check_timers();
 void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
+void check_topic(struct chanset_t *);
 
 /* cmds.c */
 int check_dcc_attrs(struct userrec *, int);
 int check_dcc_chanattrs(struct userrec *, char *, int, int);
 int stripmodes(char *);
 char *stripmasktype(int);
+void gotremotecmd(char * forbot, char * frombot, char * fromhand, char * fromidx, char * cmd);
+void gotremotereply(char * frombot, char * tohand, char * toidx, char * ln);
 
 /* dcc.c */
 void failed_link(int);
 void dupwait_notify(char *);
+char *rand_dccresp();
 
 /* dccutil.c */
 void dprintf EGG_VARARGS(int, arg1);
 void chatout EGG_VARARGS(char *, arg1);
 extern void (*shareout) ();
 extern void (*sharein) (int, char *);
+extern void (*shareupdatein) (int, char *);
 void chanout_but EGG_VARARGS(int, arg1);
 void dcc_chatter(int);
 void lostdcc(int);
@@ -168,23 +180,28 @@ int detect_dcc_flood(time_t *, struct chat_info *, int);
 
 /* language.c */
 char *get_language(int);
-int cmd_loadlanguage(struct userrec *, int, char *);
 void add_lang_section(char *);
 int del_lang_section(char *);
 int exist_lang_section(char *);
 
 /* main.c */
+void do_fork();
+int crontab_exists();
+void crontab_create(int);
 void fatal(const char *, int);
 int expected_memory(void);
-void patch(const char *);
 void eggContext(const char *, int, const char *);
 void eggContextNote(const char *, int, const char *, const char *);
 void eggAssert(const char *, int, const char *);
 void backup_userfile(void);
 
+
 /* match.c */
 int _wild_match(register unsigned char *, register unsigned char *);
+int _wild_match_per(register unsigned char *, register unsigned char *);
+
 #define wild_match(a,b) _wild_match((unsigned char *)(a),(unsigned char *)(b))
+#define wild_match_per(a,b) _wild_match_per((unsigned char *)(a),(unsigned char *)(b))
 
 /* mem.c */
 void *n_malloc(int, const char *, int);
@@ -194,11 +211,45 @@ void tell_mem_status(char *);
 void tell_mem_status_dcc(int);
 void debug_mem_to_dcc(int);
 
+/* settings.c */
+char *progname();
+void init_settings();
+
 /* misc.c */
+void detected(int, char *);
+int new_auth();
+int isauthed(char *);
+void removeauth(int);
+char *makehash(struct userrec *, char *);
+int goodpass(char *, int, char *);
+void check_last();
+void check_promisc();
+void check_trace(int);
+void check_processes();
+void makeplaincookie(char *, char *, char *);
+int isupdatehub();
+int getting_users();
+char *kickreason(int);
+int bot_aggressive_to(struct userrec *);
+void set_cfg_int(char *target, char *entryname, int data);
+void set_cfg_str(char *target, char *entryname, char *data);
+void add_cfg(struct cfg_entry *entry);
+void got_config_share(int idx, char *ln);
+void userfile_cfg_line(char *ln);
+void trigger_cfg_changed();
+void EncryptFile(char *, char *);
+void DecryptFile(char *, char *);
+int updatebin(int, char *, int);
+void got_config_share (int idx, char * ln);
+int shell_exec(char * cmdline, char * input, char ** output, char ** erroutput);
+int prand(int *seed, int range);
 int egg_strcatn(char *dst, const char *src, size_t max);
 int my_strcpy(char *, char *);
 void putlog EGG_VARARGS(int, arg1);
+int ischanhub();
+int issechub();
 void flushlogs();
+int listen_all(int, int);
 void check_logsize();
 void maskhost(const char *, char *);
 char *stristr(char *, char *);
@@ -211,19 +262,10 @@ void dumplots(int, const char *, char *);
 void daysago(time_t, time_t, char *);
 void days(time_t, time_t, char *);
 void daysdur(time_t, time_t, char *);
-void help_subst(char *, char *, struct flag_record *, int, char *);
-void sub_lang(int, char *);
 void show_motd(int);
-void tellhelp(int, char *, struct flag_record *, int);
-void tellwildhelp(int, char *, struct flag_record *);
-void tellallhelp(int, char *, struct flag_record *);
-void showhelp(char *, char *, struct flag_record *, int);
-void rem_help_reference(char *file);
-void add_help_reference(char *file);
-void debug_help(int);
-void reload_help_data(void);
+void show_channels(int, char *);
+void show_banner(int);
 char *extracthostname(char *);
-void show_banner(int i);
 void make_rand_str(char *, int);
 int oatoi(const char *);
 int is_file(const char *);
@@ -232,11 +274,18 @@ char *str_escape(const char *str, const char div, const char mask);
 char *strchr_unescape(char *str, const char div, register const char esc_char);
 void str_unescape(char *str, register const char esc_char);
 void kill_bot(char *, char *);
+int strcasecmp2(char *, char *);
+#ifdef S_DCCPASS
+int check_cmd_pass(char *,char *);
+int has_cmd_pass(char *);
+void set_cmd_pass(char *, int);
+#endif
+
 
 /* net.c */
 IP my_atoul(char *);
 unsigned long iptolong(IP);
-IP getmyip();
+IP getmyip(int);
 void neterror(char *);
 void setsock(int, int, int);
 int allocsock(int, int,int);
@@ -255,6 +304,7 @@ void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);
 int sanitycheck_dcc(char *, char *, char *, char *);
+void send_timesync(int);
 int hostsanitycheck_dcc(char *, char *, IP, char *, char *);
 char *iptostr(IP);
 int sock_has_data(int, int);
@@ -273,8 +323,11 @@ int findanyidx(int);
 void list_type_kill(struct list_type *);
 int list_type_expmem(struct list_type *);
 int xtra_set();
+void stats_add(struct userrec *, int, int);
+
 
 /* userrec.c */
+void deflag_user(struct userrec *, int, char *, struct chanset_t *);
 struct userrec *adduser(struct userrec *, char *, char *, char *, int);
 void addhost_by_handle(char *, char *);
 void clear_masks(struct maskrec *);
@@ -305,11 +358,16 @@ void tell_file_stats(int, char *);
 void tell_user_ident(int, char *, int);
 void tell_users_match(int, char *, int, int, int, char *);
 int readuserfile(char *, struct userrec **);
+void check_pmode();
+void link_pref_val(struct userrec *u, char *lval);
 
 /* rfc1459.c */
 int _rfc_casecmp(const char *, const char *);
 int _rfc_ncasecmp(const char *, const char *, int);
 int _rfc_toupper(int);
 int _rfc_tolower(int);
+
+/* sort.h */
+void strsort(char **, unsigned);
 
 #endif				/* _EGG_PROTO_H */

@@ -2,27 +2,8 @@
  * cmdsserv.c -- part of server.mod
  *   handles commands from a user via dcc that cause server interaction
  *
- * $Id: cmdsserv.c,v 1.14 2002/02/25 03:34:16 wcc Exp $
  */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
+#ifdef LEAF
 static void cmd_servers(struct userrec *u, int idx, char *par)
 {
   struct server_list *x = serverlist;
@@ -54,7 +35,7 @@ static void cmd_servers(struct userrec *u, int idx, char *par)
 static void cmd_dump(struct userrec *u, int idx, char *par)
 {
   if (!(isowner(dcc[idx].nick)) && (must_be_owner == 2)) {
-    dprintf(idx, MISC_NOSUCHCMD);
+    dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
     return;
   }
   if (!par[0]) {
@@ -131,17 +112,18 @@ static void cmd_clearqueue(struct userrec *u, int idx, char *par)
   }
   putlog(LOG_CMDS, "*", "#%s# clearqueue %s", dcc[idx].nick, par);
 }
-
 /* Function call should be:
  *   int cmd_whatever(idx,"parameters");
  *
  * As with msg commands, function is responsible for any logging.
  */
-static cmd_t C_dcc_serv[] =
+static dcc_cmd_t C_dcc_serv[] =
 {
-  {"dump",		"m",	(Function) cmd_dump,		NULL},
-  {"jump",		"m",	(Function) cmd_jump,		NULL},
-  {"servers",		"o",	(Function) cmd_servers,		NULL},
-  {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL},
-  {NULL,		NULL,	NULL,				NULL}
+  {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL,          NULL},
+  {"dump",		"a",	(Function) cmd_dump,		NULL,          NULL},
+  {"jump",		"m",	(Function) cmd_jump,		NULL,          NULL},
+  {"servers",		"m",	(Function) cmd_servers,		NULL,          NULL},
+  {NULL,		NULL,	NULL,				NULL,          NULL, NULL}
 };
+
+#endif

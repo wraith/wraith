@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include "md5.h"
+//#include "global.h"
 
 /*
  * The basic MD5 functions.
@@ -268,3 +269,45 @@ void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 
 	memset(ctx, 0, sizeof(ctx));
 }
+
+char * MD5Data (const unsigned char *data, unsigned int len, char *buf)
+{
+    MD5_CTX ctx;
+    char *ret = NULL;
+
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, &data, len);
+    MD5_Final(ret, &ctx);
+    return ret;
+//    MD5COUNT(&ctx,len);
+//    return MD5End(&ctx, buf);
+}
+/* DIE
+char *md5sum (char *filename) 
+{
+    unsigned char buffer[BUFSIZ];
+    unsigned char md5out[33];
+    char md5string[33];
+
+    MD5_CTX ctx;
+    int f,i,j;
+
+    MD5_Init(&ctx);
+    f = open(filename,O_RDONLY);
+    if (f < 0) return 0;
+    while ((i = read(f,buffer,sizeof buffer)) > 0) {
+        MD5_Update(&ctx,buffer,i);
+        MD5COUNT(&ctx, (unsigned int)i);
+    }
+    j = errno;
+    close(f);
+    errno = j;
+    if (i < 0) return 0;
+
+    MD5_final(md5out, &ctx);
+    for(i=0; i<16; i++)
+      sprintf(md5string + (i*2), "%.2x", md5out[i]);
+  
+    return md5string;
+}
+*/

@@ -1,5 +1,4 @@
 # Makefile for src/mod/server.mod/
-# $Id: Makefile,v 1.12 2000/09/12 15:26:54 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../server.$(MOD_EXT)
 	mv server.o ../
 
 ../../../server.$(MOD_EXT): ../server.o
-	$(LD) -o ../../../server.$(MOD_EXT) ../server.o $(XLIBS)
+	$(LD) -static -o ../../../server.$(MOD_EXT) ../server.o $(XLIBS)
 	$(STRIP) ../../../server.$(MOD_EXT)
 
 depend:

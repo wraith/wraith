@@ -2,25 +2,6 @@
  * users.h
  *   structures and definitions used by users.c and userrec.c
  *
- * $Id: users.h,v 1.10 2002/03/29 05:53:55 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_USERS_H
@@ -61,15 +42,20 @@ struct user_entry_type {
   int (*tcl_set) (Tcl_Interp *, struct userrec *, struct user_entry *,
 		  int, char **);
   int (*expmem) (struct user_entry *);
-  void (*display) (int idx, struct user_entry *);
+  void (*display) (int idx, struct user_entry *, struct userrec *);
   char *name;
 };
 
 
 #ifndef MAKING_MODS
 extern struct user_entry_type USERENTRY_COMMENT, USERENTRY_LASTON,
- USERENTRY_XTRA, USERENTRY_INFO, USERENTRY_BOTADDR, USERENTRY_HOSTS,
- USERENTRY_PASS, USERENTRY_BOTFL;
+ USERENTRY_INFO, USERENTRY_BOTADDR, USERENTRY_HOSTS,
+ USERENTRY_PASS, USERENTRY_BOTFL,
+  USERENTRY_STATS,
+  USERENTRY_ADDED,
+  USERENTRY_CONFIG,
+  USERENTRY_SECPASS,
+  USERENTRY_XTRA;
 #endif
 
 
@@ -81,7 +67,10 @@ struct laston_info {
 struct bot_addr {
   int telnet_port;
   int relay_port;
+  int hublevel;
   char *address;
+  char *uplink;
+  int roleid;
 };
 
 struct user_entry {
@@ -134,6 +123,8 @@ int set_user(struct user_entry_type *, struct userrec *, void *);
 #define BAN_NAME    "*ban"
 #define EXEMPT_NAME "*exempt"
 #define INVITE_NAME "*Invite"
+#define CHANS_NAME  "*channels"
+#define CONFIG_NAME "*Config"
 
 /* Channel-specific info
  */
@@ -196,7 +187,7 @@ int def_tcl_get(Tcl_Interp *interp, struct userrec *u,
 int def_tcl_set(Tcl_Interp *irp, struct userrec *u,
 		struct user_entry *e, int argc, char **argv);
 int def_expmem(struct user_entry *e);
-void def_display(int idx, struct user_entry *e);
+void def_display(int idx, struct user_entry *e, struct userrec *u);
 int def_dupuser(struct userrec *new, struct userrec *old,
 		struct user_entry *e);
 

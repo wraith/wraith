@@ -2,25 +2,6 @@
  * channels.c -- part of channels.mod
  *   support for channels within the bot
  *
- * $Id: channels.c,v 1.67 2002/07/18 19:01:44 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #define MODULE_NAME "channels"
@@ -32,21 +13,18 @@ static Function *global		= NULL;
 
 static int  setstatic;
 static int  use_info;
-static int  ban_time;
-static int  exempt_time;		/* If exempt_time = 0, never remove
-					   them */
-static int  invite_time;		/* If invite_time = 0, never remove
-					   them */
 static char chanfile[121];
 static int  chan_hack;
 static int  quiet_save;
 static char glob_chanmode[64];		/* Default chanmode (drummer,990731) */
+static char *lastdeletedmask;
 static struct udef_struct *udef;
 static int global_stopnethack_mode;
 static int global_revenge_mode;
 static int global_idle_kick;		/* Default idle-kick setting. */
-static int global_aop_min;
-static int global_aop_max;
+static int global_ban_time;
+static int global_exempt_time;
+static int global_invite_time;
 
 /* Global channel settings (drummer/dw) */
 static char glob_chanset[512];
@@ -65,12 +43,261 @@ static int gfld_ctcp_time;
 static int gfld_nick_thr;
 static int gfld_nick_time;
 
+extern int cfg_count;
+extern struct cfg_entry **cfg;
+
+
 #include "channels.h"
 #include "cmdschan.c"
 #include "tclchan.c"
 #include "userchan.c"
 #include "udefchan.c"
 
+static void got_cset(char *botnick, char *code, char *par)
+{
+  int all = 0;
+  char *chname = NULL, *list[2], *buf, *bak;
+  struct chanset_t *chan = NULL;
+
+  module_entry *me;
+
+  if (!par[0])
+   return;
+  else {
+   if (par[0] == '*' && par[1] == ' ') {
+    return;
+    all = 1;
+    newsplit(&par);
+   } else {
+    chname = newsplit(&par);
+    chan = findchan_by_dname(chname);
+    if (!chan)
+      return;
+   }
+  }
+  if (all)
+   chan = chanset;
+//blah - from cmd_chanset
+  bak = par;
+  buf = nmalloc(strlen(par) + 1);
+  while (chan) {
+    chname = chan->dname;
+    strcpy(buf, bak);
+    par = buf;
+    list[0] = newsplit(&par);
+    while (list[0][0]) {
+      if (list[0][0] == '+' || list[0][0] == '-' ||
+          (!strcmp(list[0], "dont-idle-kick"))) {
+        if (tcl_channel_modify(0, chan, 1, list) == TCL_OK) {
+        } else if (!all || !chan->next)
+          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid mode.",
+                  list[0], all ? "all channels" : chname);
+        list[0] = newsplit(&par);
+        continue;
+      }
+      if (strncmp(list[0], "need-", 5)) {
+        list[1] = par;
+        /* Par gets modified in tcl channel_modify under some
+         * circumstances, so save it now.
+         */
+        if (tcl_channel_modify(0, chan, 2, list) == TCL_OK) {
+        } else if (!all || !chan->next)
+          putlog(LOG_BOTS, "@", "Error trying to set %s for %s, invalid option\n",
+                  list[0], all ? "all channels" : chname);
+      }
+    break;
+    }
+    if (chan->status & CHAN_BITCH)
+      if ((me = module_find("irc", 0, 0)))
+        (me->funcs[IRC_RECHECK_CHANNEL])(chan, 0);
+    if (!all)
+      chan = NULL;
+    else
+      chan = chan->next;
+    nfree(buf);
+  }
+}
+
+static void got_cpart(char *botnick, char *code, char *par)
+{
+  char *chname;
+  struct chanset_t *chan;
+
+  if (!par[0])
+   return;
+
+  chname = newsplit(&par);
+  chan = findchan_by_dname(chname);
+  if (!chan)
+   return;
+  remove_channel(chan);
+}
+static void got_cycle(char *botnick, char *code, char *par)
+{
+  char *chname;
+  struct chanset_t *chan;
+
+  if (!par[0])
+   return;
+
+  chname = newsplit(&par);
+  chan = findchan_by_dname(chname);
+  if (!chan)
+   return;
+
+  dprintf(DP_SERVER, "PART %s\n", chname);
+}
+
+static void got_down(char *botnick, char *code, char *par)
+{
+  char *chname;
+  struct chanset_t *chan;
+
+  if (!par[0])
+   return;
+
+  chname = newsplit(&par);
+  chan = findchan_by_dname(chname);
+  if (!chan)
+   return;
+ 
+  add_mode(chan, '-', 'o', botname);
+
+}
+
+static void got_cjoin(char *botnick, char *code, char *par)
+{
+  char *chname;
+  struct chanset_t *chan;
+
+  if (!par[0])
+   return;
+
+  chname = newsplit(&par);
+  if (findchan_by_dname(chname)) {
+   return;
+  } else if ((chan = findchan(chname))) {
+   return;
+  }
+
+  if (tcl_channel_add(0, chname, par) == TCL_ERROR) /* drummer */
+    putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s", botnick, chname);
+  else {
+#ifdef HUB
+    write_userfile(-1);
+#endif
+  }
+}
+
+static void got_role(char *botnick, char *code, char *par)
+{
+  char *tmp;
+  tmp = newsplit(&par);
+  role = atoi(tmp);
+  tmp = newsplit(&par);
+  if (tmp[0])
+    timesync = atoi(tmp) - now;
+  putlog(LOG_DEBUG, "@", "Got role index %i", role);
+}
+
+#ifdef HUB
+void rebalance_roles()
+{
+  struct bot_addr *ba;
+  int r[5] = { 0, 0, 0, 0, 0 }, hNdx, lNdx, i;
+  struct userrec *u;
+  char tmp[10];
+
+Context;
+ContextNote("rebalance_roles");
+  for (u = userlist; u; u = u->next) {
+    if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) {
+      ba = get_user(&USERENTRY_BOTADDR, u);
+      if (ba && (ba->roleid > 0) && (ba->roleid < 5))
+        r[(ba->roleid - 1)]++;
+    }
+  }
+  /*
+     Find high & low
+     while (high-low) > 2
+     move from highNdx to lowNdx
+   */
+
+  hNdx = 0;
+  lNdx = 0;
+  for (i = 1; i <= 4; i++) {
+    if (r[i] < r[lNdx])
+      lNdx = i;
+    if (r[i] > r[hNdx])
+      hNdx = i;
+  }
+  while (r[hNdx] - r[lNdx] >= 2) {
+    for (u = userlist; u; u = u->next) {
+      if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) {
+        ba = get_user(&USERENTRY_BOTADDR, u);
+        if (ba && (ba->roleid == (hNdx + 1))) {
+          ba->roleid = lNdx + 1;
+          sprintf(tmp, STR("rl %d %li"), lNdx + 1, (timesync + now));
+          botnet_send_zapf(nextbot(u->handle), botnetnick, u->handle, tmp);
+        }
+      }
+    }
+    r[hNdx]--;
+    r[lNdx]++;
+    hNdx = 0;
+    lNdx = 0;
+    for (i = 1; i <= 4; i++) {
+      if (r[i] < r[lNdx])
+        lNdx = i;
+      if (r[i] > r[hNdx])
+        hNdx = i;
+    }
+  }
+}
+#endif
+
+static void channels_checkslowjoin() {
+  struct chanset_t * chan;
+  Context;
+  for (chan=chanset;chan;chan=chan->next) {
+    if ((chan->parttime) && (chan->parttime < now)) {
+      chan->parttime = 0;
+#ifdef LEAF
+      if (channel_active(chan) && !channel_inactive(chan))
+        dprintf(DP_MODE, "PART %s\n", chan->dname);
+#endif
+      remove_channel(chan);
+    } else if ((chan->jointime) && (chan->jointime < now)) {
+        chan->status &= ~CHAN_INACTIVE;
+        chan->jointime=0;
+#ifdef LEAF
+      if (!channel_inactive(chan))
+        dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
+#endif
+    }
+  }
+}
+
+static void got_sj(int idx, char * code, char * par) {
+  char * chname;
+  time_t delay;
+  struct chanset_t * chan;
+  chname = newsplit(&par);
+  delay=atoi(par) + now;
+  chan = findchan_by_dname(chname);
+  if (chan)
+    chan->jointime = delay;
+}
+static void got_sp(int idx, char * code, char * par) {
+  char * chname;
+  time_t delay;
+  struct chanset_t * chan;
+  chname = newsplit(&par);
+  delay=atoi(par) + now;
+  chan = findchan_by_dname(chname);
+  if (chan)
+    chan->parttime = delay;
+}
 
 static void *channel_malloc(int size, char *file, int line)
 {
@@ -147,7 +374,7 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
       chan->limit_prot = 0;
       if (pos) {
 	s1 = newsplit(&set);
-	if (s1[0])
+	if (s1[0] && !chan->limitraise)
 	  chan->limit_prot = atoi(s1);
       }
       break;
@@ -288,14 +515,17 @@ static void remove_channel(struct chanset_t *chan)
    int		 i;
    module_entry	*me;
 
+Context;
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_tcl_part() call. */
    (void) chanset_unlink(chan);
 
-   if ((me = module_find("irc", 1, 3)) != NULL)
+   if ((me = module_find("irc", 0, 0)) != NULL)
      (me->funcs[IRC_DO_CHANNEL_PART])(chan);
 
+Context;
    clear_channel(chan, 0);
+Context;
    noshare = 1;
    /* Remove channel-bans */
    while (chan->bans)
@@ -369,193 +599,6 @@ static char *convert_element(char *src, char *dst)
   return dst;
 }
 
-#define PLSMNS(x) (x ? '+' : '-')
-
-/*
- * Note:
- *  - We write chanmode "" too, so that the bot won't use default-chanmode
- *    instead of ""
- *  - We will write empty need-xxxx too, why not? (less code + lazyness)
- */
-static void write_channels()
-{
-  FILE *f;
-  char s[121], w[1024], w2[1024], name[163];
-  char need1[242], need2[242], need3[242], need4[242], need5[242];
-  struct chanset_t *chan;
-  struct udef_struct *ul;
-
-  if (!chanfile[0])
-    return;
-  sprintf(s, "%s~new", chanfile);
-  f = fopen(s, "w");
-  chmod(s, userfile_perm);
-  if (f == NULL) {
-    putlog(LOG_MISC, "*", "ERROR writing channel file.");
-    return;
-  }
-  if (!quiet_save)
-    putlog(LOG_MISC, "*", "Writing channel file...");
-  fprintf(f, "#Dynamic Channel File for %s (%s) -- written %s\n",
-	  botnetnick, ver, ctime(&now));
-  for (chan = chanset; chan; chan = chan->next) {
-    convert_element(chan->dname, name);
-    get_mode_protect(chan, w);
-    convert_element(w, w2);
-    convert_element(chan->need_op, need1);
-    convert_element(chan->need_invite, need2);
-    convert_element(chan->need_key, need3);
-    convert_element(chan->need_unban, need4);
-    convert_element(chan->need_limit, need5);
-    fprintf(f, "channel %s %s%schanmode %s idle-kick %d stopnethack-mode %d \
-revenge-mode %d \
-need-op %s need-invite %s need-key %s need-unban %s need-limit %s \
-flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
-flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d aop-delay %d:%d \
-%cenforcebans %cdynamicbans %cuserbans %cautoop %cautohalfop %cbitch \
-%cgreet %cprotectops %cprotecthalfops %cprotectfriends %cdontkickops \
-%cstatuslog %crevenge %crevengebot %cautovoice %csecret \
-%cshared %ccycle %cseen %cinactive %cdynamicexempts %cuserexempts \
-%cdynamicinvites %cuserinvites %cnodesynch ",
-	channel_static(chan) ? "set" : "add",
-	name,
-	channel_static(chan) ? " " : " { ",
-	w2,
-	chan->idle_kick, /* idle-kick 0 is same as dont-idle-kick (less code)*/
-	chan->stopnethack_mode,
-        chan->revenge_mode,
-	need1, need2, need3, need4, need5,
-	chan->flood_pub_thr, chan->flood_pub_time,
-        chan->flood_ctcp_thr, chan->flood_ctcp_time,
-        chan->flood_join_thr, chan->flood_join_time,
-        chan->flood_kick_thr, chan->flood_kick_time,
-        chan->flood_deop_thr, chan->flood_deop_time,
-	chan->flood_nick_thr, chan->flood_nick_time,
-	chan->aop_min, chan->aop_max,
-	PLSMNS(channel_enforcebans(chan)),
-	PLSMNS(channel_dynamicbans(chan)),
-	PLSMNS(!channel_nouserbans(chan)),
-	PLSMNS(channel_autoop(chan)),
-	PLSMNS(channel_autohalfop(chan)),
-	PLSMNS(channel_bitch(chan)),
-	PLSMNS(channel_greet(chan)),
-	PLSMNS(channel_protectops(chan)),
-	PLSMNS(channel_protecthalfops(chan)),
-	PLSMNS(channel_protectfriends(chan)),
-	PLSMNS(channel_dontkickops(chan)),
-	PLSMNS(channel_logstatus(chan)),
-	PLSMNS(channel_revenge(chan)),
-	PLSMNS(channel_revengebot(chan)),
-	PLSMNS(channel_autovoice(chan)),
-	PLSMNS(channel_secret(chan)),
-	PLSMNS(channel_shared(chan)),
-	PLSMNS(channel_cycle(chan)),
-	PLSMNS(channel_seen(chan)),
-	PLSMNS(channel_inactive(chan)),
-	PLSMNS(channel_dynamicexempts(chan)),
-	PLSMNS(!channel_nouserexempts(chan)),
- 	PLSMNS(channel_dynamicinvites(chan)),
-	PLSMNS(!channel_nouserinvites(chan)),
-	PLSMNS(channel_nodesynch(chan)));
-    for (ul = udef; ul; ul = ul->next) {
-      if (ul->defined && ul->name) {
-	if (ul->type == UDEF_FLAG)
-	  fprintf(f, "%c%s%s ", getudef(ul->values, chan->dname) ? '+' : '-',
-		  "udef-flag-", ul->name);
-	else if (ul->type == UDEF_INT)
-	  fprintf(f, "%s%s %d ", "udef-int-", ul->name, getudef(ul->values,
-		  chan->dname));
-	else
-	  debug1("UDEF-ERROR: unknown type %d", ul->type);
-      }
-    }
-    fprintf(f, "%s\n", channel_static(chan) ? "" : "}");
-    if (fflush(f)) {
-      putlog(LOG_MISC, "*", "ERROR writing channel file.");
-      fclose(f);
-      return;
-    }
-  }
-  fclose(f);
-  unlink(chanfile);
-  movefile(s, chanfile);
-}
-
-static void read_channels(int create)
-{
-  struct chanset_t *chan, *chan_next;
-
-  if (!chanfile[0])
-    return;
-  for (chan = chanset; chan; chan = chan->next)
-    if (!channel_static(chan))
-      chan->status |= CHAN_FLAGGED;
-  chan_hack = 1;
-  if (!readtclprog(chanfile) && create) {
-    FILE *f;
-
-    /* Assume file isnt there & therfore make it */
-    putlog(LOG_MISC, "*", "Creating channel file");
-    f = fopen(chanfile, "w");
-    if (!f)
-      putlog(LOG_MISC, "*", "Couldn't create channel file: %s.  Dropping",
-	     chanfile);
-    else
-      fclose(f);
-  }
-  chan_hack = 0;
-  for (chan = chanset; chan; chan = chan_next) {
-    chan_next = chan->next;
-    if (chan->status & CHAN_FLAGGED) {
-      putlog(LOG_MISC, "*", "No longer supporting channel %s", chan->dname);
-      remove_channel(chan);
-    }
-  }
-}
-
-static void backup_chanfile()
-{
-  char s[125];
-
-  putlog(LOG_MISC, "*", "Backing up channel file...");
-  egg_snprintf(s, sizeof s, "%s~bak", chanfile);
-  copyfile(chanfile, s);
-}
-
-static void channels_prerehash()
-{
-  struct chanset_t *chan;
-
-  /* Flag will be cleared as the channels are re-added by the
-   * config file. Any still flagged afterwards will be removed.
-   */
-  for (chan = chanset; chan; chan = chan->next) {
-    chan->status |= CHAN_FLAGGED;
-    /* Flag is only added to channels read from config file */
-    if (chan->status & CHAN_STATIC)
-      chan->status &= ~CHAN_STATIC;
-  }
-  setstatic = 1;
-}
-
-static void channels_rehash()
-{
-  struct chanset_t *chan;
-
-  setstatic = 0;
-  read_channels(1);
-  /* Remove any extra channels, by checking the flag. */
-  chan = chanset;
-  for (chan = chanset; chan;) {
-    if (chan->status & CHAN_FLAGGED) {
-      putlog(LOG_MISC, "*", "No longer supporting channel %s", chan->dname);
-      remove_channel(chan);
-      chan = chanset;
-    } else
-      chan = chan->next;
-  }
-}
-
 static cmd_t my_chon[] =
 {
   {"*",		"",	(Function) channels_chon,	"channels:chon"},
@@ -572,12 +615,9 @@ static void channels_report(int idx, int details)
   for (chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
-    if ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr)) {
+    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+        ((idx == DP_STDOUT) || glob_master(fr) || chan_master(fr))) {
       s[0] = 0;
-      if (channel_greet(chan))
-	strcat(s, "greet, ");
-      if (channel_autoop(chan))
-	strcat(s, "auto-op, ");
       if (channel_bitch(chan))
 	strcat(s, "bitch, ");
       if (s[0])
@@ -598,8 +638,13 @@ static void channels_report(int idx, int details)
 	            chan->channel.members == 1 ? "," : "s,", s2, s);
 	  }
 	} else {
+#ifdef LEAF
 	  dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
 		  channel_pending(chan) ? "pending" : "not on channel", s2, s);
+#else
+	  dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
+		  "limbo", s2, s);
+#endif
 	}
       } else {
 	dprintf(idx, "    %-10s: channel is set +inactive\n",
@@ -614,40 +659,25 @@ static void channels_report(int idx, int details)
 	  i += my_strcpy(s + i, "dynamicbans ");
 	if (!channel_nouserbans(chan))
 	  i += my_strcpy(s + i, "userbans ");
-	if (channel_autoop(chan))
-	  i += my_strcpy(s + i, "autoop ");
 	if (channel_bitch(chan))
 	  i += my_strcpy(s + i, "bitch ");
-	if (channel_greet(chan))
-	  i += my_strcpy(s + i, "greet ");
 	if (channel_protectops(chan))
 	  i += my_strcpy(s + i, "protectops ");
-	if (channel_protecthalfops(chan))
-	  i += my_strcpy(s + i, "protecthalfops ");
 	if (channel_protectfriends(chan))
 	  i += my_strcpy(s + i, "protectfriends ");
 	if (channel_dontkickops(chan))
 	  i += my_strcpy(s + i, "dontkickops ");
-	if (channel_logstatus(chan))
-	  i += my_strcpy(s + i, "statuslog ");
 	if (channel_revenge(chan))
 	  i += my_strcpy(s + i, "revenge ");
 	if (channel_revenge(chan))
 	  i += my_strcpy(s + i, "revengebot ");
 	if (channel_secret(chan))
 	  i += my_strcpy(s + i, "secret ");
-	if (channel_shared(chan))
-	  i += my_strcpy(s + i, "shared ");
 	if (!channel_static(chan))
 	  i += my_strcpy(s + i, "dynamic ");
-	if (channel_autovoice(chan))
-	  i += my_strcpy(s + i, "autovoice ");
-	if (channel_autohalfop(chan))
-	  i += my_strcpy(s + i, "autohalfop ");
 	if (channel_cycle(chan))
 	  i += my_strcpy(s + i, "cycle ");
-	if (channel_seen(chan))
-	  i += my_strcpy(s + i, "seen ");
+#ifdef S_IRCNET
 	if (channel_dynamicexempts(chan))
 	  i += my_strcpy(s + i, "dynamicexempts ");
 	if (!channel_nouserexempts(chan))
@@ -656,39 +686,43 @@ static void channels_report(int idx, int details)
 	  i += my_strcpy(s + i, "dynamicinvites ");
 	if (!channel_nouserinvites(chan))
 	  i += my_strcpy(s + i, "userinvites ");
+#endif
 	if (channel_inactive(chan))
 	  i += my_strcpy(s + i, "inactive ");
 	if (channel_nodesynch(chan))
 	  i += my_strcpy(s + i, "nodesynch ");
+        if (channel_closed(chan))
+          i += my_strcpy(s + i, "closed ");
+        if (channel_take(chan))
+          i += my_strcpy(s + i, "take ");
+        if (channel_nomop(chan))
+          i += my_strcpy(s + i, "nmop ");
+        if (channel_manop(chan))
+          i += my_strcpy(s + i, "manop ");
+        if (channel_voice(chan))
+          i += my_strcpy(s + i, "voice ");
+        if (channel_fastop(chan))
+          i += my_strcpy(s + i, "fastop ");
+        if (channel_private(chan))
+          i += my_strcpy(s + i, "private ");
+
 	dprintf(idx, "      Options: %s\n", s);
-	if (chan->need_op[0])
-	  dprintf(idx, "      To get ops I do: %s\n", chan->need_op);
-	if (chan->need_invite[0])
-	  dprintf(idx, "      To get invited I do: %s\n", chan->need_invite);
-	if (chan->need_limit[0])
-	  dprintf(idx, "      To get the channel limit up'd I do: %s\n",
-		  chan->need_limit);
-	if (chan->need_unban[0])
-	  dprintf(idx, "      To get unbanned I do: %s\n", chan->need_unban);
-	if (chan->need_key[0])
-	  dprintf(idx, "      To get the channel key I do: %s\n",
-		  chan->need_key);
 	if (chan->idle_kick)
 	  dprintf(idx, "      Kicking idle users after %d min\n",
 		  chan->idle_kick);
+        if (chan->limitraise)
+          dprintf(idx, "      Raising limit +%d every 2 minutes\n", chan->limitraise);
 	if (chan->stopnethack_mode)
 	  dprintf(idx, "      stopnethack-mode %d\n",
 		  chan->stopnethack_mode);
         if (chan->revenge_mode)
           dprintf(idx, "      revenge-mode %d\n",
                   chan->revenge_mode);
+       dprintf(idx, "    Bans last %d mins.\n", chan->ban_time);
+       dprintf(idx, "    Exemptions last %d mins.\n", chan->exempt_time);
+       dprintf(idx, "    Invitations last %d mins.\n", chan->invite_time);
       }
     }
-  }
-  if (details) {
-    dprintf(idx, "    Bans last %d mins.\n", ban_time);
-    dprintf(idx, "    Exemptions last %d mins.\n", exempt_time);
-    dprintf(idx, "    Invitations last %d mins.\n", invite_time);
   }
 }
 
@@ -731,25 +765,26 @@ static int channels_expmem()
       tot += strlen(chan->rmkey) + 1;
   }
   tot += expmem_udef(udef);
+  if (lastdeletedmask)
+    tot += strlen(lastdeletedmask) + 1;
   return tot;
 }
-
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
 static char *traced_globchanset(ClientData cdata, Tcl_Interp * irp,
-				char *name1, CONST char *name2, int flags)
+                               CONST char *name1, CONST char *name2,
+                                int flags)
 #else
 static char *traced_globchanset(ClientData cdata, Tcl_Interp * irp, 
                                 char *name1, char *name2, int flags)
 #endif
 {
-  char *s;
-  char *t;
+  char *t, *s;
   int i;
   int items;
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
-  CONST char **item;
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
+  CONST char **item, *s2;
 #else
-  char **item;
+  char **item, *s2;
 #endif
 
   if (flags & (TCL_TRACE_READS | TCL_TRACE_UNSETS)) {
@@ -759,8 +794,8 @@ static char *traced_globchanset(ClientData cdata, Tcl_Interp * irp,
 	    TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	    traced_globchanset, NULL);
   } else { /* Write */
-    s = Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
-    Tcl_SplitList(interp, s, &items, &item);
+    s2 = Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
+    Tcl_SplitList(interp, s2, &items, &item);
     for (i = 0; i<items; i++) {
       if (!(item[i]) || (strlen(item[i]) < 2)) continue;
       s = glob_chanset;
@@ -782,18 +817,44 @@ static char *traced_globchanset(ClientData cdata, Tcl_Interp * irp,
   }
   return NULL;
 }
+cmd_t channels_bot[] = {
+  {"cjoin",    "", (Function) got_cjoin, NULL},
+  {"cpart",    "", (Function) got_cpart, NULL},
+  {"cset",     "", (Function) got_cset,  NULL},
+  {"cycle",    "", (Function) got_cycle, NULL},
+  {"down",     "", (Function) got_down,  NULL},
+  {"rl", "", (Function) got_role, NULL},
+  {"sj",       "", (Function) got_sj,    NULL},
+  {"sp",       "", (Function) got_sp,    NULL},
+/*
+#ifdef HUB
+  {"o1", "", (Function) got_o1, NULL},
+  {"kl", "", (Function) got_kl, NULL},
+#endif
+  {"ltp", "", (Function) got_locktopic, NULL},
+*/
+  {0, 0, 0, 0}
+};
 
 static tcl_ints my_tcl_ints[] =
 {
   {"share-greet",		NULL,				0},
   {"use-info",			&use_info,			0},
-  {"ban-time",			&ban_time,			0},
-  {"exempt-time",		&exempt_time,			0},
-  {"invite-time",		&invite_time,			0},
   {"quiet-save",		&quiet_save,			0},
   {"global-stopnethack-mode",	&global_stopnethack_mode,	0},
   {"global-revenge-mode",       &global_revenge_mode,           0},
   {"global-idle-kick",		&global_idle_kick,		0},
+  {"global-ban-time",           &global_ban_time,               0},
+#ifdef S_IRCNET
+  {"global-exempt-time",        &global_exempt_time,            0},
+  {"global-invite-time",        &global_invite_time,            0},
+#endif
+  /* keeping [ban|exempt|invite]-time for compatability <Wcc[07/20/02]> */
+  {"ban-time",                  &global_ban_time,               0},
+#ifdef S_IRCNET
+  {"exempt-time",               &global_exempt_time,            0},
+  {"invite-time",               &global_invite_time,            0},
+#endif
   {NULL,			NULL,				0}
 };
 
@@ -805,7 +866,6 @@ static tcl_coups mychan_tcl_coups[] =
   {"global-flood-join",		&gfld_join_thr,		&gfld_join_time},
   {"global-flood-ctcp",		&gfld_ctcp_thr,		&gfld_ctcp_time},
   {"global-flood-nick",		&gfld_nick_thr, 	&gfld_nick_time},
-  {"global-aop-delay",		&global_aop_min,	&global_aop_max},
   {NULL,			NULL,			NULL}
 };
 
@@ -818,26 +878,27 @@ static tcl_strings my_tcl_strings[] =
 
 static char *channels_close()
 {
-  write_channels();
   free_udef(udef);
+  if (lastdeletedmask)
+    nfree(lastdeletedmask);
   rem_builtins(H_chon, my_chon);
-  rem_builtins(H_dcc, C_dcc_irc);
+  rem_builtins(H_bot, channels_bot);
+  rem_builtins_dcc(H_dcc, C_dcc_irc);
   rem_tcl_commands(channels_cmds);
   rem_tcl_strings(my_tcl_strings);
   rem_tcl_ints(my_tcl_ints);
   rem_tcl_coups(mychan_tcl_coups);
+  del_hook(HOOK_SWITCH_STATIC, (Function) switch_static);
   del_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
-  del_hook(HOOK_BACKUP, (Function) backup_chanfile);
-  del_hook(HOOK_REHASH, (Function) channels_rehash);
-  del_hook(HOOK_PRE_REHASH, (Function) channels_prerehash);
   del_hook(HOOK_MINUTELY, (Function) check_expired_bans);
+#ifdef S_IRCNET
   del_hook(HOOK_MINUTELY, (Function) check_expired_exempts);
   del_hook(HOOK_MINUTELY, (Function) check_expired_invites);
+#endif
+  del_hook(HOOK_3SECONDLY, (Function) channels_checkslowjoin);
   Tcl_UntraceVar(interp, "global-chanset",
 		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 		 traced_globchanset, NULL);
-  rem_help_reference("channels.help");
-  rem_help_reference("chaninfo.help");
   module_undepend(MODULE_NAME);
   return NULL;
 }
@@ -868,7 +929,7 @@ static Function channels_table[] =
   (Function) clear_channel,
   /* 16 - 19 */
   (Function) set_handle_laston,
-  (Function) & ban_time,
+  (Function) NULL, /* [17] used to be ban_time <Wcc[07/19/02]> */
   (Function) & use_info,
   (Function) get_handle_chaninfo,
   /* 20 - 23 */
@@ -877,115 +938,140 @@ static Function channels_table[] =
   (Function) add_chanrec_by_handle,
   (Function) NULL, /* [23] used to be isexempted() <cybah> */
   /* 24 - 27 */
-  (Function) & exempt_time,
+  (Function) NULL, /* [24] used to be exempt_time <Wcc[07/19/02]> */
   (Function) NULL, /* [25] used to be isinvited() <cybah> */
-  (Function) & invite_time,
+  (Function) NULL, /* [26] used to be ban_time <Wcc[07/19/02]> */
   (Function) NULL,
   /* 28 - 31 */
   (Function) NULL, /* [28] used to be u_setsticky_exempt() <cybah> */
+#ifdef S_IRCNET
   (Function) u_delexempt,
   (Function) u_addexempt,
+#else
+  (Function) NULL,
+  (Function) NULL,
+#endif
   (Function) NULL,
   /* 32 - 35 */
   (Function) NULL,/* [32] used to be u_sticky_exempt() <cybah> */
   (Function) NULL,
   (Function) NULL,	/* [34] used to be killchanset().	*/
+#ifdef S_IRCNET
   (Function) u_delinvite,
   /* 36 - 39 */
   (Function) u_addinvite,
+#else 
+  (Function) NULL,
+  (Function) NULL,
+#endif
   (Function) tcl_channel_add,
   (Function) tcl_channel_modify,
+#ifdef S_IRCNET
   (Function) write_exempts,
   /* 40 - 43 */
   (Function) write_invites,
+#else
+  (Function) NULL,
+  (Function) NULL,
+#endif
   (Function) ismodeline,
   (Function) initudef,
   (Function) ngetudef,
   /* 44 - 47 */
   (Function) expired_mask,
   (Function) remove_channel,
+  (Function) & global_ban_time,
+#ifdef S_IRCNET
+  (Function) & global_exempt_time,
+  /* 48 - 51 */
+  (Function) & global_invite_time,
+#else
+  (Function) NULL,
+  (Function) NULL,
+#endif
+  (Function) write_chans,
+  (Function) write_config,
 };
 
 char *channels_start(Function * global_funcs)
 {
   global = global_funcs;
 
-  gfld_chan_thr = 10;
-  gfld_chan_time = 60;
-  gfld_deop_thr = 3;
+  gfld_chan_thr = 0;
+  gfld_chan_time = 0;
+  gfld_deop_thr = 8;
   gfld_deop_time = 10;
-  gfld_kick_thr = 3;
-  gfld_kick_time = 10;
-  gfld_join_thr = 5;
-  gfld_join_time = 60;
-  gfld_ctcp_thr = 5;
-  gfld_ctcp_time = 60;
+  gfld_kick_thr = 0;
+  gfld_kick_time = 0;
+  gfld_join_thr = 0;
+  gfld_join_time = 0;
+  gfld_ctcp_thr = 0;
+  gfld_ctcp_time = 0;
   global_idle_kick = 0;
-  global_aop_min = 5;
-  global_aop_max = 30;
   setstatic = 0;
+  lastdeletedmask = 0;
   use_info = 1;
-  ban_time = 60;
-  exempt_time = 0;
-  invite_time = 0;
   strcpy(chanfile, "chanfile");
   chan_hack = 0;
   quiet_save = 0;
   strcpy(glob_chanmode, "nt");
   udef = NULL;
   global_stopnethack_mode = 0;
-  global_revenge_mode = 1;
+  global_revenge_mode = 3;
+  global_ban_time = 0;
+#ifdef S_IRCNET
+  global_exempt_time = 0;
+  global_invite_time = 0;
+#endif
   strcpy(glob_chanset,
-         "-enforcebans "
+         "+enforcebans "
 	 "+dynamicbans "
 	 "+userbans "
-	 "-autoop "
 	 "-bitch "
-	 "+greet "
-	 "+protectops "
-	 "+statuslog "
+	 "-protectops "
 	 "-revenge "
-	 "-secret "
-	 "-autovoice "
 	 "+cycle "
 	 "+dontkickops "
 	 "-inactive "
 	 "-protectfriends "
-	 "+shared "
-	 "-seen "
 	 "+userexempts "
-	 "+dynamicexempts "
+	 "-dynamicexempts "
 	 "+userinvites "
-	 "+dynamicinvites "
+	 "-dynamicinvites "
 	 "-revengebot "
-	 "-protecthalfops "
-	 "-autohalfop "
-	 "-nodesynch ");
+	 "+nodesynch "
+	 "-closed "
+	 "-take "
+	 "+manop "
+	 "-voice "
+         "-private "
+	 "-fastop ");
   module_register(MODULE_NAME, channels_table, 1, 0);
-  if (!module_depend(MODULE_NAME, "eggdrop", 106, 7)) {
-    module_undepend(MODULE_NAME);
-    return "This module requires Eggdrop 1.6.7 or later.";
-  }
+  add_hook(HOOK_SWITCH_STATIC, (Function) switch_static);
+#ifdef LEAF
+  add_hook(HOOK_MINUTELY, (Function) check_limitraise);
+#endif
+#ifdef HUB
+  add_hook(HOOK_30SECONDLY, (Function) rebalance_roles);
+#endif
   add_hook(HOOK_MINUTELY, (Function) check_expired_bans);
+#ifdef S_IRCNET
   add_hook(HOOK_MINUTELY, (Function) check_expired_exempts);
   add_hook(HOOK_MINUTELY, (Function) check_expired_invites);
+#endif
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
-  add_hook(HOOK_BACKUP, (Function) backup_chanfile);
-  add_hook(HOOK_REHASH, (Function) channels_rehash);
-  add_hook(HOOK_PRE_REHASH, (Function) channels_prerehash);
+  add_hook(HOOK_3SECONDLY, (Function) channels_checkslowjoin);
   Tcl_TraceVar(interp, "global-chanset",
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_globchanset, NULL);
   add_builtins(H_chon, my_chon);
-  add_builtins(H_dcc, C_dcc_irc);
+  add_builtins_dcc(H_dcc, C_dcc_irc);
+  add_builtins(H_bot, channels_bot);
   add_tcl_commands(channels_cmds);
   add_tcl_strings(my_tcl_strings);
-  add_help_reference("channels.help");
-  add_help_reference("chaninfo.help");
   my_tcl_ints[0].val = &share_greet;
   add_tcl_ints(my_tcl_ints);
   add_tcl_coups(mychan_tcl_coups);
-  read_channels(0);
   setstatic = 1;
   return NULL;
 }

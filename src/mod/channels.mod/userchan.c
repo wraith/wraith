@@ -1,26 +1,11 @@
 /*
  * userchan.c -- part of channels.mod
  *
- * $Id: userchan.c,v 1.28 2002/02/24 07:17:58 guppy Exp $
  */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
+
+#ifdef S_DCCPASS
+extern struct cmd_pass *cmdpass;
+#endif
 
 struct chanuserrec *get_chanrec(struct userrec *u, char *chname)
 {
@@ -235,12 +220,13 @@ static int u_delban(struct chanset_t *c, char *who, int doit)
   int j, i = 0;
   maskrec *t;
   maskrec **u = (c) ? &c->bans : &global_bans;
+  char temp[256];
 
   if (!strchr(who, '!') && (j = atoi(who))) {
     j--;
     for (; (*u) && j; u = &((*u)->next), j--);
     if (*u) {
-      strcpy(who, (*u)->mask);
+      strncpyz(temp, (*u)->mask, sizeof temp);
       i = 1;
     } else
       return -j - 1;
@@ -248,6 +234,7 @@ static int u_delban(struct chanset_t *c, char *who, int doit)
     /* Find matching host, if there is one */
     for (; *u && !i; u = &((*u)->next))
       if (!rfc_casecmp((*u)->mask, who)) {
+        strncpyz(temp, who, sizeof temp);
 	i = 1;
 	break;
       }
@@ -256,7 +243,7 @@ static int u_delban(struct chanset_t *c, char *who, int doit)
   }
   if (i && doit) {
     if (!noshare) {
-      char *mask = str_escape(who, ':', '\\');
+      char *mask = str_escape(temp, ':', '\\');
 
       if (mask) {
 	/* Distribute chan bans differently */
@@ -267,6 +254,10 @@ static int u_delban(struct chanset_t *c, char *who, int doit)
 	nfree(mask);
       }
     }
+    if (lastdeletedmask)
+      nfree(lastdeletedmask);
+    lastdeletedmask = nmalloc(strlen((*u)->mask) + 1);
+    strcpy(lastdeletedmask, (*u)->mask);
     nfree((*u)->mask);
     if ((*u)->desc)
       nfree((*u)->desc);
@@ -1055,6 +1046,53 @@ static void tell_invites(int idx, int show_inact, char *match)
     dprintf(idx, "%s.\n", INVITES_USEINVITESALL);
 }
 
+static int write_config(FILE *f, int idx)
+{
+  int i = 0;
+#ifdef S_DCCPASS
+  struct cmd_pass *cp;
+#endif
+  putlog(LOG_DEBUG, "@", "Writing config entries...");
+  if (lfprintf(f, CONFIG_NAME " - -\n") == EOF) /* Daemus */
+      return 0;
+  for (i = 0; i < cfg_count; i++)
+    if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->gdata)) {
+      if (lfprintf(f, "@ %s %s\n", cfg[i]->name, cfg[i]->gdata ? cfg[i]->gdata : "") == EOF)
+        return 0;
+    }
+
+/* old tcl shit..
+  int total = 0, i = 0;
+
+//fix proc config to accept NUM 0 for total, num for specific entry.
+  if (Tcl_Eval(interp, "config_start") == TCL_OK) { //make the tcl copy over vital vars first.
+   if (Tcl_Eval(interp, "array size a") == TCL_OK) { //get total config entries
+    total = atoi(interp->result);
+    for (i = 0; i < total; i++) { //loop each entry
+     buf[0] = '\0';
+     sprintf(buf, "config %i", i); //call proc config with i, returns + set...
+     if (Tcl_Eval(interp, buf) == TCL_OK) {
+       if (lfprintf(f, "%s\n", interp->result) == EOF) //write each config %i entry on a line alone.
+        return 0;
+     } else
+       return 0;
+    }
+//    if (lfprintf(f, "+ config_end\n") == EOF) //write config_end to userfile
+//      return 0;
+   } else 
+     return 0;
+  } else
+    return 0;
+*/
+
+#ifdef S_DCCPASS
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (lfprintf(f, "- %s %s\n", cp->name, cp->pass) == EOF)
+      return 0;
+#endif
+
+  return 1;
+}
 /* Write the ban lists and the ignore list to a file.
  */
 static int write_bans(FILE *f, int idx)
@@ -1065,12 +1103,12 @@ static int write_bans(FILE *f, int idx)
   char	*mask;
 
   if (global_ign)
-    if (fprintf(f, IGNORE_NAME " - -\n") == EOF)	/* Daemus */
+    if (lfprintf(f, IGNORE_NAME " - -\n") == EOF)	/* Daemus */
       return 0;
   for (i = global_ign; i; i = i->next) {
     mask = str_escape(i->igmask, ':', '\\');
     if (!mask ||
-	fprintf(f, "- %s:%s%lu:%s:%lu:%s\n", mask,
+	lfprintf(f, "- %s:%s%lu:%s:%lu:%s\n", mask,
 		(i->flags & IGREC_PERM) ? "+" : "", i->expire,
 		i->user ? i->user : botnetnick, i->added,
 		i->msg ? i->msg : "") == EOF) {
@@ -1081,12 +1119,12 @@ static int write_bans(FILE *f, int idx)
     nfree(mask);
   }
   if (global_bans)
-    if (fprintf(f, BAN_NAME " - -\n") == EOF)	/* Daemus */
+    if (lfprintf(f, BAN_NAME " - -\n") == EOF)	/* Daemus */
       return 0;
   for (b = global_bans; b; b = b->next) {
     mask = str_escape(b->mask, ':', '\\');
     if (!mask ||
-	fprintf(f, "- %s:%s%lu%s:+%lu:%lu:%s:%s\n", mask,
+	lfprintf(f, "- %s:%s%lu%s:+%lu:%lu:%s:%s\n", mask,
 		(b->flags & MASKREC_PERM) ? "+" : "", b->expire,
 		(b->flags & MASKREC_STICKY) ? "*" : "", b->added,
 		b->lastactive, b->user ? b->user : botnetnick,
@@ -1098,20 +1136,21 @@ static int write_bans(FILE *f, int idx)
     nfree(mask);
   }
   for (chan = chanset; chan; chan = chan->next)
-    if ((idx < 0) || (chan->status & CHAN_SHARED)) {
+    if ((idx < 0)  || 1) {
       struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0, 0, 0};
 
       if (idx >= 0)
 	get_user_flagrec(dcc[idx].user, &fr, chan->dname);
       else
 	fr.chan = BOT_SHARE;
-      if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
-	if (fprintf(f, "::%s bans\n", chan->dname) == EOF)
+
+      //if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
+	if (lfprintf(f, "::%s bans\n", chan->dname) == EOF)
 	  return 0;
 	for (b = chan->bans; b; b = b->next) {
 	  mask = str_escape(b->mask, ':', '\\');
 	  if (!mask ||
-	      fprintf(f, "- %s:%s%lu%s:+%lu:%lu:%s:%s\n", mask,
+	      lfprintf(f, "- %s:%s%lu%s:+%lu:%lu:%s:%s\n", mask,
 		      (b->flags & MASKREC_PERM) ? "+" : "", b->expire,
 		      (b->flags & MASKREC_STICKY) ? "*" : "", b->added,
 		      b->lastactive, b->user ? b->user : botnetnick,
@@ -1122,11 +1161,11 @@ static int write_bans(FILE *f, int idx)
 	  }
 	  nfree(mask);
 	}
-      }
+      //}
     }
   return 1;
 }
-
+#ifdef S_IRCNET
 /* Write the exemptlists to a file.
  */
 static int write_exempts(FILE *f, int idx)
@@ -1136,12 +1175,12 @@ static int write_exempts(FILE *f, int idx)
   char	*mask;
 
   if (global_exempts)
-    if (fprintf(f, EXEMPT_NAME " - -\n") == EOF) /* Daemus */
+    if (lfprintf(f, EXEMPT_NAME " - -\n") == EOF) /* Daemus */
       return 0;
   for (e = global_exempts; e; e = e->next) {
     mask = str_escape(e->mask, ':', '\\');
     if (!mask ||
-	fprintf(f, "%s %s:%s%lu%s:+%lu:%lu:%s:%s\n", "%", e->mask,
+	lfprintf(f, "%s %s:%s%lu%s:+%lu:%lu:%s:%s\n", "%", e->mask,
 		(e->flags & MASKREC_PERM) ? "+" : "", e->expire,
 		(e->flags & MASKREC_STICKY) ? "*" : "", e->added,
 		e->lastactive, e->user ? e->user : botnetnick,
@@ -1153,20 +1192,20 @@ static int write_exempts(FILE *f, int idx)
     nfree(mask);
   }
   for (chan = chanset;chan;chan=chan->next)
-    if ((idx < 0) || (chan->status & CHAN_SHARED)) {
+    if ((idx < 0) || 1) {
       struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0, 0, 0};
 
       if (idx >= 0)
 	get_user_flagrec(dcc[idx].user,&fr,chan->dname);
       else
 	fr.chan = BOT_SHARE;
-      if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
-	if (fprintf(f, "&&%s exempts\n", chan->dname) == EOF)
+//      if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
+	if (lfprintf(f, "&&%s exempts\n", chan->dname) == EOF)
 	  return 0;
 	for (e = chan->exempts; e; e = e->next) {
 	  mask = str_escape(e->mask, ':', '\\');
 	  if (!mask ||
-	      fprintf(f,"%s %s:%s%lu%s:+%lu:%lu:%s:%s\n","%",e->mask,
+	      lfprintf(f,"%s %s:%s%lu%s:+%lu:%lu:%s:%s\n","%",e->mask,
 		      (e->flags & MASKREC_PERM) ? "+" : "", e->expire,
 		      (e->flags & MASKREC_STICKY) ? "*" : "", e->added,
 		      e->lastactive, e->user ? e->user : botnetnick,
@@ -1177,7 +1216,7 @@ static int write_exempts(FILE *f, int idx)
 	  }
 	  nfree(mask);
 	}
-      }
+      //}
     }
   return 1;
 }
@@ -1191,12 +1230,12 @@ static int write_invites(FILE *f, int idx)
   char	*mask;
 
   if (global_invites)
-    if (fprintf(f, INVITE_NAME " - -\n") == EOF) /* Daemus */
+    if (lfprintf(f, INVITE_NAME " - -\n") == EOF) /* Daemus */
       return 0;
   for (ir = global_invites; ir; ir = ir->next)  {
     mask = str_escape(ir->mask, ':', '\\');
     if (!mask ||
-	fprintf(f,"@ %s:%s%lu%s:+%lu:%lu:%s:%s\n",ir->mask,
+	lfprintf(f,"@ %s:%s%lu%s:+%lu:%lu:%s:%s\n",ir->mask,
 		(ir->flags & MASKREC_PERM) ? "+" : "", ir->expire,
 		(ir->flags & MASKREC_STICKY) ? "*" : "", ir->added,
 		ir->lastactive, ir->user ? ir->user : botnetnick,
@@ -1208,20 +1247,20 @@ static int write_invites(FILE *f, int idx)
     nfree(mask);
   }
   for (chan = chanset; chan; chan = chan->next)
-    if ((idx < 0) || (chan->status & CHAN_SHARED)) {
+    if ((idx < 0) || (1)) {
       struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0, 0, 0};
 
       if (idx >= 0)
 	get_user_flagrec(dcc[idx].user,&fr,chan->dname);
       else
 	fr.chan = BOT_SHARE;
-      if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
-	if (fprintf(f, "$$%s invites\n", chan->dname) == EOF)
+//      if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
+	if (lfprintf(f, "$$%s invites\n", chan->dname) == EOF)
 	  return 0;
 	for (ir = chan->invites; ir; ir = ir->next) {
 	  mask = str_escape(ir->mask, ':', '\\');
 	  if (!mask ||
-	      fprintf(f,"@ %s:%s%lu%s:+%lu:%lu:%s:%s\n",ir->mask,
+	      lfprintf(f,"@ %s:%s%lu%s:+%lu:%lu:%s:%s\n",ir->mask,
 		      (ir->flags & MASKREC_PERM) ? "+" : "", ir->expire,
 		      (ir->flags & MASKREC_STICKY) ? "*" : "", ir->added,
 		      ir->lastactive, ir->user ? ir->user : botnetnick,
@@ -1232,28 +1271,157 @@ static int write_invites(FILE *f, int idx)
 	  }
 	  nfree(mask);
 	}
-      }
+      //}
     }
   return 1;
 }
+#endif
+/* Write the channels to the userfile
+ */
+static int write_chans(FILE *f, int idx)
+{
+
+  char w[1024], w2[1024], name[163];
+  char topic[1002], udefs[2048] = "", sadd[5], buf[2048];
+  struct chanset_t *chan;
+  struct udef_struct *ul;
+
+  putlog(LOG_DEBUG, "*", "Writing channels..");
+
+  if (lfprintf(f, CHANS_NAME " - -\n") == EOF) /* Daemus */
+    return 0;
+
+  for (chan = chanset; chan; chan = chan->next) {
+
+
+    if ((idx < 0) || (1)) {
+      struct flag_record fr = {FR_CHAN | FR_GLOBAL | FR_BOT, 0, 0, 0, 0, 0};
+      if (idx >= 0)
+        get_user_flagrec(dcc[idx].user,&fr,chan->dname);
+      else
+        fr.chan = BOT_SHARE;
+
+//    if ((fr.chan & BOT_SHARE) || (fr.bot & BOT_GLOBAL)) {
+
+     putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
+
+     memset(udefs,'\0',2048);
+     convert_element(chan->dname, name);
+     get_mode_protect(chan, w);
+     convert_element(w, w2);
+     convert_element(chan->topic_prot, topic);
+     for (ul = udef; ul; ul = ul->next) { //put the udefs into one string
+       memset(buf,'\0',2048);
+       if (ul->defined && ul->name) { 
+	if (ul->type == UDEF_FLAG)
+	 sprintf(buf, "%c%s%s ", getudef(ul->values, chan->dname) ? '+' : '-', "udef-flag-", ul->name);
+	else if (ul->type == UDEF_INT)
+	  sprintf(buf, "%s%s %d ", "udef-int-", ul->name, getudef(ul->values, chan->dname));
+	else
+	  debug1("UDEF-ERROR: unknown type %d", ul->type);
+        strcat(udefs,buf);
+       }
+     }
+   //insert the ending character into a string
+     sprintf(sadd, "%s\n", channel_static(chan) ? "" : "}");
+
+     if (lfprintf(f, "+ channel %s %s%schanmode %s topic %s idle-kick %d limit %d stopnethack-mode %d \
+revenge-mode %d \
+flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
+flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
+ban-time %d \
+exempt-time %d invite-time %d \
+%cenforcebans %cdynamicbans %cuserbans %cbitch \
+%cprotectops %cprotectfriends %cdontkickops \
+%crevenge %crevengebot %cprivate \
+%ccycle %cinactive \
+%cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites \
+%cnodesynch \
+%cclosed %ctake %cmanop %cvoice %cfastop %s %s",
+	channel_static(chan) ? "set" : "add",
+	name,
+	channel_static(chan) ? " " : " { ",
+	w2,
+        topic,
+	chan->idle_kick, /* idle-kick 0 is same as dont-idle-kick (lcode)*/
+        chan->limitraise,
+	chan->stopnethack_mode,
+        chan->revenge_mode,
+	chan->flood_pub_thr, chan->flood_pub_time,
+        chan->flood_ctcp_thr, chan->flood_ctcp_time,
+        chan->flood_join_thr, chan->flood_join_time,
+        chan->flood_kick_thr, chan->flood_kick_time,
+        chan->flood_deop_thr, chan->flood_deop_time,
+	chan->flood_nick_thr, chan->flood_nick_time,
+        chan->ban_time,
+#ifdef S_IRCNET
+        chan->exempt_time,
+        chan->invite_time,
+#endif
+ 	PLSMNS(channel_enforcebans(chan)),
+	PLSMNS(channel_dynamicbans(chan)),
+	PLSMNS(!channel_nouserbans(chan)),
+	PLSMNS(channel_bitch(chan)),
+	PLSMNS(channel_protectops(chan)),
+	PLSMNS(channel_protectfriends(chan)),
+	PLSMNS(channel_dontkickops(chan)),
+	PLSMNS(channel_revenge(chan)),
+	PLSMNS(channel_revengebot(chan)),
+	PLSMNS(channel_private(chan)),
+	PLSMNS(channel_cycle(chan)),
+	PLSMNS(channel_inactive(chan)),
+#ifdef S_IRCNET
+	PLSMNS(channel_dynamicexempts(chan)),
+	PLSMNS(!channel_nouserexempts(chan)),
+ 	PLSMNS(channel_dynamicinvites(chan)),
+	PLSMNS(!channel_nouserinvites(chan)),
+#endif
+	PLSMNS(channel_nodesynch(chan)),
+	PLSMNS(channel_closed(chan)),
+	PLSMNS(channel_take(chan)),
+	PLSMNS(channel_manop(chan)),
+	PLSMNS(channel_voice(chan)),
+	PLSMNS(channel_fastop(chan)),
+        udefs,
+        sadd) == EOF)
+          return 0;
+//     } 
+    } 
+
+  }
+  return 1;
+
+}
+
 
 static void channels_writeuserfile(void)
 {
+#ifdef HUB
   char	 s[1024];
   FILE	*f;
   int	 ret = 0;
-
+  putlog(LOG_DEBUG, "@", "Writing channel/ban/exempt/invite entries.");
   simple_sprintf(s, "%s~new", userfile);
   f = fopen(s, "a");
   if (f) {
-    ret = write_bans(f, -1);
+//write channels to the userfile
+    ret  = write_chans(f, -1);
+    ret += write_config(f, -1);
+    ret += write_bans(f, -1);
+#ifdef S_IRCNET
     ret += write_exempts(f, -1);
     ret += write_invites(f, -1);
+#endif
     fclose(f);
   }
+#ifdef S_IRCNET
+  if (ret < 5)
+#else
   if (ret < 3)
+#endif
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
-  write_channels();
+  //old .chan write_channels();
+#endif
 }
 
 /* Expire mask originally set by `who' on `chan'?
@@ -1310,9 +1478,39 @@ static int expired_mask(struct chanset_t *chan, char *who)
   else
     return 1;
 }
-
+// cheap hack.
+static void switch_static(void)
+{
+ if (setstatic)
+  setstatic = 0;
+ else
+  setstatic = 1;
+}
+#ifdef LEAF
+int checklimit = 1;
+void check_limitraise() {
+  int i=0;
+  struct chanset_t * chan;
+  struct userrec *u;
+  u=get_user_by_handle(userlist, botnetnick);
+  for (chan=chanset;chan;chan=chan->next,i++) {
+    if (i % 2 == checklimit) {
+      if (chan->limitraise) {
+        get_user_flagrec(u, &user, chan->dname);
+        if (glob_dolimit(user) || (chan_dolimit(user)))
+          raise_limit(chan);
+      }
+    }
+  }
+  if (checklimit)
+    checklimit=0;
+  else
+    checklimit=1;
+}
+#endif
 /* Check for expired timed-bans.
  */
+
 static void check_expired_bans(void)
 {
   maskrec *u, *u2;
@@ -1352,7 +1550,7 @@ static void check_expired_bans(void)
     }
   }
 }
-
+#ifdef S_IRCNET
 /* Check for expired timed-exemptions
  */
 static void check_expired_exempts(void)
@@ -1473,3 +1671,4 @@ static void check_expired_invites(void)
     }
   }
 }
+#endif

@@ -1,26 +1,8 @@
+#ifdef LEAF
 /*
  * irc.c -- part of irc.mod
  *   support for channels within the bot
  *
- * $Id: irc.c,v 1.75 2002/07/26 02:18:28 wcc Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #define MODULE_NAME "irc"
@@ -28,33 +10,62 @@
 #include "src/mod/module.h"
 #include "irc.h"
 #include "server.mod/server.h"
+#undef serv
 #include "channels.mod/channels.h"
+#include "blowfish.mod/blowfish.h"
 #ifdef HAVE_UNAME
 #include <sys/utsname.h>
 #endif
 
+
+#define op_bots (CFG_OPBOTS.gdata ? atoi(CFG_OPBOTS.gdata) : 1)
+#define in_bots (CFG_INBOTS.gdata ? atoi(CFG_INBOTS.gdata) : 1)
+#define lag_threshold (CFG_LAGTHRESHOLD.gdata ? atoi(CFG_LAGTHRESHOLD.gdata) : 15)
+#define opreq_count (CFG_OPREQUESTS.gdata ? atoi( CFG_OPREQUESTS.gdata ) : 2)
+#define opreq_seconds (CFG_OPREQUESTS.gdata ? atoi( strchr(CFG_OPREQUESTS.gdata, ':') + 1 ) : 5)
+
+#define PRIO_DEOP 1
+#define PRIO_KICK 2
+
+int host_synced = 0;
+
+struct cfg_entry CFG_OPBOTS,
+  CFG_INBOTS,
+  CFG_LAGTHRESHOLD,
+  CFG_OPTIMESLACK,
+#ifdef G_AUTOLOCK
+
+  CFG_KILLTHRESHOLD,
+  CFG_LOCKTHRESHOLD,
+  CFG_FIGHTTHRESHOLD,
+#endif
+
+  CFG_OPREQUESTS;
+
 static p_tcl_bind_list H_topc, H_splt, H_sign, H_rejn, H_part, H_pub, H_pubm;
 static p_tcl_bind_list H_nick, H_mode, H_kick, H_join, H_need;
-static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL;
+static Function *global = NULL, *channels_funcs = NULL, *server_funcs = NULL,
+                *encryption_funcs = NULL;
+
 
 static int ctcp_mode;
-static int net_type;
+static int net_type = 0;
 static int strict_host;
 static int wait_split = 300;		/* Time to wait for user to return from
 					   net-split. */
-static int max_bans = 20;		/* Modified by net-type 1-4 */
+static int max_bans = 25;		/* Modified by net-type 1-4 */
 static int max_exempts = 20;
 static int max_invites = 20;
 static int max_modes = 20;		/* Modified by net-type 1-4 */
-static int bounce_bans = 1;
+static int bounce_bans = 0;
 static int bounce_exempts = 0;
 static int bounce_invites = 0;
 static int bounce_modes = 0;
 static int learn_users = 0;
-static int wait_info = 15;
+static int wait_info = 180;
 static int invite_key = 1;
 static int no_chanrec_info = 0;
-static int modesperline = 3;		/* Number of modes per line to send. */
+static int modesperline = 4;		/* Number of modes per line to send. */
 static int mode_buf_len = 200;		/* Maximum bytes to send in 1 mode. */
 static int use_354 = 0;			/* Use ircu's short 354 /who
 					   responses. */
@@ -63,7 +74,7 @@ static int kick_method = 1;		/* How many kicks does the irc network
 					   0 = as many as possible.
 					       (Ernst 18/3/1998) */
 static int kick_fun = 0;
-static int ban_fun = 0;
+static int ban_fun = 1;
 static int keepnick = 1;		/* Keep nick */
 static int prevent_mixing = 1;		/* To prevent mixing old/new modes */
 static int rfc_compliant = 1;		/* net-type changing modifies this */
@@ -76,6 +87,538 @@ static int include_lk = 1;		/* For correct calculation
 #include "cmdsirc.c"
 #include "msgcmds.c"
 #include "tclirc.c"
+
+
+void expire_auths()
+{
+  int i = 0, idle = 0;
+  if (!ischanhub()) return;
+  for (i = 0; i < auth_total;i++) {
+    if (auth[i].authed) {
+      idle = now - auth[i].atime;
+      if (idle >= 60*60) {
+        removeauth(i);
+      }
+    }
+  }
+}
+
+void makeopline(struct chanset_t *chan, char *nick, char *buf)
+{
+  char plaincookie[20],
+    enccookie[48],
+   *p,
+    nck[20],
+    key[200];
+  memberlist * m;
+  m=ismember(chan, nick);
+  if (m)
+    strcpy(nck, m->nick);
+  else
+    strcpy(nck, nick);
+  makeplaincookie(chan->dname, nck, plaincookie);
+  strcpy(key, botname);
+  strcat(key, netpass);
+//  putlog(LOG_DEBUG, "*", "Encrypting opline for %s with cookie %s and key %s", nck, plaincookie, key);
+
+  p = encrypt_string(key, plaincookie);
+  strcpy(enccookie, p);
+  nfree(p);
+//  p = enccookie + strlen(enccookie) - 1;
+//  while (*p == '.')
+//    *p-- = 0;
+  sprintf(buf, STR("MODE %s +o-b %s *!*@<%s>\n"), chan->name, nck, enccookie);
+}
+
+void getin_request(char *botnick, char *code, char *par)
+{
+
+  /*
+     opreq = o #chan nick
+     inreq = i #chan nick uhost 
+     inreq keyreply = K #chan key
+   */
+
+  char *tmp = NULL,
+   *chname,
+   *nck = NULL,
+   *hst = NULL,
+   *ip = NULL,
+   *what = NULL,
+   *p,
+   *p2,
+   *p3;
+  struct chanset_t *chan;
+  memberlist *mem = NULL;
+  struct userrec *user;
+  char nick[NICKLEN];
+  char host[UHOSTLEN];
+  char iphost[UHOSTLEN];
+  char s[256],
+    s2[16];
+  int lim,
+    curlim,
+    sendi = 0;
+  struct maskrec **mr,
+   *tmr;
+  struct maskstruct *b;
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
+
+  if (!server_online) 
+    return;
+  
+  if (!par[0] || !par)
+    return;
+
+  what = newsplit(&par);
+
+  chname = newsplit(&par);
+
+  if (!chname[0] || !chname)
+    return;
+
+  nck = newsplit(&par);
+  if (!nck[0])
+    return;
+
+  hst = newsplit(&par);
+
+  if (nck[0]) {
+    strncpy0(nick, nck, sizeof(nick));
+  } else
+    nick[0] = 0;
+
+  if (hst[0]) {
+    strncpy0(host, hst, sizeof(host));
+    ip = newsplit(&par);
+    if (ip[0]) {
+      char *tmp2;
+Context;
+      tmp=nmalloc(strlen(host)+1);
+Context;
+      strcpy(tmp, host);
+Context;
+      tmp2 = strtok(tmp, "@");
+Context;
+      snprintf(iphost, sizeof iphost, "%s@%s", strtok(tmp2,"@") , ip);
+Context;
+    } else
+      iphost[0] = 0;
+  } else
+    host[0] = 0;
+
+
+Context;
+  if (!(chan = findchan_by_dname(chname)))
+    return;
+
+  if (!chan) {
+    putlog(LOG_GETIN, "*", STR("getin req from %s for %s which is not a valid channel!"), botnick, chname);
+    return;
+  }
+/*
+  if (!ismember(chan, botname)) {
+    putlog(LOG_GETIN, "*", STR("getin req from %s for %s - I'm not on %s!"), botnick, chname, chname);
+    return;
+  }
+*/
+  user = get_user_by_handle(userlist, botnick);
+
+  if (nick[0])
+    mem = ismember(chan, nick);
+
+  if (what[0] == 'o') {
+    if (!nick[0]) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/??? on %s - No nick specified - SHOULD NOT HAPPEN"), botnick, chname);
+      return;
+    }
+    if (!chan) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - Channel %s doesn't exist"), botnick, nick, chname, chname);
+      return;
+    }
+    if (!mem) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s isn't on %s"), botnick, nick, chan->dname, nick, chan->dname);
+      return;
+    }
+    if (!user) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - No user called %s in userlist"), botnick, nick, chan->dname, botnick);
+      return;
+    }
+    if (mem->user != user) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s doesn't match %s"), botnick, nick, chan->dname, nick, botnick);
+      return;
+    }
+    get_user_flagrec(user, &fr, chan->dname);
+
+    if ((!chan_op(fr) && !glob_op(fr)) || (glob_deop(fr) && !chan_op(fr))) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s doesnt have +o for chan."), botnick, nick, chan->dname, botnick);
+      return;
+    }
+    if (chan_hasop(mem)) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s already has ops"), botnick, nick, chan->dname, nick);
+      return;
+    }
+    if (chan_issplit(mem)) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - %s is split"), botnick, nick, chan->dname, nick);
+      return;
+    }
+    if (!me_op(chan)) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - I haven't got ops"), botnick, nick, chan->dname);
+      return;
+    }
+    if (chan_sentop(mem)) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - Already sent a +o"), botnick, nick, chan->dname);
+      return;
+    }
+    if (server_lag > lag_threshold) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - I'm too lagged"), botnick, nick, chan->dname);
+      return;
+    }
+    if (getting_users()) {
+      putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - I'm getting userlist right now"), botnick, nick, chan->dname);
+      return;
+    }
+    if (channel_fastop(chan) || channel_take(chan) || 0) {
+      add_mode(chan, '+', 'o', nick);
+    } else {
+      tmp = nmalloc(strlen(chan->dname) + 200);
+      makeopline(chan, nick, tmp);
+      dprintf(DP_MODE, tmp);
+      mem->flags |= SENTOP;
+      nfree(tmp);
+    }
+    putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - Opped"), botnick, nick, chan->dname);
+  } else if (what[0] == 'i') {
+Context;
+    strcpy(s, getchanmode(chan));
+    p = (char *) &s;
+    p2 = newsplit(&p);
+    p3 = newsplit(&p);
+    if (!nick[0]) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/??? for %s - No nick specified - SHOULD NOT HAPPEN"), botnick, chname);
+      return;
+    }
+    if (!chan) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Channel %s doesn't exist"), botnick, nick, chname, chname);
+      return;
+    }
+    if (mem) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - %s is already on %s"), botnick, nick, chan->dname, nick, chan->dname);
+      return;
+    }
+    if (!user) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - No user called %s in userlist"), botnick, nick, chan->dname, botnick);
+      return;
+    }
+    get_user_flagrec(user, &fr, chan->dname);
+    if ((!chan_op(fr) && !glob_op(fr)) || (glob_deop(fr) && !chan_op(fr))) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - %s doesn't have acces for chan."), botnick, nick, chan->dname, botnick);
+      return;
+    }
+    if (server_lag > lag_threshold) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - I'm too lagged"), botnick, nick, chan->dname);
+      return;
+    }
+    if (getting_users()) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - I'm getting userlist right now"), botnick, nick, chan->dname);
+      return;
+    }
+    if (!(channel_pending(chan) || channel_active(chan))) {
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - I'm not on %s now"), botnick, nick, chan->dname, chan->dname);
+      return;
+    }
+    if (strchr(p2, 'l')) {
+      if (!me_op(chan))
+	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - I haven't got ops"), botnick, nick, chan->dname);
+      else {
+	lim = chan->channel.members + 5;
+	if (!*p)
+	  curlim = atoi(p3);
+	else
+	  curlim = atoi(p);
+	if (curlim > 0 && curlim < lim) {
+	  sendi = 1;
+	  simple_sprintf(s2, STR("%d"), lim);
+	  add_mode(chan, '+', 'l', s2);
+	  putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Raised limit to %d"), botnick, nick, chan->dname, lim, nick);
+	}
+      }
+    }
+    mr = &global_bans;
+    while (*mr) {
+      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, iphost)) {
+	if (!noshare) {
+	  shareout(NULL, STR("-b %s\n"), (*mr)->mask);
+	}
+	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Removed permanent global ban %s"), botnick, nick, chan->dname, (*mr)->mask);
+	//gban_total--;
+	nfree((*mr)->mask);
+	if ((*mr)->desc)
+	  nfree((*mr)->desc);
+	if ((*mr)->user)
+	  nfree((*mr)->user);
+	tmr = *mr;
+	*mr = (*mr)->next;
+	nfree(tmr);
+      } else {
+	mr = &((*mr)->next);
+      }
+    }
+    mr = &chan->bans;
+    while (*mr) {
+      if (wild_match((*mr)->mask, host) || wild_match((*mr)->mask, iphost)) {
+	if (!noshare) {
+	  shareout(NULL, STR("-bc %s %s\n"), chan->dname, (*mr)->mask);
+	}
+	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Removed permanent channel ban %s"), botnick, nick, chan->dname, (*mr)->mask);
+	nfree((*mr)->mask);
+	if ((*mr)->desc)
+	  nfree((*mr)->desc);
+	if ((*mr)->user)
+	  nfree((*mr)->user);
+	tmr = *mr;
+	*mr = (*mr)->next;
+	nfree(tmr);
+      } else {
+	mr = &((*mr)->next);
+      }
+    }
+    for (b = chan->channel.ban; b->mask[0]; b = b->next) {
+      if (wild_match(b->mask, host) || wild_match(b->mask, iphost)) {
+	add_mode(chan, '-', 'b', b->mask);
+	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Removed active ban %s"), botnick, nick, chan->dname, b->mask);
+	sendi = 1;
+      }
+    }
+    if (strchr(p2, 'k')) {
+      sendi = 0;
+      tmp = nmalloc(strlen(chan->dname) + strlen(p3) + 7);
+      sprintf(tmp, STR("gi K %s %s"), chan->dname, p3);
+      botnet_send_zapf(nextbot(botnick), botnetnick, botnick, tmp);
+      putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Sent key (%s)"), botnick, nick, chan->dname, p3);
+      nfree(tmp);
+    }
+    if (strchr(p2, 'i')) {
+      if (!me_op(chan))
+	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - I haven't got ops"), botnick, nick, chan->dname);
+      else {
+	sendi = 1;
+	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Invited"), botnick, nick, chan->dname);
+      }
+    }
+    if (sendi && me_op(chan))
+      dprintf(DP_MODE, STR("INVITE %s %s\n"), nick, chan->name);
+  } else if (what[0] == 'K') {
+    if (!chan) {
+      putlog(LOG_GETIN, "*", STR("Got key for nonexistant channel %s from %s"), chname, botnick);
+      return;
+    }
+    if (channel_inactive(chan)) {
+      putlog(LOG_GETIN, "*", STR("Got key for %s from %s - I shouldn't be on that chan?!?"), chan->dname, botnick);
+    } else {
+      if (!(channel_pending(chan) || channel_active(chan))) {
+	putlog(LOG_GETIN, "*", STR("Got key for %s from %s (%s) - Joining"), chan->dname, botnick, nick);
+	dprintf(DP_MODE, STR("JOIN %s %s\n"), chan->dname, nick);
+      } else {
+	putlog(LOG_GETIN, "*", STR("Got key for %s from %s - I'm already in the channel"), chan->dname, botnick);
+      }
+    }
+  }
+}
+
+void check_hostmask()
+{
+  char s[UHOSTLEN + 2], *tmp = NULL;
+  struct userrec *u = get_user_by_handle(userlist, botnetnick);
+  struct list_type *q;
+
+  if (!server_online || !botuserhost[0])
+    return;
+Context;
+  tmp = botuserhost;
+//  strcpy(tmp, botuserhost);
+//  sprintf(tmp, "%s", botuserhost);
+
+Context;
+  if (!tmp[0] || !tmp[1]) return;
+Context;
+  if (tmp[0] != '~')
+    sprintf(s, STR("*!%s"), tmp);
+  else {
+Context;
+    tmp++;
+    sprintf(s, STR("*!*%s"), tmp);
+  }
+  for (q = get_user(&USERENTRY_HOSTS, u); q; q = q->next) {
+    if (!strcasecmp(q->extra, s))
+      return;
+  }
+
+/*   set_user(&USERENTRY_HOSTS, u, s); */
+  addhost_by_handle(botnetnick, s);
+  putlog(LOG_GETIN, "*", STR("Updated my hostmask: %s"), s);
+}
+
+static void request_op(struct chanset_t *chan)
+{
+  int i = 0,
+    exp = 0,
+    first = 100,
+    n,
+    cnt,
+    i2;
+  memberlist *ml;
+  memberlist *botops[MAX_BOTS];
+  char s[100],
+   *l,
+    myserv[SERVLEN];
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
+
+Context;
+  if (channel_pending(chan) || channel_inactive(chan) || !channel_active(chan))
+    return;
+  chan->channel.do_opreq = 0;
+  if (me_op(chan))
+    return;
+  /* check server lag */
+  if (server_lag > lag_threshold) {
+    putlog(LOG_GETIN, "*", STR("Not asking for ops on %s - I'm too lagged"), chan->dname);
+    return;
+  }
+  /* max opreq_count requests per opreq_seconds sec */
+  n = time(NULL);
+  while (i < 5) {
+    if (n - chan->opreqtime[i] > opreq_seconds) {
+      if (first > i)
+	first = i;
+      exp++;
+      chan->opreqtime[i] = 0;
+    }
+    i++;
+  }
+  if ((5 - exp) >= opreq_count) {
+    putlog(LOG_GETIN, "*", STR("Delaying opreq for %s - Maximum of %d:%d reached"), chan->dname, opreq_count, opreq_seconds);
+    return;
+  }
+  check_hostmask();		/* check, and update hostmask */
+  i = 0;
+  ml = chan->channel.member;
+  myserv[0] = 0;
+  while ((i < MAX_BOTS) && (ml) && ml->nick[0]) {
+    /* If bot, linked, global op & !split & chanop & (chan is reserver | bot isn't +a) -> 
+       add to temp list */
+    if ((i < MAX_BOTS) && (ml->user)) {
+      get_user_flagrec(ml->user, &fr, NULL);
+      if (bot_hublevel(ml->user) == 999 && glob_bot(fr) && glob_op(fr)
+	  && !glob_deop(fr) && chan_hasop(ml) && !chan_issplit(ml)
+	  && nextbot(ml->user->handle) >= 0)
+	botops[i++] = ml;
+    }
+    if (!strcmp(ml->nick, botname))
+      if (ml->server)
+	strcpy(myserv, ml->server);
+    ml = ml->next;
+  }
+  if (!i) {
+    putlog(LOG_GETIN, "@", STR("Noone to ask for ops on %s"), chan->dname);
+    return;
+  }
+  /* first scan for bots on my server, ask first found for ops */
+  cnt = op_bots;
+  sprintf(s, STR("gi o %s %s"), chan->dname, botname);
+  l = nmalloc(cnt * 50);
+  l[0] = 0;
+  for (i2 = 0; i2 < i; i2++) {
+    if (botops[i2]->server && (!strcmp(botops[i2]->server, myserv))) {
+      botnet_send_zapf(nextbot(botops[i2]->user->handle), botnetnick, botops[i2]->user->handle, s);
+      chan->opreqtime[first] = n;
+      if (l[0]) {
+	strcat(l, ", ");
+	strcat(l, botops[i2]->user->handle);
+      } else {
+	strcpy(l, botops[i2]->user->handle);
+      }
+      strcat(l, "/");
+      strcat(l, botops[i2]->nick);
+      botops[i2] = NULL;
+      cnt--;
+      break;
+    }
+  }
+  /* Pick random op and ask for ops */
+  while (cnt) {
+    i2 = random() % i;
+    if (botops[i2]) {
+      botnet_send_zapf(nextbot(botops[i2]->user->handle), botnetnick, botops[i2]->user->handle, s);
+      chan->opreqtime[first] = n;
+      if (l[0]) {
+	strcat(l, ", ");
+	strcat(l, botops[i2]->user->handle);
+      } else {
+	strcpy(l, botops[i2]->user->handle);
+      }
+      strcat(l, "/");
+      strcat(l, botops[i2]->nick);
+      cnt--;
+      botops[i2] = NULL;
+    } else {
+      if (i < op_bots)
+	cnt--;
+    }
+  }
+  putlog(LOG_GETIN, "*", STR("Requested ops on %s from %s"), chan->dname, l);
+  nfree(l);
+}
+
+static void request_in(struct chanset_t *chan)
+{
+  char s[255],
+   *l;
+  int i = 0;
+  int cnt,
+    n;
+  struct userrec *botops[MAX_BOTS];
+  struct userrec *user;
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
+
+  for (user = userlist; user && (i < MAX_BOTS); user = user->next) {
+    get_user_flagrec(user, &fr, NULL);
+    if (bot_hublevel(user) == 999 && glob_bot(fr) && glob_op(fr)
+#ifdef G_BACKUP
+	&& (!glob_backupbot(fr) || channel_backup(chan))
+#endif
+	&& nextbot(user->handle) >= 0)
+      botops[i++] = user;
+  }
+  if (!i) {
+    putlog(LOG_GETIN, "*", STR("No bots linked, can't request help to join %s"), chan->dname);
+    return;
+  }
+  check_hostmask();		/* check, and update hostmask */
+  cnt = in_bots;
+  sprintf(s, STR("gi i %s %s %s!%s %s"), chan->dname, botname, botname, botuserhost, myip[0] ? myip : myip6);
+  l = nmalloc(cnt * 30);
+  l[0] = 0;
+  while (cnt) {
+    n = random() % i;
+    if (botops[n]) {
+      botnet_send_zapf(nextbot(botops[n]->handle), botnetnick, botops[n]->handle, s);
+      if (l[0]) {
+	strcat(l, ", ");
+	strcat(l, botops[n]->handle);
+      } else {
+	strcpy(l, botops[n]->handle);
+      }
+      botops[n] = NULL;
+      cnt--;
+    } else {
+      if (i < in_bots)
+	cnt--;
+    }
+  }
+  putlog(LOG_GETIN, "*", STR("Requesting help to join %s from %s"), chan->dname, l);
+  nfree(l);
+}
 
 
 /* Contains the logic to decide wether we want to punish someone. Returns
@@ -224,8 +767,8 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
     splitnick(&whobad);
     maskhost(whobad, s1);
     simple_sprintf(s, "(%s) %s", ct, reason);
-    u_addban(chan, s1, botnetnick, s, now + (60 * ban_time), 0);
-    if (!mevictim && (me_op(chan) || me_halfop(chan))) {
+    u_addban(chan, s1, botnetnick, s, now + (60 * chan->ban_time), 0);
+    if (!mevictim && me_op(chan)) {
       add_mode(chan, '+', 'b', s1);
       flush_mode(chan, QUICK);
     }
@@ -238,8 +781,8 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
       /* ... or have we sent the kick already? */
       !chan_sentkick(m) &&
       /* ... and can I actually do anything about it? */
-      (me_op(chan) || (me_halfop(chan) && !chan_hasop(m))) && !mevictim) {
-    dprintf(DP_MODE, "KICK %s %s :%s\n", chan->name, badnick, kick_msg);
+      me_op(chan) && !mevictim) {
+    dprintf(DP_MODE, STR("KICK %s %s :%s%s\n"), chan->name, m->nick, bankickprefix, kickreason(KICK_MEAN));
     m->flags |= SENTKICK;
   }
 }
@@ -286,19 +829,6 @@ static void set_key(struct chanset_t *chan, char *k)
   }
   chan->channel.key = (char *) channel_malloc(strlen(k) + 1);
   strcpy(chan->channel.key, k);
-}
-
-static int hand_on_chan(struct chanset_t *chan, struct userrec *u)
-{
-  char s[UHOSTLEN];
-  memberlist *m;
-
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    sprintf(s, "%s!%s", m->nick, m->userhost);
-    if (u == get_user_by_host(s))
-      return 1;
-  }
-  return 0;
 }
 
 /* Adds a ban, exempt or invite mask to the list
@@ -376,21 +906,21 @@ static int me_op(struct chanset_t *chan)
   else
     return 0;
 }
-
-/* Check if I am a halfop. Returns boolean 1 or 0.
+/* Check whether I'm voice. Returns boolean 1 or 0.
  */
-static int me_halfop(struct chanset_t *chan)
+static int me_voice(struct chanset_t *chan)
 {
-  memberlist *mx = NULL;
+  memberlist *mx;
 
   mx = ismember(chan, botname);
   if (!mx)
     return 0;
-  if (chan_hashalfop(mx))
+  if (chan_hasvoice(mx))
     return 1;
   else
     return 0;
 }
+
 
 /* Check if there are any ops on the channel. Returns boolean 1 or 0.
  */
@@ -405,22 +935,6 @@ static int any_ops(struct chanset_t *chan)
     return 0;
   return 1;
 }
-
-/* Check whether I'm voice. Returns boolean 1 or 0.
- */
-static int me_voice(struct chanset_t *chan)
-{
-  memberlist	*mx;
-
-  mx = ismember(chan, botname);
-  if (!mx)
-    return 0;
-  if (chan_hasvoice(mx))
-    return 1;
-  else
-    return 0;
-}
-
 /* Reset the channel information.
  */
 static void reset_chan_info(struct chanset_t *chan)
@@ -441,6 +955,7 @@ static void reset_chan_info(struct chanset_t *chan)
       chan->status |= CHAN_ASKEDBANS;
       dprintf(DP_MODE, "MODE %s +b\n", chan->name);
     }
+#ifdef S_IRCNET
     if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) &&
 	use_exempts == 1) {
       chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
@@ -451,6 +966,7 @@ static void reset_chan_info(struct chanset_t *chan)
       chan->ircnet_status |= CHAN_ASKED_INVITED;
       dprintf(DP_MODE, "MODE %s +I\n", chan->name);
     }
+#endif
     /* These 2 need to get out asap, so into the mode queue */
     dprintf(DP_MODE, "MODE %s\n", chan->name);
     if (use_354)
@@ -476,55 +992,6 @@ static void do_channel_part(struct chanset_t *chan)
   }
 }
 
-/* Report the channel status of every active channel to dcc chat every
- * 5 minutes.
- */
-static void status_log()
-{
-  masklist *b;
-  memberlist *m;
-  struct chanset_t *chan;
-  char s[20], s2[20];
-  int chops, halfops, voice, nonops, bans, invites, exempts;
-
-  if (!server_online)
-    return;
-
-  for (chan = chanset; chan != NULL; chan = chan->next) {
-    if (channel_active(chan) && channel_logstatus(chan) &&
-        !channel_inactive(chan)) {
-      chops = 0;
-      voice = 0;
-      halfops = 0;
-      for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-	if (chan_hasop(m))
-	  chops++;
-        else if (chan_hashalfop(m))
-          halfops++;
-	else if (chan_hasvoice(m))
-	  voice++;
-      }
-      nonops = (chan->channel.members - (chops + voice + halfops));
-
-      for (bans = 0, b = chan->channel.ban; b->mask[0]; b = b->next)
-	bans++;
-      for (exempts = 0, b = chan->channel.exempt; b->mask[0]; b = b->next)
-	exempts++;
-      for (invites = 0, b = chan->channel.invite; b->mask[0]; b = b->next)
-	invites++;
-
-      sprintf(s, "%d", exempts);
-      sprintf(s2, "%d", invites);
-
-      putlog(LOG_MISC, chan->dname,
-             "%s%s (%s) : [m/%d o/%d h/%d v/%d n/%d b/%d e/%s I/%s]",
-             me_op(chan) ? "@" : me_voice(chan) ? "+" :
-             me_halfop(chan) ? "%" : "", chan->dname, getchanmode(chan),
-             chan->channel.members, chops, halfops, voice, nonops, bans,
-             use_exempts ? s : "-", use_invites ? s2 : "-");
-    }
-  }
-}
 
 /* If i'm the only person on the channel, and i'm not op'd,
  * might as well leave and rejoin. If i'm NOT the only person
@@ -555,9 +1022,12 @@ static void check_lonely_channel(struct chanset_t *chan)
     }
   } else if (any_ops(chan)) {
     whined = 0;
+    request_op(chan);
+/* need
     check_tcl_need(chan->dname, "op");
     if (chan->need_op[0])
       do_tcl("need-op", chan->need_op);
+*/
   } else {
     /* Other people here, but none are ops. If there are other bots make
      * them LEAVE!
@@ -569,7 +1039,7 @@ static void check_lonely_channel(struct chanset_t *chan)
       /* + is opless. Complaining about no ops when without special
        * help(services), we cant get them - Raist
        */
-      if (chan->name[0] != '+' && channel_logstatus(chan))
+      if (chan->name[0] != '+')
 	putlog(LOG_MISC, "*", "%s is active but has no ops :(", chan->dname);
       whined = 1;
     }
@@ -583,16 +1053,59 @@ static void check_lonely_channel(struct chanset_t *chan)
     }
     if (ok && channel_cycle(chan)) {
       /* ALL bots!  make them LEAVE!!! */
+/*
       for (m = chan->channel.member; m && m->nick[0]; m = m->next)
 	if (!match_my_nick(m->nick))
 	  dprintf(DP_SERVER, "PRIVMSG %s :go %s\n", m->nick, chan->dname);
+*/
     } else {
       /* Some humans on channel, but still op-less */
+      request_op(chan);
+/* need
       check_tcl_need(chan->dname, "op");
       if (chan->need_op[0])
 	do_tcl("need-op", chan->need_op);
+*/
     }
   }
+}
+
+void check_servers() {
+  struct chanset_t * chan;
+  memberlist * m;
+  for (chan=chanset;chan;chan=chan->next) {
+    for (m=chan->channel.member;m && m->nick[0];m=m->next)
+      if (chan_hasop(m) && (!m->server || !m->server[0] || !m->hops)) {
+        dprintf(DP_HELP, STR("WHO %s\n"), chan->name);
+        return;
+      }
+  }
+}
+
+void raise_limit(struct chanset_t * chan) {
+  int nl, cl, i, mem, ul, ll;
+  char s[50];
+  if (!chan) return;
+  if (!me_op(chan))
+    return;
+
+  mem = chan->channel.members; //members
+  nl = mem + chan->limitraise; //new limit
+  cl = chan->channel.maxmembers; //current limit
+
+  i = chan->limitraise / 4;
+
+  //if the newlimit will be in the range made by these vars, dont change.
+  ul = nl + i; //upper limit range
+  ll = nl - i; //lower limit range
+  if (cl > ll && cl < ul)
+    return; //the current limit is in the range, so leave it.
+
+  if (nl != chan->channel.maxmembers) {
+    sprintf(s, "%d", nl);
+    add_mode(chan, '+', 'l', s);
+  }
+
 }
 
 static void check_expired_chanstuff()
@@ -601,16 +1114,18 @@ static void check_expired_chanstuff()
   memberlist *m, *n;
   char s[UHOSTLEN];
   struct chanset_t *chan;
+  struct userrec *buser = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr3 = { FR_GLOBAL | FR_CHAN, 0, 0 };
 
   if (!server_online)
     return;
   for (chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan)) {
-      if (me_op(chan) || me_halfop(chan)) {
-	if (channel_dynamicbans(chan) && ban_time)
+      if (me_op(chan)) {
+       if (channel_dynamicbans(chan) && chan->ban_time)
 	  for (b = chan->channel.ban; b->mask[0]; b = b->next)
-	    if (now - b->timer > 60 * ban_time &&
+           if (now - b->timer > 60 * chan->ban_time &&
 		!u_sticky_mask(chan->bans, b->mask) &&
 		!u_sticky_mask(global_bans, b->mask) &&
 		expired_mask(chan, b->who)) {
@@ -620,10 +1135,10 @@ static void check_expired_chanstuff()
 	      add_mode(chan, '-', 'b', b->mask);
 	      b->timer = now;
 	    }
-
-	if (use_exempts && channel_dynamicexempts(chan) && exempt_time)
+#ifdef S_IRCNET
+       if (use_exempts && channel_dynamicexempts(chan) && chan->exempt_time)
 	  for (e = chan->channel.exempt; e->mask[0]; e = e->next)
-	    if (now - e->timer > 60 * exempt_time &&
+           if (now - e->timer > 60 * chan->exempt_time &&
 		!u_sticky_mask(chan->exempts, e->mask) &&
 		!u_sticky_mask(global_exempts, e->mask) &&
 		expired_mask(chan, e->who)) {
@@ -653,9 +1168,9 @@ static void check_expired_chanstuff()
 	    }
 
 	if (use_invites && channel_dynamicinvites(chan) &&
-	    invite_time && !(chan->channel.mode & CHANINV))
+           chan->invite_time && !(chan->channel.mode & CHANINV))
 	  for (b = chan->channel.invite; b->mask[0]; b = b->next)
-	    if (now - b->timer > 60 * invite_time &&
+           if (now - b->timer > 60 * chan->invite_time &&
 		!u_sticky_mask(chan->invites, b->mask) &&
 		!u_sticky_mask(global_invites, b->mask) &&
 		expired_mask(chan, b->who)) {
@@ -665,7 +1180,7 @@ static void check_expired_chanstuff()
 	      add_mode(chan, '-', 'I', b->mask);
 	      b->timer = now;
 	    }
-
+#endif
 	if (chan->idle_kick)
 	  for (m = chan->channel.member; m && m->nick[0]; m = m->next)
 	    if (now - m->last >= chan->idle_kick * 60 &&
@@ -673,11 +1188,11 @@ static void check_expired_chanstuff()
 	      sprintf(s, "%s!%s", m->nick, m->userhost);
 	      get_user_flagrec(m->user ? m->user : get_user_by_host(s),
 			       &fr, chan->dname);
-	      if ((!(glob_bot(fr) || glob_friend(fr) || (glob_op(fr) &&
-		  !chan_deop(fr)) || chan_friend(fr) || chan_op(fr))) &&
-		  (me_op(chan) || (me_halfop(chan) && !chan_hasop(m)))) {
-		dprintf(DP_SERVER, "KICK %s %s :idle %d min\n", chan->name,
-			m->nick, chan->idle_kick);
+              if (!(glob_bot(fr) || glob_friend(fr) ||
+                  (glob_op(fr) && !glob_deop(fr)) ||
+                   chan_friend(fr) || chan_op(fr))) {
+		dprintf(DP_SERVER, "KICK %s %s :%sidle %d min\n", chan->name,
+			m->nick, kickprefix, chan->idle_kick);
 		m->flags |= SENTKICK;
 	      }
 	    }
@@ -695,6 +1210,30 @@ static void check_expired_chanstuff()
 	  killmember(chan, m->nick);
 	}
 	m = n;
+      }
+     //autovoice of +v users if bot is +y
+      buser = get_user_by_handle(userlist, botnetnick);
+      get_user_flagrec(buser, &fr3, chan->dname);
+
+      if (!loading && channel_active(chan) && me_op(chan) && (buser) && 
+      (chan_dovoice(fr3) || glob_dovoice(fr3))) {
+        for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+          if (m->user) {
+            struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0 };
+
+            get_user_flagrec(m->user, &fr2, chan->dname);
+            if ((!glob_bot(fr2) && ((chan_voice(fr2) || (glob_voice(fr2) && !chan_quiet(fr2))) ||
+               (channel_voice(chan) && (!chan_quiet(fr2) && !glob_quiet(fr2)))) &&
+               !chan_hasop(m) && !chan_hasvoice(m) && !(m->flags & EVOICE))) {
+              add_mode(chan, '+', 'v', m->nick);
+            } else if (!glob_bot(fr2) && ((chan_quiet(fr2) || (glob_quiet(fr2) && !chan_voice(fr2))) || (m->flags & EVOICE))) {
+              if (!chan_hasop(m) && chan_hasvoice(m))
+                add_mode(chan, '-', 'v', m->nick);
+            }
+          } else if (m->user == NULL && !(m->flags & EVOICE))
+             if (channel_voice(chan) && !chan_hasop(m) && !chan_hasvoice(m))
+               add_mode(chan, '+', 'v', m->nick);
+        }
       }
       check_lonely_channel(chan);
     }
@@ -852,6 +1391,28 @@ static int check_tcl_pub(char *nick, char *from, char *chname, char *msg)
   return 1;
 }
 
+static int check_tcl_pubc(char *cmd, char *nick, char *uhost,
+                         struct userrec *u, char *args, char *chan)
+{
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
+  char *hand = u ? u->handle : "*";
+  int x;
+
+  get_user_flagrec(u, &fr, NULL);
+  Tcl_SetVar(interp, "_msgc1", nick, 0);
+  Tcl_SetVar(interp, "_msgc2", uhost, 0);
+  Tcl_SetVar(interp, "_msgc3", hand, 0);
+  Tcl_SetVar(interp, "_msgc4", args, 0);
+  Tcl_SetVar(interp, "_msgc5", chan, 0);
+  x = check_tcl_bind(H_msgc, cmd, &fr, " $_msgc1 $_msgc2 $_msgc3 $_msgc4 $_msgc5",
+                     MATCH_EXACT | BIND_HAS_BUILTINS | BIND_USE_ATTR);
+  if (x == BIND_EXEC_LOG)
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s%s %s", nick, uhost, hand, chan, cmdprefix,
+           cmd, args);
+  return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
+
+}
+
 static void check_tcl_pubm(char *nick, char *from, char *chname, char *msg)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
@@ -869,16 +1430,6 @@ static void check_tcl_pubm(char *nick, char *from, char *chname, char *msg)
   Tcl_SetVar(interp, "_pubm5", msg, 0);
   check_tcl_bind(H_pubm, buf, &fr, " $_pubm1 $_pubm2 $_pubm3 $_pubm4 $_pubm5",
 		 MATCH_MASK | BIND_USE_ATTR | BIND_STACKABLE);
-}
-
-static void check_tcl_need(char *chname, char *type)
-{
-  char buf[1024];
-
-  simple_sprintf(buf, "%s %s", chname, type);
-  Tcl_SetVar(interp, "_need1", chname, 0);
-  Tcl_SetVar(interp, "_need2", type, 0);
-  check_tcl_bind(H_need, buf, 0, " $_need1 $_need2", MATCH_MASK | BIND_STACKABLE);
 }
 
 static tcl_ints myints[] =
@@ -919,8 +1470,8 @@ static void flush_modes()
   struct chanset_t *chan;
   memberlist *m;
 
-  if (modesperline > 6)
-    modesperline = 6; 
+  if (modesperline > MODES_PER_LINE_MAX)
+    modesperline = MODES_PER_LINE_MAX;
   for (chan = chanset; chan; chan = chan->next) {
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       if (m->delay && m->delay <= now) {
@@ -952,7 +1503,9 @@ static void irc_report(int idx, int details)
   for (chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname);
-    if (idx == DP_STDOUT || glob_master(fr) || chan_master(fr)) {
+
+    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+        (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
       p = NULL;
       if (!channel_inactive(chan)) {
 	if (chan->status & CHAN_JUPED)
@@ -961,7 +1514,7 @@ static void irc_report(int idx, int details)
 	  p = MISC_TRYING;
 	else if (chan->status & CHAN_PEND)
 	  p = MISC_PENDING;
-	else if (!me_op(chan))
+        else if ((chan->dname[0] != '+') && !me_op(chan))
 	  p = MISC_WANTOPS;
       }
       l = simple_sprintf(ch, "%s%s%s%s, ", chan->dname, p ? "(" : "",
@@ -987,10 +1540,12 @@ static void do_nettype()
     kick_method = 1;
     modesperline = 4;
     use_354 = 0;
-    use_exempts = 0;
-    use_invites = 0;
-    max_bans = 20;
-    max_modes = 20;
+#ifdef S_IRCNET
+    use_exempts = 1;
+    use_invites = 1;
+#endif
+    max_bans = 100;
+    max_modes = 100;
     rfc_compliant = 1;
     include_lk = 0;
     break;
@@ -998,8 +1553,10 @@ static void do_nettype()
     kick_method = 4;
     modesperline = 3;
     use_354 = 0;
+#ifdef S_IRCNET
     use_exempts = 1;
     use_invites = 1;
+#endif
     max_bans = 30;
     max_modes = 30;
     rfc_compliant = 1;
@@ -1009,8 +1566,10 @@ static void do_nettype()
     kick_method = 1;
     modesperline = 6;
     use_354 = 1;
+#ifdef S_IRCNET
     use_exempts = 0;
     use_invites = 0;
+#endif
     max_bans = 30;
     max_modes = 30;
     rfc_compliant = 1;
@@ -1020,8 +1579,10 @@ static void do_nettype()
     kick_method = 1;
     modesperline = 6;
     use_354 = 0;
+#ifdef S_IRCNET
     use_exempts = 0;
     use_invites = 0;
+#endif
     max_bans = 100;
     max_modes = 100;
     rfc_compliant = 0;
@@ -1031,8 +1592,10 @@ static void do_nettype()
     kick_method = 1;
     modesperline = 4;
     use_354 = 0;
+#ifdef S_IRCNET
     use_exempts = 1;
     use_invites = 0;
+#endif
     max_bans = 20;
     max_modes = 20;
     rfc_compliant = 1;
@@ -1045,9 +1608,9 @@ static void do_nettype()
   add_hook(HOOK_RFC_CASECMP, (Function) rfc_compliant);
 }
 
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
-static char *traced_nettype(ClientData cdata, Tcl_Interp *irp, char *name1,
-			    CONST char *name2, int flags)
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
+static char *traced_nettype(ClientData cdata, Tcl_Interp *irp,
+                            CONST char *name1, CONST char *name2, int flags)
 #else
 static char *traced_nettype(ClientData cdata, Tcl_Interp *irp, char *name1,
                             char *name2, int flags)
@@ -1057,9 +1620,10 @@ static char *traced_nettype(ClientData cdata, Tcl_Interp *irp, char *name1,
   return NULL;
 }
 
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
 static char *traced_rfccompliant(ClientData cdata, Tcl_Interp *irp,
-				 char *name1, CONST char *name2, int flags)
+                                 CONST char *name1, CONST char *name2,
+                                 int flags)
 #else
 static char *traced_rfccompliant(ClientData cdata, Tcl_Interp *irp,
                                  char *name1, char *name2, int flags)
@@ -1077,6 +1641,45 @@ static int irc_expmem()
 {
   return 0;
 }
+
+static cmd_t irc_bot[] = {
+  {"dp", "", (Function) mdop_request, NULL},
+  {"gi", "", (Function) getin_request, NULL},
+  {0, 0, 0, 0}
+};
+
+static void channel_check_locked(struct chanset_t * chan) {
+  /* Kick one random nonop */
+  if (!chan) return;
+  if (!me_op(chan))
+    return;
+  if (!strchr(getchanmode(chan), 'i'))
+    dprintf(DP_MODE, STR("MODE %s +i\n"), chan->name);
+  priority_do(chan, 0, PRIO_KICK);
+}
+
+
+static void getin_3secondly()
+{
+  struct chanset_t *ch = chanset;
+
+  if (!server_online)
+    return;
+  while (ch) {
+    if ((channel_pending(ch) || channel_active(ch)) && (!me_op(ch)))
+      request_op(ch);
+    ch = ch->next;
+  }
+}
+
+static void irc_10secondly() {
+  struct chanset_t *ch = chanset;
+
+  for (ch=chanset;ch;ch=ch->next)
+    if (channel_closed(ch))
+      channel_check_locked(ch);
+}
+
 
 static char *irc_close()
 {
@@ -1098,15 +1701,20 @@ static char *irc_close()
   del_bind_table(H_pub);
   del_bind_table(H_need);
   rem_tcl_ints(myints);
-  rem_builtins(H_dcc, irc_dcc);
+  rem_builtins(H_bot, irc_bot);
+  rem_builtins_dcc(H_dcc, irc_dcc);
   rem_builtins(H_msg, C_msg);
+  rem_builtins(H_msgc, C_msgc);
   rem_builtins(H_raw, irc_raw);
   rem_tcl_commands(tclchan_cmds);
-  rem_help_reference("irc.help");
   del_hook(HOOK_MINUTELY, (Function) check_expired_chanstuff);
-  del_hook(HOOK_5MINUTELY, (Function) status_log);
+  del_hook(HOOK_MINUTELY, (Function) expire_auths);
+
+  del_hook(HOOK_MINUTELY, (Function) check_servers);
   del_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   del_hook(HOOK_IDLE, (Function) flush_modes);
+  del_hook(HOOK_3SECONDLY, (Function) getin_3secondly);
+  del_hook(HOOK_10SECONDLY, (Function) irc_10secondly);
   Tcl_UntraceVar(interp, "rfc-compliant",
 		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 		 traced_rfccompliant, NULL);
@@ -1149,8 +1757,128 @@ static Function irc_table[] =
   /* 20 - 23 */
   (Function) check_this_ban,
   (Function) check_this_user,
-  (Function) me_halfop,
+  (Function) me_voice,
+//  (Function) getchanmode,
 };
+
+void getin_describe(struct cfg_entry *cfgent, int idx)
+{
+}
+
+void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+{
+  int i;
+
+  if (!cfgent->gdata)
+    return;
+  *valid = 0;
+  if (!strcmp(cfgent->name, STR("op-requests"))) {
+    int L,
+      R;
+    char *value = cfgent->gdata;
+
+    L = atoi(value);
+    value = strchr(value, ':');
+    if (!value)
+      return;
+    value++;
+    R = atoi(value);
+    if ((R >= 60) || (R <= 3) || (L < 1) || (L > R))
+      return;
+    *valid = 1;
+    return;
+  }
+  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
+    int L,
+      R;
+    char *value = cfgent->gdata;
+
+    L = atoi(value);
+    value = strchr(value, ':');
+    if (!value)
+      return;
+    value++;
+    R = atoi(value);
+    if ((R >= 1000) || (R < 0) || (L < 0) || (L > 100))
+      return;
+    *valid = 1;
+    return;
+  }
+  i = atoi(cfgent->gdata);
+  if (!strcmp(cfgent->name, STR("op-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("invite-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("key-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("limit-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("unban-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("lag-threshold"))) {
+    if ((i < 3) || (i > 60))
+      return;
+  } else if (!strcmp(cfgent->name, STR("fight-threshold"))) {
+    if (i && ((i < 50) || (i > 1000)))
+      return;
+  } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
+    if ((i < 0) || (i >= 200))
+      return;
+  } else if (!strcmp(cfgent->name, STR("op-time-slack"))) {
+    if ((i < 30) || (i > 1200))
+      return;
+  }
+  *valid = 1;
+  return;
+}
+
+struct cfg_entry CFG_OPBOTS = {
+  "op-bots", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_INBOTS = {
+  "in-bots", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_LAGTHRESHOLD = {
+  "lag-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_OPREQUESTS = {
+  "op-requests", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_OPTIMESLACK = {
+  "op-time-slack", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+#ifdef G_AUTOLOCK
+struct cfg_entry CFG_LOCKTHRESHOLD = {
+  "lock-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_KILLTHRESHOLD = {
+  "kill-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_FIGHTTHRESHOLD = {
+  "fight-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+#endif /* G_AUTOLOCK */
+
 
 char *irc_start(Function * global_funcs)
 {
@@ -1159,10 +1887,6 @@ char *irc_start(Function * global_funcs)
   global = global_funcs;
 
   module_register(MODULE_NAME, irc_table, 1, 3);
-  if (!module_depend(MODULE_NAME, "eggdrop", 106, 0)) {
-    module_undepend(MODULE_NAME);
-    return "This module requires Eggdrop 1.6.0 or later.";
-  }
   if (!(server_funcs = module_depend(MODULE_NAME, "server", 1, 0))) {
     module_undepend(MODULE_NAME);
     return "This module requires server module 1.0 or later.";
@@ -1171,17 +1895,40 @@ char *irc_start(Function * global_funcs)
     module_undepend(MODULE_NAME);
     return "This module requires channels module 1.0 or later.";
   }
+  if (!(encryption_funcs = module_depend(MODULE_NAME, "encryption", 0, 0))) {
+    module_undepend(MODULE_NAME);
+    return "This module requires an encryption modules.";
+  }
+  add_cfg(&CFG_OPBOTS);
+  add_cfg(&CFG_INBOTS);
+  add_cfg(&CFG_LAGTHRESHOLD);
+  add_cfg(&CFG_OPREQUESTS);
+  add_cfg(&CFG_OPTIMESLACK);
+#ifdef G_AUTOLOCK
+  add_cfg(&CFG_LOCKTHRESHOLD);
+  add_cfg(&CFG_KILLTHRESHOLD);
+  add_cfg(&CFG_FIGHTTHRESHOLD);
+#endif
+
   for (chan = chanset; chan; chan = chan->next) {
     if (!channel_inactive(chan))
       dprintf(DP_MODE, "JOIN %s %s\n",
               (chan->name[0]) ? chan->name : chan->dname, chan->key_prot);
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_ASKEDBANS);
+#ifdef S_IRCNET
     chan->ircnet_status &= ~(CHAN_ASKED_INVITED | CHAN_ASKED_EXEMPTS);
+#endif
   }
+  add_hook(HOOK_MINUTELY, (Function) expire_auths);
   add_hook(HOOK_MINUTELY, (Function) check_expired_chanstuff);
-  add_hook(HOOK_5MINUTELY, (Function) status_log);
+  add_hook(HOOK_MINUTELY, (Function) check_servers);
   add_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   add_hook(HOOK_IDLE, (Function) flush_modes);
+  add_hook(HOOK_3SECONDLY, (Function) getin_3secondly);
+  add_hook(HOOK_10SECONDLY, (Function) irc_10secondly);
+#ifdef G_AUTOLOCK
+  add_hook(HOOK_MINUTELY, (Function) check_netfight);
+#endif
   Tcl_TraceVar(interp, "net-type",
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_nettype, NULL);
@@ -1189,11 +1936,12 @@ char *irc_start(Function * global_funcs)
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_rfccompliant, NULL);
   add_tcl_ints(myints);
-  add_builtins(H_dcc, irc_dcc);
+  add_builtins(H_bot, irc_bot);
+  add_builtins_dcc(H_dcc, irc_dcc);
   add_builtins(H_msg, C_msg);
+  add_builtins(H_msgc, C_msgc);
   add_builtins(H_raw, irc_raw);
   add_tcl_commands(tclchan_cmds);
-  add_help_reference("irc.help");
   H_topc = add_bind_table("topc", HT_STACKABLE, channels_5char);
   H_splt = add_bind_table("splt", HT_STACKABLE, channels_4char);
   H_sign = add_bind_table("sign", HT_STACKABLE, channels_5char);
@@ -1209,3 +1957,4 @@ char *irc_start(Function * global_funcs)
   do_nettype();
   return NULL;
 }
+#endif

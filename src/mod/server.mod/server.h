@@ -1,25 +1,7 @@
+#ifdef LEAF
 /*
  * server.h -- part of server.mod
  *
- * $Id: server.h,v 1.13 2002/01/02 03:46:40 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_MOD_SERVER_SERVER_H
@@ -33,6 +15,7 @@
 #define botuserhost ((char *)(server_funcs[5]))
 #define quiet_reject (*(int *)(server_funcs[6]))
 #define serv (*(int *)(server_funcs[7]))
+#define servi (*(int *)(server_funcs[7]))
 /* 8 - 11 */
 #define flud_thr (*(int*)(server_funcs[8]))
 #define flud_time (*(int*)(server_funcs[9]))
@@ -72,6 +55,11 @@
 #define get_altbotnick ((char *(*)(void))(server_funcs[36]))
 #define nick_len (*(int *)(server_funcs[37]))
 #define check_tcl_notc ((int (*)(char *,char *,struct userrec *,char *,char *))server_funcs[38])
+#define server_lag (*(int *)(server_funcs[39]))
+#define curserv (*(int *)(server_funcs[40))
+#define cursrvname ((char *)(server_funcs[41]))
+#define botrealname ((char *)(server_funcs[42]))
+#define H_msgc (*(p_tcl_bind_list *)(server_funcs[43]))
 
 #else		/* MAKING_SERVER */
 
@@ -103,4 +91,7 @@ enum {
 	NETT_HYBRID_EFNET	= 4	/* new +e/+I Efnet hybrid.	  */
 } nett_t;
 
+#define IRC_CANTCHANGENICK "Can't change nickname on %s.  Is my nickname banned?"
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
+
+#endif /*leaf*/

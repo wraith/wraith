@@ -5879,13 +5879,13 @@ else
   # Set default make as static for unshared Tcl library
   if test ! "$DEFAULT_MAKE" = "static"
   then
-    cat << 'EOF' >&2
-configure: warning:
+#    cat << 'EOF' >&2
+#configure: warning:
 
-  Your Tcl library is not a shared lib.
-  configure will now set default make type to static...
+#  Your Tcl library is not a shared lib.
+#  configure will now set default make type to static...
 
-EOF
+#EOF
     DEFAULT_MAKE=static
       fi
 
@@ -5991,7 +5991,7 @@ esac
 
   ac_config_commands="$ac_config_commands default-2"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile scripts/Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -6312,8 +6312,6 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
-  "scripts/Makefile" ) CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "src/md5/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/md5/Makefile" ;;
   "src/compat/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/compat/Makefile" ;;

@@ -7,46 +7,29 @@
  *   linking, unlinking, and relaying to another bot
  *   pinging the bots periodically and checking leaf status
  *
- * $Id: botnet.c,v 1.43 2002/07/09 05:40:55 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
 #include "tandem.h"
 
 extern int		 dcc_total, backgrd, connect_timeout, max_dcc,
-			 egg_numver;
+			 egg_numver, cfg_count;
 extern struct userrec	*userlist;
 extern struct dcc_t	*dcc;
 extern time_t		 now;
 extern Tcl_Interp	*interp;
+extern struct cfg_entry ** cfg;
+
 
 tand_t		*tandbot;		/* Keep track of tandem bots on the
 					   botnet */
 party_t		*party;			/* Keep track of people on the botnet */
-static int	 maxparty = 50;		/* Maximum space for party line members
+static int	 maxparty = 200;		/* Maximum space for party line members
 					   currently */
 int		 tands = 0;		/* Number of bots on the botnet */
 int		 parties = 0;		/* Number of people on the botnet */
 char		 botnetnick[HANDLEN + 1] = "";	/* Botnet nickname */
-int		 share_unlinks = 0;	/* Allow remote unlinks of my
+int		 share_unlinks = 1;	/* Allow remote unlinks of my
 					   sharebots? */
 
 
@@ -386,12 +369,32 @@ void unvia(int idx, tand_t * who)
     } else
       bot = bot->next;
   }
-#ifndef NO_OLD_BOTNET
-  /* Every bot unvia's bots behind anyway, so why send msg's for
-   * EVERY one? - will this break things?!
-   */
-  tandout_but(idx, "unlinked %s\n", who->bot);
-#endif
+}
+
+void besthub(char *hub)
+{
+  tand_t *ptr = tandbot;
+  struct userrec *u,
+   *besthub = NULL;
+  char bestlval[20],
+    lval[20];
+
+  hub[0] = 0;
+  strcpy(bestlval, "z");
+  while (ptr) {
+    u = get_user_by_handle(userlist, ptr->bot);
+    if (u) {
+      link_pref_val(u, lval);
+      if (strcmp(lval, bestlval) < 0) {
+        strcpy(bestlval, lval);
+        besthub = u;
+      }
+    }
+    ptr = ptr->next;
+  }
+  if (besthub)
+    strcpy(hub, besthub->handle);
+  return;
 }
 
 /* Return index into dcc list of the bot that connects us to bot <x>
@@ -464,12 +467,19 @@ void answer_local_whom(int idx, int chan)
   if(nicklen < 9) nicklen = 9;
   if(botnicklen < 9) botnicklen = 9;
 
-  snprintf(format, sizeof format, "%%-%us   %%-%us  %%s\n", 
+#ifdef HUB
+  egg_snprintf(format, sizeof format, "%%-%us   %%-%us  %%s\n", 
                                   nicklen, botnicklen);
   dprintf(idx, format, " Nick", 	" Bot",      " Host");
   dprintf(idx, format, "----------",	"---------", "--------------------");
-  snprintf(format, sizeof format, "%%c%%-%us %%c %%-%us  %%s%%s\n", 
+  egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%-%us  %%s%%s\n", 
                                   nicklen, botnicklen);
+#else
+  egg_snprintf(format, sizeof format, "%%-%us\n", nicklen);
+  dprintf(idx, format, " Nick");
+  dprintf(idx, format, "----------");
+  egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%s\n", nicklen);
+#endif
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].type == &DCC_CHAT) {
       if ((chan == (-1)) || ((chan >= 0) && (dcc[i].u.chat->channel == chan))) {
@@ -490,11 +500,18 @@ void answer_local_whom(int idx, int chan)
 	    sprintf(idle, " [idle %lum]", mins);
 	} else
 	  idle[0] = 0;
+
         total++;
+Context;
 	dprintf(idx, format, c, dcc[i].nick, 
 		(dcc[i].u.chat->channel == 0) && (chan == (-1)) ? '+' :
 		(dcc[i].u.chat->channel > GLOBAL_CHANS) &&
+#ifdef HUB
 		(chan == (-1)) ? '*' : ' ', botnetnick, dcc[i].host, idle);
+#else
+		(chan == (-1)) ? '*' : ' ', idle);
+#endif
+Context;
 	if (dcc[i].u.chat->away != NULL)
 	  dprintf(idx, "   AWAY: %s\n", dcc[i].u.chat->away);
       }
@@ -521,9 +538,15 @@ void answer_local_whom(int idx, int chan)
       } else
 	idle[0] = 0;
       total++;
+
       dprintf(idx, format, c, party[i].nick, 
 	      (party[i].chan == 0) && (chan == (-1)) ? '+' : ' ',
+#ifdef HUB
 	      party[i].bot, party[i].from, idle);
+#else
+	      idle);
+#endif
+
       if (party[i].status & PLSTAT_AWAY)
 	dprintf(idx, "   %s: %s\n", MISC_AWAY,
 		party[i].away ? party[i].away : "");
@@ -541,7 +564,7 @@ void tell_bots(int idx)
   tand_t *bot;
 
   if (!tands) {
-    dprintf(idx, "%s\n", BOT_NOBOTSLINKED);
+    dprintf(idx, STR("No bots linked\n"));
     return;
   }
   strcpy(s, botnetnick);
@@ -549,7 +572,7 @@ void tell_bots(int idx)
 
   for (bot = tandbot; bot; bot = bot->next) {
     if (i > (500 - HANDLEN)) {
-      dprintf(idx, "Bots: %s\n", s);
+      dprintf(idx, STR("Bots: %s\n"), s);
       s[0] = 0;
       i = 0;
     }
@@ -561,8 +584,9 @@ void tell_bots(int idx)
     i += strlen(bot->bot);
   }
   if (s[0])
-    dprintf(idx, "Bots: %s\n", s);
-  dprintf(idx, "(%s: %d)\n", MISC_TOTAL, tands + 1);
+    dprintf(idx, STR("Bots: %s\n"), s);
+  dprintf(idx, STR("(Total: %d)\n"), tands + 1);
+
 }
 
 /* Show a simpleton bot tree
@@ -739,13 +763,7 @@ void dump_links(int z)
       p = botnetnick;
     else
       p = bot->uplink->bot;
-#ifndef NO_OLD_BOTNET
-    if (b_numver(z) < NEAT_BOTNET)
-      l = simple_sprintf(x, "nlinked %s %s %c%d\n", bot->bot,
-			 p, bot->share, bot->ver);
-    else
-#endif
-      l = simple_sprintf(x, "n %s %s %c%D\n", bot->bot, p,
+    l = simple_sprintf(x, "n %s %s %c%D\n", bot->bot, p,
 			 bot->share, bot->ver);
     tputs(dcc[z].sock, x, l);
   }
@@ -755,31 +773,12 @@ void dump_links(int z)
       if (dcc[i].type == &DCC_CHAT) {
 	if ((dcc[i].u.chat->channel >= 0) &&
 	    (dcc[i].u.chat->channel < GLOBAL_CHANS)) {
-#ifndef NO_OLD_BOTNET
-	  if (b_numver(z) < NEAT_BOTNET)
-	    l = simple_sprintf(x, "join %s %s %d %c%d %s\n",
-			       botnetnick, dcc[i].nick,
-			       dcc[i].u.chat->channel, geticon(i),
-			       dcc[i].sock, dcc[i].host);
-	  else
-#endif
-	    l = simple_sprintf(x, "j !%s %s %D %c%D %s\n",
+          l = simple_sprintf(x, "j !%s %s %D %c%D %s\n",
 			       botnetnick, dcc[i].nick,
 			       dcc[i].u.chat->channel, geticon(i),
 			       dcc[i].sock, dcc[i].host);
 	  tputs(dcc[z].sock, x, l);
-#ifndef NO_OLD_BOTNET
-	  if (b_numver(z) < NEAT_BOTNET) {
-	    if (dcc[i].u.chat->away) {
-	      l = simple_sprintf(x, "away %s %d %s\n", botnetnick,
-				 dcc[i].sock, dcc[i].u.chat->away);
-	      tputs(dcc[z].sock, x, l);
-	    }
-	    l = simple_sprintf(x, "idle %s %d %d\n", botnetnick,
-			       dcc[i].sock, now - dcc[i].timeval);
-	  } else
-#endif
-	    l = simple_sprintf(x, "i %s %D %D %s\n", botnetnick,
+          l = simple_sprintf(x, "i %s %D %D %s\n", botnetnick,
 			       dcc[i].sock, now - dcc[i].timeval,
 			 dcc[i].u.chat->away ? dcc[i].u.chat->away : "");
 	  tputs(dcc[z].sock, x, l);
@@ -787,32 +786,13 @@ void dump_links(int z)
       }
     }
     for (i = 0; i < parties; i++) {
-#ifndef NO_OLD_BOTNET
-      if (b_numver(z) < NEAT_BOTNET)
-	l = simple_sprintf(x, "join %s %s %d %c%d %s\n",
-			   party[i].bot, party[i].nick,
-			   party[i].chan, party[i].flag,
-			   party[i].sock, party[i].from);
-      else
-#endif
-	l = simple_sprintf(x, "j %s %s %D %c%D %s\n",
+      l = simple_sprintf(x, "j %s %s %D %c%D %s\n",
 			   party[i].bot, party[i].nick,
 			   party[i].chan, party[i].flag,
 			   party[i].sock, party[i].from);
       tputs(dcc[z].sock, x, l);
       if ((party[i].status & PLSTAT_AWAY) || (party[i].timer != 0)) {
-#ifndef NO_OLD_BOTNET
-	if (b_numver(z) < NEAT_BOTNET) {
-	  if (party[i].status & PLSTAT_AWAY) {
-	    l = simple_sprintf(x, "away %s %d %s\n", party[i].bot,
-			       party[i].sock, party[i].away);
-	    tputs(dcc[z].sock, x, l);
-	  }
-	  l = simple_sprintf(x, "idle %s %d %d\n", party[i].bot,
-			     party[i].sock, now - party[i].timer);
-	} else
-#endif
-	  l = simple_sprintf(x, "i %s %D %D %s\n", party[i].bot,
+        l = simple_sprintf(x, "i %s %D %D %s\n", party[i].bot,
 			     party[i].sock, now - party[i].timer,
 			     party[i].away ? party[i].away : "");
 	tputs(dcc[z].sock, x, l);
@@ -1042,7 +1022,7 @@ static void botlink_resolve_failure(int i)
 {
   char s[81];
 
-  putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[i].nick);
+//  putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[i].nick);
   strcpy(s, dcc[i].nick);
   nfree(dcc[i].u.dns->cptr);
   lostdcc(i);
@@ -1059,6 +1039,7 @@ static void botlink_resolve_success(int i)
   dcc[i].timeval = now;
   strcpy(dcc[i].u.bot->linker, linker);
   strcpy(dcc[i].u.bot->version, "(primitive bot)");
+  strcpy(dcc[i].u.bot->sysname, "*");
   dcc[i].u.bot->numver = idx;
   dcc[i].u.bot->port = dcc[i].port;		/* Remember where i started */
   dcc[i].sock =  getsock(SOCK_STRONGCONN,getprotocol(dcc[i].host));
@@ -1156,8 +1137,10 @@ void tandem_relay(int idx, char *nick, register int i)
   strcpy(dcc[i].nick, nick);
   dcc[i].user = u;
   strcpy(dcc[i].host, bi->address);
+#ifdef HUB
   dprintf(idx, "%s %s @ %s:%d ...\n", BOT_CONNECTINGTO, nick,
 	  bi->address, bi->relay_port);
+#endif
   dprintf(idx, "%s\n", BOT_BYEINFO1);
   dcc[idx].type = &DCC_PRE_RELAY;
   ci = dcc[idx].u.chat;
@@ -1421,7 +1404,8 @@ static void dcc_relay(int idx, char *buf, int j)
      escape sequences. */
   if (!(dcc[j].status & STAT_TELNET)) {
     while (*p != 0) {
-      while (*p != 255 && (*p != '\033' || *(p + 1) != '[') && *p != '\r' && *p)
+//      while (*p != 255 && (*p != '\033' || *(p + 1) != '[') && *p != '\r' && *p)
+      while (*p != 255 && *p != '\r' && *p)
 	p++;			/* Search for IAC, escape sequences and CR. */
       if (*p == 255) {
 	mark = 2;
@@ -1433,13 +1417,15 @@ static void dcc_relay(int idx, char *buf, int j)
 	    mark = 2;		/* Bogus */
 	}
 	strcpy((char *) p, (char *) (p + mark));
+/*
       } else if (*p == '\033') {
 	unsigned char	*e;
 
-	/* Search for the end of the escape sequence. */
+	// Search for the end of the escape sequence.
 	for (e = p + 2; *e != 'm' && *e; e++)
 	  ;
 	strcpy((char *) p, (char *) (e + 1));
+*/
       } else if (*p == '\r')
 	strcpy((char *) p, (char *) (p + 1));
     }
@@ -1652,6 +1638,8 @@ void check_botnet_pings()
 	    killsock(dcc[i].sock);
 	    lostdcc(i);
 	  } else {
+//fix
+            putlog(LOG_MISC, "*", "I am lame, and am now rejecting %s", bot->bot);
 	    botnet_send_reject(i, botnetnick, NULL, bot->bot,
 			       NULL, NULL);
 	    dcc[i].status |= STAT_WARNED;
@@ -1696,4 +1684,56 @@ void restart_chons()
     check_tcl_chjn(party[i].bot, party[i].nick, party[i].chan,
 		   party[i].flag, party[i].sock, party[i].from);
   }
+}
+static int get_role(char *bot)
+{
+  int rl,
+    i;
+  struct bot_addr *ba;
+  int r[5] = { 0, 0, 0, 0, 0 };
+  struct userrec *u,
+   *u2;
+
+  u2 = get_user_by_handle(userlist, bot);
+  if (!u2)
+    return 1;
+
+  for (u = userlist; u; u = u->next) {
+    if (u->flags & USER_BOT) {
+      if (strcmp(u->handle, bot)) {
+        ba = get_user(&USERENTRY_BOTADDR, u);
+        if ((nextbot(u->handle) >= 0) && (ba) && (ba->roleid > 0)
+            && (ba->roleid < 5))
+          r[(ba->roleid - 1)]++;
+      }
+    }
+  }
+  rl = 0;
+  for (i = 1; i <= 4; i++)
+    if (r[i] < r[rl])
+      rl = i;
+  rl++;
+  ba = get_user(&USERENTRY_BOTADDR, u2);
+  if (ba)
+    ba->roleid = rl;
+  return rl;
+}
+
+void lower_bot_linked(int idx)
+{
+  char tmp[5];
+//  int i;
+//  botnet_send_logsettings(idx);
+//  for (i=0;i<cfg_count;i++)
+//    botnet_send_cfg(idx, cfg[i]);
+//  send_channel_sync(dcc[idx].nick, NULL);
+
+  sprintf(tmp, STR("rl %d"), get_role(dcc[idx].nick));
+  botnet_send_zapf(nextbot(dcc[idx].nick), botnetnick, dcc[idx].nick, tmp);
+
+}
+
+void higher_bot_linked(int idx)
+{
+
 }

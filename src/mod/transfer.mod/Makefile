@@ -1,5 +1,4 @@
 # Makefile for src/mod/transfer.mod/
-# $Id: Makefile,v 1.11 2000/09/12 15:26:54 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../transfer.$(MOD_EXT)
 	mv transfer.o ../
 
 ../../../transfer.$(MOD_EXT): ../transfer.o
-	$(LD) -o ../../../transfer.$(MOD_EXT) ../transfer.o $(XLIBS)
+	$(LD) -static -o ../../../transfer.$(MOD_EXT) ../transfer.o $(XLIBS)
 	$(STRIP) ../../../transfer.$(MOD_EXT)
 
 depend:

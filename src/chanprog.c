@@ -7,25 +7,6 @@
  *   telling the current programmed settings
  *   initializing a lot of stuff and loading the tcl scripts
  *
- * $Id: chanprog.c,v 1.32 2002/07/18 20:28:32 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
@@ -43,14 +24,19 @@
 extern struct userrec	*userlist;
 extern log_t		*logs;
 extern Tcl_Interp	*interp;
-extern char		 ver[], botnetnick[], firewall[],
+extern char		 ver[], botnetnick[], firewall[], myip[], origbotname[],
 			 motdfile[], userfile[], helpdir[], tempdir[],
-			 moddir[], notify_new[], owner[], configfile[];
+			 notify_new[], owner[], configfile[],
+                         netpass[], botuser[], owners[], hubs[];
+
 extern time_t		 now, online_since;
 extern int		 backgrd, term_z, con_chan, cache_hit, cache_miss,
 			 firewallport, default_flags, max_logs, conmask,
-			 protect_readonly, make_userfile, noshare,
-			 ignore_time;
+			 protect_readonly, noshare,
+#ifdef HUB
+			 my_port,
+#endif
+			 ignore_time, loading;
 
 tcl_timer_t	 *timer = NULL;		/* Minutely timer		*/
 tcl_timer_t	 *utimer = NULL;	/* Secondly timer		*/
@@ -135,7 +121,7 @@ struct userrec *check_chanlist(const char *host)
   uhost = buf;
   nick = splitnick(&uhost);
   for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next)
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) 
       if (!rfc_casecmp(nick, m->nick) && !egg_strcasecmp(uhost, m->userhost))
 	return m->user;
   return NULL;
@@ -166,8 +152,11 @@ void clear_chanlist(void)
   register struct chanset_t	*chan;
 
   for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next)
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       m->user = NULL;
+      m->tried_getuser = 0;
+    }
+
 }
 
 /* Clear the user pointer of a specific nick in the chanlists.
@@ -184,6 +173,7 @@ void clear_chanlist_member(const char *nick)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
       if (!rfc_casecmp(m->nick, nick)) {
 	m->user = NULL;
+        m->tried_getuser = 0;
 	break;
       }
 }
@@ -260,7 +250,9 @@ void tell_verbose_status(int idx)
 {
   char s[256], s1[121], s2[81];
   char *vers_t, *uni_t;
+#ifdef HUB
   int i;
+#endif
   time_t now2, hr, min;
 #if HAVE_GETRUSAGE
   struct rusage ru;
@@ -283,13 +275,12 @@ void tell_verbose_status(int idx)
   }
 #endif
 
+#ifdef HUB
   i = count_users(userlist);
   dprintf(idx, "I am %s, running %s:  %d user%s (mem: %uk)\n",
 	  botnetnick, ver, i, i == 1 ? "" : "s",
           (int) (expected_memory() / 1024));
-
-  dprintf(idx, "My Source was IPv6-patched by sb <sb@1shell.net>\n");
-
+#endif
   now2 = now - online_since;
   s[0] = 0;
   if (now2 > 86400) {
@@ -337,7 +328,6 @@ void tell_verbose_status(int idx)
   if (admin[0])
     dprintf(idx, "Admin: %s\n", admin);
 
-  dprintf(idx, "Config file: %s\n", configfile);
   dprintf(idx, "OS: %s %s\n", uni_t, vers_t);
 
   /* info library */
@@ -351,7 +341,6 @@ void tell_verbose_status(int idx)
 	  interp->result : (Tcl_Eval(interp, "info tclversion") == TCL_OK) ?
 	  interp->result : "*unknown*", MISC_TCLHVERSION,
 	  TCL_PATCH_LEVEL ? TCL_PATCH_LEVEL : "*unknown*");
-
 #if HAVE_TCL_THREADS
   dprintf(idx, "Tcl is threaded\n");
 #endif  
@@ -369,20 +358,21 @@ void tell_settings(int idx)
   dprintf(idx, "Botnet Nickname: %s\n", botnetnick);
   if (firewall[0])
     dprintf(idx, "Firewall: %s, port %d\n", firewall, firewallport);
-  dprintf(idx, "Userfile: %s   Motd: %s\n", userfile, motdfile);
+#ifdef HUB
+  dprintf(idx, "Userfile: %s   \n", userfile);
+#endif
   dprintf(idx, "Directories:\n");
   dprintf(idx, "  Help    : %s\n", helpdir);
   dprintf(idx, "  Temp    : %s\n", tempdir);
-#ifndef STATIC
-  dprintf(idx, "  Modules : %s\n", moddir);
-#endif
   fr.global = default_flags;
 
   build_flags(s, &fr, NULL);
   dprintf(idx, "%s [%s], %s: %s\n", MISC_NEWUSERFLAGS, s,
 	  MISC_NOTIFY, notify_new);
+#ifdef HUB
   if (owner[0])
     dprintf(idx, "%s: %s\n", MISC_PERMOWNER, owner);
+#endif
   for (i = 0; i < max_logs; i++)
     if (logs[i].filename != NULL) {
       dprintf(idx, "Logfile #%d: %s on %s (%s: %s)\n", i + 1,
@@ -397,16 +387,16 @@ void reaffirm_owners()
   char *p, *q, s[121];
   struct userrec *u;
 
-  /* Make sure default owners are +n */
+  /* Make sure default owners are +a */
   if (owner[0]) {
     q = owner;
     p = strchr(q, ',');
     while (p) {
-      strncpyz(s, q, p - q);
+      strncpyz(s, q, (p - q) + 1);
       rmspace(s);
       u = get_user_by_handle(userlist, s);
       if (u)
-	u->flags = sanity_check(u->flags | USER_OWNER);
+	u->flags = sanity_check(u->flags | USER_ADMIN);
       q = p + 1;
       p = strchr(q, ',');
     }
@@ -414,25 +404,231 @@ void reaffirm_owners()
     rmspace(s);
     u = get_user_by_handle(userlist, s);
     if (u)
-      u->flags = sanity_check(u->flags | USER_OWNER);
+      u->flags = sanity_check(u->flags | USER_ADMIN);
   }
+}
+void load_internal_users()
+{
+  char *p = NULL,
+   *ln,
+   *hand,
+   *ip,
+   *port,
+   *hublevel = NULL,
+   *pass,
+   *hosts,
+    host[250],
+    buf[2048];
+  char *attr;
+  int i;
+  struct bot_addr *bi;
+  struct userrec *u;
+  //struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
+
+//hubs..
+  sprintf(buf, "%s", hubs);
+  p = buf;
+  while (p) {
+    ln = p;
+    p = strchr(p, ',');
+    if (p)
+      *p++ = 0;
+    hand = ln;
+    ip = NULL;
+    port = NULL;
+    hosts = NULL;
+    for (i = 0; ln; i++) {
+      switch (i) {
+      case 0:
+	hand = ln;
+	break;
+      case 1:
+	ip = ln;
+	break;
+      case 2:
+	port = ln;
+	break;
+      case 3:
+        hublevel = ln;
+        break;
+      case 4:
+	if (!get_user_by_handle(userlist, hand)) {
+	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP | USER_FRIEND);
+/* no thanks.
+          if (atoi(hublevel) < 999 && strcmp(hand, origbotname)) {
+            u = get_user_by_handle(userlist, hand);
+            fr.bot |= (BOT_PASSIVE | BOT_GLOBAL);
+//            set_user(&USERENTRY_BOTFL, u, (void *) fr.bot);
+            set_user_flagrec(u, &fr, NULL);
+          }
+//          user.bot = BITS;
+*/
+	  bi = user_malloc(sizeof(struct bot_addr));
+
+	  bi->address = user_malloc(strlen(ip) + 1);
+	  strcpy(bi->address, ip);
+	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
+	  bi->relay_port = bi->telnet_port;
+          bi->hublevel = atoi(hublevel);
+#ifdef HUB
+//printf("adding %s with hublevel: %d\n", hand, bi->hublevel ? bi->hublevel : 99);
+
+	  if ((!bi->hublevel) && (!strcmp(hand, botnetnick)))
+	    bi->hublevel = 99;
+#endif
+          bi->uplink = user_malloc(1);
+          bi->uplink[0] = 0;
+	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
+	  set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), netpass);
+	}
+      default:
+//	ln = userids for hostlist, add them all 
+	hosts = ln;
+	ln = strchr(ln, ' ');
+	if (ln)
+	  *ln++ = 0;
+	while (hosts) {
+	  sprintf(host, "*!%s@%s", hosts, ip);
+	  set_user(&USERENTRY_HOSTS, get_user_by_handle(userlist, hand), host);
+	  hosts = ln;
+	  if (ln)
+	    ln = strchr(ln, ' ');
+	  if (ln)
+	    *ln++ = 0;
+	}
+	break;
+      }
+      if (ln)
+	ln = strchr(ln, ' ');
+      if (ln) {
+	*ln++ = 0;
+      }
+    }
+  }
+
+//owners..
+  owner[0] = 0;
+//  strcpy(p, owners);
+
+// buf = get_setting(1);
+  sprintf(buf, "%s", owners);
+  p = buf;
+  while (p) {
+    ln = p;
+    p = strchr(p, ',');
+    if (p)
+      *p++ = 0;
+//     name pass hostlist 
+    hand = ln;
+    pass = NULL;
+    attr = NULL;
+    hosts = NULL;
+    for (i = 0; ln; i++) {
+      switch (i) {
+      case 0:
+	hand = ln;
+	break;
+      case 1:
+        pass = ln;
+        break;
+      case 2:
+	hosts = ln;
+	if (owner[0])
+	  strncat(owner, ",", 120);
+	strncat(owner, hand, 120);
+	if (!get_user_by_handle(userlist, hand)) {
+	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_FRIEND | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA);
+	  u = get_user_by_handle(userlist, hand);
+	  set_user(&USERENTRY_PASS, u, pass);
+	  while (hosts) {
+	    ln = strchr(ln, ' ');
+	    if (ln)
+	      *ln++ = 0;
+	    set_user(&USERENTRY_HOSTS, u, hosts);
+	    hosts = ln;
+	  }
+	}
+	break;
+      }
+      if (ln)
+	ln = strchr(ln, ' ');
+      if (ln)
+	*ln++ = 0;
+    }
+  }
+
 }
 
 void chanprog()
 {
   int i;
+  char buf[2048];
+  struct bot_addr *bi;
+  struct userrec *u;
+
 
   admin[0] = 0;
   helpdir[0] = 0;
-  tempdir[0] = 0;
   for (i = 0; i < max_logs; i++)
     logs[i].flags |= LF_EXPIRING;
   conmask = 0;
   /* Turn off read-only variables (make them write-able) for rehash */
   protect_readonly = 0;
   /* Now read it */
-  if (!readtclprog(configfile))
-    fatal(MISC_NOCONFIGFILE, 0);
+  if (configfile[0])
+    if (!readtclprog(configfile))
+      fatal(MISC_NOCONFIGFILE, 0);
+
+//now this only checks server shit. (no channels)
+  call_hook(HOOK_REHASH);
+  protect_readonly = 1;
+  if (!botnetnick[0]) {
+    strncpyz(botnetnick, origbotname, HANDLEN + 1);
+  }
+  strcpy(botuser, origbotname);
+  if (!botnetnick[0])
+    fatal("I don't have a botnet nick!!\n", 0);
+#ifdef HUB
+  if (!userfile[0])
+    fatal(MISC_NOUSERFILE2, 0);
+  //setstatic = 0;
+  loading = 1;
+  readuserfile(userfile, &userlist);
+/* old
+  if (!readuserfile(userfile, &userlist)) {
+   char tmp[178];
+   egg_snprintf(tmp, sizeof tmp, MISC_NOUSERFILE, configfile);
+   fatal(tmp, 0);
+  }
+*/
+  loading = 0;
+  //setstatic = 1;
+#endif
+
+  load_internal_users();
+
+  if (!(u = get_user_by_handle(userlist, botnetnick))) {
+    /* I need to be on the userlist... doh. */
+    userlist = adduser(userlist, botnetnick, STR("none"), "-", USER_BOT | USER_OP | USER_FRIEND);
+    u = get_user_by_handle(userlist, botnetnick);
+    bi = user_malloc(sizeof(struct bot_addr));
+
+    bi->address = user_malloc(strlen(myip) + 1);
+    strcpy(bi->address, myip);
+    bi->telnet_port = atoi(buf) ? atoi(buf) : 3333;
+    bi->relay_port = bi->telnet_port;
+#ifdef HUB
+    bi->hublevel = 99;
+#else
+    bi->hublevel = 0;
+#endif
+    bi->uplink = user_malloc(1);
+    bi->uplink[0] = 0;
+    set_user(&USERENTRY_BOTADDR, u, bi);
+  } else {
+    bi = get_user(&USERENTRY_BOTADDR, u);
+  }
+
   for (i = 0; i < max_logs; i++) {
     if (logs[i].flags & LF_EXPIRING) {
       if (logs[i].filename != NULL) {
@@ -451,58 +647,53 @@ void chanprog()
       logs[i].flags = 0;
     }
   }
-  /* We should be safe now */
-  call_hook(HOOK_REHASH);
-  protect_readonly = 1;
-  if (!botnetnick[0]) {
-    strncpyz(botnetnick, origbotname, HANDLEN + 1);
-  }
-  if (!botnetnick[0])
-    fatal("I don't have a botnet nick!!\n", 0);
-  if (!userfile[0])
-    fatal(MISC_NOUSERFILE2, 0);
-  if (!readuserfile(userfile, &userlist)) {
-    if (!make_userfile) {
-      char tmp[178];
 
-      egg_snprintf(tmp, sizeof tmp, MISC_NOUSERFILE, configfile);
-      fatal(tmp, 0);
-    }
-    printf("\n\n%s\n", MISC_NOUSERFILE2);
-    if (module_find("server", 0, 0))
-      printf(MISC_USERFCREATE1, origbotname);
-    printf("%s\n\n", MISC_USERFCREATE2);
-  } else if (make_userfile) {
-     make_userfile = 0;
-     printf("%s\n", MISC_USERFEXISTS);
+  bi = get_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, botnetnick));
+  if (!bi)
+    fatal(STR("I'm added to userlist but without a bot record!"), 0);
+  if (bi->telnet_port != 3333) {
+#ifdef HUB
+    listen_all(bi->telnet_port, 0);
+    my_port = bi->telnet_port;
+#endif
   }
+
+  trigger_cfg_changed();
+
+  /* We should be safe now */
+
+
   if (helpdir[0])
     if (helpdir[strlen(helpdir) - 1] != '/')
       strcat(helpdir, "/");
+
   if (tempdir[0])
     if (tempdir[strlen(tempdir) - 1] != '/')
       strcat(tempdir, "/");
-  /* Test tempdir: it's vital */
+
+
+  /* test tempdir: it's vital */
   {
     FILE *f;
-    char s[161], rands[8];
+    char s[161];
+    int fd;
 
-    /* Possible file race condition solved by using a random string
-     * and the process id in the filename.
-     * FIXME: This race is only partitially fixed. We could still be
-     *        overwriting an existing file / following a malicious
-     *        link.
-     */
-    make_rand_str(rands, 7); /* create random string */
-    sprintf(s, "%s.test-%u-%s", tempdir, getpid(), rands);
-    f = fopen(s, "w");
-    if (f == NULL)
-      fatal(MISC_CANTWRITETEMP, 0);
-    fclose(f);
+    /* possible file race condition solved by using a random string
+     * and the process id in the filename */
+    /* Let's not even dare to hope... use mkstemp() -dizz */
+    sprintf(s, STR("%s.test-XXXXXX"), tempdir);
+    if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
+      if (fd != -1) {
+        unlink(s);
+        close(fd);
+      }
+      fatal(STR("Can't write to tempdir!"), 0);
+    }
     unlink(s);
   }
   reaffirm_owners();
 }
+#ifdef HUB
 
 /* Reload the user file from disk
  */
@@ -520,19 +711,27 @@ void reload()
   clear_userlist(userlist);
   noshare = 0;
   userlist = NULL;
+  //setstatic = 0;
+  loading = 1;
   if (!readuserfile(userfile, &userlist))
     fatal(MISC_MISSINGUSERF, 0);
+  loading = 0;
+  //setstatic = 1;
   reaffirm_owners();
   call_hook(HOOK_READ_USERFILE);
 }
+#endif
+
 
 void rehash()
 {
   call_hook(HOOK_PRE_REHASH);
+#ifdef HUB
   noshare = 1;
   clear_userlist(userlist);
   noshare = 0;
   userlist = NULL;
+#endif
   chanprog();
 }
 
@@ -632,7 +831,7 @@ void list_timers(Tcl_Interp *irp, tcl_timer_t *stack)
 {
   tcl_timer_t *mark;
   char mins[10], id[16], *x;
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
   CONST char *argv[3];
 #else
   char *argv[3];
@@ -680,5 +879,25 @@ int isowner(char *name)
     if (*pb == 0)
       return (0);
     pa = pb;
+  }
+}
+
+/* If we have a protected topic and the bot is opped
+ * or the channel is -t, change the topic. (Sup 11May2001)
+ */
+void check_topic(struct chanset_t *chan)
+{
+  memberlist *m = NULL;  
+
+  if (chan->topic_prot[0]) {
+    m = ismember(chan, botname);
+    if (!m)
+      return;
+    if (chan->channel.topic) {
+      if (!egg_strcasecmp(chan->topic_prot, chan->channel.topic))
+	return;
+    }
+    if (chan_hasop(m) || !channel_optopic(chan))
+      dprintf(DP_SERVER, "TOPIC %s :%s\n", chan->name, chan->topic_prot);
   }
 }

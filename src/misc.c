@@ -4,52 +4,58 @@
  *   logging things
  *   queueing output for the bot (msg and help)
  *   resync buffers for sharebots
- *   help system
  *   motd display and %var substitution
  *
- * $Id: misc.c,v 1.48 2002/07/09 05:43:27 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "chan.h"
 #include "tandem.h"
 #include "modules.h"
+#include <pwd.h>
+#include <errno.h>
+#ifdef S_ANTITRACE
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#endif
+
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <signal.h>
+
+
 #ifdef HAVE_UNAME
 #  include <sys/utsname.h>
 #endif
 #include "stat.h"
+#include "bg.h"
 
+extern struct userrec *userlist;
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
-extern char		 helpdir[], version[], origbotname[], botname[],
+extern tand_t *tandbot;
+
+extern char		 version[], origbotname[], botname[],
 			 admin[], network[], motdfile[], ver[], botnetnick[],
-			 bannerfile[], logfile_suffix[], textdir[];
-extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total,
-			 keep_all_logs, quick_logs, strict_host;
+			 bannerfile[], logfile_suffix[], textdir[], userfile[],  
+                         *binname, pid_file[], netpass[], tempdir[];
+
+extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync,
+#ifdef HUB
+                         my_port,
+#endif
+			 keep_all_logs, quick_logs, strict_host, loading,
+                         localhub;
 extern time_t		 now;
 extern Tcl_Interp	*interp;
 
+void detected(int, char *);
 
 int	 shtime = 1;		/* Whether or not to display the time
 				   with console output */
@@ -57,41 +63,450 @@ log_t	*logs = 0;		/* Logfiles */
 int	 max_logs = 5;		/* Current maximum log files */
 int	 max_logsize = 0;	/* Maximum logfile size, 0 for no limit */
 int	 conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
-int	 debug_output = 0;	/* Disply output to server to LOG_SERVEROUT */
+int	 debug_output = 1;	/* Disply output to server to LOG_SERVEROUT */
 
-struct help_list_t {
-  struct help_list_t *next;
-  char *name;
-  int type;
+int auth_total = 0;
+int max_auth = 100;
+
+struct auth_t *auth = 0;
+
+
+char authkey[121];
+char cmdprefix[1] = "+";
+
+struct cfg_entry CFG_MOTD = {
+  "motd", CFGF_GLOBAL, NULL, NULL,
+  NULL, NULL, NULL
 };
 
-static struct help_ref {
-  char *name;
-  struct help_list_t *first;
-  struct help_ref *next;
-} *help_list = NULL;
+void authkey_describe(struct cfg_entry * entry, int idx) {
+  dprintf(idx, "authkey is used for authing, give to your users if they are to use DCC chat or IRC cmds. (can be bot specific)\n");
+}
 
+void authkey_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+  if (entry->ldata) {
+    strncpy0(authkey, (char *) entry->ldata, sizeof authkey);
+  } else if (entry->gdata) {
+    strncpy0(authkey, (char *) entry->gdata, sizeof authkey);
+  }
+}
+
+struct cfg_entry CFG_AUTHKEY = {
+  "authkey", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  authkey_changed, authkey_changed, authkey_describe
+};
+
+void cmdprefix_describe(struct cfg_entry *entry, int idx) {
+  dprintf(idx, "cmdprefix is the prefix used for msg cmds, ie: !op or .op\n");
+}
+
+void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+  if (entry->ldata) {
+    strncpy0(cmdprefix, (char *) entry->ldata, sizeof cmdprefix);
+  } else if (entry->gdata) {
+    strncpy0(cmdprefix, (char *) entry->gdata, sizeof cmdprefix);
+  }
+}
+struct cfg_entry CFG_CMDPREFIX = {
+  "cmdprefix", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  cmdprefix_changed, cmdprefix_changed, cmdprefix_describe
+};
+
+
+void misc_describe(struct cfg_entry *cfgent, int idx)
+{
+  int i = 0;
+
+  if (!strcmp(cfgent->name, STR("fork-interval"))) {
+    dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
+    i = 1;
+#ifdef S_LASTCHECK
+  } else if (!strcmp(cfgent->name, STR("login"))) {
+    dprintf(idx, STR("login sets how to handle someone logging in to the shell\n"));
+#endif
+#ifdef S_ANTITRACE
+  } else if (!strcmp(cfgent->name, STR("trace"))) {
+    dprintf(idx, STR("trace sets how to handle someone tracing/debugging the bot\n"));
+#endif
+#ifdef S_PROMISC
+  } else if (!strcmp(cfgent->name, STR("promisc"))) {
+    dprintf(idx, STR("promisc sets how to handle when a interface is set to promiscous mode\n"));
+#endif
+#ifdef S_PROCESSCHECK
+  } else if (!strcmp(cfgent->name, STR("bad-process"))) {
+    dprintf(idx, STR("bad-process sets how to handle when a running process not listed in process-list is detected\n"));
+  } else if (!strcmp(cfgent->name, STR("process-list"))) {
+    dprintf(idx, STR("process-list is a comma-separated list of \"expected processes\" running on the bots uid\n"));
+    i = 1;
+#endif
+#ifdef S_HIJACKCHECK
+  } else if (!strcmp(cfgent->name, STR("hijack"))) {
+    dprintf(idx, STR("hijack sets how to handle when a commonly used hijack method attempt is detected. (recommended: die)\n"));
+#endif
+  }
+  if (!i)
+    dprintf(idx, STR("Valid settings are: nocheck, ignore, warn, die, reject, suicide\n"));
+}
+
+
+void fork_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  if (!cfgent->ldata)
+    return;
+  if (atoi(cfgent->ldata)<=0)
+    *valid=0;
+}
+
+void fork_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  if (!cfgent->gdata)
+    return;
+  if (atoi(cfgent->gdata)<=0)
+    *valid=0;
+}
+
+void fork_describe(struct cfg_entry * cfgent, int idx) {
+  dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
+}
+
+struct cfg_entry CFG_FORKINTERVAL = {
+  "fork-interval", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  fork_gchanged, fork_lchanged, fork_describe
+};
+
+void detect_lchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  char * p = cfgent->ldata;
+  if (!p)
+    *valid=1;
+  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
+           && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
+    *valid=0;
+}
+
+void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * valid) {
+  char * p = (char *) cfgent->ldata;
+  if (!p)
+    *valid=1;
+  else if (strcmp(p, STR("ignore")) && strcmp(p, STR("die")) && strcmp(p, STR("reject"))
+           && strcmp(p, STR("suicide")) && strcmp(p, STR("nocheck")) && strcmp(p, STR("warn")))
+    *valid=0;
+}
+
+
+#ifdef S_LASTCHECK
+struct cfg_entry CFG_LOGIN = {
+  "login", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, misc_describe
+};
+#endif
+#ifdef S_HIJACKCHECK
+struct cfg_entry CFG_HIJACK = {
+  "hijack", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, misc_describe
+};
+#endif
+#ifdef S_ANTITRACE
+struct cfg_entry CFG_TRACE = {
+  "trace", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, misc_describe
+};
+#endif
+#ifdef S_PROMISC
+struct cfg_entry CFG_PROMISC = {
+  "promisc", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, misc_describe
+};
+#endif
+#ifdef S_PROCESSCHECK
+struct cfg_entry CFG_BADPROCESS = {
+  "bad-process", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  detect_gchanged, detect_lchanged, misc_describe
+};
+
+struct cfg_entry CFG_PROCESSLIST = {
+  "process-list", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  NULL, NULL, misc_describe
+};
+#endif
+
+#ifdef S_DCCPASS
+struct cmd_pass *cmdpass = NULL;
+#endif
+/* unixware has no strcasecmp() without linking in a hefty library */
+#define upcase(c) (((c)>='a' && (c)<='z') ? (c)-'a'+'A' : (c))
+
+#if !HAVE_STRCASECMP
+#define strcasecmp strcasecmp2
+#endif
+
+int strcasecmp2(char *s1, char *s2)
+{
+  while ((*s1) && (*s2) && (upcase(*s1) == upcase(*s2))) {
+    s1++;
+    s2++;
+  }
+  return upcase(*s1) - upcase(*s2);
+}
+
+/* this is cfg shit from servers/irc/ctcp because hub doesnt load
+ * these mods */
+#ifdef HUB
+void servers_describe(struct cfg_entry * entry, int idx) {
+  dprintf(idx, STR("servers is a comma-separated list of servers the bot will use\n"));
+}
+void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+}
+void servers6_describe(struct cfg_entry * entry, int idx) {
+  dprintf(idx, STR("servers6 is a comma-separated list of servers the bot will use (FOR IPv6)\n"));
+}
+void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+}
+void nick_describe(struct cfg_entry * entry, int idx) {
+  dprintf(idx, "nick is the bots preferred nick when connecting/using .resetnick\n");
+}
+void nick_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+}
+void realname_describe(struct cfg_entry * entry, int idx) {
+  dprintf(idx, STR("realname is the bots \"real name\" when connecting\n"));
+}
+
+void realname_changed(struct cfg_entry * entry, char * olddata, int * valid) {
+}
+struct cfg_entry CFG_SERVERS = {
+  "servers", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  servers_changed, servers_changed, servers_describe
+};
+struct cfg_entry CFG_SERVERS6 = {
+  "servers6", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  servers6_changed, servers6_changed, servers6_describe
+};
+
+struct cfg_entry CFG_NICK = {
+  "nick", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  nick_changed, nick_changed, nick_describe
+};
+
+struct cfg_entry CFG_REALNAME = {
+  "realname", CFGF_LOCAL | CFGF_GLOBAL, NULL, NULL,
+  realname_changed, realname_changed, realname_describe
+};
+
+void getin_describe(struct cfg_entry *cfgent, int idx)
+{
+  if (!strcmp(cfgent->name, STR("op-bots")))
+    dprintf(idx, STR("op-bots is number of bots to ask every time a oprequest is to be made\n"));
+  else if (!strcmp(cfgent->name, STR("in-bots")))
+    dprintf(idx, STR("in-bots is number of bots to ask every time a inrequest is to be made\n"));
+  else if (!strcmp(cfgent->name, STR("op-requests")))
+    dprintf(idx, STR("op-requests (requests:seconds) limits how often the bot will ask for ops\n"));
+  else if (!strcmp(cfgent->name, STR("lag-threshold")))
+    dprintf(idx, STR("lag-threshold is maximum acceptable server lag for the bot to send/honor requests\n"));
+  else if (!strcmp(cfgent->name, STR("op-time-slack")))
+    dprintf(idx, STR("op-time-slack is number of seconds a opcookies encoded time value can be off from the bots current time\n"));
+  else if (!strcmp(cfgent->name, STR("lock-threshold")))
+    dprintf(idx, STR("Format H:L. When at least H hubs but L or less leafs are linked, lock all channels\n"));
+  else if (!strcmp(cfgent->name, STR("kill-threshold")))
+    dprintf(idx, STR("When more than kill-threshold bots have been killed/k-lined the last minute, channels are locked\n"));
+  else if (!strcmp(cfgent->name, STR("fight-threshold")))
+    dprintf(idx, STR("When more than fight-threshold ops/deops/kicks/bans/unbans altogether have happened on a channel in one minute, the channel is locked\n"));
+  else {
+    dprintf(idx, STR("No description for %s ???\n"), cfgent->name);
+    putlog(LOG_ERRORS, "*", STR("getin_describe() called with unknown config entry %s"), cfgent->name);
+  }
+}
+
+void getin_changed(struct cfg_entry *cfgent, char *oldval, int *valid)
+{
+  int i;
+
+  if (!cfgent->gdata)
+    return;
+  *valid = 0;
+  if (!strcmp(cfgent->name, STR("op-requests"))) {
+    int L,
+      R;
+    char *value = cfgent->gdata;
+
+    L = atoi(value);
+    value = strchr(value, ':');
+    if (!value)
+      return;
+    value++;
+    R = atoi(value);
+    if ((R >= 60) || (R <= 3) || (L < 1) || (L > R))
+      return;
+    *valid = 1;
+    return;
+  }
+  if (!strcmp(cfgent->name, STR("lock-threshold"))) {
+    int L,
+      R;
+    char *value = cfgent->gdata;
+
+    L = atoi(value);
+    value = strchr(value, ':');
+    if (!value)
+      return;
+    value++;
+    R = atoi(value);
+    if ((R >= 1000) || (R < 0) || (L < 0) || (L > 100))
+      return;
+    *valid = 1;
+    return;
+  }
+  i = atoi(cfgent->gdata);
+  if (!strcmp(cfgent->name, STR("op-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("invite-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("key-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("limit-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("unban-bots"))) {
+    if ((i < 1) || (i > 10))
+      return;
+  } else if (!strcmp(cfgent->name, STR("lag-threshold"))) {
+    if ((i < 3) || (i > 60))
+      return;
+  } else if (!strcmp(cfgent->name, STR("fight-threshold"))) {
+    if (i && ((i < 50) || (i > 1000)))
+      return;
+  } else if (!strcmp(cfgent->name, STR("kill-threshold"))) {
+    if ((i < 0) || (i >= 200))
+      return;
+  } else if (!strcmp(cfgent->name, STR("op-time-slack"))) {
+    if ((i < 30) || (i > 1200))
+      return;
+  }
+  *valid = 1;
+  return;
+}
+
+struct cfg_entry CFG_OPBOTS = {
+  "op-bots", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_INBOTS = {
+  "in-bots", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_LAGTHRESHOLD = {
+  "lag-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_OPREQUESTS = {
+  "op-requests", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_OPTIMESLACK = {
+  "op-time-slack", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+#ifdef G_AUTOLOCK
+struct cfg_entry CFG_LOCKTHRESHOLD = {
+  "lock-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_KILLTHRESHOLD = {
+  "kill-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+
+struct cfg_entry CFG_FIGHTTHRESHOLD = {
+  "fight-threshold", CFGF_GLOBAL, NULL, NULL,
+  getin_changed, NULL, getin_describe
+};
+#endif /* G_AUTOLOCK */
+
+
+/* cloak
+void cloak_describe(struct cfg_entry *cfgent, int idx)
+{
+  dprintf(idx, STR("cloak-script decides which BitchX script the bot cloaks. If set to 6, a random script will be cloaked.\n"));
+  dprintf(idx, STR("Available: 0=crackrock, 1=neonapple, 2=tunnelvision, 3=argon, 4=evolver, 5=prevail\n"));
+}
+void cloak_changed(struct cfg_entry *cfgent, char * oldval, int * valid) {
+  char * p;
+  int i;
+  p = cfgent->ldata ? cfgent->ldata : cfgent->gdata;
+  if (!p)
+    return;
+  i=atoi(p);
+#ifdef LEAF
+  if (i>=6)
+    i = random() % 6;
+#endif
+  *valid = ( (i>=0) && (i<=6));
+  if (*valid)
+    cloak_script = i;
+#ifdef LEAF
+  scriptchanged();
+#endif
+}
+
+struct cfg_entry CFG_CLOAK_SCRIPT = {
+  "cloak-script", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+  cloak_changed, cloak_changed, cloak_describe
+};
+*/
+#endif
+/* end hub compat cfg */
+
+int cfg_count=0;
+struct cfg_entry ** cfg = NULL;
+int cfg_noshare=0;
 
 /* Expected memory usage
  */
 int expmem_misc()
 {
-  struct help_ref *current;
-  struct help_list_t *item;
-  int tot = 0;
+#ifdef S_DCCPASS
+  struct cmd_pass *cp = NULL;
+#endif
 
-  for (current = help_list; current; current = current->next) {
-    tot += sizeof(struct help_ref) + strlen(current->name) + 1;
+  int tot = 0, i;
 
-    for (item = current->first; item; item = item->next)
-      tot += sizeof(struct help_list_t) + strlen(item->name) + 1;
+  for (i=0;i<cfg_count;i++) {
+    tot += sizeof(void *);
+    if (cfg[i]->gdata)
+      tot += strlen(cfg[i]->gdata) + 1;
+    if (cfg[i]->ldata)
+      tot += strlen(cfg[i]->ldata) + 1;
   }
+#ifdef S_DCCPASS
+  for (cp=cmdpass;cp;cp=cp->next) {
+    tot += sizeof(struct cmd_pass) + strlen(cp->name)+1;
+  }
+#endif
+  tot = sizeof(struct auth_t) * max_auth;
+
   return tot + (max_logs * sizeof(log_t));
 }
+void init_auth_max()
+{
+  if (max_auth < 1)
+    max_auth = 1;
+  if (auth)
+    auth = nrealloc(auth, sizeof(struct auth_t) * max_auth);
+  else
+    auth = nmalloc(sizeof(struct auth_t) * max_auth);
 
+}
 void init_misc()
 {
+
   static int last = 0;
+
+  init_auth_max();
 
   if (max_logs < 1)
     max_logs = 1;
@@ -109,6 +524,46 @@ void init_misc()
     /* Added by rtc  */
     logs[last].flags = 0;
   }
+
+  add_cfg(&CFG_AUTHKEY);
+//  add_cfg(&CFG_CMDPREFIX);
+  add_cfg(&CFG_MOTD);
+  add_cfg(&CFG_FORKINTERVAL);
+#ifdef S_LASTCHECK
+  add_cfg(&CFG_LOGIN);
+#endif
+#ifdef S_HIJACKCHECK
+  add_cfg(&CFG_HIJACK);
+#endif
+#ifdef S_ANTITRACE
+  add_cfg(&CFG_TRACE);
+#endif
+#ifdef S_PROMISC
+  add_cfg(&CFG_PROMISC);
+#endif
+#ifdef S_PROCESSCHECK
+  add_cfg(&CFG_BADPROCESS);
+  add_cfg(&CFG_PROCESSLIST);
+#endif
+#ifdef HUB
+  add_cfg(&CFG_NICK);
+  add_cfg(&CFG_SERVERS);
+  add_cfg(&CFG_SERVERS6);
+  add_cfg(&CFG_REALNAME);
+  set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders");
+  add_cfg(&CFG_OPBOTS);
+  add_cfg(&CFG_INBOTS);
+  add_cfg(&CFG_LAGTHRESHOLD);
+  add_cfg(&CFG_OPREQUESTS);
+  add_cfg(&CFG_OPTIMESLACK);
+#ifdef G_AUTOLOCK
+  add_cfg(&CFG_LOCKTHRESHOLD);
+  add_cfg(&CFG_KILLTHRESHOLD);
+  add_cfg(&CFG_FIGHTTHRESHOLD);
+#endif
+
+//cloak  add_cfg(&CFG_CLOAK_SCRIPT);
+#endif
 }
 
 
@@ -470,7 +925,90 @@ void daysdur(time_t now, time_t then, char *out)
   sprintf(s, "%02d:%02d", hrs, mins);
   strcat(out, s);
 }
+/* show l33t banner */
+void show_banner(int idx)
+{
+  dprintf(idx, "                    _ _   _     \n");
+  dprintf(idx, "__      ___ __ __ _(_) |_| |__  \n");
+  dprintf(idx, "\\ \\ /\\ / / '__/ _` | | __| '_ \\ \n");
+  dprintf(idx, " \\ V  V /| | | (_| | | |_| | | |\n");
+  dprintf(idx, "  \\_/\\_/ |_|  \\__,_|_|\\__|_| |_|\n");
+  dprintf(idx, "           by bryan          \n");
+}
 
+/* show motd to dcc chatter */
+void show_motd(int idx)
+{
+
+  dprintf(idx, STR("Motd: "));
+  if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata)
+    dprintf(idx, STR("%s\n"), (char *) CFG_MOTD.gdata);
+  else
+    dprintf(idx, STR("none\n"));
+}
+void show_channels(int idx, char *handle)
+{
+  struct chanset_t *chan;
+  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0, 0 };
+  struct userrec *u;
+  int first = 0, l = 0;
+  char format[120];
+
+  for (chan = chanset;chan;chan = chan->next)
+    if (l < strlen(chan->dname))
+      l = strlen(chan->dname);
+
+Context;
+  if (handle)
+    u = get_user_by_handle(userlist, handle);
+  else
+    u = dcc[idx].user;
+
+Context;
+
+  egg_snprintf(format, sizeof format, "  %%-%us %%-s%%-s%%-s%%-s\n", (l+2));
+
+  for (chan = chanset;chan;chan = chan->next) {
+    get_user_flagrec(u, &fr, chan->dname);
+
+Context;
+    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+       (glob_owner(fr) || ((glob_op(fr) || chan_op(fr)) && !(chan_deop(fr) || glob_deop(fr))))) {
+        if (!first) { 
+          dprintf(idx, STR("%s %s access to these channels:\n"), handle ? u->handle : "You", handle ? "has" : "have");
+          
+          first = 1;
+        }
+        dprintf(idx, format, chan->dname, channel_inactive(chan) ? "(inactive) " : "", 
+           channel_private(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
+           channel_bitch(chan) ? "(bitch)" : "");
+    }
+  }
+  if (!first)
+    dprintf(idx, "You do not have access to any channels.\n");
+Context;
+
+}
+int getting_users()
+{
+  int i;
+
+  for (i = 0; i < dcc_total; i++)
+    if ((dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_GETTING))
+      return 1;
+  return 0;
+}
+
+int prand(int *seed, int range)
+{
+  long long i1;
+
+  i1 = *seed;
+  i1 = (i1 * 0x08088405 + 1) & 0xFFFFFFFF;
+  *seed = i1;
+  i1 = (i1 * range) >> 32;
+  return i1;
+}
 
 /*
  *    Logging functions
@@ -481,30 +1019,47 @@ void daysdur(time_t now, time_t then, char *out)
  */
 void putlog EGG_VARARGS_DEF(int, arg1)
 {
-  int i, type;
-  char *format, *chname, s[LOGLINELEN], s1[256], *out;
-  time_t tt;
-  char ct[81], *s2;
-  struct tm *t = localtime(&now);
+  int i, type, tsl = 0, dohl = 0; //hl
+  char *format, *chname, s[LOGLINELEN], s1[256], *out, ct[81], *s2, stamp[34], buf2[LOGLINELEN]; // *hub, hublog[20], mys[256]
   va_list va;
-
+#ifdef HUB
+  time_t now2 = time(NULL);
+#endif
+  struct tm *t;
+  t = 0;
   type = EGG_VARARGS_START(int, arg1, va);
   chname = va_arg(va, char *);
   format = va_arg(va, char *);
+//The putlog should not be broadcast over bots, @ is *.
+  if ((chname[0] == '*'))
+    dohl = 1;
+#ifdef HUB
+  if (shtime) {
+    t = localtime(&now2);
+    egg_strftime(stamp, sizeof(stamp) - 2, LOG_TS, t);
+    strcat(stamp, " ");
+   tsl = strlen(stamp);
+  }
+#endif
+ 
 
-  /* Format log entry at offset 8, then i can prepend the timestamp */
-  out = &s[8];
+  /* Format log entry at offset 'tsl,' then i can prepend the timestamp */
+  out = s+tsl;
+
   /* No need to check if out should be null-terminated here,
    * just do it! <cybah>
    */
-  egg_vsnprintf(out, LOGLINEMAX - 8, format, va);
-  out[LOGLINEMAX - 8] = 0;
-  tt = now;
+
+  egg_vsnprintf(out, LOGLINEMAX - tsl, format, va);
+//  egg_vsnprintf(hub, LOGLINEMAX - hl, format, va);
+
+  out[LOGLINEMAX - tsl] = 0;
+//  hub[LOGLINEMAX - hl] = 0;
   if (keep_all_logs) {
     if (!logfile_suffix[0])
-      egg_strftime(ct, 12, ".%d%b%Y", localtime(&tt));
+      egg_strftime(ct, 12, ".%d%b%Y", t);
     else {
-      egg_strftime(ct, 80, logfile_suffix, localtime(&tt));
+      egg_strftime(ct, 80, logfile_suffix, t);
       ct[80] = 0;
       s2 = ct;
       /* replace spaces by underscores */
@@ -515,16 +1070,22 @@ void putlog EGG_VARARGS_DEF(int, arg1)
       }
     }
   }
+  /* Place the timestamp in the string to be printed */
   if ((out[0]) && (shtime)) {
-    egg_strftime(s1, 9, "[%H:%M] ", localtime(&tt));
-    strncpy(&s[0], s1, 8);
+    strncpy(s, stamp, tsl);
     out = s;
   }
+  /* if (hub[0]) {
+    strncpy(mys, hublog, hl);
+    hub = mys;
+  }*/
+
   strcat(out, "\n");
+//  strcat(hub, "\n");
   if (!use_stderr) {
     for (i = 0; i < max_logs; i++) {
       if ((logs[i].filename != NULL) && (logs[i].mask & type) &&
-	  ((chname[0] == '*') || (logs[i].chname[0] == '*') ||
+	  ((chname[0] == '@') || (chname[0] == '*') || (logs[i].chname[0] == '*') ||
 	   (!rfc_casecmp(chname, logs[i].chname)))) {
 	if (logs[i].f == NULL) {
 	  /* Open this logfile */
@@ -538,10 +1099,10 @@ void putlog EGG_VARARGS_DEF(int, arg1)
 	  /* Check if this is the same as the last line added to
 	   * the log. <cybah>
 	   */
-	  if (!egg_strcasecmp(out + 8, logs[i].szlast)) {
+          if (!egg_strcasecmp(out + tsl, logs[i].szlast))
 	    /* It is a repeat, so increment repeats */
 	    logs[i].repeats++;
-	  } else {
+	  else {
 	    /* Not a repeat, check if there were any repeat
 	     * lines previously...
 	     */
@@ -550,28 +1111,45 @@ void putlog EGG_VARARGS_DEF(int, arg1)
 	       * then reset repeats. We want the current time here,
 	       * so put that in the file first.
 	       */
-	      if (t) {
-		fprintf(logs[i].f, "[%2.2d:%2.2d] ", t->tm_hour, t->tm_min);
-		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
-	      } else {
-		fprintf(logs[i].f, "[??:??] ");
-		fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
-	      }
+              fprintf(logs[i].f, stamp);
+	      fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
+	      
 	      logs[i].repeats = 0;
 	      /* No need to reset logs[i].szlast here
 	       * because we update it later on...
 	       */
 	    }
 	    fputs(out, logs[i].f);
-	    strncpyz(logs[i].szlast, out + 8, LOGLINEMAX);
+           strncpyz(logs[i].szlast, out + tsl, LOGLINEMAX);
 	  }
 	}
       }
     }
   }
+/* echo line to hubs (not if it was on a +h though)*/
+
+  if (dohl) {
+    tand_t *bot;
+    struct userrec *ubot;
+Context;
+    sprintf(buf2, "hl %d %s", type, out);
+    if (userlist && !loading) {
+      for (bot = tandbot ;bot ; bot = bot->next) {
+        ubot = get_user_by_handle(userlist, bot->bot);
+        if (ubot) {
+          if (bot_hublevel(ubot) < 999) {
+            putbot(ubot->handle, buf2);
+          }
+        }
+      }
+    } else {
+      botnet_send_zapf_broad(-1, botnetnick, NULL, buf2);
+    }
+  }
+
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_CHAT) && (dcc[i].u.chat->con_flags & type)) {
-      if ((chname[0] == '*') || (dcc[i].u.chat->con_chan[0] == '*') ||
+      if ((chname[0] == '@') || (chname[0] == '*') || (dcc[i].u.chat->con_chan[0] == '*') ||
 	  (!rfc_casecmp(chname, dcc[i].u.chat->con_chan)))
 	dprintf(i, "%s", out);
     }
@@ -579,7 +1157,7 @@ void putlog EGG_VARARGS_DEF(int, arg1)
     dprintf(DP_STDOUT, "%s", out);
   else if ((type & LOG_MISC) && use_stderr) {
     if (shtime)
-      out += 8;
+      out += tsl;
     dprintf(DP_STDERR, "%s", s);
   }
   va_end(va);
@@ -646,7 +1224,6 @@ void check_logsize()
 void flushlogs()
 {
   int i;
-  struct tm *t = localtime(&now);
 
   /* Logs may not be initialised yet. */
   if (!logs)
@@ -657,17 +1234,14 @@ void flushlogs()
    */
   for (i = 0; i < max_logs; i++) {
     if (logs[i].f != NULL) {
-       if ((logs[i].repeats > 0) && quick_logs) {
+      if ((logs[i].repeats > 0) && quick_logs) {
          /* Repeat.. if quicklogs used then display 'last message
           * repeated x times' and reset repeats.
 	  */
-	if (t) {
-	  fprintf(logs[i].f, "[%2.2d:%2.2d] ", t->tm_hour, t->tm_min);
-	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
-	} else {
-	  fprintf(logs[i].f, "[??:??] ");
-	  fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
-	}
+         char stamp[32];
+         egg_strftime(&stamp[0], 32, LOG_TS, localtime(&now));
+         fprintf(logs[i].f, "%s ", stamp);
+	 fprintf(logs[i].f, MISC_LOGREPEAT, logs[i].repeats);
 	/* Reset repeats */
 	logs[i].repeats = 0;
       }
@@ -677,711 +1251,39 @@ void flushlogs()
 }
 
 
-/*
- *     String substitution functions
- */
-
-static int	 cols = 0;
-static int	 colsofar = 0;
-static int	 blind = 0;
-static int	 subwidth = 70;
-static char	*colstr = NULL;
-
-
-/* Add string to colstr
- */
-static void subst_addcol(char *s, char *newcol)
-{
-  char *p, *q;
-  int i, colwidth;
-
-  if ((newcol[0]) && (newcol[0] != '\377'))
-    colsofar++;
-  colstr = nrealloc(colstr, strlen(colstr) + strlen(newcol) +
-		    (colstr[0] ? 2 : 1));
-  if ((newcol[0]) && (newcol[0] != '\377')) {
-    if (colstr[0])
-      strcat(colstr, "\377");
-    strcat(colstr, newcol);
-  }
-  if ((colsofar == cols) || ((newcol[0] == '\377') && (colstr[0]))) {
-    colsofar = 0;
-    strcpy(s, "     ");
-    colwidth = (subwidth - 5) / cols;
-    q = colstr;
-    p = strchr(colstr, '\377');
-    while (p != NULL) {
-      *p = 0;
-      strcat(s, q);
-      for (i = strlen(q); i < colwidth; i++)
-	strcat(s, " ");
-      q = p + 1;
-      p = strchr(q, '\377');
-    }
-    strcat(s, q);
-    nfree(colstr);
-    colstr = (char *) nmalloc(1);
-    colstr[0] = 0;
-  }
-}
-
-/* Substitute %x codes in help files
- *
- * %B = bot nickname
- * %V = version
- * %C = list of channels i monitor
- * %E = eggdrop banner
- * %A = admin line
- * %n = network name
- * %T = current time ("14:15")
- * %N = user's nickname
- * %U = display system name if possible
- * %{+xy}     require flags to read this section
- * %{-}       turn of required flag matching only
- * %{center}  center this line
- * %{cols=N}  start of columnated section (indented)
- * %{help=TOPIC} start a section for a particular command
- * %{end}     end of section
- */
-#define HELP_BUF_LEN 256
-#define HELP_BOLD  1
-#define HELP_REV   2
-#define HELP_UNDER 4
-#define HELP_FLASH 8
-
-void help_subst(char *s, char *nick, struct flag_record *flags,
-		int isdcc, char *topic)
-{
-  char xx[HELP_BUF_LEN + 1], sub[161], *current, *q, chr, *writeidx,
-  *readidx, *towrite;
-  struct chanset_t *chan;
-  int i, j, center = 0;
-  static int help_flags;
-#ifdef HAVE_UNAME
-  struct utsname uname_info;
-#endif
-
-  if (s == NULL) {
-    /* Used to reset substitutions */
-    blind = 0;
-    cols = 0;
-    subwidth = 70;
-    if (colstr != NULL) {
-      nfree(colstr);
-      colstr = NULL;
-    }
-    help_flags = isdcc;
-    return;
-  }
-  strncpyz(xx, s, sizeof xx);
-  readidx = xx;
-  writeidx = s;
-  current = strchr(readidx, '%');
-  while (current) {
-    /* Are we about to copy a chuck to the end of the buffer?
-     * if so return
-     */
-    if ((writeidx + (current - readidx)) >= (s + HELP_BUF_LEN)) {
-      strncpy(writeidx, readidx, (s + HELP_BUF_LEN) - writeidx);
-      s[HELP_BUF_LEN] = 0;
-      return;
-    }
-    chr = *(current + 1);
-    *current = 0;
-    if (!blind)
-      writeidx += my_strcpy(writeidx, readidx);
-    towrite = NULL;
-    switch (chr) {
-    case 'b':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_IRC) {
-	  towrite = "\002";
-	} else if (help_flags & HELP_BOLD) {
-	  help_flags &= ~HELP_BOLD;
-	  towrite = "\033[0m";
-	} else {
-	  help_flags |= HELP_BOLD;
-	  towrite = "\033[1m";
-	}
-      }
-      break;
-    case 'v':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_IRC) {
-	  towrite = "\026";
-	} else if (help_flags & HELP_REV) {
-	  help_flags &= ~HELP_REV;
-	  towrite = "\033[0m";
-	} else {
-	  help_flags |= HELP_REV;
-	  towrite = "\033[7m";
-	}
-      }
-      break;
-    case '_':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_IRC) {
-	  towrite = "\037";
-	} else if (help_flags & HELP_UNDER) {
-	  help_flags &= ~HELP_UNDER;
-	  towrite = "\033[0m";
-	} else {
-	  help_flags |= HELP_UNDER;
-	  towrite = "\033[4m";
-	}
-      }
-      break;
-    case 'f':
-      if (glob_hilite(*flags)) {
-	if (help_flags & HELP_FLASH) {
-	  if (help_flags & HELP_IRC) {
-	    towrite = "\002\037";
-	  } else {
-	    towrite = "\033[0m";
-	  }
-	  help_flags &= ~HELP_FLASH;
-	} else {
-	  help_flags |= HELP_FLASH;
-	  if (help_flags & HELP_IRC) {
-	    towrite = "\037\002";
-	  } else {
-	    towrite = "\033[5m";
-	  }
-	}
-      }
-      break;
-    case 'U':
-#ifdef HAVE_UNAME
-      if (uname(&uname_info) >= 0) {
-	egg_snprintf(sub, sizeof sub, "%s %s", uname_info.sysname,
-		       uname_info.release);
-	towrite = sub;
-      } else
-#endif
-	towrite = "*UNKNOWN*";
-      break;
-    case 'B':
-      towrite = (isdcc ? botnetnick : botname);
-      break;
-    case 'V':
-      towrite = ver;
-      break;
-    case 'E':
-      towrite = version;
-      break;
-    case 'A':
-      towrite = admin;
-      break;
-    case 'n':
-      towrite = network;
-      break;
-    case 'T':
-      egg_strftime(sub, 6, "%H:%M", localtime(&now));
-      towrite = sub;
-      break;
-    case 'N':
-      towrite = strchr(nick, ':');
-      if (towrite)
-	towrite++;
-      else
-	towrite = nick;
-      break;
-    case 'C':
-      if (!blind)
-	for (chan = chanset; chan; chan = chan->next) {
-	  if ((strlen(chan->dname) + writeidx + 2) >=
-	      (s + HELP_BUF_LEN)) {
-	    strncpy(writeidx, chan->dname, (s + HELP_BUF_LEN) - writeidx);
-	    s[HELP_BUF_LEN] = 0;
-	    return;
-	  }
-	  writeidx += my_strcpy(writeidx, chan->dname);
-	  if (chan->next) {
-	    *writeidx++ = ',';
-	    *writeidx++ = ' ';
-	  }
-	}
-      break;
-    case '{':
-      q = current;
-      current++;
-      while ((*current != '}') && (*current))
-	current++;
-      if (*current) {
-	*current = 0;
-	current--;
-	q += 2;
-	/* Now q is the string and p is where the rest of the fcn expects */
-	if (!strncmp(q, "help=", 5)) {
-	  if (topic && egg_strcasecmp(q + 5, topic))
-	    blind |= 2;
-	  else
-	    blind &= ~2;
-	} else if (!(blind & 2)) {
-	  if (q[0] == '+') {
-	    struct flag_record fr =
-	    {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-	    break_down_flags(q + 1, &fr, NULL);
-	    if (!flagrec_ok(&fr, flags))
-	      blind |= 1;
-	    else
-	      blind &= ~1;
-	  } else if (q[0] == '-') {
-	    blind &= ~1;
-	  } else if (!egg_strcasecmp(q, "end")) {
-	    blind &= ~1;
-	    subwidth = 70;
-	    if (cols) {
-	      sub[0] = 0;
-	      subst_addcol(sub, "\377");
-	      nfree(colstr);
-	      colstr = NULL;
-	      cols = 0;
-	      towrite = sub;
-	    }
-	  } else if (!egg_strcasecmp(q, "center"))
-	    center = 1;
-	  else if (!strncmp(q, "cols=", 5)) {
-	    char *r;
-
-	    cols = atoi(q + 5);
-	    colsofar = 0;
-	    colstr = (char *) nmalloc(1);
-	    colstr[0] = 0;
-	    r = strchr(q + 5, '/');
-	    if (r != NULL)
-	      subwidth = atoi(r + 1);
-	  }
-	}
-      } else
-	current = q;		/* no } so ignore */
-      break;
-    default:
-      if (!blind) {
-	*writeidx++ = chr;
-	if (writeidx >= (s + HELP_BUF_LEN)) {
-	  *writeidx = 0;
-	  return;
-	}
-      }
-    }
-    if (towrite && !blind) {
-      if ((writeidx + strlen(towrite)) >= (s + HELP_BUF_LEN)) {
-	strncpy(writeidx, towrite, (s + HELP_BUF_LEN) - writeidx);
-	s[HELP_BUF_LEN] = 0;
-	return;
-      }
-      writeidx += my_strcpy(writeidx, towrite);
-    }
-    if (chr) {
-      readidx = current + 2;
-      current = strchr(readidx, '%');
-    } else {
-      readidx = current + 1;
-      current = NULL;
-    }
-  }
-  if (!blind) {
-    i = strlen(readidx);
-    if (i && ((writeidx + i) >= (s + HELP_BUF_LEN))) {
-      strncpy(writeidx, readidx, (s + HELP_BUF_LEN) - writeidx);
-      s[HELP_BUF_LEN] = 0;
-      return;
-    }
-    strcpy(writeidx, readidx);
-  } else
-    *writeidx = 0;
-  if (center) {
-    strcpy(xx, s);
-    i = 35 - (strlen(xx) / 2);
-    if (i > 0) {
-      s[0] = 0;
-      for (j = 0; j < i; j++)
-	s[j] = ' ';
-      strcpy(s + i, xx);
-    }
-  }
-  if (cols) {
-    strcpy(xx, s);
-    s[0] = 0;
-    subst_addcol(s, xx);
-  }
-}
-
-static void scan_help_file(struct help_ref *current, char *filename, int type)
-{
-  FILE *f;
-  char s[HELP_BUF_LEN + 1], *p, *q;
-  struct help_list_t *list;
-
-  if (is_file(filename) && (f = fopen(filename, "r"))) {
-    while (!feof(f)) {
-      fgets(s, HELP_BUF_LEN, f);
-      if (!feof(f)) {
-	p = s;
-	while ((q = strstr(p, "%{help="))) {
-	  q += 7;
-	  if ((p = strchr(q, '}'))) {
-	    *p = 0;
-	    list = nmalloc(sizeof(struct help_list_t));
-
-	    list->name = nmalloc(p - q + 1);
-	    strcpy(list->name, q);
-	    list->next = current->first;
-	    list->type = type;
-	    current->first = list;
-	    p++;
-	  } else
-	    p = "";
-	}
-      }
-    }
-    fclose(f);
-  }
-}
-
-void add_help_reference(char *file)
-{
-  char s[1024];
-  struct help_ref *current;
-
-  for (current = help_list; current; current = current->next)
-    if (!strcmp(current->name, file))
-      return;			/* Already exists, can't re-add :P */
-  current = nmalloc(sizeof(struct help_ref));
-
-  current->name = nmalloc(strlen(file) + 1);
-  strcpy(current->name, file);
-  current->next = help_list;
-  current->first = NULL;
-  help_list = current;
-  egg_snprintf(s, sizeof s, "%smsg/%s", helpdir, file);
-  scan_help_file(current, s, 0);
-  egg_snprintf(s, sizeof s, "%s%s", helpdir, file);
-  scan_help_file(current, s, 1);
-  egg_snprintf(s, sizeof s, "%sset/%s", helpdir, file);
-  scan_help_file(current, s, 2);
-}
-
-void rem_help_reference(char *file)
-{
-  struct help_ref *current, *last = NULL;
-  struct help_list_t *item;
-
-  for (current = help_list; current; last = current, current = current->next)
-    if (!strcmp(current->name, file)) {
-      while ((item = current->first)) {
-	current->first = item->next;
-	nfree(item->name);
-	nfree(item);
-      }
-      nfree(current->name);
-      if (last)
-	last->next = current->next;
-      else
-	help_list = current->next;
-      nfree(current);
-      return;
-    }
-}
-
-void reload_help_data(void)
-{
-  struct help_ref *current = help_list, *next;
-  struct help_list_t *item;
-
-  help_list = NULL;
-  while (current) {
-    while ((item = current->first)) {
-      current->first = item->next;
-      nfree(item->name);
-      nfree(item);
-    }
-    add_help_reference(current->name);
-    nfree(current->name);
-    next = current->next;
-    nfree(current);
-    current = next;
-  }
-}
-
-void debug_help(int idx)
-{
-  struct help_ref *current;
-  struct help_list_t *item;
-
-  for (current = help_list; current; current = current->next) {
-    dprintf(idx, "HELP FILE(S): %s\n", current->name);
-    for (item = current->first; item; item = item->next) {
-      dprintf(idx, "   %s (%s)\n", item->name, (item->type == 0) ? "msg/" :
-	      (item->type == 1) ? "" : "set/");
-    }
-  }
-}
-
-FILE *resolve_help(int dcc, char *file)
-{
-
-  char s[1024];
-  FILE *f;
-  struct help_ref *current;
-  struct help_list_t *item;
-
-  /* Somewhere here goes the eventual substituation */
-  if (!(dcc & HELP_TEXT))
-  {
-    for (current = help_list; current; current = current->next)
-      for (item = current->first; item; item = item->next)
-	if (!strcmp(item->name, file)) {
-	  if (!item->type && !dcc) {
-	    egg_snprintf(s, sizeof s, "%smsg/%s", helpdir, current->name);
-	    if ((f = fopen(s, "r")))
-	      return f;
-	  } else if (dcc && item->type) {
-	    if (item->type == 1)
-	      egg_snprintf(s, sizeof s, "%s%s", helpdir, current->name);
-	    else
-	      egg_snprintf(s, sizeof s, "%sset/%s", helpdir, current->name);
-	    if ((f = fopen(s, "r")))
-	      return f;
-	  }
-	}
-    /* No match was found, so we better return NULL */
-    return NULL;
-  }
-  /* Since we're not dealing with help files, we should just prepend the filename with textdir */
-  simple_sprintf(s, "%s%s", textdir, file);
-  if (is_file(s))
-    return fopen(s, "r");
-  else
-    return NULL;
-}
-
-void showhelp(char *who, char *file, struct flag_record *flags, int fl)
-{
-  int lines = 0;
-  char s[HELP_BUF_LEN + 1];
-  FILE *f = resolve_help(fl, file);
-
-  if (f) {
-    help_subst(NULL, NULL, 0, HELP_IRC, NULL);	/* Clear flags */
-    while (!feof(f)) {
-      fgets(s, HELP_BUF_LEN, f);
-      if (!feof(f)) {
-	if (s[strlen(s) - 1] == '\n')
-	  s[strlen(s) - 1] = 0;
-	if (!s[0])
-	  strcpy(s, " ");
-	help_subst(s, who, flags, 0, file);
-	if ((s[0]) && (strlen(s) > 1)) {
-	  dprintf(DP_HELP, "NOTICE %s :%s\n", who, s);
-	  lines++;
-	}
-      }
-    }
-    fclose(f);
-  }
-  if (!lines && !(fl & HELP_TEXT))
-    dprintf(DP_HELP, "NOTICE %s :%s\n", who, IRC_NOHELP2);
-}
-
-static int display_tellhelp(int idx, char *file, FILE *f,
-			    struct flag_record *flags)
-{
-  char s[HELP_BUF_LEN + 1];
-  int lines = 0;
-
-  if (f) {
-    help_subst(NULL, NULL, 0,
-	       (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-    while (!feof(f)) {
-      fgets(s, HELP_BUF_LEN, f);
-      if (!feof(f)) {
-	if (s[strlen(s) - 1] == '\n')
-	  s[strlen(s) - 1] = 0;
-	if (!s[0])
-	  strcpy(s, " ");
-	help_subst(s, dcc[idx].nick, flags, 1, file);
-	if (s[0]) {
-	  dprintf(idx, "%s\n", s);
-	  lines++;
-	}
-      }
-    }
-    fclose(f);
-  }
-  return lines;
-}
-
-void tellhelp(int idx, char *file, struct flag_record *flags, int fl)
-{
-  int lines = 0;
-  FILE *f = resolve_help(HELP_DCC | fl, file);
-
-  if (f)
-    lines = display_tellhelp(idx, file, f, flags);
-  if (!lines && !(fl & HELP_TEXT))
-    dprintf(idx, "%s\n", IRC_NOHELP2);
-}
-
-/* Same as tellallhelp, just using wild_match instead of strcmp
- */
-void tellwildhelp(int idx, char *match, struct flag_record *flags)
-{
-  struct help_ref *current;
-  struct help_list_t *item;
-  FILE *f;
-  char s[1024];
-
-  s[0] = '\0';
-  for (current = help_list; current; current = current->next)
-    for (item = current->first; item; item = item->next)
-      if (wild_match(match, item->name) && item->type) {
-	if (item->type == 1)
-	  egg_snprintf(s, sizeof s, "%s%s", helpdir, current->name);
-	else
-	  egg_snprintf(s, sizeof s, "%sset/%s", helpdir, current->name);
-	if ((f = fopen(s, "r")))
-	  display_tellhelp(idx, item->name, f, flags);
-      }
-  if (!s[0])
-    dprintf(idx, "%s\n", IRC_NOHELP2);
-}
-
-/* Same as tellwildhelp, just using strcmp instead of wild_match
- */
-void tellallhelp(int idx, char *match, struct flag_record *flags)
-{
-  struct help_ref *current;
-  struct help_list_t *item;
-  FILE *f;
-  char s[1024];
-
-  s[0] = '\0';
-  for (current = help_list; current; current = current->next)
-    for (item = current->first; item; item = item->next)
-      if (!strcmp(match, item->name) && item->type) {
-
-	if (item->type == 1)
-	  egg_snprintf(s, sizeof s, "%s%s", helpdir, current->name);
-	else
-	  egg_snprintf(s, sizeof s, "%sset/%s", helpdir, current->name);
-	if ((f = fopen(s, "r")))
-	  display_tellhelp(idx, item->name, f, flags);
-      }
-  if (!s[0])
-    dprintf(idx, "%s\n", IRC_NOHELP2);
-}
-
-/* Substitute vars in a lang text to dcc chatter
- */
-void sub_lang(int idx, char *text)
-{
-  char s[1024];
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  help_subst(NULL, NULL, 0,
-	     (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-  strncpyz(s, text, sizeof s);
-  if (s[strlen(s) - 1] == '\n')
-    s[strlen(s) - 1] = 0;
-  if (!s[0])
-    strcpy(s, " ");
-  help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
-  if (s[0])
-    dprintf(idx, "%s\n", s);
-}
-
-/* This will return a pointer to the first character after the @ in the
- * string given it.  Possibly it's time to think about a regexp library
- * for eggdrop...
- */
 char *extracthostname(char *hostmask)
 {
   char *p = strrchr(hostmask, '@');
   return p ? p + 1 : "";
 }
 
-/* Show motd to dcc chatter
- */
-void show_motd(int idx)
-{
-  FILE *vv;
-  char s[1024];
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  if (!is_file(motdfile))
-    return;
-
-  vv = fopen(motdfile, "r");
-  if (!vv)
-    return;
-
-  get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  dprintf(idx, "\n");
-  /* reset the help_subst variables to their defaults */
-  help_subst(NULL, NULL, 0,
-	     (dcc[idx].status & STAT_TELNET) ? 0 : HELP_IRC, NULL);
-  while (!feof(vv)) {
-    fgets(s, 120, vv);
-    if (!feof(vv)) {
-      if (s[strlen(s) - 1] == '\n')
-	s[strlen(s) - 1] = 0;
-      if (!s[0])
-	strcpy(s, " ");
-      help_subst(s, dcc[idx].nick, &fr, 1, botnetnick);
-      if (s[0])
-	dprintf(idx, "%s\n", s);
-    }
-  }
-  fclose(vv);
-  dprintf(idx, "\n");
-}
-
-/* Show banner to telnet user 
- */
-void show_banner(int idx) {
-  FILE *vv;
-  char s[1024];
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-
-  if (!is_file(bannerfile))
-    return;
-
-  vv = fopen(bannerfile, "r");
-  if (!vv)
-    return;
-
-  get_user_flagrec(dcc[idx].user, &fr,dcc[idx].u.chat->con_chan);
-  /* reset the help_subst variables to their defaults */
-  help_subst(NULL, NULL, 0, 0, NULL);
-  while(!feof(vv)) {
-    fgets(s, 120, vv);
-    if (!feof(vv)) {
-      if (!s[0])
-	strcpy(s, " \n");
-      help_subst(s, dcc[idx].nick, &fr, 0, botnetnick);
-      dprintf(idx, "%s", s);
-    }
-  }
-  fclose(vv);
-}
-
 /* Create a string with random letters and digits
  */
 void make_rand_str(char *s, int len)
 {
-  int j;
+  int j, r = 0;
 
+Context;
   for (j = 0; j < len; j++) {
-    if (random() % 3 == 0)
+    r = random();
+Context;
+    if (r % 4 == 0)
       s[j] = '0' + (random() % 10);
-    else
+    else if (r % 4 == 1)
       s[j] = 'a' + (random() % 26);
+    else if (r % 4 == 2)
+      s[j] = 'A' + (random() % 26);
+    else
+      s[j] = '!' + (random() % 15);
+
+    if (s[j] == 37) //take out % because mIRC is lame and bugged with % in $md5(text)
+      s[j] = 35;
   }
-  s[len] = 0;
+
+
+  s[len] = '\0';
+//  s[len] = 0;
+Context;
 }
 
 /* Convert an octal string into a decimal integer value.  If the string
@@ -1490,10 +1392,1363 @@ void str_unescape(char *str, register const char esc_char)
  */
 void kill_bot(char *s1, char *s2)
 {
+#ifdef HUB
+  write_userfile(-1);
+#endif
   call_hook(HOOK_DIE);
   chatout("*** %s\n", s1);
   botnet_send_chat(-1, botnetnick, s1);
   botnet_send_bye();
-  write_userfile(-1);
   fatal(s2, 0);
 }
+int isupdatehub()
+{
+#ifdef HUB
+  struct userrec *buser;
+  buser = get_user_by_handle(userlist, botnetnick);
+  if ((buser) && (buser->flags & USER_UPDATEHUB))
+    return 1;
+  else
+#endif
+    return 0;
+
+}
+int ischanhub()
+{
+
+  struct userrec *buser;
+  buser = get_user_by_handle(userlist, botnetnick);
+  if ((buser) && (buser->flags & USER_CHANHUB))
+    return 1;
+  else
+    return 0;
+}
+
+int issechub()
+{
+
+  struct userrec *buser;
+  buser = get_user_by_handle(userlist, botnetnick);
+  if ((buser) && (buser->flags & USER_SECHUB))
+    return 1;
+  else
+    return 0;
+ 
+}
+#ifdef S_DCCPASS
+int check_cmd_pass(char *cmd, char *pass) 
+{
+  struct cmd_pass *cp;
+
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!strcasecmp2(cmd, cp->name)) {
+      char tmp[32];
+
+      encrypt_pass(pass, tmp);
+      if (!strcmp(tmp, cp->pass))
+        return 1;
+      return 0;
+    }
+  return 0;
+}
+
+int has_cmd_pass(char *cmd) 
+{
+  struct cmd_pass *cp;
+
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!strcasecmp2(cmd, cp->name))
+      return 1;
+  return 0;
+}
+
+void set_cmd_pass(char *ln, int shareit) {
+  struct cmd_pass *cp;
+  char *cmd;
+
+  cmd = newsplit(&ln);
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!strcmp(cmd, cp->name))
+      break;
+  if (cp)
+    if (ln[0]) {
+      /* change */
+      strcpy(cp->pass, ln);
+      if (shareit)
+        botnet_send_cmdpass(-1, cp->name, cp->pass);
+    } else {
+      if (cp == cmdpass)
+        cmdpass = cp->next;
+      else {
+        struct cmd_pass *cp2;
+
+        cp2 = cmdpass;
+        while (cp2->next != cp)
+          cp2 = cp2->next;
+        cp2->next = cp->next;
+      }
+      if (shareit)
+        botnet_send_cmdpass(-1, cp->name, "");
+      nfree(cp->name);
+      nfree(cp);
+  } else if (ln[0]) {
+    /* create */
+    cp = nmalloc(sizeof(struct cmd_pass));
+    cp->next = cmdpass;
+    cmdpass = cp;
+    cp->name = nmalloc(strlen(cmd) + 1);
+    strcpy(cp->name, cmd);
+    strcpy(cp->pass, ln);
+    if (shareit)
+      botnet_send_cmdpass(-1, cp->name, cp->pass);
+  }
+}
+#endif
+
+#ifdef S_LASTCHECK
+char last_buf[128]="";
+#endif
+
+void check_last() {
+#ifdef S_LASTCHECK
+  char user[20];
+  struct passwd *pw;
+
+  if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "", STR("nocheck")))
+    return;
+
+Context;
+  pw = getpwuid(geteuid());
+Context;
+  if (!pw) return;
+
+  strncpy0(user, pw->pw_name ? pw->pw_name : "" , sizeof(user));
+  if (user[0]) {
+    char *out;
+    char buf[50];
+
+    sprintf(buf, STR("last %s"), user);
+    if (shell_exec(buf, NULL, &out, NULL)) {
+      if (out) {
+        char *p;
+
+        p = strchr(out, '\n');
+        if (p)
+          *p = 0;
+        if (strlen(out) > 10) {
+          if (last_buf[0]) {
+            if (strncmp(last_buf, out, sizeof(last_buf))) {
+              char wrk[16384];
+
+              sprintf(wrk, STR("Login: %s"), out);
+              detected(DETECT_LOGIN, wrk);
+            }
+          }
+          strncpy0(last_buf, out, sizeof(last_buf));
+        }
+        nfree(out);
+      }
+    }
+  }
+#endif
+}
+
+void check_processes()
+{
+#ifdef S_PROCESSCHECK
+  char *proclist,
+   *out,
+   *p,
+   *np,
+   *curp,
+    buf[1024],
+    bin[128];
+
+  if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "", STR("nocheck")))
+    return;
+
+  proclist = (char *) (CFG_PROCESSLIST.ldata && ((char *) CFG_PROCESSLIST.ldata)[0] ?
+                       CFG_PROCESSLIST.ldata : CFG_PROCESSLIST.gdata && ((char *) CFG_PROCESSLIST.gdata)[0] ? CFG_PROCESSLIST.gdata : NULL);
+  if (!proclist)
+    return;
+
+  if (!shell_exec(STR("ps x"), NULL, &out, NULL))
+    return;
+
+  /* Get this binary's filename */
+  strncpy0(buf, binname, sizeof(buf));
+  p = strrchr(buf, '/');
+  if (p) {
+    p++;
+    strncpy0(bin, p, sizeof(bin));
+  } else {
+    bin[0] = 0;
+  }
+  /* Fix up the "permitted processes" list */
+  p = nmalloc(strlen(proclist) + strlen(bin) + 6);
+  strcpy(p, proclist);
+  strcat(p, " ");
+  strcat(p, bin);
+  strcat(p, " ");
+  proclist = p;
+  curp = out;
+  while (curp) {
+    np = strchr(curp, '\n');
+    if (np)
+      *np++ = 0;
+    if (atoi(curp) > 0) {
+      char *pid,
+       *tty,
+       *stat,
+       *time,
+        cmd[512],
+        line[2048];
+
+      strncpy0(line, curp, sizeof(line));
+      /* it's a process line */
+      /* Assuming format: pid tty stat time cmd */
+      pid = newsplit(&curp);
+      tty = newsplit(&curp);
+      stat = newsplit(&curp);
+      time = newsplit(&curp);
+      strncpy0(cmd, curp, sizeof(cmd));
+      /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff */
+      if (!strstr(cmd, STR("<defunct>")) && !strncmp(cmd, STR("/bin/sh -c"), 10)
+          && !strncmp(cmd, binname, strlen(binname))) {
+        /* get rid of any args */
+        if ((p = strchr(cmd, ' ')))
+          *p = 0;
+        /* remove [] or () */
+        if (strlen(cmd)) {
+          p = cmd + strlen(cmd) - 1;
+          if (((cmd[0] == '(') && (*p == ')')) || ((cmd[0] == '[') && (*p == ']'))) {
+            *p = 0;
+            strcpy(buf, cmd + 1);
+            strcpy(cmd, buf);
+          }
+        }
+
+        /* remove path */
+        if ((p = strrchr(cmd, '/'))) {
+          p++;
+          strcpy(buf, p);
+          strcpy(cmd, buf);
+        }
+
+        /* skip "ps" */
+        if (strcmp(cmd, "ps")) {
+          /* see if proc's in permitted list */
+          strcat(cmd, " ");
+          if ((p = strstr(proclist, cmd))) {
+            /* Remove from permitted list */
+            while (*p != ' ')
+              *p++ = 1;
+          } else {
+            char wrk[16384];
+
+            sprintf(wrk, STR("Unexpected process: %s"), line);
+            detected(DETECT_PROCESS, wrk);
+          }
+        }
+      }
+    }
+    curp = np;
+  }
+  nfree(proclist);
+  if (out)
+    nfree(out);
+#endif /* S_PROCESSCHECK */
+}
+
+void check_promisc()
+{
+#ifdef S_PROMISC
+#ifdef SIOCGIFCONF
+  char buf[8192];
+  struct ifreq ifreq,
+   *ifr;
+  struct ifconf ifcnf;
+  char *cp,
+   *cplim;
+  int sock;
+
+  if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "", STR("nocheck")))
+    return;
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  ifcnf.ifc_len = 8191;
+  ifcnf.ifc_buf = buf;
+  if (ioctl(sock, SIOCGIFCONF, (char *) &ifcnf) < 0) {
+    close(sock);
+    return;
+  }
+  ifr = ifcnf.ifc_req;
+  cplim = buf + ifcnf.ifc_len;
+  for (cp = buf; cp < cplim; cp += sizeof(ifr->ifr_name) + sizeof(ifr->ifr_addr)) {
+    ifr = (struct ifreq *) cp;
+    ifreq = *ifr;
+    if (!ioctl(sock, SIOCGIFFLAGS, (char *) &ifreq)) {
+      if (ifreq.ifr_flags & IFF_PROMISC) {
+        close(sock);
+        detected(DETECT_PROMISC, STR("Detected promiscous mode"));
+        return;
+      }
+    }
+  }
+  close(sock);
+#endif /* SIOCGIFCONF */
+#endif /* S_PROMISC */
+}
+
+#ifdef S_ANTITRACE
+int traced = 0;
+
+void got_trace(int z)
+{
+  traced = 0;
+}
+#endif
+
+void check_trace(int n)
+{
+#ifdef S_ANTITRACE
+  int x,
+    parent,
+    i;
+  struct sigaction sv,
+   *oldsv = NULL;
+
+  if (n && !strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "", STR("nocheck")))
+    return;
+  parent = getpid();
+#ifdef __linux__
+  egg_bzero(&sv, sizeof(sv));
+  sv.sa_handler = got_trace;
+  sigemptyset(&sv.sa_mask);
+  oldsv = NULL;
+  sigaction(SIGTRAP, &sv, oldsv);
+  traced = 1;
+  asm("INT3");
+  sigaction(SIGTRAP, oldsv, NULL);
+  if (traced)
+    detected(DETECT_TRACE, STR("I'm being traced!"));
+  else {
+    x = fork();
+    if (x == -1)
+      return;
+    else if (x == 0) {
+      i = ptrace(PTRACE_ATTACH, parent, 0, 0);
+      if (i == (-1) && errno == EPERM)
+        detected(DETECT_TRACE, STR("I'm being traced!"));
+      else {
+        waitpid(parent, &i, 0);
+        kill(parent, SIGCHLD);
+        ptrace(PTRACE_DETACH, parent, 0, 0);
+        kill(parent, SIGCHLD);
+      }
+      exit(0);
+    } else
+      wait(&i);
+  }
+#endif
+#ifdef __FreeBSD__
+  x = fork();
+  if (x == -1)
+    return;
+  else if (x == 0) {
+    i = ptrace(PT_ATTACH, parent, 0, 0);
+    if (i == (-1) && errno == EBUSY)
+      detected(DETECT_TRACE, STR("I'm being traced"));
+    else {
+      wait(&i);
+      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
+      kill(parent, SIGCHLD);
+      wait(&i);
+      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
+      wait(&i);
+    }
+    exit(0);
+  } else
+    waitpid(x, NULL, 0);
+#endif /* __FreeBSD__ */
+#ifdef __OpenBD__
+  x = fork();
+  if (x == -1)
+    return;
+  else if (x == 0) {
+    i = ptrace(PT_ATTACH, parent, 0, 0);
+    if (i == (-1) && errno == EBUSY)
+      detected(DETECT_TRACE, STR("I'm being traced"));
+    else {
+      wait(&i);
+      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
+      kill(parent, SIGCHLD);
+      wait(&i);
+      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
+      wait(&i);
+    }
+    exit(0);
+  } else
+    waitpid(x, NULL, 0);
+#endif /* __OpenBSD__ */
+#endif /* S_ANTITRACE */
+}
+
+
+struct cfg_entry *check_can_set_cfg(char *target, char *entryname)
+{
+  int i;
+  struct userrec *u;
+  struct cfg_entry *entry = NULL;
+
+  for (i = 0; i < cfg_count; i++)
+    if (!strcmp(cfg[i]->name, entryname)) {
+      entry = cfg[i];
+      break;
+    }
+  if (!entry)
+    return 0;
+  if (target) {
+    if (!(entry->flags & CFGF_LOCAL))
+      return 0;
+    if (!(u = get_user_by_handle(userlist, target)))
+      return 0;
+    if (!(u->flags & USER_BOT))
+      return 0;
+  } else {
+    if (!(entry->flags & CFGF_GLOBAL))
+      return 0;
+  }
+  return entry;
+}
+
+void set_cfg_str(char *target, char *entryname, char *data)
+{
+  struct cfg_entry *entry;
+  int free = 0;
+
+  if (!(entry = check_can_set_cfg(target, entryname)))
+    return;
+  if (data && !strcmp(data, "-"))
+    data = NULL;
+  if (data && (strlen(data) >= 1024))
+    data[1023] = 0;
+  if (target) {
+    struct userrec *u = get_user_by_handle(userlist, target);
+    struct xtra_key *xk;
+    char *olddata = entry->ldata;
+
+    if (u && !strcmp(botnetnick, u->handle)) {
+      if (data) {
+	entry->ldata = nmalloc(strlen(data) + 1);
+	strcpy(entry->ldata, data);
+      } else
+	entry->ldata = NULL;
+      if (entry->localchanged) {
+	int valid = 1;
+
+	entry->localchanged(entry, olddata, &valid);
+	if (!valid) {
+	  if (entry->ldata)
+	    nfree(entry->ldata);
+	  entry->ldata = olddata;
+	  data = olddata;
+	  olddata = NULL;
+	}
+      }
+    }
+    xk = nmalloc(sizeof(struct xtra_key));
+    egg_bzero(xk, sizeof(struct xtra_key));
+    xk->key = nmalloc(strlen(entry->name) + 1);
+    strcpy(xk->key, entry->name);
+    if (data) {
+      xk->data = nmalloc(strlen(data) + 1);
+      strcpy(xk->data, data);
+    }
+    set_user(&USERENTRY_CONFIG, u, xk);
+    if (olddata)
+      nfree(olddata);
+  } else {
+    char *olddata = entry->gdata;
+
+    if (data) {
+      free = 1;
+      entry->gdata = nmalloc(strlen(data) + 1);
+      strcpy(entry->gdata, data);
+    } else
+      entry->gdata = NULL;
+    if (entry->globalchanged) {
+      int valid = 1;
+
+      entry->globalchanged(entry, olddata, &valid);
+      if (!valid) {
+	if (entry->gdata)
+	  nfree(entry->gdata);
+	entry->gdata = olddata;
+	olddata = NULL;
+      }
+    }
+    if (!cfg_noshare)
+      botnet_send_cfg_broad(-1, entry);
+    if (olddata)
+      nfree(olddata);
+  }
+
+//  if (free)
+//    nfree(entry->gdata);
+}
+
+void userfile_cfg_line(char *ln)
+{
+  char *name;
+  int i;
+  struct cfg_entry *cfgent = NULL;
+
+  name = newsplit(&ln);
+  for (i = 0; !cfgent && (i < cfg_count); i++)
+    if (!strcmp(cfg[i]->name, name))
+      cfgent = cfg[i];
+  if (cfgent) {
+    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
+  } else
+    putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
+
+}
+
+void got_config_share(int idx, char *ln)
+{
+  char *name;
+  int i;
+  struct cfg_entry *cfgent = NULL;
+
+  cfg_noshare++;
+  name = newsplit(&ln);
+  for (i = 0; !cfgent && (i < cfg_count); i++)
+    if (!strcmp(cfg[i]->name, name))
+      cfgent = cfg[i];
+  if (cfgent) {
+    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
+    botnet_send_cfg_broad(idx, cfgent);
+  } else
+    putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
+  cfg_noshare--;
+}
+
+void add_cfg(struct cfg_entry *entry)
+{
+  cfg = (void *) user_realloc(cfg, sizeof(void *) * (cfg_count + 1));
+  cfg[cfg_count] = entry;
+  cfg_count++;
+  entry->ldata = NULL;
+  entry->gdata = NULL;
+}
+
+void trigger_cfg_changed()
+{
+  int i;
+  struct userrec *u;
+  struct xtra_key *xk;
+
+  u = get_user_by_handle(userlist, botnetnick);
+
+  for (i = 0; i < cfg_count; i++) {
+    if (cfg[i]->flags & CFGF_LOCAL) {
+      xk = get_user(&USERENTRY_CONFIG, u);
+      while (xk && strcmp(xk->key, cfg[i]->name))
+	xk = xk->next;
+      if (xk) {
+	putlog(LOG_DEBUG, "*", STR("trigger_cfg_changed for %s"), cfg[i]->name ? cfg[i]->name : "(null)");
+	if (!strcmp(cfg[i]->name, xk->key ? xk->key : "")) {
+	  set_cfg_str(botnetnick, cfg[i]->name, xk->data);
+	}
+      }
+    }
+  }
+}
+
+
+
+int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
+{
+  FILE *inpFile,
+   *outFile,
+   *errFile;
+  char tmpfile[161];
+  int x,
+    fd;
+
+  if (!cmdline)
+    return 0;
+  /* Set up temp files */
+  /* always use mkstemp() when handling temp filess! -dizz */
+  sprintf(tmpfile, STR("%s.in-XXXXXX"), tempdir);
+  if ((fd = mkstemp(tmpfile)) == -1 || (inpFile = fdopen(fd, "w+")) == NULL) {
+    if (fd != -1) {
+      unlink(tmpfile);
+      close(fd);
+    }
+    putlog(LOG_ERRORS, "*" , STR("exec: Couldn't open %s"), tmpfile);
+    return 0;
+  }
+  unlink(tmpfile);
+  if (input) {
+    if (fwrite(input, 1, strlen(input), inpFile) != strlen(input)) {
+      fclose(inpFile);
+      putlog(LOG_ERRORS, "*", STR("exec: Couldn't write to %s"), tmpfile);
+      return 0;
+    }
+    fseek(inpFile, 0, SEEK_SET);
+  }
+  unlink(tmpfile);
+  sprintf(tmpfile, STR("%s.err-XXXXXX"), tempdir);
+  if ((fd = mkstemp(tmpfile)) == -1 || (errFile = fdopen(fd, "w+")) == NULL) {
+    if (fd != -1) {
+      unlink(tmpfile);
+      close(fd);
+    }
+    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open %s"), tmpfile);
+    return 0;
+  }
+  unlink(tmpfile);
+  sprintf(tmpfile, STR("%s.out-XXXXXX"), tempdir);
+  if ((fd = mkstemp(tmpfile)) == -1 || (outFile = fdopen(fd, "w+")) == NULL) {
+    if (fd != -1) {
+      unlink(tmpfile);
+      close(fd);
+    }
+    putlog(LOG_ERRORS, "*", STR("exec: Couldn't open %s"), tmpfile);
+    return 0;
+  }
+  unlink(tmpfile);
+  x = fork();
+  if (x == -1) {
+    putlog(LOG_ERRORS, "*", STR("exec: fork() failed"));
+    fclose(inpFile);
+    fclose(errFile);
+    fclose(outFile);
+    return 0;
+  }
+  if (x) {
+    /* Parent: wait for the child to complete */
+    int st = 0;
+
+    waitpid(x, &st, 0);
+    /* Now read the files into the buffers */
+    fclose(inpFile);
+    fflush(outFile);
+    fflush(errFile);
+    if (erroutput) {
+      char *buf;
+      int fs;
+
+      fseek(errFile, 0, SEEK_END);
+      fs = ftell(errFile);
+      if (fs == 0) {
+        (*erroutput) = NULL;
+      } else {
+        buf = nmalloc(fs + 1);
+        fseek(errFile, 0, SEEK_SET);
+        fread(buf, 1, fs, errFile);
+        buf[fs] = 0;
+        (*erroutput) = buf;
+      }
+    }
+    fclose(errFile);
+    if (output) {
+      char *buf;
+      int fs;
+
+      fseek(outFile, 0, SEEK_END);
+      fs = ftell(outFile);
+      if (fs == 0) {
+        (*output) = NULL;
+      } else {
+        buf = nmalloc(fs + 1);
+        fseek(outFile, 0, SEEK_SET);
+        fread(buf, 1, fs, outFile);
+        buf[fs] = 0;
+        (*output) = buf;
+      }
+    }
+    fclose(outFile);
+    return 1;
+  } else {
+    /* Child: make fd's and set them up as std* */
+    int ind,
+      outd,
+      errd;
+    char *argv[4];
+
+    ind = fileno(inpFile);
+    outd = fileno(outFile);
+    errd = fileno(errFile);
+    if (dup2(ind, STDIN_FILENO) == (-1)) {
+      exit(1);
+    }
+    if (dup2(outd, STDOUT_FILENO) == (-1)) {
+      exit(1);
+    }
+    if (dup2(errd, STDERR_FILENO) == (-1)) {
+      exit(1);
+    }
+    argv[0] = STR("/bin/sh");
+    argv[1] = STR("-c");
+    argv[2] = cmdline;
+    argv[3] = NULL;
+    execvp(argv[0], &argv[0]);
+    exit(1);
+  }
+
+}
+
+
+
+
+int ucnt = 0;
+static void updatelocal(void)
+{
+#ifdef LEAF
+  module_entry *me;
+#endif
+  Context;
+  if (ucnt < 300) {
+    ucnt++;
+    return;
+  } 
+  del_hook(HOOK_SECONDLY, (Function) updatelocal);
+  ucnt = 0;
+
+  /* let's drop the server connection ASAP */
+#ifdef LEAF
+  if ((me = module_find("server", 0, 0))) {
+    Function *func = me->funcs;
+    (func[SERVER_NUKESERVER]) ("Updating...");
+  }
+#endif
+
+  botnet_send_chat(-1, botnetnick, "Updating...");
+  botnet_send_bye();
+
+  fatal("Updating...", 1);
+  usleep(2000 * 500);
+  bg_send_quit(BG_ABORT);
+  unlink(pid_file); //if this fails it is ok, cron will restart the bot, *hopefully*
+  system(binname); //start new bot. 
+  exit(0);
+}
+
+int updatebin (int idx, char *par, int autoi)
+{
+  char *path = NULL,
+   *newbin;
+  char buf[2048], old[1024];
+  struct stat sb;
+  int i;
+#ifdef LEAF
+  module_entry *me;
+#endif
+
+  path = newsplit(&par);
+  par = path;
+  if (!par[0]) {
+    if (idx)
+      dprintf(idx, "Not enough parameters.\n");
+    return 1;
+  }
+  path = nmalloc(strlen(binname) + strlen(par));
+  strcpy(path, binname);
+  newbin = strrchr(path, '/');
+  if (!newbin) {
+    nfree(path);
+    if (idx)
+      dprintf(idx, "Don't know current binary name\n");
+    return 1;
+  }
+  newbin++;
+  if (strchr(par, '/')) {
+    *newbin = 0;
+    if (idx)
+      dprintf(idx, "New binary must be in %s and name must be specified without path information\n", path);
+    nfree(path);
+    return 1;
+  }
+  strcpy(newbin, par);
+  if (!strcmp(path, binname)) {
+    nfree(path);
+    if (idx)
+      dprintf(idx, "Can't update with the current binary\n");
+    return 1;
+  }
+  if (stat(path, &sb)) {
+    if (idx)
+      dprintf(idx, "%s can't be accessed\n", path);
+    nfree(path);
+    return 1;
+  }
+  if (chmod(path, S_IRUSR | S_IWUSR | S_IXUSR)) {
+    if (idx)
+      dprintf(idx, "Can't set mode 0600 on %s\n", path);
+    nfree(path);
+    return 1;
+  }
+
+  //make a backup just in case.
+
+  egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
+  copyfile(binname, old);
+
+  if (movefile(path, binname)) {
+    if (idx)
+      dprintf(idx, "Can't rename %s to %s\n", path, binname);
+    nfree(path);
+    return 1;
+  }
+
+  sprintf(buf, "%s", binname);
+  
+#ifdef LEAF
+  if (localhub) {
+    /* if localhub = 1, this is the spawn bot and controls
+     * the spawning of new bots. */
+
+    sprintf(buf, "%s -P %d", buf, getpid());
+  } 
+#endif
+
+  //safe to run new binary..
+#ifdef LEAF
+  if (!autoi && !localhub) //dont delete pid for auto update!!!
+#endif
+    unlink(pid_file); //delete pid so new binary doesnt exit.
+#ifdef HUB
+  listen_all(my_port, 1); //close the listening port...
+#endif
+  i = system(buf);
+  if (i == -1 || i == 1) {
+    if (idx)
+      dprintf(idx, "Couldn't restart new binary (error %d)\n", i);
+      putlog(LOG_MISC, "*", "Couldn't restart new binary (error %d)\n", i);
+    return i;
+
+  } else {
+
+#ifdef LEAF
+    if (!autoi && !localhub) {
+      /* let's drop the server connection ASAP */
+      if ((me = module_find("server", 0, 0))) {
+        Function *func = me->funcs;
+        (func[SERVER_NUKESERVER]) ("Updating...");
+      }
+#endif
+      if (idx)
+        dprintf(idx, "Updating...bye\n");
+      putlog(LOG_MISC, "*", "Updating...\n");
+      botnet_send_chat(-1, botnetnick, "Updating...");
+      botnet_send_bye();
+      fatal("Updating...", 1);
+      usleep(2000 * 500);
+      bg_send_quit(BG_ABORT);
+
+      exit(0);
+      //No need to return :)
+#ifdef LEAF
+    } else {
+      if (localhub && autoi) {
+        add_hook(HOOK_SECONDLY, (Function) updatelocal);
+        return 0;
+      }
+    }
+#endif
+  }
+  //This shouldn't happen...
+  return 2;
+}
+
+void EncryptFile(char *infile, char *outfile)
+{
+  char  buf[8192];
+//  char *temps;
+  FILE *f, *f2;
+Context;
+  f  = fopen(infile, "r");
+  if(!f)
+    return;      
+  f2 = fopen(outfile, "w");
+  if (!f2)
+    return;
+Context;
+
+  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
+Context;
+    lfprintf(f2, "%s\n", buf);
+Context;
+  }
+  fclose(f);
+  fclose(f2);
+}
+void DecryptFile(char *infile, char *outfile)
+{
+  char  buf[8192], *temps;
+  FILE *f, *f2;
+
+  f  = fopen(infile, "r");
+  if (!f)
+    return;      
+  f2 = fopen(outfile, "w");
+  if (!f2)
+    return;
+
+  while (fscanf(f,"%[^\n]\n",buf) != EOF) {
+    temps = (char *) decrypt_string(netpass, decryptit(buf));
+    fprintf(f2, "%s\n",temps);
+    nfree(temps);
+  }
+  fclose(f);
+  fclose(f2);
+}
+
+int bot_aggressive_to(struct userrec *u)
+{
+  char mypval[20],
+    botpval[20];
+
+  link_pref_val(u, botpval);
+  link_pref_val(get_user_by_handle(userlist, botnetnick), mypval);
+
+//printf("vals: my: %s them: %s\n", mypval, botpval);
+
+  if (strcmp(mypval, botpval) < 0)
+    return 1;
+  else
+    return 0;
+}
+
+void detected(int code, char *msg)
+{
+#ifdef LEAF
+  module_entry *me;
+#endif
+  char *p = NULL;
+  char tmp[512];
+  struct userrec *u;
+  struct flag_record fr = { FR_GLOBAL, 0, 0 };
+  int act;
+
+  u = get_user_by_handle(userlist, botnetnick);
+#ifdef S_LASTCHECK
+  if (code == DETECT_LOGIN)
+    p = (char *) (CFG_LOGIN.ldata ? CFG_LOGIN.ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
+#endif
+#ifdef S_ANTITRACE
+  if (code == DETECT_TRACE)
+    p = (char *) (CFG_TRACE.ldata ? CFG_TRACE.ldata : (CFG_TRACE.gdata ? CFG_TRACE.gdata : NULL));
+#endif
+#ifdef S_PROMISC
+  if (code == DETECT_PROMISC)
+    p = (char *) (CFG_PROMISC.ldata ? CFG_PROMISC.ldata : (CFG_PROMISC.gdata ? CFG_PROMISC.gdata : NULL));
+#endif
+#ifdef S_PROCESSCHECK
+  if (code == DETECT_PROCESS)
+    p = (char *) (CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : (CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : NULL));
+#endif
+#ifdef S_HIJACKCHECK
+  if (code == DETECT_SIGCONT)
+    p = (char *) (CFG_HIJACK.ldata ? CFG_HIJACK.ldata : (CFG_HIJACK.gdata ? CFG_HIJACK.gdata : NULL));
+#endif
+
+  if (!p)
+    act = DET_WARN;
+  else if (!strcmp(p, STR("die")))
+    act = DET_DIE;
+  else if (!strcmp(p, STR("reject")))
+    act = DET_REJECT;
+  else if (!strcmp(p, STR("suicide")))
+    act = DET_SUICIDE;
+  else if (!strcmp(p, STR("nocheck")))
+    act = DET_NOCHECK;
+  else if (!strcmp(p, STR("ignore")))
+    act = DET_IGNORE;
+  else
+    act = DET_WARN;
+  switch (act) {
+  case DET_IGNORE:
+    break;
+  case DET_WARN:
+    putlog(LOG_WARN, "*", msg);
+    break;
+  case DET_REJECT:
+    do_fork();
+    putlog(LOG_WARN, "*", STR("Setting myself +d: %s"), msg);
+    sprintf(tmp, STR("+d: %s"), msg);
+    set_user(&USERENTRY_COMMENT, u, tmp);
+    get_user_flagrec(u, &fr, 0);
+    fr.global = USER_DEOP | USER_BOT;
+
+    set_user_flagrec(u, &fr, 0);
+    sleep(1);
+    break;
+  case DET_DIE:
+    putlog(LOG_WARN, "*", STR("Dying: %s"), msg);
+    sprintf(tmp, STR("Dying: %s"), msg);
+    set_user(&USERENTRY_COMMENT, u, tmp);
+#ifdef LEAF
+    if ((me = module_find("server", 0, 0))) {
+      Function *func = me->funcs;
+      (func[SERVER_NUKESERVER]) ("BBL");
+    }
+#endif
+    sleep(1);
+    fatal(msg, 0);
+    break;
+  case DET_SUICIDE:
+    putlog(LOG_WARN, "*", STR("Comitting suicide: %s"), msg);
+    sprintf(tmp, STR("Suicide: %s"), msg);
+    set_user(&USERENTRY_COMMENT, u, tmp);
+#ifdef LEAF
+    if ((me = module_find("server", 0, 0))) {
+      Function *func = me->funcs;
+      (func[SERVER_NUKESERVER]) ("HARAKIRI!!");
+    }
+#endif
+    sleep(1);
+    unlink(binname);
+#ifdef HUB
+    unlink(userfile);
+    sprintf(tmp, STR("%s~"), userfile);
+    unlink(tmp);
+//    unlink(logfile);
+//    sprintf(tmp, STR("%s~"), logfile);
+//    unlink(tmp);
+#endif
+    fatal(msg, 0);
+    break;
+  case DET_NOCHECK:
+    break;
+  }
+}
+
+
+
+char * kickreason(int kind) {
+  int r;
+  r=random();
+  switch (kind) {
+  case KICK_BANNED:
+    switch (r % 6) {
+    case 0: return STR("bye");
+    case 1: return STR("banned");
+    case 2: return STR("bummer");
+    case 3: return STR("go away");
+    case 4: return STR("cya around looser");
+    case 5: return STR("unwanted!");
+    }
+  case KICK_KUSER:
+    switch (r % 4) {
+    case 0: return STR("not wanted");
+    case 1: return STR("something tells me you're annoying");
+    case 2: return STR("don't bug me looser");
+    case 3: return STR("creep");
+    }
+  case KICK_KICKBAN:
+    switch (r % 4) {
+    case 0: return STR("gone");
+    case 1: return STR("stupid");
+    case 2: return STR("looser");
+    case 3: return STR("...");
+    }     
+  case KICK_MASSDEOP:
+    switch (r % 8) {
+    case 0: return STR("spammer!");
+    case 1: return STR("easy on the modes now");
+    case 2: return STR("mode this");
+    case 3: return STR("nice try");
+    case 4: return STR("really?");
+    case 5: return STR("mIRC sux for mdop kiddo");
+    case 6: return STR("scary... really scary...");
+    case 7: return STR("you lost the game!");
+    }
+  case KICK_BADOP:
+    switch (r % 5) {
+    case 0: return STR("neat...");
+    case 1: return STR("oh, no you don't. go away.");
+    case 2: return STR("didn't you forget something now?");
+    case 3: return STR("no");
+    case 4: return STR("hijack this");
+    }
+  case KICK_BADOPPED:
+    switch (r % 5) {
+    case 0: return STR("buggar off kid");
+    case 1: return STR("asl?");
+    case 2: return STR("whoa... what a hacker... skills!");
+    case 3: return STR("yes! yes! yes! hit me baby one more time!");
+    case 4: return STR("with your skills, you're better off jacking off than hijacking");
+    }
+  case KICK_MANUALOP:
+    switch (r % 6) {
+    case 0: return STR("naughty kid");
+    case 1: return STR("didn't someone tell you that is bad?");
+    case 2: return STR("want perm?");
+    case 3: return STR("see how much good that did you?");
+    case 4: return STR("not a smart move...");
+    case 5: return STR("jackass!");
+    }
+  case KICK_MANUALOPPED:
+    switch (r % 8) {
+    case 0: return STR("your pal got mean friends. like me.");
+    case 1: return STR("uhh now.. don't wake me up...");
+    case 2: return STR("hi hun. missed me?");
+    case 3: return STR("spammer! die!");
+    case 4: return STR("boo!");
+    case 5: return STR("that @ was useful, don't ya think?");
+    case 6: return STR("not in my book");
+    case 7: return STR("lol, really?");
+    }
+  case KICK_CLOSED:
+    switch (r % 17) {
+    case 0: return STR("locked");
+    case 1: return STR("later");
+    case 2: return STR("closed for now");
+    case 3: return STR("sorry, but it's getting late, locking channel. cya around");
+    case 4: return STR("better safe than sorry");
+    case 5: return STR("cleanup, come back later");
+    case 6: return STR("this channel is closed");
+    case 7: return STR("shutting down for now");
+    case 8: return STR("lockdown");
+    case 9: return STR("reopening later");
+    case 10: return STR("not for the public atm");
+    case 11: return STR("private channel for now");
+    case 12: return STR("might reopen soon, might reopen later");
+    case 13: return STR("you're not supposed to be here right now");
+    case 14: return STR("sorry, closed");
+    case 15: return STR("try us later, atm we're locked down");
+    case 16: return STR("closed. try tomorrow");
+    }
+  case KICK_FLOOD:
+    switch (r % 7) {
+    case 0: return STR("so much bullshit in such a short time. amazing.");
+    case 1: return STR("slow down. i'm trying to read here.");
+    case 2: return STR("uhm... you actually think irc is for talking?");
+    case 3: return STR("talk talk talk");
+    case 4: return STR("blabbering are we?");
+    case 5: return STR("... and i don't even like you!");
+    case 6: return STR("and you're outa here...");
+
+    }
+  case KICK_NICKFLOOD:
+    switch (r % 7) {
+    case 0: return STR("make up your mind?");
+    case 1: return STR("be schizofrenic elsewhere");
+    case 2: return STR("I'm loosing track of you... not!");
+    case 3: return STR("that is REALLY annoying");
+    case 4: return STR("try this: /NICK looser");
+    case 5: return STR("playing hide 'n' seek?");
+    case 6: return STR("gotcha!");
+    }
+  case KICK_KICKFLOOD:
+    switch (r % 6) {
+    case 0: return STR("easier to just leave if you wan't to be alone");
+    case 1: return STR("cool down");
+    case 2: return STR("don't be so damned aggressive. that's my job.");
+    case 3: return STR("kicking's fun, isn't it?");
+    case 4: return STR("what's the rush?");
+    case 5: return STR("next time you do that, i'll kick you again");
+
+    }
+  case KICK_BOGUSUSERNAME:
+    return STR("bogus username");
+  case KICK_MEAN:
+    switch (r % 11) {
+    case 0: return STR("hey! that wasn't very nice!");
+    case 1: return STR("don't fuck with my pals");
+    case 2: return STR("meanie!");
+    case 3: return STR("I can be a bitch too...");
+    case 4: return STR("leave the bots alone, will ya?");
+    case 5: return STR("not very clever");
+    case 6: return STR("watch it");
+    case 7: return STR("fuck off");
+    case 8: return STR("easy now. that's a friend.");
+    case 9: return STR("abuse of power. leave that to me, will ya?");      
+    case 10: return STR("there as some things you cannot do, and that was one of them...");
+    }
+  case KICK_BOGUSKEY:
+    return STR("I have a really hard time reading that key");
+  default:
+    return "OMFG@YUO";    
+  }
+
+}
+
+
+
+char kickprefix[25] = "";
+char bankickprefix[25] = "";
+
+void makeplaincookie(char *chname, char *nick, char *buf)
+{
+  /*
+     plain cookie:
+     Last 6 digits of time
+     Last 5 chars of nick
+     Last 4 regular chars of chan
+   */
+  char work[256],
+    work2[256];
+  int i,
+    n;
+
+  sprintf(work, STR("%010li"), (now + timesync));
+  strcpy(buf, (char *) &work[4]);
+  work[0] = 0;
+  if (strlen(nick) < 5)
+    while (strlen(work) + strlen(nick) < 5)
+      strcat(work, " ");
+  else
+    strcpy(work, (char *) &nick[strlen(nick) - 5]);
+  strcat(buf, work);
+
+  n = 3;
+  for (i = strlen(chname) - 1; (i >= 0) && (n >= 0); i--)
+    if (((unsigned char) chname[i] < 128) && ((unsigned char) chname[i] > 32)) {
+      work2[n] = tolower(chname[i]);
+      n--;
+    }
+  while (n >= 0)
+    work2[n--] = ' ';
+  work2[4] = 0;
+  strcat(buf, work2);
+}
+
+int goodpass(char *pass, int idx, char *nick)
+{
+  int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
+
+  char *tell;
+  tell = nmalloc(300);
+
+  if (!pass[0]) 
+    return 0;
+
+  for (i = 0; i < strlen(pass); i++) {
+    tc = (int) pass[i];
+    if (tc < 58 && tc > 47)
+      ocase++; //number
+    else if (tc < 91 && tc > 64)
+      ucase++; //upper case
+    else if (tc < 123 && tc > 96)
+      lcase++; //lower case
+    else
+       nalpha++; //non-alphabet/number
+  }
+
+  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) {
+
+    sprintf(tell, "Insecure pass, must be: ");
+
+    if (ocase < 1)
+      strcat(tell, "\002>= 1 number\002, ");
+    else
+      strcat(tell, ">= 1 number, ");
+
+    if (lcase < 2)
+      strcat(tell, "\002>= 2 lcase\002, ");
+    else
+      strcat(tell, ">= 2 lowercase, ");
+
+    if (ucase < 2)
+      strcat(tell, "\002>= 2 ucase\002, ");
+    else
+      strcat(tell, ">= 2 uppercase, ");
+
+    if (nalpha < 1)
+      strcat(tell, "\002>= 1 non-alpha/num\002, ");
+    else
+      strcat(tell, ">= 1 non-alpha/num, ");
+
+    if (strlen(pass) < 8)
+      strcat(tell, "\002>= 8 chars.\002");
+    else
+      strcat(tell, ">= 8 chars.");
+
+    if (idx)
+      dprintf(idx, "%s\n", tell);
+    else if (nick[0])
+      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, tell);
+    
+    return 0;
+  }
+  
+
+  return 1;
+}
+
+//strcpy(dcc[idx].nick, char *string);
+//.nick is char nick[uhostlen]
+
+char *makehash(struct userrec *u, char *rand)
+{
+  int i = 0;
+  MD5_CTX ctx;
+  unsigned char md5out[33];
+  char md5string[33], hash[500], *ret = NULL;
+
+
+Context;
+//    strcpy(hash, rand);
+Context;
+//    strcat(hash, get_user(&USERENTRY_SECPASS, u));
+ 
+    sprintf(hash, "%s%s%s", rand, (char *) get_user(&USERENTRY_SECPASS, u), authkey ? authkey : "");
+
+    putlog(LOG_DEBUG, "*", "Making hash from %s %s: %s", rand, get_user(&USERENTRY_SECPASS, u), hash);
+
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, hash, strlen(hash));
+    MD5_Final(md5out, &ctx);
+
+    for(i=0; i<16; i++)
+      sprintf(md5string + (i*2), "%.2x", md5out[i]);
+   
+    putlog(LOG_DEBUG, "*", "MD5 of hash: %s", md5string);
+Context;
+    ret = md5string;
+Context;
+//    sprintf(ret, "%s", md5string);
+    return ret;
+}
+
+
+int new_auth(void)
+{
+  int i = auth_total;
+
+Context;
+  if (auth_total == max_auth)
+    return -1;
+
+  auth_total++;
+Context;
+  egg_bzero((char *) &auth[i], sizeof(struct auth_t));
+Context;
+  return i;
+}
+
+int isauthed(char *host)
+{
+  int i = 0;
+Context;
+  for (i = 0; i < auth_total; i++) {
+    if (!strcmp(auth[i].host, host))
+      return i;
+  }
+  return -1;
+}
+  
+void removeauth(int n)
+{
+Context;
+  auth_total--;
+  if (n < auth_total)
+    egg_memcpy(&auth[n], &auth[auth_total], sizeof(struct auth_t));
+  else
+    egg_bzero(&auth[n], sizeof(struct auth_t)); /* drummer */
+}
+

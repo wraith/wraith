@@ -7,25 +7,6 @@
  *   (non-Tcl) procedure lookups for msg/dcc/file commands
  *   (Tcl) binding internal procedures to msg/dcc/file commands
  *
- * $Id: tclhash.c,v 1.36 2002/06/13 20:43:08 wcc Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
@@ -38,6 +19,10 @@ extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
 extern int		 dcc_total;
 extern time_t		 now;
+extern mycmds		 cmds[];
+extern int		 cmdi;
+
+extern char		dcc_prefix[];
 
 p_tcl_bind_list		bind_table_list;
 p_tcl_bind_list		H_chat, H_act, H_bcst, H_chon, H_chof,
@@ -126,11 +111,9 @@ inline void garbage_collect_tclhash(void)
     } else {
       for (tm = tl->first, tm_prev = NULL; tm; tm = tm_next) {
 	tm_next = tm->next;
-
 	if (!(tm->flags & TBM_DELETED)) {
 	  for (tc = tm->first, tc_prev = NULL; tc; tc = tc_next) {
 	    tc_next = tc->next;
-
 	    if (tc->attributes & TC_DELETED) {
 	      if (tc_prev)
 		tc_prev->next = tc->next;
@@ -203,7 +186,7 @@ int expmem_tclhash(void)
 }
 
 
-extern cmd_t C_dcc[];
+extern dcc_cmd_t C_dcc[];
 static int tcl_bind();
 
 static cd_tcl_cmd cd_cmd_table[] = {
@@ -236,7 +219,7 @@ void init_bind(void)
   H_away = add_bind_table("away", HT_STACKABLE, builtin_chat);
   H_act = add_bind_table("act", HT_STACKABLE, builtin_chat);
   H_event = add_bind_table("evnt", HT_STACKABLE, builtin_char);
-  add_builtins(H_dcc, C_dcc);
+  add_builtins_dcc(H_dcc, C_dcc);
   Context;
 }
 
@@ -244,7 +227,7 @@ void kill_bind(void)
 {
   tcl_bind_list_t	*tl, *tl_next;
 
-  rem_builtins(H_dcc, C_dcc);
+  rem_builtins_dcc(H_dcc, C_dcc);
   for (tl = bind_table_list; tl; tl = tl_next) {
     tl_next = tl->next;
 
@@ -311,7 +294,6 @@ tcl_bind_list_t *find_bind_table(const char *nme)
 {
   tcl_bind_list_t	*tl;
   int			 v;
-
   for (tl = bind_table_list; tl; tl = tl->next) {
     if (tl->flags & HT_DELETED)
       continue;
@@ -375,9 +357,12 @@ static int unbind_bind_entry(tcl_bind_list_t *tl, const char *flags,
 static int bind_bind_entry(tcl_bind_list_t *tl, const char *flags,
 			   const char *cmd, const char *proc)
 {
+
+
   tcl_cmd_t		*tc;
   tcl_bind_mask_t	*tm, *tm_last;
 
+Context;
   /* Search for matching bind in bind list. */
   for (tm = tl->first, tm_last = NULL; tm; tm_last = tm, tm = tm->next) {
     if (tm->flags & TBM_DELETED)
@@ -670,7 +655,7 @@ static int trigger_bind(const char *proc, const char *param)
     const char *msg = "Tcl proc: %s, param: %s";
     char *buf;
 
-    Context;
+Context;
     buf = nmalloc(strlen(msg) + (proc ? strlen(proc) : 6)
 		  + (param ? strlen(param) : 6) + 1);
     sprintf(buf, msg, proc ? proc : "<null>", param ? param : "<null>");
@@ -718,6 +703,7 @@ int check_tcl_bind(tcl_bind_list_t *tl, const char *match,
       break;
     case MATCH_MASK:
       ok = wild_match_per((unsigned char *) tm->mask, (unsigned char *) match);
+//      ok = wild_match_per(tm->mask, match);
       break;
     default:
       ok = 0;
@@ -744,6 +730,7 @@ int check_tcl_bind(tcl_bind_list_t *tl, const char *match,
 	  tm_p = tm_last;
 	  Tcl_SetVar(interp, "lastbind", (char *) tm->mask, TCL_GLOBAL_ONLY);
 	  x = trigger_bind(tc->func_name, param);
+Context;
 	  if (match_type & BIND_ALTER_ARGS) {
 	    if (interp->result == NULL || !interp->result[0])
 	      return x;
@@ -815,20 +802,58 @@ int check_tcl_bind(tcl_bind_list_t *tl, const char *match,
   if (cnt > 1)
     return BIND_AMBIGUOUS;
   Tcl_SetVar(interp, "lastbind", (char *) fullmatch, TCL_GLOBAL_ONLY);
+Context;
   return trigger_bind(proc, param);
 }
 
 /* Check for tcl-bound dcc command, return 1 if found
  * dcc: proc-name <handle> <sock> <args...>
  */
-int check_tcl_dcc(const char *cmd, int idx, const char *args)
+int check_tcl_dcc(char *cmd, int idx, char *args)
 {
+  struct tcl_bind_mask_b *hm;
   struct flag_record	fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int			x;
+#ifdef S_DCCPASS
+  int found = 0;
+#endif
   char			s[11];
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
   egg_snprintf(s, sizeof s, "%ld", dcc[idx].sock);
+#ifdef S_DCCPASS
+
+  for (hm = H_dcc->first; hm; hm = hm->next) {
+    if (!strcasecmp(cmd, hm->mask)) {
+      found = 1;
+      break;
+    }
+  }
+  if (found) {
+
+    if (has_cmd_pass(cmd)) {
+      char *p,
+        work[1024],
+        pass[128];
+      p = strchr(args, ' ');
+      if (p)
+        *p = 0;
+      strncpy0(pass, args, sizeof(pass));
+      if (check_cmd_pass(cmd, pass)) {
+        if (p)
+          *p = ' ';
+        strncpy0(work, args, sizeof(work));
+        p = work;
+        newsplit(&p);
+        strcpy(args, p);
+      } else {
+        dprintf(idx, "Invalid command password. Use %scommand password arguments\n", dcc_prefix);
+        putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, dcc_prefix, cmd);
+        return 0;
+      }
+    }
+  }
+#endif
   Tcl_SetVar(interp, "_dcc1", (char *) dcc[idx].nick, 0);
   Tcl_SetVar(interp, "_dcc2", (char *) s, 0);
   Tcl_SetVar(interp, "_dcc3", (char *) args, 0);
@@ -839,7 +864,7 @@ int check_tcl_dcc(const char *cmd, int idx, const char *args)
     return 0;
   }
   if (x == BIND_NOMATCH) {
-    dprintf(idx, MISC_NOSUCHCMD);
+    dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
     return 0;
   }
   if (x == BIND_EXEC_BRK)
@@ -968,6 +993,9 @@ void check_tcl_chjn(const char *bot, const char *nick, int chan,
   t[0] = type;
   t[1] = 0;
   switch (type) {
+  case '^':
+    fr.global = USER_ADMIN;
+    break;
   case '*':
     fr.global = USER_OWNER;
     break;
@@ -977,11 +1005,6 @@ void check_tcl_chjn(const char *bot, const char *nick, int chan,
   case '@':
     fr.global = USER_OP;
     break;
-  case '^':
-    fr.global = USER_HALFOP;
-    break;
-  case '%':
-    fr.global = USER_BOTMAST;
   }
   egg_snprintf(s, sizeof s, "%d", chan);
   egg_snprintf(u, sizeof u, "%d", sock);
@@ -1095,9 +1118,9 @@ void tell_binds(int idx, char *par)
 	  int	ok = 0;
 
           if (patmatc == 1) {
-            if (wild_match(name, tl->name) ||
-                wild_match(name, tm->mask) ||
-                wild_match(name, tc->func_name))
+            if (wild_match_per(name, tl->name) ||
+                wild_match_per(name, tm->mask) ||
+                wild_match_per(name, tc->func_name))
 	      ok = 1;
           } else
 	    ok = 1;
@@ -1142,6 +1165,53 @@ void add_builtins(tcl_bind_list_t *tl, cmd_t *cc)
     nfree(l);
   }
 }
+
+void add_builtins_dcc(tcl_bind_list_t *tl, dcc_cmd_t * cc)
+{
+  int	k, i;
+  char	p[1024], *l;
+  cd_tcl_cmd table[2];
+  table[0].name = p;
+  table[0].callback = tl->func;
+  table[1].name = NULL;
+  for (i = 0; cc[i].name; i++) {
+  //lets add to the help system..
+    cmds[cmdi].name = cc[i].name;
+    cmds[cmdi].usage = cc[i].usage;
+    cmds[cmdi].desc = cc[i].desc;
+    cmds[cmdi].flags.match = FR_GLOBAL | FR_CHAN;
+    break_down_flags(cc[i].flags, &(cmds[cmdi].flags), NULL);
+    cmdi++;
+
+    egg_snprintf(p, sizeof p, "*%s:%s", tl->name,
+		   cc[i].funcname ? cc[i].funcname : cc[i].name);
+    l = (char *) nmalloc(Tcl_ScanElement(p, &k));
+    Tcl_ConvertElement(p, l, k | TCL_DONT_USE_BRACES);
+    table[0].cdata = (void *)cc[i].func;
+    add_cd_tcl_cmds(table);
+    bind_bind_entry(tl, cc[i].flags, cc[i].name, l);
+    nfree(l);
+  }
+
+/*
+  int i;
+
+  for (i = 0; cc[i].name; i++) {
+    bind_bind_entry(table, cc[i].flags, cc[i].name, "");
+  }
+*/
+}
+
+void rem_builtins_dcc(tcl_bind_list_t *table, dcc_cmd_t *cc)
+{
+  int i;
+
+  for (i = 0; cc[i].name; i++) {
+    unbind_bind_entry(table, cc[i].flags, cc[i].name, "");
+  }
+
+}
+
 
 /* Remove the default msg/dcc/fil commands from the Tcl interpreter */
 void rem_builtins(tcl_bind_list_t *table, cmd_t *cc)

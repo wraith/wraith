@@ -2,25 +2,6 @@
  * cmdsnote.c -- part of notes.mod
  *   handles all notes interaction over the party line
  *
- * $Id: cmdsnote.c,v 1.14 2002/01/02 08:06:15 tothwolf Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 static void cmd_pls_noteign(struct userrec *u, int idx, char *par)
@@ -235,13 +216,13 @@ static void cmd_note(struct userrec *u, int idx, char *par)
   add_note(p, dcc[idx].nick, par, idx, echo);
 }
 
-static cmd_t notes_cmds[] =
+static dcc_cmd_t notes_cmds[] =
 {
-  {"fwd",	"m",	(Function) cmd_fwd,		NULL},
-  {"notes",	"",	(Function) cmd_notes,		NULL},
-  {"+noteign",	"",	(Function) cmd_pls_noteign,	NULL},
-  {"-noteign",	"",	(Function) cmd_mns_noteign,	NULL},
-  {"noteigns",	"",	(Function) cmd_noteigns,	NULL},
-  {"note",	"",	(Function) cmd_note,		NULL},
-  {NULL,	NULL,	NULL,				NULL}
+  {"fwd",	"m",	(Function) cmd_fwd,		NULL,          NULL},
+  {"notes",	"",	(Function) cmd_notes,		NULL,          NULL},
+  {"+noteign",	"",	(Function) cmd_pls_noteign,	NULL,          NULL},
+  {"-noteign",	"",	(Function) cmd_mns_noteign,	NULL,          NULL},
+  {"noteigns",	"",	(Function) cmd_noteigns,	NULL,          NULL},
+  {"note",	"",	(Function) cmd_note,		NULL,          NULL},
+  {NULL,	NULL,	NULL,				NULL,          NULL}
 };

@@ -1,7 +1,6 @@
 /*
  * modvals.h
  *
- * $Id: modvals.h,v 1.22 2002/01/02 03:46:37 guppy Exp $
  */
 /*
  * Copyright (C) 1997 Robey Pointer
@@ -41,7 +40,11 @@
 #define HOOK_LOADED		 13
 #define HOOK_BACKUP     	 14
 #define HOOK_DIE		 15
-#define REAL_HOOKS		 16
+#define HOOK_10SECONDLY          16
+#define HOOK_30SECONDLY          17
+#define HOOK_3SECONDLY		18
+#define REAL_HOOKS		 19
+//#define HOOK_CHANFILE            17
 #define HOOK_SHAREOUT		105
 #define HOOK_SHAREIN		106
 #define HOOK_ENCRYPT_PASS	107
@@ -53,6 +56,8 @@
 #define HOOK_DNS_IPBYHOST	113
 #define HOOK_ENCRYPT_STRING     114
 #define HOOK_DECRYPT_STRING     115
+#define HOOK_SWITCH_STATIC      116
+#define HOOK_SHAREUPDATEIN	117
 
 /* These are FIXED once they are in a release they STAY
  */
@@ -67,6 +72,7 @@
 #define FILESYS_ISVALID		  7
 /* Share */
 #define SHARE_FINISH		  4
+#define UPDATE_FINISH		  4
 #define SHARE_DUMP_RESYNC	  5
 /* Channels */
 #define CHANNEL_CLEAR		 15
@@ -74,6 +80,7 @@
 #define SERVER_BOTNAME		  4
 #define SERVER_BOTUSERHOST	  5
 #define SERVER_NICKLEN		 38
+#define SERVER_NUKESERVER	 19
 /* IRC */
 #define IRC_RECHECK_CHANNEL	  15
 #define IRC_RECHECK_CHANNEL_MODES 17
@@ -84,6 +91,9 @@
 #define NOTES_CMD_NOTE		  4
 /* Console */
 #define CONSOLE_DOSTORE		  4
+/* compress */
+#define COMPRESS_CFILE		  5
+#define COMPRESS_UFILE		  7
 
 #ifdef HPUX_HACKS
 #  include <dl.h>
@@ -94,13 +104,6 @@ typedef struct _module_entry {
   char			*name;	/* Name of the module (without .so)	*/
   int			 major;	/* Major version number MUST match	*/
   int			 minor;	/* Minor version number MUST be >=	*/
-#ifndef STATIC
-#  ifdef HPUX_HACKS
-  shl_t			 hand;
-#  else		/* !HPUX_HACKS */
-  void			*hand;	/* Module handle			*/
-#  endif	/* !HPUX_HACKS */
-#endif		/* STATIC */
   Function		*funcs;
 #  ifdef DEBUG_MEM
   int			 mem_work;

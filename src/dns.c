@@ -4,26 +4,6 @@
  *   provides the code used by the bot if the DNS module is not loaded
  *   DNS Tcl commands
  *
- * $Id: dns.c,v 1.24 2002/01/02 03:46:35 guppy Exp $
- */
-/*
- * Written by Fabian Knittel <fknittel@gmx.de>
- *
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
@@ -434,8 +414,10 @@ void block_dns_hostbyip(IP ip)
   static char s[UHOSTLEN];
 
   if (!setjmp(alarmret)) {
+    debug0("dns.c:437 alarm");
     alarm(resolve_timeout);
     hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
+    debug0("dns.c:440 alarm");
     alarm(0);
     if (hp) {
       strncpyz(s, hp->h_name, sizeof s);
@@ -463,9 +445,10 @@ void block_dns_ipbyhost(char *host)
     struct hostent *hp;
     struct in_addr *in;
     IP ip = 0;
-
+    debug0("dns.c:468 alarm");
     alarm(resolve_timeout);
     hp = gethostbyname(host);
+    debug0("dns.c:472 alarm");
     alarm(0);
 
     if (hp) {

@@ -1,5 +1,4 @@
 # Makefile for src/mod/ctcp.mod/
-# $Id: Makefile,v 1.11 2000/09/12 15:26:52 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../ctcp.$(MOD_EXT)
 	mv ctcp.o ../
 
 ../../../ctcp.$(MOD_EXT): ../ctcp.o
-	$(LD) -o ../../../ctcp.$(MOD_EXT) ../ctcp.o
+	$(LD) -static -o ../../../ctcp.$(MOD_EXT) ../ctcp.o
 	$(STRIP) ../../../ctcp.$(MOD_EXT)
 
 depend:

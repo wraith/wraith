@@ -1,24 +1,6 @@
 /*
  * share.h -- part of share.mod
  *
- * $Id: share.h,v 1.4 2002/01/02 03:46:40 guppy Exp $
- */
-/*
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_MOD_SHARE_SHARE_H
@@ -27,6 +9,9 @@
 #define	UFF_OVERRIDE	0x000001	/* Override existing bot entries    */
 #define UFF_INVITE	0x000002	/* Send invites in user file	    */
 #define UFF_EXEMPT	0x000004	/* Send exempts in user file	    */
+#define UFF_CHANS	0x000020	/* Send channels in user file */
+#define UFF_TCL		0x000040	/* Send tcl file with userfile */
+
 /* Currently reserved flags for other modules:
  *      UFF_COMPRESS    0x000008	   Compress the user file
  *      UFF_ENCRYPT	0x000010	   Encrypt the user file

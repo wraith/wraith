@@ -3,24 +3,6 @@
  *   saved console settings based on console.tcl
  *   by cmwagner/billyjoe/D. Senso
  *
- * $Id: console.c,v 1.25 2002/06/06 18:52:23 wcc Exp $
- */
-/*
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #define MODULE_NAME "console"
@@ -30,7 +12,7 @@
 #include "console.h"
 
 static Function *global = NULL;
-static int console_autosave = 0;
+static int console_autosave = 1;
 static int force_channel = 0;
 static int info_party = 0;
 
@@ -41,6 +23,7 @@ struct console_info {
   int echoflags;
   int page;
   int conchan;
+  int color;
 };
 
 static struct user_entry_type USERENTRY_CONSOLE;
@@ -65,6 +48,8 @@ static int console_unpack(struct userrec *u, struct user_entry *e)
   ci->page = atoi(arg);
   arg = newsplit(&par);
   ci->conchan = atoi(arg);
+  arg = newsplit(&par);
+  ci->color = atoi(arg);
   list_type_kill(e->u.list);
   e->u.extra = ci;
   return 1;
@@ -78,10 +63,10 @@ static int console_pack(struct userrec *u, struct user_entry *e)
 
   ci = (struct console_info *) e->u.extra;
 
-  l = simple_sprintf(work, "%s %s %s %d %d %d",
+  l = simple_sprintf(work, "%s %s %s %d %d %d %d",
 		     ci->channel, masktype(ci->conflags),
 		     stripmasktype(ci->stripflags), ci->echoflags,
-		     ci->page, ci->conchan);
+		     ci->page, ci->conchan, ci->color);
 
   e->u.list = user_malloc(sizeof(struct list_type));
   e->u.list->next = NULL;
@@ -108,14 +93,13 @@ static int console_write_userfile(FILE *f, struct userrec *u,
 {
   struct console_info *i = e->u.extra;
 
-  if (fprintf(f, "--CONSOLE %s %s %s %d %d %d\n",
+  if (lfprintf(f, "--CONSOLE %s %s %s %d %d %d %d\n",
 	      i->channel, masktype(i->conflags),
 	      stripmasktype(i->stripflags), i->echoflags,
-	      i->page, i->conchan) == EOF)
+	      i->page, i->conchan, i->color) == EOF)
     return 0;
   return 1;
 }
-
 static int console_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   struct console_info *ci = (struct console_info *) e->u.extra;
@@ -141,10 +125,10 @@ static int console_tcl_get(Tcl_Interp *irp, struct userrec *u,
   char work[1024];
   struct console_info *i = e->u.extra;
 
-  simple_sprintf(work, "%s %s %s %d %d %d",
+  simple_sprintf(work, "%s %s %s %d %d %d %d",
 		 i->channel, masktype(i->conflags),
 		 stripmasktype(i->stripflags), i->echoflags,
-		 i->page, i->conchan);
+		 i->page, i->conchan, i->color);
   Tcl_AppendResult(irp, work, NULL);
   return TCL_OK;
 }
@@ -176,8 +160,11 @@ static int console_tcl_set(Tcl_Interp *irp, struct userrec *u,
 	i->echoflags = (argv[6][0] == '1') ? 1 : 0;
 	if (argc > 7) {
 	  i->page = atoi(argv[7]);
-	  if (argc > 8)
+	  if (argc > 8) {
 	    i->conchan = atoi(argv[8]);
+            if (argc > 9)
+              i->color = atoi(argv[9]);
+          }  
 	}
       }
     }
@@ -193,7 +180,7 @@ static int console_expmem(struct user_entry *e)
   return sizeof(struct console_info) + strlen(i->channel) + 1;
 }
 
-static void console_display(int idx, struct user_entry *e)
+static void console_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct console_info *i = e->u.extra;
 
@@ -207,6 +194,13 @@ static void console_display(int idx, struct user_entry *e)
     dprintf(idx, "    %s %d, %s %s%d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*",
             i->conchan % GLOBAL_CHANS);
+    dprintf(idx, "    Color:");
+    if (i->color == 1)
+     dprintf(idx, " mIRC\n");
+    else if (i->color == 2)
+     dprintf(idx, " ANSI\n");
+    else
+     dprintf(idx, " off\n");      
   }
 }
 
@@ -254,16 +248,37 @@ static int console_chon(char *handle, int idx)
       if (i->echoflags)
 	dcc[idx].status |= STAT_ECHO;
       else
-	dcc[idx].status &= ~STAT_ECHO;
+        	dcc[idx].status &= ~STAT_ECHO;
       if (i->page) {
 	dcc[idx].status |= STAT_PAGE;
 	dcc[idx].u.chat->max_line = i->page;
 	if (!dcc[idx].u.chat->line_count)
 	  dcc[idx].u.chat->current_lines = 0;
       }
-      dcc[idx].u.chat->channel = i->conchan;
-    } else if (force_channel > -1)
-      dcc[idx].u.chat->channel = force_channel;
+//putlog(LOG_MISC, "*", "UH: %s color: %d", handle, i->color);
+//      dcc[idx].status &= ~(STAT_COLOR | STAT_COLORA | STAT_COLORM);
+      if (i->color) {
+        if (i->color == 1) {
+         dcc[idx].status &= ~STAT_COLORA;
+         dcc[idx].status |= (STAT_COLOR | STAT_COLORM);
+        } else if (i->color == 2) {
+         dcc[idx].status &= ~STAT_COLORM;
+         dcc[idx].status |= (STAT_COLOR | STAT_COLORA);
+        }
+      } else
+         dcc[idx].status &= ~(STAT_COLOR | STAT_COLORA | STAT_COLORM);
+/* lame.
+      if (!(dcc[idx].user->flags & USER_PARTY))
+        dcc[idx].u.chat->channel = i->conchan;
+      else
+        dcc[idx].u.chat->channel = (-1);
+    } else if (force_channel > -1) {
+      if (!(dcc[idx].user->flags & USER_PARTY))
+        dcc[idx].u.chat->channel = force_channel;
+      else
+        dcc[idx].u.chat->channel = (-1);
+*/
+    }
     if ((dcc[idx].u.chat->channel >= 0) &&
 	(dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
       botnet_send_join_idx(idx, -1);
@@ -308,6 +323,13 @@ static int console_store(struct userrec *u, int idx, char *par)
     i->page = dcc[idx].u.chat->max_line;
   else
     i->page = 0;
+  if (dcc[idx].status & STAT_COLOR) {
+    if (dcc[idx].status & STAT_COLORM)
+      i->color = 1;
+    else if (dcc[idx].status & STAT_COLORA)
+      i->color = 2;
+  } else
+   i->color = 0;
   i->conchan = dcc[idx].u.chat->channel;
   if (par) {
     dprintf(idx, "%s\n", CONSOLE_SAVED_SETTINGS2);
@@ -318,6 +340,13 @@ static int console_store(struct userrec *u, int idx, char *par)
 	    i->echoflags ? CONSOLE_YES : CONSOLE_NO);
     dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, i->conchan);
+    dprintf(idx, "    Color:");
+    if (i->color == 1)
+     dprintf(idx, " mIRC\n");
+    else if (i->color == 2)
+     dprintf(idx, " ANSI\n");
+    else
+     dprintf(idx, " off\n");
   }
   set_user(&USERENTRY_CONSOLE, u, i);
   return 0;
@@ -345,18 +374,18 @@ static cmd_t mychon[] =
   {NULL,	NULL,	NULL,			NULL}
 };
 
-static cmd_t mydcc[] =
+static dcc_cmd_t mydcc[] =
 {
-  {"store",	"",	console_store,		NULL},
-  {NULL,	NULL,	NULL,			NULL}
+  {"store",	"",	console_store,		NULL,        NULL},
+  {NULL,	NULL,	NULL,			NULL,        NULL}
 };
 
 static char *console_close()
 {
   rem_builtins(H_chon, mychon);
-  rem_builtins(H_dcc, mydcc);
+  rem_builtins_dcc(H_dcc, mydcc);
   rem_tcl_ints(myints);
-  rem_help_reference("console.help");
+  //rem_help_reference("console.help");
   del_entry_type(&USERENTRY_CONSOLE);
   del_lang_section("console");
   module_undepend(MODULE_NAME);
@@ -379,14 +408,10 @@ char *console_start(Function * global_funcs)
   global = global_funcs;
 
   module_register(MODULE_NAME, console_table, 1, 1);
-  if (!module_depend(MODULE_NAME, "eggdrop", 106, 0)) {
-    module_undepend(MODULE_NAME);
-    return "This module requires Eggdrop 1.6.0 or later.";
-  }
   add_builtins(H_chon, mychon);
-  add_builtins(H_dcc, mydcc);
+  add_builtins_dcc(H_dcc, mydcc);
   add_tcl_ints(myints);
-  add_help_reference("console.help");
+  //add_help_reference("console.help");
   USERENTRY_CONSOLE.get = def_get;
   add_entry_type(&USERENTRY_CONSOLE);
   add_lang_section("console");

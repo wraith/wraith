@@ -1,25 +1,6 @@
 /*
  * uf_features.c -- part of share.mod
  *
- * $Id: uf_features.c,v 1.9 2002/03/07 21:18:52 guppy Exp $
- */
-/*
- * Copyright (C) 2000, 2001, 2002 Eggheads Development Team
- * Written by Fabian Knittel <fknittel@gmx.de>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 /*
  * Userfile feature protocol description:
@@ -378,5 +359,7 @@ static uff_table_t internal_uff_table[] = {
   {"overbots",	UFF_OVERRIDE,	uff_ask_override_bots,	0, NULL, NULL},
   {"invites",	UFF_INVITE,	NULL,			0, NULL, NULL},
   {"exempts",	UFF_EXEMPT,	NULL,			0, NULL, NULL},
+  {"chans",     UFF_CHANS,      NULL,                   0, NULL, NULL},
+  {"tcl",	UFF_TCL,	NULL,			0, NULL, NULL},
   {NULL,	0,		NULL,			0, NULL, NULL}
 };

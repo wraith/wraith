@@ -1,5 +1,4 @@
 # Makefile for src/mod/channels.mod/
-# $Id: Makefile,v 1.12 2000/09/12 15:26:52 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../channels.$(MOD_EXT)
 	mv channels.o ../
 
 ../../../channels.$(MOD_EXT): ../channels.o
-	$(LD) -o ../../../channels.$(MOD_EXT) ../channels.o $(XLIBS)
+	$(LD) -static -o ../../../channels.$(MOD_EXT) ../channels.o $(XLIBS)
 	$(STRIP) ../../../channels.$(MOD_EXT)
 
 depend:

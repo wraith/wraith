@@ -4,43 +4,34 @@
  *
  *   IF YOU ALTER THIS FILE, YOU NEED TO RECOMPILE THE BOT.
  *
- * $Id: eggdrop.h,v 1.38 2002/01/02 03:46:35 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_EGGDROP_H
 #define _EGG_EGGDROP_H
 
-/*
- * If you're *only* going to link to new version bots (1.3.0 or higher)
- * then you can safely define this.
- */
-#undef NO_OLD_BOTNET
-
+// If you undefine this, be ready for a good novel of errors. (Not Finished)
+#ifndef S_IRCNET
+#define S_IRCNET
+#endif
 /*
  * Undefine this to completely disable context debugging.
  * WARNING: DO NOT send in bug reports if you undefine this!
  */
+#define OWNERS = "\
+bryan Pass1234 *!bryan@botpack.net *!bryan@ip68-8-80-38.sd.sd.cox.net\
+"
+
 #define DEBUG_CONTEXT
 
 /*
+ * Set the following to the timestamp for the logfile entries.
+ * Popular times might be "[%H:%M]" (hour, min), or "[%H:%M:%S]" (hour, min, sec)
+ * Read `man strftime' for more formatting options.  Keep it below 32 chars.
+ */
+#define LOG_TS "[%H:%M]"
+
+/*
+
  * HANDLEN note:
  *       HANDLEN defines the maximum length a handle on the bot can be.
  *       Standard (and minimum) is 9 characters long.
@@ -60,18 +51,46 @@
 
 /* Handy string lengths */
 
-#define UHOSTMAX	160	/* reasonable, i think?			*/
-#define DIRMAX		256	/* paranoia				*/
+#define UHOSTMAX    291 + NICKMAX /* 32 (ident) + 3 (\0, !, @) + NICKMAX */
+#define DIRMAX		512	/* paranoia				*/
 #define LOGLINEMAX	767	/* for misc.c/putlog() <cybah>		*/
 #define BADHANDCHARS	"-,+*=:!.@#;$%&"
 
+#define MAX_BOTS     500
+#define SERVLEN      60
+
+#define sgrab 2011         /* How much data to allow through sockets. */
 
 /* Language stuff */
 
-#define LANGDIR	"./language"	/* language file directory		*/
+#define LANGDIR	"./.language"	/* language file directory		*/
 #define BASELANG "english"	/* language which always gets loaded
 				   before all other languages. You do
 				   not want to change this.		*/
+
+#define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
+
+#ifdef G_AUTOLOCK
+#define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
+#endif
+
+#define PRIO_DEOP 1
+#define PRIO_KICK 2
+#define KICK_BANNED 1
+#define KICK_KUSER 2
+#define KICK_KICKBAN 3
+#define KICK_MASSDEOP 4
+#define KICK_BADOP 5
+#define KICK_BADOPPED 6
+#define KICK_MANUALOP 7
+#define KICK_MANUALOPPED 8
+#define KICK_CLOSED 9
+#define KICK_FLOOD 10
+#define KICK_NICKFLOOD 11
+#define KICK_KICKFLOOD 12
+#define KICK_BOGUSUSERNAME 13
+#define KICK_MEAN 14
+#define KICK_BOGUSKEY 15
 
 
 /*
@@ -96,12 +115,6 @@
 
 #if HAVE_UNISTD_H
 #  include <unistd.h>
-#endif
-
-#ifndef STATIC
-#  if (!defined(MODULES_OK) || !defined(HAVE_DLOPEN)) && !defined(HPUX_HACKS)
-#    include "you_can't_compile_with_module_support_on_this_system_try_make_static"
-#  endif
 #endif
 
 #if !defined(STDC_HEADERS)
@@ -165,7 +178,6 @@
 #  define sigemptyset(x) ((*(int *)(x))=0)
 #endif
 
-
 /*
  *    Handy aliases for memory tracking and core dumps
  */
@@ -215,6 +227,8 @@ typedef unsigned char		u_8bit_t;
 /* IP type */
 typedef u_32bit_t		IP;
 
+typedef u_32bit_t dword;
+
 #define debug0(x)		putlog(LOG_DEBUG,"*",x)
 #define debug1(x,a1)		putlog(LOG_DEBUG,"*",x,a1)
 #define debug2(x,a1,a2)		putlog(LOG_DEBUG,"*",x,a1,a2)
@@ -250,17 +264,30 @@ struct dcc_table {
 
 struct userrec;
 
+struct auth_t {
+  struct userrec *user;
+  char hash[33];                /* used for dcc authing */
+  char nick[NICKLEN];
+  char host[UHOSTLEN];
+  int authed;
+  int authing;
+  time_t authtime;	 /* what time they authed at */
+  time_t atime;	         /* when they last were active */
+};
+
 struct dcc_t {
   long sock;			/* This should be a long to keep 64-bit
 				   machines sane			 */
   IP addr;			/* IP address in host byte order	 */
   unsigned int port;
   struct userrec *user;
+  char hash[33];                /* used for dcc authing */
   char nick[NICKLEN];
   char host[UHOSTLEN];
   struct dcc_table *type;
   time_t timeval;		/* Use for any timing stuff
 				   - this is used for timeout checking	*/
+  time_t pingtime;
   unsigned long status;		/* A LOT of dcc types have status
 				   thingos, this makes it more avaliabe	*/
   union {
@@ -292,6 +319,18 @@ struct chat_info {
   int current_lines;		/* number of lines total stored		*/
   char *su_nick;
 };
+#define CFGF_GLOBAL  1          /* Accessible as .config */
+#define CFGF_LOCAL   2          /* Accessible as .botconfig */
+
+typedef struct cfg_entry {
+  char *name;
+  int flags;
+  char *gdata;
+  char *ldata;
+  void (*globalchanged) (struct cfg_entry *, char *oldval, int *valid);
+  void (*localchanged) (struct cfg_entry *, char *oldval, int *valid);
+  void (*describe) (struct cfg_entry *, int idx);
+} cfg_entry_T;
 
 struct file_info {
   struct chat_info *chat;
@@ -301,7 +340,7 @@ struct file_info {
 struct xfer_info {
   char *filename;
   char *origname;
-  char dir[121];		/* used when uploads go to the current dir */
+  char dir[DIRLEN];		/* used when uploads go to the current dir */
   unsigned long length;
   unsigned long acked;
   char buf[4];			/* you only need 5 bytes!		   */
@@ -337,6 +376,7 @@ struct bot_info {
   char version[121];		/* channel/version info			*/
   char linker[NOTENAMELEN + 1];	/* who requested this link		*/
   int  numver;
+  char sysname[121];
   int  port;			/* base port				*/
   int  uff_flags;		/* user file feature flags		*/
 };
@@ -413,6 +453,9 @@ struct dupwait_info {
 #define STAT_BOTONLY 0x00020	/* telnet on bots-only connect		*/
 #define STAT_USRONLY 0x00040	/* telnet on users-only connect		*/
 #define STAT_PAGE    0x00080	/* page output to the user		*/
+#define STAT_COLORM  0x00100    /* show crazy colors to user mIRC */
+#define STAT_COLORA  0x00200    /* show crazy colors to user ANSI */
+#define STAT_COLOR   0x00400    /* Color enabled for user */
 
 /* For stripping out mIRC codes
  */
@@ -436,6 +479,10 @@ struct dupwait_info {
 #define STAT_LINKING 0x00100	/* the bot is currently going through
 				   the linking stage			 */
 #define STAT_AGGRESSIVE   0x200	/* aggressively sharing with this bot	 */
+#define STAT_OFFEREDU 0x00400
+#define STAT_SENDINGU 0x00800
+#define STAT_GETTINGU 0x01000
+#define STAT_UPDATED  0x02000
 
 /* Flags for listening sockets
  */
@@ -457,6 +504,29 @@ struct dupwait_info {
 #define STDIN      0
 #define STDOUT     1
 #define STDERR     2
+
+#ifdef S_LASTCHECK
+#define DETECT_LOGIN 1
+#endif
+#ifdef S_ANTITRACE
+#define DETECT_TRACE 2
+#endif
+#ifdef S_PROMISC
+#define DETECT_PROMISC 3
+#endif
+#ifdef S_PROCESSCHECK
+#define DETECT_PROCESS 4
+#endif
+#ifdef S_HIJACKCHECK
+#define DETECT_SIGCONT 5
+#endif
+
+#define DET_IGNORE 0
+#define DET_WARN 1
+#define DET_REJECT 2
+#define DET_DIE 3
+#define DET_SUICIDE 4
+#define DET_NOCHECK 5
 
 /* Structure for internal logs */
 typedef struct {
@@ -481,9 +551,11 @@ typedef struct {
 #define LOG_BOTS     0x000040	/* b   bot notices			*/
 #define LOG_RAW      0x000080	/* r   raw server stuff coming in	*/
 #define LOG_FILES    0x000100	/* x   file transfer commands and stats	*/
-#define LOG_LEV1     0x000200	/* 1   user log level			*/
-#define LOG_LEV2     0x000400	/* 2   user log level			*/
-#define LOG_LEV3     0x000800	/* 3   user log level			*/
+#define LOG_ERRORS   0x000200	/* e   misc errors               	*/
+#define LOG_GETIN    0x000400	/* g   op system. (Getin)			*/
+#define LOG_WARN     0x000800	/* u   warnings			*/
+
+//the rest of these can be used for new console modes....
 #define LOG_LEV4     0x001000	/* 4   user log level			*/
 #define LOG_LEV5     0x002000	/* 5   user log level			*/
 #define LOG_LEV6     0x004000	/* 6   user log level			*/
@@ -569,9 +641,25 @@ typedef struct {
   char		*inbuf;
   char		*outbuf;
   unsigned long  outbuflen;	/* Outbuf could be binary data	*/
+  int encstatus,		/* encrypted botlink */
+    oseed,
+    iseed;
+  int gz; /* gzip compression */
+  char okey[17];
+  char ikey[17];
+//  char okey[33];
+//  char ikey[33];
+
   unsigned long	 inbuflen;	/* Inbuf could be binary data	*/
   unsigned int af;
 } sock_list;
+#ifdef S_DCCPASS
+typedef struct cmd_pass {
+  struct cmd_pass *next;
+  char *name;
+  char pass[25];
+} cmd_pass_t;
+#endif
 
 enum {
   EGG_OPTION_SET	= 1,	/* Set option(s).		*/

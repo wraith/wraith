@@ -2,36 +2,47 @@
  * main.h
  *   include file to include most other include files
  *
- * $Id: main.h,v 1.19 2002/01/02 03:46:35 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_MAIN_H
 #define _EGG_MAIN_H
 
+
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
 
+#include "lush.h" /* We seem to need this everywhere... */
+
+#if (((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION >= 5)) || (TCL_MAJOR_VERSION > 7))
+#  define USE_TCL_EVENTS
+#  define USE_TCL_FINDEXEC
+#  define USE_TCL_PACKAGE
+#  define USE_TCL_VARARGS
+#endif
+
+#if (TCL_MAJOR_VERSION >= 8)
+#  define USE_TCL_OBJ
+#endif
+
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 1)) || (TCL_MAJOR_VERSION > 8))
+#  define USE_TCL_BYTE_ARRAYS
+#  define USE_TCL_ENCODING
+#endif
+
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
+#  ifdef CONST
+#    define EGG_CONST CONST
+#  else
+#    define EGG_CONST
+#  endif
+#else
+#  define EGG_CONST
+#endif
+
+
 /* UGH! Why couldn't Tcl pick a standard? */
-#if !defined(HAVE_PRE7_5_TCL) && defined(__STDC__)
+#if defined(USE_TCL_VARARGS) && (defined(__STDC__) || defined(HAS_STDARG))
 #  ifdef HAVE_STDARG_H
 #    include <stdarg.h>
 #  else
@@ -60,6 +71,7 @@
 #include "lang.h"
 #include "eggdrop.h"
 #include "flags.h"
+
 #ifndef MAKING_MODS
 #  include "proto.h"
 #endif
@@ -109,8 +121,15 @@ extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_SCRIPT, DCC_BOT_NEW,
 
 /* For net.c */
 #  define O_NONBLOCK	00000004    /* POSIX non-blocking I/O		   */
-
 #endif				/* BORGUBES */
 
+#define strncpy0(a,b,c) { strncpy(a, b, c-1); (a)[c-1]=0; }
+
+#ifdef strncpy
+#undef strncpy
+#endif
+
+
+#include "md5/md5.h"
 
 #endif				/* _EGG_MAIN_H */

@@ -1,25 +1,6 @@
 /*
  * tandem.h
  *
- * $Id: tandem.h,v 1.9 2002/01/02 03:46:36 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_TANDEM_H
@@ -55,7 +36,7 @@ typedef struct {
 /* Minimum version that uses tokens & base64 ints
  * for channel msg's
  */
-#define NEAT_BOTNET 1029900
+#define NEAT_BOTNET 1000000
 #define GLOBAL_CHANS 100000
 
 
@@ -80,7 +61,6 @@ void botnet_send_nlinked(int, char *, char *, char, int);
 void botnet_send_reject(int, char *, char *, char *, char *, char *);
 void botnet_send_zapf(int, char *, char *, char *);
 void botnet_send_zapf_broad(int, char *, char *, char *);
-void botnet_send_motd(int, char *, char *);
 void botnet_send_filereq(int, char *, char *, char *);
 void botnet_send_filereject(int, char *, char *, char *);
 void botnet_send_filesend(int, char *, char *, char *);
@@ -95,6 +75,10 @@ void botnet_send_nkch_part(int, int, char *);
 void botnet_send_nkch(int, char *);
 int bots_in_subtree(tand_t *);
 int users_in_subtree(tand_t *);
+int botnet_send_cmd(char * fbot, char * bot, char * from, int fromidx, char * cmd);
+void botnet_send_cmd_broad(int idx, char * fbot, char * from, int fromidx, char * cmd);
+void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
+
 
 #endif				/* MAKING_MODS */
 

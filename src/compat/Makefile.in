@@ -1,5 +1,4 @@
 # Makefile for src/compat/
-# $Id: Makefile.in,v 1.5 2000/09/12 15:26:51 fabian Exp $
 
 SHELL = @SHELL@
 top_srcdir = @top_srcdir@

@@ -1,25 +1,6 @@
 /*
  * transfer.h -- part of transfer.mod
  *
- * $Id: transfer.h,v 1.14 2002/01/02 03:46:40 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #ifndef _EGG_MOD_TRANSFER_TRANSFER_H
@@ -84,67 +65,68 @@ typedef struct zarrf {
 #endif				/* MAKING_TRANSFER */
 
 /* Language file additions */
-#define TRANSFER_COPY_FAILED        get_language(0xf00)
-#define TRANSFER_FILESYS_BROKEN     get_language(0xf01)
-#define TRANSFER_FILE_ARRIVE        get_language(0xf02)
-#define TRANSFER_LOG_CONFULL        get_language(0xf03)
-#define TRANSFER_NOTICE_CONFULL     get_language(0xf04)
-#define TRANSFER_LOG_SOCKERR        get_language(0xf05)
-#define TRANSFER_NOTICE_SOCKERR     get_language(0xf06)
-#define TRANSFER_LOG_FILEEMPTY      get_language(0xf07)
-#define TRANSFER_NOTICE_FILEEMPTY   get_language(0xf08)
-#define TRANSFER_SEND_TO            get_language(0xf09)
-#define TRANSFER_LINES              get_language(0xf0a)
-#define TRANSFER_WAITING            get_language(0xf0b)
-#define TRANSFER_DONE               get_language(0xf0c)
-#define TRANSFER_QUEUED_UP          get_language(0xf0d)
-#define TRANSFER_TOTAL              get_language(0xf0e)
-#define TRANSFER_CANCELLED          get_language(0xf0f)
-#define TRANSFER_ABORT_DCCSEND      get_language(0xf10)
-#define TRANSFER_NOTICE_ABORT       get_language(0xf11)
-#define TRANSFER_DCC_CANCEL         get_language(0xf12)
-#define TRANSFER_NO_MATCHES         get_language(0xf13)
-#define TRANSFER_CANCELLED_FILE     get_language(0xf14)
-#define TRANSFER_COMPLETED_DCC      get_language(0xf15)
-#define TRANSFER_FILENAME_TOOLONG   get_language(0xf16)
-#define TRANSFER_NOTICE_FNTOOLONG   get_language(0xf17)
-#define TRANSFER_TOO_BAD            get_language(0xf18)
-#define TRANSFER_NOTICE_TOOBAD      get_language(0xf19)
-#define TRANSFER_FAILED_MOVE        get_language(0xf1a)
-#define TRANSFER_THANKS             get_language(0xf1b)
-#define TRANSFER_NOTICE_THANKS      get_language(0xf1c)
-#define TRANSFER_USERFILE_LOST      get_language(0xf1d)
-/* #define TRANSFER_BYE	            get_language(0xf1e) */
-#define TRANSFER_USERFILE_DISCON    get_language(0xf1f)
-#define TRANSFER_LOST_DCCSEND       get_language(0xf20)
-#define TRANSFER_REGET_PACKET       get_language(0xf21)
-#define TRANSFER_BEHIND_FILEEND     get_language(0xf22)
-#define TRANSFER_TRY_SKIP_AHEAD     get_language(0xf23)
-#define TRANSFER_RESUME_FILE        get_language(0xf24)
-#define TRANSFER_COMPLETED_USERFILE get_language(0xf25)
-#define TRANSFER_FINISHED_DCCSEND   get_language(0xf26)
-#define TRANSFER_ABORT_USERFILE     get_language(0xf27)
-#define TRANSFER_LOST_DCCGET        get_language(0xf28)
-#define TRANSFER_BOGUS_FILE_LENGTH  get_language(0xf29)
-#define TRANSFER_FILE_TOO_LONG      get_language(0xf2a)
-#define TRANSFER_USERFILE_TIMEOUT   get_language(0xf2b)
-#define TRANSFER_DICONNECT_TIMEOUT  get_language(0xf2c)
-#define TRANSFER_NOTICE_TIMEOUT     get_language(0xf2d)
-#define TRANSFER_LOG_TIMEOUT        get_language(0xf2e)
-#define TRANSFER_DCC_GET_TIMEOUT    get_language(0xf2f)
-#define TRANSFER_DCC_SEND_TIMEOUT   get_language(0xf30)
-#define TRANSFER_SEND               get_language(0xf31)
-#define TRANSFER_SEND_WAITED        get_language(0xf32)
-#define TRANSFER_CONN_SEND          get_language(0xf33)
-#define TRANSFER_DCC_CONN           get_language(0xf34)
-#define TRANSFER_NOTICE_BAD_CONN    get_language(0xf35)
-#define TRANSFER_LOG_BAD_CONN       get_language(0xf36)
-#define TRANSFER_BEGIN_DCC          get_language(0xf37)
-#define TRANSFER_RE                 get_language(0xf38)
-#define TRANSFER_DCC_IGNORED        get_language(0xf39)
-#define TRANSFER_UNLOADING          get_language(0xf40)
-#define TRANSFER_STAT_BLOCK         get_language(0xf41)
-#define TRANSFER_STAT_MEMORY        get_language(0xf42)
+
+#define TRANSFER_COPY_FAILED        "Refused dcc get %s: copy to %s FAILED!"
+#define TRANSFER_FILESYS_BROKEN     "NOTICE %s :File system is broken; aborting queued files.\n"
+#define TRANSFER_FILE_ARRIVE        "NOTICE %s :Here is a file from %s ...\n"
+#define TRANSFER_LOG_CONFULL        "DCC connections full: GET %s [%s]"
+#define TRANSFER_NOTICE_CONFULL     "NOTICE %s :DCC connections full; aborting queued files.\n"
+#define TRANSFER_LOG_SOCKERR        "DCC socket error: GET %s [%s]"
+#define TRANSFER_NOTICE_SOCKERR     "NOTICE %s :DCC socket error; aborting queued files.\n"
+#define TRANSFER_LOG_FILEEMPTY      "Aborted dcc get %s: File is empty!"
+#define TRANSFER_NOTICE_FILEEMPTY   "NOTICE %s :File %s is empty, aborting transfer.\n"
+#define TRANSFER_SEND_TO            "  Send to  %s  Filename\n"
+#define TRANSFER_LINES              "  ---------%s  --------------------\n"
+#define TRANSFER_WAITING            "  %s%s  %s  [WAITING]\n"
+#define TRANSFER_DONE               "  %s%s  %s  (%.1f%% done)\n"
+#define TRANSFER_QUEUED_UP          "No files queued up.\n"
+#define TRANSFER_TOTAL              "Total: %d\n"
+#define TRANSFER_CANCELLED          "Cancelled: %s to %s\n"
+#define TRANSFER_ABORT_DCCSEND      "Cancelled: %s  (aborted dcc send)\n"
+#define TRANSFER_NOTICE_ABORT       "NOTICE %s :Transfer of %s aborted by %s\n"
+#define TRANSFER_DCC_CANCEL         "DCC cancel: GET %s (%s) at %lu/%lu"
+#define TRANSFER_NO_MATCHES         "No matches.\n"
+#define TRANSFER_CANCELLED_FILE     "Cancelled %d file%s.\n"
+#define TRANSFER_COMPLETED_DCC      "Completed dcc send %s from %s!%s"
+#define TRANSFER_FILENAME_TOOLONG   "Filename %d length. Way To LONG."
+#define TRANSFER_NOTICE_FNTOOLONG   "NOTICE %s :Filename %d length Way To LONG!\n"
+#define TRANSFER_TOO_BAD            "Too Bad So Sad Your Dad!"
+#define TRANSFER_NOTICE_TOOBAD      "NOTICE %s :Too Bad So Sad Your Dad!\n"
+#define TRANSFER_FAILED_MOVE        "FAILED move `%s' from `%s'! File lost!"
+#define TRANSFER_THANKS             "Thanks for the file!\n"
+#define TRANSFER_NOTICE_THANKS      "NOTICE %s :Thanks for the file!\n"
+#define TRANSFER_USERFILE_LOST      "Lost userfile transfer from %s; aborting."
+/* #define TRANSFER_BYE	            "0xf1e) */
+#define TRANSFER_USERFILE_DISCON    "Disconnected %s (aborted userfile transfer)"
+#define TRANSFER_LOST_DCCSEND       "Lost dcc send %s from %s!%s (%lu/%lu)"
+#define TRANSFER_REGET_PACKET       "(!) reget packet from %s for %s is invalid!"
+#define TRANSFER_BEHIND_FILEEND     "!! Resuming file transfer behind file end for %s to %s"
+#define TRANSFER_TRY_SKIP_AHEAD     "!!! Trying to skip ahead on userfile transfer"
+#define TRANSFER_RESUME_FILE        "Resuming file transfer at %dk for %s to %s"
+#define TRANSFER_COMPLETED_USERFILE "Completed userfile transfer to %s."
+#define TRANSFER_FINISHED_DCCSEND   "Finished dcc send %s to %s"
+#define TRANSFER_ABORT_USERFILE     "Lost userfile transfer; aborting."
+#define TRANSFER_LOST_DCCGET        "Lost dcc get %s from %s!%s"
+#define TRANSFER_BOGUS_FILE_LENGTH  "NOTICE %s :Bogus file length.\n"
+#define TRANSFER_FILE_TOO_LONG      "File too long: dropping dcc send %s from %s!%s"
+#define TRANSFER_USERFILE_TIMEOUT   "Timeout on userfile transfer."
+#define TRANSFER_DICONNECT_TIMEOUT  "Disconnected %s (timed-out userfile transfer)"
+#define TRANSFER_NOTICE_TIMEOUT     "NOTICE %s :Timeout during transfer, aborting %s.\n"
+#define TRANSFER_LOG_TIMEOUT        "EGGDROP TEAM IS TEH GAY"
+#define TRANSFER_DCC_GET_TIMEOUT    "DCC timeout: GET %s (%s) at %lu/%lu"
+#define TRANSFER_DCC_SEND_TIMEOUT   "DCC timeout: SEND %s (%s) at %lu/%lu"
+#define TRANSFER_SEND               "send  (%lu)/%lu\n    Filename: %s\n"
+#define TRANSFER_SEND_WAITED        "send  waited %lus\n    Filename: %s\n"
+#define TRANSFER_CONN_SEND          "conn  send"
+#define TRANSFER_DCC_CONN           "DCC connection: SEND %s (%s)"
+#define TRANSFER_NOTICE_BAD_CONN    "NOTICE %s :Bad connection (%s)\n"
+#define TRANSFER_LOG_BAD_CONN       "DCC bad connection: GET %s (%s!%s)"
+#define TRANSFER_BEGIN_DCC          "Begin DCC %ssend %s to %s"
+#define TRANSFER_RE                 "re"
+#define TRANSFER_DCC_IGNORED        "NOTICE %s :Ignoring resume of `%s': no data requested.\n"
+#define TRANSFER_UNLOADING          "Unloading transfer module, killing all transfer connections..."
+#define TRANSFER_STAT_BLOCK         "    DCC block is %d%s, max concurrent d/ls is %d\n"
+#define TRANSFER_STAT_MEMORY        "   Using %d bytes of memory\n"
 /* end of langauge addon */
 
 #endif				/* _EGG_MOD_TRANSFER_TRANSFER_H */

@@ -1,5 +1,4 @@
 # Makefile for src/mod/blowfish.mod/
-# $Id: Makefile,v 1.11 2000/09/12 15:26:51 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../blowfish.$(MOD_EXT)
 	mv blowfish.o ../
 
 ../../../blowfish.$(MOD_EXT): ../blowfish.o
-	$(LD) -o ../../../blowfish.$(MOD_EXT) ../blowfish.o $(XLIBS)
+	$(LD) -static -o ../../../blowfish.$(MOD_EXT) ../blowfish.o $(XLIBS)
 	$(STRIP) ../../../blowfish.$(MOD_EXT)
 
 depend:

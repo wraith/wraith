@@ -10,25 +10,6 @@
  *
  * dprintf'ized, 9nov1995
  *
- * $Id: users.c,v 1.34 2002/07/09 05:40:55 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
@@ -37,15 +18,14 @@
 #include "modules.h"
 #include "tandem.h"
 char natip[121] = "";
-
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
 extern struct dcc_t *dcc;
 extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
-extern int dcc_total, noshare;
-extern char botnetnick[];
+extern int dcc_total, noshare, egg_numver, norestruct;
+extern char botnetnick[], netpass[];
 extern Tcl_Interp *interp;
 extern time_t now;
 
@@ -82,25 +62,28 @@ int delignore(char *ign)
   int i, j;
   struct igrec **u;
   struct igrec *t;
+  char temp[256];
+
 
   i = 0;
   if (!strchr(ign, '!') && (j = atoi(ign))) {
     for (u = &global_ign, j--; *u && j; u = &((*u)->next), j--);
     if (*u) {
-      strcpy(ign, (*u)->igmask);
+      strncpyz(temp, (*u)->igmask, sizeof temp);
       i = 1;
     }
   } else {
     /* find the matching host, if there is one */
     for (u = &global_ign; *u && !i; u = &((*u)->next))
       if (!rfc_casecmp(ign, (*u)->igmask)) {
+        strncpyz(temp, ign, sizeof temp);
 	i = 1;
 	break;
       }
   }
   if (i) {
     if (!noshare) {
-      char *mask = str_escape(ign, ':', '\\');
+      char *mask = str_escape(temp, ':', '\\');
 
       if (mask) {
 	shareout(NULL, "-i %s\n", mask);
@@ -476,6 +459,7 @@ void tell_user(int idx, struct userrec *u, int master)
   int n;
   time_t now2;
   struct chanuserrec *ch;
+  struct chanset_t *chan;
   struct user_entry *ue;
   struct laston_info *li;
   struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
@@ -497,39 +481,43 @@ void tell_user(int idx, struct userrec *u, int master)
     else
       egg_strftime(s1, 6, "%H:%M", localtime(&li->laston));
   }
-  snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)\n", 
+  egg_snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)", 
                           HANDLEN);
   dprintf(idx, format, u->handle, 
 	  get_user(&USERENTRY_PASS, u) ? "yes" : "no", n, s, s1,
 	  (li && li->lastonplace) ? li->lastonplace : "nowhere");
+  dprintf(idx, "\n");
   /* channel flags? */
   for (ch = u->chanrec; ch; ch = ch->next) {
     fr.match = FR_CHAN | FR_GLOBAL;
+    chan = findchan_by_dname(ch->channel);
     get_user_flagrec(dcc[idx].user, &fr, ch->channel);
-    if (glob_op(fr) || chan_op(fr)) {
-      if (ch->laston == 0L)
-	strcpy(s1, "never");
-      else {
-	now2 = now - (ch->laston);
-	if (now2 > 86400)
-	  egg_strftime(s1, 7, "%d %b", localtime(&ch->laston));
-	else
-	  egg_strftime(s1, 6, "%H:%M", localtime(&ch->laston));
+    if (!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) {
+      if (glob_op(fr) || chan_op(fr)) {
+        if (ch->laston == 0L)
+  	  strcpy(s1, "never");
+        else {
+  	  now2 = now - (ch->laston);
+	  if (now2 > 86400)
+	    egg_strftime(s1, 7, "%d %b", localtime(&ch->laston));
+	  else
+	    egg_strftime(s1, 6, "%H:%M", localtime(&ch->laston));
+        }
+        fr.match = FR_CHAN;
+        fr.chan = ch->flags;
+        fr.udef_chan = ch->flags_udef;
+        build_flags(s, &fr, NULL);
+        egg_snprintf(format, sizeof format, "%%%us  %%-18s %%-15s %%s\n", HANDLEN-9);
+        dprintf(idx, format, " ", ch->channel, s, s1);
+        if (ch->info != NULL)
+  	  dprintf(idx, "    INFO: %s\n", ch->info);
       }
-      fr.match = FR_CHAN;
-      fr.chan = ch->flags;
-      fr.udef_chan = ch->flags_udef;
-      build_flags(s, &fr, NULL);
-      snprintf(format, sizeof format, "%%%us  %%-18s %%-15s %%s\n", HANDLEN-9);
-      dprintf(idx, format, " ", ch->channel, s, s1);
-      if (ch->info != NULL)
-	dprintf(idx, "    INFO: %s\n", ch->info);
     }
   }
   /* user-defined extra fields */
   for (ue = u->entries; ue; ue = ue->next)
     if (!ue->name && ue->type->display)
-      ue->type->display(idx, ue);
+      ue->type->display(idx, ue, u);
 }
 
 /* show user by ident */
@@ -537,15 +525,31 @@ void tell_user_ident(int idx, char *id, int master)
 {
   char format[81];
   struct userrec *u;
+//  struct chanset_t *chan;
+  struct flag_record user = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  int noax = 0;
+
+  get_user_flagrec(dcc[idx].user, &user, NULL);
 
   u = get_user_by_handle(userlist, id);
   if (u == NULL)
     u = get_user_by_host(id);
-  if (u == NULL) {
+
+  if (u) {
+    get_user_flagrec(u, &fr, NULL);
+
+    if (glob_master(fr) && !glob_master(user)) { u = dcc[idx].user; noax = 1; }
+    else if (glob_owner(fr) && !glob_owner(user)) { u = dcc[idx].user; noax = 1; }
+    else if (glob_admin(fr) && !glob_admin(user)) { u = dcc[idx].user; noax = 1; }
+    else if (glob_bot(fr) && !glob_master(user)) { u = dcc[idx].user; noax = 1; }
+  }
+
+  if (u == NULL || noax) {
     dprintf(idx, "%s.\n", USERF_NOMATCH);
     return;
   }
-  snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", 
+  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", 
                           HANDLEN);
   dprintf(idx, format, "HANDLE");
   tell_user(idx, u, master);
@@ -565,7 +569,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
 
   dprintf(idx, "*** %s '%s':\n", MISC_MATCHING, mtch);
   cnt = 0;
-  snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", 
+  egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", 
                       HANDLEN);
   dprintf(idx, format, "HANDLE");
   if (start > 1)
@@ -643,6 +647,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
  * *ignore global ignores
  * ::#chan channel bans
  * - entries in each
+ * + denotes tcl command
  * <handle> begin user entry
  * --KEY INFO - info on each
  * NEWER:
@@ -656,10 +661,11 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
  * $$#chan channel Invites
  */
 
-int noxtra = 0;
 int readuserfile(char *file, struct userrec **ret)
 {
-  char *p, buf[512], lasthand[512], *attr, *pass, *code, s1[512], *s;
+  char *p, buf[1024], lasthand[512], *attr, *pass, *code, s1[1024], *s, cbuf[1024], *temps;
+  char *horesak;
+
   FILE *f;
   struct userrec *bu, *u = NULL;
   struct chanset_t *cst = NULL;
@@ -668,6 +674,7 @@ int readuserfile(char *file, struct userrec **ret)
   struct flag_record fr;
   struct chanuserrec *cr;
 
+Context;
   bu = (*ret);
   ignored[0] = 0;
   if (bu == userlist) {
@@ -682,10 +689,13 @@ int readuserfile(char *file, struct userrec **ret)
   f = fopen(file, "r");
   if (f == NULL)
     return 0;
-  noshare = noxtra = 1;
   /* read opening comment */
   s = buf;
-  fgets(s, 180, f);
+  fscanf(f, "%s\n", cbuf);
+  horesak = decryptit(cbuf);
+  temps = (char *) decrypt_string(netpass, horesak);
+  snprintf(s, 1024, temps);
+  nfree(temps);
   if (s[1] < '4') {
     fatal(USERF_OLDFMT, 0);
   }
@@ -693,7 +703,11 @@ int readuserfile(char *file, struct userrec **ret)
     fatal(USERF_INVALID, 0);
   while (!feof(f)) {
     s = buf;
-    fgets(s, 511, f);
+    fscanf(f, "%s\n", cbuf);
+    horesak = decryptit(cbuf);
+    temps = (char *) decrypt_string(netpass, horesak);
+    snprintf(s, 1024, temps);
+    nfree(temps);
     if (!feof(f)) {
       if (s[0] != '#' && s[0] != ';' && s[0]) {
 	code = newsplit(&s);
@@ -716,8 +730,14 @@ int readuserfile(char *file, struct userrec **ret)
 	    if (lasthand[0] && strchr(CHANMETA, lasthand[0]) != NULL)
 	      restore_chanban(cst, s);
 	    else if (lasthand[0] == '*') {
-	      if (lasthand[1] == 'i')
+	      if (lasthand[1] == IGNORE_NAME[1])
 		restore_ignore(s);
+#ifdef S_DCCPASS
+              else if (lasthand[1] == CONFIG_NAME[1]) {
+Context;
+                set_cmd_pass(s, 1);
+              }
+#endif
 	      else
 		restore_chanban(NULL, s);
 	    } else if (lasthand[0])
@@ -730,18 +750,22 @@ int readuserfile(char *file, struct userrec **ret)
 	    if (lasthand[0] == '#' || lasthand[0] == '+')
 	      restore_chanexempt(cst,s);
 	    else if (lasthand[0] == '*')
-	      if (lasthand[1] == 'e')
+	      if (lasthand[1] == EXEMPT_NAME[1])
 		restore_chanexempt(NULL, s);
 	  }
 	} else if (!strcmp(code, "@")) { /* Invitemasks */
 	  if (!lasthand[0])
 	    continue;		/* Skip this entry.	*/
 	  if (s[0]) {
-	    if (lasthand[0] == '#' || lasthand[0] == '+')
+	    if (lasthand[0] == '#' || lasthand[0] == '+') {
 	      restore_chaninvite(cst,s);
-	    else if (lasthand[0] == '*')
-	      if (lasthand[1] == 'I')
+	    } else if (lasthand[0] == '*') {
+	      if (lasthand[1] == INVITE_NAME[1]) {
 		restore_chaninvite(NULL, s);
+              } else if (lasthand[1] == CONFIG_NAME[1]) {
+                userfile_cfg_line(s);
+              }
+            }
 	  }
 	} else if (!strcmp(code, "!")) {
 	  /* ! #chan laston flags [info] */
@@ -776,6 +800,19 @@ int readuserfile(char *file, struct userrec **ret)
 	      }
 	    }
 	  }
+        } else if (!strcmp(code, "+")) {  // channels
+         int code2;
+Context;
+         if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
+	  code2 = Tcl_Eval(interp, s);
+          if (code2 != TCL_OK) {
+           putlog(LOG_MISC, "*", "Tcl error in userfile");
+           putlog(LOG_MISC, "*", "%s",
+            Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
+           return 0;
+          }
+	 call_hook(HOOK_SWITCH_STATIC);
+         }
 	} else if (!strncmp(code, "::", 2)) {
 	  /* channel-specific bans */
 	  strcpy(lasthand, &code[2]);
@@ -855,6 +892,7 @@ int readuserfile(char *file, struct userrec **ret)
 	    }
 	  }
 	} else if (!strncmp(code, "--", 2)) {
+Context;
 	  if (u) {
 	    /* new format storage */
 	    struct user_entry *ue;
@@ -898,6 +936,13 @@ int readuserfile(char *file, struct userrec **ret)
 	} else if (!rfc_casecmp(code, INVITE_NAME)) {
 	  strcpy(lasthand, code);
 	  u = NULL;
+        } else if (!rfc_casecmp(code, CHANS_NAME)) {
+          call_hook(HOOK_SWITCH_STATIC);
+          strcpy(lasthand, code);
+          u = NULL;
+        } else if (!rfc_casecmp(code, CONFIG_NAME)) {
+          strcpy(lasthand, code);
+          u = NULL;  
 	} else if (code[0] == '*') {
 	  lasthand[0] = 0;
 	  u = NULL;
@@ -905,13 +950,14 @@ int readuserfile(char *file, struct userrec **ret)
 	  pass = newsplit(&s);
 	  attr = newsplit(&s);
 	  rmspace(s);
+Context;
 	  if (!attr[0] || !pass[0]) {
 	    putlog(LOG_MISC, "*", "* %s '%s'!", USERF_CORRUPT, code);
 	    lasthand[0] = 0;
 	  } else {
 	    u = get_user_by_handle(bu, code);
 	    if (u && !(u->flags & USER_UNSHARED)) {
-	      putlog(LOG_MISC, "*", "* %s '%s'!", USERF_DUPE, code);
+//	      putlog(LOG_MISC, "*", "* %s '%s'!", USERF_DUPE, code);
 	      lasthand[0] = 0;
 	      u = NULL;
 	    } else if (u) {
@@ -953,7 +999,7 @@ int readuserfile(char *file, struct userrec **ret)
     struct user_entry *e;
 
     if (!(u->flags & USER_BOT) && !egg_strcasecmp (u->handle, botnetnick)) {
-      putlog(LOG_MISC, "*", "(!) I have an user record, but without +b");
+      putlog(LOG_MISC, "*", "(!) I have a user record, but without +b");
       /* u->flags |= USER_BOT; */
     }
 
@@ -969,8 +1015,11 @@ int readuserfile(char *file, struct userrec **ret)
 	}
       }
   }
-  noshare = noxtra = 0;
   /* process the user data *now* */
+Context;
+#ifdef LEAF
+  unlink(userfile);
+#endif
   return 1;
 }
 
@@ -978,117 +1027,283 @@ int readuserfile(char *file, struct userrec **ret)
  * 1st time scan for +sh bots and link if none connected
  * 2nd time scan for +h bots
  * 3rd time scan for +a/+h bots */
+
+void link_pref_val(struct userrec *u, char *val)
+{
+
+/* val must be HANDLEN + 4 chars minimum */
+  struct bot_addr *ba;
+
+  val[0] = 'Z';
+  val[1] = 0;
+  if (!u)
+    return;
+  if (!(u->flags & USER_BOT))
+    return;
+  ba = get_user(&USERENTRY_BOTADDR, u);
+  if (!ba)
+    return;
+  if (!ba->hublevel)
+    return;
+  sprintf(val, STR("%02d%s"), ba->hublevel, u->handle);
+
+}
+struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
+{
+
+/*
+  starting at "current" or "userlist" if NULL, find next bot with a
+  link_pref_val higher than "lowval" and lower than "highval"
+  If none found return bot with best overall link_pref_val
+  If still not found return NULL
+*/
+  char thisval[NICKLEN + 4],
+    bestmatchval[NICKLEN + 4] = "z",
+    bestallval[NICKLEN + 4] = "z";
+  struct userrec *cur = NULL,
+   *bestmatch = NULL,
+   *bestall = NULL;
+
+  if (current)
+    cur = current->next;
+  else
+    cur = userlist;
+  while (cur != current) {
+    if (!cur)
+      cur = userlist;
+    if (cur == current)
+      break;
+    if ((cur->flags & USER_BOT) && (strcmp(cur->handle, botnetnick))) {
+      link_pref_val(cur, thisval);
+      if ((strcmp(thisval, lowval) < 0) && (strcmp(thisval, highval) > 0) &&(strcmp(thisval, bestmatchval) < 0)) {
+        strcpy(bestmatchval, thisval);
+        bestmatch = cur;
+      }
+      if ((strcmp(thisval, lowval) < 0)
+          && (strcmp(thisval, bestallval) < 0)) {
+        strcpy(bestallval, thisval);
+        bestall = cur;
+      }
+    }
+    cur = cur->next;
+  }
+  if (bestmatch)
+    return bestmatch;
+  if (bestall)
+    return bestall;
+  return NULL;
+}
+
+#ifdef HUB
 void autolink_cycle(char *start)
 {
-  struct userrec *u = userlist, *autc = NULL;
-  static int cycle = 0;
-  int got_hub = 0, got_alt = 0, got_shared = 0, linked, ready = 0, i,
-   bfl;
+  struct userrec *u = NULL;
+  int i;
+  char bestval[HANDLEN + 4],
+    curval[HANDLEN + 4],
+    myval[HANDLEN + 4];
 
-  /* don't start a new cycle if some links are still pending */
-  if (!start) {
-    for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type == &DCC_BOT_NEW)
-	return;
-      if (dcc[i].type == &DCC_FORK_BOT)
-	return;
-      if ((dcc[i].type == &DCC_DNSWAIT) &&
-	  (dcc[i].u.dns && (dcc[i].u.dns->type == &DCC_FORK_BOT)))
-	return;
-    }
-  }
-  if (!start) {
-    ready = 1;
-    cycle = 0;
-  }				/* new run through the user list */
-  while (u && !autc) {
-    while (u && !autc) {
-      if (u->flags & USER_BOT) {
-	bfl = bot_flags(u);
-	if (bfl & (BOT_HUB | BOT_ALT)) {
-	  linked = 0;
-	  for (i = 0; i < dcc_total; i++) {
-	    if (dcc[i].user == u) {
-	      if (dcc[i].type == &DCC_BOT)
-		linked = 1;
-	      if (dcc[i].type == &DCC_BOT_NEW)
-		linked = 1;
-	      if (dcc[i].type == &DCC_FORK_BOT)
-		linked = 1;
-	    }
+  if (norestruct) return; //this shouldn't ever happen..
+  u = get_user_by_handle(userlist, botnetnick);
+  link_pref_val(u, myval);
+  strcpy(bestval, myval);
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type == &DCC_BOT_NEW)
+      return;
+    if (dcc[i].type == &DCC_FORK_BOT)
+      return;
+    if (dcc[i].type == &DCC_BOT) {
+
+      if (dcc[i].status & (STAT_OFFEREDU | STAT_GETTINGU | STAT_SENDINGU))
+        continue; //lets let the binary have it's peace.
+
+      if (dcc[i].u.bot->numver != egg_numver)
+        continue; //same thing.
+
+      if (dcc[i].status & (STAT_SHARE | STAT_OFFERED | STAT_SENDING | STAT_GETTING)) {
+	link_pref_val(dcc[i].user, curval);
+
+	if (strcmp(myval, curval) < 0) {
+	  /* I should be aggressive to this one */
+	  if (dcc[i].status & STAT_AGGRESSIVE) {
+	    putlog(LOG_MISC, "*", STR("Passively sharing with %s but should be aggressive"), dcc[i].user->handle);
+	    putlog(LOG_DEBUG, "*", STR("My linkval: %s - %s linkval: %s"), myval, dcc[i].nick, curval);
+	    botunlink(-2, dcc[i].nick, STR("Marked passive, should be aggressive"));
+	    return;
 	  }
-	  if ((bfl & BOT_HUB) && (bfl & BOT_SHARE)) {
-	    if (linked)
-	      got_shared = 1;
-	    else if (!cycle && ready && !autc)
-	      autc = u;
-	  } else if ((bfl & BOT_HUB) && cycle > 0) {
-	    if (linked)
-	      got_hub = 1;
-	    else if ((cycle == 1) && ready && !autc)
-	      autc = u;
-	  } else if ((bfl & BOT_ALT) && (cycle == 2)) {
-	    if (linked)
-	      got_alt = 1;
-	    else if (!in_chain(u->handle) && ready && !autc)
-	      autc = u;
+	} else {
+	  /* I should be passive to this one */
+	  if (!(dcc[i].status & STAT_AGGRESSIVE)) {
+	    putlog(LOG_MISC, "*", STR("Aggressively sharing with %s but should be passive"), dcc[i].user->handle);
+	    putlog(LOG_DEBUG, "*", STR("My linkval: %s - %s linkval: %s"), myval, dcc[i].nick, curval);
+	    botunlink(-2, dcc[i].nick, STR("Marked aggressive, should be passive"));
+	    return;
 	  }
-	  /* did we make it where we're supposed to start?  yay! */
-	  if (!ready)
-	    if (!egg_strcasecmp(u->handle, start)) {
-	      ready = 1;
-	      autc = NULL;
-	      /* if starting point is a +h bot, must be in 2nd cycle */
-	      if ((bfl & BOT_HUB) && !(bfl & BOT_SHARE)) {
-		cycle = 1;
-	      }
-	      /* if starting point is a +a bot, must be in 3rd cycle */
-	      if (bfl & BOT_ALT) {
-		cycle = 2;
-	      }
-	    }
+	  if (strcmp(curval, bestval) < 0)
+	    strcpy(bestval, curval);
 	}
-	if (!cycle && (bfl & BOT_REJECT) && in_chain(u->handle)) {
-	  /* get rid of nasty reject bot */
-	  int i;
-
-	  i = nextbot(u->handle);
-	  if ((i >= 0) && !egg_strcasecmp(dcc[i].nick, u->handle)) {
-	    char *p = MISC_REJECTED;
-
-	    /* we're directly connected to the offending bot?! (shudder!) */
-	    putlog(LOG_BOTS, "*", "%s %s", BOT_REJECTING, dcc[i].nick);
-	    chatout("*** %s bot %s\n", p, dcc[i].nick);
-	    botnet_send_unlinked(i, dcc[i].nick, p);
-	    dprintf(i, "bye %s\n", BOT_REJECTING);
-	    killsock(dcc[i].sock);
-	    lostdcc(i);
-	  } else if ((i < 0) && egg_strcasecmp(botnetnick, u->handle)) {
-	    /* The bot is not connected, but listed in our tandem list! */
-	    putlog(LOG_BOTS, "*", "(!) BUG: rejecting not connected bot %s!",
-		   u->handle);
-	    rembot(u->handle);
-	  }
-	}
-      }
-      u = u->next;
-    }
-    if (!autc) {
-      if (!cycle && !got_shared) {
-	cycle++;
-	u = userlist;
-      } else if ((cycle == 1) && !(got_shared || got_hub)) {
-	cycle++;
-	u = userlist;
+      } else {
+  	  botunlink(-2, dcc[i].nick, STR("Linked but not sharing?"));
       }
     }
   }
-  if (got_shared && !cycle)
-    autc = NULL;
-  else if ((got_shared || got_hub) && (cycle == 1))
-    autc = NULL;
-  else if ((got_shared || got_hub || got_alt) && (cycle == 2))
-    autc = NULL;
-  if (autc)
-    botlink("", -3, autc->handle);	/* try autoconnect */
+  if (start)
+    u = get_user_by_handle(userlist, start);
+  else
+    u = NULL;
+  if (u) {
+    link_pref_val(u, curval);
+    if (strcmp(bestval, curval) < 0) {
+      /* This shouldn't happen. Getting a failed link attempt (start!=NULL)
+         while a dcc scan indicates we *are* connected to a better bot than
+         the one we failed a link to.
+       */
+      putlog(LOG_BOTS, "*",  STR("Failed link attempt to %s but connected to %s already???"), u->handle, (char *) &bestval[3]);
+      return;
+    }
+  } else
+    strcpy(curval, "0");
+  u = next_hub(u, bestval, curval);
+  if ((u) && (!in_chain(u->handle)))
+    botlink("", -3, u->handle);
 }
+#endif /* HUB */
+
+#ifdef LEAF
+
+typedef struct hublist_entry {
+  struct hublist_entry *next;
+  struct userrec *u;
+} tag_hublist_entry;
+
+int botlinkcount = 0;
+
+void autolink_cycle(char *start)
+{
+
+
+  struct userrec *u = NULL,
+   *ul = NULL;
+  struct hublist_entry *hl = NULL,
+   *hl2 = NULL;
+  struct bot_addr *ba;
+  char uplink[HANDLEN + 1],
+    avoidbot[HANDLEN + 1],
+    curhub[HANDLEN + 1];
+  int i,
+    hlc;
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
+
+  if (norestruct) return;
+  /* Reset connection attempts if we ain't called due to a failed link */
+  if (!start)
+    botlinkcount = 0;
+  u = get_user_by_handle(userlist, botnetnick);
+  ba = get_user(&USERENTRY_BOTADDR, u);
+Context;
+  if (ba && (ba->uplink[0])) {
+    strncpy0(uplink, ba->uplink, sizeof(uplink));
+  } else {
+    uplink[0] = 0;
+  }
+Context;
+  curhub[0] = 0;
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type == &DCC_BOT_NEW)
+      return;
+    if (dcc[i].type == &DCC_FORK_BOT)
+      return;
+    if (dcc[i].type == &DCC_BOT) {
+      strcpy(curhub, dcc[i].nick);
+      break;
+    }
+  }
+
+  if (curhub[0]) {
+Context;
+    /* we got a hub */
+    if (uplink[0] && !strcmp(curhub, uplink))
+      /* Connected to uplink, nothing more to do */
+      return;
+
+Context;
+    if (start)
+      /* Failed a link... let's just wait for next regular call */
+      return;
+
+Context;
+    if (uplink[0]) {
+      /* Trying the uplink */
+Context;
+      botlink("", -3, uplink);
+      return;
+    }
+    /* we got a hub currently, and no set uplink. Stay here */
+    return;
+Context;
+  } else {
+Context;
+    /* no hubs connected... pick one */
+    if (!start) {
+      /* Regular interval call, no previous failed link */
+      if (uplink[0]) {
+	/* We have a set uplink, try it */
+Context;
+	botlink("", -3, uplink);
+	return;
+      }
+      /* No preferred uplink, we need a random bot */
+      avoidbot[0] = 0;
+    } else {
+      /* We got a failed link... */
+Context;
+      botlinkcount++;
+      if (botlinkcount >= 3)
+	/* tried 3+ random hubs without success, wait for next regular interval call */
+	return;
+      /* We need a random bot but *not* the last we tried */
+Context;
+      strcpy(avoidbot, start);
+    }
+  }
+  /* Pick a random hub, but avoid 'avoidbot' */
+Context;
+  ul = userlist;
+  hlc = 0;
+Context;
+  while (ul) {
+    get_user_flagrec(ul, &fr, NULL);
+
+//printf("connect to? %s %s %d\n", ul->handle, u->handle, bot_hublevel(ul));
+    if (glob_bot(fr) && 
+        strcmp(ul->handle, botnetnick) && 
+        strcmp(u->handle, avoidbot) && 
+        (bot_hublevel(ul) < 999)) {
+      hl2 = hl;
+      hl = nmalloc(sizeof(struct hublist_entry));
+      egg_bzero(hl, sizeof(struct hublist_entry));
+      hl->next = hl2;
+      hlc++;
+      hl->u = ul;
+    }
+    ul = ul->next;
+  }
+Context;
+//wtf?  if (!hlc) return; //no bots were found..just wait till next cycle..
+  hlc = random() % hlc;
+Context;
+  while (hl) {
+Context;
+    if (!hlc) {
+Context;
+      botlink("", -3, hl->u->handle);
+    }
+    hlc--;
+    hl2 = hl->next;
+    nfree(hl);
+    hl = hl2;
+  }
+Context;
+}
+#endif /* LEAF */
+

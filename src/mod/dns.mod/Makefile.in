@@ -1,5 +1,4 @@
 # Makefile for src/mod/dns.mod/
-# $Id: Makefile.in,v 1.8 2001/07/24 15:08:22 guppy Exp $
 
 RESLIB = @RESLIB@
 RESINCLUDE = @RESINCLUDE@
@@ -23,7 +22,7 @@ modules: ../../../dns.$(MOD_EXT)
 	mv dns.o ../
 
 ../../../dns.$(MOD_EXT): ../dns.o
-	$(LD) -o ../../../dns.$(MOD_EXT) ../dns.o $(RESLIB)
+	$(LD) -static -o ../../../dns.$(MOD_EXT) ../dns.o $(RESLIB)
 	$(STRIP) ../../../dns.$(MOD_EXT)
 
 depend:

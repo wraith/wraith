@@ -2,7 +2,6 @@
 #  This is the Makefile for EGGDROP (the IRC bot)
 #  You should never need to edit this.
 #
-# $Id: Makefile.in,v 1.30 2002/02/28 05:13:54 wcc Exp $
 
 SHELL = @SHELL@
 top_srcdir = @top_srcdir@
@@ -68,8 +67,6 @@ DEBCFLAGS = -DDEBUG_ASSERT -DDEBUG_MEM
 
 modconf = $(top_srcdir)/misc/modconfig --top_srcdir=$(top_srcdir)
 
-egg_test_run =  EGG_LANGDIR=$(top_srcdir)/language ./$(EGGEXEC) -v
-
 post_config  =  echo "" && \
 		echo "You can now compile the bot, using \"make\"." && \
 		echo ""
@@ -122,8 +119,6 @@ all: @DEFAULT_MAKE@
 
 eggclean:
 	@rm -f $(EGGEXEC) *.$(MOD_EXT) *.stamp core DEBUG *~
-	@cd doc && $(MAKE) clean
-	@cd scripts && $(MAKE) clean
 	@cd src && $(MAKE) clean
 	@cd src/md5 && $(MAKE) clean
 	@cd src/compat && $(MAKE) clean
@@ -133,7 +128,7 @@ clean: eggclean
 
 distclean: eggclean clean-modconfig
 	@cd src/mod && $(MAKE) distclean
-	@rm -f Makefile doc/Makefile scripts/Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile
+	@rm -f Makefile src/Makefile src/md5/Makefile src/compat/Makefile src/mod/Makefile
 	@rm -f config.cache config.log config.status config.h lush.h
 	@rm -rf autom4te.cache
 
@@ -205,7 +200,6 @@ modegg: modtest
 	@rm -f src/mod/mod.xlibs
 	@cd src && $(MAKE_MODEGG) $(EGGEXEC)
 	@echo ""
-	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
 
 modules: modtest
@@ -226,7 +220,6 @@ static: eggtest
 	@echo ""
 	@cd src && $(MAKE_STATIC) $(EGGEXEC)
 	@echo ""
-	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
 	@$(egg_install_msg)
 
@@ -235,7 +228,6 @@ debug: debegg debmodules
 debegg: modtest
 	@cd src && $(MAKE_DEBEGG) $(EGGEXEC)
 	@echo ""
-	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
 
 debmodules: modtest
@@ -256,7 +248,6 @@ sdebug: eggtest
 	@echo ""
 	@cd src && $(MAKE_SDEBUG) $(EGGEXEC)
 	@echo ""
-	@$(egg_test_run)
 	@ls -l $(EGGEXEC)
 	@$(egg_install_msg)
 
@@ -287,8 +278,8 @@ dinstall: eggdrop ainstall
 sinstall: static ainstall
 
 ainstall: install-start install-bin install-modules install-data \
-install-help install-language install-filesys install-doc \
-install-scripts install-end
+install-filesys \
+install-end
 
 install-start:
 	@if test ! -f $(EGGEXEC); then \
@@ -306,7 +297,6 @@ install-start:
 		exit 1; \
 	fi
 	@echo ""
-	@$(egg_test_run)
 	@echo
 	@echo "Installing in directory: '$(DEST)'."
 	@echo
@@ -354,68 +344,14 @@ install-modules:
 	fi
 
 install-data:
-	@$(INSTALL_DATA) $(srcdir)/eggdrop.advanced.conf $(DEST)
-	@$(INSTALL_DATA) $(srcdir)/eggdrop.complete.conf $(DEST)
-	@$(INSTALL_DATA) $(srcdir)/eggdrop.simple.conf $(DEST)
 	@if test ! -d $(DEST)/logs; then \
 		echo "Creating 'logs' subdirectory."; \
 		$(top_srcdir)/misc/mkinstalldirs $(DEST)/logs; \
-		$(INSTALL_DATA) $(srcdir)/logs/CONTENTS $(DEST)/logs/; \
 	fi;
 	@if test ! -d $(DEST)/text; then \
 		echo "Creating 'text' subdirectory."; \
 		$(top_srcdir)/misc/mkinstalldirs $(DEST)/text; \
 	fi;
-	@if test ! -f $(DEST)/text/motd; then \
-		$(INSTALL_DATA) $(srcdir)/text/motd $(DEST)/text/; \
-	fi
-	@if test ! -f $(DEST)/text/banner; then \
-		$(INSTALL_DATA) $(srcdir)/text/banner $(DEST)/text/; \
-	fi
-
-install-help:
-	@echo "Copying help files."
-	@if test ! "x`echo $(srcdir)/help/*.help`" = "x$(srcdir)/help/*.help"; then \
-		if test ! -d $(DEST)/help; then \
-			echo "Creating 'help' subdirectory."; \
-			$(top_srcdir)/misc/mkinstalldirs $(DEST)/help; \
-		fi; \
-		for i in $(srcdir)/help/*.help; do \
-			$(INSTALL_DATA) $$i $(DEST)/help/; \
-		done; \
-	fi
-	@if test ! "x`echo $(srcdir)/help/msg/*.help`" = "x$(srcdir)/help/msg/*.help"; then \
-		if test ! -d $(DEST)/help/msg; then \
-			echo "Creating 'help/msg' subdirectory."; \
-			$(top_srcdir)/misc/mkinstalldirs $(DEST)/help/msg; \
-		fi; \
-		for i in $(srcdir)/help/msg/*.help; do \
-			$(INSTALL_DATA) $$i $(DEST)/help/msg/; \
-		done; \
-	fi
-	@if test ! "x`echo $(srcdir)/help/set/*.help`" = "x$(srcdir)/help/set/*.help"; then \
-		if test ! -d $(DEST)/help/set; then \
-			echo "Creating 'help/set' subdirectory."; \
-			$(top_srcdir)/misc/mkinstalldirs $(DEST)/help/set; \
-		fi; \
-		for i in $(srcdir)/help/set/*.help; do \
-			$(INSTALL_DATA) $$i $(DEST)/help/set/; \
-		done; \
-	fi
-	@cd src/mod/ && $(MAKE_INSTALL) install-help
-
-install-language:
-	@echo "Copying language files."
-	@if test ! "x`echo $(srcdir)/language/*.lang`" = "x$(srcdir)/language/*.lang"; then \
-		if test ! -d $(DEST)/language; then \
-			echo "Creating 'language' subdirectory."; \
-			$(top_srcdir)/misc/mkinstalldirs $(DEST)/language; \
-		fi; \
-		for i in $(srcdir)/language/*.lang; do \
-			$(INSTALL_DATA) $$i $(DEST)/language/; \
-		done; \
-	fi
-	@cd src/mod && $(MAKE_INSTALL) install-language
 
 install-filesys:
 	@if test ! -d $(DEST)/filesys; then \
@@ -424,21 +360,9 @@ install-filesys:
 		$(top_srcdir)/misc/mkinstalldirs $(DEST)/filesys/incoming; \
 	fi
 
-install-doc:
-	@$(INSTALL_DATA) $(srcdir)/README $(DEST)
-	@cd doc/ && $(MAKE_INSTALL) install
-
-install-scripts:
-	@cd scripts/ && $(MAKE_INSTALL) install
-
 install-end:
 	@echo
 	@echo "Installation completed."
-	@echo ""
-	@echo "You MUST ensure that you edit/verify your configuration file."
-	@echo "Use one of the three configuration files (eggdrop.simple.conf, eggdrop.advanced.conf and eggdrop.complete.conf) distributed with your bot."
-	@echo ""
-	@echo "Remember to change directory to $(DEST) before you proceed."
 	@echo ""
 
 #safety hash

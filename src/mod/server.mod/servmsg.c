@@ -1,28 +1,14 @@
+#ifdef LEAF
 /*
  * servmsg.c -- part of server.mod
  *
- * $Id: servmsg.c,v 1.64 2002/02/22 04:04:57 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#ifdef S_NODELAY
+#include <netinet/tcp.h>
+#endif
 
+char cursrvname[120]="";
 static time_t last_ctcp    = (time_t) 0L;
 static int    count_ctcp   = 0;
 static char   altnick_char = 0;
@@ -45,47 +31,35 @@ static char   altnick_char = 0;
 static int gotfake433(char *from)
 {
   int l = strlen(botname) - 1;
+  char *oknicks = "-_\\`^[]{}";
 
+  Context;
   /* First run? */
   if (altnick_char == 0) {
-    char *alt = get_altbotnick();
-
-    if (alt[0] && (rfc_casecmp(alt, botname)))
-      /* Alternate nickname defined. Let's try that first. */
-      strcpy(botname, alt);
-    else {
-      /* Fall back to appending count char. */
-      altnick_char = '0';
-      if ((l + 1) == nick_len) {
-	botname[l] = altnick_char;
-      } else {
-	botname[++l]   = altnick_char;
-	botname[l + 1] = 0;
-      }
-    }
-  /* No, we already tried the default stuff. Now we'll go through variations
-   * of the original alternate nick.
-   */
-  } else {
-    char *oknicks = "^-_\\[]`";
-    char *p = strchr(oknicks, altnick_char);
-
-    if (p == NULL) {
-      if (altnick_char == '9')
-        altnick_char = oknicks[0];
-      else
-	altnick_char = altnick_char + 1;
+Context;
+    altnick_char = oknicks[0];
+Context;
+    if (l + 1 == NICKMAX) {
+      botname[l] = altnick_char;
     } else {
-      p++;
-      if (!*p)
-	altnick_char = 'a' + random() % 26;
-      else
-	altnick_char = (*p);
+      botname[++l] = altnick_char;
+      botname[l + 1] = 0;
     }
+  } else {
+    char *p = strchr(oknicks, altnick_char);
+Context;
+    p++;
+    if (!*p)
+      altnick_char = 'a' + random() % 26;
+    else
+      altnick_char = (*p);
+Context;
     botname[l] = altnick_char;
   }
+
   putlog(LOG_MISC, "*", IRC_BOTNICKINUSE, botname);
   dprintf(DP_MODE, "NICK %s\n", botname);
+Context;
   return 0;
 }
 
@@ -112,6 +86,28 @@ static int check_tcl_msg(char *cmd, char *nick, char *uhost,
 	   cmd, args);
   return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
 }
+
+static int check_tcl_msgc(char *cmd, char *nick, char *uhost,
+                         struct userrec *u, char *args)
+{
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
+  char *hand = u ? u->handle : "*";
+  int x;
+
+  get_user_flagrec(u, &fr, NULL);
+  Tcl_SetVar(interp, "_msgc1", nick, 0);
+  Tcl_SetVar(interp, "_msgc2", uhost, 0);
+  Tcl_SetVar(interp, "_msgc3", hand, 0);
+  Tcl_SetVar(interp, "_msgc4", args, 0);
+  Tcl_SetVar(interp, "_msgc5", NULL, 0);
+  x = check_tcl_bind(H_msgc, cmd, &fr, " $_msgc1 $_msgc2 $_msgc3 $_msgc4 $_msgc5",
+                     MATCH_EXACT | BIND_HAS_BUILTINS | BIND_USE_ATTR);
+  if (x == BIND_EXEC_LOG)
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s%s %s", nick, uhost, hand, cmdprefix,
+           cmd, args);
+  return ((x == BIND_MATCHED) || (x == BIND_EXECUTED) || (x == BIND_EXEC_LOG));
+}
+
 
 static void check_tcl_notc(char *nick, char *uhost, struct userrec *u,
 	       		   char *dest, char *arg)
@@ -152,7 +148,7 @@ static void check_tcl_msgm(char *cmd, char *nick, char *uhost,
 static int check_tcl_raw(char *from, char *code, char *msg)
 {
   int x;
-
+Context;
   Tcl_SetVar(interp, "_raw1", from, 0);
   Tcl_SetVar(interp, "_raw2", code, 0);
   Tcl_SetVar(interp, "_raw3", msg, 0);
@@ -233,6 +229,8 @@ static int got001(char *from, char *msg)
   fixcolon(msg);
   strncpyz(botname, msg, NICKLEN);
   altnick_char = 0;
+  strncpy0(cursrvname, from, sizeof(cursrvname));
+
   dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
   /* Call Tcl init-server */
   if (initserver[0])
@@ -341,6 +339,9 @@ static int detect_flood(char *floodnick, char *floodhost, char *from, int which)
   if (atr & (USER_BOT | USER_FRIEND))
     return 0;
 
+  if (isauthed(floodhost) > -1) 
+    return 0;
+
   /* Determine how many are necessary to make a flood */
   switch (which) {
   case FLOOD_PRIVMSG:
@@ -422,12 +423,14 @@ static int gotmsg(char *from, char *msg)
   char *to, buf[UHOSTLEN], *nick, ctcpbuf[512], *uhost = buf, *ctcp;
   char *p, *p1, *code;
   struct userrec *u;
-  int ctcp_count = 0;
-  int ignoring;
+  int ctcp_count = 0, i;
+  int ignoring = 0;
+
 
   if (msg[0] && ((strchr(CHANMETA, *msg) != NULL) ||
      (*msg == '@')))           /* Notice to a channel, not handled here */
     return 0;
+
   ignoring = match_ignore(from);
   to = newsplit(&msg);
   fixcolon(msg);
@@ -447,109 +450,121 @@ static int gotmsg(char *from, char *msg)
 		now + (60 * ignore_time));
     }
   }
-  /* Check for CTCP: */
-  ctcp_reply[0] = 0;
-  p = strchr(msg, 1);
-  while ((p != NULL) && (*p)) {
-    p++;
-    p1 = p;
-    while ((*p != 1) && (*p != 0))
+
+
+    /* Check for CTCP: */
+    ctcp_reply[0] = 0;
+    p = strchr(msg, 1);
+    while ((p != NULL) && (*p)) {
       p++;
-    if (*p == 1) {
-      *p = 0;
-      ctcp = strcpy(ctcpbuf, p1);
-      strcpy(p1 - 1, p + 1);
-      if (!ignoring)
-	detect_flood(nick, uhost, from,
+      p1 = p;
+      while ((*p != 1) && (*p != 0))
+        p++;
+      if (*p == 1) {
+        *p = 0;
+        ctcp = strcpy(ctcpbuf, p1);
+        strcpy(p1 - 1, p + 1);
+        if (!ignoring)
+	  detect_flood(nick, uhost, from,
 		     strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
-      /* Respond to the first answer_ctcp */
-      p = strchr(msg, 1);
-      if (ctcp_count < answer_ctcp) {
-	ctcp_count++;
-	if (ctcp[0] != ' ') {
-	  code = newsplit(&ctcp);
-	  if ((to[0] == '$') || strchr(to, '.')) {
-	    if (!ignoring)
-	      /* Don't interpret */
-	      putlog(LOG_PUBLIC, to, "CTCP %s: %s from %s (%s) to %s",
+        /* Respond to the first answer_ctcp */
+        p = strchr(msg, 1);
+        if (ctcp_count < answer_ctcp) {
+	  ctcp_count++;
+	  if (ctcp[0] != ' ') {
+	    code = newsplit(&ctcp);
+	    if ((to[0] == '$') || strchr(to, '.')) {
+	      if (!ignoring)
+	        /* Don't interpret */
+	        putlog(LOG_PUBLIC, to, "CTCP %s: %s from %s (%s) to %s",
 		     code, ctcp, nick, uhost, to);
-	  } else {
-	    u = get_user_by_host(from);
-	    if (!ignoring || trigger_on_ignore) {
-	      if (!check_tcl_ctcp(nick, uhost, u, to, code, ctcp) &&
-		  !ignoring) {
-		if ((lowercase_ctcp && !egg_strcasecmp(code, "DCC")) ||
-		    (!lowercase_ctcp && !strcmp(code, "DCC"))) {
-		  /* If it gets this far unhandled, it means that
-		   * the user is totally unknown.
-		   */
-		  code = newsplit(&ctcp);
-		  if (!strcmp(code, "CHAT")) {
-		    if (!quiet_reject) {
-		      if (u)
-			dprintf(DP_HELP, "NOTICE %s :%s\n", nick,
+	    } else {
+	      u = get_user_by_host(from);
+	      if (!ignoring || trigger_on_ignore) {
+	        if (!check_tcl_ctcp(nick, uhost, u, to, code, ctcp) &&
+		    !ignoring) {
+		  if ((lowercase_ctcp && !egg_strcasecmp(code, "DCC")) ||
+		      (!lowercase_ctcp && !strcmp(code, "DCC"))) {
+		    /* If it gets this far unhandled, it means that
+		     * the user is totally unknown.
+		     */
+		    code = newsplit(&ctcp);
+		    if (!strcmp(code, "CHAT")) {
+		      if (!quiet_reject) {
+		        if (u)
+			  dprintf(DP_HELP, "NOTICE %s :%s\n", nick,
 				"I'm not accepting call at the moment.");
-		      else
-			dprintf(DP_HELP, "NOTICE %s :%s\n",
+		        else
+			  dprintf(DP_HELP, "NOTICE %s :%s\n",
 				nick, DCC_NOSTRANGERS);
-		    }
-		    putlog(LOG_MISC, "*", "%s: %s",
+		      }
+		      putlog(LOG_MISC, "*", "%s: %s",
 			   DCC_REFUSED, from);
-		  } else
-		    putlog(LOG_MISC, "*", "Refused DCC %s: %s",
+		    } else
+		      putlog(LOG_MISC, "*", "Refused DCC %s: %s",
 			   code, from);
-		}
-	      }
-	      if (!strcmp(code, "ACTION")) {
-		putlog(LOG_MSGS, "*", "Action to %s: %s %s",
+		  }
+	        }
+	        if (!strcmp(code, "ACTION")) {
+		  putlog(LOG_MSGS, "*", "Action to %s: %s %s",
 		       to, nick, ctcp);
-	      } else {
-		putlog(LOG_MSGS, "*", "CTCP %s: %s from %s (%s)",
+	        } else {
+		  putlog(LOG_MSGS, "*", "CTCP %s: %s from %s (%s)",
 		       code, ctcp, nick, uhost);
-	      }			/* I love a good close cascade ;) */
+	        }			/* I love a good close cascade ;) */
+	      }
 	    }
 	  }
-	}
+        }
       }
     }
-  }
-  /* Send out possible ctcp responses */
-  if (ctcp_reply[0]) {
-    if (ctcp_mode != 2) {
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
-    } else {
-      if (now - last_ctcp > flud_ctcp_time) {
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
-	count_ctcp = 1;
-      } else if (count_ctcp < flud_ctcp_thr) {
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
-	count_ctcp++;
+    /* Send out possible ctcp responses */
+    if (ctcp_reply[0]) {
+      if (ctcp_mode != 2) {
+        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+      } else {
+        if (now - last_ctcp > flud_ctcp_time) {
+	  dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+	  count_ctcp = 1;
+        } else if (count_ctcp < flud_ctcp_thr) {
+	  dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+	  count_ctcp++;
+        }
+        last_ctcp = now;
       }
-      last_ctcp = now;
     }
-  }
+
   if (msg[0]) {
     if ((to[0] == '$') || (strchr(to, '.') != NULL)) {
       /* Msg from oper */
       if (!ignoring) {
 	detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
 	/* Do not interpret as command */
-	putlog(LOG_MSGS | LOG_SERV, "*", "[%s!%s to %s] %s",
-	       nick, uhost, to, msg);
+	putlog(LOG_MSGS | LOG_SERV, "*", "[%s!%s to %s] %s",nick, uhost, to, msg);
       }
     } else {
       char *code;
       struct userrec *u;
-
       detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
       u = get_user_by_host(from);
       code = newsplit(&msg);
       rmspace(msg);
-      if (!ignoring || trigger_on_ignore)
-	check_tcl_msgm(code, nick, uhost, u, msg);
-      if (!ignoring)
-	if (!check_tcl_msg(code, nick, uhost, u, msg))
-	  putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
+      i = isauthed(uhost);
+      /* is it a cmd? */
+
+      if (i > -1 && auth[i].authed && code[0] == cmdprefix[0] && code[1]) {
+        code++;        
+        if (check_tcl_msgc(code, nick, uhost, u, msg))
+          auth[i].atime = now;
+        else
+          putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
+      } else if ((code[0] != cmdprefix[0] || !code[1] || i == -1 || !(auth[i].authed))) {
+        if (!ignoring || trigger_on_ignore)
+ 	  check_tcl_msgm(code, nick, uhost, u, msg);
+        if (!ignoring)
+	  if (!check_tcl_msg(code, nick, uhost, u, msg))
+	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
+      }
     }
   }
   return 0;
@@ -670,35 +685,28 @@ static int got251(char *from, char *msg)
 static int gotwall(char *from, char *msg)
 {
   char *nick;
-  char *p;
   int r;
 
   fixcolon(msg);
-  p = strchr(from, '!');
-  if (p && (p == strrchr(from, '!'))) {
+  r = check_tcl_wall(from, msg);
+
+  if (r == 0) {
+    /* Following is not needed at all, but we'll keep it for compatibility sak$
+     * so not to confuse possible scripts that are parsing log files.
+     */
+    if (strchr(from, '!')) {
     nick = splitnick(&from);
-    r = check_tcl_wall(nick, msg);
-    if (r == 0)
-      putlog(LOG_WALL, "*", "!%s(%s)! %s", nick, from, msg);
-  } else {
-    r = check_tcl_wall(from, msg);
-    if (r == 0)
+    putlog(LOG_WALL, "*", "!%s(%s)! %s", nick, from, msg);
+    } else
       putlog(LOG_WALL, "*", "!%s! %s", from, msg);
   }
   return 0;
 }
 
-/* Called once a minute... but if we're the only one on the
- * channel, we only wanna send out "lusers" once every 5 mins.
- */
-static void minutely_checks()
+static void server_10secondly()
 {
   char *alt;
-  static int count = 4;
-  int ok = 0;
-  struct chanset_t *chan;
 
-  /* Only check if we have already successfully logged in.  */
   if (!server_online)
     return;
   if (keepnick) {
@@ -714,6 +722,19 @@ static void minutely_checks()
           dprintf(DP_SERVER, "ISON :%s %s\n", botname, origbotname);
     }
   }
+}
+/* Called once a minute... but if we're the only one on the
+ * channel, we only wanna send out "lusers" once every 5 mins.
+ */
+static void minutely_checks()
+{
+  static int count = 4;
+  int ok = 0;
+  struct chanset_t *chan;
+
+  /* Only check if we have already successfully logged in.  */
+  if (!server_online)
+    return;
   if (min_servs == 0)
     return;
   for (chan = chanset; chan; chan = chan->next)
@@ -887,7 +908,7 @@ static int goterror(char *from, char *msg)
   */
   if (msg[0] == ':')
     msg++;       
-  putlog(LOG_SERV | LOG_MSGS, "*", "-ERROR from server- %s", msg);
+  putlog(LOG_SERV, "*", "-ERROR from server- %s", msg);
   if (serverror_quit) {
     putlog(LOG_SERV, "*", "Disconnecting from server.");
     nuke_server("Bah, stupid error messages.");
@@ -946,6 +967,7 @@ static int gotmode(char *from, char *msg)
 {
   char *ch;
 
+Context;
   ch = newsplit(&msg);
   /* Usermode changes? */
   if (strchr(CHANMETA, ch[0]) == NULL) {
@@ -978,7 +1000,13 @@ static void disconnect_server(int idx)
 
 static void eof_server(int idx)
 {
+  int i = 0;
   putlog(LOG_SERV, "*", "%s %s", IRC_DISCONNECTED, dcc[idx].host);
+  if (ischanhub()) {
+    putlog(LOG_MISC, "*", "Removing %d auth entries.", auth_total);
+    for (i = 0; i < auth_total; i++)
+      removeauth(i);  
+  }
   disconnect_server(idx);
   lostdcc(idx);
 }
@@ -1029,10 +1057,69 @@ static struct dcc_table SERVER_SOCKET =
   NULL
 };
 
+int isop(char *mode)
+{
+  int state = 0,
+    cnt = 0;
+  char *p;
+
+  p = mode;
+  while ((*p) && (*p != ' ')) {
+    if (*p == '-')
+      state = 1;
+    else if (*p == '+')
+      state = 0;
+    else if ((!state) && (*p == 'o'))
+      cnt++;
+    p++;
+  }
+  return (cnt >= 1);
+}
+
+int ismdop(char *mode)
+{
+  int state = 0,
+    cnt = 0;
+  char *p;
+
+  p = mode;
+  while ((*p) && (*p != ' ')) {
+    if (*p == '-')
+      state = 1;
+    else if (*p == '+')
+      state = 0;
+    else if ((state) && (*p == 'o'))
+      cnt++;
+    p++;
+  }
+  return (cnt >= 3);
+}
+/*
+void got_rsn(char *botnick, char *code, char *par) {
+  if (strcmp(origbotname, botname)) {
+    randuse = 0;
+    dprintf(DP_MODE, STR("NICK %s\n"), origbotname);
+  }
+}
+
+void got_rn(char *botnick, char *code, char *par) {
+  int l = (rand() % 4) + 6, i;
+  char newnick[NICKLEN+1];
+  for (i=0;i<l;i++)
+    newnick[i]=(rand() % 2) * 32 + 65 + rand() % 26;
+  newnick[l]=0;
+  randuse = 1;
+  //havealt = 1;
+  dprintf(DP_MODE, STR("NICK %s\n"), newnick);
+}
+*/
+
 static void server_activity(int idx, char *msg, int len)
 {
-  char *from, *code;
+  char *from, *code, tmp[1024];
+  char sign = '+';
 
+Context;
   if (trying_server) {
     strcpy(dcc[idx].nick, "(server)");
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
@@ -1046,14 +1133,292 @@ static void server_activity(int idx, char *msg, int len)
     from = newsplit(&msg);
   }
   code = newsplit(&msg);
+
+/* check MODEs now, we're in a rush */
+
+  if (!strcmp(code, STR("MODE")) && (msg[0] == '#') && strchr(from, '!')) {
+    /* It's MODE #chan by a user */
+    char *modes[5] = { NULL, NULL, NULL, NULL, NULL };
+    char *nfrom,
+     *hfrom;
+    int i;
+    struct userrec *ufrom = NULL;
+
+    struct chanset_t *chan = NULL;
+    char work[1024],
+     *wptr,
+     *p;
+
+    memberlist *m;
+    int modecnt = 0,
+      ops = 0,
+      deops = 0,
+      bans = 0,
+      unbans = 0;
+
+    /* Split up the mode: #chan modes param param param param */
+    strncpy0(work, msg, sizeof(work));
+    wptr = work;
+
+    p = newsplit(&wptr);
+    chan = findchan(p);
+
+    p = newsplit(&wptr);
+    while (*p) {
+      char *mp;
+
+      if (*p == '+')
+	sign = '+';
+      else if (*p == '-')
+	sign = '-';
+      else if (strchr(STR("oblkvIe"), p[0])) {
+	mp = newsplit(&wptr);
+	if (strchr("ob", p[0])) {
+	  /* Just want o's and b's */
+	  modes[modecnt] = nmalloc(strlen(mp) + 4);
+	  sprintf(modes[modecnt], STR("%c%c %s"), sign, p[0], mp);
+	  modecnt++;
+	  if (p[0] == 'o') {
+	    if (sign == '+')
+	      ops++;
+	    else
+	      deops++;
+	  }
+	  if (p[0] == 'b') {
+	    if (sign == '+')
+	      bans++;
+	    else
+	      unbans++;
+	  }
+	}
+      } else if (strchr(STR("pstnmi"), p[0])) {
+      } else {
+	/* hrmm... what modechar did i forget? */
+	putlog(LOG_ERRORS, "*", STR("Forgotten modechar: %c"), p[0]);
+      }
+      p++;
+    }
+
+    ufrom = get_user_by_host(from);
+    
+    /* Split up from */
+    strncpy0(work, from, sizeof(work));
+    p = strchr(work, '!');
+    *p++ = 0;
+    nfrom = work;
+    hfrom = p;
+
+    /* Now we got modes[], chan, ufrom, nfrom, hfrom, and count of each relevant mode */
+    // check for mdop
+    if ((chan) && (deops >= 3)) {
+      if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
+	if (ROLE_KICK_MDOP) {
+	  m=ismember(chan, nfrom);
+	  if (!m || !chan_sentkick(m)) {
+	    
+	    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MASSDEOP));
+	    tputs(serv, tmp, strlen(tmp));
+	    if (m)
+	      m->flags |= SENTKICK;
+	  }
+	}
+      }
+    }
+    //check for mop
+    if (chan && (ops >= 3)) {
+      if (channel_nomop(chan)) {
+        if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
+          if (ROLE_KICK_MDOP) {
+            m=ismember(chan, nfrom);
+            if (!m || !chan_sentkick(m)) {
+
+              sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+              tputs(serv, tmp, strlen(tmp));
+              if (m)
+                m->flags |= SENTKICK;
+            }
+          }
+        }
+      }
+    }
+
+    if (chan && ops && (ufrom) && (ufrom->flags & USER_BOT)
+	&& (!channel_fastop(chan))
+	&& (!channel_take(chan))
+      ) {
+      int isbadop = 0;
+
+      if ((modecnt != 2) || (strncmp(modes[0], "+o", 2))
+	  || (strncmp(modes[1], "-b", 2)))
+	isbadop = 1;
+      else {
+	char enccookie[25],
+	  plaincookie[25],
+	  key[NICKLEN + 20],
+	  goodcookie[25];
+
+	/* -b *!*@[...] */
+	strncpy0(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
+	p = enccookie + strlen(enccookie) - 1;
+//	*p = 0;
+//	while (p - enccookie < 24) {
+//	  *p++ = '.';
+//	  *p = 0;
+//	}
+	strcpy(key, nfrom);
+	strcat(key, netpass);
+//putlog(LOG_DEBUG, "*", "Decrypting cookie: %s with key %s", enccookie, key);
+	p = decrypt_string(key, enccookie);
+//putlog(LOG_DEBUG, "*", "Decrypted cookie: %s", p);
+Context;
+	strncpy0(plaincookie, p, sizeof(plaincookie));
+	nfree(p);
+	/*
+	   last 6 digits of time
+	   last 5 chars of nick
+	   last 5 regular chars of chan
+	 */
+	makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);
+  //      putlog(LOG_DEBUG, "*", "cookie from %s: %s should be: %s", nfrom, plaincookie, goodcookie);
+	if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
+	  isbadop = 2;
+	else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
+	  isbadop = 3;
+	else {
+	  char tmp[20];
+	  long optime;
+          int off;
+
+	  sprintf(tmp, STR("%010li"), (now + timesync));
+	  strncpy0((char *) &tmp[4], plaincookie, 7);
+	  optime = atol(tmp);
+          off = (now + timesync - optime);
+
+          if (abs(off) > op_time_slack) {
+//	    isbadop = 4;
+            putlog(LOG_ERRORS, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nfrom, optime, off);
+          }
+	}
+      }
+      if (isbadop) {
+	char trg[NICKLEN + 1] = "";
+	int n,
+	  i;
+	memberlist *m;
+Context;
+
+	switch (role) {
+	case 0:
+	  break;
+	case 1:
+	  /* Kick opper */
+          m=ismember(chan, nfrom);
+	  if (!m || !chan_sentkick(m)) {
+	    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_BADOP));
+	    tputs(serv, tmp, strlen(tmp));
+	    if (m) 
+	      m->flags |= SENTKICK;
+	  }
+	  sprintf(tmp, STR("%s MODE %s"), from, msg);
+	  deflag_user(ufrom, DEFLAG_BADCOOKIE, tmp, chan);
+	  break;
+	default:
+	  n = role - 1;
+	  i = 0;
+	  while ((i < 5) && (n > 0)) {
+	    if (modes[i] && !strncmp(modes[i], "+o", 2))
+	      n--;
+	    if (n)
+	      i++;
+	  }
+	  if (!n) {
+	    strcpy(trg, (char *) &modes[i][3]);
+	    m = ismember(chan, trg);
+	    if (m) {
+	      if (!(m->flags & CHANOP)) {
+                if (!chan_sentkick(m)) {
+		  sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_BADOPPED));
+		  tputs(serv, tmp, strlen(tmp));
+                  m->flags |= SENTKICK;
+		}
+	      }
+	    }
+	  }
+	}
+	if (isbadop == 1)
+	  putlog(LOG_WARN, "*", STR("Missing cookie: %s MODE %s"), from, msg);
+	else if (isbadop == 2)
+	  putlog(LOG_WARN, "*", STR("Invalid cookie (bad nick): %s MODE %s"), from, msg);
+	else if (isbadop == 3)
+	  putlog(LOG_WARN, "*", STR("Invalid cookie (bad chan): %s MODE %s"), from, msg);
+	else if (isbadop == 4)
+	  putlog(LOG_WARN, "*", STR("Invalid cookie (bad time): %s MODE %s"), from, msg);
+      } else
+	putlog(LOG_DEBUG, "@", STR("Good op: %s"), msg);
+    }
+    if ((ops) && chan && !channel_manop(chan) && (ufrom)
+	&& !(ufrom->flags & USER_BOT)) {
+      char trg[NICKLEN + 1] = "";
+      int n,
+        i;
+      memberlist *m;
+
+      switch (role) {
+      case 0:
+	break;
+      case 1:
+	/* Kick opper */
+	m = ismember(chan, nfrom);
+	if (!m || !chan_sentkick(m)) {
+	  sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, nfrom, kickprefix, kickreason(KICK_MANUALOP));
+	  tputs(serv, tmp, strlen(tmp));
+	  if (m)
+	    m->flags |= SENTKICK;
+	}
+	sprintf(tmp, STR("%s MODE %s"), from, msg);
+	deflag_user(ufrom, DEFLAG_MANUALOP, tmp, chan);
+	break;
+      default:
+	n = role - 1;
+	i = 0;
+	while ((i < 5) && (n > 0)) {
+	  if (modes[i] && !strncmp(modes[i], "+o", 2))
+	    n--;
+	  if (n)
+	    i++;
+	}
+	if (!n) {
+	  strcpy(trg, (char *) &modes[i][3]);
+	  m = ismember(chan, trg);
+	  if (m) {
+	    if (!(m->flags & CHANOP) && (rfc_casecmp(botname, trg))) {
+              if (!chan_sentkick(m)) {
+		sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+		tputs(serv, tmp, strlen(tmp));
+		m->flags |= SENTKICK;
+	      }
+	    }
+	  } else {
+	    sprintf(tmp, STR("KICK %s %s :%s%s\n"), chan->name, trg, kickprefix, kickreason(KICK_MANUALOPPED));
+	    tputs(serv, tmp, strlen(tmp));
+	  }
+	}
+      }
+    }
+    for (i = 0; i < 5; i++)
+      if (modes[i])
+	nfree(modes[i]);
+  }
+
   if (use_console_r) {
     if (!strcmp(code, "PRIVMSG") ||
 	!strcmp(code, "NOTICE")) {
       if (!match_ignore(from))
-	putlog(LOG_RAW, "*", "[@] %s %s %s", from, code, msg);
+	putlog(LOG_RAW, "@", "[@] %s %s %s", from, code, msg);
     } else
-      putlog(LOG_RAW, "*", "[@] %s %s %s", from, code, msg);
+      putlog(LOG_RAW, "@", "[@] %s %s %s", from, code, msg);
   }
+
   /* This has GOT to go into the raw binding table, * merely because this
    * is less effecient.
   */
@@ -1192,8 +1557,8 @@ static void connect_server(void)
     struct server_list *x = serverlist;
 
     if (!x) {
-      putlog(LOG_SERV, "*", "No servers in server list");
-      cycle_time = 300;
+//      putlog(LOG_SERV, "*", "No servers in server list");
+//      cycle_time = 10;
       return;
     }
  
@@ -1257,7 +1622,7 @@ static void server_resolve_failure(int servidx)
 
 static void server_resolve_success(int servidx)
 {
-  int oldserv = dcc[servidx].u.dns->ibuf;
+  int oldserv = dcc[servidx].u.dns->ibuf, i = 0;
   char s[121], pass[121];
 
   resolvserv = 0;
@@ -1286,5 +1651,10 @@ static void server_resolve_success(int servidx)
     dprintf(DP_MODE, "NICK %s\n", botname);
     dprintf(DP_MODE, "USER %s . . :%s\n", botuser, botrealname);
     /* Wait for async result now */
+#ifdef S_NODELAY
+    i = 1;
+    setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(i));
+#endif
   }
 }
+#endif

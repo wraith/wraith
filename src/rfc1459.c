@@ -1,7 +1,6 @@
 /* 
  * rfc1459.c
  * 
- * $Id: rfc1459.c,v 1.5 2002/01/02 08:06:14 tothwolf Exp $
  */
 /* 
  * Copyright (C) 1990 Jarkko Oikarinen

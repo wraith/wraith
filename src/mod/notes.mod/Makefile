@@ -1,5 +1,4 @@
 # Makefile for src/mod/notes.mod
-# $Id: Makefile,v 1.12 2000/09/12 15:26:53 fabian Exp $
 
 srcdir = .
 
@@ -20,7 +19,7 @@ modules: ../../../notes.$(MOD_EXT)
 	mv notes.o ../
 
 ../../../notes.$(MOD_EXT): ../notes.o
-	$(LD) -o ../../../notes.$(MOD_EXT) ../notes.o $(XLIBS)
+	$(LD) -static -o ../../../notes.$(MOD_EXT) ../notes.o $(XLIBS)
 	$(STRIP) ../../../notes.$(MOD_EXT)
 
 depend:

@@ -2,38 +2,25 @@
  * tcldcc.c -- handles:
  *   Tcl stubs for the dcc commands
  *
- * $Id: tcldcc.c,v 1.34 2002/07/18 19:01:44 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include "main.h"
 #include "tandem.h"
 #include "modules.h"
 
+#include "blowfish_conf.h"
+//#include "bf_conf_tab.h"
+#include <sys/stat.h>
+
 extern Tcl_Interp	*interp;
 extern tcl_timer_t	*timer,
 			*utimer;
 extern struct dcc_t	*dcc;
-extern int		 dcc_total, backgrd, parties, make_userfile,
-			 do_restart, remote_boots, max_dcc;
-extern char		 botnetnick[];
+
+extern int		 dcc_total, backgrd, parties,
+			 do_restart, remote_boots, max_dcc, hub, leaf;
+
+extern char		 botnetnick[], netpass[], *binname;
 extern party_t		*party;
 extern tand_t		*tandbot;
 extern time_t		 now;
@@ -133,7 +120,7 @@ static int tcl_dccsimul STDVAR
 
 static int tcl_dccbroadcast STDVAR
 {
-  char msg[401];
+  char msg[sgrab-110];
 
   BADARGS(2, 2, " message");
   strncpyz(msg, argv[1], sizeof msg);
@@ -228,7 +215,7 @@ static int tcl_setchan STDVAR
 		   dcc[idx].sock, dcc[idx].host);
   }
   /* Console autosave. */
-  if ((me = module_find("console", 1, 1))) {
+  if ((me = module_find("console", 0, 0))) {
     Function *func = me->funcs;
 
     (func[CONSOLE_DOSTORE]) (idx);
@@ -239,7 +226,7 @@ static int tcl_setchan STDVAR
 static int tcl_dccputchan STDVAR
 {
   int chan;
-  char msg[401];
+  char msg[sgrab-110];
 
   BADARGS(3, 3, " channel message");
   chan = atoi(argv[1]);
@@ -305,7 +292,7 @@ static int tcl_console STDVAR
   Tcl_AppendElement(irp, dcc[i].u.chat->con_chan);
   Tcl_AppendElement(irp, masktype(dcc[i].u.chat->con_flags));
   /* Console autosave. */
-  if (argc > 2 && (me = module_find("console", 1, 1))) {
+  if (argc > 2 && (me = module_find("console", 0, 0))) {
     Function *func = me->funcs;
 
     (func[CONSOLE_DOSTORE]) (i);
@@ -347,7 +334,7 @@ static int tcl_strip STDVAR
   }
   Tcl_AppendElement(irp, stripmasktype(dcc[i].u.chat->strip_flags));
   /* Console autosave. */
-  if (argc > 2 && (me = module_find("console", 1, 1))) {
+  if (argc > 2 && (me = module_find("console", 0, 0))) {
     Function *func = me->funcs;
 
     (func[CONSOLE_DOSTORE]) (i);
@@ -377,14 +364,13 @@ static int tcl_echo STDVAR
   else
     Tcl_AppendResult(irp, "0", NULL);
   /* Console autosave. */
-  if (argc > 2 && (me = module_find("console", 1, 1))) {
+  if (argc > 2 && (me = module_find("console", 0, 0))) {
     Function *func = me->funcs;
 
     (func[CONSOLE_DOSTORE]) (i);
   }
   return TCL_OK;
 }
-
 static int tcl_page STDVAR
 {
   int i;
@@ -413,7 +399,7 @@ static int tcl_page STDVAR
   } else
     Tcl_AppendResult(irp, "0", NULL);
   /* Console autosave. */
-  if ((argc > 2) && (me = module_find("console", 1, 1))) {
+  if ((argc > 2) && (me = module_find("console", 0, 0))) {
     Function *func = me->funcs;
 
     (func[CONSOLE_DOSTORE]) (i);
@@ -501,7 +487,7 @@ static int tcl_killdcc STDVAR
 static int tcl_putbot STDVAR
 {
   int i;
-  char msg[401];
+  char msg[sgrab-110];
 
   BADARGS(3, 3, " botnick message");
   i = nextbot(argv[1]);
@@ -516,7 +502,7 @@ static int tcl_putbot STDVAR
 
 static int tcl_putallbots STDVAR
 {
-  char msg[401];
+  char msg[sgrab-110];
 
   BADARGS(2, 2, " message");
   strncpyz(msg, argv[1], sizeof msg);
@@ -550,6 +536,147 @@ static int tcl_islinked STDVAR
      Tcl_AppendResult(irp, "1", NULL);
    return TCL_OK;
 }
+static int tcl_randstring STDVAR
+{
+ int length = atoi(argv[1]);
+ char s[length+1];
+
+ BADARGS(2, 2, " length");
+ if (length) {
+  make_rand_str(s,length);
+  Tcl_AppendResult(irp, s, NULL);
+ } else
+  Tcl_AppendResult(irp, "", NULL);
+ return TCL_OK;
+}
+//This function is simply for the tcl to check if the right binary is being used.
+static int tcl_hcheck STDVAR
+{
+  Tcl_AppendResult(irp, "1", NULL);
+  return TCL_OK;
+}
+static int tcl_binname STDVAR
+{
+ Tcl_AppendResult(irp, binname, NULL);
+ return TCL_OK;
+}
+static int tcl_configend STDVAR 
+{
+ Tcl_AppendResult(irp, "1", NULL);
+ return TCL_OK;
+}
+static int tcl_esource STDVAR
+{
+
+  int code, nc, skip = 0, incom = 0, lines = 0, line = 0;
+
+  FILE  *f;
+  char *buf, *tptr, templine[2048];
+  char *temps = NULL, temps2[2048];
+  char *horeting, check[2048];
+
+
+  struct stat st;
+
+  BADARGS(2, 2, " file");
+
+  /* Check whether file is readable. */
+  if ((f = fopen(argv[1], "r")) == NULL)
+    return 0;
+  fclose(f);
+
+  if (stat(argv[1], &st)) {
+    fatal("broken file", 0);
+  }
+
+  buf = nmalloc(st.st_size * 2.5);
+  *buf = 0;
+
+  f = fopen(argv[1], "r");
+  if (!f)
+    fatal("broken file", 0);
+
+  while(fgets(templine, sizeof(templine), f)) {
+    nc = 0;
+
+    if(strchr(templine, '\n')) {
+      tptr = templine;
+      while( (tptr = strchr(tptr, '\n')) ) {
+        nc++;
+        *tptr++ = 0;
+      }
+    }
+
+    horeting = decryptit(templine);
+    temps = (char *) decrypt_string(netpass, horeting);
+    temps2[0] = '\0';
+    strcpy(temps2,temps);
+    nfree(temps);
+    strcpy(check,temps2);
+    line++;
+    if (!strncmp(check,"-ifhub",6) || !strncmp(check,"-ifleaf",7) || !strncmp(check,"-endif",6) || (!strncmp(check,"-else",5) && (skip == 1 || skip == 2)) || !strncmp(check,"/*",2) || !strncmp(check,"*/",2) || !strcmp(check+(strlen(check)-2),"*/") || !strncmp(check,"//",2)) {
+      /* skip == 1 means hub code is being processed, 2 is leaf code */
+     if (!strncmp(check,"-",1) && !incom) { //check for changing defines, but not if in comment.
+      if (!strncmp(check,"-ifhub",6)) 
+       skip = 1;
+      else if (!strncmp(check,"-ifleaf",7))
+       skip = 2;
+      else if (!strncmp(check,"-endif",6)) { //end the ifdef
+       if (skip)
+        skip = 0;
+       else {
+        putlog(LOG_MISC, "*", "Error on line %i -endif with no ifdef!", line);
+        return 0;
+       }
+      } 
+      else if (!strncmp(check,"-else",5)) { //change the ifdef from hub->leaf or leaf->hub
+       if (skip == 1) 
+	skip = 2;
+       else if (skip == 2)
+	skip = 1;
+       else {
+        putlog(LOG_MISC, "*", "Error on line %i -else with no ifdef!", line);
+        return 0;
+       }
+      }
+     } 
+     else { //then it must be a comment!
+      if (!strncmp(check,"/*",2))
+       if (!incom)
+	incom = 1;
+       else {
+        putlog(LOG_MISC, "*", "Error on line %i New /* inside a /*", line);
+        return 0;
+       }
+      else if (!strcmp(check+(strlen(check)-2),"*/") || !strncmp(check,"*/",2)) {
+       if (incom)
+        incom = 0;
+       else {
+        putlog(LOG_MISC, "*", "Error on line %i */ without a /*", line);
+        return 0;
+       }
+      }
+      //we dont need to check for // because its a 1 line skip, the actual read is an ELSE.
+     }
+     check[0] = '\0';
+    }
+    else {
+     if ((((hub && (skip == 1)) || (leaf && (skip == 2))) || (!skip)) && !incom) {
+      lines++;
+      strcat(buf, temps2);
+      while (nc > 0) {
+        strcat(buf, "\n");
+        nc--;
+      }
+     }
+    }
+  }
+//  putlog(LOG_MISC, "@", "Loading %i lines from tcl", lines);
+  code = Tcl_Eval(interp, buf);
+  memset(buf, 0, st.st_size*2.5);
+  nfree(buf);
+  return code;
+}
 
 static int tcl_bots STDVAR
 {
@@ -566,7 +693,7 @@ static int tcl_botlist STDVAR
   tand_t *bot;
   char *p;
   char sh[2], string[20];
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
     CONST char *list[4];
 #else
     char *list[4];
@@ -597,7 +724,7 @@ static int tcl_dcclist STDVAR
   char timestamp[11];
   char *p;
   char other[160];
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
     CONST char *list[6];
 #else
     char *list[6];
@@ -636,7 +763,7 @@ static int tcl_whom STDVAR
 {
   char c[2], idle[11], work[20], *p;
   int chan, i;
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
     CONST char *list[7];
 #else
     char *list[7];
@@ -916,7 +1043,7 @@ static int tcl_listen STDVAR
       return TCL_ERROR;
     }
     idx = new_dcc(&DCC_TELNET, 0);
-    dcc[idx].addr = iptolong(getmyip());
+    dcc[idx].addr = iptolong(getmyip(0));
     dcc[idx].port = port;
     dcc[idx].sock = i;
     dcc[idx].timeval = now;
@@ -1012,11 +1139,9 @@ static int tcl_boot STDVAR
 static int tcl_rehash STDVAR
 {
   BADARGS(1, 1, " ");
-  if (make_userfile) {
-    putlog(LOG_MISC, "*", USERF_NONEEDNEW);
-    make_userfile = 0;
-  }
+#ifdef HUB
   write_userfile(-1);
+#endif
   putlog(LOG_MISC, "*", USERF_REHASHING);
   do_restart = -2;
   return TCL_OK;
@@ -1029,11 +1154,9 @@ static int tcl_restart STDVAR
     Tcl_AppendResult(interp, "You can't restart a -n bot", NULL);
     return TCL_ERROR;
   }
-  if (make_userfile) {
-    putlog(LOG_MISC, "*", USERF_NONEEDNEW);
-    make_userfile = 0;
-  }
+#ifdef HUB
   write_userfile(-1);
+#endif
   putlog(LOG_MISC, "*", MISC_RESTARTING);
   wipe_timers(interp, &utimer);
   wipe_timers(interp, &timer);
@@ -1089,6 +1212,7 @@ static int tcl_traffic STDVAR
 
 tcl_cmds tcldcc_cmds[] =
 {
+  {"binname",		tcl_binname},
   {"putdcc",		tcl_putdcc},
   {"putdccraw",		tcl_putdccraw},
   {"putidx",		tcl_putdcc},
@@ -1117,6 +1241,10 @@ tcl_cmds tcldcc_cmds[] =
   {"getdccaway",	tcl_getdccaway},
   {"setdccaway",	tcl_setdccaway},
   {"islinked",		tcl_islinked},
+  {"hcheck",		tcl_hcheck},
+  {"randstring",        tcl_randstring},
+  {"source",		tcl_esource},
+  {"config_end",        tcl_configend},
   {"link",		tcl_link},
   {"unlink",		tcl_unlink},
   {"connect",		tcl_connect},

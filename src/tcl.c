@@ -4,30 +4,20 @@
  *   Tcl initialization
  *   getting and setting Tcl/eggdrop variables
  *
- * $Id: tcl.c,v 1.47 2002/07/18 19:01:44 guppy Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 #include <stdlib.h>		/* getenv()				*/
 #include <locale.h>		/* setlocale()				*/
 #include "main.h"
+//#include "blowfish_conf.h"
+//#include "bf_conf_tab.h"
+#include <sys/stat.h>
+
+
+#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 1)) || (TCL_MAJOR_VERSION > 8)
+#define USE_BYTE_ARRAYS
+#endif
+
 
 /* Used for read/write to internal strings */
 typedef struct {
@@ -42,19 +32,20 @@ typedef struct {
   int ro;
 } intinfo;
 
-
 extern time_t	online_since;
 extern int	backgrd, flood_telnet_thr, flood_telnet_time;
-extern int	shtime, share_greet, require_p, keep_all_logs;
-extern int	allow_new_telnets, stealth_telnets, use_telnet_banner;
+extern int	shtime, share_greet, keep_all_logs;
+extern int	allow_new_telnets, use_telnet_banner;
 extern int	default_flags, conmask, switch_logfiles_at, connect_timeout;
 extern int	firewallport, notify_users_at, flood_thr, ignore_time;
 extern int	reserved_port_min, reserved_port_max;
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
-                firewall[], helpdir[], notify_new[], hostname[], hostname6[], myip[], myip6[],
-		moddir[], tempdir[], owner[], network[], botnetnick[],
+                firewall[], notify_new[], hostname[], hostname6[], myip[], myip6[],
+		tempdir[], owner[], network[], botnetnick[],
 		bannerfile[], egg_version[], natip[], configfile[],
-		logfile_suffix[], textdir[], pid_file[];
+		logfile_suffix[], textdir[], pid_file[], dcc_prefix[], 
+		netpass[];
+
 extern int	die_on_sighup, die_on_sigterm, max_logs, max_logsize,
 		enable_simul, dcc_total, debug_output, identtimeout,
 		protect_telnet, dupwait_timeout, egg_numver, share_unlinks,
@@ -68,19 +59,19 @@ char	    whois_fields[1025] = "";	/* fields to display in a .whois */
 Tcl_Interp *interp;			/* eggdrop always uses the same
 					   interpreter */
 int	    dcc_flood_thr = 3;
-int	    use_invites = 0;		/* Jason/drummer */
-int	    use_exempts = 0;		/* Jason/drummer */
+int	    use_invites = 1;		/* Jason/drummer */
+int	    use_exempts = 1;		/* Jason/drummer */
 int	    force_expire = 0;		/* Rufus */
 int	    remote_boots = 2;
 int	    allow_dk_cmds = 1;
 int	    must_be_owner = 1;
-int	    max_dcc = 20;		/* needs at least 4 or 5 just to
+int	    max_dcc = 200;		/* needs at least 4 or 5 just to
 					   get started. 20 should be enough   */
-int	    quick_logs = 0;		/* quick write logs? (flush them
+int	    quick_logs = 1;		/* quick write logs? (flush them
 					   every min instead of every 5	      */
-int	    par_telnet_flood = 1;       /* trigger telnet flood for +f
+int	    par_telnet_flood = 0;       /* trigger telnet flood for +f
 					   ppl? - dw			      */
-int	    quiet_save = 0;             /* quiet-save patch by Lucas	      */
+int	    quiet_save = 1;             /* quiet-save patch by Lucas	      */
 int	    strtot = 0;
 int 	    handlen = HANDLEN;
 int	    utftot = 0;
@@ -135,8 +126,8 @@ typedef struct {
 } coupletinfo;
 
 /* Read/write integer couplets (int1:int2) */
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
-static char *tcl_eggcouplet(ClientData cdata, Tcl_Interp *irp, char *name1,
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
+static char *tcl_eggcouplet(ClientData cdata, Tcl_Interp *irp, CONST char *name1,
                             CONST char *name2, int flags)
 #else
 static char *tcl_eggcouplet(ClientData cdata, Tcl_Interp *irp, char *name1,
@@ -154,7 +145,7 @@ static char *tcl_eggcouplet(ClientData cdata, Tcl_Interp *irp, char *name1,
 		   TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 		   tcl_eggcouplet, cdata);
   } else {			/* writes */
-    s = (char *) Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
+    s = (char *) Tcl_GetVar2(interp, name1, name2, 0);
     if (s != NULL) {
       int nr1, nr2;
 
@@ -170,8 +161,8 @@ static char *tcl_eggcouplet(ClientData cdata, Tcl_Interp *irp, char *name1,
 
 /* Read or write normal integer.
  */
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
-static char *tcl_eggint(ClientData cdata, Tcl_Interp *irp, char *name1,
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
+static char *tcl_eggint(ClientData cdata, Tcl_Interp *irp, CONST char *name1,
 			CONST char *name2, int flags)
 #else
 static char *tcl_eggint(ClientData cdata, Tcl_Interp *irp, char *name1,
@@ -246,8 +237,8 @@ static char *tcl_eggint(ClientData cdata, Tcl_Interp *irp, char *name1,
 
 /* Read/write normal string variable
  */
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4))
-static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
+#if (((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)) || (TCL_MAJOR_VERSION > 8))
+static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, CONST char *name1,
                         CONST char *name2, int flags)
 #else
 static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
@@ -277,7 +268,26 @@ static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
       Tcl_SetVar2(interp, name1, name2, st->str, TCL_GLOBAL_ONLY);
       return "read-only variable";
     }
-    s = (char *) Tcl_GetVar2(interp, name1, name2, TCL_GLOBAL_ONLY);
+#ifdef USE_BYTE_ARRAYS
+#undef malloc
+#undef free
+    {
+         Tcl_Obj *obj;
+         unsigned char *bytes;
+         int len;
+
+         obj = Tcl_GetVar2Ex(interp, name1, name2, 0);
+         if (!obj) return(NULL);
+         len = 0;
+         bytes = Tcl_GetByteArrayFromObj(obj, &len);
+         if (!bytes) return(NULL);
+         s = malloc(len+1);
+         memcpy(s, bytes, len);
+         s[len] = 0;
+    }
+#else
+    s = (char *) Tcl_GetVar2(interp, name1, name2, 0);
+#endif
     if (s != NULL) {
       if (strlen(s) > abs(st->max))
 	s[abs(st->max)] = 0;
@@ -297,6 +307,9 @@ static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
 	if (st->str[strlen(st->str) - 1] != '/')
 	  strcat(st->str, "/");
       }
+#ifdef USE_BYTE_ARRAYS
+      free(s);
+#endif
     }
     return NULL;
   }
@@ -305,7 +318,7 @@ static char *tcl_eggstr(ClientData cdata, Tcl_Interp *irp, char *name1,
 /* Add/remove tcl commands
  */
 
-#if ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 1)) || (TCL_MAJOR_VERSION > 8)
+#ifdef USE_BYTE_ARRAYS
 
 static int utf_converter(ClientData cdata, Tcl_Interp *myinterp, int objc,
 			 Tcl_Obj *CONST objv[])
@@ -358,7 +371,9 @@ void add_tcl_commands(tcl_cmds *table)
     Tcl_CreateObjCommand(interp, table->name, utf_converter, (ClientData) cdata,
 			 cmd_delete_callback);
     table++;
+    //nfree(cdata);
   }
+
 }
 
 void add_cd_tcl_cmds(cd_tcl_cmd *table)
@@ -373,6 +388,7 @@ void add_cd_tcl_cmds(cd_tcl_cmd *table)
     Tcl_CreateObjCommand(interp, table->name, utf_converter, (ClientData) cdata, 
 			 cmd_delete_callback);
     table++;
+    //nfree(cdata);
   }
 }
 
@@ -427,15 +443,12 @@ void add_tcl_objcommands(tcl_cmds *table)
 static tcl_strings def_tcl_strings[] =
 {
   {"botnet-nick",	botnetnick,	HANDLEN,	0},
+  {"origbotname",       origbotname,    HANDLEN,        0},
   {"userfile",		userfile,	120,		STR_PROTECT},
   {"motd",		motdfile,	120,		STR_PROTECT},
   {"admin",		admin,		120,		0},
-  {"help-path",		helpdir,	120,		STR_DIR | STR_PROTECT},
   {"temp-path",		tempdir,	120,		STR_DIR | STR_PROTECT},
   {"text-path",		textdir,	120,		STR_DIR | STR_PROTECT},
-#ifndef STATIC
-  {"mod-path",		moddir,		120,		STR_DIR | STR_PROTECT},
-#endif
   {"notify-newusers",	notify_new,	120,		0},
   {"owner",		owner,		120,		STR_PROTECT},
   {"my-ip",		myip,		120,		0},
@@ -446,13 +459,15 @@ static tcl_strings def_tcl_strings[] =
   {"whois-fields",	whois_fields,	1024,		0},
   {"nat-ip",		natip,		120,		0},
   {"username",		botuser,	10,		0},
-  {"version",		egg_version,	0,		0},
+  {"version",		egg_version,	0,		STR_PROTECT},
   {"firewall",		firewall,	120,		0},
 /* confvar patch by aaronwl */
   {"config",		configfile,	0,		0},
   {"telnet-banner",	bannerfile,	120,		STR_PROTECT},
   {"logfile-suffix",	logfile_suffix,	20,		0},
   {"pidfile",		pid_file,       120,		STR_PROTECT},
+/*settings made by installer */
+  {"dcc_prefix",	dcc_prefix,	1,		0},
   {NULL,		NULL,		0,		0}
 };
 
@@ -467,10 +482,8 @@ static tcl_ints def_tcl_ints[] =
   {"connect-timeout",		&connect_timeout,	0},
   {"reserved-port",		&reserved_port_min,		0},
   /* booleans (really just ints) */
-  {"require-p",			&require_p,		0},
   {"keep-all-logs",		&keep_all_logs,		0},
   {"open-telnets",		&allow_new_telnets,	0},
-  {"stealth-telnets",		&stealth_telnets,	0},
   {"use-telnet-banner",		&use_telnet_banner,	0},
   {"uptime",			(int *) &online_since,	2},
   {"console",			&conmask,		0},
@@ -539,7 +552,7 @@ extern tcl_cmds tcluser_cmds[], tcldcc_cmds[], tclmisc_cmds[], tclmisc_objcmds[]
  */
 void init_tcl(int argc, char **argv)
 {
-#if (TCL_MAJOR_VERSION >= 8 && TCL_MINOR_VERSION >= 1) || (TCL_MAJOR_VERSION >= 9)
+#if (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION >= 1) || (TCL_MAJOR_VERSION > 8)
   const char *encoding;
   int i;
   char *langEnv;
@@ -575,7 +588,7 @@ void init_tcl(int argc, char **argv)
   Tcl_Init(interp);
 
 /* Code based on Tcl's TclpSetInitialEncodings() */
-#if (TCL_MAJOR_VERSION >= 8 && TCL_MINOR_VERSION >= 1) || (TCL_MAJOR_VERSION >= 9)
+#if (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION >= 1) || (TCL_MAJOR_VERSION > 8)
   /* Determine the current encoding from the LC_* or LANG environment
    * variables.
    */
@@ -658,15 +671,18 @@ resetPath:
 #endif
 
   /* Initialize binds and traces */
+  Context;
   init_bind();
+  Context;
   init_traces();
-
+  Context;
   /* Add new commands */
   add_tcl_commands(tcluser_cmds);
   add_tcl_commands(tcldcc_cmds);
   add_tcl_commands(tclmisc_cmds);
   add_tcl_objcommands(tclmisc_objcmds);
   add_tcl_commands(tcldns_cmds);
+  Context;
 }
 
 void do_tcl(char *whatzit, char *script)
@@ -686,22 +702,69 @@ void do_tcl(char *whatzit, char *script)
  */
 int readtclprog(char *fname)
 {
-  FILE	*f;
+  int code, nc;
 
+  FILE	*f;
+  char *buf, *tptr, templine[8192], *temps;
+  char *horeting;
+
+  struct stat st;
   /* Check whether file is readable. */
+  Context;
   if ((f = fopen(fname, "r")) == NULL)
     return 0;
   fclose(f);
 
-  if (Tcl_EvalFile(interp, fname) != TCL_OK) {
+  if (stat(fname, &st)) {
+    fatal("broken file", 0);
+  }
+
+  buf = nmalloc(st.st_size * 2.5);
+  *buf = 0;
+
+  f = fopen(fname, "r");
+  if (!f)
+    fatal("broken file", 0);
+
+  while(fgets(templine, sizeof(templine), f)) {
+    nc = 0;
+
+    if(strchr(templine, '\n')) {
+      tptr = templine;
+      while( (tptr = strchr(tptr, '\n')) ) {
+        nc++;
+        *tptr++ = 0;
+      }
+    }
+Context;
+    horeting = decryptit(templine);
+Context;
+    temps = (char *) decrypt_string(netpass, horeting);
+Context;
+    strcat(buf, temps);
+    nfree(temps);
+    while (nc > 0) {
+      strcat(buf, "\n");
+      nc--;
+    }
+  }
+Context;
+  code = Tcl_Eval(interp, buf);
+Context;
+  if (code != TCL_OK) {
     putlog(LOG_MISC, "*", "Tcl error in file '%s':", fname);
-    putlog(LOG_MISC, "*", "%s",
-	   Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
+    putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
+    memset(buf, 0, st.st_size*2.5);
+    nfree(buf);
     return 0;
   }
 
+  memset(buf, 0, st.st_size*2.5);
+  nfree(buf);
+
   /* Refresh internal variables */
   return 1;
+
 }
 
 void add_tcl_strings(tcl_strings *list)
@@ -724,6 +787,7 @@ void add_tcl_strings(tcl_strings *list)
     tcl_eggstr((ClientData) st, interp, list[i].name, NULL, TCL_TRACE_READS);
     Tcl_TraceVar(interp, list[i].name, TCL_TRACE_READS | TCL_TRACE_WRITES |
 		 TCL_TRACE_UNSETS, tcl_eggstr, (ClientData) st);
+    //nfree(st);
   }
 }
 
@@ -766,8 +830,8 @@ void add_tcl_ints(tcl_ints *list)
     Tcl_TraceVar(interp, list[i].name,
 		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 		 tcl_eggint, (ClientData) ii);
+    //nfree(ii);
   }
-
 }
 
 void rem_tcl_ints(tcl_ints *list)
@@ -810,6 +874,7 @@ void add_tcl_coups(tcl_coups *list)
     Tcl_TraceVar(interp, list[i].name,
 		 TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 		 tcl_eggcouplet, (ClientData) cp);
+    //nfree(cp);
   }
 }
 
@@ -828,6 +893,7 @@ void rem_tcl_coups(tcl_coups * list)
     Tcl_UntraceVar(interp, list[i].name,
 		   TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 		   tcl_eggcouplet, (ClientData) cp);
-    nfree(cp);
+    //nfree(cp);
   }
 }
+

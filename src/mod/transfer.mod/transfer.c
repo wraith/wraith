@@ -1,25 +1,6 @@
 /*
  * transfer.c -- part of transfer.mod
  *
- * $Id: transfer.c,v 1.51 2002/06/06 18:52:25 wcc Exp $
- */
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999, 2000, 2001, 2002 Eggheads Development Team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 /*
  * Small code snippets related to REGET/RESEND support were taken from
@@ -33,6 +14,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "src/mod/module.h"
+#include "src/mod/update.mod/update.h"
 #include "src/tandem.h"
 
 #include "src/users.h"
@@ -42,15 +24,15 @@
 #include <arpa/inet.h>
 
 
-static Function *global = NULL;
+static Function *global = NULL, *update_funcs = NULL;
 
 static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
-static int wait_dcc_xfer = 300;	/* Timeout time on DCC xfers */
+static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
 static p_tcl_bind_list H_rcvd, H_sent, H_lost, H_tout;
-static int dcc_limit = 3;	/* Maximum number of simultaneous file
+static int dcc_limit = 4;	/* Maximum number of simultaneous file
 				   downloads allowed */
-static int dcc_block = 1024;	/* Size of one dcc block */
-static int quiet_reject;        /* Quietly reject dcc chat or sends from
+static int dcc_block = 0;	/* Size of one dcc block */
+static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
                                    users without access? */
 
 /*
@@ -609,8 +591,14 @@ static int tcl_dccsend STDVAR
   }
   if (copy_to_tmp) {
     sys = nmalloc(strlen(tempdir) + strlen(nfn) + 1);
-    sprintf(sys, "%s%s", tempdir, nfn);		/* New filename, in /tmp */
-    copyfile(argv[1], sys);
+    sprintf(sys, "%s%s", tempdir, nfn);
+    f = fopen(sys, "r");
+    if (f) {
+      fclose(f);
+      Tcl_AppendResult(irp, "5", NULL);
+      return TCL_OK;
+    } else
+      copyfile(argv[1], sys);
   } else {
     sys = nmalloc(strlen(argv[1]) + 1);
     strcpy(sys, argv[1]);
@@ -714,6 +702,19 @@ static void eof_dcc_fork_send(int idx)
     }
     putlog(LOG_BOTS, "*", USERF_FAILEDXFER);
     unlink(dcc[idx].u.xfer->filename);
+  } else if (!strcmp(dcc[idx].nick, "*binary")) {
+    int x, y = 0;
+
+    for (x = 0; x < dcc_total; x++)
+      if ((!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
+	  (dcc[x].type->flags & DCT_BOT)) {
+	y = x;
+	break;
+      }
+    if (y != 0) {
+      dcc[y].status &= ~STAT_GETTINGU;
+    }
+    putlog(LOG_BOTS, "*", "Failed binary transfer.");
   } else {
     neterror(s1);
     if (!quiet_reject)
@@ -748,6 +749,17 @@ static void eof_dcc_send(int idx)
 
       if (me && me->funcs) {
 	Function f = me->funcs[SHARE_FINISH];
+
+	(f) (idx);
+      }
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
+      return;
+    } else if (!strcmp(dcc[idx].nick, "*binary")) {
+      module_entry *me = module_find("update", 0, 0);
+
+      if (me && me->funcs) {
+	Function f = me->funcs[UPDATE_FINISH];
 
 	(f) (idx);
       }
@@ -828,14 +840,43 @@ static void eof_dcc_send(int idx)
 		   dcc[y].nick);
       botnet_send_unlinked(y, dcc[y].nick, s);
       chatout("*** %s\n", dcc[y].nick, s);
-      if (y < idx) {
-	int t = y;
 
-	y = idx;
-	idx = t;
+      if (y < idx) {
+       int t = y;
+
+       y = idx;
+       idx = t;
       }
-      killsock(dcc[y].sock);
-      lostdcc(y);
+
+      if (y != idx) {
+       killsock(dcc[y].sock);
+       lostdcc(y);
+      }
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
+    }
+  } else if (!strcmp(dcc[idx].nick, "*binary")) {
+    int x, y = 0;
+
+    for (x = 0; x < dcc_total; x++)
+      if ((!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) &&
+	  (dcc[x].type->flags & DCT_BOT))
+	y = x;
+    if (y) {
+            
+      putlog(LOG_BOTS, "*", "Lost binary transfer from %s; aborting.", dcc[y].nick);
+      unlink(dcc[idx].u.xfer->filename);
+/* Drop that bot */
+//      dprintf(y, "bye\n");
+//      egg_snprintf(s, sizeof s,"Disconnected %s (aborted binary transfer)", dcc[y].nick);
+//      botnet_send_unlinked(y, dcc[y].nick, s);
+//      chatout("*** %s\n", dcc[y].nick, s);
+//      if (y != idx) {
+//       killsock(dcc[y].sock);
+//       lostdcc(y);
+//      }
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
     }
   } else {
     putlog(LOG_FILES, "*",TRANSFER_LOST_DCCSEND,
@@ -954,9 +995,11 @@ static void dcc_get(int idx, char *buf, int len)
 	   dcc[idx].u.xfer->origname, dcc[idx].nick);
   } else if (cmp > dcc[idx].status) {
     /* Attempt to resume */
-    if (!strcmp(dcc[idx].nick, "*users"))
+    if (!strcmp(dcc[idx].nick, "*users")) {
       putlog(LOG_BOTS, "*",TRANSFER_TRY_SKIP_AHEAD);
-    else {
+    } else if (!strcmp(dcc[idx].nick, "*binary")) {
+      putlog(LOG_BOTS, "*","!!! Trying to skip ahead on binary transfer");
+    } else {
       fseek(dcc[idx].u.xfer->f, cmp, SEEK_SET);
       dcc[idx].status = cmp;
       putlog(LOG_FILES, "*",TRANSFER_RESUME_FILE,
@@ -1001,6 +1044,23 @@ static void dcc_get(int idx, char *buf, int len)
       if (me && me->funcs[SHARE_DUMP_RESYNC])
 	((me->funcs)[SHARE_DUMP_RESYNC]) (y);
       xnick[0] = 0;
+    } else if (!strcmp(dcc[idx].nick, "*binary")) {
+      int x, y = 0;
+
+      for (x = 0; x < dcc_total; x++)
+	if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+	    (dcc[x].type->flags & DCT_BOT))
+	  y = x;
+      if (y != 0) {
+	dcc[y].status &= ~STAT_SENDINGU;
+        dcc[y].status |= STAT_UPDATED;
+      }
+      putlog(LOG_BOTS, "*", "Completed binary file send to %s",
+	     dcc[y].nick);
+      xnick[0] = 0;
+#ifdef HUB
+      bupdating = 0;
+#endif
     } else {
       module_entry *fs = module_find("filesys", 0, 0);
       struct userrec *u = get_user_by_handle(userlist,
@@ -1059,14 +1119,39 @@ static void eof_dcc_get(int idx)
 		 dcc[y].nick);
     botnet_send_unlinked(y, dcc[y].nick, s);
     chatout("*** %s\n", s);
-    if (y < idx) {
-      int t = y;
-
-      y = idx;
-      idx = t;
+    if (y != idx) {
+     killsock(dcc[y].sock);
+     lostdcc(y);
     }
-    killsock(dcc[y].sock);
-    lostdcc(y);
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
+    return;
+  } else if (!strcmp(dcc[idx].nick, "*binary")) {
+    int x, y = 0;
+
+    for (x = 0; x < dcc_total; x++)
+      if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+	  (dcc[x].type->flags & DCT_BOT))
+	y = x;
+    putlog(LOG_BOTS, "*", "Lost binary transfer; aborting.");
+    /* Note: no need to unlink the xfer file, as it's already unlinked. */
+    xnick[0] = 0;
+    /* Drop that bot */
+    dcc[y].status &= ~STAT_SENDINGU;
+#ifdef HUB
+    bupdating = 0;
+#endif
+//    dprintf(-dcc[y].sock, "bye\n");
+//    egg_snprintf(s, sizeof s, "Disconnected %s (aborted binary transfer)",
+//		 dcc[y].nick);
+//    botnet_send_unlinked(y, dcc[y].nick, s);
+//    chatout("*** %s\n", s);
+//    if (y != idx) {
+//     killsock(dcc[y].sock);
+//     lostdcc(y);
+//    }
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
     return;
   } else {
     struct userrec *u;
@@ -1154,6 +1239,31 @@ static void transfer_get_timeout(int i)
     killsock(dcc[y].sock);
     lostdcc(y);
     xx[0] = 0;
+  } else if (strcmp(dcc[i].nick, "*binary") == 0) {
+    int x, y = 0;
+
+    for (x = 0; x < dcc_total; x++)
+      if ((!egg_strcasecmp(dcc[x].nick, dcc[i].host)) &&
+	  (dcc[x].type->flags & DCT_BOT))
+	y = x;
+    if (y != 0) {
+      dcc[y].status &= ~STAT_SENDINGU;
+    }
+    putlog(LOG_BOTS, "*","Timeout on binary transfer.");
+    dprintf(y, "bye\n");
+    egg_snprintf(xx, sizeof xx,"Disconnected %s (timed-out binary transfer)",
+		 dcc[y].nick);
+    botnet_send_unlinked(y, dcc[y].nick, xx);
+    chatout("*** %s\n", xx);
+    if (y < i) {
+      int t = y;
+
+      y = i;
+      i = t;
+    }
+    killsock(dcc[y].sock);
+    lostdcc(y);
+    xx[0] = 0;
   } else {
     char *p;
     struct userrec *u;
@@ -1196,6 +1306,18 @@ static void tout_dcc_send(int idx)
     }
     unlink(dcc[idx].u.xfer->filename);
     putlog(LOG_BOTS, "*", TRANSFER_USERFILE_TIMEOUT);
+  } else if (!strcmp(dcc[idx].nick, "*binary")) {
+    int x, y = 0;
+
+    for (x = 0; x < dcc_total; x++)
+      if (!egg_strcasecmp(dcc[x].nick, dcc[idx].host) &&
+	  (dcc[x].type->flags & DCT_BOT))
+	y = x;
+    if (y != 0) {
+      dcc[y].status &= ~STAT_GETTINGU;
+    }
+    putlog(LOG_BOTS, "*", "Timeout on binary transfer.");
+
   } else {
     char *buf;
 
@@ -1231,6 +1353,7 @@ static void display_dcc_get_p(int idx, char *buf)
 
 static void display_dcc_send(int idx, char *buf)
 {
+Context;
   sprintf(buf,TRANSFER_SEND, dcc[idx].status,
 	  dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
@@ -1321,9 +1444,8 @@ static void dcc_fork_send(int idx, char *x, int y)
   dcc[idx].type = &DCC_SEND;
   dcc[idx].u.xfer->start_time = now;
   egg_snprintf(s1, sizeof s1, "%s!%s", dcc[idx].nick, dcc[idx].host);
-  if (strcmp(dcc[idx].nick, "*users"))
-    putlog(LOG_MISC, "*", TRANSFER_DCC_CONN,
-	   dcc[idx].u.xfer->origname, s1);
+  if (strcmp(dcc[idx].nick, "*users") && strcmp(dcc[idx].nick, "*binary"))
+    putlog(LOG_MISC, "*", TRANSFER_DCC_CONN, dcc[idx].u.xfer->origname, s1);
 }
 
 static struct dcc_table DCC_GET =
@@ -1477,8 +1599,8 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from,
     nfn = buf = replace_spaces(nfn);
   dcc[i].u.xfer->origname = get_data_ptr(strlen(nfn) + 1);
   strcpy(dcc[i].u.xfer->origname, nfn);
-  strcpy(dcc[i].u.xfer->from, from);
-  strcpy(dcc[i].u.xfer->dir, dir);
+  strncpyz(dcc[i].u.xfer->from, from, NICKLEN);
+  strncpyz(dcc[i].u.xfer->dir, dir, DIRLEN);
   dcc[i].u.xfer->length = dccfilesize;
   dcc[i].timeval = now;
   dcc[i].u.xfer->f = f;
@@ -1486,7 +1608,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from,
   if (nick[0] != '*') {
     dprintf(DP_HELP, "PRIVMSG %s :\001DCC %sSEND %s %lu %d %lu\001\n", nick,
 	    resend ? "RE" :  "", nfn,
-	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()), port,
+	    iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip(0)), port,
 	    dccfilesize);
     putlog(LOG_FILES, "*",TRANSFER_BEGIN_DCC, resend ? TRANSFER_RE :  "",
 	   nfn, nick);
@@ -1571,7 +1693,7 @@ static int fstat_write_userfile(FILE *f, struct userrec *u,
   register struct filesys_stats *fs;
 
   fs = e->u.extra;
-  if (fprintf(f, "--FSTAT %09u %09u %09u %09u\n",
+  if (lfprintf(f, "--FSTAT %09u %09u %09u %09u\n",
 	      fs->uploads, fs->upload_ks,
 	      fs->dnloads, fs->dnload_ks) == EOF)
     return 0;
@@ -1648,7 +1770,7 @@ static int fstat_expmem(struct user_entry *e)
   return sizeof(struct filesys_stats);
 }
 
-static void fstat_display(int idx, struct user_entry *e)
+static void fstat_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct filesys_stats *fs;
 
@@ -1887,6 +2009,7 @@ static char *transfer_close()
   int i;
   p_tcl_bind_list H_ctcp;
 
+Context;
   putlog(LOG_MISC, "*",TRANSFER_UNLOADING);
   for (i = dcc_total - 1; i >= 0; i--) {
     if (dcc[i].type == &DCC_GET || dcc[i].type == &DCC_GET_PENDING)
@@ -1909,7 +2032,6 @@ static char *transfer_close()
     rem_builtins(H_ctcp, transfer_ctcps);
   rem_tcl_commands(mytcls);
   rem_tcl_ints(myints);
-  rem_help_reference("transfer.help");
   del_lang_section("transfer");
   module_undepend(MODULE_NAME);
   return NULL;
@@ -1967,16 +2089,15 @@ char *transfer_start(Function *global_funcs)
 
   fileq = NULL;
   module_register(MODULE_NAME, transfer_table, 2, 2);
-  if (!module_depend(MODULE_NAME, "eggdrop", 106, 0)) {
+  if (!(update_funcs = module_depend(MODULE_NAME, "update", 0, 0))) {
     module_undepend(MODULE_NAME);
-    return "This module requires Eggdrop 1.6.0 or later.";
+    return "This module requires update module 0.0 or later.";
   }
 
   add_tcl_commands(mytcls);
   add_tcl_ints(myints);
   add_builtins(H_load, transfer_load);
   server_transfer_setup(NULL);
-  add_help_reference("transfer.help");
   H_rcvd = add_bind_table("rcvd", HT_STACKABLE, builtin_sentrcvd);
   H_sent = add_bind_table("sent", HT_STACKABLE, builtin_sentrcvd);
   H_lost = add_bind_table("lost", HT_STACKABLE, builtin_toutlost);
