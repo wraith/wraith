@@ -581,7 +581,7 @@ static void startup_checks(int hack) {
     if (do_killbot[0]) {
       const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
 
-      if (killbot(do_killbot, kill_sig) == 0)
+      if (killbot(do_killbot, NULL, kill_sig) == 0)
         printf("'%s' successfully %sed.\n", do_killbot, what);
       else {
         printf("Error %sing '%s'\n", what, do_killbot);
@@ -619,7 +619,7 @@ static void startup_checks(int hack) {
     werr(ERR_BOTDISABLED);
 
   if (!conf.bot->hub && !conf.bot->localhub)
-    free_conf_bots();			/* not a localhub, so no need to store all bot info */
+    free_conf_bots(conf.bots);			/* not a localhub, so no need to store all bot info */
 }
 
 static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";

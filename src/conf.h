@@ -55,14 +55,14 @@ enum {
 
 void spawnbot(const char *);
 void spawnbots();
-int killbot(char *, int);
+int killbot(char *, conf_bot *, int);
 void confedit() __attribute__((noreturn));
 void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
 pid_t checkpid(const char *, conf_bot *);
 void init_conf();
 void free_conf();
-void free_conf_bots();
+void free_conf_bots(conf_bot *);
 int readconf(const char *, int);
 int parseconf(bool);
 int writeconf(char *, FILE *, int);
@@ -70,6 +70,8 @@ void fill_conf_bot();
 void bin_to_conf(void);
 void conf_checkpids();
 void conf_add_userlist_bots();
+conf_bot *conf_bots_dup(conf_bot *);
+void kill_removed_bots(conf_bot *, conf_bot *);
 
 #ifdef CYGWIN_HACKS
 extern char		cfile[DIRMAX];

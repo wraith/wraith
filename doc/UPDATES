@@ -75,8 +75,10 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * +O now implies +o
 * Combined kick reasons for +k and .kickban
 * Fixed cmd_conf not correctly writing settings back to the binary
-* After editing binary with -C, new bots/hosts are automatically added if first bot is linked.
-  Plus, bots are automatically killed/started now.
+* Some automatic things done after editing the binary with -C are:
+  -New bots are spawned and added (if linked)
+  -Changed (NEW) ip/host for bots are added to the botnet (if linked)
+  -Removed bots are killed and removed from the userlist (if linked)
 * Added options 'enable' and 'disable' to cmd_conf for bots
 
 

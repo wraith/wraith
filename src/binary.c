@@ -504,15 +504,20 @@ void conf_to_bin(conf_t *in, bool move, int die)
 
 void reload_bin_data() {
   if (bin_checksum(binname, GET_CONF)) {
+    conf_bot *oldlist = NULL;
+    
+    oldlist = conf_bots_dup(conf.bots);
     free_conf();
     bin_to_conf();
     fill_conf_bot();
     if (!conf.bot->localhub)
-      free_conf_bots();
+      free_conf_bots(conf.bots);
     else {
+      kill_removed_bots(oldlist, conf.bots);
       conf_add_userlist_bots();
       spawnbots();
     }
+    free_conf_bots(oldlist);
   }
 }
 
