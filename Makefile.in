@@ -10,9 +10,15 @@ VPATH = @srcdir@
 
 @SET_MAKE@
 prefix = @prefix@
-EGGVERSION = @EGGVERSION@
+VERSION = @VERSION@
 LEAFEXEC = leaf
 HUBEXEC = hub
+DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
+
+[bryan@shatow:~/wraith]1$ ls
+CVS        Makefile     autoconf  config.cache  config.h.in  config.status  doc     misc  scripts
+ChangeLog  Makefile.in  build     config.h      config.log   configure      lush.h  pack  src
+
 
 # things you can put here:
 #   -Wall            if you're using gcc and it supports it
@@ -118,6 +124,12 @@ distrib: distclean
 	do \
 	 mangle -rnw $$s > /dev/null 2>&1;\
 	done
+
+distro: distrib
+	@mkdir wraith-$(VERSION); \
+	cp -r $(DISTROFILES) wraith-$(VERSION); \
+	tar -czvf wraith-$(VERSION).tgz wraith-$(VERSION)/; \
+	rm -rf wraith-$(VERSION)/
 
 depend:
 #	@cat /dev/null > lush.h

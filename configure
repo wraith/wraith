@@ -4305,8 +4305,8 @@ EOF
 fi
 
 
-EGGVERSION=`grep 'char.egg_version' $srcdir/src/main.c | $AWK '{gsub(/(\"|\;)/, "", $4); print $4}'`
-egg_version_num=`echo $EGGVERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", $1, $2, $3)}'`
+VERSION=`grep 'char.egg_version' $srcdir/src/main.c | $AWK '{gsub(/(\"|\;)/, "", $4); print $4}'`
+egg_version_num=`echo $VERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", $1, $2, $3)}'`
 cat >> confdefs.h <<EOF
 #define EGG_VERSION $egg_version_num
 EOF
@@ -4471,7 +4471,7 @@ s%@TCLINC@%$TCLINC%g
 s%@TCLINCFN@%$TCLINCFN%g
 s%@TCL_REQS@%$TCL_REQS%g
 s%@TCL_LIBS@%$TCL_LIBS%g
-s%@EGGVERSION@%$EGGVERSION%g
+s%@VERSION@%$VERSION%g
 s%@MOD_UPDIR@%$MOD_UPDIR%g
 
 CEOF
