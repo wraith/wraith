@@ -1627,7 +1627,10 @@ static void cmd_uplink(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("Useful only for bots.\n"));
     return;
   }
-  dprintf(idx, STR("Changed bot's uplink.\n"));
+  if (uplink && uplink[0])
+    dprintf(idx, STR("Changed bot's uplink.\n"));
+  else
+    dprintf(idx, STR("Cleared bot's uplink.\n"));
   obi = get_user(&USERENTRY_BOTADDR, u1);
   bi = user_malloc(sizeof(struct bot_addr));
 
