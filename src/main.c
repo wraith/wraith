@@ -66,6 +66,9 @@ extern struct chanset_t	*chanset;
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.1.0";
 
+#ifdef S_CONFEDIT
+int	do_confedit = 0;		/* show conf menu if -C */
+#endif /* S_CONFEDIT */
 int 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
 int 	loading = 0;
@@ -167,7 +170,7 @@ static void checkpass()
     gpasswd = (char *) getpass("");
     checkedpass = 1;
     if (!gpasswd || (gpasswd && md5cmp(shellhash, gpasswd)))
-      fatal(STR("incorrect password."), 0);
+      werr(ERR_BADPASS);
   }
 }
 
@@ -198,6 +201,7 @@ static void show_help()
   printf(format, STR("Option"), STR("Description"));
   printf(format, STR("------"), STR("-----------"));
   printf(format, STR("-B <botnick>"), STR("Starts the specified bot"));
+  printf(format, STR("-C"), STR("Config file menu system"));
   printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
   printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
   printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
@@ -216,9 +220,9 @@ static void show_help()
 
 
 #ifdef LEAF
-# define PARSE_FLAGS "2B:d:De:Eg:G:L:P:hnstv"
+# define PARSE_FLAGS "2B:Cd:De:Eg:G:L:P:hnstv"
 #else /* !LEAF */
-# define PARSE_FLAGS "2d:De:Eg:G:hnstv"
+# define PARSE_FLAGS "2Cd:De:Eg:G:hnstv"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "dDeEgGhntv"
 static void dtx_arg(int argc, char *argv[])
@@ -229,6 +233,7 @@ static void dtx_arg(int argc, char *argv[])
 #endif /* LEAF */
   char *p = NULL;
 
+  opterr = 0;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
@@ -241,6 +246,11 @@ static void dtx_arg(int argc, char *argv[])
         strncpyz(origbotname, optarg, NICKLEN + 1);
         break;
 #endif /* LEAF */
+#ifdef S_CONFEDIT
+      case 'C':
+        do_confedit = 1;
+        break;
+#endif /* S_CONFEDIT */
       case 'h':
         show_help();
       case 'n':
@@ -313,6 +323,7 @@ static void dtx_arg(int argc, char *argv[])
         updating = 1;
         break;
 #endif
+      case '?':
       default:
         break;
     }
@@ -484,8 +495,6 @@ static void event_resettraffic()
 
 extern module_entry *module_list;
 
-void check_static(char *, char *(*)());
-
 #include "mod/static.h"
 
 int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
@@ -575,7 +584,8 @@ int main(int argc, char **argv)
 
     sdprintf(STR("newbin at: %s"), newbin);
 
-    if (strcmp(binname,newbin)) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
+    /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
+    if (strcmp(binname,newbin)) { 
 #ifdef LEAF
       int ok = 1;
 #endif /* LEAF */
@@ -651,15 +661,20 @@ int main(int argc, char **argv)
   if (localhub)
 #endif /* LEAF */
     showconf();
-  parseconf();
+#ifdef S_CONFEDIT
+  if (do_confedit)
+    confedit(cfile);		/* this will exit() */
+#endif /* S_CONFEDIT */
 #ifdef LEAF
-  if (localhub)
+  if (localhub) {
 #endif /* LEAF */
-    writeconf(cfile);
+    parseconf();
+    writeconf(cfile, NULL, CONF_ENC);
+#ifdef LEAF
+  }
+#endif /* LEAF */
   fillconf(&conf);
   free_conf();
-printf("I AM : %s (%s: %d)\n", conf.bot->nick, conf.bot->pid_file, conf.bot->pid);
-printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host, conf.bot->ip6, conf.bot->host6);
 
   if ((localhub && !updating) || !localhub) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
@@ -704,7 +719,7 @@ printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host
   }
 #endif /* LEAF && PSCLOAK */
 
-  putlog(LOG_MISC, "*", STR("=== %s: %d users."), conf.bot->nick, count_users(userlist));
+  putlog(LOG_MISC, "*", "=== %s: %d users.", conf.bot->nick, count_users(userlist));
 
   /* Move into background? */
   if (backgrd) {
@@ -724,10 +739,8 @@ printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host
       /* Let the bot live since this doesn't appear to be a botchk */
         printf(EGG_NOWRITE, conf.bot->pid_file);
         unlink(conf.bot->pid_file);
-        fclose(f);
-      } else {
-        fclose(f);
       }
+      fclose(f);
     } else
       printf(EGG_NOWRITE, conf.bot->pid_file);
 #ifdef CYGWIN_HACKS
@@ -790,7 +803,8 @@ printf("bleh..ip: %s host: %s ip6: %s host6: %s\n", conf.bot->ip, conf.bot->host
   add_hook(HOOK_USERFILE, (Function) event_save);
   add_hook(HOOK_DAILY, (Function) event_resettraffic);
 
-  debug0(STR("main: entering loop"));
+  debug0("main: entering loop");
+
   while (1) {
     int socket_cleanup = 0, i, xx;
     char buf[SGRAB + 9] = "";

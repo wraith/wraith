@@ -30,6 +30,7 @@
 
 
 #ifndef MAKING_MODS
+char *wbanner();
 char *color(int, int, int);
 void shuffle(char *, char *);
 void showhelp(int, struct flag_record *, char *);

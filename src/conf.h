@@ -2,6 +2,7 @@
 #define _CONF_H
 
 #include <sys/types.h>
+#include <stdio.h>
 
 typedef struct conf_bot_b {
   char *nick;
@@ -36,15 +37,25 @@ typedef struct conf_b {
 } conf_t;
 
 extern conf_t		conf;
+
+enum {
+  CONF_ENC = 1,
+  CONF_COMMENT = 2
+};
+
+
 #ifndef MAKING_MODS
 
+#ifdef S_CONFEDIT
+void confedit(char *);
+#endif /* S_CONFEDIT */
 int checkpid(char *, conf_bot *);
 void showconf();
 void init_conf();
 void free_conf();
 int readconf(char *);
 int parseconf();
-int writeconf(char *);
+int writeconf(char *, FILE *, int);
 void fillconf(conf_t *);
 #endif /* !MAKING_MODS */
 

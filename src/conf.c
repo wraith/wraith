@@ -12,10 +12,15 @@
 #include "main.h"
 #include "salt.h"
 #include "misc.h"
+#include "misc_file.h"
 
 #include <errno.h>
-#include <pwd.h>
+#include <paths.h>
 #include <sys/types.h>
+#ifdef S_CONFEDIT
+#include <sys/wait.h>
+#endif /* S_CONFEDIT */
+#include <sys/stat.h>
 #include <signal.h>
 
 extern char             origbotname[], tempdir[],
@@ -28,13 +33,135 @@ conf_t		conf;		/* global conf struct */
 
 static conf_t conffile;
 
+#ifdef S_CONFEDIT
+static uid_t save_euid, save_egid;
+static int swap_uids()
+{
+        save_euid = geteuid(); save_egid = getegid();
+        return (setegid(getgid()) || seteuid(getuid())) ? -1 : 0;
+}
+static int swap_uids_back()
+{
+        return (setegid(save_egid) || seteuid(save_euid)) ? -1 : 0;
+}
+
+
+void confedit(char *cfile) {
+    FILE *f = NULL;
+    char s[DIRMAX] = "", *editor = NULL;
+    int fd;
+    mode_t um;
+    int waiter;
+    pid_t pid, xpid;
+
+    egg_snprintf(s, sizeof s, STR("%s.conf-XXXXXX"), tempdir);
+    um = umask(077);
+
+    if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
+      fatal(STR("Can't create temp conffile!"), 0);
+    }
+
+    writeconf(NULL, f, CONF_COMMENT);
+
+    (void) umask(um);
+
+    if (!can_stat(s)) 
+      fatal("Cannot stat tempfile", 0);
+
+    /* Okay, edit the file */
+
+    if ((!((editor = getenv("VISUAL")) && strlen(editor)))
+     && (!((editor = getenv("EDITOR")) && strlen(editor)))
+        ) {
+            editor = "vi";
+/*
+            #if defined(DEBIAN)
+              editor = "/usr/bin/editor";
+            #elif defined(_PATH_VI)
+              editor = _PATH_VI;
+            #else
+              editor = "/usr/ucb/vi";
+            #endif
+*/
+    }
+    fclose(f);
+
+    (void)signal(SIGINT, SIG_IGN);
+    (void)signal(SIGQUIT, SIG_IGN);
+
+    swap_uids();
+
+    switch (pid = fork()) {
+      case -1:
+              fatal("Cannot fork", 0);
+      case 0: 
+      {
+              char *run = NULL;
+              size_t size = strlen(s) + strlen(editor) + 5;
+
+              setgid(getgid());
+              setuid(getuid());
+              run = calloc(1, size);
+              /* child */
+              egg_snprintf(run, size, "%s %s", editor, s);
+              execlp("/bin/sh", "/bin/sh", "-c", run, NULL);
+              perror(editor);
+              exit(1);
+              /*NOTREACHED*/
+      }
+      default:
+              /* parent */
+              break;
+    }
+
+    /* parent */
+    while (1) {
+      xpid = waitpid(pid, &waiter, WUNTRACED);
+      if (xpid == -1) {
+        fprintf(stderr, "waitpid() failed waiting for PID %d from \"%s\": %s\n",
+                         pid, editor, strerror(errno));
+      } else if (xpid != pid) {
+        fprintf(stderr, "wrong PID (%d != %d) from \"%s\"\n", xpid, pid, editor);
+        goto fatal;
+      } else if (WIFSTOPPED(waiter)) {
+        /* raise(WSTOPSIG(waiter)); Not needed and breaks in job control shell*/
+      } else if (WIFEXITED(waiter) && WEXITSTATUS(waiter)) {
+        fprintf(stderr, "\"%s\" exited with status %d\n", editor, WEXITSTATUS(waiter));
+        goto fatal;
+      } else if (WIFSIGNALED(waiter)) {
+        fprintf(stderr, "\"%s\" killed; signal %d (%score dumped)\n",
+                        editor, WTERMSIG(waiter), WCOREDUMP(waiter) ?"" :"no ");
+        goto fatal;
+      } else {
+        break;
+      }
+    }
+
+    (void)signal(SIGINT, SIG_DFL);
+    (void)signal(SIGQUIT, SIG_DFL);
+
+    swap_uids_back();
+
+    if (!can_stat(s)) 
+      fatal("Error reading new config file", 0);
+
+    unlink(cfile);
+    EncryptFile(s, cfile);
+    unlink(s);
+    fatal("New config file saved, restart bot to use", 0);
+
+ fatal:
+      unlink(s);
+      exit(1);
+}
+#endif /* S_CONFEDIT */
+
 void init_conf() {
   conffile.bots = (conf_bot *) calloc(1, sizeof(conf_bot));
   conffile.bots->nick = NULL;
   conffile.bots->next = NULL;
   conffile.bot = NULL;
 
-  conffile.comments = calloc(1, 1);
   conffile.autocron = 1;
   conffile.autouname = 0;
   conffile.binpath = strdup(STR("~/"));
@@ -163,12 +290,9 @@ void free_conf() {
   free(conffile.homedir);
   free(conffile.binname);
   free(conffile.binpath);
-  free(conffile.comments);
 }
 
 int parseconf() {
-  struct passwd *pw = NULL;
-
   if (conffile.uid && conffile.uid != myuid) {
     sdprintf("wrong uid, conf: %d :: %d", conffile.uid, myuid);
     werr(ERR_WRONGUID);
@@ -186,23 +310,18 @@ int parseconf() {
     conffile.uname = strdup(my_uname());
   }
 
-  if ((pw = getpwuid(conffile.uid))) {
-
-    if (conffile.username) {
-      str_redup(&conffile.username, pw->pw_name);
-    } else {
-      conffile.username = strdup(pw->pw_name);
-    }
-
-    if (conffile.homedir) {
-      str_redup(&conffile.homedir, pw->pw_dir);
-    } else {
-      conffile.homedir = strdup(pw->pw_dir);
-    }
-
+  if (conffile.username) {
+    str_redup(&conffile.username, my_username());
   } else {
-    return 1;
+    conffile.username = strdup(my_username());
   }
+
+  if (conffile.homedir) {
+    str_redup(&conffile.homedir, homedir());
+  } else {
+    conffile.homedir = strdup(homedir());
+  }
+
   return 0;
 }
 
@@ -215,10 +334,16 @@ int readconf(char *cfile)
   Context;
   if (!(f = fopen(cfile, "r")))
     fatal("Cannot read config", 0);
+
   while (fgets(inbuf, sizeof inbuf, f) != NULL) {
     char *line = NULL, *temp_ptr = NULL;
-
     line = temp_ptr = decrypt_string(SALT1, inbuf);
+
+    if ((line && !line[0]) || line[0] == '\n') {
+      free(line);
+      continue;
+    }
+
     i++;
 
     sdprintf("CONF LINE: %s", line);
@@ -299,7 +424,7 @@ int readconf(char *cfile)
         conffile.portmax = atoi(line);
 
       /* now to parse nick/hosts */
-      } else if (line[0] != '#') {
+      } else if (line[0] != '#') { 
         char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
 
         nick = newsplit(&line);
@@ -314,10 +439,6 @@ int readconf(char *cfile)
           ipsix = newsplit(&line);
 
         conf_addbot(nick, ip, host, ipsix);
-      } else {
-        conffile.comments = realloc(conffile.comments, strlen(conffile.comments) + strlen(line) + 1 + 1);
-        strcat(conffile.comments, line);
-        strcat(conffile.comments, "\n");
       }
     }
     free(temp_ptr);
@@ -327,43 +448,98 @@ int readconf(char *cfile)
   return 0;
 }
 
-int writeconf(char *filename) {
+int writeconf(char *filename, FILE *stream, int bits) {
   FILE *f = NULL;
   conf_bot *bot = NULL;
+  Function my_write = NULL;
 
-  if (!(f = fopen(filename, "w"))) {
-    return 1;
+  if (bits & CONF_ENC)
+    my_write = (Function) lfprintf;
+  else if (!(bits & CONF_ENC))
+    my_write = (Function) fprintf;
+
+#define comment(text)			\
+	if (bits & CONF_COMMENT)	\
+	  my_write(f, "%s\n", text);
+
+  if (stream) {
+    f = stream;
+  } else if (filename) {
+    if (!(f = fopen(filename, "w")))
+      return 1;
   }
-/* old
-  lfprintf(f, "- %d\n", conffile.uid);
-  lfprintf(f, "+ %s\n", conffile.uname);
-*/
-  lfprintf(f, "! uid %d\n", conffile.uid);
-  lfprintf(f, "! uname %s\n", conffile.uname);
-  lfprintf(f, "! username %s\n", conffile.username);
-  lfprintf(f, "! homedir %s\n", conffile.homedir);
-  lfprintf(f, "! binname %s\n", conffile.binname);
-  lfprintf(f, "! binpath %s\n", conffile.binpath);
-/* old
-  lfprintf(f, "> %d\n", conffile.portmin);
-  lfprintf(f, "< %d\n", conffile.portmax);
-*/
-  lfprintf(f, "! portmin %d\n", conffile.portmin);
-  lfprintf(f, "! portmax %d\n", conffile.portmax);
-  lfprintf(f, "! pscloak %d\n", conffile.pscloak);
-  lfprintf(f, "! autocron %d\n", conffile.autocron);
-  lfprintf(f, "! autouname %d\n", conffile.autouname);
 
+  comment("# Lines beginning with # are what the preceeding line SHOULD be");
+  comment("# They are also ignored during parsing\n");
+
+  my_write(f, "! uid %d\n", conffile.uid);
+  if ((bits & CONF_COMMENT) && conffile.uid != myuid)
+    my_write(f, "#! uid %d\n\n", myuid);
+
+
+  if (!conffile.uname || (conffile.uname && conffile.autouname && strcmp(conffile.uname, my_uname()))) {
+    comment("# Automatic");
+    my_write(f, "! uname %s\n", my_uname());
+  } else if (conffile.uname && !conffile.autouname && strcmp(conffile.uname, my_uname())) {
+    my_write(f, "! uname %s\n", conffile.uname);
+    comment("# autouname is OFF");
+    my_write(f, "#! uname %s\n\n", my_uname());
+  } else 
+    my_write(f, "! uname %s\n", conffile.uname);
+
+  my_write(f, "! username %s\n", conffile.username ? conffile.username : my_username());
+  if (conffile.username && strcmp(conffile.username, my_username())) 
+    my_write(f, "#! username %s\n", my_username());
+
+  my_write(f, "! homedir %s\n", conffile.homedir ? conffile.homedir : homedir());
+  if (conffile.homedir && strcmp(conffile.homedir, homedir()))
+    my_write(f, "#! homedir %s\n", homedir());
+
+  comment("");
+
+  my_write(f, "! binpath %s\n", conffile.binpath);
+  comment("# binname is relative to binpath");
+  my_write(f, "! binname %s\n", conffile.binname);
+
+  comment("");
+
+  comment("# portmin/max are for incoming connections (DCC) [0 for any]");
+  my_write(f, "! portmin %d\n", conffile.portmin);
+  my_write(f, "! portmax %d\n", conffile.portmax);
+
+  comment("");
+  
+  comment("# Attempt to \"cloak\" the process name in `ps` for Linux?");
+  my_write(f, "! pscloak %d\n", conffile.pscloak);
+ 
+  comment("");
+  
+  comment("# Automatically add the bot to crontab?");
+  my_write(f, "! autocron %d\n", conffile.autocron);
+
+  comment("");
+ 
+  comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
+  my_write(f, "! autouname %d\n", conffile.autouname);
+
+  comment("");
+
+  comment("# '|' means OR, [] means the enclosed is optional");
+  comment("# A '+' in front of HOST means the HOST is ipv6");
+  comment("# A '/' in front of BOT will disable that bot.");
+  comment("#[/]BOT IP|. [+]HOST|. [IPV6-IP]");
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
-    lfprintf(f, "%s %s %s%s %s\n", bot->nick,
+    my_write(f, "%s %s %s%s %s\n", bot->nick,
                                    bot->ip ? bot->ip : ".",
                                    bot->host6 ? "+" : "",
                                    bot->host ? bot->host : (bot->host6 ? bot->host6 : "."),
                                    bot->ip6 ? bot->ip6 : "");
   }
-  lfprintf(f, "%s", conffile.comments);
+
   fflush(f);
-  fclose(f);
+
+  if (!stream)
+    fclose(f);
 
   return 0;
 }

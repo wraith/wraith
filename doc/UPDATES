@@ -14,6 +14,9 @@ This is a summary of ChangeLog basically.
 11.Added extort to CREDITS.
 12.Rewrote cmd_chanset to parse options correctly.
 13.Cmds that auto save userfile now alert you of that.
+14.binary -C now opens up a config editor, (crontab -e style).
+15.Invalid cmdline options are now silently ignored.
+16.Bad cmdline passwords now spoof an error.
 
 1.0.15 (Non-Release Version)
 1.cmd_randstring is now limited to 300.

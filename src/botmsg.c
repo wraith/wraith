@@ -412,12 +412,7 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top, char *to
 
 void putallbots(char *par)
 { 
-  char msg[SGRAB - 110] = "";
-
-  if (!par || !par[0])
-    return;
-  strncpyz(msg, par, sizeof msg);
-  botnet_send_zapf_broad(-1, conf.bot->nick, NULL, msg);
+  botnet_send_zapf_broad(-1, conf.bot->nick, NULL, par);
 }
 
 void putbot(char *bot, char *par)

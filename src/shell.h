@@ -16,7 +16,8 @@
 #define ERR_WRONGUNAME  13
 #define ERR_BADCONF     14
 #define ERR_BADBOT	15
-#define ERR_MAX         16
+#define ERR_BADPASS	16
+#define ERR_MAX         17
 
 #define EMAIL_OWNERS    0x1
 #define EMAIL_TEAM      0x2
@@ -38,6 +39,7 @@
 void check_mypid();
 int clear_tmp();
 char *homedir();
+char *my_username();
 char *my_uname();
 char *confdir();
 void baduname(char *, char *);

@@ -595,6 +595,8 @@ char *werr_tostr(int errnum)
   switch (errnum) {
   case ERR_BINSTAT:
     return STR("Cannot access binary");
+  case ERR_BADPASS:
+    return STR("Incorrect password");
   case ERR_BINMOD:
     return STR("Cannot chmod() binary");
   case ERR_PASSWD:
@@ -765,6 +767,20 @@ char *homedir()
     realpath(tmp, homedir); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
   }
   return homedir;
+}
+
+char *my_username()
+{
+  static char username[DIRMAX] = "";
+
+  if (!username || (username && !username[0])) {
+    struct passwd *pw = NULL;
+
+    ContextNote("Calling getpwuid");
+    pw = getpwuid(myuid);
+    egg_snprintf(username, sizeof username, "%s", pw->pw_name);
+  }
+  return username;
 }
 
 char *confdir()

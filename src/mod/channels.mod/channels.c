@@ -123,7 +123,7 @@ static void got_cset(char *botnick, char *code, char *par)
     newsplit(&par);
    } else {
     if (!strchr(CHANMETA, par[0])) {
-      putlog(LOG_ERROR, "*", "Got bad cset: bot: %s code: %s par: %s\n", botnick, code, par);
+      putlog(LOG_ERROR, "*", "Got bad cset: bot: %s code: %s par: %s", botnick, code, par);
       return;
     }
     chname = newsplit(&par);

@@ -58,6 +58,7 @@ HUB <God god.net 666 god ~God ~george>
 + AUTHHASH              Require a script to AUTH (using hashes)
 + AUTOAWAY		Random autoaway/return on IRC
 - AUTOLOCK		Will lock channels upon certain conditions
++ CONFEDIT              Crontab -e style config editor
 + DCCAUTH               Require Auth hashing with scripts for dcc party line.
 + DCCPASS		DCC command passwords
 + GARBLESTRINGS		Encrypt strings in binary

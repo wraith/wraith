@@ -233,11 +233,11 @@ void putlog(int type, char *chname, char *format, ...)
 
   va_start(va, format);
 #ifdef HUB
-#ifdef S_UTCTIME
+# ifdef S_UTCTIME
   t = gmtime(&now);
-#else /* !S_UTCTIME */
+# else /* !S_UTCTIME */
   t = localtime(&now);
-#endif /* S_UTCTIME */
+# endif /* S_UTCTIME */
 
   egg_strftime(stamp, sizeof(stamp) - 2, LOG_TS, t);
   strcat(stamp, " ");
@@ -271,8 +271,8 @@ void putlog(int type, char *chname, char *format, ...)
 
     egg_snprintf(outbuf, sizeof outbuf, "hl %d %s", type, out);
     if (userlist && !loading) {
-      tand_t *bot;
-      struct userrec *ubot;
+      tand_t *bot = NULL;
+      struct userrec *ubot = NULL;
 
       for (bot = tandbot ; bot; bot = bot->next) {
         if ((ubot = get_user_by_handle(userlist, bot->bot))) {

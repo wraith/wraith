@@ -16,6 +16,8 @@
 
 #ifndef MAKING_NUMMODS
 
+void check_static(char *, char *(*)());
+
 /* Modules specific functions and functions called by eggdrop
  */
 
