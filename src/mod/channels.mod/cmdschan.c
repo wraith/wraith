@@ -4,6 +4,7 @@
  *
  */
 
+
 #include <ctype.h>
 
 static struct flag_record user	 = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };

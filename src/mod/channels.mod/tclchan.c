@@ -3,6 +3,7 @@
  *
  */
 
+
 static int FindElement(char *resultBuf, const char *list, size_t listLength, 
                        const char **elementPtr, const char **nextPtr, 
                        size_t *sizePtr, int *bracePtr)

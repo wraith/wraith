@@ -8,6 +8,7 @@
  *
  */
 
+
 #include <sys/stat.h>
 #include "common.h"
 #include "color.h"

@@ -6,6 +6,7 @@
  *
  */
 
+
 /* Reversing this mode? */
 static bool reversing = 0;
 

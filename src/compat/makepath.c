@@ -19,6 +19,7 @@
 
 /* Written by David MacKenzie <djm@gnu.ai.mit.edu> and Jim Meyering.  */
 
+
 #include "src/common.h"
 #include "makepath.h"
 #include "dirname.h"

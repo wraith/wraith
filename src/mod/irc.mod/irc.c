@@ -4,6 +4,7 @@
  *
  */
 
+
 #include "src/common.h"
 #define MAKING_IRC
 #include "irc.h"

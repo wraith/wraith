@@ -4,6 +4,7 @@
  *
  */
 
+
 #include "src/core_binds.h"
 
 static int msg_pass(char *nick, char *host, struct userrec *u, char *par)

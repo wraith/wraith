@@ -1,6 +1,8 @@
 /* base64.c: base64 encoding/decoding
  *
  */
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "base64.h"

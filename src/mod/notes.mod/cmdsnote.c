@@ -4,6 +4,7 @@
  *
  */
 
+
 static void cmd_fwd(int idx, char *par)
 {
   if (!par[0]) {
