@@ -13,12 +13,6 @@
 #include "misc_file.h"
 #include "main.h"
 
-
-int mkdir_p(const char *path)
-{
-
-}
-
 /* Copy a file from one place to another (possibly erasing old copy).
  *
  * returns:  0 if OK
