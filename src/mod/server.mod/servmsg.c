@@ -310,7 +310,7 @@ static int got442(char *from, char *msg)
  */
 void nuke_server(char *reason)
 {
-  if (serv >= 0 && servidx > 0) {
+  if (serv >= 0 && servidx >= 0) {
     if (reason)
       dprintf(servidx, "QUIT :%s\n", reason);
 

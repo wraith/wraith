@@ -989,7 +989,7 @@ bool write_chans(FILE *f, int idx)
     get_mode_protect(chan, w);
 
     /* if a bot should explicitly NOT join, just set it +inactive ... */
-    if (idx > 0 && !botshouldjoin(dcc[idx].user, chan))
+    if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))
       inactive = '+';
     /* ... otherwise give the bot the *actual* setting */
     else
