@@ -487,7 +487,7 @@ void set_away(int idx, char *s)
       botnet_send_away(-1, conf.bot->nick, dcc[idx].sock, s, idx);
     }
   }
-  dprintf(idx, "You are now away.\n");
+  dprintf(idx, "You are now away. (%s)\n", s);
   check_bind_away(conf.bot->nick, idx, s);
 }
 
