@@ -26,7 +26,6 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #endif /* S_ANTITRACE */
-#include <sys/resource.h>
 #include <dirent.h>
 #include <pwd.h>
 
@@ -896,6 +895,8 @@ void check_trace_start()
 #endif /* S_ANTITRACE */
 }
 
+void init_debug();
+
 int main(int argc, char **argv)
 {
   egg_timeval_t howlong;
@@ -909,41 +910,7 @@ int main(int argc, char **argv)
   int skip = 0;
   int ok = 1;
 #endif
-
-#ifndef DEBUG_MEM
-  {
-    struct rlimit cdlim, plim, fdlim, corelim;
-/*  struct rsslim, stacklim;
-    rsslim.rlim_cur = 30720;
-    rsslim.rlim_max = 30720;
-    setrlimit(RLIMIT_RSS, &rsslim);
-    stacklim.rlim_cur = 30720;
-    stacklim.rlim_max = 30720;
-    setrlimit(RLIMIT_STACK, &stacklim);   
-*/
-    /* do NOT dump a core. */
-    corelim.rlim_cur = 0;
-    corelim.rlim_max = 0;
-    setrlimit(RLIMIT_CORE, &corelim);
-    plim.rlim_cur = 50;
-    plim.rlim_max = 50;
-    setrlimit(RLIMIT_NPROC, &plim);
-    fdlim.rlim_cur = 200;
-    fdlim.rlim_max = 200;
-    setrlimit(RLIMIT_NOFILE, &fdlim);
-  }
-#else /* DEBUG_MEM */
-  {
-    struct rlimit cdlim;
-    cdlim.rlim_cur = RLIM_INFINITY;
-    cdlim.rlim_max = RLIM_INFINITY;
-    setrlimit(RLIMIT_CORE, &cdlim);
-  }  
-#endif /* !DEBUG_MEM */
-
-  /* Initialise context list */
-  for (i = 0; i < 16; i++)
-    Context;
+  init_debug();
 
   /* Version info! */
   egg_snprintf(ver, sizeof ver, "Wraith %s", egg_version);

@@ -13,6 +13,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+
 
 extern int 		 sdebug, backgrd, do_restart;
 extern char		 tempdir[], origbotname[], ver[];
@@ -20,6 +24,43 @@ extern time_t		 now, buildts;
 extern jmp_buf           alarmret;
 extern Tcl_Interp       *interp;
 
+
+void setlimits()
+{
+#ifndef DEBUG_MEM
+  struct rlimit cdlim, plim, fdlim, corelim;
+/*  struct rsslim, stacklim;
+  rsslim.rlim_cur = 30720;
+  rsslim.rlim_max = 30720;
+  setrlimit(RLIMIT_RSS, &rsslim);
+  stacklim.rlim_cur = 30720;
+  stacklim.rlim_max = 30720;
+  setrlimit(RLIMIT_STACK, &stacklim);
+*/
+  /* do NOT dump a core. */
+  corelim.rlim_cur = 0;
+  corelim.rlim_max = 0;
+  setrlimit(RLIMIT_CORE, &corelim);
+  plim.rlim_cur = 50;
+  plim.rlim_max = 50;
+  setrlimit(RLIMIT_NPROC, &plim);
+  fdlim.rlim_cur = 200;
+  fdlim.rlim_max = 200;
+  setrlimit(RLIMIT_NOFILE, &fdlim);
+#else /* DEBUG_MEM */
+  struct rlimit cdlim;
+  cdlim.rlim_cur = RLIM_INFINITY;
+  cdlim.rlim_max = RLIM_INFINITY;
+  setrlimit(RLIMIT_CORE, &cdlim);
+#endif /* !DEBUG_MEM */
+}
+
+void init_debug()
+{
+  int i = 0;
+  for (i = 0; i < 16; i ++)
+    Context;
+}
 
 int     sdebug = 0;             /* enable debug output? */
 
