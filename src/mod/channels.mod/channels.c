@@ -362,13 +362,14 @@ static void got_jn(int idx, char *code, char *par)
   chname = newsplit(&par);
   if (!chname || !chname[0]) return;
   if (!(chan = findchan_by_dname(chname))) return;
-  
-  chan->status &= ~CHAN_INACTIVE;
-  chan->channel.jointime = 0;
+  if (chan->channel.jointime && channel_inactive(chan)) {
+    chan->status &= ~CHAN_INACTIVE;
+    chan->channel.jointime = 0;
 #ifdef LEAF
-  if (shouldjoin(chan) && !channel_active(chan))
-   dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+    if (shouldjoin(chan) && !channel_active(chan))
+     dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
 #endif /* LEAF */
+  }
 }
 
 static void *channel_malloc(int size, char *file, int line)
