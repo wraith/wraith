@@ -61,6 +61,12 @@ int hash_table_check_resize(hash_table_t *ht)
 {
 	if (!ht) return(-1);
 
+        /* This 100 allows (ht->max_rows) linked lists each with an average of 100 elements in the list
+         * before actually resizing.
+         * This is done to avoid a very slow and cpu intensive resize which requires recalculating all hashes.
+         * Having (ht->max_rows) linked lists is still more effecient than one large linked list.
+         */
+
 	if (ht->cells_in_use / ht->max_rows > 100) {
 		hash_table_resize(ht, ht->max_rows * 3);
 	}
@@ -107,6 +113,7 @@ int hash_table_insert(hash_table_t *ht, const void *key, void *data)
 
 	hash = ht->hash(key);
 	idx = hash % ht->max_rows;
+printf("idx: %d/%d\n", idx, ht->max_rows);
 	row = ht->rows+idx;
 
 	/* Allocate an entry. */

@@ -41,6 +41,7 @@ OBJS = auth.o \
 	misc_file.o \
 	net.o \
 	adns.o \
+	profile.o \
 	response.o \
 	rfc1459.o \
 	shell.o \
