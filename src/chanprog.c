@@ -23,7 +23,7 @@
 
 extern struct userrec	*userlist;
 extern Tcl_Interp	*interp;
-extern char		 ver[], botnetnick[], firewall[], myip[], origbotname[],
+extern char		 ver[], botnetnick[], firewall[], myip[], 
 			 motdfile[], userfile[], tempdir[],
 			 notify_new[], owner[], 
                          *netpass, botuser[], *owners, *hubs;
