@@ -281,12 +281,7 @@ init_conf()
 #ifdef CYGWIN_HACKS
   conf.binpath = strdup(homedir());
 #else /* !CYGWIN_HACKS */
-#  ifdef LEAF
-  conf.binpath = strdup(STR("~/"));
-#  endif /* LEAF */
-#  ifdef HUB
   conf.binpath = strdup(dirname(binname));
-#  endif /* HUB */
 #endif /* CYGWIN_HACKS */
 //#ifdef LEAF
 //  conf.binname = strdup(STR(".sshrc"));
