@@ -1545,6 +1545,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
       egg_snprintf(nick, sizeof nick, "%s", chan->added_by);
     else
       nick[0] = 0;
+    putlog(LOG_CMDS, "*", "#%s# chaninfo %s", dcc[idx].nick, chname);
     if (nick[0] && date[0])
       dprintf(idx, "Settings for channel %s (Added %s by %s%s%s):\n", chan->dname, date, colorI(idx, BOLD_OPEN, 0), nick, colorI(idx, BOLD_CLOSE, 0));
     else
@@ -1681,7 +1682,6 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 	    chan->flood_pub_time, chan->flood_ctcp_time,
 	    chan->flood_join_time, chan->flood_kick_time,
 	    chan->flood_deop_time, chan->flood_nick_time);
-    putlog(LOG_CMDS, "*", "#%s# chaninfo %s", dcc[idx].nick, chname);
   }
 }
 
