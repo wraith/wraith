@@ -92,11 +92,11 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
       egg_snprintf(s, sizeof s, "%s@*", who);	/* brain-dead? */
     else
       strncpyz(s, who, sizeof s);
-    if ((me = module_find("server", 0, 0)) && me->funcs)
-      egg_snprintf(s1, sizeof s1, "%s!%s", me->funcs[SERVER_BOTNAME],
-	            me->funcs[SERVER_BOTUSERHOST]);
-    else
+#ifdef LEAF
+      egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
+#else
       egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->host);
+#endif /* LEAF */
     if (wild_match(s, s1)) {
       dprintf(idx, "I'm not going to ban myself.\n");
       putlog(LOG_CMDS, "*", "#%s# attempted +ban %s", dcc[idx].nick, s);
@@ -125,6 +125,7 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
 	 */
 	if ((me = module_find("irc", 0, 0)))
 	  (me->funcs[IRC_CHECK_THIS_BAN])(chan, s, sticky);
+        
       } else {
 	u_addban(NULL, s, dcc[idx].nick, par, expire_time ? now + expire_time : 0, 0);
 	if (par[0] == '*') {
@@ -149,7 +150,6 @@ static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
   char *chname = NULL, *who = NULL, s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *p = NULL, *p_expire = NULL;
   unsigned long int expire_time = 0, expire_foo;
   struct chanset_t *chan = NULL;
-  module_entry *me = NULL;
 
   if (!use_exempts) {
     dprintf(idx, "This command can only be used with use-exempts enabled.\n");
@@ -229,11 +229,11 @@ static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
       egg_snprintf(s, sizeof s, "%s@*", who);		/* brain-dead? */
     else
       strncpyz(s, who, sizeof s);
-    if ((me = module_find("server",0,0)) && me->funcs)
-      egg_snprintf(s1, sizeof s1, "%s!%s", me->funcs[SERVER_BOTNAME],
-		     me->funcs[SERVER_BOTUSERHOST]);
-    else
+#ifdef LEAF
+      egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
+#else
       egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->host);
+#endif /* LEAF */
 
     /* IRC can't understand exempts longer than 70 characters */
     if (strlen(s) > 70) {
@@ -278,7 +278,6 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
   char *chname = NULL, *who = NULL, s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *p = NULL, *p_expire = NULL;
   unsigned long int expire_time = 0, expire_foo;
   struct chanset_t *chan = NULL;
-  module_entry *me = NULL;
 
   if (!use_invites) {
     dprintf(idx, "This command can only be used with use-invites enabled.\n");
@@ -359,11 +358,11 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
       egg_snprintf(s, sizeof s, "%s@*", who);		/* brain-dead? */
     else
       strncpyz(s, who, sizeof s);
-    if ((me = module_find("server",0,0)) && me->funcs)
-      egg_snprintf(s1, sizeof s1, "%s!%s", me->funcs[SERVER_BOTNAME],
-		     me->funcs[SERVER_BOTUSERHOST]);
-    else
+#ifdef LEAF
+      egg_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
+#else
       egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->host);
+#endif /* LEAF */
 
     /* IRC can't understand invites longer than 70 characters */
     if (strlen(s) > 70) {

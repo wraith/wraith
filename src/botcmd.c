@@ -509,8 +509,11 @@ static void bot_endlink(int idx, char *par)
  */
 static void bot_infoq(int idx, char *par)
 {
-  char s[200] = "", s2[32] = "", *realnick = NULL;
+#ifdef LEAF
+  char s[200] = "";
   struct chanset_t *chan = NULL;
+#endif /* LEAF */
+  char s2[32] = "", *realnick = NULL;
   time_t now2;
   int hr, min;
 
@@ -538,30 +541,26 @@ static void bot_infoq(int idx, char *par)
   now2 -= (hr * 3600);
   min = (time_t) ((int) now2 / 60);
   sprintf(&s2[strlen(s2)], "%02d:%02d", (int) hr, (int) min);
-  if (module_find("server", 0, 0)) {
-    s[0] = 0;
-    for (chan = chanset; chan; chan = chan->next) {
-      if (!channel_secret(chan)) {
-        if ((strlen(s) + strlen(chan->dname) + strlen(network)
-                   + strlen(conf.bot->nick) + strlen(ver) + 1) >= 200) {
-          strcat(s,"++  ");
-          break; /* Yegads..! */
-        }
-	strcat(s, chan->dname);
-	strcat(s, ", ");
+#ifdef LEAF
+  s[0] = 0;
+  for (chan = chanset; chan; chan = chan->next) {
+    if (!channel_secret(chan)) {
+      if ((strlen(s) + strlen(chan->dname) + strlen(network) + strlen(conf.bot->nick) + strlen(ver) + 1) >= 200) {
+        strcat(s,"++  ");
+        break; /* Yegads..! */
       }
+      strcat(s, chan->dname);
+      strcat(s, ", ");
     }
-    if (s[0]) {
-      s[strlen(s) - 2] = 0;
-      botnet_send_priv(idx, conf.bot->nick, par, NULL,
-		       "%s <%s> (%s) [UP %s]", ver, network, s, s2);
-    } else
-      botnet_send_priv(idx, conf.bot->nick, par, NULL,
-		    "%s <%s> (%s) [UP %s]", ver, network, BOT_NOCHANNELS,
-		       s2);
+  }
+  if (s[0]) {
+    s[strlen(s) - 2] = 0;
+    botnet_send_priv(idx, conf.bot->nick, par, NULL, "%s <%s> (%s) [UP %s]", ver, network, s, s2);
   } else
-    botnet_send_priv(idx, conf.bot->nick, par, NULL,
-		     "%s <NO_IRC> [UP %s]", ver, s2);
+    botnet_send_priv(idx, conf.bot->nick, par, NULL, "%s <%s> (%s) [UP %s]", ver, network, BOT_NOCHANNELS, s2);
+#else /* !HUB */
+  botnet_send_priv(idx, conf.bot->nick, par, NULL, "%s <NO_IRC> [UP %s]", ver, s2);
+#endif /* LEAF */
   botnet_send_infoq(idx, par);
 }
 

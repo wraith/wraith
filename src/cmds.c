@@ -220,7 +220,6 @@ static void tell_who(struct userrec *u, int idx, int chan)
 static void cmd_botinfo(struct userrec *u, int idx, char *par)
 {
   char s[512] = "", s2[32] = "";
-  struct chanset_t *chan = NULL;
   time_t now2;
   int hr, min;
 
@@ -244,29 +243,8 @@ static void cmd_botinfo(struct userrec *u, int idx, char *par)
   sprintf(&s2[strlen(s2)], "%02d:%02d", (int) hr, (int) min);
   simple_sprintf(s, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
   botnet_send_infoq(-1, s);
-  s[0] = 0;
-  if (module_find("server", 0, 0)) {
-    for (chan = chanset; chan; chan = chan->next) { 
-      if (!channel_secret(chan)) {
-	if ((strlen(s) + strlen(chan->dname) + strlen(network)
-                   + strlen(conf.bot->nick) + strlen(ver) + 1) >= 490) {
-          strcat(s,"++  ");
-          break; /* yeesh! */
-	}
-	strcat(s, chan->dname);
-	strcat(s, ", ");
-      }
-    }
 
-    if (s[0]) {
-      s[strlen(s) - 2] = 0;
-      dprintf(idx, "*** [%s] %s <%s> (%s) [UP %s]\n", conf.bot->nick,
-	      ver, network, s, s2);
-    } else
-      dprintf(idx, "*** [%s] %s <%s> (%s) [UP %s]\n", conf.bot->nick,
-	      ver, network, BOT_NOCHANNELS, s2);
-  } else
-    dprintf(idx, STR("*** [%s] %s <NO_IRC> [UP %s]\n"), conf.bot->nick, ver, s2);
+  dprintf(idx, STR("*** [%s] %s <NO_IRC> [UP %s]\n"), conf.bot->nick, ver, s2);
 }
 #endif /* HUB */
 
@@ -3415,19 +3393,13 @@ static void cmd_botserver(struct userrec * u, int idx, char * par) {
 
 void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
 #ifdef LEAF
-  char tmp[2048] = "", _cursrvname[500] = "";
-  int _server_online = 0;
-  module_entry *me = NULL;
+  char tmp[2048] = "";
 
-  if ((me = module_find("server", 0, 0))) {
-    Function *func = me->funcs;
-    _server_online = (*(int *)(func[25]));
-    sprintf(_cursrvname, "%s", ((char *)(func[41])));
-  }
-  if (_server_online)
-    sprintf(tmp, "Currently: %-40s Lag: %d", _cursrvname, server_lag);
+  if (server_online)
+    sprintf(tmp, "Currently: %-40s Lag: %d", cursrvname, server_lag);
   else
     sprintf(tmp, "Currently: none");
+
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 #endif /* LEAF */
 }
@@ -3487,19 +3459,12 @@ static void cmd_botnick(struct userrec * u, int idx, char * par) {
 void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
 #ifdef LEAF
   char tmp[1024] = "";
-  int _server_online = 0;
-  module_entry *me = NULL;
 
-  if ((me = module_find("server", 0, 0))) {
-    Function *func = me->funcs;
-    _server_online = (*(int *)(func[25]));
-  }
-
-  if (_server_online)
+  if (server_online)
     sprintf(tmp, STR("Currently: %-20s "), botname);
   if (strncmp(botname, origbotname, strlen(botname)))
     sprintf(tmp, STR("%sWant: %s"), tmp, origbotname);
-  if (!_server_online)
+  if (!server_online)
     sprintf(tmp, STR("%s(not online)"), tmp);
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 #endif /* LEAF */
@@ -3802,29 +3767,21 @@ static void cmd_botjump(struct userrec * u, int idx, char * par) {
 void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
 #ifdef LEAF
   char *other = NULL;
-  module_entry *me = NULL;
-  Function *func = NULL;
-  int port, _default_port = 0;
-
-  if (!(me = module_find("server", 0, 0)) )
-    return;
-  func = me->funcs;
-
-  _default_port = (*(int *)(func[24]));
+  int port;
 
   if (par[0]) {
     other = newsplit(&par);
     port = atoi(newsplit(&par));
     if (!port)
-      port = _default_port;
-    strncpyz(((char *)(func[20])), other, 120); //newserver
-    (*(int *)(func[21])) = port; //newserverport
-    strncpyz(((char *)(func[22])), par, 120); //newserverpass
+      port = default_port;
+    strncpyz(newserver, other, 120); //newserver
+    newserverport = port; //newserverport
+    strncpyz(newserverpass, par, 120); //newserverpass
   }
   botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, STR("Jumping..."));
 
-  (*(int *)(func[23])) = 0; //cycle_time
   nuke_server("Jumping...");
+  cycle_time = 0;
 #endif /* LEAF */
 }
 

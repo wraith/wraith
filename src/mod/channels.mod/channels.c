@@ -10,6 +10,9 @@
 #include "src/mod/module.h"
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/share.mod/share.h"
+#ifdef LEAF
+#include "src/mod/server.mod/server.h"
+#endif /* LEAF */
 #include "src/chanprog.h"
 #include "src/egg_timer.h"
 

@@ -23,7 +23,7 @@
 
 #ifndef MAKING_SERVER
 /* 4 - 7 */
-#define botuserhost ((char *)(server_funcs[5]))
+/* UNUSED 5 */
 #define quiet_reject (*(int *)(server_funcs[6]))
 /* UNUSED 7 */
 #define servi (*(int *)(server_funcs[7]))
@@ -42,13 +42,13 @@
 #define detect_avalanche ((int(*)(char *))server_funcs[18])
 /* 19 UNUSED */
 /* 20 - 22 */
-#define newserver ((char *)(server_funcs[20]))
-#define newserverport (*(int *)(server_funcs[21]))
-#define newserverpass ((char *)(server_funcs[22]))
+/* UNUSED 20 */
+/* UNUSED 21 */
+/* UNUSED 22 */
 /* 23 - 26 */
-#define cycle_time (*(int *)(server_funcs[23]))
-#define default_port (*(int *)(server_funcs[24]))
-#define server_online (*(int *)(server_funcs[25]))
+/* UNUSED 23 */
+/* UNUSED 24 */
+/* UNUSED 25 */
 /* 26 -- UNUSED */
 /* 27 - 30 */
 /* UNUSED -- 28 */
@@ -58,14 +58,11 @@
 /* UNUSED -- 33 */
 /* UNUSED -- 34 */
 /* 35 - 38 */
-#define ctcp_reply ((char *)(server_funcs[35]))
+/* UNUSED 35 */
 /* 36 UNUSED */
 #define nick_len (*(int *)(server_funcs[37]))
 /* 38 UNUSED */
 #define checked_hostmask (*(int *)(server_funcs[39]))
-#define curserv (*(int *)(server_funcs[40))
-#define cursrvname ((char *)(server_funcs[41]))
-#define botrealname ((char *)(server_funcs[42]))
 
 #else		/* MAKING_SERVER */
 
@@ -107,6 +104,9 @@ enum {
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
 void nuke_server(char *);
-extern int serv, servidx;
+extern int 		serv, servidx, cycle_time, default_port, newserverport;
+extern time_t		server_online;
+extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
+			newserver[], newserverpass[];
 
 #endif /*leaf*/

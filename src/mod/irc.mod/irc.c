@@ -1572,10 +1572,9 @@ char *irc_start(Function * global_funcs)
   global = global_funcs;
 
   module_register(MODULE_NAME, irc_table, 1, 3);
-  if (!(server_funcs = module_depend(MODULE_NAME, "server", 1, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires server module 1.0 or later.";
-  }
+
+  server_funcs = module_depend(MODULE_NAME, "server", 1, 0);
+
   if (!(channels_funcs = module_depend(MODULE_NAME, "channels", 1, 0))) {
     module_undepend(MODULE_NAME);
     return "This module requires channels module 1.0 or later.";

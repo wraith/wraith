@@ -22,9 +22,9 @@ static int ctcp_mode;
 int serv;		/* sock # of server currently */
 int servidx;		/* idx of server */
 static int strict_host;		/* strict masking of hosts ? */
-static char newserver[121] = "";	/* new server? */
-static int newserverport;	/* new server port? */
-static char newserverpass[121] = "";	/* new server password? */
+char newserver[121] = "";	/* new server? */
+int newserverport;		/* new server port? */
+char newserverpass[121] = "";	/* new server password? */
 static time_t trying_server;	/* trying to connect to a server right now? */
 static int curserv;		/* current position in server list: */
 static int flud_thr;		/* msg flood threshold */
@@ -45,7 +45,7 @@ static int quiet_reject;	/* Quietly reject dcc chat or sends from
 				   users without access? */
 static int waiting_for_awake;	/* set when i unidle myself, cleared when
 				   i get the response */
-static time_t server_online;	/* server connection time */
+time_t server_online;	/* server connection time */
 static time_t server_cycle_wait;	/* seconds to wait before
 					   re-beginning the server list */
 char botrealname[121] = "";	/* realname of bot */
@@ -54,8 +54,8 @@ static int never_give_up;	/* never give up when connecting to servers? */
 static int strict_servernames;	/* don't update server list */
 static struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
-static int cycle_time;		/* cycle time till next server connect */
-static int default_port;	/* default IRC port */
+int cycle_time;			/* cycle time till next server connect */
+int default_port;		/* default IRC port */
 static char oldnick[NICKLEN] = "";	/* previous nickname *before* rehash */
 static int trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 static int answer_ctcp;		/* answer how many stacked ctcp's ? */
@@ -1483,7 +1483,7 @@ static Function server_table[] =
   (Function) server_report,
   /* 4 - 7 */
   (Function) NULL,		/* char * (points to botname later on)	*/
-  (Function) botuserhost,	/* char *				*/
+  (Function) 0,
   (Function) & quiet_reject,	/* int					*/
   (Function) 0,
   /* 8 - 11 */
@@ -1502,13 +1502,13 @@ static Function server_table[] =
   (Function) detect_avalanche,
   (Function) 0,
   /* 20 - 23 */
-  (Function) newserver,		/* char *				*/
-  (Function) & newserverport,	/* int					*/
-  (Function) newserverpass,	/* char *				*/
-  (Function) & cycle_time,	/* int					*/
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
+  (Function) 0,
   /* 24 - 27 */
-  (Function) & default_port,	/* int					*/
-  (Function) & server_online,	/* int					*/
+  (Function) 0,
+  (Function) 0,	
   (Function) 0,	
   (Function) 0,
   /* 28 - 31 */
@@ -1520,16 +1520,12 @@ static Function server_table[] =
   (Function) 0,
   (Function) 0,	
   (Function) 0,
-  (Function) ctcp_reply,
+  (Function) 0,
   /* 36 - 38 */
   (Function) 0,	
   (Function) & nick_len,	/* int					*/
   (Function) 0,
   (Function) & checked_hostmask,
-  (Function) & curserv,
-  (Function) cursrvname,
-  (Function) botrealname,
-
 };
 
 char *server_start(Function *global_funcs)

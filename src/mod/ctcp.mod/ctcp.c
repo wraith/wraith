@@ -22,6 +22,7 @@
 #include "src/egg_timer.h"
 
 #ifdef LEAF
+#include "src/mod/server.mod/server.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/utsname.h>
@@ -392,24 +393,27 @@ static void ctcp_minutely()
   int i;
 
 #ifdef S_AUTOAWAY
-  if ((cloak_awaytime == 0) && (cloak_heretime == 0)) {
-    cloak_heretime = now;
-    dprintf(DP_HELP, STR("AWAY :\n"));
-    return;
-  }
-  if (cloak_awaytime == 0) {
-    if (!randint(AVGHERETIME)) {
-      cloak_heretime = 0;
-      cloak_awaytime = now - 600 - randint(60);
-      sendaway();
-    }
-  } else {
-    if (!randint(AVGAWAYTIME)) {
-      cloak_awaytime = 0;
+  if (server_online) {
+    if ((cloak_awaytime == 0) && (cloak_heretime == 0)) {
       cloak_heretime = now;
       dprintf(DP_HELP, STR("AWAY :\n"));
-    } else
-      sendaway();
+      return;
+    }
+
+    if (cloak_awaytime == 0) {
+      if (!randint(AVGHERETIME)) {
+        cloak_heretime = 0;
+        cloak_awaytime = now - 600 - randint(60);
+        sendaway();
+      }
+    } else {
+      if (!randint(AVGAWAYTIME)) {
+        cloak_awaytime = 0;
+        cloak_heretime = now;
+        dprintf(DP_HELP, STR("AWAY :\n"));
+      } else
+        sendaway();
+    }
   }
 #endif /* S_AUTOAWAY */
 
@@ -447,7 +451,7 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
 #endif
   if ((p = strchr(pwd->pw_gecos, GECOS_DELIMITER)) != NULL)
     *p = 0;
-  dprintf(DP_HELP, STR("NOTICE %s :\001%s %s (%s@%s) Idle %ld second%s\001\n"), nick, keyword, pwd->pw_gecos, pwd->pw_name, (char *) (strchr(botuserhost, '@') + 1), idletime, (idletime == 1) ? "" : "s");
+  dprintf(DP_HELP, STR("NOTICE %s :\001%s %s (%s@%s) Idle %ld second%s\001\n"), nick, keyword, pwd->pw_gecos, conf.username, (char *) (strchr(botuserhost, '@') + 1), idletime, (idletime == 1) ? "" : "s");
   return BIND_RET_BREAK;
 }
 
