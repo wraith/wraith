@@ -29,10 +29,10 @@ See also: -chrec, chattr%{+n}, +chan, -chan%{-}
  
 See also: exempts, -exempt, stick, unstick
 ::+host
-###  %b+host%b [handle] <hostmask>
+###  %b+host%b [handle] <hostmask> [anotherhost] ...
    Adds a hostmask to a user's user record. Hostmasks are used to identify your
    handle on IRC. If a handle is not specified, the hostmask will be added to
-   YOUR user record.
+   YOUR user record. List as many hosts as wanted.
  
 See also: -host
 ::+ignore

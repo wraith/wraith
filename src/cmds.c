@@ -3192,7 +3192,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
     while (par[0]) {
       host = newsplit(&par);
       set_user(&USERENTRY_HOSTS, u2, host);
-      dprintf(idx, STR("Added host %s to %s.\n"), host, handle);
+      dprintf(idx, STR("Added host '%s' to %s.\n"), host, handle);
     }
     make_rand_str(s, 15);
     set_user(&USERENTRY_PASS, u2, s);
@@ -3280,7 +3280,7 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", STR("#%s# +host %s"), dcc[idx].nick, par);
 
   if (!par[0]) {
-    dprintf(idx, STR("Usage: +host [handle] <newhostmask>\n"));
+    dprintf(idx, STR("Usage: +host [handle] <newhostmask> [anotherhost] ...\n"));
     return;
   }
 
@@ -3340,6 +3340,11 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
   addhost_by_handle(handle, host);
   update_mod(handle, dcc[idx].nick, "+host", host);
   dprintf(idx, STR("Added '%s' to %s.\n"), host, handle);
+  while (par[0]) {
+    host = newsplit(&par);
+    addhost_by_handle(handle, host);
+    dprintf(idx, STR("Added host '%s' to %s.\n"), host, handle);
+  }
 #ifdef LEAF
   check_this_user(handle, 0, NULL);
 #endif /* LEAF */
