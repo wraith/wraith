@@ -101,7 +101,7 @@ bool def_set(struct userrec *u, struct user_entry *e, void *buf)
 
     e->u.string = (char *) my_realloc (e->u.string, l + 1);
 
-    strncpyz (e->u.string, string, l + 1);
+    strlcpy (e->u.string, string, l + 1);
 
     for (i = e->u.string; *i; i++)
       /* Allow bold, inverse, underline, color text here...
@@ -176,7 +176,7 @@ static void added_display(int idx, struct user_entry *e, struct userrec *u)
     char tmp[30] = "", tmp2[70] = "", *hnd = NULL;
     time_t tm;
 
-    strncpyz(tmp, e->u.string, sizeof(tmp));
+    strlcpy(tmp, e->u.string, sizeof(tmp));
     hnd = strchr(tmp, ' ');
     if (hnd)
       *hnd++ = 0;
@@ -442,7 +442,7 @@ void stats_add(struct userrec *u, int login, int op)
   int sl, so;
 
   if (s) {
-    strncpyz(s2, s, sizeof(s2));
+    strlcpy(s2, s, sizeof(s2));
   } else
     strcpy(s2, "0 0");
   s = strchr(s2, ' ');
@@ -499,7 +499,7 @@ static void modified_display(int idx, struct user_entry *e, struct userrec *u)
     char tmp[1024] = "", tmp2[1024] = "", *hnd = NULL;
     time_t tm;
 
-    strncpyz(tmp, e->u.string, sizeof(tmp));
+    strlcpy(tmp, e->u.string, sizeof(tmp));
     hnd = strchr(tmp, ' ');
     if (hnd)
       *hnd++ = 0;
@@ -593,9 +593,9 @@ static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
       p++;
     }
     if (u->bot || (pass[0] == '+'))
-      strcpy(newpass, pass);
+      e->u.extra = strdup(pass);
     else
-      e->u.extra = encrypt_string(get_user(&USERENTRY_ADDED, u), pass);
+      e->u.extra = encrypt_string((char *) get_user(&USERENTRY_ADDED, u), pass);
   }
   if (!noshare)
     shareout("c TMPPASS %s %s\n", u->handle, pass ? pass : "");
