@@ -462,6 +462,21 @@ struct cfg_entry CFG_REALNAME = {
 };
 
 #ifdef HUB
+static void dccauth_describe(struct cfg_entry *cfgent, int idx)
+{
+  dprintf(idx, STR("dccauth is boolean (0 or 1). Set to use auth checking on dcc/telnet login.\n"));
+}
+#endif /* HUB */
+
+struct cfg_entry CFG_DCCAUTH = {
+	"dccauth", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
+	NULL, NULL
+#ifdef HUB
+	, dccauth_describe
+#endif /* HUB */
+};
+
+#ifdef HUB
 static void getin_describe(struct cfg_entry *cfgent, int idx)
 {
   if (!strcmp(cfgent->name, "op-bots"))
@@ -762,6 +777,7 @@ void init_config()
   add_cfg(&CFG_FIGHTTHRESHOLD);
   add_cfg(&CFG_CLOSETHRESHOLD);
   add_cfg(&CFG_KILLTHRESHOLD);
+  add_cfg(&CFG_DCCAUTH);
 }
 
 int check_cmd_pass(const char *cmd, char *pass)

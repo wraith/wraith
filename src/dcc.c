@@ -621,18 +621,22 @@ struct dcc_table DCC_IDENTD_CONNECT = {
 static void
 dcc_chat_secpass(int idx, char *buf, int atr)
 {
-#ifdef S_DCCAUTH
-  char check[MD5_HASH_LENGTH + 7] = "";
+  int badauth = 0;
 
-  if (!atr)
-    return;
-  strip_telnet(dcc[idx].sock, buf, &atr);
-  atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-  egg_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
+  if (dccauth) {
+    char check[MD5_HASH_LENGTH + 7] = "";
 
-  /* +secpass */
-  if (!strcmp(check, buf)) {
-#endif /* S_DCCAUTH */
+    if (!atr)
+      return;
+    strip_telnet(dcc[idx].sock, buf, &atr);
+    atr = dcc[idx].user ? dcc[idx].user->flags : 0;
+    egg_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
+    badauth = strcmp(check, buf);
+    /* +secpass */
+  }
+
+  /* Correct pass or secpass! */
+  if (!dccauth || (dccauth && !badauth)) {
     putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {
       free(dcc[idx].u.chat->away);
@@ -660,8 +664,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       dprintf(idx, "********************************************************************\n");
     }
     dcc_chatter(idx);
-#ifdef S_DCCAUTH
-  } else {                      /* bad auth */
+  } else if (dccauth && badauth) { 		/* bad auth */
     dprintf(idx, "%s\n", response(RES_BADUSERPASS));
     putlog(LOG_MISC, "*", DCC_BADAUTH, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {        /* su from a dumb user */
@@ -683,7 +686,6 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       lostdcc(idx);
     }
   }
-#endif /* S_DCCAUTH */
 }
 struct dcc_table DCC_CHAT_SECPASS;
 
@@ -714,17 +716,17 @@ dcc_chat_pass(int idx, char *buf, int atr)
     return;
   }
   if (u_pass_match(dcc[idx].user, buf)) {
-#ifdef S_DCCAUTH
-    char rand[51] = "";
+    if (dccauth) { 
+      char randstr[51] = "";
 
-    make_rand_str(rand, 50);
-    strncpyz(dcc[idx].hash, makehash(dcc[idx].user, rand), sizeof dcc[idx].hash);
-    dcc[idx].type = &DCC_CHAT_SECPASS;
-    dcc[idx].timeval = now;
-    dprintf(idx, "-Auth %s %s\n", rand, conf.bot->nick);
-#else /* !S_DCCAUTH */
-    dcc_chat_secpass(idx, buf, atr);
-#endif /* S_DCCAUTH */
+      make_rand_str(randstr, 50);
+      strncpyz(dcc[idx].hash, makehash(dcc[idx].user, randstr), sizeof dcc[idx].hash);
+      dcc[idx].type = &DCC_CHAT_SECPASS;
+      dcc[idx].timeval = now;
+      dprintf(idx, "-Auth %s %s\n", randstr, conf.bot->nick);
+    } else {
+      dcc_chat_secpass(idx, buf, atr);
+    }
   } else {
     dprintf(idx, "%s\n", response(RES_BADUSERPASS));
     putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);

@@ -336,5 +336,4 @@
 #undef volatile
 
 /* Defines for pack features */
-#undef S_DCCAUTH
 #undef S_MESSUPTERM
