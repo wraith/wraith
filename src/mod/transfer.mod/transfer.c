@@ -16,7 +16,6 @@
 #include "src/userent.h"
 #include "src/tandem.h"
 #include "src/net.h"
-#include "src/tclhash.h"
 #include "src/users.h"
 
 #define MAKING_TRANSFER
@@ -32,8 +31,6 @@
 
 extern int		bupdating;
 
-static bind_table_t *BT_rcvd = NULL, *BT_sent = NULL, *BT_lost = NULL, *BT_tout = NULL;
-
 static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
 static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
 static int dcc_limit = 4;	/* Maximum number of simultaneous file
@@ -45,8 +42,6 @@ static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
 /*
  * Prototypes
  */
-static void stats_add_dnload(struct userrec *, unsigned long);
-static void stats_add_upload(struct userrec *, unsigned long);
 static void wipe_tmp_filename(char *, int);
 static int at_limit(char *);
 static void dcc_get_pending(int, char *, int);
@@ -104,28 +99,6 @@ static char *replace_spaces(char *fn)
   return ret;
 }
 
-
-
-static void check_sentrcvd(struct userrec *u, char *nick, char *path,
-			       bind_table_t *table)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  char *hand = u ? u->handle : "*";	/* u might be NULL. */
-
-  get_user_flagrec(u, &fr, NULL);
-  check_bind(table, hand, &fr, u, nick, path);
-}
-
-static void check_toutlost(struct userrec *u, char *nick, char *path,
-			       unsigned long acked, unsigned long length,
-				bind_table_t *table)
-{
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
-  char *hand = u ? u->handle : "*";	/* u might be NULL. */
-
-  get_user_flagrec(u, &fr, NULL);
-  check_bind(table, hand, &fr, u, nick, path, acked, length);
-}
 
 static void deq_this(fileq_t *this)
 {
@@ -395,11 +368,7 @@ static void eof_dcc_send(int idx)
     sprintf(nfn, "%s%s", dcc[idx].u.xfer->dir, dcc[idx].u.xfer->origname);
     if (movefile(ofn, nfn))
       putlog(LOG_MISC | LOG_FILES, "*", TRANSFER_FAILED_MOVE, nfn, ofn);
-    else {
-      /* old filesys crap was here */
-      stats_add_upload(u, dcc[idx].u.xfer->length);
-      check_sentrcvd(u, dcc[idx].nick, nfn, BT_rcvd);
-    }
+
     free(ofn);
     free(nfn);
     for (j = 0; j < dcc_total; j++)
@@ -653,14 +622,10 @@ void dcc_get(int idx, char *buf, int len)
       bupdating = 0;
 #endif
     } else {
-      struct userrec *u = get_user_by_handle(userlist, dcc[idx].u.xfer->from);
-      check_sentrcvd(u, dcc[idx].nick, dcc[idx].u.xfer->dir, BT_sent);
       /* Download is credited to the user who requested it
        * (not the user who actually received it)
        */
-      stats_add_dnload(u, dcc[idx].u.xfer->length);
-      putlog(LOG_FILES, "*",TRANSFER_FINISHED_DCCSEND,
-	     dcc[idx].u.xfer->origname, dcc[idx].nick);
+      putlog(LOG_FILES, "*",TRANSFER_FINISHED_DCCSEND, dcc[idx].u.xfer->origname, dcc[idx].nick);
       wipe_tmp_filename(dcc[idx].u.xfer->filename, idx);
       strcpy((char *) xnick, dcc[idx].nick);
     }
@@ -739,16 +704,8 @@ void eof_dcc_get(int idx)
     lostdcc(idx);
     return;
   } else {
-    struct userrec *u = NULL;
-
     /* Call `lost' DCC trigger now.
      */
-    egg_snprintf(s, sizeof s, "%s!%s", dcc[idx].nick, dcc[idx].host);
-    u = get_user_by_host(s);
-    check_toutlost(u, dcc[idx].nick, dcc[idx].u.xfer->dir,
-		       dcc[idx].u.xfer->acked, dcc[idx].u.xfer->length,
-		       BT_lost);
-
     putlog(LOG_FILES, "*",TRANSFER_LOST_DCCGET,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     wipe_tmp_filename(dcc[idx].u.xfer->filename, idx);
@@ -851,7 +808,6 @@ static void transfer_get_timeout(int i)
     xx[0] = 0;
   } else {
     char *p = NULL;
-    struct userrec *u = NULL;
 
     p = strrchr(dcc[i].u.xfer->origname, '/');
     dprintf(DP_HELP, TRANSFER_NOTICE_TIMEOUT,
@@ -859,11 +815,6 @@ static void transfer_get_timeout(int i)
 
     /* Call DCC `timeout' trigger now.
      */
-    egg_snprintf(xx, sizeof xx, "%s!%s", dcc[i].nick, dcc[i].host);
-    u = get_user_by_host(xx);
-    check_toutlost(u, dcc[i].nick, dcc[i].u.xfer->dir,
-		       dcc[i].u.xfer->acked, dcc[i].u.xfer->length, BT_tout);
-
     putlog(LOG_FILES, "*",TRANSFER_DCC_GET_TIMEOUT,
 	   p ? p + 1 : dcc[i].u.xfer->origname, dcc[i].nick, dcc[i].status,
 	   dcc[i].u.xfer->length);
@@ -1207,220 +1158,6 @@ int raw_dcc_send(char *filename, char *nick, char *from, char *dir)
   return raw_dcc_resend_send(filename, nick, from, dir, 0);
 }
 
-/*
- *    fstat functions
- */
-
-static int fstat_unpack(struct userrec *u, struct user_entry *e)
-{
-  char *par = NULL, *arg = NULL;
-  struct filesys_stats *fs = NULL;
-
-  fs = calloc(1, sizeof(struct filesys_stats));
-  par = e->u.list->extra;
-  arg = newsplit(&par);
-  if (arg[0])
-    fs->uploads = atoi(arg);
-  arg = newsplit(&par);
-  if (arg[0])
-    fs->upload_ks = atoi(arg);
-  arg = newsplit(&par);
-  if (arg[0])
-    fs->dnloads = atoi(arg);
-  arg = newsplit(&par);
-  if (arg[0])
-    fs->dnload_ks = atoi(arg);
-
-  list_type_kill(e->u.list);
-  e->u.extra = fs;
-  return 1;
-}
-
-static int fstat_pack(struct userrec *u, struct user_entry *e)
-{
-  register struct filesys_stats *fs = NULL;
-  struct list_type *l = calloc(1, sizeof(struct list_type));
-
-  fs = e->u.extra;
-  l->extra = calloc(1, 41);
-  egg_snprintf(l->extra, 41, "%09u %09u %09u %09u", fs->uploads, fs->upload_ks, fs->dnloads, fs->dnload_ks);
-  l->next = NULL;
-  e->u.list = l;
-  free(fs);
-  return 1;
-}
-
-static int fstat_write_userfile(FILE *f, struct userrec *u,
-				struct user_entry *e)
-{
-  register struct filesys_stats *fs = NULL;
-
-  fs = e->u.extra;
-  if (lfprintf(f, "--FSTAT %09u %09u %09u %09u\n",
-	      fs->uploads, fs->upload_ks,
-	      fs->dnloads, fs->dnload_ks) == EOF)
-    return 0;
-  return 1;
-}
-
-static int fstat_set(struct userrec *u, struct user_entry *e, void *buf)
-{
-  register struct filesys_stats *fs = buf;
-
-  if (e->u.extra != fs) {
-    if (e->u.extra)
-      free(e->u.extra);
-    e->u.extra = fs;
-  } else if (!fs) /* e->u.extra == NULL && fs == NULL */
-    return 1;
-
-  if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED))) {
-    if (fs)
-      /* Don't check here for something like
-       *  ofs->uploads != fs->uploads || ofs->upload_ks != fs->upload_ks ||
-       *  ofs->dnloads != fs->dnloads || ofs->dnload_ks != fs->dnload_ks
-       * someone could do:
-       *  e->u.extra->uploads = 12345;
-       *  fs = calloc(1, sizeof(struct filesys_stats));
-       *  memcpy (...e->u.extra...fs...);
-       *  set_user(&USERENTRY_FSTAT, u, fs);
-       * then we wouldn't detect here that something's changed...
-       * --rtc
-       */
-      shareout (NULL, "ch fstat %09u %09u %09u %09u\n",
-	        fs->uploads, fs->upload_ks, fs->dnloads, fs->dnload_ks);
-    else
-      shareout (NULL, "ch fstat r\n");
-  }
-  return 1;
-}
-
-static int fstat_kill(struct user_entry *e)
-{
-  if (e->u.extra)
-    free(e->u.extra);
-  free(e);
-  return 1;
-}
-
-static void fstat_display(int idx, struct user_entry *e, struct userrec *u)
-{
-  struct filesys_stats *fs = NULL;
-
-  fs = e->u.extra;
-  dprintf(idx, "  FILES: %u download%s (%luk), %u upload%s (%luk)\n",
-	  fs->dnloads, (fs->dnloads == 1) ? "" : "s", fs->dnload_ks,
-	  fs->uploads, (fs->uploads == 1) ? "" : "s", fs->upload_ks);
-}
-
-static int fstat_gotshare(struct userrec *u, struct user_entry *e,
-			  char *par, int idx);
-static int fstat_dupuser(struct userrec *u, struct userrec *o,
-			 struct user_entry *e);
-static void stats_add_dnload(struct userrec *u, unsigned long bytes);
-static void stats_add_upload(struct userrec *u, unsigned long bytes);
-
-static struct user_entry_type USERENTRY_FSTAT =
-{
-  NULL,
-  fstat_gotshare,
-  fstat_dupuser,
-  fstat_unpack,
-  fstat_pack,
-  fstat_write_userfile,
-  fstat_kill,
-  NULL,
-  fstat_set,
-  fstat_display,
-  "FSTAT"
-};
-
-static int fstat_gotshare(struct userrec *u, struct user_entry *e,
-			  char *par, int idx)
-{
-  char *p = NULL;
-  struct filesys_stats *fs = NULL;
-
-  noshare = 1;
-  switch (par[0]) {
-  case 'u':
-  case 'd':
-    /* No stats_add_up/dnload here, it's already been sent... --rtc */
-    break;
-  case 'r':
-    set_user (&USERENTRY_FSTAT, u, NULL);
-    break;
-  default:
-    if (!(fs = e->u.extra)) {
-      fs = calloc(1, sizeof(struct filesys_stats));
-    }
-    p = newsplit (&par);
-    if (p[0])
-      fs->uploads = atoi (p);
-    p = newsplit (&par);
-    if (p[0])
-      fs->upload_ks = atoi (p);
-    p = newsplit (&par);
-    if (p[0])
-      fs->dnloads = atoi (p);
-    p = newsplit (&par);
-    if (p[0])
-      fs->dnload_ks = atoi (p);
-    set_user(&USERENTRY_FSTAT, u, fs);
-    break;
-  }
-  noshare = 0;
-  return 1;
-}
-
-static int fstat_dupuser(struct userrec *u, struct userrec *o,
-			 struct user_entry *e)
-{
-  struct filesys_stats *fs = NULL;
-
-  if (e->u.extra) {
-    fs = calloc(1, sizeof(struct filesys_stats));
-    egg_memcpy(fs, e->u.extra, sizeof(struct filesys_stats));
-
-    return set_user(&USERENTRY_FSTAT, u, fs);
-  }
-  return 0;
-}
-
-static void stats_add_dnload(struct userrec *u, unsigned long bytes)
-{
-  struct user_entry *ue = NULL;
-  register struct filesys_stats *fs = NULL;
-
-  if (u) {
-    if (!(ue = find_user_entry (&USERENTRY_FSTAT, u)) ||
-        !(fs = ue->u.extra)) {
-      fs = calloc(1, sizeof(struct filesys_stats));
-    }
-    fs->dnloads++;
-    fs->dnload_ks += ((bytes + 512) / 1024);
-    set_user(&USERENTRY_FSTAT, u, fs);
-    /* No shareout here, set_user already sends info... --rtc */
-  }
-}
-
-static void stats_add_upload(struct userrec *u, unsigned long bytes)
-{
-  struct user_entry *ue = NULL;
-  register struct filesys_stats *fs = NULL;
-
-  if (u) {
-    if (!(ue = find_user_entry (&USERENTRY_FSTAT, u)) ||
-        !(fs = ue->u.extra)) {
-      fs = calloc(1, sizeof(struct filesys_stats));
-    }
-    fs->uploads++;
-    fs->upload_ks += ((bytes + 512) / 1024);
-    set_user(&USERENTRY_FSTAT, u, fs);
-    /* No shareout here, set_user already sends info... --rtc */
-  }
-}
-
 
 /*
  *    CTCP functions
@@ -1494,11 +1231,4 @@ void transfer_init()
   fileq = NULL;
 
   server_transfer_setup(NULL);
-  BT_rcvd = bind_table_add("rcvd", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
-  BT_sent = bind_table_add("sent", 3, "Uss", MATCH_MASK, BIND_STACKABLE);
-  BT_lost = bind_table_add("lost", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
-  BT_tout = bind_table_add("tout", 5, "Ussii", MATCH_MASK, BIND_STACKABLE);
-
-  USERENTRY_FSTAT.get = def_get;
-  add_entry_type(&USERENTRY_FSTAT);
 }
