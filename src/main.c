@@ -1,5 +1,5 @@
 /*
- * main.c -- handles:
+ * main.c -- handles: 
  *   core event handling
  *   command line arguments
  *   context and assert debugging
