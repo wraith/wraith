@@ -62,6 +62,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Users can no longer whois PERM OWNERS unless they are themselves one.
 * Fixed cmd_boot to allow users to boot users they can whois. (Users with lower flags)
 * Fixed a file descriptor leak in the 'last' checking.
+* Fixed bot's being tagged with op/login stats. (#22)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

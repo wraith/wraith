@@ -404,7 +404,7 @@ struct user_entry_type USERENTRY_OS = {
 
 void stats_add(struct userrec *u, int login, int op)
 {
-  if (!u)
+  if (!u || u->bot)
     return;
 
   char *s = (char *) get_user(&USERENTRY_STATS, u), s2[50] = "";
@@ -432,7 +432,7 @@ void stats_add(struct userrec *u, int login, int op)
 static void stats_display(int idx, struct user_entry *e, struct userrec *u)
 {
   /* format: logincount opcount */
-  if (dcc[idx].user && (dcc[idx].user->flags & USER_OWNER)) {
+  if (!u->bot && dcc[idx].user && (dcc[idx].user->flags & USER_OWNER)) {
     char *p = strchr(e->u.string, ' ');
 
     if (p)
