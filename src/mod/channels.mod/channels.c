@@ -254,13 +254,18 @@ void rebalance_roles()
   int r[5] = { 0, 0, 0, 0, 0 }, hNdx, lNdx, i;
   struct userrec *u;
   char tmp[10];
+  int i;
 
-  for (u = userlist; u; u = u->next) {
-    if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) {
-      ba = get_user(&USERENTRY_BOTADDR, u);
+/*  for (u = userlist; u; u = u->next) {
+    if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) { */
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].user->flags & USER_BOT) {
+      ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
       if (ba && (ba->roleid > 0) && (ba->roleid < 5))
         r[(ba->roleid - 1)]++;
     }
+
+
   }
   /*
      Find high & low
@@ -277,13 +282,15 @@ void rebalance_roles()
       hNdx = i;
   }
   while (r[hNdx] - r[lNdx] >= 2) {
-    for (u = userlist; u; u = u->next) {
-      if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) {
-        ba = get_user(&USERENTRY_BOTADDR, u);
+    for (i = 0; i < dcc_total; i++) {
+/*    for (u = userlist; u; u = u->next) {
+      if ((u->flags & USER_BOT) && (nextbot(u->handle) >= 0)) { */
+      if (dcc[i].user->flags & USER_BOT) {
+        ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
         if (ba && (ba->roleid == (hNdx + 1))) {
           ba->roleid = lNdx + 1;
           sprintf(tmp, STR("rl %d %li"), lNdx + 1, (timesync + now));
-          botnet_send_zapf(nextbot(u->handle), botnetnick, u->handle, tmp);
+          putbot(dcc[i].nick, tmp);
         }
       }
     }
