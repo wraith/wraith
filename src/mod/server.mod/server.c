@@ -1251,8 +1251,6 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
       dprintf(DP_HELP, "NOTICE %s :%s (invalid port)\n", nick, DCC_CONNECTFAILED1);
     putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED3, nick, from);
   } else {
-    if (!sanitycheck_dcc(nick, from, ip, prt))
-      return BIND_RET_BREAK;
     i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
     if (i < 0) {
       putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick, ip);
@@ -1298,15 +1296,9 @@ static void dcc_chat_hostresolved(int i)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
 
   egg_snprintf(buf, sizeof buf, "%d", dcc[i].port);
-#ifndef USE_IPV6
-  if (!hostsanitycheck_dcc(dcc[i].nick, dcc[i].host, dcc[i].addr, dcc[i].u.dns->host, buf)) {
-    lostdcc(i);
-    return;
-  }
-#else
+#ifdef USE_IPV6
   if (sockprotocol(dcc[i].sock) == AF_INET6) {
-    strcpy(ip,dcc[i].addr6); /* safe, addr6 is 121 */
-    debug0("afinet6, af_type, strcpy");
+    strcpy(ip, dcc[i].addr6); /* safe, addr6 is 121 */
   } else
 #endif /* !USE_IPV6 */
   egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));

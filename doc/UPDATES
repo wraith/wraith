@@ -3,7 +3,7 @@ This is a summary of ChangeLog basically.
 1.1.6
 
 1.Fixed a cosmetic error in cmd_downbots.
-2.Cleaned up and removed more un-needed code.
+2.Cleaned up and removed a ton of un-needed and old code.
 3.Fixed a bug in defalg_user()
 4.Several user cmds on BOTS were not being shared.
 5.Fixed a fatal bug in +take.

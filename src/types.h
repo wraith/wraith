@@ -5,6 +5,9 @@
 #  include "config.h"
 #endif
 
+#include <sys/types.h>
+#include <netinet/in.h>
+
 /* For local console: */
 #define STDIN      0
 #define STDOUT     1
@@ -32,10 +35,10 @@ typedef unsigned short int      u_16bit_t;
 typedef unsigned char           u_8bit_t;
 
 /* IP type */
-typedef unsigned long		IP;
-typedef u_32bit_t 		dword;
+typedef in_addr_t		IP;
+typedef u_int32_t 		dword;
 
 /* port */
-typedef unsigned short		port_t;
+typedef in_port_t		port_t;
 
 #endif /* !_TYPES_H */

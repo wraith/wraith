@@ -162,8 +162,6 @@ void tputs(int, char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);
-int sanitycheck_dcc(char *, char *, char *, char *);
-int hostsanitycheck_dcc(char *, char *, IP, char *, char *);
 char *iptostr(IP);
 int sock_has_data(int, int);
 int sockoptions(int sock, int operation, int sock_options);

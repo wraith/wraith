@@ -54,9 +54,6 @@ sock_list *socklist = NULL;	/* Enough to be safe			    */
 int	MAXSOCKS = 0;
 jmp_buf	alarmret;		/* Env buffer for alarm() returns	    */
 
-static int	dcc_sanitycheck = 0;	/* We should do some sanity checking on dcc connections. */
-
-
 /* Types of proxy */
 #define PROXY_SOCKS   1
 #define PROXY_SUN     2
@@ -1747,79 +1744,6 @@ void tell_netdebug(int idx)
     }
   }
   dprintf(idx, " done.\n");
-}
-
-/* Security-flavoured sanity checking on DCC connections of all sorts can be
- * done with this routine.  Feed it the proper information from your DCC
- * before you attempt the connection, and this will make an attempt at
- * figuring out if the connection is really that person, or someone screwing
- * around.  It's not foolproof, but anything that fails this check probably
- * isn't going to work anyway due to masquerading firewalls, NAT routers, 
- * or bugs in mIRC.
- */
-int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
-{
-  /* According to the latest RFC, the clients SHOULD be able to handle
-   * DNS names that are up to 255 characters long.  This is not broken.
-   */
-
-  /* This function needs to be updated for IPv6 IP's, although it doesn't
-   * currently harm them (afaik)
-   */
-
-  char badaddress[16] = "";
-  IP ip = my_atoul(ipaddy);
-  port_t prt = (port_t) atoi(port);
-
-  /* It is disabled HERE so we only have to check in *one* spot! */
-  if (!dcc_sanitycheck)
-    return 1;
-
-  if (prt < 1) {
-    putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible port of %u!",
-	   nick, from, prt);
-    return 0;
-  }
-  sprintf(badaddress, "%lu.%lu.%lu.%lu", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
-	  (ip >> 8) & 0xff, ip & 0xff);
-  if (ip < (1 << 24)) {
-    putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible IP of %s!",
-	   nick, from, badaddress);
-    return 0;
-  }
-  return 1;
-}
-
-int hostsanitycheck_dcc(char *nick, char *from, IP ip, char *dnsname,
-		        char *prt)
-{
-  /* According to the latest RFC, the clients SHOULD be able to handle
-   * DNS names that are up to 255 characters long.  This is not broken.
-   */
-  char hostn[256] = "", badaddress[16] = "";
-
-  /* It is disabled HERE so we only have to check in *one* spot! */
-  if (!dcc_sanitycheck)
-    return 1;
-  sprintf(badaddress, "%lu.%lu.%lu.%lu", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
-	  (ip >> 8) & 0xff, ip & 0xff);
-  /* These should pad like crazy with zeros, since 120 bytes or so is
-   * where the routines providing our data currently lose interest. I'm
-   * using the n-variant in case someone changes that...
-   */
-  strncpyz(hostn, extracthostname(from), sizeof hostn);
-  if (!egg_strcasecmp(hostn, dnsname)) {
-    putlog(LOG_DEBUG, "*", "DNS information for submitted IP checks out.");
-    return 1;
-  }
-  if (!strcmp(badaddress, dnsname))
-    putlog(LOG_MISC, "*", "ALERT: (%s!%s) sent a DCC request with bogus IP "
-	   "information of %s port %s. %s does not resolve to %s!", nick, from,
-	    badaddress, prt, from, badaddress);
-  else
-    return 1; /* <- usually happens when we have 
-		    a user with an unresolved hostmask! */
-  return 0;
 }
 
 /* Checks wether the referenced socket has data queued.
