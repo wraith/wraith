@@ -221,6 +221,8 @@ void putlog(int type, const char *chname, const char *format, ...)
 void
 irc_log(struct chanset_t *chan, const char *format, ...)
 {
+  return;		/* dont spam this to 1.1.8 nets */
+#ifdef NEW
   char va_out[LOGLINEMAX + 1];
   va_list va;
 
@@ -239,4 +241,5 @@ irc_log(struct chanset_t *chan, const char *format, ...)
      putlog(LOG_PUBLIC, "*", "%s", va_out);
 
 //  sdprintf("%s", va_out);
+#endif
 }
