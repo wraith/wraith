@@ -527,8 +527,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       chan->status &= ~CHAN_CLOSED;
     else if (!strcmp(item[i], "+take"))
       chan->status |= CHAN_TAKE;
-    else if (!strcmp(item[i], "-take"))
+    else if (!strcmp(item[i], "-take")) {
       chan->status &= ~CHAN_TAKE;
+      chan->status |= CHAN_FASTOP;		// to avoid bots still mass opping from +take from not using cookies
+    }
     else if (!strcmp(item[i], "+voice"))
       chan->status |= CHAN_VOICE;
     else if (!strcmp(item[i], "-voice"))
