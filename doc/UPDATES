@@ -3,10 +3,7 @@ This is a summary of ChangeLog basically.
 1.2
 * No longer displaying SATLS on ./bin -v
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
-* Removed many unnecesary compile defines: (.config controlling them makes more sense)
-  ANTITRACE, HIJACKCHECK, LASTCHECK, NODELAY, PROCESSCHECK, PROMISC, AUTHCMDS, CONFEDIT
-  RANDSERVERS, DCCPASS, PSCLOAK, MSGCMDS, UTCTIME, AUTOAWAY, AUTHHASH, SPLITHIJACK
-  AUTOLOCK, NAZIPASS, GARBLESTRINGS, DCCAUTH, MESSUPTERM
+* Removed all compile time defines, moved to .config/.chanset
   -Moved PSCLOAK entries to misc/responses.txt
   -Dccauth is now a .config option (1/0)
 * Removed MESSUPTERM feature, no one used it anyway.
