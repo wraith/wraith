@@ -217,12 +217,18 @@ int u_match_mask(maskrec *rec, char *mask)
   return 0;
 }
 
-int u_delban(struct chanset_t *c, char *who, int doit)
+int u_delmask(char type, struct chanset_t *c, char *who, int doit)
 {
   int j, i = 0;
-  maskrec *t = NULL;
-  maskrec **u = (c) ? &c->bans : &global_bans;
   char temp[256] = "";
+  maskrec **u = NULL, *t;
+
+  if (type == 'b')
+    u = c ? &c->bans : &global_bans;
+  if (type == 'e')
+    u = c ? &c->exempts : &global_exempts;
+  if (type == 'I')
+    u = c ? &c->invites : &global_invites;
 
   if (!strchr(who, '!') && str_isdigit(who)) {
     j = atoi(who);
@@ -251,62 +257,9 @@ int u_delban(struct chanset_t *c, char *who, int doit)
       if (mask) {
 	/* Distribute chan bans differently */
 	if (c)
-	  shareout(c, "-bc %s %s\n", c->dname, mask);
+	  shareout(c, "-%s %s %s\n", type == 'b' ? "bc" : type == 'e' ? "ec" : "invc", c->dname, mask);
 	else
-	  shareout(NULL, "-b %s\n", mask);
-	free(mask);
-      }
-    }
-    if (lastdeletedmask)
-      free(lastdeletedmask);
-    lastdeletedmask = strdup((*u)->mask);
-    free((*u)->mask);
-    if ((*u)->desc)
-      free((*u)->desc);
-    if ((*u)->user)
-      free((*u)->user);
-    t = *u;
-    *u = (*u)->next;
-    free(t);
-  }
-  return i;
-}
-
-int u_delexempt (struct chanset_t * c, char * who, int doit)
-{
-  int j, i = 0;
-  maskrec *t = NULL;
-  maskrec **u = c ? &(c->exempts) : &global_exempts;
-
-  if (!strchr(who, '!') && str_isdigit(who)) {
-    j = atoi(who);
-    j--;
-    for (;(*u) && j;u=&((*u)->next),j--);
-    if (*u) {
-      strcpy(who, (*u)->mask);
-      i = 1;
-    } else
-      return -j-1;
-  } else {
-    /* Find matching host, if there is one */
-    for (;*u && !i;u=&((*u)->next))
-      if (!rfc_casecmp((*u)->mask,who)) {
-	i = 1;
-	break;
-      }
-    if (!*u)
-      return 0;
-  }
-  if (i && doit) {
-    if (!noshare) {
-      char *mask = str_escape(who, ':', '\\');
-
-      if (mask) {
-	/* Distribute chan exempts differently */
-	if (c)
-	  shareout(c, "-ec %s %s\n", c->dname, mask);
-	else
-	  shareout(NULL, "-e %s\n", mask);
+	  shareout(NULL, "-%s %s\n", type == 'b' ? "b" : type == 'e' ? "e" : "inv", mask);
 	free(mask);
       }
     }
@@ -322,64 +275,21 @@ int u_delexempt (struct chanset_t * c, char * who, int doit)
   return i;
 }
 
-int u_delinvite(struct chanset_t *c, char *who, int doit)
-{
-  int j, i = 0;
-  maskrec *t = NULL;
-  maskrec **u = c ? &(c->invites) : &global_invites;
-
-  if (!strchr(who, '!') && str_isdigit(who)) {
-    j = atoi(who);
-    j--;
-    for (;(*u) && j;u=&((*u)->next),j--);
-    if (*u) {
-      strcpy(who, (*u)->mask);
-      i = 1;
-    } else
-      return -j-1;
-  } else {
-    /* Find matching host, if there is one */
-    for (;*u && !i; u = &((*u)->next))
-      if (!rfc_casecmp((*u)->mask,who)) {
-	i = 1;
-	break;
-      }
-    if (!*u)
-      return 0;
-  }
-  if (i && doit) {
-    if (!noshare) {
-      char *mask = str_escape(who, ':', '\\');
-
-      if (mask) {
-	/* Distribute chan invites differently */
-	if (c)
-	  shareout(c, "-invc %s %s\n", c->dname, mask);
-	else
-	  shareout(NULL, "-inv %s\n", mask);
-	free(mask);
-      }
-    }
-    free((*u)->mask);
-    if ((*u)->desc)
-      free((*u)->desc);
-    if ((*u)->user)
-      free((*u)->user);
-    t = *u;
-    *u = (*u)->next;
-    free(t);
-  }
-  return i;
-}
-
-/* Note: If first char of note is '*' it's a sticky ban.
+/* Note: If first char of note is '*' it's a sticky mask.
  */
-int u_addban(struct chanset_t *chan, char *ban, char *from, char *note, time_t expire_time, int flags)
+int u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *note, time_t expire_time, int flags)
 {
   char host[1024] = "", s[1024] = "";
-  maskrec *p = NULL, *l = NULL, **u = chan ? &chan->bans : &global_bans;
+  maskrec *p = NULL, *l = NULL, **u = NULL;
 
-  strcpy(host, ban);
+  if (type == 'b')
+    u = chan ? &chan->bans : &global_bans;
+  if (type == 'e')
+    u = chan ? &chan->exempts : &global_exempts;
+  if (type == 'I')
+    u = chan ? &chan->invites : &global_invites;
+
+  strcpy(host, who);
   /* Choke check: fix broken bans (must have '!' and '@') */
   if ((strchr(host, '!') == NULL) && (strchr(host, '@') == NULL))
     strcat(host, "!*@*");
@@ -398,7 +308,7 @@ int u_addban(struct chanset_t *chan, char *ban, char *from, char *note, time_t e
 #else
     simple_sprintf(s, "%s!%s@%s", origbotname, botuser, conf.bot->host);
 #endif /* LEAF */
-  if (wild_match(host, s)) {
+  if (s[0] && type == 'b' && wild_match(host, s)) {
     putlog(LOG_MISC, "*", IRC_IBANNEDME);
     return 0;
   }
@@ -443,167 +353,17 @@ int u_addban(struct chanset_t *chan, char *ban, char *from, char *note, time_t e
 
     if (mask) {
       if (!chan)
-	shareout(NULL, "+b %s %li %s%s %s %s\n", mask, expire_time - now,
+	shareout(NULL, "+%s %s %lu %s%s %s %s\n",
+		 type == 'b' ? "b" : type == 'e' ? "e" : "inv",
+		 mask, expire_time - now,
 		 (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p" : "-", from, note);
       else
-	shareout(chan, "+bc %s %li %s %s%s %s %s\n", mask, expire_time - now,
+	shareout(chan, "+%s %s %lu %s %s%s %s %s\n",
+		 type == 'b' ? "bc" : type == 'e' ? "ec" : "invc",	
+		 mask, expire_time - now,
 		 chan->dname, (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p" : "-", from, note);
-      free(mask);
-    }
-  }
-  return 1;
-}
-
-/* Note: If first char of note is '*' it's a sticky invite.
- */
-int u_addinvite(struct chanset_t *chan, char *invite, char *from, char *note, time_t expire_time, int flags)
-{
-  char host[1024] = "", s[1024] = "";
-  maskrec *p = NULL, *l, **u = chan ? &chan->invites : &global_invites;
-
-  strcpy(host, invite);
-  /* Choke check: fix broken invites (must have '!' and '@') */
-  if ((strchr(host, '!') == NULL) && (strchr(host, '@') == NULL))
-    strcat(host, "!*@*");
-  else if (strchr(host, '@') == NULL)
-    strcat(host, "@*");
-  else if (strchr(host, '!') == NULL) {
-    char * i = strchr(host, '@');
-    strcpy(s, i);
-    *i = 0;
-    strcat(host, "!*");
-    strcat(host, s);
-  }
-#ifdef LEAF
-    simple_sprintf(s, "%s!%s", botname, botuserhost);
-#else
-    simple_sprintf(s, "%s!%s@%s", origbotname, botuser, conf.bot->host);
-#endif /* LEAF */
-
-  for (l = *u; l; l = l->next)
-    if (!rfc_casecmp(l->mask, host)) {
-      p = l;
-      break;
-    }  
-
-  /* It shouldn't expire and be sticky also */
-  if (note[0] == '*') {
-    flags |= MASKREC_STICKY;
-    note++;
-  }
-  if ((expire_time == 0L) || (flags & MASKREC_PERM)) {
-    flags |= MASKREC_PERM;
-    expire_time = 0L;
-  }
-
-  if (p == NULL) {  
-    p = calloc(1, sizeof(maskrec));
-    p->next = *u;
-    *u = p;
-  }
-  else {
-    free( p->mask );
-    free( p->user );
-    free( p->desc );
-  }
-  p->expire = expire_time;
-  p->added = now;
-  p->lastactive = 0;
-  p->flags = flags;
-  p->mask = strdup(host);
-  p->user = strdup(from);
-  p->desc = strdup(note);
-  if (!noshare) {
-    char *mask = str_escape(host, ':', '\\');
-
-    if (mask) {
-      if (!chan)
-	shareout(NULL, "+inv %s %li %s%s %s %s\n", mask, expire_time - now,
-		 (flags & MASKREC_STICKY) ? "s" : "",
-		 (flags & MASKREC_PERM) ? "p": "-", from, note);
-      else
-	shareout(chan, "+invc %s %li %s %s%s %s %s\n", mask, expire_time - now,
-		 chan->dname, (flags & MASKREC_STICKY) ? "s" : "",
-		 (flags & MASKREC_PERM) ? "p": "-", from, note);
-      free(mask);
-    }
-  }
-  return 1;
-}
-
-/* Note: If first char of note is '*' it's a sticky exempt.
- */
-int u_addexempt(struct chanset_t *chan, char *exempt, char *from, char *note, time_t expire_time, int flags)
-{
-  char host[1024] = "", s[1024] = "";
-  maskrec *p = NULL, *l, **u = chan ? &chan->exempts : &global_exempts;
-
-  strcpy(host, exempt);
-  /* Choke check: fix broken exempts (must have '!' and '@') */
-  if ((strchr(host, '!') == NULL) && (strchr(host, '@') == NULL))
-    strcat(host, "!*@*");
-  else if (strchr(host, '@') == NULL)
-    strcat(host, "@*");
-  else if (strchr(host, '!') == NULL) {
-    char * i = strchr(host, '@');
-    strcpy(s, i);
-    *i = 0;
-    strcat(host, "!*");
-    strcat(host, s);
-  }
-#ifdef LEAF
-    simple_sprintf(s, "%s!%s", botname, botuserhost);
-#else
-    simple_sprintf(s, "%s!%s@%s", origbotname, botuser, conf.bot->host);
-#endif /* LEAF */
-
-  for (l = *u; l; l = l->next)
-    if (!rfc_casecmp(l->mask, host)) {
-      p = l;
-      break;
-    }  
-
-  /* It shouldn't expire and be sticky also */
-  if (note[0] == '*') {
-    flags |= MASKREC_STICKY;
-    note++;
-  }
-  if ((expire_time == 0L) || (flags & MASKREC_PERM)) {
-    flags |= MASKREC_PERM;
-    expire_time = 0L;
-  }
-
-  if (p == NULL) {  
-    p = calloc(1, sizeof(maskrec));
-    p->next = *u;
-    *u = p;
-  }
-  else {
-    free( p->mask );
-    free( p->user );
-    free( p->desc );
-  }
-  p->expire = expire_time;
-  p->added = now;
-  p->lastactive = 0;
-  p->flags = flags;
-  p->mask = strdup(host);
-  p->user = strdup(from);
-  p->desc = strdup(note);
-  if (!noshare) {
-    char *mask = str_escape(host, ':', '\\');
-
-    if (mask) {
-      if (!chan)
-	shareout(NULL, "+e %s %li %s%s %s %s\n", mask, expire_time - now,
-		 (flags & MASKREC_STICKY) ? "s" : "",
-		 (flags & MASKREC_PERM) ? "p": "-", from, note);
-      else
-	shareout(chan, "+ec %s %li %s %s%s %s %s\n", mask, expire_time - now,
-		 chan->dname, (flags & MASKREC_STICKY) ? "s" : "",
-		 (flags & MASKREC_PERM) ? "p": "-", from, note);
       free(mask);
     }
   }
@@ -1437,7 +1197,7 @@ static void check_expired_bans(void)
 #endif /* LEAF */
 	    b->timer = now;
 	  }
-      u_delban(NULL, u->mask, 1);
+      u_delmask('b', NULL, u->mask, 1);
     }
   }
   /* Check for specific channel-domain bans expiring */
@@ -1454,7 +1214,7 @@ static void check_expired_bans(void)
 #endif /* LEAF */
 	    b->timer = now;
 	  }
-	u_delban(chan, u->mask, 1);
+	u_delmask('b', chan, u->mask, 1);
       }
     }
   }
@@ -1499,7 +1259,7 @@ static void check_expired_exempts(void)
 	      e->timer = now;
 	    }
       }
-      u_delexempt(NULL, u->mask,1);
+      u_delmask('e', NULL, u->mask,1);
     }
   }
   /* Check for specific channel-domain exempts expiring */
@@ -1530,7 +1290,7 @@ static void check_expired_exempts(void)
 #endif /* LEAF */
 	      e->timer = now;
 	    }
-          u_delexempt(chan, u->mask, 1);
+          u_delmask('e', chan, u->mask, 1);
         }
       }
     }
@@ -1561,7 +1321,7 @@ static void check_expired_invites(void)
 #endif /* LEAF */
 	      b->timer = now;
 	    }
-      u_delinvite(NULL, u->mask,1);
+      u_delmask('I', NULL, u->mask,1);
     }
   }
   /* Check for specific channel-domain invites expiring */
@@ -1579,7 +1339,7 @@ static void check_expired_invites(void)
 #endif /* LEAF */
 	      b->timer = now;
 	    }
-	u_delinvite(chan, u->mask, 1);
+	u_delmask('I', chan, u->mask, 1);
       }
     }
   }

@@ -608,13 +608,13 @@ void remove_channel(struct chanset_t *chan)
    noshare = 1;
    /* Remove channel-bans */
    while (chan->bans)
-     u_delban(chan, chan->bans->mask, 1);
+     u_delmask('b', chan, chan->bans->mask, 1);
    /* Remove channel-exempts */
    while (chan->exempts)
-     u_delexempt(chan, chan->exempts->mask, 1);
+     u_delmask('e', chan, chan->exempts->mask, 1);
    /* Remove channel-invites */
    while (chan->invites)
-     u_delinvite(chan, chan->invites->mask, 1);
+     u_delmask('I', chan, chan->invites->mask, 1);
    /* Remove channel specific user flags */
    user_del_chan(chan->dname);
    noshare = 0;

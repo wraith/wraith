@@ -467,7 +467,7 @@ static int detect_chan_flood(char *floodnick, char *floodhost, char *from,
       else
 	putlog(LOG_MISC | LOG_JOIN, chan->dname, IRC_FLOODIGNORE4, p);
       strcpy(ftype + 4, " flood");
-      u_addban(chan, h, conf.bot->nick, ftype, now + (60 * chan->ban_time), 0);
+      u_addmask('b', chan, h, conf.bot->nick, ftype, now + (60 * chan->ban_time), 0);
       if (!channel_enforcebans(chan) && me_op(chan)) {
 	  char s[UHOSTLEN];
 	  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {	  
@@ -529,7 +529,7 @@ static void doban(struct chanset_t *chan, memberlist *m)
 
     check_exemptlist(chan, s);
     s1 = quickban(chan, m->userhost);
-    u_addban(chan, s1, conf.bot->nick, "joined closed chan", now + (60 * chan->ban_time), 0);
+    u_addmask('b', chan, s1, conf.bot->nick, "joined closed chan", now + (60 * chan->ban_time), 0);
   }
   return;
 }
@@ -2584,7 +2584,7 @@ static int gotmsg(char *from, char *msg)
 	   u_match_mask(chan->exempts, from)))) {
       if (ban_fun) {
 	check_exemptlist(chan, from);
-	u_addban(chan, quickban(chan, uhost), conf.bot->nick,
+	u_addmask('b', chan, quickban(chan, uhost), conf.bot->nick,
                IRC_FUNKICK, now + (60 * chan->ban_time), 0);
       }
       if (kick_fun) {
@@ -2759,7 +2759,7 @@ static int gotnotice(char *from, char *msg)
 	   u_match_mask(chan->exempts, from)))) {
       if (ban_fun) {
 	check_exemptlist(chan, from);
-	u_addban(chan, quickban(chan, uhost), conf.bot->nick,
+	u_addmask('b', chan, quickban(chan, uhost), conf.bot->nick,
                IRC_FUNKICK, now + (60 * chan->ban_time), 0);
       }
       if (kick_fun) {

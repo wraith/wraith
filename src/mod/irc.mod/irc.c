@@ -778,7 +778,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
     splitnick(&whobad);
     maskhost(whobad, s1);
     simple_sprintf(s, "(%s) %s", ct, reason);
-    u_addban(chan, s1, conf.bot->nick, s, now + (60 * chan->ban_time), 0);
+    u_addmask('b', chan, s1, conf.bot->nick, s, now + (60 * chan->ban_time), 0);
     if (!mevictim && me_op(chan)) {
       add_mode(chan, '+', 'b', s1);
       flush_mode(chan, QUICK);

@@ -260,7 +260,7 @@ static void cmd_kickban(struct userrec *u, int idx, char *par)
       par = "requested";
     dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, par);
     m->flags |= SENTKICK;
-    u_addban(chan, s1, dcc[idx].nick, par, now + (60 * chan->ban_time), 0);
+    u_addmask('b', chan, s1, dcc[idx].nick, par, now + (60 * chan->ban_time), 0);
     dprintf(idx, "Kick-banned %s on %s.\n", nick, chan->dname);
     next:;
     if (!all)
