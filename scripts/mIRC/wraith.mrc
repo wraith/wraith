@@ -88,7 +88,7 @@ ALIAS auth {
     echo 8 -a botname is optional. 
   }
   else {
-    echo +Auth $md5($2 $+ $wsecpass($3) $+ $wauthkey($3))
+    echo +Auth $wmd5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
 }
 ALIAS msg { 
