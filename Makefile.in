@@ -124,7 +124,8 @@ clean:  cleanutils
 	@cd src && $(MAKE) clean
 	@cd src/md5 && $(MAKE) clean
 	@cd src/compat && $(MAKE) clean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.$(MOD_EXT) *.so *.stamp core DEBUG *~ key configure.temp makesalt src/makesalt
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.$(MOD_EXT) *.so *.stamp core DEBUG *~ key configure.temp makesalt 
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/makesalt
 
 distclean: clean clean-modconfig
 	@cd src/mod && $(MAKE) distclean

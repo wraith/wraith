@@ -63,11 +63,12 @@ dephub:
 build_msg:
 	@echo "(This may take a while.  Go get some runts.)"
 
-main.o:
-	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) \
-'-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
-'-DLDFLAGS="$(LD)"' \
-'-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/main.c
+
+main.o: ../stringfix
+	cp -f main.c xmain.c
+	../stringfix xmain.c
+	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
+	'-DLDFLAGS="$(LD)"' '-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/xmain.c -o main.o
 
 compatability:
 	@cd compat && $(MAKE_GENERIC) compat
@@ -97,8 +98,6 @@ eggdrop.h:
 	$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) -I$(top_srcdir) \
         $(CPPFLAGS)"' '-DLDFLAGS="$(LD)"' \
         '-DSTRIPFLAGS="$(STRIP)"' -c x$< -o `basename $< .c`.o
-#.c.o:
-#	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 #safety hash
 ../stringfix: stringfix.c

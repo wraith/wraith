@@ -9,14 +9,18 @@ TCLDIR="/home/wheel/bryan"
 
 # Awk out the version from source
 ver=`cat src/main.c 2>&1 | grep "char" | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+numver=`cat src/main.c 2>&1 | grep "int" | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
 if test -z "$ver"
 then
   ver="?.?.?"
 fi
-echo "*** wraith v$ver builder ***"
+echo "*** wraith v${ver}/${numver} builder ***"
 echo ""
 
 debug=0
+all=0
+hub=0
+leaf=0
 #if test $# -lt 1; then
 if test -z "$1"; then
  echo "Usage: $0 -d all|leaf|hub pack.conf"
@@ -63,6 +67,11 @@ if ! test $pack
  else
   pack=$2
  fi
+fi
+
+if [ $all = "1" ]; then
+ leaf=1
+ hub=1
 fi
 
 if test $pack
@@ -137,34 +146,45 @@ then
   exit 1
 fi
 
-# Build leaf and check
-echo "[*] Building ${d}leaf..."
-make ${d}leaf CFLGS="$defines" > /dev/null
-if ! test -f leaf
-then
-  echo "[!] ${d}leaf build failed"
-  exit 1
+if [ $leaf = "1" ]; then
+ # Build leaf and check
+ echo "[*] Building ${d}leaf..."
+ make ${d}leaf CFLGS="$defines" > /dev/null
+ if ! test -f leaf
+ then
+   echo "[!] ${d}leaf build failed"
+   exit 1
+ fi
 fi
-
-# Build hub and check
-echo "[*] Building ${d}hub..."
-make ${d}hub CFLGS="$defines" > /dev/null
-if ! test -f hub
-then
-  echo "[!] ${d}hub build failed"
-  exit 1
+if [ $hub = "1" ]; then
+ # Build hub and check
+ echo "[*] Building ${d}hub..."
+ make ${d}hub CFLGS="$defines" > /dev/null
+ if ! test -f hub
+ then
+   echo "[!] ${d}hub build failed"
+   exit 1
+ fi
 fi
 
 
 # Wrap it nicely up into an archive
 echo "[*] Packaging..."
 packname=`basename $packname .conf`
-for bin in leaf hub
+if [ $all = "1" ]; then
+ fls="leaf hub"
+elif [ $leaf = "1" ]; then
+ fls="leaf"
+elif [ $hub = "1" ]; then
+ fls="hub"
+fi
+
+for bin in $fls
 do
-  mv -f $bin $os.$bin
+  mv -f $bin $bin.$os.$numver
 done
-tar -zcf $packname.$os.tgz $os.*
-rm -f $os.*
-echo "Binaries are now in '$packname.$os.tgz'."
+tar -zcf $packname.$os.$numver.tgz *.$os.$numver
+rm -f *.$os.$numver
+echo "Binaries are now in '$packname.$os.$numver.tgz'."
 exit 0
 
