@@ -37,6 +37,7 @@ This is a summary of ChangeLog basically.
 33.Possibly fixed a bug with bots dying on link.
 34.Bots no longer have userflag +b, they are distinguished in whois by BOTNICK instead of HANDLE.
 35.Added cmd_matchbot for matching bots, cmd_match now only does users.
+36.Fixed +d|d bots still being opped.
 
 1.1.7
 
