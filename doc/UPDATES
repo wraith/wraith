@@ -36,6 +36,7 @@ This is a summary of ChangeLog basically.
 * cmd_quit failed to log.
 * Now making a small attempt to auto make the tmpdir.
 * Increased password timeout to 40 seconds and auth timeout to 80 seconds.
+* Quietly ignore/drop invalid nicks for telnet login.
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -1547,17 +1547,6 @@ dcc_telnet_id(int idx, char *buf, int atr)
 
   nick[HANDLEN] = 0;
 
-  /* Toss out bad nicknames */
-  if ((dcc[idx].nick[0] != '@') && (!wild_match(dcc[idx].nick, nick))) {
-/* FIXME: if a bot gets this, they will try to decrypt it ;/ */
-    dprintf(idx, "Sorry, that nickname format is invalid.\n");
-    putlog(LOG_BOTS, "*", DCC_BADNICK, dcc[idx].host);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-    return;
-  }
-
-
   dcc[idx].user = get_user_by_handle(userlist, nick);
 
   /* FIXME: remove after 1.2.2 */
@@ -1571,26 +1560,27 @@ dcc_telnet_id(int idx, char *buf, int atr)
   }
 */
   bool ok = 0;
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
-  get_user_flagrec(dcc[idx].user, &fr, NULL);
+  if (dcc[idx].user) {
+    struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
+    get_user_flagrec(dcc[idx].user, &fr, NULL);
 
-/*  if (!ok && glob_party(fr))
-    ok = 1;*/
-  ok = 1;
-#ifdef HUB
-  if (!glob_huba(fr))
-    ok = 0;
-#else /* !HUB */
-  /* if I am a chanhub and they dont have +c then drop */
-  if (ischanhub() && !glob_chuba(fr))
-    ok = 0;
-  if (!ischanhub())
-    ok = 0;
-#endif /* HUB */
-  if (!ok && glob_bot(fr))
     ok = 1;
+#ifdef HUB
+    if (!glob_huba(fr))
+      ok = 0;
+#else /* !HUB */
+    /* if I am a chanhub and they dont have +c then drop */
+    if (ischanhub() && !glob_chuba(fr))
+      ok = 0;
+    if (!ischanhub())
+      ok = 0;
+#endif /* HUB */
+    if (!ok && glob_bot(fr))
+      ok = 1;
+  }
+
   if (!ok) {
     putlog(LOG_BOTS, "*", DCC_INVHANDLE, dcc[idx].host, nick);
     killsock(dcc[idx].sock);
