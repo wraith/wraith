@@ -50,8 +50,6 @@ typedef struct devent_str {
   u_8bit_t	lookup;		/* RES_IPBYHOST or RES_HOSTBYIP	  */
 } devent_t;
 
-void block_dns_hostbyip(in_addr_t);
-void block_dns_ipbyhost(char *);
 void call_hostbyip(in_addr_t, char *, int);
 void call_ipbyhost(char *, in_addr_t, int);
 void dcc_dnshostbyip(in_addr_t);
