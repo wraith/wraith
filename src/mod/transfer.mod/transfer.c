@@ -675,7 +675,8 @@ void eof_dcc_get(int idx)
      killsock(dcc[y].sock);
      lostdcc(y);
     }
-    killsock(dcc[idx].sock);
+    if (dcc[idx].sock != -1) 
+      killsock(dcc[idx].sock);
     lostdcc(idx);
     return;
   } else if (!strcmp(dcc[idx].nick, "*binary")) {
