@@ -287,27 +287,17 @@ static int uff_call_receiving(int idx, char *user_file)
  */
 
 
-/* Feature `overbots'
- */
-
-static int uff_ask_override_bots(int idx)
-{
-  if (overr_local_bots)
-    return 1;
-  else
-    return 0;
-}
-
-
 /*
  *     Internal user file feature table
  */
 
+int
+blah() {
+  return 1;
+}
 static uff_table_t internal_uff_table[] = {
-  {"overbots",	UFF_OVERRIDE,	uff_ask_override_bots,	0, NULL, NULL},
+  {"overbots",	UFF_OVERRIDE,	blah,			0, NULL, NULL},
   {"invites",	UFF_INVITE,	NULL,			0, NULL, NULL},
   {"exempts",	UFF_EXEMPT,	NULL,			0, NULL, NULL},
-  {"chans",     UFF_CHANS,      NULL,                   0, NULL, NULL},
-  {"tcl",	UFF_TCL,	NULL,			0, NULL, NULL},
   {NULL,	0,		NULL,			0, NULL, NULL}
 };

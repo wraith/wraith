@@ -9,8 +9,6 @@
 #define	UFF_OVERRIDE	BIT0	/* Override existing bot entries    */
 #define UFF_INVITE	BIT1	/* Send invites in user file	    */
 #define UFF_EXEMPT	BIT2	/* Send exempts in user file	    */
-#define UFF_CHANS	BIT3	/* Send channels in user file */
-#define UFF_TCL		BIT4	/* Send tcl file with userfile */
 
 /* Currently reserved flags for other modules:
  *      UFF_COMPRESS    0x000008	   Compress the user file

@@ -38,10 +38,7 @@ static const int min_exemptinvite = 1000000;
 /* Minimum version that supports userfile features. */
 static const int min_uffeature = 1000000;
 
-static int allow_resync = 0;
 static struct flag_record fr = { 0, 0, 0, 0 };
-static int resync_time = 900;
-static int overr_local_bots = 1;        /* Override local bots?             */
 
 
 struct delay_mode {
@@ -70,16 +67,11 @@ typedef struct tandbuf_t {
   struct tandbuf_t *next;
 } tandbuf;
 
-tandbuf *tbuf;
-
 /* Prototypes */
 #ifdef HUB
 static void start_sending_users(int);
 #endif /* HUB */
 static void shareout_but(struct chanset_t *, ...);
-static int flush_tbuf(char *);
-static int can_resync(char *);
-static void q_resync(char *, struct chanset_t *);
 static void cancel_user_xfer(int, void *);
 
 #include "share.h"
@@ -320,10 +312,11 @@ share_chattr(int idx, char *par)
           get_user_flagrec(dcc[idx].user, &fr, 0);
           /* Don't let bot flags be altered */
           ofl = fr.global;
+
           break_down_flags(atr, &fr, 0);
           bfl = u->flags & USER_BOT;
 
-          fr.global = sanity_check(fr.global | bfl);
+          fr.global = sanity_check(fr.global |bfl);
 
           set_user_flagrec(u, &fr, 0);
           check_dcc_attrs(u, ofl);
@@ -978,8 +971,6 @@ share_userfileq(int idx, char *par)
 {
   int ok = 1, i;
 
-  flush_tbuf(dcc[idx].nick);
-
   if (bot_aggressive_to(dcc[idx].user)) {
     putlog(LOG_ERRORS, "*", "%s offered user transfer - I'm supposed to be aggressive to it", dcc[idx].nick);
     dprintf(idx, "s un I have you marked for Agressive sharing.\n");
@@ -1061,60 +1052,13 @@ share_ufsend(int idx, char *par)
 }
 
 static void
-share_resyncq(int idx, char *par)
-{
-  if (!allow_resync)
-    dprintf(idx, "s rn Not permitting resync.\n");
-  else {
-    if (can_resync(dcc[idx].nick)) {
-      dprintf(idx, "s r!\n");
-      dump_resync(idx);
-      dcc[idx].status &= ~STAT_OFFERED;
-      dcc[idx].status |= STAT_SHARE;
-      putlog(LOG_BOTS, "*", "Resync'd user file with %s", dcc[idx].nick);
-      updatebot(-1, dcc[idx].nick, '+', 0);
-    } else if (!bot_aggressive_to(dcc[idx].user)) {
-      dprintf(idx, "s r!\n");
-      dcc[idx].status &= ~STAT_OFFERED;
-      dcc[idx].status |= STAT_SHARE;
-      updatebot(-1, dcc[idx].nick, '+', 0);
-      putlog(LOG_BOTS, "@", "Resyncing user file from %s", dcc[idx].nick);
-    } else
-      dprintf(idx, "s rn No resync buffer.\n");
-  }
-}
-
-static void
-share_resync(int idx, char *par)
-{
-  if ((dcc[idx].status & STAT_OFFERED) && can_resync(dcc[idx].nick)) {
-    dump_resync(idx);
-    dcc[idx].status &= ~STAT_OFFERED;
-    dcc[idx].status |= STAT_SHARE;
-    updatebot(-1, dcc[idx].nick, '+', 0);
-    putlog(LOG_BOTS, "@", "Resync'd user file with %s", dcc[idx].nick);
-  }
-}
-
-static void
-share_resync_no(int idx, char *par)
-{
-  putlog(LOG_BOTS, "@", "Resync refused by %s: %s", dcc[idx].nick, par);
-  flush_tbuf(dcc[idx].nick);
-  dprintf(idx, "s u?\n");
-}
-
-static void
 share_version(int idx, char *par)
 {
   /* Cleanup any share flags */
   dcc[idx].status &= ~(STAT_SHARE | STAT_GETTING | STAT_SENDING | STAT_OFFERED | STAT_AGGRESSIVE);
   dcc[idx].u.bot->uff_flags = 0;
   if (bot_aggressive_to(dcc[idx].user)) {
-    if (can_resync(dcc[idx].nick))
-      dprintf(idx, "s r?\n");
-    else
-      dprintf(idx, "s u?\n");
+    dprintf(idx, "s u?\n");
     dcc[idx].status |= STAT_OFFERED;
   }                             /*else
                                  * higher_bot_linked(idx); */
@@ -1195,9 +1139,6 @@ static botcmd_t C_share[] = {
   {"h", (Function) share_chhand},
   {"k", (Function) share_killuser},
   {"n", (Function) share_newuser},
-  {"r!", (Function) share_resync},
-  {"r?", (Function) share_resyncq},
-  {"rn", (Function) share_resync_no},
   {"s", (Function) share_stick_ban},
   {"se", (Function) share_stick_exempt},
   {"sInv", (Function) share_stick_invite},
@@ -1253,7 +1194,6 @@ shareout(struct chanset_t *chan, ...)
       }
       tputs(dcc[i].sock, s, l + 2);
     }
-  q_resync(s, chan);
   va_end(va);
 }
 
@@ -1280,69 +1220,7 @@ shareout_but(struct chanset_t *chan, ...)
       }
       tputs(dcc[i].sock, s, l + 2);
     }
-  q_resync(s, chan);
   va_end(va);
-}
-
-
-/*
- *    Resync buffers
- */
-
-/* Create a tandem buffer for 'bot'.
- */
-static void
-new_tbuf(char *bot)
-{
-  tandbuf **old = &tbuf, *new = NULL;
-
-  new = calloc(1, sizeof(tandbuf));
-  strcpy(new->bot, bot);
-  new->q = NULL;
-  new->timer = now;
-  new->next = *old;
-  *old = new;
-  putlog(LOG_BOTS, "@", "Creating resync buffer for %s", bot);
-}
-
-static void
-del_tbuf(tandbuf * goner)
-{
-  struct share_msgq *q = NULL, *r = NULL;
-  tandbuf *t = NULL, *old = NULL;
-
-  for (t = tbuf; t; old = t, t = t->next) {
-    if (t == goner) {
-      if (old)
-        old->next = t->next;
-      else
-        tbuf = t->next;
-      for (q = t->q; q && q->msg[0]; q = r) {
-        r = q->next;
-        free(q->msg);
-        free(q);
-      }
-      free(t);
-      break;
-    }
-  }
-}
-
-/* Flush a certain bot's tbuf.
- */
-static int
-flush_tbuf(char *bot)
-{
-  tandbuf *t = NULL, *tnext = NULL;
-
-  for (t = tbuf; t; t = tnext) {
-    tnext = t->next;
-    if (!egg_strcasecmp(t->bot, bot)) {
-      del_tbuf(t);
-      return 1;
-    }
-  }
-  return 0;
 }
 
 /* Flush all tbufs older than 15 minutes.
@@ -1351,17 +1229,9 @@ static void
 check_expired_tbufs()
 {
   int i;
-  tandbuf *t = NULL, *tnext = NULL;
 
-  for (t = tbuf; t; t = tnext) {
-    tnext = t->next;
-    if ((now - t->timer) > resync_time) {
-      putlog(LOG_BOTS, "@", "Flushing resync buffer for clonebot %s.", t->bot);
-      del_tbuf(t);
-    }
-  }
   /* Resend userfile requests */
-  for (i = 0; i < dcc_total; i++)
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type->flags & DCT_BOT) {
       if (dcc[i].status & STAT_OFFERED) {
         if (now - dcc[i].timeval > 120) {
@@ -1377,130 +1247,6 @@ check_expired_tbufs()
         }
       }
     }
-}
-
-static struct share_msgq *
-q_addmsg(struct share_msgq *qq, struct chanset_t *chan, char *s)
-{
-  struct share_msgq *q = NULL;
-  int cnt;
-
-  if (!qq) {
-    q = (struct share_msgq *) calloc(1, sizeof(struct share_msgq));
-
-    q->chan = chan;
-    q->next = NULL;
-    q->msg = strdup(s);
-    return q;
-  }
-  cnt = 0;
-  for (q = qq; q->next; q = q->next)
-    cnt++;
-  if (cnt > 1000)
-    return NULL;                /* Return null: did not alter queue */
-  q->next = (struct share_msgq *) calloc(1, sizeof(struct share_msgq));
-
-  q = q->next;
-  q->chan = chan;
-  q->next = NULL;
-  q->msg = strdup(s);
-  return qq;
-}
-
-#ifdef HUB
-/* Add stuff to a specific bot's tbuf.
- */
-static void
-q_tbuf(char *bot, char *s, struct chanset_t *chan)
-{
-  struct share_msgq *q = NULL;
-  tandbuf *t = NULL;
-
-  for (t = tbuf; t && t->bot[0]; t = t->next)
-    if (!egg_strcasecmp(t->bot, bot)) {
-      if (chan) {
-        fr.match = (FR_CHAN | FR_BOT);
-        get_user_flagrec(get_user_by_handle(userlist, bot), &fr, chan->dname);
-      }
-      if ((q = q_addmsg(t->q, chan, s)))
-        t->q = q;
-      break;
-    }
-}
-#endif /* HUB */
-
-/* Add stuff to the resync buffers.
- */
-static void
-q_resync(char *s, struct chanset_t *chan)
-{
-  struct share_msgq *q = NULL;
-  tandbuf *t = NULL;
-
-  for (t = tbuf; t && t->bot[0]; t = t->next) {
-    if (chan) {
-      fr.match = (FR_CHAN | FR_BOT);
-      get_user_flagrec(get_user_by_handle(userlist, t->bot), &fr, chan->dname);
-    }
-    if ((q = q_addmsg(t->q, chan, s)))
-      t->q = q;
-  }
-}
-
-/* Is bot in resync list?
- */
-static int
-can_resync(char *bot)
-{
-  tandbuf *t = NULL;
-
-  for (t = tbuf; t && t->bot[0]; t = t->next)
-    if (!egg_strcasecmp(bot, t->bot))
-      return 1;
-  return 0;
-}
-
-/* Dump the resync buffer for a bot.
- */
-void
-dump_resync(int idx)
-{
-  struct share_msgq *q = NULL;
-  tandbuf *t = NULL;
-
-  for (t = tbuf; t && t->bot[0]; t = t->next)
-    if (!egg_strcasecmp(dcc[idx].nick, t->bot)) {
-      for (q = t->q; q && q->msg[0]; q = q->next) {
-        dprintf(idx, "%s", q->msg);
-      }
-      flush_tbuf(dcc[idx].nick);
-      break;
-    }
-}
-
-/* Give status report on tbufs.
- */
-static void
-status_tbufs(int idx)
-{
-  int count;
-  size_t off = 0;
-  struct share_msgq *q = NULL;
-  char s[121] = "";
-  tandbuf *t = NULL;
-
-  off = 0;
-  for (t = tbuf; t && t->bot[0]; t = t->next)
-    if (off < (110 - HANDLEN)) {
-      off += my_strcpy(s + off, t->bot);
-      count = 0;
-      for (q = t->q; q; q = q->next)
-        count++;
-      off += simple_sprintf(s + off, " (%d), ", count);
-    }
-  if (off) {
-    s[off - 2] = 0;
-    dprintf(idx, "Pending sharebot buffers: %s\n", s);
   }
 }
 
@@ -1785,7 +1531,7 @@ finish_share(int idx)
       for (ue = u2->entries; ue; ue = ue->next)
         if (ue->type && !ue->type->got_share && ue->type->dup_user)
           ue->type->dup_user(u, u2, ue);
-    } 
+    }
   }
   clear_userlist(ou);
 
@@ -1804,7 +1550,7 @@ static void
 start_sending_users(int idx)
 {
   struct userrec *u = NULL;
-  char share_file[1024] = "", s1[64] = "";
+  char share_file[1024] = "";
   int i = 1;
 
   egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%li", tempdir, dcc[idx].nick, now);
@@ -1839,39 +1585,7 @@ start_sending_users(int idx)
     i = dcc_total - 1;
     strcpy(dcc[i].host, dcc[idx].nick); /* Store bot's nick */
     dprintf(idx, "s us %lu %d %lu\n", iptolong(natip[0] ? (IP) inet_addr(natip) : getmyip()), dcc[i].port, dcc[i].u.xfer->length);
-    /* Start up a tbuf to queue outgoing changes for this bot until the
-     * userlist is done transferring.
-     */
-    new_tbuf(dcc[idx].nick);
-    /* Immediately, queue bot hostmasks & addresses (jump-start) - if we
-     * don't override the leaf's local bots.
-     */
-    if (!(dcc[idx].u.bot->uff_flags & UFF_OVERRIDE)) {
-      for (u = userlist; u; u = u->next) {
-        if ((u->flags & USER_BOT)) {
-          struct bot_addr *bi = get_user(&USERENTRY_BOTADDR, u);
-          struct list_type *t = NULL;
-          char s2[1024] = "";
 
-          /* Send hostmasks */
-          for (t = get_user(&USERENTRY_HOSTS, u); t; t = t->next) {
-            egg_snprintf(s2, sizeof s2, "s +bh %s %s\n", u->handle, t->extra);
-            q_tbuf(dcc[idx].nick, s2, NULL);
-          }
-          /* Send address */
-          if (bi)
-            egg_snprintf(s2, sizeof s2, "s c BOTADDR %s %s %d %d\n", u->handle, bi->address, bi->telnet_port, bi->relay_port);
-          q_tbuf(dcc[idx].nick, s2, NULL);
-          fr.match = FR_GLOBAL;
-          fr.global = u->flags;
-
-          build_flags(s1, &fr, NULL);
-          egg_snprintf(s2, sizeof s2, "s a %s %s\n", u->handle, s1);
-          q_tbuf(dcc[idx].nick, s2, NULL);
-        }
-      }
-    }
-    q_tbuf(dcc[idx].nick, "s !\n", NULL);
     /* Unlink the file. We don't really care whether this causes problems
      * for NFS setups. It's not worth the trouble.
      */
@@ -1892,7 +1606,6 @@ cancel_user_xfer(int idx, void *x)
     k = 1;
     updatebot(-1, dcc[idx].nick, '-', 0);
   }
-  flush_tbuf(dcc[idx].nick);
   if (dcc[idx].status & STAT_SHARE) {
     if (dcc[idx].status & STAT_GETTING) {
       j = 0;
@@ -1920,8 +1633,6 @@ cancel_user_xfer(int idx, void *x)
       }
       putlog(LOG_BOTS, "@", "(Userlist transmit aborted.)");
     }
-    if (allow_resync && (!(dcc[idx].status & STAT_GETTING)) && (!(dcc[idx].status & STAT_SENDING)))
-      new_tbuf(dcc[idx].nick);
   }
   if (!k)
     def_dcc_bot_kill(idx, x);
@@ -1966,14 +1677,12 @@ share_report(int idx, int details)
           dprintf(idx, "    Aggressively sharing with %s.\n", dcc[i].nick);
         }
       }
-    status_tbufs(idx);
   }
 }
 
 void
 share_init()
 {
-
   timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
   timer_create_secs(1, "check_delay", (Function) check_delay);
   def_dcc_bot_kill = DCC_BOT.kill;
@@ -1981,4 +1690,3 @@ share_init()
   uff_init();
   uff_addtable(internal_uff_table);
 }
-

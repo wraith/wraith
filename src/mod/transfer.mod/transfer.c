@@ -605,10 +605,10 @@ void dcc_get(int idx, char *buf, int len)
 	  y = x;
       if (y != 0)
 	dcc[y].status &= ~STAT_SENDING;
-      putlog(LOG_BOTS, "*",TRANSFER_COMPLETED_USERFILE, dcc[y].nick);
+      putlog(LOG_BOTS, "*", TRANSFER_COMPLETED_USERFILE, dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
       /* Any sharebot things that were queued: */
-      dump_resync(y);
+      dprintf(y, "s !\n");
       xnick[0] = 0;
     } else if (!strcmp(dcc[idx].nick, "*binary")) {
       int x, y = 0;
