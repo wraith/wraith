@@ -526,7 +526,7 @@ readconf(char *fname, int bits)
 
     sdprintf("CONF LINE: %s", line);
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
-    if (enc && (char) line[0] > (char) 127) {
+    if (enc && line[0] > '~') {
       sdprintf("line %d, char %c ", i, line[0]);
       werr(ERR_CONFBADENC);
     } else {                    /* line is good to parse */
