@@ -278,18 +278,15 @@ void cache_my_ip()
   egg_memset(&cached_myip6_so, 0, sizeof(union sockaddr_union));
 
   if (conf.bot->ip6) {
-    sdprintf("ip6: %s", conf.bot->ip6);
     if (get_ip(conf.bot->ip6, &cached_myip6_so))
       any = 1;
   } else if (conf.bot->host6) {
-    sdprintf("host6: %s", conf.bot->host6);
     if (get_ip(conf.bot->host6, &cached_myip6_so))
       any = 1;
   } else
     any = 1;
 
   if (any) {
-    sdprintf("IPV6 addr_any is set.");
     cached_myip6_so.sin6.sin6_family = AF_INET6;
     cached_myip6_so.sin6.sin6_addr = in6addr_any;
   }
@@ -302,15 +299,17 @@ void cache_my_ip()
     if (get_ip(conf.bot->host, &cached_myip4_so))
       error = 2;
   } else {
+/*
     char s[121] = "";
 
     gethostname(s, sizeof(s));
+
     if (get_ip(s, &cached_myip4_so)) {
+*/
       /* error = 3; */
-      sdprintf("IPV4 addr_any is set.");
       cached_myip4_so.sin.sin_family = AF_INET;
       cached_myip4_so.sin.sin_addr.s_addr = INADDR_ANY;
-    }
+//    }
   }
 
   if (error) {
