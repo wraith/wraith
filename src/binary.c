@@ -13,6 +13,7 @@
 #include "salt.h"
 #include "misc_file.h"
 
+#ifndef CYGWIN_HACKS
 encdata_t encdata = {
   "AAAAAAAAAAAAAAAA",
   ""
@@ -95,3 +96,4 @@ bin_md5(const char *fname, int todo)
   free(buf);
   return hash;
 }
+#endif /* !CYGWIN_HACKS */
