@@ -292,7 +292,7 @@ static void dtx_arg(int argc, char *argv[])
         readconf(optarg, CONF_ENC);
         fix_tilde(&conf.binpath);
         parseconf(0);
-        conf_to_bin(&conf, 1, 6);		/* this will exit() in write_settings() */
+        conf_to_bin(&conf, 0, 6);		/* this will exit() in write_settings() */
       case 'B':
         localhub = 0;
         used_B = 1;
