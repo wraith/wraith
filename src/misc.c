@@ -647,6 +647,8 @@ void kill_bot(char *s1, char *s2)
 void 
 restart(int idx)
 {
+  char buf[1024] = "";
+
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
@@ -657,10 +659,11 @@ restart(int idx)
     botnet_send_chat(-1, conf.bot->nick, "Updating...");
     botnet_send_bye();
   }
-  fatal(idx <= 0x7FF0 ? "Updating..." : NULL, 1);
+  fatal(idx <= 0x7FF0 && idx != -1 ? "Updating..." : NULL, 1);
   usleep(2000 * 500);
   unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
-  system(binname); /* start new bot. */
+  sprintf(buf, "%s -B %s\n", binname, conf.bot->nick);
+  system(buf); /* start new bot. */
   exit(0);
 }
 
