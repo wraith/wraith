@@ -504,6 +504,11 @@
 #define isupdatehub ((int (*)(void))global[306])
 #define norestruct (*(int*)global[307])
 #define botlink ((int (*)(char *, int, char *))global[308])
+/* 309 - 312 */
+#define makeplaincookie ((void (*)(char *, char *, char *))global[309])
+#define kickprefix ((char *)(global[310]))
+#define bankickprefix ((char *)(global[311]))
+#define deflag_user ((void (*)(struct userrec *, int, char *))global[312])
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
  * file for it ;)

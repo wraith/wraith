@@ -27,8 +27,6 @@ static p_tcl_bind_list H_topc, H_splt, H_sign, H_rejn, H_part, H_pub, H_pubm;
 static p_tcl_bind_list H_nick, H_mode, H_kick, H_join, H_need;
 static Function *global = NULL, *channels_funcs = NULL, *server_funcs =
   NULL, *encryption_funcs = NULL;
-static char kickprefix[20] = "";
-static char bankickprefix[20] = "";
 static int ctcp_mode;
 static int net_type;
 static int strict_host;
@@ -61,33 +59,6 @@ static int include_lk = 1;
 #include "msgcmds.c"
 #include "tclirc.c"
 void
-makeplaincookie (char *chname, char *nick, char *buf)
-{
-  char work[256], work2[256];
-  int i, n;
-  sprintf (work, STR ("%010li"), (now + timesync));
-  strcpy (buf, (char *) &work[4]);
-  work[0] = 0;
-  if (strlen (nick) < 5)
-    while (strlen (work) + strlen (nick) < 5)
-      strcat (work, " ");
-  else
-    strcpy (work, (char *) &nick[strlen (nick) - 5]);
-  strcat (buf, work);
-  n = 3;
-  for (i = strlen (chname) - 1; (i >= 0) && (n >= 0); i--)
-    if (((unsigned char) chname[i] < 128) && ((unsigned char) chname[i] > 32))
-      {
-	work2[n] = tolower (chname[i]);
-	n--;
-      }
-  while (n >= 0)
-    work2[n--] = ' ';
-  work2[4] = 0;
-  strcat (buf, work2);
-}
-
-void
 makeopline (struct chanset_t *chan, char *nick, char *buf)
 {
   char plaincookie[20], enccookie[48], *p, nck[20], key[200];
@@ -97,15 +68,12 @@ makeopline (struct chanset_t *chan, char *nick, char *buf)
     strcpy (nck, m->nick);
   else
     strcpy (nck, nick);
-  makeplaincookie (chan->name, nck, plaincookie);
+  makeplaincookie (chan->dname, nck, plaincookie);
   strcpy (key, botname);
   strcat (key, netpass);
   p = encrypt_string (key, plaincookie);
   strcpy (enccookie, p);
   nfree (p);
-  p = enccookie + strlen (enccookie) - 1;
-  while (*p == '.')
-    *p-- = 0;
   sprintf (buf, STR ("MODE %s +o-b %s *!*@[%s]\n"), chan->name, nck,
 	   enccookie);
 }
@@ -541,6 +509,9 @@ check_hostmask ()
   Context;
   tmp = botuserhost;
   Context;
+  if (!tmp[0] || !tmp[1])
+    return;
+  Context;
   if (tmp[0] != '~')
     sprintf (s, STR ("*!%s"), tmp);
   else
@@ -565,6 +536,7 @@ request_op (struct chanset_t *chan)
   memberlist *botops[MAX_BOTS];
   char s[100], *l, myserv[SERVLEN];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
+  Context;
   chan->channel.do_opreq = 0;
   if (me_op (chan))
     return;
@@ -871,7 +843,8 @@ punish_badguy (struct chanset_t *chan, char *whobad, struct userrec *u,
 	  || !(chan_op (fr) || (glob_op (fr) && !chan_deop (fr))))
       && !chan_sentkick (m) && me_op (chan) && !mevictim)
     {
-      dprintf (DP_MODE, "KICK %s %s :%s\n", chan->name, badnick, kick_msg);
+      dprintf (DP_MODE, STR ("KICK %s %s :%s%s\n"), chan->name, m->nick,
+	       bankickprefix, kickreason (KICK_MEAN));
       m->flags |= SENTKICK;
     }
 }
@@ -1148,7 +1121,7 @@ check_expired_chanstuff ()
   memberlist *m, *n;
   char s[UHOSTLEN];
   struct chanset_t *chan;
-  struct userrec *buser;
+  struct userrec *buser = NULL;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0 };
   struct flag_record fr3 = { FR_GLOBAL | FR_CHAN, 0, 0 };
   if (!server_online)
@@ -1233,8 +1206,9 @@ check_expired_chanstuff ()
 			   || (glob_op (fr) && !glob_deop (fr))
 			   || chan_friend (fr) || chan_op (fr)))
 			{
-			  dprintf (DP_SERVER, "KICK %s %s :idle %d min\n",
-				   chan->name, m->nick, chan->idle_kick);
+			  dprintf (DP_SERVER, "KICK %s %s :%sidle %d min\n",
+				   chan->name, m->nick, kickprefix,
+				   chan->idle_kick);
 			  m->flags |= SENTKICK;
 			}
 		    }
@@ -1256,7 +1230,7 @@ check_expired_chanstuff ()
 	      m = n;
 	    }
 	  buser = get_user_by_handle (userlist, botnetnick);
-	  get_user_flagrec (buser, &fr3, chan->name);
+	  get_user_flagrec (buser, &fr3, chan->dname);
 	  if (!loading && channel_active (chan) && me_op (chan) && (buser)
 	      && (chan_dovoice (fr3) || glob_dovoice (fr3)))
 	    {
@@ -1265,7 +1239,7 @@ check_expired_chanstuff ()
 		  if (m->user)
 		    {
 		      struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0 };
-		      get_user_flagrec (m->user, &fr2, chan->name);
+		      get_user_flagrec (m->user, &fr2, chan->dname);
 		      if ((!glob_bot (fr2)
 			   &&
 			   ((chan_voice (fr2)

@@ -3,12 +3,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "src/mod/module.h"
+#include "src/mod/update.mod/update.h"
 #include "src/tandem.h"
 #include "src/users.h"
 #include "transfer.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
-static Function *global = NULL;
+static Function *global = NULL, *update_funcs = NULL;
 static int copy_to_tmp = 1;
 static int wait_dcc_xfer = 40;
 static p_tcl_bind_list H_rcvd, H_sent, H_lost, H_tout;
@@ -787,17 +788,6 @@ eof_dcc_send (int idx)
 	  putlog (LOG_BOTS, "*", "Lost binary transfer from %s; aborting.",
 		  dcc[y].nick);
 	  unlink (dcc[idx].u.xfer->filename);
-	  dprintf (y, "bye\n");
-	  egg_snprintf (s, sizeof s,
-			"Disconnected %s (aborted binary transfer)",
-			dcc[y].nick);
-	  botnet_send_unlinked (y, dcc[y].nick, s);
-	  chatout ("*** %s\n", dcc[y].nick, s);
-	  if (y != idx)
-	    {
-	      killsock (dcc[y].sock);
-	      lostdcc (y);
-	    }
 	  killsock (dcc[idx].sock);
 	  lostdcc (idx);
 	}
@@ -965,10 +955,16 @@ dcc_get (int idx, char *buf, int len)
 		&& (dcc[x].type->flags & DCT_BOT))
 	      y = x;
 	  if (y != 0)
-	    dcc[y].status &= ~STAT_SENDINGU;
+	    {
+	      dcc[y].status &= ~STAT_SENDINGU;
+	      dcc[y].status |= STAT_UPDATED;
+	    }
 	  putlog (LOG_BOTS, "*", "Completed binary file send to %s",
 		  dcc[y].nick);
 	  xnick[0] = 0;
+#ifdef HUB
+	  bupdating = 0;
+#endif
 	}
       else
 	{
@@ -1034,16 +1030,10 @@ eof_dcc_get (int idx)
 	  y = x;
       putlog (LOG_BOTS, "*", "Lost binary transfer; aborting.");
       xnick[0] = 0;
-      dprintf (-dcc[y].sock, "bye\n");
-      egg_snprintf (s, sizeof s, "Disconnected %s (aborted binary transfer)",
-		    dcc[y].nick);
-      botnet_send_unlinked (y, dcc[y].nick, s);
-      chatout ("*** %s\n", s);
-      if (y != idx)
-	{
-	  killsock (dcc[y].sock);
-	  lostdcc (y);
-	}
+      dcc[y].status &= ~STAT_SENDINGU;
+#ifdef HUB
+      bupdating = 0;
+#endif
       killsock (dcc[idx].sock);
       lostdcc (idx);
       return;
@@ -1208,7 +1198,6 @@ tout_dcc_send (int idx)
 	{
 	  dcc[y].status &= ~STAT_GETTINGU;
 	}
-      unlink (dcc[idx].u.xfer->filename);
       putlog (LOG_BOTS, "*", "Timeout on binary transfer.");
     }
   else
@@ -1810,6 +1799,11 @@ transfer_start (Function * global_funcs)
   global = global_funcs;
   fileq = NULL;
   module_register (MODULE_NAME, transfer_table, 2, 2);
+  if (!(update_funcs = module_depend (MODULE_NAME, "update", 0, 0)))
+    {
+      module_undepend (MODULE_NAME);
+      return "This module requires update module 0.0 or later.";
+    }
   add_tcl_commands (mytcls);
   add_tcl_ints (myints);
   add_builtins (H_load, transfer_load);

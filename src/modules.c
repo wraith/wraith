@@ -8,7 +8,8 @@ extern Tcl_Interp *interp;
 extern struct userrec *userlist, *lastuser;
 extern char tempdir[], botnetnick[], botname[], natip[], hostname[],
   origbotname[], botuser[], admin[], userfile[], ver[], notify_new[],
-  version[], quit_msg[], hostname6[], netpass[], thepass[];
+  kickprefix[], bankickprefix[], version[], quit_msg[], hostname6[],
+  netpass[], thepass[];
 extern int noshare, loading, role, dcc_total, egg_numver, userfile_perm,
   use_console_r, ignore_time, must_be_owner, debug_output, default_flags,
   norestruct, max_dcc, share_greet, password_timeout, localhub,
@@ -249,7 +250,8 @@ Function global_table[] = { (Function) mod_malloc, (Function) mod_free,
     (Function) getting_users, (Function) add_builtins_dcc,
     (Function) rem_builtins_dcc, (Function) & USERENTRY_ADDED,
     (Function) thepass, (Function) isupdatehub, (Function) & norestruct,
-    (Function) botlink
+    (Function) botlink, (Function) makeplaincookie, (Function) bankickprefix,
+    (Function) kickprefix, (Function) deflag_user
 };
 void
 init_modules (void)

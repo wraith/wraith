@@ -41,6 +41,7 @@
 #define server_lag (*(int *)(server_funcs[39]))
 #define curserv (*(int *)(server_funcs[40))
 #define cursrvname ((char *)(server_funcs[41]))
+#define botrealname ((char *)(server_funcs[42]))
 #else
 #define free_null(ptr)	do {	nfree(ptr);	ptr = NULL;	} while (0)
 #endif

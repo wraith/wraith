@@ -233,7 +233,8 @@ cmd_kickban (struct userrec *u, int idx, char *par)
     do_mask (chan, chan->channel.ban, s1, 'b');
   if (!par[0])
     par = "requested";
-  dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, m->nick, par);
+  dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick,
+	   bankickprefix, par);
   m->flags |= SENTKICK;
   u_addban (chan, s1, dcc[idx].nick, par, now + (60 * chan->ban_time), 0);
   dprintf (idx, "Okay, done.\n");
@@ -374,6 +375,10 @@ cmd_devoice (struct userrec *u, int idx, char *par)
 void
 do_op (char *nick, struct chanset_t *chan)
 {
+  memberlist *m;
+  m = ismember (chan, nick);
+  if (!m)
+    return;
   if (channel_fastop (chan))
     {
       add_mode (chan, '+', 'o', nick);
@@ -920,7 +925,8 @@ cmd_kick (struct userrec *u, int idx, char *par)
       dprintf (idx, "%s is another channel bot!\n", nick);
       return;
     }
-  dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, m->nick, par);
+  dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix,
+	   par);
   m->flags |= SENTKICK;
   dprintf (idx, "Okay, done.\n");
 }
@@ -1248,7 +1254,7 @@ cmd_adduser (struct userrec *u, int idx, char *par)
   char *nick, *hand;
   struct chanset_t *chan;
   memberlist *m = NULL;
-  char s[UHOSTLEN], s1[UHOSTLEN];
+  char s[UHOSTLEN], s1[UHOSTLEN], s3[20];
   char tmp[50], s2[30];
   int atr = u ? u->flags : 0;
   int statichost = 0;
@@ -1343,8 +1349,11 @@ cmd_adduser (struct userrec *u, int idx, char *par)
       set_user (&USERENTRY_ADDED, u, tmp);
       make_rand_str (s2, 10);
       set_user (&USERENTRY_PASS, u, s2);
+      make_rand_str (s3, 10);
+      set_user (&USERENTRY_PASS, u, s3);
       dprintf (idx, "Added [%s]%s with no flags.\n", hand, p1);
       dprintf (idx, STR ("%s's password set to \002%s\002.\n"), hand, s2);
+      dprintf (idx, STR ("%s's secpass set to \002%s\002.\n"), hand, s3);
     }
   else
     {

@@ -5,18 +5,34 @@ static time_t last_invtime = (time_t) 0L;
 static char last_invchan[300] = "";
 #define CHANNEL_ID_LEN 5
 static memberlist *
-newmember (struct chanset_t *chan)
+newmember (struct chanset_t *chan, char *nick)
 {
-  memberlist *x;
-  for (x = chan->channel.member; x && x->nick[0]; x = x->next);
-  x->next = (memberlist *) channel_malloc (sizeof (memberlist));
-  x->next->next = NULL;
-  x->next->nick[0] = 0;
-  x->next->split = 0L;
-  x->next->last = 0L;
-  x->next->delay = 0L;
+  memberlist *x, *lx, *n;
+  x = chan->channel.member;
+  lx = NULL;
+  while (x && x->nick[0] && (rfc_casecmp (x->nick, nick) < 0))
+    {
+      lx = x;
+      x = x->next;
+    }
+  n = (memberlist *) channel_malloc (sizeof (memberlist));
+  n->next = NULL;
+  strncpy0 (n->nick, nick, sizeof (n->nick));
+  n->split = 0L;
+  n->last = 0L;
+  n->delay = 0L;
+  if (!lx)
+    {
+      n->next = chan->channel.member;
+      chan->channel.member = n;
+    }
+  else
+    {
+      n->next = lx->next;
+      lx->next = n;
+    }
   chan->channel.members++;
-  return x;
+  return n;
 }
 static void
 update_idle (char *chname, char *nick)
@@ -108,7 +124,7 @@ priority_do (struct chanset_t *chan, int opsonly, int action)
       if (!m->user)
 	{
 	  char s[256];
-	  sprintf (s, "%s!%s", m->nick, m->userhost);
+	  sprintf (s, STR ("%s!%s"), m->nick, m->userhost);
 	  m->user = get_user_by_host (s);
 	}
       if (m->user
@@ -116,12 +132,12 @@ priority_do (struct chanset_t *chan, int opsonly, int action)
 	      (USER_BOT | USER_OP)))
 	{
 	  ops++;
-	  if (!strcmp (m->nick, botname))
+	  if (match_my_nick (m->nick))
 	    bpos = (ops - 1);
 	}
       else if (!opsonly || chan_hasop (m))
 	{
-	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0 };
+	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
 	  if (m->user)
 	    get_user_flagrec (m->user, &fr, chan->dname);
 	  if (chan_deop (fr) || glob_deop (fr)
@@ -146,7 +162,7 @@ priority_do (struct chanset_t *chan, int opsonly, int action)
     {
       if (!opsonly || chan_hasop (m))
 	{
-	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0 };
+	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
 	  if (m->user)
 	    get_user_flagrec (m->user, &fr, chan->dname);
 	  if (chan_deop (fr) || glob_deop (fr)
@@ -169,8 +185,9 @@ priority_do (struct chanset_t *chan, int opsonly, int action)
 		    {
 		      actions++;
 		      sent++;
-		      dprintf (DP_MODE, "KICK %s %s :%s%s\n", chan->name,
-			       m->nick, kickprefix, kickreason (KICK_CLOSED));
+		      dprintf (DP_MODE, STR ("KICK %s %s :%s%s\n"),
+			       chan->name, m->nick, kickprefix,
+			       kickreason (KICK_CLOSED));
 		      m->flags |= SENTKICK;
 		      if (actions >= ct)
 			return;
@@ -190,7 +207,7 @@ priority_do (struct chanset_t *chan, int opsonly, int action)
     {
       if (!opsonly || chan_hasop (m))
 	{
-	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0 };
+	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
 	  if (m->user)
 	    get_user_flagrec (m->user, &fr, chan->dname);
 	  if (chan_deop (fr) || glob_deop (fr)
@@ -212,8 +229,9 @@ priority_do (struct chanset_t *chan, int opsonly, int action)
 		  else if ((action == PRIO_KICK) && !chan_sentkick (m))
 		    {
 		      actions++;
-		      dprintf (DP_MODE, "KICK %s %s :%s%s\n", chan->name,
-			       m->nick, kickprefix, kickreason (KICK_CLOSED));
+		      dprintf (DP_MODE, STR ("KICK %s %s :%s%s\n"),
+			       chan->name, m->nick, kickprefix,
+			       kickreason (KICK_CLOSED));
 		      m->flags |= SENTKICK;
 		      if ((actions >= ct) || (sent > 5))
 			return;
@@ -229,6 +247,7 @@ target_priority (struct chanset_t *chan, memberlist * target, int opsonly)
 {
   memberlist *m;
   int ops = 0, targets = 0, bpos = 0, ft = 0, ct = 0, tp = (-1), pos = 0;
+  return 1;
   for (m = chan->channel.member; m && m->nick[0]; m = m->next)
     {
       if (m->user
@@ -236,12 +255,12 @@ target_priority (struct chanset_t *chan, memberlist * target, int opsonly)
 	      (USER_BOT | USER_OP)))
 	{
 	  ops++;
-	  if (!strcmp (m->nick, botname))
+	  if (match_my_nick (m->nick))
 	    bpos = ops;
 	}
       else if (!opsonly || chan_hasop (m))
 	{
-	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0, 0 };
+	  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
 	  if (m->user)
 	    get_user_flagrec (m->user, &fr, chan->dname);
 	  if (chan_deop (fr) || glob_deop (fr)
@@ -410,8 +429,8 @@ detect_chan_flood (char *floodnick, char *floodhost, char *from,
 	  if (!chan_sentkick (m) && me_op (chan))
 	    {
 	      putlog (LOG_MODES, chan->dname, IRC_FLOODKICK, floodnick);
-	      dprintf (DP_MODE, "KICK %s %s :%s\n", chan->name, floodnick,
-		       CHAN_FLOOD);
+	      dprintf (DP_MODE, STR ("KICK %s %s :%s%s\n"), chan->name,
+		       floodnick, kickprefix, kickreason (KICK_FLOOD));
 	      m->flags |= SENTKICK;
 	    }
 	  return 1;
@@ -450,11 +469,12 @@ detect_chan_flood (char *floodnick, char *floodhost, char *from,
 		    {
 		      m->flags |= SENTKICK;
 		      if (which == FLOOD_JOIN)
-			dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name,
-				 m->nick, IRC_JOIN_FLOOD);
+			dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name,
+				 m->nick, kickprefix, IRC_JOIN_FLOOD);
 		      else
-			dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name,
-				 m->nick, IRC_NICK_FLOOD);
+			dprintf (DP_SERVER, STR ("KICK %s %s :%s%s\n"),
+				 chan->name, m->nick, kickprefix,
+				 kickreason (KICK_NICKFLOOD));
 		    }
 		}
 	    }
@@ -464,8 +484,8 @@ detect_chan_flood (char *floodnick, char *floodhost, char *from,
 	    {
 	      putlog (LOG_MODES, chan->dname, "Kicking %s, for mass kick.",
 		      floodnick);
-	      dprintf (DP_MODE, "KICK %s %s :%s\n", chan->name, floodnick,
-		       IRC_MASSKICK);
+	      dprintf (DP_MODE, STR ("KICK %s %s :%s%s\n"), chan->name,
+		       floodnick, kickprefix, kickreason (KICK_KICKFLOOD));
 	      m->flags |= SENTKICK;
 	    }
 	  return 1;
@@ -474,8 +494,8 @@ detect_chan_flood (char *floodnick, char *floodhost, char *from,
 	    {
 	      putlog (LOG_MODES, chan->dname, CHAN_MASSDEOP, chan->dname,
 		      from);
-	      dprintf (DP_MODE, "KICK %s %s :%s\n", chan->name, floodnick,
-		       CHAN_MASSDEOP_KICK);
+	      dprintf (DP_MODE, STR ("KICK %s %s :%s%s\n"), chan->name,
+		       floodnick, kickprefix, kickreason (KICK_MASSDEOP));
 	      m->flags |= SENTKICK;
 	    }
 	  return 1;
@@ -487,6 +507,7 @@ static char *
 quickban (struct chanset_t *chan, char *uhost)
 {
   static char s1[512];
+  Context;
   maskhost (uhost, s1);
   if ((strlen (s1) != 1) && (strict_host == 0))
     s1[2] = '*';
@@ -541,15 +562,16 @@ kick_all (struct chanset_t *chan, char *hostmask, char *comment, int bantype)
 	  l = strlen (chan->name) + strlen (kicknick) + strlen (comment) + 5;
 	  if ((kick_method != 0 && k == kick_method) || (l > 480))
 	    {
-	      dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, kicknick,
-		       comment);
+	      dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, kicknick,
+		       kickprefix, comment);
 	      k = 0;
 	      kicknick[0] = 0;
 	    }
 	}
     }
   if (k > 0)
-    dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, kicknick, comment);
+    dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, kicknick,
+	     kickprefix, comment);
 }
 static void
 refresh_ban_kick (struct chanset_t *chan, char *user, char *nick)
@@ -854,6 +876,7 @@ check_this_member (struct chanset_t *chan, char *nick, struct flag_record *fr)
 {
   memberlist *m;
   char s[UHOSTLEN], *p;
+  Context;
   m = ismember (chan, nick);
   if (!m || match_my_nick (nick) || !me_op (chan))
     return;
@@ -898,17 +921,10 @@ check_this_member (struct chanset_t *chan, char *nick, struct flag_record *fr)
 	  check_exemptlist (chan, s);
 #endif
 	  quickban (chan, m->userhost);
+	  Context;
 	  p = get_user (&USERENTRY_COMMENT, m->user);
-	  if (p[0])
-	    {
-	      dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, m->nick,
-		       p ? p : IRC_POLITEKICK);
-	    }
-	  else
-	    {
-	      dprintf (DP_SERVER, STR ("KICK %s %s :%s%s\n"), chan->name,
-		       m->nick, bankickprefix, kickreason (KICK_KUSER));
-	    }
+	  dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick,
+		   bankickprefix, p ? p : kickreason (KICK_KUSER));
 	  m->flags |= SENTKICK;
 	}
     }
@@ -948,6 +964,7 @@ recheck_channel (struct chanset_t *chan, int dobans)
   static int stacking = 0;
   int botops = 0, botnonops = 0, nonbotops = 0;
   int stop_reset = 0;
+  Context;
   if (stacking)
     return;
   if (!userlist)
@@ -1019,18 +1036,23 @@ recheck_channel (struct chanset_t *chan, int dobans)
   for (m = chan->channel.member; m && m->nick[0]; m = m->next)
     {
       sprintf (s, "%s!%s", m->nick, m->userhost);
+      Context;
       if (!m->user && !m->tried_getuser)
 	{
 	  m->tried_getuser = 1;
 	  m->user = get_user_by_host (s);
 	}
+      Context;
       get_user_flagrec (m->user, &fr, chan->dname);
+      Context;
       if (glob_bot (fr) && chan_hasop (m) && !match_my_nick (m->nick))
 	stop_reset = 1;
       check_this_member (chan, m->nick, &fr);
     }
+  Context;
   if (channel_closed (chan))
     channel_check_locked (chan);
+  Context;
   if (dobans)
     {
       if (channel_nouserbans (chan) && !stop_reset)
@@ -1172,7 +1194,7 @@ got352or4 (struct chanset_t *chan, char *user, char *host, char *serv,
   m = ismember (chan, nick);
   if (!m)
     {
-      m = newmember (chan);
+      m = newmember (chan, nick);
       m->joined = m->split = m->delay = 0L;
       m->flags = 0;
       m->last = now;
@@ -1814,7 +1836,7 @@ gotjoin (char *from, char *chname)
 	    {
 	      if (m)
 		killmember (chan, nick);
-	      m = newmember (chan);
+	      m = newmember (chan, nick);
 	      m->joined = now;
 	      m->split = 0L;
 	      m->flags = 0;
@@ -2242,8 +2264,8 @@ gotmsg (char *from, char *msg)
 	    }
 	  if (kick_fun)
 	    {
-	      dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, nick,
-		       IRC_FUNKICK);
+	      dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick,
+		       kickprefix, IRC_FUNKICK);
 	      m->flags |= SENTKICK;
 	    }
 	}
@@ -2407,8 +2429,8 @@ gotnotice (char *from, char *msg)
 	    }
 	  if (kick_fun)
 	    {
-	      dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, nick,
-		       IRC_FUNKICK);
+	      dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick,
+		       kickprefix, IRC_FUNKICK);
 	      m->flags |= SENTKICK;
 	    }
 	}

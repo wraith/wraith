@@ -25,22 +25,25 @@ int updated = 0;
 static void
 update_ufno (int idx, char *par)
 {
-  putlog (LOG_BOTS, "*", "nary file rejected by %s: %s", dcc[idx].nick, par);
+  putlog (LOG_BOTS, "*", "binary file rejected by %s: %s", dcc[idx].nick,
+	  par);
   dcc[idx].status &= ~STAT_OFFEREDU;
 } static void
 update_ufyes (int idx, char *par)
 {
   if (dcc[idx].status & STAT_OFFEREDU)
     {
-      dcc[idx].status &= ~STAT_OFFEREDU;
-      dcc[idx].status |= STAT_SENDINGU;
       start_sending_binary (idx);
     }
 }
 static void
 update_fileq (int idx, char *par)
 {
+  if (dcc[idx].status & STAT_GETTINGU)
+    return;
 #ifdef LEAF
+  if (updated)
+    return;
   if (localhub)
     {
 #else
@@ -48,7 +51,6 @@ update_fileq (int idx, char *par)
     {
 #endif
       dprintf (idx, "sb uy\n");
-      dcc[idx].status |= STAT_GETTINGU;
     }
   else if (isupdatehub ())
     {
@@ -112,11 +114,11 @@ update_ufsend (int idx, char *par)
 }}} static void
 update_version (int idx, char *par)
 {
+  return;
 #ifdef HUB
   if (bupdating)
     return;
-  dcc[idx].status &=
-    ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU | STAT_UPDATED);
+  dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
   if ((dcc[idx].u.bot->numver < egg_numver) && (isupdatehub ()))
     {
       dprintf (idx, "sb u?\n");
@@ -134,14 +136,13 @@ static void
 got_nu (char *botnick, char *code, char *par)
 {
   int newver = 0;
+#ifdef LEAF
   tand_t *bot;
-#ifdef HUB
-  return;
-#endif
+  struct bot_addr *bi, *obi;
+  struct userrec *u1;
   bot = tandbot;
   if (!strcmp (bot->bot, botnick))
     return;
-#ifdef LEAF
   if (!localhub)
     return;
   if (localhub && updated)
@@ -152,10 +153,26 @@ got_nu (char *botnick, char *code, char *par)
   newver = atoi (newsplit (&par));
   if (newver > egg_numver)
     {
-      norestruct = 1;
+      Context;
+#ifdef LEAF
+      u1 = get_user_by_handle (userlist, botnetnick);
+      obi = get_user (&USERENTRY_BOTADDR, u1);
+      bi = user_malloc (sizeof (struct bot_addr));
+      bi->uplink = user_malloc (strlen (botnick) + 1);
+      strcpy (bi->uplink, botnick);
+      bi->address = user_malloc (strlen (obi->address) + 1);
+      strcpy (bi->address, obi->address);
+      bi->telnet_port = obi->telnet_port;
+      bi->relay_port = obi->relay_port;
+      bi->hublevel = obi->hublevel;
+      set_user (&USERENTRY_BOTADDR, u1, bi);
+      putlog (LOG_MISC, "*", "Changed uplink to %s for update.", botnick);
       botunlink (-2, bot->bot, "Restructure for update.");
       usleep (1000 * 500);
       botlink ("", -3, botnick);
+#else
+      putlog (LOG_MISC, "*", "I need to be updated with %d", newver);
+#endif
     }
 }
 static cmd_t update_bot[] =
@@ -182,7 +199,7 @@ finish_update (int idx)
   uid_t id;
   char buf[1024];
   char *buf2;
-  int result, i, ic, j = -1;
+  int i, j = -1;
   id = geteuid ();
   pw = getpwuid (id);
   for (i = 0; i < dcc_total; i++)
@@ -191,35 +208,14 @@ finish_update (int idx)
       j = i;
   if (j == -1)
     return;
-  ic = 0;
-next:;
-  ic++;
-  if (ic > 5)
-    {
-      putlog (LOG_MISC, "*", "COULD NOT UNCOMPRESS BINARY");
-      return;
-    }
-  result = 0;
-  result = is_compressedfile (dcc[idx].u.xfer->filename);
-  if (result == COMPF_COMPRESSED)
-    {
-      uncompress_file (dcc[idx].u.xfer->filename);
-      usleep (1000 * 500);
-      result = is_compressedfile (dcc[idx].u.xfer->filename);
-      if (result == COMPF_COMPRESSED)
-	goto next;
-    }
   sprintf (buf, "%s%s", pw->pw_dir, strrchr (dcc[idx].u.xfer->filename, '/'));
   movefile (dcc[idx].u.xfer->filename, buf);
   chmod (buf, S_IRUSR | S_IWUSR | S_IXUSR);
-  Context;
   sprintf (buf, "%s", strrchr (buf, '/'));
-  Context;
   buf2 = buf;
-  Context;
   buf2++;
-  Context;
   putlog (LOG_MISC, "*", "Updating with binary: %s", buf2);
+  Context;
   if (updatebin (0, buf2, 1))
     putlog (LOG_MISC, "*", "Failed to update to new binary..");
 #ifdef LEAF
@@ -232,12 +228,14 @@ start_sending_binary (int idx)
 {
 #ifdef HUB
   char update_file[1024];
-  char buf2[1024];
+  char buf2[1024], buf3[1024];
   struct stat sb;
-  int i = 1, result, ic;
+  int i = 1;
+  dcc[idx].status &= ~STAT_OFFEREDU;
   if (bupdating)
     return;
   bupdating = 1;
+  dcc[idx].status |= STAT_SENDINGU;
   putlog (LOG_BOTS, "*", "Sending binary send request to %s", dcc[idx].nick);
   if (!strcmp ("*", dcc[idx].u.bot->sysname))
     {
@@ -263,27 +261,10 @@ start_sending_binary (int idx)
 	      dcc[idx].nick, update_file);
       return;
     }
-  ic = 0;
-next:;
-  ic++;
-  if (ic > 5)
-    {
-      putlog (LOG_MISC, "*", "COULD NOT COMPRESS BINARY");
-      goto end;
-    }
-  result = 0;
-  result = is_compressedfile (update_file);
-  if (result == COMPF_UNCOMPRESSED)
-    {
-      compress_file (update_file, 9);
-      usleep (1000 * 500);
-    }
-  result = is_compressedfile (update_file);
-  if (result == COMPF_UNCOMPRESSED)
-    goto next;
-end:;
-  if ((i =
-       raw_dcc_send (update_file, "*binary", "(binary)", update_file)) > 0)
+  sprintf (buf3, "%s.%s", tempdir, update_file);
+  unlink (buf3);
+  copyfile (update_file, buf3);
+  if ((i = raw_dcc_send (buf3, "*binary", "(binary)", buf3)) > 0)
     {
       putlog (LOG_BOTS, "*", "%s -- can't send new binary",
 	      i == DCCSEND_FULL ? "NO MORE DCC CONNECTIONS" : i ==
@@ -301,8 +282,6 @@ end:;
 	       iptolong (natip[0] ? (IP) inet_addr (natip) : getmyip ()),
 	       dcc[i].port, dcc[i].u.xfer->length);
     }
-  dcc[idx].status |= (STAT_UPDATED);
-  bupdating = 0;
 #endif
 }
 static void (*def_dcc_bot_kill) (int, void *) = 0;
@@ -365,14 +344,17 @@ check_updates ()
   if (!isupdatehub ())
     return;
   cnt++;
-  if ((cnt == 3) && bupdating)
+  if ((cnt > 5) && bupdating)
     bupdating = 0;
   if (bupdating)
     return;
   cnt = 0;
   for (i = 0; i < dcc_total; i++)
     {
-      if (dcc[i].type->flags & DCT_BOT && !(dcc[i].status & STAT_UPDATED))
+      if (dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE)
+	  && !(dcc[i].status & STAT_SENDINGU)
+	  && !(dcc[i].status & STAT_OFFEREDU)
+	  && !(dcc[i].status & STAT_UPDATED))
 	{
 	  dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
 	  if ((dcc[i].u.bot->numver < egg_numver) && (isupdatehub ()))
@@ -463,7 +445,12 @@ EXPORT_SCOPE char *update_start ();
 static Function update_table[] =
   { (Function) update_start, (Function) update_close,
 (Function) update_expmem, (Function) update_report, (Function) finish_update, (Function) 0, (Function) 0,
-(Function) 0 };
+#ifdef LEAF
+  (Function) 0
+#else
+  (Function) 0, (Function) & bupdating
+#endif
+};
 char *
 update_start (Function * global_funcs)
 {

@@ -28,9 +28,9 @@ int dcc_total = 0;
 int allow_new_telnets = 0;
 int use_telnet_banner = 0;
 char network[41] = "EFnet";
-int password_timeout = 30;
+int password_timeout = 15;
 int bot_timeout = 25;
-int identtimeout = 5;
+int identtimeout = 10;
 int dupwait_timeout = 5;
 int protect_telnet = 0;
 int flood_telnet_thr = 10;
@@ -65,6 +65,8 @@ rand_dccresp ()
 	"mIRC v6.03 File Server\n\nUse: cd dir ls get read help exit\n[\\]\n";
     case 8:
       return "got any porn?\n";
+    case 9:
+      return "?\n";
     default:
       return "";
     }
@@ -192,6 +194,7 @@ send_timesync (idx)
 	  if ((dcc[i].type == &DCC_BOT) && (bot_aggressive_to (dcc[i].user)))
 	    {
 	      dprintf (i, s);
+	      lower_bot_linked (i);
 	    }
 	}
 #else
@@ -428,8 +431,12 @@ eof_dcc_bot_new (int idx)
 } static void
 timeout_dcc_bot_new (int idx)
 {
+#ifdef LEAF
+  putlog (LOG_BOTS, "*", "Timeout: bot link to %s", dcc[idx].nick);
+#else
   putlog (LOG_BOTS, "*", DCC_TIMEOUT, dcc[idx].nick, dcc[idx].host,
 	  dcc[idx].port);
+#endif
   killsock (dcc[idx].sock);
   lostdcc (idx);
 } static void
@@ -462,10 +469,13 @@ dcc_bot (int idx, char *code, int i)
   strip_telnet (dcc[idx].sock, code, &i);
   if (debug_output)
     {
-      if (code[0] == 's')
-	putlog (LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code + 2);
-      else
-	putlog (LOG_BOTNET, "@", "[%s] %s", dcc[idx].nick, code);
+      if (code[0] != 'h' && code[1] != 'l' && code[2] != ' ')
+	{
+	  if (code[0] == 's')
+	    putlog (LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code + 2);
+	  else
+	    putlog (LOG_BOTNET, "@", "[%s] %s", dcc[idx].nick, code);
+	}
     }
   msg = strchr (code, ' ');
   if (msg)

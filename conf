@@ -1,3 +1,4 @@
+#when you make the bot, remove these #lines :)
 #These lines MUST be correctly syntaxed or the bot will not work properly.
 #A conf can be only a hub conf or only a leaf conf. (see README for locations)
 #The first line must contain UID (use "id" in shell to get uid)

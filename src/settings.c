@@ -5,7 +5,6 @@ char netpass[15] = "kd8e3nchasd93dk";	//Just 15 random chars here.. (DO CHANGE)
 
 //This pass will be used to encrypt files and other important things...
 //Just MD5 some word and put the hash in here..
-//An md5 program is include in wraith/md5/, just type ./md5
 char thepass[33] = "5f4dcc3b5aa765d61d8327deb882cf99";
 
 
@@ -42,7 +41,7 @@ char dcc_prefix[1] = "!";	/* Defines the command prefix */
 char owners[2048] = "";
 char hubs[2048] = "";
 
-char mhub[15] = "sbp";		// Put your main hub nick in there, needed for logging, temp fix.
+char mhub[15] = "hub";		// Put your main hub nick in there, needed for logging, temp fix.
 
 void
 init_settings ()
@@ -58,8 +57,6 @@ init_settings ()
 
 //By "ip/hostname" I mean ip OR hostname, I highly recommend setting up dns for your hub with a hostname.
 
-  THIS IS ONLY AN EXAMPLE, THE REAL LINES ARE FURTHER DOWN...
-
 char t_owners[2048] = "\
 nick pass *!u@host *!u@ip *!u@host *!u@host *!u@ip,\
 nick pass *!u@host\
@@ -67,7 +64,7 @@ nick pass *!u@host\
 char t_hubs[2048] = "\
 hubnick ip/hostname port 1 username username,\
 hubnick2 ip/hostname port 2 username username,\
-hubnick3 ip/hostname port 3 username username\       <-- note missing comma
+hubnick3 ip/hostname port 3 username username\
 ";
 
  * Give your main hub the number 1...

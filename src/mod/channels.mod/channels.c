@@ -5,9 +5,6 @@
 static Function *global = NULL;
 static int setstatic;
 static int use_info;
-#ifdef ROLE
-static int role;
-#endif
 static char chanfile[121];
 static int chan_hack;
 static int quiet_save;
@@ -178,45 +175,11 @@ got_cjoin (char *botnick, char *code, char *par)
 #endif
     }
 }
-
-#ifdef ROLE
 static void
 got_role (char *botnick, char *code, char *par)
 {
   role = atoi (par);
   putlog (LOG_DEBUG, "*", "Got role index %i", role);
-} static int
-get_role (char *bot)
-{
-  int rl, i;
-  struct bot_addr *ba;
-  int r[5] = { 0, 0, 0, 0, 0 };
-  struct userrec *u, *u2;
-  u2 = get_user_by_handle (userlist, bot);
-  if (!u2)
-    return 1;
-  for (u = userlist; u; u = u->next)
-    {
-      if (u->flags & USER_BOT)
-	{
-	  if (strcmp (u->handle, bot))
-	    {
-	      ba = get_user (&USERENTRY_BOTADDR, u);
-	      if ((nextbot (u->handle) >= 0) && (ba) && (ba->roleid > 0)
-		  && (ba->roleid < 5))
-		r[(ba->roleid - 1)]++;
-	    }
-	}
-    }
-  rl = 0;
-  for (i = 1; i <= 4; i++)
-    if (r[i] < r[rl])
-      rl = i;
-  rl++;
-  ba = get_user (&USERENTRY_BOTADDR, u2);
-  if (ba)
-    ba->roleid = rl;
-  return rl;
 }
 
 #ifdef HUB
@@ -274,7 +237,6 @@ rebalance_roles ()
 	}
     }
 }
-#endif
 #endif
 static void
 channels_checkslowjoin ()
@@ -826,12 +788,8 @@ cmd_t channels_bot[] = { {"cjoin", "", (Function) got_cjoin, NULL}
 , {"cset", "", (Function) got_cset, NULL}
 , {"cycle", "", (Function) got_cycle, NULL}
 , {"down", "", (Function) got_down, NULL}
-,
-#ifdef ROLE
-{"rl", "", (Function) got_role, NULL}
-,
-#endif
-{"sj", "", (Function) got_sj, NULL}
+, {"rl", "", (Function) got_role, NULL}
+, {"sj", "", (Function) got_sj, NULL}
 , {0, 0, 0, 0}
 };
 static tcl_ints my_tcl_ints[] =
@@ -974,6 +932,9 @@ channels_start (Function * global_funcs)
   add_hook (HOOK_SWITCH_STATIC, (Function) switch_static);
 #ifdef LEAF
   add_hook (HOOK_MINUTELY, (Function) check_limitraise);
+#endif
+#ifdef HUB
+  add_hook (HOOK_30SECONDLY, (Function) rebalance_roles);
 #endif
   add_hook (HOOK_MINUTELY, (Function) check_expired_bans);
 #ifdef S_IRCNET

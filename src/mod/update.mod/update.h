@@ -11,5 +11,8 @@ typedef struct
 } uff_table_t;
 #ifndef MAKING_update
 #define finish_update ((void (*) (int))update_funcs[4])
+#ifdef HUB
+#define bupdating (*(int*)update_funcs[8])
+#endif
 #endif
 #endif

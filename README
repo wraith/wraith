@@ -17,7 +17,7 @@ edit src/settings.c
 Edit pack.conf (dont change anything in this actually.)
 Now, ./bldall pack
 Ignore any warnings, any errors report to bryan
-There are your binaries: leaf, hub
+There are your binaries for the OS you compiled on..: leaf, hub
 
 DONT LOSE: settings.c salt.h
 

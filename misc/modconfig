@@ -370,9 +370,9 @@ EOF
 	#  Create declarations for module _start functions
 	for mc_mod in ${mc_sel_modules}; do
 		echo ${mc_n} ".${mc_c}" 1>&6
-if test ${mc_mod} = "server" || test ${mc_mod} = "irc" || test ${mc_mod} = "ctcp";then echo "#ifdef LEAF" 1>> ${mc_fstatic_h};fi
+if test ${mc_mod} = "server" || test ${mc_mod} = "irc";then echo "#ifdef LEAF" 1>> ${mc_fstatic_h};fi
 		echo "char *${mc_mod}_start();" 1>> ${mc_fstatic_h}
-if test ${mc_mod} = "server" || test ${mc_mod} = "irc" || test ${mc_mod} = "ctcp";then echo "#endif" 1>> ${mc_fstatic_h};fi
+if test ${mc_mod} = "server" || test ${mc_mod} = "irc";then echo "#endif" 1>> ${mc_fstatic_h};fi
 
 	done
 	echo 1>> ${mc_fstatic_h}
@@ -381,9 +381,9 @@ if test ${mc_mod} = "server" || test ${mc_mod} = "irc" || test ${mc_mod} = "ctcp
 	echo "static void link_statics()" 1>> ${mc_fstatic_h}
 	echo "{" 1>> ${mc_fstatic_h}
 	for mc_mod in ${mc_sel_modules}; do
-if test ${mc_mod} = "server" || test ${mc_mod} = "irc" || test ${mc_mod} = "ctcp";then echo "#ifdef LEAF" 1>> ${mc_fstatic_h};fi
+if test ${mc_mod} = "server" || test ${mc_mod} = "irc";then echo "#ifdef LEAF" 1>> ${mc_fstatic_h};fi
 		echo "  check_static(\"${mc_mod}\", ${mc_mod}_start);" 1>> ${mc_fstatic_h}
-if test ${mc_mod} = "server" || test ${mc_mod} = "irc" || test ${mc_mod} = "ctcp";then echo "#endif" 1>> ${mc_fstatic_h};fi
+if test ${mc_mod} = "server" || test ${mc_mod} = "irc";then echo "#endif" 1>> ${mc_fstatic_h};fi
 
 	done
 	cat 1>> ${mc_fstatic_h} << EOF

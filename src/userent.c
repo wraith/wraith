@@ -19,6 +19,7 @@ init_userent ()
   add_entry_type (&USERENTRY_LASTON);
   add_entry_type (&USERENTRY_BOTADDR);
   add_entry_type (&USERENTRY_PASS);
+  add_entry_type (&USERENTRY_SECPASS);
   add_entry_type (&USERENTRY_HOSTS);
   add_entry_type (&USERENTRY_BOTFL);
   add_entry_type (&USERENTRY_STATS);
@@ -127,8 +128,10 @@ def_set (struct userrec *u, struct user_entry *e, void *buf)
 int
 def_gotshare (struct userrec *u, struct user_entry *e, char *data, int idx)
 {
+#ifdef HUB
   putlog (LOG_CMDS, "@", "%s: change %s %s", dcc[idx].nick, e->type->name,
 	  u->handle);
+#endif
   return e->type->set (u, e, data);
 }
 
@@ -501,48 +504,9 @@ pass_tcl_set (Tcl_Interp * irp, struct userrec *u, struct user_entry *e,
 struct user_entry_type USERENTRY_PASS =
   { 0, def_gotshare, 0, def_unpack, def_pack, def_write_userfile, def_kill,
 def_get, pass_set, def_tcl_get, pass_tcl_set, def_expmem, 0, "PASS" };
-int
-secpass_set (struct userrec *u, struct user_entry *e, void *buf)
-{
-  char new[32];
-  register char *pass = buf;
-  if (e->u.extra)
-    nfree (e->u.extra);
-  if (!pass || !pass[0] || (pass[0] == '-'))
-    e->u.extra = NULL;
-  else
-    {
-      unsigned char *p = (unsigned char *) pass;
-      if (strlen (pass) > 15)
-	pass[15] = 0;
-      while (*p)
-	{
-	  if ((*p <= 32) || (*p == 127))
-	    *p = '?';
-	  p++;
-	}
-      if ((u->flags & USER_BOT) || (pass[0] == '+'))
-	strcpy (new, pass);
-      else
-	encrypt_pass (pass, new);
-      e->u.extra = user_malloc (strlen (new) + 1);
-      strcpy (e->u.extra, new);
-    }
-  if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED)))
-    shareout (NULL, "c SECPASS %s %s\n", u->handle, pass ? pass : "");
-  return 1;
-}
-static int
-secpass_tcl_set (Tcl_Interp * irp, struct userrec *u, struct user_entry *e,
-		 int argc, char **argv)
-{
-  BADARGS (3, 4, " handle SECPASS ?newpass?");
-  pass_set (u, e, argc == 3 ? NULL : argv[3]);
-  return TCL_OK;
-}
 struct user_entry_type USERENTRY_SECPASS =
-  { 0, def_gotshare, 0, def_unpack, def_pack, def_write_userfile, def_kill,
-def_get, secpass_set, def_tcl_get, secpass_tcl_set, def_expmem, 0, "SECPASS" };
+  { 0, def_gotshare, def_dupuser, def_unpack, def_pack, def_write_userfile,
+def_kill, def_get, def_set, 0, 0, def_expmem, def_display, "SECPASS" };
 static int
 laston_unpack (struct userrec *u, struct user_entry *e)
 {
@@ -773,7 +737,6 @@ botaddr_kill (struct user_entry *e)
   nfree (((struct bot_addr *) (e->u.extra))->uplink);
   nfree (e->u.extra);
   nfree (e);
-  Context;
   return 1;
 }
 static int
@@ -1236,6 +1199,9 @@ xtra_write_userfile, xtra_kill, def_get, xtra_set, xtra_tcl_get, xtra_tcl_set, x
       }
     if (s[0])
       dprintf (idx, "%s\n", s);
+#endif
+#ifdef LEAF
+    dprintf (idx, "  HOSTS:          Hidden on leaf bots.\n");
 #endif
   }
   static int hosts_set (struct userrec *u, struct user_entry *e, void *buf)

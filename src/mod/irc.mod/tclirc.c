@@ -775,14 +775,15 @@ static int tcl_putkick STDVAR
       l = strlen (chan->name) + strlen (kicknick) + strlen (comment);
       if (((kick_method != 0) && (k == kick_method)) || (l > 480))
 	{
-	  dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, kicknick,
-		   comment);
+	  dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, kicknick,
+		   kickprefix, comment);
 	  k = 0;
 	  kicknick[0] = 0;
 	}
     }
   if (k > 0)
-    dprintf (DP_SERVER, "KICK %s %s :%s\n", chan->name, kicknick, comment);
+    dprintf (DP_SERVER, "KICK %s %s :%s%s\n", chan->name, kicknick,
+	     kickprefix, comment);
   return TCL_OK;
 }
 static tcl_cmds tclchan_cmds[] =

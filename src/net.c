@@ -39,7 +39,7 @@ char hostname6[121] = "";
 char firewall[121] = "";
 int firewallport = 1080;
 char botuser[21] = "wraith";
-int dcc_sanitycheck = 1;
+int dcc_sanitycheck = 0;
 sock_list *socklist = NULL;
 int MAXSOCKS = 0;
 jmp_buf alarmret;

@@ -13,7 +13,7 @@ extern char origbotname[], botnetnick[], quit_msg[];
 extern struct userrec *userlist;
 extern time_t now;
 extern module_entry *module_list;
-extern int max_logs;
+extern int max_logs, timesync;
 extern log_t *logs;
 extern Tcl_Interp *interp;
 extern char myipv6host[120];
@@ -439,6 +439,13 @@ static int tcl_backup STDVAR
   return TCL_OK;
 }
 #endif
+static int tcl_timesync STDVAR
+{
+  char buf[20];
+    sprintf (buf, "%li %li %li", (now + timesync), now, timesync);
+    Tcl_AppendResult (irp, buf, NULL);
+    return TCL_OK;
+}
 static int tcl_die STDVAR
 {
   char s[1024];
@@ -577,6 +584,7 @@ tcl_cmds tclmisc_cmds[] = {
 #endif
   {"ischanhub", tcl_ischanhub}
   , {"issechub", tcl_issechub}
+  , {"timesync", tcl_timesync}
   , {"exit", tcl_die}
   , {"die", tcl_die}
   , {"unames", tcl_unames}

@@ -16,6 +16,10 @@
 #define SERVLEN 60
 #define LANGDIR	"./.language"
 #define BASELANG "english"
+#define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
+#ifdef G_AUTOLOCK
+#define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
+#endif
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 #define KICK_BANNED 1

@@ -359,9 +359,11 @@ share_chattr (int idx, char *par)
 		  noshare = 0;
 		  build_flags (s, &fr, 0);
 		  fr.match = FR_CHAN;
+#ifndef LEAF
 		  if (!(dcc[idx].status & STAT_GETTING))
 		    putlog (LOG_CMDS, "@", "%s: chattr %s %s", dcc[idx].nick,
 			    hand, s);
+#endif
 		  if ((me = module_find ("irc", 0, 0)))
 		    {
 		      Function *func = me->funcs;
@@ -480,8 +482,10 @@ share_newuser (int idx, char *par)
 	      set_user_flagrec (u, &fr, 0);
 	      fr.match = FR_CHAN;
 	      noshare = 0;
+#ifndef LEAF
 	      putlog (LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick,
 		      s);
+#endif
 	    }
 	}
     }
@@ -498,7 +502,9 @@ share_killuser (int idx, char *par)
       if (deluser (par))
 	{
 	  shareout_but (NULL, idx, "k %s\n", par);
+#ifndef LEAF
 	  putlog (LOG_CMDS, "@", "%s: killuser %s", dcc[idx].nick, par);
+#endif
 	}
       noshare = 0;
     }
@@ -516,7 +522,9 @@ share_pls_host (int idx, char *par)
 	{
 	  shareout_but (NULL, idx, "+h %s %s\n", hand, par);
 	  set_user (&USERENTRY_HOSTS, u, par);
+#ifndef LEAF
 	  putlog (LOG_CMDS, "@", "%s: +host %s %s", dcc[idx].nick, hand, par);
+#endif
 	}
     }
 }
@@ -544,9 +552,11 @@ share_pls_bothost (int idx, char *par)
 	      makepass (p);
 	      userlist = adduser (userlist, hand, par, p, USER_BOT);
 	    }
+#ifndef LEAF
 	  if (!(dcc[idx].status & STAT_GETTING))
 	    putlog (LOG_CMDS, "@", "%s: +host %s %s", dcc[idx].nick, hand,
 		    par);
+#endif
 	}
     }
 }
@@ -565,7 +575,9 @@ share_mns_host (int idx, char *par)
 	  noshare = 1;
 	  delhost_by_handle (hand, par);
 	  noshare = 0;
+#ifndef LEAF
 	  putlog (LOG_CMDS, "@", "%s: -host %s %s", dcc[idx].nick, hand, par);
+#endif
 	}
     }
 }
@@ -1219,8 +1231,7 @@ share_version (int idx, char *par)
     ~(STAT_SHARE | STAT_GETTING | STAT_SENDING | STAT_OFFERED |
       STAT_AGGRESSIVE);
   dcc[idx].u.bot->uff_flags = 0;
-  if ((dcc[idx].u.bot->numver == egg_numver)
-      && (bot_aggressive_to (dcc[idx].user)))
+  if (1 && (bot_aggressive_to (dcc[idx].user)))
     {
       if (can_resync (dcc[idx].nick))
 	dprintf (idx, "s r?\n");
@@ -1239,8 +1250,7 @@ hook_read_userfile ()
     {
       for (i = 0; i < dcc_total; i++)
 	if ((dcc[i].type->flags & DCT_BOT) && (dcc[i].status & STAT_SHARE)
-	    && !(dcc[i].status & STAT_AGGRESSIVE)
-	    && (dcc[i].u.bot->numver == egg_numver))
+	    && !(dcc[i].status & STAT_AGGRESSIVE) && (1))
 	  {
 	    if (dcc[i].status & STAT_SENDING)
 	      cancel_user_xfer (-i, 0);
@@ -1453,15 +1463,13 @@ check_expired_tbufs ()
 	  {
 	    if (now - dcc[i].timeval > 120)
 	      {
-		if (dcc[i].user && (bot_aggressive_to (dcc[i].user))
-		    && (dcc[i].u.bot->numver == egg_numver))
+		if (dcc[i].user && (bot_aggressive_to (dcc[i].user)) && (1))
 		  dprintf (i, "s u?\n");
 	      }
 	  }
 	else if (!(dcc[i].status & STAT_SHARE))
 	  {
-	    if (dcc[i].user && (bot_aggressive_to (dcc[i].user))
-		&& (dcc[i].u.bot->numver == egg_numver))
+	    if (dcc[i].user && (bot_aggressive_to (dcc[i].user)) && (1))
 	      dprintf (i, "s u?\n");
 	    dcc[i].status |= STAT_OFFERED;
 	  }
@@ -1751,8 +1759,10 @@ finish_share (int idx)
     for (i = 0; i < dcc_total; i++)
       dcc[i].user = get_user_by_handle (u, dcc[i].nick);
   loading = 1;
+  Context;
   if (!readuserfile (dcc[idx].u.xfer->filename, &u))
     {
+      Context;
       unlink (dcc[idx].u.xfer->filename);
       putlog (LOG_MISC, "@", "%s", USERF_CANTREAD);
       clear_userlist (u);

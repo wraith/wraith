@@ -22,7 +22,7 @@ extern unsigned long otraffic_irc, otraffic_irc_today, itraffic_irc,
   itraffic_unknown, itraffic_unknown_today;
 extern Tcl_Interp *interp;
 extern char botnetnick[], origbotname[], ver[], network[], owner[],
-  quit_msg[], dcc_prefix[], netpass[], botname[];
+  quit_msg[], dcc_prefix[], netpass[], botname[], *binname;
 extern time_t now, online_since;
 extern module_entry *module_list;
 extern struct cfg_entry CFG_MOTD;
@@ -659,6 +659,39 @@ cmd_newpass (struct userrec *u, int idx, char *par)
   set_user (&USERENTRY_PASS, u, new);
   dprintf (idx, "Changed password to '%s'.\n", new);
 }
+static void
+cmd_secpass (struct userrec *u, int idx, char *par)
+{
+  char *new, pass[17];
+  putlog (LOG_CMDS, "*", "#%s# secpass...", dcc[idx].nick);
+  if (!par[0])
+    {
+      dprintf (idx,
+	       "Usage: secpass <newsecpass>\nIf you use \"rand\" as the secpass, a random pass will be chosen.\n");
+      return;
+    }
+  new = newsplit (&par);
+  if (!strcmp (new, "rand"))
+    {
+      make_rand_str (pass, 17);
+    }
+  else
+    {
+      if (strlen (new) < 6)
+	{
+	  dprintf (idx, "Please use at least 6 characters.\n");
+	  return;
+	}
+      else
+	{
+	  sprintf (pass, "%s", new);
+	}
+    }
+  if (strlen (pass) > 16)
+    pass[16] = 0;
+  set_user (&USERENTRY_SECPASS, u, pass);
+  dprintf (idx, "Changed secpass to '%s'.\n", pass);
+}
 
 #ifdef HUB
 static void
@@ -893,6 +926,35 @@ cmd_match (struct userrec *u, int idx, char *par)
   tell_users_match (idx, s, start, limit, u ? (u->flags & USER_MASTER) : 0,
 		    chname);
 }
+
+#ifdef HUB
+void
+cmd_botupdate (struct userrec *u, int idx, char *par)
+{
+  char *tbot, tmp[256];
+  putlog (LOG_CMDS, "*", STR ("#%s# botupdate %s"), dcc[idx].nick, par);
+  tbot = newsplit (&par);
+  if (!par[0])
+    {
+      dprintf (idx, STR ("Not enough parameters.\n"));
+      return;
+    }
+  if (nextbot (tbot) < 0)
+    {
+      dprintf (idx, STR ("No such bot linked\n"));
+      return;
+    }
+  sprintf (tmp, STR ("update %s"), par);
+  botnet_send_cmd (botnetnick, tbot, u->handle, idx, tmp);
+}
+#endif
+static void
+rcmd_update (char *fbot, char *fhand, char *fidx, char *par)
+{
+  if (!par[0])
+    return;
+  updatebin (0, par, 0);
+}
 static void
 cmd_update (struct userrec *u, int idx, char *par)
 {
@@ -911,6 +973,26 @@ cmd_userlist (struct userrec *u, int idx, char *par)
 {
   int cnt = 0;
   putlog (LOG_CMDS, "*", STR ("#%s# userlist"), dcc[idx].nick);
+  for (u = userlist; u; u = u->next)
+    {
+      if ((u->flags & USER_BOT) && (u->flags & USER_CHANHUB))
+	{
+	  if (cnt)
+	    dprintf (idx, ", ");
+	  else
+	    dprintf (idx, STR ("Chathubs  : "));
+	  dprintf (idx, u->handle);
+	  cnt++;
+	  if (cnt == 15)
+	    {
+	      dprintf (idx, "\n");
+	      cnt = 0;
+	    }
+	}
+    }
+  if (cnt)
+    dprintf (idx, "\n");
+  cnt = 0;
 #ifdef HUB
   for (u = userlist; u; u = u->next)
     {
@@ -1266,74 +1348,6 @@ cmd_console (struct userrec *u, int idx, char *par)
 
 #ifdef HUB
 static void
-cmd_pls_bot (struct userrec *u, int idx, char *par)
-{
-  char *handle, *addr, *p, *q, *host;
-  struct userrec *u1;
-  struct bot_addr *bi;
-  if (!par[0])
-    dprintf (idx,
-	     "Usage: +bot <handle> <address[:telnet-port[/relay-port]]> [host]\n");
-  else
-    {
-      handle = newsplit (&par);
-      addr = newsplit (&par);
-      if (strlen (handle) > HANDLEN)
-	handle[HANDLEN] = 0;
-      if (get_user_by_handle (userlist, handle))
-	dprintf (idx, "Someone already exists by that name.\n");
-      else if (strchr (BADHANDCHARS, handle[0]) != NULL)
-	dprintf (idx, "You can't start a botnick with '%c'.\n", handle[0]);
-      else
-	{
-	  if (strlen (addr) > 60)
-	    addr[60] = 0;
-	  putlog (LOG_CMDS, "*", "#%s# +bot %s %s", dcc[idx].nick, handle,
-		  addr);
-	  userlist = adduser (userlist, handle, "none", "-", USER_BOT);
-	  u1 = get_user_by_handle (userlist, handle);
-	  bi = user_malloc (sizeof (struct bot_addr));
-	  q = strchr (addr, ':');
-	  if (!q)
-	    {
-	      bi->address = user_malloc (strlen (addr) + 1);
-	      strcpy (bi->address, addr);
-	      bi->telnet_port = 3333;
-	      bi->relay_port = 3333;
-	    }
-	  else
-	    {
-	      bi->address = user_malloc (q - addr + 1);
-	      strncpy (bi->address, addr, q - addr);
-	      bi->address[q - addr] = 0;
-	      p = q + 1;
-	      bi->telnet_port = atoi (p);
-	      q = strchr (p, '/');
-	      if (!q)
-		{
-		  bi->relay_port = bi->telnet_port;
-		}
-	      else
-		{
-		  bi->relay_port = atoi (q + 1);
-		}
-	    }
-	  set_user (&USERENTRY_BOTADDR, u1, bi);
-	  dprintf (idx, "Added bot '%s' with address '%s' and no password.\n",
-		   handle, addr);
-	  host = newsplit (&par);
-	  if (host[0])
-	    {
-	      addhost_by_handle (handle, host);
-	    }
-	  else if (!add_bot_hostmask (idx, handle))
-	    dprintf (idx,
-		     "You'll want to add a hostmask if this bot will ever %s",
-		     "be on any channels that I'm on.\n");
-	}
-    }
-}
-static void
 cmd_chhandle (struct userrec *u, int idx, char *par)
 {
   char hand[HANDLEN + 1], newhand[HANDLEN + 1];
@@ -1484,6 +1498,72 @@ cmd_chpass (struct userrec *u, int idx, char *par)
 	      putlog (LOG_CMDS, "*", "#%s# chpass %s [something]",
 		      dcc[idx].nick, handle);
 	      dprintf (idx, "Changed password.\n");
+	    }
+	  else
+	    {
+	      dprintf (idx, "Use >= 8 chars, ucase, lcase and a number.\n");
+	      return;
+	    }
+	}
+    }
+}
+static void
+cmd_chsecpass (struct userrec *u, int idx, char *par)
+{
+  char *handle, *new;
+  int atr = u ? u->flags : 0, l;
+  int ucase, lcase, ocase, tc, faenda;
+  ucase = lcase = ocase = 0;
+  if (!par[0])
+    dprintf (idx, "Usage: chsecpass <handle> [secpass]\n");
+  else
+    {
+      handle = newsplit (&par);
+      u = get_user_by_handle (userlist, handle);
+      if (!u)
+	dprintf (idx, "No such user.\n");
+      else if (!(atr & USER_MASTER) && !(u->flags & USER_BOT))
+	dprintf (idx, "You can't change passwords for non-bots.\n");
+      else if ((bot_flags (u) & BOT_SHARE) && !(atr & USER_OWNER))
+	dprintf (idx, "You can't change a share bot's password.\n");
+      else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER)
+	       && egg_strcasecmp (handle, dcc[idx].nick))
+	dprintf (idx, "You can't change a bot owner's password.\n");
+      else if (isowner (handle) && egg_strcasecmp (dcc[idx].nick, handle))
+	dprintf (idx, "You can't change a permanent bot owner's password.\n");
+      else if (!par[0])
+	{
+	  putlog (LOG_CMDS, "*", "#%s# chsecpass %s [nothing]", dcc[idx].nick,
+		  handle);
+	  set_user (&USERENTRY_PASS, u, NULL);
+	  dprintf (idx, "Removed secpass.\n");
+	}
+      else
+	{
+	  l = strlen (new = newsplit (&par));
+	  if (l > 16)
+	    new[16] = 0;
+	  if (l < 8)
+	    {
+	      dprintf (idx, "Use >= 8 chars, ucase, lcase and a number.\n");
+	      return;
+	    }
+	  for (faenda = 0; faenda < l; faenda++)
+	    {
+	      tc = (int) new[faenda];
+	      if (tc < 58 && tc > 47)
+		ocase = 1;
+	      if (tc < 91 && tc > 64)
+		ucase = 1;
+	      if (tc < 123 && tc > 96)
+		lcase = 1;
+	    }
+	  if ((lcase + ocase + ucase) == 3)
+	    {
+	      set_user (&USERENTRY_SECPASS, u, new);
+	      putlog (LOG_CMDS, "*", "#%s# chsecpass %s [something]",
+		      dcc[idx].nick, handle);
+	      dprintf (idx, "Changed secpass.\n");
 	    }
 	  else
 	    {
@@ -1658,6 +1738,7 @@ cmd_comment (struct userrec *u, int idx, char *par)
 static void
 cmd_restart (struct userrec *u, int idx, char *par)
 {
+  return;
   putlog (LOG_CMDS, "*", "#%s# restart", dcc[idx].nick);
   if (!backgrd)
     {
@@ -1673,17 +1754,6 @@ cmd_restart (struct userrec *u, int idx, char *par)
   wipe_timers (interp, &utimer);
   wipe_timers (interp, &timer);
   do_restart = idx;
-}
-static void
-cmd_rehash (struct userrec *u, int idx, char *par)
-{
-  putlog (LOG_CMDS, "*", "#%s# rehash", dcc[idx].nick);
-  dprintf (idx, "Rehashing.\n");
-#ifdef HUB
-  write_userfile (-1);
-#endif
-  putlog (LOG_MISC, "*", "Rehashing ...");
-  do_restart = -2;
 }
 
 #ifdef HUB
@@ -2699,6 +2769,8 @@ cmd_last (struct userrec *u, int idx, char *par)
   else
     {
       pw = getpwuid (geteuid ());
+      if (!pw)
+	return;
       strncpy0 (user, pw->pw_name, sizeof (user));
     }
   if (!user[0])
@@ -3356,7 +3428,7 @@ cmd_pls_user (struct userrec *u, int idx, char *par)
   else
     {
       struct userrec *u2;
-      char tmp[50], s[50];
+      char tmp[50], s[50], s2[50];
       userlist = adduser (userlist, handle, host, "-", USER_DEFAULT);
       u2 = get_user_by_handle (userlist, handle);
       sprintf (tmp, STR ("%lu %s"), time (NULL), u->handle);
@@ -3370,7 +3442,10 @@ cmd_pls_user (struct userrec *u, int idx, char *par)
 	}
       make_rand_str (s, 10);
       set_user (&USERENTRY_PASS, u2, s);
+      make_rand_str (s2, 17);
+      set_user (&USERENTRY_SECPASS, u2, s2);
       dprintf (idx, STR ("%s's password set to \002%s\002.\n"), handle, s);
+      dprintf (idx, STR ("%s's secpass set to \002%s\002.\n"), handle, s2);
 #ifdef HUB
       write_userfile (idx);
 #endif
@@ -3867,6 +3942,35 @@ cmd_netw (struct userrec *u, int idx, char *par)
   strcpy (tmp, STR ("exec w"));
   botnet_send_cmd_broad (-1, botnetnick, dcc[idx].nick, idx, tmp);
 } static void
+cmd_botkill (struct userrec *u, int idx, char *par)
+{
+  char *tbot, buf[1024];
+  putlog (LOG_CMDS, "*", STR ("#%s# botkill %s"), dcc[idx].nick, par);
+  tbot = newsplit (&par);
+  if (!tbot[0])
+    {
+      dprintf (idx, STR ("Usage: botkill <botname> [kill-parameters]\n"));
+      return;
+    }
+  if (strchr (par, '|') || strchr (par, '<') || strchr (par, ';')
+      || strchr (par, '>'))
+    {
+      putlog (LOG_WARN, "*",
+	      STR
+	      ("%s attempted 'botkill' with pipe/semicolon in parameters: %s"),
+	      dcc[idx].nick, par);
+      dprintf (idx, STR ("No."));
+      return;
+    }
+  if (nextbot (tbot) < 0)
+    {
+      dprintf (idx, STR ("No such linked bot\n"));
+      return;
+    }
+  sprintf (buf, STR ("exec kill %s"), par);
+  botnet_send_cmd (botnetnick, tbot, dcc[idx].nick, idx, buf);
+}
+static void
 cmd_botps (struct userrec *u, int idx, char *par)
 {
   char *tbot, buf[1024];
@@ -3962,6 +4066,137 @@ cmd_netlast (struct userrec *u, int idx, char *par)
 }
 
 void
+crontab_show (struct userrec *u, int idx)
+{
+  dprintf (idx, STR ("Showing current crontab:\n"));
+  if (!exec_str (u, idx, STR ("crontab -l | grep -v \"^#\"")))
+    dprintf (idx, STR ("Exec failed"));
+}
+
+void
+crontab_del ()
+{
+  char *tmpfile, *p, buf[2048];
+  tmpfile = nmalloc (strlen (binname) + 100);
+  strcpy (tmpfile, binname);
+  if (!(p = strrchr (tmpfile, '/')))
+    return;
+  p++;
+  strcpy (p, STR (".ctb"));
+  sprintf (buf,
+	   STR
+	   ("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s"),
+	   binname, tmpfile);
+  if (shell_exec (buf, NULL, NULL, NULL))
+    {
+      sprintf (buf, STR ("crontab %s"), tmpfile);
+      shell_exec (buf, NULL, NULL, NULL);
+    }
+  unlink (tmpfile);
+}
+
+void
+cmd_crontab (struct userrec *u, int idx, char *par)
+{
+  char *code;
+  int i;
+  putlog (LOG_CMDS, "*", STR ("#%s# crontab %s"), dcc[idx].nick, par);
+  if (!par[0])
+    {
+      dprintf (idx,
+	       STR ("Usage: crontab status|delete|show|new [interval]\n"));
+      return;
+    }
+  code = newsplit (&par);
+  if (!strcmp (code, STR ("status")))
+    {
+      i = crontab_exists ();
+      if (!i)
+	dprintf (idx, STR ("No crontab\n"));
+      else if (i == 1)
+	dprintf (idx, STR ("Crontabbed\n"));
+      else
+	dprintf (idx, STR ("Error checking crontab status\n"));
+    }
+  else if (!strcmp (code, STR ("show")))
+    {
+      crontab_show (u, idx);
+    }
+  else if (!strcmp (code, STR ("delete")))
+    {
+      crontab_del ();
+      i = crontab_exists ();
+      if (!i)
+	dprintf (idx, STR ("No crontab\n"));
+      else if (i == 1)
+	dprintf (idx, STR ("Crontabbed\n"));
+      else
+	dprintf (idx, STR ("Error checking crontab status\n"));
+    }
+  else if (!strcmp (code, STR ("new")))
+    {
+      i = atoi (par);
+      if ((i <= 0) || (i > 60))
+	i = 10;
+      crontab_create (i);
+      i = crontab_exists ();
+      if (!i)
+	dprintf (idx, STR ("No crontab\n"));
+      else if (i == 1)
+	dprintf (idx, STR ("Crontabbed\n"));
+      else
+	dprintf (idx, STR ("Error checking crontab status\n"));
+    }
+  else
+    {
+      dprintf (idx,
+	       STR ("Usage: crontab status|delete|show|new [interval]\n"));
+    }
+}
+
+#ifdef HUB
+static void
+cmd_botcrontab (struct userrec *u, int idx, char *par)
+{
+  char *tbot, buf[1024], *cmd;
+  putlog (LOG_CMDS, "*", STR ("#%s# botcrontab %s"), dcc[idx].nick, par);
+  tbot = newsplit (&par);
+  cmd = newsplit (&par);
+  if (!tbot[0]
+      || (strcmp (cmd, STR ("status")) && strcmp (cmd, STR ("show"))
+	  && strcmp (cmd, STR ("delete")) && strcmp (cmd, STR ("new"))))
+    {
+      dprintf (idx,
+	       STR
+	       ("Usage: botcrontab <botname> status|delete|show|new [interval]\n"));
+      return;
+    }
+  if (nextbot (tbot) < 0)
+    {
+      dprintf (idx, STR ("No such linked bot\n"));
+      return;
+    }
+  sprintf (buf, STR ("exec crontab %s %s"), cmd, par);
+  botnet_send_cmd (botnetnick, tbot, dcc[idx].nick, idx, buf);
+}
+static void
+cmd_netcrontab (struct userrec *u, int idx, char *par)
+{
+  char buf[1024], *cmd;
+  putlog (LOG_CMDS, "*", STR ("#%s# netcrontab %s"), dcc[idx].nick, par);
+  cmd = newsplit (&par);
+  if ((strcmp (cmd, STR ("status")) && strcmp (cmd, STR ("show"))
+       && strcmp (cmd, STR ("delete")) && strcmp (cmd, STR ("new"))))
+    {
+      dprintf (idx,
+	       STR ("Usage: netcrontab status|delete|show|new [interval]\n"));
+      return;
+    }
+  sprintf (buf, STR ("exec crontab %s %s"), cmd, par);
+  botnet_send_cmd_broad (-1, botnetnick, dcc[idx].nick, idx, buf);
+}
+#endif
+void
 rcmd_exec (char *frombot, char *fromhand, char *fromidx, char *par)
 {
   char *cmd, scmd[512], *out, *err;
@@ -3982,6 +4217,8 @@ rcmd_exec (char *frombot, char *fromhand, char *fromidx, char *par)
       else
 	{
 	  pw = getpwuid (geteuid ());
+	  if (!pw)
+	    return;
 	  strncpy0 (user, pw->pw_name, sizeof (user));
 	}
       if (!user[0])
@@ -3995,6 +4232,43 @@ rcmd_exec (char *frombot, char *fromhand, char *fromidx, char *par)
   else if (!strcmp (cmd, STR ("ps")))
     {
       sprintf (scmd, STR ("ps %s"), par);
+    }
+  else if (!strcmp (cmd, STR ("kill")))
+    {
+      sprintf (scmd, STR ("kill %s"), par);
+    }
+  else if (!strcmp (cmd, STR ("crontab")))
+    {
+      char *code = newsplit (&par);
+      scmd[0] = 0;
+      if (!strcmp (code, STR ("show")))
+	{
+	  strcpy (scmd, STR ("crontab -l | grep -v \"^#\""));
+	}
+      else if (!strcmp (code, STR ("delete")))
+	{
+	  crontab_del ();
+	}
+      else if (!strcmp (code, STR ("new")))
+	{
+	  int i = atoi (par);
+	  if ((i <= 0) || (i > 60))
+	    i = 10;
+	  crontab_create (i);
+	}
+      if (!scmd[0])
+	{
+	  char s[200];
+	  int i;
+	  i = crontab_exists ();
+	  if (!i)
+	    sprintf (s, STR ("No crontab"));
+	  else if (i == 1)
+	    sprintf (s, STR ("Crontabbed"));
+	  else
+	    sprintf (s, STR ("Error checking crontab status"));
+	  botnet_send_cmdreply (botnetnick, frombot, fromhand, fromidx, s);
+	}
     }
   if (!scmd[0])
     return;
@@ -4041,6 +4315,28 @@ rcmd_exec (char *frombot, char *fromhand, char *fromidx, char *par)
 			    STR ("exec failed"));
     }
 }
+
+#ifdef HUB
+static void
+cmd_botdie (struct userrec *u, int idx, char *par)
+{
+  char *tbot, buf[1024];
+  putlog (LOG_CMDS, "*", STR ("#%s# botdie %s"), dcc[idx].nick, par);
+  tbot = newsplit (&par);
+  if (!tbot[0])
+    {
+      dprintf (idx, STR ("Usage: botdie <botname>\n"));
+      return;
+    }
+  if (nextbot (tbot) < 0)
+    {
+      dprintf (idx, STR ("No such linked bot\n"));
+      return;
+    }
+  sprintf (buf, STR ("die %s"), par);
+  botnet_send_cmd (botnetnick, tbot, dcc[idx].nick, idx, buf);
+}
+#endif
 static void
 cmd_botjump (struct userrec *u, int idx, char *par)
 {
@@ -4068,10 +4364,11 @@ rcmd_jump (char *frombot, char *fromhand, char *fromidx, char *par)
 #ifdef LEAF
   char *other;
   module_entry *me;
-  Function *func = me->funcs;
+  Function *func;
   int port, default_port = 0;
   if (!(me = module_find ("server", 0, 0)))
     return;
+  func = me->funcs;
   default_port = (*(int *) (func[24]));
   if (par[0])
     {
@@ -4126,6 +4423,14 @@ gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx,
   else if (!strcmp (cmd, STR ("pong")))
     {
       rcmd_pong (frombot, fromhand, fromidx, par);
+    }
+  else if (!strcmp (cmd, STR ("die")))
+    {
+      exit (0);
+    }
+  else if (!strcmp (cmd, STR ("update")))
+    {
+      rcmd_update (frombot, fromhand, fromidx, par);
     }
   else
     {
@@ -4259,245 +4564,242 @@ cmd_whoami (struct userrec *u, int idx, char *par)
 {
   dprintf (idx, "You are %s@%s.\n", dcc[idx].nick, botnetnick);
   putlog (LOG_CMDS, "*", "#%s# whoami", dcc[idx].nick);
-} dcc_cmd_t C_dcc[] = {
-
-#ifdef HUB
-  {"+bot", "a", (Function) cmd_pls_bot, NULL, NULL},
-#endif
-  {"+host", "m|m", (Function) cmd_pls_host, NULL, NULL}, {"+ignore", "m",
-							  (Function)
-							  cmd_pls_ignore,
-							  NULL, NULL},
-    {"+user", "m", (Function) cmd_pls_user, NULL, NULL},
-#ifdef HUB
-  {"-bot", "a", (Function) cmd_mns_user, NULL, NULL},
-#endif
-  {"-host", "", (Function) cmd_mns_host, NULL, NULL}, {"-ignore", "m",
-						       (Function)
-						       cmd_mns_ignore, NULL,
-						       NULL}, {"-user", "m",
-							       (Function)
-							       cmd_mns_user,
-							       NULL, NULL},
-#ifdef HUB
-  {"addlog", "mo|o", (Function) cmd_addlog, NULL, NULL},
-#endif
-  {"away", "", (Function) cmd_away, NULL, NULL}, {"back", "",
-						  (Function) cmd_back, NULL,
-						  NULL},
-#ifdef HUB
-  {"backup", "m|m", (Function) cmd_backup, NULL, NULL}, {"binds", "m",
-							 (Function) cmd_binds,
-							 NULL, NULL}, {"boot",
-								       "m",
-								       (Function)
-								       cmd_boot,
-								       NULL,
-								       NULL},
-    {"botattr", "a", (Function) cmd_botattr, NULL, NULL}, {"botconfig", "n",
-							   (Function)
-							   cmd_botconfig,
-							   NULL, NULL},
-    {"botinfo", "", (Function) cmd_botinfo, NULL, NULL}, {"bots", "m",
-							  (Function) cmd_bots,
-							  NULL, NULL},
-    {"downbots", "m", (Function) cmd_downbots, NULL, NULL},
-#endif
-  {"botconfig", "n", (Function) cmd_botconfig, NULL, NULL},
-#ifdef HUB
-  {"bottree", "n", (Function) cmd_bottree, NULL, NULL}, {"chaddr", "a",
-							 (Function)
-							 cmd_chaddr, NULL,
-							 NULL},
-#endif
-  {"chat", "", (Function) cmd_chat, NULL, NULL}, {"chattr", "m|m",
-						  (Function) cmd_chattr, NULL,
-						  NULL},
-#ifdef HUB
-  {"chhandle", "m", (Function) cmd_chhandle, NULL, NULL}, {"chnick", "m",
-							   (Function)
-							   cmd_chhandle, NULL,
-							   NULL}, {"chpass",
-								   "m",
-								   (Function)
-								   cmd_chpass,
-								   NULL,
-								   NULL},
-#ifdef S_DCCPASS
-  {"cmdpass", "a", (Function) cmd_cmdpass, NULL, NULL},
-#endif
-#endif
-  {"color", "", (Function) cmd_color, NULL, NULL}, {"comment", "m|m",
-						    (Function) cmd_comment,
-						    NULL, NULL}, {"config",
-								  "n",
-								  (Function)
-								  cmd_config,
-								  NULL, NULL},
-    {"console", "mo|o", (Function) cmd_console, NULL, NULL},
-#ifdef HUB
-  {"dccstat", "a", (Function) cmd_dccstat, NULL, NULL},
-#endif
-  {"debug", "a", (Function) cmd_debug, NULL, NULL}, {"die", "n",
-						     (Function) cmd_die, NULL,
-						     NULL}, {"echo", "",
-							     (Function)
-							     cmd_echo, NULL,
-							     NULL},
-    {"fixcodes", "", (Function) cmd_fixcodes, NULL, NULL}, {"handle", "",
+} dcc_cmd_t C_dcc[] =
+  { {"+host", "m|m", (Function) cmd_pls_host, NULL, NULL}, {"+ignore", "m",
 							    (Function)
-							    cmd_handle, NULL,
-							    NULL}, {"help",
-								    "",
-								    (Function)
-								    cmd_help,
-								    NULL,
-								    NULL},
-    {"ignores", "m", (Function) cmd_ignores, NULL, NULL},
+							    cmd_pls_ignore,
+							    NULL, NULL},
+  {"+user", "m", (Function) cmd_pls_user, NULL, NULL},
 #ifdef HUB
-  {"link", "n", (Function) cmd_link, NULL, NULL},
+{"-bot", "a", (Function) cmd_mns_user, NULL, NULL},
 #endif
-  {"match", "m|m", (Function) cmd_match, NULL, NULL}, {"me", "",
-						       (Function) cmd_me,
-						       NULL, NULL}, {"motd",
-								     "",
+{"-host", "", (Function) cmd_mns_host, NULL, NULL}, {"-ignore", "m",
+						     (Function)
+						     cmd_mns_ignore, NULL,
+						     NULL}, {"-user", "m",
+							     (Function)
+							     cmd_mns_user,
+							     NULL, NULL},
+#ifdef HUB
+{"addlog", "mo|o", (Function) cmd_addlog, NULL, NULL},
+#endif
+{"away", "", (Function) cmd_away, NULL, NULL}, {"back", "",
+						(Function) cmd_back, NULL,
+						NULL},
+#ifdef HUB
+{"backup", "m|m", (Function) cmd_backup, NULL, NULL}, {"binds", "m",
+						       (Function) cmd_binds,
+						       NULL, NULL}, {"boot",
+								     "m",
 								     (Function)
-								     cmd_motd,
+								     cmd_boot,
 								     NULL,
 								     NULL},
-#ifdef HUB
-  {"mtcl", "a", (Function) cmd_mtcl, NULL, NULL}, {"newleaf", "n",
-						   (Function) cmd_newleaf,
+  {"botattr", "a", (Function) cmd_botattr, NULL, NULL}, {"botconfig", "n",
+							 (Function)
+							 cmd_botconfig, NULL,
+							 NULL}, {"botinfo",
+								 "",
+								 (Function)
+								 cmd_botinfo,
+								 NULL, NULL},
+  {"bots", "m", (Function) cmd_bots, NULL, NULL}, {"downbots", "m",
+						   (Function) cmd_downbots,
 						   NULL, NULL},
 #endif
-  {"newpass", "", (Function) cmd_newpass, NULL, NULL}, {"nick", "",
-							(Function) cmd_handle,
-							NULL, NULL}, {"page",
-								      "",
-								      (Function)
-								      cmd_page,
-								      NULL,
-								      NULL},
-    {"quit", "", (Function) NULL, NULL, NULL}, {"rehash", "m",
-						(Function) cmd_rehash, NULL,
-						NULL}, {"relay", "i",
-							(Function) cmd_relay,
-							NULL, NULL},
+{"botconfig", "n", (Function) cmd_botconfig, NULL, NULL},
 #ifdef HUB
-  {"reload", "m|m", (Function) cmd_reload, NULL, NULL},
+{"bottree", "n", (Function) cmd_bottree, NULL, NULL}, {"chaddr", "a",
+						       (Function) cmd_chaddr,
+						       NULL, NULL},
 #endif
-  {"restart", "m", (Function) cmd_restart, NULL, NULL},
+{"chat", "", (Function) cmd_chat, NULL, NULL}, {"chattr", "m|m",
+						(Function) cmd_chattr, NULL,
+						NULL},
 #ifdef HUB
-  {"save", "m|m", (Function) cmd_save, NULL, NULL}, {"set", "a",
-						     (Function) cmd_set, NULL,
-						     NULL},
+{"chhandle", "m", (Function) cmd_chhandle, NULL, NULL}, {"chnick", "m",
+							 (Function)
+							 cmd_chhandle, NULL,
+							 NULL}, {"chpass",
+								 "m",
+								 (Function)
+								 cmd_chpass,
+								 NULL, NULL},
+  {"chsecpass", "n", (Function) cmd_chsecpass, NULL, NULL},
+#ifdef S_DCCPASS
+{"cmdpass", "a", (Function) cmd_cmdpass, NULL, NULL},
 #endif
-  {"simul", "a", (Function) cmd_simul, NULL, NULL}, {"status", "m|m",
-						     (Function) cmd_status,
-						     NULL, NULL}, {"strip",
+#endif
+{"color", "", (Function) cmd_color, NULL, NULL}, {"comment", "m|m",
+						  (Function) cmd_comment,
+						  NULL, NULL}, {"config", "n",
+								(Function)
+								cmd_config,
+								NULL, NULL},
+  {"console", "mo|o", (Function) cmd_console, NULL, NULL},
+#ifdef HUB
+{"dccstat", "a", (Function) cmd_dccstat, NULL, NULL},
+#endif
+{"debug", "a", (Function) cmd_debug, NULL, NULL}, {"die", "n",
+						   (Function) cmd_die, NULL,
+						   NULL}, {"echo", "",
+							   (Function)
+							   cmd_echo, NULL,
+							   NULL}, {"fixcodes",
 								   "",
 								   (Function)
-								   cmd_strip,
+								   cmd_fixcodes,
 								   NULL,
 								   NULL},
-    {"su", "a", (Function) cmd_su, NULL, NULL}, {"tcl", "a",
-						 (Function) cmd_tcl, NULL,
+  {"handle", "", (Function) cmd_handle, NULL, NULL}, {"help", "",
+						      (Function) cmd_help,
+						      NULL, NULL}, {"ignores",
+								    "m",
+								    (Function)
+								    cmd_ignores,
+								    NULL,
+								    NULL},
+#ifdef HUB
+{"link", "n", (Function) cmd_link, NULL, NULL},
+#endif
+{"match", "m|m", (Function) cmd_match, NULL, NULL}, {"me", "",
+						     (Function) cmd_me, NULL,
+						     NULL}, {"motd", "",
+							     (Function)
+							     cmd_motd, NULL,
+							     NULL},
+#ifdef HUB
+{"mtcl", "a", (Function) cmd_mtcl, NULL, NULL}, {"newleaf", "n",
+						 (Function) cmd_newleaf, NULL,
 						 NULL},
-#ifdef HUB
-  {"trace", "n", (Function) cmd_trace, NULL, NULL},
 #endif
-  {"traffic", "m", (Function) cmd_traffic, NULL, NULL}, {"unlink", "m",
-							 (Function)
-							 cmd_unlink, NULL,
-							 NULL}, {"update",
-								 "a",
+{"newpass", "", (Function) cmd_newpass, NULL, NULL}, {"secpass", "",
+						      (Function) cmd_secpass,
+						      NULL, NULL}, {"nick",
+								    "",
+								    (Function)
+								    cmd_handle,
+								    NULL,
+								    NULL},
+  {"page", "", (Function) cmd_page, NULL, NULL}, {"quit", "", (Function) NULL,
+						  NULL, NULL}, {"relay", "i",
+								(Function)
+								cmd_relay,
+								NULL, NULL},
+#ifdef HUB
+{"reload", "m|m", (Function) cmd_reload, NULL, NULL},
+#endif
+{"restart", "m", (Function) cmd_restart, NULL, NULL},
+#ifdef HUB
+{"save", "m|m", (Function) cmd_save, NULL, NULL}, {"set", "a",
+						   (Function) cmd_set, NULL,
+						   NULL},
+#endif
+{"simul", "a", (Function) cmd_simul, NULL, NULL}, {"status", "m|m",
+						   (Function) cmd_status,
+						   NULL, NULL}, {"strip", "",
 								 (Function)
-								 cmd_update,
+								 cmd_strip,
 								 NULL, NULL},
-    {"uptime", "m|m", (Function) cmd_uptime, NULL, NULL},
+  {"su", "a", (Function) cmd_su, NULL, NULL}, {"tcl", "a", (Function) cmd_tcl,
+					       NULL, NULL},
 #ifdef HUB
-  {"vbottree", "n", (Function) cmd_vbottree, NULL, NULL}, {"who", "n",
-							   (Function) cmd_who,
-							   NULL, NULL},
+{"trace", "n", (Function) cmd_trace, NULL, NULL},
 #endif
-  {"whois", "o|o", (Function) cmd_whois, NULL, NULL}, {"whom", "",
-						       (Function) cmd_whom,
-						       NULL, NULL}, {"whoami",
-								     "",
+{"traffic", "m", (Function) cmd_traffic, NULL, NULL}, {"unlink", "m",
+						       (Function) cmd_unlink,
+						       NULL, NULL}, {"update",
+								     "a",
 								     (Function)
-								     cmd_whoami,
+								     cmd_update,
 								     NULL,
 								     NULL},
-    {"botjump", "n", (Function) cmd_botjump, NULL, NULL}, {"botmsg", "o",
+#ifdef HUB
+{"botupdate", "a", (Function) cmd_botupdate, NULL, NULL}, {"botcrontab", "a",
 							   (Function)
-							   cmd_botmsg, NULL,
-							   NULL}, {"netmsg",
-								   "n",
+							   cmd_botcrontab,
+							   NULL, NULL},
+  {"netcrontab", "a", (Function) cmd_netcrontab, NULL, NULL},
+#endif
+{"uptime", "m|m", (Function) cmd_uptime, NULL, NULL}, {"crontab", "a",
+						       (Function) cmd_crontab,
+						       NULL, NULL},
+#ifdef HUB
+{"vbottree", "n", (Function) cmd_vbottree, NULL, NULL}, {"who", "n",
+							 (Function) cmd_who,
+							 NULL, NULL},
+#endif
+{"whois", "o|o", (Function) cmd_whois, NULL, NULL}, {"whom", "",
+						     (Function) cmd_whom,
+						     NULL, NULL}, {"whoami",
+								   "",
 								   (Function)
-								   cmd_netmsg,
+								   cmd_whoami,
 								   NULL,
 								   NULL},
-    {"botnick", "m", (Function) cmd_botnick, NULL, NULL}, {"netnick", "m",
-							   (Function)
-							   cmd_netnick, NULL,
-							   NULL}, {"botw",
-								   "n",
+  {"botjump", "n", (Function) cmd_botjump, NULL, NULL},
+#ifdef HUB
+{"botdie", "a", (Function) cmd_botdie, NULL, NULL},
+#endif
+{"botmsg", "o", (Function) cmd_botmsg, NULL, NULL}, {"netmsg", "n",
+						     (Function) cmd_netmsg,
+						     NULL, NULL}, {"botnick",
+								   "m",
 								   (Function)
-								   cmd_botw,
+								   cmd_botnick,
 								   NULL,
 								   NULL},
-    {"netw", "n", (Function) cmd_netw, NULL, NULL}, {"botps", "n",
-						     (Function) cmd_botps,
+  {"netnick", "m", (Function) cmd_netnick, NULL, NULL}, {"botw", "n",
+							 (Function) cmd_botw,
+							 NULL, NULL}, {"netw",
+								       "n",
+								       (Function)
+								       cmd_netw,
+								       NULL,
+								       NULL},
+  {"botps", "n", (Function) cmd_botps, NULL, NULL}, {"botkill", "n",
+						     (Function) cmd_botkill,
 						     NULL, NULL}, {"netps",
 								   "n",
 								   (Function)
 								   cmd_netps,
 								   NULL,
 								   NULL},
-    {"botlast", "n", (Function) cmd_botlast, NULL, NULL}, {"netlast", "n",
-							   (Function)
-							   cmd_netlast, NULL,
-							   NULL}, {"netlag",
-								   "m",
-								   (Function)
-								   cmd_netlag,
-								   NULL,
-								   NULL},
-    {"botserver", "m", (Function) cmd_botserver, NULL, NULL}, {"netserver",
-							       "m",
-							       (Function)
-							       cmd_netserver,
-							       NULL, NULL},
-    {"botversion", "o", (Function) cmd_botversion, NULL, NULL}, {"netversion",
-								 "o",
+  {"botlast", "n", (Function) cmd_botlast, NULL, NULL}, {"netlast", "n",
+							 (Function)
+							 cmd_netlast, NULL,
+							 NULL}, {"netlag",
+								 "m",
 								 (Function)
-								 cmd_netversion,
+								 cmd_netlag,
 								 NULL, NULL},
-    {"userlist", "m", (Function) cmd_userlist, NULL, NULL}, {"ps", "n",
+  {"botserver", "m", (Function) cmd_botserver, NULL, NULL}, {"netserver", "m",
 							     (Function)
-							     cmd_ps, NULL,
-							     NULL}, {"last",
-								     "n",
-								     (Function)
-								     cmd_last,
-								     NULL,
-								     NULL},
-    {"exec", "a", (Function) cmd_exec, NULL, NULL}, {"w", "n",
-						     (Function) cmd_w, NULL,
-						     NULL}, {"channels", "o",
-							     (Function)
-							     cmd_channels,
+							     cmd_netserver,
 							     NULL, NULL},
+  {"botversion", "o", (Function) cmd_botversion, NULL, NULL}, {"netversion",
+							       "o",
+							       (Function)
+							       cmd_netversion,
+							       NULL, NULL},
+  {"userlist", "m", (Function) cmd_userlist, NULL, NULL}, {"ps", "n",
+							   (Function) cmd_ps,
+							   NULL, NULL},
+  {"last", "n", (Function) cmd_last, NULL, NULL}, {"exec", "a",
+						   (Function) cmd_exec, NULL,
+						   NULL}, {"w", "n",
+							   (Function) cmd_w,
+							   NULL, NULL},
+  {"channels", "o", (Function) cmd_channels, NULL, NULL},
 #ifdef HUB
-  {"hublevel", "a", (Function) cmd_hublevel, NULL, NULL}, {"lagged", "m",
-							   (Function)
-							   cmd_lagged, NULL,
-							   NULL}, {"uplink",
-								   "a",
-								   (Function)
-								   cmd_uplink,
-								   NULL,
-								   NULL},
+{"hublevel", "a", (Function) cmd_hublevel, NULL, NULL}, {"lagged", "m",
+							 (Function)
+							 cmd_lagged, NULL,
+							 NULL}, {"uplink",
+								 "a",
+								 (Function)
+								 cmd_uplink,
+								 NULL, NULL},
 #endif
-  {NULL, NULL, NULL, NULL, NULL, NULL}
+{NULL, NULL, NULL, NULL, NULL, NULL}
 };

@@ -19,7 +19,7 @@ extern struct chanset_t *chanset;
 extern char version[], origbotname[], botname[], admin[], network[],
   motdfile[], ver[], botnetnick[], bannerfile[], logfile_suffix[], textdir[],
   *binname, pid_file[], netpass[], tempdir[], mhub[];
-extern int backgrd, con_chan, term_z, use_stderr, dcc_total,
+extern int backgrd, con_chan, term_z, use_stderr, dcc_total, timesync,
 #ifdef HUB
   my_port,
 #endif
@@ -1199,14 +1199,20 @@ check_last ()
   struct passwd *pw;
   Context;
   pw = getpwuid (geteuid ());
+  Context;
+  if (!pw)
+    return;
   strncpy0 (user, pw->pw_name ? pw->pw_name : "", sizeof (user));
+  Context;
   if (user[0])
     {
       char *out;
       char buf[50];
       sprintf (buf, "last %s", user);
+      Context;
       if (shell_exec (buf, NULL, &out, NULL))
 	{
+	  Context;
 	  if (out)
 	    {
 	      char *p;
@@ -1357,7 +1363,7 @@ userfile_cfg_line (char *ln)
       set_cfg_str (NULL, cfgent->name, ln[0] ? ln : NULL);
     }
   else
-    putlog (LOG_MISC, "*", STR ("Unrecognized config entry %s in userfile"),
+    putlog (LOG_ERRORS, "*", STR ("Unrecognized config entry %s in userfile"),
 	    name);
 }
 
@@ -1378,9 +1384,13 @@ got_config_share (int idx, char *ln)
       botnet_send_cfg_broad (idx, cfgent);
     }
   else
-    putlog (LOG_MISC, "*", STR ("Unrecognized config entry %s in userfile"),
+    putlog (LOG_ERRORS, "*", STR ("Unrecognized config entry %s in userfile"),
 	    name);
   cfg_noshare--;
+  Context;
+#ifdef HUB
+  write_userfile (-1);
+#endif
 }
 
 void
@@ -1437,14 +1447,12 @@ shell_exec (char *cmdline, char *input, char **output, char **erroutput)
     }
   p++;
   strcpy (p, ".i");
-  inpFile = fopen (fname, "w+");
   unlink (fname);
+  inpFile = fopen (fname, "w+");
   if (!inpFile)
     {
       putlog (LOG_MISC, "*", "exec: Couldn't open %s", fname);
       nfree (fname);
-      Context;
-      fclose (inpFile);
       return 0;
     }
   if (input)
@@ -1459,20 +1467,18 @@ shell_exec (char *cmdline, char *input, char **output, char **erroutput)
       fseek (inpFile, 0, SEEK_SET);
     }
   strcpy (p, ".e");
-  errFile = fopen (fname, "w+");
   unlink (fname);
+  errFile = fopen (fname, "w+");
   if (!errFile)
     {
       putlog (LOG_MISC, "*", "exec: Couldn't open %s", fname);
       nfree (fname);
       fclose (inpFile);
-      Context;
-      fclose (errFile);
       return 0;
     }
   strcpy (p, ".o");
-  outFile = fopen (fname, "w+");
   unlink (fname);
+  outFile = fopen (fname, "w+");
   if (!outFile)
     {
       putlog (LOG_MISC, "*", "exec: Couldn't open %s", fname);
@@ -1597,6 +1603,7 @@ updatelocal (void)
   botnet_send_chat (-1, botnetnick, "Updating...");
   botnet_send_bye ();
   fatal ("Updating...", 1);
+  usleep (2000 * 500);
   bg_send_quit (BG_ABORT);
   unlink (pid_file);
   system (binname);
@@ -1712,6 +1719,7 @@ updatebin (int idx, char *par, int autoi)
 	  botnet_send_chat (-1, botnetnick, "Updating...");
 	  botnet_send_bye ();
 	  fatal ("Updating...", 1);
+	  usleep (2000 * 500);
 	  bg_send_quit (BG_ABORT);
 	  exit (0);
 #ifdef LEAF
@@ -2019,4 +2027,32 @@ kickreason (int kind)
     default:
       return "!";
     }
+}
+char kickprefix[20] = "";
+char bankickprefix[20] = "";
+void
+makeplaincookie (char *chname, char *nick, char *buf)
+{
+  char work[256], work2[256];
+  int i, n;
+  sprintf (work, STR ("%010li"), (now + timesync));
+  strcpy (buf, (char *) &work[4]);
+  work[0] = 0;
+  if (strlen (nick) < 5)
+    while (strlen (work) + strlen (nick) < 5)
+      strcat (work, " ");
+  else
+    strcpy (work, (char *) &nick[strlen (nick) - 5]);
+  strcat (buf, work);
+  n = 3;
+  for (i = strlen (chname) - 1; (i >= 0) && (n >= 0); i--)
+    if (((unsigned char) chname[i] < 128) && ((unsigned char) chname[i] > 32))
+      {
+	work2[n] = tolower (chname[i]);
+	n--;
+      }
+  while (n >= 0)
+    work2[n--] = ' ';
+  work2[4] = 0;
+  strcat (buf, work2);
 }

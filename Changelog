@@ -18,3 +18,32 @@
  Fixed FreeBSD compile errors 
  Improved last checker functions
  
+1.0.04
+ Rewrote most of the update system... the first bot installed on shells will set their uplink to the +u bot now.
+
+1.0.05
+ Added cmd_botdie
+ Added text for HOSTS entry on leaf bots..
+ Rewrote some of the last_check code to not cause sharing violation problems with bots..
+ Added .secpass .chsecpass (to be used at a later time)
+ Users are given a random secpass when added
+ Disabled share system host/user/flag related logging on leaf bots
+ Added cookieops checking and flag stripping..
+ Added roles
+ Fixed various seg fault bugs..
+ Rewrote update system once again, seems to be working flawlessly now.
+	-Binaries are no longer compressed on send, use upx for linux binaries.
+	-Hubs must be manually updated in most cases (unless your hublevel 1 hub is the update bot ;])
+          -Just ftp the new binary, and use .botupdate
+ Added cmds: botupdate, botkill, net/botcrontab
+ Removed cmd_rehash; cmd_restart does nothing for now.
+ Fixed +take
+ +bitch is enforced by every bot as of now, will be fixed to be like +take later..
+ Added ctcp cloaking
+ All kicks are cloaked correctly now 
+
+1.0.06
+ +closed now sends +i a lot quicker.
+ Fixed msg_op to use cookieops when a channel is specified
+ Fixed do_op to only send opline (+o-b) if nick is in channel ;)
+ Removed cmd_pls_bot

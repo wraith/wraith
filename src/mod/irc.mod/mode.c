@@ -263,6 +263,7 @@ real_add_mode (struct chanset_t *chan, char plus, char mode, char *op)
   masklist *m;
   memberlist *mx;
   char s[21];
+  Context;
   if (!me_op (chan))
     return;
   if (mode == 'o')
@@ -455,6 +456,7 @@ got_op (struct chanset_t *chan, char *nick, char *from, char *who,
   struct userrec *u;
   int check_chan = 0;
   int snm = chan->stopnethack_mode;
+  Context;
   m = ismember (chan, who);
   if (!m)
     {
@@ -481,33 +483,22 @@ got_op (struct chanset_t *chan, char *nick, char *from, char *who,
     return;
   if (me_op (chan) && !match_my_nick (who) && nick[0])
     {
-#ifdef S_OWNEREXCEPT
       if ((channel_bitch (chan) || channel_closed (chan)
-	   || channel_take (chan)) && !(glob_master (*opper)
-					|| glob_bot (*opper))
-	  && !chan_master (*opper) && !(glob_op (victim) || glob_bot (victim))
-	  && !chan_op (victim))
-#else
-      if (channel_bitch (chan) && !(glob_bot (*opper))
-	  && !(glob_bot (victim) || glob_bot (victim)) && !chan_op (victim))
-#endif
-	add_mode (chan, '-', 'o', who);
-      else if ((chan_deop (victim) ||
-#ifdef S_OWNEREXCEPT
-		(glob_deop (victim) && !chan_op (victim)))
-	       && !glob_master (*opper) && !chan_master (*opper))
-#else
-		(glob_deop (victim) && !chan_op (victim))))
-#endif
-	add_mode (chan, '-', 'o', who);
-      else
-    if (reversing)
-      add_mode (chan, '-', 'o', who);
+	   || channel_take (chan)) && !glob_op (victim) && !chan_op (victim))
+	{
+	  if (target_priority (chan, m, 1))
+	    add_mode (chan, '-', 'o', who);
+	}
+      else if (reversing)
+	{
+	  add_mode (chan, '-', 'o', who);
+	}
     }
   else if (reversing && !match_my_nick (who))
     add_mode (chan, '-', 'o', who);
   if (!nick[0] && me_op (chan) && !match_my_nick (who))
     {
+      Context;
       if (chan_deop (victim) || (glob_deop (victim) && !chan_op (victim)))
 	{
 	  m->flags |= FAKEOP;
@@ -552,6 +543,7 @@ got_op (struct chanset_t *chan, char *nick, char *from, char *who,
   m->flags |= WASOP;
   if (check_chan)
     {
+      Context;
       recheck_channel (chan, 1);
       check_topic (chan);
     }
@@ -895,6 +887,7 @@ gotmode (char *from, char *origmsg)
   memberlist *m;
   struct chanset_t *chan;
   struct flag_record fr3 = { FR_GLOBAL | FR_CHAN, 0, 0 };
+  Context;
   strncpy (buf, origmsg, 510);
   buf[510] = 0;
   msg = buf;
@@ -906,6 +899,7 @@ gotmode (char *from, char *origmsg)
       chg = newsplit (&msg);
       reversing = 0;
       chan = findchan (ch);
+      Context;
       if (!chan)
 	{
 	  putlog (LOG_MISC, "*", CHAN_FORCEJOIN, ch);
@@ -913,8 +907,7 @@ gotmode (char *from, char *origmsg)
 	}
       else if (channel_active (chan) || channel_pending (chan))
 	{
-	  buser = get_user_by_handle (userlist, botnetnick);
-	  get_user_flagrec (buser, &fr3, chan->name);
+	  Context;
 	  z = strlen (msg);
 	  if (msg[--z] == ' ')
 	    msg[z] = 0;
@@ -923,6 +916,7 @@ gotmode (char *from, char *origmsg)
 	  u = get_user_by_host (from);
 	  get_user_flagrec (u, &user, ch);
 	  nick = splitnick (&from);
+	  Context;
 	  m = ismember (chan, nick);
 	  if (m)
 	    m->last = now;
@@ -935,22 +929,23 @@ gotmode (char *from, char *origmsg)
 	      if (chan_fakeop (m))
 		{
 		  putlog (LOG_MODES, ch, CHAN_FAKEMODE, ch);
-		  dprintf (DP_MODE, "KICK %s %s :%s\n", ch, nick,
-			   CHAN_FAKEMODE_KICK);
+		  dprintf (DP_MODE, "KICK %s %s :%s%s\n", ch, nick,
+			   kickprefix, CHAN_FAKEMODE_KICK);
 		  m->flags |= SENTKICK;
 		  reversing = 1;
 		}
 	      else if (!chan_hasop (m) && !channel_nodesynch (chan))
 		{
 		  putlog (LOG_MODES, ch, CHAN_DESYNCMODE, ch);
-		  dprintf (DP_MODE, "KICK %s %s :%s\n", ch, nick,
-			   CHAN_DESYNCMODE_KICK);
+		  dprintf (DP_MODE, "KICK %s %s :%s%s\n", ch, nick,
+			   kickprefix, CHAN_DESYNCMODE_KICK);
 		  m->flags |= SENTKICK;
 		  reversing = 1;
 		}
 	    }
 	  ms2[0] = '+';
 	  ms2[2] = 0;
+	  Context;
 	  while ((ms2[1] = *chg))
 	    {
 	      int todo = 0;
@@ -1028,10 +1023,14 @@ gotmode (char *from, char *origmsg)
 		    reversing = 1;
 		  break;
 		case 'l':
+		  Context;
+		  buser = get_user_by_handle (userlist, botnetnick);
+		  get_user_flagrec (buser, &fr3, ch);
 		  if ((!nick[0]) && (bounce_modes))
 		    reversing = 1;
 		  if (ms2[0] == '-')
 		    {
+		      Context;
 		      check_tcl_mode (nick, from, u, chan->dname, ms2, "");
 		      if (channel_active (chan))
 			{
@@ -1060,6 +1059,7 @@ gotmode (char *from, char *origmsg)
 		    }
 		  else
 		    {
+		      Context;
 		      op = newsplit (&msg);
 		      fixcolon (op);
 		      if (op == '\0')
@@ -1122,6 +1122,7 @@ gotmode (char *from, char *origmsg)
 		    }
 		  break;
 		case 'o':
+		  Context;
 		  op = newsplit (&msg);
 		  fixcolon (op);
 		  if (ms2[0] == '+')
@@ -1263,6 +1264,7 @@ gotmode (char *from, char *origmsg)
 		}
 	      chg++;
 	    }
+	  Context;
 	  if (chan->channel.do_opreq)
 	    request_op (chan);
 	  if (!me_op (chan) && !nick[0])

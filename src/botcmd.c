@@ -859,7 +859,7 @@ bot_traced (int idx, char *par)
 void
 bot_timesync (int idx, char *par)
 {
-  putlog (LOG_BOTS, "*", "Got timesync from %s: %s\n", dcc[idx].nick, par);
+  putlog (LOG_DEBUG, "*", "Got timesync from %s: %s\n", dcc[idx].nick, par);
   timesync = atoi (par) - now;
 #ifdef HUB
   send_timesync (-1);

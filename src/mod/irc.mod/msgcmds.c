@@ -43,7 +43,7 @@ msg_pass (char *nick, char *host, struct userrec *u, char *par)
   if (strlen (new) < 8)
     {
       dprintf (DP_HELP,
-	       "NOTICE %s :insecure password, use >= 8 chars ucase, lcase and a number\n",
+	       "NOTICE %s :insecure password, use >= 8 chars uppercase, lowercase and a number\n",
 	       nick);
       return 0;
     }
@@ -60,7 +60,7 @@ msg_pass (char *nick, char *host, struct userrec *u, char *par)
   if ((ucase + ocase + lcase) != 3)
     {
       dprintf (DP_HELP,
-	       "NOTICE %s :insecure password, use >= 8 chars ucase, lcase and a number.\n",
+	       "NOTICE %s :insecure password, use >= 8 chars uppercase, lowercase and a number.\n",
 	       nick);
       return 0;
     }
@@ -153,7 +153,10 @@ msg_op (char *nick, char *host, struct userrec *u, char *par)
 		{
 		  get_user_flagrec (u, &fr, par);
 		  if (chan_op (fr) || (glob_op (fr) && !chan_deop (fr)))
-		    add_mode (chan, '+', 'o', nick);
+		    {
+		      stats_add (u, 0, 1);
+		      do_op (nick, chan);
+		    }
 		  putlog (LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host,
 			  u->handle, par);
 		  return 1;

@@ -3,7 +3,8 @@
 #define MAKING_SERVER
 #include "src/mod/module.h"
 #include "server.h"
-static Function *global = NULL;
+static Function *global = NULL, *encryption_funcs;
+extern struct cfg_entry CFG_OPTIMESLACK;
 static int ctcp_mode;
 static int serv;
 static int strict_host;
@@ -1880,7 +1881,8 @@ static Function server_table[] =
 (Function) & server_online, (Function) & min_servs, (Function) & H_raw, (Function) & H_wall,
 (Function) & H_msg, (Function) & H_msgm, (Function) & H_notc, (Function) & H_flud, (Function) & H_ctcp,
 (Function) & H_ctcr, (Function) ctcp_reply, (Function) get_altbotnick, (Function) & nick_len,
-(Function) check_tcl_notc, (Function) & server_lag, (Function) & curserv, (Function) cursrvname, };
+(Function) check_tcl_notc, (Function) & server_lag, (Function) & curserv, (Function) cursrvname,
+(Function) botrealname, };
 char *
 server_start (Function * global_funcs)
 {
@@ -1944,6 +1946,11 @@ server_start (Function * global_funcs)
   stack_limit = 4;
   server_table[4] = (Function) botname;
   module_register (MODULE_NAME, server_table, 1, 2);
+  if (!(encryption_funcs = module_depend (MODULE_NAME, "encryption", 0, 0)))
+    {
+      module_undepend (MODULE_NAME);
+      return "This module requires an encryption modules.";
+    }
   s = Tcl_GetVar (interp, "nick", TCL_GLOBAL_ONLY);
   if (s)
     strncpyz (origbotname, s, NICKLEN);

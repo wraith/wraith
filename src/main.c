@@ -54,8 +54,8 @@ extern jmp_buf alarmret;
 extern void check_last ();
 int role;
 int loading = 0;
-char egg_version[1024] = "1.0.04";
-int egg_numver = 1000400;
+char egg_version[1024] = "1.0.06";
+int egg_numver = 1000600;
 time_t lastfork = 0;
 #ifdef HUB
 int my_port;
@@ -533,16 +533,22 @@ core_10secondly ()
     check_trace ();
 #endif
 #ifdef S_LASTCHECK
-  if (curcheck == 2)
-    check_last ();
+#ifdef LEAF
+  if (localhub)
 #endif
-  if (curcheck == 3)
-    {
+    if (curcheck == 2)
+      check_last ();
+#endif
+#ifdef LEAF
+  if (localhub)
+#endif
+    if (curcheck == 3)
+      {
 #ifdef S_PROCESSCHECK
-      check_processes ();
+	check_processes ();
 #endif
-      curcheck = 0;
-    }
+	curcheck = 0;
+      }
   Context;
   autolink_cycle (NULL);
 }
@@ -781,9 +787,10 @@ extern module_entry *module_list;
 void restart_chons ();
 void check_static (char *, char *(*)());
 #include "mod/static.h"
-int init_mem (), init_dcc_max (), init_userent (), init_misc (), init_bots (),
-init_net (), init_modules (), init_tcl (int, char **), init_language (int),
-init_botcmd ();
+int init_userrec (), init_mem (), init_dcc_max (), init_userent (),
+init_misc (), init_bots (), init_net (), init_modules (), init_tcl (int,
+								    char **),
+init_language (int), init_botcmd ();
 void
 checklockfile ()
 {
@@ -1047,6 +1054,8 @@ main (int argc, char **argv)
     }
 #ifdef LEAF
   id = geteuid ();
+  if (!id)
+    fatal ("Cannot read userid.", 0);
   pw = getpwuid (id);
   if (!pw)
     fatal ("Cannot read from the passwd file.", 0);
@@ -1141,6 +1150,7 @@ main (int argc, char **argv)
   init_bots ();
   init_net ();
   init_modules ();
+  init_userrec ();
   if (backgrd)
     bg_prepare_split ();
   init_tcl (argc, argv);
@@ -1189,7 +1199,7 @@ main (int argc, char **argv)
 	      newsplit (&temps);
 	      sprintf (check, "%s %s", unix_n, vers_n);
 	      if (strcmp (temps, check))
-		fatal ("Go away.", 0);
+		fatal ("Go away..", 0);
 	    }
 	  else if (c[0] == '!')
 	    {
@@ -1307,13 +1317,9 @@ main (int argc, char **argv)
   module_load ("transfer");
   module_load ("share");
   module_load ("update");
-#ifdef HUB
   module_load ("notes");
-#endif
   module_load ("console");
-#ifdef LEAF
   module_load ("ctcp");
-#endif
   module_load ("compress");
   chanprog ();
 #ifdef LEAF

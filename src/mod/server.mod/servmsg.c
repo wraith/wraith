@@ -96,6 +96,7 @@ static int
 check_tcl_raw (char *from, char *code, char *msg)
 {
   int x;
+  Context;
   Tcl_SetVar (interp, "_raw1", from, 0);
   Tcl_SetVar (interp, "_raw2", code, 0);
   Tcl_SetVar (interp, "_raw3", msg, 0);
@@ -896,6 +897,7 @@ static int
 gotmode (char *from, char *msg)
 {
   char *ch;
+  Context;
   ch = newsplit (&msg);
   if (strchr (CHANMETA, ch[0]) == NULL)
     {
@@ -958,10 +960,49 @@ timeout_server (int idx)
 static struct dcc_table SERVER_SOCKET =
   { "SERVER", 0, eof_server, server_activity, NULL, timeout_server,
 display_server, NULL, kill_server, NULL };
+int
+isop (char *mode)
+{
+  int state = 0, cnt = 0;
+  char *p;
+  p = mode;
+  while ((*p) && (*p != ' '))
+    {
+      if (*p == '-')
+	state = 1;
+      else if (*p == '+')
+	state = 0;
+      else if ((!state) && (*p == 'o'))
+	cnt++;
+      p++;
+    }
+  return (cnt >= 1);
+}
+
+int
+ismdop (char *mode)
+{
+  int state = 0, cnt = 0;
+  char *p;
+  p = mode;
+  while ((*p) && (*p != ' '))
+    {
+      if (*p == '-')
+	state = 1;
+      else if (*p == '+')
+	state = 0;
+      else if ((state) && (*p == 'o'))
+	cnt++;
+      p++;
+    }
+  return (cnt >= 3);
+}
 static void
 server_activity (int idx, char *msg, int len)
 {
-  char *from, *code;
+  char *from, *code, tmp[1024];
+  char sign = '+';
+  Context;
   if (trying_server)
     {
       strcpy (dcc[idx].nick, "(server)");
@@ -977,6 +1018,272 @@ server_activity (int idx, char *msg, int len)
       from = newsplit (&msg);
     }
   code = newsplit (&msg);
+  if (!strcmp (code, STR ("MODE")) && (msg[0] == '#') && strchr (from, '!'))
+    {
+      char *modes[5] = { NULL, NULL, NULL, NULL, NULL };
+      char *nfrom, *hfrom;
+      int i;
+      struct userrec *ufrom = NULL;
+      struct chanset_t *chan = NULL;
+      char work[1024], *wptr, *p;
+      memberlist *m;
+      int modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
+      strncpy0 (work, msg, sizeof (work));
+      wptr = work;
+      p = newsplit (&wptr);
+      chan = findchan (p);
+      p = newsplit (&wptr);
+      while (*p)
+	{
+	  char *mp;
+	  if (*p == '+')
+	    sign = '+';
+	  else if (*p == '-')
+	    sign = '-';
+	  else if (strchr (STR ("oblkvIe"), p[0]))
+	    {
+	      mp = newsplit (&wptr);
+	      if (strchr ("ob", p[0]))
+		{
+		  modes[modecnt] = nmalloc (strlen (mp) + 4);
+		  sprintf (modes[modecnt], STR ("%c%c %s"), sign, p[0], mp);
+		  modecnt++;
+		  if (p[0] == 'o')
+		    {
+		      if (sign == '+')
+			ops++;
+		      else
+			deops++;
+		    }
+		  if (p[0] == 'b')
+		    {
+		      if (sign == '+')
+			bans++;
+		      else
+			unbans++;
+		    }
+		}
+	    }
+	  else if (strchr (STR ("pstnmi"), p[0]))
+	    {
+	    }
+	  else
+	    {
+	      putlog (LOG_ERRORS, "*", STR ("Forgotten modechar: %c"), p[0]);
+	    }
+	  p++;
+	}
+      ufrom = get_user_by_host (from);
+      strncpy0 (work, from, sizeof (work));
+      p = strchr (work, '!');
+      *p++ = 0;
+      nfrom = work;
+      hfrom = p;
+      if ((chan) && (deops >= 3))
+	{
+	  if ((!ufrom) || (!(ufrom->flags & USER_BOT)))
+	    {
+	      if (ROLE_KICK_MDOP)
+		{
+		  m = ismember (chan, nfrom);
+		  if (!m || !chan_sentkick (m))
+		    {
+		      sprintf (tmp, STR ("KICK %s %s :%s%s\n"), chan->name,
+			       nfrom, kickprefix, kickreason (KICK_MASSDEOP));
+		      tputs (serv, tmp, strlen (tmp));
+		      if (m)
+			m->flags |= SENTKICK;
+		    }
+		}
+	    }
+	}
+      if (chan && ops && (ufrom) && (ufrom->flags & USER_BOT)
+	  && (!channel_fastop (chan)) && (!channel_take (chan)))
+	{
+	  int isbadop = 0;
+	  if ((modecnt != 2) || (strncmp (modes[0], "+o", 2))
+	      || (strncmp (modes[1], "-b", 2)))
+	    isbadop = 1;
+	  else
+	    {
+	      char enccookie[25], plaincookie[25], key[NICKLEN + 20],
+		goodcookie[25];
+	      strncpy0 (enccookie, (char *) &(modes[1][8]),
+			sizeof (enccookie));
+	      p = enccookie + strlen (enccookie) - 1;
+	      strcpy (key, nfrom);
+	      strcat (key, netpass);
+	      p = decrypt_string (key, enccookie);
+	      Context;
+	      strncpy0 (plaincookie, p, sizeof (plaincookie));
+	      nfree (p);
+	      makeplaincookie (chan->dname, (char *) (modes[0] + 3),
+			       goodcookie);
+	      if (strncmp
+		  ((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
+		isbadop = 2;
+	      else
+		if (strncmp
+		    ((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
+		isbadop = 3;
+	      else
+		{
+		  char tmp[20];
+		  long optime;
+		  int off;
+		  sprintf (tmp, STR ("%010li"), (now + timesync));
+		  strncpy0 ((char *) &tmp[4], plaincookie, 7);
+		  optime = atol (tmp);
+		  off = (now + timesync - optime);
+		  if (abs (off) > op_time_slack)
+		    {
+		      isbadop = 4;
+		      putlog (LOG_ERRORS, "*",
+			      "%s opped with bad ts: %li was off by %li",
+			      nfrom, optime, off);
+		    }
+		}
+	    }
+	  if (isbadop)
+	    {
+	      char trg[NICKLEN + 1] = "";
+	      int n, i;
+	      memberlist *m;
+	      Context;
+	      switch (role)
+		{
+		case 0:
+		  break;
+		case 1:
+		  m = ismember (chan, nfrom);
+		  if (!m || !chan_sentkick (m))
+		    {
+		      sprintf (tmp, STR ("KICK %s %s :%s%s\n"), chan->name,
+			       nfrom, kickprefix, kickreason (KICK_BADOP));
+		      tputs (serv, tmp, strlen (tmp));
+		      if (m)
+			m->flags |= SENTKICK;
+		    }
+		  sprintf (tmp, STR ("%s MODE %s"), from, msg);
+		  deflag_user (ufrom, DEFLAG_BADCOOKIE, tmp);
+		  break;
+		default:
+		  n = role - 1;
+		  i = 0;
+		  while ((i < 5) && (n > 0))
+		    {
+		      if (modes[i] && !strncmp (modes[i], "+o", 2))
+			n--;
+		      if (n)
+			i++;
+		    }
+		  if (!n)
+		    {
+		      strcpy (trg, (char *) &modes[i][3]);
+		      m = ismember (chan, trg);
+		      if (m)
+			{
+			  if (!(m->flags & CHANOP))
+			    {
+			      if (!chan_sentkick (m))
+				{
+				  sprintf (tmp, STR ("KICK %s %s :%s%s\n"),
+					   chan->name, trg, kickprefix,
+					   kickreason (KICK_BADOPPED));
+				  tputs (serv, tmp, strlen (tmp));
+				  m->flags |= SENTKICK;
+				}
+			    }
+			}
+		    }
+		}
+	      if (isbadop == 1)
+		putlog (LOG_WARN, "*", STR ("Missing cookie: %s MODE %s"),
+			from, msg);
+	      else if (isbadop == 2)
+		putlog (LOG_WARN, "*",
+			STR ("Invalid cookie (bad nick): %s MODE %s"), from,
+			msg);
+	      else if (isbadop == 3)
+		putlog (LOG_WARN, "*",
+			STR ("Invalid cookie (bad chan): %s MODE %s"), from,
+			msg);
+	      else if (isbadop == 4)
+		putlog (LOG_WARN, "*",
+			STR ("Invalid cookie (bad time): %s MODE %s"), from,
+			msg);
+	    }
+	  else
+	    putlog (LOG_DEBUG, "*", STR ("Good op: %s"), msg);
+	}
+#ifdef G_MANUALOP
+      if ((ops) && chan && !channel_manop (chan) && (ufrom)
+	  && !(ufrom->flags & USER_BOT))
+	{
+	  char trg[NICKLEN + 1] = "";
+	  int n, i;
+	  memberlist *m;
+	  switch (role)
+	    {
+	    case 0:
+	      break;
+	    case 1:
+	      m = ismember (chan, nfrom);
+	      if (!m || !chan_sentkick (m))
+		{
+		  sprintf (tmp, STR ("KICK %s %s :%s%s\n"), chan->name, nfrom,
+			   kickprefix, kickreason (KICK_MANUALOP));
+		  tputs (serv, tmp, strlen (tmp));
+		  if (m)
+		    m->flags |= SENTKICK;
+		}
+	      sprintf (tmp, STR ("%s MODE %s"), from, msg);
+	      deflag_user (ufrom, DEFLAG_MANUALOP, tmp);
+	      break;
+	    default:
+	      n = role - 1;
+	      i = 0;
+	      while ((i < 5) && (n > 0))
+		{
+		  if (modes[i] && !strncmp (modes[i], "+o", 2))
+		    n--;
+		  if (n)
+		    i++;
+		}
+	      if (!n)
+		{
+		  strcpy (trg, (char *) &modes[i][3]);
+		  m = ismember (chan, trg);
+		  if (m)
+		    {
+		      if (!(m->flags & CHANOP)
+			  && (rfc_casecmp (botname, trg)))
+			{
+			  if (!chan_sentkick (m))
+			    {
+			      sprintf (tmp, STR ("KICK %s %s :%s%s\n"),
+				       chan->name, trg, kickprefix,
+				       kickreason (KICK_MANUALOPPED));
+			      tputs (serv, tmp, strlen (tmp));
+			      m->flags |= SENTKICK;
+			    }
+			}
+		    }
+		  else
+		    {
+		      sprintf (tmp, STR ("KICK %s %s :%s%s\n"), chan->name,
+			       trg, kickprefix,
+			       kickreason (KICK_MANUALOPPED));
+		      tputs (serv, tmp, strlen (tmp));
+		    }
+		}
+	    }
+	}
+      for (i = 0; i < 5; i++)
+	if (modes[i])
+	  nfree (modes[i]);
+#endif
+    }
   if (use_console_r)
     {
       if (!strcmp (code, "PRIVMSG") || !strcmp (code, "NOTICE"))

@@ -1936,7 +1936,7 @@ tcl_channel_add (Tcl_Interp * irp, char *newname, char *options)
       chan->stopnethack_mode = global_stopnethack_mode;
       chan->revenge_mode = global_revenge_mode;
       chan->idle_kick = global_idle_kick;
-      chan->limitraise = 0;
+      chan->limitraise = 20;
       chan->ban_time = global_ban_time;
       chan->exempt_time = global_exempt_time;
       chan->invite_time = global_invite_time;

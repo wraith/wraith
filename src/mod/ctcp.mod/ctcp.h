@@ -1,4 +1,3 @@
-#ifdef LEAF
 #ifndef _EGG_MOD_CTCP_CTCP_H
 #define _EGG_MOD_CTCP_CTCP_H
 #define CLIENTINFO "SED VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME ACTION DCC UTC PING ECHO  :Use CLIENTINFO <COMMAND> to get more specific information"
@@ -14,5 +13,4 @@
 #define CLIENTINFO_UTC "UTC substitutes the local timezone"
 #define CLIENTINFO_PING "PING returns the arguments it receives"
 #define CLIENTINFO_ECHO "ECHO returns the arguments it receives"
-#endif
 #endif

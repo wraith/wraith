@@ -1286,23 +1286,28 @@ autolink_cycle (char *start)
     }
   if (curhub[0])
     {
+      Context;
       if (!strcmp (curhub, uplink))
 	return;
       if (start)
 	return;
       if (uplink[0])
 	{
+	  Context;
 	  botlink ("", -3, uplink);
 	  return;
 	}
       return;
+      Context;
     }
   else
     {
+      Context;
       if (!start)
 	{
 	  if (uplink[0])
 	    {
+	      Context;
 	      botlink ("", -3, uplink);
 	      return;
 	    }
@@ -1310,12 +1315,15 @@ autolink_cycle (char *start)
 	}
       else
 	{
+	  Context;
 	  botlinkcount++;
 	  if (botlinkcount >= 3)
 	    return;
+	  Context;
 	  strcpy (avoidbot, start);
 	}
     }
+  Context;
   ul = userlist;
   hlc = 0;
   Context;

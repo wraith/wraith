@@ -16,6 +16,18 @@ struct flag_record
 #define FR_AND 0x20000000
 #define FR_ANYWH 0x10000000
 #define FR_ALL 0x0fffffff
+#define ROLE_KICK_MDOP (role)
+#define ROLE_KICK_MEAN (role)
+#define DEFLAG_BADCOOKIE 1
+#ifdef G_MANUALOP
+#define DEFLAG_MANUALOP 2
+#endif
+#ifdef G_MEAN
+#define DEFLAG_MEAN_DEOP 3
+#define DEFLAG_MEAN_KICK 4
+#define DEFLAG_MEAN_BAN 5
+#endif
+#define DEFLAG_MDOP 6
 #define USER_VALID 0x03ffffff
 #define CHAN_VALID 0x03ffffff
 #define BOT_VALID 0x7fe689C1
