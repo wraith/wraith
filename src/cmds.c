@@ -401,7 +401,7 @@ static void cmd_cmdpass(int idx, char *par)
   cmd = newsplit(&par);
   putlog(LOG_CMDS, "*", "#%s# cmdpass %s ...", dcc[idx].nick, cmd[0] ? cmd : "");
   pass = newsplit(&par);
-  if (!cmd || !pass) {
+  if (!cmd || !cmd[0] || !pass || !pass[0]) {
     dprintf(idx, "Usage: %scmdpass <command> <password> [clear]\n", settings.dcc_prefix);
     dprintf(idx, "  if the password is specified and 'clear' after it, the command's password is cleared\n");
     return;
@@ -453,10 +453,10 @@ static void cmd_cmdpass(int idx, char *par)
     else
       dprintf(idx, "Set command password for %s to '%s'\n", cmd, pass);
     set_cmd_pass(tmp, 1);
-  }
 #ifdef HUB
-  write_userfile(idx);
+    write_userfile(idx);
 #endif /* HUB */
+  }
 }
 
 static void cmd_lagged(int idx, char *par)
