@@ -314,7 +314,8 @@ void link_hash(int idx, char *rand)
 {
   char hash[256] = "";
 
-  egg_snprintf(hash, sizeof(hash), "%s.%s.%s", MD5(settings.salt2), settings.salt1, rand);
+  /* nothing fancy, just something simple that can stop people from playing */
+  egg_snprintf(hash, sizeof(hash), "enclink%s", rand);
   strlcpy(dcc[idx].shahash, SHA1(hash), sizeof(dcc[idx].shahash));
   egg_bzero(hash, sizeof(hash));
   return;
