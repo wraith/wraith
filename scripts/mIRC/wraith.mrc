@@ -63,8 +63,8 @@ ON *:TEXT:*:?:{
 }
 
 ALIAS -l wraith {
-  if ($eval(% $+ $1 $+ . $+ $2,2)) {
-    return $ifmatch
+  if ($eval(% $+ $1 $+ . $+ $2,2) || $var($eval(% $+ $1 $+ . $+ $2,1))) {
+    return $eval(% $+ $1 $+ . $+ $2,2)
   }
   else {
     return $eval(% $+ $1,2)
