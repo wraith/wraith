@@ -159,11 +159,11 @@ void bot_remotecmd(int idx, char *par) {
   if (!strcmp(tbot, conf.bot->nick)) {
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else if (!strcmp(tbot, "*")) {
-    botnet_send_cmd_broad(idx, fbot, atoi(fidx), par);
+    botnet_send_cmd_broad(idx, fbot, fhnd, atoi(fidx), par);
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else {
     if (nextbot(tbot) != idx)
-      botnet_send_cmd(fbot, tbot, atoi(fidx), par);
+      botnet_send_cmd(fbot, tbot, fhnd, atoi(fidx), par);
   }
 }
 

@@ -3616,7 +3616,7 @@ static void cmd_mns_host(int idx, char *par)
 /* netserver */
 static void cmd_netserver(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netserver", dcc[idx].nick);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, "cursrv");
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "cursrv");
 }
 
 static void cmd_botserver(int idx, char * par) {
@@ -3628,7 +3628,7 @@ static void cmd_botserver(int idx, char * par) {
   if (nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot\n", par);
   }
-  botnet_send_cmd(conf.bot->nick, par, idx, "cursrv");
+  botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "cursrv");
 }
 
 
@@ -3650,7 +3650,7 @@ static void cmd_timesync(int idx, char *par) {
 
   putlog(LOG_CMDS, "*", "#%s# timesync", dcc[idx].nick);
   sprintf(tmp, "timesync %li", timesync + now);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, tmp);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
 static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *par) {
@@ -3666,7 +3666,7 @@ static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *pa
 /* netversion */
 static void cmd_netversion(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netversion", dcc[idx].nick);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, "ver");
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "ver");
 }
 
 static void cmd_botversion(int idx, char * par) {
@@ -3678,7 +3678,7 @@ static void cmd_botversion(int idx, char * par) {
   if (nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot\n", par);
   }
-  botnet_send_cmd(conf.bot->nick, par, idx, "ver");
+  botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "ver");
 }
 #endif /* HUB */
 
@@ -3699,7 +3699,7 @@ static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
 /* netnick, botnick */
 static void cmd_netnick (int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# netnick", dcc[idx].nick);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, "curnick");
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "curnick");
 }
 
 static void cmd_botnick(int idx, char * par) {
@@ -3711,7 +3711,7 @@ static void cmd_botnick(int idx, char * par) {
   if (nextbot(par) < 0) {
     dprintf(idx, "%s isn't a linked bot\n", par);
   }
-  botnet_send_cmd(conf.bot->nick, par, idx, "curnick");
+  botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "curnick");
 }
 
 static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
@@ -3748,7 +3748,7 @@ static void cmd_botmsg(int idx, char * par) {
   char tmp[1024] = "";
 
   egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
-  botnet_send_cmd(conf.bot->nick, tbot, idx, tmp);
+  botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, tmp);
 }
 
 static void cmd_netmsg(int idx, char * par) {
@@ -3764,7 +3764,7 @@ static void cmd_netmsg(int idx, char * par) {
   char tmp[1024] = "";
 
   egg_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, tmp);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
 static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
@@ -3794,7 +3794,7 @@ static void cmd_netlag(int idx, char * par) {
   tm = (tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000);
   sprintf(tmp, "ping %li", tm);
   dprintf(idx, "Sent ping to all linked bots\n");
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, tmp);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 #endif /* HUB */
 
@@ -3802,7 +3802,7 @@ static void rcmd_ping(char * frombot, char *fromhand, char * fromidx, char * par
   char tmp[64] = "";
 
   egg_snprintf(tmp, sizeof tmp, "pong %s", par);
-  botnet_send_cmd(conf.bot->nick, frombot, atoi(fromidx), tmp);
+  botnet_send_cmd(conf.bot->nick, frombot, fromhand, atoi(fromidx), tmp);
 }
 
 static void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
@@ -3825,7 +3825,7 @@ static void cmd_netw(int idx, char * par) {
 
   putlog(LOG_CMDS, "*", "#%s# netw", dcc[idx].nick);
   strcpy(tmp, "exec w");
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, tmp);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
 static void cmd_netps(int idx, char * par) {
@@ -3839,7 +3839,7 @@ static void cmd_netps(int idx, char * par) {
   char buf[1024] = "";
 
   egg_snprintf(buf, sizeof par, "exec ps %s", par);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, buf);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 
 static void cmd_netlast(int idx, char * par) {
@@ -3853,7 +3853,7 @@ static void cmd_netlast(int idx, char * par) {
   char buf[1024] = "";
 
   egg_snprintf(buf, sizeof par, "exec last %s", par);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, buf);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 #endif /* HUB */
 
@@ -3947,7 +3947,7 @@ static void cmd_netcrontab(int idx, char * par) {
   char buf[1024] = "";
 
   egg_snprintf(buf, sizeof buf, "exec crontab %s %s", cmd, par);
-  botnet_send_cmd_broad(-1, conf.bot->nick, idx, buf);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 #endif /* HUB */
 
@@ -4058,7 +4058,7 @@ static void cmd_botjump(int idx, char * par) {
   char buf[1024] = "";
 
   egg_snprintf(buf, sizeof buf, "jump %s", par);
-  botnet_send_cmd(conf.bot->nick, tbot, idx, buf);
+  botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, buf);
 }
 
 static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {

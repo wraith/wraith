@@ -71,8 +71,8 @@ void botnet_send_nkch_part(int, int, char *);
 void botnet_send_nkch(int, char *);
 int bots_in_subtree(tand_t *);
 int users_in_subtree(tand_t *);
-int botnet_send_cmd(char * fbot, char * bot, int fromidx, char * cmd);
-void botnet_send_cmd_broad(int idx, char * fbot, int fromidx, char * cmd);
+int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd);
+void botnet_send_cmd_broad(int idx, char * fbot, char *fhnd, int fromidx, char * cmd);
 void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
 
 #define b_status(a)	(dcc[a].status)
