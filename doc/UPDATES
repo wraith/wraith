@@ -2,6 +2,8 @@ This is a summary of ChangeLog basically.
 
 1.1.5
 1.Fixed a small bug in update which only affected hubs.
+2.Checksum is now calculated and added to binary during compile.
+3.Fixed a bug in transfer/update which caused transfers to fail often.
 
 1.1.4
 1.User flag +x is now correctly recognized in more places.
