@@ -22,14 +22,12 @@ static int reversing = 0;
 static struct flag_record user   = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 
-static void do_op(char *nick, struct chanset_t *chan, int force)
+static int do_op(char *nick, struct chanset_t *chan, int force)
 {
   memberlist *m = ismember(chan, nick);
 
-  if (!m) return;
-
-  if (!force && chan_hasop(m))
-    return;
+  if ((!m) || (m && !force && chan_hasop(m)))
+    return 0;
 
   if (channel_fastop(chan) || channel_take(chan)) {
     add_mode(chan, '+', 'o', nick);
@@ -39,7 +37,9 @@ static void do_op(char *nick, struct chanset_t *chan, int force)
     dprintf(DP_MODE, tmp);
     nfree(tmp);
   }
+  return 1;
 }
+
 #define NEW_ADDMODE 1
 #ifdef NEW_ADDMODE
 void dequeue_op_deop(struct chanset_t * chan);

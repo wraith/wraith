@@ -68,19 +68,18 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
         if (chan && channel_active(chan)) {
           get_user_flagrec(u, &fr, par);
           if (chk_op(fr, chan)) {
-            stats_add(u, 0, 1);
-            do_op(nick, chan, 1);
+            if (do_op(nick, chan, 1))
+              stats_add(u, 0, 1);
           }
-          putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s",
-			  nick, host, u->handle, par);
+          putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
           return 1;
         }
       } else {
         for (chan = chanset; chan; chan = chan->next) {
           get_user_flagrec(u, &fr, chan->dname);
           if (chk_op(fr, chan)) {
-            stats_add(u, 0, 1);
-            do_op(nick, chan, 1);
+            if (do_op(nick, chan, 1))
+              stats_add(u, 0, 1);
           }
         }
         putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host, u->handle);
@@ -422,20 +421,17 @@ static int msgc_op(char *nick, char *host, struct userrec *u, char *par, char *c
     if (chan && channel_active(chan)) {
       get_user_flagrec(u, &fr, chan->dname);
       if (chk_op(fr, chan)) {
-        stats_add(u, 0, 1);
-        do_op(nick, chan, force);
+        if (do_op(nick, chan, force))
+          stats_add(u, 0, 1);
       }
       return 1;
     }
   } else {
     for (chan = chanset; chan; chan = chan->next) {
-      int op = 0;
       get_user_flagrec(u, &fr, chan->dname);
       if (chk_op(fr, chan)) {
-        if (!op) 
-          stats_add(u, 0, 1);
-        op = 1;
-        do_op(nick, chan, force);
+       if (do_op(nick, chan, force))
+         stats_add(u, 0, 1);
       }
     }
   }
