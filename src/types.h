@@ -34,7 +34,7 @@ typedef unsigned long           u_32bit_t;
 typedef unsigned short int      u_16bit_t;
 typedef unsigned char           u_8bit_t;
 
-typedef u_int32_t 		dword;
+typedef u_32bit_t 		dword;
 
 /* port */
 typedef in_port_t		port_t;
