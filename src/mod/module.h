@@ -360,7 +360,7 @@
 /* 204 - 207 */
 #define online_since (*(int *)(global[204]))
 #define buildts (*(const time_t*)(global[205]))
-#define colorI ((char *(*)(int, int, int))global[206])
+#define color ((char *(*)(int, int, int))global[206])
 #define check_dcc_attrs ((int (*)(struct userrec *,int))global[207])
 /* 208 - 211 */
 #define check_dcc_chanattrs ((int (*)(struct userrec *,char *,int,int))global[208])
