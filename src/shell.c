@@ -106,7 +106,12 @@ int clear_tmp()
 #ifdef LEAF
 void check_mypid()
 { 
-  if (can_stat(conf.bot->pid_file) && (getpid() != checkpid(conf.bot->nick, NULL)))
+  pid_t pid = 0;
+  
+  if (can_stat(conf.bot->pid_file))
+    pid = checkpid(conf.bot->nick, NULL);
+
+  if (pid && (pid != getpid()))
     fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 0);
 }
 #endif /* LEAF */
