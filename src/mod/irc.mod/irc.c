@@ -1072,6 +1072,7 @@ static void warn_pls_take()
 }
 
 
+/* FIXME: max sendq will occur. */
 void check_servers() {
   struct chanset_t *chan = NULL;
 
@@ -1079,9 +1080,10 @@ void check_servers() {
     memberlist *m = NULL;
 
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (chan_hasop(m) && ((!m->server || !m->server[0]) || !m->hops)) {
+      if (!match_my_nick(m->nick) && chan_hasop(m) && (!m->server || (m->server && !m->server[0]) || (m->hops == -1))) {
+        putlog(LOG_DEBUG, "*", "Updating WHO for '%s' because '%s' is missing data.", chan->dname, m->nick);
         dprintf(DP_HELP, STR("WHO %s\n"), chan->name);
-        return;
+        break;
       }
     }
   }
