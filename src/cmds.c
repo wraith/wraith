@@ -1538,11 +1538,13 @@ static void cmd_botcmd(int idx, char *par)
   /* the rest of the cmd will be logged remotely */
   putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);	
   if (!strcmp(botm, "*")) {
-    if (!strcmp(botm, "di") || !strcmp(botm, "die")) 
+    if (!strcmp(botm, "di") || !strcmp(botm, "die")) {
       dprintf(idx, "Not a good idea.\n");
-    else if (!dcc[idx].user->flags & USER_OWNER)
+      return;
+    } else if (!dcc[idx].user->flags & USER_OWNER) {
       dprintf(idx, "'botcmd *' is limited to +n only.\n");
-    return;
+      return;
+    }
   }
 
   if (!strcmp(botm, "?")) {
