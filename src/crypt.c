@@ -20,7 +20,8 @@
 
 AES_KEY e_key, d_key;
 
-char *encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
+static unsigned char *
+encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
 {
   size_t len = *inlen;
   int blocks = 0, block = 0;
@@ -51,7 +52,8 @@ char *encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen
   return out;
 }
 
-char *decrypt_binary(const char *keydata, unsigned char *in, size_t len)
+static unsigned char *
+decrypt_binary(const char *keydata, unsigned char *in, size_t len)
 {
   int blocks = 0, block = 0;
   unsigned char *out = NULL;
@@ -296,4 +298,3 @@ char *btoh(const unsigned char *md, int len)
   ret = buf;
   return ret;
 }
-
