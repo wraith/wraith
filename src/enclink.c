@@ -198,6 +198,15 @@ char *link_write(int snum, char *buf, size_t *len)
   return buf;
 }
 
+void link_hash(int idx, char *rand)
+{
+  char hash[256] = "";
+
+  egg_snprintf(hash, sizeof(hash), "%s.%s.%s", settings.packname, settings.salt1, rand);
+  strncpyz(dcc[idx].shahash, SHA1(hash), sizeof(dcc[idx].shahash));
+  return;
+}
+
 struct enc_link enclink[] = {
   { "ghost", LINK_GHOST, ghost_link, ghost_write, ghost_read },
   { NULL, 0, NULL, NULL, NULL }

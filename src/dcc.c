@@ -352,7 +352,7 @@ dcc_bot_new(int idx, char *buf, int x)
     int snum = findanysnum(dcc[idx].sock);
 
     if (snum >= 0) {
-      char *tmp = strdup(buf), *tmpp = tmp, *p = NULL;
+      char *rand = newsplit(&buf), *tmp = strdup(buf), *tmpp = tmp, *p = NULL;
       int i = -1;
 
       while ((p = strchr(buf, ' ')) && i == -1) {
@@ -367,7 +367,8 @@ dcc_bot_new(int idx, char *buf, int x)
       free(tmpp);
 
       sdprintf("Choosing '%s' for link", enclink[i].name);
-      dprintf(idx, "neg %d\n", enclink[i].type);
+      link_hash(idx, rand);
+      dprintf(idx, "neg %s %d\n", dcc[idx].shahash, enclink[i].type);
       socklist[snum].enclink = i;
       if (enclink[i].link)
         (enclink[i].link) (idx, TO);	
@@ -936,6 +937,14 @@ dcc_chat_pass(int idx, char *buf, int atr)
       int snum = findanysnum(dcc[idx].sock);
 
       if (snum >= 0) {
+        char *hash = newsplit(&buf);
+
+        if (strcmp(dcc[idx].shahash, hash)) {
+          putlog(LOG_WARN, "*", "%s attempted to negotiate an encryption with an invalid hash.", dcc[idx].nick);
+          killsock(dcc[idx].sock);
+          lostdcc(idx);
+          return;
+        }
         int type = atoi(newsplit(&buf)), i = -1;
 
         /* verify we have that type and then initiate it */
@@ -1638,16 +1647,25 @@ dcc_telnet_pass(int idx, int atr)
   if (glob_bot(fr)) {
     /* FIXME: remove after 1.2.2 */
     if (!dcc[idx].newbot) {
-      link_call(idx, LINK_GHOST, FROM);
+      int snum = findanysnum(dcc[idx].sock);
+
+      if (snum >= 0) {
+        socklist[snum].enclink = link_find_by_type(LINK_GHOST);
+        link_link(idx, LINK_GHOST, FROM);
+      }
     } else {
       /* negotiate a new linking scheme */
       int i = 0;
-      char buf[1024] = "";
+      char buf[1024] = "", rand[51] = "";
   
+      make_rand_str(rand, 50);
+
+      link_hash(idx, rand);
+
       for (i = 0; enclink[i].name; i++)
         sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
 
-      dprintf(idx, "neg? %s\n", buf);
+      dprintf(idx, "neg? %s %s\n", rand, buf);
     }
   } else
     /* Turn off remote telnet echo (send IAC WILL ECHO). */

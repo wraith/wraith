@@ -56,6 +56,7 @@ struct dcc_t {
   port_t port;
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
+  char shahash[SHA_HASH_LENGTH + 1];
   char nick[NICKLEN];
   char whois[UHOSTLEN];
   char host[UHOSTLEN];
