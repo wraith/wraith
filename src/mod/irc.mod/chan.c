@@ -1532,8 +1532,8 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   char userhost[UHOSTLEN] = "";
   memberlist *m = ismember(chan, nick);	/* in my channel list copy? */
   bool waschanop;
-  struct chanset_t *ch = NULL;
-  memberlist *ml = NULL;
+//  struct chanset_t *ch = NULL;
+//  memberlist *ml = NULL;
 
   if (!m) {			/* Nope, so update */
     m = newmember(chan, nick);	/* Get a new channel entry */
