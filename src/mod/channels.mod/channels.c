@@ -940,19 +940,18 @@ void channels_init()
 #ifdef LEAF
   timer_create_secs(60, "check_limitraise", (Function) check_limitraise);
 #endif /* LEAF */
-#ifdef HUB
-  timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
-#endif /* HUB */
   timer_create_secs(60, "check_expired_bans", (Function) check_expired_bans);
   timer_create_secs(60, "check_expired_exempts", (Function) check_expired_exempts);
   timer_create_secs(60, "check_expired_invites", (Function) check_expired_invites);
-  timer_create_secs(10, "channels_10secondly", (Function) channels_10secondly);
 #ifdef HUB
+  timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
   timer_create_secs(30, "check_should_close", (Function) check_should_close);
 #ifdef G_BACKUP
   timer_create_secs(30, "check_should_backup", (Function) check_should_backup);
 #endif /* G_BACKUP */
 #endif /* HUB */
+  timer_create_secs(10, "channels_10secondly", (Function) channels_10secondly);
+
 
   add_builtins("dcc", C_dcc_irc);
   add_builtins("bot", channels_bot);
