@@ -27,7 +27,7 @@ static encdata_t encdata = {
 */
 
 settings_t settings = {
-  "AAAAAAAAAAAAAAAA",
+  "AAAAAAAAAAAAAAA",
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
