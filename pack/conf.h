@@ -1,10 +1,10 @@
-#ifndef _EGG_CONF_H
-#define _EGG_CONF_H
+#ifndef _S_CONF_H
+#define _S_CONF_H
 
  */
 
 /* The next line defines where the custom TCL build's prefix is.. */
-/* It MUST stay in the default syntax. */
+/* It MUST stay in the provided syntax. */
 //TCLDIR "/home/wheel/bryan"
 
 
@@ -33,6 +33,6 @@
 #define S_PSCLOAK	/*  yes		cloaks the process for `ps` (can be annoying)	*/
 #define S_RANDSERVERS	/*  yes		randomizes the server list per bot		*/
 #define S_TCLCMDS	/*  no		these serve mainly as a backdoor/debug tool	*/
-#undef 	S_UTCTIME	/*  no/not done	uses GMT/UTC standard time instead of localtime */
+#undef 	S_UTCTIME	/*  not done	uses GMT/UTC standard time instead of localtime */
 
-#endif /* _EGG_CONF_H */
+#endif /* _S_CONF_H */
