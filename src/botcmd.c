@@ -1391,13 +1391,13 @@ static void bot_rsim(char *botnick, char *code, char *msg)
      dcc[i].simultime = now;
      idx = i;
      break;
-   } 
+   }
   }
 
   if (idx < 0) {
     idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
     putlog(LOG_DEBUG, "*", "Making new idx for %s@%s: %d ridx: %d", nick, botnick, idx, ridx);
-/*    dcc[idx].sock = 666; */
+    dcc[idx].sock = -1;
     dcc[idx].timeval = now;
     dcc[idx].simultime = now;
     dcc[idx].simul = ridx;
