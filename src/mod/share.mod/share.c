@@ -1247,22 +1247,16 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
     strcpy(s1, ctime(&tt));
     lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
 
-    ok = 1;
-    if (!write_chans(f, idx))
+    ok += write_chans(f, idx);
+    ok += write_config(f, idx);
+    ok += write_bans(f, idx);
+    ok += write_exempts(f, idx);
+    ok += write_invites(f, idx);
+    if (ok != 5)
       ok = 0;
-    if (!write_config(f, idx))
-      ok = 0;
-    if (!write_bans(f, idx))
-      ok = 0;
-    if (!write_exempts(f, idx))
-      ok = 0;
-    if (!write_invites(f, idx))
-      ok = 0;
-
     for (u = (struct userrec *) bu; u && ok; u = u->next) {
-      if (!write_user(u, f, idx)) {
+      if (!write_user(u, f, idx))
         ok = 0;
-      }
     }
     fclose(f);
   }
