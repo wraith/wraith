@@ -802,7 +802,6 @@ If you have flags on a channel, type %sconsole #chan to see more commands.\n"), 
     dprintf(idx, STR("No help for nonexistant command '%s'.\n"), par);
 }
 
-#ifdef HUB
 static void cmd_addlog(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_MISC, "*", "%s: %s", dcc[idx].nick, par);
@@ -812,6 +811,8 @@ static void cmd_addlog(struct userrec *u, int idx, char *par)
   }
   dprintf(idx, "Placed entry in the log file.\n");
 }
+
+#ifdef HUB
 static void cmd_who(struct userrec *u, int idx, char *par)
 {
   int i;
@@ -846,7 +847,8 @@ static void cmd_who(struct userrec *u, int idx, char *par)
       tell_who(u, idx, dcc[idx].u.chat->channel);
   }
 }
-#endif
+#endif /* HUB */
+
 static void cmd_whois(struct userrec *u, int idx, char *par)
 {
   if (!par[0]) {
@@ -4017,13 +4019,11 @@ dcc_cmd_t C_dcc[] =
   {"+user",		"m",	(Function) cmd_pls_user,	NULL,    NULL},
 #ifdef HUB
   {"-bot",		"a",	(Function) cmd_mns_user,	NULL,    NULL},
-#endif
+#endif /* HUB */
   {"-host",		"",	(Function) cmd_mns_host,	NULL,    NULL},
   {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL,    NULL},
   {"-user",		"m",	(Function) cmd_mns_user,	NULL,    NULL},
-#ifdef HUB
   {"addlog",		"mo|o",	(Function) cmd_addlog,		NULL,    NULL},
-#endif
   {"about",		"",	(Function) cmd_about,		NULL,    NULL},
   {"away",		"",	(Function) cmd_away,		NULL,    NULL},
   {"back",		"",	(Function) cmd_back,		NULL,    NULL},
@@ -4037,7 +4037,7 @@ dcc_cmd_t C_dcc[] =
   {"downbots",		"m",	(Function) cmd_downbots,	NULL,	 NULL},
   {"bottree",		"n",	(Function) cmd_bottree,		NULL,    NULL},
   {"chaddr",		"a",	(Function) cmd_chaddr,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"chat",		"",	(Function) cmd_chat,		NULL,    NULL},
   {"chattr",		"m|m",	(Function) cmd_chattr,		NULL,	 NULL},
 #ifdef HUB
@@ -4047,17 +4047,17 @@ dcc_cmd_t C_dcc[] =
   {"chsecpass",		"n",	(Function) cmd_chsecpass,		NULL,    NULL},
 #ifdef S_DCCPASS
   {"cmdpass",           "a",    (Function) cmd_cmdpass,         NULL,    NULL},
-#endif
+#endif /* S_DCCPASS */
 #endif /* HUB */
   {"color",		"",     (Function) cmd_color,           NULL,    NULL},
   {"comment",		"m|m",	(Function) cmd_comment,		NULL,    NULL},
 #ifdef HUB
   {"config",		"n",	(Function) cmd_config,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"console",		"-|-",	(Function) cmd_console,		NULL,    NULL},
 #ifdef HUB
   {"dccstat",		"a",	(Function) cmd_dccstat,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"debug",		"a",	(Function) cmd_debug,		NULL,    NULL},
   {"die",		"n",	(Function) cmd_die,		NULL,    NULL},
   {"echo",		"",	(Function) cmd_echo,		NULL,    NULL},
@@ -4067,7 +4067,7 @@ dcc_cmd_t C_dcc[] =
   {"ignores",		"m",	(Function) cmd_ignores,		NULL,    NULL},
 #ifdef HUB
   {"link",		"n",	(Function) cmd_link,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"match",		"m|m",	(Function) cmd_match,		NULL,    NULL},
   {"me",		"",	(Function) cmd_me,		NULL,    NULL},
   {"motd",		"",	(Function) cmd_motd,		NULL,    NULL},
@@ -4077,7 +4077,7 @@ dcc_cmd_t C_dcc[] =
   {"bottcl",		"a",	(Function) cmd_bottcl,		NULL,    NULL},
 #endif /* S_TCLCMDS */
   {"newleaf",		"n",	(Function) cmd_newleaf,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"newpass",		"",	(Function) cmd_newpass,		NULL,    NULL},
   {"secpass",		"",	(Function) cmd_secpass,		NULL,    NULL},
   {"nick",		"",	(Function) cmd_handle,		NULL,    NULL},
@@ -4086,12 +4086,12 @@ dcc_cmd_t C_dcc[] =
   {"relay",		"i",	(Function) cmd_relay,		NULL,    NULL},
 #ifdef HUB
   {"reload",		"m|m",	(Function) cmd_reload,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"restart",		"m",	(Function) cmd_restart,		NULL,    NULL},
 #ifdef HUB
   {"save",		"m|m",	(Function) cmd_save,		NULL,    NULL},
   {"set",		"a",	(Function) cmd_set,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"simul",		"a",	(Function) cmd_simul,		NULL,    NULL},
   {"status",		"m|m",	(Function) cmd_status,		NULL,    NULL},
   {"strip",		"",	(Function) cmd_strip,		NULL,    NULL},
@@ -4101,7 +4101,7 @@ dcc_cmd_t C_dcc[] =
 #endif /* S_TCLCMDS */
 #ifdef HUB
   {"trace",		"n",	(Function) cmd_trace,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"traffic",		"m",	(Function) cmd_traffic,		NULL,    NULL},
   {"unlink",		"m",	(Function) cmd_unlink,		NULL,    NULL},
   {"update",		"a",	(Function) cmd_update,		NULL,    NULL},
@@ -4109,20 +4109,20 @@ dcc_cmd_t C_dcc[] =
   {"botupdate",		"a",	(Function) cmd_botupdate,	NULL,    NULL},
   {"botcrontab",	"a",	(Function) cmd_botcrontab,	NULL,    NULL},
   {"netcrontab",	"a",	(Function) cmd_netcrontab,	NULL,    NULL},
-#endif
+#endif /* HUB */
   {"uptime",		"m|m",	(Function) cmd_uptime,		NULL,    NULL},
   {"crontab",		"a",	(Function) cmd_crontab,		NULL,    NULL},
 #ifdef HUB
   {"vbottree",		"n",	(Function) cmd_vbottree,	NULL,    NULL},
   {"who",		"n",	(Function) cmd_who,		NULL,    NULL},
-#endif
+#endif /* HUB */
   {"whois",		"",	(Function) cmd_whois,		NULL,    NULL},
   {"whom",		"",	(Function) cmd_whom,		NULL,    NULL},
   {"whoami",		"",	(Function) cmd_whoami,		NULL,    NULL},
   {"botjump", 		"n", 	(Function) cmd_botjump, 	NULL,    NULL},
 #ifdef HUB
   {"botdie", 		"a", 	(Function) cmd_botdie, 	NULL,    NULL},
-#endif
+#endif /* HUB */
   {"botmsg", 		"o", 	(Function) cmd_botmsg, 		NULL,    NULL},
   {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL,    NULL},
   {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL,    NULL},
@@ -4136,7 +4136,7 @@ dcc_cmd_t C_dcc[] =
   {"netps", 		"n", 	(Function) cmd_netps, 		NULL,    NULL},
   {"botlast", 		"n", 	(Function) cmd_botlast, 	NULL,    NULL},
   {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL,    NULL},
-#endif
+#endif /* HUB */
   {"netlag", 		"m", 	(Function) cmd_netlag, 		NULL,    NULL},
   {"botserver", 	"m", 	(Function) cmd_botserver, 	NULL,    NULL},
   {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL,    NULL},
@@ -4153,6 +4153,6 @@ dcc_cmd_t C_dcc[] =
   {"hublevel", 		"a", 	(Function) cmd_hublevel, NULL, NULL},
   {"lagged", 		"m", 	(Function) cmd_lagged, NULL, NULL},
   {"uplink", 		"a", 	(Function) cmd_uplink, NULL, NULL},
-#endif
+#endif /* HUB */
   {NULL,		NULL,	NULL,				NULL,    NULL, NULL}
 };
