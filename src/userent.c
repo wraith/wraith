@@ -1045,7 +1045,7 @@ void *get_user(struct user_entry_type *et, struct userrec *u)
 
   if (u && (e = find_user_entry(et, u)))
     return et->get(u, e);
-  return 0;
+  return NULL;
 }
 
 int set_user(struct user_entry_type *et, struct userrec *u, void *d)

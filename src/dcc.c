@@ -218,7 +218,6 @@ static void greet_new_bot(int idx)
 
   dcc[idx].timeval = now;
   dcc[idx].u.bot->version[0] = 0;
-  dcc[idx].u.bot->bts = 0;
   dcc[idx].u.bot->sysname[0] = 0;
   dcc[idx].u.bot->numver = 0;
 #ifdef HUB
@@ -244,10 +243,9 @@ static void greet_new_bot(int idx)
   dprintf(idx, "v 1001500 %d %s <%s> %d %li %s\n", HANDLEN, ver, "-", localhub, buildts, egg_version);
 /* FIXME: remove after 1.1.8 */
   dprintf(idx, "vs %s\n", sysname);
-  dprintf(idx, "username %s\n", conf.username ? conf.username : "");	/* username */
-  dprintf(idx, "nodename %s\n", un.nodename ? un.nodename : "");	/* nodename */
-  dprintf(idx, "os %s\n", un.sysname ? un.sysname : "");		/* os */
   dprintf(idx, "bts %lu\n", buildts);
+
+  dprintf(idx, "si %s %s %s", conf.username ? conf.username : "*", un.sysname ? un.sysname : "*", un.nodename ? un.nodename : "*");
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_FORK_BOT) {
       killsock(dcc[i].sock);

@@ -434,39 +434,30 @@ static void remote_tell_who(int idx, char *nick, int chan)
   }
 }
 
+static void bot_shellinfo(int idx, char *par)
+{
+  char *username = NULL, *sysname = NULL, *nodename = NULL;
+  
+  username = newsplit(&par);
+  sysname = newsplit(&par);
+  nodename = newsplit(&par);
+
+  dcc[idx].u.bot->sysname[0] = 0;
+  set_user(&USERENTRY_USERNAME, dcc[idx].user, username);
+
+  set_user(&USERENTRY_OS, dcc[idx].user, par);
+  strcpy(dcc[idx].u.bot->sysname, sysname); 
+
+  set_user(&USERENTRY_NODENAME, dcc[idx].user, nodename);
+}
+
+
+/* FIXME: remove after 1.1.8 */
 static void bot_sysname(int idx, char *par)
 {
   dcc[idx].u.bot->sysname[0] = 0;
   strcpy(dcc[idx].u.bot->sysname, par);
 }
-
-static void bot_username(int idx, char *par)
-{
-  if (par && par[0]) {
-    set_user(&USERENTRY_USERNAME, dcc[idx].user, par);
-  }
-}
-
-static void bot_nodename(int idx, char *par)
-{
-  if (par && par[0]) {
-    set_user(&USERENTRY_NODENAME, dcc[idx].user, par);
-  }
-}
-
-static void bot_os(int idx, char *par)
-{
-  if (par && par[0]) {
-    set_user(&USERENTRY_OS, dcc[idx].user, par);
-  }
-}
-
-
-//  dprintf(idx, "username %s\n", conf.username ? conf.username : "");  /* username */
-//  dprintf(idx, "nodename %s\n", un.nodename ? un.nodename : "");      /* nodename */
-//  dprintf(idx, "os %s\n", un.sysname ? un.sysname : "");        /* os */
-
-
 
 /* who <from@bot> <tobot> <chan#>
  */
@@ -783,12 +774,6 @@ static void bot_traced(int idx, char *par)
     if (i >= 0)
       botnet_send_traced(i, to, par);
   }
-}
-
-static void bot_buildts(int idx, char *par)
-{
-  if (par && par[0])
-    dcc[idx].u.bot->bts = atoi(par);
 }
 
 static void bot_timesync(int idx, char *par)
@@ -1188,8 +1173,6 @@ botcmd_t C_bot[] =
 {
   {"a",			(Function) bot_actchan},
   {"aw",		(Function) bot_away},
-  {"away",		(Function) bot_away},
-  {"bts",		(Function) bot_buildts},
   {"bye",		(Function) bot_bye},
   {"c",			(Function) bot_chan2},
   {"cg",                (Function) bot_config},
@@ -1205,8 +1188,6 @@ botcmd_t C_bot[] =
   {"l",			(Function) bot_link},
   {"n",			(Function) bot_nlinked},
   {"nc",		(Function) bot_nickchange},
-  {"nodename",		(Function) bot_nodename},
-  {"os",		(Function) bot_os},
   {"p",			(Function) bot_priv},
   {"pi",		(Function) bot_ping},
   {"po",		(Function) bot_pong},
@@ -1216,6 +1197,7 @@ botcmd_t C_bot[] =
   {"rr", 		(Function) bot_remotereply},
   {"s",			(Function) bot_share},
   {"sb",		(Function) bot_shareupdate},
+  {"si",		(Function) bot_shellinfo},
   {"t",			(Function) bot_trace},
   {"tb",		(Function) bot_thisbot},
   {"td",		(Function) bot_traced},
@@ -1223,7 +1205,6 @@ botcmd_t C_bot[] =
   {"u",			(Function) bot_update},
   {"ul",		(Function) bot_unlink},
   {"un",		(Function) bot_unlinked},
-  {"username",		(Function) bot_username},
   {"v",			(Function) bot_versions},
   {"vs",		(Function) bot_sysname},
   {"w",			(Function) bot_who},

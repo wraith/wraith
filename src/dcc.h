@@ -103,7 +103,6 @@ struct xfer_info {
 };
 
 struct bot_info {
-  time_t bts;                   /* build timestamp */
   int  numver;
   int  uff_flags;               /* user file feature flags              */
   port_t port;		        /* base port                            */

@@ -18,10 +18,7 @@
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/stat.h>
-
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 
@@ -139,15 +136,18 @@ static void update_version(int idx, char *par)
 return;
   /* Cleanup any share flags */
 #ifdef HUB
+  tand_t *bot = NULL;
+
   if (bupdating) return;
 
   dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
-  if ((dcc[idx].u.bot->bts < buildts) && (isupdatehub())) {
+  bot = findbot(dcc[idx].nick);
+  if (bot && (bot->buildts < buildts) && (isupdatehub())) {
     putlog(LOG_DEBUG, "@", "Asking %s to accept update from me", dcc[idx].nick);
     dprintf(idx, "sb u?\n");
     dcc[idx].status |= STAT_OFFEREDU;
   }
-#endif
+#endif /* HUB */
 }
 
 /* Note: these MUST be sorted. */
@@ -283,8 +283,7 @@ static void start_sending_binary(int idx)
 {
   /* module_entry *me; */
 #ifdef HUB
-  char update_file[1024] = "", buf2[1024] = "", buf3[1024] = "";
-  struct stat sb;
+  char update_file[DIRMAX] = "", tmpFile[1024] = "", *sysname = NULL;
   int i = 1;
 
   dcc[idx].status &= ~(STAT_OFFEREDU | STAT_SENDINGU);
@@ -295,25 +294,28 @@ static void start_sending_binary(int idx)
   dcc[idx].status |= STAT_SENDINGU;
 
   putlog(LOG_BOTS, "*", "Sending binary send request to %s", dcc[idx].nick);
-  if (!strcmp("*", dcc[idx].u.bot->sysname)) {
+  sysname = get_user(&USERENTRY_OS, dcc[idx].user);
+/* FIXME: remove after 1.1.8 */
+  if (!sysname || !sysname[0] || !sysname[1] || !sysname[2] || !strcmp(sysname, ""))
+    sysname = dcc[idx].u.bot->sysname;
+  if (!sysname || !sysname[0] || !strcmp("*", sysname)) {
     putlog(LOG_MISC, "*", "Cannot update \002%s\002 automatically, uname not returning os name.", dcc[idx].nick);
     return;
   }
-  if (bot_hublevel(dcc[idx].user) == 999) { /* send them the leaf binary.. */
-    sprintf(buf2, "leaf");
-  } else {
-    sprintf(buf2, "hub");
-  }
-  sprintf(update_file, "%s.%s-%s", buf2,dcc[idx].u.bot->sysname, egg_version);
 
-  if (stat(update_file, &sb)) {
+  sprintf(update_file, "%s%s.%s-%s", dirname(binname), (bot_hublevel(dcc[idx].user) == 999) ? "leaf" : "hub", 
+                                     sysname, egg_version);
+
+  if (!can_stat(update_file)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s, but it cannot be accessed", dcc[idx].nick, update_file);
     bupdating = 0;
     return;
-  } 
-  sprintf(buf3, "%s.%s", tempdir, update_file);
-  unlink(buf3);
-  copyfile(update_file, buf3);
+  }
+
+  /* copy the binary to our tempdir and send that one. */
+  sprintf(tmpFile, "%s.%s", tempdir, update_file);
+  unlink(tmpFile);
+  copyfile(update_file, tmpFile);
 
 /* NO
   ic = 0;
@@ -324,7 +326,7 @@ static void start_sending_binary(int idx)
     goto end;
   }
   result = 0;
-  result = is_compressedfile(buf3);
+  result = is_compressedfile(tmpFile);
   if (result == COMPF_UNCOMPRESSED) {
     compress_file(buf3, 9);
     usleep(1000 * 500);
@@ -335,7 +337,7 @@ static void start_sending_binary(int idx)
   end:;
 */
 
-  if ((i = raw_dcc_send(buf3, "*binary", "(binary)", buf3)) > 0) {
+  if ((i = raw_dcc_send(tmpFile, "*binary", "(binary)", tmpFile)) > 0) {
     putlog(LOG_BOTS, "*", "%s -- can't send new binary",
 	   i == DCCSEND_FULL   ? "NO MORE DCC CONNECTIONS" :
 	   i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :
@@ -360,6 +362,7 @@ static void check_updates()
   if (isupdatehub()) {
     int i;
     char buf[1024] = "";
+    tand_t *bot = NULL;
 
     cnt++;
     if ((cnt > 5) && bupdating)  bupdating = 0; /* 2 minutes should be plenty. */
@@ -370,11 +373,12 @@ static void check_updates()
       if (dcc[i].type->flags & DCT_BOT && (dcc[i].status & STAT_SHARE) &&
           !(dcc[i].status & STAT_SENDINGU) && !(dcc[i].status & STAT_OFFEREDU) &&
           !(dcc[i].status & STAT_UPDATED)) { /* only offer binary to bots that are sharing */
+        bot = findbot(dcc[i].nick);
 
         dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
 
-        if ((dcc[i].u.bot->bts < buildts) && (isupdatehub())) {
-          putlog(LOG_DEBUG, "@", "Bot: %s has build %lu, offering them %lu", dcc[i].nick, dcc[i].u.bot->bts, buildts);
+        if (bot && (bot->buildts < buildts) && (isupdatehub())) {
+          putlog(LOG_DEBUG, "@", "Bot: %s has build %lu, offering them %lu", dcc[i].nick, bot->buildts, buildts);
           dprintf(i, "sb u?\n");
           dcc[i].status |= STAT_OFFEREDU;
         }
