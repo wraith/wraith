@@ -11,22 +11,16 @@ doofus:
 
 static: ../notes.o
 
-modules: ../../../notes.$(MOD_EXT)
-
 ../notes.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/notes.c
 	@rm -f ../notes.o
 	mv notes.o ../
 
-../../../notes.$(MOD_EXT): ../notes.o
-	$(LD) -static -o ../../../notes.$(MOD_EXT) ../notes.o $(XLIBS)
-	$(STRIP) ../../../notes.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/notes.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

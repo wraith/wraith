@@ -11,22 +11,16 @@ doofus:
 
 static: ../console.o
 
-modules: ../../../console.$(MOD_EXT)
-
 ../console.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/console.c
 	@rm -f ../console.o
 	mv console.o ../
 
-../../../console.$(MOD_EXT): ../console.o
-	$(LD) -static -o ../../../console.$(MOD_EXT) ../console.o $(XLIBS)
-	$(STRIP) ../../../console.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/console.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

@@ -11,22 +11,16 @@ doofus:
 
 static: ../irc.o
 
-modules: ../../../irc.$(MOD_EXT)
-
 ../irc.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/irc.c
 	@rm -f ../irc.o
 	mv irc.o ../
 
-../../../irc.$(MOD_EXT): ../irc.o
-	$(LD) -static -o ../../../irc.$(MOD_EXT) ../irc.o $(XLIBS)
-	$(STRIP) ../../../irc.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/irc.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

@@ -11,22 +11,16 @@ doofus:
 
 static: ../share.o
 
-modules: ../../../share.$(MOD_EXT)
-
 ../share.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/share.c
 	@rm -f ../share.o
 	mv share.o ../
 
-../../../share.$(MOD_EXT): ../share.o
-	$(LD) -static -o ../../../share.$(MOD_EXT) ../share.o
-	$(STRIP) ../../../share.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/share.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

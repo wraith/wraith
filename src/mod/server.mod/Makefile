@@ -11,22 +11,16 @@ doofus:
 
 static: ../server.o
 
-modules: ../../../server.$(MOD_EXT)
-
 ../server.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/server.c
 	@rm -f ../server.o
 	mv server.o ../
 
-../../../server.$(MOD_EXT): ../server.o
-	$(LD) -static -o ../../../server.$(MOD_EXT) ../server.o $(XLIBS)
-	$(STRIP) ../../../server.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/server.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

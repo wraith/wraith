@@ -49,9 +49,6 @@
 /* Defines the current eggdrop version  */
 #undef EGG_VERSION
 
-/* Defines extension of eggdrop modules  */
-#undef EGG_MOD_EXT
-
 @BOTTOM@
 
 #endif /* !_EGG_CONFIG_H */

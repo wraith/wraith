@@ -11,22 +11,16 @@ doofus:
 
 static: ../transfer.o
 
-modules: ../../../transfer.$(MOD_EXT)
-
 ../transfer.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/transfer.c
 	@rm -f ../transfer.o
 	mv transfer.o ../
 
-../../../transfer.$(MOD_EXT): ../transfer.o
-	$(LD) -static -o ../../../transfer.$(MOD_EXT) ../transfer.o $(XLIBS)
-	$(STRIP) ../../../transfer.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/transfer.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

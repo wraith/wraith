@@ -11,22 +11,16 @@ doofus:
 
 static: ../update.o
 
-modules: ../../../update.$(MOD_EXT)
-
 ../update.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/update.c
 	@rm -f ../update.o
 	mv update.o ../
 
-../../../update.$(MOD_EXT): ../update.o
-	$(LD) -static -o ../../../update.$(MOD_EXT) ../update.o
-	$(STRIP) ../../../update.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/update.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

@@ -46,7 +46,6 @@ MOD_STRIP = @MOD_STRIP@
 SHLIB_CC = @SHLIB_CC@
 SHLIB_LD = @SHLIB_LD@
 SHLIB_STRIP = @SHLIB_STRIP@
-MOD_EXT = @MOD_EXT@
 
 # programs make install uses
 LN_S = @LN_S@
@@ -128,7 +127,7 @@ clean:  cleanutils cleanpack
 	@cd src && $(MAKE) clean
 	@cd src/md5 && $(MAKE) clean
 	@cd src/compat && $(MAKE) clean
-	@rm -f $(HUBEXEC) $(LEAFEXEC) *.$(MOD_EXT) *.so *.stamp core DEBUG *~ key configure.temp makesalt 
+	@rm -f $(HUBEXEC) $(LEAFEXEC) *.so *.stamp core DEBUG *~ key configure.temp makesalt 
 	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/makesalt
 
 distclean: clean clean-modconfig

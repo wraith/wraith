@@ -11,22 +11,16 @@ doofus:
 
 static: ../ctcp.o
 
-modules: ../../../ctcp.$(MOD_EXT)
-
 ../ctcp.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/ctcp.c
 	@rm -f ../ctcp.o
 	mv ctcp.o ../
 
-../../../ctcp.$(MOD_EXT): ../ctcp.o
-	$(LD) -static -o ../../../ctcp.$(MOD_EXT) ../ctcp.o
-	$(STRIP) ../../../ctcp.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/ctcp.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

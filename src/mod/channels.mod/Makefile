@@ -11,22 +11,16 @@ doofus:
 
 static: ../channels.o
 
-modules: ../../../channels.$(MOD_EXT)
-
 ../channels.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/channels.c
 	@rm -f ../channels.o
 	mv channels.o ../
 
-../../../channels.$(MOD_EXT): ../channels.o
-	$(LD) -static -o ../../../channels.$(MOD_EXT) ../channels.o $(XLIBS)
-	$(STRIP) ../../../channels.$(MOD_EXT)
-
 depend:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $(srcdir)/channels.c > .depend
 
 clean:
-	@rm -f .depend *.o *.$(MOD_EXT) *~
+	@rm -f .depend *.o *~
 distclean: clean
 
 #safety hash

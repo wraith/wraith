@@ -116,7 +116,6 @@ SHLIB_LD="$CC"
 SHLIB_STRIP="$STRIP"
 NEED_DL=1
 DEFAULT_MAKE=eggdrop
-MOD_EXT=so
 
 AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNAME -s`)
 AC_CACHE_CHECK(system release, egg_cv_var_system_release, egg_cv_var_system_release=`$UNAME -r`)
@@ -164,7 +163,6 @@ case "$egg_cv_var_system_type" in
           AC_MSG_RESULT(no)
           AC_MSG_WARN(Make sure the directory Eggdrop is installed into is mounted in binary mode.)
         fi
-        MOD_EXT=dll
         AC_DEFINE(MODULES_OK)dnl
       ;;
       *)
@@ -333,8 +331,6 @@ AC_SUBST(SHLIB_LD)dnl
 AC_SUBST(SHLIB_CC)dnl
 AC_SUBST(SHLIB_STRIP)dnl
 AC_SUBST(DEFAULT_MAKE)dnl
-AC_SUBST(MOD_EXT)dnl
-AC_DEFINE_UNQUOTED(EGG_MOD_EXT, "$MOD_EXT")dnl
 ])dnl
 
 
