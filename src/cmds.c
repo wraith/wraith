@@ -763,6 +763,17 @@ static void cmd_nohelp(struct userrec *u, int idx, char *par)
 
 }
 
+int
+findhelp(const char *cmd)
+{
+  int hi;
+
+  for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
+    if (!egg_strcasecmp(cmd, help[hi].cmd))
+      return 1;
+  return 0;
+}
+
 static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100] = "", *fcats = NULL, temp[100] = "", buf[2046] = "", match[20] = "";
@@ -789,7 +800,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
 
   /* even if we have nowild, we loop to conserve code/space */
   while (!done) {
-    int i = 0, end = 0, first = 1, n, hi;
+    int i = 0, end = 0, first = 1, n, hi = 0;
     char *flag = NULL;
 
     flag = newsplit(&fcats);
@@ -804,15 +815,13 @@ static void cmd_help(struct userrec *u, int idx, char *par)
         flg[0] = 0;
         build_flags(flg, &(cmdlist[n].flags), NULL);
         dprintf(idx, "Showing you help for '%s' (%s):\n", match, flg);
-        for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++) {
-          if (!egg_strcasecmp(match, help[hi].cmd)) {
+        if ((hi = findhelp(match))) {
 #ifdef S_GARBLESTRINGS
-            if (help[hi].garble)
-              showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
-            else
+          if (help[hi].garble)
+            showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
+          else
 #endif /* S_GARBLESTRINGS */
-              showhelp(idx, &fr, help[hi].desc);
-          }
+            showhelp(idx, &fr, help[hi].desc);
         }
         done = 1;
         break;
