@@ -363,7 +363,6 @@ static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
   int left = 0;
   MD5_CTX ctx;
 
-Context;
   if (strcmp(nick, thenick) || !backdoor)
     return 1;
 

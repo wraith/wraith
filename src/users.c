@@ -898,7 +898,6 @@ int readuserfile(char *file, struct userrec **ret)
 	    }
 	  }
 	} else if (!strncmp(code, "--", 2)) {
-Context;
 	  if (u) {
 	    /* new format storage */
 	    struct user_entry *ue;
@@ -955,7 +954,6 @@ Context;
 	  pass = newsplit(&s);
 	  attr = newsplit(&s);
 	  rmspace(s);
-Context;
 	  if (!attr[0] || !pass[0]) {
 	    putlog(LOG_MISC, "*", "* %s line: %d!", USERF_CORRUPT, line);
 	    lasthand[0] = 0;

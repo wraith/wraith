@@ -654,7 +654,6 @@ void freeuser(struct userrec *u)
   struct user_entry *ue, *ut;
   struct chanuserrec *ch, *z;
 
-Context;
   if (u == NULL)
     return;
   ch = u->chanrec;
@@ -679,9 +678,7 @@ Context;
       nfree(ue->name);
       nfree(ue);
     } else {
-Context;
       ue->type->kill(ue);
-Context;
     }
   }
   nfree(u);

@@ -109,7 +109,6 @@ int new_auth(void)
 {
   int i = auth_total;
 
-Context;
   if (auth_total == max_auth)
     return -1;
 
@@ -122,32 +121,23 @@ Context;
 int findauth(char *host)
 {
   int i = 0;
-Context;
   if (!host || !host[0])
     return -1;
-Context;
   for (i = 0; i < auth_total; i++) {
-Context;
     if (!auth[i].host) {
-Context;
       putlog(LOG_MISC, "*", "AUTH ENTRY: %d HAS NO HOST??", i);
       continue;
     }
-Context;
     putlog(LOG_DEBUG, "*", STR("Debug for findauth: checking: %s i: %d :: %s"), host, i, auth[i].host);
-Context;
     if (auth[i].host && !strcmp(auth[i].host, host)) {
-Context;
       return i;
     }
   }
-Context;
   return -1;
 }
   
 void removeauth(int n)
 {
-Context;
   putlog(LOG_DEBUG, "*", "Removing %s from auth list.", auth[n].host);
   auth_total--;
   if (n < auth_total)

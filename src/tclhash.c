@@ -360,7 +360,6 @@ static int bind_bind_entry(tcl_bind_list_t *tl, const char *flags,
   tcl_cmd_t		*tc;
   tcl_bind_mask_t	*tm, *tm_last;
 
-Context;
   /* Search for matching bind in bind list. */
   for (tm = tl->first, tm_last = NULL; tm; tm_last = tm, tm = tm->next) {
     if (tm->flags & TBM_DELETED)
@@ -597,7 +596,6 @@ static int builtin_dcc STDVAR
 {
   int idx;
   Function F = (Function) cd;
-Context;
   BADARGS(4, 4, " hand idx param");
   if (atoi(argv[2]) < 0) { /* this is a remote-simul idx */
     idx = atoi(argv[2]) * -1;
@@ -637,7 +635,6 @@ static int trigger_bind(const char *proc, const char *param)
     const char *msg = "Tcl proc: %s, param: %s";
     char *buf;
 
-Context;
     buf = nmalloc(strlen(msg) + (proc ? strlen(proc) : 6)
 		  + (param ? strlen(param) : 6) + 1);
     sprintf(buf, msg, proc ? proc : "<null>", param ? param : "<null>");
@@ -711,7 +708,6 @@ int check_tcl_bind(tcl_bind_list_t *tl, const char *match,
 	  tm_p = tm_last;
 	  Tcl_SetVar(interp, "lastbind", (char *) tm->mask, TCL_GLOBAL_ONLY);
 	  x = trigger_bind(tc->func_name, param);
-Context;
 	  if (match_type & BIND_ALTER_ARGS) {
 	    if (interp->result == NULL || !interp->result[0])
 	      return x;
@@ -783,7 +779,6 @@ Context;
   if (cnt > 1)
     return BIND_AMBIGUOUS;
   Tcl_SetVar(interp, "lastbind", (char *) fullmatch, TCL_GLOBAL_ONLY);
-Context;
   return trigger_bind(proc, param);
 }
 
@@ -799,7 +794,6 @@ int check_tcl_dcc(char *cmd, int idx, char *args)
   int found = 0;
 #endif
   char			s[11];
-Context;
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
   if (dcc[idx].simul) {
     egg_snprintf(s, sizeof s, "-%d", idx);

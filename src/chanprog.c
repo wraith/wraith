@@ -871,7 +871,6 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
   char *buf;
   module_entry *me;
 
-Context;
   /* send out over botnet. */
   if (local != 2) {
          /* nmalloc(options,chan,'cset ',' ',+ 1) */

@@ -783,9 +783,21 @@ void core_10secondly()
 #endif /* LEAF */
 }
 
+void expire_simuls() {
+  int idx = 0;
+  for (idx = 0; idx < dcc_total; idx++) {
+    if (dcc[idx].simul > 0) {
+      if ((now - dcc[idx].simultime) >= 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
+        dcc[idx].simul = -1;
+        lostdcc(idx);
+      }
+    }
+  }
+}
+
 void do_fork() {
   int xx;
-Context;
+
   xx = fork();
   if (xx == -1)
     return;
@@ -848,17 +860,14 @@ static void core_secondly()
 #ifdef CRAZY_TRACE 
   if (!attached) crazy_trace();
 #endif /* CRAZY_TRACE */
-  if (geteuid() != myuid || getuid() != myuid) {
-    putlog(LOG_MISC, "*", STR("MY UID CHANGED!, POSSIBLE HIJACK ATTEMPT"));
-  }
   do_check_timers(&utimer);	/* Secondly timers */
   if (fork_interval && backgrd) {
     if (now-lastfork > fork_interval)
       do_fork();
   }
   cnt++;
-  if ((cnt % 3) == 0)
-    call_hook(HOOK_3SECONDLY);
+  if ((cnt % 5) == 0)
+    call_hook(HOOK_5SECONDLY);
   if ((cnt % 10) == 0) {
     call_hook(HOOK_10SECONDLY);
     check_expired_dcc();
@@ -874,15 +883,6 @@ static void core_secondly()
     autolink_cycle(NULL);         /* attempt autolinks */
     call_hook(HOOK_30SECONDLY);
     cnt = 0;
-  }
-
-  for (idx = 0; idx < dcc_total; idx++) {
-    if (dcc[idx].simul > 0) {
-      if ((now - dcc[idx].simultime) == 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
-        dcc[idx].simul = -1;
-        lostdcc(idx);
-      }
-    }
   }
 
 #ifdef S_UTCTIME
@@ -973,7 +973,6 @@ static void core_minutely()
 #ifdef LEAF
   check_mypid();
 #endif
-
   check_tcl_time(&nowtm);
   do_check_timers(&timer);
 /*     flushlogs(); */
@@ -1041,7 +1040,6 @@ int init_mem(), init_dcc_max(), init_userent(), init_misc(), init_auth(), init_c
 
 void got_ed(char *which, char *in, char *out)
 {
-Context;
   sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
   if (!in || !out)
     fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
@@ -1150,7 +1148,6 @@ static void gotspawn(char *filename)
 
   if (!(fp = fopen(filename, "r")))
     fatal(STR("Cannot read from local config (2)"), 0);
-Context;
   while(fscanf(fp,"%[^\n]\n",templine) != EOF) {
     void *my_ptr;
     temps = my_ptr = decrypt_string(SALT1, templine);
@@ -1339,7 +1336,6 @@ Context;
 
   if (!pw)
    werr(ERR_PASSWD);
-
 Context;
   egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
 Context;
@@ -1743,7 +1739,6 @@ if (1) {		/* config shit */
         }
 #endif /* LEAF */
       } // if read in[0] != #
-Context;
 //      if (temps)
       nfree(temp_ptr);
     }
@@ -1767,9 +1762,7 @@ Context;
   module_load("console");
   module_load("ctcp");
   module_load("compress");
-Context;
   chanprog();
-Context;
   clear_tmp();
 #ifdef LEAF
   if (localhub) {
@@ -1894,6 +1887,7 @@ Context;
   autolink_cycle(NULL);		/* Hurry and connect to tandem bots */
   add_hook(HOOK_SECONDLY, (Function) core_secondly);
   add_hook(HOOK_10SECONDLY, (Function) core_10secondly);
+  add_hook(HOOK_30SECONDLY, (Function) expire_simuls);
   add_hook(HOOK_MINUTELY, (Function) core_minutely);
   add_hook(HOOK_HOURLY, (Function) core_hourly);
   add_hook(HOOK_HALFHOURLY, (Function) core_halfhourly);

@@ -1237,7 +1237,6 @@ static void display_dcc_get_p(int idx, char *buf)
 
 static void display_dcc_send(int idx, char *buf)
 {
-Context;
   sprintf(buf,TRANSFER_SEND, dcc[idx].status,
 	  dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }

@@ -446,7 +446,6 @@ char *degarble(int len, char *g)
   int i;
   unsigned char x;
 
-Context;
   garble_ptr++;
   if (garble_ptr == GARBLE_BUFFERS)
     garble_ptr = 0;

@@ -274,7 +274,6 @@ static void finish_update(int idx)
 
   putlog(LOG_MISC, "*", "Updating with binary: %s", buf2);
   
-Context;
   if (updatebin(0, buf2, 1))
     putlog(LOG_MISC, "*", "Failed to update to new binary..");
 #ifdef LEAF

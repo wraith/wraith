@@ -229,16 +229,12 @@ void getin_request(char *botnick, char *code, char *par)
     }
   } else
     host[0] = 0;
-
-
-Context;
-
-/*
-  if (!ismember(chan, botname)) {
-    putlog(LOG_GETIN, "*", STR("getin req from %s for %s - I'm not on %s!"), botnick, chname, chname);
-    return;
-  }
-*/
+  /*
+    if (!ismember(chan, botname)) {
+      putlog(LOG_GETIN, "*", STR("getin req from %s for %s - I'm not on %s!"), botnick, chname, chname);
+      return;
+    }
+  */
   user = get_user_by_handle(userlist, botnick);
 
   if (nick[0])
@@ -306,7 +302,6 @@ Context;
 
     putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - Opped"), botnick, nick, chan->dname);
   } else if (what[0] == 'i') {
-Context;
     strcpy(s, getchanmode(chan));
     p = (char *) &s;
     p2 = newsplit(&p);
@@ -476,13 +471,9 @@ static void request_op(struct chanset_t *chan)
   memberlist *botops[MAX_BOTS];
   char s[100], *l, myserv[SERVLEN];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
-Context;
-  if (!chan) return;
-  if (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan))
+  if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan))))
     return;
   chan->channel.do_opreq = 0;
-  if (me_op(chan))
-    return;
   /* check server lag */
   if (server_lag > LAG_THRESHOLD) {
     putlog(LOG_GETIN, "*", STR("Not asking for ops on %s - I'm too lagged"), chan->dname);
@@ -1097,30 +1088,20 @@ void check_servers() {
 void check_netfight()
 {
   int limit = atoi(CFG_FIGHTTHRESHOLD.gdata ? CFG_FIGHTTHRESHOLD.gdata : "0");
-Context;
   if (limit) {
     struct chanset_t *chan;
     for (chan = chanset; chan; chan = chan->next) {
-Context;
       if ((chan->channel.fighting) && (chan->channel.fighting > limit)) {
-Context;
         if (!channel_bitch(chan) || !channel_closed(chan)) {
-Context;
           putlog(LOG_WARN, "*", STR("Auto-closed %s - channel fight\n"), chan->dname);
-Context;
           do_chanset(chan, STR("+bitch +closed"), 1);
-Context;
           enforce_closed(chan);
-Context;
           dprintf(DP_MODE, STR("TOPIC %s :Auto-closed - channel fight\n"), chan->name);
-Context;
         }
-Context;
       }
       chan->channel.fighting = 0; 		/* we put this here because we need to clear it once per min */
     }
   }
-Context;
 }
 #endif /* S_AUTOLOCK */
 
@@ -1558,7 +1539,7 @@ static cmd_t irc_bot[] = {
 };
 
 
-static void getin_3secondly()
+static void getin_5secondly()
 {
   if (server_online) {
     struct chanset_t *chan;
@@ -1737,7 +1718,7 @@ char *irc_start(Function * global_funcs)
   add_hook(HOOK_MINUTELY, (Function) check_servers);
   add_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   add_hook(HOOK_IDLE, (Function) flush_modes);
-  add_hook(HOOK_3SECONDLY, (Function) getin_3secondly);
+  add_hook(HOOK_5SECONDLY, (Function) getin_5secondly);
   add_hook(HOOK_10SECONDLY, (Function) irc_10secondly);
 #ifdef S_AUTOLOCK
   add_hook(HOOK_MINUTELY, (Function) check_netfight);

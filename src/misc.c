@@ -2051,7 +2051,6 @@ void showhelp (int idx, struct flag_record *flags, char *string)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   char helpstr[12288], tmp[2] = "", flagstr[10] = "";
   int ok = 1;
-Context;
   helpstr[0] = 0;
   while (string && string[0]) {
     if (*string == '%') {

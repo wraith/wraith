@@ -1196,7 +1196,6 @@ int xtra_unpack(struct userrec *u, struct user_entry *e)
   struct xtra_key *t;
   char *key, *data;
 
-Context;
   head = curr = e->u.list;
   e->u.extra = NULL;
   while (curr) {

@@ -334,7 +334,6 @@ void dcc_chatter(int idx)
 void lostdcc(int n)
 {
 
-Context;
   /* Make sure it's a valid dcc index. */
   if (n < 0 || n >= max_dcc) return;
 

@@ -587,7 +587,6 @@ static void remove_channel(struct chanset_t *chan)
 {
    int		 i;
    module_entry	*me;
-Context;
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_tcl_part() call. */
    (void) chanset_unlink(chan);
