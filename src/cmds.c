@@ -780,7 +780,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100] = "", *fcats = NULL, temp[100] = "", buf[2046] = "", match[20] = "";
   int fnd = 0, done = 0, nowild = 0;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANY, 0, 0, 0 };
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   egg_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
   fcats = temp;
@@ -862,7 +862,7 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   } else if (!fnd) {
     dprintf(idx, "No match for '%s'.\n", match);
   }
-  dprintf(idx, "Some commands may require you to '%sconsole #chan' to a chan you have flags on first.\n", dcc_prefix
+  dprintf(idx, "Some commands may require you to '%sconsole #chan' to a chan you have flags on first.\n", dcc_prefix);
 }
 
 static void cmd_addlog(struct userrec *u, int idx, char *par)

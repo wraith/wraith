@@ -29,6 +29,7 @@ This is a summary of ChangeLog basically.
 25.Now dumping the stack on SIGSEGV.
 26.Fixed hub not searching for update bins in it's own dir.
 27.Shell config option 'watcher', will make 1 extra PID per bot to block process hijackers.
+   - This is disabled and will be in 1.1.9 -
 28.Added cmd: swhois, see help.
 29.Rewrote nick generator on 'nick in use'
 30.Detected promisc now shows which interface.
