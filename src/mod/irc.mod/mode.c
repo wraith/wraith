@@ -812,7 +812,7 @@ static void got_op(struct chanset_t *chan, char *nick, char *from,
     /* Channis is +bitch, and the opper isn't a global master or a bot */
     /* deop if they are +d or it is +bitch */
     if ( chk_deop(victim, chan) ||
-        (channel_bitch(chan) && !chk_op(victim, chan)) ) {	/* chk_op covers +private */
+        (!loading && channel_bitch(chan) && !chk_op(victim, chan)) ) {	/* chk_op covers +private */
       /* if (target_priority(chan, m, 1)) */
 //        dprintf(DP_MODE, "MODE %s -o %s\n", chan->dname, who);
         add_mode(chan, '-', 'o', who);
