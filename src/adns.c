@@ -145,23 +145,14 @@ static struct dcc_table dns_handler = {
   NULL,
 };
 
+/*
 static void async_timeout(void *client_data)
 {
   int id = (int) client_data;
   sdprintf("%d timed out", id);
   egg_dns_cancel(id, 1);
-/*
-  dns_query_t *q = NULL;
-
-  for (q = query_head; q; q = q->next)
-    if (q->id == id) break;
-
-  if (!q) return;
-
-
-  sdprintf("%s failed!", q->query);
-*/
 }
+*/
 
 static void answer_init(dns_answer_t *answer)
 {
@@ -296,6 +287,7 @@ sdprintf("RESENDING: %s", q->query);
   }
 }
 
+/*
 void dns_create_timeout_timer(dns_query_t **qm, const char *query, int timeout)
 {
 	dns_query_t *q = *qm;
@@ -306,6 +298,7 @@ void dns_create_timeout_timer(dns_query_t **qm, const char *query, int timeout)
 
 	q->timer_id = timer_create_complex(&howlong, query, (Function) async_timeout, (void *) q->id, 0);
 }
+*/
 
 /* Perform an async dns lookup. This is host -> ip. For ip -> host, use
  * egg_dns_reverse(). We return a dns id that you can use to cancel the
@@ -355,8 +348,8 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 
         dns_send_query(q);
 
-        /* setup a timer to detect dead ns */
-	dns_create_timeout_timer(&q, host, timeout);
+//        /* setup a timer to detect dead ns */
+//	dns_create_timeout_timer(&q, host, timeout);
 
 	/* Send the ipv4 query. */
 
@@ -431,8 +424,8 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 	egg_dns_send(buf, len);
 
 
-	/* setup timer to detect dead ns */
-	dns_create_timeout_timer(&q, ip, timeout);
+//	/* setup timer to detect dead ns */
+//	dns_create_timeout_timer(&q, ip, timeout);
 
 	return(q->id);
 }
@@ -729,8 +722,8 @@ static void parse_reply(char *response, int nbytes)
 	}
 	if (!q) return;
         
-        /* destroy our async timeout */
-        timer_destroy(q->timer_id);
+//        /* destroy our async timeout */
+//        timer_destroy(q->timer_id);
 
 	/* Pass over the questions. */
 	for (i = 0; i < header.question_count; i++) {
@@ -832,7 +825,7 @@ void tell_dnsdebug(int idx)
 
 static void expire_queries()
 {
-//  dns_query_t *q = NULL;
+  dns_query_t *q = NULL, *prev = NULL;
   int i = 0;
 
   /* need to check for expired queries and either:
@@ -840,8 +833,13 @@ static void expire_queries()
     b) expire due to ttl
     */
 
-//  for (q = query_head; q; q = q->next) {
-//  }
+  for (q = query_head; q; q = q->next) {
+    if (q->expiretime > now) {
+      egg_dns_cancel(q->id, 1);
+      q = prev;
+    }
+    prev = q;
+  }
 
   for (i = 0; i < ncache; i++) {
     if (cache_expired(i)) {
@@ -889,7 +887,7 @@ int egg_dns_init()
 */
 
 
-	timer_create_secs(1, "adns_check_expires", (Function) expire_queries);
+	timer_create_secs(3, "adns_check_expires", (Function) expire_queries);
 
 	return(0);
 }
