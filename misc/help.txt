@@ -405,6 +405,8 @@ See also: link
                           invite will be removed the next time the bot checks.
                           Please note that this is an IRCnet feature.
      The following can be set + or - (e.g. .chanset #channel -enforcebans)
+        %bautoop%b         Bots that are +y will auto-op all users with 
+                       op access to the channel.
         %bbitch%b          Only let users with the +o flag have op on the
                        channel?
         %bclosed%b         Kick all people who join channel unless they have
@@ -1629,13 +1631,14 @@ See also: whom
       %bm%b - master (user has more access to the botnet cmds than a normal user)
       %bn%b - owner (user has just about full access to bot)
       %bo%b - op (user has op access to all of the bot's channels)
+      %bO%b - autoop (user is auto-opped in all channels)
       %bp%b - party-line (user has access to the partyline)
       %bq%b - quiet (user cannot gain voice on any channel)
       %bu%b - update-bot (see doc/UPGRADING)
       %bv%b - voice (user gets +v automatically from +y bots)
       %bw%b - wasop-test (needs wasop test for +stopnethack procedure)
       %bx%b - flood-exempt (user is exempt from flood kicks)
-      %by%b - voice-bot (bot gives out voices in chans) [%bCPU INTENSIVE%b]
+      %by%b - voice-bot (bot gives out voices/auto-ops in chans) [%bCPU INTENSIVE%b]
  
    Users can also have flags specific to a channel:
  
@@ -1646,10 +1649,11 @@ See also: whom
       %bm%b - master (user is a channel master)
       %bn%b - owner (user is a channel owner)
       %bo%b - op (user has op access to the channel)
+      %bO%b - autoop (user is auto-opped in channel)
       %bq%b - quiet (user cannot gain voice on the channel)
       %bv%b - voice (user gets +v automatically)
       %bw%b - wasop-test (needs wasop test for +stopnethack procedure)
-      %by%b - voice-bot (bot gives out voices in the channel) [%bCPU INTENSIVE%b]
+      %by%b - voice-bot (bot gives out voices/auto-ops in the channel) [%bCPU INTENSIVE%b]
       %bz%b - washalfop-test (needs washalfop test for +stopnethack procedure)
  
    Hostmasks for the user are displayed on the following lines. If the user is
