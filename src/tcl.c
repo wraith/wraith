@@ -469,11 +469,6 @@ void init_tcl(int argc, char **argv)
   /* Initialize the interpreter */
   interp = Tcl_CreateInterp();
 
-#ifdef DEBUG_MEM
-  /* Initialize Tcl's memory debugging if we want it */
-  Tcl_InitMemory(interp);
-#endif
-
   /* Set Tcl variable tcl_interactive to 0 */
   Tcl_SetVar(interp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
 

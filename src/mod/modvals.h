@@ -105,9 +105,6 @@ typedef struct _module_entry {
   int			 major;	/* Major version number MUST match	*/
   int			 minor;	/* Minor version number MUST be >=	*/
   Function		*funcs;
-#  ifdef DEBUG_MEM
-  int			 mem_work;
-#  endif	/* DEBUG_MEM */
 } module_entry;
 
 #endif		/* _EGG_MOD_MODVALS_H */
