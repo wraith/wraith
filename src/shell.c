@@ -380,7 +380,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
   }
   unlink(tmpfile);
   if (input) {
-    if (fwrite(input, 1, strlen(input), inpFile) != strlen(input)) {
+    if (fwrite(input, strlen(input), 1, inpFile) != 1) {
       fclose(inpFile);
       putlog(LOG_ERRORS, "*", "exec: Couldn't write to '%s': %s", tmpfile, strerror(errno));
       return 0;

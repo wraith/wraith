@@ -81,7 +81,7 @@ bin_md5(const char *fname, int todo)
         i -= 16;
         continue;
       }
-      if (fwrite(buf, 1, sizeof buf - 1, fn) != (sizeof(buf) - 1)) {
+      if (fwrite(buf, sizeof buf - 1, 1, fn) != 1) {
         fclose(f);
         fclose(fn);
         unlink(s);
@@ -93,7 +93,7 @@ bin_md5(const char *fname, int todo)
         char *enc_hash = NULL;
 
         enc_hash = encrypt_string(SALT1, hash);
-        fwrite(enc_hash, 1, strlen(enc_hash), fn);
+        fwrite(enc_hash, strlen(enc_hash), 1, fn);
         i = strlen(enc_hash);			/* skip the next strlen(enc_hash) bytes */
         free(enc_hash);
       }

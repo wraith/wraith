@@ -1072,7 +1072,7 @@ static int sockread(char *s, int *len)
   fd_set fd;
   int fds = 0, i, x, fdtmp;
   struct timeval t;
-  int grab = SGRAB;
+  int grab = SGRAB + 1;
   egg_timeval_t howlong;
 
   if (timer_get_shortest(&howlong)) {
@@ -1310,13 +1310,12 @@ char *botlink_encrypt(int snum, char *src)
 
 int sockgets(char *s, int *len)
 {
-  char xx[SGRAB + 3] = "", *p = NULL, *px = NULL;
-  int ret, i, data = 0, grab = SGRAB+1;
+  char xx[SGRAB + 4] = "", *p = NULL, *px = NULL;
+  int ret, i, data = 0;
 
   for (i = 0; i < MAXSOCKS; i++) {
     /* Check for stored-up data waiting to be processed */
-    if (!(socklist[i].flags & SOCK_UNUSED) &&
-	!(socklist[i].flags & SOCK_BUFFER) && (socklist[i].inbuf != NULL)) {
+    if (!(socklist[i].flags & SOCK_UNUSED) && !(socklist[i].flags & SOCK_BUFFER) && (socklist[i].inbuf != NULL)) {
       if (!(socklist[i].flags & SOCK_BINARY)) {
 	/* look for \r too cos windows can't follow RFCs */
 	p = strchr(socklist[i].inbuf, '\n');
@@ -1324,10 +1323,10 @@ int sockgets(char *s, int *len)
 	  p = strchr(socklist[i].inbuf, '\r');
 	if (p != NULL) {
 	  *p = 0;
-	  if (strlen(socklist[i].inbuf) > (grab - 2))
-	    socklist[i].inbuf[(grab - 2)] = 0;
+	  if (strlen(socklist[i].inbuf) > SGRAB)
+	    socklist[i].inbuf[SGRAB] = 0;
 	  strcpy(s, socklist[i].inbuf);
-	  px = (char *) calloc(1, strlen(p + 1) + 1);
+	  px = calloc(1, strlen(p + 1) + 1);
 	  strcpy(px, p + 1);
 	  free(socklist[i].inbuf);
 	  if (px[0])
@@ -1345,16 +1344,17 @@ int sockgets(char *s, int *len)
 	  return socklist[i].sock;
 	}
       } else {
+/* FIXME, THESE SGRABS SHOULD BE 510 I THINK. */
 	/* Handling buffered binary data (must have been SOCK_BUFFER before). */
-	if (socklist[i].inbuflen <= (grab - 2)) {
+	if (socklist[i].inbuflen <= SGRAB) {
 	  *len = socklist[i].inbuflen;
 	  egg_memcpy(s, socklist[i].inbuf, socklist[i].inbuflen);
 	  free(socklist[i].inbuf);
           socklist[i].inbuf = NULL;
 	  socklist[i].inbuflen = 0;
 	} else {
-	  /* Split up into chunks of grab bytes. */
-	  *len = (grab - 2);
+	  /* Split up into chunks of SGRAB bytes. */
+	  *len = SGRAB;
 	  egg_memcpy(s, socklist[i].inbuf, *len);
 	  egg_memcpy(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
 	  socklist[i].inbuflen -= *len;
@@ -1384,7 +1384,7 @@ int sockgets(char *s, int *len)
       socklist[ret].flags &= ~SOCK_STRONGCONN;
       /* Buffer any data that came in, for future read. */
       socklist[ret].inbuflen = *len;
-      socklist[ret].inbuf = (char *) calloc(1, *len + 1);
+      socklist[ret].inbuf = calloc(1, *len + 1);
       /* It might be binary data. You never know. */
       egg_memcpy(socklist[ret].inbuf, xx, *len);
       socklist[ret].inbuf[*len] = 0;
@@ -1412,21 +1412,21 @@ int sockgets(char *s, int *len)
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
-    socklist[ret].inbuf = (char *) calloc(1, strlen(p) + strlen(xx) + 1);
+    socklist[ret].inbuf = calloc(1, strlen(p) + strlen(xx) + 1);
     strcpy(socklist[ret].inbuf, p);
     strcat(socklist[ret].inbuf, xx);
     free(p);
-    if (strlen(socklist[ret].inbuf) < grab) {
+    if (strlen(socklist[ret].inbuf) < (SGRAB + 2)) {
       strcpy(xx, socklist[ret].inbuf);
       free(socklist[ret].inbuf);
       socklist[ret].inbuf = NULL;
       socklist[ret].inbuflen = 0;
     } else {
       p = socklist[ret].inbuf;
-      socklist[ret].inbuflen = strlen(p) - (grab - 2);
+      socklist[ret].inbuflen = strlen(p) - SGRAB;
       socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1); 
-      strcpy(socklist[ret].inbuf, p + (grab - 2));
-      *(p + (grab - 2)) = 0;
+      strcpy(socklist[ret].inbuf, p + SGRAB);
+      *(p + SGRAB) = 0;
       strcpy(xx, p);
       free(p);
       /* (leave the rest to be post-pended later) */
@@ -1441,14 +1441,15 @@ int sockgets(char *s, int *len)
     strcpy(s, xx);
 /*    strcpy(xx, p + 1); */
     sprintf(xx, "%s", p + 1);
-    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r'))
+//    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r'))
+    if (s[strlen(s) - 1] == '\r')
       s[strlen(s) - 1] = 0;
     data = 1;			/* DCC_CHAT may now need to process a blank line */
 /* NO! */
 /* if (!s[0]) strcpy(s," ");  */
   } else {
     s[0] = 0;
-    if (strlen(xx) >= (grab - 2)) {
+    if (strlen(xx) >= SGRAB) {
       /* String is too long, so just insert fake \n */
       strcpy(s, xx);
       xx[0] = 0;
@@ -1469,13 +1470,13 @@ int sockgets(char *s, int *len)
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
     socklist[ret].inbuflen = strlen(p) + strlen(xx);
-    socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = calloc(1, socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
     strcat(socklist[ret].inbuf, p);
     free(p);
   } else {
     socklist[ret].inbuflen = strlen(xx);
-    socklist[ret].inbuf = (char *) calloc(1, socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = calloc(1, socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
   }
   if (data) {

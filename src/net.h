@@ -39,7 +39,7 @@
 #  endif
 #endif
 
-#define SGRAB 2011         /* How much data to allow through sockets. */
+#define SGRAB 2010         /* How much data to allow through sockets. */
 
 enum {
   EGG_OPTION_SET        = 1,    /* Set option(s).               */

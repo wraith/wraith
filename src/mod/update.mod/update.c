@@ -73,9 +73,12 @@ static void update_fileq(int idx, char *par)
   if (!isupdatehub()) {
 #endif /* LEAF */
     dprintf(idx, "sb uy\n");
-  } else if (isupdatehub()) {
+  } 
+#ifdef HUB
+  else if (isupdatehub()) {
     dprintf(idx, "sb un I am the update hub, NOT YOU.\n");
   }
+#endif /* HUB */
 }
 
 /* us <ip> <port> <length>
@@ -472,10 +475,32 @@ void update_report(int idx, int details)
   }
 }
 
+#ifdef HUB
+static void cmd_bupdate(struct userrec *u, int idx, char *par)
+{
+  int i;
+
+  for (i = 0; i < dcc_total; i++) {
+    if (!egg_strcasecmp(dcc[i].nick, par)) {
+      dprintf(i, "sb u?\n");
+      dcc[i].status &= ~(STAT_SENDINGU | STAT_UPDATED);
+      dcc[i].status |= STAT_OFFEREDU;
+    }
+  }
+}
+
+cmd_t update_cmds[] =
+{
+  {"bupdate",		"a",	(Function) cmd_bupdate,		NULL},
+  {NULL,		NULL,	NULL,				NULL}
+};
+#endif /* HUB */
+
 void update_init()
 {
   add_builtins("bot", update_bot);
 #ifdef HUB
+  add_builtins("dcc", update_cmds);
   timer_create_secs(30, "check_updates", (Function) check_updates);
 #endif /* HUB */
   def_dcc_bot_kill = DCC_BOT.kill;

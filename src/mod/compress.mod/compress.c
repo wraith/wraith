@@ -146,7 +146,7 @@ static int uncompress_to_file(char *f_src, char *f_target)
     }
     if (!len)
       break;
-    if ((int) fwrite(buf, 1, (unsigned int) len, fout) != len) {
+    if ((int) fwrite(buf, (unsigned int) len, 1, fout) != 1) {
       putlog(LOG_MISC, "*", "Failed to uncompress file `%s': fwrite failed: %s.",
 	     f_src, strerror(errno));
       return COMPF_ERROR;

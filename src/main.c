@@ -899,7 +899,7 @@ int main(int argc, char **argv)
 
   while (1) {
     int socket_cleanup = 0, i, xx;
-    char buf[SGRAB + 9] = "";
+    char buf[SGRAB + 10] = "";
 
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers

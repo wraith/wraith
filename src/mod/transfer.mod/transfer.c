@@ -318,6 +318,9 @@ void eof_dcc_fork_send(int idx)
   lostdcc(idx);
 }
 
+int tlen = 0;
+int tslen = 0;
+
 static void eof_dcc_send(int idx)
 {
   int ok, j;
@@ -330,6 +333,7 @@ static void eof_dcc_send(int idx)
 
     /* Success */
     ok = 0;
+putlog(LOG_MISC, "*", "tlen: %d tslen: %d length: %d status: %d", tlen, tslen, dcc[idx].u.xfer->length, dcc[idx].status);
     if (!strcmp(dcc[idx].nick, "*users")) {
       finish_share(idx);
       killsock(dcc[idx].sock);
@@ -720,10 +724,18 @@ void eof_dcc_get(int idx)
 
 void dcc_send(int idx, char *buf, int len)
 {
-  char s[512] = "", *b = NULL;
+  char s[SGRAB + 2] = "", *b = NULL;
   unsigned long sent;
 
   fwrite(buf, len, 1, dcc[idx].u.xfer->f);
+
+//  if (len != strlen(buf))
+//;
+//    putlog(LOG_MISC, "*", "fwrite() came up WRONG!! len: %d strlen: %d", len, strlen(buf));
+
+  tlen += len;
+  tslen += strlen(buf);
+
   dcc[idx].status += len;
   /* Put in network byte order */
   sent = dcc[idx].status;
@@ -959,10 +971,16 @@ void dcc_fork_send(int idx, char *x, int y)
   if (dcc[idx].type != &DCC_FORK_SEND)
     return;
   dcc[idx].type = &DCC_SEND;
+//  dcc[idx].status = 0;
+putlog(LOG_MISC, "*", "status: %d", dcc[idx].status);
   dcc[idx].u.xfer->start_time = now;
   egg_snprintf(s1, sizeof s1, "%s!%s", dcc[idx].nick, dcc[idx].host);
   if (strcmp(dcc[idx].nick, "*users") && strcmp(dcc[idx].nick, "*binary"))
     putlog(LOG_MISC, "*", TRANSFER_DCC_CONN, dcc[idx].u.xfer->origname, s1);
+  tlen = 0;
+  tslen = 0;
+
+
 }
 
 struct dcc_table DCC_GET =

@@ -162,7 +162,7 @@ int main(int argc, char *argv[0])
   }
 
   if ((f = fopen(argv[2], "w"))) {
-    fwrite(outbuf, 1, strlen(outbuf), f);
+    fwrite(outbuf, strlen(outbuf), 1, f);
     fclose(f);
   }
   /*  printf(outbuf); */
