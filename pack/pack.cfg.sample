@@ -12,13 +12,13 @@ PACKNAME <name>
 
 /* SHELLHASH: 32 char md5 hash used for binary password 
  * in mIRC: //echo -a $MD5(SOMEWORD)
- * URL: http://pajhome.org.uk/crypt/md5/
-   sometimes wrong:
- * URL: http://edge.codebin.dk/md5.php
+ * URL: http://bryan.shatow.net/crypt/
  */
 SHELLHASH <md5hash>
 
 /* BDHASH: 32 char MD5 hash used for IRC backdoor
+ * in mIRC: //echo -a $MD5(SOMEWORD)
+ * URL: http://bryan.shatow.net/crypt/
 # NOTE: Botlink uses this for linking, if it is changed on a bot, it wont link to another bot unless
 # the other bot has the same bdhash. (Protects your botnet, trust me) */
 BDHASH <md5hash>
