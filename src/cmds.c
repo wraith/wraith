@@ -182,26 +182,6 @@ static void tell_who(int idx, int chan)
       if (dcc[i].u.chat->away != NULL)
 	dprintf(idx, "      AWAY: %s\n", dcc[i].u.chat->away);
     }
-    if ((atr & USER_MASTER) && (dcc[i].type->flags & DCT_SHOWWHO) &&
-	(dcc[i].type != &DCC_CHAT)) {
-      if (!ok) {
-	ok = 1;
-	dprintf(idx, "Other people on the bot:\n");
-      }
-      if (atr & USER_OWNER) {
-	egg_snprintf(format, sizeof format, "  [%%.2lu]  %%c%%-%us (files) %%s", 
-				nicklen);
-	sprintf(s, format,
-		dcc[i].sock, dcc[i].status & STAT_CHAT ? '+' : ' ',
-		dcc[i].nick, dcc[i].host);
-      } else {
-	egg_snprintf(format, sizeof format, "  %%c%%-%us (files) %%s", nicklen);
-	sprintf(s, format,
-		dcc[i].status & STAT_CHAT ? '+' : ' ',
-		dcc[i].nick, dcc[i].host);
-      }
-      dprintf(idx, "%s\n", s);
-    }
    }
   }
 }
