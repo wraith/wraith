@@ -469,6 +469,9 @@ static void core_secondly()
 
 static void core_minutely()
 {
+#ifdef HUB
+  send_timesync(-1);
+#endif /* HUB */
 #ifdef LEAF
   check_mypid();
 #endif

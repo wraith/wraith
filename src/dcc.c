@@ -117,27 +117,26 @@ strip_telnet(int sock, char *buf, int *len)
   *o = *p;
 }
 
+#ifdef HUB
 void
 send_timesync(int idx)
 {
-#ifdef HUB
   /* Send timesync to idx, or all lower bots if idx<0 */
   if (idx >= 0)
     dprintf(idx, "ts %li\n", timesync + now);
   else {
-    char s[30] = "";
+    char s[15] = "";
     int i;
 
     sprintf(s, "ts %li\n", timesync + now);
     for (i = 0; i < dcc_total; i++) {
       if ((dcc[i].type == &DCC_BOT) && (bot_aggressive_to(dcc[i].user))) {
         dprintf(i, s);
-        lower_bot_linked(i);
       }
     }
   }
-#endif /* HUB */
 }
+#endif /* HUB */
 
 static void
 greet_new_bot(int idx)
@@ -703,7 +702,9 @@ dcc_chat_pass(int idx, char *buf, int atr)
       dcc[idx].status = STAT_CALLED;
       dprintf(idx, "goodbye!\n");
       greet_new_bot(idx);
+#ifdef HUB
       send_timesync(idx);
+#endif /* HUB */
     } else {
       /* Invalid password/digest on hub */
       putlog(LOG_WARN, "*", "%s failed encrypted link handshake.", dcc[idx].nick);

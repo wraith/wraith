@@ -3602,7 +3602,7 @@ static void cmd_botserver(struct userrec * u, int idx, char * par) {
 }
 
 
-void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
+static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
 #ifdef LEAF
   char tmp[2048] = "";
 
@@ -3613,6 +3613,23 @@ void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
 
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 #endif /* LEAF */
+}
+
+static void cmd_timesync(struct userrec *u, int idx, char *par) {
+  char tmp[30] = "";
+
+  putlog(LOG_CMDS, "*", "#%s# timesync", dcc[idx].nick);
+  sprintf(tmp, "timesync %li", timesync + now);
+  botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
+}
+
+static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *par) {
+  char tmp[1024] = "";
+  time_t net;
+
+  net = atol(par);
+  sprintf(tmp, "NET: %li    ME: %li   DIFF: %li", net, timesync + now, (timesync+now) - net);
+  botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, tmp);
 }
 
 #ifdef HUB
@@ -3635,7 +3652,7 @@ static void cmd_botversion(struct userrec * u, int idx, char * par) {
 }
 #endif /* HUB */
 
-void rcmd_ver(char * fbot, char * fhand, char * fidx) {
+static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
   char tmp[2048] = "";
   struct utsname un;
 
@@ -3667,7 +3684,7 @@ static void cmd_botnick(struct userrec * u, int idx, char * par) {
   botnet_send_cmd(conf.bot->nick, par, u->handle, idx, "curnick");
 }
 
-void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
+static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
 #ifdef LEAF
   char tmp[1024] = "";
 
@@ -3714,7 +3731,7 @@ static void cmd_netmsg(struct userrec * u, int idx, char * par) {
   botnet_send_cmd_broad(-1, conf.bot->nick, u->handle, idx, tmp);
 }
 
-void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
+static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
 #ifdef LEAF
   char buf[1024] = "", *nick = NULL;
 
@@ -3744,14 +3761,14 @@ static void cmd_netlag(struct userrec * u, int idx, char * par) {
 }
 #endif /* HUB */
 
-void rcmd_ping(char * frombot, char *fromhand, char * fromidx, char * par) {
+static void rcmd_ping(char * frombot, char *fromhand, char * fromidx, char * par) {
   char tmp[64] = "";
 
   egg_snprintf(tmp, sizeof tmp, "pong %s", par);
   botnet_send_cmd(conf.bot->nick, frombot, fromhand, atoi(fromidx), tmp);
 }
 
-void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
+static void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
   int i = atoi(fromidx);
 
   if ((i >= 0) && (i < dcc_total) && (dcc[i].type == &DCC_CHAT) && (!strcmp(dcc[i].nick, fromhand))) {
@@ -3872,7 +3889,7 @@ static void cmd_netcrontab(struct userrec * u, int idx, char * par) {
 }
 #endif /* HUB */
 
-void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
+static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
   char *cmd = NULL, scmd[512] = "", *out = NULL, *err = NULL;
 
   cmd = newsplit(&par);
@@ -3981,7 +3998,7 @@ static void cmd_botjump(struct userrec * u, int idx, char * par) {
   botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, buf);
 }
 
-void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
+static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
 #ifdef LEAF
   char *other = NULL;
   int port;
@@ -4001,7 +4018,6 @@ void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
   cycle_time = 0;
 #endif /* LEAF */
 }
-
 
 /* "Remotable" commands */
 void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, char *cmd) {
@@ -4026,6 +4042,8 @@ void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, c
     rcmd_pong(frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, "die")) {
     exit(0);
+  } else if (!strcmp(cmd, "timesync")) {
+    rcmd_timesync(frombot, fromhand, fromidx, par);
   } else {
     botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, "Unrecognized remote command");
   }
@@ -4300,6 +4318,7 @@ cmd_t C_dcc[] =
 #endif /* HUB */
   {"botserver",		"m",	(Function) cmd_botserver,	NULL},
   {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL},
+  {"timesync",		"a",	(Function) cmd_timesync,	NULL},
 #ifdef HUB
   {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL},
   {"netversion", 	"o", 	(Function) cmd_netversion, 	NULL},
