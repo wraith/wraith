@@ -3,6 +3,8 @@ This is a summary of ChangeLog basically.
 1.2
 * No longer displaying SATLS on ./bin -v
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
+* Removed many unnecesary compile defines: (.config controlling them makes more sense)
+  ANTITRACE, HIJACKCHECK, LASTCHECK, NODELAY, PROCESSCHECK, PROMISC
 
 1.1.9
 

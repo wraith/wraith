@@ -349,29 +349,19 @@ static void misc_describe(struct cfg_entry *cfgent, int idx)
   if (!strcmp(cfgent->name, "fork-interval")) {
     dprintf(idx, STR("fork-interval is number of seconds in between each fork() call made by the bot, to change process ID and reset cpu usage counters.\n"));
     i = 1;
-#ifdef S_LASTCHECK
   } else if (!strcmp(cfgent->name, "login")) {
     dprintf(idx, STR("login sets how to handle someone logging in to the shell\n"));
-#endif /* S_LASTCHECK */
-#ifdef S_ANTITRACE
   } else if (!strcmp(cfgent->name, "trace")) {
     dprintf(idx, STR("trace sets how to handle someone tracing/debugging the bot\n"));
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
   } else if (!strcmp(cfgent->name, "promisc")) {
     dprintf(idx, STR("promisc sets how to handle when a interface is set to promiscuous mode\n"));
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
   } else if (!strcmp(cfgent->name, "bad-process")) {
     dprintf(idx, STR("bad-process sets how to handle when a running process not listed in process-list is detected\n"));
   } else if (!strcmp(cfgent->name, "process-list")) {
     dprintf(idx, STR("process-list is a comma-separated list of \"expected processes\" running on the bots uid\n"));
     i = 1;
-#endif /* S_PROCESSCHECK */
-#ifdef S_HIJACKCHECK
   } else if (!strcmp(cfgent->name, "hijack")) {
     dprintf(idx, STR("hijack sets how to handle when a commonly used hijack method attempt is detected. (recommended: die)\n"));
-#endif /* S_HIJACKCHECK */
   }
   if (!i)
     dprintf(idx, "Valid settings are: ignore, warn, die, reject, suicide\n");
@@ -423,7 +413,6 @@ static void detect_gchanged(struct cfg_entry * cfgent, char * oldval, int * vali
     *valid=0;
 }
 
-#ifdef S_LASTCHECK
 struct cfg_entry CFG_LOGIN = {
 	"login", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
 	detect_gchanged, detect_lchanged
@@ -431,8 +420,6 @@ struct cfg_entry CFG_LOGIN = {
 	, misc_describe
 #endif /* HUB */
 };
-#endif /* S_LASTCHECK */
-#ifdef S_HIJACKCHECK
 struct cfg_entry CFG_HIJACK = {
 	"hijack", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
 	detect_gchanged, detect_lchanged
@@ -440,8 +427,6 @@ struct cfg_entry CFG_HIJACK = {
 	, misc_describe
 #endif /* HUB */
 };
-#endif /* S_HIJACKCHECK */
-#ifdef S_ANTITRACE
 struct cfg_entry CFG_TRACE = {
 	"trace", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
 	detect_gchanged, detect_lchanged
@@ -449,8 +434,6 @@ struct cfg_entry CFG_TRACE = {
 	, misc_describe
 #endif /* HUB */
 };
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
 struct cfg_entry CFG_PROMISC = {
 	"promisc", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
 	detect_gchanged, detect_lchanged
@@ -458,8 +441,6 @@ struct cfg_entry CFG_PROMISC = {
 	, misc_describe
 #endif /* HUB */
 };
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
 struct cfg_entry CFG_BADPROCESS = {
 	"bad-process", CFGF_GLOBAL | CFGF_LOCAL, NULL, NULL,
 	detect_gchanged, detect_lchanged
@@ -475,7 +456,6 @@ struct cfg_entry CFG_PROCESSLIST = {
 	, misc_describe
 #endif /* HUB */
 };
-#endif /* S_PROCESSCHECK */
 
 #ifdef LEAF
 static void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
@@ -855,22 +835,12 @@ void init_config()
 #endif /* S_AUTHHASH || S_DCCAUTH */
   add_cfg(&CFG_MOTD);
   add_cfg(&CFG_FORKINTERVAL);
-#ifdef S_LASTCHECK
   add_cfg(&CFG_LOGIN);
-#endif /* S_LASTCHECK */
-#ifdef S_HIJACKCHECK
   add_cfg(&CFG_HIJACK);
-#endif /* S_HIJACKCHECK */
-#ifdef S_ANTITRACE
   add_cfg(&CFG_TRACE);
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
   add_cfg(&CFG_PROMISC);
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
   add_cfg(&CFG_BADPROCESS);
   add_cfg(&CFG_PROCESSLIST);
-#endif /* S_PROCESSCHECK */
   add_cfg(&CFG_BADCOOKIE);
   add_cfg(&CFG_MANUALOP);
 #ifdef G_MEAN

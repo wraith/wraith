@@ -31,12 +31,10 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <signal.h>
-#ifdef S_ANTITRACE
-# ifndef CYGWIN_HACKS
-#  include <sys/ptrace.h>
-# endif /* !CYGWIN_HACKS */
+#ifndef CYGWIN_HACKS
+# include <sys/ptrace.h>
+#endif /* !CYGWIN_HACKS */
 #include <sys/wait.h>
-#endif /* S_ANTITRACE */
 #include <sys/utsname.h>
 #include <pwd.h>
 #include <errno.h>
@@ -113,12 +111,9 @@ void check_mypid()
 
 #ifndef CYGWIN_HACKS
 
-#ifdef S_LASTCHECK
 char last_buf[128] = "";
-#endif /* S_LASTCHECK */
 
 void check_last() {
-#ifdef S_LASTCHECK
 
   if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "ignore", "ignore"))
     return;
@@ -152,12 +147,10 @@ void check_last() {
       }
     }
   }
-#endif /* S_LASTCHECK */
 }
 
 void check_processes()
 {
-#ifdef S_PROCESSCHECK
   char *proclist = NULL, *out = NULL, *p = NULL, *np = NULL, *curp = NULL, buf[1024] = "", bin[128] = "";
 
   if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "ignore", "ignore"))
@@ -193,15 +186,15 @@ void check_processes()
     if (np)
       *np++ = 0;
     if (atoi(curp) > 0) {
-      char *pid = NULL, *tty = NULL, *stat = NULL, *time = NULL, cmd[512] = "", line[2048] = "";
+      char *pid = NULL, *tty = NULL, *mystat = NULL, *mytime = NULL, cmd[512] = "", line[2048] = "";
 
       strncpyz(line, curp, sizeof(line));
       /* it's a process line */
       /* Assuming format: pid tty stat time cmd */
       pid = newsplit(&curp);
       tty = newsplit(&curp);
-      stat = newsplit(&curp);
-      time = newsplit(&curp);
+      mystat = newsplit(&curp);
+      mytime = newsplit(&curp);
       strncpyz(cmd, curp, sizeof(cmd));
       /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff */
       if (!strstr(cmd, "<defunct>") && !strncmp(cmd, "/bin/sh -c", 10) && !strncmp(cmd, binname, strlen(binname))) {
@@ -251,13 +244,11 @@ void check_processes()
   free(proclist);
   if (out)
     free(out);
-#endif /* S_PROCESSCHECK */
 }
 #endif /* !CYGWIN_HACKS */
 
 void check_promisc()
 {
-#ifdef S_PROMISC
 #ifdef SIOCGIFCONF
   struct ifconf ifcnf;
   char *reqp = NULL, *end_req = NULL, buf[1024] = "";
@@ -300,21 +291,17 @@ void check_promisc()
   }
   close(sock);
 #endif /* SIOCGIFCONF */
-#endif /* S_PROMISC */
 }
 
-#ifdef S_ANTITRACE
 int traced = 0;
 
 static void got_sigtrap(int z)
 {
   traced = 0;
 }
-#endif /* S_ANTITRACE */
 
 void check_trace(int start)
 {
-#ifdef S_ANTITRACE
   int x, parent, i;
 
   if (!strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
@@ -392,7 +379,6 @@ void check_trace(int start)
   } else
     waitpid(x, NULL, 0);
 #endif /* BSD */
-#endif /* S_ANTITRACE */
 }
 
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
@@ -535,26 +521,16 @@ void detected(int code, char *msg)
   int act;
 
   u = get_user_by_handle(userlist, conf.bot->nick);
-#ifdef S_LASTCHECK
   if (code == DETECT_LOGIN)
     p = (char *) (CFG_LOGIN.ldata ? CFG_LOGIN.ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
-#endif /* S_LASTCHECK */
-#ifdef S_ANTITRACE
   if (code == DETECT_TRACE)
     p = (char *) (CFG_TRACE.ldata ? CFG_TRACE.ldata : (CFG_TRACE.gdata ? CFG_TRACE.gdata : NULL));
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
   if (code == DETECT_PROMISC)
     p = (char *) (CFG_PROMISC.ldata ? CFG_PROMISC.ldata : (CFG_PROMISC.gdata ? CFG_PROMISC.gdata : NULL));
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
   if (code == DETECT_PROCESS)
     p = (char *) (CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : (CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : NULL));
-#endif /* S_PROMISC */
-#ifdef S_HIJACKCHECK
   if (code == DETECT_SIGCONT)
     p = (char *) (CFG_HIJACK.ldata ? CFG_HIJACK.ldata : (CFG_HIJACK.gdata ? CFG_HIJACK.gdata : NULL));
-#endif /* S_PROMISC */
 
   if (!p)
     act = DET_WARN;

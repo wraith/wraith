@@ -279,12 +279,10 @@ static void got_abort(int z)
 #endif /* DEBUG_MEM */
 }
 
-#ifdef S_HIJACKCHECK
 static void got_cont(int z)
 {
   detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED");
 }
-#endif /* S_HIJACKCHECK */
 
 /* A call to resolver (gethostbyname, etc) timed out
  */
@@ -314,9 +312,7 @@ void init_signals()
   signal(SIGSEGV, got_segv);
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
-#ifdef S_HIJACKCHECK
   signal(SIGCONT, got_cont);
-#endif /* S_HIJACKCHECK */
   signal(SIGABRT, got_abort);
   signal(SIGPIPE, SIG_IGN);
   signal(SIGILL, got_ill);

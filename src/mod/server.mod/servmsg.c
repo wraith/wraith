@@ -4,9 +4,7 @@
  *
  */
 
-#ifdef S_NODELAY
 #include <netinet/tcp.h>
-#endif /* S_NODELAY */
 
 #define msgop CFG_MSGOP.ldata ? CFG_MSGOP.ldata : CFG_MSGOP.gdata ? CFG_MSGOP.gdata : ""
 #define msgpass CFG_MSGPASS.ldata ? CFG_MSGPASS.ldata : CFG_MSGPASS.gdata ? CFG_MSGPASS.gdata : ""
@@ -1478,16 +1476,12 @@ static void server_resolve_success(int idx)
     trying_server = 0;
     lostdcc(idx);
   } else {
+    int i = 1;
+
     /* set these now so if we fail disconnect_server() can cleanup right. */
     dcc[idx].sock = serv;
     servidx = idx;
-#ifdef S_NODELAY
-    {
-      int i = 1;
-
-      setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(int));
-    }
-#endif /* S_NODELAY */
+    setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(int));
     /* Queue standard login */
     dcc[idx].timeval = now;
     SERVER_SOCKET.timeout_val = &server_timeout;

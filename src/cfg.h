@@ -33,21 +33,7 @@ extern struct cfg_entry CFG_MSGOP, CFG_MSGPASS, CFG_MSGINVITE, CFG_MSGIDENT;
 #ifdef G_MEAN
 extern struct cfg_entry CFG_MEANDEOP, CFG_MEANKICK, CFG_MEANBAN;
 #endif /* G_MEAN */
-#ifdef S_LASTCHECK
-extern struct cfg_entry CFG_LOGIN;
-#endif /* S_LASTCHECK */
-#ifdef S_HIJACKCHECK
-extern struct cfg_entry CFG_HIJACK;
-#endif /* S_HIJACKCHECK */
-#ifdef S_ANTITRACE
-extern struct cfg_entry CFG_TRACE;
-#endif /* S_ANTITRACE */
-#ifdef S_PROMISC
-extern struct cfg_entry CFG_PROMISC;
-#endif /* S_PROMISC */
-#ifdef S_PROCESSCHECK
-extern struct cfg_entry CFG_BADPROCESS, CFG_PROCESSLIST;
-#endif /* S_PROCESSCHECK */
+extern struct cfg_entry CFG_LOGIN, CFG_HIJACK, CFG_TRACE, CFG_PROMISC, CFG_BADPROCESS, CFG_PROCESSLIST;
 #ifdef S_AUTOLOCK
 struct cfg_entry CFG_FIGHTTHRESHOLD;
 #endif /* S_AUTOLOCK */
