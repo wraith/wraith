@@ -558,8 +558,8 @@ Function global_table[] =
   (Function) enetpass,  	/* char *				*/
   (Function) kickreason,
   (Function) getting_users,
-  (Function) add_builtins_dcc,
-  (Function) rem_builtins_dcc,
+  (Function) 0,
+  (Function) 0,
   (Function) & USERENTRY_ADDED,	/* struct user_entry_type *	*/
   (Function) bdhash,
   (Function) isupdatehub,

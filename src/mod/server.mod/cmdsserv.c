@@ -117,13 +117,13 @@ static void cmd_clearqueue(struct userrec *u, int idx, char *par)
  *
  * As with msg commands, function is responsible for any logging.
  */
-static dcc_cmd_t C_dcc_serv[] =
+static cmd_t C_dcc_serv[] =
 {
-  {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL,          NULL},
-  {"dump",		"a",	(Function) cmd_dump,		NULL,          NULL},
-  {"jump",		"m",	(Function) cmd_jump,		NULL,          NULL},
-  {"servers",		"m",	(Function) cmd_servers,		NULL,          NULL},
-  {NULL,		NULL,	NULL,				NULL,          NULL, NULL}
+  {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL},
+  {"dump",		"a",	(Function) cmd_dump,		NULL},
+  {"jump",		"m",	(Function) cmd_jump,		NULL},
+  {"servers",		"m",	(Function) cmd_servers,		NULL},
+  {NULL,		NULL,	NULL,				NULL}
 };
 
-#endif
+#endif /* LEAF */

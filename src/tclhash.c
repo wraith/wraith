@@ -186,7 +186,7 @@ int expmem_tclhash(void)
 }
 
 
-extern dcc_cmd_t C_dcc[];
+extern cmd_t C_dcc[];
 static int tcl_bind();
 
 static cd_tcl_cmd cd_cmd_table[] = {
@@ -219,7 +219,7 @@ void init_bind(void)
   H_away = add_bind_table("away", HT_STACKABLE, builtin_chat);
   H_act = add_bind_table("act", HT_STACKABLE, builtin_chat);
   H_event = add_bind_table("evnt", HT_STACKABLE, builtin_char);
-  add_builtins_dcc(H_dcc, C_dcc);
+  add_builtins(H_dcc, C_dcc);
   Context;
 }
 
@@ -227,7 +227,7 @@ void kill_bind(void)
 {
   tcl_bind_list_t	*tl, *tl_next;
 
-  rem_builtins_dcc(H_dcc, C_dcc);
+  rem_builtins(H_dcc, C_dcc);
   for (tl = bind_table_list; tl; tl = tl_next) {
     tl_next = tl->next;
 
@@ -1176,53 +1176,6 @@ void add_builtins(tcl_bind_list_t *tl, cmd_t *cc)
     nfree(l);
   }
 }
-
-void add_builtins_dcc(tcl_bind_list_t *tl, dcc_cmd_t * cc)
-{
-  int	k, i;
-  char	p[1024], *l;
-  cd_tcl_cmd table[2];
-  table[0].name = p;
-  table[0].callback = tl->func;
-  table[1].name = NULL;
-  for (i = 0; cc[i].name; i++) {
-  //lets add to the help system..
-    cmds[cmdi].name = cc[i].name;
-    cmds[cmdi].usage = cc[i].usage;
-    cmds[cmdi].desc = cc[i].desc;
-    cmds[cmdi].flags.match = FR_GLOBAL | FR_CHAN;
-    break_down_flags(cc[i].flags, &(cmds[cmdi].flags), NULL);
-    cmdi++;
-
-    egg_snprintf(p, sizeof p, "*%s:%s", tl->name,
-		   cc[i].funcname ? cc[i].funcname : cc[i].name);
-    l = (char *) nmalloc(Tcl_ScanElement(p, &k));
-    Tcl_ConvertElement(p, l, k | TCL_DONT_USE_BRACES);
-    table[0].cdata = (void *)cc[i].func;
-    add_cd_tcl_cmds(table);
-    bind_bind_entry(tl, cc[i].flags, cc[i].name, l);
-    nfree(l);
-  }
-
-/*
-  int i;
-
-  for (i = 0; cc[i].name; i++) {
-    bind_bind_entry(table, cc[i].flags, cc[i].name, "");
-  }
-*/
-}
-
-void rem_builtins_dcc(tcl_bind_list_t *table, dcc_cmd_t *cc)
-{
-  int i;
-
-  for (i = 0; cc[i].name; i++) {
-    unbind_bind_entry(table, cc[i].flags, cc[i].name, "");
-  }
-
-}
-
 
 /* Remove the default msg/dcc/fil commands from the Tcl interpreter */
 void rem_builtins(tcl_bind_list_t *table, cmd_t *cc)

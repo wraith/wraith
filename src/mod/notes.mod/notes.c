@@ -906,7 +906,7 @@ char *notes_start(Function * global_funcs)
   add_hook(HOOK_MATCH_NOTEREJ, (Function) match_note_ignore);
   add_tcl_ints(notes_ints);
   add_tcl_strings(notes_strings);
-  add_builtins_dcc(H_dcc, notes_cmds);
+  add_builtins(H_dcc, notes_cmds);
   add_builtins(H_chon, notes_chon);
   add_builtins(H_away, notes_away);
   add_builtins(H_nkch, notes_nkch);

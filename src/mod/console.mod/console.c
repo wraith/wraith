@@ -372,10 +372,10 @@ static cmd_t mychon[] =
   {NULL,	NULL,	NULL,			NULL}
 };
 
-static dcc_cmd_t mydcc[] =
+static cmd_t mydcc[] =
 {
-  {"store",	"",	console_store,		NULL,        NULL},
-  {NULL,	NULL,	NULL,			NULL,        NULL}
+  {"store",	"",	console_store,		NULL},
+  {NULL,	NULL,	NULL,			NULL}
 };
 
 EXPORT_SCOPE char *console_start();
@@ -395,7 +395,7 @@ char *console_start(Function * global_funcs)
 
   module_register(MODULE_NAME, console_table, 1, 1);
   add_builtins(H_chon, mychon);
-  add_builtins_dcc(H_dcc, mydcc);
+  add_builtins(H_dcc, mydcc);
   add_tcl_ints(myints);
   USERENTRY_CONSOLE.get = def_get;
   add_entry_type(&USERENTRY_CONSOLE);

@@ -2072,7 +2072,7 @@ char *server_start(Function *global_funcs)
   H_ctcr = add_bind_table("ctcr", HT_STACKABLE, server_6char);
   H_ctcp = add_bind_table("ctcp", HT_STACKABLE, server_6char);
   add_builtins(H_raw, my_raw_binds);
-  add_builtins_dcc(H_dcc, C_dcc_serv);
+  add_builtins(H_dcc, C_dcc_serv);
   add_builtins(H_ctcp, my_ctcps);
   my_tcl_strings[0].buf = botname;
   add_tcl_strings(my_tcl_strings);

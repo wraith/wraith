@@ -1036,7 +1036,7 @@ char *channels_start(Function * global_funcs)
 	       TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 	       traced_globchanset, NULL);
   add_builtins(H_chon, my_chon);
-  add_builtins_dcc(H_dcc, C_dcc_irc);
+  add_builtins(H_dcc, C_dcc_irc);
   add_builtins(H_bot, channels_bot);
   add_tcl_commands(channels_cmds);
   add_tcl_strings(my_tcl_strings);

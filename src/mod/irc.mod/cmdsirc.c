@@ -1575,33 +1575,33 @@ static void cmd_reset(struct userrec *u, int idx, char *par)
   }
 }
 
-static dcc_cmd_t irc_dcc[] =
+static cmd_t irc_dcc[] =
 {
-  {"act",		"o|o",	 (Function) cmd_act,		NULL,         NULL},
-  {"adduser",		"m|m",	 (Function) cmd_adduser,		NULL,         NULL},
+  {"act",		"o|o",	 (Function) cmd_act,		NULL},
+  {"adduser",		"m|m",	 (Function) cmd_adduser,	NULL},
 #ifdef S_AUTH
-  {"authed",		"n",	 (Function) cmd_authed,			NULL,         NULL},
+  {"authed",		"n",	 (Function) cmd_authed,		NULL},
 #endif /* S_AUTH */
-  {"channel",		"o|o",	 (Function) cmd_channel,		NULL,         NULL},
-  {"deluser",		"m|m",	 (Function) cmd_deluser,		NULL,         NULL},
-  {"deop",		"o|o",	 (Function) cmd_deop,		NULL,         NULL},
-  {"devoice",		"o|o",	 (Function) cmd_devoice,		NULL,         NULL},
-  {"getkey",            "o|o",   (Function) cmd_getkey,         NULL,         NULL},
-  {"find",		"",	 (Function) cmd_find,		NULL,	      NULL},
-  {"invite",		"o|o",	 (Function) cmd_invite,		NULL,         NULL},
-  {"kick",		"o|o", (Function) cmd_kick,		NULL,         NULL},
-  {"kickban",		"o|o", (Function) cmd_kickban,		NULL,         NULL},
-  {"mdop",              "n|n",     (Function) cmd_mdop,           NULL,         NULL},
-  {"msg",		"o",	 (Function) cmd_msg,		NULL,         NULL},
-  {"op",		"o|o",	 (Function) cmd_op,		NULL,         NULL},
-  {"reset",		"m|m",	 (Function) cmd_reset,		NULL,         NULL},
-  {"resetbans",		"o|o",	 (Function) cmd_resetbans,	NULL,         NULL},
-  {"resetexempts",	"o|o",	 (Function) cmd_resetexempts,	NULL,         NULL},
-  {"resetinvites",	"o|o",	 (Function) cmd_resetinvites,	NULL,         NULL},
-  {"say",		"o|o",	 (Function) cmd_say,		NULL,         NULL},
-  {"topic",		"o|o",	 (Function) cmd_topic,		NULL,         NULL},
-  {"voice",		"o|o",	 (Function) cmd_voice,		NULL,         NULL},
-  {NULL,		NULL,	 NULL,				NULL,         NULL, NULL}
+  {"channel",		"o|o",	 (Function) cmd_channel,	NULL},
+  {"deluser",		"m|m",	 (Function) cmd_deluser,	NULL},
+  {"deop",		"o|o",	 (Function) cmd_deop,		NULL},
+  {"devoice",		"o|o",	 (Function) cmd_devoice,	NULL},
+  {"getkey",            "o|o",   (Function) cmd_getkey,         NULL},
+  {"find",		"",	 (Function) cmd_find,		NULL},
+  {"invite",		"o|o",	 (Function) cmd_invite,		NULL},
+  {"kick",		"o|o",	 (Function) cmd_kick,		NULL},
+  {"kickban",		"o|o",	 (Function) cmd_kickban,	NULL},
+  {"mdop",              "n|n",	 (Function) cmd_mdop,		NULL},
+  {"msg",		"o",	 (Function) cmd_msg,		NULL},
+  {"op",		"o|o",	 (Function) cmd_op,		NULL},
+  {"reset",		"m|m",	 (Function) cmd_reset,		NULL},
+  {"resetbans",		"o|o",	 (Function) cmd_resetbans,	NULL},
+  {"resetexempts",	"o|o",	 (Function) cmd_resetexempts,	NULL},
+  {"resetinvites",	"o|o",	 (Function) cmd_resetinvites,	NULL},
+  {"say",		"o|o",	 (Function) cmd_say,		NULL},
+  {"topic",		"o|o",	 (Function) cmd_topic,		NULL},
+  {"voice",		"o|o",	 (Function) cmd_voice,		NULL},
+  {NULL,		NULL,	 NULL,				NULL}
 };
 
 #endif

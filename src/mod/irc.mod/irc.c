@@ -1879,7 +1879,7 @@ char *irc_start(Function * global_funcs)
 	       traced_rfccompliant, NULL);
   add_tcl_ints(myints);
   add_builtins(H_bot, irc_bot);
-  add_builtins_dcc(H_dcc, irc_dcc);
+  add_builtins(H_dcc, irc_dcc);
   add_builtins(H_msg, C_msg);
 #ifdef S_AUTH
   add_builtins(H_msgc, C_msgc);

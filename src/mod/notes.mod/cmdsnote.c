@@ -216,13 +216,13 @@ static void cmd_note(struct userrec *u, int idx, char *par)
   add_note(p, dcc[idx].nick, par, idx, echo);
 }
 
-static dcc_cmd_t notes_cmds[] =
+static cmd_t notes_cmds[] =
 {
-  {"fwd",	"m",	(Function) cmd_fwd,		NULL,          NULL},
-  {"notes",	"",	(Function) cmd_notes,		NULL,          NULL},
-  {"+noteign",	"",	(Function) cmd_pls_noteign,	NULL,          NULL},
-  {"-noteign",	"",	(Function) cmd_mns_noteign,	NULL,          NULL},
-  {"noteigns",	"",	(Function) cmd_noteigns,	NULL,          NULL},
-  {"note",	"",	(Function) cmd_note,		NULL,          NULL},
-  {NULL,	NULL,	NULL,				NULL,          NULL}
+  {"fwd",	"m",	(Function) cmd_fwd,		NULL},
+  {"notes",	"",	(Function) cmd_notes,		NULL},
+  {"+noteign",	"",	(Function) cmd_pls_noteign,	NULL},
+  {"-noteign",	"",	(Function) cmd_mns_noteign,	NULL},
+  {"noteigns",	"",	(Function) cmd_noteigns,	NULL},
+  {"note",	"",	(Function) cmd_note,		NULL},
+  {NULL,	NULL,	NULL,				NULL}
 };

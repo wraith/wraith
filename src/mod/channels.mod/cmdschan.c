@@ -1732,36 +1732,36 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
  *
  * NOTE: As with msg commands, the function is responsible for any logging.
  */
-static dcc_cmd_t C_dcc_irc[] =
+static cmd_t C_dcc_irc[] =
 {
-  {"+ban",	"o|o",	(Function) cmd_pls_ban,		NULL,        NULL},
+  {"+ban",	"o|o",	(Function) cmd_pls_ban,		NULL},
 #ifdef S_IRCNET
-  {"+exempt",	"o|o",	(Function) cmd_pls_exempt,	NULL,        NULL},
-  {"+invite",	"o|o",	(Function) cmd_pls_invite,	NULL,        NULL},
-#endif
-  {"+chan",	"n",	(Function) cmd_pls_chan,	NULL,        NULL},
-  {"+chrec",	"m|m",	(Function) cmd_pls_chrec,	NULL,        NULL},
-  {"-ban",	"o|o",	(Function) cmd_mns_ban,		NULL,        NULL},
-  {"-chan",	"n",	(Function) cmd_mns_chan,	NULL,        NULL},
-  {"-chrec",	"m|m",	(Function) cmd_mns_chrec,	NULL,        NULL},
+  {"+exempt",	"o|o",	(Function) cmd_pls_exempt,	NULL},
+  {"+invite",	"o|o",	(Function) cmd_pls_invite,	NULL},
+#endif /* S_IRCNET */
+  {"+chan",	"n",	(Function) cmd_pls_chan,	NULL},
+  {"+chrec",	"m|m",	(Function) cmd_pls_chrec,	NULL},
+  {"-ban",	"o|o",	(Function) cmd_mns_ban,		NULL},
+  {"-chan",	"n",	(Function) cmd_mns_chan,	NULL},
+  {"-chrec",	"m|m",	(Function) cmd_mns_chrec,	NULL},
 #ifdef S_IRCNET
-  {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL,        NULL},
-  {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL,        NULL},
-#endif
-  {"bans",	"o|o",	(Function) cmd_bans,		NULL,        NULL},
+  {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL},
+  {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL},
+#endif /* S_IRCNET */
+  {"bans",	"o|o",	(Function) cmd_bans,		NULL},
 #ifdef S_IRCNET
-  {"exempts",	"o|o",	(Function) cmd_exempts,		NULL,        NULL},
-  {"invites",	"o|o",	(Function) cmd_invites,		NULL,        NULL},
-#endif
-  {"chaninfo",	"m|m",	(Function) cmd_chaninfo,	NULL,        NULL},
-  {"chanset",	"m|m",	(Function) cmd_chanset,		NULL,        NULL},
-  {"chinfo",	"m|m",	(Function) cmd_chinfo,		NULL,        NULL},
-  {"cycle", 	"n|n",	(Function) cmd_cycle,		NULL,        NULL},
-  {"down",	"n|n",	(Function) cmd_down,		NULL,        NULL},
-  {"info",	"",	(Function) cmd_info,		NULL,        NULL},
-  {"slowjoin",  "n",    (Function) cmd_slowjoin,        NULL,        NULL},
-  {"slowpart",  "n|n",  (Function) cmd_slowpart,        NULL,        NULL},
-  {"stick",	"o|o",	(Function) cmd_stick,		NULL,        NULL},
-  {"unstick",	"o|o",	(Function) cmd_unstick,		NULL,        NULL},
-  {NULL,	NULL,	NULL,				NULL,      NULL}
+  {"exempts",	"o|o",	(Function) cmd_exempts,		NULL},
+  {"invites",	"o|o",	(Function) cmd_invites,		NULL},
+#endif /* S_IRCNET */
+  {"chaninfo",	"m|m",	(Function) cmd_chaninfo,	NULL},
+  {"chanset",	"m|m",	(Function) cmd_chanset,		NULL},
+  {"chinfo",	"m|m",	(Function) cmd_chinfo,		NULL},
+  {"cycle", 	"n|n",	(Function) cmd_cycle,		NULL},
+  {"down",	"n|n",	(Function) cmd_down,		NULL},
+  {"info",	"",	(Function) cmd_info,		NULL},
+  {"slowjoin",  "n",    (Function) cmd_slowjoin,        NULL},
+  {"slowpart",  "n|n",  (Function) cmd_slowpart,        NULL},
+  {"stick",	"o|o",	(Function) cmd_stick,		NULL},
+  {"unstick",	"o|o",	(Function) cmd_unstick,		NULL},
+  {NULL,	NULL,	NULL,				NULL}
 };

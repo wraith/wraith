@@ -113,9 +113,6 @@ void check_tcl_loadunld(const char *, tcl_bind_list_t *);
 void rem_builtins(tcl_bind_list_t *, cmd_t *);
 void add_builtins(tcl_bind_list_t *, cmd_t *);
 
-void rem_builtins_dcc(tcl_bind_list_t *, dcc_cmd_t *);
-void add_builtins_dcc(tcl_bind_list_t *, dcc_cmd_t *);
-
 int check_validity(char *, Function);
 extern p_tcl_bind_list H_chat, H_act, H_bcst, H_chon, H_chof;
 extern p_tcl_bind_list H_load, H_unld, H_dcc, H_bot, H_link;

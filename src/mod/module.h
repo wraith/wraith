@@ -499,8 +499,8 @@
 #define kickreason ((char *(*)(int))global[300])
 /* 301 - 304 */
 #define getting_users ((int (*)())global[301])
-#define add_builtins_dcc ((int (*) (tcl_bind_list_t *, dcc_cmd_t *))global[302])
-#define rem_builtins_dcc ((int (*) (tcl_bind_list_t *, dcc_cmd_t *))global[303])
+/* 302 */
+/* 303 */
 #define USERENTRY_ADDED (*(struct user_entry_type *)(global[304]))
 /* 305 - 308 */
 #define bdhash ((char *)(global[305]))
