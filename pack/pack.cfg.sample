@@ -12,6 +12,8 @@ PACKNAME <name>
 
 /* SHELLHASH: 32 char md5 hash used for binary password 
  * in mIRC: //echo -a $MD5(SOMEWORD)
+ * URL: http://pajhome.org.uk/crypt/md5/
+   sometimes wrong:
  * URL: http://edge.codebin.dk/md5.php
  */
 SHELLHASH <md5hash>
