@@ -749,9 +749,13 @@ Context;
     showall = 1;
     build_flags(flg, &fr, NULL);
     dprintf(idx, STR("Showing help topics matching your flags: (%s)\n  "), flg);
+  } else {
+    dprintf(idx, "Not yet implemented.\n");
+    return;
   }
 
-  for (o = 0; o < cmdi; o++) {
+  /* this displays help for old system
+  for (o = 0; o < cmdi; o++) {			
     if (!flagrec_ok(&cmds[o].flags, &fr))
       continue;
     if (!showall && !egg_strcasecmp(par, cmds[o].name)) {
@@ -762,8 +766,9 @@ Context;
       dprintf(idx, STR("Description: %s\n"), cmds[o].desc ? cmds[o].desc : "None");
       break;
     }
+  */
   }
-
+  
   if (showall) {
     qsort(cmds, o, sizeof(mycmds), my_cmp);
     end = 0;
@@ -785,19 +790,15 @@ Context;
             dprintf(idx, "%s\n", buf[0] ? buf : "");
             dprintf(idx, STR("# DCC (%s)\n"), flag);
             sprintf(buf, "  ");
-            /* dprintf(idx, "%s## DCC (%s)\n  ", "\n", flag); */
           }
 
           if (end && !first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
             /* we dumped the buf to dprintf, now start a new one... */
             sprintf(buf, "  ");
-            /* snprintf(buf, sizeof buf, "%s\n  ", buf); */
-            /* dprintf(idx, STR("\n  ")); */
           }
         
           sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmds[n].name);
-          /* dprintf(idx, STR("%-14.14s"), cmds[n].name); */
           first = 0;
           end = 0;
           i++;

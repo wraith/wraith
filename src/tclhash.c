@@ -1166,6 +1166,13 @@ void add_builtins(tcl_bind_list_t *tl, cmd_t *cc)
   table[0].callback = tl->func;
   table[1].name = NULL;
   for (i = 0; cc[i].name; i++) {
+    /* add H_dcc cmds to cmds[] :: add to the help system.. */
+    if (tl == H_dcc) {
+      cmds[cmdi].name = cc[i].name;
+      cmds[cmdi].flags.match = FR_GLOBAL | FR_CHAN;
+      break_down_flags(cc[i].flags, &(cmds[cmdi].flags), NULL);
+      cmdi++;
+    }
     egg_snprintf(p, sizeof p, "*%s:%s", tl->name,
 		   cc[i].funcname ? cc[i].funcname : cc[i].name);
     l = (char *) nmalloc(Tcl_ScanElement(p, &k));

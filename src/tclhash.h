@@ -16,8 +16,6 @@ typedef struct tcl_cmd_b {
   char			*func_name;	/* Proc name.			*/
   int			 hits;		/* Number of times this proc
 					   was triggered.		*/
-  char *usage;
-  char *desc;
   u_8bit_t		 attributes;	/* Flags for this entry. TC_*	*/
 } tcl_cmd_t;
 
@@ -27,8 +25,6 @@ typedef struct tcl_cmd_b {
 typedef struct tct {
   struct flag_record flags;
   void *func;
-  char *usage;
-  char *desc;
   struct tct *next;
 } bind_cmd_t;
 
@@ -50,8 +46,6 @@ typedef struct tcl_bind_mask_b {
 typedef struct {
  char *name;
  struct flag_record     flags;
- char *desc;
- char *usage;
 } mycmds;
 
 typedef struct tcl_bind_list_b {
