@@ -280,8 +280,6 @@ void dcc_chatter(int idx)
 	  botnet_send_join_idx(idx, -1);
 	}
       }
-      check_bind_chjn(conf.bot->nick, dcc[idx].nick, dcc[idx].u.chat->channel,
-		     geticon(idx), dcc[idx].sock, dcc[idx].host);
     }
     /* But *do* bother with sending it locally */
 

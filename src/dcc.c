@@ -1052,7 +1052,6 @@ static void eof_dcc_chat(int idx)
 		dcc[idx].nick);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, "lost dcc link");
-    check_bind_chpt(conf.bot->nick, dcc[idx].nick, dcc[idx].sock, dcc[idx].u.chat->channel);
   }
   check_bind_chof(dcc[idx].nick, idx);
   killsock(dcc[idx].sock);
@@ -1155,11 +1154,6 @@ static void dcc_chat(int idx, char *buf, int i)
 	}
       }
     } else {
-	int r;
-
-	r = check_bind_chat(dcc[idx].nick, dcc[idx].u.chat->channel, buf);
-	if (r & BIND_RET_BREAK) return;
-
       if (dcc[idx].u.chat->away != NULL)
         not_away(idx);
        if (dcc[idx].status & STAT_ECHO)

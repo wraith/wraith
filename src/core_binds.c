@@ -20,21 +20,15 @@
 extern cmd_t 		C_dcc[];
 
 static bind_table_t *BT_away = NULL, *BT_dcc = NULL;
-static bind_table_t *BT_chat = NULL, *BT_act = NULL, *BT_bcst = NULL, *BT_note = NULL;
-static bind_table_t *BT_bot = NULL, *BT_nkch = NULL, *BT_chon = NULL, *BT_chof = NULL;
-static bind_table_t *BT_chpt = NULL, *BT_chjn = NULL, *BT_time = NULL;
+static bind_table_t *BT_note = NULL;
+static bind_table_t *BT_bot = NULL, *BT_nkch = NULL, *BT_chon = NULL;
+static bind_table_t *BT_time = NULL;
 
 void core_binds_init()
 {
-        BT_act = bind_table_add("act", 3, "sis", MATCH_MASK, BIND_STACKABLE);
         BT_away = bind_table_add("away", 3, "sis", MATCH_MASK, BIND_STACKABLE);
-        BT_bcst = bind_table_add("bcst", 3, "sis", MATCH_MASK, BIND_STACKABLE);
         BT_bot = bind_table_add("bot", 3, "sss", MATCH_EXACT, 0);
-        BT_chat = bind_table_add("chat", 3, "sis", MATCH_MASK, BIND_STACKABLE | BIND_BREAKABLE);
-        BT_chjn = bind_table_add("chjn", 6, "ssisis", MATCH_MASK, BIND_STACKABLE);
         BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
-        BT_chof = bind_table_add("chof", 2, "si", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
-        BT_chpt = bind_table_add("chpt", 4, "ssii", MATCH_MASK, BIND_STACKABLE);
         BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_PARTIAL | MATCH_FLAGS, 0);
         add_builtins("dcc", C_dcc);
         BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
@@ -125,28 +119,10 @@ void check_bind_chon(char *hand, int idx)
 
 void check_bind_chof(char *hand, int idx)
 {
-  struct flag_record     fr = {FR_GLOBAL | FR_CHAN, 0, 0};
   struct userrec        *u = NULL;
 
   u = get_user_by_handle(userlist, hand);
   touch_laston(u, "partyline", now);
-  get_user_flagrec(u, &fr, NULL);
-  check_bind(BT_chof, hand, &fr, hand, idx);
-}
-
-int check_bind_chat(char *handle, int chan, const char *text)
-{
-  return check_bind(BT_chat, text, NULL, handle, chan, text);
-}
-
-void check_bind_act(const char *from, int chan, const char *text)
-{
-  check_bind(BT_act, text, NULL, from, chan, text);
-}
-
-void check_bind_bcst(const char *from, int chan, const char *text)
-{
-  check_bind(BT_bcst, text, NULL, from, chan, text);
 }
 
 void check_bind_nkch(const char *ohand, const char *nhand)
@@ -157,39 +133,6 @@ void check_bind_nkch(const char *ohand, const char *nhand)
 int check_bind_note(const char *from, const char *to, const char *text)
 {
   return check_bind(BT_note, to, NULL, from, to, text);
-}
-
-void check_bind_chjn(const char *bot, const char *nick, int chan, const char type, int sock, const char *host)
-{
-  struct flag_record    fr = {FR_GLOBAL, 0, 0};
-  char                  s[11] = "", t[2] = "";
-
-  t[0] = type;
-  t[1] = 0;
-  switch (type) {
-  case '^':
-    fr.global = USER_ADMIN;
-    break;
-  case '*':
-    fr.global = USER_OWNER;
-    break;
-  case '+':
-    fr.global = USER_MASTER;
-    break;
-  case '@':
-    fr.global = USER_OP;
-    break;
-  }
-  egg_snprintf(s, sizeof s, "%d", chan);
-  check_bind(BT_chjn, s, &fr, bot, nick, chan, t, sock, host);
-}
-
-void check_bind_chpt(const char *bot, const char *hand, int sock, int chan)
-{
-  char  v[11] = "";
-
-  egg_snprintf(v, sizeof v, "%d", chan);
-  check_bind(BT_chpt, v, NULL, bot, hand, sock, chan);
 }
 
 void check_bind_away(const char *bot, int idx, const char *msg)

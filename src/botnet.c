@@ -348,8 +348,6 @@ void rempartybot(char *bot)
 
   for (i = 0; i < parties; i++)
     if (!egg_strcasecmp(party[i].bot, bot)) {
-      if (party[i].chan >= 0)
-        check_bind_chpt(bot, party[i].nick, party[i].sock, party[i].chan);
       remparty(bot, party[i].sock);
       i--;
     }
@@ -932,9 +930,6 @@ int botunlink(int idx, char *nick, char *reason)
     while (parties) {
       parties--;
       /* Assert? */
-      if (party[i].chan >= 0)
-        check_bind_chpt(party[i].bot, party[i].nick, party[i].sock,
-		       party[i].chan);
     }
   }
   return 0;
@@ -1369,8 +1364,6 @@ static void cont_tandem_relay(int idx, char *buf, register int i)
 		dcc[uidx].nick, BOT_PARTYLEFT);
     if (dcc[uidx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(uidx, NULL);
-    check_bind_chpt(conf.bot->nick, dcc[uidx].nick, dcc[uidx].sock,
-		   dcc[uidx].u.chat->channel);
   }
   check_bind_chof(dcc[uidx].nick, uidx);
   dcc[uidx].type = &DCC_RELAYING;
@@ -1408,8 +1401,6 @@ static void eof_dcc_relay(int idx)
       botnet_send_join_idx(j, -1);
   }
   check_bind_chon(dcc[j].nick, j);
-  check_bind_chjn(conf.bot->nick, dcc[j].nick, dcc[j].u.chat->channel,
-		 geticon(j), dcc[j].sock, dcc[j].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1503,9 +1494,6 @@ static void dcc_relaying(int idx, char *buf, int j)
   dcc[idx].u.chat = ci;
   dcc[idx].type = &DCC_CHAT;
   check_bind_chon(dcc[idx].nick, idx);
-  if (dcc[idx].u.chat->channel >= 0)
-    check_bind_chjn(conf.bot->nick, dcc[idx].nick, dcc[idx].u.chat->channel,
-		   geticon(idx), dcc[idx].sock, dcc[idx].host);
   killsock(dcc[j].sock);
   lostdcc(j);
 }
@@ -1708,13 +1696,7 @@ void restart_chons()
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_CHAT) {
       check_bind_chon(dcc[i].nick, i);
-      check_bind_chjn(conf.bot->nick, dcc[i].nick, dcc[i].u.chat->channel,
-		     geticon(i), dcc[i].sock, dcc[i].host);
     }
-  }
-  for (i = 0; i < parties; i++) {
-    check_bind_chjn(party[i].bot, party[i].nick, party[i].chan,
-		   party[i].flag, party[i].sock, party[i].from);
   }
 }
 

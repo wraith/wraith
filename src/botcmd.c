@@ -118,10 +118,11 @@ static void bot_chan2(int idx, char *msg)
     /* Send to new version bots */
     if (i >= 0)
       botnet_send_chan(idx, from, NULL, chan, msg);
-    if (strchr(from, '@') != NULL)
+/*    if (strchr(from, '@') != NULL)
       check_bind_chat(from, chan, msg);
     else
       check_bind_bcst(from, chan, msg);
+*/
   }
 }
 
@@ -256,7 +257,6 @@ static void bot_actchan(int idx, char *par)
   }
   chanout_but(-1, chan, "* %s %s\n", from, par);
   botnet_send_act(idx, from, NULL, chan, par);
-  check_bind_act(from, chan, par);
 }
 
 /* priv <from> <to> <message>
@@ -1121,11 +1121,9 @@ static void bot_join(int idx, char *par)
   if (i != chan) {
     if (i >= 0) {
       chanout_but(-1, i, "*** (%s) %s %s %s.\n", bot, nick, NET_LEFTTHE, i ? "channel" : "party line");
-      check_bind_chpt(bot, nick, sock, i);
     }
     if (!linking)
     chanout_but(-1, chan, "*** (%s) %s %s %s.\n", bot, nick, NET_JOINEDTHE, chan ? "channel" : "party line");
-    check_bind_chjn(bot, nick, chan, y[0], sock, par);
   }
 }
 
@@ -1154,8 +1152,6 @@ static void bot_part(int idx, char *par)
     touch_laston(u, TBUF, now);
   }
   if ((partyidx = getparty(bot, sock)) != -1) {
-    if (party[partyidx].chan >= 0)
-      check_bind_chpt(bot, nick, sock, party[partyidx].chan);
     if (!silent) {
       register int chan = party[partyidx].chan;
 
