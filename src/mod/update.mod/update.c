@@ -259,7 +259,7 @@ void finish_update(int idx)
     fclose(f);
   }
 
-  sprintf(buf, "%s%s", dirname(binname),  strrchr(dcc[idx].u.xfer->filename, '/'));
+  sprintf(buf, "%s%s", conf.binpath,  strrchr(dcc[idx].u.xfer->filename, '/'));
 
   movefile(dcc[idx].u.xfer->filename, buf); 
   fixmod(buf);
@@ -303,7 +303,7 @@ static void start_sending_binary(int idx)
   egg_snprintf(update_file, sizeof update_file, "%s.%s-%s", 
               (bot_hublevel(dcc[idx].user) == 999) ? "leaf" : "hub", sysname, egg_version);
 
-  egg_snprintf(update_fpath, sizeof update_fpath, "%s/%s", dirname(binname), update_file);
+  egg_snprintf(update_fpath, sizeof update_fpath, "%s/%s", conf.binpath, update_file);
 
   if (!can_stat(update_fpath)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s, but it cannot be accessed", dcc[idx].nick, update_fpath);
