@@ -951,7 +951,8 @@ char *wbanner() {
 
 void show_banner(int idx)
 {
-  dprintf(idx, "%s\n", wbanner());
+  dprintf(idx, "%s", wbanner());
+  dprintf(idx, "\n\n");
   dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://www.shatow.net/wraith/ -\n"));
 }
 
@@ -970,37 +971,41 @@ void show_channels(int idx, char *handle)
   struct chanset_t *chan;
   struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0, 0 };
   struct userrec *u;
-  int first = 0, l = 0;
+  int first = 0, l = 0, total = 0;
   char format[120];
 
-  for (chan = chanset;chan;chan = chan->next)
-    if (l < strlen(chan->dname))
-      l = strlen(chan->dname);
-
-Context;
   if (handle)
     u = get_user_by_handle(userlist, handle);
   else
     u = dcc[idx].user;
 
-Context;
+  for (chan = chanset;chan;chan = chan->next) {
+    get_user_flagrec(u, &fr, chan->dname);
+    if (l < strlen(chan->dname)) {
+      l = strlen(chan->dname);
+    }
+    if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
+       (glob_owner(fr) || ((glob_op(fr) || chan_op(fr)) && !(chan_deop(fr) || glob_deop(fr))))) {
+      total++;
+    }
+  }
+
 
   egg_snprintf(format, sizeof format, "  %%-%us %%-s%%-s%%-s%%-s%%-s\n", (l+2));
 
   for (chan = chanset;chan;chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
 
-Context;
     if ((!channel_private(chan) || (channel_private(chan) && (chan_op(fr) || glob_owner(fr)))) &&
        (glob_owner(fr) || ((glob_op(fr) || chan_op(fr)) && !(chan_deop(fr) || glob_deop(fr))))) {
         if (!first) { 
-          dprintf(idx, STR("%s %s access to these channels:\n"), handle ? u->handle : "You", handle ? "has" : "have");
+          dprintf(idx, STR("%s %s access to %d channel%s:\n"), handle ? u->handle : "You", handle ? "has" : "have", total, (total > 1) ? "s" : "");
           
           first = 1;
         }
         dprintf(idx, format, chan->dname, channel_inactive(chan) ? "(inactive) " : "", 
            channel_private(chan) ? "(private)  " : "", !channel_manop(chan) ? "(no manop) " : "", 
-           channel_bitch(chan) ? "(bitch)   " : "", channel_closed(chan) ?  "(closed)" : "");
+           channel_bitch(chan) ? "(bitch)    " : "", channel_closed(chan) ?  "(closed)" : "");
     }
   }
   if (!first)
