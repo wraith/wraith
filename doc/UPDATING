@@ -1,0 +1,15 @@
+
+Get the new src from bryan.
+Copy your salt.h, settings.c and bldall files and put them in their respect directories in the untarred newsrc..
+./bldall pack
+./leaf -v
+(uname -s)
+cp leaf leaf.Os.ver
+cp hub hub.Os.hub
+Set a hub +U
+Then on that hub, copy all the binaries for the new version to it's dir..
+whatever os you are in, copy the appropiate new hub binary to 'newhub', then on the hub, type .update newhub
+Sit back and cry as all the bots die probably.. nah j/k
+
+This will all be improved over time, and you won't need to redo your entire net ever...
+
