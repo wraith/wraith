@@ -270,6 +270,8 @@ See also: tcl
    '?' for exactly 1 char. Use this cmd carefuly, and even think about placing
    a cmdpass on it.
  
+   Just using '?' for 'bot' will chose a random leaf bot.
+ 
 See also: bc, cmdpass
 :hub:botconfig:
 ###  %bbotconfig%b <bot> [name [value|-]]
