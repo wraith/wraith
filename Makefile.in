@@ -95,6 +95,7 @@ all:
 
 cleanutils:
 	@rm -f stringfix
+	@misc/dostrings l
 
 cleanpack:
 	@rm -f src/settings.c
@@ -150,6 +151,7 @@ packconf:
 
 utils:  packconf
 	@cd src && $(MAKE_UTILS) ../stringfix
+	@misc/dostrings
 	@cd src && $(MAKE_UTILS) ../makesalt
 
 depleaf:
