@@ -998,11 +998,10 @@ void enforce_closed(struct chanset_t *chan) {
 static char *
 take_massopline(char *op, char **to_op)
 {
-  char *nicks = (char *) calloc(1, 51), *modes = (char *) calloc(1, 10), *ret = (char *) calloc(1, 61), *nick;
-  bool useop = 0;
+  char *nicks = (char *) calloc(1, 51), *modes = (char *) calloc(1, 10), *ret = (char *) calloc(1, 61), *nick = NULL;
+  register bool useop = 0;
 
   for (int i = 0; i < 4; i++) {
-    nick = NULL;
     if (*to_op[0] || op) {
       /* if 'op' then use it, then move on to to_op */
       if (!useop && op) {
@@ -1053,7 +1052,6 @@ take_makeline(char *op, char *deops, unsigned int deopn)
     strcat(ret, " ");
   }
 
-  /* putlog(LOG_MISC, "*", "modeline: %s", ret); */
   return ret;  
 }
 
@@ -1064,7 +1062,7 @@ do_take(struct chanset_t *chan)
   unsigned int lines = 0, deopn, i;
   char *to_op = (char *) calloc(1, 2048), *to_op_ptr = to_op;
   char *to_deop = (char *) calloc(1, 2048), *to_deop_ptr = to_deop;
-  bool hasop, isbot;
+  register bool hasop, isbot;
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     hasop = (m->flags & CHANOP);
