@@ -712,10 +712,10 @@ static void away_notes(char *bot, int idx, char *msg)
     notes_read(dcc[idx].nick, 0, "+", idx);
 }
 
-static int chon_notes(char *nick, int idx)
+int chon_notes(int idx)
 {
   if (dcc[idx].type == &DCC_CHAT)
-    notes_read(nick, 0, "+", idx);
+    notes_read(dcc[idx].nick, 0, "+", idx);
   return 0;
 }
 
@@ -728,12 +728,6 @@ static cmd_t notes_nkch[] =
 static cmd_t notes_away[] =
 {
   {"*",		"",	(Function) away_notes,		"notes"},
-  {NULL,	NULL,	NULL,				NULL}
-};
-
-static cmd_t notes_chon[] =
-{
-  {"*",		"",	(Function) chon_notes,		"notes"},
   {NULL,	NULL,	NULL,				NULL}
 };
 
@@ -765,7 +759,6 @@ void notes_init()
 
   add_builtins("dcc", notes_cmds);
   add_builtins("away", notes_away);
-  add_builtins("chon", notes_chon);
   add_builtins("nkch", notes_nkch);
 
   notes_server_setup(0);

@@ -65,5 +65,6 @@ void fwd_display(int, struct user_entry *, struct userrec *);
 int num_notes(const char *);
 void notes_report(int, int);
 int storenote(char *, char *, char *, int, char *, int);
+int notes_chon(int);
 
 #endif				/* _EGG_MOD_NOTES_H */

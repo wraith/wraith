@@ -247,6 +247,7 @@ void dcc_chatter(int idx)
 
   show_motd(idx);
 
+  notes_chon(idx);
   if (glob_party(fr)) {
      i = dcc[idx].u.chat->channel;
   } else {
