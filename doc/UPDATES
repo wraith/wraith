@@ -11,6 +11,7 @@ This is a summary of ChangeLog basically.
 * cmd_newleaf was sharing the new bot incorrectly.
 * Fixed a cosmetic/memory bug in cmd_who.
 * cmd_bots was displaying the wrong number of bots up.
+* -userbans no longer exempts +m|m
 
 1.1.9
 

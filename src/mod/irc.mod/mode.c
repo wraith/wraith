@@ -579,8 +579,7 @@ static void got_ban(struct chanset_t *chan, char *nick, char *from, char *who)
     return;
   }
   if (!match_my_nick(nick)) {
-    if (channel_nouserbans(chan) && nick[0] && !glob_bot(user) &&
-	!glob_master(user) && !chan_master(user)) {
+    if (channel_nouserbans(chan) && nick[0] && !glob_bot(user)) {
       add_mode(chan, '-', 'b', who);
       return;
     }
