@@ -592,52 +592,37 @@ void show_help()
 }
 
 
-#ifdef LEAF
-#define PARSE_FLAGS "cedghnstvDEGLP"
-#endif /* LEAF */
-#ifdef HUB
-#define PARSE_FLAGS "edghnstvDEG"
-#endif /* HUB */
-#define FLAGS_CHECKPASS "edhgntDEGv"
 char *confdir();
 static void dtx_arg(int argc, char *argv[])
 {
+#ifdef LEAF
+#define PARSE_FLAGS "2c:d:De:E::g:G:L:P:hnstv"
+#else /* !LEAF */
+#define PARSE_FLAGS "2d:De:E::g:G:hnstv"
+#endif /* HUB */
+#define FLAGS_CHECKPASS "dDeEgGhntv"
   int i, localhub_pid = 0;
   char *p = NULL, *p2 = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
     switch (i) {
+      case '2':
+        exit(2);
 #ifdef LEAF
       case 'c':
         localhub = 0;
-        p = argv[optind];
         if (!localhub)
-          gotspawn(p);
+          gotspawn(optarg);
         break;
 #endif /* LEAF */
       case 'h':
         show_help();
         break; /* never reached */
       case 'g':
-        p = argv[optind];
-        if (p)
-          gen_conf(p, 1);
-        else
-          fatal(STR("You must specify a filename after -g"), 0);
-        break; /* never reached */
+        gen_conf(optarg, 1);
       case 'G':
-        p = argv[optind];
-        if (p)
-          gen_conf(p, 2);
-        else
-          fatal(STR("You must specify a filename after -G"), 0);
-        break; /* never reached */
-      case 'k':
-        p = argv[optind];
-/*        kill_bot(p); */
-        exit(0);
-        break; /* never reached */
+        gen_conf(optarg, 2);
       case 'n':
 	backgrd = 0;
 	break;
@@ -652,35 +637,28 @@ static void dtx_arg(int argc, char *argv[])
         sdprintf(STR("debug enabled"));
         break;
       case 'E':
-        p = argv[optind];
-        if (p) {
-          if (!strcmp(p, "all")) {
+        if (optarg && optarg[0]) {
+          if (!strcmp(optarg, "all")) {
             int n;
             putlog(LOG_MISC, "*", STR("Listing all errors"));
             for (n = 1; n < ERR_MAX; n++)
-              putlog(LOG_MISC, "*", STR("Error #%d: %s"), n, werr_tostr(n));
+            putlog(LOG_MISC, "*", STR("Error #%d: %s"), n, werr_tostr(n));
           } else {
-            putlog(LOG_MISC, "*", STR("Error #%d: %s"), atoi(p), werr_tostr(atoi(p)));
+            putlog(LOG_MISC, "*", STR("Error #%d: %s"), atoi(optarg), werr_tostr(atoi(optarg)));
           }
           exit(0);
         } else {
           fatal(STR("You must specify error number after -E (or 'all')"), 0);
         }
-         break;
+        break;
       case 'e':
         if (argv[optind])
           p = argv[optind];
-        if (argv[optind+1])
-          p2 = argv[optind+1];
-        got_ed("e", p, p2);
-        break; /* this should never be reached */
+        got_ed("e", optarg, p);
       case 'd':
         if (argv[optind])
           p = argv[optind];
-        if (argv[optind+1])
-          p2 = argv[optind+1];
-        got_ed("d", p, p2);
-        break; /* this should never be reached */
+        got_ed("d", optarg, p);
       case 'v':
       {
         char date[50];
@@ -694,24 +672,21 @@ static void dtx_arg(int argc, char *argv[])
 #ifdef LEAF
       case 'L':
       {
-        p = argv[optind];
-        if (p && p[0]) {
-          FILE *fp;
-          char buf2[DIRMAX], s[11];
+        FILE *fp;
+        char buf2[DIRMAX], s[11];
 
-          egg_snprintf(buf2, sizeof buf2, "%s/.../.pid.%s", confdir(), p);
-          if ((fp = fopen(buf2, "r"))) {
-            fgets(s, 10, fp);
-            localhub_pid = atoi(s);
-            fclose(fp);
-            /* printf("LOCALHUB PID: %d\n", localhub_pid); */
-          }
+        egg_snprintf(buf2, sizeof buf2, "%s/.../.pid.%s", confdir(), optarg);
+        if ((fp = fopen(buf2, "r"))) {
+          fgets(s, 10, fp);
+          localhub_pid = atoi(s);
+          fclose(fp);
+          /* printf("LOCALHUB PID: %d\n", localhub_pid); */
         }
         break;
       }
-      case 'P':	
-        if (atoi(argv[optind]) != localhub_pid)
-          exit(1);
+      case 'P':
+        if (atoi(optarg) && (atoi(optarg) != localhub_pid))
+          exit(2);
         else
           sdprintf(STR("Updating..."));
         localhub = 1;
@@ -719,7 +694,6 @@ static void dtx_arg(int argc, char *argv[])
         break;
 #endif
       default:
-//        exit(1);
         break;
     }
   }

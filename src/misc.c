@@ -1326,14 +1326,14 @@ int updatebin (int idx, char *par, int autoi)
 {
   char *path = NULL,
    *newbin;
-  char buf[2048], old[1024];
+  char buf[DIRMAX], old[DIRMAX], testbuf[DIRMAX];
   struct stat sb;
   int i;
 #ifdef LEAF
   module_entry *me;
 #endif /* LEAF */
 
-  buf[0] = 0;
+  buf[0] = testbuf[0] = old[0] = 0;
   path = newsplit(&par);
   par = path;
   if (!par[0]) {
@@ -1383,6 +1383,16 @@ int updatebin (int idx, char *par, int autoi)
   egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
   copyfile(binname, old);
 
+  /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
+  snprintf(testbuf, sizeof testbuf, "%s -2", path);
+  i = system(testbuf);
+  if (i == -1 || WEXITSTATUS(i) != 2) {
+    if (idx)
+      dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
+    putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)\n"), i);
+    return i;
+  }
+
   if (movefile(path, binname)) {
     if (idx)
       dprintf(idx, STR("Can't rename %s to %s\n"), path, binname);
@@ -1391,12 +1401,10 @@ int updatebin (int idx, char *par, int autoi)
   }
 
   sprintf(buf, "%s", binname);
-  
 #ifdef LEAF
   if (localhub) {
     /* if localhub = 1, this is the spawn bot and controls
      * the spawning of new bots. */
-
      sprintf(buf, "%s -L %s -P %d", buf, botnetnick, getpid());
   } 
 #endif /* LEAF */
@@ -1411,7 +1419,8 @@ int updatebin (int idx, char *par, int autoi)
   usleep(5000);
 #endif /* HUB */
   putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
-  if ((i = system(buf))) {
+  i = system(buf);
+  if (i == -1 || WEXITSTATUS(i)) {
     if (idx)
       dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
     putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)\n"), i);
