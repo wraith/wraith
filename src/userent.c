@@ -802,7 +802,7 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
 #ifdef LEAF
   /* if this is a su, dont show hosts
    * otherwise, let users see their own hosts */
-  if (!strcmp(u->handle,dcc[idx].nick) && !dcc[idx].u.chat->su_nick) { 
+  if (dcc[idx].simul || (!strcmp(u->handle,dcc[idx].nick) && !dcc[idx].u.chat->su_nick)) { 
 #endif /* LEAF */
     char s[1024] = "";
     struct list_type *q = NULL;
