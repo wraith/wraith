@@ -6,7 +6,7 @@
 
 #ifdef S_NODELAY
 #include <netinet/tcp.h>
-#endif
+#endif /* S_NODELAY */
 
 #define msgop CFG_MSGOP.ldata ? CFG_MSGOP.ldata : CFG_MSGOP.gdata ? CFG_MSGOP.gdata : ""
 #define msgpass CFG_MSGPASS.ldata ? CFG_MSGPASS.ldata : CFG_MSGPASS.gdata ? CFG_MSGPASS.gdata : ""
@@ -19,78 +19,80 @@ char curnetwork[120] = "";
 static time_t last_ctcp    = (time_t) 0L;
 static int    count_ctcp   = 0;
 static char   altnick_char = 0;
-
-/* We try to change to a preferred unique nick here. We always first try the
- * specified alternate nick. If that failes, we repeatedly modify the nick
- * until it gets accepted.
- *
- * sent nick:
- *     "<altnick><c>"
- *                ^--- additional count character: 1-9^-_\\[]`a-z
- *          ^--------- given, alternate nick
- *
- * The last added character is always saved in altnick_char. At the very first
- * attempt (were altnick_char is 0), we try the alternate nick without any
- * additions.
- *
- * fixed by guppy (1999/02/24) and Fabian (1999/11/26)
- */
-int rolls = 0;
+static unsigned int rolls = 0;
+#define ALTCHARS "-_\\`^[]"
+#define ROLL_RIGHT
+#undef ROLL_LEFT
 static int gotfake433(char *from)
 {
-  int l = strlen(botname) - 1;
+  size_t len = strlen(botname);
   int use_chr = 1;
-  char *altchrs = "-_\\`^[]";
 
   /* First run? */
-  if (altnick_char == 0) {
-    altnick_char = altchrs[0];
+  if (altnick_char == 0 && !rolls) {
+    altnick_char = ALTCHARS[0];
     /* the nick is already as long as it can be. */
-    if (l + 1 == nick_len) {
-      /* make the last char the altnick_char */
-      botname[l] = altnick_char;
+    if (len == (unsigned) nick_len) {
+      /* make the last char the current altnick_char */
+      botname[len - 1] = altnick_char;
     } else {
       /* tack it on to the end */
-      botname[++l] = altnick_char;
-      botname[l + 1] = 0;
+      botname[len] = altnick_char;
+      botname[len + 1] = 0;
     }
   } else {
     char *p = NULL;
- 
-    if ((p = strchr(altchrs, altnick_char)))
+
+    if ((p = strchr(ALTCHARS, altnick_char)))
       p++;
-    if (!p || (p && !*p)) {
-      /* fun BX style rolling, WEEEE */
-      if (rolls < 10) {
-        char tmp;
-        if (rolls == 0)
-          strcpy(botname, origbotname);
-        tmp = botname[8];
-        if (strchr(BADNICKCHARS, tmp))
-          tmp = '_';
+    /* if we haven't been rolling, use the ALTCHARS
+     */
+    if (!rolls && p && *p) {
+      altnick_char = *p;
+    /* if we've already rolled, just keep rolling until we've rolled completely 
+     * after that, just generate random chars 
+     */
+    } else if (rolls < len) {
+        /* fun BX style rolling, WEEEE */
+        char tmp = 0;
+        int i = 0;
+
         altnick_char = 0;
         use_chr = 0;
-            
+
+        if (rolls == 0) {
+          strcpy(botname, origbotname);
+          len = strlen(botname);
+        }
+#ifdef ROLL_RIGHT
+        tmp = botname[len - 1];
+#endif /* ROLL_RIGHT */
+#ifdef ROLL_LEFT
+        tmp = botname[0]; 
+#endif /* ROLL_LEFT */
+        if (strchr(BADNICKCHARS, tmp))
+          tmp = '_';
         rolls++;
-        botname[8] = botname[7];
-        botname[7] = botname[6];
-        botname[6] = botname[5];
-        botname[5] = botname[4];
-        botname[4] = botname[3];
-        botname[3] = botname[2];
-        botname[2] = botname[1];
-        botname[1] = botname[0];
+#ifdef ROLL_RIGHT
+        for (i = (len - 1); i > 0; i--)
+          botname[i] = botname[i - 1];
         botname[0] = tmp;
-      } else {
-        /* when we run out of 'altchrs', then make altnick_char a random alpha */
-        altnick_char = 'a' + randint(26);
-      }
+#endif /* ROLL_RIGHT */
+#ifdef ROLL_LEFT
+        for (i = 0; i < (len - 1); i++)
+          botname[i] = botname[i + 1];
+        botname[len - 1] = tmp; 
+#endif /* ROLL_LEFT */
+        botname[len] = 0;
     } else {
-      /* else, make altnick_char the 'oknick' */
-      altnick_char = (*p);
+      /* we've tried ALTCHARS, and rolled the nick, just use random chars now */
+      altnick_char = 'a' + randint(26);
     }
-    if (use_chr)
-      botname[l] = altnick_char;
+
+    if (use_chr && altnick_char) {
+      botname[len - 1] = altnick_char;
+      botname[len] = 0;
+    }
   }
 
   putlog(LOG_SERV, "*", IRC_BOTNICKINUSE, botname);
@@ -799,10 +801,10 @@ static int got432(char *from, char *msg)
  */
 static int got433(char *from, char *msg)
 {
-  char *tmp = NULL;
-
+  /* We are online and have a nickname, we'll keep it */
   if (server_online) {
-    /* We are online and have a nickname, we'll keep it */
+    char *tmp = NULL;
+
     newsplit(&msg);
     tmp = newsplit(&msg);
     putlog(LOG_MISC, "*", "NICK IN USE: %s (keeping '%s').", tmp, botname);
