@@ -54,6 +54,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 * Fixed chanset limit not being set every 2 minutes.
 * '~' replacement is now internal for paths in config.
 * No longer enforcing $binpath/$binname when using -C.
+* $binname is no longer defaulted to ".sshrc"
 
 1.2
 * No longer displaying SALTS on ./bin -v
