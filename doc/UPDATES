@@ -53,6 +53,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Setting -take now automatically sets +fastop as well (#13).
 * Added cmd_version (does same as .botversion)
 * Fixed userfile becoming desynced during transfer; A bot downloading a userfile would miss changes made during the transfer. (#11)
+* Fixed a problem with accepting new telnet connections.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

@@ -1232,10 +1232,11 @@ dcc_telnet(int idx, char *buf, int ii)
   int sock = answer(dcc[idx].sock, s, &ip, &port, 0);
 
   while ((sock == -1) && (errno == EAGAIN))
-    sock = answer(sock, s, &ip, &port, 0);
+    sock = answer(dcc[idx].sock, s, &ip, &port, 0);
 /*. ssl_link ACCEPT_SSL should go here!!!! */
   if (sock < 0) {
     putlog(LOG_MISC, "*", DCC_FAILED, strerror(errno));
+//    killsock(dcc[idx].sock);
     return;
   }
   /* Buffer data received on this socket.  */
