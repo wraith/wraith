@@ -818,6 +818,7 @@ bin_to_conf(void)
   conf.uname = strdup(settings.uname);
   conf.homedir = strdup(settings.homedir);
   conf.binpath = strdup(settings.binpath);
+  fix_tilde(&conf.binpath);
   conf.binname = strdup(settings.binname);
   conf.portmin = atol(settings.portmin);
   conf.portmax = atol(settings.portmax);
