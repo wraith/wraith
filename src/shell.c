@@ -119,10 +119,10 @@ void check_maxfiles()
   if (sock1 != -1)
     killsock(sock1);
   bogus = sock - socks_total - 4;	//4 for stdin/stdout/stderr/dns 
-
-  sdprintf("SOCK: %d BOGUS: %d SOCKS_TOTAL: %d", sock, bogus, socks_total);
-
+ 
   if (bogus >= 50) {			/* Attempt to close them */
+    sdprintf("SOCK: %d BOGUS: %d SOCKS_TOTAL: %d", sock, bogus, socks_total);
+
     for (int i = 10; i < sock; i++)	/* dont close lower sockets, they're probably legit */
       if (!findanysnum(i))
         if ((close(i)) == -1)			/* try to close the BOGUS fd (likely a KQUEUE) */
