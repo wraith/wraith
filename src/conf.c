@@ -43,6 +43,7 @@ tellconf(conf_t * inconf)
   sdprintf("autocron: %d\n", inconf->autocron);
   sdprintf("autouname: %d\n", inconf->autouname);
   sdprintf("watcher: %d\n", inconf->watcher);
+  sdprintf("bots:\n");
   for (bot = inconf->bots; bot && bot->nick; bot = bot->next) {
     i++;
     sdprintf("%d: %s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n", i,
@@ -50,6 +51,12 @@ tellconf(conf_t * inconf)
              bot->ip ? bot->ip : "",
              bot->host ? bot->host : "", bot->ip6 ? bot->ip6 : "", bot->host6 ? bot->host6 : "", bot->pid);
   }
+  sdprintf("bot:\n");
+  if (inconf->bot && ((bot = inconf->bot)))
+    sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n",
+             bot->nick,
+             bot->ip ? bot->ip : "",
+             bot->host ? bot->host : "", bot->ip6 ? bot->ip6 : "", bot->host6 ? bot->host6 : "", bot->pid);
 }
 
 #ifdef LEAF
@@ -333,7 +340,7 @@ checkpid(char *nick, conf_bot * bot)
 #ifdef HUB
 static
 #endif                          /* HUB */
-  void
+void
 conf_addbot(char *nick, char *ip, char *host, char *ip6)
 {
   conf_bot *bot = NULL;
