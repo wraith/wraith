@@ -180,7 +180,7 @@ void Tempfile::MakeTemp()
   if ((f = fdopen(fd, "w+b")) == NULL)
     goto error;
   
-  chmod(file, S_IRUSR | S_IWUSR);
+  fchmod(fd, S_IRUSR | S_IWUSR);
 
   return;
 
