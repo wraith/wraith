@@ -35,6 +35,7 @@ This is a summary of ChangeLog basically.
 * Fixed some *possible* problems with msgop/pass/invite/ident checking.
 * cmd_quit failed to log.
 * Now making a small attempt to auto make the tmpdir.
+* Increased password timeout to 40 seconds and auth timeout to 80 seconds.
 
 1.2
 * No longer displaying SALTS on ./bin -v

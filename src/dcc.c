@@ -45,8 +45,8 @@ time_t timesync = 0;
 int dcc_total = 0;              /* size of dcc table                             */
 int dccn = 0;			/* actual number of dcc entries */
 
-static time_t password_timeout = 20;       /* Time to wait for a password from a user */
-static time_t auth_timeout = 40;
+static time_t password_timeout = 40;       /* Time to wait for a password from a user */
+static time_t auth_timeout = 80;
 static time_t bot_timeout = 15;    /* Bot timeout value                       */
 static time_t identtimeout = 15;   /* Timeout value for ident lookups         */
 static time_t dupwait_timeout = 5; /* Timeout for rejecting duplicate entries */
