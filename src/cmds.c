@@ -881,12 +881,9 @@ static void cmd_who(int idx, char *par)
 
 static void cmd_whois(int idx, char *par)
 {
-  if (!par[0]) {
-    dprintf(idx, "Usage: whois <handle>\n");
-    return;
-  }
   putlog(LOG_CMDS, "*", "#%s# whois %s", dcc[idx].nick, par);
-  tell_user_ident(idx, par);
+
+  tell_user_ident(idx, par[0] ? par : u->handle);
 }
 
 static void match(int idx, char *par, int isbot)

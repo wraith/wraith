@@ -1691,8 +1691,9 @@ See also: whom
  
 See also: whom
 ::whois:
-###  $bwhois$b <nickname>
-   Shows you stored information about a user record. Five headings are
+###  $bwhois$b [nickname]
+   Shows you stored information about a user record. 
+   If no nickname is specified, your own record is shown. Five headings are
    displayed:
       $bHANDLE$b - the handle (nickname) of the user
       $bPASS$b   - "yes" if she has a password set; "no" otherwise 
