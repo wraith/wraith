@@ -227,7 +227,7 @@ static void show_help()
 #else /* !LEAF */
 # define PARSE_FLAGS "2Cd:De:Eg:G:hnstv"
 #endif /* HUB */
-#define FLAGS_CHECKPASS "dDeEgGhkntv"
+#define FLAGS_CHECKPASS "CdDeEgGhkntv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i;
