@@ -36,7 +36,7 @@ extern int	shtime, share_greet, keep_all_logs;
 extern int	allow_new_telnets, use_telnet_banner;
 extern int	default_flags, conmask, switch_logfiles_at, connect_timeout;
 extern int	firewallport, notify_users_at, flood_thr, ignore_time;
-extern int	reserved_port_min, reserved_port_max;
+extern int	reserved_port_min, reserved_port_max, localhub;
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
                 firewall[], notify_new[], hostname[], hostname6[], myip[], myip6[],
 		tempdir[], owner[], network[], botnetnick[],
@@ -472,6 +472,7 @@ static tcl_strings def_tcl_strings[] =
 /* Ints */
 static tcl_ints def_tcl_ints[] =
 {
+  {"localhub",			&localhub,		2},
   {"ignore-time",		&ignore_time,		0},
   {"handlen",			&handlen,		2},
   {"dcc-flood-thr",		&dcc_flood_thr,		0},
