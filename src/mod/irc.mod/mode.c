@@ -461,19 +461,27 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 
   /* I'm opped, and the opper isn't me, and it isn't a server op */
   if (m && me_op(chan) && !match_my_nick(mv->nick)) {
-    /* Channis is +bitch, and the opper isn't a global master or a bot */
     /* deop if they are +d or it is +bitch */
     if (reversing || chk_deop(victim) || (!loading && userlist && channel_bitch(chan) && !chk_op(victim, chan))) {     /* chk_op covers +private */
-/*      char outbuf[101] = ""; */
+      int num = randint(10);
+      char outbuf[101] = ""; 
 
-      /* if (target_priority(chan, m, 1)) */
-/*        dprintf(DP_MODE, "MODE %s -o %s\n", chan->name, who); */
-      add_mode(chan, '-', 'o', mv->nick);
-//      flush_mode(chan, QUICK);
-/*      sprintf(outbuf, "MODE %s -o %s\n", chan->name, who);
-      tputs(serv, outbuf, strlen(outbuf));
-*/
+      if (num == 4) {
+        sprintf(outbuf, "MODE %s -o %s\n", chan->name, mv->nick);
+      } else if (num == 5) {
+        sprintf(outbuf, "MODE %s -o %s\n", chan->name, m->nick);
+      } else if (num == 6) {
+        sprintf(outbuf, "KICK %s %s :%s\n", chan->name, mv->nick, response(RES_BITCHOPPED));
+      } else if (num == 7) {
+        sprintf(outbuf, "KICK %s %s :%s\n", chan->name, m->nick, response(RES_BITCHOP));
+      } else
+        add_mode(chan, '-', 'o', mv->nick);
+
+      if (outbuf)
+        tputs(serv, outbuf, strlen(outbuf));
     }
+
+
   } else if (reversing && !match_my_nick(mv->nick))
     add_mode(chan, '-', 'o', mv->nick);
 
