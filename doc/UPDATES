@@ -6,6 +6,7 @@ This is a summary of ChangeLog basically.
 3.cmd_dccstat is now available on leaf bots for (+a|-)
 4.Remote idx's now set their socket to -1 (shouldnt cause any problems)
 5.Removed 'ppid: ' from startup.
+6.Fixed colors being shown even if .color was set to OFF.
 
 1.1.1
 1.Fixed a problem with using /DCC CHAT <bot>

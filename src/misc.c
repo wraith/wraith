@@ -1285,6 +1285,9 @@ char *color(int idx, int type, int color)
   /* if user is connected over TELNET or !backgrd, show ANSI
    * if they are relaying, they are most likely on an IRC client and should have mIRC codes
    */
+  if (!(dcc[idx].status & STAT_COLOR))
+    return "";
+
   if ((idx && (idx != -1 && (dcc[idx].type != &DCC_RELAYING) && (dcc[idx].status & STAT_TELNET))) 
      || (idx == -1 || !backgrd)) ansi++;
 
