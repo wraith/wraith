@@ -424,9 +424,9 @@ static void cmd_cmdpass(int idx, char *par)
   cmd = newsplit(&par);
   putlog(LOG_CMDS, "*", "#%s# cmdpass %s ...", dcc[idx].nick, cmd[0] ? cmd : "");
   pass = newsplit(&par);
-  if (!cmd[0] || par[0]) {
-    dprintf(idx, "Usage: %scmdpass <command> [password]\n", settings.dcc_prefix);
-    dprintf(idx, "  if no password is specified, the commands password is reset\n");
+  if (!cmd || !pass) {
+    dprintf(idx, "Usage: %scmdpass <command> <password> [clear]\n", settings.dcc_prefix);
+    dprintf(idx, "  if the password is specified and 'clear' after it, the command's password is cleared\n");
     return;
   }
   for (i = 0; cmd[i]; i++)
@@ -452,6 +452,16 @@ static void cmd_cmdpass(int idx, char *par)
   }
 
   if (pass[0]) {
+    if (!egg_strcasemp(par, "clear")) {
+      if (!isowner(dcc[idx].nick)) {
+        putlog(LOG_MISC, "*", "%s attempted to remove command password for %s - not perm owner", dcc[idx].nick, cmd);
+        dprintf(idx, "Perm owners only.\n");
+        return;
+      }
+      set_cmd_pass(cmd, 1);
+      dprintf(idx, "Removed command password for %s\n", cmd);
+      return;
+    }
     char epass[36] = "", tmp[256] = "";
 
     if (!isowner(dcc[idx].nick) && has_cmd_pass(cmd)) {
@@ -466,14 +476,6 @@ static void cmd_cmdpass(int idx, char *par)
     else
       dprintf(idx, "Set command password for %s to '%s'\n", cmd, pass);
     set_cmd_pass(tmp, 1);
-  } else {
-    if (!isowner(dcc[idx].nick)) {
-      putlog(LOG_MISC, "*", "%s attempted to remove command password for %s - not perm owner", dcc[idx].nick, cmd);
-      dprintf(idx, "Perm owners only.\n");
-      return;
-    }
-    set_cmd_pass(cmd, 1);
-    dprintf(idx, "Removed command password for %s\n", cmd);
   }
 #ifdef HUB
   write_userfile(idx);

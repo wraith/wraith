@@ -62,6 +62,7 @@ This is a summary of ChangeLog basically.
 * All dns resolving is now asynchronous, all dns bugs now fixed.
 * Check server lag every 30 seconds, not every 5 minutes.
 * +v users are no longer enforced if opped.
+* cmdpasses now require that the old pass be used to clear old pass.
 
 1.1.9
 

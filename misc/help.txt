@@ -656,7 +656,7 @@ See also: chhandle, chpass
 ###  $bclearqueue$b <queue>
    removes all msgs from the specified queue (mode/server/help/all)
 :hub:cmdpass:
-###  $bcmdpass$b <command> <pass>
+###  $bcmdpass$b <command> <pass> [clear]
    Places the specified pass on the cmd so that the cmd will need to be 
    followed by the specified pass whenever it is called. For example:
     !cmdpass whoami BLAH
@@ -669,8 +669,7 @@ See also: chhandle, chpass
      You are bryan@hub.
      [19:33] #bryan# whoami
  
-   To remove a cmdpass for a cmd, simply don't include the pass argument for
-   a cmd.
+   To remove a cmdpass for a cmd, specify 'clear' after the pass
  
    ** Only permanent owners specified in the binary COMPILE config file **
    ** can use this cmd.                                                 **
