@@ -41,11 +41,11 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
     mynew[MAXPASSLEN] = 0;
 
   if (!goodpass(mynew, 0, nick)) {
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! \002!\002PASS...", nick, host, u->handle);
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
     return BIND_RET_BREAK;
   }
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS...", nick, host, u->handle);
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS", nick, host, u->handle);
 
   set_user(&USERENTRY_PASS, u, mynew);
   dprintf(DP_HELP, "NOTICE %s :%s '%s'.\n", nick,
