@@ -43,7 +43,7 @@ static void bg_do_detach(pid_t p)
 #ifdef HUB
   printf("Launched into the background  (pid: %d)\n\n", p);
 #else /* LEAF */
-  printf("%s launched into the background  (pid: %d ppid: %d)\n\n", conf.bot->nick, p, getpid());
+  printf("%s launched into the background  (pid: %d)\n\n", conf.bot->nick, p);
 #endif /* HUB */
 
 #if HAVE_SETPGID
