@@ -2411,7 +2411,6 @@ void makeplaincookie(char *chname, char *nick, char *buf)
 int goodpass(char *pass, int idx, char *nick)
 {
   int i, nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
-
   char *tell;
   tell = nmalloc(300);
 
@@ -2430,7 +2429,8 @@ int goodpass(char *pass, int idx, char *nick)
        nalpha++; //non-alphabet/number
   }
 
-  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) {
+/*  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) { */
+  if (ocase < 1 || lcase < 2 || ucase < 2 || strlen(pass) < 8) {
 
     sprintf(tell, "Insecure pass, must be: ");
 
@@ -2448,12 +2448,12 @@ int goodpass(char *pass, int idx, char *nick)
       strcat(tell, "\002>= 2 ucase\002, ");
     else
       strcat(tell, ">= 2 uppercase, ");
-
+/* This is annoying as hell
     if (nalpha < 1)
       strcat(tell, "\002>= 1 non-alpha/num\002, ");
     else
       strcat(tell, ">= 1 non-alpha/num, ");
-
+*/
     if (strlen(pass) < 8)
       strcat(tell, "\002>= 8 chars.\002");
     else
