@@ -303,7 +303,6 @@ case "$egg_cv_var_system_type" in
   ;;
   *BSD)
     # FreeBSD/OpenBSD/NetBSD
-    AC_DEFINE(BSD, 1, [Define if running on *BSD])dnl
   ;;
   *)
     AC_MSG_CHECKING(if system is Mach based)

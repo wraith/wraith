@@ -7,9 +7,6 @@
    */
 #undef BROKEN_SNPRINTF
 
-/* Define if running on *BSD */
-#undef BSD
-
 /* Define if running under cygwin */
 #undef CYGWIN_HACKS
 
