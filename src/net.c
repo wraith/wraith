@@ -151,7 +151,7 @@ int get_ip(char *hostname, union sockaddr_union *so)
   error = 1;
   for (ai = res; ai != NULL; ai = ai->ai_next) {
     if ((ai->ai_family == AF_INET6) || (ai->ai_family == AF_INET)) {
-      memcpy(so, ai->ai_addr, sizeof(union sockaddr_union));
+      memcpy(so, ai->ai_addr, ai->ai_addrlen);
       error = 0;
       break;
     }
