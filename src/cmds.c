@@ -1848,15 +1848,15 @@ static void cmd_save(struct userrec *u, int idx, char *par)
   sprintf(buf, "Saving user file...");
   i = write_userfile(-1);
   if (i == 0)
-    sprintf(buf, "success.");
+    strcat(buf, "success.");
   else if (i == 1)
-    sprintf(buf, "failed: No userlist.");
+    strcat(buf, "failed: No userlist.");
   else if (i == 2)
-    sprintf(buf, "failed: Cannot open userfile for writing.");
+    strcat(buf, "failed: Cannot open userfile for writing.");
   else if (i == 3)
-    sprintf(buf, "failed: Problem writing users/chans (see debug).");
+    strcat(buf, "failed: Problem writing users/chans (see debug).");
   else		/* This can't happen. */
-    sprintf(buf, "failed: Unforseen error");
+    strcat(buf, "failed: Unforseen error");
   buf[99] = 0;
   dprintf(idx, "%s\n", buf);
 }
