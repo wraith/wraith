@@ -479,8 +479,8 @@ static void request_op(struct chanset_t *chan)
   memberlist *botops[MAX_BOTS];
   char s[100], *l, myserv[SERVLEN];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
-  
 Context;
+  if (!chan) return;
   if (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan))
     return;
   chan->channel.do_opreq = 0;
