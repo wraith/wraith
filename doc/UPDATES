@@ -2,6 +2,8 @@ This is a summary of ChangeLog basically.
 
 1.2.1
 
+* No longer reading in /etc/hosts, still reading .hosts though
+
 1.2
 * No longer displaying SALTS on ./bin -v
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
