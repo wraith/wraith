@@ -4,7 +4,8 @@
 
 dnl  EGG_CHECK_DEPMODE()
 dnl
-AC_DEFUN(EGG_CHECK_DEPMODE, [dnl
+AC_DEFUN([EGG_CHECK_DEPMODE],
+[
 CCDEPMODE=gcc
 num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num = "3"; then
@@ -14,7 +15,7 @@ if test $num = "3"; then
 fi
 AC_SUBST(CCDEPMODE)dnl
 AC_SUBST(GCC3)dnl
-])dnl
+])
 
 AC_DEFUN([DO_DEPS],
 [
@@ -53,6 +54,6 @@ for mf in $files; do
     echo "_$base.c:" >> "$dirpart/.deps/includes"
   done
 done
-])# DO_DEPS
+])
 
 

@@ -1,6 +1,6 @@
 dnl  FIND_WRAPS()
 dnl
-AC_DEFUN(FIND_WRAPS, [dnl
+AC_DEFUN([FIND_WRAPS], [
 
 ld_line="-Wl"
 for func in `grep -hrsI __wrap_ src/compat/* | sed -e '[s/^__wrap_\(.*\)(.*/\1/]'`; do
@@ -11,4 +11,4 @@ for func in `grep -hrsI __wrap_ src/compat/* | sed -e '[s/^__wrap_\(.*\)(.*/\1/]
  AC_SUBST(WRAP)
 done
 
-])dnl
+])

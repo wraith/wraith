@@ -1301,6 +1301,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
   # Remove --cache-file and --srcdir arguments so they do not pile up.
   egg_ac_parameters=
   ac_prev=
@@ -1888,6 +1889,7 @@ ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
 
 if test "${cross_compiling-x}" = "x"
 then
@@ -2888,6 +2890,7 @@ echo "${ECHO_T}$egg_cv_var_ccpipe" >&6
   fi
 
 
+
 CCDEPMODE=gcc
 num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num = "3"; then
@@ -2983,6 +2986,7 @@ echo "${ECHO_T}no" >&6
   SET_MAKE="MAKE=${MAKE-make}"
 fi
 
+
 cat << 'EOF' > conftest.head
 a
 b
@@ -3028,6 +3032,7 @@ fi
 
 rm -f conftest.head
 HEAD_1=$ac_cv_prog_HEAD_1
+
 
 # awk is needed for Tcl library and header checks, and eggdrop version subst
 for ac_prog in gawk mawk nawk awk
@@ -3081,6 +3086,7 @@ configure: error:
 EOF
   exit 1
 fi
+
 
 # basename is needed for Tcl library and header checks
 # Extract the first word of "basename", so it can be a program name with args.
@@ -3275,8 +3281,8 @@ fi
 
 
 # Test the os and set the module linking settings
-EGG_CYGWIN=no
 
+EGG_CYGWIN=no
 echo "$as_me:$LINENO: checking system type" >&5
 echo $ECHO_N "checking system type... $ECHO_C" >&6
 if test "${egg_cv_var_system_type+set}" = set; then
@@ -3556,6 +3562,7 @@ esac
 
 # Check for IPv6 support
 #EGG_IPV6_SUPPORTED
+
 echo "$as_me:$LINENO: checking whether or not you disabled IPv6 support" >&5
 echo $ECHO_N "checking whether or not you disabled IPv6 support... $ECHO_C" >&6
 # Check whether --enable-ipv6 or --disable-ipv6 was given.
@@ -3584,6 +3591,7 @@ _ACEOF
 
  fi
 fi
+
 
 echo "$as_me:$LINENO: checking for socklen_t" >&5
 echo $ECHO_N "checking for socklen_t... $ECHO_C" >&6
@@ -3676,6 +3684,7 @@ _ACEOF
 
 
 # Create static binaries
+
 if test -z "$no_static"
 then
   if test -n "$GXX"
@@ -3812,6 +3821,7 @@ fi
 rm -f confcache
 
 # Checks for system libraries
+
 
 echo "$as_me:$LINENO: checking for socket in -lsocket" >&5
 echo $ECHO_N "checking for socket in -lsocket... $ECHO_C" >&6
@@ -10234,6 +10244,7 @@ done
 #mkdir munmap realpath select setlocale socket strchr strerror strpbrk strrchr strstr strtol tzset])
 
 
+
 for ac_func in vsprintf
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -10345,6 +10356,7 @@ configure: error:
 EOF
   exit 1
 fi
+
 
 
 for ac_func in uname
@@ -10461,6 +10473,7 @@ fi
 
 
 # Make sure we have stdc headers, since we can't compile without them
+
 if test "$ac_cv_header_stdc" = "no"
 then
   cat << 'EOF' >&2
@@ -10530,6 +10543,7 @@ if diff $cache_file confcache >/dev/null 2>&1; then :; else
 fi
 rm -f confcache
 
+
 VERSION=`grep "char" $srcdir/src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 version_num=`echo $VERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", $1, $2, $3)}'`
 
@@ -10538,6 +10552,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 #FIND_WRAPS
+
 case "$srcdir" in
   [\\/]* | ?:[\\/]*)
     MOD_UPDIR=""
