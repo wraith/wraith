@@ -58,6 +58,7 @@ jmp_buf	alarmret;		/* Env buffer for alarm() returns	    */
 /* Types of proxy */
 #define PROXY_SOCKS   1
 #define PROXY_SUN     2
+#define PROXY_HTTP    3
 
 
 /* I need an UNSIGNED long for dcc type stuff
@@ -541,7 +542,11 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
   } else if (proxy == PROXY_SUN) {
     egg_snprintf(s, sizeof s, "%s %d\n", host, port);
     tputs(sock, s, strlen(s));  /* drummer */
+  } else if (proxy == PROXY_HTTP) {
+    egg_snprintf(s, sizeof s, "CONNECT %s:%d\n\n", host, port);
+    tputs(sock, s, strlen(s));
   }
+
   return sock;
 }
 
@@ -567,6 +572,9 @@ int open_telnet_raw(int sock, char *server, port_t sport)
   if (firewall[0]) {
     if (firewall[0] == '!') {
       proxy = PROXY_SUN;
+      strcpy(host, &firewall[1]);
+    } else if (firewall[0] == '@') {
+      proxy = PROXY_HTTP;
       strcpy(host, &firewall[1]);
     } else {
       proxy = PROXY_SOCKS;
