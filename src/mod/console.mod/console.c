@@ -122,7 +122,7 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
     ci = e->u.extra = buf;
   }
 
-  if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED))) {
+  if (!noshare && !(u->flags & USER_BOT)) {
     char string[501] = "";
 
     egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d", ci->channel, masktype(ci->conflags), 

@@ -934,7 +934,7 @@ int readuserfile(char *file, struct userrec **ret)
             return 0;
 	  } else {
 	    u = get_user_by_handle(bu, code);
-	    if (u && !(u->flags & USER_UNSHARED)) {
+	    if (u) {
 	      putlog(LOG_ERROR, "@", "* %s '%s'!", USERF_DUPE, code);
 	      lasthand[0] = 0;
 	      u = NULL;

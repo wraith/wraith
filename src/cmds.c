@@ -2446,8 +2446,8 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
       mns.chan &= ~(USER_HUBA | USER_CHUBA);
     }
     if (!glob_owner(user) && !isowner(u->handle)) {
-      pls.global &= ~(USER_CHUBA | USER_OWNER | USER_MASTER | USER_UNSHARED);
-      mns.global &= ~(USER_CHUBA | USER_OWNER | USER_MASTER | USER_UNSHARED);
+      pls.global &= ~(USER_CHUBA | USER_OWNER | USER_MASTER);
+      mns.global &= ~(USER_CHUBA | USER_OWNER | USER_MASTER);
 
       if (chan) {
 	pls.chan &= ~USER_OWNER;

@@ -33,7 +33,7 @@ struct chanuserrec *add_chanrec(struct userrec *u, char *chname)
     ch->laston = 0;
     strncpy(ch->channel, chname, 81);
     ch->channel[80] = 0;
-    if (!noshare && !(u->flags & USER_UNSHARED))
+    if (!noshare)
       shareout(findchan_by_dname(chname), "+cr %s %s\n", u->handle, chname);
   }
   return ch;
@@ -73,8 +73,7 @@ void get_handle_chaninfo(char *handle, char *chname, char *s)
   return;
 }
 
-void set_handle_chaninfo(struct userrec *bu, char *handle,
-				char *chname, char *info)
+void set_handle_chaninfo(struct userrec *bu, char *handle, char *chname, char *info)
 {
   struct userrec *u = NULL;
   struct chanuserrec *ch = NULL;
@@ -99,7 +98,7 @@ void set_handle_chaninfo(struct userrec *bu, char *handle,
   } else
     ch->info = NULL;
   cst = findchan_by_dname(chname);
-  if ((!noshare) && (bu == userlist) && !(u->flags & (USER_UNSHARED | USER_BOT))) {
+  if ((!noshare) && (bu == userlist)) {
     shareout(cst, "chchinfo %s %s %s\n", handle, chname, info ? info : "");
   }
 }
@@ -117,7 +116,7 @@ void del_chanrec(struct userrec *u, char *chname)
       if (ch->info != NULL)
 	free(ch->info);
       free(ch);
-      if (!noshare && !(u->flags & USER_UNSHARED))
+      if (!noshare)
 	shareout(findchan_by_dname(chname), "-cr %s %s\n", u->handle, chname);
       return;
     }

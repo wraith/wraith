@@ -119,7 +119,7 @@ int def_set(struct userrec *u, struct user_entry *e, void *buf)
     free(e->u.string);
     e->u.string = NULL;
   }
-  if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED))) {
+  if (!noshare) {
     shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, e->u.string ? e->u.string : "");
   }
   return 1;
@@ -544,7 +544,7 @@ int pass_set(struct userrec *u, struct user_entry *e, void *buf)
       encrypt_pass(pass, new);
     e->u.extra = strdup(new);
   }
-  if (!noshare && !(u->flags & (USER_BOT | USER_UNSHARED)))
+  if (!noshare)
     shareout(NULL, "c PASS %s %s\n", u->handle, pass ? pass : "");
   return 1;
 }
@@ -806,7 +806,7 @@ static int botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
     bi = e->u.extra = buf;
   }
   Assert(u);
-  if (bi && !noshare && !(u->flags & USER_UNSHARED)) {
+  if (bi && !noshare) {
     shareout(NULL, "c BOTADDR %s %s %d %d %d %s\n",u->handle, 
             (bi->address && bi->address[0]) ? bi->address : "127.0.0.1", 
             bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);

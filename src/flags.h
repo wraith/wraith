@@ -89,8 +89,7 @@ struct flag_record {
 #define USER_WASOPTEST     BIT22 /* w  wasop test needed for stopnethack */
 #define USER_NOFLOOD       BIT23 /* x  user is exempt from flood kicks   */
 #define USER_DOVOICE       BIT24 /* y  bot gives voices                  */
-#define USER_UNSHARED      BIT25 /* z  not shared with sharebots	      */
-#define USER_DEFAULT       BIT26 /* use default-flags                    */
+#define USER_DEFAULT       BIT25 /* use default-flags                    */
 
 #define bot_hublevel(x) ( ( (x) && (x->flags & USER_BOT) && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
                           ( ((struct bot_addr *) get_user(&USERENTRY_BOTADDR, x))->hublevel ? \

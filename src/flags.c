@@ -374,7 +374,7 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
   if (oldflags & FR_GLOBAL) {
     u->flags = fr->global;
 
-    if (!noshare && !(u->flags & USER_UNSHARED)) {
+    if (!noshare) {
       fr->match = FR_GLOBAL;
       build_flags(buffer, fr, NULL);
       shareout(NULL, "a %s %s\n", u->handle, buffer);
@@ -397,7 +397,7 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
     }
     if (cr && ch) {
       cr->flags = fr->chan;
-      if (!noshare && !(u->flags & USER_UNSHARED)) {
+      if (!noshare) {
 	fr->match = FR_CHAN;
 	build_flags(buffer, fr, NULL);
 	shareout(ch, "a %s %s %s\n", u->handle, buffer, chname);
