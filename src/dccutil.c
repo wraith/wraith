@@ -200,10 +200,12 @@ dprintf(int idx, const char *format, ...)
       case DP_DUMP:
         len -= remove_crlf_r(buf);
 
-        if ((idx == DP_DUMP || floodless) && server_online && serv != -1) {
-          if (debug_output)
-            putlog(LOG_SRVOUT, "@", "[m->] %s", buf);
-          write_to_server(buf, len);
+        if ((idx == DP_DUMP || floodless)) {
+         if (serv != -1) {
+           if (debug_output)
+             putlog(LOG_SRVOUT, "@", "[m->] %s", buf);
+           write_to_server(buf, len);
+         }
         } else
           queue_server(idx, buf, len);
         break;
