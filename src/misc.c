@@ -2102,8 +2102,10 @@ void baduname(char *conf, char *my_uname) {
   sdprintf("CHECKING %s", tmpfile);
   if (is_file(tmpfile)) {
     struct stat ss;
+    time_t diff;
+
     stat(tmpfile, &ss);
-    time_t diff = now - ss.st_mtime;
+    diff = now - ss.st_mtime;
     if (diff >= 86400) send++;		/* only send once a day */
   } else {
     FILE *fp;

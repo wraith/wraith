@@ -28,7 +28,9 @@
 #define MODULE_NAME "compress"
 #define MAKING_COMPRESS
 
+#define free_func zlib_free_func
 #include <zlib.h>
+#undef free_func
 #include <string.h>
 #include <errno.h>
 
