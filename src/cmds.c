@@ -1782,7 +1782,7 @@ static void cmd_conf(int idx, char *par)
       struct userrec *u = NULL;
 
       dprintf(idx, "Deleted bot from conf: %s\n", par);
-      if ((u = get_user_by_handle(par))) {
+      if ((u = get_user_by_handle(userlist, par))) {
 #ifdef LEAF
         check_this_user(par, 1, NULL);
 #endif /* LEAF */
