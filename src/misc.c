@@ -618,7 +618,7 @@ void
 restart(int idx)
 {
   char buf[1024] = "";
-  const char *reason = idx != -1 ?  "Updating..." : "Restarting...";
+  const char *reason = updating ? "Updating..." : "Restarting...";
  
 #ifdef HUB
   write_userfile(idx);
@@ -741,6 +741,7 @@ int updatebin(int idx, char *par, int secs)
     
     /* this odd statement makes it so specifying 1 sec will restart other bots running
      * and then just restart with no delay */
+    updating = 1;
     if (secs > 1) {
       egg_timeval_t howlong;
       howlong.sec = secs;
