@@ -318,9 +318,10 @@ void cache_my_ip()
     if (get_ip(conf.bot->host, &cached_myip4_so))
       error = 2;
   } else {
-    gethostname(s, 120);
-    if (get_ip(conf.bot->host, &cached_myip4_so)) {
+    gethostname(s, sizeof(s));
+    if (get_ip(s, &cached_myip4_so)) {
       /* error = 3; */
+      sdprintf("IPV4 addr_any is set.");
       cached_myip4_so.sin.sin_family = AF_INET;
       cached_myip4_so.sin.sin_addr.s_addr = INADDR_ANY;
     }

@@ -565,8 +565,8 @@ void chanprog()
     userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_BOT | USER_OP );
     conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
     bi = calloc(1, sizeof(struct bot_addr));
-
-    bi->address = strdup(conf.bot->ip);
+    if (conf.bot->ip)
+      bi->address = strdup(conf.bot->ip);
     /* bi->telnet_port = atoi(buf) ? atoi(buf) : 3333; */
     bi->telnet_port = bi->relay_port = 3333;
 #ifdef HUB
