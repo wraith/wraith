@@ -16,6 +16,7 @@
 #include "misc.h"
 #include "main.h"
 
+#include <ctype.h>
 #include <stdarg.h>
 
 extern struct userrec   *userlist;
@@ -31,186 +32,88 @@ int	conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
 int	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
 int 	use_console_r = 1;      /* Allow users to set their console +r  */
 
+typedef struct {
+	int flag;
+	char c;
+	char *type;
+} logmode_mapping_t;
+
+static logmode_mapping_t logmode_mappings[] = {
+	{LOG_MSGS, 'm', "msgs"},
+	{LOG_PUBLIC, 'p', "public"},
+	{LOG_JOIN, 'j', "joins"},
+	{LOG_MODES, 'k', "kicks/modes"},
+	{LOG_CMDS, 'c', "cmds"},
+	{LOG_MISC, 'o', "misc"},
+	{LOG_BOTS, 'b', "bots"},
+	{LOG_RAW, 'r', "raw"},
+	{LOG_WALL, 'w', "wallops"},
+	{LOG_FILES, 'x', "files"},
+	{LOG_SERV, 's', "server"},
+	{LOG_DEBUG, 'd', "debug"},
+	{LOG_SRVOUT, 'v', "server output"},
+	{LOG_BOTNET, 't', "botnet traffic"},
+	{LOG_BOTSHARE, 'h', "share traffic"},
+	{LOG_ERRORS, 'e', "errors"},
+	{LOG_GETIN, 'g', "getin"},
+	{LOG_WARN, 'u', "warnings"},
+	{0}
+};
+#define LOG_LEVELS 18 		/* change this if you change the levels */
+
+#define NEEDS_DEBUG_OUTPUT (LOG_RAW|LOG_SRVOUT|LOG_BOTNET|LOG_BOTSHARE)
+
+
 int logmodes(char *s)
 {
-  int i;
-  int res = 0;
-
-  for (i = 0; i < strlen(s); i++)
-    switch (s[i]) {
-    case 'm':
-    case 'M':
-      res |= LOG_MSGS;
-      break;
-    case 'p':
-    case 'P':
-      res |= LOG_PUBLIC;
-      break;
-    case 'j':
-    case 'J':
-      res |= LOG_JOIN;
-      break;
-    case 'k':
-    case 'K':
-      res |= LOG_MODES;
-      break;
-    case 'c':
-    case 'C':
-      res |= LOG_CMDS;
-      break;
-    case 'o':
-    case 'O':
-      res |= LOG_MISC;
-      break;
-    case 'b':
-    case 'B':
-      res |= LOG_BOTS;
-      break;
-    case 'r':
-    case 'R':
-      res |= use_console_r ? LOG_RAW : 0;
-      break;
-    case 'w':
-    case 'W':
-      res |= LOG_WALL;
-      break;
-    case 'x':
-    case 'X':
-      res |= LOG_FILES;
-      break;
-    case 's':
-    case 'S':
-      res |= LOG_SERV;
-      break;
-    case 'd':
-    case 'D':
-      res |= LOG_DEBUG;
-      break;
-    case 'v':
-    case 'V':
-      res |= debug_output ? LOG_SRVOUT : 0;
-      break;
-    case 't':
-    case 'T':
-      res |= debug_output ? LOG_BOTNET : 0;
-      break;
-    case 'h':
-    case 'H':
-      res |= debug_output ? LOG_BOTSHARE : 0;
-      break;
-    case 'e':
-    case 'E': 
-      res |= LOG_ERRORS;
-      break;
-    case 'g':
-    case 'G':
-      res |= LOG_GETIN;
-      break;
-    case 'u':
-    case 'U':
-      res |= LOG_WARN;
-      break;
-    case '*':
-      res |= LOG_ALL;
-      break;
-    }
-  return res;
+	logmode_mapping_t *mapping = NULL;
+	int modes = 0;
+	while (*s) {
+		if (*s == '*') return(LOG_ALL);
+		for (mapping = logmode_mappings; mapping->type; mapping++) {
+			if (mapping->c == tolower(*s)) break;
+		}
+		if (mapping->type) modes |= mapping->flag;
+		s++;
+	}
+	return(modes);
 }
 
 char *masktype(int x)
 {
-  static char s[24] = "";		/* Change this if you change the levels */
-  char *p = s;
+	static char s[LOG_LEVELS + 1];	
+	char *p = s;
+	logmode_mapping_t *mapping = NULL;
 
-  if (x & LOG_MSGS)
-    *p++ = 'm';
-  if (x & LOG_PUBLIC)
-    *p++ = 'p';
-  if (x & LOG_JOIN)
-    *p++ = 'j';
-  if (x & LOG_MODES)
-    *p++ = 'k';
-  if (x & LOG_CMDS)
-    *p++ = 'c';
-  if (x & LOG_MISC)
-    *p++ = 'o';
-  if (x & LOG_BOTS)
-    *p++ = 'b';
-  if ((x & LOG_RAW) && use_console_r)
-    *p++ = 'r';
-  if (x & LOG_FILES)
-    *p++ = 'x';
-  if (x & LOG_SERV)
-    *p++ = 's';
-  if (x & LOG_DEBUG)
-    *p++ = 'd';
-  if (x & LOG_WALL)
-    *p++ = 'w';
-  if ((x & LOG_SRVOUT) && debug_output)
-    *p++ = 'v';
-  if ((x & LOG_BOTNET) && debug_output)
-    *p++ = 't';
-  if ((x & LOG_BOTSHARE) && debug_output)
-    *p++ = 'h';
-  if (x & LOG_ERRORS)
-    *p++ = 'e';
-  if (x & LOG_GETIN)
-    *p++ = 'g';
-  if (x & LOG_WARN)
-    *p++ = 'u';
-  if (p == s)
-    *p++ = '-';
-  *p = 0;
-  return s;
+	for (mapping = logmode_mappings; mapping->type; mapping++) {
+		if (x & mapping->flag) {
+			if ((mapping->flag & NEEDS_DEBUG_OUTPUT) && !debug_output) continue;
+			*p++ = mapping->c;
+		}
+	}
+	if (p == s) *p++ = '-';
+	*p = 0;
+	return(s);
 }
 
 char *maskname(int x)
 {
-  static char s[207] = "";		/* Change this if you change the levels */
-  int i = 0;
+	static char s[1024] = "";
+	logmode_mapping_t *mapping = NULL;
+	int len;
 
-  s[0] = 0;
-  if (x & LOG_MSGS)
-    i += my_strcpy(s, "msgs, ");
-  if (x & LOG_PUBLIC)
-    i += my_strcpy(s + i, "public, ");
-  if (x & LOG_JOIN)
-    i += my_strcpy(s + i, "joins, ");
-  if (x & LOG_MODES)
-    i += my_strcpy(s + i, "kicks/modes, ");
-  if (x & LOG_CMDS)
-    i += my_strcpy(s + i, "cmds, ");
-  if (x & LOG_MISC)
-    i += my_strcpy(s + i, "misc, ");
-  if (x & LOG_BOTS)
-    i += my_strcpy(s + i, "bots, ");
-  if ((x & LOG_RAW) && use_console_r)
-    i += my_strcpy(s + i, "raw, ");
-  if (x & LOG_FILES)
-    i += my_strcpy(s + i, "files, ");
-  if (x & LOG_SERV)
-    i += my_strcpy(s + i, "server, ");
-  if (x & LOG_DEBUG)
-    i += my_strcpy(s + i, "debug, ");
-  if (x & LOG_WALL)
-    i += my_strcpy(s + i, "wallops, ");
-  if ((x & LOG_SRVOUT) && debug_output)
-    i += my_strcpy(s + i, "server output, ");
-  if ((x & LOG_BOTNET) && debug_output)
-    i += my_strcpy(s + i, "botnet traffic, ");
-  if ((x & LOG_BOTSHARE) && debug_output)
-    i += my_strcpy(s + i, "share traffic, ");
-  if (x & LOG_ERRORS)
-    i += my_strcpy(s + i, "errors, ");
-  if (x & LOG_GETIN)
-    i += my_strcpy(s + i, "getin, ");
-  if (x & LOG_WARN)
-    i += my_strcpy(s + i, "warnings, ");
-  if (i)
-    s[i - 2] = 0;
-  else
-    strcpy(s, "none");
-  return s;
+	*s = 0;
+	for (mapping = logmode_mappings; mapping->type; mapping++) {
+		if (x & mapping->flag) {
+			if ((mapping->flag & NEEDS_DEBUG_OUTPUT) && !debug_output) continue;
+			strcat(s, mapping->type);
+			strcat(s, ", ");
+		}
+	}
+	len = strlen(s);
+	if (len) s[len-2] = 0;
+	else strcpy(s, "none");
+	return(s);
 }
 
 
