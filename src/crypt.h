@@ -14,7 +14,6 @@
 #define md5cmp(hash, string)            strcmp(hash, MD5(string))
 
 char *MD5(const char *);
-char *MD5WORD(const char *);
 char *MD5FILE(const char *);
 char *SHA1(const char *);
 char *encrypt_string(const char *, char *);
