@@ -29,17 +29,7 @@
 #  include "src/mod/irc.mod/irc.h"
 #endif /* LEAF */
 
-/* Minimum version I will share with. */
-static const int min_share = 1000000;
-
-/* Earliest version that supports exempts and invites. */
-static const int min_exemptinvite = 1000000;
-
-/* Minimum version that supports userfile features. */
-static const int min_uffeature = 1000000;
-
 static struct flag_record fr = { 0, 0, 0, 0 };
-
 
 struct delay_mode {
   struct delay_mode *next;
@@ -52,21 +42,6 @@ struct delay_mode {
 
 static struct delay_mode *start_delay = NULL;
 
-
-/* Store info for sharebots */
-struct share_msgq {
-  struct chanset_t *chan;
-  char *msg;
-  struct share_msgq *next;
-};
-
-typedef struct tandbuf_t {
-  char bot[HANDLEN + 1];
-  time_t timer;
-  struct share_msgq *q;
-  struct tandbuf_t *next;
-} tandbuf;
-
 /* Prototypes */
 #ifdef HUB
 static void start_sending_users(int);
@@ -75,8 +50,6 @@ static void shareout_but(struct chanset_t *, ...);
 static void cancel_user_xfer(int, void *);
 
 #include "share.h"
-
-#include "uf_features.c"
 
 /*
  *   Sup's delay code
@@ -957,7 +930,10 @@ share_ufyes(int idx, char *par)
     dcc[idx].status &= ~STAT_OFFERED;
     dcc[idx].status |= STAT_SHARE;
     dcc[idx].status |= STAT_SENDING;
-    uf_features_parse(idx, par);
+
+    dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
+    dprintf(idx, "s feats overbots invites exempts\n");
+
     lower_bot_linked(idx);
 
     start_sending_users(idx);
@@ -986,7 +962,7 @@ share_userfileq(int idx, char *par)
     if (!ok)
       dprintf(idx, "s un Already sharing.\n");
     else {
-      dprintf(idx, "s uy %s\n", uf_features_dump(idx));
+      dprintf(idx, "s uy overbots invites exempts\n");
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
 #ifdef HUB
@@ -1105,7 +1081,7 @@ share_end(int idx, char *par)
 static void
 share_feats(int idx, char *par)
 {
-  (int) uf_features_check(idx, par);
+   dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT );
 }
 
 
@@ -1290,7 +1266,6 @@ write_tmp_userfile(char *fn, struct userrec *bu, int idx)
     putlog(LOG_MISC, "@", USERF_ERRWRITE2);
   return ok;
 }
-#endif /* HUB */
 
 
 /* Create a copy of the entire userlist (for sending user lists to clone
@@ -1362,6 +1337,7 @@ dup_userlist(int t)
   noshare = 0;
   return retu;
 }
+#endif /* HUB */
 
 /* Erase old user list, switch to new one.
  */
@@ -1378,7 +1354,8 @@ finish_share(int idx)
   if (j == -1)
     return;
 
-  if (!uff_call_receiving(j, dcc[idx].u.xfer->filename)) {
+/* compress.mod 
+  if (!uncompressfile(dcc[idx].u.xfer->filename)) {
     char xx[1024] = "";
 
     putlog(LOG_BOTS, "*", "A uff parsing function failed for the userfile!");
@@ -1394,12 +1371,7 @@ finish_share(int idx)
 
     return;
   }
-
-  if (dcc[j].u.bot->uff_flags & UFF_OVERRIDE)
-    debug1("NOTE: Sharing passively with %s, overriding local bots.", dcc[j].nick);
-  else
-    /* Copy the bots over. The entries will be used in the new user list. */
-    u = dup_userlist(1);
+*/
 
   /*
    * This is where we remove all global and channel bans/exempts/invites and
@@ -1432,14 +1404,11 @@ finish_share(int idx)
    * are set to NULL. If our userfile will be overriden, just set _all_
    * to NULL directly.
    */
-  if (u == NULL)
-    for (i = 0; i < dcc_total; i++)
-      dcc[i].user = NULL;
-  else
-    for (i = 0; i < dcc_total; i++)
-      dcc[i].user = get_user_by_handle(u, dcc[i].nick);
+  for (i = 0; i < dcc_total; i++)
+    dcc[i].user = NULL;
 
-  conf.bot->u = NULL;
+  if (conf.bot->u)
+    conf.bot->u = NULL;
 
   /* Read the transferred userfile. Add entries to u, which already holds
    * the bot entries in non-override mode.
@@ -1478,6 +1447,7 @@ finish_share(int idx)
 
     return;
   }
+
   unlink(dcc[idx].u.xfer->filename);    //I mean really, shit fills up the quota fast.
 
   loading = 0;
@@ -1499,11 +1469,11 @@ finish_share(int idx)
   for (u = userlist; u; u = u->next) {
     struct userrec *u2 = get_user_by_handle(ou, u->handle);
 
-    if ((dcc[j].u.bot->uff_flags & UFF_OVERRIDE) && u2 && (u2->flags & USER_BOT)) {
+    if (u2 && (u2->flags & USER_BOT)) {
       /* We knew this bot before, copy flags and the password back over. */
       set_user(&USERENTRY_BOTFL, u, get_user(&USERENTRY_BOTFL, u2));
       set_user(&USERENTRY_PASS, u, get_user(&USERENTRY_PASS, u2));
-    } else if ((dcc[j].u.bot->uff_flags & UFF_OVERRIDE) && (u->flags & USER_BOT)) {
+    } else if (u->flags & USER_BOT) {
       /* This bot was unknown to us, reset it's flags and password. */
       set_user(&USERENTRY_BOTFL, u, NULL);
       set_user(&USERENTRY_PASS, u, NULL);
@@ -1555,22 +1525,21 @@ start_sending_users(int idx)
   int i = 1;
 
   egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%li", tempdir, dcc[idx].nick, now);
-  if (dcc[idx].u.bot->uff_flags & UFF_OVERRIDE) {
-    debug1("NOTE: Sharing aggressively with %s, overriding its local bots.", dcc[idx].nick);
-    u = dup_userlist(2);        /* All entries          */
-  } else
-    u = dup_userlist(0);        /* Only non-bots        */
+
+  u = dup_userlist(2);        /* All entries          */
 
   write_tmp_userfile(share_file, u, idx);
   clear_userlist(u);
 
-  if (!uff_call_sending(idx, share_file)) {     /* compress! */
+/* compress.mod
+  if (!compress_file(share_file, compress_level)) {
     unlink(share_file);
     dprintf(idx, "s e %s\n", "uff parsing failed");
     putlog(LOG_BOTS, "*", "uff parsing failed");
     dcc[idx].status &= ~(STAT_SHARE | STAT_SENDING | STAT_AGGRESSIVE);
     return;
   }
+*/
 
   if ((i = raw_dcc_send(share_file, "*users", "(users)", share_file)) > 0) {
     unlink(share_file);
@@ -1688,6 +1657,4 @@ share_init()
   timer_create_secs(1, "check_delay", (Function) check_delay);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
-  uff_init();
-  uff_addtable(internal_uff_table);
 }
