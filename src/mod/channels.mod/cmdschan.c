@@ -1544,7 +1544,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     else
       dprintf(idx, "revenge-mode: 0\n");
     if (chan->closed_ban)
-      dprintf(idx, "closed-ban: %d", chan->closed_ban);
+      dprintf(idx, "closed-ban: %d\n", chan->closed_ban);
     else
       dprintf(idx, "closed-ban: 0\n");
 /* Chanint template
