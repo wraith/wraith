@@ -835,11 +835,12 @@ static int goterror(char *from, char *msg)
  */
 static int gotnick(char *from, char *msg)
 {
-  char *nick;
+  char *nick, *buf, *buf_ptr;
   struct userrec *u;
 
-  u = get_user_by_host(from);
-  nick = splitnick(&from);
+  buf = buf_ptr = strdup(from);
+  u = get_user_by_host(buf);
+  nick = splitnick(&buf);
   fixcolon(msg);
   check_queues(nick, msg);
   if (match_my_nick(nick)) {
@@ -864,6 +865,7 @@ static int gotnick(char *from, char *msg)
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
     }
   }
+  free(buf_ptr);
   return 0;
 }
 
