@@ -821,14 +821,11 @@ void got_config_share(int idx, char *ln)
 void trigger_cfg_changed()
 {
   int i;
-  struct userrec *u;
   struct xtra_key *xk;
-
-  u = get_user_by_handle(userlist, botnetnick);
 
   for (i = 0; i < cfg_count; i++) {
     if (cfg[i]->flags & CFGF_LOCAL) {
-      xk = get_user(&USERENTRY_CONFIG, u);
+      xk = get_user(&USERENTRY_CONFIG, conf.bot->u);
       while (xk && strcmp(xk->key, cfg[i]->name))
 	xk = xk->next;
       if (xk) {

@@ -1131,8 +1131,7 @@ void autolink_cycle(char *start)
     curval[HANDLEN + 4],
     myval[HANDLEN + 4];
 
-  u = get_user_by_handle(userlist, botnetnick);
-  link_pref_val(u, myval);
+  link_pref_val(conf.bot->u, myval);
   strcpy(bestval, myval);
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type == &DCC_BOT_NEW)
@@ -1141,10 +1140,10 @@ void autolink_cycle(char *start)
       return;
     if (dcc[i].type == &DCC_BOT) {
       if (dcc[i].status & (STAT_OFFEREDU | STAT_GETTINGU | STAT_SENDINGU))
-        continue; //lets let the binary have it's peace.
+        continue; /* lets let the binary have it's peace. */
 
       if (dcc[i].u.bot->numver != egg_numver)
-        continue; //same thing.
+        continue; /* same thing. */
 
       if (dcc[i].status & (STAT_SHARE | STAT_OFFERED | STAT_SENDING | STAT_GETTING)) {
 	link_pref_val(dcc[i].user, curval);
@@ -1173,10 +1172,12 @@ void autolink_cycle(char *start)
       }
     }
   }
+
   if (start)
     u = get_user_by_handle(userlist, start);
   else
     u = NULL;
+
   if (u) {
     link_pref_val(u, curval);
     if (strcmp(bestval, curval) < 0) {
@@ -1189,6 +1190,7 @@ void autolink_cycle(char *start)
     }
   } else
     strcpy(curval, "0");
+
   u = next_hub(u, bestval, curval);
   if ((u) && (!in_chain(u->handle)))
     botlink("", -3, u->handle);
@@ -1196,7 +1198,6 @@ void autolink_cycle(char *start)
 #endif /* HUB */
 
 #ifdef LEAF
-
 typedef struct hublist_entry {
   struct hublist_entry *next;
   struct userrec *u;
@@ -1206,7 +1207,7 @@ int botlinkcount = 0;
 
 void autolink_cycle(char *start)
 {
-  struct userrec *my_u = NULL, *u = NULL;
+  struct userrec *u = NULL;
   struct hublist_entry *hl = NULL, *hl2 = NULL;
   struct bot_addr *my_ba;
   char uplink[HANDLEN + 1], avoidbot[HANDLEN + 1], curhub[HANDLEN + 1];
@@ -1216,8 +1217,8 @@ void autolink_cycle(char *start)
   /* Reset connection attempts if we ain't called due to a failed link */
   if (!start)
     botlinkcount = 0;
-  my_u = get_user_by_handle(userlist, botnetnick);
-  my_ba = get_user(&USERENTRY_BOTADDR, my_u);
+
+  my_ba = get_user(&USERENTRY_BOTADDR, conf.bot->u);
   if (my_ba && (my_ba->uplink[0])) {
     strncpyz(uplink, my_ba->uplink, sizeof(uplink));
   } else {

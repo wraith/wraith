@@ -14,7 +14,7 @@
 
 extern int		 noshare, allow_dk_cmds;
 extern struct dcc_t	*dcc;
-
+extern struct userrec   *userlist;
 
 /* Some flags are mutually exclusive -- this roots them out
  */
@@ -618,5 +618,46 @@ int chk_devoice(struct flag_record fr, struct chanset_t *chan)
     return 1;
   else
     return 0;
+}
+
+int isupdatehub()
+{
+#ifdef HUB
+  if (conf.bot->u && (conf.bot->u->flags & USER_UPDATEHUB))
+    return 1;
+  else
+#endif /* HUB */
+    return 0;
+}
+
+int ischanhub()
+{
+  if (conf.bot->u && (conf.bot->u->flags & USER_CHANHUB))
+    return 1;
+  else
+    return 0;
+}
+int dovoice(struct chanset_t *chan)
+{
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+
+  if (!chan) return 0;
+
+  get_user_flagrec(conf.bot->u, &fr, chan->dname);
+  if (glob_dovoice(fr) || chan_dovoice(fr))
+    return 1;
+  return 0;
+}
+
+int dolimit(struct chanset_t *chan)
+{
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
+
+  if (!chan) return 0;
+
+  get_user_flagrec(conf.bot->u, &fr, chan->dname);
+  if (glob_dolimit(fr) || chan_dolimit(fr))
+    return 1;
+  return 0;
 }
 

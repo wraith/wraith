@@ -21,7 +21,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
-#include <pwd.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -175,7 +174,6 @@ static void got_nu(char *botnick, char *code, char *par)
   tand_t *bot;
   struct bot_addr *bi,
    *obi;
-  struct userrec *u1;
   bot = tandbot;
   if (!strcmp(bot->bot, botnick)) //dont listen to our uplink.. use normal upate system..
     return;
@@ -188,8 +186,7 @@ static void got_nu(char *botnick, char *code, char *par)
    newts = atoi(newsplit(&par));
    if (newts > buildts) {
 #ifdef LEAF
-     u1 = get_user_by_handle(userlist, botnetnick);
-     obi = get_user(&USERENTRY_BOTADDR, u1);
+     obi = get_user(&USERENTRY_BOTADDR, conf.bot->u);
      bi = malloc(sizeof(struct bot_addr));
 
      bi->uplink = strdup(botnick);
@@ -197,7 +194,7 @@ static void got_nu(char *botnick, char *code, char *par)
      bi->telnet_port = obi->telnet_port;
      bi->relay_port = obi->relay_port;
      bi->hublevel = obi->hublevel;
-     set_user(&USERENTRY_BOTADDR, u1, bi);
+     set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
 
    /* Change our uplink to them */
    /* let cont_link restructure us.. */
@@ -238,14 +235,9 @@ static void updatein_mod(int idx, char *msg)
 void finish_update(int idx)
 {
   /* module_entry *me; */
-  struct passwd *pw;
-  uid_t id;
-  char buf[1024];
-  char *buf2;
+  char buf[1024] = "";
+  char *buf2 = NULL;
   int i, j = -1;
-
-  id = geteuid();
-  pw = getpwuid(id);
 
   for (i = 0; i < dcc_total; i++)
     if (!egg_strcasecmp(dcc[i].nick, dcc[idx].host) &&
@@ -272,7 +264,7 @@ void finish_update(int idx)
       goto next;
   }
 */
-  sprintf(buf, "%s%s", pw->pw_dir,  strrchr(dcc[idx].u.xfer->filename, '/'));
+  sprintf(buf, "%s%s", conf.homedir,  strrchr(dcc[idx].u.xfer->filename, '/'));
 
   movefile(dcc[idx].u.xfer->filename, buf); 
   

@@ -44,7 +44,7 @@ extern time_t		 now, buildts;
 extern int		 egg_numver, connect_timeout, conmask, backgrd,
 			 max_dcc, default_flags, debug_output,
 			 ignore_time;
-extern char		 botnetnick[], ver[], origbotname[], notify_new[], bdhash[],
+extern char		 botnetnick[], ver[], origbotname[], bdhash[],
                          dcc_prefix[];
 
 extern sock_list 	*socklist;

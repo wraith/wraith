@@ -14,6 +14,7 @@ typedef struct conf_bot_b {
 #ifdef LEAF
   int localhub;         /* bot is localhub */
 #endif /* LEAF */
+  struct userrec *u;	/* our own user record */
   struct conf_bot_b *next;
 } conf_bot;
 
@@ -36,8 +37,8 @@ typedef struct conf_b {
   conf_bot *bot;        /* single bot (me) */
 } conf_t;
 
-#ifndef MAKING_MODS
 extern conf_t		conf;
+#ifndef MAKING_MODS
 
 int checkpid(char *, conf_bot *);
 void showconf();

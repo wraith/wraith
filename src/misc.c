@@ -693,57 +693,6 @@ void kill_bot(char *s1, char *s2)
   fatal(s2, 0);
 }
 
-int isupdatehub()
-{
-#ifdef HUB
-  struct userrec *buser;
-  buser = get_user_by_handle(userlist, botnetnick);
-  if ((buser) && (buser->flags & USER_UPDATEHUB))
-    return 1;
-  else
-#endif /* HUB */
-    return 0;
-}
-
-int ischanhub()
-{
-  struct userrec *buser;
-  buser = get_user_by_handle(userlist, botnetnick);
-  if ((buser) && (buser->flags & USER_CHANHUB))
-    return 1;
-  else
-    return 0;
-}
-
-int dovoice(struct chanset_t *chan)
-{
-  struct userrec *user = NULL;
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
-
-  if (!chan) return 0;
-
-  user = get_user_by_handle(userlist, botnetnick);
-  get_user_flagrec(user, &fr, chan->dname);
-  if (glob_dovoice(fr) || chan_dovoice(fr))
-    return 1;
-  return 0;
-}
-
-int dolimit(struct chanset_t *chan)
-{
-  struct userrec *user = NULL;
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0 };
-
-  if (!chan) return 0;
-
-  user = get_user_by_handle(userlist, botnetnick);
-  get_user_flagrec(user, &fr, chan->dname);
-  if (glob_dolimit(fr) || chan_dolimit(fr))
-    return 1;
-  return 0;
-}
-
-
 /* Update system code
  */
 int ucnt = 0;
@@ -909,7 +858,7 @@ int bot_aggressive_to(struct userrec *u)
     botpval[20];
 
   link_pref_val(u, botpval);
-  link_pref_val(get_user_by_handle(userlist, botnetnick), mypval);
+  link_pref_val(conf.bot->u, mypval);
 
   if (strcmp(mypval, botpval) < 0)
     return 1;

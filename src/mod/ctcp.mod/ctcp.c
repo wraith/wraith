@@ -446,7 +446,7 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
     idletime = now - cloak_heretime;
   else
     idletime = 0;
-  if (!(pwd = getpwuid(geteuid())))
+  if (!(pwd = getpwuid(conf.uid)))
     return 0;
 #ifndef GECOS_DELIMITER
 #define GECOS_DELIMITER ','

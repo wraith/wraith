@@ -44,7 +44,7 @@ extern Tcl_Interp	*interp;
 extern struct userrec	*userlist, *lastuser;
 extern char		 tempdir[], botnetnick[], botname[], natip[], cmdprefix[],
 			 hostname[], origbotname[], botuser[], admin[],
-			 userfile[], ver[], notify_new[], kickprefix[], bankickprefix[],
+			 userfile[], ver[], kickprefix[], bankickprefix[],
 			 version[], quit_msg[], hostname6[], bdhash[], dcc_prefix[],
 #ifdef S_AUTHHASH
                          authkey[], 
@@ -317,7 +317,7 @@ Function global_table[] =
   (Function) userfile,		 /* char *				*/
   (Function) ver,		 /* char *				*/
   /* 120 - 123 */
-  (Function) notify_new,	 /* char *				*/
+  (Function) 0,
   (Function) dovoice,
   (Function) version,		 /* char *				*/
   (Function) botnetnick,	 /* char *				*/

@@ -447,7 +447,6 @@ void getin_request(char *botnick, char *code, char *par)
 void check_hostmask()
 {
   char s[UHOSTLEN + 2], *tmp = NULL;
-  struct userrec *u = get_user_by_handle(userlist, botnetnick);
   struct list_type *q;
 
   checked_hostmask = 1;
@@ -462,7 +461,7 @@ void check_hostmask()
     tmp++;
     sprintf(s, STR("*!*%s"), tmp);
   }
-  for (q = get_user(&USERENTRY_HOSTS, u); q; q = q->next) {
+  for (q = get_user(&USERENTRY_HOSTS, conf.bot->u); q; q = q->next) {
     if (!strcasecmp(q->extra, s))
       return;
   }
