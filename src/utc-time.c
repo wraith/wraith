@@ -6,9 +6,7 @@
 
 int main() {
   time_t now = time(NULL);
-  now = mktime(gmtime(&now));
-  printf("%lu\n", mktime(localtime(&now)));
-  printf("%lu\n", gmtime(&now));
-  printf("%lu\n", now);
+  printf("%lu\n", mktime(gmtime(&now)));
   return 0;
 }
+
