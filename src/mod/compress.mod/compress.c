@@ -338,13 +338,13 @@ static int uncompress_file(char *filename)
 
 static int uff_comp(int idx, char *filename)
 {
-  debug1("Compressing user file for %s.", dcc[idx].nick);
+  putlog(LOG_BOTS, "*", "Compressing user file for %s.", dcc[idx].nick);
   return compress_file(filename, compress_level);
 }
 
 static int uff_uncomp(int idx, char *filename)
 {
-  debug1("Uncompressing user file from %s.", dcc[idx].nick);
+  putlog(LOG_BOTS, "*", "Uncompressing user file from %s.", dcc[idx].nick);
   return uncompress_file(filename);
 }
 
@@ -378,9 +378,17 @@ static int compress_expmem(void)
 
 static int compress_report(int idx, int details)
 {
-  if (details)
-    dprintf(idx, "    Compressed %u file(s), uncompressed %u file(s).\n",
-	    compressed_files, uncompressed_files);
+  if (details) {
+    int size = compress_expmem();
+
+    dprintf(idx, "    %u file%s compressed\n", compressed_files,
+            (compressed_files != 1) ? "s" : "");
+    dprintf(idx, "    %u file%s uncompressed\n", uncompressed_files,
+            (uncompressed_files != 1) ? "s" : "");
+    dprintf(idx, "    Using %d byte%s of memory\n", size,
+            (size != 1) ? "s" : "");
+  }
+
   return 0;
 }
 
