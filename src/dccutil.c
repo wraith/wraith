@@ -233,18 +233,24 @@ void dcc_chatter(int idx)
   dprintf(idx, "Connected to %s, running %s\n", conf.bot->nick, version);
   show_banner(idx);		/* check STAT_BANNER inside function */
 
-  if (1 || dcc[idx].status & STAT_WHOM)
-    answer_local_whom(idx, -1);
-
   get_user_flagrec(dcc[idx].user, &fr, NULL);
   if ((dcc[idx].status & STAT_BOTS) && glob_master(fr)) {
     if ((tands+1) > 1)
       dprintf(idx, "There are %s-%d- bots%s currently linked.\n", BOLD(idx), tands + 1, BOLD_END(idx));
     else
       dprintf(idx, "There is %s-%d- bot%s currently linked.\n", BOLD(idx), tands + 1, BOLD_END(idx));
+    dprintf(idx, " \n");
   }
-  if (dcc[idx].status & STAT_CHANNELS)
+
+  if (dcc[idx].status & STAT_WHOM) {
+    answer_local_whom(idx, -1);
+    dprintf(idx, " \n");
+  }
+
+  if (dcc[idx].status & STAT_CHANNELS) {
     show_channels(idx, NULL);
+    dprintf(idx, " \n");
+  }
 
   show_motd(idx);
 
