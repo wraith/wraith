@@ -1,5 +1,8 @@
 This is a summary of ChangeLog basically.
 
+1.0.12
+1.When a user first logs in, if they don't have a secpass set, one is set and displayed.
+
 1.0.11
 
 1.Fixed countless various bugs. (see ChangeLog for full list)

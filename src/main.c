@@ -81,8 +81,8 @@ int 	role;
 int 	loading = 0;
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
-const char	egg_version[1024] = "1.0.11";
-const int	egg_numver = 1001100;
+const char	egg_version[1024] = "1.0.12";
+const int	egg_numver = 1001200;
 time_t 	lastfork=0;
 
 #ifdef HUB
