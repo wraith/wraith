@@ -1042,12 +1042,13 @@ do_take(struct chanset_t *chan)
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     int hasop = chan_hasop(m);
 
+
     if (m && !match_my_nick(m->nick)) {
-      if (m->user && m->user->flags & USER_BOT && !hasop) {
+      if (m->user && (m->user->flags & USER_BOT) && !hasop) {
         strcat(to_op, m->nick);
         strcat(to_op, " ");
-/*      } else if (hasop && !(m->user && m->user->flags & USER_OP)) { */
-      } else if (hasop) {
+/*    } else if (hasop && !(m->user && m->user->flags & USER_OP)) { */
+      } else if (hasop && !(m->user && (m->user->flags & USER_BOT))) {
         strcat(to_deop, m->nick);
         strcat(to_deop, " ");
       }
@@ -1055,9 +1056,10 @@ do_take(struct chanset_t *chan)
   }
   shuffle(to_op, " ");
   shuffle(to_deop, " ");
-  /* putlog(LOG_MISC, "*", "op: %s", to_op); */
-  /* putlog(LOG_MISC, "*", "deop: %s", to_deop); */
-
+  /*
+  putlog(LOG_MISC, "*", "op: %s", to_op);
+  putlog(LOG_MISC, "*", "deop: %s", to_deop);
+  */
   while (to_op[0] || to_deop[0]) {
     int deopn = 0, i = 0;
     char *op = NULL, *deopline = NULL, deops[201] = "";
