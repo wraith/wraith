@@ -1003,7 +1003,7 @@ int main(int argc, char **argv)
     }
   }
 
-  // Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config...
+  /* Ok if we are here, then the binary is accessable and in the correct directory, now lets do the local config... */
 
 }
 #endif /* LEAF */
@@ -1039,7 +1039,7 @@ int main(int argc, char **argv)
   if (!fixmod(tempdir))
     werr(ERR_TMPMOD);
 
-  //The config dir is accessable with correct permissions, lets read/write/create config file now..
+  /* The config dir is accessable with correct permissions, lets read/write/create config file now.. */
   {		/* config shit */
     char cfile[DIRMAX] = "", templine[8192] = "";
 #ifdef LEAF
@@ -1097,7 +1097,7 @@ int main(int argc, char **argv)
             Tcl_Eval(interp, temps);
           }
         } else if (c[0] != '#') {  //now to parse nick/hosts
-          //we have the right uname/uid, safe to setup crontab now.
+          /* we have the right uname/uid, safe to setup crontab now. */
           i++;
           nick = newsplit(&temps);
           if (!nick || !nick[0])

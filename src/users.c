@@ -837,7 +837,6 @@ int readuserfile(char *file, struct userrec **ret)
              newsplit(&options);
              options[strlen(options) - 1] = 0;
 /* Above is a hack to remove { } */
-//             putlog(LOG_MISC, "*", "TCL_CHANNEL_ADD: (%s) %s", chan, options);
              if ((func[37]) (0, chan, options) != TCL_OK) {	/* tcl_channel_add() */
                putlog(LOG_MISC, "*", "Tcl error in userfile on line %d", line);
                free(my_ptr);

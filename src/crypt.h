@@ -7,7 +7,6 @@
 #endif
 
 #ifdef HAVE_OPENSSL_SSL_H
-//#  include <openssl/ssl.h>
 #  include <openssl/crypto.h>
 #  include <openssl/aes.h>
 #  include <openssl/sha.h>

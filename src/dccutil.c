@@ -166,18 +166,18 @@ void dprintf (int idx, ...)
           sprintf(buf2, "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
         } else if (c == '@') {
           sprintf(buf2, "%s%c%s", BOLD(idx), c, BOLD_END(idx));
-//        } else if (c == ']' || c == '>' || c == ')' || c == '[' || c == '<' || c == '(') {
+/*        } else if (c == ']' || c == '>' || c == ')' || c == '[' || c == '<' || c == '(') { */
         } else if (c == '>' || c == ')' || c == '<' || c == '(') {
           sprintf(buf2, "%s%c%s", GREEN(idx), c, COLOR_END(idx));
         } else {
           sprintf(buf2, "%c", c);
         }
-//        sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : "");
+/*        sprintf(buf3, "%s%s", buf3 ? buf3 : "", buf2 ? buf2 : ""); */
         sprintf(buf3, "%s%s", (buf3 && buf3[0]) ? buf3 : "", (buf2 && buf2[0]) ? buf2 : "");
       }
       buf3[strlen(buf3)] = 0;
       strcpy(buf, buf3);
-//      strncpyz(buf, buf2, sizeof buf);
+/*      strncpyz(buf, buf2, sizeof buf); */
     }
     buf[sizeof(buf) - 1] = 0;
     len = strlen(buf);

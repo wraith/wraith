@@ -704,15 +704,16 @@ static void eof_dcc_send(int idx)
             
       putlog(LOG_BOTS, "*", "Lost binary transfer from %s; aborting.", dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
-/* Drop that bot */
-//      dprintf(y, "bye\n");
-//      egg_snprintf(s, sizeof s,"Disconnected %s (aborted binary transfer)", dcc[y].nick);
-//      botnet_send_unlinked(y, dcc[y].nick, s);
-//      chatout("*** %s\n", dcc[y].nick, s);
-//      if (y != idx) {
-//       killsock(dcc[y].sock);
-//       lostdcc(y);
-//      }
+/* Drop that bot 
+      dprintf(y, "bye\n");
+      egg_snprintf(s, sizeof s,"Disconnected %s (aborted binary transfer)", dcc[y].nick);
+      botnet_send_unlinked(y, dcc[y].nick, s);
+      chatout("*** %s\n", dcc[y].nick, s);
+      if (y != idx) {
+       killsock(dcc[y].sock);
+       lostdcc(y);
+      }
+*/
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }
@@ -979,15 +980,17 @@ void eof_dcc_get(int idx)
 #ifdef HUB
     bupdating = 0;
 #endif
-//    dprintf(-dcc[y].sock, "bye\n");
-//    egg_snprintf(s, sizeof s, "Disconnected %s (aborted binary transfer)",
-//		 dcc[y].nick);
-//    botnet_send_unlinked(y, dcc[y].nick, s);
-//    chatout("*** %s\n", s);
-//    if (y != idx) {
-//     killsock(dcc[y].sock);
-//     lostdcc(y);
-//    }
+/*
+    dprintf(-dcc[y].sock, "bye\n");
+    egg_snprintf(s, sizeof s, "Disconnected %s (aborted binary transfer)",
+		 dcc[y].nick);
+    botnet_send_unlinked(y, dcc[y].nick, s);
+    chatout("*** %s\n", s);
+    if (y != idx) {
+     killsock(dcc[y].sock);
+     lostdcc(y);
+    }
+*/
     killsock(dcc[idx].sock);
     lostdcc(idx);
     return;

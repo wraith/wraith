@@ -442,7 +442,7 @@ static int msgc_test(char *nick, char *host, struct userrec *u, char *par, char 
   private(fr, chan, 1), private(fr, chan, 2), 
   chk_op(fr, chan), chk_voice(fr, chan), chk_deop(fr, chan), chk_devoice(fr, chan));
 
-//  dprintf(DP_HELP, "NOTICE %s :Works :)\n", nick);
+  dprintf(DP_HELP, "NOTICE %s :Works :)\n", nick);
   return 0;
 }
 */

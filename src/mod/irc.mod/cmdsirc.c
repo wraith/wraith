@@ -469,7 +469,6 @@ static void cmd_op(struct userrec *u, int idx, char *par)
     return;
   }
 
-//  add_mode(chan, '+', 'o', nick);
   if (do_op(nick, chan, 1)) {
     dprintf(idx, "Gave op to %s on %s.\n", nick, chan->dname);
     stats_add(u, 0, 1);

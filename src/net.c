@@ -319,7 +319,7 @@ void cache_my_ip()
   } else {
     gethostname(s, 120);
     if (get_ip(hostname, &cached_myip4_so)) {
-//      error = 3;
+      /* error = 3; */
       cached_myip4_so.sin.sin_family = AF_INET;
       cached_myip4_so.sin.sin_addr.s_addr = INADDR_ANY;
     }
@@ -885,8 +885,8 @@ int ssl_link(register int sock, int state)
         } else if (state == ACCEPT_SSL) {
           err = SSL_accept(socklist[i].ssl);
         }
-//        if ((errs!=SSL_ERROR_WANT_READ)&&(errs!=SSL_ERROR_WANT_WRITE)&& (errs!=SSL_ERROR_WANT_X509_LOOKUP))
-//          break; /* anything not one of these is a sufficient condition to break out... */
+/*        if ((errs!=SSL_ERROR_WANT_READ)&&(errs!=SSL_ERROR_WANT_WRITE)&& (errs!=SSL_ERROR_WANT_X509_LOOKUP)) */
+/*          break;  anything not one of these is a sufficient condition to break out... */
       }
       alarm(0);
   }
@@ -1145,7 +1145,7 @@ static int sockread(char *s, int *len)
 	    *len = 0;
 #ifdef HAVE_SSL
 /*            debug0(STR("CALLING SSL_LINK() FROM SOCKREAD"));
-//            if (!ssl_link(socklist[i].sock))
+            if (!ssl_link(socklist[i].sock))
               debug0(STR("SSL_LINK FAILED"));
             debug0(STR("BACK FROM SSL_LINK()")); */
 #endif /* HAVE_SSL */
@@ -1459,7 +1459,7 @@ int sockgets(char *s, int *len)
   if (p != NULL) {
     *p = 0;
     strcpy(s, xx);
-//    strcpy(xx, p + 1);
+/*    strcpy(xx, p + 1); */
     sprintf(xx, "%s", p + 1);
     if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r'))
       s[strlen(s) - 1] = 0;
@@ -1580,14 +1580,16 @@ void tputs(register int z, char *s, unsigned int len)
         }
       } else
 #endif /* HAVE_SSL */
-//#ifdef HAVE_ZLIB_H
-//      if (socklist[i].gz) { 		/* gzipped links */
-//        FILE *fp;
-//        fp = gzdopen(z, "wb0");
-//        x = gzwrite(fp, s, len);
-//        
-//      } else
-//#endif /* HAVE_ZLIB_H */
+#ifdef HAVE_ZLIB_H
+/*
+      if (socklist[i].gz) { 		
+        FILE *fp;
+        fp = gzdopen(z, "wb0");
+        x = gzwrite(fp, s, len);
+        
+      } else
+*/
+#endif /* HAVE_ZLIB_H */
         x = write(z, s, len);
       if (x == -1)
 	x = 0;
@@ -1613,8 +1615,9 @@ void tputs(register int z, char *s, unsigned int len)
     inhere = 0;
   }
 
-//  if (socklist[i].encstatus > 0)
-//    free(s);
+/*  if (socklist[i].encstatus > 0)
+    free(s); 
+*/
 }
 
 static int findanyidx(register int z)

@@ -219,12 +219,12 @@ struct chanset_t {
 #define CHAN_SECRET         0x0200	   /* don't advertise channel on botnet  */
 #define CHAN_MANOP          0x0400         /* manual opping allowed? */
 #define CHAN_CYCLE          0x0800	   /* cycle the channel if possible      */
-//#define CHAN_    0x1000	   /* unused*/
+/*#define CHAN_    0x1000	   */
 #define CHAN_INACTIVE       0x2000	   /* no irc support for this channel
                                          - drummer                           */
-//#define CHAN_               0x4000	   /* unused */
+/* #define CHAN_               0x4000	   */
 #define CHAN_VOICE          0x8000	   /* a bot +y|y will voice *, except +q */
-//#define CHAN_           0x10000
+/* #define CHAN_           0x10000 */
 #define CHAN_REVENGEBOT     0x20000	   /* revenge on actions against the bot */
 #define CHAN_NODESYNCH      0x40000
 #define CHAN_FASTOP         0x80000        /* Bots will not use +o-b to op (no cookies) */ 
@@ -234,7 +234,7 @@ struct chanset_t {
 #define CHAN_PEND           0x2000000  /* just joined; waiting for end of
                                           WHO list                           */
 #define CHAN_FLAGGED        0x4000000  /* flagged during rehash for delete   */
-//#define CHAN_ 		    0x8000000  /* unused      */
+/* #define CHAN_ 		    0x8000000  */
 #define CHAN_ASKEDBANS      0x10000000
 #define CHAN_ASKEDMODES     0x20000000 /* find out key-info on IRCu          */
 #define CHAN_JUPED          0x40000000 /* Is channel juped                   */

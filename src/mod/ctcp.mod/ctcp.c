@@ -21,7 +21,6 @@
 #include "src/modules.h"
 
 #ifdef LEAF
-//#include "server.mod/server.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/utsname.h>
@@ -507,7 +506,7 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
     }
   }
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s%s\001\n"), nick, keyword, ctcpversion, s);
-//if mirc send second reply here..
+/* if mirc send second reply here.. */
 
   return 1;
 }

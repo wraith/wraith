@@ -113,8 +113,9 @@ void free_conf() {
 
 int readconf() 
 {
-//  conf.uid = READ;
-//  conf.uname = strdup(READ);
+/*  conf.uid = READ;
+  conf.uname = strdup(READ);
+*/
   return 0;
 }
 

@@ -131,7 +131,6 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
         return TCL_ERROR;
       }
       strncpyz(chan->temp, item[i], sizeof(chan->temp));
-      //Entry just changed so update/recheck it's purpose?
       check_temp(chan);
  */
     } else if (!strcmp(item[i], "topic")) { //this is here for compatability

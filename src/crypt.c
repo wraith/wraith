@@ -39,7 +39,7 @@ char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
   } else {
     char key[CRYPT_KEYSIZE + 1];
     strncpyz(key, keydata, sizeof(key));
-//      strncpyz(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
+/*      strncpyz(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key)); */
     AES_set_encrypt_key(key, CRYPT_KEYBITS, &e_key);
 
     /* Now loop through the blocks and crypt them */
@@ -66,7 +66,7 @@ char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
     /* Init/fetch key */
     char key[CRYPT_KEYSIZE + 1];
     strncpyz(key, keydata, sizeof(key));
-//      strncpy(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key));
+/*      strncpy(&key[sizeof(key) - strlen(keydata)], keydata, sizeof(key)); */
     AES_set_decrypt_key(key, CRYPT_KEYBITS, &d_key);
 
     /* Now loop through the blocks and crypt them */

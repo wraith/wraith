@@ -1532,8 +1532,8 @@ void show_int(int idx, char *work, int *cnt, char *desc, int state, char *yes, c
   }
   if (!work[0])
     sprintf(work, "  ");
+  /* need to make next line all one char, and then put it into %-30s */
   if (desc && desc[0]) {
-//need to make next line all one char, and then put it into %-30s
     char tmp2[50], tmp3[50];
     tmp2[0] = tmp3[0] = 0;
     strcat(tmp2, BOLD(idx));

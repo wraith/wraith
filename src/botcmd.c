@@ -100,7 +100,7 @@ static void bot_chan2(int idx, char *msg)
   /* Strip annoying control chars */
   for (p = from; *p;) {
     if ((*p < 32) || (*p == 127))
-//      strcpy(p, p + 1);
+/*      strcpy(p, p + 1); */
       sprintf(p, "%s", p + 1);
     else
       p++;
@@ -248,7 +248,7 @@ static void bot_actchan(int idx, char *par)
   for (p = from; *p;) {
     if ((*p < 32) || (*p == 127))
       sprintf(p, "%s", p + 1);
-//      strcpy(p, p + 1);
+/*      strcpy(p, p + 1); */
     else
       p++;
   }
@@ -793,11 +793,13 @@ static void bot_unlinked(int idx, char *par)
     fake_alert(idx, "direction", bot);
   else if (i >= 0) {		/* Valid bot downstream of idx */
     if (par[0])
-//#ifdef HUB
+/* #ifdef HUB */
       chatout("*** (%s) %s\n", lastbot(bot), par);
-//#else
-//      chatout("*** %s unlinked from botnet.\n", par);
-//#endif
+/*
+#else
+      chatout("*** %s unlinked from botnet.\n", par);
+#endif 
+*/
     botnet_send_unlinked(idx, bot, par);
     unvia(idx, findbot(bot));
     rembot(bot);

@@ -48,7 +48,7 @@
 #define HOOK_5SECONDLY           18
 #define HOOK_HALFHOURLY		 19
 #define REAL_HOOKS		 20
-//#define HOOK_CHANFILE            17
+/* #define HOOK_CHANFILE            17 */
 #define HOOK_SHAREOUT		105
 #define HOOK_SHAREIN		106
 #define HOOK_QSERV		108

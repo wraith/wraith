@@ -132,7 +132,6 @@ static int check_bind_msgc(char *cmd, char *nick, char *from, struct userrec *u,
  */
 static int check_bind_raw(char *from, char *code, char *msg)
 {
-//  return check_bind(BT_raw, code, NULL, from, code, msg);
   return check_bind(BT_raw, code, NULL, from, msg);
 }
 

@@ -833,7 +833,7 @@ int updatebin(int idx, char *par, int autoi)
     return 1;
   }
 
-  //make a backup just in case.
+  /* make a backup just in case. */
 
   egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
   copyfile(binname, old);
@@ -864,7 +864,7 @@ int updatebin(int idx, char *par, int autoi)
   } 
 #endif /* LEAF */
 
-  //safe to run new binary..
+  /* safe to run new binary.. */
 #ifdef LEAF
   if (!autoi && !localhub) //dont delete pid for auto update!!!
 #endif /* LEAF */

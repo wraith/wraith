@@ -106,18 +106,20 @@ static void detect_autokick(char *nick, char *uhost, struct chanset_t *chan, cha
       i++;
   }
 
-//  if ((chan->capslimit)) {
+/*  if ((chan->capslimit)) { */
     while (((msg) && *msg)) {
       if (egg_isupper(*msg))
         i++;
       msg++;
     }
 
-//  if (chan->capslimit && ((i / tot) >= chan->capslimit)) {
-//dprintf(DP_MODE, "PRIVMSG %s :flood stats for %s: %d/%d are CAP, percentage: %d\n", chan->name, nick, i, tot, (i/tot)*100);
-//  if ((((i / tot) * 100) >= 50)) {
-//dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
-//  }
+/*
+  if (chan->capslimit && ((i / tot) >= chan->capslimit)) {
+dprintf(DP_MODE, "PRIVMSG %s :flood stats for %s: %d/%d are CAP, percentage: %d\n", chan->name, nick, i, tot, (i/tot)*100);
+  if ((((i / tot) * 100) >= 50)) {
+dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
+  }
+*/
 
 }
 
@@ -135,7 +137,7 @@ void makeopline(struct chanset_t *chan, char *nick, char *buf)
   makeplaincookie(chan->dname, nck, plaincookie);
   strcpy(key, botname);
   strcat(key, SALT2);
-//  putlog(LOG_DEBUG, "*", "Encrypting opline for %s with cookie %s and key %s", nck, plaincookie, key);
+/*  putlog(LOG_DEBUG, "*", "Encrypting opline for %s with cookie %s and key %s", nck, plaincookie, key); */
   p = encrypt_string(key, plaincookie);
   strcpy(enccookie, p);
   free(p);
@@ -1230,7 +1232,7 @@ static void check_expired_chanstuff()
 	}
 	m = n;
       }
-     //autovoice of +v users if bot is +y
+      /* autovoice of +v users if bot is +y */
       if (!loading && channel_active(chan) && me_op(chan) && dovoice(chan)) {
         for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
           sprintf(s, "%s!%s", m->nick, m->userhost);

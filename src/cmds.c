@@ -3475,10 +3475,8 @@ void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
   }
   if (server_online)
     sprintf(tmp, "Currently: %-40s Lag: %d", cursrvname, server_lag);
-//    sprintf(tmp, STR("%-20s %d)"), cursrvname, server_lag);
   else
     sprintf(tmp, "Currently: none");
-//    sprintf(tmp, STR("%-20s"), "none");
   botnet_send_cmdreply(botnetnick, fbot, fhand, fidx, tmp);
 #endif /* LEAF */
 }

@@ -809,7 +809,7 @@ static void got_op(struct chanset_t *chan, char *nick, char *from,
     if ( chk_deop(victim, chan) ||
         (!loading && userlist && channel_bitch(chan) && !chk_op(victim, chan)) ) {	/* chk_op covers +private */
       /* if (target_priority(chan, m, 1)) */
-//        dprintf(DP_MODE, "MODE %s -o %s\n", chan->dname, who);
+/*        dprintf(DP_MODE, "MODE %s -o %s\n", chan->dname, who); */
         add_mode(chan, '-', 'o', who);
 flush_mode(chan, QUICK);
     } else if (reversing) {
@@ -930,7 +930,7 @@ static void got_deop(struct chanset_t *chan, char *nick, char *from,
 	m2->flags &= ~(SENTKICK | SENTDEOP | SENTOP | SENTVOICE | SENTDEVOICE);
 
     chan->channel.do_opreq=1;
-//    request_op(chan);
+/*    request_op(chan); */
 /* need: op */
     if (!nick[0])
       putlog(LOG_MODES, chan->dname, "TS resync deopped me on %s :(",

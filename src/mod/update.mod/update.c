@@ -200,7 +200,7 @@ static void got_nu(char *botnick, char *code, char *par)
      set_user(&USERENTRY_BOTADDR, u1, bi);
 
    /* Change our uplink to them */
-//let cont_link restructure us..
+   /* let cont_link restructure us.. */
      putlog(LOG_MISC, "*", "Changed uplink to %s for update.", botnick);
      botunlink(-2, bot->bot, "Restructure for update.");
      usleep(1000 * 500);
@@ -237,7 +237,7 @@ static void updatein_mod(int idx, char *msg)
 
 void finish_update(int idx)
 {
-  //module_entry *me;
+  /* module_entry *me; */
   struct passwd *pw;
   uid_t id;
   char buf[1024];
@@ -296,7 +296,7 @@ void finish_update(int idx)
 
 static void start_sending_binary(int idx)
 {
-  //module_entry *me;
+  /* module_entry *me; */
 #ifdef HUB
   char update_file[1024];
   char buf2[1024], buf3[1024];
@@ -441,7 +441,7 @@ static void check_updates()
         }
       }
     }
-    //send out notice to update remote bots ...
+    /* send out notice to update remote bots ... */
     sprintf(buf, "nu? %lu", buildts);
     putallbots(buf);
   }

@@ -78,7 +78,7 @@ char *fixfrom(char *s)
 				 * user@host here... */
   /* These are ludicrous. */
   if (strchr("~+-^=", *p) && (p[1] != '@')) /* added check for @ - drummer */
-//    strcpy(p, p + 1);
+/*    strcpy(p, p + 1); */
     sprintf(p, "%s", p + 1);
   /* Bug was: n!~@host -> n!@host  now: n!~@host */
   return buf;

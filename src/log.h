@@ -21,7 +21,7 @@
 #define LOG_WARN     0x000800   /* u   warnings                 */
 #define LOG_WARNING  0x000800   /* u   warnings                 */
 
-//the rest of these can be used for new console modes....
+/* the rest of these can be used for new console modes.... */
 #define LOG_LEV4     0x001000   /* 4   user log level                   */
 #define LOG_LEV5     0x002000   /* 5   user log level                   */
 #define LOG_LEV6     0x004000   /* 6   user log level                   */

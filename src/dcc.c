@@ -368,7 +368,7 @@ static void cont_link(int idx, char *buf, int ii)
         break;
       }
     }
-//.    ssl_link(dcc[idx].sock, CONNECT_SSL);
+/*.    ssl_link(dcc[idx].sock, CONNECT_SSL); */
     dcc[idx].type = &DCC_BOT_NEW;
     dcc[idx].u.bot->numver = 0;
     dprintf(idx, "%s\n", botnetnick);
@@ -497,12 +497,12 @@ static void dcc_bot(int idx, char *code, int i)
 
   strip_telnet(dcc[idx].sock, code, &i);
   if (debug_output) {
-//    if (code[0] != 'z' && code[1] != 'b' && code[2] != ' ') {
+/*    if (code[0] != 'z' && code[1] != 'b' && code[2] != ' ') { */
       if (code[0] == 's')
         putlog(LOG_BOTSHARE, "@", "{%s} %s", dcc[idx].nick, code + 2);
       else
         putlog(LOG_BOTNET, "@", "[%s] %s", dcc[idx].nick, code);
-//    }
+/*     } */
   }
   msg = strchr(code, ' ');
   if (msg) {
@@ -609,8 +609,8 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
   egg_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
   check[MD5_HASH_LENGTH + 6] = 0;
 
+  /* +secpass */
   if (!strcmp(check, buf)) {
-//+secpass
 #endif /* S_DCCAUTH */
       putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick,
 	     dcc[idx].host, dcc[idx].port);
@@ -1181,7 +1181,7 @@ static void dcc_telnet(int idx, char *buf, int i)
   sock = answer(dcc[idx].sock, s, &ip, &port, 0);
   while ((sock == -1) && (errno == EAGAIN))
     sock = answer(sock, s, &ip, &port, 0);
-//. ssl_link ACCEPT_SSL should go here!!!!
+/*. ssl_link ACCEPT_SSL should go here!!!! */
   if (sock < 0) {
     neterror(s);
     putlog(LOG_MISC, "*", DCC_FAILED, s);
@@ -1260,7 +1260,7 @@ static void dcc_telnet_hostresolved(int i)
     lostdcc(i);
     return;
   }
-//.  ssl_link(dcc[i].sock, ACCEPT_SSL);
+/* .  ssl_link(dcc[i].sock, ACCEPT_SSL); */
 
   changeover_dcc(i, &DCC_IDENTWAIT, 0);
   dcc[i].timeval = now;
@@ -1837,7 +1837,7 @@ static void dcc_telnet_got_ident(int i, char *host)
   /* This is so we dont tell someone doing a portscan anything
    * about ourselves. <cybah>
    */
-//n  ssl_link(dcc[i].sock, ACCEPT_SSL);
+/* n  ssl_link(dcc[i].sock, ACCEPT_SSL); */
 #ifdef HUB
   dprintf(i, "\n");
 #else /* !HUB */
