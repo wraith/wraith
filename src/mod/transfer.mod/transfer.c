@@ -61,85 +61,6 @@ static fileq_t *fileq = NULL;
  *   Misc functions
  */
 
-#undef MATCH
-#define MATCH (match+sofar)
-
-/* This function SHAMELESSLY :) pinched from match.c in the original
- * source, see that file for info about the author etc.
- */
-
-#define QUOTE '\\'
-#define WILDS '*'
-#define WILDQ '?'
-#define NOMATCH 0
-/*
- * wild_match_file(char *ma, char *na)
- *
- * Features:  Forward, case-sensitive, ?, *
- * Best use:  File mask matching, as it is case-sensitive
- */
-static int wild_match_file(register char *m, register char *n)
-{
-  char *ma = m, *lsm = NULL, *lsn = NULL;
-  int match = 1;
-  register unsigned int sofar = 0;
-
-  /* Take care of null strings (should never match) */
-  if ((m == 0) || (n == 0) || (!*n))
-    return NOMATCH;
-  /* (!*m) test used to be here, too, but I got rid of it.  After all, If
-   * (!*n) was false, there must be a character in the name (the second
-   * string), so if the mask is empty it is a non-match.  Since the
-   * algorithm handles this correctly without testing for it here and this
-   * shouldn't be called with null masks anyway, it should be a bit faster
-   * this way.
-   */
-  while (*n) {
-    /* Used to test for (!*m) here, but this scheme seems to work better */
-    switch (*m) {
-    case 0:
-      do
-	m--;			/* Search backwards      */
-      while ((m > ma) && (*m == '?'));	/* For first non-? char  */
-      if ((m > ma) ? ((*m == '*') && (m[-1] != QUOTE)) : (*m == '*'))
-	return MATCH;		/* nonquoted * = match   */
-      break;
-    case WILDS:
-      do
-	m++;
-      while (*m == WILDS);	/* Zap redundant wilds   */
-      lsm = m;
-      lsn = n;			/* Save * fallback spot  */
-      match += sofar;
-      sofar = 0;
-      continue;			/* Save tally count      */
-    case WILDQ:
-      m++;
-      n++;
-      continue;			/* Match one char        */
-    case QUOTE:
-      m++;			/* Handle quoting        */
-    }
-    if (*m == *n) {		/* If matching           */
-      m++;
-      n++;
-      sofar++;
-      continue;			/* Tally the match       */
-    }
-    if (lsm) {			/* Try to fallback on *  */
-      n = ++lsn;
-      m = lsm;			/* Restore position      */
-      /* Used to test for (!*n) here but it wasn't necessary so it's gone */
-      sofar = 0;
-      continue;			/* Next char, please     */
-    }
-    return NOMATCH;		/* No fallbacks=No match */
-  }
-  while (*m == WILDS)
-    m++;			/* Zap leftover *s       */
-  return (*m) ? NOMATCH : MATCH;	/* End of both = match   */
-}
-
 static void wipe_tmp_filename(char *fn, int idx)
 {
   int i, ok = 1;
@@ -204,22 +125,6 @@ static void check_toutlost(struct userrec *u, char *nick, char *path,
 
   get_user_flagrec(u, &fr, NULL);
   check_bind(table, hand, &fr, u, nick, path, acked, length);
-}
-
-/*
- *    File queue functions
- */
-
-static void queue_file(char *dir, char *file, char *from, char *to)
-{
-  fileq_t *q = fileq;
-
-  fileq = (fileq_t *) calloc(1, sizeof(fileq_t));
-  fileq->next = q;
-  fileq->dir = strdup(dir);
-  fileq->file = strdup(file);
-  strcpy(fileq->nick, from);
-  strcpy(fileq->to, to);
 }
 
 static void deq_this(fileq_t *this)
@@ -351,138 +256,6 @@ static void send_next_file(char *to)
   free(s);
   free(s1);
   return;
-}
-
-static void show_queued_files(int idx)
-{
-  int i, cnt = 0, len;
-  char spaces[] = "                                 ";
-  fileq_t *q = NULL;
-
-  for (q = fileq; q; q = q->next) {
-    if (!egg_strcasecmp(q->nick, dcc[idx].nick)) {
-      if (!cnt) {
-	spaces[HANDLEN - 9] = 0;
-	dprintf(idx, TRANSFER_SEND_TO , spaces);
-	dprintf(idx, TRANSFER_LINES , spaces);
-	spaces[HANDLEN - 9] = ' ';
-      }
-      cnt++;
-      spaces[len = HANDLEN - strlen(q->to)] = 0;
-      if (q->dir[0] == '*')
-	dprintf(idx, "  %s%s  %s/%s\n", q->to, spaces, &q->dir[1],
-		q->file);
-      else
-	dprintf(idx, "  %s%s  /%s%s%s\n", q->to, spaces, q->dir,
-		q->dir[0] ? "/" : "", q->file);
-      spaces[len] = ' ';
-    }
-  }
-  for (i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type == &DCC_GET_PENDING || dcc[i].type == &DCC_GET) &&
-	(!egg_strcasecmp(dcc[i].nick, dcc[idx].nick) ||
-	 !egg_strcasecmp(dcc[i].u.xfer->from, dcc[idx].nick))) {
-      char *nfn;
-
-      if (!cnt) {
-	spaces[HANDLEN - 9] = 0;
-	dprintf(idx, TRANSFER_SEND_TO , spaces);
-	dprintf(idx, TRANSFER_LINES , spaces);
-	spaces[HANDLEN - 9] = ' ';
-      }
-      nfn = strrchr(dcc[i].u.xfer->origname, '/');
-      if (nfn == NULL)
-	nfn = dcc[i].u.xfer->origname;
-      else
-	nfn++;
-      cnt++;
-      spaces[len = HANDLEN - strlen(dcc[i].nick)] = 0;
-      if (dcc[i].type == &DCC_GET_PENDING)
-	dprintf(idx,TRANSFER_WAITING, dcc[i].nick, spaces,
-		nfn);
-      else
-	dprintf(idx,TRANSFER_DONE, dcc[i].nick, spaces,
-		nfn, (100.0 * ((float) dcc[i].status /
-			       (float) dcc[i].u.xfer->length)));
-      spaces[len] = ' ';
-    }
-  }
-  if (!cnt)
-    dprintf(idx,TRANSFER_QUEUED_UP);
-  else
-    dprintf(idx,TRANSFER_TOTAL, cnt);
-}
-
-static void fileq_cancel(int idx, char *par)
-{
-  int fnd = 1, matches = 0, atot = 0, i;
-  fileq_t *q = NULL;
-  char *s = NULL;
-
-  while (fnd) {
-    q = fileq;
-    fnd = 0;
-    while (q != NULL) {
-      if (!egg_strcasecmp(dcc[idx].nick, q->nick)) {
-	s = realloc(s, strlen(q->dir) + strlen(q->file) + 3);
-	if (q->dir[0] == '*')
-	  sprintf(s, "%s/%s", &q->dir[1], q->file);
-	else
-	  sprintf(s, "/%s%s%s", q->dir, q->dir[0] ? "/" : "", q->file);
-	if (wild_match_file(par, s)) {
-	  dprintf(idx,TRANSFER_CANCELLED, s, q->to);
-	  fnd = 1;
-	  deq_this(q);
-	  q = NULL;
-	  matches++;
-	}
-	if (!fnd && wild_match_file(par, q->file)) {
-	  dprintf(idx,TRANSFER_CANCELLED, s, q->to);
-	  fnd = 1;
-	  deq_this(q);
-	  q = NULL;
-	  matches++;
-	}
-      }
-      if (q != NULL)
-	q = q->next;
-    }
-  }
-  if (s)
-    free(s);
-  for (i = 0; i < dcc_total; i++) {
-    if ((dcc[i].type == &DCC_GET_PENDING || dcc[i].type == &DCC_GET) &&
-	(!egg_strcasecmp(dcc[i].nick, dcc[idx].nick) ||
-	 !egg_strcasecmp(dcc[i].u.xfer->from, dcc[idx].nick))) {
-      char *nfn = strrchr(dcc[i].u.xfer->origname, '/');
-
-      if (nfn == NULL)
-	nfn = dcc[i].u.xfer->origname;
-      else
-	nfn++;
-      if (wild_match_file(par, nfn)) {
-	dprintf(idx,TRANSFER_ABORT_DCCSEND, nfn);
-	if (egg_strcasecmp(dcc[i].nick, dcc[idx].nick))
-	  dprintf(DP_HELP, TRANSFER_NOTICE_ABORT,
-		  dcc[i].nick, nfn, dcc[idx].nick);
-	if (dcc[i].type == &DCC_GET)
-	  putlog(LOG_FILES, "*",TRANSFER_DCC_CANCEL, nfn,
-		 dcc[i].nick, dcc[i].status, dcc[i].u.xfer->length);
-	wipe_tmp_filename(dcc[i].u.xfer->filename, i);
-	atot++;
-	matches++;
-	killsock(dcc[i].sock);
-	lostdcc(i);
-      }
-    }
-  }
-  if (!matches)
-    dprintf(idx,TRANSFER_NO_MATCHES);
-  else
-    dprintf(idx, TRANSFER_CANCELLED_FILE, matches, (matches != 1) ? "s" : "");
-  for (i = 0; i < atot; i++)
-    if (!at_limit(dcc[idx].nick))
-      send_next_file(dcc[idx].nick);
 }
 
 
@@ -1420,10 +1193,12 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
 
 /* Starts a DCC RESEND connection.
  */
+/*
 static int raw_dcc_resend(char *filename, char *nick, char *from, char *dir)
 {
   return raw_dcc_resend_send(filename, nick, from, dir, 1);
 }
+*/
 
 /* Starts a DCC_SEND connection.
  */

@@ -50,8 +50,6 @@ int raw_dcc_send(char *, char *, char *, char *);
 
 #ifdef MAKING_TRANSFER
 
-static int raw_dcc_resend(char *, char *, char *, char *);
-
 #define TRANSFER_REGET_PACKETID 0xfeab
 
 typedef struct {
