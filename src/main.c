@@ -830,11 +830,11 @@ int main(int argc, char **argv)
     dcc[n].status = STAT_ECHO;
     strcpy(dcc[n].nick, "HQ");
     strcpy(dcc[n].host, "llama@console");
-    dcc[n].user = get_user_by_handle(userlist, "HQ");
+    dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
     /* Make sure there's an innocuous HQ user if needed */
     if (!dcc[n].user) {
-      userlist = adduser(userlist, "HQ", "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_VOICE | USER_OP | USER_PARTY | USER_CHUBA | USER_HUBA);
-      dcc[n].user = get_user_by_handle(userlist, "HQ");
+      userlist = adduser(userlist, dcc[n].nick, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_VOICE | USER_OP | USER_PARTY | USER_CHUBA | USER_HUBA);
+      dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
     }
     setsock(STDOUT, 0);          /* Entry in net table */
     dprintf(n, "\n### ENTERING DCC CHAT SIMULATION ###\n\n");
