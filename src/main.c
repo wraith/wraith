@@ -98,7 +98,7 @@ int	con_chan = 0;		/* Foreground: constantly display channel
 uid_t   myuid;
 int	term_z = 0;		/* Foreground: use the terminal as a party
 				   line? */
-
+int checktrace = 1;		/* Check for trace when starting up? */
 int pscloak = 1;
 int updating = 0; /* this is set when the binary is called from itself. */
 char tempdir[DIRMAX] = "";
@@ -556,6 +556,7 @@ void show_help()
   printf(format, STR("-h"), STR("Display this help listing"));
 /*   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
+  printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -n)"));
   printf(format, STR("-v"), STR("Displays bot version"));
   exit(0);
@@ -563,10 +564,10 @@ void show_help()
 
 
 #ifdef LEAF
-#define PARSE_FLAGS "cedghntvPDE"
+#define PARSE_FLAGS "cedghnstvPDE"
 #endif /* LEAF */
 #ifdef HUB
-#define PARSE_FLAGS "edghntvDE"
+#define PARSE_FLAGS "edghnstvDE"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "edhgntDEv"
 static void dtx_arg(int argc, char *argv[])
@@ -603,6 +604,9 @@ static void dtx_arg(int argc, char *argv[])
       case 'n':
 	backgrd = 0;
 	break;
+      case 's':
+        checktrace = 0;
+        break;
       case 't':
         term_z = 1;
         break;
@@ -1375,10 +1379,6 @@ int main(int argc, char **argv)
   myuid = geteuid();
   binname = getfullbinname(argv[0]);
 
-#ifndef DEBUG_MEM
-  check_trace_start();
-#endif /* !DEBUG_MEM */
-
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
   if (!fixmod(binname))
@@ -1390,6 +1390,8 @@ int main(int argc, char **argv)
     sdprintf("Calling dtx_arg with %d params.", argc);
     dtx_arg(argc, argv);
   }
+  if (checktrace)
+    check_trace_start();
 
 #ifdef LEAF
   sdprintf("my uid: %d my uuid: %d, my ppid: %d my pid: %d", getuid(), geteuid(), getppid(), getpid());
