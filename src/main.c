@@ -256,9 +256,9 @@ static void show_help()
 
 
 #ifdef LEAF
-# define PARSE_FLAGS "2B:Cd:De:Eg:G:k:L:P:hnstv"
+# define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstv"
 #else /* !LEAF */
-# define PARSE_FLAGS "2Cd:De:Eg:G:hnstv"
+# define PARSE_FLAGS "02Cd:De:Eg:G:hnstv"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "CdDeEgGhkntv"
 static void dtx_arg(int argc, char *argv[])
@@ -274,6 +274,8 @@ static void dtx_arg(int argc, char *argv[])
     if (strchr(FLAGS_CHECKPASS, i))
       checkpass();
     switch (i) {
+      case '0':
+        exit(0);
       case '2':		/* used for testing new binary through update */
         exit(2);
 #ifdef LEAF
