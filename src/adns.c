@@ -29,6 +29,7 @@ typedef struct dns_query {
 	char *ip;
 	int id;
 //	int timer_id;
+	int answers;
 	int remaining;
 } dns_query_t;
 
@@ -103,7 +104,7 @@ static int cache_find(const char *);
 static void dns_on_read(int idx, char *buf, int atr);
 static void dns_on_eof(int idx);
 static const char *dns_next_server();
-static void parse_reply(char *response, size_t nbytes);
+static int parse_reply(char *response, size_t nbytes);
 
 time_t async_lookup_timeout = 30;
 time_t async_server_timeout = 40;
@@ -234,6 +235,7 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 	q->id = query_id;
 	query_id++;
 	q->query = strdup(query);
+	q->answers = 0;
 	q->callback = callback;
 	q->client_data = client_data;
 	q->expiretime = now + async_lookup_timeout;
@@ -521,7 +523,8 @@ static void dns_on_read(int idx, char *buf, int atr)
         }
         sdprintf("SETTING TIMEOUT to 0");
         dns_handler.timeout_val = 0;
-	parse_reply(buf, atr);
+	if (parse_reply(buf, atr))
+          dns_on_eof(idx);
 	return;
 }
 
@@ -802,7 +805,7 @@ void print_reply(dns_rr_t &reply)
 }
 */
 
-static void parse_reply(char *response, size_t nbytes)
+static int parse_reply(char *response, size_t nbytes)
 {
 	dns_header_t header;
 	dns_query_t *q = NULL, *prev = NULL;
@@ -830,7 +833,7 @@ static void parse_reply(char *response, size_t nbytes)
 		if (q->id == header.id) break;
 		prev = q;
 	}
-	if (!q) return;
+	if (!q) return 0;
         
 //        /* destroy our async timeout */
 //        timer_destroy(q->timer_id);
@@ -843,6 +846,10 @@ static void parse_reply(char *response, size_t nbytes)
 	/* End of questions. */
 
 //	for (rr = 0; rr < header.answer_count + header.ar_count + header.ns_count; rr++) {
+
+
+	q->answers += header.answer_count;
+
 	for (rr = 0; rr < header.answer_count; rr++) {
 		result[0] = 0;
 		/* Read in the answer. */
@@ -884,7 +891,22 @@ static void parse_reply(char *response, size_t nbytes)
 	}
 	q->remaining--;
 	/* Don't continue if we haven't gotten all expected replies. */
-	if (q->remaining > 0) return;
+	if (q->remaining > 0) return 0;
+
+        if (!q->answers) {
+          sdprintf("Failed to get any answers for query");
+
+          if (prev) prev->next = q->next;
+          else query_head = q->next;
+
+          q->callback(q->id, q->client_data, q->query, NULL);
+
+          free(q->query);
+          if (q->ip)
+            free(q->ip);
+          free(q);
+          return 1;		/* get a new server */
+        }
 
 	/* Ok, we have, so now issue the callback with the answers. */
 	if (prev) prev->next = q->next;
@@ -898,6 +920,8 @@ static void parse_reply(char *response, size_t nbytes)
         if (q->ip)
           free(q->ip);
 	free(q);
+
+	return(0);
 }
 
 
