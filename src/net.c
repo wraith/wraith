@@ -135,8 +135,10 @@ int get_ip(char *hostname, union sockaddr_union *so)
   egg_memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_socktype = SOCK_STREAM;
 
-  if ((error = getaddrinfo(hostname, NULL, &hints, &res)))
+  if ((error = getaddrinfo(hostname, NULL, &hints, &res))) {
+    freeaddrinfo(res);
     return error;
+  }
 
   error = 1;
   for (ai = res; ai != NULL; ai = ai->ai_next) {
