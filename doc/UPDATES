@@ -20,6 +20,8 @@ This is a summary of ChangeLog basically.
 * CLOAK_MIRC now randomly will add a SECOND version reply; some lame mIRC script.
 * Users are no longer auto-opped on netsplit rejoin.
 * Passwords now require: 2lcase, 2ucase, 8 chars.
+* Moved config settings (bad-cookie, op-time-slack, manop, mdop, mop) to 'chanset'
+* Renamed 'op-time-slack' to 'cookie-time-slack'
 
 1.1.9
 

@@ -947,7 +947,7 @@ static int gotmode(char *from, char *msg)
             optime = atol(ltmp);
             off = (now + timesync - optime);
 
-            if (abs(off) > OP_TIME_SLACK) {
+            if (chan->cookie_time_slack && (abs(off) > chan->cookie_time_slack)) {
               /* isbadop = 4; */
               putlog(LOG_DEBUG, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nfrom, optime, off);
             }

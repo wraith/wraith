@@ -1149,6 +1149,9 @@ void show_int(int idx, char *work, int *cnt, const char *desc, int state, const 
     strcat(tmp2, BOLD(idx));
     if (state && yes) {
       strcat(tmp2, yes);
+      strcat(tmp3, " (");
+      strcat(tmp3, chr_state);
+      strcat(tmp3, ")");
     } else if (!state && no) {
       strcat(tmp2, no);
       strcat(tmp3, " (");
@@ -1167,6 +1170,7 @@ void show_int(int idx, char *work, int *cnt, const char *desc, int state, const 
 
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state)
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no)
+#define P_STR deflag == P_KICK ? "Kick" : (deflag == P_DEOP ? "Deop" : (deflag == P_DELETE ? "Remove" : NULL))
 static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 {
   char *chname = NULL, work[512] = "";
@@ -1191,6 +1195,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     dprintf(idx, "No such channel defined.\n");
   else {
     char nick[NICKLEN] = "", date[81] = "";
+    int deflag = 0;
 
     if (chan->added_ts) {
       egg_strftime(date, sizeof date, "%c %Z", gmtime(&(chan->added_ts)));
@@ -1250,13 +1255,23 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
  * SHOW_INT("Desc: ", integer, "YES", "NO");
  */
     dprintf(idx, "Channel settings:\n");
+    deflag = chan->bad_cookie;
+    SHOW_INT("Bad-cookie:" , chan->bad_cookie, P_STR, "Ignore");
     SHOW_INT("Ban-time: ", chan->ban_time, NULL, "Forever");
     SHOW_INT("Closed-ban: ", chan->closed_ban, NULL, "Don't!");
-    SHOW_INT("Closed-Private", chan->closed_private, NULL, "Don't!");
+    SHOW_INT("Closed-Private:", chan->closed_private, NULL, "Don't!");
+    deflag = chan->cookie_time_slack;
+    SHOW_INT("Cookie-time-slack:", chan->cookie_time_slack, P_STR, "Ignore");
     SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
     SHOW_INT("Idle Kick after (idle-kick): ", chan->idle_kick, "", "Don't!");
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");
     SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");
+    deflag = chan->manop;
+    SHOW_INT("Manop: ", chan->manop, P_STR, "Ignore");
+    deflag = chan->mdop;
+    SHOW_INT("Mdop: ", chan->mdop, P_STR, "Ignore");
+    deflag = chan->mop;
+    SHOW_INT("Mop: ", chan->mop, P_STR, "Ignore");
     SHOW_INT("Revenge-mode: ", chan->revenge_mode, NULL, NULL);
     SHOW_INT("Stopnethack-mode: ", chan->stopnethack_mode, "", "Don't!");
 

@@ -429,7 +429,9 @@ channels_timers()
     if ((cnt % 60) == 0) {
       /* 60 seconds */
       cnt = 0;
+#ifdef LEAF
       check_limitraise(chan);
+#endif /* LEAF */
     }
   }
 }

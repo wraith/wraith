@@ -53,6 +53,10 @@ typedef struct memstruct {
 #define chan_wasop(x) (x->flags & WASOP)
 #define chan_stopcheck(x) (x->flags & STOPCHECK)
 
+#define P_DEOP		1
+#define P_KICK		2
+#define P_DELETE	3
+
 /* Why duplicate this struct for exempts and invites only under another
  * name? <cybah>
  */
@@ -131,6 +135,8 @@ struct chanset_t {
   } cmode[MODES_PER_LINE_MAX];                 /* parameter-type mode changes -        */
   /* detect floods */
   time_t floodtime[FLOOD_CHAN_MAX];
+  uint32_t status;
+  uint32_t ircnet_status;
   int flood_pub_thr;
   int flood_pub_time;
   int flood_join_thr;
@@ -143,11 +149,14 @@ struct chanset_t {
   int flood_ctcp_time;
   int flood_nick_thr;
   int flood_nick_time;
-  uint32_t status;
-  uint32_t ircnet_status;
   int limitraise;
   int closed_ban;
   int closed_private;
+  int bad_cookie;
+  int cookie_time_slack;
+  int manop;
+  int mdop;
+  int mop;
 /* Chanint template 
  *int temp;
  */

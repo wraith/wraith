@@ -417,6 +417,46 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->closed_private = atoi(item[i]);
+    } else if (!strcmp(item[i], "bad-cookie")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          sprintf(result, "channel bad-cookie needs argument");
+        return ERROR;
+      }
+      chan->bad_cookie = atoi(item[i]);
+    } else if (!strcmp(item[i], "cookie_time_slack")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          sprintf(result, "channel cookie-time-slack needs argument");
+        return ERROR;
+      }
+      chan->cookie_time_slack = atoi(item[i]);
+    } else if (!strcmp(item[i], "manop")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          sprintf(result, "channel manop needs argument");
+        return ERROR;
+      }
+      chan->manop = atoi(item[i]);
+    } else if (!strcmp(item[i], "mdop")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          sprintf(result, "channel mdop needs argument");
+        return ERROR;
+      }
+      chan->mdop = atoi(item[i]);
+    } else if (!strcmp(item[i], "mop")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          sprintf(result, "channel mop needs argument");
+        return ERROR;
+      }
+      chan->mop = atoi(item[i]);
 /* Chanint template
  *  } else if (!strcmp(item[i], "temp")) {
  *    i++;
