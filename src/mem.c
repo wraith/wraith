@@ -139,35 +139,35 @@ void debug_mem_to_dcc(int idx)
       *p = 0;
 */
     l = memtbl[i].size;
-    if (!strcmp(fn, "xauth.c"))
+    if (!strcmp(fn, "_auth.c"))
       use[0] += l;
-    else if (!strcmp(fn, "xchanprog.c"))
+    else if (!strcmp(fn, "_chanprog.c"))
       use[1] += l;
-    else if (!strcmp(fn, "xmisc.c"))
+    else if (!strcmp(fn, "_misc.c"))
       use[2] += l;
-    else if (!strcmp(fn, "xuserrec.c"))
+    else if (!strcmp(fn, "_userrec.c"))
       use[3] += l;
-    else if (!strcmp(fn, "xnet.c"))
+    else if (!strcmp(fn, "_net.c"))
       use[4] += l;
-    else if (!strcmp(fn, "xdccutil.c"))
+    else if (!strcmp(fn, "_dccutil.c"))
       use[5] += l;
-    else if (!strcmp(fn, "xbotnet.c"))
+    else if (!strcmp(fn, "_botnet.c"))
       use[6] += l;
-    else if (!strcmp(fn, "xtcl.c"))
+    else if (!strcmp(fn, "_tcl.c"))
       use[7] += l;
-    else if (!strcmp(fn, "xtclhash.c"))
+    else if (!strcmp(fn, "_tclhash.c"))
       use[8] += l;
-    else if (!strcmp(fn, "xtclmisc.c"))
+    else if (!strcmp(fn, "_tclmisc.c"))
       use[9] += l;
-    else if (!strcmp(fn, "xmodules.c"))
+    else if (!strcmp(fn, "_modules.c"))
       use[10] += l;
-    else if (!strcmp(fn, "xtcldcc.c"))
+    else if (!strcmp(fn, "_tcldcc.c"))
       use[11] += l;
-    else if (!strcmp(fn, "xdns.c"))
+    else if (!strcmp(fn, "_dns.c"))
       use[12] += l;
-    else if (!strcmp(fn, "xconfig.c"))
+    else if (!strcmp(fn, "_config.c"))
       use[13] += l;
-    else if (!strcmp(fn, "xcrypt.c"))
+    else if (!strcmp(fn, "_crypt.c"))
       use[14] += l;
     else if (p) {
       for (me = module_list; me; me = me->next)
@@ -179,49 +179,49 @@ void debug_mem_to_dcc(int idx)
   for (i = 0; i < MAX_MEM; i++) {
     switch (i) {
     case 0:
-      strcpy(fn, "xauth.c");
+      strcpy(fn, "_auth.c");
       break;
     case 1:
-      strcpy(fn, "xchanprog.c");
+      strcpy(fn, "_chanprog.c");
       break;
     case 2:
-      strcpy(fn, "xmisc.c");
+      strcpy(fn, "_misc.c");
       break;
     case 3:
-      strcpy(fn, "xuserrec.c");
+      strcpy(fn, "_userrec.c");
       break;
     case 4:
-      strcpy(fn, "xnet.c");
+      strcpy(fn, "_net.c");
       break;
     case 5:
-      strcpy(fn, "xdccutil.c");
+      strcpy(fn, "_dccutil.c");
       break;
     case 6:
-      strcpy(fn, "xbotnet.c");
+      strcpy(fn, "_botnet.c");
       break;
     case 7:
-      strcpy(fn, "xtcl.c");
+      strcpy(fn, "_tcl.c");
       break;
     case 8:
-      strcpy(fn, "xtclhash.c");
+      strcpy(fn, "_tclhash.c");
       break;
     case 9:
-      strcpy(fn, "xtclmisc.c");
+      strcpy(fn, "_tclmisc.c");
       break;
     case 10:
-      strcpy(fn, "xmodules.c");
+      strcpy(fn, "_modules.c");
       break;
     case 11:
-      strcpy(fn, "xtcldcc.c");
+      strcpy(fn, "_tcldcc.c");
       break;
     case 12:
-      strcpy(fn, "xdns.c");
+      strcpy(fn, "_dns.c");
       break;
     case 13:
-      strcpy(fn, "xconfig.c");
+      strcpy(fn, "_config.c");
       break;
     case 14:
-      strcpy(fn, "xcrypt.c");
+      strcpy(fn, "_crypt.c");
       break;
     }
     if (use[i] == exp[i]) {
