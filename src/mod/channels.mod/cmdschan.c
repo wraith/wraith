@@ -430,7 +430,7 @@ static void cmd_mns_ban(struct userrec *u, int idx, char *par)
       chname = dcc[idx].u.chat->con_chan;
     get_user_flagrec(u, &user, chname);
 
-    if (private(user, chan, PRIV_OP)) {
+    if (private(user, findchan_by_dname(chname), PRIV_OP)) {
       dprintf(idx, "No such channel.\n");
       return;
     }
@@ -546,7 +546,7 @@ static void cmd_mns_exempt (struct userrec *u, int idx, char *par)
       chname = dcc[idx].u.chat->con_chan;
     get_user_flagrec(u, &user, chname);
 
-    if (private(user, chan, PRIV_OP)) {
+    if (private(user, findchan_by_dname(chname), PRIV_OP)) {
       dprintf(idx, "No such channel.\n");
       return;
     }
@@ -663,7 +663,7 @@ static void cmd_mns_invite (struct userrec *u, int idx, char *par)
       chname = dcc[idx].u.chat->con_chan;
     get_user_flagrec(u, &user, chname);
 
-    if (private(user, chan, PRIV_OP)) {
+    if (private(user, findchan_by_dname(chname), PRIV_OP)) {
       dprintf(idx, "No such channel.\n");
       return;
     }
