@@ -409,7 +409,7 @@ int write_userfile(int idx)
   sprintf(new_userfile, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");
-  chmod(new_userfile, 0600);
+  fixmod(new_userfile);
   if (f == NULL) {
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
     free(new_userfile);

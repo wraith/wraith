@@ -8,6 +8,7 @@
 #include "src/rfc1459.h"
 #include "src/botmsg.h"
 #include "src/misc.h"
+#include "src/misc_file.h"
 #include "src/cmds.h"
 #include "src/chanprog.h"
 #include "src/users.h"
@@ -1237,7 +1238,7 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
     time_t tt;
     char s1[81] = "";
 
-    chmod(fn, 0600);            /* make it -rw------- */
+    fixmod(fn);
     tt = now;
     strcpy(s1, ctime(&tt));
     lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);

@@ -136,6 +136,7 @@ int is_dir(const char *s)
 
 int fixmod(const char *s)
 {
+#ifndef CYGWIN_HACKS
   int i;
 
   if (!can_stat(s))
@@ -144,4 +145,7 @@ int fixmod(const char *s)
   if (i < 0)
     return 0;
   return 1;
+#else
+  return 0;
+#endif /* !CYGWIN_HACKS */
 }

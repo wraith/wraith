@@ -263,7 +263,7 @@ void finish_update(int idx)
   sprintf(buf, "%s%s", dirname(binname),  strrchr(dcc[idx].u.xfer->filename, '/'));
 
   movefile(dcc[idx].u.xfer->filename, buf); 
-  chmod(buf, S_IRUSR | S_IWUSR | S_IXUSR);
+  fixmod(buf);
 
   sprintf(buf, "%s", strrchr(buf, '/'));
   buf2 = buf;

@@ -746,7 +746,7 @@ int updatebin(int idx, char *par, int autoi)
     free(path);
     return 1;
   }
-  if (chmod(path, S_IRUSR | S_IWUSR | S_IXUSR)) {
+  if (fixmod(path)) {
     logidx(idx, "Can't set mode 0600 on %s", path);
     free(path);
     return 1;
