@@ -79,6 +79,7 @@ typedef struct maskrec {
        *user;
 } maskrec;
 extern maskrec *global_bans, *global_exempts, *global_invites;
+extern int	n_bans, n_exempts, n_invites;
 #define MASKREC_STICKY 1
 #define MASKREC_PERM   2
 

@@ -208,20 +208,26 @@ bool u_match_mask(maskrec *rec, char *mask)
 
 int u_delmask(char type, struct chanset_t *c, char *who, int doit)
 {
-  int j, i = 0;
+  int j, i = 0, *n_mask = NULL;
   char temp[256] = "";
   maskrec **u = NULL, *t;
 
-  if (type == 'b')
+  if (type == 'b') {
     u = c ? &c->bans : &global_bans;
-  if (type == 'e')
+    n_mask = &n_bans;
+  } else if (type == 'e') {
     u = c ? &c->exempts : &global_exempts;
-  if (type == 'I')
+    n_mask = &n_exempts;
+  } else if (type == 'I') {
     u = c ? &c->invites : &global_invites;
+    n_mask = &n_invites;
+  }
 
   if (!strchr(who, '!') && str_isdigit(who)) {
     j = atoi(who);
-    j--;
+    j--;		/* our list starts at 0 */
+    if (c)
+      j -= *n_mask;	/* subtract out the globals as the number given is globals+j */
     for (; (*u) && j; u = &((*u)->next), j--);
     if (*u) {
       strlcpy(temp, (*u)->mask, sizeof temp);
@@ -262,6 +268,8 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
     t = *u;
     *u = (*u)->next;
     free(t);
+    if (!c)
+      (*n_mask)--;
   }
   return i;
 }
@@ -272,13 +280,18 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
 {
   char host[1024] = "", s[1024] = "";
   maskrec *p = NULL, *l = NULL, **u = NULL;
+  int *n_mask = NULL;
 
-  if (type == 'b')
+  if (type == 'b') {
     u = chan ? &chan->bans : &global_bans;
-  if (type == 'e')
+    n_mask = &n_bans;
+  } else if (type == 'e') {
     u = chan ? &chan->exempts : &global_exempts;
-  if (type == 'I')
+    n_mask = &n_exempts;
+  } else if (type == 'I') {
     u = chan ? &chan->invites : &global_invites;
+    n_mask = &n_invites;
+  }
 
   strcpy(host, who);
   /* Choke check: fix broken bans (must have '!' and '@') */
@@ -331,6 +344,9 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
     free( p->user );
     free( p->desc );
   }
+  if (!chan)
+    (*n_mask)++;
+
   p->expire = expire_time;
   p->added = now;
   p->lastactive = 0;
