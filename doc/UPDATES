@@ -1,5 +1,9 @@
 This is a summary of ChangeLog basically.
 
+1.1.3
+1.Fixed a very fatal bug with channel ctcps.
+2.Fixed a bug in cmd_botcmd.
+
 1.1.2
 1.Fixed a major bug with server connections.
 2.Fixed a bug in share.mod where it was reconnecting if the userfile was corrupt.

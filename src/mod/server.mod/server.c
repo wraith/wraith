@@ -103,7 +103,8 @@ static void msgq_clear(struct msgq_head *qh);
 static int stack_limit;
 
 /* New bind tables. */
-static bind_table_t *BT_raw = NULL, *BT_msg = NULL, *BT_ctcr = NULL, *BT_ctcp = NULL;
+static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
+bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL;
 #ifdef S_AUTHCMDS
 static bind_table_t *BT_msgc = NULL;
 #endif /* S_AUTHCMDS */
@@ -1542,6 +1543,7 @@ void server_init()
 #endif /* S_AUTHCMDS */
   BT_msg = bind_table_add("msg", 4, "ssUs", 0, BIND_USE_ATTR);
   BT_raw = bind_table_add("raw", 2, "ss", MATCH_MASK, BIND_STACKABLE);
+
   BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
   BT_ctcp = bind_table_add("ctcp", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
 

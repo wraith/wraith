@@ -49,7 +49,6 @@ struct cfg_entry CFG_OPBOTS,
 
 
 /* Import some bind tables from the server module. */
-static bind_table_t *BT_ctcp = NULL, *BT_ctcr =  NULL;
 #ifdef S_AUTHCMDS
 static bind_table_t *BT_msgc = NULL;
 #endif /* S_AUTHCMDS */
@@ -1599,8 +1598,6 @@ char *irc_start(Function * global_funcs)
   timer_create_secs(60, "check_netfight", (Function) check_netfight);
 #endif /* S_AUTOLOCK */
 
-  BT_ctcp = bind_table_lookup("ctcp");
-  BT_ctcr = bind_table_lookup("ctcr");
 #ifdef S_AUTHCMDS
   BT_msgc = bind_table_lookup("msgc");
 #endif /* S_AUTHCMDS */
