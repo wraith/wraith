@@ -66,7 +66,7 @@
 #define MAX_BOTS     500
 #define SERVLEN      60
 
-#define sgrab 2011         /* How much data to allow through sockets. */
+#define SGRAB 2011         /* How much data to allow through sockets. */
 
 #define op_time_slack (CFG_OPTIMESLACK.gdata ? atoi(CFG_OPTIMESLACK.gdata) : 60)
 
@@ -322,7 +322,9 @@ struct dcc_t {
 #endif /* USE_IPV6 */
   unsigned int port;
   struct userrec *user;
-  char simul[NICKLEN];		/* used for hub->leaf cmd simulation, holds bot that results should be sent to */
+  char simulbot[NICKLEN];	/* used for hub->leaf cmd simulation, holds bot that results should be sent to */
+  time_t simultime;		/* the time when the simul dcc is initiated, expires after a number of seconds */
+  int simul;			/* this will hold the idx on the remote bot to return result. */
   char hash[33];                /* used for dcc authing */
   char nick[NICKLEN];
   char host[UHOSTLEN];

@@ -164,7 +164,10 @@ broke:
   len = strlen(buf);
 
   if (idx < 0) {
-    tputs(-idx, buf, len);
+    if (dcc[-idx].simul > 0)
+      bounce_simul(-idx, buf);
+    else
+      tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
     switch (idx) {
     case DP_LOG:
@@ -210,15 +213,19 @@ broke:
       strcat(buf, "\n");
       len = 1001;
     }
+    if (dcc[idx].simul > 0) {
+      bounce_simul(idx, buf);
+    } else {
+      if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {
+        char *p = add_cr(buf);
 
-    if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {
-      char *p = add_cr(buf);
-
-      tputs(dcc[idx].sock, p, strlen(p));
-    } else if (dcc[idx].type && dcc[idx].type->output) {
-      dcc[idx].type->output(idx, buf, dcc[idx].u.other);
-    } else
-      tputs(dcc[idx].sock, buf, len);
+        tputs(dcc[idx].sock, p, strlen(p));
+      } else if (dcc[idx].type && dcc[idx].type->output) {
+        dcc[idx].type->output(idx, buf, dcc[idx].u.other);
+      } else {
+        tputs(dcc[idx].sock, buf, len);
+      }
+    }
   }
 }
 

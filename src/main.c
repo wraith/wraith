@@ -676,7 +676,7 @@ Context;
 static void core_secondly()
 {
   static int cnt = 0;
-  int miltime;
+  int miltime, idx;
  
   if (geteuid() != myuid || getuid() != myuid) {
     putlog(LOG_MISC, "*", "MY UID CHANGED!, POSSIBLE HIJACK ATTEMPT");
@@ -705,6 +705,16 @@ static void core_secondly()
     call_hook(HOOK_30SECONDLY);
     cnt = 0;
   }
+
+  for (idx = 0; idx < dcc_total; idx++) {
+    if (dcc[idx].simul > 0) {
+      if ((now - dcc[idx].simultime) == 60) { /* expire simuls after 60 seconds (re-uses idx, so it wont fill up) */
+        dcc[idx].simul = -1;
+        lostdcc(idx);
+      }
+    }
+  }
+
   egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
 
   if (nowtm.tm_min != lastmin) {
@@ -1145,7 +1155,7 @@ int main(int argc, char **argv)
 #ifdef LEAF
   int x = 1;
 #endif
-  char buf[sgrab + 9], s[25];
+  char buf[SGRAB + 9], s[25];
   FILE *f;
   struct sigaction sv;
   struct chanset_t *chan;
@@ -1816,6 +1826,7 @@ Context;
       socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
     }
 
+/* FIXME: do_restart */
     if (do_restart) {
       if (do_restart == -2)
 	rehash();

@@ -12,7 +12,7 @@
 #include "modules.h"
 
 extern char		 botnetnick[], ver[], admin[], network[], motdfile[];
-extern int		 dcc_total, remote_boots, noshare, timesync;
+extern int		 dcc_total, remote_boots, noshare, timesync, conmask;
 extern struct dcc_t	*dcc;
 extern struct chanset_t	*chanset;
 extern struct userrec	*userlist;
@@ -1457,11 +1457,98 @@ botcmd_t C_bot[] =
   {NULL,		NULL}
 };
 
+
+void bounce_simul(int idx, char *buf)
+{
+  char rmsg[SGRAB-110];
+
+  if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0)
+    return;
+
+  snprintf(rmsg, sizeof rmsg, "r-sr %d %s", idx, buf);          /* remote-simul[r]eturn idx buf */
+
+  putbot(dcc[idx].simulbot, rmsg);
+}
+
+void send_remote_simul(int idx, char *bot, char *cmd, char *par)
+{
+  char msg[SGRAB-110];
+Context;
+  snprintf(msg, sizeof msg, "r-s %d %s %d %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, cmd, par);
+
+Context;
+  putbot(bot, msg);
+Context;
+}
+
+/* idx nick conmask cmd par */
+static void bot_rsim(char *botnick, char *code, char *par)
+{
+  int ridx = -1, idx = -1, i = 0, rconmask;
+  char *nick = NULL, *cmd = NULL, buf[UHOSTMAX];
+
+  ridx = atoi(newsplit(&par));
+  nick = newsplit(&par);
+  rconmask = atoi(newsplit(&par));
+  cmd = newsplit(&par);
+  if (ridx < 0 || !nick || !cmd)
+    return;
+
+  putlog(LOG_DEBUG, "*", "#%s@%s# %s %s", nick, botnick, cmd, par);
+
+  for (i = 0; i < dcc_total; i++) {
+   if (dcc[i].simul == ridx) {
+     putlog(LOG_DEBUG, "*", "Simul found old idx for %s: %d (ridx: %d)", nick, i, ridx);
+     dcc[i].simultime = now;
+     idx = i;
+     break;
+   } 
+  }
+
+  if (idx < 0) {
+    idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
+    putlog(LOG_DEBUG, "*", "Making new idx for %s@%s: %d ridx: %d", nick, botnick, idx, ridx);
+    dcc[idx].sock = STDOUT;
+    dcc[idx].timeval = now;
+    dcc[idx].simultime = now;
+    dcc[idx].simul = 1;
+    strcpy(dcc[idx].simulbot, botnick);
+    dcc[idx].status = STAT_ECHO;
+    dcc[idx].u.chat->con_flags = rconmask;
+    strcpy(dcc[idx].u.chat->con_chan, "*");
+    dcc[idx].u.chat->strip_flags = STRIP_ALL;
+    strcpy(dcc[idx].nick, nick);
+    snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
+    strcpy(dcc[idx].host, buf);
+    dcc[idx].addr = 0;
+    dcc[idx].user = get_user_by_handle(userlist, nick);
+  }
+  check_tcl_dcc(cmd, idx, par);
+}
+
+#ifdef HUB
+static void bot_rsimr(char *botnick, char *code, char *par)
+{
+  int idx;
+
+  idx = atoi(newsplit(&par));
+
+  if (!par[0])
+    return;
+
+  dprintf(idx, "[%s] %s\n", botnick, par);
+}
+#endif /* HUB */
+
 static cmd_t my_bot[] = 
 {
   {"hl",	"",	(Function) bot_hublog,  NULL},
   {"mt", 	"",	(Function) bot_mtcl,	NULL},
   {"r_mt",	"",	(Function) bot_rmtcl,	NULL},
+#ifdef HUB	/* This will only allow hubs to read the return text */
+  {"r-sr",	"",	(Function) bot_rsimr,	NULL},
+#endif /* HUB */
+  {"r-s",	"",	(Function) bot_rsim,	NULL},
   {NULL, 	NULL, 	NULL, 			NULL}
 };
 

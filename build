@@ -93,10 +93,10 @@ TCLDIR=`cat pack/conf.h 2>&1 | grep "//" | awk '/TCLDIR/ {print $2}' |  sed -e '
 if test -z ${TCLDIR}
 then
   echo "[*] Searching for TCL in default dirs (edit $packname to change)"
-  ./configure --silent --disable-tcl-threads --enable-ipv6
+  ./configure --silent --disable-tcl-threads
 else
   echo "[*] Searching for TCL in: $TCLDIR"
-  ./configure --silent --disable-tcl-threads --enable-ipv6 --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h
+  ./configure --silent --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h
 fi
 
 # make clean, just in case

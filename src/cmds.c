@@ -1446,6 +1446,25 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
   }
 }
 
+static void cmd_botcmd(struct userrec *u, int idx, char *par)
+{
+  char *bot = NULL, *cmd = NULL;
+  
+  bot = newsplit(&par);
+  cmd = newsplit(&par);
+  if (!bot[0] || !cmd[0]) {
+    dprintf(idx, "Usage: botcmd bot cmd params\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# botcmd %s %s", dcc[idx].nick, bot, cmd);		/* the rest of the cmd will be logged remotely */
+  if (nextbot(bot) < 0) {
+    dprintf(idx, STR("No such bot linked\n"));
+    return;
+  }
+  send_remote_simul(idx, bot, cmd, par ? par : "");
+}
+
 static void cmd_hublevel(struct userrec *u, int idx, char *par)
 {
   char *handle,
@@ -4152,6 +4171,7 @@ dcc_cmd_t C_dcc[] =
   {"channels", 		"", 	(Function) cmd_channels, NULL, NULL},
   {"randstring", 	"", 	(Function) cmd_randstring, NULL, NULL},
 #ifdef HUB
+  {"botcmd",		"i",	(Function) cmd_botcmd, NULL, NULL},
   {"hublevel", 		"a", 	(Function) cmd_hublevel, NULL, NULL},
   {"lagged", 		"m", 	(Function) cmd_lagged, NULL, NULL},
   {"uplink", 		"a", 	(Function) cmd_uplink, NULL, NULL},

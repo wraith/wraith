@@ -18,7 +18,7 @@ extern party_t		*party;
 extern Tcl_Interp	*interp;
 extern struct userrec	*userlist;
 
-static char	OBUF[sgrab-110];
+static char	OBUF[SGRAB-110];
 
 
 /* Thank you ircu :) */
@@ -401,7 +401,7 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top,
 
 void putallbots(char *par)
 { 
-  char msg[sgrab-110];
+  char msg[SGRAB-110];
   if (!par || !par[0])
     return;
   strncpyz(msg, par, sizeof msg);
@@ -411,7 +411,7 @@ void putallbots(char *par)
 void putbot(char *bot, char *par)
 {
   int i;
-  char msg[sgrab-110];
+  char msg[SGRAB-110];
   if (!bot[0] || !par[0])
     return;
   i = nextbot(bot);

@@ -921,7 +921,7 @@ static int sockread(char *s, int *len)
   fd_set fd;
   int fds, i, x, fdtmp;
   struct timeval t;
-  int grab = sgrab;
+  int grab = SGRAB;
 
   fds = getdtablesize();
 #ifdef FD_SETSIZE
@@ -1128,8 +1128,8 @@ char *botlink_encrypt(int snum, char *src)
 
 int sockgets(char *s, int *len)
 {
-  char xx[sgrab+3], *p, *px;
-  int ret, i, data = 0, grab = sgrab+1;
+  char xx[SGRAB+3], *p, *px;
+  int ret, i, data = 0, grab = SGRAB+1;
 
   for (i = 0; i < MAXSOCKS; i++) {
     /* Check for stored-up data waiting to be processed */
