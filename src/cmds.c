@@ -1119,7 +1119,7 @@ static void cmd_channels(struct userrec *u, int idx, char *par) {
   } else
       show_channels(idx, NULL);
 
-  if ((u->flags & USER_MASTER))
+  if ((u->flags & USER_MASTER) && !(par && par[0]))
     dprintf(idx, STR("You can also %schannels <user>\n"), dcc_prefix);
 }
 
