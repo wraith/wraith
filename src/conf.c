@@ -48,9 +48,10 @@ void spawnbots() {
       char *run = NULL;
       size_t size = 0;
   
-      size = strlen(conf.bot->nick) + strlen(binname) + 10;
+      size = strlen(bot->nick) + strlen(binname) + 20;
       run = calloc(1, size);
       egg_snprintf(run, size, "%s -B %s", binname, bot->nick);
+      sdprintf("Spawning '%s': %s", bot->nick, run);
       system(run);
       free(run);
     }
