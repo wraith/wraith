@@ -1406,7 +1406,9 @@ static void server_dns_callback(void *client_data, const char *host, char **ips)
     dcc[idx].addr = htonl(addr.u.addr.s_addr);
 
   strcpy(serverpass, (char *) dcc[idx].u.other);
-  changeover_dcc(idx, &SERVER_SOCKET, 0);
+//  changeover_dcc(idx, &SERVER_SOCKET, 0);
+  free(dcc[idx].u.other);
+  dcc[idx].u.other = NULL;
 
   identd_open();
 
