@@ -289,6 +289,9 @@ case "$egg_cv_var_system_type" in
   ;;
   IRIX)
   ;;
+  HP-UX)
+    AC_DEFINE(MD32_XARRAY, 1, [Define under HPUX])
+  ;;
   Ultrix)
     SHELL=/bin/sh5
   ;;

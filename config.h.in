@@ -7,6 +7,9 @@
    */
 #undef BROKEN_SNPRINTF
 
+/* big endian */
+#undef B_ENDIAN
+
 /* Define if running under cygwin */
 #undef CYGWIN_HACKS
 
@@ -227,6 +230,12 @@
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
+/* little endian */
+#undef L_ENDIAN
+
+/* Define under HPUX */
+#undef MD32_XARRAY
+
 /* Define if running on OSF/1 platform */
 #undef OSF1_HACKS
 
@@ -280,10 +289,6 @@
 
 /* Define if windows */
 #undef WIN32_LEAN_AND_MEAN
-
-/* Define to 1 if your processor stores words with the most significant byte
-   first (like Motorola and SPARC, unlike Intel and VAX). */
-#undef WORDS_BIGENDIAN
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
