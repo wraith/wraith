@@ -846,7 +846,7 @@ void queue_server(int which, char *buf, int len)
 	}
       }
 
-    q = malloc(sizeof(struct msgq));
+    q = calloc(1, sizeof(struct msgq));
     if (qnext)
       q->next = h->head;
     else

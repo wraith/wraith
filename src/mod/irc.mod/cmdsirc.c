@@ -548,9 +548,9 @@ void cmd_mdop(struct userrec *u, int idx, char *par)
   }
 
 
-  targets = malloc(chan->channel.members * sizeof(memberlist *));
+  targets = calloc(1, chan->channel.members * sizeof(memberlist *));
 
-  chanbots = malloc(chan->channel.members * sizeof(memberlist *));
+  chanbots = calloc(1, chan->channel.members * sizeof(memberlist *));
 
 ContextNote("!mdop!");
   for (m = chan->channel.member; m; m = m->next)

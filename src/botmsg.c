@@ -174,7 +174,7 @@ void botnet_send_cmdpass(int idx, char *cmd, char *pass)
   if (tands > 0) {
     char *buf = NULL;
 
-    buf = malloc(strlen(cmd) + strlen(pass) + 5 + 1);
+    buf = calloc(1, strlen(cmd) + strlen(pass) + 5 + 1);
     sprintf(buf, "cp %s %s\n", cmd, pass);
     send_tand_but(idx, buf, strlen(buf));
     free(buf);

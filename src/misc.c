@@ -550,7 +550,7 @@ char *str_escape(const char *str, const char div, const char mask)
   char		*buf = NULL, *b = NULL;
   const char	*s = NULL;
 
-  b = buf = malloc(buflen + 1);
+  b = buf = calloc(1, buflen + 1);
 
   if (!buf)
     return NULL;

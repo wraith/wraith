@@ -389,7 +389,7 @@ int write_userfile(int idx)
   if (userlist == NULL)
     return 1;			/* No point in saving userfile */
 
-  new_userfile = malloc(strlen(userfile) + 5);
+  new_userfile = calloc(1, strlen(userfile) + 5);
   sprintf(new_userfile, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");

@@ -33,7 +33,7 @@ static int do_op(char *nick, struct chanset_t *chan, int delay, int force)
   } else {
     char *tmp = NULL;
     
-    tmp = malloc(strlen(chan->name) + 200);
+    tmp = calloc(1, strlen(chan->name) + 200);
     makeopline(chan, nick, tmp);
     dprintf(DP_MODE, tmp);
     free(tmp);
@@ -464,7 +464,7 @@ flush_mode(chan, QUICK);
     /* tell other bots to set jointime to 0 and join */
     char *buf = NULL;
    
-    buf = malloc(strlen(chan->dname) + 3 + 1);
+    buf = calloc(1, strlen(chan->dname) + 3 + 1);
 
     sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);

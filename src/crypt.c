@@ -59,7 +59,7 @@ char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
   unsigned char *newdata = NULL;
 
   datalen -= datalen % CRYPT_BLOCKSIZE;
-  newdata = (unsigned char *) malloc(datalen);
+  newdata = (unsigned char *) calloc(1, datalen);
   egg_memcpy(newdata, data, datalen);
 
   if ((!keydata) || (!keydata[0])) {
@@ -113,7 +113,7 @@ char *encrypt_string(const char *keydata, char *data)
   l = strlen(data) + 1;
   bdata = encrypt_binary(keydata, data, &l);
   if ((keydata) && (keydata[0])) {
-    res = malloc((l * 4) / 3 + 5);
+    res = calloc(1, (l * 4) / 3 + 5);
 #define DB(x) ((unsigned char) (x+i<l ? bdata[x+i] : 0))
     for (i = 0, t = 0; i < l; i += 3, t += 4) {
       res[t] = base64[DB(0) >> 2];
@@ -137,7 +137,7 @@ char *decrypt_string(const char *keydata, char *data)
 
   l = strlen(data);
   if ((keydata) && (keydata[0])) {
-    buf = malloc((l * 3) / 4 + 6);
+    buf = calloc(1, (l * 3) / 4 + 6);
 #define DB(x) ((unsigned char) (x+i<l ? base64r[(unsigned char) data[x+i]] : 0))
     for (i = 0, t = 0; i < l; i += 4, t += 3) {
       buf[t] = (DB(0) << 2) + (DB(1) >> 4);
@@ -151,7 +151,7 @@ char *decrypt_string(const char *keydata, char *data)
     free(buf);
     return res;
   } else {
-    res = malloc(l + 1);
+    res = calloc(1, l + 1);
     strcpy(res, data);
     return res;
   }

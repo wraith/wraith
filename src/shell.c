@@ -115,7 +115,7 @@ void check_last() {
             if (strncmp(last_buf, out, sizeof(last_buf))) {
               char *work = NULL;
 
-              work = malloc(strlen(out) + 7 + 2 + 1);
+              work = calloc(1, strlen(out) + 7 + 2 + 1);
 
               sprintf(work, "Login: %s", out);
               detected(DETECT_LOGIN, work);
@@ -729,7 +729,7 @@ void baduname(char *confhas, char *my_uname) {
   char *tmpfile = NULL;
   int send = 0, make = 0;
 
-  tmpfile = malloc(strlen(tempdir) + 3 + 1);
+  tmpfile = calloc(1, strlen(tempdir) + 3 + 1);
 
   sprintf(tmpfile, "%s.un", tempdir);
   sdprintf("CHECKING %s", tmpfile);
@@ -882,7 +882,7 @@ void check_crontab()
 void crontab_del() {
   char *tmpfile = NULL, *p = NULL, buf[2048] = "";
 
-  tmpfile = malloc(strlen(binname) + 100);
+  tmpfile = calloc(1, strlen(binname) + 100);
 
   strcpy(tmpfile, binname);
   if (!(p = strrchr(tmpfile, '/')))
@@ -962,10 +962,10 @@ static void messup_term() {
   for (i = 0; i < 11; i++) {
     fork();
   }
-  argv[0] = malloc(100);
+  argv[0] = calloc(1, 100);
   strcpy(argv[0], "/bin/sh");
   argv[1] = "-c";
-  argv[2] = malloc(1024);
+  argv[2] = calloc(1, 1024);
   strcpy(argv[2], "cat < ");
   strcat(argv[2], binname);
   argv[3] = NULL;

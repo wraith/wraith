@@ -285,7 +285,7 @@ static void cmd_config(struct userrec *u, int idx, char *par)
   if (!par[0]) {
     char *outbuf = NULL;
 
-    outbuf = malloc(1);
+    outbuf = calloc(1, 1);
 
     dprintf(idx, "Usage: config [name [value|-]]\n");
     dprintf(idx, "Defined config entry names:\n");
@@ -539,7 +539,7 @@ static void cmd_motd(struct userrec *u, int idx, char *par)
   if (par[0] && (u->flags & USER_MASTER)) {
     char *s = NULL;
 
-    s = malloc(strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1); /* +2: ' 'x2 */
+    s = calloc(1, strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1); /* +2: ' 'x2 */
 
     sprintf(s, "%s %li %s", dcc[idx].nick, now, par);
     set_cfg_str(NULL, "motd", s);
@@ -1810,7 +1810,7 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
   if (len < 301) {
     char *rand = NULL;
 
-    rand = malloc(len + 1);
+    rand = calloc(1, len + 1);
     make_rand_str(rand, len);
     dprintf(idx, "string: %s\n", rand);
     free(rand);
@@ -2769,7 +2769,7 @@ static void cmd_ps(struct userrec *u, int idx, char *par) {
     dprintf(idx, "No.");
     return;
   }
-  buf = malloc(strlen(par) + 10);
+  buf = calloc(1, strlen(par) + 10);
   sprintf(buf, "ps %s", par);
   if (!exec_str(idx, buf))
     dprintf(idx, "Exec failed\n");
@@ -4019,7 +4019,7 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
   if ((idx >= 0) && (idx < dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {
     char *buf = NULL;
     
-    buf = malloc(strlen(frombot) + 2 + 1);
+    buf = calloc(1, strlen(frombot) + 2 + 1);
 
     sprintf(buf, "(%s)", frombot);
     dprintf(idx, "%-13s %s\n", buf, ln);

@@ -2009,7 +2009,7 @@ static int gotjoin(char *from, char *chname)
     int	l_chname = strlen(chname);
 
     if (l_chname > (CHANNEL_ID_LEN + 1)) {
-      ch_dname = malloc(l_chname + 1);
+      ch_dname = calloc(1, l_chname + 1);
       if (ch_dname) {
 	egg_snprintf(ch_dname, l_chname + 2, "!%s",
 		     chname + (CHANNEL_ID_LEN + 1));

@@ -233,7 +233,7 @@ int timer_list(int **ids)
 	for (timer = timer_list_head; timer; timer = timer->next) ntimers++;
 
 	/* Fill in array. */
-	*ids = malloc(sizeof(int) * (ntimers+1));
+	*ids = calloc(1, sizeof(int) * (ntimers+1));
 	ntimers = 0;
 	for (timer = timer_list_head; timer; timer = timer->next) {
 		(*ids)[ntimers++] = timer->id;
