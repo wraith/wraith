@@ -1526,60 +1526,55 @@ void check_botnet_pings()
   tand_t *bot = NULL;
 
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_BOT && (dcc[i].status & STAT_PINGED)) {
-      char s[1024] = "";
-
-      putlog(LOG_BOTS, "*", "%s: %s", BOT_PINGTIMEOUT, dcc[i].nick);
-      bot = findbot(dcc[i].nick);
-      bots = bots_in_subtree(bot);
-      users = users_in_subtree(bot);
-      simple_sprintf(s, "%s: %s (lost %d bot%s and %d user%s)", BOT_PINGTIMEOUT,
-		       dcc[i].nick, bots, (bots != 1) ? "s" : "",
-		       users, (users != 1) ? "s" : "");
-      chatout("*** %s\n", s);
-      botnet_send_unlinked(i, dcc[i].nick, s);
-      killsock(dcc[i].sock);
-      lostdcc(i);
-    }
-  }
-  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_BOT) {
-      botnet_send_ping(i);
-      dcc[i].status |= STAT_PINGED;
-    }
-  }
-  for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && (dcc[i].type == &DCC_BOT) && (dcc[i].status & STAT_LEAF)) {
-      tand_t *via = findbot(dcc[i].nick);
+      if (dcc[i].status & STAT_LEAF)) {
+        tand_t *via = findbot(dcc[i].nick);
 
-      for (bot = tandbot; bot; bot = bot->next) {
-	if ((via == bot->via) && (bot != via)) {
-	  /* Not leaflike behavior */
-	  if (dcc[i].status & STAT_WARNED) {
-	    char s[1024] = "";
+        for (bot = tandbot; bot; bot = bot->next) {
+          if ((via == bot->via) && (bot != via)) {
+	    /* Not leaflike behavior */
+	    if (dcc[i].status & STAT_WARNED) {
+	      char s[1024] = "";
 
-	    putlog(LOG_BOTS, "*", "%s %s (%s).", BOT_DISCONNECTED,
-		   dcc[i].nick, BOT_BOTNOTLEAFLIKE);
-	    dprintf(i, "bye %s\n", BOT_BOTNOTLEAFLIKE);
-	    bot = findbot(dcc[i].nick);
-	    bots = bots_in_subtree(bot);
-	    users = users_in_subtree(bot);
-	    simple_sprintf(s, "%s %s (%s) (lost %d bot%s and %d user%s)",
+	      putlog(LOG_BOTS, "*", "%s %s (%s).", BOT_DISCONNECTED, dcc[i].nick, BOT_BOTNOTLEAFLIKE);
+              dprintf(i, "bye %s\n", BOT_BOTNOTLEAFLIKE);
+	      bot = findbot(dcc[i].nick);
+	      bots = bots_in_subtree(bot);
+	      users = users_in_subtree(bot);
+	      simple_sprintf(s, "%s %s (%s) (lost %d bot%s and %d user%s)",
 	    		   BOT_DISCONNECTED, dcc[i].nick, BOT_BOTNOTLEAFLIKE,
 			   bots, (bots != 1) ? "s" : "", users, (users != 1) ?
 			   "s" : "");
-	    chatout("*** %s\n", s);
-	    botnet_send_unlinked(i, dcc[i].nick, s);
-	    killsock(dcc[i].sock);
-	    lostdcc(i);
-	  } else {
-            putlog(LOG_MISC, "*", "I am lame, and am now rejecting %s", bot->bot);
-	    botnet_send_reject(i, conf.bot->nick, NULL, bot->bot,
-			       NULL, NULL);
-	    dcc[i].status |= STAT_WARNED;
-	  }
-	} else
-	  dcc[i].status &= ~STAT_WARNED;
+	      chatout("*** %s\n", s);
+	      botnet_send_unlinked(i, dcc[i].nick, s);
+	      killsock(dcc[i].sock);
+	      lostdcc(i);
+	    } else {
+	      botnet_send_reject(i, conf.bot->nick, NULL, bot->bot, NULL, NULL);
+              dcc[i].status |= STAT_WARNED;
+            }
+	  } else
+	    dcc[i].status &= ~STAT_WARNED;
+        }
+      }
+
+      if (dcc[i].status & STAT_PINGED) {
+        char s[1024] = "";
+
+        putlog(LOG_BOTS, "*", "%s: %s", BOT_PINGTIMEOUT, dcc[i].nick);
+        bot = findbot(dcc[i].nick);
+        bots = bots_in_subtree(bot);
+        users = users_in_subtree(bot);
+        simple_sprintf(s, "%s: %s (lost %d bot%s and %d user%s)", BOT_PINGTIMEOUT,
+  		       dcc[i].nick, bots, (bots != 1) ? "s" : "",
+		       users, (users != 1) ? "s" : "");
+        chatout("*** %s\n", s);
+        botnet_send_unlinked(i, dcc[i].nick, s);
+        killsock(dcc[i].sock);
+        lostdcc(i);
+      } else {
+        botnet_send_ping(i);
+        dcc[i].status |= STAT_PINGED;
       }
     }
   }
