@@ -56,6 +56,19 @@ void spawnbots() {
     }
   }
 }
+
+int killbot(char *botnick) {
+  conf_bot *bot = NULL;
+
+  for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
+    if (bot->nick[0] == '/') continue;
+    else if (!egg_strcasecmp(botnick, bot->nick)) {
+      if (bot->pid)
+        return kill(bot->pid, SIGKILL);
+    }
+  }
+  return -1;
+}
 #endif /* LEAF */
 
 #ifdef S_CONFEDIT

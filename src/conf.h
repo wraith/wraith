@@ -48,6 +48,7 @@ enum {
 
 #ifdef LEAF
 void spawnbots();
+int killbot(char *);
 #endif /* LEAF */
 #ifdef S_CONFEDIT
 void confedit(char *);

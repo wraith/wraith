@@ -69,6 +69,9 @@ const char	egg_version[1024] = "1.1.0";
 #ifdef S_CONFEDIT
 int	do_confedit = 0;		/* show conf menu if -C */
 #endif /* S_CONFEDIT */
+#ifdef LEAF
+char    do_killbot[21] = "";
+#endif /* LEAF */
 int 	localhub = 1; 		/* we set this to 0 if we get a -B */
 int 	role;
 int 	loading = 0;
@@ -210,7 +213,7 @@ static void show_help()
   printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
 */
   printf(format, STR("-h"), STR("Display this help listing"));
-/*   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
+  printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9")); */
   printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
   printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -n)"));
@@ -220,11 +223,11 @@ static void show_help()
 
 
 #ifdef LEAF
-# define PARSE_FLAGS "2B:Cd:De:Eg:G:L:P:hnstv"
+# define PARSE_FLAGS "2B:Cd:De:Eg:G:k:L:P:hnstv"
 #else /* !LEAF */
 # define PARSE_FLAGS "2Cd:De:Eg:G:hnstv"
 #endif /* HUB */
-#define FLAGS_CHECKPASS "dDeEgGhntv"
+#define FLAGS_CHECKPASS "dDeEgGhkntv"
 static void dtx_arg(int argc, char *argv[])
 {
   int i;
@@ -253,6 +256,10 @@ static void dtx_arg(int argc, char *argv[])
 #endif /* S_CONFEDIT */
       case 'h':
         show_help();
+#ifdef LEAF
+      case 'k':		/* kill bot */
+        strncpyz(do_killbot, optarg, sizeof do_killbot);
+#endif /* LEAF */
       case 'n':
 	backgrd = 0;
 	break;
@@ -676,8 +683,16 @@ int main(int argc, char **argv)
   fillconf(&conf);
 #ifdef LEAF
   if (localhub) {
-    spawnbots();
-    if (updating) exit(0); /* just let cron restart us bleh */
+    if (do_killbot[0]) {
+      if (killbot(do_killbot) == 0)
+          printf("'%s' successfully killed.\n", do_killbot);
+      else
+        printf("Error killing '%s'\n", do_killbot);
+      exit(0);
+    } else {
+      spawnbots();
+      if (updating) exit(0); /* just let cron restart us bleh */
+    }
   }
 #endif /* LEAF */
   free_conf();
