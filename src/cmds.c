@@ -556,9 +556,7 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   dprintf(idx, STR(" * $bpasswd$b for beta testing, and his dedication to finding bugs.\n"));
   dprintf(idx, STR(" * $bextort$b for finding misc bugs.\n"));
   dprintf(idx, STR(" * $bpgpkeys$b for finding bugs, and providing input.\n"));
-  dprintf(idx, STR(" * $bqFox$b for providing an mIRC $md5() alias, not requiring a dll or >6.03\n"));
-  dprintf(idx, STR(" * $bSith_Lord$b helping test ipv6 on the bot (admin@elitepackets.com)\n"));
-  dprintf(idx, STR(" * $bExcelsior$b for finding a bug on BSD with the ipv6, and for celdrop which inspired many features.\n"));
+  dprintf(idx, STR(" * $bExcelsior$b for celdrop which inspired many features.\n"));
   dprintf(idx, STR(" * $bsyt$b for giving me inspiration to code a more secure bot.\n"));
   dprintf(idx, STR(" * $bBlackjac$b for helping with the bx auth script with his Sentinel script.\n"));
   dprintf(idx, STR(" * $bMystikal$b for various bugs\n"));
