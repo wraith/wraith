@@ -98,8 +98,7 @@ struct chan_t {
 #endif /* S_AUTOLOCK */
 #ifdef G_BACKUP
   int backup_time;              /* If non-0, set +backup when now>backup_time */
-#endif
-
+#endif /* G_BACKUP */
 };
 
 #define CHANINV    BIT0		/* +i					*/
@@ -167,6 +166,7 @@ struct chanset_t {
 /* Chanchar template
  *char temp[121];
  */
+  char topic[121];
   char added_by[NICKLEN];	/* who added the channel? */
   time_t added_ts;		/* ..and when? */
   /* queued mode changes: */
@@ -178,12 +178,6 @@ struct chanset_t {
   int bytes;			/* total bytes so far			*/
   int compat;			/* to prevent mixing old/new modes	*/
   struct {
-    char * target;
-  } opqueue[24];
-  struct {
-    char * target;
-  } deopqueue[24];
-  struct {
     char *op;
     int type;
   } cmode[MODES_PER_LINE_MAX];                 /* parameter-type mode changes -        */
@@ -193,10 +187,6 @@ struct chanset_t {
   int floodnum[FLOOD_CHAN_MAX];
   char deopd[NICKLEN];		/* last person deop'd (must change	*/
   int opreqtime[5];             /* remember when ops was requested */
-#ifdef HUB
-  char topic[91];
-#endif
-
 };
 
 /* behavior modes for the channel */
