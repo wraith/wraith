@@ -40,6 +40,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
 
 
 extern struct cfg_entry CFG_LOGIN, CFG_BADPROCESS, CFG_PROCESSLIST, CFG_PROMISC,
@@ -114,6 +115,27 @@ int readconf()
 {
 //  conf.uid = READ;
 //  conf.uname = strdup(READ);
+  return 0;
+}
+
+int clear_tmp()
+{
+  DIR *tmp;
+  struct dirent *dir_ent;
+  if (!(tmp = opendir(tempdir))) return 1;
+  while ((dir_ent = readdir(tmp))) {
+    if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
+       && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
+      char *file = malloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      file[0] = 0;
+      strcat(file, tempdir);
+      strcat(file, dir_ent->d_name);
+      file[strlen(file)] = 0;
+      unlink(file);
+      free(file);
+    }
+  }
+  closedir(tmp);
   return 0;
 }
 

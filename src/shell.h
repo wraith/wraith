@@ -59,6 +59,7 @@ typedef struct conf_b {
 
 
 #ifndef MAKING_MODS
+int clear_tmp();
 void init_conf();
 void free_conf();
 int readconf();

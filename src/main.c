@@ -43,7 +43,6 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #endif /* S_ANTITRACE */
-#include <dirent.h>
 #include <pwd.h>
 
 #include "chan.h"
@@ -199,27 +198,6 @@ void checkpass()
       fatal(STR("incorrect password."), 0);
     checkedpass = 1;
   }
-}
-
-int clear_tmp()
-{
-  DIR *tmp;
-  struct dirent *dir_ent;
-  if (!(tmp = opendir(tempdir))) return 1;
-  while ((dir_ent = readdir(tmp))) {
-    if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
-       && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
-      char *file = malloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
-      file[0] = 0;
-      strcat(file, tempdir);
-      strcat(file, dir_ent->d_name);
-      file[strlen(file)] = 0;
-      unlink(file);
-      free(file);
-    }
-  }
-  closedir(tmp);
-  return 0;
 }
 
 void got_ed(char *which, char *in, char *out)
