@@ -22,9 +22,6 @@
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #undef HAVE_ARPA_INET_H
 
-/* Define to 1 if you have the `bzero' function. */
-#undef HAVE_BZERO
-
 /* Define to 1 if you have the `clock' function. */
 #undef HAVE_CLOCK
 
@@ -38,9 +35,6 @@
 /* Define to 1 if you have the `dprintf' function. */
 #undef HAVE_DPRINTF
 
-/* Define to 1 if you have the `dup2' function. */
-#undef HAVE_DUP2
-
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
@@ -50,23 +44,11 @@
 /* Define to 1 if you have the `fsync' function. */
 #undef HAVE_FSYNC
 
-/* Define to 1 if you have the `getcwd' function. */
-#undef HAVE_GETCWD
-
 /* Define to 1 if you have the `getdtablesize' function. */
 #undef HAVE_GETDTABLESIZE
 
-/* Define to 1 if you have the `gethostbyaddr' function. */
-#undef HAVE_GETHOSTBYADDR
-
-/* Define to 1 if you have the `gethostbyname' function. */
-#undef HAVE_GETHOSTBYNAME
-
 /* Define to 1 if you have the `gethostbyname2' function. */
 #undef HAVE_GETHOSTBYNAME2
-
-/* Define to 1 if you have the `gethostname' function. */
-#undef HAVE_GETHOSTNAME
 
 /* Define to 1 if you have the `getipnodebyname' function. */
 #undef HAVE_GETIPNODEBYNAME
@@ -74,20 +56,11 @@
 /* Define to 1 if you have the `getpagesize' function. */
 #undef HAVE_GETPAGESIZE
 
-/* Define to 1 if you have the `getpass' function. */
-#undef HAVE_GETPASS
-
 /* Define to 1 if you have the `getrusage' function. */
 #undef HAVE_GETRUSAGE
 
-/* Define to 1 if you have the `gettimeofday' function. */
-#undef HAVE_GETTIMEOFDAY
-
 /* Define to 1 if you have the `inet_aton' function. */
 #undef HAVE_INET_ATON
-
-/* Define to 1 if you have the `inet_ntoa' function. */
-#undef HAVE_INET_NTOA
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -124,9 +97,6 @@
    to 0 otherwise. */
 #undef HAVE_MALLOC
 
-/* Define to 1 if you have the `mbrlen' function. */
-#undef HAVE_MBRLEN
-
 /* Define to 1 if you have the `memcpy' function. */
 #undef HAVE_MEMCPY
 
@@ -136,14 +106,8 @@
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
 
-/* Define to 1 if you have the `mkdir' function. */
-#undef HAVE_MKDIR
-
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
-
-/* Define to 1 if you have the `munmap' function. */
-#undef HAVE_MUNMAP
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
@@ -167,17 +131,8 @@
    and to 0 otherwise. */
 #undef HAVE_REALLOC
 
-/* Define to 1 if you have the `realpath' function. */
-#undef HAVE_REALPATH
-
 /* Define to 1 if you have the `rename' function. */
 #undef HAVE_RENAME
-
-/* Define to 1 if you have the `select' function. */
-#undef HAVE_SELECT
-
-/* Define to 1 if you have the `setlocale' function. */
-#undef HAVE_SETLOCALE
 
 /* Define to 1 if you have the `setpgid' function. */
 #undef HAVE_SETPGID
@@ -190,9 +145,6 @@
 
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
-
-/* Define to 1 if you have the `socket' function. */
-#undef HAVE_SOCKET
 
 /* Define if you have support for socklen_t */
 #undef HAVE_SOCKLEN_T
@@ -216,12 +168,6 @@
 /* Define to 1 if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
 
-/* Define to 1 if you have the `strchr' function. */
-#undef HAVE_STRCHR
-
-/* Define to 1 if you have the `strerror' function. */
-#undef HAVE_STRERROR
-
 /* Define to 1 if you have the `strftime' function. */
 #undef HAVE_STRFTIME
 
@@ -233,18 +179,6 @@
 
 /* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP
-
-/* Define to 1 if you have the `strpbrk' function. */
-#undef HAVE_STRPBRK
-
-/* Define to 1 if you have the `strrchr' function. */
-#undef HAVE_STRRCHR
-
-/* Define to 1 if you have the `strstr' function. */
-#undef HAVE_STRSTR
-
-/* Define to 1 if you have the `strtol' function. */
-#undef HAVE_STRTOL
 
 /* Define to 1 if `tm_zone' is member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_ZONE
@@ -294,9 +228,6 @@
 /* Define to 1 if you don't have `tm_zone' but do have the external array
    `tzname'. */
 #undef HAVE_TZNAME
-
-/* Define to 1 if you have the `tzset' function. */
-#undef HAVE_TZSET
 
 /* Define to 1 if you have the `uname' function. */
 #undef HAVE_UNAME
