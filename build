@@ -11,10 +11,11 @@ echo "*** wraith v${ver}/${numver} builder ***"
 
 usage() 
 {
-    echo "Usage: $0 [-d] [-c] [-t dir] type"
+    echo "Usage: $0 [-d] [-c] [-T] [-t dir] type"
     echo "	-c	   - Cleans up old binaries/files before compile 	(default: off)"
     echo "	-d	   - Builds a debug package. 				(default: off)"
     echo "	-t dir	   - Where to search for TCL libraries. 		(usually not needed)"
+    echo "	-T	   - Builds TCL if it is not on the system		(defauly: off)"
     echo "	type	   - One of the following: all, leaf, hub."
 }
 
@@ -25,13 +26,15 @@ leaf=0
 clean=0
 type=
 tcldir=
+buildtcl=0
 
-while getopts t:cdh opt ; do
+while getopts t:Tcdh opt ; do
         case "$opt" in
 	c) clean=1 ;;
         d) debug=1 ;;
 	t) tcldir="$OPTARG" ;;
 	h) usage; exit 0 ;;
+	T) buildtcl=1 ;;
         *) usage; exit 1 ;;
 
         esac
@@ -39,6 +42,13 @@ done
 
 shift $(($OPTIND - 1))
 
+if [ $buildtcl = "1" ]; then
+ echo "Hold tight"
+ misc/maketcl
+ rm -rf tcl8.4.4*
+ echo "Done. (You must run ./build again with normal parameters)"
+ exit 0
+fi
 
 if test -z "$1"; then
  usage
