@@ -1,0 +1,3 @@
+#!/bin/sh
+
+./build -C -p $1 -s bryan@endurance.quadspeedi.net:public_html/builds/ all

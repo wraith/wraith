@@ -239,6 +239,7 @@ elif ! [ $scp = 0 ]; then
   chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} hub.$os-$ver${d}-${builddate} leaf.$os-$ver${d}-${builddate}
+  ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
 fi
 
 

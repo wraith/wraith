@@ -5,7 +5,6 @@ This is a summary of ChangeLog basically.
 * Wrote new 'response' code for misc stuff like kick reasons, and dcc responses...
 * Removed all compile time defines, moved to .config/.chanset
   -Moved PSCLOAK entries to misc/responses.txt
-  -Dccauth is now a .config option (1/0)
 * Removed MESSUPTERM feature, no one used it anyway.
 * All dates are UTC (GMT) now.
 * cmd_newleaf was sharing the new bot incorrectly.
@@ -16,6 +15,7 @@ This is a summary of ChangeLog basically.
   If authkey is set in .config, auth hashing will occur.
   If a user has a SECPASS set (default: random), auth hashing will occur.
   If either of the above two things are empty, auth hashing will NOT occur.
+  -Dccauth is now a .config option (1/0)
 * CLOAK_MIRC now randomly will add a SECOND version reply; some lame mIRC script.
 * Users are no longer auto-opped on netsplit rejoin.
 * Passwords now require: 2lcase, 2ucase, 8 chars.
