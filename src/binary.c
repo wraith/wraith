@@ -352,12 +352,32 @@ check_sum(const char *fname, const char *cfgfile)
   }
 }
 
+static bool check_bin_initialized(const char *fname)
+{
+  int i = 0;
+  size_t len = strlen(fname) + 3 + 1;
+  char *path = (char *) calloc(1, len);
+
+  egg_snprintf(path, len, "%s -p", fname);
+
+  i = system(path);
+  free(path);
+  if (i != -1 && WEXITSTATUS(i) == 4)
+    return 1;
+
+  return 0;
+}
+
 void write_settings(const char *fname, int die)
 {
   MD5_CTX ctx;
   char *hash = NULL;
-
   MD5_Init(&ctx);
+
+
+  /* see if the binary is already initialized or not */
+  bool initialized = check_bin_initialized(fname);
+
   if ((hash = bin_checksum(fname, WRITE_CHECKSUM, &ctx))) {
     printf("* Wrote settings to: %s.\n", fname);
     if (die == -1)			/* only bother decrypting if we aren't about to exit */
