@@ -1597,7 +1597,7 @@ See also: bots, bottree
  
 %{+m}See also: restart%{-}
 ::unlink
-###  $bunlink$b <bot|*>
+###  $bunlink$b <bot|*> [reason]
    This disconnects the specified bot from the botnet (assuming it was linked
    in the first place). Some bots (sharebots in particular) might not allow you
    to unlink them. If "*" is specified as the parameter, all bots will be
