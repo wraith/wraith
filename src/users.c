@@ -825,6 +825,7 @@ int readuserfile(const char *file, struct userrec **ret)
            if (channel_add(resultbuf, chan, options) != OK) {
              putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
              free(my_ptr);
+             fclose(f);
              return 0;
            }
            free(my_ptr);
@@ -947,6 +948,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	  if (!attr[0] || !pass[0]) {
 	    putlog(LOG_MISC, "*", "* %s line: %d!", USERF_CORRUPT, line);
 	    lasthand[0] = 0;
+            fclose(f);
             return 0;
 	  } else {
             int isbot = 0;

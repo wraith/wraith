@@ -306,6 +306,7 @@ void eof_dcc_fork_send(int idx)
       dcc[y].status &= ~STAT_GETTINGU;
     }
     putlog(LOG_BOTS, "*", "Failed binary transfer.");
+    unlink(dcc[idx].u.xfer->filename);
   } else {
     neterror(s1);
     if (!quiet_reject)
@@ -401,13 +402,11 @@ static void eof_dcc_send(int idx)
 	  (dcc[x].type->flags & DCT_BOT))
 	y = x;
     if (y) {
-      putlog(LOG_BOTS, "*",TRANSFER_USERFILE_LOST,
-	     dcc[y].nick);
+      putlog(LOG_BOTS, "*",TRANSFER_USERFILE_LOST, dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
       /* Drop that bot */
       dprintf(y, "bye\n");
-      egg_snprintf(s, sizeof s,TRANSFER_USERFILE_DISCON,
-		   dcc[y].nick);
+      egg_snprintf(s, sizeof s,TRANSFER_USERFILE_DISCON, dcc[y].nick);
       botnet_send_unlinked(y, dcc[y].nick, s);
       chatout("*** %s %s\n", dcc[y].nick, s);
 
@@ -625,8 +624,7 @@ void dcc_get(int idx, char *buf, int len)
 	dcc[y].status &= ~STAT_SENDINGU;
         dcc[y].status |= STAT_UPDATED;
       }
-      putlog(LOG_BOTS, "*", "Completed binary file send to %s",
-	     dcc[y].nick);
+      putlog(LOG_BOTS, "*", "Completed binary file send to %s", dcc[y].nick);
       xnick[0] = 0;
 #ifdef HUB
       bupdating = 0;
@@ -651,8 +649,7 @@ void dcc_get(int idx, char *buf, int len)
   l = dcc_block;
   if (l == 0 || dcc[idx].status + l > dcc[idx].u.xfer->length)
     l = dcc[idx].u.xfer->length - dcc[idx].status;
-  dcc[idx].u.xfer->block_pending = pump_file_to_sock(dcc[idx].u.xfer->f,
-						     dcc[idx].sock, l);
+  dcc[idx].u.xfer->block_pending = pump_file_to_sock(dcc[idx].u.xfer->f, dcc[idx].sock, l);
   dcc[idx].status += l;
 }
 
