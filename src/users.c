@@ -815,6 +815,7 @@ int readuserfile(char *file, struct userrec **ret)
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
           if (Tcl_Eval(interp, s) != TCL_OK) {
            putlog(LOG_MISC, "*", "Tcl error in userfile on line %d", line);
+           putlog(LOG_MISC, "*", "Line: %s", s);
            putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
            return 1;
           }
