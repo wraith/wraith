@@ -327,7 +327,7 @@ char *btoh(const unsigned char *md, int len)
   char buf[100] = "", *ret = NULL;
 
   for (i = 0; i < len; i++)
-    sprintf(&(buf[i*2]), "%02X", md[i]);
+    sprintf(&(buf[i*2]), "%02x", md[i]);
 
   ret = buf;
   return ret;
