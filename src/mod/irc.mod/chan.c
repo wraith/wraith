@@ -975,7 +975,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
 
       check_exemptlist(chan, s);
       quickban(chan, m->userhost);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : response(RES_KUSER));
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : response(RES_KICKBAN));
       m->flags |= SENTKICK;
     }
   }
@@ -1652,7 +1652,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
            /* && target_priority(chan, m, 0) */
       /* cya later! */
       quickban(chan, userhost);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_KUSER));
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_KICKBAN));
       m->flags |= SENTKICK;
     }
   }
@@ -2409,7 +2409,7 @@ static int gotjoin(char *from, char *chname)
 	    check_exemptlist(chan, from);
 	    quickban(chan, from);
 	    p = (char *) get_user(&USERENTRY_COMMENT, m->user);
-            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, nick, bankickprefix, response(RES_KUSER));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, nick, bankickprefix, response(RES_KICKBAN));
 	    m->flags |= SENTKICK;
 	  }
 	}
