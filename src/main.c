@@ -1904,7 +1904,7 @@ Context;
     xx = sockgets(buf, &i); 
     if (xx >= 0) {		/* Non-error */
       int idx;
-printf("READ: %s\n", buf);
+
       for (idx = 0; idx < dcc_total; idx++)
 	if (dcc[idx].sock == xx) {
 	  if (dcc[idx].type && dcc[idx].type->activity) {
