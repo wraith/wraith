@@ -1589,7 +1589,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
   }
   correct_handle(nick);
   strcpy(dcc[idx].nick, nick);
-  if (glob_bot(fr)) {
+  if (dcc[idx].user->bot) {
     if (!egg_strcasecmp(conf.bot->nick, dcc[idx].nick)) {
       putlog(LOG_BOTS, "*", DCC_MYBOTNETNICK, dcc[idx].host);
       killsock(dcc[idx].sock);
