@@ -546,7 +546,7 @@
 #define add_builtins ((void (*)(const char *, cmd_t *))global[344])
 /* 345 - 348 */
 #define rem_builtins ((void (*)(const char *, cmd_t *))global[345])
-#define bind_table_find ((bind_table_t *(*)(const char *))global[346])
+#define bind_table_lookup ((bind_table_t *(*)(const char *))global[346])
 #define check_bind ((int (*)(bind_table_t *, const char *, struct flag_record *, ...))global[347])
 
 extern int lfprintf(FILE *, char *, ...);

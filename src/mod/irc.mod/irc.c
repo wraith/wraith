@@ -1671,8 +1671,8 @@ char *irc_start(Function * global_funcs)
 	       traced_rfccompliant, NULL);
   add_tcl_ints(myints);
 
-  BT_ctcp = bind_table_find("ctcp");
-  BT_ctcr = bind_table_find("ctcr");
+  BT_ctcp = bind_table_lookup("ctcp");
+  BT_ctcr = bind_table_lookup("ctcr");
 
   /* Add our commands to the imported tables. */
   add_builtins("dcc", irc_dcc);

@@ -608,7 +608,7 @@ Function global_table[] =
   (Function) bind_table_add,
   (Function) add_builtins,
   (Function) rem_builtins,
-  (Function) bind_table_find,
+  (Function) bind_table_lookup,
   (Function) check_bind
 
 };

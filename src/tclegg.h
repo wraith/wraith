@@ -13,30 +13,6 @@
 #  include "proto.h"		/* This file needs this */
 #endif
 
-/* Match types for check_bind
- */
-#define MATCH_PARTIAL       0
-#define MATCH_EXACT         1
-#define MATCH_MASK          2
-#define MATCH_CASE          3
-
-/* Bitwise 'or' these:
- */
-#define BIND_USE_ATTR       0x04
-#define BIND_STACKABLE      0x08
-#define BIND_HAS_BUILTINS   0x10
-#define BIND_WANTRET        0x20
-#define BIND_ALTER_ARGS     0x40
-
-/* Return values
- */
-#define BIND_NOMATCH    0
-#define BIND_AMBIGUOUS  1
-#define BIND_MATCHED    2	/* But the proc couldn't be found */
-#define BIND_EXECUTED   3
-#define BIND_EXEC_LOG   4	/* Proc returned 1 -> wants to be logged */
-#define BIND_EXEC_BRK   5	/* Proc returned BREAK (quit) */
-
 /* Used for stub functions:
  */
 

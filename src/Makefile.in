@@ -173,7 +173,7 @@ main.o: main.c stringfix main.h build.h ../config.h conf.h lang.h eggdrop.h flag
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
- modules.h mod/modvals.h tandem.h  egg_timer.h traffic.h
+ modules.h mod/modvals.h tandem.h  egg_timer.h egg_timer.c traffic.h
 match.o: match.c stringfix ./main.h
 mem.o: mem.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h proto.h \
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
@@ -199,7 +199,7 @@ net.o: net.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h proto.
  ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h users.h \
  compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h compat/snprintf.h \
  compat/memset.h compat/memcpy.h compat/strcasecmp.h compat/strftime.h \
- egg_timer.h traffic.h
+ egg_timer.h egg_timer.c traffic.h
 rfc1459.o: rfc1459.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
@@ -222,7 +222,7 @@ tclhash.o: tclhash.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \
  compat/snprintf.h compat/memset.h compat/memcpy.h compat/strcasecmp.h \
- compat/strftime.h match.c
+ compat/strftime.h match.c egg_timer.h egg_timer.c
 tclmisc.o: tclmisc.c stringfix main.h ../config.h conf.h lang.h eggdrop.h flags.h \
  proto.h ../lush.h misc_file.h cmdt.h tclegg.h tclhash.h chan.h \
  users.h compat/compat.h compat/inet_aton.h compat/inet_ntop.h ../src/main.h \

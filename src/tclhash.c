@@ -13,6 +13,7 @@
 #include "chan.h"
 #include "users.h"
 #include "match.c"
+#include "egg_timer.h"
 
 extern struct dcc_t	*dcc;
 extern struct userrec	*userlist;
@@ -40,6 +41,12 @@ static bind_table_t *BT_chof;
 static bind_table_t *BT_chpt;
 static bind_table_t *BT_chjn;
 
+/* Variables to control garbage collection. */
+static int check_bind_executing = 0;
+static int already_scheduled = 0;
+static void bind_table_really_del(bind_table_t *table);
+static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry);
+
 
 extern cmd_t C_dcc[];
 
@@ -64,6 +71,39 @@ void binds_init(void)
 	add_builtins("dcc", C_dcc);
 }
 
+static int internal_bind_cleanup()
+{
+	bind_table_t *table, *next_table;
+	bind_entry_t *entry, *next_entry;
+
+	for (table = bind_table_list_head; table; table = next_table) {
+		next_table = table->next;
+		if (table->flags & BIND_DELETED) {
+			bind_table_really_del(table);
+			continue;
+		}
+		for (entry = table->entries; entry; entry = next_entry) {
+			next_entry = entry->next;
+			if (entry->flags & BIND_DELETED) bind_entry_really_del(table, entry);
+		}
+	}
+	already_scheduled = 0;
+	return(0);
+}
+
+static void schedule_bind_cleanup()
+{
+	egg_timeval_t when;
+
+	if (already_scheduled) return;
+	already_scheduled = 1;
+
+	when.sec = 0;
+	when.usec = 0;
+	timer_create(&when, internal_bind_cleanup);
+}
+
+
 void kill_binds(void)
 {
 	while (bind_table_list_head) bind_table_del(bind_table_list_head);
@@ -77,8 +117,7 @@ bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, in
 		if (!strcmp(table->name, name)) return(table);
 	}
 	/* Nope, we have to create a new one. */
-	table = (bind_table_t *)malloc(sizeof(*table));
-	table->chains = NULL;
+	table = (bind_table_t *)calloc(1, sizeof(*table));
 	table->name = strdup(name);
 	table->nargs = nargs;
 	table->syntax = strdup(syntax);
@@ -92,8 +131,6 @@ bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, in
 void bind_table_del(bind_table_t *table)
 {
 	bind_table_t *cur, *prev;
-	bind_chain_t *chain, *next_chain;
-	bind_entry_t *entry, *next_entry;
 
 	for (prev = NULL, cur = bind_table_list_head; cur; prev = cur, cur = cur->next) {
 		if (!strcmp(table->name, cur->name)) break;
@@ -106,99 +143,131 @@ void bind_table_del(bind_table_t *table)
 	}
 
 	/* Now delete it. */
-	free(table->name);
-	for (chain = table->chains; chain; chain = next_chain) {
-		next_chain = chain->next;
-		for (entry = chain->entries; entry; entry = next_entry) {
-			next_entry = entry->next;
-			free(entry->function_name);
-			free(entry);
-		}
-		free(chain);
+	if (check_bind_executing) {
+		table->flags |= BIND_DELETED;
+		schedule_bind_cleanup();
+	}
+	else {
+		bind_table_really_del(table);
 	}
 }
 
-bind_table_t *bind_table_find(const char *name)
+static void bind_table_really_del(bind_table_t *table)
+{
+	bind_entry_t *entry, *next;
+
+	free(table->name);
+	for (entry = table->entries; entry; entry = next) {
+		next = entry->next;
+		free(entry->function_name);
+		free(entry->mask);
+		free(entry);
+	}
+	free(table);
+}
+
+bind_table_t *bind_table_lookup(const char *name)
 {
 	bind_table_t *table;
 
 	for (table = bind_table_list_head; table; table = table->next) {
-		if (!strcmp(table->name, name)) break;
+		if (!(table->flags & BIND_DELETED) && !strcmp(table->name, name)) break;
 	}
 	return(table);
 }
 
-int bind_entry_del(bind_table_t *table, const char *flags, const char *mask, const char *function_name, void *cdata)
+/* Look up a bind entry based on either function name or id. */
+bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, const char *function_name)
 {
-	bind_chain_t *chain;
-	bind_entry_t *entry, *prev;
+	bind_entry_t *entry;
 
-	/* Find the correct mask entry. */
-	for (chain = table->chains; chain; chain = chain->next) {
-		if (!strcmp(chain->mask, mask)) break;
+	for (entry = table->entries; entry; entry = entry->next) {
+		if (entry->flags & BIND_DELETED) continue;
+		if (entry->id == id || (!strcmp(entry->mask, mask) && !strcmp(entry->function_name, function_name))) break;
 	}
-	if (!chain) return(1);
+	return(entry);
+}
 
-	/* Now find the function name in this mask entry. */
-	for (prev = NULL, entry = chain->entries; entry; prev = entry, entry = entry->next) {
-		if (!strcmp(entry->function_name, function_name)) break;
-	}
-	if (!entry) return(1);
+int bind_entry_del(bind_table_t *table, int id, const char *mask, const char *function_name, void *cdata)
+{
+	bind_entry_t *entry;
+
+	entry = bind_entry_lookup(table, id, mask, function_name);
+	if (!entry) return(-1);
+
 
 	/* Delete it. */
-	if (prev) prev->next = entry->next;
-	else chain->entries = entry->next;
+	if (check_bind_executing) {
+		entry->flags |= BIND_DELETED;
+		schedule_bind_cleanup();
+	}
+	else bind_entry_really_del(table, entry);
+	return(0);
+}
+
+static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry)
+{
+	if (entry->next) entry->next->prev = entry->prev;
+	if (entry->prev) entry->prev->next = entry->next;
+	else table->entries = entry->next;
 	free(entry->function_name);
+	free(entry->mask);
+	memset(entry, 0, sizeof(*entry));
 	free(entry);
+}
+
+/* Modify a bind entry's flags and mask. */
+int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char *function_name, const char *newflags, const char *newmask)
+{
+	bind_entry_t *entry;
+
+	entry = bind_entry_lookup(table, id, mask, function_name);
+	if (!entry) return(-1);
+
+	/* Modify it. */
+	free(entry->mask);
+	entry->mask = strdup(newmask);
+	entry->user_flags.match = FR_GLOBAL | FR_CHAN;
+	break_down_flags(newflags, &(entry->user_flags), NULL);
 
 	return(0);
 }
 
 int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
-	bind_chain_t *chain;
-	bind_entry_t *entry;
+	bind_entry_t *entry, *old_entry;
 
-	/* Find the chain (mask) first. */
-	for (chain = table->chains; chain; chain = chain->next) {
-		if (!strcmp(chain->mask, mask)) break;
-	}
+	old_entry = bind_entry_lookup(table, -1, mask, function_name);
 
-	/* Create if it doesn't exist. */
-	if (!chain) {
-		chain = (bind_chain_t *)malloc(sizeof(*chain));
-		chain->entries = NULL;
-		chain->mask = strdup(mask);
-		chain->next = table->chains;
-		table->chains = chain;
-	}
-
-	/* If it's stackable */
-	if (table->flags & BIND_STACKABLE) {
-		/* Search for specific entry. */
-		for (entry = chain->entries; entry; entry = entry->next) {
-			if (!strcmp(entry->function_name, function_name)) break;
+	if (old_entry) {
+		if (table->flags & BIND_STACKABLE) {
+			entry = (bind_entry_t *)calloc(1, sizeof(*entry));
+			entry->prev = old_entry;
+			entry->next = old_entry->next;
+			old_entry->next = entry;
+			if (entry->next) entry->next->prev = entry;
+		}
+		else {
+			entry = old_entry;
+			free(entry->function_name);
+			free(entry->mask);
 		}
 	}
 	else {
-		/* Nope, just use first entry. */
-		entry = chain->entries;
+		for (old_entry = table->entries; old_entry && old_entry->next; old_entry = old_entry->next) {
+			; /* empty loop */
+		}
+		entry = (bind_entry_t *)calloc(1, sizeof(*entry));
+		if (old_entry) old_entry->next = entry;
+		else table->entries = entry;
+		entry->prev = old_entry;
 	}
 
-	/* If we have an old entry, re-use it. */
-	if (entry) free(entry->function_name);
-	else {
-		/* Otherwise, create a new entry. */
-		entry = (bind_entry_t *)malloc(sizeof(*entry));
-		entry->next = chain->entries;
-		chain->entries = entry;
-	}
-
+	entry->mask = strdup(mask);
 	entry->function_name = strdup(function_name);
 	entry->callback = callback;
 	entry->client_data = client_data;
-	entry->hits = 0;
-	entry->bind_flags = bind_flags;
+	entry->flags = bind_flags;
 
 	entry->user_flags.match = FR_GLOBAL | FR_CHAN;
 	break_down_flags(flags, &(entry->user_flags), NULL);
@@ -216,92 +285,121 @@ int findanyidx(register int z)
   return -1;
 }
 
-int check_bind(bind_table_t *table, const char *match, struct flag_record *_flags, ...)
+/* Execute a bind entry with the given argument list. */
+static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 {
-	int *al; /* Argument list */
-	struct flag_record *flags;
-	bind_chain_t *chain;
-	bind_entry_t *entry;
-	int len, cmp, r, hits;
-	Function cb;
+	bind_entry_t *prev;
 
-	/* Experimental way to not use va_list... */
-	flags = _flags;
-	al = (int *)&_flags;
+	/* Give this entry a hit. */
+	entry->nhits++;
 
-	/* Save the length for strncmp */
-	len = strlen(match);
+	/* Search for the last entry that isn't deleted. */
+	for (prev = entry->prev; prev; prev = prev->prev) {
+		if (!(prev->flags & BIND_DELETED) && (prev->nhits >= entry->nhits)) break;
+	}
 
-	/* Keep track of how many binds execute (or would) */
-	hits = 0;
+	/* See if this entry is more popular than the preceding one. */
+	if (entry->prev != prev) {
+		/* Remove entry. */
+		if (entry->prev) entry->prev->next = entry->next;
+		else table->entries = entry->next;
+		if (entry->next) entry->next->prev = entry->prev;
+
+		/* Re-add in correct position. */
+		if (prev) {
+			entry->next = prev->next;
+			if (prev->next) prev->next->prev = entry;
+			prev->next = entry;
+		}
+
+		else {
+			entry->next = table->entries;
+			table->entries = entry;
+		}
+		entry->prev = prev;
+		if (entry->next) entry->next->prev = entry;
+	}
+
+	/* Does the callback want client data? */
+	if (entry->flags & BIND_WANTS_CD) {
+		*al = entry->client_data;
+	}
+	else al++;
+
+	return entry->callback(al[0], al[1], al[2], al[3], al[4], al[5], al[6], al[7], al[8], al[9]);
+}		
+
+int check_bind(bind_table_t *table, const char *match, struct flag_record *flags, ...)
+{
+	void *args[11];
+	bind_entry_t *entry, *next;
+	int i, cmp, retval;
+	va_list ap;
+
+	check_bind_executing++;
+
+	va_start(ap, flags);
+	for (i = 1; i <= table->nargs; i++) {
+		args[i] = va_arg(ap, void *);
+	}
+	va_end(ap);
 
 	/* Default return value is 0 */
-	r = 0;
+	retval = 0;
 
-	/* For each chain in the table... */
-	for (chain = table->chains; chain; chain = chain->next) {
-		/* Test to see if it matches. */
-		if (table->match_type & MATCH_PARTIAL) {
-			if (table->match_type & MATCH_CASE) cmp = strncmp(match, chain->mask, len);
-			else cmp = egg_strncasecmp(match, chain->mask, len);
+	/* If it's a partial bind, we have to find the closest match. */
+	if (table->match_type & MATCH_PARTIAL) {
+		int len, tie;
+
+		len = strlen(match);
+		tie = 0;
+		for (entry = table->entries; entry; entry = entry->next) {
+			if (entry->flags & BIND_DELETED) continue;
+			if (!strncasecmp(match, entry->mask, len)) {
+				if (tie) return(-1);
+				tie = 1;
+			}
 		}
-		else if (table->match_type & MATCH_MASK) {
-			cmp = !wild_match_per((unsigned char *)chain->mask, (unsigned char *)match);
+		if (entry && !tie) retval = bind_entry_exec(table, entry, args);
+		else retval = -1;
+		check_bind_executing--;
+		return(retval);
+	}
+
+	for (entry = table->entries; entry; entry = next) {
+		next = entry->next;
+		if (entry->flags & BIND_DELETED) continue;
+
+		if (table->match_type & MATCH_MASK) {
+			cmp = !wild_match_per((unsigned char *)entry->mask, (unsigned char *)match);
 		}
 		else {
-			if (table->match_type & MATCH_CASE) cmp = strcmp(match, chain->mask);
-			else cmp = egg_strcasecmp(match, chain->mask);
+			if (table->match_type & MATCH_CASE) cmp = strcmp(entry->mask, match);
+			else cmp = strcasecmp(entry->mask, match);
 		}
 		if (cmp) continue; /* Doesn't match. */
 
-		/* Ok, now call the entries for this chain. */
-		/* If it's not stackable, There Can Be Only One. */
-		for (entry = chain->entries; entry; entry = entry->next) {
-			/* Check flags. */
-			if (table->match_type & BIND_USE_ATTR) {
-				if (table->match_type & BIND_STRICT_ATTR) cmp = flagrec_eq(&entry->user_flags, flags);
-				else cmp = flagrec_ok(&entry->user_flags, flags);
-				if (!cmp) continue;
-			}
+		/* Check flags. */
+		if (table->flags & BIND_USE_ATTR) {
+			if (table->flags & BIND_STRICT_ATTR) cmp = flagrec_eq(&entry->user_flags, flags);
+			else cmp = flagrec_ok(&entry->user_flags, flags);
+			if (!cmp) continue;
+		}
 
-			/* This is a hit */
-			hits++;
-		
-			cb = entry->callback;
-			if (entry->bind_flags & BIND_WANTS_CD) {
-				al[0] = (int) entry->client_data;
-				table->nargs++;
-			}
-			else al++;
-
-			/* Default return value is 0. */
-			r = 0;
-
-			switch (table->nargs) {
-				case 0: r = cb(); break;
-				case 1: r = cb(al[0]); break;
-				case 2: r = cb(al[0], al[1]); break;
-				case 3: r = cb(al[0], al[1], al[2]); break;
-				case 4: r = cb(al[0], al[1], al[2], al[3]); break;
-				case 5: r = cb(al[0], al[1], al[2], al[3], al[4]); break;
-				case 6: r = cb(al[0], al[1], al[2], al[3], al[4], al[5]); break;
-				case 7: r = cb(al[0], al[1], al[2], al[3], al[4], al[5], al[6]);
-				case 8: r = cb(al[0], al[1], al[2], al[3], al[4], al[5], al[6], al[7]);
-			}
-
-			if (entry->bind_flags & BIND_WANTS_CD) table->nargs--;
-			else al--;
-
-			if ((table->flags & BIND_BREAKABLE) && (r & BIND_RET_BREAK)) return(r);
+		retval = bind_entry_exec(table, entry, args);
+		if ((table->flags & BIND_BREAKABLE) && (retval & BIND_RET_BREAK)) {
+			check_bind_executing--;
+			return(retval);
 		}
 	}
-	return(r);
+	check_bind_executing--;
+	return(retval);
 }
 
 /* Check for tcl-bound dcc command, return 1 if found
  * dcc: proc-name <handle> <sock> <args...>
  */
-void check_dcc(const char *cmd, int idx, const char *args)
+void check_dcc(const char *cmd, int idx, const char *text)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
   int x;
@@ -342,10 +440,11 @@ void check_dcc(const char *cmd, int idx, const char *args)
     }
   }
 #endif /* S_DCCPASS */
-//    dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
-  x = check_bind(BT_dcc, cmd, &fr, dcc[idx].user, idx, args);
-  if (x & BIND_RET_LOG) {
-     putlog(LOG_CMDS, "*", "#%s# %s %s", dcc[idx].nick, cmd, args);
+  x = check_bind(BT_dcc, cmd, &fr, dcc[idx].user, idx, text);
+  if (x == 0)
+    dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
+  else if (x & BIND_RET_LOG) {
+     putlog(LOG_CMDS, "*", "#%s# %s %s", dcc[idx].nick, cmd, text);
   }
 }
 
@@ -455,7 +554,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 	char name[50];
 	bind_table_t *table;
 
-	table = bind_table_find(table_name);
+	table = bind_table_lookup(table_name);
 	if (!table) return;
 
 	for (; cmds->name; cmds++) {
@@ -476,11 +575,11 @@ void rem_builtins(const char *table_name, cmd_t *cmds)
 	char name[50];
 	bind_table_t *table;
 
-	table = bind_table_find(table_name);
+	table = bind_table_lookup(table_name);
 	if (!table) return;
 
 	for (; cmds->name; cmds++) {
 		sprintf(name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
-		bind_entry_del(table, cmds->flags, cmds->name, name, NULL);
+		bind_entry_del(table, -1, cmds->name, name, NULL);
 	}
 }
