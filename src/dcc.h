@@ -151,14 +151,12 @@ struct dupwait_info {
 #define STAT_CHAT    BIT2    /* in file-system but may return        */
 #define STAT_TELNET  BIT3    /* connected via telnet                 */
 #define STAT_PARTY   BIT4    /* only on party line via 'p' flag      */
-#define STAT_BOTONLY BIT5    /* telnet on bots-only connect          */
-#define STAT_USRONLY BIT6    /* telnet on users-only connect         */
-#define STAT_PAGE    BIT7    /* page output to the user              */
-#define STAT_COLOR   BIT8    /* Color enabled for user */
-#define STAT_BANNER  BIT9    /* show banner on login? */
-#define STAT_CHANNELS BIT10  /* show channels on login? */
-#define STAT_BOTS    BIT11   /* Show bots linked on login? */
-#define STAT_WHOM    BIT12   /* show .whom on login? */
+#define STAT_PAGE    BIT5    /* page output to the user              */
+#define STAT_COLOR   BIT6    /* Color enabled for user */
+#define STAT_BANNER  BIT7    /* show banner on login? */
+#define STAT_CHANNELS BIT8  /* show channels on login? */
+#define STAT_BOTS    BIT9   /* Show bots linked on login? */
+#define STAT_WHOM    BIT10   /* show .whom on login? */
 
 /* For stripping out mIRC codes
  */

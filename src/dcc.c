@@ -1511,22 +1511,7 @@ static void dcc_telnet_id(int idx, char *buf, int atr)
   }
   dcc[idx].user = get_user_by_handle(userlist, buf);
   get_user_flagrec(dcc[idx].user, &fr, NULL);
-  /* Make sure users-only/bots-only connects are honored */
-  if ((dcc[idx].status & STAT_BOTONLY) && !glob_bot(fr)) {
-    dprintf(idx, "This telnet port is for bots only.\n");
-    putlog(LOG_BOTS, "*", DCC_NONBOT, dcc[idx].host);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-    return;
-  }
-  if ((dcc[idx].status & STAT_USRONLY) && glob_bot(fr)) {
-    dprintf(idx, "error Only users may connect at this port.\n");
-    putlog(LOG_BOTS, "*", DCC_NONUSER, dcc[idx].host);
-    killsock(dcc[idx].sock);
-    lostdcc(idx);
-    return;
-  }
-  dcc[idx].status &= ~(STAT_BOTONLY | STAT_USRONLY);
+
 /*  if (!ok && glob_party(fr))
     ok = 1;*/
    ok = 1;
@@ -1552,7 +1537,7 @@ static void dcc_telnet_id(int idx, char *buf, int atr)
   strcpy(dcc[idx].nick, buf);
   if (glob_bot(fr)) {
     if (!egg_strcasecmp(conf.bot->nick, dcc[idx].nick)) {
-      dprintf(idx, "error You cannot link using my conf.bot->nick.\n");
+      dprintf(idx, "error You cannot link using my nick.\n");
       putlog(LOG_BOTS, "*", DCC_MYBOTNETNICK, dcc[idx].host);
       killsock(dcc[idx].sock);
       lostdcc(idx);
@@ -1912,11 +1897,8 @@ static void dcc_telnet_got_ident(int i, char *host)
   egg_bzero(dcc[i].u.chat, sizeof(struct chat_info));
 
   /* Copy acceptable-nick/host mask */
-  dcc[i].status = STAT_TELNET | STAT_ECHO;
-  if (!strcmp(dcc[idx].nick, "(bots)"))
-    dcc[i].status |= STAT_BOTONLY;
-  if (!strcmp(dcc[idx].nick, "(users)"))
-    dcc[i].status |= STAT_USRONLY;
+  dcc[i].status = (STAT_TELNET | STAT_ECHO | STAT_COLOR | STAT_BANNER | STAT_CHANNELS | STAT_BOTS | STAT_WHOM);
+
   /* Copy acceptable-nick/host mask */
   strncpyz(dcc[i].nick, dcc[idx].host, HANDLEN);
   dcc[i].timeval = now;

@@ -14,6 +14,7 @@ This is a summary of ChangeLog basically.
 10.Fixed msgc_voice, was checking for +v instead of +q.
 11.Fixed cmd_botcmd not matching '?' correctly again!
 12.Added console settings for what to show on login: banner, channels, bots, whom.
+13.Changed default .color to on, and all of the new settings are default on as well.
 
 1.1.5
 
