@@ -3934,6 +3934,11 @@ static void cmd_dns(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# dns %s", dcc[idx].nick, par);
 
+  if (!egg_strcasecmp(par, "flush")) {
+    dprintf(idx, "Flushing cache...\n");
+    dns_cache_flush();
+    return;
+  }
   dprintf(idx, "Looking up %s ...\n", par);
   egg_dns_lookup(par, 0, my_dns_callback, (void *) idx);
 }

@@ -539,6 +539,15 @@ static int cache_find(const char *query)
 	return (-1);
 }
 
+void dns_cache_flush()
+{
+  for (int i = 0; i < ncache; i++) {
+    cache_del(i);
+    if (i == ncache) break;
+    i--;
+  }
+}
+
 static int read_thing(char *buf, char *ip)
 {
 	int skip, len;

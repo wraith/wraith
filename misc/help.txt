@@ -416,13 +416,13 @@ See also: link
         3           Remove user
       
       $bbad-cookie$b             Missing or invalid cookie in bot op line.
-
+ 
       $bcookie-time-slack$b      How many seconds off of botnet timesync is allowed
                                  in cookies.
       $bmanop$b                  Users who op manually in a -manop chan.
       $bmdop$b                   Users who mass deop.
       $bmop$b                    Users who mass op in a -mop chan.
-
+ 
      The following can be set + or - (e.g. .chanset #channel -enforcebans)
         $bautoop$b         Bots that are +y will auto-op all users with 
                        op access to the channel.
@@ -705,7 +705,7 @@ See also: echo, page, strip
     Deleted bots that are running will be killed.
   
     'change' syntax is the same as 'add'
-
+ 
     'list' shows all the bots currently in the config.
  
     'set' allows changing some variables in the config.
@@ -881,6 +881,10 @@ See also: op, console
    This kills the bot. The bot goes offline immediately, logging who issued
    the 'die' command. You shouldn't have to use this too often. If you specify
    a reason, it is logged, otherwise the reason is "authorized by <handle>".
+::dns
+###  $bdns$b <hostname/ip/flush>
+   Resolves the given hostname/ip
+   If "flush" is the specified hostname, the cache will be flushed.
 ::down:
 ###  $bdown$b <channel>
    All linked bots will deop themselves in the specified channel. They
