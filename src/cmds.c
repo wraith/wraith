@@ -2248,7 +2248,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
 
   for (i = 0; i < dcc_total; i++) {
 #ifdef LEAF
-    if (!ischanhub() && u == conf.bot->u) {
+    if (dcc[idx].type && dcc[idx].type == &DCC_CHAT && !ischanhub() && u == conf.bot->u) {
       dprintf(i, "I am no longer a chathub..\n\n");
       do_boot(i, conf.bot->nick, "I am no longer a chathub.\n\n");
     }
