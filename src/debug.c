@@ -54,8 +54,8 @@ void setlimits()
   setrlimit(RLIMIT_STACK, &stacklim);
 */
   /* do NOT dump a core. */
-  plim.rlim_cur = 40;
-  plim.rlim_max = 40;
+  plim.rlim_cur = 60;
+  plim.rlim_max = 60;
   corelim.rlim_cur = 0;
   corelim.rlim_max = 0;
 #else /* DEBUG */
