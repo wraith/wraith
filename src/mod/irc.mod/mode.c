@@ -1273,7 +1273,7 @@ static int gotmode(char *from, char *msg)
       /* Now we got modes[], chan, ufrom, nfrom, hfrom, and count of each relevant mode */
 
       /* check for mdop */
-      if ((chan) && (deops >= 3)) {
+      if ((chan) && (deops >= 3) && me_op(chan)) {
         if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
           if (ROLE_KICK_MDOP) {
             m = ismember(chan, nfrom);
@@ -1290,7 +1290,7 @@ static int gotmode(char *from, char *msg)
         }
       }
       /* check for mop */
-      if (chan && (ops >= 3)) {
+      if (chan && (ops >= 3) && me_op(chan)) {
         if (channel_nomop(chan)) {
           if ((!ufrom) || (!(ufrom->flags & USER_BOT))) {
             if (ROLE_KICK_MDOP) {
@@ -1309,7 +1309,7 @@ static int gotmode(char *from, char *msg)
         }
       }
 
-      if (chan && ops && (ufrom) && (ufrom->flags & USER_BOT) && !channel_fastop(chan) && !channel_take(chan)) {
+      if (chan && me_op(chan) && ops && (ufrom) && (ufrom->flags & USER_BOT) && !channel_fastop(chan) && !channel_take(chan)) {
         int isbadop = 0;
         if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) ||
             (strncmp(modes[1], "-b", 2))) {
@@ -1414,7 +1414,7 @@ static int gotmode(char *from, char *msg)
         } else
           putlog(LOG_DEBUG, "@", STR("Good op: %s"), msg);
       }
-      if ((ops) && chan && !channel_manop(chan) && (ufrom) &&
+      if ((ops) && chan && me_op(chan) && !channel_manop(chan) && (ufrom) &&
           !(ufrom->flags & USER_BOT)) {
         char trg[NICKLEN] = "";
         n = i = 0;
