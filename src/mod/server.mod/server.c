@@ -1211,13 +1211,15 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
   
   if (!ischanhub())
-    return 0;
+    return BIND_RET_LOG;
+
   action = newsplit(&text);
   param = newsplit(&text);
   ip = newsplit(&text);
   prt = newsplit(&text);
   if (egg_strcasecmp(action, "CHAT") || egg_strcasecmp(object, botname) || !u)
-    return 0;
+    return BIND_RET_LOG;
+
   get_user_flagrec(u, &fr, 0);
   ok = 1;
   if (ischanhub() && !glob_chuba(fr))
@@ -1237,17 +1239,15 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
   } else if (atoi(prt) < 1024 || atoi(prt) > 65535) {
     /* Invalid port */
     if (!quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :%s (invalid port)\n", nick,
-	      DCC_CONNECTFAILED1);
-    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED3,
-	   nick, from);
+      dprintf(DP_HELP, "NOTICE %s :%s (invalid port)\n", nick, DCC_CONNECTFAILED1);
+    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED3, nick, from);
   } else {
     if (!sanitycheck_dcc(nick, from, ip, prt))
-      return 1;
+      return BIND_RET_BREAK;
     i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
     if (i < 0) {
       putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick, ip);
-      return 1;
+      return BIND_RET_BREAK;
     }
 #ifdef USE_IPV6
     if (hostprotocol(ip) == AF_INET6 && sockprotocol(dcc[i].sock) == AF_INET6) {
@@ -1279,7 +1279,7 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
       dcc_chat_hostresolved(i); /* Don't try to look it up */
 #endif /* USE_IPV6 */
   }
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static void dcc_chat_hostresolved(int i)

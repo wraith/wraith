@@ -153,7 +153,6 @@ static int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0, 0, 0};
   get_user_flagrec(u, &fr, NULL);
-
   return check_bind(table, keyword, &fr, nick, uhost, u, dest, keyword, args);
 }
 
@@ -420,7 +419,7 @@ static int gotmsg(char *from, char *msg)
           } else {
 	    u = get_user_by_host(from);
 	    if (!ignoring || trigger_on_ignore) {
-	      if (!check_bind_ctcp(nick, uhost, u, to, code, ctcp) && !ignoring) {
+	      if (check_bind_ctcp(nick, uhost, u, to, code, ctcp) == BIND_RET_LOG && !ignoring) {
                 if ((lowercase_ctcp && !egg_strcasecmp(code, "DCC")) || (!lowercase_ctcp && !strcmp(code, "DCC"))) {
                   /* If it gets this far unhandled, it means that
                    * the user is totally unknown.
@@ -440,8 +439,20 @@ static int gotmsg(char *from, char *msg)
                   } else {
                     putlog(LOG_MISC, "*", "Refused DCC %s: %s", code, from);
                   }
-		}
+                } else if ((lowercase_ctcp && !egg_strcasecmp(code, "CHAT")) || (!lowercase_ctcp && !strcmp(code, "CHAT"))) {
+                  if (!quiet_reject) {
+                    if (u)
+                      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, "I'm not accepting call at the moment.");
+                    else
+                      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_NOSTRANGERS);
+                  }
+                  if (!ischanhub())
+                    putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
+                  else
+                    putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSED, from);
+                }
 	      }
+
 	      if (!strcmp(code, "ACTION")) {
                 putlog(LOG_MSGS, "*", "Action to %s: %s %s", to, nick, ctcp);
               } else {

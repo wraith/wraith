@@ -440,14 +440,14 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
   else
     idletime = 0;
   if (!(pwd = getpwuid(conf.uid)))
-    return 0;
+    return BIND_RET_LOG;
 #ifndef GECOS_DELIMITER
 #define GECOS_DELIMITER ','
 #endif
   if ((p = strchr(pwd->pw_gecos, GECOS_DELIMITER)) != NULL)
     *p = 0;
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s (%s@%s) Idle %ld second%s\001\n"), nick, keyword, pwd->pw_gecos, pwd->pw_name, (char *) (strchr(botuserhost, '@') + 1), idletime, (idletime == 1) ? "" : "s");
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -456,14 +456,14 @@ static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, c
 
   strncpyz(reply, text, sizeof(reply));
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, reply);
-  return 1;
+  return BIND_RET_BREAK;
 }
 static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
 
   if (strlen(text) <= 80)       /* bitchx ignores > 80 */
     dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, text);
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -501,14 +501,14 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s%s\001\n"), nick, keyword, ctcpversion, s);
 /* if mirc send second reply here.. */
 
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_WHOAMI(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
 
   dprintf(DP_HELP, STR("NOTICE %s :\002BitchX\002: Access Denied\n"), nick);
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -522,7 +522,7 @@ static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, cha
       *p = 0;
     dprintf(DP_HELP, STR("NOTICE %s :\002BitchX\002: I'm not on %s or I'm not opped\n"), nick, chan);
   }
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -539,14 +539,14 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
       if (chan->status & CHAN_ACTIVE) {
         if (!egg_strcasecmp(chan->name, chname)) {
           dprintf(DP_HELP, STR("NOTICE %s :\002BitchX\002: Access Denied\n"), nick);
-          return 0;
+          return BIND_RET_LOG;
         }
       }
       chan = chan->next;
     }
     dprintf(DP_HELP, STR("NOTICE %s :\002BitchX\002: I'm not on that channel\n"), nick);
   }
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -558,7 +558,7 @@ static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *objec
     strcat(ctcpuserinfo, " ?");
   }
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, ctcpuserinfo);
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -615,10 +615,10 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *obj
     strcpy(buf, STR("UPTIME my uptime"));
   else {
     dprintf(DP_HELP, STR("NOTICE %s :\001ERRMSG %s is not a valid function\001\n"), nick, text);
-    return 0;
+    return BIND_RET_LOG;
   }
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, buf);
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -627,7 +627,7 @@ static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, c
 
   strncpyz(tms, ctime(&now), sizeof(tms));
   dprintf(DP_HELP, STR("NOTICE %s :\001%s %s\001\n"), nick, keyword, tms);
-  return 1;
+  return BIND_RET_BREAK;
 }
 
 
@@ -635,12 +635,12 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
 {
   int i, ix = (-1);
 
-  if (!ischanhub())
-    return 0;
+  if (!ischanhub()) 
+    return BIND_RET_LOG;
 
     if (u_pass_match(u, "-")) {
       simple_sprintf(ctcp_reply, "%s\001ERROR no password set\001", ctcp_reply);
-      return 1;
+      return BIND_RET_BREAK;
     }
 
     for (i = 0; i < dcc_total; i++) {
@@ -657,7 +657,7 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
        * -poptix 5/1/1997 */
       dprintf(DP_HELP, "PRIVMSG %s :\001DCC CHAT chat %lu %u\001\n", nick, iptolong(getmyip()), dcc[ix].port);
     }
-    return 1;
+    return BIND_RET_BREAK;
 }
 
 static cmd_t myctcp[] =

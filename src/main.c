@@ -603,7 +603,9 @@ static void startup_checks() {
                  conffile.binname);
     sdprintf(STR("newbin at: %s"), newbin);
     
+    ContextNote("realpath()");
     realpath(binname, real);		/* get the realpath of binname */
+    ContextNote("realpath(): Success");
     /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
     if (strcmp(binname, newbin) && strcmp(newbin, real)) { 		/* if wrong path and new path != current */
       int ok = 1;

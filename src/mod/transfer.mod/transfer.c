@@ -1676,8 +1676,8 @@ static void stats_add_upload(struct userrec *u, unsigned long bytes)
 
 /* This handles DCC RESUME requests.
  */
-static int ctcp_DCC_RESUME(char *nick, char *from, char *handle,
-			   char *object, char *keyword, char *text)
+/* NOT EVEN USED :D 
+static int ctcp_DCC_RESUME(char *nick, char *from, char *handle, char *object, char *keyword, char *text)
 {
   char *action = NULL, *fn = NULL, buf[512] = "", *msg = buf;
   int i, port;
@@ -1686,32 +1686,30 @@ static int ctcp_DCC_RESUME(char *nick, char *from, char *handle,
   strcpy(msg, text);
   action = newsplit(&msg);
   if (egg_strcasecmp(action, "RESUME"))
-    return 0;
+    return BIND_RET_LOG;
   fn = newsplit(&msg);
   port = atoi(newsplit(&msg));
   offset = my_atoul(newsplit(&msg));
-  /* Search for existing SEND */
+  // Search for existing SEND 
   for (i = 0; i < dcc_total; i++)
     if ((dcc[i].type == &DCC_GET_PENDING) &&
 	(!rfc_casecmp(dcc[i].nick, nick)) && (dcc[i].port == port))
       break;
-  /* No matching transfer found? */
+  // No matching transfer found?
   if (i == dcc_total)
-    return 0;
+    return BIND_RET_LOG;
 
   if (dcc[i].u.xfer->length <= offset) {
     char *p = strrchr(dcc[i].u.xfer->origname, '/');
 
-    dprintf(DP_HELP,TRANSFER_DCC_IGNORED,
-	    nick, p ? p + 1 : dcc[i].u.xfer->origname);
-    return 0;
+    dprintf(DP_HELP,TRANSFER_DCC_IGNORED, nick, p ? p + 1 : dcc[i].u.xfer->origname);
+    return BIND_RET_LOG;
   }
   dcc[i].u.xfer->type = XFER_RESUME_PEND;
   dcc[i].u.xfer->offset = offset;
-  dprintf(DP_HELP, "PRIVMSG %s :\001DCC ACCEPT %s %d %u\001\n", nick,
-	  fn, port, offset);
-  /* Now we wait for the client to connect. */
-  return 1;
+  dprintf(DP_HELP, "PRIVMSG %s :\001DCC ACCEPT %s %d %u\001\n", nick, fn, port, offset);
+  // Now we wait for the client to connect.
+  return BIND_RET_BREAK;
 }
 
 static cmd_t transfer_ctcps[] =
@@ -1719,11 +1717,11 @@ static cmd_t transfer_ctcps[] =
   {"DCC",	"",	ctcp_DCC_RESUME,	"transfer:DCC"},
   {NULL,	NULL,	NULL,			NULL}
 };
-
+*/
 /* Add our CTCP bindings if the server module is loaded. */
 static int server_transfer_setup(char *mod)
 {
-  add_builtins("ctcp", transfer_ctcps);
+  /* add_builtins("ctcp", transfer_ctcps); */
   return 1;
 }
 

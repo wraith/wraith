@@ -778,12 +778,14 @@ char *homedir()
     else {
       struct passwd *pw = NULL;
  
-      ContextNote("Calling getpwuid");
+      ContextNote("getpwuid()");
       pw = getpwuid(myuid);
       egg_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
+      ContextNote("getpwuid(): Success");
     }
-    ContextNote("Calling realpath");
+    ContextNote("realpath()");
     realpath(tmp, homedir); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+    ContextNote("realpath(): Success");
   }
   return homedir;
 }
@@ -793,11 +795,16 @@ char *my_username()
   static char username[DIRMAX] = "";
 
   if (!username || (username && !username[0])) {
-    struct passwd *pw = NULL;
+    if (conf.username)
+      egg_snprintf(username, sizeof username, "%s", conf.username);
+    else {
+      struct passwd *pw = NULL;
 
-    ContextNote("Calling getpwuid");
-    pw = getpwuid(myuid);
-    egg_snprintf(username, sizeof username, "%s", pw->pw_name);
+      ContextNote("getpwuid()");
+      pw = getpwuid(myuid);
+      ContextNote("getpwuid(): Success");
+      egg_snprintf(username, sizeof username, "%s", pw->pw_name);
+    }
   }
   return username;
 }

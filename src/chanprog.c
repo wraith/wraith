@@ -694,6 +694,9 @@ int shouldjoin(struct chanset_t *chan)
     return 0; 
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
+ 
+  if (!chan || (chan && !chan->name || (chan->name && !chan->name[0])))
+    return 0;
 
   get_user_flagrec(get_user_by_handle(userlist, conf.bot->nick), &fr, chan->name);
   return (!channel_inactive(chan)
