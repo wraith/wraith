@@ -362,6 +362,11 @@ dcc_chatter(int idx)
   }
 }
 
+void trim_dcclist(int top_index)
+{
+  dcc_total = top_index + 1;    
+}
+
 /* Mark an entry as lost and deconstruct it's contents. It will be securely
  * removed from the dcc list in the main loop.
  */

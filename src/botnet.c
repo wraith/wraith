@@ -1599,12 +1599,13 @@ struct dcc_table DCC_PRE_RELAY =
  */
 void check_botnet_pings()
 {
-  int i;
-  int bots, users;
+  int i, bots, users, top_index = 0;
   tand_t *bot = NULL;
 
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_BOT) {
+   if (dcc[i].type) {
+     top_index = i;
+    if (dcc[i].type == &DCC_BOT) {
       if (dcc[i].status & STAT_LEAF) {
         tand_t *via = findbot(dcc[i].nick);
 
@@ -1655,7 +1656,11 @@ void check_botnet_pings()
         dcc[i].status |= STAT_PINGED;
       }
     }
+   }
   }
+
+  if (top_index != (dcc_total - 1))
+    trim_dcclist(top_index);
 }
 
 void zapfbot(int idx)

@@ -17,6 +17,7 @@ This is a summary of ChangeLog basically.
 * cmd_conf now correctly writes new data to binary (not tested)
 * Fixed stdin/stdout/stderr not being closed when bot is forked into background.
 * Fixed cmd_dns not displaying results.
+* Fixed dcctable list 'leak' (no shift, leaves gaps, now dcclist is shifted only if gap at end)
 
 1.2
 * No longer displaying SALTS on ./bin -v
