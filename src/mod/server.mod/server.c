@@ -947,7 +947,6 @@ static void dcc_chat_hostresolved(int i)
     ssl_link(dcc[i].sock, CONNECT_SSL);
 #endif /* HAVE_SSL */
 
-/*changeover*/
     dcc[i].status = STAT_ECHO;
     get_user_flagrec(dcc[i].user, &fr, 0);
     if (ischanhub() && !glob_chuba(fr))
