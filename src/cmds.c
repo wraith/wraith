@@ -609,7 +609,7 @@ static void cmd_back(struct userrec *u, int idx, char *par)
 
 static void cmd_newpass(struct userrec *u, int idx, char *par)
 {
-  char *new;
+  char *new, pass[17];
 
   putlog(LOG_CMDS, "*", "#%s# newpass...", dcc[idx].nick);
   if (!par[0]) {
@@ -618,14 +618,24 @@ static void cmd_newpass(struct userrec *u, int idx, char *par)
   }
   new = newsplit(&par);
 
-  if (strlen(new) > 16)
-    new[16] = 0;
+  if (!strcmp(new, "rand")) {
+    make_rand_str(pass, 17);
+  } else {
+    if (strlen(new) < 6) {
+      dprintf(idx, "Please use at least 6 characters.\n");
+      return;
+    } else {
+      sprintf(pass, "%s", new);
+    }
+  }
+  if (strlen(pass) > 16)
+    pass[16] = 0;
 
-  if (!goodpass(new, idx, NULL))
+  if (!goodpass(pass, idx, NULL))
     return;
 
-  set_user(&USERENTRY_PASS, u, new);
-  dprintf(idx, "Changed password to '%s'.\n", new);
+  set_user(&USERENTRY_PASS, u, pass);
+  dprintf(idx, "Changed password to '%s'.\n", pass);
 }
 
 static void cmd_secpass(struct userrec *u, int idx, char *par)
@@ -708,6 +718,7 @@ int my_cmp (const mycmds *c1, const mycmds *c2)
 //printf("comparing: %s and %s\n", c1->name, c2->name);
   return strcmp (c1->name, c2->name);
 }
+
 static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100];
@@ -1390,7 +1401,7 @@ static void cmd_chpass(struct userrec *u, int idx, char *par)
       pass[16] = 0;
 
       if (good) {
-        set_user(&USERENTRY_SECPASS, u, pass);
+        set_user(&USERENTRY_PASS, u, pass);
         putlog(LOG_CMDS, "*", "#%s# chpass %s [something]", dcc[idx].nick,
 	       handle);
         dprintf(idx, "%s password changed to: %s\n", handle, pass);
@@ -1441,7 +1452,7 @@ static void cmd_chsecpass(struct userrec *u, int idx, char *par)
       if (strlen(pass) > 16)
         pass[16] = 0;
       set_user(&USERENTRY_SECPASS, u, pass);
-      putlog(LOG_CMDS, "*", "#%s# chpass %s [something]", dcc[idx].nick,
+      putlog(LOG_CMDS, "*", "#%s# chsecpass %s [something]", dcc[idx].nick,
             handle);
     }
   }
@@ -3069,7 +3080,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
     make_rand_str(s,10);
     set_user(&USERENTRY_PASS, u2, s);
 
-    make_rand_str(s2,17);
+    make_rand_str(s2,16);
     set_user(&USERENTRY_SECPASS, u2, s2);
     dprintf(idx, STR("%s's password set to \002%s\002\n"), handle, s);
     dprintf(idx, STR("%s's secpass set to \002%s\002\n"), handle, s2);

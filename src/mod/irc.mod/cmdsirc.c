@@ -1469,7 +1469,7 @@ Context;
     make_rand_str(s2,10);
     set_user(&USERENTRY_PASS, u, s2);
 
-    make_rand_str(s3,10);
+    make_rand_str(s3,16);
     set_user(&USERENTRY_SECPASS, u, s3);
 
     dprintf(idx, "Added [%s]%s with no flags.\n", hand, p1);
