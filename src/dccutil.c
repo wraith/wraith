@@ -198,7 +198,8 @@ dprintf(int idx, const char *format, ...)
       case DP_MODE_NEXT:
       case DP_SERVER_NEXT:
       case DP_HELP_NEXT:
-        if (floodless && server_online && serv != -1)
+      case DP_DUMP:
+        if ((idx == DP_DUMP || floodless) && server_online && serv != -1)
           tputs(serv, buf, len);
         else
           queue_server(idx, buf, len);

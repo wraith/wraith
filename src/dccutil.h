@@ -24,6 +24,7 @@ struct portmap {
 #define DP_MODE_NEXT    0x7FF7
 #define DP_SERVER_NEXT  0x7FF8
 #define DP_HELP_NEXT    0x7FF9
+#define DP_DUMP		0x8000
 
 
 void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
