@@ -76,8 +76,8 @@ int clear_tmp()
 
 #ifdef LEAF
 void check_mypid()
-{
-  if (getpid() != checkpid(conf.bot->nick, NULL)) {
+{ 
+  if (can_stat(conf.bot->pid_file) && (getpid() != checkpid(conf.bot->nick, NULL))) {
     fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 1);
     nuke_server("Cloned Process...");
     botnet_send_bye();
