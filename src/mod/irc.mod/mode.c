@@ -460,7 +460,7 @@ got_op(struct chanset_t *chan, char *nick, char *from,
   /* Did *I* just get opped? */
   if (!me_op(chan) && match_my_nick(who))
     check_chan = 1;
-  
+
   if (!m->user) {
     simple_sprintf(s, "%s!%s", m->nick, m->userhost);
     u = get_user_by_host(s);
@@ -952,195 +952,197 @@ gotmode(char *from, char *msg)
 
         /* check for mdop */
         if (me_op(chan)) {
-        if (deops >= 3) {
-          if (!u || !u->bot) {
-            if (ROLE_KICK_MDOP) {
-              if (m && !chan_sentkick(m)) {
-                m->flags |= SENTKICK;
-                sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MASSDEOP));
-                tputs(serv, tmp, strlen(tmp));
-                if (u) {
-                  sprintf(tmp, "Mass deop on %s by %s", chan->dname, nick);
-                  deflag_user(u, DEFLAG_MDOP, tmp, chan);
-                }
-              }
-            }
-          }
-        }
-
-        /* check for mop */
-        if (ops >= 3) {
-          if (channel_nomop(chan)) {
+          if (deops >= 3) {
             if (!u || !u->bot) {
               if (ROLE_KICK_MDOP) {
                 if (m && !chan_sentkick(m)) {
                   m->flags |= SENTKICK;
-                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MANUALOP));
+                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MASSDEOP));
                   tputs(serv, tmp, strlen(tmp));
                   if (u) {
-                    sprintf(tmp, "Mass op on %s by %s", chan->dname, nick);
-                    deflag_user(u, DEFLAG_MOP, tmp, chan);
+                    sprintf(tmp, "Mass deop on %s by %s", chan->dname, nick);
+                    deflag_user(u, DEFLAG_MDOP, tmp, chan);
                   }
                 }
               }
             }
-            enforce_bitch(chan);        /* deop quick! */
           }
-        }
-        if (ops && u) {
-        if (u->bot && !channel_fastop(chan) && !channel_take(chan)) {
-          int isbadop = 0;
 
-          /* if unbans == 1 && ops */
-          if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) || (strncmp(modes[1], "-b", 2))) {
-            isbadop = 1;
-          } else {
-            char enccookie[25] = "", plaincookie[25] = "", key[NICKLEN + 20] = "", goodcookie[25] = "";
-
-            /* -b *!*@[...] */
-            strncpyz(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
-            p = enccookie + strlen(enccookie) - 1;
-            strcpy(key, nick);
-            strcat(key, SALT2);
-            p = decrypt_string(key, enccookie);
-            strncpyz(plaincookie, p, sizeof(plaincookie));
-            free(p);
-            /*
-             * last 6 digits of time
-             * last 5 chars of nick
-             * last 5 regular chars of chan
-             */
-            makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);
-            if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
-              isbadop = 2;
-            else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
-              isbadop = 3;
-            else {
-              char ltmp[20] = "";
-              time_t optime, off;
-
-              /* this makes NO sense, optime should just be ltmp[4]-... but its not... ??? */
-              sprintf(ltmp, "%010li", now + timesync);
-              strncpyz((char *) &ltmp[4], plaincookie, 7);
-              optime = atol(ltmp);
-              off = (now + timesync - optime);
-
-              if (chan->cookie_time_slack && (abs(off) > chan->cookie_time_slack)) {
-                /* isbadop = 4; */
-                putlog(LOG_DEBUG, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nick,
-                       optime, off);
-              }
-            }
-          }
-          if (isbadop) {
-            char trg[NICKLEN] = "";
-
-            putlog(LOG_DEBUG, "*", "%s opped in %s with bad cookie(%d): %s", nick, chan->dname, isbadop, msg);
-            n = i = 0;
-            switch (role) {
-              case 0:
-                break;
-              case 1:
-                /* Kick opper */
-                if (!m || !chan_sentkick(m)) {
-                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_BADOP));
-                  tputs(serv, tmp, strlen(tmp));
-                  if (m)
+          /* check for mop */
+          if (ops >= 3) {
+            if (channel_nomop(chan)) {
+              if (!u || !u->bot) {
+                if (ROLE_KICK_MDOP) {
+                  if (m && !chan_sentkick(m)) {
                     m->flags |= SENTKICK;
-                }
-                sprintf(tmp, "%s!%s MODE %s", nick, from, msg);
-                deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
-                break;
-              default:
-                n = role - 1;
-                i = 0;
-                while ((i < modecnt) && (n > 0)) {
-                  if (modes[i] && !strncmp(modes[i], "+o", 2))
-                    n--;
-                  if (n)
-                    i++;
-                }
-                if (!n) {
-                  memberlist *mo = NULL;
-
-                  strncpyz(trg, (char *) &modes[i][3], NICKLEN);
-                  mo = ismember(chan, trg);
-                  if (mo) {
-                    if (!(mo->flags & CHANOP)) {
-                      if (!chan_sentkick(mo)) {
-                        sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix,
-                                response(RES_BADOPPED));
-                        tputs(serv, tmp, strlen(tmp));
-                        mo->flags |= SENTKICK;
-                      }
+                    sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MANUALOP));
+                    tputs(serv, tmp, strlen(tmp));
+                    if (u) {
+                      sprintf(tmp, "Mass op on %s by %s", chan->dname, nick);
+                      deflag_user(u, DEFLAG_MOP, tmp, chan);
                     }
                   }
                 }
+              }
+              enforce_bitch(chan);      /* deop quick! */
+            }
+          }
+          if (ops && u) {
+            if (u->bot && !channel_fastop(chan) && !channel_take(chan)) {
+              int isbadop = 0;
+
+              /* if unbans == 1 && ops */
+              if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) || (strncmp(modes[1], "-b", 2))) {
+                isbadop = 1;
+              } else {
+                char enccookie[25] = "", plaincookie[25] = "", key[NICKLEN + 20] = "", goodcookie[25] = "";
+
+                /* -b *!*@[...] */
+                strncpyz(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
+                p = enccookie + strlen(enccookie) - 1;
+                strcpy(key, nick);
+                strcat(key, SALT2);
+                p = decrypt_string(key, enccookie);
+                strncpyz(plaincookie, p, sizeof(plaincookie));
+                free(p);
+                /*
+                 * last 6 digits of time
+                 * last 5 chars of nick
+                 * last 5 regular chars of chan
+                 */
+                makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);
+                if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
+                  isbadop = 2;
+                else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
+                  isbadop = 3;
+                else {
+                  char ltmp[20] = "";
+                  time_t optime, off;
+
+                  /* this makes NO sense, optime should just be ltmp[4]-... but its not... ??? */
+                  sprintf(ltmp, "%010li", now + timesync);
+                  strncpyz((char *) &ltmp[4], plaincookie, 7);
+                  optime = atol(ltmp);
+                  off = (now + timesync - optime);
+
+                  if (chan->cookie_time_slack && (abs(off) > chan->cookie_time_slack)) {
+                    /* isbadop = 4; */
+                    putlog(LOG_DEBUG, "*", "%s opped with bad ts (not punishing.): %li was off by %li", nick,
+                           optime, off);
+                  }
+                }
+              }
+              if (isbadop) {
+                char trg[NICKLEN] = "";
+
+                putlog(LOG_DEBUG, "*", "%s opped in %s with bad cookie(%d): %s", nick, chan->dname, isbadop,
+                       msg);
+                n = i = 0;
+                switch (role) {
+                  case 0:
+                    break;
+                  case 1:
+                    /* Kick opper */
+                    if (!m || !chan_sentkick(m)) {
+                      sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_BADOP));
+                      tputs(serv, tmp, strlen(tmp));
+                      if (m)
+                        m->flags |= SENTKICK;
+                    }
+                    sprintf(tmp, "%s!%s MODE %s", nick, from, msg);
+                    deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
+                    break;
+                  default:
+                    n = role - 1;
+                    i = 0;
+                    while ((i < modecnt) && (n > 0)) {
+                      if (modes[i] && !strncmp(modes[i], "+o", 2))
+                        n--;
+                      if (n)
+                        i++;
+                    }
+                    if (!n) {
+                      memberlist *mo = NULL;
+
+                      strncpyz(trg, (char *) &modes[i][3], NICKLEN);
+                      mo = ismember(chan, trg);
+                      if (mo) {
+                        if (!(mo->flags & CHANOP)) {
+                          if (!chan_sentkick(mo)) {
+                            sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix,
+                                    response(RES_BADOPPED));
+                            tputs(serv, tmp, strlen(tmp));
+                            mo->flags |= SENTKICK;
+                          }
+                        }
+                      }
+                    }
+                }
+
+                if (isbadop == 1)
+                  putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s", nick, from, msg);
+                else if (isbadop == 2)
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad nick): %s!%s MODE %s", nick, from, msg);
+                else if (isbadop == 3)
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad chan): %s!%s MODE %s", nick, from, msg);
+                else if (isbadop == 4)
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s", nick, from, msg);
+              } else
+                putlog(LOG_DEBUG, "@", "Good op: %s", msg);
             }
 
-            if (isbadop == 1)
-              putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s", nick, from, msg);
-            else if (isbadop == 2)
-              putlog(LOG_WARN, "*", "Invalid cookie (bad nick): %s!%s MODE %s", nick, from, msg);
-            else if (isbadop == 3)
-              putlog(LOG_WARN, "*", "Invalid cookie (bad chan): %s!%s MODE %s", nick, from, msg);
-            else if (isbadop == 4)
-              putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s", nick, from, msg);
-          } else
-            putlog(LOG_DEBUG, "@", "Good op: %s", msg);
-        }
+            if (!channel_manop(chan) && !u->bot) {
+              char trg[NICKLEN] = "";
 
-        if (!channel_manop(chan) && !u->bot) {
-          char trg[NICKLEN] = "";
+              n = i = 0;
 
-          n = i = 0;
+              switch (role) {
+                case 0:
+                  break;
+                case 1:
+                  /* Kick opper */
+                  if (!m || !chan_sentkick(m)) {
+                    sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MANUALOP));
+                    tputs(serv, tmp, strlen(tmp));
+                    if (m)
+                      m->flags |= SENTKICK;
+                  }
+                  sprintf(tmp, "%s!%s MODE %s", nick, from, msg);
+                  deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
+                  break;
+                default:
+                  n = role - 1;
+                  i = 0;
+                  while ((i < modecnt) && (n > 0)) {
+                    if (modes[i] && !strncmp(modes[i], "+o", 2))
+                      n--;
+                    if (n)
+                      i++;
+                  }
+                  if (!n) {
+                    memberlist *mo = NULL;
 
-          switch (role) {
-            case 0:
-              break;
-            case 1:
-              /* Kick opper */
-              if (!m || !chan_sentkick(m)) {
-                sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MANUALOP));
-                tputs(serv, tmp, strlen(tmp));
-                if (m)
-                  m->flags |= SENTKICK;
-              }
-              sprintf(tmp, "%s!%s MODE %s", nick, from, msg);
-              deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
-              break;
-            default:
-              n = role - 1;
-              i = 0;
-              while ((i < modecnt) && (n > 0)) {
-                if (modes[i] && !strncmp(modes[i], "+o", 2))
-                  n--;
-                if (n)
-                  i++;
-              }
-              if (!n) {
-                memberlist *mo = NULL;
-
-                strncpyz(trg, (char *) &modes[i][3], NICKLEN);
-                mo = ismember(chan, trg);
-                if (mo) {
-                  if (!(mo->flags & CHANOP) && !match_my_nick(trg)) {
-                    if (!chan_sentkick(mo)) {
+                    strncpyz(trg, (char *) &modes[i][3], NICKLEN);
+                    mo = ismember(chan, trg);
+                    if (mo) {
+                      if (!(mo->flags & CHANOP) && !match_my_nick(trg)) {
+                        if (!chan_sentkick(mo)) {
+                          sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix,
+                                  response(RES_MANUALOPPED));
+                          tputs(serv, tmp, strlen(tmp));
+                          m->flags |= SENTKICK;
+                        }
+                      }
+                    } else {
                       sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix,
                               response(RES_MANUALOPPED));
                       tputs(serv, tmp, strlen(tmp));
-                      m->flags |= SENTKICK;
                     }
                   }
-                } else {
-                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, trg, kickprefix, response(RES_MANUALOPPED));
-                  tputs(serv, tmp, strlen(tmp));
-                }
               }
+            }
           }
         }
-}
-}
         for (i = 0; i < modecnt; i++)
           if (modes[i])
             free(modes[i]);
