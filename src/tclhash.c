@@ -78,17 +78,21 @@ bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, in
 	bind_table_t *table;
 
 	for (table = bind_table_list_head; table; table = table->next) {
-		if (!strcmp(table->name, name)) return(table);
+		if (!strcmp(table->name, name)) break;
 	}
-	/* Nope, we have to create a new one. */
-	table = (bind_table_t *)calloc(1, sizeof(*table));
-	table->name = strdup(name);
+
+	/* If it doesn't exist, create it. */
+	if (!table) {
+		table = (bind_table_t *)calloc(1, sizeof(*table));
+		table->name = strdup(name);
+		table->next = bind_table_list_head;
+		bind_table_list_head = table;
+	}
+	else if (!(table->flags & BIND_FAKE)) return(table);
 	table->nargs = nargs;
-	table->syntax = strdup(syntax);
+	if (syntax) table->syntax = strdup(syntax);
 	table->match_type = match_type;
 	table->flags = flags;
-	table->next = bind_table_list_head;
-	bind_table_list_head = table;
 	return(table);
 }
 
@@ -139,6 +143,16 @@ bind_table_t *bind_table_lookup(const char *name)
 	}
 	return(table);
 }
+
+bind_table_t *bind_table_lookup_or_fake(const char *name)
+{
+	bind_table_t *table;
+
+	table = bind_table_lookup(name);
+	if (!table) table = bind_table_add(name, 0, NULL, 0, BIND_FAKE);
+	return(table);
+}
+
 
 /* Look up a bind entry based on either function name or id. */
 bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, const char *function_name)
@@ -311,6 +325,11 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 		winner = NULL;
 		for (entry = table->entries; entry; entry = entry->next) {
 			if (entry->flags & BIND_DELETED) continue;
+			if (table->flags & BIND_USE_ATTR) {
+				if (table->flags & BIND_STRICT_ATTR) cmp = flagrec_eq(&entry->user_flags, flags);
+				else cmp = flagrec_ok(&entry->user_flags, flags);
+				if (!cmp) continue;
+			}
 			masklen = strlen(entry->mask);
 			if (!strncasecmp(match, entry->mask, masklen < matchlen ? masklen : matchlen)) {
 				winner = entry;
@@ -360,8 +379,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 	char name[50];
 	bind_table_t *table;
 
-	table = bind_table_lookup(table_name);
-	if (!table) return;
+	table = bind_table_lookup_or_fake(table_name);
 
 	for (; cmds->name; cmds++) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */

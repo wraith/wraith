@@ -24,6 +24,7 @@
 #define BIND_BREAKABLE		8
 #define BIND_STACKABLE		16
 #define BIND_DELETED		32
+#define BIND_FAKE       	64
 
 /* Flags for return values from bind callbacks */
 #define BIND_RET_LOG 1
