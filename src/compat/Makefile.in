@@ -15,6 +15,7 @@ CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) -I$(top_srcdir)/src @DEFS@ $(CFLGS
 CPPFLAGS = @CPPFLAGS@
 
 OBJS = dirname.o \
+	dn_expand.o \
 	inet_aton.o \
 	inet_ntop.o \
 	snprintf.o \
