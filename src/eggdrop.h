@@ -615,6 +615,7 @@ typedef struct {
 #define LOG_ERROR    0x000200	/* e   misc errors               	*/
 #define LOG_GETIN    0x000400	/* g   op system. (Getin)			*/
 #define LOG_WARN     0x000800	/* u   warnings			*/
+#define LOG_WARNING  0x000800	/* u   warnings			*/
 
 //the rest of these can be used for new console modes....
 #define LOG_LEV4     0x001000	/* 4   user log level			*/
