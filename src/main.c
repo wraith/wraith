@@ -646,12 +646,25 @@ static void startup_checks() {
 #endif /* LEAF */
 }
 
-#include "mod/static.h"
-
 int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
  init_net(), init_botcmd();
 
 static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
+
+void dns_init();
+void console_init();
+void ctcp_init();
+void update_init();
+void notes_init();
+#ifdef LEAF
+void server_init();
+void irc_init();
+#endif /* LEAF */
+void channels_init();
+void compress_init();
+void share_init();
+void transfer_init();
+
 
 int main(int argc, char **argv)
 {
