@@ -219,6 +219,7 @@ static void cmd_config(int idx, char *par)
   char *name = NULL;
   struct cfg_entry *cfgent = NULL;
   int cnt, i;
+  bool describe = conf.bot->hub;
 
   putlog(LOG_CMDS, "*", "#%s# config %s", dcc[idx].nick, par);
   if (!par[0]) {
@@ -230,8 +231,7 @@ static void cmd_config(int idx, char *par)
     dprintf(idx, "Defined config entry names:\n");
     cnt = 0;
     for (i = 0; i < cfg_count; i++) {
-#ifdef HUB
-      if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
+      if (conf.bot->hub && (cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
 	if (!cnt) {
           outbuf = (char *) my_realloc(outbuf, 2 + 1);
 	  sprintf(outbuf, "  ");
@@ -244,7 +244,6 @@ static void cmd_config(int idx, char *par)
 	  cnt = 0;
 	}
       }
-#endif /* HUB */
     }
     if (cnt)
       dprintf(idx, "%s\n", outbuf);
@@ -256,12 +255,10 @@ static void cmd_config(int idx, char *par)
   for (i = 0; !cfgent && (i < cfg_count); i++)
     if (!strcmp(cfg[i]->name, name))
       cfgent = cfg[i];
-#ifdef HUB
-  if (!cfgent || !cfgent->describe) {
+  if (describe && (!cfgent || !cfgent->describe)) {
     dprintf(idx, "No such config entry\n");
     return;
   }
-#endif /* HUB */
   if (!isowner(dcc[idx].nick)) {
     int no = 0;
     if (!egg_strcasecmp(name, "authkey"))
@@ -281,9 +278,8 @@ static void cmd_config(int idx, char *par)
     }
   }
   if (!par[0]) {
-#ifdef HUB
-    cfgent->describe(cfgent, idx);
-#endif /* HUB */
+    if (describe)
+      cfgent->describe(cfgent, idx);
     if (!cfgent->gdata)
       dprintf(idx, "No current value\n");
     else {
@@ -312,7 +308,7 @@ static void cmd_botconfig(int idx, char *par)
   struct cfg_entry *cfgent = NULL;
   int i, cnt;
   tand_t *tbot = NULL;
-  bool found = 0, described = 0;
+  bool found = 0, described = 0, describe = conf.bot->hub;
 
   /* botconfig bot [name [value]]  */
   putlog(LOG_CMDS, "*", "#%s# botconfig %s", dcc[idx].nick, par);
@@ -349,8 +345,7 @@ static void cmd_botconfig(int idx, char *par)
 
       if (!entry || !entry[0]) {
         for (i = 0; i < cfg_count; i++) {
-#ifdef HUB
-          if ((cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe)) {
+          if (describe && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe)) {
 	    k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
             while (k && strcmp(k->key, cfg[i]->name))
               k = k->next;
@@ -359,17 +354,16 @@ static void cmd_botconfig(int idx, char *par)
             else
               dprintf(idx, "  %s: (not set)\n", cfg[i]->name);
           }
-#endif /* HUB */
         }
         continue;
       }
 
       cfgent = NULL;
-#ifdef HUB
-      for (i = 0; !cfgent && (i < cfg_count); i++)
-        if (!strcmp(cfg[i]->name, entry) && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe))
-          cfgent = cfg[i];
-#endif /* HUB */
+      if (describe) {
+        for (i = 0; !cfgent && (i < cfg_count); i++)
+          if (!strcmp(cfg[i]->name, entry) && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe))
+            cfgent = cfg[i];
+      }
       if (!cfgent) {
         dprintf(idx, "No such configuration value\n");
         return;
@@ -383,12 +377,10 @@ static void cmd_botconfig(int idx, char *par)
         dprintf(idx, "Now: ");
         write_userfile(idx);
       } else {
-#ifdef HUB
-        if (cfgent->describe && !described) {
+        if (describe && cfgent->describe && !described) {
           described++;
           cfgent->describe(cfgent, idx);
         }
-#endif /* HUB */
       }
       k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
       while (k && strcmp(k->key, cfgent->name))

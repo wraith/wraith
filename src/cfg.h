@@ -5,8 +5,10 @@
 #  include "config.h"
 #endif
 
-#define CFGF_GLOBAL  1          /* Accessible as .config */
-#define CFGF_LOCAL   2          /* Accessible as .botconfig */
+#define CFGF_GLOBAL  BIT0          /* Accessible as .config */
+#define CFGF_LOCAL   BIT1          /* Accessible as .botconfig */
+#define CFGF_HUB     BIT2
+#define CFGF_LEAF    BIT3
 
 typedef struct cfg_entry {
   char *name;
@@ -15,9 +17,7 @@ typedef struct cfg_entry {
   char *ldata;
   void (*globalchanged) (struct cfg_entry *, int *valid);
   void (*localchanged) (struct cfg_entry *, int *valid);
-#ifdef HUB
   void (*describe) (struct cfg_entry *, int idx);
-#endif /* HUB */
 } cfg_entry_T;
 
 extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_FORKINTERVAL, CFG_CHANSET, CFG_SERVERS, CFG_SERVERS6, 
