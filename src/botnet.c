@@ -1696,6 +1696,7 @@ void restart_chons()
 		   party[i].flag, party[i].sock, party[i].from);
   }
 }
+
 static int get_role(char *bot)
 {
   int rl, i;
@@ -1710,8 +1711,7 @@ static int get_role(char *bot)
     if (u->flags & USER_BOT) {
       if (strcmp(u->handle, bot)) {
         ba = get_user(&USERENTRY_BOTADDR, u);
-        if ((nextbot(u->handle) >= 0) && (ba) && (ba->roleid > 0)
-            && (ba->roleid < 5))
+        if ((nextbot(u->handle) >= 0) && (ba) && (ba->roleid > 0) && (ba->roleid < 5))
           r[(ba->roleid - 1)]++;
       }
     }
@@ -1731,7 +1731,7 @@ void lower_bot_linked(int idx)
 {
   char tmp[6] = "";
 
-  sprintf(tmp, STR("rl %d"), get_role(dcc[idx].nick));
-  botnet_send_zapf(nextbot(dcc[idx].nick), conf.bot->nick, dcc[idx].nick, tmp);
+  egg_snprintf(tmp, sizeof tmp, "rl %d", get_role(dcc[idx].nick));
+  putbot(dcc[idx].nick, tmp);
 }
 

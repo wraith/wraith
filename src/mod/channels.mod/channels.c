@@ -247,10 +247,11 @@ static void got_role(char *botnick, char *code, char *par)
 
   tmp = newsplit(&par);
   role = atoi(tmp);
-  tmp = newsplit(&par);
-  if (tmp[0])
+  if (par[0]) {
+    tmp = newsplit(&par);
     timesync = atoi(tmp) - now;
-  putlog(LOG_DEBUG, "@", "Got role index %i", role);
+  }
+  putlog(LOG_DEBUG, "@", "Got role index %d", role);
 }
 
 void got_kl(char *botnick, char *code, char *par)
