@@ -12,6 +12,7 @@
 #include "src/dccutil.h"
 #include "src/modules.h"
 #include "src/main.h"
+#include "src/egg_timer.h"
 #include "src/types.h"
 
 static void dns_event_success(struct resolve *rp, int type);
@@ -128,5 +129,5 @@ void dns_init()
   dcc[idx].timeval = now;
   strcpy(dcc[idx].nick, "(dns)");
 
-  add_hook(HOOK_SECONDLY, (Function) dns_check_expires);
+  timer_create_secs(1, "dns_check_expires", (Function) dns_check_expires);
 }

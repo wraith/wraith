@@ -19,6 +19,7 @@
 #include "src/botmsg.h"
 #include "src/tclhash.h"
 #include "src/modules.h"
+#include "src/egg_timer.h"
 
 #ifdef LEAF
 #include <netinet/in.h>
@@ -757,7 +758,7 @@ void ctcp_init()
 
   add_builtins("ctcp", myctcp);
 
-  add_hook(HOOK_MINUTELY, (Function) ctcp_minutely);
+  timer_create_secs(60, "ctcp_minutely", (Function) ctcp_minutely);
 #endif /* LEAF */
   add_cfg(&CFG_CLOAK_SCRIPT);
 }

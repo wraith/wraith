@@ -11,6 +11,7 @@
 #include "misc.h"
 #include "rfc1459.h"
 #include "misc_file.h"
+#include "egg_timer.h"
 #include "dcc.h"
 #include "users.h"
 #include "main.h"
@@ -701,26 +702,18 @@ void kill_bot(char *s1, char *s2)
 
 /* Update system code
  */
-int ucnt = 0;
-void updatelocal(void)
+static void updatelocal(void)
 {
-#ifdef LEAF
-  module_entry *me = NULL;
-#endif /* LEAF */
-
-  if (ucnt < 300) {
-    ucnt++;
-    return;
-  } 
-  del_hook(HOOK_SECONDLY, (Function) updatelocal);
-  ucnt = 0;
-
   /* let's drop the server connection ASAP */
 #ifdef LEAF
+{
+  module_entry *me = NULL;
+
   if ((me = module_find("server", 0, 0))) {
     Function *func = me->funcs;
     (func[SERVER_NUKESERVER]) ("Updating...");
   }
+}
 #endif /* LEAF */
 
   botnet_send_chat(-1, conf.bot->nick, "Updating...");
@@ -828,10 +821,15 @@ int updatebin(int idx, char *par, int autoi)
     exit(0);
 #ifdef LEAF
   } else if (localhub && autoi) {
+    egg_timeval_t howlong;
+
     egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());	
     /* will exit after run, cron will restart us later */
     system(buf);
-    add_hook(HOOK_SECONDLY, (Function) updatelocal);
+
+    howlong.sec = 300;
+    howlong.usec = 0;
+    timer_create(&howlong, "updatelocal()", (Function) updatelocal);
     return 0;
   }
 #endif /* LEAF */

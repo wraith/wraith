@@ -560,6 +560,7 @@ static int gotnotice(char *from, char *msg)
     return 0;
   ignoring = match_ignore(from);
   to = newsplit(&msg);
+/* FIXME: This fixcolon() breaks the server notice display later */
   fixcolon(msg);
   strcpy(uhost, from);
   nick = splitnick(&uhost);

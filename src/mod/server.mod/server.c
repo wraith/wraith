@@ -11,6 +11,7 @@
 #include "src/net.h"
 #include "src/auth.h"
 #include "src/dns.h"
+#include "src/egg_timer.h"
 #include "server.h"
 
 static Function *global = NULL;
@@ -1604,10 +1605,10 @@ char *server_start(Function *global_funcs)
   add_builtins("dcc", C_dcc_serv);
   add_builtins("ctcp", my_ctcps);
 
-  add_hook(HOOK_SECONDLY, (Function) server_secondly);
-  add_hook(HOOK_10SECONDLY, (Function) server_10secondly);
-  add_hook(HOOK_5MINUTELY, (Function) server_5minutely);
-  add_hook(HOOK_MINUTELY, (Function) minutely_checks);
+  timer_create_secs(1, "server_secondly", (Function) server_secondly);
+  timer_create_secs(10, "server_10secondly", (Function) server_10secondly);
+  timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
+  timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
   add_hook(HOOK_QSERV, (Function) queue_server);
   add_hook(HOOK_PRE_REHASH, (Function) server_prerehash);
   add_hook(HOOK_REHASH, (Function) server_postrehash);

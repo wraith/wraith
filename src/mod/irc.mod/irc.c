@@ -13,6 +13,7 @@
 #include "src/chanprog.h"
 #include "src/auth.h"
 #include "src/salt.h"
+#include "src/egg_timer.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/server.mod/server.h"
 #undef serv
@@ -1595,14 +1596,14 @@ char *irc_start(Function * global_funcs)
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_ASKEDBANS);
     chan->ircnet_status &= ~(CHAN_ASKED_INVITED | CHAN_ASKED_EXEMPTS);
   }
-  add_hook(HOOK_MINUTELY, (Function) check_expired_chanstuff);
-  add_hook(HOOK_MINUTELY, (Function) warn_pls_take);
-  add_hook(HOOK_MINUTELY, (Function) check_servers);
+  timer_create_secs(60, "check_expired_chanstuff", (Function) check_expired_chanstuff);
+  timer_create_secs(60, "warn_pls_take", (Function) warn_pls_take);
+  timer_create_secs(60, "check_servers", (Function) check_servers);
+  timer_create_secs(5, "getin_5secondly", (Function) getin_5secondly);
   add_hook(HOOK_ADD_MODE, (Function) real_add_mode);
   add_hook(HOOK_IDLE, (Function) flush_modes);
-  add_hook(HOOK_5SECONDLY, (Function) getin_5secondly);
 #ifdef S_AUTOLOCK
-  add_hook(HOOK_MINUTELY, (Function) check_netfight);
+  timer_create_secs(60, "check_netfight", (Function) check_netfight);
 #endif /* S_AUTOLOCK */
 
   BT_ctcp = bind_table_lookup("ctcp");

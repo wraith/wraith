@@ -1858,15 +1858,23 @@ static void cmd_debug(struct userrec *u, int idx, char *par)
 
 static void cmd_timers(struct userrec *u, int idx, char *par)
 {
-  int *ids = 0, n = 0;
-  
+  int *ids = 0, n = 0, called = 0;
+  egg_timeval_t howlong, trigger_time, mynow, diff;
+
   if ((n = timer_list(&ids))) {
     int i = 0;
     char *name = NULL;
 
-    for (i = *ids; i <= n; i++) {
-      timer_info(i, &name, NULL, NULL);
-      dprintf(idx, "%d: %s\n", i, name);
+    timer_get_now(&mynow);
+
+    for (i = 0; i < n; i++) {
+      char interval[51] = "", next[51] = "";
+
+      timer_info(ids[i], &name, &howlong, &trigger_time, &called);
+      timer_diff(&mynow, &trigger_time, &diff);
+      egg_snprintf(interval, sizeof interval, "(%d.%d secs)", howlong.sec, howlong.usec);
+      egg_snprintf(next, sizeof next, "%d.%d secs", diff.sec, diff.usec);
+      dprintf(idx, "%-2d: %-25s %-15s Next: %-25s Called: %d\n", i, name, interval, next, called);
     }
     free(ids);
   }

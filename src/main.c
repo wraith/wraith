@@ -149,6 +149,8 @@ egg_traffic_t traffic;
 
 void fatal(const char *s, int recoverable)
 {
+  int i = 0;
+
 #ifdef LEAF
   module_entry *me = NULL;
 
@@ -157,12 +159,18 @@ void fatal(const char *s, int recoverable)
     (func[SERVER_NUKESERVER]) (s);
   }
 #endif /* LEAF */
+
   if (s[0])
     putlog(LOG_MISC, "*", "* %s", s);
 /*  flushlogs(); */
 #ifdef HAVE_SSL
     ssl_cleanup();
 #endif /* HAVE_SSL */
+
+  for (i = 0; i < dcc_total; i++)
+    if (dcc[i].sock >= 0)
+      killsock(dcc[i].sock);
+
   if (!recoverable) {
     if (conf.bot && conf.bot->pid_file)
       unlink(conf.bot->pid_file);
@@ -406,19 +414,12 @@ static void core_secondly()
 #ifdef CRAZY_TRACE 
   if (!attached) crazy_trace();
 #endif /* CRAZY_TRACE */
-  call_hook(HOOK_SECONDLY);	/* Will be removed later */
   if (fork_interval && backgrd && ((now - lastfork) > fork_interval))
       do_fork();
   cnt++;
-  if ((cnt % 5) == 0)
-    call_hook(HOOK_5SECONDLY);
-  if ((cnt % 10) == 0) {
-    call_hook(HOOK_10SECONDLY);
-    check_expired_dcc();
-  }
+
   if ((cnt % 30) == 0) {
     autolink_cycle(NULL);         /* attempt autolinks */
-    call_hook(HOOK_30SECONDLY);
     cnt = 0;
   }
 
@@ -432,22 +433,17 @@ static void core_secondly()
 
     /* Once a minute */
     lastmin = (lastmin + 1) % 60;
-    call_hook(HOOK_MINUTELY);
-    check_botnet_pings();
-    check_expired_ignores();
     /* In case for some reason more than 1 min has passed: */
     while (nowtm.tm_min != lastmin) {
       /* Timer drift, dammit */
       debug2(STR("timer: drift (lastmin=%d, now=%d)"), lastmin, nowtm.tm_min);
       i++;
       lastmin = (lastmin + 1) % 60;
-      call_hook(HOOK_MINUTELY);
     }
     if (i > 1)
       putlog(LOG_MISC, "*", STR("(!) timer drift -- spun %d minutes"), i);
     miltime = (nowtm.tm_hour * 100) + (nowtm.tm_min);
     if (((int) (nowtm.tm_min / 5) * 5) == (nowtm.tm_min)) {	/* 5 min */
-      call_hook(HOOK_5MINUTELY);
 /* 	flushlogs(); */
       if (!miltime) {	/* At midnight */
 	char s[25] = "";
@@ -459,17 +455,12 @@ static void core_secondly()
 #endif /* HUB */
       }
     }
-    if (nowtm.tm_min == notify_users_at)
-      call_hook(HOOK_HOURLY);
-    else if (nowtm.tm_min == 30)
-      call_hook(HOOK_HALFHOURLY);
     /* These no longer need checking since they are all check vs minutely
      * settings and we only get this far on the minute.
      */
 #ifdef HUB
-    if (miltime == 300) {
+    if (miltime == 300)
       call_hook(HOOK_DAILY);
-    }
 #endif /* HUB */
   }
 }
@@ -666,7 +657,7 @@ int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
 
 int main(int argc, char **argv)
 {
-  egg_timeval_t howlong, egg_timeval_now;	
+  egg_timeval_t egg_timeval_now;	
 
 #ifdef STOP_UAC
   {
@@ -849,14 +840,16 @@ int main(int argc, char **argv)
 
   online_since = now;
   autolink_cycle(NULL);		/* Hurry and connect to tandem bots */
-  howlong.sec = 1;
-  howlong.usec = 0;
-  timer_create_repeater(&howlong, "core_secondly()", (Function) core_secondly);
-  add_hook(HOOK_10SECONDLY, (Function) core_10secondly);
-  add_hook(HOOK_30SECONDLY, (Function) expire_simuls);
-  add_hook(HOOK_MINUTELY, (Function) core_minutely);
-  add_hook(HOOK_HOURLY, (Function) core_hourly);
-  add_hook(HOOK_HALFHOURLY, (Function) core_halfhourly);
+  timer_create_secs(1, "core_secondly", (Function) core_secondly);
+  timer_create_secs(10, "check_expired_dcc", (Function) check_expired_dcc);
+  timer_create_secs(10, "core_10secondly", (Function) core_10secondly);
+  timer_create_secs(30, "expire_simuls", (Function) expire_simuls);
+  timer_create_secs(60, "core_minutely", (Function) core_minutely);
+  timer_create_secs(60, "check_botnet_pings", (Function) check_botnet_pings);
+  timer_create_secs(60, "check_expired_ignores", (Function) check_expired_ignores);
+  timer_create_secs(3600, "core_hourly", (Function) core_hourly);
+  timer_create_secs(1800, "core_halfhourly", (Function) core_halfhourly);
+
   add_hook(HOOK_REHASH, (Function) event_rehash);
   add_hook(HOOK_PRE_REHASH, (Function) event_prerehash);
   add_hook(HOOK_USERFILE, (Function) event_save);

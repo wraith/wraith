@@ -26,28 +26,15 @@
 
 #include "src/types.h"
 
-/* #define HOOK_GET_FLAGREC	  0 	*/
-/* #define HOOK_BUILD_FLAGREC	  1 	*/
-/* #define HOOK_SET_FLAGREC	  2 	*/
-#define HOOK_READ_USERFILE	  3
-#define HOOK_REHASH		  4
-#define HOOK_MINUTELY		  5
-#define HOOK_DAILY		  6
-#define HOOK_HOURLY		  7
-#define HOOK_USERFILE		  8
-#define HOOK_SECONDLY		  9
-#define HOOK_PRE_REHASH		 10
-#define HOOK_IDLE		 11
-#define HOOK_5MINUTELY		 12
-/* HOOK_LOADED IS OBSOLETE */
-#define HOOK_LOADED		 13
-#define HOOK_BACKUP     	 14
-#define HOOK_DIE		 15
-#define HOOK_10SECONDLY          16
-#define HOOK_30SECONDLY          17
-#define HOOK_5SECONDLY           18
-#define HOOK_HALFHOURLY		 19
-#define REAL_HOOKS		 20
+#define HOOK_READ_USERFILE	  1
+#define HOOK_REHASH		  2
+#define HOOK_USERFILE		  3
+#define HOOK_PRE_REHASH		  4
+#define HOOK_IDLE		  5
+#define HOOK_BACKUP     	  6
+#define HOOK_DIE		  7
+#define HOOK_DAILY		  8
+#define REAL_HOOKS		  9
 
 #define HOOK_QSERV		108
 #define HOOK_ADD_MODE		109

@@ -11,6 +11,7 @@
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/share.mod/share.h"
 #include "src/chanprog.h"
+#include "src/egg_timer.h"
 
 static Function *global = NULL;
 #ifdef LEAF
@@ -1016,16 +1017,16 @@ char *channels_start(Function * global_funcs)
 #endif /* LEAF */
 
 #ifdef LEAF
-  add_hook(HOOK_MINUTELY, (Function) check_limitraise);
+  timer_create_secs(60, "check_limitraise", (Function) check_limitraise);
 #endif /* LEAF */
 #ifdef HUB
-  add_hook(HOOK_30SECONDLY, (Function) rebalance_roles);
+  timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
 #endif /* HUB */
-  add_hook(HOOK_MINUTELY, (Function) check_expired_bans);
-  add_hook(HOOK_MINUTELY, (Function) check_expired_exempts);
-  add_hook(HOOK_MINUTELY, (Function) check_expired_invites);
+  timer_create_secs(60, "check_expired_bans", (Function) check_expired_bans);
+  timer_create_secs(60, "check_expired_exempts", (Function) check_expired_exempts);
+  timer_create_secs(60, "check_expired_invites", (Function) check_expired_invites);
+  timer_create_secs(10, "channels_10secondly", (Function) channels_10secondly);
   add_hook(HOOK_USERFILE, (Function) channels_writeuserfile);
-  add_hook(HOOK_10SECONDLY, (Function) channels_10secondly);
 
   add_builtins("dcc", C_dcc_irc);
   add_builtins("bot", channels_bot);

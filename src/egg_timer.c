@@ -17,6 +17,7 @@ typedef struct egg_timer_b {
 	egg_timeval_t howlong;
 	egg_timeval_t trigger_time;
 	int flags;
+	int called;
 } egg_timer_t;
 
 /* We keep a sorted list of active timers. */
@@ -105,6 +106,16 @@ static int timer_add_to_list(egg_timer_t *timer)
 	return(0);
 }
 
+int timer_create_secs(int secs, const char *name, Function callback)
+{
+	egg_timeval_t howlong;
+
+	howlong.sec = secs;
+	howlong.usec = 0;
+
+	return timer_create_repeater(&howlong, name, (Function) callback);
+}
+
 int timer_create_complex(egg_timeval_t *howlong, const char *name, Function callback, void *client_data, int flags)
 {
 	egg_timer_t *timer = NULL;
@@ -121,6 +132,7 @@ int timer_create_complex(egg_timeval_t *howlong, const char *name, Function call
 	timer->howlong.usec = howlong->usec;
 	timer->trigger_time.sec = now.sec + howlong->sec;
 	timer->trigger_time.usec = now.usec + howlong->usec;
+	timer->called = 0;
 
 	timer_add_to_list(timer);
 
@@ -206,6 +218,7 @@ int timer_run()
 			free(timer);
 		}
 
+		timer->called++;
 		callback(client_data);
 	}
 	return(0);
@@ -228,7 +241,7 @@ int timer_list(int **ids)
 	return(ntimers);
 }
 
-int timer_info(int id, char **name, egg_timeval_t *initial_len, egg_timeval_t *trigger_time)
+int timer_info(int id, char **name, egg_timeval_t *initial_len, egg_timeval_t *trigger_time, int *called)
 {
         egg_timer_t *timer = NULL;
 
@@ -239,6 +252,7 @@ int timer_info(int id, char **name, egg_timeval_t *initial_len, egg_timeval_t *t
 	if (name) *name = timer->name;
         if (initial_len) memcpy(initial_len, &timer->howlong, sizeof(*initial_len));
         if (trigger_time) memcpy(trigger_time, &timer->trigger_time, sizeof(*trigger_time));
+	if (called) *called = timer->called;
         return(0);
 }
 

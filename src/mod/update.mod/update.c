@@ -483,7 +483,7 @@ void update_init()
 {
   add_builtins("bot", update_bot);
 #ifdef HUB
-  add_hook(HOOK_30SECONDLY, (Function) check_updates);
+  timer_create_secs(30, "check_updates", (Function) check_updates);
 #endif /* HUB */
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;

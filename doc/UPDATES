@@ -11,6 +11,8 @@ This is a summary of ChangeLog basically.
 8.cmd_quit was not returning from 'su' correctly.
 9.Fixed bots mass sending out CONFIG entries when they linked.
 10.Fixed some bugs in writing to server (caused too many open files errors)
+11.Updated all hooks to new timer system.
+12.Added more information to cmd_timers (for development)
 
 1.1.0
 1.Rewrote the shell config parsing...

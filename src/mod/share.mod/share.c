@@ -16,6 +16,7 @@
 #include "src/chan.h"
 #include "src/net.h"
 #include "src/users.h"
+#include "src/egg_timer.h"
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/channels.mod/channels.h"
 #ifdef LEAF
@@ -2137,9 +2138,9 @@ char *share_start(Function *global_funcs)
     return "This module requires channels module 1.0 or later.";
   }
 #endif /* LEAF */
-  add_hook(HOOK_MINUTELY, (Function) check_expired_tbufs);
+  timer_create_secs(60, "check_expired_tbufs", (Function) check_expired_tbufs);
+  timer_create_secs(1, "check_delay", (Function) check_delay);
   add_hook(HOOK_READ_USERFILE, (Function) hook_read_userfile);
-  add_hook(HOOK_SECONDLY, (Function) check_delay);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
   uff_init();

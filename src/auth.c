@@ -8,6 +8,7 @@
 #include "auth.h"
 #include "misc.h"
 #include "types.h"
+#include "egg_timer.h"
 #include "users.h"
 #include "crypt.h"
 #include <sys/stat.h>
@@ -75,7 +76,7 @@ void init_auth()
 {
 #ifdef S_AUTHCMDS
   init_auth_max();
-  add_hook(HOOK_MINUTELY, (Function) expire_auths);
+  timer_create_secs(60, "expire_auths", (Function) expire_auths);
 #endif /* S_AUTHCMDS */
 }
 
