@@ -924,7 +924,7 @@ static void disconnect_server(int idx, int dolost)
   checked_hostmask = 0;
   floodless = 0;
   botuserhost[0] = 0;
-  botuserip[0] = 0;
+  botuserip[0] = 0; 
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;
