@@ -405,7 +405,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
     bot_version(idx, buf);
   } else if (!strcasecmp(code, "elink")) {
     int snum = -1;
-
+    putlog(LOG_DEBUG, "*", "Got elink: %s %s", code, buf);
     /* Set the socket key and we're linked */
     for (i = 0; i < MAXSOCKS; i++) {
       if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == dcc[idx].sock)) {
@@ -413,6 +413,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
        break;
       }
     }
+    putlog(LOG_DEBUG, "*", "snum: %d", snum);
     if (snum >= 0) {
       char *tmp,
        *p;
