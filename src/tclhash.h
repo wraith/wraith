@@ -8,6 +8,8 @@
 
 #include "cmds.h"
 
+typedef int (*HashFunc) (void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+
 /* Match type flags for bind tables. */
 #define MATCH_PARTIAL       BIT0
 #define MATCH_EXACT         BIT1
@@ -41,7 +43,7 @@ typedef struct bind_entry_b {
         struct flag_record user_flags;
 	char *mask;
         char *function_name;
-        Function callback;
+        HashFunc callback;
         void *client_data;
 	int nhits;
         int flags;

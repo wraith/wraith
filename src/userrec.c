@@ -220,7 +220,7 @@ struct userrec *get_user_by_host(char *host)
   strncpyz(host2, host, sizeof host2);
   host = fixfrom(host);
   for (u = userlist; u; u = u->next) {
-    q = get_user(&USERENTRY_HOSTS, u);
+    q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
     for (; q; q = q->next) {
       i = wild_match(q->extra, host);
       if (i > cnt) {
@@ -241,14 +241,14 @@ struct userrec *get_user_by_host(char *host)
  */
 int u_pass_match(struct userrec *u, char *in)
 {
-  char *cmp = NULL, new[32] = "", pass[MAXPASSLEN + 1] = "";
+  char *cmp = NULL, newpass[32] = "", pass[MAXPASSLEN + 1] = "";
 
   if (!u)
     return 0;
 
   egg_snprintf(pass, sizeof pass, "%s", in);
 
-  cmp = get_user(&USERENTRY_PASS, u);
+  cmp = (char *) get_user(&USERENTRY_PASS, u);
   if (!cmp && (!pass[0] || (pass[0] == '-')))
     return 1;
   if (!cmp || !pass || !pass[0] || (pass[0] == '-'))
@@ -259,8 +259,8 @@ int u_pass_match(struct userrec *u, char *in)
   } else {
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
-    encrypt_pass(pass, new);
-    if (!strcmp(cmp, new))
+    encrypt_pass(pass, newpass);
+    if (!strcmp(cmp, newpass))
       return 1;
   }
   return 0;
@@ -498,7 +498,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass
     }
     set_user(&USERENTRY_HOSTS, u, host);
   } else
-    set_user(&USERENTRY_HOSTS, u, "none");
+    set_user(&USERENTRY_HOSTS, u, (void *) "none");
   if (bu == userlist)
     clear_chanlist();
   noshare = oldshare;
@@ -602,7 +602,7 @@ int delhost_by_handle(char *handle, char *host)
   u = get_user_by_handle(userlist, handle);
   if (!u)
     return 0;
-  q = get_user(&USERENTRY_HOSTS, u);
+  q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
   qprev = q;
   if (q) {
     if (!rfc_casecmp(q->extra, host)) {
@@ -612,7 +612,7 @@ int delhost_by_handle(char *handle, char *host)
       free(q);
       i++;
       qprev = NULL;
-      q = e->u.extra;
+      q = (struct list_type *) e->u.extra;
     } else
       q = q->next;
     while (q) {
@@ -633,7 +633,7 @@ int delhost_by_handle(char *handle, char *host)
     }
   }
   if (!qprev)
-    set_user(&USERENTRY_HOSTS, u, "none");
+    set_user(&USERENTRY_HOSTS, u, (void *) "none");
   if (!noshare && i)
     shareout("-h %s %s\n", handle, host);
   clear_chanlist();

@@ -385,7 +385,7 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top, char *to
   tputs(dcc[idx].sock, OBUF, len);
 }
 
-inline void putallbots(char *par)
+void putallbots(char *par)
 { 
   botnet_send_zapf_broad(-1, conf.bot->nick, NULL, par);
 

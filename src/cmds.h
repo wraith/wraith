@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+
 typedef struct {
   const char          *name;
   const char          *flags;
@@ -17,7 +18,8 @@ typedef struct {
 
 typedef struct {
   const char *name;
-  Function func;
+//  Function func;
+  void (*func) (int, char *);
 } botcmd_t;
 
 typedef struct cmd_pass {

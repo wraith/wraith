@@ -35,13 +35,13 @@ enum {
 	NETT_UNDERNET		= 2,	/* Undernet.			  */
 	NETT_DALNET		= 3,	/* Dalnet.			  */
 	NETT_HYBRID_EFNET	= 4	/* new +e/+I Efnet hybrid.	  */
-} nett_t;
+};
 
 #define IRC_CANTCHANGENICK "Can't change nickname on %s.  Is my nickname banned?"
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
 void nuke_server(char *);
-extern inline int match_my_nick(char *);
+int match_my_nick(char *);
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern int 		serv, servidx, cycle_time, newserverport,

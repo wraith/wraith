@@ -45,7 +45,6 @@ static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
 /*
  * Prototypes
  */
-struct dcc_table DCC_SEND;
 #ifdef HUB
 static void wipe_tmp_filename(char *, int);
 static int at_limit(char *);

@@ -1154,45 +1154,45 @@ share_end(int idx, char *par)
 
 /* Note: these MUST be sorted. */
 static botcmd_t C_share[] = {
-  {"!", (Function) share_endstartup},
-  {"+b", (Function) share_pls_ban},
-  {"+bc", (Function) share_pls_banchan},
-  {"+bh", (Function) share_pls_bothost},
-  {"+cr", (Function) share_pls_chrec},
-  {"+e", (Function) share_pls_exempt},
-  {"+ec", (Function) share_pls_exemptchan},
-  {"+h", (Function) share_pls_host},
-  {"+i", (Function) share_pls_ignore},
-  {"+inv", (Function) share_pls_invite},
-  {"+invc", (Function) share_pls_invitechan},
-  {"-b", (Function) share_mns_ban},
-  {"-bc", (Function) share_mns_banchan},
-  {"-cr", (Function) share_mns_chrec},
-  {"-e", (Function) share_mns_exempt},
-  {"-ec", (Function) share_mns_exemptchan},
-  {"-h", (Function) share_mns_host},
-  {"-i", (Function) share_mns_ignore},
-  {"-inv", (Function) share_mns_invite},
-  {"-invc", (Function) share_mns_invitechan},
-  {"a", (Function) share_chattr},
-  {"c", (Function) share_change},
-  {"chchinfo", (Function) share_chchinfo},
-  {"e", (Function) share_end},
-  {"h", (Function) share_chhand},
-  {"k", (Function) share_killuser},
-  {"n", (Function) share_newuser},
-  {"s", (Function) share_stick_ban},
-  {"se", (Function) share_stick_exempt},
-  {"sInv", (Function) share_stick_invite},
-  {"u?", (Function) share_userfileq},
+  {"!", share_endstartup},
+  {"+b", share_pls_ban},
+  {"+bc", share_pls_banchan},
+  {"+bh", share_pls_bothost},
+  {"+cr", share_pls_chrec},
+  {"+e", share_pls_exempt},
+  {"+ec", share_pls_exemptchan},
+  {"+h", share_pls_host},
+  {"+i", share_pls_ignore},
+  {"+inv", share_pls_invite},
+  {"+invc", share_pls_invitechan},
+  {"-b", share_mns_ban},
+  {"-bc", share_mns_banchan},
+  {"-cr", share_mns_chrec},
+  {"-e", share_mns_exempt},
+  {"-ec", share_mns_exemptchan},
+  {"-h", share_mns_host},
+  {"-i", share_mns_ignore},
+  {"-inv", share_mns_invite},
+  {"-invc", share_mns_invitechan},
+  {"a", share_chattr},
+  {"c", share_change},
+  {"chchinfo", share_chchinfo},
+  {"e", share_end},
+  {"h", share_chhand},
+  {"k", share_killuser},
+  {"n", share_newuser},
+  {"s", share_stick_ban},
+  {"se", share_stick_exempt},
+  {"sInv", share_stick_invite},
+  {"u?", share_userfileq},
 #ifdef HUB
-  {"un", (Function) share_ufno},
+  {"un", share_ufno},
 #endif /* HUB */
-  {"us", (Function) share_ufsend},
+  {"us", share_ufsend},
 #ifdef HUB
-  {"uy", (Function) share_ufyes},
+  {"uy", share_ufyes},
 #endif /* HUB */
-  {"v", (Function) share_version},
+  {"v", share_version},
   {NULL, NULL}
 };
 
@@ -1380,7 +1380,7 @@ finish_share(int idx)
   }
   noshare = 0;
   ou = userlist;                /* Save old user list                   */
-  userlist = (void *) -1;       /* Do this to prevent .user messups     */
+  userlist = (struct userrec *) -1;       /* Do this to prevent .user messups     */
 
   /* Bot user pointers are updated to point to the new list, all others
    * are set to NULL. If our userfile will be overriden, just set _all_

@@ -205,42 +205,42 @@ struct user_entry_type USERENTRY_ADDED = {
 
 int config_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  struct xtra_key *curr = NULL, *old = NULL, *new = buf;
+  struct xtra_key *curr = NULL, *old = NULL, *mynew = (struct xtra_key *) buf;
 
-  for (curr = e->u.extra; curr; curr = curr->next) {
-    if (curr->key && !egg_strcasecmp(curr->key, new->key)) {
+  for (curr = (struct xtra_key *) e->u.extra; curr; curr = curr->next) {
+    if (curr->key && !egg_strcasecmp(curr->key, mynew->key)) {
       old = curr;
       break;
     }
   }
-  if (!old && (!new->data || !new->data[0])) {
+  if (!old && (!mynew->data || !mynew->data[0])) {
     /* delete non-existant entry */
-    free(new->key);
-    if (new->data)
-      free(new->data);
-    free(new);
+    free(mynew->key);
+    if (mynew->data)
+      free(mynew->data);
+    free(mynew);
     return 1;
   }
 
   /* we will possibly free new below, so let's send the information
    * to the botnet now */
   if (!noshare && !cfg_noshare)
-    shareout("c CONFIG %s %s %s\n", u->handle, new->key, new->data ? new->data : "");
-  if ((old && old != new) || !new->data || !new->data[0]) {
+    shareout("c CONFIG %s %s %s\n", u->handle, mynew->key, mynew->data ? mynew->data : "");
+  if ((old && old != mynew) || !mynew->data || !mynew->data[0]) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
     free(old->key);
     free(old->data);
     free(old);
   }
-  if (old != new && new->data) {
-    if (new->data[0]) {
-      list_insert((&e->u.extra), new);
+  if (old != mynew && mynew->data) {
+    if (mynew->data[0]) {
+      list_insert((&e->u.extra), mynew);
     } else {
-      if (new->data)
-        free(new->data);
-      free(new->key);
-      free(new);
+      if (mynew->data)
+        free(mynew->data);
+      free(mynew->key);
+      free(mynew);
     }
   }
   return 1;
@@ -346,7 +346,7 @@ int config_kill(struct user_entry *e)
 {
   struct xtra_key *x = NULL, *y = NULL;
 
-  for (x = e->u.extra; x; x = y) {
+  for (x = (struct xtra_key *) e->u.extra; x; x = y) {
     y = x->next;
     free(x->key);
     free(x->data);
@@ -443,7 +443,7 @@ void stats_add(struct userrec *u, int login, int op)
 
   if (!u)
     return;
-  s = get_user(&USERENTRY_STATS, u);
+  s = (char *) get_user(&USERENTRY_STATS, u);
   if (s) {
     strncpyz(s2, s, sizeof(s2));
   } else
@@ -533,8 +533,8 @@ struct user_entry_type USERENTRY_MODIFIED =
 
 int pass_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  char new[32] = "";
-  register char *pass = buf;
+  char newpass[32] = "";
+  register char *pass = (char *) buf;
 
   if (e->u.extra)
     free(e->u.extra);
@@ -551,10 +551,10 @@ int pass_set(struct userrec *u, struct user_entry *e, void *buf)
       p++;
     }
     if (u->bot || (pass[0] == '+'))
-      strcpy(new, pass);
+      strcpy(newpass, pass);
     else
-      encrypt_pass(pass, new);
-    e->u.extra = strdup(new);
+      encrypt_pass(pass, newpass);
+    e->u.extra = strdup(newpass);
   }
   if (!noshare)
     shareout("c PASS %s %s\n", u->handle, pass ? pass : "");
@@ -659,7 +659,8 @@ static int laston_set(struct userrec *u, struct user_entry *e, void *buf)
       free(li);
     }
 
-    li = e->u.extra = buf;
+    li = (struct laston_info *) buf;
+    e->u.extra = (struct laston_info *) buf;
   }
 
   /* FIXME: laston sharing is disabled until a better solution is found
@@ -788,7 +789,8 @@ static int botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
       free(bi);
     }
     ContextNote("(sharebug) occurred in botaddr_set");
-    bi = e->u.extra = buf;
+    bi = (struct bot_addr *) buf;
+    e->u.extra = (struct bot_addr *) buf;
   }
   Assert(u);
   if (bi && !noshare) {
@@ -924,12 +926,12 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
 
 static int hosts_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  if (!buf || !egg_strcasecmp(buf, "none")) {
+  if (!buf || !egg_strcasecmp((const char *) buf, "none")) {
     /* When the bot crashes, it's in this part, not in the 'else' part */
     list_type_kill(e->u.list);
     e->u.list = NULL;
   } else {
-    char *host = buf, *p = strchr(host, ',');
+    char *host = (char *) buf, *p = strchr(host, ',');
     struct list_type **t;
 
     /* Can't have ,'s in hostmasks */

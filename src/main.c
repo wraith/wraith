@@ -725,14 +725,6 @@ void compress_init();
 void share_init();
 void transfer_init();
 
-#ifndef CYGWIN_HACKS
-int _start();
-int tracecheck_breakpoint() {
-  int *u = _start;
-  return (*u == 0xCC);
-}
-#endif /* !CYGWIN_HACKS */
-
 int main(int argc, char **argv)
 {
 //printf("YAY!\n\n\n\n\n\n\n\n");
@@ -966,9 +958,6 @@ printf("out: %s\n", out);
   while (1) {
     int socket_cleanup = 0, i, xx, status = 0;
     char buf[SGRAB + 10] = "";
-
-    if (tracecheck_breakpoint())
-      exit(0);
 
 #ifndef CYGWIN_HACKS
     if (conf.watcher && waitpid(watcher, &status, WNOHANG))

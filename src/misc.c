@@ -622,9 +622,9 @@ char *strchr_unescape(char *str, const char divc, register const char esc_char)
 /* As strchr_unescape(), but converts the complete string, without
  * searching for a specific delimiter character.
  */
-inline void str_unescape(char *str, register const char esc_char)
+void str_unescape(char *str, register const char esc_char)
 {
-  (void) strchr_unescape(str, 0, esc_char);
+  strchr_unescape(str, 0, esc_char);
 
   return;
 }
@@ -669,14 +669,9 @@ restart(int idx)
   exit(0);
 }
 
-static void restart_data(int *idx)
-{
-  restart(*idx);
-}
-
 int updatebin(int idx, char *par, int secs)
 {
-  char *path = NULL, *newbin = NULL, buf[DIRMAX] = "", old[DIRMAX] = "", testbuf[DIRMAX] = "";
+  char *path = NULL, *newbin = NULL, old[DIRMAX] = "", testbuf[DIRMAX] = "";
   int i;
 
   path = par;
@@ -765,6 +760,8 @@ int updatebin(int idx, char *par, int secs)
 
 #ifdef LEAF
   if (secs > 0) {
+    char buf[DIRMAX] = "";
+
     /* will exit after run, cron will restart us later */
     egg_snprintf(buf, sizeof buf, "%s -L %s -P %d", binname, conf.bot->nick, getpid());
     putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
@@ -776,7 +773,7 @@ int updatebin(int idx, char *par, int secs)
       egg_timeval_t howlong;
       howlong.sec = secs;
       howlong.usec = 0;
-      timer_create_complex(&howlong, "restarting for update", (Function) restart_data, (void *) &idx, 0);
+      timer_create_complex(&howlong, "restarting for update", (int (*)(int)) restart, (void *) idx, 0);
     } else
       restart(idx);
     return 0;
@@ -1027,7 +1024,8 @@ coloridx(int idx)
   return 0;
 }
 
-char *color(int idx, int type, int which)
+const char *
+color(int idx, int type, int which)
 {
   int ansi = 0;
    

@@ -1655,7 +1655,7 @@ static int get_role(char *bot)
   for (u = userlist; u; u = u->next) {
     if (u->bot && bot_hublevel(u) == 999) {
       if (strcmp(u->handle, bot)) {
-        ba = get_user(&USERENTRY_BOTADDR, u);
+        ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u);
         if ((nextbot(u->handle) >= 0) && (ba) && (ba->roleid > 0) && (ba->roleid < 5))
           r[(ba->roleid - 1)]++;
       }
@@ -1666,7 +1666,7 @@ static int get_role(char *bot)
     if (r[i] < r[rl])
       rl = i;
   rl++;
-  ba = get_user(&USERENTRY_BOTADDR, u2);
+  ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u2);
   if (ba)
     ba->roleid = rl;
   return rl;

@@ -559,10 +559,10 @@ void chanprog()
     bi->uplink = (char *) calloc(1, 1);
     set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
   } else {
-    bi = get_user(&USERENTRY_BOTADDR, conf.bot->u);
+    bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
   }
 
-  bi = get_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, conf.bot->nick));
+  bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, conf.bot->nick));
   if (!bi)
     fatal("I'm added to userlist but without a bot record!", 0);
   if (bi->telnet_port != 3333) {

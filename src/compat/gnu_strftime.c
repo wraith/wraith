@@ -153,11 +153,9 @@ extern char *tzname[];
    Similarly for localtime_r.  */
 
 # if ! HAVE_TM_GMTOFF
-static struct tm *my_strftime_gmtime_r __P ((const time_t *, struct tm *));
+//static struct tm *my_strftime_gmtime_r __P ((const time_t *, struct tm *));
 static struct tm *
-my_strftime_gmtime_r (t, tp)
-     const time_t *t;
-     struct tm *tp;
+my_strftime_gmtime_r (const time_t *t, struct tm *tp)
 {
   struct tm *l = gmtime (t);
   if (! l)
@@ -167,11 +165,9 @@ my_strftime_gmtime_r (t, tp)
 }
 # endif /* ! HAVE_TM_GMTOFF */
 
-static struct tm *my_strftime_localtime_r __P ((const time_t *, struct tm *));
+//static struct tm *my_strftime_localtime_r __P ((const time_t *, struct tm *));
 static struct tm *
-my_strftime_localtime_r (t, tp)
-     const time_t *t;
-     struct tm *tp;
+my_strftime_localtime_r (const time_t *t, struct tm *tp)
 {
   struct tm *l = localtime (t);
   if (! l)
@@ -269,26 +265,20 @@ static const char zeroes[16] = /* "0000000000000000" */
    more reliable way to accept other sets of digits.  */
 #define ISDIGIT(Ch) ((unsigned int) (Ch) - '0' <= 9)
 
-static char *memcpy_lowcase __P ((char *dest, const char *src, size_t len));
+//static char *memcpy_lowcase __P ((char *dest, const char *src, size_t len));
 
 static char *
-memcpy_lowcase (dest, src, len)
-     char *dest;
-     const char *src;
-     size_t len;
+memcpy_lowcase (char *dest, const char *src, size_t len)
 {
   while (len-- > 0)
     dest[len] = TOLOWER ((unsigned char) src[len]);
   return dest;
 }
 
-static char *memcpy_uppcase __P ((char *dest, const char *src, size_t len));
+//static char *memcpy_uppcase __P ((char *dest, const char *src, size_t len));
 
 static char *
-memcpy_uppcase (dest, src, len)
-     char *dest;
-     const char *src;
-     size_t len;
+memcpy_uppcase (char *dest, const char *src, size_t len)
 {
   while (len-- > 0)
     dest[len] = TOUPPER ((unsigned char) src[len]);
@@ -300,11 +290,9 @@ memcpy_uppcase (dest, src, len)
 /* Yield the difference between *A and *B,
    measured in seconds, ignoring leap seconds.  */
 # define tm_diff ftime_tm_diff
-static int tm_diff __P ((const struct tm *, const struct tm *));
+//static int tm_diff __P ((const struct tm *, const struct tm *));
 static int
-tm_diff (a, b)
-     const struct tm *a;
-     const struct tm *b;
+tm_diff (const struct tm *a, const struct tm *b)
 {
   /* Compute intervening leap days correctly even if year is negative.
      Take care to avoid int overflow in leap day calculations,
@@ -334,14 +322,12 @@ tm_diff (a, b)
 #define ISO_WEEK_START_WDAY 1 /* Monday */
 #define ISO_WEEK1_WDAY 4 /* Thursday */
 #define YDAY_MINIMUM (-366)
-static int iso_week_days __P ((int, int));
+//static int iso_week_days __P ((int, int));
 #ifdef __GNUC__
 __inline__
 #endif
 static int
-iso_week_days (yday, wday)
-     int yday;
-     int wday;
+iso_week_days (int yday, int wday)
 {
   /* Add enough to the first operand of % to make it nonnegative.  */
   int big_enough_multiple_of_7 = (-YDAY_MINIMUM / 7 + 2) * 7;
@@ -382,15 +368,9 @@ static char const month_name[][10] =
 #if !defined _LIBC && HAVE_TZNAME && HAVE_TZSET
   /* Solaris 2.5 tzset sometimes modifies the storage returned by localtime.
      Work around this bug by copying *tp before it might be munged.  */
-  size_t _strftime_copytm __P ((char *, size_t, const char *,
-			        const struct tm * ut_argument_spec_iso));
+//  size_t _strftime_copytm __P ((char *, size_t, const char *, const struct tm * ut_argument_spec_iso));
   size_t
-  my_strftime (s, maxsize, format, tp ut_argument)
-      char *s;
-      size_t maxsize;
-      const char *format;
-      const struct tm *tp;
-      ut_argument_spec
+  my_strftime (char *s, size_t maxsize, const char *format, const struct tm *tp ut_argument)
   {
     struct tm tmcopy;
     tmcopy = *tp;
@@ -409,12 +389,7 @@ static char const month_name[][10] =
    anywhere, so to determine how many characters would be
    written, use NULL for S and (size_t) UINT_MAX for MAXSIZE.  */
 size_t
-my_strftime (s, maxsize, format, tp ut_argument)
-      char *s;
-      size_t maxsize;
-      const char *format;
-      const struct tm *tp;
-      ut_argument_spec
+my_strftime (char *s, size_t maxsize, const char *format, const struct tm *tp ut_argument)
 {
   int hour12 = tp->tm_hour;
 #ifdef _NL_CURRENT
@@ -1246,11 +1221,7 @@ my_strftime (s, maxsize, format, tp ut_argument)
    strftime function and does not have the extra information whether the
    TP arguments comes from a `gmtime' call or not.  */
 size_t
-emacs_strftime (s, maxsize, format, tp)
-      char *s;
-      size_t maxsize;
-      const char *format;
-      const struct tm *tp;
+emacs_strftime (char *s, size_t maxsize, const char *format, const struct tm *tp)
 {
   return my_strftime (s, maxsize, format, tp, 0);
 }

@@ -695,69 +695,6 @@ dcc_chat_secpass(int idx, char *buf, int atr)
     }
   }
 }
-struct dcc_table DCC_CHAT_SECPASS;
-
-static void
-dcc_chat_pass(int idx, char *buf, int atr)
-{
-  if (!atr)
-    return;
-  strip_telnet(dcc[idx].sock, buf, &atr);
-  atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-  if (dcc[idx].user->bot) {
-    if (!egg_strcasecmp(buf, "elinkdone")) {
-      free(dcc[idx].u.chat);
-      dcc[idx].type = &DCC_BOT_NEW;
-      dcc[idx].u.bot = (struct bot_info *) calloc(1, sizeof(struct bot_info));
-      dcc[idx].status = STAT_CALLED;
-      dprintf(idx, "goodbye!\n");
-      greet_new_bot(idx);
-#ifdef HUB
-      send_timesync(idx);
-#endif /* HUB */
-    } else {
-      /* Invalid password/digest on hub */
-      putlog(LOG_WARN, "*", "%s failed encrypted link handshake.", dcc[idx].nick);
-      killsock(dcc[idx].sock);
-      lostdcc(idx);
-    }
-    return;
-  }
-  if (u_pass_match(dcc[idx].user, buf)) {
-    if (dccauth) { 
-      char randstr[51] = "";
-
-      make_rand_str(randstr, 50);
-      strncpyz(dcc[idx].hash, makehash(dcc[idx].user, randstr), sizeof dcc[idx].hash);
-      dcc[idx].type = &DCC_CHAT_SECPASS;
-      dcc[idx].timeval = now;
-      dprintf(idx, "-Auth %s %s\n", randstr, conf.bot->nick);
-    } else {
-      dcc_chat_secpass(idx, buf, atr);
-    }
-  } else {
-    dprintf(idx, "%s\n", response(RES_BADUSERPASS));
-    putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
-    if (dcc[idx].u.chat->away) {        /* su from a dumb user */
-      /* Turn echo back on for telnet sessions (send IAC WON'T ECHO). */
-      if (dcc[idx].status & STAT_TELNET)
-        dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
-      dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->away);
-      strcpy(dcc[idx].nick, dcc[idx].u.chat->away);
-      free(dcc[idx].u.chat->away);
-      free(dcc[idx].u.chat->su_nick);
-      dcc[idx].u.chat->away = NULL;
-      dcc[idx].u.chat->su_nick = NULL;
-      dcc[idx].type = &DCC_CHAT;
-      if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
-        botnet_send_join_idx(idx);
-      chanout_but(-1, dcc[idx].u.chat->channel, DCC_JOIN, dcc[idx].nick);
-    } else {
-      killsock(dcc[idx].sock);
-      lostdcc(idx);
-    }
-  }
-}
 
 static void
 eof_dcc_general(int idx)
@@ -946,7 +883,7 @@ out_dcc_general(int idx, char *buf, void *x)
     tputs(dcc[idx].sock, y, strlen(y));
 }
 
-struct dcc_table DCC_CHAT_SECPASS = {
+static struct dcc_table DCC_CHAT_SECPASS = {
   "CHAT_SECPASS",
   0,
   eof_dcc_general,
@@ -958,6 +895,68 @@ struct dcc_table DCC_CHAT_SECPASS = {
   out_dcc_general,
   NULL
 };
+
+static void
+dcc_chat_pass(int idx, char *buf, int atr)
+{
+  if (!atr)
+    return;
+  strip_telnet(dcc[idx].sock, buf, &atr);
+  atr = dcc[idx].user ? dcc[idx].user->flags : 0;
+  if (dcc[idx].user->bot) {
+    if (!egg_strcasecmp(buf, "elinkdone")) {
+      free(dcc[idx].u.chat);
+      dcc[idx].type = &DCC_BOT_NEW;
+      dcc[idx].u.bot = (struct bot_info *) calloc(1, sizeof(struct bot_info));
+      dcc[idx].status = STAT_CALLED;
+      dprintf(idx, "goodbye!\n");
+      greet_new_bot(idx);
+#ifdef HUB
+      send_timesync(idx);
+#endif /* HUB */
+    } else {
+      /* Invalid password/digest on hub */
+      putlog(LOG_WARN, "*", "%s failed encrypted link handshake.", dcc[idx].nick);
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
+    }
+    return;
+  }
+  if (u_pass_match(dcc[idx].user, buf)) {
+    if (dccauth) { 
+      char randstr[51] = "";
+
+      make_rand_str(randstr, 50);
+      strncpyz(dcc[idx].hash, makehash(dcc[idx].user, randstr), sizeof dcc[idx].hash);
+      dcc[idx].type = &DCC_CHAT_SECPASS;
+      dcc[idx].timeval = now;
+      dprintf(idx, "-Auth %s %s\n", randstr, conf.bot->nick);
+    } else {
+      dcc_chat_secpass(idx, buf, atr);
+    }
+  } else {
+    dprintf(idx, "%s\n", response(RES_BADUSERPASS));
+    putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+    if (dcc[idx].u.chat->away) {        /* su from a dumb user */
+      /* Turn echo back on for telnet sessions (send IAC WON'T ECHO). */
+      if (dcc[idx].status & STAT_TELNET)
+        dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
+      dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->away);
+      strcpy(dcc[idx].nick, dcc[idx].u.chat->away);
+      free(dcc[idx].u.chat->away);
+      free(dcc[idx].u.chat->su_nick);
+      dcc[idx].u.chat->away = NULL;
+      dcc[idx].u.chat->su_nick = NULL;
+      dcc[idx].type = &DCC_CHAT;
+      if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
+        botnet_send_join_idx(idx);
+      chanout_but(-1, dcc[idx].u.chat->channel, DCC_JOIN, dcc[idx].nick);
+    } else {
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
+    }
+  }
+}
 
 struct dcc_table DCC_CHAT_PASS = {
   "CHAT_PASS",

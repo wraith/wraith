@@ -198,7 +198,7 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
 
   if (who && bufsize > 0) who[0] = 0;
   ur = get_user_by_handle(userlist, argv2);
-  if (ur && allow_fwd && (f1 = get_user(&USERENTRY_FWD, ur))) {
+  if (ur && allow_fwd && (f1 = (char *) get_user(&USERENTRY_FWD, ur))) {
     char fwd[161] = "", fwd2[161] = "", *f2 = NULL, *p = NULL, *q = NULL, *r = NULL;
     int ok = 1;
 
@@ -216,7 +216,7 @@ int storenote(char *argv1, char *argv2, char *argv3, int idx, char *who, int buf
       ur2 = get_user_by_handle(userlist, fwd2);
       if (!ur2)
 	ok = 0;
-      if ((f2 = get_user(&USERENTRY_FWD, ur2))) {
+      if ((f2 = (char *) get_user(&USERENTRY_FWD, ur2))) {
 	strcpy(fwd2, f2);
 	splitc(fwd2, fwd2, '@');
 	if (!egg_strcasecmp(fwd2, argv2))

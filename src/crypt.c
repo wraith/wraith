@@ -42,7 +42,7 @@ encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
     char key[CRYPT_KEYSIZE + 1] = "";
 
     strncpyz(key, keydata, sizeof(key));
-    AES_set_encrypt_key(key, CRYPT_KEYBITS, &e_key);
+    AES_set_encrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &e_key);
     /* Now loop through the blocks and crypt them */
     blocks = len / CRYPT_BLOCKSIZE;
     for (block = blocks - 1; block >= 0; block--)
@@ -69,7 +69,7 @@ decrypt_binary(const char *keydata, unsigned char *in, size_t len)
     char key[CRYPT_KEYSIZE + 1] = "";
 
     strncpyz(key, keydata, sizeof(key));
-    AES_set_decrypt_key(key, CRYPT_KEYBITS, &d_key);
+    AES_set_decrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &d_key);
     /* Now loop through the blocks and crypt them */
     blocks = len / CRYPT_BLOCKSIZE;
 
@@ -128,7 +128,7 @@ void encrypt_pass(char *s1, char *s2)
   free(tmp);
 }
 
-int lfprintf (FILE *stream, char *format, ...)
+int lfprintf (FILE *stream, const char *format, ...)
 {
   va_list va;
   char buf[2048], *ln = NULL, *nln = NULL, *tmp = NULL;

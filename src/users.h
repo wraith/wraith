@@ -146,8 +146,8 @@ extern struct igrec *global_ign;
 
 struct userrec *get_user_by_handle(struct userrec *, char *);
 struct userrec *get_user_by_host(char *);
-struct userrec *check_chanlist();
-struct userrec *check_chanlist_hand();
+struct userrec *check_chanlist(const char *);
+struct userrec *check_chanlist_hand(const char *);
 
 /* All the default userentry stuff, for code re-use
  */

@@ -593,7 +593,7 @@ static void cmd_addline(int idx, char *par)
     return;
   }
 
-  q = get_user(&USERENTRY_HOSTS, u);
+  q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
   
   hostbuf = (char *) calloc(1, 1);
   for (; q; q = q->next) {
@@ -622,23 +622,23 @@ static void cmd_back(int idx, char *par)
 
 static void cmd_newpass(int idx, char *par)
 {
-  char *new = NULL, pass[MAXPASSLEN + 1] = "";
+  char *newpass = NULL, pass[MAXPASSLEN + 1] = "";
 
   putlog(LOG_CMDS, "*", "#%s# newpass...", dcc[idx].nick);
   if (!par[0]) {
     dprintf(idx, "Usage: newpass <newpassword>\n");
     return;
   }
-  new = newsplit(&par);
+  newpass = newsplit(&par);
 
-  if (!strcmp(new, "rand")) {
+  if (!strcmp(newpass, "rand")) {
     make_rand_str(pass, MAXPASSLEN);
   } else {
-    if (strlen(new) < 6) {
+    if (strlen(newpass) < 6) {
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      egg_snprintf(pass, sizeof pass, "%s", new);
+      egg_snprintf(pass, sizeof pass, "%s", newpass);
     }
   }
   if (strlen(pass) > MAXPASSLEN)
@@ -656,23 +656,23 @@ static void cmd_newpass(int idx, char *par)
 
 static void cmd_secpass(int idx, char *par)
 {
-  char *new = NULL, pass[MAXPASSLEN + 1] = "";
+  char *newpass = NULL, pass[MAXPASSLEN + 1] = "";
 
   putlog(LOG_CMDS, "*", "#%s# secpass...", dcc[idx].nick);
   if (!par[0]) {
     dprintf(idx, "Usage: secpass <newsecpass>\nIf you use \"rand\" as the secpass, a random pass will be chosen.\n");
     return;
   }
-  new = newsplit(&par);
+  newpass = newsplit(&par);
 
-  if (!strcmp(new, "rand")) {
+  if (!strcmp(newpass, "rand")) {
     make_rand_str(pass, MAXPASSLEN);
   } else {
-    if (strlen(new) < 6) {
+    if (strlen(newpass) < 6) {
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      egg_snprintf(pass, sizeof pass, "%s", new);
+      egg_snprintf(pass, sizeof pass, "%s", newpass);
     }
   }
   if (strlen(pass) > MAXPASSLEN)
@@ -705,8 +705,11 @@ static void cmd_bottree(int idx, char *par)
 }
 #endif /* HUB */
 
-int my_cmp (const mycmds *c1, const mycmds *c2)
+int my_cmp (const void *in1, const void *in2)
 {
+  const mycmds *c1 = (const mycmds *) in1;
+  const mycmds *c2 = (const mycmds *) in2;
+
   return strcmp (c1->name, c2->name);
 }
 
@@ -717,7 +720,7 @@ static void cmd_nohelp(int idx, char *par)
 
   buf = (char *) calloc(1, 1);
 
-  qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
+  qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)(const void *, const void *)) &my_cmp);
   
   for (i = 0; i < cmdi; i++) {
     int o, found = 0;
@@ -769,7 +772,7 @@ static void cmd_help(int idx, char *par)
   if (!nowild)
     dprintf(idx, "Showing help topics matching '%s' for flags: (%s)\n", match, flg);
 
-  qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
+  qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)(const void *, const void *)) &my_cmp);
 
   /* even if we have nowild, we loop to conserve code/space */
   while (!done) {
@@ -1904,7 +1907,7 @@ static void cmd_conf(int idx, char *par)
       }
     }
     if (show) {
-      char *ss = set ? "Set: " : "";
+      const char *ss = set ? "Set: " : "";
       
 /*      if (!what || !egg_strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conffile.uid);
       if (!what || !egg_strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conffile.uname);
@@ -3496,7 +3499,7 @@ static void cmd_pls_host(int idx, char *par)
     return;
   }
   
-  for (q = get_user(&USERENTRY_HOSTS, dcc[idx].user); q; q = q->next)
+  for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, dcc[idx].user); q; q = q->next)
     if (!egg_strcasecmp(q->extra, host)) {
       dprintf(idx, "That hostmask is already there.\n");
       return;

@@ -74,7 +74,7 @@ static const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
 	MD5_u32plus a, b, c, d;
 	MD5_u32plus saved_a, saved_b, saved_c, saved_d;
 
-	ptr = data;
+	ptr = (const unsigned char *) data;
 
 	a = ctx->a;
 	b = ctx->b;

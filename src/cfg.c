@@ -899,7 +899,7 @@ void trigger_cfg_changed()
 
   for (i = 0; i < cfg_count; i++) {
     if (cfg[i]->flags & CFGF_LOCAL) {
-      xk = get_user(&USERENTRY_CONFIG, conf.bot->u);
+      xk = (struct xtra_key *) get_user(&USERENTRY_CONFIG, conf.bot->u);
       while (xk && strcmp(xk->key, cfg[i]->name))
 	xk = xk->next;
       if (xk) {

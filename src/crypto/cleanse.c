@@ -4,7 +4,7 @@ unsigned char cleanse_ctr = 0;
 
 void OPENSSL_cleanse(void *ptr, size_t len)
         {
-        unsigned char *p = ptr;
+        unsigned char *p = (unsigned char *) ptr;
         size_t loop = len;
         while(loop--)
                 {

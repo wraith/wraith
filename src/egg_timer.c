@@ -12,7 +12,7 @@ typedef struct egg_timer_b {
 	struct egg_timer_b *next;
 	int id;
 	char *name;
-	Function callback;
+	int (*callback) (void *);
 	void *client_data;
 	egg_timeval_t howlong;
 	egg_timeval_t trigger_time;
@@ -186,7 +186,7 @@ int timer_get_shortest(egg_timeval_t *howlong)
 int timer_run()
 {
 	egg_timer_t *timer = NULL;
-	Function callback;
+	int (*callback) (void *);
 	void *client_data = NULL;
 
 	while (timer_list_head) {

@@ -642,13 +642,13 @@ writeconf(char *filename, FILE * stream, int bits)
 {
   FILE *f = NULL;
   conf_bot *bot = NULL;
-  Function my_write = NULL;
+  int (*my_write) (FILE *, const char *, ... ) = NULL;
   char *p = NULL;
 
   if (bits & CONF_ENC)
-    my_write = (Function) lfprintf;
+    my_write = lfprintf;
   else if (!(bits & CONF_ENC))
-    my_write = (Function) fprintf;
+    my_write = fprintf;
 
 #define comment(text)			\
 	if (bits & CONF_COMMENT)	\
@@ -803,7 +803,7 @@ fillconf(conf_t * inconf)
 }
 
 void
-bin_to_conf(settings_t * in)
+bin_to_conf(void)
 {
 /* printf("Converting binary data to conf struct\n"); */
   conffile.uid = atol(settings.uid);

@@ -174,7 +174,7 @@ static bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *
 			if (entry->mask && !strcmp(entry->mask, mask)) hit++;
 			else if (!entry->mask) hit++;
 			if (entry->function_name && !strcmp(entry->function_name, function_name)) hit++;
-			if (entry->callback == callback || !callback) hit++;
+			if (entry->callback == (HashFunc) callback || !callback) hit++;
 			if (hit == 3) break;
 		}
 	}
@@ -249,7 +249,7 @@ int bind_entry_overwrite(bind_table_t *table, int id, const char *mask, const ch
 	entry = bind_entry_lookup(table, id, mask, function_name, NULL);
 	if (!entry) return(-1);
 
-	entry->callback = callback;
+	entry->callback = (HashFunc) callback;
 	entry->client_data = client_data;
 	return(0);
 }
@@ -291,7 +291,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 	}
 	if (mask) entry->mask = strdup(mask);
 	if (function_name) entry->function_name = strdup(function_name);
-	entry->callback = callback;
+	entry->callback = (HashFunc) callback;
 	entry->client_data = client_data;
 	entry->flags = bind_flags;
 

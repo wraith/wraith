@@ -76,7 +76,7 @@ makehash(struct userrec *u, char *randstring)
   char hash[256] = "", *secpass = NULL;
 
   if (get_user(&USERENTRY_SECPASS, u)) {
-    secpass = strdup(get_user(&USERENTRY_SECPASS, u));
+    secpass = strdup((char *) get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
   egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, (secpass && secpass[0]) ? secpass : "", authkey);

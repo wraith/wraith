@@ -233,7 +233,7 @@ readcfg(const char *cfgfile)
 static void edpack(settings_t *incfg, const char *hash, int what)
 {
   char *tmp = NULL;
-  char *(*enc_dec_string)();
+  char *(*enc_dec_string)(const char *, char *);
   
   if (what == PACK_ENC)
     enc_dec_string = encrypt_string;

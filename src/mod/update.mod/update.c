@@ -154,11 +154,11 @@ static void update_version(int idx, char *par)
 /* Note: these MUST be sorted. */
 static botcmd_t C_update[] =
 {
-  {"u?",	(Function) update_fileq},
-  {"un",	(Function) update_ufno},
-  {"us",	(Function) update_ufsend},
-  {"uy",	(Function) update_ufyes},
-  {"v",         (Function) update_version},
+  {"u?",	update_fileq},
+  {"un",	update_ufno},
+  {"us",	update_ufsend},
+  {"uy",	update_ufyes},
+  {"v",         update_version},
   {NULL,	NULL}
 };
 
@@ -186,7 +186,7 @@ static void got_nu(char *botnick, char *code, char *par)
 #ifdef LEAF
      struct bot_addr *bi = NULL, *obi = NULL;
 
-     obi = get_user(&USERENTRY_BOTADDR, conf.bot->u);
+     obi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
      bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
      bi->uplink = strdup(botnick);
