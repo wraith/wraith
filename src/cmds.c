@@ -4008,8 +4008,8 @@ static char *btos(unsigned long  bytes)
 
 static void cmd_whoami(struct userrec *u, int idx, char *par)
 {
-  dprintf(idx, "You are %s@%s.\n", dcc[idx].nick, botnetnick);
   putlog(LOG_CMDS, "*", STR("#%s# whoami"), dcc[idx].nick);
+  dprintf(idx, "You are %s@%s.\n", dcc[idx].nick, botnetnick);
 }
 
 /* DCC CHAT COMMANDS
