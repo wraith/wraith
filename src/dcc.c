@@ -1928,7 +1928,7 @@ dcc_telnet_got_ident(int i, char *host)
    */
 /* n  ssl_link(dcc[i].sock, ACCEPT_SSL); */
 #ifdef HUB
-  dprintf(i, " \n");			/* represents hub that support new linking scheme */
+  dprintf(i, "\n");			/* represents hub that support new linking scheme */
 					/* FIXME: remove after 1.2.2? back to '\n' */
 #else /* !HUB */
   dprintf(i, "%s\n", response(RES_USERNAME));
