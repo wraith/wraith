@@ -297,15 +297,10 @@ Context;
       putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - I'm getting userlist right now"), botnick, nick, chan->dname);
       return;
     }
-    if (channel_fastop(chan) || channel_take(chan) || 0) {
-      add_mode(chan, '+', 'o', nick);
-    } else {
-      tmp = nmalloc(strlen(chan->dname) + 200);
-      makeopline(chan, nick, tmp);
-      dprintf(DP_MODE, tmp);
-      mem->flags |= SENTOP;
-      nfree(tmp);
-    }
+
+    do_op(nick, chan, 1);
+    mem->flags |= SENTOP;
+
     putlog(LOG_GETIN, "*", STR("opreq from %s/%s on %s - Opped"), botnick, nick, chan->dname);
   } else if (what[0] == 'i') {
 Context;
@@ -1408,7 +1403,7 @@ static void flush_modes()
 	m->flags &= ~FULL_DELAY;
         if (chan_sentop(m)) {
           m->flags &= ~SENTOP;
-          add_mode(chan, '+', 'o', m->nick);
+          do_op(m->nick, chan, 0);
         }
         if (chan_sentvoice(m)) {
           m->flags &= ~SENTVOICE;

@@ -33,7 +33,11 @@ static struct chanset_t *get_channel(int idx, char *chname)
 static int has_op(int idx, struct chanset_t *chan)
 {
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
-  if (chan_op(user) || (glob_op(user) && !chan_deop(user)))
+  if (private(user, chan, PRIV_OP)) {
+    dprintf(idx, "No such channel.\n");
+    return 0;
+  }
+  if (chk_op(user, chan))
     return 1;
   dprintf(idx, "You are not a channel op on %s.\n", chan->dname);
   return 0;
@@ -76,11 +80,6 @@ static void cmd_act(struct userrec *u, int idx, char *par)
     return;
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
-
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
 
   m = ismember(chan, botname);
   if (!m) {
@@ -132,10 +131,6 @@ static void cmd_say(struct userrec *u, int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
   m = ismember(chan, botname);
   if (!m) {
     dprintf(idx, "Cannot say to %s: I'm not on that channel.\n", chan->dname);
@@ -408,28 +403,6 @@ static void cmd_devoice(struct userrec *u, int idx, char *par)
   }
 
 }
-void do_op(char *nick, struct chanset_t *chan, int force)
-{
-  memberlist *m;
-
-  m = ismember(chan, nick);
-
-  if (!m) return;
-
-//  if (chan_hasop(m)) return;  
-
-  if (!force && chan_hasop(m)) 
-    return; 
-
-  if (channel_fastop(chan)) {
-    add_mode(chan, '+', 'o', nick);
-  } else {
-    char *tmp = nmalloc(strlen(chan->name) + 200);
-    makeopline(chan, nick, tmp);
-    dprintf(DP_MODE, tmp);
-    nfree(tmp);
-  }
-}
 
 static void cmd_op(struct userrec *u, int idx, char *par)
 {
@@ -594,9 +567,10 @@ Context;
   chanbots = nmalloc(chan->channel.members * sizeof(memberlist *));
   bzero(chanbots, chan->channel.members * sizeof(memberlist *));
 
-Context;
+ContextNote("!mdop!");
   for (m = chan->channel.member; m; m = m->next)
     if (m->flags & CHANOP) {
+      ContextNote(m->nick);
       if (!m->user)
 	targets[targetcount++] = m;
       else if (((m->user->flags & (USER_BOT | USER_OP)) == (USER_BOT | USER_OP))
@@ -988,11 +962,6 @@ static void cmd_getkey(struct userrec *u, int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
-
   if (!glob_op(user) && !chan_op(user)) {
     dprintf(idx, "You do not have access for %s\n");
     return;
@@ -1011,6 +980,43 @@ static void cmd_getkey(struct userrec *u, int idx, char *par)
     dprintf(idx, " (Enforcing +k %s)", chan->key_prot);
   dprintf(idx, "\n");
 }
+
+static void cmd_mop(struct userrec *u, int idx, char *par)
+{
+  struct chanset_t *chan;
+  memberlist *m;
+  int found = 0;
+
+  if (par[0] && (strchr(CHANMETA, par[0]) != NULL)) {
+    char *chname = newsplit(&par);
+    chan = get_channel(idx, chname);
+  } else
+    chan = get_channel(idx, "");
+
+  if (!chan || !has_op(idx, chan))
+    return;
+
+  putlog(LOG_CMDS, "*", "#%s# (%s) mop %s", dcc[idx].nick, chan->dname, par);
+
+  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+
+  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    if (!m->user) {
+      char s[256];
+      sprintf(s, STR("%s!%s"), m->nick, m->userhost);
+      m->user = get_user_by_host(s);
+    }
+    get_user_flagrec(m->user, &victim, chan->dname);
+    if (!chan_hasop(m) && !glob_bot(victim) && chk_op(victim, chan)) {
+      found++;
+      dprintf(idx, "Gave op to %s on %s\n", m->nick, chan->dname);
+      do_op(m->nick, chan, 0);
+    }
+  }
+  if (!found)
+    dprintf(idx, "No one to op on %s\n", chan->dname);
+}
+
 
 static void cmd_find(struct userrec *u, int idx, char *par)
 {
@@ -1174,11 +1180,6 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
-
   putlog(LOG_CMDS, "*", "#%s# (%s) channel", dcc[idx].nick, chan->dname);
   strncpyz(s, getchanmode(chan), sizeof s);
   if (channel_pending(chan)) {
@@ -1335,11 +1336,6 @@ static void cmd_topic(struct userrec *u, int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
-
   if (!channel_active(chan)) {
     dprintf(idx, "I'm not on %s right now!\n", chan->dname);
     return;
@@ -1373,10 +1369,6 @@ static void cmd_resetbans(struct userrec *u, int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
   putlog(LOG_CMDS, "*", "#%s# (%s) resetbans", dcc[idx].nick, chan->dname);
   dprintf(idx, "Resetting bans on %s...\n", chan->dname);
   resetbans(chan);
@@ -1393,11 +1385,6 @@ static void cmd_resetexempts(struct userrec *u, int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
   putlog(LOG_CMDS, "*", "#%s# (%s) resetexempts", dcc[idx].nick, chan->dname);
   dprintf(idx, "Resetting exempts on %s...\n", chan->dname);
   resetexempts(chan);
@@ -1413,10 +1400,6 @@ static void cmd_resetinvites(struct userrec *u, int idx, char *par)
     return;
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
-  if (private(user, chan, PRIV_OP)) {
-    dprintf(idx, "No such channel.\n");
-    return;
-  }
   putlog(LOG_CMDS, "*", "#%s# (%s) resetinvites", dcc[idx].nick, chan->dname);
   dprintf(idx, "Resetting resetinvites on %s...\n", chan->dname);
   resetinvites(chan);
@@ -1636,6 +1619,7 @@ static cmd_t irc_dcc[] =
   {"kick",		"o|o",	 (Function) cmd_kick,		NULL},
   {"kickban",		"o|o",	 (Function) cmd_kickban,	NULL},
   {"mdop",              "n|n",	 (Function) cmd_mdop,		NULL},
+  {"mop",		"n|m",	 (Function) cmd_mop,		NULL},
   {"msg",		"o",	 (Function) cmd_msg,		NULL},
   {"op",		"o|o",	 (Function) cmd_op,		NULL},
   {"reset",		"m|m",	 (Function) cmd_reset,		NULL},

@@ -32,7 +32,8 @@ static void flush_mode(struct chanset_t *, int);
 				       (chan)->invites, global_invites, 'I')
 
 static void detect_autokick(char *, char *, struct chanset_t *, char *);
-static int target_priority(struct chanset_t *, memberlist *, int);
+/* static int target_priority(struct chanset_t *, memberlist *, int); */
+static void do_op(char *, struct chanset_t *, int);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
 static void reset_chan_info(struct chanset_t *);
