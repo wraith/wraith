@@ -622,7 +622,6 @@ static void startup_checks() {
   else if (fixmod(binname))
    werr(ERR_BINMOD);
 
-#ifdef LEAF
 #ifndef CYGWIN_HACKS
   /* move the binary to the correct place */
   {
@@ -669,7 +668,6 @@ static void startup_checks() {
     }
   }
 #endif /* !CYGWIN_HACKS */
-#endif /* LEAF */
 
   fillconf(&conf);
 #ifdef LEAF
