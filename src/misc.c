@@ -1549,21 +1549,21 @@ char * kickreason(int kind) {
     case 1: return STR("banned");
     case 2: return STR("see you in hell");
     case 3: return STR("go away");
-    case 4: return STR("cya around looser");
+    case 4: return STR("cya around lewser");
     case 5: return STR("unwanted!");
     }
   case KICK_KUSER:
     switch (r % 4) {
     case 0: return STR("not wanted");
     case 1: return STR("something tells me you're annoying");
-    case 2: return STR("don't bug me looser");
+    case 2: return STR("don't bug me lewser");
     case 3: return STR("creep");
     }
   case KICK_KICKBAN:
     switch (r % 4) {
     case 0: return STR("gone");
     case 1: return STR("stupid");
-    case 2: return STR("looser");
+    case 2: return STR("lewser");
     case 3: return STR("...");
     }     
   case KICK_MASSDEOP:
@@ -1650,7 +1650,7 @@ char * kickreason(int kind) {
     case 1: return STR("be schizofrenic elsewhere");
     case 2: return STR("I'm loosing track of you... not!");
     case 3: return STR("that is REALLY annoying");
-    case 4: return STR("try this: /NICK looser");
+    case 4: return STR("try this: /NICK n00b");
     case 5: return STR("playing hide 'n' seek?");
     case 6: return STR("gotcha!");
     }
