@@ -1293,7 +1293,7 @@ See also: echo, color
    be displayed to other partyline users as you leave.
 ::randstring
 ###  %brandstring%b <len>
-   Displays a random string of length 'len'
+   Displays a random string of length 'len' up to 300 chars.
 ::relay
 ###  %brelay%b <bot>
    Relays you via telnet to another bot, whether or not it is currently linked.
