@@ -122,24 +122,27 @@ fi
 
 echo "[*] Building ${PACKNAME}::${type} for $os"
 
+MAKE="`which gmake`"
+if test -z "${MAKE}"; then
+ MAKE="`which make`"
+fi
+
+if [ $clean = "2" ]; then
+ if test -f Makefile; then
+  echo "[*] DistCleaning old files..."
+  ${MAKE} distclean > /dev/null
+ fi
+fi
+
 # Run ./configure, then verify it's ok
 echo "[*] Configuring..."
 umask 077 >/dev/null
 
 ./configure --silent --with-pack=${pack}
 
-MAKE="`which gmake`"
-if test -z "${MAKE}"; then
- MAKE="`which make`"
-fi
-
-
 if [ $clean = "1" ]; then
  echo "[*] Cleaning up old binaries/files..."
  ${MAKE} clean > /dev/null
-elif [ $clean = "2" ]; then
- echo "[*] DistCleaning old files..."
- ${MAKE} distclean > /dev/null
 fi
 
 _build()
