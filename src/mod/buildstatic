@@ -1,0 +1,24 @@
+#! /bin/sh
+# $Id: buildstatic,v 1.4 1999/12/15 02:32:58 guppy Exp $
+
+rm -f static.h
+for i in *.mod
+do
+y=`echo $i | sed s/.mod//`
+cat >> static.h << EOF
+char *${y}_start();
+EOF
+done
+cat >> static.h << EOF
+static void link_statics() {
+EOF
+for i in *.mod
+do
+y=`echo $i | sed s/.mod//`
+cat >> static.h << EOF
+  check_static("${y}", ${y}_start);
+EOF
+done
+cat >> static.h << EOF
+}
+EOF

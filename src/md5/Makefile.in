@@ -1,0 +1,36 @@
+# Makefile for src/md5/
+# $Id: Makefile.in,v 1.4 1999/12/15 02:32:58 guppy Exp $
+
+SHELL = /bin/sh
+top_srcdir = @top_srcdir@
+
+@SET_MAKE@
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+
+OBJS = md5c.o
+
+doofus:
+	@echo ""
+	@echo "Let's try this from the right directory..."
+	@echo ""
+	@cd $(top_srcdir); $(MAKE)
+
+depend:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MM *.c > .depend
+
+clean:
+	@rm -f .depend *.o *~
+
+md5: $(OBJS)
+
+.SUFFIXES:
+.SUFFIXES: .c .o .h
+
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+#safety hash
+md5c.o: md5c.c global.h md5.h
