@@ -31,23 +31,10 @@ After the compile process is finished, the binaries will be placed in wraith.OS.
 
 Step 3: Making bots
 
-NOTE: conf files from versions older than 1.0.11 still work, but improvements have been made.
+simply do ./binary -C
+You may need to 'export EDITOR=pico' or to whatever editor you prefer.
+Make sure you check all settings presented.
 
-read over doc/conf.example.
-This file can be made by the bot binary with ./binary -g filename
-Edit the conf (conf.example or the generated one, doesnt matter)
-For leaf bots, encrypt the conf as '~/.ssh/.known_hosts'
-For hub bots, encrypt the conf as 'conf'
-Thie is done by: ./binary -e infile outfile
-tar -czvf somebot.tgz .known_hosts binary
-(or for hub): tar -czvf somehub.tgz conf binary
-then upload somebot.tgz to whatever shell..
-
-LEAF:
-untar, mkdir ~/.ssh;mv .known_hosts ~/.ssh/.known_hosts
-then just run the leaf binary, it will move itself to: ~/.sshrc
-
-HUB:
-untar, ./binary 
-This is assuming the conf is already encrypted as 'conf', if not, move it to 'conf'.
-The binary can be named ANYTHING, just as long as the encrypted conf is known as 'conf' in the same dir
+If you were updating an old bot on the shell:
+./old_binary -U new_binary
+If you want bots to auto restart use '-u' instead

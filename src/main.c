@@ -65,7 +65,7 @@
 extern int		optind;
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
-const char	egg_version[1024] = "1.2";
+const char	egg_version[1024] = "1.2.1";
 
 /* FIXME: remove after 1.2 ??? OR NOT */
 int	old_hack = 0;
