@@ -1,8 +1,12 @@
-ON *:LOAD:{ echo -a Wraith authorization script, for mIRC 5.8 and up, by bryan loaded (MSG/DCC/Psybnc support). type /setauth }
+ON *:LOAD:{ 
+  echo -a Wraith authorization script, for mIRC 5.8 and up, by bryan loaded (MSG/DCC/Psybnc support).
+  helpauth 
+}
 
 alias helpauth {
   echo -a Type /setauth
   echo -a /auth -Auth string <botnick> <- That will return the md5 hash. (use for telnet possibly)
+  echo -a /showauth [botnick] will show what settings will be used.
 }
 
 alias setauth {
@@ -44,6 +48,13 @@ alias setauth {
     }
     echo -a set!
   }
+}
+
+ALIAS showauth {
+  if ($1) {
+    var %s ( $+ $1 $+ )
+  }
+  echo -a %s PASS: $wpass($1) :: SECPASS: $wsecpass($1) :: AUTHKEY: $wauthkey($1)
 }
 
 ALIAS -l psy {
@@ -92,11 +103,11 @@ ALIAS -l wraith {
   }
 }
 
-alias -l wauthkey { return $wraith(w.authkey,$1) }
-alias -l wpass { return $wraith(w.pass,$1) }
-alias -l wsecpass { return $wraith(w.secpass,$1) }
+alias wauthkey { return $wraith(w.authkey,$1) }
+alias wpass { return $wraith(w.pass,$1) }
+alias wsecpass { return $wraith(w.secpass,$1) }
 
-alias -l wmd5 {
+alias wmd5 {
   if ($version < 5.8) {
     echo 8 -a This script will only work for mIRC 5.8 and up.
   }
@@ -113,6 +124,10 @@ alias -l wmd5 {
 }
 
 ALIAS auth { 
+  ; stupid ircn.
+  if ($gettok($1-, 0, 160) > $gettok($1-, 0, 32)) {
+    tokenize 160 $1-
+  }
   if ($1 != -Auth || !$2) { 
     echo 8 -a Usage: /auth -Auth string botname 
     echo 8 -a botname is optional. 
