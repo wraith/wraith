@@ -455,7 +455,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 
 	for (; cmds->name; cmds++) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
-                if (!strcmp(table->name, "dcc") && findhelp(cmds->name)) {
+                if (!strcmp(table->name, "dcc") && (findhelp(cmds->name) != -1)) {
                   cmdlist[cmdi].name = cmds->name;
                   cmdlist[cmdi].flags.match = FR_GLOBAL | FR_CHAN;
                   break_down_flags(cmds->flags, &(cmdlist[cmdi].flags), NULL);

@@ -697,11 +697,7 @@ static void cmd_nohelp(int idx, char *par)
   qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)(const void *, const void *)) &my_cmp);
   
   for (int i = 0; i < cmdi; i++) {
-    int found = 0;
-
-    for (int o = 0; (help[o].cmd) && (help[o].desc); o++)
-      if (!egg_strcasecmp(help[o].cmd, cmdlist[i].name)) found++;
-    if (!found) {
+    if (findhelp(cmdlist[i].name) != -1) {
       buf = (char *) my_realloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
       strcat(buf, cmdlist[i].name);
       strcat(buf, ", ");
@@ -718,7 +714,8 @@ findhelp(const char *cmd)
   for (int hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
     if (!egg_strcasecmp(cmd, help[hi].cmd))
       return hi;
-  return 0;
+
+  return -1;
 }
 
 static void cmd_help(int idx, char *par)
@@ -763,7 +760,7 @@ static void cmd_help(int idx, char *par)
         flg[0] = 0;
         build_flags(flg, &(cmdlist[n].flags), NULL);
         dprintf(idx, "Showing you help for '%s' (%s):\n", match, flg);
-        if ((hi = findhelp(match))) {
+        if ((hi = findhelp(match)) != -1) {
           if (help[hi].garble)
             showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
           else
