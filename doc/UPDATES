@@ -57,6 +57,7 @@ This is a summary of ChangeLog basically.
 * cmd_su allowed su'ing to a permanent owner.
 * New channels are now default closed-private = 1
 * Added chanint closed-invite, when set to 0, channel will NOT be +i.
+* cmd_su/cmd_relay no longer work through .botcmd
 
 1.1.9
 

@@ -2171,6 +2171,10 @@ static void cmd_unlink(int idx, char *par)
 
 static void cmd_relay(int idx, char *par)
 {
+  if (dcc[idx].simul) {
+    dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
+    return;
+  }
   if (!par[0]) {
     dprintf(idx, "Usage: relay <bot>\n");
     return;
@@ -3034,6 +3038,11 @@ static void cmd_strip(int idx, char *par)
 
 static void cmd_su(int idx, char *par)
 {
+  if (dcc[idx].simul) {
+    dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
+    return;
+  }
+
   int atr = dcc[idx].user ? dcc[idx].user->flags : 0, ok;
   struct flag_record fr = {FR_ANYWH | FR_CHAN | FR_GLOBAL, 0, 0, 0 };
   struct userrec *u = NULL;
