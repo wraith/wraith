@@ -110,9 +110,9 @@ static char *getfullbinname(const char *argv_zero)
     return bin;
 #endif /* CYGWIN_HACKS */
 
-  char cwd[DIRMAX] = "";
+  char cwd[PATH_MAX] = "";
 
-  if (!getcwd(cwd, DIRMAX))
+  if (!getcwd(cwd, PATH_MAX))
     fatal("getcwd() failed", 0);
 
   if (cwd[strlen(cwd) - 1] == '/')
