@@ -3017,15 +3017,15 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
       bi->relay_port = 3333;
       bi->hublevel = 0;
       set_user(&USERENTRY_BOTADDR, u1, bi);
-      host = newsplit(&par);
-      while ((host) && (host[0])) {
-        addhost_by_handle(handle, host);
-        host = newsplit(&par);
-      }
       /* set_user(&USERENTRY_PASS, u1, SALT2); */
       sprintf(tmp, STR("%lu %s"), now, u->handle);
       set_user(&USERENTRY_ADDED, u1, tmp);
       dprintf(idx, STR("Added new leaf: %s\n"), handle);
+      while (par[0]) {
+        host = newsplit(&par);
+        addhost_by_handle(handle, host);
+        dprintf(idx, STR("Added host '%s' to leaf: %s\n"), host, handle);
+      }
 #ifdef HUB
       write_userfile(idx);
 #endif /* HUB */
@@ -3339,7 +3339,7 @@ static void cmd_pls_host(struct userrec *u, int idx, char *par)
     }
   addhost_by_handle(handle, host);
   update_mod(handle, dcc[idx].nick, "+host", host);
-  dprintf(idx, STR("Added '%s' to %s.\n"), host, handle);
+  dprintf(idx, STR("Added host '%s' to %s.\n"), host, handle);
   while (par[0]) {
     host = newsplit(&par);
     addhost_by_handle(handle, host);
