@@ -1304,7 +1304,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
     all = 1;
     get_user_flagrec(u, &user, chanset ? chanset->dname : "");
     if (!glob_master(user)) {
-      dprintf(idx, "You need to be a global master to use %schanset *.\n", dcc_prefix);
+      dprintf(idx, "You need to be a global master to use %schanset *.\n", settings.dcc_prefix);
       return;
     }
     newsplit(&par);

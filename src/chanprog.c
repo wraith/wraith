@@ -399,7 +399,7 @@ void load_internal_users()
   struct userrec *u = NULL;
 
   /* hubs */
-  egg_snprintf(buf, sizeof buf, "%s", hubs);
+  egg_snprintf(buf, sizeof buf, "%s", settings.hubs);
   p = buf;
   while (p) {
     ln = p;
@@ -467,7 +467,7 @@ void load_internal_users()
   /* perm owners */
   owner[0] = 0;
 
-  egg_snprintf(buf, sizeof buf, "%s", owners);
+  egg_snprintf(buf, sizeof buf, "%s", settings.owners);
   p = buf;
   while (p) {
     ln = p;

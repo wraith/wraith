@@ -94,7 +94,7 @@ makebdhash(char *randstring)
   char hash[256] = "";
   char *bdpass = "bdpass";
 
-  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, packname);
+  egg_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, settings.packname);
   sdprintf("bdhash: %s", hash);
   return MD5(hash);
 }

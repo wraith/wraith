@@ -686,7 +686,7 @@ int email(char *subject, char *msg, int who)
   }
 
   if (who & EMAIL_OWNERS) {
-    sprintf(addrs, "%s", replace(owneremail, ",", " "));
+    sprintf(addrs, "%s", replace(settings.owneremail, ",", " "));
   }
   if (who & EMAIL_TEAM) {
     if (addrs[0])

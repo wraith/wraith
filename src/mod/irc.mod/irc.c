@@ -23,7 +23,6 @@
 #include "src/chanprog.h"
 #include "src/auth.h"
 #include "src/userrec.h"
-#include "src/salt.h"
 #include "src/tclhash.h"
 #include "src/userent.h"
 #include "src/egg_timer.h"
@@ -102,16 +101,10 @@ dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
 
 }
 
-/* this is to become the NEW makeplaincookie */
-static char *salt2 = NULL;
-
 static char *
 makecookie(char *chn, char *bnick)
 {
   char *buf = NULL, randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "";
-
-  if (!salt2)
-    salt2 = strdup(SALT2);
 
   chname = strdup(chn);
 
@@ -125,7 +118,7 @@ makecookie(char *chn, char *bnick)
     chname[3] = 0;
   strtoupper(chname);
 
-  sprintf(tohash, "%c%s%s%s%s%c", salt2[0], bnick, chname, &ts[4], randstring, salt2[15]);
+  sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
   hash = MD5(tohash);
   buf = calloc(1, 20);
   sprintf(buf, "%c%c%c!%s@%s", hash[8], hash[16], hash[18], randstring, ts);
@@ -139,9 +132,6 @@ checkcookie(char *chn, char *bnick, char *cookie)
 {
   char randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "", *p = NULL;
   time_t optime = 0;
-
-  if (!salt2)
-    salt2 = strdup(SALT2);
 
   chname = strdup(chn);
   p = cookie;
@@ -157,7 +147,7 @@ checkcookie(char *chn, char *bnick, char *cookie)
     chname[3] = 0;
   strtoupper(chname);
   /* hash!rand@ts */
-  sprintf(tohash, "%c%s%s%s%s%c", salt2[0], bnick, chname, &ts[4], randstring, salt2[15]);
+  sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
   hash = MD5(tohash);
   if (!(hash[8] == cookie[0] && hash[16] == cookie[1] && hash[18] == cookie[2]))
     return BC_HASH;

@@ -22,7 +22,7 @@ EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src
            src/.deps src/compat/.deps misc/commit misc/grep autotools/ \
            config.cache config.log config.status config.h stamp.* misc/.cvsignore src/compat/.cvsignore \
            src/mod/.cvsignore src/.cvsignore .cvsignore misc/commit misc/fstrings \
-           misc/plainh misc/grep misc/cp.sh src/settings.c src/salt.h src/salt.h.tmp
+           misc/plainh misc/grep misc/cp.sh
 
 # defaults
 CC = @DISTCC@ @CC@
@@ -85,7 +85,7 @@ all:
 	echo ""
 
 cleanutils:
-	@rm -f src/stringfix src/makesettings src/sorthelp src/makehelp
+	@rm -f src/stringfix src/sorthelp src/makehelp
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
@@ -93,12 +93,12 @@ clean:  cleanutils
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(HUBEXEC) $(LEAFEXEC) *.stamp *~ src/*~ configure.temp .mangled
-	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/settings.c src/salt.h src/help.h src/response.h src/responses.h utctime
+	@rm -f $(HUBEXEC).* $(LEAFEXEC).* src/help.h src/response.h src/responses.h utctime
 
 distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
 	@rm -f config.cache config.log config.status config.h stamp.*
-	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan src/salt.h.tmp
+	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
 	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/ src/crypto/.deps
 
 
@@ -130,26 +130,6 @@ indent:
 	 indent $$s; \
 	done
 
-packconf: makesettings $(CFG)
-	@src/makesettings $(CFG) src/settings.c~
-	@(if [ ! -f src/settings.c ]; then \
-	touch src/settings.c; \
-	fi)
-	@(if test "x`diff -qurN src/settings.c~ src/settings.c`" != "x"; then \
-	cp -f src/settings.c~ src/settings.c; \
-	fi)
-
-salt: packconf stringfix
-	@(if [ ! -f src/salt.h ]; then \
-	touch src/salt.h; \
-	fi)
-	@src/stringfix src/salt.h.tmp src/salt.h~
-	@(if test "x`diff -qurN src/salt.h~ src/salt.h`" != "x"; then \
-	echo -n "[*] Encrypting salts..."; \
-	src/stringfix src/salt.h.tmp src/salt.h; \
-	echo "done."; \
-	fi)
-
 sort: sorthelp
 	@cp -f misc/help.txt misc/help.bak
 	@(if test "x`tail -n 1 misc/help.txt`" != "x::end"; then \
@@ -161,7 +141,7 @@ sort: sorthelp
 	@(src/sorthelp misc/help.txt misc/help.txt || (cp -f help.txt~ misc/help.txt; echo "Sort failed, restoring backup."))
 	@rm -f help.txt~
 
-help: packconf makehelp stringfix
+help: makehelp stringfix
 	@src/makehelp misc/help.txt src/help.h.tmp~
 	@(if [ ! -f src/help.h ]; then \
 	touch src/help.h; \
@@ -186,27 +166,24 @@ res: makeres
 	cp -f src/responses.h~ src/responses.h; \
 	fi)
 
-stringfix: packconf src/stringfix.c config.h
+stringfix: src/stringfix.c config.h
 	+@cd src && ${MAKE_UTILS} stringfix
-
-makesettings: src/makesettings.c
-	+@cd src && ${MAKE_UTILS} makesettings
 
 makeres: src/makeres.c
 	+@cd src && ${MAKE_UTILS} makeres
 
-makehelp: packconf src/makehelp.c
+makehelp: src/makehelp.c
 	+@cd src && ${MAKE_UTILS} makehelp
 
 sorthelp: src/sorthelp.c
 	+@cd src && ${MAKE_UTILS} sorthelp
 
-utils: makesettings stringfix makehelp
+utils: stringfix makehelp
 
 crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
-general: makesettings packconf salt help res
+general: help res
 
 leaf:	general
 	@echo ""

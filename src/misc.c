@@ -968,7 +968,7 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         }
       } else if (*(string + 1) == 'd') {
         string += 2;
-        strcat(helpstr, dcc_prefix);        
+        strcat(helpstr, settings.dcc_prefix);        
       } else if (*(string + 1) == '%') {
         string += 2;
         strcat(helpstr, "%");        

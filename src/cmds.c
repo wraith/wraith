@@ -10,7 +10,7 @@
 #include "conf.h"
 #include "color.h"
 #include "settings.h"
-#include "salt.h"
+#include "settings.h"
 #include "debug.h"
 #include "dcc.h"
 #include "shell.h"
@@ -424,7 +424,7 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# cmdpass %s ...", dcc[idx].nick, cmd[0] ? cmd : "");
   pass = newsplit(&par);
   if (!cmd[0] || par[0]) {
-    dprintf(idx, "Usage: %scmdpass <command> [password]\n", dcc_prefix);
+    dprintf(idx, "Usage: %scmdpass <command> [password]\n", settings.dcc_prefix);
     dprintf(idx, "  if no password is specified, the commands password is reset\n");
     return;
   }
@@ -826,11 +826,11 @@ static void cmd_help(struct userrec *u, int idx, char *par)
   if (fnd) 
     dprintf(idx, "--End help listing\n");
   if (!strcmp(match, "*")) {
-    dprintf(idx, "For individual command help, type: %shelp <command>\n", dcc_prefix);
+    dprintf(idx, "For individual command help, type: %shelp <command>\n", settings.dcc_prefix);
   } else if (!fnd) {
     dprintf(idx, "No match for '%s'.\n", match);
   }
-  dprintf(idx, "Some commands may require you to '%sconsole #chan' to a chan you have flags on first.\n", dcc_prefix);
+  dprintf(idx, "Some commands may require you to '%sconsole #chan' to a chan you have flags on first.\n", settings.dcc_prefix);
 }
 
 static void cmd_addlog(struct userrec *u, int idx, char *par)
@@ -1096,7 +1096,7 @@ static void cmd_channels(struct userrec *u, int idx, char *par) {
   }
 
   if ((u->flags & USER_MASTER) && !(par && par[0]))
-    dprintf(idx, "You can also %schannels <user>\n", dcc_prefix);
+    dprintf(idx, "You can also %schannels <user>\n", settings.dcc_prefix);
 }
 
 
@@ -1964,7 +1964,7 @@ static void cmd_encrypt(struct userrec *u, int idx, char *par)
 
   }
 
-  buf = encrypt_string(key ? key : SALT2, par);
+  buf = encrypt_string(key ? key : settings.salt2, par);
 
   dprintf(idx, "encrypt(%s) = %s\n", par, buf);
   free(buf);
@@ -1988,7 +1988,7 @@ static void cmd_decrypt(struct userrec *u, int idx, char *par)
 
   }
 
-  buf = decrypt_string(key ? key : SALT2, par);
+  buf = decrypt_string(key ? key : settings.salt2, par);
 
   dprintf(idx, "decrypt(%s) = %s\n", par, buf);
   free(buf);
@@ -2277,7 +2277,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
       if (!(oatr & USER_PARTY) && (u->flags & USER_PARTY) && dcc[i].u.chat->channel < 0) {
         dprintf(i, "-+- POOF! -+-\n");
         dprintf(i, "You now have party line chat access.\n");
-        dprintf(i, "To rejoin the partyline, type: %schat on\n", dcc_prefix);
+        dprintf(i, "To rejoin the partyline, type: %schat on\n", settings.dcc_prefix);
       }
 
       if (!(oatr & USER_OWNER) && (u->flags & USER_OWNER)) {
@@ -3177,7 +3177,7 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
       bi->relay_port = 3333;
       bi->hublevel = 0;
       set_user(&USERENTRY_BOTADDR, u1, bi);
-      /* set_user(&USERENTRY_PASS, u1, SALT2); */
+      /* set_user(&USERENTRY_PASS, u1, settings.salt2); */
       sprintf(tmp, "%li %s", now, u->handle);
       set_user(&USERENTRY_ADDED, u1, tmp);
       dprintf(idx, "Added new leaf: %s\n", handle);

@@ -11,7 +11,7 @@
 #include "chanprog.h"
 #include "crypt.h"
 #include "main.h"
-#include "salt.h"
+#include "settings.h"
 #include "misc.h"
 #include "misc_file.h"
 
@@ -481,7 +481,7 @@ readconf(char *fname, int bits)
 
     remove_crlf(inbuf);
     if (enc)
-      line = temp_ptr = decrypt_string(SALT1, inbuf);
+      line = temp_ptr = decrypt_string(settings.salt1, inbuf);
     else
       line = inbuf;
 

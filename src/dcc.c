@@ -13,7 +13,6 @@
 #include "main.h"
 #include "cmds.h"
 #include "color.h"
-#include "salt.h"
 #include "net.h"
 #include "response.h"
 #include "misc.h"
@@ -307,7 +306,7 @@ cont_link(int idx, char *buf, int ii)
     /* initkey-gen leaf */
     /* bdhash myport hubnick mynick */
     getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
-    egg_snprintf(tmp, sizeof tmp, "%s@%4x@%s@%s", bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
+    egg_snprintf(tmp, sizeof tmp, "%s@%4x@%s@%s", settings.bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
     strncpyz(socklist[snum].ikey, SHA1(tmp), sizeof(socklist[snum].ikey));
     /*
      * putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
@@ -353,7 +352,7 @@ dcc_bot_new(int idx, char *buf, int x)
       char *tmp = NULL, *p = NULL;
 
       p = newsplit(&buf);
-      tmp = decrypt_string(SALT2, p);
+      tmp = decrypt_string(settings.salt2, p);
       strncpyz(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
       strncpyz(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
       socklist[snum].iseed = atoi(buf);
@@ -1017,7 +1016,7 @@ dcc_chat(int idx, char *buf, int i)
   char *v = NULL, *d = NULL;
 
   strip_telnet(dcc[idx].sock, buf, &i);
-  if (buf[0] && (buf[0] != dcc_prefix[0]) && !(dcc[idx].user && (dcc[idx].user->flags & USER_NOFLOOD)) &&
+  if (buf[0] && (buf[0] != settings.dcc_prefix[0]) && !(dcc[idx].user && (dcc[idx].user->flags & USER_NOFLOOD)) &&
       detect_dcc_flood(&dcc[idx].timeval, dcc[idx].u.chat, idx))
     return;
   dcc[idx].timeval = now;
@@ -1066,8 +1065,8 @@ dcc_chat(int idx, char *buf, int i)
     if (u_pass_match(dcc[idx].user, buf)) {     /* user said their password :) */
       dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
     } else if (!strncmp(buf, "+Auth ", 6)) {    /* ignore extra +Auth lines */
-    } else if ((!strncmp(buf, dcc_prefix, strlen(dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
-      if (!strncmp(buf, dcc_prefix, strlen(dcc_prefix)))        /* strip '.' out */
+    } else if ((!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
+      if (!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix)))        /* strip '.' out */
         buf++;
       v = newsplit(&buf);
       rmspace(buf);
@@ -1591,7 +1590,7 @@ dcc_telnet_pass(int idx, int atr)
 
       /* initkey-gen hub */
       /* bdhash port mynick conf.bot->nick */
-      sprintf(tmp, "%s@%4x@%s@%s", bdhash, htons(dcc[idx].port), conf.bot->nick, dcc[idx].nick);
+      sprintf(tmp, "%s@%4x@%s@%s", settings.bdhash, htons(dcc[idx].port), conf.bot->nick, dcc[idx].nick);
       SHA1_Init(&ctx);
       SHA1_Update(&ctx, tmp, strlen(tmp));
       SHA1_Final(buf, &ctx);
@@ -1602,7 +1601,7 @@ dcc_telnet_pass(int idx, int atr)
       make_rand_str(initkey, 32);       /* set the initial out/in link key to random chars. */
       socklist[snum].oseed = random();
       socklist[snum].iseed = socklist[snum].oseed;
-      tmp2 = encrypt_string(SALT2, initkey);
+      tmp2 = encrypt_string(settings.salt2, initkey);
       putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
 
       /* the leaf bot set encstatus right after it sent it's nick, but we just set the key.... */

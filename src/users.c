@@ -17,7 +17,7 @@
 #include "rfc1459.h"
 #include "src/mod/share.mod/share.h"
 #include "dcc.h"
-#include "salt.h"
+#include "settings.h"
 #include "userrec.h"
 #include "misc.h"
 #include "cfg.h"
@@ -688,7 +688,7 @@ int readuserfile(const char *file, struct userrec **ret)
   s = buf;
   fgets(cbuf, 180, f);
   remove_crlf(cbuf);
-  temps = (char *) decrypt_string(SALT1, cbuf);
+  temps = (char *) decrypt_string(settings.salt1, cbuf);
   egg_snprintf(s, 180, "%s", temps);
   free(temps);
   if (s[1] < '4') {
@@ -700,7 +700,7 @@ int readuserfile(const char *file, struct userrec **ret)
     s = buf;
     fgets(cbuf, 1024, f);
     remove_crlf(cbuf);
-    temps = (char *) decrypt_string(SALT1, cbuf);
+    temps = (char *) decrypt_string(settings.salt1, cbuf);
     egg_snprintf(s, 1024, "%s", temps);
     free(temps);
     if (!feof(f)) {

@@ -82,11 +82,6 @@ sorthelp: sorthelp.c
 	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c -o sorthelp
 	@$(STRIP) sorthelp
 
-makesettings: makesettings.c
-	@echo -e "Compiling: \033[1mmakesettings\033[0m"
-	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makesettings.c -o makesettings
-	@$(STRIP) makesettings
-
 stringfix: stringfix.c common.h ../config.h eggdrop.h
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
 	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix

@@ -7,15 +7,13 @@
 
 #include "common.h"
 #include "binary.h"
+#include "settings.h"
 #include "crypt.h"
 #include "shell.h"
 #include "misc.h"
 #include "main.h"
-#include "salt.h"
 #include "misc_file.h"
 
-
-#define PREFIXLEN 16
 
 /*
 typedef struct encdata_struct {
@@ -28,29 +26,15 @@ static encdata_t encdata = {
   ""
 };
 */
-typedef struct bindata_struct {
-  char prefix[PREFIXLEN];
-  char hash[65];
-  char packname[65];
-  char shellhash[65];
-  char bdhash[65];
-  char owners[1024];
-  char hubs[1024];
-  char owneremail[1024];
-  char salt1[65];
-  char salt2[45];
-  char dccprefix[25];
-  char pad_3418_to_3488[5];
-} bindata_t;
 
-static bindata_t bindata = {
+settings_t settings = {
   "AAAAAAAAAAAAAAAA",
   "", "", "", "", "", "", "", "", "", "", "",
 };
 
 #define PACK_ENC 1
 #define PACK_DEC 2
-static void edpack(struct bindata_struct *, const char *, int);
+static void edpack(struct settings_struct *, const char *, int);
 
 int checked_bin_buf = 0;
 
@@ -67,7 +51,7 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
     werr(ERR_BINSTAT);
 
   while ((len = fread(buf, 1, sizeof buf - 1, f))) {
-    if (!memcmp(buf, &bindata.prefix, PREFIXLEN)) {
+    if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {
       break;
     }
     MD5_Update(ctx, buf, len);
@@ -128,11 +112,11 @@ bin_md5(const char *fname, int todo, MD5_CTX * ctx)
         free(enc_hash);
       }
 */
-      if (!memcmp(buf, &bindata.prefix, PREFIXLEN)) {
-        strncpyz(bindata.hash, hash, 65);
-        edpack(&bindata, hash, PACK_ENC);
-        fwrite(&bindata.hash, sizeof(struct bindata_struct) - PREFIXLEN, 1, fn);
-        i = sizeof(struct bindata_struct) - PREFIXLEN;
+      if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {
+        strncpyz(settings.hash, hash, 65);
+        edpack(&settings, hash, PACK_ENC);
+        fwrite(&settings.hash, sizeof(struct settings_struct) - PREFIXLEN, 1, fn);
+        i = sizeof(struct settings_struct) - PREFIXLEN;
       }
     }
 
@@ -182,34 +166,34 @@ readcfg(const char *cfgfile)
         *p++ = 0;
       if (p) {
         if (!egg_strcasecmp(buffer, "packname")) {
-          strncpyz(bindata.packname, trim(p), sizeof bindata.packname);
+          strncpyz(settings.packname, trim(p), sizeof settings.packname);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "shellhash")) {
-          strncpyz(bindata.shellhash, trim(p), sizeof bindata.shellhash);
+          strncpyz(settings.shellhash, trim(p), sizeof settings.shellhash);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "bdhash")) {
-          strncpyz(bindata.bdhash, trim(p), sizeof bindata.bdhash);
+          strncpyz(settings.bdhash, trim(p), sizeof settings.bdhash);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "dccprefix")) {
-          strncpyz(bindata.dccprefix, trim(p), sizeof bindata.dccprefix);
+          strncpyz(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
           printf(".");
         } else if (!egg_strcasecmp(buffer, "owner")) {
-          strcat(bindata.owners, trim(p));
-          strcat(bindata.owners, ",");
+          strcat(settings.owners, trim(p));
+          strcat(settings.owners, ",");
           printf(".");
         } else if (!egg_strcasecmp(buffer, "owneremail")) {
-          strcat(bindata.owneremail, trim(p));
-          strcat(bindata.owneremail, ",");
+          strcat(settings.owneremail, trim(p));
+          strcat(settings.owneremail, ",");
           printf(".");
         } else if (!egg_strcasecmp(buffer, "hub")) {
-          strcat(bindata.hubs, trim(p));
-          strcat(bindata.hubs, ",");
+          strcat(settings.hubs, trim(p));
+          strcat(settings.hubs, ",");
           printf(".");
         } else if (!egg_strcasecmp(buffer, "salt1")) {
-          strcat(bindata.salt1, trim(p));
+          strcat(settings.salt1, trim(p));
           printf(".");
         } else if (!egg_strcasecmp(buffer, "salt2")) {
-          strcat(bindata.salt2, trim(p));
+          strcat(settings.salt2, trim(p));
           printf(".");
         } else {
           printf("%s %s\n", buffer, p);
@@ -221,7 +205,7 @@ readcfg(const char *cfgfile)
   }
   if (f)
     fclose(f);
-  if (!bindata.salt1[0] || !bindata.salt2[0]) {
+  if (!settings.salt1[0] || !settings.salt2[0]) {
     /* Write salts back to the cfgfile */
     char salt1[SALT1LEN + 1] = "", salt2[SALT2LEN + 1] = "";
 
@@ -242,7 +226,7 @@ readcfg(const char *cfgfile)
   return 1;
 }
 
-static void edpack(struct bindata_struct *incfg, const char *hash, int what)
+static void edpack(struct settings_struct *incfg, const char *hash, int what)
 {
   char *tmp = NULL;
   char *(*enc_dec_string)();
@@ -268,8 +252,8 @@ static void edpack(struct bindata_struct *incfg, const char *hash, int what)
   egg_snprintf(incfg->bdhash, sizeof(incfg->bdhash), tmp);
   free(tmp);
 
-  tmp = enc_dec_string(hash, incfg->dccprefix);
-  egg_snprintf(incfg->dccprefix, sizeof(incfg->dccprefix), tmp);
+  tmp = enc_dec_string(hash, incfg->dcc_prefix);
+  egg_snprintf(incfg->dcc_prefix, sizeof(incfg->dcc_prefix), tmp);
   free(tmp);
 
   tmp = enc_dec_string(hash, incfg->owners);
@@ -287,25 +271,25 @@ static void edpack(struct bindata_struct *incfg, const char *hash, int what)
 
 
 static void
-tellconfig(struct bindata_struct *incfg)
+tellconfig(struct settings_struct *incfg)
 {
   printf("hash: %s\n", incfg->hash);
   printf("packname: %s\n", incfg->packname);
   printf("shellhash: %s\n", incfg->shellhash);
   printf("bdhash: %s\n", incfg->bdhash);
-  printf("dccprefix: %s\n", incfg->dccprefix);
+  printf("dccprefix: %s\n", incfg->dcc_prefix);
   printf("owners: %s\n", incfg->owners);
   printf("owneremails: %s\n", incfg->owneremail);
   printf("hubs: %s\n", incfg->hubs);
 }
 
 static void
-md5cfg(struct bindata_struct *incfg, MD5_CTX * ctx)
+md5cfg(struct settings_struct *incfg, MD5_CTX * ctx)
 {
   MD5_Update(ctx, incfg->packname, strlen(incfg->packname));
   MD5_Update(ctx, incfg->shellhash, strlen(incfg->shellhash));
   MD5_Update(ctx, incfg->bdhash, strlen(incfg->bdhash));
-  MD5_Update(ctx, incfg->dccprefix, strlen(incfg->dccprefix));
+  MD5_Update(ctx, incfg->dcc_prefix, strlen(incfg->dcc_prefix));
   MD5_Update(ctx, incfg->owners, strlen(incfg->owners));
   MD5_Update(ctx, incfg->owneremail, strlen(incfg->owneremail));
   MD5_Update(ctx, incfg->hubs, strlen(incfg->hubs));
@@ -318,24 +302,24 @@ check_sum(const char *fname, const char *cfgfile)
 
   MD5_Init(&ctx);
 
-  if (!bindata.hash[0]) {
+  if (!settings.hash[0]) {
     if (cfgfile) {
       printf("* CFGFILE: %s\n", cfgfile);
       readcfg(cfgfile);
     }
     printf("* Wrote checksum to binary. (%s)\n", bin_md5(fname, WRITE_MD5, &ctx));
-    tellconfig(&bindata);
+    tellconfig(&settings);
   } else {
     char *hash = NULL;
 
 
     hash = bin_md5(fname, GET_MD5, &ctx);
 
-tellconfig(&bindata);
-    edpack(&bindata, hash, PACK_DEC);
-tellconfig(&bindata);
+tellconfig(&settings);
+    edpack(&settings, hash, PACK_DEC);
+tellconfig(&settings);
 
-    if (strcmp(bindata.hash, hash)) {
+    if (strcmp(settings.hash, hash)) {
       unlink(fname);
       fatal("!! Invalid binary", 0);
     }

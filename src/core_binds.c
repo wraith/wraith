@@ -69,8 +69,8 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
         newsplit(&p);
         strcpy(args, p);
       } else {
-        dprintf(idx, "Invalid command password. Use %scommand password arguments\n", dcc_prefix);
-        putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, dcc_prefix, cmd);
+        dprintf(idx, "Invalid command password. Use %scommand password arguments\n", settings.dcc_prefix);
+        putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, cmd);
         free(args);
         return;
       }
@@ -83,7 +83,7 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
     putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
 
   if (hits == 0)
-    dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
+    dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
   else if (hits > 1)
     dprintf(idx, "Ambiguous command.\n");
 
