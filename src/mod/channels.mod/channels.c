@@ -318,7 +318,7 @@ static void rebalance_roles()
 
   for (i = 0; i < (unsigned) dcc_total; i++) {
     if (dcc[i].user && dcc[i].user->bot && bot_hublevel(dcc[i].user) == 999) {
-      ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
+      ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, dcc[i].user);
       if (ba && (ba->roleid > 0) && (ba->roleid < 5))
         r[(ba->roleid - 1)]++;
     }
@@ -340,7 +340,7 @@ static void rebalance_roles()
   while (r[hNdx] - r[lNdx] >= 2) {
     for (i = 0; i < (unsigned) dcc_total; i++) {
       if (dcc[i].user && dcc[i].user->bot && bot_hublevel(dcc[i].user) == 999) {
-        ba = get_user(&USERENTRY_BOTADDR, dcc[i].user);
+        ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, dcc[i].user);
         if (ba && (ba->roleid == (hNdx + 1))) {
           ba->roleid = lNdx + 1;
           sprintf(tmp, "rl %d", lNdx + 1);

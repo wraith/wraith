@@ -575,7 +575,7 @@ void tell_bottree(int idx)
   char s[161] = "", work[1024] = "";
   tand_t *last[20] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-  tand_t *this = NULL, *bot = NULL, *bot2 = NULL;
+  tand_t *thisbot = NULL, *bot = NULL, *bot2 = NULL;
   int lev = 0, more = 1, mark[20], ok, cnt, i = 0, imark, tothops = 0;
 
   if (tands == 0) {
@@ -600,7 +600,7 @@ void tell_bottree(int idx)
                                     localhub ? COLOR_END(idx) : "",
                                     egg_version, buildts);
 
-  this = (tand_t *) 1;
+  thisbot = (tand_t *) 1;
   work[0] = 0;
   while (more) {
     if (lev == 20) {
@@ -610,7 +610,7 @@ void tell_bottree(int idx)
     cnt = 0;
     tothops += lev;
     for (bot = tandbot; bot; bot = bot->next)
-      if (bot->uplink == this)
+      if (bot->uplink == thisbot)
 	cnt++;
     if (cnt) {
       imark = 0;
@@ -628,7 +628,7 @@ void tell_bottree(int idx)
       s[0] = 0;
       bot = tandbot;
       while (!s[0]) {
-	if (bot->uplink == this) {
+	if (bot->uplink == thisbot) {
           if (bot->share)
             i = sprintf(s, "%c", bot->share);
           else
@@ -646,8 +646,8 @@ void tell_bottree(int idx)
       else
 	mark[lev] = 0;
       work[0] = 0;
-      last[lev] = this;
-      this = bot;
+      last[lev] = thisbot;
+      thisbot = bot;
       lev++;
       more = 1;
     } else {
@@ -660,7 +660,7 @@ void tell_bottree(int idx)
 	ok = 0;
 	for (bot = tandbot; bot; bot = bot->next) {
 	  if (bot->uplink == last[lev - 1]) {
-	    if (this == bot)
+	    if (thisbot == bot)
 	      ok = 1;
 	    else if (ok) {
 	      cnt++;
@@ -692,7 +692,7 @@ void tell_bottree(int idx)
 	    dprintf(idx, "%s  |-%s\n", work, s);
 	  else
 	    dprintf(idx, "%s  `-%s\n", work, s);
-	  this = bot2;
+	  thisbot = bot2;
 	  work[0] = 0;
 	  if (cnt > 1)
 	    mark[lev - 1] = 1;
@@ -706,7 +706,7 @@ void tell_bottree(int idx)
 	    cnt = 999;
 	  } else {
 	    more = 1;
-	    this = last[lev];
+	    thisbot = last[lev];
 	  }
 	}
       }

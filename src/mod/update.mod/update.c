@@ -296,7 +296,7 @@ static void start_sending_binary(int idx)
   dcc[idx].status |= STAT_SENDINGU;
 
   putlog(LOG_BOTS, "*", "Sending binary send request to %s", dcc[idx].nick);
-  sysname = get_user(&USERENTRY_OS, dcc[idx].user);
+  sysname = (char *) get_user(&USERENTRY_OS, dcc[idx].user);
 
   if (!sysname || !sysname[0] || !strcmp("*", sysname)) {
     putlog(LOG_MISC, "*", "Cannot update \002%s\002 automatically, uname not returning os name.", dcc[idx].nick);

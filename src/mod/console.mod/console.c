@@ -88,7 +88,7 @@ console_kill(struct user_entry *e)
 static int
 console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 {
-  struct console_info *i = e->u.extra;
+  struct console_info *i = (struct console_info *) e->u.extra;
 
   if (lfprintf(f, "--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
                i->channel, masktype(i->conflags),

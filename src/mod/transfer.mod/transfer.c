@@ -49,8 +49,6 @@ static int quiet_reject = 1;        /* Quietly reject dcc chat or sends from
 static void wipe_tmp_filename(char *, int);
 static int at_limit(char *);
 static void dcc_get_pending(int, char *, int);
-struct dcc_table DCC_GET;
-struct dcc_table DCC_GET_PENDING;
 #endif /* HUB */
 
 static fileq_t *fileq = NULL;
@@ -104,11 +102,11 @@ static char *replace_spaces(char *fn)
 }
 
 
-static void deq_this(fileq_t *this)
+static void deq_this(fileq_t *thisfile)
 {
   fileq_t *q = fileq, *last = NULL;
 
-  while (q && q != this) {
+  while (q && q != thisfile) {
     last = q;
     q = q->next;
   }
@@ -147,42 +145,42 @@ static void flush_fileq(char *to)
 
 static void send_next_file(char *to)
 {
-  fileq_t *q = NULL, *this = NULL;
+  fileq_t *q = NULL, *thisfile = NULL;
   char *s = NULL, *s1 = NULL;
   int x;
 
   for (q = fileq; q; q = q->next)
     if (!egg_strcasecmp(q->to, to))
-      this = q;
-  if (this == NULL)
+      thisfile = q;
+  if (thisfile == NULL)
     return;			/* None */
   /* Copy this file to /tmp */
-  if (this->dir[0] == '*') {	/* Absolute path */
-    s = (char *) calloc(1, strlen(&this->dir[1]) + strlen(this->file) + 2);
-    sprintf(s, "%s/%s", &this->dir[1], this->file);
+  if (thisfile->dir[0] == '*') {	/* Absolute path */
+    s = (char *) calloc(1, strlen(&thisfile->dir[1]) + strlen(thisfile->file) + 2);
+    sprintf(s, "%s/%s", &thisfile->dir[1], thisfile->file);
   } else {
-    char *p = strchr(this->dir, '*');
+    char *p = strchr(thisfile->dir, '*');
 
     if (p == NULL) {		/* if it's messed up */
       send_next_file(to);
       return;
     }
     p++;
-    s = (char *) calloc(1, strlen(p) + strlen(this->file) + 2);
-    sprintf(s, "%s%s%s", p, p[0] ? "/" : "", this->file);
-    strcpy(this->dir, &(p[atoi(this->dir)]));
+    s = (char *) calloc(1, strlen(p) + strlen(thisfile->file) + 2);
+    sprintf(s, "%s%s%s", p, p[0] ? "/" : "", thisfile->file);
+    strcpy(thisfile->dir, &(p[atoi(thisfile->dir)]));
   }
   if (copy_to_tmp) {
-    s1 = (char *) calloc(1, strlen(tempdir) + strlen(this->file) + 1);
-    sprintf(s1, "%s%s", tempdir, this->file);
+    s1 = (char *) calloc(1, strlen(tempdir) + strlen(thisfile->file) + 1);
+    sprintf(s1, "%s%s", tempdir, thisfile->file);
     if (copyfile(s, s1) != 0) {
       putlog(LOG_FILES | LOG_MISC, "*",
 	     TRANSFER_COPY_FAILED,
-	     this->file, tempdir);
+	     thisfile->file, tempdir);
       dprintf(DP_HELP,
 	      TRANSFER_FILESYS_BROKEN,
-	      this->to);
-      strcpy(s, this->to);
+	      thisfile->to);
+      strcpy(s, thisfile->to);
       flush_fileq(s);
       free(s1);
       free(s);
@@ -191,44 +189,44 @@ static void send_next_file(char *to)
   } else {
     s1 = strdup(s);
   }
-  if (this->dir[0] == '*') {
-    s = (char *) realloc(s, strlen(&this->dir[1]) + strlen(this->file) + 2);
-    sprintf(s, "%s/%s", &this->dir[1], this->file);
+  if (thisfile->dir[0] == '*') {
+    s = (char *) realloc(s, strlen(&thisfile->dir[1]) + strlen(thisfile->file) + 2);
+    sprintf(s, "%s/%s", &thisfile->dir[1], thisfile->file);
   } else {
-    s = (char *) realloc(s, strlen(this->dir) + strlen(this->file) + 2);
-    sprintf(s, "%s%s%s", this->dir, this->dir[0] ? "/" : "", this->file);
+    s = (char *) realloc(s, strlen(thisfile->dir) + strlen(thisfile->file) + 2);
+    sprintf(s, "%s%s%s", thisfile->dir, thisfile->dir[0] ? "/" : "", thisfile->file);
   }
-  x = raw_dcc_send(s1, this->to, this->nick, s);
+  x = raw_dcc_send(s1, thisfile->to, thisfile->nick, s);
   if (x == DCCSEND_OK) {
-    if (egg_strcasecmp(this->to, this->nick))
-      dprintf(DP_HELP, TRANSFER_FILE_ARRIVE, this->to,
-	      this->nick);
-    deq_this(this);
+    if (egg_strcasecmp(thisfile->to, thisfile->nick))
+      dprintf(DP_HELP, TRANSFER_FILE_ARRIVE, thisfile->to,
+	      thisfile->nick);
+    deq_this(thisfile);
     free(s);
     free(s1);
     return;
   }
   wipe_tmp_filename(s1, -1);
   if (x == DCCSEND_FULL) {
-    putlog(LOG_FILES, "*",TRANSFER_LOG_CONFULL, s1, this->nick);
+    putlog(LOG_FILES, "*",TRANSFER_LOG_CONFULL, s1, thisfile->nick);
     dprintf(DP_HELP,
 	    TRANSFER_NOTICE_CONFULL,
-	    this->to);
-    strcpy(s, this->to);
+	    thisfile->to);
+    strcpy(s, thisfile->to);
     flush_fileq(s);
   } else if (x == DCCSEND_NOSOCK) {
-    putlog(LOG_FILES, "*", TRANSFER_LOG_SOCKERR, s1, this->nick);
+    putlog(LOG_FILES, "*", TRANSFER_LOG_SOCKERR, s1, thisfile->nick);
     dprintf(DP_HELP, TRANSFER_NOTICE_SOCKERR,
-	    this->to);
-    strcpy(s, this->to);
+	    thisfile->to);
+    strcpy(s, thisfile->to);
     flush_fileq(s);
   } else {
     if (x == DCCSEND_FEMPTY) {
-      putlog(LOG_FILES, "*", TRANSFER_LOG_FILEEMPTY, this->file);
+      putlog(LOG_FILES, "*", TRANSFER_LOG_FILEEMPTY, thisfile->file);
       dprintf(DP_HELP, TRANSFER_NOTICE_FILEEMPTY,
-	      this->to, this->file);
+	      thisfile->to, thisfile->file);
     }
-    deq_this(this);
+    deq_this(thisfile);
   }
   free(s);
   free(s1);

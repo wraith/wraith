@@ -278,7 +278,7 @@ void config_display(int idx, struct user_entry *e, struct userrec *u)
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
   /* scan thru xtra field, searching for matches */
-  for (xk = e->u.extra; xk; xk = xk->next) {
+  for (xk = (struct xtra_key *) e->u.extra; xk; xk = xk->next) {
     /* ok, it's a valid xtra field entry */
     if (glob_owner(fr))
       dprintf(idx, "  %s: %s\n", xk->key, xk->data);
@@ -336,7 +336,7 @@ int config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
 {
   struct xtra_key *x = NULL;
 
-  for (x = e->u.extra; x; x = x->next)
+  for (x = (struct xtra_key *) e->u.extra; x; x = x->next)
     lfprintf(f, "--CONFIG %s %s\n", x->key, x->data);
   return 1;
 }
@@ -867,7 +867,7 @@ static int hosts_write_userfile(FILE *f, struct userrec *u, struct user_entry *e
 {
   struct list_type *h = NULL;
 
-  for (h = e->u.extra; h; h = h->next)
+  for (h = (struct list_type *) e->u.extra; h; h = h->next)
     if (lfprintf(f, "--HOSTS %s\n", h->extra) == EOF)
       return 0;
   return 1;
