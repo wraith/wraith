@@ -1038,8 +1038,7 @@ share_ufsend(int idx, char *par)
 {
   char *ip = NULL, *port = NULL;
   char s[1024] = "";
-  int i;
-  sock_t sock;
+  int i, sock;
   FILE *f = NULL;
 
   egg_snprintf(s, sizeof s, "%s.share.%s.%li.users", tempdir, conf.bot->nick, now);

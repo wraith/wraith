@@ -29,7 +29,7 @@
 bool strict_servernames;
 bool checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 int ctcp_mode;
-sock_t serv;		/* sock # of server currently */
+int serv;		/* sock # of server currently */
 int servidx;		/* idx of server */
 char newserver[121] = "";	/* new server? */
 port_t newserverport;		/* new server port? */

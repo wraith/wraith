@@ -22,8 +22,8 @@ typedef struct tand_t_struct {
 /* Keep track of party-line members */
 typedef struct {
   time_t timer;			/* Track idle time */
-  sock_t sock;
   size_t status;
+  int sock;
   int chan;
   char *from;
   char *away;

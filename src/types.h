@@ -38,6 +38,5 @@ typedef u_int32_t 		dword;
 
 /* port */
 typedef in_port_t		port_t;
-typedef long			sock_t;
 
 #endif /* !_TYPES_H */

@@ -254,7 +254,7 @@ void check_promisc()
   if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", "ignore"))
     return;
 
-  sock_t sock = socket(AF_INET, SOCK_DGRAM, 0);
+  int sock = socket(AF_INET, SOCK_DGRAM, 0);
 
   if (sock < 0)
     return;

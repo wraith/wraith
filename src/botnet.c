@@ -1020,7 +1020,7 @@ static void failed_tandem_relay(int idx)
 	(dcc[i].u.relay->sock == dcc[idx].sock))
       uidx = i;
   if (uidx < 0) {
-    putlog(LOG_MISC, "*", "%s  %li -> %li", BOT_CANTFINDRELAYUSER,
+    putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[idx].sock, dcc[idx].u.relay->sock);
     killsock(dcc[idx].sock);
     lostdcc(idx);
@@ -1150,7 +1150,7 @@ static void tandem_relay_resolve_failure(int idx)
       break;
     }
   if (uidx < 0) {
-    putlog(LOG_MISC, "*", "%s  %li -> %li", BOT_CANTFINDRELAYUSER,
+    putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[idx].sock, dcc[idx].u.relay->sock);
     killsock(dcc[idx].sock);
     lostdcc(idx);
@@ -1197,7 +1197,7 @@ static void tandem_relay_resolve_success(int i)
 
 /* Input from user before connect is ready
  */
-static void pre_relay(int idx, char *buf, register size_t len)
+static void pre_relay(int idx, char *buf, register int len)
 {
   register int tidx = (-1), i;
 
@@ -1217,7 +1217,7 @@ static void pre_relay(int idx, char *buf, register size_t len)
       }
   }
   if (tidx < 0) {
-    putlog(LOG_MISC, "*", "%s  %li -> %li", BOT_CANTFINDRELAYUSER,
+    putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[idx].sock, dcc[idx].u.relay->sock);
     killsock(dcc[idx].sock);
     lostdcc(idx);
@@ -1263,7 +1263,7 @@ static void failed_pre_relay(int idx)
       }
   }
   if (tidx < 0) {
-    putlog(LOG_MISC, "*", "%s  %li -> %li", BOT_CANTFINDRELAYUSER,
+    putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[idx].sock, dcc[idx].u.relay->sock);
     killsock(dcc[idx].sock);
     lostdcc(idx);
@@ -1288,7 +1288,7 @@ static void failed_pre_relay(int idx)
   lostdcc(idx);
 }
 
-static void cont_tandem_relay(int idx, char *buf, register size_t len)
+static void cont_tandem_relay(int idx, char *buf, register int len)
 {
   register int uidx = (-1), i;
 
@@ -1297,7 +1297,7 @@ static void cont_tandem_relay(int idx, char *buf, register size_t len)
 	(dcc[i].u.relay->sock == dcc[idx].sock))
       uidx = i;
   if (uidx < 0) {
-    putlog(LOG_MISC, "*", "%s  %li -> %li", BOT_CANTFINDRELAYUSER,
+    putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
 	   dcc[i].sock, dcc[i].u.relay->sock);
     killsock(dcc[i].sock);
     lostdcc(i);
@@ -1376,7 +1376,7 @@ static void eof_dcc_relaying(int idx)
   lostdcc(j);			/* Drop connection to the bot */
 }
 
-static void dcc_relay(int idx, char *buf, size_t j)
+static void dcc_relay(int idx, char *buf, int j)
 {
   unsigned char *p = (unsigned char *) buf;
   int mark;
@@ -1415,7 +1415,7 @@ static void dcc_relay(int idx, char *buf, size_t j)
     dprintf(-dcc[idx].u.relay->sock, "%s\r\n", buf);
 }
 
-static void dcc_relaying(int idx, char *buf, size_t j)
+static void dcc_relaying(int idx, char *buf, int j)
 {
   if (egg_strcasecmp(buf, "*bye*")) {
     dprintf(-dcc[idx].u.relay->sock, "%s\n", buf);
@@ -1450,12 +1450,12 @@ static void dcc_relaying(int idx, char *buf, size_t j)
 
 static void display_relay(int i, char *other)
 {
-  sprintf(other, "rela  -> sock %li", dcc[i].u.relay->sock);
+  sprintf(other, "rela  -> sock %d", dcc[i].u.relay->sock);
 }
 
 static void display_relaying(int i, char *other)
 {
-  sprintf(other, ">rly  -> sock %li", dcc[i].u.relay->sock);
+  sprintf(other, ">rly  -> sock %d", dcc[i].u.relay->sock);
 }
 
 static void display_tandem_relay(int i, char *other)

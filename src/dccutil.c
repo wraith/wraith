@@ -269,7 +269,7 @@ void chanout_but(int x, int chan, const char *format, ...)
 void dcc_chatter(int idx)
 {
   int i;
-  sock_t j;
+  int j;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   strcpy(dcc[idx].u.chat->con_chan, "***");
@@ -633,9 +633,9 @@ port_t listen_all(port_t lport, bool off)
   int idx = (-1);
   port_t port, realport;
 #ifdef USE_IPV6
-  sock_t i6 = 0;
+  int i6 = 0;
 #endif /* USE_IPV6 */
-  sock_t i;
+  int i;
   struct portmap *pmap = NULL, *pold = NULL;
 
   port = realport = lport;
@@ -739,7 +739,7 @@ port_t listen_all(port_t lport, bool off)
 void identd_open()
 {
   int idx;
-  sock_t i = -1;
+  int i = -1;
   port_t port = 113;
 
   for (idx = 0; idx < dcc_total; idx++)

@@ -109,7 +109,7 @@ void sdprintf (char *format, ...)
 
 static void write_debug()
 {
-  sock_t x;
+  int x;
   char s[25] = "", tmpout[150] = "", buf[DIRMAX] = "";
   int y;
 

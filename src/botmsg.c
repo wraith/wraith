@@ -553,7 +553,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     if ((idx >= 0) && (echo))
       dprintf(idx, "-> %s@%s: %s\n", x, p, msg);
     if (idx >= 0) {
-      sprintf(ssf, "%lu:%s", dcc[idx].sock, botf);
+      sprintf(ssf, "%d:%s", dcc[idx].sock, botf);
       botnet_send_priv(i, ssf, x, p, "%s", msg);
     } else
       botnet_send_priv(i, botf, x, p, "%s", msg);

@@ -27,7 +27,7 @@ devent_t	*dns_events = NULL;
  *   DCC functions
  */
 
-void dcc_dnswait(int idx, char *buf, size_t len)
+void dcc_dnswait(int idx, char *buf, int len)
 {
   /* Ignore anything now. */
 }

@@ -41,10 +41,9 @@ enum {
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
-extern sock_t		serv;
 extern size_t		nick_len;
 extern bool		checked_hostmask, quiet_reject, trigger_on_ignore;
-extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp;
+extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp, serv;
 extern port_t		default_port, newserverport;
 extern time_t		server_online, cycle_time, flud_time, flud_ctcp_time;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],

@@ -24,7 +24,7 @@
  */
 int copyfile(const char *oldpath, const char *newpath)
 {
-  sock_t fi;
+  int fi;
 
 #ifndef CYGWIN_HACKS
   fi = open(oldpath, O_RDONLY, 0);
@@ -40,7 +40,7 @@ int copyfile(const char *oldpath, const char *newpath)
   if (!(st.st_mode & S_IFREG))
     return 3;
 
-  sock_t fo;
+  int fo;
 
   fo = creat(newpath, (int) (st.st_mode & 0600));
   if (fo < 0) {
@@ -50,7 +50,7 @@ int copyfile(const char *oldpath, const char *newpath)
 
   char buf[512] = "";
 
-  for (ssize_t x = 1; x > 0;) {
+  for (int x = 1; x > 0;) {
     x = read(fi, buf, 512);
     if (x > 0) {
       if (write(fo, buf, x) < x) {	/* Couldn't write */

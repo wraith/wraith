@@ -48,7 +48,7 @@ static bool quiet_reject = 1;        /* Quietly reject dcc chat or sends from
 #ifdef HUB
 static void wipe_tmp_filename(char *, int);
 static int at_limit(char *);
-static void dcc_get_pending(int, char *, size_t);
+static void dcc_get_pending(int, char *, int);
 #endif /* HUB */
 
 static fileq_t *fileq = NULL;
@@ -501,7 +501,7 @@ inline static void handle_resend_packet(int idx, transfer_reget *reget_data)
  * Note: The first received packet during reget is a special 8 bit packet
  *       containing special information.
  */
-void dcc_get(int idx, char *buf, size_t len)
+void dcc_get(int idx, char *buf, int len)
 {
   char xnick[NICKLEN] = "";
   unsigned char bbuf[4] = "";
@@ -723,7 +723,7 @@ void eof_dcc_get(int idx)
 }
 #endif /* HUB */
 
-void dcc_send(int idx, char *buf, size_t len)
+void dcc_send(int idx, char *buf, int len)
 {
   char s[SGRAB + 2] = "", *b = NULL;
   unsigned long sent;
@@ -952,7 +952,7 @@ struct dcc_table DCC_SEND =
   NULL
 };
 
-void dcc_fork_send(int idx, char *x, size_t y);
+void dcc_fork_send(int idx, char *x, int y);
 
 struct dcc_table DCC_FORK_SEND =
 {
@@ -968,7 +968,7 @@ struct dcc_table DCC_FORK_SEND =
   NULL
 };
 
-void dcc_fork_send(int idx, char *x, size_t y)
+void dcc_fork_send(int idx, char *x, int y)
 {
   if (dcc[idx].type != &DCC_FORK_SEND)
     return;
@@ -1012,11 +1012,11 @@ struct dcc_table DCC_GET_PENDING =
   NULL
 };
 
-static void dcc_get_pending(int idx, char *buf, size_t len)
+static void dcc_get_pending(int idx, char *buf, int len)
 {
   in_addr_t ip;
   port_t port;
-  sock_t i;
+  int i;
   char s[UHOSTLEN] = "";
 
   i = answer(dcc[idx].sock, s, &ip, &port, 1);
@@ -1087,7 +1087,7 @@ static void dcc_get_pending(int idx, char *buf, size_t len)
 
 static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir, int resend)
 {
-  sock_t zz = -1;
+  int zz = -1;
   int i;
   port_t port;
   char *nfn = NULL, *buf = NULL;

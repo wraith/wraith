@@ -15,7 +15,7 @@ struct dcc_table {
   char *name;
   int flags;
   void (*eof) (int);
-  void (*activity) (int, char *, size_t);
+  void (*activity) (int, char *, int);
   time_t *timeout_val;
   void (*timeout) (int);
   void (*display) (int, char *);
@@ -36,7 +36,7 @@ struct dcc_t {
     struct relay_info *relay;
     struct dns_info *dns;
     struct dupwait_info *dupwait;
-    sock_t ident_sock;
+    int ident_sock;
     void *other;
   } u;                          /* Special use depending on type        */
 
@@ -47,8 +47,7 @@ struct dcc_t {
   time_t pingtime;
   unsigned long status;         /* A LOT of dcc types have status
                                    thingos, this makes it more avaliabe */
-  sock_t sock;                    /* This should be a long to keep 64-bit
-                                   machines sane                         */
+  int sock;
   int ssl;                      /* use ssl on this dcc? */
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   int msgc;			/* forward the output back to irc? */
@@ -115,7 +114,7 @@ struct bot_info {
 
 struct relay_info {
   struct chat_info *chat;
-  sock_t sock;
+  int sock;
   int old_status;
   port_t port;
 };

@@ -949,10 +949,10 @@ printf("out: %s\n", out);
 
   debug0("main: entering loop");
 
-  while (1) {
-    int socket_cleanup = 0, status = 0, xx, i = 0;
-    char buf[SGRAB + 10] = "";
+  int socket_cleanup = 0, status = 0, xx, i = 0, idx = 0;
+  char buf[SGRAB + 10] = "";
 
+  while (1) {
 #ifndef CYGWIN_HACKS
     if (conf.watcher && waitpid(watcher, &status, WNOHANG))
       fatal("watcher PID died/stopped", 0);
@@ -981,7 +981,7 @@ printf("out: %s\n", out);
     xx = sockgets(buf, &i);
 
     if (xx >= 0) {		/* Non-error */
-      for (int idx = 0; idx < dcc_total; idx++) {
+      for (idx = 0; idx < dcc_total; idx++) {
 	if (dcc[idx].sock == xx) {
 	  if (dcc[idx].type && dcc[idx].type->activity) {
 	    /* Traffic stats */
@@ -1004,14 +1004,12 @@ printf("out: %s\n", out);
 	    dcc[idx].type->activity(idx, buf, i);
 	  } else
 	    putlog(LOG_MISC, "*",
-		   "!!! untrapped dcc activity: type %s, sock %li",
+		   "!!! untrapped dcc activity: type %s, sock %d",
 		   dcc[idx].type->name, dcc[idx].sock);
 	  break;
 	}
       }
     } else if (xx == -1) {	/* EOF from someone */
-      int idx;
-
       if (i == STDOUT && !backgrd)
 	fatal("END OF FILE ON TERMINAL", 0);
       for (idx = 0; idx < dcc_total; idx++) {
@@ -1038,7 +1036,7 @@ printf("out: %s\n", out);
       for (i = 0; i < dcc_total; i++) {
 	if ((fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
 	  putlog(LOG_MISC, "*",
-		 "DCC socket %li (type %s, name '%s') expired -- pfft",
+		 "DCC socket %d (type %s, name '%s') expired -- pfft",
 		 dcc[i].sock, dcc[i].type->name, dcc[i].nick);
 	  killsock(dcc[i].sock);
 	  lostdcc(i);

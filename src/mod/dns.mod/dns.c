@@ -75,7 +75,7 @@ static void eof_dns_socket(int idx)
     lostdcc(idx);
 }
 
-static void dns_socket(int idx, char *buf, size_t len)
+static void dns_socket(int idx, char *buf, int len)
 {
   dns_ack();
 }
