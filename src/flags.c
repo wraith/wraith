@@ -235,6 +235,9 @@ int sanity_check(int atr)
  */
 int chan_sanity_check(int chatr, int atr)
 {
+  /* admin for chan does shit.. */
+  if (chattr & USER_ADMIN)
+    chatr &= ~(USER_ADMIN);
   if ((chatr & USER_OP) && (chatr & USER_DEOP))
     chatr &= ~(USER_OP | USER_DEOP);
   if ((chatr & USER_VOICE) && (chatr & USER_QUIET))
