@@ -203,6 +203,7 @@ static void tell_who(struct userrec *u, int idx, int chan)
     }
   }
 }
+#endif /* HUB */
 
 static void cmd_whom(struct userrec *u, int idx, char *par)
 {

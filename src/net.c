@@ -1211,7 +1211,8 @@ static int sockread(char *s, int *len)
   return -3;
 }
 
-int prand(int *seed, int range)
+__inline__ static int 
+prand(int *seed, int range)
 {
   long long i1;
 
@@ -1219,20 +1220,23 @@ int prand(int *seed, int range)
   i1 = (i1 * 0x08088405 + 1) & 0xFFFFFFFF;
   *seed = i1;
   i1 = (i1 * range) >> 32;
+
   return i1;
 }
 
 char *botlink_decrypt(int snum, char *src)
 {
   char *line = NULL;
-  int i;
 
   line = decrypt_string(socklist[snum].ikey, src);
   strcpy(src, line);
   free(line);
   if (socklist[snum].iseed) {
-    for (i = 0; i <= 3; i++)
-      *(dword *) & socklist[snum].ikey[i * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[0 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[1 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[2 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[3 * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+
     if (!socklist[snum].iseed)
       socklist[snum].iseed++;
   }
@@ -1242,7 +1246,7 @@ char *botlink_decrypt(int snum, char *src)
 char *botlink_encrypt(int snum, char *src, size_t *len)
 {
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
-  int bufpos = 0, i = 0;
+  int bufpos = 0;
 
   srcbuf = calloc(1, *len + 9 + 1);
   strcpy(srcbuf, src);
@@ -1256,8 +1260,11 @@ char *botlink_encrypt(int snum, char *src, size_t *len)
     *eol++ = 0;
     eline = encrypt_string(socklist[snum].okey, line);
     if (socklist[snum].oseed) {
-      for (i = 0; i <= 3; i++)
-        *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[0 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[1 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[2 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[3 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }
@@ -1272,8 +1279,11 @@ char *botlink_encrypt(int snum, char *src, size_t *len)
   if (line[0]) {
     eline = encrypt_string(socklist[snum].okey, line);
     if (socklist[snum].oseed) {
-      for (i = 0; i <= 3; i++)
-        *(dword *) & socklist[snum].okey[i * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[0 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[1 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[2 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[3 * 4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }

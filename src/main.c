@@ -184,6 +184,7 @@ static void expire_simuls() {
       if ((now - dcc[idx].simultime) >= 20) { /* expire simuls after 20 seconds (re-uses idx, so it wont fill up) */
         dcc[idx].simul = -1;
         lostdcc(idx);
+        return;		/* only safe to do one at a time */
       }
     }
   }

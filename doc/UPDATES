@@ -22,6 +22,7 @@ This is a summary of ChangeLog basically.
 18.Fixed setting ban/invite/exempt on hub, and leafs not setting it.
 19.Annoying log -NOTICE- *** should be fixed.
 20.Removed cmd_botinfo.
+21.Unrolled some loops in the botlink encrypt.
 
 1.1.7
 
