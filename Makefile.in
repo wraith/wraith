@@ -22,10 +22,10 @@ EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src
            misc/plainh misc/grep misc/cp.sh src/settings.c src/salt.h 
 
 # defaults
-CC = @CC@
-LD = @CC@
-CCDEBUG = @CCDEBUG@
-LDDEBUG = @CCDEBUG@
+CC = @CCACHE@ @CC@
+LD = @CCACHE@ @CC@
+CCDEBUG = @CCACHE@ @CCDEBUG@
+LDDEBUG = @CCACHE@ @CCDEBUG@
 STRIP = @STRIP@
 
 # stuff for Tcl

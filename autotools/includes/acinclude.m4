@@ -183,6 +183,15 @@ then
 fi
 ])dnl
 
+dnl  EGG_PROG_CCACHE()
+dnl
+AC_DEFUN(EGG_PROG_CCACHE, [dnl
+AC_CHECK_PROG(CCACHE, ccache, ccache)
+if test "${CCACHE-x}" = "x"
+then
+  CCACHE=ccache
+fi
+])dnl
 
 dnl  EGG_PROG_AWK()
 dnl

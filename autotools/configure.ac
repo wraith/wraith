@@ -36,6 +36,7 @@ EGG_PROG_HEAD_1
 EGG_PROG_STRIP
 EGG_PROG_AWK
 EGG_PROG_BASENAME
+EGG_PROG_CCACHE
 AC_CHECK_PROG(UNAME,uname,uname)
 
 # Test the os and set the module linking settings

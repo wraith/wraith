@@ -29,6 +29,7 @@ for mf in $files; do
 #    echo "creating $dirpart/.deps/$base.Po"
     echo '# dummy' > "$dirpart/.deps/$base.Po"
     echo "include .deps/$base.Po" >> "$dirpart/.deps/includes"
+    echo "_$base.c:" >> "$dirpart/.deps/includes"
   done
 done
 ])# DO_DEPS

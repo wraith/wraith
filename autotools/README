@@ -1,6 +1,5 @@
 Type 'make' whenever one of these conditions are met:
 
-- Any files in bootstrap/ are modified.
-- Any files are added or removed in src/
-- Any files change their dependancies (#include "file.h")
+- Any files in autotools/ are modified.
+- Any Makefiles are added or removed (Editting of includes/depend.m4 required)
 
