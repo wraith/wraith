@@ -3,7 +3,7 @@ This is a summary of ChangeLog basically.
 1.2.1
 
 * No longer reading in /etc/hosts, still reading .hosts though
-- Disabled all the DEBUG emailing and context shit, it was utterly pointless
+* Disabled all the DEBUG emailing 
 * Fixed closed-invite not being checked correctly.
 * Fixed segfault while relaying.
 * Telnet host matching is now fixed to match these hosts against the userfile (ONLY FOR ACCESS):

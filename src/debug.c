@@ -106,69 +106,14 @@ void sdprintf (char *format, ...)
 #ifdef DEBUG_CONTEXT
 
 #define CX(ptr) cx_file[ptr] && cx_file[ptr][0] ? cx_file[ptr] : "", cx_line[ptr], cx_note[ptr] && cx_note[ptr][0] ? cx_note[ptr] : ""
-
 static void write_debug()
 {
-  int x;
-  char s[25] = "", tmpout[150] = "", buf[DIRMAX] = "";
-  int y;
+  char tmpout[150] = "";
 
   egg_snprintf(tmpout, sizeof tmpout, "* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]",
                                   CX(cx_ptr - 2), CX(cx_ptr - 1), CX(cx_ptr));
   putlog(LOG_MISC, "*", "%s", tmpout);
   printf("%s\n", tmpout);
-  sprintf(buf, "%sDEBUG", tempdir);
-  x = creat(buf, 0600);
-  setsock(x, SOCK_NONSOCK);
-  if (x < 0) {
-    putlog(LOG_MISC, "*", "* Failed to write DEBUG");
-  } else {
-    char date[80] = "";
-    strncpyz(s, ctime(&now), sizeof s);
-    dprintf(-x, "Debug (%s) written %s\n", ver, s);
-
-    egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
-    dprintf(-x, "Build: %s (%lu)\n", date, buildts);
-
-#ifndef CYGWIN_HACKS
-    stackdump(-x);
-#endif /* !CYGWIN_HACKS */
-    dprintf(-x, "Context: ");
-    cx_ptr = cx_ptr & 15;
-    for (y = ((cx_ptr + 1) & 15); y != cx_ptr; y = ((y + 1) & 15))
-      dprintf(-x, "%s/%d, [%s]\n         ", CX(y));
-    dprintf(-x, "%s/%d [%s]\n\n", CX(cx_ptr));
-    tell_dcc(-x);
-    dprintf(-x, "\n");
-    tell_netdebug(-x);
-    killsock(x);
-    close(x);
-#ifndef CYGWIN_HACKS
-    {
-      char *w = NULL, *who = NULL, *ps = NULL, *uname = NULL, 
-           *id = NULL, *ls = NULL, *debug = NULL, *msg = NULL, buf2[DIRMAX] = "";
-
-      egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
-      shell_exec("w", NULL, &w, NULL);
-      shell_exec("who", NULL, &who, NULL);
-      shell_exec("ps cux", NULL, &ps, NULL);
-      shell_exec("uname -a", NULL, &uname, NULL);
-      shell_exec("id", NULL, &id, NULL);
-      shell_exec("ls -al", NULL, &ls, NULL);
-      buf2[0] = 0;
-      sprintf(buf2, "cat %s", buf);
-      shell_exec(buf2, NULL, &debug, NULL);
-
-      msg = (char *) my_calloc(1, strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
-
-      sprintf(msg, "%s\n%s\n%s\n\n%s\n%s\n\n%s\n\n-----%s-----\n\n\n\n%s", date, id, uname, w, who, ps, ls, debug);
-      email("Debug output", msg, EMAIL_TEAM);
-      free(msg);
-    }
-    putlog(LOG_MISC, "*", "* Emailed DEBUG to development team...");
-#endif /* !CYGWIN_HACKS */
-    unlink(buf);
-  }
 }
 #endif /* DEBUG_CONTEXT */
 
