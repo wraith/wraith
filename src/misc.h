@@ -29,6 +29,7 @@
 #define KICK_BOGUSKEY 		15
 
 char *wbanner();
+int coloridx(int);
 char *color(int, int, int);
 void shuffle(char *, char *);
 void showhelp(int, struct flag_record *, char *);

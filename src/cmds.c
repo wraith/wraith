@@ -2855,12 +2855,11 @@ static void cmd_color(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# color %s", dcc[idx].nick, par);
 
-  if ((idx && ((dcc[idx].type != &DCC_RELAYING) && (dcc[idx].status & STAT_TELNET))) || !backgrd)
-    ansi++;
+  ansi = coloridx(idx);
   if (!par[0]) {
     dprintf(idx, "Usage: color <on/off>\n");
-    if (dcc[idx].status & STAT_COLOR) 
-      dprintf(idx, "Color is currently on. (%s)\n", ansi ? "ANSI" : "mIRC");
+    if (ansi)
+      dprintf(idx, "Color is currently on. (%s)\n", ansi == 1 ? "ANSI" : "mIRC");
     else
       dprintf(idx, "Color is currently off.\n");
     return;

@@ -458,7 +458,7 @@ void show_motd(int idx)
 #else /* !S_UTCTIME */
     egg_strftime(date, sizeof date, "%c %Z", localtime(&when));
 #endif /* S_UTCTIME */
-    dprintf(idx, "Motd set by \002%s\002 (%s)\n", who, date);
+    dprintf(idx, "Motd set by %s%s%s (%s)\n", BOLD(idx), who, BOLD_END(idx), date);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
     dprintf(idx, " \n");
     free(buf_ptr);
@@ -1209,6 +1209,31 @@ void shuffle(char *string, char *delim)
   string[strlen(string)] = 0;
 }
 
+/* returns
+   1: use ANSI
+   2: use mIRC
+   0: neither
+ */
+
+int
+coloridx(int idx)
+{
+  if (idx == -1) {		/* who cares, just show color! */
+    return 1;	/* ANSI */
+  } else if (idx == -2) {
+    return 2;	/* mIRC */
+  /* valid idx and NOT relaying */
+  } else if (idx >= 0 && (dcc[idx].status & STAT_COLOR) && (dcc[idx].type && dcc[idx].type != &DCC_RELAYING)) {
+    /* telnet probably wants ANSI, even though it might be a relay from an mIRC client; fuck`em */
+    if (dcc[idx].status & STAT_TELNET)
+      return 1;
+    /* non-telnet is probably a /dcc-chat, most irc clients support mIRC codes... */
+    else
+      return 2;
+  } 
+  return 0;
+}
+
 char *color(int idx, int type, int which)
 {
   int ansi = 0;
@@ -1216,18 +1241,11 @@ char *color(int idx, int type, int which)
   /* if user is connected over TELNET or !backgrd, show ANSI
    * if they are relaying, they are most likely on an IRC client and should have mIRC codes
    */
-
-  if (idx == -1) {		/* who cares, just show color! */
-    ansi++;
-  } else if (idx && dcc[idx].status & STAT_COLOR) {
-    /* over telnet but not relaying */
-    if (dcc[idx].type != &DCC_RELAYING && dcc[idx].status & STAT_TELNET)
-      ansi++;
-    /* else: use mIRC color codes. */
-  } else {
+ 
+  if ((ansi = coloridx(idx)) == 0)
     return "";
-  }
-
+  if (ansi == 2)
+    ansi = 0;
   if (type == BOLD_OPEN) {
     return ansi ? "\033[1m" : "\002";
   } else if (type == BOLD_CLOSE) {

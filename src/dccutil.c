@@ -119,7 +119,7 @@ void dprintf(int idx, const char *format, ...)
     }
     return;
   } else { /* normal chat text */
-    if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type == &DCC_CHAT)) {
+    if (!dcc[idx].simul && coloridx(idx)) {
       int i;
       char buf3[1024] = "", buf2[1024] = "", c = 0;
 
@@ -234,6 +234,9 @@ void dcc_chatter(int idx)
   int i, j;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
 
+  strcpy(dcc[idx].u.chat->con_chan, "***");
+  check_bind_chon(dcc[idx].nick, idx);
+
   get_user_flagrec(dcc[idx].user, &fr, NULL);
   dprintf(idx, "Connected to %s, running %s\n", conf.bot->nick, version);
   show_banner(idx);
@@ -254,8 +257,6 @@ void dcc_chatter(int idx)
   }
 
   j = dcc[idx].sock;
-  strcpy(dcc[idx].u.chat->con_chan, "***");
-  check_bind_chon(dcc[idx].nick, idx);
   dcc[idx].u.chat->channel = 234567;
   /* Still there? */
 

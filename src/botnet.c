@@ -1415,7 +1415,7 @@ static void dcc_relay(int idx, char *buf, int j)
      escape sequences. */
   if (!(dcc[j].status & STAT_TELNET)) {
     while (*p != 0) {
-      while (*p != 255 && (*p != '\033' || *(p + 1) != '[') && *p != '\r' && *p)
+      while (*p && *p != 255 && *p != '\r')
 	p++;			/* Search for IAC, escape sequences and CR. */
       if (*p == 255) {
 	mark = 2;
@@ -1427,13 +1427,6 @@ static void dcc_relay(int idx, char *buf, int j)
 	    mark = 2;		/* Bogus */
 	}
 	strcpy((char *) p, (char *) (p + mark));
-      } else if (*p == '\033') {
-	unsigned char	*e;
-
-	/* Search for the end of the escape sequence. */
-	for (e = p + 2; *e != 'm' && *e; e++)
-	  ;
-	strcpy((char *) p, (char *) (e + 1));
       } else if (*p == '\r')
 	strcpy((char *) p, (char *) (p + 1));
     }

@@ -1170,6 +1170,7 @@ static void dcc_chat(int idx, char *buf, int i)
 static void display_dcc_chat(int idx, char *buf)
 {
   size_t i;
+  int colori = 0;
 
   i = simple_sprintf(buf, "chat  flags: ");
   buf[i++] = dcc[idx].status & STAT_CHAT ? 'C' : 'c';
@@ -1177,7 +1178,8 @@ static void display_dcc_chat(int idx, char *buf)
   buf[i++] = dcc[idx].status & STAT_TELNET ? 'T' : 't';
   buf[i++] = dcc[idx].status & STAT_ECHO ? 'E' : 'e';
   buf[i++] = dcc[idx].status & STAT_PAGE ? 'P' : 'p';
-  buf[i++] = dcc[idx].status & STAT_COLOR ? 'K' : 'k';
+  if ((colori = coloridx(idx)))
+    buf[i++] = colori == 1 ? 'A' : 'M';
 #ifdef USE_IPV6
   if (sockprotocol(dcc[idx].sock) == AF_INET6 && dcc[idx].addr6[0])
     buf[i++] = '6';

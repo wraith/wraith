@@ -792,7 +792,9 @@ share_pls_exempt(int idx, char *par)
   int flags = 0;
 
   if (dcc[idx].status & STAT_SHARE) {
+#ifdef LEAF
     struct chanset_t *chan = NULL;
+#endif /* LEAF */
     int stick = 0;
 
     shareout_but(NULL, idx, "+e %s\n", par);
@@ -871,7 +873,9 @@ share_pls_invite(int idx, char *par)
   int flags = 0;
 
   if (dcc[idx].status & STAT_SHARE) {
+#ifdef LEAF
     struct chanset_t *chan = NULL;
+#endif /* LEAF */
     int stick = 0;
 
     shareout_but(NULL, idx, "+inv %s\n", par);
