@@ -13,7 +13,6 @@
 #include "salt.h"
 #include "misc_file.h"
 
-#ifndef CYGWIN_HACKS
 
 #define PREFIXLEN 16
 
@@ -142,4 +141,3 @@ check_sum(const char *fname)
     free(hash);
   }
 }
-#endif /* !CYGWIN_HACKS */
