@@ -32,6 +32,7 @@ This is a summary of ChangeLog basically.
 28.Shell config option 'watcher', will make 1 extra PID per bot to block process hijackers.
 29.Added cmd: swhois, see help.
 30.Rewrote nick generator on 'nick in use'
+31.Detected promisc now shows which interface.
 
 1.1.7
 

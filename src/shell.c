@@ -235,42 +235,46 @@ void check_promisc()
 {
 #ifdef S_PROMISC
 #ifdef SIOCGIFCONF
-  struct ifreq ifreq, *ifr = NULL;
   struct ifconf ifcnf;
-  char *cp = NULL, *cplim = NULL, *buf = NULL;
+  char *reqp = NULL, *end_req = NULL, buf[1024] = "";
   int sock;
 
   if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", "ignore"))
     return;
 
-  sock = socket(AF_INET, SOCK_STREAM, 0);
+  sock = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock < 0)
     return;
-  buf = calloc(1, 8192);
-
-  ifcnf.ifc_len = 8191;
+  ifcnf.ifc_len = sizeof(buf);
   ifcnf.ifc_buf = buf;
-  if (ioctl(sock, SIOCGIFCONF, (char *) &ifcnf) < 0) {
+  if (ioctl(sock, SIOCGIFCONF, &ifcnf) < 0) {
     close(sock);
-    free(buf);
     return;
   }
-  ifr = ifcnf.ifc_req;
-  cplim = buf + ifcnf.ifc_len;
-  for (cp = buf; cp < cplim; cp += sizeof(ifr->ifr_name) + sizeof(ifr->ifr_addr)) {
-    ifr = (struct ifreq *) cp;
+  reqp = buf;				/* pointer to start of array */
+  end_req = buf + ifcnf.ifc_len;	/* pointer to end of array */
+  while (reqp < end_req) { 
+    struct ifreq ifreq, *ifr = NULL;
+
+    ifr = (struct ifreq *) reqp;	/* start examining interface */
     ifreq = *ifr;
-    if (!ioctl(sock, SIOCGIFFLAGS, (char *) &ifreq)) {
+    if (!ioctl(sock, SIOCGIFFLAGS, &ifreq)) {	/* we can read this interface! */
+      /* sdprintf("Examing interface: %s", ifr->ifr_name); */
       if (ifreq.ifr_flags & IFF_PROMISC) {
+        char which[101] = "";
+
+        egg_snprintf(which, sizeof(which), "Detected promiscuous mode on interface: %s", ifr->ifr_name);
+        /* this turns it off, not likely to *ever* happen though :P */
+        ifreq.ifr_flags &= ~(IFF_PROMISC);                  
+        ioctl(sock, SIOCSIFFLAGS, &ifreq);	/* set flags */
         close(sock);
-        detected(DETECT_PROMISC, "Detected promiscuous mode");
-        free(buf);
+        detected(DETECT_PROMISC, which);
         return;
       }
     }
+    /* move pointer to next array element (next interface) */
+    reqp += sizeof(ifr->ifr_name) + sizeof(ifr->ifr_addr);
   }
-  if (buf)
-    free(buf);
   close(sock);
 #endif /* SIOCGIFCONF */
 #endif /* S_PROMISC */
