@@ -1605,9 +1605,11 @@ int findanyidx(register int z)
 {
   register int j;
 
-  for (j = 0; j < dcc_total; j++)
-    if (dcc[j].sock == z)
-      return j;
+  if (z != -1)
+    for (j = 0; j < dcc_total; j++)
+      if (dcc[j].sock == z)
+        return j;
+
   return -1;
 }
 
