@@ -26,6 +26,8 @@ AC_CACHE_SAVE
 # Speedup compile
 EGG_CHECK_CCPIPE
 
+EGG_CHECK_DEPMODE
+
 # Create static binaries
 EGG_CHECK_CCSTATIC
 AC_SUBST(CCDEBUG)dnl

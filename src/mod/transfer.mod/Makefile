@@ -18,7 +18,7 @@ static: ../transfer.o
 
 ../transfer.o:
 	@echo -e "Compiling: \033[1mtransfer\033[0m"
-	@source='transfer.c' object='$@' depfile='.deps/transfer.Po' tmpdepfile='.deps/transfer.TPo' depmode=gcc3 $(depcomp) \
+	@source='transfer.c' object='$@' depfile='.deps/transfer.Po' tmpdepfile='.deps/transfer.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/transfer.c
 	@rm -f ../transfer.o
 	@mv transfer.o ../

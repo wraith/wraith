@@ -28,6 +28,7 @@ modconfig = $(top_srcdir)/misc/modconfig --bindir=../.. \
 egg_ac_parameters = @egg_ac_parameters@
 
 MAKE_MOD = $(MAKE) 'MAKE=$(MAKE)' 'CC=$(CC)' 'LD=$(LD)' \
+'CCDEPMODE=$(CCDEPMODE)' \
 'STRIP=$(STRIP)' 'CFLAGS=$(MOD_CFLAGS)' 'CPPFLAGS=$(MOD_CPPFLAGS)' \
 'XLIBS=$(XLIBS)' 'SHELL=$(SHELL)'
 

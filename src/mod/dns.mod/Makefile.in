@@ -21,7 +21,7 @@ static: ../dns.o
 
 ../dns.o:
 	@echo -e "Compiling: \033[1mdns\033[0m"
-	 @source='dns.c' object='$@' depfile='.deps/dns.Po' tmpdepfile='.deps/dns.TPo' depmode=gcc3 $(depcomp) \
+	 @source='dns.c' object='$@' depfile='.deps/dns.Po' tmpdepfile='.deps/dns.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(RESINCLUDE) -DMAKING_MODS -c $(srcdir)/dns.c
 	@rm -f ../dns.o
 	@mv dns.o ../

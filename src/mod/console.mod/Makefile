@@ -18,7 +18,7 @@ static: ../console.o
 
 ../console.o:
 	@echo -e "Compiling: \033[1mconsole\033[0m"
-	@source='console.c' object='$@' depfile='.deps/console.Po' tmpdepfile='.deps/console.TPo' depmode=gcc3 $(depcomp) \
+	@source='console.c' object='$@' depfile='.deps/console.Po' tmpdepfile='.deps/console.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/console.c
 	@rm -f ../console.o
 	@mv console.o ../

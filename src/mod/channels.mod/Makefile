@@ -18,7 +18,7 @@ static: ../channels.o
 
 ../channels.o:
 	@echo -e "Compiling: \033[1mchannels\033[0m"
-	@source='channels.c' object='$@' depfile='.deps/channels.Po' tmpdepfile='.deps/channels.TPo' depmode=gcc3 $(depcomp) \
+	@source='channels.c' object='$@' depfile='.deps/channels.Po' tmpdepfile='.deps/channels.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DMAKING_MODS -c $(srcdir)/channels.c
 	@rm -f ../channels.o
 	@mv channels.o ../

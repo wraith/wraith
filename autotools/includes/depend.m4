@@ -1,5 +1,18 @@
 # DO_DEPS
 # ------------------------------
+
+
+dnl  EGG_CHECK_DEPMODE()
+dnl
+AC_DEFUN(EGG_CHECK_DEPMODE, [dnl
+CCDEPMODE=gcc
+num=`gcc -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
+if test $num = "3"; then
+  CCDEPMODE=gcc3
+fi
+AC_SUBST(CCDEPMODE)dnl
+])dnl
+
 AC_DEFUN([DO_DEPS],
 [
 files="src/Makefile.in src/compat/Makefile.in src/mod/channels.mod/Makefile src/mod/compress.mod/Makefile src/mod/console.mod/Makefile src/mod/ctcp.mod/Makefile src/mod/dns.mod/Makefile.in src/mod/irc.mod/Makefile src/mod/notes.mod/Makefile src/mod/server.mod/Makefile src/mod/share.mod/Makefile src/mod/transfer.mod/Makefile src/mod/update.mod/Makefile"
