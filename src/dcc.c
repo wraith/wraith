@@ -315,18 +315,20 @@ dcc_bot_new(int idx, char *buf, int x)
       char *rand = newsplit(&buf), *tmp = strdup(buf), *tmpp = tmp, *p = NULL;
       int i = -1;
 
-      while ((p = strchr(buf, ' ')) && i == -1) {
-        *p = 0;
+      while ((p = newsplit(&tmp))[0]) {
+        if (str_isdigit(p)) {
+          int type = atoi(p);
 
-        /* pick the first (lowest num) one that we share */
-        if ((i = link_find_by_type(atoi(tmp))) != -1)
-          break;
+          /* pick the first (lowest num) one that we share */
+          i = link_find_by_type(type);
 
-        tmp = p++;
+          if (i != -1)
+            break;
+        }
       }
       free(tmpp);
 
-      sdprintf("Choosing '%s' for link", enclink[i].name);
+      sdprintf("Choosing '%s' (%d) for link", enclink[i].name, i);
       link_hash(idx, rand);
       dprintf(idx, "neg %s %d\n", dcc[idx].shahash, enclink[i].type);
       socklist[snum].enclink = i;
@@ -908,7 +910,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
 
         /* verify we have that type and then initiate it */
         if ((i = link_find_by_type(type)) == -1) {
-          putlog(LOG_WARN, "*", "%s attempted to link with an invalid encryption.", dcc[idx].nick);
+          putlog(LOG_WARN, "*", "%s attempted to link with an invalid encryption. (%d)", dcc[idx].nick, type);
           killsock(dcc[idx].sock);
           lostdcc(idx);
           return;

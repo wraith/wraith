@@ -328,8 +328,9 @@ void link_parse(int idx, char *buf)
   return;
 }
 
+/* the order of entries here determines which will be picked */
 struct enc_link enclink[] = {
-  { "ghost+case", LINK_GHOSTCASE, ghost_link_case, ghost_write, ghost_read, ghost_parse },
+//  { "ghost+case", LINK_GHOSTCASE, ghost_link_case, ghost_write, ghost_read, ghost_parse },
   { "ghost+nat", LINK_GHOSTNAT, ghost_link_nat, ghost_write, ghost_read, ghost_parse },
   { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL, NULL },
   { NULL, 0, NULL, NULL, NULL, NULL }
