@@ -24,7 +24,9 @@
 #include <sys/stat.h>
 #include <signal.h>
 
+#ifdef CYGWIN_HACKS
 char cfile[DIRMAX] = "";
+#endif /* CYGWIN_HACKS */
 conf_t conf;                    /* global conf struct */
 conf_t conffile;                /* just some config options only avail during loading */
 
@@ -234,7 +236,7 @@ confedit()
 
   if (!can_stat(tmpconf.file))
     fatal("Error reading new config file", 0);
-  readconf(tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
+  readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   unlink(tmpconf.file);
   fix_tilde(&conffile.binpath);
   conf_to_bin(&conffile);       /* will exit */
@@ -455,9 +457,9 @@ void free_conf(void)
 }
 
 int
-parseconf()
+parseconf(bool error)
 {
-  if (!conffile.bots->nick && !conffile.bots->next)     /* no bots ! */
+  if (error && !conffile.bots->nick && !conffile.bots->next)     /* no bots ! */
     werr(ERR_NOBOTS);
 
   if (conffile.username) {
@@ -467,7 +469,7 @@ parseconf()
   }
 
 #ifndef CYGWIN_HACKS
-  if (conffile.uid && conffile.uid != myuid) {
+  if (error && conffile.uid && conffile.uid != myuid) {
     sdprintf("wrong uid, conf: %d :: %d", conffile.uid, myuid);
     werr(ERR_WRONGUID);
   } else if (!conffile.uid)
@@ -476,7 +478,8 @@ parseconf()
   if (conffile.uname && strcmp(conffile.uname, my_uname()) && !conffile.autouname) {
     baduname(conffile.uname, my_uname());       /* its not auto, and its not RIGHT, bail out. */
     sdprintf("wrong uname, conf: %s :: %s", conffile.uname, my_uname());
-    werr(ERR_WRONGUNAME);
+    if (error)
+      werr(ERR_WRONGUNAME);
   } else if (conffile.uname && conffile.autouname) {    /* if autouname, dont bother comparing, just set uname to output */
     str_redup(&conffile.uname, my_uname());
   } else if (!conffile.uname) { /* if not set, then just set it, wont happen again next time... */
@@ -496,7 +499,7 @@ parseconf()
 }
 
 int
-readconf(char *fname, int bits)
+readconf(const char *fname, int bits)
 {
   FILE *f = NULL;
   int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;

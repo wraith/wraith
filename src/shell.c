@@ -909,16 +909,17 @@ char *move_bin(const char *path, const char *file, bool run)
   char real[DIRMAX] = "";
 
   egg_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
-  sdprintf("newbin: %s", newbin);
 
   ContextNote("realpath()");
   realpath(binname, real);            /* get the realpath of binname */
   ContextNote("realpath(): Success");
   /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
+  sdprintf("binname: %s", binname);
+  sdprintf("newbin: %s", newbin);
+  sdprintf("real: %s", real);
   if (strcmp(binname, newbin) && strcmp(newbin, real)) {              /* if wrong path and new path != current */
     bool ok = 1;
 
-    sdprintf("real: %s", real);
     sdprintf("wrong dir, is: %s :: %s", binname, newbin);
 
     unlink(newbin);

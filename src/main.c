@@ -268,9 +268,9 @@ static void show_help()
 }
 
 #ifdef LEAF
-# define PARSE_FLAGS "023B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
+# define PARSE_FLAGS "0234:B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
 #else /* !LEAF */
-# define PARSE_FLAGS "023Cd:De:Eg:G:hnstu:U:v"
+# define PARSE_FLAGS "0234:Cd:De:Eg:G:hnstu:U:v"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "CdDeEgGhkntuUv"
 static void dtx_arg(int argc, char *argv[])
@@ -293,6 +293,10 @@ static void dtx_arg(int argc, char *argv[])
       case '3':		/* return the size of our settings struct */
         printf("%d %d\n", SETTINGS_VER, sizeof(settings_t));
         exit(0);
+      case '4':
+        readconf(optarg, CONF_ENC);
+        parseconf(0);
+        conf_to_bin(&conffile);		/* this will exit() in write_settings() */
 #ifdef LEAF
       case 'B':
         localhub = 0;
@@ -568,13 +572,6 @@ static void check_tempdir()
   }
 }
 
-void compat_read_conf(const char *fname)
-{
-  readconf(fname, CONF_ENC);
-  parseconf(0);
-  conf_to_bin(&conffile);	/* this will exit() in write_settings() */
-}
-
 /* FIXME: Remove after 1.2 (the hacks) */
 static void startup_checks(int hack) {
   /* for compatability with old conf files 
@@ -691,6 +688,7 @@ printf("out: %s\n", out);
   /* This allows -2/-0 to be used without an initialized binary */
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
 //  doesn't work correctly yet, if we don't go in here, our settings stay encrypted
+
     check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
 
     if (!checked_bin_buf)

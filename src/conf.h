@@ -66,11 +66,13 @@ int conf_delbot(char *);
 pid_t checkpid(char *, conf_bot *);
 void init_conf();
 void free_conf();
-int readconf(char *, int);
-int parseconf();
+int readconf(const char *, int);
+int parseconf(bool);
 int writeconf(char *, FILE *, int);
 void fillconf(conf_t *);
 void bin_to_conf(void);
 
+#ifdef CYGWIN_HACKS
 extern char		cfile[DIRMAX];
+#endif /* CYGWIN_HACKS */
 #endif /* !_CONF_H */

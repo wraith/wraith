@@ -2,6 +2,8 @@
 #define _SETTINGS_H
 #define PREFIXLEN 16
 
+#define SETTINGS_VER 1
+
 typedef struct settings_struct {
   char prefix[PREFIXLEN];
   /* -- STATIC -- */
