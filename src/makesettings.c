@@ -353,7 +353,7 @@ int loadconfig(char **argv) {
   if (cfg.definesn && cfg.defines) {
     char *def;
     int i = 0;
-    f = fopen("src/conf.h", "w");
+    f = fopen("src/conf.h~", "w");
     fprintf(f, "#ifndef _S_CONF_H\n#define _S_CONF_H\n\n");
 
     for (i = 0; i < cfg.definesn; i++) {

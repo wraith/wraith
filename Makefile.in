@@ -131,6 +131,12 @@ packconf: makesettings pack/pack.cfg
 	@(if test "x`diff -qurN src/settings.c~ src/settings.c`" != "x"; then \
 	cp -f src/settings.c~ src/settings.c; \
 	fi)
+	@(if [ ! -f src/conf.h ]; then \
+	touch src/conf.h; \
+	fi)
+	@(if test "x`diff -qurN src/conf.h~ src/conf.h`" != "x"; then \
+	cp -f src/conf.h~ src/conf.h; \
+	fi)
 
 salt: packconf stringfix
 	@(if [ ! -f src/salt.h ]; then \
