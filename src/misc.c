@@ -2198,18 +2198,26 @@ char *color(int idx, int type, int color)
     return ansi ? "\033[0m" : "\037\002";
   } else if (type == COLOR_OPEN) {
     switch (color) {
-      case C_BLACK: 	return ansi ? "\033[30m" : "\00301";
-      case C_RED: 	return ansi ? "\033[31m" : "\00304";
-      case C_GREEN: 	return ansi ? "\033[32m" : "\00303";
-      case C_YELLOW: 	return ansi ? "\033[33m" : "\00308";
-      case C_BLUE: 	return ansi ? "\033[34m" : "\00302";
-      case C_PURPLE: 	return ansi ? "\033[35m" : "\00306";
-      case C_CYAN: 	return ansi ? "\033[36m" : "\00309";
-      case C_WHITE: 	return ansi ? "\033[37m" : "\00300";
+      case C_BLACK: 		return ansi ? "\033[30m"   : "\00301";
+      case C_RED: 		return ansi ? "\033[31m"   : "\00305";
+      case C_GREEN: 		return ansi ? "\033[32m"   : "\00303";
+      case C_BROWN: 		return ansi ? "\033[33m"   : "\00307";
+      case C_BLUE: 		return ansi ? "\033[34m"   : "\00302";
+      case C_PURPLE: 		return ansi ? "\033[35m"   : "\00306";
+      case C_CYAN: 		return ansi ? "\033[36m"   : "\00310";
+      case C_WHITE:	 	return ansi ? "\033[1;37m" : "\00300";
+      case C_DARKGREY:		return ansi ? "\033[1;30m" : "\00314";
+      case C_LIGHTRED:  	return ansi ? "\033[1;31m" : "\00304";
+      case C_LIGHTGREEN: 	return ansi ? "\033[1;32m" : "\00309";
+      case C_LIGHTBLUE:		return ansi ? "\033[1;34m" : "\00312";
+      case C_LIGHTPURPLE: 	return ansi ? "\033[1;35m" : "\00313";
+      case C_LIGHTCYAN:		return ansi ? "\033[1;36m" : "\00311";
+      case C_LIGHTGREY:		return ansi ? "\033[37m"   : "\00315";
+      case C_YELLOW:		return ansi ? "\033[1;33m" : "\00308";
       default: break;
     }
   } else if (type == COLOR_CLOSE) {
-    return ansi ? "\033[0m" : "\003";
+    return ansi ? "\033[0m" : "\00300";
   } 
   /* This should never be reached.. */
   return "";

@@ -1502,7 +1502,6 @@ void show_flag(int idx, char *work, int *cnt, char *name, int state)
     sprintf(work, "  ");
   if (name && name[0]) {
     chr_state[0] = 0;
-//    strcat(chr_state, BOLD(idx));
     if (state) {
       strcat(chr_state, GREEN(idx));
       strcat(chr_state, "+");
@@ -1510,7 +1509,6 @@ void show_flag(int idx, char *work, int *cnt, char *name, int state)
       strcat(chr_state, RED(idx));
       strcat(chr_state, "-");
     }
-//    strcat(chr_state, BOLD_END(idx));
     strcat(chr_state, COLOR_END(idx));
     egg_snprintf(tmp, sizeof tmp, "%s%-17s", chr_state, name);
     strcat(work, tmp);
