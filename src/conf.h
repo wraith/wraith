@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include "types.h"
+#include "eggdrop.h"
 
 
 typedef struct conf_bot_b {
@@ -55,7 +56,6 @@ int killbot(char *);
 void confedit(char *);
 #endif /* S_CONFEDIT */
 pid_t checkpid(char *, conf_bot *);
-void showconf(int);
 void init_conf();
 void free_conf();
 int readconf(char *, int);
@@ -63,4 +63,5 @@ int parseconf();
 int writeconf(char *, FILE *, int);
 void fillconf(conf_t *);
 
+extern char		cfile[DIRMAX];
 #endif /* !_CONF_H */

@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <signal.h>
 
+char cfile[DIRMAX] = "";
 conf_t conf;                    /* global conf struct */
 conf_t conffile;                /* just some config options only avail during loading */
 
@@ -93,7 +94,6 @@ swap_uids_back()
 {
   return (setegid(save_egid) || seteuid(save_euid)) ? -1 : 0;
 }
-
 
 void
 confedit(char *cfile)
@@ -347,35 +347,6 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
   bot->u = NULL;
   bot->pid = checkpid(nick, bot);
-}
-
-
-void
-showconf(int idx)
-{
-  conf_bot *bot = NULL;
-
-#ifndef CYGWIN_HACKS
-  dprintf(idx, "uid      : %d\n", conffile.uid);
-  dprintf(idx, "uname    : %s\n", conffile.uname);
-  dprintf(idx, "username : %s\n", conffile.username);
-  dprintf(idx, "homedir  : %s\n", conffile.homedir);
-  dprintf(idx, "binpath  : %s\n", conffile.binpath);
-  dprintf(idx, "binname  : %s\n", conffile.binname);
-  dprintf(idx, "portmin  : %d\n", conffile.portmin);
-  dprintf(idx, "portmax  : %d\n", conffile.portmax);
-  dprintf(idx, "pscloak  : %d\n", conffile.pscloak);
-  dprintf(idx, "autocron : %d\n", conffile.autocron);
-  dprintf(idx, "autouname: %d\n", conffile.autouname);
-#endif /* !CYGWIN_HACKS */
-  for (bot = conffile.bots; bot && bot->nick; bot = bot->next)
-    dprintf(idx, "%s IP: %s HOST: %s IP6: %s HOST6: %s PID: %d\n",
-             bot->nick, 
-             bot->ip ? bot->ip : "",
-             bot->host ? bot->host : "",
-             bot->ip6 ? bot->ip6 : "", 
-             bot->host6 ? bot->host6 : "", 
-             bot->pid);
 }
 
 void

@@ -1843,6 +1843,7 @@ static void cmd_sha1(struct userrec *u, int idx, char *par)
 static void cmd_conf(struct userrec *u, int idx, char *par)
 {
   char *cmd = NULL;
+  int save = 0;
 
   if (!localhub) {
     dprintf(idx, "Please use '%s%s%s' for this login/shell.\n", RED(idx), conf.localhub, COLOR_END(idx));
@@ -1875,7 +1876,54 @@ static void cmd_conf(struct userrec *u, int idx, char *par)
                     bot->host6 ? bot->host6 : "",
                     bot->pid);
     }
+#ifndef CYGWIN_HACKS
+  } else if (!egg_strcasecmp(cmd, "set")) {
+    char *what = NULL;
+    int show = 1, set = 0;
+
+    if (par[0]) {       
+      what = newsplit(&par);
+
+      if (par[0] && what) { /* set */
+        set++;
+        save = 1;
+//        if (!egg_strcasecmp(what, "uid"))            conffile.uid = atoi(par);
+//        else if (!egg_strcasecmp(what, "uname"))     str_redup(&conffile.uname, par);
+//        else if (!egg_strcasecmp(what, "username"))  str_redup(&conffile.username, par);
+        if (!egg_strcasecmp(what, "homedir"))   str_redup(&conffile.homedir, par);
+        else if (!egg_strcasecmp(what, "binpath"))   str_redup(&conffile.binpath, par);
+        else if (!egg_strcasecmp(what, "binname"))   str_redup(&conffile.binname, par);
+        else if (!egg_strcasecmp(what, "portmin"))   conffile.portmin = atoi(par);
+        else if (!egg_strcasecmp(what, "portmax"))   conffile.portmax = atoi(par);
+        else if (!egg_strcasecmp(what, "pscloak"))   conffile.pscloak = atoi(par);
+        else if (!egg_strcasecmp(what, "autocron"))  conffile.autocron = atoi(par);
+        else if (!egg_strcasecmp(what, "autouname")) conffile.autouname = atoi(par);
+        else { 
+          set--;
+          save = 0;
+          dprintf(idx, "Unknown option '%s'\n", par);
+        }
+      }
+    }
+    if (show) {
+      char *ss = set ? "Set: " : "";
+      
+//      if (!what || !egg_strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conffile.uid);
+//      if (!what || !egg_strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conffile.uname);
+//      if (!what || !egg_strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conffile.username);
+      if (!what || !egg_strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conffile.homedir);
+      if (!what || !egg_strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conffile.binpath);
+      if (!what || !egg_strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conffile.binname);
+      if (!what || !egg_strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conffile.portmin);
+      if (!what || !egg_strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conffile.portmax);
+      if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spsclaok: %d\n", ss, conffile.pscloak);
+      if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conffile.autocron);
+      if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conffile.autouname);
+    }
+#endif /* !CYGWIN_HACKS */
   }
+  if (save)
+    writeconf(cfile, NULL, CONF_ENC);
   /* showconf(idx); */
 }
 
@@ -3136,7 +3184,7 @@ static void cmd_nopass(struct userrec *u, int idx, char *par)
   struct userrec *cu = NULL;
   char *users = NULL;
 
-  users = malloc(1);
+  users = calloc(1, 1);
 
   putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
 

@@ -281,7 +281,7 @@ share_chattr(int idx, char *par)
           noshare = 0;
           build_flags(s, &fr, 0);
           if (!(dcc[idx].status & STAT_GETTING))
-            putlog(LOG_CMDS, "*", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
+            putlog(LOG_CMDS, "@", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
 #ifdef LEAF
           recheck_channel(cst, 0);
 #endif /* LEAF */
