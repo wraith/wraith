@@ -32,10 +32,10 @@ void core_binds_init()
         BT_bot = bind_table_add("bot", 3, "sss", MATCH_EXACT, 0);
         BT_chat = bind_table_add("chat", 3, "sis", MATCH_MASK, BIND_STACKABLE | BIND_BREAKABLE);
         BT_chjn = bind_table_add("chjn", 6, "ssisis", MATCH_MASK, BIND_STACKABLE);
-        BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
-        BT_chof = bind_table_add("chof", 2, "si", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+        BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
+        BT_chof = bind_table_add("chof", 2, "si", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
         BT_chpt = bind_table_add("chpt", 4, "ssii", MATCH_MASK, BIND_STACKABLE);
-        BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_PARTIAL, BIND_USE_ATTR);
+        BT_dcc = bind_table_add("dcc", 3, "Uis", MATCH_PARTIAL | MATCH_FLAGS, 0);
         add_builtins("dcc", C_dcc);
         BT_disc = bind_table_add("disc", 1, "s", MATCH_MASK, BIND_STACKABLE);
         BT_link = bind_table_add("link", 2, "ss", MATCH_MASK, BIND_STACKABLE);

@@ -26,6 +26,7 @@ static bind_table_t *bind_table_list_head = NULL;
 /* Garbage collection stuff. */
 static int check_bind_executing = 0;
 static int already_scheduled = 0;
+/* main routine for bind checks */
 static void bind_table_really_del(bind_table_t *table);
 static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry);
 
@@ -126,8 +127,8 @@ static void bind_table_really_del(bind_table_t *table)
 	free(table->name);
 	for (entry = table->entries; entry; entry = next) {
 		next = entry->next;
-		free(entry->function_name);
-		free(entry->mask);
+		if (entry->function_name) free(entry->function_name);
+		if (entry->mask) free(entry->mask);
 		free(entry);
 	}
 	free(table);
@@ -157,10 +158,20 @@ bind_table_t *bind_table_lookup_or_fake(const char *name)
 bind_entry_t *bind_entry_lookup(bind_table_t *table, int id, const char *mask, const char *function_name)
 {
 	bind_entry_t *entry = NULL;
+	int hit;
 
 	for (entry = table->entries; entry; entry = entry->next) {
 		if (entry->flags & BIND_DELETED) continue;
-		if (entry->id == id || (!strcmp(entry->mask, mask) && !strcmp(entry->function_name, function_name))) break;
+		if (entry->id >= 0) {
+			if (entry->id == id) break;
+		}
+		else {
+			hit = 0;
+			if (entry->mask && !strcmp(entry->mask, mask)) hit++;
+			else if (!entry->mask) hit++;
+			if (entry->function_name && !strcmp(entry->function_name, function_name)) hit++;
+			if (hit == 2) break;
+		}
 	}
 	return(entry);
 }
@@ -187,8 +198,8 @@ static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry)
 	if (entry->next) entry->next->prev = entry->prev;
 	if (entry->prev) entry->prev->next = entry->next;
 	else table->entries = entry->next;
-	free(entry->function_name);
-	free(entry->mask);
+	if (entry->function_name) free(entry->function_name);
+	if (entry->mask) free(entry->mask);
 	memset(entry, 0, sizeof(*entry));
 	free(entry);
 }
@@ -202,10 +213,12 @@ int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char 
 	if (!entry) return(-1);
 
 	/* Modify it. */
-	free(entry->mask);
-	entry->mask = strdup(newmask);
-	entry->user_flags.match = FR_GLOBAL | FR_CHAN;
-	break_down_flags(newflags, &(entry->user_flags), NULL);
+	if (newflags) {
+          entry->user_flags.match = FR_GLOBAL | FR_CHAN;
+          break_down_flags(newflags, &entry->user_flags, NULL);
+        }
+/*	if (newflags) flag_from_str(&entry->user_flags, newflags); */
+	if (newmask) str_redup(&entry->mask, newmask);
 
 	return(0);
 }
@@ -223,6 +236,19 @@ int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char 
 }
 */
 
+/* Overwrite a bind entry's callback and client_data. */
+int bind_entry_overwrite(bind_table_t *table, int id, const char *mask, const char *function_name, Function callback, void *client_data)
+{
+	bind_entry_t *entry = NULL;
+
+	entry = bind_entry_lookup(table, id, mask, function_name);
+	if (!entry) return(-1);
+
+	entry->callback = callback;
+	entry->client_data = client_data;
+	return(0);
+}
+
 int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
 	bind_entry_t *entry = NULL, *old_entry = NULL;
@@ -239,8 +265,8 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 		}
 		else {
 			entry = old_entry;
-			free(entry->function_name);
-			free(entry->mask);
+			if (entry->function_name) free(entry->function_name);
+			if (entry->mask) free(entry->mask);
 		}
 	}
 	else {
@@ -253,14 +279,16 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 		entry->prev = old_entry;
 	}
 
-	entry->mask = strdup(mask);
-	entry->function_name = strdup(function_name);
+/*	if (flags) flag_from_str(&entry->user_flags, flags); */
+	if (flags) {
+		entry->user_flags.match = FR_GLOBAL | FR_CHAN;
+		break_down_flags(flags, &entry->user_flags, NULL);
+	}
+	if (mask) entry->mask = strdup(mask);
+	if (function_name) entry->function_name = strdup(function_name);
 	entry->callback = callback;
 	entry->client_data = client_data;
 	entry->flags = bind_flags;
-
-	entry->user_flags.match = FR_GLOBAL | FR_CHAN;
-	break_down_flags(flags, &(entry->user_flags), NULL);
 
 	return(0);
 }
@@ -269,9 +297,21 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 {
 	bind_entry_t *prev = NULL;
+	int retval;
+
 	ContextNote(entry->mask);
 	/* Give this entry a hit. */
 	entry->nhits++;
+
+	/* Does the callback want client data? */
+	if (entry->flags & BIND_WANTS_CD) {
+		*al = entry->client_data;
+	}
+	else al++;
+
+	retval = entry->callback(al[0], al[1], al[2], al[3], al[4], al[5], al[6], al[7], al[8], al[9]);
+
+	if (table->match_type & (MATCH_MASK | MATCH_PARTIAL | MATCH_NONE)) return(retval);
 
 	/* Search for the last entry that isn't deleted. */
 	for (prev = entry->prev; prev; prev = prev->prev) {
@@ -300,26 +340,21 @@ static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 		if (entry->next) entry->next->prev = entry;
 	}
 
-	/* Does the callback want client data? */
-	if (entry->flags & BIND_WANTS_CD) {
-		*al = entry->client_data;
-	}
-	else al++;
-
-	return entry->callback(al[0], al[1], al[2], al[3], al[4], al[5], al[6], al[7], al[8], al[9]);
+	return(retval);
 }		
 
 int check_bind(bind_table_t *table, const char *match, struct flag_record *flags, ...)
 {
 	void *args[11] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-	bind_entry_t *entry = NULL, *next = NULL;
+	bind_entry_t *entry = NULL, *next = NULL, *winner = NULL;
 	int i, cmp, retval;
+	int tie = 0, matchlen = 0, masklen = 0;
 	va_list ap;
 
 	Assert(table);
 	check_bind_executing++;
 
-	va_start(ap, flags);
+        va_start(ap, flags);
 	for (i = 1; i <= table->nargs; i++) {
 		args[i] = va_arg(ap, void *);
 	}
@@ -328,42 +363,42 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 	/* Default return value is 0 */
 	retval = 0;
 
-	/* If it's a partial bind, we have to find the closest match. */
-	if (table->match_type & MATCH_PARTIAL) {
-		int matchlen, masklen, tie;
-		bind_entry_t *winner;
-
-		matchlen = strlen(match);
-		tie = 0;
-		winner = NULL;
-		for (entry = table->entries; entry; entry = entry->next) {
-			if (entry->flags & BIND_DELETED) continue;
-			if (table->flags & BIND_USE_ATTR) {
-				if (table->flags & BIND_STRICT_ATTR) cmp = flagrec_eq(&entry->user_flags, flags);
-				else cmp = flagrec_ok(&entry->user_flags, flags);
-				if (!cmp) continue;
-			}
-			masklen = strlen(entry->mask);
-			if (!egg_strncasecmp(match, entry->mask, masklen < matchlen ? masklen : matchlen)) {
-				winner = entry;
-				if (masklen == matchlen) break;
-				else if (tie) return(-1);
-				else tie = 1;
-			}
-		}
-		if (winner) retval = bind_entry_exec(table, winner, args);
-/* FIXME: ambiguous cmd... */
-		else retval = -1;
-		check_bind_executing--;
-		return(retval);
-	}
+	/* Check if we're searching for a partial match. */
+	if (table->match_type & MATCH_PARTIAL) matchlen = strlen(match);
 
 	for (entry = table->entries; entry; entry = next) {
 		next = entry->next;
 		if (entry->flags & BIND_DELETED) continue;
 
+		/* Check flags. */
+		if (table->match_type & MATCH_FLAGS) {
+/*wtf?			if (!(entry->user_flags.builtin | entry->user_flags.udef)) cmp = 1;
+			else if (!user_flags) cmp = 0;
+			else 
+*/
+			if (entry->flags & MATCH_FLAGS_AND) cmp = flagrec_eq(&entry->user_flags, flags);
+			else cmp = flagrec_ok(&entry->user_flags, flags);
+			if (!cmp) continue;
+		}
+
+
 		if (table->match_type & MATCH_MASK) {
 			cmp = !wild_match_per((unsigned char *)entry->mask, (unsigned char *)match);
+		}
+		else if (table->match_type & MATCH_NONE) {
+			cmp = 0;
+		}
+		else if (table->match_type & MATCH_PARTIAL) {
+			cmp = 1;
+			masklen = strlen(entry->mask);
+			if (!egg_strncasecmp(match, entry->mask, masklen < matchlen ? masklen : matchlen)) {
+				winner = entry;
+				if (masklen == matchlen) {
+					tie = 1;
+					break;
+				}
+				else tie++;
+			}
 		}
 		else {
 			if (table->match_type & MATCH_CASE) cmp = strcmp(entry->mask, match);
@@ -371,18 +406,12 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 		}
 		if (cmp) continue; /* Doesn't match. */
 
-		/* Check flags. */
-		if (table->flags & BIND_USE_ATTR) {
-			if (table->flags & BIND_STRICT_ATTR) cmp = flagrec_eq(&entry->user_flags, flags);
-			else cmp = flagrec_ok(&entry->user_flags, flags);
-			if (!cmp) continue;
-		}
-
 		retval = bind_entry_exec(table, entry, args);
-		if ((table->flags & BIND_BREAKABLE) && (retval & BIND_RET_BREAK)) {
-			check_bind_executing--;
-			return(retval);
-		}
+		if ((table->flags & BIND_BREAKABLE) && (retval & BIND_RET_BREAK)) break;
+	}
+	/* If it's a partial match table, see if we have 1 winner. */
+	if (winner && tie == 1) {
+		retval = bind_entry_exec(table, winner, args);
 	}
 	check_bind_executing--;
 	return(retval);

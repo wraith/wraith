@@ -1516,13 +1516,13 @@ void server_init()
   stack_limit = 4;
 
 #ifdef S_AUTHCMDS
-  BT_msgc = bind_table_add("msgc", 5, "ssUss", 0, BIND_USE_ATTR); 
+  BT_msgc = bind_table_add("msgc", 5, "ssUss", MATCH_FLAGS, 0); 
 #endif /* S_AUTHCMDS */
-  BT_msg = bind_table_add("msg", 4, "ssUs", 0, BIND_USE_ATTR);
+  BT_msg = bind_table_add("msg", 4, "ssUs", MATCH_FLAGS, 0);
   BT_raw = bind_table_add("raw", 2, "ss", MATCH_MASK, BIND_STACKABLE);
 
-  BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
-  BT_ctcp = bind_table_add("ctcp", 6, "ssUsss", MATCH_MASK, BIND_USE_ATTR | BIND_STACKABLE);
+  BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
+  BT_ctcp = bind_table_add("ctcp", 6, "ssUsss", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
 
   add_builtins("raw", my_raw_binds);
   add_builtins("dcc", C_dcc_serv);
