@@ -2859,6 +2859,53 @@ static void cmd_echo(int idx, char *par)
   console_dostore(idx);
 }
 
+static void cmd_login(int idx, char *par)
+{
+  char *which = NULL;
+  int set = -1, whichbit = 0;
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: login <banner|bots|channels|whom> [on/off]\n");
+    return;
+  }
+
+  which = newsplit(&par);
+
+  if (!egg_strcasecmp(which, "banner"))
+    whichbit = STAT_BANNER;
+  else if (!egg_strcasecmp(which, "bots"))
+    whichbit = STAT_BOTS;
+  else if (!egg_strcasecmp(which, "channels"))
+    whichbit = STAT_CHANNELS;
+  else if (!egg_strcasecmp(which, "whom"))
+    whichbit = STAT_WHOM;
+  else {
+    dprintf(idx, "Unrecognized option '$b%s$b'\n", which);
+    return;
+  }
+
+  if (!par[0]) {
+    dprintf(idx, "'%s' is currently: $b%s$b\n", which, (dcc[idx].status & whichbit) ? "on" : "off");
+    return;
+  }
+
+  if (!egg_strcasecmp(par, "on"))
+    set = 1;
+  else if (!egg_strcasecmp(par, "off"))
+    set = 0;
+  else {
+    dprintf(idx, "Unrecognized setting '$b%s$b'\n", par);
+    return;
+  }
+
+  if (set)
+    dcc[idx].status |= whichbit;
+  else if (!set)
+    dcc[idx].status &= ~whichbit;
+  
+  console_dostore(idx);
+}
+
 static void cmd_color(int idx, char *par)
 {
   int ansi = coloridx(idx);
@@ -4345,6 +4392,7 @@ cmd_t C_dcc[] =
   {"timers",		"a",	(Function) cmd_timers,		NULL},
   {"die",		"n",	(Function) cmd_die,		NULL},
   {"echo",		"",	(Function) cmd_echo,		NULL},
+  {"login",		"",	(Function) cmd_login,		NULL},
   {"fixcodes",		"",	(Function) cmd_fixcodes,	NULL},
   {"handle",		"",	(Function) cmd_handle,		NULL},
   {"nohelp",		"-|-",	(Function) cmd_nohelp,		NULL},

@@ -765,7 +765,7 @@ See also: botconfig
 ###  $bconsole$b <user> [channel] [modes]
    This is used to set the console level of another user. This can even be used
    on users who normally would not be able to set their own console mode.%{-}
-
+ 
 See also: color, echo, page, strip
 ::crontab:
 ###  $bcrontab$b <status|delete|show|new> [interval]
@@ -1154,6 +1154,13 @@ See also: netlag
    recommended for use.
  
 See also: unlink, newleaf%{+a}, -bot%{-}
+::login
+###  $blogin$b <banner|bots|channels|whom> [on/off]
+   Sets various login options.
+   Not specifying on/off will display what the setting is the for the specified
+   login entry.
+ 
+See also: echo, color, console, page, strip, whois
 ::match
 ###  $bmatch$b <attr> [channel] [[start] limit]
    This displays all user records with the attributes requested.
