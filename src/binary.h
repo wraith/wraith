@@ -10,5 +10,5 @@ extern int checked_bin_buf;
 
 void check_sum(const char *, const char *);
 void write_settings(const char *, int);
-void conf_to_bin(conf_t *);
+void conf_to_bin(conf_t *, bool);
 #endif /* !_BINARY_H */

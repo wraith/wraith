@@ -238,7 +238,7 @@ confedit()
     fatal("Error reading new config file", 0);
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   unlink(tmpconf.file);
-  conf_to_bin(&conffile);       /* will exit */
+  conf_to_bin(&conffile, 0);       /* will exit */
   exit(0);                      /* never reached */
 
 fatal:

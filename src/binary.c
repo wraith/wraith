@@ -347,7 +347,7 @@ clear_settings(void)
   memset(&settings.bots, 0, sizeof(settings_t) - 3467);
 }
 
-void conf_to_bin(conf_t *in)
+void conf_to_bin(conf_t *in, bool move)
 {
   conf_bot *bot = NULL;
   char *newbin = NULL;
@@ -377,7 +377,10 @@ void conf_to_bin(conf_t *in)
                            bot->net.ip6 ? bot->net.ip6 : "");
     }
 
-  newbin = move_bin(in->binpath, in->binname, 0);
+  if (move)
+    newbin = move_bin(in->binpath, in->binname, 0);
+  else
+    newbin = binname;
   /* tellconfig(&settings); */
   write_settings(newbin, 1);
 }

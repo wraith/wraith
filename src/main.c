@@ -297,7 +297,7 @@ static void dtx_arg(int argc, char *argv[])
       case '4':
         readconf(optarg, CONF_ENC);
         parseconf(0);
-        conf_to_bin(&conffile);		/* this will exit() in write_settings() */
+        conf_to_bin(&conffile, 1);		/* this will exit() in write_settings() */
 #ifdef LEAF
       case 'B':
         localhub = 0;
