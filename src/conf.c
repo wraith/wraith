@@ -815,7 +815,7 @@ fill_conf_bot()
   } else
     mynick = strdup(origbotname);
 
-  for (me = conf.bots; me && me->nick; me = bot->next)
+  for (me = conf.bots; me && me->nick; me = me->next)
     if (!egg_strcasecmp(me->nick, mynick))
       break;
 
@@ -824,10 +824,8 @@ fill_conf_bot()
 
   free(mynick);
   /* for future, we may just want to make this a pointer to ->bots if we do an emech style currentbot-> */
-  if (bot) {
-    conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
-    conf_bot_dup(conf.bot, bot);
-  }
+  conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+  conf_bot_dup(conf.bot, me);
 }
 
 void
