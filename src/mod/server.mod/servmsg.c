@@ -465,8 +465,10 @@ static int gotmsg(char *from, char *msg)
 			  dprintf(DP_HELP, "NOTICE %s :%s\n",
 				nick, DCC_NOSTRANGERS);
 		      }
-		      putlog(LOG_MISC, "*", "%s: %s",
-			   DCC_REFUSED, from);
+                      if (!ischanhub())
+                        putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
+                      else
+                        putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSED, from);
 		    } else
 		      putlog(LOG_MISC, "*", "Refused DCC %s: %s",
 			   code, from);
