@@ -41,7 +41,8 @@
 
 struct dcc_t *dcc = NULL;       /* DCC list                                */
 time_t timesync = 0;
-int dcc_total = 0;              /* Total dcc's                             */
+int dcc_total = 0;              /* size of dcc table                             */
+int dccn = 0;			/* actual number of dcc entries */
 
 static time_t password_timeout = 20;       /* Time to wait for a password from a user */
 static time_t auth_timeout = 40;
@@ -1678,25 +1679,6 @@ struct dcc_table DCC_SOCKET = {
   NULL,
   NULL,
   display_dcc_socket,
-  NULL,
-  NULL,
-  NULL
-};
-
-static void
-display_dcc_lost(int idx, char *buf)
-{
-  strcpy(buf, "lost");
-}
-
-struct dcc_table DCC_LOST = {
-  "LOST",
-  0,
-  NULL,
-  dcc_socket,
-  NULL,
-  NULL,
-  display_dcc_lost,
   NULL,
   NULL,
   NULL

@@ -178,7 +178,7 @@ void fatal(const char *s, int recoverable)
 static void check_expired_dcc()
 {
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && (dcc[i].type != &DCC_LOST) && dcc[i].type->timeout_val &&
+    if (dcc[i].type && dcc[i].type->timeout_val &&
 	((now - dcc[i].timeval) > *(dcc[i].type->timeout_val))) {
       if (dcc[i].type->timeout)
 	dcc[i].type->timeout(i);
@@ -932,9 +932,6 @@ printf("out: %s\n", out);
     /* Only do this every so often. */
     if (!socket_cleanup) {
       socket_cleanup = 5;
-
-      /* Remove dead dcc entries. */
-      dcc_remove_lost();
 
       /* Check for server or dcc activity. */
       dequeue_sockets();		

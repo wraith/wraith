@@ -213,11 +213,11 @@ struct dupwait_info {
 #define TLN_ECHO_C      "\001"
 
 extern struct dcc_t 		*dcc;
-extern int 			dcc_total;
+extern int 			dcc_total, dccn;
 extern time_t			timesync;
 extern char			network[];
 
-extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_LOST, DCC_BOT_NEW,
+extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_BOT_NEW,
  DCC_RELAY, DCC_RELAYING, DCC_FORK_RELAY, DCC_PRE_RELAY, DCC_CHAT_PASS,
  DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,
  DCC_TELNET, DCC_IDENT, DCC_IDENTWAIT, DCC_DNSWAIT, DCC_IDENTD, DCC_IDENTD_CONNECT;

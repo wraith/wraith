@@ -358,58 +358,13 @@ void lostdcc(int n)
   egg_bzero(&dcc[n], sizeof(struct dcc_t));
 
   dcc[n].sock = -1;
-  dcc[n].type = &DCC_LOST;
-}
+  dcc[n].type = NULL;
 
-/* Remove entry from dcc list. Think twice before using this function,
- * because it invalidates any variables that point to a specific dcc
- * entry!
- *
- * Note: The entry will be deconstructed if it was not deconstructed
- *       already. This case should normally not occur.
- */
-static void removedcc(int n)
-{
-  sdprintf("removedcc(%d)", n);
-  if (dcc[n].type && dcc[n].type->kill)
-    dcc[n].type->kill(n, dcc[n].u.other);
-  else if (dcc[n].u.other)
-    free(dcc[n].u.other);
+  dccn--;
 
-  dcc_total--;
-
-  if (n < dcc_total) {
-    egg_memcpy(&dcc[n], &dcc[dcc_total], sizeof(struct dcc_t));
-    sdprintf("idx: %d -> %d", dcc_total, n);
-  } else
-    egg_bzero(&dcc[n], sizeof(struct dcc_t)); /* drummer */
-}
-
-/* Clean up sockets that were just left for dead.
- */
-void dcc_remove_lost(void)
-{
-  for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_LOST) {
-      dcc[i].type = NULL;
-      dcc[i].sock = -1;
-      removedcc(i);
-      i--;
-    }
-  }
-#ifdef LEAF
-  /* check if any of our idx's moved. */
-  if (serv >= 0 && (servidx >= 0 && servidx < dcc_total && dcc[servidx].sock != serv) || (servidx >= dcc_total)) {
-    sdprintf("changing serv: %d servidx: %d to ...", serv, servidx);
-    servidx = findanyidx(serv);		
-    sdprintf("...      serv: %d servidx: %d", serv, servidx);
-  }
-#endif /* LEAF */
-  if (dns_sock >= 0 && (dns_idx >= 0 && dns_idx < dcc_total && dcc[dns_idx].sock != dns_sock) || (dns_idx >= dcc_total)) {
-    sdprintf("changing dns_sock: %d dns_idx: %d to ...", dns_sock, dns_idx);
-    dns_idx = findanyidx(dns_sock);	
-    sdprintf("...      dns_sock: %d dns_idx: %d", dns_sock, dns_idx);
-  }
+  /* last entry! make table smaller :) */
+  if (n == (dcc_total - 1))
+    dcc_total--;
 }
 
 /* Show list of current dcc's to a dcc-chatter
@@ -435,7 +390,8 @@ void tell_dcc(int idx)
                         "----------------------------------------", "----");
 
   egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5ud %%-%us %%-40s %%s\n", nicklen);
-
+ 
+  dprintf(idx, "dccn: %d, dcc_total: %d\n", dccn, dcc_total);
 #ifdef LEAF
   dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
 #endif /* LEAF */
@@ -452,8 +408,6 @@ void tell_dcc(int idx)
       sprintf(other, "?:%lX  !! ERROR !!", (long) dcc[i].type);
       break;
     }
-    if (dcc[i].type == &DCC_LOST)
-      dprintf(idx, "LOST:\n");
     dprintf(idx, format, dcc[i].sock, i, dcc[i].addr, dcc[i].port, dcc[i].nick, dcc[i].host + j, other);
    }
   }
@@ -537,18 +491,32 @@ void flush_lines(int idx, struct chat_info *ci)
 
 int new_dcc(struct dcc_table *type, int xtra_size)
 {
-  int i = dcc_total;
-
   if (dcc_total == max_dcc)
     return -1;
-  dcc_total++;
+
+  int i = 0;
+
+  /* Find the first gap */
+  for (i = 0; i <= dcc_total; i++)
+    if (!dcc[i].type)
+      break;
+
+  /* we managed to get to the end of the list! */
+  if (i == dcc_total) {
+    i = dcc_total;
+    dcc_total++;
+  }
+   
+  dccn++;
+
+  /* empty out the memory for the entry */
   egg_bzero((char *) &dcc[i], sizeof(struct dcc_t));
 
   dcc[i].type = type;
   if (xtra_size)
     dcc[i].u.other = (char *) calloc(1, xtra_size);
 
-  sdprintf("new_dcc: %d (dcc_total: %d)", i, dcc_total);
+  sdprintf("new_dcc: %d (dccn/dcc_total: %d/%d)", i, dccn, dcc_total);
   return i;
 }
 
