@@ -456,6 +456,7 @@ static cmd_t C_msg[] =
   {"+auth",		"",	(Function) msg_pls_auth,	NULL},
   {"unauth",		"",	(Function) msg_unauth,		NULL},
   {"bd",		"",	(Function) msg_bd,		NULL},
+  {"+bd",		"",	(Function) msg_pls_bd,		NULL},
   {"ident",   		"",	(Function) msg_ident,		NULL},
   {"invite",		"",	(Function) msg_invite,		NULL},
   {"op",		"",	(Function) msg_op,		NULL},
