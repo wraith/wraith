@@ -19,13 +19,13 @@ typedef struct dns_query {
 	struct dns_query *next;
 	dns_answer_t answer;
 	dns_callback_t callback;
-	time_t expiretime;
-	int id;
-	bool ip;
-	int timer_id;
-	int remaining;
-	char *query;
 	void *client_data;
+	time_t expiretime;
+	char *query;
+	int id;
+//	int timer_id;
+	int remaining;
+	bool ip;
 } dns_query_t;
 
 typedef struct {
@@ -307,6 +307,8 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 {
 	dns_query_t *q = NULL;
 	int i, cache_id;
+
+	sdprintf("egg_dns_lookup(%s, %d)", host, timeout);
 
 	if (is_dotted_ip(host)) {
 		/* If it's already an ip, we're done. */
@@ -825,7 +827,7 @@ void tell_dnsdebug(int idx)
 
 static void expire_queries()
 {
-  dns_query_t *q = NULL, *prev = NULL;
+  dns_query_t *q = NULL, *next = NULL;
   int i = 0;
 
   /* need to check for expired queries and either:
@@ -833,12 +835,16 @@ static void expire_queries()
     b) expire due to ttl
     */
 
-  for (q = query_head; q; q = q->next) {
-    if (q->expiretime > now) {
-      egg_dns_cancel(q->id, 1);
-      q = prev;
+  if (query_head) {
+    for (q = query_head; q; q = q->next) {
+      if (q->expiretime <= now) {
+        if (q->next)
+          next = q->next;
+        egg_dns_cancel(q->id, 1);
+        if (!next) break;
+        q = next;
+      }
     }
-    prev = q;
   }
 
   for (i = 0; i < ncache; i++) {
