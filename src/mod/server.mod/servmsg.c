@@ -194,6 +194,7 @@ static int got001(char *from, char *msg)
 
   /* Ok...param #1 of 001 = what server thinks my nick is */
   server_online = now;
+  checked_hostmask = 0;
   fixcolon(msg);
   strncpyz(botname, msg, NICKLEN);
   altnick_char = 0;

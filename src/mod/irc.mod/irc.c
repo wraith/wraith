@@ -444,6 +444,7 @@ void check_hostmask()
   struct userrec *u = get_user_by_handle(userlist, botnetnick);
   struct list_type *q;
 
+  checked_hostmask = 1;
   if (!server_online || !botuserhost[0])
     return;
   tmp = botuserhost;
@@ -473,6 +474,14 @@ static void request_op(struct chanset_t *chan)
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
   if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan))))
     return;
+
+  if (chan->channel.no_op) {
+    if (chan->channel.no_op > now) 			/* dont op until this time has passed */
+      return;
+    else 
+      chan->channel.no_op = 0;
+  }
+
   chan->channel.do_opreq = 0;
   /* check server lag */
   if (server_lag > LAG_THRESHOLD) {
@@ -494,39 +503,31 @@ static void request_op(struct chanset_t *chan)
     putlog(LOG_GETIN, "*", STR("Delaying opreq for %s - Maximum of %d:%d reached"), chan->dname, OPREQ_COUNT, OPREQ_SECONDS);
     return;
   }
-  check_hostmask();		/* check, and update hostmask */
-  i = 0;
+  if (!checked_hostmask)
+    check_hostmask();		/* check, and update hostmask */
   ml = chan->channel.member;
   myserv[0] = 0;
-  while ((i < MAX_BOTS) && (ml) && ml->nick[0]) {
+  for (i = 0; ((i < MAX_BOTS) && (ml) && (ml->nick[0])); ml = ml->next) {
     /* If bot, linked, global op & !split & chanop & (chan is reserver | bot isn't +a) -> 
        add to temp list */
     if ((i < MAX_BOTS) && (ml->user)) {
       get_user_flagrec(ml->user, &fr, NULL);
-      if (bot_hublevel(ml->user) == 999 && glob_bot(fr) && glob_op(fr)
-	  && !glob_deop(fr) && chan_hasop(ml) && !chan_issplit(ml)
-	  && nextbot(ml->user->handle) >= 0)
+      if (bot_hublevel(ml->user) == 999 && glob_bot(fr) && chk_op(fr, chan) &&
+          chan_hasop(ml) && !chan_issplit(ml) && nextbot(ml->user->handle) >= 0)
 	botops[i++] = ml;
     }
     if (!strcmp(ml->nick, botname))
       if (ml->server)
 	strcpy(myserv, ml->server);
-    ml = ml->next;
   }
   if (!i) {
-    putlog(LOG_GETIN, "@", STR("No one to ask for ops on %s"), chan->dname);
+    putlog(LOG_GETIN, "*", STR("No one to ask for ops on %s"), chan->dname);
     return;
-  }
-  if (chan->channel.no_op) {
-    if (chan->channel.no_op > now) 			/* dont op until this time has passed */
-      return;
-    else 
-      chan->channel.no_op = 0;
   }
 
   /* first scan for bots on my server, ask first found for ops */
   cnt = OP_BOTS;
-  sprintf(s, STR("gi o %s %s"), chan->dname, botname);
+  sprintf(s, "gi o %s %s", chan->dname, botname);
   l = nmalloc(cnt * 50);
   l[0] = 0;
   for (i2 = 0; i2 < i; i2++) {
@@ -574,21 +575,18 @@ static void request_op(struct chanset_t *chan)
 
 static void request_in(struct chanset_t *chan)
 {
-  char s[255],
-   *l;
+  char s[255], *l;
   int i = 0;
-  int cnt,
-    n;
-  struct userrec *botops[MAX_BOTS];
-  struct userrec *user;
+  int cnt, n;
+  struct userrec *botops[MAX_BOTS], *user;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
 
   for (user = userlist; user && (i < MAX_BOTS); user = user->next) {
     get_user_flagrec(user, &fr, NULL);
-    if (bot_hublevel(user) == 999 && glob_bot(fr) && glob_op(fr)
+    if (bot_hublevel(user) == 999 && glob_bot(fr) && chk_op(fr, chan)
 #ifdef G_BACKUP
 	&& (!glob_backupbot(fr) || channel_backup(chan))
-#endif
+#endif/* G_BACKUP */
 	&& nextbot(user->handle) >= 0)
       botops[i++] = user;
   }
@@ -596,16 +594,17 @@ static void request_in(struct chanset_t *chan)
     putlog(LOG_GETIN, "*", STR("No bots linked, can't request help to join %s"), chan->dname);
     return;
   }
-  check_hostmask();		/* check, and update hostmask */
+  if (!checked_hostmask)
+    check_hostmask();		/* check, and update hostmask */
   cnt = IN_BOTS;
-  sprintf(s, STR("gi i %s %s %s!%s %s %s"), chan->dname, botname, botname, botuserhost, myipstr(4) ? myipstr(4) : "."
+  sprintf(s, "gi i %s %s %s!%s %s %s", chan->dname, botname, botname, botuserhost, myipstr(4) ? myipstr(4) : "."
                                           , myipstr(6) ? myipstr(6) : ".");
   l = nmalloc(cnt * 30);
   l[0] = 0;
   while (cnt) {
     n = random() % i;
     if (botops[n]) {
-      botnet_send_zapf(nextbot(botops[n]->handle), botnetnick, botops[n]->handle, s);
+      putbot(botops[n]->handle, s);
       if (l[0]) {
 	strcat(l, ", ");
 	strcat(l, botops[n]->handle);

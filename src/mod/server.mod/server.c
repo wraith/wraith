@@ -12,6 +12,7 @@
 
 static Function *global = NULL;
 extern struct cfg_entry CFG_OPTIMESLACK;
+static int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 static int ctcp_mode;
 static int serv;		/* sock # of server currently */
 static int strict_host;		/* strict masking of hosts ? */
@@ -1674,7 +1675,7 @@ static Function server_table[] =
   (Function) 0,	
   (Function) & nick_len,	/* int					*/
   (Function) 0,
-  (Function) 0,
+  (Function) & checked_hostmask,
   (Function) & curserv,
   (Function) cursrvname,
   (Function) botrealname,
@@ -1773,6 +1774,7 @@ char *server_start(Function *global_funcs)
   newserver[0] = 0;
   newserverport = 0;
   curserv = 999;
+  checked_hostmask = 0;
   do_nettype();
   add_cfg(&CFG_NICK);
   add_cfg(&CFG_SERVERS);
