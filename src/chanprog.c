@@ -388,8 +388,8 @@ void reaffirm_owners()
 
 void load_internal_users()
 {
-  char *p = NULL, *ln = NULL, *hand = NULL, *ip = NULL, *port = NULL, *pass = NULL;
-  char *hosts = NULL, host[UHOSTMAX] = "", buf[2048] = "", *attr = NULL;
+  char *p = NULL, *ln = NULL, *hand = NULL, *ip = NULL, *port = NULL, *pass = NULL, *q = NULL;
+  char *hosts = NULL, host[UHOSTMAX] = "", buf[2048] = "", *attr = NULL, tmp[51] = "";
   int i, hublevel = 0;
   struct bot_addr *bi = NULL;
   struct userrec *u = NULL;
@@ -406,6 +406,7 @@ void load_internal_users()
     ip = NULL;
     port = NULL;
     hosts = NULL;
+    u = NULL;
     for (i = 0; ln; i++) {
       switch (i) {
       case 0:
@@ -421,6 +422,11 @@ void load_internal_users()
         hublevel++;		/* We must increment this even if it is already added */
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
+          u = get_user_by_handle(userlist, hand);
+
+          egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);
+          set_user(&USERENTRY_ADDED, u, tmp);
+
 	  bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
 
           bi->address = strdup(ip);
@@ -432,31 +438,33 @@ void load_internal_users()
 	    bi->hublevel = 99;
 #endif /* HUB */
           bi->uplink = (char *) my_calloc(1, 1);
-	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
+	  set_user(&USERENTRY_BOTADDR, u, bi);
 	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
 	}
       default:
 	/* ln = userids for hostlist, add them all */
-	hosts = ln;
-	ln = strchr(ln, ' ');
-	if (ln)
-	  *ln++ = 0;
-	while (hosts) {
-	  egg_snprintf(host, sizeof host, "*!%s@%s", hosts, ip);
-	  set_user(&USERENTRY_HOSTS, get_user_by_handle(userlist, hand), host);
-	  hosts = ln;
-	  if (ln)
-	    ln = strchr(ln, ' ');
-	  if (ln)
-	    *ln++ = 0;
-	}
-	break;
+        hosts = ln;
+        ln = strchr(ln, ' ');
+
+        if (ln && (ln = strchr(ln, ' ')))
+	   *ln++ = 0;
+
+        if (!u)
+          u = get_user_by_handle(userlist, hand);
+
+        while (hosts) {
+          egg_snprintf(host, sizeof host, "-telnet!%s@%s", hosts, ip);
+          set_user(&USERENTRY_HOSTS, u, host);
+          hosts = ln;
+          if (ln && ((ln = strchr(ln, ' ')))
+            *ln++ = 0;
+        }
+        egg_snprintf(host, sizeof host, "-telnet!telnet@%s", ip);
+        set_user(&USERENTRY_HOSTS, u, host);
+        break;
       }
-      if (ln)
-	ln = strchr(ln, ' ');
-      if (ln) {
+      if (ln && (ln = strchr(ln, ' ')))
 	*ln++ = 0;
-      }
     }
   }
 
@@ -491,12 +499,21 @@ void load_internal_users()
 	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA, 0);
 	  u = get_user_by_handle(userlist, hand);
 	  set_user(&USERENTRY_PASS, u, pass);
+          egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);
+          set_user(&USERENTRY_ADDED, u, tmp);
 	  while (hosts) {
             char x[1024] = "";
 
-	    ln = strchr(ln, ' ');
-	    if (ln)
+	    if ((ln = strchr(ln, ' ')))
 	      *ln++ = 0;
+
+            if ((q = strchr(hosts, '!'))) {	/* skip over nick they provided ... */
+              q++;
+              if (*q == '*' || *q == '?')		/* ... and any '*' or '?' */
+                q++;
+              hosts = q;
+            }
+            
             sprintf(x, "-telnet!%s", hosts);
 	    set_user(&USERENTRY_HOSTS, u, x);
 	    hosts = ln;
@@ -504,10 +521,8 @@ void load_internal_users()
 	}
 	break;
       }
-      if (ln)
-	ln = strchr(ln, ' ');
-      if (ln)
-	*ln++ = 0;
+      if (ln && (ln = strchr(ln, ' ')))
+        *ln++ = 0;
     }
   }
 
