@@ -296,7 +296,7 @@ int getsock(int);
 #endif /* USE_IPV6 */
 int getprotocol(char *);
 char *hostnamefromip(unsigned long);
-void killsock(int);
+void real_killsock(int, const char *, int);
 int answer(int, char *, unsigned long *, unsigned short *, int);
 inline int open_listen(int *);
 #ifdef USE_IPV6

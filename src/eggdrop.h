@@ -205,6 +205,7 @@ typedef int socklen_t;
 #define nmalloc(x)	n_malloc((x),__FILE__,__LINE__)
 #define nrealloc(x,y)	n_realloc((x),(y),__FILE__,__LINE__)
 #define nfree(x)	n_free((x),__FILE__,__LINE__)
+#define killsock(x)	real_killsock((x),__FILE__,__LINE__)
 
 #ifdef DEBUG_CONTEXT
 #  define Context		eggContext(__FILE__, __LINE__, NULL)

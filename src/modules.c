@@ -64,6 +64,20 @@ void check_static(char *name, char *(*func) ())
   static_modules = p;
 }
 
+void *mod_killsock(int size, const char *modname, const char *filename, int line)
+{
+#ifdef DEBUG_MEM
+  char x[100], *p;
+
+  p = strrchr(filename, '/');
+  egg_snprintf(x, sizeof x, "%s:%s", modname, p ? p + 1 : filename);
+  x[19] = 0;
+  real_killsock(size, x, line);
+#else
+  killsock(size);
+#endif
+  return NULL;
+}
 
 
 /* The null functions */
@@ -240,7 +254,7 @@ Function global_table[] =
   (Function) new_dcc,
   (Function) lostdcc,
   (Function) getsock,
-  (Function) killsock,
+  (Function) mod_killsock,
   /* 84 - 87 */
   (Function) open_listen,
   (Function) open_telnet_dcc,

@@ -42,6 +42,7 @@
  * held responsible for mental break-downs caused by this file <G>
  */
 
+#undef killsock
 #undef nmalloc
 #undef nfree
 #undef nrealloc
@@ -203,7 +204,7 @@
 #else
 #define getsock ((int (*) (int))global[82])
 #endif /* USE_IPV6 */
-#define killsock ((void (*) (int))global[83])
+#define killsock(x) (((void *(*)())global[83])((x),MODULE_NAME,__FILE__,__LINE__))
 /* 84 - 87 */
 #define open_listen ((int (*) (int *))global[84])
 #define open_telnet_dcc ((int (*) (int,char *,char *))global[85])

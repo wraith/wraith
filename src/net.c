@@ -393,7 +393,7 @@ int getsock(int options)
 
 /* Done with a socket
  */
-void killsock(register int sock)
+void real_killsock(register int sock, const char *file, int line)
 {
   register int	i;
 
@@ -417,7 +417,7 @@ void killsock(register int sock)
       return;
     }
   }
-  putlog(LOG_MISC, "*", "Attempt to kill un-allocated socket %d !!", sock);
+  putlog(LOG_MISC, "*", "Attempt to kill un-allocated socket %d %s:%d !!", sock, file, line);
 }
 
 /* Send connection request to proxy
