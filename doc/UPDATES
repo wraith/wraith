@@ -5,6 +5,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed.
 1.2.3
 * Read in '.resolv.conf' before '/etc/resolv.conf'
 * Fixed binary getting an excess of 1-15 bytes during write. 
+* Binary writing is now a bit faster as the hash is calculated on the fly now.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
