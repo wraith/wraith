@@ -411,7 +411,7 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 
 
 		if (table->match_type & MATCH_MASK) {
-			cmp = !wild_match_per((unsigned char *)entry->mask, (unsigned char *)match);
+			cmp = !wild_match_per(entry->mask, match);
 		}
 		else if (table->match_type & MATCH_NONE) {
 			cmp = 0;

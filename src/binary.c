@@ -145,10 +145,10 @@ readcfg(const char *cfgfile)
 
   f = fopen(cfgfile, "r");
   if (!f) {
-    printf("Error: Can't open '\%s' for reading\n", cfgfile);
+    printf("Error: Can't open '%s' for reading\n", cfgfile);
     exit(1);
   }
-  printf("Reading '\%s' ", cfgfile);
+  printf("Reading '%s' ", cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
     line++;
     if ((*buffer)) {

@@ -229,7 +229,7 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
         else
           mask = s;
 	putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s", dcc[idx].nick, chan->dname, cmd, mask);
-	dprintf(idx, "Removed %1$s channel %2$s: %3$s\n", chan->dname, cmd, mask);
+	dprintf(idx, "Removed %s channel %s: %s\n", chan->dname, cmd, mask);
 #ifdef LEAF
 	add_mode(chan, '-', type, mask);
 #endif  /* LEAF */
@@ -256,7 +256,7 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
       j = u_delmask(type, chan, who, 1);
       if (j > 0) {
 	putlog(LOG_CMDS, "*", "#%s# (%s) -%s %s", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, who);
-	dprintf(idx, "Removed %1$s channel %2$s: %3$s\n", chname, cmd, who);
+	dprintf(idx, "Removed %s channel %s: %s\n", chname, cmd, who);
 #ifdef LEAF
 	add_mode(chan, '-', type, who);
 #endif  /* LEAF */
@@ -274,7 +274,7 @@ static void cmd_mns_mask(char type, struct userrec *u, int idx, char *par)
       }
     }
   }
-  dprintf(idx, "No such %1$s.\n", cmd);
+  dprintf(idx, "No such %s.\n", cmd);
 }
 
 static void cmd_mns_ban(struct userrec *u, int idx, char *par)

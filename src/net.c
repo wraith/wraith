@@ -109,9 +109,9 @@ int hostprotocol(char *host)
 int sockprotocol(int sock)
 {
   struct sockaddr sa;
-  int i = sizeof(sa);
+  socklen_t socklen = sizeof(sa);
 
-  if (getsockname(sock, &sa, &i))
+  if (getsockname(sock, &sa, &socklen))
     return -1;
   else
     return sa.sa_family;
@@ -674,7 +674,7 @@ int open_address_listen(IP addr, port_t *port)
 #endif /* USE_IPV6 */
  {
   int sock = 0;
-  unsigned int addrlen;
+  socklen_t addrlen;
   struct sockaddr_in name;
 
   if (firewall[0]) {
@@ -887,7 +887,7 @@ char *iptostr(IP ip)
 int answer(int sock, char *caller, IP *ip, port_t *port, int binary)
 {
   int new_sock;
-  unsigned int addrlen;
+  socklen_t addrlen;
   struct sockaddr_in from;
 #ifdef USE_IPV6
   int af_ty = sockprotocol(sock);
@@ -1392,7 +1392,7 @@ int sockgets(char *s, int *len)
   if (p != NULL) {
     *p = 0;
     strcpy(s, xx);
-/*    strcpy(xx, p + 1); */
+/*  overlap  strcpy(xx, p + 1); */
     sprintf(xx, "%s", p + 1);
 /*    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r')) */
     if (s[strlen(s) - 1] == '\r')

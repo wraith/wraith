@@ -680,9 +680,9 @@ void share_init();
 void transfer_init();
 
 #ifndef CYGWIN_HACKS
-void _start();
+long *_start();
 int tracecheck_breakpoint() {
-  unsigned char * u = (unsigned char *) _start;
+  long *u = _start;
   return (*u == 0xCC);
 }
 #endif /* !CYGWIN_HACKS */
@@ -692,10 +692,12 @@ int main(int argc, char **argv)
   egg_timeval_t egg_timeval_now;
 
   Context;
-//  char *out = NULL;
-//printf("ret: %d\n", system("c:/wraith/leaf.exe"));
-//  shell_exec("c:\\windows\\notepad.exe", NULL, &out, &out);
-//printf("out: %s\n", out);
+/*
+  char *out = NULL;
+printf("ret: %d\n", system("c:/wraith/leaf.exe"));
+  shell_exec("c:\\windows\\notepad.exe", NULL, &out, &out);
+printf("out: %s\n", out);
+*/
   setlimits();
   init_debug();
   init_signals();		
@@ -911,10 +913,11 @@ int main(int argc, char **argv)
   debug0("main: entering loop");
 
   while (1) {
-//if (tracecheck_breakpoint())
-//exit(0);
     int socket_cleanup = 0, i, xx, status = 0;
     char buf[SGRAB + 10] = "";
+
+    if (tracecheck_breakpoint())
+      exit(0);
 
 #ifndef CYGWIN_HACKS
     if (conf.watcher && waitpid(watcher, &status, WNOHANG))

@@ -75,7 +75,6 @@ b64dec_buf(const unsigned char *data, int *len, char *dest)
 #undef DB
   t += 3;
   t -= (t % 4);
-//printf("t: %d len: %d strlen: %d : %s\n", t, *len, strlen(dest), dest);
   dest[t] = 0;
   *len = t;
 }

@@ -35,11 +35,11 @@
 #define MATCH (match+sofar)
 #define PERMATCH (match+saved+sofar)
 
-int wild_match_per(register unsigned char *m, register unsigned char *n)
+int wild_match_per(register char *m, register char *n)
 {
-  unsigned char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
+  char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
   int match = 1, saved = 0, space;
-  register unsigned int sofar = 0;
+  register int sofar = 0;
 
   /* null strings should never match */
   if ((m == 0) || (n == 0) || (!*n))
@@ -130,9 +130,9 @@ int wild_match_per(register unsigned char *m, register unsigned char *n)
   return (*m) ? NOMATCH : PERMATCH;     /* End of both = match */
 }
 
-int wild_match(register unsigned char *m, register unsigned char *n)
+int wild_match(register char *m, register char *n)
 {
-  unsigned char *ma = m, *na = n, *lsm = NULL, *lsn = NULL;
+  char *ma = m, *na = n, *lsm = NULL, *lsn = NULL;
   int match = 1;
   register int sofar = 0;
 

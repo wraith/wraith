@@ -227,14 +227,14 @@ irc_log(struct chanset_t *chan, const char *format, ...)
 
   if ((chan && egg_strcasecmp(chan->dname, "#!obs")) || !chan)
     dprintf(DP_HELP, "PRIVMSG #!obs :[%s] %s\n", chan ? chan->dname : "" , va_out);
-
-//  chanout_but(-1, 1, "[%s] %s\n", chan->dname, va_out);
-//  botnet_send_chan(-1, conf.bot->nick, chan->dname, 1, va_out);
-/*   if (chan)
+/*
+  chanout_but(-1, 1, "[%s] %s\n", chan->dname, va_out);
+  botnet_send_chan(-1, conf.bot->nick, chan->dname, 1, va_out);
+   if (chan)
      putlog(LOG_PUBLIC, "*", "[%s] %s", chan->dname, va_out);
    else
      putlog(LOG_PUBLIC, "*", "%s", va_out);
+  sdprintf("%s", va_out);
 */
-//  sdprintf("%s", va_out);
 #endif 
 }

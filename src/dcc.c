@@ -279,6 +279,7 @@ cont_link(int idx, char *buf, int ii)
   struct sockaddr_in sa;
   char tmp[301] = "";
   int i, snum = -1;
+  socklen_t socklen;
 
   for (i = 0; i < MAXSOCKS; i++) {
     if ((socklist[i].sock == dcc[idx].sock) && !(socklist[i].flags & SOCK_UNUSED)) {
@@ -301,11 +302,11 @@ cont_link(int idx, char *buf, int ii)
     dcc[idx].type = &DCC_BOT_NEW;
     dcc[idx].u.bot->numver = 0;
     dprintf(idx, "%s\n", conf.bot->nick);
-    i = sizeof(sa);
+    socklen = sizeof(sa);
 
     /* initkey-gen leaf */
     /* bdhash myport hubnick mynick */
-    getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &i);
+    getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &socklen);
     egg_snprintf(tmp, sizeof tmp, "%s@%4x@%s@%s", settings.bdhash, sa.sin_port, dcc[idx].nick, conf.bot->nick);
     strncpyz(socklist[snum].ikey, SHA1(tmp), sizeof(socklist[snum].ikey));
     /*
@@ -1585,7 +1586,8 @@ dcc_telnet_pass(int idx, int atr)
     }
     if (snum >= 0) {
       char initkey[33] = "", *tmp2 = NULL;
-      char tmp[256] = "", buf[SHA_HASH_LENGTH + 1] = "";
+      char tmp[256] = "";
+      unsigned char buf[SHA_HASH_LENGTH + 1] = "";
       SHA_CTX ctx;
 
       /* initkey-gen hub */

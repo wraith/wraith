@@ -1009,10 +1009,7 @@ bad-cookie %d cookie-time-slack %d manop %d mdop %d mop %d \
 limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d \
 flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d \
 flood-nick %d:%d closed-ban %d closed-private %d ban-time %d \
-exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans \
-%cbitch %cprotectops %crevenge %crevengebot %cprivate %ccycle \
-%cinactive %cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites \
-%cnodesynch %cclosed %ctake %cmanop %cvoice %cfastop %cautoop }\n",
+exempt-time %d invite-time %d ",
 	chan->dname,
 	w,
         chan->added_by,
@@ -1044,7 +1041,15 @@ exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans \
         chan->ban_time,
         chan->closed_private,
         chan->exempt_time,
-        chan->invite_time,
+        chan->invite_time
+        ) == EOF)
+          return 0;
+
+     if (lfprintf(f, "\
+%cenforcebans %cdynamicbans %cuserbans \
+%cbitch %cprotectops %crevenge %crevengebot %cprivate %ccycle \
+%cinactive %cdynamicexempts %cuserexempts %cdynamicinvites %cuserinvites \
+%cnodesynch %cclosed %ctake %cmanop %cvoice %cfastop %cautoop }\n",
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),
