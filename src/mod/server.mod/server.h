@@ -41,7 +41,7 @@ enum {
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
 void nuke_server(char *);
-inline int match_my_nick(char *);
+extern inline int match_my_nick(char *);
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern int 		serv, servidx, cycle_time, newserverport,
