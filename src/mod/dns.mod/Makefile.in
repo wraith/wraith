@@ -3,7 +3,7 @@
 RESLIB = @RESLIB@
 RESINCLUDE = @RESINCLUDE@
 srcdir = .
-
+depcomp = /bin/sh ../../../autotools/depcomp
 
 doofus:
 	@echo ""
@@ -16,7 +16,8 @@ static: ../dns.o
 
 ../dns.o:
 	@echo -e "Compiling: \033[1mdns\033[0m"
-	@$(CC) $(CFLAGS) $(CPPFLAGS) $(RESINCLUDE) -DMAKING_MODS -c -MT ../dns.o -MD -MP -MF $(srcdir)/.deps/dns.Po $(srcdir)/dns.c
+	 @source='dns.c' object='$@' depfile='.deps/dns.Po' tmpdepfile='.deps/dns.TPo' depmode=gcc3 $(depcomp) \
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(RESINCLUDE) -DMAKING_MODS -c $(srcdir)/dns.c
 	@rm -f ../dns.o
 	@mv dns.o ../
 
