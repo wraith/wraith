@@ -340,7 +340,7 @@ See also: bots, downbots
 ###  $bbotversion$b <bot>
    The bot will display it's pack version and uname.
  
-See also: netversion, about%{+m|m}, status%{-}
+See also: version, netversion, about%{+m|m}, status%{-}
 :hub:chaddr
 ###  $bchaddr$b <bot> <address[:bot port[/user port]]>
    Changes the address for a bot. This is the address your bot will try to
@@ -1313,7 +1313,7 @@ See also: botserver, servers%{+n}, config%{-}
 ###  $bnetversion$b <bot>
    All bots on the botnet will display their pack version, and uname.
  
-See also: botversion, about%{+m|m}, status%{-}
+See also: botversion, version, about%{+m|m}, status%{-}
 :hub:netw:
 ###  $bnetw$b
    All bots on the botnet will run 'w' on their shell and display
@@ -1635,6 +1635,11 @@ See also: status
    will not appear in the list.
  
 See also: match, whois
+::version:
+###  $bversion$b
+   Displays the pack version and uname.
+ 
+See also: botversion, netversion, about%{+m|m}, status%{-}
 :leaf:voice
 ###  $bvoice$b <nickname> [channel|*]
     will give a +v voice to a person you specify, so long as the
