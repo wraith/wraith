@@ -2616,9 +2616,9 @@ void sdprintf EGG_VARARGS_DEF(char *, arg1)
     egg_vsnprintf(s, 2000, format, va);
     va_end(va);
     if (!backgrd)
-      dprintf(DP_STDOUT, "[D] %s\n", s);
+      dprintf(DP_STDOUT, "[D:%d] %s\n", getpid(), s);
     else
-      putlog(LOG_MISC, "*", "[D] %s", s);
+      putlog(LOG_MISC, "*", "[D:%d] %s", getpid(), s);
   }
 }
 
