@@ -905,5 +905,6 @@ bool valid_dns_id(int idx, int id)
 {
   if (valid_idx(idx) && (id == -1 || dcc[idx].dns_id == id))
     return 1;
+  sdprintf("dns_id: %d is not associated with dead idx: %d", id, idx);
   return 0;
 }
