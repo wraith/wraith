@@ -958,6 +958,7 @@ Context;
 	  if (!attr[0] || !pass[0]) {
 	    putlog(LOG_MISC, "*", "* %s '%s'!", USERF_CORRUPT, code);
 	    lasthand[0] = 0;
+            return 1;
 	  } else {
 	    u = get_user_by_handle(bu, code);
 	    if (u && !(u->flags & USER_UNSHARED)) {
