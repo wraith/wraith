@@ -17,6 +17,7 @@ void restart(int) __attribute__((noreturn));
 int coloridx(int);
 const char *color(int, int, int);
 void shuffle(char *, char *);
+void shuffleArray(char **, size_t);
 void showhelp(int, struct flag_record *, char *);
 char *replace(const char *, const char *, const char *);
 int goodpass(char *, int, char *);

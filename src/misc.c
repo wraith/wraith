@@ -910,7 +910,7 @@ void showhelp(int idx, struct flag_record *flags, char *string)
 }
 
 /* Arrange the N elements of ARRAY in random order. */
-static void shuffleArray(char *array[], size_t n)
+void shuffleArray(char *array[], size_t n)
 {
   size_t j = 0;
   char *temp = NULL;
