@@ -51,6 +51,7 @@ This is a summary of ChangeLog basically.
 * Made a solution to what to do when the fds max, from 100-130, bot will WARN once a min, >=180 -> auto restart.
 * Raised max dcc/fd to 300.
 * Bots will auto-restart if 150 or more bogus fd are detected.
+* Conf/uname email now includes binary path.
 
 1.1.9
 
