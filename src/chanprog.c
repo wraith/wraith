@@ -30,7 +30,7 @@
 #include "modules.h"
 
 extern struct userrec	*userlist;
-extern char		 ver[], firewall[], myip[], 
+extern char		 ver[], firewall[],  
 			 motdfile[], userfile[], tempdir[],
 			 owner[], 
                          botuser[], *owners, *hubs;
@@ -577,7 +577,7 @@ void chanprog()
     conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
     bi = malloc(sizeof(struct bot_addr));
 
-    bi->address = strdup(myip);
+    bi->address = strdup(conf.bot->ip);
     /* bi->telnet_port = atoi(buf) ? atoi(buf) : 3333; */
     bi->telnet_port = bi->relay_port = 3333;
 #ifdef HUB

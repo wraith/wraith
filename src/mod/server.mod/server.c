@@ -1006,7 +1006,7 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   char *slist, *p;
 
-  if (hostname6[0] || myip6[0]) //we want to use the servers6 entry.
+  if (conf.bot->host6 || conf.bot->ip6) /* we want to use the servers6 entry. */
     return;
 
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
@@ -1027,8 +1027,9 @@ void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
 #ifdef LEAF
   char *slist, *p;
 
-  if (!hostname6[0] && !myip6[0]) //we probably want to use the normal server list..
+  if (!conf.bot->host6 && !conf.bot->ip6) /* we probably want to use the normal server list.. */
     return;
+
   slist = (char *) (entry->ldata ? entry->ldata : (entry->gdata ? entry->gdata : ""));
   if (serverlist) {
     clearq(serverlist);

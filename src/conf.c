@@ -18,7 +18,7 @@
 #include <sys/types.h>
 
 extern char             origbotname[], tempdir[],
-                        userfile[], myip[], myip6[], natip[], hostname[], hostname6[];
+                        userfile[], natip[];
 extern int              localhub;
 extern uid_t		myuid;
 extern conf_t           conf;
@@ -31,6 +31,7 @@ void init_conf() {
   conffile.bots = (conf_bot *) calloc(1, sizeof(conf_bot));
   conffile.bots->nick = NULL;
   conffile.bots->next = NULL;
+  conffile.bot = NULL;
 
   conffile.comments = calloc(1, 1);
   conffile.autocron = 1;
@@ -383,9 +384,10 @@ void fillconf(conf_t *inconf) {
   conf_bot *bot;
   char *mynick = NULL;
 
-  if (localhub)
+  if (localhub) {
     mynick = strdup(conffile.bots->nick);
-  else
+    strncpyz(origbotname, conffile.bots->nick, NICKLEN + 1);
+  } else
     mynick = strdup(origbotname);
 
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next)

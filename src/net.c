@@ -58,11 +58,6 @@ union sockaddr_union cached_myip6_so;
 unsigned long notalloc = 0;
 #endif /* USE_IPV6 */
 
-char	hostname[121] = "";	/* Hostname can be specified in the config
-				   file					    */
-char	myip[121] = "";		/* IP can be specified in the config file   */
-char    myip6[121] = "";        /* IP can be specified in the config file   */
-char    hostname6[121] = "";    /* Hostname can be specified in the config file */
 char	firewall[121] = "";	/* Socks server for firewall		    */
 int	firewallport = 1080;	/* Default port of Sock4/5 firewalls	    */
 char	botuser[21] = "wraith"; /* Username of the user running the bot    */
@@ -293,13 +288,13 @@ void cache_my_ip()
 #ifdef USE_IPV6
   egg_memset(&cached_myip6_so, 0, sizeof(union sockaddr_union));
 
-  if (myip6 != NULL && myip6[1]) {
-    sdprintf("myip6: %s", myip6);
-    if (get_ip(myip6, &cached_myip6_so))
+  if (conf.bot->ip6) {
+    sdprintf("ip6: %s", conf.bot->ip6);
+    if (get_ip(conf.bot->ip6, &cached_myip6_so))
       any = 1;
-  } else if (hostname != NULL && hostname6[1]) {
-    sdprintf("myhostname6: %s", hostname6);
-    if (get_ip(hostname6, &cached_myip6_so))
+  } else if (conf.bot->host6) {
+    sdprintf("host6: %s", conf.bot->host6);
+    if (get_ip(conf.bot->host6, &cached_myip6_so))
       any = 1;
   } else
     any = 1;
@@ -312,15 +307,15 @@ void cache_my_ip()
 #endif /* USE_IPV6 */
 
   error = 0;
-  if (myip[0]) {
-    if (get_ip(myip, &cached_myip4_so))
+  if (conf.bot->ip) {
+    if (get_ip(conf.bot->ip, &cached_myip4_so))
       error = 1;
-  } else if (hostname[0]) {
-    if (get_ip(hostname, &cached_myip4_so))
+  } else if (conf.bot->host) {
+    if (get_ip(conf.bot->host, &cached_myip4_so))
       error = 2;
   } else {
     gethostname(s, 120);
-    if (get_ip(hostname, &cached_myip4_so)) {
+    if (get_ip(conf.bot->host, &cached_myip4_so)) {
       /* error = 3; */
       cached_myip4_so.sin.sin_family = AF_INET;
       cached_myip4_so.sin.sin_addr.s_addr = INADDR_ANY;
@@ -820,9 +815,9 @@ int open_address_listen(IP addr, int *port)
 inline int open_listen(int *port)
 {
 #ifdef USE_IPV6
-  return open_address_listen(myip[0] ? getmyip() : INADDR_ANY, AF_INET, port);
+  return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, AF_INET, port);
 #else
-  return open_address_listen(myip[0] ? getmyip() : INADDR_ANY, port);
+  return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, port);
 #endif /* USE_IPV6 */
 }
 
@@ -833,7 +828,7 @@ inline int open_listen(int *port)
 inline int open_listen_by_af(int *port, int af_def)
 {
 #ifdef USE_IPV6
-  return open_address_listen(myip[0] ? getmyip() : INADDR_ANY, af_def, port);
+  return open_address_listen(conf.bot->ip ? getmyip() : INADDR_ANY, af_def, port);
 #else
   return 0;
 #endif /* USE_IPV6 */

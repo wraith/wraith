@@ -246,7 +246,7 @@
 /* 112 - 115 */
 #define tempdir ((char *)(global[112]))
 #define natip ((char *)(global[113]))
-#define hostname ((char *)(global[114]))
+/* UNUSED 114 */
 #define origbotname ((char *)(global[115]))
 /* 116 - 119 */
 #define botuser ((char *)(global[116]))
@@ -489,7 +489,7 @@
 #define bot_aggressive_to ((int (*)(struct userrec *))global[295])
 #define botunlink ((int (*)(int, char *, char *))global[296])
 /* 297 - 300 */
-#define hostname6 ((char *)(global[297]))
+/* UNUSED 297 */
 #define timesync (*(int*)global[298])
 /* UNUSED 299 */
 #define kickreason ((char *(*)(int))global[300])
@@ -525,8 +525,8 @@
 #define authkey ((char *)(global[321]))
 #endif /* S_AUTHHASH */
 #define USERENTRY_SECPASS (*(struct user_entry_type *)(global[322]))
-#define myip ((char *)(global[323]))
-#define myip6 ((char *)(global[324]))
+/* UNUSED 323 */
+/* UNUSED 324 */
 /* 325 - 328 */
 #define cmdprefix ((char *)(global[325]))
 #define replace ((char*(*)(char *, char *, char *))global[326])

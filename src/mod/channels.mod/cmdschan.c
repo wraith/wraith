@@ -96,7 +96,7 @@ static void cmd_pls_ban(struct userrec *u, int idx, char *par)
       egg_snprintf(s1, sizeof s1, "%s!%s", me->funcs[SERVER_BOTNAME],
 	            me->funcs[SERVER_BOTUSERHOST]);
     else
-      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, hostname);
+      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->host);
     if (wild_match(s, s1)) {
       dprintf(idx, "I'm not going to ban myself.\n");
       putlog(LOG_CMDS, "*", "#%s# attempted +ban %s", dcc[idx].nick, s);
@@ -236,7 +236,7 @@ static void cmd_pls_exempt(struct userrec *u, int idx, char *par)
       egg_snprintf(s1, sizeof s1, "%s!%s", me->funcs[SERVER_BOTNAME],
 		     me->funcs[SERVER_BOTUSERHOST]);
     else
-      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, hostname);
+      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->host);
 
     /* IRC can't understand exempts longer than 70 characters */
     if (strlen(s) > 70) {
@@ -366,7 +366,7 @@ static void cmd_pls_invite(struct userrec *u, int idx, char *par)
       egg_snprintf(s1, sizeof s1, "%s!%s", me->funcs[SERVER_BOTNAME],
 		     me->funcs[SERVER_BOTUSERHOST]);
     else
-      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, hostname);
+      egg_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->host);
 
     /* IRC can't understand invites longer than 70 characters */
     if (strlen(s) > 70) {

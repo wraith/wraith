@@ -42,8 +42,7 @@ extern int	backgrd, flood_telnet_thr, flood_telnet_time,
 		dcc_sanitycheck, sort_users, tands, resolve_timeout,
 		default_uflags, strict_host, userfile_perm;
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
-                firewall[], hostname[], hostname6[], myip[], myip6[],
-		tempdir[], owner[], network[], 
+                firewall[], tempdir[], owner[], network[], 
 		egg_version[], natip[], 
 		dcc_prefix[];
 
