@@ -733,7 +733,7 @@ static void cmd_downbots(struct userrec *u, int idx, char *par)
     }
   }
   if (work[0])
-    dprintf(idx, "Down bots: %s\n", work);
+    dprintf(idx, "Down bot%s: %s\n", cnt > 1 ? "s" : "", work);
   dprintf(idx, "(Total down: %d)\n", tot);
 }
 

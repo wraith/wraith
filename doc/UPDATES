@@ -1,5 +1,9 @@
 This is a summary of ChangeLog basically.
 
+1.1.6
+
+1.Fixed a cosmetic error in cmd_downbots.
+
 1.1.5
 
 1.Fixed a small bug in update which only affected hubs.
