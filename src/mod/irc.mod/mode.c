@@ -1092,7 +1092,7 @@ gotmode(char *from, char *msg)
                       sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
                       tputs(serv, tmp, strlen(tmp));
                     }
-                    sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, msg);
+                    sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
                     deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
                     break;
                   default:
@@ -1143,7 +1143,7 @@ gotmode(char *from, char *msg)
                     if (m)
                       m->flags |= SENTKICK;
                   }
-                  sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, msg);
+                  sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
                   deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
                   break;
                 default:
