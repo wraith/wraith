@@ -515,7 +515,7 @@ static void cmd_slowjoin(int idx, char *par)
   }
   strcpy(buf, "+inactive ");
   if (par[0])
-    strncat(buf, par, sizeof(buf));
+    strlcat(buf, par, sizeof(buf));
   if (channel_add(buf2, chname, buf) == ERROR) {
     dprintf(idx, "Invalid channel or channel options.\n");
     if (buf2[0])
