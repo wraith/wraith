@@ -21,6 +21,7 @@ typedef struct dns_query {
 	time_t expiretime;
 	int id;
 	bool ip;
+	int timer_id;
 	int remaining;
 	char *query;
 	void *client_data;
@@ -146,6 +147,9 @@ static struct dcc_table dns_handler = {
 static void async_timeout(void *client_data)
 {
   int id = (int) client_data;
+  sdprintf("%d timed out", id);
+  egg_dns_cancel(id, 1);
+/*
   dns_query_t *q = NULL;
 
   for (q = query_head; q; q = q->next)
@@ -155,6 +159,7 @@ static void async_timeout(void *client_data)
 
 
   sdprintf("%s failed!", q->query);
+*/
 }
 
 static void answer_init(dns_answer_t *answer)
@@ -290,6 +295,17 @@ sdprintf("RESENDING: %s", q->query);
   }
 }
 
+void dns_create_timeout_timer(dns_query_t **qm, const char *query, int timeout)
+{
+	dns_query_t *q = *qm;
+	egg_timeval_t howlong;
+
+	howlong.sec = timeout;
+	howlong.usec = 0;
+
+	q->timer_id = timer_create_complex(&howlong, query, (Function) async_timeout, (void *) q->id, 0);
+}
+
 /* Perform an async dns lookup. This is host -> ip. For ip -> host, use
  * egg_dns_reverse(). We return a dns id that you can use to cancel the
  * lookup. */
@@ -338,12 +354,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
         dns_send_query(q);
 
         /* setup a timer to detect dead ns */
-//        egg_timeval_t howlong;
-
-//        howlong.sec = async_resolve_timeout;
-//        howlong.usec = 0;
-
-//        q->timer_id = timer_create_complex(&howlong, host, (Function) async_timeout, (void *) q->id, 0);
+	dns_create_timeout_timer(&q, host, timeout);
 
 	/* Send the ipv4 query. */
 
@@ -415,6 +426,10 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 
 	q->ip = 1;
 	egg_dns_send(buf, len);
+
+
+	/* setup timer to detect dead ns */
+	dns_create_timeout_timer(&q, ip, timeout);
 
 	return(q->id);
 }
@@ -663,7 +678,7 @@ int egg_dns_cancel(int id, int issue_callback)
 	if (!q) return(-1);
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
-
+sdprintf("Cancelling query: %s", q->query);
 	if (issue_callback) q->callback(q->client_data, q->query, NULL);
 	free(q);
 	return(0);
@@ -712,7 +727,7 @@ static void parse_reply(char *response, int nbytes)
 	if (!q) return;
         
         /* destroy our async timeout */
-//        timer_destroy(q->timer_id);
+        timer_destroy(q->timer_id);
 
 	/* Pass over the questions. */
 	for (i = 0; i < header.question_count; i++) {

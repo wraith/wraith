@@ -3942,11 +3942,11 @@ static void cmd_dns(int idx, char *par)
   }
   if (is_dotted_ip(par)) {
     dprintf(idx, "Reversing %s ...\n", par);
-    egg_dns_reverse(par, 0, my_dns_callback, (void *) idx);
+    egg_dns_reverse(par, 20, my_dns_callback, (void *) idx);
 
   } else {
     dprintf(idx, "Looking up %s ...\n", par);
-    egg_dns_lookup(par, 0, my_dns_callback, (void *) idx);
+    egg_dns_lookup(par, 20, my_dns_callback, (void *) idx);
   }
 }
 
