@@ -7,79 +7,23 @@ ver=`grep "char" src/main.c | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' 
 numver=`grep "int" src/main.c | awk '/egg_numver =/ {print $4}' |  sed -e 's/\;//g'`
 PACKNAME=`grep "PACKNAME " pack/pack.cfg | awk '/PACKNAME/ {print $2}'`
 
+#load the banners file
+if test -f misc/.banners; then
+ . misc/.banners
+fi
+
 clear
-case $[(`date '+%s'` % 5)] in
-	0) echo "                                                            *"
-           echo "                                             *      *     **"
-           echo "**                                          ***    **     **"
-           echo "**                                           *     **     **"
-           echo " **    ***    ****    ***  ****                  ******** **"
-           echo "  **    ***     ***  * **** **** * ****    ***  ********  **  ***"
-           echo "  **     ***     ****   **   **** * ***  *  ***    **     ** * ***"
-           echo "  **      **      **    **       *   ****    **    **     ***   ***"
-           echo "  **      **      **    **      **    **     **    **     **     **"
-           echo "  **      **      **    **      **    **     **    **     **     **"
-           echo "  **      **      **    **      **    **     **    **     **     **"
-           echo "  **      **      *     **      **    **     **    **     **     **"
-           echo "   ******* *******      ***     **    **     **    **     **     **"
-           echo "    *****   *****        ***     ***** **    *** *  **    **     **"
-           echo "                                  ***   **    *** bryan **    **"
-           echo "                                                   version ${ver}*"
-           echo "                                                                *"
-           echo "                                                               *"
-           echo "                                                              *" ;;
-
-	1) echo " :::  ===  === :::====  :::====  ::: :::==== :::  ==="
-           echo " :::  ===  === :::  === :::  === ::: :::==== :::  ==="
-           echo " ===  ===  === =======  ======== ===   ===   ========"
-           echo "  ===========  === ===  ===  === ===   ===   ===  ==="
-           echo "   ==== ====   ===  === ===  === ===   ===   ===  ==="
-           echo "                    \`version ${ver}'"
-           echo "                      \`-bryan-'" ;;
-
-	2) echo "                            .__  __  .__"
-           echo '     __  _  ______________  |__|/  |_|  |__'
-           echo '     \ \/ \/ /\_  __ \__  \ |  \   __\  |  \'
-           echo '      \     /  |  | \// __ \|  ||  | |   Y  \'
-           echo '       \/\_/   |__|  (____  /__||__| |___|  /'
-           echo "           - bryan -   \/version ${ver}\/" ;;
-
-	3) echo "     dBPdBPdBP dBBBBBb dBBBBBb     dBP dBBBBBBP dBP dBP"
-           echo "                   dBP      BB"
-           echo "   dBPdBPdBP   dBBBBK   dBP BB   dBP    dBP   dBBBBBP"  
-           echo "  dBPdBPdBP   dBP  BB  dBP  BB  dBP    dBP   dBP dBP"
-           echo " dBBBBBBBP   dBP  dB' dBBBBBBB dBP    dBP   dBP dBP"
-           echo "                       version ${ver} by bryan" ;;
-
-	4) echo "                                                    /"
-           echo "                                       #          #/"
-           echo "                                      ###    #    ##"
-           echo "##                                     #    ##    ##"
-           echo "##                                          ##    ##"
-           echo " ##    ###    ####  ###  /###   /### ###  ##########  /##"
-           echo "  ##    ###     ###/ ###/ #### / ###/ ########### ## / ###"
-           echo "  ##     ###     ###  ##   ###/   ###  ##   ##    ##/   ###"
-           echo "  ##      ##      ##  ##     ##    ##  ##   ##    ##     ##"
-           echo "  ##      ##      ##  ##     ##    ##  ##   ##    ##     ##"
-           echo "  ##      ##      ##  ##     ##    ##  ##   ##    ##     ##"
-           echo "  ##      ##      ##  ##     ##    ##  ##   ##    ##     ##"
-           echo "  ##      /#      /   ##     ##    /#  ##   ##    ##     ##"
-           echo "   ######/ ######/    ###     ####/ ## ### /##    ##     ##"
-           echo "    #####   #####      ###     ###   ##/##/  ##    ##    ##"
-           echo "                                          \_version ${ver}/"
-           echo "                                            \_by bryan/"
-           echo "                                                        /"
-           echo "                                                       /" ;;
-esac
-echo
+banner
 
 usage() 
 {
-    echo "Usage: $0 [-c] [-d] [-t dir] [-T] [all|hub|leaf]"
+    echo "Usage: $0 [-b] [-c] [-d] [-n] [-t dir] [-T] [all|hub|leaf]"
     echo
     echo "    The options are as follows:"
+    echo "    -b        Use bzip2 instead of gzip when packaging."
     echo "    -c        Cleans up old binaries/files before compile."
     echo "    -d        Builds a debug package."
+    echo "    -n        Do not package the binaries."
     echo "    -t dir    Where to search for TCL libraries."
     echo "    -T        Builds TCL if it is not on the system."
 }
@@ -92,13 +36,17 @@ clean=0
 type=
 tcldir=
 buildtcl=0
+nopkg=0
+bzip=0
 
-while getopts t:Tcdh opt ; do
+while getopts t:bcdhnT opt ; do
         case "$opt" in
+        b) bzip=1 ;;
 	c) clean=1 ;;
         d) debug=1 ;;
-	t) tcldir="$OPTARG" ;;
 	h) usage; exit 0 ;;
+        n) nopkg=1 ;;
+	t) tcldir="$OPTARG" ;;
 	T) buildtcl=1 ;;
         *) usage; exit 1 ;;
 
@@ -129,8 +77,6 @@ else
   type="hub"
  else
   all=1
-#  usage
-#  exit 1
  fi
 fi
 
@@ -146,7 +92,7 @@ if [ $all = "1" ]; then
  hub=1
 fi
 
-############# CHECK FOR pack/ FILES #################
+# FIXME: We need to check for the proper pack/ files no? 
 
 # Figure what bins we're making
 case `uname` in
@@ -172,10 +118,10 @@ umask 077 >/dev/null
 
 if test -z "$tcldir"; then
   echo "[*] Searching for TCL in default paths (use '-t dir' to change)"
-  ./configure --silent --disable-tcl-threads
+  ./configure --silent 
 else
   echo "[*] Searching for TCL in: $tcldir"
-  ./configure --silent --disable-tcl-threads --with-tcllib=${tcldir}/lib/libtcl8.4.a --with-tclinc=${tcldir}/include/tcl.h
+  ./configure --silent --with-tcllib=${tcldir}/lib/libtcl8.4.a --with-tclinc=${tcldir}/include/tcl.h
 fi
 
 
@@ -186,50 +132,34 @@ fi
 
 echo "[*] Using '${MAKE}'"
 
-# make clean, just in case
 if [ $clean = "1" ]; then
  echo "[*] Cleaning up old binaries/files..."
  ${MAKE} clean > /dev/null
 fi
 
-_leaf()
+_build()
 {
-  if [ $leaf = "1" ]; then
-   # Build leaf and check
-   echo "[*] Building ${d}leaf..."
-   ${MAKE} ${d}leaf -s
-   if ! test -f leaf
-   then
-     echo "[!] ${d}leaf build failed"
-     exit 1
-   fi
+ if [ $[${tb}] = "1" ]; then
+  echo "[*] Building ${d}${tb}..."
+  ${MAKE} ${d}${tb}
+  if ! test -f ${tb}; then
+    echo "[!] ${d}${tb} build failed"
+    exit 1
   fi
-}
-
-_hub()
-{
-  if [ $hub = "1" ]; then
-   # Build hub and check
-   echo "[*] Building ${d}hub..."
-   ${MAKE} ${d}hub -s
-   if ! test -f hub
-   then
-     echo "[!] ${d}hub build failed"
-     exit 1
-   fi
-  fi
+ fi
 }
 
 if [ -f stamp.hub ]; then
- _hub
- _leaf
+ tb="hub"
+ _build
+ tb="leaf"
 else
- _leaf
- _hub
+ tb="leaf"
+ _build
+ tb="hub"
 fi
+_build
 
-# Wrap it nicely up into an archive
-echo "[*] Packaging..."
 
 if [ $all = "1" ]; then
  fls="leaf hub"
@@ -248,8 +178,26 @@ do
   mv -f $bin $bin.$os.$numver${d}
 done
 
-tar -zcf ${PACKNAME}.$os.$numver${d}.tgz *.$os.$numver${d}
-rm -f *$os.$numver${d}
-echo "Binaries are now in '${PACKNAME}.$os.$numver${d}.tgz'."
-exit 0
+set -x
+# Wrap it nicely up into an archive
+if [ $nopkg = "0" ]; then
+  echo "[*] Packaging..."
+  if [ $bzip = "1" ]; then
+    zip="j"
+    ext="bz2"
+  else
+    zip="z"
+    ext="gz"
+  fi
+  #This MALLOC business is to not Abort 'tar' due to some bug it has.
+  tmp=${MALLOC_CHECK_}
+  unset MALLOC_CHECK_
+  tar -c${zip}f ${PACKNAME}.$os.$numver${d}.tar.${ext} *.$os.$numver${d}
+  if test -n "$tmp"; then
+    declare -x MALLOC_CHECK_=$tmp
+  fi
+  rm -f *$os.$numver${d}
+  echo "Binaries are now in '${PACKNAME}.$os.$numver${d}.tar.${ext}'."
+fi
+  exit 0
 
