@@ -1,11 +1,14 @@
 This is a summary of ChangeLog basically.
 
 1.1.5
+
 1.Fixed a small bug in update which only affected hubs.
 2.Checksum is now calculated and added to binary during compile.
 3.Fixed a bug in transfer/update which caused transfers to fail often.
+4.Segfault fix in cmd_debug.
 
 1.1.4
+
 1.User flag +x is now correctly recognized in more places.
 2.Auth system was broken similar to the channel ctcp bug.
 3.Added config option 'cmdprefix' back.
@@ -34,10 +37,12 @@ This is a summary of ChangeLog basically.
 25.cmd_status now shows all information correctly.
 
 1.1.3
+
 1.Fixed a very fatal bug with channel ctcps.
 2.Fixed a bug in cmd_botcmd.
 
 1.1.2
+
 1.Fixed a major bug with server connections.
 2.Fixed a bug in share.mod where it was reconnecting if the userfile was corrupt.
 3.cmd_dccstat is now available on leaf bots for (+a|-)
@@ -50,6 +55,7 @@ This is a summary of ChangeLog basically.
 10.Fixed the annoying 'attempt to kill unallocated socket' log when a device is broken.
 
 1.1.1
+
 1.Fixed a problem with using /DCC CHAT <bot>
 2.Fixed a bug in cmd_botcmd with picking a random leaf.
 3.Fixed a bug in the conf parsing which didn't read 'homedir' correctly. (broke update in 1.1)
@@ -64,6 +70,7 @@ This is a summary of ChangeLog basically.
 12.Added more information to cmd_timers (for development)
 
 1.1.0
+
 1.Rewrote the shell config parsing...
 2.Stripped that long version (1001400) stuff out, now just 1.1.0 and the build timestamp...
 3.Rewrote the core from scratch.
@@ -85,6 +92,7 @@ This is a summary of ChangeLog basically.
 19.Small cosmetic fix in cmd_status for closed channels (show "+i")
 
 1.0.15 (Non-Release Version)
+
 1.cmd_randstring is now limited to 300.
 2.cmd_botversion and cmd_netversion are now HUB only.
 3.Bots will now email owners once a day if their uname() output changes.
@@ -111,6 +119,7 @@ This is a summary of ChangeLog basically.
 
 
 1.0.14
+
 1.Fixed order of log/info for cmd_whoami.
 2.Fixed a redundancy in cmd_channels.
 3.cmd_uplink now more clear about what is is doing.
@@ -146,9 +155,11 @@ This is a summary of ChangeLog basically.
 33.Fixed a bug in the update system; wasn't RUNNING the new binary.
 
 1.0.13
+
 1.Fixed a fatal bug in console_gotshare()
 
 1.0.12
+
 1.When a user first logs in, if they don't have a secpass set, one is set and displayed.
 2.+closed now enforces +i AND +p (+p notifies you of invites in hybrid)
 

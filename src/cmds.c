@@ -1951,13 +1951,13 @@ static void cmd_debug(struct userrec *u, int idx, char *par)
 
   if (par[0])
     cmd = newsplit(&par);
-  if (!strcmp(cmd, "timesync") || !cmd)
+  if (cmd && !strcmp(cmd, "timesync") || !cmd)
     dprintf(idx, "Timesync: %li (%li)\n", now + timesync, timesync);
-  if (!strcmp(cmd, "now") || !cmd)
+  if (cmd && !strcmp(cmd, "now") || !cmd)
     dprintf(idx, "Now: %li\n", now);
-  if (!strcmp(cmd, "role") || !cmd)
+  if (cmd && !strcmp(cmd, "role") || !cmd)
     dprintf(idx, "Role: %d\n", role);
-  if (!strcmp(cmd, "net") || !cmd)
+  if (!cmd || (cmd &&!strcmp(cmd, "net")))
     tell_netdebug(idx);
 }
 
