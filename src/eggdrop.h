@@ -288,6 +288,7 @@ typedef u_32bit_t dword;
 #define egg_isascii(x)  isascii((int)  (unsigned char) (x))
 #define egg_isspace(x)  isspace((int)  (unsigned char) (x))
 #define egg_islower(x)  islower((int)  (unsigned char) (x))
+#define egg_isupper(x)  isupper((int)  (unsigned char) (x))
 
 /***********************************************************************/
 

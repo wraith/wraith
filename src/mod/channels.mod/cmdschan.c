@@ -1482,7 +1482,7 @@ static void cmd_mns_chan(struct userrec *u, int idx, char *par)
 void modesetting(int idx, char *work, int *cnt, char *name, int state)
 {
   char tmp[100];
-  if (!name || (name && !name[0])) (*cnt) = 3; 		/* empty buffer if no (char *) name */
+  if (((*cnt) < 3) && (!name || (name && !name[0]))) (*cnt) = 3; 		/* empty buffer if no (char *) name */
   (*cnt)++;
   if (*cnt > 4) {
     *cnt = 1;

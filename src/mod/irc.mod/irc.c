@@ -83,6 +83,41 @@ static int include_lk = 1;		/* For correct calculation
 #include "msgcmds.c"
 #include "tclirc.c"
 
+static void detect_autokick(char *nick, char *uhost, struct chanset_t *chan, char *msg)
+{
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct userrec *u = NULL;
+  int i = 0, tot = 0;
+
+  if (!nick || !nick[0] || !uhost || !uhost[0] || !chan || !msg || !msg[0])
+    return;
+  
+  tot = strlen(msg);
+  u = get_user_by_host(uhost);
+  get_user_flagrec(u, &fr, chan->dname);
+
+  for(; *msg; ++msg) {
+    if (egg_isupper(*msg))
+      i++;
+  }
+
+//  if ((chan->capslimit)) {
+    while (((msg) && *msg)) {
+      if (egg_isupper(*msg))
+        i++;
+      msg++;
+    }
+
+//  if (chan->capslimit && ((i / tot) >= chan->capslimit)) {
+//dprintf(DP_MODE, "PRIVMSG %s :flood stats for %s: %d/%d are CAP, percentage: %d\n", chan->name, nick, i, tot, (i/tot)*100);
+//  if ((((i / tot) * 100) >= 50)) {
+//dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
+//  }
+
+}
+
+
+
 void makeopline(struct chanset_t *chan, char *nick, char *buf)
 {
   char plaincookie[20], enccookie[48], *p, nck[20], key[200];
