@@ -990,9 +990,8 @@ int readuserfile(const char *file, struct userrec **ret)
       }
   }
   /* process the user data *now* */
-#ifdef LEAF
-  unlink(userfile);
-#endif /* LEAF */
+  if (!conf.bot->hub)
+    unlink(userfile);
   noshare = 0;
   return 1;
 }
@@ -1061,8 +1060,7 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
   return NULL;
 }
 
-#ifdef HUB
-void autolink_cycle(char *start)
+void autolink_cycle_hub(char *start)
 {
   char bestval[HANDLEN + 4] = "", curval[HANDLEN + 4] = "", myval[HANDLEN + 4] = "";
   tand_t *bot = NULL;
@@ -1135,9 +1133,7 @@ void autolink_cycle(char *start)
   if ((u) && (!in_chain(u->handle)))
     botlink("", -3, u->handle);
 }
-#endif /* HUB */
 
-#ifdef LEAF
 typedef struct hublist_entry {
   struct hublist_entry *next;
   struct userrec *u;
@@ -1145,7 +1141,7 @@ typedef struct hublist_entry {
 
 int botlinkcount = 0;
 
-void autolink_cycle(char *start)
+void autolink_cycle_leaf(char *start)
 {
   struct bot_addr *my_ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
   char uplink[HANDLEN + 1] = "", avoidbot[HANDLEN + 1] = "", curhub[HANDLEN + 1] = "";
@@ -1252,5 +1248,12 @@ void autolink_cycle(char *start)
     hl = hl2;
   }
 }
-#endif /* LEAF */
 
+
+void autolink_cycle(char *start)
+{
+  if (conf.bot->hub)
+    autolink_cycle_hub(start);
+  else
+    autolink_cycle_leaf(start);
+}

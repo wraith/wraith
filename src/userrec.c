@@ -280,10 +280,8 @@ bool write_user(struct userrec *u, FILE * f, int idx)
 	if (lfprintf(f, "--%s %s\n", ue->name, lt->extra) == EOF)
 	  return 0;
     } else {
-#ifdef HUB
-      if (!ue->type->write_userfile(f, u, ue))
+      if (conf.bot->hub && !ue->type->write_userfile(f, u, ue))
 	return 0;
-#endif /* HUB */
     }
   }
   return 1;

@@ -212,10 +212,10 @@ struct chanset_t {
 #define CHAN_BITCH          BIT4	/* be a tightwad with ops             */
 #define CHAN_TAKE 	    BIT5	/* When a bot gets opped, take the chan */
 #define CHAN_PROTECTOPS     BIT6	/* re-op any +o people who get deop'd */
-#undef  CHAN_7              BIT7        /* unused */
+#undef  CHAN_7              /* BIT7         unused */
 #define CHAN_REVENGE        BIT8	/* get revenge on bad people          */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
-#undef  CHAN_10		    BIT10       /* not used */
+#undef  CHAN_10		    /* BIT10        not used */
 #define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
 #define CHAN_INACTIVE       BIT12	/* no irc support for this channel */
 #define CHAN_VOICE          BIT13	/* a bot +y|y will voice *, except +q */
