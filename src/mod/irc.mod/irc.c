@@ -1163,8 +1163,8 @@ check_expired_chanstuff(struct chanset_t *chan)
             e->timer = now;
           }
 
-      if (use_invites && channel_dynamicinvites(chan) && chan->invite_time && !(chan->channel.mode & CHANINV))
-        for (b = chan->channel.invite; b->mask[0]; b = b->next)
+      if (use_invites && channel_dynamicinvites(chan) && chan->invite_time && !(chan->channel.mode & CHANINV)) {
+        for (b = chan->channel.invite; b->mask[0]; b = b->next) {
           if (now - b->timer > 60 * chan->invite_time &&
               !u_sticky_mask(chan->invites, b->mask) &&
               !u_sticky_mask(global_invites, b->mask) && expired_mask(chan, b->who)) {
@@ -1172,18 +1172,11 @@ check_expired_chanstuff(struct chanset_t *chan)
             add_mode(chan, '-', 'I', b->mask);
             b->timer = now;
           }
-      if (chan->idle_kick)
-        for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-          if (now - m->last >= chan->idle_kick * 60 && !match_my_nick(m->nick) && !chan_issplit(m)) {
-            sprintf(s, "%s!%s", m->nick, m->userhost);
-            get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
-            if (!(glob_bot(fr) || (glob_op(fr) && !glob_deop(fr)) || chan_op(fr))) {
-              dprintf(DP_SERVER, "KICK %s %s :%sidle %d min\n", chan->name,
-                      m->nick, kickprefix, chan->idle_kick);
-              m->flags |= SENTKICK;
-            }
-          }
-    }
+        }
+      }
+    } /* me_op */
+
+//    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     for (m = chan->channel.member; m && m->nick[0]; m = n) {
       n = m->next;
       if (m->split && now - m->split > wait_split) {
@@ -1191,39 +1184,49 @@ check_expired_chanstuff(struct chanset_t *chan)
         putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
         killmember(chan, m->nick);
       }
-      m = n;
-    }
-    /* autovoice of +v users if bot is +y */
-    if (!loading && channel_active(chan) && me_op(chan) && dovoice(chan)) {
-      for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-        if (!chan_hasop(m) && !chan_hasvoice(m)) {
-          if (!m->user) {
-            sprintf(s, "%s!%s", m->nick, m->userhost);
-            m->user = get_user_by_host(s);
-          }
 
-          if (m->user) {
-            get_user_flagrec(m->user, &fr, chan->dname);
-            if (!glob_bot(fr)) {
-              if (!(m->flags & EVOICE) && !privchan(fr, chan, PRIV_VOICE) &&
-                  ((channel_voice(chan) && !chk_devoice(fr)) ||
-                   (!channel_voice(chan) && chk_voice(fr, chan)))) {
-                add_mode(chan, '+', 'v', m->nick);
-              } else if ((chk_devoice(fr) || (m->flags & EVOICE))) {
-                add_mode(chan, '-', 'v', m->nick);
-              }
+      if (me_op(chan)) {
+        if (chan->idle_kick) {
+          if (now - m->last >= chan->idle_kick * 60 && !match_my_nick(m->nick) && !chan_issplit(m)) {
+            sprintf(s, "%s!%s", m->nick, m->userhost);
+            get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
+            if (!(glob_bot(fr) || (glob_op(fr) && !glob_deop(fr)) || chan_op(fr))) {
+              dprintf(DP_SERVER, "KICK %s %s :%sidle %d min\n", chan->name, m->nick, kickprefix, chan->idle_kick);
+              m->flags |= SENTKICK;
             }
-          } else if (!m->user && !(m->flags & EVOICE) && channel_voice(chan)) {
+          }
+        } else if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
+          if (!chan_hasop(m) && !chan_hasvoice(m)) {
+            if (!m->user) {
+              sprintf(s, "%s!%s", m->nick, m->userhost);
+              m->user = get_user_by_host(s);
+            }
+
+            if (m->user) {
+              get_user_flagrec(m->user, &fr, chan->dname);
+              if (!glob_bot(fr)) {
+                if (!(m->flags & EVOICE) && !privchan(fr, chan, PRIV_VOICE) &&
+                   ((channel_voice(chan) && !chk_devoice(fr)) ||
+                   (!channel_voice(chan) && chk_voice(fr, chan)))) {
+                  add_mode(chan, '+', 'v', m->nick);
+                } else if ((chk_devoice(fr) || (m->flags & EVOICE))) {
+                  add_mode(chan, '-', 'v', m->nick);
+                }
+              }
+            } else if (!m->user && !(m->flags & EVOICE) && channel_voice(chan)) {
               add_mode(chan, '+', 'v', m->nick);
+            }
           }
         }
       }
+      m = n;
     }
     check_lonely_channel(chan);
-  } else if (shouldjoin(chan) && !channel_pending(chan))
+  } else if (shouldjoin(chan) && !channel_pending(chan)) {
     dprintf(DP_MODE, "JOIN %s %s\n",
             (chan->name[0]) ? chan->name : chan->dname,
             chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+  }
 }
 
 void
