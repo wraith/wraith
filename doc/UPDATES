@@ -7,6 +7,7 @@ This is a summary of ChangeLog basically.
 3.Fixed a bug in transfer/update which caused transfers to fail often.
 4.Segfault fix in cmd_debug.
 5.Fixed a potential bug in share.
+6.Traffic stats are now properly cleared on leaf bots every day.
 
 1.1.4 (Quickly advanced to 1.1.5)
 

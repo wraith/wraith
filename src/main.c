@@ -132,11 +132,6 @@ static char *getfullbinname(const char *argv_zero)
   return bin;
 }
 
-
-/* Traffic stats
- */
-egg_traffic_t traffic;
-
 void fatal(const char *s, int recoverable)
 {
   int i = 0;
@@ -392,6 +387,29 @@ void core_10secondly()
 #endif /* LEAF */
 }
 
+/* Traffic stats
+ */
+egg_traffic_t traffic;
+
+static void event_resettraffic()
+{
+	traffic.out_total.irc += traffic.out_today.irc;
+	traffic.out_total.bn += traffic.out_today.bn;
+	traffic.out_total.dcc += traffic.out_today.dcc;
+	traffic.out_total.filesys += traffic.out_today.filesys;
+	traffic.out_total.trans += traffic.out_today.trans;
+	traffic.out_total.unknown += traffic.out_today.unknown;
+
+	traffic.in_total.irc += traffic.in_today.irc;
+	traffic.in_total.bn += traffic.in_today.bn;
+	traffic.in_total.dcc += traffic.in_today.dcc;
+	traffic.in_total.filesys += traffic.in_today.filesys;
+	traffic.in_total.trans += traffic.in_today.trans;
+	traffic.in_total.unknown += traffic.in_today.unknown;
+
+	egg_memset(&traffic.out_today, 0, sizeof(traffic.out_today));
+	egg_memset(&traffic.in_today, 0, sizeof(traffic.in_today));
+}
 
 static void core_secondly()
 {
@@ -445,10 +463,8 @@ static void core_secondly()
     /* These no longer need checking since they are all check vs minutely
      * settings and we only get this far on the minute.
      */
-#ifdef HUB
     if (miltime == 300)
-      call_hook(HOOK_DAILY);
-#endif /* HUB */
+      event_resettraffic();
   }
 }
 
@@ -470,26 +486,6 @@ static void core_halfhourly()
 #ifdef HUB
   write_userfile(-1);
 #endif /* HUB */
-}
-
-static void event_resettraffic()
-{
-	traffic.out_total.irc += traffic.out_today.irc;
-	traffic.out_total.bn += traffic.out_today.bn;
-	traffic.out_total.dcc += traffic.out_today.dcc;
-	traffic.out_total.filesys += traffic.out_today.filesys;
-	traffic.out_total.trans += traffic.out_today.trans;
-	traffic.out_total.unknown += traffic.out_today.unknown;
-
-	traffic.in_total.irc += traffic.in_today.irc;
-	traffic.in_total.bn += traffic.in_today.bn;
-	traffic.in_total.dcc += traffic.in_today.dcc;
-	traffic.in_total.filesys += traffic.in_today.filesys;
-	traffic.in_total.trans += traffic.in_today.trans;
-	traffic.in_total.unknown += traffic.in_today.unknown;
-
-	egg_memset(&traffic.out_today, 0, sizeof(traffic.out_today));
-	egg_memset(&traffic.in_today, 0, sizeof(traffic.in_today));
 }
 
 static void startup_checks() {
@@ -892,8 +888,6 @@ int main(int argc, char **argv)
   timer_create_secs(60, "check_expired_ignores", (Function) check_expired_ignores);
   timer_create_secs(3600, "core_hourly", (Function) core_hourly);
   timer_create_secs(1800, "core_halfhourly", (Function) core_halfhourly);
-
-  add_hook(HOOK_DAILY, (Function) event_resettraffic);
 
   debug0("main: entering loop");
 
