@@ -975,6 +975,11 @@ static void cmd_mop(struct userrec *u, int idx, char *par)
   int all = 0;
 
   if (par[0] == '*' && !par[1]) {
+    get_user_flagrec(dcc[idx].user, &user, NULL);
+    if (!glob_owner(user)) {
+      dprintf(idx, "You do not have access to mop '*'\n");
+      return;
+    }
     all = 1;
     chan = chanset;
     newsplit(&par);
@@ -1004,7 +1009,6 @@ static void cmd_mop(struct userrec *u, int idx, char *par)
       dprintf(idx, "You are not a channel op on %s.\n", chan->dname);
       return;
     }
-
     if (channel_active(chan) && !channel_pending(chan)) {
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
         if (!m->user) {
