@@ -633,8 +633,8 @@ restart(int idx)
   }
   fatal(idx <= 0x7FF0 ? reason : NULL, 1);
   usleep(2000 * 500);
-  unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
   sprintf(buf, "%s -B %s\n", binname, conf.bot->nick);
+  unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
   system(buf); /* start new bot. */
   exit(0);
 }
