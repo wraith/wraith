@@ -260,6 +260,15 @@ EGG_CYGWIN=no
 
 AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNAME -s`)
 AC_CACHE_CHECK(system release, egg_cv_var_system_release, egg_cv_var_system_release=`$UNAME -r`)
+AC_CACHE_CHECK(system machine, egg_cv_var_system_machine, egg_cv_var_system_machine=`$UNAME -m`)
+
+case "$egg_cv_var_system_machine" in
+  i*)
+    CXX="$CXX -march=i486"
+  ;;
+  *)
+    ;;
+esac
 
 case "$egg_cv_var_system_type" in
   BSD/OS)

@@ -13,6 +13,7 @@ This is a summary of ChangeLog basically.
 * Fixed typo in help file (botconfig)
 * Fixed a leaked socket on failed address bind.
 * Removed compatability support for <= 1.1.9 userfiles (bot records).
+* Now compiling all x86 binaries as i486 (as opposed to pentium binaries on FreeBSD like before).
 
 1.2
 * No longer displaying SALTS on ./bin -v
