@@ -2016,3 +2016,71 @@ char *btoh(const unsigned char *md, int len)
   return ret;
 }
 
+void showhelp (int idx, struct flag_record *flags, char *string)
+{
+  struct flag_record tr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
+  static char helpstr[8092] = "", tmp[2] = "", flagstr[10] = "";
+  int ok = 1;
+Context;
+  helpstr[0] = 0;
+  while ( (string) && (string[0]) ) {
+    if ( (*string == '%') ) {
+      if ( !strncmp(string + 1, "{+", 2) ) {
+        while ( (*string) && (*string != '+') ) {
+          string++;
+        }
+        flagstr[0] = 0;
+        while ( (*string) && (*string != '}') ) {
+          sprintf(tmp, "%c", *string);
+          strcat(flagstr, tmp);
+          string++;
+        }
+        string++;
+        break_down_flags(flagstr, &tr, NULL);
+        if (flagrec_ok(&tr, flags)) {
+          ok = 1;
+          while ( (*string) && (*string != '%') ) {
+            sprintf(tmp, "%c", *string);
+            strcat(helpstr, tmp);
+            string++;
+          }
+          if ( !strncmp(string + 1, "{-", 2) ) {
+            ok = 1;
+            while ( (*string) && (*string != '}') ) {
+              string++;
+            }
+          }
+          string++;
+        } else {
+          ok = 0;
+        }
+      } else if ( !strncmp(string + 1, "{-", 2) ) {
+        ok = 1;
+        while ( (*string) && (*string != '}') ) {
+          string++;
+        }
+        string++;
+      } else if ( (*string == '{') ) {
+        while ( (*string) && (*string != '}') ) {
+          string++;
+        }
+      } else {
+        if (ok) {
+          sprintf(tmp, "%c", *string);
+          strcat(helpstr, tmp);
+        }
+        string++;
+      }
+    } else {
+      if (ok) {
+        sprintf(tmp, "%c", *string);
+        strcat(helpstr, tmp);
+      }
+      string++;
+    }
+  }
+  if (strchr(helpstr, '\0'))
+    *(char*)(strchr(helpstr, '\0')) = 0;
+  if (helpstr[0]) dumplots(idx, "", helpstr);
+}
+

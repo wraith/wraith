@@ -8,6 +8,7 @@
 #include "main.h"
 #include "tandem.h"
 #include "modules.h"
+#include "help.h"
 #include <ctype.h>
 #include <stdlib.h>
 #include <pwd.h>
@@ -740,64 +741,52 @@ int my_cmp (const mycmds *c1, const mycmds *c2)
 static void cmd_help(struct userrec *u, int idx, char *par)
 {
   char flg[100];
-  int i = 0,
-    showall = 0,
-    fnd = 0,
-    n = 0,
-    done = 0,
-    first = 0, 
-    o = 0,
-    end;
+  int fnd = 0, done = 0, o = 0, nowild = 0;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
-  char *fcats, *flag, temp[100], buf[2046];
+  char *fcats, temp[100], buf[2046], match[20];
 
-Context;
   egg_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
   fcats = temp;
 
   putlog(LOG_CMDS, "*", STR("#%s# help %s"), dcc[idx].nick, par);
   get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
+  build_flags(flg, &fr, NULL);
   if (!par[0]) {
-    showall = 1;
-    build_flags(flg, &fr, NULL);
-    dprintf(idx, STR("Showing help topics matching your flags: (%s)\n  "), flg);
+    sprintf(match, "*");
   } else {
-    dprintf(idx, "Not yet implemented.\n");
-    return;
+    if (!strchr(par, '*') && !strchr(par, '?'))
+      nowild++;
+    sprintf(match, "%s", newsplit(&par));
   }
+  if (!nowild)
+    dprintf(idx, STR("Showing help topics matching '%s' for flags: (%s)\n"), match, flg);
+  o = cmdi - 1;  
+  qsort(cmds, o, sizeof(mycmds), (int (*)()) &my_cmp);
+  buf[0] = 0;
+  /* even if we have nowild, we loop to conserve code/space */
+  while (!done) {
+    int i = 0, end = 0, first = 1, n, hi;
+    char *flag;
 
-  for (o = 0; o < cmdi; o++)
-  ;
-  /* this displays help for old system
-  {
-    if (!flagrec_ok(&cmds[o].flags, &fr))
-      continue;
-    if (!showall && !egg_strcasecmp(par, cmds[o].name)) {
-      fnd = 1;
-      build_flags(flg, &(cmds[o].flags), NULL);
-      dprintf(idx, STR("### %s (required flags: %s)\n"), cmds[o].name, flg);
-      dprintf(idx, STR("Usage      : %s%s %s\n"), dcc_prefix, cmds[o].name, cmds[o].usage ? cmds[o].usage : "");
-      dprintf(idx, STR("Description: %s\n"), cmds[o].desc ? cmds[o].desc : "None");
-      break;
-    }
-  }
-  */
-  
-  if (showall) {
-    qsort(cmds, o, sizeof(mycmds), (int (*)()) &my_cmp);
-    end = 0;
-    buf[0] = '\0';
-    while (!done) {
-      flag = newsplit(&fcats);
-      if (!flag[0]) 
-	done = 1;
+    flag = newsplit(&fcats);
+    if (!flag[0]) 
+      done = 1;
 
-      i = 0;
-      first = 1;
-      for (n = 0; n < o ; n++) { /* loop each command */
-        if (!flagrec_ok(&cmds[n].flags, &fr))
-          continue;
-        flg[0] = '\0';
+    for (n = 0; n < o ; n++) { /* loop each command */
+      if (!flagrec_ok(&cmds[n].flags, &fr) || !wild_match(match,cmds[n].name))
+        continue;
+      fnd++;
+      if (nowild) {
+        dprintf(idx, STR("Showing you help for '%s':"), match);
+        for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++) {
+          if (!egg_strcasecmp(match, help[hi].cmd)) {
+            showhelp(idx, &fr, help[hi].desc);
+          }
+        }
+        done = 1;
+        break;
+      } else {
+        flg[0] = 0;
         build_flags(flg, &(cmds[n].flags), NULL);
         if (!strcmp(flg, flag)) {
           if (first) {
@@ -805,13 +794,11 @@ Context;
             dprintf(idx, STR("# DCC (%s)\n"), flag);
             sprintf(buf, "  ");
           }
-
           if (end && !first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
             /* we dumped the buf to dprintf, now start a new one... */
             sprintf(buf, "  ");
           }
-        
           sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmds[n].name);
           first = 0;
           end = 0;
@@ -823,15 +810,15 @@ Context;
         } 
       }
     }
-    dprintf(idx, "%s\n", buf[0] ? buf : "");
   }
-
-  if (showall) {
-    dprintf(idx, STR("End of list. For individual command help, type: %shelp <command>\n"), dcc_prefix);
-    dprintf(idx, STR("If you have flags on a channel, type %sconsole #chan to see more commands.\n"), dcc_prefix);
+  dprintf(idx, "%s\n", buf[0] ? buf : "");
+  dprintf(idx, STR("--End help listing\n"));
+  if (!strcmp(match, "*")) {
+    dprintf(idx, STR("For individual command help, type: %shelp <command>\n"), dcc_prefix);
   } else if (!fnd) {
-    dprintf(idx, STR("No help for nonexistant command '%s'.\n"), par);
+    dprintf(idx, STR("No match for '%s'.\n"), match);
   }
+  dprintf(idx, STR("If you have flags on a channel, type %sconsole #chan to possibly see more commands.\n"), dcc_prefix);
 }
 
 static void cmd_addlog(struct userrec *u, int idx, char *par)
