@@ -1123,8 +1123,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
    *outFile,
    *errFile;
   char tmpfile[161];
-  int x,
-    fd;
+  int x, fd;
+  int parent = getpid();
 
   if (!cmdline)
     return 0;
@@ -1232,12 +1232,15 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     outd = fileno(outFile);
     errd = fileno(errFile);
     if (dup2(ind, STDIN_FILENO) == (-1)) {
+      kill(parent, SIGCHLD);
       exit(1);
     }
     if (dup2(outd, STDOUT_FILENO) == (-1)) {
+      kill(parent, SIGCHLD);
       exit(1);
     }
     if (dup2(errd, STDERR_FILENO) == (-1)) {
+      kill(parent, SIGCHLD);
       exit(1);
     }
     argv[0] = STR("sh");
@@ -1245,6 +1248,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
     argv[2] = cmdline;
     argv[3] = NULL;
     execvp(argv[0], &argv[0]);
+    kill(parent, SIGCHLD);
     exit(1);
   }
 
