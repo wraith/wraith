@@ -26,6 +26,7 @@
 
 /* Just include *all* the include files...it's slower but EASIER */
 #include "src/eggmain.h"
+#include "src/dcc.h"
 #include "src/debug.h"
 #include "src/color.h"
 #include "src/users.h"

@@ -4,6 +4,16 @@
 #include "eggmain.h"
 #include "cfg.h"
 
+/* Return codes for add_note */
+#define NOTE_ERROR      0       /* error                        */
+#define NOTE_OK         1       /* success                      */
+#define NOTE_STORED     2       /* not online; stored           */
+#define NOTE_FULL       3       /* too many notes stored        */
+#define NOTE_TCL        4       /* tcl binding caught it        */
+#define NOTE_AWAY       5       /* away; stored                 */
+#define NOTE_FWD        6       /* away; forwarded              */
+
+
 #ifndef MAKING_MODS
 void botnet_send_cfg(int idx, struct cfg_entry *entry);
 void botnet_send_cfg_broad(int idx, struct cfg_entry *entry);

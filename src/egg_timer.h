@@ -1,6 +1,8 @@
 #ifndef _EGG_TIMER_H_
 #define _EGG_TIMER_H_
 
+#include "types.h"
+
 typedef struct egg_timeval_b {
 	int sec;
 	int usec;

@@ -6,6 +6,8 @@
 #endif
 
 #include "types.h"
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 
 #ifdef HAVE_OPENSSL_SSL_H
@@ -38,9 +40,82 @@
 
 #define SGRAB 2011         /* How much data to allow through sockets. */
 
+enum {
+  EGG_OPTION_SET        = 1,    /* Set option(s).               */
+  EGG_OPTION_UNSET      = 2     /* Unset option(s).             */
+};
+
+/* Socket flags:
+ */
+#define SOCK_UNUSED     0x0001  /* empty socket                         */
+#define SOCK_BINARY     0x0002  /* do not buffer input                  */
+#define SOCK_LISTEN     0x0004  /* listening port                       */
+#define SOCK_CONNECT    0x0008  /* connection attempt                   */
+#define SOCK_NONSOCK    0x0010  /* used for file i/o on debug           */
+#define SOCK_STRONGCONN 0x0020  /* don't report success until sure      */
+#define SOCK_EOFD       0x0040  /* it EOF'd recently during a write     */
+#define SOCK_PROXYWAIT  0x0080  /* waiting for SOCKS traversal          */
+#define SOCK_PASS       0x0100  /* passed on; only notify in case
+                                   of traffic                           */
+#define SOCK_VIRTUAL    0x0200  /* not-connected socket (dont read it!) */
+#define SOCK_BUFFER     0x0400  /* buffer data; don't notify dcc funcs  */
+
+/* Flags to sock_has_data
+ */
+enum {
+  SOCK_DATA_OUTGOING,           /* Data in out-queue?                   */
+  SOCK_DATA_INCOMING            /* Data in in-queue?                    */
+};
+
 
 #define iptolong(a)             (0xffffffff &                           \
                                  (long) (htonl((unsigned long) a)))
+#define CONNECT_SSL 1
+#define ACCEPT_SSL 2
+
+#ifdef USE_IPV6
+#define SIZEOF_SOCKADDR(so) ((so).sa.sa_family == AF_INET6 ? sizeof(so.sin6) : sizeof(so.sin))
+#else
+#define SIZEOF_SOCKADDR(so) (sizeof(so.sin))
+#endif /* USE_IPV6 */
+
+#if !defined(IN6_IS_ADDR_V4MAPPED)
+# define IN6_IS_ADDR_V4MAPPED(a) \
+        ((((u_int32_t *) (a))[0] == 0) && (((u_int32_t *) (a))[1] == 0) && \
+         (((u_int32_t *) (a))[2] == htonl (0xffff)))
+#endif /* !defined(IN6_IS_ADDR_V4MAPPED) */
+
+union sockaddr_union {
+  struct sockaddr sa;
+  struct sockaddr_in sin;
+#ifdef USE_IPV6
+  struct sockaddr_in6 sin6;
+#endif /* USE_IPV6 */
+};
+
+/* This is used by the net module to keep track of sockets and what's
+ * queued on them
+ */
+typedef struct {
+  int            sock;
+  short          flags;
+  char          *inbuf;
+  char          *outbuf;
+  unsigned long  outbuflen;             /* Outbuf could be binary data  */
+  int encstatus;                        /* encrypted botlink */
+  int oseed;                            /* botlink out seed */
+  int iseed;                            /* botlink in seed */
+  char okey[33];                        /* botlink enckey: out */
+  char ikey[33];                        /* botlink enckey: in  */
+  int gz; /* gzip compression */
+  unsigned long  inbuflen;              /* Inbuf could be binary data   */
+#ifdef USE_IPV6
+  unsigned int af;
+#endif /* USE_IPV6 */
+#ifdef HAVE_SSL
+  SSL           *ssl;
+#endif /* HAVE_SSL */
+} sock_list;
 
 
 #ifndef MAKING_MODS

@@ -2,6 +2,7 @@
 #define _DCCUTIL_H
 
 #include "eggmain.h"
+#include "dcc.h"
 
 #ifdef HAVE_DPRINTF
 #  define dprintf dprintf_eggdrop

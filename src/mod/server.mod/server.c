@@ -9,6 +9,8 @@
 #define MAKING_SERVER
 #include "src/mod/module.h"
 #include "src/net.h"
+#include "src/auth.h"
+#include "src/dns.h"
 #include "server.h"
 
 static Function *global = NULL;

@@ -17,6 +17,7 @@
  * Released under the GPL, as above.
  */
 
+#include "src/net.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

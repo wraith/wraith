@@ -13,6 +13,9 @@
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
+/* For flushmodes */
+#define NORMAL          0
+#define QUICK           1
 
 #ifdef MAKING_IRC
 #ifdef S_AUTH

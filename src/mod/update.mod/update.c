@@ -7,6 +7,7 @@
 #define MAKING_update
 
 #include "src/mod/module.h"
+#include "src/net.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -17,9 +18,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef HUB
-#include "src/net.h"
-#endif
 
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/compress.mod/compress.h"

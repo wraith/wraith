@@ -48,6 +48,19 @@
 #define EMAIL_TEAM      0x2
 
 
+#define DETECT_LOGIN 1
+#define DETECT_TRACE 2
+#define DETECT_PROMISC 3
+#define DETECT_PROCESS 4
+#define DETECT_SIGCONT 5
+
+#define DET_IGNORE 0
+#define DET_WARN 1
+#define DET_REJECT 2
+#define DET_DIE 3
+#define DET_SUICIDE 4
+
+
 #ifndef MAKING_MODS
 char *homedir();
 char *my_uname();

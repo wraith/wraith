@@ -14,6 +14,23 @@ enum dccsend_types {
   DCCSEND_FEMPTY	/* File is empty			*/
 };
 
+enum {                          /* transfer connection handling a ...   */
+        XFER_SEND,              /*  ... normal file-send to s.o.        */
+        XFER_RESEND,            /*  ... file-resend to s.o.             */
+        XFER_RESEND_PEND,       /*  ... (as above) and waiting for info */
+        XFER_RESUME,            /*  ... file-send-resume to s.o.        */
+        XFER_RESUME_PEND,       /*  ... (as above) and waiting for conn */
+        XFER_GET                /*  ... file-get from s.o.              */
+};
+
+enum {
+        XFER_ACK_UNKNOWN,       /* We don't know how blocks are acked.  */
+        XFER_ACK_WITH_OFFSET,   /* Skipped data is also counted as
+                                   received.                            */
+        XFER_ACK_WITHOUT_OFFSET /* Skipped data is NOT counted in ack.  */
+};
+
+
 #ifndef MAKING_TRANSFER
 /* 4 - 7 */
 #define DCC_FORK_SEND (*(struct dcc_table *)(transfer_funcs[4]))

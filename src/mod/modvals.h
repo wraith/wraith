@@ -24,6 +24,8 @@
 #ifndef _EGG_MOD_MODVALS_H
 #define _EGG_MOD_MODVALS_H
 
+#include "src/types.h"
+
 /* #define HOOK_GET_FLAGREC	  0 	*/
 /* #define HOOK_BUILD_FLAGREC	  1 	*/
 /* #define HOOK_SET_FLAGREC	  2 	*/

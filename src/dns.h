@@ -7,6 +7,28 @@
 #ifndef _EGG_DNS_H
 #define _EGG_DNS_H
 
+#include "types.h"
+#include "dcc.h"
+
+/* Flags for dns_type
+ */
+#define RES_HOSTBYIP  1         /* hostname to IP address               */
+#define RES_IPBYHOST  2         /* IP address to hostname               */
+
+struct dns_info {
+  void (*dns_success)(int);     /* is called if the dns request succeeds   */
+  void (*dns_failure)(int);     /* is called if it fails                   */
+  char *host;                   /* hostname                                */
+  char *cbuf;                   /* temporary buffer. Memory will be free'd
+                                   as soon as dns_info is free'd           */
+  char *cptr;                   /* temporary pointer                       */
+  IP ip;                        /* IP address                              */
+  int ibuf;                     /* temporary buffer for one integer        */
+  char dns_type;                /* lookup type, e.g. RES_HOSTBYIP          */
+  struct dcc_table *type;       /* type of the dcc table we are making the
+                                   lookup for                              */
+};
+
 typedef struct {
   char *name;
   void (*event)(IP, char *, int, void *);
