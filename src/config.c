@@ -808,7 +808,7 @@ void userfile_cfg_line(char *ln)
     if (!strcmp(cfg[i]->name, name))
       cfgent = cfg[i];
   if (cfgent) {
-    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
+    set_cfg_str(NULL, cfgent->name, (ln && ln[0]) ? ln : NULL);
   } else
     putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
 
@@ -826,7 +826,7 @@ void got_config_share(int idx, char *ln)
     if (!strcmp(cfg[i]->name, name))
       cfgent = cfg[i];
   if (cfgent) {
-    set_cfg_str(NULL, cfgent->name, ln[0] ? ln : NULL);
+    set_cfg_str(NULL, cfgent->name, (ln && ln[0]) ? ln : NULL);
     botnet_send_cfg_broad(idx, cfgent);
   } else
     putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
