@@ -1494,8 +1494,6 @@ static void bot_rsim(char *botnick, char *code, char *par)
   if (ridx < 0 || !nick || !cmd)
     return;
 
-  putlog(LOG_DEBUG, "*", "#%s@%s# %s %s", nick, botnick, cmd, par);
-
   for (i = 0; i < dcc_total; i++) {
    if (dcc[i].simul == ridx) {
      putlog(LOG_DEBUG, "*", "Simul found old idx for %s: %d (ridx: %d)", nick, i, ridx);

@@ -1457,7 +1457,7 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
     return;
   }
 
-  putlog(LOG_CMDS, "*", "#%s# botcmd %s %s", dcc[idx].nick, bot, cmd);		/* the rest of the cmd will be logged remotely */
+  putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, bot, cmd);		/* the rest of the cmd will be logged remotely */
   if (nextbot(bot) < 0) {
     dprintf(idx, STR("No such bot linked\n"));
     return;
