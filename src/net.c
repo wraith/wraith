@@ -620,8 +620,10 @@ int open_telnet_raw(int sock, char *server, port_t sport)
   if ((is_resolved = is_dotted_ip(server))) {	/* already resolved */
     initialize_sockaddr(is_resolved, NULL, 0, &so);
 
-    if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0)
+    if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0) {
+      killsock(sock);
       return -1;
+    }
 
     initialize_sockaddr(is_resolved, host, port, &so);
 
