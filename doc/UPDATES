@@ -12,6 +12,7 @@ This is a summary of ChangeLog basically.
 9.With +nomop set in a chan, a mass op will trigger enforce_bitch() now, regardless of +bitch.
 10.Now all bots check for promisc.
 11.Added chanint: closed-private. Will set +p in +closed chans.
+12.New +take.
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.

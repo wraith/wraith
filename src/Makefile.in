@@ -47,7 +47,6 @@ OBJS = auth.o \
 	users.o
 
 MODOBJS = mod/channels.o \
-        mod/compress.o \
         mod/console.o \
         mod/ctcp.o \
         mod/dns.o \

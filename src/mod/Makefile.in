@@ -19,7 +19,6 @@ MOD_CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 
 mods = channels.mod \
-	compress.mod \
 	console.mod \
 	ctcp.mod \
 	dns.mod \
@@ -31,7 +30,6 @@ mods = channels.mod \
 	update.mod
 
 mod_objs = channels.mod_o \
-	compress.mod_o \
 	console.mod_o \
 	ctcp.mod_o \
 	dns.mod_o \
