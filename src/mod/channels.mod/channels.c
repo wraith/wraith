@@ -252,7 +252,6 @@ void rebalance_roles()
 {
   struct bot_addr *ba;
   int r[5] = { 0, 0, 0, 0, 0 }, hNdx, lNdx, i;
-  struct userrec *u;
   char tmp[10];
   tmp[0] = 0;
   for (i = 0; i < dcc_total; i++) {
