@@ -714,11 +714,13 @@ static void share_mns_mask(int idx, char *par)
     if (u_delmask(type, NULL, par, 1) > 0) {
       if (!conf.bot->hub) {
         struct chanset_t *chan = NULL;
-        masklist *channel_list = (type == 'b' ? chan->channel.ban : type == 'e' ? 
-                                  chan->channel.exempt : chan->channel.invite);
+        masklist *channel_list = NULL;
         
         for (chan = chanset; chan; chan = chan->next) {
-          if (!ismasked(channel_list, par))
+          channel_list = (type == 'b' ? chan->channel.ban : type == 'e' ? 
+                          chan->channel.exempt : chan->channel.invite);
+
+          if (channel_list && !ismasked(channel_list, par))
             add_delay(chan, '-', type, par);
         }
       }
