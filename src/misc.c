@@ -1,4 +1,4 @@
-/*
+/* 
  * misc.c -- handles:
  *   split() maskhost() dumplots() daysago() days() daysdur()
  *   queueing output for the bot (msg and help)
