@@ -1500,9 +1500,11 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
   char *botm = NULL, *cmd = NULL;
   
   botm = newsplit(&par);
+
   if (par[0])
     cmd = newsplit(&par);
-  if (!botm[0] || !cmd[0]) {
+
+  if (!botm[0] || !cmd || (cmd && !cmd[0])) {
     dprintf(idx, STR("Usage: botcmd <bot> <cmd> [params]\n"));
     return;
   }
