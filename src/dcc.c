@@ -1703,17 +1703,15 @@ dcc_telnet_pass(int idx, int atr)
   if (glob_bot(fr)) {
     /* FIXME: remove after 1.2.2 */
     if (!dcc[idx].newbot) {
-sdprintf("OLD LEAF");
       gen_linkkey_hub(idx);
     } else {
-sdprintf("NEW LEAF");
       /* negotiate a new linking scheme */
       int i = 0;
       char buf[1024] = "";
   
       for (i = 0; enclink[i].name; i++)
         sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
-sdprintf("SENDING %s", buf);
+
       dprintf(idx, "neg? %s\n", buf);
     }
   } else
