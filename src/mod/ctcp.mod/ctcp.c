@@ -605,20 +605,20 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
 
 static cmd_t myctcp[] =
 {
-  {"CLIENTINFO", 	"", 	ctcp_CLIENTINFO, 	NULL},
-  {"FINGER", 		"", 	ctcp_FINGER, 		NULL},
-  {"WHOAMI", 		"", 	ctcp_WHOAMI, 		NULL},
-  {"OP", 		"", 	ctcp_OP, 		NULL},
-  {"OPS", 		"", 	ctcp_OP, 		NULL},
-  {"INVITE", 		"",	ctcp_INVITE_UNBAN, 	NULL},
-  {"UNBAN", 		"", 	ctcp_INVITE_UNBAN, 	NULL},
-  {"ERRMSG", 		"", 	ctcp_ECHO, 		NULL},
-  {"USERINFO", 		"", 	ctcp_USERINFO, 		NULL},
-  {"ECHO", 		"", 	ctcp_ECHO, 		NULL},
-  {"VERSION", 		"", 	ctcp_VERSION, 		NULL},
-  {"PING", 		"", 	ctcp_PING, 		NULL},
-  {"TIME", 		"", 	ctcp_TIME, 		NULL},
-  {"CHAT",		"",	ctcp_CHAT,		NULL},
+  {"CLIENTINFO", 	"", 	(Function) ctcp_CLIENTINFO, 	NULL},
+  {"FINGER", 		"", 	(Function) ctcp_FINGER, 		NULL},
+  {"WHOAMI", 		"", 	(Function) ctcp_WHOAMI, 		NULL},
+  {"OP", 		"", 	(Function) ctcp_OP, 		NULL},
+  {"OPS", 		"", 	(Function) ctcp_OP, 		NULL},
+  {"INVITE", 		"",	(Function) ctcp_INVITE_UNBAN, 	NULL},
+  {"UNBAN", 		"", 	(Function) ctcp_INVITE_UNBAN, 	NULL},
+  {"ERRMSG", 		"", 	(Function) ctcp_ECHO, 		NULL},
+  {"USERINFO", 		"", 	(Function) ctcp_USERINFO, 		NULL},
+  {"ECHO", 		"", 	(Function) ctcp_ECHO, 		NULL},
+  {"VERSION", 		"", 	(Function) ctcp_VERSION, 		NULL},
+  {"PING", 		"", 	(Function) ctcp_PING, 		NULL},
+  {"TIME", 		"", 	(Function) ctcp_TIME, 		NULL},
+  {"CHAT",		"",	(Function) ctcp_CHAT,		NULL},
   {NULL,		NULL,	NULL,			NULL}
 };
 #endif /* LEAF */

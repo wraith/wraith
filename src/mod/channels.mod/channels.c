@@ -758,7 +758,7 @@ static int channels_chon(char *handle, int idx)
 
 static cmd_t my_chon[] =
 {
-  {"*",		"",	channels_chon,	"channels:chon"},
+  {"*",		"",	(Function) channels_chon,	"channels:chon"},
   {NULL,	NULL,	NULL,				NULL}
 };
 

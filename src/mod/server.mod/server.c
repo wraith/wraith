@@ -1056,7 +1056,7 @@ static void msgq_clear(struct msgq_head *qh)
 
 static cmd_t my_ctcps[] =
 {
-  {"DCC",	"",	ctcp_DCC_CHAT,		"server:DCC"},
+  {"DCC",	"",	(Function) ctcp_DCC_CHAT,		"server:DCC"},
   {NULL,	NULL,	NULL,			NULL}
 };
 
