@@ -10,6 +10,17 @@
 #include "src/main.h"
 #include <stdio.h>
 
+/* Check for broken snprintf versions */
+#ifdef BROKEN_SNPRINTF
+#  ifdef HAVE_VSNPRINTF
+#    undef HAVE_VSNPRINTF
+#  endif
+#  ifdef HAVE_SNPRINTF
+#    undef HAVE_SNPRINTF
+#  endif
+#endif
+
+
 /* Use the system libraries version of vsnprintf() if available. Otherwise
  * use our own.
  */

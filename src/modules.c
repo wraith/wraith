@@ -562,7 +562,9 @@ Function global_table[] =
   (Function) myip6,
   (Function) cmdprefix,
   (Function) replace,
-  (Function) degarble
+  (Function) degarble,
+  (Function) egg_inet_ntop,
+  (Function) open_listen_by_af
 
 
 };

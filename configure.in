@@ -49,8 +49,15 @@ AC_C_INLINE
 AC_CHECK_SIZEOF(long, 0)
 AC_CHECK_SIZEOF(int, 0)
 
+
+# Check for IPv6 support
+#EGG_IPV6_SUPPORTED
+EGG_IPV6_OPTIONS
+EGG_CHECK_SOCKLEN_T
+
 # Checks for library functions
-AC_CHECK_FUNCS(clock getrusage setpgid uname sigaction sigemptyset rename strcasecmp strncasecmp getdtablesize memset random srandom dlopen dprintf snprintf vsnprintf isascii inet_aton memcpy strftime fsync)
+AC_CHECK_FUNCS(clock getrusage setpgid uname sigaction sigemptyset rename strcasecmp strncasecmp getdtablesize memset random srandom)
+AC_CHECK_FUNCS(dlopen dprintf snprintf vsnprintf isascii inet_aton inet_ntop memcpy strftime fsync gethostbyname2 getipnodebyname)
 EGG_CHECK_FUNC_VSPRINTF
 
 # Make sure we have stdc headers, since we can't compile without them
@@ -67,10 +74,10 @@ EGG_EXEEXT
 # (well, what used to be robey's Tcl thingies...)
 
 # Latest tested Tcl version to recommend if Tcl isn't found
-tclrecommendver="8.3.3"
+tclrecommendver="8.3.4"
 
 # Site recommended to download Tcl from
-tclrecommendsite="ftp://ftp.eggheads.org/pub/tcl/tcl8_3/"
+tclrecommendsite="ftp://tcl.activestate.com/pub/tcl/tcl8_3/"
 
 # Tcl library filename prefixes (also used for Tcl header dir on FreeBSD)
 tcllibnames="tcl tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 tcl8.1 tcl81 \
@@ -78,7 +85,7 @@ tcllibnames="tcl tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 tcl8.1 tcl81 \
 	tcl7.3 tcl73 tcl7.2 tcl72 tcl7.1 tcl71 tcl7.0 tcl70"
 
 # Tcl library filename suffixes
-tcllibextensions=".so .so.1 .so.1.0 .so.1.2 .a .sl .dll"
+tcllibextensions=".so .so.1 .so.1.0 .so.1.2 .a .sl .dll .dylib"
 
 # Tcl library search paths
 tcllibpaths="$HOME/lib $HOME/tcl/lib $HOME \
@@ -107,7 +114,6 @@ EGG_TCL_DETECT_CHANGE
 
 EGG_TCL_CHECK_VERSION
 EGG_TCL_CHECK_PRE70
-EGG_TCL_CHECK_PRE75
 EGG_TCL_TESTLIBS
 EGG_TCL_CHECK_FREE
 EGG_TCL_ENABLE_THREADS

@@ -8,10 +8,12 @@
 #define _EGG_COMPAT_COMPAT_H
 
 #include "inet_aton.h"
+#include "inet_ntop.h"
 #include "snprintf.h"
 #include "memset.h"
 #include "memcpy.h"
 #include "strcasecmp.h"
 #include "strftime.h"
 
-#endif	/* !__EGG_COMPAT_COMPAT_H */
+#endif /* !__EGG_COMPAT_COMPAT_H */
+

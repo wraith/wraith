@@ -1567,14 +1567,20 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from,
   if (dccfilesize == 0)
     return DCCSEND_FEMPTY;
   if (reserved_port_min > 0 && reserved_port_min < reserved_port_max) {
-    for (port = reserved_port_min; port <= reserved_port_max; port++) {
-  zz = open_listen(&port);
-     if (zz != (-1))
+    for (port = reserved_port_min; port <= reserved_port_max; port++)
+#ifdef USE_IPV6
+      if ((zz = open_listen_by_af(&port, AF_INET6)) != -1) /* no idea how we want to handle this -poptix 02/03/03 */
+#else
+      if ((zz = open_listen(&port)) != -1)
+#endif /* USE_IPV6 */
        break;
-    }
   } else {
     port = reserved_port_min;
+#ifdef USE_IPV6
+    zz = open_listen_by_af(&port, AF_INET6);
+#else
     zz = open_listen(&port);
+#endif /* USE_IPV6 */
   }
   if (zz == (-1))
     return DCCSEND_NOSOCK;

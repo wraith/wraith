@@ -22,6 +22,56 @@ EOF
 fi
 ])dnl
 
+dnl  EGG_IPV6_OPTIONS()
+dnl
+AC_DEFUN(EGG_IPV6_OPTIONS, [dnl
+AC_MSG_CHECKING(whether or not you enabled IPv6 support)
+AC_ARG_ENABLE(ipv6, [  --enable-ipv6           enable IPv6 support],
+[ ac_cv_ipv6="yes"
+  if test "$egg_cv_ipv6_supported" = "no"; then
+    ac_cv_ipv6="no"
+  fi
+  AC_MSG_RESULT($ac_cv_ipv6)
+],
+[ ac_cv_ipv6="no"
+  AC_MSG_RESULT(no)
+])
+if test "$ac_cv_ipv6" = "yes"; then
+  AC_DEFINE(HAVE_IPV6)
+  ENABLEIPV6="--enable-ipv6"
+fi
+AC_SUBST(ENABLEIPV6)
+])dnl
+
+
+dnl  EGG_CHECK_SOCKLEN_T()
+dnl
+AC_DEFUN(EGG_CHECK_SOCKLEN_T, [dnl
+AC_MSG_CHECKING(for socklen_t)
+AC_CACHE_VAL(egg_cv_socklen_t,[
+  AC_TRY_RUN([
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main()
+{
+  socklen_t test = sizeof(int);
+
+  return 0;
+}
+  ],
+egg_cv_socklen_t=yes, egg_cv_socklen_t=no, egg_cv_socklen_t=no)])
+if test "$egg_cv_socklen_t" = "yes"; then
+  AC_DEFINE(HAVE_SOCKLEN_T)
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+])dnl
+
 
 dnl  EGG_CHECK_CCPIPE()
 dnl
@@ -259,6 +309,7 @@ case "$egg_cv_var_system_type" in
       ;;
     esac
     AC_DEFINE(STOP_UAC)dnl
+    AC_DEFINE(BROKEN_SNPRINTF)dnl
   ;;
   SunOS)
     if test "`echo $egg_cv_var_system_release | cut -d . -f 1`" = "5"
@@ -876,18 +927,6 @@ configure: error:
 
 EOF
   exit 1
-fi
-])dnl
-
-
-dnl  EGG_TCL_CHECK_PRE75()
-dnl
-AC_DEFUN(EGG_TCL_CHECK_PRE75, [dnl
-# Are we using a pre 7.5 Tcl version ?
-TCL_VER_PRE75=`echo $egg_cv_var_tcl_version | $AWK '{split([$]1, i, "."); if (((i[[1]] == 7) && (i[[2]] < 5)) || (i[[1]] < 7)) print "yes"; else print "no"}'`
-if test "$TCL_VER_PRE75" = "yes"
-then
-  AC_DEFINE(HAVE_PRE7_5_TCL)dnl
 fi
 ])dnl
 

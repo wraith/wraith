@@ -55,6 +55,7 @@ char *decryptit (char *);
 int lfprintf(FILE *, char *, ...);
 
 /* botnet.c */
+inline int open_listen_by_af(int *, int);
 void lower_bot_linked(int idx);
 void higher_bot_linked(int idx);
 void answer_local_whom(int, int);
@@ -284,15 +285,25 @@ IP my_atoul(char *);
 unsigned long iptolong(IP);
 IP getmyip(int);
 void neterror(char *);
+#ifdef USE_IPV6
 void setsock(int, int, int);
-int allocsock(int, int,int);
-int getsock(int, int); 
+int allocsock(int, int, int);
+int getsock(int, int);
+#else
+void setsock(int, int);
+int allocsock(int, int);
+int getsock(int);
+#endif /* USE_IPV6 */
 int getprotocol(char *);
 char *hostnamefromip(unsigned long);
 void killsock(int);
 int answer(int, char *, unsigned long *, unsigned short *, int);
 inline int open_listen(int *);
-int open_address_listen(IP addr, int *port);
+#ifdef USE_IPV6
+int open_address_listen(IP addr, int af_def, int *);
+#else
+int open_address_listen(IP addr, int *);
+#endif /* USE_IPV6 */
 int open_telnet(char *, int);
 int open_telnet_dcc(int, char *, char *);
 int open_telnet_raw(int, char *, int);

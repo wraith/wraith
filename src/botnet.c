@@ -1042,7 +1042,11 @@ static void botlink_resolve_success(int i)
   strcpy(dcc[i].u.bot->sysname, "*");
   dcc[i].u.bot->numver = idx;
   dcc[i].u.bot->port = dcc[i].port;		/* Remember where i started */
-  dcc[i].sock =  getsock(SOCK_STRONGCONN,getprotocol(dcc[i].host));
+#ifdef USE_IPV6
+  dcc[i].sock = getsock(SOCK_STRONGCONN, getprotocol(dcc[i].host));
+#else
+  dcc[i].sock = getsock(SOCK_STRONGCONN);
+#endif /* USE_IPV6 */
   nfree(linker);
   if (dcc[i].sock < 0 ||
       open_telnet_raw(dcc[i].sock, iptostr(htonl(dcc[i].addr)),
@@ -1078,7 +1082,11 @@ static void failed_tandem_relay(int idx)
     return;
   }
   killsock(dcc[idx].sock);
-  dcc[idx].sock = getsock(SOCK_STRONGCONN,getprotocol(dcc[idx].host));
+#ifdef USE_IPV6
+  dcc[idx].sock = getsock(SOCK_STRONGCONN, getprotocol(dcc[idx].host));
+#else
+  dcc[idx].sock = getsock(SOCK_STRONGCONN);
+#endif /* USE_IPV6 */
   dcc[uidx].u.relay->sock = dcc[idx].sock;
   dcc[idx].port++;
   dcc[idx].timeval = now;
@@ -1125,7 +1133,12 @@ void tandem_relay(int idx, char *nick, register int i)
     return;
   }
 
-  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL,getprotocol(bi->address));
+#ifdef USE_IPV6
+  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL, getprotocol(bi->address));
+#else
+  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL);
+#endif /* USE_IPV6 */
+
   if (dcc[i].sock < 0) {
     lostdcc(i);
     dprintf(idx, "%s\n", MISC_NOFREESOCK);

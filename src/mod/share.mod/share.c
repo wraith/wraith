@@ -1135,7 +1135,11 @@ static void share_userfileq(int idx, char *par)
 /* us <ip> <port> <length>
  */
 static void share_ufsend(int idx, char *par)
-    sock = getsock(SOCK_BINARY,getprotocol(ip));       /* Don't buffer this -> mark binary. */
+{
+    sock = getsock(SOCK_BINARY, getprotocol(ip)); /* Don't buffer this -> mark binary. */
+  char s[1024];
+  int i, sock;
+  FILE *f;
 
   egg_snprintf(s, sizeof s, "%s.share.%s.%lu.users", tempdir, botnetnick, now);
   if (!(b_status(idx) & STAT_SHARE)) {

@@ -31,7 +31,7 @@ distclean: clean
  ../../../src/eggdrop.h ../../../src/flags.h ../../../src/proto.h \
  ../../../lush.h ../../../src/misc_file.h ../../../src/cmdt.h \
  ../../../src/tclegg.h ../../../src/tclhash.h \
- ../../../src/users.h ../../../src/compat/compat.h \
+ ../../../src/users.h ../../../src/compat/compat.h ../../../src/compat/inet_ntop.h \
  ../../../src/compat/inet_aton.h ../../../src/compat/snprintf.h \
  ../../../src/compat/memset.h ../../../src/compat/memcpy.h \
  ../../../src/compat/strcasecmp.h ../../../src/compat/strftime.h \

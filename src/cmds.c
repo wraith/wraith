@@ -1532,15 +1532,20 @@ static void cmd_uplink(struct userrec *u, int idx, char *par)
 static void cmd_chaddr(struct userrec *u, int idx, char *par)
 {
   int telnet_port = 3333, relay_port = 3333;
+#ifdef USE_IPV6
+  char *handle, *addr, *p, *q, *r;
+#else
   char *handle, *addr, *p, *q;
+#endif /* USE_IPV6 */
   struct bot_addr *bi;
   struct userrec *u1;
 
+  handle = newsplit(&par);
   if (!par[0]) {
-    dprintf(idx, "Usage: chaddr <botname> <address[:telnet-port[/relay-port]]>\n");
+    dprintf(idx, "Usage: chaddr <botname> "
+            "<address[:telnet-port[/relay-port]]>\n");
     return;
   }
-  handle = newsplit(&par);
   addr = newsplit(&par);
   if (strlen(addr) > UHOSTMAX)
     addr[UHOSTMAX] = 0;
@@ -1571,16 +1576,41 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
     bi->telnet_port = telnet_port;
     bi->relay_port = relay_port;
   } else {
+#ifdef USE_IPV6
+    r = strchr(addr, '[');
+    if (r) { /* ipv6 notation [3ffe:80c0:225::] */
+      *addr++;
+      r = strchr(addr, ']');
+      bi->address = user_malloc(r - addr + 1);
+      strncpyz(bi->address, addr, r - addr + 1);
+      addr = r;
+      *addr++;
+    } else {
+      bi->address = user_malloc(q - addr + 1);
+      strncpyz(bi->address, addr, q - addr + 1);
+    }
+    q = strchr(addr, ':');
+    if (q) {
+      p = q + 1;
+      bi->telnet_port = atoi(p);
+      q = strchr(p, '/');
+      if (!q) {
+        bi->relay_port = telnet_port;
+      } else {
+        bi->relay_port = atoi(q + 1);
+      }
+    }
+#else
     bi->address = user_malloc(q - addr + 1);
     strncpyz(bi->address, addr, q - addr + 1);
     p = q + 1;
     bi->telnet_port = atoi(p);
     q = strchr(p, '/');
-    if (!q) {
+    if (!q)
       bi->relay_port = bi->telnet_port;
-    } else {
+    else
       bi->relay_port = atoi(q + 1);
-    }
+#endif /* USE_IPV6 */
   }
   set_user(&USERENTRY_BOTADDR, u1, bi);
 }

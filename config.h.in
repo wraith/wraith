@@ -1,11 +1,54 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
+/* config.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
 #ifndef _EGG_CONFIG_H
 #define _EGG_CONFIG_H
-/* 
- * acconfig.h
- *   template file autoheader uses when building config.h.in
- * 
- */
+
+/* Define if on AIX 3.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _ALL_SOURCE
+#undef _ALL_SOURCE
+#endif
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
+#undef HAVE_SYS_WAIT_H
+
+/* Define as __inline if that's what the C compiler calls it.  */
+#undef inline
+
+/* Define if on MINIX.  */
+#undef _MINIX
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef pid_t
+
+/* Define if the system does not provide POSIX.1 features except
+   with this defined.  */
+#undef _POSIX_1_SOURCE
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+#undef WORDS_BIGENDIAN
+
+/* Define if you want to enable IPv6 support. */
+#undef HAVE_IPV6
+
+/* Define if you have support for socklen_t. */
+#undef HAVE_SOCKLEN_T
 
 /* Define if modules will work on your system  */
 #undef MODULES_OK
@@ -18,6 +61,9 @@
 
 /* Define if running on OSF/1 platform.  */
 #undef OSF1_HACKS
+
+/* Define to use Eggdrop's snprintf functions without regard to HAVE_SNPRINTF. */
+#undef BROKEN_SNPRINTF
 
 /* Define if running on OSF/1 platform.  */
 #undef STOP_UAC
@@ -37,9 +83,6 @@
 /* Define if we need dlopen (for module support)  */
 #undef HAVE_DLOPEN
 
-/* Define for pre Tcl 7.5 compat  */
-#undef HAVE_PRE7_5_TCL
-
 /* Define for Tcl that has Tcl_Free() (7.5p1 and later)  */
 #undef HAVE_TCL_FREE
 
@@ -49,200 +92,142 @@
 /* Defines the current eggdrop version  */
 #undef EGG_VERSION
 
-/* Define if you have the `clock' function. */
-#undef HAVE_CLOCK
-
-/* Define if you have the <dirent.h> header file, and it defines `DIR'. */
-#undef HAVE_DIRENT_H
-
-/* Define if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
-
-/* Define if you have the `dlopen' function. */
-#undef HAVE_DLOPEN
-
-/* Define if you have the `dprintf' function. */
-#undef HAVE_DPRINTF
-
-/* Define if you have the `fsync' function. */
-#undef HAVE_FSYNC
-
-/* Define if you have the `ipv6' support. */
-#define USE_IPV6
-
-/* Define if you have the `getdtablesize' function. */
-#undef HAVE_GETDTABLESIZE
-
-/* Define if you have the `getrusage' function. */
-#undef HAVE_GETRUSAGE
-
-/* Define if you have the `inet_aton' function. */
-#undef HAVE_INET_ATON
-
-/* Define if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
-
-/* Define if you have the `isascii' function. */
-#undef HAVE_ISASCII
-
-/* Define if you have the `dl' library (-ldl). */
-#undef HAVE_LIBDL
-
-/* Define if you have the `dld' library (-ldld). */
-#undef HAVE_LIBDLD
-
-/* Define if you have the `dns' library (-ldns). */
-#undef HAVE_LIBDNS
-
-/* Define if you have the `nsl' library (-lnsl). */
-#undef HAVE_LIBNSL
-
-/* Define if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
-
-/* Define if you have the <limits.h> header file. */
-#undef HAVE_LIMITS_H
-
-/* Define if you have the `memcpy' function. */
-#undef HAVE_MEMCPY
-
-/* Define if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define if you have the `memset' function. */
-#undef HAVE_MEMSET
-
-/* Define if you have the <ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_NDIR_H
-
-/* Define if you have the `random' function. */
-#undef HAVE_RANDOM
-
-/* Define if you have the `rename' function. */
-#undef HAVE_RENAME
-
-/* Define if you have the `setpgid' function. */
-#undef HAVE_SETPGID
-
-/* Define if you have the `sigaction' function. */
-#undef HAVE_SIGACTION
-
-/* Define if you have the `sigemptyset' function. */
-#undef HAVE_SIGEMPTYSET
-
-/* Define if you have the `snprintf' function. */
-#undef HAVE_SNPRINTF
-
-/* Define if you have the `srandom' function. */
-#undef HAVE_SRANDOM
-
-/* Define if you have the <stdarg.h> header file. */
-#undef HAVE_STDARG_H
-
-/* Define if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
-/* Define if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
-
-/* Define if you have the <std_args.h> header file. */
-#undef HAVE_STD_ARGS_H
-
-/* Define if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
-/* Define if you have the `strftime' function. */
-#undef HAVE_STRFTIME
-
-/* Define if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
-
-/* Define if you have the <string.h> header file. */
-#undef HAVE_STRING_H
-
-/* Define if you have the `strncasecmp' function. */
-#undef HAVE_STRNCASECMP
-
-/* Define if you have the <sys/dir.h> header file, and it defines `DIR'. */
-#undef HAVE_SYS_DIR_H
-
-/* Define if you have the <sys/ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_SYS_NDIR_H
-
-/* Define if you have the <sys/rusage.h> header file. */
-#undef HAVE_SYS_RUSAGE_H
-
-/* Define if you have the <sys/select.h> header file. */
-#undef HAVE_SYS_SELECT_H
-
-/* Define if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define if you have the <sys/time.h> header file. */
-#undef HAVE_SYS_TIME_H
-
-/* Define if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
-
-/* Define if you have <sys/wait.h> that is POSIX.1 compatible. */
-#undef HAVE_SYS_WAIT_H
-
-/* Define if you have the `uname' function. */
-#undef HAVE_UNAME
-
-/* Define if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
-
-/* Define if you have the `vsnprintf' function. */
-#undef HAVE_VSNPRINTF
-
-/* Define if you have the `vsprintf' function. */
-#undef HAVE_VSPRINTF
-
-/* The size of a `int', as computed by sizeof. */
+/* The number of bytes in a int.  */
 #undef SIZEOF_INT
 
-/* The size of a `long', as computed by sizeof. */
+/* The number of bytes in a long.  */
 #undef SIZEOF_LONG
 
-/* Define if you have the ANSI C header files. */
-#undef STDC_HEADERS
+/* Define if you have the clock function.  */
+#undef HAVE_CLOCK
 
-/* Define if you can safely include both <sys/time.h> and <time.h>. */
-#undef TIME_WITH_SYS_TIME
+/* Define if you have the dlopen function.  */
+#undef HAVE_DLOPEN
 
-/* Define if your processor stores words with the most significant byte first
-   (like Motorola and SPARC, unlike Intel and VAX). */
-#undef WORDS_BIGENDIAN
+/* Define if you have the dprintf function.  */
+#undef HAVE_DPRINTF
 
-/* Define if on AIX 3.
-   System headers sometimes define this.
-   We just want to avoid a redefinition error message.  */
-#ifndef _ALL_SOURCE
-# undef _ALL_SOURCE
-#endif
+/* Define if you have the fsync function.  */
+#undef HAVE_FSYNC
 
-/* Define if on MINIX. */
-#undef _MINIX
+/* Define if you have the getdtablesize function.  */
+#undef HAVE_GETDTABLESIZE
 
-/* Define if the system does not provide POSIX.1 features except with this
-   defined. */
-#undef _POSIX_1_SOURCE
+/* Define if you have the gethostbyname2 function.  */
+#undef HAVE_GETHOSTBYNAME2
 
-/* Define if you need to in order for `stat' and other things to work. */
-#undef _POSIX_SOURCE
+/* Define if you have the getipnodebyname function.  */
+#undef HAVE_GETIPNODEBYNAME
 
-/* Define to empty if `const' does not conform to ANSI C. */
-#undef const
+/* Define if you have the getrusage function.  */
+#undef HAVE_GETRUSAGE
 
-/* Define as `__inline' if that's what the C compiler calls it, or to nothing
-   if it is not supported. */
-#undef inline
+/* Define if you have the inet_aton function.  */
+#undef HAVE_INET_ATON
 
-/* Define to `int' if <sys/types.h> does not define. */
-#undef pid_t
+/* Define if you have the inet_ntop function.  */
+#undef HAVE_INET_NTOP
 
-/* Define to `unsigned' if <sys/types.h> does not define. */
-#undef size_t
+/* Define if you have the isascii function.  */
+#undef HAVE_ISASCII
+
+/* Define if you have the memcpy function.  */
+#undef HAVE_MEMCPY
+
+/* Define if you have the memset function.  */
+#undef HAVE_MEMSET
+
+/* Define if you have the random function.  */
+#undef HAVE_RANDOM
+
+/* Define if you have the rename function.  */
+#undef HAVE_RENAME
+
+/* Define if you have the setpgid function.  */
+#undef HAVE_SETPGID
+
+/* Define if you have the sigaction function.  */
+#undef HAVE_SIGACTION
+
+/* Define if you have the sigemptyset function.  */
+#undef HAVE_SIGEMPTYSET
+
+/* Define if you have the snprintf function.  */
+#undef HAVE_SNPRINTF
+
+/* Define if you have the srandom function.  */
+#undef HAVE_SRANDOM
+
+/* Define if you have the strcasecmp function.  */
+#undef HAVE_STRCASECMP
+
+/* Define if you have the strftime function.  */
+#undef HAVE_STRFTIME
+
+/* Define if you have the strncasecmp function.  */
+#undef HAVE_STRNCASECMP
+
+/* Define if you have the uname function.  */
+#undef HAVE_UNAME
+
+/* Define if you have the vsnprintf function.  */
+#undef HAVE_VSNPRINTF
+
+/* Define if you have the vsprintf function.  */
+#undef HAVE_VSPRINTF
+
+/* Define if you have the <dirent.h> header file.  */
+#undef HAVE_DIRENT_H
+
+/* Define if you have the <dlfcn.h> header file.  */
+#undef HAVE_DLFCN_H
+
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
+/* Define if you have the <ndir.h> header file.  */
+#undef HAVE_NDIR_H
+
+/* Define if you have the <std_args.h> header file.  */
+#undef HAVE_STD_ARGS_H
+
+/* Define if you have the <stdarg.h> header file.  */
+#undef HAVE_STDARG_H
+
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
+
+/* Define if you have the <sys/dir.h> header file.  */
+#undef HAVE_SYS_DIR_H
+
+/* Define if you have the <sys/ndir.h> header file.  */
+#undef HAVE_SYS_NDIR_H
+
+/* Define if you have the <sys/rusage.h> header file.  */
+#undef HAVE_SYS_RUSAGE_H
+
+/* Define if you have the <sys/select.h> header file.  */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the dl library (-ldl).  */
+#undef HAVE_LIBDL
+
+/* Define if you have the dld library (-ldld).  */
+#undef HAVE_LIBDLD
+
+/* Define if you have the dns library (-ldns).  */
+#undef HAVE_LIBDNS
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET
 
 #endif /* !_EGG_CONFIG_H */

@@ -60,6 +60,9 @@
 #ifdef egg_inet_aton
 #  undef egg_inet_aton
 #endif
+#ifdef egg_inet_ntop
+#  undef egg_inet_ntop
+#endif
 #ifdef egg_vsnprintf
 #  undef egg_vsnprintf
 #endif
@@ -523,6 +526,10 @@
 #define cmdprefix ((char *)(global[325]))
 #define replace ((char*(*)(char *, char *, char *))global[326])
 #define degarble ((char *(*)(int, char *))global[327])
+#define open_listen_by_af ((int (*) (int *, int))global[328])
+/* 329 - 332 */
+#define egg_inet_ntop ((int (*)(int af, const void *src, char *dst, socklen_t size))global[329])
+
 
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
