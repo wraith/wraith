@@ -298,7 +298,12 @@ cont_link(int idx, char *buf, int ii)
   if (ii == 2) {
     dprintf(idx, "%s\n", conf.bot->nick);
 
-    enclink_call(idx, LINK_GHOST, TO);
+    int snum = findanysnum(dcc[idx].sock);
+
+    if (snum >= 0) {
+      socklist[snum].enclink = link_find_by_type(LINK_GHOST);
+      link_link(idx, LINK_GHOST, TO);
+    }
 
     /* wait for "elink" now */
   } else if (ii == 3) {			/* new hub response */
@@ -347,27 +352,25 @@ dcc_bot_new(int idx, char *buf, int x)
     int snum = findanysnum(dcc[idx].sock);
 
     if (snum >= 0) {
-      int i = 0, type = 0;
       char *tmp = strdup(buf), *tmpp = tmp, *p = NULL;
+      int i = -1;
 
-      while ((p = strchr(buf, ' ')) && !type) {
+      while ((p = strchr(buf, ' ')) && i == -1) {
         *p = 0;
 
         /* pick the first (lowest num) one that we share */
-        for (i = 0; enclink[i].name; i++) {
-          if (atoi(tmp) == enclink[i].type) {
-            type = i;
-            break;
-          }
-        }
+        if ((i = link_find_by_type(atoi(tmp))) != -1)
+          break;
+
         tmp = p++;
       }
       free(tmpp);
 
-      sdprintf("Choosing '%s' for link", enclink[type].name);
-      dprintf(idx, "neg %d\n", type);
-      socklist[snum].enctype = type;
-      (enclink[type].func) (idx, TO);	
+      sdprintf("Choosing '%s' for link", enclink[i].name);
+      dprintf(idx, "neg %d\n", enclink[i].type);
+      socklist[snum].enclink = i;
+      if (enclink[i].link)
+        (enclink[i].link) (idx, TO);	
     }
   } else if (!egg_strcasecmp(code, "error")) {
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
@@ -933,24 +936,18 @@ dcc_chat_pass(int idx, char *buf, int atr)
       int snum = findanysnum(dcc[idx].sock);
 
       if (snum >= 0) {
-        int type = atoi(newsplit(&buf)), i = 0;
-        bool found = 0;
+        int type = atoi(newsplit(&buf)), i = -1;
 
         /* verify we have that type and then initiate it */
-        for (i = 0; enclink[i].name; i++) {
-          if (type == enclink[i].type) {
-            found = 1;
-            break;
-          }
-        }
-        if (!found) {
+        if ((i = link_find_by_type(type)) == -1) {
           putlog(LOG_WARN, "*", "%s attempted to link with an invalid encryption.", dcc[idx].nick);
           killsock(dcc[idx].sock);
           lostdcc(idx);
           return;
         }
-        socklist[snum].enctype = type;
-        (enclink[i].func) (idx, FROM);
+        socklist[snum].enclink = i;
+        if (enclink[i].link)
+          (enclink[i].link) (idx, FROM);
       }
     } else {
       /* Invalid password/digest on hub */
@@ -1641,7 +1638,7 @@ dcc_telnet_pass(int idx, int atr)
   if (glob_bot(fr)) {
     /* FIXME: remove after 1.2.2 */
     if (!dcc[idx].newbot) {
-      enclink_call(idx, LINK_GHOST, FROM);
+      link_call(idx, LINK_GHOST, FROM);
     } else {
       /* negotiate a new linking scheme */
       int i = 0;

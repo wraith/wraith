@@ -12,7 +12,7 @@
 #include "main.h"
 #include "debug.h"
 #include "dccutil.h"
-#include "crypt.h"
+#include "enclink.h"
 #include "egg_timer.h"
 #include "traffic.h"
 #include "adns.h"
@@ -367,6 +367,7 @@ int allocsock(int sock, int options)
       socklist[i].flags = options;
       socklist[i].sock = sock;
       socklist[i].encstatus = 0;
+      socklist[i].enclink = -1;
       socklist[i].gz = 0;
       egg_bzero(&socklist[i].okey, sizeof(socklist[i].okey));
       egg_bzero(&socklist[i].ikey, sizeof(socklist[i].ikey));
@@ -1172,86 +1173,6 @@ static int sockread(char *s, int *len)
   return -3;
 }
 
-inline static int 
-prand(int *seed, int range)
-{
-  long long i1 = *seed;
-
-  i1 = (i1 * 0x08088405 + 1) & 0xFFFFFFFF;
-  *seed = i1;
-  return ((i1 * range) >> 32);
-}
-
-char *botlink_decrypt(int snum, char *src)
-{
-  char *line = decrypt_string(socklist[snum].ikey, src);
-
-  strcpy(src, line);
-  free(line);
-  if (socklist[snum].iseed) {
-    *(dword *) & socklist[snum].ikey[0] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[8] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[12] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-
-    if (!socklist[snum].iseed)
-      socklist[snum].iseed++;
-  }
-  return src;
-}
-
-char *botlink_encrypt(int snum, char *src, size_t *len)
-{
-  char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
-  size_t bufpos = 0;
-
-  srcbuf = (char *) my_calloc(1, *len + 9 + 1);
-  strcpy(srcbuf, src);
-  line = srcbuf;
-
-  eol = strchr(line, '\n');
-  while (eol) {
-    *eol++ = 0;
-    eline = encrypt_string(socklist[snum].okey, line);
-    if (socklist[snum].oseed) {
-      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-
-      if (!socklist[snum].oseed)
-        socklist[snum].oseed++;
-    }
-    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
-    strcpy((char *) &buf[bufpos], eline);
-    free(eline);
-    strcat(buf, "\n");
-    bufpos = strlen(buf);
-    line = eol;
-    eol = strchr(line, '\n');
-  }
-  if (line[0]) {
-    eline = encrypt_string(socklist[snum].okey, line);
-    if (socklist[snum].oseed) {
-      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-
-      if (!socklist[snum].oseed)
-        socklist[snum].oseed++;
-    }
-    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
-    strcpy((char *) &buf[bufpos], eline);
-    free(eline);
-    strcat(buf, "\n");
-  }
-  free(srcbuf);
-
-  *len = strlen(buf);
-  return buf;
-}
-
 /* sockgets: buffer and read from sockets
  * 
  * Attempts to read from all registered sockets for up to one second.  if
@@ -1304,9 +1225,12 @@ int sockgets(char *s, int *len)
 	  /* Strip CR if this was CR/LF combo */
 	  if (s[strlen(s) - 1] == '\r')
 	    s[strlen(s) - 1] = 0;
-          if (socklist[i].encstatus && s[0])
-            botlink_decrypt(i, s);
-	  *len = strlen(s);
+
+          if (s[0] && socklist[i].encstatus)
+            link_read(i, s, (size_t *) len);
+            
+          *len = strlen(s);
+
 	  return socklist[i].sock;
 	}
       } else {
@@ -1427,9 +1351,11 @@ int sockgets(char *s, int *len)
       data = 1;
     }
   }
-  if (socklist[ret].encstatus && s[0])
-    botlink_decrypt(ret, s);
+  if (s[0] && socklist[ret].encstatus)
+    link_read(ret, s, (size_t *) len);
+
   *len = strlen(s);
+
   /* Anything left that needs to be saved? */
   if (!xx[0]) {
     if (data)
@@ -1495,8 +1421,8 @@ void tputs(register int z, char *s, size_t len)
         }
       }
 
-      if (socklist[i].encstatus && (len > 0))
-        s = botlink_encrypt(i, s, &len);		/* will modify len */
+      if (len && socklist[i].encstatus)
+        s = link_write(i, s, &len);
       
       if (socklist[i].outbuf != NULL) {
 	/* Already queueing: just add it */
