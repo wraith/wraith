@@ -968,6 +968,7 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
     }
   /* Set up all the normal socket crap */
   setsock(new_sock, (binary ? SOCK_BINARY : 0));
+  sdprintf("Answered socket %d: %s", new_sock, caller);
   return new_sock;
 }
 
