@@ -5,7 +5,7 @@
 
 /* The next line defines where the custom TCL build's prefix is.. */
 /* It MUST stay in the default syntax. */
-//TCLDIR "/home/ares"
+//TCLDIR "/home/wheel/bryan"
 
 
 /* Change "define" to "undef" to disable a feature

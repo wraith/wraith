@@ -77,3 +77,71 @@ int movefile(char *oldpath, char *newpath)
     unlink(oldpath);
   return ret;
 }
+
+int is_file(const char *s)
+{
+  struct stat ss;
+  int i = stat(s, &ss);
+
+  if (i < 0)
+    return 0;
+  if ((ss.st_mode & S_IFREG) || (ss.st_mode & S_IFLNK))
+    return 1;
+  return 0;
+}
+
+int can_stat(const char *s)
+{
+  struct stat ss;
+  int i = stat(s, &ss);
+
+  if (i < 0)
+    return 0;
+  return 1;
+}
+
+int can_lstat(const char *s)
+{
+  struct stat ss;
+  int i = lstat(s, &ss);
+
+  if (i < 0)
+    return 0;
+  return 1;
+}
+
+int is_symlink(const char *s)
+{
+  struct stat ss;
+  int i = stat(s, &ss);
+
+  if (i < 0)
+    return 0;
+  if (ss.st_mode & S_IFLNK)
+    return 1;
+  return 0;
+}
+
+int is_dir(const char *s)
+{
+  struct stat ss;
+  int i = stat(s, &ss);
+
+  if (i < 0)
+    return 0;
+  if (ss.st_mode & S_IFDIR)
+    return 1;
+  return 0;
+}
+
+int fixmod(const char *s)
+{
+  int i;
+
+  if (!can_stat(s))
+    return 0;
+  i = chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
+  if (i < 0)
+    return 0;
+  return 1;
+}

@@ -212,21 +212,18 @@ void cache_my_ip()
   memset(&cached_myip6_so, 0, sizeof(union sockaddr_union));
 
   if (myip6 != NULL && myip6[1]) {
-    if (SDEBUG)
-      printf("myip6: %s\n", myip6);
+    sdprintf("myip6: %s", myip6);
     if (get_ip(myip6, &cached_myip6_so))
       any = 1;
   } else if (hostname != NULL && hostname6[1]) {
-    if (SDEBUG)
-      printf("myhostname6: %s\n", hostname6);
+    sdprintf("myhostname6: %s", hostname6);
     if (get_ip(hostname6, &cached_myip6_so))
       any = 1;
   } else
     any = 1;
 
   if (any) {
-    if (SDEBUG)
-      printf("IPV6 addr_any is set.\n");
+    sdprintf("IPV6 addr_any is set.");
     cached_myip6_so.sin6.sin6_family = AF_INET6;
     cached_myip6_so.sin6.sin6_addr = in6addr_any;
   }

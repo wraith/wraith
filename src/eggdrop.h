@@ -9,8 +9,6 @@
 #ifndef _EGG_EGGDROP_H
 #define _EGG_EGGDROP_H
 
-#define SDEBUG 1
-
 /*
  * Enable IPv6 support?
  */
@@ -94,6 +92,21 @@
 #define KICK_MEAN 14
 #define KICK_BOGUSKEY 15
 
+#define ERR_BINSTAT 1
+#define ERR_BINMOD 2
+#define ERR_PASSWD 3
+#define ERR_WRONGBINDIR 4
+#define ERR_CONFSTAT 5
+#define ERR_TMPSTAT 6
+#define ERR_CONFDIRMOD 7
+#define ERR_CONFMOD 8
+#define ERR_TMPMOD 9
+#define ERR_NOCONF 10
+#define ERR_CONFBADENC 11
+#define ERR_WRONGUID 12
+#define ERR_WRONGUNAME 13
+#define ERR_BADCONF 14
+#define ERR_MAX 15
 
 /*
  *     The 'configure' script should make this next part automatic,
@@ -599,6 +612,7 @@ typedef struct {
 #define LOG_RAW      0x000080	/* r   raw server stuff coming in	*/
 #define LOG_FILES    0x000100	/* x   file transfer commands and stats	*/
 #define LOG_ERRORS   0x000200	/* e   misc errors               	*/
+#define LOG_ERROR    0x000200	/* e   misc errors               	*/
 #define LOG_GETIN    0x000400	/* g   op system. (Getin)			*/
 #define LOG_WARN     0x000800	/* u   warnings			*/
 

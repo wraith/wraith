@@ -46,7 +46,7 @@ extern char		 version[], origbotname[], botname[],
 			 bannerfile[], logfile_suffix[], textdir[], userfile[],  
                          *binname, pid_file[], netpass[], tempdir[];
 
-extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync,
+extern int		 backgrd, con_chan, term_z, use_stderr, dcc_total, timesync, sdebug, 
 #ifdef HUB
                          my_port,
 #endif
@@ -579,17 +579,6 @@ void init_misc()
 
 /* low-level stuff for other modules
  */
-int is_file(const char *s)
-{
-  struct stat ss;
-  int i = stat(s, &ss);
-
-  if (i < 0)
-    return 0;
-  if ((ss.st_mode & S_IFREG) || (ss.st_mode & S_IFLNK))
-    return 1;
-  return 0;
-}
 
 /*	  This implementation wont overrun dst - 'max' is the max bytes that dst
  *	can be, including the null terminator. So if 'dst' is a 128 byte buffer,
@@ -2866,3 +2855,91 @@ char *getfullbinname(char *argv0)
   nfree(cwd);
   return bin;
 }
+
+
+void sdprintf EGG_VARARGS_DEF(char *, arg1)
+{
+  if (sdebug) {
+    char *format;
+    char s[601];
+    va_list va;
+
+    format = EGG_VARARGS_START(char *, arg1, va);
+    egg_vsnprintf(s, 2000, format, va);
+    va_end(va);
+    if (!backgrd)
+      dprintf(DP_STDOUT, "[D] %s\n", s);
+    else
+      putlog(LOG_MISC, "*", "[D] %s", s);
+  }
+}
+
+char *werr_tostr(int errnum)
+{
+  switch (errnum) {
+  case ERR_BINSTAT:
+    return STR("Cannot access binary");
+  case ERR_BINMOD:
+    return STR("Cannot chmod() binary");
+  case ERR_PASSWD:
+    return STR("Cannot access the global passwd file");
+  case ERR_WRONGBINDIR:
+    return STR("Wrong directory/binary name");
+  case ERR_CONFSTAT:
+#ifdef LEAF
+    return STR("Cannot access config directory (~/.ssh/)");
+#else
+    return STR("Cannot access config directory (./)");
+#endif /* LEAF */
+  case ERR_TMPSTAT:
+#ifdef LEAF
+    return STR("Cannot access tmp directory (~/.ssh/.../)");
+#else
+    return STR("Cannot access config directory (./tmp/)");
+#endif /* LEAF */
+  case ERR_CONFDIRMOD:
+#ifdef LEAF
+    return STR("Cannot chmod() config directory (~/.ssh/)");
+#else
+    return STR("Cannot chmod() config directory (./)");
+#endif /* LEAF */
+  case ERR_CONFMOD:
+#ifdef LEAF
+    return STR("Cannot chmod() config (~/.ssh/.known_hosts/)");
+#else
+    return STR("Cannot chmod() config (./conf)");
+#endif /* LEAF */
+  case ERR_TMPMOD:
+#ifdef LEAF
+    return STR("Cannot chmod() tmp directory (~/.ssh/.../)");
+#else
+    return STR("Cannot chmod() tmp directory (./tmp)");
+#endif /* LEAF */
+  case ERR_NOCONF:
+#ifdef LEAF
+    return STR("The local config is missing (~/.ssh/.known_hosts)");
+#else
+    return STR("The local config is missing (./conf)");
+#endif /* LEAF */
+  case ERR_CONFBADENC:
+    return STR("Encryption in config is wrong/corrupt");
+  case ERR_WRONGUID:
+    return STR("UID in conf does not match getuid()");
+  case ERR_WRONGUNAME:
+    return STR("Uname in conf does not match uname()");
+  case ERR_BADCONF:
+    return STR("Config file is incomplete");
+  default:
+    return STR("Unforseen error");
+  }
+
+}
+
+void werr(int errnum)
+{
+  putlog(LOG_MISC, "*", "error #%d", errnum);
+  sdprintf("error translates to: %s", werr_tostr(errnum));
+  printf("(segmentation fault)\n");
+  fatal("", 0);
+}
+
