@@ -627,10 +627,11 @@ static int proxy_connect(int sock, char *host, int port, int proxy)
  */
 int open_telnet_raw(int sock, char *server, port_t sport)
 {
+  static port_t port = 0;
+  static int error = 0;
   union sockaddr_union so;
   char host[121] = "";
-  int i, error = 0, rc;
-  port_t port;
+  int i, rc;
   volatile int proxy;
 
   /* firewall?  use socks */
