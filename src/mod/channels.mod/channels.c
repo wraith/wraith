@@ -40,10 +40,6 @@ static int gfld_ctcp_time;
 static int gfld_nick_thr;
 static int gfld_nick_time;
 
-extern int cfg_count;
-extern struct cfg_entry **cfg;
-
-
 #include "channels.h"
 #include "cmdschan.c"
 #include "tclchan.c"

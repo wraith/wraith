@@ -25,8 +25,6 @@ static Function *global = NULL, *transfer_funcs = NULL, *compress_funcs = NULL,
                 *uncompress_funcs = NULL;
 
 
-extern int egg_numver;
-
 /* Prototypes */
 static void start_sending_binary(int);
 static void cancel_user_xfer(int, void *);

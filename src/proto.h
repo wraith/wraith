@@ -78,7 +78,7 @@ void partysetidle(char *, int, int);
 void partyaway(char *, int, char *);
 #ifdef S_DCCPASS
 void botnet_send_cmdpass(int, char *, char *);
-#endif
+#endif /* S_DCCPASS */
 void zapfbot(int);
 void tandem_relay(int, char *, int);
 int getparty(char *, int);
@@ -94,9 +94,6 @@ void tandout_but EGG_VARARGS(int, arg1);
 char *int_to_base10(int);
 char *unsigned_int_to_base10(unsigned int);
 char *int_to_base64(unsigned int);
-#ifdef S_DCCPASS
-void botnet_send_cmdpass(int, char *, char *);
-#endif
 
 /* chanprog.c */
 void checkchans(int);
@@ -114,7 +111,6 @@ void chanprog();
 void check_timers();
 void check_utimers();
 void rmspace(char *s);
-void check_timers();
 void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
@@ -222,10 +218,9 @@ char *makehash(struct userrec *, char *);
 void set_cfg_int(char *target, char *entryname, int data);
 void set_cfg_str(char *target, char *entryname, char *data);
 void add_cfg(struct cfg_entry *entry);
-void got_config_share(int idx, char *ln);
+void got_config_share(int idx, char * ln);
 void userfile_cfg_line(char *ln);
 void trigger_cfg_changed();
-void got_config_share (int idx, char * ln);
 #ifdef S_DCCPASS
 int check_cmd_pass(char *,char *);
 int has_cmd_pass(char *);
