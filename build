@@ -107,11 +107,13 @@ fi
 # Figure what bins we're making
 case `uname` in
   Linux) os=Linux;;
-  FreeBSD) case `uname -r` in
-    5*) os=FreeBSD5;;
-    4*) os=FreeBSD4;;
-    3*) os=FreeBSD3;;
-  esac;;
+  FreeBSD) os=FreeBSD;
+
+#  FreeBSD) case `uname -r` in
+#    5*) os=FreeBSD5;;
+#    4*) os=FreeBSD4;;
+#    3*) os=FreeBSD3;;
+#  esac;;
   OpenBSD) os=OpenBSD;;
 esac
 
