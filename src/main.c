@@ -673,7 +673,7 @@ static void dtx_arg(int argc, char *argv[])
         got_ed("d", p, p2);
         break; /* this should never be reached */
       case 'v':
-	printf("Wraith %s\nBuild Date: %s UTC\n", egg_version, ctime(&buildts));
+	printf("Wraith %s\nBuild Date: %s\n", egg_version, ctime(&buildts));
 	bg_send_quit(BG_ABORT);
 	exit(0);
         break; /* this should never be reached */
