@@ -434,22 +434,20 @@ int sort_compare(struct userrec *a, struct userrec *b)
    * return true if (a > b)
    */
   if (a->flags & b->flags & USER_BOT) {
-    if (~bot_flags(a) & bot_flags(b) & BOT_HUB)
+    if (bot_hublevel(a) > bot_hublevel(b))
       return 1;
-    if (bot_flags(a) & ~bot_flags(b) & BOT_HUB)
+    else if (bot_hublevel(a) < bot_hublevel(b))
       return 0;
-/*    if (~bot_flags(a) & bot_flags(b) & BOT_ALT)
-      return 1;
-    if (bot_flags(a) & ~bot_flags(b) & BOT_ALT)
-      return 0;*/
-    if (~bot_flags(a) & bot_flags(b) & BOT_LEAF)
-      return 1;
-    if (bot_flags(a) & ~bot_flags(b) & BOT_LEAF)
+    else if (bot_hublevel(a) == bot_hublevel(b) && bot_hublevel(a) == 999)
       return 0;
   } else {
     if (~a->flags & b->flags & USER_BOT)
       return 1;
     if (a->flags & ~b->flags & USER_BOT)
+      return 0;
+    if (~a->flags & b->flags & USER_ADMIN)
+      return 1;
+    if (a->flags & ~b->flags & USER_ADMIN)
       return 0;
     if (~a->flags & b->flags & USER_OWNER)
       return 1;
