@@ -25,6 +25,9 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <errno.h>
+#include <sys/mman.h>
+#define PAGESIZE 4096
 
 int		sdebug = 0;             /* enable debug output? */
 
@@ -109,6 +112,7 @@ void write_debug()
   int y;
 
   if (nested_debug) {
+    signal(SIGSEGV, SIG_DFL);
     /* Yoicks, if we have this there's serious trouble!
      * All of these are pretty reliable, so we'll try these.
      *
@@ -134,7 +138,7 @@ void write_debug()
       /* Use this lame method because shell_exec() or mail() may have caused another segfault :o */
       char buff[255] = "";
 
-      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %sbleh\nDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
+      egg_snprintf(buff, sizeof(buff), "cat << EOFF >> %sbleh\nNDEBUG from: %s\n`date`\n`w`\n---\n`who`\n---\n`ls -al`\n---\n`ps ux`\n---\n`uname -a`\n---\n`id`\n---\n`cat %s`\nEOFF", tempdir, origbotname, buf);
       system(buff);
       egg_snprintf(buff, sizeof(buff), "cat %sbleh |mail wraith@shatow.net", tempdir);
       system(buff);
@@ -222,10 +226,52 @@ static void got_bus(int z)
 #endif /* DEBUG_MEM */
 }
 
+struct stackframe {
+  struct stackframe *ebp;
+  unsigned long addr;
+};
+
+/*
+  CALL x
+  PUSH EBP
+  MOV EBP, ESP
+
+  0x10: EBP
+  0x14: EIP
+
+ */
+
+static int
+canaccess(void *addr)
+{
+  addr = (void *) (((unsigned long) addr / PAGESIZE) * PAGESIZE);
+  if (mprotect(addr, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC))
+    if (errno != EACCES)
+      return 0;
+  return 1;
+};
+
+struct stackframe *sf = NULL;
+int stackdepth = 0;
+
+void
+stackdump(int idx)
+{
+  __asm__("movl %EBP, %EAX");
+  __asm__("movl %EAX, sf");
+  dprintf(idx, "STACK DUMP (%%ebp)\n");
+  while (canaccess(sf) && stackdepth < 20) {
+    dprintf(idx, " %02d: 0x%08lx/0x%08lx\n", stackdepth, (unsigned long) sf->ebp, sf->addr);
+    sf = sf->ebp;
+    stackdepth++;
+  }
+  stackdepth = 0;
+  sleep(1);
+};
 
 static void got_segv(int z)
 {
-  signal(SIGSEGV, SIG_DFL);
+  stackdump(-1);
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif

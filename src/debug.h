@@ -55,6 +55,7 @@
 
 extern int		sdebug;
 
+void stackdump(int);
 void setlimits();
 void sdprintf (char *, ...) __attribute__((format(printf, 1, 2)));
 void init_signals();

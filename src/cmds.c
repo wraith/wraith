@@ -2061,7 +2061,7 @@ static void cmd_debug(struct userrec *u, int idx, char *par)
 {
   char *cmd = NULL;
 
-  if (!par[0])
+  if (!par[0]) 
     putlog(LOG_CMDS, "*", "#%s# debug", dcc[idx].nick);
 
   if (par[0])
@@ -2074,6 +2074,8 @@ static void cmd_debug(struct userrec *u, int idx, char *par)
     dprintf(idx, "Role: %d\n", role);
   if (!cmd || (cmd &&!strcmp(cmd, "net")))
     tell_netdebug(idx);
+  if (!cmd || (cmd &&!strcmp(cmd, "stackdump")))
+    stackdump(idx);
 }
 
 static void cmd_timers(struct userrec *u, int idx, char *par)
