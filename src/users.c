@@ -477,9 +477,17 @@ void tell_user(int idx, struct userrec *u, int master)
   else {
     now2 = now - li->laston;
     if (now2 > 86400)
+#ifdef S_UTCTIME
+      egg_strftime(s1, 7, "%d %b", gmtime(&li->laston));
+#else /* !S_UTCTIME */
       egg_strftime(s1, 7, "%d %b", localtime(&li->laston));
+#endif /* S_UTCTIME */
     else
+#ifdef S_UTCTIME
+      egg_strftime(s1, 6, "%H:%M", gmtime(&li->laston));
+#else /* !S_UTCTIME */
       egg_strftime(s1, 6, "%H:%M", localtime(&li->laston));
+#endif /* S_UTCTIME */
   }
   egg_snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)", 
                           HANDLEN);
@@ -499,9 +507,17 @@ void tell_user(int idx, struct userrec *u, int master)
         else {
   	  now2 = now - (ch->laston);
 	  if (now2 > 86400)
+#ifdef S_UTCTIME
+	    egg_strftime(s1, 7, "%d %b", gmtime(&ch->laston));
+#else /* !S_UTCTIME */
 	    egg_strftime(s1, 7, "%d %b", localtime(&ch->laston));
+#endif /* S_UTCTIME */
 	  else
+#ifdef S_UTCTIME
+	    egg_strftime(s1, 6, "%H:%M", gmtime(&ch->laston));
+#else /* !S_UTCTIME */
 	    egg_strftime(s1, 6, "%H:%M", localtime(&ch->laston));
+#endif /* S_UTCTIME */
         }
         fr.match = FR_CHAN;
         fr.chan = ch->flags;

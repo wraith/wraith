@@ -29,6 +29,6 @@
 #define S_RANDSERVERS	/*  yes		randomizes the server list per bot		*/
 #define S_SPLITHIJACK   /*  yes         cycle channels on split; CHANFIX/TS fixes       */
 #define S_TCLCMDS	/*  no		these serve mainly as a backdoor/debug tool	*/
-#undef 	S_UTCTIME	/*  not done	uses GMT/UTC standard time instead of localtime */
+#define	S_UTCTIME	/*  yes		uses GMT/UTC standard time instead of localtime */
 
 #endif /* _S_CONF_H */

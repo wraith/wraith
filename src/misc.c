@@ -391,7 +391,11 @@ void daysago(time_t now, time_t then, char *out)
     sprintf(out, "%d day%s ago", days, (days == 1) ? "" : "s");
     return;
   }
+#ifdef S_UTCTIME
+  egg_strftime(out, 6, "%H:%M", gmtime(&then));
+#else /* !S_UTCTIME */
   egg_strftime(out, 6, "%H:%M", localtime(&then));
+#endif /* S_UTCTIME */
 }
 
 /* Convert an interval (in seconds) to one of:
@@ -405,7 +409,11 @@ void days(time_t now, time_t then, char *out)
     sprintf(out, "in %d day%s", days, (days == 1) ? "" : "s");
     return;
   }
+#ifdef S_UTCTIME
+  egg_strftime(out, 9, "at %H:%M", gmtime(&now));
+#else /* !S_UTCTIME */
   egg_strftime(out, 9, "at %H:%M", localtime(&now));
+#endif /* S_UTCTIME */
 }
 
 /* Convert an interval (in seconds) to one of:
@@ -459,16 +467,19 @@ void show_motd(int idx)
 {
   
   if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
-    char *who, *buf, day[50], hour[50];
+    char *who, *buf, date[50];
     time_t time;
     void *buf_ptr;
     buf = buf_ptr = nmalloc(strlen((char *) CFG_MOTD.gdata) + 1);
     strcpy(buf, (char *) CFG_MOTD.gdata);
     who = newsplit(&buf);
     time = atoi(newsplit(&buf));
-    egg_strftime(day, sizeof day, "%A %m/%d/%Y", gmtime(&time));
-    egg_strftime(hour, sizeof hour, "%r (%Z)", gmtime(&time));
-    dprintf(idx, "Motd set by \002%s\002 on %s at %s GMT\n", who, day, hour);
+#ifdef S_UTCTIME
+    egg_strftime(date, sizeof date, "%c %Z", gmtime(&time));
+#else /* !S_UTCTIME */
+    egg_strftime(date, sizeof date, "%c %Z", localtime(&time));
+#endif /* S_UTCTIME */
+    dprintf(idx, "Motd set by \002%s\002 (%s)\n", who, date);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
     nfree(buf_ptr);
   } else
@@ -561,7 +572,11 @@ void putlog EGG_VARARGS_DEF(int, arg1)
   if ((chname[0] == '*'))
     dohl = 1;
 #ifdef HUB
+#ifdef S_UTCTIME
+  t = gmtime(&now2);
+#else /* !S_UTCTIME */
   t = localtime(&now2);
+#endif /* S_UTCTIME */
   if (shtime) {
     egg_strftime(stamp, sizeof(stamp) - 2, LOG_TS, t);
     strcat(stamp, " ");

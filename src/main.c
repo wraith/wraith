@@ -122,9 +122,6 @@ int	do_restart = 0;		/* .restart has been called, restart asap */
 int	resolve_timeout = 10;	/* hostname/address lookup timeout */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
-#ifdef S_UTCTIME
-time_t  now_tmp;		/* used to convert to UTC */
-#endif /* S_UTCTIME */
 
 extern struct cfg_entry CFG_FORKINTERVAL;
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
@@ -667,11 +664,15 @@ static void dtx_arg(int argc, char *argv[])
         got_ed("d", p, p2);
         break; /* this should never be reached */
       case 'v':
-	printf("Wraith %s\nBuild Date: (%lu) %s\n", egg_version, buildts, ctime(&buildts));
+      {
+        char date[50];
+        egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
+	printf("Wraith %s\nBuild Date: (%lu) %s\n", egg_version, buildts, date);
         printf("SALTS\nfiles: %s\nbotlink: %s\n", SALT1, SALT2);
 	bg_send_quit(BG_ABORT);
 	exit(0);
         break; /* this should never be reached */
+      }
 #ifdef LEAF
       case 'P':
         if (getppid() != atoi(argv[optind]))
@@ -841,7 +842,11 @@ static void core_secondly()
     }
   }
 
+#ifdef S_UTCTIME
+  egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
+#else /* !S_UTCTIME */
   egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
+#endif /* S_UTCTIME */
 
   if (nowtm.tm_min != lastmin) {
     int i = 0;
@@ -1449,14 +1454,13 @@ int main(int argc, char **argv)
 
   Context;
   /* Initialize variables and stuff */
-#ifdef S_UTCTIME
-  now_tmp = time(NULL);
-  now = mktime(gmtime(&now_tmp));
-#else
   now = time(NULL);
-#endif /* S_UTCTIME */
   chanset = NULL;
+#ifdef S_UTCTIME
+  egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
+#else /* !S_UTCTIME */
   egg_memcpy(&nowtm, localtime(&now), sizeof(struct tm));
+#endif /* S_UTCTIME */
   lastmin = nowtm.tm_min;
   srandom(now % (getpid() + getppid()));
   init_mem();
@@ -1875,12 +1879,7 @@ Context;
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers
      */
-#ifdef S_UTCTIME
-    now_tmp = time(NULL);
-    now = mktime(gmtime(&now_tmp));
-#else
     now = time(NULL);
-#endif /* S_UTCTIME */
     random();			/* Woop, lets really jumble things */
     if (now != then) {		/* Once a second */
       call_hook(HOOK_SECONDLY);

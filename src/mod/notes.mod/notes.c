@@ -280,7 +280,11 @@ static void notes_read(char *hand, char *nick, char *srd, int idx)
 	  from = newsplit(&s1);
 	  dt = newsplit(&s1);
 	  tt = atoi(dt);
-	  egg_strftime(wt, 14, "%b %d %H:%M", localtime(&tt));
+#ifdef S_UTCTIME
+	  egg_strftime(wt, sizeof wt, "%b %d %H:%M %Z", gmtime(&tt));
+#else /* !S_UTCTIME */
+	  egg_strftime(wt, sizeof wt, "%b %d %H:%M %Z", localtime(&tt));
+#endif /* S_UTCTIME */
 	  dt = wt;
 	  lapse = (int) ((now - tt) / 86400);
 	  if (lapse > note_life - 7) {

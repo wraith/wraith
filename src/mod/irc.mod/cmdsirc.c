@@ -1241,9 +1241,17 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
       int hops = m->hops;
       if (m->joined > 0) {
 	if ((now - (m->joined)) > 86400)
+#ifdef S_UTCTIME
+	  egg_strftime(s, 6, "%d%b", gmtime(&(m->joined)));
+#else /* !S_UTCTIME */
 	  egg_strftime(s, 6, "%d%b", localtime(&(m->joined)));
+#endif /* S_UTCTIME */
 	else
+#ifdef S_UTCTIME
+	  egg_strftime(s, 6, "%H:%M", gmtime(&(m->joined)));
+#else /* !S_UTCTIME */
 	  egg_strftime(s, 6, "%H:%M", localtime(&(m->joined)));
+#endif /* S_UTCTIME */
       } else
 	strncpyz(s, " --- ", sizeof s);
       if (m->user == NULL) {

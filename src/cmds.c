@@ -127,7 +127,11 @@ static void tell_who(struct userrec *u, int idx, int chan)
 	ok = 1;
 	dprintf(idx, STR("Bots connected:\n"));
       }
-      egg_strftime(s, 14, "%d %b %H:%M", localtime(&dcc[i].timeval));
+#ifdef S_UTCTIME
+      egg_strftime(s, 14, "%d %b %H:%M %Z", gmtime(&dcc[i].timeval));
+#else /* !S_UTCTIME */
+      egg_strftime(s, 14, "%d %b %H:%M %Z", localtime(&dcc[i].timeval));
+#endif /* S_UTCTIME */
       if (atr & USER_OWNER) {
         egg_snprintf(format, sizeof format, "  [%%.2lu]  %%s%%c%%-%us (%%s) %%s\n", 
 			    nicklen);
@@ -1271,6 +1275,22 @@ static void cmd_console(struct userrec *u, int idx, char *par)
     Function *func = me->funcs;
     (func[CONSOLE_DOSTORE]) (dest);
   }
+}
+
+static void cmd_date(struct userrec *u, int idx, char *par)
+{
+  char date[50], utctime[50], ltime[50];
+  putlog(LOG_CMDS, "*", "#%s# date", dcc[idx].nick);
+  egg_strftime(date, sizeof date, "%c %Z", localtime(&now));
+#ifndef S_UTCTIME
+  sprintf(ltime, "<-- This time is used on the bot.");
+#endif /* !S_UTCTIME */
+  dprintf(idx, "%s %s\n", date, ltime[0] ? ltime : "");
+  egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
+#ifdef S_UTCTIME
+  sprintf(utctime, "<-- This time is used on the bot.");
+#endif /* S_UTCTIME */
+  dprintf(idx, "%s %s\n", date, utctime[0] ? utctime : "");
 }
 
 #ifdef HUB
@@ -3968,6 +3988,7 @@ cmd_t C_dcc[] =
   {"config",		"n",	(Function) cmd_config,		NULL},
 #endif /* HUB */
   {"console",		"-|-",	(Function) cmd_console,		NULL},
+  {"date",		"",	(Function) cmd_date,		NULL},
 #ifdef HUB
   {"dccstat",		"a",	(Function) cmd_dccstat,		NULL},
 #endif /* HUB */
