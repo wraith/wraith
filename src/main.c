@@ -536,32 +536,6 @@ static void core_halfhourly()
     write_userfile(-1);
 }
 
-static void check_tempdir()
-{
-  if (!can_stat(tempdir)) {
-    if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
-      unlink(tempdir);
-      if (!can_stat(tempdir))
-        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
-          werr(ERR_TMPSTAT);
-    }
-  }
-  if (fixmod(tempdir))
-    werr(ERR_TMPMOD);
-
-  /* test tempdir: it's vital */
-  {
-    Tempfile *testdir = new Tempfile("test");
-    int result;
-   
-    fprintf(testdir->f, "\n");
-    result = fflush(testdir->f);
-    delete testdir;
-    if (result)
-      fatal(strerror(errno), 0);
-  }
-}
-
 static void startup_checks(int hack) {
   /* for compatability with old conf files 
    * only check/use conf file if it exists and settings.uname is empty.

@@ -201,3 +201,29 @@ Tempfile::~Tempfile()
   delete[] file;
 }
 
+void check_tempdir()
+{
+  if (!can_stat(tempdir)) {
+    if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
+      unlink(tempdir);
+      if (!can_stat(tempdir))
+        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
+          werr(ERR_TMPSTAT);
+    }
+  }
+  if (fixmod(tempdir))
+    werr(ERR_TMPMOD);
+
+  /* test tempdir: it's vital */
+  {
+    Tempfile *testdir = new Tempfile("test");
+    int result;
+
+    fprintf(testdir->f, "\n");
+    result = fflush(testdir->f);
+    delete testdir;
+    if (result)
+      fatal(strerror(errno), 0);
+  }
+}
+
