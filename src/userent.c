@@ -246,14 +246,9 @@ void added_display(int idx, struct user_entry *e, struct userrec *u)
   }
 }
 
-int added_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx)
-{
-  return e->type->set(u, e, data);
-}
-
 struct user_entry_type USERENTRY_ADDED = {
   0,				/* always 0 ;) */
-  added_gotshare,
+  def_gotshare,
   def_dupuser,
   def_unpack,
   def_pack,
@@ -656,14 +651,9 @@ void stats_display(int idx, struct user_entry *e, struct userrec *u)
   }
 }
 
-int stats_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx)
-{
-  return e->type->set(u, e, data);
-}
-
 struct user_entry_type USERENTRY_STATS = {
   0,				/* always 0 ;) */
-  stats_gotshare,
+  def_gotshare,
   def_dupuser,
   def_unpack,
   def_pack,
