@@ -274,6 +274,7 @@ void tell_verbose_status(int idx)
 
   i = count_users(userlist);
   dprintf(idx, "I am %s, running %s:  %d user%s\n", conf.bot->nick, ver, i, i == 1 ? "" : "s");
+  dprintf(idx, "my user: %s\n", conf.bot->u->handle);
   if (conf.bot->localhub)
     dprintf(idx, "I am a localhub.\n");
   if (conf.bot->hub && isupdatehub())
