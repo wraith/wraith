@@ -1280,8 +1280,7 @@ static void pre_relay(int idx, char *buf, register int len)
 
     dprintf(idx, "%s %s.\n", BOT_ABORTRELAY1, dcc[tidx].nick);
     dprintf(idx, "%s %s.\n\n", BOT_ABORTRELAY2, conf.bot->nick);
-    putlog(LOG_MISC, "*", "%s %s -> %s", BOT_ABORTRELAY3, dcc[idx].nick,
-	   dcc[tidx].nick);
+    putlog(LOG_MISC, "*", "%s %s -> %s", BOT_ABORTRELAY3, dcc[idx].nick, dcc[tidx].nick);
     dcc[idx].status = dcc[idx].u.relay->old_status;
     free(dcc[idx].u.relay);
     dcc[idx].u.chat = ci;
@@ -1343,16 +1342,18 @@ static void failed_pre_relay(int idx)
 static void cont_tandem_relay(int idx, char *buf, register int len)
 {
   register int uidx = (-1), i;
+  struct relay_info *ri = NULL;
 
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && (dcc[i].type == &DCC_PRE_RELAY) && (dcc[i].u.relay->sock == dcc[idx].sock))
       uidx = i;
   }
+
   if (uidx < 0) {
     putlog(LOG_MISC, "*", "%s  %d -> %d", BOT_CANTFINDRELAYUSER,
-	   dcc[i].sock, dcc[i].u.relay->sock);
-    killsock(dcc[i].sock);
-    lostdcc(i);
+	   dcc[idx].sock, dcc[idx].u.relay->sock);
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
     return;
   }
   dcc[idx].type = &DCC_RELAY;
@@ -1363,8 +1364,7 @@ static void cont_tandem_relay(int idx, char *buf, register int len)
   putlog(LOG_MISC, "*", "%s %s -> %s", BOT_RELAYLINK,
 	 dcc[uidx].nick, dcc[idx].nick);
 
-  struct relay_info *ri = dcc[uidx].u.relay;	/* YEAH */
-
+  ri = dcc[uidx].u.relay;
   dcc[uidx].type = &DCC_CHAT;
   dcc[uidx].u.chat = ri->chat;
   if (dcc[uidx].u.chat->channel >= 0) {
@@ -1385,7 +1385,8 @@ static void eof_dcc_relay(int idx)
   for (j = 0; j < dcc_total; j++)
     if (dcc[j].type && dcc[j].sock == dcc[idx].u.relay->sock)
       break;
-  if (j == dcc_total) {
+
+  if (j == dcc_total || !dcc[j].type) {
     killsock(dcc[idx].sock);
     lostdcc(idx);
     return;
@@ -1422,7 +1423,11 @@ static void eof_dcc_relaying(int idx)
 	 dcc[idx].host, dcc[idx].port);
   killsock(dcc[idx].sock);
   lostdcc(idx);
-  for (j = 0; (dcc[j].sock != x) || (dcc[j].type == &DCC_FORK_RELAY); j++);
+
+  for (j = 0; j < dcc_total; j++)
+    if (dcc[j].type && dcc[j].sock == x && dcc[j].type != &DCC_FORK_RELAY)
+      break;
+
   putlog(LOG_MISC, "*", "(%s %s)", BOT_DROPPEDRELAY, dcc[j].nick);
   killsock(dcc[j].sock);
   lostdcc(j);			/* Drop connection to the bot */
@@ -1433,8 +1438,10 @@ static void dcc_relay(int idx, char *buf, int j)
   unsigned char *p = (unsigned char *) buf;
   int mark;
 
-  for (j = 0; dcc[j].sock != dcc[idx].u.relay->sock ||
-       dcc[j].type != &DCC_RELAYING; j++);
+  for (j = 0; j < dcc_total; j++)
+   if (dcc[j].type && dcc[j].sock == dcc[idx].u.relay->sock && dcc[j].type == &DCC_RELAYING)
+     break;
+
   /* If redirecting to a non-telnet user, swallow telnet codes and
      escape sequences. */
   if (!(dcc[j].status & STAT_TELNET)) {
@@ -1473,19 +1480,21 @@ static void dcc_relaying(int idx, char *buf, int j)
     dprintf(-dcc[idx].u.relay->sock, "%s\n", buf);
     return;
   }
-  for (j = 0; (dcc[j].sock != dcc[idx].u.relay->sock) ||
-       (dcc[j].type != &DCC_RELAY); j++);
+  /* The user want's to abort, so return them to partyline */
+
+  for (j = 0; j < dcc_total; j++)
+    if (dcc[j].type && dcc[j].sock == dcc[idx].u.relay->sock && dcc[j].type == &DCC_RELAY)
+      break;
+
   dcc[idx].status = dcc[idx].u.relay->old_status;
   /* In case echo was off, turn it back on (send IAC WON'T ECHO): */
   if (dcc[idx].status & STAT_TELNET)
     dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
   dprintf(idx, "\n(%s %s.)\n", BOT_BREAKRELAY, dcc[j].nick);
   dprintf(idx, "%s %s.\n\n", BOT_ABORTRELAY2, conf.bot->nick);
-  putlog(LOG_MISC, "*", "%s: %s -> %s", BOT_RELAYBROKEN,
-	 dcc[idx].nick, dcc[j].nick);
+  putlog(LOG_MISC, "*", "%s: %s -> %s", BOT_RELAYBROKEN, dcc[idx].nick, dcc[j].nick);
   if (dcc[idx].u.relay->chat->channel >= 0) {
-    chanout_but(-1, dcc[idx].u.relay->chat->channel,
-		"*** %s joined the party line.\n", dcc[idx].nick);
+    chanout_but(-1, dcc[idx].u.relay->chat->channel, "*** %s joined the party line.\n", dcc[idx].nick);
     if (dcc[idx].u.relay->chat->channel < GLOBAL_CHANS)
       botnet_send_join_idx(idx);
   }

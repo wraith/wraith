@@ -451,7 +451,9 @@ void botnet_send_join_idx(int useridx)
   if (tands > 0) {
     size_t len = simple_sprintf(OBUF, "j %s %s %D %c%D %s\n",
 		       conf.bot->nick, dcc[useridx].nick,
-		       dcc[useridx].u.chat->channel, geticon(useridx),
+		       dcc[useridx].type && dcc[useridx].type == &DCC_RELAYING ? 
+                         dcc[useridx].u.relay->chat->channel : 
+                         dcc[useridx].u.chat->channel, geticon(useridx),
 		       dcc[useridx].sock, dcc[useridx].host);
 
     send_tand_but(-1, OBUF, len);

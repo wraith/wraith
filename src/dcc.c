@@ -1801,7 +1801,7 @@ dcc_telnet_got_ident(int i, char *host)
 
   dcc[i].u.other = 0;
 
-  if (!dcc[idx].type) {
+  if (idx == dcc_total || !dcc[idx].type) {
     putlog(LOG_MISC, "*", DCC_LOSTIDENT);
     killsock(dcc[i].sock);
     lostdcc(i);

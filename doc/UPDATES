@@ -22,6 +22,7 @@ This is a summary of ChangeLog basically.
 * Fixed a typo in cmd_slowjoin.
 * Fixed display bug when bot is msgd with (op|pass|ident|invite) while the respective .config msg option is set to something else.
 * Fixed dns queries returning invalid (compressed) results for reverses.
+* Fixed some other relay segfaults and stack smashings (one from eggdrop).
 
 1.2
 * No longer displaying SALTS on ./bin -v
