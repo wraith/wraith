@@ -1244,10 +1244,13 @@ dcc_telnet(int idx, char *buf, int ii)
     return;
   }
 
+  putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
+
   i = new_dcc(&DCC_IDENTWAIT, 0);
 
   dcc[i].sock = sock;
   dcc[i].addr = ip;
+  strcpy(dcc[i].host, s);
 #ifdef USE_IPV6
   if (sockprotocol(sock) == AF_INET6)
     strcpy(dcc[i].host6, s);
