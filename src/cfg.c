@@ -98,10 +98,13 @@ void cmdprefix_describe(struct cfg_entry *entry, int idx) {
 
 void cmdprefix_changed(struct cfg_entry * entry, char * olddata, int * valid) {
   if (entry->ldata) {
-    strncpyz(cmdprefix, (char *) entry->ldata, sizeof cmdprefix);
+    cmdprefix[0] = entry->ldata[0];
+    /* strncpyz(cmdprefix, (char *) entry->ldata, 2); */
   } else if (entry->gdata) {
-    strncpyz(cmdprefix, (char *) entry->gdata, sizeof cmdprefix);
+    cmdprefix[0] = entry->gdata[0];
+    /* strncpyz(cmdprefix, (char *) entry->gdata, 2); */
   }
+  cmdprefix[1] = NULL;
 }
 
 struct cfg_entry CFG_CMDPREFIX = {
@@ -678,6 +681,7 @@ void init_config()
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
+  add_cfg(&CFG_CMDPREFIX);
   cfg_noshare = 1;
   set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders");
   cfg_noshare = 0;
