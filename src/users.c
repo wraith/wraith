@@ -679,7 +679,6 @@ void tell_users_match(int idx, char *mtch, int start, int limit,
 int readuserfile(char *file, struct userrec **ret)
 {
   char *p, buf[1024], lasthand[512], *attr, *pass, *code, s1[1024], *s, cbuf[1024], *temps;
-
   FILE *f;
   struct userrec *bu, *u = NULL;
   struct chanset_t *cst = NULL;
@@ -688,7 +687,6 @@ int readuserfile(char *file, struct userrec **ret)
   struct flag_record fr;
   struct chanuserrec *cr;
 
-Context;
   bu = (*ret);
   ignored[0] = 0;
   if (bu == userlist) {
@@ -706,9 +704,9 @@ Context;
   noshare = 1;
   /* read opening comment */
   s = buf;
-  fscanf(f, "%[^\n]\n", cbuf);
+  fgets(cbuf, 180, f);
   temps = (char *) decrypt_string(SALT1, cbuf);
-  egg_snprintf(s, 1024, temps);
+  egg_snprintf(s, 180, temps);
   nfree(temps);
   if (s[1] < '4') {
     fatal(USERF_OLDFMT, 0);
@@ -717,7 +715,7 @@ Context;
     fatal(USERF_INVALID, 0);
   while (!feof(f)) {
     s = buf;
-    fscanf(f, "%[^\n]\n", cbuf);
+    fgets(cbuf, 1024, f);
     temps = (char *) decrypt_string(SALT1, cbuf);
     egg_snprintf(s, 1024, temps);
     nfree(temps);
@@ -812,16 +810,12 @@ Context;
 	      }
 	    }
 	  }
-        } else if (!strcmp(code, "+")) {  // channels
-         int code2;
-Context;
+        } else if (!strcmp(code, "+")) {
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
-	  code2 = Tcl_Eval(interp, s);
-          if (code2 != TCL_OK) {
+          if (Tcl_Eval(interp, s) != TCL_OK) {
            putlog(LOG_MISC, "*", "Tcl error in userfile");
-           putlog(LOG_MISC, "*", "%s",
-            Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
-           return 0;
+           putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
+           return 1;
           }
          }
 	} else if (!strncmp(code, "::", 2)) {
