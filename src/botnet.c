@@ -1649,9 +1649,11 @@ static int get_role(char *bot)
 
   if (!(u2 = get_user_by_handle(userlist, bot)))
     return 1;
+  if (bot_hublevel(u2) != 999)
+    return 0;
 
   for (u = userlist; u; u = u->next) {
-    if (u->bot) {
+    if (u->bot && bot_hublevel(u) == 999) {
       if (strcmp(u->handle, bot)) {
         ba = get_user(&USERENTRY_BOTADDR, u);
         if ((nextbot(u->handle) >= 0) && (ba) && (ba->roleid > 0) && (ba->roleid < 5))
