@@ -63,6 +63,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Reverted patch from 1.2 which disabled removing duplicate msgs in server queue. (Fixes most queue/excess flood bugs)
 * Users can no longer whois PERM OWNERS unless they are themselves one.
 * Fixed cmd_boot to allow users to boot users they can whois. (Users with lower flags)
+  Also, cmd_boot will now boot all sessions of a user on the bot specified. (#37)
 * Fixed a file descriptor leak in the 'last' checking.
 * Fixed bot's being tagged with op/login stats. (#22)
 * cmd_cycle now will only cycle the net if done on the hub. Doing it on a leaf cycles only that one bot.

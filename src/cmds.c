@@ -1059,7 +1059,7 @@ static void cmd_boot(int idx, char *par)
     return;
   }
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, who) && !ok && (dcc[i].type->flags & DCT_CANBOOT)) {
+    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, who) && (dcc[i].type->flags & DCT_CANBOOT)) {
       if (!whois_access(dcc[idx].user, dcc[i].user)) {
         dprintf(idx, "Sorry, you cannot boot %s.\n", dcc[i].nick);
         return;

@@ -800,8 +800,8 @@ static void bot_reject(int idx, char *par)
     /* Kick someone here! */
     int ok = 0;
 
-    for (i = 0; (i < dcc_total) && (!ok); i++) {
-      if (dcc[i].type && (!egg_strcasecmp(who, dcc[i].nick)) && (dcc[i].type->flags & DCT_CHAT)) {
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && !egg_strcasecmp(who, dcc[i].nick) && (dcc[i].type->flags & DCT_CHAT)) {
         u = get_user_by_handle(userlist, from);
         if (u) {
           if (!whois_access(u, dcc[idx].user)) {
@@ -809,8 +809,8 @@ static void bot_reject(int idx, char *par)
             return;
           }
           do_boot(i, from, par);
-          ok = 1;
           putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
+          ok = 1;
         }
       }
     }
