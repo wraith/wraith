@@ -544,11 +544,8 @@ Context;
     }
   }
   m->flags |= WASOP;
-  if (check_chan) {
-Context;
+  if (check_chan)
     recheck_channel(chan, 1);
-    check_topic(chan);
-  }
 }
 
 static void got_deop(struct chanset_t *chan, char *nick, char *from,
@@ -1218,8 +1215,6 @@ Context;
 		     ((ms2[0] == '-') || (chan->mode_mns_prot & todo)))
 	      add_mode(chan, ms2[0] == '+' ? '-' : '+', *chg, "");
 	  }
-          if ((ms2[0] == '-') && ((*chg == 't') || (*chg == 'h')))
-            check_topic(chan);
 	}
 	chg++;
       }

@@ -1282,7 +1282,7 @@ static int write_chans(FILE *f, int idx)
 {
 
   char w[1024], w2[1024], name[163];
-  char topic[1002], udefs[2048] = "", sadd[5], buf[2048];
+  char udefs[2048] = "", sadd[5], buf[2048];
 /* Chanchar template
  *char temp[121];
  */
@@ -1312,7 +1312,6 @@ static int write_chans(FILE *f, int idx)
      convert_element(chan->dname, name);
      get_mode_protect(chan, w);
      convert_element(w, w2);
-     convert_element(chan->topic_prot, topic);
 /* Chanchar template
  *   convert_element(chan->temp, temp);
  */
@@ -1331,7 +1330,7 @@ static int write_chans(FILE *f, int idx)
    //insert the ending character into a string
      sprintf(sadd, "%s\n", channel_static(chan) ? "" : "}");
 
-     if (lfprintf(f, "+ channel %s %s%schanmode %s topic %s idle-kick %d limit %d stopnethack-mode %d \
+     if (lfprintf(f, "+ channel %s %s%schanmode %s idle-kick %d limit %d stopnethack-mode %d \
 revenge-mode %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
@@ -1348,7 +1347,6 @@ exempt-time %d invite-time %d \
 	name,
 	channel_static(chan) ? " " : " { ",
 	w2,
-        topic,
 /* Chanchar template
  *      temp,
  * also include temp %s in dprintf.

@@ -360,7 +360,7 @@
 #define rem_tcl_coups ((void (*) (tcl_coups *))global[210])
 #define botname ((char *)(global[211]))
 /* 212 - 215 */
-#define check_topic ((void (*)(struct chanset_t *))global[212])
+/* 212: remove_gunk() -- UNUSED (drummer) */
 #define check_tcl_chjn ((void (*) (const char *,const char *,int,char,int,const char *))global[213])
 #define sanitycheck_dcc ((int (*)(char *, char *, char *, char *))global[214])
 #define isowner ((int (*)(char *))global[215])

@@ -173,7 +173,6 @@ struct chanset_t {
   int mode_mns_prot;		/* modes to reject			*/
   int limit_prot;		/* desired limit			*/
   char key_prot[121];		/* desired password			*/
-  char topic_prot[501];		/* desired topic			*/
 /* Chanchar template
  *char temp[121];
  */

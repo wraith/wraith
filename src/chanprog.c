@@ -882,22 +882,3 @@ int isowner(char *name)
   }
 }
 
-/* If we have a protected topic and the bot is opped
- * or the channel is -t, change the topic. (Sup 11May2001)
- */
-void check_topic(struct chanset_t *chan)
-{
-  memberlist *m = NULL;  
-
-  if (chan->topic_prot[0]) {
-    m = ismember(chan, botname);
-    if (!m)
-      return;
-    if (chan->channel.topic) {
-      if (!egg_strcasecmp(chan->topic_prot, chan->channel.topic))
-	return;
-    }
-    if (chan_hasop(m) || !channel_optopic(chan))
-      dprintf(DP_SERVER, "TOPIC %s :%s\n", chan->name, chan->topic_prot);
-  }
-}

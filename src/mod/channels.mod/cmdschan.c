@@ -1396,7 +1396,6 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
 	    channel_static(chan) ? "static" : "dynamic", chan->dname);
     get_mode_protect(chan, work);
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
-    dprintf(idx, "Protect topic: %s\n", chan->topic_prot[0] ? chan->topic_prot : "None");
 /* Chanchar template
  *  dprintf(idx, "String temp: %s\n", chan->temp[0] ? chan->temp : "NULL");
  */

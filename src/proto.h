@@ -123,7 +123,6 @@ void check_timers();
 void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
-void check_topic(struct chanset_t *);
 
 /* cmds.c */
 int check_dcc_attrs(struct userrec *, int);

@@ -1199,16 +1199,6 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
  *    }
  *    chan->temp = atoi(item[i]);
  */
-    } else if (!strcmp(item[i], "topic")) {
-      i++;
-      if (i >= items) {
-	if (irp)
-	  Tcl_AppendResult(irp, "channel topic needs argument", NULL);
-	return TCL_ERROR;
-      }
-      strncpyz(chan->topic_prot, item[i], sizeof(chan->topic_prot));
-      check_topic(chan);
-    }
 /* Chanchar template
     } else if (!strcmp(item[i], "temp")) {
       i++;
@@ -1220,8 +1210,15 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
       strncpyz(chan->temp, item[i], sizeof(chan->temp));
       //Entry just changed so update/recheck it's purpose?
       check_temp(chan);
-    }
  */
+    } else if (!strcmp(item[i], "topic")) { //this is here for compatability
+      i++;
+      if (i >= items) {
+        if (irp)
+          Tcl_AppendResult(irp, "channel topic needs argument", NULL);
+        return TCL_ERROR;
+      }
+    }
     else if (!strcmp(item[i], "+enforcebans"))
       chan->status |= CHAN_ENFORCEBANS;
     else if (!strcmp(item[i], "-enforcebans"))

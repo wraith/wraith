@@ -402,7 +402,7 @@ Function global_table[] =
   (Function) rem_tcl_coups,
   (Function) botname,
   /* 212 - 215 */
-  (Function) check_topic,
+  (Function) 0,			/* remove_gunk() -- UNUSED! (drummer)	*/
   (Function) check_tcl_chjn,
   (Function) sanitycheck_dcc,
   (Function) isowner,

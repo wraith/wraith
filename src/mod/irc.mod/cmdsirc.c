@@ -1279,7 +1279,6 @@ static void cmd_channel(struct userrec *u, int idx, char *par)
 static void cmd_topic(struct userrec *u, int idx, char *par)
 {
   struct chanset_t *chan;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0, 0, 0};
 
   if (par[0] && (strchr(CHANMETA, par[0]) != NULL)) {
     char *chname = newsplit(&par);
@@ -1311,13 +1310,6 @@ static void cmd_topic(struct userrec *u, int idx, char *par)
       dprintf(idx, "I'm not a channel op on %s and the channel %s",
 		  "is +t.\n", chan->dname);
     } else {
-      if (chan->topic_prot[0]) {
-	get_user_flagrec(u, &fr, chan->dname);
-	if (!glob_master(fr) && !chan_master(fr)) {
-	  dprintf(idx, "The topic of %s is protected.\n", chan->dname);
-	  return;
-	}
-      }
       dprintf(DP_SERVER, "TOPIC %s :%s\n", chan->name, par);
       dprintf(idx, "Changing topic...\n");
       putlog(LOG_CMDS, "*", "#%s# (%s) topic %s", dcc[idx].nick,
