@@ -65,24 +65,5 @@ HUB <God god.net 666 god ~God ~george>
 + SPLITHIJACK		Cycle channels on split; CHANFIX/TS fixes
 + UTCTIME		Uses GMT/UTC standard time instead of localtime 
 
-/* PSCLOAK <name>
- * name: the name of the program to spoof as in 'ps'
- * list as many as needed
- * A default list is provided
- */
-PSCLOAK -bash
-PSCLOAK ftp
-PSCLOAK /usr/sbin/sshd
-PSCLOAK man
-PSCLOAK pine
-PSCLOAK bash
-PSCLOAK top
-PSCLOAK last
-PSCLOAK w
-PSCLOAK ps ux
-PSCLOAK bash
-PSCLOAK ./psybnc
-PSCLOAK BitchX
-
 /* SALTS: DO NOT TOUCH BELOW THIS LINE */
 
