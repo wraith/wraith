@@ -113,7 +113,7 @@ void check_maxfiles()
   sock = getsock(0, AF_INET);
   
   if (sock == -1)
-    fatal("MAXFD reached.", 0);		/* this shouldnt happen */
+    fatal("Cannot create new socket.", 0);		/* this shouldnt happen */
   else
     killsock(sock);
   if (sock1 != -1)
