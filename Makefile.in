@@ -130,7 +130,7 @@ packconf: makesettings pack/pack.cfg
 	fi)
 
 
-salt: pack/salt.h makesalt stringfix
+salt: makesalt stringfix
 	@src/makesalt
 	@(if [ ! -f src/salt.h ]; then \
 	touch src/salt.h; \
