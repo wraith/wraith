@@ -236,7 +236,7 @@ void failed_link(int idx)
 
   /* Try next port */
   killsock(dcc[idx].sock);
-  dcc[idx].sock = getsock(SOCK_STRONGCONN);
+  dcc[idx].sock = getsock(SOCK_STRONGCONN,getprotocol(dcc[idx].host));
   dcc[idx].port++;
   dcc[idx].timeval = now;
   if (dcc[idx].sock < 0 ||

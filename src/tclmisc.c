@@ -42,6 +42,19 @@ extern module_entry	*module_list;
 extern int max_logs;
 extern log_t *logs;
 extern Tcl_Interp *interp;
+extern char myipv6host[120];
+
+static int tcl_myip6 STDVAR      
+{
+  char s[120];
+  getmyip();                     
+  BADARGS(1, 1, "");
+  s[0]=0;
+  if(strlen(myipv6host)<120)
+    strcpy(s,myipv6host);
+  Tcl_AppendResult(irp, s, NULL);
+  return TCL_OK;
+}
 
 int expmem_tclmisc()
 {
@@ -648,6 +661,7 @@ tcl_cmds tclmisc_cmds[] =
   {"strftime",          tcl_strftime},
   {"ctime",		tcl_ctime},
   {"myip",		tcl_myip},
+  {"myip6",             tcl_myip6},
   {"rand",		tcl_rand},
   {"sendnote",		tcl_sendnote},
   {"dumpfile",		tcl_dumpfile},

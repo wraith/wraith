@@ -570,6 +570,7 @@ typedef struct {
   char		*outbuf;
   unsigned long  outbuflen;	/* Outbuf could be binary data	*/
   unsigned long	 inbuflen;	/* Inbuf could be binary data	*/
+  unsigned int af;
 } sock_list;
 
 enum {

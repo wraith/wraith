@@ -195,7 +195,7 @@
 /* 80 - 83 */
 #define new_dcc ((int (*) (struct dcc_table *, int))global[80])
 #define lostdcc ((void (*) (int))global[81])
-#define getsock ((int (*) (int))global[82])
+#define getsock ((int (*) (int,int))global[82])
 #define killsock ((void (*) (int))global[83])
 /* 84 - 87 */
 #define open_listen ((int (*) (int *))global[84])
@@ -438,20 +438,21 @@
 #define egg_strcatn ((int (*)(char *dst, const char *src, size_t max))global[265])
 #define clear_chanlist_member ((void (*)(const char *nick))global[266])
 #define fixfrom ((char *(*)(char *))global[267])
-/* 268 - 271 */
+/* 268 - 272 */
 /* Please don't modify socklist directly, unless there's no other way.
  * Its structure might be changed, or it might be completely removed,
  * so you can't rely on it without a version-check.
  */
-#define socklist (*(struct sock_list **)global[268])
-#define sockoptions ((int (*)(int, int, int))global[269])
-#define flush_inbuf ((int (*)(int))global[270])
-#define kill_bot ((void (*)(char *, char *))global[271])
-/* 272 - 275 */
-#define quit_msg ((char *)(global[272]))
-#define module_load ((char *(*)(char *))global[273])
-#define module_unload ((char *(*)(char *, char *))global[274])
-#define parties (*(int *)global[275])
+#define getprotocol ((int (*)(char *))global[268]) /* get protocol */
+#define socklist (*(struct sock_list **)global[269])
+#define sockoptions ((int (*)(int, int, int))global[270])
+#define flush_inbuf ((int (*)(int))global[271])
+#define kill_bot ((void (*)(char *, char *))global[272])
+/* 273 - 276 */
+#define quit_msg ((char *)(global[273]))
+#define module_load ((char *(*)(char *))global[274])
+#define module_unload ((char *(*)(char *, char *))global[275])
+#define parties (*(int *)global[276])
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
  * file for it ;)

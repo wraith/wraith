@@ -226,7 +226,7 @@ void write_debug()
      *       _not_ safe <cybah>
      */
     x = creat("DEBUG.DEBUG", 0644);
-    setsock(x, SOCK_NONSOCK);
+    setsock(x, SOCK_NONSOCK,AF_INET);
     if (x >= 0) {
       strncpyz(s, ctime(&now), sizeof s);
       dprintf(-x, "Debug (%s) written %s\n", ver, s);
@@ -251,7 +251,7 @@ void write_debug()
   putlog(LOG_MISC, "*", "* Please REPORT this BUG!");
   putlog(LOG_MISC, "*", "* Check doc/BUG-REPORT on how to do so.");
   x = creat("DEBUG", 0644);
-  setsock(x, SOCK_NONSOCK);
+  setsock(x, SOCK_NONSOCK,AF_INET);
   if (x < 0) {
     putlog(LOG_MISC, "*", "* Failed to write DEBUG");
   } else {
@@ -714,7 +714,7 @@ int main(int argc, char **argv)
 #include "patch.h"
   /* Version info! */
   egg_snprintf(ver, sizeof ver, "eggdrop v%s", egg_version);
-  egg_snprintf(version, sizeof version, "Eggdrop v%s (C) 1997 Robey Pointer (C) 2002 Eggheads",
+  egg_snprintf(version, sizeof version, "Eggdrop v%s+ipv6 (C) 1997 Robey Pointer (C) 2002 Eggheads",
 	       egg_version);
   /* Now add on the patchlevel (for Tcl) */
   sprintf(&egg_version[strlen(egg_version)], " %u", egg_numver);
@@ -885,7 +885,7 @@ int main(int argc, char **argv)
       userlist = adduser(userlist, "HQ", "none", "-", USER_PARTY);
       dcc[n].user = get_user_by_handle(userlist, "HQ");
     }
-    setsock(STDOUT, 0);		/* Entry in net table */
+    setsock(STDOUT, 0,AF_INET);                /* Entry in net table */
     dprintf(n, "\n### ENTERING DCC CHAT SIMULATION ###\n\n");
     dcc_chatter(n);
   }

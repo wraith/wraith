@@ -51,7 +51,7 @@ extern int	default_flags, conmask, switch_logfiles_at, connect_timeout;
 extern int	firewallport, notify_users_at, flood_thr, ignore_time;
 extern int	reserved_port_min, reserved_port_max;
 extern char	origbotname[], botuser[], motdfile[], admin[], userfile[],
-		firewall[], helpdir[], notify_new[], hostname[], myip[],
+                firewall[], helpdir[], notify_new[], hostname[], hostname6[], myip[], myip6[],
 		moddir[], tempdir[], owner[], network[], botnetnick[],
 		bannerfile[], egg_version[], natip[], configfile[],
 		logfile_suffix[], textdir[], pid_file[];
@@ -438,8 +438,10 @@ static tcl_strings def_tcl_strings[] =
 #endif
   {"notify-newusers",	notify_new,	120,		0},
   {"owner",		owner,		120,		STR_PROTECT},
-  {"my-hostname",	hostname,	120,		0},
   {"my-ip",		myip,		120,		0},
+  {"my-hostname",       hostname,       120,            0},
+  {"my-ip6",            myip6,          120,            0},
+  {"my-hostname6",      hostname6,      120,            0},
   {"network",		network,	40,		0},
   {"whois-fields",	whois_fields,	1024,		0},
   {"nat-ip",		natip,		120,		0},

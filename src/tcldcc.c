@@ -827,7 +827,7 @@ static int tcl_connect STDVAR
     Tcl_AppendResult(irp, "out of dcc table space", NULL);
     return TCL_ERROR;
   }
-  sock = getsock(0);
+  sock = getsock(0,getprotocol(argv[1]));
   if (sock < 0) {
     Tcl_AppendResult(irp, MISC_NOFREESOCK, NULL);
     return TCL_ERROR;

@@ -288,6 +288,8 @@ void tell_verbose_status(int idx)
 	  botnetnick, ver, i, i == 1 ? "" : "s",
           (int) (expected_memory() / 1024));
 
+  dprintf(idx, "My Source was IPv6-patched by sb <sb@1shell.net>\n");
+
   now2 = now - online_since;
   s[0] = 0;
   if (now2 > 86400) {

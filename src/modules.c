@@ -82,7 +82,7 @@ extern tand_t *tandbot;
 extern party_t *party;
 extern int parties;
 extern sock_list        *socklist;
-
+extern int getprotocol(char *);
 
 int cmd_die();
 int xtra_kill();
@@ -529,12 +529,13 @@ Function global_table[] =
   (Function) egg_strcatn,
   (Function) clear_chanlist_member,
   (Function) fixfrom,
-  /* 268 - 271 */
+  /* 268 - 272 */
+  (Function) getprotocol,
   (Function) & socklist,	/* sock_list *				*/
   (Function) sockoptions,
   (Function) flush_inbuf,
   (Function) kill_bot,
-  /* 272 - 275 */
+  /* 273 - 276 */
   (Function) quit_msg,		/* char *				*/
   (Function) module_load,
   (Function) module_unload,

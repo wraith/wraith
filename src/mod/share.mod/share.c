@@ -1115,7 +1115,7 @@ static void share_userfileq(int idx, char *par)
  */
 static void share_ufsend(int idx, char *par)
 {
-  char *ip, *port;
+  char *ip=NULL, *port;
   char s[1024];
   int i, sock;
   FILE *f;
@@ -1135,7 +1135,7 @@ static void share_ufsend(int idx, char *par)
   } else {
     ip = newsplit(&par);
     port = newsplit(&par);
-    sock = getsock(SOCK_BINARY);	/* Don't buffer this -> mark binary. */
+    sock = getsock(SOCK_BINARY,getprotocol(ip));       /* Don't buffer this -> mark binary. */
     if (sock < 0 || open_telnet_dcc(sock, ip, port) < 0) {
       killsock(sock);
       putlog(LOG_BOTS, "*", "Asynchronous connection failed!");
