@@ -702,7 +702,7 @@ int updatebin(int idx, char *par, int secs)
     size_t binsize = strlen(tmpdir) + 7 + 1;
     char *tmpbuf = (char *) my_calloc(1, binsize);
 
-    sprintf(tmpbuf, "%sbin.old", tmpdir);
+    sprintf(tmpbuf, "%sbin.old.exe", tmpdir);
     tmpbuf[binsize - 1] = 0;
     movefile(binname, tmpbuf);
     free(tmpbuf);
