@@ -1,10 +1,6 @@
 #!/bin/sh
 
-#edit this to your homedir (no trailing slash)
-
 #add in 'cont' support for NOT using make clean.
-
-TCLDIR="/home/bryan"
 
 #change this to 0 to not clean previously compiled files (faster/for dev)
 clean=1
@@ -119,10 +115,13 @@ echo "[*] Building pack for $os"
 # Run ./configure, then verify it's ok
 echo "[*] Configuring..."
 umask 077 >/dev/null
+TCLDIR=`cat $packname | grep "^\/"`
 if test -z ${TCLDIR}
 then
+  echo "[*] Searching for TCL in default dirs (edit $packname to change)"
   ./configure --disable-tcl-threads > /dev/null 2>configure.temp
 else
+  echo "[*] Searching for TCL in: $TCLDIR"
   ./configure --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
 fi
 #if test "`cat configure.temp`"
@@ -142,7 +141,7 @@ fi
 
 # Read the config
 echo -n "[*] Compiling with:"
-for cnf in `cat $packname | grep -v "^#"`
+for cnf in `cat $packname | grep -v "^#" | grep -v "^\/"`
 do
   defines="$defines -DS_$cnf"
   echo -n "$cnf "
