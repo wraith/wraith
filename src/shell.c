@@ -42,9 +42,6 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#ifndef CYGWIN_HACKS
-#  include <libgen.h>
-#endif /* !CYGWIN_HACKS */
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -812,18 +809,10 @@ char *confdir()
 
   if (!confdir || (confdir && !confdir[0])) {
 #ifdef LEAF
-    {
-      egg_snprintf(confdir, sizeof confdir, "%s/.ssh", homedir());
-    }
+    egg_snprintf(confdir, sizeof confdir, "%s/.ssh", homedir());
 #endif /* LEAF */
 #ifdef HUB
-    {
-      char *buf = NULL;
-
-      buf = strdup(binname);
-      egg_snprintf(confdir, sizeof confdir, "%s", dirname(buf));
-      free(buf);
-    }
+    egg_snprintf(confdir, sizeof confdir, "%s", dirname(binname));
 #endif /* HUB */
   }
   return confdir;

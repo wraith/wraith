@@ -7,6 +7,7 @@
 #ifndef _EGG_COMPAT_COMPAT_H
 #define _EGG_COMPAT_COMPAT_H
 
+#include "dirname.h"
 #include "inet_aton.h"
 #include "inet_ntop.h"
 #include "snprintf.h"

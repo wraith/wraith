@@ -673,7 +673,7 @@ int shouldjoin(struct chanset_t *chan)
 {
   if (!strncmp(conf.bot->nick, "wtest", 5) && !strcmp(chan->dname, "#wraith"))
     return 1;
-  else if (!strncmp(conf.bot->nick, "wtest", 5))
+  else if (!strncmp(conf.bot->nick, "wtest", 4)) /* use 5 for all */
     return 0; 
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
