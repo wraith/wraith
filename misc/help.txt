@@ -376,6 +376,10 @@ See also: link
         %bclosed-ban%b        Set this to 1 to ban users who join +closed 
                           channels. This is probably not needed though, as
                           +closed maintains +i.
+        %bclosed-private%b    If a channel is set +closed, the bots will
+                          enforce +p as well. The point is to notice the chan
+                          and bots when an /invite is done. This is useful in 
+                          seeing when a shell is hijacked ;)
         %bban-time%b          Set here how long temporary bans will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them.

@@ -1717,6 +1717,7 @@ static void cmd_chaninfo(struct userrec *u, int idx, char *par)
     dprintf(idx, "Channel settings:\n");
     SHOW_INT("Ban-time: ", chan->ban_time, NULL, "Forever");
     SHOW_INT("Closed-ban: ", chan->closed_ban, NULL, "Don't!");
+    SHOW_INT("Closed-Private", chan->closed_private, NULL, "Don't!");
     SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
     SHOW_INT("Idle Kick after (idle-kick): ", chan->idle_kick, "", "Don't!");
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");

@@ -992,8 +992,8 @@ void enforce_closed(struct chanset_t *chan) {
   if (!chan || !me_op(chan)) return;
   if (!(chan->channel.mode & CHANINV))
     strcat(buf, "i");
-/*  if (!(chan->channel.mode & CHANPRIV))
-    strcat(buf, "p"); */
+  if (chan->closed_private && !(chan->channel.mode & CHANPRIV))
+    strcat(buf, "p"); 
   if (buf && buf[0])
     dprintf(DP_MODE, STR("MODE %s +%s\n"), chan->name, buf);
   priority_do(chan, 0, PRIO_KICK);
