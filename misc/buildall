@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if test $# -lt 1; then
+ echo "Usage: $0 directory"
+ exit 1
+fi
+
+cfgs="`find \"$@\" -name \"*.cfg\"`"
+for cfg in $cfgs
+do
+ if test "`grep 'PACKNAME' $cfg`x" != "x"; then
+  ./build -C -p $cfg all
+ fi
+done
+
+
+
+
+
+
+
+
+
+
+
