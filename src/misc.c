@@ -952,7 +952,7 @@ char *wbanner() {
 void show_banner(int idx)
 {
   dprintf(idx, "%s", wbanner());
-  dprintf(idx, "\n\n");
+  dprintf(idx, "\n \n");
   dprintf(idx, STR("info, bugs, suggestions, comments:\n- http://www.shatow.net/wraith/ -\n"));
 }
 
