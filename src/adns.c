@@ -901,7 +901,7 @@ int egg_dns_init()
 
 bool valid_dns_id(int idx, int id)
 {
-  if (valid_idx(idx) && dcc[idx].dns_id == id)
+  if (valid_idx(idx) && (id == -1 || dcc[idx].dns_id == id))
     return 1;
   return 0;
 }
