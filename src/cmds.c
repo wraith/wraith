@@ -1035,7 +1035,6 @@ static void cmd_boot(int idx, char *par)
 {
   char *who = NULL;
   int i, ok = 0;
-  struct userrec *u2 = NULL;
 
   if (!par[0]) {
     dprintf(idx, "Usage: boot nick[@bot]\n");

@@ -529,6 +529,8 @@ void queue_server(int which, char *buf, int len)
   if (h->tot < maxqmsg) {
     /* Don't queue msg if it's already queued?  */
     if (!doublemsg) {
+      struct msgq *tq = NULL, *tqq = NULL;
+
       for (tq = tempq.head; tq; tq = tqq) {
 	tqq = tq->next;
 	if (!egg_strcasecmp(tq->msg, buf)) {
