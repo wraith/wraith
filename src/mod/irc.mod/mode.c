@@ -948,7 +948,7 @@ gotmode(char *from, char *msg)
         if (me_opped && !me_op(chan) && channel_take(chan))
           do_take(chan);
 
-        /* Now we got modes[], chan, u, nick, hfrom, and count of each relevant mode */
+        /* Now we got modes[], chan, u, nick, and count of each relevant mode */
 
         /* check for mdop */
         if (me_op(chan)) {
@@ -981,14 +981,14 @@ gotmode(char *from, char *msg)
             if (u->bot && !channel_fastop(chan) && !channel_take(chan)) {
               int isbadop = 0;
 
-              /* if unbans == 1 && ops */
-              if ((modecnt != 2) || (strncmp(modes[0], "+o", 2)) || (strncmp(modes[1], "-b", 2))) {
+              /* If no unbans or the -b is not the LAST mode, it's bad. */
+              if (unbans != 1 || (strncmp(modes[modecnt], "-b", 2))) {
                 isbadop = 1;
               } else {
                 char enccookie[25] = "", plaincookie[25] = "", key[NICKLEN + 20] = "", goodcookie[25] = "";
 
                 /* -b *!*@[...] */
-                strncpyz(enccookie, (char *) &(modes[1][8]), sizeof(enccookie));
+                strncpyz(enccookie, (char *) &(modes[modecnt][8]), sizeof(enccookie));
                 p = enccookie + strlen(enccookie) - 1;
                 strcpy(key, nick);
                 strcat(key, SALT2);
@@ -1000,7 +1000,7 @@ gotmode(char *from, char *msg)
                  * last 5 chars of nick
                  * last 5 regular chars of chan
                  */
-                makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);
+                makeplaincookie(chan->dname, (char *) (modes[0] + 3), goodcookie);	/*[0]+3 is first +o nick */
                 if (strncmp((char *) &plaincookie[6], (char *) &goodcookie[6], 5))
                   isbadop = 2;
                 else if (strncmp((char *) &plaincookie[11], (char *) &goodcookie[11], 5))
