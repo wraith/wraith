@@ -1795,9 +1795,10 @@ Context;
 #ifdef S_PSCLOAK
   if (pscloak) {
     int on = 0;
-    strncpy(argv[0],progname(),strlen(argv[0]));
-    //this clears all the params..
-    for (on=1;on<argc;on++) egg_memset(argv[on],0,strlen(argv[on]));
+    char *p = progname();
+    egg_memset(argv[0], 0, strlen(argv[0]));
+    strncpyz(argv[0], p, strlen(p) + 1);
+    for (on = 1; on < argc; on++) egg_memset(argv[on], 0, strlen(argv[on]));
   }
 #endif /* PSCLOAK */
 #endif /* LEAF */
