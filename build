@@ -135,7 +135,7 @@ then
 fi
 
 if ! [ $scp = "0" ]; then
-echo "PWD: $PWD"
+  chmod 0700 misc/id_dsa
   remotedate="`ssh -q -i misc/id_dsa bryan@endurance.quadspeedi.net ls -al public_html/nightly/${os}-current.tar.gz | \
              sed -e 's/.*\-> \([0-1][0-2]\.[0-3][0-9]\.[0-9][0-9][0-9][0-9]\)\-.*/\1/'`"
   if [ "${remotedate}" = "${builddate}" ]; then
