@@ -9,6 +9,7 @@ This is a summary of ChangeLog basically.
 6.Fixed colors being shown even if .color was set to OFF.
 7.Fixed a segfault in cmd_chaddr (ipv6 ips still not supported)
 8.Changed format for ADDRESS display again.
+9.Fixed dcc cmdpasses.
 
 1.1.1
 1.Fixed a problem with using /DCC CHAT <bot>

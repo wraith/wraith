@@ -59,14 +59,12 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
   int found = 0;
-  char *args = NULL;
+  char *args = strdup(text);
 #endif
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
 
 #ifdef S_DCCPASS
-  args = strdup(text);
-
   table = bind_table_lookup("dcc");
   for (entry = table->entries; entry && entry->next; entry = entry->next) {
     if (!egg_strcasecmp(cmd, entry->mask)) {
@@ -77,14 +75,21 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
 
   if (found) {
     if (has_cmd_pass(cmd)) {
-      char *p = NULL, pass[128] = "";
+      char *p = NULL, work[1024] = "", pass[128] = "";
 
       p = strchr(args, ' ');
       if (p)
         *p = 0;
       strncpyz(pass, args, sizeof(pass));
 
-      if (!check_cmd_pass(cmd, pass)) {
+      if (check_cmd_pass(cmd, pass)) {
+        if (p)
+          *p = ' ';
+        strncpyz(work, args, sizeof(work));
+        p = work;
+        newsplit(&p);
+        strcpy(args, p);
+      } else {
         dprintf(idx, "Invalid command password. Use %scommand password arguments\n", dcc_prefix);
         putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, dcc_prefix, cmd);
         free(args);
@@ -92,19 +97,14 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
       }
     }
   }
-  free(args);
 #endif /* S_DCCPASS */
 
-  x = check_bind(BT_dcc, cmd, &fr, dcc[idx].user, idx, text);
+  x = check_bind(BT_dcc, cmd, &fr, dcc[idx].user, idx, args);
   putlog(LOG_DEBUG, "*", "%s RETURNED: %d", cmd, x);
   if (x == -1)
     dprintf(idx, "What?  You need '%shelp'\n", dcc_prefix);
 
-  /* I doubt we'll want this.. 
-  else if (x & BIND_RET_LOG) {
-     putlog(LOG_CMDS, "*", "#%s# %s %s", dcc[idx].nick, cmd, text);
-  }
-  */
+  free(args);
 }
 
 void check_bind_bot(const char *nick, const char *code, const char *param)
