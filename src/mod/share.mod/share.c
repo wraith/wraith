@@ -1612,6 +1612,7 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
   FILE *f;
   struct userrec *u;
   int ok = 0;
+
   if ((f = fopen(fn, "wb"))) {
     chmod(fn, 0600);		/* make it -rw------- */
     lfprintf(f, "#4v: %s -- %s -- transmit\n", ver, botnetnick);
@@ -1628,20 +1629,20 @@ static int write_tmp_userfile(char *fn, struct userrec *bu, int idx)
      * UFF isn't supported, but +I/+e is supported, we just share.
      */
     if (dcc[idx].u.bot->numver >= min_exemptinvite) {
-      if ((dcc[idx].u.bot->uff_flags & UFF_EXEMPT) ||
-	  (dcc[idx].u.bot->numver < min_uffeature))
-        if (!write_exempts(f, idx))
-          ok = 0;
-      if ((dcc[idx].u.bot->uff_flags & UFF_INVITE) ||
-	  (dcc[idx].u.bot->numver < min_uffeature))
-        if (!write_invites(f,idx))
-  	  ok = 0;
-    } else
-      putlog(LOG_BOTS, "@", "%s is too old: not sharing exempts and invites.",
-             dcc[idx].nick);
-    for (u = bu; u && ok; u = u->next)
-    if (!write_user(u, f, idx))
-     ok = 0;
+      if ((dcc[idx].u.bot->uff_flags & UFF_EXEMPT) || (dcc[idx].u.bot->numver < min_uffeature)) {
+        if (!write_exempts(f, idx)) ok = 0;
+      }
+      if ((dcc[idx].u.bot->uff_flags & UFF_INVITE) || (dcc[idx].u.bot->numver < min_uffeature)) {
+        if (!write_invites(f,idx)) ok = 0;
+      }
+    } else {
+      putlog(LOG_BOTS, "@", "%s is too old: not sharing exempts and invites.", dcc[idx].nick);
+    }
+    for (u = bu; u && ok; u = u->next) {
+      if (!write_user(u, f, idx)) {
+       ok = 0;
+      }
+    }
     fclose(f);
   }
   if (!ok)
@@ -1931,8 +1932,7 @@ static void start_sending_users(int idx)
   struct chanuserrec *ch;
   struct chanset_t *cst;
 
-  egg_snprintf(share_file, sizeof share_file, ".share.%s.%lu", dcc[idx].nick,
-	       now);
+  egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%lu", tempdir, dcc[idx].nick, now);
   if (dcc[idx].u.bot->uff_flags & UFF_OVERRIDE) {
     debug1("NOTE: Sharing aggressively with %s, overriding its local bots.",
 	   dcc[idx].nick);
@@ -1943,10 +1943,10 @@ static void start_sending_users(int idx)
   write_tmp_userfile(share_file, u, idx);
   clear_userlist(u);
 
-  if (!uff_call_sending(idx, share_file)) {
+  if (!uff_call_sending(idx, share_file)) { /* compress! */
     unlink(share_file);
     dprintf(idx, "s e %s\n", "uff parsing failed");
-    putlog(LOG_BOTS, "@", "uff parsing failed");
+    putlog(LOG_BOTS, "*", "uff parsing failed");
     dcc[idx].status &= ~(STAT_SHARE | STAT_SENDING | STAT_AGGRESSIVE);
     return;
   }
