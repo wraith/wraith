@@ -410,7 +410,7 @@ privchan(struct flag_record fr, struct chanset_t *chan, int type)
     if (chan_op(fr))
       return 0;
   } else if (type == PRIV_VOICE) {
-    if (chan_voice(fr))
+    if (chan_voice(fr) || chan_op(fr))
       return 0;
   }
   return 1;                     /* user is restricted by +private */
