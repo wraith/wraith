@@ -8,6 +8,7 @@ This is a summary of ChangeLog basically.
 5.msg_op now shows OP before STATS log.
 6.Fixed a cosmetic error in cmd_secpass.
 7.Bots will now relink if they get a corrupt userfile.
+8.cmd_botcmd ? was not targetting leafs only, fixed.
 
 1.0.14
 1.Fixed order of log/info for cmd_whoami.
