@@ -172,8 +172,8 @@ typedef char * res_t;\n\n");
           fprintf(outsf, "static res_t res_%s[] = {\n", cmd);
           sprintf(lower_resps, "%s,\n\tres_%s", lower_resps, cmd);
         } else {			/* END */
-          fprintf(outf, "\tRES_END\n} response_t;\n\n#define RES_TYPES %d\n", total_responses);
-          fprintf(outf, "char *response(response_t);\nvoid init_responses();\n\n#endif /* !_RESPONSE_H */\n");
+          fprintf(outf, "\tRES_END\n} Response;\n\n#define RES_TYPES %d\n", total_responses);
+          fprintf(outf, "char *response(Response);\nvoid init_responses();\n\n#endif /* !_RESPONSE_H */\n");
           fprintf(outsf, "static res_t *res[] = {\n\tNULL%s\n};\n#endif /* !_RESPONSES_H */\n", lower_resps);
         }
       } else {				/* NEXT RES TEXT */
