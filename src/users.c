@@ -24,7 +24,7 @@ char natip[121] = "";
 extern struct dcc_t *dcc;
 extern struct userrec *userlist, *lastuser;
 extern struct chanset_t *chanset;
-extern int dcc_total, noshare, egg_numver, norestruct;
+extern int dcc_total, noshare, egg_numver;
 extern char botnetnick[], *netpass;
 extern Tcl_Interp *interp;
 extern time_t now;
@@ -1098,7 +1098,6 @@ void autolink_cycle(char *start)
     curval[HANDLEN + 4],
     myval[HANDLEN + 4];
 
-  if (norestruct) return; //this shouldn't ever happen..
   u = get_user_by_handle(userlist, botnetnick);
   link_pref_val(u, myval);
   strcpy(bestval, myval);
@@ -1108,7 +1107,6 @@ void autolink_cycle(char *start)
     if (dcc[i].type == &DCC_FORK_BOT)
       return;
     if (dcc[i].type == &DCC_BOT) {
-
       if (dcc[i].status & (STAT_OFFEREDU | STAT_GETTINGU | STAT_SENDINGU))
         continue; //lets let the binary have it's peace.
 
@@ -1175,36 +1173,26 @@ int botlinkcount = 0;
 
 void autolink_cycle(char *start)
 {
+  struct userrec *my_u = NULL, *u = NULL;
+  struct hublist_entry *hl = NULL, *hl2 = NULL;
+  struct bot_addr *my_ba;
+  char uplink[HANDLEN + 1], avoidbot[HANDLEN + 1], curhub[HANDLEN + 1];
+  int i, hlc;
+  struct flag_record fr = {FR_GLOBAL, 0, 0, 0, 0, 0};
 
-
-  struct userrec *u = NULL,
-   *ul = NULL;
-  struct hublist_entry *hl = NULL,
-   *hl2 = NULL;
-  struct bot_addr *ba;
-  char uplink[HANDLEN + 1],
-    avoidbot[HANDLEN + 1],
-    curhub[HANDLEN + 1];
-  int i,
-    hlc;
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0 };
-
-  if (norestruct) return;
   /* Reset connection attempts if we ain't called due to a failed link */
   if (!start)
     botlinkcount = 0;
-  u = get_user_by_handle(userlist, botnetnick);
-  ba = get_user(&USERENTRY_BOTADDR, u);
-  if (ba && (ba->uplink[0])) {
-    strncpy0(uplink, ba->uplink, sizeof(uplink));
+  my_u = get_user_by_handle(userlist, botnetnick);
+  my_ba = get_user(&USERENTRY_BOTADDR, my_u);
+  if (my_ba && (my_ba->uplink[0])) {
+    strncpy0(uplink, my_ba->uplink, sizeof(uplink));
   } else {
     uplink[0] = 0;
   }
   curhub[0] = 0;
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type == &DCC_BOT_NEW)
-      return;
-    if (dcc[i].type == &DCC_FORK_BOT)
+    if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
       return;
     if (dcc[i].type == &DCC_BOT) {
       strcpy(curhub, dcc[i].nick);
@@ -1213,7 +1201,7 @@ void autolink_cycle(char *start)
   }
 
   if (curhub[0]) {
-    /* we got a hub */
+    /* we are linked to a bot (hub) */
     if (uplink[0] && !strcmp(curhub, uplink))
       /* Connected to uplink, nothing more to do */
       return;
@@ -1251,28 +1239,28 @@ void autolink_cycle(char *start)
     }
   }
   /* Pick a random hub, but avoid 'avoidbot' */
-  ul = userlist;
   hlc = 0;
-  while (ul) {
-    get_user_flagrec(ul, &fr, NULL);
-
-    if (glob_bot(fr) && 
-        strcmp(ul->handle, botnetnick) && 
-        strcmp(u->handle, avoidbot) && 
-        (bot_hublevel(ul) < 999)) {
+  for (u = userlist; u; u = u->next) {
+    get_user_flagrec(u, &fr, NULL);
+    if (glob_bot(fr) && strcmp(u->handle, botnetnick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
+      putlog(LOG_DEBUG, "@", STR("Adding %s to hublist"), u->handle);
       hl2 = hl;
       hl = user_malloc(sizeof(struct hublist_entry));
       egg_bzero(hl, sizeof(struct hublist_entry));
+
       hl->next = hl2;
       hlc++;
-      hl->u = ul;
+      hl->u = u;
     }
-    ul = ul->next;
   }
+  putlog(LOG_DEBUG, "@", STR("Picking random hub from %d hubs"), hlc);
   hlc = random() % hlc;
+  putlog(LOG_DEBUG, "@", STR("Picked #%d for hub"), hlc);
   while (hl) {
-    if (!hlc)
+    if (!hlc) {
+      putlog(LOG_DEBUG, "@", STR("Which is bot: %s"), hl->u->handle);
       botlink("", -3, hl->u->handle);
+    }
     hlc--;
     hl2 = hl->next;
     nfree(hl);

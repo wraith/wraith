@@ -329,7 +329,6 @@ void failed_link(int idx)
   autolink_cycle(s);		/* Check for more auto-connections */
 }
 
-int norestruct = 0;
 static void cont_link(int idx, char *buf, int ii)
 {
   /* Now set the initial link key (incoming only, we're not sending more until we get an OK)... */
@@ -348,16 +347,14 @@ static void cont_link(int idx, char *buf, int ii)
     int i;
 
     /* If we're already connected somewhere, unlink and idle a sec */
-    if (!norestruct) {
-      for (i = 0; i < dcc_total; i++) {
-        if ((dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user))) {
-          putlog(LOG_BOTS, "*", STR("Unlinking %s - restructure"), dcc[i].nick);
-          botnet_send_unlinked(i, dcc[i].nick, STR("Restructure"));
-          killsock(dcc[i].sock);
-          lostdcc(i);
-          usleep(1000 * 500);
-          break;
-        }
+    for (i = 0; i < dcc_total; i++) {
+      if ((dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user))) {
+        putlog(LOG_BOTS, "*", STR("Unlinking %s - restructure"), dcc[i].nick);
+        botnet_send_unlinked(i, dcc[i].nick, STR("Restructure"));
+        killsock(dcc[i].sock);
+        lostdcc(i);
+        usleep(1000 * 500);
+        break;
       }
     }
 //.    ssl_link(dcc[idx].sock, CONNECT_SSL);

@@ -508,7 +508,7 @@
 /* 305 - 308 */
 #define bdhash ((char *)(global[305]))
 #define isupdatehub ((int (*)(void))global[306])
-#define norestruct (*(int*)global[307])
+/* 307 UNUSED */
 #define botlink ((int (*)(char *, int, char *))global[308])
 /* 309 - 312 */
 #define makeplaincookie ((void (*)(char *, char *, char *))global[309])

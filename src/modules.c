@@ -34,7 +34,7 @@ extern int	 noshare, loading, role,
 #endif /* S_AUTH */
  			 dcc_total, egg_numver, userfile_perm,
 			 use_console_r, ignore_time, must_be_owner,
-			 debug_output, default_flags, norestruct, 
+			 debug_output, default_flags,  
 			 max_dcc, share_greet, password_timeout, localhub,
 #ifdef S_IRCNET
 			 use_invites, use_exempts, 
@@ -563,7 +563,7 @@ Function global_table[] =
   (Function) & USERENTRY_ADDED,	/* struct user_entry_type *	*/
   (Function) bdhash,
   (Function) isupdatehub,
-  (Function) & norestruct,
+  (Function) 0,
   (Function) botlink,
   (Function) makeplaincookie,
   (Function) bankickprefix,
