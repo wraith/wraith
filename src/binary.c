@@ -73,7 +73,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
   if (todo & WRITE_CHECKSUM) {
     Tempfile *newbin = new Tempfile("bin");
     char *fname_bak = NULL;
-    size_t size = 0, skip_bytes = 0, pos = 0;
+    size_t size = 0, skip_bytes = 0, newpos = 0;
 
     size = strlen(fname) + 2;
     fname_bak = (char *) my_calloc(1, size);
@@ -86,7 +86,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
     fseek(f, 0, SEEK_END);
     size = ftell(f);
     fseek(f, 0, SEEK_SET);
-    pos = 0;
+    newpos = 0;
 
     while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
       if (skip_bytes) {                  /* to skip bytes for pack data */
@@ -101,7 +101,7 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
         werr(ERR_BINSTAT);
       }
 
-      pos += len;
+      newpos += len;
 
       if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {		/* found the settings struct! */
         MD5_Final(md5out, ctx);
@@ -122,9 +122,9 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
           fread(buf, 1, SIZE_PACK, f);
           fwrite(buf, 1, SIZE_PACK, newbin->f);
         }
-//          fseek(newbin->f, pos + SIZE_PACK, SEEK_SET);
+//          fseek(newbin->f, newpos + SIZE_PACK, SEEK_SET);
 
-        pos += SIZE_PACK;
+        newpos += SIZE_PACK;
 
         if (todo & WRITE_CONF) {
           skip_bytes += SIZE_CONF;
@@ -134,12 +134,12 @@ bin_checksum(const char *fname, int todo, MD5_CTX * ctx)
           fread(buf, 1, SIZE_CONF, f);
           fwrite(buf, 1, SIZE_CONF, newbin->f);
         }
-//          fseek(newbin->f, pos + SIZE_CONF, SEEK_SET);
-        pos += SIZE_CONF;
+//          fseek(newbin->f, newpos + SIZE_CONF, SEEK_SET);
+        newpos += SIZE_CONF;
 
         skip_bytes += SIZE_PAD;
-        fseek(newbin->f, pos + SIZE_PAD, SEEK_SET);
-        pos += SIZE_PAD;
+        fseek(newbin->f, newpos + SIZE_PAD, SEEK_SET);
+        newpos += SIZE_PAD;
       } else if (!hash[0])
         MD5_Update(ctx, buf, len);
     }
