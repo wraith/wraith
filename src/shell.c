@@ -121,7 +121,7 @@ void check_maxfiles()
   }
 
   if (fd >= 100 && fd <= 130)		/* a warning range */
-    putlog(LOG_MISC, "* Warning, FD:%d, at >=180, the bot will auto restart", fd);
+    putlog(LOG_MISC, "*", "* Warning, FD:%d, at >=180, the bot will auto restart", fd);
 
   if (fd >= 180) {
     nuke_server("Max FD reached, restarting...");
