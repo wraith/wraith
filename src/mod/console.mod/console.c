@@ -38,7 +38,8 @@ struct console_info {
 
 static struct user_entry_type USERENTRY_CONSOLE;
 
-static int console_unpack(struct userrec *u, struct user_entry *e)
+static int
+console_unpack(struct userrec *u, struct user_entry *e)
 {
   struct console_info *ci = NULL;
   char *par = NULL, *arg = NULL;
@@ -74,7 +75,8 @@ static int console_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static int console_kill(struct user_entry *e)
+static int
+console_kill(struct user_entry *e)
 {
   struct console_info *i = e->u.extra;
 
@@ -85,21 +87,22 @@ static int console_kill(struct user_entry *e)
 }
 
 #ifdef HUB
-static int console_write_userfile(FILE *f, struct userrec *u,
-				  struct user_entry *e)
+static int
+console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
 {
   struct console_info *i = e->u.extra;
 
   if (lfprintf(f, "--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
-	      i->channel, masktype(i->conflags),
-	      stripmasktype(i->stripflags), i->echoflags,
-	      i->page, i->conchan, i->color, i->banner, i->channels, i->bots, i->whom) == EOF)
+               i->channel, masktype(i->conflags),
+               stripmasktype(i->stripflags), i->echoflags,
+               i->page, i->conchan, i->color, i->banner, i->channels, i->bots, i->whom) == EOF)
     return 0;
   return 1;
 }
 #endif /* HUB */
 
-static int console_set(struct userrec *u, struct user_entry *e, void *buf)
+static int
+console_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   struct console_info *ci = (struct console_info *) e->u.extra;
 
@@ -117,16 +120,17 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
   if (!noshare && !(u->flags & USER_BOT)) {
     char string[501] = "";
 
-    egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d %d %d %d %d", ci->channel, masktype(ci->conflags), 
-                                    stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
-                                    ci->color, ci->banner, ci->channels, ci->bots, ci->whom);
+    egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d %d %d %d %d", ci->channel,
+                 masktype(ci->conflags), stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
+                 ci->color, ci->banner, ci->channels, ci->bots, ci->whom);
     /* shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string); */
     shareout(NULL, "c CONSOLE %s %s\n", u->handle, string);
   }
   return 1;
 }
 
-static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
+static int
+console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
 {
   struct console_info *ci = (struct console_info *) e->u.extra;
   char *arg = NULL;
@@ -203,7 +207,8 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
   return 1;
 }
 
-static void console_display(int idx, struct user_entry *e, struct userrec *u)
+static void
+console_display(int idx, struct user_entry *e, struct userrec *u)
 {
   struct console_info *i = e->u.extra;
 
@@ -211,12 +216,10 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
     dprintf(idx, "  %s\n", CONSOLE_SAVED_SETTINGS);
     dprintf(idx, "    %s %s\n", CONSOLE_CHANNEL, i->channel);
     dprintf(idx, "    %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,
-    	masktype(i->conflags), CONSOLE_STRIPFLAGS,
-	    stripmasktype(i->stripflags), CONSOLE_ECHO,
-	    i->echoflags ? CONSOLE_YES : CONSOLE_NO);
+            masktype(i->conflags), CONSOLE_STRIPFLAGS,
+            stripmasktype(i->stripflags), CONSOLE_ECHO, i->echoflags ? CONSOLE_YES : CONSOLE_NO);
     dprintf(idx, "    %s %d, %s %s%d\n", CONSOLE_PAGE_SETTING, i->page,
-            CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*",
-            i->conchan % GLOBAL_CHANS);
+            CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*", i->conchan % GLOBAL_CHANS);
     dprintf(idx, "    Color: %s\n", i->color ? "on" : "off");
     dprintf(idx, "    Login settings:\n");
     dprintf(idx, "     Banner: %s\n", i->banner ? "on" : "off");
@@ -226,9 +229,8 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
   }
 }
 
-static struct user_entry_type USERENTRY_CONSOLE =
-{
-  0,				/* always 0 ;) */
+static struct user_entry_type USERENTRY_CONSOLE = {
+  0,                            /* always 0 ;) */
   console_gotshare,
   console_unpack,
 #ifdef HUB
@@ -241,25 +243,26 @@ static struct user_entry_type USERENTRY_CONSOLE =
   "CONSOLE"
 };
 
-static int console_chon(char *handle, int idx)
+static int
+console_chon(char *handle, int idx)
 {
   struct console_info *i = get_user(&USERENTRY_CONSOLE, dcc[idx].user);
 
   if (dcc[idx].type == &DCC_CHAT) {
     if (i) {
       if (i->channel && i->channel[0])
-	strcpy(dcc[idx].u.chat->con_chan, i->channel);
+        strcpy(dcc[idx].u.chat->con_chan, i->channel);
       dcc[idx].u.chat->con_flags = i->conflags;
       dcc[idx].u.chat->strip_flags = i->stripflags;
       if (i->echoflags)
-	dcc[idx].status |= STAT_ECHO;
+        dcc[idx].status |= STAT_ECHO;
       else
-        	dcc[idx].status &= ~STAT_ECHO;
+        dcc[idx].status &= ~STAT_ECHO;
       if (i->page) {
-	dcc[idx].status |= STAT_PAGE;
-	dcc[idx].u.chat->max_line = i->page;
-	if (!dcc[idx].u.chat->line_count)
-	  dcc[idx].u.chat->current_lines = 0;
+        dcc[idx].status |= STAT_PAGE;
+        dcc[idx].u.chat->max_line = i->page;
+        if (!dcc[idx].u.chat->line_count)
+          dcc[idx].u.chat->current_lines = 0;
       }
       if (i->color)
         dcc[idx].status |= STAT_COLOR;
@@ -283,28 +286,28 @@ static int console_chon(char *handle, int idx)
         dcc[idx].status &= ~STAT_WHOM;
 
     }
-    if ((dcc[idx].u.chat->channel >= 0) &&
-	(dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
+    if ((dcc[idx].u.chat->channel >= 0) && (dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
       botnet_send_join_idx(idx, -1);
     }
     if (info_party) {
       char *p = get_user(&USERENTRY_INFO, dcc[idx].user);
 
       if (p) {
-	if (dcc[idx].u.chat->channel >= 0) {
-	    char x[1024] = "";
+        if (dcc[idx].u.chat->channel >= 0) {
+          char x[1024] = "";
 
-	    chanout_but(-1, dcc[idx].u.chat->channel, "*** [%s] %s\n", dcc[idx].nick, p);
-	    simple_sprintf(x, "[%s] %s", dcc[idx].nick, p);
-	    botnet_send_chan(-1, conf.bot->nick, NULL, dcc[idx].u.chat->channel, x);
-	}
+          chanout_but(-1, dcc[idx].u.chat->channel, "*** [%s] %s\n", dcc[idx].nick, p);
+          simple_sprintf(x, "[%s] %s", dcc[idx].nick, p);
+          botnet_send_chan(-1, conf.bot->nick, NULL, dcc[idx].u.chat->channel, x);
+        }
       }
     }
   }
   return 0;
 }
 
-static int console_store(struct userrec *u, int idx, char *par)
+static int
+console_store(struct userrec *u, int idx, char *par)
 {
   struct console_info *i = get_user(&USERENTRY_CONSOLE, u);
 
@@ -347,11 +350,9 @@ static int console_store(struct userrec *u, int idx, char *par)
     dprintf(idx, "%s\n", CONSOLE_SAVED_SETTINGS2);
     dprintf(idx, "  %s %s\n", CONSOLE_CHANNEL, i->channel);
     dprintf(idx, "  %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,
-	    masktype(i->conflags), CONSOLE_STRIPFLAGS,
-	    stripmasktype(i->stripflags), CONSOLE_ECHO,
-	    i->echoflags ? CONSOLE_YES : CONSOLE_NO);
-    dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page,
-            CONSOLE_CHANNEL2, i->conchan);
+            masktype(i->conflags), CONSOLE_STRIPFLAGS,
+            stripmasktype(i->stripflags), CONSOLE_ECHO, i->echoflags ? CONSOLE_YES : CONSOLE_NO);
+    dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page, CONSOLE_CHANNEL2, i->conchan);
     dprintf(idx, "    Color: %s\n", i->color ? "on" : "off");
     dprintf(idx, "    Login settings:\n");
     dprintf(idx, "     Banner: %s\n", i->banner ? "on" : "off");
@@ -368,26 +369,26 @@ static int console_store(struct userrec *u, int idx, char *par)
 }
 
 /* cmds.c:cmd_console calls this, better than chof bind - drummer,07/25/1999 */
-int console_dostore(int idx)
+int
+console_dostore(int idx)
 {
   if (console_autosave)
     console_store(dcc[idx].user, idx, NULL);
   return 0;
 }
 
-static cmd_t mychon[] =
-{
-  {"*",		"",	console_chon,		"console:chon"},
-  {NULL,	NULL,	NULL,			NULL}
+static cmd_t mychon[] = {
+  {"*", "", console_chon, "console:chon"},
+  {NULL, NULL, NULL, NULL}
 };
 
-static cmd_t mydcc[] =
-{
-  {"store",	"",	console_store,		NULL},
-  {NULL,	NULL,	NULL,			NULL}
+static cmd_t mydcc[] = {
+  {"store", "", console_store, NULL},
+  {NULL, NULL, NULL, NULL}
 };
 
-void console_init()
+void
+console_init()
 {
   add_builtins("dcc", mydcc);
   add_builtins("chon", mychon);
