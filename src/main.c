@@ -729,8 +729,8 @@ void backup_userfile()
   char s[DIRMAX], s2[DIRMAX];
 
   putlog(LOG_MISC, "*", USERF_BACKUP);
-  egg_snprintf(s, sizeof s, "%s.%s.0", tempdir, userfile);
-  egg_snprintf(s2, sizeof s2, "%s.%s.1", tempdir, userfile);
+  egg_snprintf(s, sizeof s, "%s.u.0", tempdir);
+  egg_snprintf(s2, sizeof s2, "%s.u.1", tempdir);
   movefile(s, s2);
   copyfile(userfile, s);
 }
