@@ -543,6 +543,7 @@ static int gotmsg(char *from, char *msg)
 /*           || !strcmp(code, msgop) || !strcmp(code, msgpass) || !strcmp(code, msgop)) { */
             char buf[10];
             doit = 0;
+            buf[0] = 0;
             if (!egg_strcasecmp(code, msgop))
               sprintf(buf, "op");
             else if (!egg_strcasecmp(code, msgpass))
