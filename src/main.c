@@ -552,9 +552,11 @@ static void startup_checks() {
   }
   if (!fixmod(confdir()))
     werr(ERR_CONFDIRMOD);
-  else if (!can_stat(cfile))
-    werr(ERR_NOCONF);
-  else if (!fixmod(cfile))
+  /*technically no longer needed? 
+   else if (!can_stat(cfile))
+     werr(ERR_NOCONF);
+  */
+  else if (can_stat(cfile) && !fixmod(cfile))
     werr(ERR_CONFMOD);
 
   if (!can_stat(tempdir)) {
@@ -568,7 +570,8 @@ static void startup_checks() {
   if (!fixmod(tempdir))
     werr(ERR_TMPMOD);
 
-  readconf(cfile);
+  if (can_stat(cfile))
+    readconf(cfile);
 #ifdef LEAF
   if (localhub)
 #endif /* LEAF */

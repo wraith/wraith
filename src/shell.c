@@ -650,6 +650,8 @@ char *werr_tostr(int errnum)
     return STR("No such botnick");
   case ERR_BOTDISABLED:
     return STR("Bot is disabled, remove '/' in config");
+  case ERR_NOBOTS:
+    return STR("There are no bots in the config! Please use ./binary -C to edit");
   default:
     return STR("Unforseen error");
   }

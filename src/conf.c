@@ -354,6 +354,9 @@ void free_conf() {
 }
 
 int parseconf() {
+  if (!conffile.bots->nick && !conffile.bots->next) /* no bots ! */
+    werr(ERR_NOBOTS);
+
   if (conffile.uid && conffile.uid != myuid) {
     sdprintf("wrong uid, conf: %d :: %d", conffile.uid, myuid);
     werr(ERR_WRONGUID);
@@ -440,7 +443,11 @@ int readconf(char *cfile)
         char *option = NULL;
 
         newsplit(&line);
-        option = newsplit(&line);
+        if (line[0])
+          option = newsplit(&line);
+
+        if (!option)
+          continue;
 
         if (!strcmp(option, "autocron")) {              /* automatically check/create crontab? */
           if (egg_isdigit(line[0]))
@@ -641,7 +648,7 @@ void fillconf(conf_t *inconf) {
   conf_bot *bot = NULL;
   char *mynick = NULL;
 
-  if (localhub) {
+  if (localhub && conffile.bots && conffile.bots->nick) {
     mynick = strdup(conffile.bots->nick);
     strncpyz(origbotname, conffile.bots->nick, NICKLEN + 1);
   } else
