@@ -535,55 +535,39 @@ void answer_local_whom(int idx, int chan)
 #ifdef HUB
 /* Show z a list of all bots connected
  */
-void tell_bots(int idx)
+void
+tell_bots(int idx, int up)
 {
-  char format[81] = "";
-  int upi = 1, downi = 0;
-  size_t len;
   struct userrec *u = NULL;
+  int cnt = 0, tot = 0;
+  char work[128] = "";
 
-  len = strlen(conf.bot->nick);
-  //up = calloc(1, ulen + 1);
-  //strcpy(up, conf.bot->nick);
-  //down = calloc(1, 1);
+  if (up) {
+    strcat(work, conf.bot->nick);
+    strcat(work, " ");
+    cnt++;
+  }
 
-  egg_snprintf(format, sizeof format, "%%s%%-11s%%s %%-5s %%-10s %%-11s %%s\n");
-  dprintf(idx, format, "", "Bot", "", "OS", "Username", "Shell");
-  dprintf(idx, format, "", "-----------", "", "----------", "-----------", "-----------------------");
-  
-/* FIXME: NEED ME! */
   for (u = userlist; u; u = u->next) {
-    if (u->bot && (egg_strcasecmp(u->handle, conf.bot->nick))) {
-      size_t hlen = strlen(u->handle);
-      int up = 0;
-
-      if (findbot(u->handle)) {
-        upi++;
-        up = 1;
-      } else
-        downi++;
-
-      dprintf(idx, format, up ? GREEN(idx) : RED(idx), u->handle, COLOR_END(idx), 
-              get_user(&USERENTRY_OS, u), get_user(&USERENTRY_USERNAME, u), 
-              get_user(&USERENTRY_NODENAME, u));
-
-//      if (up) {
+    if (u->bot) {
+      if (egg_strcasecmp(u->handle, conf.bot->nick)) {
+        if ((!up && nextbot(u->handle) == -1) || (up && nextbot(u->handle))) {
+          strcat(work, u->handle);
+          cnt++;
+          tot++;
+          if (cnt == 11) {
+            dprintf(idx, "%s bots: %s\n", up ? "Up" : "Down", work);
+            work[0] = 0;
+            cnt = 0;
+          } else
+            strcat(work, " ");
+        }
+      }
     }
   }
-/*
-  if (!downi)
-    dprintf(idx, "Bots up (%d) [%sall%s]: %s\n", upi, BOLD(idx), BOLD_END(idx), up);
-  else
-    dprintf(idx, "Bots up (%d): %s\n", upi, up);
-  
-  if (downi)
-    dprintf(idx, "Bots down (%d): %s\n", downi, down);
-
-  dprintf(idx, "Total: %d [%s%d%% up%s, %s%d%% down%s]\n", upi + downi, GREEN(idx), (100 * upi / (upi + downi)),
-               COLOR_END(idx), RED(idx), (100 * downi / (upi + downi)), COLOR_END(idx));
-  free(up);
-  free(down);
-*/
+  if (work[0])
+    dprintf(idx, "%s bot%s: %s\n", up ? "Up" : "Down", cnt > 1 ? "s" : "", work);
+  dprintf(idx, "(Total %s: %d)\n", up ? "up" : "down", tot);
 }
 
 /* Show a simpleton bot tree

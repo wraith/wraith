@@ -695,36 +695,13 @@ static void cmd_secpass(struct userrec *u, int idx, char *par)
 static void cmd_bots(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# bots", dcc[idx].nick);
-  tell_bots(idx);
+  tell_bots(idx, 1);
 }
 
 static void cmd_downbots(struct userrec *u, int idx, char *par)
 {
-  struct userrec *u2 = NULL;
-  int cnt = 0, tot = 0;
-  char work[128] = "";
-
   putlog(LOG_CMDS, "*", "#%s# downbots", dcc[idx].nick);
-  for (u2 = userlist; u2; u2 = u2->next) {
-    if (u2->bot) {
-      if (egg_strcasecmp(u2->handle, conf.bot->nick)) {
-        if (nextbot(u2->handle) == -1) {
-          strcat(work, u2->handle);
-          cnt++;
-          tot++;
-          if (cnt == 10) {
-            dprintf(idx, "Down bots: %s\n", work);
-            work[0] = 0;
-            cnt = 0;
-          } else
-            strcat(work, " ");
-        }
-      }
-    }
-  }
-  if (work[0])
-    dprintf(idx, "Down bot%s: %s\n", cnt > 1 ? "s" : "", work);
-  dprintf(idx, "(Total down: %d)\n", tot);
+  tell_bots(idx, 0);
 }
 
 
