@@ -68,6 +68,7 @@ const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
 const char	egg_version[1024] = "1.2.1";
 
 bool 	localhub = 1; 		/* we set this to 0 if we get a -B */
+bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
 bool 	loading = 0;
 int	default_flags = 0;	/* Default user flags and */
@@ -300,6 +301,7 @@ static void dtx_arg(int argc, char *argv[])
 #ifdef LEAF
       case 'B':
         localhub = 0;
+        used_B = 1;
         strncpyz(origbotname, optarg, NICKLEN + 1);
         break;
 #endif /* LEAF */
@@ -609,7 +611,7 @@ static void startup_checks(int hack) {
 
   fillconf(&conf);
 #ifdef LEAF
-  if (localhub) {
+  if (localhub && !used_B) {
     if (do_killbot[0]) {
       if (killbot(do_killbot) == 0)
           printf("'%s' successfully killed.\n", do_killbot);
@@ -630,8 +632,7 @@ static void startup_checks(int hack) {
       }
 #ifdef LEAF
       spawnbots();
-      if (updating)
-        exit(0); /* just let the timer restart us (our parent) */
+      exit(0); /* our job is done! */
     }
   }
   if (!localhub)		/* only clear conf on NON localhubs, we need it for cmd_conf */
