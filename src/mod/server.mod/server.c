@@ -1300,10 +1300,7 @@ static void dcc_chat_hostresolved(int i)
     debug0("afinet6, af_type, strcpy");
   } else
 #endif /* !USE_IPV6 */
-/* redundant?
   egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
-*/
-  egg_snprintf(ip, sizeof ip, "%lu", iptolong(dcc[i].addr));
 #ifdef USE_IPV6
   if (sockprotocol(dcc[i].sock) == AF_INET6) {
 #  ifdef IPV6_DEBUG

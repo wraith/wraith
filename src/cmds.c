@@ -3144,7 +3144,7 @@ static void cmd_pls_user(struct userrec *u, int idx, char *par)
   else if (!egg_strcasecmp(handle, conf.bot->nick))
     dprintf(idx, STR("Hey! That's MY name!\n"));
   else {
-    struct userrec *u2;
+    struct userrec *u2 = NULL;
     char tmp[50] = "", s[16] = "", s2[17] = "";
 
     userlist = adduser(userlist, handle, host, "-", USER_DEFAULT);
