@@ -166,8 +166,8 @@ void fatal(const char *s, int recoverable)
       killsock(dcc[i].sock);
 
   if (!recoverable) {
-    if (conf.bot && conf.bot->pid_file)
-      unlink(conf.bot->pid_file);
+//    if (conf.bot && conf.bot->pid_file)
+//      unlink(conf.bot->pid_file);
     exit(1);
   }
 }
@@ -345,7 +345,7 @@ static void dtx_arg(int argc, char *argv[])
       case 'U':
         if (optarg) {
           update_bin = strdup(optarg);
-          updating = i == 'u' ? 1 : 2;	/* use 2 if 'U' to not kill/spawn bots. */
+          updating = (i == 'u' ? 1 : 2);	/* use 2 if 'U' to not kill/spawn bots. */
           break;
         } else
           exit(0);
