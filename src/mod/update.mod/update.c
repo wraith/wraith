@@ -134,6 +134,7 @@ static void update_version(int idx, char *par)
 
   dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
   if ((dcc[idx].u.bot->bts < buildts) && (isupdatehub())) {
+    putlog(LOG_DEBUG, "?", "Asking %s to accept update from me", dcc[idx].nick);
     dprintf(idx, "sb u?\n");
     dcc[idx].status |= STAT_OFFEREDU;
   }
@@ -297,7 +298,7 @@ static void start_sending_binary(int idx)
 
   dcc[idx].status |= STAT_SENDINGU;
 
-  putlog(LOG_BOTS, "*", "Sending binary send request to %s",dcc[idx].nick);
+  putlog(LOG_BOTS, "*", "Sending binary send request to %s", dcc[idx].nick);
   if (!strcmp("*", dcc[idx].u.bot->sysname)) {
     putlog(LOG_MISC, "*", "Cannot update \002%s\002 automatically, uname not returning os name.", dcc[idx].nick);
     return;

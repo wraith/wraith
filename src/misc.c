@@ -1407,6 +1407,7 @@ int updatebin (int idx, char *par, int autoi)
     unlink(pid_file); //delete pid so new binary doesnt exit.
 #ifdef HUB
   listen_all(my_port, 1); //close the listening port...
+  usleep(5000);
 #endif /* HUB */
   i = system(buf);
   if (i == -1 || i == 1) {

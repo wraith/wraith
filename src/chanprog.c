@@ -318,6 +318,8 @@ void tell_verbose_status(int idx)
   dprintf(idx, "I am %s, running %s:  %d user%s (mem: %uk)\n",
 	  botnetnick, ver, i, i == 1 ? "" : "s",
           (int) (expected_memory() / 1024));
+  if (isupdatehub())
+    dprintf(idx, "I am an update hub.\n");
 #endif /* HUB */
   now2 = now - online_since;
   s[0] = 0;
