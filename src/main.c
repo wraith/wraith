@@ -489,12 +489,20 @@ static void event_resettraffic()
 
 static void startup_checks() {
   char cfile[DIRMAX] = "";
+  int enc = CONF_ENC;
 
+#ifdef LEAF
+  egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
+#endif /* LEAF */
 #ifdef HUB
   egg_snprintf(cfile, sizeof cfile, STR("%s/conf"), confdir());
-#else /* LEAF */
-  egg_snprintf(cfile, sizeof cfile, STR("%s/.known_hosts"), confdir());
 #endif /* HUB */
+
+#ifdef CYGWIN_HACKS
+  egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
+  enc =~ CONF_ENC;
+#endif /* CYGWIN_HACKS */
+
   if (!can_stat(confdir())) {
 #ifdef LEAF
     if (mkdir(confdir(),  S_IRUSR | S_IWUSR | S_IXUSR)) {
@@ -528,7 +536,8 @@ static void startup_checks() {
     werr(ERR_TMPMOD);
 
   if (can_stat(cfile))
-    readconf(cfile);
+    readconf(cfile, enc);
+      
 #ifdef LEAF
   if (localhub)
 #endif /* LEAF */
@@ -542,7 +551,7 @@ static void startup_checks() {
 #ifdef LEAF
   if (localhub)
 #endif /* LEAF */
-    writeconf(cfile, NULL, CONF_ENC);
+    writeconf(cfile, NULL, enc);
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);

@@ -55,7 +55,7 @@ pid_t checkpid(char *, conf_bot *);
 void showconf();
 void init_conf();
 void free_conf();
-int readconf(char *);
+int readconf(char *, int);
 int parseconf();
 int writeconf(char *, FILE *, int);
 void fillconf(conf_t *);

@@ -207,7 +207,11 @@ void init_conf() {
   conffile.bots->next = NULL;
   conffile.bot = NULL;
 
+#ifdef CYGWIN_HACKS
+  conffile.autocron = 0;
+#else
   conffile.autocron = 1;
+#endif /* CYGWIN_HACKS */
   conffile.autouname = 0;
 #ifdef CYGWIN_HACKS
   conffile.binpath = strdup(homedir());
@@ -408,30 +412,38 @@ int parseconf() {
   return 0;
 }
 
-int readconf(char *cfile)
+int readconf(char *cfile, int bits)
 {
   FILE *f = NULL;
-  int i = 0;
+  int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
   char inbuf[8192] = "";
 
-  sdprintf("readconf(%s)", cfile);
+  sdprintf("readconf(%s, %d)", cfile, enc);
   Context;
   if (!(f = fopen(cfile, "r")))
     fatal("Cannot read config", 0);
 
   while (fgets(inbuf, sizeof inbuf, f) != NULL) {
-    char *line = NULL, *temp_ptr = NULL;
-    line = temp_ptr = decrypt_string(SALT1, inbuf);
+    char *line = NULL, *temp_ptr = NULL, *p = NULL;
+
+    if (p = strchr(inbuf, '\n'))
+      *p = 0;
+
+    if (enc)
+      line = temp_ptr = decrypt_string(SALT1, inbuf);
+    else
+      line = inbuf;
 
     if ((line && !line[0]) || line[0] == '\n') {
-      free(line);
+      if (enc)
+        free(line);
       continue;
     }
 
     i++;
 
-    /* sdprintf("CONF LINE: %s", line); */
-    if (!strchr("*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
+    sdprintf("CONF LINE: %s", line);
+    if (enc && !strchr("*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
       sdprintf(STR("line %d, char %c "), i, line[0]);
       werr(ERR_CONFBADENC);
     } else {                    /* line is good to parse */
@@ -529,7 +541,8 @@ int readconf(char *cfile)
         conf_addbot(nick, ip, host, ipsix);
       }
     }
-    free(temp_ptr);
+    if (enc)
+      free(temp_ptr);
   } /* while(fgets()) */
   fclose(f);
 
