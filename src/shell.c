@@ -127,6 +127,8 @@ void check_maxfiles()
       if (!findanysnum(i))
         if ((close(i)) == -1)			/* try to close the BOGUS fd (likely a KQUEUE) */
           failed_close++;
+        else
+          bogus--;
     if (bogus >= 150 || failed_close >= 50) {
       nuke_server("Max FD reached, restarting...");
       cycle_time = 0;
