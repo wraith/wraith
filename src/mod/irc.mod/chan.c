@@ -825,6 +825,18 @@ void check_this_ban(struct chanset_t *chan, char *banmask, int sticky)
     add_mode(chan, '+', 'b', banmask);
 }
 
+void check_this_exempt(struct chanset_t *chan, char *mask, int sticky)
+{
+  if (!isexempted(chan, mask) && (!channel_dynamicexempts(chan) || sticky))
+    add_mode(chan, '+', 'e', mask);
+}
+
+void check_this_invite(struct chanset_t *chan, char *mask, int sticky)
+{
+  if (!isinvited(chan, mask) && (!channel_dynamicinvites(chan) || sticky))
+    add_mode(chan, '+', 'I', mask);
+}
+
 void recheck_channel_modes(struct chanset_t *chan)
 {
   int cur = chan->channel.mode,

@@ -716,14 +716,18 @@ share_pls_ban(int idx, char *par)
   int flags = 0;
 
   if (dcc[idx].status & STAT_SHARE) {
+    int stick = 0;
+
     shareout_but(NULL, idx, "+b %s\n", par);
     noshare = 1;
     ban = newsplit(&par);
     str_unescape(ban, '\\');
     tm = newsplit(&par);
     from = newsplit(&par);
-    if (strchr(from, 's'))
+    if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
+      stick++;
+    }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
@@ -735,7 +739,7 @@ share_pls_ban(int idx, char *par)
     noshare = 0;
 #ifdef LEAF
     for (chan = chanset; chan != NULL; chan = chan->next)
-      check_this_ban(chan, ban, 0);
+      check_this_ban(chan, ban, stick);
 #endif /* LEAF */
   }
 }
@@ -749,6 +753,8 @@ share_pls_banchan(int idx, char *par)
   char *ban = NULL, *tm = NULL, *chname = NULL, *from = NULL;
 
   if (dcc[idx].status & STAT_SHARE) {
+    int stick = 0;
+
     ban = newsplit(&par);
     tm = newsplit(&par);
     chname = newsplit(&par);
@@ -756,8 +762,10 @@ share_pls_banchan(int idx, char *par)
     shareout_but(chan, idx, "+bc %s %s %s %s\n", ban, tm, chname, par);
     str_unescape(ban, '\\');
     from = newsplit(&par);
-    if (strchr(from, 's'))
+    if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
+      stick++;
+    }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
@@ -769,7 +777,7 @@ share_pls_banchan(int idx, char *par)
     u_addmask('b', chan, ban, from, par, expire_time, flags);
     noshare = 0;
 #ifdef LEAF
-    check_this_ban(chan, ban, 0);
+    check_this_ban(chan, ban, stick);
 #endif /* LEAF */
   }
 }
@@ -784,14 +792,19 @@ share_pls_exempt(int idx, char *par)
   int flags = 0;
 
   if (dcc[idx].status & STAT_SHARE) {
+    struct chanset_t *chan = NULL;
+    int stick = 0;
+
     shareout_but(NULL, idx, "+e %s\n", par);
     noshare = 1;
     exempt = newsplit(&par);
     str_unescape(exempt, '\\');
     tm = newsplit(&par);
     from = newsplit(&par);
-    if (strchr(from, 's'))
+    if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
+      stick++;
+    }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
@@ -801,6 +814,10 @@ share_pls_exempt(int idx, char *par)
     u_addmask('e', NULL, exempt, from, par, expire_time, flags);
     putlog(LOG_CMDS, "@", "%s: global exempt %s (%s:%s)", dcc[idx].nick, exempt, from, par);
     noshare = 0;
+#ifdef LEAF
+    for (chan = chanset; chan != NULL; chan = chan->next)
+      check_this_exempt(chan, exempt, stick);
+#endif /* LEAF */
   }
 }
 
@@ -815,6 +832,8 @@ share_pls_exemptchan(int idx, char *par)
   char *exempt = NULL, *tm = NULL, *chname = NULL, *from = NULL;
 
   if (dcc[idx].status & STAT_SHARE) {
+    int stick = 0;
+
     exempt = newsplit(&par);
     tm = newsplit(&par);
     chname = newsplit(&par);
@@ -822,8 +841,10 @@ share_pls_exemptchan(int idx, char *par)
     shareout_but(chan, idx, "+ec %s %s %s %s\n", exempt, tm, chname, par);
     str_unescape(exempt, '\\');
     from = newsplit(&par);
-    if (strchr(from, 's'))
+    if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
+      stick++;
+    }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
@@ -834,6 +855,9 @@ share_pls_exemptchan(int idx, char *par)
       expire_time += now;
     u_addmask('e', chan, exempt, from, par, expire_time, flags);
     noshare = 0;
+#ifdef LEAF
+    check_this_exempt(chan, exempt, stick);
+#endif /* LEAF */
   }
 }
 
@@ -847,14 +871,19 @@ share_pls_invite(int idx, char *par)
   int flags = 0;
 
   if (dcc[idx].status & STAT_SHARE) {
+    struct chanset_t *chan = NULL;
+    int stick = 0;
+
     shareout_but(NULL, idx, "+inv %s\n", par);
     noshare = 1;
     invite = newsplit(&par);
     str_unescape(invite, '\\');
     tm = newsplit(&par);
     from = newsplit(&par);
-    if (strchr(from, 's'))
+    if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
+      stick++;
+    }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
@@ -864,6 +893,10 @@ share_pls_invite(int idx, char *par)
     u_addmask('I', NULL, invite, from, par, expire_time, flags);
     putlog(LOG_CMDS, "@", "%s: global invite %s (%s:%s)", dcc[idx].nick, invite, from, par);
     noshare = 0;
+#ifdef LEAF
+    for (chan = chanset; chan != NULL; chan = chan->next)
+      check_this_invite(chan, invite, stick);
+#endif /* LEAF */
   }
 }
 
@@ -878,6 +911,8 @@ share_pls_invitechan(int idx, char *par)
   char *invite = NULL, *tm = NULL, *chname = NULL, *from = NULL;
 
   if (dcc[idx].status & STAT_SHARE) {
+    int stick = 0;
+
     invite = newsplit(&par);
     tm = newsplit(&par);
     chname = newsplit(&par);
@@ -885,8 +920,10 @@ share_pls_invitechan(int idx, char *par)
     shareout_but(chan, idx, "+invc %s %s %s %s\n", invite, tm, chname, par);
     str_unescape(invite, '\\');
     from = newsplit(&par);
-    if (strchr(from, 's'))
+    if (strchr(from, 's')) {
       flags |= MASKREC_STICKY;
+      stick++;
+    }
     if (strchr(from, 'p'))
       flags |= MASKREC_PERM;
     from = newsplit(&par);
@@ -897,6 +934,9 @@ share_pls_invitechan(int idx, char *par)
       expire_time += now;
     u_addmask('I', chan, invite, from, par, expire_time, flags);
     noshare = 0;
+#ifdef LEAF
+    check_this_invite(chan, invite, stick);
+#endif /* LEAF */
   }
 }
 

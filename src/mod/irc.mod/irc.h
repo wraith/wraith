@@ -64,6 +64,8 @@ static int gotmode(char *, char *);
 void add_mode(struct chanset_t *, const unsigned char, const unsigned char, const char *);
 int me_op(struct chanset_t *);
 void check_this_ban(struct chanset_t *, char *, int);
+void check_this_exempt(struct chanset_t *, char *, int);
+void check_this_invite(struct chanset_t *, char *, int);
 void check_this_user(char *, int, char *);
 void raise_limit(struct chanset_t *);
 void enforce_closed(struct chanset_t *);
