@@ -652,7 +652,7 @@ needed to login for now on.\n \n************************************************
       dcc_chatter(idx);
 #ifdef S_DCCAUTH
   } else {		/* bad auth */
-    dprintf(idx, "%s", response(RES_BADUSERPASS));
+    dprintf(idx, "%s\n", response(RES_BADUSERPASS));
     putlog(LOG_MISC, "*", DCC_BADAUTH, dcc[idx].nick,
 	   dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {	/* su from a dumb user */
@@ -714,7 +714,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
     dcc_chat_secpass(idx, buf, atr);
 #endif /* S_DCCAUTH */
   } else {
-    dprintf(idx, "%s", response(RES_BADUSERPASS));
+    dprintf(idx, "%s\n", response(RES_BADUSERPASS));
     putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {	/* su from a dumb user */
       /* Turn echo back on for telnet sessions (send IAC WON'T ECHO). */
@@ -1568,7 +1568,7 @@ static void dcc_telnet_pass(int idx, int atr)
 #ifdef HUB
     dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
 #else /* !HUB */
-    dprintf(idx, "%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, response(RES_PASSWORD));
+    dprintf(idx, "%s\n" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, response(RES_PASSWORD));
 #endif /* HUB */
   }
 }
@@ -1830,7 +1830,7 @@ static void dcc_telnet_got_ident(int i, char *host)
 #ifdef HUB
   dprintf(i, "\n");
 #else /* !HUB */
-  dprintf(i, "%s", response(RES_USERNAME));
+  dprintf(i, "%s\n", response(RES_USERNAME));
 #endif /* HUB */
 }
 

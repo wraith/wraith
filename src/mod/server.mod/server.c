@@ -953,7 +953,7 @@ static void dcc_chat_hostresolved(int i)
     dcc[i].timeval = now;
     /* Ok, we're satisfied with them now: attempt the connect */
     putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick, dcc[i].host);
-    dprintf(i, "%s", response(RES_USERNAME));
+    dprintf(i, "%s\n", response(RES_USERNAME));
   }
   return;
 }
