@@ -632,7 +632,7 @@ void remove_channel(struct chanset_t *chan)
  */
 static int channels_chon(char *handle, int idx)
 {
-  struct flag_record fr = {FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0};
+  struct flag_record fr = {FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0};
   int find, found = 0;
   struct chanset_t *chan = chanset;
 
@@ -679,7 +679,7 @@ void channels_report(int idx, int details)
   struct chanset_t *chan = NULL;
   int i;
   char s[1024] = "", s2[100] = "";
-  struct flag_record fr = {FR_CHAN | FR_GLOBAL, 0, 0, 0};
+  struct flag_record fr = {FR_CHAN | FR_GLOBAL, 0, 0};
 
   for (chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)

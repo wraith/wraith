@@ -226,7 +226,7 @@ void chanout_but (int x, ...)
 void dcc_chatter(int idx)
 {
   int i, j;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
   dprintf(idx, "Connected to %s, running %s\n", conf.bot->nick, version);

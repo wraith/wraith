@@ -95,7 +95,7 @@ static int include_lk = 1;		/* For correct calculation
 
 static void detect_autokick(char *nick, char *uhost, struct chanset_t *chan, char *msg)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
   struct userrec *u = NULL;
   int i = 0, tot = 0;
 
@@ -182,7 +182,7 @@ void getin_request(char *botnick, char *code, char *par)
   struct maskrec **mr = NULL,
    *tmr = NULL;
   struct maskstruct *b = NULL;
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
 
   if (!server_online) 
     return;
@@ -480,7 +480,7 @@ static void request_op(struct chanset_t *chan)
   memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
   char s[100] = "", *l = NULL, myserv[SERVLEN] = "";
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
 
   if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan))))
     return;
@@ -590,7 +590,7 @@ static void request_in(struct chanset_t *chan)
   int i = 0;
   int cnt, n;
   struct userrec *botops[MAX_BOTS], *u = NULL;
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
 
   for (u = userlist; u && (i < MAX_BOTS); u = u->next) {
     get_user_flagrec(u, &fr, NULL);
@@ -640,7 +640,7 @@ static int want_to_revenge(struct chanset_t *chan, struct userrec *u,
 			   struct userrec *u2, char *badnick, char *victimstr,
 			   int mevictim)
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0};
 
   /* Do not take revenge upon ourselves. */
   if (match_my_nick(badnick))
@@ -657,7 +657,7 @@ static int want_to_revenge(struct chanset_t *chan, struct userrec *u,
         return 1;
     /* Do we revenge for our users ... and do we actually know the victim? */
     } else if (channel_revenge(chan) && u2) {
-      struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0, 0};
+      struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0};
 
       get_user_flagrec(u2, &fr2, chan->dname);
       /* Protecting friends? */
@@ -679,7 +679,7 @@ static void punish_badguy(struct chanset_t *chan, char *whobad,
 {
   char reason[1024] = "", ct[81] = "", *kick_msg = NULL;
   memberlist *m = NULL;
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0};
 
   m = ismember(chan, badnick);
   if (!m)
@@ -1150,7 +1150,7 @@ static void check_expired_chanstuff()
   memberlist *m = NULL, *n = NULL;
   char s[UHOSTLEN] = "";
   struct chanset_t *chan;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
 
   if (!server_online)
     return;
@@ -1246,7 +1246,7 @@ static void check_expired_chanstuff()
             m->user = get_user_by_host(s);
 
           if (m->user) {
-            struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0, 0};
+            struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0};
             get_user_flagrec(m->user, &fr2, chan->dname);
             if (!private(fr2, chan, PRIV_VOICE) && 
                ((channel_voice(chan) && !chk_devoice(fr2, chan)) ||
@@ -1279,7 +1279,7 @@ static void check_expired_chanstuff()
 #ifdef S_AUTHCMDS
 static int check_bind_pubc(char *cmd, char *nick, char *from, struct userrec *u, char *args, char *chan)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
   int x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, chan);
 
   if (x & BIND_RET_LOG)
@@ -1319,7 +1319,7 @@ void flush_modes()
 
 void irc_report(int idx, int details)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
   char ch[1024] = "", q[160] = "", *p = NULL;
   int k;
   size_t len;

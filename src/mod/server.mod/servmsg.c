@@ -104,7 +104,7 @@ static int gotfake433(char *from)
 
 static void check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
   int x;
 
   get_user_flagrec(u, &fr, NULL);
@@ -119,7 +119,7 @@ static void check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u
 #ifdef S_AUTHCMDS
 static int check_bind_msgc(char *cmd, char *nick, char *from, struct userrec *u, char *args)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0};
   int x;
 
   x = check_bind(BT_msgc, cmd, &fr, nick, from, u, args, NULL);
@@ -153,7 +153,7 @@ int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
                            char *dest, char *keyword, char *args,
                            bind_table_t *table)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0};
   get_user_flagrec(u, &fr, NULL);
   return check_bind(table, keyword, &fr, nick, uhost, u, dest, keyword, args);
 }

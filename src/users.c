@@ -453,7 +453,7 @@ void tell_user(int idx, struct userrec *u, int master)
   struct chanset_t *chan = NULL;
   struct user_entry *ue = NULL;
   struct laston_info *li = NULL;
-  struct flag_record fr = {FR_GLOBAL, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL, 0, 0};
 
   n = num_notes(u->handle);
 
@@ -525,7 +525,7 @@ void tell_user_ident(int idx, char *id, int master)
 {
   char format[81] = "";
   struct userrec *u = NULL;
-  struct flag_record user = {FR_GLOBAL | FR_CHAN, 0, 0, 0};
+  struct flag_record user = {FR_GLOBAL | FR_CHAN, 0, 0};
 
   get_user_flagrec(dcc[idx].user, &user, NULL);
 
@@ -563,9 +563,9 @@ void tell_users_match(int idx, char *mtch, int start, int limit, int master, cha
     user.match = pls.match = FR_GLOBAL | FR_CHAN;
     break_down_flags(mtch, &pls, &mns);
     mns.match = pls.match ^ (FR_AND | FR_OR);
-    if (!mns.global && !mns.chan && !mns.bot) {
+    if (!mns.global && !mns.chan) {
       nomns = 1;
-      if (!pls.global && !pls.chan && !pls.bot) {
+      if (!pls.global && !pls.chan) {
 	/* happy now BB you weenie :P */
 	dprintf(idx, "Unknown flag specified for matching!!\n");
 	return;
@@ -1155,7 +1155,7 @@ void autolink_cycle(char *start)
   struct bot_addr *my_ba = NULL;
   char uplink[HANDLEN + 1] = "", avoidbot[HANDLEN + 1] = "", curhub[HANDLEN + 1] = "";
   int i, hlc;
-  struct flag_record fr = {FR_GLOBAL, 0, 0, 0};
+  struct flag_record fr = {FR_GLOBAL, 0, 0};
 
   /* Reset connection attempts if we ain't called due to a failed link */
   if (!start)
