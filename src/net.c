@@ -331,7 +331,7 @@ void neterror(char *s)
     strcpy(s, "Address already in use");
     break;
   case EADDRNOTAVAIL:
-    strcpy(s, "Address invalid on remote machine");
+    strcpy(s, "Cannot assign requested address");
     break;
   case EAFNOSUPPORT:
     strcpy(s, "Address family not supported");
@@ -346,7 +346,7 @@ void neterror(char *s)
     strcpy(s, "Connection refused");
     break;
   case EFAULT:
-    strcpy(s, "Namespace segment violation");
+    strcpy(s, "Bad address");
     break;
   case EINPROGRESS:
     strcpy(s, "Operation in progress");
@@ -355,7 +355,7 @@ void neterror(char *s)
     strcpy(s, "Timeout");
     break;
   case EINVAL:
-    strcpy(s, "Invalid namespace");
+    strcpy(s, "Invalid argument");
     break;
   case EISCONN:
     strcpy(s, "Socket already connected");
@@ -364,7 +364,7 @@ void neterror(char *s)
     strcpy(s, "Network unreachable");
     break;
   case ENOTSOCK:
-    strcpy(s, "File descriptor, not a socket");
+    strcpy(s, "Socket operation on non-socket");
     break;
   case ETIMEDOUT:
     strcpy(s, "Connection timed out");
@@ -373,7 +373,7 @@ void neterror(char *s)
     strcpy(s, "Socket is not connected");
     break;
   case EHOSTUNREACH:
-    strcpy(s, "Host is unreachable");
+    strcpy(s, "No route to host");
     break;
   case EPIPE:
     strcpy(s, "Broken pipe");
