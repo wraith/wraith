@@ -408,7 +408,7 @@ void putbot(char *bot, char *par)
 {
   int i;
   char msg[SGRAB-110];
-  if (!bot[0] || !par[0])
+  if (!bot || !par || !bot[0] || !par[0])
     return;
   i = nextbot(bot);
   if (i < 0)
