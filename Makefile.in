@@ -126,10 +126,11 @@ packconf: makesettings
 	cp -f src/settings.tmp src/settings.c; \
 	fi)
 
-salt:	makesalt
+salt:	makesalt src/makesalt.c stringfix
 	@src/makesalt
-	@cp -f pack/salt.h src/salt.h
-	@src/stringfix src/salt.h
+	@echo -n "[*] Encrypting salts..."
+	@src/stringfix pack/salt.h src/salt.h || echo "FAILED"
+	@echo "done."
 
 config:
 	@$(modconf) modules-still-exist
@@ -144,17 +145,20 @@ clean-modconfig:
 
 reconfig: clean-modconfig config
 
-stringfix:
+
+stringfix: src/stringfix.c
 	+@cd src && ${MAKE_UTILS} stringfix
 
-makesalt:
+makesalt: src/makesalt.c
 	+@cd src && ${MAKE_UTILS} makesalt
 
-makesettings:
+makesettings: src/makesettings.c
 	+@cd src && ${MAKE_UTILS} makesettings
 
-utils:
-	+@cd src && ${MAKE_UTILS} utils
+utils: makesettings makesalt stringfix
+
+#utils: src/stringfix.c src/makesalt.c src/makesettings.c
+#	+@cd src && ${MAKE_UTILS} utils
 
 dostrings: stringfix
 	@misc/dostrings

@@ -38,8 +38,11 @@ doofus:
 	@echo ""
 	@cd ../.. && $(MAKE)
 
-static: $(mod_objs)
+static: build_msg $(mod_objs)
 	@$(modconfig) static.h
+
+build_msg:
+	@echo "[*] Building modules"
 
 .SUFFIXES:
 .SUFFIXES: .mod .mod_o
@@ -108,6 +111,5 @@ distclean:
 		fi; \
 	done
 
-install:
 
 #safety hash

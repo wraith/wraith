@@ -43,8 +43,6 @@ stringfix: stringfix.c
 	@$(CC) $(CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
 	@$(STRIP) stringfix
 
-utils: stringfix makesettings makesalt
-
 ../$(EGGEXEC): build_msg $(eggdrop_objs) $(XREQS) compatability
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
@@ -58,7 +56,7 @@ utils: stringfix makesettings makesalt
 $(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o *.a *~ x*.c
+	@rm -f .depend *.o *~ _*.c
 
 depleaf:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DLEAF -MM $(srcdir)/*.c > .depend
@@ -73,10 +71,10 @@ build_msg:
 
 main.o: stringfix
 	@cp -f main.c xmain.c
+	@./stringfix main.c _main.c || cp -f main.c _main.c
 	@echo -e "Compiling: \033[1mmain\033[0m"
-	@./stringfix xmain.c
 	@$(CC) $(CFLAGS) -I$(top_srcdir) $(CPPFLAGS) '-DCCFLAGS="$(CC) $(CFLAGS) $(CPPFLAGS)"' \
-	'-DLDFLAGS="$(LD)"' '-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/xmain.c -o main.o
+	'-DLDFLAGS="$(LD)"' '-DSTRIPFLAGS="$(STRIP)"' -c $(srcdir)/_main.c -o main.o
 
 compatability:
 	+@cd compat && $(MAKE_GENERIC) compat
@@ -87,15 +85,13 @@ eggdrop.h:
 	@exit 1
 
 .SUFFIXES:
-.SUFFIXES: .c .h .o .a
+.SUFFIXES: .c .h .o
 
 
-.c.o:   stringfix
-	@cp -f $< x$<
+.c.o: stringfix
+	@./stringfix $< _$< || cp -f $< _$<
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	@./stringfix x$<
-	@$(CC) $(CFLAGS) $(CPPFLAGS) -c x$< -o `basename $< .c`.o
-	@${STRIP} `basename $< .c`.o
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -c _$< -o `basename $< .c`.o
 
 #safety hash
 auth.o: auth.c main.h ../config.h ../pack/conf.h lang.h eggdrop.h flags.h proto.h \

@@ -9,15 +9,13 @@
 #include <string.h>
 #include "conf.h"
 
-char tmp[] = { 0x0, 0x1 };
-
 #ifdef S_GARBLESTRINGS
 void garble(char **inptr, char **outptr)
 {
   char *in = *inptr,
    *out,
    *p = NULL;
-  char obuf[16384];
+  char obuf[1024];
   int chars = 0;
   unsigned char x;
 
@@ -96,8 +94,8 @@ char *outbuf = NULL;
 
 void processline(char *line)
 {
-  char tmpin[16384],
-    tmpout[16384];
+  char tmpin[1024],
+    tmpout[1024];
   char *in,
    *out;
 
@@ -127,7 +125,7 @@ void processline(char *line)
   strcat(outbuf, tmpout);
   strcat(outbuf, "\n");
 }
-#endif
+#endif /* S_GARBLESTRINGS */
 
 int main(int argc, char *argv[0])
 {
@@ -138,11 +136,10 @@ int main(int argc, char *argv[0])
   int insize;
   char *buf;
 
-  if (argc != 2)
-    exit(1);
-  f = fopen(argv[1], "r");
-  if (!f)
-    exit(1);
+  if (argc != 3)
+    return 1;
+  if (!(f = fopen(argv[1], "r")))
+    return 1;
   fseek(f, 0, SEEK_END);
   insize = ftell(f);
   fseek(f, 0, SEEK_SET);
@@ -160,12 +157,13 @@ int main(int argc, char *argv[0])
     ln = nln;
   }
 
-  f = fopen(argv[1], "w");
-  if (f) {
+  if ((f = fopen(argv[2], "w"))) {
     fwrite(outbuf, 1, strlen(outbuf), f);
     fclose(f);
   }
   /*  printf(outbuf); */
-#endif
-  exit(0);
+  return 0;
+#else /* !S_GARBLESTRINGS */
+  return 1;
+#endif /* S_GARBLESTRINGS */
 }
