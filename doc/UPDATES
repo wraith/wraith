@@ -41,6 +41,7 @@ This is a summary of ChangeLog basically.
 * msg_cmd_PASS/cmd_adduser/+user were flawed. Displayed wrong length of ACTUAL set pass
 * closed-private and ban-time were mixed up in the saving/loading process.
 * cmd_swhois now shows matching username
+* cmd_botcmd * is now limited to +n only
 
 1.1.9
 
