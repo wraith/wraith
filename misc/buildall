@@ -5,11 +5,16 @@ if test $# -lt 1; then
  exit 1
 fi
 
+#Build hub/leaf
+./build -C -n all
+
+#Then package up each cfg
 cfgs="`find \"$@\" -name \"*.cfg\"`"
 for cfg in $cfgs
 do
  if test "`grep 'PACKNAME' $cfg`x" != "x"; then
-  ./build -C -p $cfg all
+  #Dont compile, just package up and dont rm old binaries.
+  ./build -n -P -p $cfg all
  fi
 done
 

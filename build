@@ -28,7 +28,7 @@ echo -e "Version:   ${ver}\nBuild:     ${builddate}"
 usage() 
 {
     echo
-    echo "Usage: $0 [-bcCdn] [-p FILE] [all|hub|leaf]"
+    echo "Usage: $0 [-bcCdnP] [-p FILE] [all|hub|leaf]"
     echo
     echo "    The options are as follows:"
     echo "    -b        Use bzip2 instead of gzip when packaging."
@@ -37,6 +37,7 @@ usage()
     echo "    -d        Builds a debug package."
     echo "    -n        Do not package the binaries."
     echo "    -p  FILE  What file to use as the cfg file."
+    echo "    -P        For development (Don't compile/rm binaries)"
 }
 
 debug=0
@@ -47,12 +48,10 @@ clean=0
 type=
 nopkg=0
 bzip=0
+pkg=0
 pack=pack/pack.cfg
-if test -f Makefile; then
-  pack="`grep "CFG =" Makefile | sed -e 's/CFG = \(.*\)/\1/'`"
-fi
 
-while getopts bCcdhnp: opt ; do
+while getopts bCcdhnPp: opt ; do
         case "$opt" in
         b) bzip=1 ;;
 	c) clean=1 ;;
@@ -61,6 +60,7 @@ while getopts bCcdhnp: opt ; do
 	h) usage; exit 0 ;;
         n) nopkg=1 ;;
 	p) pack="$OPTARG" ;;
+        P) pkg=1 ;;
         *) usage; exit 1 ;;
 
         esac
@@ -88,6 +88,13 @@ else
  else
   all=1
  fi
+fi
+
+rm=1
+compile=1
+if [ $pkg = "1" ]; then
+ rm=0
+ compile=0
 fi
 
 if [ $debug = "1" ]; then
@@ -122,42 +129,57 @@ then
   echo "[!] Automated packaging disabled, `uname` isn't recognized"
 fi
 
-echo "[*] Building ${PACKNAME}::${type} for $os"
+if [ $compile = "1" ]; then
 
-MAKE="`which gmake`"
-if test -z "${MAKE}"; then
- MAKE="`which make`"
-fi
+ echo "[*] Building ${PACKNAME}::${type} for $os"
 
-if [ $clean = "2" ]; then
- if test -f Makefile; then
-  echo "[*] DistCleaning old files..."
-  ${MAKE} distclean > /dev/null
+ MAKE="`which gmake`"
+ if test -z "${MAKE}"; then
+  MAKE="`which make`"
+ fi
+
+ if [ $clean = "2" ]; then
+  if test -f Makefile; then
+   echo "[*] DistCleaning old files..."
+   ${MAKE} distclean > /dev/null
+  fi
+ fi
+
+ # Run ./configure, then verify it's ok
+ echo "[*] Configuring..."
+ umask 077 >/dev/null
+
+ ./configure --silent
+
+ if [ $clean = "1" ]; then
+  echo "[*] Cleaning up old binaries/files..."
+  ${MAKE} clean > /dev/null
  fi
 fi
 
-# Run ./configure, then verify it's ok
-echo "[*] Configuring..."
-umask 077 >/dev/null
-
-./configure --silent
-
-if [ $clean = "1" ]; then
- echo "[*] Cleaning up old binaries/files..."
- ${MAKE} clean > /dev/null
+if test -n "$d"; then
+ d="-debug"
 fi
 
 _build()
 {
  if [ $[${tb}] = "1" ]; then
-  echo "[*] Building ${d}${tb}..."
-  ${MAKE} ${d}${tb}
-  if ! test -f ${tb}; then
-    echo "[!] ${d}${tb} build failed"
-    exit 1
+  if [ $compile = "1" ]; then
+   echo "[*] Building ${d}${tb}..."
+   ${MAKE} ${d}${tb}
+   if ! test -f ${tb}; then
+     echo "[!] ${d}${tb} build failed"
+     exit 1
+   fi
   fi
-  echo "[*] Hashing and initializing settings in binary"
-  ${d}${tb} -p ${pack}
+  if [ $nopkg = "0" -o $pkg = "1" ]; then
+   echo "[*] Hashing and initializing settings in binary"
+    cp ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
+   ./${tb}.$os-$ver${d} -p ${pack}
+   rm=1
+  elif [ $nopkg = "0" ]; then
+    mv ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
+  fi
  fi
 }
 
@@ -172,26 +194,8 @@ else
 fi
 _build
 
-
-if [ $all = "1" ]; then
- fls="leaf hub"
-elif [ $leaf = "1" ]; then
- fls="leaf"
-elif [ $hub = "1" ]; then
- fls="hub"
-fi
-
-if test -n "$d"; then
- d="-debug"
-fi
-
-for bin in $fls
-do
-  mv -f $bin $bin.$os-$ver${d}
-done
-
 # Wrap it nicely up into an archive
-if [ $nopkg = "0" ]; then
+if [ $nopkg = "0" -o $pkg = "1" ]; then
   echo "[*] Packaging..."
   if [ $bzip = "1" ]; then
     zip="j"
@@ -207,7 +211,9 @@ if [ $nopkg = "0" ]; then
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
-  rm -f *$os-$ver${d}
+  if [ $rm = "1" ]; then
+    rm -f *$os-$ver${d}
+  fi
   echo "Binaries are now in '${PACKNAME}.$os-$ver${d}.tar.${ext}'."
 fi
   exit 0
