@@ -14,6 +14,7 @@
 
 #define WTF 50720
 int help = 0;
+
 #ifdef S_GARBLESTRINGS
 void garble(char **inptr, char **outptr)
 {
@@ -94,6 +95,7 @@ void garble(char **inptr, char **outptr)
   }
   *inptr = in;
 }
+#endif /* S_GARBLESTRINGS */
 
 char *outbuf = NULL;
 
@@ -107,11 +109,13 @@ void processline(char *line)
   out = tmpout;
   if (*in) {
     while (*in) {
+#ifdef S_GARBLESTRINGS
       if (!strncmp(in, "STR(\"", 5)) {
 	*out = 0;
 	garble(&in, &out);
 	*out = 0;
       } else
+#endif /* S_GARBLESTRINGS */
 	*out++ = *in++;
     }
     *out = 0;
@@ -126,11 +130,9 @@ void processline(char *line)
   strcat(outbuf, tmpout);
   strcat(outbuf, "\n");
 }
-#endif /* S_GARBLESTRINGS */
 
 int main(int argc, char *argv[0])
 {
-#ifdef S_GARBLESTRINGS
   FILE *f = NULL;
   char *ln = NULL, *nln = NULL, *buf = NULL;
   int insize;
@@ -155,6 +157,7 @@ int main(int argc, char *argv[0])
     if (nln)
       *nln++ = 0;
     processline(ln);
+
     ln = nln;
   }
 
@@ -164,7 +167,4 @@ int main(int argc, char *argv[0])
   }
   /*  printf(outbuf); */
   return 0;
-#else /* !S_GARBLESTRINGS */
-  return 1;
-#endif /* S_GARBLESTRINGS */
 }
