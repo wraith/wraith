@@ -76,15 +76,6 @@
 #ifdef HAVE_ZLIB_H
 #  include <zlib.h>
 #endif /* HAVE_ZLIB_H */
-#ifdef HAVE_OPENSSL_SSL_H
-# ifndef SSL_INC
-//#  include <openssl/rand.h>
-#  include <openssl/ssl.h>
-#  include <openssl/err.h>
-#  include <openssl/md5.h>
-#  define SSL_INC
-# endif /* ! SSL_INC */
-#endif /* HAVE_OPENSSL_SSL_H */
 
 #ifndef MAKING_MODS
 #  include "proto.h"

@@ -1061,6 +1061,18 @@ static void botlink_resolve_success(int i)
 #endif /* USE_IPV6 */
 		      dcc[i].port) < 0)
     failed_link(i);
+  else { /* let's attempt to initiate SSL before ANYTHING else... */
+#ifdef HAVE_SSL
+/*    if (!ssl_link(dcc[i].sock, CONNECT_SSL)) {
+      debug2("back from ssl_link(%d, %d) for botlink (failed)", dcc[i].sock, CONNECT_SSL);
+      dcc[i].ssl = 0;
+      putlog(LOG_BOTS, "*", "SSL link for '%s' failed", dcc[i].nick); 
+    } else */
+      dcc[i].ssl = 1;
+#else
+      dcc[i].ssl = 0;
+#endif /* HAVE_SSL */
+  }
 }
 
 static void failed_tandem_relay(int idx)

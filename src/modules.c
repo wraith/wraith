@@ -39,7 +39,6 @@ extern party_t *party;
 extern int parties;
 extern sock_list        *socklist;
 
-int cmd_die();
 int xtra_kill();
 int xtra_unpack();
 static int module_rename(char *name, char *newname);
@@ -315,7 +314,7 @@ Function global_table[] =
   (Function) findanyidx,
   (Function) findchan,
   /* 132 - 135 */
-  (Function) cmd_die,
+  (Function) 0,
   (Function) days,
   (Function) daysago,
   (Function) daysdur,
@@ -581,7 +580,10 @@ Function global_table[] =
   (Function) hostprotocol,
   (Function) sdprintf,
   (Function) putbot,
-  (Function) putallbots
+  (Function) putallbots,
+  (Function) ssl_link,
+  (Function) dropssl,
+  (Function) myipstr
 
 
 };

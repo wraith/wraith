@@ -44,6 +44,12 @@ extern unsigned long	 otraffic_irc_today, otraffic_bn_today,
 			 otraffic_dcc_today, otraffic_filesys_today,
 			 otraffic_trans_today, otraffic_unknown_today;
 
+
+#ifdef HAVE_SSL
+  SSL_CTX 		*ssl_c_ctx = NULL, *ssl_s_ctx = NULL;
+  char 			*tls_rand_file = NULL;
+#endif /* HAVE_SSL */
+
 union sockaddr_union cached_myip4_so;
 #ifdef USE_IPV6
 union sockaddr_union cached_myip6_so;
@@ -166,6 +172,38 @@ int get_ip(char *hostname, union sockaddr_union *so)
 #endif /* USE_IPV6 */
 }
 
+#ifdef HAVE_SSL
+int seed_PRNG(void)
+{
+  char stackdata[1024];
+  static char rand_file[300];
+  FILE *fh = 0;
+#if OPENSSL_VERSION_NUMBER >= 0x00905100
+  if (RAND_status()) return 0;
+#endif
+  if ((fh = fopen("/dev/urandom", "r"))) {
+    fclose(fh);
+    return 0;
+  }
+  if (RAND_file_name(rand_file, sizeof(rand_file)))
+    tls_rand_file = rand_file;
+  else
+    return 1;
+  if (!RAND_load_file(rand_file, 1024)) {
+    unsigned int c;
+    c = time(NULL);
+    RAND_seed(&c, sizeof(c));
+    c = getpid();
+    RAND_seed(&c, sizeof(c));
+    RAND_seed(stackdata, sizeof(stackdata));
+  }
+#if OPENSSL_VERSION_NUMBER >= 0x00905100
+  if (!RAND_status()) return 2;
+#endif /* OPENSSL_VERSION_NUMBER >= 0x00905100 */
+  return 0;
+}
+#endif /* HAVE_SSL */
+
 /* Initialize the socklist
  */
 void init_net()
@@ -174,9 +212,38 @@ void init_net()
 
   for (i = 0; i < MAXSOCKS; i++) {
     bzero(&socklist[i], sizeof(socklist[i]));
+#ifdef HAVE_SSL
+    socklist[i].ssl=NULL;
+#endif /* HAVE_SSL */
     socklist[i].flags = SOCK_UNUSED;
   }
+#ifdef HAVE_SSL
+  SSL_load_error_strings();
+  OpenSSL_add_ssl_algorithms();
+  ssl_c_ctx = SSL_CTX_new(SSLv23_client_method());
+  ssl_s_ctx = SSL_CTX_new(SSLv23_server_method());
+  if (!ssl_c_ctx || !ssl_s_ctx)
+    fatal("SSL Inititlization failed", 0);
+  if (seed_PRNG())
+    fatal("SSL PRNG seeding failed!", 0);
+#endif /* HAVE_SSL */
 }
+
+#ifdef HAVE_SSL
+int ssl_cleanup() {
+ if (ssl_c_ctx) {
+    SSL_CTX_free(ssl_c_ctx);
+    ssl_c_ctx = NULL;
+  }
+  if (ssl_s_ctx) {
+    SSL_CTX_free(ssl_s_ctx);
+    ssl_s_ctx = NULL;
+  }
+  if (tls_rand_file) RAND_write_file(tls_rand_file);
+ return 0;
+}
+#endif /* HAVE_SSL */
+
 
 int expmem_net()
 {
@@ -193,18 +260,27 @@ int expmem_net()
   return tot;
 }
 
-/* Get my ipv6 ip
+/* Get my ipv? ip
  */
-char *getmyip6()
+char *myipstr(int af_type)
 {
+
 #ifdef USE_IPV6
-  static char s[UHOSTLEN + 1];
-  egg_inet_ntop(AF_INET6, &cached_myip6_so.sin6.sin6_addr, s, 119);
-  s[120] = 0;
-  return s;
-#else
-  return "";
+  if (af_type == 6) {
+    static char s[UHOSTLEN + 1];
+    egg_inet_ntop(AF_INET6, &cached_myip6_so.sin6.sin6_addr, s, 119);
+    s[120] = 0;
+    return s;
+  } else
 #endif /* USE_IPV6 */
+    if (af_type == 4) {
+      static char s[UHOSTLEN + 1];
+      egg_inet_ntop(AF_INET, &cached_myip4_so.sin.sin_addr, s, 119);
+      s[120] = 0;
+      return s;
+    }
+
+  return "";
 }
 
 /* Get my ip number
@@ -380,6 +456,9 @@ int allocsock(int sock, int options)
       /* yay!  there is table space */
       socklist[i].inbuf = socklist[i].outbuf = NULL;
       socklist[i].inbuflen = socklist[i].outbuflen = 0;
+#ifdef HAVE_SSL
+      socklist[i].ssl = NULL;
+#endif /* HAVE_SSL */
       socklist[i].flags = options;
       socklist[i].sock = sock;
       socklist[i].encstatus = 0;
@@ -434,6 +513,27 @@ int getsock(int options)
   return sock;
 }
 
+void dropssl(register int sock)
+{
+#ifdef HAVE_SSL
+  int i;
+
+  if (sock < 0)
+    return;
+  for (i = 0; (i < MAXSOCKS); i++)
+    if (socklist[i].sock == sock) break;
+
+  if (socklist[i].ssl) {
+    SSL_set_quiet_shutdown(socklist[i].ssl, 1);
+    SSL_shutdown(socklist[i].ssl);
+    usleep(1000 * 500);
+    SSL_free(socklist[i].ssl);
+    usleep(1000 * 500);
+    socklist[i].ssl = NULL;
+  }
+#endif /* HAVE_SSL */
+}
+
 /* Done with a socket
  */
 void real_killsock(register int sock, const char *file, int line)
@@ -445,6 +545,7 @@ void real_killsock(register int sock, const char *file, int line)
     return;
   for (i = 0; i < MAXSOCKS; i++) {
     if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED)) {
+      dropssl(sock);
       close(socklist[i].sock);
       if (socklist[i].inbuf != NULL) {
 	nfree(socklist[i].inbuf);
@@ -622,6 +723,7 @@ int open_telnet_raw(int sock, char *server, int sport)
   /* Synchronous? :/ */
   if (firewall[0])
     return proxy_connect(sock, server, sport, proxy);
+
   return sock;
 }
 
@@ -747,6 +849,74 @@ inline int open_listen_by_af(int *port, int af_def)
   return 0;
 #endif /* USE_IPV6 */
 }
+
+#ifdef HAVE_SSL
+int ssl_link(register int sock, int state)
+{
+  int err = 0, i = 0, errs = 0;
+
+  debug2("ssl_link(%d, %d)", sock, state);
+  for (i = 0; (i < MAXSOCKS); i++) {		
+    if (socklist[i].sock == sock) break;
+  }
+  if (socklist[i].ssl) {
+    putlog(LOG_ERROR, "*", "Switching to SSL (%d,%d) - already active", state, sock);
+    return 0;
+  }
+  if (state == CONNECT_SSL) {
+    socklist[i].ssl = SSL_new(ssl_c_ctx);
+  } else if (state == ACCEPT_SSL) {
+    socklist[i].ssl = SSL_new(ssl_s_ctx);
+  }
+  if (!socklist[i].ssl) {
+    putlog(LOG_ERROR, "*", "Switching to SSL (%d) - SSL_new(%d) failed", sock, state);
+    return 0;
+  }
+  if (!SSL_set_fd(socklist[i].ssl, socklist[i].sock)) {
+    putlog(LOG_ERROR, "*", "SSL_set_fd(%d) (%d) failed", state, socklist[i].sock);
+    return 0;
+  }
+  if (state == CONNECT_SSL) {
+    SSL_set_connect_state(socklist[i].ssl);
+  } else if (state == ACCEPT_SSL) {
+    SSL_set_accept_state(socklist[i].ssl);
+  } else {
+    putlog(LOG_DEBUG, "*" "ssl_link(%d, 0?) NO STATE?", sock);
+    return 0;
+  }
+
+  if (state == CONNECT_SSL) {
+    err = SSL_connect(socklist[i].ssl);
+  } else if (state == ACCEPT_SSL) {
+    err = SSL_accept(socklist[i].ssl);
+  }
+  if (!setjmp(alarmret)) {
+      alarm(5); /* this is plenty of time */
+      while ((err < 1) && (errno == EAGAIN)) {
+        if (state == CONNECT_SSL) {
+          err = SSL_connect(socklist[i].ssl);
+        } else if (state == ACCEPT_SSL) {
+          err = SSL_accept(socklist[i].ssl);
+        }
+        if ((errs!=SSL_ERROR_WANT_READ)&&(errs!=SSL_ERROR_WANT_WRITE)&& (errs!=SSL_ERROR_WANT_X509_LOOKUP))
+          break; /* anything not one of these is a sufficient condition to break out... */
+      }
+      alarm(0);
+  }
+      errs = SSL_get_error(socklist[i].ssl, err);
+        putlog(LOG_DEBUG, "*", "SSL_link(%d, %d) = %d, errs: %d (%d), %s", sock, state, err, errs, errno, (char *)ERR_error_string(ERR_get_error(), NULL));
+        if (errno) putlog(LOG_DEBUG, "*", "errno %d: %s", errno, strerror(errno));
+  if (err == 1) {
+    putlog(LOG_ERROR, "*", "SSL_link(%d, %d) was successfull", sock, state);
+    return 1;
+  } else {
+    putlog(LOG_ERROR, "*", "SSL_link(%d, %d) failed", sock, state);
+    dropssl(socklist[i].sock);
+  }
+  return 0;
+}
+#endif /* HAVE_SSL */
+
 
 /* Given a network-style IP address, returns the hostname. The hostname
  * will be in the "##.##.##.##" format if there was an error.
@@ -962,10 +1132,11 @@ static int sockread(char *s, int *len)
   if (x > 0) {
     /* Something happened */
     for (i = 0; i < MAXSOCKS; i++) {
-      if ((!(socklist[i].flags & SOCK_UNUSED)) &&
-	  ((FD_ISSET(socklist[i].sock, &fd)) ||
-	  ((socklist[i].sock == STDOUT) && (!backgrd) &&
-	  (FD_ISSET(STDIN, &fd))))) {
+      if ((!(socklist[i].flags & SOCK_UNUSED)) && ((FD_ISSET(socklist[i].sock, &fd)) ||
+#ifdef HAVE_SSL
+          ((socklist[i].ssl) && (SSL_pending(socklist[i].ssl))) ||
+#endif /* HAVE_SSL */
+	  ((socklist[i].sock == STDOUT) && (!backgrd) && (FD_ISSET(STDIN, &fd))))) {
 	if (socklist[i].flags & (SOCK_LISTEN | SOCK_CONNECT)) {
 	  /* Listening socket -- don't read, just return activity */
 	  /* Same for connection attempt */
@@ -977,6 +1148,12 @@ static int sockread(char *s, int *len)
 	    debug1("net: connect! sock %d", socklist[i].sock);
 	    s[0] = 0;
 	    *len = 0;
+#ifdef HAVE_SSL
+/*            debug0("CALLING SSL_LINK() FROM SOCKREAD");
+            if (!ssl_link(socklist[i].sock))
+              debug0("SSL_LINK FAILED");
+            debug0("BACK FROM SSL_LINK()"); */
+#endif /* HAVE_SSL */
 	    return i;
 	  }
 	} else if (socklist[i].flags & SOCK_PASS) {
@@ -987,8 +1164,29 @@ static int sockread(char *s, int *len)
 	errno = 0;
 	if ((socklist[i].sock == STDOUT) && !backgrd)
 	  x = read(STDIN, s, grab);
-	else
-	  x = read(socklist[i].sock, s, grab);
+	else {
+#ifdef HAVE_SSL
+          if (socklist[i].ssl) {
+            x = SSL_read(socklist[i].ssl, s, grab);
+            if (x < 0) {
+              int err = SSL_get_error(socklist[i].ssl, x);
+              x = -1;
+              switch (err) {
+                case SSL_ERROR_WANT_READ:
+                  errno = EAGAIN;
+                  break;
+                case SSL_ERROR_WANT_WRITE:
+                  errno = EAGAIN;
+                  break;
+                case SSL_ERROR_WANT_X509_LOOKUP:
+                  errno = EAGAIN;
+                  break;
+              }
+            }
+          } else 
+#endif /* HAVE_SSL */
+            x = read(socklist[i].sock, s, grab);
+        }
 	if (x <= 0) {		/* eof */
 	  if (errno != EAGAIN) { /* EAGAIN happens when the operation would block 
 				    on a non-blocking socket, if the socket is going
@@ -1379,14 +1577,34 @@ void tputs(register int z, char *s, unsigned int len)
 	return;
       }
       /* Try. */
-#ifdef HAVE_ZLIB_H
+#ifdef HAVE_SSL
+      if (socklist[i].ssl) {
+        x = SSL_write(socklist[i].ssl, s, len);
+        if (x < 0) {
+          int err = SSL_get_error(socklist[i].ssl, x);
+          x = -1;
+          switch (err) {
+            case SSL_ERROR_WANT_READ:
+              errno = EAGAIN;
+              break;
+            case SSL_ERROR_WANT_WRITE:
+              errno = EAGAIN;
+              break;
+            case SSL_ERROR_WANT_X509_LOOKUP:
+              errno = EAGAIN;
+              break;
+          }
+        }
+      } else
+#endif /* HAVE_SSL */
+//#ifdef HAVE_ZLIB_H
 //      if (socklist[i].gz) { 		/* gzipped links */
 //        FILE *fp;
 //        fp = gzdopen(z, "wb0");
 //        x = gzwrite(fp, s, len);
 //        
 //      } else
-#endif /* HAVE_ZLIB_H */
+//#endif /* HAVE_ZLIB_H */
         x = write(z, s, len);
       if (x == (-1))
 	x = 0;
@@ -1462,6 +1680,26 @@ void dequeue_sockets()
 	(socklist[i].outbuf != NULL) && (FD_ISSET(socklist[i].sock, &wfds))) {
       /* Trick tputs into doing the work */
       errno = 0;
+#ifdef HAVE_SSL
+      if (socklist[i].ssl) {
+        x = write(socklist[i].sock, socklist[i].outbuf, socklist[i].outbuflen);
+        if (x < 0) {
+          int err = SSL_get_error(socklist[i].ssl, x);
+          x = -1;
+          switch (err) {
+            case SSL_ERROR_WANT_READ:
+              errno = EAGAIN;
+              break;
+            case SSL_ERROR_WANT_WRITE:
+              errno = EAGAIN;
+              break;
+            case SSL_ERROR_WANT_X509_LOOKUP:
+              errno = EAGAIN;
+              break;
+          }
+        }
+      } else
+#endif
       x = write(socklist[i].sock, socklist[i].outbuf, socklist[i].outbuflen);
       if ((x < 0) && (errno != EAGAIN)
 #ifdef EBADSLT

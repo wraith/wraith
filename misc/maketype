@@ -5,6 +5,7 @@ if test ! -f stamp.$1
 then
   flist="`find src -name \*.c`"
   cfiles="`grep -l \"def [H|L][U|E][B|A]\" $flist`"
+  echo "[*] Cleaning up files for $1 build"
   for s in $cfiles 
   do
     bleh="`echo $s | cut -d / -f 2`";

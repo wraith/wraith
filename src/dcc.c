@@ -363,6 +363,7 @@ static void cont_link(int idx, char *buf, int ii)
         }
       }
     }
+//.    ssl_link(dcc[idx].sock, CONNECT_SSL);
     dcc[idx].type = &DCC_BOT_NEW;
     dcc[idx].u.bot->numver = 0;
     dprintf(idx, "%s\n", botnetnick);
@@ -1234,6 +1235,7 @@ static void dcc_telnet(int idx, char *buf, int i)
   sock = answer(dcc[idx].sock, s, &ip, &port, 0);
   while ((sock == -1) && (errno == EAGAIN))
     sock = answer(sock, s, &ip, &port, 0);
+//. ssl_link ACCEPT_SSL should go here!!!!
   if (sock < 0) {
     neterror(s);
     putlog(LOG_MISC, "*", DCC_FAILED, s);
@@ -1312,6 +1314,7 @@ static void dcc_telnet_hostresolved(int i)
     lostdcc(i);
     return;
   }
+//.  ssl_link(dcc[i].sock, ACCEPT_SSL);
 
   changeover_dcc(i, &DCC_IDENTWAIT, 0);
   dcc[i].timeval = now;
@@ -2053,6 +2056,7 @@ void dcc_telnet_got_ident(int i, char *host)
   /* This is so we dont tell someone doing a portscan anything
    * about ourselves. <cybah>
    */
+//n  ssl_link(dcc[i].sock, ACCEPT_SSL);
 #ifdef HUB
   dprintf(i, "\n");
 #else

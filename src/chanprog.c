@@ -547,6 +547,8 @@ void chanprog()
 
   /* cache our ip on load instead of every 30 seconds -zip */
   cache_my_ip();
+  sdprintf("ip4: %s", myipstr(4));
+  sdprintf("ip6: %s", myipstr(6));
   conmask = 0;
   /* Turn off read-only variables (make them write-able) for rehash */
   protect_readonly = 0;

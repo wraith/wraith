@@ -52,10 +52,13 @@ Context;
 Context;
     p++;
 Context;
-    if (!*p)
+    if (!*p) {
+Context;
       altnick_char = 'a' + random() % 26;
-    else
+    } else {
+Context;
       altnick_char = (*p);
+    }
 Context;
     botname[l] = altnick_char;
   }
@@ -1662,6 +1665,21 @@ static void server_resolve_success(int servidx)
       fatal("NO SERVERS WILL ACCEPT MY CONNECTION.", 0);
   } else {
     dcc[servidx].sock = serv;
+#ifdef HAVE_SSL
+    if (!ssl_link(dcc[servidx].sock, CONNECT_SSL)) {
+      dcc[servidx].ssl = 0;
+      putlog(LOG_SERV, "*", "SSL for '%s' failed", dcc[servidx].host);
+    } else {
+      putlog(LOG_SERV, "*", "SSL for '%s' successful", dcc[servidx].host);
+      dcc[servidx].ssl = 1;
+    }
+#else
+      dcc[servidx].ssl = 0;
+#endif /* HAVE_SSL */
+#ifdef S_NODELAY
+    i = 1;
+    setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(i));
+#endif /* S_NODELAY */
     /* Queue standard login */
     dcc[servidx].timeval = now;
     SERVER_SOCKET.timeout_val = &server_timeout;
@@ -1674,10 +1692,6 @@ static void server_resolve_success(int servidx)
     dprintf(DP_MODE, "NICK %s\n", botname);
     dprintf(DP_MODE, "USER %s . . :%s\n", botuser, botrealname);
     /* Wait for async result now */
-#ifdef S_NODELAY
-    i = 1;
-    setsockopt(serv, 6, TCP_NODELAY, &i, sizeof(i));
-#endif
   }
 }
 #endif

@@ -267,7 +267,7 @@
 #define findanyidx ((int (*)(int))global[130])
 #define findchan ((struct chanset_t *(*)(char *))global[131])
 /* 132 - 135 */
-#define cmd_die (global[132])
+/* 132 -- UNUSED */
 #define days ((void (*)(time_t,time_t,char *))global[133])
 #define daysago ((void (*)(time_t,time_t,char *))global[134])
 #define daysdur ((void (*)(time_t,time_t,char *))global[135])
@@ -539,8 +539,9 @@
 #define putbot ((void (*)(char *, char *))global[332])
 /* 333 - 335 */
 #define putallbots ((void (*)(char *))global[333])
-
-
+#define ssl_link ((int (*) (int, int))global[334])
+#define dropssl ((void (*) (int))global[335])
+#define myipstr ((char*(*)(int))global[336])
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
  * file for it ;)

@@ -181,9 +181,14 @@ void fatal(const char *s, int recoverable)
   if (s[0])
     putlog(LOG_MISC, "*", "* %s", s);
 /*  flushlogs(); */
-  for (i = 0; i < dcc_total; i++)
+  for (i = 0; i < dcc_total; i++) {
     if (dcc[i].sock >= 0)
       killsock(dcc[i].sock);
+#ifdef HAVE_SSL
+      ssl_cleanup();
+#endif /* HAVE_SSL */
+
+  }
   if (!recoverable) {
     unlink(pid_file);
     bg_send_quit(BG_ABORT);
@@ -415,6 +420,7 @@ static void got_hup(int z)
  */
 static void got_alarm(int z)
 {
+  debug0("got alarm...");
   longjmp(alarmret, 1);
 
   /* -Never reached- */
@@ -940,10 +946,7 @@ void crontab_create(int interval) {
   if ((fd = mkstemp(tmpfile)) == -1) {
     unlink(tmpfile);
     return;
-  } else { /* FIXME: is this absolutely necesary? */
-    unlink(tmpfile);
-    close(fd);
-  }
+  } 
 
   sprintf(buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), binname, tmpfile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
@@ -969,6 +972,7 @@ void crontab_create(int interval) {
     sprintf(buf, STR("crontab %s"), tmpfile);
     shell_exec(buf, NULL, NULL, NULL);
   }
+  close(fd);
   unlink(tmpfile);
 
 }

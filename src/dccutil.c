@@ -415,19 +415,19 @@ void tell_dcc(int zidx)
   }
   if(nicklen < 9) nicklen = 9;
   
-  egg_snprintf(format, sizeof format, "%%-4s %%-8s %%-5s %%-%us %%-25s %%s\n", 
+  egg_snprintf(format, sizeof format, "%%-4s %%-8s %%-5s %%-%us %%-40s %%s\n", 
                           nicklen);
   dprintf(zidx, format, "SOCK", "ADDR",     "PORT",  "NICK", "HOST", "TYPE");
   dprintf(zidx, format, "----", "--------", "-----", "---------", 
-                        "-------------------------", "----");
+                        "----------------------------------------", "----");
 
-  egg_snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-25s %%s\n", 
+  egg_snprintf(format, sizeof format, "%%-4d %%08X %%5d %%-%us %%-40s %%s\n", 
                           nicklen);
   /* Show server */
   for (i = 0; i < dcc_total; i++) {
     j = strlen(dcc[i].host);
-    if (j > 25)
-      j -= 25;
+    if (j > 40)
+      j -= 40;
     else
       j = 0;
     if (dcc[i].type && dcc[i].type->display)
@@ -710,7 +710,7 @@ Context;
       else {
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = notalloc;
-        strcpy(dcc[idx].addr6, getmyip6());
+        strcpy(dcc[idx].addr6, myipstr(6));
         dcc[idx].port = port;
         dcc[idx].sock = i6;
         dcc[idx].timeval = now;

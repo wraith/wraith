@@ -282,9 +282,13 @@ void set_cmd_pass(char *, int);
 
 
 /* net.c */
+#ifdef HAVE_SSL
+int ssl_cleanup();
+int ssl_link(int, int);
+#endif /* HAVE_SSL */
 IP my_atoul(char *);
 unsigned long iptolong(IP);
-char *getmyip6();
+char *myipstr(int);
 IP getmyip();
 void cache_my_ip();
 void neterror(char *);
@@ -298,6 +302,7 @@ int getsock(int);
 int sockprotocol(int);
 int hostprotocol(char *);
 char *hostnamefromip(unsigned long);
+void dropssl(int);
 void real_killsock(int, const char *, int);
 int answer(int, char *, unsigned long *, unsigned short *, int);
 inline int open_listen(int *);
