@@ -2782,3 +2782,33 @@ char *degarble(int len, char *g)
   return (char *) garble_buffer[garble_ptr];
 }
 #endif
+
+
+char *replace (char *string, char *oldie, char *newbie)
+{
+  static char newstring[1024] = "";
+  int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
+  char *c;
+  if (string == NULL) return "";
+  if ((c = (char *) strstr(string, oldie)) == NULL) return string;
+  new_len = strlen(newbie);
+  old_len = strlen(oldie);
+  end = strlen(string) - old_len;
+  oldie_index = c - string;
+  newstr_index = 0;
+  str_index = 0;
+  while(str_index <= end && c != NULL) {
+    cpy_len = oldie_index-str_index;
+    strncpy(newstring + newstr_index, string + str_index, cpy_len);
+    newstr_index += cpy_len;
+    str_index += cpy_len;
+    strcpy(newstring + newstr_index, newbie);
+    newstr_index += new_len;
+    str_index += old_len;
+    if((c = (char *) strstr(string + str_index, oldie)) != NULL)
+     oldie_index = c - string;
+  }
+  strcpy(newstring + newstr_index, string + str_index);
+  return (newstring);
+}
+

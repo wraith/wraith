@@ -216,6 +216,7 @@ char *progname();
 void init_settings();
 
 /* misc.c */
+char *replace(char *, char *, char *);
 #ifdef S_GARBLESTRINGS
 char *degarble(int, char *);
 #endif

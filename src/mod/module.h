@@ -526,6 +526,7 @@
 #define myip6 ((char *)(global[324]))
 /* 325 - 328 */
 #define cmdprefix ((char *)(global[325]))
+#define replace ((char*(*)(char *, char *, char *))global[326])
 
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h

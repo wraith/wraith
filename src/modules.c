@@ -560,7 +560,8 @@ Function global_table[] =
   (Function) authkey,
   (Function) myip,
   (Function) myip6,
-  (Function) cmdprefix
+  (Function) cmdprefix,
+  (Function) replace
 
 
 };
