@@ -4144,7 +4144,7 @@ cmd_t C_dcc[] =
   {"whois",		"",	(Function) cmd_whois,		NULL},
   {"whom",		"",	(Function) cmd_whom,		NULL},
   {"whoami",		"",	(Function) cmd_whoami,		NULL},
-  {"botjump",           "n",    (Function) cmd_botjump,         NULL},
+  {"botjump",           "m",    (Function) cmd_botjump,         NULL},
   {"botmsg",		"o",    (Function) cmd_botmsg,          NULL},
   {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL},
   {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL},
