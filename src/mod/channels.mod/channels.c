@@ -34,7 +34,6 @@
 
 static int 			use_info;
 static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
-static char 			*lastdeletedmask = NULL;
 static struct udef_struct 	*udef = NULL;
 static int 			global_stopnethack_mode;
 static int 			global_revenge_mode;
@@ -912,7 +911,6 @@ void channels_init()
   gfld_ctcp_thr = 0;
   gfld_ctcp_time = 0;
   global_idle_kick = 0;
-  lastdeletedmask = 0;
   use_info = 1;
   strcpy(glob_chanmode, "nt");
   udef = NULL;
