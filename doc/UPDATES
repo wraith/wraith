@@ -33,7 +33,6 @@ This is a summary of ChangeLog basically.
 * Optimized lots of code to use less CPU
 * +c bots will now boot users when they lose +c
 * Fixed a bug with removing hosts while having +d or +k
-* Fixed an obscure memory bug with the perm-owner list
 * Fixed /me over partyline; now auto changes into cmd_me
 * Fixed cosmetic error in cmd_mns/invite/ban/exempt regarding which chan was displayed in log
 * Ignores are now checked before host is checked for access for telnet
