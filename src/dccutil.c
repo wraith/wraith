@@ -345,7 +345,7 @@ void dcc_chatter(int idx)
  */
 void lostdcc(int n)
 {
-
+  sdprintf("lostdcc(%d)", n);
   /* Make sure it's a valid dcc index. */
   if (n < 0 || n >= max_dcc) 
     return;
@@ -370,6 +370,7 @@ void lostdcc(int n)
  */
 void removedcc(int n)
 {
+  sdprintf("removedcc(%d)", n);
   if (dcc[n].type && dcc[n].type->kill)
     dcc[n].type->kill(n, dcc[n].u.other);
   else if (dcc[n].u.other)
@@ -377,9 +378,10 @@ void removedcc(int n)
 
   dcc_total--;
 
-  if (n < dcc_total)
+  if (n < dcc_total) {
     egg_memcpy(&dcc[n], &dcc[dcc_total], sizeof(struct dcc_t));
-  else
+    sdprintf("idx: %d -> %d", dcc_total, n);
+  } else
     egg_bzero(&dcc[n], sizeof(struct dcc_t)); /* drummer */
 }
 
@@ -542,6 +544,7 @@ int new_dcc(struct dcc_table *type, int xtra_size)
   if (xtra_size)
     dcc[i].u.other = (char *) calloc(1, xtra_size);
 
+  sdprintf("new_dcc: %d (dcc_total: %d)", i, dcc_total);
   return i;
 }
 
