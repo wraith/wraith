@@ -821,7 +821,7 @@ int channel_add(char *result, char *newname, char *options)
   free(item);
 #ifdef LEAF
   if (join && shouldjoin(chan))
-    dprintf(DP_SERVER, "JOIN %s %s\n", chan->name, chan->key_prot);
+    dprintf(DP_SERVER, "JOIN %s %s\n", chan->dname, chan->key_prot);
 #endif /* LEAF */
   return ret;
 }
