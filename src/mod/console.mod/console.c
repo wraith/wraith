@@ -29,7 +29,7 @@ struct console_info {
   int echoflags;
   int page;
   int conchan;
-  int colour;
+  int color;
 };
 
 static struct user_entry_type USERENTRY_CONSOLE;
@@ -55,7 +55,7 @@ static int console_unpack(struct userrec *u, struct user_entry *e)
   arg = newsplit(&par);
   ci->conchan = atoi(arg);
   arg = newsplit(&par);
-  ci->colour = atoi(arg);
+  ci->color = atoi(arg);
   list_type_kill(e->u.list);
   e->u.extra = ci;
   return 1;
@@ -80,7 +80,7 @@ static int console_write_userfile(FILE *f, struct userrec *u,
   if (lfprintf(f, "--CONSOLE %s %s %s %d %d %d %d\n",
 	      i->channel, masktype(i->conflags),
 	      stripmasktype(i->stripflags), i->echoflags,
-	      i->page, i->conchan, i->colour) == EOF)
+	      i->page, i->conchan, i->color) == EOF)
     return 0;
   return 1;
 }
@@ -106,7 +106,7 @@ static int console_set(struct userrec *u, struct user_entry *e, void *buf)
 
     egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d", ci->channel, masktype(ci->conflags), 
                                     stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
-                                    ci->colour);
+                                    ci->color);
     /* shareout(NULL, "c %s %s %s\n", e->type->name, u->handle, string); */
     shareout(NULL, "c CONSOLE %s %s\n", u->handle, string);
   }
@@ -137,7 +137,7 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
   arg = newsplit(&par);
   ci->conchan = atoi(arg);
   arg = newsplit(&par);
-  ci->colour = atoi(arg);
+  ci->color = atoi(arg);
   e->u.extra = ci;
   /* now let's propogate to the dcc list */
   for (i = 0; i < dcc_total; i++) {
@@ -156,7 +156,7 @@ static int console_gotshare(struct userrec *u, struct user_entry *e, char *par, 
         if (!dcc[i].u.chat->line_count)
           dcc[i].u.chat->current_lines = 0;
       }
-      if (ci->colour)
+      if (ci->color)
         dcc[i].status |= (STAT_COLOR);
       else
         dcc[i].status &= ~(STAT_COLOR);
@@ -181,7 +181,7 @@ static void console_display(int idx, struct user_entry *e, struct userrec *u)
             CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*",
             i->conchan % GLOBAL_CHANS);
     sprintf(tmp, "    Color:");
-    if (i->colour == 1)
+    if (i->color == 1)
      sprintf(tmp, "%s on", tmp);
     else
      sprintf(tmp, "%s off", tmp);
@@ -224,7 +224,7 @@ static int console_chon(char *handle, int idx)
 	if (!dcc[idx].u.chat->line_count)
 	  dcc[idx].u.chat->current_lines = 0;
       }
-      if (i->colour)
+      if (i->color)
         dcc[idx].status |= (STAT_COLOR);
       else
         dcc[idx].status &= ~(STAT_COLOR);
@@ -270,9 +270,9 @@ static int console_store(struct userrec *u, int idx, char *par)
   else
     i->page = 0;
   if (dcc[idx].status & STAT_COLOR)
-    i->colour = 1;
+    i->color = 1;
   else
-    i->colour = 0;
+    i->color = 0;
   i->conchan = dcc[idx].u.chat->channel;
   if (par) {
     char tmp[100] = "";
@@ -286,7 +286,7 @@ static int console_store(struct userrec *u, int idx, char *par)
     dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page,
             CONSOLE_CHANNEL2, i->conchan);
     sprintf(tmp, "    Color:");
-    if (i->colour == 1)
+    if (i->color == 1)
      sprintf(tmp, "%s on", tmp);
     else
      sprintf(tmp, "%s off", tmp);
