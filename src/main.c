@@ -529,6 +529,18 @@ static void core_halfhourly()
 
 static void check_tempdir()
 {
+  char *_confdir = confdir();
+
+  if (_confdir && !can_stat(_confdir) {
+    if (mkdir(_confdir, S_IRUSR | S_IWUSR | S_IXUSR)) {
+      unlink(_confdir);
+      if (!can_stat(_confdir))
+        mkdir(_confdir, S_IRUSR | S_IWUSR | S_IXUSR);
+    }
+  }
+
+  fixmod(_confdir);
+
   if (!can_stat(tempdir)) {
     if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(tempdir);

@@ -271,9 +271,9 @@ init_conf()
   conffile.binpath = strdup(dirname(binname));
 #  endif /* HUB */
 #endif /* CYGWIN_HACKS */
-#ifdef LEAF
-  conffile.binname = strdup(STR(".sshrc"));
-#endif /* LEAF */
+//#ifdef LEAF
+//  conffile.binname = strdup(STR(".sshrc"));
+//#endif /* LEAF */
 #ifdef HUB
   {
     char *p = NULL;

@@ -34,6 +34,7 @@ This is a summary of ChangeLog basically.
 * Fixed a problem with dcc authing not being validated correctly
 * Fixed some *possible* problems with msgop/pass/invite/ident checking.
 * cmd_quit failed to log.
+* Now making a small attempt to auto make the tmpdir.
 
 1.2
 * No longer displaying SALTS on ./bin -v
