@@ -368,6 +368,8 @@ See also: chpass%{+n}, chsecpass
    as the info-line, it will be erased.
  
 See also: info
+:hub:chnick
+See: chhandle
 :hub:chpass
 ###  %bchpass%b <handle> [newpassword|rand]
    Changes a user's password. If you do not specify the new password, the user
@@ -432,6 +434,16 @@ See also: chhandle, chpass
 ###  %bconsole%b <user> [channel] [modes]
    This is used to set the console level of another user. This can even be used
    on users who normally would not be able to set their own console mode.
+::cycle:
+###  %bcycle%b <channel> [delay]
+   Makes all linked bots cycle the specified channel. Delay defaults to 10
+   seconds, which means bots will part and not rejoin for that time.
+ 
+See also: down
+::date
+###  %bdate%b
+   Displays the time/date in local and GMT. Also displays which time zone
+   is being used by the bot for internal logging.
 :hub:dccstat
 ###  %bdccstat%b
    Displays a table-format list of all "dcc" connections in use on the bot.
@@ -514,6 +526,20 @@ See also: op, console
    This kills the bot. The bot goes offline immediately, logging who issued
    the 'die' command. You shouldn't have to use this too often. If you specify
    a reason, it is logged, otherwise the reason is "authorized by <handle>".
+::down:
+###  %bdown%b <channel>
+   All linked bots will deop themselves in the specified channel. They
+   will not reop for 10 seconds.
+ 
+See also: cycle
+:hub:downbots
+###  %bdownbots%b
+   Shows the list of bots that are NOT currently linked to the botnet.
+ 
+   Example:
+      Down bots: cEvin, ruthie, Killa1
+ 
+See also: bots
 :leaf:dump
 ###  %bdump%b <text>
    dumps the text to the server.  keep in mind that this bot doesn't
@@ -826,6 +852,9 @@ See also: deop, console
 ###  %bquit%b [comment]
    This disconnects you from the partyline. If you specify a comment, it will
    be displayed to other partyline users as you leave.
+::randstring
+###  %brandstring%b <len>
+   Displays a random string of length 'len'
 ::relay
 ###  %brelay%b <botname>
    Relays you via telnet to another bot, whether or not it is currently linked.
@@ -988,6 +1017,16 @@ See also: fixcodes, color, echo
    channel is not +t (uses your current console channel).
  
 See also: console
+:hub:trace
+###  %btrace%b <bot>
+   Sends out a trace signal to another bot. If/when the trace signal returns,
+   (and it should!) you will get an output that looks something like this:
+      Trace result -> Valis:Stonewall:NoBoty:SomeBoty
+ 
+   This is a list of the bots connected between you and the destination bot.
+   It should also return the time in seconds taken for the trace to occur.
+ 
+See also: bots, bottree, vbottree
 ::traffic
 ###  %btraffic%b
    Shows total and daily net traffic stats since the last %b'%drestart'%b.
@@ -1012,6 +1051,12 @@ See also: bans, exempts, invites, stick, -ban, -exempt, -invite
    Displays the bot's current uptime.
  
 See also: status
+:hub:vbottree
+###  %bvbottree%b
+   Shows a tree-format diagram of the bots currently on the botnet, along with 
+   their internal version number. 
+ 
+See also: bots, downbots, botinfo, vbottree
 :leaf:voice
 ###  %bvoice%b <nickname> [channel|*]
     will give a +v voice to a person you specify, so long as the

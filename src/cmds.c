@@ -4068,7 +4068,7 @@ cmd_t C_dcc[] =
   {"chattr",		"m|m",	(Function) cmd_chattr,		NULL},
 #ifdef HUB
   {"chhandle",		"m",	(Function) cmd_chhandle,	NULL},
-  {"chnick",		"m",	(Function) cmd_chhandle,	NULL},
+  {"chnick",		"m",	(Function) cmd_chhandle,	NULL,		1},
   {"chpass",		"m",	(Function) cmd_chpass,		NULL},
   {"chsecpass",		"n",	(Function) cmd_chsecpass,	NULL},
 #ifdef S_DCCPASS
