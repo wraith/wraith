@@ -1346,7 +1346,7 @@ gotmode(char *from, char *msg)
                   } else {
 /* FIXME: same thing here */
                     if (!match_my_nick(nick) && channel_voice(chan) && (glob_master(user) || chan_master(user) || glob_bot(user))
-                       && strcmp(nick, victim)) {
+                       && strcmp(nick, mparam)) {
                       /* if the user is not +q set them norEVOICE. */
                       if (!chan_quiet(victim) && !(mv->flags & EVOICE)) {
                         putlog(LOG_DEBUG, "@", "Giving EVOICE flag to: %s (%s)", mv->nick, chan->dname);
