@@ -46,6 +46,7 @@ This is a summary of ChangeLog basically.
 43.Added a MODIFIED field to whois.
 44.Console channel/flags now correctly shared among bots.
 45.Various cosmetic changes.
+46.Leaf bots now correctly respond to remote userfile changes, (+/-host, chattr, [un]stick, +/-ban...)
 
 1.0.10
 
