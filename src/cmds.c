@@ -1562,10 +1562,12 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
     return;
   }
   if (!strcmp(botm, "?")) {
-    for (tbot = tandbot; tbot; tbot = tbot->next)
+    for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)))
-      tbots++;
-    rleaf = random() % tbots;
+        tbots++;
+    }
+    if (tbots)
+      rleaf = random() % tbots;
   }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
