@@ -11,9 +11,9 @@ builddate=`perl -e "use POSIX 'strftime';print strftime(\"%m.%d.%Y\n\",gmtime(${
 
 clear
 #Display a banner
-btotal=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*switch (r % \(.\)) {/\1/"`
-bnum=$[(`date '+%s'` % ${btotal})]
-banner=`grep -A 15 "char \*wbanner() {" src/misc.c | grep "case ${bnum}:" | sed -e "s/.*case ${bnum}: return STR(\"\(.*\)\");/\1/"`
+bt=`grep -A 3 "char \*wbanner() {" src/misc.c | grep "switch" | sed -e "s/.*switch (r % \(.\)) {/\1/"`
+bn=$[(`cat /proc/self/stat | awk '{print $1}'` % ${bt})]
+banner=`grep -A 15 "char \*wbanner() {" src/misc.c | grep "case ${bn}:" | sed -e "s/.*case ${bn}: return STR(\"\(.*\)\");/\1/"`
 echo -e "${banner}"
 echo -e "Version:   ${ver} (${numver})\nBuild:     ${builddate}"
 echo -e `grep -r "http://" src/misc.c | sed -e "s/dprintf(idx, STR(\"\(.*\)\"));/\1/"`
