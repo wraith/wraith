@@ -191,9 +191,9 @@ int socket_create(const char *dest_ip, int dest_port, const char *src_ip, int sr
             }
           }
 
-                if (connect(sock, &dest_name.u.addr, dest_name.len) != 0) {
-                        if (errno != EINPROGRESS) return(-4);
-                }
+          if (connect(sock, &dest_name.u.addr, dest_name.len) != 0) {
+            if (errno != EINPROGRESS) return(-4);
+          }
         }
 
         errno = 0;

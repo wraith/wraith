@@ -72,6 +72,7 @@ typedef struct {
 	time_t expiretime;
 } dns_cache_t;
 
+
 static int query_id = 1;
 static dns_header_t _dns_header = {0, 0, 0, 0, 0, 0};
 static dns_query_t *query_head = NULL;
@@ -95,7 +96,7 @@ static int reverse_ip(const char *host, char *reverse);
 static void read_resolv(char *fname);
 static void read_hosts(char *fname);
 static int get_dns_idx();
-static void dns_resend_queries();
+//static void dns_resend_queries();
 static int cache_find(const char *);
 //static int dns_on_read(void *client_data, int idx, char *buf, int len);
 //static int dns_on_eof(void *client_data, int idx, int err, const char *errmsg);
@@ -104,7 +105,8 @@ static void dns_on_eof(int idx);
 static const char *dns_next_server();
 static void parse_reply(char *response, size_t nbytes);
 
-time_t async_resolve_timeout = 30;
+time_t async_lookup_timeout = 30;
+time_t async_server_timeout = 40;
 //int resend_on_read = 0;
 
 static void 
@@ -145,7 +147,7 @@ static struct dcc_table dns_handler = {
   DCT_VALIDIDX,
   dns_on_eof,
   dns_on_read,
-  &async_resolve_timeout,
+  NULL,
   dns_timeout,
   dns_display,
   NULL,
@@ -234,7 +236,7 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 	q->query = strdup(query);
 	q->callback = callback;
 	q->client_data = client_data;
-	q->expiretime = now + async_resolve_timeout;
+	q->expiretime = now + async_lookup_timeout;
 	q->next = query_head;
 	query_head = q;
 
@@ -287,8 +289,11 @@ void egg_dns_send(char *query, int len)
                   return;
                 }
 	}
-        dns_handler.timeout_val = &async_resolve_timeout;
-        dcc[dns_idx].timeval = now;
+        if (!dns_handler.timeout_val) {
+          dns_handler.timeout_val = &async_server_timeout;
+          sdprintf("SETTING TIMEOUT to %li", async_server_timeout);
+          dcc[dns_idx].timeval = now;
+        }
         write(dcc[dns_idx].sock, query, len);
 //	sockbuf_write(dns_idx, query, len);
 }
@@ -339,17 +344,19 @@ void dns_send_query(dns_query_t *q)
   }
 }
 
+/*
 void dns_resend_queries()
 {
   dns_query_t *q = NULL;
 
   for (q = query_head; q; q = q->next) {
-    if (now >=  q->expiretime) {
+    if (now >= q->expiretime) {
 sdprintf("RESENDING: %s", q->query);
       dns_send_query(q);
     }
   }
 }
+*/
 
 /*
 void dns_create_timeout_timer(dns_query_t **qm, const char *query, int timeout)
@@ -495,7 +502,6 @@ sdprintf("reversed ipv6 ip: %s", q->ip);
 static void dns_on_read(int idx, char *buf, int atr)
 {
         dcc[idx].timeval = now;
-        dns_handler.timeout_val = 0;
 
 //	if (resend_on_read) {
 //		resend_on_read = 0;
@@ -505,15 +511,23 @@ static void dns_on_read(int idx, char *buf, int atr)
 
         atr = read(dcc[idx].sock, buf, 512);
 
+        if (atr == -1) {
+          if (errno == EAGAIN)
+            atr = read(dcc[idx].sock, buf, 512);
+          if (atr == -1) {
+            dns_on_eof(idx);
+            return;
+          }
+        }
+        sdprintf("SETTING TIMEOUT to 0");
+        dns_handler.timeout_val = 0;
 	parse_reply(buf, atr);
 	return;
 }
 
-//static int dns_on_eof(void *client_data, int idx, int err, const char *errmsg)
 static void dns_on_eof(int idx)
 {
-//	sockbuf_delete(idx);
-        sdprintf("eof on dns idx: %d sock: %d", idx, dcc[idx].sock);
+        sdprintf("EOF on dns idx: %d sock: %d (%s)", idx, dcc[idx].sock, dcc[idx].host);
         dns_reinit(idx);
 
 	return;
@@ -916,7 +930,7 @@ static void expire_queries()
 
   if (query_head) {
     for (q = query_head; q; q = q->next) {
-      if (q->expiretime <= now) {
+      if (q->expiretime <= now) {		/* set in alloc_query */
         if (q->next)
           next = q->next;
         egg_dns_cancel(q->id, 1);
@@ -933,6 +947,7 @@ static void expire_queries()
       i--;
     }
   }
+
 }
 
 
