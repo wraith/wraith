@@ -46,7 +46,7 @@ static char *
 bin_md5(const char *fname, int todo, MD5_CTX * ctx)
 {
   static char hash[MD5_HASH_LENGTH + 1] = "";
-  unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[17] = "";
+  unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
   FILE *f = NULL;
   size_t len = 0;
 
