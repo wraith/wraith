@@ -9,17 +9,38 @@ alias setauth {
   if (!$3) {
     echo -a usage: /setauth password secpass authkey <botnick>
     echo -a <botnick> is optional if the authkey specified is for that bot only...
+    echo -a Use a . in place of a param if you do not have one set yet. (pass excluded)
   }
   else {
     if ($4) {
       set %w.pass. $+ $4 $1
-      set %w.secpass. $+ $4 $2
-      set %w.authkey. $+ $4 $3 
+      if ($2 != .) {
+        set %w.secpass. $+ $4 $2
+      } 
+      else {
+        set %w.secpass. $+ $4
+      }
+      if ($3 != .) {
+        set %w.authkey. $+ $4 $3
+      } 
+      else {
+        set %w.authkey. $+ $4
+      }
     }
     else {
       set %w.pass $1
-      set %w.secpass $2
-      set %w.authkey $3
+      if ($2 != .) {
+        set %w.secpass $2
+      } 
+      else {
+        set %w.secpass
+      }
+      if ($3 != .) {
+        set %w.authkey $3
+      } 
+      else {
+        set %w.authkey
+      }
     }
     echo -a set!
   }
