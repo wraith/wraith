@@ -8,6 +8,7 @@ typedef struct encdata_struct {
 
 
 extern encdata_t encdata;
+extern int	checked_bin_buf;
 
 #  define WRITE_MD5 	1
 #  define GET_MD5		2

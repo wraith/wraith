@@ -723,6 +723,8 @@ int main(int argc, char **argv)
     }
     free(hash);
   }
+  if (!checked_bin_buf)
+    exit(1);
 #endif /* !CYGWIN_HACKS */
 #ifdef HUB
   egg_snprintf(userfile, 121, "%s/.u", confdir());
