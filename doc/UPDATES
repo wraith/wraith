@@ -8,7 +8,8 @@ This is a summary of ChangeLog basically.
 5.Fixed a double log cosmetic bug with dcc cmds.
 6.If no config file, one is generated now.
 7.And if no bots are listed, the bot nows gives an error.
-
+8.cmd_quit was not returning from 'su' correctly.
+9.Fixed bots mass sending out CONFIG entries when they linked.
 
 1.1.0
 1.Rewrote the shell config parsing...

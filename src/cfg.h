@@ -19,10 +19,10 @@ typedef struct cfg_entry {
 } cfg_entry_T;
 
 #ifndef MAKING_MODS
-void set_cfg_str(char *target, char *entryname, char *data);
+void set_cfg_str(char *, char *, char *);
 void add_cfg(struct cfg_entry *);
-void got_config_share(int idx, char * ln);
-void userfile_cfg_line(char *ln);
+void got_config_share(int, char *, int);
+void userfile_cfg_line(char *);
 void trigger_cfg_changed();
 #ifdef S_DCCPASS
 int check_cmd_pass(const char *, char *);

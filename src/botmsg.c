@@ -457,7 +457,7 @@ void botnet_send_cfg(int idx, struct cfg_entry * entry) {
 void botnet_send_cfg_broad(int idx, struct cfg_entry * entry) {
   int l;
   if (tands > 0) {
-      l = simple_sprintf(OBUF, STR("cg %s %s\n"), entry->name, entry->gdata ? entry->gdata : "");
+      l = simple_sprintf(OBUF, STR("cgb %s %s\n"), entry->name, entry->gdata ? entry->gdata : "");
     send_tand_but(idx, OBUF, l);
   }
 }

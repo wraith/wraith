@@ -15,6 +15,7 @@
 
 static Function *global = NULL;
 extern struct cfg_entry CFG_OPTIMESLACK;
+extern int		cfg_noshare;
 static int checked_hostmask;	/* Used in request_op()/check_hostmask() cleared on connect */
 static int ctcp_mode;
 static int serv;		/* sock # of server currently */
@@ -1625,7 +1626,9 @@ char *server_start(Function *global_funcs)
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
+  cfg_noshare = 1;
   set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders.");
+  cfg_noshare = 0;
   return NULL;
 }
 #endif /* LEAF */

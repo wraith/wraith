@@ -705,7 +705,9 @@ void init_config()
   add_cfg(&CFG_SERVERS);
   add_cfg(&CFG_SERVERS6);
   add_cfg(&CFG_REALNAME);
+  cfg_noshare = 1;
   set_cfg_str(NULL, STR("realname"), "A deranged product of evil coders");
+  cfg_noshare = 0;
   add_cfg(&CFG_OPBOTS);
   add_cfg(&CFG_INBOTS);
   add_cfg(&CFG_LAGTHRESHOLD);
@@ -798,13 +800,18 @@ void userfile_cfg_line(char *ln)
     if (!strcmp(cfg[i]->name, name))
       cfgent = cfg[i];
   if (cfgent) {
+    /* if we are a leaf, dont share the cfg line. */
+    if (bot_hublevel(conf.bot->u) == 999)
+      cfg_noshare = 1;
     set_cfg_str(NULL, cfgent->name, (ln && ln[0]) ? ln : NULL);
+    /* regardless of leaf/hub it is safe to set this to 0 */
+    cfg_noshare = 0;
   } else
     putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
 
 }
 
-void got_config_share(int idx, char *ln)
+void got_config_share(int idx, char *ln, int broad)
 {
   char *name = NULL;
   int i;
@@ -817,7 +824,8 @@ void got_config_share(int idx, char *ln)
       cfgent = cfg[i];
   if (cfgent) {
     set_cfg_str(NULL, cfgent->name, (ln && ln[0]) ? ln : NULL);
-    botnet_send_cfg_broad(idx, cfgent);
+    if (broad)
+      botnet_send_cfg_broad(idx, cfgent);
   } else
     putlog(LOG_ERRORS, "*", STR("Unrecognized config entry %s in userfile"), name);
   cfg_noshare = 0;
