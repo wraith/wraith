@@ -629,6 +629,7 @@ int open_telnet_raw(int sock, char *server, port_t sport)
     initialize_sockaddr(is_resolved, NULL, 0, &so);
 
     if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0) {
+      putlog(LOG_ERROR, "*", "Failed to bind to socket %d: %s", sock, strerror(errno));
       killsock(sock);
       return -1;
     }
@@ -646,12 +647,14 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 #ifdef USE_IPV6
         if (so.sa.sa_family == AF_INET6) {
           if (bind(sock, &cached_myip6_so.sa, SIZEOF_SOCKADDR(cached_myip6_so)) < 0) {
+            putlog(LOG_ERROR, "*", "Failed to bind to v6 socket %d: %s", sock, strerror(errno));
             killsock(sock);
             return -1;
           }
         } else {
 #endif /* USE_IPV6 */
           if (bind(sock, &cached_myip4_so.sa, SIZEOF_SOCKADDR(cached_myip4_so)) < 0) {
+            putlog(LOG_ERROR, "*", "Failed to bind to socket %d: %s", sock, strerror(errno));
             killsock(sock);
             return -3;
           }
@@ -751,19 +754,19 @@ intt open_address_listen(in_addr_t addr, port_t *port)
     /* memcpy(&name6.sin6_addr, &in6addr_any, 16); */ /* this is the only way to get ipv6+ipv4 in 1 socket */
     memcpy(&name6.sin6_addr, &cached_myip6_so.sin6.sin6_addr, 16);
     if (bind(sock, (struct sockaddr *) &name6, sizeof(name6)) < 0) {
-      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
+      putlog(LOG_ERROR, "*", "Failed to bind to socket %d for listen on port '%d': %s", sock, *port, strerror(errno));
       killsock(sock);
       return -1;
     }
     addrlen = sizeof(name6);
     if (getsockname(sock, (struct sockaddr *) &name6, &addrlen) < 0) {
-      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
+      putlog(LOG_ERROR, "*", "Failed to getsockname on socket '%d' for listen on port '%d': %s", sock, *port, strerror(errno));
       killsock(sock);
       return -1;
     }
     *port = ntohs(name6.sin6_port);
     if (listen(sock, 1) < 0) {
-      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
+      putlog(LOG_ERROR, "*", "Failed to listen on socket '%d' for listen on port '%d': %s", sock, *port, strerror(errno));
       killsock(sock);
       return -1;
     }
@@ -782,20 +785,20 @@ intt open_address_listen(in_addr_t addr, port_t *port)
     name.sin_port = htons(*port); /* 0 = just assign us a port */
     name.sin_addr.s_addr = addr;
     if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0) {
-      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
+      putlog(LOG_ERROR, "*", "Failed to bind to socket '%d' for listen on port '%d': %s", sock, *port, strerror(errno));
       killsock(sock);
       return -1;
     }
     /* what port are we on? */
     addrlen = sizeof(name);
     if (getsockname(sock, (struct sockaddr *) &name, &addrlen) < 0) {
-      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
+      putlog(LOG_ERROR, "*", "Failed to getsockname on socket '%d' for listen on port '%d': %s", sock, *port, strerror(errno));
       killsock(sock);
       return -1;
     }
     *port = ntohs(name.sin_port);
     if (listen(sock, 1) < 0) {
-      sdprintf("Failed to open sock '%d' for listen on port '%d'", sock, *port);
+      putlog(LOG_ERROR, "*", "Failed to listen on socket '%d' for on port '%d': %s", sock, *port, strerror(errno));
       killsock(sock);
       return -1;
     }
