@@ -48,6 +48,7 @@ writepid(const char *pidfile, pid_t pid)
 {
   FILE *fp = NULL;
 
+  sdprintf("Writing pid to: %s", pidfile);
   /* Need to attempt to write pid now, not later. */
   unlink(pidfile);
   if ((fp = fopen(pidfile, "w"))) {
