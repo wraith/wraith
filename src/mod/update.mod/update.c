@@ -420,7 +420,6 @@ void update_report(int idx, int details)
   }
 }
 
-#ifdef HUB
 static void cmd_bupdate(int idx, char *par)
 {
   for (int i = 0; i < dcc_total; i++) {
@@ -434,17 +433,17 @@ static void cmd_bupdate(int idx, char *par)
 
 cmd_t update_cmds[] =
 {
+#ifdef HUB
   {"bupdate",		"a",	(Function) cmd_bupdate,		NULL, HUB},
+#endif /* HUB */
   {NULL,		NULL,	NULL,				NULL, 0}
 };
-#endif /* HUB */
 
 void update_init()
 {
   add_builtins("bot", update_bot);
-#ifdef HUB
-  add_builtins("dcc", update_cmds);
-  if (conf.bot->hub)
+  if (conf.bot->hub) {
+    add_builtins("dcc", update_cmds);
     timer_create_secs(30, "check_updates", (Function) check_updates);
-#endif /* HUB */
+  }
 }
