@@ -1943,7 +1943,7 @@ static void cmd_debug(int idx, char *par)
     tell_netdebug(idx);
   if (!cmd || (cmd && !strcmp(cmd, "dns")))
     tell_dnsdebug(idx);
-#ifndef CYGWIN_HACKS
+#if !defined(CYGWIN_HACKS) && defined(__i386__)
   if (!cmd || (cmd &&!strcmp(cmd, "stackdump")))
     stackdump(0);
 #endif /* !CYGWIN_HACKS */
