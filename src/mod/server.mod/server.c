@@ -33,6 +33,7 @@ int servidx;		/* idx of server */
 char newserver[121] = "";	/* new server? */
 int newserverport;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
+static char serverpass[121] = "";
 static time_t trying_server;	/* trying to connect to a server right now? */
 static int curserv;		/* current position in server list: */
 int flud_thr;		/* msg flood threshold */
