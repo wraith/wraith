@@ -106,32 +106,16 @@ void dprintf (int idx, ...)
     case DP_STDERR:
       tputs(STDERR, buf, len);
       break;
+#ifdef LEAF
     case DP_SERVER:
-#ifdef HUB
-     return;
-#endif /* HUB */
     case DP_HELP:
-#ifdef HUB
-     return;
-#endif /* HUB */
     case DP_MODE:
-#ifdef HUB
-     return;
-#endif /* HUB */
     case DP_MODE_NEXT:
-#ifdef HUB
-     return;
-#endif /* HUB */
     case DP_SERVER_NEXT:
-#ifdef HUB
-     return;
-#endif /* HUB */
     case DP_HELP_NEXT:
-#ifdef HUB
-     return;
-#endif /* HUB */
       queue_server(idx, buf, len);
       break;
+#endif /* LEAF */
     }
     return;
   } else { /* normal chat text */

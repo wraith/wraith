@@ -1272,7 +1272,7 @@ int write_chans(FILE *f, int idx)
      get_mode_protect(chan, w);
 
      if (lfprintf(f, "\
-+ channel add %s { chanmode %s addedby %s addedts %lu idle-kick %d \
++ channel add %s { chanmode { %s } addedby %s addedts %lu idle-kick %d \
 limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%d \
 flood-ctcp %d:%d flood-join %d:%d flood-kick %d:%d flood-deop %d:%d \
 flood-nick %d:%d closed-ban %d closed-private %d ban-time %d \
