@@ -9,6 +9,7 @@ This is a summary of ChangeLog basically.
 5.No longer warning about "Can't create new socket" for identd.
 6.Re-wrote cmd_bots.
 7.Don't auto-op users in a +take chan.
+8.+take now does +oooo on remaining bots instead of individual +o lines.
 
 1.1.7
 

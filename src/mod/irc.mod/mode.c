@@ -385,7 +385,8 @@ static void got_op(struct chanset_t *chan, char *nick, char *from,
     /* take asap. */
     if (channel_take(chan))
       do_take(chan);
-    check_chan = 1;
+    else
+      check_chan = 1;
   }
 
   if (!m->user) {
@@ -536,7 +537,7 @@ static void got_deop(struct chanset_t *chan, char *nick, char *from,
   /* Having op hides your +v and +h  status -- so now that someone's lost ops,
    * check to see if they have +v or +h
    */
-  if (!(m->flags & (CHANVOICE | STOPWHO))) {
+  if (!channel_take(chan) && !channel_bitch(chan) && !(m->flags & (CHANVOICE | STOPWHO))) {
     dprintf(DP_HELP, "WHO %s\n", m->nick);
     m->flags |= STOPWHO;
   }

@@ -1001,6 +1001,34 @@ void enforce_closed(struct chanset_t *chan) {
 }
 
 static char *
+take_massopline(char *to_op)
+{
+  char *op = NULL, *modes = NULL, *nicks = NULL, *ret = NULL;
+  int i = 0;
+
+  nicks = calloc(1, 51);
+  modes = calloc(1, 10);
+  
+  for (i = 0; i < 4; i++) {
+    if (to_op[0]) {
+      op = newsplit(&to_op);
+      strcat(modes, "+o");
+      strcat(nicks, op);
+      strcat(nicks, " "); 
+    }
+  }
+  
+  ret = calloc(1, 61);
+  strcat(ret, modes);
+  strcat(ret, " ");
+  strcat(ret, nicks);
+  free(modes);
+  free(nicks);
+  
+  return ret;
+}
+
+static char *
 take_makeline(char *op, char *deops, int deopn)
 {
   int pos = 0, i = 0, n = 0, opn = op ? 1 : 0;
@@ -1063,7 +1091,7 @@ do_take(struct chanset_t *chan)
   */
   while (to_op[0] || to_deop[0]) {
     int deopn = 0, i = 0;
-    char *op = NULL, *deopline = NULL, deops[201] = "";
+    char *op = NULL, *modeline = NULL, deops[201] = "";
 
     if (to_op[0])
       op = newsplit(&to_op);
@@ -1080,11 +1108,14 @@ do_take(struct chanset_t *chan)
     strcat(work, chan->name);
     strcat(work, " ");
 
-    deopline = take_makeline(op, deops, deopn);
-    strcat(work, deopline);
+    if (deops[0])
+      modeline = take_makeline(op, deops, deopn);
+    else
+      modeline = take_massopline(to_op);
+    strcat(work, modeline);
     strcat(work, "\n");
     lines++;
-    free(deopline);
+    free(modeline);
 
     /* just dump when we have 5 lines because the server is going to throttle after that anyway */
     if (lines == 5) {
