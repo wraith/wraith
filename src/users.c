@@ -815,9 +815,8 @@ int readuserfile(char *file, struct userrec **ret)
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
           if (Tcl_Eval(interp, s) != TCL_OK) {
            putlog(LOG_MISC, "*", "Tcl error in userfile on line %d", line);
-           putlog(LOG_MISC, "*", "Line: %s", s);
            putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
-           return 1;
+           return 0;
           }
          }
 	} else if (!strncmp(code, "::", 2)) {
@@ -958,9 +957,9 @@ Context;
 	  rmspace(s);
 Context;
 	  if (!attr[0] || !pass[0]) {
-	    putlog(LOG_MISC, "*", "* %s '%s' line: %d split: %s::%s!", USERF_CORRUPT, code, line, (pass && pass[0]) ? pass : "" , (attr && attr[0]) ? attr : "");
+	    putlog(LOG_MISC, "*", "* %s line: %d!", USERF_CORRUPT, line);
 	    lasthand[0] = 0;
-            return 1;
+            return 0;
 	  } else {
 	    u = get_user_by_handle(bu, code);
 	    if (u && !(u->flags & USER_UNSHARED)) {
