@@ -33,16 +33,16 @@ ON *:CHAT:*:{
 }
 ON *:TEXT:auth*:?:{
   var %c = %auth. [ $+ [ $nick ] ]
-  if (!$2) {
+  if (!$3) {
     ;if this is a MSG not psybnc DCC, and we arent cleared to auth with them, IGNORE.
     if ($left($nick,1) != $chr(40) && !%c) {
       return
     }
     if ($right($1,1) == . && %c) {
-      msg $nick auth $wpass($iif($2,$2,$nick))
+      msg $nick auth $wpass($2)
     } 
     elseif ($right($1,1) == ! && %c) {
-      msg $nick auth $wpass($iif($2,$2,$nick)) %myuser
+      msg $nick auth $wpass($2) %myuser
     }
   }
 }
@@ -83,7 +83,10 @@ alias -l wmd5 {
 }
 
 ALIAS auth { 
-  if ($1 != -Auth || !$2) { echo 8 -a Usage: /auth -Auth string botname | echo 8 -a botname is optional. }
+  if ($1 != -Auth || !$2) { 
+    echo 8 -a Usage: /auth -Auth string botname 
+    echo 8 -a botname is optional. 
+  }
   else {
     echo +Auth $md5($2 $+ $wsecpass($3) $+ $wauthkey($3))
   }
