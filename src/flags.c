@@ -544,9 +544,13 @@ whois_access(struct userrec *user, struct userrec *whois_user)
   get_user_flagrec(user, &fr, NULL);
   get_user_flagrec(whois_user, &whois, NULL);
 
-  if ((glob_master(whois) && !glob_master(fr)) ||
+  if (
+      (isowner(user->handle) && !isowner(user->handle)) ||
+      (glob_admin(whois) && !glob_admin(fr)) || 
       (glob_owner(whois) && !glob_owner(fr)) ||
-      (glob_admin(whois) && !glob_admin(fr)) || (glob_bot(whois) && !glob_master(fr)))
+      (glob_master(whois) && !glob_master(fr)) ||
+      (glob_bot(whois) && !glob_master(fr))
+     )
     return 0;
   return 1;
 }
