@@ -1,7 +1,8 @@
-#include <stdlib.h>
 #include <string.h>
 #include "memcpy.h"
 #include "src/main.h"
+#include <stdlib.h>
+
 
 void 
 str_redup(char **str, const char *newstr)

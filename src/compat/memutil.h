@@ -5,6 +5,8 @@
 
 #undef str_redup
 #undef strdup
+#undef calloc
+#undef realloc
 
 void str_redup(char **, const char *);
 char * strdup(const char *);
