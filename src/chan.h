@@ -87,9 +87,7 @@ struct chan_t {
   time_t jointime;
   time_t parttime;
   time_t no_op;
-#ifdef S_AUTOLOCK
   int fighting;
-#endif /* S_AUTOLOCK */
 #ifdef G_BACKUP
   int backup_time;              /* If non-0, set +backup when now>backup_time */
 #endif /* G_BACKUP */

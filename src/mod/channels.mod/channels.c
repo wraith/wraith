@@ -59,21 +59,19 @@ static int 			gfld_ctcp_time;
 static int 			gfld_nick_thr;
 static int 			gfld_nick_time;
 
-#ifdef S_AUTOLOCK
-int 				killed_bots = 0;
-#endif /* S_AUTOLOCK */
+static int 			killed_bots = 0;
 
 #include "channels.h"
 #include "cmdschan.c"
 #include "tclchan.c"
 #include "userchan.c"
 
-/* This will close channels if the HUB:leaf count is skewed from config setting */
-void check_should_lock()
-{
-#ifdef S_AUTOLOCK
 #ifdef HUB
-  char *p = CFG_LOCKTHRESHOLD.gdata;
+/* This will close channels if the HUB:leaf count is skewed from config setting */
+static void 
+check_should_close()
+{
+  char *p = CFG_CLOSETHRESHOLD.gdata;
   tand_t *bot = NULL;
   int H, L, hc, lc;
   struct chanset_t *chan = NULL;
@@ -110,10 +108,8 @@ void check_should_lock()
       }
     }
   }
-#endif /* HUB */
-#endif /* S_AUTOLOCK */
 }
-
+#endif /* HUB */
 
 static void got_cset(char *botnick, char *code, char *par)
 {
@@ -308,16 +304,14 @@ static void got_role(char *botnick, char *code, char *par)
 
 void got_kl(char *botnick, char *code, char *par)
 {
-#ifdef S_AUTOLOCK
   killed_bots++;
   if (kill_threshold && (killed_bots = kill_threshold)) {
     struct chanset_t *ch = NULL;
 
     for (ch = chanset; ch; ch = ch->next)
-      do_chanset(NULL, ch, "+closed +backup +bitch", DO_LOCAL | DO_NET);
+      do_chanset(NULL, ch, "+closed +bitch +backup", DO_LOCAL | DO_NET);
   /* FIXME: we should randomize nick here ... */
   }
-#endif /* S_AUTOLOCK */
 }
 
 
@@ -953,6 +947,12 @@ void channels_init()
   timer_create_secs(60, "check_expired_exempts", (Function) check_expired_exempts);
   timer_create_secs(60, "check_expired_invites", (Function) check_expired_invites);
   timer_create_secs(10, "channels_10secondly", (Function) channels_10secondly);
+#ifdef HUB
+  timer_create_secs(30, "check_should_close", (Function) check_should_close);
+#ifdef G_BACKUP
+  timer_create_secs(30, "check_should_backup", (Function) check_should_backup);
+#endif /* G_BACKUP */
+#endif /* HUB */
 
   add_builtins("dcc", C_dcc_irc);
   add_builtins("bot", channels_bot);

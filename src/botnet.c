@@ -23,11 +23,6 @@
 #include "botmsg.h"
 #include "tandem.h"
 #include "core_binds.h"
-#ifdef HUB
-# ifdef S_AUTOLOCK
-#  include "src/mod/channels.mod/channels.h"
-# endif /* S_AUTOLOCK */
-#endif /* HUB */
 
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
@@ -1623,14 +1618,6 @@ void check_botnet_pings()
       }
     }
   }
-#ifdef HUB
-#ifdef S_AUTOLOCK
-  check_should_lock();
-#endif /* S_AUTOLOCK */
-#ifdef G_BACKUP
-  check_should_backup();
-#endif /* G_BACKUP */
-#endif /* HUB */
 }
 
 void zapfbot(int idx)

@@ -762,9 +762,7 @@ int channel_add(char *result, char *newname, char *options)
     /* let's initialize this stuff for shits & giggles */
     chan->channel.jointime = 0;
     chan->channel.parttime = 0;
-#ifdef S_AUTOLOCK
     chan->channel.fighting = 0;
-#endif /* S_AUTOLOCK */
 
     /* We _only_ put the dname (display name) in here so as not to confuse
      * any code later on. chan->name gets updated with the channel name as

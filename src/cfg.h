@@ -25,13 +25,10 @@ extern struct cfg_entry CFG_MOTD, CFG_CMDPREFIX, CFG_BADCOOKIE, CFG_MANUALOP, CF
                         CFG_NICK, CFG_REALNAME, CFG_INBOTS, CFG_LAGTHRESHOLD, CFG_OPREQUESTS, CFG_OPTIMESLACK,
                         CFG_OPBOTS, CFG_INBOTS, CFG_SERVPORT, CFG_AUTHKEY, CFG_MSGOP, CFG_MSGPASS, 
 			CFG_MSGINVITE, CFG_MSGIDENT, CFG_LOGIN, CFG_HIJACK, CFG_TRACE, CFG_PROMISC, 
-			CFG_BADPROCESS, CFG_PROCESSLIST;
+			CFG_BADPROCESS, CFG_PROCESSLIST, CFG_FIGHTTHRESHOLD, CFG_CLOSETHRESHOLD, CFG_KILLTHRESHOLD;
 #ifdef G_MEAN
 extern struct cfg_entry CFG_MEANDEOP, CFG_MEANKICK, CFG_MEANBAN;
 #endif /* G_MEAN */
-#ifdef S_AUTOLOCK
-struct cfg_entry CFG_FIGHTTHRESHOLD;
-#endif /* S_AUTOLOCK */
 
 void set_cfg_str(char *, char *, char *);
 void add_cfg(struct cfg_entry *);
@@ -58,8 +55,6 @@ extern struct cfg_entry		**cfg;
 #define msgpass CFG_MSGPASS.ldata ? CFG_MSGPASS.ldata : CFG_MSGPASS.gdata ? CFG_MSGPASS.gdata : ""
 #define msginvite CFG_MSGINVITE.ldata ? CFG_MSGINVITE.ldata : CFG_MSGINVITE.gdata ? CFG_MSGINVITE.gdata : ""
 #define msgident CFG_MSGIDENT.ldata ? CFG_MSGIDENT.ldata : CFG_MSGIDENT.gdata ? CFG_MSGIDENT.gdata : ""
-#ifdef S_AUTOLOCK
 #define kill_threshold (CFG_KILLTHRESHOLD.gdata ? atoi(CFG_KILLTHRESHOLD.gdata) : 0)
-#endif /* S_AUTOLOCK */
 
 #endif /* !_CFG_H */

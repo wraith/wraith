@@ -2339,9 +2339,7 @@ static int gotkick(char *from, char *origmsg)
     return 0; /* rejoin if kicked before getting needed info <Wcc[08/08/02]> */
   }
   if (channel_active(chan)) {
-#ifdef S_AUTOLOCK
     chan->channel.fighting++;
-#endif /* S_AUTOLOCK */
     fixcolon(msg);
     u = get_user_by_host(from);
     strcpy(uhost, from);

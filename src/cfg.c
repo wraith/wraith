@@ -663,7 +663,6 @@ struct cfg_entry CFG_OPBOTS = {
 #endif /* HUB */
 };
 
-#ifdef S_AUTOLOCK
 struct cfg_entry CFG_FIGHTTHRESHOLD = {
 	"fight-threshold", CFGF_GLOBAL, NULL, NULL,
 	getin_changed, NULL
@@ -671,7 +670,22 @@ struct cfg_entry CFG_FIGHTTHRESHOLD = {
 	, getin_describe
 #endif /* HUB */
 };
-#endif /* S_AUTOLOCK */
+
+struct cfg_entry CFG_CLOSETHRESHOLD = {
+	"close-threshold", CFGF_GLOBAL, NULL, NULL,
+	getin_changed, NULL
+#ifdef HUB
+	, getin_describe
+#endif /* HUB */
+};
+
+struct cfg_entry CFG_KILLTHRESHOLD = {
+	"kill-threshold", CFGF_GLOBAL, NULL, NULL,
+	getin_changed, NULL
+#ifdef HUB
+	, getin_describe
+#endif /* HUB */
+};
 
 struct cfg_entry CFG_INBOTS = {
 	"in-bots", CFGF_GLOBAL, NULL, NULL,
@@ -851,9 +865,9 @@ void init_config()
   add_cfg(&CFG_LAGTHRESHOLD);
   add_cfg(&CFG_OPREQUESTS);
   add_cfg(&CFG_OPTIMESLACK);
-#ifdef S_AUTOLOCK
   add_cfg(&CFG_FIGHTTHRESHOLD);
-#endif /* S_AUTOLOCK */
+  add_cfg(&CFG_CLOSETHRESHOLD);
+  add_cfg(&CFG_KILLTHRESHOLD);
 }
 
 int check_cmd_pass(const char *cmd, char *pass)

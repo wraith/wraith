@@ -195,7 +195,7 @@ static void deq_msg()
   tputs(serv, hq.head->msg, hq.head->len);
   if (debug_output) {
     hq.head->msg[strlen(hq.head->msg) - 1] = 0; /* delete the "\n" */
-    putlog(LOG_SRVOUT, "*", "[h->] %s", hq.head->msg);
+    putlog(LOG_SRVOUT, "@", "[h->] %s", hq.head->msg);
   }
   hq.tot--;
   last_time += calc_penalty(hq.head->msg);
