@@ -1045,7 +1045,7 @@ gotmode(char *from, char *msg)
           char tmp[1024] = "";
 
           if (role && (!u || (u && !u->bot)) && m && !chan_sentkick(m)) {
-            if (deops >= 3) {
+            if (deops >= 3 && chan->mdop) {
               m->flags |= SENTKICK;
               simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
               tputs(serv, tmp, strlen(tmp));
