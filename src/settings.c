@@ -1,3 +1,8 @@
+/* settings.c:
+ *    handles pack settings
+ */
+   
+
 #include <stdio.h>
 #include <stdlib.h>
 
