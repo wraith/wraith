@@ -107,7 +107,7 @@ typedef struct {
   int oseed;                            /* botlink out seed */
   int iseed;                            /* botlink in seed */
   int gz; /* gzip compression */
-  int enclink;				/* new encrypted botlink type */
+  int enclink;				/* new encrypted botlink */
 #ifdef HAVE_SSL
   SSL           *ssl;
 #endif /* HAVE_SSL */

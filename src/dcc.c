@@ -302,7 +302,7 @@ cont_link(int idx, char *buf, int ii)
 
     if (snum >= 0) {
       socklist[snum].enclink = link_find_by_type(LINK_GHOST);
-      link_link(idx, LINK_GHOST, TO);
+      link_link(idx, LINK_GHOST, -1, TO);
     }
 
     /* wait for "elink" now */
@@ -330,7 +330,9 @@ dcc_bot_new(int idx, char *buf, int x)
     greet_new_bot(idx);
   } else if (!egg_strcasecmp(code, "v")) {
     bot_version(idx, buf);
-  } else if (!egg_strcasecmp(code, "elink")) {	/* we're connecting to THEM (old) */
+
+/* FIXME: remove after 1.2.2 */
+  } else if (!egg_strcasecmp(code, "elink")) { /* we're connecting to THEM (old) */
     int snum = findanysnum(dcc[idx].sock);
 
     /* putlog(LOG_DEBUG, "*", "Got elink: %s %s", code, buf); */
@@ -347,6 +349,8 @@ dcc_bot_new(int idx, char *buf, int x)
       putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
       free(tmp);
     }
+  } else if (!egg_strcasecmp(code, "neg!")) {	/* something to parse in enclink.c */
+    link_parse(idx, buf);
   } else if (!egg_strcasecmp(code, "neg?")) {	/* we're connecting to THEM */
     int snum = findanysnum(dcc[idx].sock);
 
@@ -369,8 +373,7 @@ dcc_bot_new(int idx, char *buf, int x)
       link_hash(idx, rand);
       dprintf(idx, "neg %s %d\n", dcc[idx].shahash, enclink[i].type);
       socklist[snum].enclink = i;
-      if (enclink[i].link)
-        (enclink[i].link) (idx, TO);	
+      link_link(idx, -1, i, TO);
     }
   } else if (!egg_strcasecmp(code, "error")) {
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
@@ -923,7 +926,10 @@ dcc_chat_pass(int idx, char *buf, int atr)
   pass = newsplit(&buf);
 
   if (dcc[idx].user->bot) {
-    if (!egg_strcasecmp(pass, "elinkdone")) {		/* we're the hub */
+    if (!egg_strcasecmp(pass, "neg!")) {		/* we're the hub */
+      link_parse(idx, buf);
+/* FIXME: remove after 1.2.2 */
+    } else if (!egg_strcasecmp(pass, "neg.") || !egg_strcasecmp(pass, "elinkdone")) {		/* we're done, link up! */
       free(dcc[idx].u.chat);
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
@@ -955,8 +961,8 @@ dcc_chat_pass(int idx, char *buf, int atr)
           return;
         }
         socklist[snum].enclink = i;
-        if (enclink[i].link)
-          (enclink[i].link) (idx, FROM);
+
+        link_link(idx, -1, i, FROM);
       }
     } else {
       /* Invalid password/digest on hub */
@@ -1651,7 +1657,7 @@ dcc_telnet_pass(int idx, int atr)
 
       if (snum >= 0) {
         socklist[snum].enclink = link_find_by_type(LINK_GHOST);
-        link_link(idx, LINK_GHOST, FROM);
+        link_link(idx, LINK_GHOST, -1, FROM);
       }
     } else {
       /* negotiate a new linking scheme */

@@ -24,6 +24,7 @@ struct enc_link {
   void (*link) (int, direction_t);
   char *(*write) (int, char *, size_t *);
   int (*read) (int, char *, size_t *);
+  void (*parse) (int, int, char *);
 };
 
 
@@ -32,9 +33,12 @@ extern struct enc_link enclink[];
 
 extern int link_find_by_type(int);
 
-extern void link_link(int, int, direction_t);
+extern void link_link(int, int, int, direction_t);
 extern char *link_write(int, char *, size_t *);
 extern int link_read(int, char *, size_t *);
 extern void link_hash(int, char *);
+extern void link_send(int, char *, ...) __attribute__((format(printf, 2, 3)));
+extern void link_done(int);
+extern void link_parse(int, char *);
 
 #endif /* !_ENCLINK_H */

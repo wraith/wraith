@@ -8,16 +8,7 @@
 #include "net.h"
 #include "misc.h"
 
-int link_find_by_type(int type)
-{
-  int i = 0;
-
-  for (i = 0; enclink[i].name; i++)
-    if (type == enclink[i].type)
-      return i;
-
-  return -1;
-}
+#include <stdarg.h>
 
 static void ghost_link(int idx, direction_t direction)
 {
@@ -67,7 +58,7 @@ static void ghost_link(int idx, direction_t direction)
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;
 
-      dprintf(idx, "elink %s %d\n", tmp2, socklist[snum].oseed);
+      link_send(idx, "elink %s %d\n", tmp2, socklist[snum].oseed);
       free(tmp2);
       strcpy(socklist[snum].okey, initkey);
       strcpy(socklist[snum].ikey, initkey);
@@ -163,18 +154,74 @@ static char *ghost_write(int snum, char *src, size_t *len)
   return buf;
 }
 
+void ghost_parse(int idx, int snum, char *buf)
+{
+  /* putlog(LOG_DEBUG, "*", "Got elink: %s %s", code, buf); */
+  /* Set the socket key and we're linked */
+
+  char *code = newsplit(&buf);
+
+  if (!egg_strcasecmp(code, "elink")) {
+    char *tmp = decrypt_string(settings.salt2, newsplit(&buf));
+
+    strncpyz(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
+    strncpyz(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
+    socklist[snum].iseed = atoi(buf);
+    socklist[snum].oseed = atoi(buf);
+    putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
+    free(tmp);
+    if (dcc[idx].newbot)
+      link_done(idx);
+    else
+/* FIXME: remove after 1.2.2 */
+      dprintf(idx, "elinkdone\n");
+  }
+}
+
+void link_send(int idx, char *format, ...)
+{
+  char s[2001] = "";
+  va_list va;
+
+  va_start(va, format);
+  egg_vsnprintf(s, sizeof(s) - 1, format, va);
+  va_end(va);
+  remove_crlf(s);
 
 
-void link_link(int idx, int type, direction_t direction)
+  dprintf(idx, "neg! %s\n", s);
+}
+
+void link_done(int idx)
+{
+  dprintf(idx, "neg.\n");
+}
+
+int link_find_by_type(int type)
 {
   int i = 0;
 
-  for (i = 0; enclink[i].name; i++) {
-    if (enclink[i].link && enclink[i].type == type) {
-      (enclink[i].link) (idx, direction);
-      return;
+  for (i = 0; enclink[i].name; i++)
+    if (type == enclink[i].type)
+      return i;
+
+  return -1;
+}
+
+void link_link(int idx, int type, int i, direction_t direction)
+{
+  if (i == -1 && type != -1) {
+    for (i = 0; enclink[i].name; i++) {
+      if (enclink[i].type == type)
+        break;
     }
   }
+
+  if (i != -1 && enclink[i].link)
+    (enclink[i].link) (idx, direction);
+  else if (direction == TO)		/* problem finding function, just assume we're done */
+    link_done(idx);
+
   return;
 }
 
@@ -207,8 +254,19 @@ void link_hash(int idx, char *rand)
   return;
 }
 
+void link_parse(int idx, char *buf)
+{
+  int snum = findanysnum(dcc[idx].sock);
+  int i = socklist[snum].enclink;
+
+  if (i >= 0 && enclink[i].parse)
+    (enclink[i].parse) (idx, snum, buf);
+
+  return;
+}
+
 struct enc_link enclink[] = {
-  { "ghost", LINK_GHOST, ghost_link, ghost_write, ghost_read },
-  { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL },
-  { NULL, 0, NULL, NULL, NULL }
+  { "ghost", LINK_GHOST, ghost_link, ghost_write, ghost_read, ghost_parse },
+  { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL, NULL },
+  { NULL, 0, NULL, NULL, NULL, NULL }
 };
