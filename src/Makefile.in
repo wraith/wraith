@@ -30,6 +30,7 @@ OBJS = auth.o \
 	dccutil.o \
 	debug.o \
 	egg_timer.o \
+	enclink.o \
 	flags.o \
 	garble.o \
 	log.o \

@@ -9,6 +9,7 @@
 #include "common.h"
 #include "dcc.h"
 #include "settings.h"
+#include "enclink.h"
 #include "tclhash.h"
 #include "adns.h"
 #include "main.h"
@@ -316,15 +317,20 @@ cont_link(int idx, char *buf, int ii)
 
   dcc[idx].type = &DCC_BOT_NEW;
   dcc[idx].u.bot->numver = 0;
-  sdprintf("buf: '%s' len: %d", buf, ii);
+
 /* FIXME: remove after 1.2.2 */
 /* need to support the posibility of old hubs being up */
-  if (!buf[0]) {
+  if (ii == 2) {
     dprintf(idx, "%s\n", conf.bot->nick);
     gen_linkkey(idx);
-  } else if (buf[1]) {
+
+    /* wait for "elink" now */
+  } else if (ii == 3) {			/* new hub response */
+
     dprintf(idx, "-%s\n", conf.bot->nick);
     dcc[idx].newbot = 1;
+
+    /* wait for "neg?" now */
   }
 
 
@@ -344,7 +350,7 @@ dcc_bot_new(int idx, char *buf, int x)
     greet_new_bot(idx);
   } else if (!egg_strcasecmp(code, "v")) {
     bot_version(idx, buf);
-  } else if (!egg_strcasecmp(code, "elink")) {
+  } else if (!egg_strcasecmp(code, "elink")) {	/* we're connecting to THEM (old) */
     int snum = findanysnum(dcc[idx].sock);
 
     /* putlog(LOG_DEBUG, "*", "Got elink: %s %s", code, buf); */
@@ -360,6 +366,32 @@ dcc_bot_new(int idx, char *buf, int x)
       dprintf(idx, "elinkdone\n");
       putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
       free(tmp);
+    }
+  } else if (!egg_strcasecmp(code, "neg?")) {	/* we're connecting to THEM */
+    int snum = findanysnum(dcc[idx].sock);
+
+    if (snum >= 0) {
+      int i = 0, type = 0;
+      char *tmp = strdup(buf), *tmpp = tmp, *p = NULL;
+
+      while ((p = strchr(buf, ' ')) && !type) {
+        *p = 0;
+
+        /* pick the first (lowest num) one that we share */
+        for (i = 0; enclink[i].name; i++) {
+          if (atoi(tmp) == enclink[i].type) {
+            type = i;
+            break;
+          }
+        }
+        tmp = p++;
+      }
+      free(tmpp);
+
+      sdprintf("Choosing '%s' for link", enclink[type].name);
+      dprintf(idx, "neg %d\n", type);
+      socklist[snum].enctype = type;
+      (enclink[type].func) (idx, TO);	
     }
   } else if (!egg_strcasecmp(code, "error")) {
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
@@ -902,10 +934,16 @@ dcc_chat_pass(int idx, char *buf, int atr)
 {
   if (!atr)
     return;
+
+  char *pass = NULL;
+
   strip_telnet(dcc[idx].sock, buf, &atr);
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
+
+  pass = newsplit(&buf);
+
   if (dcc[idx].user->bot) {
-    if (!egg_strcasecmp(buf, "elinkdone")) {
+    if (!egg_strcasecmp(pass, "elinkdone")) {		/* we're the hub */
       free(dcc[idx].u.chat);
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
@@ -915,6 +953,29 @@ dcc_chat_pass(int idx, char *buf, int atr)
 #ifdef HUB
       send_timesync(idx);
 #endif /* HUB */
+    } else if (!egg_strcasecmp(pass, "neg")) {
+      int snum = findanysnum(dcc[idx].sock);
+
+      if (snum >= 0) {
+        int type = atoi(newsplit(&buf)), i = 0;
+        bool found = 0;
+
+        /* verify we have that type and then initiate it */
+        for (i = 0; enclink[i].name; i++) {
+          if (type == enclink[i].type) {
+            found = 1;
+            break;
+          }
+        }
+        if (!found) {
+          putlog(LOG_WARN, "*", "%s attempted to link with an invalid encryption.", dcc[idx].nick);
+          killsock(dcc[idx].sock);
+          lostdcc(idx);
+          return;
+        }
+        socklist[snum].enctype = type;
+        (enclink[i].func) (idx, FROM);
+      }
     } else {
       /* Invalid password/digest on hub */
       putlog(LOG_WARN, "*", "%s failed encrypted link handshake.", dcc[idx].nick);
@@ -923,7 +984,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
     }
     return;
   }
-  if (u_pass_match(dcc[idx].user, buf)) {
+  if (u_pass_match(dcc[idx].user, pass)) {
     if (dccauth) { 
       char randstr[51] = "";
 
@@ -933,7 +994,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       dcc[idx].timeval = now;
       dprintf(idx, "-Auth %s %s\n", randstr, conf.bot->nick);
     } else {
-      dcc_chat_secpass(idx, buf, atr);
+      dcc_chat_secpass(idx, pass, atr);
     }
   } else {
     dprintf(idx, "%s\n", response(RES_BADUSERPASS));
@@ -1576,16 +1637,11 @@ static void gen_linkkey_hub(int idx)
   if (snum >= 0) {
     char initkey[33] = "", *tmp2 = NULL;
     char tmp[256] = "";
-    unsigned char buf[SHA_HASH_LENGTH + 1] = "";
-    SHA_CTX ctx;
 
     /* initkey-gen hub */
     /* bdhash port mynick conf.bot->nick */
     sprintf(tmp, "%s@%4x@%s@%s", settings.bdhash, htons(dcc[idx].port), conf.bot->nick, dcc[idx].nick);
-    SHA1_Init(&ctx);
-    SHA1_Update(&ctx, tmp, strlen(tmp));
-    SHA1_Final(buf, &ctx);
-    strncpyz(socklist[snum].okey, btoh(buf, SHA_DIGEST_LENGTH), sizeof(socklist[snum].okey));
+    strncpyz(socklist[snum].okey, SHA1(tmp), sizeof(socklist[snum].okey));
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(socklist[snum].okey), socklist[snum].okey);
 
@@ -1647,10 +1703,18 @@ dcc_telnet_pass(int idx, int atr)
   if (glob_bot(fr)) {
     /* FIXME: remove after 1.2.2 */
     if (!dcc[idx].newbot) {
+sdprintf("OLD LEAF");
       gen_linkkey_hub(idx);
     } else {
+sdprintf("NEW LEAF");
       /* negotiate a new linking scheme */
-
+      int i = 0;
+      char buf[1024] = "";
+  
+      for (i = 0; enclink[i].name; i++)
+        sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
+sdprintf("SENDING %s", buf);
+      dprintf(idx, "neg? %s\n", buf);
     }
   } else
     /* Turn off remote telnet echo (send IAC WILL ECHO). */
