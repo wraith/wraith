@@ -217,8 +217,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 void
 irc_log(struct chanset_t *chan, const char *format, ...)
 {
-  return;		/* dont spam this to 1.1.8 nets */
-#ifdef NEW
+#ifdef NOTHANKS
   char va_out[LOGLINEMAX + 1];
   va_list va;
 
@@ -226,16 +225,16 @@ irc_log(struct chanset_t *chan, const char *format, ...)
   egg_vsnprintf(va_out, LOGLINEMAX, format, va);
   va_end(va);
 
-//  if (egg_strcasecmp(chan->dname, TO))
-//    dprintf(DP_HELP, "PRIVMSG %s :[%s] %s\n", TO, chan->dname, va_out);
+  if ((chan && egg_strcasecmp(chan->dname, "#!obs")) || !chan)
+    dprintf(DP_HELP, "PRIVMSG #!obs :[%s] %s\n", chan ? chan->dname : "" , va_out);
 
 //  chanout_but(-1, 1, "[%s] %s\n", chan->dname, va_out);
 //  botnet_send_chan(-1, conf.bot->nick, chan->dname, 1, va_out);
-   if (chan)
+/*   if (chan)
      putlog(LOG_PUBLIC, "*", "[%s] %s", chan->dname, va_out);
    else
      putlog(LOG_PUBLIC, "*", "%s", va_out);
-
+*/
 //  sdprintf("%s", va_out);
-#endif
+#endif 
 }
