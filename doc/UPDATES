@@ -19,6 +19,7 @@ This is a summary of ChangeLog basically.
 * Fixed cmd_dns not displaying results.
 * Fixed dcctable list 'leak' (no shift, leaves gaps, now dcclist is shifted only if gap at end)
 * cmd_whois with no parameters now shows your own record.
+* Fixed a typo in cmd_slowjoin.
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -516,10 +516,13 @@ static void cmd_slowjoin(int idx, char *par)
   strcpy(buf, "+inactive ");
   if (par[0])
     strncat(buf, par, sizeof(buf));
-  if (channel_add(NULL, chname, buf) == ERROR) {
-    dprintf(idx, "Invalid channel.\n");
+  if (channel_add(buf2, chname, buf) == ERROR) {
+    dprintf(idx, "Invalid channel or channel options.\n");
+    if (buf2[0])
+      dprintf(idx, " %s\n", buf2);
     return;
   }
+  buf2[0] = 0;
 
   chan = findchan_by_dname(chname);
   if (!chan) {
@@ -985,7 +988,7 @@ static void pls_chan(int idx, char *par, char *bot)
   if (!chan && !findchan_by_dname(chname) && channel_add(result, chname, par) == ERROR) {
     dprintf(idx, "Invalid channel or channel options.\n");
     if (result[0])
-      dprintf(idx, "%s\n", result);
+      dprintf(idx, " %s\n", result);
   } else {
     if ((chan = findchan_by_dname(chname))) {
       if (!bot) {
