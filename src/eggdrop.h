@@ -18,7 +18,7 @@
 #  define SSL_INC
 # endif /* ! SSL_INC */
 # undef HAVE_SSL
-/* Disabled for now # define HAVE_SSL 1 */
+/* #define HAVE_SSL 1 */
 #endif /* HAVE_OPENSSL_SSL_H */
 
 

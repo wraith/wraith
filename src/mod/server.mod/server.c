@@ -1703,6 +1703,9 @@ static void dcc_chat_hostresolved(int i)
     killsock(dcc[i].sock);
     lostdcc(i);
   } else {
+#ifdef HAVE_SSL
+    ssl_link(dcc[i].sock, CONNECT_SSL);
+#endif /* HAVE_SSL */
     changeover_dcc(i, &DCC_CHAT_PASS, sizeof(struct chat_info));
     dcc[i].status = STAT_ECHO;
     get_user_flagrec(dcc[i].user, &fr, 0);
