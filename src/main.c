@@ -249,7 +249,7 @@ static void show_help()
   printf(format, "Option", "Description");
   printf(format, "------", "-----------");
   printf(format, STR("-B <botnick>"), STR("Starts the specified bot"));
-  printf(format, STR("-C"), STR("Config file menu system"));
+  printf(format, STR("-C"), STR("Config file editor [reads env: EDITOR]"));
   printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
   printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
   printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
@@ -259,9 +259,9 @@ static void show_help()
 */
   printf(format, "-h", "Display this help listing");
   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9"));
-  printf(format, STR("-n"), STR("Disables backgrounding first bot in conf"));
+  printf(format, STR("-n"), STR("Disables backgrounding bot (requires -B)"));
   printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
-  printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -n)"));
+  printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -nB)"));
   printf(format, STR("-u <binary>"), STR("Update binary, Automatically kill/respawn bots"));
   printf(format, STR("-U <binary>"), STR("Update binary"));
   printf(format, "-v", "Displays bot version");
