@@ -1,20 +1,6 @@
-dnl Eggdrop compile-time configuration file for src/mod/dns.mod
+dnl  EGG_CHECK_DNS()
 dnl
-
-dnl This file is based on the autoconf m4 macros. Special eggdrop
-dnl macros are used to optimise the size of the resulting configure
-dnl script `./configure'.  Run `../eggautoconf' to update that
-dnl script. You need to have the GNU autoconf package installed
-dnl though.
-
-
-dnl Instead of AC_INIT, we call EGG_INIT().
-sinclude(../eggmod.m4)
-EGG_INIT(coredns.c)
-
-
-AC_PROG_CC
-AC_CYGWIN
+AC_DEFUN(EGG_CHECK_DNS, [dnl
 
 dns_reslib_avail="true"
 AC_CHECK_FUNC(res_init, ,
@@ -95,7 +81,9 @@ configure: warning:
 EOF
   exit 1
 fi
+
 AC_SUBST(RESLIB)
 AC_SUBST(RESINCLUDE)
+])dnl
 
-AC_OUTPUT(Makefile)
+

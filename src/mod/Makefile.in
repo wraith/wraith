@@ -72,19 +72,6 @@ build_msg:
 	fi; \
 	cd $*.mod && $(MAKE_MOD) 'VPATH=$(MOD_UPDIR)$(srcdir)/$*.mod' 'srcdir=$(MOD_UPDIR)$(srcdir)/$*.mod' static;
 
-config:
-	@for i in $(mods); do \
-		if test -f $(srcdir)/$$i/configure; then \
-			modname=`echo $$i | sed -e 's/.mod//'`; \
-			echo ""; \
-			echo "Configuring module $${modname} ..."; \
-			echo ""; \
-			if test ! -d $$i; then mkdir $$i; fi; \
-			(cd $$i && $(MOD_UPDIR)$(srcdir)/$$i/configure $(egg_ac_parameters) --silent --cache-file=../../../config.cache --srcdir=$(MOD_UPDIR)$(top_srcdir)/src/mod/$$i); \
-		fi; \
-	done; \
-	echo ""
-
 clean:
 	@rm -f *.o *~
 	@for i in *.mod; do \

@@ -31,7 +31,7 @@ STRIP = @STRIP@
 
 # stuff for Tcl
 XREQS = @TCL_REQS@
-XLIBS = @TCL_LIBS@ @LIBS@ @ZLIB@ @SSL@  -lresolv
+XLIBS = @TCL_LIBS@ @LIBS@ @ZLIB@ @SSL@ @RESLIB@
 TCLLIB = @TCLLIB@
 TCLLIBFN = @TCLLIBFN@
 
@@ -176,7 +176,6 @@ dostrings: stringfix
 	@misc/dostrings
 
 general: makesettings packconf salt help dostrings
-	+@cd src/mod && $(MAKE_CONFIG) config
 
 leaf:	general
 	@echo ""

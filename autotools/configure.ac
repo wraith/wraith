@@ -44,6 +44,7 @@ AC_CHECK_PROG(UNAME,uname,uname)
 
 # Test the os and set the module linking settings
 EGG_CHECK_OS
+EGG_CHECK_DNS
 
 #checkpoint
 AC_CACHE_SAVE 
@@ -201,5 +202,5 @@ DO_PACK_CFG
 EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
-AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/mod/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/mod/dns.mod/Makefile])
 AC_OUTPUT

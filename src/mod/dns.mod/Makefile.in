@@ -1,6 +1,5 @@
 # Makefile for src/mod/dns.mod/
 
-RESLIB = @RESLIB@
 RESINCLUDE = @RESINCLUDE@
 srcdir = .
 depcomp = /bin/sh ../../../autotools/depcomp
