@@ -1,5 +1,8 @@
 This is a summary of ChangeLog basically.
 
+1.1.5
+1.Fixed a small bug in update which only affected hubs.
+
 1.1.4
 1.User flag +x is now correctly recognized in more places.
 2.Auth system was broken similar to the channel ctcp bug.
