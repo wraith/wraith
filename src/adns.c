@@ -759,8 +759,7 @@ int egg_dns_cancel(int id, int issue_callback)
 	if (issue_callback) q->callback(q->id, q->client_data, q->query, NULL);
 	if (q->ip)
 		free(q->ip);
-	if (q->query)
-		free(q->query);
+	free(q->query);
 	free(q);
 	return(0);
 }
