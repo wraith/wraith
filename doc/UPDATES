@@ -24,6 +24,7 @@ This is a summary of ChangeLog basically.
 * Fixed dns queries returning invalid (compressed) results for reverses.
 * Fixed some other relay segfaults and stack smashings (one from eggdrop).
 * Fixed ipv6 bots connecting over ipv4.
+* Fixed getin system continuing to parse for bans and assorted requests when bot wasn't even opped.
 
 1.2
 * No longer displaying SALTS on ./bin -v

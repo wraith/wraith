@@ -340,9 +340,10 @@ getin_request(char *botnick, char *code, char *par)
     p3 = newsplit(&p);
 
     if (strchr(p2, 'l')) {
-      if (!me_op(chan))
+      if (!me_op(chan)) {
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
-      else {
+        return;
+      } else {
         int lim = chan->channel.members + 5, curlim;
 
         if (!*p)
@@ -423,9 +424,10 @@ getin_request(char *botnick, char *code, char *par)
       free(tmp);
     }
     if (strchr(p2, 'i')) {
-      if (!me_op(chan))
+      if (!me_op(chan)) {
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
-      else {
+        return;
+      } else {
         sendi = 1;
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Invited", botnick, nick, chan->dname);
       }
