@@ -1453,7 +1453,7 @@ static void
 start_sending_users(int idx)
 {
   char share_file[1024] = "";
-  int i = 1;
+  int i = 1, j = -1;
 
   egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%li", tempdir, dcc[idx].nick, now);
 
@@ -1469,7 +1469,7 @@ start_sending_users(int idx)
   }
 */
 
-  if ((i = raw_dcc_send(share_file, "*users", "(users)", share_file)) > 0) {
+  if ((i = raw_dcc_send(share_file, "*users", "(users)", share_file, &j)) > 0) {
     unlink(share_file);
     dprintf(idx, "s e %s\n", USERF_CANTSEND);
     putlog(LOG_BOTS, "@", "%s -- can't send userfile",
@@ -1480,9 +1480,8 @@ start_sending_users(int idx)
   } else {
     updatebot(-1, dcc[idx].nick, '+', 0, 0, NULL);
     dcc[idx].status |= STAT_SENDING;
-    i = dcc_total - 1;
-    strcpy(dcc[i].host, dcc[idx].nick); /* Store bot's nick */
-    dprintf(idx, "s us %lu %d %lu\n", iptolong(getmyip()), dcc[i].port, dcc[i].u.xfer->length);
+    strcpy(dcc[j].host, dcc[idx].nick); /* Store bot's nick */
+    dprintf(idx, "s us %lu %d %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
 
     /* Unlink the file. We don't really care whether this causes problems
      * for NFS setups. It's not worth the trouble.

@@ -287,7 +287,7 @@ static void start_sending_binary(int idx)
   /* module_entry *me; */
 #ifdef HUB
   char update_file[51] = "", update_fpath[DIRMAX] = "", tmpFile[1024] = "", *sysname = NULL;
-  int i = 1;
+  int i = 1, j = -1;
 
   dcc[idx].status &= ~(STAT_OFFEREDU | STAT_SENDINGU);
 
@@ -340,7 +340,7 @@ static void start_sending_binary(int idx)
   end:;
 */
 
-  if ((i = raw_dcc_send(tmpFile, "*binary", "(binary)", tmpFile)) > 0) {
+  if ((i = raw_dcc_send(tmpFile, "*binary", "(binary)", tmpFile, &j)) > 0) {
     putlog(LOG_BOTS, "*", "%s -- can't send new binary",
 	   i == DCCSEND_FULL   ? "NO MORE DCC CONNECTIONS" :
 	   i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :
@@ -349,9 +349,8 @@ static void start_sending_binary(int idx)
     dcc[idx].status &= ~(STAT_SENDINGU);
   } else {
     dcc[idx].status |= STAT_SENDINGU;
-    i = dcc_total - 1;
-    strcpy(dcc[i].host, dcc[idx].nick);		/* Store bot's nick */
-    dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[i].port, dcc[i].u.xfer->length);
+    strcpy(dcc[j].host, dcc[idx].nick);		/* Store bot's nick */
+    dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
   }
 #endif /* HUB */
 }

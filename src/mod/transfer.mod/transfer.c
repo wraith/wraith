@@ -197,7 +197,7 @@ static void send_next_file(char *to)
     s = (char *) realloc(s, strlen(thisfile->dir) + strlen(thisfile->file) + 2);
     sprintf(s, "%s%s%s", thisfile->dir, thisfile->dir[0] ? "/" : "", thisfile->file);
   }
-  x = raw_dcc_send(s1, thisfile->to, thisfile->nick, s);
+  x = raw_dcc_send(s1, thisfile->to, thisfile->nick, s, NULL);
   if (x == DCCSEND_OK) {
     if (egg_strcasecmp(thisfile->to, thisfile->nick))
       dprintf(DP_HELP, TRANSFER_FILE_ARRIVE, thisfile->to,
@@ -1087,7 +1087,7 @@ static void dcc_get_pending(int idx, char *buf, int len)
  * Use raw_dcc_resend() and raw_dcc_send() instead of this function.
  */
 
-static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir, int resend)
+static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir, int resend, int *idx)
 {
   int zz = -1;
   int i;
@@ -1163,6 +1163,9 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
   }
   if (buf)
     free(buf);
+
+  if (idx)
+    *idx = i;
   return DCCSEND_OK;
 }
 
@@ -1177,9 +1180,9 @@ static int raw_dcc_resend(char *filename, char *nick, char *from, char *dir)
 
 /* Starts a DCC_SEND connection.
  */
-int raw_dcc_send(char *filename, char *nick, char *from, char *dir)
+int raw_dcc_send(char *filename, char *nick, char *from, char *dir, int *idx)
 {
-  return raw_dcc_resend_send(filename, nick, from, dir, 0);
+  return raw_dcc_resend_send(filename, nick, from, dir, 0, idx);
 }
 #endif /* HUB */
 
