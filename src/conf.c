@@ -57,14 +57,15 @@ tellconf(conf_t * inconf)
              bot->net.v6,
              bot->pid);
   }
-  sdprintf("bot:\n");
-  if (inconf->bot && ((bot = inconf->bot)))
+  if (inconf->bot && ((bot = inconf->bot))) {
+    sdprintf("me:\n");
     sdprintf("%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d PID: %d\n",
              bot->nick,
              bot->net.ip ? bot->net.ip : "",
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
              bot->pid);
+  }
 }
 
 #ifdef LEAF
