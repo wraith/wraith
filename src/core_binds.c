@@ -13,9 +13,7 @@
 #include "users.h"
 #include "misc.h"
 #include "tclhash.h"
-#ifdef S_DCCPASS
 #include "cfg.h"
-#endif /* S_DCCPASS */
 
 extern cmd_t 		C_dcc[];
 
@@ -39,17 +37,13 @@ void core_binds_init()
 void check_bind_dcc(const char *cmd, int idx, const char *text)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  int x, hits;
-#ifdef S_DCCPASS
+  int x, hits, found = 0;
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
-  int found = 0;
   char *args = strdup(text);
-#endif
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
 
-#ifdef S_DCCPASS
   table = bind_table_lookup("dcc");
   for (entry = table->entries; entry && entry->next; entry = entry->next) {
     if (!egg_strcasecmp(cmd, entry->mask)) {
@@ -82,7 +76,6 @@ void check_bind_dcc(const char *cmd, int idx, const char *text)
       }
     }
   }
-#endif /* S_DCCPASS */
 
   x = check_bind_hits(BT_dcc, cmd, &fr, &hits, dcc[idx].user, idx, args);
 

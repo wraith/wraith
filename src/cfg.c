@@ -24,9 +24,7 @@
 #include "src/chanprog.h"
 #include "src/mod/server.mod/server.h"
 #endif /* LEAF */
-#ifdef S_DCCPASS
 #include "botnet.h"
-#endif /* S_DCCPASS */
 #include <net/if.h>
 
 #include "stat.h"
@@ -34,10 +32,7 @@
 int 				cfg_count = 0, cfg_noshare = 0;
 struct cfg_entry 		**cfg = NULL;
 char 				cmdprefix = '+';	/* This is the prefix for msg/channel cmds */
-#ifdef S_DCCPASS
 struct cmd_pass 		*cmdpass = NULL;
-#endif /* S_DCCPASS */
-
 
 #ifdef HUB
 static void chanset_describe(struct cfg_entry * entry, int idx) {
@@ -869,7 +864,6 @@ void init_config()
 #endif /* S_AUTOLOCK */
 }
 
-#ifdef S_DCCPASS
 int check_cmd_pass(const char *cmd, char *pass)
 {
   struct cmd_pass *cp = NULL;
@@ -937,7 +931,6 @@ void set_cmd_pass(char *ln, int shareit)
       botnet_send_cmdpass(-1, cp->name, cp->pass);
   }
 }
-#endif /* S_DCCPAS */
 
 void userfile_cfg_line(char *ln)
 {

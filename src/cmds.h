@@ -20,14 +20,11 @@ typedef struct {
   Function func;
 } botcmd_t;
 
-#ifdef S_DCCPASS
 typedef struct cmd_pass {
   struct cmd_pass *next;
   char *name;
   char pass[25];
 } cmd_pass_t;
-#endif
-
 
 extern mycmds 		cmdlist[]; 
 extern int		cmdi;

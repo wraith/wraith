@@ -36,9 +36,7 @@ int partynick(char *, int, char *);
 int partyidle(char *, char *);
 void partysetidle(char *, int, int);
 void partyaway(char *, int, char *);
-#ifdef S_DCCPASS
 void botnet_send_cmdpass(int, char *, char *);
-#endif /* S_DCCPASS */
 void zapfbot(int);
 void tandem_relay(int, char *, int);
 int getparty(char *, int);

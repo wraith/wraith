@@ -3,9 +3,7 @@
  *
  */
 
-#ifdef S_DCCPASS
 extern struct cmd_pass *cmdpass;
-#endif
 
 int force_expire = 0;
 
@@ -810,9 +808,7 @@ static void tell_invites(int idx, int show_inact, char *match)
 int write_config(FILE *f, int idx)
 {
   int i = 0;
-#ifdef S_DCCPASS
   struct cmd_pass *cp = NULL;
-#endif
   putlog(LOG_DEBUG, "@", "Writing config entries...");
   if (lfprintf(f, CONFIG_NAME " - -\n") == EOF) /* Daemus */
       return 0;
@@ -823,11 +819,9 @@ int write_config(FILE *f, int idx)
     }
   }
 
-#ifdef S_DCCPASS
   for (cp = cmdpass; cp; cp = cp->next)
     if (lfprintf(f, "- %s %s\n", cp->name, cp->pass) == EOF)
       return 0;
-#endif
 
   return 1;
 }

@@ -340,7 +340,6 @@
 #undef S_AUTOAWAY
 #undef S_AUTOLOCK
 #undef S_DCCAUTH
-#undef S_DCCPASS
 #undef S_GARBLESTRINGS
 #undef S_MESSUPTERM
 #undef S_MSGCMDS

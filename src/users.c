@@ -743,11 +743,9 @@ int readuserfile(const char *file, struct userrec **ret)
 	    else if (lasthand[0] == '*') {
 	      if (lasthand[1] == IGNORE_NAME[1])
 		restore_ignore(s);
-#ifdef S_DCCPASS
               else if (lasthand[1] == CONFIG_NAME[1]) {
                 set_cmd_pass(s, 1);
               }
-#endif /* S_DCCPASS */
 	      else
 		restore_chanban(NULL, s);
 	    } else if (lasthand[0])

@@ -414,7 +414,6 @@ static void cmd_botconfig(struct userrec *u, int idx, char *par)
     dprintf(idx, "  %s: (not set)\n", cfgent->name);
 }
 
-#ifdef S_DCCPASS
 static void cmd_cmdpass(struct userrec *u, int idx, char *par)
 {
   bind_entry_t *entry = NULL;
@@ -481,7 +480,6 @@ static void cmd_cmdpass(struct userrec *u, int idx, char *par)
   write_userfile(idx);
 #endif /* HUB */
 }
-#endif /* S_DCCPASS */
 
 static void cmd_lagged(struct userrec *u, int idx, char *par)
 {
@@ -4244,9 +4242,7 @@ cmd_t C_dcc[] =
 /*  {"chnick",		"m",	(Function) cmd_chhandle,	NULL}, */
   {"chpass",		"m",	(Function) cmd_chpass,		NULL},
   {"chsecpass",		"n",	(Function) cmd_chsecpass,	NULL},
-#ifdef S_DCCPASS
   {"cmdpass",           "a",    (Function) cmd_cmdpass,         NULL},
-#endif /* S_DCCPASS */
 #endif /* HUB */
   {"color",		"",     (Function) cmd_color,           NULL},
   {"comment",		"m|m",	(Function) cmd_comment,		NULL},

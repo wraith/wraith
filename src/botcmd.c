@@ -119,7 +119,6 @@ static void bot_chan2(int idx, char *msg)
   }
 }
 
-#ifdef S_DCCPASS
 void bot_cmdpass(int idx, char *par)
 {
   char *p = NULL;
@@ -135,7 +134,6 @@ void bot_cmdpass(int idx, char *par)
   }
   set_cmd_pass(par, 0);
 }
-#endif /* S_DCCPASS */
 
 void bot_config(int idx, char *par)
 {
@@ -1175,9 +1173,7 @@ botcmd_t C_bot[] =
   {"c",			(Function) bot_chan2},
   {"cg",                (Function) bot_config},
   {"cgb",		(Function) bot_configbroad},
-#ifdef S_DCCPASS
   {"cp", 		(Function) bot_cmdpass},
-#endif
   {"ct",		(Function) bot_chat},
   {"e",			(Function) bot_error},
   {"el",		(Function) bot_endlink},

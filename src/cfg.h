@@ -43,13 +43,11 @@ void add_cfg(struct cfg_entry *);
 void got_config_share(int, char *, int);
 void userfile_cfg_line(char *);
 void trigger_cfg_changed();
-#ifdef S_DCCPASS
 int check_cmd_pass(const char *, char *);
 int has_cmd_pass(const char *);
 void set_cmd_pass(char *, int);
 
 extern struct cmd_pass            *cmdpass;
-#endif /* S_DCCPASS */
 
 extern char			cmdprefix;
 extern int			cfg_count, cfg_noshare;
