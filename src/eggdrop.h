@@ -282,6 +282,13 @@ typedef u_32bit_t dword;
 #define debug3(x,a1,a2,a3)	putlog(LOG_DEBUG,"*",x,a1,a2,a3)
 #define debug4(x,a1,a2,a3,a4)	putlog(LOG_DEBUG,"*",x,a1,a2,a3,a4)
 
+/* These apparently are unsafe without recasting. */
+#define egg_isdigit(x)  isdigit((int)  (unsigned char) (x))
+#define egg_isxdigit(x) isxdigit((int) (unsigned char) (x))
+#define egg_isascii(x)  isascii((int)  (unsigned char) (x))
+#define egg_isspace(x)  isspace((int)  (unsigned char) (x))
+#define egg_islower(x)  islower((int)  (unsigned char) (x))
+
 /***********************************************************************/
 
 /* It's used in so many places, let's put it here */

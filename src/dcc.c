@@ -807,14 +807,14 @@ static void strip_mirc_codes(int flags, char *text)
       break;
     case 3:			/* mIRC colors? */
       if (flags & STRIP_COLOR) {
-	if (isdigit(text[1])) {	/* Is the first char a number? */
+	if (egg_isdigit(text[1])) {	/* Is the first char a number? */
 	  text += 2;		/* Skip over the ^C and the first digit */
-	  if (isdigit(*text))
+	  if (egg_isdigit(*text))
 	    text++;		/* Is this a double digit number? */
 	  if (*text == ',') {	/* Do we have a background color next? */
-	    if (isdigit(text[1]))
+	    if (egg_isdigit(text[1]))
 	      text += 2;	/* Skip over the first background digit */
-	    if (isdigit(*text))
+	    if (egg_isdigit(*text))
 	      text++;		/* Is it a double digit? */
 	  }
 	} else
@@ -845,7 +845,7 @@ static void strip_mirc_codes(int flags, char *text)
 	text++;
 	if (*text == '[') {
 	  text++;
-	  while ((*text == ';') || isdigit(*text))
+	  while ((*text == ';') || egg_isdigit(*text))
 	    text++;
 	  if (*text)
 	    text++;		/* also kill the following char */

@@ -200,7 +200,7 @@ static void dopr(char *buffer, size_t maxlen, const char *format,
       }
       break;
     case DP_S_MIN:
-      if (isdigit(ch)) {
+      if (egg_isdigit(ch)) {
 	min = 10 * min + char_to_int(ch);
 	ch = *format++;
       } else if (ch == '*') {
@@ -218,7 +218,7 @@ static void dopr(char *buffer, size_t maxlen, const char *format,
 	state = DP_S_MOD;
       break;
     case DP_S_MAX:
-      if (isdigit(ch)) {
+      if (egg_isdigit(ch)) {
 	if (max < 0)
 	  max = 0;
 	max = 10 * max + char_to_int(ch);

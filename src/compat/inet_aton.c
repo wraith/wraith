@@ -7,8 +7,9 @@
 #include "inet_aton.h"
 
 #ifndef HAVE_ISASCII
-/* Let all checks succeed if we don't have isascii(). */
-#  define isascii(x)	1
+#  define inet_isascii(x) 1 /* Let checks succeed if we don't have isascii(). */
+#else
+#  define inet_isascii(x) egg_isascii(x)
 #endif
 
 #ifndef HAVE_INET_ATON
@@ -104,7 +105,7 @@ egg_inet_aton(cp, addr)
 		 * Values are specified as for C:
 		 * 0x=hex, 0=octal, isdigit=decimal.
 		 */
-		if (!isdigit(c))
+		if (!egg_isdigit(c))
 			goto ret_0;
 		base = 10;
 		if (c == '0') {
@@ -116,12 +117,12 @@ egg_inet_aton(cp, addr)
 		}
 		val = 0;
 		for (;;) {
-			if (isascii(c) && isdigit(c)) {
+			if (inet_isascii(c) && egg_isdigit(c)) {
 				val = (val * base) + (c - '0');
 				c = *++cp;
-			} else if (base == 16 && isascii(c) && isxdigit(c)) {
+			} else if (base == 16 && inet_isascii(c) && egg_isxdigit(c)) {
 				val = (val << 4) |
-					(c + 10 - (islower(c) ? 'a' : 'A'));
+					(c + 10 - (egg_islower(c) ? 'a' : 'A'));
 				c = *++cp;
 			} else
 				break;
@@ -143,7 +144,7 @@ egg_inet_aton(cp, addr)
 	/*
 	 * Check for trailing characters.
 	 */
-	if (c != '\0' && (!isascii(c) || !isspace(c)))
+	if (c != '\0' && (!inet_isascii(c) || !egg_isspace(c)))
 		goto ret_0;
 	/*
 	 * Concoct the address according to
