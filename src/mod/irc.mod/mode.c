@@ -299,11 +299,13 @@ flush_mode(struct chanset_t *chan, int pri)
   }
   if (out[0]) {
     if (pri == QUICK) {
+/* floods too much
       char outbuf[201] = "";
 
       sprintf(outbuf, "MODE %s %s\r\n", chan->name, out);
       tputs(serv, outbuf, strlen(outbuf));
-      /* dprintf(DP_MODE, "MODE %s %s\n", chan->name, out); */
+*/
+      dprintf(DP_MODE, "MODE %s %s\n", chan->name, out);
     } else
       dprintf(DP_SERVER, "MODE %s %s\n", chan->name, out);
   }
