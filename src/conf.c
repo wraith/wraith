@@ -631,11 +631,11 @@ int writeconf(char *filename, FILE *stream, int bits) {
 
   comment("");
 
-#endif /* CYGWIN_HACKS */
   comment("# '|' means OR, [] means the enclosed is optional");
   comment("# A '+' in front of HOST means the HOST is ipv6");
   comment("# A '/' in front of BOT will disable that bot.");
   comment("#[/]BOT IP|. [+]HOST|. [IPV6-IP]");
+#endif /* CYGWIN_HACKS */
   for (bot = conffile.bots; bot && bot->nick; bot = bot->next) {
     my_write(f, "%s %s %s%s %s\n", bot->nick,
                                    bot->ip ? bot->ip : ".",
