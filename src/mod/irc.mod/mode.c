@@ -953,30 +953,30 @@ gotmode(char *from, char *msg)
         /* check for mdop */
         if (me_op(chan)) {
           if (role && (!u || (u && !u->bot)) && m && !chan_sentkick(m)) {
-          if (deops >= 3) {
-                  m->flags |= SENTKICK;
-                  sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MASSDEOP));
-                  tputs(serv, tmp, strlen(tmp));
-                  if (u) {
-                    sprintf(tmp, "Mass deop on %s by %s", chan->dname, nick);
-                    deflag_user(u, DEFLAG_MDOP, tmp, chan);
-                  }
-                }
-
-          /* check for mop */
-          if (ops >= 3) {
-            if (channel_nomop(chan)) {
-                    m->flags |= SENTKICK;
-                    sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MANUALOP));
-                    tputs(serv, tmp, strlen(tmp));
-                    if (u) {
-                      sprintf(tmp, "Mass op on %s by %s", chan->dname, nick);
-                      deflag_user(u, DEFLAG_MOP, tmp, chan);
-                    }
-                }
+            if (deops >= 3) {
+              m->flags |= SENTKICK;
+              sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MASSDEOP));
+              tputs(serv, tmp, strlen(tmp));
+              if (u) {
+                sprintf(tmp, "Mass deop on %s by %s", chan->dname, nick);
+                deflag_user(u, DEFLAG_MDOP, tmp, chan);
               }
-              enforce_bitch(chan);      /* deop quick! */
-}
+            }
+
+            /* check for mop */
+            if (ops >= 3) {
+              if (channel_nomop(chan)) {
+                m->flags |= SENTKICK;
+                sprintf(tmp, "KICK %s %s :%s%s\n", chan->name, nick, kickprefix, response(RES_MANUALOP));
+                tputs(serv, tmp, strlen(tmp));
+                if (u) {
+                  sprintf(tmp, "Mass op on %s by %s", chan->dname, nick);
+                  deflag_user(u, DEFLAG_MOP, tmp, chan);
+                }
+                enforce_bitch(chan);        /* deop quick! */
+              }
+            }
+          }
           if (ops && u) {
             if (u->bot && !channel_fastop(chan) && !channel_take(chan)) {
               int isbadop = 0;
