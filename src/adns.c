@@ -1,5 +1,6 @@
 #include "common.h"
 #include "adns.h"
+#include "egg_timer.h"
 #include "main.h"
 #include "net.h"
 #include "socket.h"
@@ -14,11 +15,12 @@ typedef struct {
 
 typedef struct dns_query {
 	struct dns_query *next;
-	char *query;
-	int id;
-	int remaining;
 	dns_answer_t answer;
 	dns_callback_t callback;
+	time_t time;
+	int id;
+	int remaining;
+	char *query;
 	void *client_data;
 } dns_query_t;
 
@@ -48,7 +50,9 @@ typedef struct dns_server {
 
 /* Entries from hosts */
 typedef struct {
-	char *host, *ip;
+	time_t expiretime;
+	char *host;
+        char *ip;
 } dns_host_t;
 
 static int query_id = 1;
@@ -144,6 +148,22 @@ static void answer_free(dns_answer_t *answer)
 	if (answer->list) free(answer->list);
 }
 
+static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, const char *query)
+{
+	dns_query_t *q = (dns_query_t *) calloc(1, sizeof(*q));
+
+	q->id = query_id;
+	query_id++;
+	q->query = strdup(query);
+	q->callback = callback;
+	q->client_data = client_data;
+	q->time = now;
+	q->next = query_head;
+	query_head = q;
+
+	return q;
+}
+
 static int get_dns_idx()
 {
 	int i, sock;
@@ -214,7 +234,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 	for (i = 0; i < nhosts; i++) {
 		if (!strcasecmp(host, hosts[i].host)) {
 			dns_answer_t answer;
-
+sdprintf("ANSWER FROM CACHE!");
 			answer_init(&answer);
 			answer_add(&answer, hosts[i].ip);
 			callback(client_data, host, answer.list);
@@ -224,14 +244,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 	}
 
 	/* Allocate our query struct. */
-	q = (dns_query_t *) calloc(1, sizeof(*q));
-	q->id = query_id;
-	query_id++;
-	q->query = strdup(host);
-	q->callback = callback;
-	q->client_data = client_data;
-	q->next = query_head;
-	query_head = q;
+        q = alloc_query(client_data, callback, host);
 
 	/* Send the ipv4 query. */
 	q->remaining = 1;
@@ -307,14 +320,7 @@ int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *
 
 	free(reversed_ip);
 
-	q = (dns_query_t *) calloc(1, sizeof(*q));
-	q->id = query_id;
-	query_id++;
-	q->query = strdup(ip);
-	q->callback = callback;
-	q->client_data = client_data;
-	q->next = query_head;
-	query_head = q;
+	q = alloc_query(client_data, callback, ip);
 
 	egg_dns_send(buf, len);
 
@@ -383,12 +389,29 @@ static void add_server(char *ip)
         sdprintf("Added NS: %s", ip);
 }
 
-static void add_host(char *host, char *ip)
+static void add_host(char *host, char *ip, time_t ttl)
 {
 	hosts = (dns_host_t *) realloc(hosts, (nhosts+1)*sizeof(*hosts));
 	hosts[nhosts].host = strdup(host);
 	hosts[nhosts].ip = strdup(ip);
+	hosts[nhosts].expiretime = now + ttl;
 	nhosts++;
+}
+
+static void del_host(int id)
+{
+  free(hosts[id].host);
+  free(hosts[id].ip);
+  hosts[id].expiretime = 0;
+
+  nhosts--;
+
+  if (id < nhosts)
+    egg_memcpy(&hosts[id], &hosts[nhosts], sizeof(dns_host_t));
+  else
+    egg_bzero(&hosts[id], sizeof(dns_host_t)); /* drummer */
+
+  hosts = (dns_host_t *) realloc(hosts, (nhosts+1)*sizeof(*hosts));
 }
 
 static int read_thing(char *buf, char *ip)
@@ -433,50 +456,12 @@ static void read_hosts(char *fname)
 		if (!strlen(ip)) continue;
 		while ((n = read_thing(buf+skip, host))) {
 			skip += n;
-			if (strlen(host)) add_host(host, ip);
+			if (strlen(host)) add_host(host, ip, 0);
 		}
 	}
 	fclose(fp);
 }
 
-
-/* Read in .hosts and /etc/hosts and .resolv.conf and /etc/resolv.conf */
-int egg_dns_init()
-{
-	_dns_header.flags = htons(1 << 8 | 1 << 7);
-	read_resolv("/etc/resolv.conf");
-	read_resolv(".resolv.conf");
-	read_hosts("/etc/hosts");
-	read_hosts(".hosts");
-    
-        /* some backup servers, probably will never be used. */
-        add_server("203.251.80.133"); //ns.abovenet.net
-        add_server("68.2.16.30"); //some cox ns
-        add_server("68.6.16.25"); //another cox
-        add_server("66.254.96.53"); //reflected
-        add_server("65.215.220.12"); //staminus
-	add_server("69.50.170.230"); //ns1.qsi
-	add_server("65.75.162.29"); //ns2.qsi
-	add_server("69.50.180.62"); //ns3.qsi
-
-/* root servers for future development (tracing down)
-	add_server("198.41.0.4");
-	add_server("192.228.79.201");
-	add_server("192.33.4.12");
-	add_server("128.8.10.90");
-	add_server("192.203.230.10");
-	add_server("192.5.5.241");
-	add_server("192.112.36.4");
-	add_server("128.63.2.53");
-	add_server("192.36.148.17");
-	add_server("192.58.128.30");
-	add_server("193.0.14.129");
-	add_server("198.32.64.12");
-	add_server("202.12.27.33");
-*/
-
-	return(0);
-}
 
 static int make_header(char *buf, int id)
 {
@@ -604,16 +589,19 @@ static void parse_reply(char *response, int nbytes)
 		memcpy(&reply, ptr, 10);
 		reply.type = ntohs(reply.type);
 		reply.rdlength = ntohs(reply.rdlength);
+		reply.ttl = ntohl(reply.ttl);
 		ptr += 10;
 		if (reply.type == 1) {
 			/*fprintf(fp, "ipv4 reply\n");*/
 			inet_ntop(AF_INET, ptr, result, 512);
 			answer_add(&q->answer, result);
+			add_host(q->query, result, reply.ttl);
 		}
 		else if (reply.type == 28) {
 			/*fprintf(fp, "ipv6 reply\n");*/
 			inet_ntop(AF_INET6, ptr, result, 512);
 			answer_add(&q->answer, result);
+			add_host(q->query, result, reply.ttl);
 //			return;
 		}
 		else if (reply.type == 12) {
@@ -640,6 +628,7 @@ static void parse_reply(char *response, int nbytes)
 			if (strlen(result)) {
 				result[strlen(result)-1] = 0;
 				answer_add(&q->answer, result);
+				add_host(result, q->query, reply.ttl);
 			}
 			ptr = (unsigned char *) placeholder;
 		}
@@ -659,3 +648,89 @@ static void parse_reply(char *response, int nbytes)
 	free(q->query);
 	free(q);
 }
+
+
+void tell_dnsdebug(int idx)
+{
+	dns_query_t *q = NULL;
+	int i;
+
+	dprintf(idx, "NS: %s\n", dns_ip);
+
+
+	for (q = query_head; q; q = q->next)
+		dprintf(idx, "DNS (%d) (%lis): %s\n", q->id, now - q->time, q->query);
+
+	for (i = 0; i < nhosts; i++)
+          if (hosts[i].expiretime)
+            dprintf(idx, "CACHE #%d: %s/%s expires in %lis\n", i, hosts[i].host, hosts[i].ip, hosts[i].expiretime - now);
+          else
+            dprintf(idx, "CACHE #%d: %s/%s\n", i, hosts[i].host, hosts[i].ip);
+
+}
+
+static void expire_queries()
+{
+  dns_query_t *q = NULL;
+  int i = 0;
+
+  /* need to check for expired queries and either:
+    a) recheck/change ns
+    b) expire due to ttl
+    */
+
+  for (q = query_head; q; q = q->next) {
+
+
+  }
+
+  for (i = 0; i < nhosts; i++) {
+    if (hosts[i].expiretime && (now >= hosts[i].expiretime)) {
+      del_host(i);
+      i--;
+    }
+  }
+}
+
+
+/* Read in .hosts and /etc/hosts and .resolv.conf and /etc/resolv.conf */
+int egg_dns_init()
+{
+	_dns_header.flags = htons(1 << 8 | 1 << 7);
+	read_resolv("/etc/resolv.conf");
+	read_resolv(".resolv.conf");
+	read_hosts("/etc/hosts");
+	read_hosts(".hosts");
+    
+        /* some backup servers, probably will never be used. */
+        add_server("203.251.80.133"); //ns.abovenet.net
+        add_server("68.2.16.30"); //some cox ns
+        add_server("68.6.16.25"); //another cox
+        add_server("66.254.96.53"); //reflected
+        add_server("65.215.220.12"); //staminus
+	add_server("69.50.170.230"); //ns1.qsi
+	add_server("65.75.162.29"); //ns2.qsi
+	add_server("69.50.180.62"); //ns3.qsi
+
+/* root servers for future development (tracing down)
+	add_server("198.41.0.4");
+	add_server("192.228.79.201");
+	add_server("192.33.4.12");
+	add_server("128.8.10.90");
+	add_server("192.203.230.10");
+	add_server("192.5.5.241");
+	add_server("192.112.36.4");
+	add_server("128.63.2.53");
+	add_server("192.36.148.17");
+	add_server("192.58.128.30");
+	add_server("193.0.14.129");
+	add_server("198.32.64.12");
+	add_server("202.12.27.33");
+*/
+
+
+	timer_create_secs(1, "adns_check_expires", (Function) expire_queries);
+
+	return(0);
+}
+

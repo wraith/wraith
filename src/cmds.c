@@ -2052,8 +2052,10 @@ static void cmd_debug(int idx, char *par)
     dprintf(idx, "Now: %li\n", now);
   if (!cmd || (cmd && !strcmp(cmd, "role")))
     dprintf(idx, "Role: %d\n", role);
-  if (!cmd || (cmd &&!strcmp(cmd, "net")))
+  if (!cmd || (cmd && !strcmp(cmd, "net")))
     tell_netdebug(idx);
+  if (!cmd || (cmd && !strcmp(cmd, "dns")))
+    tell_dnsdebug(idx);
 #ifndef CYGWIN_HACKS
   if (!cmd || (cmd &&!strcmp(cmd, "stackdump")))
     stackdump(0);
