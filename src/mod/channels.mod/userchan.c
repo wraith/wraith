@@ -246,9 +246,9 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
       if (mask) {
 	/* Distribute chan bans differently */
 	if (c)
-	  shareout("-%s %s %s\n", type == 'b' ? "bc" : type == 'e' ? "ec" : "invc", c->dname, mask);
+          shareout("-mc %c %s %s\n", type, c->dname, mask);
 	else
-	  shareout("-%s %s\n", type == 'b' ? "b" : type == 'e' ? "e" : "inv", mask);
+          shareout("-m %c %s\n", type, mask);
 	free(mask);
       }
     }
@@ -343,16 +343,14 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
 
     if (mask) {
       if (!chan)
-	shareout("+%s %s %lu %s%s %s %s\n",
-		 type == 'b' ? "b" : type == 'e' ? "e" : "inv",
-		 mask, expire_time - now,
+	shareout("+m %c %s %lu %s%s %s %s\n",
+                 type, mask, expire_time - now,
 		 (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p" : "-", from, note);
       else
-	shareout("+%s %s %lu %s %s%s %s %s\n",
-		 type == 'b' ? "bc" : type == 'e' ? "ec" : "invc",	
-		 mask, expire_time - now,
-		 chan->dname, (flags & MASKREC_STICKY) ? "s" : "",
+	shareout("+mc %c %s %lu %s %s%s %s %s\n",
+		 type, mask, expire_time - now, chan->dname, 
+                 (flags & MASKREC_STICKY) ? "s" : "",
 		 (flags & MASKREC_PERM) ? "p" : "-", from, note);
       free(mask);
     }

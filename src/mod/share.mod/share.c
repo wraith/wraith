@@ -555,10 +555,13 @@ share_chchinfo(int idx, char *par)
   }
 }
 
-static void share_mns_mask(const char type, int idx, char *par)
+static void share_mns_mask(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
-    shareout_but(idx, "-%s %s\n", type == 'b' ? "b" : type == 'e' ? "e" : "inv", par);
+    char *types = newsplit(&par);
+    const char type = types[0];
+
+    shareout_but(idx, "-m %c %s\n", type, par);
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: cancel %s %s", dcc[idx].nick, type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite", par);
     str_unescape(par, '\\');
@@ -575,33 +578,19 @@ static void share_mns_mask(const char type, int idx, char *par)
   }
 }
 
-static void share_mns_ban(int idx, char *par)
-{
-  share_mns_mask('b', idx, par);
-}
-
-static void
-share_mns_exempt(int idx, char *par)
-{
-  share_mns_mask('e', idx, par);
-}
-
-static void
-share_mns_invite(int idx, char *par)
-{
-  share_mns_mask('I', idx, par);
-}
-
-static void share_mns_maskchan(const char type, int idx, char *par)
+static void share_mns_maskchan(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
+    char *types = newsplit(&par);
+    const char type = types[0];
+
     char *chname = NULL;
     struct chanset_t *chan = NULL;
     int value = 0;
 
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(idx, "-%s %s %s\n", chname, type == 'b' ? "bc" : type == 'e' ? "ec" : "invc", par);
+    shareout_but(idx, "-mc %c %s %s\n", type, chname, par);
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: cancel %s %s on %s", dcc[idx].nick, 
                             type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite", par, chname);
@@ -614,31 +603,19 @@ static void share_mns_maskchan(const char type, int idx, char *par)
   }
 }
 
-static void share_mns_banchan(int idx, char *par)
-{
-  share_mns_maskchan('b', idx, par);
-}
-
-static void share_mns_exemptchan(int idx, char *par)
-{
-  share_mns_maskchan('e', idx, par);
-}
-
-static void share_mns_invitechan(int idx, char *par)
-{
-  share_mns_maskchan('I', idx, par);
-}
-
-static void share_pls_mask(const char type, int idx, char *par)
+static void share_pls_mask(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
+    char *types = newsplit(&par);
+    const char type = types[0];
+
     const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
     time_t expire_time;
     char *mask = NULL, *tm = NULL, *from = NULL;
     int flags = 0;
     bool stick = 0;
 
-    shareout_but(idx, "+%s %s\n", type == 'b' ? "b" : type == 'e' ? "e" : "inv", par);
+    shareout_but(idx, "+m %c %s\n", type, par);
     noshare = 1;
     mask = newsplit(&par);
     str_unescape(mask, '\\');
@@ -669,24 +646,12 @@ static void share_pls_mask(const char type, int idx, char *par)
   }
 }
 
-static void share_pls_ban(int idx, char *par)
-{
-  share_pls_mask('b', idx, par);
-}
-
-static void share_pls_exempt(int idx, char *par)
-{
-  share_pls_mask('e', idx, par);
-}
-
-static void share_pls_invite(int idx, char *par)
-{
-  share_pls_mask('I', idx, par);
-}
-
-static void share_pls_maskchan(const char type, int idx, char *par)
+static void share_pls_maskchan(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
+    char *types = newsplit(&par);
+    const char type = types[0];
+
     const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
     time_t expire_time;
     int flags = 0;
@@ -698,7 +663,7 @@ static void share_pls_maskchan(const char type, int idx, char *par)
     tm = newsplit(&par);
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(idx, "+%s %s %s %s %s\n", type == 'b' ? "bc" : type == 'e' ? "ec" : "invc", mask, tm, chname, par);
+    shareout_but(idx, "+mc %c %s %s %s %s\n", type, mask, tm, chname, par);
     str_unescape(mask, '\\');
     from = newsplit(&par);
     if (strchr(from, 's')) {
@@ -724,21 +689,6 @@ static void share_pls_maskchan(const char type, int idx, char *par)
       check_this_mask(chan, mask, stick);
     }
   }
-}
-
-static void share_pls_banchan(int idx, char *par)
-{
-  share_pls_maskchan('b', idx, par);
-}
-
-static void share_pls_exemptchan(int idx, char *par)
-{
-  share_pls_maskchan('e', idx, par);
-}
-
-static void share_pls_invitechan(int idx, char *par)
-{
-  share_pls_maskchan('I', idx, par);
 }
 
 static void
@@ -951,25 +901,17 @@ share_end(int idx, char *par)
 /* Note: these MUST be sorted. */
 static botcmd_t C_share[] = {
   {"!", share_endstartup, 0},
-  {"+b", share_pls_ban, 0},
-  {"+bc", share_pls_banchan, 0},
   {"+bh", share_pls_bothost, 0},
   {"+cr", share_pls_chrec, 0},
-  {"+e", share_pls_exempt, 0},
-  {"+ec", share_pls_exemptchan, 0},
   {"+h", share_pls_host, 0},
   {"+i", share_pls_ignore, 0},
-  {"+inv", share_pls_invite, 0},
-  {"+invc", share_pls_invitechan, 0},
-  {"-b", share_mns_ban, 0},
-  {"-bc", share_mns_banchan, 0},
+  {"+m", share_pls_mask, 0},
+  {"+mc", share_pls_maskchan, 0},
   {"-cr", share_mns_chrec, 0},
-  {"-e", share_mns_exempt, 0},
-  {"-ec", share_mns_exemptchan, 0},
   {"-h", share_mns_host, 0},
   {"-i", share_mns_ignore, 0},
-  {"-inv", share_mns_invite, 0},
-  {"-invc", share_mns_invitechan, 0},
+  {"-m", share_mns_mask, 0},
+  {"-mc", share_mns_maskchan, 0},
   {"a", share_chattr, 0},
   {"c", share_change, 0},
   {"chchinfo", share_chchinfo, 0},
