@@ -17,6 +17,7 @@ This is a summary of ChangeLog basically.
 14.Bots were not recognizing keys set in .chanset.
 15.cmd_pls_host now accepts multiple hosts.
 16.Fixed bots not joining right away when a +chan was made.
+17.New cmd: addline, see .help addline for more info.
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.

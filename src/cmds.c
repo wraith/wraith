@@ -589,6 +589,41 @@ static void cmd_about(struct userrec *u, int idx, char *par)
   dprintf(idx, STR(" * $utfbot$u by $bwarknite$b and $bloslinux$b\n"));
 }
 
+static void cmd_addline(struct userrec *user, int idx, char *par)
+{
+  struct userrec *u = NULL;
+  struct list_type *q = NULL;
+  char *hostbuf = NULL, *outbuf = NULL;
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: addline <user>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# addline %s", dcc[idx].nick, par);
+
+  u = get_user_by_handle(userlist, par);
+
+  if (!u || (u && !whois_access(user, u))) {
+    dprintf(idx, "No such user.\n");
+    return;
+  }
+
+  q = get_user(&USERENTRY_HOSTS, u);
+  
+  hostbuf = calloc(1, 1);
+  for (; q; q = q->next) {
+    hostbuf = realloc(hostbuf, strlen(hostbuf) + strlen(q->extra) + 2);
+    strcat(hostbuf, q->extra);
+    strcat(hostbuf, " ");
+  }
+  outbuf = calloc(1, strlen(hostbuf) + strlen(u->handle) + 20);
+  sprintf(outbuf, "Addline: +user %s %s", u->handle, hostbuf);
+  dumplots(idx, "", outbuf);
+  free(hostbuf);
+  free(outbuf);
+}
+
 static void cmd_away(struct userrec *u, int idx, char *par)
 {
   if (strlen(par) > 60)
@@ -4066,6 +4101,7 @@ cmd_t C_dcc[] =
   {"addlog",		"mo|o",	(Function) cmd_addlog,		NULL},
 /*  {"putlog",		"mo|o",	(Function) cmd_addlog,		NULL}, */
   {"about",		"",	(Function) cmd_about,		NULL},
+  {"addline",		"",	(Function) cmd_addline,		NULL},
   {"away",		"",	(Function) cmd_away,		NULL},
   {"back",		"",	(Function) cmd_back,		NULL},
 #ifdef HUB

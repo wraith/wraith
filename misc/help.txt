@@ -1,4 +1,3 @@
-
 ::+ban
 ###  %b+ban%b <hostmask> [channel] [%%<XdXhXm>] [comment]
    Adds a ban to the list of bans stored on the bot, with optional comment and
@@ -132,6 +131,12 @@ See also: +user%{+ai}, -bot%{-}%{+nai}, newleaf%{-}
    command in IRC.
  
 See also: console
+::addline
+###  %baddline%b <username>
+   Shows you a simple line for adding a user to another botnet with the
+   same hostmasks.
+ 
+See also: whois
 ::addlog
 ###  %baddlog%b <text>
    Adds your comment to the bot's logfile. Bot masters can go back later and
@@ -791,6 +796,11 @@ See also: down
    Display a dump of memory allocation information, assuming the bot was
    compiled with memory debugging. It's useless to anyone but developers
    trying to find memory leaks.
+::decrypt
+###  %decrypt%b <key> <string>
+   Decrypts the string using the specified key.
+ 
+See also: encrypt, randstring, md5, sha1
 :leaf:deluser
 ###  %bdeluser%b <nickname>
    deletes a user record for a user on the channel, using their
@@ -842,6 +852,11 @@ See also: bots
    just like everyone else will see it. If it's off, then it won't happen.
  
 See also: color, page, strip
+::encrypt
+###  %bencrypt%b <key> <string>
+   Encrypts the string using the specified key.
+ 
+See also: decrypt, randstring, md5, sha1
 ::exec:
 ###  %bexec%b <params>
    The bot will execute the specified program with each param specified,
@@ -1114,21 +1129,6 @@ See also: unlink, newleaf%{+a}, -bot%{-}
      .match *.edu 16 25
    This would show results 16 through 25 matching any users with a hostmask
    that ends with ".edu".
-::encrypt
-###  %bencrypt%b <key> <string>
-   Encrypts the string using the specified key.
-
-See also: decrypt, randstring, md5, sha1
-::decrypt
-###  %decrypt%b <key> <string>
-   Decrypts the string using the specified key.
-
-See also: encrypt, randstring, md5, sha1
-::sha1
-###  %bsha1%b <string>
-   Returns the SHA1 hash of the specified string.
-
-See also: randstring, md5, encrypt, decrypt
 ::md5
 ###  %bmd5%b <string>
    Returns the MD5 hash of the specified string.
@@ -1305,7 +1305,7 @@ See also: echo, color
 ::randstring
 ###  %brandstring%b <len>
    Displays a random string of length 'len' up to 300 chars.
-
+ 
 See also: md5, sha1, encrypt, decrypt
 ::relay
 ###  %brelay%b <bot>
@@ -1383,6 +1383,11 @@ See also: reload, backup
    bot is booted up.  after that, you can add servers with the
    %b'%djump'%b command.  the server list will indicate which server the
    bot is currently on.
+::sha1
+###  %bsha1%b <string>
+   Returns the SHA1 hash of the specified string.
+ 
+See also: randstring, md5, encrypt, decrypt
 ::simul
 ###  %bsimul%b <handle> <text>
    This allows you to simulate the specified handle typing the given text.
