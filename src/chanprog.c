@@ -652,13 +652,10 @@ void chanprog()
 
   /* test tempdir: it's vital */
   {
-    FILE *f;
+    FILE *f = NULL;
     char s[161];
     int fd;
 
-    /* possible file race condition solved by using a random string
-     * and the process id in the filename */
-    /* Let's not even dare to hope... use mkstemp() -dizz */
     sprintf(s, STR("%s.test-XXXXXX"), tempdir);
     if ((fd = mkstemp(s)) == -1 || (f = fdopen(fd, "w")) == NULL) {
       if (fd != -1) {
@@ -668,6 +665,7 @@ void chanprog()
       fatal(STR("Can't write to tempdir!"), 0);
     }
     unlink(s);
+    fclose(f);
   }
   reaffirm_owners();
 }
@@ -859,10 +857,10 @@ int isowner(char *name)
 
 int shouldjoin(struct chanset_t *chan)
 {
-/*  if (!strcmp(chan->dname, "#wraith"))
+/*  if (!strcmp(chan->dname, "#wtest2"))
     return 1;
   else
-    return 0;  */
+    return 0; */
 #ifdef G_BACKUP
   struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0, 0, 0 };
 

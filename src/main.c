@@ -1776,10 +1776,9 @@ Context;
   cache_hit = 0;
   if (!pid_file[0])
     egg_snprintf(pid_file, sizeof pid_file, "%s.pid.%s", tempdir, botnetnick);
-  f = fopen(pid_file, "r");
 
-  if ((localhub && !updating) || !localhub) { 
-    if (f != NULL) {
+  if ((localhub && !updating) || !localhub) {
+    if ((f = fopen(pid_file, "r")) != NULL) {
       fgets(s, 10, f);
       xx = atoi(s);
       kill(xx, SIGCHLD);
@@ -1788,6 +1787,7 @@ Context;
         bg_send_quit(BG_ABORT);
         exit(1);
       }
+      fclose(f);
     }
   }
 
@@ -1817,20 +1817,18 @@ Context;
 #endif /* CYGWIN_HACKS */
     xx = getpid();
     if (xx != 0) {
-      FILE *fp;
-
       /* Write pid to file */
       unlink(pid_file);
-      fp = fopen(pid_file, "w");
-      if (fp != NULL) {
-        fprintf(fp, "%u\n", xx);
-        if (fflush(fp)) {
+      if ((f = fopen(pid_file, "w")) != NULL) {
+        fprintf(f, "%u\n", xx);
+        if (fflush(f)) {
 	  /* Let the bot live since this doesn't appear to be a botchk */
 	  printf(EGG_NOWRITE, pid_file);
-	  fclose(fp);
 	  unlink(pid_file);
-        } else
- 	  fclose(fp);
+	  fclose(f);
+        } else {
+          fclose(f);
+        }
       } else
         printf(EGG_NOWRITE, pid_file);
 #ifdef CYGWIN_HACKS

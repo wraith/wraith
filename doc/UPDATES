@@ -23,6 +23,7 @@ This is a summary of ChangeLog basically.
 20.chanset #chan +/-inactive now requires global n|-
 21.Fixed some bugs in the readuserfile() function.
 22.cmd_mop didn't check if the bot was opped before sending +o lines.
+23.Fixed several file descriptors that weren't closed.
 
 1.0.13
 1.Fixed a fatal bug in console_gotshare()
