@@ -434,6 +434,7 @@ void tell_dcc(int idx)
 
   egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5ud %%-%us %%-40s %%s\n", nicklen);
 
+  dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
   for (i = 0; i < dcc_total; i++) {
     j = strlen(dcc[i].host);
     if (j > 40)
