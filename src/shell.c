@@ -698,7 +698,7 @@ int email(char *subject, char *msg, int who)
   if ((f = popen(open, "w"))) {
     if (sendmail) {
       fprintf(f, "To: %s\n", addrs);
-      fprintf(f, "From: %s@%s\n", conf.bot->nick ? conf.bot->nick : conf.username, un.nodename);
+      fprintf(f, "From: %s@%s\n", conffile.bots->nick ? conffile.bots->nick : (conffile.username ? conffile.username : "WRAITH"), un.nodename);
       fprintf(f, "Subject: %s\n", subject);
       fprintf(f, "Content-Type: text/plain\n");
     }
@@ -742,7 +742,7 @@ void baduname(char *confhas, char *my_uname) {
 
     uname(&un);
     egg_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
-    egg_snprintf(msg, sizeof msg, "This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nConf : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n", conf.username, confhas, my_uname, un.nodename);
+    egg_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nConf : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), conf.username, confhas, my_uname, un.nodename);
     email(subject, msg, EMAIL_OWNERS);
   }
   free(tmpfile);

@@ -4,6 +4,7 @@ This is a summary of ChangeLog basically.
 1.User flag +x is now correctly recognized in more places.
 2.Auth system was broken similar to the channel ctcp bug.
 3.Added config option 'cmdprefix' back.
+4.Fixed a bug in the auto-email code for bad uname.
 
 1.1.3
 1.Fixed a very fatal bug with channel ctcps.
