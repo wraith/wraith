@@ -826,11 +826,10 @@ static void cmd_help(struct userrec *u, int idx, char *par)
         dprintf(idx, STR("Showing you help for '%s' (%s):"), match, flg);
         for (hi = 0; (help[hi].cmd) && (help[hi].desc); hi++) {
           if (!egg_strcasecmp(match, help[hi].cmd)) {
-#ifdef S_GARBLEHELP
-            showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
-#else /* !S_GARBLEHELP */
-            showhelp(idx, &fr, help[hi].desc);
-#endif /* S_GARBLEHELP */
+            if (help[hi].garble)
+              showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
+            else
+              showhelp(idx, &fr, help[hi].desc);
           }
         }
         done = 1;

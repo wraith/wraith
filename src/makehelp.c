@@ -151,11 +151,10 @@ help_t help[] = \n\
         } else { if (leaf || hub) { cl = 1; } leaf = 0; hub = 0;  }
 
         if (cmd && cmd[0]) {		/* CLOSE LAST CMD */
-#ifdef S_GARBLEHELP
-          fprintf(out,"\")},\n");
-#else /* !S_GARBLEHELP */
-          fprintf(out,"\"},\n");
-#endif /* S_GARBLEHELP */
+          if (strchr(cmd, ':'))		/* garbled */
+            fprintf(out,"\")},\n");
+          else
+            fprintf(out,"\"},\n");
           if (cl) { cl = 0; fprintf(out, "#endif\n"); }
           if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
           else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
@@ -169,11 +168,14 @@ help_t help[] = \n\
           printf(".");
           if (dohub) { dohub = 0; fprintf(out, "#ifdef HUB\n"); }
           else if (doleaf) { doleaf = 0; fprintf(out, "#ifdef LEAF\n"); }
-#ifdef S_GARBLEHELP
-          fprintf(out, "  {2, \"%s\", STR(\"", cmd);
-#else /* !S_GARBLEHELP */
-          fprintf(out, "  {2, \"%s\", 0, \"", cmd);
-#endif /* S_GARBLEHELP */
+          if (strchr(cmd, ':')) {
+            char *p2, *cmdn = malloc(strlen(cmd) + 1);
+            strcpy(cmdn, cmd);
+            p2 = strchr(cmdn, ':');
+            *p2 = 0;
+            fprintf(out, "  {2, \"%s\", STR(\"", cmdn);
+          } else
+            fprintf(out, "  {2, \"%s\", 0, \"", cmd);
         } else {			/* END */
           fprintf(out, "  {0, NULL}\n};\n");
         }
