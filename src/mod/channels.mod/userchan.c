@@ -1283,6 +1283,9 @@ static int write_chans(FILE *f, int idx)
 
   char w[1024], w2[1024], name[163];
   char topic[1002], udefs[2048] = "", sadd[5], buf[2048];
+/* Chanchar template
+ *char temp[121];
+ */
   struct chanset_t *chan;
   struct udef_struct *ul;
 
@@ -1310,6 +1313,9 @@ static int write_chans(FILE *f, int idx)
      get_mode_protect(chan, w);
      convert_element(w, w2);
      convert_element(chan->topic_prot, topic);
+/* Chanchar template
+ *   convert_element(chan->temp, temp);
+ */
      for (ul = udef; ul; ul = ul->next) { //put the udefs into one string
        memset(buf,'\0',2048);
        if (ul->defined && ul->name) { 
@@ -1343,6 +1349,10 @@ exempt-time %d invite-time %d \
 	channel_static(chan) ? " " : " { ",
 	w2,
         topic,
+/* Chanchar template
+ *      temp,
+ * also include temp %s in dprintf.
+ */
 	chan->idle_kick, /* idle-kick 0 is same as dont-idle-kick (lcode)*/
         chan->limitraise,
 	chan->stopnethack_mode,
@@ -1353,6 +1363,10 @@ exempt-time %d invite-time %d \
         chan->flood_kick_thr, chan->flood_kick_time,
         chan->flood_deop_thr, chan->flood_deop_time,
 	chan->flood_nick_thr, chan->flood_nick_time,
+/* Chanint template
+ *      chan->temp,
+ * also include temp %d in dprintf
+ */
         chan->ban_time,
 #ifdef S_IRCNET
         chan->exempt_time,
@@ -1382,6 +1396,10 @@ exempt-time %d invite-time %d \
 	PLSMNS(channel_manop(chan)),
 	PLSMNS(channel_voice(chan)),
 	PLSMNS(channel_fastop(chan)),
+/* Chanflag template
+ * also include a %ctemp above.
+ *      PLSMNS(channel_temp(chan)),
+ */
         udefs,
         sadd) == EOF)
           return 0;

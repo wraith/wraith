@@ -701,6 +701,10 @@ static void channels_report(int idx, int details)
           i += my_strcpy(s + i, "manop ");
         if (channel_voice(chan))
           i += my_strcpy(s + i, "voice ");
+/* Chanflag template
+ *	if (channel_temp(chan))
+ *	  i += my_strcpy(s + i, "temp ");
+*/
         if (channel_fastop(chan))
           i += my_strcpy(s + i, "fastop ");
         if (channel_private(chan))

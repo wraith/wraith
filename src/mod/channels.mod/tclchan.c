@@ -752,6 +752,10 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
   Tcl_AppendElement(irp, s);
   simple_sprintf(s, "%d", chan->ban_time);
   Tcl_AppendElement(irp, s);
+/* Chanint template 
+ *simple_sprintf(s, "%s", chan->temp);
+ *Tcl_AppendElement(irp, s);
+ */
 #ifdef S_IRCNET
   simple_sprintf(s, "%d", chan->exempt_time);
   Tcl_AppendElement(irp, s);
@@ -848,6 +852,12 @@ static int tcl_channel_info(Tcl_Interp * irp, struct chanset_t *chan)
     Tcl_AppendElement(irp, "+voice");
   else
     Tcl_AppendElement(irp, "-voice");
+/* Chanflag template
+ *if (chan->status & CHAN_TEMP)
+ *  Tcl_AppendElement(irp, "+temp");
+ *else
+ *  Tcl_AppendElement(irp, "-temp");
+ */
   if (chan->status & CHAN_FASTOP)
     Tcl_AppendElement(irp, "+fastop");
   else
@@ -915,6 +925,9 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
   else if (CHECK("flood-kick"))    simple_sprintf(s, "%d %d", chan->flood_kick_thr, chan->flood_kick_time);
   else if (CHECK("flood-deop"))    simple_sprintf(s, "%d %d", chan->flood_deop_thr, chan->flood_deop_time);
   else if (CHECK("flood-nick"))    simple_sprintf(s, "%d %d", chan->flood_nick_thr, chan->flood_nick_time);
+/* Chanint template
+ *else if (CHECK("temp"))	   simple_sprintf(s, "%s", chan->temp);
+ */
   else if (CHECK("ban-time"))  	   simple_sprintf(s, "%d", chan->ban_time);
 #ifdef S_IRCNET
   else if (CHECK("exempt-time"))   simple_sprintf(s, "%d", chan->exempt_time);
@@ -946,6 +959,9 @@ static int tcl_channel_get(Tcl_Interp * irp, struct chanset_t *chan, char *setti
   else if CHKFLAG_POS(CHAN_VOICE,          "voice",          chan->status)
   else if CHKFLAG_POS(CHAN_FASTOP,          "fastop",          chan->status)
   else if CHKFLAG_POS(CHAN_PRIVATE,          "private",          chan->status)
+/* Chanflag template
+ *else if CHKFLAG_POS(CHAN_TEMP,	   "temp",		chan->status)
+ */
 
   else {
     /* Hopefully it's a user-defined flag. */
@@ -1173,6 +1189,16 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
       }
       chan->invite_time = atoi(item[i]);
 #endif
+/* Chanint template
+ *  } else if (!strcmp(item[i], "temp")) {
+ *    i++;
+ *    if (i >= items) {
+ *      if (irp)
+ *        Tcl_AppendResult(irp, "channel temp needs argument", NULL);
+ *      return TCL_ERROR;
+ *    }
+ *    chan->temp = atoi(item[i]);
+ */
     } else if (!strcmp(item[i], "topic")) {
       i++;
       if (i >= items) {
@@ -1183,6 +1209,19 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
       strncpyz(chan->topic_prot, item[i], sizeof(chan->topic_prot));
       check_topic(chan);
     }
+/* Chanchar template
+    } else if (!strcmp(item[i], "temp")) {
+      i++;
+      if (i >= items) {
+        if (irp)
+          Tcl_AppendResult(irp, "channel temp needs argument", NULL);
+        return TCL_ERROR;
+      }
+      strncpyz(chan->temp, item[i], sizeof(chan->temp));
+      //Entry just changed so update/recheck it's purpose?
+      check_temp(chan);
+    }
+ */
     else if (!strcmp(item[i], "+enforcebans"))
       chan->status |= CHAN_ENFORCEBANS;
     else if (!strcmp(item[i], "-enforcebans"))
@@ -1273,6 +1312,12 @@ static int tcl_channel_modify(Tcl_Interp * irp, struct chanset_t *chan,
       chan->status |= CHAN_VOICE;
     else if (!strcmp(item[i], "-voice"))
       chan->status &= ~CHAN_VOICE;
+/* Chanflag template
+ *  else if (!strcmp(item[i], "+temp"))
+ *    chan->status |= CHAN_TEMP;
+ *  else if (!strcmp(item[i], "-temp"))
+ *    chan->status &= ~CHAN_TEMP;
+ */
     else if (!strcmp(item[i], "+fastop")) {
       chan->status |= CHAN_FASTOP;
     }
@@ -1805,6 +1850,9 @@ static int tcl_channel_add(Tcl_Interp *irp, char *newname, char *options)
 
     chan->limit_prot = 0;
     chan->limit = 0;
+/* Chanint template
+ *  chan->temp = 0;
+ */
     chan->flood_pub_thr = gfld_chan_thr;
     chan->flood_pub_time = gfld_chan_time;
     chan->flood_ctcp_thr = gfld_ctcp_thr;

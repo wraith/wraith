@@ -149,6 +149,9 @@ struct chanset_t {
   int status;
   int ircnet_status;
   int limitraise;
+/* Chanint template 
+ *int temp;
+ */
   int jointime;
   int parttime;
   int idle_kick;
@@ -171,6 +174,9 @@ struct chanset_t {
   int limit_prot;		/* desired limit			*/
   char key_prot[121];		/* desired password			*/
   char topic_prot[501];		/* desired topic			*/
+/* Chanchar template
+ *char temp[121];
+ */
   /* queued mode changes: */
   char pls[21];			/* positive mode changes		*/
   char mns[21];			/* negative mode changes		*/
@@ -208,6 +214,11 @@ struct chanset_t {
 };
 
 /* behavior modes for the channel */
+
+/* Chanflag template 
+ * #define CHAN_TEMP           0x0000
+ */
+
 #define CHAN_ENFORCEBANS    0x0001	   /* kick people who match channel bans */
 #define CHAN_DYNAMICBANS    0x0002	   /* only activate bans when needed     */
 #define CHAN_NOUSERBANS     0x0004	   /* don't let non-bots place bans      */
@@ -297,7 +308,9 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_voice(chan) (chan->status & CHAN_VOICE)
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
 #define channel_private(chan) (chan->status & CHAN_PRIVATE)
-
+/* Chanflag template
+ *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
+ */
 
 
 
