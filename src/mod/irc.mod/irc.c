@@ -638,12 +638,19 @@ request_op(struct chanset_t *chan)
   memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  char s[UHOSTLEN] = "";
 
   for (i = 0, ml = chan->channel.member; (i < MAX_BOTS) && ml && ml->nick[0]; ml = ml->next) {
     /* If bot, linked, global op & !split & chanop & (chan is reserver | bot isn't +a) -> 
      * add to temp list */
-    if ((i < MAX_BOTS) && ml->user && ml->user->bot &&
+    if (!ml->user && !ml->tried_getuser) {
+      simple_sprintf(s, "%s!%s", ml->nick, ml->userhost);
+      ml->user = get_user_by_host(s);
+      ml->tried_getuser = 1;
+    }
+    if ((i < MAX_BOTS) && ml->user && ml->user->bot && 
         (nextbot(ml->user->handle) >= 0) && chan_hasop(ml) && !chan_issplit(ml)) {
+
       get_user_flagrec(ml->user, &fr, NULL);
       if (chk_op(fr, chan))
         botops[i++] = ml;
