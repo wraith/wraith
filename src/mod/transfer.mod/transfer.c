@@ -464,7 +464,7 @@ static void eof_dcc_send(int idx)
 #ifdef HUB
 /* Determine byte order. Used for resend DCC startup packets.
  */
-static __inline__ u_8bit_t byte_order_test(void)
+static inline u_8bit_t byte_order_test(void)
 {
   u_16bit_t test = TRANSFER_REGET_PACKETID;
 
@@ -477,7 +477,7 @@ static __inline__ u_8bit_t byte_order_test(void)
 
 /* Parse and handle resend DCC startup packets.
  */
-__inline__ static void handle_resend_packet(int idx, transfer_reget *reget_data)
+inline static void handle_resend_packet(int idx, transfer_reget *reget_data)
 {
   if (byte_order_test() != reget_data->byte_order) {
     /* The sender's byte order does not match our's so we need to switch the

@@ -60,7 +60,7 @@ void show_banner(int);
 void make_rand_str(char *, int);
 char *str_escape(const char *, const char, const char);
 char *strchr_unescape(char *, const char, register const char);
-__inline__ void str_unescape(char *, register const char);
+inline void str_unescape(char *, register const char);
 int str_isdigit(const char *);
 void kill_bot(char *, char *);
 

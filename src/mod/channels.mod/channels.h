@@ -24,7 +24,7 @@ static void tell_exempts (int idx, int show_inact, char * match);
 static void tell_invites (int idx, int show_inact, char * match);
 static void get_mode_protect(struct chanset_t *chan, char *s);
 static void set_mode_protect(struct chanset_t *chan, char *set);
-__inline__ static int chanset_unlink(struct chanset_t *chan);
+inline static int chanset_unlink(struct chanset_t *chan);
 
 #endif				/* MAKING_CHANNELS */
 

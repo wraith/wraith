@@ -635,7 +635,7 @@ char *strchr_unescape(char *str, const char divc, register const char esc_char)
 /* As strchr_unescape(), but converts the complete string, without
  * searching for a specific delimiter character.
  */
-__inline__ void str_unescape(char *str, register const char esc_char)
+inline void str_unescape(char *str, register const char esc_char)
 {
   (void) strchr_unescape(str, 0, esc_char);
 }

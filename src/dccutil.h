@@ -31,7 +31,7 @@ void chatout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void chanout_but(int, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 void dcc_chatter(int);
 void lostdcc(int);
-__inline__ void makepass(char *);
+inline void makepass(char *);
 void tell_dcc(int);
 void not_away(int);
 void set_away(int, char *);
