@@ -80,10 +80,9 @@ colorbuf(char *buf, size_t len, int idx)
     c = buf[i];
     buf2[0] = 0;
 
-    if (schar) {                /* These are for $X replacements */
-      schar--;                  /* Unset identifier int */
-
-      if (cidx) {
+    if (cidx) {
+      if (schar) {                /* These are for $X replacements */
+        schar--;                  /* Unset identifier int */
         switch (c) {
           case 'b':
             if (cflags & CFLGS_BOLD) {
@@ -116,31 +115,50 @@ colorbuf(char *buf, size_t len, int idx)
             sprintf(buf2, "$%c", c);    /* No identifier, put the '$' back in */
             break;
         }
+      } else {                    /* These are character replacements */
+        switch (c) {
+          case '$':
+            schar++;
+            break;
+          case ':':
+            sprintf(buf2, "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
+            break;
+          case '@':
+            sprintf(buf2, "%s%c%s", BOLD(idx), c, BOLD_END(idx));
+            break;
+          case '>':
+          case ')':
+          case '<':
+          case '(':
+            sprintf(buf2, "%s%c%s", GREEN(idx), c, COLOR_END(idx));
+            break;
+          default:
+            sprintf(buf2, "%c", c);
+            break;
+        }
       }
-
-    } else {                    /* These are character replacements */
-      switch (c) {
-        case '$':
-          schar++;
-          break;
-        case ':':
-          sprintf(buf2, "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
-          break;
-        case '@':
-          sprintf(buf2, "%s%c%s", BOLD(idx), c, BOLD_END(idx));
-          break;
-        case '>':
-        case ')':
-        case '<':
-        case '(':
-          sprintf(buf2, "%s%c%s", GREEN(idx), c, COLOR_END(idx));
-          break;
-        default:
-          sprintf(buf2, "%c", c);
-          break;
+    } else {
+      if (schar) {
+        schar--;
+        switch (c) {
+          case 'b':
+          case 'u':
+          case 'f':
+            break;
+          default:
+            sprintf(buf2, "$%c", c);    /* No identifier, put the '$' back in */
+        }
+      } else {
+        switch (c) {
+          case '$':
+            schar++;
+            break;
+          default:
+            sprintf(buf2, "%c", c);
+            break;
+        }
       }
     }
-
     sprintf(buf3, "%s%s", (buf3 && buf3[0]) ? buf3 : "", (buf2 && buf2[0]) ? buf2 : "");
   }
   buf3[strlen(buf3)] = 0;
