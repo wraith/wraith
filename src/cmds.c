@@ -2318,7 +2318,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
 		     user = {0, 0, 0, 0},
 		     ouser = {0, 0, 0, 0};
   /*int fl = -1, of = 0, ocf = 0;*/
-  flag_t fl = 0, of = 0, ocf = 0;
+  flag_t fl = -1, of = 0, ocf = 0;
 
   if (!par[0]) {
     dprintf(idx, "Usage: chattr <handle> [changes] [channel]\n");
