@@ -7,7 +7,7 @@ PACKNAME <name>
 
 /* HASHES 
  * These must remain 100% secure/private, these keys can retrieve the salts, and
- * the entire botnet could be hijacked, a pass 8 chars or more is suggested */
+ * the entire botnet could be hijacked, a pass 8 chars or more is suggested
  */
 
 /* SHELLHASH: 32 char md5 hash used for binary password 
@@ -18,7 +18,7 @@ SHELLHASH <md5hash>
 
 /* BDHASH: 32 char MD5 hash used for IRC backdoor
 # NOTE: Botlink uses this for linking, if it is changed on a bot, it wont link to another bot unless
-# the other bot has the same bdhash. (Protects your botnet, trust me)
+# the other bot has the same bdhash. (Protects your botnet, trust me) */
 BDHASH <md5hash>
 
 /* DCCPREFIX: 1 char cmd prefix for dcc. (ie, .cmd or !cmd) */

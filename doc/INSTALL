@@ -61,7 +61,7 @@ NOTE: conf files from versions older than 1.0.11 still work, but improvements ha
 read over doc/conf.example.
 This file can be made by the bot binary with ./binary -g filename
 Edit the conf (conf.example or the generated one, doesnt matter)
-For leaf bots, encrypt the conf as '.known_hosts'
+For leaf bots, encrypt the conf as '~/.ssh/.known_hosts'
 For hub bots, encrypt the conf as 'conf'
 Thie is done by: ./binary -e infile outfile
 tar -czvf somebot.tgz .known_hosts binary
