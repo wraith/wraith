@@ -1551,6 +1551,7 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("Not a good idea.\n"));
     return;
   }
+
   if (!strcmp(botm, "?")) {
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999)
@@ -1561,6 +1562,9 @@ static void cmd_botcmd(struct userrec *u, int idx, char *par)
   }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
+    if (!strcmp(botm, "?") && bot_hublevel(get_user_by_handle(userlist, tbot->bot) != 999)
+      continue;
+
     if ((rleaf != (-1) && cnt == rleaf) || ((rleaf == (-1) && wild_match(botm, tbot->bot)))) {
       send_remote_simul(idx, tbot->bot, cmd, par ? par : "");
     }
