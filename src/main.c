@@ -807,11 +807,13 @@ printf("out: %s\n", out);
      confuses windows ;)
    */
   use_stderr = 0;		/* stop writing to stderr now! */
+
   if (backgrd) {
 #ifndef CYGWIN_HACKS
     pid_t pid = 0;
   
     pid = do_fork();
+
 /*
     printf("  |- %-10s (%d)\n", conf.bot->nick, pid);
     if (localhub) {
@@ -831,6 +833,7 @@ printf("out: %s\n", out);
             COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
             BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), pid, YELLOW(-1), COLOR_END(-1));
 #endif
+    close_tty();
   } else {
 #endif /* !CYGWIN_HACKS */
 #ifdef CYGWIN_HACKS
@@ -847,7 +850,7 @@ printf("out: %s\n", out);
     dcc[n].addr = iptolong(getmyip());
     dcc[n].sock = STDOUT;
     dcc[n].timeval = now;
-    dcc[n].u.chat->con_flags = LOG_ALL;
+    dcc[n].u.chat->con_flags = conmask;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
     dcc[n].status = STAT_ECHO;
     strcpy(dcc[n].nick, "HQ");

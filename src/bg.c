@@ -31,12 +31,25 @@ pid_t watcher;                  /* my child/watcher */
 static void init_watcher(pid_t);
 #endif /* !CYGWIN_HACKS */
 
+int close_tty()
+{
+  int fd = -1;
+
+  if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
+    dup2(fd, STDIN_FILENO);
+    dup2(fd, STDOUT_FILENO);
+    dup2(fd, STDERR_FILENO);
+    if (fd > 2)
+      close(fd);
+    return 1;
+  }
+  return 0;
+}
+
 /*
 int
 my_daemon(int nochdir, int noclose)
 {
-  int fd;
-
   switch (fork()) {
     case -1:
       return (-1);
@@ -52,25 +65,8 @@ my_daemon(int nochdir, int noclose)
   if (!nochdir)
     (void) chdir("/");
 
-  if (!noclose && (fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
-    struct stat64 st;
-
-    if (__builtin_expect(__fxstat64(_STAT_VER, fd, &st), 0) == 0
-        && __builtin_expect(S_ISCHR(st.st_mode), 1) != 0
-#if defined DEV_NULL_MAJOR && defined DEV_NULL_MINOR
-        && st.st_rdev == makedev(DEV_NULL_MAJOR, DEV_NULL_MINOR)
-#endif
-      ) {
-      (void) dup2(fd, STDIN_FILENO);
-      (void) dup2(fd, STDOUT_FILENO);
-      (void) dup2(fd, STDERR_FILENO);
-      if (fd > 2)
-        (void) close(fd);
-    } else {
-      (void) close(fd);
-      return -1;
-    }
-  }
+  if (!noclose)
+    close_tty();
   return (0);
 }
 */
