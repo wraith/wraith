@@ -1687,10 +1687,11 @@ if (1) {		/* config shit */
             }
             kill(xx, SIGCHLD);
             if (errno == ESRCH || (updating && !x)) { //PID is !running, safe to run.
-
-            if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
+              if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
                 printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
-            } 
+            } else if (!x)
+              sdprintf(STR("%s is already running, pid: %d"), nick, xx);
+  
           } else {
             if (spawnbot(binname, nick, ip, host, ipsix, pscloak))
               printf(STR("* Failed to spawn %s\n"), nick); //This probably won't ever happen.
