@@ -44,9 +44,9 @@ OWNEREMAIL <some@email.com>
  * nick: nick of hub
  * host: hostname or ip of hub (A 'dynamic' OR 'changeable' HOSTNAME IS RECOMMENDED)
  * port: port the hub listens on
- * ident: ident of the hub (list as many as needed) 
+ * ident: ident of bot (username on shell)
  */
-HUB <God god.net 666 god ~God ~george>
+HUB <God god.net 666 god>
 
 /* SALTS: DO NOT TOUCH BELOW THIS LINE */
 
