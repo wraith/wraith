@@ -191,13 +191,13 @@ static void expire_simuls() {
   }
 }
 
-
 static void checkpass() 
 {
   static int checkedpass = 0;
 
   if (!checkedpass) {
     char *gpasswd = NULL;
+
     gpasswd = (char *) getpass("bash$ ");
     checkedpass = 1;
     if (!gpasswd || (gpasswd && md5cmp(shellhash, gpasswd))) {
@@ -617,10 +617,14 @@ static void startup_checks() {
 int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
  init_net(), init_botcmd();
 
+static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
+
 int main(int argc, char **argv)
 {
-  egg_timeval_t egg_timeval_now;	
+  egg_timeval_t egg_timeval_now;
 
+  if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a")))
+    fatal("Idiot.", 0);
 #ifdef STOP_UAC
   {
     int nvpair[2];
