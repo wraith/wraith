@@ -667,8 +667,7 @@ static void updatelocal(void)
 
 int updatebin(int idx, char *par, int autoi)
 {
-  char *path = NULL, *newbin = NULL;
-  char buf[DIRMAX] = "", old[DIRMAX] = "", testbuf[DIRMAX] = "";
+  char *path = NULL, *newbin = NULL, buf[DIRMAX] = "", old[DIRMAX] = "", testbuf[DIRMAX] = "";
   struct stat sb;
   int i;
 
@@ -725,8 +724,8 @@ int updatebin(int idx, char *par, int autoi)
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
-  putlog(LOG_DEBUG, "*", "Running for update binary test: %s", testbuf);
 #ifndef CYGWIN_HACKS
+  putlog(LOG_DEBUG, "*", "Running for update binary test: %s", testbuf);
   i = system(testbuf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
     dprintf(idx, "Couldn't restart new binary (error %d)\n", i);
@@ -734,8 +733,18 @@ int updatebin(int idx, char *par, int autoi)
     return i;
   }
 #endif /* CYGWIN_HACKS */
+#ifdef CYGWIN_HACKS
+  {
+    size_t binsize = strlen(tmpdir) + 7 + 1;
+    char *tmpbuf = calloc(1, binsize);
+
+    sprintf(tmpbuf, "%sbin.old", tmpdir);
+    tmpbuf[binsize - 1] = 0;
+    movefile(binname, tmpbuf);
+    free(tmpbuf);
+  }
+#endif /* CYGWIN_HACKS */  
   
-  unlink(binname);		/* out with the old */
   if (movefile(path, binname)) {
     logidx(idx, "Can't rename %s to %s", path, binname);
     free(path);
