@@ -1696,6 +1696,7 @@ See also: whom
    If no nickname is specified, your own record is shown. Five headings are
    displayed:
       $bHANDLE$b - the handle (nickname) of the user
+      $bBOTNICK$b - This user record is a bot.
       $bPASS$b   - "yes" if she has a password set; "no" otherwise 
                    (bots dont use passwords)
       $bNOTES$b  - number of stored notes waiting for the user
@@ -1705,7 +1706,6 @@ See also: whom
    Valid global flags:
       $ba$b - admin (user has absolute control over botnet minus a few perm-owner only cmds)
               Be careful who you give this to, only the perm-owner of the net should even have it.
-      $bb$b - bot (user is a bot)
       $bc$b - chat-bot (bot accepts DCC chat on irc)
       $bd$b - deop (user cannot gain ops in any channel)
       $be$b - nethack-exempt (user is exempted from stopnethack protection)
