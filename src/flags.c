@@ -14,27 +14,29 @@
 #include "userent.h"
 #include "users.h"
 
-flag_t		FLAG[128];
+flag_t FLAG[128];
 
-void init_flags()
+void
+init_flags()
 {
-       unsigned char i;
+  unsigned char i;
 
-       for (i = 0; i < 'A'; i++)
-               FLAG[i] = 0;
-       for (; i <= 'Z'; i++)
-               FLAG[i] = (flag_t) 1 << (26 + (i - 'A'));
-       for (; i < 'a'; i++)
-               FLAG[i] = 0;
-       for (; i <= 'z'; i++)
-               FLAG[i] = (flag_t) 1 << (i - 'a');
-       for (; i < 128; i++)
-               FLAG[i] = 0;
+  for (i = 0; i < 'A'; i++)
+    FLAG[i] = 0;
+  for (; i <= 'Z'; i++)
+    FLAG[i] = (flag_t) 1 << (26 + (i - 'A'));
+  for (; i < 'a'; i++)
+    FLAG[i] = 0;
+  for (; i <= 'z'; i++)
+    FLAG[i] = (flag_t) 1 << (i - 'a');
+  for (; i < 128; i++)
+    FLAG[i] = 0;
 }
 
 /* Some flags are mutually exclusive -- this roots them out
  */
-flag_t sanity_check(flag_t atr, int bot)
+flag_t
+sanity_check(flag_t atr, int bot)
 {
   if (bot && (atr & (USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA)))
     atr &= ~(USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA);
@@ -47,7 +49,7 @@ flag_t sanity_check(flag_t atr, int bot)
     atr &= ~(USER_AUTOOP | USER_DEOP);
   if ((atr & USER_VOICE) && (atr & USER_QUIET))
     atr &= ~(USER_VOICE | USER_QUIET);
- 
+
   /* Can't be admin without also being owner and having hub access */
   if (atr & USER_ADMIN)
     atr |= USER_OWNER | USER_HUBA | USER_PARTY;
@@ -69,7 +71,8 @@ flag_t sanity_check(flag_t atr, int bot)
 
 /* Sanity check on channel attributes
  */
-flag_t chan_sanity_check(flag_t chatr, flag_t atr)
+flag_t
+chan_sanity_check(flag_t chatr, flag_t atr)
 {
   /* admin for chan does shit.. */
   if (chatr & USER_ADMIN)
@@ -85,7 +88,7 @@ flag_t chan_sanity_check(flag_t chatr, flag_t atr)
     chatr |= USER_MASTER;
   /* Master implies op */
   if (chatr & USER_MASTER)
-    chatr |= USER_OP ;
+    chatr |= USER_OP;
   return chatr;
 }
 
@@ -97,9 +100,10 @@ flag_t chan_sanity_check(flag_t chatr, flag_t atr)
  * (@) op on any channel
  * (-) other
  */
-char geticon(int idx)
+char
+geticon(int idx)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   if (!dcc[idx].user)
     return '-';
@@ -115,73 +119,75 @@ char geticon(int idx)
   return '-';
 }
 
-void break_down_flags(const char *string, struct flag_record *plus, struct flag_record *minus)
+void
+break_down_flags(const char *string, struct flag_record *plus, struct flag_record *minus)
 {
-  struct flag_record	*which = plus;
-  int			 chan = 0;	/* 0 = glob, 1 = chan */
-  int			 flags = plus->match;
+  struct flag_record *which = plus;
+  int chan = 0;                 /* 0 = glob, 1 = chan */
+  int flags = plus->match;
 
   if (!(flags & FR_GLOBAL)) {
     if (flags & FR_CHAN)
       chan = 1;
     else
-      return;			/* We dont actually want any..huh? */
+      return;                   /* We dont actually want any..huh? */
   }
   egg_bzero(plus, sizeof(struct flag_record));
 
   if (minus)
     egg_bzero(minus, sizeof(struct flag_record));
 
-  plus->match = FR_OR;		/* Default binding type OR */
+  plus->match = FR_OR;          /* Default binding type OR */
   while (*string) {
     switch (*string) {
-    case '+':
-      which = plus;
-      break;
-    case '-':
-      which = minus ? minus : plus;
-      break;
-    case '|':
-    case '&':
-      if (!chan) {
-	if (*string == '|')
-	  plus->match = FR_OR;
-	else
-	  plus->match = FR_AND;
-      }
-      which = plus;
-      chan++;
-      if (chan == 2)
-        string = "";
-      else if (chan == 3)
-        chan = 1;
-      break;		/* switch() */
-    default:
-     {
-      flag_t flagbit = FLAG[(unsigned char) *string];
+      case '+':
+        which = plus;
+        break;
+      case '-':
+        which = minus ? minus : plus;
+        break;
+      case '|':
+      case '&':
+        if (!chan) {
+          if (*string == '|')
+            plus->match = FR_OR;
+          else
+            plus->match = FR_AND;
+        }
+        which = plus;
+        chan++;
+        if (chan == 2)
+          string = "";
+        else if (chan == 3)
+          chan = 1;
+        break;                  /* switch() */
+      default:
+      {
+        flag_t flagbit = FLAG[(unsigned char) *string];
 
-      if (flagbit) {
-	switch (chan) {
-	case 0:
-	  /* which->global |= (flag_t) 1 << (*string - 'a'); */
-          which->global |= flagbit;
-	  break;
-	case 1:
-	  /* which->chan |= (flag_t) 1 << (*string - 'a'); */
-          which->chan |= flagbit;
-	  break;
-	}
-      } 
-     }
+        if (flagbit) {
+          switch (chan) {
+            case 0:
+              /* which->global |= (flag_t) 1 << (*string - 'a'); */
+              which->global |=flagbit;
+
+              break;
+            case 1:
+              /* which->chan |= (flag_t) 1 << (*string - 'a'); */
+              which->chan |= flagbit;
+              break;
+          }
+        }
+      }
     }
     string++;
   }
   /*
-  for (which = plus; which; which = (which == plus ? minus : 0)) {
-    which->global &= USER_VALID;
-    which->chan &= CHAN_VALID;
-  }
-  */
+   * for (which = plus; which; which = (which == plus ? minus : 0)) {
+   * which->global &= USER_VALID;
+   * which->chan &= CHAN_VALID;
+   * }
+   */
   plus->match |= flags;
   if (minus) {
     minus->match |= flags;
@@ -190,7 +196,8 @@ void break_down_flags(const char *string, struct flag_record *plus, struct flag_
   }
 }
 
-static int flag2str(char *string, flag_t flag)
+static int
+flag2str(char *string, flag_t flag)
 {
   unsigned char c;
   char *old = string;
@@ -205,7 +212,8 @@ static int flag2str(char *string, flag_t flag)
   return string - old;
 }
 
-int build_flags(char *string, struct flag_record *plus, struct flag_record *minus)
+int
+build_flags(char *string, struct flag_record *plus, struct flag_record *minus)
 {
   char *old = string;
 
@@ -226,7 +234,7 @@ int build_flags(char *string, struct flag_record *plus, struct flag_record *minu
 */
     if (plus->match & FR_GLOBAL)
       *string++ = (plus->match & FR_AND) ? '&' : '|';
-    
+
     if (minus && plus->chan)
       *string++ = '+';
     string += flag2str(string, plus->chan);
@@ -245,14 +253,15 @@ int build_flags(char *string, struct flag_record *plus, struct flag_record *minu
 }
 
 /* Returns 1 if flags match, 0 if they don't. */
-int flagrec_ok(struct flag_record *req, struct flag_record *have)
+int
+flagrec_ok(struct flag_record *req, struct flag_record *have)
 {
   if (req->match & FR_AND) {
     return flagrec_eq(req, have);
   } else if (req->match & FR_OR) {
     int hav = have->global;
 
-    /* no flags, is a match*/
+    /* no flags, is a match */
     if (!req->chan && !req->global)
       return 1;
     if (hav & req->global)
@@ -261,20 +270,21 @@ int flagrec_ok(struct flag_record *req, struct flag_record *have)
       return 1;
     return 0;
   }
-  return 0;			
+  return 0;
 }
 
 /* Returns 1 if flags match, 0 if they don't. */
-int flagrec_eq(struct flag_record *req, struct flag_record *have)
+int
+flagrec_eq(struct flag_record *req, struct flag_record *have)
 {
   if (req->match & FR_AND) {
     if (req->match & FR_GLOBAL) {
       if ((req->global &have->global) !=req->global)
-	return 0;
+        return 0;
     }
     if (req->match & FR_CHAN) {
       if ((req->chan & have->chan) != req->chan)
-	return 0;
+        return 0;
     }
     return 1;
   } else if (req->match & FR_OR) {
@@ -282,18 +292,19 @@ int flagrec_eq(struct flag_record *req, struct flag_record *have)
       return 1;
     if (req->match & FR_GLOBAL) {
       if (have->global &req->global)
-	return 1;
+        return 1;
     }
     if (req->match & FR_CHAN) {
       if (have->chan & req->chan)
-	return 1;
+        return 1;
     }
     return 0;
   }
-  return 0;			/* fr0k3 binding, dont pass it */
+  return 0;                     /* fr0k3 binding, dont pass it */
 }
 
-void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
+void
+set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 {
   struct chanuserrec *cr = NULL;
   int oldflags = fr->match;
@@ -315,7 +326,7 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
   if ((oldflags & FR_CHAN) && chname) {
     for (cr = u->chanrec; cr; cr = cr->next)
       if (!rfc_casecmp(chname, cr->channel))
-	break;
+        break;
     ch = findchan_by_dname(chname);
     if (!cr && ch) {
       cr = calloc(1, sizeof(struct chanuserrec));
@@ -327,9 +338,9 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
     if (cr && ch) {
       cr->flags = fr->chan;
       if (!noshare) {
-	fr->match = FR_CHAN;
-	build_flags(buffer, fr, NULL);
-	shareout(ch, "a %s %s %s\n", u->handle, buffer, chname);
+        fr->match = FR_CHAN;
+        build_flags(buffer, fr, NULL);
+        shareout(ch, "a %s %s %s\n", u->handle, buffer, chname);
       }
     }
   }
@@ -338,13 +349,15 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
 
 /* Always pass the dname (display name) to this function for chname <cybah>
  */
-void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
+void
+get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 {
   struct chanuserrec *cr = NULL;
 
   fr->bot = 0;
   if (!u) {
     fr->global = fr->chan = 0;
+
     return;
   }
   if (u->bot)
@@ -359,21 +372,21 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
     if (fr->match & FR_ANYWH) {
       fr->chan = u->flags;
       for (cr = u->chanrec; cr; cr = cr->next)
-	if (findchan_by_dname(cr->channel)) {
-	  fr->chan |= cr->flags;
-	}
+        if (findchan_by_dname(cr->channel)) {
+          fr->chan |= cr->flags;
+        }
     } else {
       if (chname) {
-	for (cr = u->chanrec; cr; cr = cr->next) {
-	  if (!rfc_casecmp(chname, cr->channel))
-	    break;
+        for (cr = u->chanrec; cr; cr = cr->next) {
+          if (!rfc_casecmp(chname, cr->channel))
+            break;
         }
       }
 
       if (cr) {
-	fr->chan = cr->flags;
+        fr->chan = cr->flags;
       } else {
-	fr->chan = 0;
+        fr->chan = 0;
       }
     }
   }
@@ -383,11 +396,11 @@ void get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chn
  * This function does not check if the user has "op" access, it only checks if the user is
  * restricted by +private for the channel
  */
-inline int 
+inline int
 private(struct flag_record fr, struct chanset_t *chan, int type)
 {
   if (!chan || !channel_private(chan) || glob_bot(fr) || glob_owner(fr))
-    return 0; /* user is implicitly not restricted by +private, they may however be lacking other flags */
+    return 0;                   /* user is implicitly not restricted by +private, they may however be lacking other flags */
 
   if (type == PRIV_OP) {
     /* |o implies all flags above. n| has access to all +private. Bots are exempt. */
@@ -397,10 +410,10 @@ private(struct flag_record fr, struct chanset_t *chan, int type)
     if (chan_voice(fr))
       return 0;
   }
-  return 1; /* user is restricted by +private */
+  return 1;                     /* user is restricted by +private */
 }
 
-inline int 
+inline int
 chk_op(struct flag_record fr, struct chanset_t *chan)
 {
   if (!chan || (!private(fr, chan, PRIV_OP) && !chk_deop(fr))) {
@@ -410,7 +423,7 @@ chk_op(struct flag_record fr, struct chanset_t *chan)
   return 0;
 }
 
-inline int 
+inline int
 chk_autoop(struct flag_record fr, struct chanset_t *chan)
 {
   if (glob_bot(fr))
@@ -422,7 +435,8 @@ chk_autoop(struct flag_record fr, struct chanset_t *chan)
   return 0;
 }
 
-inline int chk_deop(struct flag_record fr)
+inline int
+chk_deop(struct flag_record fr)
 {
   if (chan_deop(fr) || (glob_deop(fr) && !chan_op(fr)))
     return 1;
@@ -430,7 +444,7 @@ inline int chk_deop(struct flag_record fr)
     return 0;
 }
 
-inline int 
+inline int
 chk_voice(struct flag_record fr, struct chanset_t *chan)
 {
   if (!chan || (!private(fr, chan, PRIV_VOICE) && !chk_devoice(fr))) {
@@ -440,7 +454,7 @@ chk_voice(struct flag_record fr, struct chanset_t *chan)
   return 0;
 }
 
-inline int 
+inline int
 chk_devoice(struct flag_record fr)
 {
   if (chan_quiet(fr) || (glob_quiet(fr) && !chan_voice(fr)))
@@ -449,13 +463,13 @@ chk_devoice(struct flag_record fr)
     return 0;
 }
 
-inline int 
+inline int
 chk_noflood(struct flag_record fr)
 {
   return (chan_noflood(fr) || glob_noflood(fr));
 }
 
-inline int 
+inline int
 isupdatehub()
 {
 #ifdef HUB
@@ -466,7 +480,7 @@ isupdatehub()
     return 0;
 }
 
-inline int 
+inline int
 ischanhub()
 {
   if (conf.bot->u && (conf.bot->u->flags & USER_CHANHUB))
@@ -475,11 +489,13 @@ ischanhub()
     return 0;
 }
 
-int dovoice(struct chanset_t *chan)
+int
+dovoice(struct chanset_t *chan)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-  if (!chan) return 0;
+  if (!chan)
+    return 0;
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
   if (glob_dovoice(fr) || chan_dovoice(fr))
@@ -487,11 +503,13 @@ int dovoice(struct chanset_t *chan)
   return 0;
 }
 
-int dolimit(struct chanset_t *chan)
+int
+dolimit(struct chanset_t *chan)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-  if (!chan) return 0;
+  if (!chan)
+    return 0;
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
   if (glob_dolimit(fr) || chan_dolimit(fr))
@@ -499,18 +517,18 @@ int dolimit(struct chanset_t *chan)
   return 0;
 }
 
-int whois_access(struct userrec *user, struct userrec *whois_user)
+int
+whois_access(struct userrec *user, struct userrec *whois_user)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 }, whois = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 }, whois = {
+  FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
   get_user_flagrec(user, &fr, NULL);
   get_user_flagrec(whois_user, &whois, NULL);
 
   if ((glob_master(whois) && !glob_master(fr)) ||
-     (glob_owner(whois) && !glob_owner(fr)) ||
-     (glob_admin(whois) && !glob_admin(fr)) ||
-     (glob_bot(whois) && !glob_master(fr)))
+      (glob_owner(whois) && !glob_owner(fr)) ||
+      (glob_admin(whois) && !glob_admin(fr)) || (glob_bot(whois) && !glob_master(fr)))
     return 0;
   return 1;
 }
-
