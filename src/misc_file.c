@@ -186,7 +186,7 @@ void Tempfile::MakeTemp()
   return;
 
 error:
-  putlog(LOG_ERRORS, "Couldn't create temporary file '%s': %s", file, strerror(errno));
+  putlog(LOG_ERRORS, "*", "Couldn't create temporary file '%s': %s", file, strerror(errno));
   delete this;
   fatal("Cannot create tempory file!", 0);
 }
