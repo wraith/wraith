@@ -2180,10 +2180,11 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
         putlog(LOG_MISC, "*", STR("%s attempted to take owner away from %s"), dcc[idx].nick, u2->handle);
       pls.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | USER_UPDATEHUB);
       mns.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | USER_UPDATEHUB);
+      pls.chan &= ~(USER_ADMIN | USER_UPDATEHUB);
     }
     if (chan) {
-      pls.chan &= ~(BOT_SHARE);
-      mns.chan &= ~(BOT_SHARE);
+      pls.chan &= ~(BOT_SHARE | USER_HUBA | USER_CHUBA);
+      mns.chan &= ~(BOT_SHARE | USER_HUBA | USER_CHUBA);
     }
     if (!glob_owner(user) && !isowner(u->handle)) {
       pls.global &= ~(USER_CHUBA | USER_OWNER | USER_MASTER | USER_UNSHARED);
