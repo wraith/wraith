@@ -19,7 +19,7 @@ static char tobase64array[64] =
   '[', ']'
 };
 
-char *int_to_base64(unsigned int val)
+static char *int_to_base64(unsigned int val)
 {
   static char buf_base64[12] = "";
 
@@ -39,7 +39,8 @@ char *int_to_base64(unsigned int val)
 
   return buf_base64 + i;
 }
-char *int_to_base10(int val)
+
+static char *int_to_base10(int val)
 {
   static char buf_base10[17] = "";
 
@@ -67,7 +68,8 @@ char *int_to_base10(int val)
   }
   return buf_base10 + i;
 }
-char *unsigned_int_to_base10(unsigned int val)
+
+static char *unsigned_int_to_base10(unsigned int val)
 {
   static char buf_base10[16] = "";
 
@@ -86,17 +88,15 @@ char *unsigned_int_to_base10(unsigned int val)
   }
   return buf_base10 + i;
 }
-size_t simple_sprintf (char *buf, const char *format, ...)
+
+static size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
 {
   char *s = NULL;
   char *fp = (char *) format;
   size_t c = 0;
   unsigned int i;
-  va_list va;
 
-  va_start(va, format);
-
-  while (*fp && c < 1023) {
+  while (*fp && c < size) {
     if (*fp == '%') {
       fp++;
       switch (*fp) {
@@ -127,14 +127,41 @@ size_t simple_sprintf (char *buf, const char *format, ...)
         continue;
       }
       if (s)
-        while (*s && c < 1023)
+        while (*s && c < size)
           buf[c++] = *s++;
       fp++;
     } else
       buf[c++] = *fp++;
   }
-  va_end(va);
   buf[c] = 0;
+
   return c;
+}
+
+static size_t simple_vsprintf(char *buf, const char *format, va_list va)
+{
+  return simple_vsnprintf(buf, VSPRINTF_SIZE, format, va);
+}
+
+size_t simple_sprintf (char *buf, const char *format, ...)
+{
+  size_t ret = 0;
+
+  va_list va;
+  va_start(va, format);
+  ret = simple_vsprintf(buf, format, va);
+  va_end(va);
+  return ret;
+}
+
+size_t simple_snprintf (char *buf, size_t size, const char *format, ...)
+{
+  size_t ret = 0;
+
+  va_list va;
+  va_start(va, format);
+  ret = simple_vsnprintf(buf, size, format, va);
+  va_end(va);
+  return ret;
 }
 
