@@ -8,6 +8,7 @@
 
 #include "eggmain.h"
 #include "modules.h"
+#include "tclhash.h"
 #include "misc_file.h"
 #include "rfc1459.h"
 #include "net.h"

@@ -8,6 +8,8 @@
 
 #include "eggmain.h"
 #include "dcc.h"
+#include "tclhash.h"
+#include "cmds.h"
 #include "color.h"
 #include "salt.h"
 #include "net.h"

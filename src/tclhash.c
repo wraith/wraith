@@ -10,6 +10,7 @@
  */
 
 #include "eggmain.h"
+#include "tclhash.h"
 #include "chan.h"
 #include "users.h"
 #include "match.h"

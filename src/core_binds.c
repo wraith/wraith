@@ -1,8 +1,16 @@
+/*
+ * core_binds.c -- handles:
+ *
+ *   binds for the CORE
+ *
+ */
+
 #include "eggmain.h"
 #include "dccutil.h"
 #include "userrec.h"
 #include "users.h"
 #include "misc.h"
+#include "tclhash.h"
 
 extern cmd_t C_dcc[];
 extern struct dcc_t *dcc;
