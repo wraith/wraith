@@ -619,9 +619,9 @@ char *confdir();
 static void dtx_arg(int argc, char *argv[])
 {
 #ifdef LEAF
-#define PARSE_FLAGS "2c:d:De:E::g:G:L:P:hnstv"
+#define PARSE_FLAGS "2c:d:De:Eg:G:L:P:hnstv"
 #else /* !LEAF */
-#define PARSE_FLAGS "2d:De:E::g:G:hnstv"
+#define PARSE_FLAGS "2d:De:Eg:G:hnstv"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "dDeEgGhntv"
   int i, localhub_pid = 0;
@@ -660,14 +660,15 @@ static void dtx_arg(int argc, char *argv[])
         sdprintf(STR("debug enabled"));
         break;
       case 'E':
-        if (optarg && optarg[0]) {
-          if (!strcmp(optarg, "all")) {
+        p = argv[optind];
+        if (p && p[0]) {
+          if (!strcmp(p, "all")) {
             int n;
             putlog(LOG_MISC, "*", STR("Listing all errors"));
             for (n = 1; n < ERR_MAX; n++)
             putlog(LOG_MISC, "*", STR("Error #%d: %s"), n, werr_tostr(n));
-          } else {
-            putlog(LOG_MISC, "*", STR("Error #%d: %s"), atoi(optarg), werr_tostr(atoi(optarg)));
+          } else if (egg_isdigit(p[0])) {
+            putlog(LOG_MISC, "*", STR("Error #%d: %s"), atoi(p), werr_tostr(atoi(p)));
           }
           exit(0);
         } else {
