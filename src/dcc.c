@@ -620,7 +620,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
 
         dprintf(idx, "******************************************************************** \
                       \n \n \n%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n",
-                     color(idx, FLASH_OPEN, 0), color(idx, FLASH_CLOSE, 0));
+                     FLASH(idx), FLASH_END(idx));
         make_rand_str(pass, 16);
         pass[16] = 0;
         set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
@@ -629,7 +629,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
 #endif /* HUB */
         dprintf(idx, "Your secpass is now: %s%s%s\nMake sure you do not lose this, as it is \
                      needed to login for now on.\n \n*******************************************************\n", 
-                    color(idx, BOLD_OPEN, 0), pass, color(idx, BOLD_CLOSE, 0));
+                    BOLD(idx), BOLD_END(idx));
       }
       dcc_chatter(idx);
 #ifdef S_AUTH

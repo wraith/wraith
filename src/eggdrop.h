@@ -104,31 +104,6 @@
 #define ERR_BADCONF 14
 #define ERR_MAX 15
 
-#define C_BLACK                 1
-#define C_BLUE                  2
-#define C_GREEN                 3
-#define C_CYAN                  4
-#define C_RED                   5
-#define C_PURPLE                6
-#define C_BROWN                 7
-#define C_LIGHTGREY             8
-#define C_DARKGREY              9
-#define C_LIGHTBLUE             10
-#define C_LIGHTGREEN            11
-#define C_LIGHTCYAN             12
-#define C_LIGHTRED              13
-#define C_LIGHTPURPLE           14
-#define C_YELLOW                15
-#define C_WHITE                 16
-#define BOLD_OPEN               1
-#define BOLD_CLOSE              2
-#define UNDERLINE_OPEN          3
-#define UNDERLINE_CLOSE         4
-#define COLOR_OPEN              5
-#define COLOR_CLOSE             6
-#define FLASH_OPEN              7
-#define FLASH_CLOSE             8
-
 #define EMAIL_OWNERS    0x1
 #define EMAIL_TEAM      0x2
 

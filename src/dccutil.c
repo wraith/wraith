@@ -175,12 +175,12 @@ void dprintf EGG_VARARGS_DEF(int, arg1)
         buf2[0] = 0;
 
         if (c == ':') {
-          sprintf(buf2, "%s%c%s", color(idx, COLOR_OPEN, C_LIGHTGREY), c, color(idx, COLOR_CLOSE, 0));
+          sprintf(buf2, "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
         } else if (c == '@') {
-          sprintf(buf2, "%s%c%s", color(idx, BOLD_OPEN, 0), c, color(idx, BOLD_CLOSE, 0));
+          sprintf(buf2, "%s%c%s", BOLD(idx), c, BOLD_END(idx));
 //        } else if (c == ']' || c == '>' || c == ')' || c == '[' || c == '<' || c == '(') {
         } else if (c == '>' || c == ')' || c == '<' || c == '(') {
-          sprintf(buf2, "%s%c%s", color(idx, COLOR_OPEN, C_GREEN), c, color(idx, COLOR_CLOSE, 0));
+          sprintf(buf2, "%s%c%s", GREEN(idx), c, COLOR_END(idx));
         } else {
           sprintf(buf2, "%c", c);
         }
