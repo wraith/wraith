@@ -512,7 +512,6 @@ static void remove_channel(struct chanset_t *chan)
    int		 i;
    module_entry	*me;
 
-Context;
    /* Remove the channel from the list, so that noone can pull it
       away from under our feet during the check_tcl_part() call. */
    (void) chanset_unlink(chan);
@@ -520,9 +519,7 @@ Context;
    if ((me = module_find("irc", 0, 0)) != NULL)
      (me->funcs[IRC_DO_CHANNEL_PART])(chan);
 
-Context;
    clear_channel(chan, 0);
-Context;
    noshare = 1;
    /* Remove channel-bans */
    while (chan->bans)

@@ -217,12 +217,15 @@ void checkchans(int which)
 {
   struct chanset_t *chan, *chan_next;
 
+  sdprintf(STR("checkchans(%d)"), which);
   if (which == 0 || which == 2) {
-    for (chan = chanset; chan; chan = chan->next)
-      if (which == 0)
+    for (chan = chanset; chan; chan = chan->next) {
+      if (which == 0) {
         chan->status |= CHAN_FLAGGED;
-      else
-        chan->statuc &= ~CHAN_FLAGGED;
+      } else if (which == 2) {
+        chan->status &= ~CHAN_FLAGGED;
+      }
+    }
   } else if (which == 1) {
 #ifdef LEAF
     module_entry *me;
@@ -233,7 +236,7 @@ void checkchans(int which)
         putlog(LOG_MISC, "*", "No longer supporting channel %s", chan->dname);
 #ifdef LEAF
         /* remove_channel(chan); */
-        if ((me = module_find("console", 0, 0))) {
+        if ((me = module_find("channels", 0, 0))) {
           Function *func = me->funcs;
           (func[CHANNEL_REMOVE]) (chan);
         }
@@ -241,6 +244,7 @@ void checkchans(int which)
       }
     }
   }
+
 }
 
 /* Dump uptime info out to dcc (guppy 9Jan99)

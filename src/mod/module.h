@@ -543,7 +543,7 @@
 #define dropssl ((void (*) (int))global[335])
 #define myipstr ((char*(*)(int))global[336])
 /* 337 - 340 */
-#define checkchans ((void (*) (int))global[340])
+#define checkchans ((void (*)(int))global[337])
 
 /* This is for blowfish module, couldnt be bothered making a whole new .h
  * file for it ;)

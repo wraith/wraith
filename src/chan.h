@@ -233,7 +233,7 @@ struct chanset_t {
 #define CHAN_DONTKICKOPS    0x1000	   /* never kick +o flag people -arthur2 */
 #define CHAN_INACTIVE       0x2000	   /* no irc support for this channel
                                          - drummer                           */
-#define CHAN_               0x4000	   /* unused */
+//#define CHAN_               0x4000	   /* unused */
 #define CHAN_VOICE          0x8000	   /* a bot +y|y will voice *, except +q */
 #define CHAN_SEEN           0x10000
 #define CHAN_REVENGEBOT     0x20000	   /* revenge on actions against the bot */
@@ -245,7 +245,7 @@ struct chanset_t {
 #define CHAN_PEND           0x2000000  /* just joined; waiting for end of
                                           WHO list                           */
 #define CHAN_FLAGGED        0x4000000  /* flagged during rehash for delete   */
-#define CHAN_ 		    0x8000000  /* unused      */
+//#define CHAN_ 		    0x8000000  /* unused      */
 #define CHAN_ASKEDBANS      0x10000000
 #define CHAN_ASKEDMODES     0x20000000 /* find out key-info on IRCu          */
 #define CHAN_JUPED          0x40000000 /* Is channel juped                   */
