@@ -76,6 +76,7 @@ int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
 bool	backgrd = 1;		/* Run in the background? */
 uid_t   myuid;
+pid_t   mypid;
 bool	term_z = 0;		/* Foreground: use the terminal as a party line? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
@@ -629,7 +630,7 @@ static void startup_checks(int hack) {
           
           kill(conf.bot->pid, SIGKILL);
           unlink(conf.bot->pid_file);
-          writepid(conf.bot->pid_file, getpid());
+          writepid(conf.bot->pid_file, mypid);
         }
         updatebin(DP_STDOUT, update_bin, 1);	/* will call restart all bots */
         /* never reached */
@@ -670,8 +671,9 @@ int main(int argc, char **argv)
   /* Initialize variables and stuff */
   timer_update_now(&egg_timeval_now);
   now = egg_timeval_now.sec;
+  mypid = getpid();
 
-  srandom(now % (getpid() + getppid()) * randint(1000));
+  srandom(now % (mypid + getppid()) * randint(1000));
 
   Context;		/* FIXME: wtf is this here for?, probably some old hack to fix a corrupt heap */
 /*
@@ -757,7 +759,7 @@ printf("out: %s\n", out);
     dtx_arg(argc, argv);
   }
 
-  sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", geteuid(), myuid, getppid(), getpid());
+  sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", geteuid(), myuid, getppid(), mypid);
 
 #ifndef CYGWIN_HACKS
   if (checktrace)
@@ -833,9 +835,7 @@ printf("out: %s\n", out);
 
   if (backgrd) {
 #ifndef CYGWIN_HACKS
-    pid_t pid = 0;
-  
-    pid = do_fork();
+    mypid = do_fork();
 
 /*
     printf("  |- %-10s (%d)\n", conf.bot->nick, pid);
@@ -848,13 +848,13 @@ printf("out: %s\n", out);
 */
     printf("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n",
            BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
-           BOLD(-1), BOLD_END(-1), pid, BOLD(-1), BOLD_END(-1));
+           BOLD(-1), BOLD_END(-1), mypid, BOLD(-1), BOLD_END(-1));
 
 #ifdef lame	/* keeping for god knows why */
     printf("%s%s%c%s%s%s l%sA%su%sN%sc%sH%se%sD%s %s(%s%d%s)%s\n",
             RED(-1), BOLD(-1), conf.bot->nick[0], BOLD_END(-1), &conf.bot->nick[1],
             COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
-            BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), pid, YELLOW(-1), COLOR_END(-1));
+            BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), mypid, YELLOW(-1), COLOR_END(-1));
 #endif
     close_tty();
   } else {
@@ -863,7 +863,7 @@ printf("out: %s\n", out);
     FreeConsole();
 #endif /* CYGWIN_HACKS */
     printf("%s[%s%s%s]%s -%s- initiated\n", BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
-    writepid(conf.bot->pid_file, getpid());
+    writepid(conf.bot->pid_file, mypid);
   }
 
   /* Terminal emulating dcc chat */
