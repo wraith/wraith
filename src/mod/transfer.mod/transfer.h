@@ -30,8 +30,9 @@ enum {
         XFER_ACK_WITHOUT_OFFSET /* Skipped data is NOT counted in ack.  */
 };
 
+int raw_dcc_send(char *, char *, char *, char *);
 
-#ifndef MAKING_TRANSFER
+#if !defined(MAKING_TRANSFER) && defined(MAKING_MODS)
 /* 4 - 7 */
 #define DCC_FORK_SEND (*(struct dcc_table *)(transfer_funcs[4]))
 #define at_limit(a) (((int (*) (char *))transfer_funcs[5])(a))
@@ -55,10 +56,10 @@ enum {
 /* 20 - 23 */
 /* UNUSED 20 */
 
-#else	/* MAKING_TRANSFER */
+#endif
+#ifdef MAKING_TRANSFER
 
 static int raw_dcc_resend(char *, char *, char *, char *);
-static int raw_dcc_send(char *, char *, char *, char *);
 
 #define TRANSFER_REGET_PACKETID 0xfeab
 

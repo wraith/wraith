@@ -1206,7 +1206,7 @@ int main(int argc, char **argv)
 #endif /* LEAF */
   module_load("transfer");
   module_load("share");
-  module_load("update"); 
+  update_init();
   module_load("notes");
   module_load("console");
   ctcp_init();

@@ -18,9 +18,9 @@ char *server_start();
 #endif
 char *share_start();
 char *transfer_start();
-char *update_start();
 
 void ctcp_init();
+void update_init();
 
 static void link_statics()
 {
@@ -37,7 +37,6 @@ static void link_statics()
 #endif
   check_static("share", share_start);
   check_static("transfer", transfer_start);
-  check_static("update", update_start);
 }
 
 #endif /* _EGG_MOD_STATIC_H */

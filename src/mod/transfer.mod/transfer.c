@@ -14,19 +14,22 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "src/mod/module.h"
-#include "src/mod/update.mod/update.h"
 #include "src/tandem.h"
 #include "src/net.h"
 
 #include "src/users.h"
 #include "transfer.h"
 
+#include "src/mod/update.mod/update.h"
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+extern int		bupdating;
+
 static bind_table_t *BT_rcvd, *BT_sent, *BT_lost, *BT_tout;
 
-static Function *global = NULL, *update_funcs = NULL;
+static Function *global = NULL;
 
 static int copy_to_tmp = 1;	/* Copy files to /tmp before transmitting? */
 static int wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
@@ -44,9 +47,9 @@ static void stats_add_upload(struct userrec *, unsigned long);
 static void wipe_tmp_filename(char *, int);
 static int at_limit(char *);
 static void dcc_get_pending(int, char *, int);
-static struct dcc_table DCC_SEND;
-static struct dcc_table DCC_GET;
-static struct dcc_table DCC_GET_PENDING;
+struct dcc_table DCC_SEND;
+struct dcc_table DCC_GET;
+struct dcc_table DCC_GET_PENDING;
 
 static fileq_t *fileq = NULL;
 
@@ -516,7 +519,7 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
   return pending_data;
 }
 
-static void eof_dcc_fork_send(int idx)
+void eof_dcc_fork_send(int idx)
 {
   char s1[121];
   char *s2;
@@ -768,7 +771,7 @@ inline static void handle_resend_packet(int idx, transfer_reget *reget_data)
  * Note: The first received packet during reget is a special 8 bit packet
  *       containing special information.
  */
-static void dcc_get(int idx, char *buf, int len)
+void dcc_get(int idx, char *buf, int len)
 {
   char xnick[NICKLEN];
   unsigned char bbuf[4];
@@ -933,7 +936,7 @@ static void dcc_get(int idx, char *buf, int len)
   dcc[idx].status += l;
 }
 
-static void eof_dcc_get(int idx)
+void eof_dcc_get(int idx)
 {
   char xnick[NICKLEN], s[1024];
 
@@ -1011,7 +1014,7 @@ static void eof_dcc_get(int idx)
     send_next_file(xnick);
 }
 
-static void dcc_send(int idx, char *buf, int len)
+void dcc_send(int idx, char *buf, int len)
 {
   char s[512], *b;
   unsigned long sent;
@@ -1126,7 +1129,7 @@ static void transfer_get_timeout(int i)
     send_next_file(xx);
 }
 
-static void tout_dcc_send(int idx)
+void tout_dcc_send(int idx)
 {
   if (!strcmp(dcc[idx].nick, "*users")) {
     int x, y = 0;
@@ -1170,7 +1173,7 @@ static void tout_dcc_send(int idx)
   lostdcc(idx);
 }
 
-static void display_dcc_get(int idx, char *buf)
+void display_dcc_get(int idx, char *buf)
 {
   if (dcc[idx].status == dcc[idx].u.xfer->length)
     sprintf(buf,TRANSFER_SEND, dcc[idx].u.xfer->acked,
@@ -1180,24 +1183,24 @@ static void display_dcc_get(int idx, char *buf)
 	    dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
-static void display_dcc_get_p(int idx, char *buf)
+void display_dcc_get_p(int idx, char *buf)
 {
   sprintf(buf,TRANSFER_SEND_WAITED, now - dcc[idx].timeval,
 	  dcc[idx].u.xfer->origname);
 }
 
-static void display_dcc_send(int idx, char *buf)
+void display_dcc_send(int idx, char *buf)
 {
   sprintf(buf,TRANSFER_SEND, dcc[idx].status,
 	  dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
-static void display_dcc_fork_send(int idx, char *buf)
+void display_dcc_fork_send(int idx, char *buf)
 {
   sprintf(buf,TRANSFER_CONN_SEND);
 }
 
-static void kill_dcc_xfer(int idx, void *x)
+void kill_dcc_xfer(int idx, void *x)
 {
   register struct xfer_info *p = (struct xfer_info *) x;
 
@@ -1211,7 +1214,7 @@ static void kill_dcc_xfer(int idx, void *x)
   free(x);
 }
 
-static void out_dcc_xfer(int idx, char *buf, void *x)
+void out_dcc_xfer(int idx, char *buf, void *x)
 {
 }
 
@@ -1223,7 +1226,7 @@ static void outdone_dcc_xfer(int idx)
 			      dcc[idx].u.xfer->block_pending);
 }
 
-static struct dcc_table DCC_SEND =
+struct dcc_table DCC_SEND =
 {
   "SEND",
   DCT_FILETRAN | DCT_FILESEND | DCT_VALIDIDX,
@@ -1236,9 +1239,9 @@ static struct dcc_table DCC_SEND =
   out_dcc_xfer
 };
 
-static void dcc_fork_send(int idx, char *x, int y);
+void dcc_fork_send(int idx, char *x, int y);
 
-static struct dcc_table DCC_FORK_SEND =
+struct dcc_table DCC_FORK_SEND =
 {
   "FORK_SEND",
   DCT_FILETRAN | DCT_FORKTYPE | DCT_FILESEND | DCT_VALIDIDX,
@@ -1251,7 +1254,7 @@ static struct dcc_table DCC_FORK_SEND =
   out_dcc_xfer
 };
 
-static void dcc_fork_send(int idx, char *x, int y)
+void dcc_fork_send(int idx, char *x, int y)
 {
   char s1[121];
 
@@ -1264,7 +1267,7 @@ static void dcc_fork_send(int idx, char *x, int y)
     putlog(LOG_MISC, "*", TRANSFER_DCC_CONN, dcc[idx].u.xfer->origname, s1);
 }
 
-static struct dcc_table DCC_GET =
+struct dcc_table DCC_GET =
 {
   "GET",
   DCT_FILETRAN | DCT_VALIDIDX,
@@ -1278,7 +1281,7 @@ static struct dcc_table DCC_GET =
   outdone_dcc_xfer
 };
 
-static struct dcc_table DCC_GET_PENDING =
+struct dcc_table DCC_GET_PENDING =
 {
   "GET_PENDING",
   DCT_FILETRAN | DCT_VALIDIDX,
@@ -1451,7 +1454,7 @@ static int raw_dcc_resend(char *filename, char *nick, char *from, char *dir)
 
 /* Starts a DCC_SEND connection.
  */
-static int raw_dcc_send(char *filename, char *nick, char *from, char *dir)
+int raw_dcc_send(char *filename, char *nick, char *from, char *dir)
 {
   return raw_dcc_resend_send(filename, nick, from, dir, 0);
 }
@@ -1789,10 +1792,6 @@ char *transfer_start(Function *global_funcs)
 
   fileq = NULL;
   module_register(MODULE_NAME, transfer_table, 2, 2);
-  if (!(update_funcs = module_depend(MODULE_NAME, "update", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires update module 0.0 or later.";
-  }
 
   add_builtins("load", transfer_load);
 

@@ -3,11 +3,20 @@
  *
  */
 
-#define MODULE_NAME "update"
-#define MAKING_update
+#undef MAKING_MODS
 
-#include "src/mod/module.h"
+#include "src/common.h"
+#include "src/users.h"
+#include "src/modules.h"
+#include "src/dcc.h"
+#include "src/botnet.h"
+#include "src/main.h"
+#include "src/botmsg.h"
+#include "src/tandem.h"
+#include "src/misc_file.h"
 #include "src/net.h"
+#include "src/tclhash.h"
+#include "src/misc.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -22,15 +31,20 @@
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/compress.mod/compress.h"
 
-static Function *global = NULL, *transfer_funcs = NULL, *compress_funcs = NULL,
-                *uncompress_funcs = NULL;
-
 
 /* Prototypes */
 static void start_sending_binary(int);
 static void cancel_user_xfer(int, void *);
 
 #include "update.h"
+
+extern struct userrec	*userlist;
+extern tand_t		*tandbot;
+extern int 		localhub, max_dcc, egg_numver;
+extern char		botnetnick[], tempdir[], natip[];
+extern time_t		buildts;
+extern struct dcc_table DCC_FORK_SEND, DCC_GET;
+
 
 #ifdef HUB
 int bupdating = 0;
@@ -221,7 +235,7 @@ static void updatein_mod(int idx, char *msg)
 }
 
 
-static void finish_update(int idx)
+void finish_update(int idx)
 {
   //module_entry *me;
   struct passwd *pw;
@@ -434,7 +448,7 @@ static void check_updates()
 }
 #endif /* HUB */
 
-static void update_report(int idx, int details)
+void update_report(int idx, int details)
 {
   int i, j;
 
@@ -479,43 +493,8 @@ static void update_report(int idx, int details)
   }
 }
 
-EXPORT_SCOPE char *update_start();
-
-static Function update_table[] =
+void update_init()
 {
-  /* 0 - 3 */
-  (Function) update_start,
-  (Function) NULL,
-  (Function) 0,
-  (Function) update_report,
-  /* 4 - 7 */
-  (Function) finish_update,
-#ifdef HUB
-  (Function) & bupdating
-#else
-  (Function) 0
-#endif /* HUB */
-};
-
-char *update_start(Function *global_funcs)
-{
-
-  global = global_funcs;
-
-  module_register(MODULE_NAME, update_table, 2, 3);
-  if (!(transfer_funcs = module_depend(MODULE_NAME, "transfer", 2, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires transfer module 2.0 or later.";
-  }
-  if (!(compress_funcs = module_depend(MODULE_NAME, "compress", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires the compression.";
-  }
-  if (!(uncompress_funcs = module_depend(MODULE_NAME, "compress", 0, 0))) {
-    module_undepend(MODULE_NAME);
-    return "This module requires the compression.";
-  }
-
   add_builtins("bot", update_bot);
 #ifdef HUB
   add_hook(HOOK_30SECONDLY, (Function) check_updates);
@@ -523,6 +502,5 @@ char *update_start(Function *global_funcs)
   add_hook(HOOK_SHAREUPDATEIN, (Function) updatein_mod);
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
-  return NULL;
 }
 

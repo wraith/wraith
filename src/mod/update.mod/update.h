@@ -30,12 +30,9 @@ typedef struct {
 				   to `priority'.			*/
 } uff_table_t;
 
-#ifndef MAKING_update
-/* 4 - 7 */
-#define finish_update ((void (*) (int))update_funcs[4])
-#ifdef HUB
-#define bupdating (*(int*)update_funcs[5])
-#endif /* HUB */
-#endif				/* !MAKING_update */
+extern int bupdating;
+
+void finish_update(int);
+void update_report(int, int);
 
 #endif				/* _EGG_MOD_update_update_H */
