@@ -121,7 +121,7 @@ int def_set(struct userrec *u, struct user_entry *e, void *buf)
 int def_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx)
 {
 #ifdef HUB
-  putlog(LOG_CMDS, "@", "%s: change %s %s", dcc[idx].nick, e->type->name, u->handle);
+  putlog(LOG_DEBUG, "@", "%s: change %s %s", dcc[idx].nick, e->type->name, u->handle);
 #endif
   return e->type->set(u, e, data);
 }
