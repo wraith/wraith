@@ -21,6 +21,7 @@ void rmspace(char *s);
 void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
+int botshouldjoin(struct userrec *u, struct chanset_t *);
 int shouldjoin(struct chanset_t *);
 
 

@@ -16,6 +16,8 @@ This is a summary of ChangeLog basically.
 12.cfg: cmdprefix is now working as intended.
 13.Fixed a very obscure bug in auth/share that would corrupt the memory.
 14.Now only perm owners may change cfg settings: authkey, cmdprefix, hijack, bad-cookie, manop
+15.Hubs weren't saving userflie on remote -chan.
+16.Bot specific channels (cmd_botjoin/cmd_botpart)
 
 1.1.7
 

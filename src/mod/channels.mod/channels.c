@@ -161,9 +161,60 @@ static void got_cset(char *botnick, char *code, char *par)
   }
 }
 
+/* returns 1 if botn is in bots */
+
+static int
+parsebots(char *bots, char *botn) {
+  if (!strcmp(bots, "*")) {
+    return 1;
+  } else {
+    char *list = NULL, *bot = NULL;
+
+    list = strdup(bots);
+    bot = strtok(list, ",");
+    while(bot && *bot) {
+      if (!egg_strcasecmp(bot, botn))
+        return 1;
+      bot = strtok((char*) NULL, ",");
+    }
+    free(list);
+  }
+  return 0;
+}
+
 static void got_cpart(char *botnick, char *code, char *par)
 {
-  char *chname = NULL;
+  char *chname = NULL, *bots = NULL;
+  struct chanset_t *chan = NULL;
+  int match = 0;
+
+  if (!par[0])
+   return;
+
+  chname = newsplit(&par);
+  if (!(chan = findchan_by_dname(chname)))
+   return;
+
+  bots = newsplit(&par);
+  match = parsebots(bots, conf.bot->nick);
+ 
+  if (match)
+    do_chanset(NULL, chan, "+inactive", DO_LOCAL);
+  else
+    remove_channel(chan);
+
+#ifdef HUB
+  write_userfile(-1);
+#endif /* HUB */
+}
+
+static void got_cjoin(char *botnick, char *code, char *par)
+{
+  char *chname = NULL, *options = NULL;
+#ifdef LEAF 
+  char *bots = NULL;
+  int match = 0, inactive = 0;
+#endif /* LEAF */
   struct chanset_t *chan = NULL;
 
   if (!par[0])
@@ -171,33 +222,40 @@ static void got_cpart(char *botnick, char *code, char *par)
 
   chname = newsplit(&par);
   chan = findchan_by_dname(chname);
-  if (!chan)
-   return;
-  remove_channel(chan);
-}
+  
+  /* ALL hubs should add the channel, leaf should check the list for a match */
+#ifdef LEAF
+  bots = newsplit(&par);
+  if (strstr(par, "+inactive"))
+    inactive = 1;
+  match = parsebots(bots, conf.bot->nick);
+  if (chan && !match)
+    return;
+  if (!match) {
+    size_t size = strlen(par) + 12 + 1;
 
-static void got_cjoin(char *botnick, char *code, char *par)
-{
-  char *chname = NULL;
-  struct chanset_t *chan = NULL;
-
-  if (!par[0])
-   return;
-
-  chname = newsplit(&par);
-  if (findchan_by_dname(chname)) {
-   return;
-  } else if ((chan = findchan(chname))) {
-   return;
-  }
-
-  if (channel_add(NULL, chname, par) == ERROR) /* drummer */
+    options = calloc(1, size);
+    egg_snprintf(options, size, "%s +inactive", par);
+  } else if (match && chan && !shouldjoin(chan)) {
+    if (!inactive)
+      do_chanset(NULL, chan, "-inactive", DO_LOCAL);
+    return;
+  } else
+#endif /* LEAF */
+    options = par;
+  if (chan)
+    return;
+sdprintf("OPTIONS: %s", options);
+  if (channel_add(NULL, chname, options) == ERROR) /* drummer */
     putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s", botnick, chname);
-  else {
 #ifdef HUB
+  else
     write_userfile(-1);
 #endif /* HUB */
-  }
+#ifdef LEAF
+  if (!match)
+    free(options);
+#endif /* LEAF */
 }
 
 #ifdef LEAF

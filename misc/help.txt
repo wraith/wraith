@@ -286,6 +286,12 @@ See also: botconfig
    channels, and uptime.
  
 See also: %{+n}bottree %{-}%{+m}, bots%{-}
+::botjoin
+###  %bbotjoin%b <bot> <channel> [options]
+    Adds a channel to the bot's channel list. If options are specified, the 
+    channel will be configured with the options.
+ 
+See also: botpart, +chan, -chan, chanset, chaninfo
 ::botjump:
 ###  %bbotjump%b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
@@ -307,6 +313,11 @@ See also: msg%{+n}, netmsg%{-}
    The bot will display it's current nick over DCC.
  
 See also: netnick
+::botpart
+###  %bbotjoin%b <bot> <channel> [options]
+    Removes bot from the specified channel
+ 
+See also: botjoin, +chan, -chan, chanset, chaninfo
 :hub:bots
 ###  %bbots%b
    Shows the list of bots currently on the botnet.

@@ -643,21 +643,31 @@ int isowner(char *name)
   }
 }
 
+
+int 
+botshouldjoin(struct userrec *u, struct chanset_t *chan)
+{
+  /* just return 1 for now */
+  return 1;
+}
+
 int shouldjoin(struct chanset_t *chan)
 {
-  if (!strncmp(conf.bot->nick, "wtest", 5) && !strcmp(chan->dname, "#wraith"))
-    return 1;
-  else if (!strncmp(conf.bot->nick, "wtest", 4)) /* use 5 for all */
-    return 0; 
+//  if (!strncmp(conf.bot->nick, "wtest", 5) && !strcmp(chan->dname, "#wraith"))
+//    return 1;
+//  else if (!strncmp(conf.bot->nick, "wtest", 4)) /* use 5 for all */
+//    return 0; 
 #ifdef G_BACKUP
-  struct flag_record fr = { FR_CHAN | FR_ANYWH | FR_GLOBAL, 0, 0};
+  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0};
+  struct userrec *u = NULL;
  
-  if (!chan || (chan && !chan->name || (chan->name && !chan->name[0])))
+  if (!chan || !chan->dname || !chan->dname[0])
     return 0;
 
-  get_user_flagrec(get_user_by_handle(userlist, conf.bot->nick), &fr, chan->name);
-  return (!channel_inactive(chan)
-          && (channel_backup(chan) || !glob_backupbot(fr)));
+  if ((u = get_user_by_handle(userlist, conf.bot->nick)))
+    get_user_flagrec(u, &fr, chan->dname);
+
+  return (!channel_inactive(chan) && (channel_backup(chan) || !glob_backupbot(fr)));
 #else /* !G_BACKUP */
   return !channel_inactive(chan);
 #endif /* G_BACKUP */

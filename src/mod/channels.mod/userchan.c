@@ -998,8 +998,17 @@ int write_chans(FILE *f, int idx)
     return 0;
 
   for (chan = chanset; chan; chan = chan->next) {
+    char inactive = 0;
+
     putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
     get_mode_protect(chan, w);
+
+    /* if a bot should explicitly NOT join, just set it +inactive ... */
+    if (idx > 0 && !botshouldjoin(dcc[idx].user, chan))
+      inactive = '+';
+    /* ... otherwise give the bot the *actual* setting */
+    else
+      inactive = PLSMNS(channel_inactive(chan));
 
     if (lfprintf(f, "\
 + channel add %s { chanmode { %s } addedby %s addedts %lu idle-kick %d \
@@ -1046,7 +1055,7 @@ exempt-time %d invite-time %d %cenforcebans %cdynamicbans %cuserbans \
 	PLSMNS(channel_revengebot(chan)),
 	PLSMNS(channel_private(chan)),
 	PLSMNS(channel_cycle(chan)),
-	PLSMNS(channel_inactive(chan)),
+        inactive,
 	PLSMNS(channel_dynamicexempts(chan)),
 	PLSMNS(!channel_nouserexempts(chan)),
  	PLSMNS(channel_dynamicinvites(chan)),

@@ -602,24 +602,22 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
     }
   }
 #ifdef LEAF
-  if (1 || loading) {
-    if ((old_status ^ chan->status) & CHAN_INACTIVE) {
-      if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
-        dprintf(DP_SERVER, "PART %s\n", chan->name);
-      if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
-	dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
-					   chan->name : chan->dname,
-					   chan->channel.key[0] ?
-					   chan->channel.key : chan->key_prot);
-    }
-    if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
-      recheck_channel(chan, 1);
-    /* if we -take, recheck the chan for modes and shit */
-    } else if ((chan->status ^ old_status) & (CHAN_TAKE)) {
-      recheck_channel(chan, 1);
-    } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
-      recheck_channel_modes(chan);
-    }
+  if ((old_status ^ chan->status) & CHAN_INACTIVE) {
+    if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+      dprintf(DP_SERVER, "PART %s\n", chan->name);
+    if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+      dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
+			   chan->name : chan->dname,
+			   chan->channel.key[0] ?
+			   chan->channel.key : chan->key_prot);
+  }
+  if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH)) {
+    recheck_channel(chan, 1);
+  /* if we -take, recheck the chan for modes and shit */
+  } else if ((chan->status ^ old_status) & (CHAN_TAKE)) {
+    recheck_channel(chan, 1);
+  } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
+    recheck_channel_modes(chan);
   }
 #endif /* LEAF */
   if (x > 0)
@@ -724,7 +722,6 @@ int channel_add(char *result, char *newname, char *options)
   strcat(buf, " ");
   strcat(buf, options);
   buf[strlen(buf)] = 0;
-
 
   if (SplitList(result, buf, &items, &item) != OK)
     return ERROR;

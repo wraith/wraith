@@ -941,12 +941,13 @@ static void cmd_down(struct userrec *u, int idx, char *par)
   
 }
 
-static void cmd_pls_chan(struct userrec *u, int idx, char *par)
+static void pls_chan(struct userrec *u, int idx, char *par, char *bot)
 {
   char *chname = NULL, result[1024] = "", buf[2048] = "";
   struct chanset_t *chan = NULL;
 
-  putlog(LOG_CMDS, "*", "#%s# +chan %s", dcc[idx].nick, par);
+  if (!bot)
+    putlog(LOG_CMDS, "*", "#%s# +chan %s", dcc[idx].nick, par);
 
   if (!par[0]) {
     dprintf(idx, "Usage: +chan [%s]<channel> [options]\n", CHANMETA);
@@ -954,13 +955,13 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
   }
 
   chname = newsplit(&par);
-  sprintf(buf, "cjoin %s %s", chname, par);
+  sprintf(buf, "cjoin %s %s %s", chname, bot ? bot : "*", par);		/* +chan makes all bots join */
 
-  if (findchan_by_dname(chname)) {
+  if (!bot && findchan_by_dname(chname)) {
     putallbots(buf);
     dprintf(idx, "That channel already exists!\n");
     return;
-  } else if ((chan = findchan(chname))) {
+  } else if ((chan = findchan(chname)) && !bot) {
     putallbots(buf);
     dprintf(idx, "That channel already exists as %s!\n", chan->dname);
     return;
@@ -971,25 +972,26 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
     dprintf(idx, "Invalid channel name.\n");
     return;
   }
-  if (channel_add(result, chname, par) == ERROR) {
+  if (!chan && !findchan_by_dname(chname) && channel_add(result, chname, par) == ERROR) {
     dprintf(idx, "Invalid channel or channel options.\n");
-    if (result && result[0])
+    if (result[0])
       dprintf(idx, "%s\n", result);
   } else {
     if ((chan = findchan_by_dname(chname))) {
-      char *tmp = NULL;
+      if (!bot) {
+        char tmp[51] = "";
 
+        sprintf(tmp, "addedby %s addedts %li", dcc[idx].nick, now);
+        if (buf[0])
+          sprintf(buf, "%s %s", buf, tmp);
+        else
+          sprintf(buf, "%s", tmp);
+        do_chanset(NULL, chan, tmp, DO_LOCAL);
+        dprintf(idx, "Channel %s added to the botnet.\n", chname);
+      } else {
+        dprintf(idx, "Channel %s added to the bot: %s\n", chname, bot);
+      }
       putallbots(buf);
-
-      tmp = calloc(1, 7 + 1 + strlen(dcc[idx].nick) + 1);
-      sprintf(tmp, "addedby %s", dcc[idx].nick);
-      do_chanset(NULL, chan, tmp, DO_LOCAL | DO_NET );
-      free(tmp);
-
-      tmp = calloc(1, 7 + 1 + 10 + 1);
-      sprintf(tmp, "addedts %li", now);
-      do_chanset(NULL, chan, tmp, DO_LOCAL | DO_NET );
-      free(tmp);
     }
 #ifdef HUB
     write_userfile(-1);
@@ -997,13 +999,39 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
   }
 }
 
-static void cmd_mns_chan(struct userrec *u, int idx, char *par)
+static void cmd_pls_chan(struct userrec *u, int idx, char *par)
+{
+  pls_chan(u, idx, par, NULL);
+}
+
+static void cmd_botjoin(struct userrec *u, int idx, char *par)
+{
+  char *bot = NULL;
+  struct userrec *botu = NULL;
+
+  putlog(LOG_CMDS, "*", "#%s# botjoin %s", dcc[idx].nick, par);
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: botjoin <bot> [%s]<channel> [options]\n", CHANMETA);
+    return;
+  }
+  bot = newsplit(&par);
+  botu = get_user_by_handle(userlist, bot);
+  if (botu && botu->flags && (botu->flags & USER_BOT)) {
+    pls_chan(u, idx, par, bot);
+  } else {
+    dprintf(idx, "Error: '%s' is not a bot.\n", bot);
+  }
+}
+
+static void mns_chan(struct userrec *u, int idx, char *par, char *bot)
 {
   char *chname = NULL, buf2[1024] = "";
   struct chanset_t *chan = NULL;
   int i;
 
-  putlog(LOG_CMDS, "*", "#%s# -chan %s", dcc[idx].nick, par);
+  if (!bot)
+    putlog(LOG_CMDS, "*", "#%s# -chan %s", dcc[idx].nick, par);
 
   if (!par[0]) {
     dprintf(idx, "Usage: -chan [%s]<channel>\n", CHANMETA);
@@ -1011,32 +1039,61 @@ static void cmd_mns_chan(struct userrec *u, int idx, char *par)
   }
   chname = newsplit(&par);
 
-  sprintf(buf2, "cpart %s", chname);
-  putallbots(buf2);
+  sprintf(buf2, "cpart %s %s", chname, bot ? bot : "*");
+  if (bot)		/* bot will just set it +inactive */
+    putbot(bot, buf2);
+  else
+    putallbots(buf2);
 
   chan = findchan_by_dname(chname);
   if (!chan) {
     if ((chan = findchan(chname)))
-      dprintf(idx, "That channel exists with a short name of %s, use that.\n",
-              chan->dname);
+      dprintf(idx, "That channel exists with a short name of %s, use that.\n", chan->dname);
     else
       dprintf(idx, "That channel doesn't exist!\n");
     return;
   }
 
-  for (i = 0; i < dcc_total; i++)
-    if ((dcc[i].type->flags & DCT_CHAT) &&
-	!rfc_casecmp(dcc[i].u.chat->con_chan, chan->dname)) {
-      dprintf(i, "%s is no longer a valid channel, changing your console to '*'\n",
-	      chname);
-      strcpy(dcc[i].u.chat->con_chan, "*");
-    }
-  remove_channel(chan);
+  if (!bot) {
+    for (i = 0; i < dcc_total; i++)
+      if ((dcc[i].type->flags & DCT_CHAT) && !rfc_casecmp(dcc[i].u.chat->con_chan, chan->dname)) {
+        dprintf(i, "%s is no longer a valid channel, changing your console to '*'\n", chname);
+        strcpy(dcc[i].u.chat->con_chan, "*");
+      } 
+    remove_channel(chan);
 #ifdef HUB
-  write_userfile(-1);
+    write_userfile(-1);
 #endif /* HUB */
-  dprintf(idx, "Channel %s removed from the bot.\n", chname);
-  dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
+    dprintf(idx, "Channel %s removed from the botnet.\n", chname);
+    dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
+  } else
+    dprintf(idx, "Channel %s removed from the bot: %s\n", chname, bot);
+}
+
+static void cmd_mns_chan(struct userrec *u, int idx, char *par)
+{
+  mns_chan(u, idx, par, NULL);
+}
+
+static void cmd_botpart(struct userrec *u, int idx, char *par)
+{
+  char *bot = NULL;
+  struct userrec *botu = NULL;
+
+  putlog(LOG_CMDS, "*", "#%s# botpart %s", dcc[idx].nick, par);
+  
+  if (!par[0]) {
+    dprintf(idx, "Usage: botpart <bot> [%s]<channel> [options]\n", CHANMETA);
+    return;
+  }
+
+  bot = newsplit(&par);
+  botu = get_user_by_handle(userlist, bot);
+  if (botu && botu->flags && (botu->flags & USER_BOT)) {
+    mns_chan(u, idx, par, bot);
+  } else {
+    dprintf(idx, "Error: '%s' is not a bot.\n", bot);
+  }
 }
 
 /* thanks Excelsior */
@@ -1306,6 +1363,8 @@ static cmd_t C_dcc_irc[] =
   {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL},
   {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL},
   {"bans",	"o|o",	(Function) cmd_bans,		NULL},
+  {"botjoin",	"n",	(Function) cmd_botjoin,		NULL},
+  {"botpart",	"n",	(Function) cmd_botpart,		NULL},
   {"exempts",	"o|o",	(Function) cmd_exempts,		NULL},
   {"invites",	"o|o",	(Function) cmd_invites,		NULL},
   {"chaninfo",	"m|m",	(Function) cmd_chaninfo,	NULL},
