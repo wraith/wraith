@@ -2129,47 +2129,29 @@ static void shuffleArray(char *array[], int n)
   }
 }
 
-static void str2array(const char *string, char *array[], char *delim, int *len)
+void shuffle(char *string, char *delim)
 {
-  char *p, *work = nmalloc(strlen(string) + 1);
+  char *array[501], *str, *work;
+  int len = 0, i = 0;
 
+  work = nmalloc(strlen(string) + 1);
   strcpy(work, string);
-  if ((p = strtok(work, delim))) {
-    array[(*len)] = nmalloc(strlen(p) + 1);
-    strcpy(array[(*len)], p);
-    (*len)++;
-    while (p && *p) {
-      if ((p = strtok(NULL, delim))) {
-        array[(*len)] = nmalloc(strlen(p) + 1);
-        strcpy(array[(*len)], p);
-        (*len)++;
-      } else
-        array[(*len)] = 0;
-    }
-  }
-  nfree(work);
-}
 
-static void array2str(char **array, char *string, char *delim, int len)
-{
-  int i = 0;
+  str = strtok(work, delim);
+  while(str && *str)
+  {
+    array[len] = str;
+    len++;
+    str = strtok((char*) NULL, delim);
+  }
+  shuffleArray(array, len);
   string[0] = 0;
   for (i = 0; i < len; i++) {
     strcat(string, array[i]);
-    strcat(string, delim);
-    nfree(array[i]);
+    if (i != len - 1)
+      strcat(string, delim);
   }
-  string[strlen(string) - 1] = 0;               /* remove trailing comma */
-}
-
-void shuffle(char *string, char *delim)
-{
-  char *array[501];
-  int len = 0;
-//printf("SHUFFLING: %s\n", string);
-  str2array(string, array, delim, &len);
-  shuffleArray(array, len);
-  array2str(array, string, delim, len);
-//printf("NOW: %s\n", string);
+  nfree(work);
+  string[strlen(string)] = 0;
 }
 
