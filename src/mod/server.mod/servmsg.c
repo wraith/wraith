@@ -1012,7 +1012,7 @@ static void eof_server(int idx)
 {
   int i = 0;
   putlog(LOG_SERV, "*", "%s %s", IRC_DISCONNECTED, dcc[idx].host);
-  if (ischanhub()) {
+  if (ischanhub() && auth_total > 0) {
     putlog(LOG_MISC, "*", "Removing %d auth entries.", auth_total);
     for (i = 0; i < auth_total; i++)
       removeauth(i);  
