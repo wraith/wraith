@@ -1428,14 +1428,14 @@ static void cmd_pls_chan(struct userrec *u, int idx, char *par)
   else {
     if ((chan = findchan_by_dname(chname))) {
       char *tmp = NULL;
-      tmp = nmalloc(7 + 1 + strlen(dcc[idx].nick) + 1);
+      tmp = malloc(7 + 1 + strlen(dcc[idx].nick) + 1);
       sprintf(tmp, "addedby %s", dcc[idx].nick);
       do_chanset(chan, tmp, 1);
-      nfree(tmp);
-      tmp = nmalloc(7 + 1 + 10 + 1);
+      free(tmp);
+      tmp = malloc(7 + 1 + 10 + 1);
       sprintf(tmp, "addedts %lu", now);
       do_chanset(chan, tmp, 1);
-      nfree(tmp);
+      free(tmp);
     }
 #ifdef HUB
     write_userfile(-1);
@@ -1768,7 +1768,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
     if (all)
       chan = chanset;
     bak = par;
-    buf = nmalloc(strlen(par) + 1);
+    buf = malloc(strlen(par) + 1);
     while (chan) {
       chname = chan->dname;
       strcpy(buf, bak);
@@ -1796,7 +1796,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	/* Par gets modified in tcl channel_modify under some
   	 * circumstances, so save it now.
 	 */
-	parcpy = nmalloc(strlen(par) + 1);
+	parcpy = malloc(strlen(par) + 1);
 	strcpy(parcpy, par);
         if (tcl_channel_modify(0, chan, 2, list) == TCL_OK) {
 	  strcat(answers, list[0]);
@@ -1805,7 +1805,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 	  strcat(answers, " }");
 	} else if (!all || !chan->next)
 	  dprintf(idx, "Error trying to set %s for %s, invalid option\n", list[0], all ? "all channels" : chname);
-        nfree(parcpy);
+        free(parcpy);
 	break;
       }
       if (!all && answers[0]) {
@@ -1830,7 +1830,7 @@ static void cmd_chanset(struct userrec *u, int idx, char *par)
 #endif /* HUB */
 
     }
-    nfree(buf);
+    free(buf);
   }
 }
 

@@ -23,7 +23,7 @@ char *encrypt_binary(const char *keydata, unsigned char *data, int *datalen)
   if (newdatalen % CRYPT_BLOCKSIZE)             /* more than 1 block? */
     newdatalen += (CRYPT_BLOCKSIZE - (newdatalen % CRYPT_BLOCKSIZE));
 
-  newdata = (unsigned char *) nmalloc(newdatalen);
+  newdata = (unsigned char *) malloc(newdatalen);
   egg_memcpy(newdata, data, *datalen);
   if (newdatalen != *datalen)
     egg_bzero((void *) &newdata[*datalen], (newdatalen - *datalen));
@@ -53,7 +53,7 @@ char *decrypt_binary(const char *keydata, unsigned char *data, int datalen)
   unsigned char *newdata = NULL;
 
   datalen -= datalen % CRYPT_BLOCKSIZE;
-  newdata = (unsigned char *) nmalloc(datalen);
+  newdata = (unsigned char *) malloc(datalen);
   egg_memcpy(newdata, data, datalen);
 
   if ((!keydata) || (!keydata[0])) {
@@ -105,7 +105,7 @@ char *encrypt_string(const char *keydata, char *data)
   l = strlen(data) + 1;
   bdata = encrypt_binary(keydata, data, &l);
   if ((keydata) && (keydata[0])) {
-    res = nmalloc((l * 4) / 3 + 5);
+    res = malloc((l * 4) / 3 + 5);
 #define DB(x) ((unsigned char) (x+i<l ? bdata[x+i] : 0))
     for (i = 0, t = 0; i < l; i += 3, t += 4) {
       res[t] = base64[DB(0) >> 2];
@@ -115,7 +115,7 @@ char *encrypt_string(const char *keydata, char *data)
     }
 #undef DB
     res[t] = 0;
-    nfree(bdata);
+    free(bdata);
     return res;
   } else {
     return bdata;
@@ -128,7 +128,7 @@ char *decrypt_string(const char *keydata, char *data)
   char *buf, *res;
   l = strlen(data);
   if ((keydata) && (keydata[0])) {
-    buf = nmalloc((l * 3) / 4 + 6);
+    buf = malloc((l * 3) / 4 + 6);
 #define DB(x) ((unsigned char) (x+i<l ? base64r[(unsigned char) data[x+i]] : 0))
     for (i = 0, t = 0; i < l; i += 4, t += 3) {
       buf[t] = (DB(0) << 2) + (DB(1) >> 4);
@@ -139,10 +139,10 @@ char *decrypt_string(const char *keydata, char *data)
     t += 3;
     t -= (t % 4);
     res = decrypt_binary(keydata, buf, t);
-    nfree(buf);
+    free(buf);
     return res;
   } else {
-    res = nmalloc(l + 1);
+    res = malloc(l + 1);
     strcpy(res, data);
     return res;
   }
@@ -159,7 +159,7 @@ void encrypt_pass(char *s1, char *s2)
   strcpy(s2, "+");
   strncat(s2, tmp, 15);
   s2[15] = 0;
-  nfree(tmp);
+  free(tmp);
 }
 
 int lfprintf EGG_VARARGS_DEF(FILE *, arg1)
@@ -180,7 +180,7 @@ int lfprintf EGG_VARARGS_DEF(FILE *, arg1)
       *nln++ = 0;
     tmp = encrypt_string(SALT1, ln);
     res = fprintf(stream, "%s\n", tmp);
-    nfree(tmp);
+    free(tmp);
     if (res == EOF)
       return EOF;
     ln = nln;
@@ -245,7 +245,7 @@ void DecryptFile(char *infile, char *outfile)
       fprintf(f2, "%s\n",temps);
     else
       printf("%s\n", temps);
-    nfree(temps);
+    free(temps);
   }
   if (std)
     printf("-----------------------------------END-----------------------------------\n");

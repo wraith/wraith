@@ -587,7 +587,7 @@ void set_user_flagrec(struct userrec *u, struct flag_record *fr,
 	break;
     ch = findchan_by_dname(chname);
     if (!cr && ch) {
-      cr = user_malloc(sizeof(struct chanuserrec));
+      cr = malloc(sizeof(struct chanuserrec));
       egg_bzero(cr, sizeof(struct chanuserrec));
 
       cr->next = u->chanrec;
@@ -670,16 +670,16 @@ static int botfl_pack(struct userrec *u, struct user_entry *e)
   struct flag_record fr = {FR_BOT, 0, 0, 0, 0, 0};
 
   fr.bot = e->u.ulong;
-  e->u.list = user_malloc(sizeof(struct list_type));
+  e->u.list = malloc(sizeof(struct list_type));
   e->u.list->next = NULL;
-  e->u.list->extra = user_malloc (build_flags (x, &fr, NULL) + 1);
+  e->u.list->extra = malloc (build_flags (x, &fr, NULL) + 1);
   strcpy(e->u.list->extra, x);
   return 1;
 }
 
 static int botfl_kill(struct user_entry *e)
 {
-  nfree(e);
+  free(e);
   return 1;
 }
 

@@ -141,6 +141,7 @@ void dupwait_notify(char *);
 char *rand_dccresp();
 
 /* dccutil.c */
+void *get_data_ptr(int);
 void dprintf EGG_VARARGS(int, arg1);
 void chatout EGG_VARARGS(char *, arg1);
 extern void (*shareout) ();
@@ -154,10 +155,8 @@ void makepass(char *);
 void tell_dcc(int);
 void not_away(int);
 void set_away(int, char *);
-void *_get_data_ptr(int, char *, int);
 void dcc_remove_lost(void);
 
-#define get_data_ptr(x) _get_data_ptr(x,__FILE__,__LINE__)
 void flush_lines(int, struct chat_info *);
 struct dcc_t *find_idx(int);
 int new_dcc(struct dcc_table *, int);
@@ -189,7 +188,6 @@ void do_fork();
 int crontab_exists();
 void crontab_create(int);
 void fatal(const char *, int);
-int expected_memory(void);
 void eggContext(const char *, int, const char *);
 void eggContextNote(const char *, int, const char *, const char *);
 void eggAssert(const char *, int, const char *);
@@ -204,14 +202,11 @@ int _wild_match_per(register unsigned char *, register unsigned char *);
 
 /* mem.c */
 void *my_malloc(int);
-void *n_malloc(int, const char *, int);
 void *my_realloc(void *, int);
-void *n_realloc(void *, int, const char *, int);
 void my_free(void *);
-void n_free(void *, const char *, int);
-void tell_mem_status(char *);
-void tell_mem_status_dcc(int);
-void debug_mem_to_dcc(int);
+#ifdef S_GARBLESTRINGS
+char *degarble(int, char *);
+#endif /* S_GARBLESTRINGS */
 
 /* settings.c */
 char *progname();
@@ -250,9 +245,6 @@ char *werr_tostr(int);
 int listen_all(int, int);
 char *getfullbinname(char *);
 char *replace(char *, char *, char *);
-#ifdef S_GARBLESTRINGS
-char *degarble(int, char *);
-#endif /* S_GARBLESTRINGS */
 void detected(int, char *);
 int goodpass(char *, int, char *);
 void check_last();

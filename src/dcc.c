@@ -408,7 +408,7 @@ static void dcc_bot_new(int idx, char *buf, int x)
       socklist[snum].oseed = atoi(buf);
       dprintf(idx, "elinkdone\n");
       putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
-      nfree(tmp);
+      free(tmp);
     }
   } else if (!egg_strcasecmp(code, "error")) {
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
@@ -453,7 +453,7 @@ static void free_dcc_bot_(int n, void *x)
     unvia(n, findbot(dcc[n].nick));
     rembot(dcc[n].nick);
   }
-  nfree(x);
+  free(x);
 }
 
 struct dcc_table DCC_BOT_NEW =
@@ -596,7 +596,7 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
       putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick,
 	     dcc[idx].host, dcc[idx].port);
       if (dcc[idx].u.chat->away) {
-	nfree(dcc[idx].u.chat->away);
+	free(dcc[idx].u.chat->away);
 	dcc[idx].u.chat->away = NULL;
       }
       dcc[idx].type = &DCC_CHAT;
@@ -634,8 +634,8 @@ static void dcc_chat_secpass(int idx, char *buf, int atr)
 	dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
       dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->away);
       strcpy(dcc[idx].nick, dcc[idx].u.chat->away);
-      nfree(dcc[idx].u.chat->away);
-      nfree(dcc[idx].u.chat->su_nick);
+      free(dcc[idx].u.chat->away);
+      free(dcc[idx].u.chat->su_nick);
       dcc[idx].u.chat->away = NULL;
       dcc[idx].u.chat->su_nick = NULL;
       dcc[idx].type = &DCC_CHAT;
@@ -659,7 +659,7 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
   atr = dcc[idx].user ? dcc[idx].user->flags : 0;
   if (atr & USER_BOT) {
     if (!egg_strcasecmp(buf, "elinkdone")) {
-      nfree(dcc[idx].u.chat);
+      free(dcc[idx].u.chat);
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = get_data_ptr(sizeof(struct bot_info));
       dcc[idx].status = STAT_CALLED;
@@ -695,8 +695,8 @@ static void dcc_chat_pass(int idx, char *buf, int atr)
 	dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
       dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->away);
       strcpy(dcc[idx].nick, dcc[idx].u.chat->away);
-      nfree(dcc[idx].u.chat->away);
-      nfree(dcc[idx].u.chat->su_nick);
+      free(dcc[idx].u.chat->away);
+      free(dcc[idx].u.chat->su_nick);
       dcc[idx].u.chat->away = NULL;
       dcc[idx].u.chat->su_nick = NULL;
       dcc[idx].type = &DCC_CHAT;
@@ -754,14 +754,14 @@ static void kill_dcc_general(int idx, void *x)
 
       for (r = dcc[idx].u.chat->buffer; r; r = q) {
 	q = r->next;
-	nfree(r->msg);
-	nfree(r);
+	free(r->msg);
+	free(r);
       }
     }
     if (p->away) {
-      nfree(p->away);
+      free(p->away);
     }
-    nfree(p);
+    free(p);
   }
 }
 
@@ -847,8 +847,8 @@ static void append_line(int idx, char *line)
     /* They're probably trying to fill up the bot nuke the sods :) */
     for (p = c->buffer; p; p = q) {
       q = p->next;
-      nfree(p->msg);
-      nfree(p);
+      free(p->msg);
+      free(p);
     }
     c->buffer = 0;
     dcc[idx].status &= ~STAT_PAGE;
@@ -1354,7 +1354,7 @@ static void kill_dupwait(int idx, void *x)
   if (p) {
     if (p->chat && DCC_CHAT.kill)
       DCC_CHAT.kill(idx, p->chat);
-    nfree(p);
+    free(p);
   }
 }
 
@@ -1484,7 +1484,7 @@ static void dcc_telnet_pass(int idx, int atr)
     struct chat_info *ci;
 
     ci = dcc[idx].u.dupwait->chat;
-    nfree(dcc[idx].u.dupwait);
+    free(dcc[idx].u.dupwait);
     dcc[idx].u.chat = ci;
   }
   dcc[idx].type = &DCC_CHAT_PASS;
@@ -1544,7 +1544,7 @@ static void dcc_telnet_pass(int idx, int atr)
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;
       dprintf(idx, "elink %s %lu\n", tmp2, socklist[snum].oseed);
-      nfree(tmp2);
+      free(tmp2);
       strcpy(socklist[snum].okey, initkey);
       strcpy(socklist[snum].ikey, initkey);
     } else {

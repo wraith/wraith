@@ -290,9 +290,8 @@ void tell_verbose_status(int idx)
 
 #ifdef HUB
   i = count_users(userlist);
-  dprintf(idx, "I am %s, running %s:  %d user%s (mem: %uk)\n",
-	  botnetnick, ver, i, i == 1 ? "" : "s",
-          (int) (expected_memory() / 1024));
+  dprintf(idx, "I am %s, running %s:  %d user%s\n",
+	  botnetnick, ver, i, i == 1 ? "" : "s");
   if (localhub)
     dprintf(idx, "I am a localhub.\n");
   if (isupdatehub())
@@ -454,8 +453,8 @@ void load_internal_users()
         hublevel++;		/* We must increment this even if it is already added */
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_BOT | USER_OP);
-	  bi = user_malloc(sizeof(struct bot_addr));
-	  bi->address = user_malloc(strlen(ip) + 1);
+	  bi = malloc(sizeof(struct bot_addr));
+	  bi->address = malloc(strlen(ip) + 1);
 	  strcpy(bi->address, ip);
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
@@ -464,7 +463,7 @@ void load_internal_users()
 	  if ((!bi->hublevel) && (!strcmp(hand, botnetnick)))
 	    bi->hublevel = 99;
 #endif /* HUB */
-          bi->uplink = user_malloc(1);
+          bi->uplink = malloc(1);
           bi->uplink[0] = 0;
 	  set_user(&USERENTRY_BOTADDR, get_user_by_handle(userlist, hand), bi);
 	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
@@ -583,9 +582,9 @@ void chanprog()
     /* I need to be on the userlist... doh. */
     userlist = adduser(userlist, botnetnick, STR("none"), "-", USER_BOT | USER_OP );
     u = get_user_by_handle(userlist, botnetnick);
-    bi = user_malloc(sizeof(struct bot_addr));
+    bi = malloc(sizeof(struct bot_addr));
 
-    bi->address = user_malloc(strlen(myip) + 1);
+    bi->address = malloc(strlen(myip) + 1);
     strcpy(bi->address, myip);
     bi->telnet_port = atoi(buf) ? atoi(buf) : 3333;
     bi->relay_port = bi->telnet_port;
@@ -594,7 +593,7 @@ void chanprog()
 #else
     bi->hublevel = 0;
 #endif /* HUB */
-    bi->uplink = user_malloc(1);
+    bi->uplink = malloc(1);
     bi->uplink[0] = 0;
     set_user(&USERENTRY_BOTADDR, u, bi);
   } else {
@@ -736,11 +735,11 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
 
   /* send out over botnet. */
   if (local != 2) {
-         /* nmalloc(options,chan,'cset ',' ',+ 1) */
+         /* malloc(options,chan,'cset ',' ',+ 1) */
     if (chan)
-      buf = nmalloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+      buf = malloc(strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
     else
-      buf = nmalloc(strlen(options) + 1 + 5 + 1 + 1);
+      buf = malloc(strlen(options) + 1 + 5 + 1 + 1);
     buf[0] = 0;
     strcat(buf, "cset ");
     if (chan)
@@ -752,7 +751,7 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
     buf[strlen(buf)] = 0;
     putlog(LOG_DEBUG, "*", "sending out cset: %s", buf);
     putallbots(buf); 
-    nfree(buf);
+    free(buf);
   }
   /* now set locally, hopefully it works */
   if (local && (me = module_find("channels", 0, 0))) {
@@ -769,7 +768,7 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
       ch = chan;
 
     bak = options;
-    buf2 = nmalloc(strlen(options) + 1);
+    buf2 = malloc(strlen(options) + 1);
 
     while (ch) {
       char *list[2];
@@ -792,6 +791,6 @@ void do_chanset(struct chanset_t *chan, char *options, int local)
       else
         ch = NULL;
     }
-    nfree(buf2);
+    free(buf2);
   }
 }

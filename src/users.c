@@ -87,17 +87,17 @@ int delignore(char *ign)
 
       if (mask) {
 	shareout(NULL, STR("-i %s\n"), mask);
-	nfree(mask);
+	free(mask);
       }
     }
-    nfree((*u)->igmask);
+    free((*u)->igmask);
     if ((*u)->msg)
-      nfree((*u)->msg);
+      free((*u)->msg);
     if ((*u)->user)
-      nfree((*u)->user);
+      free((*u)->user);
     t = *u;
     *u = (*u)->next;
-    nfree(t);
+    free(t);
   }
   return i;
 }
@@ -113,23 +113,23 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
     }
 
   if (p == NULL) {
-    p = user_malloc(sizeof(struct igrec));
+    p = malloc(sizeof(struct igrec));
     p->next = global_ign;
     global_ign = p;
   } else {
-    nfree(p->igmask);
-    nfree(p->user);
-    nfree(p->msg);
+    free(p->igmask);
+    free(p->user);
+    free(p->msg);
   }
 
   p->expire = expire_time;
   p->added = now;
   p->flags = expire_time ? 0 : IGREC_PERM;
-  p->igmask = user_malloc(strlen(ign) + 1);
+  p->igmask = malloc(strlen(ign) + 1);
   strcpy(p->igmask, ign);
-  p->user = user_malloc(strlen(from) + 1);
+  p->user = malloc(strlen(from) + 1);
   strcpy(p->user, from);
-  p->msg = user_malloc(strlen(mnote) + 1);
+  p->msg = malloc(strlen(mnote) + 1);
   strcpy(p->msg, mnote);
   if (!noshare) {
     char *mask = str_escape(ign, ':', '\\');
@@ -137,7 +137,7 @@ void addignore(char *ign, char *from, char *mnote, time_t expire_time)
     if (mask) {
       shareout(NULL, STR("+i %s %lu %c %s %s\n"), mask, expire_time - now,
 	       (p->flags & IGREC_PERM) ? 'p' : '-', from, mnote);
-      nfree(mask);
+      free(mask);
     }
   }
 }
@@ -221,7 +221,7 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
 			 char *note, time_t expire_time, int flags,
 			 time_t added, time_t last)
 {
-  maskrec *p = user_malloc(sizeof(maskrec));
+  maskrec *p = malloc(sizeof(maskrec));
   maskrec **u = (chan) ? m : global;
 
   p->next = *u;
@@ -230,11 +230,11 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
   p->added = added;
   p->lastactive = last;
   p->flags = flags;
-  p->mask = user_malloc(strlen(mask) + 1);
+  p->mask = malloc(strlen(mask) + 1);
   strcpy(p->mask, mask);
-  p->user = user_malloc(strlen(from) + 1);
+  p->user = malloc(strlen(from) + 1);
   strcpy(p->user, from);
-  p->desc = user_malloc(strlen(note) + 1);
+  p->desc = malloc(strlen(note) + 1);
   strcpy(p->desc, note);
 }
 
@@ -430,19 +430,19 @@ static void restore_ignore(char *host)
 	added = "0";
 	desc = NULL;
       }
-      p = user_malloc(sizeof(struct igrec));
+      p = malloc(sizeof(struct igrec));
 
       p->next = global_ign;
       global_ign = p;
       p->expire = atoi(expi);
       p->added = atoi(added);
       p->flags = flags;
-      p->igmask = user_malloc(strlen(host) + 1);
+      p->igmask = malloc(strlen(host) + 1);
       strcpy(p->igmask, host);
-      p->user = user_malloc(strlen(user) + 1);
+      p->user = malloc(strlen(user) + 1);
       strcpy(p->user, user);
       if (desc) {
-	p->msg = user_malloc(strlen(desc) + 1);
+	p->msg = malloc(strlen(desc) + 1);
 	strcpy(p->msg, desc);
       } else
 	p->msg = NULL;
@@ -712,7 +712,7 @@ int readuserfile(char *file, struct userrec **ret)
   fgets(cbuf, 180, f);
   temps = (char *) decrypt_string(SALT1, cbuf);
   egg_snprintf(s, 180, temps);
-  nfree(temps);
+  free(temps);
   if (s[1] < '4') {
     fatal(USERF_OLDFMT, 0);
   }
@@ -723,7 +723,7 @@ int readuserfile(char *file, struct userrec **ret)
     fgets(cbuf, 1024, f);
     temps = (char *) decrypt_string(SALT1, cbuf);
     egg_snprintf(s, 1024, temps);
-    nfree(temps);
+    free(temps);
     if (!feof(f)) {
       line++;
       if (s[0] != '#' && s[0] != ';' && s[0]) {
@@ -800,7 +800,7 @@ int readuserfile(char *file, struct userrec **ret)
 		  break;
 	      if (!cr) {
 		cr = (struct chanuserrec *)
-		  user_malloc(sizeof(struct chanuserrec));
+		  malloc(sizeof(struct chanuserrec));
 
 		cr->next = u->chanrec;
 		u->chanrec = cr;
@@ -809,7 +809,7 @@ int readuserfile(char *file, struct userrec **ret)
 		cr->flags = fr.chan;
 		cr->flags_udef = fr.udef_chan;
 		if (s[0]) {
-		  cr->info = (char *) user_malloc(strlen(s) + 1);
+		  cr->info = (char *) malloc(strlen(s) + 1);
 		  strcpy(cr->info, s);
 		} else
 		  cr->info = NULL;
@@ -912,24 +912,24 @@ int readuserfile(char *file, struct userrec **ret)
 	      if (ue->name && !egg_strcasecmp(code + 2, ue->name)) {
 		struct list_type *list;
 
-		list = user_malloc(sizeof(struct list_type));
+		list = malloc(sizeof(struct list_type));
 
 		list->next = NULL;
-		list->extra = user_malloc(strlen(s) + 1);
+		list->extra = malloc(strlen(s) + 1);
 		strcpy(list->extra, s);
 		list_append((&ue->u.list), list);
 		ok = 1;
 	      }
 	    if (!ok) {
-	      ue = user_malloc(sizeof(struct user_entry));
+	      ue = malloc(sizeof(struct user_entry));
 
-	      ue->name = user_malloc(strlen(code + 1));
+	      ue->name = malloc(strlen(code + 1));
 	      ue->type = NULL;
 	      strcpy(ue->name, code + 2);
-	      ue->u.list = user_malloc(sizeof(struct list_type));
+	      ue->u.list = malloc(sizeof(struct list_type));
 
 	      ue->u.list->next = NULL;
-	      ue->u.list->extra = user_malloc(strlen(s) + 1);
+	      ue->u.list->extra = malloc(strlen(s) + 1);
 	      strcpy(ue->u.list->extra, s);
 	      list_insert((&u->entries), ue);
 	    }
@@ -1019,7 +1019,7 @@ int readuserfile(char *file, struct userrec **ret)
 	if (uet) {
 	  e->type = uet;
 	  uet->unpack(u, e);
-	  nfree(e->name);
+	  free(e->name);
 	  e->name = NULL;
 	}
       }
@@ -1259,7 +1259,7 @@ void autolink_cycle(char *start)
     if (glob_bot(fr) && strcmp(u->handle, botnetnick) && strcmp(u->handle, avoidbot) && (bot_hublevel(u) < 999)) {
       putlog(LOG_DEBUG, "@", STR("Adding %s to hublist"), u->handle);
       hl2 = hl;
-      hl = user_malloc(sizeof(struct hublist_entry));
+      hl = malloc(sizeof(struct hublist_entry));
       egg_bzero(hl, sizeof(struct hublist_entry));
 
       hl->next = hl2;
@@ -1277,7 +1277,7 @@ void autolink_cycle(char *start)
     }
     hlc--;
     hl2 = hl->next;
-    nfree(hl);
+    free(hl);
     hl = hl2;
   }
 }

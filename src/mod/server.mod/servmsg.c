@@ -195,15 +195,15 @@ static int got001(char *from, char *msg)
       return 0;
     }
     if (x->realname)
-      nfree(x->realname);
+      free(x->realname);
     if (strict_servernames == 1) {
       x->realname = NULL;
       if (x->name)
-	nfree(x->name);
-      x->name = nmalloc(strlen(from) + 1);
+	free(x->name);
+      x->name = malloc(strlen(from) + 1);
       strcpy(x->name, from);
     } else {
-      x->realname = nmalloc(strlen(from) + 1);
+      x->realname = malloc(strlen(from) + 1);
       strcpy(x->realname, from);
     }
   }

@@ -37,7 +37,7 @@ void init_bots()
   tandbot = NULL;
   /* Grab space for 50 bots for now -- expand later as needed */
   maxparty = 50;
-  party = (party_t *) nmalloc(maxparty * sizeof(party_t));
+  party = (party_t *) malloc(maxparty * sizeof(party_t));
 }
 
 tand_t *findbot(char *who)
@@ -61,7 +61,7 @@ void addbot(char *who, char *from, char *next, char flag, int vernum)
       putlog(LOG_BOTS, "*", "!!! Duplicate botnet bot entry!!");
     ptr = &((*ptr)->next);
   }
-  ptr2 = nmalloc(sizeof(tand_t));
+  ptr2 = malloc(sizeof(tand_t));
   strncpy(ptr2->bot, who, HANDLEN);
   ptr2->bot[HANDLEN] = 0;
   ptr2->share = flag;
@@ -141,8 +141,8 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock,
 	  flag = '-';
 	party[i].flag = flag;
 	if (party[i].from)
-	  nfree(party[i].from);
-	party[i].from = nmalloc(strlen(from) + 1);
+	  free(party[i].from);
+	party[i].from = malloc(strlen(from) + 1);
 	strcpy(party[i].from, from);
       }
       *idx = i;
@@ -152,7 +152,7 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock,
   /* New member */
   if (parties == maxparty) {
     maxparty += 50;
-    party = (party_t *) nrealloc((void *) party, maxparty * sizeof(party_t));
+    party = (party_t *) realloc((void *) party, maxparty * sizeof(party_t));
   }
   strncpy(party[parties].nick, nick, HANDLEN);
   party[parties].nick[HANDLEN] = 0;
@@ -167,11 +167,11 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock,
     if (flag == ' ')
       flag = '-';
     party[parties].flag = flag;
-    party[parties].from = nmalloc(strlen(from) + 1);
+    party[parties].from = malloc(strlen(from) + 1);
     strcpy(party[parties].from, from);
   } else {
     party[parties].flag = ' ';
-    party[parties].from = nmalloc(10);
+    party[parties].from = malloc(10);
     strcpy(party[parties].from, "(unknown)");
   }
   *idx = parties;
@@ -268,9 +268,9 @@ void partyaway(char *bot, int sock, char *msg)
     if ((!egg_strcasecmp(party[i].bot, bot)) &&
 	(party[i].sock == sock)) {
       if (party[i].away)
-	nfree(party[i].away);
+	free(party[i].away);
       if (msg[0]) {
-	party[i].away = nmalloc(strlen(msg) + 1);
+	party[i].away = malloc(strlen(msg) + 1);
 	strcpy(party[i].away, msg);
       } else
 	party[i].away = 0;
@@ -301,7 +301,7 @@ void rembot(char *who)
 
   ptr2 = *ptr;
   *ptr = ptr2->next;
-  nfree(ptr2);
+  free(ptr2);
   tands--;
 
   dupwait_notify(who);
@@ -316,9 +316,9 @@ void remparty(char *bot, int sock)
 	(party[i].sock == sock)) {
       parties--;
       if (party[i].from)
-	nfree(party[i].from);
+	free(party[i].from);
       if (party[i].away)
-	nfree(party[i].away);
+	free(party[i].away);
       if (i < parties) {
 	strcpy(party[i].bot, party[parties].bot);
 	strcpy(party[i].nick, party[parties].nick);
@@ -1018,7 +1018,7 @@ int botlink(char *linker, int idx, char *nick)
 
 static void botlink_resolve_failure(int i)
 {
-  nfree(dcc[i].u.dns->cptr);
+  free(dcc[i].u.dns->cptr);
   lostdcc(i);
 }
 
@@ -1040,7 +1040,7 @@ static void botlink_resolve_success(int i)
 #else
   dcc[i].sock = getsock(SOCK_STRONGCONN);
 #endif /* USE_IPV6 */
-  nfree(linker);
+  free(linker);
 
   if (dcc[i].sock < 0 ||
 #ifdef USE_IPV6
@@ -1084,7 +1084,7 @@ static void failed_tandem_relay(int idx)
 
     dprintf(uidx, "%s %s.\n", BOT_CANTLINKTO, dcc[idx].nick);
     dcc[uidx].status = dcc[uidx].u.relay->old_status;
-    nfree(dcc[uidx].u.relay);
+    free(dcc[uidx].u.relay);
     dcc[uidx].u.chat = ci;
     dcc[uidx].type = &DCC_CHAT;
     killsock(dcc[idx].sock);
@@ -1213,7 +1213,7 @@ static void tandem_relay_resolve_failure(int idx)
   ci = dcc[uidx].u.relay->chat;
   dprintf(uidx, "%s %s.\n", BOT_CANTLINKTO, dcc[idx].nick);
   dcc[uidx].status = dcc[uidx].u.relay->old_status;
-  nfree(dcc[uidx].u.relay);
+  free(dcc[uidx].u.relay);
   dcc[uidx].u.chat = ci;
   dcc[uidx].type = &DCC_CHAT;
   killsock(dcc[idx].sock);
@@ -1284,7 +1284,7 @@ static void pre_relay(int idx, char *buf, register int i)
     putlog(LOG_MISC, "*", "%s %s -> %s", BOT_ABORTRELAY3, dcc[idx].nick,
 	   dcc[tidx].nick);
     dcc[idx].status = dcc[idx].u.relay->old_status;
-    nfree(dcc[idx].u.relay);
+    free(dcc[idx].u.relay);
     dcc[idx].u.chat = ci;
     dcc[idx].type = &DCC_CHAT;
     killsock(dcc[tidx].sock);
@@ -1400,7 +1400,7 @@ static void eof_dcc_relay(int idx)
 	 dcc[idx].nick);
   dprintf(j, "\n\n*** %s %s\n", BOT_ENDRELAY2, botnetnick);
   ci = dcc[j].u.relay->chat;
-  nfree(dcc[j].u.relay);
+  free(dcc[j].u.relay);
   dcc[j].u.chat = ci;
   dcc[j].type = &DCC_CHAT;
   if (dcc[j].u.chat->channel >= 0) {
@@ -1501,7 +1501,7 @@ static void dcc_relaying(int idx, char *buf, int j)
       botnet_send_join_idx(idx, -1);
   }
   ci = dcc[idx].u.relay->chat;
-  nfree(dcc[idx].u.relay);
+  free(dcc[idx].u.relay);
   dcc[idx].u.chat = ci;
   dcc[idx].type = &DCC_CHAT;
   check_chon(dcc[idx].nick, idx);
@@ -1538,7 +1538,7 @@ static void kill_relay(int idx, void *x)
 
   if (p->chat)
     DCC_CHAT.kill(idx, p->chat);
-  nfree(p);
+  free(p);
 }
 
 struct dcc_table DCC_RELAY =

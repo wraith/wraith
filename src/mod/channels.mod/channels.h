@@ -106,7 +106,7 @@ inline static int chanset_unlink(struct chanset_t *chan);
 #define del_chanrec ((void (*)(struct userrec *, char *))channels_funcs[10])
 #define set_handle_chaninfo ((void (*)(struct userrec *, char *, char *, char *))channels_funcs[11])
 /* 12 - 15 */
-#define channel_malloc(x) ((void *(*)(int, char *, int))channels_funcs[12])(x,__FILE__,__LINE__)
+/* UNUSED 12 */
 #define u_match_mask ((int (*)(maskrec *, char *))channels_funcs[13])
 #define u_equals_mask ((int (*)(maskrec *, char *))channels_funcs[14])
 #define clear_channel ((void (*)(struct chanset_t *, int))channels_funcs[15])

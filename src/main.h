@@ -91,7 +91,7 @@
 
 /* For pre Tcl7.5p1 versions */
 #ifndef HAVE_TCL_FREE
-#  define Tcl_Free(x) n_free(x, "", 0)
+#  define Tcl_Free(x) free(x)
 #endif
 
 /* For pre7.6 Tcl versions */

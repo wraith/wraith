@@ -49,7 +49,7 @@ int timer_create_complex(egg_timeval_t *howlong, Function callback, void *client
 	}
 
 	/* Fill out a new timer. */
-	timer = (egg_timer_t *)nmalloc(sizeof(*timer));
+	timer = (egg_timer_t *)malloc(sizeof(*timer));
 	timer->callback = callback;
 	timer->client_data = client_data;
 	timer->flags = flags;
@@ -88,7 +88,7 @@ int timer_destroy(int timer_id)
 	if (prev) prev->next = timer->next;
 	else timer_list_head = timer->next;
 
-	nfree(timer);
+	free(timer);
 	return(0);
 }
 
@@ -97,7 +97,7 @@ int timer_destroy_all()
 	egg_timer_t *timer;
 
 	for (timer = timer_list_head; timer; timer = timer->next) {
-		nfree(timer);
+		free(timer);
 	}
 	timer_list_head = NULL;
 	return(0);
@@ -160,7 +160,7 @@ int timer_run()
 			}
 		}
 		else {
-			nfree(timer);
+			free(timer);
 		}
 		callback(client_data);
 	}

@@ -113,7 +113,7 @@ static void update_ufsend(int idx, char *par)
       dcc[i].addr = my_atoul(ip);
       dcc[i].port = atoi(port);
       strcpy(dcc[i].nick, "*binary");
-      dcc[i].u.xfer->filename = nmalloc(strlen(s) + 1);
+      dcc[i].u.xfer->filename = malloc(strlen(s) + 1);
       strcpy(dcc[i].u.xfer->filename, s);
       dcc[i].u.xfer->origname = dcc[i].u.xfer->filename;
       dcc[i].u.xfer->length = atoi(par);
@@ -176,11 +176,11 @@ static void got_nu(char *botnick, char *code, char *par)
 #ifdef LEAF
      u1 = get_user_by_handle(userlist, botnetnick);
      obi = get_user(&USERENTRY_BOTADDR, u1);
-     bi = user_malloc(sizeof(struct bot_addr));
+     bi = malloc(sizeof(struct bot_addr));
 
-     bi->uplink = user_malloc(strlen(botnick) + 1);
+     bi->uplink = malloc(strlen(botnick) + 1);
      strcpy(bi->uplink, botnick);
-     bi->address = user_malloc(strlen(obi->address) + 1);
+     bi->address = malloc(strlen(obi->address) + 1);
      strcpy(bi->address, obi->address);
      bi->telnet_port = obi->telnet_port;
      bi->relay_port = obi->relay_port;

@@ -32,10 +32,10 @@ static int do_op(char *nick, struct chanset_t *chan, int force)
   if (channel_fastop(chan) || channel_take(chan)) {
     add_mode(chan, '+', 'o', nick);
   } else {
-    char *tmp = nmalloc(strlen(chan->name) + 200);
+    char *tmp = malloc(strlen(chan->name) + 200);
     makeopline(chan, nick, tmp);
     dprintf(DP_MODE, tmp);
-    nfree(tmp);
+    free(tmp);
   }
   return 1;
 }
@@ -82,7 +82,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
     postsize -= egg_strcatn(post, chan->key, sizeof(post));
     postsize -= egg_strcatn(post, " ", sizeof(post));
 
-    nfree(chan->key), chan->key = NULL;
+    free(chan->key), chan->key = NULL;
   }
 
   /* max +l is signed 2^32 on ircnet at least... so makesure we've got at least
@@ -111,7 +111,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
     postsize -= egg_strcatn(post, chan->rmkey, sizeof(post));
     postsize -= egg_strcatn(post, " ", sizeof(post));
 
-    nfree(chan->rmkey), chan->rmkey = NULL;
+    free(chan->rmkey), chan->rmkey = NULL;
   }
 
   /* Do -{b,e,I} before +{b,e,I} to avoid the server ignoring overlaps */
@@ -131,7 +131,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
       postsize -= egg_strcatn(post, chan->cmode[i].op, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
 
-      nfree(chan->cmode[i].op), chan->cmode[i].op = NULL;
+      free(chan->cmode[i].op), chan->cmode[i].op = NULL;
       chan->cmode[i].type = 0;
     }
   }
@@ -153,7 +153,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
       postsize -= egg_strcatn(post, chan->cmode[i].op, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
 
-      nfree(chan->cmode[i].op), chan->cmode[i].op = NULL;
+      free(chan->cmode[i].op), chan->cmode[i].op = NULL;
       chan->cmode[i].type = 0;
     }
   }
@@ -202,7 +202,7 @@ void dequeue_op_deop(struct chanset_t * chan) {
       modechars[0] = 0;
       nicks[0] = 0;
     }
-    nfree(chan->opqueue[i].target);
+    free(chan->opqueue[i].target);
     chan->opqueue[i].target = NULL;
     i++;
   }
@@ -229,7 +229,7 @@ void dequeue_op_deop(struct chanset_t * chan) {
         lines[0]=0;
       }
     }
-    nfree(chan->deopqueue[i].target);
+    free(chan->deopqueue[i].target);
     chan->deopqueue[i].target = NULL;
     i++;
   }
@@ -248,7 +248,7 @@ void queue_op(struct chanset_t *chan, char *op) {
   memberlist *m;
   for (n = 0; n < 20; n++) {
     if (!chan->opqueue[n].target) {
-      chan->opqueue[n].target = nmalloc(strlen(op) + 1);
+      chan->opqueue[n].target = malloc(strlen(op) + 1);
       strcpy(chan->opqueue[n].target, op);
       m = ismember(chan, op);
       if (m)
@@ -265,7 +265,7 @@ void queue_deop(struct chanset_t *chan, char *op) {
   memberlist *m;
   for (n = 0; n<20; n++) {
     if (!chan->deopqueue[n].target) {
-      chan->deopqueue[n].target = nmalloc(strlen(op)+1);
+      chan->deopqueue[n].target = malloc(strlen(op)+1);
       strcpy(chan->deopqueue[n].target, op);
       m = ismember(chan, op);
       if (m)
@@ -392,7 +392,7 @@ static void real_add_mode(struct chanset_t *chan,
     for (i = 0; i < modesperline; i++)
       if (chan->cmode[i].type == 0) {
 	chan->cmode[i].type = type;
-	chan->cmode[i].op = (char *) channel_malloc(l);
+	chan->cmode[i].op = (char *) malloc(l);
 	chan->bytes += l;	/* Add 1 for safety */
 	strcpy(chan->cmode[i].op, op);
 	break;
@@ -402,16 +402,16 @@ static void real_add_mode(struct chanset_t *chan,
   /* +k ? store key */
   else if (plus == '+' && mode == 'k') {
     if (chan->key)
-      nfree(chan->key);
-    chan->key = (char *) channel_malloc(strlen(op) + 1);
+      free(chan->key);
+    chan->key = (char *) malloc(strlen(op) + 1);
     if (chan->key)
       strcpy(chan->key, op);
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
     if (chan->rmkey)
-      nfree(chan->rmkey);
-    chan->rmkey = (char *) channel_malloc(strlen(op) + 1);
+      free(chan->rmkey);
+    chan->rmkey = (char *) malloc(strlen(op) + 1);
     if (chan->rmkey)
       strcpy(chan->rmkey, op);
   }
@@ -484,7 +484,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
     postsize -= egg_strcatn(post, chan->key, sizeof(post));
     postsize -= egg_strcatn(post, " ", sizeof(post));
 
-    nfree(chan->key), chan->key = NULL;
+    free(chan->key), chan->key = NULL;
   }
 
   /* max +l is signed 2^32 on IRCnet at least... so makesure we've got at least
@@ -514,7 +514,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
     postsize -= egg_strcatn(post, chan->rmkey, sizeof(post));
     postsize -= egg_strcatn(post, " ", sizeof(post));
 
-    nfree(chan->rmkey), chan->rmkey = NULL;
+    free(chan->rmkey), chan->rmkey = NULL;
   }
 
   /* Do -{b,e,I} before +{b,e,I} to avoid the server ignoring overlaps */
@@ -532,7 +532,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
       postsize -= egg_strcatn(post, chan->cmode[i].op, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
 
-      nfree(chan->cmode[i].op), chan->cmode[i].op = NULL;
+      free(chan->cmode[i].op), chan->cmode[i].op = NULL;
       chan->cmode[i].type = 0;
     }
   }
@@ -552,7 +552,7 @@ static void flush_mode(struct chanset_t *chan, int pri)
       postsize -= egg_strcatn(post, chan->cmode[i].op, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
 
-      nfree(chan->cmode[i].op), chan->cmode[i].op = NULL;
+      free(chan->cmode[i].op), chan->cmode[i].op = NULL;
       chan->cmode[i].type = 0;
     }
   }
@@ -684,7 +684,7 @@ static void real_add_mode(struct chanset_t *chan,
     for (i = 0; i < modesperline; i++)
       if (chan->cmode[i].type == 0) {
         chan->cmode[i].type = type;
-        chan->cmode[i].op = (char *) channel_malloc(l);
+        chan->cmode[i].op = (char *) malloc(l);
         chan->bytes += l;       /* Add 1 for safety */
         strcpy(chan->cmode[i].op, op);
         break;
@@ -694,16 +694,16 @@ static void real_add_mode(struct chanset_t *chan,
   /* +k ? store key */
   else if (plus == '+' && mode == 'k') {
     if (chan->key)
-      nfree(chan->key);
-    chan->key = (char *) channel_malloc(strlen(op) + 1);
+      free(chan->key);
+    chan->key = (char *) malloc(strlen(op) + 1);
     if (chan->key)
       strcpy(chan->key, op);
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
     if (chan->rmkey)
-      nfree(chan->rmkey);
-    chan->rmkey = (char *) channel_malloc(strlen(op) + 1);
+      free(chan->rmkey);
+    chan->rmkey = (char *) malloc(strlen(op) + 1);
     if (chan->rmkey)
       strcpy(chan->rmkey, op);
   }
@@ -852,10 +852,10 @@ flush_mode(chan, QUICK);
   m->flags |= WASOP;
   if (check_chan) {
     /* tell other bots to set jointime to 0 and join */
-    char *buf = nmalloc(strlen(chan->dname) + 3 + 1);
+    char *buf = malloc(strlen(chan->dname) + 3 + 1);
     sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);
-    nfree(buf);
+    free(buf);
     recheck_channel(chan, 1);
   }
 }
@@ -1024,9 +1024,9 @@ static void got_unban(struct chanset_t *chan, char *nick, char *from,
       old->next = b->next;
     else
       chan->channel.ban = b->next;
-    nfree(b->mask);
-    nfree(b->who);
-    nfree(b);
+    free(b->mask);
+    free(b->who);
+    free(b);
   }
 
   if (channel_pending(chan))
@@ -1090,9 +1090,9 @@ static void got_unexempt(struct chanset_t *chan, char *nick, char *from,
       old->next = e->next;
     else
       chan->channel.exempt = e->next;
-    nfree(e->mask);
-    nfree(e->who);
-    nfree(e);
+    free(e->mask);
+    free(e->who);
+    free(e);
   }
 
   if (channel_pending(chan))
@@ -1166,9 +1166,9 @@ static void got_uninvite(struct chanset_t *chan, char *nick, char *from,
       old->next = inv->next;
     else
       chan->channel.invite = inv->next;
-    nfree(inv->mask);
-    nfree(inv->who);
-    nfree(inv);
+    free(inv->mask);
+    free(inv->who);
+    free(inv);
   }
 
   if (channel_pending(chan))
@@ -1238,7 +1238,7 @@ static int gotmode(char *from, char *msg)
           mp = newsplit(&wptr);
           if (strchr("ob", p[0])) {
             /* Just want o's and b's */
-            modes[modecnt] = nmalloc(strlen(mp) + 4);
+            modes[modecnt] = malloc(strlen(mp) + 4);
             sprintf(modes[modecnt], STR("%c%c %s"), sign, p[0], mp);
             modecnt++;
             if (p[0] == 'o') {
@@ -1333,7 +1333,7 @@ static int gotmode(char *from, char *msg)
           p = decrypt_string(key, enccookie);
 /* putlog(LOG_DEBUG, "*", "Decrypted cookie: %s", p); */
           strncpyz(plaincookie, p, sizeof(plaincookie));
-          nfree(p);
+          free(p);
           /*
            * last 6 digits of time
            * last 5 chars of nick
@@ -1463,7 +1463,7 @@ static int gotmode(char *from, char *msg)
       }
       for (i = 0; i < 5; i++)
         if (modes[i])
-          nfree(modes[i]);
+          free(modes[i]);
     }
 
     /* Now do the modes again, this time throughly... */

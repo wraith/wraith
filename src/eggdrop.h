@@ -222,9 +222,6 @@ typedef int socklen_t;
  */
 
 #define my_bzero(a, b) { char *x = (char *) a; int y = (int) b; while (y--) *x++ = 0; }
-#define nmalloc(x)	n_malloc((x),__FILE__,__LINE__)
-#define nrealloc(x,y)	n_realloc((x),(y),__FILE__,__LINE__)
-#define nfree(x)	n_free((x),__FILE__,__LINE__)
 #define killsock(x)	real_killsock((x),__FILE__,__LINE__)
 
 #ifdef DEBUG_CONTEXT
@@ -243,15 +240,6 @@ typedef int socklen_t;
 #else
 #  define Assert(expr)	do {	} while (0)
 #endif
-
-#ifndef COMPILING_MEM
-#  undef malloc
-#  define malloc(x)	dont_use_old_malloc(x)
-#  undef free
-#  define free(x)	dont_use_old_free(x)
-#  undef realloc
-#  define realloc(x)    dont_use_old_realloc(x)
-#endif /* !COMPILING_MEM */
 
 /* 32 bit type */
 #if (SIZEOF_INT == 4)

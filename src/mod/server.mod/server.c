@@ -160,8 +160,8 @@ static void deq_msg()
       modeq.tot--;
       last_time += calc_penalty(modeq.head->msg);
       q = modeq.head->next;
-      nfree(modeq.head->msg);
-      nfree(modeq.head);
+      free(modeq.head->msg);
+      free(modeq.head);
       modeq.head = q;
       burst++;
     }
@@ -186,8 +186,8 @@ static void deq_msg()
     mq.tot--;
     last_time += calc_penalty(mq.head->msg);
     q = mq.head->next;
-    nfree(mq.head->msg);
-    nfree(mq.head);
+    free(mq.head->msg);
+    free(mq.head);
     mq.head = q;
     if (!mq.head)
       mq.last = NULL;
@@ -210,8 +210,8 @@ static void deq_msg()
   hq.tot--;
   last_time += calc_penalty(hq.head->msg);
   q = hq.head->next;
-  nfree(hq.head->msg);
-  nfree(hq.head);
+  free(hq.head->msg);
+  free(hq.head);
   hq.head = q;
   if (!hq.head)
     hq.last = NULL;
@@ -448,8 +448,8 @@ static int fast_deq(int which)
       m->next = nm->next;
       if (!nm->next)
         h->last = m;
-      nfree(nm->msg);
-      nfree(nm);
+      free(nm->msg);
+      free(nm);
       h->tot--;
     } else
       m = m->next;
@@ -460,8 +460,8 @@ static int fast_deq(int which)
     tosend[len - 1] = '\n';
     tputs(serv, tosend, len);
     m = h->head->next;
-    nfree(h->head->msg);
-    nfree(h->head);
+    free(h->head->msg);
+    free(h->head);
     h->head = m;
     if (!h->head)
       h->last = 0;
@@ -535,15 +535,15 @@ static void parse_q(struct msgq_head *q, char *oldnick, char *newnick)
           q->head = m->next;
         else
           lm->next = m->next;
-        nfree(m->msg);
-        nfree(m);
+        free(m->msg);
+        free(m);
         m = lm;
         q->tot--;
         if (!q->head)
           q->last = 0;
       } else {
-        nfree(m->msg);
-        m->msg = nmalloc(strlen(newmsg) + 1);
+        free(m->msg);
+        m->msg = malloc(strlen(newmsg) + 1);
         m->len = strlen(newmsg);
         strcpy(m->msg, newmsg);
       }
@@ -602,17 +602,17 @@ static void purge_kicks(struct msgq_head *q)
             q->head = m->next;
           else
             lm->next = m->next;
-          nfree(m->msg);
-          nfree(m);
+          free(m->msg);
+          free(m);
           m = lm;
           q->tot--;
           if (!q->head)
             q->last = 0;
         } else {
-          nfree(m->msg);
+          free(m->msg);
           egg_snprintf(newmsg, sizeof newmsg, "KICK %s %s %s\n", chan,
 		       newnicks + 1, reason);
-          m->msg = nmalloc(strlen(newmsg) + 1);
+          m->msg = malloc(strlen(newmsg) + 1);
           m->len = strlen(newmsg);
           strcpy(m->msg, newmsg);
         }
@@ -700,17 +700,17 @@ static int deq_kick(int which)
             h->head->next = m->next;
           else
             lm->next = m->next;
-          nfree(m->msg);
-          nfree(m);
+          free(m->msg);
+          free(m);
           m = lm;
           h->tot--;
           if (!h->head)
             h->last = 0;
         } else {
-          nfree(m->msg);
+          free(m->msg);
           egg_snprintf(newmsg, sizeof newmsg, "KICK %s %s %s\n", chan2,
 		       newnicks2 + 1, reason);
-          m->msg = nmalloc(strlen(newmsg) + 1);
+          m->msg = malloc(strlen(newmsg) + 1);
           m->len = strlen(newmsg);
           strcpy(m->msg, newmsg);
         }
@@ -743,8 +743,8 @@ static int deq_kick(int which)
   h->tot--;
   last_time += calc_penalty(newmsg);
   m = h->head->next;
-  nfree(h->head->msg);
-  nfree(h->head);
+  free(h->head->msg);
+  free(h->head);
   h->head = m;
   if (!h->head)
     h->last = 0;
@@ -839,7 +839,7 @@ static void queue_server(int which, char *buf, int len)
 	}
       }
 
-    q = nmalloc(sizeof(struct msgq));
+    q = malloc(sizeof(struct msgq));
     if (qnext)
       q->next = h->head;
     else
@@ -853,7 +853,7 @@ static void queue_server(int which, char *buf, int len)
        h->head = q;
     h->last = q;
     q->len = len;
-    q->msg = nmalloc(len + 1);
+    q->msg = malloc(len + 1);
     strncpyz(q->msg, buf, len + 1);
     h->tot++;
     h->warned = 0;
@@ -929,7 +929,7 @@ static void add_server(char *ss)
     p = strchr(ss, ',');
     if (p)
       *p++ = 0;
-    x = nmalloc(sizeof(struct server_list));
+    x = malloc(sizeof(struct server_list));
 
     x->next = 0;
     x->realname = 0;
@@ -943,7 +943,7 @@ static void add_server(char *ss)
     if (!q) {
       x->port = default_port;
       x->pass = 0;
-      x->name = nmalloc(strlen(ss) + 1);
+      x->name = malloc(strlen(ss) + 1);
       strcpy(x->name, ss);
     } else {
 #ifdef USE_IPV6
@@ -957,7 +957,7 @@ static void add_server(char *ss)
       }
 #endif /* USE_IPV6 */
       *q++ = 0;
-      x->name = nmalloc(q - ss);
+      x->name = malloc(q - ss);
       strcpy(x->name, ss);
       ss = q;
       q = strchr(ss, ':');
@@ -965,7 +965,7 @@ static void add_server(char *ss)
 	x->pass = 0;
       } else {
 	*q++ = 0;
-	x->pass = nmalloc(strlen(q) + 1);
+	x->pass = malloc(strlen(q) + 1);
 	strcpy(x->pass, q);
       }
 #ifdef USE_IPV6
@@ -989,12 +989,12 @@ static void clearq(struct server_list *xx)
   while (xx) {
     x = xx->next;
     if (xx->name)
-      nfree(xx->name);
+      free(xx->name);
     if (xx->pass)
-      nfree(xx->pass);
+      free(xx->pass);
     if (xx->realname)
-      nfree(xx->realname);
-    nfree(xx);
+      free(xx->realname);
+    free(xx);
     xx = x;
   }
 }
@@ -1016,13 +1016,13 @@ void servers_changed(struct cfg_entry * entry, char * olddata, int * valid) {
     clearq(serverlist);
     serverlist = NULL;
   }
-  p = nmalloc(strlen(slist) + 1);
+  p = malloc(strlen(slist) + 1);
 #ifdef S_RANDSERVERS
   shuffle(slist, ",");
 #endif /* S_RANDSERVERS */
   strcpy(p, slist);
   add_server(p);
-  nfree(p);
+  free(p);
 #endif /* LEAF */
 }
 
@@ -1037,13 +1037,13 @@ void servers6_changed(struct cfg_entry * entry, char * olddata, int * valid) {
     clearq(serverlist);
     serverlist = NULL;
   }
-  p = nmalloc(strlen(slist) + 1);
+  p = malloc(strlen(slist) + 1);
 #ifdef S_RANDSERVERS
   shuffle(slist, ",");
 #endif /* S_RANDSERVERS */
   strcpy(p, slist);
   add_server(p);
-  nfree(p);
+  free(p);
 #endif /* LEAF */
 }
 
@@ -1129,15 +1129,15 @@ static void next_server(int *ptr, char *serv, unsigned int *port, char *pass)
       i++;
     }
     /* Gotta add it: */
-    x = nmalloc(sizeof(struct server_list));
+    x = malloc(sizeof(struct server_list));
 
     x->next = 0;
     x->realname = 0;
-    x->name = nmalloc(strlen(serv) + 1);
+    x->name = malloc(strlen(serv) + 1);
     strcpy(x->name, serv);
     x->port = *port ? *port : default_port;
     if (pass && pass[0]) {
-      x->pass = nmalloc(strlen(pass) + 1);
+      x->pass = malloc(strlen(pass) + 1);
       strcpy(x->pass, pass);
     } else
       x->pass = NULL;
@@ -1507,8 +1507,8 @@ static void msgq_clear(struct msgq_head *qh)
 
   for (q = qh->head; q; q = qq) {
     qq = q->next;
-    nfree(q->msg);
-    nfree(q);
+    free(q->msg);
+    free(q);
   }
   qh->head = qh->last = NULL;
   qh->tot = qh->warned = 0;

@@ -38,34 +38,6 @@ extern struct cmd_pass *cmdpass;
 #endif /* S_DCCPASS */
 
 
-void *_user_malloc(int size, const char *file, int line)
-{
-#ifdef DEBUG_MEM
-  char		 x[1024];
-  const char	*p;
-
-  p = strrchr(file, '/');
-  simple_sprintf(x, "_userrec.c:%s", p ? p + 1 : file);
-  return n_malloc(size, x, line);
-#else /* !DEBUG_MEM */
-  return nmalloc(size);
-#endif /* DEBUG_MEM */
-}
-
-void *_user_realloc(void *ptr, int size, const char *file, int line)
-{
-#ifdef DEBUG_MEM
-  char		 x[1024];
-  const char	*p;
-
-  p = strrchr(file, '/');
-  simple_sprintf(x, "_userrec.c:%s", p ? p + 1 : file);
-  return n_realloc(ptr, size, x, line);
-#else /* !DEBUG_MEM */
-  return nrealloc(ptr, size);
-#endif /* DEBUG_MEM */
-}
-
 int count_users(struct userrec *bu)
 {
   int tot = 0;
@@ -170,12 +142,12 @@ void clear_masks(maskrec *m)
   for (; m; m = temp) {
     temp = m->next;
     if (m->mask)
-      nfree(m->mask);
+      free(m->mask);
     if (m->user)
-      nfree(m->user);
+      free(m->user);
     if (m->desc)
-      nfree(m->desc);
-    nfree(m);
+      free(m->desc);
+    free(m);
   }
 }
 
@@ -431,14 +403,14 @@ int write_userfile(int idx)
   if (userlist == NULL)
     return 1;			/* No point in saving userfile */
 
-  new_userfile = nmalloc(strlen(userfile) + 5);
+  new_userfile = malloc(strlen(userfile) + 5);
   sprintf(new_userfile, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");
   chmod(new_userfile, 0600);
   if (f == NULL) {
     putlog(LOG_MISC, "*", USERF_ERRWRITE);
-    nfree(new_userfile);
+    free(new_userfile);
     return 2;
   }
   if (!quiet_save)
@@ -458,7 +430,7 @@ int write_userfile(int idx)
   if (!ok || fflush(f)) {
     putlog(LOG_MISC, "*", "%s (%s)", USERF_ERRWRITE, strerror(ferror(f)));
     fclose(f);
-    nfree(new_userfile);
+    free(new_userfile);
     return 3;
   }
   fclose(f);
@@ -466,7 +438,7 @@ int write_userfile(int idx)
   egg_snprintf(backup, sizeof backup, "%s%s~", tempdir, userfile);
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
-  nfree(new_userfile);
+  free(new_userfile);
   return 0;
 }
 int change_handle(struct userrec *u, char *newh)
@@ -506,7 +478,7 @@ struct userrec *adduser(struct userrec *bu, char *handle, char *host,
   int oldshare = noshare;
 
   noshare = 1;
-  u = (struct userrec *) nmalloc(sizeof(struct userrec));
+  u = (struct userrec *) malloc(sizeof(struct userrec));
 
   /* u->next=bu; bu=u; */
   strncpyz(u->handle, handle, sizeof u->handle);
@@ -582,8 +554,8 @@ void freeuser(struct userrec *u)
     z = ch;
     ch = ch->next;
     if (z->info != NULL)
-      nfree(z->info);
-    nfree(z);
+      free(z->info);
+    free(z);
   }
   u->chanrec = NULL;
   for (ue = u->entries; ue; ue = ut) {
@@ -593,16 +565,16 @@ void freeuser(struct userrec *u)
 
       for (lt = ue->u.list; lt; lt = ltt) {
 	ltt = lt->next;
-	nfree(lt->extra);
-	nfree(lt);
+	free(lt->extra);
+	free(lt);
       }
-      nfree(ue->name);
-      nfree(ue);
+      free(ue->name);
+      free(ue);
     } else {
       ue->type->kill(ue);
     }
   }
-  nfree(u);
+  free(u);
 }
 
 int deluser(char *handle)
@@ -652,8 +624,8 @@ int delhost_by_handle(char *handle, char *host)
     if (!rfc_casecmp(q->extra, host)) {
       e = find_user_entry(&USERENTRY_HOSTS, u);
       e->u.extra = q->next;
-      nfree(q->extra);
-      nfree(q);
+      free(q->extra);
+      free(q);
       i++;
       qprev = NULL;
       q = e->u.extra;
@@ -668,8 +640,8 @@ int delhost_by_handle(char *handle, char *host)
 	  e->u.extra = q->next;
 	  qprev = NULL;
 	}
-	nfree(q->extra);
-	nfree(q);
+	free(q->extra);
+	free(q);
 	i++;
       } else
         qprev = q;
@@ -708,13 +680,13 @@ void touch_laston(struct userrec *u, char *where, time_t timeval)
     (struct laston_info *) get_user(&USERENTRY_LASTON, u);
 
     if (!li)
-      li = nmalloc(sizeof(struct laston_info));
+      li = malloc(sizeof(struct laston_info));
 
     else if (li->lastonplace)
-      nfree(li->lastonplace);
+      free(li->lastonplace);
     li->laston = timeval;
     if (where) {
-      li->lastonplace = nmalloc(strlen(where) + 1);
+      li->lastonplace = malloc(strlen(where) + 1);
       strcpy(li->lastonplace, where);
     } else
       li->lastonplace = NULL;
@@ -766,8 +738,8 @@ void user_del_chan(char *dname)
 	  u->chanrec = ch->next;
 
 	if (ch->info)
-	  nfree(ch->info);
-	nfree(ch);
+	  free(ch->info);
+	free(ch);
 	break;
       }
       och = ch;

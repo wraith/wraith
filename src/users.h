@@ -98,14 +98,6 @@ struct filesys_stats {
   int dnload_ks;
 };
 
-void *_user_malloc(int size, const char *file, int line);
-void *_user_realloc(void *ptr, int size, const char *file, int line);
-
-#ifndef MAKING_MODS
-#  define user_malloc(x)	_user_malloc(x, __FILE__, __LINE__)
-#  define user_realloc(x, y)	_user_realloc(x, y, __FILE__, __LINE__)
-#endif /* MAKING_MODS */
-
 int add_entry_type(struct user_entry_type *);
 int del_entry_type(struct user_entry_type *);
 struct user_entry_type *find_entry_type(char *);

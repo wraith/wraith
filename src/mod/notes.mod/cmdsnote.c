@@ -14,7 +14,7 @@ static void cmd_pls_noteign(struct userrec *u, int idx, char *par)
   }
   putlog(LOG_CMDS, "*", "#%s# +noteign %s", dcc[idx].nick, par);
 
-  p = buf = nmalloc(strlen(par)+1);
+  p = buf = malloc(strlen(par)+1);
   strcpy(p, par);
   handle = newsplit(&p);
   mask = newsplit(&p);
@@ -25,13 +25,13 @@ static void cmd_pls_noteign(struct userrec *u, int idx, char *par)
       get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
       if (!(glob_master(fr) || glob_owner(fr))) {
 	dprintf(idx, NOTES_IGN_OTHERS, handle);
-	nfree(buf);
+	free(buf);
         return;
       }
     }
     if (!u2) {
       dprintf(idx, NOTES_UNKNOWN_USER, handle);
-      nfree(buf);
+      free(buf);
       return;
     }
   } else {
@@ -42,7 +42,7 @@ static void cmd_pls_noteign(struct userrec *u, int idx, char *par)
     dprintf(idx, NOTES_IGN_NEW, mask);
   else
     dprintf(idx, NOTES_IGN_ALREADY, mask);
-  nfree(buf);
+  free(buf);
   return;
 }
 
@@ -55,7 +55,7 @@ static void cmd_mns_noteign(struct userrec *u, int idx, char *par)
     return;
   }
   putlog(LOG_CMDS, "*", "#%s# -noteign %s", dcc[idx].nick, par);
-  p = buf = nmalloc(strlen(par)+1);
+  p = buf = malloc(strlen(par)+1);
   strcpy(p, par);
   handle = newsplit(&p);
   mask = newsplit(&p);
@@ -66,13 +66,13 @@ static void cmd_mns_noteign(struct userrec *u, int idx, char *par)
       get_user_flagrec(u, &fr, dcc[idx].u.chat->con_chan);
       if (!(glob_master(fr) || glob_owner(fr))) {
 	dprintf(idx, NOTES_IGN_OTHERS, handle);
-	nfree(buf);
+	free(buf);
         return;
       }
     }
     if (!u2) {
       dprintf(idx, NOTES_UNKNOWN_USER, handle);
-      nfree(buf);
+      free(buf);
       return;
     }
   } else {
@@ -84,7 +84,7 @@ static void cmd_mns_noteign(struct userrec *u, int idx, char *par)
     dprintf(idx, NOTES_IGN_REM, mask);
   else
     dprintf(idx, NOTES_IGN_NOTFOUND, mask);
-  nfree(buf);
+  free(buf);
   return;
 }
 
@@ -121,8 +121,8 @@ static void cmd_noteigns(struct userrec *u, int idx, char *par)
   for (i = 0; i < ignoresn; i++)
     dprintf(idx, " %s", ignores[i]);
   dprintf(idx, "\n");
-  nfree(ignores[0]);		/* Free the string buffer	*/
-  nfree(ignores);		/* Free the ptr array		*/
+  free(ignores[0]);		/* Free the string buffer	*/
+  free(ignores);		/* Free the ptr array		*/
 }
 
 static void cmd_fwd(struct userrec *u, int idx, char *par)

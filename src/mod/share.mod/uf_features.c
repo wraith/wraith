@@ -154,7 +154,7 @@ static void uff_addfeature(uff_table_t *ut)
 	   ut->flag, ut->feature, ul->entry->feature);
     return;
   }
-  ul = nmalloc(sizeof(uff_list_t));
+  ul = malloc(sizeof(uff_list_t));
   ul->entry = ut;
   uff_insert_entry(ul);
 }
@@ -178,7 +178,7 @@ static int uff_delfeature(uff_table_t *ut)
   for (ul = uff_list.start; ul; ul = ul->next)
     if (!strcmp(ul->entry->feature, ut->feature)) {
       uff_remove_entry(ul);
-      nfree(ul);
+      free(ul);
       return 1;
     }
   return 0;
@@ -208,7 +208,7 @@ static void uf_features_parse(int idx, char *par)
   uff_list_t *ul;
 
   uff_sbuf[0] = 0;				/* Reset static buffer	*/
-  p = s = buf = nmalloc(strlen(par) + 1);	/* Allocate temp buffer	*/
+  p = s = buf = malloc(strlen(par) + 1);	/* Allocate temp buffer	*/
   strcpy(buf, par);
 
   /* Clear all currently set features. */
@@ -227,7 +227,7 @@ static void uf_features_parse(int idx, char *par)
     }
     p = ++s;
   }
-  nfree(buf);
+  free(buf);
 
   /* Send response string						*/
   if (uff_sbuf[0])
@@ -255,7 +255,7 @@ static int uf_features_check(int idx, char *par)
   uff_list_t *ul;
 
   uff_sbuf[0] = 0;				/* Reset static buffer	*/
-  p = s = buf = nmalloc(strlen(par) + 1);	/* Allocate temp buffer	*/
+  p = s = buf = malloc(strlen(par) + 1);	/* Allocate temp buffer	*/
   strcpy(buf, par);
 
   /* Clear all currently set features. */
@@ -281,12 +281,12 @@ static int uf_features_check(int idx, char *par)
       dprintf(idx, "s e Attempt to use an unsupported feature\n");
       zapfbot(idx);
 
-      nfree(buf);
+      free(buf);
       return 0;
     }
     p = ++s;
   }
-  nfree(buf);
+  free(buf);
   return 1;
 }
 

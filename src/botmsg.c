@@ -168,10 +168,10 @@ void botnet_send_cmdpass(int idx, char *cmd, char *pass)
   char *buf;
 
   if (tands > 0) {
-    buf = nmalloc(strlen(cmd) + strlen(pass) + 5 + 1);
+    buf = malloc(strlen(cmd) + strlen(pass) + 5 + 1);
     sprintf(buf, "cp %s %s\n", cmd, pass);
     send_tand_but(idx, buf, strlen(buf));
-    nfree(buf);
+    free(buf);
   }
 }
 #endif /* S_DCCPASS */

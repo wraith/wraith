@@ -41,8 +41,8 @@ static void setudef(struct udef_struct *us, char *name, int value)
       return;
     }
 
-  ul = nmalloc(sizeof(struct udef_chans));
-  ul->chan = nmalloc(strlen(name) + 1);
+  ul = malloc(sizeof(struct udef_chans));
+  ul->chan = malloc(strlen(name) + 1);
   strcpy(ul->chan, name);
   ul->value = value;
   ul->next = NULL;
@@ -68,8 +68,8 @@ static void initudef(int type, char *name, int defined)
     }
 
   debug2("Creating %s (type %d)", name, type);
-  ul = nmalloc(sizeof(struct udef_struct));
-  ul->name = nmalloc(strlen(name) + 1);
+  ul = malloc(sizeof(struct udef_struct));
+  ul->name = malloc(strlen(name) + 1);
   strcpy(ul->name, name);
   if (defined)
     ul->defined = 1;
@@ -90,7 +90,7 @@ static void free_udef_chans(struct udef_chans *ul)
 
   for (; ul; ul = ull) {
     ull = ul->next;
-    nfree(ul->chan);
-    nfree(ul);
+    free(ul->chan);
+    free(ul);
   }
 }

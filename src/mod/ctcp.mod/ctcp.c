@@ -54,7 +54,7 @@ char autoaway[100];
 char *strtolower(char *s)
 {
   char *p,
-    *p2 = nmalloc(strlen(s) + 1);
+    *p2 = malloc(strlen(s) + 1);
 
   strcpy(p2, s);
   p = p2;
@@ -89,7 +89,7 @@ void scriptchanged()
     sprintf(tmp, STR("%s %s"), cloak_os, cloak_osver);
     p = strtolower(tmp);
     sprintf(ctcpversion, STR("bitchx-%s\037(\037%s\037):\037 \002n\002eon\037a\037ppl\002e\002\037/\037\002v\0020\037.\03714i : \002d\002ont you wish you had it\037?\037"), cloak_bxver, p);
-    nfree(p);
+    free(p);
     strcpy(ctcpuserinfo, STR("neon apple"));
     strcpy(autoaway, STR("automatically away after 10 mins \037(\037\002n\002/\037a)\037"));
     strcpy(kickprefix, STR("\037[na\002(\037k\037)\002]\037 "));
@@ -249,13 +249,13 @@ void scriptchanged()
       sprintf(tmp, STR("%s %s"), cloak_os, cloak_osver);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("cypress\037.\03701i%s %s\037(\037%s\037)\037 bitchx\037-\037%s)"), theme, p, cloak_host, cloak_bxver);
-      nfree(p);
+      free(p);
       break;
     case 3:
       sprintf(tmp, STR("%s %s"), cloak_os, cloak_osver);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("bitchx\037-\037%s %s\037(\037%s\037)\037 cypress\037.\03701i%s"), cloak_bxver, p, cloak_host, theme);
-      nfree(p);
+      free(p);
       break;
     case 4:
       sprintf(ctcpversion, STR("%s\002/\002%s: BitchX-%s \002[\002cypress\002]\002 v01i%s"), cloak_os, cloak_osver, cloak_bxver, theme);
@@ -265,21 +265,21 @@ void scriptchanged()
       sprintf(tmp, STR("%s %s"), cloak_os, p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("\037.\037.cypress\037.\03701i%s %s\037(\037%s\037)\037 bitchx\037/\037%s"),theme, p, cloak_host, cloak_bxver);
-      nfree(p);
+      free(p);
       break;
     case 6:
       p = replace(cloak_osver, ".", "\037.\037");
       sprintf(tmp, STR("%s %s"), cloak_os, p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("cypress\002.\00201i%s\037(\037bitchx\002.\002%s\037)\037\002.\002. %s\037(\037%s\037)\037"),theme, cloak_bxver, p, cloak_host);
-      nfree(p);
+      free(p);
       break;
     case 7:
       p = replace(cloak_osver, ".", "\037.\037");
       sprintf(tmp, STR("%s %s"), cloak_os, p);
       p = strtolower(tmp);
       sprintf(ctcpversion, STR("\037.\037.cypress\037.\03701i%s - bitchx\037.\037%s\002/\002%s"), theme, cloak_bxver, p);
-      nfree(p);
+      free(p);
       break;
     case 8:
       sprintf(ctcpversion, STR("\002BitchX-%s\002 by panasync \002-\002 %s %s"), cloak_bxver, cloak_os, cloak_osver);
@@ -296,7 +296,7 @@ void scriptchanged()
     case 12:
       p = strtolower(cloak_os);
       sprintf(ctcpversion, STR("bitchx\037/\037%s %s %s \037(\037cypress\037/\03701i\037)\037 %s"), cloak_bxver, p, cloak_osver, theme);
-      nfree(p);
+      free(p);
       break;
     case 13:
       sprintf(ctcpversion, STR("\037.\037.cypress\037/\03701i\037!\037bitchx\037/\037%s\037.\037.%s"), cloak_bxver, theme);
@@ -304,12 +304,12 @@ void scriptchanged()
     case 14:
       p = strtolower(cloak_bxver);
       sprintf(ctcpversion, STR("cypress\002\037.\037\002\037.\03701i\002/\002bitchx\037.\037\002\037.\037\002%s%s"), p, theme);
-      nfree(p);
+      free(p);
       break;
     case 15:
       p = strtolower(cloak_bxver);
       sprintf(ctcpversion, STR("cypress\037.\03701i\037/\037bx%s \037(\037%s\037)\037"), p, theme);
-      nfree(p);
+      free(p);
       break;
     }
     strcpy(ctcpuserinfo, STR(""));

@@ -375,19 +375,6 @@ static void got_jn(int idx, char *code, char *par)
   }
 }
 
-static void *channel_malloc(int size, char *file, int line)
-{
-  char *p;
-
-#ifdef DEBUG_MEM
-  p = ((void *) (global[0] (size, MODULE_NAME, file, line)));
-#else
-  p = nmalloc(size);
-#endif
-  egg_bzero(p, size);
-  return p;
-}
-
 static void set_mode_protect(struct chanset_t *chan, char *set)
 {
   int i, pos = 1;
@@ -611,14 +598,14 @@ static void remove_channel(struct chanset_t *chan)
    /* Remove channel specific user flags */
    user_del_chan(chan->dname);
    noshare = 0;
-   nfree(chan->channel.key);
+   free(chan->channel.key);
    for (i = 0; i < 6 && chan->cmode[i].op; i++)
-     nfree(chan->cmode[i].op);
+     free(chan->cmode[i].op);
    if (chan->key)
-     nfree(chan->key);
+     free(chan->key);
    if (chan->rmkey)
-     nfree(chan->rmkey);
-   nfree(chan);
+     free(chan->rmkey);
+   free(chan);
 }
 
 /* Bind this to chon and *if* the users console channel == ***
@@ -837,7 +824,7 @@ static Function channels_table[] =
   (Function) del_chanrec,
   (Function) set_handle_chaninfo,
   /* 12 - 15 */
-  (Function) channel_malloc,
+  (Function) 0,
   (Function) u_match_mask,
   (Function) u_equals_mask,
   (Function) clear_channel,

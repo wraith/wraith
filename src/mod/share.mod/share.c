@@ -91,15 +91,15 @@ static void add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
 {
   struct delay_mode *d = NULL;
 
-  d = (struct delay_mode *) nmalloc(sizeof(struct delay_mode));
+  d = (struct delay_mode *) malloc(sizeof(struct delay_mode));
   if (!d)
     return;
   d->chan = chan;
   d->plsmns = plsmns;
   d->mode = mode;
-  d->mask = (char *) nmalloc(strlen(mask) + 1);
+  d->mask = (char *) malloc(strlen(mask) + 1);
   if (!d->mask) {
-    nfree(d);
+    free(d);
     return;
   }
   strncpyz(d->mask, mask, strlen(mask) + 1);
@@ -119,8 +119,8 @@ static void del_delay(struct delay_mode *delay)
       else
         start_delay = d->next;
       if (d->mask)
-        nfree(d->mask);
-      nfree(d);
+        free(d->mask);
+      free(d);
       break;
     }
   }
@@ -593,7 +593,7 @@ static void share_change(int idx, char *par)
 	  return;
 	if (uet->got_share) {
 	  if (!(e = find_user_entry(uet, u))) {
-	    e = user_malloc(sizeof(struct user_entry));
+	    e = malloc(sizeof(struct user_entry));
 
 	    e->type = uet;
 	    e->name = NULL;
@@ -604,7 +604,7 @@ static void share_change(int idx, char *par)
 	  if (!e->u.list) {
 	    list_delete((struct list_type **) &(u->entries),
 			(struct list_type *) e);
-	    nfree(e);
+	    free(e);
 	  }
 	}
 	noshare = 0;
@@ -1145,7 +1145,7 @@ static void share_ufsend(int idx, char *par)
       dcc[i].addr = my_atoul(ip);
       dcc[i].port = atoi(port);
       strcpy(dcc[i].nick, "*users");
-      dcc[i].u.xfer->filename = nmalloc(strlen(s) + 1);
+      dcc[i].u.xfer->filename = malloc(strlen(s) + 1);
       strcpy(dcc[i].u.xfer->filename, s);
       dcc[i].u.xfer->origname = dcc[i].u.xfer->filename;
       dcc[i].u.xfer->length = atoi(par);
@@ -1391,7 +1391,7 @@ static void new_tbuf(char *bot)
 {
   tandbuf **old = &tbuf, *new;
 
-  new = nmalloc(sizeof(tandbuf));
+  new = malloc(sizeof(tandbuf));
   strcpy(new->bot, bot);
   new->q = NULL;
   new->timer = now;
@@ -1413,10 +1413,10 @@ static void del_tbuf(tandbuf *goner)
         tbuf = t->next;
       for (q = t->q; q && q->msg[0]; q = r) {
 	r = q->next;
-	nfree(q->msg);
-	nfree(q);
+	free(q->msg);
+	free(q);
       }
-      nfree(t);
+      free(t);
       break;
     }
   }
@@ -1479,11 +1479,11 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq,
   int cnt;
 
   if (!qq) {
-    q = (struct share_msgq *) nmalloc(sizeof(struct share_msgq));
+    q = (struct share_msgq *) malloc(sizeof(struct share_msgq));
 
     q->chan = chan;
     q->next = NULL;
-    q->msg = (char *) nmalloc(strlen(s) + 1);
+    q->msg = (char *) malloc(strlen(s) + 1);
     strcpy(q->msg, s);
     return q;
   }
@@ -1492,12 +1492,12 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq,
     cnt++;
   if (cnt > 1000)
     return NULL;		/* Return null: did not alter queue */
-  q->next = (struct share_msgq *) nmalloc(sizeof(struct share_msgq));
+  q->next = (struct share_msgq *) malloc(sizeof(struct share_msgq));
 
   q = q->next;
   q->chan = chan;
   q->next = NULL;
-  q->msg = (char *) nmalloc(strlen(s) + 1);
+  q->msg = (char *) malloc(strlen(s) + 1);
   strcpy(q->msg, s);
   return qq;
 }
@@ -1686,8 +1686,8 @@ static struct userrec *dup_userlist(int t)
 	  struct list_type *lt;
 	  struct user_entry *nue;
 
-	  nue = user_malloc(sizeof(struct user_entry));
-	  nue->name = user_malloc(strlen(ue->name) + 1);
+	  nue = malloc(sizeof(struct user_entry));
+	  nue->name = malloc(strlen(ue->name) + 1);
 	  nue->type = NULL;
 	  nue->u.list = NULL;
 	  strcpy(nue->name, ue->name);
@@ -1695,9 +1695,9 @@ static struct userrec *dup_userlist(int t)
 	  for (lt = ue->u.list; lt; lt = lt->next) {
 	    struct list_type *list;
 
-	    list = user_malloc(sizeof(struct list_type));
+	    list = malloc(sizeof(struct list_type));
 	    list->next = NULL;
-	    list->extra = user_malloc(strlen(lt->extra) + 1);
+	    list->extra = malloc(strlen(lt->extra) + 1);
 	    strcpy(list->extra, lt->extra);
 	    list_append((&nue->u.list), list);
 	  }

@@ -142,7 +142,7 @@ void write_debug()
             (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
     tell_dcc(-x);
     dprintf(-x, "\n");
-    debug_mem_to_dcc(-x);
+    tell_netdebug(-x);
     killsock(x);
     close(x);
     {
@@ -160,12 +160,12 @@ void write_debug()
       sprintf(buf2, "cat %s", buf);
       shell_exec(buf2, NULL, &debug, NULL);
 
-      msg = nmalloc(strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
+      msg = malloc(strlen(date) + strlen(id) + strlen(uname) + strlen(w) + strlen(who) + strlen(ps) + strlen(ls) + strlen(debug) + 50);
 
       msg[0] = 0;
       sprintf(msg, "%s\n%s\n%s\n\n%s\n%s\n\n%s\n\n-----%s-----\n\n\n\n%s", date, id, uname, w, who, ps, ls, debug);
       email("Debug output", msg, EMAIL_TEAM);
-      nfree(msg);
+      free(msg);
     }
     unlink(buf);
     putlog(LOG_MISC, "*", "* Emailed DEBUG to development team...");

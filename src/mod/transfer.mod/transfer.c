@@ -170,7 +170,7 @@ static char *replace_spaces(char *fn)
 {
   register char *ret, *p;
 
-  p = ret = nmalloc(strlen(fn) + 1);
+  p = ret = malloc(strlen(fn) + 1);
   strcpy(ret, fn);
   while ((p = strchr(p, ' ')) != NULL)
     *p = '_';
@@ -208,10 +208,10 @@ static void queue_file(char *dir, char *file, char *from, char *to)
 {
   fileq_t *q = fileq;
 
-  fileq = (fileq_t *) nmalloc(sizeof(fileq_t));
+  fileq = (fileq_t *) malloc(sizeof(fileq_t));
   fileq->next = q;
-  fileq->dir = (char *) nmalloc(strlen(dir) + 1);
-  fileq->file = (char *) nmalloc(strlen(file) + 1);
+  fileq->dir = (char *) malloc(strlen(dir) + 1);
+  fileq->file = (char *) malloc(strlen(file) + 1);
   strcpy(fileq->dir, dir);
   strcpy(fileq->file, file);
   strcpy(fileq->nick, from);
@@ -232,9 +232,9 @@ static void deq_this(fileq_t *this)
     last->next = q->next;
   else
     fileq = q->next;
-  nfree(q->dir);
-  nfree(q->file);
-  nfree(q);
+  free(q->dir);
+  free(q->file);
+  free(q);
 }
 
 /* Remove all files queued to a certain user.
@@ -272,7 +272,7 @@ static void send_next_file(char *to)
     return;			/* None */
   /* Copy this file to /tmp */
   if (this->dir[0] == '*') {	/* Absolute path */
-    s = nmalloc(strlen(&this->dir[1]) + strlen(this->file) + 2);
+    s = malloc(strlen(&this->dir[1]) + strlen(this->file) + 2);
     sprintf(s, "%s/%s", &this->dir[1], this->file);
   } else {
     char *p = strchr(this->dir, '*');
@@ -282,12 +282,12 @@ static void send_next_file(char *to)
       return;
     }
     p++;
-    s = nmalloc(strlen(p) + strlen(this->file) + 2);
+    s = malloc(strlen(p) + strlen(this->file) + 2);
     sprintf(s, "%s%s%s", p, p[0] ? "/" : "", this->file);
     strcpy(this->dir, &(p[atoi(this->dir)]));
   }
   if (copy_to_tmp) {
-    s1 = nmalloc(strlen(tempdir) + strlen(this->file) + 1);
+    s1 = malloc(strlen(tempdir) + strlen(this->file) + 1);
     sprintf(s1, "%s%s", tempdir, this->file);
     if (copyfile(s, s1) != 0) {
       putlog(LOG_FILES | LOG_MISC, "*",
@@ -298,19 +298,19 @@ static void send_next_file(char *to)
 	      this->to);
       strcpy(s, this->to);
       flush_fileq(s);
-      nfree(s1);
-      nfree(s);
+      free(s1);
+      free(s);
       return;
     }
   } else {
-    s1 = nmalloc(strlen(s) + 1);
+    s1 = malloc(strlen(s) + 1);
     strcpy(s1, s);
   }
   if (this->dir[0] == '*') {
-    s = nrealloc(s, strlen(&this->dir[1]) + strlen(this->file) + 2);
+    s = realloc(s, strlen(&this->dir[1]) + strlen(this->file) + 2);
     sprintf(s, "%s/%s", &this->dir[1], this->file);
   } else {
-    s = nrealloc(s, strlen(this->dir) + strlen(this->file) + 2);
+    s = realloc(s, strlen(this->dir) + strlen(this->file) + 2);
     sprintf(s, "%s%s%s", this->dir, this->dir[0] ? "/" : "", this->file);
   }
   x = raw_dcc_send(s1, this->to, this->nick, s);
@@ -319,8 +319,8 @@ static void send_next_file(char *to)
       dprintf(DP_HELP, TRANSFER_FILE_ARRIVE, this->to,
 	      this->nick);
     deq_this(this);
-    nfree(s);
-    nfree(s1);
+    free(s);
+    free(s1);
     return;
   }
   wipe_tmp_filename(s1, -1);
@@ -345,8 +345,8 @@ static void send_next_file(char *to)
     }
     deq_this(this);
   }
-  nfree(s);
-  nfree(s1);
+  free(s);
+  free(s1);
   return;
 }
 
@@ -421,7 +421,7 @@ static void fileq_cancel(int idx, char *par)
     fnd = 0;
     while (q != NULL) {
       if (!egg_strcasecmp(dcc[idx].nick, q->nick)) {
-	s = nrealloc(s, strlen(q->dir) + strlen(q->file) + 3);
+	s = realloc(s, strlen(q->dir) + strlen(q->file) + 3);
 	if (q->dir[0] == '*')
 	  sprintf(s, "%s/%s", &q->dir[1], q->file);
 	else
@@ -446,7 +446,7 @@ static void fileq_cancel(int idx, char *par)
     }
   }
   if (s)
-    nfree(s);
+    free(s);
   for (i = 0; i < dcc_total; i++) {
     if ((dcc[i].type == &DCC_GET_PENDING || dcc[i].type == &DCC_GET) &&
 	(!egg_strcasecmp(dcc[i].nick, dcc[idx].nick) ||
@@ -504,7 +504,7 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
 {
   const unsigned long		 buf_len = pending_data >= PMAX_SIZE ?
 	  					PMAX_SIZE : pending_data;
-  char				*bf = nmalloc(buf_len);
+  char				*bf = malloc(buf_len);
   register unsigned long	 actual_size;
 
   if (bf) {
@@ -514,7 +514,7 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
       tputs(sock, bf, actual_size);
       pending_data -= actual_size;
     } while (!sock_has_data(SOCK_DATA_OUTGOING, sock) && pending_data != 0);
-    nfree(bf);
+    free(bf);
   }
   return pending_data;
 }
@@ -561,10 +561,10 @@ static void eof_dcc_fork_send(int idx)
     putlog(LOG_MISC, "*", "%s: SEND %s (%s!%s)", DCC_CONNECTFAILED2,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     putlog(LOG_MISC, "*", "    (%s)", s1);
-    s2 = nmalloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    s2 = malloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(s2, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(s2);
-    nfree(s2);
+    free(s2);
   }
   killsock(dcc[idx].sock);
   lostdcc(idx);
@@ -625,8 +625,8 @@ static void eof_dcc_send(int idx)
       return;
     }
     /* Move the file from /tmp */
-    ofn = nmalloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
-    nfn = nmalloc(strlen(dcc[idx].u.xfer->dir)
+    ofn = malloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    nfn = malloc(strlen(dcc[idx].u.xfer->dir)
 		  + strlen(dcc[idx].u.xfer->origname) + 1);
     sprintf(ofn, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     sprintf(nfn, "%s%s", dcc[idx].u.xfer->dir, dcc[idx].u.xfer->origname);
@@ -645,8 +645,8 @@ static void eof_dcc_send(int idx)
       stats_add_upload(u, dcc[idx].u.xfer->length);
       check_sentrcvd(u, dcc[idx].nick, nfn, BT_rcvd);
     }
-    nfree(ofn);
-    nfree(nfn);
+    free(ofn);
+    free(nfn);
     for (j = 0; j < dcc_total; j++)
       if (!ok && (dcc[j].type->flags & (DCT_GETNOTES)) &&
 	  !egg_strcasecmp(dcc[j].nick, hand)) {
@@ -720,10 +720,10 @@ static void eof_dcc_send(int idx)
     putlog(LOG_FILES, "*",TRANSFER_LOST_DCCSEND,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host,
 	   dcc[idx].status, dcc[idx].u.xfer->length);
-    ofn = nmalloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    ofn = malloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(ofn, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(ofn);
-    nfree(ofn);
+    free(ofn);
     killsock(dcc[idx].sock);
     lostdcc(idx);
   }
@@ -1036,10 +1036,10 @@ static void dcc_send(int idx, char *buf, int len)
 	   TRANSFER_FILE_TOO_LONG,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);
-    b = nmalloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    b = malloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(b, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(b);
-    nfree(b);
+    free(b);
     killsock(dcc[idx].sock);
     lostdcc(idx);
   }
@@ -1164,10 +1164,10 @@ static void tout_dcc_send(int idx)
     putlog(LOG_FILES, "*",TRANSFER_DCC_SEND_TIMEOUT,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].status,
 	   dcc[idx].u.xfer->length);
-    buf = nmalloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
+    buf = malloc(strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
     sprintf(buf, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(buf);
-    nfree(buf);
+    free(buf);
   }
   killsock(dcc[idx].sock);
   lostdcc(idx);
@@ -1205,13 +1205,13 @@ static void kill_dcc_xfer(int idx, void *x)
   register struct xfer_info *p = (struct xfer_info *) x;
 
   if (p->filename)
-    nfree(p->filename);
+    free(p->filename);
   /* We need to check if origname points to filename before
    * attempting to free the memory.
    */
   if (p->origname && p->origname != p->filename)
-    nfree(p->origname);
-  nfree(x);
+    free(p->origname);
+  free(x);
 }
 
 static void out_dcc_xfer(int idx, char *buf, void *x)
@@ -1441,7 +1441,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from,
 	   nfn, nick);
   }
   if (buf)
-    nfree(buf);
+    free(buf);
   return DCCSEND_OK;
 }
 
@@ -1468,7 +1468,7 @@ static int fstat_unpack(struct userrec *u, struct user_entry *e)
   char *par, *arg;
   struct filesys_stats *fs;
 
-  fs = user_malloc(sizeof(struct filesys_stats));
+  fs = malloc(sizeof(struct filesys_stats));
   egg_bzero(fs, sizeof(struct filesys_stats));
   par = e->u.list->extra;
   arg = newsplit(&par);
@@ -1492,15 +1492,15 @@ static int fstat_unpack(struct userrec *u, struct user_entry *e)
 static int fstat_pack(struct userrec *u, struct user_entry *e)
 {
   register struct filesys_stats *fs;
-  struct list_type *l = user_malloc(sizeof(struct list_type));
+  struct list_type *l = malloc(sizeof(struct list_type));
 
   fs = e->u.extra;
-  l->extra = user_malloc(41);
+  l->extra = malloc(41);
   egg_snprintf(l->extra, 41, "%09u %09u %09u %09u",
           fs->uploads, fs->upload_ks, fs->dnloads, fs->dnload_ks);
   l->next = NULL;
   e->u.list = l;
-  nfree(fs);
+  free(fs);
   return 1;
 }
 
@@ -1523,7 +1523,7 @@ static int fstat_set(struct userrec *u, struct user_entry *e, void *buf)
 
   if (e->u.extra != fs) {
     if (e->u.extra)
-      nfree(e->u.extra);
+      free(e->u.extra);
     e->u.extra = fs;
   } else if (!fs) /* e->u.extra == NULL && fs == NULL */
     return 1;
@@ -1535,7 +1535,7 @@ static int fstat_set(struct userrec *u, struct user_entry *e, void *buf)
        *  ofs->dnloads != fs->dnloads || ofs->dnload_ks != fs->dnload_ks
        * someone could do:
        *  e->u.extra->uploads = 12345;
-       *  fs = user_malloc(sizeof(struct filesys_stats));
+       *  fs = malloc(sizeof(struct filesys_stats));
        *  memcpy (...e->u.extra...fs...);
        *  set_user(&USERENTRY_FSTAT, u, fs);
        * then we wouldn't detect here that something's changed...
@@ -1577,8 +1577,8 @@ static int fstat_tcl_get(Tcl_Interp *irp, struct userrec *u,
 static int fstat_kill(struct user_entry *e)
 {
   if (e->u.extra)
-    nfree(e->u.extra);
-  nfree(e);
+    free(e->u.extra);
+  free(e);
   return 1;
 }
 
@@ -1635,7 +1635,7 @@ static int fstat_gotshare(struct userrec *u, struct user_entry *e,
     break;
   default:
     if (!(fs = e->u.extra)) {
-      fs = user_malloc(sizeof(struct filesys_stats));
+      fs = malloc(sizeof(struct filesys_stats));
       egg_bzero(fs, sizeof(struct filesys_stats));
     }
     p = newsplit (&par);
@@ -1663,7 +1663,7 @@ static int fstat_dupuser(struct userrec *u, struct userrec *o,
   struct filesys_stats *fs;
 
   if (e->u.extra) {
-    fs = user_malloc(sizeof(struct filesys_stats));
+    fs = malloc(sizeof(struct filesys_stats));
     my_memcpy(fs, e->u.extra, sizeof(struct filesys_stats));
 
     return set_user(&USERENTRY_FSTAT, u, fs);
@@ -1679,7 +1679,7 @@ static void stats_add_dnload(struct userrec *u, unsigned long bytes)
   if (u) {
     if (!(ue = find_user_entry (&USERENTRY_FSTAT, u)) ||
         !(fs = ue->u.extra)) {
-      fs = user_malloc(sizeof(struct filesys_stats));
+      fs = malloc(sizeof(struct filesys_stats));
       egg_bzero(fs, sizeof(struct filesys_stats));
     }
     fs->dnloads++;
@@ -1697,7 +1697,7 @@ static void stats_add_upload(struct userrec *u, unsigned long bytes)
   if (u) {
     if (!(ue = find_user_entry (&USERENTRY_FSTAT, u)) ||
         !(fs = ue->u.extra)) {
-      fs = user_malloc(sizeof(struct filesys_stats));
+      fs = malloc(sizeof(struct filesys_stats));
       egg_bzero(fs, sizeof(struct filesys_stats));
     }
     fs->uploads++;
@@ -1722,7 +1722,7 @@ static int fstat_tcl_set(Tcl_Interp *irp, struct userrec *u,
   case 'u':
   case 'd':
     if (!(fs = e->u.extra)) {
-      fs = user_malloc(sizeof(struct filesys_stats));
+      fs = malloc(sizeof(struct filesys_stats));
       egg_bzero(fs, sizeof(struct filesys_stats));
     }
     switch (argv[3][0]) {

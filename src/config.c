@@ -550,7 +550,7 @@ struct cfg_entry CFG_OPTIMESLACK = {
 
 void add_cfg(struct cfg_entry *entry)
 {
-  cfg = (void *) nrealloc(cfg, sizeof(void *) * (cfg_count + 1));
+  cfg = (void *) realloc(cfg, sizeof(void *) * (cfg_count + 1));
   cfg[cfg_count] = entry;
   cfg_count++;
   entry->ldata = NULL;
@@ -601,7 +601,7 @@ void set_cfg_str(char *target, char *entryname, char *data)
 
     if (u && !strcmp(botnetnick, u->handle)) {
       if (data) {
-        entry->ldata = nmalloc(strlen(data) + 1);
+        entry->ldata = malloc(strlen(data) + 1);
         strcpy(entry->ldata, data);
       } else
         entry->ldata = NULL;
@@ -611,29 +611,29 @@ void set_cfg_str(char *target, char *entryname, char *data)
         entry->localchanged(entry, olddata, &valid);
         if (!valid) {
           if (entry->ldata)
-            nfree(entry->ldata);
+            free(entry->ldata);
           entry->ldata = olddata;
           data = olddata;
           olddata = NULL;
         }
       }
     }
-    xk = user_malloc(sizeof(struct xtra_key));
+    xk = malloc(sizeof(struct xtra_key));
     egg_bzero(xk, sizeof(struct xtra_key));
-    xk->key = user_malloc(strlen(entry->name) + 1);
+    xk->key = malloc(strlen(entry->name) + 1);
     strcpy(xk->key, entry->name);
     if (data) {
-      xk->data = user_malloc(strlen(data) + 1);
+      xk->data = malloc(strlen(data) + 1);
       strcpy(xk->data, data);
     }
     set_user(&USERENTRY_CONFIG, u, xk);
     if (olddata)
-      nfree(olddata);
+      free(olddata);
   } else {
     char *olddata = entry->gdata;
 
     if (data) {
-      entry->gdata = nmalloc(strlen(data) + 1);
+      entry->gdata = malloc(strlen(data) + 1);
       strcpy(entry->gdata, data);
     } else
       entry->gdata = NULL;
@@ -643,7 +643,7 @@ void set_cfg_str(char *target, char *entryname, char *data)
       entry->globalchanged(entry, olddata, &valid);
       if (!valid) {
         if (entry->gdata)
-          nfree(entry->gdata);
+          free(entry->gdata);
         entry->gdata = olddata;
         olddata = NULL;
       }
@@ -651,7 +651,7 @@ void set_cfg_str(char *target, char *entryname, char *data)
     if (!cfg_noshare)
       botnet_send_cfg_broad(-1, entry);
     if (olddata)
-      nfree(olddata);
+      free(olddata);
   }
 }
 
@@ -765,14 +765,14 @@ void set_cmd_pass(char *ln, int shareit)
       }
       if (shareit)
         botnet_send_cmdpass(-1, cp->name, "");
-      nfree(cp->name);
-      nfree(cp);
+      free(cp->name);
+      free(cp);
   } else if (ln[0]) {
     /* create */
-    cp = nmalloc(sizeof(struct cmd_pass));
+    cp = malloc(sizeof(struct cmd_pass));
     cp->next = cmdpass;
     cmdpass = cp;
-    cp->name = nmalloc(strlen(cmd) + 1);
+    cp->name = malloc(strlen(cmd) + 1);
     strcpy(cp->name, cmd);
     strcpy(cp->pass, ln);
     if (shareit)

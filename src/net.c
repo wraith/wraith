@@ -530,11 +530,11 @@ void real_killsock(register int sock, const char *file, int line)
       dropssl(sock);
       close(socklist[i].sock);
       if (socklist[i].inbuf != NULL) {
-	nfree(socklist[i].inbuf);
+	free(socklist[i].inbuf);
 	socklist[i].inbuf = NULL;
       }
       if (socklist[i].outbuf != NULL) {
-	nfree(socklist[i].outbuf);
+	free(socklist[i].outbuf);
 	socklist[i].outbuf = NULL;
 	socklist[i].outbuflen = 0;
       }
@@ -1244,7 +1244,7 @@ char *botlink_decrypt(int snum, char *src)
 
   line = decrypt_string(socklist[snum].ikey, src);
   strcpy(src, line);
-  nfree(line);
+  free(line);
   if (socklist[snum].iseed) {
     for (i = 0; i <= 3; i++)
       *(dword *) & socklist[snum].ikey[i * 4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
@@ -1259,11 +1259,11 @@ char *botlink_encrypt(int snum, char *src)
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
   int bufpos = 0, i = 0;
   
-  srcbuf = nmalloc(strlen(src) + 9 + 1);
+  srcbuf = malloc(strlen(src) + 9 + 1);
   strcpy(srcbuf, src);
   line = srcbuf;
   if (!line) {
-    nfree(srcbuf);
+    free(srcbuf);
     return NULL;
   }
   eol = strchr(line, '\n');
@@ -1276,9 +1276,9 @@ char *botlink_encrypt(int snum, char *src)
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }
-    buf = nrealloc(buf, bufpos + strlen(eline) + 1 + 9);
+    buf = realloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
-    nfree(eline);
+    free(eline);
     strcat(buf, "\n");
     bufpos = strlen(buf);
     line = eol;
@@ -1292,12 +1292,12 @@ char *botlink_encrypt(int snum, char *src)
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }
-    buf = nrealloc(buf, bufpos + strlen(eline) + 1 + 9);
+    buf = realloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
-    nfree(eline);
+    free(eline);
     strcat(buf, "\n");
   }
-  nfree(srcbuf);
+  free(srcbuf);
   return buf;
 }
 
@@ -1342,13 +1342,13 @@ int sockgets(char *s, int *len)
 	  if (strlen(socklist[i].inbuf) > (grab - 2))
 	    socklist[i].inbuf[(grab - 2)] = 0;
 	  strcpy(s, socklist[i].inbuf);
-	  px = (char *) nmalloc(strlen(p + 1) + 1);
+	  px = (char *) malloc(strlen(p + 1) + 1);
 	  strcpy(px, p + 1);
-	  nfree(socklist[i].inbuf);
+	  free(socklist[i].inbuf);
 	  if (px[0])
 	    socklist[i].inbuf = px;
 	  else {
-	    nfree(px);
+	    free(px);
 	    socklist[i].inbuf = NULL;
 	  }
 	  /* Strip CR if this was CR/LF combo */
@@ -1364,7 +1364,7 @@ int sockgets(char *s, int *len)
 	if (socklist[i].inbuflen <= (grab - 2)) {
 	  *len = socklist[i].inbuflen;
 	  egg_memcpy(s, socklist[i].inbuf, socklist[i].inbuflen);
-	  nfree(socklist[i].inbuf);
+	  free(socklist[i].inbuf);
           socklist[i].inbuf = NULL;
 	  socklist[i].inbuflen = 0;
 	} else {
@@ -1373,7 +1373,7 @@ int sockgets(char *s, int *len)
 	  egg_memcpy(s, socklist[i].inbuf, *len);
 	  egg_memcpy(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
 	  socklist[i].inbuflen -= *len;
-	  socklist[i].inbuf = nrealloc(socklist[i].inbuf, socklist[i].inbuflen);
+	  socklist[i].inbuf = realloc(socklist[i].inbuf, socklist[i].inbuflen);
 	}
 	return socklist[i].sock;
       }
@@ -1399,7 +1399,7 @@ int sockgets(char *s, int *len)
       socklist[ret].flags &= ~SOCK_STRONGCONN;
       /* Buffer any data that came in, for future read. */
       socklist[ret].inbuflen = *len;
-      socklist[ret].inbuf = (char *) nmalloc(*len + 1);
+      socklist[ret].inbuf = (char *) malloc(*len + 1);
       /* It might be binary data. You never know. */
       egg_memcpy(socklist[ret].inbuf, xx, *len);
       socklist[ret].inbuf[*len] = 0;
@@ -1415,7 +1415,7 @@ int sockgets(char *s, int *len)
   if ((socklist[ret].flags & SOCK_LISTEN) || (socklist[ret].flags & SOCK_PASS))
     return socklist[ret].sock;
   if (socklist[ret].flags & SOCK_BUFFER) {
-    socklist[ret].inbuf = (char *) nrealloc(socklist[ret].inbuf,
+    socklist[ret].inbuf = (char *) realloc(socklist[ret].inbuf,
 		    			    socklist[ret].inbuflen + *len + 1);
     egg_memcpy(socklist[ret].inbuf + socklist[ret].inbuflen, xx, *len);
     socklist[ret].inbuflen += *len;
@@ -1427,23 +1427,23 @@ int sockgets(char *s, int *len)
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
-    socklist[ret].inbuf = (char *) nmalloc(strlen(p) + strlen(xx) + 1);
+    socklist[ret].inbuf = (char *) malloc(strlen(p) + strlen(xx) + 1);
     strcpy(socklist[ret].inbuf, p);
     strcat(socklist[ret].inbuf, xx);
-    nfree(p);
+    free(p);
     if (strlen(socklist[ret].inbuf) < grab) {
       strcpy(xx, socklist[ret].inbuf);
-      nfree(socklist[ret].inbuf);
+      free(socklist[ret].inbuf);
       socklist[ret].inbuf = NULL;
       socklist[ret].inbuflen = 0;
     } else {
       p = socklist[ret].inbuf;
       socklist[ret].inbuflen = strlen(p) - (grab - 2);
-      socklist[ret].inbuf = (char *) nmalloc(socklist[ret].inbuflen + 1); 
+      socklist[ret].inbuf = (char *) malloc(socklist[ret].inbuflen + 1); 
       strcpy(socklist[ret].inbuf, p + (grab - 2));
       *(p + (grab - 2)) = 0;
       strcpy(xx, p);
-      nfree(p);
+      free(p);
       /* (leave the rest to be post-pended later) */
     }
   }
@@ -1484,13 +1484,13 @@ int sockgets(char *s, int *len)
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
     socklist[ret].inbuflen = strlen(p) + strlen(xx);
-    socklist[ret].inbuf = (char *) nmalloc(socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = (char *) malloc(socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
     strcat(socklist[ret].inbuf, p);
-    nfree(p);
+    free(p);
   } else {
     socklist[ret].inbuflen = strlen(xx);
-    socklist[ret].inbuf = (char *) nmalloc(socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = (char *) malloc(socklist[ret].inbuflen + 1);
     strcpy(socklist[ret].inbuf, xx);
   }
   if (data) {
@@ -1546,12 +1546,12 @@ void tputs(register int z, char *s, unsigned int len)
       
       if (socklist[i].outbuf != NULL) {
 	/* Already queueing: just add it */
-	p = (char *) nrealloc(socklist[i].outbuf, socklist[i].outbuflen + len);
+	p = (char *) realloc(socklist[i].outbuf, socklist[i].outbuflen + len);
 	egg_memcpy(p + socklist[i].outbuflen, s, len);
 	socklist[i].outbuf = p;
 	socklist[i].outbuflen += len;
         if (socklist[i].encstatus && s)
-          nfree(s);
+          free(s);
 	return;
       }
       /* Try. */
@@ -1588,12 +1588,12 @@ void tputs(register int z, char *s, unsigned int len)
 	x = 0;
       if (x < len) {
 	/* Socket is full, queue it */
-	socklist[i].outbuf = (char *) nmalloc(len - x);
+	socklist[i].outbuf = (char *) malloc(len - x);
 	egg_memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }
       if (socklist[i].encstatus && s)
-        nfree(s);
+        free(s);
       return;
     }
   }
@@ -1609,7 +1609,7 @@ void tputs(register int z, char *s, unsigned int len)
   }
 
 //  if (socklist[i].encstatus > 0)
-//    nfree(s);
+//    free(s);
 }
 
 /* tputs might queue data for sockets, let's dump as much of it as
@@ -1693,17 +1693,17 @@ void dequeue_sockets()
 	socklist[i].flags |= SOCK_EOFD;
       } else if (x == socklist[i].outbuflen) {
 	/* If the whole buffer was sent, nuke it */
-	nfree(socklist[i].outbuf);
+	free(socklist[i].outbuf);
 	socklist[i].outbuf = NULL;
 	socklist[i].outbuflen = 0;
       } else if (x > 0) {
 	char *p = socklist[i].outbuf;
 
 	/* This removes any sent bytes from the beginning of the buffer */
-	socklist[i].outbuf = (char *) nmalloc(socklist[i].outbuflen - x);
+	socklist[i].outbuf = (char *) malloc(socklist[i].outbuflen - x);
 	egg_memcpy(socklist[i].outbuf, p + x, socklist[i].outbuflen - x);
 	socklist[i].outbuflen -= x;
-	nfree(p);
+	free(p);
       } else {
 	debug3(STR("dequeue_sockets(): errno = %d (%s) on %d"), errno,
                strerror(errno), socklist[i].sock);
@@ -1882,7 +1882,7 @@ int flush_inbuf(int idx)
           inbuf = socklist[i].inbuf;
           socklist[i].inbuf = NULL;
           dcc[idx].type->activity(idx, inbuf, len);
-          nfree(inbuf);
+          free(inbuf);
           return len;
         } else
           return -2;

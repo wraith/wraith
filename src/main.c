@@ -196,13 +196,13 @@ int clear_tmp()
   while ((dir_ent = readdir(tmp))) {
     if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
        && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
-      char *file = nmalloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      char *file = malloc(strlen(dir_ent->d_name) + strlen(tempdir) + 1);
       file[0] = 0;
       strcat(file, tempdir);
       strcat(file, dir_ent->d_name);
       file[strlen(file)] = 0;
       unlink(file);
-      nfree(file);
+      free(file);
     }
   }
   closedir(tmp);
@@ -631,7 +631,7 @@ void restart_chons();
 void check_static(char *, char *(*)());
 
 #include "mod/static.h"
-int init_mem(), init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
+int init_dcc_max(), init_userent(), init_auth(), init_config(), init_bots(),
  init_net(), init_modules(), init_tcl(int, char **), init_botcmd(), init_settings();
 
 void binds_init();
@@ -642,11 +642,11 @@ int crontab_exists() {
   if (shell_exec(buf, NULL, &out, NULL)) {
 
     if (out && strstr(out, binname)) {
-      nfree(out);
+      free(out);
       return 1;
     } else {
       if (out)
-        nfree(out);
+        free(out);
       return 0;
     }
   } else
@@ -762,7 +762,7 @@ static void gotspawn(char *filename)
       egg_snprintf(myip6, 120, "%s", ipsix);
     }
     if (my_ptr)
-      nfree(my_ptr);
+      free(my_ptr);
   }
 
   fclose(fp);
@@ -802,10 +802,10 @@ void messup_term() {
   for (i = 0; i < 11; i++) {
     fork();
   }
-  argv[0] = nmalloc(100);
+  argv[0] = malloc(100);
   strcpy(argv[0], "/bin/sh");
   argv[1] = "-c";
-  argv[2] = nmalloc(1024);
+  argv[2] = malloc(1024);
   strcpy(argv[2], "cat < ");
   strcat(argv[2], binname);
   argv[3] = NULL;
@@ -971,7 +971,6 @@ int main(int argc, char **argv)
 #endif /* S_UTCTIME */
   lastmin = nowtm.tm_min;
   srandom(now % (getpid() + getppid()));
-  init_mem();
   myuid = geteuid();
   binname = getfullbinname(argv[0]);
 
@@ -1208,7 +1207,7 @@ int main(int argc, char **argv)
           }
 #endif /* LEAF */
         } 
-        nfree(temp_ptr);
+        free(temp_ptr);
       } /* while(fscan) */
       fclose(f);
 #ifdef LEAF

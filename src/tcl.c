@@ -307,14 +307,14 @@ static int utf_converter(ClientData cdata, Tcl_Interp *myinterp, int objc,
   ClientData cd;
 
   objc += 5;
-  strings = (char **)nmalloc(sizeof(char *) * objc);
+  strings = (char **)malloc(sizeof(char *) * objc);
   egg_memset(strings, 0, sizeof(char *) * objc);
   diff = utftot;
   utftot += sizeof(char *) * objc;
   objc -= 5;
   for (i = 0; i < objc; i++) {
     byteptr = (char *)Tcl_GetByteArrayFromObj(objv[i], &len);
-    strings[i] = (char *)nmalloc(len+1);
+    strings[i] = (char *)malloc(len+1);
     utftot += len+1;
     strncpy(strings[i], byteptr, len);
     strings[i][len] = 0;
@@ -324,15 +324,15 @@ static int utf_converter(ClientData cdata, Tcl_Interp *myinterp, int objc,
   cd = (ClientData) callback_data[1];
   diff -= utftot;
   retval = func(cd, myinterp, objc, strings);
-  for (i = 0; i < objc; i++) nfree(strings[i]);
-  nfree(strings);
+  for (i = 0; i < objc; i++) free(strings[i]);
+  free(strings);
   utftot += diff;
   return(retval);
 }
 
 void cmd_delete_callback(ClientData cdata)
 {
-  nfree(cdata);
+  free(cdata);
   clientdata_stuff -= sizeof(void *) * 2;
 }
 
@@ -341,7 +341,7 @@ void add_tcl_commands(tcl_cmds *table)
   void **cdata;
 
   while (table->name) {
-    cdata = (void **)nmalloc(sizeof(void *) * 2);
+    cdata = (void **)malloc(sizeof(void *) * 2);
     clientdata_stuff += sizeof(void *) * 2;
     cdata[0] = table->func;
     cdata[1] = NULL;
@@ -452,7 +452,6 @@ void init_tcl(int argc, char **argv)
 {
 #if (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION >= 1) || (TCL_MAJOR_VERSION > 8)
   const char *encoding;
-  int i;
   char *langEnv;
 #endif
   int j;
@@ -586,7 +585,7 @@ void add_tcl_strings(tcl_strings *list)
   int tmp;
 
   for (i = 0; list[i].name; i++) {
-    st = (strinfo *) nmalloc(sizeof(strinfo));
+    st = (strinfo *) malloc(sizeof(strinfo));
     strtot += sizeof(strinfo);
     st->max = list[i].length - (list[i].flags & STR_DIR);
     if (list[i].flags & STR_PROTECT)
@@ -618,7 +617,7 @@ void rem_tcl_strings(tcl_strings *list)
 		   tcl_eggstr, st);
     if (st != NULL) {
       strtot -= sizeof(strinfo);
-      nfree(st);
+      free(st);
     }
   }
 }
@@ -629,7 +628,7 @@ void add_tcl_ints(tcl_ints *list)
   intinfo *ii;
 
   for (i = 0; list[i].name; i++) {
-    ii = nmalloc(sizeof(intinfo));
+    ii = malloc(sizeof(intinfo));
     strtot += sizeof(intinfo);
     ii->var = list[i].val;
     ii->ro = list[i].readonly;
@@ -660,7 +659,7 @@ void rem_tcl_ints(tcl_ints *list)
 		   tcl_eggint, (ClientData) ii);
     if (ii) {
       strtot -= sizeof(intinfo);
-      nfree(ii);
+      free(ii);
     }
   }
 }
@@ -673,7 +672,7 @@ void add_tcl_coups(tcl_coups *list)
   int i;
 
   for (i = 0; list[i].name; i++) {
-    cp = (coupletinfo *) nmalloc(sizeof(coupletinfo));
+    cp = (coupletinfo *) malloc(sizeof(coupletinfo));
     strtot += sizeof(coupletinfo);
     cp->left = list[i].lptr;
     cp->right = list[i].rptr;
@@ -702,7 +701,7 @@ void rem_tcl_coups(tcl_coups * list)
     Tcl_UntraceVar(interp, list[i].name,
 		   TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
 		   tcl_eggcouplet, (ClientData) cp);
-    nfree(cp);
+    free(cp);
   }
 }
 

@@ -287,7 +287,7 @@ static int compress_file(char *filename, int mode_num)
   int   ret;
 
   /* Create temporary filename. */
-  temp_fn = nmalloc(strlen(filename) + 5);
+  temp_fn = malloc(strlen(filename) + 5);
   make_rand_str(randstr, 4);
   strcpy(temp_fn, filename);
   strcat(temp_fn, randstr);
@@ -301,7 +301,7 @@ static int compress_file(char *filename, int mode_num)
   if (ret == COMPF_SUCCESS)
     movefile(temp_fn, filename);
 
-  nfree(temp_fn);
+  free(temp_fn);
   return ret;
 }
 
@@ -313,7 +313,7 @@ static int uncompress_file(char *filename)
   int   ret;
 
   /* Create temporary filename. */
-  temp_fn = nmalloc(strlen(filename) + 5);
+  temp_fn = malloc(strlen(filename) + 5);
   make_rand_str(randstr, 4);
   strcpy(temp_fn, filename);
   strcat(temp_fn, randstr);
@@ -327,7 +327,7 @@ static int uncompress_file(char *filename)
   if (ret == COMPF_SUCCESS)
     movefile(temp_fn, filename);
 
-  nfree(temp_fn);
+  free(temp_fn);
   return ret;
 }
 

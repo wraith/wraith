@@ -140,7 +140,7 @@ void makeopline(struct chanset_t *chan, char *nick, char *buf)
 //  putlog(LOG_DEBUG, "*", "Encrypting opline for %s with cookie %s and key %s", nck, plaincookie, key);
   p = encrypt_string(key, plaincookie);
   strcpy(enccookie, p);
-  nfree(p);
+  free(p);
   sprintf(buf, STR("MODE %s +o-b %s *!*@<%s>\n"), chan->name, nck, enccookie);
 }
 
@@ -215,11 +215,11 @@ void getin_request(char *botnick, char *code, char *par)
     if (ip4[0]) {
       char *tmp2;
 
-      tmp = nmalloc(strlen(host) + 1);
+      tmp = malloc(strlen(host) + 1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
       egg_snprintf(ip4host, sizeof ip4host, "%s@%s", strtok(tmp2, "@") ,ip4);
-      nfree(tmp);
+      free(tmp);
     } else {
       ip4host[0] = 0;
     }
@@ -227,11 +227,11 @@ void getin_request(char *botnick, char *code, char *par)
     if (ip6[0]) {
       char *tmp2;
 
-      tmp = nmalloc(strlen(host) + 1);
+      tmp = malloc(strlen(host) + 1);
       strcpy(tmp, host);
       tmp2 = strtok(tmp, "@");
       egg_snprintf(ip6host, sizeof ip6host, "%s@%s", strtok(tmp2, "@") ,ip6);
-      nfree(tmp);
+      free(tmp);
     } else {
       ip6host[0] = 0;
     }
@@ -372,14 +372,14 @@ void getin_request(char *botnick, char *code, char *par)
 	}
 	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Removed permanent global ban %s"), botnick, nick, chan->dname, (*mr)->mask);
 	//gban_total--;
-	nfree((*mr)->mask);
+	free((*mr)->mask);
 	if ((*mr)->desc)
-	  nfree((*mr)->desc);
+	  free((*mr)->desc);
 	if ((*mr)->user)
-	  nfree((*mr)->user);
+	  free((*mr)->user);
 	tmr = *mr;
 	*mr = (*mr)->next;
-	nfree(tmr);
+	free(tmr);
       } else {
 	mr = &((*mr)->next);
       }
@@ -391,14 +391,14 @@ void getin_request(char *botnick, char *code, char *par)
 	  shareout(NULL, STR("-bc %s %s\n"), chan->dname, (*mr)->mask);
 	}
 	putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Removed permanent channel ban %s"), botnick, nick, chan->dname, (*mr)->mask);
-	nfree((*mr)->mask);
+	free((*mr)->mask);
 	if ((*mr)->desc)
-	  nfree((*mr)->desc);
+	  free((*mr)->desc);
 	if ((*mr)->user)
-	  nfree((*mr)->user);
+	  free((*mr)->user);
 	tmr = *mr;
 	*mr = (*mr)->next;
-	nfree(tmr);
+	free(tmr);
       } else {
 	mr = &((*mr)->next);
       }
@@ -412,11 +412,11 @@ void getin_request(char *botnick, char *code, char *par)
     }
     if (strchr(p2, 'k')) {
       sendi = 0;
-      tmp = nmalloc(strlen(chan->dname) + strlen(p3) + 7);
+      tmp = malloc(strlen(chan->dname) + strlen(p3) + 7);
       sprintf(tmp, STR("gi K %s %s"), chan->dname, p3);
       botnet_send_zapf(nextbot(botnick), botnetnick, botnick, tmp);
       putlog(LOG_GETIN, "*", STR("inreq from %s/%s for %s - Sent key (%s)"), botnick, nick, chan->dname, p3);
-      nfree(tmp);
+      free(tmp);
     }
     if (strchr(p2, 'i')) {
       if (!me_op(chan))
@@ -536,7 +536,7 @@ static void request_op(struct chanset_t *chan)
   /* first scan for bots on my server, ask first found for ops */
   cnt = OP_BOTS;
   sprintf(s, "gi o %s %s", chan->dname, botname);
-  l = nmalloc(cnt * 50);
+  l = malloc(cnt * 50);
   l[0] = 0;
   for (i2 = 0; i2 < i; i2++) {
     if (botops[i2]->server && (!strcmp(botops[i2]->server, myserv))) {
@@ -578,7 +578,7 @@ static void request_op(struct chanset_t *chan)
     }
   }
   putlog(LOG_GETIN, "*", STR("Requested ops on %s from %s"), chan->dname, l);
-  nfree(l);
+  free(l);
 }
 
 static void request_in(struct chanset_t *chan)
@@ -607,7 +607,7 @@ static void request_in(struct chanset_t *chan)
   cnt = IN_BOTS;
   sprintf(s, "gi i %s %s %s!%s %s %s", chan->dname, botname, botname, botuserhost, myipstr(4) ? myipstr(4) : "."
                                           , myipstr(6) ? myipstr(6) : ".");
-  l = nmalloc(cnt * 30);
+  l = malloc(cnt * 30);
   l[0] = 0;
   while (cnt) {
     n = random() % i;
@@ -627,7 +627,7 @@ static void request_in(struct chanset_t *chan)
     }
   }
   putlog(LOG_GETIN, "*", STR("Requesting help to join %s from %s"), chan->dname, l);
-  nfree(l);
+  free(l);
 }
 
 
@@ -826,13 +826,13 @@ static void maybe_revenge(struct chanset_t *chan, char *whobad,
  */
 static void my_setkey(struct chanset_t *chan, char *k)
 {
-  nfree(chan->channel.key);
+  free(chan->channel.key);
   if (k == NULL) {
-    chan->channel.key = (char *) channel_malloc(1);
+    chan->channel.key = (char *) malloc(1);
     chan->channel.key[0] = 0;
     return;
   }
-  chan->channel.key = (char *) channel_malloc(strlen(k) + 1);
+  chan->channel.key = (char *) malloc(strlen(k) + 1);
   strcpy(chan->channel.key, k);
 }
 
@@ -845,14 +845,14 @@ static void newmask(masklist *m, char *s, char *who)
   if (m->mask[0])
     return;			/* Already existent mask */
 
-  m->next = (masklist *) channel_malloc(sizeof(masklist));
+  m->next = (masklist *) malloc(sizeof(masklist));
   m->next->next = NULL;
-  m->next->mask = (char *) channel_malloc(1);
+  m->next->mask = (char *) malloc(1);
   m->next->mask[0] = 0;
-  nfree(m->mask);
-  m->mask = (char *) channel_malloc(strlen(s) + 1);
+  free(m->mask);
+  m->mask = (char *) malloc(strlen(s) + 1);
   strcpy(m->mask, s);
-  m->who = (char *) channel_malloc(strlen(who) + 1);
+  m->who = (char *) malloc(strlen(who) + 1);
   strcpy(m->who, who);
   m->timer = now;
 }
@@ -876,7 +876,7 @@ static int killmember(struct chanset_t *chan, char *nick)
     old->next = x->next;
   else
     chan->channel.member = x->next;
-  nfree(x);
+  free(x);
   chan->channel.members--;
 
   /* The following two errors should NEVER happen. We will try to correct
@@ -890,7 +890,7 @@ static int killmember(struct chanset_t *chan, char *nick)
 	    chan->channel.members);
   }
   if (!chan->channel.member) {
-    chan->channel.member = (memberlist *) channel_malloc(sizeof(memberlist));
+    chan->channel.member = (memberlist *) malloc(sizeof(memberlist));
     chan->channel.member->nick[0] = 0;
     chan->channel.member->next = NULL;
   }
@@ -953,8 +953,8 @@ static void reset_chan_info(struct chanset_t *chan)
   if (!channel_pending(chan)) {
     if (me_op(chan))
       opped += 1;
-    nfree(chan->channel.key);
-    chan->channel.key = (char *) channel_malloc(1);
+    free(chan->channel.key);
+    chan->channel.key = (char *) malloc(1);
     chan->channel.key[0] = 0;
     clear_channel(chan, 1);
     chan->status |= CHAN_PEND;

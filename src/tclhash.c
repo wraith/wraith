@@ -45,27 +45,11 @@ static char *my_strdup(const char *s)
 {
 	char *t;
 
-	t = (char *)nmalloc(strlen(s)+1);
+	t = (char *)malloc(strlen(s)+1);
 	strcpy(t, s);
 	return(t);
 }
 
-
-/* Allocate and initialise a chunk of memory.
- */
-static inline void *n_malloc_null(int size, const char *file, int line)
-{
-#ifdef DEBUG_MEM
-# define	nmalloc_null(size)	n_malloc_null(size, __FILE__, __LINE__)
-  void	*ptr = n_malloc(size, file, line);
-#else
-# define	nmalloc_null(size)	n_malloc_null(size, NULL, 0)
-  void	*ptr = nmalloc(size);
-#endif
-
-  egg_memset(ptr, 0, size);
-  return ptr;
-}
 
 extern cmd_t C_dcc[];
 
@@ -103,7 +87,7 @@ bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, in
 		if (!strcmp(table->name, name)) return(table);
 	}
 	/* Nope, we have to create a new one. */
-	table = (bind_table_t *)nmalloc(sizeof(*table));
+	table = (bind_table_t *)malloc(sizeof(*table));
 	table->chains = NULL;
 	table->name = my_strdup(name);
 	table->nargs = nargs;
@@ -132,15 +116,15 @@ void bind_table_del(bind_table_t *table)
 	}
 
 	/* Now delete it. */
-	nfree(table->name);
+	free(table->name);
 	for (chain = table->chains; chain; chain = next_chain) {
 		next_chain = chain->next;
 		for (entry = chain->entries; entry; entry = next_entry) {
 			next_entry = entry->next;
-			nfree(entry->function_name);
-			nfree(entry);
+			free(entry->function_name);
+			free(entry);
 		}
-		nfree(chain);
+		free(chain);
 	}
 }
 
@@ -174,8 +158,8 @@ int bind_entry_del(bind_table_t *table, const char *flags, const char *mask, con
 	/* Delete it. */
 	if (prev) prev->next = entry->next;
 	else chain->entries = entry->next;
-	nfree(entry->function_name);
-	nfree(entry);
+	free(entry->function_name);
+	free(entry);
 
 	return(0);
 }
@@ -192,7 +176,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 
 	/* Create if it doesn't exist. */
 	if (!chain) {
-		chain = (bind_chain_t *)nmalloc(sizeof(*chain));
+		chain = (bind_chain_t *)malloc(sizeof(*chain));
 		chain->entries = NULL;
 		chain->mask = my_strdup(mask);
 		chain->next = table->chains;
@@ -212,10 +196,10 @@ int bind_entry_add(bind_table_t *table, const char *flags, const char *mask, con
 	}
 
 	/* If we have an old entry, re-use it. */
-	if (entry) nfree(entry->function_name);
+	if (entry) free(entry->function_name);
 	else {
 		/* Otherwise, create a new entry. */
-		entry = (bind_entry_t *)nmalloc(sizeof(*entry));
+		entry = (bind_entry_t *)malloc(sizeof(*entry));
 		entry->next = chain->entries;
 		chain->entries = entry;
 	}

@@ -42,19 +42,12 @@
  * Do not read this file whilst unless heavily sedated, I will not be
  * held responsible for mental break-downs caused by this file <G>
  */
-
 #undef killsock
-#undef nmalloc
-#undef nfree
-#undef nrealloc
 #undef feof
-#undef user_malloc
 #undef dprintf
 #undef sdprintf
-#undef get_data_ptr
 #undef wild_match
 #undef wild_match_per
-#undef user_realloc
 #undef Context
 #undef ContextNote
 #undef Assert
@@ -95,8 +88,8 @@
 /* Redefine for module-relevance */
 
 /* 0 - 3 */
-#define nmalloc(x) ((void *)(global[0]((x),MODULE_NAME,__FILE__,__LINE__)))
-#define nfree(x) (global[1]((x),MODULE_NAME,__FILE__,__LINE__))
+/* UNUSED 0 */
+/* UNUSED 1 */
 #ifdef DEBUG_CONTEXT
 #  define Context (global[2](__FILE__, __LINE__, MODULE_NAME))
 #else
@@ -145,9 +138,9 @@
 #define nextbot ((int (*)(char *))global[35])
 /* 36 - 39 */
 #define zapfbot ((void (*)(int))global[36])
-#define n_free ((void (*)(void *,char *, int))global[37])
+/* UNUSED 37 */
 #define u_pass_match ((int (*)(struct userrec *,char *))global[38])
-#define user_malloc(x) ((void *(*)(int,char *,int))global[39])(x,__FILE__,__LINE__)
+/* UNUSED 39 */
 /* 40 - 43 */
 #define get_user ((void *(*)(struct user_entry_type *,struct userrec *))global[40])
 #define set_user ((int(*)(struct user_entry_type *,struct userrec *,void *))global[41])
@@ -210,7 +203,7 @@
 /* 84 - 87 */
 #define open_listen_by_af ((int (*) (int *, int))global[84])
 #define open_telnet_dcc ((int (*) (int,char *,char *))global[85])
-#define get_data_ptr(x) ((void *(*)(int,char*,int))global[86])(x,__FILE__,__LINE__)
+#define get_data_ptr(x) ((void *(*)(int))global[86])(x)
 #define open_telnet ((int (*) (char *, int))global[87])
 /* 88 - 91 */
 #define check_bind_event ((void * (*) (const char *))global[88])
@@ -313,8 +306,8 @@
 #define detect_dcc_flood ((int (*) (time_t *,struct chat_info *,int))global[166])
 #define flush_lines ((void(*)(int,struct chat_info*))global[167])
 /* 168 - 171 */
-#define expected_memory ((int(*)(void))global[168])
-#define tell_mem_status ((void(*)(char *))global[169])
+/* UNUSED 168 */
+/* UNUSED 169 */
 #define do_restart (*(int *)(global[170]))
 /* --- UNUSED 171 */
 /* 172 - 175 */
@@ -389,8 +382,8 @@
 #define force_expire (*(int *)(global[227]))	/* Rufus */
 /* 228 - 231 */
 /* 228 */
-#define user_realloc(x,y) ((void *(*)(void *,int,char *,int))global[229])((x),(y),__FILE__,__LINE__)
-#define nrealloc(x,y) ((void *)(global[230]((x),(y),MODULE_NAME,__FILE__,__LINE__)))
+/* UNUSED 229 */
+/* UNUSED 230 */
 #define xtra_set ((int(*)(struct userrec *,struct user_entry *, void *))global[231])
 /* 232 - 235 */
 #ifdef DEBUG_CONTEXT

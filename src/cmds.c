@@ -304,7 +304,7 @@ static void cmd_config(struct userrec *u, int idx, char *par)
 
   putlog(LOG_CMDS, "*", STR("#%s# config %s"), dcc[idx].nick, par);
   if (!par[0]) {
-    char *outbuf = nmalloc(1);
+    char *outbuf = malloc(1);
     outbuf[0] = 0;
     dprintf(idx, STR("Usage: config [name [value|-]]\n"));
     dprintf(idx, STR("Defined config entry names:\n"));
@@ -312,10 +312,10 @@ static void cmd_config(struct userrec *u, int idx, char *par)
     for (i = 0; i < cfg_count; i++) {
       if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
 	if (!cnt) {
-          outbuf = nrealloc(outbuf, 2 + 1);
+          outbuf = realloc(outbuf, 2 + 1);
 	  sprintf(outbuf, "  ");
         }
-        outbuf = nrealloc(outbuf, strlen(outbuf) + strlen(cfg[i]->name) + 1 + 1);
+        outbuf = realloc(outbuf, strlen(outbuf) + strlen(cfg[i]->name) + 1 + 1);
 	sprintf(outbuf, STR("%s%s "), outbuf, cfg[i]->name);
 	cnt++;
 	if (cnt == 10) {
@@ -327,7 +327,7 @@ static void cmd_config(struct userrec *u, int idx, char *par)
     if (cnt)
       dprintf(idx, "%s\n", outbuf);
     if (outbuf)
-      nfree(outbuf);
+      free(outbuf);
     return;
   }
   name = newsplit(&par);
@@ -572,10 +572,10 @@ static void cmd_motd(struct userrec *u, int idx, char *par)
   if (par[0] && (u->flags & USER_MASTER)) {
     char *s;
 
-    s = nmalloc(strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1); /* +2: ' 'x2 */
+    s = malloc(strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1); /* +2: ' 'x2 */
     sprintf(s, STR("%s %lu %s"), dcc[idx].nick, now, par);
     set_cfg_str(NULL, "motd", s);
-    nfree(s);
+    free(s);
     dprintf(idx, STR("Motd set\n"));
 #ifdef HUB
   write_userfile(idx);
@@ -752,7 +752,7 @@ int my_cmp (const mycmds *c1, const mycmds *c2)
 static void cmd_nohelp(struct userrec *u, int idx, char *par)
 {
   int i;
-  char *buf = nmalloc(1);
+  char *buf = malloc(1);
   buf[0] = 0;
 
   qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)()) &my_cmp);
@@ -762,7 +762,7 @@ static void cmd_nohelp(struct userrec *u, int idx, char *par)
     for (o = 0; (help[o].cmd) && (help[o].desc); o++)
       if (!egg_strcasecmp(help[o].cmd, cmdlist[i].name)) found++;
     if (!found) {
-      buf = nrealloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
+      buf = realloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
       strcat(buf, cmdlist[i].name);
       strcat(buf, ", ");
     }
@@ -1126,14 +1126,12 @@ static void cmd_status(struct userrec *u, int idx, char *par)
     }
     putlog(LOG_CMDS, "*", STR("#%s# status all"), dcc[idx].nick);
     tell_verbose_status(idx);
-    tell_mem_status_dcc(idx);
     dprintf(idx, "\n");
     tell_settings(idx);
     do_module_report(idx, 1, NULL);
   } else {
     putlog(LOG_CMDS, "*", STR("#%s# status"), dcc[idx].nick);
     tell_verbose_status(idx);
-    tell_mem_status_dcc(idx);
     do_module_report(idx, 0, NULL);
   }
 }
@@ -1592,11 +1590,11 @@ static void cmd_hublevel(struct userrec *u, int idx, char *par)
   }
   dprintf(idx, STR("Changed bot's hublevel.\n"));
   obi = get_user(&USERENTRY_BOTADDR, u1);
-  bi = user_malloc(sizeof(struct bot_addr));
+  bi = malloc(sizeof(struct bot_addr));
 
-  bi->uplink = user_malloc(strlen(obi->uplink) + 1);
+  bi->uplink = malloc(strlen(obi->uplink) + 1);
   strcpy(bi->uplink, obi->uplink);
-  bi->address = user_malloc(strlen(obi->address) + 1);
+  bi->address = malloc(strlen(obi->address) + 1);
   strcpy(bi->address, obi->address);
   bi->telnet_port = obi->telnet_port;
   bi->relay_port = obi->relay_port;
@@ -1632,11 +1630,11 @@ static void cmd_uplink(struct userrec *u, int idx, char *par)
   else
     dprintf(idx, STR("Cleared bot's uplink.\n"));
   obi = get_user(&USERENTRY_BOTADDR, u1);
-  bi = user_malloc(sizeof(struct bot_addr));
+  bi = malloc(sizeof(struct bot_addr));
 
-  bi->uplink = user_malloc(strlen(uplink) + 1);
+  bi->uplink = malloc(strlen(uplink) + 1);
   strcpy(bi->uplink, uplink);
-  bi->address = user_malloc(strlen(obi->address) + 1);
+  bi->address = malloc(strlen(obi->address) + 1);
   strcpy(bi->address, obi->address);
   bi->telnet_port = obi->telnet_port;
   bi->relay_port = obi->relay_port;
@@ -1686,15 +1684,15 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
     relay_port = bi->relay_port;
   }
 
-  bi = user_malloc(sizeof(struct bot_addr));
+  bi = malloc(sizeof(struct bot_addr));
 
-  bi->uplink = user_malloc(strlen(obi->uplink) + 1);
+  bi->uplink = malloc(strlen(obi->uplink) + 1);
   strcpy(bi->uplink, obi->uplink);
   bi->hublevel = obi->hublevel;
 
   q = strchr(addr, ':');
   if (!q) {
-    bi->address = user_malloc(strlen(addr) + 1);
+    bi->address = malloc(strlen(addr) + 1);
     strcpy(bi->address, addr);
     bi->telnet_port = telnet_port;
     bi->relay_port = relay_port;
@@ -1704,12 +1702,12 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
     if (r) { /* ipv6 notation [3ffe:80c0:225::] */
       *addr++;
       r = strchr(addr, ']');
-      bi->address = user_malloc(r - addr + 1);
+      bi->address = malloc(r - addr + 1);
       strncpyz(bi->address, addr, r - addr + 1);
       addr = r;
       *addr++;
     } else {
-      bi->address = user_malloc(q - addr + 1);
+      bi->address = malloc(q - addr + 1);
       strncpyz(bi->address, addr, q - addr + 1);
     }
     q = strchr(addr, ':');
@@ -1724,7 +1722,7 @@ static void cmd_chaddr(struct userrec *u, int idx, char *par)
       }
     }
 #else /* !USE_IPV6 */
-    bi->address = user_malloc(q - addr + 1);
+    bi->address = malloc(q - addr + 1);
     strncpyz(bi->address, addr, q - addr + 1);
     p = q + 1;
     bi->telnet_port = atoi(p);
@@ -1790,10 +1788,10 @@ static void cmd_randstring(struct userrec *u, int idx, char *par)
 
   len = atoi(par);
   if (len < 301) {
-    rand = nmalloc(len + 1);
+    rand = malloc(len + 1);
     make_rand_str(rand, len);
     dprintf(idx, STR("string: %s\n"), rand);
-    nfree(rand);
+    free(rand);
   } else 
     dprintf(idx, "Too long, must be <= 300\n");
 }
@@ -1852,7 +1850,7 @@ static void cmd_die(struct userrec *u, int idx, char *par)
 static void cmd_debug(struct userrec *u, int idx, char *par)
 {
   putlog(LOG_CMDS, "*", STR("#%s# debug"), dcc[idx].nick);
-  debug_mem_to_dcc(idx);
+  tell_netdebug(idx);
 }
 
 static void cmd_simul(struct userrec *u, int idx, char *par)
@@ -2247,7 +2245,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
 	return;
       }
     } else if (arg && !strpbrk(chg, "&|")) {
-      tmpchg = nmalloc(strlen(chg) + 2);
+      tmpchg = malloc(strlen(chg) + 2);
       strcpy(tmpchg, "|");
       strcat(tmpchg, chg);
       chg = tmpchg;
@@ -2263,13 +2261,13 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     dprintf(idx, STR("You do not have channel master privileges for channel %s.\n"),
 	    par);
     if (tmpchg)
-      nfree(tmpchg);
+      free(tmpchg);
     return;
   }
     if (chan && private(user, chan, PRIV_OP)) {
       dprintf(idx, STR("You do not have access to change flags for %s\n"), chan->dname);
       if (tmpchg)
-        nfree(tmpchg);
+        free(tmpchg);
       return;
     }
 
@@ -2395,7 +2393,7 @@ static void cmd_chattr(struct userrec *u, int idx, char *par)
     (func[IRC_CHECK_THIS_USER]) (hand, 0, NULL);
   }
   if (tmpchg)
-    nfree(tmpchg);
+    free(tmpchg);
 #ifdef HUB
   write_userfile(idx);
 #endif /* HUB */
@@ -2535,7 +2533,7 @@ int exec_str(int idx, char *cmd) {
         p=np;
       }
       dprintf(idx, "\n");
-      nfree(out);
+      free(out);
     }
     if (err) {
       dprintf(idx, STR("Errors:\n"));
@@ -2548,7 +2546,7 @@ int exec_str(int idx, char *cmd) {
         p=np;
       }
       dprintf(idx, "\n");
-      nfree(err);
+      free(err);
     }
     return 1;
   }
@@ -2584,11 +2582,11 @@ static void cmd_ps(struct userrec *u, int idx, char *par) {
     dprintf(idx, STR("No."));
     return;
   }
-  buf=nmalloc(strlen(par)+4);
+  buf=malloc(strlen(par)+4);
   sprintf(buf, STR("ps %s"), par);
   if (!exec_str(idx, buf))
     dprintf(idx, STR("Exec failed\n"));
-  nfree(buf);
+  free(buf);
 }
 
 static void cmd_last(struct userrec *u, int idx, char *par) {
@@ -2883,7 +2881,7 @@ static void cmd_su(struct userrec *u, int idx, char *par)
 	 * their password right ;)
 	 */
 	if (dcc[idx].u.chat->away != NULL)
-	  nfree(dcc[idx].u.chat->away);
+	  free(dcc[idx].u.chat->away);
         dcc[idx].u.chat->away = get_data_ptr(strlen(dcc[idx].nick) + 1);
 	strcpy(dcc[idx].u.chat->away, dcc[idx].nick);
         dcc[idx].u.chat->su_nick = get_data_ptr(strlen(dcc[idx].nick) + 1);
@@ -3039,13 +3037,13 @@ static void cmd_newleaf(struct userrec *u, int idx, char *par)
       char tmp[81];
       userlist = adduser(userlist, handle, STR("none"), "-", USER_BOT | USER_OP);
       u1 = get_user_by_handle(userlist, handle);
-      bi = user_malloc(sizeof(struct bot_addr));
+      bi = malloc(sizeof(struct bot_addr));
 
-      bi->uplink = user_malloc(strlen(botnetnick) + 1); 
+      bi->uplink = malloc(strlen(botnetnick) + 1); 
 /*      strcpy(bi->uplink, botnetnick); */
       strcpy(bi->uplink, "");
 
-      bi->address = user_malloc(1);
+      bi->address = malloc(1);
       bi->address[0] = 0;
       bi->telnet_port = 3333;
       bi->relay_port = 3333;
@@ -3071,7 +3069,7 @@ static void cmd_nopass(struct userrec *u, int idx, char *par)
 {
   int cnt = 0;
   struct userrec *cu;
-  char *users = nmalloc(1);
+  char *users = malloc(1);
 
   putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
 
@@ -3080,7 +3078,7 @@ static void cmd_nopass(struct userrec *u, int idx, char *par)
     if (!(cu->flags & USER_BOT)) {
       if (u_pass_match(cu, "-")) {
         cnt++;
-        users = nrealloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
+        users = realloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
         strcat(users, cu->handle);
         strcat(users, " ");
       }
@@ -3090,7 +3088,7 @@ static void cmd_nopass(struct userrec *u, int idx, char *par)
     dprintf(idx, "All users have passwords set.\n");
   else
     dprintf(idx, "Users without passwords: %s\n", users);
-  nfree(users);
+  free(users);
 }
 #endif /* HUB */
 
@@ -3691,7 +3689,7 @@ void crontab_show(struct userrec * u, int idx) {
 
 void crontab_del() {
   char * tmpfile, *p, buf[2048];
-  tmpfile=nmalloc(strlen(binname)+100);
+  tmpfile=malloc(strlen(binname)+100);
   strcpy(tmpfile, binname);
   if (!(p=strrchr(tmpfile, '/')))
     return;
@@ -3832,7 +3830,7 @@ void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
         botnet_send_cmdreply(botnetnick, frombot, fromhand, fromidx, p);
         p=np;
       }
-      nfree(out);
+      free(out);
     }
     if (err) {
       char * p, * np;
@@ -3845,7 +3843,7 @@ void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
         botnet_send_cmdreply(botnetnick, frombot, fromhand, fromidx, p);
         p=np;
       }
-      nfree(err);
+      free(err);
     }
   } else {
     botnet_send_cmdreply(botnetnick, frombot, fromhand, fromidx, STR("exec failed"));
@@ -3929,10 +3927,10 @@ void gotremotecmd (char * forbot, char * frombot, char * fromhand, char * fromid
 void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
   int idx = atoi(toidx);
   if ((idx >= 0) && (idx < dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {
-    char *buf = nmalloc(strlen(frombot) + 2 + 1);
+    char *buf = malloc(strlen(frombot) + 2 + 1);
     sprintf(buf, "(%s)", frombot);
     dprintf(idx, STR("%-13s %s\n"), buf, ln);
-    nfree(buf);
+    free(buf);
   }
 }
 
@@ -4059,7 +4057,7 @@ static void cmd_quit(struct userrec *u, int idx, char *text)
 		dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
 		dcc[idx].type = &DCC_CHAT;
 		dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);
-		nfree(dcc[idx].u.chat->su_nick);
+		free(dcc[idx].u.chat->su_nick);
 		dcc[idx].u.chat->su_nick = NULL;
 		dcc_chatter(idx);
 		if (dcc[idx].u.chat->channel < 100000 && dcc[idx].u.chat->channel >= 0) {

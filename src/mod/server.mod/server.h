@@ -62,7 +62,7 @@
  */
 
 #define free_null(ptr)	do {				\
-	nfree(ptr);					\
+	free(ptr);					\
 	ptr = NULL;					\
 } while (0)
 

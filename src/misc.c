@@ -461,7 +461,7 @@ void show_motd(int idx)
     char *who, *buf, date[50];
     time_t time;
     void *buf_ptr;
-    buf = buf_ptr = nmalloc(strlen((char *) CFG_MOTD.gdata) + 1);
+    buf = buf_ptr = malloc(strlen((char *) CFG_MOTD.gdata) + 1);
     strcpy(buf, (char *) CFG_MOTD.gdata);
     who = newsplit(&buf);
     time = atoi(newsplit(&buf));
@@ -473,7 +473,7 @@ void show_motd(int idx)
     dprintf(idx, "Motd set by \002%s\002 (%s)\n", who, date);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
     dprintf(idx, " \n");
-    nfree(buf_ptr);
+    free(buf_ptr);
   } else
     dprintf(idx, STR("Motd: none\n"));
 }
@@ -688,7 +688,7 @@ char *str_escape(const char *str, const char div, const char mask)
 {
   const int	 len = strlen(str);
   int		 buflen = (2 * len), blen = 0;
-  char		*buf = nmalloc(buflen + 1), *b = buf;
+  char		*buf = malloc(buflen + 1), *b = buf;
   const char	*s;
 
   if (!buf)
@@ -697,7 +697,7 @@ char *str_escape(const char *str, const char div, const char mask)
     /* Resize buffer. */
     if ((buflen - blen) <= 3) {
       buflen = (buflen * 2);
-      buf = nrealloc(buf, buflen + 1);
+      buf = realloc(buf, buflen + 1);
       if (!buf)
 	return NULL;
       b = buf + blen;
@@ -881,7 +881,7 @@ void check_last() {
           }
           strncpyz(last_buf, out, sizeof(last_buf));
         }
-        nfree(out);
+        free(out);
       }
     }
   }
@@ -920,7 +920,7 @@ void check_processes()
     bin[0] = 0;
   }
   /* Fix up the "permitted processes" list */
-  p = nmalloc(strlen(proclist) + strlen(bin) + 6);
+  p = malloc(strlen(proclist) + strlen(bin) + 6);
   strcpy(p, proclist);
   strcat(p, " ");
   strcat(p, bin);
@@ -989,9 +989,9 @@ void check_processes()
     }
     curp = np;
   }
-  nfree(proclist);
+  free(proclist);
   if (out)
-    nfree(out);
+    free(out);
 #endif /* S_PROCESSCHECK */
 }
 
@@ -1201,7 +1201,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       if (fs == 0) {
         (*erroutput) = NULL;
       } else {
-        buf = nmalloc(fs + 1);
+        buf = malloc(fs + 1);
         fseek(errFile, 0, SEEK_SET);
         fread(buf, 1, fs, errFile);
         buf[fs] = 0;
@@ -1218,7 +1218,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       if (fs == 0) {
         (*output) = NULL;
       } else {
-        buf = nmalloc(fs + 1);
+        buf = malloc(fs + 1);
         fseek(outFile, 0, SEEK_SET);
         fread(buf, 1, fs, outFile);
         buf[fs] = 0;
@@ -1313,11 +1313,11 @@ int updatebin (int idx, char *par, int autoi)
       dprintf(idx, STR("Not enough parameters.\n"));
     return 1;
   }
-  path = nmalloc(strlen(binname) + strlen(par));
+  path = malloc(strlen(binname) + strlen(par));
   strcpy(path, binname);
   newbin = strrchr(path, '/');
   if (!newbin) {
-    nfree(path);
+    free(path);
     if (idx)
       dprintf(idx, STR("Don't know current binary name\n"));
     return 1;
@@ -1327,12 +1327,12 @@ int updatebin (int idx, char *par, int autoi)
     *newbin = 0;
     if (idx)
       dprintf(idx, STR("New binary must be in %s and name must be specified without path information\n"), path);
-    nfree(path);
+    free(path);
     return 1;
   }
   strcpy(newbin, par);
   if (!strcmp(path, binname)) {
-    nfree(path);
+    free(path);
     if (idx)
       dprintf(idx, STR("Can't update with the current binary\n"));
     return 1;
@@ -1340,13 +1340,13 @@ int updatebin (int idx, char *par, int autoi)
   if (stat(path, &sb)) {
     if (idx)
       dprintf(idx, STR("%s can't be accessed\n"), path);
-    nfree(path);
+    free(path);
     return 1;
   }
   if (chmod(path, S_IRUSR | S_IWUSR | S_IXUSR)) {
     if (idx)
       dprintf(idx, STR("Can't set mode 0600 on %s\n"), path);
-    nfree(path);
+    free(path);
     return 1;
   }
 
@@ -1368,7 +1368,7 @@ int updatebin (int idx, char *par, int autoi)
   if (movefile(path, binname)) {
     if (idx)
       dprintf(idx, STR("Can't rename %s to %s\n"), path, binname);
-    nfree(path);
+    free(path);
     return 1;
   }
 
@@ -1725,7 +1725,7 @@ int goodpass(char *pass, int idx, char *nick)
   if (!pass[0]) 
     return 0;
 
-  tell = nmalloc(300);
+  tell = malloc(300);
 
 #ifdef S_NAZIPASS
   for (i = 0; i < strlen(pass); i++) {
@@ -1778,10 +1778,10 @@ int goodpass(char *pass, int idx, char *nick)
       dprintf(idx, "%s\n", tell);
     else if (nick[0])
       dprintf(DP_HELP, STR("NOTICE %s :%s\n"), nick, tell);
-    nfree(tell);
+    free(tell);
     return 0;
   }
-  nfree(tell);
+  free(tell);
   return 1;
 }
 
@@ -1817,12 +1817,12 @@ char *getfullbinname(char *argv0)
 {
   char *cwd, *bin, *p, *p2;
 
-  bin = nmalloc(strlen(argv0) + 1);
+  bin = malloc(strlen(argv0) + 1);
   strcpy(bin, argv0);
   if (bin[0] == '/') {
     return bin;
   }
-  cwd = nmalloc(8192);
+  cwd = malloc(8192);
   getcwd(cwd, 8191);
   cwd[8191] = 0;
   if (cwd[strlen(cwd) - 1] == '/')
@@ -1845,10 +1845,10 @@ char *getfullbinname(char *argv0)
     if (p)
       p2 = strchr(p, '/');
   }
-  nfree(bin);
-  bin = nmalloc(strlen(cwd) + 1);
+  free(bin);
+  bin = malloc(strlen(cwd) + 1);
   strcpy(bin, cwd);
-  nfree(cwd);
+  free(cwd);
   return bin;
 }
 
@@ -2113,7 +2113,7 @@ void shuffle(char *string, char *delim)
   char *array[501], *str, *work;
   int len = 0, i = 0;
 
-  work = nmalloc(strlen(string) + 1);
+  work = malloc(strlen(string) + 1);
   strcpy(work, string);
 
   str = strtok(work, delim);
@@ -2130,7 +2130,7 @@ void shuffle(char *string, char *delim)
     if (i != len - 1)
       strcat(string, delim);
   }
-  nfree(work);
+  free(work);
   string[strlen(string)] = 0;
 }
 
@@ -2234,7 +2234,7 @@ int email(char *subject, char *msg, int who)
 }
 
 void baduname(char *conf, char *my_uname) {
-  char *tmpfile = nmalloc(strlen(tempdir) + 3 + 1);
+  char *tmpfile = malloc(strlen(tempdir) + 3 + 1);
   int send = 0;
 
   tmpfile[0] = 0;
@@ -2266,7 +2266,7 @@ void baduname(char *conf, char *my_uname) {
     egg_snprintf(msg, sizeof msg, "This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n", pw->pw_name, conf, my_uname, un.nodename);
     email(subject, msg, EMAIL_OWNERS);
   }
-  nfree(tmpfile);
+  free(tmpfile);
 }
 
 
@@ -2302,10 +2302,10 @@ char *confdir()
 #endif /* LEAF */
 #ifdef HUB
     {
-      char *buf = nmalloc(strlen(binname) + 1);
+      char *buf = malloc(strlen(binname) + 1);
       strcpy(buf, binname);
       egg_snprintf(confdir, sizeof confdir, "%s", dirname(buf));
-      nfree(buf);
+      free(buf);
     }
 #endif /* HUB */
   }

@@ -42,9 +42,9 @@ void init_auth_max()
   if (max_auth < 1)
     max_auth = 1;
   if (auth)
-    auth = nrealloc(auth, sizeof(struct auth_t) * max_auth);
+    auth = realloc(auth, sizeof(struct auth_t) * max_auth);
   else
-    auth = nmalloc(sizeof(struct auth_t) * max_auth);
+    auth = malloc(sizeof(struct auth_t) * max_auth);
 }
 
 static void expire_auths()
@@ -75,13 +75,13 @@ char *makehash(struct userrec *u, char *rand)
 {
   char hash[256], *secpass = NULL;
   if (get_user(&USERENTRY_SECPASS, u)) {
-    secpass = nmalloc(strlen(get_user(&USERENTRY_SECPASS, u)) + 1);
+    secpass = malloc(strlen(get_user(&USERENTRY_SECPASS, u)) + 1);
     strcpy(secpass, (char *) get_user(&USERENTRY_SECPASS, u));
     secpass[strlen(secpass)] = 0;
   }
   sprintf(hash, "%s%s%s", rand, (secpass && secpass[0]) ? secpass : "" , (authkey && authkey[0]) ? authkey : "");
   if (secpass)
-    nfree(secpass);
+    free(secpass);
 
   return md5(hash);
 }

@@ -340,7 +340,7 @@ static int tcl_setuser STDVAR
     (func[IRC_CHECK_THIS_USER]) (argv[1], 1, NULL);
   }
   if (!(e = find_user_entry(et, u))) {
-    e = user_malloc(sizeof(struct user_entry));
+    e = malloc(sizeof(struct user_entry));
     e->type = et;
     e->name = NULL;
     e->u.list = NULL;
@@ -351,7 +351,7 @@ static int tcl_setuser STDVAR
   if (!e->u.list) {
     if (list_delete((struct list_type **) &(u->entries),
 		    (struct list_type *) e))
-      nfree(e);
+      free(e);
     /* else maybe already freed... (entry_type==HOSTS) <drummer> */
   }
   if (me && !strcmp(argv[2], "hosts") && argc == 4) {
