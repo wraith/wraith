@@ -668,7 +668,9 @@ int open_telnet_raw(int sock, char *server, port_t sport)
 
   int rc = connect(sock, &so.sa, SIZEOF_SOCKADDR(so));
 
-  if (rc < 0) {    if (errno == EINPROGRESS) {
+  if (rc < 0) {    
+    sdprintf("connect(%s) failed: %s", server, strerror(errono));
+    if (errno == EINPROGRESS) {
       /* Firewall?  announce connect attempt to proxy */
       if (firewall[0])
 	return proxy_connect(sock, server, sport, proxy);
