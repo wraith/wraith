@@ -91,7 +91,7 @@ static void dns_dcchostbyip(IP ip, char *hostn, int ok, void *other)
         (dcc[idx].u.dns->ip == ip)) {
       if (dcc[idx].u.dns->host)
         free(dcc[idx].u.dns->host);
-      dcc[idx].u.dns->host = get_data_ptr(strlen(hostn) + 1);
+      dcc[idx].u.dns->host = calloc(1, strlen(hostn) + 1);
       strcpy(dcc[idx].u.dns->host, hostn);
       if (ok)
         dcc[idx].u.dns->dns_success(idx);

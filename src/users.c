@@ -808,11 +808,28 @@ int readuserfile(char *file, struct userrec **ret)
 	  }
         } else if (!strcmp(code, "+")) {
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
-          if (Tcl_Eval(interp, s) != TCL_OK) {
-           putlog(LOG_MISC, "*", "Tcl error in userfile on line %d", line);
-           putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
-           return 0;
-          }
+           module_entry *me = module_find("channels", 0, 0);
+           if (me) {
+             Function *func = me->funcs;
+             char *options = strdup(s), *chan = NULL, *my_ptr = NULL;
+             my_ptr = options;
+
+             newsplit(&options);
+             newsplit(&options);
+             chan = newsplit(&options);
+/* FIXME: THIS HACK FOR { } REMOVAL SHOULD JUST NOT WRITE THEM? */
+             newsplit(&options);
+             options[strlen(options) - 1] = 0;
+/* Above is a hack to remove { } */
+//             putlog(LOG_MISC, "*", "TCL_CHANNEL_ADD: (%s) %s", chan, options);
+             if ((func[37]) (interp, chan, options) != TCL_OK) {	/* tcl_channel_add() */
+               putlog(LOG_MISC, "*", "Tcl error in userfile on line %d", line);
+               putlog(LOG_MISC, "*", "%s", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
+               free(my_ptr);
+               return 0;
+             }
+             free(my_ptr);
+           }
          }
 	} else if (!strncmp(code, "::", 2)) {
 	  /* channel-specific bans */

@@ -173,8 +173,8 @@ Function global_table[] =
   /* 12 - 15 */
   (Function) 0,
   (Function) 0,
-  (Function) add_tcl_commands,
-  (Function) rem_tcl_commands,
+  (Function) 0,
+  (Function) 0,
   /* 16 - 19 */
   (Function) add_tcl_ints,
   (Function) rem_tcl_ints,
@@ -263,7 +263,7 @@ Function global_table[] =
   /* 84 - 87 */
   (Function) open_listen_by_af,
   (Function) open_telnet_dcc,
-  (Function) get_data_ptr,
+  (Function) 0,
   (Function) open_telnet,
   /* 88 - 91 */
   (Function) check_bind_event,

@@ -2878,9 +2878,9 @@ static void cmd_su(struct userrec *u, int idx, char *par)
 	 */
 	if (dcc[idx].u.chat->away != NULL)
 	  free(dcc[idx].u.chat->away);
-        dcc[idx].u.chat->away = get_data_ptr(strlen(dcc[idx].nick) + 1);
+        dcc[idx].u.chat->away = calloc(1, strlen(dcc[idx].nick) + 1);
 	strcpy(dcc[idx].u.chat->away, dcc[idx].nick);
-        dcc[idx].u.chat->su_nick = get_data_ptr(strlen(dcc[idx].nick) + 1);
+        dcc[idx].u.chat->su_nick = calloc(1, strlen(dcc[idx].nick) + 1);
 	strcpy(dcc[idx].u.chat->su_nick, dcc[idx].nick);
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);
@@ -2897,7 +2897,7 @@ static void cmd_su(struct userrec *u, int idx, char *par)
 	dprintf(idx, STR("Setting your username to %s.\n"), par);
 	if (atr & USER_MASTER)
 	  dcc[idx].u.chat->con_flags = conmask;
-        dcc[idx].u.chat->su_nick = get_data_ptr(strlen(dcc[idx].nick) + 1);
+        dcc[idx].u.chat->su_nick = calloc(1, strlen(dcc[idx].nick) + 1);
 	strcpy(dcc[idx].u.chat->su_nick, dcc[idx].nick);
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);

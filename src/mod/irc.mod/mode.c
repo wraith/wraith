@@ -390,7 +390,7 @@ static void real_add_mode(struct chanset_t *chan,
     for (i = 0; i < modesperline; i++)
       if (chan->cmode[i].type == 0) {
 	chan->cmode[i].type = type;
-	chan->cmode[i].op = (char *) malloc(l);
+	chan->cmode[i].op = (char *) calloc(1, l);
 	chan->bytes += l;	/* Add 1 for safety */
 	strcpy(chan->cmode[i].op, op);
 	break;
@@ -401,13 +401,15 @@ static void real_add_mode(struct chanset_t *chan,
   else if (plus == '+' && mode == 'k') {
     if (chan->key)
       free(chan->key);
-    chan->key = strdup(op);
+    chan->key = (char *) calloc(1, strlen(op) + 1);
+    strcpy(chan->key, op);
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
     if (chan->rmkey)
       free(chan->rmkey);
-    chan->rmkey = strdup(op);
+    chan->rmkey = (char *) calloc(1, strlen(op) + 1);
+    strcpy(chan->rmkey, op);
   }
   /* +l ? store limit */
   else if (plus == '+' && mode == 'l')
@@ -678,7 +680,7 @@ static void real_add_mode(struct chanset_t *chan,
     for (i = 0; i < modesperline; i++)
       if (chan->cmode[i].type == 0) {
         chan->cmode[i].type = type;
-        chan->cmode[i].op = (char *) malloc(l);
+        chan->cmode[i].op = (char *) calloc(1, l);
         chan->bytes += l;       /* Add 1 for safety */
         strcpy(chan->cmode[i].op, op);
         break;
@@ -689,13 +691,16 @@ static void real_add_mode(struct chanset_t *chan,
   else if (plus == '+' && mode == 'k') {
     if (chan->key)
       free(chan->key);
-    chan->key = strdup(op);
+    chan->key = (char *) calloc(1, strlen(op) + 1);
+    strcpy(chan->key, op);
+
   }
   /* -k ? store removed key */
   else if (plus == '-' && mode == 'k') {
     if (chan->rmkey)
       free(chan->rmkey);
-    chan->rmkey = strdup(op);
+    chan->rmkey = (char *) calloc(1, strlen(op) + 1);
+    strcpy(chan->rmkey, op);
   }
   /* +l ? store limit */
   else if (plus == '+' && mode == 'l')

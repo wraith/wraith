@@ -994,9 +994,9 @@ int botlink(char *linker, int idx, char *nick)
       strcpy(dcc[i].nick, nick);
       strcpy(dcc[i].host, bi->address);
       dcc[i].u.dns->ibuf = idx;
-      dcc[i].u.dns->cptr = get_data_ptr(strlen(linker) + 1);
+      dcc[i].u.dns->cptr = calloc(1, strlen(linker) + 1);
       strcpy(dcc[i].u.dns->cptr, linker);
-      dcc[i].u.dns->host = get_data_ptr(strlen(dcc[i].host) + 1);
+      dcc[i].u.dns->host = calloc(1, strlen(dcc[i].host) + 1);
       strcpy(dcc[i].u.dns->host, dcc[i].host);
       dcc[i].u.dns->dns_success = botlink_resolve_success;
       dcc[i].u.dns->dns_failure = botlink_resolve_failure;
@@ -1169,13 +1169,13 @@ void tandem_relay(int idx, char *nick, register int i)
   dprintf(idx, "%s\n", BOT_BYEINFO1);
   dcc[idx].type = &DCC_PRE_RELAY;
   ci = dcc[idx].u.chat;
-  dcc[idx].u.relay = get_data_ptr(sizeof(struct relay_info));
+  dcc[idx].u.relay = calloc(1, sizeof(struct relay_info));
   dcc[idx].u.relay->chat = ci;
   dcc[idx].u.relay->old_status = dcc[idx].status;
   dcc[idx].u.relay->sock = dcc[i].sock;
   dcc[i].timeval = now;
   dcc[i].u.dns->ibuf = dcc[idx].sock;
-  dcc[i].u.dns->host = get_data_ptr(strlen(bi->address) + 1);
+  dcc[i].u.dns->host = calloc(1, strlen(bi->address) + 1);
   strcpy(dcc[i].u.dns->host, bi->address);
   dcc[i].u.dns->dns_success = tandem_relay_resolve_success;
   dcc[i].u.dns->dns_failure = tandem_relay_resolve_failure;
@@ -1223,7 +1223,7 @@ static void tandem_relay_resolve_success(int i)
 
   dcc[i].addr = dcc[i].u.dns->ip;
   changeover_dcc(i, &DCC_FORK_RELAY, sizeof(struct relay_info));
-  dcc[i].u.relay->chat = get_data_ptr(sizeof(struct chat_info));
+  dcc[i].u.relay->chat = calloc(1, sizeof(struct chat_info));
 
   dcc[i].u.relay->sock = sock;
   dcc[i].u.relay->port = dcc[i].port;

@@ -54,8 +54,6 @@ typedef struct _tcl_cmds {
   Function func;
 } tcl_cmds;
 
-void add_tcl_commands(tcl_cmds *);
-void rem_tcl_commands(tcl_cmds *);
 void add_tcl_strings(tcl_strings *);
 void rem_tcl_strings(tcl_strings *);
 void add_tcl_coups(tcl_coups *);

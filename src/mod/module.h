@@ -109,8 +109,8 @@
 /* 12 - 15 */
 /* UNUSED 12 */
 /* UNUSED 13 */
-#define add_tcl_commands ((void (*) (tcl_cmds *))global[14])
-#define rem_tcl_commands ((void (*) (tcl_cmds *))global[15])
+/* UNUSED 14 */
+/* UNUSED 15 */
 /* 16 - 19 */
 #define add_tcl_ints ((void (*) (tcl_ints *))global[16])
 #define rem_tcl_ints ((void (*) (tcl_ints *))global[17])
@@ -203,7 +203,7 @@
 /* 84 - 87 */
 #define open_listen_by_af ((int (*) (int *, int))global[84])
 #define open_telnet_dcc ((int (*) (int,char *,char *))global[85])
-#define get_data_ptr(x) ((void *(*)(int))global[86])(x)
+/* UNUSED 86 */
 #define open_telnet ((int (*) (char *, int))global[87])
 /* 88 - 91 */
 #define check_bind_event ((void * (*) (const char *))global[88])

@@ -1027,7 +1027,6 @@ char *channels_start(Function * global_funcs)
   add_builtins("bot", channels_bot);
   add_builtins("chon", my_chon);
 
-  add_tcl_commands(channels_cmds);
 #ifdef S_AUTOLOCK
   add_cfg(&CFG_LOCKTHRESHOLD);
   add_cfg(&CFG_KILLTHRESHOLD);

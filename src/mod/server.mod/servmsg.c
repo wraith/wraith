@@ -107,7 +107,7 @@ static int check_bind_msg(char *cmd, char *nick, char *uhost, struct userrec *u,
 
   get_user_flagrec(u, &fr, NULL);
   x = check_bind(BT_msg, cmd, &fr, nick, uhost, u, args);
-  if (x & BIND_RET_LOG) putlog(LOG_CMDS, "*", "in check_bind_msg (%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
+  if (x & BIND_RET_LOG) putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %s", nick, uhost, u ? u->handle : "*" , args);
   if (x) return(1);
   else return(0);
 }
@@ -529,7 +529,7 @@ static int gotmsg(char *from, char *msg)
             result = check_bind_msg(code, nick, uhost, u, msg);
             
 	  if (!result)
-	    putlog(LOG_MSGS, "*", " in gotmsg [%s] %s %s", from, code, msg);
+	    putlog(LOG_MSGS, "*", "[%s] %s %s", from, code, msg);
         }
 #ifdef S_AUTH
       }
@@ -1190,9 +1190,9 @@ static void connect_server(void)
 
     dcc[servidx].timeval = now;
     dcc[servidx].sock = -1;
-    dcc[servidx].u.dns->host = get_data_ptr(strlen(dcc[servidx].host) + 1);
+    dcc[servidx].u.dns->host = calloc(1, strlen(dcc[servidx].host) + 1);
     strcpy(dcc[servidx].u.dns->host, dcc[servidx].host);
-    dcc[servidx].u.dns->cbuf = get_data_ptr(strlen(pass) + 1);
+    dcc[servidx].u.dns->cbuf = calloc(1, strlen(pass) + 1);
     strcpy(dcc[servidx].u.dns->cbuf, pass);
     dcc[servidx].u.dns->dns_success = server_resolve_success;
     dcc[servidx].u.dns->dns_failure = server_resolve_failure;

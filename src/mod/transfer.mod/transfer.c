@@ -1416,11 +1416,11 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from,
   dcc[i].port = port;
   strcpy(dcc[i].nick, nick);
   strcpy(dcc[i].host, "irc");
-  dcc[i].u.xfer->filename = get_data_ptr(strlen(filename) + 1);
+  dcc[i].u.xfer->filename = calloc(1, strlen(filename) + 1);
   strcpy(dcc[i].u.xfer->filename, filename);
   if (strchr(nfn, ' '))
     nfn = buf = replace_spaces(nfn);
-  dcc[i].u.xfer->origname = get_data_ptr(strlen(nfn) + 1);
+  dcc[i].u.xfer->origname = calloc(1, strlen(nfn) + 1);
   strcpy(dcc[i].u.xfer->origname, nfn);
   strncpyz(dcc[i].u.xfer->from, from, NICKLEN);
   strncpyz(dcc[i].u.xfer->dir, dir, DIRLEN);

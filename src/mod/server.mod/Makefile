@@ -40,4 +40,4 @@ distclean: clean
  ../../../src/compat/strcasecmp.h ../../../src/compat/strftime.h \
  ../../../src/mod/modvals.h ../../../src/tandem.h \
  ../server.mod/server.h ../server.mod/servmsg.c \
- ../server.mod/cmdsserv.c ../server.mod/tclserv.c
+ ../server.mod/cmdsserv.c

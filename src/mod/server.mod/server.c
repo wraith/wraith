@@ -108,7 +108,6 @@ static struct msgq_head mq, hq, modeq;
 static int burst;
 
 #include "cmdsserv.c"
-#include "tclserv.c"
 
 
 /*
@@ -1644,7 +1643,6 @@ char *server_start(Function *global_funcs)
 
   my_tcl_ints[0].val = &use_console_r;
   add_tcl_ints(my_tcl_ints);
-  add_tcl_commands(my_tcl_cmds);
   add_hook(HOOK_SECONDLY, (Function) server_secondly);
   add_hook(HOOK_10SECONDLY, (Function) server_10secondly);
   add_hook(HOOK_5MINUTELY, (Function) server_5minutely);

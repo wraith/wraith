@@ -40,4 +40,4 @@ distclean: clean
  ../../../src/compat/strcasecmp.h ../../../src/compat/strftime.h \
  ../../../src/mod/modvals.h ../../../src/tandem.h \
  ../../../src/mod/share.mod/share.h \
- ../compress.mod/compress.h ../compress.mod/tclcompress.c
+ ../compress.mod/compress.h 

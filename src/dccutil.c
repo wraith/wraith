@@ -455,16 +455,6 @@ void set_away(int idx, char *s)
   check_bind_away(botnetnick, dcc[idx].sock, s);
 }
 
-/* This helps the memory debugging
- */
-void *get_data_ptr(int size)
-{
-  char *p = malloc(size);
-  egg_bzero(p, size);
-  return p;
-}
-
-
 
 /* Make a password, 10-15 random letters and digits
  */

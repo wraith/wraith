@@ -58,8 +58,6 @@ static int compress_file(char *filename, int mode_num);
 static int uncompress_file(char *filename);
 static int is_compressedfile(char *filename);
 
-#include "tclcompress.c"
-
 
 /*
  *    Misc functions.
@@ -419,6 +417,5 @@ char *compress_start(Function *global_funcs)
 
   uff_addtable(compress_uff_table);
   add_tcl_ints(my_tcl_ints);
-  add_tcl_commands(my_tcl_cmds);
   return NULL;
 }

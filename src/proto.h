@@ -141,7 +141,6 @@ void dupwait_notify(char *);
 char *rand_dccresp();
 
 /* dccutil.c */
-void *get_data_ptr(int);
 void dprintf EGG_VARARGS(int, arg1);
 void chatout EGG_VARARGS(char *, arg1);
 extern void (*shareout) ();

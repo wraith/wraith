@@ -88,7 +88,6 @@ static int include_lk = 1;		/* For correct calculation
 #include "mode.c"
 #include "cmdsirc.c"
 #include "msgcmds.c"
-#include "tclirc.c"
 
 static void detect_autokick(char *nick, char *uhost, struct chanset_t *chan, char *msg)
 {
@@ -826,11 +825,12 @@ static void my_setkey(struct chanset_t *chan, char *k)
 {
   free(chan->channel.key);
   if (k == NULL) {
-    chan->channel.key = (char *) malloc(1);
+    chan->channel.key = (char *) calloc(1, 1);
     chan->channel.key[0] = 0;
     return;
   }
-  chan->channel.key = strdup(k);
+  chan->channel.key = (char *) calloc(1, strlen(k) + 1);
+  strcpy(chan->channel.key, k);
 }
 
 /* Adds a ban, exempt or invite mask to the list
@@ -842,13 +842,15 @@ static void newmask(masklist *m, char *s, char *who)
   if (m->mask[0])
     return;			/* Already existent mask */
 
-  m->next = (masklist *) malloc(sizeof(masklist));
+  m->next = (masklist *) calloc(1, sizeof(masklist));
   m->next->next = NULL;
-  m->next->mask = (char *) malloc(1);
+  m->next->mask = (char *) calloc(1, 1);
   m->next->mask[0] = 0;
   free(m->mask);
-  m->mask = strdup(s);
-  m->who = strdup(who);
+  m->mask = (char *) calloc(1, strlen(s) + 1);
+  strcpy(m->mask, s);
+  m->who = (char *) calloc(1, strlen(who) + 1);
+  strcpy(m->who, who);
   m->timer = now;
 }
 
@@ -885,7 +887,7 @@ static int killmember(struct chanset_t *chan, char *nick)
 	    chan->channel.members);
   }
   if (!chan->channel.member) {
-    chan->channel.member = (memberlist *) malloc(sizeof(memberlist));
+    chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
     chan->channel.member->nick[0] = 0;
     chan->channel.member->next = NULL;
   }
@@ -949,7 +951,7 @@ static void reset_chan_info(struct chanset_t *chan)
     if (me_op(chan))
       opped += 1;
     free(chan->channel.key);
-    chan->channel.key = (char *) malloc(1);
+    chan->channel.key = (char *) calloc(1, 1);
     chan->channel.key[0] = 0;
     clear_channel(chan, 1);
     chan->status |= CHAN_PEND;
@@ -1683,7 +1685,6 @@ char *irc_start(Function * global_funcs)
   add_builtins("msgc", C_msgc);
 #endif /* S_AUTH */
 
-  add_tcl_commands(tclchan_cmds);
   do_nettype();
   return NULL;
 }
