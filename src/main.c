@@ -1766,7 +1766,7 @@ Context;
     dcc[n].user = get_user_by_handle(userlist, "HQ");
     /* Make sure there's an innocuous HQ user if needed */
     if (!dcc[n].user) {
-      userlist = adduser(userlist, "HQ", "none", "-", USER_OP | USER_PARTY | USER_CHUBA | USER_HUBA);
+      userlist = adduser(userlist, "HQ", "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_VOICE | USER_OP | USER_PARTY | USER_CHUBA | USER_HUBA);
       dcc[n].user = get_user_by_handle(userlist, "HQ");
     }
 #ifdef USE_IPV6

@@ -178,8 +178,11 @@ IP getmyip(int dfatal)
 
   /* Could be pre-defined */
   if (myip[0]) {
-    if ((myip[strlen(myip) - 1] >= '0') && (myip[strlen(myip) - 1] <= '9'))
+    if ((myip[strlen(myip) - 1] >= '0') && (myip[strlen(myip) - 1] <= '9')) {
+      if (SDEBUG)
+        printf("myip1: %d\n", inet_addr(myip));
       return (IP) inet_addr(myip);
+    }
   }
   /* Also could be pre-defined */
   if (hostname[0])
@@ -201,6 +204,8 @@ IP getmyip(int dfatal)
 #endif /* USE_IPV6 */
   in = (struct in_addr *) (hp->h_addr_list[0]);
   ip = (IP) (in->s_addr);
+  if (SDEBUG)
+    printf("myip2: %d\n", ip);
   return ip;
 }
 
@@ -518,7 +523,6 @@ int open_telnet_raw(int sock, char *server, int sport)
   struct sockaddr_in name;
 #ifdef USE_IPV6
   struct sockaddr_in6 name6;
-  int rc;
   unsigned long succ;
   int af_ty;
 #  ifndef HAVE_GETHOSTBYNAME2
@@ -527,7 +531,7 @@ int open_telnet_raw(int sock, char *server, int sport)
 #endif /* USE_IPV6 */
   struct hostent *hp;
   char host[121];
-  int i, port;
+  int i, port, rc;
   volatile int proxy;
 
   /* firewall?  use socks */

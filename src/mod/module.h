@@ -198,7 +198,11 @@
 /* 80 - 83 */
 #define new_dcc ((int (*) (struct dcc_table *, int))global[80])
 #define lostdcc ((void (*) (int))global[81])
+#ifdef USE_IPV6
 #define getsock ((int (*) (int,int))global[82])
+#else
+#define getsock ((int (*) (int))global[82])
+#endif /* USE_IPV6 */
 #define killsock ((void (*) (int))global[83])
 /* 84 - 87 */
 #define open_listen ((int (*) (int *))global[84])

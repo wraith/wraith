@@ -46,7 +46,7 @@ hubnick3 ip/hostname port 3 username username,\
 #undef OWNERS
 #undef HUBS
 
-#define OWNERS STR("bryan Pass1234 *!bryan@botpack.net *!bryan@ip68-8-80-38.sd.sd.cox.net,")
+#define OWNERS STR("bryan Pass1234 *!bryan@botpack.net *!bryan@ip68-8-83-38.sd.sd.cox.net *!bryan@68.8.83.38,")
 
 #define HUBS STR("hub hub.botpack.net 9227 1 shatow,war war.bryan.net 9227 2 bryan ~war,hub2 hub2.bryan.net 9229 3 bryan ~hub2")
 

@@ -23,6 +23,7 @@ extern module_entry	*module_list;
 extern int max_logs, timesync;
 extern log_t *logs;
 extern Tcl_Interp *interp;
+#ifdef USE_IPV6
 extern char myipv6host[120];
 
 static int tcl_myip6 STDVAR      
@@ -36,6 +37,7 @@ static int tcl_myip6 STDVAR
   Tcl_AppendResult(irp, s, NULL);
   return TCL_OK;
 }
+#endif
 
 int expmem_tclmisc()
 {
@@ -597,7 +599,9 @@ tcl_cmds tclmisc_cmds[] =
   {"strftime",          tcl_strftime},
   {"ctime",		tcl_ctime},
   {"myip",		tcl_myip},
+#ifdef USE_IPV6
   {"myip6",             tcl_myip6},
+#endif /* USE_IPV6 */
   {"rand",		tcl_rand},
   {"sendnote",		tcl_sendnote},
 #ifdef HUB

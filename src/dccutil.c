@@ -702,12 +702,23 @@ Context;
     if (dcc_total >= max_dcc) {
       putlog(LOG_ERRORS, "*", STR("Can't open listening port - no more DCC Slots"));
     } else {
+#ifdef USE_IPV6
+      /* dum de dum, listen needs an af_def option, on linux this will listen on
+       * both ipv6 and ipv4
+       */
+      i = open_listen_by_af(&port, AF_INET6);
+#else
       i = open_listen(&port);
+#endif /* USE_IPV6 */
       if (i < 0)
         putlog(LOG_ERRORS, "*", STR("Can't open listening port - it's taken"));
       else {
         idx = new_dcc(&DCC_TELNET, 0);
+#ifdef USE_IPV6
+        dcc[idx].addr = 0x00000000; /* it's not big enough to hold '0xffffffffffffffffffffffffffffffff' =P */
+#else
         dcc[idx].addr = iptolong(getmyip(0));
+#endif /* USE_IPV6 */
         dcc[idx].port = port;
         dcc[idx].sock = i;
         dcc[idx].timeval = now;
