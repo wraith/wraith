@@ -956,6 +956,7 @@ int answer(int sock, char *caller, unsigned long *ip, unsigned short *port,
   int af_ty = sockprotocol(sock);
   struct sockaddr_in6 from6;
 
+  egg_bzero(&from6, sizeof(struct sockaddr_in6));
   if (af_ty == AF_INET6) {
     addrlen = sizeof(from6);
     new_sock = accept(sock, (struct sockaddr *) &from6, &addrlen);
