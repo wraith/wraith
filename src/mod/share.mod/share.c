@@ -310,6 +310,9 @@ share_chattr(int idx, char *par)
         }
         noshare = 0;
       }
+#ifdef HUB
+    write_userfile(-1);
+#endif /* HUB */
     }
   }
 }
