@@ -135,7 +135,7 @@ return;
 
   dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
   if ((dcc[idx].u.bot->bts < buildts) && (isupdatehub())) {
-    putlog(LOG_DEBUG, "?", "Asking %s to accept update from me", dcc[idx].nick);
+    putlog(LOG_DEBUG, "@", "Asking %s to accept update from me", dcc[idx].nick);
     dprintf(idx, "sb u?\n");
     dcc[idx].status |= STAT_OFFEREDU;
   }
@@ -424,6 +424,7 @@ static void check_updates()
                        STAT_OFFEREDU);
 
       if ((dcc[i].u.bot->bts < buildts) && (isupdatehub())) {
+        putlog(LOG_DEBUG, "@", "Bot: %s has build %lu, offering them %lu", dcc[i].nick, dcc[i].u.bot->bts, buildts);
         dprintf(i, "sb u?\n");
         dcc[i].status |= STAT_OFFEREDU;
       }

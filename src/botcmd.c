@@ -864,13 +864,13 @@ static void bot_traced(int idx, char *par)
   }
 }
 
-void bot_buildts(int idx, char *par)
+static void bot_buildts(int idx, char *par)
 {
   if (par && par[0])
     dcc[idx].u.bot->bts = atoi(par);
 }
 
-void bot_timesync(int idx, char *par)
+static void bot_timesync(int idx, char *par)
 {
   putlog(LOG_DEBUG, "@", "Got timesync from %s: %s\n", dcc[idx].nick, par);
   timesync = atoi(par) - now;
@@ -1320,6 +1320,7 @@ botcmd_t C_bot[] =
   {"a",			(Function) bot_actchan},
   {"aw",		(Function) bot_away},
   {"away",		(Function) bot_away},
+  {"bts",		(Function) bot_buildts},
   {"bye",		(Function) bot_bye},
   {"c",			(Function) bot_chan2},
   {"cg",                (Function) bot_config},
@@ -1348,7 +1349,6 @@ botcmd_t C_bot[] =
   {"t",			(Function) bot_trace},
   {"tb",		(Function) bot_thisbot},
   {"td",		(Function) bot_traced},
-  {"bts",		(Function) bot_buildts},
   {"ts", 		(Function) bot_timesync},
   {"u",			(Function) bot_update},
   {"ul",		(Function) bot_unlink},
