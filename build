@@ -1,0 +1,170 @@
+#!/bin/sh
+
+#edit this to your homedir (no trailing slash)
+
+TCLDIR="/home/wheel/bryan"
+
+
+#### DO NOT EDIT BELOW THIS LINE #####
+
+# Awk out the version from source
+ver=`cat src/main.c 2>&1 | grep "char" | awk '/egg_version/ {print $4}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+if test -z "$ver"
+then
+  ver="?.?.?"
+fi
+echo "*** wraith v$ver builder ***"
+echo ""
+
+debug=0
+#if test $# -lt 1; then
+if test -z "$1"; then
+ echo "Usage: $0 -d all|leaf|hub pack.conf"
+ echo "   -d: Builds a debug package."
+ echo ""
+ exit 1
+elif [ $1 = "all" ]; then
+ all=1
+elif [ $1 = "leaf" ]; then
+ leaf=1
+elif [ $1 = "hub" ]; then
+ hub=1
+elif [ $1 = "-d" ]; then
+ debug=1
+ test=" "
+ if ! test $# -lt 2; then
+  if [ $2 = "all" ]; then
+   all=1
+  elif [ $2 = "leaf" ]; then
+   leaf=1
+  elif [ $2 = "hub" ]; then
+   hub=1
+  else
+   all=1
+   pack=$2
+  fi
+ else
+  all=1
+ fi
+else
+ all=1
+ pack=$1
+fi
+
+d=""
+if [ $debug = "1" ]; then
+ d="d"
+fi
+
+if ! test $pack
+ then
+ if [ $debug = "1" ]; then
+  pack=$3
+ else
+  pack=$2
+ fi
+fi
+
+if test $pack
+then
+  packname=$pack
+else
+  packname=default
+fi
+
+# Verify we got the config file
+origpack=$packname
+if ! test -f $packname; then
+  packname=$packname.conf
+fi
+if ! test -f $packname; then
+  echo "[!] Can't find pack configuration file $origpack"
+  exit 1
+else
+  echo "[*] Using pack configuration file: $packname"
+fi
+
+# Figure what bins we're making
+case `uname` in
+  Linux) os=Linux;;
+  FreeBSD) case `uname -r` in
+    5*) os=FreeBSD5;;
+    4*) os=FreeBSD4;;
+    3*) os=FreeBSD3;;
+  esac;;
+  OpenBSD) os=OpenBSD;;
+esac
+if test -z $os
+then
+  echo "[!] Automated packaging disabled, `uname` isn't recognized"
+fi
+
+echo "[*] Building pack for $os"
+
+# Run ./configure, then verify it's ok
+echo "[*] Configuring..."
+umask 077 >/dev/null
+./configure --disable-tcl-threads --with-tcllib=${TCLDIR}/lib/libtcl8.4.a --with-tclinc=${TCLDIR}/include/tcl.h > /dev/null 2>configure.temp
+#if test "`cat configure.temp`"
+#then
+#  echo "Configure error'd"
+#  cat configure.temp
+#
+#  exit 1
+#fi
+#rm -f configure.temp
+
+# make clean, just in case
+echo "[*] Cleaning up old binaries..."
+make clean > /dev/null
+
+
+# Read the config
+echo -n "[*] Compiling with:"
+for cnf in `cat $packname | grep -v "^#"`
+do
+  defines="$defines -DS_$cnf"
+  echo -n "$cnf "
+done
+echo ""
+
+# Build utils and check we got the bins
+echo "[*] Building utils..."
+make utils CFLGS="$defines" > /dev/null
+if ! test -f stringfix
+then
+  echo "[!] Util build failed"
+  exit 1
+fi
+
+# Build leaf and check
+echo "[*] Building ${d}leaf..."
+make ${d}leaf CFLGS="$defines" > /dev/null
+if ! test -f leaf
+then
+  echo "[!] ${d}leaf build failed"
+  exit 1
+fi
+
+# Build hub and check
+echo "[*] Building ${d}hub..."
+make ${d}hub CFLGS="$defines" > /dev/null
+if ! test -f hub
+then
+  echo "[!] ${d}hub build failed"
+  exit 1
+fi
+
+
+# Wrap it nicely up into an archive
+echo "[*] Packaging..."
+packname=`basename $packname .conf`
+for bin in leaf hub
+do
+  mv -f $bin $os.$bin
+done
+tar -zcf $packname.$os.tgz $os.*
+rm -f $os.*
+echo "Binaries are now in '$packname.$os.tgz'."
+exit 0
+
