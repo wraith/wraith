@@ -940,6 +940,7 @@ void channels_init()
 #ifdef LEAF
   timer_create_secs(60, "check_limitraise", (Function) check_limitraise);
 #endif /* LEAF */
+  /* FIXME: combine all of these into one function, check_expired_masks('e') */
   timer_create_secs(60, "check_expired_bans", (Function) check_expired_bans);
   timer_create_secs(60, "check_expired_exempts", (Function) check_expired_exempts);
   timer_create_secs(60, "check_expired_invites", (Function) check_expired_invites);
