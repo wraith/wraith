@@ -45,7 +45,7 @@ typedef struct settings_struct {
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix)
 
-//#define SIZE_CONF sizeof(settings.tempdir) + sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
+/* #define SIZE_CONF sizeof(settings.tempdir) + sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \ */
 #define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
 sizeof(settings.pscloak) + sizeof(settings.autocron) + sizeof(settings.watcher) + sizeof(settings.uname) + \
 sizeof(settings.username) + sizeof(settings.homedir) + sizeof(settings.binpath) + sizeof(settings.binname) + \
