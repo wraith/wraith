@@ -40,6 +40,7 @@ This is a summary of ChangeLog basically.
 * Detect botcmds from leaf bots (hijack).
 * WHO parsing was redundant and had a ton of inner loops per line, fixed.
 * Fixed a problem with leaf bots not chosing a hub when only 1 was set.
+* Fixed cmd_channel showing a user as an op in a +private chan where they might have not access.
 
 1.2
 * No longer displaying SALTS on ./bin -v

@@ -1327,17 +1327,17 @@ static void cmd_channel(int idx, char *par)
         atrflag = 'A';
       else if (chan_autoop(user))
         atrflag = 'a';
-      else if (glob_op(user))
+      else if (glob_op(user) && !private(user, chan, PRIV_OP))
         atrflag = 'O';
-      else if (chan_op(user))
+      else if (chan_op(user) && !private(user, chan, PRIV_OP))
         atrflag = 'o';
       else if (glob_quiet(user))
         atrflag = 'Q';
       else if (chan_quiet(user))
         atrflag = 'q';
-      else if (glob_voice(user))
+      else if (glob_voice(user) && !private(user, chan, PRIV_VOICE))
         atrflag = 'V';
-      else if (chan_voice(user))
+      else if (chan_voice(user) && !private(user, chan, PRIV_VOICE))
         atrflag = 'v';
       else if (glob_kick(user))
         atrflag = 'K';
