@@ -35,13 +35,14 @@ AC_SUBST(CCDEBUG)dnl
 # Checks for programs
 AC_PROG_MAKE_SET
 EGG_PROG_HEAD_1
-EGG_PROG_STRIP
 EGG_PROG_AWK
 EGG_PROG_BASENAME
-EGG_PROG_OBJCOPY
-#EGG_PROG_CCACHE
-EGG_PROG_DISTCC
-AC_CHECK_PROG(UNAME,uname,uname)
+#EGG_PROG_OBJCOPY
+AC_CHECK_PROG(OBJCOPY, objcopy, [objcopy --remove-section=.note --remove-section=.comment])
+AC_CHECK_PROG(STRIP, strip, strip, touch)
+AC_CHECK_PROG(UNAME, uname, uname)
+#AC_CHECK_PROG(CCACHE, ccache, ccache)
+AC_CHECK_PROG(DISTCC, distcc, distcc)
 
 # Test the os and set the module linking settings
 EGG_CHECK_OS
