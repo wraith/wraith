@@ -1,0 +1,59 @@
+# wraith authorization script 1.0
+# By bryan
+#
+# This expects the md5 executable in $cspath/.BitchX
+# $botnick is the current nick of the bot.
+# You must /setauth 
+# If you chat a diff bot, you must do that command first.
+# $pass is the DEFPASS setting from your pack.cfg
+
+#change this to your homedir.
+assign wpath /home/admin/bryan
+
+#put the 'md5' binary in $HOME/.BitchX/md5 
+
+
+#        if ($2 == "") {
+#        }
+
+alias setauth {
+        if ([$2] == "") {
+          ^eval echo /setauth password secpass authkey <botnick>
+        }          
+        ^assign wpass $0
+        ^assign wsecpass $1
+        ^assign wauthkey $2
+        ^assign wbotnick $3
+}
+
+alias auth {
+        ^assign blah $1$wsecpass$wauthkey
+     
+        ^exec -name secauth $wpath/.BitchX/md5 "-s$blah"
+	^on ^exec "secauth *" {
+          ^eval echo +Auth $1
+        }
+
+}
+
+alias secauth {
+        ^assign blah $1$wsecpass$wauthkey
+        ^eval echo Returning hash to $0
+        ^exec -name secauth2 $wpath/.BitchX/md5 "-s$blah"
+
+	^on ^exec "secauth2 *" {
+           send +Auth $1
+        }
+}
+
+on ^dcc_chat "% -Auth *" {
+         query =$0
+         secauth $0 $2
+}
+
+on ^msg "% -Auth *" {
+         query $0
+         secauth $0 $2
+}
+
+^eval xecho -bwraith Authorization Module Loaded.

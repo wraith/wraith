@@ -1,0 +1,24 @@
+wraith bx auth script 1.0
+
+This script is lame.
+
+It will improve over time to be as effecient as the mIRC script.
+
+
+Compile the md5 binary and place: $HOME/.BitchX/md5
+Edit the w.bx file and change the path near the top.
+
+To load: /load /path/to/w.bx
+
+You will have to /setauth pass secpass authkey, everytime you load the script, I will fix this in future versions.
+
+to auth over IRC:
+/msg bot auth?
+They will reply with "auth. botname"
+then:
+/msg bot auth yourpass
+then it will msg back that +Auth line, the script takes it from here.
+
+DCC chat is similar, enter pass, then +Auth is sent and script takes over.
+
+Send all improvements to bryan, thanks.
