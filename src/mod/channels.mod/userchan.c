@@ -142,7 +142,7 @@ int u_sticky_mask(maskrec *u, char *uhost)
 
 /* Set sticky attribute for a mask.
  */
-int u_setsticky_mask(struct chanset_t *chan, maskrec *u, char *uhost, bool sticky, const char *botcmd)
+int u_setsticky_mask(struct chanset_t *chan, maskrec *u, char *uhost, bool sticky, const char type)
 {
   int j;
 
@@ -166,7 +166,7 @@ int u_setsticky_mask(struct chanset_t *chan, maskrec *u, char *uhost, bool stick
 	strcpy(uhost, u->mask);
 
       if (!noshare)
-        shareout("%s %s %d %s\n", botcmd, uhost, sticky, (chan) ? chan->dname : "");
+        shareout("ms %c %s %d %s\n", type, uhost, sticky, (chan) ? chan->dname : "");
       return 1;
     }
 

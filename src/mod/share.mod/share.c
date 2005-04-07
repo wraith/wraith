@@ -253,116 +253,47 @@ check_delay()
  */
 
 static void
-share_stick_ban(int idx, char *par)
+share_stick_mask(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
+    char *types = newsplit(&par);
+    const char type = types[0];
+    const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
     char *host = NULL, *val = NULL;
-    bool yn;
+    bool yn = 0;
+    struct chanset_t *chan = NULL;
+    maskrec *channel_list = NULL;
 
     host = newsplit(&par);
     val = newsplit(&par);
     yn = atoi(val);
     noshare = 1;
+
     if (!par[0]) {              /* Global ban */
-      struct chanset_t *chan = NULL;
+      channel_list = (type == 'b' ? global_bans : type == 'e' ? global_exempts : global_invites);
 
-      if (u_setsticky_ban(NULL, host, yn) > 0) {
+      if (u_setsticky_mask(NULL, channel_list, host, yn, type) > 0) {
         if (conf.bot->hub)
-          putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-        shareout_but(idx, "s %s %d\n", host, yn);
+          putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", str_type, host);
+        else
+          for (chan = chanset; chan ; chan = chan->next)
+            check_this_mask(type, chan, host, yn);
+        shareout_but(idx, "ms %c %s %d\n", type, host, yn);
       }
-      if (!conf.bot->hub)
-        for (chan = chanset; chan != NULL; chan = chan->next)
-          check_this_ban(chan, host, yn);
     } else {
-      struct chanset_t *chan = findchan_by_dname(par);
-      struct chanuserrec *cr;
-
-      if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
-        if (u_setsticky_ban(chan, host, yn) > 0) {
+      if ((chan = findchan_by_dname(par))) {
+          channel_list = (type == 'b' ? chan->bans : type == 'e' ? chan->exempts : chan->invites);
+        if (u_setsticky_mask(chan, channel_list, host, yn, type) > 0) {
           if (conf.bot->hub)
-            putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
-          shareout_but(idx, "s %s %d %s\n", host, yn, chan->dname);
+            putlog(LOG_CMDS, "@", "%s: %s %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", str_type, host, par);
+          else
+            check_this_mask(type, chan, host, yn);
+          shareout_but(idx, "ms %c %s %d %s\n", type, host, yn, chan->dname);
           noshare = 0;
           return;
         }
-      if (chan && !conf.bot->hub)
-        check_this_ban(chan, host, yn);
-      putlog(LOG_CMDS, "@", "Rejecting invalid sticky ban: %s on %s%s", host, par, yn ? "" : " (unstick)");
-    }
-    noshare = 0;
-  }
-}
-
-/* Same as share_stick_ban, only for exempts.
- */
-static void
-share_stick_exempt(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    char *host = NULL, *val = NULL;
-    bool yn;
-
-    host = newsplit(&par);
-    val = newsplit(&par);
-    yn = atoi(val);
-    noshare = 1;
-    if (!par[0]) {              /* Global exempt */
-      if (u_setsticky_exempt(NULL, host, yn) > 0) {
-        if (conf.bot->hub)
-          putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-        shareout_but(idx, "se %s %d\n", host, yn);
       }
-    } else {
-      struct chanset_t *chan = findchan_by_dname(par);
-      struct chanuserrec *cr = NULL;
-
-      if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
-        if (u_setsticky_exempt(chan, host, yn) > 0) {
-          if (conf.bot->hub)
-            putlog(LOG_CMDS, "@", "%s: stick %s %c %s", dcc[idx].nick, host, yn ? 'y' : 'n', par);
-          shareout_but(idx, "se %s %d %s\n", host, yn, chan->dname);
-          noshare = 0;
-          return;
-        }
-      putlog(LOG_CMDS, "@", "Rejecting invalid sticky exempt: %s on %s, %c", host, par, yn ? 'y' : 'n');
-    }
-    noshare = 0;
-  }
-}
-
-/* Same as share_stick_ban, only for invites.
- */
-static void
-share_stick_invite(int idx, char *par)
-{
-  if (dcc[idx].status & STAT_SHARE) {
-    char *host = NULL, *val = NULL;
-    bool yn;
-
-    host = newsplit(&par);
-    val = newsplit(&par);
-    yn = atoi(val);
-    noshare = 1;
-    if (!par[0]) {              /* Global invite */
-      if (u_setsticky_invite(NULL, host, yn) > 0) {
-        if (conf.bot->hub)
-          putlog(LOG_CMDS, "@", "%s: %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host);
-        shareout_but(idx, "sInv %s %d\n", host, yn);
-      }
-    } else {
-      struct chanset_t *chan = findchan_by_dname(par);
-      struct chanuserrec *cr = NULL;
-
-      if ((chan != NULL) && (cr = get_chanrec(dcc[idx].user, par)))
-        if (u_setsticky_invite(chan, host, yn) > 0) {
-          if (conf.bot->hub)
-            putlog(LOG_CMDS, "@", "%s: %s %s %s", dcc[idx].nick, (yn) ? "stick" : "unstick", host, par);
-          shareout_but(idx, "sInv %s %d %s\n", host, yn, chan->dname);
-          noshare = 0;
-          return;
-        }
-      putlog(LOG_CMDS, "@", "Rejecting invalid sticky invite: %s on %s%s", host, par, yn ? "" : " (unstick)");
+      putlog(LOG_CMDS, "@", "Rejecting invalid sticky %s: %s on %s%s", host, par, yn ? "" : " (unstick)", str_type);
     }
     noshare = 0;
   }
@@ -787,12 +718,8 @@ static void share_pls_mask(int idx, char *par)
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: global %s %s (%s:%s)", dcc[idx].nick, str_type, mask, from, par);
     else {
-      void (*check_this_mask) (struct chanset_t *, char *, bool) = NULL;
-
-      check_this_mask = (type == 'b' ? check_this_ban : type == 'e' ? check_this_exempt : check_this_invite);
-
       for (struct chanset_t *chan = chanset; chan != NULL; chan = chan->next)
-        check_this_mask(chan, mask, stick);
+        check_this_mask(type, chan, mask, stick);
     }
   }
 }
@@ -832,13 +759,8 @@ static void share_pls_maskchan(int idx, char *par)
       expire_time += now;
     u_addmask(type, chan, mask, from, par, expire_time, flags);
     noshare = 0;
-    if (!conf.bot->hub) {
-      void (*check_this_mask) (struct chanset_t *, char *, bool) = NULL;
-
-      check_this_mask = (type == 'b' ? check_this_ban : type == 'e' ? check_this_exempt : check_this_invite);
-
-      check_this_mask(chan, mask, stick);
-    }
+    if (!conf.bot->hub)
+      check_this_mask(type, chan, mask, stick);
   }
 }
 
@@ -1071,10 +993,8 @@ static botcmd_t C_share[] = {
   {"e", share_end, 0},
   {"h", share_chhand, 0},
   {"k", share_killuser, 0},
+  {"ms", share_stick_mask, 0},
   {"n", share_newuser, 0},
-  {"s", share_stick_ban, 0},
-  {"se", share_stick_exempt, 0},
-  {"sInv", share_stick_invite, 0},
   {"u?", share_userfileq, 0},
   {"un", share_ufno, HUB},
   {"us", share_ufsend, 0},

@@ -804,6 +804,16 @@ static void resetmasks(struct chanset_t *chan, masklist *m, maskrec *mrec, maskr
   }
 }
 
+void check_this_mask(const char type, struct chanset_t *chan, char *mask, bool sticky)
+{
+  if (type == 'b')
+    check_this_ban(chan, mask, sticky);
+  else if (type == 'e')
+    check_this_exempt(chan, mask, sticky);
+  else if (type == 'I')
+    check_this_invite(chan, mask, sticky);
+}
+
 void check_this_ban(struct chanset_t *chan, char *banmask, bool sticky)
 {
   if (!me_op(chan))

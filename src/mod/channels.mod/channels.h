@@ -40,7 +40,7 @@ void set_handle_laston(char *, struct userrec *, time_t);
 int u_delmask(char type, struct chanset_t *c, char *who, int doit);
 bool u_addmask(char type, struct chanset_t *, char *, char *, char *, time_t, int);
 int u_sticky_mask(maskrec *, char *);
-int u_setsticky_mask(struct chanset_t *, maskrec *, char *, bool, const char *);
+int u_setsticky_mask(struct chanset_t *, maskrec *, char *, bool, const char);
 int SplitList(char *, const char *, int *, const char ***);
 int channel_modify(char *, struct chanset_t *, int, char **);
 int channel_add(char *, char *, char *);
@@ -66,7 +66,7 @@ extern char		glob_chanset[], cfg_glob_chanset[];
 #define ischaninvite(chan, user) ismodeline((chan)->channel.invite, user)
 #define ischanmask(type, chan, user) ismodeline(type == 'b' ? (chan)->channel.ban : type == 'e' ? (chan)->channel.exempt : (chan)->channel.invite, user)
 
-#define u_setsticky_ban(chan, host, sticky)     u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->bans : global_bans, host, sticky, "s")
-#define u_setsticky_exempt(chan, host, sticky)  u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->exempts : global_exempts, host, sticky, "se")
-#define u_setsticky_invite(chan, host, sticky)  u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->invites : global_invites, host, sticky, "sInv")
+#define u_setsticky_ban(chan, host, sticky)     u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->bans : global_bans, host, sticky, 'b')
+#define u_setsticky_exempt(chan, host, sticky)  u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->exempts : global_exempts, host, sticky, 'e')
+#define u_setsticky_invite(chan, host, sticky)  u_setsticky_mask(chan, ((struct chanset_t *)chan) ? ((struct chanset_t *)chan)->invites : global_invites, host, sticky, 'I')
 #endif				/* _EGG_MOD_CHANNELS_CHANNELS_H */

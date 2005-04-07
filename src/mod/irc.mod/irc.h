@@ -100,6 +100,7 @@ void real_add_mode(struct chanset_t *, const char, const char, const char *, boo
 #define add_mode(chan, pls, mode, nick) real_add_mode(chan, pls, mode, nick, 0)
 #define add_cookie(chan, nick) real_add_mode(chan, '+', 'o', nick, 1)
 bool me_op(struct chanset_t *);
+void check_this_mask(const char, struct chanset_t *, char *, bool);
 void check_this_ban(struct chanset_t *, char *, bool);
 void check_this_exempt(struct chanset_t *, char *, bool);
 void check_this_invite(struct chanset_t *, char *, bool);
