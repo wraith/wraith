@@ -129,17 +129,25 @@ spawnbots()
 }
 
 int
-killbot(char *botnick, conf_bot *bot, int signal)
+conf_killbot(const char *botnick, conf_bot *bot, int signal)
 {
-  if (!bot) {
-    for (bot = conf.bots; bot && bot->nick; bot = bot->next)
-      if (!egg_strcasecmp(botnick, bot->nick))
-        break;
-  }
-  if (bot)
+  int return = -1;
+
+  if (bot) {
     if (bot->pid)
-      return kill(bot->pid, signal);
-  return -1;
+      ret = kill(bot->pid, signal);
+  } else {
+    for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+      /* kill all bots but myself if botnick==NULL, otherwise just kill botnick */
+      if ((!botnick && egg_strcasecmp(conf.bot->nick, bot->nick)) || !egg_strcasecmp(botnick, bot->nick)) {
+        if (bot->pid)
+          ret = kill(bot->pid, signal);
+
+        if (botnick)
+          break;
+    }
+  }
+  return ret;
 }
 
 #ifndef CYGWIN_HACKS

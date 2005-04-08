@@ -418,7 +418,7 @@ void core_10secondly()
   if (curcheck == 1)
     check_trace(0);
 
-  if (!conf.bot->hub && conf.bot->localhub) {
+  if (conf.bot->hub || conf.bot->localhub) {
     check_promisc();
 
     if (curcheck == 2)
@@ -580,7 +580,7 @@ static void startup_checks(int hack) {
     if (do_killbot[0]) {
       const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
 
-      if (killbot(do_killbot, NULL, kill_sig) == 0)
+      if (conf_killbot(do_killbot, NULL, kill_sig) == 0)
         printf("'%s' successfully %sed.\n", do_killbot, what);
       else {
         printf("Error %sing '%s'\n", what, do_killbot);

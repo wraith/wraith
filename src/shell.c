@@ -550,8 +550,8 @@ void detected(int code, char *msg)
   char *p = NULL, tmp[512] = "";
   struct userrec *u = NULL;
   struct flag_record fr = { FR_GLOBAL, 0, 0, 0 };
-  int act;
-
+  int act, do_fatal = 0, killbots = 0;
+  
   u = get_user_by_handle(userlist, conf.bot->nick);
   if (code == DETECT_LOGIN)
     p = (char *) (CFG_LOGIN.ldata ? CFG_LOGIN.ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
@@ -599,7 +599,8 @@ void detected(int code, char *msg)
     if (!conf.bot->hub)
       nuke_server("BBL");
     sleep(1);
-    fatal(msg, 0);
+    killbots++;
+    do_fatal++;
     break;
   case DET_SUICIDE:
     putlog(LOG_WARN, "*", "Comitting suicide: %s", msg);
@@ -614,9 +615,16 @@ void detected(int code, char *msg)
       unlink(tmp);
     }
     unlink(binname);
-    fatal(msg, 0);
+    killbots++;
+    do_fatal++;
     break;
   }
+  if (killbots && conf.bot->localhub) {
+    conf_checkpids();
+    conf_killbot(NULL, NULL, SIGKILL);
+  }
+  if (do_fatal)
+    fatal(msg, 0);
 }
 
 char *werr_tostr(int errnum)
