@@ -10,6 +10,9 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 - Change userentry system around to use strings ?
 - Fixed bot's not being able to link when the botnick case did not match (userlist vs binary -C).
 - Remove bot_hublog
+- Simple autoaway on dcc after 10 minutes, will be customizable in the future.
+- Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
+- Added hijacked invite detection based on server invite notices.
 
 1.2.3
 * HUB/LEAF binaries have been combined into 1 binary named 'wraith'
@@ -157,8 +160,6 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * WHO parsing was redundant and had a ton of inner loops per line, fixed.
 * Fixed a problem with leaf bots not chosing a hub when only 1 was set.
 * Fixed cmd_channel showing a user as an op in a +private chan where they might have not access.
-- Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
-- Added hijacked invite detection based on server invite notices.
 * Added an action when a bot performs an invite, including username and full address.
 * No longer making the bot fatal() if it cannot open a new socket.
 * Fixed NAT bug for botlinks.
@@ -221,7 +222,6 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * cmd_swhois now shows matching username
 * cmd_botcmd * is now limited to +n only
 * cmd_chhandle did not check if the old handle existed!
--(Disabled) Simple autoaway on dcc after 10 minutes, will be customizable in the future.
 * Fixed a problem with what ip was binded to when using '.' as the ip.
 * Fixed some problems with special characters in conf files.
 * cmd_chaninfo/chanset didn't check for +private access correctly.
