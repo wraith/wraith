@@ -1116,17 +1116,17 @@ void autolink_cycle_hub(char *start)
 
   if (start)
     u = get_user_by_handle(userlist, start);
-  else
-    u = NULL;
 
   if (u) {
     link_pref_val(u, curval);
     if (strcmp(bestval, curval) < 0) {
+	/* This happens if we're already connected to a good hub but we failed to link to another hub as well
+	   can happen if you .link.... but it's nothing FATAL :) */
       /* This shouldn't happen. Getting a failed link attempt (start!=NULL)
          while a dcc scan indicates we *are* connected to a better bot than
          the one we failed a link to.
        */
-      putlog(LOG_BOTS, "*",  "Failed link attempt to %s but connected to %s already???", u->handle, (char *) &bestval[2]);
+//      putlog(LOG_BOTS, "*",  "Failed link attempt to %s but connected to %s already???", u->handle, (char *) &bestval[2]);
       return;
     }
   } else
