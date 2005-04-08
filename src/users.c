@@ -718,7 +718,8 @@ int readuserfile(const char *file, struct userrec **ret)
 	      if (lasthand[1] == IGNORE_NAME[1])
 		restore_ignore(s);
               else if (lasthand[1] == CONFIG_NAME[1]) {
-                set_cmd_pass(s, 1);
+                set_cmd_pass(s, 0);		/* no need to share here, if we have a new userfile
+						 * then leaf bots under us also get the new userfile */
               }
 	      else
 		restore_chanban(NULL, s);
