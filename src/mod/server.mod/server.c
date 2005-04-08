@@ -969,7 +969,7 @@ static void server_5minutely()
        * Server is probably stoned.
        */
       disconnect_server(servidx, DO_LOST);
-      putlog(LOG_SERV, "*", IRC_SERVERSTONED);
+      putlog(LOG_SERV, "*", "Server got stoned; jumping...");
   }
 }
 
@@ -1012,16 +1012,16 @@ void server_report(int idx, int details)
     dprintf(idx, "    Server %s:%d %s\n", dcc[servidx].host, dcc[servidx].port,
 	    trying_server ? "(trying)" : s);
   } else
-    dprintf(idx, "    %s\n", IRC_NOSERVER);
+    dprintf(idx, "    No server currently.\n");
   if (modeq.tot)
-    dprintf(idx, "    %s %d%%, %d msgs\n", IRC_MODEQUEUE,
+    dprintf(idx, "    Mode queue is at %d%%, %d msgs\n",
             (int) ((float) (modeq.tot * 100.0) / (float) maxqmsg),
 	    (int) modeq.tot);
   if (mq.tot)
-    dprintf(idx, "    %s %d%%, %d msgs\n", IRC_SERVERQUEUE,
+    dprintf(idx, "    Server queue is at %d%%, %d msgs\n",
            (int) ((float) (mq.tot * 100.0) / (float) maxqmsg), (int) mq.tot);
   if (hq.tot)
-    dprintf(idx, "    %s %d%%, %d msgs\n", IRC_HELPQUEUE,
+    dprintf(idx, "    Help queue is at %d%%, %d msgs\n",
            (int) ((float) (hq.tot * 100.0) / (float) maxqmsg), (int) hq.tot);
   if (details) {
     dprintf(idx, "    Flood is: %d msg/%lus, %d ctcp/%lus\n",

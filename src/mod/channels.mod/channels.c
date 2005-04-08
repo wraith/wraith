@@ -761,7 +761,7 @@ void channels_report(int idx, int details)
       if (s[0])
 	s[strlen(s) - 2] = 0;
       if (!s[0])
-	strcpy(s, MISC_LURKING);
+	strcpy(s, "lurking");
       get_mode_protect(chan, s2);
       if (channel_closed(chan)) {
         if (chan->closed_invite)

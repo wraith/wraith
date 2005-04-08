@@ -1282,16 +1282,16 @@ static void cmd_channel(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# (%s) channel", dcc[idx].nick, chan->dname);
   strlcpy(s, getchanmode(chan), sizeof s);
   if (channel_pending(chan)) {
-    simple_snprintf(s1, sizeof s1, "%s %s", IRC_PROCESSINGCHAN, chan->dname);
+    simple_snprintf(s1, sizeof s1, "Processing channel %s", chan->dname);
   } else if (channel_active(chan)) {
-    simple_snprintf(s1, sizeof s1, "%s %s", IRC_CHANNEL, chan->dname);
+    simple_snprintf(s1, sizeof s1, "Channel %s", chan->dname);
   } else {
-    simple_snprintf(s1, sizeof s1, "%s %s", IRC_DESIRINGCHAN, chan->dname);
+    simple_snprintf(s1, sizeof s1, "Desiring channel %s", chan->dname);
   }
   dprintf(idx, "%s, %d member%s, mode %s:\n", s1, chan->channel.members,
 	  chan->channel.members == 1 ? "" : "s", s);
   if (chan->channel.topic)
-    dprintf(idx, "%s: %s\n", IRC_CHANNELTOPIC, chan->channel.topic);
+    dprintf(idx, "%s: %s\n", "Channel Topic", chan->channel.topic);
   if (channel_active(chan)) {
     /* find max nicklen and handlen */
     maxnicklen = maxhandlen = 0;
@@ -1412,16 +1412,16 @@ static void cmd_channel(int idx, char *par)
                      s1, m->userhost);
       }
       if (chan_fakeop(m))
-	dprintf(idx, "    (%s)\n", IRC_FAKECHANOP);
+	dprintf(idx, "    (FAKE CHANOP GIVEN BY SERVER)\n");
       if (chan_sentop(m))
-	dprintf(idx, "    (%s)\n", IRC_PENDINGOP);
+	dprintf(idx, "    (pending +o -- I'm lagged)\n");
       if (chan_sentdeop(m))
-	dprintf(idx, "    (%s)\n", IRC_PENDINGDEOP);
+	dprintf(idx, "    (pending -o -- I'm lagged)\n");
       if (chan_sentkick(m))
-	dprintf(idx, "    (%s)\n", IRC_PENDINGKICK);
+	dprintf(idx, "    (pending kick)\n");
     }
   }
-  dprintf(idx, "%s\n", IRC_ENDCHANINFO);
+  dprintf(idx, "End of channel info.\n");
 }
 
 static void cmd_topic(int idx, char *par)
@@ -1670,7 +1670,7 @@ static void cmd_reset(int idx, char *par)
     if (chan)
       get_user_flagrec(dcc[idx].user, &user, chan->dname);
     if (!chan || privchan(user, chan, PRIV_OP)) {
-      dprintf(idx, "%s\n", IRC_NOMONITOR);
+      dprintf(idx, "I don't monitor that channel.\n");
     } else {
       get_user_flagrec(dcc[idx].user, &user, par);
       if (!glob_master(user) && !chan_master(user)) {

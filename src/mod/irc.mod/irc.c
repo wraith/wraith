@@ -800,12 +800,12 @@ punish_badguy(struct chanset_t *chan, char *whobad,
   reason[0] = 0;
   switch (type) {
     case REVENGE_KICK:
-      kick_msg = IRC_KICK_PROTECT;
+      kick_msg = "don't kick my friends, bud";
       simple_sprintf(reason, "kicked %s off %s", victimstr, chan->dname);
       break;
     case REVENGE_DEOP:
       simple_sprintf(reason, "deopped %s on %s", victimstr, chan->dname);
-      kick_msg = IRC_DEOP_PROTECT;
+      kick_msg = "don't deop my friends, bud";
       break;
     default:
       kick_msg = "revenge!";
@@ -1416,15 +1416,15 @@ irc_report(int idx, int details)
       p = NULL;
       if (shouldjoin(chan)) {
         if (chan->status & CHAN_JUPED)
-          p = MISC_JUPED;
+          p = "juped";
         else if (channel_joining(chan))
-          p = MISC_JOINING;
+          p = "joining";
         else if (!(chan->status & CHAN_ACTIVE))
-          p = MISC_TRYING;
+          p = "trying";
         else if (chan->status & CHAN_PEND)
-          p = MISC_PENDING;
+          p = "pending";
         else if ((chan->dname[0] != '+') && !me_op(chan))
-          p = MISC_WANTOPS;
+          p = "want ops!";
       }
       len = simple_sprintf(ch, "%s%s%s%s, ", chan->dname, p ? "(" : "", p ? p : "", p ? ")" : "");
       if ((k + len) > 70) {

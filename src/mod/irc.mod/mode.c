@@ -929,7 +929,7 @@ static memberlist *assert_ismember(struct chanset_t *chan, const char *nick)
   } else {
     if (channel_pending(chan))
       return NULL;
-    putlog(LOG_MISC, chan->dname, CHAN_BADCHANMODE, chan->dname, nick);
+    putlog(LOG_MISC, chan->dname, "* Mode change on %s for nonexistant %s!", chan->dname, nick);
     dprintf(DP_MODE, "WHO %s\n", nick);
   }
 
@@ -952,7 +952,7 @@ gotmode(char *from, char *msg)
     struct chanset_t *chan = findchan(ch);
 
     if (!chan) {
-      putlog(LOG_MISC, "*", CHAN_FORCEJOIN, ch);
+      putlog(LOG_MISC, "*", "Oops.   Someone made me join %s... leaving...", ch);
       dprintf(DP_SERVER, "PART %s\n", ch);
       return 0;
     }
@@ -986,7 +986,7 @@ gotmode(char *from, char *msg)
           if (channel_pending(chan))
             return 0;
           dprintf(DP_MODE, "KICK %s %s :Desync\n", chan->dname, nick);
-          putlog(LOG_MISC, "*", CHAN_BADCHANMODE, chan->dname, nick);
+          putlog(LOG_MISC, "*", "* Mode change on %s for nonexistant %s!", chan->dname, nick);
           dprintf(DP_MODE, "WHO %s\n", nick);
           return 0;
         }
@@ -1180,13 +1180,13 @@ gotmode(char *from, char *msg)
 
       if (m && channel_active(chan) && me_op(chan)) {
         if (chan_fakeop(m)) {
-          putlog(LOG_MODES, ch, CHAN_FAKEMODE, ch);
-          dprintf(DP_MODE, "KICK %s %s :%s%s\n", ch, m->nick, kickprefix, CHAN_FAKEMODE_KICK);
+          putlog(LOG_MODES, ch, "Mode change by fake op on %s!  Reversing...", ch);
+          dprintf(DP_MODE, "KICK %s %s :%sAbusing ill-gained server ops\n", ch, m->nick, kickprefix);
           m->flags |= SENTKICK;
           reversing = 1;
         } else if (!chan_hasop(m) && !channel_nodesynch(chan)) {
-          putlog(LOG_MODES, ch, CHAN_DESYNCMODE, ch);
-          dprintf(DP_MODE, "KICK %s %s :%s%s\n", ch, m->nick, kickprefix, CHAN_DESYNCMODE_KICK);
+          putlog(LOG_MODES, ch, "Mode change by non-chanop on %s!  Reversing...", ch);
+          dprintf(DP_MODE, "KICK %s %s :%sAbusing desync\n", ch, m->nick, kickprefix);
           m->flags |= SENTKICK;
           reversing = 1;
         }

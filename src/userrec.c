@@ -398,7 +398,7 @@ int write_userfile(int idx)
   f = fopen(new_userfile, "w");
   fixmod(new_userfile);
   if (f == NULL) {
-    putlog(LOG_MISC, "*", USERF_ERRWRITE);
+    putlog(LOG_MISC, "*", "ERROR writing user file.");
     free(new_userfile);
     return 2;
   }
@@ -422,7 +422,7 @@ int write_userfile(int idx)
   for (struct userrec *u = userlist; u && ok; u = u->next)
     ok = write_user(u, f, idx);
   if (!ok || fflush(f)) {
-    putlog(LOG_MISC, "*", "%s (%s)", USERF_ERRWRITE, strerror(ferror(f)));
+    putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(ferror(f)));
     fclose(f);
     free(new_userfile);
     return 3;

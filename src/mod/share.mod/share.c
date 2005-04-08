@@ -1131,7 +1131,7 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
     fclose(f);
   }
   if (!ok)
-    putlog(LOG_MISC, "*", USERF_ERRWRITE2);
+    putlog(LOG_MISC, "*", "ERROR writing user file to transfer.");
   return ok;
 }
 
@@ -1241,7 +1241,7 @@ finish_share(int idx)
 
     /* old userlist is now being used, safe to do this stuff... */
     loading = 0;
-    putlog(LOG_MISC, "*", "%s", USERF_CANTREAD);
+    putlog(LOG_MISC, "*", "%s", "CAN'T READ NEW USERFILE");
     dprintf(idx, "bye\n");
     simple_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[j].nick);
     botnet_send_unlinked(j, dcc[j].nick, xx);
@@ -1261,7 +1261,7 @@ finish_share(int idx)
                                  * channel lists.                       */
   userlist = u;                 /* Set new user list.                   */
   lastuser = NULL;              /* Reset last accessed user ptr.        */
-  putlog(LOG_BOTS, "*", "%s.", USERF_XFERDONE);
+  putlog(LOG_BOTS, "*", "%s.", "Userlist transfer complete; switched over");
 
   /*
    * Migrate:
@@ -1302,7 +1302,7 @@ start_sending_users(int idx)
 
   if ((i = raw_dcc_send(share_file, "*users", "(users)", share_file, &j)) > 0) {
     unlink(share_file);
-    dprintf(idx, "s e %s\n", USERF_CANTSEND);
+    dprintf(idx, "s e %s\n", "Can't send userfile to you (internal error)");
     putlog(LOG_BOTS, "@", "%s -- can't send userfile",
            i == DCCSEND_FULL ? "NO MORE DCC CONNECTIONS" :
            i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :

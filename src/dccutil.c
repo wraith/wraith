@@ -650,7 +650,7 @@ detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
     chat->msgs_per_sec++;
     if (chat->msgs_per_sec > dcc_flood_thr) {
       /* FLOOD */
-      dprintf(idx, "*** FLOOD: %s.\n", IRC_GOODBYE);
+      dprintf(idx, "*** FLOOD: Goodbye.\n");
       /* Evil assumption here that flags&DCT_CHAT implies chat type */
       if ((dcc[idx].type->flags & DCT_CHAT) && chat && (chat->channel >= 0)) {
         char x[1024];

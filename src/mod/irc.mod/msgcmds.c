@@ -20,20 +20,20 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   if (u->bot)
     return BIND_RET_BREAK;
   if (!par[0]) {
-    dprintf(DP_HELP, "NOTICE %s :%s\n", nick, u_pass_match(u, "-") ? IRC_NOPASS : IRC_PASS);
+    dprintf(DP_HELP, "NOTICE %s :%s\n", nick, u_pass_match(u, "-") ? "You don't have a password set." : "You have a password set.");
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS?", nick, host, u->handle);
     return BIND_RET_BREAK;
   }
   old = newsplit(&par);
   if (!u_pass_match(u, "-") && !par[0]) {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
-    dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_EXISTPASS);
+    dprintf(DP_HELP, "NOTICE %s :You already have a password set.\n", nick);
     return BIND_RET_BREAK;
   }
   if (par[0]) {
     if (!u_pass_match(u, old)) {
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_FAILPASS);
+      dprintf(DP_HELP, "NOTICE %s :Incorrent password.\n", nick);
       return BIND_RET_BREAK;
     }
     mynew = newsplit(&par);
@@ -52,7 +52,7 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
 
   set_user(&USERENTRY_PASS, u, mynew);
   dprintf(DP_HELP, "NOTICE %s :%s '%s'.\n", nick,
-	  mynew == old ? IRC_SETPASS : IRC_CHANGEPASS, mynew);
+	  mynew == old ? "Password set to:" : "Password changed to:", mynew);
   return BIND_RET_BREAK;
 }
 
@@ -117,16 +117,16 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
   u2 = get_user_by_handle(userlist, who);
   if (!u2) {
     if (u && !quiet_reject)
-      dprintf(DP_HELP, IRC_MISIDENT, nick, nick, u->handle);
+      dprintf(DP_HELP, "NOTICE %s :You're not %s, you're %s.\n", nick, nick, u->handle);
   } else if (rfc_casecmp(who, origbotname) && !u2->bot) {
     /* This could be used as detection... */
     if (u_pass_match(u2, "-")) {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
       if (!quiet_reject)
-        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_NOPASS);
+        dprintf(DP_HELP, "NOTICE %s :You don't have a password set.\n", nick);
     } else if (!u_pass_match(u2, pass)) {
       if (!quiet_reject)
-        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_DENYACCESS);
+        dprintf(DP_HELP, "NOTICE %s :Access denied.\n", nick);
     } else if (u == u2) {
       /*
        * NOTE: Checking quiet_reject *after* u_pass_match()
@@ -134,16 +134,16 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
        * (Broken since 1.3.0+bel17)  Bad Beldin! No Cookie!
        *   -Toth  [July 30, 2003]
        */
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, IRC_RECOGNIZED);
+      dprintf(DP_HELP, "NOTICE %s :I recognize you there.\n", nick);
       return BIND_RET_BREAK;
     } else if (u) {
-      dprintf(DP_HELP, IRC_MISIDENT, nick, who, u->handle);
+      dprintf(DP_HELP, "NOTICE %s :You're not %s, you're %s.\n", nick, who, u->handle);
       return BIND_RET_BREAK;
     } else {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
       simple_snprintf(s, sizeof s, "%s!%s", nick, host);
       maskhost(s, s1);
-      dprintf(DP_HELP, "NOTICE %s :%s: %s\n", nick, IRC_ADDHOSTMASK, s1);
+      dprintf(DP_HELP, "NOTICE %s :Added hostmask: %s\n", nick, s1);
       addhost_by_handle(who, s1);
       check_this_user(who, 0, NULL);
       return BIND_RET_BREAK;
@@ -175,12 +175,11 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
       return BIND_RET_BREAK;
     }
     if (!(chan = findchan_by_dname(par))) {
-      dprintf(DP_HELP, "NOTICE %s :%s: /MSG %s invite <pass> <channel>\n",
-	      nick, MISC_USAGE, botname);
+      dprintf(DP_HELP, "NOTICE %s :Usage: /MSG %s invite <pass> <channel>\n", nick, botname);
       return BIND_RET_BREAK;
     }
     if (!channel_active(chan)) {
-      dprintf(DP_HELP, "NOTICE %s :%s: %s\n", nick, par, IRC_NOTONCHAN);
+      dprintf(DP_HELP, "NOTICE %s :%s: Not on that channel right now.\n", nick, par);
       return BIND_RET_BREAK;
     }
     /* We need to check access here also (dw 991002) */

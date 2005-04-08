@@ -165,7 +165,7 @@ void display_ignore(int idx, int number, struct igrec *ignore)
   if (ignore->msg && ignore->msg[0])
     dprintf(idx, "        %s: %s\n", ignore->user, ignore->msg);
   else
-    dprintf(idx, "        %s %s\n", MODES_PLACEDBY, ignore->user);
+    dprintf(idx, "        placed by %s\n", ignore->user);
   if (dates[0])
     dprintf(idx, "        %s\n", dates);
 }
@@ -204,7 +204,7 @@ void check_expired_ignores()
     return;
   while (*u) {
     if (!((*u)->flags & IGREC_PERM) && (now >= (*u)->expire)) {
-      putlog(LOG_MISC, "*", "%s %s (%s)", IGN_NOLONGER, (*u)->igmask, MISC_EXPIRED);
+      putlog(LOG_MISC, "*", "%s %s (expired)", IGN_NOLONGER, (*u)->igmask);
       delignore((*u)->igmask);
     } else {
       u = &((*u)->next);
@@ -515,7 +515,7 @@ void tell_user_ident(int idx, char *id)
     u = get_user_by_host(id);
 
   if (u == NULL || (u && !whois_access(dcc[idx].user, u))) {
-    dprintf(idx, "%s.\n", USERF_NOMATCH);
+    dprintf(idx, "Can't find anyone matching that.\n");
     return;
   }
 
@@ -542,7 +542,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
   struct list_type *q = NULL;
   struct flag_record user, pls, mns;
 
-  dprintf(idx, "*** %s '%s':\n", MISC_MATCHING, mtch);
+  dprintf(idx, "*** Matching '%s':\n", mtch);
   if (isbot) {
     egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
@@ -551,7 +551,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
     dprintf(idx, format, "HANDLE");
   }
   if (start > 1)
-    dprintf(idx, "(%s %d)\n", MISC_SKIPPING, start - 1);
+    dprintf(idx, "(skipping first %d)\n", start - 1);
   if (strchr("+-&|", *mtch)) {
     user.match = pls.match = FR_GLOBAL | FR_CHAN;
     break_down_flags(mtch, &pls, &mns);
@@ -579,7 +579,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
 	  if ((cnt <= limit) && (cnt >= start))
 	    tell_user(idx, u);
 	  if (cnt == limit + 1)
-	    dprintf(idx, MISC_TRUNCATED, limit);
+	    dprintf(idx, "(more than %d matches; list truncated)\n", limit);
 	}
       }
     } else if (wild_match(mtch, u->handle)) {
@@ -587,7 +587,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
       if ((cnt <= limit) && (cnt >= start))
 	tell_user(idx, u);
       if (cnt == limit + 1)
-	dprintf(idx, MISC_TRUNCATED, limit);
+	dprintf(idx, "(more than %d matches; list truncated)\n", limit);
     } else {
       fnd = 0;
       for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, u); q; q = q->next) {
@@ -598,19 +598,19 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
 	    tell_user(idx, u);
 	  }
 	  if (cnt == limit + 1)
-	    dprintf(idx, MISC_TRUNCATED, limit);
+	    dprintf(idx, "(more than %d matches; list truncated)\n", limit);
 	}
       }
     }
   }
-  dprintf(idx, MISC_FOUNDMATCH, cnt, cnt == 1 ? "" : MISC_MATCH_PLURAL);
+  dprintf(idx, "--- Found %d match%s.\n", cnt, cnt == 1 ? "" : "es");
 }
 
 void backup_userfile()
 {
   char s[DIRMAX] = "", s2[DIRMAX] = "";
 
-  putlog(LOG_MISC, "*", USERF_BACKUP);
+  putlog(LOG_MISC, "*", "Backing up user file...");
   simple_snprintf(s, sizeof s, "%s.u.0", tempdir);
   simple_snprintf(s2, sizeof s2, "%s.u.1", tempdir);
   movefile(s, s2);
@@ -681,10 +681,10 @@ int readuserfile(const char *file, struct userrec **ret)
   simple_snprintf(s, 180, "%s", temps);
   free(temps);
   if (s[1] < '4') {
-    fatal(USERF_OLDFMT, 0);
+    fatal("boring....", 0);
   }
   if (s[1] > '4')
-    fatal(USERF_INVALID, 0);
+    fatal("Invalid userfile format.", 0);
   while (!feof(f)) {
     s = buf;
     fgets(cbuf, 1024, f);
@@ -918,7 +918,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	  attr = newsplit(&s);
 	  rmspace(s);
 	  if (!attr[0] || !pass[0]) {
-	    putlog(LOG_MISC, "*", "* %s line: %d!", USERF_CORRUPT, line);
+	    putlog(LOG_MISC, "*", "* Corrupt user record line: %d!", line);
 	    lasthand[0] = 0;
             fclose(f);
             return 0;
@@ -932,7 +932,7 @@ int readuserfile(const char *file, struct userrec **ret)
 
 	    u = get_user_by_handle(bu, code);
 	    if (u) {
-	      putlog(LOG_ERROR, "@", "* %s '%s'!", USERF_DUPE, code);
+	      putlog(LOG_ERROR, "@", "* Duplicate user record '%s'!", code);
 	      lasthand[0] = 0;
 	      u = NULL;
 	    } else {
@@ -944,7 +944,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	      if (strlen(code) > HANDLEN)
 		code[HANDLEN] = 0;
 	      if (strlen(pass) > 20) {
-		putlog(LOG_MISC, "*", "* %s '%s'", USERF_BROKEPASS, code);
+		putlog(LOG_MISC, "*", "* Corrupted password reset for '%s'", code);
 		strcpy(pass, "-");
 	      }
 	      bu = adduser(bu, code, 0, pass, sanity_check(fr.global, isbot), isbot);
@@ -967,7 +967,7 @@ int readuserfile(const char *file, struct userrec **ret)
   fclose(f);
   (*ret) = bu;
   if (ignored[0]) {
-    putlog(LOG_MISC, "*", "%s %s", USERF_IGNBANS, ignored);
+    putlog(LOG_MISC, "*", "Ignored masks for channel(s): %s", ignored);
   }
   putlog(LOG_MISC, "*", "Userfile loaded, unpacking...");
   for (u = bu; u; u = u->next) {

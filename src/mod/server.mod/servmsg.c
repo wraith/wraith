@@ -87,7 +87,7 @@ static int gotfake433(char *from)
     }
   }
 
-  putlog(LOG_SERV, "*", IRC_BOTNICKINUSE, botname);
+  putlog(LOG_SERV, "*", "NICK IN USE: Trying '%s'", botname);
   dprintf(DP_SERVER, "NICK %s\n", botname);
   return 0;
 }
@@ -270,7 +270,7 @@ static int got442(char *from, char *msg)
   chan = findchan(chname);
   if (chan)
     if (shouldjoin(chan) && !channel_joining(chan)) {
-      putlog(LOG_MISC, chname, IRC_SERVNOTONCHAN, chname);
+      putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
       clear_channel(chan, 1);
       chan->status &= ~CHAN_ACTIVE;
       chan->status |= CHAN_JOINING;
@@ -362,7 +362,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     u = get_user_by_host(from);
     /* Private msg */
     simple_sprintf(h, "*!*@%s", p);
-    putlog(LOG_MISC, "*", IRC_FLOODIGNORE1, p);
+    putlog(LOG_MISC, "*", "Flood from @%s!  Placing on ignore!", p);
     addignore(h, conf.bot->nick, (which == FLOOD_CTCP) ? "CTCP flood" : "MSG/NOTICE flood", now + (60 * ignore_time));
     return 1;
   }
@@ -731,7 +731,7 @@ static void got303(char *from, char *msg)
     }
     if (!ison_orig) {
       if (!nick_juped)
-        putlog(LOG_MISC, "*", IRC_GETORIGNICK, origbotname);
+        putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
     }
   }
@@ -749,7 +749,7 @@ static int got432(char *from, char *msg)
     putlog(LOG_MISC, "*", "NICK IS INVALID: %s (keeping '%s').", erroneus,
 	   botname);
   else {
-    putlog(LOG_MISC, "*", IRC_BADBOTNICK);
+    putlog(LOG_MISC, "*", "Server says my nickname is invalid.");
     if (!keepnick) {
       makepass(erroneus);
       erroneus[NICKMAX] = 0;
@@ -795,7 +795,7 @@ static int got437(char *from, char *msg)
 	putlog(LOG_MISC, "*", IRC_CANTCHANGENICK, s);
       } else {
 	if (!channel_juped(chan)) {
-	  putlog(LOG_MISC, "*", IRC_CHANNELJUPED, s);
+	  putlog(LOG_MISC, "*", "Channel %s is juped. :(", s);
 	  chan->status |= CHAN_JUPED;
 	}
       }
@@ -806,7 +806,7 @@ static int got437(char *from, char *msg)
     if (!rfc_casecmp(s, origbotname))
       nick_juped = 1;
   } else {
-    putlog(LOG_MISC, "*", "%s: %s", IRC_BOTNICKJUPED, s);
+    putlog(LOG_MISC, "*", "%s: %s", "Nickname has been juped", s);
     gotfake433(from);
   }
   return 0;
@@ -834,7 +834,7 @@ static int got451(char *from, char *msg)
    * Probably should do something about it some time - beldin
    */
   putlog(LOG_MISC, "*", "%s says I'm not registered, trying next one.", from);
-  nuke_server(IRC_NOTREGISTERED2);
+  nuke_server("The server says we are not registered yet..");
   return 0;
 }
 
@@ -872,7 +872,7 @@ static int gotnick(char *from, char *msg)
     } else if (keepnick && strcmp(nick, msg)) {
       putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
       if (!rfc_casecmp(nick, origbotname)) {
-        putlog(LOG_MISC, "*", IRC_GETORIGNICK, origbotname);
+        putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
         dprintf(DP_SERVER, "NICK %s\n", origbotname);
       }
     } else
@@ -880,7 +880,7 @@ static int gotnick(char *from, char *msg)
   } else if ((keepnick) && (rfc_casecmp(nick, msg))) {
     /* Only do the below if there was actual nick change, case doesn't count */
     if (!rfc_casecmp(nick, origbotname)) {
-      putlog(LOG_MISC, "*", IRC_GETORIGNICK, origbotname);
+      putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
     }
   }

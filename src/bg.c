@@ -100,7 +100,7 @@ writepid(const char *pidfile, pid_t pid)
     fprintf(fp, "%u\n", pid);
     if (fflush(fp)) {
       /* Kill bot incase a botchk is run from crond. */
-      printf(EGG_NOWRITE, pidfile);
+      printf("* Warning!  Could not write %s file!\n", pidfile);
       printf("  Try freeing some disk space\n");
       fclose(fp);
       unlink(pidfile);
@@ -108,7 +108,7 @@ writepid(const char *pidfile, pid_t pid)
     } else
       fclose(fp);
   } else
-    printf(EGG_NOWRITE, pidfile);
+    printf("* Warning!  Could not write %s file!\n", pidfile);
 }
 
 #if !defined(CYGWIN_HACKS) && !defined(__sun__)

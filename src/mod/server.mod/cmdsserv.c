@@ -65,7 +65,7 @@ static void cmd_jump(int idx, char *par)
     strlcpy(newserverpass, par, sizeof newserverpass);
   } else
     putlog(LOG_CMDS, "*", "#%s# jump", dcc[idx].nick);
-  dprintf(idx, "%s...\n", IRC_JUMP);
+  dprintf(idx, "Jumping servers...\n");
   nuke_server("changing servers");
   cycle_time = 0;
 }

@@ -60,13 +60,11 @@ static void tell_who(int idx, int chan)
   char s[1024] = "";
 
   if (!chan)
-    dprintf(idx, "%s  (* = %s, + = %s, @ = %s)\n", BOT_PARTYMEMBS, MISC_OWNER, MISC_MASTER, MISC_OP);
+    dprintf(idx, "Party line members:  (^ = admin, * = owner, + = master, @ = op)\n");
   else {
-    dprintf(idx, "%s %s%d:  (* = %s, + = %s, @ = %s)\n",
-                      BOT_PEOPLEONCHAN,
+    dprintf(idx, "People on channel %s%d:  (^ = admin, * = owner, + = master, @ = op)\n",
                       (chan < GLOBAL_CHANS) ? "" : "*",
-                      chan % GLOBAL_CHANS,
-                      MISC_OWNER, MISC_MASTER, MISC_OP);
+                      chan % GLOBAL_CHANS);
   }
 
   /* calculate max nicklen */

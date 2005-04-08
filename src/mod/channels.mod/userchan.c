@@ -312,7 +312,7 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
     else
       simple_sprintf(s, "%s!%s", botname, botuserhost);
   if (s[0] && type == 'b' && wild_match(host, s)) {
-    putlog(LOG_MISC, "*", IRC_IBANNEDME);
+    putlog(LOG_MISC, "*", "Wanted to ban myself--deflected.");
     return 0;
   }
   if (expire_time == now)
@@ -383,10 +383,10 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
 
   if (mask->added) {
     daysago(now, mask->added, s);
-    simple_sprintf(dates, "%s %s", MODES_CREATED, s);
+    simple_sprintf(dates, "Created %s", s);
     if (mask->added < mask->lastactive) {
       strcat(dates, ", ");
-      strcat(dates, MODES_LASTUSED);
+      strcat(dates, "last used");
       strcat(dates, " ");
       daysago(now, mask->lastactive, s);
       strcat(dates, s);
@@ -439,7 +439,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
     if (chname[0] && (strchr(CHANMETA, chname[0]))) {
       chan = findchan_by_dname(chname);
       if (!chan) {
-	dprintf(idx, "%s.\n", CHAN_NOSUCH);
+	dprintf(idx, "No such channel defined.\n");
 	return;
       }
     } else
@@ -451,7 +451,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
     chan = NULL;
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
   if (privchan(user, chan, PRIV_OP)) {
-    dprintf(idx, "%s.\n", CHAN_NOSUCH);
+    dprintf(idx, "No such channel defined.\n");
     return;
   }
 
@@ -815,7 +815,7 @@ void channels_writeuserfile()
     fclose(f);
   }
   if (ret < 5)
-    putlog(LOG_MISC, "*", USERF_ERRWRITE);
+    putlog(LOG_MISC, "*", "ERROR writing user file.");
 }
 
 /* Expire mask originally set by `who' on `chan'?
@@ -881,7 +881,7 @@ static void check_expired_bans(void)
   for (u = global_bans; u; u = u2) { 
     u2 = u->next;
     if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-      putlog(LOG_MISC, "*", "%s %s (%s)", BANS_NOLONGER, u->mask, MISC_EXPIRED);
+      putlog(LOG_MISC, "*", "No longer banning %s (expired)", u->mask);
       for (chan = chanset; chan; chan = chan->next)
         for (b = chan->channel.ban; b->mask[0]; b = b->next)
 	  if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
@@ -897,8 +897,7 @@ static void check_expired_bans(void)
     for (u = chan->bans; u; u = u2) {
       u2 = u->next;
       if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-	putlog(LOG_MISC, "*", "%s %s %s %s (%s)", BANS_NOLONGER,
-	       u->mask, MISC_ONLOCALE, chan->dname, MISC_EXPIRED);
+	putlog(LOG_MISC, "*", "No longer banning %s on %s (expired)", u->mask, chan->dname);
 	for (b = chan->channel.ban; b->mask[0]; b = b->next)
           if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
             if (!conf.bot->hub)
@@ -926,8 +925,7 @@ static void check_expired_exempts(void)
   for (u = global_exempts; u; u = u2) {
     u2 = u->next;
     if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-      putlog(LOG_MISC, "*", "%s %s (%s)", EXEMPTS_NOLONGER,
-	     u->mask, MISC_EXPIRED);
+      putlog(LOG_MISC, "*", "No longer ban exempting %s (expired)", u->mask);
       for (chan = chanset; chan; chan = chan->next) {
         match = 0;
         b = chan->channel.ban;
@@ -972,8 +970,7 @@ static void check_expired_exempts(void)
             "Exempt not expired on channel %s. Ban still set!",
             chan->dname);
         else {
-          putlog(LOG_MISC, "*", "%s %s %s %s (%s)", EXEMPTS_NOLONGER,
-		 u->mask, MISC_ONLOCALE, chan->dname, MISC_EXPIRED);
+          putlog(LOG_MISC, "*", "No longer ban exempting %s on %s (expired)", u->mask, chan->dname);
 	  for (e = chan->channel.exempt; e->mask[0]; e = e->next)
 	    if (!rfc_casecmp(e->mask, u->mask) && expired_mask(chan, e->who) && e->timer != now) {
               if (!conf.bot->hub)
@@ -1001,8 +998,7 @@ static void check_expired_invites(void)
   for (u = global_invites; u; u = u2) {
     u2 = u->next;
     if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-      putlog(LOG_MISC, "*", "%s %s (%s)", INVITES_NOLONGER,
-	     u->mask, MISC_EXPIRED);
+      putlog(LOG_MISC, "*", "No longer inviting %s (expired)", u->mask);
       for (chan = chanset; chan; chan = chan->next)
 	if (!(chan->channel.mode & CHANINV))
 	  for (b = chan->channel.invite; b->mask[0]; b = b->next)
@@ -1019,8 +1015,7 @@ static void check_expired_invites(void)
     for (u = chan->invites; u; u = u2) {
       u2 = u->next;
       if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-	putlog(LOG_MISC, "*", "%s %s %s %s (%s)", INVITES_NOLONGER,
-	       u->mask, MISC_ONLOCALE, chan->dname, MISC_EXPIRED);
+	putlog(LOG_MISC, "*", "No longing inviting %s on %s (expired)", u->mask, chan->dname);
 	if (!(chan->channel.mode & CHANINV))
 	  for (b = chan->channel.invite; b->mask[0]; b = b->next)
 	    if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {

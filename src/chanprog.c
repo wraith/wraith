@@ -238,14 +238,14 @@ void tell_verbose_uptime(int idx)
   sprintf(&s[strlen(s)], "%02d:%02d", (int) hr, (int) min);
   s1[0] = 0;
   if (backgrd)
-    strcpy(s1, MISC_BACKGROUND);
+    strcpy(s1, "background");
   else {
     if (term_z)
-      strcpy(s1, MISC_TERMMODE);
+      strcpy(s1, "terminal mode");
     else
-      strcpy(s1, MISC_LOGMODE);
+      strcpy(s1, "log dump mode");
   }
-  dprintf(idx, "%s %s  (%s)\n", MISC_ONLINEFOR, s, s1);
+  dprintf(idx, "Online for %s  (%s)\n", s, s1);
 }
 
 /* Dump status info out to dcc
@@ -295,12 +295,12 @@ void tell_verbose_status(int idx)
   sprintf(&s[strlen(s)], "%02d:%02d", (int) hr, (int) min);
   s1[0] = 0;
   if (backgrd)
-    strcpy(s1, MISC_BACKGROUND);
+    strcpy(s1, "background");
   else {
     if (term_z)
-      strcpy(s1, MISC_TERMMODE);
+      strcpy(s1, "terminal mode");
     else
-      strcpy(s1, MISC_LOGMODE);
+      strcpy(s1, "log dump mode");
   }
 #if HAVE_GETRUSAGE
   getrusage(RUSAGE_SELF, &ru);
@@ -317,8 +317,8 @@ void tell_verbose_status(int idx)
   simple_sprintf(s2, "CPU ???");
 # endif
 #endif /* HAVE_GETRUSAGE */
-  dprintf(idx, "%s %s  (%s)  %s  %s %4.1f%%\n", MISC_ONLINEFOR,
-	  s, s1, s2, MISC_CACHEHIT,
+  dprintf(idx, "Online for %s  (%s)  %s  cache hit %4.1f%%\n",
+	  s, s1, s2,
 	  100.0 * ((float) cache_hit) / ((float) (cache_hit + cache_miss)));
 
   if (admin[0])
@@ -343,9 +343,9 @@ void tell_settings(int idx)
   fr.global = default_flags;
 
   build_flags(s, &fr, NULL);
-  dprintf(idx, "%s [%s]\n", MISC_NEWUSERFLAGS, s);
+  dprintf(idx, "New users get flags [%s]\n", s);
   if (conf.bot->hub && owner[0])
-    dprintf(idx, "%s: %s\n", MISC_PERMOWNER, owner);
+    dprintf(idx, "Permanent owner(s): %s\n", owner);
   dprintf(idx, "Ignores last %li mins\n", ignore_time);
 }
 
@@ -579,7 +579,7 @@ void reload()
   FILE *f = fopen(userfile, "r");
 
   if (f == NULL) {
-    putlog(LOG_MISC, "*", MISC_CANTRELOADUSER);
+    putlog(LOG_MISC, "*", "Can't reload user file!");
     return;
   }
   fclose(f);
@@ -590,7 +590,7 @@ void reload()
   loading = 1;
   checkchans(0);
   if (!readuserfile(userfile, &userlist))
-    fatal(MISC_MISSINGUSERF, 0);
+    fatal("User file is missing!", 0);
   Auth::FillUsers();
   checkchans(1);
   loading = 0;

@@ -454,7 +454,7 @@ void notes_read(const char *hand, const char *nick, const char *srd, int idx)
       if (idx >= 0)
 	dprintf(idx, "### %s.\n", NOTES_DCC_USAGE_READ);
       else
-	dprintf(DP_HELP, "NOTICE %s :(%d %s)\n", nick, ix - 1, MISC_TOTAL);
+	dprintf(DP_HELP, "NOTICE %s :(%d total)\n", nick, ix - 1);
     }
   } else if ((ir == 0) && (ix == 1)) {
     if (idx >= 0)
@@ -553,7 +553,7 @@ void notes_del(const char *hand, const char *nick, const char *sdl, int idx)
 	dprintf(idx, "%s %d note%s; %d %s.\n", NOTES_ERASED, er,
 		(er != 1) ? "s" : "", in - 1 - er, NOTES_LEFT);
       else
-	dprintf(DP_HELP, "NOTICE %s :%s %d note%s; %d %s.\n", nick, MISC_ERASED,
+	dprintf(DP_HELP, "NOTICE %s :Erased %d note%s; %d %s.\n", nick,
 		er, (er != 1) ? "s" : "", in - 1 - er, NOTES_LEFT);
     }
   }

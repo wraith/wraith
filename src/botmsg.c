@@ -485,7 +485,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
   }
   if (!(u = get_user_by_handle(userlist, to))) {
     if (idx >= 0)
-      dprintf(idx, USERF_UNKNOWN);
+      dprintf(idx, "I don't know anyone by that name.\n");
     return NOTE_ERROR;
   }
   if (is_bot(u)) {

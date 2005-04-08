@@ -112,7 +112,7 @@ void eof_dcc_fork_send(int idx)
       dcc[y].status &= ~STAT_GETTING;
       dcc[y].status &= ~STAT_SHARE;
     }
-    putlog(LOG_BOTS, "*", USERF_FAILEDXFER);
+    putlog(LOG_BOTS, "*", "Failed connection; aborted userfile transfer.");
     unlink(dcc[idx].u.xfer->filename);
   } else if (!strcmp(dcc[idx].nick, "*binary")) {
     int x, y = -1;
