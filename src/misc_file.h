@@ -17,7 +17,7 @@ int can_lstat(const char *);
 int is_symlink(const char *);
 int is_dir(const char *);
 int fixmod(const char *);
-void check_tempdir();
+void check_tempdir(bool);
 
 class Tempfile 
 {

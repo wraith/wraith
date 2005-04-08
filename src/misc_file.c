@@ -204,7 +204,7 @@ Tempfile::~Tempfile()
   delete[] file;
 }
 
-void check_tempdir()
+void check_tempdir(bool do_chmod)
 {
   if (!can_stat(tempdir)) {
     if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
@@ -214,7 +214,7 @@ void check_tempdir()
           werr(ERR_TMPSTAT);
     }
   }
-  if (fixmod(tempdir))
+  if (do_chmod && fixmod(tempdir))
     werr(ERR_TMPMOD);
 
   /* test tempdir: it's vital */

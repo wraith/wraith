@@ -936,7 +936,7 @@ bin_to_conf(void)
   simple_snprintf(tempdir, DIRMAX, "tmp/");
 #endif /* CYGWIN_HACKS */
 
-  check_tempdir();      /* ensure we can access tmpdir if it changed */
+  check_tempdir(1);      /* ensure we can access tmpdir if it changed */
   clear_tmp();          /* clear out the tmp dir, no matter if we are localhub or not */
 
   conf_checkpids();

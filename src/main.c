@@ -668,13 +668,13 @@ printf("out: %s\n", out);
     fatal("!! Invalid binary", 0);
   }
 
-  /* setup initial tempdir as ./ until we read in tmpdir from conf */
+  /* setup initial tempdir as /tmp until we read in tmpdir from conf */
 
   binname = getfullbinname(argv[0]);
-  simple_snprintf(tempdir, sizeof(tempdir), "%s/", dirname(binname));
   chdir(dirname(binname));
 
-  check_tempdir();	/* make sure directory exists and we can access it */
+  simple_snprintf(tempdir, sizeof(tempdir), "/tmp/");
+  check_tempdir(0);	/* make sure directory exists and we can access it */
 
   /* This allows -2/-0 to be used without an initialized binary */
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
