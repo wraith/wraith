@@ -1062,7 +1062,8 @@ reset_chan_info(struct chanset_t *chan)
     clear_channel(chan, 1);
     chan->status |= CHAN_PEND;
     chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);
-    if (!(chan->status & CHAN_ASKEDBANS)) {
+    /* don't bother checking bans if it's +take */
+    if (!(chan->status & CHAN_ASKEDBANS) && !channel_take(chan)) {
       chan->status |= CHAN_ASKEDBANS;
       dprintf(DP_MODE, "MODE %s +b\n", chan->name);
     }
