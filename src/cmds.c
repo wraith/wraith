@@ -397,12 +397,10 @@ static void cmd_botconfig(int idx, char *par)
 
 static void cmd_cmdpass(int idx, char *par)
 {
-  bind_table_t *table = NULL;
   char *cmd = NULL, *pass = NULL;
-  int i, l = 0;
+  int i;
 
   /* cmdpass [command [newpass]] */
-  table = bind_table_lookup("dcc");
   cmd = newsplit(&par);
   putlog(LOG_CMDS, "*", "#%s# cmdpass %s ...", dcc[idx].nick, cmd[0] ? cmd : "");
   pass = newsplit(&par);
@@ -411,26 +409,12 @@ static void cmd_cmdpass(int idx, char *par)
     dprintf(idx, "  if the password is specified and 'clear' after it, the command's password is cleared\n");
     return;
   }
-  for (i = 0; cmd[i]; i++)
-    cmd[i] = tolower(cmd[i]);
 
-  /* need to check for leaf cmds, and set l > 0 here */
+  strtolower(cmd);
 
-  if (!l) {
-    int found = 0;
-    bind_entry_t *entry = NULL;
-
-    for (entry = table->entries; entry && entry->next; entry = entry->next) {
-      if (!egg_strcasecmp(cmd, entry->mask)) {
-        found++;
-        break;
-      }
-    }
-
-    if (!found) {
-      dprintf(idx, "No such DCC command\n");
-      return;
-    }
+  if (!findcmd(cmd, 0)) {
+    dprintf(idx, "No such DCC command\n");
+    return;
   }
 
   if (pass[0]) {
@@ -705,13 +689,19 @@ static void cmd_nohelp(int idx, char *par)
 }
 
 int
-findhelp(const char *cmd)
+findcmd(const char *cmd, bool care_about_type)
 {
   for (int hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
-    if (!egg_strcasecmp(cmd, help[hi].cmd) && have_cmd(help[hi].type))
+    if (!egg_strcasecmp(cmd, help[hi].cmd) && ((care_about_type && have_cmd(help[hi].type)) || (!care_about_type)))
       return hi;
 
   return -1;
+}
+
+int
+findhelp(const char *cmd)
+{
+  return findcmd(cmd, 1);
 }
 
 static void cmd_help(int idx, char *par)
