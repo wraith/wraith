@@ -176,5 +176,6 @@ void link_pref_val(struct userrec *u, char *lval);
 
 extern char			userfile[];
 extern time_t			ignore_time;
+extern bool			dont_restructure;
 
 #endif				/* _EGG_USERS_H */

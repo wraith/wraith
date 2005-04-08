@@ -176,20 +176,8 @@ static void got_nu(char *botnick, char *code, char *par)
 
    if (newts > buildts) {
      if (!conf.bot->hub) {
-       struct bot_addr *obi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
-       struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
-
-       bi->uplink = strdup(botnick);
-       if (obi) {
-         bi->address = strdup(obi->address);
-         bi->telnet_port = obi->telnet_port;
-         bi->relay_port = obi->relay_port;
-         bi->hublevel = obi->hublevel;
-       } 
-       set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
-     /* Change our uplink to them */
-     /* let cont_link restructure us.. */
-       putlog(LOG_MISC, "*", "Changed uplink to %s for update.", botnick);
+       dont_restructure = 1;
+       putlog(LOG_MISC, "*", "Linking to %s for binary update.", botnick);
        botunlink(-2, tandbot->bot, "Restructure for update.");
        usleep(1000 * 500);
        botlink("", -3, botnick);

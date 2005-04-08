@@ -38,6 +38,7 @@
 
 char userfile[121] = "";	/* where the user records are stored */
 time_t ignore_time = 10;		/* how many minutes will ignores last? */
+bool	dont_restructure = 0;		/* set when we botlink() to a hub with +U, only stops bot from restructuring */
 
 /* is this nick!user@host being ignored? */
 bool match_ignore(char *uhost)
@@ -1077,7 +1078,7 @@ void autolink_cycle_hub(char *start)
       return;
     if (dcc[i].type == &DCC_BOT) {
       if (dcc[i].status & (STAT_OFFEREDU | STAT_GETTINGU | STAT_SENDINGU))
-        continue; /* lets let the binary have it's peace. */
+        continue; /* lets let the binary update have it's peace. */
 
       if ((bot = findbot(dcc[i].nick)) && bot->buildts != buildts)
         continue; /* same thing. */
@@ -1176,6 +1177,9 @@ void autolink_cycle_leaf(char *start)
 
     if (start)
       /* Failed a link... let's just wait for next regular call */
+      return;
+
+    if (dont_restructure)
       return;
 
     if (uplink[0]) {
