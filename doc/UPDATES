@@ -51,7 +51,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Fixed channel bans not displaying on hubs (#1)
 * Fixed users showing up in .whom after doing .botcmd and relinking the bot which the cmd was ran on. (#9)
 * Default UID is now: -1 (Fixes running as root by accident. #12)
-* Added some error logging for failed bind() listen() and getsockname()
+* Added some debug logging for failed bind() listen() and getsockname()
 * Fixed DNS returning a blank reply for reverse lookups with missing records.
 * Setting -take now automatically sets +fastop as well (#13).
 * Added cmd_version (does same as .botversion)
