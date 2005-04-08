@@ -14,8 +14,8 @@
 /* language #define's */
 
 
-#define NOTES_USAGE			MISC_USAGE
-#define NOTES_USERF_UNKNOWN		USERF_UNKNOWN
+#define NOTES_USAGE			"Usage"
+#define NOTES_USERF_UNKNOWN		"I don't know anyone by that name.\n"
 #define NOTES_FORWARD_TO		"  Forward notes to: %.70s\n"
 #define NOTES_SWITCHED_NOTES		"Switched %d note%s from %s to %s."
 #define NOTES_EXPIRED			"Expired %d note%s"
