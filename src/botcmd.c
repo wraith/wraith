@@ -1027,6 +1027,20 @@ static void bot_part(int idx, char *par)
     botnet_send_part_party(idx, partyidx, par, silent);
     remparty(bot, sock);
   }
+
+  /* check if we have a remote idx for them */
+  int i = 0;
+
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && dcc[i].simul >= 0 && !egg_strcasecmp(dcc[i].nick, nick)) {
+        dcc[idx].simul = -1;
+// FIXME: THIS NEEDS TO BE UPDATED FOR CLASS
+//        if (dcc[idx].irc)
+//          auth[dcc[idx].auth].idx = -1;
+        lostdcc(idx);
+    }
+  }
+
 }
 
 /* away <bot> <sock> <message>

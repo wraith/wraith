@@ -3036,10 +3036,8 @@ static void cmd_su(int idx, char *par)
 	 */
 	if (dcc[idx].u.chat->away != NULL)
 	  free(dcc[idx].u.chat->away);
-        dcc[idx].u.chat->away = (char *) my_calloc(1, strlen(dcc[idx].nick) + 1);
-	strcpy(dcc[idx].u.chat->away, dcc[idx].nick);
-        dcc[idx].u.chat->su_nick = (char *) my_calloc(1, strlen(dcc[idx].nick) + 1);
-	strcpy(dcc[idx].u.chat->su_nick, dcc[idx].nick);
+        dcc[idx].u.chat->away = strdup(dcc[idx].nick);
+        dcc[idx].u.chat->su_nick = strdup(dcc[idx].nick);
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);
 	/* Display password prompt and turn off echo (send IAC WILL ECHO). */
@@ -3047,7 +3045,7 @@ static void cmd_su(int idx, char *par)
 		(dcc[idx].status & STAT_TELNET) ? TLN_IAC_C TLN_WILL_C
 	       					  TLN_ECHO_C : "");
 	dcc[idx].type = &DCC_CHAT_PASS;
-      } else if (atr & USER_OWNER) {
+      } else if (atr & USER_ADMIN) {
 	if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
 	  botnet_send_part_idx(idx, "");
 	chanout_but(-1, dcc[idx].u.chat->channel,
@@ -3055,8 +3053,7 @@ static void cmd_su(int idx, char *par)
 	dprintf(idx, "Setting your username to %s.\n", par);
 	if (atr & USER_MASTER)
 	  dcc[idx].u.chat->con_flags = conmask;
-        dcc[idx].u.chat->su_nick = (char *) my_calloc(1, strlen(dcc[idx].nick) + 1);
-	strcpy(dcc[idx].u.chat->su_nick, dcc[idx].nick);
+        dcc[idx].u.chat->su_nick = strdup(dcc[idx].nick);
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);
 	dcc_chatter(idx);
