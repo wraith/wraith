@@ -179,7 +179,7 @@ confedit()
   um = umask(077);
 
   writeconf(NULL, tmpconf.f, CONF_COMMENT);
-  fclose(tmpconf.f);
+  tmpconf.my_close();
   (void) umask(um);
 
   if (!can_stat(tmpconf.file))
