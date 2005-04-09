@@ -194,13 +194,21 @@ error:
 //  fatal("Cannot create temporary file!", 0);
 }
 
+void Tempfile::my_close()
+{
+  if (f) {
+    fclose(f);
+    f = NULL;
+  } else if (fd >= 0) {
+    close(fd);
+    fd = -1;
+  }
+}
+
 Tempfile::~Tempfile()
 {
   unlink(file);
-  if (f)
-    fclose(f);
-  else
-    close(fd);
+  my_close();
   delete[] file;
 }
 

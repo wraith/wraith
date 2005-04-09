@@ -24,6 +24,7 @@ class Tempfile
   public:
     Tempfile();					//constructor
     Tempfile(const char *prefix);		//constructor with file prefix
+    void Tempfile::my_close();
     ~Tempfile();				//destructor
 
     bool error;					//exceptions are lame.

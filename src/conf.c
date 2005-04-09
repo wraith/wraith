@@ -269,6 +269,8 @@ confedit()
   if (conf.bots && conf.bots->pid)
     localhub_pid = conf.bots->pid;
 
+  tmpconf.my_close();
+
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   fix_tilde(&conf.binpath);
   unlink(tmpconf.file);

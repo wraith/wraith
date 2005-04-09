@@ -73,6 +73,7 @@ bin_checksum(const char *fname, int todo)
     }
 
     fclose(f);
+    f = NULL;
     MD5_Final(md5out, &ctx);
     strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
@@ -176,7 +177,8 @@ bin_checksum(const char *fname, int todo)
     }
 
     fclose(f);
-    fclose(newbin->f);
+    f = NULL;
+    newbin->my_close();
 
     if (size != newpos) {
       delete newbin;
