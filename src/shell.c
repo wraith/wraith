@@ -340,12 +340,14 @@ void check_promisc()
 #endif /* SIOCGIFCONF */
 }
 
+#ifdef __linux__
 bool traced = 0;
 
 static void got_sigtrap(int z)
 {
   traced = 0;
 }
+#endif
 
 void check_trace(int start)
 {
