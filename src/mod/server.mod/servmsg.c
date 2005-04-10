@@ -1280,6 +1280,21 @@ static int got406(char *from, char *msg)
  
   return 0;
 }
+
+/* 718 $me nick user@host :msg 
+ * for receiving a msg while +g
+ */
+static int got718(char *from, char *msg)
+{
+  char *nick = NULL, *uhost = NULL;
+
+  newsplit(&msg);
+  nick = newsplit(&msg);
+  uhost = newsplit(&msg);
+  fixcolon(msg);
+
+  putlog(LOG_WALL, "*", "(+g) !%s!%s! %s", nick, uhost, msg);
+}
  
 static cmd_t my_raw_binds[] =
 {
@@ -1315,6 +1330,7 @@ static cmd_t my_raw_binds[] =
   {"406",	"",	(Function) got406,		NULL, LEAF},
   {"318",	"",	(Function) whoispenalty,	NULL, LEAF},	/* :End of /WHOIS */
   {"369",	"",	(Function) got369,		NULL, LEAF},	/* :End of /WHOWAS */
+  {"718",	"",	(Function) got718,		NULL, LEAF},
   {NULL,	NULL,	NULL,				NULL, 0}
 };
 
