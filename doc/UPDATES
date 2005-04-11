@@ -41,16 +41,14 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Removed channel flag '+|-manop' as it was redundant with chanint 'manop'
 * Removed channel flag '+|-nomop' as it was redundant with chanint 'mop'
 * Upped user limit for processes to 60.
-* After you edit a binary with -C, the first bot will be sent a signal to reload the data from the binary.
-  (Fixes old bots/uname/data showing up in conf after bot is updated)
 * Fixed some bad passes being generated/set beginning with -/+
 * Fixed binary exiting with ERR_NOBOTS under conditions that it shouldn't. (updating)
 * Fixed bots not rechecking channel for invalid users after a .-chrec
 * Users who are v|o in a +private chan are now voiced, as before |v was needed.
-* Added channel flag +|-botbitch, when set only bots will be allowed to be opped, users be auto-deopped.
+* Added channel flag +|-botbitch, when set only bots will be allowed to be opped, users are auto-deopped.
 * chanset -bitch/-private/-botbitch/+botbitch/+closed/+private will now trigger bots to recheck channel (op/deop/kick people)
 * Fixed bot not updating it's hostmask when reconnecting to server
-* Fixed bot sending +Ie modes before recieving list after opping.
+* Fixed bot sending +Ie modes before recieving list from server after opping.
 * Fixed channel bans not displaying on hubs (#1)
 * Fixed users showing up in .whom after doing .botcmd and relinking the bot which the cmd was ran on. (#9)
 * Default UID is now: -1 (Fixes running as root by accident. #12)
@@ -59,7 +57,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Setting -take now automatically sets +fastop as well (#13).
 * Added cmd_version (does same as .botversion)
 * Fixed userfile becoming desynced during transfer; A bot downloading a userfile would miss changes made during the transfer. (#11)
-* Fixed a problem with accepting new telnet connections.
+* Fixed a fatal loop with accepting new telnet connections.
 * Fixed segfault after booting users when a leaf has lost +c. (#18)
 * Fixed a bug with connecting to servers that did not send any data on connect.
 * Fixed colors still showing for characters ":@()<>" when colors were turned off.
@@ -87,7 +85,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
   -Removed bots are killed and removed from the userlist (if linked)
 * Added options 'enable' and 'disable' to cmd_conf for bots
 * Fixed dccauth not correctly working according to it's [bot]config setting (#30)
-* Added match option for cmd_botcmd: '$' will match on all localhubs (first bot in config) (#28)
+* Added match option for cmd_botcmd: '&' will match on all localhubs (first bot in config) (#28)
 * Added some debug logging when a telnet connection is ignored.
 * Fixed some missing sanity checking on certain user flags for channel records.
 * cmd_dns wasn't checking for param
