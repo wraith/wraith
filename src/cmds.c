@@ -402,47 +402,58 @@ static void cmd_cmdpass(int idx, char *par)
   /* cmdpass [command [newpass]] */
   cmd = newsplit(&par);
   putlog(LOG_CMDS, "*", "#%s# cmdpass %s ...", dcc[idx].nick, cmd[0] ? cmd : "");
+
+  if (!isowner(dcc[idx].nick)) {
+    putlog(LOG_WARN, "*", "%s attempted to modify command password for %s - not perm owner", dcc[idx].nick, cmd);
+    dprintf(idx, "Perm owners only.\n");
+    return;
+  }
+
   pass = newsplit(&par);
   if (!cmd || !cmd[0] || !pass || !pass[0]) {
-    dprintf(idx, "Usage: %scmdpass <command> <password> [clear]\n", settings.dcc_prefix);
-    dprintf(idx, "  if the password is specified and 'clear' after it, the command's password is cleared\n");
+    dprintf(idx, "Usage: cmdpass <command> <password> [newpassword]\n");
+    dprintf(idx, "  Specifying the password but not a new one will clear it.\n");
     return;
   }
 
   strtolower(cmd);
 
   if (!findcmd(cmd, 0)) {
-    dprintf(idx, "No such DCC command\n");
+    dprintf(idx, "No such DCC command.\n");
     return;
   }
 
-  if (pass[0]) {
-    if (!egg_strcasecmp(par, "clear")) {
-      if (!isowner(dcc[idx].nick)) {
-        putlog(LOG_MISC, "*", "%s attempted to remove command password for %s - not perm owner", dcc[idx].nick, cmd);
-        dprintf(idx, "Perm owners only.\n");
-        return;
-      }
+  int has_pass = has_cmd_pass(cmd);
+
+  if (!has_pass && par[0]) {
+    dprintf(idx, "That cmd has no password.\n");
+    return;
+  }
+
+  if (has_pass) {
+    if (!check_cmd_pass(cmd, pass)) {
+      putlog(LOG_WARN, "*", "%s attempted to modify command password for %s - invalid password specified", dcc[idx].nick, cmd);
+      dprintf(idx, "Wrong password.\n");
+      return;
+    }
+
+    if (!par[0]) {
       set_cmd_pass(cmd, 1);
       dprintf(idx, "Removed command password for %s\n", cmd);
       return;
     }
-    char epass[36] = "", tmp[256] = "";
-
-    if (!isowner(dcc[idx].nick) && has_cmd_pass(cmd)) {
-      putlog(LOG_MISC, "*", "%s attempted to change command password for %s - not perm owner", dcc[idx].nick, cmd);
-      dprintf(idx, "Perm owners only.\n");
-      return;
-    }
-    encrypt_pass(pass, epass);
-    simple_snprintf(tmp, sizeof tmp, "%s %s", cmd, epass);
-    if (has_cmd_pass(cmd))
-      dprintf(idx, "Changed command password for %s\n", cmd);
-    else
-      dprintf(idx, "Set command password for %s to '%s'\n", cmd, pass);
-    set_cmd_pass(tmp, 1);
-    write_userfile(idx);
   }
+
+  char epass[36] = "", tmp[256] = "";
+
+  encrypt_pass(par[0] ? par : pass, epass);
+  simple_snprintf(tmp, sizeof tmp, "%s %s", cmd, epass);
+  if (has_pass)
+    dprintf(idx, "Changed command password for %s\n", cmd);
+  else
+    dprintf(idx, "Set command password for %s to '%s'\n", cmd, par[0] ? par : pass);
+  set_cmd_pass(tmp, 1);
+  write_userfile(idx);
 }
 
 static void cmd_lagged(int idx, char *par)

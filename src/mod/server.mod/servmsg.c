@@ -1294,6 +1294,8 @@ static int got718(char *from, char *msg)
   fixcolon(msg);
 
   putlog(LOG_WALL, "*", "(+g) !%s!%s! %s", nick, uhost, msg);
+
+  return 0;
 }
  
 static cmd_t my_raw_binds[] =
