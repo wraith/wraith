@@ -526,7 +526,9 @@ static void core_minutely()
       fatal("MEMORY HACKED", 0);
     check_maxfiles();
     check_mypid();
-  }
+  } else
+    send_timesync(-1);
+
   check_bind_time(&nowtm);
 //  check_autoaway();
 /*     flushlogs(); */
