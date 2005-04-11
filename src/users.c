@@ -235,10 +235,23 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
   p->desc = strdup(note);
 }
 
-static void restore_chanban(struct chanset_t *chan, char *host)
+static void restore_chanmask(const char type, struct chanset_t *chan, char *host)
 {
   char *expi = NULL, *add = NULL, *last = NULL, *user = NULL, *desc = NULL;
   int flags = 0;
+  maskrec **chan_masks = NULL, **global_masks = NULL;
+  const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
+
+  if (type == 'b') {
+    if (chan)  chan_masks = &chan->bans;
+    global_masks = &global_bans;
+  } else if (type == 'e') {
+    if (chan)  chan_masks = &chan->exempts;
+    global_masks = &global_exempts;
+  } else if (type == 'I') {
+    if (chan)  chan_masks = &chan->invites;
+    global_masks = &global_invites;
+  }
 
   expi = strchr_unescape(host, ':', '\\');
   if (expi) {
@@ -267,7 +280,7 @@ static void restore_chanban(struct chanset_t *chan, char *host)
 	    if (desc) {
 	      *desc = 0;
 	      desc++;
-	      addmask_fully(chan, &chan->bans, &global_bans, host, user,
+	      addmask_fully(chan, chan_masks, global_masks, host, user,
 			    desc, atoi(expi), flags, atoi(add), atoi(last));
 	      return;
 	    }
@@ -278,119 +291,14 @@ static void restore_chanban(struct chanset_t *chan, char *host)
 	if (desc) {
 	  *desc = 0;
 	  desc++;
-	  addmask_fully(chan, &chan->bans, &global_bans, host, add, desc,
+	  addmask_fully(chan, chan_masks, global_masks, host, add, desc,
 			atoi(expi), flags, now, 0);
 	  return;
 	}
       }
     }
   }
-  putlog(LOG_MISC, "*", "*** Malformed banline for %s.", chan ? chan->dname : "global_bans");
-}
-
-static void restore_chanexempt(struct chanset_t *chan, char *host)
-{
-  char *expi = NULL, *add = NULL, *last = NULL, *user = NULL, *desc = NULL;
-  int flags = 0;
-
-  expi = strchr_unescape(host, ':', '\\');
-  if (expi) {
-      if (*expi == '+') {
-	flags |= MASKREC_PERM;
-	expi++;
-      }
-    add = strchr(expi, ':');
-    if (add) {
-      if (add[-1] == '*') {
-	flags |= MASKREC_STICKY;
-	add[-1] = 0;
-      } else
-	*add = 0;
-      add++;
-      if (*add == '+') {
-	last = strchr(add, ':');
-	if (last) {
-	  *last = 0;
-	  last++;
-	  user = strchr(last, ':');
-	  if (user) {
-	    *user = 0;
-	    user++;
-	    desc = strchr(user, ':');
-	    if (desc) {
-	      *desc = 0;
-	      desc++;
-	      addmask_fully(chan, &chan->exempts, &global_exempts, host, user,
-			    desc, atoi(expi), flags, atoi(add), atoi(last));
-	      return;
-	    }
-	  }
-	}
-      } else {
-	desc = strchr(add, ':');
-	if (desc) {
-	  *desc = 0;
-	  desc++;
-	  addmask_fully(chan, &chan->exempts, &global_exempts, host, add,
-			desc, atoi(expi), flags, now, 0);
-	  return;
-	}
-      }
-    }
-  }
-  putlog(LOG_MISC, "*", "*** Malformed exemptline for %s.", chan ? chan->dname : "global_exempts");
-}
-
-static void restore_chaninvite(struct chanset_t *chan, char *host)
-{
-  char *expi = NULL, *add = NULL, *last = NULL, *user = NULL, *desc = NULL;
-  int flags = 0;
-
-  expi = strchr_unescape(host, ':', '\\');
-  if (expi) {
-    if (*expi == '+') {
-      flags |= MASKREC_PERM;
-      expi++;
-    }
-    add = strchr(expi, ':');
-    if (add) {
-      if (add[-1] == '*') {
-	flags |= MASKREC_STICKY;
-	add[-1] = 0;
-      } else
-	*add = 0;
-      add++;
-      if (*add == '+') {
-	last = strchr(add, ':');
-	if (last) {
-	  *last = 0;
-	  last++;
-	  user = strchr(last, ':');
-	  if (user) {
-	    *user = 0;
-	    user++;
-	    desc = strchr(user, ':');
-	    if (desc) {
-	      *desc = 0;
-	      desc++;
-	      addmask_fully(chan, &chan->invites, &global_invites, host, user,
-			    desc, atoi(expi), flags, atoi(add), atoi(last));
-	      return;
-	    }
-	  }
-	}
-      } else {
-	desc = strchr(add, ':');
-	if (desc) {
-	  *desc = 0;
-	  desc++;
-	  addmask_fully(chan, &chan->invites, &global_invites, host, add, desc, atoi(expi), flags, now, 0);
-	  return;
-	}
-      }
-    }
-  }
-  putlog(LOG_MISC, "*", "*** Malformed inviteline for %s.", chan ? chan->dname : "global_invites");
+  putlog(LOG_MISC, "*", "*** Malformed %sline for %s%s%s.", str_type, chan ? chan->dname : "global_", chan ? "" : str_type, chan ? "" : "s");
 }
 
 static void restore_ignore(char *host)
@@ -714,7 +622,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	  /* channel bans are never stacked with , */
 	  if (s[0]) {
 	    if (lasthand[0] && strchr(CHANMETA, lasthand[0]) != NULL)
-	      restore_chanban(cst, s);
+              restore_chanmask('b', cst, s);
 	    else if (lasthand[0] == '*') {
 	      if (lasthand[1] == IGNORE_NAME[1])
 		restore_ignore(s);
@@ -723,7 +631,7 @@ int readuserfile(const char *file, struct userrec **ret)
 						 * then leaf bots under us also get the new userfile */
               }
 	      else
-		restore_chanban(NULL, s);
+                restore_chanmask('b', NULL, s);
 	    } else if (lasthand[0])
 	      set_user(&USERENTRY_HOSTS, u, s);
 	  }
@@ -732,20 +640,20 @@ int readuserfile(const char *file, struct userrec **ret)
 	    continue;		/* Skip this entry.	*/
 	  if (s[0]) {
 	    if (lasthand[0] == '#' || lasthand[0] == '+')
-	      restore_chanexempt(cst,s);
+              restore_chanmask('e', cst, s);
 	    else if (lasthand[0] == '*')
 	      if (lasthand[1] == EXEMPT_NAME[1])
-		restore_chanexempt(NULL, s);
+                restore_chanmask('e', NULL, s);
 	  }
 	} else if (!strcmp(code, "@")) { /* Invitemasks */
 	  if (!lasthand[0])
 	    continue;		/* Skip this entry.	*/
 	  if (s[0]) {
 	    if (lasthand[0] == '#' || lasthand[0] == '+') {
-	      restore_chaninvite(cst,s);
+              restore_chanmask('I', cst, s);
 	    } else if (lasthand[0] == '*') {
 	      if (lasthand[1] == INVITE_NAME[1]) {
-		restore_chaninvite(NULL, s);
+                restore_chanmask('I', NULL, s);
               } else if (lasthand[1] == CONFIG_NAME[1]) {
                 userfile_cfg_line(s);
               }
