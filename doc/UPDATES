@@ -104,6 +104,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Fixed an outstanding bug on linking from a hub to another hub.
 * Added log msg (+w) for when a msg is received when umode +g. (#44)
 * cmd_botcmd now works correctly when the target is the bot you're on. (#46)
+* cmd_pls_user wasn't correctly sharing multiple hosts to the botnet. (#48)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

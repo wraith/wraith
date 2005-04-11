@@ -3319,7 +3319,7 @@ static void cmd_pls_user(int idx, char *par)
     dprintf(idx, "Added %s (%s) with no flags.\n", handle, host);
     while (par[0]) {
       host = newsplit(&par);
-      set_user(&USERENTRY_HOSTS, u2, host);
+      addhost_by_handle(handle, host);
       dprintf(idx, "Added host '%s' to %s.\n", host, handle);
     }
     make_rand_str(s, MAXPASSLEN);
