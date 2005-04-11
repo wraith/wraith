@@ -32,9 +32,6 @@ struct userrec	*lastuser = NULL;	/* last accessed user record	    */
 maskrec		*global_bans = NULL,
 		*global_exempts = NULL,
 		*global_invites = NULL;
-int		n_bans = 0;
-int		n_exempts = 0;
-int		n_invites = 0;
 
 struct igrec	*global_ign = NULL;
 int		cache_hit = 0,
