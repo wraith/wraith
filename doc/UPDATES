@@ -28,7 +28,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Removed/cleaned up more code left from eggdrop/modules
 * Fixed chanset (manop/mop/mdop/bad-cookie) to accept english parameters: ignore/deop/kick/delete/remove. 
 * bots now only kick for -ooo (mdop) if 'mdop' is set with chanset.
-* Changed around usage and fixed up help for cmd_cmdpass. Also fixed not being able to set a pass on leaf cmds from hub.
+* Fixed up bugs in cmd_cmdpass and cleared up usage/help. Also fixed not being able to set a pass on leaf cmds from hub.
 * Using a cmd with a cmdpass without proper flags now acts as if cmd is not valid (no longer spams wrong pass error)
 * cmd_deluser change: only allow a |m user to remove users whom they have added.
 * Fixed some botnet userfile sharing logs showing up on leaf bots.
