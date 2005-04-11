@@ -1456,6 +1456,11 @@ static void cmd_botcmd(int idx, char *par)
     }
   }
 
+  if (wild_match(botm, conf.bot->nick) || !egg_strcasecmp(botm, conf.bot->nick)) {
+    found++;
+    check_bind_dcc(cmd, idx, par);
+  }
+
   if (!found)
     dprintf(idx, "No bot matching '%s' linked\n", botm);
 
