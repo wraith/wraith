@@ -1753,7 +1753,7 @@ static void cmd_conf(int idx, char *par)
       dprintf(idx, "Changed bot: %s\n", nick);
     listbot = strdup(nick);
     save++;
-  } else if (!egg_strcasecmp(cmd, "del")) {
+  } else if (!egg_strncasecmp(cmd, "del", 3) || !egg_strncasecmp(cmd, "rem", 3)) {
     if (!par[0]) {
       dprintf(idx, "Usage: conf del <bot>\n");
       return;

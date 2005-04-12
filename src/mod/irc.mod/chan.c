@@ -950,7 +950,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
          (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
       /* if (target_priority(chan, m, 1)) */
         add_mode(chan, '-', 'o', m->nick);
-    } else if (!chan_hasop(m) && dovoice(chan) && chk_autoop(*fr, chan)) {
+    } else if (!chan_hasop(m) && dovoice(chan) && m->user && !u_pass_match(m->user, "-") && chk_autoop(*fr, chan)) {
       do_op(m->nick, chan, 1, 0);
     }
     if (dovoice(chan)) {
