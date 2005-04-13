@@ -713,30 +713,38 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("# Lines beginning with # are what the preceeding line SHOULD be");
   comment("# They are simply comments and are not parsed at all.\n");
 
-  my_write(f, "! uid %d\n", conf.uid);
-
-  if ((bits & CONF_COMMENT) && conf.uid != (signed) myuid)
-    my_write(f, "#! uid %d\n\n", myuid);
+  if ((do_confedit != 2) && (bits & CONF_COMMENT) && conf.uid != (signed) myuid) {
+    comment("#* Automatically updated with -C *#");
+    my_write(f, "! uid %d\n", myuid);
+    my_write(f, "#! uid %d\n", conf.uid);
+  } else
+    my_write(f, "! uid %d\n", conf.uid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
-    comment("# Automatic");
+    comment("\n#* Automiatically updated - autouname is ON *#");
     my_write(f, "! uname %s\n", my_uname());
-  } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
-    my_write(f, "! uname %s\n", conf.uname);
-    comment("# autouname is OFF");
-    my_write(f, "#! uname %s\n\n", my_uname());
+  } else if ((do_confedit != 2) && conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
+    comment("\n#* Automatically updated with -C *#");
+    my_write(f, "! uname %s\n", my_uname());
+    my_write(f, "#! uname %s\n", conf.uname);
   } else
     my_write(f, "! uname %s\n", conf.uname);
 
   comment("");
 
-  my_write(f, "! username %s\n", conf.username ? conf.username : my_username());
-  if (conf.username && strcmp(conf.username, my_username()))
-    my_write(f, "#! username %s\n", my_username());
+  if ((do_confedit != 2) && conf.username && strcmp(conf.username, my_username())) {
+    comment("#* Automatically updated with -C *#");
+    my_write(f, "! username %s\n", my_username());
+    my_write(f, "#! username %s\n", conf.username);
+  } else
+    my_write(f, "! username %s\n", conf.username ? conf.username : my_username());
 
-  my_write(f, "! homedir %s\n", conf.homedir ? conf.homedir : homedir());
-  if (conf.homedir && strcmp(conf.homedir, homedir()))
-    my_write(f, "#! homedir %s\n", homedir());
+  if ((do_confedit != 2) && conf.homedir && strcmp(conf.homedir, homedir(0))) {
+    comment("\n#* Automatically updated with -C *#");
+    my_write(f, "! homedir %s\n", homedir(0));
+    my_write(f, "#! homedir %s\n", conf.homedir);
+  } else 
+    my_write(f, "! homedir %s\n", conf.homedir ? conf.homedir : homedir(0));
 
   comment("\n# binpath needs to be full path unless it begins with '~', which uses 'homedir', ie, '~/'");
 

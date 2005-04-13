@@ -788,14 +788,14 @@ void baduname(char *confhas, char *myuname) {
   free(tmpFile);
 }
 
-char *homedir()
+char *homedir(bool useconf)
 {
   static char homedir_buf[DIRMAX] = "";
 
   if (!homedir_buf || (homedir_buf && !homedir_buf[0])) {
     char tmp[DIRMAX] = "";
 
-    if (conf.homedir)
+    if (conf.homedir && useconf)
       simple_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
     else {
 #ifdef CYGWIN_HACKS
@@ -821,20 +821,16 @@ char *my_username()
   static char username[DIRMAX] = "";
 
   if (!username || (username && !username[0])) {
-    if (conf.username)
-      simple_snprintf(username, sizeof username, "%s", conf.username);
-    else {
 #ifdef CYGWIN_HACKS
-      simple_snprintf(username, sizeof username, "cygwin");
+    simple_snprintf(username, sizeof username, "cygwin");
 #else /* !CYGWIN_HACKS */
-      struct passwd *pw = NULL;
+    struct passwd *pw = NULL;
 
-      ContextNote("getpwuid()");
-      pw = getpwuid(myuid);
-      ContextNote("getpwuid(): Success");
-      simple_snprintf(username, sizeof username, "%s", pw->pw_name);
+    ContextNote("getpwuid()");
+    pw = getpwuid(myuid);
+    ContextNote("getpwuid(): Success");
+    simple_snprintf(username, sizeof username, "%s", pw->pw_name);
 #endif /* CYGWIN_HACKS */
-    }
   }
   return username;
 }

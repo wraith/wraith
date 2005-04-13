@@ -93,7 +93,7 @@ char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
 #define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
-static bool do_confedit = 0;		/* show conf menu if -C */
+int do_confedit = 0;		/* show conf menu if -C */
 static char do_killbot[21] = "";
 static int kill_sig;
 static char *update_bin = NULL;
@@ -272,8 +272,8 @@ static void show_help()
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS STR("0234:aB:c:Cd:De:Ek:L:P:hnr:stu:U:v")
-#define FLAGS_CHECKPASS STR("CdDeEhknrtuUv")
+#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:L:P:hnr:stu:U:v")
+#define FLAGS_CHECKPASS STR("cCdDeEhknrtuUv")
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;
@@ -304,11 +304,14 @@ static void dtx_arg(int argc, char *argv[])
         used_B = 1;
         strlcpy(origbotname, optarg, NICKLEN + 1);
         break;
-      case 'c':
+      case 'H':
         printf("SHA1 (%s): %s\n", optarg, SHA1(optarg));
         printf("MD5  (%s): %s\n", optarg, MD5(optarg));
 //        do_crypt_console();
         exit(0);
+        break;
+      case 'c':
+        do_confedit = 2;
         break;
       case 'C':
         do_confedit = 1;
@@ -565,7 +568,8 @@ static void startup_checks(int hack) {
     confedit();		/* this will exit() */
 #endif /* !CYGWIN_HACKS */
 
-  parseconf(1);
+  if (!updating)
+    parseconf(1);
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);

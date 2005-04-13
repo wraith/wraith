@@ -39,7 +39,7 @@
 void check_maxfiles();
 void check_mypid();
 int clear_tmp();
-char *homedir();
+char *homedir(bool = 1);
 char *my_username();
 char *my_uname();
 #ifndef CYGWIN_HACKS 
