@@ -20,6 +20,7 @@
 #include "makepath.h"
 #include "strlcpy.h"
 #include "strsep.h"
+#include "timespec.h"
 
 /* These apparently are unsafe without recasting. */
 #define egg_isdigit(x)  isdigit((int)  (unsigned char) (x))

@@ -128,12 +128,13 @@ AC_FUNC_MKTIME
 AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_FUNC_STAT
+EGG_FUNC_TIMESPEC
 AC_FUNC_STRFTIME
 
 #checkpoint
 AC_CACHE_SAVE
 AC_CHECK_FUNCS([clock fsync getrusage isascii inet_aton gethostbyname2])
-AC_CHECK_FUNCS([getipnodebyname memcpy memset random rename snprintf srandom])
+AC_CHECK_FUNCS([getipnodebyname memcpy memset random rename snprintf srandom gettime])
 #checkpoint
 AC_CACHE_SAVE
 AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf])
@@ -159,3 +160,25 @@ DO_DEPS
 
 AC_CONFIG_FILES([Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile])
 AC_OUTPUT
+
+AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
+AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
+AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
+AH_TEMPLATE(HAVE_TIMESPECSUB2, [Define to 1 if you have a timespecsub macro or function that takes two arguments (not three)])
+AH_BOTTOM([/*
+ * Macros to pull sec and nsec parts of mtime from struct stat.
+ */
+#ifdef HAVE_ST_MTIM
+# define mtim_getsec(_x)        ((_x).st_mtim.tv_sec)
+# define mtim_getnsec(_x)       ((_x).st_mtim.tv_nsec)
+#else
+# ifdef HAVE_ST_MTIMESPEC
+#  define mtim_getsec(_x)       ((_x).st_mtimespec.tv_sec)
+#  define mtim_getnsec(_x)      ((_x).st_mtimespec.tv_nsec)
+# else
+#  define mtim_getsec(_x)       ((_x).st_mtime)
+#  define mtim_getnsec(_x)      (0)
+# endif /* HAVE_ST_MTIMESPEC */
+#endif /* HAVE_ST_MTIM */
+])
+

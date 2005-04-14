@@ -27,6 +27,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <sys/time.h>
 #include <signal.h>
 
 #ifdef CYGWIN_HACKS
@@ -166,6 +168,24 @@ swap_uids_back()
   return (setegid(save_egid) || seteuid(save_euid)) ? -1 : 0;
 }
 
+static int
+my_gettime(struct timespec *ts)
+{
+    int rval;
+#if defined(HAVE_GETTIMEOFDAY) && (defined(HAVE_ST_MTIM) || defined(HAVE_ST_MTIMESPEC))
+    struct timeval tv;
+
+    rval = gettimeofday(&tv, NULL);
+    ts->tv_sec = tv.tv_sec;
+    ts->tv_nsec = tv.tv_usec * 1000;
+#else
+    rval = (int)time(&ts->tv_sec);
+    ts->tv_nsec = 0;
+#endif
+    return (rval);
+}
+
+
 void
 confedit()
 {
@@ -174,13 +194,16 @@ confedit()
   mode_t um;
   int waiter;
   pid_t pid, xpid, localhub_pid = 0;
-
+  struct stat st, sn;
+  struct timespec ts1, ts2;           /* time before and after edit */
 
   um = umask(077);
 
   writeconf(NULL, tmpconf.f, CONF_COMMENT);
-  tmpconf.my_close();
-  (void) umask(um);
+  fstat(tmpconf.fd, &st);		/* for file modification compares */
+//  tmpconf.my_close();
+
+  umask(um);
 
   if (!can_stat(tmpconf.file))
     fatal("Cannot stat tempfile", 0);
@@ -208,6 +231,7 @@ confedit()
 
   swap_uids();
 
+  my_gettime(&ts1);
   switch (pid = fork()) {
     case -1:
       fatal("Cannot fork", 0);
@@ -233,6 +257,7 @@ confedit()
   /* parent */
   while (1) {
     xpid = waitpid(pid, &waiter, WUNTRACED);
+    my_gettime(&ts2);
     if (xpid == -1) {
       fprintf(stderr, "waitpid() failed waiting for PID %d from \"%s\": %s\n", pid, editor, strerror(errno));
     } else if (xpid != pid) {
@@ -258,19 +283,36 @@ confedit()
     }
   }
 
-  (void) signal(SIGINT, SIG_DFL);
-  (void) signal(SIGQUIT, SIG_DFL);
+
+  signal(SIGINT, SIG_DFL);
+  signal(SIGQUIT, SIG_DFL);
 
   swap_uids_back();
-
-  if (!can_stat(tmpconf.file))
+  if (fstat(tmpconf.fd, &sn))
     fatal("Error reading new config file", 0);
+
+  if (st.st_size == sn.st_size &&
+      mtim_getsec(st) == mtim_getsec(sn) &&
+      mtim_getnsec(st) == mtim_getnsec(sn)) {
+    /*
+     * If mtime and size match but the user spent no measurable
+     * time in the editor we can't tell if the file was changed.
+     */
+#ifdef HAVE_TIMESPECSUB2
+    timespecsub(&ts1, &ts2);
+#else
+    timespecsub(&ts1, &ts2, &ts2);
+#endif
+    if (timespecisset(&ts2)) {
+      printf("* Config unchanged.\n");
+      exit(0);            
+    }
+  }
 
   if (conf.bots && conf.bots->pid)
     localhub_pid = conf.bots->pid;
 
   tmpconf.my_close();
-
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   fix_tilde(&conf.binpath);
   unlink(tmpconf.file);

@@ -156,6 +156,12 @@
 /* Define to 1 if `tm_zone' is member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_ZONE
 
+/* Define to 1 if your struct stat has an st_mtim member */
+#undef HAVE_ST_MTIM
+
+/* Define to 1 if your struct stat has an st_mtimespec member */
+#undef HAVE_ST_MTIMESPEC
+
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
 #undef HAVE_SYS_DIR_H
@@ -190,6 +196,13 @@
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
+
+/* Define to 1 if you have struct timespec in sys/time.h */
+#undef HAVE_TIMESPEC
+
+/* Define to 1 if you have a timespecsub macro or function that takes two
+   arguments (not three) */
+#undef HAVE_TIMESPECSUB2
 
 /* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
    `HAVE_STRUCT_TM_TM_ZONE' instead. */
@@ -336,5 +349,22 @@
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
 #undef volatile
+
+/*
+ * Macros to pull sec and nsec parts of mtime from struct stat.
+ */
+#ifdef HAVE_ST_MTIM
+# define mtim_getsec(_x)        ((_x).st_mtim.tv_sec)
+# define mtim_getnsec(_x)       ((_x).st_mtim.tv_nsec)
+#else
+# ifdef HAVE_ST_MTIMESPEC
+#  define mtim_getsec(_x)       ((_x).st_mtimespec.tv_sec)
+#  define mtim_getnsec(_x)      ((_x).st_mtimespec.tv_nsec)
+# else
+#  define mtim_getsec(_x)       ((_x).st_mtime)
+#  define mtim_getnsec(_x)      (0)
+# endif /* HAVE_ST_MTIMESPEC */
+#endif /* HAVE_ST_MTIM */
+
 
 /* Defines for pack features */
