@@ -611,6 +611,8 @@ new_dcc(struct dcc_table *type, int xtra_size)
   dcc[i].type = type;
   if (xtra_size)
     dcc[i].u.other = (char *) my_calloc(1, xtra_size);
+  else
+    dcc[i].u.other = NULL;
   dcc[i].simul = -1;
   dcc[i].sock = -1;
 
