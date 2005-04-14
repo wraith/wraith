@@ -78,7 +78,8 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Combined kick reasons for +k and .kickban
 * Some changes to ./binary -C:
   -Default binpath is now the directory the binary is first ran in
-  -Running the bot with -C will automatically update uid/uname/homedir/username **(use -c to avoid this)**
+  -Running the bot with -C will automatically update uid/uname/homedir/username
+  -Added cmd line param '-c' to avoid auto updating uid/uname/homedir/username
   * Things done after the config is saved:
    -New bots are spawned and added (if linked)
    -Changed (NEW) ip/host for bots are added to the botnet (if linked)

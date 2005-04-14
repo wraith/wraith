@@ -8,6 +8,11 @@ enum {
   UPDATE_EXIT
 };
 
+enum {
+  CONF_AUTO = 1,
+  CONF_STATIC
+};
+
 extern int		role, default_flags, default_uflags, do_confedit,
 			updating;
 extern bool		use_stderr, backgrd, used_B, term_z, loading, have_take;

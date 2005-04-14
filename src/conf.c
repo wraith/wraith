@@ -699,9 +699,10 @@ writeconf(char *filename, FILE * stream, int bits)
   else if (!(bits & CONF_ENC))
     my_write = fprintf;
 
-#define comment(text)			\
+#define comment(text)	do {		\
 	if (bits & CONF_COMMENT)	\
-	  my_write(f, "%s\n", text);
+	  my_write(f, "%s\n", text);	\
+} while(0)
 
   if (stream) {
     f = stream;
@@ -713,36 +714,43 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("# Lines beginning with # are what the preceeding line SHOULD be");
   comment("# They are simply comments and are not parsed at all.\n");
 
-  if ((do_confedit != 2) && (bits & CONF_COMMENT) && conf.uid != (signed) myuid) {
-    comment("#* Automatically updated with -C *#");
-    my_write(f, "! uid %d\n", myuid);
-    my_write(f, "#! uid %d\n", conf.uid);
+#define conf_com() do {							\
+	if (do_confedit == CONF_AUTO)					\
+	  comment("# Automatically updated with -C");			\
+	else								\
+	  comment("#The correct line follows. (Not auto due to -c)");	\
+} while(0)
+
+  if ((bits & CONF_COMMENT) && conf.uid != (signed) myuid) {
+    conf_com();
+    my_write(f, "%s! uid %d\n", do_confedit == CONF_AUTO ? "" : "#", myuid);
+    my_write(f, "%s! uid %d\n", do_confedit == CONF_STATIC ? "" : "#", conf.uid);
   } else
     my_write(f, "! uid %d\n", conf.uid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
-    comment("\n#* Automiatically updated - autouname is ON *#");
+    conf_com();
     my_write(f, "! uname %s\n", my_uname());
-  } else if ((do_confedit != 2) && conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
-    comment("\n#* Automatically updated with -C *#");
-    my_write(f, "! uname %s\n", my_uname());
-    my_write(f, "#! uname %s\n", conf.uname);
+  } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
+    conf_com();
+    my_write(f, "%s! uname %s\n", do_confedit == CONF_AUTO ? "" : "#", my_uname());
+    my_write(f, "%s! uname %s\n", do_confedit == CONF_STATIC ? "" : "#", conf.uname);
   } else
     my_write(f, "! uname %s\n", conf.uname);
 
   comment("");
 
-  if ((do_confedit != 2) && conf.username && strcmp(conf.username, my_username())) {
-    comment("#* Automatically updated with -C *#");
-    my_write(f, "! username %s\n", my_username());
-    my_write(f, "#! username %s\n", conf.username);
+  if (conf.username && strcmp(conf.username, my_username())) {
+    conf_com();
+    my_write(f, "%s! username %s\n", do_confedit == CONF_AUTO ? "" : "#", my_username());
+    my_write(f, "%s! username %s\n", do_confedit == CONF_STATIC ? "" : "#", conf.username);
   } else
     my_write(f, "! username %s\n", conf.username ? conf.username : my_username());
 
-  if ((do_confedit != 2) && conf.homedir && strcmp(conf.homedir, homedir(0))) {
-    comment("\n#* Automatically updated with -C *#");
-    my_write(f, "! homedir %s\n", homedir(0));
-    my_write(f, "#! homedir %s\n", conf.homedir);
+  if (conf.homedir && strcmp(conf.homedir, homedir(0))) {
+    conf_com();
+    my_write(f, "%s! homedir %s\n", do_confedit == CONF_AUTO ? "" : "#", homedir(0));
+    my_write(f, "%s! homedir %s\n", do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
   } else 
     my_write(f, "! homedir %s\n", conf.homedir ? conf.homedir : homedir(0));
 
