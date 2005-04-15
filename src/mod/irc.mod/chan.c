@@ -2136,12 +2136,13 @@ static int gotinvite(char *from, char *msg)
   if (!chan)
     /* Might be a short-name */
     chan = findchan_by_dname(msg);
-
-  if (chan && (channel_pending(chan) || channel_active(chan)))
-    dprintf(DP_HELP, "NOTICE %s :I'm already here.\n", nick);
-  else if (chan && shouldjoin(chan))
-    dprintf(DP_MODE, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
-            chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+  else {
+    if (channel_pending(chan) || channel_active(chan))
+      dprintf(DP_HELP, "NOTICE %s :I'm already here.\n", nick);
+    else if (shouldjoin(chan))
+      dprintf(DP_MODE, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
+              chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+  }
   return 0;
 }
 
