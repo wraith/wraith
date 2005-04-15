@@ -2001,6 +2001,7 @@ static int got471(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan) {
+    chan->status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Channel full--can't join: %s", chan->dname);
     request_in(chan);
 /* need: limit */
@@ -2033,6 +2034,7 @@ static int got473(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan) {
+    chan->status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Channel invite only--can't join: %s", chan->dname);
     request_in(chan);
 /* need: invite */
@@ -2065,6 +2067,7 @@ static int got474(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan) {
+    chan->status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Banned from channel--can't join: %s", chan->dname);
     request_in(chan);
 /* need: unban */
@@ -2097,6 +2100,7 @@ static int got475(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan) {
+    chan->status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Bad key--can't join: %s", chan->dname);
     if (chan->channel.key[0]) {
       free(chan->channel.key);
@@ -2105,9 +2109,6 @@ static int got475(char *from, char *msg)
     } else {
       request_in(chan);
 /* need: key */
-      chan = findchan_by_dname(chname); 
-      if (!chan)
-        return 0;
     }
   } else
     putlog(LOG_JOIN, chname, "Bad key--can't join: %s", chname);
