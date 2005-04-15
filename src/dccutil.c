@@ -446,6 +446,8 @@ lostdcc(int n)
   else if (dcc[n].u.other)
     free(dcc[n].u.other);
 
+  dcc[n].u.other = NULL;
+
 //  This is also done when we new_dcc(), so don't bother for now, we set sock/type to NULL, so it won't even be 
 //  parsed by anything.
 //  egg_bzero(&dcc[n], sizeof(struct dcc_t));
