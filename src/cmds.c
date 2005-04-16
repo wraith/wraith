@@ -720,7 +720,7 @@ static void cmd_help(int idx, char *par)
   int fnd = 0, done = 0, nowild = 0;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYCH, 0, 0, 0 };
 
-  simple_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m mo|o m|o i|- o|o o|- p|- -|-");
+  simple_snprintf(temp, sizeof temp, "a|- a|a n|- n|n m|- m|m m|o i|- o|o o|- p|- -|-");
   fcats = temp;
 
   putlog(LOG_CMDS, "*", "#%s# help %s", dcc[idx].nick, par);
@@ -4242,8 +4242,8 @@ cmd_t C_dcc[] =
   {"-host",		"",	(Function) cmd_mns_host,	NULL, AUTH},
   {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL, AUTH},
   {"-user",		"m",	(Function) cmd_mns_user,	NULL, AUTH},
-  {"addlog",		"mo|o",	(Function) cmd_addlog,		NULL, AUTH},
-/*  {"putlog",		"mo|o",	(Function) cmd_addlog,		NULL, 0}, */
+  {"addlog",		"m|o",	(Function) cmd_addlog,		NULL, AUTH},
+/*  {"putlog",		"m|o",	(Function) cmd_addlog,		NULL, 0}, */
   {"about",		"",	(Function) cmd_about,		NULL, 0},
   {"addline",		"",	(Function) cmd_addline,		NULL, 0},
   {"away",		"",	(Function) cmd_away,		NULL, 0},
