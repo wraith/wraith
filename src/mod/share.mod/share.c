@@ -1303,7 +1303,7 @@ start_sending_users(int idx)
   if ((i = raw_dcc_send(share_file, "*users", "(users)", share_file, &j)) > 0) {
     unlink(share_file);
     dprintf(idx, "s e %s\n", "Can't send userfile to you (internal error)");
-    putlog(LOG_BOTS, "@", "%s -- can't send userfile",
+    putlog(LOG_BOTS, "*", "%s -- can't send userfile",
            i == DCCSEND_FULL ? "NO MORE DCC CONNECTIONS" :
            i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :
            i == DCCSEND_BADFN ? "BAD FILE" : i == DCCSEND_FEMPTY ? "EMPTY FILE" : "UNKNOWN REASON!");
