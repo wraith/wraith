@@ -141,7 +141,7 @@ conf_killbot(const char *botnick, conf_bot *bot, int signal)
   } else {
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
       /* kill all bots but myself if botnick==NULL, otherwise just kill botnick */
-      if ((!botnick && egg_strcasecmp(conf.bot->nick, bot->nick)) || !egg_strcasecmp(botnick, bot->nick)) {
+      if ((!botnick && egg_strcasecmp(conf.bot->nick, bot->nick)) || (botnick && !egg_strcasecmp(botnick, bot->nick))) {
         if (bot->pid)
           ret = kill(bot->pid, signal);
 
