@@ -4242,7 +4242,7 @@ cmd_t C_dcc[] =
   {"-host",		"",	(Function) cmd_mns_host,	NULL, AUTH},
   {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL, AUTH},
   {"-user",		"m",	(Function) cmd_mns_user,	NULL, AUTH},
-  {"addlog",		"m|o",	(Function) cmd_addlog,		NULL, AUTH},
+  {"addlog",		"o|o",	(Function) cmd_addlog,		NULL, AUTH},
 /*  {"putlog",		"m|o",	(Function) cmd_addlog,		NULL, 0}, */
   {"about",		"",	(Function) cmd_about,		NULL, 0},
   {"addline",		"",	(Function) cmd_addline,		NULL, 0},
