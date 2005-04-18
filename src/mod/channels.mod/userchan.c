@@ -235,15 +235,18 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
 
   if (!strchr(who, '!') && str_isdigit(who)) {
     j = atoi(who);
-    j--;		/* our list starts at 0 */
-    if (c)
-      j -= n_mask;	/* subtract out the globals as the number given is globals+j */
-    for (; (*u) && j; u = &((*u)->next), j--);
-    if (*u) {
-      strlcpy(temp, (*u)->mask, sizeof temp);
-      i = 1;
+    if (j) {
+      j--;		/* our list starts at 0 */
+      if (c)
+        j -= n_mask;	/* subtract out the globals as the number given is globals+j */
+      for (; (*u) && j; u = &((*u)->next), j--);
+      if (*u) {
+        strlcpy(temp, (*u)->mask, sizeof temp);
+        i = 1;
+      } else
+        return -j - 1;
     } else
-      return -j - 1;
+      return 0;
   } else {
     /* Find matching host, if there is one */
     for (; *u && !i; u = &((*u)->next))

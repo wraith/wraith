@@ -129,6 +129,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * The mode queue being flushed could cause excess flood, reverted back to eggdrop code for flushing the mode queue.
 * Added errno output to "Can't create new socket" error.
 * Display channel name from console if one is not used with cmd_chanset
+* Fix cmd_mns_[ban|exempt|invite] 0 removing first ban, instead of failing. (#55)
 
 1.2.1
 
