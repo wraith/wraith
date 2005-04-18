@@ -537,6 +537,7 @@ See also: link
         $bflood-nick$b   Set here how many nick changes in how many seconds from
                     one host constitutes a flood. Setting this to 0 or 0:0
                     disables nick flood protection for the channel.
+     These can all be changed simultaneously with $bflood-*$b
  
 See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
 :leaf:channel

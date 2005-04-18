@@ -583,23 +583,27 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       int *pthr = NULL;
       time_t *ptime = NULL;
       char *p = NULL;
+      bool all = 0;
 
-      if (!strcmp(item[i] + 6, "chan")) {
+      if (!strcmp(item[i] + 6, "*"))
+        all = 1;
+
+      if (all || !strcmp(item[i] + 6, "chan")) {
 	pthr = &chan->flood_pub_thr;
 	ptime = &chan->flood_pub_time;
-      } else if (!strcmp(item[i] + 6, "join")) {
+      } else if (all || !strcmp(item[i] + 6, "join")) {
 	pthr = &chan->flood_join_thr;
 	ptime = &chan->flood_join_time;
-      } else if (!strcmp(item[i] + 6, "ctcp")) {
+      } else if (all || !strcmp(item[i] + 6, "ctcp")) {
 	pthr = &chan->flood_ctcp_thr;
 	ptime = &chan->flood_ctcp_time;
-      } else if (!strcmp(item[i] + 6, "kick")) {
+      } else if (all || !strcmp(item[i] + 6, "kick")) {
 	pthr = &chan->flood_kick_thr;
 	ptime = &chan->flood_kick_time;
-      } else if (!strcmp(item[i] + 6, "deop")) {
+      } else if (all || !strcmp(item[i] + 6, "deop")) {
 	pthr = &chan->flood_deop_thr;
 	ptime = &chan->flood_deop_time;
-      } else if (!strcmp(item[i] + 6, "nick")) {
+      } else if (all || !strcmp(item[i] + 6, "nick")) {
 	pthr = &chan->flood_nick_thr;
 	ptime = &chan->flood_nick_time;
       } else {
