@@ -1347,7 +1347,7 @@ gotmode(char *from, char *msg)
               if (msign == '+') {
                 if (mv->flags & EVOICE) {
 /* FIXME: This is a lame check, we need to expand on this more */
-                  if (!chan_master(user) && !glob_master(user)) {
+                  if (!chan_master(user) && !glob_master(user) && !chk_voice(victim, chan)) {
                     dv = 1;
                   } else {
                     mv->flags &= ~EVOICE;

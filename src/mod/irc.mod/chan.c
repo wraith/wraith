@@ -960,8 +960,11 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
           add_mode(chan, '-', 'v', m->nick);
       } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
         /* voice +v users */
-        if (chk_voice(*fr, chan))
+        if (chk_voice(*fr, chan)) {
           add_mode(chan, '+', 'v', m->nick);
+          if (m->flags & EVOICE)
+            m->flags &= ~EVOICE;
+        }
       }
     }
   }
