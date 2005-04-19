@@ -118,6 +118,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Added ability to +chan/chanset flood-* x:n (#69)
 * Fixed bots kicking with +bitch responses when a +d user is opped.
 * Fixed a possible loop of -v+v with +voice/+v
+* Rewrote cmd_stick to use less code, as all the ban/exempt/invite code was redundant.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

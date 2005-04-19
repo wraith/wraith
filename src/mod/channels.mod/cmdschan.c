@@ -633,6 +633,8 @@ static void cmd_stick_yn(int idx, char *par, int yn)
   int i = 0, j;
   struct chanset_t *chan = NULL;
   char *stick_type = NULL, s[UHOSTLEN] = "", chname[81] = "";
+  const char type = 0, *str_type = NULL;
+  maskrec *channel_list = NULL;
 
   stick_type = newsplit(&par);
   strlcpy(s, newsplit(&par), sizeof s);
@@ -653,105 +655,41 @@ static void cmd_stick_yn(int idx, char *par, int yn)
       dprintf(idx, "This command can only be used with use-exempts enabled.\n");
       return;
     }
-    if (!chname[0]) {
-      i = u_setsticky_exempt(NULL, s, (dcc[idx].user->flags & USER_MASTER) ? yn : -1);
-      if (i > 0) {
-        putlog(LOG_CMDS, "*", "#%s# %sstick exempt %s", dcc[idx].nick, yn ? "" : "un", s);
-        dprintf(idx, "%stuck exempt: %s\n", yn ? "S" : "Uns", s);
-
-        if (conf.bot->hub)
-          write_userfile(idx);
-        return;
-      }
-      strlcpy(chname, dcc[idx].u.chat->con_chan, sizeof chname);
-    }
-    /* Channel-specific exempt? */
-    if (!(chan = findchan_by_dname(chname))) {
-      dprintf(idx, "No such channel.\n");
-      return;
-    }
-    get_user_flagrec(dcc[idx].user, &user, chan->dname);
-    if (privchan(user, chan, PRIV_OP)) {
-      dprintf(idx, "No such channel.\n");
-      return;
-    }
-    if (str_isdigit(s)) {
-      /* substract the numer of global exempts to get the number of the channel exempt */
-      j = u_setsticky_exempt(NULL, s, -1);
-      if (j < 0)
-        simple_snprintf(s, sizeof s, "%d", -j);
-    }
-    j = u_setsticky_exempt(chan, s, yn);
-    if (j > 0) {
-      putlog(LOG_CMDS, "*", "#%s# %sstick exempt %s %s", dcc[idx].nick, yn ? "" : "un", s, chname);
-      dprintf(idx, "%stuck %s exempt: %s\n", yn ? "S" : "Uns", chname, s);
-      if (conf.bot->hub)
-        write_userfile(idx);
-      return;
-    }
-    dprintf(idx, "No such exempt.\n");
-    return;
-  /* Now the invites */
-  } else if (!egg_strcasecmp(stick_type, "invite")) {
+    type = 'e';
+    str_type = "exempt";
+  } else if (!egg_strcasecmp(stick, type, "invite")) {
     if (!use_invites) {
       dprintf(idx, "This command can only be used with use-invites enabled.\n");
       return;
     }
-    if (!chname[0]) {
-      i = u_setsticky_invite(NULL, s, (dcc[idx].user->flags & USER_MASTER) ? yn : -1);
-      if (i > 0) {
-        putlog(LOG_CMDS, "*", "#%s# %sstick invite %s", dcc[idx].nick, yn ? "" : "un", s);
-        dprintf(idx, "%stuck invite: %s\n", yn ? "S" : "Uns", s);
-        if (conf.bot->hub)
-          write_userfile(idx);
-        return;
-      }
-      strlcpy(chname, dcc[idx].u.chat->con_chan, sizeof chname);
-    }
-    /* Channel-specific invite? */
-    if (!(chan = findchan_by_dname(chname))) {
-      dprintf(idx, "No such channel.\n");
-      return;
-    }
-    get_user_flagrec(dcc[idx].user, &user, chan->dname);
-    if (privchan(user, chan, PRIV_OP)) {
-      dprintf(idx, "No such channel.\n");
-      return;
-    }
-    if (str_isdigit(s)) {
-      /* substract the numer of global invites to get the number of the channel invite */
-      j = u_setsticky_invite(NULL, s, -1);
-      if (j < 0)
-        simple_snprintf(s, sizeof s, "%d", -j);
-    }
-    j = u_setsticky_invite(chan, s, yn);
-    if (j > 0) {
-      putlog(LOG_CMDS, "*", "#%s# %sstick invite %s %s", dcc[idx].nick, yn ? "" : "un", s, chname);
-      dprintf(idx, "%stuck %s invite: %s\n", yn ? "S" : "Uns", chname, s);
-      if (conf.bot->hub)
-        write_userfile(idx);
-      return;
-    }
-    dprintf(idx, "No such invite.\n");
-    return;
+    type = 'I';
+    str_type = "invite";
+  } else {
+    type = 'b';
+    str_type = "ban";
   }
+
   if (!chname[0]) {
-    i = u_setsticky_ban(NULL, s, (dcc[idx].user->flags & USER_MASTER) ? yn : -1);
+    channel_list = (type == 'b' ? global_bans : type == 'e' ? global_exempts : global_invites);
+
+    i = u_setsticky_mask(NULL, channel_list, s, (dcc[idx].user->flags & USER_MASTER) ? yn : -1, type);
     if (i > 0) {
-      putlog(LOG_CMDS, "*", "#%s# %sstick ban %s", dcc[idx].nick, yn ? "" : "un", s);
-      dprintf(idx, "%stuck ban: %s\n", yn ? "S" : "Uns", s);
+      putlog(LOG_CMDS, "*", "#%s# %sstick %s %s", dcc[idx].nick, yn ? "" : "un", str_type, s);
+      dprintf(idx, "%stuck %s: %s\n", yn ? "S" : "Uns", str_type, s);
+
       if (!conf.bot->hub) {
         struct chanset_t *achan = NULL;
- 
+
         for (achan = chanset; achan != NULL; achan = achan->next)
-          check_this_ban(achan, s, yn);
+          check_this_mask(type, achan, s, yn);
       } else
         write_userfile(idx);
+
       return;
     }
     strlcpy(chname, dcc[idx].u.chat->con_chan, sizeof chname);
   }
-  /* Channel-specific ban? */
+  /* Channel-specific mask? */
   if (!(chan = findchan_by_dname(chname))) {
     dprintf(idx, "No such channel.\n");
     return;
@@ -761,23 +699,27 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     dprintf(idx, "No such channel.\n");
     return;
   }
+
+  channel_list = (type == 'b' ? chan->bans : type == 'e' ? chan->exempts : chan->invites);
+
   if (str_isdigit(s)) {
-    /* substract the numer of global bans to get the number of the channel ban */
-    j = u_setsticky_ban(NULL, s, -1);
+    /* substract the numer of global masks to get the number of the channel masks */
+    j = u_setsticky_mask(NULL, channel_list, s, -1, type);
     if (j < 0)
       simple_snprintf(s, sizeof s, "%d", -j);
   }
-  j = u_setsticky_ban(chan, s, yn);
+  j = u_setsticky_mask(chan, channel_list, s, yn, type);
   if (j > 0) {
-    putlog(LOG_CMDS, "*", "#%s# %sstick ban %s %s", dcc[idx].nick, yn ? "" : "un", s, chname);
-    dprintf(idx, "%stuck %s ban: %s\n", yn ? "S" : "Uns", chname, s);
+    putlog(LOG_CMDS, "*", "#%s# %sstick %s %s %s", dcc[idx].nick, yn ? "" : "un", str_type, s, chname);
+    dprintf(idx, "%stuck %s %s: %s\n", yn ? "S" : "Uns", chname, str_type, s);
     if (!conf.bot->hub)
-      check_this_ban(chan, s, yn);
+      check_this_mask(type, chan, s, yn);
     else
       write_userfile(idx);
+
     return;
   }
-  dprintf(idx, "No such ban.\n");
+  dprintf(idx, "No such %s.\n", str_type);
 }
 
 
