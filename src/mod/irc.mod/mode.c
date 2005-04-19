@@ -544,7 +544,9 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
   /* I'm opped, and the opper isn't me, and it isn't a server op */
   if (m && me_op(chan) && !match_my_nick(mv->nick)) {
     /* deop if they are +d or it is +bitch */
-    if (reversing || chk_deop(victim, chan) || (!loading && userlist && chan_bitch(chan) && !chk_op(victim, chan))) {     /* chk_op covers +private */
+    int bitch = chan_bitch(chan);
+
+    if (reversing || chk_deop(victim, chan) || (!loading && userlist && bitch && !chk_op(victim, chan))) {     /* chk_op covers +private */
       int num = randint(10);
       char outbuf[101] = ""; 
 /* should kick the oppee first, then deal with the opper */
@@ -553,9 +555,9 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
         simple_sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, mv->nick);
       } else if (num == 5) {
         simple_sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, m->nick);
-      } else if (num == 6) {
+      } else if (bitch && num == 6) {
         simple_sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
-      } else if (num == 7) {
+      } else if (bitch && num == 7) {
         simple_sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, m->nick, response(RES_BITCHOP));
       } else
         add_mode(chan, '-', 'o', mv->nick);
