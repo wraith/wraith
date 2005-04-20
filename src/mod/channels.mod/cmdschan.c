@@ -632,8 +632,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
 {
   int i = 0, j;
   struct chanset_t *chan = NULL;
-  char *stick_type = NULL, s[UHOSTLEN] = "", chname[81] = "";
-  const char type = 0, *str_type = NULL;
+  char *stick_type = NULL, s[UHOSTLEN] = "", chname[81] = "", type = 0, *str_type = NULL;
   maskrec *channel_list = NULL;
 
   stick_type = newsplit(&par);
@@ -657,17 +656,18 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     }
     type = 'e';
     str_type = "exempt";
-  } else if (!egg_strcasecmp(stick, type, "invite")) {
+  } else if (!egg_strcasecmp(stick_type, "invite")) {
     if (!use_invites) {
       dprintf(idx, "This command can only be used with use-invites enabled.\n");
       return;
     }
     type = 'I';
     str_type = "invite";
-  } else {
+  } else if (!egg_strcasecmp(stick_type, "ban")) {
     type = 'b';
     str_type = "ban";
-  }
+  } else
+    return;
 
   if (!chname[0]) {
     channel_list = (type == 'b' ? global_bans : type == 'e' ? global_exempts : global_invites);
