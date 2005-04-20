@@ -398,7 +398,7 @@ See also: link
                           seeing when a shell is hijacked ;)
         $bban-time$b          Set here how long temporary bans will last (in
                           minutes). If you set this setting to 0, the bot will
-                          never remove them.
+                          never remove them. (This also requires +dynamicbans)
         $bexempt-time$b       Set here how long temporary exempts will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. The bot will check the exempts
