@@ -1435,6 +1435,8 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     }
     if (!ip) {
       putlog(LOG_SERV, "*", "Failed connect to %s (Could not DNS as IPV6)", host);
+      trying_server = 0;
+      lostdcc(idx);
       return;
     }
   } else
