@@ -912,7 +912,6 @@ void channels_init()
 	 "-voice "
          "-private "
 	 "-fastop ");
-  /* FIXME: combine all of these into one function, check_expired_masks('e') */
   timer_create_secs(60, "check_expired_masks", (Function) check_expired_masks);
   if (conf.bot->hub) {
     timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);

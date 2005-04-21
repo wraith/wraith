@@ -876,158 +876,91 @@ bool expired_mask(struct chanset_t *chan, char *who)
 /* Check for expired timed-bans.
  */
 
-static void check_expired_bans(void)
+static void check_expired_mask(const char type)
 {
-  maskrec *u = NULL, *u2 = NULL;
+  maskrec *u = NULL, *u2 = NULL, *list = NULL;
   struct chanset_t *chan = NULL;
-  masklist *b = NULL;
+  masklist *b = NULL, *chanlist = NULL;
+  const char *str_typing = (type == 'b' ? "banning" : type == 'e' ? "ban exempting" : "inviting");
+  bool remove, match;
+  
+  list = (type == 'b' ? global_bans : type == 'e' ? global_exempts : global_invites);
 
-  for (u = global_bans; u; u = u2) { 
+  for (u = list; u; u = u2) { 
     u2 = u->next;
     if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-      putlog(LOG_MISC, "*", "No longer banning %s (expired)", u->mask);
-      for (chan = chanset; chan; chan = chan->next)
-        for (b = chan->channel.ban; b->mask[0]; b = b->next)
-	  if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
-            if (!conf.bot->hub)
-              add_mode(chan, '-', 'b', u->mask);
-	    b->timer = now;
-	  }
-      u_delmask('b', NULL, u->mask, 1);
+      putlog(LOG_MISC, "*", "No longer %s %s (expired)", str_typing, u->mask);
+     if (!conf.bot->hub) {
+      for (chan = chanset; chan; chan = chan->next) {
+        remove = 1;			/* hack for 'e' */
+        if (type == 'e') {
+          match = 0;
+          b = chan->channel.ban;
+          while (b->mask[0] && !match) {
+            if (wild_match(b->mask, u->mask) || wild_match(u->mask, b->mask))
+              match = 1;
+            else
+              b = b->next;
+          }
+          if (match) {
+            putlog(LOG_MISC, chan->dname, "Exempt not expired on channel %s. Ban still set!", chan->dname);
+            remove = 0;
+          }
+        }
+        if (remove) {
+          chanlist = (type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite);
+          for (b = chanlist; b->mask[0]; b = b->next) {
+            if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
+              add_mode(chan, '-', type, u->mask);
+              b->timer = now;
+	    }
+          }
+          u_delmask(type, NULL, u->mask, 1);
+        }
+      }
+     } else
+       u_delmask(type, NULL, u->mask, 1);
     }
   }
   /* Check for specific channel-domain bans expiring */
+
   for (chan = chanset; chan; chan = chan->next) {
-    for (u = chan->bans; u; u = u2) {
+    list = (type == 'b' ? chan->bans : type == 'e' ? chan->exempts : chan->invites);
+
+    for (u = list; u; u = u2) {
       u2 = u->next;
       if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-	putlog(LOG_MISC, "*", "No longer banning %s on %s (expired)", u->mask, chan->dname);
-	for (b = chan->channel.ban; b->mask[0]; b = b->next)
-          if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
-            if (!conf.bot->hub)
-              add_mode(chan, '-', 'b', u->mask);
-	    b->timer = now;
-	  }
-	u_delmask('b', chan, u->mask, 1);
-      }
-    }
-  }
-}
-
-/* Check for expired timed-exemptions
- */
-static void check_expired_exempts(void)
-{
-  if (!use_exempts)
-    return;
-
-  maskrec *u = NULL, *u2 = NULL;
-  struct chanset_t *chan = NULL;
-  masklist *b = NULL, *e = NULL;
-  int match;
-
-  for (u = global_exempts; u; u = u2) {
-    u2 = u->next;
-    if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-      putlog(LOG_MISC, "*", "No longer ban exempting %s (expired)", u->mask);
-      for (chan = chanset; chan; chan = chan->next) {
-        match = 0;
-        b = chan->channel.ban;
-        while (b->mask[0] && !match) {
-          if (wild_match(b->mask, u->mask) ||
-            wild_match(u->mask, b->mask))
-            match = 1;
-          else
-            b = b->next;
+        remove = 1;
+        if (!conf.bot->hub && type == 'e') {
+          match = 0;
+          b = chan->channel.ban;
+          while (b->mask[0] && !match) {
+            if (wild_match(b->mask, u->mask) || wild_match(u->mask, b->mask))
+              match = 1;
+            else
+              b = b->next;
+          }
+          if (match) {
+            putlog(LOG_MISC, chan->dname, "Exempt not expired on channel %s. Ban still set!", chan->dname);
+            remove = 0;
+          }
         }
-        if (match)
-          putlog(LOG_MISC, chan->dname,
-            "Exempt not expired on channel %s. Ban still set!",
-            chan->dname);
-	else
-	  for (e = chan->channel.exempt; e->mask[0]; e = e->next)
-	    if (!rfc_casecmp(e->mask, u->mask) && expired_mask(chan, e->who) && e->timer != now) {
-              if (!conf.bot->hub)
-                add_mode(chan, '-', 'e', u->mask);
-	      e->timer = now;
-	    }
-      }
-      u_delmask('e', NULL, u->mask,1);
-    }
-  }
-  /* Check for specific channel-domain exempts expiring */
-  for (chan = chanset; chan; chan = chan->next) {
-    for (u = chan->exempts; u; u = u2) {
-      u2 = u->next;
-      if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-        match=0;
-        b = chan->channel.ban;
-        while (b->mask[0] && !match) {
-          if (wild_match(b->mask, u->mask) ||
-            wild_match(u->mask, b->mask))
-            match=1;
-          else
-            b = b->next;
+
+        if (remove) {
+          putlog(LOG_MISC, "*", "No longer %s %s on %s (expired)", str_typing, u->mask, chan->dname);
+          if (!conf.bot->hub) {
+            chanlist = (type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite);
+
+            for (b = chanlist; b->mask[0]; b = b->next) {
+              if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
+                if (!conf.bot->hub)
+                  add_mode(chan, '-', type, u->mask);
+                b->timer = now;
+              }
+            }
+          }
+          u_delmask(type, chan, u->mask, 1);
         }
-        if (match)
-          putlog(LOG_MISC, chan->dname,
-            "Exempt not expired on channel %s. Ban still set!",
-            chan->dname);
-        else {
-          putlog(LOG_MISC, "*", "No longer ban exempting %s on %s (expired)", u->mask, chan->dname);
-	  for (e = chan->channel.exempt; e->mask[0]; e = e->next)
-	    if (!rfc_casecmp(e->mask, u->mask) && expired_mask(chan, e->who) && e->timer != now) {
-              if (!conf.bot->hub)
-                add_mode(chan, '-', 'e', u->mask);
-	      e->timer = now;
-	    }
-          u_delmask('e', chan, u->mask, 1);
-        }
-      }
-    }
-  }
-}
-
-/* Check for expired timed-invites.
- */
-static void check_expired_invites(void)
-{
-  if (!use_invites)
-    return;
-
-  maskrec *u = NULL, *u2 = NULL;
-  struct chanset_t *chan = NULL;
-  masklist *b = NULL;
-
-  for (u = global_invites; u; u = u2) {
-    u2 = u->next;
-    if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-      putlog(LOG_MISC, "*", "No longer inviting %s (expired)", u->mask);
-      for (chan = chanset; chan; chan = chan->next)
-	if (!(chan->channel.mode & CHANINV))
-	  for (b = chan->channel.invite; b->mask[0]; b = b->next)
-	    if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
-              if (!conf.bot->hub)
-                add_mode(chan, '-', 'I', u->mask);
-	      b->timer = now;
-	    }
-      u_delmask('I', NULL, u->mask,1);
-    }
-  }
-  /* Check for specific channel-domain invites expiring */
-  for (chan = chanset; chan; chan = chan->next) {
-    for (u = chan->invites; u; u = u2) {
-      u2 = u->next;
-      if (!(u->flags & MASKREC_PERM) && (now >= u->expire)) {
-	putlog(LOG_MISC, "*", "No longing inviting %s on %s (expired)", u->mask, chan->dname);
-	if (!(chan->channel.mode & CHANINV))
-	  for (b = chan->channel.invite; b->mask[0]; b = b->next)
-	    if (!rfc_casecmp(b->mask, u->mask) && expired_mask(chan, b->who) && b->timer != now) {
-              if (!conf.bot->hub)
-                add_mode(chan, '-', 'I', u->mask);
-	      b->timer = now;
-	    }
-	u_delmask('I', chan, u->mask, 1);
       }
     }
   }
@@ -1035,7 +968,9 @@ static void check_expired_invites(void)
 
 void check_expired_masks()
 {
-  check_expired_bans();
-  check_expired_exempts();
-  check_expired_invites();
+  check_expired_mask('b');
+  if (use_exempts)
+    check_expired_mask('e');
+  if (use_invites)
+    check_expired_mask('I');
 }
