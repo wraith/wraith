@@ -798,6 +798,8 @@ void trigger_cfg_changed()
   int i;
   struct xtra_key *xk = NULL;
 
+  /* look for local cfgs inside our own USERENTRY_CONFIG and set them in our cfg struct */
+  cfg_noshare = 1;			/* why bother sharing out our LOCAL cfg settings? */
   for (i = 0; i < cfg_count; i++) {
     if (cfg[i]->flags & CFGF_LOCAL) {
       xk = (struct xtra_key *) get_user(&USERENTRY_CONFIG, conf.bot->u);
@@ -811,4 +813,5 @@ void trigger_cfg_changed()
       }
     }
   }
+  cfg_noshare = 0;
 }

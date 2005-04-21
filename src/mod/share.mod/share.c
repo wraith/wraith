@@ -1273,7 +1273,7 @@ finish_share(int idx)
   Auth::FillUsers();
 
   checkchans(1);                /* remove marked channels */
-  trigger_cfg_changed();
+  trigger_cfg_changed();	/* Set our local cfg settings from our userentry */
   reaffirm_owners();            /* Make sure my owners are +a   */
   updatebot(-1, dcc[j].nick, '+', 0, 0, NULL);
 }
