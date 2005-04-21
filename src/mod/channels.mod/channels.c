@@ -54,8 +54,8 @@ static int 			gfld_kick_thr;
 static time_t 			gfld_kick_time;
 static int 			gfld_join_thr;
 static time_t 			gfld_join_time;
-static int 			gfld_ctcp_thr;
-static time_t 			gfld_ctcp_time;
+static int 			gfld_ctcp_thr = 5;
+static time_t 			gfld_ctcp_time = 30;
 static int			gfld_nick_thr;
 static time_t 			gfld_nick_time;
 
