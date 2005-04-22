@@ -121,7 +121,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Added entry to help for ban-time in chanset: ban-time requires +dynamicbans
 * Fixed a bug where a bot would stop trying to connect to servers if using ipv6.
 * New channels get a default chanset of: flood-ctcp 5:30
-* Tempdir is now chosen from a list as follows: (hub) ./tmp/ (leaf) ~/.ssh/..., /tmp/, ./
+* Tempdir is now chosen from a list as follows: (hub) ./tmp/ (leaf) ~/.ssh/..., /tmp/, /var/tmp/, ./
 
 
 1.2.2
