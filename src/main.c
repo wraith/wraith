@@ -679,8 +679,7 @@ printf("out: %s\n", out);
   binname = getfullbinname(argv[0]);
   chdir(dirname(binname));
 
-  simple_snprintf(tempdir, sizeof(tempdir), "/tmp/");
-  check_tempdir(0);	/* make sure directory exists and we can access it */
+  Tempfile::FindDir();
 
   /* This allows -2/-0 to be used without an initialized binary */
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {

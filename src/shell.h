@@ -38,7 +38,7 @@
 
 void check_maxfiles();
 void check_mypid();
-int clear_tmp();
+void clear_tmp();
 char *homedir(bool = 1);
 char *my_username();
 char *my_uname();
@@ -62,5 +62,7 @@ void detected(int, char *);
 #endif /* !CYGWIN_HACKS */
 void werr(int) __attribute__((noreturn));
 char *werr_tostr(int);
+
+extern bool		clear_tmpdir;
 
 #endif /* _SHELL_H */

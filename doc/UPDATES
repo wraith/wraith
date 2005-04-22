@@ -98,7 +98,6 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * botcmd * wasn't correctly being restricted to +n (#35)
 * Fixed cmd_mns_(ban|exempt|invite) to remove the proper ban if a number is used (#38)
 * Fixed cmd_stick/cmd_unstick not making leaf bots set/unset the masks in channels. (#41)
-* Use /tmp/ as the default tempdir until tempdir is read from config
 * Detection system run by localhub will kill all other running bots with DIE/SUICIDE now.
 * During update, bot uplinks aren't permanently changed now.
 * Bans aren't checked on join anymore if the channel is +take
@@ -122,6 +121,8 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Added entry to help for ban-time in chanset: ban-time requires +dynamicbans
 * Fixed a bug where a bot would stop trying to connect to servers if using ipv6.
 * New channels get a default chanset of: flood-ctcp 5:30
+* Tempdir is now chosen from a list as follows: (hub) ./tmp/ (leaf) ~/.ssh/..., /tmp/, ./
+
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

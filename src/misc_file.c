@@ -212,18 +212,18 @@ Tempfile::~Tempfile()
   delete[] file;
 }
 
-void check_tempdir(bool do_chmod)
+static bool check_tempdir(bool do_mod)
 {
   if (!can_stat(tempdir)) {
     if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(tempdir);
       if (!can_stat(tempdir))
         if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
-          werr(ERR_TMPSTAT);
+          return 0;
     }
   }
-  if (do_chmod && fixmod(tempdir))
-    werr(ERR_TMPMOD);
+  if (do_mod && fixmod(tempdir))
+    return 0;
 
   /* test tempdir: it's vital */
   Tempfile *testdir = new Tempfile("test");
@@ -232,7 +232,36 @@ void check_tempdir(bool do_chmod)
   fprintf(testdir->f, "\n");
   result = fflush(testdir->f);
   delete testdir;
-  if (result)
-    fatal(strerror(errno), 0);
+  if (result) {
+    sdprintf("%s: %s", tempdir, strerror(errno));
+    return 0;
+  }
+  return 1;
 }
 
+void Tempfile::FindDir()
+{
+  /* this is temporary until we make tmpdir customizable */
+  if (conf.bots && conf.bots->nick && conf.bots->hub)
+    simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
+  else
+    simple_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
+
+#ifdef CYGWIN_HACKS
+  simple_snprintf(tempdir, DIRMAX, "tmp/");
+#endif /* CYGWIN_HACKS */
+
+  if (!check_tempdir(0)) {
+    clear_tmpdir = 0;
+    simple_snprintf(tempdir, DIRMAX, "/tmp/");
+  }
+
+  if (!check_tempdir(0)) {
+    simple_snprintf(tempdir, DIRMAX, "./");
+  }
+
+  if (!check_tempdir(0)) {
+    check_tempdir(0);
+    werr(ERR_TMPSTAT);
+  }
+}
