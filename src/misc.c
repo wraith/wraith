@@ -433,10 +433,7 @@ void make_rand_str(char *s, size_t len)
     else if (r == 2)
       s[j] = 'A' + randint(26);
     else if (r == 3)
-      s[j] = '!' + randint(15);
-
-    if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) /* no % ( ) & */
-      s[j] = 'a' + randint(26);
+      s[j] = RANDSPECIAL[randint(RANDSPECIALLEN)];
 
     if (j && strchr(BADREPEATEDRAND, s[j]) && s[j] == s[j - 1]) {
       while (s[j] == s[j - 1])
