@@ -257,7 +257,10 @@ void Tempfile::FindDir()
   }
 
   if (!check_tempdir(0)) {
-    clear_tmpdir = 0;
+    simple_snprintf(tempdir, DIRMAX, "/usr/tmp/");
+  }
+
+  if (!check_tempdir(0)) {
     simple_snprintf(tempdir, DIRMAX, "/var/tmp/");
   }
 
