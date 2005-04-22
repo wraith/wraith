@@ -122,7 +122,7 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Fixed a bug where a bot would stop trying to connect to servers if using ipv6.
 * New channels get a default chanset of: flood-ctcp 5:30
 * Tempdir is now chosen from a list as follows: (hub) ./tmp/ (leaf) ~/.ssh/..., /tmp/, /usr/tmp/, /var/tmp/, ./
-
+* Fixed a bug in the hash creation of cookies due to an ircd stripping excess '*' in cookies.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

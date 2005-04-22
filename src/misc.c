@@ -437,6 +437,11 @@ void make_rand_str(char *s, size_t len)
 
     if (s[j] == 33 || s[j] == 37 || s[j] == 34 || s[j] == 40 || s[j] == 41 || s[j] == 38 || s[j] == 36) /* no % ( ) & */
       s[j] = 'a' + randint(26);
+
+    if (j && strchr(BADREPEATEDRAND, s[j]) && s[j] == s[j - 1]) {
+      while (s[j] == s[j - 1])
+          s[j] = 'A' + randint(26);
+    }
   }
 
   if (strchr(BADPASSCHARS, s[0]))

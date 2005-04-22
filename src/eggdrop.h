@@ -54,6 +54,7 @@
 #define NOTENAMELEN     ((HANDLEN << 1) + 1)
 #define BADPASSCHARS    "-+"
 #define LISTSEPERATORS  ",=:; "
+#define BADREPEATEDRAND "*?"
 
 
 #if (NICKMAX < 9) || (NICKMAX > 32)
