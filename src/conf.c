@@ -1019,8 +1019,8 @@ void conf_add_userlist_bots()
     if (!bot->hub) {
       u = get_user_by_handle(userlist, bot->nick);
       if (!u) {
+        putlog(LOG_MISC, "*", "Adding bot '%s' as it has been added to the binary config.", bot->nick);
         userlist = adduser(userlist, bot->nick, "none", "-", USER_OP, 1);
-        putlog(LOG_MISC, "*", "Adding '%s' as it has been added to the binary config.", bot->nick);
         u = get_user_by_handle(userlist, bot->nick);
 
         egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);

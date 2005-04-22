@@ -81,7 +81,13 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
   -Running the bot with -C will automatically update uid/uname/homedir/username
   -Added cmd line param '-c' to avoid auto updating uid/uname/homedir/username
   -The binary is only rewritten now if CHANGES are made in the editor.
-  * Things done after the config is saved:
+* cmd_conf changes:
+  -Added 'enable' and 'disable' for bots
+  -'remove', 'rem', 'delete' are now also recognized for 'del'
+  -Fixed the binary not correctly being rewritten/saved
+  -Bots are now correctly killed/spawned 
+  -'del' now also removes the bot from the userlist
+* Things done after using cmd_conf / editing config with -C:
    -New bots are spawned and added (if linked)
    -Changed (NEW) ip/host for bots are added to the botnet (if linked)
    -Removed bots are killed and removed from the userlist (if linked)
@@ -105,12 +111,6 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * Added log msg (+w) for when a msg is received when umode +g. (#44)
 * cmd_botcmd now works correctly when the target is the bot you're on. (#46)
 * cmd_pls_user wasn't correctly sharing multiple hosts to the botnet. (#48)
-* cmd_conf changes:
-  -Added 'enable' and 'disable' for bots
-  -'remove', 'rem', 'delete' are now also recognized for 'del'
-  -Fixed the binary not correctly being rewritten/saved
-  -Bots are now correctly killed/spawned 
-  -'del' now also removes the bot from the userlist
 * Only auto-op a user if they have a password set. (#52)
 * Made cmd_addlog o|o
 * Several cmds were not saving userfile: -/+chrec|ban|exempt|invite, [un]stick, chinfo (#68)

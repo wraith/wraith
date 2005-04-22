@@ -1729,8 +1729,11 @@ static void cmd_conf(int idx, char *par)
       dprintf(idx, "Usage: conf <add|del|change|disable|enable|list|set> [options]\n");
     else
       dprintf(idx, "Usage: conf <set> [options]\n");
+
     return;
   }
+
+  conf_bot *oldlist = conf_bots_dup(conf.bots);
   
   putlog(LOG_CMDS, "*", "#%s# conf %s %s", dcc[idx].nick, cmd, par[0] ? par : "");
   if (!egg_strcasecmp(cmd, "add") || !egg_strcasecmp(cmd, "change")) {
@@ -1739,6 +1742,8 @@ static void cmd_conf(int idx, char *par)
     nick = newsplit(&par);
     if (!nick || (nick && !nick[0])) {
       dprintf(idx, "Usage: conf %s <bot> [<ip|.> <[+]host|.> [ipv6-ip]]\n", cmd);
+
+      free_conf_bots(oldlist);
       return;
     }
 
@@ -1759,6 +1764,8 @@ static void cmd_conf(int idx, char *par)
   } else if (!egg_strncasecmp(cmd, "del", 3) || !egg_strncasecmp(cmd, "rem", 3)) {
     if (!par[0]) {
       dprintf(idx, "Usage: conf del <bot>\n");
+
+      free_conf_bots(oldlist);
       return;
     }
 
@@ -1874,10 +1881,15 @@ static void cmd_conf(int idx, char *par)
     free(listbot);
 
   if (save) {
+    /* rewrite our binary */
     conf_to_bin(&conf, 0, -1);
-    if (!conf.bot->hub)
-      spawnbots();			/* parse conf struct and spawn/kill as needed */
+
+    kill_removed_bots(oldlist, conf.bots);
+    conf_add_userlist_bots();
+    spawnbots();
   }
+
+  free_conf_bots(oldlist);
 }
 
 static void cmd_encrypt(int idx, char *par)
