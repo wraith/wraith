@@ -289,6 +289,10 @@ static int get_dns_idx()
 
 void egg_dns_send(char *query, int len)
 {
+        if (dns_idx >= 0 && dcc[dns_idx].sock == -1) {
+          lostdcc(dns_idx);
+          dns_idx = -1;
+        }
 	if (dns_idx < 0) {
 		if (get_dns_idx()) {
                   sdprintf("get_dns_idx() failed in egg_dns_send");
@@ -573,7 +577,7 @@ static const char *dns_next_server()
 	return(servers[cur_server].ip);
 }
 
-static void add_server(char *ip)
+static void add_dns_server(char *ip)
 {
 	servers = (dns_server_t *) my_realloc(servers, (nservers+1)*sizeof(*servers));
 	servers[nservers].ip = strdup(ip);
@@ -666,7 +670,7 @@ static void read_resolv(char *fname)
 	while (fgets(buf, sizeof(buf), fp)) {
 		if (!strncasecmp(buf, "nameserver", 10)) {
 			read_thing(buf+10, ip);
-			if (strlen(ip)) add_server(ip);
+			if (strlen(ip)) add_dns_server(ip);
 		}
 	}
 	fclose(fp);
@@ -992,27 +996,27 @@ int egg_dns_init()
 	read_hosts(".hosts");
     
         /* some backup servers, probably will never be used. */
-	add_server("205.152.0.20"); //ns.atl.bellsouth.net
-        add_server("203.251.80.133"); //ns.abovenet.net
-        add_server("68.2.16.30"); //some cox ns
-        add_server("68.6.16.25"); //another cox
-        add_server("65.215.220.12"); //staminus
-	add_server("72.20.1.2"); //new staminus
+	add_dns_server("205.152.0.20"); //ns.atl.bellsouth.net
+        add_dns_server("203.251.80.133"); //ns.abovenet.net
+        add_dns_server("68.2.16.30"); //some cox ns
+        add_dns_server("68.6.16.25"); //another cox
+        add_dns_server("65.215.220.12"); //staminus
+	add_dns_server("72.20.1.2"); //new staminus
 
 /* root servers for future development (tracing down)
-	add_server("198.41.0.4");
-	add_server("192.228.79.201");
-	add_server("192.33.4.12");
-	add_server("128.8.10.90");
-	add_server("192.203.230.10");
-	add_server("192.5.5.241");
-	add_server("192.112.36.4");
-	add_server("128.63.2.53");
-	add_server("192.36.148.17");
-	add_server("192.58.128.30");
-	add_server("193.0.14.129");
-	add_server("198.32.64.12");
-	add_server("202.12.27.33");
+	add_dns_server("198.41.0.4");
+	add_dns_server("192.228.79.201");
+	add_dns_server("192.33.4.12");
+	add_dns_server("128.8.10.90");
+	add_dns_server("192.203.230.10");
+	add_dns_server("192.5.5.241");
+	add_dns_server("192.112.36.4");
+	add_dns_server("128.63.2.53");
+	add_dns_server("192.36.148.17");
+	add_dns_server("192.58.128.30");
+	add_dns_server("193.0.14.129");
+	add_dns_server("198.32.64.12");
+	add_dns_server("202.12.27.33");
 */
 
 
