@@ -1,4 +1,4 @@
-/* new async dns
+/* async dns
  *
  */
 
@@ -278,7 +278,7 @@ static int get_dns_idx()
           dns_sock = sock;
           sdprintf("dns_sock: %d", dcc[dns_idx].sock);
           strcpy(dcc[dns_idx].host, dns_ip);
-          strcpy(dcc[dns_idx].nick, "(new_dns)");
+          strcpy(dcc[dns_idx].nick, "(adns)");
           sdprintf("dns_ip: %s", dns_ip);
           dcc[dns_idx].timeval = now;
           dns_handler.timeout_val = 0;
