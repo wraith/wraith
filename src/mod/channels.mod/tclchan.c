@@ -432,6 +432,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->bad_cookie = deflag_translate(item[i]);
+    } else if (!strcmp(item[i], "manop")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          simple_sprintf(result, "channel manop needs argument");
+        return ERROR;
+      }
+      chan->manop = deflag_translate(item[i]);
     } else if (!strcmp(item[i], "mdop")) {
       i++;
       if (i >= items) {
