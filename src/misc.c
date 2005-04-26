@@ -962,15 +962,17 @@ coloridx(int idx)
   } else if (idx == -2) {
     return 2;	/* mIRC */
   /* valid idx and NOT relaying */
-  } else if (idx >= 0 && dcc[idx].irc) {
-    return 0;
-  } else if (idx >= 0 && (dcc[idx].status & STAT_COLOR) && (dcc[idx].type && dcc[idx].type != &DCC_RELAYING)) {
-    /* telnet probably wants ANSI, even though it might be a relay from an mIRC client; fuck`em */
-    if (dcc[idx].status & STAT_TELNET)
-      return 1;
-    /* non-telnet is probably a /dcc-chat, most irc clients support mIRC codes... */
-    else
-      return 2;
+  } else if (idx >= 0) {
+    if (dcc[idx].irc) {
+      return 0;
+    } else if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type && dcc[idx].type != &DCC_RELAYING)) {
+      /* telnet probably wants ANSI, even though it might be a relay from an mIRC client; fuck`em */
+      if (dcc[idx].status & STAT_TELNET)
+        return 1;
+      /* non-telnet is probably a /dcc-chat, most irc clients support mIRC codes... */
+      else
+        return 2;
+    }
   } 
   return 0;
 }
