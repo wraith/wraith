@@ -250,12 +250,12 @@ void link_send(int idx, const char *format, ...)
   va_end(va);
   remove_crlf(s);
 
-  dprintf(idx, "neg! %s\n", s);
+  dprintf(-dcc[idx].sock, "neg! %s\n", s);
 }
 
 void link_done(int idx)
 {
-  dprintf(idx, "neg.\n");
+  dprintf(-dcc[idx].sock, "neg.\n");
 }
 
 int link_find_by_type(int type)

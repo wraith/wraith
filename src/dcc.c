@@ -336,7 +336,7 @@ dcc_bot_new(int idx, char *buf, int x)
 
       sdprintf("Choosing '%s' (%d) for link", enclink[i].name, i);
       link_hash(idx, rand);
-      dprintf(idx, "neg %s %d\n", dcc[idx].shahash, enclink[i].type);
+      dprintf(-dcc[idx].sock, "neg %s %d\n", dcc[idx].shahash, enclink[i].type);
       socklist[snum].enclink = i;
       link_link(idx, -1, i, TO);
     }
@@ -943,7 +943,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
 
       dcc[idx].type = &DCC_CHAT_SECPASS;
       dcc[idx].timeval = now;
-      dprintf(idx, "-Auth %s %s\n", randstr, conf.bot->nick);
+      dprintf(-dcc[idx].sock, "-Auth %s %s\n", randstr, conf.bot->nick);
     } else {
       dcc_chat_secpass(idx, pass, atr);
     }
@@ -1609,7 +1609,7 @@ dcc_telnet_pass(int idx, int atr)
       for (i = 0; enclink[i].name; i++)
         simple_sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
 
-      dprintf(idx, "neg? %s %s\n", rand, buf);
+      dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
     } else
       /* Turn off remote telnet echo (send IAC WILL ECHO). */
       dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
