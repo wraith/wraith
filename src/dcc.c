@@ -251,7 +251,7 @@ bot_version(int idx, char *par)
 void
 failed_link(int idx)
 {
-  char s[81] = "", s1[512] = "";
+  char s[NICKLEN] = "", s1[512] = "";
 
   if (dcc[idx].u.bot->linker[0]) {
     simple_snprintf(s, sizeof s, "Couldn't link to %s.", dcc[idx].nick);
@@ -260,14 +260,9 @@ failed_link(int idx)
   }
   if (dcc[idx].u.bot->numver >= (-1))
     putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[idx].nick);
-  if (dcc[idx].sock != -1) {
-    for (int i = 0; i < MAXSOCKS; i++)
-      if (dcc[idx].sock == socklist[i].sock) {
-        killsock(dcc[idx].sock);
-        dcc[idx].sock = -1; 
-      }
-  }
-  strcpy(s, dcc[idx].nick);
+  if (dcc[idx].sock != -1)
+    killsock(dcc[idx].sock);
+  strlcpy(s, dcc[idx].nick, sizeof(s));
   lostdcc(idx);
   autolink_cycle(s);            /* Check for more auto-connections */
 }
