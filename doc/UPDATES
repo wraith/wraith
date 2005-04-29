@@ -128,7 +128,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * cmd_update/cmd_restart/SIGHUP now soft restarts bot
 * Shell cmd param -u now soft restarts all running bots after updating binary
 * Changed the output of cmd_uptime (shows in cmd_status as well)
-
+* Disabled auto-renaming server names internally on connect if they don't match our own list
 
 
 1.2.2
