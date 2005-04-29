@@ -433,6 +433,8 @@ static void got_sp(int idx, char *code, char *par)
   if (chan)
     chan->channel.parttime = ((atoi(par) + now) - server_lag);
 }
+
+#ifdef no
 /* got_jn
  * We get this when a bot is opped in a +take chan
  * we are to set -inactive, jointime = 0, and join.
@@ -457,6 +459,7 @@ static void got_jn(int idx, char *code, char *par)
     }
   }
 }
+#endif
 
 static void set_mode_protect(struct chanset_t *chan, char *set)
 {
@@ -877,7 +880,7 @@ cmd_t channels_bot[] = {
   {"kl",	"", 	(Function) got_kl,    	NULL, 0},
   {"sj",	"", 	(Function) got_sj,    	NULL, 0},
   {"sp",	"", 	(Function) got_sp,    	NULL, 0},
-  {"jn",	"", 	(Function) got_jn,    	NULL, 0},
+//  {"jn",	"", 	(Function) got_jn,    	NULL, 0},
 /*
 #ifdef HUB
   {"o1", "", (Function) got_o1, NULL, 0},

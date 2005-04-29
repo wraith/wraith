@@ -604,12 +604,14 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
   }
   mv->flags |= WASOP;
   if (check_chan) {
+#ifdef no
     /* tell other bots to set jointime to 0 and join */
     char *buf = (char *) my_calloc(1, strlen(chan->dname) + 3 + 1);
 
     simple_sprintf(buf, "jn %s", chan->dname);
     putallbots(buf);
     free(buf);
+#endif
     recheck_channel(chan, 2);
   }
 }
