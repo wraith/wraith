@@ -53,6 +53,9 @@ void identd_open();
 void identd_close();
 port_t listen_all(port_t, bool);
 bool valid_idx(int);
+int dcc_read(FILE *);
+void dcc_write(FILE *, int);
+
 extern int		max_dcc;
 extern time_t		connect_timeout;
 

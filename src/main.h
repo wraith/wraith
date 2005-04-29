@@ -14,10 +14,10 @@ enum {
 };
 
 extern int		role, default_flags, default_uflags, do_confedit,
-			updating;
-extern bool		use_stderr, backgrd, used_B, term_z, loading, have_take;
-extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[];
-extern time_t		online_since, now;
+			updating, do_restart;
+extern bool		use_stderr, backgrd, used_B, term_z, loading, have_take, restart_was_update;
+extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[], *socksfile;
+extern time_t		online_since, now, restart_time;
 extern uid_t		myuid;
 extern pid_t            mypid;
 extern const time_t	buildts;

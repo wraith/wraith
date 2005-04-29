@@ -13,7 +13,7 @@
 
 
 char *wbanner(void);
-void restart(int) __attribute__((noreturn));
+void restart(int);
 int coloridx(int);
 const char *color(int, int, int);
 void shuffle(char *, char *);
@@ -22,6 +22,7 @@ void showhelp(int, struct flag_record *, char *);
 char *replace(const char *, const char *, const char *);
 int goodpass(char *, int, char *);
 int bot_aggressive_to(struct userrec *);
+void readsocks(const char *);
 int updatebin(int, char *, int);
 size_t my_strcpy(char *, char *);
 void maskhost(const char *, char *);

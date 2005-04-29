@@ -118,10 +118,13 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
 }
 
 
-void botnet_send_bye()
+void botnet_send_bye(const char *reason)
 {
-  if (tands > 0)
-    send_tand_but(-1, "bye\n", 5);
+  if (tands > 0) {
+    size_t len = simple_sprintf(OBUF, "bye %s\n", reason ? reason : "No reason");
+
+    send_tand_but(-1, OBUF, len);
+  }
 }
 
 void botnet_send_chan(int idx, char *botnick, char *user, int chan, char *data)

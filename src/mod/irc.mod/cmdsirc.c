@@ -1689,7 +1689,7 @@ static void cmd_reset(int idx, char *par)
     putlog(LOG_CMDS, "*", "#%s# reset all", dcc[idx].nick);
     dprintf(idx, "Resetting channel info for all channels...\n");
     for (chan = chanset; chan; chan = chan->next) {
-      if (channel_active(chan))
+      if (channel_active(chan) || (!channel_active(chan) && shouldjoin(chan)))
 	reset_chan_info(chan);
     }
   }

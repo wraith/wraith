@@ -31,6 +31,7 @@
 #include "src/mod/irc.mod/irc.h"
 #include "userrec.h"
 #include "stat.h"
+#include "net.h"
 
 #include <sys/wait.h>
 #include <stdarg.h>
@@ -555,28 +556,152 @@ void kill_bot(char *s1, char *s2)
     server_die();
   chatout("*** %s\n", s1);
   botnet_send_chat(-1, conf.bot->nick, s1);
-  botnet_send_bye();
+  botnet_send_bye(s2);
   fatal(s2, 0);
 }
+
+void
+readsocks(const char *fname)
+{
+  FILE *f = NULL;
+
+  if (!(f = fopen(fname, "r"))) {
+    fatal("CANT READ SOCKSFILE", 0);
+  }
+
+  char buf[1024] = "", *nick = NULL, *bufp = NULL, *type = NULL;
+  time_t old_buildts = 0;
+
+  while (fgets(buf, sizeof(buf), f) != NULL) {
+    remove_crlf(buf);
+    bufp = buf;
+
+//    dprintf(DP_STDOUT, "read line: %s\n", buf);
+    type = newsplit(&bufp);
+    if (!strcmp(type, "-dcc"))
+      dprintf(DP_STDOUT, "Added dcc: %d\n", dcc_read(f));
+    else if (!strcmp(type, "-sock"))
+      dprintf(DP_STDOUT, "Added fd: %d\n", sock_read(f));
+    else if (!strcmp(type, "+online_since"))
+      online_since = strtol(bufp, NULL, 10);
+    else if (!strcmp(type, "+buildts"))
+      old_buildts = strtol(bufp, NULL, 10);
+    else if (!strcmp(type, "+botname"))
+      nick = strdup(bufp);
+  }
+
+  restart_time = now;
+  if (old_buildts && buildts > old_buildts)
+    restart_was_update = 1;
+
+  tell_dcc(DP_STDOUT);
+  tell_netdebug(DP_STDOUT);
+
+  unlink(fname);
+  fclose(f);
+  if (servidx >= 0) {
+    rehash_server(dcc[servidx].host, nick);
+    dprintf(DP_DUMP, "VERSION\n");
+    reset_chans = 1;
+  }
+  free(nick);
+  if (socksfile)
+    free(socksfile);
+}
+
 
 /* Update system code
  */
 
-void 
+void
 restart(int idx)
 {
-  char buf[1024] = "";
   const char *reason = updating ? "Updating..." : "Restarting...";
+  Tempfile *socks = new Tempfile("socks");
+  int fd = 0;
 
-  sdprintf("restarting [%s]", reason); 
+  sdprintf("%s", reason); 
+
+
+  if (tands > 0) {
+    botnet_send_chat(-1, conf.bot->nick, (char *) reason);
+    botnet_send_bye(reason);
+  }
+
+  /* kill all connections except STDOUT/server */
+  for (fd = 0; fd < dcc_total; fd++) {
+    if (dcc[fd].type && dcc[fd].type != &SERVER_SOCKET && dcc[fd].sock != STDOUT) {
+      if (dcc[fd].sock >= 0)
+        killsock(dcc[fd].sock);
+      lostdcc(fd);
+    }
+  }
+
+  /* write out all leftover dcc[] entries */
+  for (fd = 0; fd < dcc_total; fd++)
+    if (dcc[fd].type && dcc[fd].sock != STDOUT)
+      dcc_write(socks->f, fd);
+
+  /* write out all leftover socklist[] entries */
+  for (fd = 0; fd < MAXSOCKS; fd++)
+    if (socklist[fd].sock != STDOUT)
+      sock_write(socks->f, fd);
+
+  if (server_online) {
+    if (botname[0])
+      fprintf(socks->f, "+botname %s\n", botname);
+    fprintf(socks->f, "+online_since %li\n", online_since);
+    fprintf(socks->f, "+buildts %li\n", buildts);
+  }
+  fflush(socks->f);
+  socks->my_close();
+
+  if (conf.bot->hub)
+    write_userfile(idx);
+
+  if (server_online) {
+    do_chanset(NULL, NULL, "+inactive", DO_LOCAL);
+    dprintf(DP_DUMP, "JOIN 0\n");
+  }
+
+  fixmod(binname);
+
+  /* replace image now */
+  char *argv[5] = { NULL, NULL, NULL, NULL, NULL };
+  char shit[5] = "";
+
+  simple_sprintf(shit, "-%s%s%s", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
+
+  argv[0] = strdup(binname);
+  argv[1] = strdup(shit);
+  argv[2] = strdup("-B");
+  argv[3] = strdup(conf.bot->nick);
+  argv[4] = NULL;
+
+  unlink(conf.bot->pid_file);
+  FILE *fp = NULL;
+  if (!(fp = fopen(conf.bot->pid_file, "w")))
+    return;
+  fprintf(fp, "%d %s\n", getpid(), socks->file);
+  fclose(fp);
+
+  execvp(argv[0], &argv[0]);
+
+  /* hopefully this is never reached */
+  putlog(LOG_MISC, "*", "Could not restart: %s", strerror(errno));
+  return;
+}
+
+#ifdef NO
+void 
+hard_restart(int idx)
+{
+  char buf[1024] = "";
+
   write_userfile(idx);
   if (!conf.bot->hub) {
     nuke_server((char *) reason);		/* let's drop the server connection ASAP */
     cycle_time = 0;
-  }
-  if (tands > 0) {
-    botnet_send_chat(-1, conf.bot->nick, (char *) reason);
-    botnet_send_bye();
   }
   fatal(idx <= 0x7FF0 ? reason : NULL, 1);
   usleep(2000 * 500);
@@ -585,6 +710,7 @@ restart(int idx)
   system(buf); /* start new bot. */
   exit(0);
 }
+#endif
 
 int updatebin(int idx, char *par, int secs)
 {
@@ -594,7 +720,7 @@ int updatebin(int idx, char *par, int secs)
   }
 
   char *path = (char *) my_calloc(1, strlen(binname) + strlen(par) + 2);
-  char *newbin = NULL, old[DIRMAX] = "", testbuf[DIRMAX] = "";
+  char *newbin = NULL, buf[DIRMAX] = "";
   int i;
 
   strcpy(path, binname);
@@ -638,8 +764,8 @@ int updatebin(int idx, char *par, int secs)
 
   /* make a backup just in case. */
 
-  simple_snprintf(old, sizeof old, "%s.bin.old", tempdir);
-  copyfile(binname, old);
+  simple_snprintf(buf, sizeof(buf), "%s.bin.old", tempdir);
+  copyfile(binname, buf);
 
   write_settings(path, -1, 0);	/* re-write the binary with our packdata */
 
@@ -652,10 +778,10 @@ int updatebin(int idx, char *par, int secs)
   }
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
-  simple_snprintf(testbuf, sizeof testbuf, STR("%s -2"), path);
+  simple_snprintf(buf, sizeof(buf), STR("%s -2"), path);
 #ifndef CYGWIN_HACKS
-  putlog(LOG_DEBUG, "*", "Running for update binary test: %s", testbuf);
-  i = system(testbuf);
+  putlog(LOG_DEBUG, "*", "Running for update binary test: %s", buf);
+  i = system(buf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
     dprintf(idx, "Couldn't restart new binary (error %d)\n", i);
     putlog(LOG_MISC, "*", "Couldn't restart new binary (error %d)", i);
@@ -665,10 +791,10 @@ int updatebin(int idx, char *par, int secs)
 #endif /* !CYGWIN_HACKS */
 
   /* now to send our config to the new binary */
-  simple_snprintf(testbuf, sizeof testbuf, STR("%s -4 %s"), path, conffile->file);
+  simple_snprintf(buf, sizeof(buf), STR("%s -4 %s"), path, conffile->file);
 #ifndef CYGWIN_HACKS
-  putlog(LOG_DEBUG, "*", "Running for update conf: %s", testbuf);
-  i = system(testbuf);
+  putlog(LOG_DEBUG, "*", "Running for update conf: %s", buf);
+  i = system(buf);
   delete conffile;
   if (i == -1 || WEXITSTATUS(i) != 6) { /* 6 for successfull config read/write */
     dprintf(idx, "Couldn't pass config to new binary (error %d)\n", i);
@@ -698,15 +824,27 @@ int updatebin(int idx, char *par, int secs)
     printf("* Moved binary to: %s\n", binname);
     fatal("Binary updated.", 0);
   }
+  if (updating == UPDATE_AUTO) {
+    /* Make all other bots do a soft restart */
+    conf_checkpids();
+    conf_killbot(NULL, NULL, SIGHUP);
+
+    if (conf.bot->pid)
+      kill(conf.bot->pid, SIGHUP);
+    exit(0);
+  }
 
   if (!conf.bot->hub && secs > 0) {
-    char buf[DIRMAX] = "";
-
-    /* this forces all running bots to be restarted (except localhub/me) */
-    simple_snprintf(buf, sizeof buf, STR("%s -L %s -P %d"), binname, conf.bot->nick, getpid());
-    putlog(LOG_DEBUG, "*", "Running for update: %s", buf);
-    system(buf);	/* restarts other bots running, removes pid files */
+    /* Make all other bots do a soft restart */
+    conf_checkpids();
+    conf_killbot(NULL, NULL, SIGHUP);
     
+    /* invoked with -u */
+    if (updating == UPDATE_AUTO) {
+      if (conf.bot->pid)
+        kill(conf.bot->pid, SIGHUP);
+      exit(0);
+    }
     /* this odd statement makes it so specifying 1 sec will restart other bots running
      * and then just restart with no delay */
     updating = UPDATE_AUTO;

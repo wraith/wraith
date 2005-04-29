@@ -32,6 +32,7 @@
 #include "botcmd.h"	
 #include "botnet.h"
 #include "tandem.h"
+#include "misc_file.h"
 #include "help.h"
 #include "socket.h"
 #include "traffic.h" /* egg_traffic_t */
@@ -267,8 +268,6 @@ static void cmd_config(int idx, char *par)
     if (!egg_strcasecmp(name, "hijack"))
       no++;
     if (!egg_strcasecmp(name, "bad-cookie"))
-      no++;
-    if (!egg_strcasecmp(name, "manop"))
       no++;
 
     if (no) {
@@ -1936,8 +1935,6 @@ static void cmd_decrypt(int idx, char *par)
   free(buf);
 }
 
-static void cmd_restart(int, char *) __attribute__((noreturn));
-
 static void cmd_restart(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# restart", dcc[idx].nick);
@@ -1949,6 +1946,13 @@ static void cmd_reload(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# reload", dcc[idx].nick);
   dprintf(idx, "Reloading user file...\n");
   reload();
+}
+
+static void cmd_rehash(int idx, char *par)
+{
+  putlog(LOG_CMDS, "*", "#%s# rehash", dcc[idx].nick);
+  dprintf(idx, "Rehashing config data from binary...\n");
+  reload_bin_data();
 }
 
 static void cmd_die(int idx, char *par)
@@ -4239,6 +4243,11 @@ static void cmd_quit(int idx, char *text)
 	}
 }
 
+void cmd_test(int idx, char *par)
+{
+  putlog(LOG_CMDS, "*", "#%s# test", dcc[idx].nick);
+}
+
 /* DCC CHAT COMMANDS
  */
 /* Function call should be:
@@ -4304,6 +4313,7 @@ cmd_t C_dcc[] =
   {"quit",		"",	(Function) cmd_quit,		NULL, 0},
   {"relay",		"i",	(Function) cmd_relay,		NULL, 0},
   {"reload",		"m|m",	(Function) cmd_reload,		NULL, HUB},
+  {"rehash",		"a",	(Function) cmd_rehash,		NULL, 0},
   {"restart",		"m",	(Function) cmd_restart,		NULL, 0},
   {"save",		"m|m",	(Function) cmd_save,		NULL, HUB},
   {"simul",		"a",	(Function) cmd_simul,		NULL, 0},
@@ -4345,6 +4355,7 @@ cmd_t C_dcc[] =
   {"exec", 		"a", 	(Function) cmd_exec, 		NULL, 0},
   {"w", 		"n", 	(Function) cmd_w, 		NULL, 0},
   {"channels", 		"", 	(Function) cmd_channels, 	NULL, 0},
+  {"test",		"",	(Function) cmd_test,		NULL, 0},
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL, AUTH_ALL},
   {"md5",		"",	(Function) cmd_md5,		NULL, AUTH_ALL},
   {"sha1",		"",	(Function) cmd_sha1,		NULL, AUTH_ALL},

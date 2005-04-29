@@ -38,6 +38,7 @@ char 			admin[121] = "";	/* Admin info			*/
 char 			origbotname[NICKLEN + 1] = "";
 char 			botname[NICKLEN + 1] = "";	/* Primary botname		*/
 port_t     		my_port = 0;
+bool			reset_chans = 0;
 
 /* Remove leading and trailing whitespaces.
  */
@@ -218,12 +219,12 @@ void checkchans(int which)
 
 /* Dump uptime info out to dcc (guppy 9Jan99)
  */
-void tell_verbose_uptime(int idx)
+static void tell_time(time_t time, char *s)
 {
-  char s[256] = "", s1[121] = "";
   time_t now2, hr, min;
 
-  now2 = now - online_since;
+  s[0] = 0;
+  now2 = now - time;
   if (now2 > 86400) {
     /* days */
     simple_sprintf(s, "%d day", (int) (now2 / 86400));
@@ -236,7 +237,21 @@ void tell_verbose_uptime(int idx)
   now2 -= (hr * 3600);
   min = (time_t) ((int) now2 / 60);
   sprintf(&s[strlen(s)], "%02d:%02d", (int) hr, (int) min);
-  s1[0] = 0;
+}
+
+void tell_verbose_uptime(int idx)
+{
+  char s[256] = "", s1[121] = "", s2[81] = "", outbuf[501] = "";
+  time_t total, hr, min;
+#if HAVE_GETRUSAGE
+  struct rusage ru;
+#else
+# if HAVE_CLOCK
+  clock_t cl;
+# endif
+#endif /* HAVE_GETRUSAGE */
+
+  tell_time(online_since, s);
   if (backgrd)
     strcpy(s1, "background");
   else {
@@ -245,23 +260,42 @@ void tell_verbose_uptime(int idx)
     else
       strcpy(s1, "log dump mode");
   }
-  dprintf(idx, "Online for %s  (%s)\n", s, s1);
+  simple_sprintf(outbuf,  "Online for %s", s);
+  if (restart_time) {
+    tell_time(restart_time, s);
+    simple_sprintf(outbuf, "%s (%s %s)", outbuf, restart_was_update ? "updated" : "restarted", s);
+  }
+
+#if HAVE_GETRUSAGE
+  getrusage(RUSAGE_SELF, &ru);
+  total = ru.ru_utime.tv_sec + ru.ru_stime.tv_sec;
+  hr = (int) (total / 60);
+  min = (int) (total - (hr * 60));
+  sprintf(s2, "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min, 
+  100.0 * ((float) total / (float) (now - online_since)));
+#else
+# if HAVE_CLOCK
+  cl = (clock() / CLOCKS_PER_SEC);
+  hr = (int) (cl / 60);
+  min = (int) (cl - (hr * 60));
+  sprintf(s2, "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min,
+  100.0 * ((float) cl / (float) (now - online_since)));
+# else
+  simple_sprintf(s2, "CPU ???");
+# endif
+#endif /* HAVE_GETRUSAGE */
+  dprintf(idx, "%s  (%s)  %s  cache hit %4.1f%%\n",
+          outbuf, s1, s2,
+          100.0 * ((float) cache_hit) / ((float) (cache_hit + cache_miss)));
+
 }
 
 /* Dump status info out to dcc
  */
 void tell_verbose_status(int idx)
 {
-  char s[256] = "", s1[121] = "", s2[81] = "", *vers_t = NULL, *uni_t = NULL;
+  char *vers_t = NULL, *uni_t = NULL;
   int i;
-  time_t now2, hr, min;
-#if HAVE_GETRUSAGE
-  struct rusage ru;
-#else
-# if HAVE_CLOCK
-  clock_t cl;
-# endif
-#endif /* HAVE_GETRUSAGE */
   struct utsname un;
 
   if (!uname(&un) < 0) {
@@ -279,53 +313,15 @@ void tell_verbose_status(int idx)
     dprintf(idx, "I am a localhub.\n");
   if (conf.bot->hub && isupdatehub())
     dprintf(idx, "I am an update hub.\n");
-  now2 = now - online_since;
-  s[0] = 0;
-  if (now2 > 86400) {
-    /* days */
-    simple_sprintf(s, "%d day", (int) (now2 / 86400));
-    if ((int) (now2 / 86400) >= 2)
-      strcat(s, "s");
-    strcat(s, ", ");
-    now2 -= (((int) (now2 / 86400)) * 86400);
-  }
-  hr = (time_t) ((int) now2 / 3600);
-  now2 -= (hr * 3600);
-  min = (time_t) ((int) now2 / 60);
-  sprintf(&s[strlen(s)], "%02d:%02d", (int) hr, (int) min);
-  s1[0] = 0;
-  if (backgrd)
-    strcpy(s1, "background");
-  else {
-    if (term_z)
-      strcpy(s1, "terminal mode");
-    else
-      strcpy(s1, "log dump mode");
-  }
-#if HAVE_GETRUSAGE
-  getrusage(RUSAGE_SELF, &ru);
-  hr = (int) ((ru.ru_utime.tv_sec + ru.ru_stime.tv_sec) / 60);
-  min = (int) ((ru.ru_utime.tv_sec + ru.ru_stime.tv_sec) - (hr * 60));
-  sprintf(s2, "CPU %02d:%02d", (int) hr, (int) min);	/* Actally min/sec */
-#else
-# if HAVE_CLOCK
-  cl = (clock() / CLOCKS_PER_SEC);
-  hr = (int) (cl / 60);
-  min = (int) (cl - (hr * 60));
-  sprintf(s2, "CPU %02d:%02d", (int) hr, (int) min);	/* Actually min/sec */
-# else
-  simple_sprintf(s2, "CPU ???");
-# endif
-#endif /* HAVE_GETRUSAGE */
-  dprintf(idx, "Online for %s  (%s)  %s  cache hit %4.1f%%\n",
-	  s, s1, s2,
-	  100.0 * ((float) cache_hit) / ((float) (cache_hit + cache_miss)));
+
+  tell_verbose_uptime(idx);
 
   if (admin[0])
     dprintf(idx, "Admin: %s\n", admin);
 
   dprintf(idx, "OS: %s %s\n", uni_t, vers_t);
   dprintf(idx, "Running from: %s\n", binname);
+  dprintf(idx, "uid: %s (%d) pid: %d homedir: %s\n", conf.username, conf.uid, mypid, conf.homedir);
   if (tempdir[0])
     dprintf(idx, "Tempdir     : %s\n", tempdir);
 }

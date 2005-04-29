@@ -8,6 +8,7 @@
 #include "types.h"
 #include "crypt.h"
 #include "eggdrop.h"
+#include "src/mod/server.mod/server.h"
 
 /* Public structure of all the dcc connections */
 struct dcc_table {
@@ -39,7 +40,6 @@ struct dcc_t {
   } u;                          /* Special use depending on type        */
 
   in_addr_t addr;                      /* IP address in host byte order         */
-  addr_t addru;
   time_t simultime;             /* the time when the simul dcc is initiated, expires after a number of seconds */
   time_t timeval;               /* Use for any timing stuff
                                    - this is used for timeout checking  */
@@ -51,8 +51,8 @@ struct dcc_t {
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   bool irc;			/* forward the output back to irc? */
   bool hub;			// is this bot a hub?
-  int auth;
-  int whowas;
+//  int auth;
+  bool whowas;
   int dns_id;
   port_t port;
   char simulbot[NICKLEN];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */

@@ -430,6 +430,86 @@ void trim_dcclist(int top_index)
   dcc_total = top_index + 1;    
 }
 
+int
+dcc_read(FILE *f)
+{
+  char inbuf[1024] = "", *type = NULL, *buf = NULL;
+  int idx = -1;
+  bool isserv = 0;
+
+  while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
+    remove_crlf(inbuf);
+    buf = inbuf;
+
+    if (!strcmp(buf, "+dcc"))
+      return idx;
+    
+    type = newsplit(&buf);
+    if (!strcmp(type, "type")) {
+      struct dcc_table *dcc_type = NULL;
+      size_t dcc_size = 0;
+
+//      if (!strcmp(buf, "CHAT"))
+//        dcc_type = &DCC_CHAT;
+      if (!strcmp(buf, "SERVER")) {
+        dcc_type = &SERVER_SOCKET;
+        isserv = 1;
+      }
+//      if (!strcmp(buf, "BOT"))
+//        dcc_type = &DCC_BOT;
+    
+      if (dcc_type) {
+        idx = new_dcc(dcc_type, dcc_size);
+        if (isserv)
+          servidx = idx;
+      }
+    }
+
+    if (idx >= 0) {
+      if (!strcmp(type, "addr"))
+        dcc[idx].addr = my_atoul(buf);
+      if (!strcmp(type, "sock")) {
+        dcc[idx].sock = atoi(buf);
+        if (isserv)
+          serv = dcc[idx].sock;
+      }
+      if (!strcmp(type, "port"))
+        dcc[idx].port = atoi(buf);
+      if (!strcmp(type, "nick"))
+        strlcpy(dcc[idx].nick, buf, NICKLEN);
+      if (!strcmp(type, "host")) {
+        strlcpy(dcc[idx].host, buf, UHOSTLEN);
+      }
+    }
+  }
+  return -1;
+}
+
+void 
+dcc_write(FILE *f, int idx)
+{
+  if (dcc[idx].sock > 0) {
+    fprintf(f, "-dcc\n");
+    if (dcc[idx].type)
+      fprintf(f, "type %s\n", dcc[idx].type->name);
+//  if (user)
+//  fprintf(f, "user %s\n", dcc[idx].user->handle);
+    if (dcc[idx].addr)
+      fprintf(f, "addr %u\n", dcc[idx].addr);
+    if (dcc[idx].status)
+      fprintf(f, "status %lu\n", dcc[idx].status);
+    fprintf(f, "sock %d\n", dcc[idx].sock);
+//  fprintf(f, "simul %d\n", dcc[idx].simul);
+    if (dcc[idx].port)
+      fprintf(f, "port %d\n", dcc[idx].port);  
+    if (dcc[idx].nick[0])
+      fprintf(f, "nick %s\n", dcc[idx].nick);
+    if (dcc[idx].host[0])
+      fprintf(f, "host %s\n", dcc[idx].host);
+    fprintf(f, "+dcc\n");
+  }
+}
+
 /* Mark an entry as lost and deconstruct it's contents. It will be securely
  * removed from the dcc list in the main loop.
  */
@@ -589,6 +669,9 @@ flush_lines(int idx, struct chat_info *ci)
 int
 new_dcc(struct dcc_table *type, int xtra_size)
 {
+  if (!type)
+    return -1;
+
   if (dcc_total == max_dcc)
     return -1;
 

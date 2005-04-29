@@ -95,7 +95,7 @@ void spawnbot(const char *nick)
 
 /* spawn and kill bots accordingly
  * bots prefixxed with '/' will be killed auto if running.
- * if (updating) then we were called with -L and -P, we need to restart all running bots except our parent and localhub */
+ * if (updating) then we were called with -U or -u */
 void
 spawnbots()
 {
@@ -110,7 +110,7 @@ spawnbots()
         kill(bot->pid, SIGKILL);
       else
         continue;
-    /* if we're updating automatically, we were called with -L -P, and are only supposed to kill non-localhubs
+    /* if we're updating automatically, we were called with -u and are only supposed to kill non-localhubs
       -if updating and we find our nick, skip
       -if pid exists and not updating, bot is running and we have nothing more to do, skip.
      */
@@ -118,11 +118,10 @@ spawnbots()
       sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
       continue;
     } else {
-      /* if we are updating with -L -P, then we need to restart ALL bots */
+      /* if we are updating with -u then we need to restart ALL bots */
       if (updating == UPDATE_AUTO && bot->pid) {
-        kill(bot->pid, SIGKILL);
-        /* remove the pid incase we start the new bot before the old dies */
-        unlink(bot->pid_file);
+        kill(bot->pid, SIGHUP);
+        continue;
       }
 
       spawnbot(bot->nick);
@@ -378,7 +377,8 @@ pid_t
 checkpid(const char *nick, conf_bot *bot)
 {
   FILE *f = NULL;
-  char buf[DIRMAX] = "", s[11] = "", *tmpnick = NULL, *tmp_ptr = NULL;
+  char buf[DIRMAX] = "", *tmpnick = NULL, *tmp_ptr = NULL;
+  pid_t pid = 0;
 
   tmpnick = tmp_ptr = strdup(nick);
 
@@ -391,26 +391,35 @@ checkpid(const char *nick, conf_bot *bot)
     str_redup(&bot->pid_file, buf);
 
   if ((f = fopen(buf, "r"))) {
-    pid_t xx = 0;
+    char *bufp = NULL, *pids = NULL;
 
-    fgets(s, 10, f);
-    remove_crlf(s);
+    fgets(buf, sizeof(buf), f);
     fclose(f);
-    xx = atoi(s);
-//    if (bot) {
-      int x = 0;
+    remove_crlf(buf);
 
-      x = kill(xx, SIGCHLD);
-      if (x == -1 && errno == ESRCH)
-        return 0;
-      else if (x == 0)
-        return xx;
-//    } else {
-//      return xx ? xx : 0;
-//    }
+    if (!buf || !buf[0])
+      return 0;
+  
+    bufp = buf;
+    pids = newsplit(&bufp);
+
+    if (str_isdigit(pids)) {
+      pid = atoi(pids);
+
+      if (kill(pid, SIGCHLD))	//Problem killing, most likely it's just not running.
+        pid = 0;
+    }
+
+    //There is a socksfile given and it's accessable, plus the pid in the file is my own
+    //So it's a good chance we just did a soft restart
+    if (bufp[0] && pid && can_stat(bufp) && (getpid() == pid) &&
+        !egg_strcasecmp(nick, origbotname)) {
+      socksfile = strdup(bufp);
+      return 0;
+    }
   }
 
-  return 0;
+  return pid;
 }
 
 void

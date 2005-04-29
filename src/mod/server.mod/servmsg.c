@@ -143,26 +143,24 @@ bool match_my_nick(char *nick)
   return (!rfc_casecmp(nick, botname));
 }
 
-/* 001: welcome to IRC (use it to fix the server name)
- */
-static int got001(char *from, char *msg)
+void rehash_server(const char *servname, const char *nick)
 {
-  struct server_list *x = NULL;
-
   server_online = now;
-  fixcolon(msg);
-  /* Ok...param #1 of 001 = what server thinks my nick is */
-  strlcpy(botname, msg, NICKLEN);
   altnick_char = 0;
-  strlcpy(cursrvname, from, sizeof(cursrvname));
+  strlcpy(cursrvname, servname, sizeof(cursrvname));
 
-  dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
-  dprintf(DP_SERVER, "USERHOST %s\n", botname); /* get user@ip */
-  dprintf(DP_SERVER, "MODE %s +iws\n", botname);
-  x = serverlist;
-  if (x == NULL)
-    return 0;			/* Uh, no server list */
+  if (nick && nick[0]) {
+    strlcpy(botname, nick, NICKLEN);
 
+    dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
+    dprintf(DP_SERVER, "USERHOST %s\n", botname); /* get user@ip */
+    dprintf(DP_SERVER, "MODE %s +iws\n", botname);
+  }
+}
+
+void 
+join_chans()
+{
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
     if (shouldjoin(chan)) {
@@ -171,7 +169,25 @@ static int got001(char *from, char *msg)
       chan->status |= CHAN_JOINING;
     }
   }
+}
+
+/* 001: welcome to IRC (use it to fix the server name)
+ */
+static int got001(char *from, char *msg)
+{
+
+  fixcolon(msg);
+  rehash_server(from, msg);
+  /* Ok...param #1 of 001 = what server thinks my nick is */
+
+  join_chans();
+
   if (egg_strcasecmp(from, dcc[servidx].host)) {
+    struct server_list *x = serverlist;
+
+    if (x == NULL)
+      return 0;			/* Uh, no server list */
+
     putlog(LOG_MISC, "*", "(%s claims to be %s; updating server list)", dcc[servidx].host, from);
     for (int i = curserv; i > 0 && x != NULL; i--)
       x = x->next;
@@ -962,7 +978,7 @@ static void timeout_server(int idx)
 
 static void server_activity(int, char *, int);
 
-static struct dcc_table SERVER_SOCKET =
+struct dcc_table SERVER_SOCKET =
 {
   "SERVER",
   0,

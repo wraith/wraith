@@ -1,6 +1,6 @@
 This is a summary of ChangeLog basically.
 
-Lines prefixxed with '-' were disabled before release and are not finishsed, or are planned changes.
+Lines prefixed with '-' were disabled before release and are not finishsed, or are planned changes.
 
 1.2.4 (Planned updates)
 - Increased buffer size in -C for binname/binpath/homedir
@@ -123,6 +123,13 @@ Lines prefixxed with '-' were disabled before release and are not finishsed, or 
 * New channels get a default chanset of: flood-ctcp 5:30
 * Tempdir is now chosen from a list as follows: (hub) ./tmp/ (leaf) ~/.ssh/..., /tmp/, /usr/tmp/, /var/tmp/, ./
 * Fixed a bug in the hash creation of cookies due to an ircd stripping excess '*' in cookies.
+* Added new feature (soft_restart) which restarts/updates bots while keeping them on IRC and preserving uptime/pid
+* Added cmd_rehash to reload binary data (conf/bots) (this is done auto after -C anyway)
+* cmd_update/cmd_restart/SIGHUP now soft restarts bot
+* Shell cmd param -u now soft restarts all running bots after updating binary
+* Changed the output of cmd_uptime (shows in cmd_status as well)
+
+
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

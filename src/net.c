@@ -225,6 +225,7 @@ void init_net()
     socklist[i].ssl = NULL;
 #endif /* HAVE_SSL */
     socklist[i].flags = SOCK_UNUSED;
+    socklist[i].sock = -1;
   }
 #ifdef HAVE_SSL
   SSL_load_error_strings();
@@ -358,6 +359,55 @@ int sockoptions(int sock, int operation, int sock_options)
     }
   }
   return -1;
+}
+
+int
+sock_read(FILE *f)
+{
+  char inbuf[1024] = "", *type = NULL, *buf = NULL;
+  int fd = -1;
+
+  while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
+    remove_crlf(inbuf);
+
+    buf = inbuf;
+    if (!strcmp(buf, "+sock"))
+      return fd;
+
+    type = newsplit(&buf);
+    if (!strcmp(type, "sock")) {
+      int sock = atoi(newsplit(&buf)), options = atoi(newsplit(&buf));
+
+      fd = allocsock(sock, options);
+    }
+
+    if (fd >= 0) {
+      if (!strcmp(type, "af"))
+        socklist[fd].af = atoi(buf);
+      if (!strcmp(type, "host"))
+        socklist[fd].host = strdup(buf);
+      if (!strcmp(type, "port"))
+        socklist[fd].port = atoi(buf);
+    }
+  }
+  return -1;
+}
+
+void 
+sock_write(FILE *f, int fd)
+{
+  if (socklist[fd].sock > 0) {
+    fprintf(f, "-sock\n");
+    fprintf(f, "sock %d %d\n", socklist[fd].sock, socklist[fd].flags);
+#ifdef USE_IPV6
+    fprintf(f, "af %u\n", socklist[fd].af);
+#endif
+    if (socklist[fd].host)
+      fprintf(f, "host %s\n", socklist[fd].host);
+    if (socklist[fd].port)
+      fprintf(f, "port %d\n", socklist[fd].port);
+    fprintf(f, "+sock\n");
+  }    
 }
 
 /* Return a free entry in the socket entry

@@ -7,6 +7,7 @@
 #define _EGG_MOD_SERVER_SERVER_H
 
 #include "src/tclhash.h"
+#include "src/dcc.h"
 
 #define DO_LOST 1
 #define NO_LOST 0
@@ -52,7 +53,7 @@ extern time_t		server_online, cycle_time, flud_time, flud_ctcp_time;
 extern char		cursrvname[], botrealname[], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[], curnetwork[], botuserip[];
 extern struct server_list *serverlist;
-
+extern struct dcc_table SERVER_SOCKET;
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)
@@ -67,4 +68,6 @@ void add_server(char *);
 void clearq(struct server_list *);
 void nuke_server(const char *);
 bool match_my_nick(char *);
+void rehash_server(const char *, const char *);
+void join_chans();
 

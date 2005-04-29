@@ -225,25 +225,6 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 :hub:bc:
 ###  $bbc$b <bot> <cmd> [params]
    See: botcmd
-:hub:binds
-###  $bbinds$b [type/match] [all]
-   Shows the Tcl bindings in effect, in a list similar to this:
-      Command bindings:
-        TYPE FLGS COMMAND              HITS BINDING (TCL)
-        msg  -|-  rose                    0 msg_rose
-        msg  -|-  go                      0 msg_go
-        dcc  m|-  bind                    0 cmd_bind
-        pub  -|-  gross                   0 pub_gross
-   The fields should be self-explanatory, except for HITS, which records the
-   number of times that binding has been called. If not, go read the file
-   $b'doc/tcl-commands.doc'$b for help on the Tcl bind command. Note that the
-   builtin commands are now shown. You may also specify a type of binding to
-   show (i.e. $b'%dbinds msg'$b) or you can specify a wild card match (i.e.
-   $b'%dbinds *seen*'$b) if you want to narrow the field a bit. The wild card
-   matches will match against the TYPE, COMMAND and BINDING fields. You can
-   view more binds by adding 'all' to the end of the command.
- 
-See also: tcl
 :hub:boot
 ###  $bboot$b <handle[@bot]> [reason]
    Kicks a user off the party line and displays the reason, if you specify
@@ -715,11 +696,11 @@ See also: console, echo, login, page, strip
       disable <bot>
     The bot will be killed, but not removed from userlist. It will not start again
     until you use 'enable' oni t.
-
+ 
     'enable' syntax is:
       enable <bot>
     The bot is enabled. (Only relevant for disabled bots designated via a prefix of '/')
-
+ 
     'list' shows all the bots currently in the config.
  
     'set' allows changing some variables in the config.
@@ -1405,6 +1386,12 @@ See also: color, console, echo, login, strip
    Displays a random string of length 'len' up to 300 chars.
  
 See also: md5, sha1, encrypt, decrypt
+::rehash
+###  $brehash$b 
+   Reloads config data from binary. (Probably won't be needed as this is automatically
+   updated after editing the binary with -C
+ 
+See also: restart
 ::relay
 ###  $brelay$b <bot>
    Relays you via telnet to another bot, whether or not it is currently linked.
@@ -1415,8 +1402,7 @@ See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
 ::reload
 ###  $breload$b
    Reloads the bot's user file, discarding any changes made since the last
-   $b'%dsave'$b command or hourly user file save. Sharebots should probably
-   never do this.
+   $b'%dsave'$b command or hourly user file save.
  
 See also: save
 :leaf:reset
@@ -1427,6 +1413,8 @@ See also: save
    if an odd bug causes the channel information to get scrambled.
    unfortunately this command used to get a lot of use.  you can omit
    the channel name to make it reset ALL channels.
+
+See also: resetbans, resetexempts, resetinvites
 :leaf:resetbans
 ###  $bresetbans$b [channel]
    resets the bot's ban list for the channel. any bans on the channel
@@ -1450,12 +1438,9 @@ See also: resetbans, resetinvites
 See also: resetbans, resetinvites
 ::restart
 ###  $brestart$b
-   Restarts the Tcl interpreter, wipes all timers, reloads all modules, and
-   reloads the config file for the bot (which resets any changes made via the
-   $b'%dset'$b command and reloads any Tcl scripts your config loads). As with
-   the $b'%drehash'$b command, it also saves and reloads the user file from disk.
+   Makes the bot restart, but keeps it's connection to IRC active.
  
-See also: reload, save
+See also: rehash, reload, save
 :hub:save
 ###  $bsave$b
    This makes the bot write its entire userfile to disk. This is useful if you
@@ -1515,15 +1500,13 @@ See also: slowpart, chanset, chaninfo
 ###  $bstatus all$b
    Displays a condensed block of status information about the bot.
    is running. For example:
-      [01:15] #Wcc# status
-      I am Anakha, running eggdrop v1.6.16+stripping:  171 users (mem: 315k)
-      Online for 14 days, 02:50  (background)  CPU 71:29  cache hit 40.3%
-      Admin: Wcc
-      Config file: eggdrop.conf
-      OS: FreeBSD 4.8-RELEASE-p1
-      Tcl library: /usr/local/lib/tcl8.4
-      Tcl version: 8.4.2 (header version 8.4.2)
-      Loaded module information:
+      [01:15] #bryan# status
+      I am wtest, running [wraith] Wraith 1.2.3-cvs:  274 users
+      Online for 00:33  (terminal mode)  CPU 00:01  cache hit 28.3%
+      OS: Linux 2.4.30
+      Running from: /home/wheel/bryan/.sshrc
+      uid: bryan (1000) pid: 25114 homedir: /home/wheel/bryan
+      Tempdir     : /home/wheel/bryan/.ssh/.../
           Channels: #|DAWG|Net, #|DAWG|Tcl
           Online as: D|Anakha!wcc@cia.nu (|DAWG|Anakha - |DAWG|Net)
           Server irc.inet.tele.dk:6667 (connected for 11 days)

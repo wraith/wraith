@@ -931,8 +931,7 @@ my_setkey(struct chanset_t *chan, char *k)
     chan->channel.key = (char *) my_calloc(1, 1);
     return;
   }
-  chan->channel.key = (char *) my_calloc(1, strlen(k) + 1);
-  strcpy(chan->channel.key, k);
+  chan->channel.key = strdup(k);
 }
 
 /* Adds a ban, exempt or invite mask to the list
@@ -949,10 +948,8 @@ new_mask(masklist *m, char *s, char *who)
   m->next->next = NULL;
   m->next->mask = (char *) my_calloc(1, 1);
   free(m->mask);
-  m->mask = (char *) my_calloc(1, strlen(s) + 1);
-  strcpy(m->mask, s);
-  m->who = (char *) my_calloc(1, strlen(who) + 1);
-  strcpy(m->who, who);
+  m->mask = strdup(s);
+  m->who = strdup(who);
   m->timer = now;
 }
 
@@ -1043,9 +1040,14 @@ any_ops(struct chanset_t *chan)
 
 /* Reset the channel information.
  */
-static void
+void
 reset_chan_info(struct chanset_t *chan)
 {
+  if (!chan) return;
+
+  if (!chan->name[0])
+    strlcpy(chan->name, chan->dname, 81);
+
   /* Don't reset the channel if we're already resetting it */
   if (!shouldjoin(chan)) {
     dprintf(DP_MODE, "PART %s\n", chan->name);

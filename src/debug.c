@@ -280,20 +280,22 @@ static void got_ill(int z)
 #endif /* DEBUG_CONTEXT */
 }
 
-static void got_hup(int) __attribute__((noreturn));
-
 static void
 got_hup(int z)
 {
+  signal(SIGHUP, got_hup);
   putlog(LOG_MISC, "*", "GOT SIGHUP -- RESTARTING");
-  restart(-1);
+  do_restart = 1;
+//  restart(-1);
 }
 
 static void
 got_usr1(int z)
 {
+  signal(SIGUSR1, got_usr1);
   putlog(LOG_DEBUG, "*", "GOT SIGUSR1 -- RECHECKING BINARY");
-  reload_bin_data();
+  do_restart = 2;
+//  reload_bin_data();
 }
 
 void init_signals() 

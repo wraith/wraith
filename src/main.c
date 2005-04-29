@@ -76,6 +76,7 @@ bool	have_take = 1;
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
+int     do_restart = 0;
 bool	backgrd = 1;		/* Run in the background? */
 uid_t   myuid;
 pid_t   mypid;
@@ -84,6 +85,8 @@ int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[DIRMAX] = "";
 char 	*binname = NULL;
 time_t	online_since;		/* Unix-time that the bot loaded up */
+time_t  restart_time;
+bool	restart_was_update = 0;
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
 char	version[81] = "";	/* Version info (long form) */
@@ -98,7 +101,7 @@ static char do_killbot[21] = "";
 static int kill_sig;
 static char *update_bin = NULL;
 static bool checktrace = 1;		/* Check for trace when starting up? */
-
+char *socksfile = NULL;
 
 static char *getfullbinname(const char *argv_zero)
 {
@@ -272,12 +275,11 @@ static void show_help()
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:L:P:hnr:stu:U:v")
+#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:stu:U:v")
 #define FLAGS_CHECKPASS STR("cCdDeEhknrtuUv")
 static void dtx_arg(int argc, char *argv[])
 {
   int i = 0;
-  int localhub_pid = 0;
   char *p = NULL;
   
   opterr = 0;
@@ -388,18 +390,6 @@ static void dtx_arg(int argc, char *argv[])
         }
 	exit(0);
       }
-      case 'L':
-      {
-        localhub_pid = checkpid(optarg, NULL);
-        break;
-      }
-      case 'P':
-        if (atoi(optarg) && localhub_pid && (atoi(optarg) != localhub_pid))
-          exit(3);
-        else
-          sdprintf("Updating...");
-        updating = UPDATE_AUTO;
-        break;
       case '?':
       default:
         break;
@@ -597,13 +587,11 @@ static void startup_checks(int hack) {
     } else {
       /* this needs to be both hub/leaf */
       if (update_bin) {					/* invokved with -u/-U */
-        if (updating == UPDATE_AUTO && conf.bot && conf.bot->pid) {		/* invoked with -u bin, so kill  */
-          
-          kill(conf.bot->pid, SIGKILL);
-          unlink(conf.bot->pid_file);
-          writepid(conf.bot->pid_file, mypid);
-        } else if (!conf.bot)
+        if (!conf.bot)
           updating = UPDATE_EXIT;		//if we don't have a botlist, dont bother with restarting bots...
+
+//        if (updating == UPDATE_AUTO && conf.bot && conf.bot->pid)
+//          kill(conf.bot->pid, SIGHUP);
 
         updatebin(DP_STDOUT, update_bin, 1);	/* will call restart all bots */
         /* never reached */
@@ -727,7 +715,7 @@ printf("out: %s\n", out);
   /* Check and load conf file */
   startup_checks(0);
 
-  if ((conf.bot->localhub && !updating) || !conf.bot->localhub) {
+  if (!socksfile && ((conf.bot->localhub && !updating) || !conf.bot->localhub)) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
       sdprintf("%s is already running, pid: %d", conf.bot->nick, conf.bot->pid);
       exit(1);
@@ -800,7 +788,8 @@ printf("out: %s\n", out);
 
   if (backgrd) {
 #ifndef CYGWIN_HACKS
-    mypid = do_fork();
+    if (!socksfile) {
+      mypid = do_fork();
 
 /*
     printf("  |- %-10s (%d)\n", conf.bot->nick, pid);
@@ -821,13 +810,16 @@ printf("out: %s\n", out);
             COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
             BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), mypid, YELLOW(-1), COLOR_END(-1));
 #endif
+    } else
+      writepid(conf.bot->pid_file, mypid);
     close_tty();
   } else {
 #endif /* !CYGWIN_HACKS */
 #ifdef CYGWIN_HACKS
     FreeConsole();
 #endif /* CYGWIN_HACKS */
-    printf("%s[%s%s%s]%s -%s- initiated\n", BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
+    if (!socksfile)
+      printf("%s[%s%s%s]%s -%s- initiated\n", BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
     writepid(conf.bot->pid_file, mypid);
   }
 
@@ -838,7 +830,7 @@ printf("out: %s\n", out);
     dcc[n].addr = iptolong(getmyip());
     dcc[n].sock = STDOUT;
     dcc[n].timeval = now;
-    dcc[n].u.chat->con_flags = conmask;
+    dcc[n].u.chat->con_flags = conmask | LOG_ALL;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
     dcc[n].status = STAT_ECHO;
     strcpy(dcc[n].nick, "HQ");
@@ -865,6 +857,9 @@ printf("out: %s\n", out);
   timer_create_secs(60, "check_expired_ignores", (Function) check_expired_ignores);
   timer_create_secs(3600, "core_hourly", (Function) core_hourly);
   timer_create_secs(1800, "core_halfhourly", (Function) core_halfhourly);
+
+  if (socksfile)
+    readsocks(socksfile);
 
   debug0("main: entering loop");
 
@@ -964,6 +959,12 @@ printf("out: %s\n", out);
       if (!conf.bot->hub)
         flush_modes();
       socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
+    }
+    if (do_restart) {
+      if (do_restart == 1)
+        restart(-1);
+      else
+        reload_bin_data();
     }
   }
 

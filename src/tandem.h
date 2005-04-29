@@ -67,7 +67,7 @@ void botnet_send_join_idx(int);
 void botnet_send_join_party(int, int, int);
 void botnet_send_part_idx(int, char *);
 void botnet_send_part_party(int, int, char *, int);
-void botnet_send_bye();
+void botnet_send_bye(const char *);
 void botnet_send_nkch_part(int, int, char *);
 void botnet_send_nkch(int, char *);
 int bots_in_subtree(tand_t *);

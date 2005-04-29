@@ -28,5 +28,6 @@ char *samechans(const char *, const char *);
 extern struct chanset_t		*chanset;
 extern char			admin[], origbotname[], botname[];
 extern port_t			my_port;
+extern bool			reset_chans;
 
 #endif /* !_CHANPROG_H */

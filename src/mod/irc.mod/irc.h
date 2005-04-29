@@ -77,7 +77,6 @@ static void detect_autokick(char *, char *, struct chanset_t *, char *);
 static bool do_op(char *, struct chanset_t *, time_t, bool);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
-static void reset_chan_info(struct chanset_t *);
 static void my_setkey(struct chanset_t *, char *);
 static void maybe_revenge(struct chanset_t *, char *, char *, int);
 static bool detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
@@ -111,6 +110,7 @@ void recheck_channel(struct chanset_t *, int);
 void recheck_channel_modes(struct chanset_t *);
 void irc_report(int, int);
 void flush_modes();
+void reset_chan_info(struct chanset_t *);
 
 extern int		max_bans, max_exempts, max_invites, max_modes;
 extern bool		use_354;

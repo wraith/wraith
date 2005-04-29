@@ -1276,6 +1276,14 @@ finish_share(int idx)
   trigger_cfg_changed();	/* Set our local cfg settings from our userentry */
   reaffirm_owners();            /* Make sure my owners are +a   */
   updatebot(-1, dcc[j].nick, '+', 0, 0, NULL);
+
+  if (reset_chans) {
+    reset_chans = 0;
+//    putlog(LOG_DEBUG, "*", "Resetting channel info for all channels...");
+//    for (chan = chanset; chan; chan = chan->next)
+//      reset_chan_info(chan);
+    join_chans();
+  }
 }
 
 /* Begin the user transfer process.
