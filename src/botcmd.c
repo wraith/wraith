@@ -602,8 +602,9 @@ static void bot_update(int idx, char *par)
 static void bot_nlinked(int idx, char *par)
 {
   char *newbot = NULL, *next = NULL, *p = NULL, s[1024] = "", x = 0, *vversion = NULL;
-  int bogus = 0, i, vlocalhub = 0;
+  int i, vlocalhub = 0;
   time_t vbuildts = 0L;
+  bool bogus = 0;
 
   newbot = newsplit(&par);
   next = newsplit(&par);
@@ -625,16 +626,18 @@ static void bot_nlinked(int idx, char *par)
     i = nextbot(next);
     if (i != idx)
       bogus = 1;
+
+    if (bogus) {
+      putlog(LOG_BOTS, "*", "Bogus link notice from %s!  (%s -> %s)", dcc[idx].nick, next, newbot);
+      simple_sprintf(s, "Bogus link notice from: %s Disconnected", dcc[idx].nick);
+      dprintf(idx, "error Bogus link notice from (%s -> %s)\n", next, newbot);
+    }
   }
-  if (bogus) {
-    putlog(LOG_BOTS, "*", "Bogus link notice from %s!  (%s -> %s)", dcc[idx].nick, next, newbot);
-    simple_sprintf(s, "Bogus link notice from: %s Disconnected", dcc[idx].nick);
-    dprintf(idx, "error Bogus link notice from (%s -> %s)\n", next, newbot);
-  }
+
   if (s[0]) {
     chatout("*** %s\n", s);
     botnet_send_unlinked(idx, dcc[idx].nick, s);
-    dprintf(idx, "bye Illegal link by leaf\n");
+    dprintf(idx, "bye %s\n", s);
     killsock(dcc[idx].sock);
     lostdcc(idx);
     return;
