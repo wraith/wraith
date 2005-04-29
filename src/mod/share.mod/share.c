@@ -314,9 +314,9 @@ share_chhand(int idx, char *par)
       shareout_but(idx, "h %s %s\n", hand, par);
       noshare = 1;
       value = change_handle(u, par);
+      noshare = 0;
       if (value && conf.bot->hub)
         putlog(LOG_CMDS, "@", "%s: handle %s->%s", dcc[idx].nick, hand, par);
-      noshare = 0;
     }
   }
 }
@@ -345,10 +345,9 @@ share_chattr(int idx, char *par)
           fr2.match = FR_CHAN;
           break_down_flags(atr, &fr, 0);
           get_user_flagrec(u, &fr2, par);
-
           set_user_flagrec(u, &fr, par);
-          check_dcc_chanattrs(u, par, fr.chan, fr2.chan);
           noshare = 0;
+          check_dcc_chanattrs(u, par, fr.chan, fr2.chan);
           build_flags(s, &fr, 0);
           if (conf.bot->hub) {
             if (!(dcc[idx].status & STAT_GETTING))
@@ -363,8 +362,8 @@ share_chattr(int idx, char *par)
           break_down_flags(atr, &fr, 0);
           fr.global = sanity_check(fr.global, u->bot);
           set_user_flagrec(u, &fr, 0);
-          check_dcc_attrs(u, ofl);
           noshare = 0;
+          check_dcc_attrs(u, ofl);
           build_flags(s, &fr, 0);
           fr.match = FR_CHAN;
           if (conf.bot->hub) {
@@ -457,19 +456,18 @@ share_newuser(int idx, char *par)
       /* If user already exists, ignore command */
       shareout_but(idx, "n %s%s %s %s %s\n", isbot ? "-" : "", nick, host, pass, par);
 
-      noshare = 1;
       if (strlen(nick) > HANDLEN)
         nick[HANDLEN] = 0;
 
       fr.match = FR_GLOBAL;
       build_flags(s, &fr, 0);
 
+      noshare = 1;
       userlist = adduser(userlist, nick, host, pass, 0, isbot);
 
       /* Support for userdefinedflag share - drummer */
       u = get_user_by_handle(userlist, nick);
       set_user_flagrec(u, &fr, 0);
-      fr.match = FR_CHAN;       /* why?? */
       noshare = 0;
       if (conf.bot->hub)
         putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
@@ -586,8 +584,10 @@ share_change(int idx, char *par)
         makepass(pass);
         userlist = adduser(userlist, hand, "none", pass, 0, 1);
         u = get_user_by_handle(userlist, hand);
-      } else if (!u)
+      } else if (!u) {
+        noshare = 0;
         return;
+      }
 
       if (uet->got_share) {
         if (!(e = find_user_entry(uet, u))) {
@@ -679,9 +679,9 @@ static void share_mns_maskchan(int idx, char *par)
     str_unescape(par, '\\');
     noshare = 1;
     value = u_delmask(type, chan, par, 1);
+    noshare = 0;
     if (!conf.bot->hub && value > 0)
       add_delay(chan, '-', type, par);
-    noshare = 0;
   }
 }
 
@@ -698,7 +698,6 @@ static void share_pls_mask(int idx, char *par)
     bool stick = 0;
 
     shareout_but(idx, "+m %c %s\n", type, par);
-    noshare = 1;
     mask = newsplit(&par);
     str_unescape(mask, '\\');
     tm = newsplit(&par);
@@ -713,6 +712,7 @@ static void share_pls_mask(int idx, char *par)
     expire_time = (time_t) atoi(tm);
     if (expire_time != 0L)
       expire_time += now;
+    noshare = 1;
     u_addmask(type, NULL, mask, from, par, expire_time, flags);
     noshare = 0;
     if (conf.bot->hub)
@@ -753,10 +753,10 @@ static void share_pls_maskchan(int idx, char *par)
     from = newsplit(&par);
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: %s %s on %s (%s:%s)", dcc[idx].nick, str_type, mask, chname, from, par);
-    noshare = 1;
     expire_time = (time_t) atoi(tm);
     if (expire_time != 0L)
       expire_time += now;
+    noshare = 1;
     u_addmask(type, chan, mask, from, par, expire_time, flags);
     noshare = 0;
     if (!conf.bot->hub)
@@ -788,7 +788,6 @@ share_pls_ignore(int idx, char *par)
     char *ign = NULL, *from = NULL, *ts = NULL;
 
     shareout_but(idx, "+i %s\n", par);
-    noshare = 1;
     ign = newsplit(&par);
     str_unescape(ign, '\\');
     ts = newsplit(&par);
@@ -805,6 +804,7 @@ share_pls_ignore(int idx, char *par)
     par[65] = 0;
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: ignore %s (%s: %s)", dcc[idx].nick, ign, from, par);
+    noshare = 1;
     addignore(ign, from, (const char *) par, expire_time);
     noshare = 0;
   }
