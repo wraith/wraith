@@ -40,6 +40,11 @@
 static cache_t *irccache = NULL;
 #endif /* CACHE */
 
+static time_t last_eI; /* this will stop +e and +I from being checked over and over if the bot is stuck in a
+                        * -o+o loop for some reason, hence possibly causing a SENDQ kill
+                        */
+#define do_eI (((now - last_eI) > 30) ? 1 : 0)
+
 static int net_type = 0;
 static time_t wait_split = 300;    /* Time to wait for user to return from
                                  * net-split. */
@@ -1065,18 +1070,21 @@ reset_chan_info(struct chanset_t *chan)
     chan->status |= CHAN_PEND;
     chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);
     /* don't bother checking bans if it's +take */
-    if (!(chan->status & CHAN_ASKEDBANS) && !channel_take(chan)) {
-      chan->status |= CHAN_ASKEDBANS;
-      dprintf(DP_MODE, "MODE %s +b\n", chan->name);
-    }
-    if (opped && !channel_take(chan)) {
-      if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
-        chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
-        dprintf(DP_MODE, "MODE %s +e\n", chan->name);
+    if (!channel_take(chan)) {
+      if (!(chan->status & CHAN_ASKEDBANS)) {
+        chan->status |= CHAN_ASKEDBANS;
+        dprintf(DP_MODE, "MODE %s +b\n", chan->name);
       }
-      if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
-        chan->ircnet_status |= CHAN_ASKED_INVITES;
-        dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+      if (opped && do_eI) {
+        last_eI = now;
+        if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
+          chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
+          dprintf(DP_MODE, "MODE %s +e\n", chan->name);
+        }
+        if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
+          chan->ircnet_status |= CHAN_ASKED_INVITES;
+          dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+        }
       }
     }
     /* These 2 need to get out asap, so into the mode queue */

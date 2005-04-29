@@ -1185,10 +1185,6 @@ do_take(struct chanset_t *chan)
   return;
 }
 
-time_t last_eI; /* this will stop +e and +I from being checked over and over if the bot is stuck in a 
-                 * -o+o loop for some reason, hence possibly causing a SENDQ kill 
-                 */
-
 /* Things to do when i just became a chanop:
  */
 void recheck_channel(struct chanset_t *chan, int dobans)
@@ -1241,15 +1237,13 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   /* this can all die, we want to enforce +bitch/+take first :) */
 
   /* This is a bad hack for +e/+I */
-  if (!channel_take(chan) && me_op(chan) && ((now - last_eI) > 30)) {
+  if (dobans == 2 && !channel_take(chan) && me_op(chan) && do_eI) {
     last_eI = now;
-    if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) &&
-        use_exempts == 1) {
+    if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
         dprintf(DP_MODE, "MODE %s +e\n", chan->name);
     }
-    if (!(chan->ircnet_status & CHAN_ASKED_INVITES) &&
-        use_invites == 1) {
+    if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
       chan->ircnet_status |= CHAN_ASKED_INVITES;
       dprintf(DP_MODE, "MODE %s +I\n", chan->name);
     }
@@ -1628,7 +1622,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->joined = now;				/* set this to keep the whining masses happy */
 
     if (!waschanop && me_op(chan))
-      recheck_channel(chan, 1);
+      recheck_channel(chan, 2);
     if (!me_op(chan) && any_ops(chan))
       chan->channel.do_opreq = 1;
   }
@@ -1752,7 +1746,7 @@ static int got315(char *from, char *msg)
 	    chan->channel.key[0] ? chan->channel.key : chan->key_prot);
   } else {
     if (me_op(chan))
-      recheck_channel(chan, 1);
+      recheck_channel(chan, 2);
     else if (chan->channel.members == 1)
       chan->status |= CHAN_STOP_CYCLE;
     else
