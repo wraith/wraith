@@ -1013,8 +1013,6 @@ void autolink_cycle_hub(char *start)
 	  if (strcmp(curval, bestval) < 0)
 	    strcpy(bestval, curval);
 	}
-      } else {
-  	  botunlink(-2, dcc[i].nick, "Linked but not sharing?");
       }
     }
    }
@@ -1040,8 +1038,9 @@ void autolink_cycle_hub(char *start)
   } else
     strcpy(curval, "0");
 
+  /* link to the (highlest level)/best hub */
   u = next_hub(u, bestval, curval);
-  if ((u) && (!in_chain(u->handle)))
+  if (u && !in_chain(u->handle))
     botlink("", -3, u->handle);
 }
 

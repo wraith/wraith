@@ -1344,11 +1344,13 @@ cancel_user_xfer(int idx, void *x)
   if (idx < 0) {
     idx = -idx;
     k = 1;
+    /* turn off sharing flag */
     updatebot(-1, dcc[idx].nick, '-', 0, 0, NULL);
   }
   flush_tbuf(dcc[idx].nick);
 
   if (dcc[idx].status & STAT_SHARE) {
+    /* look for any transfers from this bot and kill them */
     if (dcc[idx].status & STAT_GETTING) {
       for (i = 0; i < dcc_total; i++)
         if (dcc[i].type && !egg_strcasecmp(dcc[i].host, dcc[idx].nick) &&
@@ -1363,11 +1365,11 @@ cancel_user_xfer(int idx, void *x)
       }
       putlog(LOG_BOTS, "*", "(Userlist download aborted.)");
     }
+    /* look for any transfers we were sending them */
     if (dcc[idx].status & STAT_SENDING) {
       for (i = 0; i < dcc_total; i++)
         if (dcc[i].type && (!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) &&
-            ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND))
-             == DCT_FILETRAN)) {
+            ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND)) == DCT_FILETRAN)) {
           j = i;
           break;
         }

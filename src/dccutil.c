@@ -565,7 +565,7 @@ tell_dcc(int idx)
   dprintf(idx, format, "----", "---", "--------", "-----", "---------",
           "----------------------------------------", "----");
 
-  egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5ud %%-%us %%-40s %%s\n", nicklen);
+  egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5u %%-%us %%-40s %%s\n", nicklen);
 
   dprintf(idx, "dccn: %d, dcc_total: %d\n", dccn, dcc_total);
   dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
