@@ -131,6 +131,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * Disabled auto-renaming server names internally on connect if they don't match our own list
 * Fixed hub delinking bots for not sharing instead of just offering the userfile again. (#59)
 * Possibly fixed a very rare userfile sharing desync (#58)
+* Fixed wrong spacing in cmd_status
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

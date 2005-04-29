@@ -1439,8 +1439,8 @@ irc_report(int idx, int details)
       }
       len = simple_sprintf(ch, "%s%s%s%s, ", chan->dname, p ? "(" : "", p ? p : "", p ? ")" : "");
       if ((k + len) > 70) {
-        dprintf(idx, "   %s\n", q);
-        strcpy(q, "          ");
+        dprintf(idx, "    %s\n", q);
+        strcpy(q, "           ");
         k = 10;
       }
       k += my_strcpy(q + k, ch);
