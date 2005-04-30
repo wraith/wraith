@@ -153,19 +153,27 @@ bool logfile_open()
   return 1;
 }
 
+bool logfile_stat(const char *fname)
+{
+  struct stat st;
+  int fd = open(fname, O_RDONLY);
+
+  if (fd == -1 || fstat(fd, &st) < 0) {
+    if (fd != -1)
+      close(fd);
+    fclose(logf);
+    if (!logfile_open())
+      return;
+  }
+}
+
 void logfile(int type, const char *msg)
 {
   if (!logf && !logfile_open())
     return;
 
-  int fd = fileno(logf);
-  struct stat st;
-
-  if ((fstat(fd, &st)) < 0) {
-    fclose(logf);
-    if (!logfile_open())
-      return;
-  }
+  if (!logfile_stat(".l"))
+    return;
 
   if (!egg_strcasecmp(msg, log_last)) {
     repeats++;
