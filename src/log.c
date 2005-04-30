@@ -22,6 +22,9 @@
 
 #include <ctype.h>
 #include <stdarg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 int	conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
 bool	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
@@ -132,6 +135,54 @@ void logidx(int idx, const char *format, ...)
     dprintf(idx, "%s\n", va_out);
 }
 
+#ifdef no
+FILE *logf;
+bool flush_log = 1;
+char log_last[LOGLINEMAX + 1] = "";
+int repeats = 0;
+
+bool logfile_open()
+{
+  if (!(logf = fopen(".l", "a")))
+    return 0;
+
+  char date[50] = "";
+
+  egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
+  fprintf(logf, "--- Log session begin: %s ---\n", date);
+  return 1;
+}
+
+void logfile(int type, const char *msg)
+{
+  if (!logf && !logfile_open())
+    return;
+
+  int fd = fileno(logf);
+  struct stat st;
+
+  if ((fstat(fd, &st)) < 0) {
+    fclose(logf);
+    if (!logfile_open())
+      return;
+  }
+
+  if (!egg_strcasecmp(msg, log_last)) {
+    repeats++;
+    return;
+  }
+  if (repeats) {
+    fprintf(logf, "Last message repeated %d times.\n", repeats);
+    repeats = 0;
+  }
+
+  strlcpy(log_last, msg, sizeof(log_last));
+  fprintf(logf, "%s\n", msg);
+  if (flush_log)
+    fflush(logf);
+}
+#endif
+
 /* Log something
  * putlog(level,channel_name,format,...);
  * Broadcast the log if chname is not '@'
@@ -171,7 +222,12 @@ void putlog(int type, const char *chname, const char *format, ...)
   /* strcat(out, "\n"); */
 
   /* FIXME: WRITE LOG HERE */
+#ifdef no
+  int logfile_masks = LOG_CMDS|LOG_ERRORS|LOG_WARN|LOG_BOTS|LOG_MISC;
 
+  if (logfile_masks && (logfile_masks & type))
+    logfile(type, out);
+#endif
   /* broadcast to hubs */
   if (chname[0] == '*' && conf.bot && conf.bot->nick)
     botnet_send_log(-1, conf.bot->nick, type, out);
