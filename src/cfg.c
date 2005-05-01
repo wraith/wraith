@@ -462,18 +462,6 @@ static void getin_changed(struct cfg_entry *cfgent, int *valid)
   if (!strcmp(cfgent->name, "op-bots")) {
     if ((i < 1) || (i > 10))
       return;
-  } else if (!strcmp(cfgent->name, "invite-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "key-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "limit-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
-  } else if (!strcmp(cfgent->name, "unban-bots")) {
-    if ((i < 1) || (i > 10))
-      return;
   } else if (!strcmp(cfgent->name, "lag-threshold")) {
     if ((i < 3) || (i > 60))
       return;
@@ -482,9 +470,6 @@ static void getin_changed(struct cfg_entry *cfgent, int *valid)
       return;
   } else if (!strcmp(cfgent->name, "kill-threshold")) {
     if ((i < 0) || (i >= 200))
-      return;
-  } else if (!strcmp(cfgent->name, "op-time-slack")) {
-    if ((i < 30) || (i > 1200))
       return;
   }
   *valid = 1;
