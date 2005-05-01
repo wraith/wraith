@@ -196,9 +196,6 @@ static int got001(char *from, char *msg)
       putlog(LOG_MISC, "*", "Invalid server list!");
       return 0;
     }
-    if (x->realname) 
-      free(x->realname);
-    x->realname = strdup(from);
   }
 #endif
   return 0;
@@ -279,7 +276,7 @@ static int got442(char *from, char *msg)
 
   for (x = serverlist, i = 0; x; x = x->next, i++)
     if (i == curserv) {
-      if (egg_strcasecmp(from, x->realname ? x->realname : x->name))
+      if (egg_strcasecmp(from, x->name))
 	return 0;
       break;
     }
@@ -1064,13 +1061,8 @@ static int whoispenalty(char *from, char *msg)
 
     for (; x; x = x->next) {
       if (i == curserv) {
-        if (!x->realname) {
-          if (strcmp(x->name, from))
-            ii = 1;
-        } else {
-          if (strcmp(x->realname, from))
-            ii = 1;
-        }
+        if (strcmp(x->name, from))
+          ii = 1;
       }
       i++;
     }

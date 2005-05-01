@@ -59,7 +59,7 @@ static time_t server_timeout = 15;	/* server timeout for connecting */
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 time_t cycle_time;			/* cycle time till next server connect */
-port_t default_port;		/* default IRC port */
+port_t default_port = 6667;		/* default IRC port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
 static bool check_mode_r;	/* check for IRCNET +r modes */
@@ -637,7 +637,6 @@ void add_server(char *ss)
     x = (struct server_list *) my_calloc(1, sizeof(struct server_list));
 
     x->next = 0;
-    x->realname = 0;
     x->port = 0;
     if (z)
       z->next = x;
@@ -695,8 +694,6 @@ void clearq(struct server_list *xx)
       free(xx->name);
     if (xx->pass)
       free(xx->pass);
-    if (xx->realname)
-      free(xx->realname);
     free(xx);
     xx = x;
   }
@@ -722,10 +719,6 @@ static void next_server(int *ptr, char *servname, port_t *port, char *pass)
 	if (!egg_strcasecmp(x->name, servname)) {
 	  *ptr = i;
 	  return;
-	} else if (x->realname && !egg_strcasecmp(x->realname, servname)) {
-	  *ptr = i;
-	  strlcpy(servname, x->realname, sizeof servname);
-	  return;
 	}
       }
       i++;
@@ -734,7 +727,6 @@ static void next_server(int *ptr, char *servname, port_t *port, char *pass)
     x = (struct server_list *) my_calloc(1, sizeof(struct server_list));
 
     x->next = 0;
-    x->realname = 0;
     x->name = strdup(servname);
     x->port = *port ? *port : default_port;
     if (pass && pass[0]) {

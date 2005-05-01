@@ -18,11 +18,6 @@ static void cmd_servers(int idx, char *par)
     dprintf(idx, "Server list:\n");
     i = 0;
     for (; x; x = x->next) {
-      if (x->realname)
-	simple_snprintf(s, sizeof s, "  %s:%d (%s) %s", x->name,
-                     x->port ? x->port : default_port, x->realname,
-                     (i == curserv) ? "<- I am here" : "");
-      else 
         simple_snprintf(s, sizeof s, "  %s:%d %s", x->name, 
 		     x->port ? x->port : default_port, 
 		     (i == curserv) ? "<- I am here" : "");
