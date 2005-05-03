@@ -708,6 +708,7 @@ int readuserfile(const char *file, struct userrec **ret)
              putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
              free(my_ptr);
              fclose(f);
+             noshare = 0;
              return 0;
            }
            free(my_ptr);
@@ -831,6 +832,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	    putlog(LOG_MISC, "*", "* Corrupt user record line: %d!", line);
 	    lasthand[0] = 0;
             fclose(f);
+            noshare = 0;
             return 0;
 	  } else {
             int isbot = 0;
