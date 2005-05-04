@@ -10,8 +10,11 @@
 #define UFF_INVITE	BIT1	/* Send invites in user file	    */
 #define UFF_EXEMPT	BIT2	/* Send exempts in user file	    */
 
+#include "src/users.h"
+
 void sharein(int, char *);
 void shareout(const char *, ...) __attribute__((format(printf, 1, 2)));
+void shareout_prot(struct userrec *, const char *, ...) __attribute__((format(printf, 2, 3)));
 void finish_share(int);
 void dump_resync(int);
 void share_report(int, int);

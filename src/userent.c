@@ -69,7 +69,7 @@ bool def_kill(struct user_entry *e)
   return 1;
 }
 
-bool write_userfile_noleaf(FILE * f, struct userrec *u, struct user_entry *e, int idx)
+bool write_userfile_protected(FILE * f, struct userrec *u, struct user_entry *e, int idx)
 {
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
   if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
@@ -91,7 +91,7 @@ void *def_get(struct userrec *u, struct user_entry *e)
   return e->u.string;
 }
 
-bool def_set(struct userrec *u, struct user_entry *e, void *buf)
+bool def_set_real(struct userrec *u, struct user_entry *e, void *buf, bool protect)
 {
   char *string = (char *) buf;
 
@@ -122,9 +122,22 @@ bool def_set(struct userrec *u, struct user_entry *e, void *buf)
     e->u.string = NULL;
   }
   if (!noshare) {
-    shareout("c %s %s %s\n", e->type->name, u->handle, e->u.string ? e->u.string : "");
+    if (protect)
+      shareout_prot(u, "c %s %s %s\n", e->type->name, u->handle, e->u.string ? e->u.string : "");
+    else
+      shareout("c %s %s %s\n", e->type->name, u->handle, e->u.string ? e->u.string : "");
   }
   return 1;
+}
+
+bool def_set(struct userrec *u, struct user_entry *e, void *buf)
+{
+  return (def_set_real(u, e, buf, 0));
+}
+
+bool set_protected(struct userrec *u, struct user_entry *e, void *buf)
+{
+  return (def_set_real(u, e, buf, 1));
 }
 
 bool def_gotshare(struct userrec *u, struct user_entry *e, char *data, int idx)
@@ -227,7 +240,7 @@ static bool config_set(struct userrec *u, struct user_entry *e, void *buf)
   /* we will possibly free new below, so let's send the information
    * to the botnet now */
   if (!noshare && !cfg_noshare)
-    shareout("c CONFIG %s %s %s\n", u->handle, mynew->key, mynew->data ? mynew->data : "");
+    shareout_prot(u, "c CONFIG %s %s %s\n", u->handle, mynew->key, mynew->data ? mynew->data : "");
   if ((old && old != mynew) || !mynew->data || !mynew->data[0]) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
@@ -384,10 +397,10 @@ struct user_entry_type USERENTRY_USERNAME = {
  0,
  def_gotshare,
  def_unpack,
- write_userfile_noleaf,
+ write_userfile_protected,
  def_kill,
  def_get,
- def_set,
+ set_protected,
  botmisc_display,
  "USERNAME"
 };
@@ -396,10 +409,10 @@ struct user_entry_type USERENTRY_NODENAME = {
  0,
  def_gotshare,
  def_unpack,
- write_userfile_noleaf,
+ write_userfile_protected,
  def_kill,
  def_get,
- def_set,
+ set_protected,
  botmisc_display,
  "NODENAME"
 };
@@ -408,10 +421,10 @@ struct user_entry_type USERENTRY_OS = {
  0,
  def_gotshare,
  def_unpack,
- write_userfile_noleaf,
+ write_userfile_protected,
  def_kill,
  def_get,
- def_set,
+ set_protected,
  botmisc_display,
  "OS"
 };
