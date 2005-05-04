@@ -83,7 +83,7 @@ console_kill(struct user_entry *e)
 }
 
 static bool
-console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
+console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e, int idx)
 {
   if (u->bot)
     return 1;

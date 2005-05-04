@@ -34,7 +34,7 @@ struct user_entry_type {
   struct user_entry_type *next;
   bool (*got_share) (struct userrec *, struct user_entry *, char *, int);
   bool (*unpack) (struct userrec *, struct user_entry *);
-  bool (*write_userfile) (FILE *, struct userrec *, struct user_entry *);
+  bool (*write_userfile) (FILE *, struct userrec *, struct user_entry *, int);
   bool (*kill) (struct user_entry *);
   void *(*get) (struct userrec *, struct user_entry *);
   bool (*set) (struct userrec *, struct user_entry *, void *);

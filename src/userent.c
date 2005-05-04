@@ -69,7 +69,17 @@ bool def_kill(struct user_entry *e)
   return 1;
 }
 
-bool def_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
+bool write_userfile_noleaf(FILE * f, struct userrec *u, struct user_entry *e, int idx)
+{
+  /* only write if saving local, or if sending to hub, or if sending to same user as entry */
+  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
+    if (lfprintf(f, "--%s %s\n", e->type->name, e->u.string) == EOF)
+      return 0;
+  }
+  return 1;
+}
+
+bool def_write_userfile(FILE * f, struct userrec *u, struct user_entry *e, int idx)
 {
   if (lfprintf(f, "--%s %s\n", e->type->name, e->u.string) == EOF)
     return 0;
@@ -320,12 +330,16 @@ static bool config_gotshare(struct userrec *u, struct user_entry *e, char *buf, 
   return 1;
 }
 
-static bool config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
+static bool config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
 {
-  struct xtra_key *x = NULL;
+  /* only write if saving local, or if sending to hub, or if sending to same user as entry */
+  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
+    struct xtra_key *x = NULL;
 
-  for (x = (struct xtra_key *) e->u.extra; x; x = x->next)
-    lfprintf(f, "--CONFIG %s %s\n", x->key, x->data);
+    for (x = (struct xtra_key *) e->u.extra; x; x = x->next)
+      if (lfprintf(f, "--CONFIG %s %s\n", x->key, x->data) == EOF)
+        return 0;
+  }
   return 1;
 }
 
@@ -370,7 +384,7 @@ struct user_entry_type USERENTRY_USERNAME = {
  0,
  def_gotshare,
  def_unpack,
- def_write_userfile,
+ write_userfile_noleaf,
  def_kill,
  def_get,
  def_set,
@@ -382,7 +396,7 @@ struct user_entry_type USERENTRY_NODENAME = {
  0,
  def_gotshare,
  def_unpack,
- def_write_userfile,
+ write_userfile_noleaf,
  def_kill,
  def_get,
  def_set,
@@ -394,7 +408,7 @@ struct user_entry_type USERENTRY_OS = {
  0,
  def_gotshare,
  def_unpack,
- def_write_userfile,
+ write_userfile_noleaf,
  def_kill,
  def_get,
  def_set,
@@ -624,12 +638,11 @@ static bool laston_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static bool laston_write_userfile(FILE * f, struct userrec *u, struct user_entry *e)
+static bool laston_write_userfile(FILE * f, struct userrec *u, struct user_entry *e, int idx)
 {
   struct laston_info *li = (struct laston_info *) e->u.extra;
 
-  if (lfprintf(f, "--LASTON %lu %s\n", li->laston,
-	      li->lastonplace ? li->lastonplace : "") == EOF)
+  if (lfprintf(f, "--LASTON %lu %s\n", li->laston, li->lastonplace ? li->lastonplace : "") == EOF)
     return 0;
   return 1;
 }
@@ -749,12 +762,12 @@ static bool botaddr_kill(struct user_entry *e)
   return 1;
 }
 
-static bool botaddr_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
+static bool botaddr_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
   if (lfprintf(f,  "--%s %s:%u/%u:%u:%s\n", e->type->name, bi->address,
-	      bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink) == EOF)
+  	      bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink) == EOF)
     return 0;
   return 1;
 }
@@ -838,7 +851,7 @@ struct user_entry_type USERENTRY_BOTADDR =
   "BOTADDR"
 };
 
-static bool hosts_write_userfile(FILE *f, struct userrec *u, struct user_entry *e)
+static bool hosts_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
 {
   struct list_type *h = NULL;
 

@@ -305,7 +305,7 @@ bool write_user(struct userrec *u, FILE * f, int idx)
 	if (lfprintf(f, "--%s %s\n", ue->name, lt->extra) == EOF)
 	  return 0;
     } else {
-      if (conf.bot->hub && !ue->type->write_userfile(f, u, ue))
+      if (conf.bot->hub && !ue->type->write_userfile(f, u, ue, idx))
 	return 0;
     }
   }
@@ -417,7 +417,7 @@ int write_userfile(int idx)
   f = fopen(new_userfile, "a");
   putlog(LOG_DEBUG, "@", "Writing user entries.");
   for (struct userrec *u = userlist; u && ok; u = u->next)
-    ok = write_user(u, f, idx);
+    ok = write_user(u, f, -1);
   if (!ok || fflush(f)) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(ferror(f)));
     fclose(f);
