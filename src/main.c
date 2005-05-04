@@ -961,11 +961,11 @@ printf("out: %s\n", out);
       socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
     }
     if (do_restart) {
-      do_restart = 0;
       if (do_restart == 1)
         restart(-1);
       else
         reload_bin_data();
+      do_restart = 0;
     }
   }
 
