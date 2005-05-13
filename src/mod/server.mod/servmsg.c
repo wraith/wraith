@@ -1094,8 +1094,11 @@ irc_whois(char *nick, const char *format, ...)
       dprintf(idx, "%s\n", va_out);
 }
 
-static void check_hostmask()
+void check_hostmask()
 {
+  if (!server_online || !botuserhost[0])
+    return;
+
   char s[UHOSTLEN + 2] = "";
 
   simple_sprintf(s, "*!%s", botuserhost);              /* just add actual user@ident, regardless of ~ */

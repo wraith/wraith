@@ -45,7 +45,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * Users who are v|o in a +private chan are now voiced, as before |v was needed.
 * Added channel flag +|-botbitch, when set only bots will be allowed to be opped, users are auto-deopped.
 * chanset -bitch/-private/-botbitch/+botbitch/+closed/+private will now trigger bots to recheck channel (op/deop/kick people)
-* Fixed bot not updating it's hostmask when reconnecting to server
+* Fixed bot not updating it's hostmask when reconnecting to server (#11/#85)
 * Fixed bot sending +Ie modes before recieving list from server after opping.
 * Fixed channel bans not displaying on hubs (#1)
 * Fixed users showing up in .whom after doing .botcmd and relinking the bot which the cmd was ran on. (#9)

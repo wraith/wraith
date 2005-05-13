@@ -69,4 +69,4 @@ void nuke_server(const char *);
 bool match_my_nick(char *);
 void rehash_server(const char *, const char *);
 void join_chans();
-
+void check_hostmask();

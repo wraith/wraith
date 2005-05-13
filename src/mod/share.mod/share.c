@@ -29,6 +29,7 @@
 #include "src/mod/transfer.mod/transfer.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/irc.mod/irc.h"
+#include "src/mod/server.mod/server.h"
 
 static struct flag_record fr = { 0, 0, 0, 0 };
 
@@ -1293,6 +1294,9 @@ finish_share(int idx)
    *   - unshared (got_share == 0) user entries
    */
   clear_userlist(ou);
+
+  /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
+  check_hostmask();
 
   /* copy over any auth users */
   Auth::FillUsers();
