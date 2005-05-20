@@ -61,7 +61,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * Fixed colors still showing for characters ":@()<>" when colors were turned off.
 * Reverted patch from 1.2 which disabled removing duplicate msgs in server queue. (Fixes most queue/excess flood bugs)
 * Users can no longer whois PERM OWNERS unless they are themselves one.
-* Fixed cmd_boot to allow users to boot users they can whois. (Users with lower flags)
+* Fixed cmd_boot to only allow users to boot users they can whois. (Users with lower flags)
   Also, cmd_boot will now boot all sessions of a user on the bot specified. (#37)
 * Fixed a file descriptor leak in the 'last' checking.
 * Fixed bot's being tagged with op/login stats. (#22)
@@ -132,6 +132,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * Fixed hub delinking bots for not sharing instead of just offering the userfile again. (#59)
 * Possibly fixed a very rare userfile sharing desync (#58)
 * Fixed wrong spacing in cmd_status
+* Fixed cmd_boot attempting to boot a remote simulated dcc created by .botcmd. (#90)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
