@@ -602,6 +602,11 @@ readsocks(const char *fname)
   unlink(fname);
   fclose(f);
   if (servidx >= 0) {
+    char nserv[50] = "";
+
+    simple_snprintf(nserv, sizeof(nserv), "%s:%d", dcc[servidx].host, dcc[servidx].port);
+    add_server(nserv);
+    curserv = 0;
     rehash_server(dcc[servidx].host, nick);
     dprintf(DP_DUMP, "VERSION\n");
     reset_chans = 1;

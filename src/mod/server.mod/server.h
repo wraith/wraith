@@ -46,8 +46,8 @@ enum {
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern size_t		nick_len;
 extern bool		quiet_reject, trigger_on_ignore, floodless;
-extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp, serv;
-extern port_t		default_port, newserverport;
+extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp, serv, curserv;
+extern port_t		default_port, newserverport, curservport;
 extern time_t		server_online, cycle_time, flud_time, flud_ctcp_time;
 extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[], curnetwork[], botuserip[];
@@ -70,3 +70,4 @@ bool match_my_nick(char *);
 void rehash_server(const char *, const char *);
 void join_chans();
 void check_hostmask();
+void next_server(int *, char *, port_t *, char *);

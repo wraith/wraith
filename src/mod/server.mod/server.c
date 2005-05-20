@@ -37,7 +37,8 @@ port_t newserverport = 0;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
 static char serverpass[121] = "";
 static time_t trying_server;	/* trying to connect to a server right now? */
-static int curserv = 999;		/* current position in server list: */
+int curserv = 999;		/* current position in server list: */
+port_t curservport = 0;
 int flud_thr = 5;		/* msg flood threshold */
 time_t flud_time = 60;		/* msg flood time */
 int flud_ctcp_thr = 3;	/* ctcp flood threshold */
@@ -79,7 +80,6 @@ static bool double_help = 0;
 static bool double_warned = 0;
 
 static void empty_msgq(void);
-static void next_server(int *, char *, port_t *, char *);
 static void disconnect_server(int, int);
 static int calc_penalty(char *);
 static bool fast_deq(int);
@@ -703,7 +703,7 @@ void clearq(struct server_list *xx)
  *
  * -> if (*ptr == -1) then jump to that particular server
  */
-static void next_server(int *ptr, char *servname, port_t *port, char *pass)
+void next_server(int *ptr, char *servname, port_t *port, char *pass)
 {
   struct server_list *x = serverlist;
 

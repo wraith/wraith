@@ -148,6 +148,8 @@ void rehash_server(const char *servname, const char *nick)
   server_online = now;
   altnick_char = 0;
   strlcpy(cursrvname, servname, sizeof(cursrvname));
+  if (servidx >= 0)
+    curservport = dcc[servidx].port;
 
   if (nick && nick[0]) {
     strlcpy(botname, nick, NICKLEN);
