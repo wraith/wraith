@@ -455,7 +455,11 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   if (bot->net.ip6 || bot->net.host6)
     bot->net.v6 = 1;
 
-  bot->u = NULL;
+  if (userlist)
+    bot->u = get_user_by_handle(userlist, nick);
+  else
+    bot->u = NULL;
+
 //  bot->pid = checkpid(nick, bot);
 
   if (settings.hubs) {
