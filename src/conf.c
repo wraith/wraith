@@ -85,7 +85,7 @@ void spawnbot(const char *nick)
   char *run = (char *) my_calloc(1, size);
   int status = 0;
 
-  simple_snprintf(run, size, "%s -B %s", binname, nick);
+  simple_snprintf(run, size, "%s -B %s", binname, replace(nick, "`", "\\`"));
   sdprintf("Spawning '%s': %s", nick, run);
   status = system(run);
   if (status == -1 || WEXITSTATUS(status))
@@ -905,7 +905,7 @@ conf_bot *conf_bots_dup(conf_bot *src)
 
 void kill_removed_bots(conf_bot *oldlist, conf_bot *newlist)
 {
-  if (oldlist && newlist) {
+  if (oldlist) {
     conf_bot *botold = NULL, *botnew = NULL;
     bool found = 0;
     struct userrec *u = NULL;
@@ -922,11 +922,13 @@ void kill_removed_bots(conf_bot *oldlist, conf_bot *newlist)
         conf_killbot(NULL, botold, SIGKILL);
         if ((u = get_user_by_handle(userlist, botold->nick))) {
           putlog(LOG_MISC, "*", "Removing '%s' as it has been removed from the binary config.", botold->nick);
-          if (!conf.bot->hub)
+          if (server_online)
             check_this_user(botold->nick, 1, NULL);
           if (deluser(botold->nick)) {
+            /* there is likely NO conf[] 
             if (conf.bot->hub)
               write_userfile(-1);
+            */
           }
         }
       }
@@ -943,6 +945,7 @@ fill_conf_bot()
   char *mynick = NULL;
   conf_bot *me = NULL;
 
+  /* This first clause should actually be obsolete */
   if (!used_B && conf.bots && conf.bots->nick) {
     mynick = strdup(conf.bots->nick);
     strlcpy(origbotname, conf.bots->nick, NICKLEN + 1);

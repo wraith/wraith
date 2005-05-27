@@ -682,7 +682,7 @@ restart(int idx)
   argv[0] = strdup(binname);
   argv[1] = strdup(shit);
   argv[2] = strdup("-B");
-  argv[3] = strdup(conf.bot->nick);
+  argv[3] = strdup(replace(conf.bot->nick, "`", "\\`"));
   argv[4] = NULL;
 
   unlink(conf.bot->pid_file);
