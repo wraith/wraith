@@ -475,6 +475,8 @@ void answer_local_whom(int idx, int chan)
 
 	if (dcc[i].u.chat->away != NULL)
 	  dprintf(idx, "   AWAY: %s\n", dcc[i].u.chat->away);
+        if (dcc[i].u.chat->su_nick && (dcc[idx].user->flags & USER_ADMIN)) 
+          dprintf(idx, "   SU FROM: %s\n", dcc[i].u.chat->su_nick);
       }
     }
   }
