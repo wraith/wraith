@@ -2303,7 +2303,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, flag_t chflags, flag_t 
   struct chanset_t *chan = NULL;
 
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && (dcc[i].type->flags & DCT_MASTER) && !egg_strcasecmp(u->handle, dcc[i].nick)) {
+    if (dcc[i].type && dcc[i].simul == -1 && (dcc[i].type->flags & DCT_MASTER) && !egg_strcasecmp(u->handle, dcc[i].nick)) {
       if ((dcc[i].type == &DCC_CHAT) &&
 	  ((chflags & (USER_OP | USER_MASTER | USER_OWNER))
 	   != (ochatr & (USER_OP | USER_MASTER | USER_OWNER))))
