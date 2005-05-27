@@ -881,6 +881,8 @@ See also: op, console
    This kills the bot. The bot goes offline immediately, logging who issued
    the 'die' command. You shouldn't have to use this too often. If you specify
    a reason, it is logged, otherwise the reason is "authorized by <handle>".
+ 
+See also: suicide, conf
 ::dns
 ###  $bdns$b <hostname/ip/flush>
    Resolves the given hostname/ip
@@ -1413,7 +1415,7 @@ See also: save
    if an odd bug causes the channel information to get scrambled.
    unfortunately this command used to get a lot of use.  you can omit
    the channel name to make it reset ALL channels.
-
+ 
 See also: resetbans, resetexempts, resetinvites
 :leaf:resetbans
 ###  $bresetbans$b [channel]
@@ -1564,6 +1566,12 @@ See also: fixcodes, color, echo, login, page
    Lets you assume the identity of another user. If you are a global owner,
    this does not require a password. Otherwise, you will be asked for the
    user's password. $b%dquit$b returns you to your original handle.
+::suicide
+###  $bsuicide$b [reason]
+   Makes bot remove itself and then dies. If bot is first bot in it's binary
+   it will kill all bots running for that binary.
+ 
+See also: die, conf
 :leaf:swhois
 ###  $bswhois$b [server/nick] <nick>
    Displays a server /whois for the specified nick. Specifying

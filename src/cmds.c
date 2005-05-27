@@ -1418,7 +1418,7 @@ static void cmd_botcmd(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);	
 
   if (!strcmp(botm, "*")) {
-    if (!egg_strncasecmp(cmd, "di", 2) || !egg_strncasecmp(cmd, "res", 3)) {
+    if (!egg_strncasecmp(cmd, "di", 2) || !egg_strncasecmp(cmd, "res", 3) || !egg_strncasecmp(cmd, "sui", 3)) {
       dprintf(idx, "Not a good idea.\n");
       return;
     } else if (!(dcc[idx].user->flags & USER_OWNER)) {
@@ -1970,6 +1970,12 @@ static void cmd_die(int idx, char *par)
     strlcpy(quit_msg, dcc[idx].nick, 1024);
   }
   kill_bot(s1, s2);
+}
+
+static void cmd_suicide(int idx, char *par)
+{
+  putlog(LOG_CMDS, "*", "#%s# suicide %s", dcc[idx].nick, par);
+  suicide(par);
 }
 
 static void cmd_debug(int idx, char *par)
@@ -4292,6 +4298,7 @@ cmd_t C_dcc[] =
   {"debug",		"a",	(Function) cmd_debug,		NULL, 0},
   {"timers",		"a",	(Function) cmd_timers,		NULL, 0},
   {"die",		"n",	(Function) cmd_die,		NULL, 0},
+  {"suicide",		"a",	(Function) cmd_suicide,		NULL, 0},
   {"echo",		"",	(Function) cmd_echo,		NULL, 0},
   {"login",		"",	(Function) cmd_login,		NULL, 0},
   {"fixcodes",		"",	(Function) cmd_fixcodes,	NULL, 0},

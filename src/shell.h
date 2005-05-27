@@ -58,6 +58,7 @@ void check_crontab();
 void crontab_del();
 int crontab_exists();
 void crontab_create(int);
+void suicide(const char *);
 void detected(int, char *);
 #endif /* !CYGWIN_HACKS */
 void werr(int) __attribute__((noreturn));

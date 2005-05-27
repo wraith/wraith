@@ -552,14 +552,37 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
   }
 }
 
+void suicide(const char *msg)
+{
+  char tmp[512] = "";
+
+  putlog(LOG_WARN, "*", "Comitting suicide: %s", msg);
+  simple_sprintf(tmp, "Suicide: %s", msg);
+  set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
+  if (!conf.bot->hub) {
+    nuke_server("HARAKIRI!!");
+    sleep(1);
+  } else {
+    unlink(userfile);
+    simple_sprintf(tmp, "%s~", userfile);
+    unlink(tmp);
+  }
+  unlink(binname);
+
+  if (conf.bot->localhub) {
+    conf_checkpids();
+    conf_killbot(NULL, NULL, SIGKILL);
+  }
+
+  fatal(msg, 0);
+}
+
 void detected(int code, char *msg)
 {
   char *p = NULL, tmp[512] = "";
-  struct userrec *u = NULL;
   struct flag_record fr = { FR_GLOBAL, 0, 0, 0 };
   int act, do_fatal = 0, killbots = 0;
   
-  u = get_user_by_handle(userlist, conf.bot->nick);
   if (code == DETECT_LOGIN)
     p = (char *) (CFG_LOGIN.ldata ? CFG_LOGIN.ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
   if (code == DETECT_TRACE)
@@ -593,16 +616,16 @@ void detected(int code, char *msg)
     do_fork();
     putlog(LOG_WARN, "*", "Setting myself +d: %s", msg);
     simple_sprintf(tmp, "+d: %s", msg);
-    set_user(&USERENTRY_COMMENT, u, tmp);
+    set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
     fr.global = USER_DEOP;
     fr.bot = 1;
-    set_user_flagrec(u, &fr, 0);
+    set_user_flagrec(conf.bot->u, &fr, 0);
     sleep(1);
     break;
   case DET_DIE:
     putlog(LOG_WARN, "*", "Dying: %s", msg);
     simple_sprintf(tmp, "Dying: %s", msg);
-    set_user(&USERENTRY_COMMENT, u, tmp);
+    set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
     if (!conf.bot->hub)
       nuke_server("BBL");
     sleep(1);
@@ -610,20 +633,7 @@ void detected(int code, char *msg)
     do_fatal++;
     break;
   case DET_SUICIDE:
-    putlog(LOG_WARN, "*", "Comitting suicide: %s", msg);
-    simple_sprintf(tmp, "Suicide: %s", msg);
-    set_user(&USERENTRY_COMMENT, u, tmp);
-    if (!conf.bot->hub) {
-      nuke_server("HARAKIRI!!");
-      sleep(1);
-    } else {
-      unlink(userfile);
-      simple_sprintf(tmp, "%s~", userfile);
-      unlink(tmp);
-    }
-    unlink(binname);
-    killbots++;
-    do_fatal++;
+    suicide(msg);
     break;
   }
   if (killbots && conf.bot->localhub) {
