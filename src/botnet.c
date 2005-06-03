@@ -779,10 +779,10 @@ void dump_links(int z)
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_CHAT && dcc[i].simul == -1) {
       if ((dcc[i].u.chat->channel >= 0) && (dcc[i].u.chat->channel < GLOBAL_CHANS)) {
-        l = simple_sprintf2(x, "j !%s %s %D %c%D %s\n", conf.bot->nick, dcc[i].nick, 
+        l = simple_snprintf2(x, sizeof(x), "j !%s %s %D %c%D %s\n", conf.bot->nick, dcc[i].nick, 
                                dcc[i].u.chat->channel, geticon(i), dcc[i].sock, dcc[i].host);
 	tputs(dcc[z].sock, x, l);
-        l = simple_sprintf2(x, "i %s %D %D %s\n", conf.bot->nick, 
+        l = simple_snprintf2(x, sizeof(x), "i %s %D %D %s\n", conf.bot->nick, 
                               dcc[i].sock, now - dcc[i].timeval, 
                               dcc[i].u.chat->away ? dcc[i].u.chat->away : "");
 	tputs(dcc[z].sock, x, l);
@@ -790,11 +790,11 @@ void dump_links(int z)
     }
   }
   for (i = 0; i < parties; i++) {
-    l = simple_sprintf2(x, "j %s %s %D %c%D %s\n", party[i].bot, party[i].nick, 
+    l = simple_snprintf2(x, sizeof(x), "j %s %s %D %c%D %s\n", party[i].bot, party[i].nick, 
                           party[i].chan, party[i].flag, party[i].sock, party[i].from);
     tputs(dcc[z].sock, x, l);
     if ((party[i].status & PLSTAT_AWAY) || (party[i].timer != 0)) {
-      l = simple_sprintf2(x, "i %s %D %D %s\n", party[i].bot, party[i].sock, now - party[i].timer, party[i].away ? party[i].away : "");
+      l = simple_snprintf2(x, sizeof(x), "i %s %D %D %s\n", party[i].bot, party[i].sock, now - party[i].timer, party[i].away ? party[i].away : "");
       tputs(dcc[z].sock, x, l);
     }
   }

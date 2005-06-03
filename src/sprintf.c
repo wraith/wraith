@@ -111,13 +111,13 @@ size_t simple_vsprintf(char *buf, const char *format, va_list va)
   return simple_vsnprintf(buf, VSPRINTF_MAXSIZE, format, va);
 }
 
-size_t simple_sprintf2 (char *buf, const char *format, ...)
+size_t simple_snprintf2 (char *buf, size_t size, const char *format, ...)
 {
   size_t ret = 0;
 
   va_list va;
   va_start(va, format);
-  ret = simple_vsprintf(buf, format, va);
+  ret = simple_vsnprintf(buf, size, format, va);
   va_end(va);
   return ret;
 }
