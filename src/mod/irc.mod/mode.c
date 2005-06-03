@@ -1099,7 +1099,7 @@ gotmode(char *from, char *msg)
                       simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
                       tputs(serv, tmp, strlen(tmp));
                     }
-                    simple_sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
+                    simple_sprintf(tmp, "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
                     deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
                     break;
                   default:
@@ -1127,11 +1127,11 @@ gotmode(char *from, char *msg)
                 }
 
                 if (isbadop == BC_NOCOOKIE)
-                  putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
+                  putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
                 else if (isbadop == BC_HASH)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
                 else if (isbadop == BC_SLACK)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
               } else
                 putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
             }
@@ -1150,7 +1150,7 @@ gotmode(char *from, char *msg)
                     if (m)
                       m->flags |= SENTKICK;
                   }
-                  simple_sprintf(tmp, "%s!%s MODE %s", m->nick, m->userhost, modes[modecnt - 1]);
+                  simple_sprintf(tmp, "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
                   deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
                   break;
                 default:
