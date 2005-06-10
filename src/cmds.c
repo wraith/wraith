@@ -1117,18 +1117,16 @@ static void cmd_console(int idx, char *par)
       return;
     }
 
+    if (strcmp(nick, "*") && privchan(fr, findchan_by_dname(nick), PRIV_OP)) {
+      dprintf(idx, "Invalid console channel: %s.\n", nick);
+      return;
+    }
+
     get_user_flagrec(dcc[idx].user, &fr, nick);
 
-    if (strcmp(nick, "*")) {
-      if (privchan(fr, findchan_by_dname(nick), PRIV_OP)) {
-        dprintf(idx, "Invalid console channel: %s.\n", nick);
-        return;
-      }
-
-      if (!chk_op(fr, findchan_by_dname(nick))) {
-        dprintf(idx, "You don't have op or master access to channel %s.\n", nick);
-        return;
-      }
+    if (!chk_op(fr, findchan_by_dname(nick))) {
+      dprintf(idx, "You don't have op or master access to channel %s.\n", nick);
+      return;
     }
 
     strlcpy(dcc[dest].u.chat->con_chan, nick, 81);
