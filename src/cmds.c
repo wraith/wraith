@@ -1419,7 +1419,8 @@ static void cmd_botcmd(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);	
 
   if (!strcmp(botm, "*")) {
-    if (!egg_strncasecmp(cmd, "di", 2) || !egg_strncasecmp(cmd, "res", 3) || !egg_strncasecmp(cmd, "sui", 3)) {
+    if (!egg_strncasecmp(cmd, "di", 2) || !egg_strncasecmp(cmd, "res", 3) || !egg_strncasecmp(cmd, "sui", 3) || 
+        !egg_strncasecmp(cmd, "j", 1)) {
       dprintf(idx, "Not a good idea.\n");
       return;
     } else if (!(dcc[idx].user->flags & USER_OWNER)) {

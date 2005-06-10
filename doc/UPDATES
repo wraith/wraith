@@ -96,7 +96,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * Added some debug logging when a telnet connection is ignored.
 * Fixed some missing sanity checking on certain user flags for channel records.
 * cmd_dns wasn't checking for param
-* cmd_getkey over .botcmd was displaying excess newlines.
+* cmd_getkey over botcmd was displaying excess newlines.
 * Rewrote how logs are shared over botnet, now uses much less bw and resources. (#31)
   -[will break logging during update]
 * Added some missing logging for msg_pass (#34)
@@ -132,7 +132,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * Fixed hub delinking bots for not sharing instead of just offering the userfile again. (#59)
 * Possibly fixed a very rare userfile sharing desync (#58)
 * Fixed wrong spacing in cmd_status
-* Fixed cmd_boot attempting to boot a remote simulated dcc created by .botcmd. (#90)
+* Fixed cmd_boot attempting to boot a remote simulated dcc created by botcmd. (#90)
 * Fixed bots with '`' in nick not spawning correctly. (#88)
 * Added cmd_suicide. (#80)
 * Fixed 'user has joined partyline' when after using cmd_botcmd/cmd_chattr on remote bots. (#84)
@@ -140,6 +140,7 @@ Lines prefixed with '-' were disabled before release and are not finishsed, or a
 * Added channel name to bad cookie/manop commenting (#97)
 * Fixed *many* buffer overflows in the botnet code. (#94)
 * Changes to console flag requirements: +rbh (PERM OWNER), +vd (+a), +egu (+n). (#99)
+* cmd_botcmd blocks the following cmds for '*': die, restard, suicide, jump. (#17)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
