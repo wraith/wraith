@@ -1,6 +1,6 @@
 This is a summary of ChangeLog basically.
 
-Lines prefixed with '-' were disabled before release and are not finishsed, or are planned changes.
+Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
 1.2.4 (Planned updates)
 - Increased buffer size in -C for binname/binpath/homedir
