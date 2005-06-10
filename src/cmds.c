@@ -1154,11 +1154,14 @@ static void cmd_console(int idx, char *par)
 	  if (chan_master(fr))
 	    md &= ~(LOG_FILES | LOG_DEBUG);
 	  else
-	    md &= ~(LOG_MISC | LOG_CMDS | LOG_FILES | LOG_WALL |
-		    LOG_DEBUG);
+	    md &= ~(LOG_MISC | LOG_CMDS | LOG_FILES | LOG_WALL | LOG_DEBUG);
 	}
+        if (!isowner(dcc[dest].nick) && pls)
+          md &= ~(LOG_RAW | LOG_BOTNET | LOG_BOTSHARE);
+        if (!glob_admin(fr) && pls)
+          md &= ~(LOG_SRVOUT | LOG_DEBUG);
 	if (!glob_owner(fr) && pls)
-	  md &= ~(LOG_RAW | LOG_SRVOUT | LOG_BOTNET | LOG_BOTSHARE | LOG_ERRORS | LOG_GETIN | LOG_WARN);
+	  md &= ~(LOG_ERRORS | LOG_GETIN | LOG_WARN);
 	if (!glob_master(fr) && pls)
 	  md &= ~LOG_BOTS;
 	if (pls)
