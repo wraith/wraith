@@ -431,7 +431,9 @@ chk_op(struct flag_record fr, struct chanset_t *chan)
 int
 real_chk_op(struct flag_record fr, struct chanset_t *chan, bool botbitch)
 {
-  if (!chan)
+  if (!chan && glob_op(fr))
+    return 1;
+  else if (!chan)
     return 0;
 
   if (!privchan(fr, chan, PRIV_OP) && !real_chk_deop(fr, chan, botbitch)) {
