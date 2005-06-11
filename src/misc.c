@@ -601,6 +601,8 @@ readsocks(const char *fname)
 
   unlink(fname);
   fclose(f);
+  if (nick)
+    strlcpy(origbotname, nick, sizeof(origbotname));
   if (servidx >= 0) {
     char nserv[50] = "";
 
