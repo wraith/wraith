@@ -507,9 +507,9 @@ void conf_to_bin(conf_t *in, bool move, int die)
 
 void reload_bin_data() {
   if (bin_checksum(binname, GET_CONF)) {
-    conf_bot *oldlist = NULL;
+    conf_bot *oldbots = NULL;
     
-    oldlist = conf_bots_dup(conf.bots);
+    oldbots = conf_bots_dup(conf.bots);
     /* free up our current conf struct */
     free_conf();
     /* Fill conf[] with binary data from settings[] */
@@ -518,7 +518,7 @@ void reload_bin_data() {
     fill_conf_bot();
 
     /* If we don't have conf.bot, then all bots were removed or just our own record */
-    if ((!conf.bot && oldlist.bot->localhub) || (conf.bot && !conf.bot->localhub && oldlist.bot->localhub)) {
+    if ((!conf.bot && oldbots->localhub) || (conf.bot && !conf.bot->localhub && oldbots->localhub)) {
       /* no longer the localhub (or removed), need to alert the new one to rehash */
       if (conf.bots->pid)
         conf_killbot(NULL, conf.bots, SIGHUP);		//restart the new localhub
@@ -527,7 +527,7 @@ void reload_bin_data() {
     }
     if (conf.bot && conf.bot->localhub) {
       /* kill and remove bots removed from conf */
-      kill_removed_bots(oldlist, conf.bots);
+      kill_removed_bots(oldbots, conf.bots);
       /* add any bots not in userfile */
       conf_add_userlist_bots();
       /* start/disable new bots as necesary */
@@ -535,7 +535,7 @@ void reload_bin_data() {
     } else
       free_conf_bots(conf.bots);
 
-    free_conf_bots(oldlist);
+    free_conf_bots(oldbots);
     putlog(LOG_MISC, "*", "Rehashed config data from binary.");
   }
 }
