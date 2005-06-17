@@ -1250,9 +1250,9 @@ static void cmd_chhandle(int idx, char *par)
       putlog(LOG_CMDS, "*", "#%s# chhandle %s %s", dcc[idx].nick,
             hand, newhand);
       dprintf(idx, "Changed.\n");
+      write_userfile(idx);
     } else
       dprintf(idx, "Failed.\n");
-    write_userfile(idx);
   }
 }
 
@@ -1285,10 +1285,10 @@ static void cmd_handle(int idx, char *par)
     if (change_handle(dcc[idx].user, newhandle)) {
       putlog(LOG_CMDS, "*", "#%s# handle %s", oldhandle, newhandle);
       dprintf(idx, "Okay, changed.\n");
+      if (conf.bot->hub)
+        write_userfile(idx);
     } else
       dprintf(idx, "Failed.\n");
-    if (conf.bot->hub)
-      write_userfile(idx);
   }
 }
 
