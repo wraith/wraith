@@ -99,7 +99,7 @@ int do_confedit = 0;		/* show conf menu if -C */
 static char do_killbot[21] = "";
 static int kill_sig;
 static char *update_bin = NULL;
-static bool checktrace = 1;		/* Check for trace when starting up? */
+bool checktrace = 1;		/* Check for trace when starting up? */
 char *socksfile = NULL;
 
 static char *getfullbinname(const char *argv_zero)
