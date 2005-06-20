@@ -11,6 +11,7 @@
 #include "chanprog.h"
 #include "misc.h"
 #include "src/mod/server.mod/server.h"
+#include "src/mod/channels.mod/channels.h"
 #include "src/mod/ctcp.mod/ctcp.h"
 #include "users.h"
 #include "userrec.h"
@@ -23,7 +24,7 @@ char auth_key[51] = "";
 char auth_prefix[2] = "";
 int badprocess = DET_IGNORE;
 bool dccauth = 0;
-char cfg_glob_chanset[512] = "+enforcebans +dynamicbans +userbans -bitch -protectops -revenge +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -revengebot -nodesynch -closed -take +manop -voice -private -fastop";
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch -protectops -revenge +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -revengebot -nodesynch -closed -take +manop -voice -private -fastop";
 int cloak_script = 0;
 rate_t close_threshold = { 0, 0 };
 int fight_threshold;
@@ -49,7 +50,7 @@ static variable_t vars[] = {
  {"auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM, NULL, NULL},
  {"bad-process",	&badprocess,		0,				VAR_INT|VAR_DETECTED, NULL, NULL},
  {"dccauth",		&dccauth,		0,				VAR_INT|VAR_BOOL, NULL, NULL},
- {"chanset",		cfg_glob_chanset,	sizeof(cfg_glob_chanset),	VAR_STRING|VAR_NOLHUB, NULL, NULL},
+ {"chanset",		glob_chanset,		sizeof(glob_chanset),		VAR_STRING|VAR_CHANSET|VAR_NOLHUB, NULL, NULL},
  {"cloak-script",	&cloak_script,		0,				VAR_INT|VAR_CLOAK|VAR_NOLHUB, NULL, NULL},
  {"close-threshold",	&close_threshold,	0,				VAR_RATE|VAR_NOLOC, NULL, NULL},
  {"fight-threshold",	&fight_threshold,	0,				VAR_INT|VAR_NOLOC, NULL, NULL},
@@ -148,10 +149,9 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
     } else
       return 0;
   } else if (var->flags & VAR_STRING) {
-
-    if (data) {
+    if (data)
       strlcpy((char *) var->mem, data, var->size);
-    } else
+    else
       ((char *) var->mem)[0] = 0;
 
     if (var->flags & VAR_NICK) {
@@ -364,8 +364,12 @@ sdprintf("var: %s (local): %s", var->name, data);
 sdprintf("var: %s (global): %s", var->name, data);
     if (data && !clear)
       var->gdata = strdup(data);
-    else
-      var->gdata = NULL;
+    else {
+      if (var->flags & VAR_CHANSET)
+        var->gdata = strdup(def_chanset);
+      else 
+        var->gdata = NULL;
+    }
 
     if (domem && var->mem)
       var_set_mem(var, var->gdata);
@@ -442,6 +446,7 @@ void init_vars()
     if (!vars[i].gdata && !vars[i].ldata) 
       var_string(&vars[i]);
   }
+  var_set_by_name(NULL, "chanset", def_chanset);
 }
 
 /* This is used to parse (GLOBAL) userfile var lines and changes via .set from a remote hub */

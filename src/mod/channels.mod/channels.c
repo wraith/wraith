@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 
 static bool 			use_info = 1;
-static char 			glob_chanmode[64];		/* Default chanmode (drummer,990731) */
+static char 			glob_chanmode[64] = "nt";		/* Default chanmode (drummer,990731) */
 static int 			global_stopnethack_mode;
 static int 			global_revenge_mode = 3;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
@@ -42,7 +42,7 @@ static time_t 			global_invite_time;
 
 
 /* Global channel settings (drummer/dw) */
-char glob_chanset[512] = "";
+char glob_chanset[512];
 static char *lastdeletedmask = NULL;
 
 /* Global flood settings */
@@ -881,27 +881,6 @@ cmd_t channels_bot[] = {
 
 void channels_init()
 {
-  strcpy(glob_chanmode, "nt");
-  strcpy(glob_chanset,
-         "+enforcebans "
-	 "+dynamicbans "
-	 "+userbans "
-	 "-bitch "
-	 "-protectops "
-	 "-revenge "
-	 "+cycle "
-	 "-inactive "
-	 "+userexempts "
-	 "-dynamicexempts "
-	 "+userinvites "
-	 "-dynamicinvites "
-	 "-revengebot "
-	 "-nodesynch "
-	 "-closed "
-	 "-take "
-	 "-voice "
-         "-private "
-	 "-fastop ");
   timer_create_secs(60, "check_expired_masks", (Function) check_expired_masks);
   if (conf.bot->hub) {
     timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);

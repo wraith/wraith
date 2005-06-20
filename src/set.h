@@ -28,6 +28,7 @@
 #define VAR_PERM	BIT13
 /* Don't set the var data from the mem as default (NICK) */
 #define VAR_NODEF	BIT14
+#define VAR_CHANSET	BIT15
 
 #define VAR_LDATA 	1
 #define VAR_GDATA	2
@@ -50,7 +51,7 @@ typedef struct rate_b {
  time_t time;
 } rate_t;
 
-extern char		auth_key[], auth_prefix[2], motd[], cfg_glob_chanset[],
+extern char		auth_key[], auth_prefix[2], motd[], *def_chanset,
 			msgident[], msginvite[], msgop[], msgpass[], process_list[];
 extern bool		dccauth;
 extern int		cloak_script, fight_threshold, fork_interval, in_bots, set_noshare,

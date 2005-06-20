@@ -145,6 +145,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_quit working over botcmd. (#108)
 * Fixed 'bots' not showing up in help, and a typo in 'botpart'.
 * In config/-C, the ip field for bots can now be either ipv4 or ipv6. (ipv6 field still present)
+* Clearing chanset var now correctly uses defaults.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
