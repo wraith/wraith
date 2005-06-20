@@ -86,6 +86,8 @@ void Auth::MakeHash(bool bd)
 
 void Auth::Done(bool _bd)
 {
+  hash[0] = 0;
+  rand[0] = 0;
   Status(AUTHED);
   bd = _bd;
 }
