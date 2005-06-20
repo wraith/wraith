@@ -786,7 +786,8 @@ writeconf(char *filename, FILE * stream, int bits)
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
     comment("# autouname is ON");
     my_write(f, "! uname %s\n", my_uname());
-    my_write(f, "#! uname %s\n", conf.uname);
+    if (conf.uname)
+      my_write(f, "#! uname %s\n", conf.uname);
   } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
     conf_com();
     my_write(f, "%s! uname %s\n", do_confedit == CONF_AUTO ? "" : "#", my_uname());
