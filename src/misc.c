@@ -676,16 +676,15 @@ restart(int idx)
   fixmod(binname);
 
   /* replace image now */
-  char *argv[5] = { NULL, NULL, NULL, NULL, NULL };
-  char shit[5] = "";
+  char *argv[4] = { NULL, NULL, NULL, NULL, NULL };
+  char shit[7] = "";
 
-  simple_sprintf(shit, "-%s%s%s%s", !checktrace ? "s" : "", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
+  simple_sprintf(shit, "-%s%s%s%sB", !checktrace ? "s" : "", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
 
   argv[0] = strdup(binname);
   argv[1] = strdup(shit);
-  argv[2] = strdup("-B");
-  argv[3] = strdup(replace(conf.bot->nick, "`", "\\`"));
-  argv[4] = NULL;
+  argv[2] = strdup(replace(conf.bot->nick, "`", "\\`"));
+  argv[3] = NULL;
 
   unlink(conf.bot->pid_file);
   FILE *fp = NULL;
