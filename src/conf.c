@@ -853,7 +853,7 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("# A '+' in front of HOST means the HOST is ipv6");
   comment("# A '/' in front of BOT will disable that bot.");
   comment("#[/]BOT IP|. [+]HOST|. [IPV6-IP]");
-  comment("***** 1.2.3: Hubs CAN be mixed with leaf bots, but is not fully tested; it is not recommended. ******");
+  comment("#***** 1.2.3: Hubs CAN be mixed with leaf bots, but is not fully tested; it is not recommended. ******");
 
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
