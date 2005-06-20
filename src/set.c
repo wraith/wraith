@@ -20,6 +20,7 @@
 
 int set_noshare = 0;
 
+//char alias[1024] = "";
 char auth_key[51] = "";
 char auth_prefix[2] = "";
 int badprocess = DET_IGNORE;
@@ -46,6 +47,7 @@ int promisc = DET_WARN;
 int trace = DET_WARN;
 
 static variable_t vars[] = {
+// {"alias",		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC, NULL, NULL},
  {"auth-key",		auth_key,		sizeof(auth_key),		VAR_STRING|VAR_PERM, NULL, NULL},
  {"auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM, NULL, NULL},
  {"bad-process",	&badprocess,		0,				VAR_INT|VAR_DETECTED, NULL, NULL},
@@ -539,8 +541,10 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
     olddata = var->gdata ? var->gdata : NULL;
 
   /* Append to the olddata if there...*/
-  if (olddata) {
-    size_t osiz = strlen(olddata), esiz = strlen(element) + 1;		// element + ,
+  size_t osiz = strlen(olddata);
+
+  if (olddata && osiz) {
+    size_t esiz = strlen(element) + 1;		// element + ,
 
     data = (char *) calloc(1, osiz + esiz + 1);
     simple_snprintf(data, osiz + esiz + 1, "%s,%s", olddata, element);
@@ -583,7 +587,10 @@ static int var_rem_list(const char *botnick, variable_t *var, const char *elemen
 
   while ((word = strsep(&olddata, delim))) {
     if ((num && num != i) || (!num && egg_strcasecmp(word, element))) {
-      simple_snprintf(data, tsiz, "%s,%s", data, word);
+      if (data && data[0])
+        simple_snprintf(data, tsiz, "%s,%s", data, word);
+      else
+        simple_snprintf(data, tsiz, "%s", word);
     }
     i++;
   }
