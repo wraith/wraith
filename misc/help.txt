@@ -1483,14 +1483,19 @@ See also: reload, backup
    $uR$u:    Rate. Set as 'number:interval', ie, '1:5'
    $uD$u:    Detected vars have the folloing options: $bignore$b/0, $bwarn$b/1, $bdie$b/2, 
                                                       $breject$b/3, $bsuicide$b/4
- 
+
+[SL] $balias$b           List of dcc aliases in format '<alias> <cmd> [parms]'. First
+                          matching alias is used. Normal flag checking is done
+                          after the alias is expanded.
+                          $fCAUTION: TRIPPLE CHECK FOR POSSIBLE LOOPS AS THEY ARE FATAL.$f
 [S]  $bchanset$b         List of default options for when a channel is added. Same format 
                           as 'chanset'.
 [N]  $bserver-port$b     Default port to use for server connections.
 [S]  $bauth-key$b        The authkey used during authing.G ive to users if they need to auth. 
                           (can be bot specific)
 [C]  $bauth-prefix$b     The prefix character used for msg cmds, ie: $u!$uop or $u.$uop
- 
+[B]  $bauth-obscure$b    Will not halt in dcc pass is wrong and authing is enabled. 
+                          Will always fail at auth hash though.
   *  Msg cmd vars may be left blank to disable usage of cmd.
 [S]  $bmsgop$b           Defines the cmd for opping via msging the bot.
 [S]  $bmsgpass$b         Defines the cmd for setting a pass via msging the bot.

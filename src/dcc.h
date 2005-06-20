@@ -51,6 +51,7 @@ struct dcc_t {
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   bool irc;			/* forward the output back to irc? */
   bool hub;			// is this bot a hub?
+  bool wrong_pass;		// auth obscure hack
 //  int auth;
   bool whowas;
   int dns_id;

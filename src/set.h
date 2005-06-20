@@ -53,7 +53,7 @@ typedef struct rate_b {
 
 extern char		auth_key[], auth_prefix[2], motd[], *def_chanset, alias[],
 			msgident[], msginvite[], msgop[], msgpass[], process_list[];
-extern bool		dccauth;
+extern bool		dccauth, auth_obscure;
 extern int		cloak_script, fight_threshold, fork_interval, in_bots, set_noshare,
 			kill_threshold, lag_threshold, op_bots, badprocess, hijack, login, promisc, trace;
 extern rate_t		op_requests, close_threshold;

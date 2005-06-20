@@ -149,6 +149,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * In config/-C, the ip field for bots can now be either ipv4 or ipv6. (ipv6 field still present)
 * Clearing chanset var now correctly uses defaults.
 * Fixed cmd_jump/cmd_botjump not parsing 'server:port' correctly.
+* Added var 'auth-obscure': Don't halt on dcc w/dccauth if the pass is wrong; halt at hash (right or wrong). (#100)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

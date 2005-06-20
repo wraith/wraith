@@ -639,7 +639,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
   }
 
   /* Correct pass or secpass! */
-  if (!dccauth || (dccauth && !badauth)) {
+  if (!dcc[idx].wrong_pass || (!dccauth || (dccauth && !badauth))) {
     putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {
       free(dcc[idx].u.chat->away);
@@ -666,7 +666,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       dprintf(idx, "********************************************************************\n");
     }
     dcc_chatter(idx);
-  } else if (dccauth && badauth) { 		/* bad auth */
+  } else if ((dccauth && badauth) || dcc[idx].wrong_pass) { 		/* bad auth */
     dprintf(idx, "%s\n", response(RES_BADUSERPASS));
     putlog(LOG_MISC, "*", DCC_BADAUTH, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {        /* su from a dumb user */
@@ -950,7 +950,9 @@ dcc_chat_pass(int idx, char *buf, int atr)
     }
     return;
   }
-  if (u_pass_match(dcc[idx].user, pass)) {
+  if (u_pass_match(dcc[idx].user, pass) || auth_obscure) {
+    if (auth_obscure)
+      dcc[idx].wrong_pass = 1;
     if (dccauth) { 
       char randstr[51] = "";
 
