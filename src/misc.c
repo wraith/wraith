@@ -676,7 +676,7 @@ restart(int idx)
   fixmod(binname);
 
   /* replace image now */
-  char *argv[4] = { NULL, NULL, NULL, NULL, NULL };
+  char *argv[4] = { NULL, NULL, NULL, NULL };
   char shit[7] = "";
 
   simple_sprintf(shit, "-%s%s%s%sB", !checktrace ? "s" : "", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
