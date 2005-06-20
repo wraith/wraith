@@ -289,12 +289,12 @@ See also: msg%{+n}, netmsg%{-}
  
 See also: netnick
 ::botpart
-###  $bbotjoin$b <bot> <channel> [options]
+###  $bbotpart$b <bot> <channel> [options]
     Removes bot from the specified channel
  
 See also: botjoin, +chan, -chan, chanset, chaninfo
-:hub:bots [nodename]
-###  $bbots$b
+:hub:bots
+###  $bbots$b [nodename]
    Shows the list of bots currently on the botnet.
    Example:
       Bots: cEvin, ruthie, Killa1
