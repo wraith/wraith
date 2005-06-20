@@ -13,7 +13,7 @@
 #include "common.h"
 #include "shell.h"
 #include "chanprog.h"
-#include "cfg.h"
+#include "set.h"
 #include "settings.h"
 #include "userrec.h"
 #include "net.h"
@@ -166,7 +166,7 @@ void check_mypid()
 char last_buf[128] = "";
 
 void check_last() {
-  if (!strcmp((char *) CFG_LOGIN.ldata ? CFG_LOGIN.ldata : CFG_LOGIN.gdata ? CFG_LOGIN.gdata : "ignore", "ignore"))
+  if (login == DET_IGNORE)
     return;
 
   if (conf.username) {
@@ -202,13 +202,13 @@ void check_last() {
 
 void check_processes()
 {
-  if (!strcmp((char *) CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : "ignore", "ignore"))
+  if (badprocess == DET_IGNORE)
     return;
 
   char *proclist = NULL, *out = NULL, *p = NULL, *np = NULL, *curp = NULL, buf[1024] = "", bin[128] = "";
 
-  proclist = (char *) (CFG_PROCESSLIST.ldata && ((char *) CFG_PROCESSLIST.ldata)[0] ?
-                       CFG_PROCESSLIST.ldata : CFG_PROCESSLIST.gdata && ((char *) CFG_PROCESSLIST.gdata)[0] ? CFG_PROCESSLIST.gdata : NULL);
+  proclist = process_list[0] ? process_list : NULL;
+
   if (!proclist)
     return;
 
@@ -300,7 +300,7 @@ void check_processes()
 void check_promisc()
 {
 #ifdef SIOCGIFCONF
-  if (!strcmp((char *) CFG_PROMISC.ldata ? CFG_PROMISC.ldata : CFG_PROMISC.gdata ? CFG_PROMISC.gdata : "ignore", "ignore"))
+  if (promisc == DET_IGNORE)
     return;
 
   int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -356,7 +356,7 @@ static void got_sigtrap(int z)
 
 void check_trace(int start)
 {
-  if (!strcmp((char *) CFG_TRACE.ldata ? CFG_TRACE.ldata : CFG_TRACE.gdata ? CFG_TRACE.gdata : "ignore", "ignore"))
+  if (trace == DET_IGNORE)
     return;
 
   int x, i;
@@ -579,33 +579,21 @@ void suicide(const char *msg)
 
 void detected(int code, char *msg)
 {
-  char *p = NULL, tmp[512] = "";
+  char tmp[512] = "";
   struct flag_record fr = { FR_GLOBAL, 0, 0, 0 };
-  int act, do_fatal = 0, killbots = 0;
+  int act = DET_WARN, do_fatal = 0, killbots = 0;
   
   if (code == DETECT_LOGIN)
-    p = (char *) (CFG_LOGIN.ldata ? CFG_LOGIN.ldata : (CFG_LOGIN.gdata ? CFG_LOGIN.gdata : NULL));
+    act = login;
   if (code == DETECT_TRACE)
-    p = (char *) (CFG_TRACE.ldata ? CFG_TRACE.ldata : (CFG_TRACE.gdata ? CFG_TRACE.gdata : NULL));
+    act = trace;
   if (code == DETECT_PROMISC)
-    p = (char *) (CFG_PROMISC.ldata ? CFG_PROMISC.ldata : (CFG_PROMISC.gdata ? CFG_PROMISC.gdata : NULL));
+    act = promisc;
   if (code == DETECT_PROCESS)
-    p = (char *) (CFG_BADPROCESS.ldata ? CFG_BADPROCESS.ldata : (CFG_BADPROCESS.gdata ? CFG_BADPROCESS.gdata : NULL));
+    act = badprocess;
   if (code == DETECT_SIGCONT)
-    p = (char *) (CFG_HIJACK.ldata ? CFG_HIJACK.ldata : (CFG_HIJACK.gdata ? CFG_HIJACK.gdata : NULL));
+    act = hijack;
 
-  if (!p)
-    act = DET_WARN;
-  else if (!strcmp(p, "die"))
-    act = DET_DIE;
-  else if (!strcmp(p, "reject"))
-    act = DET_REJECT;
-  else if (!strcmp(p, "suicide"))
-    act = DET_SUICIDE;
-  else if (!strcmp(p, "ignore"))
-    act = DET_IGNORE;
-  else
-    act = DET_WARN;
   switch (act) {
   case DET_IGNORE:
     break;
@@ -1073,3 +1061,32 @@ void crazy_trace()
   printf("end\n");
 }
 #endif /* CRAZY_TRACE */
+
+int det_translate(const char *word)
+{
+  if (!egg_strcasecmp(word, "ignore"))
+    return DET_IGNORE;
+  else if (!egg_strcasecmp(word, "warn"))
+    return DET_WARN;
+  else if (!egg_strcasecmp(word, "reject"))
+    return DET_REJECT;
+  else if (!egg_strcasecmp(word, "die"))
+    return DET_DIE;
+  else if (!egg_strcasecmp(word, "suicide"))
+    return DET_SUICIDE;
+
+  return DET_IGNORE;
+}
+
+const char *det_translate_num(int num)
+{
+  switch (num) {
+    case DET_IGNORE: return "ignore";
+    case DET_WARN:   return "warn";
+    case DET_REJECT: return "reject";
+    case DET_DIE:    return "die";
+    case DET_SUICIDE:return "suicide";
+    default:         return "ignore";
+  }
+  return "ignore";
+}

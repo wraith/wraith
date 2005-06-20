@@ -36,7 +36,7 @@ void init_userent()
   add_entry_type(&USERENTRY_STATS);
   add_entry_type(&USERENTRY_ADDED);
   add_entry_type(&USERENTRY_MODIFIED);
-  add_entry_type(&USERENTRY_CONFIG);
+  add_entry_type(&USERENTRY_SET);
 }
 
 void list_type_kill(struct list_type *t)
@@ -218,167 +218,165 @@ struct user_entry_type USERENTRY_ADDED = {
   "ADDED"
 };
 
-static bool config_set(struct userrec *u, struct user_entry *e, void *buf)
-{
-  struct xtra_key *curr = NULL, *old = NULL, *mynew = (struct xtra_key *) buf;
 
-  for (curr = (struct xtra_key *) e->u.extra; curr; curr = curr->next) {
-    if (curr->key && !egg_strcasecmp(curr->key, mynew->key)) {
+static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
+{
+  struct xtra_key *curr = (struct xtra_key *) e->u.extra, 
+                  *newxk = (struct xtra_key *) buf, *old = NULL;
+
+  /* find the curr key if it exists */
+  for (; curr; curr = curr->next) {
+    if (curr->key && !egg_strcasecmp(curr->key, newxk->key)) {
       old = curr;
       break;
     }
   }
-  if (!old && (!mynew->data || !mynew->data[0])) {
-    /* delete non-existant entry */
-    free(mynew->key);
-    if (mynew->data)
-      free(mynew->data);
-    free(mynew);
+  
+  /* unset and bail out if the new data is empty and the old doesn't exist, why'd we even get this change? */
+  if (!old && (!newxk->data || !newxk->data[0])) {
+    /* or simply ... delete non-existant entry */
+    free(newxk->key);
+    if (newxk->data)
+      free(newxk->data);
+    free(newxk);
     return 1;
   }
 
-  /* we will possibly free new below, so let's send the information
-   * to the botnet now */
-  if (!noshare && !cfg_noshare)
-    shareout_prot(u, "c CONFIG %s %s %s\n", u->handle, mynew->key, mynew->data ? mynew->data : "");
-  if ((old && old != mynew) || !mynew->data || !mynew->data[0]) {
+  /* we will possibly free new below, so let's send the information to the botnet now */
+  if (!noshare && !set_noshare)
+    /* only share to pertinent bots */
+    shareout_prot(u, "c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+
+  /* if we have a new entry and an old entry.. or our new entry is empty -> clear out the old entry */
+  if ((old && old != newxk) || !newxk->data || !newxk->data[0]) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
     free(old->key);
     free(old->data);
     free(old);
   }
-  if (old != mynew && mynew->data) {
-    if (mynew->data[0]) {
-      list_insert((struct xtra_key **) (&e->u.extra), mynew);
+
+  /* add the new entry if it's not empty */
+  if (old != newxk && newxk->data) {
+    if (newxk->data[0]) {
+      list_insert((struct xtra_key **) (&e->u.extra), newxk);
     } else {
-      if (mynew->data)
-        free(mynew->data);
-      free(mynew->key);
-      free(mynew);
+      if (newxk->data)
+        free(newxk->data);
+      free(newxk->key);
+      free(newxk);
     }
   }
   return 1;
 }
 
-static bool config_unpack(struct userrec *u, struct user_entry *e)
+static bool set_unpack(struct userrec *u, struct user_entry *e)
 {
   struct list_type *curr = NULL, *head = NULL;
-  struct xtra_key *t = NULL;
-  char *key = NULL, *data = NULL;
 
   head = curr = e->u.list;
   e->u.extra = NULL;
-  while (curr) {
-    t = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
 
-    data = curr->extra;
-    key = newsplit(&data);
-    if (data[0]) {
-      t->key = strdup(key);
-      t->data = strdup(data);
-      list_insert((struct xtra_key **) (&e->u.extra), t);
+  if (conf.bot->hub || !egg_strcasecmp(conf.bot->nick, u->handle)) {
+    struct xtra_key *t = NULL;
+    char *key = NULL, *data = NULL;
+
+    while (curr) {
+      t = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
+      data = curr->extra;
+      key = newsplit(&data);
+      if (data[0]) {
+        t->key = strdup(key);
+        t->data = strdup(data);
+        list_insert((struct xtra_key **) (&e->u.extra), t);
+      } else
+        free(t);
+      curr = curr->next;
     }
-    curr = curr->next;
-  }
+  } 
+
   list_type_kill(head);
   return 1;
 }
 
-static void config_display(int idx, struct user_entry *e, struct userrec *u)
+static void set_display(int idx, struct user_entry *e, struct userrec *u)
 {
   if (conf.bot->hub) {
-    struct xtra_key *xk = NULL;
+    struct xtra_key *xk = (struct xtra_key *) e->u.extra;
     struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
 
     get_user_flagrec(dcc[idx].user, &fr, NULL);
     /* scan thru xtra field, searching for matches */
-    for (xk = (struct xtra_key *) e->u.extra; xk; xk = xk->next) {
+    for (; xk; xk = xk->next) {
       /* ok, it's a valid xtra field entry */
       if (glob_owner(fr))
-        dprintf(idx, "  %s: %s\n", xk->key, xk->data);
+        dprintf(idx, "  %s: %s\n", xk->key, xk->data ? xk->data : "");
     }
   }
 }
 
-static bool config_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
+static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
 {
-  char *arg = newsplit(&buf);
+  char *name = newsplit(&buf);
 
-  if (!arg[0])
+  if (!name || !name[0])
     return 1;
-  if (!strcmp(u->handle, conf.bot->nick)) {
-    struct cfg_entry *cfgent = NULL;
-    int i;
 
-    cfg_noshare = 1;
-    for (i = 0; !cfgent && (i < cfg_count); i++)
-      if (!strcmp(arg, cfg[i]->name) && (cfg[i]->flags & CFGF_LOCAL))
-	cfgent = cfg[i];
-    if (cfgent) {
-      set_cfg_str(conf.bot->nick, cfgent->name, (buf && buf[0]) ? buf : NULL);
-    }
-    cfg_noshare = 0;
-    return 1;
+  if (!egg_strcasecmp(u->handle, conf.bot->nick)) {
+    set_noshare = 1;
+    var_set_by_name(conf.bot->nick, name, buf);
+    set_noshare = 0;
+  /* var_set_by_name() called set_user(), no need to do it again... */
+  } 
+  /* not else if as the hub might have gotten a botset for itself */
+  if (conf.bot->hub) {
+  /* only hubs need to bother saving this stuff, leaf bots just store it in vars[] */
+    struct xtra_key *xk = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
+
+    xk->key = strdup(name);
+    xk->data = (buf && buf[0]) ? strdup(buf) : NULL;
+    set_set(u, e, xk);	/* set the USERENTRY */
   }
-
-  size_t l = strlen(arg);
-  struct xtra_key *xk = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
-
-  if (l > 1500)
-    l = 1500;
-  xk->key = (char *) my_calloc(1, l + 1);
-  strncpy(xk->key, arg, l + 1);
-
-  if (buf && buf[0]) {
-    size_t k = strlen(buf);
-
-    if (k > 1500 - l)
-      k = 1500 - l;
-    xk->data = (char *) my_calloc(1, k + 1);
-    strncpy(xk->data, buf, k + 1);
-  }
-  config_set(u, e, xk);
-
   return 1;
 }
 
-static bool config_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
+static bool set_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
 {
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
   if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
-    struct xtra_key *x = NULL;
+    struct xtra_key *x = (struct xtra_key *) e->u.extra;
 
-    for (x = (struct xtra_key *) e->u.extra; x; x = x->next)
-      if (lfprintf(f, "--CONFIG %s %s\n", x->key, x->data) == EOF)
+    for (; x; x = x->next)
+      if (lfprintf(f, "--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "") == EOF)
         return 0;
   }
   return 1;
 }
 
-static bool config_kill(struct user_entry *e)
+static bool set_kill(struct user_entry *e)
 {
-  struct xtra_key *x = NULL, *y = NULL;
+  struct xtra_key *x = (struct xtra_key *) e->u.extra, *y = NULL;
 
-  for (x = (struct xtra_key *) e->u.extra; x; x = y) {
+  for (; x; x = y) {
     y = x->next;
     free(x->key);
-    free(x->data);
+    if (x->data)
+      free(x->data);
     free(x);
   }
   free(e);
   return 1;
 }
 
-struct user_entry_type USERENTRY_CONFIG = {
+struct user_entry_type USERENTRY_SET = {
   0,
-  config_gotshare,
-  config_unpack,
-  config_write_userfile,
-  config_kill,
+  set_gotshare,
+  set_unpack,
+  set_write_userfile,
+  set_kill,
   def_get,
-  config_set,
-  config_display,
+  set_set,
+  set_display,
   "CONFIG"
 };
 
@@ -1028,7 +1026,8 @@ struct user_entry_type *find_entry_type(char *name)
   struct user_entry_type *p = NULL;
 
   for (p = entry_type_list; p; p = p->next) {
-    if (!egg_strcasecmp(name, p->name))
+/* FIXME: remove after 1.2.3 */
+    if (!egg_strcasecmp(name, p->name) || (!egg_strcasecmp(name, "CONFIG") && !egg_strcasecmp(p->name, "SET")))
       return p;
   }
   return NULL;
@@ -1039,8 +1038,10 @@ struct user_entry *find_user_entry(struct user_entry_type *et, struct userrec *u
   struct user_entry **e = NULL, *t = NULL;
 
   for (e = &(u->entries); *e; e = &((*e)->next)) {
+/* FIXME: remove after 1.2.3 */
     if (((*e)->type == et) ||
-	((*e)->name && !egg_strcasecmp((*e)->name, et->name))) {
+	((*e)->name && (!egg_strcasecmp((*e)->name, et->name) ||
+        (!egg_strcasecmp((*e)->name, "CONFIG") && !egg_strcasecmp(et->name, "SET"))))) {
       t = *e;
       *e = t->next;
       t->next = u->entries;

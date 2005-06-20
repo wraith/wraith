@@ -17,7 +17,6 @@
 #include "misc.h"
 #include "dcc.h"
 #include "userrec.h"
-#include "cfg.h"
 #include "dccutil.h"
 #include "cmds.h"
 #include "chanprog.h"
@@ -106,14 +105,14 @@ void bot_cmdpass(int idx, char *par)
   set_cmd_pass(par, 0);
 }
 
-void bot_config(int idx, char *par)
+void bot_set(int idx, char *par)
 {
-  got_config_share(idx, par, 0);
+  var_userfile_share_line(par, idx, 0);
 }
 
-void bot_configbroad(int idx, char *par)
+void bot_setbroad(int idx, char *par)
 {
-  got_config_share(idx, par, 1);
+  var_userfile_share_line(par, idx, 1);
 }
 
 void bot_remotecmd(int idx, char *par) {
@@ -1154,8 +1153,10 @@ botcmd_t C_bot[] =
   {"aw",		bot_away, 0},
   {"bye",		bot_bye, 0},
   {"c",			bot_chan2, 0},
-  {"cg",                bot_config, 0},
-  {"cgb",		bot_configbroad, 0},
+/* FIXME: remove after 1.2.3 */
+  {"cg",                bot_set, 0},
+/* FIXME: remove after 1.2.3 */
+  {"cgb",		bot_setbroad, 0},
   {"cp", 		bot_cmdpass, 0},
   {"ct",		bot_chat, 0},
   {"e",			bot_error, 0},
@@ -1184,6 +1185,8 @@ botcmd_t C_bot[] =
   {"ul",		bot_unlink, 0},
   {"un",		bot_unlinked, 0},
   {"v",			bot_versions, 0},
+  {"va",                bot_set, 0},
+  {"vab",		bot_setbroad, 0},
   {"w",			bot_who, 0},
   {"z",			bot_zapf, 0},
   {"zb",		bot_zapfbroad, 0},

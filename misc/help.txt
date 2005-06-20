@@ -251,16 +251,6 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
    Just using '&' for 'bot' will do the cmd on all localhub bots. (first bot in config).
  
 See also: bc, cmdpass
-:hub:botconfig:
-###  $bbotconfig$b <bot> [name [value|-]]
-   Set's a bot specific entry.
-   <bot> may contain wildcards.
-   NOTE: 'config' and 'botconfig' have different entries. 
-   If there is a botconfig entry for 'name' and a config entry for 'name', 
-   the bot will use the 'botconfig' entry. Otherwise, the 'config' entry
-   will be used for all options.
- 
-See also: config
 ::botjoin
 ###  $bbotjoin$b <bot> <channel> [options]
     Adds a channel to the bot's channel list. If options are specified, the 
@@ -310,6 +300,18 @@ See also: downbots%{+n}, bottree%{-}
    The bot will display it's current server and lag over DCC.
  
 See also: netserver, servers%{+n}, config%{-}
+:hub:botset:
+###  $bbotset$b <bot> [<+/->list] [<var> [data|-]]
+   Set's a bot specific entry.
+   <bot> may contain wildcards.
+   NOTE: 'set' and 'botset' have different entries. 
+   If there is a botset entry for 'name' and a set entry for 'name', 
+   the bot will use the 'botset' entry. Otherwise, the 'set' entry
+   will be used for all options.
+ 
+   See 'set' for a full help listing.
+ 
+See also: set
 :hub:bottree
 ###  $bbottree$b
    Shows a tree-format diagram of the bots currently on the botnet. It's just a
@@ -713,12 +715,6 @@ See also: console, echo, login, page, strip
     $bhomedir$b, $bbinpath$b, $bbinname$b, $bportmin$b, $bportmax$b, $bpscloak$b
  
 See also: newleaf
-:hub:config:
-###  $bconfig$b [name [value|-]]
-   Sets various config options. Type alone to see all config entries. To set
-   an entry do 'config name VALUE'. Use '-' as a value to clear an entry.
- 
-See also: botconfig
 ::console:
 ###  $bconsole$b [channel] [modes]
    Changes your console level so that you will see only the types of console
@@ -1468,6 +1464,76 @@ See also: reload, backup
    bot is booted up.  after that, you can add servers with the
    $b'%djump'$b command.  the server list will indicate which server the
    bot is currently on.
+:hub:set:
+###  $bset$b [<+/->list] [<var> [data|-]]
+   Sets various options. Type alone to see all set entries. To set
+   an entry do '%dset name VALUE'. Use '-' as a value to clear an entry.
+ 
+   The '+' may be used to add 1 element to a comma separated list. (ie, servers)
+   The '-' may be used to remove 1 element from a comma separated list. (ie, servers)
+   The 'list' may be used to list a comma separated variable as a vertical listing. (like %dservers)
+ 
+ 
+   Current variables:
+ 
+   $uB$u:    Boolean (0 or 1)
+   $uS$u:    String
+   $uN$u:    Number
+   $uL$u:    List capable
+   $uR$u:    Rate. Set as 'number:interval', ie, '1:5'
+   $uD$u:    Detected vars have the folloing options: $bignore$b/0, $bwarn$b/1, $bdie$b/2, 
+                                                      $breject$b/3, $bsuicide$b/4
+ 
+[S]  $bchanset$b         List of default options for when a channel is added. Same format 
+                          as 'chanset'.
+[N]  $bserver-port$b     Default port to use for server connections.
+[S]  $bauth-key$b        The authkey used during authing.G ive to users if they need to auth. 
+                          (can be bot specific)
+[C]  $bauth-prefix$b     The prefix character used for msg cmds, ie: $u!$uop or $u.$uop
+ 
+  *  Msg cmd vars may be left blank to disable usage of cmd.
+[S]  $bmsgop$b           Defines the cmd for opping via msging the bot.
+[S]  $bmsgpass$b         Defines the cmd for setting a pass via msging the bot.
+[S]  $bmsginvite$b       Defines the cmd for requesting invite via msging the bot.
+[S]  $bmsgident$b        Defines the cmd for identing via msging the bot.
+ 
+[N]  $bfork-interval$b   Number of seconds in between each fork() call made by the bot. 
+                          (Resets PID/CPU)
+ 
+[D]  $blogin$b           How to handle someone logging in to the shell.
+[D]  $btrace$b           How to handle someone tracing/debugging the bot.
+[D]  $bpromisc$b         How to handle when a interface is set to promiscuous mode.
+[D]  $bbad-process$b     How to handle when a running process not listed in process-list 
+                         is detected.
+[SL] $bprocess-list$b    Comma-separated list of "expected processes" running on the bots uid.
+[D]  $bhijack$b          How to handle when a commonly used hijack method attempt is detected. 
+ 
+[SL] $bservers$b         Comma-separated list of servers the bot will use.
+[SL] $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
+ 
+[S]  $brealname$b        The bot's "real name" when connecting.
+[S]  $bnick$b            The bot's preferred nickname on IRC.
+ 
+[B]  $bdccauth$b         Boolean (0 or 1). Set to use auth checking on dcc/telnet login.
+[N]  $bop-bots$b         Number of bots to ask every time a oprequest is to be made.
+[N]  $bin-bots$b         Number of bots to ask every time a inrequest is to be made.
+ 
+[R]  $bop-requests$b     (requests:seconds) limits how often the bot will ask for ops.
+[R]  $bclose-threshold$b (H:L) When at least H hubs but L or less leafs are linked, close 
+                          all channels.
+ 
+[N]  $blag-threshold$b   Maximum acceptable server lag for the bot to send/honor requests.
+[N]  $bkill-threshold$b  When more than this many bots have been killed/klined in the last
+                          minute, close all channels.
+[N]  $bfight-threshold$b When more than this many +ob/-ob/kicks have happened on a channel in 
+                          1 minute, the channel is closed.
+ 
+[N]  $bcloak-script$b    Decides which script the bot cloaks as. 
+                          If set to 0, a random script will be used.
+                          1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 
+                          5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC
+ 
+See also: botset
 ::sha1
 ###  $bsha1$b <string>
    Returns the SHA1 hash of the specified string.

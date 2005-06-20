@@ -16,6 +16,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 
 1.2.3
 * HUB/LEAF binaries have been combined into 1 binary named 'wraith'
+* Rewrote config/botconfig from scratch as [bot]set with list support. See 'help set'.
 * Read in '.resolv.conf' before '/etc/resolv.conf'
 * Fixed binary getting an excess of 1-15 bytes during write. 
 * Binary writing is now a bit faster as the hash is calculated on the fly now.
@@ -31,7 +32,6 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Using a cmd with a cmdpass without proper flags now acts as if cmd is not valid (no longer spams wrong pass error)
 * cmd_deluser change: only allow a |m user to remove users whom they have added.
 * Fixed some botnet userfile sharing logs showing up on leaf bots.
-* cmd_botconfig now supports wildcards for the bot parameter
 * Eliminated a duplicate struct (conffile)
 * Removed chanset cookie-time-slack
 * Fixed a memory leak in dns
@@ -42,6 +42,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed some bad passes being generated/set beginning with -/+
 * Fixed binary exiting with ERR_NOBOTS under conditions that it shouldn't. (updating)
 * Fixed bots not rechecking channel for invalid users after a .-chrec
+* Fixed dccauth not correctly working according to it's setting (#30)
 * Users who are v|o in a +private chan are now voiced, as before |v was needed.
 * Added channel flag +|-botbitch, when set only bots will be allowed to be opped, users are auto-deopped.
 * chanset -bitch/-private/-botbitch/+botbitch/+closed/+private will now trigger bots to recheck channel (op/deop/kick people)
@@ -91,7 +92,6 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
    -New bots are spawned and added (if linked)
    -Changed (NEW) ip/host for bots are added to the botnet (if linked)
    -Removed bots are killed and removed from the userlist (if linked)
-* Fixed dccauth not correctly working according to it's [bot]config setting (#30)
 * Added match option for cmd_botcmd: '&' will match on all localhubs (first bot in config) (#28)
 * Added some debug logging when a telnet connection is ignored.
 * Fixed some missing sanity checking on certain user flags for channel records.

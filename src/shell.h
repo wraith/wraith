@@ -36,6 +36,8 @@
 #define DET_DIE 	3
 #define DET_SUICIDE 	4
 
+#define DETECTED_LEN	8		/* 'suicide' is longest word */
+
 void check_maxfiles();
 void check_mypid();
 void clear_tmp();
@@ -63,6 +65,8 @@ void detected(int, char *);
 #endif /* !CYGWIN_HACKS */
 void werr(int) __attribute__((noreturn));
 char *werr_tostr(int);
+int det_translate(const char *);
+const char *det_translate_num(int);
 
 extern bool		clear_tmpdir;
 

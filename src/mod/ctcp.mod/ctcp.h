@@ -34,7 +34,7 @@
 #define CLOAK_MIRC              9
 
 void ctcp_init();
-extern struct cfg_entry 	CFG_CLOAK_SCRIPT;
+void scriptchanged();
 extern char		kickprefix[], bankickprefix[];
 
 #endif				/* _EGG_MOD_CTCP_CTCP_H */

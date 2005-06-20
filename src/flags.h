@@ -147,5 +147,8 @@ int isupdatehub(void);
 int dovoice(struct chanset_t *);
 int dolimit(struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);
+void deflag_user(struct userrec *, int, char *, struct chanset_t *);
+int deflag_translate(const char *);
+
 
 #endif				/* _EGG_FLAGS_H */

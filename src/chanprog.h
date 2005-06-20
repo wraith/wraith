@@ -26,7 +26,7 @@ int shouldjoin(struct chanset_t *);
 char *samechans(const char *, const char *);
 
 extern struct chanset_t		*chanset;
-extern char			admin[], origbotname[], botname[];
+extern char			admin[], origbotname[NICKLEN + 1], botname[];
 extern port_t			my_port;
 extern bool			reset_chans;
 

@@ -528,24 +528,6 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
     dprintf(idx, "Use '%ss all' to see the total list.\n", str_type);
 }
 
-bool write_config(FILE *f, int idx)
-{
-  putlog(LOG_DEBUG, "@", "Writing config entries...");
-  if (lfprintf(f, CONFIG_NAME " - -\n") == EOF) /* Daemus */
-      return 0;
-  for (int i = 0; i < cfg_count; i++) {
-    if ((cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->gdata)) {
-      if (lfprintf(f, "@ %s %s\n", cfg[i]->name, cfg[i]->gdata ? cfg[i]->gdata : "") == EOF)
-        return 0;
-    }
-  }
-
-  for (struct cmd_pass *cp = cmdpass; cp; cp = cp->next)
-    if (lfprintf(f, "- %s %s\n", cp->name, cp->pass) == EOF)
-      return 0;
-
-  return 1;
-}
 /* Write the ban lists and the ignore list to a file.
  */
 bool write_bans(FILE *f, int idx)
@@ -812,7 +794,7 @@ void channels_writeuserfile()
   f = fopen(s, "a");
   if (f) {
     ret  = write_chans(f, -1);
-    ret += write_config(f, -1);
+    ret += write_vars_and_cmdpass(f, -1);
     ret += write_bans(f, -1);
     ret += write_exempts(f, -1);
     ret += write_invites(f, -1);

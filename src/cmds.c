@@ -206,192 +206,34 @@ static void cmd_whom(int idx, char *par)
   answer_local_whom(idx, chan);
 }
 
-/*
-   .config
-   Usage + available entry list
-   .config name
-   Show current value + description
-   .config name value
-   Set
- */
-static void cmd_config(int idx, char *par)
+static void cmd_botset(int idx, char *par)
 {
-  char *name = NULL;
-  struct cfg_entry *cfgent = NULL;
-  int cnt, i;
-  bool describe = conf.bot->hub;
+  char *botnick = NULL;
 
-  putlog(LOG_CMDS, "*", "#%s# config %s", dcc[idx].nick, par);
-  if (!par[0]) {
-    char *outbuf = NULL;
-
-    outbuf = (char *) my_calloc(1, 1);
-
-    dprintf(idx, "Usage: config [name [value|-]]\n");
-    dprintf(idx, "Defined config entry names:\n");
-    cnt = 0;
-    for (i = 0; i < cfg_count; i++) {
-      if (conf.bot->hub && (cfg[i]->flags & CFGF_GLOBAL) && (cfg[i]->describe)) {
-	if (!cnt) {
-          outbuf = (char *) my_realloc(outbuf, 2 + 1);
-	  simple_sprintf(outbuf, "  ");
-        }
-        outbuf = (char *) my_realloc(outbuf, strlen(outbuf) + strlen(cfg[i]->name) + 1 + 1);
-	simple_sprintf(outbuf, "%s%s ", outbuf, cfg[i]->name);
-	cnt++;
-	if (cnt == 10) {
-	  dprintf(idx, "%s\n", outbuf);
-	  cnt = 0;
-	}
-      }
-    }
-    if (cnt)
-      dprintf(idx, "%s\n", outbuf);
-    if (outbuf)
-      free(outbuf);
+  if (!par[0] || !(botnick = newsplit(&par))) {
+    dprintf(idx, "Usage: botset <bot> [<+/->list] [<var> [data|-]]\n");
     return;
   }
-  name = newsplit(&par);
-  for (i = 0; !cfgent && (i < cfg_count); i++)
-    if (!strcmp(cfg[i]->name, name))
-      cfgent = cfg[i];
-  if (describe && (!cfgent || !cfgent->describe)) {
-    dprintf(idx, "No such config entry\n");
-    return;
-  }
-  if (!isowner(dcc[idx].nick)) {
-    int no = 0;
-    if (!egg_strcasecmp(name, "authkey"))
-      no++;
-    if (!egg_strcasecmp(name, "cmdprefix"))
-      no++;
-    if (!egg_strcasecmp(name, "hijack"))
-      no++;
-    if (!egg_strcasecmp(name, "bad-cookie"))
-      no++;
 
-    if (no) {
-      dprintf(idx, "Only permanent owners may change '%s'.\n", name);
-      return;
-    }
-  }
-  if (!par[0]) {
-    if (describe)
-      cfgent->describe(cfgent, idx);
-    if (!cfgent->gdata)
-      dprintf(idx, "No current value\n");
-    else {
-      dprintf(idx, "Currently: %s\n", cfgent->gdata);
-    }
+  struct userrec *u = get_user_by_handle(userlist, botnick);
+
+  if (!u || !u->bot) {
+    dprintf(idx, "%s is not a valid bot.\n", botnick);
     return;
   }
-  if (strlen(par) >= 2048) {
-    dprintf(idx, "Value can't be longer than 2048 chars");
-    return;
-  }
-  set_cfg_str(NULL, cfgent->name, par);
-  if (!cfgent->gdata)
-    dprintf(idx, "Now: (not set)\n");
-  else {
-    dprintf(idx, "Now: %s\n", cfgent->gdata);
-  }
-  write_userfile(idx);
+  
+  cmd_set_real(botnick, idx, par);
+  return;
 }
 
-static void cmd_botconfig(int idx, char *par)
+static void cmd_set(int idx, char *par)
 {
-  struct userrec *u2 = NULL;
-  char *entry = NULL, *botm = NULL;
-  struct xtra_key *k = NULL;
-  struct cfg_entry *cfgent = NULL;
-  int i, cnt;
-  tand_t *tbot = NULL;
-  bool found = 0, described = 0, describe = conf.bot->hub;
-
-  /* botconfig bot [name [value]]  */
-  putlog(LOG_CMDS, "*", "#%s# botconfig %s", dcc[idx].nick, par);
-  if (!par[0]) {
-    dprintf(idx, "Usage: botconfig <bot> [name [value|-]]\n");
-    dprintf(idx, " <bot> may contain wildcards\n");
-    cnt = 0;
-    for (i = 0; i < cfg_count; i++) {
-      if (cfg[i]->flags & CFGF_LOCAL) {
-	dprintf(idx, "%s ", cfg[i]->name);
-	cnt++;
-	if (cnt == 10) {
-	  dprintf(idx, "\n");
-	  cnt=0;
-	}
-      }
-    }
-    if (cnt > 0)
-      dprintf(idx, "\n");
-    return;
-  }
-  botm = newsplit(&par);
-  entry = newsplit(&par);
-
-  for (tbot = tandbot; tbot; tbot = tbot->next) {
-    if (wild_match(botm, tbot->bot)) {
-      u2 = get_user_by_handle(userlist, tbot->bot);
-      if (!u2)
-        continue;
-
-      found = 1;
-
-      dprintf(idx, "%s:\n", tbot->bot);
-
-      if (!entry || !entry[0]) {
-        for (i = 0; i < cfg_count; i++) {
-          if (describe && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe)) {
-	    k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
-            while (k && strcmp(k->key, cfg[i]->name))
-              k = k->next;
-            if (k)
-              dprintf(idx, "  %s: %s\n", k->key, k->data);
-            else
-              dprintf(idx, "  %s: (not set)\n", cfg[i]->name);
-          }
-        }
-        continue;
-      }
-
-      cfgent = NULL;
-      if (describe) {
-        for (i = 0; !cfgent && (i < cfg_count); i++)
-          if (!strcmp(cfg[i]->name, entry) && (cfg[i]->flags & CFGF_LOCAL) && (cfg[i]->describe))
-            cfgent = cfg[i];
-      }
-      if (!cfgent) {
-        dprintf(idx, "No such configuration value\n");
-        return;
-      }
-      if (par[0]) {
-        char tmp[100] = "";
-
-        set_cfg_str(u2->handle, cfgent->name, (strcmp(par, "-")) ? par : NULL);
-        simple_snprintf(tmp, sizeof tmp, "%s %s", cfgent->name, par);
-        update_mod(u2->handle, dcc[idx].nick, "botconfig", tmp);
-        dprintf(idx, "Now: ");
-        write_userfile(idx);
-      } else {
-        if (describe && cfgent->describe && !described) {
-          described++;
-          cfgent->describe(cfgent, idx);
-        }
-      }
-      k = (struct xtra_key *) get_user(&USERENTRY_CONFIG, u2);
-      while (k && strcmp(k->key, cfgent->name))
-        k = k->next;
-      if (k)
-        dprintf(idx, "  %s: %s\n", k->key, k->data);
-      else
-        dprintf(idx, "  %s: (not set)\n", cfgent->name);
-    }
-  }
-
-  if (!found)
-    dprintf(idx, "No bot matching '%s' linked\n", botm);
+//  if (!par[0]) {
+//    dprintf(idx, "Usage: set [<+/->list] <var> [data]\n");
+//    return;
+//  }
+  cmd_set_real(NULL, idx, par);
+  return;
 }
 
 static void cmd_cmdpass(int idx, char *par)
@@ -497,7 +339,7 @@ static void cmd_motd(int idx, char *par)
     s = (char *) my_calloc(1, size); /* +2: ' 'x2 */
 
     egg_snprintf(s, size, "%s %li %s", dcc[idx].nick, now, par);
-    set_cfg_str(NULL, "motd", s);
+    var_set_by_name(NULL, "motd", s);
     free(s);
     dprintf(idx, "Motd set\n");
     if (conf.bot->hub)
@@ -4284,7 +4126,6 @@ cmd_t C_dcc[] =
   {"back",		"",	(Function) cmd_back,		NULL, 0},
   {"backup",		"m|m",	(Function) cmd_backup,		NULL, HUB},
   {"boot",		"m",	(Function) cmd_boot,		NULL, HUB},
-  {"botconfig",		"n",	(Function) cmd_botconfig,	NULL, HUB},
   {"bots",		"m",	(Function) cmd_bots,		NULL, HUB},
   {"downbots",		"m",	(Function) cmd_downbots,	NULL, HUB},
   {"bottree",		"n",	(Function) cmd_bottree,		NULL, HUB},
@@ -4298,7 +4139,8 @@ cmd_t C_dcc[] =
   {"cmdpass",           "a",    (Function) cmd_cmdpass,         NULL, HUB},
   {"color",		"",     (Function) cmd_color,           NULL, 0},
   {"comment",		"m|m",	(Function) cmd_comment,		NULL, 0},
-  {"config",		"n",	(Function) cmd_config,		NULL, HUB},
+  {"set",		"n",	(Function) cmd_set,		NULL, HUB},
+  {"botset",		"n",	(Function) cmd_botset,		NULL, HUB},
   {"console",		"-|-",	(Function) cmd_console,		NULL, 0},
   {"date",		"",	(Function) cmd_date,		NULL, AUTH},
   {"dccstat",		"a",	(Function) cmd_dccstat,		NULL, 0},

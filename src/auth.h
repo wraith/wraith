@@ -1,7 +1,6 @@
 #ifndef _AUTH_H
 #  define _AUTH_H
 
-#  include "cfg.h"
 #  include "crypt.h"
 #  include "hash_table.h"
 
@@ -53,7 +52,5 @@ char *makebdhash(char *);
 void makehash(struct userrec *u, const char *randstring, char *out, size_t out_size);
 
 void check_auth_dcc(Auth *, const char *, const char *);
-
-#  define authkey CFG_AUTHKEY.ldata ? CFG_AUTHKEY.ldata : CFG_AUTHKEY.gdata ? CFG_AUTHKEY.gdata : ""
 
 #endif /* !_AUTH_H */

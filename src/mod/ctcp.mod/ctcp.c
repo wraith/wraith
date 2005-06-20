@@ -9,7 +9,7 @@
 #include "src/common.h"
 #include "src/response.h"
 #include "src/main.h"
-#include "src/cfg.h"
+#include "src/set.h"
 #include "src/chanprog.h"
 #include "src/cmds.h"
 #include "src/misc.h"
@@ -23,8 +23,6 @@
 #include <arpa/inet.h>
 #include <sys/utsname.h>
 #include <ctype.h>
-
-int cloak_script = CLOAK_PLAIN;
 
 #define AVGAWAYTIME             60
 #define AVGHERETIME             5
@@ -614,35 +612,6 @@ static cmd_t myctcp[] =
   {"CHAT",		"",	(Function) ctcp_CHAT,		NULL, LEAF},
   {NULL,		NULL,	NULL,			NULL, 0}
 };
-
-static void cloak_describe(struct cfg_entry *cfgent, int idx)
-{
-  dprintf(idx, STR("cloak-script decides which BitchX script the bot cloaks. If set to 0, a random script will be cloaked.\n"));
-  dprintf(idx, STR("Available: 1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC\n"));
-}
-
-static void cloak_changed(struct cfg_entry *cfgent, int *valid)
-{
-  char *p = NULL;
-
-  if (!(p = cfgent->ldata ? cfgent->ldata : cfgent->gdata))
-    return;
-
-  int i = atoi(p);
-
-  if (i == 0)
-    i = randint(CLOAK_COUNT) + 1;
-  if ((*valid = ((i >= 0) && (i <= CLOAK_COUNT))))
-    cloak_script = i;
-
-  scriptchanged();
-}
-
-struct cfg_entry CFG_CLOAK_SCRIPT = {
-	"cloak-script", CFGF_GLOBAL | CFGF_LOCAL | CFGF_LEAF, NULL, NULL,
-	cloak_changed, cloak_changed, cloak_describe
-};
-
 
 void ctcp_init()
 {

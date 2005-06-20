@@ -17,7 +17,7 @@
 #include "src/color.h"
 #include "src/userrec.h"
 #include "src/users.h"
-#include "src/cfg.h"
+#include "src/set.h"
 #include "src/rfc1459.h"
 #include "src/match.h"
 #include "src/settings.h"
@@ -42,7 +42,7 @@ static time_t 			global_invite_time;
 
 
 /* Global channel settings (drummer/dw) */
-char glob_chanset[512] = "", cfg_glob_chanset[512] = "";
+char glob_chanset[512] = "";
 static char *lastdeletedmask = NULL;
 
 /* Global flood settings */
@@ -70,20 +70,7 @@ static int 			killed_bots = 0;
 static void 
 check_should_close()
 {
-  char *p = CFG_CLOSETHRESHOLD.gdata;
-
-  if (!p)
-    return;
-
-  int H = atoi(p);
-
-  p = strchr(p, ':');
-  if (!p)
-    return;
-
-  p++;
-
-  int L = atoi(p);
+  int H = close_threshold.count, L = close_threshold.time;
 
   if ((H <= 0) || (L <= 0))
     return;
@@ -293,7 +280,7 @@ static void got_role(char *botnick, char *code, char *par)
 void got_kl(char *botnick, char *code, char *par)
 {
   killed_bots++;
-  if (kill_threshold && (killed_bots = kill_threshold)) {
+  if (kill_threshold && (killed_bots == kill_threshold)) {
     for (struct chanset_t *ch = chanset; ch; ch = ch->next)
       do_chanset(NULL, ch, "+closed +bitch +backup", DO_LOCAL | DO_NET);
   /* FIXME: we should randomize nick here ... */

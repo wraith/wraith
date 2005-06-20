@@ -527,6 +527,7 @@ void chanprog()
     checkchans(0);
     readuserfile(userfile, &userlist);
     checkchans(1);
+    var_parse_my_botset();
     loading = 0;
   }
 
@@ -563,7 +564,7 @@ void chanprog()
   set_user(&USERENTRY_USERNAME, conf.bot->u, conf.username);
   set_user(&USERENTRY_NODENAME, conf.bot->u, un.nodename);
 
-  trigger_cfg_changed();
+  var_parse_my_botset();
 
   /* We should be safe now */
 
@@ -592,6 +593,7 @@ void reload()
   Auth::FillUsers();
   checkchans(1);
   loading = 0;
+  var_parse_my_botset();
   reaffirm_owners();
   hook_read_userfile();
 }

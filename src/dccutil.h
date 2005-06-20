@@ -28,6 +28,7 @@ struct portmap {
 #define DP_DUMP		0x8000
 
 
+
 void init_dcc(void);
 void dumplots(int, const char *, char *);
 void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
@@ -55,6 +56,9 @@ port_t listen_all(port_t, bool);
 bool valid_idx(int);
 int dcc_read(FILE *);
 void dcc_write(FILE *, int);
+int check_cmd_pass(const char *, char *);
+int has_cmd_pass(const char *);
+void set_cmd_pass(char *, int);
 
 extern int		max_dcc;
 extern time_t		connect_timeout;

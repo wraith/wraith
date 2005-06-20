@@ -361,11 +361,11 @@ void show_banner(int idx)
 /* show motd to dcc chatter */
 void show_motd(int idx)
 {
-  if (CFG_MOTD.gdata && *(char *) CFG_MOTD.gdata) {
+  if (motd[0]) {
     char *who = NULL, *buf = NULL, *buf_ptr = NULL, date[50] = "";
     time_t when;
 
-    buf = buf_ptr = strdup(CFG_MOTD.gdata);
+    buf = buf_ptr = strdup(motd);
     who = newsplit(&buf);
     when = atoi(newsplit(&buf));
     egg_strftime(date, sizeof date, "%c %Z", gmtime(&when));

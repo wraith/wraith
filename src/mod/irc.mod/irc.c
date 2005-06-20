@@ -16,7 +16,7 @@
 #include "src/botmsg.h"
 #include "src/main.h"
 #include "src/response.h"
-#include "src/cfg.h"
+#include "src/set.h"
 #include "src/userrec.h"
 #include "src/misc.h"
 #include "src/rfc1459.h"
@@ -373,7 +373,7 @@ getin_request(char *botnick, char *code, char *par)
     return;
   }
 
-  if (server_lag > LAG_THRESHOLD) {
+  if (server_lag > lag_threshold) {
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm too lagged", type, botnick, nick, desc, chan->dname);
     return;
   }
@@ -596,7 +596,7 @@ request_op(struct chanset_t *chan)
 
   chan->channel.do_opreq = 0;
   /* check server lag */
-  if (server_lag > LAG_THRESHOLD) {
+  if (server_lag > lag_threshold) {
     putlog(LOG_GETIN, "*", "Not asking for ops on %s - I'm too lagged", chan->dname);
     return;
   }
@@ -606,7 +606,7 @@ request_op(struct chanset_t *chan)
 
   /* max OPREQ_COUNT requests per OPREQ_SECONDS sec */
   while (i < 5) {
-    if (n - chan->opreqtime[i] > OPREQ_SECONDS) {
+    if (n - chan->opreqtime[i] > op_requests.time) {
       if (first > i)
         first = i;
       my_exp++;
@@ -614,12 +614,12 @@ request_op(struct chanset_t *chan)
     }
     i++;
   }
-  if ((5 - my_exp) >= OPREQ_COUNT) {
-    putlog(LOG_GETIN, "*", "Delaying opreq for %s - Maximum of %d:%d reached", chan->dname, OPREQ_COUNT,
-           OPREQ_SECONDS);
+  if ((5 - my_exp) >= op_requests.count) {
+    putlog(LOG_GETIN, "*", "Delaying opreq for %s - Maximum of %d:%li reached", chan->dname, op_requests.count,
+           op_requests.time);
     return;
   }
-  int cnt = OP_BOTS, i2;
+  int cnt = op_bots, i2;
   memberlist *ml = NULL;
   memberlist *botops[MAX_BOTS];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
@@ -688,7 +688,7 @@ request_op(struct chanset_t *chan)
       cnt--;
       botops[i2] = NULL;
     } else {
-      if (i < OP_BOTS)
+      if (i < op_bots)
         cnt--;
     }
   }
@@ -718,8 +718,8 @@ request_in(struct chanset_t *chan)
     return;
   }
 
-  char s[255] = "", *l = (char *) my_calloc(1, IN_BOTS * 30);
-  int cnt = IN_BOTS, n;
+  int cnt = in_bots, n;
+  char s[255] = "", *l = (char *) my_calloc(1, cnt * 30);
 
   simple_sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
   while (cnt) {
@@ -735,7 +735,7 @@ request_in(struct chanset_t *chan)
       botops[n] = NULL;
       cnt--;
     } else {
-      if (i < IN_BOTS)
+      if (i < in_bots)
         cnt--;
     }
   }
@@ -1192,10 +1192,8 @@ check_servers(struct chanset_t *chan)
 static void
 check_netfight(struct chanset_t *chan)
 {
-  int limit = atoi(CFG_FIGHTTHRESHOLD.gdata ? CFG_FIGHTTHRESHOLD.gdata : "0");
-
-  if (limit) {
-    if ((chan->channel.fighting) && (chan->channel.fighting > limit)) {
+  if (fight_threshold) {
+    if ((chan->channel.fighting) && (chan->channel.fighting > fight_threshold)) {
       if (!chan_bitch(chan) || !channel_closed(chan)) {
         putlog(LOG_WARN, "*", "Auto-closed %s - channel fight", chan->dname);
         do_chanset(NULL, chan, "+bitch +closed +backup", DO_LOCAL | DO_NET);
@@ -1371,9 +1369,9 @@ int check_bind_authc(char *cmd, Auth *auth, char *chname, char *args)
   if (x & BIND_RET_LOG) {
     if (chname)
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", auth->nick, auth->host, 
-                            auth->handle, chname, cmdprefix, cmd, args);
+                            auth->handle, chname, auth_prefix[0], cmd, args);
     else
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", auth->nick, auth->host, auth->handle, cmdprefix, cmd, args);
+      putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", auth->nick, auth->host, auth->handle, auth_prefix[0], cmd, args);
   }
 
   if (x & BIND_RET_BREAK)

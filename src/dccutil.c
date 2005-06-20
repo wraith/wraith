@@ -964,3 +964,72 @@ valid_idx(int idx)
   return 1;
 }
 
+int check_cmd_pass(const char *cmd, char *pass)
+{
+  if (check_master_hash(NULL, pass))
+    return 1;
+
+  struct cmd_pass *cp = NULL;
+
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!egg_strcasecmp(cmd, cp->name)) {
+      char tmp[32] = "";
+
+      encrypt_pass(pass, tmp);
+      if (!strcmp(tmp, cp->pass))
+        return 1;
+      return 0;
+    }
+  return 0;
+}
+
+int has_cmd_pass(const char *cmd)
+{
+  struct cmd_pass *cp = NULL;
+
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!egg_strcasecmp(cmd, cp->name))
+      return 1;
+  return 0;
+}
+void set_cmd_pass(char *ln, int shareit)
+{
+  struct cmd_pass *cp = NULL;
+  char *cmd = NULL;
+
+  cmd = newsplit(&ln);
+  for (cp = cmdpass; cp; cp = cp->next)
+    if (!strcmp(cmd, cp->name))
+      break;
+  if (cp)
+    if (ln[0]) {
+      /* change */
+      strcpy(cp->pass, ln);
+      if (shareit)
+        botnet_send_cmdpass(-1, cp->name, cp->pass);
+    } else {
+      if (cp == cmdpass)
+        cmdpass = cp->next;
+      else {
+        struct cmd_pass *cp2;
+
+        cp2 = cmdpass;
+        while (cp2->next != cp)
+          cp2 = cp2->next;
+        cp2->next = cp->next;
+      }
+      if (shareit)
+        botnet_send_cmdpass(-1, cp->name, "");
+      free(cp->name);
+      free(cp);
+  } else if (ln[0]) {
+    /* create */
+    cp = (struct cmd_pass *) my_calloc(1, sizeof(struct cmd_pass));
+    cp->next = cmdpass;
+    cmdpass = cp;
+    cp->name = strdup(cmd);
+    strcpy(cp->pass, ln);
+    if (shareit)
+      botnet_send_cmdpass(-1, cp->name, cp->pass);
+  }
+}

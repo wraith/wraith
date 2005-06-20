@@ -46,7 +46,7 @@ struct user_entry_type {
 extern struct user_entry_type USERENTRY_COMMENT, USERENTRY_LASTON,
  USERENTRY_INFO, USERENTRY_BOTADDR, USERENTRY_HOSTS,
  USERENTRY_PASS, USERENTRY_STATS, USERENTRY_ADDED, USERENTRY_MODIFIED,
- USERENTRY_CONFIG, USERENTRY_SECPASS, USERENTRY_USERNAME, USERENTRY_NODENAME, USERENTRY_OS,
+ USERENTRY_SET, USERENTRY_SECPASS, USERENTRY_USERNAME, USERENTRY_NODENAME, USERENTRY_OS,
  USERENTRY_TMPPASS;
 
 struct laston_info {
@@ -104,7 +104,7 @@ bool set_user(struct user_entry_type *, struct userrec *, void *);
 #define EXEMPT_NAME "*exempt"
 #define INVITE_NAME "*Invite"
 #define CHANS_NAME  "*channels"
-#define CONFIG_NAME "*Config"
+#define SET_NAME "*Set"
 
 /* Channel-specific info
  */

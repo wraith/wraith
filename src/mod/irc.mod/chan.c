@@ -2933,11 +2933,11 @@ static int gotmsg(char *from, char *msg)
     if (botmatch && strcmp(fword, "*"))	
       fword = newsplit(&my_msg);	/* now this will be the command */
     /* is it a cmd? */
-    if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != cmdprefix) || (fword[0] == cmdprefix))) {
+    if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != auth_prefix[0]) || (fword[0] == auth_prefix[0]))) {
       Auth *auth = Auth::Find(uhost);
 
       if (auth && auth->Authed()) {
-        if (fword[0] == cmdprefix)
+        if (fword[0] == auth_prefix[0])
           fword++;
         auth->atime = now;
         check_bind_authc(fword, auth, chan->dname, my_msg);

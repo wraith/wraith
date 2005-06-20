@@ -31,7 +31,6 @@ struct chanuserrec *get_chanrec(struct userrec *u, char *);
 struct chanuserrec *add_chanrec(struct userrec *u, char *);
 void del_chanrec(struct userrec *, char *);
 bool write_bans(FILE *, int);
-bool write_config (FILE *, int);
 bool write_exempts (FILE *, int);
 bool write_chans (FILE *, int);
 bool write_invites (FILE *, int);
@@ -52,7 +51,7 @@ bool ismodeline(masklist *, const char *);
 void channels_report(int, int);
 void channels_writeuserfile();
 
-extern char		glob_chanset[], cfg_glob_chanset[];
+extern char		glob_chanset[512];
 
 /* Macro's here because their functions were replaced by something more
  * generic. <cybah>

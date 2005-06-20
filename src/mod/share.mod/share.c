@@ -16,6 +16,7 @@
 #include "src/userrec.h"
 #include "src/botnet.h"
 #include "src/auth.h"
+#include "src/set.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -1144,7 +1145,7 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
     lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
 
     ok += write_chans(f, idx);
-    ok += write_config(f, idx);
+    ok += write_vars_and_cmdpass(f, idx);
     ok += write_bans(f, idx);
     ok += write_exempts(f, idx);
     ok += write_invites(f, idx);
@@ -1305,7 +1306,7 @@ finish_share(int idx)
   Auth::FillUsers();
 
   checkchans(1);                /* remove marked channels */
-  trigger_cfg_changed();	/* Set our local cfg settings from our userentry */
+  var_parse_my_botset();
   reaffirm_owners();            /* Make sure my owners are +a   */
   updatebot(-1, dcc[j].nick, '+', 0, 0, NULL);
 

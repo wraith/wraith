@@ -22,7 +22,6 @@ OBJS = auth.o \
 	botnet.o \
 	chanprog.o \
 	cmds.o \
-	cfg.o \
 	core_binds.o \
 	conf.o \
 	crypt.o \
@@ -44,6 +43,7 @@ OBJS = auth.o \
 	profile.o \
 	response.o \
 	rfc1459.o \
+	set.o \
 	shell.o \
 	socket.o \
 	sprintf.o \

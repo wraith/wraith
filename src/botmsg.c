@@ -13,9 +13,9 @@
 #include "dcc.h"
 #include "userrec.h"
 #include "main.h"
+#include "set.h"
 #include "net.h"
 #include "users.h"
-#include "cfg.h"
 #include "botmsg.h"
 #include "dccutil.h"
 #include "cmds.h"
@@ -326,15 +326,15 @@ void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
   }
 }
 
-void botnet_send_cfg(int idx, struct cfg_entry * entry) {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "cg %s %s\n", entry->name, entry->gdata ? entry->gdata : "");
+void botnet_send_var(int idx, variable_t *var) {
+  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "va %s %s\n", var->name, var->gdata ? var->gdata : "");
 
   tputs(dcc[idx].sock, OBUF, len);
 }
 
-void botnet_send_cfg_broad(int idx, struct cfg_entry * entry) {
+void botnet_send_var_broad(int idx, variable_t *var) {
   if (tands > 0) {
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "cgb %s %s\n", entry->name, entry->gdata ? entry->gdata : "");
+    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "vab %s %s\n", var->name, var->gdata ? var->gdata : "");
 
     send_tand_but(idx, OBUF, len);
   }

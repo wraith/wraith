@@ -562,3 +562,89 @@ whois_access(struct userrec *user, struct userrec *whois_user)
     return 0;
   return 1;
 }
+
+int deflag_translate(const char *buf)
+{
+  int num = atoi(buf);
+
+  if (egg_isdigit(num))
+    return num;
+
+  if (!egg_strcasecmp(buf, "ignore"))
+    return P_IGNORE;
+  else if (!egg_strcasecmp(buf, "deop"))
+    return P_DEOP;
+  else if (!egg_strcasecmp(buf, "kick"))
+    return P_KICK;
+  else if (!egg_strcasecmp(buf, "delete") || !egg_strcasecmp(buf, "remove"))
+    return P_DELETE;
+  return P_IGNORE;
+}
+void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
+{
+  if (!u)
+    return;
+
+  char tmp[256] = "", tmp2[1024] = "";
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  int which = 0;
+
+  switch (why) {
+  case DEFLAG_BADCOOKIE:
+    strcpy(tmp, "Bad op cookie");
+    which = chan->bad_cookie;
+    break;
+  case DEFLAG_MANUALOP:
+    strcpy(tmp, STR("Manual op in -manop channel"));
+    which = chan->manop;
+    break;
+#ifdef G_MEAN
+  case DEFLAG_MEAN_DEOP:
+    strcpy(tmp, STR("Deopped bot in +mean channel"));
+    ent = &CFG_MEANDEOP;
+    break;
+  case DEFLAG_MEAN_KICK:
+    strcpy(tmp, STR("Kicked bot in +mean channel"));
+    ent = &CFG_MEANDEOP;
+    break;
+  case DEFLAG_MEAN_BAN:
+    strcpy(tmp, STR("Banned bot in +mean channel"));
+    ent = &CFG_MEANDEOP;
+    break;
+#endif /* G_MEAN */
+  case DEFLAG_MDOP:
+    strcpy(tmp, "Mass deop");
+    which = chan->mdop;
+    break;
+  case DEFLAG_MOP:
+    strcpy(tmp, "Mass op");
+    which = chan->mop;
+    break;
+  default:
+    simple_sprintf(tmp, "Reason #%i", why);
+  }
+  if (which == P_DEOP) {
+    putlog(LOG_WARN, "*",  "Setting %s +d (%s): %s", u->handle, tmp, msg);
+    simple_sprintf(tmp2, "+d: %s (%s)", tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+    get_user_flagrec(u, &fr, chan->dname);
+    fr.global = USER_DEOP;
+    fr.chan = USER_DEOP;
+    set_user_flagrec(u, &fr, chan->dname);
+  } else if (which == P_KICK) {
+    putlog(LOG_WARN, "*",  "Setting %s +dk (%s): %s", u->handle, tmp, msg);
+    simple_sprintf(tmp2, "+dk: %s (%s)", tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+    get_user_flagrec(u, &fr, chan->dname);
+    fr.global = USER_DEOP | USER_KICK;
+    fr.chan = USER_DEOP | USER_KICK;
+    set_user_flagrec(u, &fr, chan->dname);
+  } else if (which == P_DELETE) {
+    putlog(LOG_WARN, "*",  "Deleting %s (%s): %s", u->handle, tmp, msg);
+    deluser(u->handle);
+  } else {
+    putlog(LOG_WARN, "*",  "No user flag effects for %s (%s): %s", u->handle, tmp, msg);
+    simple_sprintf(tmp2, "Warning: %s (%s)", tmp, msg);
+    set_user(&USERENTRY_COMMENT, u, tmp2);
+  }
+}

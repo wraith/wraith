@@ -26,7 +26,7 @@
 #include "shell.h"
 #include "userrec.h"
 #include "tclhash.h"
-#include "cfg.h"
+#include "set.h"
 #include "dccutil.h"
 #include "crypt.h"
 #include "debug.h"
@@ -95,7 +95,6 @@ bool	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
 
-#define fork_interval atoi( CFG_FORKINTERVAL.ldata ? CFG_FORKINTERVAL.ldata : CFG_FORKINTERVAL.gdata ? CFG_FORKINTERVAL.gdata : "0")
 int do_confedit = 0;		/* show conf menu if -C */
 static char do_killbot[21] = "";
 static int kill_sig;
@@ -730,7 +729,7 @@ printf("out: %s\n", out);
   init_userent();		/* needed before loading userfile */
   init_party();			/* creates party[] */
   Auth::InitTimer();
-  init_cfg();			/* needed for cfg */
+  init_vars();			/* needed for cfg */
   init_botcmd();
   init_responses();		/* zeros out response[] */
 
@@ -747,19 +746,8 @@ printf("out: %s\n", out);
   notes_init();
   console_init();
   chanprog();
-  if (conf.bot->hub) {
-    cfg_noshare = 1;
-    if (!CFG_CHANSET.gdata)
-      set_cfg_str(NULL, "chanset", glob_chanset);
-    if (!CFG_SERVPORT.gdata)
-      set_cfg_str(NULL, "servport", "6667");
-    if (!CFG_REALNAME.gdata)
-      set_cfg_str(NULL, "realname", "A deranged product of evil coders.");
-    cfg_noshare = 0;
-  }
 
   strcpy(botuser, origbotname);
-  trigger_cfg_changed();
 
   if (!conf.bot->hub && conf.bot->localhub) {
     sdprintf("I am localhub (%s)", conf.bot->nick);

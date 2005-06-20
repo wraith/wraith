@@ -21,7 +21,7 @@
 #include "settings.h"
 #include "userrec.h"
 #include "misc.h"
-#include "cfg.h"
+#include "set.h"
 #include "match.h"
 #include "main.h"
 #include "chanprog.h"
@@ -626,7 +626,8 @@ int readuserfile(const char *file, struct userrec **ret)
 	    else if (lasthand[0] == '*') {
 	      if (lasthand[1] == IGNORE_NAME[1])
 		restore_ignore(s);
-              else if (lasthand[1] == CONFIG_NAME[1]) {
+/* FIXME: remove after 1.2.3 */
+              else if (lasthand[1] == SET_NAME[1] || lasthand[1] == 'C') {
                 set_cmd_pass(s, 0);		/* no need to share here, if we have a new userfile
 						 * then leaf bots under us also get the new userfile */
               }
@@ -654,8 +655,9 @@ int readuserfile(const char *file, struct userrec **ret)
 	    } else if (lasthand[0] == '*') {
 	      if (lasthand[1] == INVITE_NAME[1]) {
                 restore_chanmask('I', NULL, s);
-              } else if (lasthand[1] == CONFIG_NAME[1]) {
-                userfile_cfg_line(s);
+/* FIXME: Remove after 1.2.3 */
+              } else if (lasthand[1] == SET_NAME[1] || lasthand[1] == 'C') {
+                var_userfile_share_line(s, -1, 0);
               }
             }
 	  }
@@ -780,7 +782,9 @@ int readuserfile(const char *file, struct userrec **ret)
 	    int ok = 0;
 
 	    for (ue = u->entries; ue && !ok; ue = ue->next)
-	      if (ue->name && !egg_strcasecmp(code + 2, ue->name)) {
+/* FIXME: remove after 1.2.3 */
+	      if (ue->name && (!egg_strcasecmp(code + 2, ue->name) ||
+                (!egg_strcasecmp(code + 2, "CONFIG") && !egg_strcasecmp(ue->name, "SET")))) {
 		struct list_type *list = NULL;
 
 		list = (struct list_type *) my_calloc(1, sizeof(struct list_type));
@@ -790,12 +794,14 @@ int readuserfile(const char *file, struct userrec **ret)
 		list_append((&ue->u.list), list);
 		ok = 1;
 	      }
+            /* if we don't have the entry, make it?? */
 	    if (!ok) {
 	      ue = (struct user_entry *) my_calloc(1, sizeof(struct user_entry));
 
-	      ue->name = (char *) my_calloc(1, strlen(code + 1));
+//	      ue->name = (char *) my_calloc(1, strlen(code + 1));
+              ue->name = strdup(code + 2);
 	      ue->type = NULL;
-	      strcpy(ue->name, code + 2);
+//	      strcpy(ue->name, code + 2);
 	      ue->u.list = (struct list_type *) my_calloc(1, sizeof(struct list_type));
 
 	      ue->u.list->next = NULL;
@@ -818,7 +824,8 @@ int readuserfile(const char *file, struct userrec **ret)
         } else if (!rfc_casecmp(code, CHANS_NAME)) {
           strcpy(lasthand, code);
           u = NULL;
-        } else if (!rfc_casecmp(code, CONFIG_NAME)) {
+/* FIXME: remove after 1.2.3 */
+        } else if (!rfc_casecmp(code, SET_NAME) || !rfc_casecmp(code, "*Config")) {
           strcpy(lasthand, code);
           u = NULL;  
 	} else if (code[0] == '*') {
@@ -899,7 +906,8 @@ int readuserfile(const char *file, struct userrec **ret)
 	  uet->unpack(u, e);
 	  free(e->name);
 	  e->name = NULL;
-	}
+	} else
+          sdprintf("FAILED TO UNPACK '%s'", e->name);
       }
   }
   /* process the user data *now* */

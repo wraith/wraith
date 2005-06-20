@@ -542,13 +542,13 @@ static int gotmsg(char *from, char *msg)
       rmspace(msg);
       /* is it a cmd? */
 
-      if (my_code && my_code[0] && my_code[1] && auth && auth->Authed() && my_code[0] == cmdprefix) {
-        my_code++;		//eliminate the cmdprefix
+      if (my_code && my_code[0] && my_code[1] && auth && auth->Authed() && my_code[0] == auth_prefix[0]) {
+        my_code++;		//eliminate the prefix
         auth->atime = now;
 
         if (!check_bind_authc(my_code, auth, NULL, msg))
-          putlog(LOG_MSGS, "*", "[%s] %c%s %s", from, cmdprefix, my_code, msg);
-      } else if (!ignoring && (my_code[0] != cmdprefix || !my_code[1] || !auth || !auth->Authed())) {
+          putlog(LOG_MSGS, "*", "[%s] %c%s %s", from, auth_prefix[0], my_code, msg);
+      } else if (!ignoring && (my_code[0] != auth_prefix[0] || !my_code[1] || !auth || !auth->Authed())) {
         struct userrec *my_u = get_user_by_host(from);
         bool doit = 1;
 

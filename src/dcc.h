@@ -221,6 +221,7 @@ extern int 			dcc_total, dccn, uplink_idx;
 extern time_t			timesync;
 extern char			network[];
 extern bool			protect_telnet;
+extern struct cmd_pass          *cmdpass;
 extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_BOT_NEW,
  DCC_RELAY, DCC_RELAYING, DCC_FORK_RELAY, DCC_PRE_RELAY, DCC_CHAT_PASS,
  DCC_FORK_BOT, DCC_SOCKET, DCC_TELNET_ID, DCC_TELNET_NEW, DCC_TELNET_PW,
