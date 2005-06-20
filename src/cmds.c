@@ -3894,8 +3894,15 @@ static void cmd_botjump(int idx, char * par) {
 static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
   if (!conf.bot->hub) {
     if (par[0]) {
-      char *other = newsplit(&par);
+      char *other = newsplit(&par), *p = NULL;
       port_t port = atoi(newsplit(&par));
+
+      if ((p = strchr(other, ':'))) {
+        *p = 0;
+        p++;
+        if (!port)
+          port = atoi(p);
+      }
 
       if (!port)
         port = default_port;

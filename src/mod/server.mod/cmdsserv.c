@@ -46,12 +46,19 @@ static void cmd_dump(int idx, char *par)
 
 static void cmd_jump(int idx, char *par)
 {
-  char *other = NULL;
+  char *other = NULL, *p = NULL;
   int port;
 
   if (par[0]) {
     other = newsplit(&par);
     port = atoi(newsplit(&par));
+
+    if ((p = strchr(other, ':'))) {
+      *p = 0;
+      p++;
+      if (!port)
+        port = atoi(p);
+    }
     if (!port)
       port = default_port;
     putlog(LOG_CMDS, "*", "#%s# jump %s %d %s", dcc[idx].nick, other, port, par);
