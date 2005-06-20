@@ -142,6 +142,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Changes to console flag requirements: +rbh (PERM OWNER), +vd (+a), +egu (+n). (#99)
 * cmd_botcmd blocks the following cmds for '*': die, restard, suicide, jump. (#17)
 * Fixed cmd_[ch]handle saving userfile when changes weren't actually made.
+* Fixed cmd_quit working over botcmd. (#108)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

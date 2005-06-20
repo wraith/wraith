@@ -4217,6 +4217,11 @@ static void cmd_whoami(int idx, char *par)
 
 static void cmd_quit(int idx, char *text)
 {
+  if (dcc[idx].simul >= 0) {
+    dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
+    return;
+  }
+
 	putlog(LOG_CMDS, "*", "#%s# quit %s", dcc[idx].nick, text);
 
 	check_bind_chof(dcc[idx].nick, idx);
