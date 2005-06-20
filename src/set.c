@@ -19,7 +19,7 @@
 #include "rfc1459.h"
 
 int set_noshare = 0;
-
+int autoaway = 1800;
 bool auth_obscure = 0;
 char alias[1024] = "bc botcmd,bl botcmd ?";
 char auth_key[51] = "";
@@ -52,6 +52,7 @@ static variable_t vars[] = {
  {"auth-key",		auth_key,		sizeof(auth_key),		VAR_STRING|VAR_PERM, NULL, NULL},
  {"auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM, NULL, NULL},
  {"auth-obscure",	&auth_obscure,		0,				VAR_INT|VAR_BOOL, NULL, NULL},
+ {"dcc-autoaway",	&autoaway,		0,				VAR_INT|VAR_NOLOC, NULL, NULL},	
  {"bad-process",	&badprocess,		0,				VAR_INT|VAR_DETECTED, NULL, NULL},
  {"dccauth",		&dccauth,		0,				VAR_INT|VAR_BOOL, NULL, NULL},
  {"chanset",		glob_chanset,		sizeof(glob_chanset),		VAR_STRING|VAR_CHANSET|VAR_NOLHUB, NULL, NULL},

@@ -10,7 +10,6 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Change userentry system around to use strings ?
 - Fixed bot's not being able to link when the botnick case did not match (userlist vs binary -C).
 - Remove bot_hublog
-- Simple autoaway on dcc after 10 minutes, will be customizable in the future.
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
 
@@ -150,6 +149,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Clearing chanset var now correctly uses defaults.
 * Fixed cmd_jump/cmd_botjump not parsing 'server:port' correctly.
 * Added var 'auth-obscure': Don't halt on dcc w/dccauth if the pass is wrong; halt at hash (right or wrong). (#100)
+* Added var 'autoaway': How long in seconds until an idle user is set away on dcc auto. (Def: 1800, 30min)
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

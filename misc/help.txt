@@ -1496,6 +1496,8 @@ See also: reload, backup
 [C]  $bauth-prefix$b     The prefix character used for msg cmds, ie: $u!$uop or $u.$uop
 [B]  $bauth-obscure$b    Will not halt in dcc pass is wrong and authing is enabled. 
                           Will always fail at auth hash though.
+[N]  $bdcc-autoaway$b    Time in seconds until a user is set auto-away on dcc.
+                          (0/- to disable)
   *  Msg cmd vars may be left blank to disable usage of cmd.
 [S]  $bmsgop$b           Defines the cmd for opping via msging the bot.
 [S]  $bmsgpass$b         Defines the cmd for setting a pass via msging the bot.

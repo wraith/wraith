@@ -498,14 +498,12 @@ static void core_secondly()
   }
 }
 
-/*
 static void check_autoaway()
 {
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && dcc[i].type == &DCC_CHAT && !(dcc[i].u.chat->away) && ((now - dcc[i].timeval) >= 600))
+    if (dcc[i].type && dcc[i].type == &DCC_CHAT && !(dcc[i].u.chat->away) && ((now - dcc[i].timeval) >= autoaway))
       set_away(i, "Auto away after 10 minutes.");
 }
-*/
 
 static int washub = -1;
 
@@ -522,7 +520,8 @@ static void core_minutely()
     send_timesync(-1);
 
   check_bind_time(&nowtm);
-//  check_autoaway();
+  if (autoaway)
+    check_autoaway();
 /*     flushlogs(); */
 }
 
