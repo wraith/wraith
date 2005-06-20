@@ -17,6 +17,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 1.2.3
 * HUB/LEAF binaries have been combined into 1 binary named 'wraith'
 * Rewrote config/botconfig from scratch as [bot]set with list support. See 'help set'.
+* Added dcc alias support, see 'help set' (only perm owner may set aliases as loops are easy and fatal)
+  -Added aliases: bl, bc. See 'set list alias' for more info.
 * Read in '.resolv.conf' before '/etc/resolv.conf'
 * Fixed binary getting an excess of 1-15 bytes during write. 
 * Binary writing is now a bit faster as the hash is calculated on the fly now.

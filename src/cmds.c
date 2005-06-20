@@ -4226,7 +4226,6 @@ cmd_t C_dcc[] =
   {"encrypt",		"",	(Function) cmd_encrypt,		NULL, AUTH_ALL},
   {"decrypt",		"",	(Function) cmd_decrypt,		NULL, AUTH_ALL},
   {"botcmd",		"i",	(Function) cmd_botcmd, 		NULL, HUB},
-  {"bc",		"i",	(Function) cmd_botcmd, 		NULL, HUB},
   {"hublevel", 		"a", 	(Function) cmd_hublevel, 	NULL, HUB},
   {"lagged", 		"m", 	(Function) cmd_lagged, 		NULL, HUB},
   {"uplink", 		"a", 	(Function) cmd_uplink, 		NULL, HUB},

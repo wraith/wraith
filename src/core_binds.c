@@ -13,6 +13,7 @@
 #include "userrec.h"
 #include "main.h"
 #include "settings.h"
+#include "set.h"
 #include "users.h"
 #include "misc.h"
 #include "tclhash.h"
@@ -36,6 +37,45 @@ void core_binds_init()
         BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);
 	BT_time = bind_table_add("time", 5, "iiiii", MATCH_MASK, BIND_STACKABLE);
+}
+
+bool check_aliases(int idx, const char *cmd, const char *args)
+{
+  char *a = NULL, *p = NULL, *aliasp = NULL, *aliasdup = NULL;
+  bool found = 0;
+
+  aliasp = aliasdup = strdup(alias);
+
+  while ((a = strsep(&aliasdup, ","))) {
+    p = newsplit(&a);
+    if (!egg_strcasecmp(p, cmd)) {
+      p = newsplit(&a);
+
+      if (!egg_strcasecmp(cmd, p)) {
+        putlog(LOG_WARN, "*", "Loop detected in alias '%s'", p);
+        return 0;
+      }
+
+      char *myargs = NULL;
+      size_t size = 0;
+
+      found = 1;
+
+      size = strlen(a) + 1 + strlen(args) + 1;
+      myargs = (char *) calloc(1, size);
+      simple_snprintf(myargs, size, "%s %s", a, args);        
+      check_bind_dcc(p, idx, myargs);
+
+      if (myargs)
+        free(myargs);
+      break;
+    }
+  }
+
+
+  free(aliasp);
+
+  return found;
 }
 
 void check_bind_dcc(const char *cmd, int idx, const char *text)
@@ -101,9 +141,10 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   if (hits != 1)
     putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
 
-  if (hits == 0)
-    dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
-  else if (hits > 1)
+  if (hits == 0) {
+    if (!check_aliases(idx, cmd, args)) 
+      dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
+  } else if (hits > 1)
     dprintf(idx, "Ambiguous command.\n");
 
   free(args);
