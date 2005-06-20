@@ -230,5 +230,6 @@ extern struct dcc_table DCC_CHAT, DCC_BOT, DCC_BOT_NEW,
 void send_timesync(int);
 void failed_link(int);
 void dupwait_notify(const char *);
+void send_sysinfo();
 
 #endif /* !_DCC_H */

@@ -1309,6 +1309,7 @@ finish_share(int idx)
   var_parse_my_botset();
   reaffirm_owners();            /* Make sure my owners are +a   */
   updatebot(-1, dcc[j].nick, '+', 0, 0, NULL);
+  send_sysinfo();
 
   if (reset_chans) {
     reset_chans = 0;

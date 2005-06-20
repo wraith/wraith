@@ -117,6 +117,36 @@ strip_telnet(int sock, char *buf, int *len)
 }
 
 void
+send_sysinfo()
+{
+  char *username = NULL, *sysname = NULL, *nodename = NULL;
+  struct utsname un;
+  bool gotun = 0;
+
+  if (uname(&un) < 0)
+    gotun = 0;
+  else 
+    gotun = 1;
+
+  username = (char *) get_user(&USERENTRY_USERNAME, conf.bot->u);
+  sysname = (char *) get_user(&USERENTRY_OS, conf.bot->u);
+  nodename = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);
+
+
+  if (egg_strcasecmp(sysname, gotun ? un.sysname : "*") ||
+      egg_strcasecmp(username, conf.username ? conf.username : "*") ||
+      egg_strcasecmp(nodename, gotun ? un.nodename : "*")) {
+      char buf[201] = "";
+      size_t len = 0;
+
+      len = simple_snprintf(buf, sizeof(buf), "si %s %s %s", 
+            conf.username ? conf.username : "*", gotun ? un.sysname : "*", gotun ? un.nodename : "*");
+
+      send_uplink(buf, len);
+  }
+}
+
+void
 send_timesync(int idx)
 {
   /* Send timesync to idx, or all lower bots if idx<0 */
@@ -137,9 +167,6 @@ send_timesync(int idx)
 static void
 greet_new_bot(int idx)
 {
-  char *sysname = NULL;
-  struct utsname un;
-
   dcc[idx].timeval = now;
   dcc[idx].u.bot->version[0] = 0;
   dcc[idx].u.bot->sysname[0] = 0;
@@ -157,15 +184,8 @@ greet_new_bot(int idx)
     dcc[idx].status |= STAT_LEAF;
   dcc[idx].status |= STAT_LINKING;
 
-  if (uname(&un) < 0)
-    sysname = "*";
-  else
-    sysname = un.sysname;
-
   dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s\n", HANDLEN, egg_version, "-", conf.bot->localhub, buildts, egg_version);
 
-  dprintf(idx, "si %s %s %s", conf.username ? conf.username : "*", un.sysname ? un.sysname : "*",
-          un.nodename ? un.nodename : "*");
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_FORK_BOT) {
       killsock(dcc[i].sock);
