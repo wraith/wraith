@@ -54,7 +54,8 @@ extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[], curnetwork[], botuserip[];
 extern struct server_list *serverlist;
 extern struct dcc_table SERVER_SOCKET;
-extern rate_t		flood_msg, flood_ctcp;
+extern rate_t		flood_msg, flood_ctcp, flood_g;
+
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)

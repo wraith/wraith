@@ -61,6 +61,7 @@ static variable_t vars[] = {
  {"fight-threshold",	&fight_threshold,	0,				VAR_INT|VAR_NOLOC, NULL, NULL},
  {"flood-msg",		&flood_msg,		0,				VAR_RATE|VAR_NOLHUB, NULL, NULL},
  {"flood-ctcp",		&flood_ctcp,		0,				VAR_RATE|VAR_NOLHUB, NULL, NULL},
+ {"flood-g",		&flood_g,		0,				VAR_RATE|VAR_NOLHUB, NULL, NULL},
  {"fork-interval",	&fork_interval,		0,				VAR_INT, NULL, NULL},
  {"hijack",		&hijack,		0,				VAR_INT|VAR_DETECTED|VAR_PERM, NULL, NULL},
  {"in-bots",		&in_bots,		0,				VAR_INT|VAR_NOLOC, NULL, NULL},

@@ -316,6 +316,18 @@ char ctcp_reply[1024] = "";
 static int lastmsgs[FLOOD_GLOBAL_MAX];
 static char lastmsghost[FLOOD_GLOBAL_MAX][128];
 static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
+static int dronemsgs;
+static time_t dronemsgtime;
+static bool set_pls_g;
+static time_t flood_g_time = 60;
+
+rate_t flood_g = { 6, 2 };
+
+void unset_g(int data)
+{
+  dprintf(DP_MODE, "MODE %s :-g\n", botname);
+  set_pls_g = 0;
+}
 
 /* Do on NICK, PRIVMSG, NOTICE and JOIN.
  */
@@ -352,6 +364,30 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     return 0;
   if (!egg_strcasecmp(floodhost, botuserhost))
     return 0;			/* My user@host (?) */
+
+  //FIXME: hack for +g 
+
+  if (dronemsgtime < now - flood_g.time) {	//expired, reset counter
+    dronemsgs = 0;
+//    dronemsgtime = now;
+  }
+
+  dronemsgs++;
+  dronemsgtime = now;
+
+  if (!set_pls_g && dronemsgs >= flood_g.count) {  //flood from dronenet, let's attempt to set +g
+    egg_timeval_t howlong;
+
+    set_pls_g = 1;
+    dronemsgs = 0;
+    dronemsgtime = 0;
+    dprintf(DP_DUMP, "MODE %s :+g\n", botname);
+    howlong.sec = flood_g_time;
+    howlong.usec = 0;
+    timer_create(&howlong, "Unset umode +g", (Function) unset_g);
+    putlog(LOG_MISC, "*", "Drone flood detected! Setting +g for %li seconds.", flood_g_time);
+  }
+
   p = strchr(floodhost, '@');
   if (p) {
     p++;
