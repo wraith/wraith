@@ -903,6 +903,7 @@ See also: bots
    run through ircII, so ircII commands will most likely not work this
    way.  they need to be raw irc codes. read rfc1459 from ftp.internic.net
    for more help.
+   '$n' is replaced with the bot's irc nickname.
 ::echo
 ###  $becho$b <on/off>
    Specifies whether you want your messages echoed back to you. If it's on,
@@ -1483,7 +1484,7 @@ See also: reload, backup
    $uR$u:    Rate. Set as 'number:interval', ie, '1:5'
    $uD$u:    Detected vars have the folloing options: $bignore$b/0, $bwarn$b/1, $bdie$b/2, 
                                                       $breject$b/3, $bsuicide$b/4
-
+ 
 [SL] $balias$b           List of dcc aliases in format '<alias> <cmd> [parms]'. First
                           matching alias is used. Normal flag checking is done
                           after the alias is expanded.
@@ -1508,7 +1509,7 @@ See also: reload, backup
                           (Resets PID/CPU)
 [R]  $bflood-msg$b       Msgs:Secs until a host is ignored. (0:0 to disable) 
 [R]  $bflood-ctcp$b      Ctcps:Secs until a host is ignored. (0:0 to disable) 
-
+ 
 [D]  $blogin$b           How to handle someone logging in to the shell.
 [D]  $btrace$b           How to handle someone tracing/debugging the bot.
 [D]  $bpromisc$b         How to handle when a interface is set to promiscuous mode.

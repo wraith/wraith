@@ -41,7 +41,7 @@ static void cmd_dump(int idx, char *par)
     return;
   }
 
-  dprintf(DP_DUMP, "%s\n", par);
+  dprintf(DP_DUMP, "%s\n", replace(par, "$n", botname));
 }
 
 static void cmd_jump(int idx, char *par)

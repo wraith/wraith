@@ -152,6 +152,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added var 'autoaway': How long in seconds until an idle user is set away on dcc auto. (Def: 1800, 30min)
 * Added rate vars 'flood-msg' and 'flood-ctcp' to control how quickly a bot ignores on flood.
 * Fixed cosmetic bug with removing ignores.
+* cmd_dump now has a substitution. '$n' is replaced with the bot's current IRC nick.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
