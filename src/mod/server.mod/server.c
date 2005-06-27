@@ -39,10 +39,8 @@ static char serverpass[121] = "";
 static time_t trying_server;	/* trying to connect to a server right now? */
 int curserv = 999;		/* current position in server list: */
 port_t curservport = 0;
-int flud_thr = 5;		/* msg flood threshold */
-time_t flud_time = 60;		/* msg flood time */
-int flud_ctcp_thr = 3;	/* ctcp flood threshold */
-time_t flud_ctcp_time = 60;	/* ctcp flood time */
+rate_t flood_msg = { 5, 60 };
+rate_t flood_ctcp = { 3, 60 };
 char botuserhost[UHOSTLEN] = "";	/* bot's user@host (refreshed whenever the bot joins a channel) */
 					/* may not be correct user@host BUT it's how the server sees it */
 char botuserip[UHOSTLEN] = "";		/* bot's user@host with the ip. */
@@ -1017,7 +1015,7 @@ void server_report(int idx, int details)
            (int) ((float) (hq.tot * 100.0) / (float) maxqmsg), (int) hq.tot);
   if (details) {
     dprintf(idx, "    Flood is: %d msg/%lus, %d ctcp/%lus\n",
-	    flud_thr, flud_time, flud_ctcp_thr, flud_ctcp_time);
+	    flood_msg.count, flood_msg.time, flood_ctcp.count, flood_ctcp.time);
   }
 }
 

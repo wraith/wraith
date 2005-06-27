@@ -335,13 +335,13 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   switch (which) {
   case FLOOD_PRIVMSG:
   case FLOOD_NOTICE:
-    thr = flud_thr;
-    lapse = flud_time;
+    thr = flood_msg.count;
+    lapse = flood_msg.time;
     strcpy(ftype, "msg");
     break;
   case FLOOD_CTCP:
-    thr = flud_ctcp_thr;
-    lapse = flud_ctcp_time;
+    thr = flood_ctcp.count;
+    lapse = flood_ctcp.time;
     strcpy(ftype, "ctcp");
     break;
   }
@@ -422,7 +422,7 @@ static int gotmsg(char *from, char *msg)
   /* Only check if flood-ctcp is active */
   strcpy(uhost, from);
   nick = splitnick(&uhost);
-  if (flud_ctcp_thr && detect_avalanche(msg)) {
+  if (flood_ctcp.count && detect_avalanche(msg)) {
     if (!ignoring) {
       putlog(LOG_MODES, "*", "Avalanche from %s - ignoring", from);
       p = strchr(uhost, '@');
@@ -514,10 +514,10 @@ static int gotmsg(char *from, char *msg)
     if (ctcp_mode != 2) {
       dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
     } else {
-      if (now - last_ctcp > flud_ctcp_time) {
+      if (now - last_ctcp > flood_ctcp.time) {
         dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
 	count_ctcp = 1;
-      } else if (count_ctcp < flud_ctcp_thr) {
+      } else if (count_ctcp < flood_ctcp.count) {
         dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
 	count_ctcp++;
       }
@@ -598,7 +598,7 @@ static int gotnotice(char *from, char *msg)
   fixcolon(msg);
   strcpy(uhost, from);
   nick = splitnick(&uhost);
-  if (flud_ctcp_thr && detect_avalanche(msg)) {
+  if (flood_ctcp.count && detect_avalanche(msg)) {
     /* Discard -- kick user if it was to the channel */
     if (!ignoring)
       putlog(LOG_MODES, "*", "Avalanche from %s", from);

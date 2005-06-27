@@ -1506,7 +1506,9 @@ See also: reload, backup
  
 [N]  $bfork-interval$b   Number of seconds in between each fork() call made by the bot. 
                           (Resets PID/CPU)
- 
+[R]  $bflood-msg$b       Msgs:Secs until a host is ignored. (0:0 to disable) 
+[R]  $bflood-ctcp$b      Ctcps:Secs until a host is ignored. (0:0 to disable) 
+
 [D]  $blogin$b           How to handle someone logging in to the shell.
 [D]  $btrace$b           How to handle someone tracing/debugging the bot.
 [D]  $bpromisc$b         How to handle when a interface is set to promiscuous mode.

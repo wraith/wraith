@@ -2,7 +2,6 @@
 #define _SET_H
 
 #include <sys/types.h>
-#include "set.h"
 
 #define var_type_name(x) (x & VAR_DETECTED) ? "detect" : (x & VAR_INT) ? "int" : (x & VAR_LIST) ? "list" : \
                          (x & VAR_STRING) ? "string" : (x & VAR_RATE) ? "rate" : (x & VAR_BOOL) ? "bool" : ""

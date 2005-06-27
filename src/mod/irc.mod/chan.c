@@ -2816,7 +2816,7 @@ static int gotmsg(char *from, char *msg)
 
   /* Only check if flood-ctcp is active */
   detect_autokick(nick, uhost, chan, msg);
-  if (flud_ctcp_thr && detect_avalanche(msg)) {
+  if (flood_ctcp.count && detect_avalanche(msg)) {
     memberlist *m = ismember(chan, nick);
 
     u = get_user_by_host(from);
@@ -2905,10 +2905,10 @@ static int gotmsg(char *from, char *msg)
     if (ctcp_mode != 2) {
       dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
     } else {
-      if (now - last_ctcp > flud_ctcp_time) {
+      if (now - last_ctcp > flood_ctcp.time) {
 	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
 	count_ctcp = 1;
-      } else if (count_ctcp < flud_ctcp_thr) {
+      } else if (count_ctcp < flood_ctcp.count) {
 	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
 	count_ctcp++;
       }
@@ -2977,7 +2977,7 @@ static int gotnotice(char *from, char *msg)
   strcpy(uhost, from);
   nick = splitnick(&uhost);
   u = get_user_by_host(from);
-  if (flud_ctcp_thr && detect_avalanche(msg)) {
+  if (flood_ctcp.count && detect_avalanche(msg)) {
     memberlist *m = ismember(chan, nick);
 
     get_user_flagrec(u, &fr, chan->dname);

@@ -8,6 +8,7 @@
 
 #include "src/tclhash.h"
 #include "src/dcc.h"
+#include "src/set.h"
 
 #define DO_LOST 1
 #define NO_LOST 0
@@ -46,13 +47,14 @@ enum {
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern size_t		nick_len;
 extern bool		quiet_reject, trigger_on_ignore, floodless;
-extern int 		servidx, ctcp_mode, flud_thr, flud_ctcp_thr, answer_ctcp, serv, curserv;
+extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv;
 extern port_t		default_port, newserverport, curservport;
-extern time_t		server_online, cycle_time, flud_time, flud_ctcp_time;
+extern time_t		server_online, cycle_time;
 extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[],
 			newserver[], newserverpass[], curnetwork[], botuserip[];
 extern struct server_list *serverlist;
 extern struct dcc_table SERVER_SOCKET;
+extern rate_t		flood_msg, flood_ctcp;
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)
