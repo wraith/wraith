@@ -771,9 +771,9 @@ share_mns_ignore(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
     shareout_but(idx, "-i %s\n", par);
+    str_unescape(par, '\\');
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: cancel ignore %s", dcc[idx].nick, par);
-    str_unescape(par, '\\');
     noshare = 1;
     delignore(par);
     noshare = 0;
