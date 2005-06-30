@@ -154,6 +154,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cosmetic bug with removing ignores.
 * cmd_dump now has a substitution. '$n' is replaced with the bot's current IRC nick.
 * Added rate var 'flood-g' which will set +g for 60 seconds after this many msgs:sec has been detected. (#74)
+* Fixed a possible cause for cpu spinning on segfault.
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.

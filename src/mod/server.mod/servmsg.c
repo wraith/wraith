@@ -303,8 +303,13 @@ static int got442(char *from, char *msg)
 void nuke_server(const char *reason)
 {
   if (serv >= 0 && servidx >= 0) {
-    if (reason)
-      dprintf(DP_DUMP, "QUIT :%s\n", reason);
+    if (reason) {
+      char buf[101] = "";
+      size_t len = 0;
+
+      len = simple_snprintf(buf, sizeof(buf), "QUIT :%s\r\n", reason);
+      write_to_server(buf, len);
+    }
 
     sleep(1);
     disconnect_server(servidx, DO_LOST);
