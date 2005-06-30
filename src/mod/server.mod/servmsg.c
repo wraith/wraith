@@ -303,13 +303,8 @@ static int got442(char *from, char *msg)
 void nuke_server(const char *reason)
 {
   if (serv >= 0 && servidx >= 0) {
-    if (reason) {
-      char buf[101] = "";
-      size_t len = 0;
-
-      len = simple_snprintf(buf, sizeof(buf), "QUIT :%s\r\n", reason);
-      write_to_server(buf, len);
-    }
+    if (reason)
+      dprintf(DP_DUMP, "QUIT :%s\n", reason);
 
     sleep(1);
     disconnect_server(servidx, DO_LOST);
@@ -1006,8 +1001,10 @@ static void connect_server(void);
 static void kill_server(int idx, void *x)
 {
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
-     clear_channel(chan, 1);
+
+  if (!segfaulted)		// don't bother if we've segfaulted, too many memory calls in this loop
+    for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+       clear_channel(chan, 1);
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }

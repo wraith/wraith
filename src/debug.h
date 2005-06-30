@@ -30,7 +30,7 @@
 #define debug4(x,a1,a2,a3,a4)   putlog(LOG_DEBUG,"*",x,a1,a2,a3,a4)
 
 
-extern bool		sdebug;
+extern bool		sdebug, segfaulted;
 
 void stackdump(int);
 void setlimits();
