@@ -236,6 +236,32 @@ bool user_has_host(const char *handle, struct userrec *u, char *host)
   return 0;
 }
 
+void convert_password(struct userrec *u)
+{
+  char *oldpass = (char *) get_user(&USERENTRY_TMPPASS, u);
+
+  if (oldpass && oldpass[0]) {
+    char *pass = NULL;
+    /* need to convert into new password format and remove old */
+
+    /* --------- this changes to reflect how to decrypt old password --------- */
+    pass = decrypt_string(u->handle, oldpass);
+    /* ----------------------------------------------------------------------- */
+
+    if (strlen(pass) > MAXPASSLEN)
+      pass[MAXPASSLEN] = 0;
+
+    set_user(&USERENTRY_PASS, u, pass);
+    free(pass);
+
+    /* clear old record */
+    noshare = 1;
+    set_user(&USERENTRY_TMPPASS, u, NULL);
+    noshare = 0;
+  }
+  
+}
+
 /* Try: pass_match_by_host("-",host)
  * will return 1 if no password is set for that host
  */
@@ -243,6 +269,8 @@ int u_pass_match(struct userrec *u, char *in)
 {
   if (!u)
     return 0;
+
+  convert_password(u);
 
   char *cmp = (char *) get_user(&USERENTRY_PASS, u), pass[MAXPASSLEN + 1] = "";
 
@@ -258,16 +286,16 @@ int u_pass_match(struct userrec *u, char *in)
     if (!strcmp(cmp, pass))
       return 1;
   } else {
-    char newpass[MAXPASSLEN + 1] = "";
+    char *newpass = NULL;
 
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
-    encrypt_pass(pass, newpass);
+    newpass = encrypt_pass(u, pass);
     if (!strcmp(cmp, newpass)) {
-      /* save for later */
-      set_user(&USERENTRY_TMPPASS, u, in);
+      free(newpass);
       return 1;
     }
+    free(newpass);
   }
   return 0;
 }

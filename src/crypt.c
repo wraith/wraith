@@ -114,17 +114,37 @@ char *decrypt_string(const char *keydata, char *in)
   }
 }
 
-void encrypt_pass(char *s1, char *s2)
+void encrypt_cmd_pass(char *in, char *out)
 {
   char *tmp = NULL;
 
-  if (strlen(s1) > MAXPASSLEN)
-    s1[MAXPASSLEN] = 0;
-  tmp = encrypt_string(s1, s1);
-  strcpy(s2, "+");
-  strlcat(s2, tmp, MAXPASSLEN + 1);
-  s2[MAXPASSLEN] = 0;
+  if (strlen(in) > MAXPASSLEN)
+    in[MAXPASSLEN] = 0;
+  tmp = encrypt_string(in, in);
+  strcpy(out, "+");
+  strlcat(out, tmp, MAXPASSLEN + 1);
+  out[MAXPASSLEN] = 0;
   free(tmp);
+}
+
+char *encrypt_pass(struct userrec *u, char *in)
+{
+  char *tmp = NULL, buf[101] = "", *ret = NULL;
+  size_t ret_size = 0;
+
+  if (strlen(in) > MAXPASSLEN)
+    in[MAXPASSLEN] = 0;
+
+  simple_snprintf(buf, sizeof(buf), "%s-%s", settings.salt2, in);
+
+  tmp = encrypt_string(u->handle, buf);
+  ret_size = strlen(tmp) + 1 + 1;
+  ret = (char *) my_calloc(1, ret_size);
+
+  simple_snprintf(ret, ret_size, "+%s", tmp);
+  free(tmp);
+
+  return ret;
 }
 
 /*

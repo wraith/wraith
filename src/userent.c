@@ -519,7 +519,7 @@ struct user_entry_type USERENTRY_MODIFIED =
 
 static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  char newpass[32] = "";
+  char *newpass = NULL;
   register char *pass = (char *) buf;
 
   if (e->u.extra)
@@ -537,16 +537,14 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
       p++;
     }
     if (u->bot || (pass[0] == '+'))
-      strcpy(newpass, pass);
+      newpass = strdup(pass);
     else
-      encrypt_pass(pass, newpass);
+      newpass = encrypt_pass(u, pass);
     e->u.extra = strdup(newpass);
-    /* save for later */
-    set_user(&USERENTRY_TMPPASS, u, pass);
-
+    free(newpass);
   }
   if (!noshare)
-    shareout("c PASS %s %s\n", u->handle, pass ? pass : "");
+    shareout("c %s %s %s\n", e->type->name, u->handle, pass ? pass : "");
   return 1;
 }
 
@@ -560,10 +558,10 @@ struct user_entry_type USERENTRY_PASS =
   def_get,
   pass_set,
   NULL,
-  "PASS"
+  "PASS1"
 };
 
-
+/* FIXME: remove after 1.2.3 */
 static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   register char *pass = (char *) buf;

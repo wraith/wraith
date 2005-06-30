@@ -287,7 +287,7 @@ static void cmd_cmdpass(int idx, char *par)
 
   char epass[36] = "", tmp[256] = "";
 
-  encrypt_pass(par[0] ? par : pass, epass);
+  encrypt_cmd_pass(par[0] ? par : pass, epass);
   simple_snprintf(tmp, sizeof tmp, "%s %s", cmd, epass);
   if (has_pass)
     dprintf(idx, "Changed command password for %s\n", cmd);

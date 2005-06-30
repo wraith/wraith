@@ -9,6 +9,7 @@
 
 #include <sys/types.h>
 #include "src/crypto/crypto.h"
+#include "users.h"
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH << 1)
@@ -19,7 +20,8 @@ char *MD5FILE(const char *);
 char *SHA1(const char *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
-void encrypt_pass(char *, char *);
+void encrypt_cmd_pass(char *, char *);
+char *encrypt_pass(struct userrec *, char *);
 char *cryptit (char *);
 char *decryptit (char *);
 int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));
