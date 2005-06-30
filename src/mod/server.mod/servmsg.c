@@ -1055,13 +1055,11 @@ static void server_activity(int idx, char *msg, int len)
  
   code = newsplit(&msg);
 
-  if (use_console_r) {
-    if (!strcmp(code, "PRIVMSG") || !strcmp(code, "NOTICE")) {
-      if (!match_ignore(from))
-	putlog(LOG_RAW, "@", "[@] %s %s %s", from, code, msg);
-    } else
+  if (!strcmp(code, "PRIVMSG") || !strcmp(code, "NOTICE")) {
+    if (!match_ignore(from))
       putlog(LOG_RAW, "@", "[@] %s %s %s", from, code, msg);
-  }
+  } else
+    putlog(LOG_RAW, "@", "[@] %s %s %s", from, code, msg);
 
   /* This has GOT to go into the raw binding table, * merely because this
    * is less effecient.

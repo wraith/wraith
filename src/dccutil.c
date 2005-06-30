@@ -240,16 +240,13 @@ dprintf(int idx, const char *format, ...)
   if (idx < 0) {
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
-    if (idx == DP_LOG || idx == DP_STDOUT || idx == DP_STDOUT) {
+    if (idx == DP_STDOUT || idx == DP_STDOUT) {
       colorbuf(buf, len, -1);
       buf[sizeof(buf) - 1] = 0;
       len = strlen(buf);
     }
 
     switch (idx) {
-      case DP_LOG:
-        putlog(LOG_MISC, "*", "%s", buf);
-        break;
       case DP_STDOUT:
         tputs(STDOUT, buf, len);
         break;

@@ -36,6 +36,6 @@ char *maskname(int);
 void irc_log(struct chanset_t *, const char *, ...) __attribute__((format(printf, 2, 3)));
 
 extern int		conmask;
-extern bool		debug_output, use_console_r;
+extern bool		debug_output;
 
 #endif /* !_LOG_H */
