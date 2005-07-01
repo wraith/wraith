@@ -127,6 +127,12 @@ void encrypt_cmd_pass(char *in, char *out)
   free(tmp);
 }
 
+static char *user_key(struct userrec *u)
+{
+  /* FIXME: fix after 1.2.3 */
+  return u->handle;
+}
+
 char *encrypt_pass(struct userrec *u, char *in)
 {
   char *tmp = NULL, buf[101] = "", *ret = NULL;
@@ -137,12 +143,29 @@ char *encrypt_pass(struct userrec *u, char *in)
 
   simple_snprintf(buf, sizeof(buf), "%s-%s", settings.salt2, in);
 
-  tmp = encrypt_string(u->handle, buf);
+  tmp = encrypt_string(user_key(u), buf);
   ret_size = strlen(tmp) + 1 + 1;
   ret = (char *) my_calloc(1, ret_size);
 
   simple_snprintf(ret, ret_size, "+%s", tmp);
   free(tmp);
+
+  return ret;
+}
+
+char *decrypt_pass(struct userrec *u)
+{
+  char *tmp = NULL, *p = NULL, *ret = NULL, *pass = NULL;
+  
+  pass = (char *) get_user(&USERENTRY_PASS, u);
+  if (pass && pass[0] == '+') {
+    tmp = decrypt_string(user_key(u), &pass[1]);
+    if ((p = strchr(tmp, '-')))
+      ret = strdup(++p); 
+    free(tmp);
+  }
+  if (!ret)
+    ret = (char *) my_calloc(1, 1);
 
   return ret;
 }
