@@ -386,6 +386,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     howlong.usec = 0;
     timer_create(&howlong, "Unset umode +g", (Function) unset_g);
     putlog(LOG_MISC, "*", "Drone flood detected! Setting +g for %li seconds.", flood_g_time);
+    return 1;	//ignore the current msg
   }
 
   p = strchr(floodhost, '@');
