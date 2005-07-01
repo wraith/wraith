@@ -14,70 +14,20 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Added hijacked invite detection based on server invite notices.
 
 1.2.3
+
+----- ADDITIONS/IMPROVEMENTS -----
+
 * HUB/LEAF binaries have been combined into 1 binary named 'wraith'
 * Rewrote config/botconfig from scratch as [bot]set with list support. See 'help set'.
 * Added dcc alias support, see 'help set' (only perm owner may set aliases as loops are easy and fatal)
   -Added aliases: bl, bc. See 'set list alias' for more info.
-* Read in '.resolv.conf' before '/etc/resolv.conf'
-* Fixed binary getting an excess of 1-15 bytes during write. 
-* Binary writing is now a bit faster as the hash is calculated on the fly now.
-* If a binary is already initialized when updating, the pack data will not be overwritten.
-* cmd_mns_user cosmetic change
 * Added cmdline option '-r <botname>' for restarting/starting specified bot.
-* Typos in help for 'info'
-* Removed compatability code left from 1.2->1.2.1 switch
-* Removed/cleaned up more code left from eggdrop/modules
-* Fixed chanset (manop/mop/mdop/bad-cookie) to accept english parameters: ignore/deop/kick/delete/remove. 
-* bots now only kick for -ooo (mdop) if 'mdop' is set with chanset.
-* Fixed up bugs in cmd_cmdpass and cleared up usage/help. Also fixed not being able to set a pass on leaf cmds from hub.
-* Using a cmd with a cmdpass without proper flags now acts as if cmd is not valid (no longer spams wrong pass error)
-* cmd_deluser change: only allow a |m user to remove users whom they have added.
-* Fixed some botnet userfile sharing logs showing up on leaf bots.
-* Eliminated a duplicate struct (conffile)
-* Removed chanset cookie-time-slack
-* Fixed a memory leak in dns
-* Fixed DNS staying on nameservers that fail to give replies
-* Removed channel flag '+|-manop' as it was redundant with chanint 'manop'
-* Removed channel flag '+|-nomop' as it was redundant with chanint 'mop'
-* Upped user limit for processes to 60.
-* Fixed some bad passes being generated/set beginning with -/+
-* Fixed binary exiting with ERR_NOBOTS under conditions that it shouldn't. (updating)
-* Fixed bots not rechecking channel for invalid users after a .-chrec
-* Fixed dccauth not correctly working according to it's setting (#30)
-* Users who are v|o in a +private chan are now voiced, as before |v was needed.
-* Added channel flag +|-botbitch, when set only bots will be allowed to be opped, users are auto-deopped.
 * chanset -bitch/-private/-botbitch/+botbitch/+closed/+private will now trigger bots to recheck channel (op/deop/kick people)
-* Fixed bot not updating it's hostmask when reconnecting to server (#11/#85)
-* Fixed bot sending +Ie modes before recieving list from server after opping.
-* Fixed channel bans not displaying on hubs (#1)
-* Fixed users showing up in .whom after doing .botcmd and relinking the bot which the cmd was ran on. (#9)
-* Default UID is now: -1 (Fixes running as root by accident. #12)
-* Added some debug logging for failed bind() listen() and getsockname()
-* Fixed DNS returning a blank reply for reverse lookups with missing records.
-* Setting -take now automatically sets +fastop as well (#13).
+* Added channel flag +|-botbitch, when set only bots will be allowed to be opped, users are auto-deopped.
 * Added cmd_version (does same as .botversion)
-* Fixed userfile becoming desynced during transfer; A bot downloading a userfile would miss changes made during the transfer. (#11)
-* Fixed a fatal loop with accepting new telnet connections.
-* Fixed segfault after booting users when a leaf has lost +c. (#18)
-* Fixed a bug with connecting to servers that did not send any data on connect.
-* Fixed colors still showing for characters ":@()<>" when colors were turned off.
-* Reverted patch from 1.2 which disabled removing duplicate msgs in server queue. (Fixes most queue/excess flood bugs)
+* Added some debug logging for failed bind() listen() and getsockname()
 * Users can no longer whois PERM OWNERS unless they are themselves one.
-* Fixed cmd_boot to only allow users to boot users they can whois. (Users with lower flags)
-  Also, cmd_boot will now boot all sessions of a user on the bot specified. (#37)
-* Fixed a file descriptor leak in the 'last' checking.
-* Fixed bot's being tagged with op/login stats. (#22)
-* cmd_cycle now will only cycle the net if done on the hub. Doing it on a leaf cycles only that one bot.
-* Optimized WHO parsing more to alieviate some cpu usage in large chans
-* Fixed a bug which caused a leaf to not request ops in a channel after adding it's new host to the userfile.
-* Fixed bots unbanning bots via botnet requests when the bot is set +k for the chan.
-* Fixed a bunch of lame bugs in the getop system
-* Now using ANSI color code *0* to close bold (as opposed to new standard: 22)
-* Fixed some excess newlines when a user is booted for losing hub/leaf access.
-* cmd_find now optional takes a username instead of a nick!user@host to search for.
-* Fixed unsetting a global ban when the same ban is local to a chan causes the bots to unban it. (#24)
-* +O now implies +o
-* Combined kick reasons for +k and .kickban
+* cmd_find now takes an optional username instead of a nick!user@host to search for.
 * Some changes to ./binary -C:
   -Default binpath is now the directory the binary is first ran in
   -Running the bot with -C will automatically update uid/uname/homedir/username
@@ -95,68 +45,128 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
    -Removed bots are killed and removed from the userlist (if linked)
 * Added match option for cmd_botcmd: '&' will match on all localhubs (first bot in config) (#28)
 * Added some debug logging when a telnet connection is ignored.
-* Fixed some missing sanity checking on certain user flags for channel records.
-* cmd_dns wasn't checking for param
-* cmd_getkey over botcmd was displaying excess newlines.
-* Rewrote how logs are shared over botnet, now uses much less bw and resources. (#31)
-  -[will break logging during update]
 * Added some missing logging for msg_pass (#34)
-* Fixed msgs being logged when the msg has triggered an ignore for flooding. (#23)
-* botcmd * wasn't correctly being restricted to +n (#35)
-* Fixed cmd_mns_(ban|exempt|invite) to remove the proper ban if a number is used (#38)
-* Fixed cmd_stick/cmd_unstick not making leaf bots set/unset the masks in channels. (#41)
-* Detection system run by localhub will kill all other running bots with DIE/SUICIDE now.
-* During update, bot uplinks aren't permanently changed now.
-* Bans aren't checked on join anymore if the channel is +take
-* Fixed an outstanding bug on linking from a hub to another hub.
 * Added log msg (+w) for when a msg is received when umode +g. (#44)
-* cmd_botcmd now works correctly when the target is the bot you're on. (#46)
-* cmd_pls_user wasn't correctly sharing multiple hosts to the botnet. (#48)
-* Only auto-op a user if they have a password set. (#52)
-* Made cmd_addlog o|o
-* Several cmds were not saving userfile: -/+chrec|ban|exempt|invite, [un]stick, chinfo (#68)
 * Added ability to +chan/chanset flood-* x:n (#69)
-* Fixed bots kicking with +bitch responses when a +d user is opped.
-* Fixed a possible loop of -v+v with +voice/+v
-* Rewrote cmd_stick to use less code, as all the ban/exempt/invite code was redundant.
 * Added entry to help for ban-time in chanset: ban-time requires +dynamicbans
-* Fixed a bug where a bot would stop trying to connect to servers if using ipv6.
-* New channels get a default chanset of: flood-ctcp 5:30
-* Tempdir is now chosen from a list as follows: (hub) ./tmp/ (leaf) ~/.ssh/..., /tmp/, /usr/tmp/, /var/tmp/, ./
-* Fixed a bug in the hash creation of cookies due to an ircd stripping excess '*' in cookies.
 * Added new feature (soft_restart) which restarts/updates bots while keeping them on IRC and preserving uptime/pid
 * Added cmd_rehash to reload binary data (conf/bots) (this is done auto after -C anyway)
+* Added cmd_suicide. (#80)
+* Added a note for users who are 'SU'd in cmd_whom for +a|. (LOCAL WHOM ONLY) (#64)
+* Added channel name to bad cookie/manop commenting (#97)
+* Added var 'auth-obscure': Don't halt on dcc w/dccauth if the pass is wrong; halt at hash (right or wrong). (#100)
+* Added var 'autoaway': How long in seconds until an idle user is set away on dcc auto. (Def: 1800, 30min)
+* Added rate vars 'flood-msg' and 'flood-ctcp' to control how quickly a bot ignores on flood.
+* Added rate var 'flood-g' which will set +g for 60 seconds after this many msgs:sec has been detected. (#74)
+* Optimized WHO parsing more to alieviate some cpu usage in large chans
+* Binary writing is now a bit faster as the hash is calculated on the fly now.
+* Rewrote how logs are shared over botnet, now uses much less bw and resources. (#31)
+  -[will break logging during update]
+* Tempdir is now chosen from a list as follows: (hub) ./tmp/ (leaf) ~/.ssh/..., /tmp/, /usr/tmp/, /var/tmp/, ./
 * cmd_update/cmd_restart/SIGHUP now soft restarts bot
 * Shell cmd param -u now soft restarts all running bots after updating binary
-* Changed the output of cmd_uptime (shows in cmd_status as well)
-* Disabled auto-renaming server names internally on connect if they don't match our own list
+* cmd_dump now has a substitution. '$n' is replaced with the bot's current IRC nick.
+* Disabled all memory allocations after a segfault (Fixes CPU spinning)
+* Changed password encryption, should auto convert, might need to reset all though. (#75)
+
+----- FIXES -----
+
+* Fixed binary getting an excess of 1-15 bytes during write. 
+* If a binary is already initialized when updating, the pack data will not be overwritten.
+* Fixed chanset (manop/mop/mdop/bad-cookie) to accept english parameters: ignore/deop/kick/delete/remove. 
+* bots now only kick for -ooo (mdop) if 'mdop' is set with chanset.
+* Fixed up bugs in cmd_cmdpass and cleared up usage/help. Also fixed not being able to set a pass on leaf cmds from hub.
+* Using a cmd with a cmdpass without proper flags now acts as if cmd is not valid (no longer spams wrong pass error)
+* Fixed some botnet userfile sharing logs showing up on leaf bots.
+* Fixed a memory leak in dns
+* Fixed DNS staying on nameservers that fail to give replies
+* Fixed some bad passes being generated/set beginning with -/+
+* Fixed binary exiting with ERR_NOBOTS under conditions that it shouldn't. (updating)
+* Fixed bots not rechecking channel for invalid users after a .-chrec
+* Fixed dccauth not correctly working according to it's setting (#30)
+* Fixed bot not updating it's hostmask when reconnecting to server (#11/#85)
+* Fixed bot sending +Ie modes before recieving list from server after opping.
+* Fixed channel bans not displaying on hubs (#1)
+* Fixed users showing up in .whom after doing .botcmd and relinking the bot which the cmd was ran on. (#9)
+* Fixed DNS returning a blank reply for reverse lookups with missing records.
+* Fixed userfile becoming desynced during transfer; A bot downloading a userfile would miss changes made during the transfer. (#11)
+* Fixed a fatal loop with accepting new telnet connections.
+* Fixed segfault after booting users when a leaf has lost +c. (#18)
+* Fixed a bug with connecting to servers that did not send any data on connect.
+* Fixed colors still showing for characters ":@()<>" when colors were turned off.
+* Fixed cmd_boot to only allow users to boot users they can whois. (Users with lower flags)
+  Also, cmd_boot will now boot all sessions of a user on the bot specified. (#37)
+* Fixed a file descriptor leak in the 'last' checking.
+* Fixed bot's being tagged with op/login stats. (#22)
+* Fixed a bug which caused a leaf to not request ops in a channel after adding it's new host to the userfile.
+* Fixed bots unbanning bots via botnet requests when the bot is set +k for the chan.
+* Fixed a bunch of lame bugs in the getop system
+* Fixed some excess newlines when a user is booted for losing hub/leaf access.
+* Fixed unsetting a global ban when the same ban is local to a chan causes the bots to unban it. (#24)
+* botcmd * wasn't correctly being restricted to +n (#35)
+* Fixed some missing sanity checking on certain user flags for channel records.
+* Fixed msgs being logged when the msg has triggered an ignore for flooding. (#23)
+* Fixed cmd_mns_(ban|exempt|invite) to remove the proper ban if a number is used (#38)
+* Fixed cmd_stick/cmd_unstick not making leaf bots set/unset the masks in channels. (#41)
+* Fixed bots kicking with +bitch responses when a +d user is opped.
+* Fixed a possible loop of -v+v with +voice/+v
+* Fixed a bug where a bot would stop trying to connect to servers if using ipv6.
+* Fixed a bug in the hash creation of cookies due to an ircd stripping excess '*' in cookies.
 * Fixed hub delinking bots for not sharing instead of just offering the userfile again. (#59)
 * Possibly fixed a very rare userfile sharing desync (#58)
 * Fixed wrong spacing in cmd_status
 * Fixed cmd_boot attempting to boot a remote simulated dcc created by botcmd. (#90)
 * Fixed bots with '`' in nick not spawning correctly. (#88)
-* Added cmd_suicide. (#80)
+* cmd_dns wasn't checking for params.
+* cmd_getkey over botcmd was displaying excess newlines.
+* Fixed an outstanding bug on linking from a hub to another hub.
 * Fixed 'user has joined partyline' when after using cmd_botcmd/cmd_chattr on remote bots. (#84)
-* Added a note for users who are 'SU'd in cmd_whom for +a|. (LOCAL WHOM ONLY) (#64)
-* Added channel name to bad cookie/manop commenting (#97)
 * Fixed *many* buffer overflows in the botnet code. (#94)
-* Changes to console flag requirements: +rbh (PERM OWNER), +vd (+a), +egu (+n). (#99)
-* cmd_botcmd blocks the following cmds for '*': die, restard, suicide, jump. (#17)
 * Fixed cmd_[ch]handle saving userfile when changes weren't actually made.
 * Fixed cmd_quit working over botcmd. (#108)
 * Fixed 'bots' not showing up in help, and a typo in 'botpart'.
+* Fixed cmd_jump/cmd_botjump not parsing 'server:port' correctly.
+* Fixed cosmetic bug with removing ignores.
+* Fixed ANSI colors not showing for logs when bot is not in background.
+* Reverted patch from 1.2 which disabled removing duplicate msgs in server queue. (Fixes most queue/excess flood bugs)
+* During update, bot uplinks aren't permanently changed now.
+* cmd_botcmd now works correctly when the target is the bot you're on. (#46)
+* cmd_pls_user wasn't correctly sharing multiple hosts to the botnet. (#48)
+* Only auto-op a user if they have a password set. (#52)
+* Several cmds were not saving userfile: -/+chrec|ban|exempt|invite, [un]stick, chinfo (#68)
+* Changes to console flag requirements: +rbh (PERM OWNER), +vd (+a), +egu (+n). (#99)
+* cmd_botcmd blocks the following cmds for '*': die, restard, suicide, jump. (#17)
+
+----- MISC CHANGES -----
+
+* cmd_mns_user cosmetic change
+* Typos in help for 'info'
+* Removed compatability code left from 1.2->1.2.1 switch
+* Removed/cleaned up more code left from eggdrop/modules
+* Read in '.resolv.conf' before '/etc/resolv.conf'
+* cmd_deluser change: only allow a |m user to remove users whom they have added.
+* Eliminated a duplicate struct (conffile)
+* Removed chanset cookie-time-slack
+* Removed channel flag '+|-manop' as it was redundant with chanint 'manop'
+* Removed channel flag '+|-nomop' as it was redundant with chanint 'mop'
+* Upped user limit for processes to 60.
+* Users who are v|o in a +private chan are now voiced, as before |v was needed.
+* Default UID is now: -1 (Fixes running as root by accident. #12)
+* Setting -take now automatically sets +fastop as well (#13).
+* cmd_cycle now will only cycle the net if done on the hub. Doing it on a leaf cycles only that one bot.
+* Now using ANSI color code *0* to close bold (as opposed to new standard: 22)
+* +O now implies +o
+* Combined kick reasons for +k and .kickban
+* Detection system run by localhub will kill all other running bots with DIE/SUICIDE now.
+* Bans aren't checked on join anymore if the channel is +take
+* Made cmd_addlog o|o
+* Rewrote cmd_stick to use less code, as all the ban/exempt/invite code was redundant.
+* New channels get a default chanset of: flood-ctcp 5:30
+* Changed the output of cmd_uptime to reflect irc/shell uptime (shows in cmd_status as well)
+* Disabled auto-renaming server names internally on connect if they don't match our own list
 * In config/-C, the ip field for bots can now be either ipv4 or ipv6. (ipv6 field still present)
 * Clearing chanset var now correctly uses defaults.
-* Fixed cmd_jump/cmd_botjump not parsing 'server:port' correctly.
-* Added var 'auth-obscure': Don't halt on dcc w/dccauth if the pass is wrong; halt at hash (right or wrong). (#100)
-* Added var 'autoaway': How long in seconds until an idle user is set away on dcc auto. (Def: 1800, 30min)
-* Added rate vars 'flood-msg' and 'flood-ctcp' to control how quickly a bot ignores on flood.
-* Fixed cosmetic bug with removing ignores.
-* cmd_dump now has a substitution. '$n' is replaced with the bot's current IRC nick.
-* Added rate var 'flood-g' which will set +g for 60 seconds after this many msgs:sec has been detected. (#74)
-* Disabled all memory allocations after a segfault (Fixes CPU spinning)
-* Fixed ANSI colors not showing for logs when bot is not in background.
-* Changed password encryption, should auto convert, might need to reset all though. (#75)
+
 
 1.2.2
 * Don't sanity check flags for users on DCC CHAT if they are on the bot via .botcmd.
