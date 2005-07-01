@@ -177,7 +177,7 @@ void dumplots(int idx, const char *prefix, char *data)
   char *p = data, *q = NULL, *n = NULL, c = 0;
   const size_t max_data_len = 100 - strlen(prefix);
 
-  while (strlen(p) > max_data_len) {
+  while ((strlen(p) - ansi_len(p)) > max_data_len) {
     q = p + max_data_len;
     /* Search for embedded linefeed first */
     n = strchr(p, '\n');

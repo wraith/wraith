@@ -1025,6 +1025,32 @@ check_ansi(char *v)
   return count;
 }
 
+int ansi_len(char *s)
+{
+  char *c = s;
+  int count = 0;
+
+  while (*c) {
+    if (*c == 27) {
+      c++;
+      count++;
+
+      if (*c == '[') {
+        c++;
+        count++;
+        while ((*c != 'm')) {
+          c++;
+          count++;
+        }
+        c++;
+        count++;
+      }
+    } else
+      c++;
+  }
+
+  return count;
+}
 
 static void
 eof_dcc_chat(int idx)
