@@ -3,6 +3,7 @@ Numbers expressed as '#12' are references to a ticket/bug posting which can be v
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
 1.2.4 (Planned updates)
+- Another new password encryption
 - Increased buffer size in -C for binname/binpath/homedir
 - Added tempdir option in config -C
 - Add back in uhost cache / hash table for invites
