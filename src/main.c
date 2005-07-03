@@ -500,9 +500,13 @@ static void core_secondly()
 
 static void check_autoaway()
 {
+  char autoaway[51] = "";
+
+  simple_snprintf(autoaway, sizeof(autoaway), "Auto away after %d minutes.", dcc_autoaway / 60);
+
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && dcc[i].type == &DCC_CHAT && !(dcc[i].u.chat->away) && ((now - dcc[i].timeval) >= dcc_autoaway))
-      set_away(i, "Auto away after 10 minutes.");
+      set_away(i, autoaway);
 }
 
 static int washub = -1;
