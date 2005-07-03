@@ -21,7 +21,7 @@
 int set_noshare = 0;
 int dcc_autoaway = 1800;
 bool auth_obscure = 0;
-char alias[1024] = "bc botcmd,bl botcmd ?";
+char alias[1024] = "bc botcmd,bl botcmd ?,+set set +,-set set -";
 char auth_key[51] = "";
 char auth_prefix[2] = "";
 int badprocess = DET_IGNORE;
