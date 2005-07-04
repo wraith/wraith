@@ -565,10 +565,8 @@ whois_access(struct userrec *user, struct userrec *whois_user)
 
 int deflag_translate(const char *buf)
 {
-  int num = atoi(buf);
-
-  if (egg_isdigit(num))
-    return num;
+  if (str_isdigit(buf))
+    return (atoi(buf));
 
   if (!egg_strcasecmp(buf, "ignore"))
     return P_IGNORE;
