@@ -40,6 +40,7 @@
 #include "src/mod/console.mod/console.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/irc.mod/irc.h"
+#include "src/mod/update.mod/update.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -3502,7 +3503,10 @@ static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
   if (uname(&un) < 0) {
     strcat(tmp, "(unknown OS)");
   } else {
-    simple_sprintf(tmp + strlen(tmp), "%s %s (%s)", un.sysname, un.release, un.machine);
+    if (updated) {
+      simple_sprintf(tmp + strlen(tmp), "%s %s (%s-UPDATED)", un.sysname, un.release, un.machine);
+    } else
+      simple_sprintf(tmp + strlen(tmp), "%s %s (%s)", un.sysname, un.release, un.machine);
   }
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 }
