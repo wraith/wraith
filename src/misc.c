@@ -613,7 +613,8 @@ readsocks(const char *fname)
     dprintf(DP_DUMP, "VERSION\n");
     reset_chans = 1;
   }
-  free(nick);
+  if (nick)
+    free(nick);
   if (socksfile)
     free(socksfile);
 }
