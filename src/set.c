@@ -754,16 +754,16 @@ void cmd_set_real(const char *botnick, int idx, char *par)
     if (list) {
       if (list == LIST_ADD) {
         if (var_add_list(botnick, var, data)) {
-          dprintf(idx, "Added to %s list.", var->name);
+          dprintf(idx, "Added to %s list.\n", var->name);
           return;
         }
       } else if (list == LIST_RM) {
         if (var_rem_list(botnick, var, data)) {
-          dprintf(idx, "Removed from %s list.", var->name);
+          dprintf(idx, "Removed from %s list.\n", var->name);
           return;
         }
       }
-        dprintf(idx, "Failed to modify %s list.", var->name);
+        dprintf(idx, "Failed to modify %s list.\n", var->name);
 
     } else {
       var_set(var, botnick, data);
