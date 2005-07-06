@@ -232,6 +232,11 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
     }
   }
   
+  /* we will possibly free new below, so let's send the information to the botnet now */
+  if (!noshare && !set_noshare)
+    /* only share to pertinent bots */
+    shareout_prot(u, "c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+
   /* unset and bail out if the new data is empty and the old doesn't exist, why'd we even get this change? */
   if (!old && (!newxk->data || !newxk->data[0])) {
     /* or simply ... delete non-existant entry */
@@ -241,11 +246,6 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
     free(newxk);
     return 1;
   }
-
-  /* we will possibly free new below, so let's send the information to the botnet now */
-  if (!noshare && !set_noshare)
-    /* only share to pertinent bots */
-    shareout_prot(u, "c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
 
   /* if we have a new entry and an old entry.. or our new entry is empty -> clear out the old entry */
   if ((old && old != newxk) || !newxk->data || !newxk->data[0]) {
