@@ -770,7 +770,7 @@ void cmd_set_real(const char *botnick, int idx, char *par)
       if (botnick)
         var_set_userentry(botnick, name, data);
 
-      dprintf(idx, "%s: %s\n", name, botnick ? (var->ldata ? var->ldata : "(not set)") : (var->gdata ? var->gdata : "(not set)"));
+      dprintf(idx, "%s: %s\n", name, botnick ? (!data || (data[0] == '-') ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
     }
     if (conf.bot->hub)
       write_userfile(idx);
