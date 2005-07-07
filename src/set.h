@@ -3,8 +3,8 @@
 
 #include <sys/types.h>
 
-#define var_type_name(x) (x & VAR_DETECTED) ? "detect" : (x & VAR_INT) ? "int" : (x & VAR_LIST) ? "list" : \
-                         (x & VAR_STRING) ? "string" : (x & VAR_RATE) ? "rate" : (x & VAR_BOOL) ? "bool" : ""
+#define var_type_name(x) (x & VAR_DETECTED) ? "detect" : (x & VAR_BOOL) ? "bool" : (x & VAR_INT) ? "int" :\
+                         (x & VAR_LIST) ? "list" : (x & VAR_STRING) ? "string" : (x & VAR_RATE) ? "rate" : ""
 
 #define VAR_INT		BIT0
 #define VAR_STRING	BIT1
