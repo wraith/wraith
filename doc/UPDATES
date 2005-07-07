@@ -137,6 +137,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Several cmds were not saving userfile: -/+chrec|ban|exempt|invite, [un]stick, chinfo (#68)
 * Changes to console flag requirements: +rbh (PERM OWNER), +vd (+a), +egu (+n). (#99)
 * cmd_botcmd blocks the following cmds for '*': die, restard, suicide, jump. (#17)
+* Fixed users not being deopped in +bitch channels after being removed from the botnet. (#112)
 
 ----- MISC CHANGES -----
 

@@ -486,6 +486,7 @@ share_killuser(int idx, char *par)
   if ((dcc[idx].status & STAT_SHARE) && (u = get_user_by_handle(userlist, par))) {
 
     noshare = 1;
+    check_this_user(u->handle, 1, NULL);
     if (deluser(par)) {
       shareout_but(idx, "k %s\n", par);
       if (conf.bot->hub)
