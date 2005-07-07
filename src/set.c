@@ -710,7 +710,7 @@ void cmd_set_real(const char *botnick, int idx, char *par)
         else {
           char buf[51] = "";
 
-          egg_snprintf(buf, sizeof(buf), "(%-6s)  %-15s:\t", var_type_name(var->flags), var->name);
+          egg_snprintf(buf, sizeof(buf), "(%-6s)  %-19s:  ", var_type_name(var->flags), var->name);
 //        dprintf(idx, "   %-15s:   %s\n", var->name, data);
           dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
         }
