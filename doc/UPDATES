@@ -170,6 +170,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * In config/-C, the ip field for bots can now be either ipv4 or ipv6. (ipv6 field still present)
 * Clearing chanset var now correctly uses defaults.
 * cmd_[net|bot|]version now displays if a bot has been updated and is on timer for restart.
+* Increased slack time for cookies.
 
 
 1.2.2

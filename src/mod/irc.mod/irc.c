@@ -304,7 +304,7 @@ checkcookie(char *chn, char *bnick, char *cookie)
   hash = MD5(tohash);
   if (!(hash[8] == cookie[0] && hash[16] == cookie[1] && hash[18] == cookie[2]))
     return BC_HASH;
-  if (((now + timesync) - optime) > 600)
+  if (((now + timesync) - optime) > 1800)
     return BC_SLACK;
   return 0;
 }
