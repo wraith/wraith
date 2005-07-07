@@ -69,6 +69,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * cmd_dump now has a substitution. '$n' is replaced with the bot's current IRC nick.
 * Disabled all memory allocations after a segfault (Fixes CPU spinning)
 * Changed password encryption, should auto convert, might need to reset all though. (#75)
+* Adding hosts with missing nick/ident will now prefix the host with '*!' and '*!*' respectively.
 
 ----- FIXES -----
 
