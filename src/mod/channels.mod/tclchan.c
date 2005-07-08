@@ -424,6 +424,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->closed_private = atoi(item[i]);
+    } else if (!strcmp(item[i], "voice-non-ident")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          simple_sprintf(result, "channel voice-ident needs argument");
+        return ERROR;
+      }
+      chan->voice_non_ident = atoi(item[i]);
     } else if (!strcmp(item[i], "bad-cookie")) {
       i++;
       if (i >= items) {
@@ -789,6 +797,7 @@ int channel_add(char *result, char *newname, char *options)
     chan->closed_ban = 0;
     chan->closed_private = 1;
     chan->closed_invite = 1;
+    chan->voice_non_ident = 1;
 /* Chanint template
  *  chan->temp = 0;
  */

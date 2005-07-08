@@ -47,7 +47,6 @@ char process_list[1024] = "";
 int promisc = DET_WARN;
 int trace = DET_WARN;
 bool offensive_bans = 1;
-bool voice_non_ident = 1;
 
 static variable_t vars[] = {
  {"alias",		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM, NULL, NULL},
@@ -86,7 +85,6 @@ static variable_t vars[] = {
  {"servers6",		&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB, NULL, NULL},
  {"server-port",	&default_port,		0,				VAR_INT|VAR_NOLHUB, NULL, NULL},
  {"trace",		&trace,			0,				VAR_INT|VAR_DETECTED, NULL, NULL},
- {"voice-non-ident",	&voice_non_ident,	0,				VAR_INT|VAR_BOOL|VAR_NOLHUB, NULL, NULL},
  {NULL,			NULL,			0,				0, NULL, NULL}
 };
 

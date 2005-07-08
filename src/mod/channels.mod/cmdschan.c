@@ -1237,6 +1237,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Mop: ", chan->mop, P_STR, "Ignore");
     SHOW_INT("Revenge-mode: ", chan->revenge_mode, NULL, NULL);
     SHOW_INT("Stopnethack-mode: ", chan->stopnethack_mode, "", "Don't!");
+    SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "", "Don't!");
 
     dprintf(idx, "Flood settings:   chan ctcp join kick deop nick\n");
     dprintf(idx, "  number:          %3d  %3d  %3d  %3d  %3d  %3d\n",

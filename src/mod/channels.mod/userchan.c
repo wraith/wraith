@@ -714,7 +714,7 @@ bad-cookie %d manop %d mdop %d mop %d \
 limit %d stopnethack-mode %d revenge-mode %d flood-chan %d:%lu \
 flood-ctcp %d:%lu flood-join %d:%lu flood-kick %d:%lu flood-deop %d:%lu \
 flood-nick %d:%lu closed-ban %d closed-invite %d closed-private %d ban-time %lu \
-exempt-time %lu invite-time %lu \
+exempt-time %lu invite-time %lu voice-non-ident %d \
 %cenforcebans %cdynamicbans %cuserban %cbitch %cprotectops %crevenge \
 %crevengebot %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
@@ -751,6 +751,7 @@ exempt-time %lu invite-time %lu \
         chan->ban_time,
         chan->exempt_time,
         chan->invite_time,
+        chan->voice_non_ident,
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),
