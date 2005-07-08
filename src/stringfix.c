@@ -13,7 +13,7 @@
 #include "config.h"
 #endif
 
-#define WTF 50720
+#define WTF 52768
 int help = 0;
 
 void garble(char **inptr, char **outptr)
