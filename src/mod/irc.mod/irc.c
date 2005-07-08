@@ -73,12 +73,12 @@ static bool include_lk = 1;      /* For correct calculation
 #include "msgcmds.c"
 
 static int
-voice_ok(memberlist *m)
+voice_ok(memberlist *m, struct chanset_t *chan)
 {
   if (m->flags & EVOICE)
     return 0;
 
-  if (m->userhost[0] && !voice_non_ident && m->userhost[0] == '~')
+  if (m->userhost[0] && !chan->voice_non_ident && m->userhost[0] == '~')
     return 0;
 
   return 1;
@@ -1338,7 +1338,7 @@ check_expired_chanstuff(struct chanset_t *chan)
                   add_mode(chan, '-', 'v', m->nick);
                 }
               }
-            } else if (!m->user && channel_voice(chan) && voice_ok(m)) {
+            } else if (!m->user && channel_voice(chan) && voice_ok(m, chan)) {
               add_mode(chan, '+', 'v', m->nick);
             }
           }
