@@ -1306,7 +1306,7 @@ static void cmd_chanset(int idx, char *par)
     }
   }
 
-  putlog(LOG_CMDS, "*", "#%s# chanset (%s) %s", dcc[idx].nick, chan->dname, par);
+  putlog(LOG_CMDS, "*", "#%s# chanset (%s) %s", dcc[idx].nick, all ? "*" : chan->dname, par);
   
   if (do_chanset(result, all ? NULL : chan, par, DO_LOCAL | DO_NET) == ERROR) {
     dprintf(idx, "Error trying to set { %s } on %s: %s\n", par, all ? "all channels" : chan->dname, result);
