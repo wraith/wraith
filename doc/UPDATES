@@ -17,6 +17,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 1.2.4
 * Fixed cmd_botset not displaying botnick.
 * cmd_adduser now sends a NOTICE to the person being added with their initial password.
+* Fixed cmd_conf not working at all.
 
 1.2.3
 

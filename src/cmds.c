@@ -1554,7 +1554,7 @@ static void cmd_sha1(int idx, char *par)
 
 static void cmd_conf(int idx, char *par)
 {
-  if (!conf.bot->localhub || !conf.bot->hub) {
+  if (!conf.bot->localhub && !conf.bot->hub) {
     dprintf(idx, "Please use '%s%s%s' for this login/shell.\n", RED(idx), conf.localhub, COLOR_END(idx));
     return;
   }
