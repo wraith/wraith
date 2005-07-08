@@ -9,7 +9,6 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Add back in uhost cache / hash table for invites
 - Change user system to hash table with uids
 - Change userentry system around to use strings ?
-- Fixed bot's not being able to link when the botnick case did not match (userlist vs binary -C).
 - Remove bot_hublog
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
@@ -20,6 +19,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_conf not working at all.
 * When msging bot for op, a NOTICE is sent to user if the channel is set to no manop.
 * Fixed 'chanset *' not working.
+* Fixed bot's not being able to link when the botnick case did not match (userlist vs binary -C).
 
 1.2.3
 
