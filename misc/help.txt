@@ -158,6 +158,8 @@ See also: whois
  
    If you want to add a user using a static hostmask, prefix their nick
    with a '!'. i.e. .adduser !Lamer
+
+   The user being added is sent a NOTICE with their initial password.
  
 See also: +host, -host%{+m}, +user, -user%{-}
 :leaf:authed:

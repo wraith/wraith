@@ -1590,6 +1590,8 @@ static void cmd_adduser(int idx, char *par)
     dprintf(idx, "Added [%s]%s with no flags.\n", hand, p1);
     dprintf(idx, "%s's initial password set to \002%s\002\n", hand, s2);
     dprintf(idx, "%s's initial secpass set to \002%s\002\n", hand, s3);
+
+    dprintf(DP_HELP, "NOTICE %s :*** You've been add to this botnet as '%s' with the host '%s'. Ask a botnet admin for the msg cmds. Your initial password is: %s\n", nick, hand, p1, s2);
   } else {
     dprintf(idx, "Added hostmask %s to %s.\n", p1, u->handle);
     addhost_by_handle(hand, p1);
