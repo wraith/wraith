@@ -752,7 +752,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
         }
       }
     }
-    kick_all(chan, mask, resn[0] ? (const char *) resn : response(RES_BANNED), match_my_nick(m->nick) ? 0 : 1);
+    kick_all(chan, mask, resn[0] ? (const char *) resn : r_banned(), match_my_nick(m->nick) ? 0 : 1);
   }
   if (!m && (bounce_bans || bounce_modes) &&
       (!u_equals_mask(global_bans, mask) || !u_equals_mask(chan->bans, mask)))

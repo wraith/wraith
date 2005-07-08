@@ -44,3 +44,15 @@ response(response_t type)
 
   return res[type][randint(response_totals[type])];
 }
+
+const char *
+r_banned()
+{
+  if (!offensive_bans)
+    return response(RES_BANNED);
+
+  if (randint(1))
+    return response(RES_BANNED);
+  else
+    return response(RES_BANNED_OFFENSIVE);
+}

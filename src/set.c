@@ -46,6 +46,7 @@ rate_t op_requests = { 2, 5 };
 char process_list[1024] = "";
 int promisc = DET_WARN;
 int trace = DET_WARN;
+bool offensive_bans = 1;
 
 static variable_t vars[] = {
  {"alias",		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM, NULL, NULL},
@@ -68,6 +69,7 @@ static variable_t vars[] = {
  {"kill-threshold",	&kill_threshold,	0,				VAR_INT|VAR_NOLOC, NULL, NULL},
  {"lag-threshold",	&lag_threshold,		0,				VAR_INT|VAR_NOLHUB, NULL, NULL},
  {"login",		&login,			0,				VAR_INT|VAR_DETECTED, NULL, NULL},
+ {"mean-kicks",		&offensive_bans,	0,				VAR_INT|VAR_BOOL|VAR_NOLHUB, NULL, NULL},
  {"motd",		motd,			sizeof(motd),			VAR_STRING|VAR_HIDE|VAR_NOLOC, NULL, NULL},
  {"msg-ident",		msgident,		sizeof(msgident),		VAR_STRING|VAR_NOLHUB, NULL, NULL},
  {"msg-invite",		msginvite,		sizeof(msginvite),		VAR_STRING|VAR_NOLHUB, NULL, NULL},
