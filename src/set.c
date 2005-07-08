@@ -643,7 +643,10 @@ void cmd_set_real(const char *botnick, int idx, char *par)
   const char *data = NULL, *botdata = NULL;
   int list = 0, i = 0;
 
-  putlog(LOG_CMDS, "*", "#%s# %sset %s", dcc[idx].nick, botnick ? "bot" : "", par);
+  if (botnick)
+    putlog(LOG_CMDS, "*", "#%s# botset %s %s", dcc[idx].nick, botnick, par);
+  else
+    putlog(LOG_CMDS, "*", "#%s# set %s", dcc[idx].nick, par);
 
   if (par[0])
     name = newsplit(&par);
