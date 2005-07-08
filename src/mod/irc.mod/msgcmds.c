@@ -75,6 +75,8 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
             if (do_op(nick, chan, 0, 1)) {
               stats_add(u, 0, 1);
               putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
+              if (chan->manop)
+                dprintf(DP_HELP, "NOTICE %s :%s is currently set to punish for manual op.\n", nick, chan->dname);
             }
           }
           return BIND_RET_BREAK;
@@ -84,8 +86,11 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
         for (chan = chanset; chan; chan = chan->next) {
           get_user_flagrec(u, &fr, chan->dname);
           if (chk_op(fr, chan)) {
-            if (do_op(nick, chan, 0, 1))
+            if (do_op(nick, chan, 0, 1)) {
               stats++;
+              if (chan->manop)
+                dprintf(DP_HELP, "NOTICE %s :%s is currently set to punish for manual op.\n", nick, chan->dname);
+            }
           }
         }
         putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP", nick, host, u->handle);

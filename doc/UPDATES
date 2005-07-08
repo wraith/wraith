@@ -18,6 +18,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_botset not displaying botnick.
 * cmd_adduser now sends a NOTICE to the person being added with their initial password.
 * Fixed cmd_conf not working at all.
+* When msging bot for op, a NOTICE is sent to user if the channel is set to no manop.
 
 1.2.3
 
