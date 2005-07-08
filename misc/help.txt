@@ -399,7 +399,7 @@ See also: link
                           Please note that this is an IRCnet feature.
         $bvoice-non-ident$b   If channel is +voice, clients without an ident will 
                           be voiced. Set to 0 to not voice clients without ident.
-
+ 
      The following options chose how to respond to specific events.
         Each can be set as any of the specified options.
         ignore/0           Ignore
@@ -1548,7 +1548,7 @@ See also: reload, backup
                           If set to 0, a random script will be used.
                           1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 
                           5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC
-
+ 
  
 See also: botset
 ::sha1
