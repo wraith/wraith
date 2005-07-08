@@ -60,6 +60,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added rate vars 'flood-msg' and 'flood-ctcp' to control how quickly a bot ignores on flood.
 * Added rate var 'flood-g' which will set +g for 60 seconds after this many msgs:sec has been detected. (#74)
 * Added bool var 'mean-kicks' which enables offensive/mean kick msgs.
+* Added bool var 'voice-non-ident' which can be used to not voice non-idented clients with +voice.
 * Optimized WHO parsing more to alieviate some cpu usage in large chans
 * Binary writing is now a bit faster as the hash is calculated on the fly now.
 * Rewrote how logs are shared over botnet, now uses much less bw and resources. (#31)

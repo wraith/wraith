@@ -72,6 +72,18 @@ static bool include_lk = 1;      /* For correct calculation
 #include "cmdsirc.c"
 #include "msgcmds.c"
 
+static int
+voice_ok(memberlist *m)
+{
+  if (m->flags & EVOICE)
+    return 0;
+
+  if (m->userhost[0] && !voice_non_ident && m->userhost[0] == '~')
+    return 0;
+
+  return 1;
+}
+
 static void
 detect_autokick(char *nick, char *uhost, struct chanset_t *chan, char *msg)
 {
@@ -1318,7 +1330,7 @@ check_expired_chanstuff(struct chanset_t *chan)
             if (m->user) {
               get_user_flagrec(m->user, &fr, chan->dname);
               if (!glob_bot(fr)) {
-                if (!(m->flags & EVOICE) && !privchan(fr, chan, PRIV_VOICE) &&
+                if (!privchan(fr, chan, PRIV_VOICE) &&
                    ((channel_voice(chan) && !chk_devoice(fr)) ||
                    (!channel_voice(chan) && chk_voice(fr, chan)))) {
                   add_mode(chan, '+', 'v', m->nick);
@@ -1326,7 +1338,7 @@ check_expired_chanstuff(struct chanset_t *chan)
                   add_mode(chan, '-', 'v', m->nick);
                 }
               }
-            } else if (!m->user && !(m->flags & EVOICE) && channel_voice(chan)) {
+            } else if (!m->user && channel_voice(chan) && voice_ok(m)) {
               add_mode(chan, '+', 'v', m->nick);
             }
           }

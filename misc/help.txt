@@ -1546,6 +1546,9 @@ See also: reload, backup
                           1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 
                           5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC
  
+[B]  $bvoice-non-ident$b  If channel is +voice, clients without an ident will be voiced.
+                          Set to 0 to not voice clients without ident.
+ 
 See also: botset
 ::sha1
 ###  $bsha1$b <string>
