@@ -377,7 +377,7 @@ struct user_entry_type USERENTRY_SET = {
   def_get,
   set_set,
   set_display,
-  "CONFIG"
+  "SET"
 };
 
 static void botmisc_display(int idx, struct user_entry *e, struct userrec *u)

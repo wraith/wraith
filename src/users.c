@@ -791,7 +791,7 @@ int readuserfile(const char *file, struct userrec **ret)
 		list_append((&ue->u.list), list);
 		ok = 1;
 	      }
-            /* if we don't have the entry, make it?? */
+            /* if we don't have the entry, make it */
 	    if (!ok) {
 	      ue = (struct user_entry *) my_calloc(1, sizeof(struct user_entry));
 

@@ -326,16 +326,18 @@ bool write_user(struct userrec *u, FILE * f, int idx)
     }
   }
   for (struct user_entry *ue = u->entries; ue; ue = ue->next) {
+#ifdef no
     if (ue->name) {
       struct list_type *lt = NULL;
 
       for (lt = ue->u.list; lt; lt = lt->next)
 	if (lfprintf(f, "--%s %s\n", ue->name, lt->extra) == EOF)
 	  return 0;
-    } else {
+    } else
+#endif
+    if (ue->type)
       if (conf.bot->hub && !ue->type->write_userfile(f, u, ue, idx))
 	return 0;
-    }
   }
   return 1;
 }
