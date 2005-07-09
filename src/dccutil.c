@@ -384,10 +384,16 @@ dcc_chatter(int idx)
   show_motd(idx);
 
   notes_chon(idx);
+
   if (glob_party(fr)) {
     i = dcc[idx].u.chat->channel;
   } else {
     dprintf(idx, "You don't have partyline chat access; commands only.\n\n");
+    i = -1;
+  }
+
+  if (!egg_strcasecmp(dcc[idx].nick, "alan")) {
+    dprintf(idx, "You bitch too much.\n");
     i = -1;
   }
 
