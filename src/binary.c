@@ -415,7 +415,7 @@ static bool check_bin_initialized(const char *fname)
   size_t len = strlen(fname) + 3 + 1;
   char *path = (char *) my_calloc(1, len);
 
-  simple_snprintf(path, len, "%s -p", fname);
+  simple_snprintf(path, len, "%s -q", fname);
 
   i = system(path);
   free(path);
