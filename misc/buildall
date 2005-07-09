@@ -14,7 +14,7 @@ for cfg in $cfgs
 do
  if test "`grep 'PACKNAME' $cfg`x" != "x"; then
   #Dont compile, just package up and dont rm old binaries.
-  ./build -n -P -p $cfg -s bryan@endurance.quadspeedi.net:public_html/builds/ all
+  ./build -n -P -q $cfg -s bryan@endurance.quadspeedi.net:public_html/builds/ all
  fi
 done
 chmod 0700 misc/id_dsa

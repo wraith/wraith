@@ -674,12 +674,12 @@ printf("out: %s\n", out);
   /* This allows -2/-0 to be used without an initialized binary */
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
 //  doesn't work correctly yet, if we don't go in here, our settings stay encrypted
-  if (argc == 2 && !strcmp(argv[1], "-p")) {
+  if (argc == 2 && !strcmp(argv[1], "-q")) {
     if (settings.hash[0]) exit(4);	/* initialized */
     exit(5);				/* not initialized */
   }
 
-  check_sum(binname, argc >= 3 && !strcmp(argv[1], "-p") ? argv[2] : NULL);
+  check_sum(binname, argc >= 3 && !strcmp(argv[1], "-q") ? argv[2] : NULL);
   // Now settings struct is decrypted
   if (!checked_bin_buf)
     exit(1);

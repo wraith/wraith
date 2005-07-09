@@ -30,7 +30,7 @@ echo -e "Version:   ${ver}\nBuild:     ${builddate}"
 usage() 
 {
     echo
-    echo "Usage: $0 [-bcCdnP] [-p FILE]"
+    echo "Usage: $0 [-bcCdnP] [-q FILE]"
     echo
     echo "    The options are as follows:"
     echo "    -b        Use bzip2 instead of gzip when packaging."
@@ -38,7 +38,7 @@ usage()
     echo "    -C        Preforms a distclean before making."
     echo "    -d        Builds a debug package."
     echo "    -n        Do not package the binaries."
-    echo "    -p  FILE  What file to use as the cfg file."
+    echo "    -q  FILE  What file to use as the cfg file."
     echo "    -P        For development (Don't compile/rm binaries)"
     echo "    -s        scp target."
 }
@@ -166,7 +166,7 @@ _build()
  if [ $nopkg = "0" -o $pkg = "1" ]; then
   echo "[*] Hashing and initializing settings in binary"
    cp ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
-  ./${tb}.$os-$ver${d} -p ${pack}
+  ./${tb}.$os-$ver${d} -q ${pack}
   rm=1
  elif [ $nopkg = "0" ]; then
    mv ${tb} ${tb}.$os-$ver${d} > /dev/null 2>&1
@@ -202,7 +202,7 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
  
   if ! [ $scp = 0 ]; then
     chmod 0700 misc/id_dsa
-    scp -i misc/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
+    scp -i misc/id_dsa -B -q -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
   fi
 elif ! [ $scp = "0" ]; then
   cp wraith wraith.$os-$ver${d} > /dev/null 2>&1
@@ -217,7 +217,7 @@ elif ! [ $scp = "0" ]; then
     declare -x MALLOC_CHECK_=$tmp
   fi
   chmod 0700 misc/id_dsa
-  scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
+  scp -i misc/id_dsa -B -q -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz
   ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
 fi
