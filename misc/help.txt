@@ -1335,8 +1335,10 @@ See also: w
 ::nick
 See: handle
 :hub:nopass
-###  $bnohelp$b
+###  $bnohelp$b [anything]
    Displays all users who do not have a password set.
+
+   Specify any argument to give random passes to users.
 ::note
 ###  $bnote$b <nickname[@bot]> <message>
    Sends a private note to a user on the partyline. If that user is currently

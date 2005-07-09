@@ -20,6 +20,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * When msging bot for op, a NOTICE is sent to user if the channel is set to no manop.
 * Fixed 'chanset *' not working.
 * Fixed bot's not being able to link when the botnick case did not match (userlist vs binary -C).
+* cmd_nopass when given any argument will give random passes to users with no password. (#114)
 
 1.2.3
 

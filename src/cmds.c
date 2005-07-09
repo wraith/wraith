@@ -3040,23 +3040,36 @@ static void cmd_nopass(int idx, char *par)
 {
   int cnt = 0;
   struct userrec *cu = NULL;
-  char *users = (char *) my_calloc(1, 1);
+  char *users = (char *) my_calloc(1, 1), pass[MAXPASSLEN] = "";
+  bool dopass = 0;
 
   putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
+
+  if (par[0])
+    dopass = 1;
 
   for (cu = userlist; cu; cu = cu->next) {
     if (!cu->bot) {
       if (u_pass_match(cu, "-")) {
         cnt++;
-        users = (char *) my_realloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
-        strcat(users, cu->handle);
-        strcat(users, " ");
+        if (dopass) {
+          pass[0] = 0;
+          make_rand_str(pass, MAXPASSLEN);
+          set_user(&USERENTRY_PASS, cu, pass);
+        } else {
+          users = (char *) my_realloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
+          strcat(users, cu->handle);
+          strcat(users, " ");
+        }
       }
     }
   }
   if (!cnt) 
     dprintf(idx, "All users have passwords set.\n");
-  else
+  else if (dopass) {
+    dprintf(idx, "%d users without passwords set to random.\n", cnt);
+    write_userfile(idx);
+  } else
     dprintf(idx, "Users without passwords: %s\n", users);
   free(users);
 }
