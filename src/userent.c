@@ -815,12 +815,13 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
     if (glob_admin(fr)) {
       register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
-      if (bi->address && bi->hublevel && bi->hublevel != 0) {
-        dprintf(idx, "  ADDRESS: %.70s\n", bi->address);
-        dprintf(idx, "     port: %d\n", bi->telnet_port);
-      }
-      if (bi->hublevel && bi->hublevel != 0)
+      if (bi->hublevel && bi->hublevel != 999) {
+        if (bi->address) {
+          dprintf(idx, "  ADDRESS: %.70s\n", bi->address);
+          dprintf(idx, "     port: %d\n", bi->telnet_port);
+        }
         dprintf(idx, "  HUBLEVEL: %d\n", bi->hublevel);
+      }
       if (bi->uplink && bi->uplink[0])
         dprintf(idx, "  UPLINK: %s\n", bi->uplink);
     }

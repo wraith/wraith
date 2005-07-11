@@ -21,6 +21,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed 'chanset *' not working.
 * Fixed bot's not being able to link when the botnick case did not match (userlist vs binary -C).
 * cmd_nopass when given any argument will give random passes to users with no password. (#114)
+* Fixed a small cosmetic error with displaying bot info in whois.
 
 1.2.3
 
