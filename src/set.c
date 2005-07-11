@@ -549,7 +549,7 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
     olddata = var->gdata ? var->gdata : NULL;
 
   /* Append to the olddata if there...*/
-  size_t osiz = strlen(olddata);
+  size_t osiz = olddata ? strlen(olddata) : 0;
 
   if (olddata && osiz) {
     size_t esiz = strlen(element) + 1;		// element + ,
@@ -588,7 +588,7 @@ static int var_rem_list(const char *botnick, variable_t *var, const char *elemen
   if (str_isdigit(element))
     num = atoi(element);
 
-  olddata = olddatap = strdup(olddatacp);
+  olddata = olddatap = strdup(olddatacp) : NULL;
   size_t osiz = strlen(olddata), esiz = strlen(element) + 1, tsiz = osiz - esiz + 1;          // element + ,
 
   data = (char *) calloc(1, tsiz);
@@ -680,6 +680,10 @@ void cmd_set_real(const char *botnick, int idx, char *par)
     return;
   }
 
+  if (list && !(var->flags & VAR_LIST)) {
+    dprintf(idx, "That variable is not a list!\n");
+    return;
+  }
   
   struct userrec *botu = NULL;
   bool ishub = 0;

@@ -27,6 +27,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Default binary name is now what you name it, or "wraith" if left in "wraith.OS-ver" format.
 * Increased buffer size in binary config for binname/binpath/homedir
 * Removed '+/-manop' from 'chanset' var and added to ignore list for chanset.
+* Fixed a segfault with 'set +' (#17)
+* List functions now only work on variables marked as list variables.
 
 1.2.3
 
