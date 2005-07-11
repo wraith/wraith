@@ -931,7 +931,7 @@ void link_pref_val(struct userrec *u, char *val)
   if (!(ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u))) {
     return;
   }
-  if (!ba->hublevel) {
+  if (!ba->hublevel || ba->hublevel == 999) {
     return;
   }
   sprintf(val, "%02d%s", ba->hublevel, u->handle);
