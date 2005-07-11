@@ -26,7 +26,7 @@ char auth_key[51] = "";
 char auth_prefix[2] = "";
 int badprocess = DET_IGNORE;
 bool dccauth = 0;
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch -protectops -revenge +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -revengebot -nodesynch -closed -take +manop -voice -private -fastop";
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch -protectops -revenge +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -revengebot -nodesynch -closed -take -voice -private -fastop";
 int cloak_script = 0;
 rate_t close_threshold = { 0, 0 };
 int fight_threshold;

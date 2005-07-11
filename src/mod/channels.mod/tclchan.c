@@ -576,6 +576,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 
     /* ignore wasoptest, stopnethack and clearbans in chanfile, remove
        this later */
+    else if (!strcmp(item[i], "+manop")) ;
+    else if (!strcmp(item[i], "-manop")) ;
     else if (!strcmp(item[i], "+dontkickops")) ;
     else if (!strcmp(item[i], "-dontkickops")) ;
     else if (!strcmp(item[i], "+nomdop"))  ;
