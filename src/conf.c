@@ -195,10 +195,11 @@ confedit()
   pid_t pid, xpid, localhub_pid = 0;
   struct stat st, sn;
   struct timespec ts1, ts2;           /* time before and after edit */
+  bool autowrote = 0;
 
   um = umask(077);
 
-  writeconf(NULL, tmpconf.f, CONF_COMMENT);
+  autowrote = writeconf(NULL, tmpconf.f, CONF_COMMENT);
   fstat(tmpconf.fd, &st);		/* for file modification compares */
 //  tmpconf.my_close();
 
@@ -290,7 +291,7 @@ confedit()
   if (fstat(tmpconf.fd, &sn))
     fatal("Error reading new config file", 0);
 
-  if (st.st_size == sn.st_size &&
+  if (!autowrote && st.st_size == sn.st_size &&
       mtim_getsec(st) == mtim_getsec(sn) &&
       mtim_getnsec(st) == mtim_getnsec(sn)) {
     /*
@@ -754,6 +755,7 @@ writeconf(char *filename, FILE * stream, int bits)
   conf_bot *bot = NULL;
   int (*my_write) (FILE *, const char *, ... ) = NULL;
   char *p = NULL;
+  int autowrote = 0;
 
   if (bits & CONF_ENC)
     my_write = lfprintf;
@@ -776,9 +778,10 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("# They are simply comments and are not parsed at all.\n");
 
 #define conf_com() do {							\
-	if (do_confedit == CONF_AUTO)					\
+	if (do_confedit == CONF_AUTO) {					\
 	  comment("# Automatically updated with -C");			\
-	else								\
+	  autowrote = 1;						\
+        } else								\
 	  comment("#The correct line follows. (Not auto due to -c)");	\
 } while(0)
 
@@ -790,6 +793,7 @@ writeconf(char *filename, FILE * stream, int bits)
     my_write(f, "! uid %d\n", conf.uid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
+    autowrote = 1;
     if (conf.uname)
       comment("# autouname is ON");
     else
