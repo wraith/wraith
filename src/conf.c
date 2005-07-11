@@ -351,7 +351,10 @@ init_conf()
   char *p = strrchr(binname, '/');
 
   p++;
-  conf.binname = strdup(p);
+  if (strncmp(p, "wraith.", 7))
+    conf.binname = strdup(p);
+  else
+    conf.binname = strdup("wraith");
 
   conf.portmin = 0;
   conf.portmax = 0;
