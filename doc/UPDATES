@@ -23,6 +23,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * cmd_nopass when given any argument will give random passes to users with no password. (#114)
 * Fixed a small cosmetic error with displaying bot info in whois.
 * Fixed CPU lockup for bots which did not have NODENAME/USERNAME/SYSNAME entries filled out.
+* Slightly changed/added a comment in -C for uname.
 
 1.2.3
 

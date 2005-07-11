@@ -790,7 +790,11 @@ writeconf(char *filename, FILE * stream, int bits)
     my_write(f, "! uid %d\n", conf.uid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
-    comment("# autouname is ON");
+    if (conf.uname)
+      comment("# autouname is ON");
+    else
+      comment("# Automatically updated empty uname");
+
     my_write(f, "! uname %s\n", my_uname());
     if (conf.uname)
       my_write(f, "#! uname %s\n", conf.uname);
