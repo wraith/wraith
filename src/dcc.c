@@ -132,10 +132,17 @@ send_sysinfo()
   sysname = (char *) get_user(&USERENTRY_OS, conf.bot->u);
   nodename = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);
 
+  const char *usysname = NULL, *uusername = NULL, *unodename = NULL;
 
-  if (egg_strcasecmp(sysname, gotun ? un.sysname : "*") ||
-      egg_strcasecmp(username, conf.username ? conf.username : "*") ||
-      egg_strcasecmp(nodename, gotun ? un.nodename : "*")) {
+  usysname = gotun ? un.sysname : "*";
+  uusername = conf.username ? conf.username : "*";
+  unodename = gotun ? un.nodename : "*";
+
+  if (((sysname && egg_strcasecmp(sysname, usysname)) ||
+      (username && egg_strcasecmp(username, uusername)) ||
+      (nodename && egg_strcasecmp(nodename, unodename))) ||
+      ((!sysname && usysname) || (!username && uusername) || (!nodename && unodename))
+      ) {
       char buf[201] = "";
       size_t len = 0;
 
