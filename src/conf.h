@@ -37,6 +37,7 @@ typedef struct conf_b {
   int watcher;		/* spawn a watcher pid to block ptrace? */
   char *localhub;	/* my localhub */
   char *uname;
+  char *tempdir;
   char *username;       /* shell username */
   char *homedir;        /* homedir */
   char *binpath;        /* path to binary, ie: ~/ */

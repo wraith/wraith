@@ -36,7 +36,7 @@ settings_t settings = {
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
-  "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "",
   /* -- PADDING */
   ""
 };
@@ -330,6 +330,8 @@ static void edpack(settings_t *incfg, const char *hash, int what)
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
+//  dofield(incfg->salt1);
+//  dofield(incfg->salt2);
   /* -- DYNAMIC -- */
 //printf("BOTS: %s\n", incfg->bots);
   dofield(incfg->bots);
@@ -341,6 +343,7 @@ static void edpack(settings_t *incfg, const char *hash, int what)
   dofield(incfg->watcher);
   dofield(incfg->uname);
   dofield(incfg->username);
+  dofield(incfg->tempdir);
   dofield(incfg->homedir);
   dofield(incfg->binpath);
   dofield(incfg->binname);
@@ -372,6 +375,7 @@ tellconfig(settings_t *incfg)
   dofield(incfg->watcher);
   dofield(incfg->uname);
   dofield(incfg->username);
+  dofield(incfg->tempdir);
   dofield(incfg->homedir);
   dofield(incfg->binpath);
   dofield(incfg->binname);
@@ -460,7 +464,7 @@ void write_settings(const char *fname, int die, bool conf)
 static void 
 clear_settings(void)
 {
-  memset(&settings.bots, 0, sizeof(settings_t) - 3467);
+  memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK);
 }
 
 void conf_to_bin(conf_t *in, bool move, int die)
@@ -478,12 +482,13 @@ void conf_to_bin(conf_t *in, bool move, int die)
   simple_sprintf(settings.portmax, "%d", in->portmax);
   simple_sprintf(settings.pscloak, "%d", in->pscloak);
 
-  strlcpy(settings.binname, in->binname, 16);
+  strlcpy(settings.binname, in->binname, 51);
   strlcpy(settings.username, in->username, 16);
 
   strlcpy(settings.uname, in->uname, 350);
-  strlcpy(settings.homedir, in->homedir, 350);
-  strlcpy(settings.binpath, in->binpath, 350);
+  strlcpy(settings.tempdir, in->tempdir, 1024);
+  strlcpy(settings.homedir, in->homedir, 1024);
+  strlcpy(settings.binpath, in->binpath, 1024);
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
     simple_sprintf(settings.bots, "%s%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
                            bot->disabled ? "/" : "",
@@ -498,7 +503,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
     newbin = move_bin(in->binpath, in->binname, 0);
   else
     newbin = binname;
-  /* tellconfig(&settings); */
+//  tellconfig(&settings); 
   write_settings(newbin, -1, 1);
 
   if (die >= 0)
