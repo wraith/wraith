@@ -20,8 +20,8 @@
 
 AES_KEY e_key, d_key;
 
-static unsigned char *
-encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
+unsigned char *
+encrypt_binary(const char *keydata, unsigned char *in, size_t *inlen)
 {
   size_t len = *inlen;
   int blocks = 0, block = 0;
@@ -52,15 +52,15 @@ encrypt_binary(const char *keydata, const unsigned char *in, size_t *inlen)
   return out;
 }
 
-static unsigned char *
-decrypt_binary(const char *keydata, unsigned char *in, size_t len)
+unsigned char *
+decrypt_binary(const char *keydata, unsigned char *in, size_t *len)
 {
   int blocks = 0, block = 0;
   unsigned char *out = NULL;
 
-  len -= len % CRYPT_BLOCKSIZE;
-  out = (unsigned char *) my_calloc(1, len + 1);
-  egg_memcpy(out, in, len);
+  *len -= *len % CRYPT_BLOCKSIZE;
+  out = (unsigned char *) my_calloc(1, *len + 1);
+  egg_memcpy(out, in, *len);
 
   if (!keydata || !*keydata) {
     /* No key, no decryption */
@@ -71,7 +71,7 @@ decrypt_binary(const char *keydata, unsigned char *in, size_t len)
     strlcpy(key, keydata, sizeof(key));
     AES_set_decrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &d_key);
     /* Now loop through the blocks and crypt them */
-    blocks = len / CRYPT_BLOCKSIZE;
+    blocks = *len / CRYPT_BLOCKSIZE;
 
     for (block = blocks - 1; block >= 0; block--)
       AES_decrypt(&out[block * CRYPT_BLOCKSIZE], &out[block * CRYPT_BLOCKSIZE], &d_key);
@@ -86,7 +86,7 @@ char *encrypt_string(const char *keydata, char *in)
   unsigned char *bdata = NULL;
   char *res = NULL;
 
-  len = strlen(in) + 1;
+  len = strlen(in);
   bdata = encrypt_binary(keydata, (unsigned char *) in, &len);
   if (keydata && *keydata) {
     res = b64enc(bdata, len);
@@ -104,7 +104,7 @@ char *decrypt_string(const char *keydata, char *in)
 
   if (keydata && *keydata) {
     buf = b64dec((const unsigned char *) in, &len);
-    res = (char *) decrypt_binary(keydata, (unsigned char *) buf, len);
+    res = (char *) decrypt_binary(keydata, (unsigned char *) buf, &len);
     free(buf);
     return res;
   } else {

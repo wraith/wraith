@@ -105,6 +105,93 @@ void sdprintf (const char *format, ...)
   }
 }
 
+void printstr(unsigned char *str, int len)
+{
+#ifdef no
+        static char *outstr;
+        int i, n, c, usehex;
+        char *s, *outend;
+	int max_strlen = 64;
+        int xflag = 0;
+
+        outstr = (char *) calloc(1, 2 * max_strlen);
+        outend = outstr + max_strlen * 2 - 10;
+
+        n = (((max_strlen) < (len)) ? (max_strlen) : (len));
+        usehex = 0;
+        if (xflag > 1)
+                usehex = 1;
+        else if (xflag) {
+                for (i = 0; i < n; i++) {
+                        c = str[i];
+                        if (len < 0 && c == '\0')
+                                break;
+                        if (!isprint(c) && !egg_isspace(c)) {
+                                usehex = 1;
+                                break;
+                        }
+                }
+        }
+
+        s = outstr;
+        *s++ = '\"';
+
+        if (usehex) {
+                for (i = 0; i < n; i++) {
+                        c = str[i];
+                        if (len < 0 && c == '\0')
+                                break;
+                        sprintf(s, "\\x%02x", c);
+                        s += 4;
+                        if (s > outend)
+                                break;
+                }
+        }
+        else {
+                for (i = 0; i < n; i++) {
+                        c = str[i];
+                        if (len < 0 && c == '\0')
+                                break;
+                        switch (c) {
+                        case '\"': case '\'': case '\\':
+                                *s++ = '\\'; *s++ = c; break;
+                        case '\f':
+                                *s++ = '\\'; *s++ = 'f'; break;
+                        case '\n':
+                                *s++ = '\\'; *s++ = 'n'; break;
+                        case '\r':
+                                *s++ = '\\'; *s++ = 'r'; break;
+                        case '\t':
+                                *s++ = '\\'; *s++ = 't'; break;
+                        case '\v':
+                                *s++ = '\\'; *s++ = 'v'; break;
+                        default:
+                                if (egg_isprint(c))
+                                        *s++ = c;
+                                else if (i < n - 1 && egg_isdigit(str[i + 1])) {
+                                        sprintf(s, "\\%03o", c);
+                                        s += 4;
+                                }
+                                else {
+                                        sprintf(s, "\\%o", c);
+                                        s += strlen(s);
+                                }
+                                break;
+                        }
+                        if (s > outend)
+                                break;
+                }
+        }
+
+        *s++ = '\"';
+        if (i < len || (len < 0 && (i == n || s > outend))) {
+                *s++ = '.'; *s++ = '.'; *s++ = '.';
+        }
+        *s = '\0';
+
+        printf("%s\n", outstr);
+#endif
+}
 
 #ifdef DEBUG_CONTEXT
 

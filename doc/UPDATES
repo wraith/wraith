@@ -29,6 +29,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Removed '+/-manop' from 'chanset' var and added to ignore list for chanset.
 * Fixed a segfault with 'set +' (#117)
 * List functions now only work on variables marked as list variables.
+* Changed binary data encryption to not be viewable under 'strings'.
 
 1.2.3
 

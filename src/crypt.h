@@ -18,6 +18,9 @@
 char *MD5(const char *);
 char *MD5FILE(const char *);
 char *SHA1(const char *);
+
+unsigned char *encrypt_binary(const char *, unsigned char *, size_t *);
+unsigned char *decrypt_binary(const char *, unsigned char *, size_t *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 void encrypt_cmd_pass(char *, char *);

@@ -19,20 +19,8 @@
 #include <sys/types.h>
 #include <signal.h>
 
-/*
-typedef struct encdata_struct {
-  char prefix[PREFIXLEN];
-  char data[65];
-} encdata_t;
-
-static encdata_t encdata = {
-  "AAAAAAAAAAAAAAAA",
-  ""
-};
-*/
-
 settings_t settings = {
-  "AAAAAAAAAAAAAAA",
+  "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200",
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
@@ -306,20 +294,30 @@ readcfg(const char *cfgfile)
 static void edpack(settings_t *incfg, const char *hash, int what)
 {
   char *tmp = NULL;
-  char *(*enc_dec_string)(const char *, char *);
-  
-  if (what == PACK_ENC)
-    enc_dec_string = encrypt_string;
-  else
-    enc_dec_string = decrypt_string;
+  unsigned char *(*enc_dec_string)(const char *, unsigned char *, size_t *);
+  size_t len = 0;
 
-#define dofield(_field) 		do {				\
-	if (_field && _field[0]) {					\
-		tmp = enc_dec_string(hash, _field);			\
-		simple_snprintf(_field, sizeof(_field), "%s", tmp);	\
-		free(tmp);						\
-	}								\
+  if (what == PACK_ENC)
+    enc_dec_string = encrypt_binary;
+  else
+    enc_dec_string = decrypt_binary;
+
+#define dofield(_field) 		do {							\
+	if (_field && _field[0]) {								\
+		len = sizeof(_field) - 1;							\
+		tmp = (char *) enc_dec_string(hash, (unsigned char *) _field, &len);		\
+		if (what == PACK_ENC) 								\
+		  egg_memcpy(_field, tmp, len);							\
+		else 										\
+		  simple_snprintf(_field, sizeof(_field), "%s", tmp);				\
+		free(tmp);									\
+	}											\
 } while (0)
+
+#ifdef no
+		  egg_memcpy(_field, tmp, len);							\
+
+#endif
 
   /* -- STATIC -- */
   dofield(incfg->hash);
@@ -330,12 +328,10 @@ static void edpack(settings_t *incfg, const char *hash, int what)
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
-//  dofield(incfg->salt1);
-//  dofield(incfg->salt2);
+  dofield(incfg->salt1);
+  dofield(incfg->salt2);
   /* -- DYNAMIC -- */
-//printf("BOTS: %s\n", incfg->bots);
   dofield(incfg->bots);
-//printf("EBOTS: %s\n", incfg->bots);
   dofield(incfg->uid);
   dofield(incfg->autouname);
   dofield(incfg->pscloak);
@@ -366,6 +362,8 @@ tellconfig(settings_t *incfg)
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
+  dofield(incfg->salt1);
+  dofield(incfg->salt2);
   // -- DYNAMIC --
   dofield(incfg->bots);
   dofield(incfg->uid);

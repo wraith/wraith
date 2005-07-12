@@ -29,6 +29,7 @@
 #define egg_isspace(x)  isspace((int)  (unsigned char) (x))
 #define egg_islower(x)  islower((int)  (unsigned char) (x))
 #define egg_isupper(x)  isupper((int)  (unsigned char) (x))
+#define egg_isprint(x)  isprint((int)  (unsigned char) (x))
 
 
 #endif /* !__EGG_COMPAT_COMPAT_H */
