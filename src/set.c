@@ -588,7 +588,7 @@ static int var_rem_list(const char *botnick, variable_t *var, const char *elemen
   if (str_isdigit(element))
     num = atoi(element);
 
-  olddata = olddatap = strdup(olddatacp) : NULL;
+  olddata = olddatap = strdup(olddatacp);
   size_t osiz = strlen(olddata), esiz = strlen(element) + 1, tsiz = osiz - esiz + 1;          // element + ,
 
   data = (char *) calloc(1, tsiz);
