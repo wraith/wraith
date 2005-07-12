@@ -288,33 +288,12 @@ const char *var_string(variable_t *var)
   return var->gdata ? var->gdata : NULL;
 }
 
-/* FIXME: remove after 1.2.3 */
-static bool var_compat_map(const char *newname, const char *oldname)
-{
-  if (!egg_strcasecmp(newname, "auth-key") && !egg_strcasecmp(oldname, "authkey"))
-    return 1;
-  else if (!egg_strcasecmp(newname, "msg-op") && !egg_strcasecmp(oldname, "msgop"))
-    return 1;
-  else if (!egg_strcasecmp(newname, "msg-pass") && !egg_strcasecmp(oldname, "msgpass"))
-    return 1;
-  else if (!egg_strcasecmp(newname, "msg-invite") && !egg_strcasecmp(oldname, "msginvite"))
-    return 1;
-  else if (!egg_strcasecmp(newname, "msg-ident") && !egg_strcasecmp(oldname, "msgident"))
-    return 1;
-  else if (!egg_strcasecmp(newname, "auth-prefix") && !egg_strcasecmp(oldname, "cmdprefix"))
-    return 1;
-  else if (!egg_strcasecmp(newname, "server-port") && !egg_strcasecmp(oldname, "servport"))
-    return 1;
-  return 0;
-}
-
 static variable_t *var_get_var_by_name(const char *name)
 {
   int i = 0;
 
   for (i = 0; vars[i].name; i++)
-/* FIXME: remove after 1.2.3 */
-    if (!egg_strcasecmp(vars[i].name, name) || var_compat_map(vars[i].name, name))
+    if (!egg_strcasecmp(vars[i].name, name))
       return &(vars[i]);
   return NULL;
 }

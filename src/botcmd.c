@@ -844,21 +844,6 @@ static void bot_thisbot(int idx, char *par)
   strcpy(dcc[idx].nick, par);
 }
 
-/* FIXME: remove after 1.2.3 */
-static void bot_hublog(char *botnick, char *code, char *msg)
-{
-  char *par = NULL, *parp;
-  par = parp = strdup(msg);
-  if (egg_isdigit(par[0])) {
-    int type = atoi(newsplit(&par));
-
-    putlog(type, "@", "(%s) %s", botnick, par);
-  } else {
-    putlog(LOG_ERRORS, "*", "Malformed HL line from %s: %s %s", botnick, code, par);
-  }
-  free(parp);
-}
-
 /* Used to send a direct msg from Tcl on one bot to Tcl on another
  * zapf <frombot> <tobot> <code [param]>
  */
@@ -1153,10 +1138,6 @@ botcmd_t C_bot[] =
   {"aw",		bot_away, 0},
   {"bye",		bot_bye, 0},
   {"c",			bot_chan2, 0},
-/* FIXME: remove after 1.2.3 */
-  {"cg",                bot_set, 0},
-/* FIXME: remove after 1.2.3 */
-  {"cgb",		bot_setbroad, 0},
   {"cp", 		bot_cmdpass, 0},
   {"ct",		bot_chat, 0},
   {"e",			bot_error, 0},
@@ -1289,7 +1270,6 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
 
 static cmd_t my_bot[] = 
 {
-  {"hl",	"",	(Function) bot_hublog,  NULL, HUB},
   {"r-sr",	"",	(Function) bot_rsimr,	NULL, HUB},
   {"r-s",	"",	(Function) bot_rsim,	NULL, 0},
   {NULL, 	NULL, 	NULL, 			NULL, 0}
