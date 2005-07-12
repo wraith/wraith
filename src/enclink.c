@@ -240,6 +240,80 @@ void ghost_parse(int idx, int snum, char *buf)
   }
 }
 
+#ifdef no
+static int binary_read(int snum, char *src, size_t *len)
+{
+  char *line = NULL;
+
+  line = decrypt_binary(socklist[snum].ikey, (unsigned char *) src, len);
+  strlcpy(src, line, SGRAB + 10);
+  free(line);
+  if (socklist[snum].iseed) {
+    *(dword *) & socklist[snum].ikey[0] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[8] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+    *(dword *) & socklist[snum].ikey[12] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
+
+    if (!socklist[snum].iseed)
+      socklist[snum].iseed++;
+  }
+//  *len = strlen(src);
+  return OK;
+}
+
+static char *binary_write(int snum, char *src, size_t *len)
+{
+  char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
+  size_t bufpos = 0;
+
+  srcbuf = (char *) my_calloc(1, *len + 9 + 1);
+  strcpy(srcbuf, src);
+  line = srcbuf;
+
+  eol = strchr(line, '\n');
+  while (eol) {
+    *eol++ = 0;
+    eline = encrypt_binary(socklist[snum.okey, (unsigned char *) line, len);
+    if (socklist[snum].oseed) {
+      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+
+      if (!socklist[snum].oseed)
+        socklist[snum].oseed++;
+    }
+    buf = (char *) my_realloc(buf, bufpos + len + 1 + 9);
+    strcpy((char *) &buf[bufpos], eline);
+    free(eline);
+    strcat(buf, "\n");
+    bufpos = strlen(buf);
+    line = eol;
+    eol = strchr(line, '\n');
+  }
+  if (line[0]) {
+    eline = encrypt_string(socklist[snum].okey, line);
+    if (socklist[snum].oseed) {
+      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
+
+      if (!socklist[snum].oseed)
+        socklist[snum].oseed++;
+    }
+    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
+    strcpy((char *) &buf[bufpos], eline);
+    free(eline);
+    strcat(buf, "\n");
+  }
+  free(srcbuf);
+
+  *len = strlen(buf);
+  return buf;
+}
+#endif
+
 void link_send(int idx, const char *format, ...)
 {
   char s[2001] = "";
