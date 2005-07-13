@@ -52,7 +52,7 @@ scp=0
 nightly=0
 pack=pack/pack.cfg
 
-while getopts bCcdhnNPp:s: opt ; do
+while getopts bCcdhnNPq:s: opt ; do
         case "$opt" in
         b) bzip=1 ;;
 	c) clean=1 ;;
@@ -61,7 +61,7 @@ while getopts bCcdhnNPp:s: opt ; do
 	h) usage; exit 0 ;;
         n) nopkg=1 ;;
 	N) nightly=1 ;;
-	p) pack="$OPTARG" ;;
+	q) pack="$OPTARG" ;;
         P) pkg=1 ;;
 	s) scp="$OPTARG" ;;
         *) usage; exit 1 ;;
