@@ -633,25 +633,33 @@ void cmd_set_real(const char *botnick, int idx, char *par)
   if (name) {
     if (name[0] == '+')
       list = LIST_ADD; 
-   else if (name[0] == '-')
+    else if (name[0] == '-')
       list = LIST_RM;
     else if (!egg_strcasecmp(name, "list"))
       list = LIST_SHOW;
   }
 
   if (list) {
-    if (!par[0]) {
-      dprintf(idx, "A variable must be specified!\n");
-      return;
+    if (list != LIST_SHOW && name[1] && egg_strcasecmp(&name[1], "list"))
+      name = &name[1];
+    else {
+      if (!par[0]) {
+        dprintf(idx, "A variable must be specified!\n");
+        return;
+      }
+      name = newsplit(&par);
     }
-    name = newsplit(&par);
   }
 
-  if (par[0])
-    data = (const char *) par;
-  else if (list && list != LIST_SHOW) {
-    dprintf(idx, "A value must be specified!\n");
-    return;
+  if (!list || (list && list != LIST_SHOW)) {
+    if (par[0])
+      data = (const char *) par;
+    else {
+      dprintf(idx, "A value must be specified!\n");
+      return;
+    }
+  } else if (par[0] && list && list == LIST_SHOW) {
+    dprintf(idx, "Data value ignored for listing.\n");
   }
 
   if (name && !(var = var_get_var_by_name(name))) {

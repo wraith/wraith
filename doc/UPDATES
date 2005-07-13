@@ -30,6 +30,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a segfault with 'set +' (#117)
 * List functions now only work on variables marked as list variables.
 * Changed binary data encryption to not be viewable under 'strings'.
+* Fixed/Finished some cmd_set bugs/cosmetics.
+  -Now 'set +VAR' and 'set -VAR' will work for adding/removing to lists. ('set +/- VAR' still works)
 
 1.2.3
 
