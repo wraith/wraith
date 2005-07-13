@@ -654,7 +654,7 @@ void cmd_set_real(const char *botnick, int idx, char *par)
   if (!list || (list && list != LIST_SHOW)) {
     if (par[0])
       data = (const char *) par;
-    else {
+    else if (!par[0] && list) {
       dprintf(idx, "A value must be specified!\n");
       return;
     }
