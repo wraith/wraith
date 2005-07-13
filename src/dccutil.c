@@ -75,15 +75,17 @@ colorbuf(char *buf, size_t len, int idx)
   static int cflags;
   int schar = 0;
   char buf3[1024] = "", buf2[1024] = "", c = 0;
-  bool upper = 0, alan = 0;
+  bool upper = 0;
+#ifdef no
+  bool alan = 0;
 
   if (idx != -1 && !egg_strcasecmp(dcc[idx].nick, "alan"))
     alan = 1;
-
+#endif
   for (size_t i = 0; i < len; i++) {
     c = buf[i];
     buf2[0] = 0;
-
+#ifdef no
     if (alan) {
       if (upper) {
         upper = 0;
@@ -93,6 +95,7 @@ colorbuf(char *buf, size_t len, int idx)
         c = tolower(c);
       }
     }
+#endif
 
     if (cidx) {
       if (schar) {                /* These are for $X replacements */
