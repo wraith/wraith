@@ -2,13 +2,12 @@ This is a summary of ChangeLog basically.
 Numbers expressed as '#12' are references to a ticket/bug posting which can be viewed at: http://xx.shatow.net
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
-1.2.4 (Planned updates)
+1.2.5 (Planned updates)
 - Another new password encryption
 - Added tempdir option in config -C
 - Add back in uhost cache / hash table for invites
 - Change user system to hash table with uids
 - Change userentry system around to use strings ?
-- Remove bot_hublog
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
 
