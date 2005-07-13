@@ -352,7 +352,7 @@ init_conf()
   char *p = strrchr(binname, '/');
 
   p++;
-  if (strncmp(p, "wraith.", 7))
+  if (strncmp(p, "wraith.", 7) && strchr(p, '-'))
     conf.binname = strdup(p);
   else
     conf.binname = strdup("wraith");
