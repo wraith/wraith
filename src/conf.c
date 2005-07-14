@@ -891,7 +891,8 @@ writeconf(char *filename, FILE * stream, int bits)
 
   if (!stream)
     fclose(f);
-  return 0;
+
+  return autowrote;
 }
 
 static void

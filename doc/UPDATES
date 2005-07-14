@@ -16,6 +16,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Changed order of 'rehashed config data from binary' notice to appear before any bot/userfile changes.
 * 'localhub's now check minutely if their bots need added or hosts added to userlist.
 * Fixed bot username casing causing bad cookies.
+* Fixed binary config stating there was no change with -C under certain conditions.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
@@ -28,7 +29,6 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a small cosmetic error with displaying bot info in whois.
 * Fixed CPU lockup for bots which did not have NODENAME/USERNAME/SYSNAME entries filled out.
 * Slightly changed/added a comment in -C for uname.
-* Fixed binary config stating there was no change with -C under certain conditions.
 * Default binary name is now what you name it, or "wraith" if left in "wraith.OS-ver" format.
 * Increased buffer size in binary config for binname/binpath/homedir
 * Removed '+/-manop' from 'chanset' var and added to ignore list for chanset.
