@@ -1726,10 +1726,11 @@ static void cmd_conf(int idx, char *par)
 
   if (save) {
     /* rewrite our binary */
-    conf_to_bin(&conf, 0, -1, 0);
+    conf_to_bin(&conf, 0, -1);
 
     kill_removed_bots(oldlist, conf.bots);
     conf_add_userlist_bots();
+    conf_checkpids();
     spawnbots(1);
   }
 

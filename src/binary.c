@@ -468,13 +468,12 @@ clear_settings(void)
   egg_memset(&settings.bots, 0, SIZE_CONF);
 }
 
-void conf_to_bin(conf_t *in, bool move, int die, bool clear)
+void conf_to_bin(conf_t *in, bool move, int die)
 {
   conf_bot *bot = NULL;
   char *newbin = NULL;
 
-  if (clear)
-    clear_settings();
+  clear_settings();
   sdprintf("converting conf to bin\n");
   simple_sprintf(settings.uid, "%d", in->uid);
   simple_sprintf(settings.watcher, "%d", in->watcher);
@@ -541,6 +540,7 @@ void reload_bin_data() {
       /* add any bots not in userfile */
       conf_add_userlist_bots();
       /* start/disable new bots as necesary */
+      conf_checkpids();
       spawnbots(1);		//1 signifies to not start me!
     } else
       free_conf_bots(conf.bots);
