@@ -1261,7 +1261,6 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
 
     prefix = (char *) my_calloc(1, size);
     simple_snprintf(prefix, size, "[%s] ", botnick);
-    rmspace(par);
     dumplots(idx, prefix, par);
     free(prefix);
     free(parp);

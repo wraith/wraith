@@ -11,6 +11,9 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
 
+1.2.5
+* Fixed spaces being stripped in .botcmd reply.
+
 1.2.4
 * Fixed cmd_botset not displaying botnick.
 * cmd_adduser now sends a NOTICE to the person being added with their initial password.
