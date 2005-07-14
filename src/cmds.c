@@ -1730,7 +1730,7 @@ static void cmd_conf(int idx, char *par)
 
     kill_removed_bots(oldlist, conf.bots);
     conf_add_userlist_bots();
-    spawnbots();
+    spawnbots(1);
   }
 
   free_conf_bots(oldlist);

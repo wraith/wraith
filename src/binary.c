@@ -536,7 +536,7 @@ void reload_bin_data() {
       /* add any bots not in userfile */
       conf_add_userlist_bots();
       /* start/disable new bots as necesary */
-      spawnbots();
+      spawnbots(1);		//1 signifies to not start me!
     } else
       free_conf_bots(conf.bots);
 

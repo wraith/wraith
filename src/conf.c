@@ -98,7 +98,7 @@ void spawnbot(const char *nick)
  * bots prefixxed with '/' will be killed auto if running.
  * if (updating) then we were called with -U or -u */
 void
-spawnbots()
+spawnbots(bool rehashed)
 {
   conf_bot *bot = NULL;
 
@@ -115,7 +115,7 @@ spawnbots()
       -if updating and we find our nick, skip
       -if pid exists and not updating, bot is running and we have nothing more to do, skip.
      */
-    } else if ((!strcmp(bot->nick, conf.bot->nick) && updating == UPDATE_AUTO) || (bot->pid && !updating)) {
+    } else if ((!strcmp(bot->nick, conf.bot->nick) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
       sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
       continue;
     } else {

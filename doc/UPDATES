@@ -22,6 +22,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed delay of requesting op spamming logs with delay msgs.
 * Added a 5 second delay on requesting/checking ops when no bots are available to ask.
 * Fixed 16 bytes after packdata being cleared in memory, causing random memory corruption.
+* Fixed localhub attempting to spawn itself during binary rehash and cmd_conf
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
