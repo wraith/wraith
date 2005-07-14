@@ -24,6 +24,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed 16 bytes after packdata being cleared in memory, causing random memory corruption.
 * Fixed localhub attempting to spawn itself during binary rehash and cmd_conf
 * Fixed another fatal bug with cmd_conf, this should fix it for good.
+* Added var 'manop-warn' to allow disabling the new manop NOTICE warnings when msg opping.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

@@ -75,7 +75,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
             if (do_op(nick, chan, 0, 1)) {
               stats_add(u, 0, 1);
               putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
-              if (chan->manop)
+              if (manop_warn && chan->manop)
                 dprintf(DP_HELP, "NOTICE %s :%s is currently set to punish for manual op.\n", nick, chan->dname);
             }
           }

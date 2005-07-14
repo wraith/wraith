@@ -1507,6 +1507,8 @@ See also: reload, backup
 [N]  $bdcc-autoaway$b    Time in seconds until a user is set auto-away on dcc.
                           (0/- to disable)
 [B]  $bmean-kicks$b      Enables 'mean' and 'offensive' kick msgs.
+[B]  $bmanop-warn$b      Warn users via /NOTICE when they msg-op in a channel with manop
+                           punishments.
  
   *  Msg cmd vars may be left blank to disable usage of cmd.
 [S]  $bmsgop$b           Defines the cmd for opping via msging the bot.
