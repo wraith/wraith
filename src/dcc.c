@@ -357,7 +357,7 @@ dcc_bot_new(int idx, char *buf, int x)
       }
       free(tmpp);
 
-      sdprintf("Choosing '%s' (%d) for link", enclink[i].name, i);
+      sdprintf("Choosing '%s' (%d/%d) for link", enclink[i].name, enclink[i].type, i);
       link_hash(idx, rand);
       dprintf(-dcc[idx].sock, "neg %s %d\n", dcc[idx].shahash, enclink[i].type);
       socklist[snum].enclink = i;
