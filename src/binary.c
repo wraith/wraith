@@ -510,6 +510,8 @@ void conf_to_bin(conf_t *in, bool move, int die)
 
 void reload_bin_data() {
   if (bin_checksum(binname, GET_CONF)) {
+    putlog(LOG_MISC, "*", "Rehashed config data from binary.");
+
     conf_bot *oldbots = NULL;
     
     oldbots = conf_bots_dup(conf.bots);
@@ -539,7 +541,6 @@ void reload_bin_data() {
       free_conf_bots(conf.bots);
 
     free_conf_bots(oldbots);
-    putlog(LOG_MISC, "*", "Rehashed config data from binary.");
   }
 }
 
