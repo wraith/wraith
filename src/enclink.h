@@ -11,8 +11,8 @@
 enum {
         LINK_GHOST = 0,	/* attic */
 	LINK_GHOSTNAT,
-        LINK_GHOSTSHA1,
-        LINK_GHOSTMD5,
+        LINK_GHOSTSHA1, /* attic */
+        LINK_GHOSTMD5, /* attic */
         LINK_CLEARTEXT,
 	LINK_GHOSTCASE
 };
