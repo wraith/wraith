@@ -348,7 +348,7 @@ static void edpack(settings_t *incfg, const char *hash, int what)
 #undef dofield
 }
 
-/* 
+#ifdef DEBUG 
 static void
 tellconfig(settings_t *incfg)
 {
@@ -381,7 +381,7 @@ tellconfig(settings_t *incfg)
   dofield(incfg->portmax);
 #undef dofield
 }
-*/
+#endif
 
 void
 check_sum(const char *fname, const char *cfgfile)
@@ -402,7 +402,9 @@ check_sum(const char *fname, const char *cfgfile)
 
 // tellconfig(&settings); 
     edpack(&settings, hash, PACK_DEC);
-// tellconfig(&settings); 
+#ifdef DEBUG
+ tellconfig(&settings); 
+#endif
 
     if (strcmp(settings.hash, hash)) {
       unlink(fname);
@@ -462,15 +464,17 @@ void write_settings(const char *fname, int die, bool conf)
 static void 
 clear_settings(void)
 {
-  egg_memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK - PREFIXLEN);
+//  egg_memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK - PREFIXLEN);
+  egg_memset(&settings.bots, 0, SIZE_CONF);
 }
 
-void conf_to_bin(conf_t *in, bool move, int die)
+void conf_to_bin(conf_t *in, bool move, int die, bool clear)
 {
   conf_bot *bot = NULL;
   char *newbin = NULL;
 
-  clear_settings();
+  if (clear)
+    clear_settings();
   sdprintf("converting conf to bin\n");
   simple_sprintf(settings.uid, "%d", in->uid);
   simple_sprintf(settings.watcher, "%d", in->watcher);
@@ -480,15 +484,16 @@ void conf_to_bin(conf_t *in, bool move, int die)
   simple_sprintf(settings.portmax, "%d", in->portmax);
   simple_sprintf(settings.pscloak, "%d", in->pscloak);
 
-  strlcpy(settings.binname, in->binname, 51);
-  strlcpy(settings.username, in->username, 16);
+  strlcpy(settings.binname, in->binname, sizeof(settings.binname));
+  strlcpy(settings.username, in->username, sizeof(settings.username));
 
-  strlcpy(settings.uname, in->uname, 350);
-  strlcpy(settings.tempdir, in->tempdir, 1024);
-  strlcpy(settings.homedir, in->homedir, 1024);
-  strlcpy(settings.binpath, in->binpath, 1024);
+  strlcpy(settings.uname, in->uname, sizeof(settings.uname));
+  strlcpy(settings.tempdir, in->tempdir, sizeof(settings.tempdir));
+  strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));
+  strlcpy(settings.binpath, in->binpath, sizeof(settings.binpath));
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
-    simple_sprintf(settings.bots, "%s%s%s %s %s%s %s,", settings.bots && settings.bots[0] ? settings.bots : "",
+    simple_snprintf(settings.bots, sizeof(settings.bots), "%s%s%s %s %s%s %s,", 
+                           settings.bots && settings.bots[0] ? settings.bots : "",
                            bot->disabled ? "/" : "",
                            bot->nick,
                            bot->net.ip ? bot->net.ip : ".", 

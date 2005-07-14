@@ -979,6 +979,8 @@ fill_conf_bot()
   } else
     mynick = strdup(origbotname);
 
+  sdprintf("mynick: %s", mynick);
+
   for (me = conf.bots; me && me->nick; me = me->next)
     if (!egg_strcasecmp(me->nick, mynick))
       break;

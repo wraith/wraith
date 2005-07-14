@@ -13,6 +13,6 @@ extern int checked_bin_buf;
 
 void check_sum(const char *, const char *);
 void write_settings(const char *, int, bool);
-void conf_to_bin(conf_t *, bool, int);
+void conf_to_bin(conf_t *, bool, int, bool clear = 1);
 void reload_bin_data();
 #endif /* !_BINARY_H */

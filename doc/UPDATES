@@ -23,6 +23,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added a 5 second delay on requesting/checking ops when no bots are available to ask.
 * Fixed 16 bytes after packdata being cleared in memory, causing random memory corruption.
 * Fixed localhub attempting to spawn itself during binary rehash and cmd_conf
+* Fixed another fatal bug with cmd_conf, this should fix it for good.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
