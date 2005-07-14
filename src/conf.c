@@ -647,7 +647,7 @@ readconf(const char *fname, int bits)
       /* - uid */
       if (line[0] == '-') {
         newsplit(&line);
-        if (!conf.uid)
+        if (conf.uid == -1)
           conf.uid = atoi(line);
 
         /* + uname */
@@ -703,7 +703,7 @@ readconf(const char *fname, int bits)
             conf.pscloak = atoi(line);
 
         } else if (!strcmp(option, "uid")) {    /* new method uid */
-          if (egg_isdigit(line[0]))
+          if (str_isdigit(line))
             conf.uid = atoi(line);
 
         } else if (!strcmp(option, "uname")) {  /* new method uname */
