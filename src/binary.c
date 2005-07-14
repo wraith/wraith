@@ -462,7 +462,7 @@ void write_settings(const char *fname, int die, bool conf)
 static void 
 clear_settings(void)
 {
-  memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK);
+  egg_memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK - PREFIXLEN);
 }
 
 void conf_to_bin(conf_t *in, bool move, int die)
