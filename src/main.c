@@ -526,6 +526,9 @@ static void core_minutely()
   check_bind_time(&nowtm);
   if (dcc_autoaway)
     check_autoaway();
+
+  if (conf.bot->localhub)
+    conf_add_userlist_bots();
 /*     flushlogs(); */
 }
 

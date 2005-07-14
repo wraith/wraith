@@ -14,6 +14,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 1.2.5
 * Fixed spaces being stripped in .botcmd reply.
 * Changed order of 'rehashed config data from binary' notice to appear before any bot/userfile changes.
+* 'localhub's now check minutely if their bots need added or hosts added to userlist.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
