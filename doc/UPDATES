@@ -17,6 +17,10 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * 'localhub's now check minutely if their bots need added or hosts added to userlist.
 * Fixed bot username casing causing bad cookies.
 * Fixed binary config stating there was no change with -C under certain conditions.
+* Fixed bots set +k being able to request ops.
+* Fixed bots asking for ops/invite when set to +d or +k.
+* Fixed delay of requesting op spamming logs with delay msgs.
+* Added a 5 second delay on requesting/checking ops when no bots are available to ask.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

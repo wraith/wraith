@@ -430,6 +430,10 @@ getin_request(char *botnick, char *code, char *par)
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s doesnt have +o for chan.", botnick, nick, chan->dname, botnick);
       return;
     }
+    if (glob_kick(fr) || chan_kick(fr)) {
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s is currently being autokicked.", botnick, nick, chan->dname, botnick);
+      return;
+    }
     if (chan_hasop(mem)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s already has ops", botnick, nick, chan->dname, nick);
       return;
@@ -616,6 +620,15 @@ request_op(struct chanset_t *chan)
 
   int i = 0, my_exp = 0, first = 100;
   time_t n = now;
+  struct flag_record myfr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+  get_user_flagrec(conf.bot->u, &myfr, NULL);
+
+  if (!chk_op(myfr, chan) || glob_kick(myfr) || chan_kick(myfr)) {
+    putlog(LOG_GETIN, "*", "Not requesting op for %s - I do not have access to that channel.", chan->dname);
+    chan->channel.no_op = now + 10;
+    return;
+  }
 
   /* max OPREQ_COUNT requests per OPREQ_SECONDS sec */
   while (i < 5) {
@@ -630,6 +643,7 @@ request_op(struct chanset_t *chan)
   if ((5 - my_exp) >= op_requests.count) {
     putlog(LOG_GETIN, "*", "Delaying opreq for %s - Maximum of %d:%li reached", chan->dname, op_requests.count,
            op_requests.time);
+    chan->channel.no_op = now + op_requests.time + 1;
     return;
   }
   int cnt = op_bots, i2;
@@ -655,8 +669,10 @@ request_op(struct chanset_t *chan)
     }
   }
   if (!i) {
-    if (channel_active(chan) && !channel_pending(chan))
-      putlog(LOG_GETIN, "*", "No one to ask for ops on %s", chan->dname);
+    if (channel_active(chan) && !channel_pending(chan)) {
+      chan->channel.no_op = now + 5;
+      putlog(LOG_GETIN, "*", "No one to ask for ops on %s - Delaying requests for 5 seconds.", chan->dname);
+    }
     return;
   }
 
@@ -712,6 +728,15 @@ request_op(struct chanset_t *chan)
 static void
 request_in(struct chanset_t *chan)
 {
+  struct flag_record myfr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+  get_user_flagrec(conf.bot->u, &myfr, NULL);
+
+  if (!chk_op(myfr, chan) || glob_kick(myfr) || chan_kick(myfr)) {
+    putlog(LOG_GETIN, "*", "Not requesting help to join %s - I do not have access to that channel.", chan->dname);
+    return;
+  }
+
   int i = 0;
   struct userrec *botops[MAX_BOTS];
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
