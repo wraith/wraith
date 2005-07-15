@@ -26,6 +26,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed another fatal bug with cmd_conf, this should fix it for good.
 * Added var 'manop-warn' to allow disabling the new manop NOTICE warnings when msg opping.
 * Added irc.ptptech.com to default servers/servers6
+* Fixed a segfault with mode parsing. (#25)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

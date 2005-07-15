@@ -967,7 +967,7 @@ gotmode(char *from, char *msg)
     if ((channel_active(chan) || channel_pending(chan))) {
       int i = 0, modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
       bool me_opped = 0;
-      char **modes = (char **) my_calloc(modesperline + 1, sizeof(char *));
+      char **modes = (char **) my_calloc(1, sizeof(char *));
       char *nick = NULL, *chg = NULL, s[UHOSTLEN] = "", sign = '+', *mp = NULL, *isserver = NULL;
       size_t z = strlen(msg);
       struct userrec *u = NULL;
@@ -1015,6 +1015,9 @@ gotmode(char *from, char *msg)
           fixcolon(mp);
 
           /* Just want o's and b's */
+          modes = (char **) my_realloc(modes, (modecnt * sizeof(char *)) + sizeof(char *));
+//      char **modes = (char **) my_calloc(modesperline + 1, sizeof(char *));
+
           modes[modecnt] = (char *) my_calloc(1, strlen(mp) + 4);
           simple_sprintf(modes[modecnt], "%c%c %s", sign, chg[0], mp ? mp : "");
           modecnt++;
