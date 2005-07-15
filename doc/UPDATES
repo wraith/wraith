@@ -2,7 +2,7 @@ This is a summary of ChangeLog basically.
 Numbers expressed as '#12' are references to a ticket/bug posting which can be viewed at: http://xx.shatow.net
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
-1.2.5 (Planned updates)
+(future plans)
 - Another new password encryption
 - Added tempdir option in config -C
 - Add back in uhost cache / hash table for invites
