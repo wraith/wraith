@@ -1525,6 +1525,8 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     strcpy(botname, origbotname);
     /* Start alternate nicks from the beginning */
     altnick_char = 0;
+    /* reset counter so first ctcp is dumped for tcms */
+    first_ctcp_check = 0;
 
     if (serverpass[0])
       dprintf(DP_MODE, "PASS %s\n", serverpass);

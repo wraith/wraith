@@ -400,6 +400,8 @@ static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, c
   return BIND_RET_BREAK;
 }
 
+bool first_ctcp_check = 0;
+
 static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   char s[50] = "";
@@ -432,7 +434,16 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
       break;
     }
   }
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s%s\001\n", nick, keyword, ctcpversion, s);
+  
+  int queue = DP_HELP;
+
+  if (!first_ctcp_check) {
+    queue = DP_DUMP;
+    first_ctcp_check = 1;
+  }
+
+  dprintf(queue, "NOTICE %s :\001%s %s%s\001\n", nick, keyword, ctcpversion, s);
+
   if (ctcpversion2[0])
     dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, ctcpversion2);
   return BIND_RET_BREAK;

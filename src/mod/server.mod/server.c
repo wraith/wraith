@@ -24,6 +24,7 @@
 #include "src/socket.h"
 #include "src/egg_timer.h"
 #include "src/mod/channels.mod/channels.h"
+#include "src/mod/ctcp.mod/ctcp.h"
 #include "src/mod/irc.mod/irc.h"
 #include "server.h"
 #include <stdarg.h>
