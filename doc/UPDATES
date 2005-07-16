@@ -28,6 +28,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added irc.ptptech.com/efnet.port80.se to default servers/servers6, added irc.pte.hu, irc.efnet.fr to servers.
 * Fixed a segfault/cpulock with mode parsing. (#25)
 * Fixed an issue with bot respdoning to TCM CTCP VERSIONS too slowly at times on connect. (#128)
+* Added syslog style repeated log detection for all logging.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

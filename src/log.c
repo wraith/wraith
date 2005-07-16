@@ -194,6 +194,12 @@ void logfile(int type, const char *msg)
  * putlog(level,channel_name,format,...);
  * Broadcast the log if chname is not '@'
  */
+char last_log[201] = "";
+int log_repeats = 0;
+char last_chname[25] = "";
+int last_type;
+bool log_repeated;
+
 void putlog(int type, const char *chname, const char *format, ...)
 {
   char va_out[LOGLINEMAX + 1] = "";
@@ -207,6 +213,25 @@ void putlog(int type, const char *chname, const char *format, ...)
     putlog(LOG_ERRORS, "*", "Empty putlog() detected");
     return;
   }
+
+  if (!log_repeated) {
+    if (type == last_type && 
+        !egg_strncasecmp(chname, last_chname, sizeof(last_chname)) && 
+        !egg_strncasecmp(va_out, last_log, sizeof(last_log))) {
+      log_repeats++;
+
+      return;
+    }
+    if (log_repeats) {
+      log_repeated = 1;
+      putlog(type, last_chname, "Last message repeated %d times.\n", log_repeats);
+      log_repeats = 0;
+    }
+    strlcpy(last_log, va_out, sizeof(last_log));
+    last_type = type;
+    strlcpy(last_chname, chname, sizeof(last_chname));
+  } else
+    log_repeated = 0;
 
   char *p = NULL;
 
