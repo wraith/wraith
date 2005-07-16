@@ -29,6 +29,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a segfault/cpulock with mode parsing. (#25)
 * Fixed an issue with bot respdoning to TCM CTCP VERSIONS too slowly at times on connect. (#128)
 * Added syslog style repeated log detection for all logging.
+* Fixed cmd_net[ps|last] not working. (#130, #131)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
