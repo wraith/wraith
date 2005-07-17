@@ -730,6 +730,7 @@ static void cmd_matchbot(int idx, char *par)
 static void cmd_match(int idx, char *par)
 {
   match(idx, par, 0);
+  dprintf(idx, "- If trying to match a bot, please use '%smatchbot %s'\n", settings.dcc_prefix, par);
 }
 
 static void cmd_update(int idx, char *par)
