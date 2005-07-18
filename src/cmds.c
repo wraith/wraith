@@ -3848,10 +3848,6 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
     simple_snprintf(scmd, sizeof scmd, "last %s", user);
   } else if (!strcmp(cmd, "ps")) {
     simple_snprintf(scmd, sizeof scmd, "ps %s", par);
-  } else if (!strcmp(cmd, "raw")) {
-    simple_snprintf(scmd, sizeof scmd, "%s", par);
-  } else if (!strcmp(cmd, "kill")) {
-    simple_snprintf(scmd, sizeof scmd, "kill %s", par);
 #ifndef CYGWIN_HACKS
   } else if (!strcmp(cmd, "crontab")) {
     char *code = newsplit(&par);
