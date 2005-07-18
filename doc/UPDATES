@@ -31,6 +31,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added syslog style repeated log detection for all logging.
 * Fixed cmd_net[ps|last] not working. (#130, #131)
 * Added note at end of display for cmd_match to try using cmd_matchbot
+* Fixed 'reset*' being blocked with 'botcmd *'
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
