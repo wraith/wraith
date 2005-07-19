@@ -42,6 +42,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Updated CREDITS/cmd_about (#119)
 * Fixed wrong notice on partyline when a user with no access attempts to telnet in.
 * Added binary config botline output to cmd_newleaf. (#135)
+* Fixed cmd_chattr saving userfile when no changes were made. (#123)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

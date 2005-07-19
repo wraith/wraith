@@ -2241,6 +2241,7 @@ static void cmd_chattr(int idx, char *par)
 		     user = {0, 0, 0, 0 },
 		     ouser = {0, 0, 0, 0 };
   flag_t of = 0, ocf = 0;
+  bool save = 0;
 
   /* Parse args */
   if (par[0]) {
@@ -2386,16 +2387,19 @@ static void cmd_chattr(int idx, char *par)
       user.chan = chan_sanity_check((user.chan | pls.chan) & ~mns.chan, u2->bot);
     }
     set_user_flagrec(u2, &user, par);
+    save = 1;
   }
-  if (chan) {
-    char tmp[100] = "";
+  if (save) {
+    if (chan) {
+      char tmp[100] = "";
 
-    putlog(LOG_CMDS, "*", "#%s# (%s) chattr %s %s", dcc[idx].nick, chan ? chan->dname : "*", hand, chg ? chg : "");
-    simple_snprintf(tmp, sizeof tmp, "chattr %s", chg);
-    update_mod(hand, dcc[idx].nick, tmp, chan->dname);
-  } else {
-    putlog(LOG_CMDS, "*", "#%s# chattr %s %s", dcc[idx].nick, hand, chg ? chg : "");
-    update_mod(hand, dcc[idx].nick, "chattr", chg);
+      putlog(LOG_CMDS, "*", "#%s# (%s) chattr %s %s", dcc[idx].nick, chan ? chan->dname : "*", hand, chg ? chg : "");
+      simple_snprintf(tmp, sizeof tmp, "chattr %s", chg);
+      update_mod(hand, dcc[idx].nick, tmp, chan->dname);
+    } else {
+      putlog(LOG_CMDS, "*", "#%s# chattr %s %s", dcc[idx].nick, hand, chg ? chg : "");
+      update_mod(hand, dcc[idx].nick, "chattr", chg);
+    }
   }
   /* Get current flags and display them */
   if (user.match & FR_GLOBAL) {
@@ -2424,7 +2428,7 @@ static void cmd_chattr(int idx, char *par)
     check_this_user(hand, 0, NULL);
   if (tmpchg)
     free(tmpchg);
-  if (conf.bot->hub)
+  if (conf.bot->hub && save)
     write_userfile(idx);
 }
 
