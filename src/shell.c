@@ -1064,17 +1064,18 @@ void crazy_trace()
 
 int det_translate(const char *word)
 {
-  if (!egg_strcasecmp(word, "ignore"))
-    return DET_IGNORE;
-  else if (!egg_strcasecmp(word, "warn"))
-    return DET_WARN;
-  else if (!egg_strcasecmp(word, "reject"))
-    return DET_REJECT;
-  else if (!egg_strcasecmp(word, "die"))
-    return DET_DIE;
-  else if (!egg_strcasecmp(word, "suicide"))
-    return DET_SUICIDE;
-
+  if (word && word[0]) {
+    if (!egg_strcasecmp(word, "ignore"))
+      return DET_IGNORE;
+    else if (!egg_strcasecmp(word, "warn"))
+      return DET_WARN;
+    else if (!egg_strcasecmp(word, "reject"))
+      return DET_REJECT;
+    else if (!egg_strcasecmp(word, "die"))
+      return DET_DIE;
+    else if (!egg_strcasecmp(word, "suicide"))
+      return DET_SUICIDE;
+  }
   return DET_IGNORE;
 }
 
