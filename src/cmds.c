@@ -370,7 +370,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * Eggdev for eggdrop obviously\n"));
   dprintf(idx, STR(" * $bryguy$b for beta testing, providing code, finding bugs, and providing input.\n"));
   dprintf(idx, STR(" * $bSFC$b for providing compile shells, continuous input, feature suggestions, and testing.\n"));
-  dprintf(idx, STR(" * $bwarchest$b for his dedicated bug finding, testing, input, and original inspiration to code a botpack.\n");
+  dprintf(idx, STR(" * $bwarchest$b for his dedicated bug finding, testing, input, and original inspiration to code a botpack.\n"));
   dprintf(idx, STR(" * $bxmage$b for beta testing.\n"));
   dprintf(idx, STR(" * $bpasswd$b for beta testing, and his dedication to finding bugs.\n"));
   dprintf(idx, STR(" * $bextort$b for finding misc bugs.\n"));
@@ -380,7 +380,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bBlackjac$b for helping with the bx auth script with his Sentinel script.\n"));
   dprintf(idx, STR(" * $bMystikal$b for various bugs\n"));
   dprintf(idx, " \n");
-  dprintf(idx, STR("Credit for suggestions/bugs can be found at: http://wraith.botpack.net:2080/rptview?rn=13\n");
+  dprintf(idx, STR("Credit for suggestions/bugs can be found at: http://wraith.botpack.net:2080/rptview?rn=13\n"));
   dprintf(idx, " \n");
   dprintf(idx, STR("The botpack ghost inspired the early versions of wraith and the current config system.\n"));
   dprintf(idx, STR("* $beinride$b\n"));
