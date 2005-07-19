@@ -1340,7 +1340,7 @@ See also: w
 ::nick
 See: handle
 :hub:nopass
-###  $bnohelp$b [anything]
+###  $bnopass$b [anything]
    Displays all users who do not have a password set.
  
    Specify any argument to give random passes to users.
