@@ -311,6 +311,11 @@ static void cmd_lagged(int idx, char *par)
 
 static void cmd_me(int idx, char *par)
 {
+  if (dcc[idx].simul >= 0) {
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
+    return;
+  }
+
   if (dcc[idx].u.chat->channel < 0) {
     dprintf(idx, "You have chat turned off.\n");
     return;
@@ -1973,7 +1978,7 @@ static void cmd_unlink(int idx, char *par)
 static void cmd_relay(int idx, char *par)
 {
   if (dcc[idx].simul >= 0) {
-    dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
     return;
   }
   if (!par[0]) {
@@ -2874,7 +2879,7 @@ static void cmd_strip(int idx, char *par)
 static void cmd_su(int idx, char *par)
 {
   if (dcc[idx].simul >= 0) {
-    dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
     return;
   }
 
@@ -4123,7 +4128,7 @@ static void cmd_whoami(int idx, char *par)
 static void cmd_quit(int idx, char *text)
 {
   if (dcc[idx].simul >= 0) {
-    dprintf(idx, "Sorry, this cmd is not available with remote cmds.\n");
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
     return;
   }
 
