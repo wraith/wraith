@@ -1597,7 +1597,10 @@ dcc_telnet_id(int idx, char *buf, int atr)
   }
 
   if (!ok) {
-    putlog(LOG_BOTS, "*", DCC_INVHANDLE, dcc[idx].host, nick);
+    if (dcc[idx].user)
+      putlog(LOG_BOTS, "*", "%s: %s!%s", ischanhub() ? DCC_REFUSED : DCC_REFUSEDNC, nick, dcc[idx].host);
+    else
+      putlog(LOG_BOTS, "*", DCC_INVHANDLE, dcc[idx].host, nick);
     killsock(dcc[idx].sock);
     lostdcc(idx);
     return;
