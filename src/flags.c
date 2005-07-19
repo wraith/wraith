@@ -546,6 +546,9 @@ dolimit(struct chanset_t *chan)
 int
 whois_access(struct userrec *user, struct userrec *whois_user)
 {
+  if (user == whois_user)
+    return 1;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 }, whois = {
   FR_GLOBAL | FR_CHAN, 0, 0, 0};
 
@@ -553,7 +556,7 @@ whois_access(struct userrec *user, struct userrec *whois_user)
   get_user_flagrec(whois_user, &whois, NULL);
 
   if (
-      (isowner(user->handle) && !isowner(user->handle)) ||
+      (isowner(user->handle) && !isowner(whois_user->handle)) ||
       (glob_admin(whois) && !glob_admin(fr)) || 
       (glob_owner(whois) && !glob_owner(fr)) ||
       (glob_master(whois) && !glob_master(fr)) ||

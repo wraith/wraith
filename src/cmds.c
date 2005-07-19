@@ -1166,11 +1166,8 @@ static void cmd_chpass(int idx, char *par)
     dprintf(idx, "You can't change passwords for non-bots.\n");
   else if (u->bot && !(atr & USER_OWNER))
     dprintf(idx, "You can't change a bot's password.\n");
-  else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) &&
-	    egg_strcasecmp(handle, dcc[idx].nick))
-    dprintf(idx, "You can't change a bot owner's password.\n");
-  else if (isowner(handle) && egg_strcasecmp(dcc[idx].nick, handle))
-    dprintf(idx, "You can't change a permanent bot owner's password.\n");
+  else if (!whois_access(dcc[idx].user, u))
+    dprintf(idx, "No such user.\n");
   else if (!par[0]) {
     putlog(LOG_CMDS, "*", "#%s# chpass %s [nothing]", dcc[idx].nick, handle);
     set_user(&USERENTRY_PASS, u, NULL);

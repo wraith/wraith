@@ -37,6 +37,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed security flaw with 'auth-obscure', and improved: auth-obscure now gives a hash regardless of 'dccauth'.
 * Possibly fixed a random segfault after linking/connecting to irc.
 * Fixed a segfault/cpu-spin during WHO parsing, although, it could have occurred at any time. (#110)
+* Fixed the whois_access() function to not allow non-perm owners to see/access perm-owners.
+* cmd_chpass now uses the whois_access() function. (#122)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
