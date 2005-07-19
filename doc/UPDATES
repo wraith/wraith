@@ -12,6 +12,9 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Added hijacked invite detection based on server invite notices.
 
 1.2.5
+* Fixed a segfault/cpu-spin with mode parsing. (#25)
+* Fixed a segfault/cpu-spin during WHO parsing, although, it could have occurred at any time. (#110)
+* Possibly fixed a random segfault/cpu-spin after linking/connecting to irc.
 * Fixed spaces being stripped in .botcmd reply.
 * Changed order of 'rehashed config data from binary' notice to appear before any bot/userfile changes.
 * 'localhub's now check minutely if their bots need added or hosts added to userlist.
@@ -26,7 +29,6 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed another fatal bug with cmd_conf, this should fix it for good.
 * Added var 'manop-warn' to allow disabling the new manop NOTICE warnings when msg opping.
 * Added irc.ptptech.com/efnet.port80.se to default servers/servers6, added irc.pte.hu, irc.efnet.fr to servers.
-* Fixed a segfault/cpulock with mode parsing. (#25)
 * Fixed an issue with bot respdoning to TCM CTCP VERSIONS too slowly at times on connect. (#128)
 * Added syslog style repeated log detection for all logging.
 * Fixed cmd_net[ps|last] not working. (#130, #131)
@@ -35,8 +37,6 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added code to prevent cmd_botcmd from being chained over botnet.
 * Prevent use of cmd_botcmd for cmds: cmd_me, cmd_away, cmd_back
 * Fixed security flaw with 'auth-obscure', and improved: auth-obscure now gives a hash regardless of 'dccauth'.
-* Possibly fixed a random segfault after linking/connecting to irc.
-* Fixed a segfault/cpu-spin during WHO parsing, although, it could have occurred at any time. (#110)
 * Fixed the whois_access() function to not allow non-perm owners to see/access perm-owners.
 * cmd_chpass now uses the whois_access() function. (#122)
 
