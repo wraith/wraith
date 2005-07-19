@@ -2410,7 +2410,7 @@ static void cmd_chattr(int idx, char *par)
         check_dcc_attrs(u2, of);
       get_user_flagrec(u2, &user, NULL);
       build_flags(work, &user, NULL);
-      if (work[0] != '-') {
+      if (work[0] != '-')
         dprintf(idx, "Global flags for %s are now +%s.\n", hand, work);
       else
         dprintf(idx, "No global flags for %s.\n", hand);
