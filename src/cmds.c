@@ -3063,16 +3063,19 @@ static void cmd_newleaf(int idx, char *par)
       if ((p = strchr(host, '@'))) {
         hostname = ++p;
         af_type = is_dotted_ip(hostname);
-        if (af_type == AF_INET)
+        if (!ip && af_type == AF_INET)
           ip = strdup(hostname);
-        else if (af_type == AF_INET6)
+        else if (!ip6 && af_type == AF_INET6)
           ip6 = strdup(hostname);
-        else if (!strchr(hostname, '*') && !strchr(hostname, '?'))
+        else if (!bhostname && !strchr(hostname, '*') && !strchr(hostname, '?'))
           bhostname = strdup(hostname);
       }
     }
     dprintf(idx, "Bot config line (prefix host with '+' if ipv6):\n");
     dprintf(idx, "%s %s %s %s\n", handle, ip ? ip : ".", bhostname ? bhostname : ".", ip6 ? ip6 : "");
+    if (ip) free(ip);
+    if (ip6) free(ip6);
+    if (bhostname) free(bhostname);
     write_userfile(idx);
   }
 }
