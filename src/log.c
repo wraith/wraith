@@ -22,6 +22,7 @@
 
 #include <ctype.h>
 #include <stdarg.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -135,15 +136,35 @@ void logidx(int idx, const char *format, ...)
 }
 
 #ifdef no
+/* CURRENTLY SPAWNS TONS OF FILES */
 FILE *logf;
 bool flush_log = 1;
+bool init_log_exit = 0;
 char log_last[LOGLINEMAX + 1] = "";
 int repeats = 0;
+
+void logfile_close(void)
+{
+  if (!logf)
+    return;
+
+  char date[50] = "";
+
+  egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
+  fprintf(logf, "--- Log session end: %s ---\n", date);
+  fclose(logf);
+  logf = NULL;  
+}
 
 bool logfile_open()
 {
   if (!(logf = fopen(".l", "a")))
     return 0;
+
+  if (!init_log_exit) {
+    init_log_exit = 1;
+    atexit(logfile_close);
+  } 
 
   char date[50] = "";
 
@@ -161,9 +182,11 @@ bool logfile_stat(const char *fname)
     if (fd != -1)
       close(fd);
     fclose(logf);
+    logf = NULL;
     if (!logfile_open())
-      return;
+      return 0;
   }
+  return 1;
 }
 
 void logfile(int type, const char *msg)
@@ -174,7 +197,7 @@ void logfile(int type, const char *msg)
   if (!logfile_stat(".l"))
     return;
 
-  if (!egg_strcasecmp(msg, log_last)) {
+  if (!egg_strncasecmp(msg, log_last, sizeof(log_last))) {
     repeats++;
     return;
   }
@@ -184,6 +207,7 @@ void logfile(int type, const char *msg)
   }
 
   strlcpy(log_last, msg, sizeof(log_last));
+
   fprintf(logf, "%s\n", msg);
   if (flush_log)
     fflush(logf);
@@ -194,7 +218,7 @@ void logfile(int type, const char *msg)
  * putlog(level,channel_name,format,...);
  * Broadcast the log if chname is not '@'
  */
-char last_log[201] = "";
+char last_log[LOGLINEMAX + 1] = "";
 int log_repeats = 0;
 char last_chname[25] = "";
 int last_type;
@@ -253,8 +277,8 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   /* strcat(out, "\n"); */
 
-  /* FIXME: WRITE LOG HERE */
 #ifdef no
+  /* FIXME: WRITE LOG HERE */
   int logfile_masks = LOG_CMDS|LOG_ERRORS|LOG_WARN|LOG_BOTS|LOG_MISC;
 
   if (logfile_masks && (logfile_masks & type))
