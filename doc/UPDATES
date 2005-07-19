@@ -15,7 +15,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed spaces being stripped in .botcmd reply.
 * Changed order of 'rehashed config data from binary' notice to appear before any bot/userfile changes.
 * 'localhub's now check minutely if their bots need added or hosts added to userlist.
-* Fixed bot username casing causing bad cookies.
+* Fixed bot username casing causing bad cookies. (disable cookies for upgrade)
 * Fixed binary config stating there was no change with -C under certain conditions.
 * Fixed bots set +k being able to request ops.
 * Fixed bots asking for ops/invite when set to +d or +k.
