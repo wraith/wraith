@@ -2402,27 +2402,30 @@ static void cmd_chattr(int idx, char *par)
     }
   }
   /* Get current flags and display them */
-  if (user.match & FR_GLOBAL) {
-    user.match = FR_GLOBAL;
-    if (chg)
-      check_dcc_attrs(u2, of);
-    get_user_flagrec(u2, &user, NULL);
-    build_flags(work, &user, NULL);
-    if (work[0] != '-')
-      dprintf(idx, "Global flags for %s are now +%s.\n", hand, work);
-    else
-      dprintf(idx, "No global flags for %s.\n", hand);
-  }
-  if (chan) {
-    user.match = FR_CHAN;
-    get_user_flagrec(u2, &user, par);
-    if (chg)
-      check_dcc_chanattrs(u2, chan->dname, user.chan, ocf);
-    build_flags(work, &user, NULL);
-    if (work[0] != '-')
-      dprintf(idx, "Channel flags for %s on %s are now +%s.\n", hand, chan->dname, work);
-    else
-      dprintf(idx, "No flags for %s on %s.\n", hand, chan->dname);
+
+  if (whois_access(dcc[idx].user, u2)) {
+    if (user.match & FR_GLOBAL) {
+      user.match = FR_GLOBAL;
+      if (chg)
+        check_dcc_attrs(u2, of);
+      get_user_flagrec(u2, &user, NULL);
+      build_flags(work, &user, NULL);
+      if (work[0] != '-') {
+        dprintf(idx, "Global flags for %s are now +%s.\n", hand, work);
+      else
+        dprintf(idx, "No global flags for %s.\n", hand);
+    }
+    if (chan) {
+      user.match = FR_CHAN;
+      get_user_flagrec(u2, &user, par);
+      if (chg)
+        check_dcc_chanattrs(u2, chan->dname, user.chan, ocf);
+      build_flags(work, &user, NULL);
+      if (work[0] != '-')
+        dprintf(idx, "Channel flags for %s on %s are now +%s.\n", hand, chan->dname, work);
+      else
+        dprintf(idx, "No flags for %s on %s.\n", hand, chan->dname);
+    }
   }
   if (chg && !conf.bot->hub)
     check_this_user(hand, 0, NULL);

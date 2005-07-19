@@ -43,6 +43,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed wrong notice on partyline when a user with no access attempts to telnet in.
 * Added binary config botline output to cmd_newleaf. (#135)
 * Fixed cmd_chattr saving userfile when no changes were made. (#123)
+* Fixed cmd_chattr displaying flags for higher users, therefore bypassing 'whois' restrictions. (#123)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
