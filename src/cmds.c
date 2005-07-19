@@ -1255,7 +1255,7 @@ static void cmd_botcmd(int idx, char *par)
 {
   if (dcc[idx].simul >= 0) {
     dprintf(idx, "Sorry, you can't chain '%sbotcmd'.\n", settings.dcc_prefix);
-    putlog(LOG_WARN, "*", "%s attempted to chain 'botcmd' over the botnet.");
+    putlog(LOG_WARN, "*", "%s attempted to chain 'botcmd' over the botnet.", dcc[idx].nick);
     return;
   }
 
