@@ -36,6 +36,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Disabled cmd_away/cmd_back over 'botcmd'
 * Fixed security flaw with 'auth-obscure', and improved: auth-obscure now gives a hash regardless of 'dccauth'.
 * Possibly fixed a random segfault after linking/connecting to irc.
+* Fixed a segfault/cpu-spin during WHO parsing, although, it could have occurred at any time. (#110)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

@@ -1040,7 +1040,7 @@ struct user_entry *find_user_entry(struct user_entry_type *et, struct userrec *u
 /* FIXME: remove after 1.2.3 */
     if (((*e)->type == et) ||
 	((*e)->name && (!egg_strcasecmp((*e)->name, et->name) ||
-        (!egg_strcasecmp((*e)->name, "CONFIG") && !egg_strcasecmp(et->name, "SET"))))) {
+        ((*e)->name && et->name && !egg_strcasecmp((*e)->name, "CONFIG") && !egg_strcasecmp(et->name, "SET"))))) {
       t = *e;
       *e = t->next;
       t->next = u->entries;
