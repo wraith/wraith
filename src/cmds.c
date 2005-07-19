@@ -422,6 +422,10 @@ static void cmd_addline(int idx, char *par)
 
 static void cmd_away(int idx, char *par)
 {
+  if (dcc[idx].simul >= 0) {
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
+    return;
+  }
   if (strlen(par) > 60)
     par[60] = 0;
   set_away(idx, par);
@@ -429,6 +433,10 @@ static void cmd_away(int idx, char *par)
 
 static void cmd_back(int idx, char *par)
 {
+  if (dcc[idx].simul >= 0) {
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
+    return;
+  }
   not_away(idx);
 }
 
