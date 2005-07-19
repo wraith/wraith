@@ -623,6 +623,12 @@ void cmd_set_real(const char *botnick, int idx, char *par)
   char *name = NULL;
   const char *data = NULL, *botdata = NULL;
   int list = 0, i = 0;
+  bool notyes = 1;
+
+  if (par[0] && !egg_strncasecmp(par, "-yes", 4)) {
+    notyes = 0;
+    newsplit(&par);
+  }
 
   if (botnick)
     putlog(LOG_CMDS, "*", "#%s# botset %s %s", dcc[idx].nick, botnick, par);
@@ -718,6 +724,13 @@ void cmd_set_real(const char *botnick, int idx, char *par)
       i++;
     }
   } else { // need to set it!
+    if (!list && var->flags & VAR_LIST) {
+      if (notyes) {
+        dprintf(idx, "Using non-list functions on a list variable can be dangerous, please retype with -YES if you're sure:\n");
+        dprintf(idx, "%s%sset -YES %s ...\n", settings.dcc_prefix, botnick ? "bot" : "", var->name);
+        return;
+      }
+    }
     if (botnick) {
       if (var->flags & VAR_NOLOC) {
         dprintf(idx, "Sorry, cannot set '%s' locally.\n", var->name);
