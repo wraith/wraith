@@ -646,7 +646,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
   }
 
   /* Correct pass or secpass! */
-  if (!dcc[idx].wrong_pass || (!dccauth || (dccauth && !badauth))) {
+  if (!dcc[idx].wrong_pass && (!dccauth || (dccauth && !badauth))) {
     putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {
       free(dcc[idx].u.chat->away);
@@ -957,10 +957,14 @@ dcc_chat_pass(int idx, char *buf, int atr)
     }
     return;
   }
-  if (u_pass_match(dcc[idx].user, pass) || auth_obscure) {
-    if (auth_obscure)
+  int passok = u_pass_match(dcc[idx].user, pass);
+  bool do_obscure = (!passok && auth_obscure) ? 1 : 0;
+
+  if (passok || do_obscure) {
+    if (do_obscure)
       dcc[idx].wrong_pass = 1;
-    if (dccauth) { 
+
+    if (dccauth || do_obscure) { 
       char randstr[51] = "";
 
       make_rand_str(randstr, 50);

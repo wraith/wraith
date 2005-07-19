@@ -1504,8 +1504,8 @@ See also: reload, backup
 [S]  $bauth-key$b        The authkey used during authing.G ive to users if they need to auth. 
                           (can be bot specific)
 [C]  $bauth-prefix$b     The prefix character used for msg cmds, ie: $u!$uop or $u.$uop
-[B]  $bauth-obscure$b    Will not halt in dcc pass is wrong and authing is enabled. 
-                          Will always fail at auth hash though.
+[B]  $bauth-obscure$b    Will not halt on dcc login if pass is wrong. Will display auth hash..
+                          Will always fail at hash though.
 [N]  $bdcc-autoaway$b    Time in seconds until a user is set auto-away on dcc.
                           (0/- to disable)
 [B]  $bmean-kicks$b      Enables 'mean' and 'offensive' kick msgs.

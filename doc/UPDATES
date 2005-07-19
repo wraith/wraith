@@ -34,6 +34,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed 'reset*' being blocked with 'botcmd *'
 * Added code to prevent cmd_botcmd from being chained over botnet.
 * Disabled cmd_away/cmd_back over 'botcmd'
+* Fixed security flaw with 'auth-obscure', and improved: auth-obscure now gives a hash regardless of 'dccauth'.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
