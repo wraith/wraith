@@ -1225,7 +1225,8 @@ finish_share(int idx)
   }
   noshare = 0;
   ou = userlist;                /* Save old user list                   */
-  userlist = (struct userrec *) -1;       /* Do this to prevent .user messups     */
+  //userlist = (struct userrec *) -1;       /* Do this to prevent .user messups     */
+  userlist = NULL;
 
   /* Bot user pointers are updated to point to the new list, all others
    * are set to NULL. If our userfile will be overriden, just set _all_
