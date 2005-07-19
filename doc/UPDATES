@@ -32,6 +32,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_net[ps|last] not working. (#130, #131)
 * Added note at end of display for cmd_match to try using cmd_matchbot
 * Fixed 'reset*' being blocked with 'botcmd *'
+* Added code to prevent cmd_botcmd from being chained over botnet.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
