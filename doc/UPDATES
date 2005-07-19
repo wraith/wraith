@@ -39,6 +39,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed security flaw with 'auth-obscure', and improved: auth-obscure now gives a hash regardless of 'dccauth'.
 * Fixed the whois_access() function to not allow non-perm owners to see/access perm-owners.
 * cmd_chpass now uses the whois_access() function. (#122)
+* Updated CREDITS/cmd_about (#119)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
