@@ -46,6 +46,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_chattr displaying flags for higher users, therefore bypassing 'whois' restrictions. (#123)
 * Added examples on how to use cmd_set in the helpfile. (#118)
 * Added confirmation for using 'set' on list variables without using the list functions. (#118)
+* Fixed bots auto-opping passwordless users on JOIN, to match cmd_mop.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

@@ -2443,7 +2443,8 @@ static int gotjoin(char *from, char *chname)
           }
         }
 #endif /* CACHE */
-        if (!splitjoin && !chan_hasop(m) && (op || (dovoice(chan) && chk_autoop(fr, chan)))) {
+        if (!splitjoin && !chan_hasop(m) && (op || (dovoice(chan) && 
+            !u_pass_match(m->user, "-") && chk_autoop(fr, chan)))) {
           do_op(m->nick, chan, 1, 0);
         }
       }
