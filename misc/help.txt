@@ -1326,6 +1326,10 @@ See also: w
    Adds a new leaf to the botnet with the specified handle and hostname.
    Any number of hosts can be specified in the cmd. You will need to
    add a hostmask for the bot's ip for it to connect over DCC.
+
+   The binary config botline will also be outputted, but should be
+   checked for correctness.
+
 ::newpass
 ###  $bnewpass$b <password|rand>
    Changes your password on the bot. This is similar to the '/msg <bot> pass'

@@ -3029,7 +3029,8 @@ static void cmd_newleaf(int idx, char *par)
   else {
     struct userrec *u1 = NULL;
     struct bot_addr *bi = NULL;
-    char tmp[81] = "", *host = NULL;
+    char tmp[81] = "", *host = NULL, *p = NULL, *hostname = NULL, *ip = NULL, *ip6 = NULL, *bhostname = NULL;
+    int af_type = 0;
 
     userlist = adduser(userlist, handle, "none", "-", USER_OP, 1);
     u1 = get_user_by_handle(userlist, handle);
@@ -3052,7 +3053,19 @@ static void cmd_newleaf(int idx, char *par)
       host = newsplit(&par);
       addhost_by_handle(handle, host);
       dprintf(idx, "Added host '%s' to leaf: %s\n", host, handle);
+      if ((p = strchr(host, '@'))) {
+        hostname = ++p;
+        af_type = is_dotted_ip(hostname);
+        if (af_type == AF_INET)
+          ip = strdup(hostname);
+        else if (af_type == AF_INET6)
+          ip6 = strdup(hostname);
+        else if (!strchr(hostname, '*') && !strchr(hostname, '?'))
+          bhostname = strdup(hostname);
+      }
     }
+    dprintf(idx, "Bot config line (prefix host with '+' if ipv6):\n");
+    dprintf(idx, "%s %s %s %s\n", handle, ip ? ip : ".", bhostname ? bhostname : ".", ip6 ? ip6 : "");
     write_userfile(idx);
   }
 }

@@ -41,6 +41,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * cmd_chpass now uses the whois_access() function. (#122)
 * Updated CREDITS/cmd_about (#119)
 * Fixed wrong notice on partyline when a user with no access attempts to telnet in.
+* Added binary config botline output to cmd_newleaf. (#135)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
