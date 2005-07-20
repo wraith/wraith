@@ -1054,24 +1054,36 @@ gotmode(char *from, char *msg)
 
           if (role && (!u || (u && !u->bot)) && m && !chan_sentkick(m)) {
             if (deops >= 3 && chan->mdop) {
-              m->flags |= SENTKICK;
-              simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
-              tputs(serv, tmp, strlen(tmp));
-              if (u) {
-                simple_sprintf(tmp, "Mass deop on %s by %s", chan->dname, m->nick);
-                deflag_user(u, DEFLAG_MDOP, tmp, chan);
+              if (role < 5) {
+                m->flags |= SENTKICK;
+                simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
+                if (role <= 2)
+                  tputs(serv, tmp, strlen(tmp));
+                else
+                  dprintf(DP_SERVER, "%s", tmp);
+              } else {
+                if (u) {
+                  simple_sprintf(tmp, "Mass deop on %s by %s", chan->dname, m->nick);
+                  deflag_user(u, DEFLAG_MDOP, tmp, chan);
+                }
               }
             }
 
             /* check for mop */
             if (ops >= 3) {
               if (chan->mop) {
-                m->flags |= SENTKICK;
-                simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
-                tputs(serv, tmp, strlen(tmp));
-                if (u) {
-                  simple_sprintf(tmp, "Mass op on %s by %s", chan->dname, m->nick);
-                  deflag_user(u, DEFLAG_MOP, tmp, chan);
+                if (role < 5) {
+                  m->flags |= SENTKICK;
+                  simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+                  if (role <= 2)
+                    tputs(serv, tmp, strlen(tmp));
+                  else
+                    dprintf(DP_SERVER, "%s", tmp);
+                } else { 
+                  if (u) {
+                    simple_sprintf(tmp, "Mass op on %s by %s", chan->dname, m->nick);
+                    deflag_user(u, DEFLAG_MOP, tmp, chan);
+                  }
                 }
                 enforce_bitch(chan);        /* deop quick! */
               }

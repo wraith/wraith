@@ -49,6 +49,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed bots auto-opping passwordless users on JOIN, to match cmd_mop.
 * Fixed typo for 'help nopass'
 * Added CIDR/mask matching support for all user hosts, ie, '.+host user *!jerry@1.2.0.0/16' will match 'bob!jerry@1.2.3.4'
+* Balanced out mdop/mop kicks to not make entire net flood off.
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
