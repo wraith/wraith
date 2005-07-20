@@ -74,6 +74,7 @@ struct flag_record {
 #define USER_AUTOOP	FLAG[(int) 'O']
 #define USER_PARTY	FLAG[(int) 'p']
 #define USER_QUIET	FLAG[(int) 'q']
+#define USER_DORESOLV	FLAG[(int) 'r']
 #define USER_UPDATEHUB	FLAG[(int) 'u']
 #define USER_VOICE	FLAG[(int) 'v']
 #define USER_WASOPTEST	FLAG[(int) 'w']
@@ -122,6 +123,8 @@ struct flag_record {
 #define glob_noflood(x)                        ((x).global & USER_NOFLOOD)
 #define chan_noflood(x)                        ((x).chan & USER_NOFLOOD)
 #define glob_chanhub(x)                        ((x).global & USER_CHANHUB)
+#define glob_doresolv(x)                        ((x).global & USER_DORESOLV)
+#define chan_doresolv(x)                        ((x).chan & USER_DORESOLV)
 
 void init_flags(void);
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);
@@ -144,6 +147,7 @@ int chk_devoice(struct flag_record);
 int chk_noflood(struct flag_record);
 int ischanhub(void);
 int isupdatehub(void);
+int doresolv(struct chanset_t *);
 int dovoice(struct chanset_t *);
 int dolimit(struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);

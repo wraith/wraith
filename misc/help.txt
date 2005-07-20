@@ -1838,6 +1838,7 @@ See also: whom
       $bO$b - autoop (user is auto-opped in all channels)
       $bp$b - party-line (user has access to the partyline)
       $bq$b - quiet (user cannot gain voice on any channel)
+      $br$b - resolve (bot resolves clients in to match against userlist) [$bCPU INTENSIVE+$b]
       $bu$b - update-bot (see doc/UPGRADING)
       $bv$b - voice (user gets +v automatically from +y bots)
       $bw$b - wasop-test (needs wasop test for +stopnethack procedure)
@@ -1855,6 +1856,7 @@ See also: whom
       $bo$b - op (user has op access to the channel)
       $bO$b - autoop (user is auto-opped in channel)
       $bq$b - quiet (user cannot gain voice on the channel)
+      $br$b - resolve (bot resolves clients in channel to match against userlist) [$bCPU INTENSIVE+$b]
       $bv$b - voice (user gets +v automatically)
       $bw$b - wasop-test (needs wasop test for +stopnethack procedure)
       $by$b - voice-bot (bot gives out voices/auto-ops in the channel) [$bCPU INTENSIVE$b]

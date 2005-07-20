@@ -20,6 +20,8 @@
 #include "src/userrec.h"
 #include "src/misc.h"
 #include "src/rfc1459.h"
+#include "src/socket.h"
+#include "src/adns.h"
 #include "src/chanprog.h"
 #include "src/auth.h"
 #include "src/userrec.h"

@@ -15,6 +15,53 @@ static int    count_ctcp = 0;
 static time_t last_invtime = (time_t) 0L;
 static char   last_invchan[300] = "";
 
+typedef struct resolvstruct {
+  struct chanset_t *chan;
+  char *nick;
+} resolv_member;
+
+static void resolv_member_callback(int id, void *client_data, const char *host, char **ips)
+{
+  resolv_member *r = (resolv_member *) client_data;
+
+  if (!r || !r->chan || !r->nick)
+    return;
+
+  memberlist *m = NULL;
+  char *ps = NULL, *pe = NULL;
+
+  if (ips && ips[0]) {
+    for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (!rfc_casecmp(m->nick, r->nick)) {
+        if (!m->userip[0] && m->userhost[0]) {
+          ps = m->userhost;
+          pe = strchr(ps, '@');
+          if (pe) {
+            char user[15] = "";
+
+            simple_snprintf(user, pe - ps + 1, m->userhost);
+            simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+
+void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
+{
+  resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
+
+  r->chan = chan;
+  r->nick = strdup(nick);
+
+  egg_dns_lookup(host, 20, resolv_member_callback, (void *) r);
+}
+
 /* ID length for !channels.
  */
 #define CHANNEL_ID_LEN 5
@@ -1296,6 +1343,9 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 static int got302(char *from, char *msg)
 {
   char *p = NULL, *nick = NULL, *uhost = NULL;
+  struct chanset_t *chan = NULL;
+  memberlist *m = NULL;
+
 #ifdef CACHE
   cache_t *cache = NULL;
   cache_chan_t *cchan = NULL;
@@ -1598,8 +1648,13 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 
   /* Store the userhost */
   if (!m->userhost[0])
-    simple_sprintf(m->userhost, "%s@%s", user, host);
-  simple_sprintf(userhost, "%s!%s", nick, m->userhost);
+    simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
+  if (doresolv(chan) && is_dotted_ip(host))
+    simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
+  else
+    resolve_to_member(chan, nick, host);
+
+  simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
 
   waschanop = me_op(chan);      /* Am I opped here? */
   if (strchr(flags, '@') != NULL)	/* Flags say he's opped? */
@@ -2329,6 +2384,8 @@ static int gotjoin(char *from, char *chname)
 	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
       } else {
+        char *p = NULL;
+
 	if (m)
 	  killmember(chan, nick);
 	m = newmember(chan, nick);
@@ -2337,8 +2394,16 @@ static int gotjoin(char *from, char *chname)
 	m->flags = 0;
 	m->last = now;
 	m->delay = 0L;
-	strcpy(m->nick, nick);
-	strcpy(m->userhost, uhost);
+	strlcpy(m->nick, nick, sizeof(m->nick));
+	strlcpy(m->userhost, uhost, sizeof(m->userhost));
+        if (doresolv(chan) && (p = strchr(uhost, '@'))) {
+          p++;
+          if (is_dotted_ip(p))
+            strlcpy(m->userip, uhost, sizeof(m->userip));
+          else
+            resolve_to_member(chan, nick, p); 
+        }
+        
 	m->user = u;
 	m->flags |= STOPWHO;
 

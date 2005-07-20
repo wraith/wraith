@@ -1306,9 +1306,9 @@ static void cmd_channel(int idx, char *par)
     if (maxhandlen < 9) maxhandlen = 9;
     
     dprintf(idx, "(n = owner, m = master, o = op, d = deop, b = bot) CAP:global\n");
-    egg_snprintf(format, sizeof format, " %%-%us %%-%us %%-6s %%-4s %%-5s %%s\n", 
+    egg_snprintf(format, sizeof format, " %%-%us %%-%us %%-6s %%-4s %%-5s %%s %%s\n", 
 			maxnicklen, maxhandlen);
-    dprintf(idx, format, "NICKNAME", "HANDLE", " JOIN", "  HOPS", "IDLE", "USER@HOST");
+    dprintf(idx, format, "NICKNAME", "HANDLE", " JOIN", "  HOPS", "IDLE", "USER@HOST", "USER@IP");
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       if (m->joined > 0) {
 	if ((now - (m->joined)) > 86400)
@@ -1406,10 +1406,10 @@ static void cmd_channel(int idx, char *par)
 	  egg_snprintf(s1, sizeof s1, "%2lim", ((now - (m->last)) / 60));
 	else
 	  strlcpy(s1, "   ", sizeof s1);
-	egg_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c   %%d %%s  %%s\n", 
+	egg_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c   %%d %%s  %%s %%s\n", 
 			maxnicklen, maxhandlen);
 	dprintf(idx, format, chanflag[0], chanflag[1], m->nick,	handle, s, atrflag, m->hops,
-                     s1, m->userhost);
+                     s1, m->userhost, m->userip);
       }
       if (chan_fakeop(m))
 	dprintf(idx, "    (FAKE CHANOP GIVEN BY SERVER)\n");

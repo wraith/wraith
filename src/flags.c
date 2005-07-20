@@ -516,6 +516,20 @@ ischanhub()
 }
 
 int
+doresolv(struct chanset_t *chan)
+{
+  if (!chan)
+    return 0;
+
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+  get_user_flagrec(conf.bot->u, &fr, chan->dname);
+  if (glob_doresolv(fr) || chan_doresolv(fr))
+    return 1;
+  return 0;
+}
+
+int
 dovoice(struct chanset_t *chan)
 {
   if (!chan)
