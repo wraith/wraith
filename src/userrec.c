@@ -198,25 +198,22 @@ struct userrec *get_user_by_host(char *host)
   cache_miss++;
   strlcpy(host2, host, sizeof host2);
 
-  sdprintf("hostname: %s", host);
   /* do CIDR matching if given host is an ip */
-  if ((p = strchr(host2, '@'))) {
-    sdprintf("IS_DOTTED_IP: %s", p);
+  if ((p = strchr(host2, '@')))
     if (is_dotted_ip(++p))
       do_cidr = 1;
-  }
-  sdprintf("do_cidr: %d", do_cidr);
 
   for (u = userlist; u; u = u->next) {
     q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
     for (; q; q = q->next) {
       if (do_cidr) {
         fcidr = match_cidr(q->extra, host);
-        ret = u;
       }
 
-      if (fcidr)
+      if (fcidr) {
+        ret = u;
         break;
+      }
 
       i = wild_match(q->extra, host);
       if (i > cnt) {
