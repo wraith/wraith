@@ -1067,6 +1067,10 @@ static void cmd_mop(int idx, char *par)
         if (!m->user) {
           sprintf(s, "%s!%s", m->nick, m->userhost);
           m->user = get_user_by_host(s);
+          if (!m->user && doresolv(chan) && m->userip[0]) {
+            simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+            m->user = get_user_by_host(s);
+          }
         }
         if (m->user && u_pass_match(m->user, "-"))
           continue;		/* dont op users without a pass */
@@ -1129,6 +1133,10 @@ static void cmd_find(int idx, char *par)
         sprintf(s, "%s!%s", m->nick, m->userhost);
         if (!m->user && !m->tried_getuser) {
           m->user = get_user_by_host(s);
+          if (!m->user && doresolv(chan) && m->userip[0]) {
+            simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+            m->user = get_user_by_host(s);
+          }
           m->tried_getuser = 1;
         }
         if ((!lookup_user && wild_match(par, s)) || (lookup_user && m->user == u)) {
@@ -1320,6 +1328,11 @@ static void cmd_channel(int idx, char *par)
       if (m->user == NULL) {
 	simple_snprintf(s1, sizeof s1, "%s!%s", m->nick, m->userhost);
 	m->user = get_user_by_host(s1);
+        if (!m->user && doresolv(chan) && m->userip[0]) {
+          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+          m->user = get_user_by_host(s);
+        }
+        m->tried_getuser = 1;
       }
       if (m->user == NULL)
 	strlcpy(handle, "*", sizeof handle);

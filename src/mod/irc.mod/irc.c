@@ -1352,6 +1352,10 @@ check_expired_chanstuff(struct chanset_t *chan)
             if (!m->user && !m->tried_getuser) {
               simple_sprintf(s, "%s!%s", m->nick, m->userhost);
               m->user = get_user_by_host(s);
+              if (!m->user && doresolv(chan) && m->userip[0]) {
+                simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+                m->user = get_user_by_host(s);
+              }
               m->tried_getuser = 1;
             }
 

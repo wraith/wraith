@@ -28,7 +28,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
     return;
 
   memberlist *m = NULL;
-  char *ps = NULL, *pe = NULL;
+  char *ps = NULL, *pe = NULL, s[UHOSTLEN + 1];
 
   if (ips && ips[0]) {
     for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
@@ -41,6 +41,10 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 
             simple_snprintf(user, pe - ps + 1, m->userhost);
             simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
+            if (!m->user) {
+              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+              m->user = get_user_by_host(s);
+            }
             return;
           }
         }
@@ -198,6 +202,10 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
 
       simple_sprintf(s, "%s!%s", m->nick, m->userhost);
       m->user = get_user_by_host(s);
+      if (!m->user && doresolv(chan) && m->userip[0]) {
+        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+        m->user = get_user_by_host(s);
+      }
       m->tried_getuser = 1;
     }
 
@@ -1302,6 +1310,10 @@ void recheck_channel(struct chanset_t *chan, int dobans)
     if (!m->user && !m->tried_getuser) {
            m->tried_getuser = 1;
            m->user = get_user_by_host(s);
+           if (!m->user && doresolv(chan) && m->userip[0]) {
+             simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+             m->user = get_user_by_host(s);
+           }
     }
     get_user_flagrec(m->user, &fr, chan->dname);
     if (glob_bot(fr) && chan_hasop(m) && !match_my_nick(m->nick))
@@ -1343,8 +1355,6 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 static int got302(char *from, char *msg)
 {
   char *p = NULL, *nick = NULL, *uhost = NULL;
-  struct chanset_t *chan = NULL;
-  memberlist *m = NULL;
 
 #ifdef CACHE
   cache_t *cache = NULL;

@@ -50,7 +50,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed typo for 'help nopass'
 * Added CIDR/mask matching support for all user hosts, ie, '.+host user *!jerry@1.2.0.0/16' will match 'bob!jerry@1.2.3.4'
 * Balanced out mdop/mop kicks to not make entire net flood off.
-* Added flag '+r' which will make a bot resolve all hosts it sees to match against userlist. (You should only set this per-chan)
+* Added flag '+r' which will make a bot resolve all hosts it sees to match against userlist. (You should only set this per-chan) (#127)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
