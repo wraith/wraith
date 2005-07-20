@@ -25,6 +25,7 @@
 #include "chanprog.h"
 #include "crypt.h"
 #include "core_binds.h"
+#include "socket.h"
 
 bool             noshare = 1;		/* don't send out to sharebots	    */
 struct userrec	*userlist = NULL;	/* user records are stored here	    */
@@ -190,21 +191,41 @@ struct userrec *get_user_by_host(char *host)
 
   struct userrec *u = NULL;
   struct list_type *q = NULL;
-  int cnt = 0, i;
-  char host2[UHOSTLEN] = "";
+  int cnt = 0, i, fcidr = 0;
+  char host2[UHOSTLEN] = "", *p = NULL;
+  bool do_cidr = 0;
 
   cache_miss++;
   strlcpy(host2, host, sizeof host2);
 
+  sdprintf("hostname: %s", host);
+  /* do CIDR matching if given host is an ip */
+  if ((p = strchr(host2, '@'))) {
+    sdprintf("IS_DOTTED_IP: %s", p);
+    if (is_dotted_ip(++p))
+      do_cidr = 1;
+  }
+  sdprintf("do_cidr: %d", do_cidr);
+
   for (u = userlist; u; u = u->next) {
     q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
     for (; q; q = q->next) {
+      if (do_cidr) {
+        fcidr = match_cidr(q->extra, host);
+        ret = u;
+      }
+
+      if (fcidr)
+        break;
+
       i = wild_match(q->extra, host);
       if (i > cnt) {
 	ret = u;
 	cnt = i;
       }
     }
+    if (fcidr)
+      break;
   }
   if (ret != NULL) {
     lastuser = ret;
