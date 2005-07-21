@@ -52,6 +52,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Balanced out mdop/mop kicks to not make entire net flood off.
 * Added flag '+r' which will make a bot resolve all hosts it sees to match against userlist. (You should only set this per-chan) (#127)
 * Removed cmd line param '-s'; Tracing bot on startup will always make the bot die right away.
+* Trace detection cannot be set to 'ignore', lowest setting is now: 'die'
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

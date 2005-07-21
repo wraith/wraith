@@ -86,7 +86,7 @@ void spawnbot(const char *nick)
   char *run = (char *) my_calloc(1, size);
   int status = 0;
 
-  simple_snprintf(run, size, "%s -%sB %s", binname, !checktrace ? "s" : "", replace(nick, "`", "\\`"));
+  simple_snprintf(run, size, "%s -B %s", binname, replace(nick, "`", "\\`"));
   sdprintf("Spawning '%s': %s", nick, run);
   status = system(run);
   if (status == -1 || WEXITSTATUS(status))

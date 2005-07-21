@@ -45,7 +45,7 @@ int op_bots = 1;
 rate_t op_requests = { 2, 5 };
 char process_list[1024] = "";
 int promisc = DET_WARN;
-int trace = DET_WARN;
+int trace = DET_DIE;
 bool offensive_bans = 1;
 bool manop_warn = 1;
 
@@ -138,8 +138,13 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
     isnumber = data ? str_isdigit(data) : 0;
     if (isnumber)
       number = atoi(data);
-    else if (!isnumber && (var->flags & VAR_DETECTED))
+    else if (!isnumber && (var->flags & VAR_DETECTED)) {
       number = data ? det_translate(data) : DET_IGNORE;
+#ifndef DEBUG
+      if (number < 2 && !strcmp(var->name, "trace"))
+        number = DET_DIE;
+#endif
+    }
     else if (!isnumber)
       number = 0;
 
