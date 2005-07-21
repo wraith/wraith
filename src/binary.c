@@ -303,7 +303,7 @@ static void edpack(settings_t *incfg, const char *hash, int what)
     enc_dec_string = decrypt_binary;
 
 #define dofield(_field) 		do {							\
-	if (_field && _field[0]) {								\
+	if (_field) {										\
 		len = sizeof(_field) - 1;							\
 		tmp = (char *) enc_dec_string(hash, (unsigned char *) _field, &len);		\
 		if (what == PACK_ENC) 								\
