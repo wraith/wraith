@@ -1171,8 +1171,8 @@ static void cmd_chpass(int idx, char *par)
   handle = newsplit(&par);
   if (!(u = get_user_by_handle(userlist, handle))) 
     dprintf(idx, "No such user.\n");
-  else if (!(atr & USER_MASTER) && !u->bot)
-    dprintf(idx, "You can't change passwords for non-bots.\n");
+  else if (u->bot)
+    dprintf(idx, "Bots do not have passwords.\n");
   else if (u->bot && !(atr & USER_OWNER))
     dprintf(idx, "You can't change a bot's password.\n");
   else if (!whois_access(dcc[idx].user, u))

@@ -58,6 +58,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_chanset not displaying ALL invalid channel flags, although, there are still *many* errors like with with the chanset code. (#136)
 * Perm owners may no longer change their handle via cmd_handle or cmd_chhandle. (#107)
   (A user may change to a perm-owner handle though in a situation where the list changes in binary)
+* Disabled ability to cmd_chpass a bot. (#42)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

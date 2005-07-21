@@ -639,6 +639,8 @@ See: chhandle
    join the party line, etc. If the newpassword is 'rand', a random password
    will be used.
  
+   This has no affect on bots.
+ 
 See also: chhandle%{+n}, chsecpass%{-}
 :hub:chsecpass:
 ###  $bchsecpass$b <handle> [newpassword|rand]
