@@ -1082,7 +1082,10 @@ static void cmd_chhandle(int idx, char *par)
   for (size_t i = 0; i < strlen(newhand); i++)
     if ((newhand[i] <= 32) || (newhand[i] >= 127) || (newhand[i] == '@'))
       newhand[i] = '?';
-  if (strchr(BADHANDCHARS, newhand[0]) != NULL)
+  if (isowner(hand)) {
+    dprintf(idx, "Sorry, perm owners may not change their handle without recompiling binaries.\n");
+    return;
+  } else if (strchr(BADHANDCHARS, newhand[0]) != NULL)
     dprintf(idx, "Bizarre quantum forces prevent nicknames from starting with '%c'.\n", newhand[0]);
   else if (get_user_by_handle(userlist, newhand) && egg_strcasecmp(hand, newhand))
     dprintf(idx, "Somebody is already using %s.\n", newhand);
@@ -1130,7 +1133,10 @@ static void cmd_handle(int idx, char *par)
   for (size_t i = 0; i < strlen(newhandle); i++)
     if ((newhandle[i] <= 32) || (newhandle[i] >= 127) || (newhandle[i] == '@'))
       newhandle[i] = '?';
-  if (strchr(BADHANDCHARS, newhandle[0]) != NULL) {
+  if (isowner(dcc[idx].nick)) {
+    dprintf(idx, "Sorry, perm owners may not change their handle without recompiling binaries.\n");
+    return;
+  } else if (strchr(BADHANDCHARS, newhandle[0]) != NULL) {
     dprintf(idx, "Bizarre quantum forces prevent handle from starting with '%c'.\n",
 	    newhandle[0]);
   } else if (get_user_by_handle(userlist, newhandle) &&

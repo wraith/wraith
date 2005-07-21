@@ -617,6 +617,8 @@ See also: whois
    Changes the handle of a user. For example, to change the handle of user
    'gavroche' to 'jamie', you would use 'chhandle gavroche jamie'.
  
+   Perm owners may not change their handle without recompiling binaries first. 
+ 
 See also: chpass%{+n}, chsecpass%{-}
 ::chinfo
 ###  $bchinfo$b <user> [channel] [info-line/none]
@@ -1000,6 +1002,7 @@ See also: console, channels%{+m}, status%{-}
    bot will know you as from this point forward. It is used to log into the
    bot.
  
+   Perm owners may not change their handle without recompiling binaries first. 
 See also: newpass%{+mi}, chhand, chpass%{-}%{+n}, chsecpass%{-}
 ::help:
 ###  $bhelp$b [cmd]

@@ -56,6 +56,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_slowjoin (#129)
 * Automatic host adding by localhubs now sanity checks if the hosts will conflict with other bots/users. (#137)
 * Fixed cmd_chanset not displaying ALL invalid channel flags, although, there are still *many* errors like with with the chanset code. (#136)
+* Perm owners may no longer change their handle via cmd_handle or cmd_chhandle. (#107)
+  (A user may change to a perm-owner handle though in a situation where the list changes in binary)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
