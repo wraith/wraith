@@ -1144,21 +1144,15 @@ void check_hostmask()
 
   /* dont add the host if it conflicts with another in the userlist */
   struct userrec *u = NULL;
-  struct list_type *q = NULL;
-
-  for (u = userlist; u; u = u->next) {
-    q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
-    for (; q; q = q->next) {
-      if (wild_match(s, q->extra) || wild_match(q->extra, s)) {
-        if (u != conf.bot->u) {
-          putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
-          sdprintf("I am %s, they are: %s, (%X vs %X)", conf.bot->u->handle, u->handle, conf.bot->u, u);
-        } else
-          sdprintf("Already have hostmask '%s' added for myself", s);
-        return;
-      }
-    }
+  if ((u = host_conflicts(s))) {
+    if (u != conf.bot->u) {
+      putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
+      sdprintf("I am %s, they are: %s, (%X vs %X)", conf.bot->u->handle, u->handle, conf.bot->u, u);
+    } else
+      sdprintf("Already have hostmask '%s' added for myself", s);
+    return;
   }
+
   addhost_by_handle(conf.bot->nick, s);
 
   putlog(LOG_GETIN, "*", "Updated my hostmask: %s", s);

@@ -54,6 +54,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Removed cmd line param '-s'; Tracing bot on startup will always make the bot die right away.
 * Trace detection cannot be set to 'ignore', lowest setting is now: 'die'
 * Fixed cmd_slowjoin (#129)
+* Automatic host adding by localhubs now sanity checks if the hosts will conflict with other bots/users. (#137)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

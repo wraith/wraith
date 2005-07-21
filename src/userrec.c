@@ -60,6 +60,21 @@ static struct userrec *check_dcclist_hand(char *handle)
   return NULL;
 }
 
+struct userrec *host_conflicts(char *host)
+{
+  struct userrec *u = NULL;
+  struct list_type *q = NULL;
+
+  for (u = userlist; u; u = u->next) {
+    for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, u); q; q = q->next) {
+      if (wild_match(host, q->extra) || wild_match(q->extra, host))
+        return u;
+    }
+  }
+
+  return NULL;
+}
+
 struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
 {
   if (!handle)
