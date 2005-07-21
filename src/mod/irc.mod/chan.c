@@ -1659,10 +1659,12 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   /* Store the userhost */
   if (!m->userhost[0])
     simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
-  if (doresolv(chan) && is_dotted_ip(host))
-    simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
-  else
-    resolve_to_member(chan, nick, host);
+  if (doresolv(chan)) {
+    if (is_dotted_ip(host))
+      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
+    else
+      resolve_to_member(chan, nick, host);
+  }
 
   simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
 
