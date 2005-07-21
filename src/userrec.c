@@ -206,7 +206,7 @@ struct userrec *get_user_by_host(char *host)
 
   struct userrec *u = NULL;
   struct list_type *q = NULL;
-  int cnt = 0, i, fcidr = 0;
+  int cnt = 0, i;
   char host2[UHOSTLEN] = "", *p = NULL;
   bool do_cidr = 0;
 
@@ -222,12 +222,11 @@ struct userrec *get_user_by_host(char *host)
     q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
     for (; q; q = q->next) {
       if (do_cidr) {
-        fcidr = match_cidr(q->extra, host);
-      }
-
-      if (fcidr) {
-        ret = u;
-        break;
+        i = match_cidr(q->extra, host);
+        if (i > cnt) {
+          ret = u;
+          cnt = i;
+        }
       }
 
       i = wild_match(q->extra, host);
@@ -236,8 +235,6 @@ struct userrec *get_user_by_host(char *host)
 	cnt = i;
       }
     }
-    if (fcidr)
-      break;
   }
   if (ret != NULL) {
     lastuser = ret;

@@ -221,7 +221,7 @@ comp_with_mask(void *addr, void *dest, unsigned int mask)
 /* match_cidr()
  *
  * Input - mask, address
- * Ouput - 1 = Matched 0 = Did not match
+ * Ouput - + = Matched 0 = Did not match
  */
 
 int
@@ -229,7 +229,7 @@ match_cidr(const char *s1, const char *s2)
 {
   sockname_t ipaddr, maskaddr;
   char address[NICKLEN + UHOSTLEN + 6] = "", mask[NICKLEN + UHOSTLEN + 6] = "", *ipmask = NULL, *ip = NULL, *len = NULL;
-  int cidrlen, aftype;
+  int cidrlen = 0, aftype = 0, ret = 0;
 
   egg_bzero(&ipaddr, sizeof(ipaddr));
   egg_bzero(&maskaddr, sizeof(maskaddr));
@@ -269,14 +269,14 @@ match_cidr(const char *s1, const char *s2)
     inet_pton(aftype, ip, &ipaddr.u.ipv6.sin6_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv6.sin6_addr);
     if (comp_with_mask(&ipaddr.u.ipv6.sin6_addr.s6_addr, &maskaddr.u.ipv6.sin6_addr.s6_addr, cidrlen) && 
-       wild_match(mask, address))
-      return 1;
+       ((ret = wild_match(mask, address))))
+      return ret;
   } else if (aftype == AF_INET) {
     inet_pton(aftype, ip, &ipaddr.u.ipv4.sin_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv4.sin_addr);
     if (comp_with_mask(&ipaddr.u.ipv4.sin_addr.s_addr, &maskaddr.u.ipv4.sin_addr.s_addr, cidrlen) && 
-       wild_match(mask, address))
-      return 1;
+       ((ret = wild_match(mask, address))))
+      return ret;
   }
   return 0;
 }
