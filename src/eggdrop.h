@@ -43,6 +43,8 @@
 #define MAX_BOTS     500
 #define SERVLEN      60
 
+#define RESULT_LEN 	1024
+
 /*
  *     The 'configure' script should make this next part automatic,
  *     so you shouldn't need to adjust anything below.

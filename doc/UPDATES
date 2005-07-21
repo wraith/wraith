@@ -55,6 +55,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Trace detection cannot be set to 'ignore', lowest setting is now: 'die'
 * Fixed cmd_slowjoin (#129)
 * Automatic host adding by localhubs now sanity checks if the hosts will conflict with other bots/users. (#137)
+* Fixed cmd_chanset not displaying ALL invalid channel flags, although, there are still *many* errors like with with the chanset code. (#136)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

@@ -223,7 +223,7 @@ static void got_cjoin(char *botnick, char *code, char *par)
   if (chan)
     return;
 sdprintf("OPTIONS: %s", options);
-  char result[1024] = "";
+  char result[RESULT_LEN] = "";
 
   if (channel_add(result, chname, options) == ERROR) /* drummer */
     putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s: %s", botnick, chname, result);

@@ -694,7 +694,7 @@ int readuserfile(const char *file, struct userrec **ret)
         } else if (!strcmp(code, "+")) {	/* add channel record */
          if (s[0] && lasthand[0] == '*' && lasthand[1] == CHANS_NAME[1]) {
            char *options = NULL, *chan = NULL, *my_ptr = NULL;
-           char resultbuf[2048] = "";
+           char resultbuf[RESULT_LEN] = "";
 
            options = my_ptr = strdup(s);
 
