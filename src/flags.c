@@ -570,7 +570,7 @@ whois_access(struct userrec *user, struct userrec *whois_user)
   get_user_flagrec(whois_user, &whois, NULL);
 
   if (
-      (isowner(user->handle) && !isowner(whois_user->handle)) ||
+      (isowner(whois_user->handle) && !isowner(user->handle)) ||
       (glob_admin(whois) && !glob_admin(fr)) || 
       (glob_owner(whois) && !glob_owner(fr)) ||
       (glob_master(whois) && !glob_master(fr)) ||
