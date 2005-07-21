@@ -59,6 +59,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Perm owners may no longer change their handle via cmd_handle or cmd_chhandle. (#107)
   (A user may change to a perm-owner handle though in a situation where the list changes in binary)
 * Disabled ability to cmd_chpass a bot. (#42)
+* Fixed hubs sharing out channels that were 'slowparted'. (#93)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.

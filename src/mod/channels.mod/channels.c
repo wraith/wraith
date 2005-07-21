@@ -344,8 +344,7 @@ check_slowjoinpart(struct chanset_t *chan)
   /* slowpart */
   if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
     chan->channel.parttime = 0;
-    if (!conf.bot->hub)
-      dprintf(DP_MODE, "PART %s\n", chan->name);
+    dprintf(DP_MODE, "PART %s\n", chan->name);
     if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
       remove_channel(chan);
     return 1;		/* if we keep looping, we'll segfault. */
@@ -353,7 +352,7 @@ check_slowjoinpart(struct chanset_t *chan)
   } else if ((chan->channel.jointime) && (chan->channel.jointime < now)) {
       chan->status &= ~CHAN_INACTIVE;
       chan->channel.jointime = 0;
-    if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan) && !channel_joining(chan)) {
+    if (shouldjoin(chan) && !channel_active(chan) && !channel_joining(chan)) {
       dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
       chan->status |= CHAN_JOINING;
     }
@@ -388,7 +387,7 @@ channels_timers()
 
     if ((cnt % 10) == 0) {
       /* 10 seconds */
-      if (check_slowjoinpart(chan))	/* if 1 is returned, chan was removed. */
+      if (!conf.bot->hub && check_slowjoinpart(chan))	/* if 1 is returned, chan was removed. */
         continue;
     }
     if ((cnt % 60) == 0) {
@@ -407,16 +406,26 @@ static void got_sj(int idx, char *code, char *par)
 {
   struct chanset_t *chan = findchan_by_dname(newsplit(&par));
 
-  if (chan)
-    chan->channel.jointime = ((atoi(par) + now) - server_lag);
+  if (chan) {
+    if (conf.bot->hub) {
+      remove_channel(chan);
+      write_userfile(-1);
+    } else
+      chan->channel.jointime = ((atoi(par) + now) - server_lag);
+  }
 }
 
 static void got_sp(int idx, char *code, char *par) 
 {
   struct chanset_t *chan = findchan_by_dname(newsplit(&par));
 
-  if (chan)
-    chan->channel.parttime = ((atoi(par) + now) - server_lag);
+  if (chan) {
+    if (conf.bot->hub) {
+      chan->status &= ~CHAN_INACTIVE;
+      write_userfile(-1);
+    } else
+      chan->channel.parttime = ((atoi(par) + now) - server_lag);
+  }
 }
 
 #ifdef no
