@@ -2309,7 +2309,7 @@ static void cmd_chattr(int idx, char *par)
       free(tmpchg);
     return;
   }
-    if (chan && privchan(user, chan, PRIV_OP)) {
+    if (chan && (privchan(user, chan, PRIV_OP) || (channel_privchan(chan) && !(chan_master(user) || glob_owner(user))))) {
       dprintf(idx, "You do not have access to change flags for %s\n", chan->dname);
       if (tmpchg)
         free(tmpchg);

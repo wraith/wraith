@@ -61,6 +61,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
   (A user may change to a perm-owner handle though in a situation where the list changes in binary)
 * Disabled ability to cmd_chpass a bot. (#42)
 * Fixed hubs sharing out channels that were 'slowparted'. (#93)
+* Fixed m|o being able to chattr a user for a +private channel. (#98)
 
 1.2.4
 * Fixed cmd_botset not displaying botnick.
