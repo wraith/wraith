@@ -549,12 +549,12 @@ static void cmd_slowjoin(int idx, char *par)
     if (ubot) {
       /* Variation: 60 secs intvl should be 60 +/- 15 */
       if (bot_hublevel(ubot) < 999) {
-	simple_sprintf(tmp, "sj %s 0\n", chan->dname);
+	simple_sprintf(tmp, "sj %s 0", chan->dname);
       } else {
 	int v = (random() % (intvl / 2)) - (intvl / 4);
 
 	delay += intvl;
-	simple_sprintf(tmp, "sj %s %i\n", chan->dname, delay + v);
+	simple_sprintf(tmp, "sj %s %i", chan->dname, delay + v);
 	count++;
       }
       putbot(ubot->handle, tmp);
@@ -612,12 +612,12 @@ static void cmd_slowpart(int idx, char *par)
       /* Variation: 60 secs intvl should be 60 +/- 15 */
       if (ubot) {
         if (bot_hublevel(ubot) < 999) {
-  	  simple_sprintf(tmp, "sp %s 0\n", chname);
+  	  simple_sprintf(tmp, "sp %s 0", chname);
         } else {
   	  int v = (random() % (intvl / 2)) - (intvl / 4);
 
   	  delay += intvl;
-  	  simple_sprintf(tmp, "sp %s %i\n", chname, delay + v);
+  	  simple_sprintf(tmp, "sp %s %i", chname, delay + v);
   	  count++;
         }
         putbot(ubot->handle, tmp);

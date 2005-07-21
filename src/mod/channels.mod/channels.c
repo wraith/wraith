@@ -227,10 +227,8 @@ sdprintf("OPTIONS: %s", options);
 
   if (channel_add(result, chname, options) == ERROR) /* drummer */
     putlog(LOG_BOTS, "@", "Invalid channel or channel options from %s for %s: %s", botnick, chname, result);
-  else { 
-    if (conf.bot->hub)
-      write_userfile(-1);
-  }
+  if (conf.bot->hub)
+    write_userfile(-1);
   if (!match && !conf.bot->hub)
     free(options);
 }
@@ -356,7 +354,7 @@ check_slowjoinpart(struct chanset_t *chan)
       chan->status &= ~CHAN_INACTIVE;
       chan->channel.jointime = 0;
     if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan) && !channel_joining(chan)) {
-      dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
+      dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
       chan->status |= CHAN_JOINING;
     }
   } else if (channel_closed(chan)) {
