@@ -99,7 +99,6 @@ int do_confedit = 0;		/* show conf menu if -C */
 static char do_killbot[21] = "";
 static int kill_sig;
 static char *update_bin = NULL;
-bool checktrace = 1;		/* Check for trace when starting up? */
 char *socksfile = NULL;
 
 static char *getfullbinname(const char *argv_zero)
@@ -274,7 +273,7 @@ static void show_help()
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:stu:U:v")
+#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:tu:U:v")
 #define FLAGS_CHECKPASS STR("cCdDeEhknrtuUv")
 static void dtx_arg(int argc, char *argv[])
 {
@@ -330,9 +329,6 @@ static void dtx_arg(int argc, char *argv[])
       case 'n':
 	backgrd = 0;
 	break;
-      case 's':
-        checktrace = 0;
-        break;
       case 't':
         term_z = 1;
         break;
@@ -638,6 +634,12 @@ int main(int argc, char **argv)
 {
   egg_timeval_t egg_timeval_now;
 
+#ifndef DEBUG
+#ifndef CYGWIN_HACKS
+  check_trace(1);
+#endif /* !CYGWIN_HACKS */
+#endif
+
   /* Initialize variables and stuff */
   timer_update_now(&egg_timeval_now);
   now = egg_timeval_now.sec;
@@ -715,11 +717,6 @@ printf("out: %s\n", out);
   }
 
   sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", myuid, getuid(), getppid(), mypid);
-
-#ifndef CYGWIN_HACKS
-  if (checktrace)
-    check_trace(1);
-#endif /* !CYGWIN_HACKS */
 
   /* Check and load conf file */
   startup_checks(0);
