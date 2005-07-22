@@ -631,11 +631,11 @@ AC_TRY_COMPILE(,[
 dnl found windows.h using -mwin32
 AC_MSG_RESULT([found via -mwin32])
 ac_compile="$ac_compile_save"
-CXX="$save_CC"
+CXX="$save_CXX"
 WIN32FLAGS="-mwin32"
 ], [
 ac_compile="$ac_compile_save"
-CXX="$save_CC"
+CXX="$save_CXX"
 AC_MSG_RESULT([not found])
 ])
 ])
