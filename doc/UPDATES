@@ -11,6 +11,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
 
+1.2.6
+
 1.2.5
 * Fixed a segfault/cpu-spin with mode parsing. (#25)
 * Fixed a segfault/cpu-spin during WHO parsing, although, it could have occurred at any time. (#110)
