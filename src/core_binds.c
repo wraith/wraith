@@ -41,29 +41,36 @@ void core_binds_init()
 
 bool check_aliases(int idx, const char *cmd, const char *args)
 {
-  char *a = NULL, *p = NULL, *aliasp = NULL, *aliasdup = NULL;
+  char *a = NULL, *p = NULL, *aliasp = NULL, *aliasdup = NULL, *argsp = NULL, *argsdup = NULL;
   bool found = 0;
 
   aliasp = aliasdup = strdup(alias);
+  argsp = argsdup = strdup(args);
 
-  while ((a = strsep(&aliasdup, ","))) {
-    p = newsplit(&a);
-    if (!egg_strcasecmp(p, cmd)) {
-      p = newsplit(&a);
+  while ((a = strsep(&aliasdup, ","))) { //a = entire alias "alias cmd params"
+    p = newsplit(&a);   //p = alias cmd //a = rcmd params
+    if (!egg_strcasecmp(p, cmd)) { //a match on the cmd we were given!
+      p = newsplit(&a); //p = rcmd //a = params
 
       if (!egg_strcasecmp(cmd, p)) {
         putlog(LOG_WARN, "*", "Loop detected in alias '%s'", p);
+        free(argsp);
         return 0;
       }
 
-      char *myargs = NULL;
+      char *myargs = NULL, *pass = NULL;
       size_t size = 0;
 
       found = 1;
 
-      size = strlen(a) + 1 + strlen(args) + 1;
+      size = strlen(a) + 1 + strlen(argsdup) + 1 + 2;
       myargs = (char *) calloc(1, size);
-      simple_snprintf(myargs, size, "%s %s", a, args);        
+
+      if (has_cmd_pass(p)) {
+        pass = newsplit(&argsdup);
+        simple_snprintf(myargs, size, "%s %s %s", pass, a, argsdup);
+      } else
+        simple_snprintf(myargs, size, "%s %s", a, argsdup);
       check_bind_dcc(p, idx, myargs);
 
       if (myargs)
@@ -72,8 +79,8 @@ bool check_aliases(int idx, const char *cmd, const char *args)
     }
   }
 
-
   free(aliasp);
+  free(argsp);
 
   return found;
 }

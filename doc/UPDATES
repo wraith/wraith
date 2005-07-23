@@ -17,6 +17,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Disabled debug contexts as they were useless.
 * Fixed many channel cmds blocking access due to +botbitch. (#141)
 * Now using g++3.3[.6] as g++3.4 was causing spontaneous SEGFAULTS(see cpu-spin bug) on FreeBSD.
+* Fixed aliases not properly using cmdpass given. (#140)
 
 1.2.5
 * Fixed a segfault/cpu-spin with mode parsing. (#25)
