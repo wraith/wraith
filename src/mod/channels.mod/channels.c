@@ -408,7 +408,7 @@ static void got_sj(int idx, char *code, char *par)
 
   if (chan) {
     if (conf.bot->hub) {
-      remove_channel(chan);
+      chan->status &= ~CHAN_INACTIVE;
       write_userfile(-1);
     } else
       chan->channel.jointime = ((atoi(par) + now) - server_lag);
@@ -421,7 +421,7 @@ static void got_sp(int idx, char *code, char *par)
 
   if (chan) {
     if (conf.bot->hub) {
-      chan->status &= ~CHAN_INACTIVE;
+      remove_channel(chan);
       write_userfile(-1);
     } else
       chan->channel.parttime = ((atoi(par) + now) - server_lag);

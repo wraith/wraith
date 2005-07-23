@@ -21,6 +21,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Changed display for when a user uses an alias over partyline. (#116)
 * Related to above change, invalid cmds are logged in a different order now for users.
 * Fixed cloak-script not updating correctly.
+* Some fixes to slowjoin/slowpart were mixed up, fixed.
 
 1.2.5
 * Fixed a segfault/cpu-spin with mode parsing. (#25)
