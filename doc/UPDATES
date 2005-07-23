@@ -15,6 +15,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * (REVERTED FROM 1.2.3) Disabled all memory allocations after a segfault (Fixes CPU spinning)
   -This actually CAUSED cpu-spins after segfaults.
 * Disabled debug contexts as they were useless.
+* Fixed many channel cmds blocking access due to +botbitch. (#141)
 
 1.2.5
 * Fixed a segfault/cpu-spin with mode parsing. (#25)
