@@ -18,6 +18,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed many channel cmds blocking access due to +botbitch. (#141)
 * Now using g++3.3[.6] as g++3.4 was causing spontaneous SEGFAULTS(see cpu-spin bug) on FreeBSD.
 * Fixed aliases not properly using cmdpass given. (#140)
+* Changed display for when a user uses an alias over partyline. (#116)
+* Related to above change, invalid cmds are logged in a different order now for users.
 
 1.2.5
 * Fixed a segfault/cpu-spin with mode parsing. (#25)

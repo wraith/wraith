@@ -71,6 +71,7 @@ bool check_aliases(int idx, const char *cmd, const char *args)
         simple_snprintf(myargs, size, "%s %s %s", pass, a, argsdup);
       } else
         simple_snprintf(myargs, size, "%s %s", a, argsdup);
+      putlog(LOG_CMDS, "*", "@ #%s# [%s -> %s %s] ...", dcc[idx].nick, cmd, p, a);
       check_bind_dcc(p, idx, myargs);
 
       if (myargs)
@@ -141,18 +142,23 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
     if (!(entry->cflags & AUTH))
       return;
   }
+
   int hits = 0;
+  bool log_bad = 0;
 
   check_bind_hits(BT_dcc, cmd, &fr, &hits, idx, args);
 
   if (hits != 1)
-    putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
+    log_bad = 1;
 
   if (hits == 0) {
     if (!check_aliases(idx, cmd, args)) 
       dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
   } else if (hits > 1)
     dprintf(idx, "Ambiguous command.\n");
+
+  if (log_bad)
+    putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
 
   free(args);
 }
