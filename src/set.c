@@ -151,10 +151,12 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
     if (var->flags & VAR_CLOAK) {
       if (number == 0)
         number = randint(CLOAK_COUNT) + 1;
-      scriptchanged();
     }
 
     *(int *) (var->mem) = number;
+
+    if (var->flags & VAR_CLOAK)
+      scriptchanged();
   } else if (var->flags & VAR_BOOL) {
     if (data && str_isdigit(data)) {
       int num = atoi(data);
