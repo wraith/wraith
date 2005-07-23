@@ -10,7 +10,7 @@
  * WARNING: DO NOT send in bug reports if you undefine this!
  */
 
-#define DEBUG_CONTEXT
+#undef DEBUG_CONTEXT
 
 /*
  *    Handy aliases for memory tracking and core dumps
