@@ -154,6 +154,8 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   if (hits == 0) {
     if (!check_aliases(idx, cmd, args)) 
       dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
+    else
+      log_bad = 0;
   } else if (hits > 1)
     dprintf(idx, "Ambiguous command.\n");
 

@@ -11,6 +11,9 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
 
+1.2.7
+* Forgot 'log_bad = 0;' to fix the '!' showing up for aliases.
+
 1.2.6
 * (REVERTED FROM 1.2.3) Disabled all memory allocations after a segfault (Fixes CPU spinning)
   -This actually CAUSED cpu-spins after segfaults.
