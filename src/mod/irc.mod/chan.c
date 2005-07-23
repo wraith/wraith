@@ -2819,7 +2819,9 @@ static int gotquit(char *from, char *msg)
   else
     irc_log(NULL, "[%s] Quits %s (%s)", samechans(nick, ","), nick, from);
 
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
+  struct chanset_t *chan = NULL;
+
+  for (chan = chanset; chan; chan = chan->next) {
     oldchan = chan;
     chname = chan->dname;
     m = ismember(chan, nick);
