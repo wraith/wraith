@@ -30,26 +30,20 @@ strdup(const char *entry)
 
 void *my_calloc(size_t nmemb, size_t size)
 {
-  if (segfaulted)
-    return NULL;
-
   void *ptr = calloc(nmemb, size);
 
   if (ptr == NULL)
-    fatal("Cannot allocate memory", 0);
+    exit(5);
   
   return ptr;
 }
 
 void *my_realloc(void *ptr, size_t size)
 {
-  if (segfaulted)
-    return NULL;
-
   void *x = realloc(ptr, size);
 
   if (x == NULL && size > 0)
-    fatal("Cannot allocate memory", 0);
+    exit(5);
 
   return x;
 }
