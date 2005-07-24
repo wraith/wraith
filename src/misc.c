@@ -1251,6 +1251,9 @@ char *trim(char *string)
 int skipline (char *line, int *skip) {
   static int multi = 0;
 
+  if (strstr(line, "*/"))
+    multi = 0;
+
   if ( (!strncmp(line, "#", 1)) || (!strncmp(line, ";", 1)) || (!strncmp(line, "//", 2)) ) {
     (*skip)++;
   } else if ( (strstr(line, "/*")) && (strstr(line, "*/")) ) {
