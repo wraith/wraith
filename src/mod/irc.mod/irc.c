@@ -1134,6 +1134,7 @@ reset_chan_info(struct chanset_t *chan)
     else
       dprintf(DP_MODE, "WHO %s\n", chan->name);
     /* clear_channel nuked the data...so */
+    dprintf(DP_MODE, "TOPIC %s\n", chan->name);
   }
 }
 
