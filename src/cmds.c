@@ -1165,18 +1165,15 @@ static void cmd_chpass(int idx, char *par)
     return;
   }
   char *handle = NULL;
-  int atr = dcc[idx].user ? dcc[idx].user->flags : 0;
   struct userrec *u = NULL;
 
   handle = newsplit(&par);
   if (!(u = get_user_by_handle(userlist, handle))) 
     dprintf(idx, "No such user.\n");
-  else if (u->bot)
-    dprintf(idx, "Bots do not have passwords.\n");
-  else if (u->bot && !(atr & USER_OWNER))
-    dprintf(idx, "You can't change a bot's password.\n");
   else if (!whois_access(dcc[idx].user, u))
     dprintf(idx, "No such user.\n");
+  else if (u->bot)
+    dprintf(idx, "Bots do not have passwords.\n");
   else if (!par[0]) {
     putlog(LOG_CMDS, "*", "#%s# chpass %s [nothing]", dcc[idx].nick, handle);
     set_user(&USERENTRY_PASS, u, NULL);
@@ -1217,20 +1214,20 @@ static void cmd_chsecpass(int idx, char *par)
     return;
   }
   char *handle = NULL;
-  int atr = dcc[idx].user ? dcc[idx].user->flags : 0;
   struct userrec *u = NULL;
 
   handle = newsplit(&par);
   if (!(u = get_user_by_handle(userlist, handle))) 
     dprintf(idx, "No such user.\n");
-  else if (!(atr & USER_MASTER) && !u->bot)
-    dprintf(idx, "You can't change passwords for non-bots.\n");
-  else if (u->bot && !(atr & USER_OWNER))
-    dprintf(idx, "You can't change a bot's password.\n");
-  else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) && egg_strcasecmp(handle, dcc[idx].nick))
-    dprintf(idx, "You can't change a bot owner's secpass.\n");
-  else if (isowner(handle) && egg_strcasecmp(dcc[idx].nick, handle))
-    dprintf(idx, "You can't change a permanent bot owner's secpass.\n");
+  else if (!whois_access(dcc[idx].user, u))
+    dprintf(idx, "No such user.\n");
+  else if (u->bot)
+    dprintf(idx, "Bots do not have secpasses.\n");
+//  int atr = dcc[idx].user ? dcc[idx].user->flags : 0;
+//  else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) && egg_strcasecmp(handle, dcc[idx].nick))
+//    dprintf(idx, "You can't change a bot owner's secpass.\n");
+//  else if (isowner(handle) && egg_strcasecmp(dcc[idx].nick, handle))
+//    dprintf(idx, "You can't change a permanent bot owner's secpass.\n");
   else if (!par[0]) {
     putlog(LOG_CMDS, "*", "#%s# chsecpass %s [nothing]", dcc[idx].nick, handle);
     set_user(&USERENTRY_SECPASS, u, NULL);

@@ -18,6 +18,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * (eggdrop1.6) Fixed bot not requesting topic after reseting channel.
 * Fixed hubs not updating NODENAME/OS/USERNAME, which broke updating on new nets.
 * Added var 'auth-chan' which allows disabling auth cmds in all channels.
+* Fixed being able to 'chsecpass' a bot.
+* Fixed cmd_chsecpass to use whois_access() (#120)
 
 1.2.6
 * (REVERTED FROM 1.2.3) Disabled all memory allocations after a segfault (Fixes CPU spinning)
