@@ -639,9 +639,13 @@ int deluser(char *handle)
     prev->next = u->next;
   if (!noshare && (handle[0] != '*'))
     shareout("k %s\n", handle);
-  for (fnd = 0; fnd < dcc_total; fnd++)
-    if (dcc[fnd].type && dcc[fnd].user == u)
-      dcc[fnd].user = NULL;	/* Clear any dcc users for this entry null is safe-ish */
+  for (fnd = 0; fnd < dcc_total; fnd++) {
+    if (dcc[fnd].type && dcc[fnd].user == u) {
+      dprintf(fnd, "-+- POOF! -+-\n");
+      dprintf(fnd, "You are no longer a user on this botnet.\n");
+      do_boot(fnd, conf.bot->nick, "User removed.");
+    }
+  }
   clear_chanlist();
   freeuser(u);
   lastuser = NULL;
