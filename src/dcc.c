@@ -254,8 +254,11 @@ bot_version(int idx, char *par)
     putlog(LOG_BOTS, "*", DCC_LINKED, dcc[idx].nick);
     chatout("*** Linked to %s\n", dcc[idx].nick);
 
-    if (bot_hublevel(dcc[idx].user) < 999)
+    if (bot_hublevel(dcc[idx].user) < 999) {
+      if (!bot_aggressive_to(dcc[idx].user))    //not aggressive, so they are technically my uplink.
+        uplink_idx = idx;
       dcc[idx].hub = 1;
+    }
 
     botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vversion);
   } else {

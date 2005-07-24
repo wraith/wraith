@@ -16,6 +16,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * When a user is removed and is on partyline, they are now booted. (#142)
 * Booting a su'd user now returns the user to their original connection. (Problem when removing +i)
 * (eggdrop1.6) Fixed bot not requesting topic after reseting channel.
+* Fixed hubs not updating NODENAME/OS/USERNAME, which broke updating on new nets.
 
 1.2.6
 * (REVERTED FROM 1.2.3) Disabled all memory allocations after a segfault (Fixes CPU spinning)
