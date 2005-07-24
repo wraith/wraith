@@ -3004,26 +3004,26 @@ static int gotmsg(char *from, char *msg)
     
     if (!(chan = findchan(realto)))
       return 0;
-    my_msg = my_ptr = strdup(msg);
+    if (auth_chan) {
+      my_msg = my_ptr = strdup(msg);
+      fword = newsplit(&my_msg);		/* take out first word */
+      /* the first word is a wildcard match to our nick. */
+      botmatch = wild_match(fword, botname);
+      if (botmatch && strcmp(fword, "*"))	
+        fword = newsplit(&my_msg);	/* now this will be the command */
+      /* is it a cmd? */
+      if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != auth_prefix[0]) || (fword[0] == auth_prefix[0]))) {
+        Auth *auth = Auth::Find(uhost);
 
-    fword = newsplit(&my_msg);		/* take out first word */
-    
-    /* the first word is a wildcard match to our nick. */
-    botmatch = wild_match(fword, botname);
-    if (botmatch && strcmp(fword, "*"))	
-      fword = newsplit(&my_msg);	/* now this will be the command */
-    /* is it a cmd? */
-    if (fword && fword[0] && fword[1] && ((botmatch && fword[0] != auth_prefix[0]) || (fword[0] == auth_prefix[0]))) {
-      Auth *auth = Auth::Find(uhost);
-
-      if (auth && auth->Authed()) {
-        if (fword[0] == auth_prefix[0])
-          fword++;
-        auth->atime = now;
-        check_bind_authc(fword, auth, chan->dname, my_msg);
+        if (auth && auth->Authed()) {
+          if (fword[0] == auth_prefix[0])
+            fword++;
+          auth->atime = now;
+          check_bind_authc(fword, auth, chan->dname, my_msg);
+        }
       }
+      free(my_ptr);
     }
-    free(my_ptr);
     irc_log(chan, "%s<%s> %s", to[0] == '@' ? "@" : "", nick, msg);
     update_idle(chan->dname, nick);
   }

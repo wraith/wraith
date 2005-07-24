@@ -1509,6 +1509,7 @@ See also: reload, backup
 [S]  $bchanset$b         List of default options for when a channel is added. Same format 
                           as 'chanset'.
 [N]  $bserver-port$b     Default port to use for server connections.
+[B]  $bauth-chan$b       Allows disabling auth channel cmds for all channels.
 [S]  $bauth-key$b        The authkey used during authing.G ive to users if they need to auth. 
                           (can be bot specific)
 [C]  $bauth-prefix$b     The prefix character used for msg cmds, ie: $u!$uop or $u.$uop

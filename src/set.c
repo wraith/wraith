@@ -21,6 +21,7 @@
 int set_noshare = 0;
 int dcc_autoaway = 1800;
 bool auth_obscure = 0;
+bool auth_chan = 1;
 char alias[1024] = "bc botcmd,bl botcmd ?,+list set +,-list set -,list set list";
 char auth_key[51] = "";
 char auth_prefix[2] = "";
@@ -51,6 +52,7 @@ bool manop_warn = 1;
 
 static variable_t vars[] = {
  {"alias",		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM, NULL, NULL},
+ {"auth-chan",		&auth_chan,		0,				VAR_INT|VAR_BOOL|VAR_NOLHUB, NULL, NULL},
  {"auth-key",		auth_key,		sizeof(auth_key),		VAR_STRING|VAR_PERM, NULL, NULL},
  {"auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM, NULL, NULL},
  {"auth-obscure",	&auth_obscure,		0,				VAR_INT|VAR_BOOL, NULL, NULL},
