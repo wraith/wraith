@@ -224,7 +224,7 @@ readcfg(const char *cfgfile)
       if (strchr(buffer, '<') || strchr(buffer, '>')) {
         printf(" Failed\n");
         printf("%s:%d: error: Look at your configuration file again...\n", cfgfile, line);
-        exit(1);
+//        exit(1);
       }
       p = strchr(buffer, ' ');
       while (p && (strchr(LISTSEPERATORS, p[0])))
