@@ -802,7 +802,20 @@ do_boot(int idx, char *by, char *reason)
       botnet_send_part_idx(idx, x);
   }
   check_bind_chof(dcc[idx].nick, idx);
-  if ((dcc[idx].sock != STDOUT) || backgrd) {
+
+  if (dcc[idx].u.chat->su_nick) {
+    dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
+    strcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick);
+    dcc[idx].type = &DCC_CHAT;
+    dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);
+    free(dcc[idx].u.chat->su_nick);
+    dcc[idx].u.chat->su_nick = NULL;
+    dcc_chatter(idx);
+
+    if (dcc[idx].u.chat->channel < GLOBAL_CHANS && dcc[idx].u.chat->channel >= 0) {
+      botnet_send_join_idx(idx);
+    }
+  } else if ((dcc[idx].sock != STDOUT) || backgrd) {
     killsock(dcc[idx].sock);
     lostdcc(idx);
     /* Entry must remain in the table so it can be logged by the caller */
