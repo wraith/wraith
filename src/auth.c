@@ -195,24 +195,27 @@ void Auth::InitTimer()
 
 bool Auth::GetIdx(const char *chname)
 {
+sdprintf("GETIDX: auth: %s, idx: %d", nick, idx);
   if (idx != -1) {
-    strlcpy(dcc[idx].simulbot, chname ? chname : nick, NICKLEN);
-    strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", 81);
-    return 1;
+    if (!valid_idx(idx))
+      idx = -1;
+    else {
+      sdprintf("FIRST FOUND: %d", idx);
+      strlcpy(dcc[idx].simulbot, chname ? chname : nick, NICKLEN);
+      strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", 81);
+      return 1;
+    }
   }
 
-  int i = -1;
+  int i = 0;
 
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].irc &&
-    (((chname && chname[0]) && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, handle)) ||
-    (!(chname && chname[0]) && !strcmp(dcc[i].simulbot, nick)))) {
+       (((chname && chname[0]) && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, handle)) ||
+       (!(chname && chname[0]) && !strcmp(dcc[i].simulbot, nick)))) {
       putlog(LOG_DEBUG, "*", "Simul found old idx for %s/%s: (%s!%s)", nick, chname, nick, host);
       dcc[i].simultime = now;
       idx = i;
-// FIXME: THIS NEEDS TO BE UPDATED FOR CLASS
-//      dcc[idx].auth = authi;
-
       strlcpy(dcc[idx].simulbot, chname ? chname : nick, NICKLEN);
       strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", 81);
 
@@ -220,9 +223,10 @@ bool Auth::GetIdx(const char *chname)
     }
   }
 
-  if (idx == -1) {
-    idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
-    dcc[idx].sock = serv;
+  idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
+
+  if (idx != -1) {
+    dcc[idx].sock = -1;
     dcc[idx].timeval = now;
     dcc[idx].irc = 1;
     dcc[idx].simultime = now;
@@ -236,8 +240,6 @@ bool Auth::GetIdx(const char *chname)
     strlcpy(dcc[idx].host, host, UHOSTLEN);
     dcc[idx].addr = 0L;
     dcc[idx].user = user ? user : get_user_by_handle(userlist, handle);
-// FIXME: THIS NEEDS TO BE UPDATED FOR CLASS
-//    dcc[idx].auth = authi;
     return 1;
   }
 

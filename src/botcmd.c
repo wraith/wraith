@@ -1021,9 +1021,6 @@ static void bot_part(int idx, char *par)
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].simul >= 0 && !egg_strcasecmp(dcc[i].nick, nick)) {
         dcc[idx].simul = -1;
-// FIXME: THIS NEEDS TO BE UPDATED FOR CLASS
-//        if (dcc[idx].irc)
-//          auth[dcc[idx].auth].idx = -1;
         lostdcc(idx);
     }
   }
