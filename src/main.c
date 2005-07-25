@@ -506,6 +506,9 @@ static int washub = -1;
 
 static void core_minutely()
 {
+  //eat some zombies!
+  waitpid(-1, NULL, WNOHANG);
+
   if (!conf.bot->hub) {
     if (washub == -1)
       washub = conf.bot->hub;
