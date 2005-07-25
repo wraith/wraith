@@ -788,8 +788,8 @@ int updatebin(int idx, char *par, int secs)
   }
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
-  simple_snprintf(buf, sizeof(buf), STR("%s -2"), path);
 #ifndef CYGWIN_HACKS
+  simple_snprintf(buf, sizeof(buf), STR("%s -2"), path);
   putlog(LOG_DEBUG, "*", "Running for update binary test: %s", buf);
   i = system(buf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
@@ -801,8 +801,8 @@ int updatebin(int idx, char *par, int secs)
 #endif /* !CYGWIN_HACKS */
 
   /* now to send our config to the new binary */
-  simple_snprintf(buf, sizeof(buf), STR("%s -4 %s"), path, conffile->file);
 #ifndef CYGWIN_HACKS
+  simple_snprintf(buf, sizeof(buf), STR("%s -4 %s"), path, conffile->file);
   putlog(LOG_DEBUG, "*", "Running for update conf: %s", buf);
   i = system(buf);
   delete conffile;
