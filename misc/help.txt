@@ -253,8 +253,12 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
    Just using '&' for 'bot' will do the cmd on all localhub bots. (first bot in config).
  
    This cmd cannot be chained over the botnet, ie, no: .botcmd [bot] botcmd [bot2] ...
+
+   There are two default aliases added for this cmd:
+     bc -> botcmd
+     bl -> botcmd ?
  
-See also: bc, cmdpass
+See also: cmdpass
 ::botjoin
 ###  $bbotjoin$b <bot> <channel> [options]
     Adds a channel to the bot's channel list. If options are specified, the 
