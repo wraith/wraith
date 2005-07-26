@@ -643,6 +643,7 @@ static void cmd_stick_yn(int idx, char *par, int yn)
       egg_strcasecmp(stick_type, "ban")) {
     strlcpy(chname, s, sizeof chname);
     strlcpy(s, stick_type, sizeof s);
+    stick_type = "ban";
   }
   if (!s[0]) {
     dprintf(idx, "Usage: %sstick [ban/exempt/invite] <hostmask or number> [channel]\n", yn ? "" : "un");
