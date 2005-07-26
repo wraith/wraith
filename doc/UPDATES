@@ -21,6 +21,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed being able to 'chsecpass' a bot.
 * Fixed cmd_chsecpass to use whois_access() (#120)
 * Added code to eat zombie processes minutely (shouldn't interfere with anything)
+* Fixed ignores not being used. (#147) (Breaks a fix to not display msgs after added to ignore for floods)
 
 1.2.6
 * (REVERTED FROM 1.2.3) Disabled all memory allocations after a segfault (Fixes CPU spinning)
