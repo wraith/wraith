@@ -475,13 +475,15 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 //  bot->pid = checkpid(nick, bot);
 
   if (settings.hubs) {
-    char *p = settings.hubs, *p2 = NULL;
+    char *p = settings.hubs, *p2 = NULL, hubbuf[HANDLEN + 1] ="";
     size_t len = 0;
 
     while (p && *p) {
       if ((p2 = strchr(p, ' '))) {
+
         len = p2 - p;
-        if (!egg_strncasecmp(p, bot->nick, len)) {
+        simple_snprintf(hubbuf, len + 1, "%s", p);
+        if (!egg_strcasecmp(bot->nick, hubbuf)) {
           bot->hub = 1;
           break;
         }
