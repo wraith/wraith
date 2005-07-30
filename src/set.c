@@ -51,45 +51,45 @@ bool offensive_bans = 1;
 bool manop_warn = 1;
 
 static variable_t vars[] = {
- {"alias",		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM, NULL, NULL},
- {"auth-chan",		&auth_chan,		0,				VAR_INT|VAR_BOOL|VAR_NOLHUB, NULL, NULL},
- {"auth-key",		auth_key,		sizeof(auth_key),		VAR_STRING|VAR_PERM, NULL, NULL},
- {"auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM, NULL, NULL},
- {"auth-obscure",	&auth_obscure,		0,				VAR_INT|VAR_BOOL, NULL, NULL},
- {"dcc-autoaway",	&dcc_autoaway,		0,				VAR_INT|VAR_NOLOC, NULL, NULL},	
- {"bad-process",	&badprocess,		0,				VAR_INT|VAR_DETECTED, NULL, NULL},
- {"dccauth",		&dccauth,		0,				VAR_INT|VAR_BOOL, NULL, NULL},
- {"chanset",		glob_chanset,		sizeof(glob_chanset),		VAR_STRING|VAR_CHANSET|VAR_NOLHUB, NULL, NULL},
- {"cloak-script",	&cloak_script,		0,				VAR_INT|VAR_CLOAK|VAR_NOLHUB, NULL, NULL},
- {"close-threshold",	&close_threshold,	0,				VAR_RATE|VAR_NOLOC, NULL, NULL},
- {"fight-threshold",	&fight_threshold,	0,				VAR_INT|VAR_NOLOC, NULL, NULL},
- {"flood-msg",		&flood_msg,		0,				VAR_RATE|VAR_NOLHUB, NULL, NULL},
- {"flood-ctcp",		&flood_ctcp,		0,				VAR_RATE|VAR_NOLHUB, NULL, NULL},
- {"flood-g",		&flood_g,		0,				VAR_RATE|VAR_NOLHUB, NULL, NULL},
- {"fork-interval",	&fork_interval,		0,				VAR_INT, NULL, NULL},
- {"hijack",		&hijack,		0,				VAR_INT|VAR_DETECTED|VAR_PERM, NULL, NULL},
- {"in-bots",		&in_bots,		0,				VAR_INT|VAR_NOLOC, NULL, NULL},
- {"kill-threshold",	&kill_threshold,	0,				VAR_INT|VAR_NOLOC, NULL, NULL},
- {"lag-threshold",	&lag_threshold,		0,				VAR_INT|VAR_NOLHUB, NULL, NULL},
- {"login",		&login,			0,				VAR_INT|VAR_DETECTED, NULL, NULL},
- {"manop-warn",		&manop_warn,		0,				VAR_INT|VAR_BOOL|VAR_NOLHUB, NULL, NULL},
- {"mean-kicks",		&offensive_bans,	0,				VAR_INT|VAR_BOOL|VAR_NOLHUB, NULL, NULL},
- {"motd",		motd,			sizeof(motd),			VAR_STRING|VAR_HIDE|VAR_NOLOC, NULL, NULL},
- {"msg-ident",		msgident,		sizeof(msgident),		VAR_STRING|VAR_NOLHUB, NULL, NULL},
- {"msg-invite",		msginvite,		sizeof(msginvite),		VAR_STRING|VAR_NOLHUB, NULL, NULL},
- {"msg-op",		msgop,			sizeof(msgop),			VAR_STRING|VAR_NOLHUB, NULL, NULL},
- {"msg-pass",		msgpass,		sizeof(msgpass),		VAR_STRING|VAR_NOLHUB, NULL, NULL},
- {"nick",		origbotname,		sizeof(origbotname),		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF, NULL, NULL},
- {"op-bots",		&op_bots,		0,				VAR_INT|VAR_NOLOC, NULL, NULL},
- {"op-requests",	&op_requests,		0,				VAR_RATE|VAR_NOLOC, NULL, NULL},
- {"process-list",	process_list,		sizeof(process_list),		VAR_STRING|VAR_LIST, NULL, NULL},
- {"promisc",		&promisc,		0,				VAR_INT|VAR_DETECTED, NULL, NULL},
- {"realname",		botrealname,		sizeof(botrealname),		VAR_STRING|VAR_NOLHUB, NULL, NULL},
- {"servers",		&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB, NULL, NULL},
- {"servers6",		&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB, NULL, NULL},
- {"server-port",	&default_port,		0,				VAR_INT|VAR_NOLHUB, NULL, NULL},
- {"trace",		&trace,			0,				VAR_INT|VAR_DETECTED, NULL, NULL},
- {NULL,			NULL,			0,				0, NULL, NULL}
+ VAR("alias", 		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM),
+ VAR("auth-chan",	&auth_chan,		0,				VAR_INT|VAR_BOOL|VAR_NOLHUB),
+ VAR("auth-key",	auth_key,		sizeof(auth_key),		VAR_STRING|VAR_PERM),
+ VAR("auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM),
+ VAR("auth-obscure",	&auth_obscure,		0,				VAR_INT|VAR_BOOL),
+ VAR("dcc-autoaway",	&dcc_autoaway,		0,				VAR_INT|VAR_NOLOC),	
+ VAR("bad-process",	&badprocess,		0,				VAR_INT|VAR_DETECTED),
+ VAR("dccauth",		&dccauth,		0,				VAR_INT|VAR_BOOL),
+ VAR("chanset",		glob_chanset,		sizeof(glob_chanset),		VAR_STRING|VAR_CHANSET|VAR_NOLHUB),
+ VAR("cloak-script",	&cloak_script,		0,				VAR_INT|VAR_CLOAK|VAR_NOLHUB),
+ VAR("close-threshold",	&close_threshold,	0,				VAR_RATE|VAR_NOLOC),
+ VAR("fight-threshold",	&fight_threshold,	0,				VAR_INT|VAR_NOLOC),
+ VAR("flood-msg",	&flood_msg,		0,				VAR_RATE|VAR_NOLHUB),
+ VAR("flood-ctcp",	&flood_ctcp,		0,				VAR_RATE|VAR_NOLHUB),
+ VAR("flood-g",		&flood_g,		0,				VAR_RATE|VAR_NOLHUB),
+ VAR("fork-interval",	&fork_interval,		0,				VAR_INT),
+ VAR("hijack",		&hijack,		0,				VAR_INT|VAR_DETECTED|VAR_PERM),
+ VAR("in-bots",		&in_bots,		0,				VAR_INT|VAR_NOLOC),
+ VAR("kill-threshold",	&kill_threshold,	0,				VAR_INT|VAR_NOLOC),
+ VAR("lag-threshold",	&lag_threshold,		0,				VAR_INT|VAR_NOLHUB),
+ VAR("login",		&login,			0,				VAR_INT|VAR_DETECTED),
+ VAR("manop-warn",	&manop_warn,		0,				VAR_INT|VAR_BOOL|VAR_NOLHUB),
+ VAR("mean-kicks",	&offensive_bans,	0,				VAR_INT|VAR_BOOL|VAR_NOLHUB),
+ VAR("motd",		motd,			sizeof(motd),			VAR_STRING|VAR_HIDE|VAR_NOLOC),
+ VAR("msg-ident",	msgident,		sizeof(msgident),		VAR_STRING|VAR_NOLHUB),
+ VAR("msg-invite",	msginvite,		sizeof(msginvite),		VAR_STRING|VAR_NOLHUB),
+ VAR("msg-op",		msgop,			sizeof(msgop),			VAR_STRING|VAR_NOLHUB),
+ VAR("msg-pass",	msgpass,		sizeof(msgpass),		VAR_STRING|VAR_NOLHUB),
+ VAR("nick",		origbotname,		sizeof(origbotname),		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF),
+ VAR("op-bots",		&op_bots,		0,				VAR_INT|VAR_NOLOC),
+ VAR("op-requests",	&op_requests,		0,				VAR_RATE|VAR_NOLOC),
+ VAR("process-list",	process_list,		sizeof(process_list),		VAR_STRING|VAR_LIST),
+ VAR("promisc",		&promisc,		0,				VAR_INT|VAR_DETECTED),
+ VAR("realname",	botrealname,		sizeof(botrealname),		VAR_STRING|VAR_NOLHUB),
+ VAR("servers",		&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB),
+ VAR("servers6",	&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB),
+ VAR("server-port",	&default_port,		0,				VAR_INT|VAR_NOLHUB),
+ VAR("trace",		&trace,			0,				VAR_INT|VAR_DETECTED),
+ {NULL,			NULL,			0,				0, NULL, NULL, 0}
 };
 
 
@@ -499,7 +499,16 @@ void var_parse_my_botset()
     if (xk && xk->key) {
       putlog(LOG_DEBUG, "*", "var_parse_my_botset: %s: %s", vars[i].name, xk->data);
       var_set(&vars[i], conf.bot->nick, xk->data);
+      vars[i].flagged = 1;
     }
+  }
+
+  for (i = 0; vars[i].name; i++) {
+    if (vars[i].ldata && !vars[i].flagged) {
+      sdprintf("var[%s] nulled but we missed it!, reseting.", vars[i].name);
+      var_set(&vars[i], conf.bot->nick, NULL);
+    }
+    vars[i].flagged = 0;
   }
   set_noshare = 0;
 }

@@ -601,8 +601,10 @@ readsocks(const char *fname)
 
   unlink(fname);
   fclose(f);
-  if (nick)
+  if (nick) {
     var_set_by_name(conf.bot->nick, "nick", nick);
+    var_set_userentry(conf.bot->nick, "nick", nick);
+  }
 
   if (servidx >= 0) {
     char nserv[50] = "";

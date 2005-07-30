@@ -35,6 +35,8 @@
 #define set_data(x) ((x).ldata ? (x).ldata : (x).gdata ? (x).gdata : 0)
 #define set_type(x) ((x).ldata ? VAR_LDATA : (x).gdata ? VAR_GDATA : 0)
 #define set_types(x) ((x).ldata ? "local" : (x).gdata ? "global" : "")
+#define VAR(name, mem, size, flags) {name, mem, size, flags, NULL, NULL, 0}
+
 
 typedef struct variable_b {
   const char *name;
@@ -43,6 +45,7 @@ typedef struct variable_b {
   int flags;
   char *ldata;
   char *gdata;
+  bool flagged;
 } variable_t;
 
 typedef struct rate_b {
