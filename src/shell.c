@@ -345,14 +345,12 @@ void check_promisc()
 #endif /* SIOCGIFCONF */
 }
 
-#ifdef __linux__
 bool traced = 0;
 
 static void got_sigtrap(int z)
 {
   traced = 0;
 }
-#endif
 
 void check_trace(int start)
 {
@@ -368,13 +366,20 @@ void check_trace(int start)
   int x, i;
   pid_t parent = getpid();
 
-#ifdef __linux__
   /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
   signal(SIGTRAP, got_sigtrap);
   traced = 1;
   raise(SIGTRAP);
   /* no longer need this__asm__("INT3"); //SIGTRAP */
   signal(SIGTRAP, SIG_DFL);
+
+  if (!traced) {
+    signal(SIGINT, got_sigtrap);
+    traced = 1;
+    raise(SIGINT);
+    signal(SIGINT, SIG_DFL);
+  }
+
   if (traced) {
     if (start) {
       kill(parent, SIGKILL);
@@ -382,52 +387,28 @@ void check_trace(int start)
     } else
       detected(DETECT_TRACE, "I'm being traced!");
   } else {
-    x = fork();
-    if (x == -1)
-      return;
-    else if (x == 0) {
-      i = ptrace(PTRACE_ATTACH, parent, 0, 0);
-      if (i == (-1) && errno == EPERM) {
-        if (start) {
-          kill(parent, SIGKILL);
-          exit(1);
-        } else
-          detected(DETECT_TRACE, "I'm being traced!");
-      } else {
-        waitpid(parent, &i, 0);
-        kill(parent, SIGCHLD);
-        ptrace(PTRACE_DETACH, parent, 0, 0);
-        kill(parent, SIGCHLD);
-      }
-      exit(0);
-    } else
-      wait(&i);
-  }
-#endif /* __linux__ */
-#ifdef BSD
-  x = fork();
-  if (x == -1)
-    return;
-  else if (x == 0) {
-    i = ptrace(PT_ATTACH, parent, 0, 0);
-    if (i == (-1) && errno == EBUSY) {
-        if (start) {
-          kill(parent, SIGKILL);
-          exit(1);
-        } else
-          detected(DETECT_TRACE, "I'm being traced");
-    } else {
-      wait(&i);
-      i = ptrace(PT_CONTINUE, parent, (caddr_t) 1, 0);
-      kill(parent, SIGCHLD);
-      wait(&i);
-      i = ptrace(PT_DETACH, parent, (caddr_t) 1, 0);
-      wait(&i);
+  /* now, let's attempt to ptrace ourself */
+    switch ((x = fork())) {
+      case -1:
+        return;
+      case 0:		//child
+        i = ptrace(PT_ATTACH, parent, 0, 0);
+        if (i == -1) {
+          if (start) {
+            kill(parent, SIGKILL);
+            exit(1);
+          } else
+            detected(DETECT_TRACE, "I'm being traced!");
+        } else {
+          waitpid(parent, NULL, 0);
+          ptrace(PT_DETACH, parent, (char *) 1, 0);
+          kill(parent, SIGCHLD);
+        }
+        exit(0);
+      default:		//parent
+        waitpid(x, NULL, 0);
     }
-    exit(0);
-  } else
-    waitpid(x, NULL, 0);
-#endif /* BSD */
+  }
 }
 #endif /* !CYGWIN_HACKS */
 
