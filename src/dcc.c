@@ -1914,7 +1914,6 @@ dcc_telnet_got_ident(int i, char *host)
 
   dcc[i].type = &DCC_TELNET_ID;
   dcc[i].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
-  egg_bzero(dcc[i].u.chat, sizeof(struct chat_info));
 
   /* Copy acceptable-nick/host mask */
   dcc[i].status = (STAT_TELNET | STAT_ECHO | STAT_COLOR | STAT_BANNER | STAT_CHANNELS | STAT_BOTS | STAT_WHOM);
