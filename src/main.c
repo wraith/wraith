@@ -728,6 +728,8 @@ printf("out: %s\n", out);
     }
   }
 
+  if (!strcmp(settings.packname, "beta"))
+    have_take = 0;
 
   init_flags();			/* needed to establish FLAGS[] */
   core_binds_init();
