@@ -578,6 +578,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 
     /* ignore wasoptest, stopnethack and clearbans in chanfile, remove
        this later */
+    else if (!have_take && !strcmp(item[i], "+take")) ;
+    else if (!have_take && !strcmp(item[i], "-take")) ;
     else if (!strcmp(item[i], "+revenge")) ;
     else if (!strcmp(item[i], "-revenge")) ;
     else if (!strcmp(item[i], "+revengebot")) ;
