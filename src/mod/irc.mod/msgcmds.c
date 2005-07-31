@@ -585,7 +585,22 @@ static int msgc_help(Auth *a, char *chname, char *par)
 {
   LOGC("HELP");
 
-  reply(a->nick, NULL, "op invite getkey voice test\n");
+  char outbuf[201] = "";
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  bind_entry_t *entry = NULL;
+  bind_table_t *table = NULL;
+
+  get_user_flagrec(a->user, &fr, chname ? chname : NULL);
+
+  table = bind_table_lookup("msgc");
+
+  for (entry = table->entries; entry && entry->next; entry = entry->next)
+    if (((chname[0] && entry->flags & AUTH_CHAN) || (!chname[0] && entry->flags & AUTH_MSG)) && flagrec_ok(&entry->user_flags, &fr))
+      simple_snprintf(outbuf, sizeof(outbuf), "%s%s%s", outbuf[0] ? outbuf : "", outbuf[0] ? " " : "", &entry->function_name[6]);
+
+  strncat(outbuf, "\n", sizeof(outbuf));
+
+  reply(a->nick, NULL, outbuf);
   return BIND_RET_BREAK;
 }
 
@@ -665,14 +680,14 @@ static int msgc_invite(Auth *a, char *chname, char *par)
 
 static cmd_t C_msgc[] =
 {
-  {"test",		"a",	(Function) msgc_test,		NULL, LEAF},
-  {"channels",		"",	(Function) msgc_channels,	NULL, LEAF},
-  {"getkey",		"",	(Function) msgc_getkey,		NULL, LEAF},
-  {"help",		"",	(Function) msgc_help,		NULL, LEAF},
-  {"invite",		"",	(Function) msgc_invite,		NULL, LEAF},
-  {"md5",		"",	(Function) msgc_md5,		NULL, LEAF},
-  {"op",		"",	(Function) msgc_op,		NULL, LEAF},
-  {"sha1",		"",	(Function) msgc_sha1,		NULL, LEAF},
-  {"voice",		"",	(Function) msgc_voice,		NULL, LEAF},
+  {"test",		"a",	(Function) msgc_test,		NULL, LEAF|AUTH_CHAN|AUTH_MSG},
+  {"channels",		"",	(Function) msgc_channels,	NULL, LEAF|AUTH_CHAN|AUTH_MSG},
+  {"getkey",		"",	(Function) msgc_getkey,		NULL, LEAF|AUTH_MSG},
+  {"help",		"",	(Function) msgc_help,		NULL, LEAF|AUTH_CHAN|AUTH_MSG},
+  {"invite",		"",	(Function) msgc_invite,		NULL, LEAF|AUTH_MSG},
+  {"md5",		"",	(Function) msgc_md5,		NULL, LEAF|AUTH_MSG|AUTH_CHAN},
+  {"op",		"",	(Function) msgc_op,		NULL, LEAF|AUTH_CHAN|AUTH_MSG},
+  {"sha1",		"",	(Function) msgc_sha1,		NULL, LEAF|AUTH_CHAN|AUTH_MSG},
+  {"voice",		"",	(Function) msgc_voice,		NULL, LEAF|AUTH_CHAN|AUTH_MSG},
   {NULL,		NULL,	NULL,				NULL, 0}
 };
