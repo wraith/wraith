@@ -3386,11 +3386,6 @@ static void cmd_pls_host(int idx, char *par)
     return;
   }
   
-  if (user_has_host(NULL, dcc[idx].user, host)) {
-    dprintf(idx, "That hostmask is already there.\n");
-    return;
-  }
-
   char ahost[UHOSTLEN] = "", *phost = NULL;
 
   if (!strchr(host, '!')) {
@@ -3403,9 +3398,13 @@ static void cmd_pls_host(int idx, char *par)
   } else
     phost = host;
 
-  addhost_by_handle(handle, phost);
-  update_mod(handle, dcc[idx].nick, "+host", phost);
-  dprintf(idx, "Added host '%s' to %s.\n", phost, handle);
+  if (user_has_host(NULL, dcc[idx].user, phost))
+    dprintf(idx, "The hostmask '%s' is already there.\n", phost);
+  else {
+    addhost_by_handle(handle, phost);
+    update_mod(handle, dcc[idx].nick, "+host", phost);
+    dprintf(idx, "Added host '%s' to %s.\n", phost, handle);
+  }
 
   while (par[0]) {
     phost = 0;
@@ -3422,8 +3421,12 @@ static void cmd_pls_host(int idx, char *par)
     } else
       phost = host;
 
-    addhost_by_handle(handle, phost);
-    dprintf(idx, "Added host '%s' to %s.\n", phost, handle);
+    if (user_has_host(NULL, dcc[idx].user, phost))
+      dprintf(idx, "The hostmask '%s' is already there.\n", phost);
+    else {
+      addhost_by_handle(handle, phost);
+      dprintf(idx, "Added host '%s' to %s.\n", phost, handle);
+    }
   }
   if (!conf.bot->hub)
     check_this_user(handle, 0, NULL);

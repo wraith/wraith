@@ -30,6 +30,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed hang on running binary on some FreeBSD systems.
 * Fixed bots not correctly recognizing changes in botset to empty vars after restart/update. (#150)
 * Disabled chanset flags '+/-revenge' and '+/-revengebot' as they are 100% incompatable/untouched egg code.
+* Fixed an issue with cmd_pls_host not adding all hosts given, and 'hostmask already there' now displays WHICH host. (#153)
 
 1.2.6
 * (REVERTED FROM 1.2.3) Disabled all memory allocations after a segfault (Fixes CPU spinning)
