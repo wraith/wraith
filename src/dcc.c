@@ -877,10 +877,13 @@ append_line(int idx, char *line)
 static void
 out_dcc_general(int idx, char *buf, void *x)
 {
-  register struct chat_info *p = (struct chat_info *) x;
   char *y = buf;
 
-  strip_mirc_codes(p->strip_flags, buf);
+  if (dcc[idx].type == &DCC_CHAT) {
+    register struct chat_info *p = (struct chat_info *) x;
+
+    strip_mirc_codes(p->strip_flags, buf);
+  }
   if (dcc[idx].status & STAT_TELNET)
     y = add_cr(buf);
   if (dcc[idx].status & STAT_PAGE)
@@ -1520,8 +1523,8 @@ kill_dupwait(int idx, void *x)
   register struct dupwait_info *p = (struct dupwait_info *) x;
 
   if (p) {
-    if (p->chat && DCC_CHAT.kill)
-      DCC_CHAT.kill(idx, p->chat);
+//    if (p->chat && DCC_CHAT.kill)
+//      DCC_CHAT.kill(idx, p->chat);
     free(p);
   }
 }
@@ -1617,15 +1620,20 @@ dcc_telnet_id(int idx, char *buf, int atr)
       lostdcc(idx);
       return;
     } else if (in_chain(dcc[idx].nick)) {
-      struct chat_info *ci = dcc[idx].u.chat;
+//      struct chat_info *ci = dcc[idx].u.chat;
 
       dcc[idx].type = &DCC_DUPWAIT;
       dcc[idx].u.dupwait = (struct dupwait_info *) my_calloc(1, sizeof(struct dupwait_info));
-      dcc[idx].u.dupwait->chat = ci;
+//      dcc[idx].u.dupwait->chat = ci;
       dcc[idx].u.dupwait->atr = atr;
       return;
     }
+  } else {
+    //bots dont need this
+    dcc[idx].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
+    strcpy(dcc[idx].u.chat->con_chan, chanset ? chanset->dname : "*");
   }
+
   dcc_telnet_pass(idx, atr);
 }
 
@@ -1637,7 +1645,7 @@ dcc_telnet_pass(int idx, int atr)
   get_user_flagrec(dcc[idx].user, &fr, NULL);
 
   /* No password set? */
-  if (!glob_bot(fr) && (u_pass_match(dcc[idx].user, "-"))) {
+  if (!dcc[idx].user->bot && (u_pass_match(dcc[idx].user, "-"))) {
     dprintf(idx, "Can't telnet until you have a password set.\r\n");
     putlog(LOG_MISC, "*", DCC_NOPASS, dcc[idx].nick, dcc[idx].host);
     killsock(dcc[idx].sock);
@@ -1646,10 +1654,10 @@ dcc_telnet_pass(int idx, int atr)
   }
 
   if (dcc[idx].type == &DCC_DUPWAIT) {
-    struct chat_info *ci = dcc[idx].u.dupwait->chat;
+//    struct chat_info *ci = dcc[idx].u.dupwait->chat;
 
     free(dcc[idx].u.dupwait);
-    dcc[idx].u.chat = ci;
+//    dcc[idx].u.chat = ci;
   }
   dcc[idx].type = &DCC_CHAT_PASS;
   dcc[idx].timeval = now;
@@ -1913,7 +1921,6 @@ dcc_telnet_got_ident(int i, char *host)
   sockoptions(dcc[i].sock, EGG_OPTION_UNSET, SOCK_BUFFER);
 
   dcc[i].type = &DCC_TELNET_ID;
-  dcc[i].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
 
   /* Copy acceptable-nick/host mask */
   dcc[i].status = (STAT_TELNET | STAT_ECHO | STAT_COLOR | STAT_BANNER | STAT_CHANNELS | STAT_BOTS | STAT_WHOM);
@@ -1921,7 +1928,6 @@ dcc_telnet_got_ident(int i, char *host)
   /* Copy acceptable-nick/host mask */
   strlcpy(dcc[i].nick, dcc[idx].host, HANDLEN);
   dcc[i].timeval = now;
-  strcpy(dcc[i].u.chat->con_chan, chanset ? chanset->dname : "*");
   /* This is so we dont tell someone doing a portscan anything
    * about ourselves. <cybah>
    */

@@ -6,6 +6,7 @@
 #endif
 
 #include "types.h"
+#include "enclink.h"
 #include "crypt.h"
 #include "eggdrop.h"
 #include "src/mod/server.mod/server.h"
@@ -35,6 +36,7 @@ struct dcc_t {
     struct bot_info *bot;
     struct relay_info *relay;
     struct dupwait_info *dupwait;
+    struct enc_link_dcc *enc;
     int ident_sock;
     void *other;
   } u;                          /* Special use depending on type        */
@@ -127,7 +129,7 @@ struct relay_info {
 };
 
 struct dupwait_info {
-  struct chat_info *chat;       /* holds current chat data              */
+//  struct chat_info *chat;       /* holds current chat data              */
   int atr;                      /* the bots attributes                  */
 };
 

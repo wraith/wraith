@@ -30,6 +30,10 @@ struct enc_link {
   void (*parse) (int, int, char *);
 };
 
+struct enc_link_dcc {
+  struct enc_link *method;
+  int status;
+};
 
 extern struct enc_link enclink[];
 
