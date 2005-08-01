@@ -67,7 +67,7 @@
 extern int		optind;
 
 const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
-const char	*egg_version = "1.2.7";
+const char	*egg_version = "1.2.8-cvs";
 
 bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
