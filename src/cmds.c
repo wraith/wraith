@@ -3616,7 +3616,7 @@ static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
     strcat(tmp, "(unknown OS)");
   } else {
     if (updated) {
-      simple_sprintf(tmp + strlen(tmp), "%s %s (%s-UPDATED)", un.sysname, un.release, un.machine);
+      simple_sprintf(tmp + strlen(tmp), "%s %s (%s) - UPDATED", un.sysname, un.release, un.machine);
     } else
       simple_sprintf(tmp + strlen(tmp), "%s %s (%s)", un.sysname, un.release, un.machine);
   }
