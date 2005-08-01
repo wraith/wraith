@@ -3705,7 +3705,7 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
     char *nick = newsplit(&par);
 
     dprintf(DP_SERVER, "PRIVMSG %s :%s\n", nick, par);
-    if (!strcmp(tobot, conf.bot->nick)) {
+    if (!egg_strcasecmp(tobot, conf.bot->nick)) {
       char buf[1024] = "";
 
       simple_snprintf(buf, sizeof buf, "Sent message to %s", nick);

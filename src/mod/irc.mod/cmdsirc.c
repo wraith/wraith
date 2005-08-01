@@ -595,7 +595,7 @@ ContextNote("!mdop!");
       if (!m->user)
 	targets[targetcount++] = m;
       else if (m->user->bot && (m->user->flags & USER_OP) 
-	       && (strcmp(conf.bot->nick, m->user->handle))
+	       && (egg_strcasecmp(conf.bot->nick, m->user->handle))
 	       && (nextbot(m->user->handle) >= 0))
 	chanbots[chanbotcount++] = m;
       else if (!(m->user->flags & USER_OP))

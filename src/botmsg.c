@@ -112,7 +112,7 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
   if (i >= 0) {
     simple_snprintf(OBUF, sizeof OBUF, "rr %s %s %s %s %s\n", bot, fbot, to, toidx, ln);
     tputs(dcc[i].sock, OBUF, strlen(OBUF));
-  } else if (!strcmp(bot, conf.bot->nick)) {
+  } else if (!egg_strcasecmp(bot, conf.bot->nick)) {
     gotremotereply(conf.bot->nick, to, toidx, ln);
   }
 }

@@ -957,7 +957,7 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
       cur = userlist;
     if (cur == current)
       break;
-    if (cur->bot && (strcmp(cur->handle, conf.bot->nick))) {
+    if (cur->bot && (egg_strcasecmp(cur->handle, conf.bot->nick))) {
       link_pref_val(cur, thisval);
       if ((strcmp(thisval, lowval) < 0) && (strcmp(thisval, highval) > 0) &&(strcmp(thisval, bestmatchval) < 0)) {
         strcpy(bestmatchval, thisval);
@@ -1132,7 +1132,7 @@ void autolink_cycle_leaf(char *start)
 
   for (struct userrec *u = userlist; u; u = u->next) {
     get_user_flagrec(u, &fr, NULL);
-    if (glob_bot(fr) && strcmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
+    if (glob_bot(fr) && egg_strcasecmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
       if (strcmp(u->handle, avoidbot)) {
         putlog(LOG_DEBUG, "@", "Adding %s to hublist", u->handle);
         hl2 = hl;

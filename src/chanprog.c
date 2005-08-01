@@ -418,7 +418,7 @@ void load_internal_users()
 	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
 	  bi->relay_port = bi->telnet_port;
           bi->hublevel = hublevel;
-	  if (conf.bot->hub && (!bi->hublevel) && (!strcmp(hand, conf.bot->nick)))
+	  if (conf.bot->hub && (!bi->hublevel) && (!egg_strcasecmp(hand, conf.bot->nick)))
 	    bi->hublevel = 99;
           bi->uplink = (char *) my_calloc(1, 1);
 	  set_user(&USERENTRY_BOTADDR, u, bi);

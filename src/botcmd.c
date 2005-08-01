@@ -150,7 +150,7 @@ void bot_remotereply(int idx, char *par) {
   if (par[0])
     fidx = newsplit(&par);
 
-  if (!strcmp(tbot, conf.bot->nick)) {
+  if (!egg_strcasecmp(tbot, conf.bot->nick)) {
     gotremotereply(fbot, fhnd, fidx, par);
   } else {
     if (nextbot(tbot)!= idx)

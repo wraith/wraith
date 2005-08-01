@@ -341,7 +341,7 @@ void var_set(variable_t *var, const char *target, const char *datain)
   if (target) {
     bool me = 0;
 
-    if (!strcmp(conf.bot->nick, target)) {
+    if (!egg_strcasecmp(conf.bot->nick, target)) {
       me = 1;
       domem = 1;				/* always set the mem if it's local */
       if (var->ldata)
@@ -395,7 +395,7 @@ void var_set_userentry(const char *target, const char *name, const char *data)
   struct userrec *u = NULL;
   bool me = 0;
 
-  if (!strcmp(conf.bot->nick, target))
+  if (!egg_strcasecmp(conf.bot->nick, target))
     me = 1;
 
   if (me && conf.bot)
