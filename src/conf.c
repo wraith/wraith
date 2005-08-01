@@ -641,6 +641,8 @@ readconf(const char *fname, int bits)
 
     i++;
 
+    rmspace(line);
+
     sdprintf("CONF LINE: %s", line);
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
     if (enc && line[0] > '~') {
