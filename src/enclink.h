@@ -10,7 +10,7 @@
 /* must leave old ones in here */
 enum {
         LINK_GHOST = 0,	/* attic */
-	LINK_GHOSTNAT,
+	LINK_GHOSTNAT, /* attic */
         LINK_GHOSTSHA1, /* attic */
         LINK_GHOSTMD5, /* attic */
         LINK_CLEARTEXT,
