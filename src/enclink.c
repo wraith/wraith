@@ -354,7 +354,9 @@ void link_get_method(int idx)
 
 /* the order of entries here determines which will be picked */
 struct enc_link enclink[] = {
-  { "ghost+case", LINK_GHOSTCASE, ghost_link_case, ghost_write, ghost_read, ghost_parse },
+  { "ghost+case2", LINK_GHOSTCASE2, ghost_link_case, ghost_write, ghost_read, ghost_parse },
+// Disabled this one so 1.2.6->1.2.7 will use cleartext, as some 1.2.6 nets have an empty BDHASH
+//  { "ghost+case", LINK_GHOSTCASE, ghost_link_case, ghost_write, ghost_read, ghost_parse },
   { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL, NULL },
   { NULL, 0, NULL, NULL, NULL, NULL }
 };
