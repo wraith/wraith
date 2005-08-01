@@ -1628,6 +1628,9 @@ dcc_telnet_id(int idx, char *buf, int atr)
       dcc[idx].u.dupwait->atr = atr;
       return;
     }
+  
+    dcc[idx].u.enc = (struct enc_link_dcc *) my_calloc(1, sizeof(struct enc_link_dcc));
+    link_get_method(idx);
   } else {
     //bots dont need this
     dcc[idx].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));

@@ -32,7 +32,7 @@ struct enc_link {
 
 struct enc_link_dcc {
   struct enc_link *method;
-  int status;
+  int method_number;
 };
 
 extern struct enc_link enclink[];
@@ -47,5 +47,6 @@ extern void link_hash(int, char *);
 extern void link_send(int, const char *, ...) __attribute__((format(printf, 2, 3)));
 extern void link_done(int);
 extern void link_parse(int, char *);
+extern void link_get_method(int);
 
 #endif /* !_ENCLINK_H */

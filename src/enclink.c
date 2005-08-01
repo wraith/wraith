@@ -402,6 +402,19 @@ void link_parse(int idx, char *buf)
   return;
 }
 
+void link_get_method(int idx)
+{
+  if (!dcc[idx].type)
+    return;
+
+  int n = dcc[idx].u.enc->method_number;
+
+  if (enclink[n].name)
+    dcc[idx].u.enc->method = &(enclink[n]);
+
+  dcc[idx].u.enc->method_number++;
+}
+
 /* the order of entries here determines which will be picked */
 struct enc_link enclink[] = {
   { "ghost+case", LINK_GHOSTCASE, ghost_link_case, ghost_write, ghost_read, ghost_parse },
