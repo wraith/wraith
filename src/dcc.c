@@ -739,22 +739,24 @@ display_dcc_chat_pass(int idx, char *buf)
 static void
 kill_dcc_general(int idx, void *x)
 {
-  register struct chat_info *p = (struct chat_info *) x;
+  if (dcc[idx].type == &DCC_CHAT) {
+    register struct chat_info *p = (struct chat_info *) x;
 
-  if (p) {
-    if (p->buffer) {
-      struct msgq *r = NULL, *q = NULL;
+    if (p) {
+      if (p->buffer) {
+        struct msgq *r = NULL, *q = NULL;
 
-      for (r = dcc[idx].u.chat->buffer; r; r = q) {
-        q = r->next;
-        free(r->msg);
-        free(r);
+        for (r = dcc[idx].u.chat->buffer; r; r = q) {
+          q = r->next;
+          free(r->msg);
+          free(r);
+        }
       }
+      if (p->away) {
+        free(p->away);
+      }
+      free(p);
     }
-    if (p->away) {
-      free(p->away);
-    }
-    free(p);
   }
 }
 
@@ -886,7 +888,7 @@ out_dcc_general(int idx, char *buf, void *x)
   }
   if (dcc[idx].status & STAT_TELNET)
     y = add_cr(buf);
-  if (dcc[idx].status & STAT_PAGE)
+  if ((dcc[idx].type == &DCC_CHAT) && dcc[idx].status & STAT_PAGE)
     append_line(idx, y);
   else
     tputs(dcc[idx].sock, y, strlen(y));
