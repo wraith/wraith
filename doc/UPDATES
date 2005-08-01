@@ -11,6 +11,10 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
 
+1.2.8
+* Fixed [bot]* cmds depending on case of botnicks.
+
+
 1.2.7
 * Forgot 'log_bad = 0;' to fix the '!' showing up for aliases.
 * When a user is removed and is on partyline, they are now booted. (#142)

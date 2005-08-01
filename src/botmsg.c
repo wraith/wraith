@@ -84,7 +84,7 @@ int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd
     simple_snprintf(OBUF, sizeof(OBUF), "rc %s %s %s %i %s\n", bot, fbot, fhnd, fromidx, cmd);
     tputs(dcc[i].sock, OBUF, strlen(OBUF));
     return 1;
-  } else if (!strcmp(bot, conf.bot->nick)) {
+  } else if (!egg_strcasecmp(bot, conf.bot->nick)) {
     char tmp[24] = "";
 
     simple_sprintf(tmp, "%i", fromidx);

@@ -127,7 +127,7 @@ void bot_remotecmd(int idx, char *par) {
   if (par[0])
     fidx = newsplit(&par);
 
-  if (!strcmp(tbot, conf.bot->nick)) {
+  if (!egg_strcasecmp(tbot, conf.bot->nick)) {
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else if (!strcmp(tbot, "*")) {
     botnet_send_cmd_broad(idx, fbot, fhnd, atoi(fidx), par);
