@@ -32,7 +32,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Disabled chanset flags '+/-revenge' and '+/-revengebot' as they are 100% incompatable/untouched egg code.
 * Fixed an issue with cmd_pls_host not adding all hosts given, and 'hostmask already there' now displays WHICH host. (#153)
 * Fixed binary data parsing to strip trailing spaces for entries.
-* Removed support for bots older than 1.2.4
+* Removed support for encrypted link for bots older than 1.2.4
 * Implemented a hack to fix a bug with link encryptions.
 
 1.2.6
