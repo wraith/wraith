@@ -73,6 +73,7 @@ bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
 bool 	loading = 0;
 bool	have_take = 1;
+bool	beta = 0;
 int	default_flags = 0;	/* Default user flags and */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
@@ -728,8 +729,10 @@ printf("out: %s\n", out);
     }
   }
 
-  if (!strcmp(settings.packname, "beta"))
+  if (!strcmp(settings.packname, "beta")) {
     have_take = 0;
+    beta = 1;
+  }
 
   init_flags();			/* needed to establish FLAGS[] */
   core_binds_init();
