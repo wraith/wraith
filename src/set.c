@@ -95,12 +95,14 @@ static variable_t vars[] = {
 
 static bool use_server_type(const char *name)
 {
-  if (!strcmp(name, "servers")) {
-    if (conf.bot->net.host6 || conf.bot->net.ip6) /* we want to use the servers6 entry. */
-      return 0;
-  } else if (!strcmp(name, "servers6")) {
-    if (!conf.bot->net.host6 && !conf.bot->net.ip6) /* we probably want to use the normal server list.. */
-      return 0;
+  if (!conf.bot->hub) {
+    if (!strcmp(name, "servers")) {
+      if (conf.bot->net.host6 || conf.bot->net.ip6) /* we want to use the servers6 entry. */
+        return 0;
+    } else if (!strcmp(name, "servers6")) {
+      if (!conf.bot->net.host6 && !conf.bot->net.ip6) /* we probably want to use the normal server list.. */
+        return 0;
+    }
   }
   return 1;
 }
@@ -150,7 +152,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
     else if (!isnumber)
       number = 0;
 
-    if (var->flags & VAR_CLOAK) {
+    if (var->flags & VAR_CLOAK && !conf.bot->hub) {
       if (number == 0)
         number = randint(CLOAK_COUNT) + 1;
     }
@@ -168,14 +170,14 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
     } else if (!data) {
       *(bool *) (var->mem) = 0;
     } else
-      return 0;
+      goto end;
   } else if (var->flags & VAR_STRING) {
     if (data)
       strlcpy((char *) var->mem, data, var->size);
     else
       ((char *) var->mem)[0] = 0;
 
-    if (var->flags & VAR_NICK) {
+    if (var->flags & VAR_NICK && !conf.bot->hub) {
        if (!data)
          strlcpy((char *) var->mem, conf.bot->nick, var->size);
        if (server_online && rfc_casecmp(botname, (char *) var->mem))
@@ -195,10 +197,10 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
       (*(rate_t *) (var->mem)).count = 0;
       (*(rate_t *) (var->mem)).time = 0;
     } else
-      return 0;
+      goto end;
   } else if (var->flags & VAR_SERVERS) {
     if (!use_server_type(var->name))
-      return 0;
+      goto end;
 
     if (var->mem && *(struct server_list **)var->mem) {
       clearq(*(struct server_list **) var->mem);
@@ -213,6 +215,9 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
       next_server(&curserv, cursrvname, &curservport, NULL);
     }
   }
+
+  end:
+
   if (datap)
     free(datap);
 

@@ -14,6 +14,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
 * Fixed hubs attempting to generate a ctcp version reply after 'cloak-script' was set.
+* Fixed some similar problems with servers/servers6/nick
+* Fixed a memleak in var_set_mem()
 
 1.2.7
 * Forgot 'log_bad = 0;' to fix the '!' showing up for aliases.
