@@ -152,7 +152,6 @@
 /* Stuff from dcc.c
  */
 #define DCC_REJECT		"Rejecting link from %s"
-#define DCC_LINKED		"Linked to %s."
 #define DCC_LINKFAIL		"Failed link to %s."
 #define DCC_BADPASS		"Bad password on connect attempt to %s."
 #define DCC_PASSREQ		"Password required for connection to %s."

@@ -54,6 +54,7 @@ struct dcc_t {
   bool irc;			/* forward the output back to irc? */
   bool hub;			// is this bot a hub?
   bool wrong_pass;		// auth obscure hack
+  bool bot;
 //  int auth;
   bool whowas;
   int dns_id;

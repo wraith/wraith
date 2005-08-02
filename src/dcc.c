@@ -251,8 +251,8 @@ bot_version(int idx, char *par)
     vversion = newsplit(&par);
 
   if (conf.bot->hub) {
-    putlog(LOG_BOTS, "*", DCC_LINKED, dcc[idx].nick);
-    chatout("*** Linked to %s\n", dcc[idx].nick);
+    putlog(LOG_BOTS, "*", "Linked to %s.\n, dcc[idx].nick);
+    chatout("*** Linked to %s.\n", dcc[idx].nick);
 
     if (bot_hublevel(dcc[idx].user) < 999) {
       if (!bot_aggressive_to(dcc[idx].user))    //not aggressive, so they are technically my uplink.
@@ -408,7 +408,8 @@ static void
 free_dcc_bot_(int n, void *x)
 {
   if (dcc[n].type == &DCC_BOT) {
-    uplink_idx = -1;
+    if (n == uplink_idx)
+      uplink_idx = -1;
     unvia(n, findbot(dcc[n].nick));
     rembot(dcc[n].nick);
   }
@@ -739,7 +740,7 @@ display_dcc_chat_pass(int idx, char *buf)
 static void
 kill_dcc_general(int idx, void *x)
 {
-  if (!dcc[idx].user->bot) {
+  if (!dcc[idx].bot && x) {
     register struct chat_info *p = (struct chat_info *) x;
 
     if (p) {
@@ -888,7 +889,7 @@ out_dcc_general(int idx, char *buf, void *x)
   }
   if (dcc[idx].status & STAT_TELNET)
     y = add_cr(buf);
-  if (!dcc[idx].user->bot && dcc[idx].status & STAT_PAGE)
+  if (!dcc[idx].bot && dcc[idx].status & STAT_PAGE)
     append_line(idx, y);
   else
     tputs(dcc[idx].sock, y, strlen(y));
@@ -1564,13 +1565,12 @@ static void
 dcc_telnet_id(int idx, char *buf, int atr)
 {
   char *nick = buf;
-  int bot = 0;
 
   strip_telnet(dcc[idx].sock, nick, &atr);
 
   if (nick[0] == '-') {
     nick++;
-    bot = 1;
+    dcc[idx].bot = 1;
   }
 
   nick[HANDLEN] = 0;
@@ -1580,7 +1580,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
   bool ok = 0;
 
   if (dcc[idx].user) {
-    if (!bot && dcc[idx].user->bot) {
+    if (!dcc[idx].bot && dcc[idx].user->bot) {
       putlog(LOG_WARN, "*", "Refused %s (fake bot login for '%s')", dcc[idx].host, nick);
       killsock(dcc[idx].sock);
       lostdcc(idx);
