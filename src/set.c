@@ -157,7 +157,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
 
     *(int *) (var->mem) = number;
 
-    if (var->flags & VAR_CLOAK)
+    if (var->flags & VAR_CLOAK && !conf.bot->hub)
       scriptchanged();
   } else if (var->flags & VAR_BOOL) {
     if (data && str_isdigit(data)) {
