@@ -793,7 +793,7 @@ void cmd_set_real(const char *botnick, int idx, char *par)
         }
       } else if (list == LIST_RM) {
         if (var_rem_list(botnick, var, data)) {
-          dprintf(idx, "Removed from %s list.\n", var->name);
+          dprintf(idx, "Removed '%s' from %s list.\n", data, var->name);
           return;
         }
       }
