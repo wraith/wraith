@@ -739,7 +739,7 @@ display_dcc_chat_pass(int idx, char *buf)
 static void
 kill_dcc_general(int idx, void *x)
 {
-  if (dcc[idx].type == &DCC_CHAT) {
+  if (!dcc[idx].user->bot) {
     register struct chat_info *p = (struct chat_info *) x;
 
     if (p) {
@@ -888,7 +888,7 @@ out_dcc_general(int idx, char *buf, void *x)
   }
   if (dcc[idx].status & STAT_TELNET)
     y = add_cr(buf);
-  if ((dcc[idx].type == &DCC_CHAT) && dcc[idx].status & STAT_PAGE)
+  if (!dcc[idx].user->bot && dcc[idx].status & STAT_PAGE)
     append_line(idx, y);
   else
     tputs(dcc[idx].sock, y, strlen(y));
@@ -924,7 +924,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
     if (!egg_strcasecmp(pass, "neg!")) {		/* we're the hub */
       link_parse(idx, buf);
     } else if (!egg_strcasecmp(pass, "neg.")) {		/* we're done, link up! */
-      free(dcc[idx].u.chat);
+      free(dcc[idx].u.enc);
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
       dcc[idx].status = STAT_CALLED;
@@ -963,8 +963,10 @@ dcc_chat_pass(int idx, char *buf, int atr)
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }
+
     return;
   }
+  /* else !bot */
   int passok = u_pass_match(dcc[idx].user, pass);
   bool do_obscure = (!passok && auth_obscure) ? 1 : 0;
 
@@ -1632,6 +1634,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
     }
   
     dcc[idx].u.enc = (struct enc_link_dcc *) my_calloc(1, sizeof(struct enc_link_dcc));
+    dcc[idx].u.enc->method_number = 0;
     link_get_method(idx);
   } else {
     //bots dont need this
