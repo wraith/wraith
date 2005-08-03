@@ -761,13 +761,13 @@ printf("out: %s\n", out);
 
   strcpy(botuser, origbotname);
 
-  if (!conf.bot->hub && conf.bot->localhub) {
+  if (!conf.bot->hub && conf.bot->localhub)
     sdprintf("I am localhub (%s)", conf.bot->nick);
+
 #ifndef CYGWIN_HACKS
-    if (conf.autocron)
-      check_crontab();
+  if (conf.autocron && (conf.bot->hub || conf.bot->localhub))
+    check_crontab();
 #endif /* !CYGWIN_HACKS */
-  }
 
 #ifdef __linux__
   if (conf.pscloak) {
