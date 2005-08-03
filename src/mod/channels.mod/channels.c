@@ -559,6 +559,9 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
   /* Prevents a +s-p +p-s flood  (fixed by drummer) */
   if (chan->mode_pls_prot & CHANSEC)
     chan->mode_pls_prot &= ~CHANPRIV;
+
+  if (chan->mode_mns_prot & CHANPRIV && chan->closed_private)
+    chan->closed_private = 0;
 }
 
 static void get_mode_protect(struct chanset_t *chan, char *s)

@@ -22,6 +22,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed hub segfaults (on Linux) with bot links. (#155)
 * Removing an ignore by number now displays which ignore was removed. (#126)
 * Added hub cmd 'checkchannels' which displays in loglevel misc (+o) which chans leaf bots aren't on. (#149)
+* Fixed 'chanset chanmode { -p }' conflicting with 'closed-private 1' (closed-private now sets to 0 if -p) (#14)
 
 1.2.7
 * Forgot 'log_bad = 0;' to fix the '!' showing up for aliases.
