@@ -401,8 +401,11 @@ void core_10secondly()
 
   curcheck++;
 
+  //FIXME: This is disabled because it sucks.
+#ifdef no
   if (curcheck == 1)
     check_trace(0);
+#endif
 
   if (conf.bot->hub || conf.bot->localhub) {
     check_promisc();
@@ -508,7 +511,7 @@ static int washub = -1;
 static void core_minutely()
 {
   //eat some zombies!
-  waitpid(-1, NULL, WNOHANG);
+//  waitpid(-1, NULL, WNOHANG);
 
   if (!conf.bot->hub) {
     if (washub == -1)
