@@ -19,6 +19,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Now specifying what was removed from a list with set -listvar.
 * Fixed hub forgetting it's uplink.
 * Fixed hubs not correctly installing/checking crontab on startup. (#156)
+* Fixed hub segfaults (on Linux) with bot links. (#155)
 
 1.2.7
 * Forgot 'log_bad = 0;' to fix the '!' showing up for aliases.

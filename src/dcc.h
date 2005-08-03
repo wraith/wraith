@@ -130,7 +130,6 @@ struct relay_info {
 };
 
 struct dupwait_info {
-//  struct chat_info *chat;       /* holds current chat data              */
   int atr;                      /* the bots attributes                  */
 };
 

@@ -251,7 +251,7 @@ bot_version(int idx, char *par)
     vversion = newsplit(&par);
 
   if (conf.bot->hub) {
-    putlog(LOG_BOTS, "*", "Linked to %s.\n, dcc[idx].nick);
+    putlog(LOG_BOTS, "*", "Linked to %s.\n", dcc[idx].nick);
     chatout("*** Linked to %s.\n", dcc[idx].nick);
 
     if (bot_hublevel(dcc[idx].user) < 999) {
@@ -740,24 +740,22 @@ display_dcc_chat_pass(int idx, char *buf)
 static void
 kill_dcc_general(int idx, void *x)
 {
-  if (!dcc[idx].bot && x) {
-    register struct chat_info *p = (struct chat_info *) x;
+  register struct chat_info *p = (struct chat_info *) x;
 
-    if (p) {
-      if (p->buffer) {
-        struct msgq *r = NULL, *q = NULL;
+  if (p) {
+    if (p->buffer) {
+      struct msgq *r = NULL, *q = NULL;
 
-        for (r = dcc[idx].u.chat->buffer; r; r = q) {
-          q = r->next;
-          free(r->msg);
-          free(r);
-        }
+      for (r = dcc[idx].u.chat->buffer; r; r = q) {
+        q = r->next;
+        free(r->msg);
+        free(r);
       }
-      if (p->away) {
-        free(p->away);
-      }
-      free(p);
     }
+    if (p->away) {
+      free(p->away);
+    }
+    free(p);
   }
 }
 
@@ -908,6 +906,7 @@ static struct dcc_table DCC_CHAT_SECPASS = {
   NULL
 };
 
+//su drops us here
 static void
 dcc_chat_pass(int idx, char *buf, int atr)
 {
@@ -925,7 +924,6 @@ dcc_chat_pass(int idx, char *buf, int atr)
     if (!egg_strcasecmp(pass, "neg!")) {		/* we're the hub */
       link_parse(idx, buf);
     } else if (!egg_strcasecmp(pass, "neg.")) {		/* we're done, link up! */
-      free(dcc[idx].u.enc);
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
       dcc[idx].status = STAT_CALLED;
@@ -1527,11 +1525,8 @@ kill_dupwait(int idx, void *x)
 {
   register struct dupwait_info *p = (struct dupwait_info *) x;
 
-  if (p) {
-//    if (p->chat && DCC_CHAT.kill)
-//      DCC_CHAT.kill(idx, p->chat);
+  if (p)
     free(p);
-  }
 }
 
 struct dcc_table DCC_DUPWAIT = {
@@ -1624,26 +1619,21 @@ dcc_telnet_id(int idx, char *buf, int atr)
       lostdcc(idx);
       return;
     } else if (in_chain(dcc[idx].nick)) {
-//      struct chat_info *ci = dcc[idx].u.chat;
 
       dcc[idx].type = &DCC_DUPWAIT;
       dcc[idx].u.dupwait = (struct dupwait_info *) my_calloc(1, sizeof(struct dupwait_info));
-//      dcc[idx].u.dupwait->chat = ci;
       dcc[idx].u.dupwait->atr = atr;
       return;
     }
-  
-    dcc[idx].u.enc = (struct enc_link_dcc *) my_calloc(1, sizeof(struct enc_link_dcc));
-    dcc[idx].u.enc->method_number = 0;
-    link_get_method(idx);
+//    dcc[idx].u.enc = (struct enc_link_dcc *) my_calloc(1, sizeof(struct enc_link_dcc));
+//    dcc[idx].u.enc->method_number = 0;
+//    link_get_method(idx);
   } else {
-    //bots dont need this
-    dcc[idx].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
-    strcpy(dcc[idx].u.chat->con_chan, chanset ? chanset->dname : "*");
   }
 
   dcc_telnet_pass(idx, atr);
 }
+
 
 static void
 dcc_telnet_pass(int idx, int atr)
@@ -1662,11 +1652,10 @@ dcc_telnet_pass(int idx, int atr)
   }
 
   if (dcc[idx].type == &DCC_DUPWAIT) {
-//    struct chat_info *ci = dcc[idx].u.dupwait->chat;
-
     free(dcc[idx].u.dupwait);
-//    dcc[idx].u.chat = ci;
+    dcc[idx].u.other = NULL;
   }
+
   dcc[idx].type = &DCC_CHAT_PASS;
   dcc[idx].timeval = now;
 
@@ -1674,7 +1663,7 @@ dcc_telnet_pass(int idx, int atr)
     dcc[idx].status |= STAT_PARTY;
 
   if (conf.bot->hub) {
-    if (glob_bot(fr)) {
+    if (dcc[idx].bot) {
       /* negotiate a new linking scheme */
       int i = 0;
       char buf[1024] = "", rand[51] = "";
@@ -1687,9 +1676,14 @@ dcc_telnet_pass(int idx, int atr)
         simple_sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
 
       dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
-    } else
+    } else {
+      //bots dont need this
+      dcc[idx].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
+      strcpy(dcc[idx].u.chat->con_chan, chanset ? chanset->dname : "*");
+
       /* Turn off remote telnet echo (send IAC WILL ECHO). */
       dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
+    }
   } else
     dprintf(idx, "%s\n" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, response(RES_PASSWORD));
 }
@@ -1724,7 +1718,7 @@ struct dcc_table DCC_TELNET_ID = {
   &password_timeout,
   timeout_dcc_telnet_id,
   display_dcc_telnet_id,
-  kill_dcc_general,
+  NULL,
   out_dcc_general,
   NULL
 };
@@ -1936,6 +1930,8 @@ dcc_telnet_got_ident(int i, char *host)
   /* Copy acceptable-nick/host mask */
   strlcpy(dcc[i].nick, dcc[idx].host, HANDLEN);
   dcc[i].timeval = now;
+
+  dcc[i].u.other = NULL;
   /* This is so we dont tell someone doing a portscan anything
    * about ourselves. <cybah>
    */
