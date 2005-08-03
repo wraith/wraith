@@ -21,6 +21,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed hubs not correctly installing/checking crontab on startup. (#156)
 * Fixed hub segfaults (on Linux) with bot links. (#155)
 * Removing an ignore by number now displays which ignore was removed. (#126)
+* Added hub cmd 'checkchannels' which displays in loglevel misc (+o) which chans leaf bots aren't on. (#149)
 
 1.2.7
 * Forgot 'log_bad = 0;' to fix the '!' showing up for aliases.

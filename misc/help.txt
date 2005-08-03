@@ -253,7 +253,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
    Just using '&' for 'bot' will do the cmd on all localhub bots. (first bot in config).
  
    This cmd cannot be chained over the botnet, ie, no: .botcmd [bot] botcmd [bot2] ...
-
+ 
    There are two default aliases added for this cmd:
      bc -> botcmd
      bl -> botcmd ?
@@ -616,6 +616,13 @@ See also: console
           You must remove the permanent owner in the binary.
  
 See also: whois
+:hub:checkchannels
+###  $bcheckchannels$b
+   This will make all leaf bots display which channels they are currently
+   not in but *should* be in.  This command will not show channels which
+   the bot is not active in due to '$bbotpart$b'.
+ 
+See also: botcmd, channels, channel, status
 :hub:chhandle
 ###  $bchhandle$b <oldhandle> <newhandle>
    Changes the handle of a user. For example, to change the handle of user

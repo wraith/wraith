@@ -492,6 +492,16 @@ static void cmd_chinfo(int idx, char *par)
   }
 }
 
+static void cmd_checkchannels(int idx, char *par)
+{
+  char buf[6] = "";
+
+  putlog(LOG_CMDS, "*", "#%s# checkchannels", dcc[idx].nick);
+
+  simple_snprintf(buf, sizeof(buf), "chans");
+  putallbots(buf);
+}
+
 static void cmd_slowjoin(int idx, char *par)
 {
   int intvl = 0, delay = 0, count = 1;
@@ -1352,6 +1362,7 @@ static cmd_t C_dcc_channels[] =
   {"cycle", 	"n|n",	(Function) cmd_cycle,		NULL, 0},
   {"down",	"n|n",	(Function) cmd_down,		NULL, 0},
   {"info",	"",	(Function) cmd_info,		NULL, 0},
+  {"checkchannels", "n",    (Function) cmd_checkchannels,	NULL, HUB},
   {"slowjoin",  "n",    (Function) cmd_slowjoin,	NULL, 0},
   {"slowpart",  "n|n",  (Function) cmd_slowpart,  	NULL, 0},
   {"stick",	"o|o",	(Function) cmd_stick,		NULL, AUTH},
