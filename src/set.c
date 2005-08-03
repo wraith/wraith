@@ -788,7 +788,7 @@ void cmd_set_real(const char *botnick, int idx, char *par)
     if (list) {
       if (list == LIST_ADD) {
         if (var_add_list(botnick, var, data)) {
-          dprintf(idx, "Added to %s list.\n", var->name);
+          dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
           return;
         }
       } else if (list == LIST_RM) {

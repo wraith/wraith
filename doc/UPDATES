@@ -16,7 +16,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed hubs attempting to generate a ctcp version reply after 'cloak-script' was set.
 * Fixed some similar problems with servers/servers6/nick
 * Fixed a memleak in var_set_mem()
-* Now specifying what was removed from a list with set -listvar.
+* Now specifying what was removed from a list with set -listvar and set +listvar.
 * Fixed hub forgetting it's uplink.
 * Fixed hubs not correctly installing/checking crontab on startup. (#156)
 * Fixed hub segfaults (on Linux) with bot links. (#155)
