@@ -545,7 +545,6 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
 
   char *data = NULL, *olddata = NULL, *botdata = NULL;
 
-
   if (botnick) {                          //fetch data from bot's USERENTRY_SET
     botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name);
     olddata = botdata ? botdata : NULL;
@@ -570,10 +569,12 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
   return 1;
 }
 
-static int var_rem_list(const char *botnick, variable_t *var, const char *element)
+static char *var_rem_list(const char *botnick, variable_t *var, const char *element)
 {
+  static char ret[101] = "";
+
   if (!element)
-    return 0;
+    return ret;
 
   char *data = NULL, *olddata = NULL, *botdata = NULL, *olddatap = NULL, *olddatacp = NULL, *word = NULL;
 
@@ -603,7 +604,8 @@ static int var_rem_list(const char *botnick, variable_t *var, const char *elemen
         simple_snprintf(data, tsiz, "%s,%s", data, word);
       else
         simple_snprintf(data, tsiz, "%s", word);
-    }
+    } else
+      simple_snprintf(ret, sizeof(ret), "%s", word);
     i++;
   }
   var_set(var, botnick, data);
@@ -611,8 +613,7 @@ static int var_rem_list(const char *botnick, variable_t *var, const char *elemen
     var_set_userentry(botnick, var->name, data);
   free(data);
   free(olddatap);
-  return 1;
-
+  return ret;
 }
 
 bool write_vars_and_cmdpass(FILE *f, int idx)
@@ -792,8 +793,10 @@ void cmd_set_real(const char *botnick, int idx, char *par)
           return;
         }
       } else if (list == LIST_RM) {
-        if (var_rem_list(botnick, var, data)) {
-          dprintf(idx, "Removed '%s' from %s list.\n", data, var->name);
+        char *expanded_data = NULL;
+
+        if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
+          dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
           return;
         }
       }
