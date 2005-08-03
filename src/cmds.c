@@ -3224,12 +3224,12 @@ static void cmd_mns_ignore(int idx, char *par)
     return;
   }
 
-  char buf[UHOSTLEN] = "";
+  char buf[UHOSTLEN] = "", *expanded_buf = NULL;
 
   strlcpy(buf, par, sizeof buf);
-  if (delignore(buf)) {
+  if ((expanded_buf = delignore(buf)) && expanded_buf[0]) {
     putlog(LOG_CMDS, "*", "#%s# -ignore %s", dcc[idx].nick, buf);
-    dprintf(idx, "No longer ignoring: %s\n", buf);
+    dprintf(idx, "No longer ignoring: %s\n", expanded_buf);
     if (conf.bot->hub)
       write_userfile(idx);
   } else

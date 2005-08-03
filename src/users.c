@@ -63,11 +63,11 @@ int equals_ignore(char *uhost)
   return 0;
 }
 
-int delignore(char *ign)
+char *delignore(char *ign)
 {
   int i = 0, j;
   struct igrec **u = NULL, *t = NULL;
-  char temp[256] = "";
+  static char temp[256] = "";
 
   if (!strchr(ign, '!') && (j = atoi(ign))) {
     for (u = &global_ign, j--; *u && j; u = &((*u)->next), j--);
@@ -101,8 +101,10 @@ int delignore(char *ign)
     t = *u;
     *u = (*u)->next;
     free(t);
-  }
-  return i;
+  } else
+    temp[0] = 0;
+
+  return temp;
 }
 
 void addignore(char *ign, char *from, const char *mnote, time_t expire_time)

@@ -162,7 +162,7 @@ void def_display(int idx, struct user_entry *e, struct userrec *u);
 
 void backup_userfile();
 void addignore(char *, char *, const char *, time_t);
-int delignore(char *);
+char *delignore(char *);
 void tell_ignores(int, char *);
 bool match_ignore(char *);
 void check_expired_ignores();
