@@ -386,6 +386,9 @@ void check_trace(int start)
     } else
       detected(DETECT_TRACE, "I'm being traced!");
   } else {
+    if (!start)
+      return;
+
   /* now, let's attempt to ptrace ourself */
     switch ((x = fork())) {
       case -1:
