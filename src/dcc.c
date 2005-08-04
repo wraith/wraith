@@ -1662,6 +1662,12 @@ dcc_telnet_pass(int idx, int atr)
   if ((conf.bot->hub && !glob_huba(fr)) || (!conf.bot->hub && ischanhub() && !glob_chuba(fr)))
     dcc[idx].status |= STAT_PARTY;
 
+  if (!dcc[idx].bot) {
+    //bots dont need this
+    dcc[idx].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
+    strcpy(dcc[idx].u.chat->con_chan, chanset ? chanset->dname : "*");
+  }
+
   if (conf.bot->hub) {
     if (dcc[idx].bot) {
       /* negotiate a new linking scheme */
@@ -1677,10 +1683,6 @@ dcc_telnet_pass(int idx, int atr)
 
       dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
     } else {
-      //bots dont need this
-      dcc[idx].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
-      strcpy(dcc[idx].u.chat->con_chan, chanset ? chanset->dname : "*");
-
       /* Turn off remote telnet echo (send IAC WILL ECHO). */
       dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
     }
