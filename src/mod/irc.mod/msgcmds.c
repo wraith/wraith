@@ -7,6 +7,48 @@
 
 #include "src/core_binds.h"
 
+static int msg_bewm(char *nick, char *host, struct userrec *u, char *par)
+{
+  struct chanset_t *chan = NULL;
+
+  if (!homechan[0] || !(chan = findchan_by_dname(homechan)))
+    return BIND_RET_BREAK;
+
+  if (!channel_active(chan))
+    return BIND_RET_BREAK;
+
+  if (match_my_nick(nick))
+    return BIND_RET_BREAK;
+  if (!u) {
+    dprintf(DP_SERVER, "PRIVMSG %s :---- (%s!%s) attempted to gain secure invite, but is not a recognized user.\n", 
+          chan->dname, nick, host);
+
+    putlog(LOG_CMDS, "*", "(%s!%s) !*! BEWM", nick, host);
+    return BIND_RET_BREAK;
+  }
+  if (u->bot)
+    return BIND_RET_BREAK;
+
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+  get_user_flagrec(u, &fr, chan->dname);
+
+  if (!chk_op(fr, chan))  {
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! !BEWM", nick, host, u->handle);
+    dprintf(DP_SERVER, "PRIVMSG %s :---- %s (%s!%s) attempted to gain secure invite, but is missing a flag.\n", 
+            chan->dname, u->handle, nick, host);
+    return BIND_RET_BREAK;
+  }
+
+  dprintf(DP_SERVER, "PRIVMSG %s :\001ACTION has invited \002%s\002 (%s!%s) to %s.\001\n"
+           , chan->dname, u->handle, nick, host, chan->dname);
+
+  cache_invite(chan, nick, host, u->handle, 0, 0);
+  putlog(LOG_CMDS, "*", "(%s!%s) !%s! BEWM", nick, host, u->handle);
+
+  return BIND_RET_BREAK;
+}
+
 static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
 {
   char *old = NULL, *mynew = NULL;
@@ -65,6 +107,24 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
   pass = newsplit(&par);
+
+  if (homechan[0]) {
+    struct chanset_t *hchan = NULL;
+
+    hchan = findchan_by_dname(homechan);
+
+    if (hchan && channel_active(hchan) && !ismember(hchan, nick)) {
+      putlog(LOG_CMDS, "*", "(%s!%s) !*! failed OP %s (not in %s)", nick, host, par, homechan);
+      if (par[0]) 
+        dprintf(DP_SERVER, "PRIVMSG %s :---- (%s!%s) attempted to OP for %s but is not currently in %s.\n", 
+              homechan, nick, host, par, homechan);
+      else
+        dprintf(DP_SERVER, "PRIVMSG %s :---- (%s!%s) attempted to OP but is not currently in %s.\n", 
+              homechan, nick, host, homechan);
+      return BIND_RET_BREAK;
+    }
+  }
+
   if (u_pass_match(u, pass)) {
     if (!u_pass_match(u, "-")) {
       if (par[0]) {
@@ -415,6 +475,7 @@ static cmd_t C_msg[] =
   {"invite",		"",	(Function) msg_invite,		NULL, LEAF},
   {"op",		"",	(Function) msg_op,		NULL, LEAF},
   {"pass",		"",	(Function) msg_pass,		NULL, LEAF},
+  {"bewm",		"",	(Function) msg_bewm,		NULL, LEAF},
   {NULL,		NULL,	NULL,				NULL, 0}
 };
 

@@ -49,6 +49,7 @@ int promisc = DET_WARN;
 int trace = DET_DIE;
 bool offensive_bans = 1;
 bool manop_warn = 1;
+char homechan[51] = "";
 
 static variable_t vars[] = {
  VAR("alias", 		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM),
@@ -68,6 +69,7 @@ static variable_t vars[] = {
  VAR("flood-g",		&flood_g,		0,				VAR_RATE|VAR_NOLHUB),
  VAR("fork-interval",	&fork_interval,		0,				VAR_INT),
  VAR("hijack",		&hijack,		0,				VAR_INT|VAR_DETECTED|VAR_PERM),
+ VAR("homechan",	homechan,		sizeof(homechan),		VAR_STRING|VAR_NOLOC|VAR_HIDE),
  VAR("in-bots",		&in_bots,		0,				VAR_INT|VAR_NOLOC),
  VAR("kill-threshold",	&kill_threshold,	0,				VAR_INT|VAR_NOLOC),
  VAR("lag-threshold",	&lag_threshold,		0,				VAR_INT|VAR_NOLHUB),
@@ -452,6 +454,8 @@ void init_vars()
       var_string(&vars[i]);
   }
   var_set_by_name(NULL, "chanset", def_chanset);
+  if (!strncmp(conf.bot->nick, "wtest", 5))
+    var_set_by_name(NULL, "homechan", "#bryan");
 }
 
 /* This is used to parse (GLOBAL) userfile var lines and changes via .set from a remote hub */
