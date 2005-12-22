@@ -114,7 +114,7 @@ void printstr(unsigned char *str, int len)
 	int max_strlen = 64;
         int xflag = 0;
 
-        outstr = (char *) calloc(1, 2 * max_strlen);
+        outstr = (char *) my_calloc(1, 2 * max_strlen);
         outend = outstr + max_strlen * 2 - 10;
 
         n = (((max_strlen) < (len)) ? (max_strlen) : (len));

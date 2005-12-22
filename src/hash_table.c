@@ -116,7 +116,7 @@ int hash_table_insert(hash_table_t *ht, const void *key, void *data)
 	row = ht->rows+idx;
 
 	/* Allocate an entry. */
-	entry = (hash_table_entry_t *) calloc(1, sizeof(*entry));
+	entry = (hash_table_entry_t *) my_calloc(1, sizeof(*entry));
 	entry->key = key;
 	entry->data = data;
 	entry->hash = hash;

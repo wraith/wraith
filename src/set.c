@@ -561,7 +561,7 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
   if (olddata && osiz) {
     size_t esiz = strlen(element) + 1;		// element + ,
 
-    data = (char *) calloc(1, osiz + esiz + 1);
+    data = (char *) my_calloc(1, osiz + esiz + 1);
     simple_snprintf(data, osiz + esiz + 1, "%s,%s", olddata, element);
   } else /* otherwise, just set the data to the element to be added */
     data = strdup(element);
@@ -600,7 +600,7 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   olddata = olddatap = strdup(olddatacp);
   size_t osiz = strlen(olddata), esiz = strlen(element) + 1, tsiz = osiz - esiz + 1;          // element + ,
 
-  data = (char *) calloc(1, tsiz);
+  data = (char *) my_calloc(1, tsiz);
 
   while ((word = strsep(&olddata, delim))) {
     if ((num && num != i) || (!num && egg_strcasecmp(word, element))) {
