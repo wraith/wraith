@@ -249,8 +249,11 @@ void Tempfile::FindDir()
 
 #ifdef CYGWIN_HACKS
   simple_snprintf(tempdir, DIRMAX, "tmp/");
-#endif /* CYGWIN_HACKS */
-
+  if (!check_tempdir(0)) {
+    clear_tmpdir = 0;
+    simple_snprintf(tempdir, DIRMAX, "./");
+  }
+#else
   if (!check_tempdir(0)) {
     clear_tmpdir = 0;
     simple_snprintf(tempdir, DIRMAX, "/tmp/");
@@ -272,4 +275,5 @@ void Tempfile::FindDir()
     check_tempdir(0);
     werr(ERR_TMPSTAT);
   }
+#endif /* CYGWIN_HACKS */
 }

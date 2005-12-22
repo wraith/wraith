@@ -377,7 +377,7 @@ static void dtx_arg(int argc, char *argv[])
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf("%s\nBuild Date: %s (%lu)\n", version, date, buildts);
 
-	printf("pack: %d conf: %d settings_t: %d pad: %d\n", SIZE_PACK, SIZE_CONF, sizeof(settings_t), SIZE_PAD);
+	sdprintf("pack: %d conf: %d settings_t: %d pad: %d\n", SIZE_PACK, SIZE_CONF, sizeof(settings_t), SIZE_PAD);
         if (settings.uname[0]) {
           sdebug++;
           bin_to_conf();
@@ -552,6 +552,7 @@ static void startup_checks(int hack) {
 
   if (can_stat(cfile))
     readconf(cfile, 0);	/* will read into &conf struct */
+  conf_checkpids();
 #endif /* CYGWIN_HACKS */
 
 #ifndef CYGWIN_HACKS
