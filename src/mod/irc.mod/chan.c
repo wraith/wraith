@@ -2664,7 +2664,7 @@ static int gotkick(char *from, char *origmsg)
       simple_sprintf(s1, "%s!%s", m->nick, m->userhost);
       u2 = get_user_by_host(s1);
       set_handle_laston(chan->dname, u2, now);
-      maybe_revenge(chan, from, s1, REVENGE_KICK);
+//      maybe_revenge(chan, from, s1, REVENGE_KICK);
     } else {
       simple_sprintf(s1, "%s!*@could.not.loookup.hostname", nick);
     }

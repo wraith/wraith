@@ -34,7 +34,7 @@
 static bool 			use_info = 1;
 static char 			glob_chanmode[64] = "nt";		/* Default chanmode (drummer,990731) */
 static int 			global_stopnethack_mode;
-static int 			global_revenge_mode = 3;
+//static int 			global_revenge_mode = 3;
 static int 			global_idle_kick;		/* Default idle-kick setting. */
 static time_t 			global_ban_time;
 static time_t			global_exempt_time;
@@ -823,10 +823,12 @@ void channels_report(int idx, int details)
 	  i += my_strcpy(s + i, "bitch ");
 	if (channel_protectops(chan))
 	  i += my_strcpy(s + i, "protectops ");
+/*
 	if (channel_revenge(chan))
 	  i += my_strcpy(s + i, "revenge ");
 	if (channel_revenge(chan))
 	  i += my_strcpy(s + i, "revengebot ");
+*/
 	if (channel_secret(chan))
 	  i += my_strcpy(s + i, "secret ");
 	if (channel_cycle(chan))
@@ -871,9 +873,11 @@ void channels_report(int idx, int details)
 	if (chan->stopnethack_mode)
 	  dprintf(idx, "      stopnethack-mode %d\n",
 		  chan->stopnethack_mode);
+/*
         if (chan->revenge_mode)
           dprintf(idx, "      revenge-mode %d\n",
                   chan->revenge_mode);
+*/
        dprintf(idx, "    Bans last %lu mins.\n", chan->ban_time);
        dprintf(idx, "    Exemptions last %lu mins.\n", chan->exempt_time);
        dprintf(idx, "    Invitations last %lu mins.\n", chan->invite_time);

@@ -168,7 +168,9 @@ struct chanset_t {
  */
   int idle_kick;
   int stopnethack_mode;
+#ifdef REVENGE
   int revenge_mode;
+#endif
   time_t ban_time;
   time_t invite_time;
   time_t exempt_time;
@@ -215,13 +217,13 @@ struct chanset_t {
 #define CHAN_TAKE 	    BIT5	/* When a bot gets opped, take the chan */
 #define CHAN_PROTECTOPS     BIT6	/* re-op any +o people who get deop'd */
 #define CHAN_BOTBITCH       BIT7        /* only let bots be opped? */
-#define CHAN_REVENGE        BIT8	/* get revenge on bad people          */
+#undef  CHAN_8              /*BIT8	 */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
 #undef  CHAN_10		    /* BIT10        not used */
 #define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
 #define CHAN_INACTIVE       BIT12	/* no irc support for this channel */
 #define CHAN_VOICE          BIT13	/* a bot +y|y will voice *, except +q */
-#define CHAN_REVENGEBOT     BIT14	/* revenge on actions against the bot */
+#undef  CHAN_14             /* BIT14	 */
 #define CHAN_NODESYNCH      BIT15
 #define CHAN_FASTOP         BIT16	/* Bots will not use +o-b to op (no cookies) */ 
 #define CHAN_PRIVATE        BIT17	/* users need |o to access chan */ 
@@ -259,14 +261,12 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_botbitch(chan) (chan->status & CHAN_BOTBITCH)
 #define channel_nodesynch(chan) (chan->status & CHAN_NODESYNCH)
 #define channel_enforcebans(chan) (chan->status & CHAN_ENFORCEBANS)
-#define channel_revenge(chan) (chan->status & CHAN_REVENGE)
 #define channel_dynamicbans(chan) (chan->status & CHAN_DYNAMICBANS)
 #define channel_nouserbans(chan) (chan->status & CHAN_NOUSERBANS)
 #define channel_protectops(chan) (chan->status & CHAN_PROTECTOPS)
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
-#define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
 #define channel_dynamicexempts(chan) (chan->ircnet_status & CHAN_DYNAMICEXEMPTS)
 #define channel_nouserexempts(chan) (chan->ircnet_status & CHAN_NOUSEREXEMPTS)
 #define channel_dynamicinvites(chan) (chan->ircnet_status & CHAN_DYNAMICINVITES)
@@ -274,6 +274,10 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_juped(chan) (chan->status & CHAN_JUPED)
 #define channel_stop_cycle(chan) (chan->status & CHAN_STOP_CYCLE)
 
+#ifdef REVENGE
+#define channel_revenge(chan) (chan->status & CHAN_REVENGE)
+#define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
+#endif 
 
 #define channel_closed(chan) (chan->status & CHAN_CLOSED)
 #define channel_take(chan) (chan->status & CHAN_TAKE)

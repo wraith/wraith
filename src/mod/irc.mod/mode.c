@@ -688,7 +688,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
     char s[UHOSTLEN] = "";
 
     simple_sprintf(s, "%s!%s", mv->nick, mv->userhost);
-    maybe_revenge(chan, s1, s, REVENGE_DEOP);
+//    maybe_revenge(chan, s1, s, REVENGE_DEOP);
   }
 }
 

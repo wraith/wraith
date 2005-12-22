@@ -368,16 +368,6 @@ See also: link
                               If the channel is +bitch, see stopnethack-mode 1
                             6 If the channel is -bitch, see stopnethack-mode 2
                               If the channel is +bitch, see stopnethack-mode 4
-        $brevenge-mode$b      This settings defines how the bot should punish
-                          bad users when revenging. There are four possible
-                          settings:
-                            0 Deop the user.
-                            1 Deop the user and give them the +d flag for the
-                              channel.
-                            2 Deop the user, give them the +d flag for the
-                              channel, and kick them.
-                            3 Deop the user, give them the +d flag for the
-                              channel, kick, and ban them.
         $bclosed-ban$b        Set this to 1 to ban users who join +closed 
                           channels. This is probably not needed though, as
                           +closed maintains +i.
@@ -468,10 +458,6 @@ See also: link
                        will see no reference to it over the botnet in any place.
         $bprotectops$b     Re-op a user with the +o flag if they get deopped?
                        DON'T USE THIS.
-        $brevenge$b        Remember people who deop/kick/ban the bot, valid ops,
-                       or friends and punish them? 
-        $brevengebot$b     This is similar to to the 'revenge' option, but it
-                       only triggers if a bot gets deopped, kicked or banned.
         $btake$b           Once a bot is opped, it will mass op all other bots
                        in the channel. After that, they will all attempt to 
                        mass deop in hopes 'taking' the channel. :)
