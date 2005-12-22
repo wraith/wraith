@@ -1,3 +1,4 @@
+#ifdef NO
 /* makepath.c -- Ensure that a directory path exists.
 
    Copyright (C) 1990, 1997, 1998, 1999, 2000, 2002, 2003 Free
@@ -359,3 +360,4 @@ make_path (const char *argpath,
   free(dirname);
   return retval;
 }
+#endif

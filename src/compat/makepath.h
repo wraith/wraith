@@ -1,3 +1,4 @@
+#ifdef NO
 /* makepath.c -- Ensure that a directory path exists.
 
    Copyright (C) 1994, 1995, 1996, 1997, 2000, 2003 Free Software
@@ -33,3 +34,4 @@ int make_dir (const char *dir,
 	      const char *dirpath,
 	      mode_t mode,
 	      int *created_dir_p);
+#endif
