@@ -439,7 +439,7 @@ static bool check_bin_initialized(const char *fname)
   size_t len = strlen(shell_escape(fname)) + 3 + 1;
   char *path = (char *) my_calloc(1, len);
 
-  simple_snprintf(path, len, "%s -q", shell_escape(fname));
+  simple_snprintf(path, len, "%s -p", shell_escape(fname));
 
   i = system(path);
   free(path);

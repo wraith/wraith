@@ -252,6 +252,13 @@ in_addr_t getmyip() {
 /* see if it's necessary to set inaddr_any... because if we can't resolve, we die anyway */
 void cache_my_ip()
 {
+#ifdef no
+  cached_myip6_so.sin6.sin6_family = AF_INET6;
+  cached_myip6_so.sin6.sin6_addr = in6addr_any;
+  cached_myip4_so.sin.sin_family = AF_INET;
+  cached_myip4_so.sin.sin_addr.s_addr = INADDR_ANY;
+#endif
+
   int error = 0;
 
   debug0("cache_my_ip()");

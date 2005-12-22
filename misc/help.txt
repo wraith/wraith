@@ -634,11 +634,10 @@ See also: chpass%{+n}, chsecpass%{-}
 ::chinfo
 ###  $bchinfo$b <user> [channel] [info-line/none]
    Sets the information line for a user. This line is shown via the /msg
-   commands $b'who'$b and $b'whois'$b. If you have set greet on, it is also
-   shown when the user joins the channel. If the info line begins with an '@',
-   then it is "locked", and that user may no longer change it. If the channel
-   name is omitted, the default info line is changed. If you specify 'none'
-   as the info-line, it will be erased.
+   commands $b'who'$b and $b'whois'$b. 
+   If the info line begins with an '@', then it is "locked", and that user 
+   may no longer change it. If the channel name is omitted, the default info 
+   line is changed. If you specify 'none' as the info-line, it will be erased.
  
 See also: info
 :hub:chnick
@@ -1060,9 +1059,8 @@ See also: +ignore, -ignore
 ::info
 ###  $binfo$b [channel] [info-line]
    Sets your info line. This line is shown via the /msg commands $b'who'$b and
-   $b'whois'$b. If you have set greet on, it is also shown when you join the
-   channel. If the info line begins with an '@', then it is "locked", and you
-   may no longer change it.
+   $b'whois'$b. If the info line begins with an '@', then it is "locked", and 
+   you may no longer change it.
  
 %{+m|m}See also: chinfo%{-}
 :leaf:invite
