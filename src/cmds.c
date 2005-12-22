@@ -3090,8 +3090,10 @@ static void cmd_newleaf(int idx, char *par)
         af_type = is_dotted_ip(hostname);
         if (!ip && af_type == AF_INET)
           ip = strdup(hostname);
+#ifdef USE_IPV6
         else if (!ip6 && af_type == AF_INET6)
           ip6 = strdup(hostname);
+#endif /* USE_IPV6 */
         else if (!bhostname && !strchr(hostname, '*') && !strchr(hostname, '?'))
           bhostname = strdup(hostname);
       }

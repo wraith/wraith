@@ -43,8 +43,10 @@ typedef struct {
   int family;
   union {
     struct in_addr addr;
+#ifdef USE_IPV6
     struct in6_addr addr6;
+#endif
   } u;
-} addr_t;
+} my_addr_t;
 
 #endif /* !_TYPES_H */

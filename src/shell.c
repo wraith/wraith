@@ -51,8 +51,8 @@ bool clear_tmpdir = 0;
 
 int my_system(const char *run)
 {
+#ifdef WIN32-no
   int ret = -1;
-#ifdef WIN32
 
   PROCESS_INFORMATION pinfo;
   STARTUPINFO sinfo;
@@ -68,7 +68,7 @@ int my_system(const char *run)
 
   ret =
     CreateProcess(NULL, (char *) run, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS | DETACHED_PROCESS, NULL, NULL,
-                  &sinfo, &pinfo);
+                  (STARTUPINFO *) &sinfo, (PROCESS_INFORMATION *) &pinfo);
 
   if (ret == 0)
     return -1;

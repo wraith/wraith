@@ -80,42 +80,6 @@ unsigned long my_atoul(char *s)
   return ret;
 }
 
-int hostprotocol(const char *host)
-{
-  if (!host || (host && !host[0]))
-    return 0;
-
-  /* return the AF_TYPE if it's already an ip */
-  int af_type = is_dotted_ip(host);
-
-  if (af_type)
-    return af_type;
-
-#ifdef USE_IPV6
-  struct hostent *he = NULL;
-
-  sdprintf("WARNING: gethostbyname2() is about to block in hostprotocol()");
-
-  if (!setjmp(alarmret)) {
-    alarm(resolve_timeout);
-
-#   ifdef HAVE_GETHOSTBYNAME2
-    he = gethostbyname2(host, AF_INET6);
-#   else
-    int error_num;
-    he = getipnodebyname(host, AF_INET6, AI_DEFAULT, &error_num);
-#   endif /* HAVE_GETHOSTBYNAME2 */
-    alarm(0);
-  } else
-    he = NULL;
-  if (!he)
-    return AF_INET;
-  return AF_INET6;
-#else
-  return 0;
-#endif /* USE_IPV6 */
-}
-
 /* get the protocol used on a socket */
 int sockprotocol(int sock)
 {
@@ -697,40 +661,8 @@ int open_telnet_raw(int sock, const char *server, port_t sport, bool proxy_on)
     /* initialize so for connect using the host/port */
     initialize_sockaddr(is_resolved, host, port, &so);
   } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
-    sdprintf("WARNING: open_telnet_raw() is about to block in get_ip()!");
-
-    if (!setjmp(alarmret)) {
-      alarm(resolve_timeout);
-      if (!get_ip(host, &so)) {
-        alarm(0);
-        /* ok, we resolved it, bind an appropriate ip */
-#ifdef USE_IPV6
-        if (so.sa.sa_family == AF_INET6) {
-          if (bind(sock, &cached_myip6_so.sa, SIZEOF_SOCKADDR(cached_myip6_so)) < 0) {
-            putlog(LOG_DEBUG, "*", "Failed to bind to v6 socket %d: %s", sock, strerror(errno));
-            killsock(sock);
-            return -1;
-          }
-        } else {
-#endif /* USE_IPV6 */
-          if (bind(sock, &cached_myip4_so.sa, SIZEOF_SOCKADDR(cached_myip4_so)) < 0) {
-            putlog(LOG_DEBUG, "*", "Failed to bind to socket %d: %s", sock, strerror(errno));
-            killsock(sock);
-            return -3;
-          }
-#ifdef USE_IPV6
-        }
-        if (so.sa.sa_family == AF_INET6)
-          so.sin6.sin6_port = htons(port);
-        else
-#endif /* USE_IPV6 */
-          so.sin.sin_port = htons(port);
-      } else {
-        alarm(0);
-        killsock(sock);
-        return -2;
-      }
-    }
+    sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", host, port);
+    return -1;
   }
 
   for (int i = 0; i < MAXSOCKS; i++) {
@@ -775,7 +707,7 @@ int open_telnet(const char *server, port_t port, bool proxy)
   int sock = -1;
   
 #ifdef USE_IPV6
-  sock = getsock(0, hostprotocol(server));
+  sock = getsock(0, is_dotted_ip(server));
 #else
   sock = getsock(0);
 #endif /* USE_IPV6 */

@@ -736,7 +736,9 @@ int updatebin(int idx, char *par, int secs)
 
   char *path = (char *) my_calloc(1, strlen(binname) + strlen(par) + 2);
   char *newbin = NULL, buf[DIRMAX] = "";
+#ifndef CYGWIN_HACKS
   int i;
+#endif /* !CYGWIN_HACKS */
 
   strcpy(path, binname);
   newbin = strrchr(path, '/');
@@ -820,10 +822,10 @@ int updatebin(int idx, char *par, int secs)
 
 #ifdef CYGWIN_HACKS
   {
-    size_t binsize = strlen(tmpdir) + 7 + 1;
+    size_t binsize = conffile->len + 7 + 1;
     char *tmpbuf = (char *) my_calloc(1, binsize);
 
-    simple_sprintf(tmpbuf, "%sbin.old.exe", tmpdir);
+    simple_sprintf(tmpbuf, "%sbin.old.exe", conffile->file);
     tmpbuf[binsize - 1] = 0;
     movefile(binname, tmpbuf);
     free(tmpbuf);

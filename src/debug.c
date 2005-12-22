@@ -344,10 +344,12 @@ static void got_abort(int z)
 #endif /* DEBUG */
 }
 
+#ifndef CYGWIN_HACKS
 static void got_cont(int z)
 {
   detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED (!! MAY BE BOX REBOOT !!)");
 }
+#endif /* !CYGWIN_HACKS */
 
 static void got_alarm(int) __attribute__((noreturn));
 
@@ -393,7 +395,9 @@ void init_signals()
   signal(SIGSEGV, got_segv);
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
+#ifndef CYGWIN_HACKS
   signal(SIGCONT, got_cont);
+#endif /* !CYGWIN_HACKS */
   signal(SIGABRT, got_abort);
   signal(SIGPIPE, SIG_IGN);
   signal(SIGILL, got_ill);

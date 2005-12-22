@@ -253,7 +253,7 @@ from lib/dns/byaddr.c
 #endif
 }
 
-int get_addr(const char *ip, addr_t *addr)
+int get_addr(const char *ip, my_addr_t *addr)
 {
   if (inet_pton(AF_INET, ip, &addr->u.addr) > 0) {
     addr->family = AF_INET;

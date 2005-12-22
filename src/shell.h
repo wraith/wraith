@@ -60,9 +60,9 @@ void check_crontab();
 void crontab_del();
 int crontab_exists();
 void crontab_create(int);
-void suicide(const char *);
 void detected(int, char *);
 #endif /* !CYGWIN_HACKS */
+void suicide(const char *);
 void werr(int) __attribute__((noreturn));
 char *werr_tostr(int);
 int det_translate(const char *);

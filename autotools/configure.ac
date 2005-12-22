@@ -133,8 +133,8 @@ AC_FUNC_STRFTIME
 
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([clock fsync getrusage isascii inet_aton gethostbyname2])
-AC_CHECK_FUNCS([getipnodebyname memcpy memset random rename snprintf srandom gettime])
+AC_CHECK_FUNCS([clock fsync getrusage isascii inet_aton])
+AC_CHECK_FUNCS([memcpy memset random rename snprintf srandom gettime])
 #checkpoint
 AC_CACHE_SAVE
 AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf])

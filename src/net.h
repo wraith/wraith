@@ -126,7 +126,6 @@ int real_getsock(int, char *, int);
 
 
 int sockprotocol(int);
-int hostprotocol(const char *);
 void real_killsock(int, const char *, int);
 int answer(int, char *, in_addr_t *, port_t *, int);
 int findanysnum(register int);

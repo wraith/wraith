@@ -126,6 +126,9 @@ struct relay_info {
   int sock;
   int old_status;
   int idx;
+#ifdef USE_IPV6
+  int af;
+#endif /* USE_IPV6 */
   port_t port;
 };
 

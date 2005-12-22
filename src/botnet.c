@@ -1096,7 +1096,7 @@ static void failed_tandem_relay(int idx)
   }
   killsock(dcc[idx].sock);
 #ifdef USE_IPV6
-  dcc[idx].sock = getsock(SOCK_STRONGCONN, hostprotocol(dcc[idx].host));
+  dcc[idx].sock = getsock(SOCK_STRONGCONN, dcc[uidx].u.relay->af);
 #else
   dcc[idx].sock = getsock(SOCK_STRONGCONN);
 #endif /* USE_IPV6 */
@@ -1206,11 +1206,12 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   }
 
 #ifdef USE_IPV6
-  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL, is_dotted_ip(ips[0]));
+  int af = is_dotted_ip(ips[0]);
+
+  dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL, af);
 #else
   dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL);
 #endif /* USE_IPV6 */
-
   if (dcc[i].sock < 0) {
     lostdcc(i);
     dprintf(idx, "No free sockets available.\n");
@@ -1228,6 +1229,9 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   dcc[i].u.relay->chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
   dcc[i].u.relay->sock = sock;
   dcc[i].u.relay->port = dcc[i].port;
+#ifdef USE_IPV6
+  dcc[i].u.relay->af = af;
+#endif
   dcc[i].u.relay->chat->away = NULL;
   dcc[i].u.relay->chat->msgs_per_sec = 0;
   dcc[i].u.relay->chat->con_flags = 0;

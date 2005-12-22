@@ -258,28 +258,32 @@ match_cidr(const char *s1, const char *s2)
   if(cidrlen == 0)
     return 0;
 
-  if (strchr(ip, ':') && strchr(ipmask, ':'))
-    aftype = ipaddr.family = maskaddr.family = AF_INET6;
-  else if (!strchr(ip, ':') && !strchr(ipmask, ':'))
+  if (!strchr(ip, ':') && !strchr(ipmask, ':'))
     aftype = ipaddr.family = maskaddr.family =  AF_INET;
+#ifdef USE_IPV6
+  else if (strchr(ip, ':') && strchr(ipmask, ':'))
+    aftype = ipaddr.family = maskaddr.family = AF_INET6;
+#endif /* USE_IPV6 */
   else
     return 0;
 
-  if (aftype == AF_INET6) {
 #ifdef USE_IPV6
+  if (aftype == AF_INET6) {
     inet_pton(aftype, ip, &ipaddr.u.ipv6.sin6_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv6.sin6_addr);
     if (comp_with_mask(&ipaddr.u.ipv6.sin6_addr.s6_addr, &maskaddr.u.ipv6.sin6_addr.s6_addr, cidrlen) && 
        ((ret = wild_match(mask, address))))
       return ret;
-#endif /* USE_IPV6 */
   } else if (aftype == AF_INET) {
+#endif /* USE_IPV6 */
     inet_pton(aftype, ip, &ipaddr.u.ipv4.sin_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv4.sin_addr);
     if (comp_with_mask(&ipaddr.u.ipv4.sin_addr.s_addr, &maskaddr.u.ipv4.sin_addr.s_addr, cidrlen) && 
        ((ret = wild_match(mask, address))))
       return ret;
+#ifdef USE_IPV6
   }
+#endif
   return 0;
 }
 

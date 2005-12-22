@@ -1465,12 +1465,13 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     return;
   }
 
-  addr_t addr;
+  my_addr_t addr;
   char *ip = NULL;
 
   /* FIXME: this is a temporary hack to stop bots from connecting over ipv4 when they should be on ipv6
    * eventually will handle this in open_telnet(ips);
    */
+#ifdef USE_IPV6
   if (conf.bot->net.v6) {
     int i = 0;
     for (i = 0; ips[i]; i++) {
@@ -1486,6 +1487,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
       return;
     }
   } else
+#endif /* USE_IPV6 */
     ip = ips[0];
 
   get_addr(ip, &addr);

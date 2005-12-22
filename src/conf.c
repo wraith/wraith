@@ -459,14 +459,18 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
     if (aftype == AF_INET)
       bot->net.ip = strdup(ip);
+#ifdef USE_IPV6
     else if (aftype == AF_INET6)
       bot->net.ip6 = strdup(ip);
+#endif /* USE_IPV6 */
   }
+#ifdef USE_IPV6
   if (ip6 && strcmp(ip6, ".") && is_dotted_ip(ip6) == AF_INET6)
     bot->net.ip6 = strdup(ip6);
 
   if (bot->net.ip6 || bot->net.host6)
     bot->net.v6 = 1;
+#endif /* USE_IPV6 */
 
   if (userlist)
     bot->u = get_user_by_handle(userlist, nick);
@@ -768,7 +772,6 @@ writeconf(char *filename, FILE * stream, int bits)
   FILE *f = NULL;
   conf_bot *bot = NULL;
   int (*my_write) (FILE *, const char *, ... ) = NULL;
-  char *p = NULL;
   int autowrote = 0;
 
   if (bits & CONF_ENC)
@@ -788,6 +791,8 @@ writeconf(char *filename, FILE * stream, int bits)
       return 1;
   }
 #ifndef CYGWIN_HACKS
+  char *p = NULL;
+
   comment("# Lines beginning with # are what the preceeding line SHOULD be");
   comment("# They are simply comments and are not parsed at all.\n");
 

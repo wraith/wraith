@@ -880,8 +880,10 @@ static int parse_reply(char *response, size_t nbytes)
 			answer_add(&q->answer, result);
 			break;
 		case DNS_AAAA:
+#ifdef USE_IPV6
 			inet_ntop(AF_INET6, ptr, result, 512);
 			answer_add(&q->answer, result);
+#endif /* USE_IPV6 */
 			break;
 		case DNS_PTR:
 			r = my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result));

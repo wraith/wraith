@@ -10648,8 +10648,7 @@ rm -f confcache
 
 
 
-
-for ac_func in clock fsync getrusage isascii inet_aton gethostbyname2
+for ac_func in clock fsync getrusage isascii inet_aton
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -10756,8 +10755,7 @@ done
 
 
 
-
-for ac_func in getipnodebyname memcpy memset random rename snprintf srandom gettime
+for ac_func in memcpy memset random rename snprintf srandom gettime
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
