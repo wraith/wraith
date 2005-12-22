@@ -67,6 +67,7 @@ void werr(int) __attribute__((noreturn));
 char *werr_tostr(int);
 int det_translate(const char *);
 const char *det_translate_num(int);
+char *shell_escape(const char *);
 
 extern bool		clear_tmpdir;
 

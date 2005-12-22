@@ -416,10 +416,10 @@ check_sum(const char *fname, const char *cfgfile)
 static bool check_bin_initialized(const char *fname)
 {
   int i = 0;
-  size_t len = strlen(fname) + 3 + 1;
+  size_t len = strlen(shell_escape(fname)) + 3 + 1;
   char *path = (char *) my_calloc(1, len);
 
-  simple_snprintf(path, len, "%s -q", fname);
+  simple_snprintf(path, len, "%s -q", shell_escape(fname));
 
   i = system(path);
   free(path);

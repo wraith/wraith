@@ -18,6 +18,7 @@
 #include "egg_timer.h"
 #include "dcc.h"
 #include "users.h"
+#include "shell.h"
 #include "main.h"
 #include "debug.h"
 #include "dccutil.h"
@@ -687,9 +688,9 @@ restart(int idx)
 
   simple_sprintf(shit, "-%s%s%sB", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
 
-  argv[0] = strdup(binname);
+  argv[0] = strdup(shell_escape(binname));
   argv[1] = strdup(shit);
-  argv[2] = strdup(replace(conf.bot->nick, "`", "\\`"));
+  argv[2] = strdup(shell_escape(conf.bot->nick));
   argv[3] = NULL;
 
   unlink(conf.bot->pid_file);
@@ -719,7 +720,7 @@ hard_restart(int idx)
   }
   fatal(idx <= 0x7FF0 ? reason : NULL, 1);
   usleep(2000 * 500);
-  simple_sprintf(buf, "%s -B %s\n", binname, conf.bot->nick);
+  simple_sprintf(buf, "%s -B %s\n", shell_escape(binname), shell_escape(conf.bot->nick));
   unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
   system(buf); /* start new bot. */
   exit(0);
@@ -793,7 +794,7 @@ int updatebin(int idx, char *par, int secs)
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
 #ifndef CYGWIN_HACKS
-  simple_snprintf(buf, sizeof(buf), STR("%s -2"), path);
+  simple_snprintf(buf, sizeof(buf), STR("%s -2"), shell_escape(path));
   putlog(LOG_DEBUG, "*", "Running for update binary test: %s", buf);
   i = system(buf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
@@ -806,7 +807,7 @@ int updatebin(int idx, char *par, int secs)
 
   /* now to send our config to the new binary */
 #ifndef CYGWIN_HACKS
-  simple_snprintf(buf, sizeof(buf), STR("%s -4 %s"), path, conffile->file);
+  simple_snprintf(buf, sizeof(buf), STR("%s -4 %s"), shell_escape(path), conffile->file);
   putlog(LOG_DEBUG, "*", "Running for update conf: %s", buf);
   i = system(buf);
   delete conffile;

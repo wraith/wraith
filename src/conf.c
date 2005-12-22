@@ -82,11 +82,11 @@ tellconf()
 
 void spawnbot(const char *nick)
 {
-  size_t size = strlen(nick) + strlen(binname) + 20;
+  size_t size = strlen(shell_escape(nick)) + strlen(shell_escape(binname)) + 20;
   char *run = (char *) my_calloc(1, size);
   int status = 0;
 
-  simple_snprintf(run, size, "%s -B %s", binname, replace(nick, "`", "\\`"));
+  simple_snprintf(run, size, "%s -B %s", shell_escape(binname), shell_escape(nick));
   sdprintf("Spawning '%s': %s", nick, run);
   status = system(run);
   if (status == -1 || WEXITSTATUS(status))
@@ -863,7 +863,7 @@ writeconf(char *filename, FILE * stream, int bits)
 
   comment("");
 
-  comment("# Automatically add the bot to crontab?");
+  comment("# Automatically add the bot to crontab? (Disable if binname has funky chars that need escaping)");
   my_write(f, "! autocron %d\n", conf.autocron);
 
   comment("");

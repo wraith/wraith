@@ -42,13 +42,13 @@
 #ifdef WIN32
 # undef exit
 # define exit(x) ExitProcess(x)
-
-/*
-# undef system
-  int my_system(const char *);		
-# define system(_run) 	my_system(_run)
-*/
 #endif /* WIN32 */
+
+
+//# undef system
+int system(const char *);		
+//# define system(_run) 	my_system(_run)
+
 
 #define BIT0    (uint32_t) 0x000000001
 #define BIT1    (uint32_t) 0x000000002

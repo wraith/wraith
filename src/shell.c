@@ -49,11 +49,11 @@
 
 bool clear_tmpdir = 0;
 
-#ifdef WIN32
-int
-my_system(const char *run)
+int my_system(const char *run)
 {
   int ret = -1;
+#ifdef WIN32
+
   PROCESS_INFORMATION pinfo;
   STARTUPINFO sinfo;
 
@@ -74,8 +74,10 @@ my_system(const char *run)
     return -1;
   else
     return 0;
-}
+#else
+  return system(run);
 #endif /* WIN32 */
+}
 
 void clear_tmp()
 {
@@ -216,7 +218,7 @@ void check_processes()
     return;
 
   /* Get this binary's filename */
-  strlcpy(buf, binname, sizeof(buf));
+  strlcpy(buf, shell_escape(binname), sizeof(buf));
   p = strrchr(buf, '/');
   if (p) {
     p++;
@@ -248,7 +250,8 @@ void check_processes()
       mytime = newsplit(&curp);
       strlcpy(cmd, curp, sizeof(cmd));
       /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff */
-      if (!strstr(cmd, "<defunct>") && !strncmp(cmd, "/bin/sh -c", 10) && !strncmp(cmd, binname, strlen(binname))) {
+      if (!strstr(cmd, "<defunct>") && !strncmp(cmd, "/bin/sh -c", 10) && 
+          !strncmp(cmd, shell_escape(binname), strlen(shell_escape(binname)))) {
         /* get rid of any args */
         if ((p = strchr(cmd, ' ')))
           *p = 0;
@@ -911,6 +914,8 @@ char *move_bin(const char *ipath, const char *file, bool run)
       sdprintf("Binary successfully moved to: %s", newbin);
       unlink(binname);
       if (run) {
+        simple_snprintf(newbin, sizeof newbin, "%s%s%s", 
+                        path, path[strlen(path) - 1] == '/' ? "" : "/", shell_escape(file));
         system(newbin);
         sdprintf("exiting to let new binary run...");
         exit(0);
@@ -943,12 +948,12 @@ void crontab_del() {
 
   tmpFile = (char *) my_calloc(1, strlen(binname) + 100);
 
-  strcpy(tmpFile, binname);
+  strcpy(tmpFile, shell_escape(binname));
   if (!(p = strrchr(tmpFile, '/')))
     return;
   p++;
   strcpy(p, ".ctb");
-  simple_sprintf(buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpFile);
+  simple_sprintf(buf, "crontab -l | grep -v '%s' | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL)) {
     simple_sprintf(buf, "crontab %s", tmpFile);
     shell_exec(buf, NULL, NULL, NULL);
@@ -959,7 +964,7 @@ void crontab_del() {
 int crontab_exists() {
   char buf[2048] = "", *out = NULL;
 
-  simple_snprintf(buf, sizeof buf, "crontab -l | grep \"%s\" | grep -v \"^#\"", binname);
+  simple_snprintf(buf, sizeof buf, "crontab -l | grep '%s' | grep -v \"^#\"", binname);
   if (shell_exec(buf, NULL, &out, NULL)) {
     if (out && strstr(out, binname)) {
       free(out);
@@ -986,7 +991,8 @@ void crontab_create(int interval) {
 
   char buf[256] = "";
 
-  simple_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", binname, tmpFile);
+  simple_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", 
+                  binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
     buf[0] = 0;
     if (interval == 1)
@@ -1080,3 +1086,30 @@ const char *det_translate_num(int num)
   }
   return "ignore";
 }
+
+char *shell_escape(const char *path)
+{
+  static char ret1[DIRMAX] = "", ret2[DIRMAX] = "", *ret = NULL;
+  static bool alt = 0;
+  char *c = NULL;
+
+  if (alt) {
+    alt = 0;
+    ret = ret1;
+  } else {
+    alt = 1;
+    ret = ret2;
+  }
+
+  ret[0] = 0;
+
+  for (c = (char *) path; c && *c; ++c) {
+    if (strchr(ESCAPESHELL, *c))
+      simple_snprintf(ret, sizeof(ret1), "%s\\%c", ret[0] ? ret : "", *c);
+    else
+      simple_snprintf(ret, sizeof(ret1), "%s%c", ret[0] ? ret : "", *c);
+  }
+
+  return ret;
+}
+
