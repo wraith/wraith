@@ -261,6 +261,9 @@ dprintf(int idx, const char *format, ...)
     }
 
     switch (idx) {
+      case DP_DEBUG:
+        sdprintf("%s", buf);
+        break;
       case DP_STDOUT:
         tputs(STDOUT, buf, len);
         break;

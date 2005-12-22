@@ -18,6 +18,7 @@ struct portmap {
  */
 #define DP_STDOUT       0x7FF1
 //#define DP_LOG          0x7FF2
+#define DP_DEBUG	0x7FF2
 #define DP_SERVER       0x7FF3
 #define DP_HELP         0x7FF4
 #define DP_STDERR       0x7FF5
