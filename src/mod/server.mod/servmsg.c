@@ -845,6 +845,7 @@ static int got437(char *from, char *msg)
   if (s[0] && (strchr(CHANMETA, s[0]) != NULL)) {
     chan = findchan(s);
     if (chan) {
+      chan->status &= ~(CHAN_JOINING);
       if (chan->status & CHAN_ACTIVE) {
 	putlog(LOG_MISC, "*", IRC_CANTCHANGENICK, s);
       } else {
