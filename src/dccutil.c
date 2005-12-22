@@ -1023,6 +1023,7 @@ int has_cmd_pass(const char *cmd)
       return 1;
   return 0;
 }
+
 void set_cmd_pass(char *ln, int shareit)
 {
   struct cmd_pass *cp = NULL;
@@ -1062,5 +1063,17 @@ void set_cmd_pass(char *ln, int shareit)
     strcpy(cp->pass, ln);
     if (shareit)
       botnet_send_cmdpass(-1, cp->name, cp->pass);
+  }
+}
+
+void cmdpass_free(struct cmd_pass *x) 
+{
+  struct cmd_pass *cp = NULL, *cp_n = NULL;
+
+  for (cp = x; cp; cp = cp_n) {
+    cp_n = cp->next;
+    list_delete((struct list_type **) &x, (struct list_type *) cp);
+    free(cp->name);
+    free(cp);
   }
 }

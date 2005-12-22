@@ -59,6 +59,7 @@ void dcc_write(FILE *, int);
 int check_cmd_pass(const char *, char *);
 int has_cmd_pass(const char *);
 void set_cmd_pass(char *, int);
+void cmdpass_free(struct cmd_pass *);
 
 extern int		max_dcc;
 extern time_t		connect_timeout;

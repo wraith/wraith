@@ -1239,6 +1239,11 @@ finish_share(int idx)
   if (conf.bot->u)
     conf.bot->u = NULL;
 
+  struct cmd_pass *old_cmdpass = NULL;
+
+  old_cmdpass = cmdpass;
+  cmdpass = NULL;
+
   /* Read the transferred userfile. Add entries to u, which already holds
    * the bot entries in non-override mode.
    */
@@ -1264,6 +1269,8 @@ finish_share(int idx)
     lastuser = NULL;            /* Reset last accessed user ptr.        */
 
     Auth::FillUsers();
+
+    cmdpass = old_cmdpass;
 
     checkchans(2);              /* un-flag the channels, we are keeping them.. */
 
@@ -1305,6 +1312,8 @@ finish_share(int idx)
 
   /* copy over any auth users */
   Auth::FillUsers();
+
+  cmdpass_free(old_cmdpass);
 
   checkchans(1);                /* remove marked channels */
   var_parse_my_botset();
