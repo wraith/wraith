@@ -62,8 +62,14 @@
 /* Define to 1 if you have the `isascii' function. */
 #undef HAVE_ISASCII
 
+/* Define to 1 if you have the `dl' library (-ldl). */
+#undef HAVE_LIBDL
+
 /* Define to 1 if you have the `dns' library (-ldns). */
 #undef HAVE_LIBDNS
+
+/* Define to 1 if you have the `nsl' library (-lnsl). */
+#undef HAVE_LIBNSL
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
@@ -369,5 +375,23 @@
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
 
+
+/*
+ * Enable IPv6 debugging?
+ */
+#define DEBUG_IPV6 1
+#define HAVE_IPV6 1
+
+/* IPv6 sanity checks. */
+#ifdef USE_IPV6
+#  ifndef HAVE_IPV6
+#    undef USE_IPV6
+#  endif
+#  ifndef HAVE_GETHOSTBYNAME2
+#    ifndef HAVE_GETIPNODEBYNAME
+#      undef USE_IPV6
+#    endif
+#  endif
+#endif
 
 /* Defines for pack features */

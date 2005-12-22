@@ -85,9 +85,7 @@ static char rcsid[] = "$-Id: inet_addr.c,v 1.11 1999/04/29 18:19:53 drepper Exp 
  * cannot distinguish between failure and a local broadcast address.
  */
 int
-egg_inet_aton(cp, addr)
-	const char *cp;
-	struct in_addr *addr;
+egg_inet_aton(const char *cp, struct in_addr *addr)
 {
 	static const u_32bit_t max[4] = { 0xffffffff, 0xffffff, 0xffff, 0xff };
 	register u_32bit_t val;	/* changed from u_long --david */

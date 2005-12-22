@@ -221,6 +221,7 @@ elif ! [ $scp = "0" ]; then
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz
   ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
+  ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
 fi
 
 

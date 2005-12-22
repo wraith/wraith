@@ -365,7 +365,6 @@ void check_trace(int start)
   trace = DET_IGNORE;
 #endif /* DEBUG */
 
-  int x, i;
   pid_t parent = getpid();
 
   /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
@@ -392,6 +391,9 @@ void check_trace(int start)
     if (!start)
       return;
 
+#ifndef __sun__
+    int x, i;
+
   /* now, let's attempt to ptrace ourself */
     switch ((x = fork())) {
       case -1:
@@ -413,6 +415,7 @@ void check_trace(int start)
       default:		//parent
         waitpid(x, NULL, 0);
     }
+#endif
   }
 }
 #endif /* !CYGWIN_HACKS */

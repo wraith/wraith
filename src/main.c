@@ -49,6 +49,8 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <limits.h>
+#include <fcntl.h>
 
 #include "chan.h"
 #include "tandem.h"
@@ -868,7 +870,7 @@ printf("out: %s\n", out);
   char buf[SGRAB + 10] = "";
 
   while (1) {
-#ifndef CYGWIN_HACKS
+#if !defined(CYGWIN_HACKS) && !defined(__sun__)
     if (conf.watcher && waitpid(watcher, &status, WNOHANG))
       fatal("watcher PID died/stopped", 0);
 #endif /* !CYGWIN_HACKS */

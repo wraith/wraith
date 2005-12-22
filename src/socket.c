@@ -212,11 +212,12 @@ int socket_ip_to_uint(const char *ip, unsigned int *longip)
         return(0);
 }
 
+#ifdef USE_IPV6
 static char hex_digits[] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 };
-
+#endif /* USE_IPV6 */
 
 /* Converts shorthand ipv6 notation (123:456::789) into long dotted-decimal
  * notation. 'dots' must be 16*4+1 = 128 bytes long. */

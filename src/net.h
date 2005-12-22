@@ -21,24 +21,6 @@
 /* #define HAVE_SSL 1 */
 #endif /* HAVE_OPENSSL_SSL_H */
 
-/*
- * Enable IPv6 debugging?
- */
-#define DEBUG_IPV6 1
-#define HAVE_IPV6 1
-
-/* IPv6 sanity checks. */
-#ifdef USE_IPV6
-#  ifndef HAVE_IPV6
-#    undef USE_IPV6
-#  endif
-#  ifndef HAVE_GETHOSTBYNAME2
-#    ifndef HAVE_GETIPNODEBYNAME
-#      undef USE_IPV6
-#    endif
-#  endif
-#endif
-
 #define SGRAB 2010         /* How much data to allow through sockets. */
 
 enum {

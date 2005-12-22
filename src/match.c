@@ -266,11 +266,13 @@ match_cidr(const char *s1, const char *s2)
     return 0;
 
   if (aftype == AF_INET6) {
+#ifdef USE_IPV6
     inet_pton(aftype, ip, &ipaddr.u.ipv6.sin6_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv6.sin6_addr);
     if (comp_with_mask(&ipaddr.u.ipv6.sin6_addr.s6_addr, &maskaddr.u.ipv6.sin6_addr.s6_addr, cidrlen) && 
        ((ret = wild_match(mask, address))))
       return ret;
+#endif /* USE_IPV6 */
   } else if (aftype == AF_INET) {
     inet_pton(aftype, ip, &ipaddr.u.ipv4.sin_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv4.sin_addr);

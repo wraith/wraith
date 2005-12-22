@@ -326,6 +326,7 @@ case "$egg_cv_var_system_type" in
     AC_DEFINE(BROKEN_SNPRINTF, 1, [Define to use Eggdrop's snprintf functions without regard to HAVE_SNPRINTF])dnl
   ;;
   SunOS)
+    SUNOS="yes"
   ;;
   *BSD)
     # FreeBSD/OpenBSD/NetBSD
@@ -375,8 +376,11 @@ dnl
 AC_DEFUN([EGG_CHECK_LIBS], 
 [
   AC_CHECK_LIB(socket, socket)
-#  AC_CHECK_LIB(nsl, connect)
+  AC_CHECK_LIB(nsl, connect)
+#  AC_CHECK_LIB(dl, dlopen)
+  AC_CHECK_LIB(nsl, gethostbyname)
   AC_CHECK_LIB(dns, gethostbyname)
+
 #  AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
 #  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lssl -lcrypto", SSL="", -lcrypto) 
 #  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lcrypto", SSL="", -lcrypto) 
@@ -394,6 +398,13 @@ AC_DEFUN([EGG_CHECK_LIBS],
 #        ac_cv_lib_pthread_pthread_mutex_init=yes
 #        ac_cv_lib_pthread=""],
 #        ac_cv_lib_pthread_pthread_mutex_init=no)])])])
+  if test "$SUNOS" = "yes"; then
+    # For suns without yp
+    AC_CHECK_LIB(dl, main)
+    AC_CHECK_LIB(socket, main)
+    AC_CHECK_LIB(nsl, main)
+  fi
+
 ])
 
 dnl  EGG_CHECK_FUNC_VSPRINTF()

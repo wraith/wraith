@@ -382,8 +382,10 @@ sock_read(FILE *f)
     }
 
     if (fd >= 0) {
+#ifdef USE_IPV6
       if (!strcmp(type, "af"))
         socklist[fd].af = atoi(buf);
+#endif
       if (!strcmp(type, "host"))
         socklist[fd].host = strdup(buf);
       if (!strcmp(type, "port"))
@@ -790,7 +792,7 @@ int open_telnet(const char *server, port_t port, bool proxy)
 #ifdef USE_IPV6
 int open_address_listen(in_addr_t addr, int af_def, port_t *port)
 #else
-intt open_address_listen(in_addr_t addr, port_t *port)
+int open_address_listen(in_addr_t addr, port_t *port)
 #endif /* USE_IPV6 */
  {
 //  if (firewall[0]) {
