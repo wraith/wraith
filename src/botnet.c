@@ -268,9 +268,11 @@ void rembot(const char *whoin)
       break;
     ptr = &((*ptr)->next);
   }
-  if (!*ptr)
+  if (!*ptr) {
     /* May have just .unlink *'d */
+    free(who);
     return;
+  }
 
   struct userrec *u = get_user_by_handle(userlist, (char *) who);
 
