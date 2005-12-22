@@ -106,7 +106,7 @@ char *socksfile = NULL;
 
 static char *getfullbinname(const char *argv_zero)
 {
-  char *bin = strdup(argv_zero);
+  char *bin = strdup(argv_zero), *p = NULL, *p2 = NULL;
   char cwd[PATH_MAX] = "";
 
   if (bin[0] == '/')
@@ -122,7 +122,8 @@ static char *getfullbinname(const char *argv_zero)
   if (cwd[strlen(cwd) - 1] == '/')
     cwd[strlen(cwd) - 1] = 0;
 
-  char *p = bin, *p2 = strchr(p, '/');
+  p = bin;
+  p2 = strchr(p, '/');
 
   while (p) {
     if (p2)
@@ -866,7 +867,10 @@ printf("out: %s\n", out);
 
   debug0("main: entering loop");
 
-  int socket_cleanup = 0, status = 0, xx, i = 0, idx = 0;
+  int socket_cleanup = 0, xx, i = 0, idx = 0;
+#if !defined(CYGWIN_HACKS) && !defined(__sun__)
+  int status = 0;
+#endif /* !CYGWIN_HACKS */
   char buf[SGRAB + 10] = "";
 
   while (1) {

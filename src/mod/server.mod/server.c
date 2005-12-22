@@ -807,7 +807,7 @@ static int sanitycheck_dcc(char *nick, char *from, char *ipaddy, char *port)
            nick, from, prt);
     return 0;
   }
-  sprintf(badaddress, "%u.%u.%u.%u", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
+  simple_snprintf(badaddress, sizeof(badaddress), "%u.%u.%u.%u", (ip >> 24) & 0xff, (ip >> 16) & 0xff,
           (ip >> 8) & 0xff, ip & 0xff);
   if (ip < (1 << 24)) {
     putlog(LOG_MISC, "*", "ALERT: (%s!%s) specified an impossible IP of %s!",

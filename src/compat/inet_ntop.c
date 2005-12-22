@@ -37,7 +37,9 @@
  */
 
 static const char *egg_inet_ntop4 (const u_char *src, char *dst, socklen_t size);
+#ifdef USE_IPV6
 static const char *egg_inet_ntop6 (const u_char *src, char *dst, socklen_t size);
+#endif /* USE_IPV6 */
 
 /* char *
  * inet_ntop(af, src, dst, size)
@@ -86,6 +88,7 @@ egg_inet_ntop4(const u_char *src, char *dst, socklen_t size)
 	return strcpy(dst, tmp);
 }
 
+#ifdef USE_IPV6
 /* const char *
  * inet_ntop6(src, dst, size)
  *	convert IPv6 binary address into presentation (printable) format
@@ -177,4 +180,5 @@ egg_inet_ntop6(const u_char *src, char *dst, socklen_t size)
 	}
 	return strcpy(dst, tmp);
 }
+#endif /* USE_IPV6 */
 #endif /* !HAVE_INET_NTOP */
