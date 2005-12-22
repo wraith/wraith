@@ -16,6 +16,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed binary spawning/updating to escape needed chars for shell. (#158)
 * Fixed a flaw in binary checksums.
 * Removed references to the old 'greet' features of eggdrop from help.
+* Fixed tempdir checking to attempt to 'mkdir ~/.ssh/' for '~/.ssh/...' tempdir.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

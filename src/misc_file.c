@@ -242,11 +242,6 @@ static bool check_tempdir(bool do_mod)
 void Tempfile::FindDir()
 {
   /* this is temporary until we make tmpdir customizable */
-  if (conf.bots && conf.bots->nick && conf.bots->hub)
-    simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
-  else
-    simple_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
-
 #ifdef CYGWIN_HACKS
   simple_snprintf(tempdir, DIRMAX, "tmp/");
   if (!check_tempdir(0)) {
@@ -254,6 +249,17 @@ void Tempfile::FindDir()
     simple_snprintf(tempdir, DIRMAX, "./");
   }
 #else
+  if (conf.bots && conf.bots->nick && conf.bots->hub)
+    simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
+  else {
+    //need to create ~/.ssh/
+    simple_snprintf(tempdir, DIRMAX, "%s/.ssh/", conf.homedir);
+    clear_tmpdir = 0;
+    check_tempdir(0);
+    clear_tmpdir = 1;
+    simple_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
+  }
+
   if (!check_tempdir(0)) {
     clear_tmpdir = 0;
     simple_snprintf(tempdir, DIRMAX, "/tmp/");
