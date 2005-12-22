@@ -11,7 +11,6 @@ autoheader:
 	@echo "Autoheader..."
 	@autoheader
 	@echo "" >> config.h.in
-	@cat config.h.template >> config.h.in
 	@echo "/* Defines for pack features */" >> config.h.in
 	@(for define in `sed -n -e 's/^[\+|\-] \([^ ]*\) .*/\1/ p' ../pack/pack.cfg`; do \
 	echo "#undef S_$$define" >> config.h.in; \

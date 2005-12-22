@@ -180,5 +180,23 @@ AH_BOTTOM([/*
 #  define mtim_getnsec(_x)      (0)
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
+
+/*
+ * Enable IPv6 debugging?
+ */
+#define DEBUG_IPV6 1
+#define HAVE_IPV6 1
+
+/* IPv6 sanity checks. */
+#ifdef USE_IPV6
+#  ifndef HAVE_IPV6
+#    undef USE_IPV6
+#  endif
+#  ifndef HAVE_GETHOSTBYNAME2
+#    ifndef HAVE_GETIPNODEBYNAME
+#      undef USE_IPV6
+#    endif
+#  endif
+#endif
 ])
 

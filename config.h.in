@@ -369,7 +369,6 @@
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
 
-
 /*
  * Enable IPv6 debugging?
  */
@@ -387,5 +386,6 @@
 #    endif
 #  endif
 #endif
+
 
 /* Defines for pack features */
