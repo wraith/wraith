@@ -87,9 +87,9 @@ static variable_t vars[] = {
  VAR("process-list",	process_list,		sizeof(process_list),		VAR_STRING|VAR_LIST),
  VAR("promisc",		&promisc,		0,				VAR_INT|VAR_DETECTED),
  VAR("realname",	botrealname,		sizeof(botrealname),		VAR_STRING|VAR_NOLHUB),
+ VAR("server-port",	&default_port,		0,				VAR_INT|VAR_NOLHUB),
  VAR("servers",		&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB),
  VAR("servers6",	&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB),
- VAR("server-port",	&default_port,		0,				VAR_INT|VAR_NOLHUB),
  VAR("trace",		&trace,			0,				VAR_INT|VAR_DETECTED),
  {NULL,			NULL,			0,				0, NULL, NULL, 0}
 };
