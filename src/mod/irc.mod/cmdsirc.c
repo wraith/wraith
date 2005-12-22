@@ -362,7 +362,6 @@ static void cmd_voice(int idx, char *par)
       dprintf(idx, "%s is not on %s.\n", nick, chan->dname);
       return;
     }
-    simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
     add_mode(chan, '+', 'v', nick);
     dprintf(idx, "Gave voice to %s on %s\n", nick, chan->dname);
     next:;
