@@ -75,7 +75,7 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   if (par[0]) {
     if (!u_pass_match(u, old)) {
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
-      dprintf(DP_HELP, "NOTICE %s :Incorrent password.\n", nick);
+      dprintf(DP_HELP, "NOTICE %s :Incorrect password.\n", nick);
       return BIND_RET_BREAK;
     }
     mynew = newsplit(&par);
