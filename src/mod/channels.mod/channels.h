@@ -20,6 +20,7 @@ static void check_expired_masks(void);
 static void tell_masks(const char type, int idx, bool show_inact, char *match);
 static void get_mode_protect(struct chanset_t *chan, char *s);
 static void set_mode_protect(struct chanset_t *chan, char *set);
+static int count_mask(maskrec *);
 
 #endif				/* MAKING_CHANNELS */
 
@@ -39,7 +40,7 @@ void set_handle_laston(char *, struct userrec *, time_t);
 int u_delmask(char type, struct chanset_t *c, char *who, int doit);
 bool u_addmask(char type, struct chanset_t *, char *, char *, char *, time_t, int);
 int u_sticky_mask(maskrec *, char *);
-int u_setsticky_mask(struct chanset_t *, maskrec *, char *, bool, const char);
+int u_setsticky_mask(struct chanset_t *, maskrec *, char *, int, const char);
 int SplitList(char *, const char *, int *, const char ***);
 int channel_modify(char *, struct chanset_t *, int, char **);
 int channel_add(char *, char *, char *);

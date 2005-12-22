@@ -715,10 +715,11 @@ static void cmd_stick_yn(int idx, char *par, int yn)
 
   if (str_isdigit(s)) {
     /* substract the numer of global masks to get the number of the channel masks */
-    j = u_setsticky_mask(NULL, channel_list, s, -1, type);
-    if (j < 0)
-      simple_snprintf(s, sizeof s, "%d", -j);
+    j = atoi(s);
+    j -= count_mask(type == 'b' ? global_bans : type == 'e' ? global_exempts : global_invites);
+    simple_snprintf(s, sizeof s, "%d", j);
   }
+
   j = u_setsticky_mask(chan, channel_list, s, yn, type);
   if (j > 0) {
     putlog(LOG_CMDS, "*", "#%s# %sstick %s %s %s", dcc[idx].nick, yn ? "" : "un", str_type, s, chname);

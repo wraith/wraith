@@ -540,6 +540,8 @@ int str_isdigit(const char *str)
 {
   if (!str || (str && !*str))
     return 0;
+  if (*str == '-')
+    str++;
 
   for(; *str; ++str) {
     if (!egg_isdigit(*str))
