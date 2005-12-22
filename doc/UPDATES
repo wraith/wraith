@@ -18,6 +18,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Removed references to the old 'greet' features of eggdrop from help.
 * Fixed tempdir checking to attempt to 'mkdir ~/.ssh/' for '~/.ssh/...' tempdir.
 * Fixed bot link getting colors. (fixes #161)
+* Fixed +r bots resolving users by resolved ip before host.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

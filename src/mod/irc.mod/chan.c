@@ -1656,18 +1656,6 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   }
 */
 
-  /* Store the userhost */
-  if (!m->userhost[0])
-    simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
-  if (doresolv(chan)) {
-    if (is_dotted_ip(host))
-      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
-    else
-      resolve_to_member(chan, nick, host);
-  }
-
-  simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
-
   waschanop = me_op(chan);      /* Am I opped here? */
   if (strchr(flags, '@') != NULL)	/* Flags say he's opped? */
     m->flags |= (CHANOP | WASOP);	/* Yes, so flag in my table */
@@ -1684,6 +1672,12 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (!(m->flags & (CHANVOICE | CHANOP)))
     m->flags |= STOPWHO;
 
+  /* Store the userhost */
+  if (!m->userhost[0])
+    simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
+
+  simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
+
   if (me) {			/* Is it me? */
 //    strcpy(botuserhost, m->userhost);		/* Yes, save my own userhost */
     m->joined = now;				/* set this to keep the whining masses happy */
@@ -1698,6 +1692,15 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->user = get_user_by_host(userhost);
     m->tried_getuser = 1;
   }
+
+  //userhost failed, let's try resolving them...
+  if (!m->user && doresolv(chan)) {
+    if (is_dotted_ip(host))
+      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
+    else  
+      resolve_to_member(chan, nick, host);
+  }
+
   get_user_flagrec(m->user, &fr, chan->dname);
   
   if (me_op(chan)) {
@@ -2343,10 +2346,14 @@ static int gotjoin(char *from, char *chname)
       dprintf(DP_MODE, "PART %s\n", chname);
     }
   } else if (!channel_pending(chan)) {
+    char *host = NULL;
+
     chan->status &= ~CHAN_STOP_CYCLE;
     strcpy(uhost, from);
     nick = splitnick(&uhost);
     detect_chan_flood(nick, uhost, from, chan, FLOOD_JOIN, NULL);
+    if ((host = strchr(uhost, '@')))
+      host++;
 
     chan = findchan(chname);
     if (!chan) {   
@@ -2385,19 +2392,26 @@ static int gotjoin(char *from, char *chname)
           goto exit;
 
 	/* The tcl binding might have deleted the current user. Recheck. */
-	u = get_user_by_host(from);
+        if (!m->user) {
+          m->user = get_user_by_host(from);
+          m->tried_getuser = 1;
+ 
+          if (!m->user && doresolv(chan)) {
+            if (is_dotted_ip(host)) 
+              strlcpy(m->userip, uhost, sizeof(m->userip));
+            else
+              resolve_to_member(chan, nick, host); 
+          }
+        }
         splitjoin++;
 	m->split = 0;
 	m->last = now;
 	m->delay = 0L;
 	m->flags = (chan_hasop(m) ? WASOP : 0);
-	m->user = u;
-	set_handle_laston(chan->dname, u, now);
+	set_handle_laston(chan->dname, m->user, now);
 	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
       } else {
-        char *p = NULL;
-
 	if (m)
 	  killmember(chan, nick);
 	m = newmember(chan, nick);
@@ -2408,15 +2422,16 @@ static int gotjoin(char *from, char *chname)
 	m->delay = 0L;
 	strlcpy(m->nick, nick, sizeof(m->nick));
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
-        if (doresolv(chan) && (p = strchr(uhost, '@'))) {
-          p++;
-          if (is_dotted_ip(p))
+	m->user = u;
+        m->tried_getuser = 1;
+
+        if (!m->user && doresolv(chan)) {
+          if (is_dotted_ip(host)) 
             strlcpy(m->userip, uhost, sizeof(m->userip));
           else
-            resolve_to_member(chan, nick, p); 
+            resolve_to_member(chan, nick, host); 
         }
-        
-	m->user = u;
+
 	m->flags |= STOPWHO;
 
 	/* The tcl binding might have deleted the current user and the
