@@ -1531,10 +1531,10 @@ See also: reload, backup
                            punishments.
  
   *  Msg cmd vars may be left blank to disable usage of cmd.
-[S]  $bmsgop$b           Defines the cmd for opping via msging the bot.
-[S]  $bmsgpass$b         Defines the cmd for setting a pass via msging the bot.
-[S]  $bmsginvite$b       Defines the cmd for requesting invite via msging the bot.
-[S]  $bmsgident$b        Defines the cmd for identing via msging the bot.
+[S]  $bmsg-op$b          Defines the cmd for opping via msging the bot.
+[S]  $bmsg-pass$b        Defines the cmd for setting a pass via msging the bot.
+[S]  $bmsg-invite$b      Defines the cmd for requesting invite via msging the bot.
+[S]  $bmsg-ident$b       Defines the cmd for identing via msging the bot.
  
 [N]  $bfork-interval$b   Number of seconds in between each fork() call made by the bot. 
                           (Resets PID/CPU)
