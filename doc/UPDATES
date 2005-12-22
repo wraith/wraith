@@ -20,6 +20,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed bot link getting colors. (fixes #161)
 * Fixed +r bots resolving users by resolved ip before host.
 * Fixed 2 socket leaks in the dns/socket code. (#167)
+* Fixed cmd_[bot]set showing an invalid example for using '-YES'
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

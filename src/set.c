@@ -755,7 +755,10 @@ void cmd_set_real(const char *botnick, int idx, char *par)
     if (!list && var->flags & VAR_LIST) {
       if (notyes) {
         dprintf(idx, "Using non-list functions on a list variable can be dangerous, please retype with -YES if you're sure:\n");
-        dprintf(idx, "%s%sset -YES %s ...\n", settings.dcc_prefix, botnick ? "bot" : "", var->name);
+        if (botnick)
+          dprintf(idx, "%sbotset %s -YES %s ...\n", settings.dcc_prefix, botnick, var->name);
+        else
+          dprintf(idx, "%sset -YES %s ...\n", settings.dcc_prefix, var->name);
         return;
       }
     }
