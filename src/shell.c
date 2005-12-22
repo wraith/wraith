@@ -93,8 +93,13 @@ void clear_tmp()
   char *file = NULL;
 
   while ((dir_ent = readdir(tmp))) {
-    if (strncmp(dir_ent->d_name, ".pid.", 4) && strncmp(dir_ent->d_name, ".u", 2) && strcmp(dir_ent->d_name, ".bin.old")
-       && strcmp(dir_ent->d_name, ".") && strcmp(dir_ent->d_name, ".un") && strcmp(dir_ent->d_name, "..")) {
+    if (strncmp(dir_ent->d_name, ".pid.", 4) && 
+        strncmp(dir_ent->d_name, ".u", 2) && 
+        strcmp(dir_ent->d_name, ".bin.old") && 
+        strncmp(dir_ent->d_name, ".socks-", 7) &&
+        strcmp(dir_ent->d_name, ".") && 
+        strcmp(dir_ent->d_name, ".un") && 
+        strcmp(dir_ent->d_name, "..")) {
 
       file = (char *) my_calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
 
