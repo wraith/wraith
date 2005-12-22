@@ -24,6 +24,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a mem leak on bot unlinks.
 * Fixed an error with msg-* displaying as msg* in 'help set'. (seinfeld)
 * Setting 'manop-warn' was only being used for 'OP #chan' not 'OP' alone.
+* Fixed channel notices not being parsed.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

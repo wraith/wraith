@@ -3056,9 +3056,6 @@ static int gotnotice(char *from, char *msg)
   char *to = newsplit(&msg), *realto = (*to == '@') ? to + 1 : to;
   struct chanset_t *chan = findchan(realto); 
 
-  ignoring = match_ignore(from);
-  to = newsplit(&msg);
-  realto = (*to == '@') ? to + 1 : to;
   chan = findchan(realto);
   if (!chan)
     return 0;			/* Notice to an unknown channel?? */
@@ -3140,13 +3137,10 @@ static int gotnotice(char *from, char *msg)
     if (!chan)
       return 0;
 
-    if (!ignoring || trigger_on_ignore) {
-      chan = findchan(realto); 
-      if (!chan)
-	return 0;
-    }
-    irc_log(chan, "-%s:%s- %s", nick, to, msg);
     update_idle(chan->dname, nick);
+
+    if (!ignoring)
+      irc_log(chan, "-%s:%s- %s", nick, to, msg);
   }
   return 0;
 }
