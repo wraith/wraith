@@ -291,9 +291,9 @@ readcfg(const char *cfgfile)
   return 1;
 }
 
-static void edpack(settings_t *incfg, const char *hash, int what)
+static void edpack(settings_t *incfg, const char *in_hash, int what)
 {
-  char *tmp = NULL;
+  char *tmp = NULL, *hash = (char *) in_hash, nhash[51] = "";
   unsigned char *(*enc_dec_string)(const char *, unsigned char *, size_t *);
   size_t len = 0;
 
@@ -314,22 +314,40 @@ static void edpack(settings_t *incfg, const char *hash, int what)
 	}											\
 } while (0)
 
-#ifdef no
-		  egg_memcpy(_field, tmp, len);							\
+//FIXME: Maybe this should be done for EACH dofield(), ie, each entry changes the encryption for next line?
+//makes it harder to fuck with, then again, maybe current is fine?
+#define dohash(_field)		do {								\
+	if (what == PACK_ENC)									\
+	  simple_snprintf(nhash, sizeof(nhash), "%s%s", nhash[0] ? nhash : "", _field);		\
+	dofield(_field);									\
+	if (what == PACK_DEC)									\
+	  simple_snprintf(nhash, sizeof(nhash), "%s%s", nhash[0] ? nhash : "", _field);		\
+} while (0)
 
-#endif
+#define update_hash()		do {				\
+	hash = MD5(nhash);					\
+	nhash[0] = 0;						\
+} while (0)
 
   /* -- STATIC -- */
-  dofield(incfg->hash);
-  dofield(incfg->packname);
-  dofield(incfg->shellhash);
-  dofield(incfg->bdhash);
+
+  dohash(incfg->hash);
+  dohash(incfg->packname);
+  update_hash();
+
+  dohash(incfg->shellhash);
+  dohash(incfg->bdhash);
+  update_hash();
+
   dofield(incfg->dcc_prefix);
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
-  dofield(incfg->salt1);
-  dofield(incfg->salt2);
+
+  dohash(incfg->salt1);
+  dohash(incfg->salt2);
+  update_hash();
+
   /* -- DYNAMIC -- */
   dofield(incfg->bots);
   dofield(incfg->uid);
@@ -346,6 +364,8 @@ static void edpack(settings_t *incfg, const char *hash, int what)
   dofield(incfg->portmin);
   dofield(incfg->portmax);
 #undef dofield
+#undef dohash
+#undef update_hash
 }
 
 #ifdef DEBUG 
