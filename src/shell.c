@@ -370,6 +370,9 @@ void check_trace(int start)
   trace = DET_IGNORE;
 #endif /* DEBUG */
 
+  if (trace == DET_IGNORE)
+    return;
+
   pid_t parent = getpid();
 
   /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
