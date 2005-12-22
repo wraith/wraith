@@ -109,7 +109,7 @@ case `uname` in
   OpenBSD) os=OpenBSD;;
   NetBSD) os=NetBSD;;
   SunOS) os=Solaris;;
-  CYGWIN*) os=Cygwin;;
+  CYGWIN*) os=Cygwin; extras="/bin/cygwin1.dll";;
 esac
 
 if test -z $os
@@ -212,7 +212,13 @@ elif ! [ $scp = "0" ]; then
   #This MALLOC business is to not Abort 'tar' due to some bug it has.
   tmp=${MALLOC_CHECK_}
   unset MALLOC_CHECK_
-  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz
+  cp ${extras} .
+  for file in $extras
+  do
+    extras_local="${extras_local} `basename $file`"
+  done
+
+  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz ${extras_local}
   chmod 0644 ${builddate}-$os-$ver${d}.tar.${ext}
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
