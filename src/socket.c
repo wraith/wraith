@@ -178,7 +178,10 @@ int socket_create(const char *dest_ip, int dest_port, const char *src_ip, int sr
                 int yes = 1;
 
                 setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-                if (bind(sock, &src_name.u.addr, src_name.len) != 0) return(-3);
+                if (bind(sock, &src_name.u.addr, src_name.len) != 0) {
+			killsock(sock);
+			return(-3);
+		}
                 if (flags & SOCKET_SERVER) listen(sock, 50);
         }
 
@@ -193,7 +196,10 @@ int socket_create(const char *dest_ip, int dest_port, const char *src_ip, int sr
           }
 
           if (connect(sock, &dest_name.u.addr, dest_name.len) != 0) {
-            if (errno != EINPROGRESS) return(-4);
+		if (errno != EINPROGRESS) {
+			killsock(sock);
+			return(-4);
+		}
           }
         }
 
