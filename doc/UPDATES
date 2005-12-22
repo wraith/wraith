@@ -28,6 +28,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Took out all punish/revenge code, it's been disabled since 1.2.7 anyway.
 * Fixed bots giving up on joining juped channels (may be due to split) (#168)
 * Fixed cmdpass list getting desynced during userfile transfer. (#143)
+* Removed old compatability code for converting CONFIG->SET during userfile loading.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

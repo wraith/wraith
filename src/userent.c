@@ -1025,8 +1025,7 @@ struct user_entry_type *find_entry_type(char *name)
   struct user_entry_type *p = NULL;
 
   for (p = entry_type_list; p; p = p->next) {
-/* FIXME: remove after 1.2.3 */
-    if (!egg_strcasecmp(name, p->name) || (!egg_strcasecmp(name, "CONFIG") && !egg_strcasecmp(p->name, "SET")))
+    if (!egg_strcasecmp(name, p->name))
       return p;
   }
   return NULL;
@@ -1037,10 +1036,7 @@ struct user_entry *find_user_entry(struct user_entry_type *et, struct userrec *u
   struct user_entry **e = NULL, *t = NULL;
 
   for (e = &(u->entries); *e; e = &((*e)->next)) {
-/* FIXME: remove after 1.2.3 */
-    if (((*e)->type == et) ||
-	((*e)->name && (!egg_strcasecmp((*e)->name, et->name) ||
-        ((*e)->name && et->name && !egg_strcasecmp((*e)->name, "CONFIG") && !egg_strcasecmp(et->name, "SET"))))) {
+    if (((*e)->type == et) || ((*e)->name && !egg_strcasecmp((*e)->name, et->name))) {
       t = *e;
       *e = t->next;
       t->next = u->entries;
