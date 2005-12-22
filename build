@@ -109,7 +109,7 @@ case `uname` in
   OpenBSD) os=OpenBSD;;
   NetBSD) os=NetBSD;;
   SunOS) os=Solaris;;
-  CYGWIN*) os=Cygwin; extras="/bin/cygwin1.dll";;
+  CYGWIN*) os=Cygwin; extras="/bin/cygwin1.dll"; exe=".exe";;
 esac
 
 if test -z $os
@@ -212,20 +212,21 @@ elif ! [ $scp = "0" ]; then
   #This MALLOC business is to not Abort 'tar' due to some bug it has.
   tmp=${MALLOC_CHECK_}
   unset MALLOC_CHECK_
+
   cp ${extras} .
   for file in $extras
   do
     extras_local="${extras_local} `basename $file`"
   done
 
-  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz ${extras_local}
+  tar -c${zip}f ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d}${exe} ChangeLog-${builddate}.gz ${extras_local}
   chmod 0644 ${builddate}-$os-$ver${d}.tar.${ext}
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
   chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
-  rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d} ChangeLog-${builddate}.gz
+  rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d}${exe} ChangeLog-${builddate}.gz ${extras_local}
   ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
   ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
 fi
