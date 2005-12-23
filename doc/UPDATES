@@ -32,6 +32,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed "un-allocated socket" errors when a relay fails.
 * Fixed var 'server-port' not being used correctly. (Now lists/saves/loads before servers)
 * Fixed a typo in msg_pass.
+* Failed relay no longer says failed link.
+* Fixed a socket protocol error.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

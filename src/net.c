@@ -444,7 +444,11 @@ int real_getsock(int options, char *fname, int line)
 {
   int af_def = AF_INET;
 #endif /* USE_IPV6 */
-  int sock = socket(af_def, SOCK_STREAM, 0);
+  int sock = -1;
+
+  if (!af_def) 
+    af_def = AF_INET;
+  sock = socket(af_def, SOCK_STREAM, 0);
 
   if (sock >= 0)
     setsock(sock, options);

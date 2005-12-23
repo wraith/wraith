@@ -1088,7 +1088,7 @@ static void failed_tandem_relay(int idx)
   if (dcc[idx].port >= dcc[idx].u.relay->port + 3) {
     struct chat_info *ci = dcc[uidx].u.relay->chat;
 
-    dprintf(uidx, "Could not link to %s.\n", dcc[idx].nick);
+    dprintf(uidx, "Could not relay to %s.\n", dcc[idx].nick);
     dcc[uidx].status = dcc[uidx].u.relay->old_status;
     free(dcc[uidx].u.relay);
     dcc[uidx].u.chat = ci;
@@ -1201,7 +1201,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   if (!ips) {
     struct chat_info *ci = dcc[idx].u.relay->chat;
 
-    dprintf(idx, "Could not link to %s.\n", dcc[i].nick);
+    dprintf(idx, "Could not relay to %s.\n", dcc[i].nick);
     dcc[idx].status = dcc[idx].u.relay->old_status;
     free(dcc[idx].u.relay);
     dcc[idx].u.chat = ci;
