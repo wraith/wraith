@@ -34,6 +34,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a typo in msg_pass.
 * Failed relay no longer says failed link.
 * Fixed a socket protocol error.
+* Fixed a small error in help file for 'whom'.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

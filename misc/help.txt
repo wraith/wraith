@@ -1898,5 +1898,5 @@ See also: match, who, whom%{+m|m}, chattr, chaninfo%{-}
    number/name. If you specify "*" as the channel, all users on all botnet
    channels will be shown.
  
-See also: who, chat%{+m}bots%{-}
+See also: who, chat%{+m}, bots%{-}
 ::end
