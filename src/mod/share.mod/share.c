@@ -906,7 +906,8 @@ share_ufsend(int idx, char *par)
 #endif /* USE_IPV6 */
     if (sock < 0 || open_telnet_dcc(sock, ip, port) < 0) {
       fclose(f);
-      killsock(sock);
+      if (sock != -1)
+        killsock(sock);
       putlog(LOG_BOTS, "@", "Asynchronous connection failed!");
       dprintf(idx, "s e Can't connect to you!\n");
       zapfbot(idx);
