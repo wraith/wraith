@@ -269,7 +269,7 @@ See also: botpart, +chan, -chan, chanset, chaninfo
 ###  $bbotjump$b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
    server, it will jump to the next server in it's internal list (see
-   $b'help config'$b). If you specify a server, it will jump to that
+   $b'help set'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
    Jumping servers ALWAYS makes the bot lose ops! be careful!
@@ -307,7 +307,7 @@ See also: downbots%{+n}, bottree%{-}
 ###  $bbotserver$b <bot>
    The bot will display it's current server and lag over DCC.
  
-See also: netserver, servers%{+n}, config%{-}
+See also: netserver, servers%{+n}, set%{-}
 :hub:botset:
 ###  $bbotset$b <bot> [<+/->list] [<var> [data|-]]
    Set's a bot specific entry.
@@ -430,7 +430,6 @@ See also: link
                        more secure and the chances of someone hijacking the bot
                        for ops in your channel are much much less. This is
                        highly recommened to always be set. 
-                       See '%dconfig bad-cookie' for punishment options.
                        
         $binactive$b       This prevents the bot from joining the channel (or
                        makes it leave the channel if it is already there). It
@@ -440,14 +439,14 @@ See also: link
         $bmanop$b          With this set, users will be able to op anyone
                        in the channel manually (as opposed to through the bot.)
                        With this unset, users are forced to op through the bot.
-                       See '%dconfig manop' for punishment options.
+                       See chanset 'manop' for punishment options.
         $bnodesynch$b      Allow non-ops to perform channel modes? This can stop
                        the bot from fighting with services such as ChanServ, or
                        from kicking IRCops when setting channel modes without
                        having ops.
         $bnomop$b          Users will not be allowed to set more than 3 +o 
                        modes at any given time.
-                       See '%dconfig mop' for punishment options.
+                       See chanset 'mop' for punishment options.
         $bprivate$b        This by far is probably the single most unique and
                        important feature of this pack. With this set, users with
                        global +o will not implicitly have access to the channel.
@@ -1105,7 +1104,7 @@ See also: console, invite
 ###  $bjump$b [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
    server, it will jump to the next server in it'ss internal list (see
-   $b'help config'$b). If you specify a server, it will jump to that
+   $b'help set'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
    Jumping servers ALWAYS makes the bot lose ops! be careful!
@@ -1309,7 +1308,7 @@ See also: ps
    All bots on the botnet will display their current server and lag
    to that server over DCC.
  
-See also: botserver, servers%{+n}, config%{-}
+See also: botserver, servers%{+n}, set%{-}
 ::netversion:
 ###  $bnetversion$b <bot>
    All bots on the botnet will display their pack version, and uname.
