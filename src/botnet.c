@@ -1085,39 +1085,18 @@ static void failed_tandem_relay(int idx)
     lostdcc(idx);
     return;
   }
-  if (dcc[idx].port >= dcc[idx].u.relay->port + 3) {
-    struct chat_info *ci = dcc[uidx].u.relay->chat;
 
-    dprintf(uidx, "Could not relay to %s.\n", dcc[idx].nick);
-    dcc[uidx].status = dcc[uidx].u.relay->old_status;
-    free(dcc[uidx].u.relay);
-    dcc[uidx].u.chat = ci;
-    dcc[uidx].type = &DCC_CHAT;
-    if (dcc[idx].sock != -1)
-      killsock(dcc[idx].sock);
-    lostdcc(idx);
-    return;
-  }
+  struct chat_info *ci = dcc[uidx].u.relay->chat;
+
+  dprintf(uidx, "Could not relay to %s.\n", dcc[idx].nick);
+  dcc[uidx].status = dcc[uidx].u.relay->old_status;
+  free(dcc[uidx].u.relay);
+  dcc[uidx].u.chat = ci;
+  dcc[uidx].type = &DCC_CHAT;
   if (dcc[idx].sock != -1)
     killsock(dcc[idx].sock);
-#ifdef USE_IPV6
-  dcc[idx].sock = getsock(SOCK_STRONGCONN, dcc[uidx].u.relay->af);
-#else
-  dcc[idx].sock = getsock(SOCK_STRONGCONN);
-#endif /* USE_IPV6 */
-  dcc[uidx].u.relay->sock = dcc[idx].sock;
-  dcc[idx].port++;
-  dcc[idx].timeval = now;
-  if (dcc[idx].sock < 0 ||
-#ifdef USE_IPV6
-      open_telnet_raw(dcc[idx].sock, dcc[idx].host,
-#else
-      open_telnet_raw(dcc[idx].sock, dcc[idx].addr ?
-				     iptostr(htonl(dcc[idx].addr)) :
-				     dcc[idx].host, 
-#endif /* USE_IPV6 */
-      dcc[idx].port, 0) < 0)
-    failed_tandem_relay(idx);
+  lostdcc(idx);
+  return;
 }
 
 static void tandem_relay_dns_callback(int, void *, const char *, char **);

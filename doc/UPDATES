@@ -35,6 +35,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Failed relay no longer says failed link.
 * Fixed a socket protocol error.
 * Fixed a small error in help file for 'whom'.
+* Removed some legacy code from failed relays that attempts to connect to port+1, port+2, port+3... (might fix #177)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
