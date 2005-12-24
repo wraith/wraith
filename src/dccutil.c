@@ -369,9 +369,14 @@ chanout_but(int x, int chan, const char *format, ...)
 void
 dcc_chatter(int idx)
 {
-  int i;
-  int j;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
+
+  if (!glob_party(fr)) {
+    dcc[idx].u.chat->channel = -1;
+    dprintf(idx, "You don't have partyline chat access; commands only.\n\n");
+  } 
 
   strcpy(dcc[idx].u.chat->con_chan, "***");
   check_bind_chon(dcc[idx].nick, idx);
@@ -379,7 +384,6 @@ dcc_chatter(int idx)
   dprintf(idx, "Connected to %s, running %s\n", conf.bot->nick, version);
   show_banner(idx);             /* check STAT_BANNER inside function */
 
-  get_user_flagrec(dcc[idx].user, &fr, NULL);
   if ((dcc[idx].status & STAT_BOTS) && glob_master(fr)) {
     if ((tands + 1) > 1)
       dprintf(idx, "There are %s-%d- bots%s currently linked.\n", BOLD(idx), tands + 1, BOLD_END(idx));
@@ -402,42 +406,20 @@ dcc_chatter(int idx)
 
   notes_chon(idx);
 
-  if (glob_party(fr)) {
-    i = dcc[idx].u.chat->channel;
-  } else {
-    dprintf(idx, "You don't have partyline chat access; commands only.\n\n");
-    i = -1;
-  }
-
-  j = dcc[idx].sock;
-
-  dcc[idx].u.chat->channel = 234567;
-  /* Still there? */
-
-  if ((idx >= dcc_total) || (dcc[idx].sock != j))
-    return;                     /* Nope */
-
   if (dcc[idx].type == &DCC_CHAT) {
     if (!strcmp(dcc[idx].u.chat->con_chan, "***"))
       strcpy(dcc[idx].u.chat->con_chan, "*");
-    if (dcc[idx].u.chat->channel == 234567) {
-      /* If the chat channel has already been altered it's *highly*
-       * probably join/part messages have been broadcast everywhere,
-       * so dont bother sending them
-       */
-      if (i == -2)
-        i = 0;
 
-      dcc[idx].u.chat->channel = i;
+    if (dcc[idx].u.chat->channel == -2)
+      dcc[idx].u.chat->channel = 0;
 
-      if (dcc[idx].u.chat->channel >= 0) {
-        if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
-          botnet_send_join_idx(idx);
-        }
+    if (dcc[idx].u.chat->channel >= 0) {
+      if (dcc[idx].u.chat->channel < GLOBAL_CHANS) {
+        botnet_send_join_idx(idx);
       }
     }
-    /* But *do* bother with sending it locally */
 
+    /* But *do* bother with sending it locally */
     if (!dcc[idx].u.chat->channel) {
       chanout_but(-1, 0, "*** %s joined the party line.\n", dcc[idx].nick);
     } else if (dcc[idx].u.chat->channel > 0) {

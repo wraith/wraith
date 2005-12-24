@@ -4244,12 +4244,13 @@ static void cmd_quit(int idx, char *text)
 	if (dcc[idx].u.chat->su_nick) {
 		dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
 		strcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick);
+                dcc[idx].u.chat->channel = dcc[idx].u.chat->su_channel;
 		dcc[idx].type = &DCC_CHAT;
 		dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);
 		free(dcc[idx].u.chat->su_nick);
 		dcc[idx].u.chat->su_nick = NULL;
+
 		dcc_chatter(idx);
-                dcc[idx].u.chat->channel = dcc[idx].u.chat->su_channel;
 
 		if (dcc[idx].u.chat->channel < GLOBAL_CHANS && dcc[idx].u.chat->channel >= 0) {
 			botnet_send_join_idx(idx);
