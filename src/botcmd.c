@@ -29,14 +29,14 @@
 
 static char TBUF[1024] = "";		/* Static buffer for goofy bot stuff */
 
-static void fake_alert(int idx, char *item, char *extra)
+static void fake_alert(int idx, char *item, char *extra, char *what)
 {
   static time_t lastfake;	/* The last time fake_alert was used */
 
   if ((now - lastfake) > 10) {	
     /* Don't fake_alert more than once every 10secs */
-    dprintf(idx, "ct %s NOTICE: %s (%s != %s).\n", conf.bot->nick, NET_FAKEREJECT, item, extra);
-    putlog(LOG_BOTS, "*", "%s %s (%s != %s).", dcc[idx].nick, NET_FAKEREJECT, item, extra);
+    dprintf(idx, "ct %s NOTICE: %s (%s != %s). (%s)\n", conf.bot->nick, NET_FAKEREJECT, item, extra, what);
+    putlog(LOG_BOTS, "*", "%s %s (%s != %s). (%s)", dcc[idx].nick, NET_FAKEREJECT, item, extra, what);
     lastfake = now;
   }
 }
@@ -65,7 +65,7 @@ static void bot_chan2(int idx, char *msg)
     *p = 0;
     if (!partyidle(p + 1, from)) {
       *p = '@';
-      fake_alert(idx, "user", from);
+      fake_alert(idx, "user", from, "chan2_i");
       return;
     }
     *p = '@';
@@ -76,7 +76,7 @@ static void bot_chan2(int idx, char *msg)
   }
   i = nextbot(p);
   if (i != idx) {
-    fake_alert(idx, "direction", p);
+    fake_alert(idx, "direction", p, "chan2_ii");
   } else {
     chanout_but(-1, chan, "%s\n", TBUF);
     /* Send to new version bots */
@@ -167,13 +167,13 @@ static void bot_chat(int idx, char *par)
 
   from = newsplit(&par);
   if (strchr(from, '@') != NULL) {
-    fake_alert(idx, "bot", from);
+    fake_alert(idx, "bot", from, "chat_i");
     return;
   }
   /* Make sure the bot is valid */
   i = nextbot(from);
   if (i != idx) {
-    fake_alert(idx, "direction", from);
+    fake_alert(idx, "direction", from, "chat_ii");
     return;
   }
   chatout("*** (%s) %s\n", from, par);
@@ -191,20 +191,20 @@ static void bot_actchan(int idx, char *par)
   p = strchr(from, '@');
   if (p == NULL) {
     /* How can a bot do an action? */
-    fake_alert(idx, "user@bot", from);
+    fake_alert(idx, "user@bot", from, "actchan_i");
     return;
   }
   *p = 0;
   if (!partyidle(p + 1, from)) {
     *p = '@';
-    fake_alert(idx, "user", from);
+    fake_alert(idx, "user", from, "actchan_ii");
     return;
   }
   *p = '@';
   p++;
   i = nextbot(p);
   if (i != idx) {
-    fake_alert(idx, "direction", p);
+    fake_alert(idx, "direction", p, "actchan_iii");
     return;
   }
   p = newsplit(&par);
@@ -237,7 +237,7 @@ static void bot_priv(int idx, char *par)
     p = from;
   i = nextbot(p);
   if (i != idx) {
-    fake_alert(idx, "direction", p);
+    fake_alert(idx, "direction", p, "priv_i");
     return;
   }
   if (!to[0])
@@ -498,7 +498,7 @@ static void bot_log(int idx, char *par)
   int i = nextbot(from);
 
   if (i != idx) {
-    fake_alert(idx, "direction", from);
+    fake_alert(idx, "direction", from, "log");
     return;
   }
 
@@ -676,7 +676,7 @@ static void bot_unlinked(int idx, char *par)
   i = nextbot(bot);
   if ((i >= 0) && (i != idx))	/* Bot is NOT downstream along idx, so
 				 * BOGUS! */
-    fake_alert(idx, "direction", bot);
+    fake_alert(idx, "direction", bot, "unlinked");
   else if (i >= 0) {		/* Valid bot downstream of idx */
     if (par[0])
 /* #ifdef HUB */
@@ -789,7 +789,7 @@ static void bot_reject(int idx, char *par)
     frombot = from;
   i = nextbot(frombot);
   if (i != idx) {
-    fake_alert(idx, "direction", frombot);
+    fake_alert(idx, "direction", frombot, "reject");
     return;
   }
   who = newsplit(&par);
@@ -856,7 +856,7 @@ static void bot_zapf(int idx, char *par)
   to = newsplit(&par);
   i = nextbot(from);
   if (i != idx) {
-    fake_alert(idx, "direction", from);
+    fake_alert(idx, "direction", from, "zapf");
     return;
   }
   if (!egg_strcasecmp(to, conf.bot->nick)) {
@@ -886,7 +886,7 @@ static void bot_zapfbroad(int idx, char *par)
 
   i = nextbot(from);
   if (i != idx) {
-    fake_alert(idx, "direction", from);
+    fake_alert(idx, "direction", from, "zapfb");
     return;
   }
   check_bind_bot(from, opcode, par);
@@ -908,7 +908,7 @@ static void bot_nickchange(int idx, char *par)
   bot = newsplit(&par);
   i = nextbot(bot);
   if (i != idx) {
-    fake_alert(idx, "direction", bot);
+    fake_alert(idx, "direction", bot, "nickchange_i");
     return;
   }
   ssock = newsplit(&par);
@@ -916,7 +916,7 @@ static void bot_nickchange(int idx, char *par)
   newnick = newsplit(&par);
   i = partynick(bot, sock, newnick);
   if (i < 0) {
-    fake_alert(idx, "sock#", ssock);
+    fake_alert(idx, "sock#", ssock, "nickchange_ii");
     return;
   }
   chanout_but(-1, party[i].chan, "*** (%s) Nick change: %s -> %s\n",
@@ -956,7 +956,7 @@ static void bot_join(int idx, char *par)
   i = nextbot(bot);
   if (i != idx) {		/* Ok, garbage from a 1.0g (who uses that
 				 * now?) OR raistlin being evil :) */
-    fake_alert(idx, "direction", bot);
+    fake_alert(idx, "direction", bot, "join");
     return;
   }
   u = get_user_by_handle(userlist, nick);
@@ -1104,7 +1104,7 @@ static void bot_versions(int sock, char *par)
   char *frombot = newsplit(&par), *tobot = NULL, *from = NULL;
 
   if (nextbot(frombot) != sock)
-    fake_alert(sock, "versions-direction", frombot);
+    fake_alert(sock, "direction", frombot, "versions");
   else if (egg_strcasecmp(tobot = newsplit(&par), conf.bot->nick)) {
     if ((sock = nextbot(tobot)) >= 0)
       dprintf(sock, "v %s %s %s\n", frombot, tobot, par);
