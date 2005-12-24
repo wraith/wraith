@@ -827,16 +827,16 @@ do_boot(int idx, char *by, char *reason)
   return;
 }
 
-port_t
+int
 listen_all(port_t lport, bool off)
 {
-  int idx = (-1);
+  int idx = -1;
   port_t port, realport;
 
 #ifdef USE_IPV6
   int i6 = 0;
 #endif /* USE_IPV6 */
-  int i;
+  int i = 0, ii = 0;
   struct portmap *pmap = NULL, *pold = NULL;
 
   port = realport = lport;
@@ -846,7 +846,7 @@ listen_all(port_t lport, bool off)
       break;
     }
 
-  for (int ii = 0; ii < dcc_total; ii++) {
+  for (ii = 0; ii < dcc_total; ii++) {
     if (dcc[ii].type && (dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port)) {
       idx = ii;
 
@@ -885,6 +885,7 @@ listen_all(port_t lport, bool off)
         putlog(LOG_ERRORS, "*", "Can't open IPv6 listening port %d - %s", port,
                i6 == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
+        /* now setup ipv4/ipv6 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = 0L;
         strcpy(dcc[idx].host6, myipstr(6));
@@ -903,7 +904,7 @@ listen_all(port_t lport, bool off)
         putlog(LOG_ERRORS, "*", "Can't open IPv4 listening port %d - %s", port,
                i == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
-        idx = (-1);             /* now setup ipv4 listening port */
+        /* now setup ipv4 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = iptolong(getmyip());
         dcc[idx].port = port;

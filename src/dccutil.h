@@ -53,7 +53,7 @@ void do_boot(int, char *, char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
 void identd_open();
 void identd_close();
-port_t listen_all(port_t, bool);
+int listen_all(port_t, bool);
 bool valid_idx(int);
 int dcc_read(FILE *);
 void dcc_write(FILE *, int);
