@@ -415,7 +415,7 @@ void answer_local_whom(int idx, int chan)
   /* Find longest nick and botnick */
   nicklen = botnicklen = 0;
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_CHAT) {
+    if (dcc[i].type && dcc[i].simul == -1 && dcc[i].type == &DCC_CHAT) {
       if ((chan == (-1)) || ((chan >= 0) && (dcc[i].u.chat->channel == chan))) {
         t = strlen(dcc[i].nick); if(t > nicklen) nicklen = t;
         t = strlen(conf.bot->nick); if(t > botnicklen) botnicklen = t;
@@ -443,7 +443,7 @@ void answer_local_whom(int idx, int chan)
     egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%s\n", nicklen);
   }
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_CHAT) {
+    if (dcc[i].type && dcc[i].simul == -1 && dcc[i].type == &DCC_CHAT) {
       if ((chan == (-1)) || ((chan >= 0) && (dcc[i].u.chat->channel == chan))) {
 	c = geticon(i);
 	if (c == '-')
