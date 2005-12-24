@@ -88,6 +88,7 @@ struct chat_info {
   int con_flags;                /* with console: what to show           */
   int strip_flags;              /* what codes to strip (b,r,u,c,a,g,*)  */
   int channel;                  /* 0=party line, -1=off                 */
+  int su_channel;
   char *away;                   /* non-NULL if user is away             */
   char *su_nick;
   char con_chan[81];            /* with console: what channel to view   */

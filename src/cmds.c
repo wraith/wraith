@@ -2966,6 +2966,8 @@ static void cmd_su(int idx, char *par)
 	  free(dcc[idx].u.chat->away);
         dcc[idx].u.chat->away = strdup(dcc[idx].nick);
         dcc[idx].u.chat->su_nick = strdup(dcc[idx].nick);
+        dcc[idx].u.chat->su_channel = dcc[idx].u.chat->channel;
+
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);
 	/* Display password prompt and turn off echo (send IAC WILL ECHO). */
@@ -2982,6 +2984,7 @@ static void cmd_su(int idx, char *par)
 	if (atr & USER_MASTER)
 	  dcc[idx].u.chat->con_flags = conmask;
         dcc[idx].u.chat->su_nick = strdup(dcc[idx].nick);
+        dcc[idx].u.chat->su_channel = dcc[idx].u.chat->channel;
 	dcc[idx].user = u;
 	strcpy(dcc[idx].nick, par);
 	dcc_chatter(idx);
@@ -4246,6 +4249,7 @@ static void cmd_quit(int idx, char *text)
 		free(dcc[idx].u.chat->su_nick);
 		dcc[idx].u.chat->su_nick = NULL;
 		dcc_chatter(idx);
+                dcc[idx].u.chat->channel = dcc[idx].u.chat->su_channel;
 
 		if (dcc[idx].u.chat->channel < GLOBAL_CHANS && dcc[idx].u.chat->channel >= 0) {
 			botnet_send_join_idx(idx);
