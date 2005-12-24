@@ -1000,7 +1000,7 @@ See also: console, channels%{+m}, status%{-}
    bot.
  
    Perm owners may not change their handle without recompiling binaries first. 
-See also: newpass%{+mi}, chhand, chpass%{-}%{+n}, chsecpass%{-}
+See also: newpass%{+mi}, chhandle, chpass%{-}%{+n}, chsecpass%{-}
 ::help:
 ###  $bhelp$b [cmd]
    Alone, will show all cmds that match your flags. With a cmd it will show
