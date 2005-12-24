@@ -42,6 +42,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed chanset 'flood-*' not working correctly. (#69)
 * Fixed cmd_rehash killing hubs. And revised help for 'rehash'. (#186)
 * Fixed a bug in the listen code, which caused a segfault in /ctcp chat (a few other places too) (#189)
+* Fixed botcmd using wrong user on remote bot after doing su'ing to another user. (#190)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

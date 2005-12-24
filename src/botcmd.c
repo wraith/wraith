@@ -1207,7 +1207,8 @@ static void bot_rsim(char *botnick, char *code, char *msg)
   }
 
   for (i = 0; i < dcc_total; i++) {
-   if (dcc[i].type && dcc[i].simul == ridx) {
+   /* See if we can find a simul-idx for the same ridx/nick */
+   if (dcc[i].type && dcc[i].simul == ridx && !egg_strcasecmp(dcc[i].nick, nick)) {
      putlog(LOG_DEBUG, "*", "Simul found old idx for %s: %d (ridx: %d)", nick, i, ridx);
      dcc[i].simultime = now;
      idx = i;
