@@ -1019,9 +1019,11 @@ static void bot_part(int idx, char *par)
   int i = 0;
 
   for (i = 0; i < dcc_total; i++) {
+    /* This will potentially close all simul-idxs with matching nick, even though they may be connected multiple times
+       but, it won't matter as a new will just be made as needed. */
     if (dcc[i].type && dcc[i].simul >= 0 && !egg_strcasecmp(dcc[i].nick, nick)) {
-        dcc[idx].simul = -1;
-        lostdcc(idx);
+        dcc[i].simul = -1;
+        lostdcc(i);
     }
   }
 
