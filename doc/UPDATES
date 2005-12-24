@@ -40,6 +40,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Removed some legacy code from failed relays that attempts to connect to port+1, port+2, port+3... (might fix #177)
 * Fixed an invalid killsock error in sharing.
 * Fixed chanset 'flood-*' not working correctly. (#69)
+* Fixed cmd_rehash killing hubs. And revised help for 'rehash'. (#186)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

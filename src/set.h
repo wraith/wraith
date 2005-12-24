@@ -28,6 +28,8 @@
 /* Don't set the var data from the mem as default (NICK) */
 #define VAR_NODEF	BIT14
 #define VAR_CHANSET	BIT15
+/* Don't set global on hub */
+#define VAR_NOGHUB	BIT17
 
 #define VAR_LDATA 	1
 #define VAR_GDATA	2

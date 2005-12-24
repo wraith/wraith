@@ -540,6 +540,7 @@ void reload_bin_data() {
 
     conf_bot *oldbots = NULL;
     
+    /* save the old bots list */
     oldbots = conf_bots_dup(conf.bots);
     /* free up our current conf struct */
     free_conf();
