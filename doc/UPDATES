@@ -46,6 +46,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed botcmd -> su/quit causing remote bots to close random socket.
 * Fixed another cmd_whom bug which showed remote users from .botcmd. (#9)
 * Fixed returning from 'su' not returning user to correct channel. (ie, partyline)
+* Fixed cmds showing failed cmdpass. (#188)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
