@@ -612,27 +612,59 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       int *pthr = NULL;
       time_t *ptime = NULL;
       char *p = NULL;
-      bool all = 0;
 
-      if (!strcmp(item[i] + 6, "*"))
-        all = 1;
+      if (!strcmp(item[i] + 6, "*")) {
+        i++;
+        if (i >= items) {
+          if (result)
+            simple_snprintf(result, RESULT_LEN, "%s needs argument", item[i - 1]);
+          return ERROR;
+        }
+        p = strchr(item[i], ':');
 
-      if (all || !strcmp(item[i] + 6, "chan")) {
+        int thr = 0;
+        time_t time = 0;
+
+        if (p) {
+          *p++ = 0;
+
+          thr = atoi(item[i]);
+          time = atoi(p);
+
+          *--p = ':';
+        } else {
+          thr = atoi(item[i]);
+          time = 1;
+        }
+
+        chan->flood_pub_thr = thr;
+        chan->flood_pub_time = time;
+        chan->flood_join_thr = thr;
+        chan->flood_join_time = time;
+        chan->flood_ctcp_thr = thr;
+        chan->flood_ctcp_time = time;
+        chan->flood_kick_thr = thr;
+        chan->flood_kick_time = time;
+        chan->flood_deop_thr = thr;
+        chan->flood_deop_time = time;
+        chan->flood_nick_thr = thr;
+        chan->flood_nick_time = time;
+      } else if (!strcmp(item[i] + 6, "chan")) {
 	pthr = &chan->flood_pub_thr;
 	ptime = &chan->flood_pub_time;
-      } else if (all || !strcmp(item[i] + 6, "join")) {
+      } else if (!strcmp(item[i] + 6, "join")) {
 	pthr = &chan->flood_join_thr;
 	ptime = &chan->flood_join_time;
-      } else if (all || !strcmp(item[i] + 6, "ctcp")) {
+      } else if (!strcmp(item[i] + 6, "ctcp")) {
 	pthr = &chan->flood_ctcp_thr;
 	ptime = &chan->flood_ctcp_time;
-      } else if (all || !strcmp(item[i] + 6, "kick")) {
+      } else if (!strcmp(item[i] + 6, "kick")) {
 	pthr = &chan->flood_kick_thr;
 	ptime = &chan->flood_kick_time;
-      } else if (all || !strcmp(item[i] + 6, "deop")) {
+      } else if (!strcmp(item[i] + 6, "deop")) {
 	pthr = &chan->flood_deop_thr;
 	ptime = &chan->flood_deop_time;
-      } else if (all || !strcmp(item[i] + 6, "nick")) {
+      } else if (!strcmp(item[i] + 6, "nick")) {
 	pthr = &chan->flood_nick_thr;
 	ptime = &chan->flood_nick_time;
       } else {
@@ -640,21 +672,24 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 	  simple_snprintf(result, RESULT_LEN, "illegal channel flood type: %s", item[i]);
 	return ERROR;
       }
-      i++;
-      if (i >= items) {
-	if (result)
-	  simple_snprintf(result, RESULT_LEN, "%s needs argument", item[i - 1]);
-	return ERROR;
-      }
-      p = strchr(item[i], ':');
-      if (p) {
-	*p++ = 0;
-	*pthr = atoi(item[i]);
-	*ptime = atoi(p);
-	*--p = ':';
-      } else {
-	*pthr = atoi(item[i]);
-	*ptime = 1;
+
+      if (pthr && ptime) { //Ignore flood-*
+        i++;
+        if (i >= items) {
+          if (result)
+            simple_snprintf(result, RESULT_LEN, "%s needs argument", item[i - 1]);
+          return ERROR;
+        }
+        p = strchr(item[i], ':');
+        if (p) {
+          *p++ = 0;
+          *pthr = atoi(item[i]);
+          *ptime = atoi(p);
+          *--p = ':';
+        } else {
+          *pthr = atoi(item[i]);
+          *ptime = 1;
+        }
       }
     } else {
       if (result && item[i][0]) /* ignore "" */
