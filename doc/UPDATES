@@ -48,6 +48,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed returning from 'su' not returning user to correct channel. (ie, partyline)
 * Fixed cmds showing failed cmdpass. (#188)
 * The respository is now stored in subversion; binaries now hold a revision number.
+* cmd_botcmd <?> now displays which bot is chosen in the log. (#192)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

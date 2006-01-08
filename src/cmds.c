@@ -1283,7 +1283,8 @@ static void cmd_botcmd(int idx, char *par)
   tand_t *tbot = NULL;
 
   /* the rest of the cmd will be logged remotely */
-  putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);	
+  if (strcmp(botm, "?"))
+    putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);
 
   if (!strcmp(botm, "*")) {
     if (!egg_strncasecmp(cmd, "di", 2) || (!egg_strncasecmp(cmd, "res", 3) && egg_strncasecmp(cmd, "reset", 5)) || !egg_strncasecmp(cmd, "sui", 3) || 
@@ -1322,6 +1323,8 @@ static void cmd_botcmd(int idx, char *par)
       continue;
     cnt++;
     if ((rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
+      if (rleaf != -1)
+        putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, tbot->bot, cmd);
       send_remote_simul(idx, tbot->bot, cmd, par ? par : (char *) "");
       found++;
     }
