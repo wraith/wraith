@@ -364,6 +364,7 @@ static void cmd_about(int idx, char *par)
   egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
   dprintf(idx, "Version: %s\n", egg_version);
   dprintf(idx, "Build: %s (%li)\n", c, buildts);
+  dprintf(idx, "Revision: %s\n", revision);
   dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n"));
   dprintf(idx, "..with credits and thanks to the following:\n");
   dprintf(idx, " \n");

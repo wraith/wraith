@@ -34,7 +34,6 @@
 #include "traffic.h"
 #include "bg.h"	
 #include "botnet.h"
-#include "build.h"
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
@@ -68,7 +67,8 @@
 
 extern int		optind;
 
-const time_t 	buildts = CVSBUILD;		/* build timestamp (UTC) */
+const time_t 	buildts = BUILDTS;		/* build timestamp (UTC) */
+const char	*revision = REVISION;
 const char	*egg_version = "1.2.9-cvs";
 
 bool	used_B = 0;		/* did we get started with -B? */
@@ -376,7 +376,9 @@ static void dtx_arg(int argc, char *argv[])
         char date[50] = "";
 
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
-	printf("%s\nBuild Date: %s (%lu)\n", version, date, buildts);
+	printf("%s\nBuild Date: %s (%s%lu%s)\n", version, date, BOLD(-1), buildts, BOLD_END(-1));
+        printf("Revision: %s\n", revision);
+        printf("BuildOS: %s%s%s BuildArch: %s%s%s\n", BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
 
 	sdprintf("pack: %d conf: %d settings_t: %d pad: %d\n", SIZE_PACK, SIZE_CONF, sizeof(settings_t), SIZE_PAD);
         if (settings.uname[0]) {
@@ -711,7 +713,7 @@ printf("out: %s\n", out);
 
   /* Version info! */
   simple_snprintf(ver, sizeof ver, "[%s] Wraith %s", settings.packname, egg_version);
-  egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu)", settings.packname, egg_version, buildts);
+  egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu:%s)", settings.packname, egg_version, buildts, revision);
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;

@@ -20,6 +20,8 @@ EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src
            config.cache config.log config.status config.h stamp.* misc/.cvsignore src/compat/.cvsignore \
            src/mod/.cvsignore src/.cvsignore .cvsignore misc/commit misc/fstrings \
            misc/plainh misc/grep misc/cp.sh
+REVISION 	:= $(shell svnversion .)
+BUILDTS 	:= $(shell misc/buildts.php)
 
 # defaults
 CXX = @CCACHE@ @DISTCC@ @CXX@
@@ -49,12 +51,12 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 MAKEFLAGS = -s -j4
 
 MAKE_BIN = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
-'CCDEPMODE=$(CCDEPMODE)' \
+'CCDEPMODE=$(CCDEPMODE)' 'REVISION=$(REVISION)' 'BUILDTS=$(BUILDTS)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
 MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
-'CCDEPMODE=$(CCDEPMODE)' \
+'CCDEPMODE=$(CCDEPMODE)' 'REVISION=$(REVISION)' 'BUILDTS=$(BUILDTS)' \
 'STRIP=touch' 'CFLGS=$(DEBCXXFLAGS) $(CFLGS)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)' 
 

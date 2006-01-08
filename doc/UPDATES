@@ -47,6 +47,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed another cmd_whom bug which showed remote users from .botcmd. (#9)
 * Fixed returning from 'su' not returning user to correct channel. (ie, partyline)
 * Fixed cmds showing failed cmdpass. (#188)
+* The respository is now stored in subversion; binaries now hold a revision number.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

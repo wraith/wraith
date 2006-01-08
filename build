@@ -17,7 +17,7 @@ fi
 
 ver="?.?.?"
 ver=`grep "char" src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
-BUILDTS=`cat src/build.h | $AWK '{print $3}'`
+BUILDTS=$(misc/buildts.php)
 builddate=`perl -e "use POSIX 'strftime';print strftime(\"%m.%d.%Y\n\",gmtime(${BUILDTS}));"`
 
 clear
