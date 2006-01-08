@@ -378,8 +378,6 @@ static void dtx_arg(int argc, char *argv[])
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf("%s\nBuild Date: %s (%s%lu%s)\n", version, date, BOLD(-1), buildts, BOLD_END(-1));
         printf("Revision: %s\n", revision);
-        printf("BuildOS: %s%s%s BuildArch: %s%s%s\n", BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
-
 	sdprintf("pack: %d conf: %d settings_t: %d pad: %d\n", SIZE_PACK, SIZE_CONF, sizeof(settings_t), SIZE_PAD);
         if (settings.uname[0]) {
           sdebug++;
