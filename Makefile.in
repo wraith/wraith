@@ -81,7 +81,7 @@ clean:  cleanutils
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(BINEXEC) stamp.* *~ src/*~ configure.temp .mangled
-	@rm -f src/help.h src/response.h src/responses.h utctime
+	@rm -f src/help.h src/response.h src/responses.h utctime ts
 
 distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
