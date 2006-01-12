@@ -1,3 +1,3 @@
 #! /bin/sh
-svn info | grep "Last Changed Date" | sed "s/.*: \(.* \)-.*/\1/"
+svn info | grep "Last Changed Date" | sed "s/^.*: \(.* \)[-+].*$/\1/"
 
