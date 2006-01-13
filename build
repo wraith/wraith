@@ -20,7 +20,7 @@ ver=`grep "char" src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g'
 gcc -Wall -O2 -o ts misc/ts.c
 BUILDTS=`./ts \`misc/getdate.sh\``
 builddate=`./ts ${BUILDTS}`
-rm ts
+rm -f ts ts.exe
 clear
 #Display a banner
 bt=`grep -A 5 "char \*wbanner(void) {" src/misc.c | grep "switch" | sed -e "s/.*switch (randint(\(.\))) {/\1/"`
