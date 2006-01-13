@@ -74,6 +74,7 @@ default: wraith
 
 cleanutils:
 	@rm -f src/stringfix src/sorthelp src/makehelp
+	@rm -f src/stringfix.exe src/sorthelp.exe src/makehelp.exe
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
