@@ -146,13 +146,9 @@ int is_dir(const char *s)
 
 int fixmod(const char *s)
 {
-#ifndef CYGWIN_HACKS
   if (!can_stat(s))
     return 1;
   return chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
-#else
-  return 0;
-#endif /* !CYGWIN_HACKS */
 }
 
 Tempfile::Tempfile()
