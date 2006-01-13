@@ -318,7 +318,6 @@ static void cmd_voice(int idx, char *par)
       return;
   }
 
-  char s[UHOSTLEN] = "";
   memberlist *m = NULL;
 
   if (all)
