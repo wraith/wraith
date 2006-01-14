@@ -295,6 +295,7 @@ static void dtx_arg(int argc, char *argv[])
       case '4':
         readconf(optarg, CONF_ENC);
         expand_tilde(&conf.binpath);
+        expand_tilde(&conf.datadir);
         parseconf(0);
         conf_to_bin(&conf, 0, 6);		/* this will exit() in write_settings() */
       case 'a':
@@ -674,11 +675,11 @@ printf("out: %s\n", out);
     fatal("!! Invalid binary", 0);
   }
 
-  /* setup initial tempdir as /tmp until we read in tmpdir from conf */
-
   binname = getfullbinname(argv[0]);
   chdir(dirname(binname));
 
+  /* Find a temporary tempdir until we load binary data */
+  /* setup initial tempdir as /tmp until we read in tmpdir from conf */
   Tempfile::FindDir();
 
   /* This allows -2/-0 to be used without an initialized binary */

