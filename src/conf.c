@@ -688,13 +688,13 @@ readconf(const char *fname, int bits)
             conf.autouname = atoi(line);
 
         } else if (!strcmp(option, "username")) {       /* shell username */
-          conf.username = strdup(line);
+          str_redup(&conf.username, line);
 
         } else if (!strcmp(option, "homedir")) {        /* homedir */
-          conf.homedir = strdup(line);
+          str_redup(&conf.homedir, line);
 
         } else if (!strcmp(option, "datadir")) {        /* datadir */
-          conf.datadir = strdup(line);
+          str_redup(&conf.datadir, line);
 
         } else if (!strcmp(option, "binpath")) {        /* path that the binary should move to? */
           str_redup(&conf.binpath, line);
@@ -719,10 +719,7 @@ readconf(const char *fname, int bits)
             conf.uid = atoi(line);
 
         } else if (!strcmp(option, "uname")) {  /* new method uname */
-          if (!conf.uname)
-            conf.uname = strdup(line);
-          else
-            str_redup(&conf.uname, line);
+          str_redup(&conf.uname, line);
 
         } else if (!strcmp(option, "watcher")) {
           if (egg_isdigit(line[0]))
@@ -1021,14 +1018,14 @@ bin_to_conf(void)
 {
 /* printf("Converting binary data to conf struct\n"); */
   conf.uid = atol(settings.uid);
-  conf.username = strdup(settings.username);
-  conf.uname = strdup(settings.uname);
-  conf.datadir = strdup(settings.datadir);
+  str_redup(&conf.username, settings.username);
+  str_redup(&conf.uname, settings.uname); 
+  str_redup(&conf.datadir, settings.datadir);
   expand_tilde(&conf.datadir);
-  conf.homedir = strdup(settings.homedir);
-  conf.binpath = strdup(settings.binpath);
+  str_redup(&conf.homedir, settings.homedir);
+  str_redup(&conf.binpath, settings.binpath);
   expand_tilde(&conf.binpath);
-  conf.binname = strdup(settings.binname);
+  str_redup(&conf.binname, settings.binname);
   conf.portmin = atol(settings.portmin);
   conf.portmax = atol(settings.portmax);
   conf.autouname = atoi(settings.autouname);

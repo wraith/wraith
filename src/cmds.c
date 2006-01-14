@@ -1698,6 +1698,7 @@ static void cmd_conf(int idx, char *par)
         if (!egg_strcasecmp(what, "homedir"))   str_redup(&conf.homedir, par);
         else if (!egg_strcasecmp(what, "binpath"))   str_redup(&conf.binpath, par);
         else if (!egg_strcasecmp(what, "binname"))   str_redup(&conf.binname, par);
+        else if (!egg_strcasecmp(what, "datadir"))   str_redup(&conf.datadir, par);
         else if (!egg_strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
         else if (!egg_strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
         else if (!egg_strcasecmp(what, "pscloak"))   conf.pscloak = atoi(par);
@@ -1721,6 +1722,7 @@ static void cmd_conf(int idx, char *par)
       if (!what || !egg_strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conf.homedir);
       if (!what || !egg_strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conf.binpath);
       if (!what || !egg_strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conf.binname);
+      if (!what || !egg_strcasecmp(what, "datadir"))    dprintf(idx, "%sdatadir: %s\n", ss, conf.datadir);
       if (!what || !egg_strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
       if (!what || !egg_strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
       if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spscloak: %d\n", ss, conf.pscloak);
