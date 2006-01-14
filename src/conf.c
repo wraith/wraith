@@ -390,7 +390,7 @@ checkpid(const char *nick, conf_bot *bot)
 
   tmpnick = tmp_ptr = strdup(nick);
 
-  simple_snprintf(buf, sizeof buf, "%s.pid.%s", tempdir, tmpnick);
+  simple_snprintf(buf, sizeof buf, "%s/.pid.%s", conf.datadir, tmpnick);
   free(tmp_ptr);
 
   if (bot && !(bot->pid_file))

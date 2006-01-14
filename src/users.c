@@ -522,8 +522,8 @@ void backup_userfile()
   char s[DIRMAX] = "", s2[DIRMAX] = "";
 
   putlog(LOG_MISC, "*", "Backing up user file...");
-  simple_snprintf(s, sizeof s, "%s.u.0", tempdir);
-  simple_snprintf(s2, sizeof s2, "%s.u.1", tempdir);
+  simple_snprintf(s, sizeof s, "%s/.u.0", conf.datadir);
+  simple_snprintf(s2, sizeof s2, "%s/.u.1", conf.datadir);
   movefile(s, s2);
   copyfile(userfile, s);
 }

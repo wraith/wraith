@@ -486,7 +486,7 @@ int write_userfile(int idx)
   }
   fclose(f);
   putlog(LOG_DEBUG, "@", "Done writing userfile.");
-  simple_snprintf(backup, sizeof backup, "%s%s~", tempdir, userfile);
+  simple_snprintf(backup, sizeof backup, "%s/%s~", conf.datadir, userfile);
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
   free(new_userfile);

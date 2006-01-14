@@ -752,7 +752,7 @@ void baduname(char *confhas, char *myuname) {
 
   tmpFile = (char *) my_calloc(1, strlen(tempdir) + 3 + 1);
 
-  simple_sprintf(tmpFile, "%s.un", tempdir);
+  simple_sprintf(tmpFile, "%s/.un", conf.datadir);
   sdprintf("CHECKING %s", tmpFile);
   if (is_file(tmpFile)) {
     struct stat ss;

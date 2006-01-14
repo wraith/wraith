@@ -781,7 +781,7 @@ int updatebin(int idx, char *par, int secs)
 
   /* make a backup just in case. */
 
-  simple_snprintf(buf, sizeof(buf), "%s.bin.old", tempdir);
+  simple_snprintf(buf, sizeof(buf), "%s/.bin.old", conf.datadir);
   copyfile(binname, buf);
 
   write_settings(path, -1, 0);	/* re-write the binary with our packdata */

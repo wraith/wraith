@@ -324,6 +324,8 @@ void tell_verbose_status(int idx)
   dprintf(idx, "uid: %s (%d) pid: %d homedir: %s\n", conf.username, conf.uid, mypid, conf.homedir);
   if (tempdir[0])
     dprintf(idx, "Tempdir     : %s\n", tempdir);
+  if (conf.datadir)
+    dprintf(idx, "Datadir     : %s\n", conf.datadir);
 }
 
 /* Show all internal state variables
