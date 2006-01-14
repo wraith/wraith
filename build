@@ -17,7 +17,8 @@ fi
 
 ver="?.?.?"
 ver=`grep "char" src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
-gcc -O2 -o ts misc/ts.c
+rm -f ts ts.exe
+gcc -o ts misc/ts.c
 BUILDTS=`./ts \`misc/getdate.sh\``
 builddate=`./ts ${BUILDTS}`
 rm -f ts ts.exe
