@@ -47,7 +47,7 @@ char *my_uname();
 #ifndef CYGWIN_HACKS 
 char *move_bin(const char *, const char *, bool);
 #endif /* !CYGWIN_HACKS */
-void fix_tilde(char **);
+void expand_tilde(char **);
 void baduname(char *, char *);
 int email(char *, char *, int);
 int shell_exec(char *, char *, char **, char **);

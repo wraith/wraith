@@ -841,18 +841,19 @@ char *my_username()
   return username;
 }
 
-void fix_tilde(char **binptr)
+void expand_tilde(char **ptr)
 {
-  char *binpath = binptr ? *binptr : NULL;
+  char *str = ptr ? *ptr : NULL;
 
-  if (binpath && strchr(binpath, '~')) {
+  if (str && strchr(str, '~')) {
     char *p = NULL;
+    size_t siz = strlen(str);
 
-    if (binpath[strlen(binpath) - 1] == '/')
-      binpath[strlen(binpath) - 1] = 0;
+    if (str[siz - 1] == '/')
+      str[siz - 1] = 0;
 
-    if ((p = replace(binpath, "~", homedir())))
-      str_redup(binptr, p);
+    if ((p = replace(str, "~", homedir())))
+      str_redup(ptr, p);
     else
       fatal("Unforseen error expanding '~'", 0);
   }
@@ -887,7 +888,7 @@ char *move_bin(const char *ipath, const char *file, bool run)
 {
   char *path = strdup(ipath);
 
-  fix_tilde(&path);
+  expand_tilde(&path);
 
   /* move the binary to the correct place */
   static char newbin[DIRMAX] = "";

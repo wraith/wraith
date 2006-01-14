@@ -315,7 +315,7 @@ confedit()
 
   tmpconf.my_close();
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
-  fix_tilde(&conf.binpath);
+  expand_tilde(&conf.binpath);
   unlink(tmpconf.file);
   conf_to_bin(&conf, 0, -1);
   if (localhub_pid)
@@ -1014,7 +1014,7 @@ bin_to_conf(void)
   conf.tempdir = strdup(settings.tempdir);
   conf.homedir = strdup(settings.homedir);
   conf.binpath = strdup(settings.binpath);
-  fix_tilde(&conf.binpath);
+  expand_tilde(&conf.binpath);
   conf.binname = strdup(settings.binname);
   conf.portmin = atol(settings.portmin);
   conf.portmax = atol(settings.portmax);
