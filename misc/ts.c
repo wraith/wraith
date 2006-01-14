@@ -10,9 +10,10 @@ int main(int argc, char *argv[])
     char *Time = NULL;
     const char *Format = "%Y-%m-%d %H:%M:%S";
     struct tm ts;
+    size_t siz = strlen(argv[1]) + strlen(argv[2]) + 1 + 1;
 
-    Time = calloc(1, strlen(argv[1]) + strlen(argv[2]) + 1 + 1);
-    sprintf(Time, "%s %s", argv[1], argv[2]);
+    Time = calloc(1, siz);
+    snprintf(Time, siz, "%s %s", argv[1], argv[2]);
     strptime(Time, Format, &ts);
     free(Time);
     printf("%ld\n", mktime(&ts));
