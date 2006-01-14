@@ -218,6 +218,7 @@ static bool check_tempdir(bool do_mod)
           return 0;
     }
   }
+
   if (do_mod && fixmod(tempdir))
     return 0;
 
@@ -239,16 +240,19 @@ void Tempfile::FindDir()
 {
   /* this is temporary until we make tmpdir customizable */
 #ifdef CYGWIN_HACKS
-  simple_snprintf(tempdir, DIRMAX, "tmp/");
+  simple_snprintf(tempdir, DIRMAX, "./tmp/");
   if (!check_tempdir(0)) {
     clear_tmpdir = 0;
     simple_snprintf(tempdir, DIRMAX, "./");
   }
+  return;
 #else
+
+  /* If this is a hub, use, "./tmp/" */
   if (conf.bots && conf.bots->nick && conf.bots->hub)
     simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
   else {
-    //need to create ~/.ssh/
+    //need to create ~/.ssh/  
     simple_snprintf(tempdir, DIRMAX, "%s/.ssh/", conf.homedir);
     clear_tmpdir = 0;
     check_tempdir(0);
@@ -256,26 +260,29 @@ void Tempfile::FindDir()
     simple_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
   }
 
-  if (!check_tempdir(0)) {
-    clear_tmpdir = 0;
-    simple_snprintf(tempdir, DIRMAX, "/tmp/");
+  /* The dirs we WANT to use aren't accessible, try a random one instead to get the job done. */
+
+  clear_tmpdir = 0;
+
+  char *dirs[] = {
+    "/tmp/",
+    "/usr/tmp/",
+    "/var/tmp/",
+    "./",
+    NULL
+  };
+  int i = 0;
+  bool found = 0;
+
+  for (i = 0; dirs[i]; i++) {
+    simple_snprintf(tempdir, DIRMAX, dirs[i]);
+    if (check_tempdir(0)) {
+      found = 1;
+      break;
+    }
   }
 
-  if (!check_tempdir(0)) {
-    simple_snprintf(tempdir, DIRMAX, "/usr/tmp/");
-  }
-
-  if (!check_tempdir(0)) {
-    simple_snprintf(tempdir, DIRMAX, "/var/tmp/");
-  }
-
-  if (!check_tempdir(0)) {
-    simple_snprintf(tempdir, DIRMAX, "./");
-  }
-
-  if (!check_tempdir(0)) {
-    check_tempdir(0);
+  if (!found)
     werr(ERR_TMPSTAT);
-  }
 #endif /* CYGWIN_HACKS */
 }
