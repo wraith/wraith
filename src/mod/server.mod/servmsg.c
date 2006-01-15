@@ -536,7 +536,7 @@ static int gotmsg(char *from, char *msg)
 	      }
 
 	      if (!strcmp(code, "ACTION")) {
-                putlog(LOG_MSGS, "*", "Action to %s: %s %s", to, nick, ctcp);
+                putlog(LOG_MSGS, "*", "* %s (%s): %s", nick, uhost, ctcp);
               } else {
                 putlog(LOG_MSGS, "*", "CTCP %s: %s from %s (%s)", code, ctcp, nick, uhost);
               }			/* I love a good close cascade ;) */
