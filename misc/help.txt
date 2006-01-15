@@ -1542,6 +1542,7 @@ See also: reload, backup
  
 [S]  $brealname$b        The bot's "real name" when connecting.
 [S]  $bnick$b            The bot's preferred nickname on IRC.
+[N]  $bnotify-time$b     The number of seconds between server notify checks for nick.
  
 [B]  $bdccauth$b         Boolean (0 or 1). Set to use auth checking on dcc/telnet login.
 [N]  $bop-bots$b         Number of bots to ask every time a oprequest is to be made.

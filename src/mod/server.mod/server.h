@@ -74,3 +74,4 @@ void rehash_server(const char *, const char *);
 void join_chans();
 void check_hostmask();
 void next_server(int *, char *, port_t *, char *);
+void server_send_ison();

@@ -1065,7 +1065,6 @@ void server_init()
   add_builtins("ctcp", my_ctcps);
 
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
-  timer_create_secs(10, "server_10secondly", (Function) server_10secondly);
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);

@@ -710,7 +710,7 @@ static int gotwall(char *from, char *msg)
   return 0;
 }
 
-static void server_10secondly()
+void server_send_ison()
 {
   if (server_online && keepnick) {
     /* NOTE: now that botname can but upto NICKLEN bytes long,

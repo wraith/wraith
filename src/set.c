@@ -34,6 +34,7 @@ int fight_threshold;
 int fork_interval;
 int hijack = DET_DIE;
 int in_bots = 2;
+int ison_time = 10;
 int kill_threshold;
 int lag_threshold = 15;
 int login = DET_WARN;
@@ -71,6 +72,7 @@ static variable_t vars[] = {
  VAR("hijack",		&hijack,		0,				VAR_INT|VAR_DETECTED|VAR_PERM),
  VAR("homechan",	homechan,		sizeof(homechan),		VAR_STRING|VAR_NOLOC|VAR_HIDE),
  VAR("in-bots",		&in_bots,		0,				VAR_INT|VAR_NOLOC),
+ VAR("notify-time",	&ison_time,		0, 				VAR_INT|VAR_NOLHUB),
  VAR("kill-threshold",	&kill_threshold,	0,				VAR_INT|VAR_NOLOC),
  VAR("lag-threshold",	&lag_threshold,		0,				VAR_INT|VAR_NOLHUB),
  VAR("login",		&login,			0,				VAR_INT|VAR_DETECTED),
