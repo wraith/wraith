@@ -1000,7 +1000,8 @@ gotmode(char *from, char *msg)
           dprintf(DP_MODE, "WHO %s\n", nick);
           return 0;
         }
-      }
+      } else
+        nick = splitnick(&from);
 
       chg = newsplit(&msg);
       reversing = 0;
