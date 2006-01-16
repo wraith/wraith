@@ -52,6 +52,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed ACTION ctcp log msg to be more standard. (fixes #138)
 * Added set var 'notify-time' to change the interval for regaining nick. (fixes #182)
 * Fixed segfault caused by CHANFIX/server modes. (fixes #25)
+* Modified a kick to be less offensive (fixes #175)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
