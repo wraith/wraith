@@ -860,6 +860,9 @@ got_unexempt(struct chanset_t *chan, memberlist *m, char *mask)
   if ((u_equals_mask(global_exempts, mask) || u_equals_mask(chan->exempts, mask)) &&
       me_op(chan) && !channel_dynamicexempts(chan) && !glob_bot(user))
     add_mode(chan, '+', 'e', mask);
+
+  if (channel_enforcebans(chan))
+    enforce_bans(chan);
 }
 
 static void
