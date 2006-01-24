@@ -845,10 +845,11 @@ void mkdir_p(const char *dir) {
   char *p = NULL, *path = NULL;
 
   path = p = strdup(dir);
-  p = strchr(p + 1, '/');
 
-  while (p) {
-    *p = '\0';
+  do {
+    p = strchr(p + 1, '/');
+    if (p)
+      *p = '\0';
     if (can_stat(path) && !is_dir(path))
       unlink(path);
     if (!can_stat(path)) {
@@ -859,8 +860,7 @@ void mkdir_p(const char *dir) {
     }
     if (p)
       *p = '/';
-    p = strchr(p + 1, '/');
-  }
+  } while(p);
   free(path);
 }
 
