@@ -370,12 +370,45 @@ init_conf()
   expand_tilde(&conf.datadir);
 }
 
+/* FIXME: Remove after 1.2.9 I guess; or revise to work for when datadir changes. */
+/* This technically doesn't belong in the trunk, but it will be adapated for future use */
+static void conf_compat_pids()
+{
+  conf_bot *bot = NULL;
+  char path[DIRMAX] = "", dir[DIRMAX] = "";
+  int i = 0;
+
+  for (i = 0; i < 5; i++) {
+    if (i == 0) {
+      if (!conf.bot || !conf.bot->hub)
+        simple_snprintf(dir, sizeof(dir), "%s/.ssh/...", conf.homedir);
+      else
+        simple_snprintf(dir, sizeof(dir), "%s/tmp", conf.binpath);
+    } else if (i == 1) {
+      simple_snprintf(dir, sizeof(dir), "/tmp");
+    } else if (i == 2) {
+      simple_snprintf(dir, sizeof(dir), "/usr/tmp");
+    } else if (i == 3) {
+      simple_snprintf(dir, sizeof(dir), "/var/tmp");
+    } else if (i == 4) {
+      simple_snprintf(dir, sizeof(dir), "%s", conf.binpath);
+    }
+
+    for (bot = conf.bots; bot && bot->nick; bot = bot->next)
+      if (checkpid(bot->nick, bot, dir)) {
+        simple_snprintf(path, sizeof(path), "%s/.pid.%s", conf.datadir, bot->nick);
+        copyfile(bot->pid_file, path);
+      } else if (can_stat(bot->pid_file))
+        unlink(bot->pid_file);
+  }  
+}
+
 void conf_checkpids()
 {
   conf_bot *bot = NULL;
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next)
-    bot->pid = checkpid(bot->nick, bot);
+    bot->pid = checkpid(bot->nick, bot, NULL);
 }
 
 /*
@@ -383,7 +416,7 @@ void conf_checkpids()
  */
 
 pid_t
-checkpid(const char *nick, conf_bot *bot)
+checkpid(const char *nick, conf_bot *bot, const char *usedir)
 {
   FILE *f = NULL;
   char buf[DIRMAX] = "", *tmpnick = NULL, *tmp_ptr = NULL;
@@ -391,7 +424,11 @@ checkpid(const char *nick, conf_bot *bot)
 
   tmpnick = tmp_ptr = strdup(nick);
 
-  simple_snprintf(buf, sizeof buf, "%s/.pid.%s", conf.datadir, tmpnick);
+  /* FIXME: remove after 1.2.9 */
+  if (usedir)
+    simple_snprintf(buf, sizeof buf, "%s/.pid.%s", usedir, tmpnick);
+  else
+    simple_snprintf(buf, sizeof buf, "%s/.pid.%s", conf.datadir, tmpnick);
   free(tmp_ptr);
 
   if (bot && !(bot->pid_file))
@@ -418,6 +455,9 @@ checkpid(const char *nick, conf_bot *bot)
       if (kill(pid, SIGCHLD))	//Problem killing, most likely it's just not running.
         pid = 0;
     }
+
+    /* FIXME: remove after 1.2.9 - this is so, when we are moving pidfiles, dont bother with socksfile stuff, just return if the pid is valid or not. */
+    if (!usedir)
 
     //There is a socksfile given and it's accessable, plus the pid in the file is my own
     //So it's a good chance we just did a soft restart
@@ -541,7 +581,7 @@ conf_delbot(char *botn)
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     if (!strcmp(bot->nick, botn)) {     /* found it! */
-      bot->pid = checkpid(bot->nick, bot);
+      bot->pid = checkpid(bot->nick, bot, NULL);
       conf_killbot(NULL, bot, SIGKILL);
       free_bot(bot);
       return 0;
@@ -1068,6 +1108,7 @@ bin_to_conf(void)
   if (clear_tmpdir)
     clear_tmp();	/* clear out the tmp dir, no matter if we are localhub or not */
 
+  conf_compat_pids();
   conf_checkpids();
 
   tellconf();

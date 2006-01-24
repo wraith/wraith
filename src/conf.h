@@ -60,7 +60,7 @@ int conf_killbot(const char *, conf_bot *, int);
 void confedit() __attribute__((noreturn));
 void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
-pid_t checkpid(const char *, conf_bot *);
+pid_t checkpid(const char *, conf_bot *, const char *);
 void init_conf();
 void free_conf();
 void free_conf_bots(conf_bot *);
