@@ -1062,7 +1062,7 @@ bin_to_conf(void)
     free(tmpp);
   }
 
-
+  mkdir_p(conf.datadir);
   Tempfile::FindDir();
 
   if (clear_tmpdir)

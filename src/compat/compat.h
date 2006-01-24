@@ -17,7 +17,6 @@
 #include "memutil.h"
 #include "strcasecmp.h"
 #include "strftime.h"
-#include "makepath.h"
 #include "strlcpy.h"
 #include "strsep.h"
 #include "timespec.h"

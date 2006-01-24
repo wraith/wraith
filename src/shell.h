@@ -44,7 +44,7 @@ void clear_tmp();
 char *homedir(bool = 1);
 char *my_username();
 char *my_uname();
-#ifndef CYGWIN_HACKS 
+#ifndef CYGWIN_HACKS
 char *move_bin(const char *, const char *, bool);
 #endif /* !CYGWIN_HACKS */
 void expand_tilde(char **);
@@ -68,7 +68,7 @@ char *werr_tostr(int);
 int det_translate(const char *);
 const char *det_translate_num(int);
 char *shell_escape(const char *);
-
+void mkdir_p(const char *);
 extern bool		clear_tmpdir;
 
 #endif /* _SHELL_H */

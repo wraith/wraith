@@ -841,6 +841,29 @@ char *my_username()
   return username;
 }
 
+void mkdir_p(const char *dir) {
+  char *p = NULL, *path = NULL;
+
+  path = p = strdup(dir);
+  p = strchr(p + 1, '/');
+
+  while (p) {
+    *p = '\0';
+    if (can_stat(path) && !is_dir(path))
+      unlink(path);
+    if (!can_stat(path)) {
+      if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR)) {
+        unlink(path);
+        mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR);
+      }
+    }
+    if (p)
+      *p = '/';
+    p = strchr(p + 1, '/');
+  }
+  free(path);
+}
+
 void expand_tilde(char **ptr)
 {
   char *str = ptr ? *ptr : NULL;
