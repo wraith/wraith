@@ -366,7 +366,7 @@ init_conf()
   conf.uname = NULL;
   conf.username = NULL;
   conf.homedir = NULL;
-  conf.datadir = strdup("~/.ssh/...");
+  conf.datadir = strdup("./...");
   expand_tilde(&conf.datadir);
 }
 

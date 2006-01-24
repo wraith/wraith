@@ -49,6 +49,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * The respository is now stored in subversion; binaries now hold a revision number.
 * cmd_botcmd <?> now displays which bot is chosen in the log. (#192)
 * There is now a 'datadir' option in the binary config. The tempdir is still automatically found. (#162)
+* The datadir defaults to './.../' replacing the old '~/.ssh/.../'
 * Fixed ACTION ctcp log msg to be more standard. (fixes #138)
 * Added set var 'notify-time' to change the interval for regaining nick. (fixes #182)
 * Fixed segfault caused by CHANFIX/server modes. (fixes #25)
