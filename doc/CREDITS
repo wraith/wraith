@@ -14,9 +14,11 @@ Wraith botpack by bryan, with credits and thanks to the following:
 * Blackjac for helping with the bx auth script with his Sentinel script.
 * Mystikal for various bugs
 
-Credit for suggestions/bugs can be found at: http://wraith.botpack.net:2080/rptview?rn=13
+Credit for suggestions/bugs can be found at: https://wraith.botpack.net/trac/report/9
+Bugs can be reported at: http://tracker.shatow.net
+Bugs can be looked up by #, ie, '#24' in url: http://24.shatow.net/
 
-The botpack ghost inspired the early versions of wraith and the current config system.
+The botpack ghost inspired the early versions of wraith and a few cmds.
 * einride
 * ievil
 
