@@ -394,10 +394,15 @@ static void conf_compat_pids()
       simple_snprintf(dir, sizeof(dir), "%s", conf.binpath);
     }
 
+    //Wait, we are checking for pids in our datadir? No thanks..
+    if (!strcmp(conf.datadir, dir))
+      continue;
+
     for (bot = conf.bots; bot && bot->nick; bot = bot->next)
       if (checkpid(bot->nick, bot, dir)) {
         simple_snprintf(path, sizeof(path), "%s/.pid.%s", conf.datadir, bot->nick);
         copyfile(bot->pid_file, path);
+      //We only want to unlink if the pidfile is NOT being used, otherwise, it might break a bot that's on timer to restart/update.
       } else if (can_stat(bot->pid_file))
         unlink(bot->pid_file);
   }  
