@@ -57,6 +57,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed bots not enforcing bans when exempts were removed. (fixes #193)
 * Updated CREDITS/cmd_about
 * Fixed some startup segfaults resulting from bugs in glibc.
+* Fixed bot going floodless when it wasn't granted it.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
