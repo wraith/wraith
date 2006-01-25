@@ -811,12 +811,14 @@ char *homedir(bool useconf)
  
       ContextNote("getpwuid()");
       pw = getpwuid(myuid);
-      simple_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
+      if (pw)
+        simple_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
       ContextNote("getpwuid(): Success");
 #endif /* CYGWIN_HACKS */
     }
     ContextNote("realpath()");
-    realpath(tmp, homedir_buf); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+    if (tmp[0])
+      realpath(tmp, homedir_buf); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
     ContextNote("realpath(): Success");
   }
   return homedir_buf;
@@ -835,7 +837,8 @@ char *my_username()
     ContextNote("getpwuid()");
     pw = getpwuid(myuid);
     ContextNote("getpwuid(): Success");
-    simple_snprintf(username, sizeof username, "%s", pw->pw_name);
+    if (pw)
+      simple_snprintf(username, sizeof username, "%s", pw->pw_name);
 #endif /* CYGWIN_HACKS */
   }
   return username;

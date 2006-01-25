@@ -56,6 +56,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Modified a kick to be less offensive (fixes #175)
 * Fixed bots not enforcing bans when exempts were removed. (fixes #193)
 * Updated CREDITS/cmd_about
+* Fixed some startup segfaults resulting from bugs in glibc.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
