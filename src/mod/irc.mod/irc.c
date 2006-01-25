@@ -624,7 +624,7 @@ request_op(struct chanset_t *chan)
   time_t n = now;
   struct flag_record myfr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-  get_user_flagrec(conf.bot->u, &myfr, NULL);
+  get_user_flagrec(conf.bot->u, &myfr, chan->dname);
 
   if (!chk_op(myfr, chan) || glob_kick(myfr) || chan_kick(myfr)) {
     putlog(LOG_GETIN, "*", "Not requesting op for %s - I do not have access to that channel.", chan->dname);

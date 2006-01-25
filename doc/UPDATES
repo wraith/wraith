@@ -58,6 +58,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Updated CREDITS/cmd_about
 * Fixed some startup segfaults resulting from bugs in glibc.
 * Fixed bot going floodless when it wasn't granted it.
+* Fixed bots requesting op in chans they don't have access to. (fixes #196)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
