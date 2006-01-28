@@ -251,7 +251,7 @@ void Tempfile::FindDir()
   /* If this is a hub, use, "./tmp/" */
   if (conf.bots && conf.bots->nick && conf.bots->hub)
     simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
-  else {
+  else if (conf.homedir && conf.homedir[0]) {
     //need to create ~/.ssh/  
     simple_snprintf(tempdir, DIRMAX, "%s/.ssh/", conf.homedir);
     clear_tmpdir = 0;

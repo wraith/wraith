@@ -19,7 +19,9 @@
 #define ERR_BOTDISABLED	17
 #define ERR_NOBOTS	18
 #define ERR_NOBOT	19
-#define ERR_MAX         20
+#define ERR_NOUSERNAME	20
+#define ERR_NOHOMEDIR	21
+#define ERR_MAX         22
 
 #define EMAIL_OWNERS    BIT0
 #define EMAIL_TEAM      BIT1

@@ -664,6 +664,10 @@ char *werr_tostr(int errnum)
     return STR("Bot is disabled, remove '/' in config");
   case ERR_NOBOTS:
     return STR("There are no bots in the binary! Please use ./binary -C to edit");
+  case ERR_NOHOMEDIR:
+    return STR("There is no homedir set. Please set one in the binary config with ./binary -C");
+  case ERR_NOUSERNAME:
+    return STR("There is no username set. Please set one in the binary config with ./binary -C");
   case ERR_NOBOT:
     return STR("I have no bot record but received -B???");
   default:
@@ -821,7 +825,7 @@ char *homedir(bool useconf)
       realpath(tmp, homedir_buf); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
     ContextNote("realpath(): Success");
   }
-  return homedir_buf;
+  return homedir_buf[0] ? homedir_buf : NULL;
 }
 
 char *my_username()
@@ -841,7 +845,7 @@ char *my_username()
       simple_snprintf(username, sizeof username, "%s", pw->pw_name);
 #endif /* CYGWIN_HACKS */
   }
-  return username;
+  return username[0] ? username : NULL;
 }
 
 void mkdir_p(const char *dir) {
@@ -869,6 +873,9 @@ void mkdir_p(const char *dir) {
 
 void expand_tilde(char **ptr)
 {
+  if (!conf.homedir || !conf.homedir[0])
+    return;
+
   char *str = ptr ? *ptr : NULL;
 
   if (str && strchr(str, '~')) {
@@ -878,7 +885,7 @@ void expand_tilde(char **ptr)
     if (str[siz - 1] == '/')
       str[siz - 1] = 0;
 
-    if ((p = replace(str, "~", homedir())))
+    if ((p = replace(str, "~", conf.homedir)))
       str_redup(ptr, p);
     else
       fatal("Unforseen error expanding '~'", 0);

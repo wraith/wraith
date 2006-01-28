@@ -504,11 +504,13 @@ void conf_to_bin(conf_t *in, bool move, int die)
   simple_sprintf(settings.pscloak, "%d", in->pscloak);
 
   strlcpy(settings.binname, in->binname, sizeof(settings.binname));
-  strlcpy(settings.username, in->username, sizeof(settings.username));
-
-  strlcpy(settings.uname, in->uname, sizeof(settings.uname));
+  if (in->username)
+    strlcpy(settings.username, in->username, sizeof(settings.username));
+  if (in->uname)
+    strlcpy(settings.uname, in->uname, sizeof(settings.uname));
   strlcpy(settings.datadir, in->datadir, sizeof(settings.datadir));
-  strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));
+  if (in->homedir)
+    strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));
   strlcpy(settings.binpath, in->binpath, sizeof(settings.binpath));
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
     simple_snprintf(settings.bots, sizeof(settings.bots), "%s%s%s %s %s%s %s,", 

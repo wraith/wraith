@@ -962,15 +962,19 @@ int goodpass(char *pass, int idx, char *nick)
 
 char *replace(const char *string, const char *oldie, const char *newbie)
 {
-  if (string == NULL) 
-    return "";
+  if (string == NULL || !string[0])
+    return (char *) string;
+
+  static char newstring[1024] = "";
+
+  if (oldie == NULL || !oldie[0])
+    return (char *) string;
 
   char *c = NULL;
 
   if ((c = (char *) strstr(string, oldie)) == NULL) 
     return (char *) string;
 
-  static char newstring[1024] = "";
   const size_t new_len = strlen(newbie), old_len = strlen(oldie), end = (strlen(string) - old_len);
   size_t str_index = 0, newstr_index = 0, oldie_index = c - string, cpy_len;
 

@@ -569,8 +569,9 @@ static void startup_checks(int hack) {
 #endif /* CYGWIN_HACKS */
 
 #ifndef CYGWIN_HACKS
+  /* Only error out with missing homedir when we aren't editing the binary */
   if (settings.uname[0])
-    bin_to_conf();		/* read our memory from settings[] into conf[] */
+    bin_to_conf(do_confedit ? 0 : 1);		/* read our memory from settings[] into conf[] */
 
   if (do_confedit)
     confedit();		/* this will exit() */
