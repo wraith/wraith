@@ -599,7 +599,7 @@ static void cmd_slowpart(int idx, char *par)
     return;
   }
   if (!(chan = findchan_by_dname(chname))) {
-    dprintf(idx, "Not on %s\n", chan->dname);
+    dprintf(idx, "No such channel %s\n", chname);
     return;
   }
   remove_channel(chan);

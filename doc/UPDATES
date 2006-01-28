@@ -61,6 +61,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed bots requesting op in chans they don't have access to. (fixes #196)
 * Fixed a startup segfault. (fixes #195)
 * Unsetting auth-prefix disables authing/cmds.
+* Fixed segfault in cmd_slowpart (#191)
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.
