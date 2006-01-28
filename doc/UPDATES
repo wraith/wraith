@@ -62,6 +62,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a startup segfault. (fixes #195)
 * Unsetting auth-prefix disables authing/cmds.
 * Fixed segfault in cmd_slowpart (#191)
+* Fixed a memory leak in the cookie checking functions.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

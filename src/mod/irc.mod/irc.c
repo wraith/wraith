@@ -316,6 +316,7 @@ checkcookie(char *chn, char *bnick, char *cookie)
   /* hash!rand@ts */
   strtolower(bnick);
   simple_sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
+  free(chname);
   hash = MD5(tohash);
   if (!(hash[8] == cookie[0] && hash[16] == cookie[1] && hash[18] == cookie[2]))
     return BC_HASH;
