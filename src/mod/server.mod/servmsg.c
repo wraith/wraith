@@ -571,7 +571,10 @@ static int gotmsg(char *from, char *msg)
       }
     } else {
       char *my_code = NULL;
-      Auth *auth = Auth::Find(uhost);
+      Auth *auth = NULL;
+     
+      if (auth_prefix[0])
+        Auth::Find(uhost);
 
       if (!auth)
         detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
@@ -579,7 +582,7 @@ static int gotmsg(char *from, char *msg)
       rmspace(msg);
       /* is it a cmd? */
 
-      if (my_code && my_code[0] && my_code[1] && auth && auth->Authed() && my_code[0] == auth_prefix[0]) {
+      if (auth_prefix[0] && my_code && my_code[0] && my_code[1] && auth && auth->Authed() && my_code[0] == auth_prefix[0]) {
         my_code++;		//eliminate the prefix
         auth->atime = now;
 
