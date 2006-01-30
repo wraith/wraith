@@ -121,8 +121,11 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
             newsplit(&p);
             strcpy(args, p);
           } else {
-            dprintf(idx, "Invalid command password.\nUse: $b%scommand <password> [arguments]$b\n", settings.dcc_prefix);
-            putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, cmd, ++p);
+            dprintf(idx, "Invalid command password.\n");
+            dprintf(idx, "Use: $b%scommand <password> [arguments]$b\n", settings.dcc_prefix);
+            if (p)
+              p++;
+            putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, cmd, p && *p ? p : "");
             putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, cmd);
             free(args);
             return;
