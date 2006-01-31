@@ -318,7 +318,7 @@ static void start_sending_binary(int idx)
   end:;
 */
 
-  if ((i = raw_dcc_send(update_file, "*binary", "(binary)", &j)) > 0) {
+  if ((i = raw_dcc_send(update_fpath, "*binary", "(binary)", &j)) > 0) {
     putlog(LOG_BOTS, "*", "%s -- can't send new binary",
 	   i == DCCSEND_FULL   ? "NO MORE DCC CONNECTIONS" :
 	   i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :
