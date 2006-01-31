@@ -30,7 +30,7 @@ enum {
         XFER_ACK_WITHOUT_OFFSET /* Skipped data is NOT counted in ack.  */
 };
 
-int raw_dcc_send(char *, char *, char *, char *, int *);
+int raw_dcc_send(char *, char *, char *, int *);
 
 #ifdef MAKING_TRANSFER
 #define TRANSFER_REGET_PACKETID 0xfeab

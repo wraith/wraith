@@ -29,8 +29,8 @@ settings_t settings = {
   ""
 };
 
-#define PACK_ENC 1
-#define PACK_DEC 2
+int settings_crypt = PACK_ENC;
+
 static void edpack(settings_t *, const char *, int);
 
 int checked_bin_buf = 0;
@@ -296,6 +296,8 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   char *tmp = NULL, *hash = (char *) in_hash, nhash[51] = "";
   unsigned char *(*enc_dec_string)(const char *, unsigned char *, size_t *);
   size_t len = 0;
+
+  settings_crypt = what;
 
   if (what == PACK_ENC)
     enc_dec_string = encrypt_binary;
