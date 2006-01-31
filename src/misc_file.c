@@ -14,6 +14,7 @@
 #include "misc_file.h"
 #include "main.h"
 #include "shell.h"
+#include "binary.h"
 
 /* Copy a file from one place to another (possibly erasing old copy).
  *
@@ -210,14 +211,10 @@ Tempfile::~Tempfile()
 
 static bool check_tempdir(bool do_mod)
 {
-  if (!can_stat(tempdir)) {
-    if (mkdir(tempdir,  S_IRUSR | S_IWUSR | S_IXUSR)) {
-      unlink(tempdir);
-      if (!can_stat(tempdir))
-        if (mkdir(tempdir, S_IRUSR | S_IWUSR | S_IXUSR))
-          return 0;
-    }
-  }
+  mkdir_p(tempdir);
+
+  if (!can_stat(tempdir))
+    return 0;
 
   if (do_mod && fixmod(tempdir))
     return 0;
@@ -249,8 +246,13 @@ void Tempfile::FindDir()
 #else
 
   /* If this is a hub, use, "./tmp/" */
-  if (conf.bots && conf.bots->nick && conf.bots->hub)
+  if (conf.bots && conf.bots->nick && conf.bots->hub) {
     simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
+    if (check_tempdir(0))
+      return;
+  }
+  
+/* WHY
   else if (conf.homedir && conf.homedir[0]) {
     //need to create ~/.ssh/  
     simple_snprintf(tempdir, DIRMAX, "%s/.ssh/", conf.homedir);
@@ -259,6 +261,7 @@ void Tempfile::FindDir()
     clear_tmpdir = 1;
     simple_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
   }
+*/
 
   /* The dirs we WANT to use aren't accessible, try a random one instead to get the job done. */
 
@@ -273,9 +276,18 @@ void Tempfile::FindDir()
   };
   int i = 0;
   bool found = 0;
+  char *pack_hash = NULL;
+
+  if (settings_crypt == PACK_DEC) {
+    pack_hash = MD5(settings.packname);
+    pack_hash[5] = 0;
+  }
 
   for (i = 0; dirs[i]; i++) {
-    simple_snprintf(tempdir, DIRMAX, dirs[i]);
+    if (pack_hash)
+      simple_snprintf(tempdir, DIRMAX, "%s.%s/", dirs[i], pack_hash);
+    else
+      strlcpy(tempdir, dirs[i], DIRMAX);
     if (check_tempdir(0)) {
       found = 1;
       break;

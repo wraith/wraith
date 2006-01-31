@@ -258,7 +258,7 @@ void finish_update(int idx)
 static void start_sending_binary(int idx)
 {
   /* module_entry *me; */
-  char update_file[51] = "", update_fpath[DIRMAX] = "", tmpFile[1024] = "", *sysname = NULL;
+  char update_file[51] = "", update_fpath[DIRMAX] = "", *sysname = NULL;
   int i = 1, j = -1;
 
   dcc[idx].status &= ~(STAT_OFFEREDU | STAT_SENDINGU);
@@ -278,7 +278,10 @@ static void start_sending_binary(int idx)
   }
 
   simple_snprintf(update_file, sizeof update_file, "wraith.%s-%s", sysname, egg_version);
-  simple_snprintf(update_fpath, sizeof update_fpath, "%s/%s", conf.binpath, update_file);
+
+  simple_snprintf(update_fpath, sizeof update_fpath, "%s/bins/%s", conf.binpath, update_file);
+  if (!can_stat(update_fpath))
+    simple_snprintf(update_fpath, sizeof update_fpath, "%s/%s", conf.binpath, update_file);
 
   if (!can_stat(update_fpath)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s but there was an error: %s", dcc[idx].nick, update_fpath,
@@ -288,10 +291,12 @@ static void start_sending_binary(int idx)
     return;
   }
 
+#ifdef old
   /* copy the binary to our tempdir and send that one. */
   sprintf(tmpFile, "%s.%s", tempdir, update_file);
   unlink(tmpFile);
   copyfile(update_fpath, tmpFile);
+#endif
 
 /* NO
   ic = 0;
@@ -313,7 +318,7 @@ static void start_sending_binary(int idx)
   end:;
 */
 
-  if ((i = raw_dcc_send(tmpFile, "*binary", "(binary)", tmpFile, &j)) > 0) {
+  if ((i = raw_dcc_send(update_file, "*binary", "(binary)", &j)) > 0) {
     putlog(LOG_BOTS, "*", "%s -- can't send new binary",
 	   i == DCCSEND_FULL   ? "NO MORE DCC CONNECTIONS" :
 	   i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :

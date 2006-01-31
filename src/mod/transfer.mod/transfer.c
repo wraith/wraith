@@ -47,19 +47,6 @@ static void dcc_get_pending(int, char *, int);
 /*
  *   Misc functions
  */
-/* Replaces all spaces with underscores (' ' -> '_').  The returned buffer
- * needs to be freed after use.
- */
-static char *replace_spaces(char *fn)
-{
-  register char *ret = NULL, *p = NULL;
-
-  p = ret = strdup(fn);
-  while ((p = strchr(p, ' ')) != NULL)
-    *p = '_';
-  return ret;
-}
-
 
 /*
  *    DCC routines
@@ -779,12 +766,12 @@ static void dcc_get_pending(int idx, char *buf, int len)
  * Use raw_dcc_resend() and raw_dcc_send() instead of this function.
  */
 
-static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir, int resend, int *idx)
+static int raw_dcc_resend_send(char *filename, char *nick, char *from, int resend, int *idx)
 {
   int zz = -1;
   int i;
   port_t port;
-  char *nfn = NULL, *buf = NULL;
+  char *buf = NULL;
   long dccfilesize;
   FILE *f = NULL, *dccfile = NULL;
  
@@ -820,11 +807,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
 
   if (zz == (-1))
     return DCCSEND_NOSOCK;
-  nfn = strrchr(dir, '/');
-  if (nfn == NULL)
-    nfn = dir;
-  else
-    nfn++;
+  
   f = fopen(filename, "rb");
   if (!f)
     return DCCSEND_BADFN;
@@ -837,22 +820,15 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, char *dir
   strcpy(dcc[i].host, "irc");
   dcc[i].u.xfer->filename = (char *) my_calloc(1, strlen(filename) + 1);
   strcpy(dcc[i].u.xfer->filename, filename);
-  if (strchr(nfn, ' '))
-    nfn = buf = replace_spaces(nfn);
-  dcc[i].u.xfer->origname = (char *) my_calloc(1, strlen(nfn) + 1);
-  strcpy(dcc[i].u.xfer->origname, nfn);
+
+  dcc[i].u.xfer->origname = (char *) my_calloc(1, strlen(filename) + 1);
+  strcpy(dcc[i].u.xfer->origname, filename);
   strlcpy(dcc[i].u.xfer->from, from, NICKLEN);
-  strlcpy(dcc[i].u.xfer->dir, dir, DIRLEN);
   dcc[i].u.xfer->length = dccfilesize;
   dcc[i].timeval = now;
   dcc[i].u.xfer->f = f;
   dcc[i].u.xfer->type = resend ? XFER_RESEND_PEND : XFER_SEND;
-  if (nick[0] != '*') {
-    dprintf(DP_HELP, "PRIVMSG %s :\001DCC %sSEND %s %lu %d %lu\001\n", nick,
-	    resend ? "RE" :  "", nfn, iptolong(getmyip()), port, dccfilesize);
-    putlog(LOG_FILES, "*",TRANSFER_BEGIN_DCC, resend ? TRANSFER_RE :  "",
-	   nfn, nick);
-  }
+
   if (buf)
     free(buf);
 
@@ -872,9 +848,9 @@ static int raw_dcc_resend(char *filename, char *nick, char *from, char *dir)
 
 /* Starts a DCC_SEND connection.
  */
-int raw_dcc_send(char *filename, char *nick, char *from, char *dir, int *idx)
+int raw_dcc_send(char *filename, char *nick, char *from, int *idx)
 {
-  return raw_dcc_resend_send(filename, nick, from, dir, 0, idx);
+  return raw_dcc_resend_send(filename, nick, from, 0, idx);
 }
 
 /*

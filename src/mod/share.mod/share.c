@@ -1353,7 +1353,8 @@ start_sending_users(int idx)
   }
 */
 
-  if ((i = raw_dcc_send(share_file, "*users", "(users)", share_file, &j)) > 0) {
+  if ((i = raw_dcc_send(share_file, "*users", "(users)", &j)) > 0) {
+    /* FIXME: the bot should be unlinked at this point */
     unlink(share_file);
     dprintf(idx, "s e %s\n", "Can't send userfile to you (internal error)");
     putlog(LOG_BOTS, "*", "%s -- can't send userfile",

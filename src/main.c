@@ -711,6 +711,8 @@ printf("out: %s\n", out);
   if (!checked_bin_buf)
     exit(1);
 
+  /* The tempdir might use the packname, let's attempt anyway.. */
+  Tempfile::FindDir();
 
 #ifdef STOP_UAC
   {

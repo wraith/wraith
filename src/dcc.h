@@ -108,7 +108,6 @@ struct xfer_info {
   char *origname;
   unsigned char sofar;          /* how much of the byte count received     */
   unsigned short ack_type;      /* type of ack                             */
-  char dir[DIRLEN];             /* used when uploads go to the current dir */
   char from[NICKLEN];           /* [GET] user who offered the file         */
   char buf[4];                  /* you only need 5 bytes!                  */
 };
