@@ -3,11 +3,7 @@
 
 #include "conf.h"
 
-extern int checked_bin_buf, settings_crypt;
-
-#define PACK_ENC 1
-#define PACK_DEC 2
-
+extern int checked_bin_buf;
 
 #  define GET_CHECKSUM		BIT0
 #  define WRITE_CHECKSUM 	BIT1
