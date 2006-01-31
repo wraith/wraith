@@ -69,7 +69,7 @@ extern int		optind;
 
 const time_t 	buildts = BUILDTS;		/* build timestamp (UTC) */
 const char	*revision = REVISION;
-const char	*egg_version = "1.2.9";
+const char	*egg_version = "1.2.10-devel";
 
 bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
