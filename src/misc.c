@@ -636,8 +636,10 @@ restart(int idx)
   Tempfile *socks = new Tempfile("socks");
   int fd = 0;
 
-  sdprintf("%s", reason); 
+  if (!socks || socks->error)
+    werr(ERR_TMPSTAT);
 
+  sdprintf("%s", reason); 
 
   if (tands > 0) {
     botnet_send_chat(-1, conf.bot->nick, (char *) reason);
@@ -787,6 +789,9 @@ int updatebin(int idx, char *par, int secs)
   write_settings(path, -1, 0);	/* re-write the binary with our packdata */
 
   Tempfile *conffile = new Tempfile("conf");
+
+  if (!conffile || conffile->error)
+    return 1;
 
   if (writeconf(NULL, conffile->f, CONF_ENC)) {
     putlog(LOG_MISC, "*", "Failed to write temporary config file for update.");

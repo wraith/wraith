@@ -293,7 +293,7 @@ static void start_sending_binary(int idx)
 
 #ifdef old
   /* copy the binary to our tempdir and send that one. */
-  sprintf(tmpFile, "%s.%s", tempdir, update_file);
+  //simple_snprintf(tmpFile, sizeof(tmpFile), "%s.%s", tempdir, update_file);
   unlink(tmpFile);
   copyfile(update_fpath, tmpFile);
 #endif
