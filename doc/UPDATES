@@ -64,6 +64,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed segfault in cmd_slowpart (#191)
 * Fixed a memory leak in the cookie checking functions.
 * Fixed some segfaults with tempfiles
+* Update binaries can now be stored in bins/ within the hub's binary directory.
+* If a tempdir suddenly becomes unavailable, a new one is now immediately sought out.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

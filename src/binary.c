@@ -97,9 +97,6 @@ bin_checksum(const char *fname, int todo)
     char *fname_bak = NULL;
     size_t size = 0, newpos = 0;
 
-    if (!newbin || newbin->error)
-      werr(ERR_TMPSTAT);
-
     size = strlen(fname) + 2;
     fname_bak = (char *) my_calloc(1, size);
     simple_snprintf(fname_bak, size, "%s~", fname);
