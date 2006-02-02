@@ -16,6 +16,8 @@
 #include "shell.h"
 #include "binary.h"
 
+static bool looking = 0;
+
 /* Copy a file from one place to another (possibly erasing old copy).
  *
  * returns:  0 if OK
@@ -152,20 +154,29 @@ int fixmod(const char *s)
   return chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
 }
 
-Tempfile::Tempfile()
-{
-  len = strlen(tempdir) + 1 + 6 + 1;
-  file = new char[len];
-  simple_sprintf(file, "%s.XXXXXX", tempdir);
-
-  MakeTemp();
-}
-
 Tempfile::Tempfile(const char *prefix)
 {
-  len = strlen(tempdir) + 1 + strlen(prefix) + 1 + 6 + 1;
+  if (prefix) {
+    plen = strlen(prefix) + 1;
+    this->prefix = new char[plen];
+    strlcpy(this->prefix, prefix, plen);
+  } else {
+    this->prefix = NULL;
+    plen = -1; /* to swallow the '-' */
+  }
+
+  AllocTempfile();
+}
+
+void Tempfile::AllocTempfile()
+{
+  len = strlen(tempdir) + 1 + plen + 1 + 6 + 1;
   file = new char[len];
-  simple_sprintf(file, "%s.%s-XXXXXX", tempdir, prefix);
+
+  if (prefix)
+    simple_snprintf(file, len, "%s.%s-XXXXXX", tempdir, prefix);
+  else
+    simple_snprintf(file, len, "%s.XXXXXX", tempdir);
 
   MakeTemp();
 }
@@ -188,7 +199,19 @@ void Tempfile::MakeTemp()
 error:
   putlog(LOG_ERRORS, "*", "Couldn't create temporary file '%s': %s", file, strerror(errno));
   error = 1;
-//  fatal("Cannot create temporary file!", 0);
+  /* Since we failed to create a file in the given tempdir, let's try finding a new one */
+  if (!looking) {
+    /* ... Not finding a new tempdir is fatal. */
+    if (FindDir() == ERROR)
+      werr(ERR_TMPSTAT);		/* FIXME: Perhaps this should be an exception? */
+    /* ... If we found one, let's try all over! */
+    else {
+      error = 0;
+      delete[] file;
+      file = NULL;
+      AllocTempfile();
+    }
+  }
 }
 
 void Tempfile::my_close()
@@ -221,13 +244,13 @@ static bool check_tempdir(bool do_mod)
 
   /* test tempdir: it's vital */
   Tempfile *testdir = new Tempfile("test");
-  int result;
 
+  /* There was an error creating a file in this directory, return to move on in list of dirs */
   if (!testdir || testdir->error)
     return 0;
 
   fprintf(testdir->f, "\n");
-  result = fflush(testdir->f);
+  int result = fflush(testdir->f);
   delete testdir;
   if (result) {
     sdprintf("%s: %s", tempdir, strerror(errno));
@@ -236,7 +259,7 @@ static bool check_tempdir(bool do_mod)
   return 1;
 }
 
-void Tempfile::FindDir()
+bool Tempfile::FindDir()
 {
   /* this is temporary until we make tmpdir customizable */
 #ifdef CYGWIN_HACKS
@@ -245,29 +268,21 @@ void Tempfile::FindDir()
     clear_tmpdir = 0;
     simple_snprintf(tempdir, DIRMAX, "./");
   }
-  return;
+  return OK;
 #else
+
+  looking = 1;
 
   /* If this is a hub, use, "./tmp/" */
   if (conf.bots && conf.bots->nick && conf.bots->hub) {
     simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
-    if (check_tempdir(0))
-      return;
+    if (check_tempdir(0)) {
+      looking = 0;
+      return OK;
+    }
   }
   
-/* WHY
-  else if (conf.homedir && conf.homedir[0]) {
-    //need to create ~/.ssh/  
-    simple_snprintf(tempdir, DIRMAX, "%s/.ssh/", conf.homedir);
-    clear_tmpdir = 0;
-    check_tempdir(0);
-    clear_tmpdir = 1;
-    simple_snprintf(tempdir, DIRMAX, "%s/.ssh/.../", conf.homedir);
-  }
-*/
-
   /* The dirs we WANT to use aren't accessible, try a random one instead to get the job done. */
-
   clear_tmpdir = 0;
 
   char *dirs[] = {
@@ -277,18 +292,15 @@ void Tempfile::FindDir()
     "./",
     NULL
   };
-  int i = 0;
-  bool found = 0;
 
-  for (i = 0; dirs[i]; i++) {
+  for (int i = 0; dirs[i]; i++) {
     strlcpy(tempdir, dirs[i], DIRMAX);
     if (check_tempdir(0)) {
-      found = 1;
-      break;
+      looking = 0;
+      return OK;
     }
   }
 
-  if (!found)
-    werr(ERR_TMPSTAT);
+  werr(ERR_TMPSTAT);
 #endif /* CYGWIN_HACKS */
 }

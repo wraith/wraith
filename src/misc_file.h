@@ -21,18 +21,23 @@ int fixmod(const char *);
 class Tempfile 
 {
   public:
-    Tempfile();					//constructor
+    Tempfile() { Tempfile(NULL); };					//constructor
     Tempfile(const char *prefix);		//constructor with file prefix
+
+    void AllocTempfile();			//constructor with file prefix
     void Tempfile::my_close();
     ~Tempfile();				//destructor
-    static void FindDir();
+    static bool FindDir();
 
     bool error;					//exceptions are lame.
     FILE *f;
     char *file;
     int fd;
     size_t len;
+
   private:
+    char *prefix;
+    int plen;
     void MakeTemp();				//Used for mktemp() and checking
 };
 
