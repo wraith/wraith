@@ -401,7 +401,9 @@ static void conf_compat_pids()
       continue;
 
     for (bot = conf.bots; bot && bot->nick; bot = bot->next)
+      /* returns 1 if: pidfile is there and PID is running AND if there is a socksfile listed, if it is valid. */
       if (checkpid(bot->nick, bot, dir)) {
+        /* Ok so we found a valid pid file, which might include a VALID socksfile. */
         simple_snprintf(path, sizeof(path), "%s/.pid.%s", conf.datadir, bot->nick);
         copyfile(bot->pid_file, path);
       //We only want to unlink if the pidfile is NOT being used, otherwise, it might break a bot that's on timer to restart/update.
@@ -463,11 +465,17 @@ checkpid(const char *nick, conf_bot *bot, const char *usedir)
         pid = 0;
     }
 
-    /* FIXME: remove after 1.2.9 - this is so, when we are moving pidfiles, dont bother with socksfile stuff, just return if the pid is valid or not. */
-    if (!usedir)
 
     //There is a socksfile given and it's accessable, plus the pid in the file is my own
     //So it's a good chance we just did a soft restart
+    /* If this pidfile is stale, don't let compat_checkpids copy it over. */
+    if (usedir && bufp[0] && pid) {
+      if (can_stat(bufp))
+        return pid;
+      /* socks file not there? this pidfile is probably stale, move along ... */
+      return 0;
+    }
+
     if (bufp[0] && pid && can_stat(bufp) && (getpid() == pid) &&
         !egg_strcasecmp(nick, origbotname)) {
       socksfile = strdup(bufp);
