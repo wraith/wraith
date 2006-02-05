@@ -10,6 +10,9 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 - Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
 - Added hijacked invite detection based on server invite notices.
 
+1.2.10
+* Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
+
 1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)
 * Fixed binary spawning/updating to escape needed chars for shell. (#158)

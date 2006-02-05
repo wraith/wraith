@@ -436,17 +436,10 @@ See also: link
                        can be useful to make the bot leave a channel without
                        losing its settings, channel-specific user flags,
                        channel bans, and without affecting sharing.
-        $bmanop$b          With this set, users will be able to op anyone
-                       in the channel manually (as opposed to through the bot.)
-                       With this unset, users are forced to op through the bot.
-                       See chanset 'manop' for punishment options.
         $bnodesynch$b      Allow non-ops to perform channel modes? This can stop
                        the bot from fighting with services such as ChanServ, or
                        from kicking IRCops when setting channel modes without
                        having ops.
-        $bnomop$b          Users will not be allowed to set more than 3 +o 
-                       modes at any given time.
-                       See chanset 'mop' for punishment options.
         $bprivate$b        This by far is probably the single most unique and
                        important feature of this pack. With this set, users with
                        global +o will not implicitly have access to the channel.
