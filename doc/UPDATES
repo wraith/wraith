@@ -15,6 +15,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed auth cmds not working in privmsg. (fixes #228)
 * Fixed a major security hole in cmdpass checking.
 * cmd_chhandle can no longer be used on bots. (fixes #224)
+* Revised help listing for 'auth-chan' in 'help set'. (fixes #229)
 
 1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)
