@@ -1080,8 +1080,10 @@ static void failed_tandem_relay(int idx)
   }
   if (uidx < 0) {
     putlog(LOG_MISC, "*", "Can't find user for relay!  %d -> %d", dcc[idx].sock, dcc[idx].u.relay->sock);
-    if (dcc[idx].sock != -1)
+    if (dcc[idx].sock != -1) {
       killsock(dcc[idx].sock);
+      dcc[idx].sock = -1;
+    }
     lostdcc(idx);
     return;
   }
@@ -1093,8 +1095,10 @@ static void failed_tandem_relay(int idx)
   free(dcc[uidx].u.relay);
   dcc[uidx].u.chat = ci;
   dcc[uidx].type = &DCC_CHAT;
-  if (dcc[idx].sock != -1)
+  if (dcc[idx].sock != -1) {
     killsock(dcc[idx].sock);
+    dcc[idx].sock = -1;
+  }
   lostdcc(idx);
   return;
 }
@@ -1482,7 +1486,8 @@ static void dcc_relaying(int idx, char *buf, int j)
   dcc[idx].u.chat = ci;
   dcc[idx].type = &DCC_CHAT;
   check_bind_chon(dcc[idx].nick, idx);
-  killsock(dcc[j].sock);
+  if (dcc[j].sock != -1)
+    killsock(dcc[j].sock);
   lostdcc(j);
 }
 
