@@ -574,7 +574,7 @@ static int gotmsg(char *from, char *msg)
       Auth *auth = NULL;
      
       if (auth_prefix[0])
-        Auth::Find(uhost);
+        auth = Auth::Find(uhost);
 
       if (!auth)
         detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
