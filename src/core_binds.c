@@ -101,10 +101,11 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
 
   table = bind_table_lookup("dcc");
+  size_t cmdlen = strlen(cmd);
 
   for (entry = table->entries; entry && entry->next; entry = entry->next) {
-    if (!egg_strcasecmp(cmd, entry->mask)) {
-      if (has_cmd_pass(cmd)) {
+    if (!egg_strncasecmp(cmd, entry->mask, cmdlen)) {
+      if (has_cmd_pass(entry->mask)) {
         if (flagrec_ok(&entry->user_flags, &fr)) {
           char *p = NULL, work[1024] = "", pass[128] = "";
 
@@ -113,7 +114,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
             *p = 0;
           strlcpy(pass, args, sizeof(pass));
 
-          if (check_cmd_pass(cmd, pass)) {
+          if (check_cmd_pass(entry->mask, pass)) {
             if (p)
               *p = ' ';
             strlcpy(work, args, sizeof(work));
@@ -125,8 +126,8 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
             dprintf(idx, "Use: $b%scommand <password> [arguments]$b\n", settings.dcc_prefix);
             if (p)
               p++;
-            putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, cmd, p && *p ? p : "");
-            putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, cmd);
+            putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, entry->mask, p && *p ? p : "");
+            putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, entry->mask);
             free(args);
             return;
           }
