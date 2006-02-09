@@ -607,6 +607,7 @@ See also: botcmd, channels, channel, status
    'gavroche' to 'jamie', you would use 'chhandle gavroche jamie'.
  
    Perm owners may not change their handle without recompiling binaries first. 
+   Bot handles cannot be changed from partyline.
  
 See also: chpass%{+n}, chsecpass%{-}
 ::chinfo

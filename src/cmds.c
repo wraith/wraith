@@ -1083,6 +1083,19 @@ static void cmd_chhandle(int idx, char *par)
     return;
   }
 
+  struct userrec *u2 = get_user_by_handle(userlist, hand);
+
+  if (!u2) {
+    dprintf(idx, "No such handle!\n");
+    return;
+  }
+
+  if (u2->bot) {
+    dprintf(idx, "Sorry, bot handles cannot be changed from partyline.\n");
+    return;
+  }
+
+
   for (size_t i = 0; i < strlen(newhand); i++)
     if ((newhand[i] <= 32) || (newhand[i] >= 127) || (newhand[i] == '@'))
       newhand[i] = '?';
@@ -1094,12 +1107,6 @@ static void cmd_chhandle(int idx, char *par)
   else if (get_user_by_handle(userlist, newhand) && egg_strcasecmp(hand, newhand))
     dprintf(idx, "Somebody is already using %s.\n", newhand);
   else {
-    struct userrec *u2 = get_user_by_handle(userlist, hand);
-
-    if (!u2) {
-      dprintf(idx, "No such handle!\n");
-      return;
-    }
     int atr = dcc[idx].user ? dcc[idx].user->flags : 0, atr2 = u2 ? u2->flags : 0;
 
     if (!(atr & USER_MASTER) && !u2->bot)
