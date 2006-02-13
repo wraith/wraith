@@ -18,6 +18,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Revised help listing for 'auth-chan' in 'help set'. (fixes #229)
 * Fixed an invalid socket warning with failed relay. (fixes #216)
 * Fixed a potential dns socket leak. (might fix #230)
+* Fixed leaf bots sending color to hub bots still. (fixes #161)
 
 1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)

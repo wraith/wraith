@@ -999,6 +999,7 @@ int botlink(char *linker, int idx, char *nick)
       strcpy(dcc[i].host, bi->address);
       dcc[i].u.dns->cptr = strdup(linker);
       dcc[i].u.dns->ibuf = idx;
+      dcc[i].bot = 1;
 
       int dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
       if (dns_id >= 0)
