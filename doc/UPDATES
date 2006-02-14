@@ -2,15 +2,7 @@ This is a summary of ChangeLog basically.
 Numbers expressed as '#12' are references to a ticket/bug posting which can be viewed at: http://xx.shatow.net
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
-(future plans)
-- Another new password encryption
-- Add back in uhost cache / hash table for invites
-- Change user system to hash table with uids
-- Change userentry system around to use strings ?
-- Added cmd_iop which will invite the specified nick to a chan and then auto-op them upon joining (does a userhost)
-- Added hijacked invite detection based on server invite notices.
-
-1.2.10
+1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
 * Fixed auth cmds not working in privmsg. (fixes #228)
 * Fixed a major security hole in cmdpass checking.
@@ -23,7 +15,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_trace not displaying hops correctly.
 * Expand symbolic links when searching for tempdirs. (fixes #210)
 
-1.2.9
+1.2.9 - http://tracker.shatow.net/milestone/1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)
 * Fixed binary spawning/updating to escape needed chars for shell. (#158)
 * Fixed a flaw in binary checksums.
