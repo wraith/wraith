@@ -746,18 +746,16 @@ static void bot_traced(int idx, char *par)
           ((sock == (-1)) || (sock == dcc[i].sock))) {
 	if (t) {
           int j=0;
-          {
-            register char *c=p;
-            for (; *c != '\0'; c++) if (*c == ':') j++;
-          }
+          register char *c = p2;
+          for (; *c != '\0'; c++) if (*c == ':') j++;
 
-         time_t tm;
-         egg_timeval_t tv;
+          time_t tm;
+          egg_timeval_t tv;
 
-         timer_get_now(&tv);
-         tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - t;
+          timer_get_now(&tv);
+          tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - t;
 
-         dprintf(i, "%s -> %s (%li.%li secs, %d hop%s)\n", BOT_TRACERESULT, p2,
+          dprintf(i, "%s -> %s (%li.%li secs, %d hop%s)\n", BOT_TRACERESULT, p2,
             (tm / 100), (tm % 100), j, (j != 1) ? "s" : "");
 	} else
 	  dprintf(i, "%s -> %s\n", BOT_TRACERESULT, p);
