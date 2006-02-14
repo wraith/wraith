@@ -21,6 +21,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed leaf bots sending color to hub bots still. (fixes #161)
 * Fixed cmd_trace to use 2 decimal places in display for seconds. (fixes #207)
 * Fixed cmd_trace not displaying hops correctly.
+* Expand symbolic links when searching for tempdirs. (fixes #210)
 
 1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)

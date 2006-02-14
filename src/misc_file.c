@@ -294,7 +294,10 @@ bool Tempfile::FindDir()
   };
 
   for (int i = 0; dirs[i]; i++) {
-    strlcpy(tempdir, dirs[i], DIRMAX);
+    realpath(dirs[i], tempdir);
+    size_t len = strlen(tempdir);
+    tempdir[len] = '/';
+    tempdir[len + 1] = '\0';
     if (check_tempdir(0)) {
       looking = 0;
       return OK;
