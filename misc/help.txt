@@ -1392,7 +1392,7 @@ See also: color, console, echo, login, strip
 See also: md5, sha1, encrypt, decrypt
 ::rehash
 ###  $brehash$b 
-   Don't use this cmd if you don't know what it does.
+   Don't use this cmd.
 
    Reloads config data from binary. (Probably won't be needed as this is automatically
    updated after editing the binary with -C)
