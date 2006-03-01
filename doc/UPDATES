@@ -17,6 +17,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a segfault in cmd_rehash and revised help listing for it. (fixes #242)
 * Fixed cmd_set not saving the userfile when needed. (fixes #245)
 * Fixed cmd_set list removal bugs. (fixes #246)
+* Fixed chanmode -i conflicting with closed-invite 1. (fixes #249)
 
 1.2.9 - http://tracker.shatow.net/milestone/1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)

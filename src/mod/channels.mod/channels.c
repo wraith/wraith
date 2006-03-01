@@ -562,6 +562,9 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
 
   if (chan->mode_mns_prot & CHANPRIV && chan->closed_private)
     chan->closed_private = 0;
+
+  if (chan->mode_mns_prot & CHANINV && chan->closed_invite)
+    chan->closed_invite = 0;
 }
 
 static void get_mode_protect(struct chanset_t *chan, char *s)
