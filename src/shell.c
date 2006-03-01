@@ -563,7 +563,7 @@ void suicide(const char *msg)
   simple_sprintf(tmp, "Suicide: %s", msg);
   set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
   if (!conf.bot->hub) {
-    nuke_server("HARAKIRI!!");
+    nuke_server("kill the infidels!");
     sleep(1);
   } else {
     unlink(userfile);
