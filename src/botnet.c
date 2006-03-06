@@ -1154,6 +1154,7 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[idx].u.relay = (struct relay_info *) my_calloc(1, sizeof(struct relay_info));
   dcc[idx].u.relay->chat = ci;
   dcc[idx].u.relay->old_status = dcc[idx].status;
+  dcc[idx].u.relay->sock = -1;
 
   dcc[i].timeval = now;
   dcc[i].u.dns->ibuf = idx;
@@ -1249,7 +1250,7 @@ static void pre_relay(int idx, char *buf, register int len)
   if (tidx < 0) {
     /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type != &DCC_DNSWAIT || (dcc[i].sock == dcc[idx].u.relay->sock))) {
+      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT && (dcc[i].sock == dcc[idx].u.relay->sock))) {
 	tidx = i;
 	break;
       }
@@ -1272,7 +1273,8 @@ static void pre_relay(int idx, char *buf, register int len)
     free(dcc[idx].u.relay);
     dcc[idx].u.chat = ci;
     dcc[idx].type = &DCC_CHAT;
-    killsock(dcc[tidx].sock);
+    if (dcc[tidx].sock != -1)
+      killsock(dcc[tidx].sock);
     lostdcc(tidx);
     return;
   }
@@ -1294,7 +1296,7 @@ static void failed_pre_relay(int idx)
   if (tidx < 0) {
     /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type != &DCC_DNSWAIT || (dcc[i].sock == dcc[idx].u.relay->sock))) {
+      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT && (dcc[i].sock == dcc[idx].u.relay->sock))) {
 	tidx = i;
 	break;
       }
@@ -1315,12 +1317,14 @@ static void failed_pre_relay(int idx)
       tidx = idx;
       idx = t;
     }
-    killsock(dcc[tidx].sock);
+    if (dcc[tidx].sock != -1)
+      killsock(dcc[tidx].sock);
     lostdcc(tidx);
   } else {
     fatal("Lost my terminal?!", 0);
   }
-  killsock(dcc[idx].sock);
+  if (dcc[idx].sock != -1)
+    killsock(dcc[idx].sock);
   lostdcc(idx);
 }
 
