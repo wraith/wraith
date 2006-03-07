@@ -36,7 +36,7 @@
 #include "set.h"
 #include "users.h"
 #include "misc.h"
-#include "tclhash.h"
+#include "binds.h"
 #include "dcc.h"
 
 extern cmd_t 		C_dcc[];

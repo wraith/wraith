@@ -1,10 +1,10 @@
 /*
- * tclhash.h
+ * binds.h
  *
  */
 
-#ifndef _EGG_TCLHASH_H
-#define _EGG_TCLHASH_H
+#ifndef _EGG_BINDS_H
+#define _EGG_BINDS_H
 
 #include "cmds.h"
 
@@ -80,4 +80,4 @@ bind_table_t *bind_table_lookup_or_fake(const char *name);
 void add_builtins(const char *table_name, cmd_t *cmds);
 void rem_builtins(const char *table_name, cmd_t *cmds);
 
-#endif				/* _EGG_TCLHASH_H */
+#endif				/* _EGG_BINDS_H */

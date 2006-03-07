@@ -16,6 +16,7 @@ OBJCOPY = @OBJCOPY@
 OBJS = auth.o \
 	base64.o \
 	binary.o \
+	binds.o \
 	bg.o \
 	botcmd.o \
 	botmsg.o \
@@ -47,7 +48,6 @@ OBJS = auth.o \
 	shell.o \
 	socket.o \
 	sprintf.o \
-	tclhash.o \
 	userent.o \
 	userrec.o \
 	users.o

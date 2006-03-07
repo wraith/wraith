@@ -6,7 +6,7 @@
 #ifndef _EGG_MOD_SERVER_SERVER_H
 #define _EGG_MOD_SERVER_SERVER_H
 
-#include "src/tclhash.h"
+#include "src/binds.h"
 #include "src/dcc.h"
 #include "src/set.h"
 

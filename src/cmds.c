@@ -43,7 +43,7 @@
 #include "users.h"
 #include "egg_timer.h"
 #include "userent.h"
-#include "tclhash.h"
+#include "binds.h"
 #include "match.h"
 #include "main.h"
 #include "dccutil.h"

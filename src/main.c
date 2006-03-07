@@ -45,7 +45,7 @@
 #include "users.h"
 #include "shell.h"
 #include "userrec.h"
-#include "tclhash.h"
+#include "binds.h"
 #include "set.h"
 #include "dccutil.h"
 #include "crypt.h"

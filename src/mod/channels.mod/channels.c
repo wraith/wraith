@@ -45,7 +45,7 @@
 #include "src/botnet.h"
 #include "src/botmsg.h"
 #include "src/net.h"
-#include "src/tclhash.h"
+#include "src/binds.h"
 #include "src/cmds.h"
 
 

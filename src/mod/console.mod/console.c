@@ -29,7 +29,7 @@
 #include "console.h"
 #include "src/common.h"
 #include "src/mod/share.mod/share.h"
-#include "src/tclhash.h"
+#include "src/binds.h"
 #include "src/tandem.h"
 #include "src/cmds.h"
 #include "src/users.h"

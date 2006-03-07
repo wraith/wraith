@@ -19,7 +19,7 @@
  */
 
 /*
- * tclhash.c -- handles:
+ * binds.c -- handles:
  *   bind and unbind
  *   checking and triggering the various in-bot bindings
  *   listing current bindings
@@ -31,7 +31,7 @@
 
 
 #include "common.h"
-#include "tclhash.h"
+#include "binds.h"
 #include "cmds.h"
 #include "debug.h"
 #include "chan.h"
@@ -78,7 +78,7 @@ static int internal_bind_cleanup()
 
 static void schedule_bind_cleanup()
 {
-	if (already_scheduled) 
+	if (already_scheduled)
           return;
 
 	already_scheduled = 1;
@@ -317,7 +317,7 @@ static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 	}
 
 	return(retval);
-}		
+}
 
 int check_bind(bind_table_t *table, const char *match, struct flag_record *flags, ...)
 {
@@ -325,7 +325,7 @@ int check_bind(bind_table_t *table, const char *match, struct flag_record *flags
 	int ret;
 
 	va_start (args, flags);
-	ret = bind_vcheck_hits (table, match, flags, NULL, args);	
+	ret = bind_vcheck_hits (table, match, flags, NULL, args);
 	va_end (args);
 
 	return ret;
@@ -372,7 +372,7 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 		if (table->match_type & MATCH_FLAGS) {
 /*wtf?			if (!(entry->user_flags.builtin | entry->user_flags.udef)) cmp = 1;
 			else if (!user_flags) cmp = 0;
-			else 
+			else
 */
 			if (entry->flags & MATCH_FLAGS_AND) cmp = flagrec_eq(&entry->user_flags, flags);
 			else cmp = flagrec_ok(&entry->user_flags, flags);
@@ -433,7 +433,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
                   cmdlist[cmdi].flags.match = FR_GLOBAL | FR_CHAN;
                   break_down_flags(cmds->flags, &(cmdlist[cmdi].flags), NULL);
                   cmdi++;
-                } 
+                }
 		simple_snprintf(name, sizeof name, "*%s:%s", table->name, cmds->funcname ? cmds->funcname : cmds->name);
 		bind_entry_add(table, cmds->flags, cmds->type, cmds->name, name, 0, cmds->func, NULL);
           }
@@ -444,7 +444,7 @@ void rem_builtins(const char *table_name, cmd_t *cmds)
 {
 	bind_table_t *table = bind_table_lookup(table_name);
 
-	if (!table) 
+	if (!table)
           return;
 
 	char name[50] = "";

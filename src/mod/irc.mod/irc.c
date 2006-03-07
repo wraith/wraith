@@ -45,7 +45,7 @@
 #include "src/chanprog.h"
 #include "src/auth.h"
 #include "src/userrec.h"
-#include "src/tclhash.h"
+#include "src/binds.h"
 #include "src/userent.h"
 #include "src/egg_timer.h"
 #include "src/mod/share.mod/share.h"

@@ -31,7 +31,7 @@
 #include "src/rfc1459.h"
 #include "src/settings.h"
 #include "src/match.h"
-#include "src/tclhash.h"
+#include "src/binds.h"
 #include "src/users.h"
 #include "src/userrec.h"
 #include "src/main.h"

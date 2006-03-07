@@ -36,7 +36,7 @@
 #include "src/net.h"
 #include "src/userrec.h"
 #include "src/botmsg.h"
-#include "src/tclhash.h"
+#include "src/binds.h"
 #include "src/egg_timer.h"
 #include "src/mod/server.mod/server.h"
 #include <netinet/in.h>

@@ -31,7 +31,7 @@
 #include "dcc.h"
 #include "settings.h"
 #include "enclink.h"
-#include "tclhash.h"
+#include "binds.h"
 #include "adns.h"
 #include "main.h"
 #include "cmds.h"

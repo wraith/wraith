@@ -33,7 +33,7 @@
 #include "src/mod/share.mod/share.h"
 #include "src/mod/update.mod/update.h"
 #include "net.h"
-#include "tclhash.h"
+#include "binds.h"
 #include "misc.h"
 #include "dcc.h"
 #include "userrec.h"
