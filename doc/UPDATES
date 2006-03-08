@@ -22,6 +22,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * cmd_checkchannels now states if a bot is not online. (fixes #239)
 * Added mIRC 6.17 version reply
 * Fixed empty version replies. (fixes #236)
+* Fixed a sharing segfault with an empty userfile. (fixes #243)
 
 1.2.9 - http://tracker.shatow.net/milestone/1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)

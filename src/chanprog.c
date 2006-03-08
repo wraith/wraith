@@ -513,27 +513,8 @@ void load_internal_users()
 
 }
 
-void chanprog()
-{
-  struct utsname un;
+void add_myself_to_userlist() {
   struct bot_addr *bi = NULL;
-
-  /* cache our ip on load instead of every 30 seconds */
-  cache_my_ip();
-  sdprintf("ip4: %s", myipstr(4));
-  sdprintf("ip6: %s", myipstr(6));
-  sdprintf("I am: %s", conf.bot->nick);
-  if (conf.bot->hub) {
-    simple_snprintf(userfile, 121, "%s/.u", conf.binpath);
-    loading = 1;
-    checkchans(0);
-    readuserfile(userfile, &userlist);
-    checkchans(1);
-    var_parse_my_botset();
-    loading = 0;
-  }
-
-  load_internal_users();
 
   if (!(conf.bot->u = get_user_by_handle(userlist, conf.bot->nick))) {
     /* I need to be on the userlist... doh. */
@@ -555,7 +536,33 @@ void chanprog()
 
   if (!bi)
     fatal("I'm added to userlist but without a bot record!", 0);
+}
+
+void chanprog()
+{
+  struct utsname un;
+
+  /* cache our ip on load instead of every 30 seconds */
+  cache_my_ip();
+  sdprintf("ip4: %s", myipstr(4));
+  sdprintf("ip6: %s", myipstr(6));
+  sdprintf("I am: %s", conf.bot->nick);
   if (conf.bot->hub) {
+    simple_snprintf(userfile, 121, "%s/.u", conf.binpath);
+    loading = 1;
+    checkchans(0);
+    readuserfile(userfile, &userlist);
+    checkchans(1);
+    var_parse_my_botset();
+    loading = 0;
+  }
+
+  load_internal_users();
+
+  add_myself_to_userlist();
+
+  if (conf.bot->hub) {
+    struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
     listen_all(bi->telnet_port, 0);
     my_port = bi->telnet_port;
   }

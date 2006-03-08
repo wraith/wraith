@@ -1305,9 +1305,10 @@ finish_share(int idx)
    */
   clear_userlist(ou);
 
-  if (!conf.bot->u)
-    conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
-
+  /* The userfile we received may just be bogus or missing important users */
+  load_internal_users();
+  add_myself_to_userlist();
+  
   /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
   check_hostmask();
 
