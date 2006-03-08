@@ -188,14 +188,17 @@ static void got_chans(char *botnick, char *code, char *par)
   struct chanset_t *chan = NULL;
   char buf[1024] = "";
 
-  for (chan = chanset; chan; chan = chan->next) {
-    if (shouldjoin(chan) && !channel_active(chan)) {
-      simple_snprintf(buf, sizeof(buf), "%s%s%s", buf[0] ? buf : "", buf[0] ? " " : "", chan->dname);
+  if (server_online) {
+    for (chan = chanset; chan; chan = chan->next) {
+      if (shouldjoin(chan) && !channel_active(chan)) {
+        simple_snprintf(buf, sizeof(buf), "%s%s%s", buf[0] ? buf : "", buf[0] ? " " : "", chan->dname);
+      }
     }
-  }
 
-  if (buf[0])
-    putlog(LOG_MISC, "*", "I am not in: %s", buf);
+    if (buf[0])
+      putlog(LOG_MISC, "*", "I am not in: %s", buf);
+  } else
+    putlog(LOG_MISC, "*", "I am not online.");
 }
 
 static void got_cjoin(char *botnick, char *code, char *par)
