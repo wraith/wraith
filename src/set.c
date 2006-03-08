@@ -158,7 +158,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
 
     if (var->flags & VAR_CLOAK && !conf.bot->hub) {
       if (number == 0)
-        number = randint(CLOAK_COUNT) + 1;
+        number = randint(CLOAK_COUNT - 1) + 1;
     }
 
     *(int *) (var->mem) = number;
