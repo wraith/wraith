@@ -252,6 +252,7 @@
  6.14
  6.15
  6.16
+ 6.17
 :mIRCscript
  Lame script 2.0
 :end
