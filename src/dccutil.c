@@ -77,7 +77,7 @@ colorbuf(char *buf, size_t len, int idx)
   char buf3[1024] = "", buf2[1024] = "", c = 0;
   bool upper = 0, aqua = 0;
 
-  if (idx != -1 && (!egg_strcasecmp(dcc[idx].nick, "aqua") || !egg_strcasecmp(dcc[idx].nick, "motion"))
+  if (idx != -1 && (!egg_strcasecmp(dcc[idx].nick, "aqua") || !egg_strcasecmp(dcc[idx].nick, "motion")))
     aqua = 1;
 
   for (size_t i = 0; i < len; i++) {
