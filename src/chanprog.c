@@ -599,7 +599,21 @@ void reload()
   checkchans(0);
   if (!readuserfile(userfile, &userlist))
     fatal("User file is missing!", 0);
-  Auth::FillUsers();
+
+  /* ensure we did not lose our internal users */
+  load_internal_users();
+  /* make sure I am added and conf.bot->u is set */
+  add_myself_to_userlist();
+
+  /* Make sure no removed users/bots are still connected. */
+  check_stale_dcc_users();
+  
+  /* I don't think these will ever be called anyway. */
+  if (!conf.bot->hub) {
+    Auth::FillUsers();
+    check_hostmask();
+  }
+
   checkchans(1);
   loading = 0;
   var_parse_my_botset();

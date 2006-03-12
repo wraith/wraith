@@ -904,6 +904,7 @@ int readuserfile(const char *file, struct userrec **ret)
           sdprintf("FAILED TO UNPACK '%s'", e->name);
       }
   }
+
   /* process the user data *now* */
   if (!conf.bot->hub)
     unlink(userfile);
@@ -1173,4 +1174,20 @@ void autolink_cycle(char *start)
     autolink_cycle_hub(start);
   else
     autolink_cycle_leaf(start);
+}
+
+
+void check_stale_dcc_users() 
+{
+  for (int i = 0; i < dcc_total; ++i) {
+    if (!dcc[i].type || !dcc[i].nick[0]) continue;
+    
+
+    if (dcc[i].user == NULL) { /* Removed user */
+      if (dcc[i].type == &DCC_BOT || dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_NEW)
+        botunlink(i, dcc[i].nick, "No longer a valid bot.");
+      else if (dcc[i].type == &DCC_CHAT)
+        do_boot(i, "internal", "No longer a valid user.");
+    }
+  }
 }

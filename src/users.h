@@ -173,6 +173,7 @@ void tell_users_match(int, char *, int, int, char *, int);
 int readuserfile(const char *, struct userrec **);
 void check_pmode();
 void link_pref_val(struct userrec *u, char *lval);
+void check_stale_dcc_users();
 
 extern char			userfile[];
 extern time_t			ignore_time;

@@ -1312,8 +1312,15 @@ finish_share(int idx)
   /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
   check_hostmask();
 
-  /* copy over any auth users */
-  Auth::FillUsers();
+  /* Make sure no removed users/bots are still connected. */
+  check_stale_dcc_users();
+
+  if (!conf.bot->hub) {  
+    /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
+    check_hostmask();
+    /* copy over any auth users */
+    Auth::FillUsers();
+  }
 
   cmdpass_free(old_cmdpass);
 
