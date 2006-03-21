@@ -24,6 +24,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed empty version replies. (fixes #236)
 * Fixed a sharing segfault with an empty userfile. (fixes #243)
 * Hubs will now boot removed users/bots upon userfile reload. (addresses #243)
+* Fix typo in help file for 'botpart' (fixes #259)
 
 1.2.9 - http://tracker.shatow.net/milestone/1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)
