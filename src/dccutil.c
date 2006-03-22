@@ -883,8 +883,9 @@ listen_all(port_t lport, bool off)
       i = open_listen(&port);
 #endif /* USE_IPV6 */
       if (i < 0) {
-        putlog(LOG_ERRORS, "*", "Can't open IPv4 listening port %d - %s", port,
-               i == -1 ? "it's taken." : "couldn't assign ip.");
+        if (i6 < 0)
+          putlog(LOG_ERRORS, "*", "Can't open IPv4 listening port %d - %s", port,
+                 i == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
         /* now setup ipv4 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
