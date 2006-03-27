@@ -572,15 +572,15 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 
   /* server op */
   if (!m && me_op(chan) && !match_my_nick(mv->nick)) {
-    int snm = chan->stopnethack_mode;
-
-    if (chk_deop(victim, chan)) {
+    if (chk_deop(victim, chan) || (chan_bitch(chan) && !chk_op(victim, chan))) {
       mv->flags |= FAKEOP;
       add_mode(chan, '-', 'o', mv->nick);
+    } 
+#ifdef no
     } else if (snm > 0 && snm < 7 && !((channel_autoop(chan) ||
-             glob_autoop(victim) || chan_autoop(victim)) && (chan_op(victim) ||
-             (glob_op(victim) && !chan_deop(victim)))) &&
-             !glob_exempt(victim) && !chan_exempt(victim)) {
+         glob_autoop(victim) || chan_autoop(victim)) && (chan_op(victim) ||
+         (glob_op(victim) && !chan_deop(victim)))) &&
+         !glob_exempt(victim) && !chan_exempt(victim)) {
 
       if (snm == 5)
         snm = chan_bitch(chan) ? 1 : 3;
@@ -600,7 +600,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
         add_mode(chan, '-', 'o', mv->nick);
         mv->flags |= FAKEOP;
       }
-    }
+#endif
   }
   mv->flags |= WASOP;
   if (check_chan) {
@@ -1054,15 +1054,14 @@ gotmode(char *from, char *msg)
       if (me_opped && !me_op(chan) && channel_take(chan))
         do_take(chan);
 
-      if (!isserver) {
         /* Now we got modes[], chan, u, nick, and count of each relevant mode */
 
         /* check for mdop */
         if (me_op(chan)) {
           char tmp[1024] = "";
 
-          if (role && (!u || (u && !u->bot)) && m && !chan_sentkick(m)) {
-            if (deops >= 3 && chan->mdop) {
+          if (role && (!u || (u && !u->bot))) {
+            if (m && !chan_sentkick(m) && deops >= 3 && chan->mdop) {
               if (role < 5) {
                 m->flags |= SENTKICK;
                 simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
@@ -1081,27 +1080,30 @@ gotmode(char *from, char *msg)
             /* check for mop */
             if (ops >= 3) {
               if (chan->mop) {
-                if (role < 5) {
-                  m->flags |= SENTKICK;
-                  simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
-                  if (role <= 2)
-                    tputs(serv, tmp, strlen(tmp));
-                  else
-                    dprintf(DP_SERVER, "%s", tmp);
-                } else { 
-                  if (u) {
-                    simple_sprintf(tmp, "Mass op on %s by %s", chan->dname, m->nick);
-                    deflag_user(u, DEFLAG_MOP, tmp, chan);
+                if (m && !chan_sentkick(m)) {
+                  if (role < 5) {
+                    m->flags |= SENTKICK;
+                    simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+                    if (role <= 2)
+                      tputs(serv, tmp, strlen(tmp));
+                    else
+                      dprintf(DP_SERVER, "%s", tmp);
+                  } else { 
+                    if (u) {
+                      simple_snprintf(tmp, sizeof(tmp), "Mass op on %s by %s", chan->dname, m->nick);
+                      deflag_user(u, DEFLAG_MOP, tmp, chan);
+                    }
                   }
                 }
                 enforce_bitch(chan);        /* deop quick! */
               }
             }
           }
-          if (ops && u) {
+          if (ops) {
             int n = 0;
 
-            if (u->bot && !channel_fastop(chan) && !channel_take(chan)) {
+            /* Check cookies */
+            if (u && m && u->bot && !channel_fastop(chan) && !channel_take(chan)) {
               int isbadop = 0;
 
               /* If no unbans or the -b is not the LAST mode, it's bad. */
@@ -1161,24 +1163,27 @@ gotmode(char *from, char *msg)
                 putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
             }
 
-            if (chan->manop && !u->bot) {
+            /* manop */
+            if (chan->manop && (!u || (u && !u->bot))) {
               n = i = 0;
 
               switch (role) {
                 case 0:
                   break;
                 case 1:
-                  /* Kick opper */
-                  if (!m || !chan_sentkick(m)) {
-                    simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
-                    tputs(serv, tmp, strlen(tmp));
-                    if (m)
+                  if (m) {
+                    /* Kick opper */
+                    if (!chan_sentkick(m)) {
+                      simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+                      tputs(serv, tmp, strlen(tmp));
                       m->flags |= SENTKICK;
+                    }
+                    simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                    deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
                   }
-                  simple_sprintf(tmp, "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                  deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
                   break;
                 default:
+                  /* KICK the opped */
                   n = role - 1;
                   i = 0;
                   while ((i < modecnt) && (n > 0)) {
@@ -1199,13 +1204,12 @@ gotmode(char *from, char *msg)
                         }
                       }
                     }
-                  }
               }
             }
           }
         }
       }
-      /* Now do the modes again, this time throughly... */
+      /* Now do the modes again, this time thoroughly... */
 
       if (m && channel_active(chan) && me_op(chan)) {
         if (chan_fakeop(m)) {

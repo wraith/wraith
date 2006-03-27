@@ -358,16 +358,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       }
       chan->limitraise = atoi(item[i]);
       chan->limit_prot = 0;
-    } else if (!strcmp(item[i], "dont-idle-kick"))
+    } else if (!strcmp(item[i], "dont-idle-kick")) {
       chan->idle_kick = 0;
-    else if (!strcmp(item[i], "stopnethack-mode")) {
-      i++;
-      if (i >= items) {
-	if (result)
-	  simple_snprintf(result, RESULT_LEN, "channel stopnethack-mode needs argument");
-	return ERROR;
-      }
-      chan->stopnethack_mode = atoi(item[i]);
 /*
     } else if (!strcmp(item[i], "revenge-mode")) {
       i++;
@@ -582,6 +574,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
        this later */
     else if (!have_take && !strcmp(item[i], "+take")) ;
     else if (!have_take && !strcmp(item[i], "-take")) ;
+    else if (!strcmp(item[i], "stopnethack-mode")) ;
     else if (!strcmp(item[i], "revenge-mode")) ;
     else if (!strcmp(item[i], "+revenge")) ;
     else if (!strcmp(item[i], "-revenge")) ;
@@ -866,7 +859,6 @@ int channel_add(char *result, char *newname, char *options)
     chan->flood_kick_time = gfld_kick_time;
     chan->flood_nick_thr = gfld_nick_thr;
     chan->flood_nick_time = gfld_nick_time;
-    chan->stopnethack_mode = global_stopnethack_mode;
 //    chan->revenge_mode = global_revenge_mode;
     chan->idle_kick = global_idle_kick;
     chan->limitraise = 20;

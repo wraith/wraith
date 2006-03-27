@@ -710,7 +710,7 @@ bool write_chans(FILE *f, int idx)
     if (lfprintf(f, "\
 + channel add %s { chanmode { %s } addedby %s addedts %lu idle-kick %d \
 bad-cookie %d manop %d mdop %d mop %d \
-limit %d stopnethack-mode %d flood-chan %d:%lu \
+limit %d flood-chan %d:%lu \
 flood-ctcp %d:%lu flood-join %d:%lu flood-kick %d:%lu flood-deop %d:%lu \
 flood-nick %d:%lu closed-ban %d closed-invite %d closed-private %d ban-time %lu \
 exempt-time %lu invite-time %lu voice-non-ident %d \
@@ -732,7 +732,6 @@ exempt-time %lu invite-time %lu voice-non-ident %d \
 	chan->mdop,
 	chan->mop,
         chan->limitraise,
-	chan->stopnethack_mode,
 	chan->flood_pub_thr, chan->flood_pub_time,
         chan->flood_ctcp_thr, chan->flood_ctcp_time,
         chan->flood_join_thr, chan->flood_join_time,

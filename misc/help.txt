@@ -355,19 +355,6 @@ See also: link
         $blimit$b             If this is set, the +l bot will raise the limit 
                           to the users in the channel + this ammount. Set to 
                           0 to disable.
-        $bstopnethack-mode$b  This setting will make the bot de-op anyone who
-                          enters the channel with serverops. There are seven
-                          different modes for this settings:
-                            0 turn off
-                            1 isoptest (allow serverop if registered op)
-                            2 wasoptest (allow serverop if user had op before
-                              split)
-                            3 allow serverop if isop or wasop
-                            4 allow serverop if isop and wasop
-                            5 If the channel is -bitch, see stopnethack-mode 3
-                              If the channel is +bitch, see stopnethack-mode 1
-                            6 If the channel is -bitch, see stopnethack-mode 2
-                              If the channel is +bitch, see stopnethack-mode 4
         $bclosed-ban$b        Set this to 1 to ban users who join +closed 
                           channels. This is probably not needed though, as
                           +closed maintains +i.
@@ -1825,7 +1812,6 @@ See also: whom
               Be careful who you give this to, only the perm-owner of the net should even have it.
       $bc$b - chat-bot (bot accepts DCC chat on irc)
       $bd$b - deop (user cannot gain ops in any channel)
-      $be$b - nethack-exempt (user is exempted from stopnethack protection)
       $bi$b - hub access (user has hub DCC access)
       $bj$b - leaf access (user has leaf DCC access)
       $bk$b - autokick (user is kicked and banned automatically)
@@ -1839,14 +1825,13 @@ See also: whom
       $br$b - resolve (bot resolves clients in to match against userlist) [$bCPU INTENSIVE+$b]
       $bu$b - update-bot (see doc/UPGRADING)
       $bv$b - voice (user gets +v automatically from +y bots)
-      $bw$b - wasop-test (needs wasop test for +stopnethack procedure)
+      $bw$b - wasop-test (INTERNAL)
       $bx$b - flood-exempt (user is exempt from flood kicks)
       $by$b - voice-bot (bot gives out voices/auto-ops in chans) [$bCPU INTENSIVE$b]
  
    Users can also have flags specific to a channel:
  
       $bd$b - deop (user cannot gain ops on the channel)
-      $be$b - nethack-exempt (user is exempted from stopnethack protection)
       $bk$b - autokick (user is kicked and banned automatically)
       $bl$b - limit-bot (bot sets limit in the channel) [$bCPU INTENSIVE$b]
       $bm$b - master (user is a channel master)
@@ -1856,9 +1841,8 @@ See also: whom
       $bq$b - quiet (user cannot gain voice on the channel)
       $br$b - resolve (bot resolves clients in channel to match against userlist) [$bCPU INTENSIVE+$b]
       $bv$b - voice (user gets +v automatically)
-      $bw$b - wasop-test (needs wasop test for +stopnethack procedure)
+      $bw$b - wasop-test (INTERNAL)
       $by$b - voice-bot (bot gives out voices/auto-ops in the channel) [$bCPU INTENSIVE$b]
-      $bz$b - washalfop-test (needs washalfop test for +stopnethack procedure)
  
    Hostmasks for the user are displayed on the following lines. If the user is
    a bot, there will be a line below which says "ADDRESS:" and gives the bot's

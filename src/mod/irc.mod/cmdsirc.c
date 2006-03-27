@@ -1378,10 +1378,6 @@ static void cmd_channel(int idx, char *par)
         atrflag = 'W';
       else if (chan_wasoptest(user))
         atrflag = 'w';
-      else if (glob_exempt(user))
-        atrflag = 'E';
-      else if (chan_exempt(user))
-        atrflag = 'e';
       else
 	atrflag = ' ';
 

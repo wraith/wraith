@@ -167,7 +167,6 @@ struct chanset_t {
  *int temp;
  */
   int idle_kick;
-  int stopnethack_mode;
 #ifdef REVENGE
   int revenge_mode;
 #endif

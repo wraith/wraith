@@ -63,7 +63,6 @@ struct flag_record {
 #define USER_ADMIN	FLAG[(int) 'a']
 #define USER_CHANHUB	FLAG[(int) 'c']
 #define USER_DEOP	FLAG[(int) 'd']
-#define USER_EXEMPT	FLAG[(int) 'e']
 #define USER_HUBA	FLAG[(int) 'i']
 #define USER_CHUBA	FLAG[(int) 'j']
 #define USER_KICK	FLAG[(int) 'k']
@@ -111,8 +110,6 @@ struct flag_record {
 #define glob_quiet(x)                  ((x).global & USER_QUIET)
 #define glob_party(x)                  ((x).global & USER_PARTY)
 #define glob_hilite(x)                         ((x).global & USER_HIGHLITE)
-#define chan_exempt(x)                 ((x).chan & USER_EXEMPT)
-#define glob_exempt(x)                 ((x).global & USER_EXEMPT)
 #define glob_admin(x)                  ((x).global & USER_ADMIN)
 #define glob_huba(x)                   ((x).global & USER_HUBA)
 #define glob_chuba(x)                  ((x).global & USER_CHUBA)
