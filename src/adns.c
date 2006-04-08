@@ -999,8 +999,6 @@ int egg_dns_init()
 	read_hosts(".hosts");
     
         /* some backup servers, probably will never be used. */
-	add_dns_server("205.152.0.20"); //ns.atl.bellsouth.net
-        add_dns_server("203.251.80.133"); //ns.abovenet.net
         add_dns_server("68.2.16.30"); //some cox ns
         add_dns_server("68.6.16.25"); //another cox
         add_dns_server("65.215.220.12"); //staminus
