@@ -208,8 +208,8 @@ int timer_run()
                         /* This used to be '+= howlong.sec' but, if the time changed say 3 years (happened), this function 
                          * would end up executing all timers for 3 years until it is caught up.
                          */
-			timer->trigger_time.sec = my_now.sec + timer->howlong.sec;
-			timer->trigger_time.usec = my_now.usec + timer->howlong.usec;
+			timer->trigger_time.sec = now.sec + timer->howlong.sec;
+			timer->trigger_time.usec = now.usec + timer->howlong.usec;
 
 			if (timer->trigger_time.usec >= 1000000) {
 				timer->trigger_time.usec -= 1000000;
