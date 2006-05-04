@@ -22,11 +22,24 @@ str_redup(char **str, const char *newstr)
 char *
 strdup(const char *entry)
 {
-  size_t len = strlen(entry) + 1;
-  char *target = (char *) my_calloc(1, len);
+  size_t len = strlen(entry);
+  char *target = (char *) my_calloc(1, len + 1);
   if (target == NULL) return NULL;
+  target[len] = 0;
   return (char *) egg_memcpy(target, entry, len);
 }
+
+char *
+strldup(const char *entry, size_t maxlen)
+{
+  size_t slen = strlen(entry);
+  size_t len = slen < maxlen ? slen : maxlen;
+  char *target = (char *) my_calloc(1, len + 1);
+  if (target == NULL) return NULL;
+  target[len] = 0;
+  return (char *) egg_memcpy(target, entry, len);
+}
+
 
 void *my_calloc(size_t nmemb, size_t size)
 {

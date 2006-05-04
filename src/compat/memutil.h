@@ -15,6 +15,8 @@
 
 void str_redup(char **, const char *);
 char *strdup(const char *);
+char *strldup(const char *, size_t);
+
 
 void *my_calloc(size_t, size_t);
 void *my_realloc(void *, size_t);
