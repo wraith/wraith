@@ -303,7 +303,7 @@ static void dtx_arg(int argc, char *argv[])
         exit(0);
       case 'B':
         used_B = 1;
-        strlcpy(origbotname, optarg, NICKLEN + 1);
+        strlcpy(origbotname, optarg, HANDLEN + 1);
         break;
       case 'H':
         printf("SHA1 (%s): %s\n", optarg, SHA1(optarg));

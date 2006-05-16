@@ -477,7 +477,7 @@ checkpid(const char *nick, conf_bot *bot, const char *usedir)
     }
 
     if (bufp[0] && pid && can_stat(bufp) && (getpid() == pid) &&
-        !egg_strcasecmp(nick, origbotname)) {
+        !egg_strncasecmp(nick, origbotname, HANDLEN)) {
       socksfile = strdup(bufp);
       return 0;
     }
@@ -498,7 +498,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
     nick++;
     sdprintf("%s is disabled.", nick);
   }
-  bot->nick = strdup(nick);
+  bot->nick = strldup(nick, HANDLEN);
   bot->net.ip = NULL;
   bot->net.host = NULL;
   bot->net.ip6 = NULL;
@@ -545,7 +545,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
         len = p2 - p;
         simple_snprintf(hubbuf, len + 1, "%s", p);
-        if (!egg_strcasecmp(bot->nick, hubbuf)) {
+        if (!egg_strncasecmp(bot->nick, hubbuf, HANDLEN)) {
           bot->hub = 1;
           break;
         }
@@ -1059,9 +1059,9 @@ fill_conf_bot()
   /* This first clause should actually be obsolete */
   if (!used_B && conf.bots && conf.bots->nick) {
     mynick = strdup(conf.bots->nick);
-    strlcpy(origbotname, conf.bots->nick, NICKLEN + 1);
+    strlcpy(origbotname, conf.bots->nick, HANDLEN + 1);
   } else
-    mynick = strdup(origbotname);
+    mynick = strldup(origbotname, HANDLEN);
 
   sdprintf("mynick: %s", mynick);
 

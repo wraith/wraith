@@ -30,6 +30,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * +bitch is now properly enforced on a netsplit return. (fixes #219)
 * Fixed a timer bug which could cause prolonged looping.
 * Removed some stale (backup) dns servers. (fixes #263)
+* Bot handles are now restricted to 9 characters. (fixes #253)
 
 1.2.9 - http://tracker.shatow.net/milestone/1.2.9
 * Fixed cmd_[un]stick not properly using numbers for channel masks. (#160)
