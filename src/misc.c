@@ -665,9 +665,9 @@ restart(int idx)
   if (server_online) {
     if (botname[0])
       fprintf(socks->f, "+botname %s\n", botname);
-    fprintf(socks->f, "+buildts %li\n", buildts);
   }
   fprintf(socks->f, "+online_since %li\n", online_since);
+  fprintf(socks->f, "+buildts %li\n", buildts);
   fflush(socks->f);
   socks->my_close();
 
