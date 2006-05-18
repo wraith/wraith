@@ -410,6 +410,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->closed_invite = atoi(item[i]);
+      if (chan->mode_mns_prot & CHANINV && chan->closed_invite)
+        chan->closed_invite = 0;
     } else if (!strcmp(item[i], "closed-private")) {
       i++;
       if (i >= items) {
@@ -418,6 +420,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
         return ERROR;
       }
       chan->closed_private = atoi(item[i]);
+      if (chan->mode_mns_prot & CHANPRIV && chan->closed_private) 
+        chan->closed_private = 0;
     } else if (!strcmp(item[i], "voice-non-ident")) {
       i++;
       if (i >= items) {
