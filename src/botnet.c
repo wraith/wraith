@@ -1154,6 +1154,7 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[idx].u.relay = (struct relay_info *) my_calloc(1, sizeof(struct relay_info));
   dcc[idx].u.relay->chat = ci;
   dcc[idx].u.relay->old_status = dcc[idx].status;
+  dcc[idx].u.relay->idx = i;
   dcc[idx].u.relay->sock = -1;
 
   dcc[i].timeval = now;
@@ -1210,14 +1211,12 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
 
   dcc[idx].u.relay->sock = dcc[i].sock;
 
-  int sock = dcc[idx].u.dns->ibuf;
-
   changeover_dcc(i, &DCC_FORK_RELAY, sizeof(struct relay_info));
 
   dcc[i].addr = inet_addr(ips[0]);
 
   dcc[i].u.relay->chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
-  dcc[i].u.relay->sock = sock;
+  dcc[i].u.relay->sock = dcc[idx].sock;
   dcc[i].u.relay->port = dcc[i].port;
 #ifdef USE_IPV6
   dcc[i].u.relay->af = af;
@@ -1242,7 +1241,7 @@ static void pre_relay(int idx, char *buf, register int len)
   register int tidx = (-1), i;
 
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_FORK_RELAY && !dcc[i].addr && (dcc[i].u.relay->sock == dcc[idx].sock)) {
+    if (dcc[i].type && dcc[i].type == &DCC_FORK_RELAY && (dcc[i].u.relay->sock == dcc[idx].sock)) {
       tidx = i;
       break;
     }
@@ -1250,7 +1249,7 @@ static void pre_relay(int idx, char *buf, register int len)
   if (tidx < 0) {
     /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT && (dcc[i].sock == dcc[idx].u.relay->sock))) {
+      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT && (dcc[idx].u.relay->idx == i))) {
 	tidx = i;
 	break;
       }
@@ -1296,7 +1295,7 @@ static void failed_pre_relay(int idx)
   if (tidx < 0) {
     /* Now try to find it among the DNSWAIT sockets instead. */
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT && (dcc[i].sock == dcc[idx].u.relay->sock))) {
+      if (dcc[i].type && (dcc[i].type == &DCC_DNSWAIT && (dcc[idx].u.relay->idx == i))) {
 	tidx = i;
 	break;
       }
