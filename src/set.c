@@ -600,9 +600,12 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
 
   const char *delim = ",";
   int num = 0, i = 0;
+  size_t elen = 0;
 
   if (str_isdigit(element))
     num = atoi(element);
+  else
+    elen = strlen(element);
 
   olddata = olddatap = strdup(olddatacp);
   size_t tsiz = strlen(olddata) + 1;
@@ -612,7 +615,7 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   while ((word = strsep(&olddata, delim))) {
     ++i;
 
-    if ((num && num != i) || (!num && egg_strcasecmp(word, element))) {
+    if ((num && num != i) || (!num && egg_strncasecmp(word, element, elen))) {
       /* Reconstruct the left and right part of the list...*/
       if (data && data[0] && word && word[0])
         simple_snprintf(data, tsiz, "%s,%s", data, word);
