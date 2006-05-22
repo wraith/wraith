@@ -9,7 +9,7 @@ fi
 ./build -C -n all
 
 #Then package up each cfg
-cfgs="`find \"$@\" -name \"*.cfg\"`"
+cfgs="`find \"$@\" -name \"*.cfg\" | grep -v \"disabled\"`"
 for cfg in $cfgs
 do
  if test "`grep 'PACKNAME' $cfg`x" != "x"; then
