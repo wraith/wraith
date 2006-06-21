@@ -5,6 +5,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 1.2.11
 * Fixed typo in help for .set
 * Fixed a bug in cmd_chattr with |m users. (fixes #267)
+* Suicide now removes userfile backups, most pid files, and crontab entries. (Fixes #125)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.

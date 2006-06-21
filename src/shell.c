@@ -567,7 +567,15 @@ void suicide(const char *msg)
     sleep(1);
   } else {
     unlink(userfile);
-    simple_sprintf(tmp, "%s~", userfile);
+    simple_snprintf(tmp, sizeof(tmp), "%s~new", userfile);
+    unlink(tmp);
+    simple_snprintf(tmp, sizeof(tmp), "%s~", userfile);
+    unlink(tmp);
+    simple_snprintf(tmp, sizeof(tmp), "%s/%s~", conf.datadir, userfile);
+    unlink(tmp);
+    simple_snprintf(tmp, sizeof(tmp), "%s/.u.0", conf.datadir);
+    unlink(tmp);
+    simple_snprintf(tmp, sizeof(tmp), "%s/.u.1", conf.datadir);
     unlink(tmp);
   }
   unlink(binname);
@@ -576,7 +584,11 @@ void suicide(const char *msg)
     conf_checkpids();
     conf_killbot(NULL, NULL, SIGKILL);
   }
-
+  unlink(conf.bot->pid_file);
+  //Not recursively clearing these dirs as they may be ~USER/ ..
+  unlink(conf.datadir); //Probably will fail, shrug
+  unlink(tempdir); //Probably will fail too, oh well
+  crontab_del();
   fatal(msg, 0);
 }
 
