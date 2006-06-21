@@ -14,6 +14,7 @@
 #include "misc_file.h"
 #include "rfc1459.h"
 #include "dcc.h"
+#include "botnet.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/channels.mod/channels.h"
 #include "main.h"
@@ -641,11 +642,18 @@ int deluser(char *handle)
     shareout("k %s\n", handle);
   for (fnd = 0; fnd < dcc_total; fnd++) {
     if (dcc[fnd].type && dcc[fnd].user == u) {
-      dprintf(fnd, "-+- POOF! -+-\n");
-      dprintf(fnd, "You are no longer a user on this botnet.\n");
-      do_boot(fnd, conf.bot->nick, "User removed.");
+      if (conf.bot->hub && u->bot) {
+        int i = nextbot(handle);
+        if (i != -1 && !egg_strcasecmp(dcc[i].nick, handle))
+          botunlink(-1, handle, "Bot removed.");
+      } else if (!u->bot) {
+        dprintf(fnd, "-+- POOF! -+-\n");
+        dprintf(fnd, "You are no longer a user on this botnet.\n");
+        do_boot(fnd, conf.bot->nick, "User removed.");
+      }
     }
   }
+
   clear_chanlist();
   freeuser(u);
   lastuser = NULL;
