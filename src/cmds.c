@@ -2324,6 +2324,13 @@ static void cmd_chattr(int idx, char *par)
     user.match |= FR_CHAN;
   get_user_flagrec(dcc[idx].user, &user, chan ? chan->dname : 0);
   get_user_flagrec(u2, &ouser, chan ? chan->dname : 0);
+  if (!chan && !glob_master(user)) {
+    dprintf(idx, "You do not have global master access.\n";
+    if (tmpchg)
+      free(tmpchg);
+    return;
+  }
+
   if (chan && !glob_master(user) && !chan_master(user)) {
     dprintf(idx, "You do not have channel master privileges for channel %s.\n",
 	    par);

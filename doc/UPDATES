@@ -2,6 +2,10 @@ This is a summary of ChangeLog basically.
 Numbers expressed as '#12' are references to a ticket/bug posting which can be viewed at: http://xx.shatow.net
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
+1.2.11
+* Fixed typo in help for .set
+* Fixed a bug in cmd_chattr with |m users. (fixes #267)
+
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
 * Fixed auth cmds not working in privmsg. (fixes #228)
