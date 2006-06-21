@@ -1488,7 +1488,7 @@ See also: reload, backup
 [N]  $bserver-port$b     Default port to use for server connections.
 [B]  $bauth-chan$b       If set, auth cmds will work in channels as well as in msg, otherwise 
                           only in msg.
-[S]  $bauth-key$b        The authkey used during authing.G ive to users if they need to auth. 
+[S]  $bauth-key$b        The authkey used during authing. Give to users if they need to auth. 
                           (can be bot specific)
 [C]  $bauth-prefix$b     The prefix character used for msg cmds, ie: $u!$uop or $u.$uop
 [B]  $bauth-obscure$b    Will not halt on dcc login if pass is wrong. Will display auth hash..
