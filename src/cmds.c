@@ -2325,7 +2325,7 @@ static void cmd_chattr(int idx, char *par)
   get_user_flagrec(dcc[idx].user, &user, chan ? chan->dname : 0);
   get_user_flagrec(u2, &ouser, chan ? chan->dname : 0);
   if (!chan && !glob_master(user)) {
-    dprintf(idx, "You do not have global master access.\n";
+    dprintf(idx, "You do not have global master access.\n");
     if (tmpchg)
       free(tmpchg);
     return;
