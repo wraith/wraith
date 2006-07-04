@@ -72,6 +72,8 @@ MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
 default: wraith
 
+test:
+
 cleanutils:
 	@rm -f src/stringfix src/sorthelp src/makehelp
 	@rm -f src/stringfix.exe src/sorthelp.exe src/makehelp.exe
