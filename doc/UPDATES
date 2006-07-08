@@ -7,6 +7,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed a bug in cmd_chattr with |m users. (fixes #267)
 * Suicide now removes userfile backups, most pid files, and crontab entries. (Fixes #125)
 * Fixed removed bots not being automatically unlinked from botnet. (fixes #254)
+* Aliases may no longer reference other aliases (only checked when used) (fixes #244)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.

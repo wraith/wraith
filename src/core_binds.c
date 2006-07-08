@@ -43,6 +43,8 @@ bool check_aliases(int idx, const char *cmd, const char *args)
 {
   char *a = NULL, *p = NULL, *aliasp = NULL, *aliasdup = NULL, *argsp = NULL, *argsdup = NULL;
   bool found = 0;
+  bind_entry_t *entry = NULL;
+  bind_table_t *table = NULL;
 
   aliasp = aliasdup = strdup(alias);
   argsp = argsdup = strdup(args);
@@ -71,8 +73,23 @@ bool check_aliases(int idx, const char *cmd, const char *args)
         simple_snprintf(myargs, size, "%s %s %s", pass, a, argsdup);
       } else
         simple_snprintf(myargs, size, "%s %s", a, argsdup);
-      putlog(LOG_CMDS, "*", "@ #%s# [%s -> %s %s] ...", dcc[idx].nick, cmd, p, a);
-      check_bind_dcc(p, idx, myargs);
+
+      /* Sanity check - Aliases cannot reference another alias */
+      bool find = 0;
+      table = bind_table_lookup("dcc");
+      for (entry = table->entries; entry && entry->next; entry = entry->next) {
+        if (!egg_strncasecmp(p, entry->mask, strlen(p))) {
+          find = 1;
+          break;
+        }
+      }
+      if (!find) {
+        dprintf(idx, "'%s' is an invalid alias: references alias '%s'.\n", cmd, p);
+        putlog(LOG_ERROR, "*", "Invalid alias '%s' attempted: references alias '%s'.", cmd, p);
+      } else {
+        putlog(LOG_CMDS, "*", "@ #%s# [%s -> %s %s] ...", dcc[idx].nick, cmd, p, a);
+        check_bind_dcc(p, idx, myargs);
+      }
 
       if (myargs)
         free(myargs);

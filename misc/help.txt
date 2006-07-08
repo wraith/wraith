@@ -1481,8 +1481,8 @@ See also: reload, backup
  
 [SL] $balias$b           List of dcc aliases in format '<alias> <cmd> [parms]'. First
                           matching alias is used. Normal flag checking is done
-                          after the alias is expanded.
-                          $fCAUTION: TRIPPLE CHECK FOR POSSIBLE LOOPS AS THEY ARE FATAL.$f
+                          after the alias is expanded. 
+                          $bAliases may not reference other aliases.$b
 [S]  $bchanset$b         List of default options for when a channel is added. Same format 
                           as 'chanset'.
 [N]  $bserver-port$b     Default port to use for server connections.
