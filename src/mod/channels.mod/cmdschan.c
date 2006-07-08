@@ -494,12 +494,8 @@ static void cmd_chinfo(int idx, char *par)
 
 static void cmd_checkchannels(int idx, char *par)
 {
-  char buf[6] = "";
-
   putlog(LOG_CMDS, "*", "#%s# checkchannels", dcc[idx].nick);
-
-  simple_snprintf(buf, sizeof(buf), "chans");
-  putallbots(buf);
+  botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "chans");
 }
 
 static void cmd_slowjoin(int idx, char *par)

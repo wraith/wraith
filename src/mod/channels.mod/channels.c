@@ -182,10 +182,12 @@ static void got_cpart(char *botnick, char *code, char *par)
     write_userfile(-1);
 }
 
-static void got_chans(char *botnick, char *code, char *par)
-{
+void rcmd_chans(char *fbot, char *fhand, char *fidx) {
+  if (conf.bot->hub)
+    return;
+
   struct chanset_t *chan = NULL;
-  char buf[1024] = "";
+  char buf[1024] = "", reply[1024] = "";
 
   if (server_online) {
     for (chan = chanset; chan; chan = chan->next) {
@@ -195,9 +197,11 @@ static void got_chans(char *botnick, char *code, char *par)
     }
 
     if (buf[0])
-      putlog(LOG_MISC, "*", "I am not in: %s", buf);
+      simple_snprintf(reply, sizeof(reply), "I am not in: %s", buf);
   } else
-    putlog(LOG_MISC, "*", "I am not online.");
+    simple_snprintf(reply, sizeof(reply), "I am not online.");
+
+  botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, reply);
 }
 
 static void got_cjoin(char *botnick, char *code, char *par)
@@ -889,7 +893,6 @@ void channels_report(int idx, int details)
 }
 
 cmd_t channels_bot[] = {
-  {"chans",	"",	(Function) got_chans,	NULL, LEAF},
   {"cjoin",	"", 	(Function) got_cjoin, 	NULL, 0},
   {"cpart",	"", 	(Function) got_cpart, 	NULL, 0},
   {"cset",	"", 	(Function) got_cset,  	NULL, 0},

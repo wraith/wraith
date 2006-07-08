@@ -41,6 +41,7 @@
 #include "src/mod/server.mod/server.h"
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/update.mod/update.h"
+#include "src/mod/channels.mod/channels.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -4113,6 +4114,8 @@ void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, c
     rcmd_curnick(frombot, fromhand, fromidx);
   } else if (!strcmp(cmd, "cursrv")) {
     rcmd_cursrv(frombot, fromhand, fromidx);
+  } else if (!strcmp(cmd, "chans")) {
+    rcmd_chans(frombot, fromhand, fromidx);
   } else if (!strcmp(cmd, "jump")) {
     rcmd_jump(frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, "msg")) {
