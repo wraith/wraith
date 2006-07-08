@@ -881,14 +881,18 @@ printf("out: %s\n", out);
 
   int socket_cleanup = 0, xx, i = 0, idx = 0;
 #if !defined(CYGWIN_HACKS) && !defined(__sun__)
+#ifdef NO
   int status = 0;
+#endif
 #endif /* !CYGWIN_HACKS */
   char buf[SGRAB + 10] = "";
 
   while (1) {
 #if !defined(CYGWIN_HACKS) && !defined(__sun__)
+#ifdef NO
     if (conf.watcher && waitpid(watcher, &status, WNOHANG))
       fatal("watcher PID died/stopped", 0);
+#endif
 #endif /* !CYGWIN_HACKS */
 
     /* Lets move some of this here, reducing the numer of actual

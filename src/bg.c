@@ -28,9 +28,11 @@
 time_t lastfork = 0;
 
 #if !defined(CYGWIN_HACKS) && !defined(__sun__)
+#ifdef NO
 pid_t watcher;                  /* my child/watcher */
 
 static void init_watcher(pid_t);
+#endif
 #endif /* !CYGWIN_HACKS */
 
 int close_tty()
@@ -82,8 +84,10 @@ do_fork()
   writepid(conf.bot->pid_file, pid);
   lastfork = now;
 #if !defined(CYGWIN_HACKS) && !defined(__sun__)
+#ifdef NO
   if (conf.watcher)
     init_watcher(pid);
+#endif
 #endif /* !CYGWIN_HACKS */
   return pid;
 }
@@ -112,6 +116,7 @@ writepid(const char *pidfile, pid_t pid)
 }
 
 #if !defined(CYGWIN_HACKS) && !defined(__sun__)
+#ifdef NO
 static void
 init_watcher(pid_t parent)
 {
@@ -152,4 +157,5 @@ init_watcher(pid_t parent)
     }
   }
 }
+#endif
 #endif /* !CYGWIN_HACKS */

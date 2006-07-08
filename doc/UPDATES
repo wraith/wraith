@@ -9,6 +9,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed removed bots not being automatically unlinked from botnet. (fixes #254)
 * Aliases may no longer reference other aliases (only checked when used) (fixes #244)
 * Fixed cmd_checkchannels so that results are not shown in log, but to user only. (fixes #217)
+* Disabled watcher feature.
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.

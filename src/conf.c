@@ -951,11 +951,12 @@ writeconf(char *filename, FILE * stream, int bits)
   my_write(f, "! autouname %d\n", conf.autouname);
 
   comment("");
-
+#ifdef NO
   comment("# This will spawn a child process for EACH BOT that will block ALL process hijackers.");
   my_write(f, "! watcher %d\n", conf.watcher);
 
   comment("");
+#endif
 
   comment("# '|' means OR, [] means the enclosed is optional");
   comment("# A '+' in front of HOST means the HOST is ipv6");
