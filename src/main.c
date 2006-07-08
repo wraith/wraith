@@ -107,7 +107,7 @@ char *socksfile = NULL;
 static char *getfullbinname(const char *argv_zero)
 {
   char *bin = strdup(argv_zero), *p = NULL, *p2 = NULL;
-  char cwd[PATH_MAX] = "";
+  char cwd[PATH_MAX] = "", buf[PATH_MAX] = "";
 
   if (bin[0] == '/')
 #ifdef CYGWIN_HACKS
@@ -148,6 +148,12 @@ static char *getfullbinname(const char *argv_zero)
   strcat(bin, ".exe");
   bin[strlen(bin)] = 0;
 #endif /* CYGWIN_HACKS */
+  /* Fix for symlinked binaries */
+  realpath(bin, buf);
+  size_t len = strlen(buf);
+  bin = (char *) my_realloc(bin, len + 1);
+  strlcpy(bin, buf, len + 1);
+
   return bin;
 }
 
