@@ -588,7 +588,9 @@ void suicide(const char *msg)
   //Not recursively clearing these dirs as they may be ~USER/ ..
   unlink(conf.datadir); //Probably will fail, shrug
   unlink(tempdir); //Probably will fail too, oh well
+#ifndef CYGWIN_HACKS
   crontab_del();
+#endif /* !CYGWIN_HACKS */
   fatal(msg, 0);
 }
 

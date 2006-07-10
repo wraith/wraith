@@ -883,7 +883,9 @@ listen_all(port_t lport, bool off)
       i = open_listen(&port);
 #endif /* USE_IPV6 */
       if (i < 0) {
+#ifdef USE_IPV6
         if (i6 < 0)
+#endif /* USE_IPV6 */
           putlog(LOG_ERRORS, "*", "Can't open IPv4 listening port %d - %s", port,
                  i == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
