@@ -4,10 +4,7 @@
 
 
 #include "common.h"
-#include <netinet/in.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
-#include <arpa/nameser.h>
 
 /*
  * Define constants based on RFC 883, RFC 1034, RFC 1035
@@ -37,7 +34,7 @@ static const char       digits[] = "0123456789";
  * return:
  *      boolean.
  */
-static int special(int ch) {
+static inline int special(int ch) {
         switch (ch) {
         case 0x22: /* '"' */
         case 0x2E: /* '.' */
@@ -59,7 +56,7 @@ static int special(int ch) {
  * return:
  *      boolean.
  */
-static int printable(int ch) {
+static inline int printable(int ch) {
         return (ch > 0x20 && ch < 0x7f);
 }
 
