@@ -75,8 +75,7 @@ default: wraith
 test:
 
 cleanutils:
-	@rm -f src/stringfix src/sorthelp src/makehelp
-	@rm -f src/stringfix.exe src/sorthelp.exe src/makehelp.exe
+	@rm -f src/stringfix@EXEEXT@ src/sorthelp@EXEEXT@ src/makehelp@EXEEXT@
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
@@ -84,7 +83,7 @@ clean:  cleanutils
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	@rm -f $(BINEXEC) stamp.* *~ src/*~ configure.temp .mangled
-	@rm -f src/help.h src/response.h src/responses.h utctime ts
+	@rm -f src/help.h src/response.h src/responses.h utctime@EXEEXT@ ts@EXEEXT@
 
 distclean: clean
 	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
@@ -129,21 +128,21 @@ sort: sorthelp
 #	@(sed misc/help.txt -e "s/^$$/ /" > help~ && mv -f help~ misc/help.txt) || rm -f help~
 	@(sed -r -e :a -e 's/^$$/ /' -e '$$!N;s/^ \n:/:/;ta' -e 'P;D' misc/help.txt > help~ && mv -f help~ misc/help.txt) || rm -f help~
 	@cp -f misc/help.txt help.txt~
-	@(src/sorthelp misc/help.txt misc/help.txt || (cp -f help.txt~ misc/help.txt; echo "Sort failed, restoring backup."))
+	@(src/sorthelp@EXEEXT@ misc/help.txt misc/help.txt || (cp -f help.txt~ misc/help.txt; echo "Sort failed, restoring backup."))
 	@rm -f help.txt~
 
 help: makehelp stringfix
-	@src/makehelp misc/help.txt src/help.h.tmp~
+	@src/makehelp@EXEEXT@ misc/help.txt src/help.h.tmp~
 	@(if [ ! -f src/help.h ]; then \
 	touch src/help.h; \
 	fi)
-	@src/stringfix src/help.h.tmp~ src/help.h~ 1
+	@src/stringfix@EXEEXT@ src/help.h.tmp~ src/help.h~ 1
 	@(if test "x`$(DIFF) -qurN src/help.h~ src/help.h`" != "x"; then \
 	cp -f src/help.h~ src/help.h; \
 	fi)
 
 res: makeres
-	@src/makeres misc/responses.txt src/ 1
+	@src/makeres@EXEEXT@ misc/responses.txt src/ 1
 	@(if [ ! -f src/response.h ]; then \
 	touch src/response.h; \
 	fi)

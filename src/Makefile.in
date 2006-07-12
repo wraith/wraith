@@ -73,22 +73,22 @@ blah:
 makeres: makeres.c
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
-	@$(STRIP) makeres
+	@$(STRIP) makeres@EXEEXT@
 
 makehelp: makehelp.c
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c -o makehelp
-	@$(STRIP) makehelp
+	@$(STRIP) makehelp@EXEEXT@
 
 sorthelp: sorthelp.c
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c -o sorthelp
-	@$(STRIP) sorthelp
+	@$(STRIP) sorthelp@EXEEXT@
 
 stringfix: stringfix.c common.h ../config.h eggdrop.h
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
-	@$(STRIP) stringfix
+	@$(STRIP) stringfix@EXEEXT@
 
 ../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability
 	@echo ""
@@ -124,7 +124,7 @@ include ./.deps/includes
 
 .c.o: stringfix
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	@./stringfix $< _$< || cp -f $< _$<
+	@./stringfix@EXEEXT@ $< _$< || cp -f $< _$<
 	source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c _$<  -o `basename $< .c`.o
 
