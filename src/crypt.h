@@ -23,8 +23,6 @@ char *MD5FILE(const char *);
 char *SHA1(const char *);
 int sha1cmp(const char *, const char*);
 
-unsigned char *encrypt_binary(const char *, unsigned char *, size_t *);
-unsigned char *decrypt_binary(const char *, unsigned char *, size_t *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 char *salted_sha1(const char *, const char* = NULL);

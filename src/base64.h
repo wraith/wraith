@@ -6,7 +6,7 @@
 char *int_to_base64(unsigned int);
 int base64_to_int(char *);
 
-char *b64enc(const unsigned char *data, size_t len);
+char *b64enc(const unsigned char *data, size_t *len);
 void b64enc_buf(const unsigned char *data, size_t len, char *dest);
 
 char *b64dec(const unsigned char *data, size_t *len);
