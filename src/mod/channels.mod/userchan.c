@@ -200,7 +200,7 @@ int u_equals_mask(maskrec *u, char *mask)
 bool u_match_mask(maskrec *rec, char *mask)
 {
   for (; rec; rec = rec->next)
-    if (wild_match(rec->mask, mask))
+    if (wild_match(rec->mask, mask) || match_cidr(rec->mask, mask))
       return 1;
   return 0;
 }

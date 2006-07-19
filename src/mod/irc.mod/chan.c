@@ -2492,7 +2492,7 @@ static int gotjoin(char *from, char *chname)
               !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS))) && 
               me_op(chan)) {
             for (b = chan->channel.ban; b->mask[0]; b = b->next) {
-              if (wild_match(b->mask, from)) {
+              if (wild_match(b->mask, from) || match_cidr(b->mask, from)) {
                 dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, r_banned());
                 m->flags |= SENTKICK;
                 goto exit;

@@ -11,6 +11,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_checkchannels so that results are not shown in log, but to user only. (fixes #217)
 * Disabled watcher feature.
 * Fixed problems with symlinked binaries. (fixes #240)
+* Fixed CIDR masks not being checked on JOIN. (also fixes some other cases of CIDR matching) (fixes #270)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
