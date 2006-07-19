@@ -171,6 +171,7 @@ void tell_file_stats(int, char *);
 void tell_user_ident(int, char *);
 void tell_users_match(int, char *, int, int, char *, int);
 int readuserfile(const char *, struct userrec **);
+int stream_readuserfile(Stream&, struct userrec **);
 void check_pmode();
 void link_pref_val(struct userrec *u, char *lval);
 void check_stale_dcc_users();
