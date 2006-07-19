@@ -25,6 +25,7 @@ bool list_append(struct list_type **, struct list_type *);
 bool list_delete(struct list_type **, struct list_type *);
 bool list_contains(struct list_type *, struct list_type *);
 
+class Stream;
 
 /* New userfile format stuff
  */
@@ -34,7 +35,7 @@ struct user_entry_type {
   struct user_entry_type *next;
   bool (*got_share) (struct userrec *, struct user_entry *, char *, int);
   bool (*unpack) (struct userrec *, struct user_entry *);
-  bool (*write_userfile) (FILE *, struct userrec *, struct user_entry *, int);
+  void (*write_userfile) (Stream&, const struct userrec *, const struct user_entry *, int);
   bool (*kill) (struct user_entry *);
   void *(*get) (struct userrec *, struct user_entry *);
   bool (*set) (struct userrec *, struct user_entry *, void *);

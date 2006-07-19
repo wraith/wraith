@@ -11,7 +11,7 @@ int count_users(struct userrec *);
 int deluser(char *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
-bool write_user(struct userrec *u, FILE * f, int shr);
+void stream_writeuserfile(Stream&, const struct userrec *, int, bool = 0);
 int write_userfile(int);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);

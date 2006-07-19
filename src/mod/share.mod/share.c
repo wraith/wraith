@@ -37,6 +37,7 @@
 #include "src/botnet.h"
 #include "src/auth.h"
 #include "src/set.h"
+#include "src/EncryptedStream.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -1206,10 +1207,9 @@ static bool
 write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
 {
   FILE *f = NULL;
-  int ok = 0;
+  int ok = 1;
 
   if ((f = fopen(fn, "wb"))) {
-    fchmod(fileno(f), S_IRUSR | S_IWUSR);
 /* FIXME: REMOVE AFTER 1.2.14 */
     bool old = 0;
 
@@ -1217,25 +1217,13 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
     if (bot && bot->buildts < 1175102242) /* flood-* hacks */
       old = 1;
 
-    time_t tt = now;
-
-    lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, ctime(&tt));
-
-    if (!old)
-      ok += write_chans(f, idx);
-    else
-      ok += write_chans_compat(f, idx);
-    ok += write_vars_and_cmdpass(f, idx);
-    ok += write_bans(f, idx);
-    ok += write_exempts(f, idx);
-    ok += write_invites(f, idx);
-    if (ok != 5)
+    const char salt1[] = SALT1;
+    EncryptedStream stream(salt1);
+    stream_writeuserfile(stream, bu, idx, old);
+    if ((fwrite(stream.data(), 1, stream.length(), f) != stream.length()) || (fflush(f)))
       ok = 0;
-    for (struct userrec *u = (struct userrec *) bu; u && ok; u = u->next) {
-      if (!write_user(u, f, idx))
-        ok = 0;
-    }
     fclose(f);
+    fixmod(fn);
   }
   if (!ok)
     putlog(LOG_MISC, "*", "ERROR writing user file to transfer.");

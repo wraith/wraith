@@ -20,6 +20,7 @@
 #include "userrec.h"
 #include "userent.h"
 #include "rfc1459.h"
+#include "Stream.h"
 
 #include "set_default.h"
 
@@ -823,25 +824,20 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   return ret;
 }
 
-bool write_vars_and_cmdpass(FILE *f, int idx)
+void write_vars_and_cmdpass(Stream& stream, int idx)
 {
   putlog(LOG_DEBUG, "@", "Writing set entries...");
-  if (lfprintf(f, SET_NAME " - -\n") == EOF) /* Daemus */
-      return 0;
+  stream.printf(SET_NAME " - -\n");
 
   int i = 0;
 
   for (i = 0; vars[i].name; i++) {
     /* send blanks if our variable isn't set, theirs MIGHT be set and needs to be UNSET */
-    if (lfprintf(f, "@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "") == EOF)
-      return 0;
+    stream.printf("@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "");
   }
 
   for (struct cmd_pass *cp = cmdpass; cp; cp = cp->next)
-    if (lfprintf(f, "- %s %s\n", cp->name, cp->pass) == EOF)
-      return 0;
-
-  return 1;
+    stream.printf("- %s %s\n", cp->name, cp->pass);
 }
 
 

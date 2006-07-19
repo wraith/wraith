@@ -76,7 +76,7 @@ extern int		cloak_script, fight_threshold, fork_interval, in_bots, set_noshare, 
                         ison_time;
 extern rate_t		op_requests, close_threshold;
 
-bool write_vars_and_cmdpass (FILE *, int);
+void write_vars_and_cmdpass (Stream&, int);
 void var_userfile_share_line(char *, int, bool);
 void var_parse_my_botset();
 void init_vars();

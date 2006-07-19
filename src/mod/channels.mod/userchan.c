@@ -24,6 +24,7 @@
  */
 
 
+#include "src/Stream.h"
 extern struct cmd_pass *cmdpass;
 
 struct chanuserrec *get_chanrec(struct userrec *u, char *chname)
@@ -568,168 +569,137 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
 
 /* Write the ban lists and the ignore list to a file.
  */
-bool write_bans(FILE *f, int idx)
+void write_bans(Stream& stream, int idx)
 {
   if (global_ign)
-    if (lfprintf(f, IGNORE_NAME " - -\n") == EOF)	/* Daemus */
-      return 0;
+    stream.printf(IGNORE_NAME " - -\n");
 
   char *mask = NULL;
 
   for (struct igrec *i = global_ign; i; i = i->next) {
     mask = str_escape(i->igmask, ':', '\\');
-    if (!mask ||
-	lfprintf(f, "- %s:%s%li:%s:%li:%s\n", mask,
+    if (mask) {
+	stream.printf("- %s:%s%li:%s:%li:%s\n", mask,
 		(i->flags & IGREC_PERM) ? "+" : "", (long) i->expire,
 		i->user ? i->user : conf.bot->nick, (long) i->added,
-		i->msg ? i->msg : "") == EOF) {
-      if (mask)
-	free(mask);
-      return 0;
+		i->msg ? i->msg : "");
+        free(mask);
     }
-    free(mask);
   }
   if (global_bans)
-    if (lfprintf(f, BAN_NAME " - -\n") == EOF)	/* Daemus */
-      return 0;
+    stream.printf(BAN_NAME " - -\n");
 
   maskrec *b = NULL;
 
   for (b = global_bans; b; b = b->next) {
     mask = str_escape(b->mask, ':', '\\');
-    if (!mask ||
-	lfprintf(f, "- %s:%s%li%s:+%li:%li:%s:%s\n", mask,
+    if (mask) {
+	stream.printf("- %s:%s%li%s:+%li:%li:%s:%s\n", mask,
 		(b->flags & MASKREC_PERM) ? "+" : "", (long) b->expire,
 		(b->flags & MASKREC_STICKY) ? "*" : "", (long) b->added,
 		(long) b->lastactive, b->user ? b->user : conf.bot->nick,
-		b->desc ? b->desc : "requested") == EOF) {
-      if (mask)
-	free(mask);
-      return 0;
-    }
-    free(mask);
-  }
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    if (lfprintf(f, "::%s bans\n", chan->dname) == EOF)
-      return 0;
-    for (b = chan->bans; b; b = b->next) {
-      mask = str_escape(b->mask, ':', '\\');
-      if (!mask ||
-        lfprintf(f, "- %s:%s%li%s:+%li:%li:%s:%s\n", mask,
-	        (b->flags & MASKREC_PERM) ? "+" : "", (long) b->expire,
-	        (b->flags & MASKREC_STICKY) ? "*" : "", (long) b->added,
-	        (long) b->lastactive, b->user ? b->user : conf.bot->nick,
-	        b->desc ? b->desc : "requested") == EOF) {
-          if (mask)
-            free(mask);
-          return 0;
-        }
+		b->desc ? b->desc : "requested");
       free(mask);
     }
   }
-  return 1;
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
+    stream.printf("::%s bans\n", chan->dname);
+
+    for (b = chan->bans; b; b = b->next) {
+      mask = str_escape(b->mask, ':', '\\');
+      if (mask) {
+        stream.printf("- %s:%s%li%s:+%li:%li:%s:%s\n", mask,
+	        (b->flags & MASKREC_PERM) ? "+" : "", (long) b->expire,
+	        (b->flags & MASKREC_STICKY) ? "*" : "", (long) b->added,
+	        (long) b->lastactive, b->user ? b->user : conf.bot->nick,
+	        b->desc ? b->desc : "requested");
+        free(mask);
+      }
+    }
+  }
 }
 /* Write the exemptlists to a file.
  */
-bool write_exempts(FILE *f, int idx)
+void write_exempts(Stream& stream, int idx)
 {
   if (global_exempts)
-    if (lfprintf(f, EXEMPT_NAME " - -\n") == EOF) /* Daemus */
-      return 0;
+    stream.printf(EXEMPT_NAME " - -\n");
 
   maskrec *e = NULL;
   char *mask = NULL;
 
   for (e = global_exempts; e; e = e->next) {
     mask = str_escape(e->mask, ':', '\\');
-    if (!mask ||
-        lfprintf(f, "%s %s:%s%li%s:+%li:%li:%s:%s\n", "%", mask,
+    if (mask) {
+        stream.printf("%s %s:%s%li%s:+%li:%li:%s:%s\n", "%", mask,
 		(e->flags & MASKREC_PERM) ? "+" : "", (long) e->expire,
 		(e->flags & MASKREC_STICKY) ? "*" : "", (long) e->added,
 		(long) e->lastactive, e->user ? e->user : conf.bot->nick,
-		e->desc ? e->desc : "requested") == EOF) {
-      if (mask)
-	free(mask);
-      return 0;
-    }
-    free(mask);
-  }
-  for (struct chanset_t *chan = chanset;chan ;chan = chan->next) {
-    if (lfprintf(f, "&&%s exempts\n", chan->dname) == EOF)
-      return 0;
-    for (e = chan->exempts; e; e = e->next) {
-      mask = str_escape(e->mask, ':', '\\');
-      if (!mask ||
-		lfprintf(f,"%s %s:%s%li%s:+%li:%li:%s:%s\n","%", mask,
-		(e->flags & MASKREC_PERM) ? "+" : "", (long) e->expire,
-		(e->flags & MASKREC_STICKY) ? "*" : "", (long) e->added,
-		(long) e->lastactive, e->user ? e->user : conf.bot->nick,
-		e->desc ? e->desc : "requested") == EOF) {
-        if (mask)
-           free(mask);
-         return 0;
-      }
+		e->desc ? e->desc : "requested");
       free(mask);
     }
   }
-  return 1;
+  for (struct chanset_t *chan = chanset;chan ;chan = chan->next) {
+    stream.printf("&&%s exempts\n", chan->dname);
+    for (e = chan->exempts; e; e = e->next) {
+      mask = str_escape(e->mask, ':', '\\');
+      if (mask) {
+	stream.printf("%s %s:%s%li%s:+%li:%li:%s:%s\n","%", mask,
+		(e->flags & MASKREC_PERM) ? "+" : "", (long) e->expire,
+		(e->flags & MASKREC_STICKY) ? "*" : "", (long) e->added,
+		(long) e->lastactive, e->user ? e->user : conf.bot->nick,
+		e->desc ? e->desc : "requested");
+        free(mask);
+      }
+    }
+  }
 }
 
 /* Write the invitelists to a file.
  */
-bool write_invites(FILE *f, int idx)
+void write_invites(Stream& stream, int idx)
 {
-
   if (global_invites)
-    if (lfprintf(f, INVITE_NAME " - -\n") == EOF) /* Daemus */
-      return 0;
+    stream.printf(INVITE_NAME " - -\n");
 
   maskrec *ir = NULL;
   char *mask = NULL;
 
   for (ir = global_invites; ir; ir = ir->next)  {
     mask = str_escape(ir->mask, ':', '\\');
-    if (!mask ||
-	lfprintf(f,"@ %s:%s%li%s:+%li:%li:%s:%s\n", mask,
+    if (mask) {
+      stream.printf("@ %s:%s%li%s:+%li:%li:%s:%s\n", mask,
 		(ir->flags & MASKREC_PERM) ? "+" : "", (long) ir->expire,
 		(ir->flags & MASKREC_STICKY) ? "*" : "", (long) ir->added,
 		(long) ir->lastactive, ir->user ? ir->user : conf.bot->nick,
-		ir->desc ? ir->desc : "requested") == EOF) {
-      if (mask)
-	free(mask);
-      return 0;
-    }
-    free(mask);
-  }
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    if (lfprintf(f, "$$%s invites\n", chan->dname) == EOF)
-      return 0;
-    for (ir = chan->invites; ir; ir = ir->next) {
-      mask = str_escape(ir->mask, ':', '\\');
-      if (!mask ||
-	      lfprintf(f,"@ %s:%s%li%s:+%li:%li:%s:%s\n", mask,
-		      (ir->flags & MASKREC_PERM) ? "+" : "", (long) ir->expire,
-		      (ir->flags & MASKREC_STICKY) ? "*" : "", (long) ir->added,
-		      (long) ir->lastactive, ir->user ? ir->user : conf.bot->nick,
-		      ir->desc ? ir->desc : "requested") == EOF) {
-        if (mask)
-	  free(mask);
-	return 0;
-      }
+		ir->desc ? ir->desc : "requested");
       free(mask);
     }
   }
-  return 1;
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
+    stream.printf("$$%s invites\n", chan->dname);
+
+    for (ir = chan->invites; ir; ir = ir->next) {
+      mask = str_escape(ir->mask, ':', '\\');
+      if (mask) {
+        stream.printf("@ %s:%s%li%s:+%li:%li:%s:%s\n", mask,
+		      (ir->flags & MASKREC_PERM) ? "+" : "", (long) ir->expire,
+		      (ir->flags & MASKREC_STICKY) ? "*" : "", (long) ir->added,
+		      (long) ir->lastactive, ir->user ? ir->user : conf.bot->nick,
+		      ir->desc ? ir->desc : "requested");
+        free(mask);
+      }
+    }
+  }
 }
 
 /* Write the channels to the userfile
  */
-bool write_chans(FILE *f, int idx)
+void write_chans(Stream& stream, int idx)
 {
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
-  if (lfprintf(f, CHANS_NAME " - -\n") == EOF) /* Daemus */
-    return 0;
+  stream.printf(CHANS_NAME " - -\n");
 
   char w[1024] = "";
 
@@ -746,7 +716,7 @@ bool write_chans(FILE *f, int idx)
     else
       inactive = PLSMNS(channel_inactive(chan));
 
-    if (lfprintf(f, "\
+    stream.printf("\
 + channel add %s { chanmode { %s } addedby %s addedts %li \
 bad-cookie %d manop %d mdop %d mop %d limit %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
@@ -819,21 +789,18 @@ flood-exempt %d flood-lock-time %d \
  * also include a %ctemp above.
  *      PLSMNS(channel_temp(chan)),
  */
-        ) == EOF)
-          return 0;
+    );
   }
-  return 1;
 }
 
 /* FIXME: remove after 1.2.14 */
 /* Write the channels to the userfile
  */
-bool write_chans_compat(FILE *f, int idx)
+void write_chans_compat(Stream& stream, int idx)
 {
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
-  if (lfprintf(f, CHANS_NAME " - -\n") == EOF) /* Daemus */
-    return 0;
+  stream.printf(CHANS_NAME " - -\n");
 
   char w[1024] = "";
 
@@ -850,7 +817,7 @@ bool write_chans_compat(FILE *f, int idx)
     else
       inactive = PLSMNS(channel_inactive(chan));
 
-    if (lfprintf(f, "\
+    stream.printf("\
 + channel add %s { chanmode { %s } addedby %s addedts %li \
 bad-cookie %d manop %d mdop %d mop %d limit %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
@@ -918,34 +885,21 @@ exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
  * also include a %ctemp above.
  *      PLSMNS(channel_temp(chan)),
  */
-        ) == EOF)
-          return 0;
+    );
   }
-  return 1;
 }
 
-void channels_writeuserfile(bool old)
+void channels_writeuserfile(Stream& stream, bool old)
 {
-  char s[1024] = "";
-  FILE *f = NULL;
-  int  ret = 0;
-
   putlog(LOG_DEBUG, "@", "Writing channel/ban/exempt/invite entries.");
-  simple_snprintf(s, sizeof(s), "%s~new", userfile);
-  f = fopen(s, "a");
-  if (f) {
-    if (!old)
-      ret  = write_chans(f, -1);
-    else
-      ret  = write_chans_compat(f, -1);
-    ret += write_vars_and_cmdpass(f, -1);
-    ret += write_bans(f, -1);
-    ret += write_exempts(f, -1);
-    ret += write_invites(f, -1);
-    fclose(f);
-  }
-  if (ret < 5)
-    putlog(LOG_MISC, "*", "ERROR writing user file.");
+  if (!old)
+    write_chans(stream, -1);
+  else
+    write_chans_compat(stream -1);
+  write_vars_and_cmdpass(stream, -1);
+  write_bans(stream, -1);
+  write_exempts(stream, -1);
+  write_invites(stream, -1);
 }
 
 /* Expire mask originally set by `who' on `chan'?
