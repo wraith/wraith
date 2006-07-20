@@ -27,6 +27,7 @@
 #include "crypt.h"
 #include "core_binds.h"
 #include "socket.h"
+#include "net.h"
 
 bool             noshare = 1;		/* don't send out to sharebots	    */
 struct userrec	*userlist = NULL;	/* user records are stored here	    */
