@@ -12,6 +12,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Disabled watcher feature.
 * Fixed problems with symlinked binaries. (fixes #240)
 * Fixed CIDR masks not being checked on JOIN. (also fixes some other cases of CIDR matching) (fixes #270)
+* Fixed a segfault from removing bots. (fixes #271)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.

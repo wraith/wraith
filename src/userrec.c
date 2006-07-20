@@ -642,10 +642,15 @@ int deluser(char *handle)
     shareout("k %s\n", handle);
   for (fnd = 0; fnd < dcc_total; fnd++) {
     if (dcc[fnd].type && dcc[fnd].user == u) {
-      if (conf.bot->hub && u->bot) {
+      if (u->bot) {
         int i = nextbot(handle);
+
         if (i != -1 && !egg_strcasecmp(dcc[i].nick, handle))
           botunlink(-1, handle, "Bot removed.");
+        else { /* This will probably never be called -- but just in case */
+          killsock(dcc[fnd].sock);
+          lostdcc(fnd);
+        }
       } else if (!u->bot) {
         dprintf(fnd, "-+- POOF! -+-\n");
         dprintf(fnd, "You are no longer a user on this botnet.\n");
