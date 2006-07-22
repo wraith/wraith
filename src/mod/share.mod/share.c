@@ -180,6 +180,19 @@ static void q_resync(char *s)
   }
 }
 
+static void q_resync_but(char *s, const char *bot)
+{
+  struct share_msgq *q = NULL;
+  tandbuf *t = NULL;
+
+  for (t = tbuf; t && t->bot[0]; t = t->next) {
+    if (egg_strcasecmp(t->bot, bot)) {
+      if ((q = q_addmsg(t->q, s)))
+        t->q = q;
+    }
+  }
+}
+
 /* Dump the resync buffer for a bot.
  */
 void dump_resync(int idx)
@@ -1093,7 +1106,7 @@ shareout_but(int x, const char *format, ...)
       tputs(dcc[i].sock, s, l + 2);
     }
   }
-  q_resync(s);
+  q_resync_but(s, dcc[x].nick);
 }
 
 /* Flush all tbufs older than 15 minutes.
