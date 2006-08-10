@@ -34,7 +34,7 @@ DIFF = @DIFF@
 #LIBS = @LIBS@ @ZLIB@ @SSL@ 
 LIBS = @LIBS@ @ZLIB@ 
 
-DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3
+DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0
 CFLGS = @GCC3@
 _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wshadow -Wnested-externs -Wno-format-y2k \
