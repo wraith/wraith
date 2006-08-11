@@ -240,7 +240,7 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
       return BIND_RET_BREAK;
     }
     if (!(chan = findchan_by_dname(par))) {
-      dprintf(DP_HELP, "NOTICE %s :Usage: /MSG %s invite <pass> <channel>\n", nick, botname);
+      dprintf(DP_HELP, "NOTICE %s :Usage: /MSG %s %s <pass> <channel>\n", nick, botname, msginvite);
       return BIND_RET_BREAK;
     }
     if (!channel_active(chan)) {
