@@ -628,7 +628,7 @@ int stream_readuserfile(Stream& stream, struct userrec **ret)
   }
   while (stream.tell() < stream.length()) {
     s = buf;
-    stream.gets(s, 1024);
+    stream.gets(s, sizeof(buf));
     remove_crlf(s);
     if (1) {
       line++;

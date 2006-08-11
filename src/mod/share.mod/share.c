@@ -55,6 +55,8 @@
 
 static struct flag_record fr = { 0, 0, 0, 0 };
 
+static Stream stream_in;
+
 struct delay_mode {
   struct delay_mode *next;
   struct chanset_t *chan;
@@ -68,8 +70,13 @@ static struct delay_mode *start_delay = NULL;
 
 /* Prototypes */
 static void start_sending_users(int);
-static void shareout_but(int, const char *, ...)  __attribute__ ((format(printf, 2, 3)));
-
+static void stream_send_users(int);
+static void share_read_stream(int, Stream&);
+#ifdef __GNUC__
+ static void shareout_but(int, const char *, ...)  __attribute__ ((format(printf, 2, 3)));
+#else
+ static void shareout_but(int, const char *, ...);
+#endif
 static bool cancel_user_xfer_staylinked = 0;
 static void cancel_user_xfer(int, void *);
 
@@ -901,7 +908,20 @@ share_ufyes(int idx, char *par)
 
     lower_bot_linked(idx);
 
-    start_sending_users(idx);
+    if (strstr(par, "stream")) {
+      updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
+      /* Start up a tbuf to queue outgoing changes for this bot until the
+       * userlist is done transferring.
+       */
+      new_tbuf(dcc[idx].nick);
+      /* override shit removed here */
+      q_tbuf(dcc[idx].nick, "s !\n");
+      dcc[idx].status |= STAT_SENDING;
+      stream_send_users(idx);
+      dump_resync(idx);
+      dcc[idx].status &= ~STAT_SENDING;
+    } else
+      start_sending_users(idx);
     putlog(LOG_BOTS, "@", "Sending user file send request to %s", dcc[idx].nick);
   }
 }
@@ -929,7 +949,7 @@ share_userfileq(int idx, char *par)
       dprintf(idx, "s un Already sharing.\n");
     else {
       dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT);
-      dprintf(idx, "s uy overbots invites exempts\n");
+      dprintf(idx, "s uy overbots invites exempts stream\n");
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
       if (conf.bot->hub)
@@ -1053,6 +1073,25 @@ share_end(int idx, char *par)
   dcc[idx].u.bot->uff_flags = 0;
 }
 
+static void share_userfile_line(int idx, char *par) {
+  char *size = newsplit(&par);
+  size_t len = atoi(size);
+
+  stream_in.puts(par);
+  stream_in.puts('\n');
+}
+
+static void share_userfile_start(int idx, char *par) {
+  dcc[idx].status |= STAT_GETTING;
+  stream_in.seek(0, SEEK_SET);
+  stream_in.truncate();
+}
+
+static void share_userfile_end(int idx, char *par) {
+  stream_in.seek(0, SEEK_SET);
+  share_read_stream(idx, stream_in);
+}
+
 /* Note: these MUST be sorted. */
 static botcmd_t C_share[] = {
   {"!", share_endstartup, 0},
@@ -1074,6 +1113,9 @@ static botcmd_t C_share[] = {
   {"e", share_end, 0},
   {"h", share_chhand, 0},
   {"k", share_killuser, 0},
+  {"l", share_userfile_line, 0},
+  {"le", share_userfile_end, 0},
+  {"ls", share_userfile_start, 0},
   {"ms", share_stick_mask, 0},
   {"n", share_newuser, 0},
   {"u?", share_userfileq, 0},
@@ -1235,8 +1277,6 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
 void
 finish_share(int idx)
 {
-  struct userrec *u = NULL, *ou = NULL;
-  struct chanset_t *chan = NULL;
   int i, j = -1;
 
   for (i = 0; i < dcc_total; i++)
@@ -1246,6 +1286,12 @@ finish_share(int idx)
     }
   if (j == -1)
     return;
+
+  const char salt1[] = SALT1;
+  EncryptedStream stream(salt1);
+  stream.loadFile(dcc[idx].u.xfer->filename);
+  unlink(dcc[idx].u.xfer->filename);
+  share_read_stream(j, stream);
 
 /* compress.mod 
   if (!uncompressfile(dcc[idx].u.xfer->filename)) {
@@ -1265,6 +1311,11 @@ finish_share(int idx)
     return;
   }
 */
+}
+static void share_read_stream(int idx, Stream& stream) {
+  struct userrec *u = NULL, *ou = NULL;
+  struct chanset_t *chan = NULL;
+  int i;
 
   /*
    * This is where we remove all global and channel bans/exempts/invites and
@@ -1313,9 +1364,7 @@ finish_share(int idx)
   if (conf.bot->u)
     conf.bot->u = NULL;
 
-  struct cmd_pass *old_cmdpass = NULL;
-
-  old_cmdpass = cmdpass;
+  struct cmd_pass *old_cmdpass = cmdpass;
   cmdpass = NULL;
 
   /* Read the transferred userfile. Add entries to u, which already holds
@@ -1324,12 +1373,11 @@ finish_share(int idx)
   loading = 1;
   checkchans(0);                /* flag all the channels.. */
   Context;
-  if (!readuserfile(dcc[idx].u.xfer->filename, &u)) {   /* read the userfile into 'u' */
+  if (!stream_readuserfile(stream, &u)) {   /* read the userfile into 'u' */
     /* FAILURE */
     char xx[1024] = "";
 
     Context;
-    unlink(dcc[idx].u.xfer->filename);
     clear_userlist(u);          /* Clear new, obsolete, user list.      */
     clear_chanlist();           /* Remove all user references from the
                                  * channel lists.                       */
@@ -1354,19 +1402,17 @@ finish_share(int idx)
     /* old userlist is now being used, safe to do this stuff... */
     loading = 0;
     putlog(LOG_MISC, "*", "%s", "CAN'T READ NEW USERFILE");
-    dprintf(idx, "bye\n");
-    simple_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[j].nick);
-    botnet_send_unlinked(j, dcc[j].nick, xx);
+//    dprintf(idx, "bye\n");
+    simple_snprintf(xx, sizeof xx, "Disconnected %s (can't read userfile)", dcc[idx].nick);
+    botnet_send_unlinked(idx, dcc[idx].nick, xx);
     chatout("*** %s\n", xx);
 
-    killsock(dcc[j].sock);
-    lostdcc(j);
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
     return;
   }
 
   /* SUCCESS! */
-
-  unlink(dcc[idx].u.xfer->filename);
 
   loading = 0;
   clear_chanlist();             /* Remove all user references from the
@@ -1402,7 +1448,7 @@ finish_share(int idx)
   checkchans(1);                /* remove marked channels */
   var_parse_my_botset();
   reaffirm_owners();            /* Make sure my owners are +a   */
-  updatebot(-1, dcc[j].nick, '+', 0, 0, 0, NULL);
+  updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
   send_sysinfo();
 
   /* Prevents the server connect from dumping JOIN #chan */
@@ -1420,6 +1466,31 @@ finish_share(int idx)
 
 /* Begin the user transfer process.
  */
+static void
+ulsend(int idx, const char* data, size_t datalen)
+{
+  char buf[1040];
+
+  size_t len = simple_snprintf(buf, sizeof(buf), "s l %d %s", datalen-1, data);/* -1 for newline */
+  tputs(dcc[idx].sock, buf, len);
+}
+
+static void
+stream_send_users(int idx)
+{
+  Stream stream;
+  stream_writeuserfile(stream, userlist, idx);
+  stream.seek(0, SEEK_SET);
+  dprintf(idx, "s ls\n");
+  char buf[1024] = "";
+  size_t len = 0;
+  while (stream.tell() < stream.length()) {
+    len = stream.gets(buf, sizeof(buf));
+    ulsend(idx, buf, len);
+  }
+  dprintf(idx, "s le\n");
+}
+
 static void
 start_sending_users(int idx)
 {
