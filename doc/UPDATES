@@ -14,6 +14,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed CIDR masks not being checked on JOIN. (also fixes some other cases of CIDR matching) (fixes #270)
 * Fixed a segfault from removing bots. (fixes #271)
 * Fix /MSG invite not showing proper cmd for usage. (Fixes #278)
+* Fix cmdpass processing on ambiguous cmds. (fixes #279)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.

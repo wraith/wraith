@@ -120,42 +120,50 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   table = bind_table_lookup("dcc");
   size_t cmdlen = strlen(cmd);
 
-  for (entry = table->entries; entry && entry->next; entry = entry->next) {
-    if (!egg_strncasecmp(cmd, entry->mask, cmdlen)) {
-      if (has_cmd_pass(entry->mask)) {
-        if (flagrec_ok(&entry->user_flags, &fr)) {
-          char *p = NULL, work[1024] = "", pass[128] = "";
+  int hits = 0;
 
-          p = strchr(args, ' ');
-          if (p)
-            *p = 0;
-          strlcpy(pass, args, sizeof(pass));
+  for (entry = table->entries; entry && entry->next; entry = entry->next)
+    if (!egg_strncasecmp(cmd, entry->mask, cmdlen))
+      ++hits;
+ 
+  if (hits == 1) {
+    for (entry = table->entries; entry && entry->next; entry = entry->next) {
+      if (!egg_strncasecmp(cmd, entry->mask, cmdlen)) {
+        if (has_cmd_pass(entry->mask)) {
+          if (flagrec_ok(&entry->user_flags, &fr)) {
+            char *p = NULL, work[1024] = "", pass[128] = "";
 
-          if (check_cmd_pass(entry->mask, pass)) {
+            p = strchr(args, ' ');
             if (p)
-              *p = ' ';
-            strlcpy(work, args, sizeof(work));
-            p = work;
-            newsplit(&p);
-            strcpy(args, p);
+              *p = 0;
+            strlcpy(pass, args, sizeof(pass));
+
+            if (check_cmd_pass(entry->mask, pass)) {
+              if (p)
+                *p = ' ';
+              strlcpy(work, args, sizeof(work));
+              p = work;
+              newsplit(&p);
+              strcpy(args, p);
+            } else {
+              dprintf(idx, "Invalid command password.\n");
+              dprintf(idx, "Use: $b%scommand <password> [arguments]$b\n", settings.dcc_prefix);
+              if (p)
+                p++;
+              putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, entry->mask, p && *p ? p : "");
+              putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, entry->mask);
+              free(args);
+              return 0;
+            }
           } else {
-            dprintf(idx, "Invalid command password.\n");
-            dprintf(idx, "Use: $b%scommand <password> [arguments]$b\n", settings.dcc_prefix);
-            if (p)
-              p++;
-            putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, entry->mask, p && *p ? p : "");
-            putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, entry->mask);
+            putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
+            dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
             free(args);
             return;
           }
-        } else {
-          putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
-          dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
-          free(args);
-          return;
         }
+        break;
       }
-      break;
     }
   }
 
@@ -164,7 +172,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
       return;
   }
 
-  int hits = 0;
+  hits = 0;
   bool log_bad = 0;
 
   check_bind_hits(BT_dcc, cmd, &fr, &hits, idx, args);
