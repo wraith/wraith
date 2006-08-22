@@ -225,7 +225,7 @@ static void cmd_mns_mask(const char type, int idx, char *par)
     chan = findchan_by_dname(chname);
   if (chan) {
     m = type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite;
-    if ((i = atoi(who)) > 0) {
+    if (str_isdigit(who) && (i = atoi(who)) > 0) {
       simple_snprintf(s, sizeof s, "%d", i);
       j = u_delmask(type, chan, s, 1);
       if (j > 0) {
