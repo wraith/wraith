@@ -645,8 +645,10 @@ static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment
 	flush_mode(chan, QUICK);
 	flushed += 1;
       }
-      m->flags |= SENTKICK;	/* Mark as pending kick */
-      dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, comment);
+      if (!chan_sentkick(m)) {
+        m->flags |= SENTKICK;	/* Mark as pending kick */
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, comment);
+      }
     }
   }
 }
@@ -744,6 +746,9 @@ static void enforce_bans(struct chanset_t *chan)
   if (!me_op(chan))
     return;			/* Can't do it :( */
 
+  if ((chan->ircnet_status & CHAN_ASKED_EXEMPTS))
+    return;
+
   char me[UHOSTLEN] = "", meip[UHOSTLEN] = "";
 
   simple_sprintf(me, "%s!%s", botname, botuserhost);
@@ -751,9 +756,8 @@ static void enforce_bans(struct chanset_t *chan)
 
   /* Go through all bans, kicking the users. */
   for (masklist *b = chan->channel.ban; b && b->mask[0]; b = b->next) {
-    if (!(wild_match(b->mask, me) || match_cidr(b->mask, meip)))
-      if (!isexempted(chan, b->mask) && !(chan->ircnet_status & CHAN_ASKED_EXEMPTS))
-	kick_all(chan, b->mask, "You are banned", 1);
+    if (!(wild_match(b->mask, me) || match_cidr(b->mask, meip)) && !isexempted(chan, b->mask))
+      kick_all(chan, b->mask, "You are banned", 1);
   }
 }
 
@@ -770,8 +774,7 @@ static void recheck_bans(struct chanset_t *chan)
      in second cycle. */
   for (int cycle = 0; cycle < 2; cycle++) {
     for (u = cycle ? chan->bans : global_bans; u; u = u->next)
-      if (!isbanned(chan, u->mask) && (!channel_dynamicbans(chan) ||
-				       (u->flags & MASKREC_STICKY)))
+      if (!isbanned(chan, u->mask) && (!channel_dynamicbans(chan) || (u->flags & MASKREC_STICKY)))
 	add_mode(chan, '+', 'b', u->mask);
   }
 }
@@ -1712,6 +1715,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 
     /* if channel is enforce bans */
     if (channel_enforcebans(chan) &&
+        !chan_sentkick(m) && 
         /* and user matches a ban */
         (u_match_mask(global_bans, userhost) || u_match_mask(chan->bans, userhost)) &&
         /* and it's not me, and i'm an op */
@@ -1722,6 +1726,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     }
     /* if the user is a +k */
     else if ((chan_kick(fr) || glob_kick(fr)) &&
+           !chan_sentkick(m) &&
            /* and it's not me :) who'd set me +k anyway, a sicko? */
            /* and if im an op */
            !me) {

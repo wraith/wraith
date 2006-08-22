@@ -985,12 +985,12 @@ my_setkey(struct chanset_t *chan, char *k)
 /* Adds a ban, exempt or invite mask to the list
  * m should be chan->channel.(exempt|invite|ban)
  */
-static void
+static bool
 new_mask(masklist *m, char *s, char *who)
 {
   for (; m && m->mask[0] && rfc_casecmp(m->mask, s); m = m->next) ;
   if (m->mask[0])
-    return;                     /* Already existent mask */
+    return 1;                     /* Already existent mask */
 
   m->next = (masklist *) my_calloc(1, sizeof(masklist));
   m->next->next = NULL;
@@ -999,6 +999,7 @@ new_mask(masklist *m, char *s, char *who)
   m->mask = strdup(s);
   m->who = strdup(who);
   m->timer = now;
+  return 0;
 }
 
 /* Removes a nick from the channel member list (returns 1 if successful)

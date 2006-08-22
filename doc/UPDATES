@@ -16,6 +16,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix /MSG invite not showing proper cmd for usage. (Fixes #278)
 * Fix cmdpass processing on ambiguous cmds. (fixes #279)
 * Fix ban/invite/exempt removal flaw. (fixes #280)
+* Clean and speedup ban/exempt/invite processing. (addresses #227)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
