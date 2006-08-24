@@ -317,6 +317,9 @@ static void cmd_masks(const char type, int idx, char *par)
   if (!egg_strcasecmp(par, "all")) {
     putlog(LOG_CMDS, "*", "#%s# %ss all", dcc[idx].nick, str_type);
     tell_masks(type, idx, 1, "");
+  } else if (!egg_strcasecmp(par, "global")) {
+    putlog(LOG_CMDS, "*", "#%s# %ss global", dcc[idx].nick, str_type);
+    tell_masks(type, idx, 1, "", 1);
   } else {
     putlog(LOG_CMDS, "*", "#%s# %ss %s", dcc[idx].nick, str_type, par);
     tell_masks(type, idx, 0, par);

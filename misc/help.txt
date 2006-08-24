@@ -188,7 +188,7 @@ See also: away
  
 See also: reload, save
 ::bans
-###  $bbans$b [[channel/all]/wildcard]
+###  $bbans$b [[channel/all/global]/wildcard]
    Shows you a list of the global bans active on the current channel, and the
    list of channel-specific bans, as well as any bans that are on the channel
    but weren't placed by the bot.
@@ -217,7 +217,10 @@ See also: reload, save
    every ban in the global ban list and on the channel. If you use 'bans
    <wildcard>', it will list all bans (active or not) that match against your
    wildcard. Consider it a 'bans all' list matched against your wildcard.
- 
+
+   If you use 'bans global', a full list of bans for EVERY channel will be
+   displayed, including inactive/active bans on each channel. 
+
    The ban list may change according to which channel you're currently viewing
    in the console. Different bans may be active on different channels. If you
    specify a channel name, that channel will be used instead of your current
@@ -911,7 +914,7 @@ See also: decrypt, randstring, md5, sha1
    The bot will execute the specified program with each param specified,
    and display the results over DCC.
 ::exempts
-###  $bexempts$b [[channel/all]/wildcard]
+###  $bexempts$b [[channel/all/global]/wildcard]
    Shows you a list of the global exempts active on the current channel, and
    the list of channel-specific exempts, as well as any exempts that are on the
    channel but weren't placed by the bot.
@@ -943,6 +946,9 @@ See also: decrypt, randstring, md5, sha1
    match against your wildcard. Consider it a 'exempts all' list matched
    against your wildcard.
  
+   If you use 'exempts global', a full list of exempts for EVERY channel will be
+   displayed, including inactive/active exempts on each channel.
+
    The exempt list may change according to which channel you're currently
    viewing in the console. Different exempts may be active on different
    channels. If you specify a channel name, that channel will be used instead
@@ -1041,7 +1047,7 @@ See also: +ignore, -ignore
  
 See also: console, iop
 ::invites
-###  $binvites$b [[channel/all]/wildcard]
+###  $binvites$b [[channel/all/global]/wildcard]
    Shows you a list of the global invites active on the current channel, and
    the list of channel-specific invites, as well as any invites that are on the
    channel but weren't placed by the bot.
@@ -1072,6 +1078,9 @@ See also: console, iop
    use 'invites <wildcard>', it will list all invites (active or not) that
    match against your wildcard. Consider it a 'invites all' list matched
    against your wildcard.
+
+   If you use 'invites global', a full list of invites for EVERY channel will be
+   displayed, including inactive/active invites on each channel.
  
    The invite list may change according to which channel you're currently
    viewing in the console. Different invites may be active on different

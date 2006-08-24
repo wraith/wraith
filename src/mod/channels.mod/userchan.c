@@ -427,7 +427,7 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
     dprintf(idx, "        %s\n", dates);
 }
 
-static void tell_masks(const char type, int idx, bool show_inact, char *match)
+static void tell_masks(const char type, int idx, bool show_inact, char *match, bool all)
 {
   int k = 1;
   char *chname = NULL;
@@ -449,14 +449,25 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
       match = chname;
   }
 
+  if (all)
+    chan = chanset;
+
   /* don't return here, we want to show global masks even if no chan */
   if (!chan && !(chan = findchan_by_dname(dcc[idx].u.chat->con_chan)) && !(chan = chanset))
     chan = NULL;
+
+  while (chan) {
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
   if (privchan(user, chan, PRIV_OP)) {
+    if (all) goto next;
     dprintf(idx, "No such channel defined.\n");
     return;
+  } else if (!chk_op(user, chan)) {
+    if (all) goto next;
+    dprintf(idx, "You don't have access to view %ss on %s\n", str_type, chan->dname);
+    return;
   }
+
 
   if (chan && show_inact)
     dprintf(idx, "Global %ss:   (! = not active on %s)\n", str_type, chan->dname);
@@ -521,6 +532,13 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match)
       }
     }
   }
+  next:;
+    if (!all)
+      chan = NULL;
+    else
+      chan = chan->next;
+  }
+
   if (k == 1)
     dprintf(idx, "(There are no %ss, permanent or otherwise.)\n", str_type);
   if ((!show_inact) && (!match[0]))
