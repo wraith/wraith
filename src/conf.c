@@ -197,6 +197,7 @@ confedit()
   struct stat st, sn;
   struct timespec ts1, ts2;           /* time before and after edit */
   bool autowrote = 0;
+  conf_bot *localhub = NULL;
 
   um = umask(077);
 
@@ -310,9 +311,9 @@ confedit()
     }
   }
 
-  if (conf.bots && conf.bots->pid)
-    localhub_pid = conf.bots->pid;
-
+  localhub = conf_getlocalhub(conf.bots);
+  if (localhub && localhub->pid)
+    localhub_pid = localhub->pid;
   tmpconf.my_close();
   free_conf();
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
@@ -1199,4 +1200,16 @@ void conf_add_userlist_bots()
     }
   }
 
+}
+
+conf_bot *conf_getlocalhub(conf_bot *bots) {
+  if (!bots)
+    return NULL;
+
+  conf_bot *localhub = bots;
+  if (localhub->disabled)
+    while (localhub && localhub->disabled)
+      localhub = localhub->next;
+
+  return !localhub->disabled ? localhub : NULL;
 }

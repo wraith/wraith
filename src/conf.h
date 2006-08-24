@@ -73,6 +73,7 @@ void conf_checkpids();
 void conf_add_userlist_bots();
 conf_bot *conf_bots_dup(conf_bot *);
 void kill_removed_bots(conf_bot *, conf_bot *);
+conf_bot *conf_getlocalhub(conf_bot *);
 
 #ifdef CYGWIN_HACKS
 extern char		cfile[DIRMAX];
