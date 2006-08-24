@@ -153,7 +153,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
               putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, entry->mask, p && *p ? p : "");
               putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, entry->mask);
               free(args);
-              return 0;
+              return;
             }
           } else {
             putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
