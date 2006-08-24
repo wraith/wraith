@@ -1747,13 +1747,15 @@ static void cmd_conf(int idx, char *par)
 #endif /* !CYGWIN_HACKS */
 
   if (listbot || !egg_strcasecmp(cmd, "list")) {
+    conf_checkpids();
     conf_bot *bot = NULL;
     unsigned int i = 0;
 
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
       i++;
       if (!listbot || (listbot && !egg_strcasecmp(listbot, bot->nick)))
-        dprintf(idx, "%d: %s IP: %s HOST: %s IP6: %s HOST6: %s HUB: %d PID: %d\n", i,
+        dprintf(idx, "%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s HUB: %d PID: %d\n", i,
+                      bot->disabled ? "/" : "",
                       bot->nick,
                       bot->net.ip ? bot->net.ip : "",
                       bot->net.host ? bot->net.host : "",
@@ -1774,6 +1776,7 @@ static void cmd_conf(int idx, char *par)
     conf_add_userlist_bots();
     conf_checkpids();
     spawnbots(1);
+    conf_checkpids(0);
   }
 
   free_conf_bots(oldlist);

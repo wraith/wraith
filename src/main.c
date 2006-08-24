@@ -812,6 +812,7 @@ printf("out: %s\n", out);
 #ifndef CYGWIN_HACKS
     if (!socksfile) {
       mypid = do_fork();
+  conf_setmypid(mypid);
 
 /*
     printf("  |- %-10s (%d)\n", conf.bot->nick, pid);

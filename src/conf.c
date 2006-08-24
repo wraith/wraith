@@ -107,9 +107,10 @@ spawnbots(bool rehashed)
 
     if (bot->disabled) {
       /* kill it if running */
-      if (bot->pid)
+      if (bot->pid) {
         kill(bot->pid, SIGKILL);
-      else
+        bot->pid = 0;
+      } else
         continue;
     /* if we're updating automatically, we were called with -u and are only supposed to kill non-localhubs
       -if updating and we find our nick, skip
@@ -413,12 +414,13 @@ static void conf_compat_pids()
   }  
 }
 
-void conf_checkpids()
+void conf_checkpids(bool all)
 {
   conf_bot *bot = NULL;
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next)
-    bot->pid = checkpid(bot->nick, bot, NULL);
+    if (all || (!all && bot->pid == 0))
+      bot->pid = checkpid(bot->nick, bot, NULL);
 }
 
 /*
@@ -1213,3 +1215,16 @@ conf_bot *conf_getlocalhub(conf_bot *bots) {
 
   return !localhub->disabled ? localhub : NULL;
 }
+
+
+void conf_setmypid(pid_t pid) {
+  conf.bot->pid = pid;
+  conf_bot *bot = conf.bots;
+  if (conf.bots) {
+    for (; bot && strcmp(bot->nick, conf.bot->nick); bot = bot->next)
+     ;
+    if (bot)
+      bot->pid = pid;
+  }
+}
+  
