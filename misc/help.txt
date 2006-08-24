@@ -684,7 +684,7 @@ See also: console, echo, login, page, strip
     'disable' syntax is:
       disable <bot>
     The bot will be killed, but not removed from userlist. It will not start again
-    until you use 'enable' oni t.
+    until you use 'enable' on it.
  
     'enable' syntax is:
       enable <bot>
@@ -696,7 +696,7 @@ See also: console, echo, login, page, strip
       Using with no parameters will show all changable options.
       Simply specifiy the option and new setting as follows:
       set <what> [option]
-      WARNING: Options changed MAY OR MAY not affect bots already running,
+      WARNING: Options changed MAY OR MAY NOT affect bots already running,
                it is a good idea to restart all bots on the shell
                if you change any of the following: 
     $bhomedir$b, $bbinpath$b, $bbinname$b, $bportmin$b, $bportmax$b, $bpscloak$b
