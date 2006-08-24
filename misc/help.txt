@@ -891,6 +891,9 @@ See also: bots
    way.  they need to be raw irc codes. read rfc1459 from ftp.internic.net
    for more help.
    '$n' is replaced with the bot's irc nickname.
+ 
+   ** Only permanent owners specified in the binary COMPILE config file **
+   ** can use this cmd.                                                 **
 ::echo
 ###  $becho$b <on/off>
    Specifies whether you want your messages echoed back to you. If it's on,

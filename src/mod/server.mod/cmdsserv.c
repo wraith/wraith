@@ -33,8 +33,9 @@ static void cmd_dump(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# dump %s", dcc[idx].nick, par);
 
   if (!isowner(dcc[idx].nick)) {
-    dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
-    return;
+    putlog(LOG_WARN, "*", "%s attempted 'dump' %s", dcc[idx].nick, par);
+    dprintf(idx, "dump is only available to permanent owners.\n");
+    return
   }
   if (!par[0]) {
     dprintf(idx, "Usage: dump <server stuff>\n");

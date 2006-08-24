@@ -19,6 +19,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Clean and speedup ban/exempt/invite processing. (addresses #277)
 * Fix processing of localhubs when binary is editted. (fixes #274)
 * Fix some minor bugs with cmd_conf. (fixes #284)
+* Made requested changes to cmd_dump to help clear up confusion. (fixes #269)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
