@@ -22,6 +22,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Made requested changes to cmd_dump to help clear up confusion. (fixes #269)
 * Fix improper notice when doing .set <var> -- (this actually shouldn't say 'not set') (fixes #272)
 * cmd_bans/exempts/invites [global] now displays a list of bans for ALL channels. (fixes #276)
+* Fix a segfault with ctcp-cloak. (fairly random) (fixes #285)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.

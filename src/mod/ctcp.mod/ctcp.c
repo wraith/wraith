@@ -42,6 +42,10 @@ char bankickprefix[25] = "";
 
 void scriptchanged()
 {
+  /* Check if this was called from init_vars() before ctcp_init() is called */
+  if (!cloak_bxver[0])
+    return;
+
   char tmp[200] = "", *p = NULL;
 
   ctcpversion[0] = ctcpversion2[0] = ctcpuserinfo[0] = autoaway[0] = kickprefix[0] = bankickprefix[0] = 0;
