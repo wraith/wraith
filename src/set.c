@@ -184,7 +184,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
     if (var->flags & VAR_NICK && !conf.bot->hub) {
        if (!data)
          strlcpy((char *) var->mem, conf.bot->nick, var->size);
-       if (server_online && rfc_casecmp(botname, (char *) var->mem))
+       if (server_online && strcmp(botname, (char *) var->mem))
          dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
     }
   } else if (var->flags & VAR_RATE) {

@@ -23,6 +23,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix improper notice when doing .set <var> -- (this actually shouldn't say 'not set') (fixes #272)
 * cmd_bans/exempts/invites [global] now displays a list of bans for ALL channels. (fixes #276)
 * Fix a segfault with ctcp-cloak. (fairly random) (fixes #285)
+* Fixed cmd_botset not making a bot grab a different capitalization of a nick. (fixes #283)
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
