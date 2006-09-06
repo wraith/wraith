@@ -121,7 +121,7 @@ fi
 
 if [ $nightly = "1" ]; then
   chmod 0700 misc/id_dsa
-  remotedate="`ssh -q -i misc/id_dsa bryan@endurance.quadspeedi.net ls -al public_html/nightly/${os}-current.tar.gz | \
+  remotedate="`ssh -q -i misc/id_dsa bdrewery@endurance.quadspeedi.net ls -al public_html/nightly/${os}-current.tar.gz | \
              sed -e 's/.*\-> \([0-1][0-2]\.[0-3][0-9]\.[0-9][0-9][0-9][0-9]\)\-.*/\1/'`"
   if [ "${remotedate}" = "${builddate}" ]; then
     exit 0
@@ -229,8 +229,8 @@ elif ! [ $scp = "0" ]; then
   chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d}${exe} ChangeLog-${builddate}.gz ${extras_local}
-  ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
-  ssh -i misc/id_dsa bryan@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
+  ssh -i misc/id_dsa bdrewery@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
+  ssh -i misc/id_dsa bdrewery@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
 fi
 
 
