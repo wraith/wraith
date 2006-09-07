@@ -1526,9 +1526,6 @@ See also: reload, backup
 [D]  $blogin$b           How to handle someone logging in to the shell.
 [D]  $btrace$b           How to handle someone tracing/debugging the bot.
 [D]  $bpromisc$b         How to handle when a interface is set to promiscuous mode.
-[D]  $bbad-process$b     How to handle when a running process not listed in process-list 
-                         is detected.
-[SL] $bprocess-list$b    Comma-separated list of "expected processes" running on the bots uid.
 [D]  $bhijack$b          How to handle when a commonly used hijack method attempt is detected. 
  
 [SL] $bservers$b         Comma-separated list of servers the bot will use.

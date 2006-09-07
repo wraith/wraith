@@ -29,7 +29,7 @@
 #define DETECT_LOGIN 	1
 #define DETECT_TRACE 	2
 #define DETECT_PROMISC 	3
-#define DETECT_PROCESS 	4
+#define DETECT_PROCESS 	4		/* NOT USED */
 #define DETECT_SIGCONT 	5
 
 #define DET_IGNORE 	0
@@ -57,7 +57,9 @@ int shell_exec(char *, char *, char **, char **);
 void check_last();
 void check_promisc();
 void check_trace(int);
+#ifdef NOT_USED
 void check_processes();
+#endif
 void check_crontab();
 void crontab_del();
 int crontab_exists();

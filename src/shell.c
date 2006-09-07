@@ -207,6 +207,7 @@ void check_last() {
   }
 }
 
+#ifdef NOT_USED
 void check_processes()
 {
   if (badprocess == DET_IGNORE)
@@ -304,6 +305,7 @@ void check_processes()
   if (out)
     free(out);
 }
+#endif /* NOT_USED */
 
 void check_promisc()
 {
@@ -606,8 +608,10 @@ void detected(int code, char *msg)
     act = trace;
   if (code == DETECT_PROMISC)
     act = promisc;
+#ifdef NOT_USED
   if (code == DETECT_PROCESS)
     act = badprocess;
+#endif
   if (code == DETECT_SIGCONT)
     act = hijack;
 

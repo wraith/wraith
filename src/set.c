@@ -25,7 +25,10 @@ bool auth_chan = 1;
 char alias[1024] = "bc botcmd,bl botcmd ?,+list set +,-list set -,list set list";
 char auth_key[51] = "";
 char auth_prefix[2] = "";
+#ifdef NOT_USED
 int badprocess = DET_IGNORE;
+char process_list[1024] = "";
+#endif
 bool dccauth = 0;
 char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch -protectops +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop";
 int cloak_script = 0;
@@ -45,7 +48,6 @@ char msgop[21] = "";
 char msgpass[21] = "";
 int op_bots = 1;
 rate_t op_requests = { 2, 5 };
-char process_list[1024] = "";
 int promisc = DET_WARN;
 int trace = DET_DIE;
 bool offensive_bans = 1;
@@ -59,7 +61,9 @@ static variable_t vars[] = {
  VAR("auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM),
  VAR("auth-obscure",	&auth_obscure,		0,				VAR_INT|VAR_BOOL),
  VAR("dcc-autoaway",	&dcc_autoaway,		0,				VAR_INT|VAR_NOLOC),	
+#ifdef NOT_USED
  VAR("bad-process",	&badprocess,		0,				VAR_INT|VAR_DETECTED),
+#endif
  VAR("dccauth",		&dccauth,		0,				VAR_INT|VAR_BOOL),
  VAR("chanset",		glob_chanset,		sizeof(glob_chanset),		VAR_STRING|VAR_CHANSET|VAR_NOLHUB),
  VAR("cloak-script",	&cloak_script,		0,				VAR_INT|VAR_CLOAK|VAR_NOLHUB),
@@ -86,7 +90,9 @@ static variable_t vars[] = {
  VAR("nick",		origbotname,		sizeof(origbotname),		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB),
  VAR("op-bots",		&op_bots,		0,				VAR_INT|VAR_NOLOC),
  VAR("op-requests",	&op_requests,		0,				VAR_RATE|VAR_NOLOC),
+#ifdef NOT_USED
  VAR("process-list",	process_list,		sizeof(process_list),		VAR_STRING|VAR_LIST),
+#endif
  VAR("promisc",		&promisc,		0,				VAR_INT|VAR_DETECTED),
  VAR("realname",	botrealname,		sizeof(botrealname),		VAR_STRING|VAR_NOLHUB),
  VAR("server-port",	&default_port,		0,				VAR_INT|VAR_NOLHUB),

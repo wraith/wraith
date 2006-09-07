@@ -421,7 +421,9 @@ void core_10secondly()
     if (curcheck == 2)
       check_last();
     if (curcheck == 3) {
+#ifdef NOT_USED
       check_processes();
+#endif
       curcheck = 0;
     }
   }

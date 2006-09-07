@@ -26,6 +26,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_botset not making a bot grab a different capitalization of a nick. (fixes #283)
 * Hub nicks no longer show on leaf bots for partyline chat.
 * Hub bots can no longer being whois'd or match'd from leaf bots.
+* Disabled the process list checking.
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
