@@ -24,6 +24,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * cmd_bans/exempts/invites [global] now displays a list of bans for ALL channels. (fixes #276)
 * Fix a segfault with ctcp-cloak. (fairly random) (fixes #285)
 * Fixed cmd_botset not making a bot grab a different capitalization of a nick. (fixes #283)
+* Hub nicks no longer show on leaf bots for partyline chat.
 
 1.2.10 - http://tracker.shatow.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
