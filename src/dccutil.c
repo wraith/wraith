@@ -75,7 +75,6 @@ colorbuf(char *buf, size_t len, int idx)
   static int cflags;
   int schar = 0;
   char buf3[1024] = "", buf2[1024] = "", c = 0;
-  bool upper = 0;
 
   for (size_t i = 0; i < len; i++) {
     c = buf[i];
