@@ -201,7 +201,8 @@ void rcmd_chans(char *fbot, char *fhand, char *fidx) {
   } else
     simple_snprintf(reply, sizeof(reply), "I am not online.");
 
-  botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, reply);
+  if (reply[0])
+    botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, reply);
 }
 
 static void got_cjoin(char *botnick, char *code, char *par)
