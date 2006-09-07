@@ -569,6 +569,10 @@ whois_access(struct userrec *user, struct userrec *whois_user)
   get_user_flagrec(user, &fr, NULL);
   get_user_flagrec(whois_user, &whois, NULL);
 
+  /* Don't show hub bots from leaf bots. */
+  if (!conf.bot->hub && whois_user->bot && bot_hublevel(whois_user) < 999)
+    return 0;
+
   if (
       (isowner(whois_user->handle) && !isowner(user->handle)) ||
       (glob_admin(whois) && !glob_admin(fr)) || 
