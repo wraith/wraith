@@ -1194,15 +1194,16 @@ dcc_chat(int idx, char *buf, int len)
             dprintf(i, "=%s=> %s\n", dcc[idx].nick, buf + 1);
         }
       }
-    } else {
+    } else { /* partyline chat */
       if (dcc[idx].u.chat->away != NULL)
         not_away(idx);
+      /* Check for CTCP (/me) */
       if (!strncmp(buf, "CTCP_MESSAGE ", 13))		/* irssi */
         buf += 13;
       if (!strncmp(buf, "ACTION ", 7)) {
         buf += 7;
         check_bind_dcc("me", idx, buf);
-      } else {
+      } else {		/* regular text */
         if (dcc[idx].status & STAT_ECHO)
           chanout_but(-1, dcc[idx].u.chat->channel, "<%s> %s\n", dcc[idx].nick, buf);
         else

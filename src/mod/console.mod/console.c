@@ -21,7 +21,6 @@
 #include "src/core_binds.h"
 
 static int console_autosave = 1;
-static int info_party = 1;
 
 struct console_info {
   char *channel;
@@ -280,19 +279,6 @@ console_chon(char *handle, int idx)
     }
     if ((dcc[idx].u.chat->channel >= 0) && (dcc[idx].u.chat->channel < GLOBAL_CHANS)) {
       botnet_send_join_idx(idx);
-    }
-    if (info_party) {
-      char *p = (char *) get_user(&USERENTRY_INFO, dcc[idx].user);
-
-      if (p) {
-        if (dcc[idx].u.chat->channel >= 0) {
-          char x[1024] = "";
-
-          chanout_but(-1, dcc[idx].u.chat->channel, "*** [%s] %s\n", dcc[idx].nick, p);
-          simple_sprintf(x, "[%s] %s", dcc[idx].nick, p);
-          botnet_send_chan(-1, conf.bot->nick, NULL, dcc[idx].u.chat->channel, x);
-        }
-      }
     }
   }
   return 0;

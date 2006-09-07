@@ -1655,7 +1655,7 @@ void check_botnet_pings()
   }
 
   if (top_index != (dcc_total - 1))
-    trim_dcclist(top_index);
+    dcc_total = top_index + 1;
 }
 
 void zapfbot(int idx)

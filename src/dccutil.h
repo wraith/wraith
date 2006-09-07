@@ -36,7 +36,6 @@ void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
 void chatout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void chanout_but(int, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 void dcc_chatter(int);
-void trim_dcclist(int);
 void lostdcc(int);
 void makepass(char *);
 void tell_dcc(int);
