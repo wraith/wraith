@@ -525,8 +525,8 @@ See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
    a person is using.  The time displayed is the time the user
    joined the channel.  The next field is the attributes:
       n - bot owner                      o - can get ops (+o)
-      m - bot master or owner            f - channel friend
-      b - another bot                    d - cannot get ops (+d)
+      m - bot master or owner            b - another bot
+      d - cannot get ops (+d)
    The last field is the user@host he is using irc from.
  
 See also: status, whois

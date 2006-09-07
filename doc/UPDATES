@@ -3,7 +3,7 @@ Numbers expressed as '#12' are references to a ticket/bug posting which can be v
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
 1.2.11
-* Fixed typo in help for .set/.conf
+* Fixed typo in help for .set/.conf/.channel
 * Fixed a bug in cmd_chattr with |m users. (fixes #267)
 * Suicide now removes userfile backups, most pid files, and crontab entries. (Fixes #125)
 * Fixed removed bots not being automatically unlinked from botnet. (fixes #254)
