@@ -9,7 +9,6 @@
 
 #include "dirname.h"
 #include "dn_expand.h"
-#include "inet_aton.h"
 #include "inet_ntop.h"
 #include "snprintf.h"
 #include "memset.h"
