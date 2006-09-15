@@ -64,7 +64,7 @@ static variable_t vars[] = {
  VAR("auth-obscure",	&auth_obscure,		VAR_INT|VAR_BOOL,				0, 1, "0"),
  VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),
 #ifdef NOT_USED
- VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 0, "ignore"),
+ VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
 #endif
  VAR("dccauth",		&dccauth,		VAR_INT|VAR_BOOL,				0, 1, "0"),
  VAR("chanset",		glob_chanset,		VAR_STRING|VAR_CHANSET|VAR_NOLHUB,		0, 0, NULL),
@@ -74,33 +74,33 @@ static variable_t vars[] = {
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
  VAR("flood-g",		&flood_g,		VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
- VAR("fork-interval",	&fork_interval,		VAR_INT,					0, 0, "0"),
- VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 0, "die"),
+ VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
+ VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
  VAR("homechan",	homechan,		VAR_STRING|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
- VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				0, 0, "2"),
+ VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, 0, "2"),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
- VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 0, "warn"),
- VAR("manop-warn",	&manop_warn,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 0, "1"),
- VAR("mean-kicks",	&offensive_bans,	VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 0, "1"),
+ VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 4, "warn"),
+ VAR("manop-warn",	&manop_warn,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
+ VAR("mean-kicks",	&offensive_bans,	VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("motd",		motd,			VAR_STRING|VAR_HIDE|VAR_NOLOC,			0, 0, NULL),
  VAR("msg-ident",	msgident,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-invite",	msginvite,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-op",		msgop,			VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("nick",		origbotname,		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB,	0, 0, NULL),
- VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				0, 0, "1"),
+ VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, 0, "1"),
  VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
 #ifdef NOT_USED
  VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
 #endif
- VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 0, "warn"),
+ VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 4, "warn"),
  VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "A deranged product of evil coders"),
- VAR("server-port",	&default_port,		VAR_INT|VAR_NOLHUB,				0, 0, "6667"),
+ VAR("server-port",	&default_port,		VAR_INT|VAR_NOLHUB,				0, 65535, "6667"),
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
- VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 0, "die"),
+ VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
 // {NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0, 0}
  VAR(NULL,		0,			0,						0, 0, 0)
 };
@@ -131,6 +131,85 @@ const char *var_find_by_mem(void *mem)
   return "";  
 }
 
+/* sanitize the variable data string */
+char *var_sanitize(variable_t *var, const char *data)
+{
+/* var->a var->b */
+  char *dataout = NULL;
+
+  if ((var->flags & VAR_INT) && !(var->flags & VAR_BOOL) && !(var->flags & VAR_DETECTED)) {
+    bool isnumber = 0;
+    int number = 0;
+
+    isnumber = data ? str_isdigit(data) : 0;
+    if (isnumber)
+      number = atoi(data);
+
+    /* Do limit enforcing... */
+    if (number < var->a)
+      number = var->a;
+    else if (number > var->b)
+      number = var->b;
+
+    dataout = (char*) my_calloc(1, 11);
+    simple_snprintf(dataout, 11, "%d", number);
+  } else if (var->flags & VAR_DETECTED) {
+    if (data) {
+      if (str_isdigit(data)) {
+        int number = atoi(data);
+        dataout = strdup(det_translate_num(number));
+      } else if (!egg_strcasecmp(data, "ignore") || !egg_strcasecmp(data, "warn") ||
+                 !egg_strcasecmp(data, "die") || !egg_strcasecmp(data, "reject") ||
+                 !egg_strcasecmp(data, "suicide")) {
+        dataout = strdup(data);
+      }
+    } else
+      dataout = strdup("ignore");
+  } else if (var->flags & VAR_BOOL) {
+    int num = 0;
+
+    if (data && (str_isdigit(data) || 
+                 !egg_strcasecmp(data, "true") || 
+                 !egg_strcasecmp(data, "on") || 
+                 !egg_strcasecmp(data, "off") || 
+                 !egg_strcasecmp(data, "false"))) {
+      if (str_isdigit(data))
+        num = atoi(data);
+
+      if (num > 0 || !egg_strcasecmp(data, "true") || !egg_strcasecmp(data, "on"))
+        num = 1;
+      else if (num < 0 || !egg_strcasecmp(data, "false") || !egg_strcasecmp(data, "off"))
+        num = 0;
+    }
+    dataout = (char*) my_calloc(1, 2);
+    simple_snprintf(dataout, 2, "%u", num ? 1 : 0);
+  } else if (var->flags & VAR_STRING) {
+    dataout = data ? strdup(data) : NULL;
+  } else if (var->flags & VAR_RATE) {
+    char *p = NULL;
+    rate_t rate = {0, 0};
+    
+    if (data && (p = strchr(data, ':'))) {
+      *p = 0;
+      p++;
+
+      if (str_isdigit(data))
+        rate.count = atoi(data);
+      if (str_isdigit(p))
+        rate.time = atoi(p);
+      p--;
+      *p = ':';
+    }
+
+    /* No limit enforcing yet */
+    dataout = (char*) my_calloc(1, 21);
+    simple_snprintf(dataout, 21, "%u:%u", rate.count, rate.time);
+  } else if ((var->flags & VAR_SERVERS)) {
+    dataout = data ? strdup(data) : NULL;
+  }
+
+  return dataout;
+}
 
 /* set the ptr to the new data */
 static bool var_set_mem(variable_t *var, const char *datain)
@@ -148,22 +227,8 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
   }
 
   /* figure out it's type and set it's variable to the data */
-  if (var->flags & VAR_INT) {
-    bool isnumber = 0;
-    int number = 0;
-
-    isnumber = data ? str_isdigit(data) : 0;
-    if (isnumber)
-      number = atoi(data);
-    else if (!isnumber && (var->flags & VAR_DETECTED)) {
-      number = data ? det_translate(data) : DET_IGNORE;
-#ifndef DEBUG
-      if (number < 2 && !strcmp(var->name, "trace"))
-        number = DET_DIE;
-#endif
-    }
-    else if (!isnumber)
-      number = 0;
+  if ((var->flags & VAR_INT) && !(var->flags & VAR_BOOL) && !(var->flags & VAR_DETECTED)) {
+    int number = atoi(data);
 
     if (var->flags & VAR_CLOAK && !conf.bot->hub) {
       if (number == 0)
@@ -174,16 +239,21 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
 
     if (var->flags & VAR_CLOAK && !conf.bot->hub)
       scriptchanged();
+  } else if (var->flags & VAR_DETECTED) {
+    int number = data ? det_translate(data) : DET_IGNORE;
+#ifndef DEBUG
+    if (number < 2 && !egg_strcasecmp(var->name, "trace"))
+      number = DET_DIE;
+#endif
+    *(int *) (var->mem) = number;
   } else if (var->flags & VAR_BOOL) {
-    if (data && str_isdigit(data)) {
-      int num = atoi(data);
+    bool num = 0;
+    if (data[0] == '0')
+      num = 0;
+    else if (data[0] == '1')
+      num = 1;
 
-      if (num == 0 || num == 1)
-        *(bool *) (var->mem) = (bool) num;
-    } else if (!data) {
-      *(bool *) (var->mem) = 0;
-    } else
-      goto end;
+    *(bool *) (var->mem) = num;
   } else if (var->flags & VAR_STRING) {
     if (data)
       strlcpy((char *) var->mem, data, var->size);
@@ -200,21 +270,15 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
     char *p = NULL;
     
     if (data && (p = strchr(data, ':'))) {
-
       *p = 0;
       p++;
  
       (*(rate_t *) (var->mem)).count = atoi(data);
       (*(rate_t *) (var->mem)).time = atoi(p);
-    } else if (!data) {
-      (*(rate_t *) (var->mem)).count = 0;
-      (*(rate_t *) (var->mem)).time = 0;
-    } else
-      goto end;
-  } else if (var->flags & VAR_SERVERS) {
-    if (!use_server_type(var->name))
-      goto end;
-
+      --p;
+      *p = ':';
+    }
+  } else if ((var->flags & VAR_SERVERS) && use_server_type(var->name)) {
     if (var->mem && *(struct server_list **)var->mem) {
       clearq(*(struct server_list **) var->mem);
       *(struct server_list **)var->mem = NULL;
@@ -228,8 +292,6 @@ sdprintf("var (mem): %s -> %s", var->name, datain);
       next_server(&curserv, cursrvname, &curservport, NULL);
     }
   }
-
-  end:
 
   if (datap)
     free(datap);
@@ -256,7 +318,7 @@ const char *var_string(variable_t *var)
   char *data = NULL;
 
   /* else: fill gdata and return it */
-  if (var->flags & (VAR_INT|VAR_BOOL)) {
+  if ((var->flags & VAR_INT) && !(var->flags & VAR_BOOL)) {
     /* only bother setting if we have a value that's not 0 */
     if (var->flags & VAR_DETECTED) {
       data = strdup(det_translate_num(*(int *) (var->mem)));
@@ -266,8 +328,15 @@ const char *var_string(variable_t *var)
         simple_snprintf(data, 11, "%d", *(int *) (var->mem));
       }
     }
-  }
-  else if (var->flags & VAR_STRING) {
+  } else if (var->flags & (VAR_BOOL)) {
+    /* only bother setting if we have a value that's not 0 */
+    if (*(int *) (var->mem)) {
+      bool num = *(bool *) (var->mem);
+      data = (char *) my_calloc(1, 2);
+      /* Only actually set 0 or 1 */
+      simple_snprintf(data, 2, "%d", num ? 1 : 0);
+    }
+  } else if (var->flags & VAR_STRING) {
     /* only bother setting if we have a non-empty string */
     if ((char *)var->mem && *(char *)var->mem)
       data = strdup((char *) var->mem);
@@ -348,8 +417,19 @@ void var_set(variable_t *var, const char *target, const char *datain)
 //  bool freedata = 0;
   char *data = (char *) datain;
 
+  /* If no data or data is not -
+     sanitize the data */
+  char *sdata = NULL;
+  /* Make a temporary to free at the end */
+  if (data && strcmp(data, "-")) {
+    sdata = var_sanitize(var, data);
+    data = sdata;
+  }
+
+  /* If no data, or data is "-", do a clear */
   if (!data || !strcmp(data, "-") || !data[0])
     clear = 1;
+
 
 //  if (data && var->flags & VAR_SHUFFLE) {
 //    char *datadup = strdup(data);
@@ -401,6 +481,8 @@ sdprintf("var: %s (global): %s", var->name, data);
   }
 //  if (freedata)
 //    free(data);
+  if (sdata)
+    free(sdata);
 }
 
 void var_set_by_name(const char *target, const char *name, const char *data)
