@@ -75,6 +75,11 @@ makeres: makeres.c
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
 	@$(STRIP) makeres@EXEEXT@
 
+makeset: makeset.c
+	@echo -e "Compiling: \033[1mmakeset\033[0m"
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c -o makeset
+	@$(STRIP) makeset@EXEEXT@
+
 makehelp: makehelp.c
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c -o makehelp

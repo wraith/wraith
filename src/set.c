@@ -18,88 +18,91 @@
 #include "userent.h"
 #include "rfc1459.h"
 
-int set_noshare = 0;
-int dcc_autoaway = 1800;
-bool auth_obscure = 0;
-bool auth_chan = 1;
-char alias[1024] = "bc botcmd,bl botcmd ?,+list set +,-list set -,list set list";
+#include "set_default.h"
+
+char alias[1024] = "";
+bool auth_chan;
 char auth_key[51] = "";
 char auth_prefix[2] = "";
+bool auth_obscure;
 #ifdef NOT_USED
 int badprocess = DET_IGNORE;
 char process_list[1024] = "";
 #endif
 bool dccauth = 0;
 char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch -protectops +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop";
+int dcc_autoaway;
 int cloak_script = 0;
-rate_t close_threshold = { 0, 0 };
+rate_t close_threshold;
 int fight_threshold;
+int set_noshare = 0;
 int fork_interval;
-int hijack = DET_DIE;
-int in_bots = 2;
+int hijack;
+int in_bots;
 int ison_time = 10;
 int kill_threshold;
-int lag_threshold = 15;
-int login = DET_WARN;
+int lag_threshold;
+int login;
 char motd[512] = "";
 char msgident[21] = "";
 char msginvite[21] = "";
 char msgop[21] = "";
 char msgpass[21] = "";
-int op_bots = 1;
-rate_t op_requests = { 2, 5 };
-int promisc = DET_WARN;
-int trace = DET_DIE;
-bool offensive_bans = 1;
-bool manop_warn = 1;
+int op_bots;
+rate_t op_requests;
+int promisc;
+int trace;
+bool offensive_bans;
+bool manop_warn;
 char homechan[51] = "";
 
 static variable_t vars[] = {
- VAR("alias", 		alias,			sizeof(alias),			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM),
- VAR("auth-chan",	&auth_chan,		0,				VAR_INT|VAR_BOOL|VAR_NOLHUB),
- VAR("auth-key",	auth_key,		sizeof(auth_key),		VAR_STRING|VAR_PERM),
- VAR("auth-prefix",	auth_prefix,		sizeof(auth_prefix),		VAR_STRING|VAR_NOLHUB|VAR_PERM),
- VAR("auth-obscure",	&auth_obscure,		0,				VAR_INT|VAR_BOOL),
- VAR("dcc-autoaway",	&dcc_autoaway,		0,				VAR_INT|VAR_NOLOC),	
+ VAR("alias", 		alias,			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM,		0, 0, DEFAULT_ALIAS),
+ VAR("auth-chan",	&auth_chan,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
+ VAR("auth-key",	auth_key,		VAR_STRING|VAR_PERM,				0, 0, NULL),
+ VAR("auth-prefix",	auth_prefix,		VAR_STRING|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
+ VAR("auth-obscure",	&auth_obscure,		VAR_INT|VAR_BOOL,				0, 1, "0"),
+ VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),
 #ifdef NOT_USED
- VAR("bad-process",	&badprocess,		0,				VAR_INT|VAR_DETECTED),
+ VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 0, "ignore"),
 #endif
- VAR("dccauth",		&dccauth,		0,				VAR_INT|VAR_BOOL),
- VAR("chanset",		glob_chanset,		sizeof(glob_chanset),		VAR_STRING|VAR_CHANSET|VAR_NOLHUB),
- VAR("cloak-script",	&cloak_script,		0,				VAR_INT|VAR_CLOAK|VAR_NOLHUB),
- VAR("close-threshold",	&close_threshold,	0,				VAR_RATE|VAR_NOLOC),
- VAR("fight-threshold",	&fight_threshold,	0,				VAR_INT|VAR_NOLOC),
- VAR("flood-msg",	&flood_msg,		0,				VAR_RATE|VAR_NOLHUB),
- VAR("flood-ctcp",	&flood_ctcp,		0,				VAR_RATE|VAR_NOLHUB),
- VAR("flood-g",		&flood_g,		0,				VAR_RATE|VAR_NOLHUB),
- VAR("fork-interval",	&fork_interval,		0,				VAR_INT),
- VAR("hijack",		&hijack,		0,				VAR_INT|VAR_DETECTED|VAR_PERM),
- VAR("homechan",	homechan,		sizeof(homechan),		VAR_STRING|VAR_NOLOC|VAR_HIDE),
- VAR("in-bots",		&in_bots,		0,				VAR_INT|VAR_NOLOC),
- VAR("notify-time",	&ison_time,		0, 				VAR_INT|VAR_NOLHUB),
- VAR("kill-threshold",	&kill_threshold,	0,				VAR_INT|VAR_NOLOC),
- VAR("lag-threshold",	&lag_threshold,		0,				VAR_INT|VAR_NOLHUB),
- VAR("login",		&login,			0,				VAR_INT|VAR_DETECTED),
- VAR("manop-warn",	&manop_warn,		0,				VAR_INT|VAR_BOOL|VAR_NOLHUB),
- VAR("mean-kicks",	&offensive_bans,	0,				VAR_INT|VAR_BOOL|VAR_NOLHUB),
- VAR("motd",		motd,			sizeof(motd),			VAR_STRING|VAR_HIDE|VAR_NOLOC),
- VAR("msg-ident",	msgident,		sizeof(msgident),		VAR_STRING|VAR_NOLHUB),
- VAR("msg-invite",	msginvite,		sizeof(msginvite),		VAR_STRING|VAR_NOLHUB),
- VAR("msg-op",		msgop,			sizeof(msgop),			VAR_STRING|VAR_NOLHUB),
- VAR("msg-pass",	msgpass,		sizeof(msgpass),		VAR_STRING|VAR_NOLHUB),
- VAR("nick",		origbotname,		sizeof(origbotname),		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB),
- VAR("op-bots",		&op_bots,		0,				VAR_INT|VAR_NOLOC),
- VAR("op-requests",	&op_requests,		0,				VAR_RATE|VAR_NOLOC),
+ VAR("dccauth",		&dccauth,		VAR_INT|VAR_BOOL,				0, 1, "0"),
+ VAR("chanset",		glob_chanset,		VAR_STRING|VAR_CHANSET|VAR_NOLHUB,		0, 0, NULL),
+ VAR("cloak-script",	&cloak_script,		VAR_INT|VAR_CLOAK|VAR_NOLHUB,			0, 9, "0"),
+ VAR("close-threshold",	&close_threshold,	VAR_RATE|VAR_NOLOC,				0, 0, "0:0"),
+ VAR("fight-threshold",	&fight_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
+ VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
+ VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
+ VAR("flood-g",		&flood_g,		VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
+ VAR("fork-interval",	&fork_interval,		VAR_INT,					0, 0, "0"),
+ VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 0, "die"),
+ VAR("homechan",	homechan,		VAR_STRING|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
+ VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				0, 0, "2"),
+ VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
+ VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
+ VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
+ VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 0, "warn"),
+ VAR("manop-warn",	&manop_warn,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 0, "1"),
+ VAR("mean-kicks",	&offensive_bans,	VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 0, "1"),
+ VAR("motd",		motd,			VAR_STRING|VAR_HIDE|VAR_NOLOC,			0, 0, NULL),
+ VAR("msg-ident",	msgident,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msg-invite",	msginvite,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msg-op",		msgop,			VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msg-pass",	msgpass,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
+ VAR("nick",		origbotname,		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB,	0, 0, NULL),
+ VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				0, 0, "1"),
+ VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
 #ifdef NOT_USED
- VAR("process-list",	process_list,		sizeof(process_list),		VAR_STRING|VAR_LIST),
+ VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
 #endif
- VAR("promisc",		&promisc,		0,				VAR_INT|VAR_DETECTED),
- VAR("realname",	botrealname,		sizeof(botrealname),		VAR_STRING|VAR_NOLHUB),
- VAR("server-port",	&default_port,		0,				VAR_INT|VAR_NOLHUB),
- VAR("servers",		&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB),
- VAR("servers6",	&serverlist,		0,				VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB),
- VAR("trace",		&trace,			0,				VAR_INT|VAR_DETECTED),
- {NULL,			NULL,			0,				0, NULL, NULL, 0}
+ VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 0, "warn"),
+ VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "A deranged product of evil coders"),
+ VAR("server-port",	&default_port,		VAR_INT|VAR_NOLHUB,				0, 0, "6667"),
+ VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
+ VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
+ VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 0, "die"),
+// {NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0, 0}
+ VAR(NULL,		0,			0,						0, 0, 0)
 };
 
 
@@ -305,13 +308,13 @@ const char *var_string(variable_t *var)
     if (var->flags & VAR_SHUFFLE)
       shuffle(data, ",");
 
-    if (!(var->flags & VAR_NODEF) && !var->gdata)
-      var->gdata = data;
-    else
-      free(data);
+    if ((var->flags & VAR_NODEF) && !var->gdata) {
+       free(data);
+       data = NULL;
+    }
   }
 
-  return var->gdata ? var->gdata : NULL;
+  return data;
 }
 
 static variable_t *var_get_var_by_name(const char *name)
@@ -386,7 +389,7 @@ sdprintf("var: %s (global): %s", var->name, data);
       if (var->flags & VAR_CHANSET)
         var->gdata = strdup(def_chanset);
       else 
-        var->gdata = NULL;
+        var->gdata = var->def ? strdup(var->def) : NULL;
     }
 
     if (domem && var->mem)
@@ -454,15 +457,10 @@ void init_vars()
 {
   int i = 0;
 
-  if (conf.bot->hub) {
-    var_set_by_name(NULL, "servers6", "efnet.port80.se,irc.efnet.nl,irc.ipv6.homelien.no,efnet.ipv6.xs4all.nl,irc.ipv6.inter.net.il,irc.choopa.net,irc.ptptech.com");
-    var_set_by_name(NULL, "servers", "irc.umich.edu,irc.kagmir.ca,irc.dataphone.se,irc.easynews.com,efnet.cs.hut.fi,irc.umn.edu,irc.blackened.com,irc.homelien.no,irc.blessed.net,irc.he.net,irc.inter.net.il,irc.du.se,irc.csbnet.se,efnet.xs4all.nl,irc.efnet.nl,irc.banetele.no,irc.daxnet.no,irc.inet.tele.dk,irc.dks.ca,irc.scnet.net,irc.arcti.ca,irc.avalonworks.ca,irc.foxlink.net,irc2.choopa.net,irc.dkom.at,efnet.demon.co.uk,irc.efnet.pl,irc.nac.net,irc.concentric.net,irc.choopa.net,irc.wh.verio.net,irc.mindspring.com,irc.desync.com,irc.mzima.net,irc.ptptech.com,efnet.port80.se,irc.pte.hu,irc.efnet.fr");
-  }
-
-  /* check mem for all vars and copy to our gdata */
+  /* initialize vars: defaults -> gdata */
   for (i = 0; vars[i].name; i++) {
-    if (!vars[i].gdata && !vars[i].ldata) 
-      var_string(&vars[i]);
+    if (!vars[i].gdata && !vars[i].ldata && !(!conf.bot->hub && (vars[i].flags & VAR_NOLDEF)))
+      var_set(&vars[i], NULL, NULL);		//empty out and set to defaults
   }
   var_set_by_name(NULL, "chanset", def_chanset);
   if (!strncmp(conf.bot->nick, "wtest", 5))

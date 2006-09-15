@@ -3,6 +3,7 @@ Numbers expressed as '#12' are references to a ticket/bug posting which can be v
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
 1.2.12 - http://wraith.shatow.net/milestone/1.2.12
+* Clearing a variable via 'set var -' now resets that variable to default settings. (implements #111)
 * Fix bug introduced from fixing #274
 
 1.2.11 - http://wraith.shatow.net/milestone/1.2.11

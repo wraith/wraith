@@ -75,7 +75,7 @@ default: wraith
 test:
 
 cleanutils:
-	@rm -f src/stringfix@EXEEXT@ src/sorthelp@EXEEXT@ src/makehelp@EXEEXT@
+	@rm -f src/stringfix@EXEEXT@ src/sorthelp@EXEEXT@ src/makehelp@EXEEXT@ src/makeres@EXEEXT@ src/makeset@EXEEXT@
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
@@ -141,6 +141,16 @@ help: makehelp stringfix
 	cp -f src/help.h~ src/help.h; \
 	fi)
 
+set: makeset
+	@src/makeset@EXEEXT@ misc/settings.txt src/set_default.h~
+	@(if [ ! -f src/set_default.h ]; then \
+	touch src/set_default.h; \
+	fi)
+	@(if test "x`$(DIFF) -qurN src/set_default.h~ src/set_default.h`" != "x"; then \
+	cp -f src/set_default.h~ src/set_default.h; \
+	fi)
+
+
 res: makeres
 	@src/makeres@EXEEXT@ misc/responses.txt src/ 1
 	@(if [ ! -f src/response.h ]; then \
@@ -162,6 +172,9 @@ stringfix: src/stringfix.c config.h
 makeres: src/makeres.c
 	+@cd src && ${MAKE_UTILS} makeres
 
+makeset: src/makeset.c
+	+@cd src && ${MAKE_UTILS} makeset
+
 makehelp: src/makehelp.c
 	+@cd src && ${MAKE_UTILS} makehelp
 
@@ -173,7 +186,7 @@ utils: stringfix makehelp
 crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
-general: help res
+general: help res set
 
 check:
 
