@@ -47,10 +47,10 @@ static int has_op(int idx, struct chanset_t *chan)
 /* Finds a nick of the handle. Returns m->nick if
  * the nick was found, otherwise NULL (Sup 1Nov2000)
  */
-static char *getnick(char *handle, struct chanset_t *chan)
+char *getnick(const char *handle, struct chanset_t *chan)
 {
-  char s[UHOSTLEN] = "";
   struct userrec *u = NULL;
+  char s[UHOSTLEN] = "";
 
   for (register memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
@@ -1730,7 +1730,7 @@ static cmd_t irc_dcc[] =
   {"resetexempts",	"o|o",	 (Function) cmd_resetexempts,	NULL, LEAF|AUTH},
   {"resetinvites",	"o|o",	 (Function) cmd_resetinvites,	NULL, LEAF|AUTH},
   {"say",		"o|o",	 (Function) cmd_say,		NULL, LEAF},
-  {"swhois",		"n",	 (Function) cmd_swhois,		NULL, LEAF|AUTH},
+  {"swhois",		"",	 (Function) cmd_swhois,		NULL, LEAF|AUTH},
   {"topic",		"o|o",	 (Function) cmd_topic,		NULL, LEAF|AUTH},
   {"voice",		"o|o",	 (Function) cmd_voice,		NULL, LEAF|AUTH},
   {NULL,		NULL,	 NULL,				NULL, 0}

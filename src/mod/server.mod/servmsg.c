@@ -1131,9 +1131,12 @@ irc_whois(char *nick, const char *format, ...)
   egg_vsnprintf(va_out, sizeof(va_out) - 1, format, va);
   va_end(va);
 
-  for (int idx = 0; idx < dcc_total; idx++)
-    if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois))
+  for (int idx = 0; idx < dcc_total; idx++) {
+    if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois)) {
       dprintf(idx, "%s\n", va_out);
+      break;
+    }
+  }
 }
 
 void check_hostmask()
@@ -1182,12 +1185,53 @@ static int got311(char *from, char *msg)
   irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);
 
   simple_snprintf(uhost, sizeof uhost, "%s!%s@%s", nick, username, address);
-  if ((u = get_user_by_host(uhost))) 
-    irc_whois(nick, " username : $u%s$u", u->handle);
+  if ((u = get_user_by_host(uhost))) {
+    int idx = 0;
+    for (idx = 0; idx < dcc_total; idx++) {
+      if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois)) {
+        if (whois_access(dcc[idx].user, u)) {
+          irc_whois(nick, " username : $u%s$u", u->handle);
+        }
+        break;
+      }
+    }
+  }
 
   irc_whois(nick, " ircname  : %s", msg);
   
   return 0;
+}
+
+static char *
+hide_chans(const char *nick, struct userrec *u, char *channels)
+{
+  char *chans = NULL, *chname = NULL, s[5] = "";
+  size_t len = strlen(channels) + 100 + 1;
+  struct chanset_t *chan = NULL;
+  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0 };
+
+  chans = (char *) my_calloc(1, len);
+
+  while ((chname = newsplit(&channels))[0]) {
+    /* save and skip any modes in front of #chan */
+    s[0] = 0;
+    while (chname[0] && chname[0] != '#') {
+      simple_snprintf(s, sizeof(s), "%c", chname[0]);
+      chname++;
+    }
+
+    chan = findchan_by_dname(chname);
+    if (chan)
+     get_user_flagrec(u, &fr, chan->dname);
+
+    if (!chan || getnick(u->handle, chan) || !(chan->channel.mode & (CHANPRIV|CHANSEC)) || chk_op(fr, chan)) {
+      if (chans[0])
+        simple_snprintf(chans, len, "%s %s%s", chans, s, chname);
+      else
+        simple_snprintf(chans, len, "%s%s", s, chname);
+    }
+  }
+  return chans;
 }
 
 /* 319 $me nick :channels */
@@ -1199,7 +1243,16 @@ static int got319(char *from, char *msg)
   nick = newsplit(&msg);
   fixcolon(msg);
 
-  irc_whois(nick, " channels : %s", msg);
+  for (int idx = 0; idx < dcc_total; idx++) {
+    if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois)) {
+      char *chans = NULL;
+
+      if ((chans = hide_chans(nick, dcc[idx].user, msg))) {
+        irc_whois(nick, " channels : %s", chans);
+        free(chans);
+      }
+    }
+  }
 
   return 0;
 }

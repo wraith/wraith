@@ -12,6 +12,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added build os/architechture to output for ./binary -v
 * Added ARCH entry for bots in .whois
 * Added a new error code (22) which displays if attempting to run binary before using -C.
+* cmd_swhois is now -|- and hides all restricted information, channels; see 'help swhois'.
 
 1.2.11 - http://wraith.shatow.net/milestone/1.2.11
 * Fixed typo in help for .set/.conf/.channel

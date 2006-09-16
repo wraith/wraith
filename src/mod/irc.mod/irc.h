@@ -111,6 +111,7 @@ void recheck_channel_modes(struct chanset_t *);
 void irc_report(int, int);
 void flush_modes();
 void reset_chan_info(struct chanset_t *);
+char *getnick(const char *, struct chanset_t *);
 
 extern int		max_bans, max_exempts, max_invites, max_modes;
 extern bool		use_354;
