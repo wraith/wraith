@@ -119,7 +119,7 @@ strip_telnet(int sock, char *buf, int *len)
 void
 send_sysinfo()
 {
-  char *username = NULL, *sysname = NULL, *nodename = NULL;
+  char *username = NULL, *sysname = NULL, *nodename = NULL, *arch = NULL;
   struct utsname un;
   bool gotun = 0;
 
@@ -131,23 +131,32 @@ send_sysinfo()
   username = (char *) get_user(&USERENTRY_USERNAME, conf.bot->u);
   sysname = (char *) get_user(&USERENTRY_OS, conf.bot->u);
   nodename = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);
+  arch = (char *) get_user(&USERENTRY_ARCH, conf.bot->u);
 
-  const char *usysname = NULL, *uusername = NULL, *unodename = NULL;
+  const char *usysname = NULL, *uusername = NULL, *unodename = NULL, *uarch = NULL;
 
   usysname = gotun ? un.sysname : "*";
   uusername = conf.username ? conf.username : "*";
   unodename = gotun ? un.nodename : "*";
+  uarch = gotun ? un.machine : "*";
 
   if (((sysname && egg_strcasecmp(sysname, usysname)) ||
-      (username && egg_strcasecmp(username, uusername)) ||
-      (nodename && egg_strcasecmp(nodename, unodename))) ||
-      ((!sysname && usysname) || (!username && uusername) || (!nodename && unodename))
+       (username && egg_strcasecmp(username, uusername)) ||
+       (nodename && egg_strcasecmp(nodename, unodename)) ||
+       (arch && egg_strcasecmp(arch, uarch))
+      ) ||
+      ((!sysname && usysname) || 
+       (!username && uusername) || 
+       (!nodename && unodename) || 
+       (!arch && uarch)
+      )
       ) {
       char buf[201] = "";
       size_t len = 0;
 
-      len = simple_snprintf(buf, sizeof(buf), "si %s %s %s", 
-            conf.username ? conf.username : "*", gotun ? un.sysname : "*", gotun ? un.nodename : "*");
+      len = simple_snprintf(buf, sizeof(buf), "si %s %s %s %s", 
+            conf.username ? conf.username : "*", gotun ? un.sysname : "*", gotun ? un.nodename : "*",
+            gotun ? un.machine : "*");
 
       send_uplink(buf, len);
   }

@@ -572,6 +572,7 @@ void chanprog()
   set_user(&USERENTRY_OS, conf.bot->u, un.sysname);
   set_user(&USERENTRY_USERNAME, conf.bot->u, conf.username);
   set_user(&USERENTRY_NODENAME, conf.bot->u, un.nodename);
+  set_user(&USERENTRY_ARCH, conf.bot->u, un.machine);
 
   var_parse_my_botset();
 

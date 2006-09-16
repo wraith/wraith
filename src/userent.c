@@ -29,6 +29,7 @@ void init_userent()
   add_entry_type(&USERENTRY_OS);
   add_entry_type(&USERENTRY_NODENAME);
   add_entry_type(&USERENTRY_USERNAME);
+  add_entry_type(&USERENTRY_ARCH);
   add_entry_type(&USERENTRY_PASS);
   add_entry_type(&USERENTRY_TMPPASS);
   add_entry_type(&USERENTRY_SECPASS);
@@ -425,6 +426,18 @@ struct user_entry_type USERENTRY_OS = {
  set_protected,
  botmisc_display,
  "OS"
+};
+
+struct user_entry_type USERENTRY_ARCH = {
+ 0,
+ def_gotshare,
+ def_unpack,
+ write_userfile_protected,
+ def_kill,
+ def_get,
+ set_protected,
+ botmisc_display,
+ "ARCH"
 };
 
 void stats_add(struct userrec *u, int login, int op)
