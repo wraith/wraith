@@ -148,7 +148,7 @@ char *var_sanitize(variable_t *var, const char *data)
     /* Do limit enforcing... */
     if (number < var->a)
       number = var->a;
-    else if (number > var->b)
+    else if (var->b && (number > var->b))
       number = var->b;
 
     dataout = (char*) my_calloc(1, 11);
