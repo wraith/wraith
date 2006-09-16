@@ -127,6 +127,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed some segfaults with tempfiles
 * Update binaries can now be stored in bins/ within the hub's binary directory.
 * If a tempdir suddenly becomes unavailable, a new one is now immediately sought out.
+* Added a new error code (20) which displays if attempting to run binary before using -C.
 
 1.2.8
 * Fixed [bot]* cmds depending on case of botnicks.

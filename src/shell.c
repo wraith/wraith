@@ -688,6 +688,8 @@ char *werr_tostr(int errnum)
     return STR("There is no username set. Please set one in the binary config with ./binary -C");
   case ERR_NOBOT:
     return STR("I have no bot record but received -B???");
+  case ERR_NOTINIT:
+    return STR("Binary data is not initialized; try ./binary -C");
   default:
     return "Unforseen error";
   }
