@@ -9,6 +9,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * cmd_set now sanitizes input with ranges/limits. (fixes #289)
 * cmd_set now accepts 'true', 'on', 'false' and 'off' for boolean variables.
 * Added somewhat advanced password scoring to replace current password restrictions. (#56)
+* Added build os/architechture to output for ./binary -v
 
 1.2.11 - http://wraith.shatow.net/milestone/1.2.11
 * Fixed typo in help for .set/.conf/.channel

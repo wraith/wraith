@@ -268,12 +268,16 @@ AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNA
 AC_CACHE_CHECK(system release, egg_cv_var_system_release, egg_cv_var_system_release=`$UNAME -r`)
 AC_CACHE_CHECK(system machine, egg_cv_var_system_machine, egg_cv_var_system_machine=`$UNAME -m`)
 
+BUILDOS="$egg_cv_var_system_type"
+BUILDARCH="$egg_cv_var_system_machine"
+
 case "$egg_cv_var_system_machine" in
   i*)
     CXX="$CXX -march=i486"
+    BUILDARCH="i486"
   ;;
   *)
-    ;;
+  ;;
 esac
 
 case "$egg_cv_var_system_type" in
@@ -351,6 +355,8 @@ case "$egg_cv_var_system_type" in
     fi
   ;;
 esac
+AC_SUBST(BUILDOS)dnl
+AC_SUBST(BUILDARCH)dnl
 ])
 
 dnl EGG_CYGWIN_BINMODE

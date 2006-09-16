@@ -13,7 +13,7 @@ DISTRIB = wraith-@VERSION@
 CCDEPMODE = @CCDEPMODE@
 BINEXEC = wraith@EXEEXT@
 DISTROFILES = config.h.in doc/ misc/ scripts/ ChangeLog Makefile.in build configure pack/ src/
-EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile \
+EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src/mod/Makefile src/buildinfo.h \
            src/crypto/Makefile src/crypto/.deps src/crypto/.cvsignore \
            src/mod/dns.mod/Makefile src/mod/*.mod/.deps/ src/mod/*.mod/.cvsignore \
            src/.deps src/compat/.deps misc/commit misc/grep autotools/ \
@@ -86,7 +86,7 @@ clean:  cleanutils
 	@rm -f src/help.h src/response.h src/responses.h utctime@EXEEXT@ ts@EXEEXT@
 
 distclean: clean
-	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile
+	@rm -f Makefile src/Makefile src/compat/Makefile src/mod/Makefile src/crypto/Makefile src/buildinfo.h
 	@rm -f config.cache config.log config.status config.h 
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
 	@rm -rf src/.deps/ src/compat/.deps/ src/mod/*.mod/.deps/ src/crypto/.deps
