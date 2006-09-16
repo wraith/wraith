@@ -899,15 +899,19 @@ int goodpass(char *pass, int idx, char *nick)
   if (!pass[0]) 
     return 0;
 
-  char tell[501] = "";
-  int nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc;
+  char tell[501] = "", last = 0;
+  int nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc, repeats = 0, score = 0;
+  size_t length = strlen(pass);
 
   if (strchr(BADPASSCHARS, pass[0])) {
     simple_sprintf(tell, "Passes may not begin with '-'");
     goto fail;
   }
 
-  for (int i = 0; i < (signed) strlen(pass); i++) {
+  for (int i = 0; i < (signed) length; i++) {
+    if (pass[i] == last)
+      repeats++;
+
     tc = (int) pass[i];
     if (tc < 58 && tc > 47)
       ocase++; /* number */
@@ -917,37 +921,19 @@ int goodpass(char *pass, int idx, char *nick)
       lcase++; /* lower case */
     else
        nalpha++; /* non-alphabet/number */
+    last = pass[i];
   }
 
-/*  if (ocase < 1 || lcase < 2 || ucase < 2 || nalpha < 1 || strlen(pass) < 8) { */
-  if (lcase < 2 || ucase < 2 || strlen(pass) < 8) {
+  score += ocase * 3;
+  score += nalpha * 2;
+  score += ucase * 2;
+  score += lcase * 1;
+  score += length * 1;
+  score -= repeats * 1;
+  
+  simple_snprintf(tell, sizeof(tell), "Password NOT set due to being too weak. Try more characters, numbers, capitals");
 
-    simple_sprintf(tell, "Insecure pass, must be: ");
-    if (ocase < 1)
-      strcat(tell, "\002>= 1 number\002, ");
-    else
-      strcat(tell, ">= 1 number, ");
-
-    if (lcase < 2)
-      strcat(tell, "\002>= 2 lcase\002, ");
-    else
-      strcat(tell, ">= 2 lowercase, ");
-
-    if (ucase < 2)
-      strcat(tell, "\002>= 2 ucase\002, ");
-    else
-      strcat(tell, ">= 2 uppercase, ");
-/* This is annoying as hell
-    if (nalpha < 1)
-      strcat(tell, "\002>= 1 non-alpha/num\002, ");
-    else
-      strcat(tell, ">= 1 non-alpha/num, ");
-*/
-    if (strlen(pass) < 8)
-      strcat(tell, "\002>= 8 chars.\002");
-    else
-      strcat(tell, ">= 8 chars.");
-
+  if (score < 16) {
     fail:
 
     if (idx)
