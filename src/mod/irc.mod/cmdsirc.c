@@ -7,7 +7,7 @@
 
 /* Do we have any flags that will allow us ops on a channel?
  */
-static struct chanset_t *get_channel(int idx, char *chname)
+static struct chanset_t *get_channel(int idx, char *chname, bool check_console = 1)
 {
   struct chanset_t *chan = NULL;
 
@@ -17,7 +17,7 @@ static struct chanset_t *get_channel(int idx, char *chname)
       return chan;
     else
       dprintf(idx, "No such channel.\n");
-  } else {
+  } else if (check_console) {
     chname = dcc[idx].u.chat->con_chan;
     chan = findchan_by_dname(chname);
     if (chan)
@@ -25,7 +25,7 @@ static struct chanset_t *get_channel(int idx, char *chname)
     else
       dprintf(idx, "Invalid console channel.\n");
   }
-  return 0;
+  return NULL;
 }
 
 /* Do we have any flags that will allow us ops on a channel?
@@ -1030,15 +1030,17 @@ static void cmd_mop(int idx, char *par)
     newsplit(&par);
   } else {
     if (par[0] && (strchr(CHANMETA, par[0]) != NULL)) {
-      chan = get_channel(idx, newsplit(&par));
+      chan = get_channel(idx, newsplit(&par), 0);
     } else
-      chan = get_channel(idx, "");
+      chan = get_channel(idx, "", 0);
   }
 
-  if (!chan && !all)
-    return;
-
   putlog(LOG_CMDS, "*", "#%s# (%s) mop %s", dcc[idx].nick, all ? "*" : chan->dname, par);
+
+  if (!chan && !all) {
+    dprintf(idx, "Usage: mop <channel|*>\n");
+    return;
+  }
 
   memberlist *m = NULL;
   char s[256] = "";

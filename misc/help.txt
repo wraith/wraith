@@ -1242,13 +1242,12 @@ See also: randstring, sha1, encrypt, decrypt
    Performs an action on the party line. This appears as "* Wcc is leaving",
    etc.
 :leaf:mop:
-###  $bmop$b [channel|*]
+###  $bmop$b <channel|*>
    Bot will op all users in the specified channel that are valid ops
    for the channel. If '*' is specified, the bot will scan all channels
-   and op all users in all channels that are valid ops in each chan. If 
-   no channel is specified, the console channel is used.
+   and op all users in all channels that are valid ops in each chan.
  
-See also: whois, console
+See also: whois
 ::motd
 ###  $bmotd$b %{+m}<message>%{-}
    This redisplays the partyline Message Of The Day, which was shown when you
