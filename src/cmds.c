@@ -3592,7 +3592,7 @@ static void cmd_botserver(int idx, char * par) {
     dprintf(idx, "Usage: botserver <bot>\n");
     return;
   }
-  if (egg_strcasecmp(conf->bot.nick, par) && nextbot(par)<0) {
+  if (egg_strcasecmp(conf.bot.nick, par) && nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot.\n", par);
     return;
   }
