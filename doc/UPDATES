@@ -17,6 +17,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix cmds: bot[jump|server|version|msg] not running locally correctly. (fixes #304)
 * Fix cmd_chinfo to use the standard 'whois restrictions' (fixes #303)
 * Fix ',' character being allowed with 'set list' functions. (fixes #308)
+* Make 'set list' check to see if an item exists or not before add/remove. (fixes #307)
 
 1.2.11 - http://wraith.shatow.net/milestone/1.2.11
 * Fixed typo in help for .set/.conf/.channel

@@ -633,6 +633,28 @@ static void var_print_list(int idx, const char *name, const char *datain)
   free(datap);
 }
 
+static bool var_find_list(const char *botnick, variable_t *var, const char *element) {
+  char *olddata = NULL;
+
+  if (botnick) {                          //fetch data from bot's USERENTRY_SET
+    char *botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name);
+    olddata = botdata ? botdata : NULL;
+  } else                                  //use global, no bot specified
+    olddata = var->gdata ? var->gdata : NULL;
+
+  char *item = NULL, *data = strdup(olddata), *datap = data;
+  const char *delim = ",";
+  size_t slen = strlen(element);
+
+  while ((item = strsep(&data, delim)))
+    if (!egg_strncasecmp(item, element, slen)) {
+      free(datap);
+      return true;
+    }
+  free(datap);
+  return false;
+}
+
 static int var_add_list(const char *botnick, variable_t *var, const char *element)
 {
   if (!element)
@@ -902,14 +924,20 @@ int cmd_set_real(const char *botnick, int idx, char *par)
         return 0;
       }
       if (list == LIST_ADD) {
-        if (var_add_list(botnick, var, data)) {
+        if (var_find_list(botnick, var, data)) {
+          dprintf(idx, "Item '%s' is already in the %s list.\n", data, var->name);
+          return 0;
+        } else if (var_add_list(botnick, var, data)) {
           dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
           return 1;
         }
       } else if (list == LIST_RM) {
         char *expanded_data = NULL;
 
-        if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
+        if (!var_find_list(botnick, var, data)) {
+          dprintf(idx, "Item '%s' does not exist in the %s list.\n", data, var->name);
+          return 0;
+        } else if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
           dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
           return 1;
         }
