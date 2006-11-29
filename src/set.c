@@ -897,6 +897,10 @@ int cmd_set_real(const char *botnick, int idx, char *par)
     }
 
     if (list) {
+      if (strchr(data, ',')) {
+        dprintf(idx, "The ',' character may not be used with set list functions.\n");
+        return 0;
+      }
       if (list == LIST_ADD) {
         if (var_add_list(botnick, var, data)) {
           dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
