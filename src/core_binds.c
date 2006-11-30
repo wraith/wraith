@@ -47,34 +47,29 @@ bool check_aliases(int idx, const char *cmd, const char *args)
   bind_table_t *table = NULL;
 
   aliasp = aliasdup = strdup(alias);
-  argsp = argsdup = strdup(args);
+  if (args && args[0])
+    argsp = argsdup = strdup(args);
 
   while ((a = strsep(&aliasdup, ","))) { //a = entire alias "alias cmd params"
-    p = newsplit(&a);   //p = alias cmd //a = rcmd params
+    p = newsplit(&a);   //p = alias //a = cmd params
     if (!egg_strcasecmp(p, cmd)) { //a match on the cmd we were given!
-      p = newsplit(&a); //p = rcmd //a = params
+      p = newsplit(&a); //p = cmd //a = params
 
+      /*
+         p = cmd to be executed
+         a = params to be passed to the cmd from the alias listing
+         args = params given by the user -- may be a cmdpass that needs inserting before the alias params
+       */
+
+      /* Simple loop check */
       if (!egg_strcasecmp(cmd, p)) {
         putlog(LOG_WARN, "*", "Loop detected in alias '%s'", p);
-        free(argsp);
+        if (argsp)
+          free(argsp);
         return 0;
       }
 
-      char *myargs = NULL, *pass = NULL;
-      size_t size = 0;
-
-      found = 1;
-
-      size = strlen(a) + 1 + strlen(argsdup) + 1 + 2;
-      myargs = (char *) calloc(1, size);
-
-      if (has_cmd_pass(p)) {
-        pass = newsplit(&argsdup);
-        simple_snprintf(myargs, size, "%s %s %s", pass, a, argsdup);
-      } else
-        simple_snprintf(myargs, size, "%s %s", a, argsdup);
-
-      /* Sanity check - Aliases cannot reference another alias */
+      /* Sanity check - Aliases cannot reference other aliases */
       bool find = 0;
       table = bind_table_lookup("dcc");
       for (entry = table->entries; entry && entry->next; entry = entry->next) {
@@ -83,13 +78,50 @@ bool check_aliases(int idx, const char *cmd, const char *args)
           break;
         }
       }
+      /* FIXME: see cmt */
+      /* If the cmd wasnt found in the binds list, it's probably an alias, or invalid cmd? */
       if (!find) {
         dprintf(idx, "'%s' is an invalid alias: references alias '%s'.\n", cmd, p);
         putlog(LOG_ERROR, "*", "Invalid alias '%s' attempted: references alias '%s'.", cmd, p);
-      } else {
-        putlog(LOG_CMDS, "*", "@ #%s# [%s -> %s %s] ...", dcc[idx].nick, cmd, p, a);
-        check_bind_dcc(p, idx, myargs);
+        if (argsp)
+          free(argsp);
+        free(aliasp);
+        return 1; /* Alias was found -- just not accepted */
       }
+
+      char *myargs = NULL, *pass = NULL;
+      size_t size = 0;
+
+      found = 1;
+
+      size = strlen(a) + 1 + (argsdup ? strlen(argsdup) : 0) + 1 + 2;
+      myargs = (char *) calloc(1, size);
+
+      /* Rewrite the cmd including the inserted cmdpass if the cmd has one, and the user provided any param */
+      if (argsdup && argsdup[0] && has_cmd_pass(p)) {
+        pass = newsplit(&argsdup);
+        simple_snprintf(myargs, size, "%s", pass);
+        if (a && a[0]) {
+          strcat(myargs, " ");
+          strcat(myargs, a);
+        }
+        if (argsdup[0]) { /* was split */
+          strcat(myargs, " ");
+          strcat(myargs, argsdup);
+        }
+      } else {
+        /* Otherwise, just construct it based on cmd and params if provided */
+        if (argsdup && argsdup[0]) {
+          simple_snprintf(myargs, size, "%s %s", a, argsdup);
+        } else 
+          simple_snprintf(myargs, size, "%s", a);
+      }
+
+      if (a && a[0])
+        putlog(LOG_CMDS, "*", "@ #%s# [%s -> %s %s] ...", dcc[idx].nick, cmd, p, a);
+      else
+        putlog(LOG_CMDS, "*", "@ #%s# [%s -> %s] ...", dcc[idx].nick, cmd, p);
+      check_bind_dcc(p, idx, myargs);
 
       if (myargs)
         free(myargs);
@@ -98,7 +130,8 @@ bool check_aliases(int idx, const char *cmd, const char *args)
   }
 
   free(aliasp);
-  free(argsp);
+  if (argsp)
+    free(argsp);
 
   return found;
 }
