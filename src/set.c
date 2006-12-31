@@ -644,8 +644,16 @@ static bool var_find_list(const char *botnick, variable_t *var, const char *elem
 
   char *item = NULL, *data = strdup(olddata), *datap = data;
   const char *delim = ",";
-  size_t slen = strlen(element);
+  size_t slen = 0;
+  char *p = NULL;
 
+  /* The first word only .. */
+  if (!strcmp(var->name, "alias") && (p = strchr(element, ' ')))
+    slen = p - element;
+  /* Or the whole word */
+  else
+    slen = strlen(element);
+  
   while ((item = strsep(&data, delim)))
     if (!egg_strncasecmp(item, element, slen)) {
       free(datap);
@@ -925,6 +933,11 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       }
       if (list == LIST_ADD) {
         if (var_find_list(botnick, var, data)) {
+          if (!strcmp(var->name, "alias")) {
+            char *p = strchr(data, ' ');
+            if (p)
+              *p = 0;
+          }
           dprintf(idx, "Item '%s' is already in the %s list.\n", data, var->name);
           return 0;
         } else if (var_add_list(botnick, var, data)) {
@@ -934,12 +947,17 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       } else if (list == LIST_RM) {
         char *expanded_data = NULL;
 
-        if (!var_find_list(botnick, var, data)) {
-          dprintf(idx, "Item '%s' does not exist in the %s list.\n", data, var->name);
-          return 0;
-        } else if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
+        if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
           dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
           return 1;
+        } else if (!var_find_list(botnick, var, data)) {
+          if (!strcmp(var->name, "alias")) {
+            char *p = strchr(data, ' ');
+            if (p)
+              *p = 0;
+          }
+          dprintf(idx, "Item '%s' does not exist in the %s list.\n", data, var->name);
+          return 0;
         }
       }
       dprintf(idx, "Failed to modify %s list.\n", var->name);
