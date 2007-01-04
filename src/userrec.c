@@ -642,7 +642,7 @@ int deluser(char *handle)
   if (!noshare && (handle[0] != '*'))
     shareout("k %s\n", handle);
   for (fnd = 0; fnd < dcc_total; fnd++) {
-    if (dcc[fnd].type && dcc[fnd].user == u) {
+    if (dcc[fnd].type && dcc[fnd].user == u && dcc[fnd].simul == -1) {
       if (u->bot) {
         int i = nextbot(handle);
 
