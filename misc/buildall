@@ -1,5 +1,8 @@
 #!/bin/sh
 
+scp_target="bdrewery@endurance.quadspeedi.net"
+dir="public_html/builds"
+
 if test $# -lt 1; then
  echo "Usage: $0 directory"
  exit 1
@@ -14,9 +17,10 @@ for cfg in $cfgs
 do
  if test "`grep 'PACKNAME' $cfg`x" != "x"; then
   #Dont compile, just package up and dont rm old binaries.
-  ./build -n -P -q $cfg -s bdrewery@endurance.quadspeedi.net:public_html/builds/ all
+  ./build -n -P -q $cfg -s $scp_target:${dir}/ all
  fi
 done
 chmod 0700 misc/id_dsa
-ssh -i misc/id_dsa bdrewery@endurance.quadspeedi.net chmod 0644 public_html/builds/*.tar.gz
+ssh -i misc/id_dsa $scp_target chmod 0644 ${dir}/*.tar.gz
 rm *.tar.gz
+
