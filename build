@@ -209,8 +209,8 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
 
     scp_target=`echo $scp | cut -d : -f 1`
     dir=`echo $scp | cut -d : -f 2`
-    ssh -i misc/id_dsa $scp_target ln -fs ${dir}/${PACKNAME}.$os-$ver${d}.tar.${ext} ${PACKNAME}.${os}-current.tar.gz
-    ssh -i misc/id_dsa $scp_target ln -fs ${dir}/${PACKNAME}.$os-$ver${d}.tar.${ext} ${PACKNAME}.${os}-base.tar.gz
+    ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-current.tar.gz
+    ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-base.tar.gz
 
   fi
 elif ! [ $scp = "0" ]; then
