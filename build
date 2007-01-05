@@ -206,6 +206,12 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
   if ! [ $scp = 0 ]; then
     chmod 0700 misc/id_dsa
     scp -i misc/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
+
+    scp_target=`echo $scp | cut -d : -f 1`
+    dir=`echo $scp | cut -d : -f 2`
+    ssh -i misc/id_dsa $scp_target ln -fs ${dir}/${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-current.tar.gz
+    ssh -i misc/id_dsa $scp_target ln -fs ${dir}/${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-base.tar.gz
+
   fi
 elif ! [ $scp = "0" ]; then
   cp wraith wraith.$os-$ver${d} > /dev/null 2>&1
