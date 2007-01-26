@@ -2705,6 +2705,11 @@ static int gotnick(char *from, char *msg)
   fixcolon(msg);
   irc_log(NULL, "[%s] Nick change: %s -> %s", samechans(nick, ","), nick, msg);
   clear_chanlist_member(nick);	/* Cache for nick 'nick' is meaningless now. */
+
+  Auth *auth = Auth::Find(uhost);
+  if (auth)
+    auth->NewNick(msg);
+
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     oldchan = chan;
     chname = chan->dname; 

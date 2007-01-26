@@ -21,6 +21,7 @@ class Auth {
   bool Authed() { return (status == AUTHED); }
   bool GetIdx(const char *);
   void Done(bool = 0);
+  void NewNick(const char *nick);
 
   static Auth *Find(const char * host);
   static Auth *Find(const char * handle, bool _hand);

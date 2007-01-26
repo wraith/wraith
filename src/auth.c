@@ -93,6 +93,10 @@ void Auth::Done(bool _bd)
   bd = _bd;
 }
 
+void Auth::NewNick(const char *newnick) {
+  strlcpy(nick, newnick, nick_len + 1);
+}
+
 Auth *Auth::Find(const char *_host)
 {
   if (ht_host) {
@@ -105,6 +109,7 @@ Auth *Auth::Find(const char *_host)
   }
   return NULL;
 }
+
 Auth *Auth::Find(const char *handle, bool _hand)
 {
   if (ht_handle) {
