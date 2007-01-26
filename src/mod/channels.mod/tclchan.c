@@ -284,7 +284,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
 
 /* Parse options for a channel.
  */
-int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
+int channel_modify(char *result, struct chanset_t *chan, int items, char **item, bool cmd)
 {
   bool error = 0;
   int old_status = chan->status,
@@ -325,7 +325,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
       p = replace(item[i], "{", "[");
       p = replace(p, "}", "]");
       strlcpy(chan->topic, p, 121);
-    } else if (!strcmp(item[i], "addedby")) {
+    } else if (!cmd && !strcmp(item[i], "addedby")) {
       i++;
       if (i >= items) {
 	if (result)
@@ -333,7 +333,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 	return ERROR;
       }
       strlcpy(chan->added_by, item[i], NICKLEN);
-    } else if (!strcmp(item[i], "addedts")) {
+    } else if (!cmd && !strcmp(item[i], "addedts")) {
       i++;
       if (i >= items) {
 	if (result)
@@ -576,35 +576,36 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item)
 
     /* ignore wasoptest, stopnethack and clearbans in chanfile, remove
        this later */
-    else if (!have_take && !strcmp(item[i], "+take")) ;
-    else if (!have_take && !strcmp(item[i], "-take")) ;
-    else if (!strcmp(item[i], "stopnethack-mode")) ;
-    else if (!strcmp(item[i], "revenge-mode")) ;
-    else if (!strcmp(item[i], "+revenge")) ;
-    else if (!strcmp(item[i], "-revenge")) ;
-    else if (!strcmp(item[i], "+revengebot")) ;
-    else if (!strcmp(item[i], "-revengebot")) ;
-    else if (!strcmp(item[i], "+manop")) ;
-    else if (!strcmp(item[i], "-manop")) ;
-    else if (!strcmp(item[i], "+dontkickops")) ;
-    else if (!strcmp(item[i], "-dontkickops")) ;
-    else if (!strcmp(item[i], "+nomdop"))  ;
-    else if (!strcmp(item[i], "-nomdop"))  ;
-    else if (!strcmp(item[i], "+protectfriends"))  ;
-    else if (!strcmp(item[i], "-protectfriends"))  ;
-    else if (!strcmp(item[i], "+punish"))  ;
-    else if (!strcmp(item[i], "-punish"))  ;
-    else if (!strcmp(item[i], "+seen"))  ;
-    else if (!strcmp(item[i], "-seen"))  ;
-    else if (!strcmp(item[i], "+secret"))  ;
-    else if (!strcmp(item[i], "-secret"))  ;
-    else if (!strcmp(item[i], "-stopnethack"))  ;
-    else if (!strcmp(item[i], "+stopnethack"))  ;
-    else if (!strcmp(item[i], "-wasoptest"))  ;
-    else if (!strcmp(item[i], "+wasoptest"))  ;  /* Eule 01.2000 */
-    else if (!strcmp(item[i], "+clearbans"))  ;
-    else if (!strcmp(item[i], "-clearbans"))  ;
-    else if (!strncmp(item[i], "need-", 5))   ;
+
+    else if (!cmd && !have_take && !strcmp(item[i], "+take")) ;
+    else if (!cmd && !have_take && !strcmp(item[i], "-take")) ;
+    else if (!cmd && !strcmp(item[i], "stopnethack-mode")) ;
+    else if (!cmd && !strcmp(item[i], "revenge-mode")) ;
+    else if (!cmd && !strcmp(item[i], "+revenge")) ;
+    else if (!cmd && !strcmp(item[i], "-revenge")) ;
+    else if (!cmd && !strcmp(item[i], "+revengebot")) ;
+    else if (!cmd && !strcmp(item[i], "-revengebot")) ;
+    else if (!cmd && !strcmp(item[i], "+manop")) ;
+    else if (!cmd && !strcmp(item[i], "-manop")) ;
+    else if (!cmd && !strcmp(item[i], "+dontkickops")) ;
+    else if (!cmd && !strcmp(item[i], "-dontkickops")) ;
+    else if (!cmd && !strcmp(item[i], "+nomdop"))  ;
+    else if (!cmd && !strcmp(item[i], "-nomdop"))  ;
+    else if (!cmd && !strcmp(item[i], "+protectfriends"))  ;
+    else if (!cmd && !strcmp(item[i], "-protectfriends"))  ;
+    else if (!cmd && !strcmp(item[i], "+punish"))  ;
+    else if (!cmd && !strcmp(item[i], "-punish"))  ;
+    else if (!cmd && !strcmp(item[i], "+seen"))  ;
+    else if (!cmd && !strcmp(item[i], "-seen"))  ;
+    else if (!cmd && !strcmp(item[i], "+secret"))  ;
+    else if (!cmd && !strcmp(item[i], "-secret"))  ;
+    else if (!cmd && !strcmp(item[i], "-stopnethack"))  ;
+    else if (!cmd && !strcmp(item[i], "+stopnethack"))  ;
+    else if (!cmd && !strcmp(item[i], "-wasoptest"))  ;
+    else if (!cmd && !strcmp(item[i], "+wasoptest"))  ;  /* Eule 01.2000 */
+    else if (!cmd && !strcmp(item[i], "+clearbans"))  ;
+    else if (!cmd && !strcmp(item[i], "-clearbans"))  ;
+    else if (!cmd && !strncmp(item[i], "need-", 5))   ;
     else if (!strncmp(item[i], "flood-", 6)) {
       int *pthr = NULL;
       time_t *ptime = NULL;
@@ -892,7 +893,7 @@ int channel_add(char *result, char *newname, char *options)
    * if a user goes back to an eggdrop that no-longer supports certain
    * (channel) options.
    */
-  if ((channel_modify(result, chan, items, (char **) item) != OK) && !loading)
+  if ((channel_modify(result, chan, items, (char **) item, 0) != OK) && !loading)
     ret = ERROR;
 
   free(item);

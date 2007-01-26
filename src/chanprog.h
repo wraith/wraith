@@ -5,6 +5,7 @@
 
 #define DO_LOCAL	1
 #define DO_NET		2
+#define CMD		4
 
 int do_chanset(char *, struct chanset_t *, const char *, int);
 void checkchans(int);
