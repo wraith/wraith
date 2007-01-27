@@ -233,8 +233,7 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 {
 	dns_query_t *q = (dns_query_t *) my_calloc(1, sizeof(*q));
 
-	q->id = query_id;
-	query_id++;
+	q->id = query_id++;
 	q->query = strdup(query);
 	q->answers = 0;
 	q->callback = callback;
@@ -425,7 +424,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 
 	/* check if the query was already made */
         if (find_query(host))
-          return(-1);
+          return(-2);
 
 	/* Allocate our query struct. */
         q = alloc_query(client_data, callback, host);
@@ -754,9 +753,8 @@ static int reverse_ip(const char *host, char *reverse)
 
 int egg_dns_cancel(int id, int issue_callback)
 {
-	dns_query_t *q, *prev;
+	dns_query_t *q, *prev = NULL;
 
-	prev = NULL;
 	for (q = query_head; q; q = q->next) {
 		if (q->id == id) break;
 		prev = q;

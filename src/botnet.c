@@ -1002,8 +1002,15 @@ int botlink(char *linker, int idx, char *nick)
       dcc[i].bot = 1;
 
       int dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
+       /* dns_id 
+        * -1 means it was cached and the callback already called
+        * -2 means it's already being looked up.. try again later .. */
       if (dns_id >= 0)
         dcc[i].dns_id = dns_id;
+      else if (dns_id == -2) {
+        lostdcc(i);
+        return 0;
+      }
      
       return 1;
       /* wait for async reply */

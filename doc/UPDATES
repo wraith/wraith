@@ -10,6 +10,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix ./binary -C not signalling the correct process under some situations. (fixes #315)
 * Fix security hole in all shell cmds. (fixes #321)
 * Make ./binary -E default to displaying every error. (fixes #322)
+* Fix a possible memory leak with DNS. (fixes #296)
 
 1.2.12 - http://wraith.shatow.net/milestone/1.2.12
 * Clearing a variable via 'set var -' now resets that variable to default settings. (implements #111)
