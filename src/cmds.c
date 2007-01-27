@@ -2649,9 +2649,9 @@ static void cmd_ps(int idx, char *par) {
     return;
   }
 
-  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
+  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>') || strchr(par, '`')) {
     putlog(LOG_WARN, "*", "%s attempted 'ps' with pipe/semicolon in parameters: %s", dcc[idx].nick, par);
-    dprintf(idx, "No.");
+    dprintf(idx, "No.\n");
     return;
   }
 
@@ -2666,9 +2666,9 @@ static void cmd_ps(int idx, char *par) {
 
 static void cmd_last(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# last %s", dcc[idx].nick, par);
-  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
+  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>') || strchr(par, '`')) {
     putlog(LOG_WARN, "*", "%s attempted 'last' with pipe/semicolon in parameters: %s", dcc[idx].nick, par);
-    dprintf(idx, "No.");
+    dprintf(idx, "No.\n");
     return;
   }
 
@@ -3814,9 +3814,9 @@ static void cmd_netps(int idx, char * par) {
     return;
   }
 
-  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
+  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>') || strchr(par, '`')) {
     putlog(LOG_WARN, "*", "%s attempted 'netps' with pipe/semicolon in parameters: %s", dcc[idx].nick, par);
-    dprintf(idx, "No.");
+    dprintf(idx, "No.\n");
     return;
   }
 
@@ -3834,9 +3834,9 @@ static void cmd_netlast(int idx, char * par) {
     return;
   }
 
-  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>')) {
+  if (strchr(par, '|') || strchr(par, '<') || strchr(par, ';') || strchr(par, '>') || strchr(par, '`')) {
     putlog(LOG_WARN, "*", "%s attempted 'netlast' with pipe/semicolon in parameters: %s", dcc[idx].nick, par);
-    dprintf(idx, "No.");
+    dprintf(idx, "No.\n");
     return;
   }
 
