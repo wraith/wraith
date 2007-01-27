@@ -263,7 +263,7 @@ static void show_help()
   printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
   printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
   printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
-  printf(format, STR("-E [#/all]"), STR("Display Error codes english translation (use 'all' to display all)"));
+  printf(format, STR("-E [error code]"), STR("Display Error codes english translation"));
 /*  printf(format, STR("-g <file>"), STR("Generates a template config file"));
   printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
 */
@@ -346,19 +346,15 @@ static void dtx_arg(int argc, char *argv[])
         break;
       case 'E':
         p = argv[optind];
-        if (p && p[0]) {
-          if (!strcmp(p, "all")) {
-            int n;
-            putlog(LOG_MISC, "*", "Listing all errors");
-            for (n = 1; n < ERR_MAX; n++)
-            putlog(LOG_MISC, "*", "Error #%d: %s", n, werr_tostr(n));
-          } else if (egg_isdigit(p[0])) {
-            putlog(LOG_MISC, "*", "Error #%d: %s", atoi(p), werr_tostr(atoi(p)));
-          }
-          exit(0);
+        if (p && p[0] && egg_isdigit(p[0])) {
+          putlog(LOG_MISC, "*", "Error #%d: %s", atoi(p), werr_tostr(atoi(p)));
         } else {
-          fatal(STR("You must specify error number after -E (or 'all')"), 0);
+          int n;
+          putlog(LOG_MISC, "*", "Listing all errors");
+          for (n = 1; n < ERR_MAX; n++)
+          putlog(LOG_MISC, "*", "Error #%d: %s", n, werr_tostr(n));
         }
+        exit(0);
         break;
       case 'e':
         if (argv[optind])
