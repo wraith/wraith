@@ -76,5 +76,6 @@ void init_vars();
 void var_set_by_name(const char *, const char *, const char *);
 void var_set_userentry(const char *, const char *, const char *);
 int cmd_set_real(const char *, int idx, char *);
+const char *var_get_str_by_name(const char *);
 
 #endif /* !_SET_H */

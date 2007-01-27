@@ -56,6 +56,7 @@ int trace;
 bool offensive_bans;
 bool manop_warn;
 char homechan[51] = "";
+char usermode[15] = "";
 
 static variable_t vars[] = {
  VAR("alias", 		alias,			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM,		0, 0, DEFAULT_ALIAS),
@@ -102,6 +103,7 @@ static variable_t vars[] = {
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
+ VAR("usermode",	&usermode,		VAR_STRING|VAR_NOLHUB,				0, 0, "+iws"),
 // {NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0, 0}
  VAR(NULL,		0,			0,						0, 0, 0)
 };

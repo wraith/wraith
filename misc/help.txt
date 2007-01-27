@@ -1537,6 +1537,7 @@ See also: reload, backup
 [SL] $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
  
 [S]  $brealname$b        The bot's "real name" when connecting.
+[S]  $busermode$b        The bot's usermode on IRC. (Set on connect/rehash)
 [S]  $bnick$b            The bot's preferred nickname on IRC.
 [N]  $bnotify-time$b     The number of seconds between server notify checks for nick.
  
