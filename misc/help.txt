@@ -217,10 +217,10 @@ See also: reload, save
    every ban in the global ban list and on the channel. If you use 'bans
    <wildcard>', it will list all bans (active or not) that match against your
    wildcard. Consider it a 'bans all' list matched against your wildcard.
-
+ 
    If you use 'bans global', a full list of bans for EVERY channel will be
    displayed, including inactive/active bans on each channel. 
-
+ 
    The ban list may change according to which channel you're currently viewing
    in the console. Different bans may be active on different channels. If you
    specify a channel name, that channel will be used instead of your current
@@ -319,10 +319,10 @@ See also: netserver, servers%{+n}, set%{-}
    If there is a botset entry for 'name' and a set entry for 'name', 
    the bot will use the 'botset' entry. Otherwise, the 'set' entry
    will be used for all options.
-
+ 
    The <var> may have wildcards. Wildcards will only be used for listing
    variable, not for setting.
-
+ 
    See 'set' for a full help listing.
  
 See also: set
@@ -951,7 +951,7 @@ See also: decrypt, randstring, md5, sha1
  
    If you use 'exempts global', a full list of exempts for EVERY channel will be
    displayed, including inactive/active exempts on each channel.
-
+ 
    The exempt list may change according to which channel you're currently
    viewing in the console. Different exempts may be active on different
    channels. If you specify a channel name, that channel will be used instead
@@ -1081,7 +1081,7 @@ See also: console, iop
    use 'invites <wildcard>', it will list all invites (active or not) that
    match against your wildcard. Consider it a 'invites all' list matched
    against your wildcard.
-
+ 
    If you use 'invites global', a full list of invites for EVERY channel will be
    displayed, including inactive/active invites on each channel.
  
@@ -1477,7 +1477,7 @@ See also: reload, backup
 ###  $bset$b [<+/->list] [<var> [data|-]]
    Sets various options. Type alone to see all set entries. To set
    an entry do '%dset name VALUE'. Use '-' as a value to clear an entry.
-
+ 
    The <var> may have wildcards. Wildcards will only be used for listing
    variable, not for setting.
  
@@ -1710,6 +1710,13 @@ See also: bots, bottree
    Stats groups are IRC, Botnet, Partyline, Transfer.mod and Misc.
  
 %{+m}See also: restart%{-}
+:leaf:umode
+###  $bumode$b <+flags>
+   Sets the given usermode flags for the bot.
+%{+a}
+ 
+See also: dump
+%{-}
 ::unlink
 ###  $bunlink$b <bot|*> [reason]
    This disconnects the specified bot from the botnet (assuming it was linked

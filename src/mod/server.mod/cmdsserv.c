@@ -45,6 +45,18 @@ static void cmd_dump(int idx, char *par)
   dprintf(DP_DUMP, "%s\n", replace(par, "$n", botname));
 }
 
+static void cmd_umode(int idx, char *par)
+{
+  putlog(LOG_CMDS, "*", "#%s# umode %s", dcc[idx].nick, par);
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: umode <+flags>\n");
+    return;
+  }
+
+  dprintf(DP_SERVER, "MODE %s %s\n", botname, par);
+}
+
 static void cmd_jump(int idx, char *par)
 {
   char *other = NULL, *p = NULL;
@@ -129,6 +141,7 @@ static cmd_t C_dcc_serv[] =
   {"dump",		"a",	(Function) cmd_dump,		NULL, LEAF},
   {"jump",		"m",	(Function) cmd_jump,		NULL, LEAF},
   {"servers",		"m",	(Function) cmd_servers,		NULL, LEAF},
+  {"umode",		"m",	(Function) cmd_umode,		NULL, LEAF},
   {NULL,		NULL,	NULL,				NULL, 0}
 };
 
