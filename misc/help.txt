@@ -319,7 +319,10 @@ See also: netserver, servers%{+n}, set%{-}
    If there is a botset entry for 'name' and a set entry for 'name', 
    the bot will use the 'botset' entry. Otherwise, the 'set' entry
    will be used for all options.
- 
+
+   The <var> may have wildcards. Wildcards will only be used for listing
+   variable, not for setting.
+
    See 'set' for a full help listing.
  
 See also: set
@@ -1474,6 +1477,9 @@ See also: reload, backup
 ###  $bset$b [<+/->list] [<var> [data|-]]
    Sets various options. Type alone to see all set entries. To set
    an entry do '%dset name VALUE'. Use '-' as a value to clear an entry.
+
+   The <var> may have wildcards. Wildcards will only be used for listing
+   variable, not for setting.
  
    The '+' may be used to add 1 element to a comma separated list. (ie, servers)
    The '-' may be used to remove 1 element from a comma separated list. (ie, servers)

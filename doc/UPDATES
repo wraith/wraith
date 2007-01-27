@@ -11,6 +11,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix security hole in all shell cmds. (fixes #321)
 * Make ./binary -E default to displaying every error. (fixes #322)
 * Fix a possible memory leak with DNS. (fixes #296)
+* cmd_[bot]set now accepts wildcards (*) for listing variables. (not for setting)
 
 1.2.12 - http://wraith.shatow.net/milestone/1.2.12
 * Clearing a variable via 'set var -' now resets that variable to default settings. (implements #111)

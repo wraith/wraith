@@ -9,6 +9,7 @@
 #include "shell.h"
 #include "botmsg.h"
 #include "chanprog.h"
+#include "match.h"
 #include "misc.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
@@ -784,7 +785,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   char *name = NULL;
   const char *data = NULL, *botdata = NULL;
   int list = 0, i = 0;
-  bool notyes = 1;
+  bool notyes = 1, wildcard = 0;
 
   if (par[0] && !egg_strncasecmp(par, "-yes", 4)) {
     notyes = 0;
@@ -819,26 +820,34 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       name = newsplit(&par);
     }
   }
+  
+  if (name && strchr(name, '*'))
+    wildcard = 1;
 
-  if (!list || (list && list != LIST_SHOW)) {
-    if (par[0])
-      data = (const char *) par;
-    else if (!par[0] && list) {
-      dprintf(idx, "A value must be specified!\n");
+  if (wildcard && par[0]) {
+    dprintf(idx, "Wildcards may only be used for listing matching variables.\n");
+    return 0;
+  } else if (!wildcard) {
+    if (!list || (list && list != LIST_SHOW)) {
+      if (par[0])
+        data = (const char *) par;
+      else if (!par[0] && list) {
+        dprintf(idx, "A value must be specified!\n");
+        return 0;
+      }
+    } else if (par[0] && list && list == LIST_SHOW) {
+      dprintf(idx, "Data value ignored for listing.\n");
+    }
+
+    if (name && !(var = var_get_var_by_name(name))) {
+      dprintf(idx, "No such variable: %s\n", name);
       return 0;
     }
-  } else if (par[0] && list && list == LIST_SHOW) {
-    dprintf(idx, "Data value ignored for listing.\n");
-  }
 
-  if (name && !(var = var_get_var_by_name(name))) {
-    dprintf(idx, "No such variable: %s\n", name);
-    return 0;
-  }
-
-  if (list && !(var->flags & VAR_LIST)) {
-    dprintf(idx, "That variable is not a list!\n");
-    return 0;
+    if (list && !(var->flags & VAR_LIST)) {
+      dprintf(idx, "That variable is not a list!\n");
+      return 0;
+    }
   }
   
   struct userrec *botu = NULL;
@@ -851,13 +860,17 @@ int cmd_set_real(const char *botnick, int idx, char *par)
     ishub = bot_hublevel(botu) == 999 ? 0 : 1;
   }
 
-
   if (!data) {
     while (vars[i].name) {
       botdata = NULL;
-      if (!name)	//not looping all, provided with one...
+      if (!name || wildcard)	//not looping all, provided with one...
         if (vars[i].name)
           var = &vars[i]; 
+
+      if (wildcard && !wild_match(name, var->name)) {
+        ++i;
+        continue;
+      }
       
       if (!(var->flags & VAR_HIDE) && !((var->flags & VAR_PERM) && !isowner(dcc[idx].nick)) && 
           !(botnick && ((var->flags & VAR_NOLOC) || (ishub && (var->flags & VAR_NOLHUB))))
@@ -880,9 +893,9 @@ int cmd_set_real(const char *botnick, int idx, char *par)
           dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
         }
       }
-      if (name)
+      if (name && !wildcard)
         break;
-      i++;
+      ++i;
     }
   } else { // need to set it!
     if (!list && var->flags & VAR_LIST) {
