@@ -213,8 +213,8 @@ confedit()
 
   /* Okay, edit the file */
 
-  if ((!((editor = getenv("VISUAL")) && strlen(editor)))
-      && (!((editor = getenv("EDITOR")) && strlen(editor)))
+  if ((!((editor = getenv("EDITOR")) && strlen(editor)))
+      && (!((editor = getenv("VISUAL")) && strlen(editor)))
     ) {
     editor = "vi";
 /*
@@ -313,8 +313,7 @@ confedit()
   }
 
   localhub = conf_getlocalhub(conf.bots);
-  if (localhub && localhub->pid)
-    localhub_pid = localhub->pid;
+
   tmpconf.my_close();
   free_conf();
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
@@ -322,8 +321,13 @@ confedit()
   expand_tilde(&conf.datadir);
   unlink(tmpconf.file);
   conf_to_bin(&conf, 0, -1);
-  if (localhub_pid)
+
+  /* Lookup the pid now in case it changed while in the editor */
+  if (localhub) {
+    localhub->pid = localhub_pid = checkpid(localhub->nick, localhub, NULL);
     kill(localhub_pid, SIGUSR1);
+  }
+
   exit(0);
 
 fatal:

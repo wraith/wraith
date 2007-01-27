@@ -6,6 +6,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix cmd_chanset accepting invalid flags
 * Fix Auth system not tracking nick changes correctly. (fixes #318)
 * Fix set not allowing defaults under the lower limit. (addresses #315)
+* For ./binary -C prefer environment variable EDITOR over VISUAL.
+* Fix ./binary -C not signalling the correct process under some situations. (fixes #315)
 
 1.2.12 - http://wraith.shatow.net/milestone/1.2.12
 * Clearing a variable via 'set var -' now resets that variable to default settings. (implements #111)
