@@ -421,7 +421,7 @@ void var_set(variable_t *var, const char *target, const char *datain)
      sanitize the data */
   char *sdata = NULL;
   /* Make a temporary to free at the end */
-  if (data && strcmp(data, "-")) {
+  if (data && strcmp(data, "-") && (!var->def || (var->def && strcmp(data, var->def)))) {
     sdata = var_sanitize(var, data);
     data = sdata;
   }
