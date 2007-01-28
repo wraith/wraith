@@ -271,7 +271,7 @@ static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *h
 static char *
 makecookie(char *chn, char *bnick)
 {
-  char *buf = NULL, randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "";
+  char *buf = NULL, randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "", nick[NICMAX + 1] = "";
 
   chname = strdup(chn);
 
@@ -284,8 +284,9 @@ makecookie(char *chn, char *bnick)
   if (strlen(chname) > 2)
     chname[3] = 0;
   strtoupper(chname);
-  strtolower(bnick);
-  simple_sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], bnick, chname, &ts[4], randstring, settings.salt2[15]);
+  strlcpy(nick, bnick, sizeof(nick));
+  strtolower(nick);
+  simple_sprintf(tohash, "%c%s%s%s%s%c", settings.salt2[0], nick, chname, &ts[4], randstring, settings.salt2[15]);
   hash = MD5(tohash);
   buf = (char *) my_calloc(1, 20);
   simple_sprintf(buf, "%c%c%c!%s@%s", hash[8], hash[16], hash[18], randstring, ts);
