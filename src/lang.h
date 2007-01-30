@@ -132,7 +132,7 @@
 #define DCC_ENTERPASS		"Enter your password"
 #define DCC_FLOODBOOT		"%s has been forcibly removed for flooding.\n"
 #define DCC_BOOTED1		"-=- poof -=-\n"
-#define DCC_BOOTED2		"You've been booted from the %s by %s%s%s\n"
+#define DCC_BOOTED2		"You've been booted from the bot by %s%s%s\n"
 #define DCC_BOOTED3		"%s booted %s from the party line%s%s"
 
 /* Stuff from chan.c
