@@ -15,6 +15,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added set var 'usermode' for IRC usermode to set on connect/rehash.
 * Added cmd_umode (+m) to manually set bots' usermodes at will.
 * Fix botnicks becoming lower case after being opped.
+* Minor documentation change for cmd_newleaf. (fixes #291)
 
 1.2.12 - http://wraith.shatow.net/milestone/1.2.12
 * Clearing a variable via 'set var -' now resets that variable to default settings. (implements #111)

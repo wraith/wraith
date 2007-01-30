@@ -1318,8 +1318,7 @@ See also: w
 :hub:newleaf:
 ###  $bnewleaf$b <handle> [hostmask] [anotherhostmask] ...
    Adds a new leaf to the botnet with the specified handle and hostname.
-   Any number of hosts can be specified in the cmd. You will need to
-   add a hostmask for the bot's ip for it to connect over DCC.
+   Any number of hosts can be specified in the cmd.
  
    The binary config botline will also be outputted, but should be
    checked for correctness.
