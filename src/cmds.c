@@ -818,9 +818,9 @@ static void cmd_userlist(int idx, char *par)
   
   PRINT_USERS(1, 0, 0, "Bots");
   bt = tt;			/* we don't want to add these duplicates into the total */
-  PRINT_USERS(1, USER_CHANHUB, 0, "Chatbots");
-  PRINT_USERS(1, USER_DOVOICE, 0, "Voicebots");
-  PRINT_USERS(1, USER_DOLIMIT, 0, "Limitbots");
+  PRINT_USERS(1, BOT_CHANHUB, 0, "Chatbots");
+  PRINT_USERS(1, BOT_DOVOICE, 0, "Voicebots");
+  PRINT_USERS(1, BOT_DOLIMIT, 0, "Limitbots");
   tt = 0;
   PRINT_USERS(0, USER_ADMIN, 0, "Admins");
   PRINT_USERS(0, USER_OWNER, USER_ADMIN, "Owners");
@@ -2326,6 +2326,9 @@ static void cmd_chattr(int idx, char *par)
   user.match = FR_GLOBAL;
   if (chan)
     user.match |= FR_CHAN;
+  if (u2->bot)
+    user.match |= FR_BOT;
+
   get_user_flagrec(dcc[idx].user, &user, chan ? chan->dname : 0);
   get_user_flagrec(u2, &ouser, chan ? chan->dname : 0);
   if (!chan && !glob_master(user)) {
@@ -2348,7 +2351,6 @@ static void cmd_chattr(int idx, char *par)
         free(tmpchg);
       return;
     }
-  user.match &= -1;
 
   if (chg) {
     int okp = 1;
@@ -2356,9 +2358,9 @@ static void cmd_chattr(int idx, char *par)
     pls.match = user.match;
     break_down_flags(chg, &pls, &mns);
 
-    if ((pls.global & USER_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
+    if ((pls.global & BOT_UPDATEHUB) && (bot_hublevel(u2) == 999)) {
       dprintf(idx, "Only a hub can be set as the updatehub.\n");
-      pls.global &= ~(USER_UPDATEHUB);
+      pls.global &= ~(BOT_UPDATEHUB);
     }
     
     /* strip out +p without +i or +j */
@@ -2375,9 +2377,9 @@ static void cmd_chattr(int idx, char *par)
         putlog(LOG_MISC, "*", "%s attempted to give %s hub connect access", dcc[idx].nick, u2->handle);
       if (mns.global & USER_HUBA)
         putlog(LOG_MISC, "*", "%s attempted to take away hub connect access from %s", dcc[idx].nick, u2->handle);
-      if (pls.global & USER_UPDATEHUB)
+      if (pls.global & BOT_UPDATEHUB)
         putlog(LOG_MISC, "*", "%s attempted to make %s the updatehub", dcc[idx].nick, u2->handle);
-      if (mns.global & USER_UPDATEHUB)
+      if (mns.global & BOT_UPDATEHUB)
         putlog(LOG_MISC, "*", "%s attempted to take away updatehub status from %s", dcc[idx].nick, u2->handle);
       if (pls.global & USER_ADMIN)
         putlog(LOG_MISC, "*", "%s attempted to give %s admin access", dcc[idx].nick, u2->handle);
@@ -2387,9 +2389,9 @@ static void cmd_chattr(int idx, char *par)
         putlog(LOG_MISC, "*", "%s attempted to give owner to %s", dcc[idx].nick, u2->handle);
       if (mns.global & USER_OWNER)
         putlog(LOG_MISC, "*", "%s attempted to take owner away from %s", dcc[idx].nick, u2->handle);
-      pls.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | USER_UPDATEHUB);
-      mns.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | USER_UPDATEHUB);
-      pls.chan &= ~(USER_ADMIN | USER_UPDATEHUB);
+      pls.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | BOT_UPDATEHUB);
+      mns.global &=~(USER_HUBA | USER_ADMIN | USER_OWNER | BOT_UPDATEHUB);
+      pls.chan &= ~(USER_ADMIN | BOT_UPDATEHUB);
     }
     if (chan) {
       pls.chan &= ~(USER_HUBA | USER_CHUBA);

@@ -26,6 +26,7 @@ struct flag_record {
 
 #define FR_GLOBAL 0x00000001
 #define FR_CHAN   0x00000002
+#define FR_BOT    0x00000004
 #define FR_ANYWH  0x10000000
 #define FR_ANYCH  0x20000000
 #define FR_AND    0x40000000
@@ -57,29 +58,39 @@ struct flag_record {
 #define DEFLAG_MDOP        6
 #define DEFLAG_MOP	   7
 
-#define USER_VALID (flag_t) 0xfffffffffffff
-#define CHAN_VALID (flag_t) 0xfffffffffffff
+
+#define USER_DEFAULT	0
 
 #define USER_ADMIN	FLAG[(int) 'a']
-#define USER_CHANHUB	FLAG[(int) 'c']
-#define USER_DEOP	FLAG[(int) 'd']
 #define USER_HUBA	FLAG[(int) 'i']
 #define USER_CHUBA	FLAG[(int) 'j']
-#define USER_KICK	FLAG[(int) 'k']
-#define USER_DOLIMIT	FLAG[(int) 'l']
+#define USER_PARTY	FLAG[(int) 'p']
 #define USER_MASTER	FLAG[(int) 'm']
 #define USER_OWNER	FLAG[(int) 'n']
-#define USER_OP		FLAG[(int) 'o']
+
 #define USER_AUTOOP	FLAG[(int) 'O']
-#define USER_PARTY	FLAG[(int) 'p']
+
+#define USER_DEOP	FLAG[(int) 'd']
+#define USER_KICK	FLAG[(int) 'k']
+#define USER_OP		FLAG[(int) 'o']
 #define USER_QUIET	FLAG[(int) 'q']
-#define USER_DORESOLV	FLAG[(int) 'r']
-#define USER_UPDATEHUB	FLAG[(int) 'u']
 #define USER_VOICE	FLAG[(int) 'v']
-#define USER_WASOPTEST	FLAG[(int) 'w']
 #define USER_NOFLOOD	FLAG[(int) 'x']
-#define USER_DOVOICE	FLAG[(int) 'y']
-#define USER_DEFAULT	0
+#define USER_WASOPTEST	FLAG[(int) 'w']
+
+#define CHAN_VALID (flag_t) USER_DEOP|USER_KICK|USER_OP|USER_QUIET|USER_VOICE|USER_NOFLOOD|USER_WASOPTEST
+
+#define USER_CHAN_VALID (flag_t) CHAN_VALID|USER_AUTOOP|USER_MASTER|USER_OWNER
+#define USER_VALID (flag_t) USER_ADMIN|USER_HUBA|USER_CHUBA|USER_PARTY|USER_CHAN_VALID
+
+#define BOT_CHANHUB	FLAG[(int) 'c']
+#define BOT_UPDATEHUB	FLAG[(int) 'u']
+#define BOT_DORESOLV	FLAG[(int) 'r']
+#define BOT_DOLIMIT	FLAG[(int) 'l']
+#define BOT_DOVOICE	FLAG[(int) 'y']
+
+#define BOT_CHAN_VALID (flag_t) CHAN_VALID|BOT_CHANHUB|BOT_DOLIMIT|BOT_DOVOICE|BOT_DORESOLV
+#define BOT_VALID  (flag_t) BOT_CHAN_VALID|BOT_UPDATEHUB
 
 
 #define bot_hublevel(x) ( ( (x) && x->bot && (get_user(&USERENTRY_BOTADDR, x)) ) ? \
@@ -109,19 +120,20 @@ struct flag_record {
 #define chan_quiet(x)                  ((x).chan & USER_QUIET)
 #define glob_quiet(x)                  ((x).global & USER_QUIET)
 #define glob_party(x)                  ((x).global & USER_PARTY)
-#define glob_hilite(x)                         ((x).global & USER_HIGHLITE)
+#define glob_hilite(x)                 ((x).global & USER_HIGHLITE)
 #define glob_admin(x)                  ((x).global & USER_ADMIN)
 #define glob_huba(x)                   ((x).global & USER_HUBA)
 #define glob_chuba(x)                  ((x).global & USER_CHUBA)
-#define glob_dolimit(x)                        ((x).global & USER_DOLIMIT)
-#define chan_dolimit(x)                        ((x).chan & USER_DOLIMIT)
-#define glob_dovoice(x)                        ((x).global & USER_DOVOICE)
-#define chan_dovoice(x)                        ((x).chan & USER_DOVOICE)
 #define glob_noflood(x)                        ((x).global & USER_NOFLOOD)
 #define chan_noflood(x)                        ((x).chan & USER_NOFLOOD)
-#define glob_chanhub(x)                        ((x).global & USER_CHANHUB)
-#define glob_doresolv(x)                        ((x).global & USER_DORESOLV)
-#define chan_doresolv(x)                        ((x).chan & USER_DORESOLV)
+
+#define glob_dolimit(x)                        ((x).global & BOT_DOLIMIT)
+#define chan_dolimit(x)                        ((x).chan & BOT_DOLIMIT)
+#define glob_dovoice(x)                        ((x).global & BOT_DOVOICE)
+#define chan_dovoice(x)                        ((x).chan & BOT_DOVOICE)
+#define glob_chanhub(x)                        ((x).global & BOT_CHANHUB)
+#define glob_doresolv(x)                        ((x).global & BOT_DORESOLV)
+#define chan_doresolv(x)                        ((x).chan & BOT_DORESOLV)
 
 void init_flags(void);
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);

@@ -43,8 +43,8 @@ sanity_check(flag_t atr, int bot)
   if (bot && (atr & (USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA)))
     atr &= ~(USER_PARTY | USER_MASTER | USER_OWNER | USER_ADMIN | USER_HUBA | USER_CHUBA);
 /* only bots should be there: */
-  if (!bot && (atr & (USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB)))
-    atr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_UPDATEHUB | USER_CHANHUB);
+  if (!bot && (atr & (BOT_DOLIMIT | BOT_DOVOICE | BOT_UPDATEHUB | BOT_CHANHUB)))
+    atr &= ~(BOT_DOLIMIT | BOT_DOVOICE | BOT_UPDATEHUB | BOT_CHANHUB);
   if (atr & USER_AUTOOP)
     atr |= USER_OP;
   if ((atr & USER_OP) && (atr & USER_DEOP))
@@ -78,11 +78,11 @@ flag_t
 chan_sanity_check(flag_t chatr, int bot)
 {
   /* these should only be global */
-  if (chatr & (USER_PARTY | USER_ADMIN | USER_HUBA | USER_CHUBA | USER_UPDATEHUB))
-    chatr &= ~(USER_PARTY | USER_ADMIN | USER_HUBA | USER_CHUBA | USER_UPDATEHUB);
+  if (chatr & (USER_PARTY | USER_ADMIN | USER_HUBA | USER_CHUBA | BOT_UPDATEHUB))
+    chatr &= ~(USER_PARTY | USER_ADMIN | USER_HUBA | USER_CHUBA | BOT_UPDATEHUB);
   /* these should only be set on bots */
-  if (!bot && (chatr & (USER_DOLIMIT | USER_DOVOICE | USER_CHANHUB)))
-    chatr &= ~(USER_DOLIMIT | USER_DOVOICE | USER_CHANHUB);
+  if (!bot && (chatr & (BOT_DOLIMIT | BOT_DOVOICE | BOT_CHANHUB)))
+    chatr &= ~(BOT_DOLIMIT | BOT_DOVOICE | BOT_CHANHUB);
 
   if ((chatr & USER_OP) && (chatr & USER_DEOP))
     chatr &= ~(USER_OP | USER_DEOP);
@@ -190,12 +190,16 @@ break_down_flags(const char *string, struct flag_record *plus, struct flag_recor
     }
     string++;
   }
-  /*
-   * for (which = plus; which; which = (which == plus ? minus : 0)) {
-   * which->global &= USER_VALID;
-   * which->chan &= CHAN_VALID;
-   * }
-   */
+  for (which = plus; which; which = (which == plus ? minus : 0)) {
+    if (flags & FR_BOT) {
+      which->global &= BOT_VALID;
+      which->chan &= BOT_CHAN_VALID;
+    } else {    
+      which->global &= USER_VALID;
+      which->chan &= USER_CHAN_VALID;
+    }
+  }
+
   plus->match |= flags;
   if (minus) {
     minus->match |= flags;
@@ -500,7 +504,7 @@ chk_noflood(struct flag_record fr)
 int
 isupdatehub()
 {
-  if (conf.bot->hub && conf.bot->u && (conf.bot->u->flags & USER_UPDATEHUB))
+  if (conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_UPDATEHUB))
     return 1;
   else
     return 0;
@@ -509,7 +513,7 @@ isupdatehub()
 int
 ischanhub()
 {
-  if (!conf.bot->hub && conf.bot->u && (conf.bot->u->flags & USER_CHANHUB))
+  if (!conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_CHANHUB))
     return 1;
   else
     return 0;
