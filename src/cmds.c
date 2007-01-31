@@ -3353,27 +3353,26 @@ static void cmd_mns_user(int idx, char *par)
     dprintf(idx, "You can't remove a bot owner!\n");
     return;
   }
+
   if (u2->bot) {
     if (!(dcc[idx].user->flags & USER_OWNER)) {
         dprintf(idx, "You can't remove bots.\n");
         return;
     }
+    int i = nextbot(handle);
 
-    int idx2;
+    if (i < 0)
+      botunlink(idx, handle, "Bot removed.");
+    else if (!egg_strcasecmp(dcc[i].nick, handle))
+      botunlink(idx, handle, "Bot removed.");
+    else {
+      char x[40] = "";
 
-    for (idx2 = 0; idx2 < dcc_total; idx2++)
-      if (dcc[idx2].type && dcc[idx2].type != &DCC_RELAY && dcc[idx2].type != &DCC_FORK_BOT && 
-                 !egg_strcasecmp(dcc[idx2].nick, handle))
-        break;
-    if (idx2 != dcc_total) {
-      dprintf(idx, "You can't remove a directly linked bot.\n");
-      return;
+      simple_snprintf(x, sizeof(x), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
+      botnet_send_unlink(i, x, lastbot(handle), handle, "Bot removed.");
     }
   }
-  if (!(dcc[idx].user->flags & USER_MASTER) && !u2->bot) {
-    dprintf(idx, "You can't remove users who aren't bots!\n");
-    return;
-  }
+
   if (!conf.bot->hub)
     check_this_user(handle, 1, NULL);
   if (deluser(handle)) {
