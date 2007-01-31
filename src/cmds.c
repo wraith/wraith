@@ -979,19 +979,15 @@ static void cmd_console(int idx, char *par)
   if ((nick [0] == '+' && findchan_by_dname(nick)) ||
       (nick [0] != '+' && strchr(CHANMETA "*", nick[0]))) {
     chan = findchan_by_dname(nick);
-    if (strcmp(nick, "*") && !chan) {
-      dprintf(idx, "Invalid console channel: %s.\n", nick);
-      return;
-    }
-
-    if (strcmp(nick, "*") && privchan(fr, findchan_by_dname(nick), PRIV_OP)) {
-      dprintf(idx, "Invalid console channel: %s.\n", nick);
-      return;
-    }
 
     get_user_flagrec(dcc[idx].user, &fr, nick);
 
-    if (!chk_op(fr, findchan_by_dname(nick))) {
+    if (strcmp(nick, "*") && (!chan || privchan(fr, chan, PRIV_OP))) {
+      dprintf(idx, "Invalid console channel: %s.\n", nick);
+      return;
+    }
+
+    if (!chk_op(fr, chan)) {
       dprintf(idx, "You don't have op or master access to channel %s.\n", nick);
       return;
     }
