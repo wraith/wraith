@@ -271,7 +271,7 @@ static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *h
 static char *
 makecookie(char *chn, char *bnick)
 {
-  char *buf = NULL, randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "", nick[NICMAX + 1] = "";
+  char *buf = NULL, randstring[5] = "", ts[11] = "", *chname = NULL, *hash = NULL, tohash[50] = "", nick[NICKMAX + 1] = "";
 
   chname = strdup(chn);
 
