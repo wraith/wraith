@@ -1952,6 +1952,13 @@ static void cmd_link(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# link %s", dcc[idx].nick, par);
 
   char *s = newsplit(&par);
+  char *tolink = par[0] ? par : s;
+  struct userrec *u = get_user_by_handle(userlist, tolink);
+
+  if (!u || bot_hublevel(u) == 999) {
+    dprintf(idx, "You can only link to other hubs.\n");
+    return;
+  }
 
   if (!par[0] || !egg_strcasecmp(par, conf.bot->nick))
     botlink(dcc[idx].nick, idx, s);
