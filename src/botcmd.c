@@ -164,6 +164,7 @@ void bot_remotereply(int idx, char *par) {
 
 /* chat <from> <notice>  -- only from bots
  */
+/* this is only sent to hub bots */
 static void bot_chat(int idx, char *par)
 {
   char *from = NULL;
@@ -220,7 +221,15 @@ static void bot_actchan(int idx, char *par)
     else
       p++;
   }
-  chanout_but(-1, chan, "* %s %s\n", from, par);
+  if (!conf.bot->hub) { /* Need to strip out the hub nick */
+    char *q = NULL, newfrom[HANDLEN + 9 + 1]; /* HANDLEN@[botnet] */
+ 
+    strlcpy(newfrom, from, sizeof(newfrom));
+    q = strchr(newfrom, '@');
+    *q = 0;
+    chanout_but(-1, chan, "* %s@[botnet] %s\n", newfrom, par);
+  } else
+    chanout_but(-1, chan, "* %s %s\n", from, par);
   botnet_send_act(idx, from, NULL, chan, par);
 }
 
@@ -291,7 +300,7 @@ static void bot_bye(int idx, char *par)
   bots = bots_in_subtree(findbot(dcc[idx].nick));
   users = users_in_subtree(findbot(dcc[idx].nick));
   simple_sprintf(s, "%s %s. %s (lost %d bot%s and %d user%s)",
-		 BOT_DISCONNECTED, dcc[idx].nick, par[0] ?
+		 BOT_DISCONNECTED, conf.bot->hub ? dcc[idx].nick : "botnet", par[0] ?
 		 par : "No reason", bots, (bots != 1) ?
 		 "s" : "", users, (users != 1) ? "s" : "");
   putlog(LOG_BOTS, "*", "%s", s);
@@ -931,7 +940,7 @@ static void bot_nickchange(int idx, char *par)
     return;
   }
   chanout_but(-1, party[i].chan, "*** (%s) Nick change: %s -> %s\n",
-	      bot, newnick, party[i].nick);
+	      conf.bot->hub ? bot : "[botnet]", newnick, party[i].nick);
   botnet_send_nkch_part(idx, i, newnick);
 }
 
@@ -979,10 +988,10 @@ static void bot_join(int idx, char *par)
   botnet_send_join_party(idx, linking, i2);
   if (i != chan) {
     if (i >= 0) {
-      chanout_but(-1, i, "*** (%s) %s %s %s.\n", bot, nick, NET_LEFTTHE, i ? "channel" : "party line");
+      chanout_but(-1, i, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick, NET_LEFTTHE, i ? "channel" : "party line");
     }
     if (!linking)
-    chanout_but(-1, chan, "*** (%s) %s %s %s.\n", bot, nick, NET_JOINEDTHE, chan ? "channel" : "party line");
+    chanout_but(-1, chan, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick, NET_JOINEDTHE, chan ? "channel" : "party line");
   }
 }
 
@@ -1014,11 +1023,11 @@ static void bot_part(int idx, char *par)
       register int chan = party[partyidx].chan;
 
       if (par[0])
-	chanout_but(-1, chan, "*** (%s) %s %s %s (%s).\n", bot, nick,
+	chanout_but(-1, chan, "*** (%s) %s %s %s (%s).\n", conf.bot->hub ? bot : "[botnet]", nick,
 		    NET_LEFTTHE,
 		    chan ? "channel" : "party line", par);
       else
-	chanout_but(-1, chan, "*** (%s) %s %s %s.\n", bot, nick,
+	chanout_but(-1, chan, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick,
 		    NET_LEFTTHE,
 		    chan ? "channel" : "party line");
     }
@@ -1069,11 +1078,11 @@ static void bot_away(int idx, char *par)
   if (!linking) {
     if (par[0])
       chanout_but(-1, party[partyidx].chan,
-		  "*** (%s) %s %s: %s.\n", bot,
+		  "*** (%s) %s %s: %s.\n", conf.bot->hub ? bot : "[botnet]",
 		  party[partyidx].nick, NET_AWAY, par);
     else
       chanout_but(-1, party[partyidx].chan,
-		  "*** (%s) %s %s.\n", bot,
+		  "*** (%s) %s %s.\n", conf.bot->hub ? bot : "[botnet]",
 		  party[partyidx].nick, NET_UNAWAY);
   }
   botnet_send_away(idx, bot, sock, par, linking);

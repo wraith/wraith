@@ -160,7 +160,7 @@ void botnet_send_chat(int idx, char *botnick, char *data)
   if (tands > 0) {
     size_t len = simple_snprintf(OBUF, sizeof(OBUF), "ct %s %s\n", botnick, data);
 
-    send_tand_but(idx, OBUF, len);
+    send_hubs_but(idx, OBUF, len);
   }
 }
 

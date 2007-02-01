@@ -1467,12 +1467,12 @@ share_report(int idx, int details)
             if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
                  == (DCT_FILETRAN | DCT_FILESEND)) && !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
               dprintf(idx, "Downloading userlist from %s (%d%% done)\n",
-                      dcc[i].nick, (int) (100.0 * ((float) dcc[j].status) / ((float) dcc[j].u.xfer->length)));
+                      conf.bot->hub ? dcc[i].nick : "[botnet]", (int) (100.0 * ((float) dcc[j].status) / ((float) dcc[j].u.xfer->length)));
               ok = 1;
               break;
             }
           if (!ok)
-            dprintf(idx, "Download userlist from %s (negotiating " "botentries)\n", dcc[i].nick);
+            dprintf(idx, "Download userlist from %s (negotiating " "botentries)\n", conf.bot->hub ? dcc[i].nick : "[botnet]");
         } else if (dcc[i].status & STAT_SENDING) {
           for (j = 0; j < dcc_total; j++) {
             if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
@@ -1487,7 +1487,7 @@ share_report(int idx, int details)
             }
           }
         } else if (dcc[i].status & STAT_AGGRESSIVE) {
-          dprintf(idx, "    Passively sharing with %s.\n", dcc[i].nick);
+          dprintf(idx, "    Passively sharing with %s.\n", conf.bot->hub ? dcc[i].nick : "[botnet]");
         } else if (dcc[i].status & STAT_SHARE) {
           dprintf(idx, "    Aggressively sharing with %s.\n", dcc[i].nick);
         }
