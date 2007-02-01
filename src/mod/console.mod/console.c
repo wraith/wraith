@@ -20,8 +20,6 @@
 #include "src/misc.h"
 #include "src/core_binds.h"
 
-static int console_autosave = 1;
-
 struct console_info {
   char *channel;
   int conflags;
@@ -285,7 +283,7 @@ console_chon(char *handle, int idx)
 }
 
 static int
-console_store(int idx, char *par)
+console_store(int idx, char *par, bool displaySave)
 {
   struct console_info *i = (struct console_info *) get_user(&USERENTRY_CONSOLE, dcc[idx].user);
 
@@ -341,16 +339,15 @@ console_store(int idx, char *par)
   set_user(&USERENTRY_CONSOLE, dcc[idx].user, i);
   dprintf(idx, "Console setting stored.\n");
   if (conf.bot->hub)
-    write_userfile(idx);
+    write_userfile(displaySave ? idx : -1);
   return 0;
 }
 
 /* cmds.c:cmd_console calls this, better than chof bind - drummer,07/25/1999 */
 void
-console_dostore(int idx)
+console_dostore(int idx, bool displaySave)
 {
-  if (console_autosave)
-    console_store(idx, NULL);
+  console_store(idx, NULL, displaySave);
   return;
 }
 

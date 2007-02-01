@@ -6,6 +6,7 @@
 
 
 #include <ctype.h>
+#include "src/mod/console.mod/console.h"
 
 static struct flag_record user	 = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 static struct flag_record victim = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
@@ -1030,14 +1031,17 @@ static void mns_chan(int idx, char *par, char *bot)
   }
 
   if (!bot) {
-    for (i = 0; i < dcc_total; i++)
-      if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) && !rfc_casecmp(dcc[i].u.chat->con_chan, chan->dname)) {
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) && 
+          !rfc_casecmp(dcc[i].u.chat->con_chan, chan->dname)) {
         dprintf(i, "%s is no longer a valid channel, changing your console to '*'\n", chname);
         strcpy(dcc[i].u.chat->con_chan, "*");
-      } 
+        console_dostore(i, 0);
+      }
+    }
     remove_channel(chan);
     if (conf.bot->hub)
-      write_userfile(-1);
+      write_userfile(idx);
     dprintf(idx, "Channel %s removed from the botnet.\n", chname);
     dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
   } else
