@@ -9,7 +9,8 @@
 #define ERR_BINMOD      2
 #define ERR_PASSWD      3
 #define ERR_WRONGBINDIR 4
-#define ERR_TMPSTAT     6
+#define ERR_DATADIR	5
+#define ERR_TMPSTAT     8
 #define ERR_TMPMOD      9
 #define ERR_WRONGUID    12
 #define ERR_WRONGUNAME  13
@@ -73,7 +74,7 @@ char *werr_tostr(int);
 int det_translate(const char *);
 const char *det_translate_num(int);
 char *shell_escape(const char *);
-void mkdir_p(const char *);
+int mkdir_p(const char *);
 extern bool		clear_tmpdir;
 
 #endif /* _SHELL_H */

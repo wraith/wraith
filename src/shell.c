@@ -666,6 +666,8 @@ char *werr_tostr(int errnum)
     return "Cannot access the global passwd file";
   case ERR_WRONGBINDIR:
     return "Wrong directory/binary name";
+  case ERR_DATADIR: 
+    return STR("Cannot access datadir.");
   case ERR_TMPSTAT:
     return STR("Cannot access tmp directory.");
   case ERR_TMPMOD:
@@ -868,7 +870,7 @@ char *my_username()
   return username[0] ? username : NULL;
 }
 
-void mkdir_p(const char *dir) {
+int mkdir_p(const char *dir) {
   char *p = NULL, *path = NULL;
 
   path = p = strdup(dir);
@@ -888,7 +890,12 @@ void mkdir_p(const char *dir) {
     if (p)
       *p = '/';
   } while(p);
+
+  int couldStat = can_stat(path);
+
   free(path);
+
+  return couldStat;
 }
 
 void expand_tilde(char **ptr)

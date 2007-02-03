@@ -1143,7 +1143,12 @@ bin_to_conf(bool error)
     free(tmpp);
   }
 
-  mkdir_p(conf.datadir);
+  char datadir[PATH_MAX] = "";
+  realpath(conf.datadir, datadir);
+  str_redup(&conf.datadir, datadir);
+  if (!mkdir_p(conf.datadir) && error)
+    werr(ERR_DATADIR);
+
   Tempfile::FindDir();
 
   if (clear_tmpdir)

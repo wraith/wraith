@@ -23,6 +23,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix cmd_link being used to link to non-hubs. (fixes #329)
 * Fix cmd_mns_chan not sharing console changes. (fixes #328)
 * Fix many instances of hub nicks leaking to leaf bots. (fixes #326)
+* Fix bot not checking if it can access datadir on startup. (fixes #330)
 
 1.2.12 - http://wraith.shatow.net/milestone/1.2.12
 * Clearing a variable via 'set var -' now resets that variable to default settings. (implements #111)
