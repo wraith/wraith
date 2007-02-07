@@ -2,6 +2,9 @@ This is a summary of ChangeLog basically.
 Numbers expressed as '#12' are references to a ticket/bug posting which can be viewed at: http://xx.shatow.net
 Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
 
+1.2.14 - http://wraith.shatow.net/milestone/1.2.14
+* Fix another bug in shell functions. (fixes #321)
+
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
 * Fix Auth system not tracking nick changes correctly. (fixes #318)
