@@ -4,6 +4,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 
 1.2.14 - http://wraith.shatow.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
+* Fix bug with bots not retaining flags over share. (fixes #334)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

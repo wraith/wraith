@@ -358,6 +358,10 @@ share_chattr(int idx, char *par)
         if (par[0] && cst) {
           fr.match = FR_CHAN;
           fr2.match = FR_CHAN;
+          if (u->bot) {
+            fr.match |= FR_BOT; 
+            fr2.match |= FR_BOT;
+          }
           break_down_flags(atr, &fr, 0);
           get_user_flagrec(u, &fr2, par);
           set_user_flagrec(u, &fr, par);
@@ -374,6 +378,8 @@ share_chattr(int idx, char *par)
           get_user_flagrec(dcc[idx].user, &fr, 0);
           /* Don't let bot flags be altered */
           ofl = fr.global;
+          if (u->bot)
+            fr.match |= FR_BOT;
           break_down_flags(atr, &fr, 0);
           fr.global = sanity_check(fr.global, u->bot);
           set_user_flagrec(u, &fr, 0);
@@ -466,6 +472,8 @@ share_newuser(int idx, char *par)
       fr.global = 0;
 
       fr.match = FR_GLOBAL;
+      if (isbot)
+        fr.match |= FR_BOT;
       break_down_flags(par, &fr, NULL);
 
       /* If user already exists, ignore command */

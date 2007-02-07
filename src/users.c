@@ -465,6 +465,10 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
     dprintf(idx, "(skipping first %d)\n", start - 1);
   if (strchr("+-&|", *mtch)) {
     user.match = pls.match = FR_GLOBAL | FR_CHAN;
+    if (isbot) {
+      user.match |= FR_BOT;
+      pls.match |= FR_BOT;
+    }
     break_down_flags(mtch, &pls, &mns);
     mns.match = pls.match ^ (FR_AND | FR_OR);
     if (!mns.global && !mns.chan) {
