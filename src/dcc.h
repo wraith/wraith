@@ -141,7 +141,6 @@ struct dupwait_info {
  */
 #define DCT_CHAT      BIT0        /* this dcc type receives botnet
                                            chatter                          */
-#define DCT_GETNOTES  DCT_CHAT          /* can receive notes                */
 #define DCT_MASTER    BIT1        /* received master chatter          */
 #define DCT_SHOWWHO   BIT2        /* show the user in .who            */
 #define DCT_REMOTEWHO BIT3        /* show in remote who               */

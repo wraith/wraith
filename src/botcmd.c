@@ -266,23 +266,6 @@ static void bot_priv(int idx, char *par)
 	case NOTE_ERROR:
 	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s.", BOT_NOSUCHUSER, to);
 	  break;
-	case NOTE_STORED:
-	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s", BOT_NOTESTORED2);
-	  break;
-	case NOTE_FULL:
-	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s", BOT_NOTEBOXFULL);
-	  break;
-	case NOTE_AWAY:
-	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s", to, BOT_NOTEISAWAY);
-	  break;
-	case NOTE_FWD:
-	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s", "Not online; note forwarded to:", to);
-	  break;
-	case NOTE_TCL:
-	  break;		/* Do nothing */
-	case NOTE_OK:
-	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s.", BOT_NOTESENTTO, to);
-	  break;
 	}
     }
   } else {			/* Pass it on */
@@ -1067,7 +1050,6 @@ static void bot_away(int idx, char *par)
   }
   etc = newsplit(&par);
   sock = base64_to_int(etc);
-  check_bind_away(bot, idx, par);
   if (par[0]) {
     partystat(bot, sock, PLSTAT_AWAY, 0);
     partyaway(bot, sock, par);

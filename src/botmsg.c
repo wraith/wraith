@@ -23,7 +23,6 @@
 #include "botnet.h"
 #include "tandem.h"
 #include "core_binds.h"
-#include "src/mod/notes.mod/notes.h"
 #include <stdarg.h>
 
 static char	OBUF[SGRAB - 110] = "";
@@ -427,7 +426,7 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
  */
 int add_note(char *to, char *from, char *msg, int idx, int echo)
 {
-  int status, i, iaway, sock;
+  int status, i, sock;
   char *p = NULL, botf[81] = "", ss[81] = "", ssf[81] = "";
   struct userrec *u;
 
@@ -469,6 +468,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
       botnet_send_priv(i, botf, x, p, "%s", msg);
     return NOTE_OK;		/* Forwarded to the right bot */
   }
+
   /* Might be form "sock:nick" */
   splitc(ssf, from, ':');
   rmspace(ssf);
@@ -478,47 +478,24 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     sock = (-1);
   else
     sock = atoi(ss);
-  /* Don't process if there's a note binding for it */
-  if (idx != (-2)) {		/* Notes from bots don't trigger it */
-    if (check_bind_note(from, to, msg)) {
-      if ((idx >= 0) && (echo))
-	dprintf(idx, "-> %s: %s\n", to, msg);
-      return NOTE_TCL;
-    }
-  }
+
   if (!(u = get_user_by_handle(userlist, to))) {
     if (idx >= 0)
       dprintf(idx, "I don't know anyone by that name.\n");
     return NOTE_ERROR;
   }
-  if (is_bot(u)) {
-    if (idx >= 0)
-      dprintf(idx, BOT_NONOTES);
-    return NOTE_ERROR;
-  }
 
-  status = NOTE_STORED;
-  iaway = 0;
+  if (is_bot(u))
+    return NOTE_ERROR;
+
+  status = NOTE_ERROR;
+
   /* Online right now? */
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && (dcc[i].type->flags & DCT_GETNOTES) &&
+    if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) &&
 	((sock == (-1)) || (sock == dcc[i].sock)) &&
 	(!egg_strcasecmp(dcc[i].nick, to))) {
-      int aok = 1;
 
-      if (dcc[i].type == &DCC_CHAT)
-	if ((dcc[i].u.chat->away != NULL) &&
-	    (idx != (-2))) {
-	  /* Only check away if it's not from a bot */
-	  aok = 0;
-	  if (idx >= 0)
-	    dprintf(idx, "%s %s: %s\n", dcc[i].nick, BOT_USERAWAY,
-		    dcc[i].u.chat->away);
-	  if (!iaway)
-	    iaway = i;
-	  status = NOTE_AWAY;
-	}
-      if (aok) {
 	char *p2 = NULL, *fr = from;
 	int l = 0;
 	char work[1024] = "";
@@ -537,18 +514,12 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
 	if ((idx >= 0) && (echo))
 	  dprintf(idx, "-> %s: %s\n", to, msg);
 	return NOTE_OK;
-      }
     }
   }
+  /* The user is not online.. why are we getting a bot note for them? */
+
   if (idx == (-2))
     return NOTE_OK;		/* Error msg from a tandembot: don't store */
-  status = storenote(from, to, msg, idx, NULL, 0);
-  if (status < 0) status = NOTE_ERROR;
-  else if (status == NOTE_AWAY) {
-      /* User is away in all sessions -- just notify the user that a
-       * message arrived and was stored. (only oldest session is notified.)
-       */
-      dprintf(iaway, "*** %s.\n", BOT_NOTEARRIVED);
-  }
-  return(status);
+
+  return NOTE_ERROR;
 }

@@ -168,9 +168,7 @@ See also: +host, -host%{+m}, +user, -user%{-}
 ::away
 ###  $baway$b [reason]
    Marks you as "away" on the party line. Your away message will show up in
-   the $b'%dwho'$b list, and will be displayed to anyone who tries to send you
-   a note. Your notes will be stored, and then displayed to you as soon as you
-   are no longer away. Saying something on the party line will automatically
+   the $b'%dwho'$b list. Saying something on the party line will automatically
    remove your "away" status, or you can type $b'%dback'$b or $b'%daway'$b by
    itself.
  
@@ -560,7 +558,7 @@ See also: %{+n}+chan, -chan%{-}, chaninfo
    you wish.
    $b'%dchat off'$b removes you from all channels, including the main party line.
    You can still use bot commands and see the console, but you can't talk to
-   anyone except via $b'%dnote'$b. $b'%dchat on'$b returns you to the main party
+   anyone. $b'%dchat on'$b returns you to the main party
    line (channel 0) if you were elsewhere.
    If you prefix the channel with a '*', you will join a local channel.
  
@@ -973,13 +971,6 @@ See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstic
      "Local time is now [1m17:17[0m" for example instead of "Local time is
      now 17:17". Use this to turn telnet codes on or off/change the display
      mode.
-::fwd
-###  $bfwd$b <handle> [desto]
-   This allows you to set a note forwarding address for a user,
-   this means if a note needs to be stored for the user, the
-   bot will attempt to pass it on to the given user@bot, if
-   the bot is not online then the note is still stored locally,
-   if the other user doesn't exist, the note is lost. Boohoo.
 :leaf:getkey:
 ###  $bgetkey$b [channel]
    If there is a key set for channel, it is displayed. If channel is not
@@ -1337,28 +1328,6 @@ See: handle
    Displays all users who do not have a password set.
  
    Specify any argument to give random passes to users.
-::note
-###  $bnote$b <nickname[@bot]> <message>
-   Sends a private note to a user on the partyline. If that user is currently
-   logged in and not marked as away, the message will be received immediately.
-   Otherwise, it will be stored and displayed the next time that user joins the
-   partyline. To send a note to someone on a different bot, add "nick@bot" to
-   the nickname.
- 
-See also: whom, notes
-::notes
-###  $bnotes index$b
-###  $bnotes read$b <# or ALL>
-###  $bnotes erase$b <# or ALL>
-   lets you manipulate notes that have been stored up for you while
-   you were gone.  $b'notes index'$b gives a listing of all the notes
-   stored up: who they are from, and when they were left.
-   $b'notes read'$b lets you read some or all notes, according to a
-   list of numbers and/or intervals separated by semicolon.
-   and $b'notes erase'$b erases notes after you are done with them.
-     ex: notes erase 2-4;8;16-
- 
-See also: note, whom, noteigns
 :leaf:op
 ###  $bop$b <nickname> [channel|*]
    will grant chanop to the person you specify, so long as the bot
@@ -1829,7 +1798,6 @@ See also: whom
       $bBOTNICK$b - This user record is a bot.
       $bPASS$b   - "yes" if she has a password set; "no" otherwise 
                    (bots dont use passwords)
-      $bNOTES$b  - number of stored notes waiting for the user
       $bFLAGS$b  - the list of flags for this user (see below)
       $bLAST$b   - the time or date that the user was last on irc or the partyline
  

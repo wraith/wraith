@@ -644,7 +644,6 @@ static char *fake_md5 = "596a96cc7bf9108cd896f33c44aedc8a";
 void console_init();
 void ctcp_init();
 void update_init();
-void notes_init();
 void server_init();
 void irc_init();
 void channels_init();
@@ -776,7 +775,6 @@ printf("out: %s\n", out);
   transfer_init();
   share_init();
   update_init();
-  notes_init();
   console_init();
   chanprog();
 

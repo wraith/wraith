@@ -502,7 +502,7 @@ int change_handle(struct userrec *u, char *newh)
   /* Nothing that will confuse the userfile */
   if (!newh[1] && strchr(BADHANDCHARS, newh[0]))
     return 0;
-  check_bind_nkch(u->handle, newh);
+
   /* Yes, even send bot nick changes now: */
   if (!noshare)
     shareout("h %s %s\n", u->handle, newh);

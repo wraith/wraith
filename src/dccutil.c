@@ -28,7 +28,6 @@
 #include "core_binds.h"
 #include "egg_timer.h"
 #include "src/mod/server.mod/server.h"
-#include "src/mod/notes.mod/notes.h"
 #include <stdarg.h>
 
 static struct portmap *root = NULL;
@@ -401,8 +400,6 @@ dcc_chatter(int idx)
 
   show_motd(idx);
 
-  notes_chon(idx);
-
   if (dcc[idx].type == &DCC_CHAT) {
     if (!strcmp(dcc[idx].u.chat->con_chan, "***"))
       strcpy(dcc[idx].u.chat->con_chan, "*");
@@ -600,7 +597,6 @@ not_away(int idx)
   dprintf(idx, "You're not away any more.\n");
   free(dcc[idx].u.chat->away);
   dcc[idx].u.chat->away = NULL;
-  check_bind_away(conf.bot->nick, idx, NULL);
 }
 
 void
@@ -624,7 +620,6 @@ set_away(int idx, char *s)
     }
   }
   dprintf(idx, "You are now away. (%s)\n", s);
-  check_bind_away(conf.bot->nick, idx, s);
 }
 
 

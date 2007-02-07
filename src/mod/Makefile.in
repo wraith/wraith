@@ -22,7 +22,6 @@ mods = channels.mod \
 	console.mod \
 	ctcp.mod \
 	irc.mod \
-	notes.mod \
 	server.mod \
 	share.mod \
 	transfer.mod \
@@ -32,7 +31,6 @@ mod_objs = channels.mod_o \
 	console.mod_o \
 	ctcp.mod_o \
 	irc.mod_o \
-	notes.mod_o \
 	server.mod_o \
 	share.mod_o \
 	transfer.mod_o \

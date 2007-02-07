@@ -56,7 +56,6 @@ MODOBJS = mod/channels.o \
         mod/console.o \
         mod/ctcp.o \
         mod/irc.o \
-        mod/notes.o \
         mod/server.o \
         mod/share.o \
         mod/transfer.o \

@@ -16,9 +16,7 @@
 /* Messages referring to bots
  */
 #define BOT_NOTHERE		"That bot isn't here.\n"
-#define BOT_NONOTES		"That's a bot.  You can't leave notes for a bot.\n"
 #define BOT_USERAWAY		"is away"
-#define BOT_NOTEARRIVED		"Note arrived for you"
 #define BOT_MSGDIE		"Bot shut down beginning...."
 #define BOT_NOSUCHUSER		"No such user"
 #define BOT_NOCHANNELS		"no channels"
@@ -26,10 +24,6 @@
 #define BOT_OTHERPEOPLE		"Other people on the bot"
 /* was: BOT_OUTDATEDWHOM - 0xb1e */
 #define BOT_LINKATTEMPT		"Attempting to link"
-#define BOT_NOTESTORED2		"Not online; note stored."
-#define BOT_NOTEBOXFULL		"Notebox is full, sorry."
-#define BOT_NOTEISAWAY		"is away; note stored."
-#define BOT_NOTESENTTO		"Note sent to"
 #define BOT_DISCONNECTED	"Disconnected from:"
 #define BOT_CANTLINKTHERE	"Can't link there"
 #define BOT_CANTUNLINK		"Can't unlink"

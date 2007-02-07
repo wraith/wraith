@@ -31,7 +31,6 @@
 #include "chan.h"
 #include "tandem.h"
 #include "src/mod/channels.mod/channels.h"
-#include "src/mod/notes.mod/notes.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "misc_file.h"
@@ -356,7 +355,6 @@ static void
 tell_user(int idx, struct userrec *u)
 {
   char s[81] = "", s1[81] = "", format[81] = "";
-  int n = num_notes(u->handle);
   time_t now2;
   struct chanuserrec *ch = NULL;
   struct chanset_t *chan = NULL;
@@ -376,8 +374,8 @@ tell_user(int idx, struct userrec *u)
       egg_strftime(s1, 6, "%H:%M", gmtime(&li->laston));
   }
   if (!u->bot) {
-    egg_snprintf(format, sizeof format, "%%-%us %%-5s%%5d %%-15s %%s (%%-10.10s)\n", HANDLEN);
-    dprintf(idx, format, u->handle, get_user(&USERENTRY_PASS, u) ? "yes" : "no", n, s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
+    egg_snprintf(format, sizeof format, "%%-%us %%-5s %%-15s %%s (%%-10.10s)\n", HANDLEN);
+    dprintf(idx, format, u->handle, get_user(&USERENTRY_PASS, u) ? "yes" : "no", s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
   } else {	/* BOT */
     egg_snprintf(format, sizeof format, "%%-%us %%-8s %%s (%%-10.10s)\n", HANDLEN);
     dprintf(idx, format, u->handle, s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
@@ -436,7 +434,7 @@ void tell_user_ident(int idx, char *id)
     egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
   } else {
-    egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
+    egg_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
     dprintf(idx, format, "HANDLE");
   }
   tell_user(idx, u);
@@ -458,7 +456,7 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
     egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
   } else {
-    egg_snprintf(format, sizeof format, "%%-%us PASS NOTES FLAGS           LAST\n", HANDLEN);
+    egg_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
     dprintf(idx, format, "HANDLE");
   }
   if (start > 1)

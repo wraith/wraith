@@ -258,25 +258,9 @@ void check_bind_chof(char *hand, int idx)
   touch_laston(u, "partyline", now);
 }
 
-void check_bind_nkch(const char *ohand, const char *nhand)
-{
-  check_bind(BT_nkch, ohand, NULL, ohand, nhand);
-}
-
-int check_bind_note(const char *from, const char *to, const char *text)
-{
-  return check_bind(BT_note, to, NULL, from, to, text);
-}
-
-void check_bind_away(const char *bot, int idx, const char *msg)
-{
-  check_bind(BT_away, bot, NULL, bot, idx, msg);
-}
-
 void check_bind_time(struct tm *tm)
 {
 	char full[32] = "";
 	egg_snprintf(full, sizeof(full), "%02d %02d %02d %02d %04d", tm->tm_min, tm->tm_hour, tm->tm_mday, tm->tm_mon, tm->tm_year + 1900);
 	check_bind(BT_time, full, NULL, tm->tm_min, tm->tm_hour, tm->tm_mday, tm->tm_mon, tm->tm_year + 1900);
 }
-
