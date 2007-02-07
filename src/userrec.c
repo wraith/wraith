@@ -649,7 +649,9 @@ int deluser(char *handle)
         if (i != -1 && !egg_strcasecmp(dcc[i].nick, handle))
           botunlink(-1, handle, "Bot removed.");
         else { /* This will probably never be called -- but just in case */
-          killsock(dcc[fnd].sock);
+          /* Kill link in attempt/progress */
+          if (dcc[fnd].sock != -1)
+            killsock(dcc[fnd].sock);
           lostdcc(fnd);
         }
       } else if (!u->bot) {
