@@ -196,7 +196,7 @@ confedit()
   char *editor = NULL;
   mode_t um;
   int waiter;
-  pid_t pid, xpid, localhub_pid = 0;
+  pid_t pid, xpid;
   struct stat st, sn;
   struct timespec ts1, ts2;           /* time before and after edit */
   bool autowrote = 0;
@@ -331,8 +331,8 @@ confedit()
 
   /* Lookup the pid now in case it changed while in the editor */
   if (localhub) {
-    localhub->pid = localhub_pid = checkpid(localhub->nick, localhub, NULL);
-    kill(localhub_pid, SIGUSR1);
+    localhub->pid = checkpid(localhub->nick, localhub, NULL);
+    kill(localhub->pid, SIGUSR1);
   }
 
   exit(0);
@@ -1048,6 +1048,7 @@ void kill_removed_bots(conf_bot *oldlist, conf_bot *newlist)
         }
       }
       if (!found) {
+        botold->pid = checkpid(botold->nick, botold, NULL);
         conf_killbot(NULL, botold, SIGKILL);
         if ((u = get_user_by_handle(userlist, botold->nick))) {
           putlog(LOG_MISC, "*", "Removing '%s' as it has been removed from the binary config.", botold->nick);
