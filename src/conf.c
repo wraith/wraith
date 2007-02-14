@@ -36,6 +36,8 @@ char cfile[DIRMAX] = "";
 #endif /* CYGWIN_HACKS */
 conf_t conf;                    /* global conf struct */
 
+static void conf_bot_dup(conf_bot *dest, conf_bot *src);
+
 static void
 tellconf()
 {
@@ -198,7 +200,7 @@ confedit()
   struct stat st, sn;
   struct timespec ts1, ts2;           /* time before and after edit */
   bool autowrote = 0;
-  conf_bot *localhub = NULL;
+  conf_bot *localhub = NULL, *localhub_old = NULL;
 
   um = umask(077);
 
@@ -312,7 +314,12 @@ confedit()
     }
   }
 
-  localhub = conf_getlocalhub(conf.bots);
+  localhub_old = conf_getlocalhub(conf.bots);
+  
+  if (localhub_old) {
+    localhub = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+    conf_bot_dup(localhub, localhub_old);
+  }
 
   tmpconf.my_close();
   free_conf();
