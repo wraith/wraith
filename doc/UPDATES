@@ -4,7 +4,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 
 1.2.14 - http://wraith.shatow.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
-* Fix bug with bots not retaining flags over share. (fixes #334)
+* Fix some bugs with bot flags. (fixes #334 and #337)
 * Remove the notes system and related commands. (fixes #275)
 * Fix ./binary -C not signalling the correct process under some situations. (actually fixes #315)
 * Fix bots being removed from binary not being killed. (fixes #338)
