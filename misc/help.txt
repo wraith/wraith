@@ -1461,8 +1461,8 @@ See also: reload, backup
    $uN$u:    Number
    $uL$u:    List capable
    $uR$u:    Rate. Set as 'number:interval', ie, '1:5'
-   $uD$u:    Detected vars have the folloing options: $bignore$b/0, $bwarn$b/1, $bdie$b/2, 
-                                                      $breject$b/3, $bsuicide$b/4
+   $uD$u:    Detected vars have the folloing options: $bignore$b/0, $bwarn$b/1, $breject$b/2, 
+                                                      $bdie$b/3, $bsuicide$b/4
  
 [SL] $balias$b           List of dcc aliases in format '<alias> <cmd> [parms]'. First
                           matching alias is used. Normal flag checking is done

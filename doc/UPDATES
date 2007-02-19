@@ -8,6 +8,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Remove the notes system and related commands. (fixes #275)
 * Fix ./binary -C not signalling the correct process under some situations. (actually fixes #315)
 * Fix bots being removed from binary not being killed. (fixes #338)
+* Fix typo in help for 'set' (fixes #342)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
