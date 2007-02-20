@@ -525,7 +525,7 @@ doresolv(struct chanset_t *chan)
   if (!chan)
     return 0;
 
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
   if (glob_doresolv(fr) || chan_doresolv(fr))
@@ -539,7 +539,7 @@ dovoice(struct chanset_t *chan)
   if (!chan)
     return 0;
 
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
   if (glob_dovoice(fr) || chan_dovoice(fr))
@@ -553,7 +553,7 @@ dolimit(struct chanset_t *chan)
   if (!chan)
     return 0;
 
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
   if (glob_dolimit(fr) || chan_dolimit(fr))
