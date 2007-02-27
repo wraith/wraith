@@ -1216,7 +1216,7 @@ hide_chans(const char *nick, struct userrec *u, char *channels)
     /* save and skip any modes in front of #chan */
     s[0] = 0;
     while (chname[0] && chname[0] != '#') {
-      simple_snprintf(s, sizeof(s), "%c", chname[0]);
+      simple_snprintf(s, sizeof(s), "%s%c", s[0] ? s : "", chname[0]);
       chname++;
     }
 
