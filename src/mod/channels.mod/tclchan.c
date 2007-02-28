@@ -541,9 +541,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_CLOSED;
     else if (!strcmp(item[i], "-closed"))
       chan->status &= ~CHAN_CLOSED;
-    else if (have_take && !strcmp(item[i], "+take"))
+    else if (HAVE_TAKE && !strcmp(item[i], "+take"))
       chan->status |= CHAN_TAKE;
-    else if (have_take && !strcmp(item[i], "-take"))
+    else if (HAVE_TAKE && !strcmp(item[i], "-take"))
       chan->status &= ~CHAN_TAKE;
     else if (!strcmp(item[i], "+voice"))
       chan->status |= CHAN_VOICE;
@@ -577,8 +577,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     /* ignore wasoptest, stopnethack and clearbans in chanfile, remove
        this later */
 
-    else if (!cmd && !have_take && !strcmp(item[i], "+take")) ;
-    else if (!cmd && !have_take && !strcmp(item[i], "-take")) ;
+    else if (!cmd && !HAVE_TAKE && !strcmp(item[i], "+take")) ;
+    else if (!cmd && !HAVE_TAKE && !strcmp(item[i], "-take")) ;
     else if (!cmd && !strcmp(item[i], "stopnethack-mode")) ;
     else if (!cmd && !strcmp(item[i], "revenge-mode")) ;
     else if (!cmd && !strcmp(item[i], "+revenge")) ;

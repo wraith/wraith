@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+bool is_restricted_cmd(const char*);
 
 typedef struct {
   const char          *name;

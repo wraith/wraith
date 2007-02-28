@@ -18,6 +18,7 @@ typedef struct settings_struct {
   char salt1[33];
   char salt2[17];
   char dcc_prefix[17];
+  char features[17];
   /* -- DYNAMIC -- */
   char bots[1025];
   char uid[17];
@@ -34,12 +35,12 @@ typedef struct settings_struct {
   char portmin[17];       /* for hubs, the reserved port range for incoming connections */
   char portmax[17];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
-  char padding[8];
+  char padding[7];
 } settings_t;
 
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
 sizeof(settings.bdhash) + sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + \
-sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix)
+sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
 
 #define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
 sizeof(settings.pscloak) + sizeof(settings.autocron) + sizeof(settings.watcher) + sizeof(settings.uname) + \

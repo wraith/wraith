@@ -469,7 +469,7 @@ dcc_bot(int idx, char *code, int i)
 
     if (!y) {
       /* Found a match */
-      if (have_cmd(C_bot[i].type))
+      if (have_cmd(NULL, C_bot[i].type))
         (C_bot[i].func) (idx, msg);
       break;
     } else if (y < 0)

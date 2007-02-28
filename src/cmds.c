@@ -563,11 +563,20 @@ static void cmd_nohelp(int idx, char *par)
   dumplots(idx, "", buf);
 }
 
+bool is_restricted_cmd(const char* name) {
+  if (name) {
+    if (!HAVE_MDOP && !egg_strcasecmp(name, "mdop"))
+      return 1;
+  }
+  return 0;
+}
+
 int
 findcmd(const char *cmd, bool care_about_type)
 {
   for (int hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
-    if (!egg_strcasecmp(cmd, help[hi].cmd) && ((care_about_type && have_cmd(help[hi].type)) || (!care_about_type)))
+    if (!egg_strcasecmp(cmd, help[hi].cmd) && 
+        ((care_about_type && have_cmd(help[hi].cmd, help[hi].type)) || (!care_about_type)))
       return hi;
 
   return -1;
@@ -2616,7 +2625,7 @@ int exec_str(int idx, char *cmd) {
 static void cmd_exec(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# exec %s", dcc[idx].nick, par);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -2635,7 +2644,7 @@ static void cmd_exec(int idx, char *par) {
 static void cmd_w(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# w", dcc[idx].nick);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -2647,7 +2656,7 @@ static void cmd_w(int idx, char *par) {
 static void cmd_ps(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# ps %s", dcc[idx].nick, par);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -2675,7 +2684,7 @@ static void cmd_last(int idx, char *par) {
     return;
   }
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -3797,7 +3806,7 @@ static void cmd_netw(int idx, char * par) {
 
   putlog(LOG_CMDS, "*", "#%s# netw", dcc[idx].nick);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -3809,7 +3818,7 @@ static void cmd_netw(int idx, char * par) {
 static void cmd_netps(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netps %s", dcc[idx].nick, par);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -3829,7 +3838,7 @@ static void cmd_netps(int idx, char * par) {
 static void cmd_netlast(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netlast %s", dcc[idx].nick, par);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -3858,7 +3867,7 @@ void crontab_show(struct userrec *u, int idx) {
 static void cmd_crontab(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# crontab %s", dcc[idx].nick, par);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -3951,7 +3960,7 @@ static void cmd_netcrontab(int idx, char * par)
 {
   putlog(LOG_CMDS, "*", "#%s# netcrontab %s", dcc[idx].nick, par);
 
-  if (beta) {
+  if (IS_BETA) {
     dprintf(idx, "Sorry, this cmd is not available in the beta net.\n");
     return;
   }
@@ -4109,7 +4118,7 @@ void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, c
   cmd = newsplit(&par);
 
   if (!strcmp(cmd, "exec")) {
-    if (beta) {
+    if (IS_BETA) {
       putlog(LOG_WARN, "*", "Received remote cmd '%s'; disabled on beta net.", cmd);
       return;
     }
@@ -4123,7 +4132,7 @@ void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, c
   } else if (!strcmp(cmd, "jump")) {
     rcmd_jump(frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, "msg")) {
-    if (beta) {
+    if (IS_BETA) {
       putlog(LOG_WARN, "*", "Received remote cmd '%s'; disabled on beta net.", cmd);
       return;
     }

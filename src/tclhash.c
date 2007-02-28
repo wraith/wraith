@@ -452,7 +452,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 	bind_table_t *table = bind_table_lookup_or_fake(table_name);
 
 	for (; cmds->name; cmds++) {
-          if (have_cmd(cmds->type)) {
+          if (have_cmd(cmds->name, cmds->type)) {
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
                 if (!strcmp(table->name, "dcc") && (findhelp(cmds->name) != -1)) {
                   cmdlist[cmdi].name = cmds->name;

@@ -22,7 +22,7 @@
 settings_t settings = {
   "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200",
   /* -- STATIC -- */
-  "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
   "", "", "", "", "", "", "", "", "", "", "", "", "", "",
   /* -- PADDING */
@@ -202,6 +202,18 @@ bin_checksum(const char *fname, int todo)
 }
 
 static int
+features_find(const char *buffer)
+{
+  if (!egg_strcasecmp(buffer, "no_take"))
+    return FEATURE_NO_TAKE;
+  else if (!egg_strcasecmp(buffer, "no_mdop"))
+    return FEATURE_NO_MDOP;
+  else if (!egg_strcasecmp(buffer, "beta"))
+    return FEATURE_BETA;
+  return 0;
+}
+
+static int
 readcfg(const char *cfgfile)
 {
   FILE *f = NULL;
@@ -212,7 +224,7 @@ readcfg(const char *cfgfile)
   }
 
   char *buffer = NULL, *p = NULL;
-  int skip = 0, line = 0;
+  int skip = 0, line = 0, feature = 0;
 
   printf("Reading '%s' ", cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
@@ -264,6 +276,13 @@ readcfg(const char *cfgfile)
         } else {
           printf("%s %s\n", buffer, p);
           printf(",");
+        }
+      } else { /* SINGLE DIRECTIVES */
+        if ((feature = features_find(buffer))) {
+          int features = atol(settings.features);
+          features |= feature;
+          simple_snprintf(settings.features, sizeof(settings.features), "%d", features);
+          printf(".");
         }
       }
     }
@@ -341,6 +360,7 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   update_hash();
 
   dofield(incfg->dcc_prefix);
+  dofield(incfg->features);
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
@@ -380,6 +400,7 @@ tellconfig(settings_t *incfg)
   dofield(incfg->shellhash);
   dofield(incfg->bdhash);
   dofield(incfg->dcc_prefix);
+  dofield(incfg->features);
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);

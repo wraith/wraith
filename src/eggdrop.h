@@ -134,13 +134,23 @@ enum {		/* TAKE A GUESS */
 #define FLOOD_CHAN_MAX   7
 #define FLOOD_GLOBAL_MAX 3
 
-#define HUB       BIT0
-#define LEAF      BIT1
-#define AUTH      BIT2
-#define AUTH_CHAN BIT3
-#define AUTH_MSG  BIT4
-#define AUTH_NOT  BIT5
-#define AUTH_ALL  AUTH|AUTH_CHAN|AUTH_MSG|AUTH_NOT
-#define have_cmd(flags) (!(flags & (HUB|LEAF)) || (flags & HUB && conf.bot->hub) || (flags & LEAF && !conf.bot->hub))
+#define FEATURE_NO_TAKE		BIT0
+#define FEATURE_NO_MDOP		BIT1
+#define FEATURE_BETA		BIT2
+
+#define HAVE_TAKE	(!(conf.features & FEATURE_NO_TAKE))
+#define HAVE_MDOP	(!(conf.features & FEATURE_NO_MDOP))
+#define IS_BETA		(conf.features & FEATURE_BETA)
+
+
+#define HUB		BIT0
+#define LEAF		BIT1
+#define AUTH		BIT2
+#define AUTH_CHAN	BIT3
+#define AUTH_MSG	BIT4
+#define AUTH_NOT	BIT5
+#define AUTH_ALL	AUTH|AUTH_CHAN|AUTH_MSG|AUTH_NOT
+#define have_cmd(name, flags) ((!is_restricted_cmd(name)) && (!(flags & (HUB|LEAF)) || (flags & HUB && conf.bot->hub) || (flags & LEAF && !conf.bot->hub)))
+
 
 #endif				/* _EGG_EGGDROP_H */

@@ -44,6 +44,7 @@ tellconf()
   conf_bot *bot = NULL;
   int i = 0;
   sdprintf("tempdir: %s\n", replace(tempdir, conf.homedir, "~"));
+  sdprintf("features: %d\n", conf.features);
   sdprintf("uid: %d\n", conf.uid);
   sdprintf("uname: %s\n", conf.uname);
   sdprintf("homedir: %s\n", conf.homedir);
@@ -374,6 +375,7 @@ init_conf()
   else
     conf.binname = strdup(p);
 
+  conf.features = 0;
   conf.portmin = 0;
   conf.portmax = 0;
   conf.pscloak = 0;
@@ -1101,6 +1103,7 @@ void
 bin_to_conf(bool error)
 {
 /* printf("Converting binary data to conf struct\n"); */
+  conf.features = atol(settings.features);
   conf.uid = atol(settings.uid);
   if (settings.username[0])
     str_redup(&conf.username, settings.username);

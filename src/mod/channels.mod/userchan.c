@@ -785,8 +785,8 @@ exempt-time %lu invite-time %lu voice-non-ident %d \
 	PLSMNS(channel_fastop(chan)),
         PLSMNS(channel_autoop(chan)),
         PLSMNS(channel_botbitch(chan)),
-	have_take ? PLSMNS(channel_take(chan)) : 0,
-        have_take ? "take " : " "
+	HAVE_TAKE ? PLSMNS(channel_take(chan)) : 0,
+        HAVE_TAKE ? "take " : " "
 /* Chanflag template
  * also include a %ctemp above.
  *      PLSMNS(channel_temp(chan)),

