@@ -14,6 +14,8 @@
 #include "misc.h"
 #include "main.h"
 #include "misc_file.h"
+#include "tandem.h"
+#include "botnet.h"
 
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -562,52 +564,89 @@ void reload_bin_data() {
   if (bin_checksum(binname, GET_CONF)) {
     putlog(LOG_MISC, "*", "Rehashed config data from binary.");
 
-    conf_bot *oldbots = NULL;
+    conf_bot *oldbots = NULL, *oldbot = NULL;
     bool was_localhub = conf.bot->localhub ? 1 : 0;
     
     /* save the old bots list */
     oldbots = conf_bots_dup(conf.bots);
+
+    /* Save the old conf.bot */
+    oldbot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+    conf_bot_dup(oldbot, conf.bot);    
+
     /* free up our current conf struct */
     free_conf();
     /* Fill conf[] with binary data from settings[] */
     bin_to_conf();
+
     /* fill up conf.bot using origbotname */
-    fill_conf_bot();
+    fill_conf_bot(0); /* 0 to avoid exiting if conf.bot cannot be filled */
 
-    /* If we don't have conf.bot, then all bots were removed or just our own record */
-    if (oldbots && 
-        (
-         (!conf.bot && was_localhub) || 
-         (conf.bot && !conf.bot->localhub && was_localhub)
-        )) {
-      /* no longer the localhub (or removed), need to alert the new one to rehash */
+    if (conf.bot)
+      free_bot(oldbot);
 
-      conf_bot *localhub = conf_getlocalhub(conf.bots);
-      /* then SIGHUP new localhub or spawn new localhub */
-      if (localhub) {
-        if (localhub->pid)
-          conf_killbot(NULL, localhub, SIGHUP);		//restart the new localhub
-        else
-          spawnbot(localhub->nick);				//spawn the new localhub
+    /* add any new bots not in userfile */
+    conf_add_userlist_bots();
+
+    /* kill and remove bots removed from conf */
+    if (oldbots) {
+      kill_removed_bots(oldbots, conf.bots);
+
+      /* If we don't have conf.bot, then all bots were removed or just our own record */
+      if ((!conf.bot && was_localhub) || 
+           (conf.bot && !conf.bot->localhub && was_localhub)
+          ) {
+
+        /* no longer the localhub (or removed), need to alert the new one to rehash (or start it) */
+
+        conf_bot *localhub = conf_getlocalhub(conf.bots);
+        /* then SIGHUP new localhub or spawn new localhub */
+        if (localhub) {
+          /* Check for pid again - may be using fork-interval */
+          localhub->pid = checkpid(localhub->nick, localhub, NULL);
+          if (localhub->pid)
+            conf_killbot(NULL, localhub, SIGHUP);		//restart the new localhub
+          /* else
+               start new localhub - done below in spawnbots() */
+        }
       }
     }
-    if (conf.bot && conf.bot->localhub) {
-      /* kill and remove bots removed from conf */
-      if (oldbots)
-        kill_removed_bots(oldbots, conf.bots);
-      /* add any bots not in userfile */
-      conf_add_userlist_bots();
-      /* start/disable new bots as necesary */
-      conf_checkpids();
-      spawnbots(1);		//1 signifies to not start me!
-    } else
+
+    /* start/disable new bots as necesary */
+    conf_checkpids();
+    spawnbots(1);		//1 signifies to not start me!
+
+    if (!conf.bot || !conf.bot->localhub)
       free_conf_bots(conf.bots);
 
+    if (conf.bot && conf.bot->disabled) {
+      if (tands > 0) {
+        botnet_send_chat(-1, conf.bot->nick, "Bot disabled in binary.");
+        botnet_send_bye("Bot disabled in binary.");
+      }
+
+      if (server_online)
+        nuke_server("Bot disabled in binary.");
+
+      werr(ERR_BOTDISABLED);
+    }
+
+    if (!conf.bot) {
+      conf.bot = oldbot;
+
+      if (tands > 0) {
+        botnet_send_chat(-1, conf.bot->nick, "Bot removed from binary.");
+        botnet_send_bye("Bot removed from binary.");
+      }
+
+      if (server_online)
+        nuke_server("Bot removed from binary.");
+
+      werr(ERR_BADBOT);
+    }
+  
     if (oldbots)
       free_conf_bots(oldbots);
-
-    if (conf.bot->disabled)
-      werr(ERR_BOTDISABLED);
   }
 }
 

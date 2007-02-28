@@ -36,8 +36,6 @@ char cfile[DIRMAX] = "";
 #endif /* CYGWIN_HACKS */
 conf_t conf;                    /* global conf struct */
 
-static void conf_bot_dup(conf_bot *dest, conf_bot *src);
-
 static void
 tellconf()
 {
@@ -119,7 +117,8 @@ spawnbots(bool rehashed)
       -if updating and we find our nick, skip
       -if pid exists and not updating, bot is running and we have nothing more to do, skip.
      */
-    } else if ((!strcmp(bot->nick, conf.bot->nick) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
+    			/* use origbotname here because conf.bot may not exist (called from rehashing) */
+    } else if ((!strcmp(bot->nick, origbotname) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
       sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
       continue;
     } else {
@@ -999,7 +998,7 @@ writeconf(char *filename, FILE * stream, int bits)
   return autowrote;
 }
 
-static void
+void
 conf_bot_dup(conf_bot *dest, conf_bot *src)
 {
   if (dest && src) {
@@ -1049,7 +1048,7 @@ void kill_removed_bots(conf_bot *oldlist, conf_bot *newlist)
           break;
         }
       }
-      if (!found) {
+      if (!found && egg_strcasecmp(botold->nick, origbotname)) {	/* Never kill ME.. will handle it elsewhere */
         botold->pid = checkpid(botold->nick, botold, NULL);
         conf_killbot(NULL, botold, SIGKILL);
         if ((u = get_user_by_handle(userlist, botold->nick))) {
@@ -1069,7 +1068,7 @@ void kill_removed_bots(conf_bot *oldlist, conf_bot *newlist)
 }
 
 void
-fill_conf_bot()
+fill_conf_bot(bool fatal)
 {
   if (!conf.bots || !conf.bots->nick)
     return;
@@ -1090,13 +1089,19 @@ fill_conf_bot()
     if (!egg_strcasecmp(me->nick, mynick))
       break;
 
-  if (!me || (me->nick && egg_strcasecmp(me->nick, mynick)))
+  if (fatal && (!me || (me->nick && egg_strcasecmp(me->nick, mynick))))
     werr(ERR_BADBOT);
 
   free(mynick);
-  /* for future, we may just want to make this a pointer to ->bots if we do an emech style currentbot-> */
-  conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
-  conf_bot_dup(conf.bot, me);
+
+  if (me) {
+    if (!me->hub && me->localhub)
+      sdprintf("I am localhub!");
+
+    /* for future, we may just want to make this a pointer to ->bots if we do an emech style currentbot-> */
+    conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+    conf_bot_dup(conf.bot, me);
+  }
 }
 
 void

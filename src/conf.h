@@ -65,10 +65,11 @@ pid_t checkpid(const char *, conf_bot *, const char *);
 void init_conf();
 void free_conf();
 void free_conf_bots(conf_bot *);
+void free_bot(conf_bot *bot);
 int readconf(const char *, int);
 int parseconf(bool);
 int writeconf(char *, FILE *, int);
-void fill_conf_bot();
+void fill_conf_bot(bool fatal = 1);
 void bin_to_conf(bool error = 0);
 void conf_checkpids(bool all = 1);
 void conf_add_userlist_bots();
@@ -76,6 +77,7 @@ conf_bot *conf_bots_dup(conf_bot *);
 void kill_removed_bots(conf_bot *, conf_bot *);
 conf_bot *conf_getlocalhub(conf_bot *);
 void conf_setmypid(pid_t);
+void conf_bot_dup(conf_bot *dest, conf_bot *src);
 
 #ifdef CYGWIN_HACKS
 extern char		cfile[DIRMAX];

@@ -304,7 +304,7 @@ void nuke_server(const char *reason)
 {
   if (serv >= 0 && servidx >= 0) {
     if (reason)
-      dprintf(DP_DUMP, "QUIT :%s\n", reason);
+      dprintf(-serv, "QUIT :%s\n", reason);
 
     sleep(1);
     disconnect_server(servidx, DO_LOST);

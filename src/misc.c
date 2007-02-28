@@ -556,8 +556,9 @@ int str_isdigit(const char *str)
  */
 void kill_bot(char *s1, char *s2)
 {
-  write_userfile(-1);
-  if (!conf.bot->hub)
+  if (conf.bot->hub)
+    write_userfile(-1);
+  else
     server_die();
   chatout("*** %s\n", s1);
   botnet_send_chat(-1, conf.bot->nick, s1);
