@@ -423,18 +423,24 @@ dcc_chatter(int idx)
 }
 
 int
-dcc_read(FILE *f)
+dcc_read(FILE *f, bool enc)
 {
-  char inbuf[1024] = "", *type = NULL, *buf = NULL;
+  char inbuf[1024] = "", *type = NULL, *buf = NULL, *buf_ptr = NULL;
   int idx = -1;
   bool isserv = 0;
 
   while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
     remove_crlf(inbuf);
-    buf = inbuf;
+    if (enc)
+      buf = buf_ptr = decrypt_string(settings.salt1, inbuf);
+    else
+      buf = inbuf;
 
-    if (!strcmp(buf, "+dcc"))
+    if (!strcmp(buf, "+dcc")) {
+      if (enc)
+        free(buf_ptr);
       return idx;
+    }
     
     type = newsplit(&buf);
     if (!strcmp(type, "type")) {
@@ -473,6 +479,8 @@ dcc_read(FILE *f)
         strlcpy(dcc[idx].host, buf, UHOSTLEN);
       }
     }
+    if (enc)
+      free(buf_ptr);
   }
   return -1;
 }
@@ -481,24 +489,24 @@ void
 dcc_write(FILE *f, int idx)
 {
   if (dcc[idx].sock > 0) {
-    fprintf(f, "-dcc\n");
+    lfprintf(f, "-dcc\n");
     if (dcc[idx].type)
-      fprintf(f, "type %s\n", dcc[idx].type->name);
+      lfprintf(f, "type %s\n", dcc[idx].type->name);
 //  if (user)
-//  fprintf(f, "user %s\n", dcc[idx].user->handle);
+//  lfprintf(f, "user %s\n", dcc[idx].user->handle);
     if (dcc[idx].addr)
-      fprintf(f, "addr %u\n", dcc[idx].addr);
+      lfprintf(f, "addr %u\n", dcc[idx].addr);
     if (dcc[idx].status)
-      fprintf(f, "status %lu\n", dcc[idx].status);
-    fprintf(f, "sock %d\n", dcc[idx].sock);
-//  fprintf(f, "simul %d\n", dcc[idx].simul);
+      lfprintf(f, "status %lu\n", dcc[idx].status);
+    lfprintf(f, "sock %d\n", dcc[idx].sock);
+//  lfprintf(f, "simul %d\n", dcc[idx].simul);
     if (dcc[idx].port)
-      fprintf(f, "port %d\n", dcc[idx].port);  
+      lfprintf(f, "port %d\n", dcc[idx].port);  
     if (dcc[idx].nick[0])
-      fprintf(f, "nick %s\n", dcc[idx].nick);
+      lfprintf(f, "nick %s\n", dcc[idx].nick);
     if (dcc[idx].host[0])
-      fprintf(f, "host %s\n", dcc[idx].host);
-    fprintf(f, "+dcc\n");
+      lfprintf(f, "host %s\n", dcc[idx].host);
+    lfprintf(f, "+dcc\n");
   }
 }
 

@@ -54,7 +54,7 @@ void identd_open();
 void identd_close();
 int listen_all(port_t, bool);
 bool valid_idx(int);
-int dcc_read(FILE *);
+int dcc_read(FILE *, bool);
 void dcc_write(FILE *, int);
 int check_cmd_pass(const char *, char *);
 int has_cmd_pass(const char *);

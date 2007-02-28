@@ -575,25 +575,40 @@ readsocks(const char *fname)
     fatal("CANT READ SOCKSFILE", 0);
   }
 
-  char buf[1024] = "", *nick = NULL, *bufp = NULL, *type = NULL;
+  char buf[1024] = "", *nick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL;
   time_t old_buildts = 0;
+
+  bool enc = 0, first = 1;
 
   while (fgets(buf, sizeof(buf), f) != NULL) {
     remove_crlf(buf);
-    bufp = buf;
+
+    if (first) {
+      if (!strncmp(buf, "+enc", 4))
+        enc = 1;
+      first = 0;
+    }
+
+    if (enc)
+      bufp = buf_ptr = decrypt_string(settings.salt1, buf);
+    else
+      bufp = buf;
 
 //    dprintf(DP_STDOUT, "read line: %s\n", buf);
     type = newsplit(&bufp);
     if (!strcmp(type, "-dcc"))
-      dprintf(DP_STDOUT, "Added dcc: %d\n", dcc_read(f));
+      dprintf(DP_STDOUT, "Added dcc: %d\n", dcc_read(f, enc));
     else if (!strcmp(type, "-sock"))
-      dprintf(DP_STDOUT, "Added fd: %d\n", sock_read(f));
+      dprintf(DP_STDOUT, "Added fd: %d\n", sock_read(f, enc));
     else if (!strcmp(type, "+online_since"))
       online_since = strtol(bufp, NULL, 10);
     else if (!strcmp(type, "+buildts"))
       old_buildts = strtol(bufp, NULL, 10);
     else if (!strcmp(type, "+botname"))
       nick = strdup(bufp);
+
+    if (enc)
+      free(buf_ptr);
   }
 
   restart_time = now;
@@ -653,6 +668,8 @@ restart(int idx)
     }
   }
 
+  fprintf(socks->f, "+enc\n");
+
   /* write out all leftover dcc[] entries */
   for (fd = 0; fd < dcc_total; fd++)
     if (dcc[fd].type && dcc[fd].sock != STDOUT)
@@ -665,10 +682,10 @@ restart(int idx)
 
   if (server_online) {
     if (botname[0])
-      fprintf(socks->f, "+botname %s\n", botname);
+      lfprintf(socks->f, "+botname %s\n", botname);
   }
-  fprintf(socks->f, "+online_since %li\n", online_since);
-  fprintf(socks->f, "+buildts %li\n", buildts);
+  lfprintf(socks->f, "+online_since %li\n", online_since);
+  lfprintf(socks->f, "+buildts %li\n", buildts);
   fflush(socks->f);
   socks->my_close();
 

@@ -333,17 +333,24 @@ int sockoptions(int sock, int operation, int sock_options)
 }
 
 int
-sock_read(FILE *f)
+sock_read(FILE *f, bool enc)
 {
-  char inbuf[1024] = "", *type = NULL, *buf = NULL;
+  char inbuf[1024] = "", *type = NULL, *buf = NULL, *buf_ptr = NULL;
   int fd = -1;
 
   while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
     remove_crlf(inbuf);
 
-    buf = inbuf;
-    if (!strcmp(buf, "+sock"))
+    if (enc)
+      buf = buf_ptr = decrypt_string(settings.salt1, inbuf);
+    else
+      buf = inbuf;
+
+    if (!strcmp(buf, "+sock")) {
+      if (enc)
+        free(buf_ptr);
       return fd;
+    }
 
     type = newsplit(&buf);
     if (!strcmp(type, "sock")) {
@@ -362,6 +369,8 @@ sock_read(FILE *f)
       if (!strcmp(type, "port"))
         socklist[fd].port = atoi(buf);
     }
+    if (enc)
+      free(buf_ptr);
   }
   return -1;
 }
@@ -370,16 +379,16 @@ void
 sock_write(FILE *f, int fd)
 {
   if (socklist[fd].sock > 0) {
-    fprintf(f, "-sock\n");
-    fprintf(f, "sock %d %d\n", socklist[fd].sock, socklist[fd].flags);
+    lfprintf(f, "-sock\n");
+    lfprintf(f, "sock %d %d\n", socklist[fd].sock, socklist[fd].flags);
 #ifdef USE_IPV6
-    fprintf(f, "af %u\n", socklist[fd].af);
+    lfprintf(f, "af %u\n", socklist[fd].af);
 #endif
     if (socklist[fd].host)
-      fprintf(f, "host %s\n", socklist[fd].host);
+      lfprintf(f, "host %s\n", socklist[fd].host);
     if (socklist[fd].port)
-      fprintf(f, "port %d\n", socklist[fd].port);
-    fprintf(f, "+sock\n");
+      lfprintf(f, "port %d\n", socklist[fd].port);
+    lfprintf(f, "+sock\n");
   }    
 }
 
