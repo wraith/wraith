@@ -521,6 +521,9 @@ lostdcc(int n)
   if (n < 0 || n >= max_dcc)
     return;
 
+  if (n == uplink_idx)
+    uplink_idx = -1;
+
   if (dcc[n].type && dcc[n].type->kill)
     dcc[n].type->kill(n, dcc[n].u.other);
   else if (dcc[n].u.other)

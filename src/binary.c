@@ -16,6 +16,7 @@
 #include "misc_file.h"
 #include "tandem.h"
 #include "botnet.h"
+#include "userrec.h"
 
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -572,7 +573,7 @@ void reload_bin_data() {
 
     /* Save the old conf.bot */
     oldbot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
-    conf_bot_dup(oldbot, conf.bot);    
+    conf_bot_dup(oldbot, conf.bot);
 
     /* free up our current conf struct */
     free_conf();
@@ -581,9 +582,6 @@ void reload_bin_data() {
 
     /* fill up conf.bot using origbotname */
     fill_conf_bot(0); /* 0 to avoid exiting if conf.bot cannot be filled */
-
-    if (conf.bot)
-      free_bot(oldbot);
 
     /* add any new bots not in userfile */
     conf_add_userlist_bots();
@@ -644,7 +642,18 @@ void reload_bin_data() {
 
       werr(ERR_BADBOT);
     }
-  
+
+    if (oldbot) {
+      if (strcmp(conf.bot->nick, oldbot->nick)) {
+        change_handle(conf.bot->u, conf.bot->nick);
+//        var_set_by_name(conf.bot->nick, "nick", conf.bot->nick);
+//        var_set_userentry(conf.bot->nick, "nick", conf.bot->nick);
+      }
+
+
+      free_bot(oldbot);
+    }
+
     if (oldbots)
       free_conf_bots(oldbots);
   }

@@ -543,9 +543,25 @@ void chanprog()
   struct utsname un;
 
   /* cache our ip on load instead of every 30 seconds */
+  char *ip4 = NULL, *ip6 = NULL;
+
+  if (cached_ip) {
+    ip4 = strdup(myipstr(4));
+    ip6 = strdup(myipstr(6));
+  }
+
   cache_my_ip();
   sdprintf("ip4: %s", myipstr(4));
   sdprintf("ip6: %s", myipstr(6));
+
+  /* Check if our ip changed during a rehash */
+  if (ip4) {
+    if (strcmp(ip4, myipstr(4)) || strcmp(ip6, myipstr(6)))
+      fatal("IP changed.", 1);
+    free(ip4);
+    free(ip6);
+  }
+
   sdprintf("I am: %s", conf.bot->nick);
   if (conf.bot->hub) {
     simple_snprintf(userfile, 121, "%s/.u", conf.binpath);
@@ -568,7 +584,7 @@ void chanprog()
   }
 
   /* set our shell info */
-  uname(&un);  
+  uname(&un);
   set_user(&USERENTRY_OS, conf.bot->u, un.sysname);
   set_user(&USERENTRY_USERNAME, conf.bot->u, conf.username);
   set_user(&USERENTRY_NODENAME, conf.bot->u, un.nodename);

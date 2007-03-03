@@ -19,6 +19,7 @@
 #include "users.h"
 #include "misc_file.h"
 #include "socket.h"
+#include "botnet.h"
 #include "userrec.h"
 #include <errno.h>
 #ifdef HAVE_PATHS_H
@@ -117,8 +118,7 @@ spawnbots(bool rehashed)
       -if updating and we find our nick, skip
       -if pid exists and not updating, bot is running and we have nothing more to do, skip.
      */
-    			/* use origbotname here because conf.bot may not exist (called from rehashing) */
-    } else if ((!egg_strcasecmp(bot->nick, origbotname) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
+    } else if ((!egg_strcasecmp(bot->nick, conf.bot->nick) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
       sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
       continue;
     } else {
@@ -1186,7 +1186,7 @@ void conf_add_userlist_bots()
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     /* Don't auto-add hubs. */
-    if (!bot->hub) {
+    if (!bot->hub && tands > 0) {
       u = get_user_by_handle(userlist, bot->nick);
       if (!u) {
         putlog(LOG_MISC, "*", "Adding bot '%s' as it has been added to the binary config.", bot->nick);

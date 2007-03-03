@@ -173,8 +173,10 @@ void fatal(const char *s, int recoverable)
     listen_all(my_port, 1); /* close the listening port... */
 
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && dcc[i].sock >= 0)
+    if (dcc[i].type && dcc[i].sock >= 0) {
       killsock(dcc[i].sock);
+      lostdcc(i);
+    }
 
   if (!recoverable) {
 //    if (conf.bot && conf.bot->pid_file)
@@ -983,8 +985,10 @@ printf("out: %s\n", out);
     if (do_restart) {
       if (do_restart == 1)
         restart(-1);
-      else
+      else { //rehash()
         reload_bin_data();
+        chanprog();
+      }
       do_restart = 0;
     }
   }

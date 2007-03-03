@@ -419,8 +419,6 @@ static void
 free_dcc_bot_(int n, void *x)
 {
   if (dcc[n].type == &DCC_BOT) {
-    if (n == uplink_idx)
-      uplink_idx = -1;
     unvia(n, findbot(dcc[n].nick));
     rembot(dcc[n].nick);
   }

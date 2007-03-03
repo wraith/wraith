@@ -1832,7 +1832,7 @@ static void cmd_decrypt(int idx, char *par)
 static void cmd_restart(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# restart", dcc[idx].nick);
-  restart(idx);
+  do_restart = 1;
 }
 
 static void cmd_reload(int idx, char *par)
@@ -1846,7 +1846,7 @@ static void cmd_rehash(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# rehash", dcc[idx].nick);
   dprintf(idx, "Rehashing config data from binary...\n");
-  reload_bin_data();
+  do_restart = 2;
 }
 
 static void cmd_die(int idx, char *par)

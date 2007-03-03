@@ -158,7 +158,7 @@ extern unsigned long			notalloc;
 
 extern char				firewall[], botuser[], natip[];
 extern int				resolve_timeout, MAXSOCKS, socks_total;
-extern bool				identd_hack;
+extern bool				identd_hack, cached_ip;
 extern port_t				firewallport;
 extern jmp_buf				alarmret;
 extern sock_list			*socklist;

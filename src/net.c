@@ -49,7 +49,7 @@ union sockaddr_union cached_myip4_so;
 union sockaddr_union cached_myip6_so;
 #endif /* USE_IPV6 */
 
-char 	natip[121] = "";
+bool	cached_ip = 0;		/* Set to 1 after cache_my_ip is called */
 bool    identd_hack = 0;	/* identd_open() won't work on most servers, dont even bother warning. */
 char	botuser[21] = ""; 	/* Username of the user running the bot    */
 int     resolve_timeout = 10;   /* hostname/address lookup timeout */
@@ -223,22 +223,24 @@ int ssl_cleanup() {
  */
 char *myipstr(int af_type)
 {
+  if (cached_ip) {
 #ifdef USE_IPV6
-  if (af_type == 6) {
-    static char s[UHOSTLEN + 1] = "";
-
-    egg_inet_ntop(AF_INET6, &cached_myip6_so.sin6.sin6_addr, s, 119);
-    s[120] = 0;
-    return s;
-  } else
-#endif /* USE_IPV6 */
-    if (af_type == 4) {
+    if (af_type == 6) {
       static char s[UHOSTLEN + 1] = "";
 
-      egg_inet_ntop(AF_INET, &cached_myip4_so.sin.sin_addr, s, 119);
+      egg_inet_ntop(AF_INET6, &cached_myip6_so.sin6.sin6_addr, s, 119);
       s[120] = 0;
       return s;
-    }
+    } else
+#endif /* USE_IPV6 */
+      if (af_type == 4) {
+        static char s[UHOSTLEN + 1] = "";
+
+        egg_inet_ntop(AF_INET, &cached_myip4_so.sin.sin_addr, s, 119);
+        s[120] = 0;
+        return s;
+      }
+  }
 
   return "";
 }
@@ -246,7 +248,7 @@ char *myipstr(int af_type)
 /* Get my ip number
  */
 in_addr_t getmyip() {
-  return natip[0] ? inet_addr(natip) : cached_myip4_so.sin.sin_addr.s_addr;
+  return cached_myip4_so.sin.sin_addr.s_addr;
 }
 
 /* see if it's necessary to set inaddr_any... because if we can't resolve, we die anyway */
@@ -308,6 +310,8 @@ void cache_my_ip()
     putlog(LOG_DEBUG, "*", "Hostname self-lookup error: %d", error);
     fatal("Hostname self-lookup failed.", 0);
   }
+
+  cached_ip = 1;
 }
 
 /* Sets/Unsets options for a specific socket.
@@ -1521,8 +1525,10 @@ void tputs(register int z, char *s, size_t len)
     inhere = 1;
 
     putlog(LOG_MISC, "*", "!!! writing to nonexistent socket: %d", z);
-    s[strlen(s) - 1] = 0;
-    putlog(LOG_MISC, "*", "!-> '%s'", s);
+    if (strlen(s)) {
+      s[strlen(s) - 1] = 0;
+      putlog(LOG_MISC, "*", "!-> '%s'", s);
+    }
 
     inhere = 0;
   }

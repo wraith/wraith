@@ -14,6 +14,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * The socket file generated for restarting is now encrypted.
 * Delay 'op-requests'.time seconds before re-requesting op on opeless channels.
 * Fix some issues with case with pid files, nicks, conf loading. (This will break some bots upgrading to 1.2.14)
+* Fix bot not reconnecting with new ip/host when -HUPd. (fixes #340)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

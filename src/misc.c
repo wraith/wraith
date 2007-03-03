@@ -575,7 +575,7 @@ readsocks(const char *fname)
     fatal("CANT READ SOCKSFILE", 0);
   }
 
-  char buf[1024] = "", *nick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL;
+  char buf[1024] = "", *nick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL, *ip4 = NULL, *ip6 = NULL;
   time_t old_buildts = 0;
 
   bool enc = 0, first = 1;
@@ -606,6 +606,10 @@ readsocks(const char *fname)
       old_buildts = strtol(bufp, NULL, 10);
     else if (!strcmp(type, "+botname"))
       nick = strdup(bufp);
+    else if (!strcmp(type, "+ip4"))
+      ip4 = strdup(bufp);
+    else if (!strcmp(type, "+ip6"))
+      ip6 = strdup(bufp);
 
     if (enc)
       free(buf_ptr);
@@ -628,17 +632,25 @@ readsocks(const char *fname)
   if (servidx >= 0) {
     char nserv[50] = "";
 
-    simple_snprintf(nserv, sizeof(nserv), "%s:%d", dcc[servidx].host, dcc[servidx].port);
-    add_server(nserv);
-    curserv = 0;
-    rehash_server(dcc[servidx].host, nick);
-    dprintf(DP_DUMP, "VERSION\n");
-    reset_chans = 1;
+    if ((ip4 && ip6) && (strcmp(ip4, myipstr(4)) || strcmp(ip6, myipstr(6)))) {
+      fatal("IP changed.", 1);
+    } else {
+      simple_snprintf(nserv, sizeof(nserv), "%s:%d", dcc[servidx].host, dcc[servidx].port);
+      add_server(nserv);
+      curserv = 0;
+      rehash_server(dcc[servidx].host, nick);
+      dprintf(DP_DUMP, "VERSION\n");
+      reset_chans = 1;
+    }
   }
   if (nick)
     free(nick);
   if (socksfile)
     free(socksfile);
+  if (ip4)
+    free(ip4);
+  if (ip6)
+    free(ip6);
 }
 
 
@@ -686,6 +698,9 @@ restart(int idx)
   }
   lfprintf(socks->f, "+online_since %li\n", online_since);
   lfprintf(socks->f, "+buildts %li\n", buildts);
+  lfprintf(socks->f, "+ip4 %s\n", myipstr(4));
+  lfprintf(socks->f, "+ip6 %s\n", myipstr(6));
+
   fflush(socks->f);
   socks->my_close();
 
