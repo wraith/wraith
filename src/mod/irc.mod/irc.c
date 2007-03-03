@@ -674,8 +674,8 @@ request_op(struct chanset_t *chan)
   }
   if (!i) {
     if (channel_active(chan) && !channel_pending(chan)) {
-      chan->channel.no_op = now + 5;
-      putlog(LOG_GETIN, "*", "No one to ask for ops on %s - Delaying requests for 5 seconds.", chan->dname);
+      chan->channel.no_op = now + op_requests.time;
+      putlog(LOG_GETIN, "*", "No one to ask for ops on %s - Delaying requests for %d seconds.", chan->dname, op_requests.time);
     }
     return;
   }
