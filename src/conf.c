@@ -1222,7 +1222,7 @@ void conf_add_userlist_bots()
         if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
           addhost_by_handle(bot->nick, uhost);
 
-        simple_snprintf(uhost, sizeof(uhost), "*!~%s@%s", bot->nick, bot->net.ip);
+        simple_snprintf(uhost, sizeof(uhost), "*!~%s@%s", conf.username, bot->net.ip);
         if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
           addhost_by_handle(bot->nick, uhost);
       }
@@ -1230,14 +1230,26 @@ void conf_add_userlist_bots()
         simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.host);
         if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
           addhost_by_handle(bot->nick, uhost);
+
+        simple_snprintf(uhost, sizeof(uhost), "*!~%s@%s", conf.username, bot->net.host);
+        if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
+          addhost_by_handle(bot->nick, uhost);
       }
       if (bot->net.host6) {
         simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.host6);
         if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
           addhost_by_handle(bot->nick, uhost);
+
+        simple_snprintf(uhost, sizeof(uhost), "*!~%s@%s", conf.username, bot->net.host6);
+        if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
+          addhost_by_handle(bot->nick, uhost);
       }
       if (bot->net.ip6) {
         simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.ip6);
+        if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
+          addhost_by_handle(bot->nick, uhost);
+
+        simple_snprintf(uhost, sizeof(uhost), "*!~%s@%s", conf.username, bot->net.ip6);
         if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
           addhost_by_handle(bot->nick, uhost);
       }

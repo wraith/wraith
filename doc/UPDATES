@@ -17,6 +17,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix bot not reconnecting with new ip/host when -HUPd. (fixes #340)
 * All bots are now rehashed after editing binary - nick casing, ip changes are taken into effect.
 * Bots now use the shell username instead of botnick when ident does not work.
+* Localhubs now auto add *!~username@... hosts instead of *!~nick@... hosts for their leafs.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
