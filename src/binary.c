@@ -569,7 +569,8 @@ void reload_bin_data() {
     bool was_localhub = conf.bot->localhub ? 1 : 0;
     
     /* save the old bots list */
-    oldbots = conf_bots_dup(conf.bots);
+    if (conf.bots)
+      oldbots = conf_bots_dup(conf.bots);
 
     /* Save the old conf.bot */
     oldbot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
@@ -577,27 +578,25 @@ void reload_bin_data() {
 
     /* free up our current conf struct */
     free_conf();
+
     /* Fill conf[] with binary data from settings[] */
     bin_to_conf();
 
     /* fill up conf.bot using origbotname */
     fill_conf_bot(0); /* 0 to avoid exiting if conf.bot cannot be filled */
 
-    /* add any new bots not in userfile */
-    conf_add_userlist_bots();
+    if (was_localhub) {
+      /* add any new bots not in userfile */
+      conf_add_userlist_bots();
 
-    /* kill and remove bots removed from conf */
-    if (oldbots) {
-      kill_removed_bots(oldbots, conf.bots);
-
-      /* If we don't have conf.bot, then all bots were removed or just our own record */
-      if ((!conf.bot && was_localhub) || 
-           (conf.bot && !conf.bot->localhub && was_localhub)
-          ) {
-
-        /* no longer the localhub (or removed), need to alert the new one to rehash (or start it) */
-
+       /* deluser removed bots from conf */
+      if (oldbots)
+        deluser_removed_bots(oldbots, conf.bots);
+#ifdef this_is_handled_by_confedit_now
+      /* no longer the localhub (or removed), need to alert the new one to rehash (or start it) */
+      if (!conf.bot || !conf.bot->localhub) {
         conf_bot *localhub = conf_getlocalhub(conf.bots);
+
         /* then SIGHUP new localhub or spawn new localhub */
         if (localhub) {
           /* Check for pid again - may be using fork-interval */
@@ -608,14 +607,12 @@ void reload_bin_data() {
                start new localhub - done below in spawnbots() */
         }
       }
+
+      /* start/disable new bots as necesary */
+      conf_checkpids(conf.bots);
+      spawnbots(1);		//1 signifies to not start me!
+#endif
     }
-
-    /* start/disable new bots as necesary */
-    conf_checkpids();
-    spawnbots(1);		//1 signifies to not start me!
-
-    if (!conf.bot || !conf.bot->localhub)
-      free_conf_bots(conf.bots);
 
     if (conf.bot && conf.bot->disabled) {
       if (tands > 0) {
@@ -627,9 +624,7 @@ void reload_bin_data() {
         nuke_server("Bot disabled in binary.");
 
       werr(ERR_BOTDISABLED);
-    }
-
-    if (!conf.bot) {
+    } else if (!conf.bot) {
       conf.bot = oldbot;
 
       if (tands > 0) {
@@ -643,19 +638,20 @@ void reload_bin_data() {
       werr(ERR_BADBOT);
     }
 
-    if (oldbot) {
-      if (strcmp(conf.bot->nick, oldbot->nick)) {
-        change_handle(conf.bot->u, conf.bot->nick);
-//        var_set_by_name(conf.bot->nick, "nick", conf.bot->nick);
-//        var_set_userentry(conf.bot->nick, "nick", conf.bot->nick);
-      }
-
-
-      free_bot(oldbot);
+    /* The bot nick changed! (case) */
+    if (strcmp(conf.bot->nick, oldbot->nick)) {
+      change_handle(conf.bot->u, conf.bot->nick);
+//      var_set_by_name(conf.bot->nick, "nick", conf.bot->nick);
+//      var_set_userentry(conf.bot->nick, "nick", conf.bot->nick);
     }
+
+    free_bot(oldbot);
 
     if (oldbots)
       free_conf_bots(oldbots);
+
+    if (!conf.bot->localhub)
+      free_conf_bots(conf.bots);
   }
 }
 

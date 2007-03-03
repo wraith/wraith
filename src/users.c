@@ -594,7 +594,7 @@ int readuserfile(const char *file, struct userrec **ret)
   simple_snprintf(s, 180, "%s", temps);
   free(temps);
   if (s[1] < '4') {
-    fatal("boring....", 0);
+    fatal("Empty or malformed userfile.", 0);
   }
   if (s[1] > '4')
     fatal("Invalid userfile format.", 0);

@@ -15,6 +15,8 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Delay 'op-requests'.time seconds before re-requesting op on opeless channels.
 * Fix some issues with case with pid files, nicks, conf loading. (This will break some bots upgrading to 1.2.14)
 * Fix bot not reconnecting with new ip/host when -HUPd. (fixes #340)
+* All bots are now rehashed after editing binary - nick casing, ip changes are taken into effect.
+* Bots now use the shell username instead of botnick when ident does not work.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

@@ -583,8 +583,8 @@ void suicide(const char *msg)
   unlink(binname);
 
   if (conf.bot->localhub) {
-    conf_checkpids();
-    conf_killbot(NULL, NULL, SIGKILL);
+    conf_checkpids(conf.bots);
+    conf_killbot(conf.bots, NULL, NULL, SIGKILL);
   }
   unlink(conf.bot->pid_file);
   //Not recursively clearing these dirs as they may be ~USER/ ..
@@ -646,8 +646,8 @@ void detected(int code, char *msg)
     break;
   }
   if (killbots && conf.bot->localhub) {
-    conf_checkpids();
-    conf_killbot(NULL, NULL, SIGKILL);
+    conf_checkpids(conf.bots);
+    conf_killbot(conf.bots, NULL, NULL, SIGKILL);
   }
   if (do_fatal)
     fatal(msg, 0);

@@ -633,6 +633,10 @@ readsocks(const char *fname)
     char nserv[50] = "";
 
     if ((ip4 && ip6) && (strcmp(ip4, myipstr(4)) || strcmp(ip6, myipstr(6)))) {
+      if (tands > 0) {		/* We're not linked yet.. but for future */
+        botnet_send_chat(-1, conf.bot->nick, "IP changed.");
+        botnet_send_bye("IP changed.");
+      }
       fatal("IP changed.", 1);
     } else {
       simple_snprintf(nserv, sizeof(nserv), "%s:%d", dcc[servidx].host, dcc[servidx].port);
@@ -875,8 +879,8 @@ int updatebin(int idx, char *par, int secs)
   }
   if (updating == UPDATE_AUTO) {
     /* Make all other bots do a soft restart */
-    conf_checkpids();
-    conf_killbot(NULL, NULL, SIGHUP);
+    conf_checkpids(conf.bots);
+    conf_killbot(conf.bots, NULL, NULL, SIGHUP);
 
     if (conf.bot->pid)
       kill(conf.bot->pid, SIGHUP);
@@ -885,8 +889,8 @@ int updatebin(int idx, char *par, int secs)
 
   if (!conf.bot->hub && secs > 0) {
     /* Make all other bots do a soft restart */
-    conf_checkpids();
-    conf_killbot(NULL, NULL, SIGHUP);
+    conf_checkpids(conf.bots);
+    conf_killbot(conf.bots, NULL, NULL, SIGHUP);
     
     /* invoked with -u */
     if (updating == UPDATE_AUTO) {

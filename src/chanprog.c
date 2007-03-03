@@ -20,6 +20,7 @@
 #include "net.h"
 #include "misc.h"
 #include "users.h"
+#include "botnet.h"
 #include "userrec.h"
 #include "main.h"
 #include "debug.h"
@@ -35,8 +36,9 @@
 
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/
-char 			origbotname[NICKLEN + 1] = "";
-char 			botname[NICKLEN + 1] = "";	/* Primary botname		*/
+char			origbotnick[NICKLEN + 1] = "";	/* from -B (placed into conf.bot->nick .. for backup when conf is cleared */
+char 			origbotname[NICKLEN + 1] = "";	/* Nick to regain */
+char 			botname[NICKLEN + 1] = "";	/* IRC nickname */
 port_t     		my_port = 0;
 bool			reset_chans = 0;
 
@@ -556,8 +558,14 @@ void chanprog()
 
   /* Check if our ip changed during a rehash */
   if (ip4) {
-    if (strcmp(ip4, myipstr(4)) || strcmp(ip6, myipstr(6)))
+    if (strcmp(ip4, myipstr(4)) || strcmp(ip6, myipstr(6))) {
+      if (tands > 0) {
+        botnet_send_chat(-1, conf.bot->nick, "IP changed.");
+        botnet_send_bye("IP changed.");
+      }
       fatal("IP changed.", 1);
+    }
+
     free(ip4);
     free(ip6);
   }

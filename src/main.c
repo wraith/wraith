@@ -311,6 +311,7 @@ static void dtx_arg(int argc, char *argv[])
       case 'B':
         used_B = 1;
         strlcpy(origbotname, optarg, HANDLEN + 1);
+        strlcpy(origbotnick, optarg, HANDLEN + 1);
         break;
       case 'H':
         printf("SHA1 (%s): %s\n", optarg, SHA1(optarg));
@@ -570,7 +571,7 @@ static void startup_checks(int hack) {
 
   if (can_stat(cfile))
     readconf(cfile, 0);	/* will read into &conf struct */
-  conf_checkpids();
+  conf_checkpids(conf.bots);
 #endif /* CYGWIN_HACKS */
 
 #ifndef CYGWIN_HACKS
@@ -600,7 +601,7 @@ static void startup_checks(int hack) {
     if (do_killbot[0]) {
       const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
 
-      if (conf_killbot(do_killbot, NULL, kill_sig) == 0)
+      if (conf_killbot(conf.bots, do_killbot, NULL, kill_sig) == 0)
         printf("'%s' successfully %sed.\n", do_killbot, what);
       else {
         printf("Error %sing '%s'\n", what, do_killbot);
@@ -624,7 +625,7 @@ static void startup_checks(int hack) {
       if (!conf.bots || !conf.bots->nick)     /* no bots ! */
         werr(ERR_NOBOTS);
 
-      spawnbots();
+      spawnbots(conf.bots);
       exit(0); /* our job is done! */
     }
   }
@@ -773,7 +774,7 @@ printf("out: %s\n", out);
   console_init();
   chanprog();
 
-  strcpy(botuser, origbotname);
+  strcpy(botuser, conf.username ? conf.username : origbotname);
 
   if (!conf.bot->hub && conf.bot->localhub)
     sdprintf("I am localhub (%s)", conf.bot->nick);

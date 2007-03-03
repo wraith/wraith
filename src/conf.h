@@ -56,8 +56,8 @@ enum {
 
 
 void spawnbot(const char *);
-void spawnbots(bool rehashed = 0);
-int conf_killbot(const char *, conf_bot *, int);
+void spawnbots(conf_bot *bots, bool rehashed = 0);
+int conf_killbot(conf_bot *, const char *, conf_bot *, int);
 void confedit() __attribute__((noreturn));
 void conf_addbot(char *, char *, char *, char *);
 int conf_delbot(char *);
@@ -71,10 +71,10 @@ int parseconf(bool);
 int writeconf(char *, FILE *, int);
 void fill_conf_bot(bool fatal = 1);
 void bin_to_conf(bool error = 0);
-void conf_checkpids(bool all = 1);
+void conf_checkpids(conf_bot *bots, bool all = 1);
 void conf_add_userlist_bots();
 conf_bot *conf_bots_dup(conf_bot *);
-void kill_removed_bots(conf_bot *, conf_bot *);
+void deluser_removed_bots(conf_bot *, conf_bot *);
 conf_bot *conf_getlocalhub(conf_bot *);
 void conf_setmypid(pid_t);
 void conf_bot_dup(conf_bot *dest, conf_bot *src);

@@ -29,7 +29,7 @@ void add_myself_to_userlist();
 void load_internal_users();
 
 extern struct chanset_t		*chanset;
-extern char			admin[], origbotname[NICKLEN + 1], botname[];
+extern char			admin[], origbotnick[NICKLEN + 1], origbotname[NICKLEN + 1], botname[];
 extern port_t			my_port;
 extern bool			reset_chans;
 

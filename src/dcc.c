@@ -1290,7 +1290,7 @@ detect_telnet_flood(char *floodhost)
     lasttelnettime = 0;
     lasttelnethost[0] = 0;
     putlog(LOG_MISC, "*", "Telnet connection flood from %s!  Placing on ignore!", floodhost);
-    addignore(floodhost, origbotname, "Telnet connection flood", now + (60 * ignore_time));
+    addignore(floodhost, conf.bot->nick, "Telnet connection flood", now + (60 * ignore_time));
     return 1;
   }
   return 0;

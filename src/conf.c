@@ -100,11 +100,11 @@ void spawnbot(const char *nick)
  * bots prefixxed with '/' will be killed auto if running.
  * if (updating) then we were called with -U or -u */
 void
-spawnbots(bool rehashed)
+spawnbots(conf_bot *bots, bool rehashed)
 {
   conf_bot *bot = NULL;
 
-  for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+  for (bot = bots; bot && bot->nick; bot = bot->next) {
     sdprintf("checking bot: %s", bot->nick);
 
     if (bot->disabled) {
@@ -118,7 +118,8 @@ spawnbots(bool rehashed)
       -if updating and we find our nick, skip
       -if pid exists and not updating, bot is running and we have nothing more to do, skip.
      */
-    } else if ((!egg_strcasecmp(bot->nick, conf.bot->nick) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
+    } else if ((conf.bot && !egg_strcasecmp(bot->nick, conf.bot->nick) && 
+               (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
       sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
       continue;
     } else {
@@ -134,7 +135,7 @@ spawnbots(bool rehashed)
 }
 
 int
-conf_killbot(const char *botnick, conf_bot *bot, int signal)
+conf_killbot(conf_bot *bots, const char *botnick, conf_bot *bot, int signal)
 {
   int ret = -1;
 
@@ -142,9 +143,11 @@ conf_killbot(const char *botnick, conf_bot *bot, int signal)
     if (bot->pid)
       ret = kill(bot->pid, signal);
   } else {
-    for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+    for (bot = bots; bot && bot->nick; bot = bot->next) {
       /* kill all bots but myself if botnick==NULL, otherwise just kill botnick */
-      if ((!botnick && egg_strcasecmp(conf.bot->nick, bot->nick)) || (botnick && !egg_strcasecmp(botnick, bot->nick))) {
+      if ((!conf.bot) || 
+          (!botnick && (conf.bot->nick && egg_strcasecmp(conf.bot->nick, bot->nick))) || 
+          (botnick && !egg_strcasecmp(botnick, bot->nick))) {
         if (bot->pid)
           ret = kill(bot->pid, signal);
 
@@ -200,7 +203,7 @@ confedit()
   struct stat st, sn;
   struct timespec ts1, ts2;           /* time before and after edit */
   bool autowrote = 0;
-  conf_bot *localhub = NULL, *localhub_old = NULL;
+  conf_bot *oldbots = NULL;
 
   um = umask(077);
 
@@ -314,26 +317,25 @@ confedit()
     }
   }
 
-  localhub_old = conf_getlocalhub(conf.bots);
-  
-  if (localhub_old) {
-    localhub = (conf_bot *) my_calloc(1, sizeof(conf_bot));
-    conf_bot_dup(localhub, localhub_old);
-  }
-
   tmpconf.my_close();
+
+  oldbots = conf_bots_dup(conf.bots);
   free_conf();
+
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
   expand_tilde(&conf.binpath);
   expand_tilde(&conf.datadir);
   unlink(tmpconf.file);
   conf_to_bin(&conf, 0, -1);
 
-  /* Lookup the pid now in case it changed while in the editor */
-  if (localhub) {
-    localhub->pid = checkpid(localhub->nick, localhub, NULL);
-    kill(localhub->pid, SIGUSR1);
-  }
+  /* Now signal all of the old bots with SIGUSR1
+   * They will auto die and determine new localhub, etc..
+   */
+  conf_checkpids(oldbots);
+  conf_killbot(oldbots, NULL, NULL, SIGUSR1);
+
+  /* Now spawn new bots */
+  spawnbots(conf.bots);
 
   exit(0);
 
@@ -426,11 +428,11 @@ static void conf_compat_pids()
   }  
 }
 
-void conf_checkpids(bool all)
+void conf_checkpids(conf_bot *bots, bool all)
 {
   conf_bot *bot = NULL;
 
-  for (bot = conf.bots; bot && bot->nick; bot = bot->next)
+  for (bot = bots; bot && bot->nick; bot = bot->next)
     if (all || (!all && bot->pid == 0))
       bot->pid = checkpid(bot->nick, bot, NULL);
 }
@@ -494,7 +496,7 @@ checkpid(const char *nick, conf_bot *bot, const char *usedir)
     }
 
     if (bufp[0] && pid && can_stat(bufp) && (getpid() == pid) &&
-        !egg_strncasecmp(nick, origbotname, HANDLEN)) {
+        !egg_strncasecmp(nick, origbotnick, HANDLEN)) {
       socksfile = strdup(bufp);
       return 0;
     }
@@ -614,7 +616,7 @@ conf_delbot(char *botn)
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     if (!egg_strcasecmp(bot->nick, botn)) {     /* found it! */
       bot->pid = checkpid(bot->nick, bot, NULL);
-      conf_killbot(NULL, bot, SIGKILL);
+      conf_killbot(conf.bots, NULL, bot, SIGKILL);
       free_bot(bot);
       return 0;
     }
@@ -1035,7 +1037,7 @@ conf_bot *conf_bots_dup(conf_bot *src)
   return ret;
 }
 
-void kill_removed_bots(conf_bot *oldlist, conf_bot *newlist)
+void deluser_removed_bots(conf_bot *oldlist, conf_bot *newlist)
 {
   if (oldlist) {
     conf_bot *botold = NULL, *botnew = NULL;
@@ -1050,9 +1052,10 @@ void kill_removed_bots(conf_bot *oldlist, conf_bot *newlist)
           break;
         }
       }
-      if (!found && egg_strcasecmp(botold->nick, origbotname)) {	/* Never kill ME.. will handle it elsewhere */
-        botold->pid = checkpid(botold->nick, botold, NULL);
-        conf_killbot(NULL, botold, SIGKILL);
+      if (!found && egg_strcasecmp(botold->nick, origbotnick)) {	/* Never kill ME.. will handle it elsewhere */
+	/* No need to kill -- they are signalled and they will die on their own now */
+        //botold->pid = checkpid(botold->nick, botold, NULL);
+        //conf_killbot(conf.bots, NULL, botold, SIGKILL);
         if ((u = get_user_by_handle(userlist, botold->nick))) {
           putlog(LOG_MISC, "*", "Removing '%s' as it has been removed from the binary config.", botold->nick);
           if (server_online)
@@ -1081,9 +1084,9 @@ fill_conf_bot(bool fatal)
   /* This first clause should actually be obsolete */
   if (!used_B && conf.bots && conf.bots->nick) {
     mynick = strdup(conf.bots->nick);
-    strlcpy(origbotname, conf.bots->nick, HANDLEN + 1);
+    strlcpy(origbotnick, conf.bots->nick, HANDLEN + 1);
   } else
-    mynick = strldup(origbotname, HANDLEN);
+    mynick = strldup(origbotnick, HANDLEN);
 
   sdprintf("mynick: %s", mynick);
 
@@ -1172,7 +1175,7 @@ bin_to_conf(bool error)
   if (clear_tmpdir)
     clear_tmp();	/* clear out the tmp dir, no matter if we are localhub or not */
   conf_compat_pids();
-  conf_checkpids();
+  conf_checkpids(conf.bots);
 
   tellconf();
 }

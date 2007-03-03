@@ -1750,7 +1750,7 @@ static void cmd_conf(int idx, char *par)
 #endif /* !CYGWIN_HACKS */
 
   if (listbot || !egg_strcasecmp(cmd, "list")) {
-    conf_checkpids();
+    conf_checkpids(conf.bots);
     conf_bot *bot = NULL;
     unsigned int i = 0;
 
@@ -1775,11 +1775,11 @@ static void cmd_conf(int idx, char *par)
     /* rewrite our binary */
     conf_to_bin(&conf, 0, -1);
 
-    kill_removed_bots(oldlist, conf.bots);
+//    kill_removed_bots(oldlist, conf.bots);
     conf_add_userlist_bots();
-    conf_checkpids();
-    spawnbots(1);
-    conf_checkpids(0);
+    conf_checkpids(conf.bots);
+    spawnbots(conf.bots, 1);
+    conf_checkpids(conf.bots, 0);
   }
 
   free_conf_bots(oldlist);
