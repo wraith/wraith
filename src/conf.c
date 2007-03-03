@@ -118,7 +118,7 @@ spawnbots(bool rehashed)
       -if pid exists and not updating, bot is running and we have nothing more to do, skip.
      */
     			/* use origbotname here because conf.bot may not exist (called from rehashing) */
-    } else if ((!strcmp(bot->nick, origbotname) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
+    } else if ((!egg_strcasecmp(bot->nick, origbotname) && (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
       sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
       continue;
     } else {
@@ -448,6 +448,8 @@ checkpid(const char *nick, conf_bot *bot, const char *usedir)
 
   tmpnick = tmp_ptr = strdup(nick);
 
+  strtolower(tmpnick);
+
   /* FIXME: remove after 1.2.9 */
   if (usedir)
     simple_snprintf(buf, sizeof buf, "%s/.pid.%s", usedir, tmpnick);
@@ -457,7 +459,7 @@ checkpid(const char *nick, conf_bot *bot, const char *usedir)
 
   if (bot && !(bot->pid_file))
     bot->pid_file = strdup(buf);
-  else if (bot && strcmp(bot->pid_file, buf))
+  else if (bot && egg_strcasecmp(bot->pid_file, buf))
     str_redup(&bot->pid_file, buf);
 
   if ((f = fopen(buf, "r"))) {
@@ -610,7 +612,7 @@ conf_delbot(char *botn)
   conf_bot *bot = NULL;
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    if (!strcmp(bot->nick, botn)) {     /* found it! */
+    if (!egg_strcasecmp(bot->nick, botn)) {     /* found it! */
       bot->pid = checkpid(bot->nick, bot, NULL);
       conf_killbot(NULL, bot, SIGKILL);
       free_bot(bot);
@@ -762,49 +764,49 @@ readconf(const char *fname, int bits)
         if (!option || !line[0])
           continue;
 
-        if (!strcmp(option, "autocron")) {      /* automatically check/create crontab? */
+        if (!egg_strcasecmp(option, "autocron")) {      /* automatically check/create crontab? */
           if (egg_isdigit(line[0]))
             conf.autocron = atoi(line);
 
-        } else if (!strcmp(option, "autouname")) {      /* auto update uname contents? */
+        } else if (!egg_strcasecmp(option, "autouname")) {      /* auto update uname contents? */
           if (egg_isdigit(line[0]))
             conf.autouname = atoi(line);
 
-        } else if (!strcmp(option, "username")) {       /* shell username */
+        } else if (!egg_strcasecmp(option, "username")) {       /* shell username */
           str_redup(&conf.username, line);
 
-        } else if (!strcmp(option, "homedir")) {        /* homedir */
+        } else if (!egg_strcasecmp(option, "homedir")) {        /* homedir */
           str_redup(&conf.homedir, line);
 
-        } else if (!strcmp(option, "datadir")) {        /* datadir */
+        } else if (!egg_strcasecmp(option, "datadir")) {        /* datadir */
           str_redup(&conf.datadir, line);
 
-        } else if (!strcmp(option, "binpath")) {        /* path that the binary should move to? */
+        } else if (!egg_strcasecmp(option, "binpath")) {        /* path that the binary should move to? */
           str_redup(&conf.binpath, line);
 
-        } else if (!strcmp(option, "binname")) {        /* filename of the binary? */
+        } else if (!egg_strcasecmp(option, "binname")) {        /* filename of the binary? */
           str_redup(&conf.binname, line);
 
-        } else if (!strcmp(option, "portmin")) {
+        } else if (!egg_strcasecmp(option, "portmin")) {
           if (egg_isdigit(line[0]))
             conf.portmin = atoi(line);
 
-        } else if (!strcmp(option, "portmax")) {
+        } else if (!egg_strcasecmp(option, "portmax")) {
           if (egg_isdigit(line[0]))
             conf.portmax = atoi(line);
 
-        } else if (!strcmp(option, "pscloak")) {        /* should bots on this shell pscloak? */
+        } else if (!egg_strcasecmp(option, "pscloak")) {        /* should bots on this shell pscloak? */
           if (egg_isdigit(line[0]))
             conf.pscloak = atoi(line);
 
-        } else if (!strcmp(option, "uid")) {    /* new method uid */
+        } else if (!egg_strcasecmp(option, "uid")) {    /* new method uid */
           if (str_isdigit(line))
             conf.uid = atoi(line);
 
-        } else if (!strcmp(option, "uname")) {  /* new method uname */
+        } else if (!egg_strcasecmp(option, "uname")) {  /* new method uname */
           str_redup(&conf.uname, line);
 
-        } else if (!strcmp(option, "watcher")) {
+        } else if (!egg_strcasecmp(option, "watcher")) {
           if (egg_isdigit(line[0]))
             conf.watcher = atoi(line);
 
@@ -1250,7 +1252,7 @@ void conf_setmypid(pid_t pid) {
   conf.bot->pid = pid;
   conf_bot *bot = conf.bots;
   if (conf.bots) {
-    for (; bot && strcmp(bot->nick, conf.bot->nick); bot = bot->next)
+    for (; bot && egg_strcasecmp(bot->nick, conf.bot->nick); bot = bot->next)
      ;
     if (bot)
       bot->pid = pid;
