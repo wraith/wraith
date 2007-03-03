@@ -135,7 +135,7 @@ spawnbots(conf_bot *bots, bool rehashed)
 }
 
 int
-conf_killbot(conf_bot *bots, const char *botnick, conf_bot *bot, int signal)
+conf_killbot(conf_bot *bots, const char *botnick, conf_bot *bot, int signal, bool notbotnick)
 {
   int ret = -1;
 
@@ -146,12 +146,18 @@ conf_killbot(conf_bot *bots, const char *botnick, conf_bot *bot, int signal)
     for (bot = bots; bot && bot->nick; bot = bot->next) {
       /* kill all bots but myself if botnick==NULL, otherwise just kill botnick */
       if ((!conf.bot) || 
-          (!botnick && (conf.bot->nick && egg_strcasecmp(conf.bot->nick, bot->nick))) || 
-          (botnick && !egg_strcasecmp(botnick, bot->nick))) {
+          (!botnick && 
+             (conf.bot->nick && egg_strcasecmp(conf.bot->nick, bot->nick))) || 
+          (botnick && 
+             ((notbotnick == 0 && !egg_strcasecmp(botnick, bot->nick)) || 
+              (notbotnick == 1 && egg_strcasecmp(botnick, bot->nick))
+             )  
+          ) 
+         ) {
         if (bot->pid)
           ret = kill(bot->pid, signal);
 
-        if (botnick)
+        if (botnick && !notbotnick)
           break;
       }
     }
@@ -610,14 +616,16 @@ free_bot(conf_bot *bot)
 }
 
 int
-conf_delbot(char *botn)
+conf_delbot(char *botn, bool kill)
 {
   conf_bot *bot = NULL;
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     if (!egg_strcasecmp(bot->nick, botn)) {     /* found it! */
-      bot->pid = checkpid(bot->nick, bot, NULL);
-      conf_killbot(conf.bots, NULL, bot, SIGKILL);
+      if (kill) {
+        bot->pid = checkpid(bot->nick, bot, NULL);
+        conf_killbot(conf.bots, NULL, bot, SIGKILL);
+      }
       free_bot(bot);
       return 0;
     }

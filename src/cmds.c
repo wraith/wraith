@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
+#include <signal.h>
 
 extern egg_traffic_t 	traffic;
 
@@ -1641,6 +1642,9 @@ static void cmd_conf(int idx, char *par)
     if (par[0])
       ipsix = newsplit(&par);
 
+    if (cmd[0] == 'c' || cmd[0] == 'C')
+      conf_delbot(nick, 0);
+
     conf_addbot(nick, ip, host, ipsix);
     if (cmd[0] == 'a' || cmd[0] == 'A')
       dprintf(idx, "Added bot: %s\n", nick);
@@ -1775,14 +1779,23 @@ static void cmd_conf(int idx, char *par)
     /* rewrite our binary */
     conf_to_bin(&conf, 0, -1);
 
-//    kill_removed_bots(oldlist, conf.bots);
-    conf_add_userlist_bots();
-    conf_checkpids(conf.bots);
-    spawnbots(conf.bots, 1);
-    conf_checkpids(conf.bots, 0);
-  }
+    /* Now signal all of the old bots with SIGUSR1
+     * They will auto die and determine new localhub, etc..
+     */
+    conf_checkpids(oldlist);
+    conf_killbot(oldlist, conf.bot->nick, NULL, SIGUSR1, 1); /* Don't kill me. */
 
-  free_conf_bots(oldlist);
+    /* Now spawn new bots */
+    conf_checkpids(conf.bots);
+    spawnbots(conf.bots, 1); /* Not me. */
+    conf_checkpids(conf.bots, 0);
+
+    /* So reload_bin_data can process correctly */
+    conf.bots = oldlist;
+
+    do_restart = 2; /* SIGUSR1 -- reload_bin_data(); */
+  } else
+    free_conf_bots(oldlist);
 }
 
 static void cmd_encrypt(int idx, char *par)
