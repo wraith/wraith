@@ -586,10 +586,10 @@ static void startup_checks(int hack) {
   if (!updating)
     parseconf(1);
 
+  fixmod(binname);
+
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
-  else if (fixmod(binname))
-   werr(ERR_BINMOD);
 
 #ifndef CYGWIN_HACKS
   move_bin(conf.binpath, conf.binname, 1);

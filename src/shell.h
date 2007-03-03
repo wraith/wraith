@@ -6,7 +6,6 @@
 #endif /* HAVE_CONFIG_H */
 
 #define ERR_BINSTAT     1
-#define ERR_BINMOD      2
 #define ERR_PASSWD      3
 #define ERR_WRONGBINDIR 4
 #define ERR_DATADIR	5

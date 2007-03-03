@@ -660,8 +660,6 @@ char *werr_tostr(int errnum)
     return "Cannot access binary";
   case ERR_BADPASS:
     return "Incorrect password";
-  case ERR_BINMOD:
-    return "Cannot chmod() binary";
   case ERR_PASSWD:
     return "Cannot access the global passwd file";
   case ERR_WRONGBINDIR:

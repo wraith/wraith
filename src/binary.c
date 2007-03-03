@@ -54,6 +54,8 @@ bin_checksum(const char *fname, int todo)
  
   hash[0] = 0;
 
+  fixmod(fname);
+
   if (todo == GET_CHECKSUM) {
     if (!(f = fopen(fname, "rb")))
       werr(ERR_BINSTAT);
