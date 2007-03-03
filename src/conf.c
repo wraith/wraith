@@ -354,6 +354,7 @@ init_conf()
   conf.bots = NULL;
   conf.bot = NULL;
 
+  conf.localhub = NULL;
   conf.watcher = 0;
 #ifdef CYGWIN_HACKS
   conf.autocron = 0;
@@ -576,11 +577,11 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
   /* not a hub 
    AND
-   * no bots added yet (first bot) yet, not disabled.
-   OR
-   * bots already listed but we dont have a localhub yet, so we're it!
+    * no bots added yet (first bot) yet, not disabled.
+    OR
+    * bots already listed but we dont have a localhub yet, so we're it!
    */
-  if (!bot->hub && ((!conf.bots && !bot->disabled) || (conf.bots && !conf.localhub))) {
+  if (!conf.localhub && !bot->hub && !bot->disabled) {
     bot->localhub = 1;          /* first bot */
     conf.localhub = strdup(bot->nick);
   }
