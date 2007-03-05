@@ -19,6 +19,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Bots now use the shell username instead of botnick when ident does not work.
 * Localhubs now auto add *!~username@... hosts instead of *!~nick@... hosts for their leafs.
 * Make bot chmod() itself when accessing its binary.
+* Fix bots sharing wrong channel keys over botnet.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
