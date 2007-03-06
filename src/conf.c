@@ -341,7 +341,7 @@ confedit()
   conf_killbot(oldbots, NULL, NULL, SIGUSR1);
 
   /* Now spawn new bots */
-  spawnbots(conf.bots);
+//  spawnbots(conf.bots);
 
   exit(0);
 
