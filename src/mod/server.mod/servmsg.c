@@ -1203,8 +1203,9 @@ static int got311(char *from, char *msg)
 }
 
 static char *
-hide_chans(const char *nick, struct userrec *u, char *channels)
+hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly)
 {
+  char *channels = strdup(_channels), *channels_p = channels;
   char *chans = NULL, *chname = NULL, s[5] = "";
   size_t len = strlen(channels) + 100 + 1;
   struct chanset_t *chan = NULL;
@@ -1221,16 +1222,26 @@ hide_chans(const char *nick, struct userrec *u, char *channels)
     }
 
     chan = findchan_by_dname(chname);
-    if (chan)
+
+    if (chan && !publicOnly)
      get_user_flagrec(u, &fr, chan->dname);
 
-    if (!chan || getnick(u->handle, chan) || !(chan->channel.mode & (CHANPRIV|CHANSEC)) || chk_op(fr, chan)) {
+    if (!chan || 
+        
+        (!publicOnly && (
+          getnick(u->handle, chan) || 
+          !(chan->channel.mode & (CHANPRIV|CHANSEC)) || 
+          chk_op(fr, chan)
+        )) ||
+        (publicOnly && !(chan->channel.mode & (CHANPRIV|CHANSEC)))
+       ) {
       if (chans[0])
         simple_snprintf(chans, len, "%s %s%s", chans, s, chname);
       else
         simple_snprintf(chans, len, "%s%s", s, chname);
     }
   }
+  free(channels_p);
   return chans;
 }
 
@@ -1246,11 +1257,18 @@ static int got319(char *from, char *msg)
   for (int idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois)) {
       char *chans = NULL;
-
-      if ((chans = hide_chans(nick, dcc[idx].user, msg))) {
+      /* Show every channel the user has access to view */
+      if ((chans = hide_chans(nick, dcc[idx].user, msg, 0))) {
         irc_whois(nick, " channels : %s", chans);
         free(chans);
       }
+      chans = NULL;
+      /* Show all of the 'public' channels */
+      if ((chans = hide_chans(nick, dcc[idx].user, msg, 1))) {
+        irc_whois(nick, " public   : %s", chans);
+        free(chans);
+      }
+      break;
     }
   }
 

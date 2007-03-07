@@ -20,6 +20,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Localhubs now auto add *!~username@... hosts instead of *!~nick@... hosts for their leafs.
 * Make bot chmod() itself when accessing its binary.
 * Fix bots sharing wrong channel keys over botnet.
+* Cmd_swhois now displays a list of only 'public' channels as well.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
