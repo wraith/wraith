@@ -21,6 +21,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Make bot chmod() itself when accessing its binary.
 * Fix bots sharing wrong channel keys over botnet.
 * Cmd_swhois now displays a list of only 'public' channels as well.
+* Fix cmd_mns_user being ran on self-bot. (fixes #350)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

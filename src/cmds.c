@@ -3386,6 +3386,11 @@ static void cmd_mns_user(int idx, char *par)
         dprintf(idx, "You can't remove bots.\n");
         return;
     }
+    if (!egg_strcasecmp(u2->handle, conf.bot->nick)) {
+      dprintf(idx, "The 'suicide' cmd should be used instead.\n");
+      return;
+    }
+
     int i = nextbot(handle);
 
     if (i < 0)
