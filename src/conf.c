@@ -1198,7 +1198,7 @@ void conf_add_userlist_bots()
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     /* Don't auto-add hubs. */
-    if (!bot->hub && tands > 0) {
+    if (!bot->hub && tands > 0 && !bot->disabled) {
       u = get_user_by_handle(userlist, bot->nick);
       if (!u) {
         putlog(LOG_MISC, "*", "Adding bot '%s' as it has been added to the binary config.", bot->nick);
