@@ -191,7 +191,7 @@ void rcmd_chans(char *fbot, char *fhand, char *fidx) {
 
   if (server_online) {
     for (chan = chanset; chan; chan = chan->next) {
-      if (shouldjoin(chan) && !channel_active(chan)) {
+      if (!channel_active(chan) && (shouldjoin(chan) || chan->channel.jointime)) {
         simple_snprintf(buf, sizeof(buf), "%s%s%s", buf[0] ? buf : "", buf[0] ? " " : "", chan->dname);
       }
     }
