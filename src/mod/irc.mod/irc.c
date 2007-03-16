@@ -615,6 +615,7 @@ request_op(struct chanset_t *chan)
   /* check server lag */
   if (server_lag > lag_threshold) {
     putlog(LOG_GETIN, "*", "Not asking for ops on %s - I'm too lagged", chan->dname);
+    chan->channel.no_op = now + 10;
     return;
   }
 
