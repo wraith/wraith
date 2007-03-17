@@ -154,7 +154,7 @@ send_sysinfo()
       char buf[201] = "";
       size_t len = 0;
 
-      len = simple_snprintf(buf, sizeof(buf), "si %s %s %s %s", 
+      len = simple_snprintf(buf, sizeof(buf), "si %s %s %s %s\n", 
             conf.username ? conf.username : "*", gotun ? un.sysname : "*", gotun ? un.nodename : "*",
             gotun ? un.machine : "*");
 
