@@ -987,6 +987,14 @@ static void disconnect_server(int idx, int dolost)
     trying_server = 0;
     lostdcc(idx);
   }
+
+  /* Invalidate the cmd_swhois cache callback data */
+  for (int idx = 0; idx < dcc_total; idx++) {
+    if (dcc[idx].type && dcc[idx].whois[0]) {
+      dcc[idx].whois[0] = 0;
+      dcc[idx].whowas = 0;
+    }
+  }
 }
 
 static void eof_server(int idx)
