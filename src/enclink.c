@@ -48,9 +48,10 @@ static void ghost_link_case(int idx, direction_t direction)
     free(nick1);
     free(nick2);
     strlcpy(keyp, SHA1(tmp), key_len);
+#ifdef DEBUG
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(keyp), keyp);
-
+#endif
     if (direction == FROM) {
       make_rand_str(initkey, 32);       /* set the initial out/in link key to random chars. */
       socklist[snum].oseed = random();
