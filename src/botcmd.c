@@ -1250,6 +1250,11 @@ void bounce_simul(int idx, char *buf)
   if (!buf || !buf[0] || !dcc[idx].simulbot || !dcc[idx].simulbot[0] || idx < 0)
     return;
 
+  /* Truncate out the newline that was put in from the dprintf() */
+  char *p = strchr(buf, '\n');
+  if (p)
+    *p = 0;
+
   simple_snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].simul, buf);          /* remote-simul[r]eturn idx buf */
   putbot(dcc[idx].simulbot, rmsg);
 }
