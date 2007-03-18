@@ -729,6 +729,10 @@ request_op(struct chanset_t *chan)
 static void
 request_in(struct chanset_t *chan)
 {
+  /* Lag situation */
+  if (!shouldjoin(chan))
+    return;
+
   struct flag_record myfr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &myfr, NULL);
