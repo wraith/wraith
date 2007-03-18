@@ -1062,11 +1062,52 @@ typedef struct hublist_entry {
 
 int botlinkcount = 0;
 
+void autolink_random_hub(char *avoidbot) {
+  /* Pick a random hub, but avoid 'avoidbot' */
+  int hlc = 0;
+  struct hublist_entry *hl = NULL, *hl2 = NULL;
+  struct userrec *tmpu = NULL;
+  struct flag_record fr = { FR_GLOBAL|FR_BOT, 0, 0, 0 };
+
+  for (struct userrec *u = userlist; u; u = u->next) {
+    get_user_flagrec(u, &fr, NULL);
+    if (glob_bot(fr) && egg_strcasecmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
+      if (strcmp(u->handle, avoidbot)) {
+        hl2 = hl;
+        hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
+
+        hl->next = hl2;
+        hlc++;
+        hl->u = u;
+      } else
+        tmpu = u;
+    }
+  }
+
+  /* We probably have 1 hub and avoided it :/ */
+  if (!hlc && tmpu) {
+    hl2 = hl;
+    hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
+    hl->next = hl2;
+    hlc++;
+    hl->u = tmpu;
+  }
+  hlc = randint(hlc);
+  while (hl) {
+    if (!hlc) {
+      botlink("", -3, hl->u->handle);
+    }
+    hlc--;
+    hl2 = hl->next;
+    free(hl);
+    hl = hl2;
+  }
+}
+
 void autolink_cycle_leaf(char *start)
 {
   struct bot_addr *my_ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
   char uplink[HANDLEN + 1] = "", avoidbot[HANDLEN + 1] = "", curhub[HANDLEN + 1] = "";
-  struct flag_record fr = { FR_GLOBAL, 0, 0, 0 };
 
   /* Reset connection attempts if we ain't called due to a failed link */
   if (!start)
@@ -1129,48 +1170,7 @@ void autolink_cycle_leaf(char *start)
     }
   }
 
-  /* Pick a random hub, but avoid 'avoidbot' */
-  int hlc = 0;
-  struct hublist_entry *hl = NULL, *hl2 = NULL;
-  struct userrec *tmpu = NULL;
-
-  for (struct userrec *u = userlist; u; u = u->next) {
-    get_user_flagrec(u, &fr, NULL);
-    if (glob_bot(fr) && egg_strcasecmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
-      if (strcmp(u->handle, avoidbot)) {
-        putlog(LOG_DEBUG, "@", "Adding %s to hublist", u->handle);
-        hl2 = hl;
-        hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
-
-        hl->next = hl2;
-        hlc++;
-        hl->u = u;
-      } else
-        tmpu = u;
-    }
-  }
-  putlog(LOG_DEBUG, "@", "Picking random hub from %d hubs", hlc);
-
-  /* We probably have 1 hub and avoided it :/ */
-  if (!hlc && tmpu) {
-    hl2 = hl;
-    hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
-    hl->next = hl2;
-    hlc++;
-    hl->u = tmpu;
-  }
-  hlc = randint(hlc);
-  putlog(LOG_DEBUG, "@", "Picked #%d for hub", hlc);
-  while (hl) {
-    if (!hlc) {
-      putlog(LOG_DEBUG, "@", "Which is bot: %s", hl->u->handle);
-      botlink("", -3, hl->u->handle);
-    }
-    hlc--;
-    hl2 = hl->next;
-    free(hl);
-    hl = hl2;
-  }
+  autolink_random_hub(avoidbot);
 }
 
 
