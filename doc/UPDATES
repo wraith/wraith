@@ -24,6 +24,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix cmd_mns_user being ran on self-bot. (fixes #350)
 * Fix cmd_checkchannels not taking slowjoin into account.
 * Fix cmd_swhois returning results after a server jump.
+* Fix bots not connecting to their uplink.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

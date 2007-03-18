@@ -523,20 +523,18 @@ void add_myself_to_userlist() {
     userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_OP, 1);
     conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
     bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
-  } else {
-    bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
-  }
 
-  /* Assume hub has a record added from load_internal_users();
-     why would it think it was a hub if it wasn't in the hub list??
-  */
-  if (!conf.bot->hub) {
-    if (conf.bot->net.ip)
-      bi->address = strdup(conf.bot->net.ip);
-    bi->telnet_port = bi->relay_port = 3333;
-    bi->hublevel = 999;
-    bi->uplink = (char *) my_calloc(1, 1);
-    set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
+    /* Assume hub has a record added from load_internal_users();
+       why would it think it was a hub if it wasn't in the hub list??
+    */
+    if (!conf.bot->hub) {
+      if (conf.bot->net.ip)
+        bi->address = strdup(conf.bot->net.ip);
+      bi->telnet_port = bi->relay_port = 3333;
+      bi->hublevel = 999;
+      bi->uplink = (char *) my_calloc(1, 1);
+      set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
+    }
   }
 }
 
