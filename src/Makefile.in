@@ -95,6 +95,7 @@ stringfix: stringfix.c common.h ../config.h eggdrop.h
 	@$(STRIP) stringfix@EXEEXT@
 
 ../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability mybdlib
+	@echo "[*] Linking"
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
@@ -115,12 +116,10 @@ build_msg:
 compatability:
 	@echo "[*] Compiling compatability components"
 	+@cd compat && $(MAKE_GENERIC) compat
-	@echo "[*] Linking"
 
 mybdlib:
 	@echo "[*] Compiling BDLIB components"
 	+@cd bdlib && $(MAKE_GENERIC) bdlib
-	@echo "[*] Linking"
 
 mycrypto:
 	@echo "[*] Compiling crypto"
