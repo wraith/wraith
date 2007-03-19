@@ -216,7 +216,7 @@ struct chanset_t {
 #define CHAN_TAKE 	    BIT5	/* When a bot gets opped, take the chan */
 #define CHAN_PROTECTOPS     BIT6	/* re-op any +o people who get deop'd */
 #define CHAN_BOTBITCH       BIT7        /* only let bots be opped? */
-#undef  CHAN_8              /*BIT8	 */
+#define CHAN_BACKUP         BIT8	/* Join the BOT_BACKUP bots when set */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
 #undef  CHAN_10		    /* BIT10        not used */
 #define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
@@ -255,6 +255,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_active(chan)  (chan->status & CHAN_ACTIVE)
 #define channel_joining(chan) (chan->status & CHAN_JOINING)
 #define channel_pending(chan)  (chan->status & CHAN_PEND)
+#define channel_backup(chan) (chan->status & CHAN_BACKUP)
 #define channel_bitch(chan) (chan->status & CHAN_BITCH)
 #define chan_bitch(chan) (chan->status & (CHAN_BITCH|CHAN_BOTBITCH))
 #define channel_botbitch(chan) (chan->status & CHAN_BOTBITCH)

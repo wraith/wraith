@@ -83,13 +83,14 @@ struct flag_record {
 #define USER_CHAN_VALID (flag_t) CHAN_VALID|USER_AUTOOP|USER_MASTER|USER_OWNER
 #define USER_VALID (flag_t) USER_ADMIN|USER_HUBA|USER_CHUBA|USER_PARTY|USER_CHAN_VALID
 
+#define BOT_BACKUP	FLAG[(int) 'B']
 #define BOT_CHANHUB	FLAG[(int) 'c']
 #define BOT_UPDATEHUB	FLAG[(int) 'u']
 #define BOT_DORESOLV	FLAG[(int) 'r']
 #define BOT_DOLIMIT	FLAG[(int) 'l']
 #define BOT_DOVOICE	FLAG[(int) 'y']
 
-#define BOT_CHAN_VALID (flag_t) CHAN_VALID|BOT_CHANHUB|BOT_DOLIMIT|BOT_DOVOICE|BOT_DORESOLV
+#define BOT_CHAN_VALID (flag_t) CHAN_VALID|BOT_CHANHUB|BOT_DOLIMIT|BOT_DOVOICE|BOT_DORESOLV|BOT_BACKUP
 #define BOT_VALID  (flag_t) BOT_CHAN_VALID|BOT_UPDATEHUB
 
 
@@ -134,6 +135,8 @@ struct flag_record {
 #define glob_chanhub(x)                        ((x).global & BOT_CHANHUB)
 #define glob_doresolv(x)                        ((x).global & BOT_DORESOLV)
 #define chan_doresolv(x)                        ((x).chan & BOT_DORESOLV)
+#define glob_backup(x)				((x).global & BOT_BACKUP)
+#define chan_backup(x)				((x).chan & BOT_BACKUP)
 
 void init_flags(void);
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);

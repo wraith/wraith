@@ -2568,10 +2568,8 @@ static int gotpart(char *from, char *msg)
   chan = findchan(chname);
   u = get_user_by_host(from);
   nick = splitnick(&from);
-  if (chan && !shouldjoin(chan)) {
-  /* shouldnt this check for match_my_nick? */
-    if (match_my_nick(nick)) 
-      irc_log(chan, "Parting");    
+  if (chan && !shouldjoin(chan) && match_my_nick(nick)) {
+    irc_log(chan, "Parting");    
     clear_channel(chan, 1);
     chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
     return 0;

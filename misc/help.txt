@@ -404,6 +404,7 @@ See also: link
      The following can be set + or - (e.g. .chanset #channel -enforcebans)
         $bautoop$b         Bots that are +y will auto-op all users with 
                        op access to the channel.
+        $bbackup$b         Make backup-bots (+B) join when set.
         $bbitch$b          Only let users with the +o flag have op on the
                        channel?
         $bbotbitch$b       Only let $bbots$b with the +o flag have op on the
@@ -1819,6 +1820,7 @@ See also: whom
       $bx$b = flood-exempt (user is exempt from flood kicks)
  
    Valid bot-only flags:
+      $bB$b = backup-bot (bot will only join chans marked +backup, see '%dhelp chaninfo')
       $bc$b = chat-bot (bot accepts DCC chat on irc)
       $bl$b = limit-bot (bot sets limit in all channels, see '%dhelp chaninfo') [$bCPU INTENSIVE$b]
       $br$b = resolve (bot resolves clients in to match against userlist) [$bCPU INTENSIVE+$b]

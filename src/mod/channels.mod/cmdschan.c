@@ -1200,6 +1200,7 @@ static void cmd_chaninfo(int idx, char *par)
     dprintf(idx, "Channel flags:\n");
     work[0] = 0;
     SHOW_FLAG("autoop",		channel_autoop(chan));
+    SHOW_FLAG("backup",		channel_backup(chan));
     SHOW_FLAG("bitch",		channel_bitch(chan));
     SHOW_FLAG("botbitch",       channel_botbitch(chan));
     SHOW_FLAG("closed",		channel_closed(chan));

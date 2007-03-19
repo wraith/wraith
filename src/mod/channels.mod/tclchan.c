@@ -563,16 +563,18 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
  *  else if (!strcmp(item[i], "-temp"))
  *    chan->status &= ~CHAN_TEMP;
  */
-    else if (!strcmp(item[i], "+fastop")) {
+    else if (!strcmp(item[i], "+fastop"))
       chan->status |= CHAN_FASTOP;
-    }
     else if (!strcmp(item[i], "-fastop"))
       chan->status &= ~(CHAN_FASTOP | CHAN_PROTECTOPS);
-    else if (!strcmp(item[i], "+private")) {
+    else if (!strcmp(item[i], "+private"))
       chan->status |= CHAN_PRIVATE;
-    }
     else if (!strcmp(item[i], "-private"))
       chan->status &= ~CHAN_PRIVATE;
+    else if (!strcmp(item[i], "+backup"))
+      chan->status |= CHAN_BACKUP;
+    else if (!strcmp(item[i], "-backup"))
+      chan->status &= ~CHAN_BACKUP;
 
     /* ignore wasoptest, stopnethack and clearbans in chanfile, remove
        this later */
@@ -701,7 +703,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     chan->status |= CHAN_FASTOP;		// to avoid bots still mass opping from +take from not using cookies
 
   if (!conf.bot->hub) {
-    if ((old_status ^ chan->status) & CHAN_INACTIVE) {
+    if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
       if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
         dprintf(DP_SERVER, "PART %s\n", chan->name);
       if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {

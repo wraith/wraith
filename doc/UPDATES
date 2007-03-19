@@ -25,6 +25,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix cmd_checkchannels not taking slowjoin into account.
 * Fix cmd_swhois returning results after a server jump.
 * Fix bots not connecting to their uplink.
+* Add ghost-inspired feature: backup bots. Bots marked +B will only join channels marked +backup.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
