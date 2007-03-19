@@ -549,13 +549,13 @@ int my_cmp(const mycmds *c1, const mycmds *c2)
 static void cmd_nohelp(int idx, char *par)
 {
   char *buf = (char *) my_calloc(1, 1);
+  bind_entry_t *entry = NULL;
+  bind_table_t *table = bind_table_lookup("dcc");
 
-  qsort(cmdlist, cmdi, sizeof(mycmds), (int (*)(const void *, const void *)) &my_cmp);
-  
-  for (int i = 0; i < cmdi; i++) {
-    if (findhelp(cmdlist[i].name) == -1) {
-      buf = (char *) my_realloc(buf, strlen(buf) + 2 + strlen(cmdlist[i].name) + 1);
-      strcat(buf, cmdlist[i].name);
+  for (entry = table->entries; entry; entry = entry->next) {
+    if (findhelp(entry->mask) == -1) {
+      buf = (char *) my_realloc(buf, strlen(buf) + 2 + strlen(entry->mask) + 1);
+      strcat(buf, entry->mask);
       strcat(buf, ", ");
     }
   }
