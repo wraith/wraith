@@ -32,6 +32,8 @@
 #define VAR_NOLDEF	BIT16
 /* Don't set global on hub */
 #define VAR_NOGHUB	BIT17
+/* (short) number */
+#define VAR_SHORT 	BIT18
 
 #define VAR_LDATA 	1
 #define VAR_GDATA	2
