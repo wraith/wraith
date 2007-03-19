@@ -352,7 +352,6 @@ void show_banner(int idx)
     dumplots(-dcc[idx].sock, "", wbanner()); 
   dprintf(idx, " \n");
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
-  dprintf(-dcc[idx].sock, STR("|             - paypal: bryan@shatow.net  -             |\n"));
   dprintf(-dcc[idx].sock, STR("|             - http://wraith.shatow.net/ -             |\n"));
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
   dprintf(idx, " \n");
