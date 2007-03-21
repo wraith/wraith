@@ -740,7 +740,10 @@ chans_delbot(const char *bot, struct chanset_t *chan)
 
 int shouldjoin(struct chanset_t *chan)
 {
-  if (!strncmp(conf.bot->nick, "wtest", 5) && (!strcmp(chan->dname, "#wraith") || !strcmp(chan->dname, "#bryan") || !strcmp(chan->dname, "#skynet")))
+  /* If the bot is restarting (and hasn't finished getting the userfile for the first time) DO NOT JOIN channels - breaks +B/+backup */
+  if (restarting) return 0;
+
+  if (!strncmp(conf.bot->nick, "wtest", 5) && (!strcmp(chan->dname, "#skynet") || !strcmp(chan->dname, "#bryan") || !strcmp(chan->dname, "#wraith")))
     return 1;
   else if (!strncmp(conf.bot->nick, "wtest", 4)) /* use 5 for all */
     return 0; 

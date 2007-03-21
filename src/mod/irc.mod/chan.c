@@ -1811,7 +1811,7 @@ static int got315(char *from, char *msg)
   chan->status |= CHAN_ACTIVE;
   chan->status &= ~(CHAN_PEND | CHAN_JOINING);
   /* Am *I* on the channel now? if not, well d0h. */
-  if (!ismember(chan, botname)) {
+  if (shouldjoin(chan) && !ismember(chan, botname)) {
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
     clear_channel(chan, 1);
     chan->status &= ~CHAN_ACTIVE;
@@ -2151,7 +2151,7 @@ static int got474(char *from, char *msg)
   return 0;
 }
 
-/* got 475: can't goin channel, bad key
+/* got 475: can't join channel, bad key
  */
 static int got475(char *from, char *msg)
 {
@@ -2171,7 +2171,7 @@ static int got475(char *from, char *msg)
    * have joined the channel yet.
    */
   chan = findchan_by_dname(chname);
-  if (chan) {
+  if (chan && shouldjoin(chan)) {
     chan->status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Bad key--can't join: %s", chan->dname);
     if (chan->channel.key[0]) {

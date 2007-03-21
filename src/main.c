@@ -89,6 +89,7 @@ char 	*binname = NULL;
 time_t	online_since;		/* Unix-time that the bot loaded up */
 time_t  restart_time;
 bool	restart_was_update = 0;
+bool    restarting = 0;
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
 char	version[81] = "";	/* Version info (long form) */

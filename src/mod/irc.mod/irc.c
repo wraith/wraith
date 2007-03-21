@@ -587,9 +587,9 @@ getin_request(char *botnick, char *code, char *par)
     if (!shouldjoin(chan)) {
       putlog(LOG_GETIN, "*", "Got key for %s from %s - I shouldn't be on that chan?!?", chan->dname, botnick);
     } else {
-      if (!(channel_pending(chan) || channel_active(chan))) {
+      if (shouldjoin(chan) && !(channel_pending(chan) || channel_active(chan))) {
         putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, nick);
-        dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, nick);
+        dprintf(DP_MODE, "JOIN %s %s\n", chan->name[0] ? chan->name : chan->dname, nick);
         chan->status |= CHAN_JOINING;
       } else {
         putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);

@@ -1351,6 +1351,10 @@ finish_share(int idx)
   updatebot(-1, dcc[j].nick, '+', 0, 0, NULL);
   send_sysinfo();
 
+  /* Prevents the server connect from dumping JOIN #chan */
+  restarting = 0;
+
+  /* If this is ever changed, do mind the restarting bool as it will prevent 001 from dumping JOINs.. */
   if (reset_chans) {
     reset_chans = 0;
 //    putlog(LOG_DEBUG, "*", "Resetting channel info for all channels...");
