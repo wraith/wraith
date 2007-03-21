@@ -27,6 +27,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix bots not connecting to their uplink.
 * Add ghost-inspired feature: backup bots. Bots marked +B will only join channels marked +backup.
 * Fixed cmd_nohelp (for viewing undocumented cmds - mainly debugging cmds)
+* cmd_adduser sends a PRIVMSG now instead of a NOTICE
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
