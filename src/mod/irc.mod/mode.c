@@ -163,8 +163,8 @@ flush_cookies(struct chanset_t *chan, int pri)
     if (pri == QUICK) {
       char outbuf[201] = "";
 
-      simple_sprintf(outbuf, "MODE %s %s\r\n", chan->name, out);
-      tputs(serv, outbuf, strlen(outbuf));
+      const size_t len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s %s\r\n", chan->name, out);
+      tputs(serv, outbuf, len);
       /* dprintf(DP_MODE, "MODE %s %s\n", chan->name, out); */
     } else
       dprintf(DP_SERVER, "MODE %s %s\n", chan->name, out);
@@ -302,8 +302,8 @@ flush_mode(struct chanset_t *chan, int pri)
 /* floods too much
       char outbuf[201] = "";
 
-      simple_sprintf(outbuf, "MODE %s %s\r\n", chan->name, out);
-      tputs(serv, outbuf, strlen(outbuf));
+      const size_t len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s %s\r\n", chan->name, out);
+      tputs(serv, outbuf, len);
 */
       dprintf(DP_MODE, "MODE %s %s\n", chan->name, out);
     } else
@@ -548,22 +548,23 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 
     if (reversing || chk_deop(victim, chan) || (!loading && userlist && bitch && !chk_op(victim, chan))) {     /* chk_op covers +private */
       int num = randint(10);
-      char outbuf[101] = ""; 
+      char outbuf[101] = "";
+      size_t len = 0;
 /* should kick the oppee first, then deal with the opper */
 
       if (num == 4) {
-        simple_sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, mv->nick);
+        len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s -o %s\r\n", chan->name, mv->nick);
       } else if (num == 5) {
-        simple_sprintf(outbuf, "MODE %s -o %s\r\n", chan->name, m->nick);
+        len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s -o %s\r\n", chan->name, m->nick);
       } else if (bitch && num == 6) {
-        simple_sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
+        len = simple_snprintf(outbuf, sizeof(outbuf), "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
       } else if (bitch && num == 7) {
-        simple_sprintf(outbuf, "KICK %s %s :%s\r\n", chan->name, m->nick, response(RES_BITCHOP));
+        len = simple_snprintf(outbuf, sizeof(outbuf), "KICK %s %s :%s\r\n", chan->name, m->nick, response(RES_BITCHOP));
       } else
         add_mode(chan, '-', 'o', mv->nick);
 
-      if (outbuf)
-        tputs(serv, outbuf, strlen(outbuf));
+      if (len)
+        tputs(serv, outbuf, len);
     }
 
 
@@ -1076,9 +1077,9 @@ gotmode(char *from, char *msg)
             if (m && !chan_sentkick(m) && deops >= 3 && chan->mdop) {
               if (role < 5) {
                 m->flags |= SENTKICK;
-                simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
+                const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
                 if (role <= 2)
-                  tputs(serv, tmp, strlen(tmp));
+                  tputs(serv, tmp, len);
                 else
                   dprintf(DP_SERVER, "%s", tmp);
               } else {
@@ -1095,9 +1096,9 @@ gotmode(char *from, char *msg)
                 if (m && !chan_sentkick(m)) {
                   if (role < 5) {
                     m->flags |= SENTKICK;
-                    simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+                    const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
                     if (role <= 2)
-                      tputs(serv, tmp, strlen(tmp));
+                      tputs(serv, tmp, len);
                     else
                       dprintf(DP_SERVER, "%s", tmp);
                   } else { 
@@ -1135,8 +1136,8 @@ gotmode(char *from, char *msg)
                     /* Kick opper */
                     if (!chan_sentkick(m)) {
                       m->flags |= SENTKICK;
-                      simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
-                      tputs(serv, tmp, strlen(tmp));
+                      const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
+                      tputs(serv, tmp, len);
                     }
                     simple_sprintf(tmp, "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
                     deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
@@ -1157,8 +1158,8 @@ gotmode(char *from, char *msg)
                           if (!mv || !chan_sentkick(mv)) {
                             if (mv)
                               mv->flags |= SENTKICK;
-                            simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
-                            tputs(serv, tmp, strlen(tmp));
+                            const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
+                            tputs(serv, tmp, len);
                           }
                         }
                       }
@@ -1186,8 +1187,8 @@ gotmode(char *from, char *msg)
                   if (m) {
                     /* Kick opper */
                     if (!chan_sentkick(m)) {
-                      simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
-                      tputs(serv, tmp, strlen(tmp));
+                      const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+                      tputs(serv, tmp, len);
                       m->flags |= SENTKICK;
                     }
                     simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
@@ -1211,8 +1212,8 @@ gotmode(char *from, char *msg)
                         if (!mv || !chan_sentkick(mv)) {
                           if (mv)
                             mv->flags |= SENTKICK;
-                          simple_sprintf(tmp, "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
-                          tputs(serv, tmp, strlen(tmp));
+                          const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
+                          tputs(serv, tmp, len);
                         }
                       }
                     }

@@ -80,8 +80,8 @@ int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd
   int i = nextbot(bot);
 
   if (i >= 0) {
-    simple_snprintf(OBUF, sizeof(OBUF), "rc %s %s %s %i %s\n", bot, fbot, fhnd, fromidx, cmd);
-    tputs(dcc[i].sock, OBUF, strlen(OBUF));
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "rc %s %s %s %i %s\n", bot, fbot, fhnd, fromidx, cmd);
+    tputs(dcc[i].sock, OBUF, len);
     return 1;
   } else if (!egg_strcasecmp(bot, conf.bot->nick)) {
     char tmp[24] = "";
@@ -109,8 +109,8 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
   int i = nextbot(bot);
 
   if (i >= 0) {
-    simple_snprintf(OBUF, sizeof OBUF, "rr %s %s %s %s %s\n", bot, fbot, to, toidx, ln);
-    tputs(dcc[i].sock, OBUF, strlen(OBUF));
+    const size_t len = simple_snprintf(OBUF, sizeof OBUF, "rr %s %s %s %s %s\n", bot, fbot, to, toidx, ln);
+    tputs(dcc[i].sock, OBUF, len);
   } else if (!egg_strcasecmp(bot, conf.bot->nick)) {
     gotremotereply(conf.bot->nick, to, toidx, ln);
   }
@@ -120,7 +120,7 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
 void botnet_send_bye(const char *reason)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "bye %s\n", reason ? reason : "No reason");
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "bye %s\n", reason ? reason : "No reason");
 
     send_tand_but(-1, OBUF, len);
   }
@@ -157,7 +157,7 @@ void botnet_send_act(int idx, char *botnick, char *user, int chan, char *data)
 void botnet_send_chat(int idx, char *botnick, char *data)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "ct %s %s\n", botnick, data);
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "ct %s %s\n", botnick, data);
 
     send_hubs_but(idx, OBUF, len);
   }
@@ -194,21 +194,21 @@ void botnet_send_priv (int idx, char *from, char *to, char *tobot, const char *f
 
 void botnet_send_who(int idx, char *from, char *to, int chan)
 {
-  size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "w %s %s %D\n", from, to, chan);
+  const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "w %s %s %D\n", from, to, chan);
 
   tputs(dcc[idx].sock, OBUF, len);
 }
 
 void botnet_send_unlink(int idx, char *who, char *via, char *bot, char *reason)
 {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "ul %s %s %s %s\n", who, via, bot, reason);
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "ul %s %s %s %s\n", who, via, bot, reason);
 
   tputs(dcc[idx].sock, OBUF, len);
 }
 
 void botnet_send_link(int idx, char *who, char *via, char *bot)
 {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "l %s %s %s\n", who, via, bot);
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "l %s %s %s\n", who, via, bot);
 
   tputs(dcc[idx].sock, OBUF, len);
 }
@@ -216,7 +216,7 @@ void botnet_send_link(int idx, char *who, char *via, char *bot)
 void botnet_send_unlinked(int idx, char *bot, char *args)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "un %s %s\n", bot, args ? args : "");
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "un %s %s\n", bot, args ? args : "");
 
     send_tand_but(idx, OBUF, len);
   }
@@ -225,7 +225,7 @@ void botnet_send_unlinked(int idx, char *bot, char *args)
 void botnet_send_nlinked(int idx, char *bot, char *next, char flag, int vlocalhub, time_t vbuildts, char *vversion)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "n %s %s %cD0gc %d %d %s\n", bot, next, flag, 
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "n %s %s %cD0gc %d %d %s\n", bot, next, flag, 
                                        vlocalhub, (int) vbuildts, vversion ? vversion : "");
     send_tand_but(idx, OBUF, len);
   }
@@ -233,14 +233,14 @@ void botnet_send_nlinked(int idx, char *bot, char *next, char flag, int vlocalhu
 
 void botnet_send_traced(int idx, char *bot, char *buf)
 {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "td %s %s\n", bot, buf);
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "td %s %s\n", bot, buf);
 
   tputs(dcc[idx].sock, OBUF, len);
 }
 
 void botnet_send_trace(int idx, char *to, char *from, char *buf)
 {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "t %s %s %s:%s\n", to, from, buf, conf.bot->nick);
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "t %s %s %s:%s\n", to, from, buf, conf.bot->nick);
 
   tputs(dcc[idx].sock, OBUF, len);
 }
@@ -249,7 +249,7 @@ void botnet_send_update(int idx, tand_t * ptr)
 {
   if (tands > 0) {
     /* the D0gc is a lingering hack which probably will never be able to come out. */
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "u %s %cD0gc %d %d %s\n", ptr->bot, ptr->share, ptr->localhub, 
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "u %s %cD0gc %d %d %s\n", ptr->bot, ptr->share, ptr->localhub, 
                                                           (int) ptr->buildts, ptr->version ? ptr->version : "");
     send_tand_but(idx, OBUF, len);
   }
@@ -301,7 +301,7 @@ void putbot(char *bot, char *par)
 */
 void botnet_send_log(int idx, const char *from, int type, const char *msg)
 {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, msg);
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, msg);
 
   if (conf.bot->hub) {
     send_hubs_but(idx, OBUF, len);
@@ -312,7 +312,7 @@ void botnet_send_log(int idx, const char *from, int type, const char *msg)
 
 void botnet_send_zapf(int idx, char *a, char *b, char *c)
 {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "z %s %s %s\n", a, b, c);
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "z %s %s %s\n", a, b, c);
 
   tputs(dcc[idx].sock, OBUF, len);
 }
@@ -320,20 +320,20 @@ void botnet_send_zapf(int idx, char *a, char *b, char *c)
 void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "", c);
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "", c);
     send_tand_but(idx, OBUF, len);
   }
 }
 
 void botnet_send_var(int idx, variable_t *var) {
-  size_t len = simple_snprintf(OBUF, sizeof(OBUF), "va %s %s\n", var->name, var->gdata ? var->gdata : "");
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "va %s %s\n", var->name, var->gdata ? var->gdata : "");
 
   tputs(dcc[idx].sock, OBUF, len);
 }
 
 void botnet_send_var_broad(int idx, variable_t *var) {
   if (tands > 0) {
-    size_t len = simple_snprintf(OBUF, sizeof(OBUF), "vab %s %s\n", var->name, var->gdata ? var->gdata : "");
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "vab %s %s\n", var->name, var->gdata ? var->gdata : "");
 
     send_tand_but(idx, OBUF, len);
   }
@@ -342,7 +342,7 @@ void botnet_send_var_broad(int idx, variable_t *var) {
 void botnet_send_idle(int idx, char *bot, int sock, int idle, char *away)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "i %s %D %Ds%s\n", bot, sock, idle, away ? away : "");
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "i %s %D %Ds%s\n", bot, sock, idle, away ? away : "");
 
     send_tand_but(idx, OBUF, len);
   }
@@ -351,7 +351,7 @@ void botnet_send_idle(int idx, char *bot, int sock, int idle, char *away)
 void botnet_send_away(int idx, char *bot, int sock, char *msg, int linking)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "aw %s%s %D %s\n", ((idx >= 0) && linking) ? "!" : "", bot, sock, msg ? msg : "");
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "aw %s%s %D %s\n", ((idx >= 0) && linking) ? "!" : "", bot, sock, msg ? msg : "");
 
     send_tand_but(idx, OBUF, len);
   }
@@ -360,7 +360,7 @@ void botnet_send_away(int idx, char *bot, int sock, char *msg, int linking)
 void botnet_send_join_idx(int useridx)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "j %s %s %D %c%D %s\n",
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "j %s %s %D %c%D %s\n",
 		       conf.bot->nick, dcc[useridx].nick,
 		       dcc[useridx].type && dcc[useridx].type == &DCC_RELAYING ? 
                          dcc[useridx].u.relay->chat->channel : dcc[useridx].u.chat->channel, geticon(useridx),
@@ -373,7 +373,7 @@ void botnet_send_join_idx(int useridx)
 void botnet_send_join_party(int idx, int linking, int useridx)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "j %s%s %s %D %c%D %s\n", linking ? "!" : "",
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "j %s%s %s %D %c%D %s\n", linking ? "!" : "",
 		       party[useridx].bot, party[useridx].nick,
 		       party[useridx].chan, party[useridx].flag, party[useridx].sock,
 		       party[useridx].from ? party[useridx].from : "");
@@ -385,7 +385,7 @@ void botnet_send_join_party(int idx, int linking, int useridx)
 void botnet_send_part_idx(int useridx, char *reason)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "pt %s %s %D %s\n", conf.bot->nick,
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "pt %s %s %D %s\n", conf.bot->nick,
 			 dcc[useridx].nick, dcc[useridx].sock, reason ? reason : "");
 
     send_tand_but(-1, OBUF, len);
@@ -395,7 +395,7 @@ void botnet_send_part_idx(int useridx, char *reason)
 void botnet_send_part_party(int idx, int partyidx, char *reason, int silent)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "pt %s%s %s %D %s\n",
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "pt %s%s %s %D %s\n",
 		       silent ? "!" : "", party[partyidx].bot,
 		       party[partyidx].nick, party[partyidx].sock, reason ? reason : "");
 
@@ -406,7 +406,7 @@ void botnet_send_part_party(int idx, int partyidx, char *reason, int silent)
 void botnet_send_nkch(int useridx, char *oldnick)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "nc %s %D %s\n", conf.bot->nick, dcc[useridx].sock, dcc[useridx].nick);
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "nc %s %D %s\n", conf.bot->nick, dcc[useridx].sock, dcc[useridx].nick);
 
     send_tand_but(-1, OBUF, len);
   }
@@ -415,7 +415,7 @@ void botnet_send_nkch(int useridx, char *oldnick)
 void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
 {
   if (tands > 0) {
-    size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "nc %s %D %s\n", party[useridx].bot, party[useridx].sock, party[useridx].nick);
+    const size_t len = simple_snprintf2(OBUF, sizeof(OBUF), "nc %s %D %s\n", party[useridx].bot, party[useridx].sock, party[useridx].nick);
 
     send_tand_but(butidx, OBUF, len);
   }
