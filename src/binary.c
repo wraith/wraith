@@ -623,7 +623,7 @@ void reload_bin_data() {
       }
 
       if (server_online)
-        nuke_server("Bot disabled in binary.");
+        nuke_server("bbl");
 
       werr(ERR_BOTDISABLED);
     } else if (!conf.bot) {
@@ -635,7 +635,7 @@ void reload_bin_data() {
       }
 
       if (server_online)
-        nuke_server("Bot removed from binary.");
+        nuke_server("it's been good, cya");
 
       werr(ERR_BADBOT);
     }

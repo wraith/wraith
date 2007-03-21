@@ -636,7 +636,7 @@ readsocks(const char *fname)
         botnet_send_chat(-1, conf.bot->nick, "IP changed.");
         botnet_send_bye("IP changed.");
       }
-      fatal("IP changed.", 1);
+      fatal("brb", 1);
     } else {
       simple_snprintf(nserv, sizeof(nserv), "%s:%d", dcc[servidx].host, dcc[servidx].port);
       add_server(nserv);

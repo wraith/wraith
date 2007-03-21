@@ -561,7 +561,7 @@ void chanprog()
         botnet_send_chat(-1, conf.bot->nick, "IP changed.");
         botnet_send_bye("IP changed.");
       }
-      fatal("IP changed.", 1);
+      fatal("brb", 1);
     }
 
     free(ip4);
