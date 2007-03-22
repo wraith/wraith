@@ -7,6 +7,8 @@
  */
 
 
+#include "src/shell.h"
+
 /* Reversing this mode? */
 static bool reversing = 0;
 
@@ -122,17 +124,22 @@ flush_cookies(struct chanset_t *chan, int pri)
 {
   char out[512] = "", *p = out, post[512] = "";
   size_t postsize = sizeof(post) - 1;
+  memberlist *nicks[3] = { NULL, NULL, NULL };
 
   chan->cbytes = 0;
 
   for (unsigned int i = 0; i < (modesperline - 1); i++) {
-    if (chan->ccmode[i].op && postsize > strlen(chan->ccmode[i].op)) {
+    if (chan->ccmode[i].op && postsize > strlen(chan->ccmode[i].op->nick)) {
 
+      /* Build modes .. */
       *p++ = '+';
       *p++ = 'o';
-      postsize -= egg_strcatn(post, chan->ccmode[i].op, sizeof(post));
+
+      /* .. and params */
+      postsize -= egg_strcatn(post, chan->ccmode[i].op->nick, sizeof(post));
       postsize -= egg_strcatn(post, " ", sizeof(post));
-      free(chan->ccmode[i].op), chan->ccmode[i].op = NULL;
+      nicks[i] = chan->ccmode[i].op;
+      chan->ccmode[i].op = NULL;
     }
   }
 
@@ -146,18 +153,18 @@ flush_cookies(struct chanset_t *chan, int pri)
   if (post[0]) {
     /* remove the trailing space... */
     size_t myindex = (sizeof(post) - 1) - postsize;
-    char *cookie;
 
-    if (myindex > 0 && post[myindex - 1] == ' ')
-      post[myindex - 1] = 0;
+    if (myindex > 0 && post[--myindex] == ' ')
+      post[myindex] = 0;
+
+    //myindex is how long post is
 
     egg_strcatn(out, " ", sizeof(out));
     egg_strcatn(out, post, sizeof(out));
     egg_strcatn(out, " ", sizeof(out));
     
-    cookie = makecookie(chan->dname, conf.bot->nick);
-    egg_strcatn(out, cookie, sizeof(out));
-    free(cookie);
+    myindex += (p - out) + 2;  //(p-out)=outlen + 2 spaces
+    makecookie(&out[myindex], sizeof(out) - myindex, chan->dname, ismember(chan, botname), nicks[0], nicks[1], nicks[2]);
   }
   if (out[0]) {
     if (pri == QUICK) {
@@ -347,7 +354,8 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
     }
   }
 
-  int type, modes, l;
+  int type, modes;
+  size_t len = 0;
   unsigned int i;
   masklist *m = NULL;
   char s[21] = "";
@@ -413,30 +421,29 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
     /* for cookie ops, use ccmode instead of cmode */
     if (cookie) {
       for (i = 0; i < (modesperline - 1); i++)
-        if (chan->ccmode[i].op != NULL && !rfc_casecmp(chan->ccmode[i].op, op))
+        if (chan->ccmode[i].op != NULL && !rfc_casecmp(chan->ccmode[i].op->nick, mx->nick))
           return;               /* Already in there :- duplicate */
-      l = strlen(op) + 1;
-      if (chan->cbytes + l > mode_buf_len)
+      len = strlen(mx->nick) + 1;
+      if (chan->cbytes + len > mode_buf_len)
         flush_mode(chan, NORMAL);
       for (i = 0; i < (modesperline - 1); i++)
         if (!chan->ccmode[i].op) {
-          chan->ccmode[i].op = (char *) my_calloc(1, l);
-          chan->cbytes += l;    /* Add 1 for safety */
-          strcpy(chan->ccmode[i].op, op);
+          chan->ccmode[i].op = mx;
+          chan->cbytes += len;    
           break;
         }
     } else {
       for (i = 0; i < modesperline; i++)
         if (chan->cmode[i].type == type && chan->cmode[i].op != NULL && !rfc_casecmp(chan->cmode[i].op, op))
           return;               /* Already in there :- duplicate */
-      l = strlen(op) + 1;
-      if (chan->bytes + l > mode_buf_len)
+      len = strlen(op) + 1;
+      if (chan->bytes + len > mode_buf_len)
         flush_mode(chan, NORMAL);
       for (i = 0; i < modesperline; i++)
         if (chan->cmode[i].type == 0) {
           chan->cmode[i].type = type;
-          chan->cmode[i].op = (char *) my_calloc(1, l);
-          chan->bytes += l;     /* Add 1 for safety */
+          chan->cmode[i].op = (char *) my_calloc(1, len);
+          chan->bytes += len;     /* Add 1 for safety */
           strcpy(chan->cmode[i].op, op);
           break;
         }
@@ -1123,16 +1130,38 @@ gotmode(char *from, char *msg)
               if (unbans != 1 || (strncmp(modes[modecnt - 1], "-b", 2))) {
                 isbadop = BC_NOCOOKIE;
               } else {
-					                 /* hash!rand@time */
-                isbadop = checkcookie(chan->dname, u->handle, &(modes[modecnt - 1][3]));
-              }
-              if (isbadop) {
-                putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", m->nick, chan->dname, isbadop, msg);
-                n = i = 0;
-                switch (role) {
-                  case 0:
-                    break;
-                  case 1:
+                /* Check the hash for each opped nick and punish the opped client if it fails
+                   * Punish the opper lastly (and once)
+                 */
+                bool failure = 0;
+                for (i = 0; i < modecnt; i++) {
+                  if (msign == '+' && mmode == 'o') {
+                    mv = ismember(chan, mparam);
+
+                    const char *cookie = &(modes[modecnt - 1][3]);
+                    if ((isbadop = checkcookie(chan->dname, m, mv, cookie, i))) {
+                      //if (!failure) { /* First failure */
+                        failure = 1;
+                      //}
+
+                      /* Kick the opped client */
+                      if (randint(7) == (unsigned int) i) {
+                        if (!mv || !chan_sentkick(mv)) {
+                          if (mv)
+                            mv->flags |= SENTKICK;
+                          const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
+                          tputs(serv, tmp, len);
+                        }
+                      }
+                    }
+                  }
+                }
+                if (failure) { /* One of the hashes failed! */
+                  /* Did *I* do this heinous act? */
+                  if (match_my_nick(m->nick)) {
+                    detected(DETECT_HIJACK, "Possible Hijack: bad cookie");
+                  }
+                  if (randint(7) == 0) {
                     /* Kick opper */
                     if (!chan_sentkick(m)) {
                       m->flags |= SENTKICK;
@@ -1141,39 +1170,24 @@ gotmode(char *from, char *msg)
                     }
                     simple_sprintf(tmp, "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
                     deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
-                    break;
-                  default:
-                    n = role - 1;
-                    i = 0;
-                    while ((i < modecnt) && (n > 0)) {
-                      if (modes[i] && !strncmp(modes[i], "+o", 2))
-                        n--;
-                      if (n)
-                        i++;
-                    }
-                    if (!n) {
-                      for (i = 0; i < modecnt; i++) {
-                        if (msign == '+' && mmode == 'o') {
-                          mv = ismember(chan, mparam);
-                          if (!mv || !chan_sentkick(mv)) {
-                            if (mv)
-                              mv->flags |= SENTKICK;
-                            const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
-                            tputs(serv, tmp, len);
-                          }
-                        }
-                      }
-                    }
-                }
-
-                if (isbadop == BC_NOCOOKIE)
-                  putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                else if (isbadop == BC_HASH)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                else if (isbadop == BC_SLACK)
-                  putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-              } else
-                putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
+                  }
+                  /* Do the logging last as it can slow down the KICK pushing */
+                  putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", m->nick, chan->dname, isbadop, msg);
+                  if (isbadop == BC_NOCOOKIE)
+                    putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s %s", 
+                                    m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                  else if (isbadop == BC_HASH)
+                    putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s %s", 
+                                     m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                  else if (isbadop == BC_SLACK)
+                    putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s %s", 
+                                          m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                } 
+#ifdef DEBUG
+                else
+                  putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
+#endif
+              }
             }
 
             /* manop */
