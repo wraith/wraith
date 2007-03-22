@@ -618,7 +618,7 @@ void detected(int code, char *msg)
   if (code == DETECT_PROCESS)
     act = badprocess;
 #endif
-  if (code == DETECT_SIGCONT)
+  if (code == DETECT_HIJACK)
     act = hijack;
 
   switch (act) {

@@ -306,15 +306,20 @@ void Decrypt_File(char *infile, char *outfile)
 
 char *MD5(const char *string) 
 {
-  static char	  md5string[MD5_HASH_LENGTH + 1] = "";
+  static int n = 0;
+  static char ret[5][MD5_HASH_LENGTH + 1];
+  char* md5string = ret[n++];
   unsigned char   md5out[MD5_HASH_LENGTH + 1] = "";
   MD5_CTX ctx;
 
   MD5_Init(&ctx);
   MD5_Update(&ctx, string, strlen(string));
   MD5_Final(md5out, &ctx);
-  strlcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  strlcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH), MD5_HASH_LENGTH + 1);
   OPENSSL_cleanse(&ctx, sizeof(ctx));
+
+  if (n == 5) n = 0;
+
   return md5string;
 }
 

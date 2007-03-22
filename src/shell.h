@@ -31,7 +31,7 @@
 #define DETECT_TRACE 	2
 #define DETECT_PROMISC 	3
 #define DETECT_PROCESS 	4		/* NOT USED */
-#define DETECT_SIGCONT 	5
+#define DETECT_HIJACK 	5
 
 #define DET_IGNORE 	0
 #define DET_WARN 	1

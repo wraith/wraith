@@ -105,6 +105,27 @@ void sdprintf (const char *format, ...)
   }
 }
 
+char* hexize(const unsigned char* data, size_t len) {
+  static char buffers[5][513] = { "", "", "", "", "" };
+  static int n = 0;
+  char *buf = buffers[n++];
+
+  buf[0] = 0;
+
+  for (size_t i = 0; i < len; ++i) {
+    if (i == 0)
+      sprintf(buf, "%.2X", (int) (data[i]));
+    else
+      sprintf(buf, "%s %.2X", buf, (int) (data[i]));
+  }
+
+  buf[len * 3] = 0;
+
+  if (n == 5) n = 0;
+  return buf;
+}
+
+
 void printstr(unsigned char *str, int len)
 {
 #ifdef no
@@ -347,7 +368,7 @@ static void got_abort(int z)
 #ifndef CYGWIN_HACKS
 static void got_cont(int z)
 {
-  detected(DETECT_SIGCONT, "POSSIBLE HIJACK DETECTED (!! MAY BE BOX REBOOT !!)");
+  detected(DETECT_HIJACK, "POSSIBLE HIJACK DETECTED (!! MAY BE BOX REBOOT !!)");
 }
 #endif /* !CYGWIN_HACKS */
 
