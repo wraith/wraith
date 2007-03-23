@@ -1436,9 +1436,12 @@ check_expired_chanstuff(struct chanset_t *chan)
             if (m->user) {
               get_user_flagrec(m->user, &fr, chan->dname);
               if (!glob_bot(fr)) {
-                if (!privchan(fr, chan, PRIV_VOICE) &&
-                   ((channel_voice(chan) && !chk_devoice(fr)) ||
-                   (!channel_voice(chan) && chk_voice(fr, chan)))) {
+                if (!(m->flags & EVOICE) && 
+                    (
+                     (channel_voice(chan) && !chk_devoice(fr)) ||
+                     (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
+                    )
+                   ) {
                   add_mode(chan, '+', 'v', m->nick);
                 } else if ((chk_devoice(fr) || (m->flags & EVOICE))) {
                   add_mode(chan, '-', 'v', m->nick);
