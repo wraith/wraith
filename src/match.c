@@ -206,9 +206,9 @@ int _wild_match(register unsigned char *m, register unsigned char *n)
 static inline int
 comp_with_mask(void *addr, void *dest, unsigned int mask)
 {
-  if (memcmp(addr, dest, mask / 8) == 0)
+  if (memcmp(addr, dest, mask >> 3) == 0)
   {
-    int n = mask / 8;
+    int n = mask >> 3;
     int m = ((-1) << (8 - (mask % 8)));
 
     if (mask % 8 == 0 ||
@@ -227,36 +227,46 @@ comp_with_mask(void *addr, void *dest, unsigned int mask)
 int
 match_cidr(const char *s1, const char *s2)
 {
-  sockname_t ipaddr, maskaddr;
-  char address[NICKLEN + UHOSTLEN + 6] = "", mask[NICKLEN + UHOSTLEN + 6] = "", *ipmask = NULL, *ip = NULL, *len = NULL;
-  int cidrlen = 0, aftype = 0, ret = 0;
-
-  egg_bzero(&ipaddr, sizeof(ipaddr));
-  egg_bzero(&maskaddr, sizeof(maskaddr));
-
-  strcpy(mask, s1);
-  strcpy(address, s2);
-
-  ipmask = strrchr(mask, '@');
+  char *ipmask = strrchr(s1, '@');
   if(ipmask == NULL)
     return 0;
 
-  *ipmask++ = '\0';
-
-  ip = strrchr(address, '@');
+  char *ip = strrchr(s2, '@');
   if(ip == NULL)
     return 0;
-  *ip++ = '\0';
 
-  len = strrchr(ipmask, '/');
+  char mask[NICKLEN + UHOSTLEN + 6] = "";
+
+  strlcpy(mask, s1, sizeof(mask));
+  ipmask = mask + (ipmask - s1);
+
+  char address[NICKLEN + UHOSTLEN + 6] = "";
+
+  strlcpy(address, s2, sizeof(address));
+  ip = address + (ip - s2);
+
+  *ipmask++ = '\0';
+
+  char *len = strrchr(ipmask, '/');
   if(len == NULL)
     return 0;
 
   *len++ = '\0';
 
-  cidrlen = atoi(len);
+  int cidrlen = atoi(len);
   if(cidrlen == 0)
     return 0;
+
+  *ip++ = '\0';
+
+  int ret = 0;
+#ifdef USE_IPV6
+  int aftype = 0;
+#endif
+
+  sockname_t ipaddr, maskaddr;
+  egg_bzero(&ipaddr, sizeof(ipaddr));
+  egg_bzero(&maskaddr, sizeof(maskaddr));
 
   if (!strchr(ip, ':') && !strchr(ipmask, ':'))
     aftype = ipaddr.family = maskaddr.family =  AF_INET;

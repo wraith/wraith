@@ -159,9 +159,9 @@ flush_cookies(struct chanset_t *chan, int pri)
 
     //myindex is how long post is
 
-    egg_strcatn(out, " ", sizeof(out));
-    egg_strcatn(out, post, sizeof(out));
-    egg_strcatn(out, " ", sizeof(out));
+    egg_strcatn(&out[0], " ", sizeof(out));
+    egg_strcatn(&out[1], post, sizeof(out));
+    egg_strcatn(&out[myindex + 1], " ", sizeof(out));
     
     myindex += (p - out) + 2;  //(p-out)=outlen + 2 spaces
     makecookie(&out[myindex], sizeof(out) - myindex, chan->dname, ismember(chan, botname), nicks[0], nicks[1], nicks[2]);
@@ -235,7 +235,7 @@ flush_mode(struct chanset_t *chan, int pri)
     *p++ = 'l';
 
     /* 'sizeof(post) - 1' is used because we want to overwrite the old null */
-    postsize -= sprintf(&post[(sizeof(post) - 1) - postsize], "%d ", chan->limit);
+    postsize -= simple_sprintf(&post[(sizeof(post) - 1) - postsize], "%d ", chan->limit);
 
     chan->limit = 0;
   }
@@ -470,9 +470,9 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
   else {
     /* Typical mode changes */
     if (plus == '+')
-      strcpy(s, chan->pls);
+      strlcpy(s, chan->pls, sizeof(s));
     else
-      strcpy(s, chan->mns);
+      strlcpy(s, chan->mns, sizeof(s));
     if (!strchr(s, mode)) {
       if (plus == '+') {
         chan->pls[strlen(chan->pls) + 1] = 0;
@@ -993,13 +993,11 @@ gotmode(char *from, char *msg)
     /* let's pre-emptively check for mass op/deop, manual ops and cookieops */
 
     if ((channel_active(chan) || channel_pending(chan))) {
-      int i = 0, modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
-      bool me_opped = 0;
-      char **modes = (char **) my_calloc(1, sizeof(char *));
-      char *nick = NULL, *chg = NULL, s[UHOSTLEN] = "", sign = '+', *mp = NULL, *isserver = NULL;
+      char *isserver = NULL;
       size_t z = strlen(msg);
       struct userrec *u = NULL;
-      memberlist *m = NULL, *mv = NULL;
+      memberlist *m = NULL;
+      char *nick = NULL;
 
       if (!strchr(from, '!'))
         isserver = strdup(from);
@@ -1026,33 +1024,41 @@ gotmode(char *from, char *msg)
       } else
         nick = splitnick(&from);
 
-      chg = newsplit(&msg);
+      int i = 0, modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
+      bool me_opped = 0;
+      char **modes = (char **) my_calloc(1, sizeof(char *));
+      char s[UHOSTLEN] = "";
+      memberlist *mv = NULL;
+
+
       reversing = 0;
 
-      irc_log(chan, "%s!%s sets mode: %s %s", nick, from, chg, msg);
+      irc_log(chan, "%s!%s sets mode: %s", nick, from, msg);
       get_user_flagrec(u, &user, ch);
 
 
+      if (1) { // Place in block to hint chg/sign to be destroyed when done
       /* Split up the mode: #chan modes param param param param */
+      char *chg = newsplit(&msg);
+      char sign = 0;
       while (*chg) {            /* +MODES PARAM PARAM PARAM ... */
-        if (chg[0] == '+')
-          sign = '+';
-        else if (chg[0] == '-')
-          sign = '-';
+        if (strchr("+-", *chg))
+          sign = *chg;
         else {
-          mp = newsplit(&msg);       /* PARAM as noted above */
+          char* mp = newsplit(&msg);       /* PARAM as noted above */
           fixcolon(mp);
 
           /* Just want o's and b's */
           modes = (char **) my_realloc(modes, (modecnt * sizeof(char *)) + sizeof(char *));
 //      char **modes = (char **) my_calloc(modesperline + 1, sizeof(char *));
 
-          modes[modecnt] = (char *) my_calloc(1, strlen(mp) + 4);
-          simple_sprintf(modes[modecnt], "%c%c %s", sign, chg[0], mp ? mp : "");
-          modecnt++;
+          size_t siz = strlen(mp) + 3 + 1;
+          modes[modecnt] = (char *) my_calloc(1, siz);
+          simple_snprintf(modes[modecnt], siz, "%c%c %s", sign, chg[0], mp ? mp : "");
+          ++modecnt;
           if (chg[0] == 'o') {
             if (sign == '+') {
-              ops++;
+              ++ops;
               if (match_my_nick(mp))
                 me_opped = 1;
             } else {
@@ -1062,12 +1068,13 @@ gotmode(char *from, char *msg)
             }
           } else if (chg[0] == 'b') {
             if (sign == '+')
-              bans++;
+              ++bans;
             else
-              unbans++;
+              ++unbans;
           }
         }
-        chg++;
+        ++chg;
+      }
       }
 
       /* take ASAP */
