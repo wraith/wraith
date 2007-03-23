@@ -440,6 +440,7 @@ See also: link
                        control over the entire botnet and where it goes.
                        Users who lose access to a channel because of this setting
                        will see no reference to it over the botnet in any place.
+                       The +o restriction goes for +v as well.
         $bprotectops$b     Re-op a user with the +o flag if they get deopped?
                        DON'T USE THIS.
         $btake$b           Once a bot is opped, it will mass op all other bots
