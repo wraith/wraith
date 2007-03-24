@@ -3607,6 +3607,80 @@ static void cmd_mns_host(int idx, char *par)
     dprintf(idx, "Failed.\n");
 }
 
+static void cmd_clearhosts(int idx, char *par)
+{
+  putlog(LOG_CMDS, "*", "#%s# clearhosts %s", dcc[idx].nick, par);
+
+  char *handle = NULL;
+  struct userrec *u2 = NULL;
+
+  if (par[0]) {
+    handle = newsplit(&par);
+    u2 = get_user_by_handle(userlist, handle);
+  } else {
+    handle = dcc[idx].nick;
+    u2 = dcc[idx].user;
+  }
+
+  if (!u2 || !dcc[idx].user) {
+    dprintf(idx, "No such user.\n");
+    return;
+  }
+
+  struct flag_record fr2 = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 },
+                     fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
+  get_user_flagrec(u2, &fr2, NULL);
+
+  /* check to see if user is +d or +k and don't let them remove hosts from THEMSELVES*/
+  if (dcc[idx].user == u2 && (glob_deop(fr) || glob_kick(fr) || (!glob_master(fr) && (chan_deop(fr) || chan_kick (fr))))) {
+    dprintf(idx, "You can't remove hostmasks from yourself while having the +d or +k flag.\n");
+      return;
+    }
+
+  if (egg_strcasecmp(handle, dcc[idx].nick)) {
+    if (!glob_master(fr) && !glob_bot(fr2) && !chan_master(fr)) {
+      dprintf(idx, "You can't remove hostmasks from non-bots.\n");
+      return;
+    }
+    if (glob_bot(fr2) && !glob_owner(fr)) {
+      dprintf(idx, "You can't remove hostmasks from bots.\n");
+      return;
+    }
+    if (glob_admin(fr2) && !isowner(dcc[idx].nick)) {
+      dprintf(idx, "You can't remove hostmasks from an admin.\n");
+      return;
+    }
+    if ((glob_owner(fr2) || glob_master(fr2)) && !glob_owner(fr)) {
+      dprintf(idx, "You can't remove hostmasks from a bot owner/master.\n");
+      return;
+    }
+    if ((chan_owner(fr2) || chan_master(fr2)) && !glob_master(fr) &&
+        !glob_owner(fr) && !chan_owner(fr)) {
+      dprintf(idx, "You can't remove hostmasks from a channel owner/master.\n");
+      return;
+    }
+    if (!glob_master(fr) && !chan_master(fr)) {
+      dprintf(idx, "Permission denied.\n");
+      return;
+    }
+  }
+
+  if (get_user(&USERENTRY_HOSTS, u2)) {
+    while (struct list_type *q = (struct list_type *) get_user(&USERENTRY_HOSTS, u2)) {
+      char *host = strdup(q->extra);
+      delhost_by_handle(handle, host);
+      check_this_user(handle, 1, host);
+      free(host);
+    }
+    dprintf(idx, "Cleared hosts for %s.\n", handle);
+  } else
+    dprintf(idx, "%s had no hosts set.\n", handle);
+  if (conf.bot->hub)
+    write_userfile(idx);
+}
+
 /* netserver */
 static void cmd_netserver(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netserver", dcc[idx].nick);
@@ -4368,6 +4442,7 @@ cmd_t C_dcc[] =
 /*  {"chnick",		"m",	(Function) cmd_chhandle,	NULL, HUB}, */
   {"chpass",		"m",	(Function) cmd_chpass,		NULL, HUB},
   {"chsecpass",		"n",	(Function) cmd_chsecpass,	NULL, HUB},
+  {"clearhosts",	"",	(Function) cmd_clearhosts,	NULL, 0},
   {"cmdpass",           "a",    (Function) cmd_cmdpass,         NULL, HUB},
   {"color",		"",     (Function) cmd_color,           NULL, 0},
   {"comment",		"m|m",	(Function) cmd_comment,		NULL, 0},

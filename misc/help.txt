@@ -33,7 +33,7 @@ See also: exempts, -exempt, stick, unstick
    handle on IRC. If a handle is not specified, the hostmask will be added to
    YOUR user record. List as many hosts as wanted.
  
-See also: -host
+See also: -host, clearhosts
 ::+ignore
 ###  $b+ignore$b <hostmask> [%%<XdXhXm>] [comment]
    Adds an ignore to the list of ignores stored on the bot, with optional
@@ -55,7 +55,7 @@ See also: invites, -invite, stick, unstick
    have no flags, an optional hostmask, and a random pass/secpass.
    List as many hosts as needed.
  
-See also: -user, +host, -host%{+ni}, newleaf%{-}
+See also: -user, +host, -host, cleearhosts%{+ni}, newleaf%{-}
 ::-ban
 ###  $b-ban$b <banmask or number> [channel]
    Removes the specified ban from the list of bans stored on the bot. You may
@@ -103,7 +103,7 @@ See also: exempts, +exempt, stick, unstick
    Removes a hostmask from a user's user record.
 %{-}
  
-See also: +host
+See also: +host, clearhosts
 ::-ignore
 ###  $b-ignore$b <hostmask/number>
    Removes the specified ignore from the list of ignores stored on the bot. You
@@ -161,7 +161,7 @@ See also: whois
  
    The user being added is sent a NOTICE with their initial password.
  
-See also: +host, -host%{+m}, +user, -user%{-}
+See also: +host, -host, clearhosts%{+m}, +user, -user%{-}
 :leaf:authed:
 ###  $bauthed$b
    Displays users who are authed on the bot for chan/msg cmds.
@@ -632,6 +632,15 @@ See also: chhandle%{+n}, chsecpass%{-}
    will be used.
  
 See also: chhandle, chpass
+::clearhosts
+###  $bclearhosts$b
+   Removes all hosts from your handle.
+%{+m|m}
+###  $bclearhosts$b <handle>
+   Removes all hosts from a user's user record.
+%{-}
+ 
+See also: +host, -host
 :leaf:clearqueue
 ###  $bclearqueue$b <queue>
    removes all msgs from the specified queue (mode/server/help/all)
