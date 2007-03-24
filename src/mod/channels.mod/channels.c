@@ -364,7 +364,7 @@ static int
 check_slowjoinpart(struct chanset_t *chan)
 {
   /* slowpart */
-  if (channel_active(chan) && (chan->channel.parttime) && (chan->channel.parttime < now)) {
+  if (chan->channel.parttime && (chan->channel.parttime < now)) {
     chan->channel.parttime = 0;
     dprintf(DP_MODE, "PART %s\n", chan->name);
     if (chan) /* this should NOT be necesary, but some unforseen bug requires it.. */
