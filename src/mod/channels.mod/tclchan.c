@@ -478,6 +478,15 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
           chan->flood_exempt_mode = 0;
       } else
         chan->flood_exempt_mode = atoi(item[i]);
+    } else if (!strcmp(item[i], "flood-lock-time")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          simple_snprintf(result, RESULT_LEN, "channel flood-lock-time needs argument");
+        return ERROR;
+      }
+      chan->flood_lock_time = atoi(item[i]);
+     
 
 /* Chanint template
  *  } else if (!strcmp(item[i], "temp")) {
@@ -875,6 +884,7 @@ int channel_add(char *result, char *newname, char *options)
 /* Chanint template
  *  chan->temp = 0;
  */
+    chan->flood_lock_time = 120;
     chan->flood_exempt_mode = 0;
     chan->flood_pub_thr = gfld_chan_thr;
     chan->flood_pub_time = gfld_chan_time;

@@ -386,6 +386,9 @@ See also: link
                               Op/1           Ops are exempt from flood checks
                               Voice/2        Voices are exempt from flood checks
  
+        $bflood-lock-time$b   How long in seconds to keep the channel locked
+                         during drone floods.
+
         $binvite-time$b       Set here how long temporary invites will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. The bot will check the invites
