@@ -2294,8 +2294,16 @@ rate_t flood_massjoin = { 6, 1 };
 
 void unset_im(struct chanset_t *chan)
 {
-  dprintf(DP_MODE, "MODE %s :-im\n", chan->name[0] ? chan->name : chan->dname);
-  chan->channel.set_im = 0;
+  if (chan->channel.drone_set_mode) {
+    char buf[3] = "", *p = buf;
+    if (chan->channel.drone_set_mode & CHANINV)
+      *p++ = 'i';
+    if (chan->channel.drone_set_mode & CHANMODER)
+      *p++ = 'm';
+    buf[2] = '\0';
+    dprintf(DP_MODE, "MODE %s :-%s\n", chan->name[0] ? chan->name : chan->dname, buf);
+  }
+  chan->channel.drone_set_mode = 0;
 }
 
 
@@ -2435,18 +2443,34 @@ static int gotjoin(char *from, char *chname)
            ++chan->channel.drone_joins;
            chan->channel.drone_jointime = now;
 
-           if (!chan->channel.set_im && chan->channel.drone_joins >= flood_massjoin.count) {  //flood from dronenet, let's attempt to set +im
+           if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= flood_massjoin.count) {  //flood from dronenet, let's attempt to set +im
              egg_timeval_t howlong;
 
-             chan->channel.set_im = 1;
-             chan->channel.drone_joins = 0;
-             chan->channel.drone_jointime = 0;
-             dprintf(DP_DUMP, "MODE %s :+im\n", chan->name);
-             howlong.sec = flood_im_time;
-             howlong.usec = 0;
-             timer_create_complex(&howlong, "Unset umode +im", (Function) unset_im, (void *) chan, 0);
+             chan->channel.drone_set_mode = 0;
 
-             putlog(LOG_MISC, "*", "Drone flood detected in %s! Setting +im for %li seconds.", chan->dname, flood_im_time);
+             char buf[3] = "", *p = buf;
+
+             if (!(chan->channel.mode & CHANINV)) {
+               chan->channel.drone_set_mode |= CHANINV;
+               *p++ = 'i';
+             }
+             if (!(chan->channel.mode & CHANMODER)) {
+               chan->channel.drone_set_mode |= CHANMODER;
+               *p++ = 'm';
+             }
+             buf[2] = '\0';
+
+             if (chan->channel.drone_set_mode && buf[0]) {
+               chan->channel.drone_joins = 0;
+               chan->channel.drone_jointime = 0;
+              
+               dprintf(DP_DUMP, "MODE %s :+%s\n", chan->name[0] ? chan->name : chan->dname, buf);
+               howlong.sec = flood_im_time;
+               howlong.usec = 0;
+               timer_create_complex(&howlong, "Unset umode +im", (Function) unset_im, (void *) chan, 0);
+
+               putlog(LOG_MISC, "*", "Drone flood detected in %s! Setting +im for %li seconds.", chan->dname, flood_im_time);
+             }
            }
          }
 
