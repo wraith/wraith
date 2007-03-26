@@ -1209,6 +1209,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_FLAG("fastop",		channel_fastop(chan));
     SHOW_FLAG("inactive",	channel_inactive(chan));
     SHOW_FLAG("nodesynch",	channel_nodesynch(chan));
+    SHOW_FLAG("nomassjoin",	channel_nomassjoin(chan));
     SHOW_FLAG("private",	channel_privchan(chan));
     SHOW_FLAG("protectops",	channel_protectops(chan));
 //    SHOW_FLAG("revenge",	channel_revenge(chan));

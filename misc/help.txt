@@ -432,6 +432,9 @@ See also: link
                        the bot from fighting with services such as ChanServ, or
                        from kicking IRCops when setting channel modes without
                        having ops.
+        $bnomassjoin$b     If more than 6 clients join in 1 second, set +im
+                           for 2 minutes. (Could be triggered from net-split
+                           rejoin if clients hop servers and change nicks)
         $bprivate$b        This by far is probably the single most unique and
                        important feature of this pack. With this set, users with
                        global +o will not implicitly have access to the channel.

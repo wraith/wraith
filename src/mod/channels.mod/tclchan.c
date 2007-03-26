@@ -557,6 +557,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_BOTBITCH;
     else if (!strcmp(item[i], "-botbitch"))
       chan->status &= ~CHAN_BOTBITCH;
+    else if (!strcmp(item[i], "+nomassjoin"))
+      chan->status |= CHAN_NOMASSJOIN;
+    else if (!strcmp(item[i], "-nomassjoin"))
+      chan->status &= ~CHAN_NOMASSJOIN;
 /* Chanflag template
  *  else if (!strcmp(item[i], "+temp"))
  *    chan->status |= CHAN_TEMP;

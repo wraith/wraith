@@ -32,6 +32,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed +voice flaw where users in channels that were +voice AND +private would only be voiced with |v.
 * Added cmd_clearhosts
 * Added 'whois restrictions' to more cmds.
+* Add channel flag 'nomassjoin' to set +im on a timer during join floods (drones)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

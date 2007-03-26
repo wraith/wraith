@@ -92,13 +92,16 @@ struct chan_t {
   time_t jointime;
   time_t parttime;
   time_t no_op;
+  time_t drone_jointime;
   int fighting;
+  int drone_joins;
 #ifdef G_BACKUP
   int backup_time;              /* If non-0, set +backup when now>backup_time */
 #endif /* G_BACKUP */
   int maxmembers;
   int members;
   int do_opreq;
+  bool set_im;
   char *topic;
   char *key;
   unsigned short int mode;
@@ -222,7 +225,7 @@ struct chanset_t {
 #define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
 #define CHAN_INACTIVE       BIT12	/* no irc support for this channel */
 #define CHAN_VOICE          BIT13	/* a bot +y|y will voice *, except +q */
-#undef  CHAN_14             /* BIT14	 */
+#define CHAN_NOMASSJOIN     BIT14       /* watch for mass join for flood nets and react */
 #define CHAN_NODESYNCH      BIT15
 #define CHAN_FASTOP         BIT16	/* Bots will not use +o-b to op (no cookies) */ 
 #define CHAN_PRIVATE        BIT17	/* users need |o to access chan */ 
@@ -285,6 +288,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
 #define channel_privchan(chan) (chan->status & CHAN_PRIVATE)
 #define channel_autoop(chan) (chan->status & CHAN_AUTOOP)
+#define channel_nomassjoin(chan) (chan->status & CHAN_NOMASSJOIN)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */
