@@ -73,7 +73,7 @@ static void flush_mode(struct chanset_t *, int);
 #define resetexempts(chan)  resetmasks((chan), (chan)->channel.exempt, (chan)->exempts, global_exempts, 'e')
 #define resetinvites(chan)  resetmasks((chan), (chan)->channel.invite, (chan)->invites, global_invites, 'I')
 
-static void detect_autokick(char *, char *, struct chanset_t *, char *);
+static void detect_offense(memberlist*, struct chanset_t *, char *);
 /* static int target_priority(struct chanset_t *, memberlist *, int); */
 static bool do_op(char *, struct chanset_t *, time_t, bool);
 static void request_op(struct chanset_t *);
@@ -88,6 +88,8 @@ static char *quickban(struct chanset_t *, char *);
 static bool killmember(struct chanset_t *chan, char *nick);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
+void unset_im(struct chanset_t* chan);
+void detected_drone_flood(struct chanset_t* chan, memberlist*);
 #define newban(chan, mask, who)         new_mask((chan)->channel.ban, mask, who)
 #define newexempt(chan, mask, who)      new_mask((chan)->channel.exempt, mask, who)
 #define newinvite(chan, mask, who)      new_mask((chan)->channel.invite, mask, who)

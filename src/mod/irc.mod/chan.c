@@ -2292,24 +2292,6 @@ static int got332(char *from, char *msg)
   return 0;
 }
 
-static time_t flood_im_time = 120;
-rate_t flood_massjoin = { 6, 1 };
-
-void unset_im(struct chanset_t *chan)
-{
-  if (chan->channel.drone_set_mode) {
-    char buf[3] = "", *p = buf;
-    if (chan->channel.drone_set_mode & CHANINV)
-      *p++ = 'i';
-    if (chan->channel.drone_set_mode & CHANMODER)
-      *p++ = 'm';
-    buf[2] = '\0';
-    dprintf(DP_MODE, "MODE %s :-%s\n", chan->name[0] ? chan->name : chan->dname, buf);
-  }
-  chan->channel.drone_set_mode = 0;
-}
-
-
 /* Got a join
  */
 static int gotjoin(char *from, char *chname)
@@ -2438,45 +2420,6 @@ static int gotjoin(char *from, char *chname)
 	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
       } else {
-         if (channel_nomassjoin(chan) && me_op(chan)) {
-           if (chan->channel.drone_jointime < now - flood_massjoin.time) {      //expired, reset counter
-             chan->channel.drone_joins = 0;
-           }
-
-           ++chan->channel.drone_joins;
-           chan->channel.drone_jointime = now;
-
-           if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= flood_massjoin.count) {  //flood from dronenet, let's attempt to set +im
-             egg_timeval_t howlong;
-
-             chan->channel.drone_set_mode = 0;
-
-             char buf[3] = "", *p = buf;
-
-             if (!(chan->channel.mode & CHANINV)) {
-               chan->channel.drone_set_mode |= CHANINV;
-               *p++ = 'i';
-             }
-             if (!(chan->channel.mode & CHANMODER)) {
-               chan->channel.drone_set_mode |= CHANMODER;
-               *p++ = 'm';
-             }
-             buf[2] = '\0';
-
-             if (chan->channel.drone_set_mode && buf[0]) {
-               chan->channel.drone_joins = 0;
-               chan->channel.drone_jointime = 0;
-              
-               dprintf(DP_DUMP, "MODE %s :+%s\n", chan->name[0] ? chan->name : chan->dname, buf);
-               howlong.sec = flood_im_time;
-               howlong.usec = 0;
-               timer_create_complex(&howlong, "Unset umode +im", (Function) unset_im, (void *) chan, 0);
-
-               putlog(LOG_MISC, "*", "Drone flood detected in %s! Setting +im for %li seconds.", chan->dname, flood_im_time);
-             }
-           }
-         }
-
 	if (m)
 	  killmember(chan, nick);
 	m = newmember(chan, nick);
@@ -2489,6 +2432,19 @@ static int gotjoin(char *from, char *chname)
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
 	m->user = u;
         m->tried_getuser = 1;
+
+        if (channel_nomassjoin(chan) && me_op(chan)) {
+          if (chan->channel.drone_jointime < now - flood_massjoin.time) {      //expired, reset counter
+            chan->channel.drone_joins = 0;
+          }
+          ++chan->channel.drone_joins;
+          chan->channel.drone_jointime = now;
+
+          if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= flood_massjoin.count) {  //flood from dronenet, let's attempt to set +im
+            detected_drone_flood(chan, m);
+          }
+        }
+
 
         if (!m->user && doresolv(chan)) {
           if (is_dotted_ip(host)) 
@@ -2977,11 +2933,10 @@ static int gotmsg(char *from, char *msg)
   strcpy(uhost, from);
   nick = splitnick(&uhost);
 
-  /* Only check if flood-ctcp is active */
-  detect_autokick(nick, uhost, chan, msg);
-  if (flood_ctcp.count && detect_avalanche(msg)) {
-    memberlist *m = ismember(chan, nick);
+  memberlist *m = ismember(chan, nick);
 
+  /* Only check if flood-ctcp is active */
+  if (flood_ctcp.count && detect_avalanche(msg)) {
     u = get_user_by_host(from);
     get_user_flagrec(u, &fr, chan->dname);
     /* Discard -- kick user if it was to the channel */
@@ -3082,11 +3037,12 @@ static int gotmsg(char *from, char *msg)
     int botmatch = 0;
     char *my_msg = NULL, *my_ptr = NULL, *fword = NULL;
 
+    if (me_op(chan) && doflood(chan))
+      detect_offense(m, chan, msg);
+
     /* Check even if we're ignoring the host. (modified by Eule 17.7.99) */
     detect_chan_flood(nick, uhost, from, chan, FLOOD_PRIVMSG, NULL);
     
-    if (!(chan = findchan(realto)))
-      return 0;
     if (auth_chan) {
       my_msg = my_ptr = strdup(msg);
       fword = newsplit(&my_msg);		/* take out first word */

@@ -69,6 +69,8 @@ static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 
+rate_t flood_massjoin = { 6, 1 };
+
 #include "chan.c"
 #include "mode.c"
 #include "cmdsirc.c"
@@ -87,14 +89,12 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 }
 
 static void
-detect_autokick(char *nick, char *uhost, struct chanset_t *chan, char *msg)
+detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
-  if (!nick || !nick[0] || !uhost || !uhost[0] || !chan || !msg || !msg[0])
-    return;
-
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  struct userrec *u = get_user_by_host(uhost);
+  struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
   int i = 0;
+
   //size_t tot = strlen(msg);
 
   get_user_flagrec(u, &fr, chan->dname);
@@ -118,8 +118,61 @@ dprintf(DP_MODE, "PRIVMSG %s :flood stats for %s: %d/%d are CAP, percentage: %d\
 dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
   }
 */
-
 }
+
+void unlock_chan(struct chanset_t *chan)
+{
+  if (chan->channel.drone_set_mode) {
+    char buf[4] = "", *p = buf;
+    if (chan->channel.drone_set_mode & CHANINV)
+      *p++ = 'i';
+    if (chan->channel.drone_set_mode & CHANMODER)
+      *p++ = 'm';
+    if (chan->channel.drone_set_mode & CHANKEY)
+      *p++ = 'k';
+
+    buf[sizeof(buf) - 1] = '\0';
+    dprintf(DP_MODE, "MODE %s :-%s\n", chan->name[0] ? chan->name : chan->dname, buf);
+  }
+  chan->channel.drone_set_mode = 0;
+}
+
+void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
+  egg_timeval_t howlong;
+
+  chan->channel.drone_set_mode = 0;
+
+  char buf[4] = "", *p = buf;
+  char key[10] = "";
+
+  if (!(chan->channel.mode & CHANINV)) {
+    chan->channel.drone_set_mode |= CHANINV;
+    *p++ = 'i';
+  }
+  if (!(chan->channel.mode & CHANMODER)) {
+    chan->channel.drone_set_mode |= CHANMODER;
+    *p++ = 'm';
+  }
+  if (!(chan->channel.mode & CHANKEY)) {
+    chan->channel.drone_set_mode |= CHANKEY;
+    *p++ = 'k';
+    make_rand_str(key, sizeof(key) - 1);
+  }
+  buf[sizeof(buf) - 1] = '\0';
+
+  if (chan->channel.drone_set_mode && buf[0]) {
+    chan->channel.drone_joins = 0;
+    chan->channel.drone_jointime = 0;
+
+    dprintf(DP_DUMP, "MODE %s :+%s %s\n", chan->name[0] ? chan->name : chan->dname, buf, key[0] ? key : "");
+    howlong.sec = chan->flood_lock_time;
+    howlong.usec = 0;
+    timer_create_complex(&howlong, "unlock", (Function) unlock_chan, (void *) chan, 0);
+
+    putlog(LOG_MISC, "*", "Flood detected in %s! Locking for %li seconds.", chan->dname, chan->flood_lock_time);
+  }
+}
+
 
 void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost, bool op) {
   char fhandle[21] = "";
