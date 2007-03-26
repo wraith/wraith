@@ -1149,6 +1149,7 @@ void show_int(int idx, char *work, int *cnt, const char *desc, int state, const 
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state)
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no)
 #define P_STR deflag == P_KICK ? "Kick" : (deflag == P_DEOP ? "Deop" : (deflag == P_DELETE ? "Remove" : NULL))
+#define F_STR chan->flood_exempt_mode == FLOOD_EXEMPT_OP ? "Op" : (chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE ? "Voice" : NULL)
 static void cmd_chaninfo(int idx, char *par)
 {
   char *chname = NULL, work[512] = "";
@@ -1244,6 +1245,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Closed-invite:", chan->closed_invite, NULL, "Don't!");
     SHOW_INT("Closed-Private:", chan->closed_private, NULL, "Don't!");
     SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
+    SHOW_INT("Flood-exempt: ", chan->flood_exempt_mode, F_STR, "None");
     SHOW_INT("Idle Kick after (idle-kick): ", chan->idle_kick, "", "Don't!");
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");
     SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");

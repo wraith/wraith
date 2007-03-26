@@ -34,6 +34,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Added 'whois restrictions' to more cmds.
 * Add channel flag 'nomassjoin' to set +im on a timer during join floods (drones)
 * Add BOT flag +f for handling cpu intensive floods (none supported yet)
+* Add chanset 'flood-exempt' to exempt ops/voices from flood controls (see 'help chaninfo')
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

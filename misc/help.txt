@@ -379,6 +379,13 @@ See also: link
                           Once the ban is removed, then the exempt will be
                           removed the next time the bot checks. Please note
                           that this is an IRCnet feature.
+        $bflood-exempt$b      Should clients be exempt from flood checks based
+                              on their channel status? (not deop/kick floods)
+                              Valid values are:
+                              None/0         Stick to regular checking (+x)
+                              Op/1           Ops are exempt from flood checks
+                              Voice/2        Voices are exempt from flood checks
+ 
         $binvite-time$b       Set here how long temporary invites will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. The bot will check the invites

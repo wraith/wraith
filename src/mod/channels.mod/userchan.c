@@ -732,6 +732,7 @@ limit %d flood-chan %d:%lu \
 flood-ctcp %d:%lu flood-join %d:%lu flood-kick %d:%lu flood-deop %d:%lu \
 flood-nick %d:%lu closed-ban %d closed-invite %d closed-private %d ban-time %lu \
 exempt-time %lu invite-time %lu voice-non-ident %d \
+flood-exempt %d \
 %cenforcebans %cdynamicbans %cuserban %cbitch %cprotectops \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
@@ -767,6 +768,7 @@ exempt-time %lu invite-time %lu voice-non-ident %d \
         chan->exempt_time,
         chan->invite_time,
         chan->voice_non_ident,
+        chan->flood_exempt_mode,
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),

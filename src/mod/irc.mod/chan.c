@@ -423,7 +423,10 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
       ((which == FLOOD_KICK) &&
        (glob_master(fr) || chan_master(fr))) ||
       ((which != FLOOD_DEOP) && (which != FLOOD_KICK) && 
-       (chk_noflood(fr))))
+       ( (chk_noflood(fr) || 
+         (chan->flood_exempt_mode == FLOOD_EXEMPT_OP && chan_hasop(m)) || 
+         (chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE && chan_hasvoice(m)) )
+      )))
     return 0;
 
   char h[UHOSTLEN] = "", ftype[12] = "", *p = NULL;

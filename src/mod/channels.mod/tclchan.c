@@ -462,6 +462,23 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->mop = deflag_translate(item[i]);
+    } else if (!strcmp(item[i], "flood-exempt")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          simple_snprintf(result, RESULT_LEN, "channel flood-exempt needs argument");
+        return ERROR;
+      }
+      if (str_isdigit(item[i])) {
+        if (!egg_strcasecmp("Op", item[i]))
+          chan->flood_exempt_mode = FLOOD_EXEMPT_OP;
+        else if (!egg_strcasecmp("Voice", item[i]))
+          chan->flood_exempt_mode = FLOOD_EXEMPT_VOICE;
+        else if (!egg_strcasecmp("None", item[i]))
+          chan->flood_exempt_mode = 0;
+      } else
+        chan->flood_exempt_mode = atoi(item[i]);
+
 /* Chanint template
  *  } else if (!strcmp(item[i], "temp")) {
  *    i++;
@@ -858,6 +875,7 @@ int channel_add(char *result, char *newname, char *options)
 /* Chanint template
  *  chan->temp = 0;
  */
+    chan->flood_exempt_mode = 0;
     chan->flood_pub_thr = gfld_chan_thr;
     chan->flood_pub_time = gfld_chan_time;
     chan->flood_ctcp_thr = gfld_ctcp_thr;
