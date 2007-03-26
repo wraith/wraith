@@ -85,12 +85,13 @@ struct flag_record {
 
 #define BOT_BACKUP	FLAG[(int) 'B']
 #define BOT_CHANHUB	FLAG[(int) 'c']
+#define BOT_FLOODBOT	FLAG[(int) 'f'] 
 #define BOT_UPDATEHUB	FLAG[(int) 'u']
 #define BOT_DORESOLV	FLAG[(int) 'r']
 #define BOT_DOLIMIT	FLAG[(int) 'l']
 #define BOT_DOVOICE	FLAG[(int) 'y']
 
-#define BOT_CHAN_VALID (flag_t) CHAN_VALID|BOT_CHANHUB|BOT_DOLIMIT|BOT_DOVOICE|BOT_DORESOLV|BOT_BACKUP
+#define BOT_CHAN_VALID (flag_t) CHAN_VALID|BOT_CHANHUB|BOT_DOLIMIT|BOT_DOVOICE|BOT_DORESOLV|BOT_BACKUP|BOT_FLOODBOT
 #define BOT_VALID  (flag_t) BOT_CHAN_VALID|BOT_UPDATEHUB
 
 
@@ -137,6 +138,8 @@ struct flag_record {
 #define chan_doresolv(x)                        ((x).chan & BOT_DORESOLV)
 #define glob_backup(x)				((x).global & BOT_BACKUP)
 #define chan_backup(x)				((x).chan & BOT_BACKUP)
+#define glob_doflood(x)				((x).global & BOT_FLOODBOT)
+#define chan_doflood(x)				((x).chan & BOT_FLOODBOT)
 
 void init_flags(void);
 void get_user_flagrec(struct userrec *, struct flag_record *, const char *);
@@ -161,6 +164,7 @@ int ischanhub(void);
 int isupdatehub(void);
 int doresolv(struct chanset_t *);
 int dovoice(struct chanset_t *);
+int doflood(struct chanset_t *);
 int dolimit(struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);
 void deflag_user(struct userrec *, int, char *, struct chanset_t *);

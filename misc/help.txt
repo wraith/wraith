@@ -1835,6 +1835,7 @@ See also: whom
    Valid bot-only flags:
       $bB$b = backup-bot (bot will only join chans marked +backup, see '%dhelp chaninfo')
       $bc$b = chat-bot (bot accepts DCC chat on irc)
+      $bf$b = flood-bot (bot reacts to floods based on [cpu intensive] flood settings)
       $bl$b = limit-bot (bot sets limit in all channels, see '%dhelp chaninfo') [$bCPU INTENSIVE$b]
       $br$b = resolve (bot resolves clients in to match against userlist) [$bCPU INTENSIVE+$b]
       $bu$b - update-bot (see doc/UPGRADING)
