@@ -903,8 +903,8 @@ int channel_add(char *result, char *newname, char *options)
     chan->flood_kick_time = gfld_kick_time;
     chan->flood_nick_thr = gfld_nick_thr;
     chan->flood_nick_time = gfld_nick_time;
-    chan->flood_mjoin_thr = 1;
-    chan->flood_mjoin_time = 6;
+    chan->flood_mjoin_thr = 6;
+    chan->flood_mjoin_time = 1;
 //    chan->revenge_mode = global_revenge_mode;
     chan->idle_kick = global_idle_kick;
     chan->limitraise = 20;
