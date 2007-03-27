@@ -121,13 +121,11 @@ dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
 void unlock_chan(struct chanset_t *chan)
 {
   if (chan->channel.drone_set_mode) {
-    char buf[4] = "", *p = buf;
+    char buf[3] = "", *p = buf;
     if (chan->channel.drone_set_mode & CHANINV)
       *p++ = 'i';
     if (chan->channel.drone_set_mode & CHANMODER)
       *p++ = 'm';
-    if (chan->channel.drone_set_mode & CHANKEY)
-      *p++ = 'k';
 
     buf[sizeof(buf) - 1] = '\0';
     dprintf(DP_MODE, "MODE %s :-%s\n", chan->name[0] ? chan->name : chan->dname, buf);
@@ -140,8 +138,7 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
 
   chan->channel.drone_set_mode = 0;
 
-  char buf[4] = "", *p = buf;
-  char key[10] = "";
+  char buf[3] = "", *p = buf;
 
   if (!(chan->channel.mode & CHANINV)) {
     chan->channel.drone_set_mode |= CHANINV;
@@ -151,18 +148,13 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
     chan->channel.drone_set_mode |= CHANMODER;
     *p++ = 'm';
   }
-  if (!(chan->channel.mode & CHANKEY)) {
-    chan->channel.drone_set_mode |= CHANKEY;
-    *p++ = 'k';
-    make_rand_str(key, sizeof(key) - 1);
-  }
   buf[sizeof(buf) - 1] = '\0';
 
   if (chan->channel.drone_set_mode && buf[0]) {
     chan->channel.drone_joins = 0;
     chan->channel.drone_jointime = 0;
 
-    dprintf(DP_DUMP, "MODE %s :+%s %s\n", chan->name[0] ? chan->name : chan->dname, buf, key[0] ? key : "");
+    dprintf(DP_DUMP, "MODE %s +%s\n", chan->name[0] ? chan->name : chan->dname, buf);
     howlong.sec = chan->flood_lock_time;
     howlong.usec = 0;
     timer_create_complex(&howlong, "unlock", (Function) unlock_chan, (void *) chan, 0);
