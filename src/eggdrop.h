@@ -130,8 +130,9 @@ enum {		/* TAKE A GUESS */
 #define FLOOD_JOIN       4
 #define FLOOD_KICK       5
 #define FLOOD_DEOP       6
+#define FLOOD_PART       7
 
-#define FLOOD_CHAN_MAX   7
+#define FLOOD_CHAN_MAX   8
 #define FLOOD_GLOBAL_MAX 3
 
 #define FEATURE_NO_TAKE		BIT0
