@@ -159,7 +159,9 @@ struct chanset_t {
   time_t flood_ctcp_time;
   int flood_nick_thr;
   time_t flood_nick_time;
-  int flood_lock_time;
+  time_t flood_lock_time;
+  time_t flood_mjoin_time;
+  int flood_mjoin_thr;
   int limitraise;
   int checklimit;
   int closed_ban;

@@ -1259,15 +1259,17 @@ static void cmd_chaninfo(int idx, char *par)
 //    SHOW_INT("Revenge-mode: ", chan->revenge_mode, NULL, NULL);
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
 
-    dprintf(idx, "Flood settings:   chan ctcp join kick deop nick\n");
-    dprintf(idx, "  number:          %3d  %3d  %3d  %3d  %3d  %3d\n",
+    dprintf(idx, "Flood settings:   chan ctcp join kick deop nick mjoin\n");
+    dprintf(idx, "  number:          %3d  %3d  %3d  %3d  %3d  %3d  %3d\n",
 	    chan->flood_pub_thr, chan->flood_ctcp_thr,
 	    chan->flood_join_thr, chan->flood_kick_thr,
-	    chan->flood_deop_thr, chan->flood_nick_thr);
-    dprintf(idx, "  time  :          %3lu  %3lu  %3lu  %3lu  %3lu  %3lu\n",
+	    chan->flood_deop_thr, chan->flood_nick_thr,
+            chan->flood_mjoin_thr);
+    dprintf(idx, "  time  :          %3lu  %3lu  %3lu  %3lu  %3lu  %3lu  %3lu\n",
 	    chan->flood_pub_time, chan->flood_ctcp_time,
 	    chan->flood_join_time, chan->flood_kick_time,
-	    chan->flood_deop_time, chan->flood_nick_time);
+	    chan->flood_deop_time, chan->flood_nick_time,
+            chan->flood_mjoin_time);
   }
 }
 

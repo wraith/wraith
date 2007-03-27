@@ -679,6 +679,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         chan->flood_deop_time = time;
         chan->flood_nick_thr = thr;
         chan->flood_nick_time = time;
+        chan->flood_mjoin_thr = thr;
+        chan->flood_mjoin_time = time;
       } else if (!strcmp(item[i] + 6, "chan")) {
 	pthr = &chan->flood_pub_thr;
 	ptime = &chan->flood_pub_time;
@@ -697,6 +699,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       } else if (!strcmp(item[i] + 6, "nick")) {
 	pthr = &chan->flood_nick_thr;
 	ptime = &chan->flood_nick_time;
+      } else if (!strcmp(item[i] + 6, "mjoin")) {
+	pthr = &chan->flood_mjoin_thr;
+	ptime = &chan->flood_mjoin_time;
       } else {
 	if (result)
 	  simple_snprintf(result, RESULT_LEN, "illegal channel flood type: %s", item[i]);
@@ -898,6 +903,8 @@ int channel_add(char *result, char *newname, char *options)
     chan->flood_kick_time = gfld_kick_time;
     chan->flood_nick_thr = gfld_nick_thr;
     chan->flood_nick_time = gfld_nick_time;
+    chan->flood_mjoin_thr = 1;
+    chan->flood_mjoin_time = 6;
 //    chan->revenge_mode = global_revenge_mode;
     chan->idle_kick = global_idle_kick;
     chan->limitraise = 20;

@@ -69,8 +69,6 @@ static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 
-rate_t flood_massjoin = { 6, 1 };
-
 #include "chan.c"
 #include "mode.c"
 #include "cmdsirc.c"

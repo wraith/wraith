@@ -32,7 +32,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed +voice flaw where users in channels that were +voice AND +private would only be voiced with |v.
 * Added cmd_clearhosts
 * Added 'whois restrictions' to more cmds.
-* Add channel flag 'nomassjoin' to set +im on a timer during join floods (drones)
+* Add channel flags 'nomassjoin' and 'flood-mjoin' to set +im on a timer during join floods (drones)
 * Add BOT flag +f for handling cpu intensive floods (none supported yet)
 * Add chanset 'flood-exempt' to exempt ops/voices from flood controls (see 'help chaninfo')
 * Add chanset 'flood-lock-time' to control how long to keep the channel locked during drone floods.
