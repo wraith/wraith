@@ -102,10 +102,23 @@ void real_add_mode(struct chanset_t *, const char, const char, const char *, boo
 #define add_mode(chan, pls, mode, nick) real_add_mode(chan, pls, mode, nick, 0)
 #define add_cookie(chan, nick) real_add_mode(chan, '+', 'o', nick, 1)
 bool me_op(struct chanset_t *);
-void check_this_mask(const char, struct chanset_t *, char *, bool);
+
 void check_this_ban(struct chanset_t *, char *, bool);
 void check_this_exempt(struct chanset_t *, char *, bool);
 void check_this_invite(struct chanset_t *, char *, bool);
+
+inline void check_this_mask(const char type, struct chanset_t *chan, char *mask, bool sticky)
+{
+  if (channel_active(chan)) {
+    if (type == 'b')
+      check_this_ban(chan, mask, sticky);
+    else if (type == 'e')
+      check_this_exempt(chan, mask, sticky);
+    else if (type == 'I')
+      check_this_invite(chan, mask, sticky);
+  }
+}
+
 void check_this_user(char *, int, char *);
 void raise_limit(struct chanset_t *);
 void enforce_closed(struct chanset_t *);
