@@ -778,13 +778,16 @@ static void got303(char *from, char *msg)
   newsplit(&msg);
   fixcolon(msg);
   tmp = newsplit(&msg);
-  if (tmp[0] && !rfc_casecmp(botname, tmp)) {
+  if (tmp[0] && !match_my_nick(tmp)) {
     bool ison_orig = 0;
 
-    while ((tmp = newsplit(&msg))[0]) { /* no, it's NOT == */
-      if (!rfc_casecmp(tmp, origbotname))
+    while ((tmp = newsplit(&msg))[0]) {
+      if (!rfc_casecmp(tmp, origbotname)) {
         ison_orig = 1;
+        break; //Take out for alt checks
+      }
     }
+
     if (!ison_orig) {
       if (!nick_juped)
         putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);

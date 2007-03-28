@@ -2663,7 +2663,6 @@ static int gotnick(char *from, char *msg)
 {
   char *nick = NULL, *chname = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
   memberlist *m = NULL, *mm = NULL;
-  struct chanset_t *oldchan = NULL;
   struct userrec *u = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
@@ -2678,7 +2677,6 @@ static int gotnick(char *from, char *msg)
     auth->NewNick(msg);
 
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    oldchan = chan;
     chname = chan->dname; 
     m = ismember(chan, nick);
 
@@ -2699,10 +2697,6 @@ static int gotnick(char *from, char *msg)
       memberlist_reposition(chan, m);
       detect_chan_flood(msg, uhost, from, chan, FLOOD_NICK, NULL);
 
-      if (!findchan_by_dname(chname)) {
-        chan = oldchan;
-        continue;
-      }
       /* don't fill the serverqueue with modes or kicks in a nickflood */
       if (chan_sentkick(m) || chan_sentdeop(m) || chan_sentop(m) ||
 	  chan_sentdevoice(m) || chan_sentvoice(m))
@@ -2721,10 +2715,6 @@ static int gotnick(char *from, char *msg)
       }
       u = get_user_by_host(from); /* make sure this is in the loop, someone could have changed the record
                                      in an earlier iteration of the loop */
-      if (!findchan_by_dname(chname)) {
-	chan = oldchan;
-        continue;
-      }
     }
   }
   return 0;
@@ -2775,11 +2765,10 @@ void check_should_cycle(struct chanset_t *chan)
  */
 static int gotquit(char *from, char *msg)
 {
-  char *nick = NULL, *chname = NULL, *p = NULL;
-  int split = 0;
-  char from2[NICKMAX + UHOSTMAX + 1] = "";
+  char *nick = NULL, *p = NULL;
+  bool split = 0;
   memberlist *m = NULL;
-  struct chanset_t *oldchan = NULL;
+  char from2[NICKMAX + UHOSTMAX + 1] = "";
   struct userrec *u = NULL;
 
   strcpy(from2,from);
@@ -2811,14 +2800,13 @@ static int gotquit(char *from, char *msg)
   else
     irc_log(NULL, "[%s] Quits %s (%s)", samechans(nick, ","), nick, from);
 
-  struct chanset_t *chan = NULL;
+  for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
+    if (!channel_active(chan))
+      continue;
 
-  for (chan = chanset; chan; chan = chan->next) {
-    oldchan = chan;
-    chname = chan->dname;
     m = ismember(chan, nick);
     if (m) {
-      u = get_user_by_host(from2);
+      u = m->user ? m->user : (m->tried_getuser == 0 ? get_user_by_host(from2) : NULL);
       if (u) {
         set_handle_laston(chan->dname, u, now); /* If you remove this, the bot will crash when the user record in question
 						   is removed/modified during the tcl binds below, and the users was on more
@@ -2826,16 +2814,8 @@ static int gotquit(char *from, char *msg)
       }
       if (split) {
 	m->split = now;
-	if (!findchan_by_dname(chname)) {
-          chan = oldchan;
-	  continue;
-        }
         irc_log(chan, "%s (%s) got netsplit.", nick, from);
       } else {
-	if (!findchan_by_dname(chname)) {
-	  chan = oldchan;
-	  continue;
-	}
 	killmember(chan, nick);
 	check_lonely_channel(chan);
       }
@@ -2845,7 +2825,7 @@ static int gotquit(char *from, char *msg)
   }
   /* Our nick quit? if so, grab it.
    */
-  if (keepnick) {
+  if (keepnick && !match_my_nick(nick)) {
     if (!rfc_casecmp(nick, origbotname)) {
       putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
