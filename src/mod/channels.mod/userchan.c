@@ -802,7 +802,105 @@ flood-exempt %d flood-lock-time %d \
   return 1;
 }
 
-void channels_writeuserfile()
+/* FIXME: remove after 1.2.14 */
+/* Write the channels to the userfile
+ */
+bool write_chans_compat(FILE *f, int idx)
+{
+  putlog(LOG_DEBUG, "*", "Writing channels..");
+
+  if (lfprintf(f, CHANS_NAME " - -\n") == EOF) /* Daemus */
+    return 0;
+
+  char w[1024] = "";
+
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
+    char inactive = 0;
+
+    putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
+    get_mode_protect(chan, w);
+
+    /* if a bot should explicitly NOT join, just set it +inactive ... */
+    if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))
+      inactive = '+';
+    /* ... otherwise give the bot the *actual* setting */
+    else
+      inactive = PLSMNS(channel_inactive(chan));
+
+    if (lfprintf(f, "\
++ channel add %s { chanmode { %s } addedby %s addedts %lu idle-kick %d \
+bad-cookie %d manop %d mdop %d mop %d limit %d \
+flood-chan %d:%lu flood-ctcp %d:%lu flood-join %d:%lu \
+flood-kick %d:%lu flood-deop %d:%lu flood-nick %d:%lu \
+closed-ban %d closed-invite %d closed-private %d ban-time %lu \
+exempt-time %lu invite-time %lu voice-non-ident %d \
+%cenforcebans %cdynamicbans %cuserbans %cbitch \
+%cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
+%cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
+%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %c%s}\n",
+	chan->dname,
+	w,
+        chan->added_by,
+        chan->added_ts,
+/* Chanchar template
+ *      temp,
+ * also include temp %s in dprintf.
+ */
+	chan->idle_kick, /* idle-kick 0 is same as dont-idle-kick (lcode)*/
+	chan->bad_cookie,
+	chan->manop,
+	chan->mdop,
+	chan->mop,
+        chan->limitraise,
+	chan->flood_pub_thr, chan->flood_pub_time,
+        chan->flood_ctcp_thr, chan->flood_ctcp_time,
+        chan->flood_join_thr, chan->flood_join_time,
+        chan->flood_kick_thr, chan->flood_kick_time,
+        chan->flood_deop_thr, chan->flood_deop_time,
+	chan->flood_nick_thr, chan->flood_nick_time,
+        chan->closed_ban,
+/* Chanint template
+ *      chan->temp,
+ * also include temp %d in dprintf
+ */
+        chan->closed_invite,
+        chan->closed_private,
+        chan->ban_time,
+        chan->exempt_time,
+        chan->invite_time,
+        chan->voice_non_ident,
+ 	PLSMNS(channel_enforcebans(chan)),
+	PLSMNS(channel_dynamicbans(chan)),
+	PLSMNS(!channel_nouserbans(chan)),
+	PLSMNS(channel_bitch(chan)),
+	PLSMNS(channel_privchan(chan)),
+	PLSMNS(channel_cycle(chan)),
+        inactive,
+	PLSMNS(channel_dynamicexempts(chan)),
+	PLSMNS(!channel_nouserexempts(chan)),
+ 	PLSMNS(channel_dynamicinvites(chan)),
+	PLSMNS(!channel_nouserinvites(chan)),
+	PLSMNS(channel_nodesynch(chan)),
+	PLSMNS(channel_closed(chan)),
+	PLSMNS(channel_voice(chan)),
+	PLSMNS(channel_fastop(chan)),
+        PLSMNS(channel_autoop(chan)),
+        PLSMNS(channel_botbitch(chan)),
+        PLSMNS(channel_backup(chan)),
+        PLSMNS(channel_nomassjoin(chan)),
+	HAVE_TAKE ? PLSMNS(channel_take(chan)) : 0,
+        HAVE_TAKE ? "take " : " "
+/* Chanflag template
+ * also include a %ctemp above.
+ *      PLSMNS(channel_temp(chan)),
+ */
+        ) == EOF)
+          return 0;
+  }
+  return 1;
+}
+
+void channels_writeuserfile(bool old)
 {
   char s[1024] = "";
   FILE *f = NULL;
@@ -812,7 +910,10 @@ void channels_writeuserfile()
   simple_sprintf(s, "%s~new", userfile);
   f = fopen(s, "a");
   if (f) {
-    ret  = write_chans(f, -1);
+    if (!old)
+      ret  = write_chans(f, -1);
+    else
+      ret  = write_chans_compat(f, -1);
     ret += write_vars_and_cmdpass(f, -1);
     ret += write_bans(f, -1);
     ret += write_exempts(f, -1);

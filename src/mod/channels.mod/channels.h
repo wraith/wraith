@@ -34,6 +34,7 @@ void del_chanrec(struct userrec *, char *);
 bool write_bans(FILE *, int);
 bool write_exempts (FILE *, int);
 bool write_chans (FILE *, int);
+bool write_chans_compat (FILE *, int);
 bool write_invites (FILE *, int);
 bool expired_mask(struct chanset_t *, char *);
 void set_handle_laston(char *, struct userrec *, time_t);
@@ -50,7 +51,7 @@ bool u_match_mask(struct maskrec *, char *);
 bool ismasked(masklist *, const char *);
 bool ismodeline(masklist *, const char *);
 void channels_report(int, int);
-void channels_writeuserfile();
+void channels_writeuserfile(bool = 0);
 void rcmd_chans(char *, char *, char *);
 
 extern char		glob_chanset[512];

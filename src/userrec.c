@@ -475,7 +475,16 @@ int write_userfile(int idx)
   strcpy(s1, ctime(&tt));
   lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
   fclose(f);
-  channels_writeuserfile();
+
+
+/* FIXME: REMOVE AFTER 1.2.14 */
+  bool old = 0;
+
+  tand_t* bot = findbot(dcc[idx].nick);
+  if (bot && bot->buildts < 1175102242) /* flood-* hacks */
+    old = 1;
+  channels_writeuserfile(old);
+
   f = fopen(new_userfile, "a");
   putlog(LOG_DEBUG, "@", "Writing user entries.");
   for (struct userrec *u = userlist; u && ok; u = u->next)

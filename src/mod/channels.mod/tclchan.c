@@ -700,10 +700,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       } else if (!strcmp(item[i] + 6, "mjoin")) {
 	pthr = &chan->flood_mjoin_thr;
 	ptime = &chan->flood_mjoin_time;
-      } else {
-	if (result)
-	  simple_snprintf(result, RESULT_LEN, "illegal channel flood type: %s", item[i]);
-	return ERROR;
+      } else { /* Ignore for optimal forward compatibility */
+        i++;
+        continue;
       }
 
       if (pthr && ptime) { //Ignore flood-*
