@@ -936,8 +936,12 @@ int channel_add(char *result, char *newname, char *options)
    * if a user goes back to an eggdrop that no-longer supports certain
    * (channel) options.
    */
-  if ((channel_modify(result, chan, items, (char **) item, 0) != OK) && !loading)
-    ret = ERROR;
+  if ((channel_modify(result, chan, items, (char **) item, 0) != OK)) {
+    putlog(LOG_ERROR, "*", "Error parsing channel options for %s: %s", chan->dname, result);
+    if (!loading)
+      ret = ERROR;
+  }
+    
 
   free(item);
   if (join && shouldjoin(chan))
