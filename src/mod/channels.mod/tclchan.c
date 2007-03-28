@@ -469,8 +469,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
           simple_snprintf(result, RESULT_LEN, "channel flood-exempt needs argument");
         return ERROR;
       }
-      if (str_isdigit(item[i])) {
-        if (!egg_strcasecmp("Op", item[i]))
+      if (!str_isdigit(item[i])) {
+        if (!egg_strcasecmp("Op",  item[i]))
           chan->flood_exempt_mode = FLOOD_EXEMPT_OP;
         else if (!egg_strcasecmp("Voice", item[i]))
           chan->flood_exempt_mode = FLOOD_EXEMPT_VOICE;
