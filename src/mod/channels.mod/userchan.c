@@ -733,7 +733,7 @@ flood-kick %d:%lu flood-deop %d:%lu flood-nick %d:%lu flood-mjoin %d:%lu \
 closed-ban %d closed-invite %d closed-private %d ban-time %lu \
 exempt-time %lu invite-time %lu voice-non-ident %d \
 flood-exempt %d flood-lock-time %d \
-%cenforcebans %cdynamicbans %cuserban %cbitch %cprotectops \
+%cenforcebans %cdynamicbans %cuserban %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
 %cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %c%s}\n",
@@ -775,7 +775,6 @@ flood-exempt %d flood-lock-time %d \
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),
 	PLSMNS(channel_bitch(chan)),
-	PLSMNS(channel_protectops(chan)),
 	PLSMNS(channel_privchan(chan)),
 	PLSMNS(channel_cycle(chan)),
         inactive,

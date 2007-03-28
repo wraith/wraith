@@ -31,7 +31,7 @@ int badprocess = DET_IGNORE;
 char process_list[1024] = "";
 #endif
 bool dccauth = 0;
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch -protectops +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop";
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop";
 int dcc_autoaway;
 int cloak_script = 0;
 rate_t close_threshold;

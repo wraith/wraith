@@ -521,10 +521,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_NODESYNCH;
     else if (!strcmp(item[i], "-nodesynch"))
       chan->status &= ~CHAN_NODESYNCH;
-    else if (!strcmp(item[i], "+protectops"))
-      chan->status |= CHAN_PROTECTOPS;
-    else if (!strcmp(item[i], "-protectops"))
-      chan->status &= ~CHAN_PROTECTOPS;
     else if (!strcmp(item[i], "+inactive"))
       chan->status |= CHAN_INACTIVE;
     else if (!strcmp(item[i], "-inactive"))
@@ -596,7 +592,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     else if (!strcmp(item[i], "+fastop"))
       chan->status |= CHAN_FASTOP;
     else if (!strcmp(item[i], "-fastop"))
-      chan->status &= ~(CHAN_FASTOP | CHAN_PROTECTOPS);
+      chan->status &= ~CHAN_FASTOP;
     else if (!strcmp(item[i], "+private"))
       chan->status |= CHAN_PRIVATE;
     else if (!strcmp(item[i], "-private"))
@@ -625,6 +621,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     else if (!cmd && !strcmp(item[i], "-nomdop"))  ;
     else if (!cmd && !strcmp(item[i], "+protectfriends"))  ;
     else if (!cmd && !strcmp(item[i], "-protectfriends"))  ;
+    else if (!cmd && !strcmp(item[i], "+protectops"))  ;
+    else if (!cmd && !strcmp(item[i], "-protectops"))  ;
     else if (!cmd && !strcmp(item[i], "+punish"))  ;
     else if (!cmd && !strcmp(item[i], "-punish"))  ;
     else if (!cmd && !strcmp(item[i], "+seen"))  ;

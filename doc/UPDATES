@@ -38,6 +38,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Add chanset 'flood-lock-time' to control how long to keep the channel locked during drone floods.
 * chanset flood-join now also counts PARTs as flooding.
 * Fix segfault in cmd_channel during splits.
+* Remove chanflag 'protectops'
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

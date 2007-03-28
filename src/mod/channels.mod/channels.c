@@ -831,8 +831,6 @@ void channels_report(int idx, int details)
 	  i += my_strcpy(s + i, "userbans ");
 	if (channel_bitch(chan))
 	  i += my_strcpy(s + i, "bitch ");
-	if (channel_protectops(chan))
-	  i += my_strcpy(s + i, "protectops ");
 /*
 	if (channel_revenge(chan))
 	  i += my_strcpy(s + i, "revenge ");

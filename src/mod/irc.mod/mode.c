@@ -514,7 +514,7 @@ got_key(struct chanset_t *chan, char *key)
 {
   if (((reversing) && !(chan->key_prot[0])) ||
       ((chan->mode_mns_prot & CHANKEY) && !(glob_master(user) || glob_bot(user) || chan_master(user)))) {
-    if (strlen(key) != 0) {
+    if (key && key[0]) {
       add_mode(chan, '-', 'k', key);
     } else {
       add_mode(chan, '-', 'k', "");
@@ -646,21 +646,10 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 
   /* Deop'd someone on my oplist? */
   if (me_op(chan)) {
-    bool ok = 1;
-
-    /* if they aren't d|d then check if they are something we should protect */
-    if (!glob_deop(victim) && !chan_deop(victim)) {
-      if (channel_protectops(chan) && (glob_master(victim) || chan_master(victim) ||
-                                       glob_op(victim) || chan_op(victim)))
-        ok = 0;
-    }
-
     /* do we want to reop victim? */
-    if ((reversing || !ok) && 
+    if ((reversing) && 
         ((m && !match_my_nick(m->nick) && rfc_casecmp(mv->nick, m->nick)) || (!m)) && 
         !match_my_nick(mv->nick) &&
-        /* Is the deopper NOT a master or bot? */
-        !glob_master(user) && !chan_master(user) && !glob_bot(user) &&
         (chk_op(victim, chan) || !chan_bitch(chan)))
       /* Then we'll bless the victim */
       do_op(mv->nick, chan, 0, 0);

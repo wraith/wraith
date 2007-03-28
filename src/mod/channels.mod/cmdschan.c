@@ -1212,7 +1212,6 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_FLAG("nodesynch",	channel_nodesynch(chan));
     SHOW_FLAG("nomassjoin",	channel_nomassjoin(chan));
     SHOW_FLAG("private",	channel_privchan(chan));
-    SHOW_FLAG("protectops",	channel_protectops(chan));
 //    SHOW_FLAG("revenge",	channel_revenge(chan));
 //    SHOW_FLAG("revengebot",	channel_revengebot(chan));
     if (HAVE_TAKE)
