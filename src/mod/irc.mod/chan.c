@@ -424,8 +424,8 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
        (glob_master(fr) || chan_master(fr))) ||
       ((which != FLOOD_DEOP) && (which != FLOOD_KICK) && 
        ( (chk_noflood(fr) || 
-         (chan->flood_exempt_mode == FLOOD_EXEMPT_OP && chan_hasop(m)) || 
-         (chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE && chan_hasvoice(m)) )
+         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_OP && chan_hasop(m)) || 
+         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE && chan_hasvoice(m)) )
       )))
     return 0;
 
@@ -2435,9 +2435,10 @@ static int gotjoin(char *from, char *chname)
       /* ok, the op-on-join,etc, tests...first only both if Im opped */
       if (me_op(chan)) {
         struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-        bool is_op = chk_op(fr, chan);
 
         get_user_flagrec(m->user, &fr, chan->dname);
+
+        bool is_op = chk_op(fr, chan);
 
         /* Check for a mass join */
         if (!splitjoin && channel_nomassjoin(chan) && !is_op) {
