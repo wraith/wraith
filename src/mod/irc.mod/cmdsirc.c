@@ -859,8 +859,7 @@ static void cmd_deop(int idx, char *par)
       if (all) goto next;  
       return;
     }
-    if ((chan_op(victim) || (glob_op(victim) && !chan_deop(victim))) &&
-        !(chan_master(user) || glob_master(user))) {
+    if (chk_op(victim, chan) && !(chan_master(user) || glob_master(user))) {
       dprintf(idx, "%s has the op flag for %s.\n", m->nick, chan->dname);
       if (all) goto next;  
       return;
@@ -950,8 +949,7 @@ static void cmd_kick(int idx, char *par)
     simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
     u = get_user_by_host(s);
     get_user_flagrec(u, &victim, chan->dname);
-    if ((chan_op(victim) || (glob_op(victim) && !chan_deop(victim))) &&
-        !(chan_master(user) || glob_master(user))) {
+    if (chk_op(victim, chan) && !(chan_master(user) || glob_master(user))) {
       if (all) goto next;
       dprintf(idx, "%s is a legal op.\n", nick);
       return;
@@ -1340,7 +1338,7 @@ static void cmd_channel(int idx, char *par)
        	strlcpy(handle, m->user->handle, sizeof handle);
       get_user_flagrec(m->user, &user, chan->dname);
       /* Determine status char to use */
-      if (glob_bot(user) && (glob_op(user)|| chan_op(user)))
+      if (glob_bot(user) && chk_op(user, chan))
         atrflag = 'B';
       else if (glob_bot(user))
         atrflag = 'b';
@@ -1362,7 +1360,7 @@ static void cmd_channel(int idx, char *par)
         atrflag = 'a';
       else if (glob_op(user) && !privchan(user, chan, PRIV_OP))
         atrflag = 'O';
-      else if (chan_op(user) && !privchan(user, chan, PRIV_OP))
+      else if (chan_op(user))
         atrflag = 'o';
       else if (glob_quiet(user))
         atrflag = 'Q';
@@ -1370,7 +1368,7 @@ static void cmd_channel(int idx, char *par)
         atrflag = 'q';
       else if (glob_voice(user) && !privchan(user, chan, PRIV_VOICE))
         atrflag = 'V';
-      else if (chan_voice(user) && !privchan(user, chan, PRIV_VOICE))
+      else if (chan_voice(user))
         atrflag = 'v';
       else if (glob_kick(user))
         atrflag = 'K';

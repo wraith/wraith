@@ -126,8 +126,7 @@ void unlock_chan(struct chanset_t *chan)
       *p++ = 'i';
     if (chan->channel.drone_set_mode & CHANMODER)
       *p++ = 'm';
-
-    buf[sizeof(buf) - 1] = '\0';
+    *p = 0;
     dprintf(DP_MODE, "MODE %s :-%s\n", chan->name[0] ? chan->name : chan->dname, buf);
   }
   chan->channel.drone_set_mode = 0;
@@ -148,7 +147,7 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
     chan->channel.drone_set_mode |= CHANMODER;
     *p++ = 'm';
   }
-  buf[sizeof(buf) - 1] = '\0';
+  *p = 0;
 
   if (chan->channel.drone_set_mode && buf[0]) {
     chan->channel.drone_joins = 0;
@@ -925,9 +924,7 @@ want_to_revenge(struct chanset_t *chan, struct userrec *u,
       get_user_flagrec(u2, &fr2, chan->dname);
       /* Protecting friends? */
       /* Protecting ops? */
-      if ((channel_protectops(chan) &&
-           /* ... and kicked is valid op? */
-           (chan_op(fr2) || (glob_op(fr2) && !chan_deop(fr2)))))
+      if ((channel_protectops(chan) && chk_op(fr2, chan))
         return 1;
     }
   }
@@ -977,7 +974,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
     memberlist *mx = NULL;
 
     /* Removing op */
-    if (chan_op(fr) || (glob_op(fr) && !chan_deop(fr))) {
+    if (chk_op(fr, chan)) {
       fr.match = FR_CHAN;
       if (chan_op(fr)) {
         fr.chan &= ~USER_OP;
@@ -1459,7 +1456,7 @@ check_expired_chanstuff(struct chanset_t *chan)
           if (now - m->last >= chan->idle_kick * 60 && !match_my_nick(m->nick) && !chan_issplit(m)) {
             simple_sprintf(s, "%s!%s", m->nick, m->userhost);
             get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
-            if (!(glob_bot(fr) || (glob_op(fr) && !glob_deop(fr)) || chan_op(fr))) {
+            if (!(glob_bot(fr) || chk_op(fr, chan))) {
               dprintf(DP_SERVER, "KICK %s %s :%sidle %d min\n", chan->name, m->nick, kickprefix, chan->idle_kick);
               m->flags |= SENTKICK;
             }

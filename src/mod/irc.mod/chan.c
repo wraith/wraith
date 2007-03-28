@@ -1078,12 +1078,13 @@ void enforce_closed(struct chanset_t *chan) {
   if (!chan || !me_op(chan)) 
     return;
 
-  char buf[3] = "";
+  char buf[3] = "", *p = buf;
 
   if (chan->closed_invite && !(chan->channel.mode & CHANINV))
-    strcat(buf, "i");
+    *p++ = 'i';
   if (chan->closed_private && !(chan->channel.mode & CHANPRIV))
-    strcat(buf, "p"); 
+    *p++ = 'p';
+  *p = 0;
   if (buf && buf[0])
     dprintf(DP_MODE, "MODE %s +%s\n", chan->name, buf);
   priority_do(chan, 0, PRIO_KICK);
@@ -2434,11 +2435,12 @@ static int gotjoin(char *from, char *chname)
       /* ok, the op-on-join,etc, tests...first only both if Im opped */
       if (me_op(chan)) {
         struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+        bool is_op = chk_op(fr, chan);
 
         get_user_flagrec(m->user, &fr, chan->dname);
 
         /* Check for a mass join */
-        if (!splitjoin && channel_nomassjoin(chan) && !chk_op(fr, chan)) {
+        if (!splitjoin && channel_nomassjoin(chan) && !is_op) {
           if (chan->channel.drone_jointime < now - chan->flood_mjoin_time) {      //expired, reset counter
             chan->channel.drone_joins = 0;
           }
@@ -2461,7 +2463,7 @@ static int gotjoin(char *from, char *chname)
 	  refresh_invite(chan, from);
 
 	if (!(use_exempts && (u_match_mask(global_exempts,from) || u_match_mask(chan->exempts, from)))) {
-          if (channel_enforcebans(chan) && !chan_op(fr) && !glob_op(fr) && !chan_sentkick(m) &&
+          if (channel_enforcebans(chan) && !chan_sentkick(m) && !is_op &&
               !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS)))) {
             for (masklist* b = chan->channel.ban; b->mask[0]; b = b->next) {
               if (wild_match(b->mask, from) || match_cidr(b->mask, from)) {
