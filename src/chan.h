@@ -96,6 +96,9 @@ struct chan_t {
   time_t parttime;
   time_t no_op;
   time_t drone_jointime;
+  time_t last_eI;      /* this will stop +e and +I from being checked over and over if the bot is stuck in a
+                        * -o+o loop for some reason, hence possibly causing a SENDQ kill
+                        */
   int fighting;
   int drone_set_mode;
   int drone_joins;

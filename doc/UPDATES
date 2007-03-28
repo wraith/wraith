@@ -39,6 +39,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * chanset flood-join now also counts PARTs as flooding.
 * Fix segfault in cmd_channel during splits.
 * Remove chanflag 'protectops'
+* Fix bot not checking +e/+I modes when opped sometimes.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

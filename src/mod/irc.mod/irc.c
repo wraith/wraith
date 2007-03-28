@@ -42,10 +42,7 @@
 static cache_t *irccache = NULL;
 #endif /* CACHE */
 
-static time_t last_eI; /* this will stop +e and +I from being checked over and over if the bot is stuck in a
-                        * -o+o loop for some reason, hence possibly causing a SENDQ kill
-                        */
-#define do_eI (((now - last_eI) > 30) ? 1 : 0)
+#define do_eI (((now - chan->channel.last_eI) > 30) ? 1 : 0)
 
 static int net_type = 0;
 static time_t wait_split = 300;    /* Time to wait for user to return from
@@ -1211,10 +1208,8 @@ reset_chan_info(struct chanset_t *chan)
   }
 
   if (!channel_pending(chan)) {
-    bool opped = 0;
+    bool opped = me_op(chan) ? 1 : 0;
 
-    if (me_op(chan))
-      opped = 1;
     free(chan->channel.key);
     chan->channel.key = (char *) my_calloc(1, 1);
     clear_channel(chan, 1);
@@ -1226,8 +1221,9 @@ reset_chan_info(struct chanset_t *chan)
         chan->status |= CHAN_ASKEDBANS;
         dprintf(DP_MODE, "MODE %s +b\n", chan->name);
       }
+
       if (opped && do_eI) {
-        last_eI = now;
+        chan->channel.last_eI = now;
         if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
           chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
           dprintf(DP_MODE, "MODE %s +e\n", chan->name);

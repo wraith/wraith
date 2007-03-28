@@ -1294,7 +1294,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
   /* This is a bad hack for +e/+I */
   if (dobans == 2 && !channel_take(chan) && me_op(chan) && do_eI) {
-    last_eI = now;
+    chan->channel.last_eI = now;
     if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
         dprintf(DP_MODE, "MODE %s +e\n", chan->name);

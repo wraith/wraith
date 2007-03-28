@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "match.h"
+#include "misc.h"
 #include "rfc1459.h"
 #include "socket.h"
 
@@ -227,6 +228,10 @@ comp_with_mask(void *addr, void *dest, unsigned int mask)
 int
 match_cidr(const char *s1, const char *s2)
 {
+  char *len = strrchr(s1, '/');
+  if(len == NULL)
+    return 0;
+
   char *ipmask = strrchr(s1, '@');
   if(ipmask == NULL)
     return 0;
@@ -247,14 +252,14 @@ match_cidr(const char *s1, const char *s2)
 
   *ipmask++ = '\0';
 
-  char *len = strrchr(ipmask, '/');
-  if(len == NULL)
-    return 0;
-
+  len = mask + (len - s1);
   *len++ = '\0';
 
+  if (!str_isdigit(len))
+    return 0;
+
   int cidrlen = atoi(len);
-  if(cidrlen == 0)
+  if(cidrlen <= 0)
     return 0;
 
   *ip++ = '\0';
@@ -279,6 +284,8 @@ match_cidr(const char *s1, const char *s2)
 
 #ifdef USE_IPV6
   if (aftype == AF_INET6) {
+    if (cidrlen > 128) 
+      return 0;
     inet_pton(aftype, ip, &ipaddr.u.ipv6.sin6_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv6.sin6_addr);
     if (comp_with_mask(&ipaddr.u.ipv6.sin6_addr.s6_addr, &maskaddr.u.ipv6.sin6_addr.s6_addr, cidrlen) && 
@@ -286,6 +293,8 @@ match_cidr(const char *s1, const char *s2)
       return ret;
   } else if (aftype == AF_INET) {
 #endif /* USE_IPV6 */
+    if (cidrlen > 32) 
+      return 0;
     inet_pton(aftype, ip, &ipaddr.u.ipv4.sin_addr);
     inet_pton(aftype, ipmask, &maskaddr.u.ipv4.sin_addr);
     if (comp_with_mask(&ipaddr.u.ipv4.sin_addr.s_addr, &maskaddr.u.ipv4.sin_addr.s_addr, cidrlen) && 

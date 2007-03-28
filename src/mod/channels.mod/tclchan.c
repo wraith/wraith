@@ -916,6 +916,7 @@ int channel_add(char *result, char *newname, char *options)
     chan->channel.drone_set_mode = 0;
     chan->channel.drone_jointime = 0;
     chan->channel.drone_joins = 0;
+    chan->channel.last_eI = 0;
 
     /* We _only_ put the dname (display name) in here so as not to confuse
      * any code later on. chan->name gets updated with the channel name as

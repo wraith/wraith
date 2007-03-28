@@ -522,14 +522,19 @@ got_key(struct chanset_t *chan, char *key)
   }
 }
 
+  /* m may not exist */
 static void
 got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 {
   bool check_chan = 0;
+  bool me_opped = match_my_nick(mv->nick);
+  bool meop = me_op(chan);
 
   /* Did *I* just get opped? */
-  if (!me_op(chan) && match_my_nick(mv->nick))
+  if (!meop && me_opped) {
     check_chan = 1;
+    meop = 1;
+  }
 
   get_user_flagrec(mv->user, &victim, chan->dname);
   /* Flags need to be set correctly right from the beginning now, so that
@@ -545,11 +550,12 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
    */
   mv->flags &= ~SENTOP;
 
+  /* This skips the recheck_channel until we get the end of the WHO list */
   if (channel_pending(chan))
     return;
 
   /* I'm opped, and the opper isn't me, and it isn't a server op */
-  if (m && me_op(chan) && !match_my_nick(mv->nick)) {
+  if (m && meop && !me_opped) {
     /* deop if they are +d or it is +bitch */
     int bitch = chan_bitch(chan);
 
@@ -575,42 +581,18 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
     }
 
 
-  } else if (reversing && !match_my_nick(mv->nick))
+  } else if (reversing && !me_opped)
     add_mode(chan, '-', 'o', mv->nick);
 
   /* server op */
-  if (!m && me_op(chan) && !match_my_nick(mv->nick)) {
+  if (!m && meop && !me_opped) {
     if (chk_deop(victim, chan) || (chan_bitch(chan) && !chk_op(victim, chan))) {
       mv->flags |= FAKEOP;
       add_mode(chan, '-', 'o', mv->nick);
     } 
-#ifdef no
-    } else if (snm > 0 && snm < 7 && !((channel_autoop(chan) ||
-         glob_autoop(victim) || chan_autoop(victim)) && (chan_op(victim) ||
-         (glob_op(victim) && !chan_deop(victim)))) &&
-         !glob_exempt(victim) && !chan_exempt(victim)) {
-
-      if (snm == 5)
-        snm = chan_bitch(chan) ? 1 : 3;
-      if (snm == 6)
-        snm = chan_bitch(chan) ? 4 : 2;
-      if (chan_wasoptest(victim) || glob_wasoptest(victim) || snm == 2) {
-        if (!chan_wasop(mv)) {
-          mv->flags |= FAKEOP;
-          add_mode(chan, '-', 'o', mv->nick);
-        }
-      } else if (!(chan_op(victim) || (glob_op(victim) && !chan_deop(victim)))) {
-        if (snm == 1 || snm == 4 || (snm == 3 && !chan_wasop(mv))) {
-          add_mode(chan, '-', 'o', mv->nick);
-          m->flags |= FAKEOP;
-        }
-      } else if (snm == 4 && !chan_wasop(mv)) {
-        add_mode(chan, '-', 'o', mv->nick);
-        mv->flags |= FAKEOP;
-      }
-#endif
   }
   mv->flags |= WASOP;
+
   if (check_chan) {
 #ifdef no
     /* tell other bots to set jointime to 0 and join */
@@ -620,6 +602,8 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
     putallbots(buf);
     free(buf);
 #endif
+
+    /* check exempts/invites and shit */
     recheck_channel(chan, 2);
   }
 }
