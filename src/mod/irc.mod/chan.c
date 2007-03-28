@@ -2290,13 +2290,7 @@ static int got332(char *from, char *msg)
  */
 static int gotjoin(char *from, char *chname)
 {
-  char *nick = NULL, *p = NULL, buf[UHOSTLEN] = "", *uhost = buf;
-  char *ch_dname = NULL;
   struct chanset_t *chan = NULL;
-  memberlist *m = NULL;
-  masklist *b = NULL;
-  struct userrec *u = NULL;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   fixcolon(chname);
   chan = findchan(chname);
@@ -2305,33 +2299,32 @@ static int gotjoin(char *from, char *chname)
      * name now. This will happen when we initially join the channel, as we
      * dont know the unique channel name that the server has made up. <cybah>
      */
-    int	l_chname = strlen(chname);
+    size_t l_chname = strlen(chname);
 
     if (l_chname > (CHANNEL_ID_LEN + 1)) {
-      ch_dname = (char *) my_calloc(1, l_chname + 1);
-      if (ch_dname) {
-	simple_snprintf(ch_dname, l_chname + 2, "!%s",
-		     chname + (CHANNEL_ID_LEN + 1));
-	chan = findchan_by_dname(ch_dname);
-	if (!chan) {
-	  /* Hmm.. okay. Maybe the admin's a genius and doesn't know the
-	   * difference between id and descriptive channel names. Search
-	   * the channel name in the dname list using the id-name.
-	   */
-	   chan = findchan_by_dname(chname);
-	   if (chan) {
-	     /* Duh, I was right. Mark this channel as inactive and log
-	      * the incident.
-	      */
-	     chan->status |= CHAN_INACTIVE;
-	     putlog(LOG_MISC, "*", "Deactivated channel %s, because it uses "
-		    "an ID channel-name. Use the descriptive name instead.",
-		    chname);
-	     dprintf(DP_SERVER, "PART %s\n", chname);
-	     goto exit;
-	   }
-	}
+      char* ch_dname = (char *) my_calloc(1, l_chname + 1);
+      simple_snprintf(ch_dname, l_chname + 2, "!%s", chname + (CHANNEL_ID_LEN + 1));
+      chan = findchan_by_dname(ch_dname);
+      if (!chan) {
+      /* Hmm.. okay. Maybe the admin's a genius and doesn't know the
+       * difference between id and descriptive channel names. Search
+       * the channel name in the dname list using the id-name.
+       */
+        chan = findchan_by_dname(chname);
+        if (chan) {
+          /* Duh, I was right. Mark this channel as inactive and log
+           * the incident.
+           */
+          chan->status |= CHAN_INACTIVE;
+          putlog(LOG_MISC, "*", "Deactivated channel %s, because it uses "
+                                "an ID channel-name. Use the descriptive name instead.", chname);
+          dprintf(DP_SERVER, "PART %s\n", chname);
+
+          free(ch_dname);
+          return 0;
+        }
       }
+      free(ch_dname);
     }
   } else if (!chan) {
     /* As this is not a !chan, we need to search for it by display name now.
@@ -2340,9 +2333,12 @@ static int gotjoin(char *from, char *chname)
     chan = findchan_by_dname(chname);
   }
 
+  char *nick = NULL, buf[UHOSTLEN] = "", *uhost = buf;
+
+  strcpy(uhost, from);
+  nick = splitnick(&uhost);
+
   if (!chan || (chan && !shouldjoin(chan))) {
-    strcpy(uhost, from);
-    nick = splitnick(&uhost);
     if (match_my_nick(nick)) {
       putlog(LOG_WARN, "*", "joined %s but didn't want to!", chname);
       dprintf(DP_MODE, "PART %s\n", chname);
@@ -2351,26 +2347,12 @@ static int gotjoin(char *from, char *chname)
     char *host = NULL;
 
     chan->status &= ~CHAN_STOP_CYCLE;
-    strcpy(uhost, from);
-    nick = splitnick(&uhost);
+
     detect_chan_flood(nick, uhost, from, chan, FLOOD_JOIN, NULL);
+
     if ((host = strchr(uhost, '@')))
-      host++;
+      ++host;
 
-    chan = findchan(chname);
-    if (!chan) {   
-      if (ch_dname)
-	chan = findchan_by_dname(ch_dname);
-      else
-	chan = findchan_by_dname(chname);
-    }
-    if (!chan)
-      /* The channel doesn't exist anymore, so get out of here. */
-      goto exit;
-
-    /* Grab last time joined before we update it */
-    u = get_user_by_host(from);
-    get_user_flagrec(u, &fr, chan->dname); /* Lam: fix to work with !channels */
     if (!channel_active(chan) && !match_my_nick(nick)) {
       /* uh, what?!  i'm on the channel?! */
       putlog(LOG_ERROR, "*", "confused bot: guess I'm on %s and didn't realize it", chan->dname);
@@ -2378,23 +2360,22 @@ static int gotjoin(char *from, char *chname)
       chan->status &= ~(CHAN_PEND | CHAN_JOINING);
       reset_chan_info(chan);
     } else {
-      int splitjoin = 0;
+      memberlist *m = ismember(chan, nick);
+      bool splitjoin = 0;
 
-      m = ismember(chan, nick);
+      /* Net-join */
       if (m && m->split && !egg_strcasecmp(m->userhost, uhost)) {
-	chan = findchan(chname);
-	if (!chan) {
-	  if (ch_dname)
-	    chan = findchan_by_dname(ch_dname);
-	  else
-	    chan = findchan_by_dname(chname);
-        }
-        if (!chan)
-          /* The channel doesn't exist anymore, so get out of here. */
-          goto exit;
+        splitjoin = 1;
+	m->split = 0;
+	m->last = now;
+	m->delay = 0L;
+	m->flags = (chan_hasop(m) ? WASOP : 0);
+	set_handle_laston(chan->dname, m->user, now);
+	m->flags |= STOPWHO;
+        irc_log(chan, "%s returned from netsplit", m->nick);
 
-	/* The tcl binding might have deleted the current user. Recheck. */
-        if (!m->user) {
+
+        if (m && !m->user) {
           m->user = get_user_by_host(from);
           m->tried_getuser = 1;
  
@@ -2405,14 +2386,6 @@ static int gotjoin(char *from, char *chname)
               resolve_to_member(chan, nick, host); 
           }
         }
-        splitjoin++;
-	m->split = 0;
-	m->last = now;
-	m->delay = 0L;
-	m->flags = (chan_hasop(m) ? WASOP : 0);
-	set_handle_laston(chan->dname, m->user, now);
-	m->flags |= STOPWHO;
-        irc_log(chan, "%s returned from netsplit", m->nick);
       } else {
 	if (m)
 	  killmember(chan, nick);
@@ -2422,9 +2395,8 @@ static int gotjoin(char *from, char *chname)
 	m->flags = 0;
 	m->last = now;
 	m->delay = 0L;
-	strlcpy(m->nick, nick, sizeof(m->nick));
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
-	m->user = u;
+        m->user = get_user_by_host(from);
         m->tried_getuser = 1;
 
         if (!m->user && doresolv(chan)) {
@@ -2435,25 +2407,6 @@ static int gotjoin(char *from, char *chname)
         }
 
 	m->flags |= STOPWHO;
-
-	/* The tcl binding might have deleted the current user and the
-	 * current channel, so we'll now have to re-check whether they
-	 * both still exist.
-	 */
-	chan = findchan(chname);
-	if (!chan) {
-	  if (ch_dname)
-	    chan = findchan_by_dname(ch_dname);
-	  else
-	    chan = findchan_by_dname(chname);
-	}
-	if (!chan)
-	  /* The channel doesn't exist anymore, so get out of here. */
-	  goto exit;
-
-	/* The record saved in the channel record always gets updated,
-	   so we can use that. */
-	u = m->user;
 
 	if (match_my_nick(nick)) {
 	  /* It was me joining! Need to update the channel record with the
@@ -2473,26 +2426,31 @@ static int gotjoin(char *from, char *chname)
 	  if (!match_my_nick(chname))
  	    reset_chan_info(chan);
 	} else {
-          /* Check for a mass join */
-          if (channel_nomassjoin(chan) && !chk_op(fr, chan) && me_op(chan)) {
-            if (chan->channel.drone_jointime < now - chan->flood_mjoin_time) {      //expired, reset counter
-              chan->channel.drone_joins = 0;
-            }
-            ++chan->channel.drone_joins;
-            chan->channel.drone_jointime = now;
-
-            if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= chan->flood_mjoin_thr) {  //flood from dronenet, let's attempt to set +im
-              detected_drone_flood(chan, m);
-            }
-          }
-
           irc_log(chan, "Join: %s (%s)", nick, uhost);
-	  set_handle_laston(chan->dname, u, now);
+	  set_handle_laston(chan->dname, m->user, now);
 	}
       }
-      /* ok, the op-on-join,etc, tests...first only both if Im opped */
 
+      /* ok, the op-on-join,etc, tests...first only both if Im opped */
       if (me_op(chan)) {
+        struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+        get_user_flagrec(m->user, &fr, chan->dname);
+
+        /* Check for a mass join */
+        if (!splitjoin && channel_nomassjoin(chan) && !chk_op(fr, chan)) {
+          if (chan->channel.drone_jointime < now - chan->flood_mjoin_time) {      //expired, reset counter
+            chan->channel.drone_joins = 0;
+          }
+          ++chan->channel.drone_joins;
+          chan->channel.drone_jointime = now;
+
+          if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= chan->flood_mjoin_thr) {  //flood from dronenet, let's attempt to set +im
+            detected_drone_flood(chan, m);
+          }
+        }
+
+
 	/* Check for and reset exempts and invites.
 	 *
 	 * This will require further checking to account for when to use the
@@ -2504,13 +2462,12 @@ static int gotjoin(char *from, char *chname)
 
 	if (!(use_exempts && (u_match_mask(global_exempts,from) || u_match_mask(chan->exempts, from)))) {
           if (channel_enforcebans(chan) && !chan_op(fr) && !glob_op(fr) && !chan_sentkick(m) &&
-              !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS))) && 
-              me_op(chan)) {
-            for (b = chan->channel.ban; b->mask[0]; b = b->next) {
+              !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS)))) {
+            for (masklist* b = chan->channel.ban; b->mask[0]; b = b->next) {
               if (wild_match(b->mask, from) || match_cidr(b->mask, from)) {
                 dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, r_banned());
                 m->flags |= SENTKICK;
-                goto exit;
+                return 0;
               }
             }
           }
@@ -2518,12 +2475,10 @@ static int gotjoin(char *from, char *chname)
 	  if (u_match_mask(global_bans, from) || u_match_mask(chan->bans, from)) {
 	    refresh_ban_kick(chan, from, nick);
 	  /* Likewise for kick'ees */
-	  } else if (!chan_sentkick(m) && (glob_kick(fr) || chan_kick(fr)) &&
-		     me_op(chan)) {
+	  } else if (!chan_sentkick(m) && (glob_kick(fr) || chan_kick(fr))) {
 	    check_exemptlist(chan, from);
 	    quickban(chan, from);
-	    p = (char *) get_user(&USERENTRY_COMMENT, m->user);
-            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, nick, bankickprefix, response(RES_KICKBAN));
+            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, response(RES_KICKBAN));
 	    m->flags |= SENTKICK;
 	  }
 	}
@@ -2558,9 +2513,6 @@ static int gotjoin(char *from, char *chname)
     }
   }
 
-exit:
-  if (ch_dname)
-    free(ch_dname);
   return 0;
 }
 
