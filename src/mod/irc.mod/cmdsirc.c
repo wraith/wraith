@@ -1396,9 +1396,9 @@ static void cmd_channel(int idx, char *par)
 
       if (chan_issplit(m)) {
         egg_snprintf(format, sizeof format, 
-			"%%c%%c%%-%us %%-%us   %%d %%s %%c     <- netsplit, %%lus\n", 
+			"%%c%%c%%-%us %%-%us %%s %%c     <- netsplit, %%lus\n", 
 			maxnicklen, maxhandlen);
-	dprintf(idx, format, chanflag[0],chanflag[1], m->nick, handle, s, m->hops, atrflag,
+	dprintf(idx, format, chanflag[0],chanflag[1], m->nick, handle, s, atrflag,
 		now - (m->split));
       } else if (!rfc_casecmp(m->nick, botname)) {
         egg_snprintf(format, sizeof format, 
