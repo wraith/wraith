@@ -40,6 +40,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix segfault in cmd_channel during splits.
 * Remove chanflag 'protectops'
 * Fix bot not checking +e/+I modes when opped sometimes.
+* Fix chanset flag 'userbans' not being saved correctly. (may cause warnings on upgrade)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
