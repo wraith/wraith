@@ -287,12 +287,17 @@ static void logc(const char *cmd, Auth *a, char *chname, char *par)
   
 static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 {
-  if (!u) 
+  if (!u)
     return 0;
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
   if (u && u->bot)
     return BIND_RET_BREAK;
+
+  if (!ischanhub()) {
+    putlog(LOG_WARN, "*", "(%s!%s) !%s! Attempted AUTH? (I'm not a chathub (+c))", nick, host, u->handle);
+    return BIND_RET_BREAK;
+  }
 
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! AUTH?", nick, host, u->handle);
 
