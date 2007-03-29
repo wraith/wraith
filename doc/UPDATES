@@ -42,6 +42,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix bot not checking +e/+I modes when opped sometimes.
 * Fix chanset flag 'userbans' not being saved correctly. (may cause warnings on upgrade)
 * Fix authing on non-chathubs (fixes #356)
+* Fix segfault with cmd_set and adding to empty lists.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

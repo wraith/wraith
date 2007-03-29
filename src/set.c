@@ -648,6 +648,9 @@ static bool var_find_list(const char *botnick, variable_t *var, const char *elem
   } else                                  //use global, no bot specified
     olddata = var->gdata ? var->gdata : NULL;
 
+  if (!olddata)
+    return false;
+
   char *item = NULL, *data = strdup(olddata), *datap = data;
   const char *delim = ",";
   size_t slen = 0;
