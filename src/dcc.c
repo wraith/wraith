@@ -988,7 +988,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       char randstr[51] = "";
 
       make_rand_str(randstr, 50);
-      makehash(dcc[idx].user, randstr, dcc[idx].hash, sizeof(dcc[idx].hash));
+      makehash(dcc[idx].user, randstr, dcc[idx].hash, MD5_HASH_LENGTH + 1);
 
       dcc[idx].type = &DCC_CHAT_SECPASS;
       dcc[idx].timeval = now;

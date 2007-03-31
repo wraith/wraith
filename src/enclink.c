@@ -320,11 +320,11 @@ char *link_write(int snum, char *buf, size_t *len)
 
 void link_hash(int idx, char *rand)
 {
-  char hash[256] = "";
+  char hash[60] = "";
 
   /* nothing fancy, just something simple that can stop people from playing */
   simple_snprintf(hash, sizeof(hash), "enclink%s", rand);
-  strlcpy(dcc[idx].shahash, SHA1(hash), sizeof(dcc[idx].shahash));
+  strlcpy(dcc[idx].shahash, SHA1(hash), SHA_HASH_LENGTH + 1);
   egg_bzero(hash, sizeof(hash));
   return;
 }
