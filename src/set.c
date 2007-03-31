@@ -218,7 +218,7 @@ char *var_sanitize(variable_t *var, const char *data)
 static bool var_set_mem(variable_t *var, const char *datain)
 {
   char *data = (datain && datain[0]) ? strdup(datain) : NULL, *datap = data;
-sdprintf("var (mem): %s -> %s", var->name, datain);
+sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 
   if (data && var->flags & VAR_SHUFFLE) {
 //    char *datadup = strdup(data);
@@ -454,7 +454,7 @@ void var_set(variable_t *var, const char *target, const char *datain)
       if (var->ldata)
         free(var->ldata);
 
-sdprintf("var: %s (local): %s", var->name, data);
+sdprintf("var: %s (local): %s", var->name, data ? data : "(NULL)");
       if (data && !clear)
         var->ldata = strdup(data);
       else
@@ -468,7 +468,7 @@ sdprintf("var: %s (local): %s", var->name, data);
       domem = 0;
     if (var->gdata)
       free(var->gdata);
-sdprintf("var: %s (global): %s", var->name, data);
+sdprintf("var: %s (global): %s", var->name, data ? data : "(NULL)");
     if (data && !clear)
       var->gdata = strdup(data);
     else {

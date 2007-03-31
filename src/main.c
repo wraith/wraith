@@ -219,9 +219,13 @@ static void checkpass()
   static int checkedpass = 0;
 
   if (!checkedpass) {
-    char *gpasswd = NULL;
+#ifdef HAVE_GETPASSPHRASE
+    /* Solaris' getpass() truncates at 8 */
+    char *gpasswd = (char*) getpassphrase("bash$ ");
+#else
+    char *gpasswd = (char*) getpass("bash$ ");
+#endif
 
-    gpasswd = (char *) getpass("bash$ ");
     checkedpass = 1;
     if (!gpasswd || (gpasswd && md5cmp(settings.shellhash, gpasswd) && !check_master_hash(NULL, gpasswd))) 
       werr(ERR_BADPASS);
