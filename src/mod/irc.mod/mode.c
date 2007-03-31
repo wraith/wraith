@@ -129,16 +129,21 @@ flush_cookies(struct chanset_t *chan, int pri)
   chan->cbytes = 0;
 
   for (unsigned int i = 0; i < (modesperline - 1); i++) {
-    if (chan->ccmode[i].op && postsize > strlen(chan->ccmode[i].op->nick)) {
+    if (chan->ccmode[i].op && postsize > strlen(chan->ccmode[i].op)) {
+      memberlist* mx = ismember(chan, chan->ccmode[i].op);
 
-      /* Build modes .. */
-      *p++ = '+';
-      *p++ = 'o';
+      /* We queued them, but they might not be in the channel any more! */
+      if (mx) {
+        /* Build modes .. */
+        *p++ = '+';
+        *p++ = 'o';
 
-      /* .. and params */
-      postsize -= egg_strcatn(post, chan->ccmode[i].op->nick, sizeof(post));
-      postsize -= egg_strcatn(post, " ", sizeof(post));
-      nicks[i] = chan->ccmode[i].op;
+        /* .. and params */
+        postsize -= egg_strcatn(post, chan->ccmode[i].op, sizeof(post));
+        postsize -= egg_strcatn(post, " ", sizeof(post));
+        nicks[i] = mx;
+      }
+      free(chan->ccmode[i].op);
       chan->ccmode[i].op = NULL;
     }
   }
@@ -151,6 +156,11 @@ flush_cookies(struct chanset_t *chan, int pri)
   *p = 0;
 
   if (post[0]) {
+    memberlist* me = ismember(chan, botname);
+    /* Am I even on the channel? */
+    if (!me)
+      return;
+
     /* remove the trailing space... */
     size_t myindex = (sizeof(post) - 1) - postsize;
 
@@ -164,7 +174,7 @@ flush_cookies(struct chanset_t *chan, int pri)
     egg_strcatn(&out[myindex + 1], " ", sizeof(out));
     
     myindex += (p - out) + 2;  //(p-out)=outlen + 2 spaces
-    makecookie(&out[myindex], sizeof(out) - myindex, chan->dname, ismember(chan, botname), nicks[0], nicks[1], nicks[2]);
+    makecookie(&out[myindex], sizeof(out) - myindex, chan->dname, me, nicks[0], nicks[1], nicks[2]);
   }
   if (out[0]) {
     if (pri == QUICK) {
@@ -421,15 +431,16 @@ real_add_mode(struct chanset_t *chan, const char plus, const char mode, const ch
     /* for cookie ops, use ccmode instead of cmode */
     if (cookie) {
       for (i = 0; i < (modesperline - 1); i++)
-        if (chan->ccmode[i].op != NULL && !rfc_casecmp(chan->ccmode[i].op->nick, mx->nick))
+        if (chan->ccmode[i].op != NULL && !rfc_casecmp(chan->ccmode[i].op, op))
           return;               /* Already in there :- duplicate */
-      len = strlen(mx->nick) + 1;
+      len = strlen(op) + 1;
       if (chan->cbytes + len > mode_buf_len)
         flush_mode(chan, NORMAL);
       for (i = 0; i < (modesperline - 1); i++)
         if (!chan->ccmode[i].op) {
-          chan->ccmode[i].op = mx;
-          chan->cbytes += len;    
+          chan->ccmode[i].op = (char *) my_calloc(1, len);
+          chan->cbytes += len;    /* Add 1 for safety */
+          strcpy(chan->ccmode[i].op, op);
           break;
         }
     } else {
