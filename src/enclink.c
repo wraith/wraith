@@ -19,18 +19,15 @@ static void ghost_link_case(int idx, direction_t direction)
     char initkey[33] = "", *tmp2 = NULL;
     char tmp[70] = "";
     char *keyp = NULL, *nick1 = NULL, *nick2 = NULL;
-    size_t key_len = 0;
     port_t port = 0;
 
     if (direction == TO) {
       keyp = socklist[snum].ikey;
-      key_len = sizeof(socklist[snum].ikey);
       nick1 = strdup(dcc[idx].nick);
       nick2 = strdup(conf.bot->nick);
       port = htons(dcc[idx].port);
     } else if (direction == FROM) {
       keyp = socklist[snum].okey;
-      key_len = sizeof(socklist[snum].okey);
       nick1 = strdup(conf.bot->nick);
       nick2 = strdup(dcc[idx].nick);
 
@@ -47,7 +44,7 @@ static void ghost_link_case(int idx, direction_t direction)
     sprintf(tmp, "%s@%4x@%s@%s", settings.bdhash, port, strtoupper(nick1), strtoupper(nick2));
     free(nick1);
     free(nick2);
-    strlcpy(keyp, SHA1(tmp), key_len);
+    strlcpy(keyp, SHA1(tmp), ENC_KEY_LEN + 1);
 #ifdef DEBUG
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(keyp), keyp);
@@ -66,8 +63,8 @@ static void ghost_link_case(int idx, direction_t direction)
 
       link_send(idx, "elink %s %d\n", tmp2, socklist[snum].oseed);
       free(tmp2);
-      strcpy(socklist[snum].okey, initkey);
-      strcpy(socklist[snum].ikey, initkey);
+      strlcpy(socklist[snum].okey, initkey, ENC_KEY_LEN + 1);
+      strlcpy(socklist[snum].ikey, initkey, ENC_KEY_LEN + 1);
     } else {
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;
@@ -170,8 +167,8 @@ void ghost_parse(int idx, int snum, char *buf)
   if (!egg_strcasecmp(code, "elink")) {
     char *tmp = decrypt_string(settings.salt2, newsplit(&buf));
 
-    strlcpy(socklist[snum].okey, tmp, sizeof(socklist[snum].okey));
-    strlcpy(socklist[snum].ikey, socklist[snum].okey, sizeof(socklist[snum].ikey));
+    strlcpy(socklist[snum].okey, tmp, ENC_KEY_LEN + 1);
+    strlcpy(socklist[snum].ikey, socklist[snum].okey, ENC_KEY_LEN + 1);
     socklist[snum].iseed = atoi(buf);
     socklist[snum].oseed = atoi(buf);
     putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);

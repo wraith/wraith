@@ -11,6 +11,9 @@
 #include <setjmp.h>
 
 
+#define ENC_KEY_LEN 32
+
+
 #ifdef HAVE_OPENSSL_SSL_H
 # ifdef USE_SSL
 #  include <openssl/ssl.h>
@@ -98,8 +101,8 @@ typedef struct {
   char *host;
   port_t port;
   short          flags;
-  char okey[33];                        /* botlink enckey: out */
-  char ikey[33];                        /* botlink enckey: in  */
+  char okey[ENC_KEY_LEN + 1];                        /* botlink enckey: out */
+  char ikey[ENC_KEY_LEN + 1];                        /* botlink enckey: in  */
 } sock_list;
 
 
