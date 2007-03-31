@@ -327,7 +327,9 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
 sdprintf("chname: %s ts: %s salt: %c%c%c%c", chname, ts, salt[0], salt[1], salt[2], salt[3]);
 sdprintf("tohash: %s", tohash);
 #endif
-  return MD5(tohash);
+  const char* md5 = MD5(tohash);
+  OPENSSL_cleanse(tohash, sizeof(tohash));
+  return md5;
 }
 
 #define HASH_INDEX1(_x) (8 + (_x))

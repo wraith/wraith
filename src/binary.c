@@ -389,6 +389,9 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   dofield(incfg->binname);
   dofield(incfg->portmin);
   dofield(incfg->portmax);
+
+
+  OPENSSL_cleanse(nhash, sizeof(nhash));
 #undef dofield
 #undef dohash
 #undef update_hash

@@ -17,7 +17,7 @@ static void ghost_link_case(int idx, direction_t direction)
 
   if (snum >= 0) {
     char initkey[33] = "", *tmp2 = NULL;
-    char tmp[256] = "";
+    char tmp[70] = "";
     char *keyp = NULL, *nick1 = NULL, *nick2 = NULL;
     size_t key_len = 0;
     port_t port = 0;
@@ -52,6 +52,8 @@ static void ghost_link_case(int idx, direction_t direction)
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
     putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(keyp), keyp);
 #endif
+    OPENSSL_cleanse(tmp, sizeof(tmp));
+
     if (direction == FROM) {
       make_rand_str(initkey, 32);       /* set the initial out/in link key to random chars. */
       socklist[snum].oseed = random();
@@ -325,7 +327,7 @@ void link_hash(int idx, char *rand)
   /* nothing fancy, just something simple that can stop people from playing */
   simple_snprintf(hash, sizeof(hash), "enclink%s", rand);
   strlcpy(dcc[idx].shahash, SHA1(hash), SHA_HASH_LENGTH + 1);
-  egg_bzero(hash, sizeof(hash));
+  OPENSSL_cleanse(hash, sizeof(hash));
   return;
 }
 

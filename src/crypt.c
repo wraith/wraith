@@ -350,15 +350,20 @@ MD5FILE(const char *bin)
 
 char *SHA1(const char *string)
 {
-  static char	  sha1string[SHA_HASH_LENGTH + 1] = "";
+  static int n = 0;
+  static char ret[5][SHA_HASH_LENGTH + 1];
+  char* sha1string = ret[n++];
   unsigned char   sha1out[SHA_HASH_LENGTH + 1] = "";
   SHA_CTX ctx;
 
   SHA1_Init(&ctx);
   SHA1_Update(&ctx, string, strlen(string));
   SHA1_Final(sha1out, &ctx);
-  strlcpy(sha1string, btoh(sha1out, SHA_DIGEST_LENGTH), sizeof(sha1string));
+  strlcpy(sha1string, btoh(sha1out, SHA_DIGEST_LENGTH), SHA_HASH_LENGTH + 1);
   OPENSSL_cleanse(&ctx, sizeof(ctx));
+
+  if (n == 5) n = 0;
+
   return sha1string;
 }
 

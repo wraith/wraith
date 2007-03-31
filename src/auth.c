@@ -280,18 +280,21 @@ void makehash(struct userrec *u, const char *randstring, char *out, size_t out_s
     free(secpass);
 
   strlcpy(out, MD5(hash), out_size);
-  egg_bzero(hash, sizeof(hash));
+  OPENSSL_cleanse(hash, sizeof(hash));
 }
 
-char *
+const char*
 makebdhash(char *randstring)
 {
-  char hash[256] = "";
+  char hash[70] = "";
   char *bdpass = "bdpass";
 
   simple_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, settings.packname);
   sdprintf("bdhash: %s", hash);
-  return MD5(hash);
+
+  const char* md5 = MD5(hash);
+  OPENSSL_cleanse(hash, sizeof(hash));
+  return md5;
 }
 
 void check_auth_dcc(Auth *auth, const char *cmd, const char *par)
