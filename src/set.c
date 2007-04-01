@@ -79,7 +79,7 @@ static variable_t vars[] = {
  VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
  VAR("homechan",	homechan,		VAR_STRING|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
- VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, 0, "2"),
+ VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "2"),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
@@ -92,7 +92,7 @@ static variable_t vars[] = {
  VAR("msg-op",		msgop,			VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("nick",		origbotname,		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB,	0, 0, NULL),
- VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, 0, "1"),
+ VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "1"),
  VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
 #ifdef NOT_USED
  VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
