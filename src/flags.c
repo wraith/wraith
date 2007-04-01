@@ -617,44 +617,43 @@ int deflag_translate(const char *buf)
     return P_DELETE;
   return P_IGNORE;
 }
+
+
 void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
 {
-  if (!u)
-    return;
-
-  char tmp[256] = "", tmp2[1024] = "";
+  char tmp[30] = "", tmp2[1024] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int which = 0;
 
   switch (why) {
   case DEFLAG_BADCOOKIE:
-    strcpy(tmp, "Bad op cookie");
+    strlcpy(tmp, "Bad op cookie", sizeof(tmp));
     which = chan->bad_cookie;
     break;
   case DEFLAG_MANUALOP:
-    strcpy(tmp, STR("Manual op in -manop channel"));
+    strlcpy(tmp, STR("Manual op in -manop channel"), sizeof(tmp));
     which = chan->manop;
     break;
 #ifdef G_MEAN
   case DEFLAG_MEAN_DEOP:
-    strcpy(tmp, STR("Deopped bot in +mean channel"));
+    strlcpy(tmp, STR("Deopped bot in +mean channel"), sizeof(tmp));
     ent = &CFG_MEANDEOP;
     break;
   case DEFLAG_MEAN_KICK:
-    strcpy(tmp, STR("Kicked bot in +mean channel"));
+    strlcpy(tmp, STR("Kicked bot in +mean channel"), sizeof(tmp));
     ent = &CFG_MEANDEOP;
     break;
   case DEFLAG_MEAN_BAN:
-    strcpy(tmp, STR("Banned bot in +mean channel"));
+    strlcpy(tmp, STR("Banned bot in +mean channel"), sizeof(tmp));
     ent = &CFG_MEANDEOP;
     break;
 #endif /* G_MEAN */
   case DEFLAG_MDOP:
-    strcpy(tmp, "Mass deop");
+    strlcpy(tmp, "Mass deop", sizeof(tmp));
     which = chan->mdop;
     break;
   case DEFLAG_MOP:
-    strcpy(tmp, "Mass op");
+    strlcpy(tmp, "Mass op", sizeof(tmp));
     which = chan->mop;
     break;
   default:
@@ -664,18 +663,40 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     putlog(LOG_WARN, "*",  "Setting %s +d (%s): %s", u->handle, tmp, msg);
     simple_sprintf(tmp2, "+d: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
+
     get_user_flagrec(u, &fr, chan->dname);
-    fr.global = USER_DEOP;
-    fr.chan = USER_DEOP;
-    set_user_flagrec(u, &fr, chan->dname);
+    if (fr.global == USER_DEOP)
+      fr.match &= ~FR_GLOBAL;
+    else
+      fr.global = USER_DEOP;
+
+    if (fr.chan == USER_DEOP)
+      fr.match &= ~FR_CHAN;
+    else
+      fr.chan = USER_DEOP;
+ 
+    /* did anything change? */
+    if (fr.match)
+      set_user_flagrec(u, &fr, chan->dname);
   } else if (which == P_KICK) {
     putlog(LOG_WARN, "*",  "Setting %s +dk (%s): %s", u->handle, tmp, msg);
     simple_sprintf(tmp2, "+dk: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
+
     get_user_flagrec(u, &fr, chan->dname);
-    fr.global = USER_DEOP | USER_KICK;
-    fr.chan = USER_DEOP | USER_KICK;
-    set_user_flagrec(u, &fr, chan->dname);
+    if (fr.global == (USER_DEOP|USER_KICK))
+      fr.match &= ~FR_GLOBAL;
+    else
+      fr.global = USER_DEOP | USER_KICK;
+ 
+    if (fr.chan == (USER_DEOP|USER_KICK))
+      fr.match &= ~FR_CHAN;
+    else
+      fr.chan = USER_DEOP | USER_KICK;
+
+    /* did anything change */
+    if (fr.match)
+      set_user_flagrec(u, &fr, chan->dname);
   } else if (which == P_DELETE) {
     putlog(LOG_WARN, "*",  "Deleting %s (%s): %s", u->handle, tmp, msg);
     deluser(u->handle);
