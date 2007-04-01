@@ -49,8 +49,6 @@ char botuserip[UHOSTLEN] = "";		/* bot's user@host with the ip. */
 static bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
-bool quiet_reject = 1;	/* Quietly reject dcc chat or sends from
-				   users without access? */
 static time_t waiting_for_awake;	/* set when i unidle myself, cleared when
 				   i get the response */
 time_t server_online;	/* server connection time */
@@ -846,21 +844,13 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
   if (ischanhub() && !glob_chuba(fr))
    ok = 0;
   if (dcc_total == max_dcc) {
-    if (!quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_TOOMANYDCCS1);
     putlog(LOG_MISC, "*", DCC_TOOMANYDCCS2, "CHAT", param, nick, from);
   } else if (!ok) {
-    if (!quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_REFUSED2);
     putlog(LOG_MISC, "*", "%s: %s!%s", ischanhub() ? DCC_REFUSED : DCC_REFUSEDNC, nick, from);
   } else if (u_pass_match(u, "-")) {
-    if (!quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_REFUSED3);
     putlog(LOG_MISC, "*", "%s: %s!%s", DCC_REFUSED4, nick, from);
   } else if (atoi(prt) < 1024 || atoi(prt) > 65535) {
     /* Invalid port */
-    if (!quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :%s (invalid port)\n", nick, DCC_CONNECTFAILED1);
     putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED3, nick, from);
   } else {
     if (!sanitycheck_dcc(nick, from, ip, prt))
@@ -904,8 +894,6 @@ static void dcc_chat_hostresolved(int i)
 #endif /* USE_IPV6 */
   if (dcc[i].sock < 0 || open_telnet_dcc(dcc[i].sock, ip, buf) < 0) {
     strcpy(buf, strerror(errno));
-    if (!quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :%s (%s)\n", dcc[i].nick, DCC_CONNECTFAILED1, buf);
     putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED2, dcc[i].nick, dcc[i].host);
     putlog(LOG_MISC, "*", "    (%s)", buf);
     killsock(dcc[i].sock);

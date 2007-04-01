@@ -508,12 +508,6 @@ static int gotmsg(char *from, char *msg)
                    */
                   code = newsplit(&ctcp);
                   if (!strcmp(code, "CHAT")) {
-                    if (!quiet_reject) {
-                      if (u)
-                        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, "I'm not accepting call at the moment.");
-                       else
-                        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_NOSTRANGERS);
-                    }
                     if (!ischanhub())
                       putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
                     else
@@ -522,12 +516,6 @@ static int gotmsg(char *from, char *msg)
                     putlog(LOG_MISC, "*", "Refused DCC %s: %s", code, from);
                   }
                 } else if (!strcmp(code, "CHAT")) {
-                  if (!quiet_reject) {
-                    if (u)
-                      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, "I'm not accepting call at the moment.");
-                    else
-                      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, DCC_NOSTRANGERS);
-                  }
                   if (!ischanhub())
                     putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
                   else

@@ -180,25 +180,14 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
     who[NICKMAX] = 0;
   }
   u2 = get_user_by_handle(userlist, who);
-  if (!u2) {
-    if (u && !quiet_reject)
-      dprintf(DP_HELP, "NOTICE %s :You're not %s, you're %s.\n", nick, nick, u->handle);
-  } else if (rfc_casecmp(who, origbotname) && !u2->bot) {
+  if (u2 && rfc_casecmp(who, origbotname) && !u2->bot) {
     /* This could be used as detection... */
     if (u_pass_match(u2, "-")) {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
-      if (!quiet_reject)
-        dprintf(DP_HELP, "NOTICE %s :You don't have a password set.\n", nick);
     } else if (!u_pass_match(u2, pass)) {
-      if (!quiet_reject)
-        dprintf(DP_HELP, "NOTICE %s :Access denied.\n", nick);
+      putlog(LOG_CMDS, "*", "(%s!%s) !*! failed IDENT %s", nick, host, who);
+      return BIND_RET_BREAK;
     } else if (u == u2) {
-      /*
-       * NOTE: Checking quiet_reject *after* u_pass_match()
-       * verifies the password makes NO sense!
-       * (Broken since 1.3.0+bel17)  Bad Beldin! No Cookie!
-       *   -Toth  [July 30, 2003]
-       */
       dprintf(DP_HELP, "NOTICE %s :I recognize you there.\n", nick);
       return BIND_RET_BREAK;
     } else if (u) {
