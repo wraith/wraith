@@ -446,50 +446,28 @@ getin_request(char *botnick, char *code, char *par)
   if (!par[0] || !par)
     return;
 
-  struct chanset_t *chan = NULL;
   char *what = newsplit(&par), *chname = newsplit(&par);
 
   if (!chname[0] || !chname)
     return;
-
-  if (!(chan = findchan_by_dname(chname))) {
-    putlog(LOG_GETIN, "*", "getin req from %s for %s which is not a valid channel!", botnick, chname);
-    return;
-  }
 
   char *tmp = newsplit(&par);		/* nick */
 
   if (!tmp[0])
     return;
 
-
-  struct userrec *u = NULL;
-  memberlist *mem = NULL;
-  char nick[NICKLEN] = "", uhost[UHOSTLEN] = "", uip[UHOSTLEN] = "";
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-
+  char nick[NICKLEN] = "";
   strlcpy(nick, tmp, sizeof(nick));
-
-  tmp = newsplit(&par);			/* userhost */
-
-  if (tmp[0])
-    strlcpy(uhost, tmp, sizeof(uhost));
-
-  tmp = newsplit(&par);		/* userip */
-  if (tmp[0])
-    egg_snprintf(uip, sizeof uip, "%s!%s", nick, tmp);
-    
-  /*
-   * if (!ismember(chan, botname)) {
-   * putlog(LOG_GETIN, "*", "getin req from %s for %s - I'm not on %s!", botnick, chname, chname);
-   * return;
-   * }
-   */
 
   const char *type = what[0] == 'o' ? "op" : "in", *desc = what[0] == 'o' ? "on" : "for";
 
+  struct chanset_t *chan = findchan_by_dname(chname);
+  if (!chan) {
+    putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s which is not a valid channel!", type, botnick, nick, desc, chname);
+    return;
+  }
 
-  u = get_user_by_handle(userlist, botnick);
+  struct userrec *u = get_user_by_handle(userlist, botnick);
   if (!u) {
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - No user called %s in userlist", type, botnick, nick, desc, 
                            chan->dname, botnick);
@@ -500,28 +478,68 @@ getin_request(char *botnick, char *code, char *par)
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm too lagged", type, botnick, nick, desc, chan->dname);
     return;
   }
+
+
   if (what[0] != 'K') {
     if (!(channel_pending(chan) || channel_active(chan))) {
-      putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm not on %s now", type, botnick, nick, desc, 
+      putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm not on %s right now.", type, botnick, nick, desc, 
                              chan->dname, chan->dname);
       return;
     }
   }
-  if (!chan) {
-    putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - Channel %s doesn't exist", type, botnick, nick, 
-                            desc, chname, chname);
-    return;
-  }
-  mem = ismember(chan, nick);
+
+  memberlist* mem = ismember(chan, nick);
 
   if (mem && chan_issplit(mem)) {
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - %s is split", type, botnick, nick, desc, chan->dname, nick);
     return;
   }
 
+  if (what[0] == 'K') {
+    if (!shouldjoin(chan)) {
+      putlog(LOG_GETIN, "*", "Got key for %s from %s - I shouldn't be on that chan?!?", chan->dname, botnick);
+    } else {
+      if (!(channel_pending(chan) || channel_active(chan))) {
+        /* Cache the key */
+        free(chan->channel.key);
+        chan->channel.key = strdup(nick);
+
+        putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, chan->channel.key);
+        dprintf(DP_MODE, "JOIN %s %s\n", chan->name[0] ? chan->name : chan->dname, chan->channel.key);
+        chan->status |= CHAN_JOINING;
+      } else {
+        putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);
+      }
+    }
+    return;
+  }
+
+  char uhost[UHOSTLEN] = "";
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+  tmp = newsplit(&par);			/* userhost */
+
+  if (tmp[0])
+    strlcpy(uhost, tmp, sizeof(uhost));
+
   if (what[0] == 'o') {
+    if (!me_op(chan)) {
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - I haven't got ops", botnick, nick, chan->dname);
+      return;
+    }
+
     if (!mem) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s isn't on %s", botnick, nick, chan->dname, nick, chan->dname);
+      return;
+    }
+
+    if (chan_hasop(mem)) {
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s already has ops", botnick, nick, chan->dname, nick);
+      return;
+    }
+
+    if (chan_sentop(mem)) {
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Already sent a +o", botnick, nick, chan->dname);
       return;
     }
 
@@ -534,28 +552,19 @@ getin_request(char *botnick, char *code, char *par)
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s doesn't match %s", botnick, nick, chan->dname, nick, botnick);
       return;
     }
+
     get_user_flagrec(u, &fr, chan->dname);
 
     if (!chk_op(fr, chan)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s doesnt have +o for chan.", botnick, nick, chan->dname, botnick);
       return;
     }
+
     if (glob_kick(fr) || chan_kick(fr)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s is currently being autokicked.", botnick, nick, chan->dname, botnick);
       return;
     }
-    if (chan_hasop(mem)) {
-      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s already has ops", botnick, nick, chan->dname, nick);
-      return;
-    }
-    if (!me_op(chan)) {
-      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - I haven't got ops", botnick, nick, chan->dname);
-      return;
-    }
-    if (chan_sentop(mem)) {
-      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Already sent a +o", botnick, nick, chan->dname);
-      return;
-    }
+
     if (chan->channel.no_op) {
       if (chan->channel.no_op > now)    /* dont op until this time has passed */
         return;
@@ -578,48 +587,60 @@ getin_request(char *botnick, char *code, char *par)
     }
 #endif
     get_user_flagrec(u, &fr, chan->dname);
+
     if (!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr)) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
       return;
     }
 
-    char s[256] = "", *p = NULL, *p2 = NULL;
+    if (chan->channel.mode & CHANKEY) {
+      char *key = chan->channel.key[0] ? chan->channel.key : chan->key_prot;
+      size_t siz = strlen(chan->dname) + strlen(key ? key : 0) + 6 + 1;
+      tmp = (char *) my_calloc(1, siz);
+      simple_snprintf(tmp, siz, "gi K %s %s", chan->dname, key ? key : "");
+      putbot(botnick, tmp);
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Sent key (%s)", botnick, nick, chan->dname, key ? key : "");
+      free(tmp);
+    }
+
+    if (!me_op(chan)) {
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - I haven't got ops", botnick, nick, chan->dname);
+      return;
+    }
+
     bool sendi = 0;
 
-    strcpy(s, getchanmode(chan));
-    p = (char *) &s;
-    p2 = newsplit(&p);
+    if (chan->channel.maxmembers) {
+      int lim = chan->channel.members + 5, curlim = chan->channel.maxmembers;
+      if (curlim < lim) {
+        char s2[6] = "";
 
-    if (strchr(p2, 'l')) {
-      if (!me_op(chan)) {
-        putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
-        return;
-      } else {
-        int lim = chan->channel.members + 5, curlim = chan->channel.maxmembers;
-        if (curlim > 0 && curlim < lim) {
-          char s2[16] = "";
-
-          sendi = 1;
-          simple_sprintf(s2, "%d", lim);
-          add_mode(chan, '+', 'l', s2);
-          putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit to %d", botnick, nick, chan->dname, lim);
-        }
+        sendi = 1;
+        simple_snprintf(s2, sizeof(s2), "%d", lim);
+        add_mode(chan, '+', 'l', s2);
+        putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit to %d", botnick, nick, chan->dname, lim);
       }
     }
 
+    char uip[UHOSTLEN] = "";
+    tmp = newsplit(&par);		/* userip */
+    if (tmp[0])
+      simple_snprintf(uip, sizeof uip, "%s!%s", nick, tmp);
+
     struct maskrec **mr = NULL, *tmr = NULL;
 
+    /* Check internal global bans */
     mr = &global_bans;
     while (*mr) {
       if (wild_match((*mr)->mask, uhost) || 
           wild_match((*mr)->mask, uip) || 
           match_cidr((*mr)->mask, uip)) {
-        if (!noshare) {
+
+        if (!noshare)
           shareout("-m b %s\n", (*mr)->mask);
-        }
+
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed permanent global ban %s", botnick, nick,
                chan->dname, (*mr)->mask);
-        /*gban_total--; */
         free((*mr)->mask);
         if ((*mr)->desc)
           free((*mr)->desc);
@@ -632,14 +653,15 @@ getin_request(char *botnick, char *code, char *par)
         mr = &((*mr)->next);
       }
     }
+
+    /* Check internal channel bans */
     mr = &chan->bans;
     while (*mr) {
       if (wild_match((*mr)->mask, uhost) || 
           wild_match((*mr)->mask, uip) || 
           match_cidr((*mr)->mask, uip)) {
-        if (!noshare) {
+        if (!noshare)
           shareout("-mc b %s %s\n", chan->dname, (*mr)->mask);
-        }
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed permanent channel ban %s", botnick, nick,
                chan->dname, (*mr)->mask);
         free((*mr)->mask);
@@ -654,6 +676,8 @@ getin_request(char *botnick, char *code, char *par)
         mr = &((*mr)->next);
       }
     }
+
+    /* Check bans active in channel */
     for (struct maskstruct *b = chan->channel.ban; b->mask[0]; b = b->next) {
       if (wild_match(b->mask, uhost) || 
           wild_match(b->mask, uip) || 
@@ -664,43 +688,14 @@ getin_request(char *botnick, char *code, char *par)
         sendi = 1;
       }
     }
-    if (strchr(p2, 'k')) {
-      char *key = chan->channel.key[0] ? chan->channel.key : chan->key_prot;
-      sendi = 0;
-      size_t siz = strlen(chan->dname) + strlen(key ? key : 0) + 6 + 1;
-      tmp = (char *) my_calloc(1, siz);
-      simple_snprintf(tmp, siz, "gi K %s %s", chan->dname, key ? key : "");
-      putbot(botnick, tmp);
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Sent key (%s)", botnick, nick, chan->dname, key ? key : "");
-      free(tmp);
+
+    if (chan->channel.mode & CHANINV) {
+      sendi = 1;
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Invited", botnick, nick, chan->dname);
     }
-    if (strchr(p2, 'i')) {
-      if (!me_op(chan)) {
-        putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
-        return;
-      } else {
-        sendi = 1;
-        putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Invited", botnick, nick, chan->dname);
-      }
-    }
-    if (sendi && me_op(chan))
-      dprintf(DP_MODE, "INVITE %s %s\n", nick, chan->name);
-  } else if (what[0] == 'K') {
-    if (!chan) {
-      putlog(LOG_GETIN, "*", "Got key for nonexistant channel %s from %s", chname, botnick);
-      return;
-    }
-    if (!shouldjoin(chan)) {
-      putlog(LOG_GETIN, "*", "Got key for %s from %s - I shouldn't be on that chan?!?", chan->dname, botnick);
-    } else {
-      if (shouldjoin(chan) && !(channel_pending(chan) || channel_active(chan))) {
-        putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, nick);
-        dprintf(DP_MODE, "JOIN %s %s\n", chan->name[0] ? chan->name : chan->dname, nick);
-        chan->status |= CHAN_JOINING;
-      } else {
-        putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);
-      }
-    }
+
+    if (sendi)
+      dprintf(DP_MODE, "INVITE %s %s\n", nick, chan->name[0] ? chan->name : chan->dname);
   }
 }
 
