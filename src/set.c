@@ -238,7 +238,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
         number = randint(CLOAK_COUNT - 1) + 1;
     }
 
-    if (VAR_SHORT)
+    if (var->flags & VAR_SHORT)
       *(short *) (var->mem) = (short) number;
     else
       *(int *) (var->mem) = number;
