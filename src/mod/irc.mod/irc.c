@@ -720,17 +720,18 @@ request_op(struct chanset_t *chan)
     return;
   }
 
-  int i = 0, my_exp = 0, first = 100;
-  time_t n = now;
-  struct flag_record myfr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
-  get_user_flagrec(conf.bot->u, &myfr, chan->dname);
+  get_user_flagrec(conf.bot->u, &fr, chan->dname);
 
-  if (!chk_op(myfr, chan) || glob_kick(myfr) || chan_kick(myfr)) {
+  if (!chk_op(fr, chan) || glob_kick(fr) || chan_kick(fr)) {
     putlog(LOG_GETIN, "*", "Not requesting op for %s - I do not have access to that channel.", chan->dname);
     chan->channel.no_op = now + 10;
     return;
   }
+
+  int i = 0, my_exp = 0, first = 100;
+  time_t n = now;
 
   /* max OPREQ_COUNT requests per OPREQ_SECONDS sec */
   while (i < 5) {
@@ -748,32 +749,33 @@ request_op(struct chanset_t *chan)
     chan->channel.no_op = now + op_requests.time + 1;
     return;
   }
-  int cnt = op_bots, i2;
-  memberlist *ml = NULL;
-  memberlist *botops[MAX_BOTS];
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+  int cnt = op_bots, i2 = 0;
+  memberlist *ml = NULL, *botops[MAX_BOTS];
   char s[UHOSTLEN] = "";
 
   for (i = 0, ml = chan->channel.member; (i < MAX_BOTS) && ml && ml->nick[0]; ml = ml->next) {
-    /* If bot, linked, global op & !split & chanop & (chan is reserver | bot isn't +a) -> 
-     * add to temp list */
+    if (!chan_hasop(ml) || chan_issplit(ml))
+      continue;
+
     if (!ml->user && !ml->tried_getuser) {
       simple_sprintf(s, "%s!%s", ml->nick, ml->userhost);
       ml->user = get_user_by_host(s);
       ml->tried_getuser = 1;
     }
-    if ((i < MAX_BOTS) && ml->user && ml->user->bot && 
-        findbot(ml->user->handle) && chan_hasop(ml) && !chan_issplit(ml)) {
 
-      get_user_flagrec(ml->user, &fr, NULL);
-      if (chk_op(fr, chan))
-        botops[i++] = ml;
-    }
+    if (!ml->user || !ml->user->bot)
+      continue;
+
+    /* Is the bot linked? */
+    if (findbot(ml->user->handle))
+      botops[i++] = ml;
+
   }
   if (!i) {
     if (channel_active(chan) && !channel_pending(chan)) {
       chan->channel.no_op = now + op_requests.time;
-      putlog(LOG_GETIN, "*", "No one to ask for ops on %s - Delaying requests for %d seconds.", chan->dname, op_requests.time);
+      putlog(LOG_GETIN, "*", "No one to ask for ops on %s - Delaying requests for %lu seconds.", chan->dname, op_requests.time);
     }
     return;
   }
@@ -834,30 +836,28 @@ request_in(struct chanset_t *chan)
   if (!shouldjoin(chan))
     return;
 
-  struct flag_record myfr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
-  get_user_flagrec(conf.bot->u, &myfr, NULL);
+  get_user_flagrec(conf.bot->u, &fr, NULL);
 
-  if (!chk_op(myfr, chan) || glob_kick(myfr) || chan_kick(myfr)) {
+  if (!chk_op(fr, chan) || glob_kick(fr) || chan_kick(fr)) {
     putlog(LOG_GETIN, "*", "Not requesting help to join %s - I do not have access to that channel.", chan->dname);
     return;
   }
 
-  int i = 0;
+  int foundBots = 0;
   struct userrec *botops[MAX_BOTS];
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
-  for (struct userrec *u = userlist; u && (i < MAX_BOTS); u = u->next) {
-    get_user_flagrec(u, &fr, NULL);
-    if (bot_hublevel(u) == 999 && glob_bot(fr) && chk_op(fr, chan)
-#ifdef G_BACKUP
-        && (!glob_backupbot(fr) || channel_backup(chan))
-#endif
-        /* G_BACKUP */
-        && nextbot(u->handle) >= 0)
-      botops[i++] = u;
+  for (tand_t* bot = tandbot; bot && (foundBots < MAX_BOTS); bot = bot->next) {
+    if (bot->hub || !bot->u)
+      continue;
+
+    get_user_flagrec(bot->u, &fr, chan->dname);
+    if (bot_shouldjoin(bot->u, &fr, chan) && chk_op(fr, chan))
+      botops[foundBots++] = bot->u;
   }
-  if (!i) {
+
+  if (!foundBots) {
     putlog(LOG_GETIN, "*", "No bots linked, can't request help to join %s", chan->dname);
     return;
   }
@@ -867,7 +867,7 @@ request_in(struct chanset_t *chan)
 
   simple_sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
   while (cnt) {
-    n = randint(i);
+    n = randint(foundBots);
     if (botops[n]) {
       putbot(botops[n]->handle, s);
       if (l[0]) {
@@ -879,7 +879,7 @@ request_in(struct chanset_t *chan)
       botops[n] = NULL;
       cnt--;
     } else {
-      if (i < in_bots)
+      if (foundBots < in_bots)
         cnt--;
     }
   }

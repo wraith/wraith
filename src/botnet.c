@@ -46,9 +46,7 @@ void init_party()
 
 tand_t *findbot(char *who)
 {
-  tand_t *ptr = NULL;
-
-  for (ptr = tandbot; ptr; ptr = ptr->next)
+  for (tand_t* ptr = tandbot; ptr; ptr = ptr->next)
     if (!egg_strcasecmp(ptr->bot, who))
       return ptr;
   return NULL;
@@ -66,7 +64,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
     ptr = &((*ptr)->next);
   }
   ptr2 = (tand_t *) my_calloc(1, sizeof(tand_t));
-  strncpy(ptr2->bot, who, HANDLEN);
+  strlcpy(ptr2->bot, who, HANDLEN + 1);
   ptr2->bot[HANDLEN] = 0;
   ptr2->share = flag;
   ptr2->localhub = vlocalhub;
@@ -77,6 +75,10 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   *ptr = ptr2;
   /* May be via itself */
   ptr2->via = findbot(from);
+  /* Look up the bot in internal users */
+  ptr2->hub = is_hub(who);
+  /* Cache user record */
+  ptr2->u = userlist ? get_user_by_handle(userlist, who) : NULL;
   if (!egg_strcasecmp(next, conf.bot->nick))
     ptr2->uplink = (tand_t *) 1;
   else
@@ -804,9 +806,9 @@ void dump_links(int z)
 
 int in_chain(char *who)
 {
-  if (findbot(who))
-    return 1;
   if (!egg_strcasecmp(who, conf.bot->nick))
+    return 1;
+  if (findbot(who))
     return 1;
   return 0;
 }

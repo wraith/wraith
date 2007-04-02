@@ -23,9 +23,11 @@ void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
 int botshouldjoin(struct userrec *u, struct chanset_t *);
-int shouldjoin(struct chanset_t *);
+bool bot_shouldjoin(struct userrec* , struct flag_record *, struct chanset_t *);
+bool shouldjoin(struct chanset_t *);
 char *samechans(const char *, const char *);
 void add_myself_to_userlist();
+bool is_hub(const char*);
 void load_internal_users();
 
 extern struct chanset_t		*chanset;

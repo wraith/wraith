@@ -565,24 +565,8 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 
 //  bot->pid = checkpid(nick, bot);
 
-  if (settings.hubs) {
-    char *p = settings.hubs, *p2 = NULL, hubbuf[HANDLEN + 1] ="";
-    size_t len = 0;
-
-    while (p && *p) {
-      if ((p2 = strchr(p, ' '))) {
-
-        len = p2 - p;
-        simple_snprintf(hubbuf, len + 1, "%s", p);
-        if (!egg_strncasecmp(bot->nick, hubbuf, HANDLEN)) {
-          bot->hub = 1;
-          break;
-        }
-      }
-      if ((p = strchr(p, ',')))
-        p++;
-    }
-  }
+  if (settings.hubs && is_hub(bot->nick))
+    bot->hub = 1;
 
   /* not a hub 
    AND

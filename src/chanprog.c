@@ -375,6 +375,24 @@ void reaffirm_owners()
   }
 }
 
+bool is_hub(const char* nick) {
+  char *p = settings.hubs, *p2 = NULL, hubbuf[HANDLEN + 1] ="";
+  size_t len = 0;
+
+  while (p && *p) {
+    if ((p2 = strchr(p, ' '))) {
+
+      len = p2 - p;
+      simple_snprintf(hubbuf, len + 1, "%s", p);
+      if (!egg_strncasecmp(nick, hubbuf, HANDLEN))
+        return 1;
+    }
+    if ((p = strchr(p, ',')))
+      p++;
+  }
+  return 0;
+}
+
 void load_internal_users()
 {
   char *p = NULL, *ln = NULL, *hand = NULL, *ip = NULL, *port = NULL, *pass = NULL, *q = NULL;
@@ -630,7 +648,10 @@ void reload()
 
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
-  
+
+  for (tand_t* bot = tandbot; bot; bot = bot->next)
+    bot->u = get_user_by_handle(userlist, bot->bot);
+
   /* I don't think these will ever be called anyway. */
   if (!conf.bot->hub) {
     Auth::FillUsers();
@@ -738,26 +759,30 @@ chans_delbot(const char *bot, struct chanset_t *chan)
 }
 */
 
-int shouldjoin(struct chanset_t *chan)
+bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t* chan)
 {
   /* If the bot is restarting (and hasn't finished getting the userfile for the first time) DO NOT JOIN channels - breaks +B/+backup */
-  if (restarting) return 0;
+  if (restarting || loading) return 0;
 
-  if (!strncmp(conf.bot->nick, "wtest", 5) && (!strcmp(chan->dname, "#skynet") || !strcmp(chan->dname, "#bryan") || !strcmp(chan->dname, "#wraith")))
-    return 1;
-  else if (!strncmp(conf.bot->nick, "wtest", 4)) /* use 5 for all */
-    return 0; 
+  if (!strncmp(u->handle, "wtest", 5)) {
+    if (!strcmp(chan->dname, "#skynet") || 
+        !strcmp(chan->dname, "#bryan") || 
+        !strcmp(chan->dname, "#wraith"))
+      return 1;
+    else
+      return 0;
+  }
+  return (!channel_inactive(chan) && (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr))));
+}
 
-  if (!chan || !chan->dname || !chan->dname[0])
-    return 0;
-
-  struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
-  struct userrec *u = NULL;
-
-  if ((u = get_user_by_handle(userlist, conf.bot->nick)))
-    get_user_flagrec(u, &fr, chan->dname);
-
-  return (!channel_inactive(chan) && (channel_backup(chan) || (!glob_backup(fr) && !chan_backup(fr))));
+bool shouldjoin(struct chanset_t *chan)
+{
+  if (conf.bot->u) {
+    struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
+    get_user_flagrec(conf.bot->u, &fr, chan->dname);
+    return bot_shouldjoin(conf.bot->u, &fr, chan);
+  }
+  return 0;
 }
 
 /* do_chanset() set (options) on (chan)

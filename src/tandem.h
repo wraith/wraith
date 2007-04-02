@@ -13,10 +13,12 @@ typedef struct tand_t_struct {
   struct tand_t_struct *next;
   time_t buildts;
   int localhub;
+  struct userrec* u;
   char *not_chans;
   char bot[HANDLEN + 1];
   char version[121];
   char share;
+  bool hub;
 } tand_t;
 
 /* Keep track of party-line members */
