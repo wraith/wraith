@@ -17,7 +17,8 @@ void restart(int);
 int coloridx(int);
 const char *color(int, int, int);
 void shuffle(char *, char *);
-void shuffleArray(char **, size_t);
+template <class T>
+void shuffleArray(T [], size_t);
 void showhelp(int, struct flag_record *, char *);
 char *replace(const char *, const char *, const char *);
 int goodpass(char *, int, char *);
