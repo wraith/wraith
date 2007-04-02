@@ -1091,12 +1091,11 @@ void showhelp(int idx, struct flag_record *flags, char *string)
 }
 
 /* Arrange the N elements of ARRAY in random order. */
-template <class T>
-void shuffleArray(T array[], size_t n)
+void shuffleArray(char* array[], size_t n)
 {
   for (size_t i = 0; i < n; i++) {
     const size_t j = randint(n);
-    T temp = array[j];
+    char* temp = array[j];
     array[j] = array[i];
     array[i] = temp;
   }

@@ -44,7 +44,7 @@ void init_party()
   party = (party_t *) my_calloc(1, maxparty * sizeof(party_t));
 }
 
-tand_t *findbot(char *who)
+tand_t *findbot(const char *who)
 {
   for (tand_t* ptr = tandbot; ptr; ptr = ptr->next)
     if (!egg_strcasecmp(ptr->bot, who))
@@ -373,7 +373,7 @@ void besthub(char *hub)
 
 /* Return index into dcc list of the bot that connects us to bot <x>
  */
-int nextbot(char *who)
+int nextbot(const char *who)
 {
   tand_t *bot = findbot(who);
 
@@ -390,7 +390,7 @@ int nextbot(char *who)
 
 /* Return name of the bot that is directly connected to bot X
  */
-char *lastbot(char *who)
+char *lastbot(const char *who)
 {
   tand_t *bot = findbot(who);
 

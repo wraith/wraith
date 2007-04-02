@@ -604,7 +604,7 @@ getin_request(char *botnick, char *code, char *par)
     }
 
     if (!me_op(chan)) {
-      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - I haven't got ops", botnick, nick, chan->dname);
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
       return;
     }
 
@@ -846,7 +846,7 @@ request_in(struct chanset_t *chan)
   }
 
   int foundBots = 0;
-  struct userrec *botops[MAX_BOTS];
+  char* botops[MAX_BOTS];
 
   for (tand_t* bot = tandbot; bot && (foundBots < MAX_BOTS); bot = bot->next) {
     if (bot->hub || !bot->u)
@@ -854,7 +854,7 @@ request_in(struct chanset_t *chan)
 
     get_user_flagrec(bot->u, &fr, chan->dname);
     if (bot_shouldjoin(bot->u, &fr, chan) && chk_op(fr, chan))
-      botops[foundBots++] = bot->u;
+      botops[foundBots++] = bot->bot;
   }
 
   if (!foundBots) {
@@ -862,28 +862,23 @@ request_in(struct chanset_t *chan)
     return;
   }
 
-  int cnt = in_bots, n;
+  int cnt = foundBots < in_bots ? foundBots : in_bots;
   char s[255] = "", *l = (char *) my_calloc(1, cnt * 30);
 
   simple_sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
-  while (cnt) {
-    n = randint(foundBots);
-    if (botops[n]) {
-      putbot(botops[n]->handle, s);
-      if (l[0]) {
-        strcat(l, ", ");
-        strcat(l, botops[n]->handle);
-      } else {
-        strcpy(l, botops[n]->handle);
-      }
-      botops[n] = NULL;
-      cnt--;
+
+  shuffleArray(botops, foundBots);
+  for (int n = 0; n < cnt; ++n) {
+    putbot(botops[n], s);
+
+    if (l[0]) {
+      strcat(l, ", ");
+      strcat(l, botops[n]);
     } else {
-      if (foundBots < in_bots)
-        cnt--;
+      strcpy(l, botops[n]);
     }
   }
-  putlog(LOG_GETIN, "*", "Requesting help to join %s from %s", chan->dname, l);
+  putlog(LOG_GETIN, "*", "Requested help to join %s from %s", chan->dname, l);
   free(l);
 }
 

@@ -274,14 +274,14 @@ void botnet_send_reject(int idx, char *fromp, char *frombot, char *top, char *to
   tputs(dcc[idx].sock, OBUF, len);
 }
 
-void putallbots(char *par)
+void putallbots(const char *par)
 { 
   botnet_send_zapf_broad(-1, conf.bot->nick, NULL, par);
 
   return;
 }
 
-void putbot(char *bot, char *par)
+void putbot(const char *bot, char *par)
 {
   if (!bot || !par || !bot[0] || !par[0])
     return;
@@ -310,14 +310,14 @@ void botnet_send_log(int idx, const char *from, int type, const char *msg)
   }
 }
 
-void botnet_send_zapf(int idx, char *a, char *b, char *c)
+void botnet_send_zapf(int idx, const char *a, const char *b, const char *c)
 {
   const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "z %s %s %s\n", a, b, c);
 
   tputs(dcc[idx].sock, OBUF, len);
 }
 
-void botnet_send_zapf_broad(int idx, char *a, char *b, char *c)
+void botnet_send_zapf_broad(int idx, const char *a, const char *b, const char *c)
 {
   if (tands > 0) {
     const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "zb %s %s%s%s\n", a, b ? b : "", b ? " " : "", c);
