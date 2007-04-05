@@ -24,9 +24,9 @@ REVISION 	:= $(shell misc/getrev.sh)
 BUILDTS 	:= $(shell misc/getts.sh)
 
 # defaults
-CXX = @CCACHE@ @DISTCC@ @CXX@
-LD = @CXX@
-CCDEBUG = @CCACHE@ @DISTCC@ @CCDEBUG@
+CXX = @CCACHE@ @DISTCC@ @CXX@ -static
+LD = @CXX@ -static
+CCDEBUG = @CCACHE@ @DISTCC@ @CCDEBUG@ 
 LDDEBUG = @CCDEBUG@
 STRIP = @STRIP@
 DIFF = @DIFF@

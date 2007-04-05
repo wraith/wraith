@@ -8,8 +8,6 @@ MOD_UPDIR = @MOD_UPDIR@
 
 @SET_MAKE@
 
-CXX = @CXX@
-LD = @CXX@
 STRIP = @STRIP@
 CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
