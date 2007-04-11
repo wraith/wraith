@@ -1600,7 +1600,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     if (serverpass[0])
       dprintf(DP_MODE, "PASS %s\n", serverpass);
     dprintf(DP_MODE, "NICK %s\n", botname);
-    dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, botrealname);
+    dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, replace(botrealname, "$n", botname));
     /* Wait for async result now */
   }
 }
