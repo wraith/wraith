@@ -209,11 +209,11 @@ bin_checksum(const char *fname, int todo)
 static int
 features_find(const char *buffer)
 {
-  if (!egg_strcasecmp(buffer, "no_take"))
+  if (!egg_strcasecmp(buffer, STR("no_take")))
     return FEATURE_NO_TAKE;
-  else if (!egg_strcasecmp(buffer, "no_mdop"))
+  else if (!egg_strcasecmp(buffer, STR("no_mdop")))
     return FEATURE_NO_MDOP;
-  else if (!egg_strcasecmp(buffer, "beta"))
+  else if (!egg_strcasecmp(buffer, STR("beta")))
     return FEATURE_BETA;
   return 0;
 }
