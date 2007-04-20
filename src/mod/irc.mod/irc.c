@@ -119,9 +119,9 @@ void unlock_chan(struct chanset_t *chan)
 {
   if (chan->channel.drone_set_mode) {
     char buf[3] = "", *p = buf;
-    if (chan->channel.drone_set_mode & CHANINV)
+    if ((chan->channel.drone_set_mode & CHANINV) && !(chan->mode_pls_prot & CHANINV))
       *p++ = 'i';
-    if (chan->channel.drone_set_mode & CHANMODER)
+    if ((chan->channel.drone_set_mode & CHANMODER) && !(chan->mode_pls_prot & CHANMODER))
       *p++ = 'm';
     *p = 0;
     dprintf(DP_MODE, "MODE %s :-%s\n", chan->name[0] ? chan->name : chan->dname, buf);
@@ -136,11 +136,11 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
 
   char buf[3] = "", *p = buf;
 
-  if (!(chan->channel.mode & CHANINV)) {
+  if (!(chan->channel.mode & CHANINV) && !(chan->mode_mns_prot & CHANINV)) {
     chan->channel.drone_set_mode |= CHANINV;
     *p++ = 'i';
   }
-  if (!(chan->channel.mode & CHANMODER)) {
+  if (!(chan->channel.mode & CHANMODER) && !(chan->mode_mns_prot & CHANMODER)) {
     chan->channel.drone_set_mode |= CHANMODER;
     *p++ = 'm';
   }
