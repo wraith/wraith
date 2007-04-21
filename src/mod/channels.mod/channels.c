@@ -34,7 +34,6 @@
 static bool 			use_info = 1;
 static char 			glob_chanmode[64] = "nt";		/* Default chanmode (drummer,990731) */
 //static int 			global_revenge_mode = 3;
-static int 			global_idle_kick;		/* Default idle-kick setting. */
 static time_t 			global_ban_time;
 static time_t			global_exempt_time;
 static time_t 			global_invite_time;
@@ -877,9 +876,6 @@ void channels_report(int idx, int details)
           i += my_strcpy(s + i, "private ");
 
 	dprintf(idx, "      Options: %s\n", s);
-	if (chan->idle_kick)
-	  dprintf(idx, "      Kicking idle users after %d min\n",
-		  chan->idle_kick);
         if (chan->limitraise)
           dprintf(idx, "      Raising limit +%d every 2 minutes\n", chan->limitraise);
 /*

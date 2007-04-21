@@ -1440,16 +1440,7 @@ check_expired_chanstuff(struct chanset_t *chan)
       }
 
       if (me_op(chan)) {
-        if (chan->idle_kick) {
-          if (now - m->last >= chan->idle_kick * 60 && !match_my_nick(m->nick) && !chan_issplit(m)) {
-            simple_sprintf(s, "%s!%s", m->nick, m->userhost);
-            get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
-            if (!(glob_bot(fr) || chk_op(fr, chan))) {
-              dprintf(DP_SERVER, "KICK %s %s :%sidle %d min\n", chan->name, m->nick, kickprefix, chan->idle_kick);
-              m->flags |= SENTKICK;
-            }
-          }
-        } else if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
+        if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
           if (!chan_hasop(m) && !chan_hasvoice(m)) {
             if (!m->user && !m->tried_getuser) {
               simple_sprintf(s, "%s!%s", m->nick, m->userhost);

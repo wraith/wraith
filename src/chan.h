@@ -179,7 +179,6 @@ struct chanset_t {
  *int temp;
  */
   int flood_exempt_mode;
-  int idle_kick;
 #ifdef REVENGE
   int revenge_mode;
 #endif

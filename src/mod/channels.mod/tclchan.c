@@ -341,14 +341,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 	return ERROR;
       }
       chan->added_ts = atoi(item[i]);
-    } else if (!strcmp(item[i], "idle-kick")) {
-      i++;
-      if (i >= items) {
-	if (result)
-	  simple_snprintf(result, RESULT_LEN, "channel idle-kick needs argument");
-	return ERROR;
-      }
-      chan->idle_kick = atoi(item[i]);
     } else if (!strcmp(item[i], "limit")) {
       i++;
       if (i >= items) {
@@ -358,8 +350,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       chan->limitraise = atoi(item[i]);
       chan->limit_prot = 0;
-    } else if (!strcmp(item[i], "dont-idle-kick")) {
-      chan->idle_kick = 0;
 /*
     } else if (!strcmp(item[i], "revenge-mode")) {
       i++;
@@ -903,7 +893,6 @@ int channel_add(char *result, char *newname, char *options)
     chan->flood_mjoin_thr = 6;
     chan->flood_mjoin_time = 1;
 //    chan->revenge_mode = global_revenge_mode;
-    chan->idle_kick = global_idle_kick;
     chan->limitraise = 20;
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;

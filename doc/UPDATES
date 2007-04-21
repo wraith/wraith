@@ -38,7 +38,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Add chanset 'flood-lock-time' to control how long to keep the channel locked during drone floods.
 * chanset flood-join now also counts PARTs as flooding.
 * Fix segfault in cmd_channel during splits.
-* Remove chanflag 'protectops'
+* Remove chanflag 'protectops' and 'idle-kick'
 * Fix bot not checking +e/+I modes when opped sometimes.
 * Fix chanset flag 'userbans' not being saved correctly. (may cause warnings on upgrade)
 * Fix authing on non-chathubs (fixes #356)
