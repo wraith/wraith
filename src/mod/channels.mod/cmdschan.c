@@ -1304,10 +1304,13 @@ static void cmd_chanset(int idx, char *par)
         dprintf(idx, "No such channel.\n");
 	return;
       } else if ((strstr(par, "+private") || strstr(par, "-private")) && (!glob_owner(user))) {
-        dprintf(idx, "You don't have access to set +/-private on %s (halting command due to lazy coder).\n", chname);
+        dprintf(idx, "You don't have access to set +/-private on %s (halting command).\n", chname);
+	return;
+      } else if ((strstr(par, "+backup") || strstr(par, "-backup")) && (!glob_owner(user))) {
+        dprintf(idx, "You don't have access to set +/-backup on %s (halting command).\n", chname);
 	return;
       } else if ((strstr(par, "+inactive") || strstr(par, "-inactive")) && (!glob_owner(user))) {
-        dprintf(idx, "You don't have access to set +/-inactive on %s (halting command due to lazy coder).\n", chname);
+        dprintf(idx, "You don't have access to set +/-inactive on %s (halting command).\n", chname);
         return;
       }
       if (!chan) {
