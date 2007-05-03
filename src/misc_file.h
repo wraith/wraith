@@ -25,7 +25,7 @@ class Tempfile
     Tempfile(const char *prefix);		//constructor with file prefix
 
     void AllocTempfile();			//constructor with file prefix
-    void Tempfile::my_close();
+    void my_close();
     ~Tempfile();				//destructor
     static bool FindDir();
 
