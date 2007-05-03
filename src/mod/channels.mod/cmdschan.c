@@ -553,22 +553,28 @@ static void cmd_slowjoin(int idx, char *par)
     count = 0;
 
   for (bot = tandbot; bot; bot = bot->next) {
-    struct userrec *ubot = NULL;
     char tmp[100] = "";
-    
-    ubot = get_user_by_handle(userlist, bot->bot);
-    if (ubot) {
-      /* Variation: 60 secs intvl should be 60 +/- 15 */
-      if (bot_hublevel(ubot) < 999) {
-	simple_sprintf(tmp, "sj %s 0", chan->dname);
-      } else {
-	int v = (random() % (intvl / 2)) - (intvl / 4);
 
-	delay += intvl;
-	simple_sprintf(tmp, "sj %s %i", chan->dname, delay + v);
-	count++;
+    tmp[0] = 0;    
+    if (bot->u) {
+      if (bot_hublevel(bot->u) < 999) {
+	simple_snprintf(tmp, sizeof(tmp), "sj %s 0", chname);
+      } else {
+        struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
+
+        get_user_flagrec(bot->u, &fr, chname);
+	/* Only send the 'sj' command if the bot is supposed to be in the channel (backups and such) */
+        if (bot_shouldjoin(bot->u, &fr, chan)) {
+          /* Variation: 60 secs intvl should be 60 +/- 15 */
+          int v = (random() % (intvl / 2)) - (intvl / 4);
+
+          delay += intvl;
+          simple_snprintf(tmp, sizeof(tmp), "sj %s %i", chname, delay + v);
+          count++;
+        }
       }
-      putbot(ubot->handle, tmp);
+      if (tmp[0])
+        putbot(bot->bot, tmp);
     }
   }
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
@@ -610,29 +616,33 @@ static void cmd_slowpart(int idx, char *par)
   dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
 
   if (findchan_by_dname(chname)) {
-    dprintf(idx, "Hmmm... Channel didn't get removed. Weird *shrug*\n");
+    dprintf(idx, "Failed to remove channel.\n");
     return;
   }
   if (conf.bot->hub)
     count = 0;
   for (bot = tandbot; bot; bot = bot->next) {
     char tmp[100] = "";
-    struct userrec *ubot = NULL;
 
-    ubot = get_user_by_handle(userlist, bot->bot);
-      /* Variation: 60 secs intvl should be 60 +/- 15 */
-      if (ubot) {
-        if (bot_hublevel(ubot) < 999) {
-  	  simple_sprintf(tmp, "sp %s 0", chname);
-        } else {
-  	  int v = (random() % (intvl / 2)) - (intvl / 4);
-
-  	  delay += intvl;
-  	  simple_sprintf(tmp, "sp %s %i", chname, delay + v);
-  	  count++;
+    tmp[0] = 0;
+    if (bot->u) {
+      if (bot_hublevel(bot->u) < 999) {		/* HUB */
+        simple_snprintf(tmp, sizeof(tmp), "sp %s 0", chname);
+      } else {					/* LEAF */
+        struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
+        get_user_flagrec(bot->u, &fr, chname);
+	/* Only send the 'sp' command if the bot is supposed to be in the channel (backups and such) */
+        if (bot_shouldjoin(bot->u, &fr, chan)) {
+          /* Variation: 60 secs intvl should be 60 +/- 15 */
+          int v = (random() % (intvl / 2)) - (intvl / 4);
+          delay += intvl;
+          simple_snprintf(tmp, sizeof(tmp), "sp %s %i", chname, delay + v);
+          count++;
         }
-        putbot(ubot->handle, tmp);
-      }  
+      }
+      if (tmp[0])
+        putbot(bot->bot, tmp);
+    }  
   }
   dprintf(idx, "%i bots parting %s during the next %i seconds\n", count, chname, delay);
   if (!conf.bot->hub)
