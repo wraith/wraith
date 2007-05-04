@@ -784,7 +784,7 @@ static void cmd_uptime(int idx, char *par)
   tell_verbose_uptime(idx);
 }
 
-static void print_users(char *work, int idx, int *cnt, int *tt, bool bot, int flags, int notflags, const char *str)
+static void print_users(char *work, int idx, int *cnt, int *tt, int bot, int flags, int notflags, const char *str)
 {
   struct userrec *u = NULL;
 
@@ -792,18 +792,17 @@ static void print_users(char *work, int idx, int *cnt, int *tt, bool bot, int fl
     if (whois_access(dcc[idx].user, u) && 
         ((bot && u->bot) || (!bot && !u->bot)) && 
          ((!flags) || (u->flags & flags)) &&
-         ((!notflags) || !(u->flags & notflags))) {
+         ((!notflags) || !(u->flags & notflags)) &&
+          (!bot || (bot == 2 && bot_hublevel(u) < 999) || (bot == 1 && bot_hublevel(u) == 999))) {
       if (!*cnt)
-        sprintf(work, "%-10s: ", str); 
+        sprintf(work, "%-11s: ", str); 
       else
         simple_sprintf(work, "%s, ", work[0] ? work : "");
 
       strcat(work, u->handle);
       (*cnt)++;
       (*tt)++;
-sdprintf("cnt is now: %d", *cnt);
       if (*cnt == 11) {
-sdprintf("DUMP!");
         dprintf(idx, "%s\n", work);
         work[0] = 0;
         *cnt = 0;
@@ -826,7 +825,9 @@ static void cmd_userlist(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# userlist", dcc[idx].nick);
   
-  PRINT_USERS(1, 0, 0, "Bots");
+  PRINT_USERS(2, 0, 0, "Hubs");
+  PRINT_USERS(1, 0, BOT_BACKUP, "Main Bots");
+  PRINT_USERS(1, BOT_BACKUP, 0, "Backup Bots");
   bt = tt;			/* we don't want to add these duplicates into the total */
   PRINT_USERS(1, BOT_CHANHUB, 0, "Chatbots");
   PRINT_USERS(1, BOT_DOVOICE, 0, "Voicebots");

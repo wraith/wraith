@@ -47,6 +47,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Cleaned up some bugs in the 'getin' system.
 * Add '$n' expansion into realname.
 * Reformat CTCP logging. (fixes #358)
+* Cleanup cmd_userlist to list hubs/leafs/backups (fixes #363)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
