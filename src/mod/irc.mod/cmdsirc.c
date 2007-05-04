@@ -1035,7 +1035,10 @@ static void cmd_mop(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# (%s) mop %s", dcc[idx].nick, all ? "*" : (chan ? chan->dname : ""), par);
 
-  if (!chan && !all) {
+  if (!chan)
+    return;
+
+  if (!all) {
     dprintf(idx, "Usage: mop <channel|*>\n");
     return;
   }
