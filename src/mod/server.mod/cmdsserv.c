@@ -42,7 +42,7 @@ static void cmd_dump(int idx, char *par)
     return;
   }
 
-  dprintf(DP_DUMP, "%s\n", replace(par, "$n", botname));
+  dprintf(DP_DUMP, "%s\n", replace_vars(par));
 }
 
 static void cmd_umode(int idx, char *par)

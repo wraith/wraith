@@ -45,7 +45,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix authing on non-chathubs (fixes #356)
 * Fix segfault with cmd_set and adding to empty lists.
 * Cleaned up some bugs in the 'getin' system.
-* Add '$n' expansion into realname.
+* Add '$n' expansion into realname. (fixes #361)
 * Reformat CTCP logging. (fixes #358)
 * Cleanup cmd_userlist to list hubs/leafs/backups (fixes #363)
 * Bots will now cycle nicks on servers which claim their nick is invalid. (fixes #311)

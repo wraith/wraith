@@ -20,6 +20,7 @@ void shuffle(char *, char *);
 void shuffleArray(char **, size_t);
 void showhelp(int, struct flag_record *, char *);
 char *replace(const char *, const char *, const char *);
+char *replace_vars(char*);
 int goodpass(char *, int, char *);
 int bot_aggressive_to(struct userrec *);
 void readsocks(const char *);

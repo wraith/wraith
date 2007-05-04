@@ -983,12 +983,11 @@ int goodpass(char *pass, int idx, char *nick)
   return 1;
 }
 
+#define REPLACES 10
 char *replace(const char *string, const char *oldie, const char *newbie)
 {
   if (string == NULL || !string[0])
     return (char *) string;
-
-  static char newstring[1024] = "";
 
   if (oldie == NULL || !oldie[0])
     return (char *) string;
@@ -997,6 +996,14 @@ char *replace(const char *string, const char *oldie, const char *newbie)
 
   if ((c = (char *) strstr(string, oldie)) == NULL) 
     return (char *) string;
+
+  static int n = 0;
+  static char newstring_buf[REPLACES][1024];
+  char *newstring = newstring_buf[n++];
+
+  egg_memset(newstring, 0, 1024);
+  if (n == REPLACES)
+    n = 0;
 
   const size_t new_len = strlen(newbie), old_len = strlen(oldie), end = (strlen(string) - old_len);
   size_t str_index = 0, newstr_index = 0, oldie_index = c - string, cpy_len;
@@ -1014,6 +1021,10 @@ char *replace(const char *string, const char *oldie, const char *newbie)
   }
   strcpy(newstring + newstr_index, string + str_index);
   return (newstring);
+}
+
+char* replace_vars(char *buf) {
+  return replace(buf, "$n", botname);
 }
 
 void showhelp(int idx, struct flag_record *flags, char *string)
