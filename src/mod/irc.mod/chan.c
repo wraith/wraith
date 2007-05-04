@@ -1080,9 +1080,9 @@ void enforce_closed(struct chanset_t *chan) {
 
   char buf[3] = "", *p = buf;
 
-  if (chan->closed_invite && !(chan->channel.mode & CHANINV))
+  if (chan->closed_invite && !(chan->channel.mode & CHANINV) && !(chan->mode_mns_prot & CHANINV))
     *p++ = 'i';
-  if (chan->closed_private && !(chan->channel.mode & CHANPRIV))
+  if (chan->closed_private && !(chan->channel.mode & CHANPRIV) && !(chan->mode_mns_prot & CHANPRIV))
     *p++ = 'p';
   *p = 0;
   if (buf && buf[0])
