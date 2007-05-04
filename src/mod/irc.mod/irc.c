@@ -1351,6 +1351,10 @@ raise_limit(struct chanset_t *chan)
   if (!chan || !me_op(chan))
     return;
 
+  /* Don't bother setting limit if the user has set a protect -l */
+  if (chan->mode_mns_prot & CHANLIMIT)
+    return;
+
   int nl = chan->channel.members + chan->limitraise;	/* new limit */
   int i = chan->limitraise >> 2;			/* DIV 4 */
   /* if the newlimit will be in the range made by these vars, dont change. */

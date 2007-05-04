@@ -1334,7 +1334,7 @@ gotmode(char *from, char *msg)
                 }
               }
               chan->channel.maxmembers = 0;
-            } else {
+            } else {  /* + */
               if (mparam == '\0')
                 break;
               chan->channel.maxmembers = atoi(mparam);
@@ -1342,10 +1342,11 @@ gotmode(char *from, char *msg)
                 break;
               if (((reversing) &&
                    !(chan->mode_pls_prot & CHANLIMIT)) ||
-                  ((chan->mode_mns_prot & CHANLIMIT) && !glob_master(user) && !chan_master(user)))
+                  ((chan->mode_mns_prot & CHANLIMIT) && 
+                   !glob_bot(user) && !glob_master(user) && !chan_master(user)))
                 add_mode(chan, '-', 'l', "");
-              if ((chan->limit_prot != chan->channel.maxmembers) && (chan->mode_pls_prot & CHANLIMIT) && (chan->limit_prot != 0) &&     /* arthur2 */
-                  !glob_master(user) && !chan_master(user)) {
+              if ((chan->limit_prot != chan->channel.maxmembers) && (chan->mode_pls_prot & CHANLIMIT) && (chan->limit_prot != 0) && 
+                  !glob_bot(user) && !glob_master(user) && !chan_master(user)) {
                 simple_sprintf(s, "%d", chan->limit_prot);
                 add_mode(chan, '+', 'l', s);
               }
