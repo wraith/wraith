@@ -2945,7 +2945,7 @@ static int gotmsg(char *from, char *msg)
 	      if (!strcmp(code, "ACTION")) {
                 irc_log(chan, "* %s %s", nick, ctcp);
 	      } else {
-                irc_log(chan, "CTCP %s: %s from %s (%s) to %s", code, ctcp, nick, from, to);
+                irc_log(chan, "CTCP %s: from %s (%s) to %s: %s", code, nick, from, to, ctcp);
 	      }
 	  }
 	}

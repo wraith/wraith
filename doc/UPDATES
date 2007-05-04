@@ -46,6 +46,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix segfault with cmd_set and adding to empty lists.
 * Cleaned up some bugs in the 'getin' system.
 * Add '$n' expansion into realname.
+* Reformat CTCP logging. (fixes #358)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

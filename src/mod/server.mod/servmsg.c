@@ -496,7 +496,7 @@ static int gotmsg(char *from, char *msg)
 	  if ((to[0] == '$') || strchr(to, '.')) {
 	    if (!ignoring) {
 	      /* Don't interpret */
-	      putlog(LOG_PUBLIC, to, "CTCP %s: %s from %s (%s) to %s", code, ctcp, nick, uhost, to);
+	      putlog(LOG_PUBLIC, to, "CTCP %s from %s (%s) to %s: %s", code, nick, uhost, to, ctcp);
             }
           } else {
 	    u = get_user_by_host(from);
@@ -526,7 +526,7 @@ static int gotmsg(char *from, char *msg)
 	      if (!strcmp(code, "ACTION")) {
                 putlog(LOG_MSGS, "*", "* %s (%s): %s", nick, uhost, ctcp);
               } else {
-                putlog(LOG_MSGS, "*", "CTCP %s: %s from %s (%s)", code, ctcp, nick, uhost);
+                putlog(LOG_MSGS, "*", "CTCP %s: from %s (%s): %s", code, nick, uhost, ctcp);
               }			/* I love a good close cascade ;) */
 	    }
 	  }
