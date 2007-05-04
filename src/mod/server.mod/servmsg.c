@@ -15,9 +15,9 @@ static unsigned int rolls = 0;
 #define ALTCHARS "-_\\`^[]"
 #define ROLL_RIGHT
 #undef ROLL_LEFT
-static int gotfake433(char *from)
+static void rotate_nick(char *nick, char *orignick)
 {
-  size_t len = strlen(botname);
+  size_t len = strlen(nick);
   int use_chr = 1;
 
   /* First run? */
@@ -26,11 +26,11 @@ static int gotfake433(char *from)
     /* the nick is already as long as it can be. */
     if (len == (unsigned) nick_len) {
       /* make the last char the current altnick_char */
-      botname[len - 1] = altnick_char;
+      nick[len - 1] = altnick_char;
     } else {
       /* tack it on to the end */
-      botname[len] = altnick_char;
-      botname[len + 1] = 0;
+      nick[len] = altnick_char;
+      nick[len + 1] = 0;
     }
   } else {
     char *p = NULL;
@@ -53,40 +53,44 @@ static int gotfake433(char *from)
         use_chr = 0;
 
         if (rolls == 0) {
-          strcpy(botname, origbotname);
-          len = strlen(botname);
+          strcpy(nick, orignick);
+          len = strlen(nick);
         }
 #ifdef ROLL_RIGHT
-        tmp = botname[len - 1];
+        tmp = nick[len - 1];
 #endif /* ROLL_RIGHT */
 #ifdef ROLL_LEFT
-        tmp = botname[0]; 
+        tmp = nick[0]; 
 #endif /* ROLL_LEFT */
         if (strchr(BADHANDCHARS, tmp))
           tmp = '_';
         rolls++;
 #ifdef ROLL_RIGHT
         for (i = (len - 1); i > 0; i--)
-          botname[i] = botname[i - 1];
-        botname[0] = tmp;
+          nick[i] = nick[i - 1];
+        nick[0] = tmp;
 #endif /* ROLL_RIGHT */
 #ifdef ROLL_LEFT
         for (i = 0; i < (len - 1); i++)
-          botname[i] = botname[i + 1];
-        botname[len - 1] = tmp; 
+          nick[i] = nick[i + 1];
+        nick[len - 1] = tmp; 
 #endif /* ROLL_LEFT */
-        botname[len] = 0;
+        nick[len] = 0;
     } else {
       /* we've tried ALTCHARS, and rolled the nick, just use random chars now */
       altnick_char = 'a' + randint(26);
     }
 
     if (use_chr && altnick_char) {
-      botname[len - 1] = altnick_char;
-      botname[len] = 0;
+      nick[len - 1] = altnick_char;
+      nick[len] = 0;
     }
   }
+}
 
+static int gotfake433(char *from)
+{
+  rotate_nick(botname, origbotname);
   putlog(LOG_SERV, "*", "NICK IN USE: Trying '%s'", botname);
   dprintf(DP_SERVER, "NICK %s\n", botname);
   return 0;
@@ -796,12 +800,9 @@ static int got432(char *from, char *msg)
     putlog(LOG_MISC, "*", "NICK IS INVALID: %s (keeping '%s').", erroneus,
 	   botname);
   else {
-    putlog(LOG_MISC, "*", "Server says my nickname is invalid.");
-    if (!keepnick) {
-      makepass(erroneus);
-      erroneus[NICKMAX] = 0;
-      dprintf(DP_MODE, "NICK %s\n", erroneus);
-    }
+    putlog(LOG_MISC, "*", "Server says my nickname '%s' is invalid.", botname);
+    rotate_nick(botname, origbotname);
+    dprintf(DP_MODE, "NICK %s\n", erroneus);
     return 0;
   }
   return 0;
