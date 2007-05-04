@@ -9,6 +9,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix ./binary -C not signalling the correct process under some situations. (actually fixes #315)
 * Fix bots being removed from binary not being killed. (fixes #338)
 * Fix typo in help for 'set' (fixes #342)
+* Fix typo in help for 'botset' in regards to wildcards. (fixes #365)
 * Fix cmd_swhois stripping multiple channel modes. (fixes #348)
 * Fix processing/killing/signalling of possible new localhub when editing binary.
 * The socket file generated for restarting is now encrypted.

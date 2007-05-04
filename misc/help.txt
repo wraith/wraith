@@ -3,14 +3,15 @@
    Adds a ban to the list of bans stored on the bot, with optional comment and
    ban time. This ban is stored with your handle as the creator, and will be
    in effect for every channel if no channel is specified. Prefixing a comment
-   with '@' will make it only visible within the bot, and not used as the ban
-   reason. Ban time has to be expressed in days, hours, and/or minutes.
+   with '*' will set the ban sticky. Prefixing a comment with '@' will make the
+   comment only visible within the bot, and not used as the ban reason. Ban
+   time has to be expressed in days, hours, and/or minutes.
  
 See also: bans, -ban, stick, unstick
 ::+chan
 ###  $b+chan$b <channel> [options]
-    Adds a channel to the bot's channel list. If options are specified, the 
-    channel will be configured with the options.
+   Adds a channel to the bot's channel list. If options are specified, the 
+   channel will be configured with the options.
  
 See also: -chan, chanset, chaninfo
 ::+chrec
@@ -70,18 +71,18 @@ See also: bans, +ban, stick, unstick
 See also: +user, -user%{+n}, newleaf%{-}
 ::-chan
 ### $b-chan$b <channel>
-     This removes ALL information about a channel from the bot. 
+   This removes ALL information about a channel from the bot. 
  
-     $f*** IMPORTANT ***$f
+   $f*** IMPORTANT ***$f
  
-     This erases ALL information about the channel, including channel settings,
-     bans, exempts, invites, and channel records for users -- $bEVERYTHING$b.
+   This erases ALL information about the channel, including channel settings,
+   bans, exempts, invites, and channel records for users -- $bEVERYTHING$b.
  
-     $bDO NOT$b use it to have the bot temporarily leave a channel. This
-     command is for abandoning a channel (e.g. the channel will have to be
-     redefined and all user flags for that channel will have to be redone.
+   $bDO NOT$b use it to have the bot temporarily leave a channel. This
+   command is for abandoning a channel (e.g. the channel will have to be
+   redefined and all user flags for that channel will have to be redone.
  
-     If you want to do this try '%dcycle' or '%ddown'
+   If you want to do this try '%dcycle' or '%ddown'
  
 See also: +chan, chanset, chaninfo, cycle, down
 ::-chrec
@@ -262,15 +263,15 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 See also: cmdpass
 ::botjoin
 ###  $bbotjoin$b <bot> <channel> [options]
-    Adds a channel to the bot's channel list. If options are specified, the 
-    channel will be configured with the options.
+   Adds a channel to the bot's channel list. If options are specified, the 
+   channel will be configured with the options.
  
 See also: botpart, +chan, -chan, chanset, chaninfo
 ::botjump:
 ###  $bbotjump$b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
    server, it will jump to the next server in it's internal list (see
-   $b'help set'$b). If you specify a server, it will jump to that
+   $b'%dhelp set'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
    Jumping servers ALWAYS makes the bot lose ops! be careful!
@@ -289,7 +290,7 @@ See also: msg%{+n}, netmsg%{-}
 See also: netnick
 ::botpart
 ###  $bbotpart$b <bot> <channel>
-    Removes bot from the specified channel
+   Removes bot from the specified channel
  
 See also: botjoin, +chan, -chan, chanset, chaninfo
 :hub:bots
@@ -312,7 +313,6 @@ See also: netserver, servers%{+n}, set%{-}
 :hub:botset:
 ###  $bbotset$b <bot> [<+/->list] [<var> [data|-]]
    Set's a bot specific entry.
-   <bot> may contain wildcards.
    NOTE: 'set' and 'botset' have different entries. 
    If there is a botset entry for 'name' and a set entry for 'name', 
    the bot will use the 'botset' entry. Otherwise, the 'set' entry
@@ -349,8 +349,8 @@ See also: version, netversion, about%{+m|m}, status%{-}
 See also: link
 ::chaninfo:
 ###  $bchaninfo$b <channel>
-     This lists all the settings for the bot on the given channel.
-     It shows any of the following:
+   This lists all the settings for the bot on the given channel.
+   It shows any of the following:
         $bchanmode$b   These modes are enforced on the channel. Both + and -
                    modes can be enforced.
 %{+m|m}
@@ -386,7 +386,7 @@ See also: link
  
         $bflood-lock-time$b   How long in seconds to keep the channel locked
                          during drone floods.
-
+ 
         $binvite-time$b       Set here how long temporary invites will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. The bot will check the invites
@@ -397,7 +397,7 @@ See also: link
         $bvoice-non-ident$b   If channel is +voice, clients without an ident will 
                           be voiced. Set to 0 to not voice clients without ident.
  
-     The following options chose how to respond to specific events.
+   The following options chose how to respond to specific events.
         Each can be set as any of the specified options.
         ignore/0           Ignore
         deop/1             Deop (chattr +d)
@@ -409,7 +409,7 @@ See also: link
       $bmdop$b                   Users who mass deop.
       $bmop$b                    Users who mass op in a -mop chan.
  
-     The following can be set + or - (e.g. .chanset #channel -enforcebans)
+   The following can be set + or - (e.g. .chanset #channel -enforcebans)
         $bautoop$b         Bots that are +y will auto-op all users with 
                        op access to the channel.
         $bbackup$b         Make backup-bots (+B) join when set.
@@ -488,11 +488,11 @@ See also: link
         $buserinvites$b    Allow invites to be made by users directly? If turned
                        off, the bot will require all invites to be made through
                        the bot's console.
-     The following are flood settings, they are set via "%dchanset <channel>
-     flood-type number:seconds", where number and second are integers
-     indicating the number of times in how many seconds the flood will be
-     triggered. Setting one of these to 0:0, 0:1, or 1:0 will deactivate the
-     respective flood setting.
+   The following are flood settings, they are set via "%dchanset <channel>
+   flood-type number:seconds", where number and second are integers
+   indicating the number of times in how many seconds the flood will be
+   triggered. Setting one of these to 0:0, 0:1, or 1:0 will deactivate the
+   respective flood setting.
         $bflood-chan$b  Set here how many channel messages in how many seconds
                     from one host constitutes a flood. Setting this to 0 or 0:0
                     disables text flood protection for the channel.
@@ -513,7 +513,7 @@ See also: link
                     disables nick flood protection for the channel.
         $bflood-mjoin$b  Set how many joins in how many seconds before triggering
                     a lockdown for mass join. ($bnomassjoin$b must be set).
-     These can all be changed simultaneously with $bflood-*$b
+   These can all be changed simultaneously with $bflood-*$b
  
 See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
 :leaf:channel
@@ -654,18 +654,18 @@ See also: chhandle, chpass
 See also: +host, -host
 :leaf:clearqueue
 ###  $bclearqueue$b <queue>
-   removes all msgs from the specified queue (mode/server/help/all)
+   Removes all msgs from the specified queue (mode/server/help/all)
 :hub:cmdpass:
 ###  $bcmdpass$b <command> <pass> [newpassword]
    Places the specified pass on the cmd so that the cmd will need to be 
    followed by the specified pass whenever it is called. For example:
-    !cmdpass whoami BLAH
+    %dcmdpass whoami BLAH
      [19:32] #bryan# cmdpass whoami ...
      Set command password for whoami to 'BLAH'
-    !whoami
+    %dwhoami
      Invalid command password. Use !command password arguments
      [19:33] bryan attempted !whoami with missing or incorrect command password
-    !whoami BLAH
+    %dwhoami BLAH
      You are bryan@hub.
      [19:33] #bryan# whoami
  
@@ -691,7 +691,7 @@ See also: console, echo, login, page, strip
    the first bot listed will be able to perform this command. Using the cmd
    on a non-'localhub' will result in an error similar to:
  
-   [16:42] #bryan# botcmd wtest2 conf ...
+   [16:42] #bryan# botcmd wtest2 conf list
    [wtest2] Please use 'wtest' for this login/shell.
  
    Simply use the command on the bot specified.
@@ -867,7 +867,7 @@ See also: down
 See also: encrypt, randstring, md5, sha1
 :leaf:deluser
 ###  $bdeluser$b <nickname>
-   deletes a user record for a user on the channel, using their
+   Deletes a user record for a user on the channel, using their
    current hostname.  Channel masters can remove users so long as
    the user isn't a bot master.
  
@@ -875,7 +875,7 @@ See also: encrypt, randstring, md5, sha1
 see also: adduser%{+m}, +user, -user%{-}
 :leaf:deop
 ###  $bdeop$b <nickname> [channel|*]
-   will remove chanop from the person you specify, so long as the
+   Will remove chanop from the person you specify, so long as the
    bot is opped on that channel, and the person you specify isn't
    on the bot's list of authorized chanops. Specify * for all
    channels.
@@ -883,8 +883,8 @@ see also: adduser%{+m}, +user, -user%{-}
 See also: op, console
 :leaf:devoice
 ### $bdevoice$b <nickname> [channel|*]
-    will remove the +v voice from the person you specify, so long as
-    the bot is opped on that channel. Specify * for all channels.
+   Will remove the +v voice from the person you specify, so long as
+   the bot is opped on that channel. Specify * for all channels.
 ::die
 ###  $bdie$b [reason]
    This kills the bot. The bot goes offline immediately, logging who issued
@@ -987,12 +987,12 @@ See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstic
    lists.
 ::fixcodes
 ### $bfixcodes$b
-     This is for use in situations where the bot gets mixed up about the type
-     of connection you have with it. For example, you /CTCP CHAT the bot and
-     it thinks you are connecting via telnet, and you see text displayed as
-     "Local time is now [1m17:17[0m" for example instead of "Local time is
-     now 17:17". Use this to turn telnet codes on or off/change the display
-     mode.
+   This is for use in situations where the bot gets mixed up about the type
+   of connection you have with it. For example, you /CTCP CHAT the bot and
+   it thinks you are connecting via telnet, and you see text displayed as
+   "Local time is now [1m17:17[0m" for example instead of "Local time is
+   now 17:17". Use this to turn telnet codes on or off/change the display
+   mode.
 :leaf:getkey:
 ###  $bgetkey$b [channel]
    If there is a key set for channel, it is displayed. If channel is not
@@ -1006,6 +1006,7 @@ See also: console, channels%{+m}, status%{-}
    bot.
  
    Perm owners may not change their handle without recompiling binaries first. 
+ 
 See also: newpass%{+mi}, chhandle, chpass%{-}%{+n}, chsecpass%{-}
 ::help:
 ###  $bhelp$b [cmd]
@@ -1056,7 +1057,7 @@ See also: +ignore, -ignore
 %{+m|m}See also: chinfo%{-}
 :leaf:invite
 ###  $binvite$b <nickname> [channel|*]
-   invites someone from irc into your current console channel (or
+   Invites someone from irc into your current console channel (or
    specified other channel).  This is most useful when the channel
    is +i.  a user with the +o flag can also request an invite from
    the bot with /MSG INVITE. Specify * for all channels.
@@ -1106,14 +1107,14 @@ See also: console, iop
 See also: -invite, +invite, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 :leaf:iop
 ###  $biop$b <nickname> [channel|*]
-   same as normal invite, except auto-ops them when they join.
+   Same as normal invite, except auto-ops them when they join.
  
 See also: console, invite
 :leaf:jump
 ###  $bjump$b [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
    server, it will jump to the next server in it'ss internal list (see
-   $b'help set'$b). If you specify a server, it will jump to that
+   $b'%dhelp set'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
    Jumping servers ALWAYS makes the bot lose ops! be careful!
@@ -1129,7 +1130,7 @@ See also: botjump, servers, botserver
 See also: kickban, console
 :leaf:kickban
 ###  $bkickban$b [channel|*] [-|@]<nickname> [comment]
-   kicks a user off the channel and bans her by a reasonable host-
+   Kicks a user off the channel and bans her by a reasonable host-
    mask.  your nickname will be attached to the ban in the bot's
    internal ban list, and the ban will last for whatever is set in
    ban-time -- only on this channel.  use $b'%d+ban'$b for a more
@@ -1221,7 +1222,8 @@ See also: matchbot
 ::matchbot
 ###  $bmatchbot$b 
    Matches bots.
-   See: match
+ 
+See also: match
 ::md5
 ###  $bmd5$b <string>
    Returns the MD5 hash of the specified string.
@@ -1350,9 +1352,11 @@ See: handle
    Displays all users who do not have a password set.
  
    Specify any argument to give random passes to users.
+ 
+%{+mi}See also: chpass%{-}
 :leaf:op
 ###  $bop$b <nickname> [channel|*]
-   will grant chanop to the person you specify, so long as the bot
+   Will grant chanop to the person you specify, so long as the bot
    is opped on that channel, and the person you specify isn't being
    actively deopped by the bot. Specify * for all channels.
  
@@ -1404,7 +1408,7 @@ See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
 See also: save
 :leaf:reset
 ###  $breset$b [channel]
-   clears out the bot's channel information and makes it gather the
+   Clears out the bot's channel information and makes it gather the
    information from the server all over again, as if it had just
    joined that channel.  it's not really useful much, but could be
    if an odd bug causes the channel information to get scrambled.
@@ -1414,7 +1418,7 @@ See also: save
 See also: resetbans, resetexempts, resetinvites
 :leaf:resetbans
 ###  $bresetbans$b [channel]
-   resets the bot's ban list for the channel. any bans on the channel
+   Resets the bot's ban list for the channel. any bans on the channel
    that aren't in the ban list (either the global list or the local
    channel ban list) will be removed, and if there are any bans in the
    global ban list or channel ban list that are not currently on the
@@ -1423,13 +1427,13 @@ See also: resetbans, resetexempts, resetinvites
 See also: bans, console%{+m|m}, reset%{-}
 :leaf:resetexempts
 ###  $bresetexempts$b [channel]
-   resets the bot's exemption list for the channel. this command
+   Resets the bot's exemption list for the channel. this command
    behaves exactly like resetbans, except it is for exempts.
  
 See also: resetbans, resetinvites
 :leaf:resetinvites
 ###  $bresetinvites$b [channel]
-   resets the bot's invitation list for the channel. this command
+   Resets the bot's invitation list for the channel. this command
    behaves exactly like resetbans, except it is for invites.
  
 See also: resetbans, resetinvites
@@ -1447,7 +1451,7 @@ See also: rehash, reload, save
 See also: reload, backup
 :leaf:say
 ###  $bsay$b [channel] <text>
-   dumps the text to your current console channel (or other specified
+   Dumps the text to your current console channel (or other specified
    channel), as if the bot "said" it.
 ::secpass:
 ###  $bsecpass$b <password|rand>
@@ -1457,7 +1461,7 @@ See also: reload, backup
 %{+mi}See also: chpass%{-}%{+n}, chsecpass%{-}
 :leaf:servers
 ###  $bservers$b
-   lists the servers that the bot has in its server list.  this is
+   Lists the servers that the bot has in its server list.  this is
    the list it rotates through when changing servers.  it starts
    with a static list which it loads from its config-file when the
    bot is booted up.  after that, you can add servers with the
@@ -1680,7 +1684,7 @@ See also: die, conf
 See also: find
 :leaf:topic
 ###  $btopic$b <text>
-   changes the channel's topic, assuming the bot is a chanop or the
+   Changes the channel's topic, assuming the bot is a chanop or the
    channel is not +t (uses your current console channel).
  
 See also: console
@@ -1752,8 +1756,8 @@ See also: match, whois
 See also: botversion, netversion, about%{+m|m}, status%{-}
 :leaf:voice
 ###  $bvoice$b <nickname> [channel|*]
-    will give a +v voice to a person you specify, so long as the
-    bot is opped on that channel. Specify * for all channels.
+   Will give a +v voice to a person you specify, so long as the
+   bot is opped on that channel. Specify * for all channels.
  
 See also: devoice
 ::w:
