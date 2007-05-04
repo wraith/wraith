@@ -815,9 +815,10 @@ void baduname(char *confhas, char *myuname) {
 
     uname(&un);
     simple_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
-    simple_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nMy binary is: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
+    simple_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nMy binary is: %s\nLocalhub: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
                                   conf.username ? conf.username : "unknown", 
                                   binname,
+                                  conf.bots && conf.bots->nick ? conf.bots->nick : origbotname,
                                   confhas, myuname, un.nodename);
     email(subject, msg, EMAIL_OWNERS);
   }

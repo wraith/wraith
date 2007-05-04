@@ -52,6 +52,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Limit bots no longer set limit when 'chanmode -l' is set. (fixes #294)
 * Fixed +closed from interfering with 'chanmode -pi'. (fixes #294)
 * Fix logging/usage bug in cmd_mop. (fixes #313)
+* Bad uname EMAILS now include the localhub's nick. (fixes #354)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
