@@ -588,7 +588,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
 }
 
 /* Given a chan/m do all necesary exempt checks and ban. */
-static void refresh_ban_kick(struct chanset_t *, char *, char *);
+static void refresh_ban_kick(struct chanset_t*, memberlist *, char *);
 static void doban(struct chanset_t *chan, memberlist *m)
 {
   if (!chan || !m) return;
@@ -601,7 +601,7 @@ static void doban(struct chanset_t *chan, memberlist *m)
         (u_match_mask(global_exempts,s) ||
          u_match_mask(chan->exempts, s)))) {
     if (u_match_mask(global_bans, s) || u_match_mask(chan->bans, s))
-      refresh_ban_kick(chan, s, m->nick);
+      refresh_ban_kick(chan, m, s);
 
     check_exemptlist(chan, s);
     s1 = quickban(chan, m->userhost);
@@ -662,38 +662,31 @@ static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment
 
 /* If any bans match this wildcard expression, refresh them on the channel.
  */
-static void refresh_ban_kick(struct chanset_t *chan, char *user, char *nick)
+static void refresh_ban_kick(struct chanset_t* chan, memberlist *m, char *user)
 {
-  memberlist *m = ismember(chan, nick);
-
   if (!m || chan_sentkick(m))
     return;
 
-  register maskrec *b = NULL;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  get_user_flagrec(m->user, &fr, chan->dname);
 
   /* Check global bans in first cycle and channel bans
      in second cycle. */
   for (int cycle = 0; cycle < 2; cycle++) {
-    for (b = cycle ? chan->bans : global_bans; b; b = b->next) {
+    for (register maskrec* b = cycle ? chan->bans : global_bans; b; b = b->next) {
       if (wild_match(b->mask, user) || match_cidr(b->mask, user)) {
-	struct flag_record	fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-	char c[512] = "";		/* The ban comment.	*/
-	char s[UHOSTLEN] = "";
-
-	simple_sprintf(s, "%s!%s", m->nick, m->userhost);
-	get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr,
-			 chan->dname);
         if (role == 1)
-  	  add_mode(chan, '-', 'o', nick);	/* Guess it can't hurt.	*/
+  	  add_mode(chan, '-', 'o', m->nick);	/* Guess it can't hurt.	*/
 	check_exemptlist(chan, user);
 	do_mask(chan, chan->channel.ban, b->mask, 'b');
 	b->lastactive = now;
-	if (b->desc && b->desc[0] != '@')
-	  simple_snprintf(c, sizeof c, "banned: %s", b->desc);
-	else
-	  c[0] = 0;
-        if (role == 2)
-  	  kick_all(chan, b->mask, c[0] ? (const char *) c : "You are banned", 0);
+        if (role == 2) {
+          char c[512] = "";		/* The ban comment.	*/
+
+          if (b->desc && b->desc[0] != '@')
+	    simple_snprintf(c, sizeof(c), "banned: %s", b->desc);
+          kick_all(chan, b->mask, c[0] ? (const char *) c : "You are banned", 0);
+        }
         return;					/* Drop out on 1st ban.	*/
       } 
     }
@@ -881,7 +874,7 @@ void check_this_ban(struct chanset_t *chan, char *banmask, bool sticky)
         !(use_exempts &&
           (u_match_mask(global_exempts, user) ||
            u_match_mask(chan->exempts, user))))
-      refresh_ban_kick(chan, user, m->nick);
+      refresh_ban_kick(chan, m, user);
   }
   if (!isbanned(chan, banmask) &&
       (!channel_dynamicbans(chan) || sticky))
@@ -995,36 +988,34 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
   if (!m || match_my_nick(nick) || !me_op(chan))
     return;
 
-  char s[UHOSTLEN] = "";
-
-  if (me_op(chan)) {
-    /* +d or bitch and not an op
-     * we dont check private because +private does not imply bitch. */
-    if (chan_hasop(m) && 
-        (chk_deop(*fr, chan) ||
-         (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
-      /* if (target_priority(chan, m, 1)) */
-        add_mode(chan, '-', 'o', m->nick);
-    } else if (!chan_hasop(m) && dovoice(chan) && m->user && !u_pass_match(m->user, "-") && chk_autoop(*fr, chan)) {
-      do_op(m->nick, chan, 1, 0);
-    }
-    if (dovoice(chan)) {
-      if (chan_hasvoice(m) && !chan_hasop(m)) {
-        /* devoice +q users .. */
-        if (chk_devoice(*fr))
-          add_mode(chan, '-', 'v', m->nick);
-      } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
-        /* voice +v users */
-        if (chk_voice(*fr, chan)) {
-          add_mode(chan, '+', 'v', m->nick);
-          if (m->flags & EVOICE)
-            m->flags &= ~EVOICE;
-        }
+  /* +d or bitch and not an op
+   * we dont check private because +private does not imply bitch. */
+  if (chan_hasop(m) && 
+      (chk_deop(*fr, chan) ||
+       (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
+    /* if (target_priority(chan, m, 1)) */
+      add_mode(chan, '-', 'o', m->nick);
+  } else if (!chan_hasop(m) && dovoice(chan) && m->user && !u_pass_match(m->user, "-") && chk_autoop(*fr, chan)) {
+    do_op(m->nick, chan, 1, 0);
+  }
+  if (dovoice(chan)) {
+    if (chan_hasvoice(m) && !chan_hasop(m)) {
+      /* devoice +q users .. */
+      if (chk_devoice(*fr))
+        add_mode(chan, '-', 'v', m->nick);
+    } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
+      /* voice +v users */
+      if (chk_voice(*fr, chan)) {
+        add_mode(chan, '+', 'v', m->nick);
+        if (m->flags & EVOICE)
+          m->flags &= ~EVOICE;
       }
     }
   }
 
-  simple_sprintf(s, "%s!%s", m->nick, m->userhost);
+  char s[UHOSTLEN] = "";
+
+  simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
   /* check vs invites */
   if (use_invites &&
       (u_match_mask(global_invites,s) ||
@@ -1035,7 +1026,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
         (u_match_mask(global_exempts,s) ||
          u_match_mask(chan->exempts, s)))) {
     if (u_match_mask(global_bans, s) || u_match_mask(chan->bans, s))
-      refresh_ban_kick(chan, s, m->nick);
+      refresh_ban_kick(chan, m, s);
     /* are they +k ? */
     if (!chan_sentkick(m) && (chan_kick(*fr) || glob_kick(*fr)) && me_op(chan)) {
       char *p = (char *) get_user(&USERENTRY_COMMENT, m->user);
@@ -2476,7 +2467,7 @@ static int gotjoin(char *from, char *chname)
           }
 	  /* If it matches a ban, dispose of them. */
 	  if (u_match_mask(global_bans, from) || u_match_mask(chan->bans, from)) {
-	    refresh_ban_kick(chan, from, nick);
+	    refresh_ban_kick(chan, m, from);
 	  /* Likewise for kick'ees */
 	  } else if (!chan_sentkick(m) && (glob_kick(fr) || chan_kick(fr))) {
 	    check_exemptlist(chan, from);
@@ -2664,7 +2655,6 @@ static int gotnick(char *from, char *msg)
 {
   char *nick = NULL, *chname = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
   memberlist *m = NULL, *mm = NULL;
-  struct userrec *u = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   strcpy(uhost, from);
@@ -2676,6 +2666,13 @@ static int gotnick(char *from, char *msg)
   Auth *auth = Auth::Find(uhost);
   if (auth)
     auth->NewNick(msg);
+
+
+  /* Compose a nick!user@host for the new nick */
+  simple_snprintf(s1, sizeof(s1), "%s!%s", msg, uhost);
+
+  /* Users can match by nick, so a recheck is needed */
+  m->user = get_user_by_host(s1);
 
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     chname = chan->dname; 
@@ -2689,13 +2686,15 @@ static int gotnick(char *from, char *msg)
 	if ((mm = ismember(chan, msg)))
 	  killmember(chan, mm->nick);
       }
+
+      strcpy(m->nick, msg);
+
       /*
        * Banned?
        */
-      /* Compose a nick!user@host for the new nick */
-      simple_sprintf(s1, "%s!%s", msg, uhost);
-      strcpy(m->nick, msg);
+
       memberlist_reposition(chan, m);
+
       detect_chan_flood(msg, uhost, from, chan, FLOOD_NICK, NULL);
 
       /* don't fill the serverqueue with modes or kicks in a nickflood */
@@ -2711,11 +2710,9 @@ static int gotnick(char *from, char *msg)
 
       /* nick-ban or nick is +k or something? */
       if (!chan_stopcheck(m)) {
-	get_user_flagrec(m->user ? m->user : get_user_by_host(s1), &fr, chan->dname);
+	get_user_flagrec(m->user, &fr, chan->dname);
 	check_this_member(chan, m->nick, &fr);
       }
-      u = get_user_by_host(from); /* make sure this is in the loop, someone could have changed the record
-                                     in an earlier iteration of the loop */
     }
   }
   return 0;
