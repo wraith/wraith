@@ -2672,13 +2672,14 @@ static int gotnick(char *from, char *msg)
   simple_snprintf(s1, sizeof(s1), "%s!%s", msg, uhost);
 
   /* Users can match by nick, so a recheck is needed */
-  m->user = get_user_by_host(s1);
+  struct userrec *u = get_user_by_host(s1);
 
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     chname = chan->dname; 
     m = ismember(chan, nick);
 
     if (m) {
+      m->user = u;
       m->last = now;
       /* Not just a capitalization change */
       if (rfc_casecmp(nick, msg)) {
