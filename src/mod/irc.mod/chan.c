@@ -263,7 +263,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
             actions++;
             sent++;
             if (chan->closed_ban)
-              doban(chan, m);
+              do_closed_kick(chan, m);
             dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
             m->flags |= SENTKICK;
             if (actions >= ct)
@@ -305,7 +305,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
           } else if ((action == PRIO_KICK) && !chan_sentkick(m)) {
             actions++;
             if (chan->closed_ban)
-              doban(chan, m);
+              do_closed_kick(chan, m);
             dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
             m->flags |= SENTKICK;
             if ((actions >= ct) || (sent > 5))
@@ -589,7 +589,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
 
 /* Given a chan/m do all necesary exempt checks and ban. */
 static void refresh_ban_kick(struct chanset_t*, memberlist *, char *);
-static void doban(struct chanset_t *chan, memberlist *m)
+static void do_closed_kick(struct chanset_t *chan, memberlist *m)
 {
   if (!chan || !m) return;
 
@@ -629,18 +629,14 @@ static char *quickban(struct chanset_t *chan, char *uhost)
  */
 static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment, int bantype)
 {
-  if (!me_op(chan))
-    return;
-
   int flushed = 0;
   char s[UHOSTLEN] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     simple_sprintf(s, "%s!%s", m->nick, m->userhost);
-    get_user_flagrec(m->user ? m->user : get_user_by_host(s), &fr, chan->dname);
-    if (me_op(chan) &&
-	(wild_match(hostmask, s) || match_cidr(hostmask, s)) && 
+    get_user_flagrec(m->user, &fr, chan->dname);
+    if ((wild_match(hostmask, s) || match_cidr(hostmask, s)) && 
         !chan_sentkick(m) &&
 	!match_my_nick(m->nick) && !chan_issplit(m) &&
 	!(use_exempts &&
@@ -666,7 +662,6 @@ static void refresh_ban_kick(struct chanset_t* chan, memberlist *m, char *user)
 {
   if (!m || chan_sentkick(m))
     return;
-
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   get_user_flagrec(m->user, &fr, chan->dname);
 
@@ -983,9 +978,11 @@ void recheck_channel_modes(struct chanset_t *chan)
 
 static void check_this_member(struct chanset_t *chan, char *nick, struct flag_record *fr)
 {
-  memberlist *m = ismember(chan, nick);
+  if (match_my_nick(nick) || !me_op(chan))
+    return;
 
-  if (!m || match_my_nick(nick) || !me_op(chan))
+  memberlist *m = ismember(chan, nick);
+  if (!m)
     return;
 
   /* +d or bitch and not an op
@@ -1023,10 +1020,13 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     refresh_invite(chan, s);
   /* don't kickban if permanent exempted */
   if (!(use_exempts &&
-        (u_match_mask(global_exempts,s) ||
+        (u_match_mask(global_exempts, s) ||
          u_match_mask(chan->exempts, s)))) {
+
+    /* Are they banned in the internal list? */
     if (u_match_mask(global_bans, s) || u_match_mask(chan->bans, s))
       refresh_ban_kick(chan, m, s);
+
     /* are they +k ? */
     if (!chan_sentkick(m) && (chan_kick(*fr) || glob_kick(*fr)) && me_op(chan)) {
       char *p = (char *) get_user(&USERENTRY_COMMENT, m->user);
