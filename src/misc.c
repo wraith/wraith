@@ -705,7 +705,7 @@ restart(int idx)
   }
   lfprintf(socks->f, "+online_since %li\n", online_since);
   if (floodless)
-    lfprintf(socks->f, "+server_floodless %d\n", floodless)
+    lfprintf(socks->f, "+server_floodless %d\n", floodless);
   lfprintf(socks->f, "+buildts %li\n", buildts);
   lfprintf(socks->f, "+ip4 %s\n", myipstr(4));
   lfprintf(socks->f, "+ip6 %s\n", myipstr(6));
