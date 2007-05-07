@@ -679,7 +679,7 @@ static int gotnotice(char *from, char *msg)
       /* Server notice? */
       if ((nick[0] == 0) || (uhost[0] == 0)) {
         if (!server_online && 
-            !strncmp(msg, "*** You are exempt from flood", 29))
+            strstr(msg, "*** You are exempt from flood"))
           floodless = 1;
 	/* Hidden `250' connection count message from server */
 	if (strncmp(msg, "Highest connection count:", 25))

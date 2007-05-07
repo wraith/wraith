@@ -3690,9 +3690,12 @@ static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
   if (!conf.bot->hub) {
     char tmp[2048] = "";
 
-    if (server_online)
-      sprintf(tmp, "Currently: %-40s Lag: %ds", cursrvname, server_lag);
-    else
+    if (server_online) {
+      if (floodless)
+        sprintf(tmp, "Currently: %-40s Lag: %ds [floodless ;)]", cursrvname, server_lag);
+      else
+        sprintf(tmp, "Currently: %-40s Lag: %ds", cursrvname, server_lag);
+    } else
       simple_sprintf(tmp, "Currently: none");
 
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
