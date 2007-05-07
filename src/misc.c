@@ -603,6 +603,8 @@ readsocks(const char *fname)
       dprintf(DP_STDOUT, "Added fd: %d\n", sock_read(f, enc));
     else if (!strcmp(type, "+online_since"))
       online_since = strtol(bufp, NULL, 10);
+    else if (!strcmp(type, "+server_floodless"))
+      floodless = 1;
     else if (!strcmp(type, "+buildts"))
       old_buildts = strtol(bufp, NULL, 10);
     else if (!strcmp(type, "+botname"))
@@ -702,6 +704,8 @@ restart(int idx)
       lfprintf(socks->f, "+botname %s\n", botname);
   }
   lfprintf(socks->f, "+online_since %li\n", online_since);
+  if (floodless)
+    lfprintf(socks->f, "+server_floodless %d\n", floodless)
   lfprintf(socks->f, "+buildts %li\n", buildts);
   lfprintf(socks->f, "+ip4 %s\n", myipstr(4));
   lfprintf(socks->f, "+ip6 %s\n", myipstr(6));

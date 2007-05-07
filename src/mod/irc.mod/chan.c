@@ -1147,7 +1147,7 @@ take_makeline(char *op, char *deops, unsigned int deopn)
 static void
 do_take(struct chanset_t *chan)
 {
-  char work[1024] = "", *op, *modeline, deops[512] = "";;
+  char work[2048] = "", *op, *modeline, deops[2048] = "";;
   char *to_op = (char *) my_calloc(1, 2048), *to_op_ptr = to_op;
   char *to_deop = (char *) my_calloc(1, 2048), *to_deop_ptr = to_deop;
   register bool hasop, isbot;
