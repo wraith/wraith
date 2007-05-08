@@ -2183,14 +2183,17 @@ static int gotinvite(char *from, char *msg)
 {
   char *nick = NULL;
   struct chanset_t *chan = NULL;
+  bool flood = 0;
 
   newsplit(&msg);
   fixcolon(msg);
   nick = splitnick(&from);
+  /* Two invites to the same channel in 10 seconds? */
   if (!rfc_casecmp(last_invchan, msg))
-    if (now - last_invtime < 30)
-      return 0;		/* Two invites to the same channel in 30 seconds? */
-  putlog(LOG_MISC, "*", "%s!%s invited me to %s", nick, from, msg);
+    if (now - last_invtime < 10)
+      flood = 1;
+  if (!flood)
+    putlog(LOG_MISC, "*", "%s!%s invited me to %s", nick, from, msg);
   strncpy(last_invchan, msg, 299);
   last_invchan[299] = 0;
   last_invtime = now;
