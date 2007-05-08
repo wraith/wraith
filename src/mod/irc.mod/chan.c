@@ -1081,16 +1081,17 @@ void enforce_closed(struct chanset_t *chan) {
   priority_do(chan, 0, PRIO_KICK);
 }
 
-static char *
+inline static char *
 take_massopline(char *op, char **to_op)
 {
   char *nicks = (char *) my_calloc(1, 151),
        *modes = (char *) my_calloc(1, 31),
-       *ret = (char *) my_calloc(1, 182),
        *nick = NULL;
   register bool useop = 0;
+  static char ret[182] = "";
 
-  for (unsigned int i = 0; i < modesperline; i++) {
+  egg_memset(ret, 0, sizeof(ret));
+  for (register unsigned int i = 0; i < modesperline; i++) {
     if (*to_op[0] || op) {
       /* if 'op' then use it, then move on to to_op */
       if (!useop && op) {
@@ -1116,13 +1117,14 @@ take_massopline(char *op, char **to_op)
 }
 
 inline static char *
-take_makeline(char *op, char *deops, unsigned int deopn)
+take_makeline(char *op, char *deops, unsigned int deopn, size_t deops_len)
 {
   bool opn = op ? 1 : 0;
   unsigned int n = opn + deopn;		/* op + deops */
   unsigned int pos = randint(deopn), i;
-  char *ret = (char *) my_calloc(1, 151);
-  
+  static char ret[151] = "";
+
+  egg_memset(ret, 0, sizeof(ret));
   for (i = 0; i < n; i++) {
     if (opn && i == pos)
       strcat(ret, "+o");
@@ -1140,89 +1142,88 @@ take_makeline(char *op, char *deops, unsigned int deopn)
 
     strcat(ret, " ");
   }
-
   return ret;  
 }
 
 static void
 do_take(struct chanset_t *chan)
 {
-  char work[2048] = "", *op, *modeline, deops[2048] = "";;
-  char *to_op = (char *) my_calloc(1, 2048), *to_op_ptr = to_op;
-  char *to_deop = (char *) my_calloc(1, 2048), *to_deop_ptr = to_deop;
-  register bool hasop, isbot;
-  register unsigned int lines_max = 5, lines = 0, deopn, i;
+  char to_deop[2048] = "", *to_deop_ptr = to_deop;
+  char to_op[2048] = "", *to_op_ptr = to_op;
+  register size_t to_op_len = 0, to_deop_len = 0;
 
-  if (floodless)
-    lines_max = 15;
-
+  /* Make lists of who needs to be opped, and who needs to be deopped */
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    hasop = (m->flags & CHANOP);
-    isbot = 0;
-
-    if (m->user && m->user->bot)
-      isbot = 1;
-
     if (rfc_casecmp(m->nick, botname)) {
-      if (isbot && !hasop) {
-        strcat(to_op, m->nick);
-        strcat(to_op, " ");
-      } else if (!isbot && hasop) {
-        strcat(to_deop, m->nick);
-        strcat(to_deop, " ");
+      register const bool isbot = m->user && m->user->bot ? 1 : 0;
+
+      /* Avoid countless unneeded operations from strcat/strlen */
+      if (isbot && !(m->flags & CHANOP)) {
+        to_op_len += strlcpy(to_op + to_op_len, m->nick, sizeof(to_op) - to_op_len);
+        *(to_op + to_op_len++) = ' ';
+      } else if (!isbot && (m->flags & CHANOP)) {
+        to_deop_len += strlcpy(to_deop + to_deop_len, m->nick, sizeof(to_deop) - to_deop_len);
+        *(to_deop + to_deop_len++) = ' ';
       }
     }
   }
   shuffle(to_op, " ");
   shuffle(to_deop, " ");
-  /*
-  putlog(LOG_MISC, "*", "op: %s", to_op);
-  putlog(LOG_MISC, "*", "deop: %s", to_deop);
-  */
 
-  while (to_op[0] || to_deop[0]) {
+  size_t deops_len = 0;
+  size_t work_len = 0;
+  register short lines = 0;
+  register const unsigned short max_lines = floodless ? 15 : 5;
+  char work[2048] = "", *op = NULL, *modeline = NULL, deops[2048] = "";
+  register unsigned int deopn;
+
+  while (to_op_ptr[0] || to_deop_ptr[0]) {
+    deops_len = 0;
     deopn = 0;
     op = NULL;
     modeline = NULL;
     deops[0] = 0;
 
-    if (to_op[0])
-      op = newsplit(&to_op);
+    if (to_op_ptr[0])
+      op = newsplit(&to_op_ptr);
 
-    for (i = 0; i < modesperline; i++) {
-      if (to_deop[0] && ((i < (modesperline - 1)) || (!op))) {
-        deopn++; 
-        strcat(deops, newsplit(&to_deop)); 
-        strcat(deops, " "); 
+    /* Prepare a list of modesperline-1 nicks for deop */
+    for (register unsigned int i = 0; i < modesperline; i++) {
+      if (to_deop_ptr[0] && ((i < (modesperline - 1)) || (!op))) {
+        ++deopn; 
+        const char *deop_nick = newsplit(&to_deop_ptr);
+        deops_len += strlcpy(deops + deops_len, deop_nick, sizeof(deops) - deops_len);
+        *(deops + deops_len++) = ' ';
       }
     }
-
-    strcat(work, "MODE ");
-    strcat(work, chan->name);
-    strcat(work, " ");
+    deops[deops_len] = 0;
+    *(work + work_len++) = 'M';
+    *(work + work_len++) = 'O';
+    *(work + work_len++) = 'D';
+    *(work + work_len++) = 'E';
+    *(work + work_len++) = ' ';
+    work_len += strlcpy(work + work_len, chan->name, sizeof(work) - work_len);
+    *(work + work_len++) = ' ';
 
     if (deops[0])
-      modeline = take_makeline(op, deops, deopn);
+      modeline = take_makeline(op, deops, deopn, deops_len);
     else
-      modeline = take_massopline(op, &to_op);
-    strcat(work, modeline);
-    strcat(work, "\r\n");
-    lines++;
-    free(modeline);
+      modeline = take_massopline(op, &to_op_ptr);
 
-    /* just dump when we have 5 lines because the server is going to throttle after that anyway */
-    if (lines == lines_max) {
-      tputs(serv, work, strlen(work));
+    work_len += strlcpy(work + work_len, modeline, sizeof(work) - work_len);
+    *(work + work_len++) = '\r';
+    *(work + work_len++) = '\n';
+
+    if (++lines >= max_lines) {
+      tputs(serv, work, work_len);
       work[0] = 0;
+      work_len = 0;
       lines = 0;
     }
   }
 
   if (work[0])
-    tputs(serv, work, strlen(work));
-
-  free(to_op_ptr);
-  free(to_deop_ptr);
+    tputs(serv, work, work_len);
 
   if (channel_closed(chan))
     enforce_closed(chan);
