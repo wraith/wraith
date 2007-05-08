@@ -779,7 +779,7 @@ bool shouldjoin(struct chanset_t *chan)
 {
   if (conf.bot->u) {
     struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
-    get_user_flagrec(conf.bot->u, &fr, chan->dname);
+    get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);
     return bot_shouldjoin(conf.bot->u, &fr, chan);
   }
   return 0;

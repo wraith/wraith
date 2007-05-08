@@ -142,7 +142,7 @@ struct flag_record {
 #define chan_doflood(x)				((x).chan & BOT_FLOODBOT)
 
 void init_flags(void);
-void get_user_flagrec(struct userrec *, struct flag_record *, const char *);
+void get_user_flagrec(struct userrec *, struct flag_record *, const char *, struct chanset_t* = NULL);
 void set_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void break_down_flags(const char *, struct flag_record *, struct flag_record *);
 int build_flags(char *, struct flag_record *, struct flag_record *);

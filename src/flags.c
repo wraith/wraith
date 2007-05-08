@@ -360,7 +360,7 @@ set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 /* Always pass the dname (display name) to this function for chname <cybah>
  */
 void
-get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
+get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname, struct chanset_t* chan)
 {
   fr->bot = 0;
   if (!u) {
@@ -371,11 +371,8 @@ get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 
   if (u->bot)
     fr->bot = 1;
-  if (fr->match & FR_GLOBAL) {
-    fr->global = u->flags;
-  } else {
-    fr->global = 0;
-  }
+
+  fr->global = (fr->match & FR_GLOBAL) ? u->flags : 0;
 
   if (fr->match & FR_CHAN) {
     struct chanuserrec *cr = NULL;
@@ -384,7 +381,7 @@ get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
       if (fr->match & FR_ANYWH)
         fr->chan = u->flags;
       for (cr = u->chanrec; cr; cr = cr->next) {
-        if (findchan_by_dname(cr->channel)) {
+        if (chan || findchan_by_dname(cr->channel)) {
           fr->chan |= cr->flags;
         }
       }

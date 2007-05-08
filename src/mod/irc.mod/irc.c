@@ -92,7 +92,7 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 
   //size_t tot = strlen(msg);
 
-  get_user_flagrec(u, &fr, chan->dname);
+  get_user_flagrec(u, &fr, chan->dname, chan);
 
   for (; *msg; ++msg) {
     if (egg_isupper(*msg))
@@ -553,7 +553,7 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    get_user_flagrec(u, &fr, chan->dname);
+    get_user_flagrec(u, &fr, chan->dname, chan);
 
     if (!chk_op(fr, chan)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s doesnt have +o for chan.", botnick, nick, chan->dname, botnick);
@@ -586,7 +586,7 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 #endif
-    get_user_flagrec(u, &fr, chan->dname);
+    get_user_flagrec(u, &fr, chan->dname, chan);
 
     if (!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr)) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
@@ -722,7 +722,7 @@ request_op(struct chanset_t *chan)
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
-  get_user_flagrec(conf.bot->u, &fr, chan->dname);
+  get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);
 
   if (!chk_op(fr, chan) || glob_kick(fr) || chan_kick(fr)) {
     putlog(LOG_GETIN, "*", "Not requesting op for %s - I do not have access to that channel.", chan->dname);
@@ -847,7 +847,7 @@ request_in(struct chanset_t *chan)
     if (bot->hub || !bot->u)
       continue;
 
-    get_user_flagrec(bot->u, &fr, chan->dname);
+    get_user_flagrec(bot->u, &fr, chan->dname, chan);
     if (bot_shouldjoin(bot->u, &fr, chan) && chk_op(fr, chan))
       botops[foundBots++] = bot->bot;
   }
@@ -891,7 +891,7 @@ want_to_revenge(struct chanset_t *chan, struct userrec *u,
   if (match_my_nick(badnick))
     return 0;
 
-  get_user_flagrec(u, &fr, chan->dname);
+  get_user_flagrec(u, &fr, chan->dname, chan);
 
   /* Kickee didn't kick themself? */
   if (rfc_casecmp(badnick, victimstr)) {
@@ -904,7 +904,7 @@ want_to_revenge(struct chanset_t *chan, struct userrec *u,
     } else if (channel_revenge(chan) && u2) {
       struct flag_record fr2 = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-      get_user_flagrec(u2, &fr2, chan->dname);
+      get_user_flagrec(u2, &fr2, chan->dname, chan);
       /* Protecting friends? */
       /* Protecting ops? */
       if ((channel_protectops(chan) && chk_op(fr2, chan))
@@ -928,7 +928,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
   char reason[1024] = "", ct[81] = "", *kick_msg = NULL;
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-  get_user_flagrec(u, &fr, chan->dname);
+  get_user_flagrec(u, &fr, chan->dname, chan);
 
   /* Get current time into a string */
   egg_strftime(ct, sizeof ct, "%d %b %Z", gmtime(&now));
@@ -1451,7 +1451,7 @@ check_expired_chanstuff(struct chanset_t *chan)
             }
 
             if (m->user) {
-              get_user_flagrec(m->user, &fr, chan->dname);
+              get_user_flagrec(m->user, &fr, chan->dname, chan);
               if (!glob_bot(fr)) {
                 if (!(m->flags & EVOICE) && 
                     (
@@ -1557,7 +1557,7 @@ irc_report(int idx, int details)
   strcpy(q, "Channels: ");
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
-      get_user_flagrec(dcc[idx].user, &fr, chan->dname);
+      get_user_flagrec(dcc[idx].user, &fr, chan->dname, chan);
 
     if (!privchan(fr, chan, PRIV_OP) && (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
       p = NULL;

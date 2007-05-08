@@ -217,7 +217,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
     } else if (!opsonly || chan_hasop(m)) {
         struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
         if (m->user)
-          get_user_flagrec(m->user, &fr, chan->dname);
+          get_user_flagrec(m->user, &fr, chan->dname, chan);
 
         if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) || /* +d */
            ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || /* simply no +o flag. */
@@ -244,7 +244,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
       struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
       if (m->user)
-        get_user_flagrec(m->user, &fr, chan->dname);
+        get_user_flagrec(m->user, &fr, chan->dname, chan);
  
       if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
           ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) ||
@@ -287,7 +287,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
       struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
       if (m->user)
-        get_user_flagrec(m->user, &fr, chan->dname);
+        get_user_flagrec(m->user, &fr, chan->dname, chan);
 
       if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
           ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || 
@@ -416,7 +416,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
 
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-  get_user_flagrec(get_user_by_host(from), &fr, chan->dname);
+  get_user_flagrec(get_user_by_host(from), &fr, chan->dname, chan);
   if (glob_bot(fr) ||
       ((which == FLOOD_DEOP) &&
        (glob_master(fr) || chan_master(fr))) ||
@@ -635,7 +635,7 @@ static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     simple_sprintf(s, "%s!%s", m->nick, m->userhost);
-    get_user_flagrec(m->user, &fr, chan->dname);
+    get_user_flagrec(m->user, &fr, chan->dname, chan);
     if ((wild_match(hostmask, s) || match_cidr(hostmask, s)) && 
         !chan_sentkick(m) &&
 	!match_my_nick(m->nick) && !chan_issplit(m) &&
@@ -663,7 +663,7 @@ static void refresh_ban_kick(struct chanset_t* chan, memberlist *m, char *user)
   if (!m || chan_sentkick(m))
     return;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  get_user_flagrec(m->user, &fr, chan->dname);
+  get_user_flagrec(m->user, &fr, chan->dname, chan);
 
   /* Check global bans in first cycle and channel bans
      in second cycle. */
@@ -1053,7 +1053,7 @@ void check_this_user(char *hand, int del, char *host)
       if ((u && !egg_strcasecmp(u->handle, hand) && del < 2) ||
 	  (!u && del == 2 && wild_match(host, s))) {
 	u = del ? NULL : u;
-	get_user_flagrec(u, &fr, chan->dname);
+	get_user_flagrec(u, &fr, chan->dname, chan);
 	check_this_member(chan, m->nick, &fr);
       }
     }
@@ -1308,7 +1308,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
              m->user = get_user_by_host(s);
            }
     }
-    get_user_flagrec(m->user, &fr, chan->dname);
+    get_user_flagrec(m->user, &fr, chan->dname, chan);
     if (glob_bot(fr) && chan_hasop(m) && !match_my_nick(m->nick))
       stop_reset = 1;
     check_this_member(chan, m->nick, &fr);
@@ -1694,7 +1694,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
       resolve_to_member(chan, nick, host);
   }
 
-  get_user_flagrec(m->user, &fr, chan->dname);
+  get_user_flagrec(m->user, &fr, chan->dname, chan);
   
   if (me_op(chan)) {
     /* are they a chanop, and me too */
@@ -2431,7 +2431,7 @@ static int gotjoin(char *from, char *chname)
       if (me_op(chan)) {
         struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-        get_user_flagrec(m->user, &fr, chan->dname);
+        get_user_flagrec(m->user, &fr, chan->dname, chan);
 
         bool is_op = chk_op(fr, chan);
 
@@ -2619,7 +2619,7 @@ static int gotkick(char *from, char *origmsg)
     if (m)
       m->last = now;
     /* This _needs_ to use chan->dname <cybah> */
-    get_user_flagrec(u, &fr, chan->dname);
+    get_user_flagrec(u, &fr, chan->dname, chan);
     set_handle_laston(chan->dname, u, now);
  
     chan = findchan(chname);
@@ -2715,7 +2715,7 @@ static int gotnick(char *from, char *msg)
 
       /* nick-ban or nick is +k or something? */
       if (!chan_stopcheck(m)) {
-	get_user_flagrec(m->user, &fr, chan->dname);
+	get_user_flagrec(m->user, &fr, chan->dname, chan);
 	check_this_member(chan, m->nick, &fr);
       }
     }
@@ -2874,7 +2874,7 @@ static int gotmsg(char *from, char *msg)
   /* Only check if flood-ctcp is active */
   if (flood_ctcp.count && detect_avalanche(msg)) {
     u = get_user_by_host(from);
-    get_user_flagrec(u, &fr, chan->dname);
+    get_user_flagrec(u, &fr, chan->dname, chan);
     /* Discard -- kick user if it was to the channel */
     if (m && me_op(chan) && 
 	!chan_sentkick(m) &&
@@ -3032,7 +3032,7 @@ static int gotnotice(char *from, char *msg)
   if (flood_ctcp.count && detect_avalanche(msg)) {
     memberlist *m = ismember(chan, nick);
 
-    get_user_flagrec(u, &fr, chan->dname);
+    get_user_flagrec(u, &fr, chan->dname, chan);
     /* Discard -- kick user if it was to the channel */
     if (me_op(chan) && m && !chan_sentkick(m) &&
 	!(use_exempts && ban_fun &&

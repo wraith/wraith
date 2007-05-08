@@ -839,7 +839,7 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
   bool ok = 1;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
-  get_user_flagrec(u, &fr, 0);
+  get_user_flagrec(u, &fr, NULL);
 
   if (ischanhub() && !glob_chuba(fr))
    ok = 0;
@@ -905,7 +905,7 @@ static void dcc_chat_hostresolved(int i)
 #endif /* HAVE_SSL */
 
     dcc[i].status = STAT_ECHO;
-    get_user_flagrec(dcc[i].user, &fr, 0);
+    get_user_flagrec(dcc[i].user, &fr, NULL);
     if (ischanhub() && !glob_chuba(fr))
      ok = 0;
     if (ok)

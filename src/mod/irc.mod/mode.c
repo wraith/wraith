@@ -547,7 +547,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
     meop = 1;
   }
 
-  get_user_flagrec(mv->user, &victim, chan->dname);
+  get_user_flagrec(mv->user, &victim, chan->dname, chan);
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
    */
@@ -627,7 +627,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   if (m)
     simple_sprintf(s1, "%s!%s", m->nick, m->userhost);
 
-  get_user_flagrec(mv->user, &victim, chan->dname);
+  get_user_flagrec(mv->user, &victim, chan->dname, chan);
 
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
@@ -717,7 +717,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
       if ((wild_match(mask, s1) || match_cidr(mask, s1))
           && !isexempted(chan, s1)) {
         if (m2->user || (!m2->user && (m2->user = get_user_by_host(s1)))) {
-          get_user_flagrec(m2->user, &victim, chan->dname);
+          get_user_flagrec(m2->user, &victim, chan->dname, chan);
           if (!(glob_kick(victim) || chan_kick(victim)) && 
               (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && !glob_bot(user)) || 
               (m2->user->bot && findbot(m2->user->handle))) && !isexempted(chan, s1))) {
@@ -1392,7 +1392,7 @@ gotmode(char *from, char *msg)
             if (mv) {
               bool dv = 0;
 
-              get_user_flagrec(mv->user, &victim, chan->dname);
+              get_user_flagrec(mv->user, &victim, chan->dname, chan);
 
               if (msign == '+') {
                 if (mv->flags & EVOICE) {

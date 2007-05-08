@@ -457,7 +457,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
     chan = NULL;
 
   while (chan) {
-  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+  get_user_flagrec(dcc[idx].user, &user, chan->dname, chan);
   if (privchan(user, chan, PRIV_OP)) {
     if (all) goto next;
     dprintf(idx, "No such channel defined.\n");
