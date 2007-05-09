@@ -1102,7 +1102,8 @@ take_massopline(char *op, char **to_op)
       if (nick) {
         strcat(modes, "+o");
         strcat(nicks, nick);
-        strcat(nicks, " "); 
+        if (i != modesperline - 1)
+          strcat(nicks, " "); 
       }
     }
   }
@@ -1140,7 +1141,8 @@ take_makeline(char *op, char *deops, unsigned int deopn, size_t deops_len)
     else if (deopn)
       strcat(ret, newsplit(&deops));
 
-    strcat(ret, " ");
+    if (i != n - 1)
+      strcat(ret, " ");
   }
   return ret;  
 }
@@ -1213,6 +1215,7 @@ do_take(struct chanset_t *chan)
     work_len += strlcpy(work + work_len, modeline, sizeof(work) - work_len);
     *(work + work_len++) = '\r';
     *(work + work_len++) = '\n';
+    work[work_len] = 0;
 
     if (++lines >= max_lines) {
       tputs(serv, work, work_len);
