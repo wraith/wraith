@@ -3573,16 +3573,42 @@ static void cmd_mns_host(int idx, char *par)
       return;
     }
   }
-  if (delhost_by_handle(handle, host)) {
-    dprintf(idx, "Removed host '%s' from %s.\n", host, handle);
-    update_mod(handle, dcc[idx].nick, "-host", host);
+
+  char ahost[UHOSTLEN] = "", *phost = NULL;
+
+  if (!strchr(host, '!')) {
+    if (!strchr(host, '@')) {
+      simple_snprintf(ahost, sizeof(ahost), "*!*@%s", host);
+    } else
+      simple_snprintf(ahost, sizeof(ahost), "*!%s", host);
+
+    phost = ahost;
+  } else
+    phost = host;
+
+  if (delhost_by_handle(handle, phost)) {
+    dprintf(idx, "Removed host '%s' from %s.\n", phost, handle);
+    update_mod(handle, dcc[idx].nick, "-host", phost);
 
     while (par[0]) {
+      phost = 0;
+      ahost[0] = 0;
       host = newsplit(&par);
-      if (delhost_by_handle(handle, host)) {
+
+      if (!strchr(host, '!')) {
+        if (!strchr(host, '@')) {
+          simple_snprintf(ahost, sizeof(ahost), "*!*@%s", host);
+        } else
+          simple_snprintf(ahost, sizeof(ahost), "*!%s", host);
+
+        phost = ahost;
+      } else
+        phost = host;
+
+      if (delhost_by_handle(handle, phost)) {
         if (!conf.bot->hub)
-          check_this_user(handle, 2, host);
-        dprintf(idx, "Removed host '%s' from %s.\n", host, handle);
+          check_this_user(handle, 2, phost);
+        dprintf(idx, "Removed host '%s' from %s.\n", phost, handle);
       }
     }
 
