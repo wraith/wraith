@@ -999,8 +999,6 @@ int egg_dns_init()
         /* some backup servers, probably will never be used. */
         add_dns_server("68.2.16.30"); //some cox ns
         add_dns_server("68.6.16.25"); //another cox
-        add_dns_server("65.215.220.12"); //staminus
-	add_dns_server("72.20.1.2"); //new staminus
 
 /* root servers for future development (tracing down)
 	add_dns_server("198.41.0.4");
