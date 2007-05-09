@@ -229,6 +229,8 @@ static void checkpass()
     checkedpass = 1;
     if (!gpasswd || (gpasswd && md5cmp(settings.shellhash, gpasswd) && !check_master_hash(NULL, gpasswd))) 
       werr(ERR_BADPASS);
+    /* Most PASS_MAX are 256.. but it's not clear */
+    OPENSSL_cleanse(gpasswd, 30);
   }
 }
 

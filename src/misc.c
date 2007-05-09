@@ -1324,12 +1324,16 @@ bool check_master_hash(const char *rand, const char *hash)
 
   if (1) {
     if (rand && rand[0])
-      if (!strcmp(MD5(tmp), hash))
+      if (!strcmp(MD5(tmp), hash)) {
+        OPENSSL_cleanse(tmp, sizeof(tmp));
         return 1;
+      }
   }
 
-  if (!strcmp(tmp, MD5(hash)))
+  if (!strcmp(tmp, MD5(hash))) {
+    OPENSSL_cleanse(tmp, sizeof(tmp));
     return 1;
+  }
   return 0;
 }
 

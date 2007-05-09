@@ -351,6 +351,7 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
 
 #define update_hash()		do {				\
 	hash = MD5(nhash);					\
+	OPENSSL_cleanse(nhash, sizeof(nhash));			\
 	nhash[0] = 0;						\
 } while (0)
 

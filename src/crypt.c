@@ -144,6 +144,7 @@ char *encrypt_pass(struct userrec *u, char *in)
   simple_snprintf(buf, sizeof(buf), "%s-%s", settings.salt2, in);
 
   tmp = encrypt_string(user_key(u), buf);
+  OPENSSL_cleanse(buf, sizeof(buf));
   ret_size = strlen(tmp) + 1 + 1;
   ret = (char *) my_calloc(1, ret_size);
 
