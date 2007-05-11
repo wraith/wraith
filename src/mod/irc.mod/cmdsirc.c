@@ -525,44 +525,27 @@ static void cmd_op(int idx, char *par)
 
 }
 
-static void cmd_mdop(int idx, char *par)
+static void cmd_mmode(int idx, char *par)
 {
-  char *p = NULL, *chname = NULL;
-  int force_bots = 0,
-    force_alines = 0,
-    force_slines = 0,
-    force_overlap = 0;
-  int overlap = 0,
-    bitch = 0,
-    simul = 0;
-  int needed_deops,
-    max_deops,
-    bots,
-    deops,
-    sdeops;
-  memberlist **chanbots = NULL,
-  **targets = NULL,
-   *m = NULL;
-  int chanbotcount = 0,
-    targetcount = 0,
-    tpos = 0,
-    bpos = 0,
-    i;
-  struct chanset_t *chan = NULL;
-  char work[1024] = "";
-  
+  char *mode = newsplit(&par);
+  if (strlen(mode) > 2 || !strchr("+-", mode[0]) || !par[0]) {
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
+    dprintf(idx, "Ie. mmode -o #chan a\n");
+    return;
+  }
 
-  putlog(LOG_CMDS, "*", "#%s# mdop %s", dcc[idx].nick, par);
+  putlog(LOG_CMDS, "*", "#%s# mmode %s %s", dcc[idx].nick, mode, par);
+
+  char *chname = NULL;
 
   if (strchr(CHANMETA, par[0]) != NULL)
     chname = newsplit(&par);
   else
-    chname = 0;
-  chan = get_channel(idx, chname);
+    chname = NULL;
+
+  struct chanset_t *chan = get_channel(idx, chname);
  
   if (chan) {
-    get_user_flagrec(dcc[idx].user, &user, chan->dname);
-
     if (!shouldjoin(chan) || !channel_active(chan))  {
       dprintf(idx, "I'm not on %s\n", chan->dname);
       return;
@@ -571,81 +554,129 @@ static void cmd_mdop(int idx, char *par)
       dprintf(idx, "Channel pending.\n");
       return;
     }
+
+    get_user_flagrec(dcc[idx].user, &user, chan->dname, chan);
     if (!glob_owner(user) && !chan_owner(user)) {
-      dprintf(idx, "You do not have mdop access for %s\n", chan->dname);
+      dprintf(idx, "You do not have mass mode access for %s\n", chan->dname);
       return;
     }
   }
   if (!chan || !chname[0]) {
-    dprintf(idx, "Usage: mdop <#channel> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
+    dprintf(idx, "Ie. mmode -o #chan a\n");
     return;
   }
 
+  char *who = newsplit(&par);
 
-  targets = (memberlist **) my_calloc(1, chan->channel.members * sizeof(memberlist *));
+  if (strlen(who) > 1 || !strchr("aovdr", who[0])) {
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
+    dprintf(idx, "Ie. mmode -o #chan a\n");
+    dprintf(idx, "a = all.\n");
+    dprintf(idx, "o = ops.\n");
+    dprintf(idx, "O = user-op.\n");
+    dprintf(idx, "v = voices.\n");
+    dprintf(idx, "d = non-ops.\n");
+    dprintf(idx, "r = regulars (-ov).\n");
+    return;
+  }
 
-  chanbots = (memberlist **) my_calloc(1, chan->channel.members * sizeof(memberlist *));
+  memberlist** targets = (memberlist**) my_calloc(1, chan->channel.members * sizeof(memberlist *));
+  int* overlaps = (int *) my_calloc(1, chan->channel.members * sizeof(int *));
+  memberlist** chanbots = (memberlist **) my_calloc(1, chan->channel.members * sizeof(memberlist *));
+  memberlist *m = NULL;
+  int chanbotcount = 0, targetcount = 0;
 
-ContextNote("!mdop!");
-  for (m = chan->channel.member; m; m = m->next)
-    if (m->flags & CHANOP) {
-      ContextNote(m->nick);
-      if (!m->user)
-	targets[targetcount++] = m;
-      else if (m->user->bot && (m->user->flags & USER_OP) 
-	       && (egg_strcasecmp(conf.bot->nick, m->user->handle))
-	       && (nextbot(m->user->handle) >= 0))
-	chanbots[chanbotcount++] = m;
-      else if (!(m->user->flags & USER_OP))
-	targets[targetcount++] = m;
+  for (m = chan->channel.member; m; m = m->next) {
+    if (m->user) {
+      if ((m->flags & CHANOP) && m->user->bot && (m->user->flags & USER_OP) &&
+          (!match_my_nick(m->nick)) && (nextbot(m->user->handle) >= 0)) {
+        chanbots[chanbotcount++] = m;
+        continue;
+      }
+
+      get_user_flagrec(m->user, &user, chan->dname);
     }
+
+    bool is_target = 0;
+
+    if (who[0] == 'o' && (m->flags & CHANOP))
+      is_target = 1;
+    else if (who[0] == 'O' && chk_op(user, chan))
+      is_target = 1;
+    else if (who[0] == 'd' && !(m->flags & CHANOP))
+      is_target = 1;
+    else if (who[0] == 'v' && !(m->flags & CHANOP) && (m->flags & CHANVOICE))
+      is_target = 1;
+    else if (who[0] == 'r' && !(m->flags & CHANOP) && !(m->flags & CHANVOICE))
+      is_target = 1;
+    else if (who[0] == 'a')
+      is_target = 1;
+
+    if (is_target)
+      targets[targetcount++] = m;
+  }
+
   if (!chanbotcount) {
     dprintf(idx, "No bots opped on %s\n", chan->name);
     free(targets);
+    free(overlaps);
     free(chanbots);
     return;
   }
+
   if (!targetcount) {
-    dprintf(idx, "Noone to deop on %s\n", chan->name);
+    dprintf(idx, "No one to mode on %s\n", chan->name);
     free(targets);
+    free(overlaps);
     free(chanbots);
     return;
   }
+
+  int force_bots = 0, force_alines = 0, force_slines = 0, force_overlap = 0;
+  bool bitch = 0, simul = 0;
+
   while (par && par[0]) {
-    p = newsplit(&par);
-    if (!strncmp(p, "bots=", 5)) {
+    char *p = newsplit(&par);
+    if (!egg_strncasecmp(p, "bots=", 5)) {
       p += 5;
       force_bots = atoi(p);
       if ((force_bots < 1) || (force_bots > chanbotcount)) {
 	dprintf(idx, "bots must be within 1-%i\n", chanbotcount);
 	free(targets);
+	free(overlaps);
 	free(chanbots);
 	return;
       }
-    } else if (!strncmp(p, "alines=", 7)) {
+    } else if (!egg_strncasecmp(p, "alines=", 7)) {
       p += 7;
       force_alines = atoi(p);
-      if ((force_alines < 1) || (force_alines > 5)) {
-	dprintf(idx, "alines must be within 1-5\n");
+      if ((force_alines < 1) || (force_alines > 20)) {
+	dprintf(idx, "alines must be within 1-20\n");
+        dprintf(idx, ">5 will fail without a floodless.\n");
 	free(targets);
+	free(overlaps);
 	free(chanbots);
 	return;
       }
-    } else if (!strncmp(p, "slines=", 7)) {
+    } else if (!egg_strncasecmp(p, "slines=", 7)) {
       p += 7;
       force_slines = atoi(p);
-      if ((force_slines < 1) || (force_slines > 6)) {
-	dprintf(idx, "slines must be within 1-6\n");
+      if ((force_slines < 1) || (force_slines > 20)) {
+	dprintf(idx, "slines must be within 1-20\n");
+        dprintf(idx, ">6 will fail without a floodless.\n");
 	free(targets);
+	free(overlaps);
 	free(chanbots);
 	return;
       }
-    } else if (!strncmp(p, "overlap=", 8)) {
+    } else if (!egg_strncasecmp(p, "overlap=", 8)) {
       p += 8;
       force_overlap = atoi(p);
       if ((force_overlap < 1) || (force_overlap > 8)) {
 	dprintf(idx, "overlap must be within 1-8\n");
 	free(targets);
+	free(overlaps);
 	free(chanbots);
 	return;
       }
@@ -654,138 +685,179 @@ ContextNote("!mdop!");
     } else if (!strcmp(p, "simul")) {
       simul = 1;
     } else {
-      dprintf(idx, "Unrecognized mdop option %s\n", p);
+      dprintf(idx, "Unrecognized option %s\n", p);
       free(targets);
+      free(overlaps);
       free(chanbots);
       return;
     }
   }
 
-  overlap = (force_overlap ? force_overlap : 2);
-  needed_deops = (overlap * targetcount);
-  max_deops = ((force_bots ? force_bots : chanbotcount) * (force_alines ? force_alines : 5) * 4);
+  int overlap = (force_overlap ? force_overlap : 1);
+  int needed_modes = (overlap * targetcount);
+  int max_modes = ((force_bots ? force_bots : chanbotcount) * (force_alines ? force_alines : 5) * modesperline);
 
-  if (needed_deops > max_deops) {
+  if (needed_modes > max_modes) {
+    dprintf(idx, "Need to make %d modes, but the max is %d.\n", needed_modes, max_modes);
+    dprintf(idx, "Try increasing [alines] or decreasing [overlap].\n");
     if (overlap == 1)
       dprintf(idx, "Not enough bots.\n");
     else
       dprintf(idx, "Not enough bots. Try with overlap=1\n");
     free(targets);
+    free(overlaps);
     free(chanbots);
     return;
   }
+
+
+  int bots, modes;
 
   /* ok it's possible... now let's figure out how */
   if (force_bots && force_alines) {
     /* not much choice... overlap should not autochange */
     bots = force_bots;
-    deops = force_alines * 4;
+    modes = force_alines * modesperline;
   } else {
     if (force_bots) {
-      /* calc needed deops per bot */
+      /* calc needed modes per bot */
       bots = force_bots;
-      deops = (needed_deops + (bots - 1)) / bots;
+      modes = (needed_modes + (bots - 1)) / bots;
     } else if (force_alines) {
-      deops = force_alines * 4;
-      bots = (needed_deops + (deops - 1)) / deops;
+      modes = force_alines * modesperline;
+      bots = (needed_modes + (modes - 1)) / modes;
     } else {
-      deops = 12;
-      bots = (needed_deops + (deops - 1)) / deops;
-      if (bots > chanbotcount) {
-	deops = 16;
-	bots = (needed_deops + (deops - 1)) / deops;
+      /* Try minimizing alines, 1,2,3,4,5 against bots needed */
+      modes = 1 * modesperline;
+      bots = (needed_modes + (modes - 1)) / modes;
+
+      for (int min_alines = 2; min_alines <= 5; ++min_alines) {
+        if (bots > chanbotcount) {
+          modes = min_alines * modesperline;
+          bots = (needed_modes + (modes - 1)) / modes;
+        } else
+          break;
       }
+
       if (bots > chanbotcount) {
-	deops = 20;
-	bots = (needed_deops + (deops - 1)) / deops;
-      }
-      if (bots > chanbotcount) {
-	putlog(LOG_MISC, "*", "Totally fucked calculations in cmd_mdop. this CAN'T happen.");
-	dprintf(idx, "Something's wrong... bug the coder\n");
-	free(targets);
-	free(chanbots);
-	return;
+        putlog(LOG_MISC, "*", "Totally fucked calculations in cmd_mmode. this CAN'T happen.");
+        dprintf(idx, "Something's wrong... bug the coder\n");
+        free(targets);
+        free(overlaps);
+        free(chanbots);
+        return;
       }
     }
   }
+
+  /* How many modes to send */
+  int smodes;
 
   if (force_slines)
-    sdeops = force_slines * 4;
+    smodes = force_slines * modesperline;
   else
-    sdeops = 20;
-  if (sdeops < deops)
-    sdeops = deops;
+    smodes = 5 * modesperline;
+  if (smodes < modes)
+    smodes = modes;
 
-  dprintf(idx, "Mass deop of %s\n", chan->name);
-  dprintf(idx, "  %d bots used for deop\n", bots);
-  dprintf(idx, "  %d assumed deops per participating bot\n", deops);
-  dprintf(idx, "  %d max deops per participating bot\n", sdeops);
-  dprintf(idx, "  %d assumed deops per target nick\n", overlap);
+  dprintf(idx, "Mass %s of %s\n", mode, chan->dname);
+  dprintf(idx, "  %d bots used.\n", bots);
+  dprintf(idx, "  %d targets.\n", targetcount);
+  dprintf(idx, "  %d assumed modes per participating bot.\n", modes);
+  dprintf(idx, "  %d max modes per participating bot.\n", smodes);
+  dprintf(idx, "  %d assumed modes per target nick.\n", overlap);
 
-  /* now use bots/deops to distribute nicks to deop */
+  int tpos = 0, bpos = 0, i = 0;
+  char work[1024] = "";
+
+  /* now use bots/modes to distribute nicks to MODE on */
   while (bots) {
     if (!simul)
-      simple_sprintf(work, "dp %s", chan->name);
+      simple_snprintf(work, sizeof(work), "dp %s %s", mode, chan->dname);
     else
       work[0] = 0;
-    for (i = 0; i < deops; i++) {
-      strcat(work, " ");
-      strcat(work, targets[tpos]->nick);
-      tpos++;
-      if (tpos >= targetcount)
-	tpos = 0;
+    /* Make list of assumed lines (alines) */
+    for (i = 0; i < modes; i++) {
+      if (overlaps[tpos]++ < overlap) {
+        strcat(work, " ");
+        strcat(work, targets[tpos]->nick);
+      }
+      if (++tpos >= targetcount)
+        tpos = 0;
     }
-    if (sdeops > deops) {
-      int atpos;
-
-      atpos = tpos;
-      for (i = 0; i < (sdeops - deops); i++) {
-	strcat(work, " ");
-	strcat(work, targets[atpos]->nick);
-	atpos++;
-	if (atpos >= targetcount)
-	  atpos = 0;
+    /* Now make lines of throttled modes (slines) */
+    if (smodes > modes) {
+      int atpos = tpos;
+      for (i = 0; i < (smodes - modes); i++) {
+        if (overlaps[tpos]++ < overlap) {
+          strcat(work, " ");
+          strcat(work, targets[atpos]->nick);
+        }
+	if (++atpos >= targetcount)
+          atpos = 0;
       }
     }
+
     if (simul)
-      dprintf(idx, "%s deops%s\n", chanbots[bpos]->nick, work);
+      dprintf(idx, "%s MODE %s %s\n", chanbots[bpos]->nick, mode, work);
     else
-      botnet_send_zapf(nextbot(chanbots[bpos]->user->handle), conf.bot->nick, chanbots[bpos]->user->handle, work);
-    bots--;
-    bpos++;
+      putbot(chanbots[bpos]->user->handle, work);
+    --bots;
+    ++bpos;
   }
-  if (bitch && !simul && chan) {
+  if (bitch && !simul) {
     chan->status |= CHAN_BITCH;
     do_chanset(NULL, chan, "+bitch", DO_LOCAL | DO_NET);
   }
   free(targets);
+  free(overlaps);
   free(chanbots);
   return;
 }
 
-void mdop_request(char *botnick, char *code, char *par)
+void mass_mode_request(char *botnick, char *code, char *par)
 {
-  char *chname = NULL, *p = NULL;
-  char work[2048] = "";
+  char* mode = newsplit(&par);
 
-  chname = newsplit(&par);
-  work[0] = 0;
+  if (strlen(mode) > 2 || !strchr("+-", mode[0]))
+    return;
+
+  char* chname = newsplit(&par);
+
+  char list[101] = "", buf[2048] = "";
+  size_t list_len = 0, buf_len = 0;
+
   while (par[0]) {
     int cnt = 0;
 
-    strcat(work, "MODE ");
-    strcat(work, chname);
-    strcat(work, " -oooo");
+    *(buf + buf_len++) = 'M';
+    *(buf + buf_len++) = 'O';
+    *(buf + buf_len++) = 'D';
+    *(buf + buf_len++) = 'E';
+    *(buf + buf_len++) = ' ';
+    buf_len += strlcpy(buf + buf_len, chname, sizeof(buf) - buf_len);
+    *(buf + buf_len++) = ' ';
+
     while ((cnt < 4) && par[0]) {
-      p = newsplit(&par);
-      strcat(work, " ");
-      strcat(work, p);
-      cnt++;
+      /* add +mode into irc cmd */
+      buf_len += strlcpy(buf + buf_len, mode, sizeof(buf) - buf_len);
+
+      /* Make list of nicks */
+      char* nick = newsplit(&par);
+      list_len += strlcpy(list + list_len, nick, sizeof(list) - list_len); 
+      if (++cnt < 4 && par[0])
+        *(list + list_len++) = ' ';
     }
-    strcat(work, "\r");
-    strcat(work, "\n");
+
+    /* buf is so far: 'MODE #chan +o+o+o+o' */
+    *(buf + buf_len++) = ' ';
+    buf_len += strlcpy(buf + buf_len, list, sizeof(buf) - buf_len);
+    *(buf + buf_len++) = '\r';
+    *(buf + buf_len++) = '\n';
+    list[0] = list_len = 0;
   }
-  tputs(serv, work, strlen(work));
+  buf[buf_len] = 0;
+  tputs(serv, buf, buf_len);
 }
 
 static void cmd_deop(int idx, char *par)
@@ -1724,7 +1796,7 @@ static cmd_t irc_dcc[] =
 #endif /* CACHE */
   {"kick",		"o|o",	 (Function) cmd_kick,		NULL, LEAF|AUTH},
   {"kickban",		"o|o",	 (Function) cmd_kickban,	NULL, LEAF|AUTH},
-  {"mdop",              "n|n",	 (Function) cmd_mdop,		NULL, LEAF},
+  {"mmode",             "n|n",	 (Function) cmd_mmode,		NULL, LEAF},
   {"mop",		"n|m",	 (Function) cmd_mop,		NULL, LEAF|AUTH},
   {"msg",		"o",	 (Function) cmd_msg,		NULL, LEAF|AUTH},
   {"op",		"o|o",	 (Function) cmd_op,		NULL, LEAF|AUTH},

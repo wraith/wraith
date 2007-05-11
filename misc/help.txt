@@ -1229,36 +1229,55 @@ See also: match
    Returns the MD5 hash of the specified string.
  
 See also: randstring, sha1, encrypt, decrypt
-:leaf:mdop:
-###  $bmdop$b <#channel> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]
-   For those of us who do not wish to be rocket scientists in the mdop department, 
-   a simple '%dmdop #channel' will suffice.
-   **Remember, the bot you mdop on will never participate in the deopping**
+::me
+###  $bme$b <text>
+   Performs an action on the party line. This appears as "* Wcc is leaving",
+   etc.
+:leaf:mmode:
+###  $bmmode$b <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]
+   For those of us who do not wish to be rocket scientists in the mass mode department, 
+   a simple '%dmmode -o #channel o' will suffice.
+ 
+   **Remember, the bot you mmode on will never participate in the modes**
  
    options:
  
-     $bbitch$b   - set +bitch after finished with mdop.
-     $bsimul$b   - Simulates the mdop. IE: Gives you a practice run, will show who 
+     $ba$b = $ball.$b
+     $bo$b = $bops.$b
+     $bO$b = $buser-op.$b
+     $bv$b = $bvoices.$b
+     $bd$b = $bnon-ops.$b
+     $br$b = $bregulars (-ov).$b
+ 
+     $bbitch$b   - set +bitch after finished with mmode.
+     $bsimul$b   - Simulates the mmode. IE: Gives you a practice run, will show who 
                    does what in the dcc chat window.
  
      =============================================================================
      don't bother setting the following options unless you REALLY know what you're 
      doing, and don't bother messaging me asking me how to use them if you don't.
      =============================================================================
-     $bbots$b    - Number of bots to use for mdop.
+     $bbots$b    - Number of bots to use.
      $balines$b  - Number of MODE lines to assume each participating bot will get through.
      $bslines$b  - Number of MODE lines each participating bot will send.
-     $boverlap$b - Number of times to deop each target nick (using alines for calc).
+     $boverlap$b - Number of times to mode on each target nick (using alines for calc).
  
    bots, alines, slines and overlap are dependant on each other, set them wrong and
    the bot will complain. 
   
-   Defaults are alines=3, slines=5, overlap=2. alines will be increased up to 5 if 
+   Defaults are alines=1, slines=5, overlap=1. alines will be increased up to 5 if 
    there are not enough bots available.
-::me
-###  $bme$b <text>
-   Performs an action on the party line. This appears as "* Wcc is leaving",
-   etc.
+ 
+   Examples:
+ 
+     To mass deop (old style '%dmdop')
+      '%dmmode -o #chan o overlap=2'
+     To mass voice non-ops
+      '%dmmode +v #chan d'
+     To mass voice non-ops and non-voices
+      '%dmmode +v #chan r'
+ 
+See also: mop
 :leaf:mop:
 ###  $bmop$b <channel|*>
    Bot will op all users in the specified channel that are valid ops
