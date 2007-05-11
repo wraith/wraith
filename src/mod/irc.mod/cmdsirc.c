@@ -525,11 +525,56 @@ static void cmd_op(int idx, char *par)
 
 }
 
+void mass_mode_request(char *botnick, char *code, char *par)
+{
+  char* mode = newsplit(&par);
+
+  if (strlen(mode) > 2 || !strchr("+-", mode[0]))
+    return;
+
+  char* chname = newsplit(&par);
+
+  char list[101] = "", buf[2048] = "";
+  size_t list_len = 0, buf_len = 0;
+
+  while (par[0]) {
+    size_t cnt = 0;
+
+    *(buf + buf_len++) = 'M';
+    *(buf + buf_len++) = 'O';
+    *(buf + buf_len++) = 'D';
+    *(buf + buf_len++) = 'E';
+    *(buf + buf_len++) = ' ';
+    buf_len += strlcpy(buf + buf_len, chname, sizeof(buf) - buf_len);
+    *(buf + buf_len++) = ' ';
+
+    while ((cnt < modesperline) && par[0]) {
+      /* add +mode into irc cmd */
+      buf_len += strlcpy(buf + buf_len, mode, sizeof(buf) - buf_len);
+
+      /* Make list of nicks */
+      const char* nick = newsplit(&par);
+      list_len += strlcpy(list + list_len, nick, sizeof(list) - list_len); 
+      if ((++cnt < modesperline) && par[0])
+        *(list + list_len++) = ' ';
+    }
+
+    /* buf is so far: 'MODE #chan +o+o+o+o' */
+    *(buf + buf_len++) = ' ';
+    buf_len += strlcpy(buf + buf_len, list, sizeof(buf) - buf_len);
+    *(buf + buf_len++) = '\r';
+    *(buf + buf_len++) = '\n';
+    list[0] = list_len = 0;
+  }
+  buf[buf_len] = 0;
+  tputs(serv, buf, buf_len);
+}
+
 static void cmd_mmode(int idx, char *par)
 {
   char *mode = newsplit(&par);
   if (strlen(mode) > 2 || !strchr("+-", mode[0]) || !par[0]) {
-    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]\n");
     dprintf(idx, "Ie. mmode -o #chan a\n");
     return;
   }
@@ -562,7 +607,7 @@ static void cmd_mmode(int idx, char *par)
     }
   }
   if (!chan || !chname[0]) {
-    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]\n");
     dprintf(idx, "Ie. mmode -o #chan a\n");
     return;
   }
@@ -570,7 +615,7 @@ static void cmd_mmode(int idx, char *par)
   char *who = newsplit(&par);
 
   if (strlen(who) > 1 || !strchr("aovdr", who[0])) {
-    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]\n");
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]\n");
     dprintf(idx, "Ie. mmode -o #chan a\n");
     dprintf(idx, "a = all.\n");
     dprintf(idx, "o = ops.\n");
@@ -617,24 +662,8 @@ static void cmd_mmode(int idx, char *par)
       targets[targetcount++] = m;
   }
 
-  if (!chanbotcount) {
-    dprintf(idx, "No bots opped on %s\n", chan->name);
-    free(targets);
-    free(overlaps);
-    free(chanbots);
-    return;
-  }
-
-  if (!targetcount) {
-    dprintf(idx, "No one to mode on %s\n", chan->name);
-    free(targets);
-    free(overlaps);
-    free(chanbots);
-    return;
-  }
-
   int force_bots = 0, force_alines = 0, force_slines = 0, force_overlap = 0;
-  bool bitch = 0, simul = 0;
+  bool bitch = 0, simul = 0, local = 0;
 
   while (par && par[0]) {
     char *p = newsplit(&par);
@@ -651,9 +680,11 @@ static void cmd_mmode(int idx, char *par)
     } else if (!egg_strncasecmp(p, "alines=", 7)) {
       p += 7;
       force_alines = atoi(p);
-      if ((force_alines < 1) || (force_alines > 20)) {
-	dprintf(idx, "alines must be within 1-20\n");
-        dprintf(idx, ">5 will fail without a floodless.\n");
+      if (force_alines > 5)
+        dprintf(idx, "alines >5 will fail without a floodless.\n");
+
+      if ((force_alines < 1) || (force_alines > 100)) {
+	dprintf(idx, "alines must be within 1-100\n");
 	free(targets);
 	free(overlaps);
 	free(chanbots);
@@ -680,10 +711,12 @@ static void cmd_mmode(int idx, char *par)
 	free(chanbots);
 	return;
       }
-    } else if (!strcmp(p, "bitch")) {
+    } else if (!egg_strncasecmp(p, "bitch", 5)) {
       bitch = 1;
-    } else if (!strcmp(p, "simul")) {
+    } else if (!egg_strncasecmp(p, "simul", 5)) {
       simul = 1;
+    } else if (!egg_strncasecmp(p, "local", 5)) {
+      local = 1;
     } else {
       dprintf(idx, "Unrecognized option %s\n", p);
       free(targets);
@@ -693,9 +726,31 @@ static void cmd_mmode(int idx, char *par)
     }
   }
 
+  if (!targetcount) {
+    dprintf(idx, "No targets found on %s\n", chan->name);
+    free(targets);
+    free(overlaps);
+    free(chanbots);
+    return;
+  }
+
+  if ((!chanbotcount && !local) || (local && !me_op(chan))) {
+    dprintf(idx, "No bots opped on %s\n", chan->name);
+    free(targets);
+    free(overlaps);
+    free(chanbots);
+    return;
+  }
+
+  if (local)
+    force_bots = 1;
+
+  if (local && floodless)
+    force_alines = force_slines = 100;
+
   int overlap = (force_overlap ? force_overlap : 1);
   int needed_modes = (overlap * targetcount);
-  int max_modes = ((force_bots ? force_bots : chanbotcount) * (force_alines ? force_alines : 5) * modesperline);
+  int max_modes = ((force_bots ? force_bots : chanbotcount) * (force_alines ? force_alines : default_alines) * modesperline);
 
   if (needed_modes > max_modes) {
     dprintf(idx, "Need to make %d modes, but the max is %d.\n", needed_modes, max_modes);
@@ -711,35 +766,42 @@ static void cmd_mmode(int idx, char *par)
   }
 
 
-  int bots, modes;
+  double bots = 0;
+  int amodes = 0;
 
   /* ok it's possible... now let's figure out how */
   if (force_bots && force_alines) {
     /* not much choice... overlap should not autochange */
     bots = force_bots;
-    modes = force_alines * modesperline;
+    amodes = force_alines * modesperline;
   } else {
     if (force_bots) {
       /* calc needed modes per bot */
       bots = force_bots;
-      modes = (needed_modes + (bots - 1)) / bots;
+      amodes = (needed_modes + ((int)bots - 1)) / (int)bots;
     } else if (force_alines) {
-      modes = force_alines * modesperline;
-      bots = (needed_modes + (modes - 1)) / modes;
+      amodes = force_alines * modesperline;
+      bots = (double) needed_modes / amodes;
+      if (bots > (int)bots) bots = (int)bots+1; /* ceil(bots) */
     } else {
       /* Try minimizing alines, 1,2,3,4,5 against bots needed */
-      modes = 1 * modesperline;
-      bots = (needed_modes + (modes - 1)) / modes;
+      amodes = 1 * modesperline;
+      bots = (double) needed_modes / amodes;
+      if (bots > (int)bots) bots = (int)bots+1; /* ceil(bots) */
 
       for (int min_alines = 2; min_alines <= 5; ++min_alines) {
-        if (bots > chanbotcount) {
-          modes = min_alines * modesperline;
-          bots = (needed_modes + (modes - 1)) / modes;
+        if ((int)bots > chanbotcount) {
+          amodes = min_alines * modesperline;
+          bots = (double) needed_modes / amodes;
+          if (bots > (int)bots) bots = (int)bots+1; /* ceil(bots) */
         } else
           break;
       }
 
-      if (bots > chanbotcount) {
+      force_slines = (amodes / modesperline);
+
+      /* lol einride is dumb */
+      if ((int)bots > chanbotcount) {
         putlog(LOG_MISC, "*", "Totally fucked calculations in cmd_mmode. this CAN'T happen.");
         dprintf(idx, "Something's wrong... bug the coder\n");
         free(targets);
@@ -756,15 +818,17 @@ static void cmd_mmode(int idx, char *par)
   if (force_slines)
     smodes = force_slines * modesperline;
   else
-    smodes = 5 * modesperline;
-  if (smodes < modes)
-    smodes = modes;
+    smodes = default_alines * modesperline;
+  if (smodes < amodes)
+    smodes = amodes;
 
   dprintf(idx, "Mass %s of %s\n", mode, chan->dname);
-  dprintf(idx, "  %d bots used.\n", bots);
+  dprintf(idx, "  %d bots used.\n", (int)bots);
   dprintf(idx, "  %d targets.\n", targetcount);
-  dprintf(idx, "  %d assumed modes per participating bot.\n", modes);
+  dprintf(idx, "  %d assumed modes per participating bot.\n", amodes);
+  dprintf(idx, "  %d assumed mode lines per participating bot.\n", amodes / modesperline);
   dprintf(idx, "  %d max modes per participating bot.\n", smodes);
+  dprintf(idx, "  %d max mode lines per participating bot.\n", smodes / modesperline);
   dprintf(idx, "  %d assumed modes per target nick.\n", overlap);
 
   int tpos = 0, bpos = 0, i = 0;
@@ -772,12 +836,15 @@ static void cmd_mmode(int idx, char *par)
 
   /* now use bots/modes to distribute nicks to MODE on */
   while (bots) {
-    if (!simul)
+    if (local)
+      simple_snprintf(work, sizeof(work), "%s %s", mode, chan->dname);
+    else if (!simul)
       simple_snprintf(work, sizeof(work), "dp %s %s", mode, chan->dname);
     else
       work[0] = 0;
+
     /* Make list of assumed lines (alines) */
-    for (i = 0; i < modes; i++) {
+    for (i = 0; i < amodes; ++i) {
       if (overlaps[tpos]++ < overlap) {
         strcat(work, " ");
         strcat(work, targets[tpos]->nick);
@@ -785,11 +852,12 @@ static void cmd_mmode(int idx, char *par)
       if (++tpos >= targetcount)
         tpos = 0;
     }
-    /* Now make lines of throttled modes (slines) */
-    if (smodes > modes) {
+
+    /* Now make lines of throttled modes (send lines) (slines) */
+    if (smodes > amodes) {
       int atpos = tpos;
-      for (i = 0; i < (smodes - modes); i++) {
-        if (overlaps[tpos]++ < overlap) {
+      for (i = 0; i < (smodes - amodes); ++i) {
+        if (overlaps[atpos]++ < overlap) {
           strcat(work, " ");
           strcat(work, targets[atpos]->nick);
         }
@@ -799,7 +867,9 @@ static void cmd_mmode(int idx, char *par)
     }
 
     if (simul)
-      dprintf(idx, "%s MODE %s %s\n", chanbots[bpos]->nick, mode, work);
+      dprintf(idx, "%-10s MODE %s %s\n", local ? botname : chanbots[bpos]->nick, mode, work);
+    else if (local)
+      mass_mode_request(conf.bot->nick, "dp", work);
     else
       putbot(chanbots[bpos]->user->handle, work);
     --bots;
@@ -813,51 +883,6 @@ static void cmd_mmode(int idx, char *par)
   free(overlaps);
   free(chanbots);
   return;
-}
-
-void mass_mode_request(char *botnick, char *code, char *par)
-{
-  char* mode = newsplit(&par);
-
-  if (strlen(mode) > 2 || !strchr("+-", mode[0]))
-    return;
-
-  char* chname = newsplit(&par);
-
-  char list[101] = "", buf[2048] = "";
-  size_t list_len = 0, buf_len = 0;
-
-  while (par[0]) {
-    int cnt = 0;
-
-    *(buf + buf_len++) = 'M';
-    *(buf + buf_len++) = 'O';
-    *(buf + buf_len++) = 'D';
-    *(buf + buf_len++) = 'E';
-    *(buf + buf_len++) = ' ';
-    buf_len += strlcpy(buf + buf_len, chname, sizeof(buf) - buf_len);
-    *(buf + buf_len++) = ' ';
-
-    while ((cnt < 4) && par[0]) {
-      /* add +mode into irc cmd */
-      buf_len += strlcpy(buf + buf_len, mode, sizeof(buf) - buf_len);
-
-      /* Make list of nicks */
-      char* nick = newsplit(&par);
-      list_len += strlcpy(list + list_len, nick, sizeof(list) - list_len); 
-      if (++cnt < 4 && par[0])
-        *(list + list_len++) = ' ';
-    }
-
-    /* buf is so far: 'MODE #chan +o+o+o+o' */
-    *(buf + buf_len++) = ' ';
-    buf_len += strlcpy(buf + buf_len, list, sizeof(buf) - buf_len);
-    *(buf + buf_len++) = '\r';
-    *(buf + buf_len++) = '\n';
-    list[0] = list_len = 0;
-  }
-  buf[buf_len] = 0;
-  tputs(serv, buf, buf_len);
 }
 
 static void cmd_deop(int idx, char *par)

@@ -29,6 +29,7 @@
 #include "server.h"
 #include <stdarg.h>
 
+int default_alines = 5;		/* How many mode lines are assumed will work before throttling */
 bool floodless = 0;		/* floodless iline? */
 int ctcp_mode;
 int serv = -1;		/* sock # of server currently */

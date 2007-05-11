@@ -1234,11 +1234,13 @@ See also: randstring, sha1, encrypt, decrypt
    Performs an action on the party line. This appears as "* Wcc is leaving",
    etc.
 :leaf:mmode:
-###  $bmmode$b <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul]
+###  $bmmode$b <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]
    For those of us who do not wish to be rocket scientists in the mass mode department, 
    a simple '%dmmode -o #channel o' will suffice.
  
-   **Remember, the bot you mmode on will never participate in the modes**
+   This is a distributed mass mode command.
+   The modes will be distributed among the necesary bots to accomplish the task.
+   **Remember, unless specificed, the bot you mmode on will never participate.**
  
    options:
  
@@ -1252,6 +1254,8 @@ See also: randstring, sha1, encrypt, decrypt
      $bbitch$b   - set +bitch after finished with mmode.
      $bsimul$b   - Simulates the mmode. IE: Gives you a practice run, will show who 
                    does what in the dcc chat window.
+     $blocal$b   - Modes will not be distributed: Ran on local bot only.
+                   Use this with caution, and do not expect good results.
  
      =============================================================================
      don't bother setting the following options unless you REALLY know what you're 

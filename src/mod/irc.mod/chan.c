@@ -1175,7 +1175,7 @@ do_take(struct chanset_t *chan)
   size_t deops_len = 0;
   size_t work_len = 0;
   register short lines = 0;
-  register const unsigned short max_lines = floodless ? 15 : 5;
+  register const unsigned short max_lines = floodless ? 15 : default_alines;
   char work[2048] = "", *op = NULL, *modeline = NULL, deops[2048] = "";
   register unsigned int deopn;
 
