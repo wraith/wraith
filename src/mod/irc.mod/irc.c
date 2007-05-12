@@ -1613,8 +1613,8 @@ do_nettype()
 }
 
 static cmd_t irc_bot[] = {
-  {"dp", "", (Function) mass_mode_request, NULL, LEAF},
   {"gi", "", (Function) getin_request, NULL, LEAF},
+  {"mr", "", (Function) mass_request, NULL, LEAF},
   {NULL, NULL, NULL, NULL, 0}
 };
 

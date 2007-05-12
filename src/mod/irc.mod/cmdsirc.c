@@ -525,15 +525,8 @@ static void cmd_op(int idx, char *par)
 
 }
 
-void mass_mode_request(char *botnick, char *code, char *par)
+static void mass_mode(const char* chname, const char* mode, char *par)
 {
-  char* mode = newsplit(&par);
-
-  if (strlen(mode) > 2 || !strchr("+-", mode[0]))
-    return;
-
-  char* chname = newsplit(&par);
-
   char list[101] = "", buf[2048] = "";
   size_t list_len = 0, buf_len = 0;
 
@@ -568,6 +561,19 @@ void mass_mode_request(char *botnick, char *code, char *par)
   }
   buf[buf_len] = 0;
   tputs(serv, buf, buf_len);
+}
+
+void mass_request(char *botnick, char *code, char *par)
+{
+  char* mode = newsplit(&par);
+
+  if (strlen(mode) > 2 || !strchr("+-kb", mode[0]))
+    return;
+
+  char* chname = newsplit(&par);
+
+  if (strchr("+-", mode[0]))
+    mass_mode(chname, mode, par);
 }
 
 static void cmd_mmode(int idx, char *par)
@@ -844,7 +850,7 @@ static void cmd_mmode(int idx, char *par)
     if (local)
       simple_snprintf(work, work_size, "%s %s", mode, chan->dname);
     else if (!simul)
-      simple_snprintf(work, work_size, "dp %s %s", mode, chan->dname);
+      simple_snprintf(work, work_size, "mr %s %s", mode, chan->dname);
     else
       work[0] = 0;
 
@@ -885,7 +891,7 @@ static void cmd_mmode(int idx, char *par)
     if (simul)
       dprintf(idx, "%-10s MODE %s %s\n", local ? botname : chanbots[bpos]->nick, mode, work);
     else if (local)
-      mass_mode_request(conf.bot->nick, "dp", work);
+      mass_request(conf.bot->nick, "mr", work);
     else
       putbot(chanbots[bpos]->user->handle, work);
 
