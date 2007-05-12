@@ -634,11 +634,12 @@ static void cmd_mmode(int idx, char *par)
 
   for (m = chan->channel.member; m; m = m->next) {
     if (m->user) {
-      if ((m->flags & CHANOP) && m->user->bot && (m->user->flags & USER_OP) &&
+      if ((m->flags & CHANOP) && m->user->bot &&
           (!match_my_nick(m->nick)) && (nextbot(m->user->handle) >= 0)) {
         chanbots[chanbotcount++] = m;
         continue;
-      }
+      } else if (match_my_nick(m->nick))
+        continue;
 
       get_user_flagrec(m->user, &user, chan->dname);
     }
@@ -832,14 +833,18 @@ static void cmd_mmode(int idx, char *par)
   dprintf(idx, "  %d assumed modes per target nick.\n", overlap);
 
   int tpos = 0, bpos = 0, i = 0;
-  char work[1024] = "";
+  char **work_list = (char**) my_calloc((int)bots, sizeof(char**));
+  char *work = NULL;
+  size_t work_size = 2048;
 
   /* now use bots/modes to distribute nicks to MODE on */
   while (bots) {
+    work = work_list[bpos] = (char*) my_calloc(1, work_size);
+
     if (local)
-      simple_snprintf(work, sizeof(work), "%s %s", mode, chan->dname);
+      simple_snprintf(work, work_size, "%s %s", mode, chan->dname);
     else if (!simul)
-      simple_snprintf(work, sizeof(work), "dp %s %s", mode, chan->dname);
+      simple_snprintf(work, work_size, "dp %s %s", mode, chan->dname);
     else
       work[0] = 0;
 
@@ -865,6 +870,17 @@ static void cmd_mmode(int idx, char *par)
           atpos = 0;
       }
     }
+    --bots;
+    ++bpos;
+  }
+
+  bots = bpos;
+  bpos = 0;
+
+  /* QUEUE *ALL*, then dump */
+
+  while (bots) {
+    char *work = work_list[bpos];
 
     if (simul)
       dprintf(idx, "%-10s MODE %s %s\n", local ? botname : chanbots[bpos]->nick, mode, work);
@@ -872,9 +888,13 @@ static void cmd_mmode(int idx, char *par)
       mass_mode_request(conf.bot->nick, "dp", work);
     else
       putbot(chanbots[bpos]->user->handle, work);
+
+    free(work_list[bpos]);
     --bots;
     ++bpos;
   }
+  free(work_list);
+
   if (bitch && !simul) {
     chan->status |= CHAN_BITCH;
     do_chanset(NULL, chan, "+bitch", DO_LOCAL | DO_NET);
