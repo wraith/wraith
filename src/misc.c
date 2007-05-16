@@ -568,7 +568,11 @@ void kill_bot(char *s1, char *s2)
 void
 readsocks(const char *fname)
 {
-  restarting = 1;
+  /* Don't bother setting this if a hub
+     ... it is only intended to prevent parting channels (in bot_shouldjoin())
+   */
+  if (!conf.bot->hub)
+    restarting = 1;
 
   FILE *f = NULL;
 
