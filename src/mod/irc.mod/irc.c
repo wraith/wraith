@@ -417,18 +417,20 @@ sdprintf("hash: %s", hash);
 #endif
 
   /* Compare the expected hash to each of the given hashes */
-
-
   /* indexHint, Which position of the +ooo are we? (1) could be either index (1) or (2).. but not (0). */
+
+  /* See if any of the cookies match the hash we want */
   for (size_t i = indexHint; i < hashes; ++i) {
-    cookie += ((i << 1) + i); /* i * 3 */
-    if ((hash[HASH_INDEX1(i)] == cookie[0] && 
-         hash[HASH_INDEX2(i)] == cookie[1] && 
-         hash[HASH_INDEX3(i)] == cookie[2])) {
+    const char *cookie_index = cookie + ((i << 1) + i); /* i * 3 */
+
+    if ((hash[HASH_INDEX1(i)] == cookie_index[0] && 
+         hash[HASH_INDEX2(i)] == cookie_index[1] && 
+         hash[HASH_INDEX3(i)] == cookie_index[2])) {
       return 0;
     }
   }
 
+  /* None matched -> failure */
   return BC_HASH;
 }
 

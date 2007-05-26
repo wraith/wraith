@@ -1125,7 +1125,7 @@ gotmode(char *from, char *msg)
                    * Punish the opper lastly (and once)
                  */
                 bool failure = 0;
-                for (i = 0; i < modecnt; i++) {
+                for (i = 0; i < (modecnt - 1); i++) { /* Don't need to hit the -b */
                   if (msign == '+' && mmode == 'o') {
                     mv = ismember(chan, mparam);
 
