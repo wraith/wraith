@@ -1577,7 +1577,6 @@ static int got324(char *from, char *msg)
   return 0;
 }
 
-
 static void memberlist_reposition(struct chanset_t *chan, memberlist *target) {
   /* Move target from it's current position to it's correct sorted position */
   memberlist *old = NULL, *m = NULL;
@@ -1615,7 +1614,7 @@ static void memberlist_reposition(struct chanset_t *chan, memberlist *target) {
 }
 
 
-static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick, char *flags, int hops)
+static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick, char *flags, int hops, char* realname, char* ip)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   char userhost[UHOSTLEN] = "";
@@ -1672,7 +1671,8 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (!m->userhost[0])
     simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
 
-  simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
+  if (!m->userip[0] && ip)
+    simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
 
   if (me) {			/* Is it me? */
 //    strcpy(botuserhost, m->userhost);		/* Yes, save my own userhost */
@@ -1690,7 +1690,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   }
 
   //userhost failed, let's try resolving them...
-  if (!m->user && doresolv(chan)) {
+  if (!m->user && !ip && doresolv(chan)) { /* !ip.. already checked for user earlier if set */
     if (is_dotted_ip(host))
       simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
     else  
@@ -1745,7 +1745,7 @@ static int got352(char *from, char *msg)
   chname = newsplit(&msg);	/* Grab the channel */
   chan = findchan(chname);	/* See if I'm on channel */
   if (chan) {			/* Am I? */
-    char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *hops = NULL;
+    char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *hops = NULL, *realname = NULL;
 
     user = newsplit(&msg);	/* Grab the user */
     host = newsplit(&msg);	/* Grab the host */
@@ -1753,8 +1753,9 @@ static int got352(char *from, char *msg)
     nick = newsplit(&msg);	/* Grab the nick */
     flags = newsplit(&msg);	/* Grab the flags */
     hops = newsplit(&msg);	/* grab server hops */
-    hops++;
-    got352or4(chan, user, host, nick, flags, atoi(hops));
+    ++hops;			/* Skip the : */
+    realname = newsplit(&msg);	/* realname/gecos */
+    got352or4(chan, user, host, nick, flags, atoi(hops), realname, NULL);
   }
   return 0;
 }
@@ -1770,15 +1771,17 @@ static int got354(char *from, char *msg)
       struct chanset_t *chan = findchan(chname);	/* See if I'm on channel */
 
       if (chan) {		/* Am I? */
-        char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *hops = NULL;
+        char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *hops = NULL, *realname = NULL, *ip = NULL;
 
 	user = newsplit(&msg);	/* Grab the user */
+        ip = newsplit(&msg);    /** Get the numeric IP :) */
 	host = newsplit(&msg);	/* Grab the host */
 	nick = newsplit(&msg);	/* Grab the nick */
 	flags = newsplit(&msg);	/* Grab the flags */
-        hops = newsplit(&msg);  /* yay for hops, does iru even have hops?? */
-        hops++;
-	got352or4(chan, user, host, nick, flags, atoi(hops));
+        hops = newsplit(&msg);  /* server hops */
+        ++hops;			/* Skip the : */
+        realname = newsplit(&msg); /* realname/gecos */
+	got352or4(chan, user, host, nick, flags, atoi(hops), realname, ip);
       }
     }
   }

@@ -1230,10 +1230,10 @@ hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly
         
         (!publicOnly && (
           getnick(u->handle, chan) || 
-          !(chan->channel.mode & (CHANPRIV|CHANSEC)) || 
+          !(channel_hidden(chan)) || 
           chk_op(fr, chan)
         )) ||
-        (publicOnly && !(chan->channel.mode & (CHANPRIV|CHANSEC)))
+        (publicOnly && !(channel_hidden(chan)))
        ) {
       if (chans[0])
         simple_snprintf(chans, len, "%s %s%s", chans, s, chname);

@@ -261,8 +261,7 @@ static void cmd_kickban(int idx, char *par)
       dprintf(idx, "%s is another channel bot!\n", nick);
       return;
     }
-    if (use_exempts && (u_match_mask(global_exempts,s) ||
-        u_match_mask(chan->exempts, s))) {
+    if (u_match_mask(global_exempts,s) || u_match_mask(chan->exempts, s)) {
       dprintf(idx, "%s is permanently exempted!\n", nick);
       return;
     }

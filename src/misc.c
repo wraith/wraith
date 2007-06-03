@@ -40,8 +40,8 @@
 #include <signal.h>
 
 int		server_lag = 0;	/* GUESS! */
-bool		use_invites = 1;            /* Jason/drummer */
-bool		use_exempts = 1;            /* Jason/drummer */
+bool		use_invites = 0;
+bool		use_exempts = 0;
 
 /*
  *    Misc functions

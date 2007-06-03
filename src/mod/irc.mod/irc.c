@@ -1224,8 +1224,8 @@ reset_chan_info(struct chanset_t *chan)
     }
     /* These 2 need to get out asap, so into the mode queue */
     dprintf(DP_MODE, "MODE %s\n", chan->name);
-    if (use_354)
-      dprintf(DP_MODE, "WHO %s %%c%%h%%n%%u%%f\n", chan->name);
+    if (use_354) /* Added benefit of getting numeric IP! :) */
+      dprintf(DP_MODE, "WHO %s %%c%%h%%n%%u%%f%%r%%d%%i\n", chan->name);
     else
       dprintf(DP_MODE, "WHO %s\n", chan->name);
     /* clear_channel nuked the data...so */

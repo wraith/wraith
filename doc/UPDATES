@@ -55,6 +55,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Bad uname EMAILS now include the localhub's nick. (fixes #354)
 * -host now accepts partial host masks, ie, '-host user@host'.
 * Rewrote cmd_mdop into cmd_mmode. See 'help mmode' on a leaf bot.
+* Fixed bots having problems with kick/bans on undernet.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
