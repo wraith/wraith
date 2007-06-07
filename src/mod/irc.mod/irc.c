@@ -546,12 +546,13 @@ getin_request(char *botnick, char *code, char *par)
     }
 
     if (!mem->user && !mem->tried_getuser) {
+      simple_snprintf(uhost, sizeof(uhost), "%s!%s", nick, mem->userhost);
       mem->user = get_user_by_host(uhost);
       mem->tried_getuser = 1;
     }
 
     if (mem->user != u) {
-      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s doesn't match %s", botnick, nick, chan->dname, nick, botnick);
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - user mismatch: (%s)/(%s)", botnick, nick, chan->dname, u ? u->handle : "*",  mem->user ? mem->user->handle : "*");
       return;
     }
 
