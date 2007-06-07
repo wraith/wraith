@@ -957,6 +957,18 @@ identd_open()
     } else
       killsock(i);
   }
+
+  if (conf.homedir && oidentd) {
+    char oidentd_conf[1024] = "";
+
+    simple_snprintf(oidentd_conf, sizeof(oidentd_conf), "%s/.oidentd.conf", conf.homedir);
+
+    FILE *f = fopen(oidentd_conf, "w");
+    if (f) {
+      fprintf(f, "global { reply \"%s\" }\n", conf.bot->nick);
+      fclose(f);
+    }
+  }
 }
 
 void

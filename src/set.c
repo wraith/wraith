@@ -26,13 +26,14 @@ bool auth_chan;
 char auth_key[51] = "";
 char auth_prefix[2] = "";
 bool auth_obscure;
+bool oidentd;
+int dcc_autoaway;
 #ifdef NOT_USED
 int badprocess = DET_IGNORE;
 char process_list[1024] = "";
 #endif
 bool dccauth = 0;
 char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop";
-int dcc_autoaway;
 int cloak_script = 0;
 rate_t close_threshold;
 int fight_threshold;
@@ -92,6 +93,7 @@ static variable_t vars[] = {
  VAR("msg-op",		msgop,			VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("nick",		origbotname,		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB,	0, 0, NULL),
+ VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "1"),
  VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
 #ifdef NOT_USED
