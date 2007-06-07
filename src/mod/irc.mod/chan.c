@@ -1623,8 +1623,6 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 //  struct chanset_t *ch = NULL;
 //  memberlist *ml = NULL;
 
-  me = match_my_nick(nick);
-
   if (!m) {			/* Nope, so update */
     m = newmember(chan, nick);	/* Get a new channel entry */
     m->joined = m->split = m->delay = 0L;	/* Don't know when he joined */
@@ -1673,6 +1671,10 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 
   if (!m->userip[0] && ip)
     simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
+
+  simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
+
+  me = match_my_nick(nick);
 
   if (me) {			/* Is it me? */
 //    strcpy(botuserhost, m->userhost);		/* Yes, save my own userhost */
