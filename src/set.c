@@ -11,6 +11,7 @@
 #include "chanprog.h"
 #include "match.h"
 #include "misc.h"
+#include "net.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/ctcp.mod/ctcp.h"
@@ -27,6 +28,7 @@ char auth_key[51] = "";
 char auth_prefix[2] = "";
 bool auth_obscure;
 bool oidentd;
+bool ident_botnick;
 int dcc_autoaway;
 #ifdef NOT_USED
 int badprocess = DET_IGNORE;
@@ -80,6 +82,7 @@ static variable_t vars[] = {
  VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
  VAR("homechan",	homechan,		VAR_STRING|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
+ VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "2"),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
@@ -262,6 +265,9 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       num = 1;
 
     *(bool *) (var->mem) = num;
+
+    if (!strcmp(var->name, "ident-botnick"))
+      strlcpy(botuser, conf.username && !num ? conf.username : origbotname, 21);
   } else if (var->flags & VAR_STRING) {
     if (data)
       strlcpy((char *) var->mem, data, var->size);

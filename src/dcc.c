@@ -556,8 +556,8 @@ dcc_identd(int idx, char *buf, int atr)
 {
   char outbuf[1024] = "";
 
-  simple_snprintf(outbuf, sizeof outbuf, "%s : USERID : UNIX : %s\n", buf, conf.bot->nick);
-  tputs(dcc[idx].sock, outbuf, strlen(outbuf));
+  size_t len = simple_snprintf(outbuf, sizeof outbuf, "%s : USERID : UNIX : %s\n", buf, botuser);
+  tputs(dcc[idx].sock, outbuf, len);
 
   /* just close it, functions neededing it will open it. */
   identd_close();

@@ -57,6 +57,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Rewrote cmd_mdop into cmd_mmode. See 'help mmode' on a leaf bot.
 * Fixed bots having problems with kick/bans on undernet.
 * Added oidentd support. set 'oidentd' on makes bot spoof as BOTNICK.
+* Made 'ident-botnick' variable to decide to send username vs botnick for non-ident.
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

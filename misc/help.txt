@@ -1558,6 +1558,7 @@ See also: reload, backup
 [S]  $bnick$b            The bot's preferred nickname on IRC.
 [N]  $bnotify-time$b     The number of seconds between server notify checks for nick.
 
+[B]  $bident-botnick$b   Send botnick instead of shell username on connect (non-ident)
 [B]  $boidentd$b         Make bot try and use oidentd spoofing as BOTNICK.
  
 [B]  $bdccauth$b         Boolean (0 or 1). Set to use auth checking on dcc/telnet login.

@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include "common.h"
 #include "color.h"
+#include "chanprog.h"
 #include "userrec.h"
 #include "dcc.h"
 #include "auth.h"
@@ -965,7 +966,7 @@ identd_open()
 
     FILE *f = fopen(oidentd_conf, "w");
     if (f) {
-      fprintf(f, "global { reply \"%s\" }\n", conf.bot->nick);
+      fprintf(f, "global { reply \"%s\" }\n", origbotname);
       fclose(f);
     }
   }
