@@ -469,7 +469,7 @@ static void core_secondly()
 #endif /* CRAZY_TRACE */
   if (fork_interval && backgrd && ((now - lastfork) > fork_interval))
       do_fork();
-  cnt++;
+  ++cnt;
 
   if ((cnt % 30) == 0) {
     autolink_cycle(NULL);         /* attempt autolinks */
@@ -483,7 +483,7 @@ static void core_secondly()
       server_send_ison();
       ison_cnt = 0;
     } else
-      ison_cnt++;
+      ++ison_cnt;
   }
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
