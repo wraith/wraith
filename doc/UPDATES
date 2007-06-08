@@ -58,6 +58,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed bots having problems with kick/bans on undernet.
 * Added oidentd support. set 'oidentd' on makes bot spoof as BOTNICK.
 * Made 'ident-botnick' variable to decide to send username vs botnick for non-ident.
+* Default servers/servers6/alias list updated ('set -YES var -' to use it)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
