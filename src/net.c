@@ -58,6 +58,7 @@ sock_list *socklist = NULL;	/* Enough to be safe			    */
 int	MAXSOCKS = 0;
 jmp_buf	alarmret;		/* Env buffer for alarm() returns	    */
 
+/* This *MUST* be an ip */
 char   firewall[121] = "";     /* Socks server for firewall                */
 port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
 /* Types of proxy */
@@ -529,9 +530,9 @@ void real_killsock(register int sock, const char *file, int line)
 
 /* Send connection request to proxy
  */
-static int proxy_connect(int sock, const char *host, port_t port, int proxy_type)
+static int proxy_connect(int sock, const char *ip, port_t port, int proxy_type)
 {
-  sdprintf("proxy_connect(%d, %s, %d, %d)", sock, host, port, proxy_type);
+  sdprintf("proxy_connect(%d, %s, %d, %d)", sock, ip, port, proxy_type);
 #ifdef USE_IPV6
   unsigned char x[32] = "";
   int af_ty = sockprotocol(sock);
@@ -543,39 +544,15 @@ static int proxy_connect(int sock, const char *host, port_t port, int proxy_type
   /* socks proxy */
   if (proxy_type == PROXY_SOCKS) {
     /* numeric IP? */
-#ifdef USE_IPV6
-    if ((host[strlen(host) - 1] >= '0' && host[strlen(host) - 1] <= '9') && af_ty != AF_INET6) {
-#else
-    if (host[strlen(host) - 1] >= '0' && host[strlen(host) - 1] <= '9') {
-#endif /* USE_IPV6 */
-      in_addr_t ip = ((in_addr_t) inet_addr(host));
-      egg_memcpy(x, &ip, 4);
-    } else {
-      struct hostent *hp = NULL;
-
-      /* no, must be host.domain */
-      if (!setjmp(alarmret)) {
-#ifdef USE_IPV6
-        alarm(resolve_timeout);
-        if (af_ty == AF_INET6)
-          hp = gethostbyname(host);
-        else
-#endif /* USE_IPV6 */
-          hp = gethostbyname(host);
-#ifdef USE_IPV6
-        alarm(0);
-#endif /* USE_IPV6 */
-      } else
-        hp = NULL;
-      if (hp == NULL) {
-        killsock(sock);
-        return -2;
-      }
-      egg_memcpy(x, hp->h_addr, hp->h_length);
+    if (is_dotted_ip(ip)) {
+      in_addr_t ipaddr = ((in_addr_t) inet_addr(ip));
+      egg_memcpy(x, &ipaddr, 4);
+    } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
+      return -1;
     }
     for (int i = 0; i < MAXSOCKS; i++)
       if (!(socklist[i].flags & SOCK_UNUSED) && socklist[i].sock == sock)
-        socklist[i].flags |= SOCK_PROXYWAIT;    /* drummer */
+        socklist[i].flags |= SOCK_PROXYWAIT;
 #ifdef USE_IPV6
     if (af_ty == AF_INET6)
       simple_snprintf(s, sizeof s,
@@ -587,12 +564,12 @@ static int proxy_connect(int sock, const char *host, port_t port, int proxy_type
 #endif /* USE_IPV6 */
       simple_snprintf(s, sizeof s, "\004\001%c%c%c%c%c%c%s", (port >> 8) % 256,
                    (port % 256), x[0], x[1], x[2], x[3], botuser);
-    tputs(sock, s, strlen(botuser) + 9);        /* drummer */
+    tputs(sock, s, strlen(botuser) + 9);
   } else if (proxy_type == PROXY_SUN) {
-    simple_snprintf(s, sizeof s, "%s %d\n", host, port);
-    tputs(sock, s, strlen(s));  /* drummer */
+    simple_snprintf(s, sizeof s, "%s %d\n", ip, port);
+    tputs(sock, s, strlen(s));
   } else if (proxy_type == PROXY_HTTP) {
-    simple_snprintf(s, sizeof s, "CONNECT %s:%d\n\n", host, port);
+    simple_snprintf(s, sizeof s, "CONNECT %s:%d\n\n", ip, port);
     tputs(sock, s, strlen(s));
   }
 
@@ -637,11 +614,11 @@ void initialize_sockaddr(int af_type, const char *host, port_t port, union socka
  *   -1  strerror()/errno type error
  *   -2  can't resolve hostname
  */
-int open_telnet_raw(int sock, const char *server, port_t sport, bool proxy_on)
+int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on)
 {
   static port_t port = 0;
   union sockaddr_union so;
-  char host[121] = "";
+  char ip[121] = "";
   int is_resolved = 0;
   volatile int proxy_type = 0, proxy = proxy_on;
 
@@ -650,26 +627,26 @@ int open_telnet_raw(int sock, const char *server, port_t sport, bool proxy_on)
     switch (firewall[0]) {
       case '!':
         proxy_type = PROXY_SUN;
-        strlcpy(host, &firewall[1], sizeof(host));
+        strlcpy(ip, &firewall[1], sizeof(ip));
         break;
       case '@':
         proxy_type = PROXY_HTTP;
-        strlcpy(host, &firewall[1], sizeof(host));
+        strlcpy(ip, &firewall[1], sizeof(ip));
         break;
       default:
         proxy_type = PROXY_SOCKS;
-        strlcpy(host, firewall, sizeof(host));
+        strlcpy(ip, firewall, sizeof(ip));
       break;
     }
     port = firewallport;
   } else {
     proxy_type = 0;
-    strlcpy(host, server, sizeof host);
+    strlcpy(ip, ipIn, sizeof(ip));
     port = sport;
   }
 
   /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
-  if ((is_resolved = is_dotted_ip(server))) {	/* already resolved */
+  if ((is_resolved = is_dotted_ip(ip))) {	/* already resolved */
   
     /* bind to our cached ip for v4/v6 depending on what the ip is */
     initialize_sockaddr(is_resolved, NULL, 0, &so);
@@ -681,16 +658,16 @@ int open_telnet_raw(int sock, const char *server, port_t sport, bool proxy_on)
     }
 
     /* initialize so for connect using the host/port */
-    initialize_sockaddr(is_resolved, host, port, &so);
+    initialize_sockaddr(is_resolved, ip, port, &so);
   } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
-    sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", host, port);
+    sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", ip, port);
     return -1;
   }
 
   for (int i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == sock)) {
       socklist[i].flags = (socklist[i].flags & ~SOCK_VIRTUAL) | SOCK_CONNECT;
-      socklist[i].host = strdup(server);
+      socklist[i].host = strdup(ipIn);
       socklist[i].port = port;
     }
   }
@@ -702,39 +679,39 @@ int open_telnet_raw(int sock, const char *server, port_t sport, bool proxy_on)
 
   if (rc < 0) {    
     if (errno == EINPROGRESS) {
-      debug3("net: connect(%d, %s, %d)", sock, server, sport);
+      debug3("net: connect(%d, %s, %d)", sock, ipIn, sport);
       /* Firewall?  announce connect attempt to proxy */
       if (proxy)
-	return proxy_connect(sock, server, sport, proxy_type);
+	return proxy_connect(sock, ipIn, sport, proxy_type);
       return sock;		/* async success! */
     } else {
-      sdprintf("connect(%d, %s, %d) failed: %s", sock, server, sport, strerror(errno));
+      sdprintf("connect(%d, %s, %d) failed: %s", sock, ip, sport, strerror(errno));
       killsock(sock);
       return -1;
     }
   }
 
   /* Synchronous? :/ */
-  debug3("net: (BLOCKING) connect(%d, %s, %d)", sock, server, sport);
+  debug3("net: (BLOCKING) connect(%d, %s, %d)", sock, ipIn, sport);
 
   if (proxy)
-    return proxy_connect(sock, server, sport, proxy_type);
+    return proxy_connect(sock, ipIn, sport, proxy_type);
 
   return sock;
 }
 
 /* Ordinary non-binary connection attempt */
-int open_telnet(const char *server, port_t port, bool proxy)
+int open_telnet(const char *ip, port_t port, bool proxy)
 {
   int sock = -1;
   
 #ifdef USE_IPV6
-  sock = getsock(0, is_dotted_ip(server));
+  sock = getsock(0, is_dotted_ip(ip));
 #else
   sock = getsock(0);
 #endif /* USE_IPV6 */
   if (sock >= 0)
-    return open_telnet_raw(sock, server, port, proxy);
+    return open_telnet_raw(sock, ip, port, proxy);
   return -1;
 }
 
@@ -1012,17 +989,18 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
   return new_sock;
 }
 
-/* Like open_telnet, but uses server & port specifications of dcc
+/* Like open_telnet, but uses ip & port specifications of dcc
+   Take a longip and make into dotted form
  */
-int open_telnet_dcc(int sock, char *server, char *port)
+int open_telnet_dcc(int sock, char *ip, char *port)
 {
   port_t p;
   unsigned long addr;
-  char sv[500] = "";
+  char sv[100] = "";
   unsigned char c[4] = "";
 
 #ifdef DEBUG_IPV6
-  debug1("open_telnet_dcc %s", server);
+  debug1("open_telnet_dcc %s", ip);
 #endif /* DEBUG_IPV6 */
   if (port != NULL)
     p = atoi(port);
@@ -1033,12 +1011,11 @@ int open_telnet_dcc(int sock, char *server, char *port)
 #  ifdef DEBUG_IPV6
     debug0("open_telnet_dcc, af_inet6!");
 #  endif /* DEBUG_IPV6 */
-    strlcpy(sv, server, sizeof sv);
-    debug2("%s should be %s",sv,server);
+    strlcpy(sv, ip, sizeof(sv));
   } else {
 #endif /* USE_IPV6 */
-    if (server != NULL)
-      addr = my_atoul(server);
+    if (ip != NULL)
+      addr = my_atoul(ip);
     else
       addr = 0L;
     if (addr < (1 << 24))
@@ -1049,7 +1026,7 @@ int open_telnet_dcc(int sock, char *server, char *port)
     c[3] = addr & 0xff;
     simple_sprintf(sv, "%u.%u.%u.%u", c[0], c[1], c[2], c[3]);
 #ifdef USE_IPV6
-    }
+  }
   /* strcpy(sv,hostnamefromip(addr)); */
 #  ifdef DEBUG_IPV6
   debug3("open_telnet_raw %s %d %d", sv, sock, p);
