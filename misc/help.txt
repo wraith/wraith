@@ -405,7 +405,7 @@ See also: link
         delete/remove/3    Remove user
       
       $bbad-cookie$b             Missing or invalid cookie in bot op line.
-      $bmanop$b                  Users who op manually in a -manop chan.
+      $bmanop$b                  Users who op manually.
       $bmdop$b                   Users who mass deop.
       $bmop$b                    Users who mass op in a -mop chan.
  
