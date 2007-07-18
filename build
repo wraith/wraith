@@ -235,8 +235,8 @@ elif ! [ $scp = "0" ]; then
   chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d}${exe} ChangeLog-${builddate}.gz ${extras_local}
-  ssh -i misc/id_dsa bdrewery@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
-  ssh -i misc/id_dsa bdrewery@endurance.quadspeedi.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
+  ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
+  ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
 fi
 
 

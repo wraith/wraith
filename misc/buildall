@@ -1,6 +1,6 @@
 #!/bin/sh
 
-scp_target="bdrewery@endurance.quadspeedi.net"
+scp_target="shatow@wraith.shatow.net"
 dir="public_html/builds"
 
 if test $# -lt 1; then
