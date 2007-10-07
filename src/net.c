@@ -226,7 +226,7 @@ char *myipstr(int af_type)
 {
   if (cached_ip) {
 #ifdef USE_IPV6
-    if (af_type == 6) {
+    if (af_type == AF_INET6) {
       static char s[UHOSTLEN + 1] = "";
 
       egg_inet_ntop(AF_INET6, &cached_myip6_so.sin6.sin6_addr, s, 119);
@@ -234,7 +234,7 @@ char *myipstr(int af_type)
       return s;
     } else
 #endif /* USE_IPV6 */
-      if (af_type == 4) {
+      if (af_type == AF_INET) {
         static char s[UHOSTLEN + 1] = "";
 
         egg_inet_ntop(AF_INET, &cached_myip4_so.sin.sin_addr, s, 119);
@@ -614,7 +614,7 @@ void initialize_sockaddr(int af_type, const char *host, port_t port, union socka
  *   -1  strerror()/errno type error
  *   -2  can't resolve hostname
  */
-int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on)
+int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, bool identd)
 {
   static port_t port = 0;
   union sockaddr_union so;
@@ -669,8 +669,12 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on)
       socklist[i].flags = (socklist[i].flags & ~SOCK_VIRTUAL) | SOCK_CONNECT;
       socklist[i].host = strdup(ipIn);
       socklist[i].port = port;
+      break;
     }
   }
+
+  if (identd)
+    identd_open(myipstr(is_resolved), ipIn);
 
   int rc = -1;
 
@@ -701,7 +705,7 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on)
 }
 
 /* Ordinary non-binary connection attempt */
-int open_telnet(const char *ip, port_t port, bool proxy)
+int open_telnet(const char *ip, port_t port, bool proxy, bool identd)
 {
   int sock = -1;
   
@@ -711,7 +715,7 @@ int open_telnet(const char *ip, port_t port, bool proxy)
   sock = getsock(0);
 #endif /* USE_IPV6 */
   if (sock >= 0)
-    return open_telnet_raw(sock, ip, port, proxy);
+    return open_telnet_raw(sock, ip, port, proxy, identd);
   return -1;
 }
 

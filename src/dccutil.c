@@ -10,6 +10,7 @@
 
 
 #include <sys/stat.h>
+#include <sys/file.h>
 #include "common.h"
 #include "color.h"
 #include "chanprog.h"
@@ -867,7 +868,7 @@ listen_all(port_t lport, bool off)
         /* now setup ipv4/ipv6 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = 0L;
-        strcpy(dcc[idx].host6, myipstr(6));
+        strcpy(dcc[idx].host6, myipstr(AF_INET6));
         dcc[idx].port = port;
         dcc[idx].sock = i6;
         dcc[idx].timeval = now;
@@ -921,7 +922,7 @@ listen_all(port_t lport, bool off)
 }
 
 void
-identd_open()
+identd_open(const char *sourceIp, const char *destIp)
 {
   int idx;
   int i = -1;
@@ -959,14 +960,58 @@ identd_open()
       killsock(i);
   }
 
-  if (conf.homedir && oidentd) {
+  /* Only makes sense if we're spoofing by nick */
+  if (conf.homedir && oidentd && ident_botnick) {
     char oidentd_conf[1024] = "";
 
     simple_snprintf(oidentd_conf, sizeof(oidentd_conf), "%s/.oidentd.conf", conf.homedir);
 
-    FILE *f = fopen(oidentd_conf, "w");
+    sdprintf("Attempting to spoof ident with oidentd (%s)", oidentd_conf);
+    FILE *f = NULL;
+
+    /* Wait for any locks to finish up */
+    while ((f = fopen(oidentd_conf, "a+")) == NULL)
+      ;
+
     if (f) {
-      fprintf(f, "global { reply \"%s\" }\n", origbotname);
+      flock(fileno(f), LOCK_EX);
+      fseek(f, 0, SEEK_SET);
+
+      char inbuf[100] = "", outbuf[2048] = "";
+
+      /* Clear any of my matching ips and username */
+
+      while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
+        if(inbuf[0] == '\n') continue;
+        char *line = strdup(inbuf), *p = line;
+        newsplit(&line); /* to */
+        newsplit(&line); /* ip */
+        if (!strcmp(newsplit(&line), "from") && !strcmp(newsplit(&line), sourceIp)) {
+          free(p);
+          continue;
+        }
+
+
+        char reply[100] = "";
+        simple_snprintf(reply, sizeof(reply), "reply \"%s\"", origbotname);
+
+        if (strstr(line, reply)) {
+          free(p);
+          continue;
+        }
+
+        strlcat(outbuf, inbuf, sizeof(outbuf));
+        free(p);
+      }
+
+      ftruncate(fileno(f), 0);
+      fwrite(outbuf, 1, strlen(outbuf), f);
+
+      //And make a record in the oidentd.conf to spoof the ident request from this port->dest-prot
+      fprintf(f, "to %s from %s { reply \"%s\" }\n", destIp, sourceIp, origbotname);
+      
+      fflush(f);
+      flock(fileno(f), LOCK_UN);
       fclose(f);
     }
   }

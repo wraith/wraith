@@ -639,7 +639,7 @@ readsocks(const char *fname)
   if (servidx >= 0) {
     char nserv[50] = "";
 
-    if ((ip4 && ip6) && (strcmp(ip4, myipstr(4)) || strcmp(ip6, myipstr(6)))) {
+    if ((ip4 && ip6) && (strcmp(ip4, myipstr(AF_INET)) || strcmp(ip6, myipstr(AF_INET6)))) {
       if (tands > 0) {		/* We're not linked yet.. but for future */
         botnet_send_chat(-1, conf.bot->nick, "IP changed.");
         botnet_send_bye("IP changed.");
@@ -711,8 +711,8 @@ restart(int idx)
   if (floodless)
     lfprintf(socks->f, "+server_floodless %d\n", floodless);
   lfprintf(socks->f, "+buildts %li\n", buildts);
-  lfprintf(socks->f, "+ip4 %s\n", myipstr(4));
-  lfprintf(socks->f, "+ip6 %s\n", myipstr(6));
+  lfprintf(socks->f, "+ip4 %s\n", myipstr(AF_INET));
+  lfprintf(socks->f, "+ip6 %s\n", myipstr(AF_INET6));
 
   fflush(socks->f);
   socks->my_close();

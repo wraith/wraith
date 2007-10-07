@@ -139,9 +139,9 @@ int open_address_listen(in_addr_t, int, port_t *);
 #else
 int open_address_listen(in_addr_t, port_t *);
 #endif /* USE_IPV6 */
-int open_telnet(const char *, port_t, bool);
+int open_telnet(const char *, port_t, bool proxy = 0, bool identd = 0);
 int open_telnet_dcc(int, char *, char *);
-int open_telnet_raw(int, const char *, port_t, bool);
+int open_telnet_raw(int, const char *, port_t, bool, bool = 0);
 void tputs(int, char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);

@@ -564,17 +564,17 @@ void chanprog()
   char *ip4 = NULL, *ip6 = NULL;
 
   if (cached_ip) {
-    ip4 = strdup(myipstr(4));
-    ip6 = strdup(myipstr(6));
+    ip4 = strdup(myipstr(AF_INET));
+    ip6 = strdup(myipstr(AF_INET6));
   }
 
   cache_my_ip();
-  sdprintf("ip4: %s", myipstr(4));
-  sdprintf("ip6: %s", myipstr(6));
+  sdprintf("ip4: %s", myipstr(AF_INET));
+  sdprintf("ip6: %s", myipstr(AF_INET6));
 
   /* Check if our ip changed during a rehash */
   if (ip4) {
-    if (strcmp(ip4, myipstr(4)) || strcmp(ip6, myipstr(6))) {
+    if (strcmp(ip4, myipstr(AF_INET)) || strcmp(ip6, myipstr(AF_INET6))) {
       if (tands > 0) {
         botnet_send_chat(-1, conf.bot->nick, "IP changed.");
         botnet_send_bye("IP changed.");

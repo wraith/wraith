@@ -1572,9 +1572,10 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
   strcpy(serverpass, (char *) dcc[idx].u.dns->cbuf);
   changeover_dcc(idx, &SERVER_SOCKET, 0);
 
-  identd_open();
+//  identd_open(idx);
 
-  serv = open_telnet(ip, dcc[idx].port, 0);
+  //No proxy, use identd
+  serv = open_telnet(ip, dcc[idx].port, 0, 1);
 
   if (serv < 0) {
     putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, strerror(errno));
