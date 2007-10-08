@@ -958,6 +958,7 @@ gotmode(char *from, char *msg)
 {
 #define msign	modes[i][0]
 #define mmode	modes[i][1]
+/* 2 = space */
 #define mparam	&modes[i][3]
   /* Usermode changes? */
   if (msg[0] && (strchr(CHANMETA, msg[0]) != NULL)) {
@@ -1029,14 +1030,18 @@ gotmode(char *from, char *msg)
         if (strchr("+-", *chg))
           sign = *chg;
         else {
-          char* mp = newsplit(&msg);       /* PARAM as noted above */
-          fixcolon(mp);
+          char* mp = NULL;
+
+          if (strchr("beIlkov", chg[0])) {
+            mp = newsplit(&msg);       /* PARAM as noted above */
+            fixcolon(mp);
+          }
 
           /* Just want o's and b's */
           modes = (char **) my_realloc(modes, (modecnt * sizeof(char *)) + sizeof(char *));
 //      char **modes = (char **) my_calloc(modesperline + 1, sizeof(char *));
 
-          size_t siz = strlen(mp) + 3 + 1;
+          size_t siz = (mp ? strlen(mp) : 0) + 3 + 1;
           modes[modecnt] = (char *) my_calloc(1, siz);
           simple_snprintf(modes[modecnt], siz, "%c%c %s", sign, chg[0], mp ? mp : "");
           ++modecnt;
