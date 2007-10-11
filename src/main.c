@@ -262,13 +262,15 @@ static void show_help()
   egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
 
   printf(STR("%s\n\n"), version);
+  printf(STR("%s [options] [botnick]\n"));
+  printf(STR("Not supplying any options will make all bots in the binary spawn.\n"));
   printf(format, "Option", "Description");
   printf(format, "------", "-----------");
-  printf(format, STR("-B <botnick>"), STR("Starts the specified bot"));
-  printf(format, STR("-c"), STR("Crypt/Hash functions (MD5/SHA1/AES256)"));
+  printf(format, STR("-B <botnick>"), STR("Starts the specified bot [deprecated]"));
+  printf(format, STR("-c"), STR("Config file editor [reads env: EDITOR] [No auto update]"));
   printf(format, STR("-C"), STR("Config file editor [reads env: EDITOR]"));
-  printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
-  printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
+//  printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
+//  printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
   printf(format, STR("-D"), STR("Enables debug mode (see -n)"));
   printf(format, STR("-E [error code]"), STR("Display Error codes english translation"));
 /*  printf(format, STR("-g <file>"), STR("Generates a template config file"));
@@ -276,9 +278,9 @@ static void show_help()
 */
   printf(format, "-h", "Display this help listing");
   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9 (see also: -r)"));
-  printf(format, STR("-n"), STR("Disables backgrounding bot (requires -B)"));
+  printf(format, STR("-n"), STR("Disables backgrounding bot (requires [-B] <botnick>)"));
   printf(format, STR("-r <botname>"), STR("Restarts the specified bot (see also: -k)"));
-  printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
+//  printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -nB)"));
   printf(format, STR("-u <binary>"), STR("Update binary, Automatically kill/respawn bots"));
   printf(format, STR("-U <binary>"), STR("Update binary"));
@@ -289,7 +291,7 @@ static void show_help()
 // leaf: BkLP
 #define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:tu:U:v")
 #define FLAGS_CHECKPASS STR("cCdDeEhknrtuUv")
-static void dtx_arg(int argc, char *argv[])
+static void dtx_arg(int& argc, char *argv[])
 {
   int i = 0;
   char *p = NULL;
@@ -402,6 +404,12 @@ static void dtx_arg(int argc, char *argv[])
       default:
         break;
     }
+  }
+
+  if ((argc - (optind - 1)) == 2) {
+    used_B = 1;
+    strlcpy(origbotname, argv[optind], HANDLEN + 1);
+    strlcpy(origbotnick, argv[optind], HANDLEN + 1);
   }
 }
 
