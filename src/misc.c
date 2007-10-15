@@ -352,7 +352,9 @@ void show_banner(int idx)
     dumplots(-dcc[idx].sock, "", wbanner()); 
   dprintf(idx, " \n");
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
-  dprintf(-dcc[idx].sock, STR("|             - http://wraith.shatow.net/ -             |\n"));
+  dprintf(-dcc[idx].sock, STR("|             - http://wraith.botpack.net/ -            |\n"));
+  dprintf(-dcc[idx].sock, STR("|  Get Shell/Irc/Web hosting @ http://www.outlandz.net  |\n"));
+  dprintf(-dcc[idx].sock, STR("|  Use coupon code 'wraith' for 20% off lifetime        |\n"));
   dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
   dprintf(idx, " \n");
 
