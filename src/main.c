@@ -174,12 +174,13 @@ void fatal(const char *s, int recoverable)
   if (my_port)
     listen_all(my_port, 1); /* close the listening port... */
 
-  for (int i = 0; i < dcc_total; i++)
+  for (int i = 0; i < dcc_total; i++) {
     sdprintf("Closing %d sockets", dcc_total);
     if (dcc[i].type && dcc[i].sock >= 0) {
       killsock(dcc[i].sock);
       lostdcc(i);
     }
+  }
 
   if (!recoverable) {
 //    if (conf.bot && conf.bot->pid_file)
