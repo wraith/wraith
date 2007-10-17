@@ -159,6 +159,7 @@ static char *getfullbinname(const char *argv_zero)
 
 void fatal(const char *s, int recoverable)
 {
+  sdprintf("FATAL(%d) %s", recoverable, s);
   if (server_online)
     nuke_server((char *) s);
 
@@ -174,6 +175,7 @@ void fatal(const char *s, int recoverable)
     listen_all(my_port, 1); /* close the listening port... */
 
   for (int i = 0; i < dcc_total; i++)
+    sdprintf("Closing %d sockets", dcc_total);
     if (dcc[i].type && dcc[i].sock >= 0) {
       killsock(dcc[i].sock);
       lostdcc(i);
