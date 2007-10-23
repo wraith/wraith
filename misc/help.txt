@@ -1861,13 +1861,14 @@ See also: whom
       $bv$b = voice (user gets +v automatically from +y bots)
  
    Valid user-only flags:
-      $ba$b - admin (user has absolute control over botnet minus a few perm-owner only cmds)
+      $ba$b = admin (user has absolute control over botnet minus a few perm-owner only cmds)
               Be careful who you give this to, only the perm-owner of the net should even have it.
-      $bi$b - hub access (user has hub DCC access)
-      $bj$b - leaf access (user has leaf DCC access)
+      $bi$b = hub access (user has hub DCC access)
+      $bj$b = leaf access (user has leaf DCC access)
       $bm$b = master (user has more access to the botnet cmds than a normal user)
       $bn$b = owner (user has just about full access to bot)
       $bO$b = autoop (user is auto-opped in all channels)
+      $bp$b = partyline-chat (user can speak on partyline. [$brequires +j or +i$b])
       $bx$b = flood-exempt (user is exempt from flood kicks)
  
    Valid bot-only flags:
@@ -1876,7 +1877,7 @@ See also: whom
       $bf$b = flood-bot (bot reacts to floods based on [cpu intensive] flood settings)
       $bl$b = limit-bot (bot sets limit in all channels, see '%dhelp chaninfo') [$bCPU INTENSIVE$b]
       $br$b = resolve (bot resolves clients in to match against userlist) [$bCPU INTENSIVE+$b]
-      $bu$b - update-bot (see doc/UPGRADING)
+      $bu$b = update-bot (see doc/UPGRADING)
       $by$b = voice-bot (bot gives out voices/auto-ops in chans) [$bCPU INTENSIVE$b]
  
    $bFlags followed by a '=' may also be used for a specific channel record.$b
