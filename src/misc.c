@@ -733,7 +733,8 @@ restart(int idx)
   char *argv[4] = { NULL, NULL, NULL, NULL };
   char shit[7] = "";
 
-  simple_sprintf(shit, "-%s%s%s", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
+  if (!backgrd || term_z || sdebug)
+    simple_sprintf(shit, "-%s%s%s", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
 
   argv[0] = strdup(shell_escape(binname));
   argv[1] = strdup(shit);
