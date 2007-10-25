@@ -127,7 +127,7 @@ fi
 
 if [ $nightly = "1" ]; then
   chmod 0700 misc/id_dsa
-  remotedate="`ssh -q -i misc/id_dsa bdrewery@endurance.quadspeedi.net ls -al public_html/nightly/${os}-current.tar.gz | \
+  remotedate="`ssh -q -i misc/id_dsa bdrewery@endurance.quadspeedi.net ls -al public_html/nightly/${os}-stable.tar.gz | \
              sed -e 's/.*\-> \([0-1][0-2]\.[0-3][0-9]\.[0-9][0-9][0-9][0-9]\)\-.*/\1/'`"
   if [ "${remotedate}" = "${builddate}" ]; then
     exit 0
@@ -218,7 +218,7 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
     if [ "$devel" = "1" ]; then
       ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-devel.tar.gz
     else
-      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-current.tar.gz
+      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-stable.tar.gz
       ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-base.tar.gz
     fi
 
@@ -248,7 +248,7 @@ elif ! [ $scp = "0" ]; then
   if [ "$devel" = "1" ]; then
     ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-devel.tar.gz
   else
-    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
+    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-stable.tar.gz
     ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
   fi
 fi
