@@ -17,6 +17,12 @@ fi
 
 ver="?.?.?"
 ver=`grep "char" src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+echo $ver | grep "devel" > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  devel="1"
+else
+  devel="0"
+fi
 rm -f ts ts.exe
 gcc -o ts misc/ts.c > /dev/null 2>&1
 BUILDTS=`./ts \`misc/getdate.sh\``
@@ -121,7 +127,7 @@ fi
 
 if [ $nightly = "1" ]; then
   chmod 0700 misc/id_dsa
-  remotedate="`ssh -q -i misc/id_dsa bdrewery@endurance.quadspeedi.net ls -al public_html/nightly/${os}-current.tar.gz | \
+  remotedate="`ssh -q -i misc/id_dsa bdrewery@endurance.quadspeedi.net ls -al public_html/nightly/${os}-stable.tar.gz | \
              sed -e 's/.*\-> \([0-1][0-2]\.[0-3][0-9]\.[0-9][0-9][0-9][0-9]\)\-.*/\1/'`"
   if [ "${remotedate}" = "${builddate}" ]; then
     exit 0
@@ -209,8 +215,12 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
 
     scp_target=`echo $scp | cut -d : -f 1`
     dir=`echo $scp | cut -d : -f 2`
-    ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-current.tar.gz
-    ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-base.tar.gz
+    if [ "$devel" = "1" ]; then
+      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-devel.tar.gz
+    else
+      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-stable.tar.gz
+      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-base.tar.gz
+    fi
 
   fi
 elif ! [ $scp = "0" ]; then
@@ -235,8 +245,12 @@ elif ! [ $scp = "0" ]; then
   chmod 0700 misc/id_dsa
   scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d}${exe} ChangeLog-${builddate}.gz ${extras_local}
-  ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-current.tar.gz
-  ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
+  if [ "$devel" = "1" ]; then
+    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-devel.tar.gz
+  else
+    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-stable.tar.gz
+    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
+  fi
 fi
 
 
