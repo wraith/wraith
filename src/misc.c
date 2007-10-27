@@ -350,13 +350,14 @@ void show_banner(int idx)
   /* we use sock so that colors aren't applied to banner */
   if (dcc[idx].status & STAT_BANNER)
     dumplots(-dcc[idx].sock, "", wbanner()); 
-  dprintf(idx, " \n");
-  dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
-  dprintf(-dcc[idx].sock, STR("|             - paypal: bryan@shatow.net  -             |\n"));
-  dprintf(-dcc[idx].sock, STR("|             - http://wraith.shatow.net/ -             |\n"));
-  dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
-  dprintf(idx, " \n");
 
+  dprintf(idx, " \n");
+  dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
+  dprintf(-dcc[idx].sock, STR("|             - http://wraith.botpack.net/ -            |\n"));
+  dprintf(-dcc[idx].sock, STR("|  Get Shell/Irc/Web hosting @ http://www.outlandz.net  |\n"));
+  dprintf(-dcc[idx].sock, STR("|  Use coupon code 'wraith' for 30%% off lifetime        |\n"));
+  dprintf(-dcc[idx].sock,     " ------------------------------------------------------- \n");
+  dprintf(idx, " \n");
 }
 
 /* show motd to dcc chatter */
