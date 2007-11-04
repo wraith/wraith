@@ -1240,7 +1240,7 @@ See also: randstring, sha1, encrypt, decrypt
  
    This is a distributed mass mode command.
    The modes will be distributed among the necesary bots to accomplish the task.
-   **Remember, unless specificed, the bot you mmode on will never participate.**
+   **Remember, unless specified with [local], the bot you mmode on will never participate.**
  
    options:
  
