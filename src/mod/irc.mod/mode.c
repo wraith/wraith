@@ -1044,6 +1044,7 @@ gotmode(char *from, char *msg)
           size_t siz = (mp ? strlen(mp) : 0) + 3 + 1;
           modes[modecnt] = (char *) my_calloc(1, siz);
           simple_snprintf(modes[modecnt], siz, "%c%c %s", sign, chg[0], mp ? mp : "");
+
           ++modecnt;
           if (chg[0] == 'o') {
             if (sign == '+') {
@@ -1117,19 +1118,19 @@ gotmode(char *from, char *msg)
           }
           if (ops) {
             int n = 0;
-
             /* Check cookies */
             if (u && m && u->bot && !channel_fastop(chan) && !channel_take(chan)) {
               int isbadop = 0;
+              bool failure = 0;
 
               /* If no unbans or the -b is not the LAST mode, it's bad. */
               if (unbans != 1 || (strncmp(modes[modecnt - 1], "-b", 2))) {
                 isbadop = BC_NOCOOKIE;
+                failure = 1;
               } else {
                 /* Check the hash for each opped nick and punish the opped client if it fails
                    * Punish the opper lastly (and once)
                  */
-                bool failure = 0;
                 for (i = 0; i < (modecnt - 1); i++) { /* Don't need to hit the -b */
                   if (msign == '+' && mmode == 'o') {
                     mv = ismember(chan, mparam);
@@ -1152,38 +1153,39 @@ gotmode(char *from, char *msg)
                     }
                   }
                 }
-                if (failure) { /* One of the hashes failed! */
-                  /* Did *I* do this heinous act? */
-                  if (match_my_nick(m->nick)) {
-                    detected(DETECT_HIJACK, "Possible Hijack: bad cookie");
-                  }
-                  if (randint(7) == 0) {
-                    /* Kick opper */
-                    if (!chan_sentkick(m)) {
-                      m->flags |= SENTKICK;
-                      const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
-                      tputs(serv, tmp, len);
-                    }
-                    simple_sprintf(tmp, "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                    deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
-                  }
-                  /* Do the logging last as it can slow down the KICK pushing */
-                  putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", m->nick, chan->dname, isbadop, msg);
-                  if (isbadop == BC_NOCOOKIE)
-                    putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s %s", 
-                                    m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                  else if (isbadop == BC_HASH)
-                    putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s %s", 
-                                     m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                  else if (isbadop == BC_SLACK)
-                    putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s %s", 
-                                          m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                } 
-#ifdef DEBUG
-                else
-                  putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
-#endif
               }
+
+              if (failure) { /* One of the hashes failed! */
+                /* Did *I* do this heinous act? */
+                if (match_my_nick(m->nick)) {
+                  detected(DETECT_HIJACK, "Possible Hijack: bad cookie");
+                }
+                if (randint(7) == 0) {
+                  /* Kick opper */
+                  if (!chan_sentkick(m)) {
+                    m->flags |= SENTKICK;
+                    const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
+                    tputs(serv, tmp, len);
+                  }
+                  simple_sprintf(tmp, "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                  deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
+                }
+                /* Do the logging last as it can slow down the KICK pushing */
+                putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", m->nick, chan->dname, isbadop, msg);
+                if (isbadop == BC_NOCOOKIE)
+                  putlog(LOG_WARN, "*", "Missing cookie: %s!%s MODE %s %s", 
+                                  m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                else if (isbadop == BC_HASH)
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad hash): %s!%s MODE %s %s", 
+                                   m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                else if (isbadop == BC_SLACK)
+                  putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s %s", 
+                                        m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+              } 
+#ifdef DEBUG
+              else
+                putlog(LOG_DEBUG, "@", "Good op: %s", modes[modecnt - 1]);
+#endif
             }
 
             /* manop */
