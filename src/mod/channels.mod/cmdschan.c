@@ -481,7 +481,7 @@ static void cmd_checkchannels(int idx, char *par)
 
 static void cmd_slowjoin(int idx, char *par)
 {
-  int intvl = 0, delay = 0, count = 1;
+  int intvl = 0, delay = 0, count = 0;
   char *chname = NULL, *p = NULL, buf[2048] = "", buf2[RESULT_LEN] = "";
   struct chanset_t *chan = NULL;
   tand_t *bot = NULL;
@@ -528,9 +528,10 @@ static void cmd_slowjoin(int idx, char *par)
   if (conf.bot->hub)
     count = 0;
 
+  chan->status &= ~CHAN_INACTIVE;
+
   for (bot = tandbot; bot; bot = bot->next) {
     char tmp[100] = "";
-
     tmp[0] = 0;    
     if (bot->u) {
       if (bot_hublevel(bot->u) < 999) {
@@ -553,8 +554,12 @@ static void cmd_slowjoin(int idx, char *par)
         putbot(bot->bot, tmp);
     }
   }
+
+  if (shouldjoin(chan))
+    count++;
+
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
-  chan->status &= ~CHAN_INACTIVE;
+
   if (!conf.bot->hub && shouldjoin(chan) && !channel_joining(chan)) {
     dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
     chan->status |= CHAN_JOINING;
