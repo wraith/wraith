@@ -63,6 +63,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Bot no longer requires (or uses) '-B' to spawn bots. (now: ./binary <botnick>)
 * Fixed +take opping the wrong clients due to desync (+take now sets +bitch)
 * Fix cmd/dcc prefix leaking to -p users (when chat is off) (fixes #376)
+* Fix checking for flood on hosts which are already ignored. (fixes #343)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

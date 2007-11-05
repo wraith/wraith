@@ -568,7 +568,7 @@ static int gotmsg(char *from, char *msg)
       if (auth_prefix[0])
         auth = Auth::Find(uhost);
 
-      if (!auth)
+      if (!auth && !ignoring)
         detect_flood(nick, uhost, from, FLOOD_PRIVMSG);
       my_code = newsplit(&msg);
       rmspace(msg);
@@ -684,11 +684,10 @@ static int gotnotice(char *from, char *msg)
 	/* Hidden `250' connection count message from server */
 	if (strncmp(msg, "Highest connection count:", 25))
 	  putlog(LOG_SERV, "*", "-NOTICE- %s", msg);
-      } else {
+      } else if (!ignoring) {
         detect_flood(nick, uhost, from, FLOOD_NOTICE);
         u = get_user_by_host(from);
-        if (!ignoring)
-  	      putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
+        putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
       }
     }
   }
