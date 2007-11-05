@@ -30,7 +30,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fixed cmd_nohelp (for viewing undocumented cmds - mainly debugging cmds)
 * cmd_adduser sends a PRIVMSG now instead of a NOTICE
 * Rewrote op-cookies to be fix a security hole. (They also react to '.set hijack' now)
-* Fixed +voice flaw where users in channels that were +voice AND +private would only be voiced with |v.
+* Fixed +voice flaw where users in channels that were +voice AND +private would only be voiced with |v. (fixes #54)
 * Added cmd_clearhosts
 * Added 'whois restrictions' to more cmds.
 * Add channel flags 'nomassjoin' and 'flood-mjoin' to set +im on a timer during join floods (drones)
