@@ -1,5 +1,4 @@
-#! /bin/sh
-
+#! /usr/bin/env bash
 parse_info() {
   echo "$info" | grep "Last Changed Rev" | sed -e 's/.*Last Changed Rev: \(.*\).*/\1/'
 }
