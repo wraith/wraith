@@ -1091,7 +1091,8 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         }
       } else if (*(string + 1) == 'd') {
         string += 2;
-        strcat(helpstr, settings.dcc_prefix);        
+        if (dcc[idx].u.chat->channel >= 0)
+          strcat(helpstr, settings.dcc_prefix);        
       } else if (*(string + 1) == '%') {
         string += 2;
         strcat(helpstr, "%");        

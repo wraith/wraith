@@ -1270,7 +1270,7 @@ static void cmd_chanset(int idx, char *par)
     all = 1;
     get_user_flagrec(dcc[idx].user, &user, chanset ? chanset->dname : "");
     if (!glob_master(user)) {
-      dprintf(idx, "You need to be a global master to use %schanset *.\n", settings.dcc_prefix);
+      dprintf(idx, "You need to be a global master to use '%schanset *'.\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
       return;
     }
     newsplit(&par);

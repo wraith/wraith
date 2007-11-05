@@ -180,7 +180,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
               strcpy(args, p);
             } else {
               dprintf(idx, "Invalid command password.\n");
-              dprintf(idx, "Use: $b%scommand <password> [arguments]$b\n", settings.dcc_prefix);
+              dprintf(idx, "Use: $b%scommand <password> [arguments]$b\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
               if (p)
                 p++;
               putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, entry->mask, p && *p ? p : "");
@@ -190,7 +190,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
             }
           } else {
             putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
-            dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
+            dprintf(idx, "What?  You need '%shelp'\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
             free(args);
             return;
           }
@@ -215,7 +215,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
 
   if (hits == 0) {
     if (!check_aliases(idx, cmd, args)) 
-      dprintf(idx, "What?  You need '%shelp'\n", settings.dcc_prefix);
+      dprintf(idx, "What?  You need '%shelp'\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
     else
       log_bad = 0;
   } else if (hits > 1)

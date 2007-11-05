@@ -980,7 +980,7 @@ int botlink(char *linker, int idx, char *nick)
     if (!bi || !strlen(bi->address) || !bi->telnet_port || (bi->telnet_port <= 0)) {
       if (idx >= 0) {
 	dprintf(idx, "Invalid telnet address:port stored for '%s'.\n", nick);
-	dprintf(idx, "Use: %schaddr %s <address>:<port#>[/<relay-port#>]\n", settings.dcc_prefix, nick);
+	dprintf(idx, "Use: %schaddr %s <address>:<port#>[/<relay-port#>]\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "", nick);
       }
     } else if (dcc_total == max_dcc) {
       if (idx >= 0)
@@ -1135,7 +1135,7 @@ void tandem_relay(int idx, char *nick, register int i)
 
   if (!bi || !strlen(bi->address) || !bi->relay_port || (bi->relay_port <= 0)) {
     dprintf(idx, "Invalid telnet address:port stored for '%s'.\n", nick);
-    dprintf(idx, "Use: %schaddr %s <address>:<port#>[/<relay-port#>]\n", settings.dcc_prefix, nick);
+    dprintf(idx, "Use: %schaddr %s <address>:<port#>[/<relay-port#>]\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "", nick);
 
     return;
   }

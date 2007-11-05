@@ -918,9 +918,9 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       if (notyes) {
         dprintf(idx, "Using non-list functions on a list variable can be dangerous, please retype with -YES if you're sure:\n");
         if (botnick)
-          dprintf(idx, "%sbotset %s -YES %s ...\n", settings.dcc_prefix, botnick, var->name);
+          dprintf(idx, "%sbotset %s -YES %s ...\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "", botnick, var->name);
         else
-          dprintf(idx, "%sset -YES %s ...\n", settings.dcc_prefix, var->name);
+          dprintf(idx, "%sset -YES %s ...\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "", var->name);
         return 0;
       }
     }

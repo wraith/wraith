@@ -670,7 +670,7 @@ static void cmd_help(int idx, char *par)
   if (fnd) 
     dprintf(idx, "--End help listing\n");
   if (!strcmp(match, "*")) {
-    dprintf(idx, "For individual command help, type: %shelp <command>\n", settings.dcc_prefix);
+    dprintf(idx, "For individual command help, type: %shelp <command>\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
   } else if (!fnd) {
     dprintf(idx, "No match for '%s'.\n", match);
   }
@@ -763,7 +763,7 @@ static void cmd_matchbot(int idx, char *par)
 static void cmd_match(int idx, char *par)
 {
   match(idx, par, 0);
-  dprintf(idx, "- If trying to match a bot, please use '%smatchbot %s'\n", settings.dcc_prefix, par);
+  dprintf(idx, "- If trying to match a bot, please use '%smatchbot %s'\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "", par);
 }
 
 static void cmd_update(int idx, char *par)
@@ -861,7 +861,7 @@ static void cmd_channels(int idx, char *par) {
   }
 
   if ((dcc[idx].user->flags & USER_MASTER) && !(par && par[0]))
-    dprintf(idx, "You can also %schannels <user>\n", settings.dcc_prefix);
+    dprintf(idx, "You can also %schannels <user>\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
 }
 
 
@@ -1275,7 +1275,7 @@ static void cmd_chsecpass(int idx, char *par)
 static void cmd_botcmd(int idx, char *par)
 {
   if (dcc[idx].simul >= 0) {
-    dprintf(idx, "Sorry, you can't chain '%sbotcmd'.\n", settings.dcc_prefix);
+    dprintf(idx, "Sorry, you can't chain '%sbotcmd'.\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
     putlog(LOG_WARN, "*", "%s attempted to chain 'botcmd' over the botnet.", dcc[idx].nick);
     return;
   }
@@ -2144,7 +2144,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
       if (!(oatr & USER_PARTY) && (u->flags & USER_PARTY) && dcc[i].u.chat->channel < 0) {
         dprintf(i, "-+- POOF! -+-\n");
         dprintf(i, "You now have party line chat access.\n");
-        dprintf(i, "To rejoin the partyline, type: %schat on\n", settings.dcc_prefix);
+        dprintf(i, "To rejoin the partyline, type: %schat on\n", (dcc[i].u.chat->channel >= 0) ? settings.dcc_prefix : "");
       }
 
       if (!(oatr & USER_OWNER) && (u->flags & USER_OWNER)) {

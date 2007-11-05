@@ -1157,7 +1157,7 @@ dcc_chat(int idx, char *buf, int len)
       dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
     } else if (!strncmp(buf, "+Auth ", 6)) {    /* ignore extra +Auth lines */
     } else if ((!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
-      if (!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix)))        /* strip '.' out */
+      if (!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix)) && (dcc[idx].u.chat->channel >= 0))        /* strip '.' out */
         buf++;
       v = newsplit(&buf);
       rmspace(buf);
