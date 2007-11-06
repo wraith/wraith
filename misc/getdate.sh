@@ -1,4 +1,5 @@
-#! /bin/sh
+#! /usr/bin/env bash
+
 parse_date() {
   echo "$1" | grep "Last Changed Date" | sed "s/Last Changed Date: \(.* \)[-+].*$/\1/"
 }
