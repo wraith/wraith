@@ -631,6 +631,14 @@ static void cmd_mmode(int idx, char *par)
     return;
   }
 
+  if (mode[0] == '+' && mode[1] == 'o' && !channel_fastop(chan)) {
+    dprintf(idx, "Error: This channel is currently set -fastop.\n");
+    dprintf(idx, "Mass opping would result in missing op cookies.\n");
+    dprintf(idx, "Please chanset the channel +fastop first.\n");
+    return;
+  }
+
+
   memberlist** targets = (memberlist**) my_calloc(1, chan->channel.members * sizeof(memberlist *));
   int* overlaps = (int *) my_calloc(1, chan->channel.members * sizeof(int *));
   memberlist** chanbots = (memberlist **) my_calloc(1, chan->channel.members * sizeof(memberlist *));
