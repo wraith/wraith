@@ -167,7 +167,7 @@ void check_mypid()
   pid_t pid = 0;
   
   if (can_stat(conf.bot->pid_file))
-    pid = checkpid(conf.bot->nick, NULL, NULL);
+    pid = checkpid(conf.bot->nick, NULL);
 
   if (pid && (pid != getpid()))
     fatal(STR("getpid() does not match pid in file. Possible cloned process, exiting.."), 0);

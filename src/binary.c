@@ -606,7 +606,7 @@ void reload_bin_data() {
         /* then SIGHUP new localhub or spawn new localhub */
         if (localhub) {
           /* Check for pid again - may be using fork-interval */
-          localhub->pid = checkpid(localhub->nick, localhub, NULL);
+          localhub->pid = checkpid(localhub->nick, localhub);
           if (localhub->pid)
             conf_killbot(NULL, localhub, SIGHUP);		//restart the new localhub
           /* else

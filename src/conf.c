@@ -398,53 +398,13 @@ init_conf()
   expand_tilde(&conf.datadir);
 }
 
-/* FIXME: Remove after 1.2.9 I guess; or revise to work for when datadir changes. */
-/* This technically doesn't belong in the trunk, but it will be adapated for future use */
-static void conf_compat_pids()
-{
-  conf_bot *bot = NULL;
-  char path[DIRMAX] = "", dir[DIRMAX] = "";
-  int i = 0;
-
-  for (i = 0; i < 5; i++) {
-    if (i == 0) {
-      if (!conf.bot || !conf.bot->hub)
-        simple_snprintf(dir, sizeof(dir), "%s/.ssh/...", conf.homedir);
-      else
-        simple_snprintf(dir, sizeof(dir), "%s/tmp", conf.binpath);
-    } else if (i == 1) {
-      simple_snprintf(dir, sizeof(dir), "/tmp");
-    } else if (i == 2) {
-      simple_snprintf(dir, sizeof(dir), "/usr/tmp");
-    } else if (i == 3) {
-      simple_snprintf(dir, sizeof(dir), "/var/tmp");
-    } else if (i == 4) {
-      simple_snprintf(dir, sizeof(dir), "%s", conf.binpath);
-    }
-
-    //Wait, we are checking for pids in our datadir? No thanks..
-    if (!strcmp(conf.datadir, dir))
-      continue;
-
-    for (bot = conf.bots; bot && bot->nick; bot = bot->next)
-      /* returns 1 if: pidfile is there and PID is running AND if there is a socksfile listed, if it is valid. */
-      if (checkpid(bot->nick, bot, dir)) {
-        /* Ok so we found a valid pid file, which might include a VALID socksfile. */
-        simple_snprintf(path, sizeof(path), "%s/.pid.%s", conf.datadir, bot->nick);
-        copyfile(bot->pid_file, path);
-      //We only want to unlink if the pidfile is NOT being used, otherwise, it might break a bot that's on timer to restart/update.
-      } else if (can_stat(bot->pid_file))
-        unlink(bot->pid_file);
-  }  
-}
-
 void conf_checkpids(conf_bot *bots, bool all)
 {
   conf_bot *bot = NULL;
 
   for (bot = bots; bot && bot->nick; bot = bot->next)
     if (all || (!all && bot->pid == 0))
-      bot->pid = checkpid(bot->nick, bot, NULL);
+      bot->pid = checkpid(bot->nick, bot);
 }
 
 /*
@@ -452,7 +412,7 @@ void conf_checkpids(conf_bot *bots, bool all)
  */
 
 pid_t
-checkpid(const char *nick, conf_bot *bot, const char *usedir)
+checkpid(const char *nick, conf_bot *bot)
 {
   FILE *f = NULL;
   char buf[DIRMAX] = "", *tmpnick = NULL, *tmp_ptr = NULL;
@@ -462,11 +422,7 @@ checkpid(const char *nick, conf_bot *bot, const char *usedir)
 
   strtolower(tmpnick);
 
-  /* FIXME: remove after 1.2.9 */
-  if (usedir)
-    simple_snprintf(buf, sizeof buf, "%s/.pid.%s", usedir, tmpnick);
-  else
-    simple_snprintf(buf, sizeof buf, "%s/.pid.%s", conf.datadir, tmpnick);
+  simple_snprintf(buf, sizeof buf, "%s/.pid.%s", conf.datadir, tmpnick);
   free(tmp_ptr);
 
   if (bot && !(bot->pid_file))
@@ -494,16 +450,6 @@ checkpid(const char *nick, conf_bot *bot, const char *usedir)
         pid = 0;
     }
 
-
-    //There is a socksfile given and it's accessable, plus the pid in the file is my own
-    //So it's a good chance we just did a soft restart
-    /* If this pidfile is stale, don't let compat_checkpids copy it over. */
-    if (usedir && bufp[0] && pid) {
-      if (can_stat(bufp))
-        return pid;
-      /* socks file not there? this pidfile is probably stale, move along ... */
-      return 0;
-    }
 
     if (bufp[0] && pid && can_stat(bufp) && (getpid() == pid) &&
         !egg_strncasecmp(nick, origbotnick, HANDLEN)) {
@@ -610,7 +556,7 @@ conf_delbot(char *botn, bool kill)
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     if (!egg_strcasecmp(bot->nick, botn)) {     /* found it! */
       if (kill) {
-        bot->pid = checkpid(bot->nick, bot, NULL);
+        bot->pid = checkpid(bot->nick, bot);
         conf_killbot(conf.bots, NULL, bot, SIGKILL);
       }
       free_bot(bot);
@@ -1050,7 +996,7 @@ void deluser_removed_bots(conf_bot *oldlist, conf_bot *newlist)
       }
       if (!found && egg_strcasecmp(botold->nick, origbotnick)) {	/* Never kill ME.. will handle it elsewhere */
 	/* No need to kill -- they are signalled and they will die on their own now */
-        //botold->pid = checkpid(botold->nick, botold, NULL);
+        //botold->pid = checkpid(botold->nick, botold);
         //conf_killbot(conf.bots, NULL, botold, SIGKILL);
         if ((u = get_user_by_handle(userlist, botold->nick))) {
           putlog(LOG_MISC, "*", "Removing '%s' as it has been removed from the binary config.", botold->nick);
@@ -1170,7 +1116,6 @@ bin_to_conf(bool error)
 
   if (clear_tmpdir)
     clear_tmp();	/* clear out the tmp dir, no matter if we are localhub or not */
-  conf_compat_pids();
   conf_checkpids(conf.bots);
 
   tellconf();
