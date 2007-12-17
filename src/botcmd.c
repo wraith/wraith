@@ -398,12 +398,13 @@ static void remote_tell_who(int idx, char *nick, int chan)
 
 static void bot_shellinfo(int idx, char *par)
 {
-  char *username = NULL, *sysname = NULL, *nodename = NULL, *arch = NULL;
+  char *username = NULL, *sysname = NULL, *nodename = NULL, *arch = NULL, *version = NULL;
   
   username = newsplit(&par);
   sysname = newsplit(&par);
   nodename = newsplit(&par);
   arch = newsplit(&par);
+  version = newsplit(&par);
 
   set_user(&USERENTRY_USERNAME, dcc[idx].user, username);
   set_user(&USERENTRY_OS, dcc[idx].user, sysname);
@@ -411,6 +412,7 @@ static void bot_shellinfo(int idx, char *par)
   strcpy(dcc[idx].u.bot->sysname, sysname); 
   set_user(&USERENTRY_NODENAME, dcc[idx].user, nodename);
   set_user(&USERENTRY_ARCH, dcc[idx].user, arch);
+  set_user(&USERENTRY_OSVER, dcc[idx].user, version);
 }
 
 /* who <from@bot> <tobot> <chan#>
