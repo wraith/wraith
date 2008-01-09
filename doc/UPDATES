@@ -65,6 +65,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix cmd/dcc prefix leaking to -p users (when chat is off) (fixes #376)
 * Fix checking for flood on hosts which are already ignored. (fixes #343)
 * Added OSVER entry for bots in .whois
+* Userfile transfers now use a random filename instead of .share.botnick.users.timestamp
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

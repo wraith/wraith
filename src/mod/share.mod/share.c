@@ -905,7 +905,9 @@ share_ufsend(int idx, char *par)
   int i, sock;
   FILE *f = NULL;
 
-  egg_snprintf(s, sizeof s, "%s.share.%s.%li.users", tempdir, conf.bot->nick, now);
+  simple_snprintf(s, sizeof(s), "%s.share.XXXXXX", tempdir);
+  mktemp(s);
+
   if (!(b_status(idx) & STAT_SHARE)) {
     dprintf(idx, "s e You didn't ask; you just started sending.\n");
     dprintf(idx, "s e Ask before sending the userfile.\n");
@@ -1395,7 +1397,8 @@ start_sending_users(int idx)
   char share_file[1024] = "";
   int i = 1, j = -1;
 
-  egg_snprintf(share_file, sizeof share_file, "%s.share.%s.%li", tempdir, dcc[idx].nick, now);
+  simple_snprintf(share_file, sizeof(share_file), "%s.share.XXXXXX", tempdir);
+  mktemp(share_file);
 
   write_tmp_userfile(share_file, userlist, idx);
 
