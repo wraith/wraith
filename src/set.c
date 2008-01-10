@@ -30,6 +30,7 @@ bool auth_obscure;
 bool oidentd;
 bool ident_botnick;
 int dcc_autoaway;
+bool irc_autoaway;
 #ifdef NOT_USED
 int badprocess = DET_IGNORE;
 char process_list[1024] = "";
@@ -84,6 +85,7 @@ static variable_t vars[] = {
  VAR("homechan",	homechan,		VAR_STRING|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
  VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "2"),
+ VAR("irc-autoaway",	&irc_autoaway,		VAR_INT|VAR_NOLHUB|VAR_BOOL,			0, 1, "1"),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),

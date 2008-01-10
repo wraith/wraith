@@ -337,7 +337,7 @@ void sendaway()
 
 static void ctcp_minutely()
 {
-  if (server_online) {
+  if (irc_autoaway && server_online) {
     if ((cloak_awaytime == 0) && (cloak_heretime == 0)) {
       cloak_heretime = now;
       dprintf(DP_HELP, "AWAY :\n");

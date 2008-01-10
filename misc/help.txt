@@ -1557,6 +1557,7 @@ See also: reload, backup
 [S]  $busermode$b        The bot's usermode on IRC. (Set on connect/rehash)
 [S]  $bnick$b            The bot's preferred nickname on IRC.
 [N]  $bnotify-time$b     The number of seconds between server notify checks for nick.
+[B]  $birc-autoaway$b    Should the bot go away auto?
 
 [B]  $bident-botnick$b   Send botnick instead of shell username on connect (non-ident)
 [B]  $boidentd$b         Make bot try and use oidentd spoofing as BOTNICK.
