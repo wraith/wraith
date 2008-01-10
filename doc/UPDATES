@@ -66,6 +66,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix checking for flood on hosts which are already ignored. (fixes #343)
 * Added OSVER entry for bots in .whois
 * Userfile transfers now use a random filename instead of .share.botnick.users.timestamp
+* Fix ambiguous warning when a bot tries linking after being added with +user (fixes #383)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

@@ -1593,7 +1593,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
   bool ok = 0;
 
   if (dcc[idx].user) {
-    if (!dcc[idx].bot && dcc[idx].user->bot) {
+    if (dcc[idx].bot != dcc[idx].user->bot) {
       putlog(LOG_WARN, "*", "Refused %s (fake bot login for '%s')", dcc[idx].host, nick);
       killsock(dcc[idx].sock);
       lostdcc(idx);
