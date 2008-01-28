@@ -1152,7 +1152,6 @@ void check_hostmask()
   if ((u = host_conflicts(s))) {
     if (u != conf.bot->u) {
       putlog(LOG_WARN, "*", "My automatic hostmask '%s' would conflict with user: '%s'. (Not adding)", s, u->handle);
-      sdprintf("I am %s, they are: %s, (%X vs %X)", conf.bot->u->handle, u->handle, conf.bot->u, u);
     } else
       sdprintf("Already have hostmask '%s' added for myself", s);
     return;
