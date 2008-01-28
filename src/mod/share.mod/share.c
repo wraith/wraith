@@ -988,6 +988,10 @@ share_endstartup(int idx, char *par)
   /* Send to any other sharebots */
   if (conf.bot->hub)
     hook_read_userfile();
+  else {
+    /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
+    check_hostmask();
+  }
 }
 
 static void
@@ -1351,9 +1355,6 @@ finish_share(int idx)
   load_internal_users();
   add_myself_to_userlist();
   
-  /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
-  check_hostmask();
-
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
 
@@ -1362,8 +1363,6 @@ finish_share(int idx)
     bot->u = get_user_by_handle(userlist, bot->bot);
 
   if (!conf.bot->hub) {  
-    /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
-    check_hostmask();
     /* copy over any auth users */
     Auth::FillUsers();
   }
