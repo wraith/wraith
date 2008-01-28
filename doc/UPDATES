@@ -51,7 +51,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Bots will now cycle nicks on servers which claim their nick is invalid. (fixes #311)
 * Limit bots no longer set limit when 'chanmode -l' is set. (fixes #294)
 * Fixed +closed from interfering with 'chanmode -pi'. (fixes #294)
-* Fix logging/usage bug in cmd_mop. (fixes #313)
+* Fix misc bugs with cmd_mop. (fixes #313 and #392)
 * Bad uname EMAILS now include the localhub's nick. (fixes #354)
 * -host now accepts partial host masks, ie, '-host user@host'.
 * Rewrote cmd_mdop into cmd_mmode. See 'help mmode' on a leaf bot.
