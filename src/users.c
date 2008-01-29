@@ -594,10 +594,13 @@ int readuserfile(const char *file, struct userrec **ret)
   simple_snprintf(s, 180, "%s", temps);
   free(temps);
   if (s[1] < '4') {
-    fatal("Empty or malformed userfile.", 0);
+    putlog(LOG_MISC, "*", "!*! Empty or malformed userfile.");
+    return 0;
   }
-  if (s[1] > '4')
-    fatal("Invalid userfile format.", 0);
+  if (s[1] > '4') {
+    putlog(LOG_MISC, "*", "Invalid userfile format.");
+    return 0;
+  }
   while (!feof(f)) {
     s = buf;
     fgets(cbuf, 1024, f);

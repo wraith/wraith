@@ -69,6 +69,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix ambiguous warning when a bot tries linking after being added with +user (fixes #383)
 * Add set 'irc-autoaway' to be able to disable autoaway feature. (addresses #380)
 * Fix an automatic hostmask bug (fixes #339)
+* Bots no longer die when receiving a corrupt userfile under some conditions
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
