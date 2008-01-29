@@ -66,11 +66,6 @@ static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 
-#include "chan.c"
-#include "mode.c"
-#include "cmdsirc.c"
-#include "msgcmds.c"
-
 static int
 voice_ok(memberlist *m, struct chanset_t *chan)
 {
@@ -82,6 +77,11 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 
   return 1;
 }
+
+#include "chan.c"
+#include "mode.c"
+#include "cmdsirc.c"
+#include "msgcmds.c"
 
 static void
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
@@ -1456,7 +1456,7 @@ check_expired_chanstuff(struct chanset_t *chan)
             if (m->user) {
               get_user_flagrec(m->user, &fr, chan->dname, chan);
               if (!glob_bot(fr)) {
-                if (!(m->flags & EVOICE) && 
+                if (!chan_sentvoice(m) && !(m->flags & EVOICE) && 
                     (
                      (channel_voice(chan) && !chk_devoice(fr)) ||
                      (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
@@ -1467,7 +1467,7 @@ check_expired_chanstuff(struct chanset_t *chan)
                   add_mode(chan, '-', 'v', m->nick);
                 }
               }
-            } else if (!m->user && channel_voice(chan) && voice_ok(m, chan)) {
+            } else if (!chan_sentvoice(m) && !m->user && channel_voice(chan) && voice_ok(m, chan)) {
               add_mode(chan, '+', 'v', m->nick);
             }
           }

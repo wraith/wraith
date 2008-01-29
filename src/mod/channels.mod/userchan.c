@@ -731,7 +731,7 @@ bad-cookie %d manop %d mdop %d mop %d limit %d \
 flood-chan %d:%lu flood-ctcp %d:%lu flood-join %d:%lu \
 flood-kick %d:%lu flood-deop %d:%lu flood-nick %d:%lu flood-mjoin %d:%lu \
 closed-ban %d closed-invite %d closed-private %d ban-time %lu \
-exempt-time %lu invite-time %lu voice-non-ident %d \
+exempt-time %lu invite-time %lu voice-non-ident %d auto-delay %d \
 flood-exempt %d flood-lock-time %lu \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
@@ -768,6 +768,7 @@ flood-exempt %d flood-lock-time %lu \
         chan->exempt_time,
         chan->invite_time,
         chan->voice_non_ident,
+        chan->auto_delay,
         chan->flood_exempt_mode,
         chan->flood_lock_time,
  	PLSMNS(channel_enforcebans(chan)),
@@ -832,7 +833,7 @@ bad-cookie %d manop %d mdop %d mop %d limit %d \
 flood-chan %d:%lu flood-ctcp %d:%lu flood-join %d:%lu \
 flood-kick %d:%lu flood-deop %d:%lu flood-nick %d:%lu \
 closed-ban %d closed-invite %d closed-private %d ban-time %lu \
-exempt-time %lu invite-time %lu voice-non-ident %d \
+exempt-time %lu invite-time %lu voice-non-ident %d auto-delay %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
@@ -867,6 +868,7 @@ exempt-time %lu invite-time %lu voice-non-ident %d \
         chan->exempt_time,
         chan->invite_time,
         chan->voice_non_ident,
+        chan->auto_delay,
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),

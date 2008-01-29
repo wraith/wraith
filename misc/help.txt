@@ -354,6 +354,9 @@ See also: link
         $bchanmode$b   These modes are enforced on the channel. Both + and -
                    modes can be enforced.
 %{+m|m}
+        $bauto-delay$b        Amount of seconds to wait before auto opping,
+                              or auto voicing a client based on flags or
+                              +voice
         $blimit$b             If this is set, the +l bot will raise the limit 
                           to the users in the channel + this ammount. Set to 
                           0 to disable.

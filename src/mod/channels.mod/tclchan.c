@@ -476,6 +476,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->flood_lock_time = atoi(item[i]);
+    } else if (!strcmp(item[i], "auto-delay")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          simple_snprintf(result, RESULT_LEN, "channel auto-delay needs argument");
+        return ERROR;
+      }
+      chan->auto_delay = atoi(item[i]);
      
 
 /* Chanint template
@@ -873,6 +881,7 @@ int channel_add(char *result, char *newname, char *options)
     chan->closed_private = 1;
     chan->closed_invite = 1;
     chan->voice_non_ident = 1;
+    chan->auto_delay = 5;
 /* Chanint template
  *  chan->temp = 0;
  */

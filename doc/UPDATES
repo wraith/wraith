@@ -70,6 +70,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Add set 'irc-autoaway' to be able to disable autoaway feature. (addresses #380)
 * Fix an automatic hostmask bug (fixes #339)
 * Bots no longer die when receiving a corrupt userfile under some conditions
+* Delay for auto-op/voice (+O, +v) and +voice can now be set with 'chanset auto-delay' (default 5 seconds)
 
 1.2.13 - http://wraith.shatow.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

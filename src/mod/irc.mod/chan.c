@@ -2516,9 +2516,33 @@ static int gotjoin(char *from, char *chname)
           }
         }
 #endif /* CACHE */
-        if (!splitjoin && !chan_hasop(m) && (op || (dovoice(chan) && 
-            !u_pass_match(m->user, "-") && chk_autoop(fr, chan)))) {
-          do_op(m->nick, chan, 1, 0);
+        if (!splitjoin) {
+          bool common_checks = dovoice(chan) && !glob_bot(fr);
+
+          /* Autoop */
+          if (!chan_hasop(m) && 
+               (op || 
+               (common_checks && !u_pass_match(m->user, "-") && chk_autoop(fr, chan)))) {
+            do_op(m->nick, chan, 1, 0);
+          }
+
+          /* +v or +voice */
+          if (!chan_hasvoice(m) && common_checks) {
+            if (m->user) {
+              if (!(m->flags & EVOICE) &&
+                  (
+                   (channel_voice(chan) && !chk_devoice(fr)) ||
+                   (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
+                  )
+                 ) {
+                m->delay = now + chan->auto_delay;
+                m->flags |= SENTVOICE;
+              }
+            } else if (!m->user && channel_voice(chan) && voice_ok(m, chan)) {
+              m->delay = now + chan->auto_delay;
+              m->flags |= SENTVOICE;
+            }
+          }
         }
       }
     }
