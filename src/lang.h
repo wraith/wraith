@@ -172,7 +172,6 @@
 #define DCC_BADNICK		"Refused %s (bad nick)"
 #define DCC_NONBOT		"Refused %s (non-bot)"
 #define DCC_NONUSER		"Refused %s (non-user)"
-#define DCC_INVHANDLE		"Refused %s (invalid handle: %s)"
 #define DCC_DUPLICATE		"Refused telnet connection from %s (duplicate)"
 #define DCC_NOPASS		"Refused [%s]%s (no password)"
 #define DCC_LOSTCON		"Lost telnet connection to %s/%d"

@@ -1622,8 +1622,10 @@ dcc_telnet_id(int idx, char *buf, int atr)
   if (!ok) {
     if (dcc[idx].user)
       putlog(LOG_BOTS, "*", "%s: %s!%s", ischanhub() ? DCC_REFUSED : DCC_REFUSEDNC, nick, dcc[idx].host);
+    else if (dcc[idx].bot)
+      putlog(LOG_BOTS, "*", "Refused %s (invalid bot handle: %s) (Add with '%snewleaf %s')", dcc[idx].host, nick, settings.dcc_prefix, nick);
     else
-      putlog(LOG_BOTS, "*", DCC_INVHANDLE, dcc[idx].host, nick);
+      putlog(LOG_BOTS, "*", "Refused %s (invalid handle: %s)", dcc[idx].host, nick);
     killsock(dcc[idx].sock);
     lostdcc(idx);
     return;
