@@ -69,7 +69,7 @@
 extern int		optind;
 
 const time_t 	buildts = BUILDTS;		/* build timestamp (UTC) */
-const char	*revision = REVISION;
+const int	revision = REVISION;
 const char	*egg_version = "1.2.14-devel";
 
 bool	used_B = 0;		/* did we get started with -B? */
@@ -395,7 +395,7 @@ static void dtx_arg(int& argc, char *argv[])
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf("%s\nBuild Date: %s (%s%lu%s)\n", version, date, BOLD(-1), buildts, BOLD_END(-1));
         printf("BuildOS: %s%s%s BuildArch: %s%s%s\n", BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
-        printf("Revision: %s\n", revision);
+        printf("Revision: %d\n", revision);
 	printf("pack: %d conf: %d settings_t: %d pad: %d\n", SIZE_PACK, SIZE_CONF, sizeof(settings_t), SIZE_PAD);
         if (settings.uname[0]) {
           sdebug++;
@@ -746,7 +746,7 @@ printf("out: %s\n", out);
 
   /* Version info! */
   simple_snprintf(ver, sizeof ver, "[%s] Wraith %s", settings.packname, egg_version);
-  egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu:%s)", settings.packname, egg_version, buildts, revision);
+  egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu:%d)", settings.packname, egg_version, buildts, revision);
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;

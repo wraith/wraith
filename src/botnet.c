@@ -54,7 +54,7 @@ tand_t *findbot(const char *who)
 
 /* Add a tandem bot to our chain list
  */
-void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t vbuildts, char *vversion)
+void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t vbuildts, int vrevision, char *vversion)
 {
   tand_t **ptr = &tandbot, *ptr2 = NULL;
 
@@ -69,6 +69,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   ptr2->share = flag;
   ptr2->localhub = vlocalhub;
   ptr2->buildts = vbuildts;
+  ptr2->revision = vrevision;
   if (vversion && vversion[0])
     strlcpy(ptr2->version, vversion, 121);
   ptr2->next = *ptr;
@@ -100,7 +101,7 @@ void check_should_backup()
 }
 #endif /* G_BACKUP */
 
-void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, char *vversion)
+void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, int vrevision, char *vversion)
 {
   tand_t *ptr = findbot(who);
 
@@ -111,6 +112,8 @@ void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, c
       ptr->localhub = vlocalhub;
     if (vbuildts)
       ptr->buildts = vbuildts;
+    if (vrevision)
+      ptr->revision = vrevision;
     if (vversion && vversion[0])
       strlcpy(ptr->version, vversion, 121);
     botnet_send_update(idx, ptr);
@@ -619,7 +622,7 @@ void tell_bottree(int idx)
   dprintf(idx, "%s%s%s (%s %li)\n", color_str ? color_str : "", 
                                     conf.bot->nick,
                                     color_str ? COLOR_END(idx) : "",
-                                    egg_version, buildts);
+                                    egg_version, revision);
 
   thisbot = (tand_t *) 1;
   work[0] = 0;
@@ -666,7 +669,7 @@ void tell_bottree(int idx)
           i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
-                                                bot->version, bot->buildts);
+                                                bot->version, bot->revision);
 	} else
 	  bot = bot->next;
       }
@@ -712,7 +715,7 @@ void tell_bottree(int idx)
                 i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
-                                                      bot->version, bot->buildts);
+                                                      bot->version, bot->revision);
 	      }
 	    }
 	  }
@@ -773,8 +776,8 @@ void dump_links(int z)
       else
         p = bot->uplink->bot;
 
-      l = simple_sprintf(x, "n %s %s %cD0gc %d %d %s\n", bot->bot, p, bot->share, bot->localhub, 
-                                                        (int) bot->buildts, bot->version ? bot->version : "");
+      l = simple_sprintf(x, "n %s %s %cD0gc %d %d %d %s\n", bot->bot, p, bot->share, bot->localhub, 
+                                                        (int) bot->buildts, bot->revision, bot->version ? bot->version : "");
       tputs(dcc[z].sock, x, l);
     }
   }

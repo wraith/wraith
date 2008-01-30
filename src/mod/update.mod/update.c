@@ -136,7 +136,7 @@ static void update_version(int idx, char *par)
 
   dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
   bot = findbot(dcc[idx].nick);
-  if (bot && (bot->buildts < buildts) && (isupdatehub())) {
+  if (bot && (bot->revision < revision) && (isupdatehub())) {
     putlog(LOG_DEBUG, "@", "Asking %s to accept update from me", dcc[idx].nick);
     dprintf(idx, "sb u?\n");
     dcc[idx].status |= STAT_OFFEREDU;
@@ -172,8 +172,10 @@ static void got_nu(char *botnick, char *code, char *par)
 
 /* needupdate? curver */
    time_t newts = atol(newsplit(&par));
+   newsplit(&par); //ts
+   int newrevision = atol(newsplit(&par));
 
-   if (newts > buildts) {
+   if (newrevision > revision) {
      if (!conf.bot->hub) {
        dont_restructure = 1;
        putlog(LOG_MISC, "*", "Linking to %s for binary update.", botnick);
@@ -181,7 +183,7 @@ static void got_nu(char *botnick, char *code, char *par)
        usleep(1000 * 500);
        botlink("", -3, botnick);
      } else 
-       putlog(LOG_MISC, "*", "I need to be updated with %li", newts);
+       putlog(LOG_MISC, "*", "I need to be updated with %d", newrevision);
    }  
 }
 
@@ -354,15 +356,15 @@ static void check_updates()
 
         dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
 
-        if (bot && (bot->buildts < buildts) && (isupdatehub())) {
-          putlog(LOG_DEBUG, "@", "Bot: %s has build %lu, offering them %lu", dcc[i].nick, bot->buildts, buildts);
+        if (bot && (bot->revision < revision) && (isupdatehub())) {
+          putlog(LOG_DEBUG, "@", "Bot: %s has build %d, offering them %d", dcc[i].nick, bot->revision, revision);
           dprintf(i, "sb u?\n");
           dcc[i].status |= STAT_OFFEREDU;
         }
       }
     }
     /* send out notice to update remote bots ... */
-    egg_snprintf(buf, sizeof buf, "nu? %lu", buildts);
+    egg_snprintf(buf, sizeof buf, "nu? %lu %d", buildts, revision);
     putallbots(buf);
   }
 }

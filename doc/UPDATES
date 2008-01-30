@@ -67,6 +67,7 @@
 * Fix an automatic hostmask bug (fixes #339)
 * Bots no longer die when receiving a corrupt userfile under some conditions
 * Delay for auto-op/voice (+O, +v) and +voice can now be set with 'chanset auto-delay' (default 5 seconds)
+* Update system now uses revisions instead of build timestamp
 
 1.2.13 - http://wraith.botpack.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags

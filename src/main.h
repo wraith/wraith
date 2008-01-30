@@ -21,7 +21,8 @@ extern time_t		online_since, now, restart_time;
 extern uid_t		myuid;
 extern pid_t            mypid;
 extern const time_t	buildts;
-extern const char	*egg_version, *revision;
+extern const int	revision;
+extern const char	*egg_version;
 
 void fatal(const char *, int);
 
