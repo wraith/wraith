@@ -1,8 +1,4 @@
-This is a summary of ChangeLog basically.
-Numbers expressed as '#12' are references to a ticket/bug posting which can be viewed at: http://xx.shatow.net
-Lines prefixed with '-' were disabled before release and are not finished, or are planned changes.
-
-1.2.14 - http://wraith.shatow.net/milestone/1.2.14
+1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
 * Fix some bugs with bot flags. (fixes #334 and #337 and #344)
 * Remove the notes system and related commands. (fixes #275)
@@ -72,7 +68,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Bots no longer die when receiving a corrupt userfile under some conditions
 * Delay for auto-op/voice (+O, +v) and +voice can now be set with 'chanset auto-delay' (default 5 seconds)
 
-1.2.13 - http://wraith.shatow.net/milestone/1.2.13
+1.2.13 - http://wraith.botpack.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
 * Fix Auth system not tracking nick changes correctly. (fixes #318)
 * Fix set not allowing defaults under the lower limit. (addresses #315)
@@ -95,7 +91,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix many instances of hub nicks leaking to leaf bots. (fixes #326)
 * Fix bot not checking if it can access datadir on startup. (fixes #330)
 
-1.2.12 - http://wraith.shatow.net/milestone/1.2.12
+1.2.12 - http://wraith.botpack.net/milestone/1.2.12
 * Clearing a variable via 'set var -' now resets that variable to default settings. (implements #111)
 * Fix bug introduced from fixing #274
 * Fixed overflow with cmd_set (fixes #289)
@@ -114,7 +110,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Fix problems with alias rewriting. (fixes #306)
 * Fix bots trying to boot virtual user created via cmd_botcmd.
 
-1.2.11 - http://wraith.shatow.net/milestone/1.2.11
+1.2.11 - http://wraith.botpack.net/milestone/1.2.11
 * Fixed typo in help for .set/.conf/.channel
 * Fixed a bug in cmd_chattr with |m users. (fixes #267)
 * Suicide now removes userfile backups, most pid files, and crontab entries. (Fixes #125)
@@ -140,7 +136,7 @@ Lines prefixed with '-' were disabled before release and are not finished, or ar
 * Hub bots can no longer be whois'd or match'd from leaf bots.
 * Disabled the process list checking.
 
-1.2.10 - http://wraith.shatow.net/milestone/1.2.10
+1.2.10 - http://wraith.botpack.net/milestone/1.2.10
 * Removed old references to '+/-manop' and '+/-nomop' for chaninfo in help file.
 * Fixed auth cmds not working in privmsg. (fixes #228)
 * Fixed a major security hole in cmdpass checking.
