@@ -41,7 +41,6 @@ irc.he.net
 irc.mindspring.com
 irc.mzima.net
 irc.nac.net
-irc.Prison.NET
 irc.servercentral.net
 irc.SHOUTcast.com
 irc.umich.edu
