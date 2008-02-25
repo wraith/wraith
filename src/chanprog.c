@@ -396,7 +396,7 @@ bool is_hub(const char* nick) {
 void load_internal_users()
 {
   char *p = NULL, *ln = NULL, *hand = NULL, *ip = NULL, *port = NULL, *pass = NULL, *q = NULL;
-  char *hosts = NULL, host[UHOSTMAX] = "", buf[2048] = "", *attr = NULL, tmp[51] = "";
+  char *hosts = NULL, buf[2048] = "", *attr = NULL, tmp[51] = "";
   int i, hublevel = 0;
   struct bot_addr *bi = NULL;
   struct userrec *u = NULL;
@@ -446,26 +446,8 @@ void load_internal_users()
 	  set_user(&USERENTRY_BOTADDR, u, bi);
 	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
 	}
+        break;
       default:
-	/* ln = userids for hostlist, add them all */
-        hosts = ln;
-        ln = strchr(ln, ' ');
-
-        if (ln && (ln = strchr(ln, ' ')))
-	   *ln++ = 0;
-
-        if (!u)
-          u = get_user_by_handle(userlist, hand);
-
-        while (hosts) {
-          simple_snprintf(host, sizeof host, "-telnet!%s@%s", hosts, ip);
-          set_user(&USERENTRY_HOSTS, u, host);
-          hosts = ln;
-          if (ln && (ln = strchr(ln, ' ')))
-            *ln++ = 0;
-        }
-        simple_snprintf(host, sizeof host, "-telnet!telnet@%s", ip);
-        set_user(&USERENTRY_HOSTS, u, host);
         break;
       }
       if (ln && (ln = strchr(ln, ' ')))
@@ -525,6 +507,8 @@ void load_internal_users()
 	  }
 	}
 	break;
+      default:
+        break;
       }
       if (ln && (ln = strchr(ln, ' ')))
         *ln++ = 0;
