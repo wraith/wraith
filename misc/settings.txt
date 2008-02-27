@@ -56,6 +56,6 @@ irc.ac.za
 irc.ipv6.homelien.no
 irc.ipv6.inter.net.il
 irc.ipv6.he.net
-efnet.ipv6.port80.se
+irc.efnet.ch
 
 :end
