@@ -72,6 +72,7 @@
 * Bots no longer die when receiving a corrupt userfile under some conditions
 * Delay for auto-op/voice (+O, +v) and +voice can now be set with 'chanset auto-delay' (default 5 seconds)
 * Update system now uses revisions instead of build timestamp
+* Linux 2.2, Linux 2.4, and FreeBSD 4 are no longer supported.
 
 1.2.13 - http://wraith.botpack.net/milestone/1.2.13
 * Fix cmd_chanset accepting invalid flags
