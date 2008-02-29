@@ -100,6 +100,11 @@ static void cmd_act(int idx, char *par)
 
 static void cmd_msg(int idx, char *par)
 {
+  if (dcc[idx].simul >= 0) {
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
+    return;
+  }
+
   if (!par[0]) {
     dprintf(idx, "Usage: msg <nick> <message>\n");
     return;

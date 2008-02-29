@@ -282,7 +282,7 @@ See also: jump, servers, botserver
    sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
-See also: msg%{+n}, netmsg%{-}
+See also: msg%{+n}
 ::botnick:
 ###  $bbotnick$b <bot>
    The bot will display it's current nick over DCC.
@@ -1302,7 +1302,7 @@ See also: whois
    Sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
-See also: botmsg%{+n}, netmsg%{-}
+See also: botmsg%{+n}
 :hub:netcrontab:
 ###  $bnetcrontab$b <status|delete|show|new> [interval]
    Runs the specified command on all linked bots.
@@ -1318,11 +1318,6 @@ See also: lagged
    the user that they are currently running as.
  
 See also: last
-::netmsg:
-###  $bnetmsg$b <nickname|#chan> <text>
-   All bots on the botnet will send a msg to the specified target.
- 
-See also: botmsg, msg
 ::netnick:
 ###  $bnetnick$b 
    All bots on the botnet will display their nick over DCC.

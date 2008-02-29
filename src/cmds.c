@@ -3841,6 +3841,7 @@ static void cmd_botmsg(int idx, char * par) {
   botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, tmp);
 }
 
+#if 0
 static void cmd_netmsg(int idx, char * par) {
   char *tnick = NULL;
 
@@ -3856,6 +3857,7 @@ static void cmd_netmsg(int idx, char * par) {
   simple_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
+#endif
 
 static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
   if (!conf.bot->hub) {
@@ -4513,7 +4515,6 @@ cmd_t C_dcc[] =
   {"whoami",		"",	(Function) cmd_whoami,		NULL, AUTH},
   {"botjump",           "m",    (Function) cmd_botjump,         NULL, 0},
   {"botmsg",		"o",    (Function) cmd_botmsg,          NULL, 0},
-  {"netmsg", 		"n", 	(Function) cmd_netmsg, 		NULL, 0},
   {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL, 0},
   {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL, 0},
   {"netw", 		"n", 	(Function) cmd_netw, 		NULL, HUB},
