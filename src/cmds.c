@@ -3322,15 +3322,41 @@ static void cmd_pls_user(int idx, char *par)
     struct userrec *u2 = NULL;
     char tmp[50] = "", s[MAXPASSLEN + 1] = "", s2[MAXPASSLEN + 1] = "";
 
-    userlist = adduser(userlist, handle, host, "-", USER_DEFAULT, 0);
+    char ahost[UHOSTLEN] = "", *phost = NULL;
+
+    if (!strchr(host, '!')) {
+      if (!strchr(host, '@')) {
+        simple_snprintf(ahost, sizeof(ahost), "*!*@%s", host);
+      } else
+        simple_snprintf(ahost, sizeof(ahost), "*!%s", host);
+
+      phost = ahost;
+    } else
+      phost = host;
+
+
+    userlist = adduser(userlist, handle, phost, "-", USER_DEFAULT, 0);
     u2 = get_user_by_handle(userlist, handle);
     sprintf(tmp, "%li %s", now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u2, tmp);
-    dprintf(idx, "Added %s (%s) with no flags.\n", handle, host);
+    dprintf(idx, "Added %s (%s) with no flags.\n", handle, phost);
     while (par[0]) {
+      phost = 0;
+      ahost[0] = 0;
       host = newsplit(&par);
-      addhost_by_handle(handle, host);
-      dprintf(idx, "Added host '%s' to %s.\n", host, handle);
+
+      if (!strchr(host, '!')) {
+        if (!strchr(host, '@')) {
+          simple_snprintf(ahost, sizeof(ahost), "*!*@%s", host);
+        } else
+          simple_snprintf(ahost, sizeof(ahost), "*!%s", host);
+
+        phost = ahost;
+      } else
+        phost = host;
+
+      addhost_by_handle(handle, phost);
+      dprintf(idx, "Added host '%s' to %s.\n", phost, handle);
     }
     make_rand_str(s, MAXPASSLEN);
     set_user(&USERENTRY_PASS, u2, s);
