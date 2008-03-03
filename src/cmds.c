@@ -365,6 +365,7 @@ static void cmd_about(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# about", dcc[idx].nick);
   dprintf(idx, STR("Wraith botpack by bryan\n"));
+  dprintf(idx, STR("http://wraith.botpack.net\n"));
   egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
   dprintf(idx, "Version: %s\n", egg_version);
   dprintf(idx, "Build: %s (%li)\n", c, buildts);
@@ -386,8 +387,8 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bMystikal$b for various bugs\n"));
   dprintf(idx, " \n");
   dprintf(idx, STR("Credit for suggestions/bugs can be found at: https://wraith.botpack.net/trac/report/9\n"));
-  dprintf(idx, STR("Bugs can be reported at: http://tracker.shatow.net\n"));
-  dprintf(idx, STR("Bugs can be looked up by #, ie, '#24' in url: http://24.shatow.net/\n"));
+  dprintf(idx, STR("Bugs can be reported at: http://wraith.botpack.net/newticket\n"));
+  dprintf(idx, STR("Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24/\n"));
   dprintf(idx, " \n");
 
   dprintf(idx, STR("The botpack ghost inspired the early versions of wraith and a few cmds.\n"));
