@@ -567,7 +567,7 @@ static void cmd_nohelp(int idx, char *par)
 
 bool is_restricted_cmd(const char* name) {
   if (name) {
-    if (!HAVE_MDOP && !egg_strcasecmp(name, "mdop"))
+    if (!HAVE_MDOP && !egg_strcasecmp(name, "mmode"))
       return 1;
   }
   return 0;
