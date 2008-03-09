@@ -1475,6 +1475,46 @@ static int got341(char *from, char *msg)
 }
 #endif /* CACHE */
 
+/* got 710: knock
+ * <server> 710 <to> <channel> <from> :<reason?>
+ * :irc.umich.edu 710 #wraith #wraith bryand!bryan@oper.blessed.net :has asked for an invite.
+ */
+static int got710(char *from, char *msg)
+{
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
+
+  chname = newsplit(&msg);
+  chan = findchan(chname);
+
+  if (!channel_knock(chan) || !dovoice(chan))
+    return 0;
+
+  char buf[UHOSTLEN] = "", *uhost = buf, *nick;
+
+  newsplit(&msg); //not used
+  uhost = newsplit(&msg);
+
+  struct userrec *u = get_user_by_host(uhost);
+
+  if (!u)
+    return 0;
+
+  nick = splitnick(&uhost);
+
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+
+  get_user_flagrec(u, &fr, chan->dname, chan);
+
+  if (chan_kick(fr) || glob_kick(fr))
+    return 0;
+
+//  dprintf(DP_HELP, "PRIVMSG %s :%s knocked, inviting.. (%s)\n", chname, nick, u ? u->handle : "");
+  cache_invite(chan, nick, uhost, u ? u->handle : NULL, 0, 0);
+
+  return 0;
+}
+
 /* got 324: mode status
  * <server> 324 <to> <channel> <mode>
  */
@@ -3177,5 +3217,6 @@ static cmd_t irc_raw[] =
   {"348",	"",	(Function) got348,	"irc:348", LEAF},
   {"349",	"",	(Function) got349,	"irc:349", LEAF},
   {"353",	"",	(Function) got353,	"irc:353", LEAF},
+  {"710",	"",	(Function) got710,	"irc:710", LEAF},
   {NULL,	NULL,	NULL,			NULL, 0}
 };

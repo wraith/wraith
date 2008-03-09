@@ -7,6 +7,7 @@
 * Cleanup some ctcp responses
 * Add more ctcp version responses (mirc scripts), and some others, such as irssi/xchat/snak/cgi::irc
 * Add more 'responses' (ie, kicks reasons)
+* Added new chanset flag '+knock' which will make +y bots auto invite USERS. (No flag restrictions currently)
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
