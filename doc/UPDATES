@@ -3,6 +3,7 @@
 * Fix a segfault in op cookies during a desync
 * Remove cmd_netmsg and restrict cmd_msg so it cannot be used from botcmd.
 * Fixed '+user' so that hostmasks are sanity checked. Ie, (test@test.com is added as *!test@test.com)
+* Add links to FAQ/new site in cmd_help/cmd_about
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
