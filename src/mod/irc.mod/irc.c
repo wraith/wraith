@@ -723,6 +723,13 @@ request_op(struct chanset_t *chan)
     return;
   }
 
+  /* Check if my hostmask is recognized (every 10th time) */
+  static int check_hostmask_cnt = 10;
+  if (check_hostmask_cnt++ == 10) {
+    check_hostmask();
+    check_hostmask_cnt = 0;
+  }
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);
@@ -833,6 +840,13 @@ request_in(struct chanset_t *chan)
   /* Lag situation */
   if (!shouldjoin(chan))
     return;
+
+  /* Check if my hostmask is recognized (every 10th time) */
+  static int check_hostmask_cnt = 10;
+  if (check_hostmask_cnt++ == 10) {
+    check_hostmask();
+    check_hostmask_cnt = 0;
+  }
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
