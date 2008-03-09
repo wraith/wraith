@@ -4,6 +4,9 @@
 * Remove cmd_netmsg and restrict cmd_msg so it cannot be used from botcmd.
 * Fixed '+user' so that hostmasks are sanity checked. Ie, (test@test.com is added as *!test@test.com)
 * Add links to FAQ/new site in cmd_help/cmd_about
+* Cleanup some ctcp responses
+* Add more ctcp version responses (mirc scripts), and some others, such as irssi/xchat/snak/cgi::irc
+* Add more 'responses' (ie, kicks reasons)
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)

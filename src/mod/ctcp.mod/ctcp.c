@@ -123,6 +123,15 @@ void scriptchanged()
     strcpy(bankickprefix, "");
     break;
   }
+  case CLOAK_OTHER:
+  {
+    strcpy(ctcpversion, response(RES_OTHERSCRIPT));
+    strcpy(ctcpuserinfo, botrealname);
+    strcpy(autoaway, "auto-away after 10 minutes");
+    strcpy(kickprefix, "");
+    strcpy(bankickprefix, "");
+    break;
+  }
   case CLOAK_CYPRESS:
   {
     char theme[30] = "";
@@ -282,6 +291,9 @@ void sendaway()
     dprintf(DP_HELP, "AWAY :is away: (%s) [\002BX\002-MsgLog Off]\n", autoaway);
     break;
   case CLOAK_MIRC:
+    dprintf(DP_HELP, "AWAY :is away: (%s)\n", autoaway);
+    break;
+  case CLOAK_OTHER:
     dprintf(DP_HELP, "AWAY :is away: (%s)\n", autoaway);
     break;
   case CLOAK_CRACKROCK:
@@ -455,13 +467,14 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
 
 static int ctcp_WHOAMI(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: Access Denied\n", nick);
+  if (cloak_script > 0 && cloak_script < 9)
+    dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: Access Denied\n", nick);
   return BIND_RET_BREAK;
 }
 
 static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  if (text[0]) {
+  if (text[0] && cloak_script > 0 && cloak_script < 9) {
     char chan[256] = "", *p = NULL;
 
     strlcpy(chan, text, sizeof(chan));
@@ -475,7 +488,7 @@ static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, cha
 
 static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  if (text[0] == '#') {
+  if (text[0] == '#' && cloak_script > 0 && cloak_script < 9) {
     struct chanset_t *chan = chanset;
     char chname[256] = "", *p = NULL;
 
@@ -511,6 +524,9 @@ static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *objec
 
 static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
+  if (!(cloak_script > 0 && cloak_script < 9))
+    return BIND_RET_BREAK;
+
   char buf[256] = "";
 
   if (!text[0]) {
@@ -645,11 +661,11 @@ void ctcp_init()
     switch (randint(2)) {
     case 0:
       strcpy(cloak_os, "Linux");
-      strcpy(cloak_osver, "2.4.20");
+      strcpy(cloak_osver, "2.6.18");
       break;
     case 1:
       strcpy(cloak_os, "FreeBSD");
-      strcpy(cloak_osver, "4.5-STABLE");
+      strcpy(cloak_osver, "6.2-p7");
       break;
     }
     strcpy(cloak_host, "login");

@@ -1,13 +1,13 @@
 :banned
  bye
- banned
  baned
+ b&
  go away
- cya around lewser
  unwanted!
  remember when you used to be able to join this channel?
  we're gonna need to go ahead and have you move your stuff down to the basement...
 :banned_offensive
+ cya around lewser
  see you in hell
  in a word... die
  kill yourself.
@@ -34,11 +34,14 @@
  redneck
  queer
  buttslut
- buttstitute
  dyke
  gutter whore 
  cock sucking bathroom queen
  boner wad
+ try not yo fuck youre sister on the way out
+ if you wanna bump lets go nig-ga
+ UJAH IF YOU GOT COCONUTS ATTACK ME
+ AHH CMON FUCK A GUY
 :kickban
  not wanted
  something tells me you're annoying
@@ -58,6 +61,12 @@
  you lose
  scary... really scary...
  i win kthx
+ dont tase me bro
+ try that again and you will never come back to efnet
+ are you tryign to joke me ?
+ your time will come soon
+ brb loadin up mah bots
+ do, or do not. there is no try.
 :badop
  neat...
  oh, no you don't. go away.
@@ -71,6 +80,7 @@
  whoa... what a hacker... skills!
  yes! yes! yes! hit me baby one more time!
  with your skills, you're better off jacking off than hijacking
+ i'll need split all efnet to secure this fucking channel ?
 :bitchop
  channel is +bitch
 :bitchopped
@@ -111,6 +121,7 @@
  sorry, closed
  try us later, atm we're locked down
  closed. try tomorrow
+ shutting down spamchan
 :flood
  so much bull in such a short time. amazing.
  slow down. i'm trying to read here.
@@ -119,6 +130,11 @@
  blabbering are we?
  ... and i don't even like you!
  and you're outa here...
+ blog it
+ dont care
+ tell someone who cares
+ try here instead http://www.livejournal.com
+ care-meter\037:\037 14[5....4..7..8..3..9..14] 140%
 :nickflood
  detected: identity crisis
  make up your mind?
@@ -128,6 +144,8 @@
  try this: /NICK n00b
  playing hide 'n' seek?
  gotcha!
+ you are now known as kicked!
+ become who you are.
 :kickflood
  you should be a soccer player
  easier to just leave if you wan't to be alone
@@ -152,13 +170,15 @@
  there as some things you cannot do, and that was one of them...
 :username
  sup
+ dont panic
+ never forget 12/17/2007!
  a/s/l?\ni'm 17/f/ca ;)
  who are you?
  uhhh do i know you?
  what?
  wtf do you want?
  hold on a second, I am sort of busy..
- mIRC v6.16 File Server\n\nUse: cd dir ls get read help exit\n[\\]
+ mIRC v6.31 File Server\n\nUse: cd dir ls get read help exit\n[\\]
  got any porn?
  ?
  can I help you?
@@ -170,6 +190,12 @@
  ...
  lost?
  .
+ hey..checkout this cool video http://www.youtube.com/watch?v=oHg5SJYRHA0
+ SSH-2.0-OpenSSH_4.3p2 Debian-10
+ SSH-2.0-OpenSSH_4.6p1 FreeBSD-openssh-portable-overwrite-base-4.6.p1,1
+ sup g00n
+ lol
+ whats happenin pimpin?
 :password
  what?
  huh?
@@ -187,6 +213,15 @@
  why do you keep bugging me?
  I hear you're gay?
  asl?
+ wat
+ d/c
+ ignored
+ I think you got the wrong person...
+ ...
+ lol
+ I have put you on a permanent ignore, public and private. I have found you disturbing, rude and generally not worth talking to.\nAccording to the channels you hang on, it strengtens the effect of wanting to put you on ignore because of my lack of interest in you as a person. This message is not meant to be rude to you, just to inform you that i won't see anything of what you type from now on.
+ msg me again and u drop
+ how about i do a nice icmp ping, figure out where you are and what you are on, spawn your command.com to a port of my choice and log in with telnet and have a field day with you.
 :baduserpass
  stop wasting my time.
  gtg
@@ -208,6 +243,12 @@
  try again, newb
  newb
  haha, no.
+ lol
+ dont care
+ d/c
+ reporting you for spam.
+ Congratulations, prick, you've just made my ignore list. Was it worth it to you to make your 'witty' comments and snide in-jokes to your irc pals about me if it meant you are now disappeared from my online experience? Have a nice life.
+ brb getting u glined
 :pscloak
  -bash
  ftp
@@ -241,6 +282,8 @@
  screen irssi
  ezbnc
  ./bnc
+ ./sbnc
+ /usr/bin/bash
 :mIRCver
  5.91
  6.01
@@ -253,6 +296,41 @@
  6.15
  6.16
  6.17
+ 6.2
+ 6.21
+ 6.3
+ 6.31
 :mIRCscript
- Lame script 2.0
+ 12( NoNameScript 4.03 12:: \037www.nnscript.com\037 12:: \037www.XLhost.de\037 12)
+ 12( NoNameScript 4.2 12:: \037www.nnscript.com\037 12:: \037www.regroup-esports.com\037 12)
+ ircN 8.00 (20071102) \037-\037 Our salvation lies not in knowing, but in creating \037-\037
+ ircN 8.00 (20071102) \037-\037 We were created to be harvested \037-\037
+ ircN 8.00 (20071102) \037-\037 there is no god up in the sky tonight \037-\037
+ ircN 8.00 (20070218)\037-\037 after everything I've done I hate myself for what I've become \037-\037
+ ircN 8.00 (20071102) \037-\037 he sewed his eyes shut because he is afraid to see \037-\037
+ ircN 8.00 (20071102) \037-\037 everyone I know goes away in the end \037-\037
+ ircN 7.27 + 7.0 - this world's gonna have to pay -
+ ircN 8.00 (20061126)- are we being punished for fate -
+:otherscript
+ xchat 2.8.4 Linux 2.6.23.15-80.fc7 [i686/2.01GHz]
+ Snak for Macintosh 5.3.3 English Intel
+ xchat 2.8.4 Linux 2.6.23.14-64.fc7 [x86_64/2.61GHz/SMP]
+ amnesiac1.0a cvs/14 epic4/2.8.0[759]-1 I get my kicks on channel six
+ irssi v0.8.12
+ xchat 2.8.5e Windows 6.0 [i686/3.01GHz]
+ irssi v0.8.11 - running on FreeBSD i386
+ irssi v0.8.11 - running on Linux i686
+ eggdrop 1.6.18
+ eggdrop 1.6.17
+ eggdrop 1.6.16
+ X-Chat Aqua 0.16.0 (xchat 2.6.1) Darwin 9.2.0 [i386/2.93GHz]
+ irssi v0.8.11
+ JedIrc v3.1 on (j2me)
+ CGI:IRC 0.5.9 (2006/06/06) - http://cgiirc.sf.net/
+ Stat v1.95 by abe2000 (2199MHz/1023MB/534.57GB/WinXP)
+ ircN 8.00 (20061126)\037-\037 are we being punished for fate \037-\037
+ ircN 8.00 (20061126)\037-\037 my blood just wants to say hello to you \037-\037
+ ircN 8.00 (20080221) \037-\037 I hurt where I cant feel \037-\037
+ ircN 8.00 (20071102) \037-\037 I'd rather die than give you control \037-\037
+ ircN 8.00 (20071102) \037-\037 I am the voice inside your head \037-\037
 :end

@@ -1577,7 +1577,7 @@ See also: reload, backup
 [N]  $bcloak-script$b    Decides which script the bot cloaks as. 
                           If set to 0, a random script will be used.
                           1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 
-                          5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC
+                          5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC 10=other
  
  * $bExamples$b:
  
@@ -1677,7 +1677,8 @@ See also: console
       $bg$b - remove all ctrl-g (bell) codes
    The mode can also be a modifier like '+c' or '-bu' or '+ru-c'. If
    you omit modes, it will show your current setting.
- 
+
+   NOTE: THIS CMD DOES NOT AFFECT ALL COLORS, PLEASE SEE '%dhelp color' 
 See also: fixcodes, color, echo, login, page
 %{+m}
 ###  $bstrip$b <user> [modes]
