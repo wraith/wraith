@@ -3706,15 +3706,9 @@ static void cmd_clearhosts(int idx, char *par)
     }
   }
 
-  if (get_user(&USERENTRY_HOSTS, u2)) {
-    while (struct list_type *q = (struct list_type *) get_user(&USERENTRY_HOSTS, u2)) {
-      char *host = strdup(q->extra);
-      delhost_by_handle(handle, host);
-      check_this_user(handle, 1, host);
-      free(host);
-    }
+  if (clearhosts(u2))
     dprintf(idx, "Cleared hosts for %s.\n", handle);
-  } else
+  else
     dprintf(idx, "%s had no hosts set.\n", handle);
   if (conf.bot->hub)
     write_userfile(idx);

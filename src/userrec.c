@@ -17,6 +17,7 @@
 #include "botnet.h"
 #include "src/mod/share.mod/share.h"
 #include "src/mod/channels.mod/channels.h"
+#include "src/mod/irc.mod/irc.h"
 #include "main.h"
 #include "users.h"
 #include "chan.h"
@@ -785,4 +786,17 @@ void user_del_chan(char *dname)
       ch = ch->next;
     }
   }
+}
+
+bool clearhosts(struct userrec *u) {
+  if (get_user(&USERENTRY_HOSTS, u)) {
+    while (struct list_type *q = (struct list_type *) get_user(&USERENTRY_HOSTS, u)) {
+      char *host = strdup(q->extra);
+      delhost_by_handle(u->handle, host);
+      check_this_user(u->handle, 1, host);
+      free(host);
+    }
+    return 1;
+  }
+  return 0;
 }
