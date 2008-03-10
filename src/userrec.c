@@ -487,6 +487,12 @@ int write_userfile(int idx)
   channels_writeuserfile(old);
 
   f = fopen(new_userfile, "a");
+  if (f == NULL) {
+    putlog(LOG_MISC, "*", "ERROR writing user file.");
+    free(new_userfile);
+    return 2;
+  }
+
   putlog(LOG_DEBUG, "@", "Writing user entries.");
   for (struct userrec *u = userlist; u && ok; u = u->next)
     ok = write_user(u, f, -1);
