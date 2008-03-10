@@ -675,7 +675,7 @@ static void share_mns_mask(int idx, char *par)
           channel_list = (type == 'b' ? chan->channel.ban : type == 'e' ? 
                           chan->channel.exempt : chan->channel.invite);
 
-          if (channel_list && !ismasked(channel_list, par))
+          if (channel_list && ismasked(channel_list, par))
             add_delay(chan, '-', type, par);
         }
       }
