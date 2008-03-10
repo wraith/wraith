@@ -822,6 +822,7 @@ writeconf(char *filename, FILE * stream, int bits)
 #ifndef CYGWIN_HACKS
   char *p = NULL;
 
+  comment("");
   comment("# Lines beginning with # are what the preceeding line SHOULD be");
   comment("# They are simply comments and are not parsed at all.\n");
 
@@ -895,26 +896,34 @@ writeconf(char *filename, FILE * stream, int bits)
 
   comment("");
 
-  comment("# portmin/max are for incoming connections (DCC) [0 for any]");
-  my_write(f, "! portmin %d\n", conf.portmin);
-  my_write(f, "! portmax %d\n", conf.portmax);
+  if (conf.portmin || conf.portmax) {
+    comment("# portmin/max are for incoming connections (DCC) [0 for any]");
+    my_write(f, "! portmin %d\n", conf.portmin);
+    my_write(f, "! portmax %d\n", conf.portmax);
 
-  comment("");
+    comment("");
+  }
 
-  comment("# Attempt to \"cloak\" the process name in `ps` for Linux?");
-  my_write(f, "! pscloak %d\n", conf.pscloak);
 
-  comment("");
+  if (conf.pscloak) {
+    comment("# Attempt to \"cloak\" the process name in `ps` for Linux?");
+    my_write(f, "! pscloak %d\n", conf.pscloak);
+
+    comment("");
+  }
 
   comment("# Automatically add the bot to crontab? (Disable if binname has funky chars that need escaping)");
   my_write(f, "! autocron %d\n", conf.autocron);
 
   comment("");
 
-  comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
-  my_write(f, "! autouname %d\n", conf.autouname);
+  if (conf.autouname) {
+    comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
+    my_write(f, "! autouname %d\n", conf.autouname);
 
-  comment("");
+    comment("");
+  }
+
 #ifdef NO
   comment("# This will spawn a child process for EACH BOT that will block ALL process hijackers.");
   my_write(f, "! watcher %d\n", conf.watcher);
@@ -926,7 +935,9 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("# A '+' in front of HOST means the HOST is ipv6");
   comment("# A '/' in front of BOT will disable that bot.");
   comment("#[/]BOT IP|. [+]HOST|. [IPV6-IP]");
-  comment("#***** 1.2.3: Hubs CAN be mixed with leaf bots, but is not fully tested; it is not recommended. ******");
+  comment("#bot ip vhost");
+  comment("#bot2 ip vhost");
+  comment("### Hubs should have their own binary ###");
 
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {

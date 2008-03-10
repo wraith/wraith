@@ -10,6 +10,7 @@
 * Added new chanset flag '+knock' which will make +y bots auto invite USERS. (No flag restrictions currently)
 * Bots now check their own hostmask before opping or requesting assistance to join a channel
 * Fix bans not being removed from channels when removed from bot. (fixes #352)
+* Dont show portmin/portmax/pscloak/autouname in binary config unless they are set
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
