@@ -1344,7 +1344,8 @@ static void cmd_botcmd(int idx, char *par)
     }
   }
 
-  if (wild_match(botm, conf.bot->nick) || !egg_strcasecmp(botm, conf.bot->nick)) {
+  /* Only wild_match when not using botm=? and strlen(conf.bot->nick) > 1, ie dont match on hubs with 1 letter nicks */
+  if ((!(strlen(conf.bot->nick) == 1 && !strcmp(botm, "?")) && wild_match(botm, conf.bot->nick)) || !egg_strcasecmp(botm, conf.bot->nick)) {
     found++;
     check_bind_dcc(cmd, idx, par);
   }

@@ -13,6 +13,7 @@
 * Dont show portmin/portmax/pscloak/autouname in binary config unless they are set
 * Fix possible situation where an error while saving userfile is not reported (fixes #287)
 * Fix a bug where some nets did not save userfile correctly
+* Fix a case where 'botcmd ?' would loop forever when a hub had a 1 character handle
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
