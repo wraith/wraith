@@ -791,7 +791,7 @@ flood-exempt %d flood-lock-time %lu \
         PLSMNS(channel_backup(chan)),
         PLSMNS(channel_nomassjoin(chan)),
         PLSMNS(channel_knock(chan)),
-	HAVE_TAKE ? PLSMNS(channel_take(chan)) : 0,
+	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
 /* Chanflag template
  * also include a %ctemp above.
@@ -890,7 +890,7 @@ exempt-time %lu invite-time %lu voice-non-ident %d auto-delay %d \
         PLSMNS(channel_backup(chan)),
         PLSMNS(channel_nomassjoin(chan)),
         PLSMNS(channel_knock(chan)),
-	HAVE_TAKE ? PLSMNS(channel_take(chan)) : 0,
+	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
 /* Chanflag template
  * also include a %ctemp above.
