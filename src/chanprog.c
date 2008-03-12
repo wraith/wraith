@@ -424,8 +424,6 @@ void load_internal_users()
 	break;
       case 2:
 	port = ln;
-	break;
-      case 3:
         hublevel++;		/* We must increment this even if it is already added */
 	if (!get_user_by_handle(userlist, hand)) {
 	  userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
