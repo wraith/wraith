@@ -185,7 +185,7 @@ void check_last() {
   if (conf.username) {
     char *out = NULL, buf[50] = "";
 
-    simple_sprintf(buf, "last %s", conf.username);
+    simple_sprintf(buf, "last -10 %s", conf.username);
     if (shell_exec(buf, NULL, &out, NULL)) {
       if (out) {
         char *p = NULL;

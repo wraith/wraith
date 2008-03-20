@@ -15,6 +15,7 @@
 * Fix a bug where some nets did not save userfile correctly
 * Fix a case where 'botcmd ?' would loop forever when a hub had a 1 character handle
 * Change default realname to mimic bitchx
+* Make the 'detect login' use less shell resources
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
