@@ -675,7 +675,8 @@ static void cmd_help(int idx, char *par)
   } else if (!fnd) {
     dprintf(idx, "No match for '%s'.\n", match);
   }
-  dprintf(idx, "Also check the FAQ: http://wraith.botpack.net/wiki/FrequentlyAskedQuestions\n");
+  dprintf(idx, "FAQ: http://wraith.botpack.net/wiki/FrequentlyAskedQuestions\n");
+  dprintf(idx, "Documentation: http://wraith.botpack.net/wiki/Documentation\n");
 }
 
 static void cmd_addlog(int idx, char *par)
