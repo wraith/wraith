@@ -897,11 +897,10 @@ static int parse_reply(char *response, size_t nbytes)
 
 		ptr += reply.rdlength;
 	}
-	q->remaining--;
 	/* Don't continue if we haven't gotten all expected replies. */
-	if (q->remaining > 0) return 0;
+	if (--q->remaining > 0) return 0;
 
-        if (!q->answers) {
+        if (q->answer.len == 0) {
           sdprintf("Failed to get any answers for query");
 
           if (prev) prev->next = q->next;
