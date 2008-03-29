@@ -1704,8 +1704,8 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->flags |= CHANVOICE;	/* Yes */
   else
     m->flags &= ~CHANVOICE;
-  if (!(m->flags & (CHANVOICE | CHANOP)))
-    m->flags |= STOPWHO;
+//  if (!(m->flags & (CHANVOICE | CHANOP)))
+//    m->flags |= STOPWHO;
 
   /* Store the userhost */
   if (!m->userhost[0])
@@ -2420,7 +2420,7 @@ static int gotjoin(char *from, char *chname)
 	m->delay = 0L;
 	m->flags = (chan_hasop(m) ? WASOP : 0);
 	set_handle_laston(chan->dname, m->user, now);
-	m->flags |= STOPWHO;
+//	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
 
 
@@ -2455,7 +2455,7 @@ static int gotjoin(char *from, char *chname)
             resolve_to_member(chan, nick, host); 
         }
 
-	m->flags |= STOPWHO;
+//	m->flags |= STOPWHO;
 
 	if (match_my_nick(nick)) {
 	  /* It was me joining! Need to update the channel record with the

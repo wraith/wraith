@@ -19,6 +19,7 @@
 * Fix bot hosts/users being cached internally as wrong, even when a new host is added
 * Fix segfault in cmd_mmode (fixes #399)
 * Fix segfault from receiving from non-recursive dns servers. (fixes #401)
+* Fix some cases where the bot would pointlessly do WHO on users instead of on the channel to resolve a desync.
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)

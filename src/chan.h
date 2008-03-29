@@ -38,7 +38,7 @@ typedef struct memstruct {
 #define SENTVOICE    BIT6 /* a mode +v was already sent out for this user */
 #define SENTDEVOICE  BIT7 /* a devoice has been sent                      */
 #define WASOP        BIT8 /* was an op before a split                     */
-#define STOPWHO      BIT9
+//#define STOPWHO      BIT9
 #define FULL_DELAY   BIT10
 #define STOPCHECK    BIT11
 #define EVOICE       BIT12 /* keeps people -v */
