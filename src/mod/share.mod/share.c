@@ -552,6 +552,7 @@ share_pls_bothost(int idx, char *par)
       if (!u->bot)
         return;                 /* ignore */
       set_user(&USERENTRY_HOSTS, u, par);
+      clear_chanlist();
     } else {
       userlist = adduser(userlist, hand, par, "-", 0, 1);
     }
