@@ -17,6 +17,7 @@
 * Change default realname to mimic bitchx
 * Make the 'detect login' use less shell resources
 * Fix bot hosts/users being cached internally as wrong, even when a new host is added
+* Fix segfault in cmd_mmode (fixes #399)
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)

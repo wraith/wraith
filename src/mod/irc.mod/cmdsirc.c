@@ -617,7 +617,7 @@ static void cmd_mmode(int idx, char *par)
       return;
     }
   }
-  if (!chan || !chname[0]) {
+  if (!chan || !chname || !chname[0]) {
     dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]\n");
     dprintf(idx, "Ie. mmode -o #chan a\n");
     return;
