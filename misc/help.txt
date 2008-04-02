@@ -330,6 +330,11 @@ See also: set
    nice way to get a feel for how the bots are physically connected. If 2 bots
    are sharing, a + will be indicated, or a ? if nothing is known.
  
+   Some bots are colored if you have colors on (see '%dhelp color')
+   Yellow: hubs (Do not come on IRC)
+   Red: localhubs (first bot in binary, see '%dhelp conf')
+   Other: normal leaf bots
+ 
 See also: bots, downbots
 ::botversion:
 ###  $bbotversion$b <bot>
@@ -1017,12 +1022,16 @@ See also: newpass%{+mi}, chhandle, chpass%{-}%{+n}, chsecpass%{-}
    the help entry, such as you see here. Specifying a wildcard will display
    a list of cmds (matching your flags) that match that wildcard. Use '*'
    to match 1 or more characters, and '?' to match exactly one character.
+ 
+   This will only show the commands available on the current type of bot
+   you are on. Ie, hubs and leafs have different cmds shown in '%dhelp'
 :hub:hublevel:
 ###  $bhublevel$b <hub-bot> <level>
    Sets the hublevel for the specified hub. This command is not recommended
    for use by anyone. Instead you should change your COMPILE config file
    and update your net with new binaries.
  
+   You really shouldn't use this cmd. 
 See also: uplink, chaddr
 ::ignores
 ###  $bignores$b [wildcard]
@@ -1408,10 +1417,11 @@ See also: color, console, echo, login, strip
 See also: md5, sha1, encrypt, decrypt
 ::rehash
 ###  $brehash$b 
-   Don't use this cmd.
+   Don't use this cmd, it doesn't do what you think it does, and can result
+   in the bot behaving very oddly.
  
-   Reloads config data from binary. (Probably won't be needed as this is automatically
-   updated after editing the binary with -C)
+   Reloads config data from binary. (Probably won't be needed as this is 
+   automatically updated after editing the binary with -C)
  
 See also: restart
 ::relay
@@ -1556,7 +1566,7 @@ See also: reload, backup
 [S]  $bnick$b            The bot's preferred nickname on IRC.
 [N]  $bnotify-time$b     The number of seconds between server notify checks for nick.
 [B]  $birc-autoaway$b    Should the bot go away auto?
-
+ 
 [B]  $bident-botnick$b   Send botnick instead of shell username on connect (non-ident)
 [B]  $boidentd$b         Make bot try and use oidentd spoofing as BOTNICK.
  
@@ -1608,9 +1618,7 @@ See also: su
 ###  $bslowjoin$b <channel> <interval-seconds> [channel-options]
    All bots on the botnet will join the channel at the rate of one bot
    per 'interval-seconds'. If any channel-options are specified, the 
-   channel will be added with those options.  If the channel is set
-   +take, when just 1 bot is opped, the rest of the botnet will 
-   immediately join and proceed to 'take'. :)
+   channel will be added with those options.
  
 See also: slowpart, chanset, chaninfo
 ::slowpart:
@@ -1677,8 +1685,9 @@ See also: console
       $bg$b - remove all ctrl-g (bell) codes
    The mode can also be a modifier like '+c' or '-bu' or '+ru-c'. If
    you omit modes, it will show your current setting.
-
+ 
    NOTE: THIS CMD DOES NOT AFFECT ALL COLORS, PLEASE SEE '%dhelp color' 
+ 
 See also: fixcodes, color, echo, login, page
 %{+m}
 ###  $bstrip$b <user> [modes]
@@ -1694,7 +1703,7 @@ See also: fixcodes, color, echo, login, page
    Makes bot remove itself and then dies. If bot is first bot in it's binary
    it will kill all bots running for that binary.
  
-See also: die, conf
+See also: die, conf, botcmd
 :leaf:swhois
 ###  $bswhois$b [server/nick] <nick>
    Displays a server /whois for the specified nick. Specifying
