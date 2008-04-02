@@ -565,6 +565,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_TAKE;
     else if (HAVE_TAKE && !strcmp(item[i], "-take"))
       chan->status &= ~CHAN_TAKE;
+    else if (!HAVE_TAKE && !strcmp(item[i], "+take"))
+      chan->status |= CHAN_BITCH;
+    else if (!HAVE_TAKE && !strcmp(item[i], "-take"))
+      chan->status &= ~CHAN_BITCH;
     else if (!strcmp(item[i], "+voice"))
       chan->status |= CHAN_VOICE;
     else if (!strcmp(item[i], "-voice"))
