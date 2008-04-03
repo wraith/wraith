@@ -879,6 +879,9 @@ writeconf(char *filename, FILE * stream, int bits)
   if (homedir() && strstr(conf.binpath, homedir())) {
     p = replace(conf.binpath, homedir(), "~");
     my_write(f, "! binpath %s\n", p);
+  } else if (conf.homedir && strstr(conf.binpath, conf.homedir)) { /* Could be an older homedir */
+    p = replace(conf.binpath, conf.homedir, "~");
+    my_write(f, "! binpath %s\n", p);
   } else
     my_write(f, "! binpath %s\n", conf.binpath);
 
@@ -890,6 +893,9 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("# datadir should be set to a static directory that is writable");
   if (homedir() && strstr(conf.datadir, homedir())) {
     p = replace(conf.datadir, homedir(), "~");
+    my_write(f, "! datadir %s\n", p);
+  } else if (conf.homedir && strstr(conf.datadir, conf.homedir)) { /* Could be an older homedir */
+    p = replace(conf.datadir, conf.homedir, "~");
     my_write(f, "! datadir %s\n", p);
   } else
     my_write(f, "! datadir %s\n", conf.datadir);
