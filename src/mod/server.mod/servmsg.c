@@ -1399,6 +1399,18 @@ static int got406(char *from, char *msg)
   return 0;
 }
 
+/* 465 info_ :You are banned from this server- Temporary K-line 1 min. - Testing kline notices (2008/4/3 09.51) */
+static int got465(char *from, char *msg)
+{
+  newsplit(&msg); /* 465 */
+  newsplit(&msg); /* nick */
+  fixcolon(msg);
+  putlog(LOG_SERV, "*", "I am klined: %s", msg);
+  putlog(LOG_SERV, "*", "Disconnecting from server.");
+  nuke_server("I am klined!");
+  return 1;                                           
+}
+
 /* 718 $me nick user@host :msg 
  * for receiving a msg while +g
  */
@@ -1448,6 +1460,7 @@ static cmd_t my_raw_binds[] =
   {"317",	"",	(Function) got317,		NULL, LEAF},	/* idle, signon :idle-eng, signon-eng */
   {"401",	"",	(Function) got401,		NULL, LEAF},
   {"406",	"",	(Function) got406,		NULL, LEAF},
+  {"465",	"",	(Function) got465,		NULL, LEAF},	/* RPL_YOUREBANNEDCREEP */
   {"318",	"",	(Function) whoispenalty,	NULL, LEAF},	/* :End of /WHOIS */
   {"369",	"",	(Function) got369,		NULL, LEAF},	/* :End of /WHOWAS */
   {"718",	"",	(Function) got718,		NULL, LEAF},
