@@ -3810,7 +3810,7 @@ static void cmd_version(int idx, char *par)
   botnet_send_cmd(conf.bot->nick, conf.bot->nick, dcc[idx].nick, idx, "ver");
 }
 
-/* netnick, botnick */
+/* netnick, botnick, nick */
 static void cmd_netnick (int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# netnick", dcc[idx].nick);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "curnick");
@@ -4537,16 +4537,16 @@ cmd_t C_dcc[] =
   {"whois",		"",	(Function) cmd_whois,		NULL, AUTH},
   {"whom",		"",	(Function) cmd_whom,		NULL, 0},
   {"whoami",		"",	(Function) cmd_whoami,		NULL, AUTH},
-  {"botjump",           "m",    (Function) cmd_botjump,         NULL, 0},
-  {"botmsg",		"o",    (Function) cmd_botmsg,          NULL, 0},
-  {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL, 0},
-  {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL, 0},
+  {"botjump",           "m",    (Function) cmd_botjump,         NULL, HUB},
+  {"botmsg",		"o",    (Function) cmd_botmsg,          NULL, HUB},
+  {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL, HUB},
+  {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL, HUB},
   {"netw", 		"n", 	(Function) cmd_netw, 		NULL, HUB},
   {"netps", 		"n", 	(Function) cmd_netps, 		NULL, HUB},
   {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL, HUB},
   {"netlag", 		"m", 	(Function) cmd_netlag, 		NULL, HUB},
-  {"botserver",		"m",	(Function) cmd_botserver,	NULL, 0},
-  {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL, 0},
+  {"botserver",		"m",	(Function) cmd_botserver,	NULL, HUB},
+  {"netserver", 	"m", 	(Function) cmd_netserver, 	NULL, HUB},
   {"timesync",		"a",	(Function) cmd_timesync,	NULL, 0},
   {"botversion", 	"o", 	(Function) cmd_botversion, 	NULL, HUB},
   {"version", 		"o", 	(Function) cmd_version, 	NULL, 0},

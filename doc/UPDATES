@@ -24,6 +24,8 @@
 * Misc help cleanups
 * Show kline reasons on connect to servers. (fixes #400)
 * Fix case where binpath/datadir were not updated correctly when homedir changed. (fixes #169)
+* For security purposes the following commands are now hub-only: botnick, botserver, botversion, botmsg, netnick, netserver, netversion
+* Added cmd_nick to display leaf's current nick
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)

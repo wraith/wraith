@@ -267,27 +267,27 @@ See also: cmdpass
    channel will be configured with the options.
  
 See also: botpart, +chan, -chan, chanset, chaninfo
-::botjump:
+:hub:botjump:
 ###  $bbotjump$b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
-   server, it will jump to the next server in it's internal list (see
+   server, it will jump to the next server in its internal list (see
    $b'%dhelp set'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
    Jumping servers ALWAYS makes the bot lose ops! be careful!
  
 See also: jump, servers, botserver
-::botmsg:
+:hub:botmsg:
 ###  $bbotmsg$b <bot> <nickname|#chan> <text>
    sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
 See also: msg%{+n}
-::botnick:
+:hub:botnick:
 ###  $bbotnick$b <bot>
-   The bot will display it's current nick over DCC.
+   The specified bot will display its current nick over DCC.
  
-See also: netnick
+See also: netnick, nick
 ::botpart
 ###  $bbotpart$b <bot> <channel>
    Removes bot from the specified channel
@@ -302,12 +302,12 @@ See also: botjoin, +chan, -chan, chanset, chaninfo
    bot. %{+n}Use $b'%dwho'$b or $b'%dbottree'$b for that information.%{-}
  
    Specifying a nodename will display all bots up/down on that nodename.
-   Bots with a * preceeding it's name is down.
+   Bots with a * preceeding its name is down.
  
 See also: downbots%{+n}, bottree%{-}
-::botserver:
+:hub:botserver:
 ###  $bbotserver$b <bot>
-   The bot will display it's current server and lag over DCC.
+   The bot will display its current server and lag over DCC.
  
 See also: netserver, servers%{+n}, set%{-}
 :hub:botset:
@@ -338,7 +338,7 @@ See also: set
 See also: bots, downbots
 ::botversion:
 ###  $bbotversion$b <bot>
-   The bot will display it's pack version and uname.
+   The bot will display its pack version and uname.
  
 See also: version, netversion, about%{+m|m}, status%{-}
 :hub:chaddr
@@ -798,12 +798,12 @@ See also: color, echo, login, page, strip
  
      1,6,11,16,21,26,31,36,41,46,51,56 * * * * /usr/home/bryan/hub/newhub > /dev/null 2>&1
    'delete' will remove the bot's own crontab entry from the crontab list.
-   'new' will make the bot add it's self to the crontab list, although this is done
+   'new' will make the bot add itself to the crontab list, although this is done
      automatically on startup.
 ::cycle:
 ###  $bcycle$b <channel> [delay]
    If done on the hub, makes all linked bots cycle the specified channel. 
-   Otherwise, only the bot it's done on will cycle.
+   Otherwise, only the bot it is done on will cycle.
    Delay defaults to 10 seconds, which means bots will part and not rejoin
    until that time has passed.
  
@@ -1330,11 +1330,11 @@ See also: lagged
    the user that they are currently running as.
  
 See also: last
-::netnick:
+:hub:netnick:
 ###  $bnetnick$b 
    All bots on the botnet will display their nick over DCC.
  
-See also: botnick
+See also: botnick, nick
 :hub:netps:
 ###  $bnetps$b [ps-param]
    Will run 'ps' on each bot on the botnet and returned the
@@ -1346,13 +1346,13 @@ See also: ps
 ###  $bnetcrontab$b <status|delete|show|new> [interval]
    Runs the specified crontab command on all linked bots.
    See: crontab
-::netserver:
+:hub:netserver:
 ###  $bnetservers$b 
    All bots on the botnet will display their current server and lag
    to that server over DCC.
  
 See also: botserver, servers%{+n}, set%{-}
-::netversion:
+:hub:netversion:
 ###  $bnetversion$b <bot>
    All bots on the botnet will display their pack version, and uname.
  
@@ -1380,6 +1380,11 @@ See also: w
 %{+mi}See also: chpass%{-}%{+n}, chsecpass%{-}
 ::nick
 See: handle
+::nick:
+###  $bnick$b <bot>
+   The bot will display its current nick over DCC.
+ 
+See also: botnick, netnick
 :hub:nopass
 ###  $bnopass$b [anything]
    Displays all users who do not have a password set.

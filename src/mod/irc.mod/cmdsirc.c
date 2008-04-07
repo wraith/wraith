@@ -118,6 +118,12 @@ static void cmd_msg(int idx, char *par)
   dprintf(idx, "Msg to %s: %s\n", nick, par);
 }
 
+static void cmd_nick(int idx, char *par)
+{
+  putlog(LOG_CMDS, "*", "#%s# nick", dcc[idx].nick);
+  botnet_send_cmd(conf.bot->nick, conf.bot->nick, dcc[idx].nick, idx, "curnick");
+}
+
 static void cmd_say(int idx, char *par)
 {
   if (!par[0]) {
@@ -1863,6 +1869,7 @@ static cmd_t irc_dcc[] =
   {"mmode",             "n|n",	 (Function) cmd_mmode,		NULL, LEAF},
   {"mop",		"n|m",	 (Function) cmd_mop,		NULL, LEAF|AUTH},
   {"msg",		"o",	 (Function) cmd_msg,		NULL, LEAF|AUTH},
+  {"nick",		"m",	 (Function) cmd_nick,		NULL, LEAF},
   {"op",		"o|o",	 (Function) cmd_op,		NULL, LEAF|AUTH},
   {"reset",		"m|m",	 (Function) cmd_reset,		NULL, LEAF|AUTH},
   {"resetbans",		"o|o",	 (Function) cmd_resetbans,	NULL, LEAF|AUTH},
