@@ -9,7 +9,7 @@ if test $# -lt 1; then
 fi
 
 #Build hub/leaf
-./build -C -n all
+./build.sh -C -n all
 
 #Then package up each cfg
 cfgs="`find \"$@\" -name \"*.cfg\" | grep -v \"disabled\"`"
@@ -17,7 +17,7 @@ for cfg in $cfgs
 do
  if test "`grep 'PACKNAME' $cfg`x" != "x"; then
   #Dont compile, just package up and dont rm old binaries.
-  ./build -n -P -q $cfg -s $scp_target:${dir}/ all
+  ./build.sh -n -P -q $cfg -s $scp_target:${dir}/ all
  fi
 done
 chmod 0700 misc/id_dsa

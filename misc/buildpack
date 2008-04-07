@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./build -C -q $1 -s shatow@wraith.shatow.net:public_html/builds/ all
+./build.sh -C -q $1 -s shatow@wraith.shatow.net:public_html/builds/ all
