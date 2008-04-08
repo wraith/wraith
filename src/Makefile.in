@@ -8,7 +8,7 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
-CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS) '-DREVISION=$(REVISION)' -DBUILDTS=$(BUILDTS)
+CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(CFLGS) '-DREVISION=$(REVISION)' -DBUILDTS=$(BUILDTS)
 CPPFLAGS = @CPPFLAGS@
 
 OBJCOPY = @OBJCOPY@
@@ -94,12 +94,13 @@ stringfix: stringfix.c common.h ../config.h eggdrop.h
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
 	@$(STRIP) stringfix@EXEEXT@
 
-../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability
+#../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability ../lib/bdlib/src/libbdlib.a
+../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability 
 	@echo "[*] Linking"
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-#	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o bdlib/src/libbdlib.a
+#	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o ../lib/bdlib/src/libbdlib.a
 	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
@@ -117,10 +118,6 @@ build_msg:
 compatability:
 	@echo "[*] Compiling compatability components"
 	+@cd compat && $(MAKE_GENERIC) compat
-
-mybdlib:
-	@echo "[*] Compiling BDLIB components"
-	+@cd bdlib && $(MAKE_GENERIC)
 
 mycrypto:
 	@echo "[*] Compiling crypto"

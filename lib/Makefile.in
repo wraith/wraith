@@ -1,0 +1,41 @@
+
+SHELL = @SHELL@
+top_srcdir = @top_srcdir@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+@SET_MAKE@
+
+#include $(top_srcdir)/build/build.mk
+
+.PHONY: default clean distclean normal debug general buildcheck notice notice_debug build units
+
+default: normal
+
+clean:
+#	-+@cd bdlib && $(MAKE) clean
+	@rm -f *.a
+
+distclean: clean
+#	-+@cd bdlib && $(MAKE) distclean
+
+notice:
+	@echo "[*] Making libraries"
+
+notice_debug:
+	@echo "[*] Making libraries (debug)"
+
+normal: general notice build
+
+debug: general notice_debug build
+
+general:
+
+build:
+#	+@cd bdlib && $(MAKE) bdlib
+
+buildcheck: build
+
+units:
+#	+@cd bdlib/tests && $(MAKE) units
+
