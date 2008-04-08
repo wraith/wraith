@@ -79,7 +79,7 @@ int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd
 void botnet_send_cmd_broad(int idx, char * fbot, char *fhnd, int fromidx, char * cmd);
 void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
 void send_uplink(const char *, size_t);
-inline void send_hubs(const char *, size_t);
+#define send_hubs(_s, _l) send_hubs_but(-1, (_s), (_l))
 void send_hubs_but(int , const char *, size_t);
 
 

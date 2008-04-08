@@ -36,11 +36,6 @@ void send_uplink(const char *msg, size_t len)
   tputs(dcc[uplink_idx].sock, (char *) msg, len);
 }
 
-void send_hubs(const char *msg, size_t len)
-{
-  send_hubs_but(-1, msg, len);
-}
-
 void send_hubs_but(int idx, const char *msg, size_t len)
 {
   int i = 0;
