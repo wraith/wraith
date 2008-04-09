@@ -3159,7 +3159,7 @@ static void cmd_newleaf(int idx, char *par)
       }
     }
     dprintf(idx, "Bot config line (prefix host with '+' if ipv6):\n");
-    dprintf(idx, "%s %s %s %s\n", handle, ip ? ip : ".", bhostname ? bhostname : ".", ip6 ? ip6 : "");
+    dprintf(idx, "%s %s %s %s\n", handle, ip ? ip : "*", bhostname ? bhostname : "*", ip6 ? ip6 : "");
     if (ip) free(ip);
     if (ip6) free(ip6);
     if (bhostname) free(bhostname);

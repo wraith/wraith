@@ -470,7 +470,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   bot->pid_file = NULL;
   if (nick[0] == '/') {
     bot->disabled = 1;
-    nick++;
+    ++nick;
     sdprintf("%s is disabled.", nick);
   }
   bot->nick = strldup(nick, HANDLEN);
@@ -480,13 +480,13 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   bot->net.host6 = NULL;
 
   if (host && host[0] == '+') {
-    host++;
+    ++host;
     bot->net.host6 = strdup(host);
-  } else if (host && strcmp(host, ".")) {
+  } else if (host && !strchr(".*", host[0])) {
     bot->net.host = strdup(host);
   }
 
-  if (ip && strcmp(ip, ".")) {
+  if (ip && !strchr(".*", ip[0])) {
     int aftype = is_dotted_ip(ip);
 
     if (aftype == AF_INET)
@@ -495,9 +495,15 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
     else if (aftype == AF_INET6)
       bot->net.ip6 = strdup(ip);
 #endif /* USE_IPV6 */
+    else if (aftype == 0) { /* The idiot used a hostname in place of ip */
+      if (bot->net.host)
+        free(bot->net.host);
+      bot->net.host = strdup(ip);
+    }
   }
+
 #ifdef USE_IPV6
-  if (ip6 && strcmp(ip6, ".") && is_dotted_ip(ip6) == AF_INET6)
+  if (ip6 && !strchr(".*", ip6[0]) && is_dotted_ip(ip6) == AF_INET6)
     bot->net.ip6 = strdup(ip6);
 
   if (bot->net.ip6 || bot->net.host6)
@@ -890,20 +896,23 @@ writeconf(char *filename, FILE * stream, int bits)
 
   comment("");
 
-  comment("# datadir should be set to a static directory that is writable");
-  if (homedir() && strstr(conf.datadir, homedir())) {
-    p = replace(conf.datadir, homedir(), "~");
-    my_write(f, "! datadir %s\n", p);
-  } else if (conf.homedir && strstr(conf.datadir, conf.homedir)) { /* Could be an older homedir */
-    p = replace(conf.datadir, conf.homedir, "~");
-    my_write(f, "! datadir %s\n", p);
-  } else
-    my_write(f, "! datadir %s\n", conf.datadir);
+  if (conf.datadir && strcmp(conf.datadir, "./...")) {
+    comment("# datadir should be set to a static directory that is writable");
 
-  comment("");
+    if (homedir() && strstr(conf.datadir, homedir())) {
+      p = replace(conf.datadir, homedir(), "~");
+      my_write(f, "! datadir %s\n", p);
+    } else if (conf.homedir && strstr(conf.datadir, conf.homedir)) { /* Could be an older homedir */
+      p = replace(conf.datadir, conf.homedir, "~");
+      my_write(f, "! datadir %s\n", p);
+    } else
+      my_write(f, "! datadir %s\n", conf.datadir);
+
+    comment("");
+  }
 
   if (conf.portmin || conf.portmax) {
-    comment("# portmin/max are for incoming connections (DCC) [0 for any]");
+    comment("# portmin/max are for incoming connections (DCC) [0 for any] (These only make sense for HUBS)");
     my_write(f, "! portmin %d\n", conf.portmin);
     my_write(f, "! portmax %d\n", conf.portmax);
 
@@ -918,7 +927,7 @@ writeconf(char *filename, FILE * stream, int bits)
     comment("");
   }
 
-  comment("# Automatically add the bot to crontab? (Disable if binname has funky chars that need escaping)");
+  comment("# Automatically add the bot to crontab?");
   my_write(f, "! autocron %d\n", conf.autocron);
 
   comment("");
@@ -940,17 +949,20 @@ writeconf(char *filename, FILE * stream, int bits)
   comment("# '|' means OR, [] means the enclosed is optional");
   comment("# A '+' in front of HOST means the HOST is ipv6");
   comment("# A '/' in front of BOT will disable that bot.");
-  comment("#[/]BOT IP|. [+]HOST|. [IPV6-IP]");
+  comment("#[/]BOT IP|* [+]HOST|* [IPV6-IP]");
   comment("#bot ip vhost");
-  comment("#bot2 ip vhost");
+  comment("#bot2 * vhost");
+  comment("#bot3 ip");
+  comment("#bot4 * +ipv6.vhost.com");
+  comment("#bot5 * * ip:v6:ip:goes:here::");
   comment("### Hubs should have their own binary ###");
 
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     my_write(f, "%s%s %s %s%s %s\n", 
              bot->disabled ? "/" : "", bot->nick,
-             bot->net.ip ? bot->net.ip : ".", bot->net.host6 ? "+" : "",
-             bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "."), bot->net.ip6 ? bot->net.ip6 : "");
+             bot->net.ip ? bot->net.ip : "*", bot->net.host6 ? "+" : "",
+             bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"), bot->net.ip6 ? bot->net.ip6 : "");
   }
 
   fflush(f);

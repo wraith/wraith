@@ -548,9 +548,9 @@ void conf_to_bin(conf_t *in, bool move, int die)
                            settings.bots && settings.bots[0] ? settings.bots : "",
                            bot->disabled ? "/" : "",
                            bot->nick,
-                           bot->net.ip ? bot->net.ip : ".", 
+                           bot->net.ip ? bot->net.ip : "*", 
                            bot->net.host6 ? "+" : "", 
-                           bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "."),
+                           bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"),
                            bot->net.ip6 ? bot->net.ip6 : "");
     }
 
