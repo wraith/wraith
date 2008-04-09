@@ -29,6 +29,7 @@
 * Change default ip/host/ip6 to a * in the binary config
 * Hide datadir if it is set to the default in the binary config
 * Silently fix user mistake of giving hostname in ip field in binary config
+* Fix datadir being expanded to full path (fixes #405)
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)

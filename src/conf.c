@@ -1141,6 +1141,8 @@ bin_to_conf(bool error)
   if (!mkdir_p(conf.datadir) && error)
     werr(ERR_DATADIR);
 
+  str_redup(&conf.datadir, replace(datadir, conf.binpath, "."));
+
   Tempfile::FindDir();
 
   if (clear_tmpdir)
