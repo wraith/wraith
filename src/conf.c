@@ -707,7 +707,12 @@ readconf(const char *fname, int bits)
       } else if (line[0] == '!') {
         char *option = NULL;
 
-        newsplit(&line);
+        /* Only newplit if they did '! option' */
+        if (line[1] == ' ')
+          newsplit(&line);
+        else
+          ++line;
+
         if (line[0])
           option = newsplit(&line);
 
@@ -927,10 +932,12 @@ writeconf(char *filename, FILE * stream, int bits)
     comment("");
   }
 
-  comment("# Automatically add the bot to crontab?");
-  my_write(f, "! autocron %d\n", conf.autocron);
+  if (conf.autocron == 0) {
+    comment("# Automatically add the bot to crontab?");
+    my_write(f, "! autocron %d\n", conf.autocron);
 
-  comment("");
+    comment("");
+  }
 
   if (conf.autouname) {
     comment("# Automatically update 'uname' if it changes? (DANGEROUS)");

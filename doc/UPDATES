@@ -10,7 +10,7 @@
 * Added new chanset flag '+knock' which will make +y bots auto invite USERS. (No flag restrictions currently)
 * Bots now check their own hostmask before opping or requesting assistance to join a channel
 * Fix bans not being removed from channels when removed from bot. (fixes #352)
-* Dont show portmin/portmax/pscloak/autouname in binary config unless they are set
+* Dont show portmin/portmax/pscloak/autouname/datadir/autocron in binary config unless they are not set to the default
 * Fix possible situation where an error while saving userfile is not reported (fixes #287)
 * Fix a bug where some nets did not save userfile correctly
 * Fix a case where 'botcmd ?' would loop forever when a hub had a 1 character handle
@@ -27,7 +27,6 @@
 * For security purposes the following commands are now hub-only: botnick, botserver, botversion, botmsg, netnick, netserver, netversion
 * Added cmd_nick to display leaf's current nick
 * Change default ip/host/ip6 to a * in the binary config
-* Hide datadir if it is set to the default in the binary config
 * Silently fix user mistake of giving hostname in ip field in binary config
 * Fix datadir being expanded to full path (fixes #405)
 
