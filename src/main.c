@@ -265,11 +265,11 @@ static void show_help()
   egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
 
   printf(STR("%s\n\n"), version);
-  printf(STR("%s [options] [botnick]\n"));
+  printf(STR("%s [options] [botnick[.conf]]\n"));
   printf(STR("Not supplying any options will make all bots in the binary spawn.\n"));
   printf(format, "Option", "Description");
   printf(format, "------", "-----------");
-  printf(format, STR("-B <botnick>"), STR("Starts the specified bot [deprecated]"));
+  printf(format, STR("[-B] <botnick>"), STR("Starts the specified bot [deprecated]"));
   printf(format, STR("-c"), STR("Config file editor [reads env: EDITOR] [No auto update]"));
   printf(format, STR("-C"), STR("Config file editor [reads env: EDITOR]"));
 //  printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
@@ -413,6 +413,12 @@ static void dtx_arg(int& argc, char *argv[])
     used_B = 1;
     strlcpy(origbotname, argv[optind], HANDLEN + 1);
     strlcpy(origbotnick, argv[optind], HANDLEN + 1);
+    /* Trim off .conf */
+    char *p = strchr(origbotname, '.');
+    if (p) {
+      origbotname[(p - origbotname)] = 0;
+      origbotnick[(p - origbotname)] = 0;
+    }
   }
 }
 
