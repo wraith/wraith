@@ -311,6 +311,19 @@
  ircN 8.00 (20071102) \037-\037 everyone I know goes away in the end \037-\037
  ircN 7.27 + 7.0 - this world's gonna have to pay -
  ircN 8.00 (20061126)- are we being punished for fate -
+ (Gamers.IRC 4.10 powered by www.playerliga.de ) »»»» get it @ www.gamersirc.net
+ 2:: www.unitedservers.de ««« 2(Gamers.IRC 5.16 Build 0801012) »»» gamersirc.net 2::
+ 2:: www.unitedservers.de ««« 2(Gamers.IRC 5.012) »»» www.gamersirc.net 2::
+ 4,1 I am using -HIX Scriptv2.2-2,1 Download at www.rupertonline.ca/hix/
+ 12( NoNameScript 4.1 12:: \037www.nnscript.com\037 12:: \037www.regroup-esports.com\037 12)
+ 12( NoNameScript 3.81 12:: \037www.nnscript.de\037 12:: \037www.XLhost.de\037 12)
+ SysReset 2.55.3. Running Addons: (gtsdll) + Web Update 1.22 + System Information 1.18
+ .::nexgen·acidmax::. v2.1.20 (mirc 6.31) ©2006, by team nexgen - www.tnexgen.com (www.team-nexgen.com)
+ UPP v2.00 final [2005.01.28] - KyD - http://www.upp-irc.tk
+ 11« 14Ë×Ç11ü14®§îöñ 11» 14Info11~[15v9.5 for mIRC v6.12 32bit on WinXP11]~ 14Released11~[15October 27, 200311]~ 14Channel11~[15#Excursion on efnet.net11]~ 14Webpage11~[15http://excursion.humr.org11]~ 11« 1411Ë14×Çü®§îöñ 11»
+ 12« 11Ë×Çü®§î12ö11ñX 12» 11Info12~[14v10B.3.3 for mIRC v6.16 32bit on Win2K12]~ 11Released12~[14March 01 200612]~ 11Channel12~[14#Excursion on EFnet12]~ 11Webpage12~[14Http://excursion.humr.org12]~ 12« 11Ë×Çü®12§11îöñX 12»
+ 4—14I04-15n04-15v04-00i04-00s04-15i04-15o04-14n04—12 3.0 with Advanced File Serving features 12by 11cRYOa 12on 11WinVista 12obtained from 11#Invision on irc.irchighway.net 12 and 11 http://www.i-n-v-i-s-i-o-n.com
+ 12(\03714i am using polaris12\037) version:[\037142.05c12\037] webpage:[\03714http://www.polaris-central.com12\037]
 :otherscript
  xchat 2.8.4 Linux 2.6.23.15-80.fc7 [i686/2.01GHz]
  Snak for Macintosh 5.3.3 English Intel
