@@ -33,8 +33,8 @@ char cloak_bxver[10] = "";
 char cloak_os[20] = "";
 char cloak_osver[100] = "";
 char cloak_host[161] = "";
-char ctcpversion[200] = "";
-char ctcpversion2[200] = "";
+char ctcpversion[300] = "";
+char ctcpversion2[300] = "";
 char ctcpuserinfo[200] = "";
 char autoaway[100] = "";
 char kickprefix[25] = "";
@@ -116,7 +116,7 @@ void scriptchanged()
     strcpy(mircver, response(RES_MIRCVER));
     simple_sprintf(ctcpversion, "mIRC v%s Khaled Mardam-Bey", mircver);
     if (randint(2) % 2)
-      strcpy(ctcpversion2, response(RES_MIRCSCRIPT));
+      strlcpy(ctcpversion2, response(RES_MIRCSCRIPT), sizeof(ctcpversion2));
     strcpy(ctcpuserinfo, botrealname);
     strcpy(autoaway, "auto-away after 10 minutes");
     strcpy(kickprefix, "");
