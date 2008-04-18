@@ -174,9 +174,10 @@ void fatal(const char *s, int recoverable)
   if (my_port)
     listen_all(my_port, 1); /* close the listening port... */
 
+  sdprintf("Closing %d sockets", dcc_total);
   for (int i = 0; i < dcc_total; i++) {
-    sdprintf("Closing %d sockets", dcc_total);
     if (dcc[i].type && dcc[i].sock >= 0) {
+      sdprintf("Closing %s dcc(%d)", dcc[i].type->name, i);
       killsock(dcc[i].sock);
       lostdcc(i);
     }

@@ -37,9 +37,12 @@ struct dcc_t {
     struct relay_info *relay;
     struct dupwait_info *dupwait;
     struct enc_link_dcc *enc;
-    int ident_sock;
     void *other;
   } u;                          /* Special use depending on type        */
+
+  union {
+    int ident_sock;
+  } uint;
 
   in_addr_t addr;                      /* IP address in host byte order         */
   time_t simultime;             /* the time when the simul dcc is initiated, expires after a number of seconds */

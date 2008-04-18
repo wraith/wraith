@@ -629,7 +629,7 @@ dcc_identd_connect(int idx, char *buf, int atr)
   dcc[j].addr = dcc[idx].addr;
   strcpy(dcc[j].host, dcc[idx].host);
   strcpy(dcc[j].nick, "*");
-  /* dcc[j].u.ident_sock = dcc[idx].sock; */
+  /* dcc[j].uint.ident_sock = dcc[idx].sock; */
   dcc[j].timeval = now;
 }
 
@@ -1430,7 +1430,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
 
   changeover_dcc(i, &DCC_IDENTWAIT, 0);
   dcc[i].timeval = now;
-  dcc[i].u.ident_sock = dcc[idx].sock;
+  dcc[i].uint.ident_sock = dcc[idx].sock;
 
   if (!dcc[i].user)
     dcc[i].user = get_user_by_host(s2);		/* check for matching -telnet!telnet@host */
@@ -1467,7 +1467,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   dcc[j].addr = dcc[i].addr;
   strcpy(dcc[j].host, dcc[i].host);
   strcpy(dcc[j].nick, "*");
-  dcc[j].u.ident_sock = dcc[i].sock;
+  dcc[j].uint.ident_sock = dcc[i].sock;
   dcc[j].user = dcc[i].user;
   dcc[j].timeval = now;
   dprintf(j, "%d, %d\n", dcc[i].port, dcc[idx].port);
@@ -1790,7 +1790,7 @@ eof_dcc_identwait(int idx)
 {
   putlog(LOG_MISC, "*", DCC_LOSTCONN, dcc[idx].host, dcc[idx].port);
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && (dcc[i].type == &DCC_IDENT) && (dcc[i].u.ident_sock == dcc[idx].sock)) {
+    if (dcc[i].type && (dcc[i].type == &DCC_IDENT) && (dcc[i].uint.ident_sock == dcc[idx].sock)) {
       killsock(dcc[i].sock);    /* Cleanup ident socket */
       dcc[i].u.other = 0;
       lostdcc(i);
@@ -1834,7 +1834,7 @@ dcc_ident(int idx, char *buf, int len)
   rmspace(uid);
   uid[20] = 0;                  /* 20 character ident max */
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && (dcc[i].type == &DCC_IDENTWAIT) && (dcc[i].sock == dcc[idx].u.ident_sock)) {
+    if (dcc[i].type && (dcc[i].type == &DCC_IDENTWAIT) && (dcc[i].sock == dcc[idx].uint.ident_sock)) {
       simple_sprintf(buf1, "%s@%s", uid, dcc[idx].host);
       dcc_telnet_got_ident(i, buf1);
     }
@@ -1849,7 +1849,7 @@ eof_dcc_ident(int idx)
   char buf[UHOSTLEN] = "";
 
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && (dcc[i].type == &DCC_IDENTWAIT) && (dcc[i].sock == dcc[idx].u.ident_sock)) {
+    if (dcc[i].type && (dcc[i].type == &DCC_IDENTWAIT) && (dcc[i].sock == dcc[idx].uint.ident_sock)) {
       putlog(LOG_MISC, "*", DCC_EOFIDENT);
       simple_sprintf(buf, "telnet@%s", dcc[idx].host);
       dcc_telnet_got_ident(i, buf);
@@ -1862,7 +1862,7 @@ eof_dcc_ident(int idx)
 static void
 display_dcc_ident(int idx, char *buf)
 {
-  simple_sprintf(buf, "idnt  (sock %d)", dcc[idx].u.ident_sock);
+  simple_sprintf(buf, "idnt  (sock %d)", dcc[idx].uint.ident_sock);
 }
 
 struct dcc_table DCC_IDENT = {
@@ -1884,7 +1884,7 @@ dcc_telnet_got_ident(int i, char *host)
   int idx;
 
   for (idx = 0; idx < dcc_total; idx++)
-    if (dcc[i].type && (dcc[idx].type == &DCC_TELNET) && (dcc[idx].sock == dcc[i].u.ident_sock))
+    if (dcc[i].type && (dcc[idx].type == &DCC_TELNET) && (dcc[idx].sock == dcc[i].uint.ident_sock))
       break;
 
   dcc[i].u.other = 0;
