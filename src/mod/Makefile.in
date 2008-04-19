@@ -11,8 +11,8 @@ MOD_UPDIR = @MOD_UPDIR@
 STRIP = @STRIP@
 CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
-MOD_CXXFLAGS = @CXXFLAGS@ -I. -I../../.. -I$(MOD_UPDIR)$(top_srcdir) \
-  -I$(MOD_UPDIR)$(top_srcdir)/src/mod -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
+MOD_CXXFLAGS = @CXXFLAGS@ -I. -I$(MOD_UPDIR)$(top_srcdir)/src -I$(MOD_UPDIR)$(top_srcdir) \
+  -I$(MOD_UPDIR)$(top_srcdir)/src/mod -I$(MOD_UPDIR)$(top_srcdir)/lib @DEFS@ $(CFLGS)
 MOD_CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 
