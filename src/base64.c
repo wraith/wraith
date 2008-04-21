@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include "base64.h"
 #include "src/compat/compat.h"
+#include <bdlib/src/String.h>
 
 static const char base64[65] = ".\\0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 static const char base64r[256] = {
@@ -113,6 +114,33 @@ b64enc(const unsigned char *data, size_t *len)
   *len = dlen;
   return (dest);
 }
+
+/**
+ * @brief Base64 encode a string
+ * @param string The string to encode
+ * @return A new, encoded string
+ */
+bd::String broken_base64Encode(const bd::String& string) {
+  size_t len = string.length();
+  char *p = b64enc((unsigned char*) string.data(), &len);
+  bd::String encoded(p, len);
+  free(p);
+  return encoded;
+}
+
+/**
+ * @brief Base64 decode a string
+ * @param string The string to decode
+ * @return A new, decoded string
+ */
+bd::String broken_base64Decode(const bd::String& string) {
+  size_t len = string.length();
+  char *p = b64dec((unsigned char*) string.data(), &len);
+  bd::String decoded(p, len);
+  free(p);
+  return decoded;
+}
+
 
 /* Encode 3 8-bit bytes to 4 6-bit characters */
 void
