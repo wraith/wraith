@@ -13,6 +13,7 @@
 #include "base64.h"
 #include "src/crypto/crypto.h"
 #include <stdarg.h>
+#include <bdlib/src/String.h>
 
 char *encrypt_string(const char *keydata, char *in)
 {
@@ -24,12 +25,27 @@ char *encrypt_string(const char *keydata, char *in)
   bdata = encrypt_binary(keydata, (unsigned char *) in, &len);
   if (keydata && *keydata) {
     res = b64enc(bdata, &len);
-    OPENSSL_cleanse(bdata, *len);
+    OPENSSL_cleanse(bdata, len);
     free(bdata);
     return res;
   } else {
     return (char *) bdata;
   }
+}
+
+/**
+ * @brief Encrypt a string
+ * @param key The key to encrypt with
+ * @param data The string to encrypt
+ * @return A new, encrypted string
+ */
+bd::String encrypt_string(const bd::String& key, const bd::String& data) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) encrypt_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String encrypted(bdata, len);
+  free(bdata);
+  return encrypted;
 }
 
 char *decrypt_string(const char *keydata, char *in)
@@ -48,6 +64,21 @@ char *decrypt_string(const char *keydata, char *in)
     strlcpy(res, in, len + 1);
     return res;
   }
+}
+
+/**
+ * @brief Decrypt a string
+ * @param key The key to decrypt with
+ * @param data The string to decrypt
+ * @return A new, decrypted string
+ */
+bd::String decrypt_string(const bd::String& key, const bd::String& data) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) decrypt_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String decrypted(bdata, len);
+  free(bdata);
+  return decrypted;
 }
 
 char *salted_sha1(const char *in, const char* saltin)
