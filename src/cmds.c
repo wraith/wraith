@@ -4453,7 +4453,7 @@ void cmd_botlink(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# botlink %s", dcc[idx].nick, par);
 
-  if (!isowner(dcc[idx].handle)) {
+  if (!isowner(dcc[idx].nick)) {
     dprintf(idx, "botlink is only available to permanent owners.\n");
     return;
   }
