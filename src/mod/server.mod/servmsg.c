@@ -1402,7 +1402,6 @@ static int got406(char *from, char *msg)
 /* 465 info_ :You are banned from this server- Temporary K-line 1 min. - Testing kline notices (2008/4/3 09.51) */
 static int got465(char *from, char *msg)
 {
-  newsplit(&msg); /* 465 */
   newsplit(&msg); /* nick */
   fixcolon(msg);
   putlog(LOG_SERV, "*", "I am klined: %s", msg);
