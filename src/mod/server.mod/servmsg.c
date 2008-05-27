@@ -12,7 +12,6 @@ static time_t last_ctcp    = (time_t) 0L;
 static int    count_ctcp   = 0;
 static char   altnick_char = 0;
 static unsigned int rolls = 0;
-#define ALTCHARS "-_\\`^[]"
 #define ROLL_RIGHT
 #undef ROLL_LEFT
 static void rotate_nick(char *nick, char *orignick)
@@ -22,7 +21,7 @@ static void rotate_nick(char *nick, char *orignick)
 
   /* First run? */
   if (altnick_char == 0 && !rolls) {
-    altnick_char = ALTCHARS[0];
+    altnick_char = altchars[0];
     /* the nick is already as long as it can be. */
     if (len == (unsigned) nick_len) {
       /* make the last char the current altnick_char */
@@ -35,7 +34,7 @@ static void rotate_nick(char *nick, char *orignick)
   } else {
     char *p = NULL;
 
-    if ((p = strchr(ALTCHARS, altnick_char)))
+    if ((p = strchr(altchars, altnick_char)))
       p++;
     /* if we haven't been rolling, use the ALTCHARS
      */
