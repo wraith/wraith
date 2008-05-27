@@ -1533,6 +1533,8 @@ See also: reload, backup
                           matching alias is used. Normal flag checking is done
                           after the alias is expanded. 
                           $bAliases may not reference other aliases.$b
+[S]  $baltchars$b        Define string of characters to cycle when generating alternative
+                          nicks when nick is taken. Ie: _-`[].
 [S]  $bchanset$b         List of default options for when a channel is added. Same format 
                           as 'chanset'.
 [N]  $bserver-port$b     Default port to use for server connections.
