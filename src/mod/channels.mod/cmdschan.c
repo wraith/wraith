@@ -507,7 +507,9 @@ static void cmd_slowjoin(int idx, char *par)
     dprintf(idx, "Invalid channel name\n");
     return;
   }
-  strcpy(buf, "+inactive ");
+
+  egg_snprintf(buf, sizeof(buf), "+inactive addedby %s addedts %li", dcc[idx].nick, now);
+
   if (par[0])
     strlcat(buf, par, sizeof(buf));
   if (channel_add(buf2, chname, buf) == ERROR) {
