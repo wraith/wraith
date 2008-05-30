@@ -1,3 +1,6 @@
+1.2.15.1
+* Fix leaf bots not updating behind other hubs (fixes #419)
+
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong
 * Fix a segfault in op cookies during a desync
