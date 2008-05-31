@@ -13,11 +13,12 @@
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH << 1)
-#define md5cmp(hash, string)            strcmp(hash, MD5(string))
 
 char *MD5(const char *);
+int md5cmp(const char *, const char*);
 char *MD5FILE(const char *);
 char *SHA1(const char *);
+int sha1cmp(const char *, const char*);
 
 unsigned char *encrypt_binary(const char *, unsigned char *, size_t *);
 unsigned char *decrypt_binary(const char *, unsigned char *, size_t *);

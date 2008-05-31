@@ -324,6 +324,10 @@ char *MD5(const char *string)
   return md5string;
 }
 
+int md5cmp(const char *hash, const char *string) {
+  return strcmp(hash, MD5(string));
+}
+
 char *
 MD5FILE(const char *bin)
 {
@@ -366,6 +370,10 @@ char *SHA1(const char *string)
   if (n == 5) n = 0;
 
   return sha1string;
+}
+
+int sha1cmp(const char *hash, const char *string) {
+  return strcmp(hash, SHA1(string));
 }
 
 /* convert binary hashes to hex */

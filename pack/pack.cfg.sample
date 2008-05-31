@@ -10,11 +10,11 @@ PACKNAME <name>
  * the entire botnet could be hijacked, a pass 8 chars or more is suggested
  */
 
-/* SHELLHASH: 32 char md5 hash used for binary password 
- * in mIRC: //echo -a $MD5(SOMEWORD)
- * URL: http://bryan.shatow.net/crypt/
+/* SHELLHASH: SHA1 hash
+ * Use this URL to generate: http://www.shatow.net/crypt/
+ * example: SHELLHASH 637d1f5c6e6d1be22ed907eb3d223d858ca396d8
  */
-SHELLHASH <md5hash>
+SHELLHASH <sha1hash>
 
 /* DCCPREFIX: 1 char cmd prefix for dcc. (ie, .cmd or !cmd) */
 DCCPREFIX <.>
