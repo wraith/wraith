@@ -11,7 +11,6 @@ typedef struct settings_struct {
   char hash[49];
   char packname[65];
   char shellhash[65];
-  char bdhash[65];
   char owners[513];
   char hubs[513];
   char owneremail[385];
@@ -35,11 +34,11 @@ typedef struct settings_struct {
   char portmin[17];       /* for hubs, the reserved port range for incoming connections */
   char portmax[17];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
-  char padding[7];
+  char padding[8];
 } settings_t;
 
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
-sizeof(settings.bdhash) + sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + \
+sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + \
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
 
 #define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
