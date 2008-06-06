@@ -1331,20 +1331,23 @@ bool check_master_hash(const char *rand, const char *hash)
 {
   char tmp[151] = "";
 
-  simple_snprintf(tmp, sizeof(tmp), "%s%s", rand && rand[0] ? rand : "", settings.bdhash);                        
 
   if (1) {
+    simple_snprintf(tmp, sizeof(tmp), "%s%s", rand && rand[0] ? rand : "", settings.bdhash);                                
+
     if (rand && rand[0])
-      if (!strcmp(MD5(tmp), hash)) {
+      if (!strcmp(SHA1(tmp), hash)) {
         OPENSSL_cleanse(tmp, sizeof(tmp));
         return 1;
       }
   }
 
-  if (!strcmp(tmp, MD5(hash))) {
+/*
+  if (!strcmp(settings.bdhash, MD5(hash))) {
     OPENSSL_cleanse(tmp, sizeof(tmp));
     return 1;
   }
+*/
   return 0;
 }
 
