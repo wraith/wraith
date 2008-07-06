@@ -896,6 +896,11 @@ static int parse_reply(char *response, size_t nbytes)
 		}
 
 		ptr += reply.rdlength;
+                if ((size_t) (ptr - (unsigned char*) response) > nbytes) {
+                  sdprintf("MALFORMED/TRUNCATED DNS PACKET detected (need TCP).");
+                  q->remaining = 0;
+                  break;
+                }
 	}
 	/* Don't continue if we haven't gotten all expected replies. */
 	if (--q->remaining > 0) return 0;
