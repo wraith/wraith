@@ -1761,7 +1761,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
         /* and it's not me, and i'm an op */
         !me) {
       /*  && target_priority(chan, m, 0) */
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, r_banned());
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, r_banned(chan));
       m->flags |= SENTKICK;
     }
     /* if the user is a +k */
@@ -2516,7 +2516,7 @@ static int gotjoin(char *from, char *chname)
               !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS)))) {
             for (masklist* b = chan->channel.ban; b->mask[0]; b = b->next) {
               if (wild_match(b->mask, from) || match_cidr(b->mask, from)) {
-                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, r_banned());
+                dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chname, m->nick, bankickprefix, r_banned(chan));
                 m->flags |= SENTKICK;
                 return 0;
               }

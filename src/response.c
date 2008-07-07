@@ -46,9 +46,9 @@ response(response_t type)
 }
 
 const char *
-r_banned()
+r_banned(struct chanset_t *chan)
 {
-  if (!offensive_bans)
+  if (channel_meankicks(chan))
     return response(RES_BANNED);
 
   if (randint(1))

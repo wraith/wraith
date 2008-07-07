@@ -589,6 +589,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_KNOCK;
     else if (!strcmp(item[i], "-knock"))
       chan->status &= ~CHAN_KNOCK;
+    else if (!strcmp(item[i], "+meankicks"))
+      chan->status |= CHAN_MEANKICKS;
+    else if (!strcmp(item[i], "-meankicks"))
+      chan->status &= ~CHAN_MEANKICKS;
 /* Chanflag template
  *  else if (!strcmp(item[i], "+temp"))
  *    chan->status |= CHAN_TEMP;

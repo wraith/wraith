@@ -5,6 +5,7 @@
 * Removed BDHASH as it wasn't even used.
 * SHELLHASH now supports SHA1 hashes.
 * Fix segfault from receiving truncated DNS replies.
+* Remove 'set mean-kicks' and change to 'chanset +meankicks' (default on, does not upgrade from old .set, must unset after upgrade if wanted)
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong

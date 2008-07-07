@@ -447,6 +447,7 @@ See also: link
         $bknock$b          Bots which are +y will auto-invite any user who
                        does a /knock on the channel.
                        This will invite any user who is not set to auto-kick.
+        $bmeankicks$b      Use mean/offensive kicks/bans in the channel.
         $bnodesynch$b      Allow non-ops to perform channel modes? This can stop
                        the bot from fighting with services such as ChanServ, or
                        from kicking IRCops when setting channel modes without
@@ -1547,7 +1548,6 @@ See also: reload, backup
                           Will always fail at hash though.
 [N]  $bdcc-autoaway$b    Time in seconds until a user is set auto-away on dcc.
                           (0/- to disable)
-[B]  $bmean-kicks$b      Enables 'mean' and 'offensive' kick msgs.
 [B]  $bmanop-warn$b      Warn users via /NOTICE when they msg-op in a channel with manop
                            punishments.
  

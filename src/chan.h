@@ -248,6 +248,7 @@ struct chanset_t {
 #define CHAN_STOP_CYCLE     BIT24	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
 #define CHAN_AUTOOP         BIT25
 #define CHAN_JOINING        BIT26	/* attempting to join, dont flood with JOIN #chan */
+#define CHAN_MEANKICKS      BIT27	/* use mean/offensive kicks/bans */
 
 #define CHAN_ASKED_EXEMPTS  BIT0
 #define CHAN_ASKED_INVITES  BIT1
@@ -299,6 +300,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_autoop(chan) (chan->status & CHAN_AUTOOP)
 #define channel_nomassjoin(chan) (chan->status & CHAN_NOMASSJOIN)
 #define channel_knock(chan) (chan->status & CHAN_KNOCK)
+#define channel_meankicks(chan) (chan->status & CHAN_MEANKICKS)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */
