@@ -445,16 +445,21 @@ void core_10secondly()
     check_trace(0);
 
   if (conf.bot->hub || conf.bot->localhub) {
-    check_promisc();
+    if (tands > 0) {
+      check_promisc();
 
-    if (curcheck == 2)
-      check_last();
-    if (curcheck == 3) {
-#ifdef NOT_USED
-      check_processes();
-#endif
-      curcheck = 0;
+      if (curcheck == 2)
+        check_last();
     }
+
+#ifdef NOT_USED
+    if (curcheck == 3) {
+      check_processes();
+    }
+#endif
+
+    if (curcheck == 3)
+      curcheck = 0;
   }
 #endif /* !CYGWIN_HACKS */
 }
