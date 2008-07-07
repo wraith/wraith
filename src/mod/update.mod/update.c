@@ -151,8 +151,7 @@ static botcmd_t C_update[] =
   {"un",	update_ufno, 0},
   {"us",	update_ufsend, 0},
   {"uy",	update_ufyes, 0},
-  {"v",         update_version, 0},
-  {NULL,	NULL, 0}
+  {"v",         update_version, 0}
 };
 
 static void got_nu(char *botnick, char *code, char *par)
@@ -195,16 +194,10 @@ static cmd_t update_bot[] = {
 void updatein(int idx, char *msg)
 {
   char *code = newsplit(&msg);
-  int y, f = 0, i = 0;
-
-  for (f = 0, i = 0; C_update[i].name && !f; i++) {
-    y = egg_strcasecmp(code, C_update[i].name);
-
-    if (!y)
-      /* Found a match */
-      (C_update[i].func)(idx, msg);
-    if (y < 0)
-      f = 1;
+  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_update, code, sizeof(C_update)/sizeof(botcmd_t));
+  if (cmd) {
+    /* Found a match */
+    (cmd->func)(idx, msg);
   }
 }
 

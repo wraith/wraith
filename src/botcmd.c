@@ -1179,9 +1179,30 @@ botcmd_t C_bot[] =
   {"vab",		bot_setbroad, 0},
   {"w",			bot_who, 0},
   {"z",			bot_zapf, 0},
-  {"zb",		bot_zapfbroad, 0},
-  {NULL,		NULL, 0}
+  {"zb",		bot_zapfbroad, 0}
 };
+
+static int comp_botcmd_t(const void *m1, const void *m2) {
+  const botcmd_t *mi1 = (const botcmd_t *) m1;
+  const botcmd_t *mi2 = (const botcmd_t *) m2;
+  return egg_strcasecmp(mi1->name, mi2->name);
+}
+
+const botcmd_t *search_botcmd_t(const botcmd_t *table, const char* keyString, size_t elements) {
+  botcmd_t key;
+  key.name = keyString;
+  return (const botcmd_t*) bsearch(&key, table, elements, sizeof(botcmd_t), comp_botcmd_t);
+}
+
+void parse_botcmd(int idx, const char* code, const char* msg) {
+  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_bot, code, sizeof(C_bot)/sizeof(botcmd_t));
+
+  if (cmd) {
+    /* Found a match */
+    if (have_cmd(NULL, cmd->type))
+      (cmd->func) (idx, (char*)msg);
+  }
+}
 
 void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {

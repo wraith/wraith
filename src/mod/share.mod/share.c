@@ -1030,8 +1030,7 @@ static botcmd_t C_share[] = {
   {"un", share_ufno, HUB},
   {"us", share_ufsend, 0},
   {"uy", share_ufyes, HUB},
-  {"v", share_version, 0},
-  {NULL, NULL, 0}
+  {"v", share_version, 0}
 };
 
 
@@ -1039,16 +1038,10 @@ void
 sharein(int idx, char *msg)
 {
   char *code = newsplit(&msg);
-  int y, f = 0, i = 0;
-
-  for (f = 0, i = 0; C_share[i].name && !f; i++) {
-    y = egg_strcasecmp(code, C_share[i].name);
-
-    if (!y)
-      /* Found a match */
-      (C_share[i].func) (idx, msg);
-    if (y < 0)
-      f = 1;
+  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_share, code, sizeof(C_share)/sizeof(botcmd_t));
+  if (cmd) {
+    /* Found a match */
+    (cmd->func) (idx, msg);
   }
 }
 

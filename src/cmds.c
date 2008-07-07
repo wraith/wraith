@@ -56,6 +56,8 @@ int    			 cmdi = 0;
 
 static char		 *btos(unsigned long);
 
+static help_t *findcmd(const char *, bool);
+
 static void tell_who(int idx, int chan)
 {
   int i, k, ok = 0, atr = dcc[idx].user ? dcc[idx].user->flags : 0;
@@ -542,7 +544,7 @@ static void cmd_bottree(int idx, char *par)
   tell_bottree(idx);
 }
 
-int my_cmp(const mycmds *c1, const mycmds *c2)
+static int my_cmp(const mycmds *c1, const mycmds *c2)
 {
   return strcmp(c1->name, c2->name);
 }
@@ -554,7 +556,7 @@ static void cmd_nohelp(int idx, char *par)
   bind_table_t *table = bind_table_lookup("dcc");
 
   for (entry = table->entries; entry; entry = entry->next) {
-    if (findhelp(entry->mask) == -1) {
+    if (findhelp(entry->mask) == NULL) {
       buf = (char *) my_realloc(buf, strlen(buf) + 2 + strlen(entry->mask) + 1);
       strcat(buf, entry->mask);
       strcat(buf, ", ");
@@ -573,18 +575,25 @@ bool is_restricted_cmd(const char* name) {
   return 0;
 }
 
-int
-findcmd(const char *cmd, bool care_about_type)
-{
-  for (int hi = 0; (help[hi].cmd) && (help[hi].desc); hi++)
-    if (!egg_strcasecmp(cmd, help[hi].cmd) && 
-        ((care_about_type && have_cmd(help[hi].cmd, help[hi].type)) || (!care_about_type)))
-      return hi;
-
-  return -1;
+static int comp_help_t(const void *m1, const void *m2) {
+  const help_t *mi1 = (const help_t *) m1;
+  const help_t *mi2 = (const help_t *) m2;
+  return egg_strcasecmp(mi1->cmd, mi2->cmd);
 }
 
-int
+static help_t *
+findcmd(const char *lookup, bool care_about_type)
+{
+  help_t key;
+  key.cmd = (char*)lookup;
+  help_t *h_entry = (help_t *) bsearch(&key, &help, sizeof(help)/sizeof(help_t), sizeof(help_t), comp_help_t);
+  if (h_entry && ((care_about_type && have_cmd(h_entry->cmd, h_entry->type)) || (!care_about_type)))
+      return h_entry;
+
+  return NULL;
+}
+
+help_t *
 findhelp(const char *cmd)
 {
   return findcmd(cmd, 1);
@@ -632,11 +641,12 @@ static void cmd_help(int idx, char *par)
         flg[0] = 0;
         build_flags(flg, &(cmdlist[n].flags), NULL);
         dprintf(idx, "Showing you help for '%s' (%s):\n", match, flg);
-        if ((hi = findhelp(match)) != -1) {
-          if (help[hi].garble)
-            showhelp(idx, &fr, degarble(help[hi].garble, help[hi].desc));
+        help_t *h_entry = NULL;
+        if ((h_entry = findhelp(match)) != NULL) {
+          if (h_entry->garble)
+            showhelp(idx, &fr, degarble(h_entry->garble, h_entry->desc));
           else
-            showhelp(idx, &fr, help[hi].desc);
+            showhelp(idx, &fr, h_entry->desc);
         }
         done = 1;
         break;

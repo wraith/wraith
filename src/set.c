@@ -62,32 +62,30 @@ bool manop_warn;
 char homechan[51] = "";
 char usermode[15] = "";
 
+// VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
+// VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
 static variable_t vars[] = {
  VAR("alias", 		alias,			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM,		0, 0, DEFAULT_ALIAS),
  VAR("altchars",	altchars,		VAR_STRING|VAR_NOLHUB,				0, 0, "-_\\`^[]"),
  VAR("auth-chan",	&auth_chan,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("auth-key",	auth_key,		VAR_STRING|VAR_PERM,				0, 0, NULL),
- VAR("auth-prefix",	auth_prefix,		VAR_STRING|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
  VAR("auth-obscure",	&auth_obscure,		VAR_INT|VAR_BOOL,				0, 1, "0"),
- VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),
-#ifdef NOT_USED
- VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
-#endif
- VAR("dccauth",		&dccauth,		VAR_INT|VAR_BOOL,				0, 1, "0"),
+ VAR("auth-prefix",	auth_prefix,		VAR_STRING|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
  VAR("chanset",		glob_chanset,		VAR_STRING|VAR_CHANSET|VAR_NOLHUB,		0, 0, NULL),
  VAR("cloak-script",	&cloak_script,		VAR_INT|VAR_CLOAK|VAR_NOLHUB,			0, 10, "0"),
  VAR("close-threshold",	&close_threshold,	VAR_RATE|VAR_NOLOC,				0, 0, "0:0"),
+ VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),
+ VAR("dccauth",		&dccauth,		VAR_INT|VAR_BOOL,				0, 1, "0"),
  VAR("fight-threshold",	&fight_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
- VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
  VAR("flood-g",		&flood_g,		VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
+ VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
  VAR("homechan",	homechan,		VAR_STRING|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
  VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "2"),
  VAR("irc-autoaway",	&irc_autoaway,		VAR_INT|VAR_NOLHUB|VAR_BOOL,			0, 1, "1"),
- VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
  VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 4, "warn"),
@@ -98,21 +96,17 @@ static variable_t vars[] = {
  VAR("msg-op",		msgop,			VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("nick",		origbotname,		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB,	0, 0, NULL),
+ VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "1"),
  VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
-#ifdef NOT_USED
- VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
-#endif
  VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 4, "warn"),
  VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "* I'm too lame to read BitchX.doc *"),
  VAR("server-port",	&default_port,		VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6667"),
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
- VAR("usermode",	&usermode,		VAR_STRING|VAR_NOLHUB,				0, 0, "+iws"),
-// {NULL, NULL, 0, 0, NULL, NULL, 0, NULL, 0, 0}
- VAR(NULL,		0,			0,						0, 0, 0)
+ VAR("usermode",	&usermode,		VAR_STRING|VAR_NOLHUB,				0, 0, "+iws")
 };
 
 
@@ -130,6 +124,7 @@ static bool use_server_type(const char *name)
   return 1;
 }
 
+#ifdef NOT_USED
 const char *var_find_by_mem(void *mem)
 {
   int i = 0;
@@ -140,6 +135,7 @@ const char *var_find_by_mem(void *mem)
   }
   return "";  
 }
+#endif
 
 /* sanitize the variable data string */
 char *var_sanitize(variable_t *var, const char *data)
@@ -402,14 +398,17 @@ const char *var_string(variable_t *var)
   return data;
 }
 
-static variable_t *var_get_var_by_name(const char *name)
-{
-  int i = 0;
+static int comp_variable_t(const void *m1, const void *m2) {
+  const variable_t *mi1 = (const variable_t *) m1;
+  const variable_t *mi2 = (const variable_t *) m2;
+  return egg_strcasecmp(mi1->name, mi2->name);
+}
 
-  for (i = 0; vars[i].name; i++)
-    if (!egg_strcasecmp(vars[i].name, name))
-      return &(vars[i]);
-  return NULL;
+static inline variable_t *var_get_var_by_name(const char *name)
+{
+  variable_t key;
+  key.name = name;
+  return (variable_t*) bsearch(&key, &vars, sizeof(vars)/sizeof(variable_t), sizeof(variable_t), comp_variable_t);
 }
 
 void var_set(variable_t *var, const char *target, const char *datain)

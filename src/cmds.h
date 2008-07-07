@@ -14,6 +14,13 @@ typedef struct {
 } cmd_t;
 
 typedef struct {
+  int type;
+  char *cmd;
+  int garble;
+  char *desc;
+} help_t;
+
+typedef struct {
         const char *name;
         struct flag_record     flags;
 } mycmds;
@@ -25,6 +32,8 @@ typedef struct {
   int type;
 } botcmd_t;
 
+const botcmd_t *search_botcmd_t(const botcmd_t *table, const char* key, size_t elements);
+
 typedef struct cmd_pass {
   struct cmd_pass *next;
   char *name;
@@ -34,8 +43,7 @@ typedef struct cmd_pass {
 extern mycmds 		cmdlist[]; 
 extern int		cmdi;
 
-int findcmd(const char *, bool);
-int findhelp(const char *);
+help_t* findhelp(const char *);
 int check_dcc_attrs(struct userrec *, flag_t);
 int check_dcc_chanattrs(struct userrec *, char *, flag_t, flag_t);
 int stripmodes(char *);

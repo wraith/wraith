@@ -445,9 +445,6 @@ struct dcc_table DCC_BOT_NEW = {
   NULL
 };
 
-/* Hash function for tandem bot commands */
-extern botcmd_t C_bot[];
-
 static void
 dcc_bot(int idx, char *code, int i)
 {
@@ -469,17 +466,7 @@ dcc_bot(int idx, char *code, int i)
   } else
     msg = "";
 
-  for (i = 0; C_bot[i].name; i++) {
-    int y = egg_strcasecmp(code, C_bot[i].name);
-
-    if (!y) {
-      /* Found a match */
-      if (have_cmd(NULL, C_bot[i].type))
-        (C_bot[i].func) (idx, msg);
-      break;
-    } else if (y < 0)
-      break;
-  }
+  parse_botcmd(idx, code, msg);
 }
 
 static void
