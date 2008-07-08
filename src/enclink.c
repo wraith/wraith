@@ -41,7 +41,7 @@ static void ghost_link_case(int idx, direction_t direction)
 
     /* initkey-gen */
     /* salt1 salt2 port mynick conf.bot->nick */
-    sprintf(tmp, "%s@%s@%4x@%s@%s", settings.salt1, settings.salt2, port, strtoupper(nick1), strtoupper(nick2));
+    sprintf(tmp, STR("%s@%s@%4x@%s@%s"), settings.salt1, settings.salt2, port, strtoupper(nick1), strtoupper(nick2));
     free(nick1);
     free(nick2);
     strlcpy(keyp, SHA1(tmp), ENC_KEY_LEN + 1);
@@ -56,12 +56,12 @@ static void ghost_link_case(int idx, direction_t direction)
       socklist[snum].oseed = random();
       socklist[snum].iseed = socklist[snum].oseed;
       tmp2 = encrypt_string(settings.salt2, initkey);
-      putlog(LOG_BOTS, "*", "Sending encrypted link handshake to %s...", dcc[idx].nick);
+      putlog(LOG_BOTS, "*", STR("Sending encrypted link handshake to %s..."), dcc[idx].nick);
 
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;
 
-      link_send(idx, "elink %s %d\n", tmp2, socklist[snum].oseed);
+      link_send(idx, STR("elink %s %d\n"), tmp2, socklist[snum].oseed);
       free(tmp2);
       strlcpy(socklist[snum].okey, initkey, ENC_KEY_LEN + 1);
       strlcpy(socklist[snum].ikey, initkey, ENC_KEY_LEN + 1);
@@ -70,7 +70,7 @@ static void ghost_link_case(int idx, direction_t direction)
       socklist[snum].gz = 1;
     }
   } else {
-    putlog(LOG_MISC, "*", "Couldn't find socket for %s connection?? Shouldn't happen :/", dcc[idx].nick);
+    putlog(LOG_MISC, "*", STR("Couldn't find socket for %s connection?? Shouldn't happen :/"), dcc[idx].nick);
     killsock(dcc[idx].sock);
     lostdcc(idx);
   }
@@ -164,14 +164,14 @@ void ghost_parse(int idx, int snum, char *buf)
 
   char *code = newsplit(&buf);
 
-  if (!egg_strcasecmp(code, "elink")) {
+  if (!egg_strcasecmp(code, STR("elink"))) {
     char *tmp = decrypt_string(settings.salt2, newsplit(&buf));
 
     strlcpy(socklist[snum].okey, tmp, ENC_KEY_LEN + 1);
     strlcpy(socklist[snum].ikey, socklist[snum].okey, ENC_KEY_LEN + 1);
     socklist[snum].iseed = atoi(buf);
     socklist[snum].oseed = atoi(buf);
-    putlog(LOG_BOTS, "*", "Handshake with %s succeeded, we're linked.", dcc[idx].nick);
+    putlog(LOG_BOTS, "*", STR("Handshake with %s succeeded, we're linked."), dcc[idx].nick);
     free(tmp);
     link_done(idx);
   }
@@ -261,12 +261,12 @@ void link_send(int idx, const char *format, ...)
   va_end(va);
   remove_crlf(s);
 
-  dprintf(-dcc[idx].sock, "neg! %s\n", s);
+  dprintf(-dcc[idx].sock, STR("neg! %s\n"), s);
 }
 
 void link_done(int idx)
 {
-  dprintf(-dcc[idx].sock, "neg.\n");
+  dprintf(-dcc[idx].sock, STR("neg.\n"));
 }
 
 int link_find_by_type(int type)
@@ -322,7 +322,7 @@ void link_hash(int idx, char *rand)
   char hash[60] = "";
 
   /* nothing fancy, just something simple that can stop people from playing */
-  simple_snprintf(hash, sizeof(hash), "enclink%s", rand);
+  simple_snprintf(hash, sizeof(hash), STR("enclink%s"), rand);
   strlcpy(dcc[idx].shahash, SHA1(hash), SHA_HASH_LENGTH + 1);
   OPENSSL_cleanse(hash, sizeof(hash));
   return;

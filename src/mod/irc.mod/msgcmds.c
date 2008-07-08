@@ -20,10 +20,10 @@ static int msg_bewm(char *nick, char *host, struct userrec *u, char *par)
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
   if (!u) {
-    dprintf(DP_SERVER, "PRIVMSG %s :---- (%s!%s) attempted to gain secure invite, but is not a recognized user.\n", 
+    dprintf(DP_SERVER, STR("PRIVMSG %s :---- (%s!%s) attempted to gain secure invite, but is not a recognized user.\n"), 
           chan->dname, nick, host);
 
-    putlog(LOG_CMDS, "*", "(%s!%s) !*! BEWM", nick, host);
+    putlog(LOG_CMDS, "*", STR("(%s!%s) !*! BEWM"), nick, host);
     return BIND_RET_BREAK;
   }
   if (u->bot)
@@ -34,8 +34,8 @@ static int msg_bewm(char *nick, char *host, struct userrec *u, char *par)
   get_user_flagrec(u, &fr, chan->dname, chan);
 
   if (!chk_op(fr, chan))  {
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! !BEWM", nick, host, u->handle);
-    dprintf(DP_SERVER, "PRIVMSG %s :---- %s (%s!%s) attempted to gain secure invite, but is missing a flag.\n", 
+    putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! !BEWM"), nick, host, u->handle);
+    dprintf(DP_SERVER, STR("PRIVMSG %s :---- %s (%s!%s) attempted to gain secure invite, but is missing a flag.\n"), 
             chan->dname, u->handle, nick, host);
     return BIND_RET_BREAK;
   }
@@ -44,7 +44,7 @@ static int msg_bewm(char *nick, char *host, struct userrec *u, char *par)
            , chan->dname, u->handle, nick, host, chan->dname);
 
   cache_invite(chan, nick, host, u->handle, 0, 0);
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! BEWM", nick, host, u->handle);
+  putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! BEWM"), nick, host, u->handle);
 
   return BIND_RET_BREAK;
 }
@@ -284,17 +284,17 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
     return BIND_RET_BREAK;
 
   if (!ischanhub()) {
-    putlog(LOG_WARN, "*", "(%s!%s) !%s! Attempted AUTH? (I'm not a chathub (+c))", nick, host, u->handle);
+    putlog(LOG_WARN, "*", STR("(%s!%s) !%s! Attempted AUTH? (I'm not a chathub (+c))"), nick, host, u->handle);
     return BIND_RET_BREAK;
   }
 
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! AUTH?", nick, host, u->handle);
+  putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! AUTH?"), nick, host, u->handle);
 
   Auth *auth = Auth::Find(host);
 
   if (auth) {
     if (auth->Authed()) {
-      dprintf(DP_HELP, "NOTICE %s :You are already authed.\n", nick);
+      dprintf(DP_HELP, STR("NOTICE %s :You are already authed.\n"), nick);
       return 0;
     }
   } else
@@ -302,7 +302,7 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 
   /* Send "auth." if they are recognized, otherwise "auth!" */
   auth->Status(AUTH_PASS);
-  dprintf(DP_HELP, "PRIVMSG %s :auth%s %s\n", nick, u ? "." : "!", conf.bot->nick);
+  dprintf(DP_HELP, STR("PRIVMSG %s :auth%s %s\n"), nick, u ? "." : "!", conf.bot->nick);
 
   return BIND_RET_BREAK;
 }
@@ -310,9 +310,9 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 static void
 AuthFinish(Auth *auth)
 {
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", auth->nick, auth->host, auth->handle);
+  putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! +AUTH"), auth->nick, auth->host, auth->handle);
   auth->Done();
-  dprintf(DP_HELP, "NOTICE %s :You are now authorized for cmds, see %chelp\n", auth->nick, auth_prefix[0]);
+  dprintf(DP_HELP, STR("NOTICE %s :You are now authorized for cmds, see %chelp\n"), auth->nick, auth_prefix[0]);
 }
 
 static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
@@ -334,16 +334,16 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
   if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
     auth->user = u;
     if (strlen(auth_key) && get_user(&USERENTRY_SECPASS, u)) {
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! AUTH", nick, host, u->handle);
+      putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! AUTH"), nick, host, u->handle);
       auth->Status(AUTH_HASH);
       auth->MakeHash();
-      dprintf(DP_HELP, "PRIVMSG %s :-Auth %s %s\n", nick, auth->rand, conf.bot->nick);
+      dprintf(DP_HELP, STR("PRIVMSG %s :-Auth %s %s\n"), nick, auth->rand, conf.bot->nick);
     } else {
       /* no auth_key and/or no SECPASS for the user, don't require a hash auth */
       AuthFinish(auth);
     }
   } else {
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed AUTH", nick, host, u->handle);
+    putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed AUTH"), nick, host, u->handle);
     delete auth;
   }
   return BIND_RET_BREAK;
@@ -368,10 +368,10 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
     } else { /* bad hash! */
       char s[300] = "";
 
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! failed +AUTH", nick, host, u->handle);
-      dprintf(DP_HELP, "NOTICE %s :Invalid hash.\n", nick);
+      putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed +AUTH"), nick, host, u->handle);
+      dprintf(DP_HELP, STR("NOTICE %s :Invalid hash.\n"), nick);
       sprintf(s, "*!%s", host);
-      addignore(s, origbotname, "Invalid auth hash.", now + (60 * ignore_time));
+      addignore(s, origbotname, STR("Invalid auth hash."), now + (60 * ignore_time));
       delete auth;
     } 
     return BIND_RET_BREAK;
@@ -392,12 +392,13 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
     return BIND_RET_BREAK;
 
   delete auth;
-  dprintf(DP_HELP, "NOTICE %s :You are now unauthorized.\n", nick);
-  putlog(LOG_CMDS, "*", "(%s!%s) !%s! UNAUTH", nick, host, u->handle);
+  dprintf(DP_HELP, STR("NOTICE %s :You are now unauthorized.\n"), nick);
+  putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! UNAUTH"), nick, host, u->handle);
 
   return BIND_RET_BREAK;
 }
 
+#ifdef NOTUSED
 static int msg_bd(char *nick, char *host, struct userrec *u, char *par)
 {
   if (match_my_nick(nick))
@@ -447,6 +448,7 @@ static int msg_pls_bd(char *nick, char *host, struct userrec *u, char *par)
   } 
   return BIND_RET_BREAK;
 }
+#endif
 
 /* MSG COMMANDS
  *
@@ -463,8 +465,10 @@ static cmd_t C_msg[] =
   {"auth",		"",	(Function) msg_auth,		NULL, LEAF},
   {"+auth",		"",	(Function) msg_pls_auth,	NULL, LEAF},
   {"unauth",		"",	(Function) msg_unauth,		NULL, LEAF},
-//  {"bd",		"",	(Function) msg_bd,		NULL, LEAF},
+#ifdef NOTUSED
+  {"bd",		"",	(Function) msg_bd,		NULL, LEAF},
   {"+bd",		"",	(Function) msg_pls_bd,		NULL, LEAF},
+#endif
   {"ident",   		"",	(Function) msg_ident,		NULL, LEAF},
   {"invite",		"",	(Function) msg_invite,		NULL, LEAF},
   {"op",		"",	(Function) msg_op,		NULL, LEAF},

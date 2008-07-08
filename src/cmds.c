@@ -626,7 +626,7 @@ static void cmd_help(int idx, char *par)
 
   /* even if we have nowild, we loop to conserve code/space */
   while (!done) {
-    int i = 0, end = 0, first = 1, n, hi = 0;
+    int i = 0, end = 0, first = 1, n;
     char *flag = NULL;
 
     flag = newsplit(&fcats);

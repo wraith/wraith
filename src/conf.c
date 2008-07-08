@@ -45,25 +45,25 @@ tellconf()
 {
   conf_bot *bot = NULL;
   int i = 0;
-  sdprintf("tempdir: %s\n", replace(tempdir, conf.homedir, "~"));
-  sdprintf("features: %d\n", conf.features);
-  sdprintf("uid: %d\n", conf.uid);
-  sdprintf("uname: %s\n", conf.uname);
-  sdprintf("homedir: %s\n", conf.homedir);
-  sdprintf("username: %s\n", conf.username);
-  sdprintf("binpath: %s\n", replace(conf.binpath, conf.homedir, "~"));
-  sdprintf("binname: %s\n", conf.binname);
-  sdprintf("datadir: %s\n", replace(conf.datadir, conf.homedir, "~"));
-  sdprintf("portmin: %d\n", conf.portmin);
-  sdprintf("portmax: %d\n", conf.portmax);
-  sdprintf("pscloak: %d\n", conf.pscloak);
-  sdprintf("autocron: %d\n", conf.autocron);
-  sdprintf("autouname: %d\n", conf.autouname);
-  sdprintf("watcher: %d\n", conf.watcher);
-  sdprintf("bots:\n");
+  sdprintf(STR("tempdir: %s\n"), replace(tempdir, conf.homedir, "~"));
+  sdprintf(STR("features: %d\n"), conf.features);
+  sdprintf(STR("uid: %d\n"), conf.uid);
+  sdprintf(STR("uname: %s\n"), conf.uname);
+  sdprintf(STR("homedir: %s\n"), conf.homedir);
+  sdprintf(STR("username: %s\n"), conf.username);
+  sdprintf(STR("binpath: %s\n"), replace(conf.binpath, conf.homedir, "~"));
+  sdprintf(STR("binname: %s\n"), conf.binname);
+  sdprintf(STR("datadir: %s\n"), replace(conf.datadir, conf.homedir, "~"));
+  sdprintf(STR("portmin: %d\n"), conf.portmin);
+  sdprintf(STR("portmax: %d\n"), conf.portmax);
+  sdprintf(STR("pscloak: %d\n"), conf.pscloak);
+  sdprintf(STR("autocron: %d\n"), conf.autocron);
+  sdprintf(STR("autouname: %d\n"), conf.autouname);
+  sdprintf(STR("watcher: %d\n"), conf.watcher);
+  sdprintf(STR("bots:\n"));
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     i++;
-    sdprintf("%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n", i,
+    sdprintf(STR("%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n"), i,
              bot->disabled ? "/" : "",
              bot->nick,
              bot->net.ip ? bot->net.ip : "",
@@ -73,8 +73,8 @@ tellconf()
              bot->pid);
   }
   if (conf.bot && ((bot = conf.bot))) {
-    sdprintf("me:\n");
-    sdprintf("%s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n",
+    sdprintf(STR("me:\n"));
+    sdprintf(STR("%s%s IP: %s HOST: %s IP6: %s HOST6: %s v6: %d HUB: %d PID: %d\n"),
              bot->disabled ? "/" : "",
              bot->nick,
              bot->net.ip ? bot->net.ip : "",
@@ -123,7 +123,7 @@ spawnbots(conf_bot *bots, bool rehashed)
      */
     } else if ((conf.bot && !egg_strcasecmp(bot->nick, conf.bot->nick) && 
                (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
-      sdprintf(" ... skipping. Updating: %d, pid: %d", updating, bot->pid);
+      sdprintf(STR(" ... skipping. Updating: %d, pid: %d"), updating, bot->pid);
       continue;
     } else {
       /* if we are updating with -u then we need to restart ALL bots */
@@ -223,14 +223,14 @@ confedit()
   umask(um);
 
   if (!can_stat(tmpconf.file))
-    fatal("Cannot stat tempfile", 0);
+    fatal(STR("Cannot stat tempfile"), 0);
 
   /* Okay, edit the file */
 
-  if ((!((editor = getenv("EDITOR")) && strlen(editor)))
-      && (!((editor = getenv("VISUAL")) && strlen(editor)))
+  if ((!((editor = getenv(STR("EDITOR"))) && strlen(editor)))
+      && (!((editor = getenv(STR("VISUAL"))) && strlen(editor)))
     ) {
-    editor = "vi";
+    editor = STR("vi");
 /*
             #if defined(DEBIAN)
               editor = "/usr/bin/editor";
@@ -251,7 +251,7 @@ confedit()
   my_gettime(&ts1);
   switch (pid = fork()) {
     case -1:
-      fatal("Cannot fork", 0);
+      fatal(STR("Cannot fork"), 0);
     case 0:
     {
       char *run = NULL;
@@ -276,17 +276,17 @@ confedit()
     xpid = waitpid(pid, &waiter, WUNTRACED);
     my_gettime(&ts2);
     if (xpid == -1) {
-      fprintf(stderr, "waitpid() failed waiting for PID %d from \"%s\": %s\n", pid, editor, strerror(errno));
+      fprintf(stderr, STR("waitpid() failed waiting for PID %d from \"%s\": %s\n"), pid, editor, strerror(errno));
     } else if (xpid != pid) {
-      fprintf(stderr, "wrong PID (%d != %d) from \"%s\"\n", xpid, pid, editor);
+      fprintf(stderr, STR("wrong PID (%d != %d) from \"%s\"\n"), xpid, pid, editor);
       goto fatal;
     } else if (WIFSTOPPED(waiter)) {
       /* raise(WSTOPSIG(waiter)); Not needed and breaks in job control shell */
     } else if (WIFEXITED(waiter) && WEXITSTATUS(waiter)) {
-      fprintf(stderr, "\"%s\" exited with status %d\n", editor, WEXITSTATUS(waiter));
+      fprintf(stderr, STR("\"%s\" exited with status %d\n"), editor, WEXITSTATUS(waiter));
       goto fatal;
     } else if (WIFSIGNALED(waiter)) {
-      fprintf(stderr, "\"%s\" killed; signal %d (%score dumped)\n", editor, WTERMSIG(waiter),
+      fprintf(stderr, STR("\"%s\" killed; signal %d (%score dumped)\n"), editor, WTERMSIG(waiter),
 #  ifdef CYGWIN_HACKS
               0
 #  else
@@ -306,7 +306,7 @@ confedit()
 
   swap_uids_back();
   if (fstat(tmpconf.fd, &sn))
-    fatal("Error reading new config file", 0);
+    fatal(STR("Error reading new config file"), 0);
 
   if (!autowrote && st.st_size == sn.st_size &&
       mtim_getsec(st) == mtim_getsec(sn) &&
@@ -321,7 +321,7 @@ confedit()
     timespecsub(&ts1, &ts2, &ts2);
 #endif
     if (timespecisset(&ts2)) {
-      printf("* Config unchanged.\n");
+      printf(STR("* Config unchanged.\n"));
       exit(0);            
     }
   }
@@ -381,8 +381,8 @@ init_conf()
 
   p++;
 
-  if (!strncmp(p, "wraith.", 7) && strchr(p, '-'))
-    conf.binname = strdup("wraith");
+  if (!strncmp(p, STR("wraith."), 7) && strchr(p, '-'))
+    conf.binname = strdup(STR("wraith"));
   else
     conf.binname = strdup(p);
 
@@ -394,7 +394,7 @@ init_conf()
   conf.uname = NULL;
   conf.username = NULL;
   conf.homedir = NULL;
-  conf.datadir = strdup("./...");
+  conf.datadir = strdup(STR("./..."));
   expand_tilde(&conf.datadir);
 }
 
@@ -422,7 +422,7 @@ checkpid(const char *nick, conf_bot *bot)
 
   strtolower(tmpnick);
 
-  simple_snprintf(buf, sizeof buf, "%s/.pid.%s", conf.datadir, tmpnick);
+  simple_snprintf(buf, sizeof buf, STR("%s/.pid.%s"), conf.datadir, tmpnick);
   free(tmp_ptr);
 
   if (bot && !(bot->pid_file))
@@ -471,7 +471,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
   if (nick[0] == '/') {
     bot->disabled = 1;
     ++nick;
-    sdprintf("%s is disabled.", nick);
+    sdprintf(STR("%s is disabled."), nick);
   }
   bot->nick = strldup(nick, HANDLEN);
   bot->net.ip = NULL;
@@ -632,14 +632,14 @@ parseconf(bool error)
 
 #ifndef CYGWIN_HACKS
   if (error && conf.uid != (signed) myuid) {
-    sdprintf("wrong uid, conf: %d :: %d", conf.uid, myuid);
+    sdprintf(STR("wrong uid, conf: %d :: %d"), conf.uid, myuid);
     werr(ERR_WRONGUID);
   } else if (!conf.uid)
     conf.uid = myuid;
 
   if (conf.uname && strcmp(conf.uname, my_uname()) && !conf.autouname) {
     baduname(conf.uname, my_uname());       /* its not auto, and its not RIGHT, bail out. */
-    sdprintf("wrong uname, conf: %s :: %s", conf.uname, my_uname());
+    sdprintf(("wrong uname, conf: %s :: %s"), conf.uname, my_uname());
     if (error)
       werr(ERR_WRONGUNAME);
   } else if (conf.uname && conf.autouname) {    /* if autouname, dont bother comparing, just set uname to output */
@@ -659,10 +659,10 @@ readconf(const char *fname, int bits)
   int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
   char *inbuf = NULL;
 
-  sdprintf("readconf(%s, %d)", fname, enc);
+  sdprintf(STR("readconf(%s, %d)"), fname, enc);
   Context;
   if (!(f = fopen(fname, "r")))
-    fatal("Cannot read config", 0);
+    fatal(STR("Cannot read config"), 0);
 
   free_conf_bots(conf.bots);
   inbuf = (char *) my_calloc(1, 201);
@@ -685,11 +685,11 @@ readconf(const char *fname, int bits)
 
     rmspace(line);
 
-    sdprintf("CONF LINE: %s", line);
+    sdprintf(STR("CONF LINE: %s"), line);
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
     if (enc && line[0] > '~') {
-      sdprintf("line %d, char %c ", i, line[0]);
-      fatal("Bad encryption", 0);
+      sdprintf(STR("line %d, char %c "), i, line[0]);
+      fatal(STR("Bad encryption"), 0);
     } else {                    /* line is good to parse */
       /* - uid */
       if (line[0] == '-') {
@@ -719,54 +719,54 @@ readconf(const char *fname, int bits)
         if (!option || !line[0])
           continue;
 
-        if (!egg_strcasecmp(option, "autocron")) {      /* automatically check/create crontab? */
+        if (!egg_strcasecmp(option, STR("autocron"))) {      /* automatically check/create crontab? */
           if (egg_isdigit(line[0]))
             conf.autocron = atoi(line);
 
-        } else if (!egg_strcasecmp(option, "autouname")) {      /* auto update uname contents? */
+        } else if (!egg_strcasecmp(option, STR("autouname"))) {      /* auto update uname contents? */
           if (egg_isdigit(line[0]))
             conf.autouname = atoi(line);
 
-        } else if (!egg_strcasecmp(option, "username")) {       /* shell username */
+        } else if (!egg_strcasecmp(option, STR("username"))) {       /* shell username */
           str_redup(&conf.username, line);
 
-        } else if (!egg_strcasecmp(option, "homedir")) {        /* homedir */
+        } else if (!egg_strcasecmp(option, STR("homedir"))) {        /* homedir */
           str_redup(&conf.homedir, line);
 
-        } else if (!egg_strcasecmp(option, "datadir")) {        /* datadir */
+        } else if (!egg_strcasecmp(option, STR("datadir"))) {        /* datadir */
           str_redup(&conf.datadir, line);
 
-        } else if (!egg_strcasecmp(option, "binpath")) {        /* path that the binary should move to? */
+        } else if (!egg_strcasecmp(option, STR("binpath"))) {        /* path that the binary should move to? */
           str_redup(&conf.binpath, line);
 
-        } else if (!egg_strcasecmp(option, "binname")) {        /* filename of the binary? */
+        } else if (!egg_strcasecmp(option, STR("binname"))) {        /* filename of the binary? */
           str_redup(&conf.binname, line);
 
-        } else if (!egg_strcasecmp(option, "portmin")) {
+        } else if (!egg_strcasecmp(option, STR("portmin"))) {
           if (egg_isdigit(line[0]))
             conf.portmin = atoi(line);
 
-        } else if (!egg_strcasecmp(option, "portmax")) {
+        } else if (!egg_strcasecmp(option, STR("portmax"))) {
           if (egg_isdigit(line[0]))
             conf.portmax = atoi(line);
 
-        } else if (!egg_strcasecmp(option, "pscloak")) {        /* should bots on this shell pscloak? */
+        } else if (!egg_strcasecmp(option, STR("pscloak"))) {        /* should bots on this shell pscloak? */
           if (egg_isdigit(line[0]))
             conf.pscloak = atoi(line);
 
-        } else if (!egg_strcasecmp(option, "uid")) {    /* new method uid */
+        } else if (!egg_strcasecmp(option, STR("uid"))) {    /* new method uid */
           if (str_isdigit(line))
             conf.uid = atoi(line);
 
-        } else if (!egg_strcasecmp(option, "uname")) {  /* new method uname */
+        } else if (!egg_strcasecmp(option, STR("uname"))) {  /* new method uname */
           str_redup(&conf.uname, line);
 
-        } else if (!egg_strcasecmp(option, "watcher")) {
+        } else if (!egg_strcasecmp(option, STR("watcher"))) {
           if (egg_isdigit(line[0]))
             conf.watcher = atoi(line);
 
         } else {
-          putlog(LOG_MISC, "*", "Unrecognized config option '%s'", option);
+          putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option);
 
         }
         /* read in portmin */
@@ -821,7 +821,7 @@ writeconf(char *filename, FILE * stream, int bits)
 
 #define comment(text)	do {		\
 	if (bits & CONF_COMMENT)	\
-	  my_write(f, "%s\n", text);	\
+	  my_write(f, STR("%s\n"), text);	\
 } while(0)
 
   if (stream) {
@@ -847,10 +847,10 @@ writeconf(char *filename, FILE * stream, int bits)
 
   if ((bits & CONF_COMMENT) && conf.uid != (signed) myuid) {
     conf_com();
-    my_write(f, "%s! uid %d\n", do_confedit == CONF_AUTO ? "" : "#", myuid);
-    my_write(f, "%s! uid %d\n", do_confedit == CONF_STATIC ? "" : "#", conf.uid);
+    my_write(f, STR("%s! uid %d\n"), do_confedit == CONF_AUTO ? "" : "#", myuid);
+    my_write(f, STR("%s! uid %d\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uid);
   } else
-    my_write(f, "! uid %d\n", conf.uid);
+    my_write(f, STR("! uid %d\n"), conf.uid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
     autowrote = 1;
@@ -859,45 +859,45 @@ writeconf(char *filename, FILE * stream, int bits)
     else
       comment("# Automatically updated empty uname");
 
-    my_write(f, "! uname %s\n", my_uname());
+    my_write(f, STR("! uname %s\n"), my_uname());
     if (conf.uname)
-      my_write(f, "#! uname %s\n", conf.uname);
+      my_write(f, STR("#! uname %s\n"), conf.uname);
   } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
     conf_com();
-    my_write(f, "%s! uname %s\n", do_confedit == CONF_AUTO ? "" : "#", my_uname());
-    my_write(f, "%s! uname %s\n", do_confedit == CONF_STATIC ? "" : "#", conf.uname);
+    my_write(f, STR("%s! uname %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_uname());
+    my_write(f, STR("%s! uname %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uname);
   } else
-    my_write(f, "! uname %s\n", conf.uname);
+    my_write(f, STR("! uname %s\n"), conf.uname);
 
   comment("");
 
   if (conf.username && my_username() && strcmp(conf.username, my_username())) {
     conf_com();
-    my_write(f, "%s! username %s\n", do_confedit == CONF_AUTO ? "" : "#", my_username());
-    my_write(f, "%s! username %s\n", do_confedit == CONF_STATIC ? "" : "#", conf.username);
+    my_write(f, STR("%s! username %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_username());
+    my_write(f, STR("%s! username %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.username);
   } else
-    my_write(f, "! username %s\n", conf.username ? conf.username : my_username() ? my_username() : "");
+    my_write(f, STR("! username %s\n"), conf.username ? conf.username : my_username() ? my_username() : "");
 
   if (conf.homedir && homedir(0) && strcmp(conf.homedir, homedir(0))) {
     conf_com();
-    my_write(f, "%s! homedir %s\n", do_confedit == CONF_AUTO ? "" : "#", homedir(0));
-    my_write(f, "%s! homedir %s\n", do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
+    my_write(f, STR("%s! homedir %s\n"), do_confedit == CONF_AUTO ? "" : "#", homedir(0));
+    my_write(f, STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
   } else 
-    my_write(f, "! homedir %s\n", conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
+    my_write(f, STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
 
   comment("\n# binpath needs to be full path unless it begins with '~', which uses 'homedir', ie, '~/'");
 
   if (homedir() && strstr(conf.binpath, homedir())) {
     p = replace(conf.binpath, homedir(), "~");
-    my_write(f, "! binpath %s\n", p);
+    my_write(f, STR("! binpath %s\n"), p);
   } else if (conf.homedir && strstr(conf.binpath, conf.homedir)) { /* Could be an older homedir */
     p = replace(conf.binpath, conf.homedir, "~");
-    my_write(f, "! binpath %s\n", p);
+    my_write(f, STR("! binpath %s\n"), p);
   } else
-    my_write(f, "! binpath %s\n", conf.binpath);
+    my_write(f, STR("! binpath %s\n"), conf.binpath);
 
   comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
-  my_write(f, "! binname %s\n", conf.binname);
+  my_write(f, STR("! binname %s\n"), conf.binname);
 
   comment("");
 
@@ -906,20 +906,20 @@ writeconf(char *filename, FILE * stream, int bits)
 
     if (homedir() && strstr(conf.datadir, homedir())) {
       p = replace(conf.datadir, homedir(), "~");
-      my_write(f, "! datadir %s\n", p);
+      my_write(f, STR("! datadir %s\n"), p);
     } else if (conf.homedir && strstr(conf.datadir, conf.homedir)) { /* Could be an older homedir */
       p = replace(conf.datadir, conf.homedir, "~");
-      my_write(f, "! datadir %s\n", p);
+      my_write(f, STR("! datadir %s\n"), p);
     } else
-      my_write(f, "! datadir %s\n", conf.datadir);
+      my_write(f, STR("! datadir %s\n"), conf.datadir);
 
     comment("");
   }
 
   if (conf.portmin || conf.portmax) {
     comment("# portmin/max are for incoming connections (DCC) [0 for any] (These only make sense for HUBS)");
-    my_write(f, "! portmin %d\n", conf.portmin);
-    my_write(f, "! portmax %d\n", conf.portmax);
+    my_write(f, STR("! portmin %d\n"), conf.portmin);
+    my_write(f, STR("! portmax %d\n"), conf.portmax);
 
     comment("");
   }
@@ -927,28 +927,28 @@ writeconf(char *filename, FILE * stream, int bits)
 
   if (conf.pscloak) {
     comment("# Attempt to \"cloak\" the process name in `ps` for Linux?");
-    my_write(f, "! pscloak %d\n", conf.pscloak);
+    my_write(f, STR("! pscloak %d\n"), conf.pscloak);
 
     comment("");
   }
 
   if (conf.autocron == 0) {
     comment("# Automatically add the bot to crontab?");
-    my_write(f, "! autocron %d\n", conf.autocron);
+    my_write(f, STR("! autocron %d\n"), conf.autocron);
 
     comment("");
   }
 
   if (conf.autouname) {
     comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
-    my_write(f, "! autouname %d\n", conf.autouname);
+    my_write(f, STR("! autouname %d\n"), conf.autouname);
 
     comment("");
   }
 
 #ifdef NO
   comment("# This will spawn a child process for EACH BOT that will block ALL process hijackers.");
-  my_write(f, "! watcher %d\n", conf.watcher);
+  my_write(f, STR("! watcher %d\n"), conf.watcher);
 
   comment("");
 #endif
@@ -966,7 +966,7 @@ writeconf(char *filename, FILE * stream, int bits)
 
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    my_write(f, "%s%s %s %s%s %s\n", 
+    my_write(f, STR("%s%s %s %s%s %s\n"), 
              bot->disabled ? "/" : "", bot->nick,
              bot->net.ip ? bot->net.ip : "*", bot->net.host6 ? "+" : "",
              bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"), bot->net.ip6 ? bot->net.ip6 : "");
@@ -1035,7 +1035,7 @@ void deluser_removed_bots(conf_bot *oldlist, conf_bot *newlist)
         //botold->pid = checkpid(botold->nick, botold);
         //conf_killbot(conf.bots, NULL, botold, SIGKILL);
         if ((u = get_user_by_handle(userlist, botold->nick))) {
-          putlog(LOG_MISC, "*", "Removing '%s' as it has been removed from the binary config.", botold->nick);
+          putlog(LOG_MISC, "*", STR("Removing '%s' as it has been removed from the binary config."), botold->nick);
           if (server_online)
             check_this_user(botold->nick, 1, NULL);
           if (deluser(botold->nick)) {
@@ -1066,7 +1066,7 @@ fill_conf_bot(bool fatal)
   } else
     mynick = strldup(origbotnick, HANDLEN);
 
-  sdprintf("mynick: %s", mynick);
+  sdprintf(STR("mynick: %s"), mynick);
 
   for (me = conf.bots; me && me->nick; me = me->next)
     if (!egg_strcasecmp(me->nick, mynick))
@@ -1079,7 +1079,7 @@ fill_conf_bot(bool fatal)
 
   if (me) {
     if (!me->hub && me->localhub)
-      sdprintf("I am localhub!");
+      sdprintf(STR("I am localhub!"));
 
     /* for future, we may just want to make this a pointer to ->bots if we do an emech style currentbot-> */
     conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
@@ -1171,7 +1171,7 @@ void conf_add_userlist_bots()
     if (!bot->hub && tands > 0 && !bot->disabled) {
       u = get_user_by_handle(userlist, bot->nick);
       if (!u) {
-        putlog(LOG_MISC, "*", "Adding bot '%s' as it has been added to the binary config.", bot->nick);
+        putlog(LOG_MISC, "*", STR("Adding bot '%s' as it has been added to the binary config."), bot->nick);
         userlist = adduser(userlist, bot->nick, "none", "-", USER_OP, 1);
         u = get_user_by_handle(userlist, bot->nick);
 
@@ -1252,4 +1252,4 @@ void conf_setmypid(pid_t pid) {
       bot->pid = pid;
   }
 }
-  
+

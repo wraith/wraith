@@ -337,7 +337,7 @@ cont_link(int idx, char *buf, int ii)
   dcc[idx].u.bot->numver = 0;
 
   if (ii == 3)
-    dprintf(idx, "-%s\n", conf.bot->nick);
+    dprintf(idx, STR("-%s\n"), conf.bot->nick);
     /* wait for "neg?" now */
 
   /* now we wait to negotiate an encryption */
@@ -356,9 +356,9 @@ dcc_bot_new(int idx, char *buf, int x)
     greet_new_bot(idx);
   } else if (!egg_strcasecmp(code, "v")) {
     bot_version(idx, buf);
-  } else if (!egg_strcasecmp(code, "neg!")) {	/* something to parse in enclink.c */
+  } else if (!egg_strcasecmp(code, STR("neg!"))) {	/* something to parse in enclink.c */
     link_parse(idx, buf);
-  } else if (!egg_strcasecmp(code, "neg?")) {	/* we're connecting to THEM */
+  } else if (!egg_strcasecmp(code, STR("neg?"))) {	/* we're connecting to THEM */
     int snum = findanysnum(dcc[idx].sock);
 
     if (snum >= 0) {
@@ -378,9 +378,9 @@ dcc_bot_new(int idx, char *buf, int x)
       }
       free(tmpp);
 
-      sdprintf("Choosing '%s' (%d/%d) for link", enclink[i].name, enclink[i].type, i);
+      sdprintf(STR("Choosing '%s' (%d/%d) for link"), enclink[i].name, enclink[i].type, i);
       link_hash(idx, rand);
-      dprintf(-dcc[idx].sock, "neg %s %d\n", dcc[idx].shahash, enclink[i].type);
+      dprintf(-dcc[idx].sock, STR("neg %s %d\n"), dcc[idx].shahash, enclink[i].type);
       socklist[snum].enclink = i;
       link_link(idx, -1, i, TO);
     }
@@ -390,7 +390,7 @@ dcc_bot_new(int idx, char *buf, int x)
     lostdcc(idx);
   } else if (strcmp(code, "")) {
     /* Invalid password/digest on leaf */
-    putlog(LOG_WARN, "*", "%s failed encrypted link handshake", dcc[idx].nick);
+    putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake"), dcc[idx].nick);
     killsock(dcc[idx].sock);
     lostdcc(idx);
   }
@@ -647,7 +647,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
   if (dccauth) {
     char check[MD5_HASH_LENGTH + 7] = "";
 
-    simple_snprintf(check, sizeof check, "+Auth %s", dcc[idx].hash);
+    simple_snprintf(check, sizeof check, STR("+Auth %s"), dcc[idx].hash);
     badauth = strcmp(check, buf);
     /* +secpass */
   }
@@ -926,9 +926,9 @@ dcc_chat_pass(int idx, char *buf, int atr)
   pass = newsplit(&buf);
 
   if (dcc[idx].user->bot) {
-    if (!egg_strcasecmp(pass, "neg!")) {		/* we're the hub */
+    if (!egg_strcasecmp(pass, STR("neg!"))) {		/* we're the hub */
       link_parse(idx, buf);
-    } else if (!egg_strcasecmp(pass, "neg.")) {		/* we're done, link up! */
+    } else if (!egg_strcasecmp(pass, STR("neg."))) {		/* we're done, link up! */
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
       dcc[idx].status = STAT_CALLED;
@@ -936,14 +936,14 @@ dcc_chat_pass(int idx, char *buf, int atr)
       greet_new_bot(idx);
       if (conf.bot->hub)
         send_timesync(idx);
-    } else if (!egg_strcasecmp(pass, "neg")) {
+    } else if (!egg_strcasecmp(pass, STR("neg"))) {
       int snum = findanysnum(dcc[idx].sock);
 
       if (snum >= 0) {
         char *hash = newsplit(&buf);
 
         if (strcmp(dcc[idx].shahash, hash)) {
-          putlog(LOG_WARN, "*", "%s attempted to negotiate an encryption with an invalid hash.", dcc[idx].nick);
+          putlog(LOG_WARN, "*", STR("%s attempted to negotiate an encryption with an invalid hash."), dcc[idx].nick);
           killsock(dcc[idx].sock);
           lostdcc(idx);
           return;
@@ -952,7 +952,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
 
         /* verify we have that type and then initiate it */
         if ((i = link_find_by_type(type)) == -1) {
-          putlog(LOG_WARN, "*", "%s attempted to link with an invalid encryption. (%d)", dcc[idx].nick, type);
+          putlog(LOG_WARN, "*", STR("%s attempted to link with an invalid encryption. (%d)"), dcc[idx].nick, type);
           killsock(dcc[idx].sock);
           lostdcc(idx);
           return;
@@ -963,7 +963,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       }
     } else {
       /* Invalid password/digest on hub */
-      putlog(LOG_WARN, "*", "%s failed encrypted link handshake.", dcc[idx].nick);
+      putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake."), dcc[idx].nick);
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }
@@ -986,7 +986,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
 
       dcc[idx].type = &DCC_CHAT_SECPASS;
       dcc[idx].timeval = now;
-      dprintf(-dcc[idx].sock, "-Auth %s %s\n", randstr, conf.bot->nick);
+      dprintf(-dcc[idx].sock, STR("-Auth %s %s\n"), randstr, conf.bot->nick);
     } else {
       dcc_chat_secpass(idx, pass, atr);
     }
@@ -1149,7 +1149,7 @@ dcc_chat(int idx, char *buf, int len)
 
     if (u_pass_match(dcc[idx].user, buf)) {     /* user said their password :) */
       dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
-    } else if (!strncmp(buf, "+Auth ", 6)) {    /* ignore extra +Auth lines */
+    } else if (!strncmp(buf, STR("+Auth "), 6)) {    /* ignore extra +Auth lines */
     } else if ((!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
       if (!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix)) && (dcc[idx].u.chat->channel >= 0))        /* strip '.' out */
         buf++;

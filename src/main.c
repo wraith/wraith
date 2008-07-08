@@ -117,7 +117,7 @@ static char *getfullbinname(const char *argv_zero)
 #endif /* CYGWIN_HACKS */
 
   if (!getcwd(cwd, PATH_MAX))
-    fatal("getcwd() failed", 0);
+    fatal(STR("getcwd() failed"), 0);
 
   if (cwd[strlen(cwd) - 1] == '/')
     cwd[strlen(cwd) - 1] = 0;
@@ -159,12 +159,12 @@ static char *getfullbinname(const char *argv_zero)
 
 void fatal(const char *s, int recoverable)
 {
-  sdprintf("FATAL(%d) %s", recoverable, s);
+  sdprintf(STR("FATAL(%d) %s"), recoverable, s);
   if (server_online)
     nuke_server((char *) s);
 
   if (s && s[0])
-    putlog(LOG_MISC, "*", "!*! %s", s);
+    putlog(LOG_MISC, "*", STR("!*! %s"), s);
 
 /*  flushlogs(); */
 #ifdef HAVE_SSL
@@ -174,10 +174,10 @@ void fatal(const char *s, int recoverable)
   if (my_port)
     listen_all(my_port, 1); /* close the listening port... */
 
-  sdprintf("Closing %d sockets", dcc_total);
+  sdprintf(STR("Closing %d sockets"), dcc_total);
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].sock >= 0) {
-      sdprintf("Closing %s dcc(%d)", dcc[i].type->name, i);
+      sdprintf(STR("Closing %s dcc(%d)"), dcc[i].type->name, i);
       killsock(dcc[i].sock);
       lostdcc(i);
     }
@@ -231,9 +231,9 @@ static void checkpass()
   if (!checkedpass) {
 #ifdef HAVE_GETPASSPHRASE
     /* Solaris' getpass() truncates at 8 */
-    char *gpasswd = (char*) getpassphrase("bash$ ");
+    char *gpasswd = (char*) getpassphrase(STR("bash$ "));
 #else
-    char *gpasswd = (char*) getpass("bash$ ");
+    char *gpasswd = (char*) getpass(STR("bash$ "));
 #endif
 
     checkedpass = 1;
@@ -248,17 +248,17 @@ static void got_ed(char *, char *, char*) __attribute__((noreturn));
 
 static void got_ed(char *which, char *in, char *out)
 {
-  sdprintf("got_Ed called: -%s i: %s o: %s", which, in, out);
+  sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
   if (!in || !out)
     fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
   if (!strcmp(in, out))
-    fatal("<infile> should NOT be the same name as <outfile>", 0);
+    fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
   if (!strcmp(which, "e")) {
     Encrypt_File(in, out);
-    fatal("File Encryption complete",3);
+    fatal(STR("File Encryption complete"),3);
   } else if (!strcmp(which, "d")) {
     Decrypt_File(in, out);
-    fatal("File Decryption complete",3);
+    fatal(STR("File Decryption complete"),3);
   }
   exit(0);
 }
@@ -274,8 +274,8 @@ static void show_help()
   printf(STR("%s\n\n"), version);
   printf(STR("%s [options] [botnick[.conf]]\n"));
   printf(STR("Not supplying any options will make all bots in the binary spawn.\n"));
-  printf(format, "Option", "Description");
-  printf(format, "------", "-----------");
+  printf(format, STR("Option"), STR("Description"));
+  printf(format, STR("------"), STR("-----------"));
   printf(format, STR("[-B] <botnick>"), STR("Starts the specified bot [deprecated]"));
   printf(format, STR("-c"), STR("Config file editor [reads env: EDITOR] [No auto update]"));
   printf(format, STR("-C"), STR("Config file editor [reads env: EDITOR]"));
@@ -286,7 +286,7 @@ static void show_help()
 /*  printf(format, STR("-g <file>"), STR("Generates a template config file"));
   printf(format, STR("-G <file>"), STR("Generates a custom config for the box"));
 */
-  printf(format, "-h", "Display this help listing");
+  printf(format, STR("-h"), STR("Display this help listing"));
   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9 (see also: -r)"));
   printf(format, STR("-n"), STR("Disables backgrounding bot (requires [-B] <botnick>)"));
   printf(format, STR("-r <botname>"), STR("Restarts the specified bot (see also: -k)"));
@@ -294,7 +294,7 @@ static void show_help()
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -nB)"));
   printf(format, STR("-u <binary>"), STR("Update binary, Automatically kill/respawn bots"));
   printf(format, STR("-U <binary>"), STR("Update binary"));
-  printf(format, "-v", "Displays bot version");
+  printf(format, STR("-v"), STR("Displays bot version"));
   exit(0);
 }
 
@@ -367,12 +367,12 @@ static void dtx_arg(int& argc, char *argv[])
       case 'E':
         p = argv[optind];
         if (p && p[0] && egg_isdigit(p[0])) {
-          putlog(LOG_MISC, "*", "Error #%d: %s", atoi(p), werr_tostr(atoi(p)));
+          putlog(LOG_MISC, "*", STR("Error #%d: %s"), atoi(p), werr_tostr(atoi(p)));
         } else {
           int n;
-          putlog(LOG_MISC, "*", "Listing all errors");
+          putlog(LOG_MISC, "*", STR("Listing all errors"));
           for (n = 1; n < ERR_MAX; n++)
-          putlog(LOG_MISC, "*", "Error #%d: %s", n, werr_tostr(n));
+          putlog(LOG_MISC, "*", STR("Error #%d: %s"), n, werr_tostr(n));
         }
         exit(0);
         break;
@@ -400,10 +400,10 @@ static void dtx_arg(int& argc, char *argv[])
         char date[50] = "";
 
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
-	printf("%s\nBuild Date: %s (%s%lu%s)\n", version, date, BOLD(-1), buildts, BOLD_END(-1));
-        printf("BuildOS: %s%s%s BuildArch: %s%s%s\n", BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
-        printf("Revision: %d\n", revision);
-	printf("pack: %d conf: %d settings_t: %d prefix: %d pad: %d\n", SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD);
+	printf(STR("%s\nBuild Date: %s (%s%lu%s)\n"), version, date, BOLD(-1), buildts, BOLD_END(-1));
+        printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
+        printf(STR("Revision: %d\n"), revision);
+	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD);
         if (settings.uname[0]) {
           sdebug++;
           bin_to_conf();
@@ -571,7 +571,7 @@ static void core_minutely()
     if (washub == -1)
       washub = conf.bot->hub;
     else if (washub != conf.bot->hub)
-      fatal("MEMORY HACKED", 0);
+      fatal(STR("MEMORY HACKED"), 0);
     check_maxfiles();
     check_mypid();
   } else
@@ -638,9 +638,9 @@ static void startup_checks(int hack) {
       const char *what = (kill_sig == SIGKILL ? "kill" : "restart");
 
       if (conf_killbot(conf.bots, do_killbot, NULL, kill_sig) == 0)
-        printf("'%s' successfully %sed.\n", do_killbot, what);
+        printf(STR("'%s' successfully %sed.\n"), do_killbot, what);
       else {
-        printf("Error %sing '%s'\n", what, do_killbot);
+        printf(STR("Error %sing '%s'\n"), what, do_killbot);
         if (kill_sig == SIGHUP)
           spawnbot(do_killbot);
       }
@@ -725,7 +725,7 @@ printf("out: %s\n", out);
 
   if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a"))) {
     unlink(argv[0]);
-    fatal("!! Invalid binary", 0);
+    fatal(STR("!! Invalid binary"), 0);
   }
 
   binname = getfullbinname(argv[0]);
@@ -738,16 +738,16 @@ printf("out: %s\n", out);
   /* This allows -2/-0 to be used without an initialized binary */
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
 //  doesn't work correctly yet, if we don't go in here, our settings stay encrypted
-  if (argc == 2 && !strcmp(argv[1], "-q")) {
+  if (argc == 2 && !strcmp(argv[1], STR("-q"))) {
     if (settings.hash[0]) exit(4);	/* initialized */
     exit(5);				/* not initialized */
   }
-  if (argc == 2 && !strcmp(argv[1], "-p")) {
+  if (argc == 2 && !strcmp(argv[1], STR("-p"))) {
     if (settings.hash[0]) exit(4);	/* initialized */
     exit(5);				/* not initialized */
   }
 
-  check_sum(binname, argc >= 3 && !strcmp(argv[1], "-q") ? argv[2] : NULL);
+  check_sum(binname, argc >= 3 && !strcmp(argv[1], STR("-q")) ? argv[2] : NULL);
   // Now settings struct is decrypted
   if (!checked_bin_buf)
     exit(1);
@@ -763,25 +763,23 @@ printf("out: %s\n", out);
   init_conf();			/* establishes conf and sets to defaults */
 
   /* Version info! */
-  simple_snprintf(ver, sizeof ver, "[%s] Wraith %s", settings.packname, egg_version);
-  egg_snprintf(version, sizeof version, "[%s] Wraith %s (%lu:%d)", settings.packname, egg_version, buildts, revision);
+  simple_snprintf(ver, sizeof ver, STR("[%s] Wraith %s"), settings.packname, egg_version);
+  egg_snprintf(version, sizeof version, STR("[%s] Wraith %s (%lu:%d)"), settings.packname, egg_version, buildts, revision);
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
 
-  if (argc) {
-    sdprintf("Calling dtx_arg with %d params.", argc);
+  if (argc)
     dtx_arg(argc, argv);
-  }
 
-  sdprintf("my euid: %d my uuid: %d, my ppid: %d my pid: %d", myuid, getuid(), getppid(), mypid);
+  sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), myuid, getuid(), getppid(), mypid);
 
   /* Check and load conf file */
   startup_checks(0);
 
   if (!socksfile && ((conf.bot->localhub && !updating) || !conf.bot->localhub)) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
-      sdprintf("%s is already running, pid: %d", conf.bot->nick, conf.bot->pid);
+      sdprintf(STR("%s is already running, pid: %d"), conf.bot->nick, conf.bot->pid);
       exit(1);
     }
   }
@@ -813,7 +811,7 @@ printf("out: %s\n", out);
   strcpy(botuser, conf.username ? conf.username : origbotname);
 
   if (!conf.bot->hub && conf.bot->localhub)
-    sdprintf("I am localhub (%s)", conf.bot->nick);
+    sdprintf(STR("I am localhub (%s)"), conf.bot->nick);
 
 #ifndef CYGWIN_HACKS
   if (conf.autocron && (conf.bot->hub || conf.bot->localhub))
@@ -852,12 +850,12 @@ printf("out: %s\n", out);
         printf("  `- 1 bot launched\n");
     }
 */
-    printf("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n",
+    printf(STR("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n"),
            BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
            BOLD(-1), BOLD_END(-1), mypid, BOLD(-1), BOLD_END(-1));
 
 #ifdef lame	/* keeping for god knows why */
-    printf("%s%s%c%s%s%s l%sA%su%sN%sc%sH%se%sD%s %s(%s%d%s)%s\n",
+    printf(STR("%s%s%c%s%s%s l%sA%su%sN%sc%sH%se%sD%s %s(%s%d%s)%s\n"),
             RED(-1), BOLD(-1), conf.bot->nick[0], BOLD_END(-1), &conf.bot->nick[1],
             COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
             BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), mypid, YELLOW(-1), COLOR_END(-1));
@@ -871,7 +869,7 @@ printf("out: %s\n", out);
     FreeConsole();
 #endif /* CYGWIN_HACKS */
     if (!socksfile)
-      printf("%s[%s%s%s]%s -%s- initiated\n", BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
+      printf(STR("%s[%s%s%s]%s -%s- initiated\n"), BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
     writepid(conf.bot->pid_file, mypid);
   }
 
@@ -885,8 +883,8 @@ printf("out: %s\n", out);
     dcc[n].u.chat->con_flags = conmask | LOG_ALL;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
     dcc[n].status = STAT_ECHO;
-    strcpy(dcc[n].nick, "HQ");
-    strcpy(dcc[n].host, "llama@console");
+    strcpy(dcc[n].nick, STR("HQ"));
+    strcpy(dcc[n].host, STR("llama@console"));
     dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
     /* Make sure there's an innocuous HQ user if needed */
     if (!dcc[n].user) {
@@ -894,26 +892,26 @@ printf("out: %s\n", out);
       dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
     }
     setsock(STDOUT, 0);          /* Entry in net table */
-    dprintf(n, "\n### ENTERING DCC CHAT SIMULATION ###\n\n");
+    dprintf(n, STR("\n### ENTERING DCC CHAT SIMULATION ###\n\n"));
     dcc_chatter(n);
   }
 
   online_since = now;
   autolink_cycle(NULL);		/* Hurry and connect to tandem bots */
-  timer_create_secs(1, "core_secondly", (Function) core_secondly);
-  timer_create_secs(10, "check_expired_dcc", (Function) check_expired_dcc);
-  timer_create_secs(10, "core_10secondly", (Function) core_10secondly);
-  timer_create_secs(30, "expire_simuls", (Function) expire_simuls);
-  timer_create_secs(60, "core_minutely", (Function) core_minutely);
-  timer_create_secs(60, "check_botnet_pings", (Function) check_botnet_pings);
-  timer_create_secs(60, "check_expired_ignores", (Function) check_expired_ignores);
-  timer_create_secs(3600, "core_hourly", (Function) core_hourly);
-  timer_create_secs(1800, "core_halfhourly", (Function) core_halfhourly);
+  timer_create_secs(1, STR("core_secondly"), (Function) core_secondly);
+  timer_create_secs(10, STR("check_expired_dcc"), (Function) check_expired_dcc);
+  timer_create_secs(10, STR("core_10secondly"), (Function) core_10secondly);
+  timer_create_secs(30, STR("expire_simuls"), (Function) expire_simuls);
+  timer_create_secs(60, STR("core_minutely"), (Function) core_minutely);
+  timer_create_secs(60, STR("check_botnet_pings"), (Function) check_botnet_pings);
+  timer_create_secs(60, STR("check_expired_ignores"), (Function) check_expired_ignores);
+  timer_create_secs(3600, STR("core_hourly"), (Function) core_hourly);
+  timer_create_secs(1800, STR("core_halfhourly"), (Function) core_halfhourly);
 
   if (socksfile)
     readsocks(socksfile);
 
-  debug0("main: entering loop");
+  debug0(STR("main: entering loop"));
 
   int socket_cleanup = 0, xx, i = 0, idx = 0;
 #if !defined(CYGWIN_HACKS) && !defined(__sun__)
@@ -974,22 +972,22 @@ printf("out: %s\n", out);
 	    dcc[idx].type->activity(idx, buf, i);
 	  } else
 	    putlog(LOG_MISC, "*",
-		   "!!! untrapped dcc activity: type %s, sock %d",
+		   STR("!!! untrapped dcc activity: type %s, sock %d"),
 		   dcc[idx].type->name, dcc[idx].sock);
 	  break;
 	}
       }
     } else if (xx == -1) {	/* EOF from someone */
       if (i == STDOUT && !backgrd)
-	fatal("END OF FILE ON TERMINAL", 0);
+	fatal(STR("END OF FILE ON TERMINAL"), 0);
       for (idx = 0; idx < dcc_total; idx++) {
 	if (dcc[idx].type && dcc[idx].sock == i) {
-          sdprintf("EOF on '%s' idx: %d", dcc[idx].type ? dcc[idx].type->name : "unknown", idx);
+          sdprintf(STR("EOF on '%s' idx: %d"), dcc[idx].type ? dcc[idx].type->name : "unknown", idx);
 	  if (dcc[idx].type->eof)
 	    dcc[idx].type->eof(idx);
 	  else {
 	    putlog(LOG_MISC, "*",
-		   "*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED",
+		   STR("*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED"),
 		   i, dcc[idx].type ? dcc[idx].type->name : "*UNKNOWN*");
 	    killsock(i);
 	    lostdcc(idx);
@@ -998,16 +996,16 @@ printf("out: %s\n", out);
 	}
       }
       if (idx == dcc_total) {
-	putlog(LOG_MISC, "*", "(@) EOF socket %d, not a dcc socket, not anything.", i);
+	putlog(LOG_MISC, "*", STR("(@) EOF socket %d, not a dcc socket, not anything."), i);
 	close(i);
 	killsock(i);
       }
     } else if (xx == -2 && errno != EINTR) {	/* select() error */
-      putlog(LOG_MISC, "*", "* Socket error #%d; recovering.", errno);
+      putlog(LOG_MISC, "*", STR("* Socket error #%d; recovering."), errno);
       for (i = 0; i < dcc_total; i++) {
 	if (dcc[i].type && dcc[i].sock != -1 && (fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
 	  putlog(LOG_MISC, "*",
-		 "DCC socket %d (type %s, name '%s') expired -- pfft",
+		 STR("DCC socket %d (type %s, name '%s') expired -- pfft"),
 		 dcc[i].sock, dcc[i].type->name, dcc[i].nick);
 	  killsock(dcc[i].sock);
 	  lostdcc(i);

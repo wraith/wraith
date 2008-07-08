@@ -351,11 +351,11 @@ void show_banner(int idx)
   if (dcc[idx].status & STAT_BANNER)
     dumplots(-dcc[idx].sock, "", wbanner()); 
   dprintf(idx, " \n");
-  dprintf(-dcc[idx].sock,     " -------------------------------------------------------- \n");
+  dprintf(-dcc[idx].sock, STR(" -------------------------------------------------------- \n"));
   dprintf(-dcc[idx].sock, STR("|             - http://wraith.botpack.net/ -             |\n"));
   dprintf(-dcc[idx].sock, STR("|  Get Shell/Irc/Web hosting @ http://www.xzibition.com  |\n"));
   dprintf(-dcc[idx].sock, STR("|  Use coupon code 'wraith' for 30%% off lifetime         |\n"));
-  dprintf(-dcc[idx].sock,     " -------------------------------------------------------- \n");
+  dprintf(-dcc[idx].sock, STR(" -------------------------------------------------------- \n"));
   dprintf(idx, " \n");
 
 }
@@ -579,7 +579,7 @@ readsocks(const char *fname)
   FILE *f = NULL;
 
   if (!(f = fopen(fname, "r"))) {
-    fatal("CANT READ SOCKSFILE", 0);
+    fatal(STR("CANT READ SOCKSFILE"), 0);
   }
 
   char buf[1024] = "", *nick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL, *ip4 = NULL, *ip6 = NULL;
@@ -591,7 +591,7 @@ readsocks(const char *fname)
     remove_crlf(buf);
 
     if (first) {
-      if (!strncmp(buf, "+enc", 4))
+      if (!strncmp(buf, STR("+enc"), 4))
         enc = 1;
       first = 0;
     }
@@ -603,21 +603,21 @@ readsocks(const char *fname)
 
 //    dprintf(DP_STDOUT, "read line: %s\n", buf);
     type = newsplit(&bufp);
-    if (!strcmp(type, "-dcc"))
-      dprintf(DP_STDOUT, "Added dcc: %d\n", dcc_read(f, enc));
-    else if (!strcmp(type, "-sock"))
-      dprintf(DP_STDOUT, "Added fd: %d\n", sock_read(f, enc));
-    else if (!strcmp(type, "+online_since"))
+    if (!strcmp(type, STR("-dcc")))
+      dprintf(DP_STDOUT, STR("Added dcc: %d\n"), dcc_read(f, enc));
+    else if (!strcmp(type, STR("-sock")))
+      dprintf(DP_STDOUT, STR("Added fd: %d\n"), sock_read(f, enc));
+    else if (!strcmp(type, STR("+online_since")))
       online_since = strtol(bufp, NULL, 10);
-    else if (!strcmp(type, "+server_floodless"))
+    else if (!strcmp(type, STR("+server_floodless")))
       floodless = 1;
-    else if (!strcmp(type, "+buildts"))
+    else if (!strcmp(type, STR("+buildts")))
       old_buildts = strtol(bufp, NULL, 10);
-    else if (!strcmp(type, "+botname"))
+    else if (!strcmp(type, STR("+botname")))
       nick = strdup(bufp);
-    else if (!strcmp(type, "+ip4"))
+    else if (!strcmp(type, STR("+ip4")))
       ip4 = strdup(bufp);
-    else if (!strcmp(type, "+ip6"))
+    else if (!strcmp(type, STR("+ip6")))
       ip6 = strdup(bufp);
 
     if (enc)
@@ -643,8 +643,8 @@ readsocks(const char *fname)
 
     if ((ip4 && ip6) && (strcmp(ip4, myipstr(AF_INET)) || strcmp(ip6, myipstr(AF_INET6)))) {
       if (tands > 0) {		/* We're not linked yet.. but for future */
-        botnet_send_chat(-1, conf.bot->nick, "IP changed.");
-        botnet_send_bye("IP changed.");
+        botnet_send_chat(-1, conf.bot->nick, STR("IP changed."));
+        botnet_send_bye(STR("IP changed."));
       }
       fatal("brb", 1);
     } else {
@@ -673,7 +673,7 @@ readsocks(const char *fname)
 void
 restart(int idx)
 {
-  const char *reason = updating ? "Updating..." : "Restarting...";
+  const char *reason = updating ? STR("Updating...") : STR("Restarting...");
   Tempfile *socks = new Tempfile("socks");
   int fd = 0;
 
@@ -693,7 +693,7 @@ restart(int idx)
     }
   }
 
-  fprintf(socks->f, "+enc\n");
+  fprintf(socks->f, STR("+enc\n"));
 
   /* write out all leftover dcc[] entries */
   for (fd = 0; fd < dcc_total; fd++)
@@ -707,14 +707,14 @@ restart(int idx)
 
   if (server_online) {
     if (botname[0])
-      lfprintf(socks->f, "+botname %s\n", botname);
+      lfprintf(socks->f, STR("+botname %s\n"), botname);
   }
-  lfprintf(socks->f, "+online_since %li\n", online_since);
+  lfprintf(socks->f, STR("+online_since %li\n"), online_since);
   if (floodless)
-    lfprintf(socks->f, "+server_floodless %d\n", floodless);
-  lfprintf(socks->f, "+buildts %li\n", buildts);
-  lfprintf(socks->f, "+ip4 %s\n", myipstr(AF_INET));
-  lfprintf(socks->f, "+ip6 %s\n", myipstr(AF_INET6));
+    lfprintf(socks->f, STR("+server_floodless %d\n"), floodless);
+  lfprintf(socks->f, STR("+buildts %li\n"), buildts);
+  lfprintf(socks->f, STR("+ip4 %s\n"), myipstr(AF_INET));
+  lfprintf(socks->f, STR("+ip6 %s\n"), myipstr(AF_INET6));
 
   fflush(socks->f);
   socks->my_close();
@@ -723,8 +723,8 @@ restart(int idx)
     write_userfile(idx);
 
   if (server_online) {
-    do_chanset(NULL, NULL, "+inactive", DO_LOCAL);
-    dprintf(DP_DUMP, "JOIN 0\n");
+    do_chanset(NULL, NULL, STR("+inactive"), DO_LOCAL);
+    dprintf(DP_DUMP, STR("JOIN 0\n"));
   }
 
   fixmod(binname);
@@ -737,7 +737,7 @@ restart(int idx)
   if (!backgrd || term_z || sdebug) {
     char shit[7] = "";
 
-    simple_sprintf(shit, "-%s%s%s", !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
+    simple_sprintf(shit, STR("-%s%s%s"), !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
     argv[1] = strdup(shit);
     argv[2] = strdup(shell_escape(conf.bot->nick));
   } else {
@@ -754,7 +754,7 @@ restart(int idx)
   execvp(argv[0], &argv[0]);
 
   /* hopefully this is never reached */
-  putlog(LOG_MISC, "*", "Could not restart: %s", strerror(errno));
+  putlog(LOG_MISC, "*", STR("Could not restart: %s"), strerror(errno));
   return;
 }
 
@@ -795,13 +795,13 @@ int updatebin(int idx, char *par, int secs)
   newbin = strrchr(path, '/');
   if (!newbin) {
     free(path);
-    logidx(idx, "Don't know current binary name");
+    logidx(idx, STR("Don't know current binary name"));
     return 1;
   }
   newbin++;
   if (strchr(par, '/')) {
     *newbin = 0;
-    logidx(idx, "New binary must be in %s and name must be specified without path information", path);
+    logidx(idx, STR("New binary must be in %s and name must be specified without path information"), path);
     free(path);
     return 1;
   }
@@ -816,23 +816,23 @@ int updatebin(int idx, char *par, int secs)
 #endif /* CYGWIN_HACKS */
   if (!strcmp(path, binname)) {
     free(path);
-    logidx(idx, "Can't update with the current binary");
+    logidx(idx, STR("Can't update with the current binary"));
     return 1;
   }
   if (!can_stat(path)) {
-    logidx(idx, "%s can't be accessed", path);
+    logidx(idx, STR("%s can't be accessed"), path);
     free(path);
     return 1;
   }
   if (fixmod(path)) {
-    logidx(idx, "Can't set mode 0600 on %s", path);
+    logidx(idx, STR("Can't set mode 0600 on %s"), path);
     free(path);
     return 1;
   }
 
   /* make a backup just in case. */
 
-  simple_snprintf(buf, sizeof(buf), "%s/.bin.old", conf.datadir);
+  simple_snprintf(buf, sizeof(buf), STR("%s/.bin.old"), conf.datadir);
   copyfile(binname, buf);
 
   write_settings(path, -1, 0);	/* re-write the binary with our packdata */
@@ -840,7 +840,7 @@ int updatebin(int idx, char *par, int secs)
   Tempfile *conffile = new Tempfile("conf");
 
   if (writeconf(NULL, conffile->f, CONF_ENC)) {
-    putlog(LOG_MISC, "*", "Failed to write temporary config file for update.");
+    putlog(LOG_MISC, "*", STR("Failed to write temporary config file for update."));
     delete conffile;
     return 1;
   }
@@ -848,11 +848,11 @@ int updatebin(int idx, char *par, int secs)
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
 #ifndef CYGWIN_HACKS
   simple_snprintf(buf, sizeof(buf), STR("%s -2"), shell_escape(path));
-  putlog(LOG_DEBUG, "*", "Running for update binary test: %s", buf);
+  putlog(LOG_DEBUG, "*", STR("Running for update binary test: %s"), buf);
   i = system(buf);
   if (i == -1 || WEXITSTATUS(i) != 2) {
-    dprintf(idx, "Couldn't restart new binary (error %d)\n", i);
-    putlog(LOG_MISC, "*", "Couldn't restart new binary (error %d)", i);
+    dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
+    putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)"), i);
     delete conffile;
     return i;
   }
@@ -861,12 +861,12 @@ int updatebin(int idx, char *par, int secs)
   /* now to send our config to the new binary */
 #ifndef CYGWIN_HACKS
   simple_snprintf(buf, sizeof(buf), STR("%s -4 %s"), shell_escape(path), conffile->file);
-  putlog(LOG_DEBUG, "*", "Running for update conf: %s", buf);
+  putlog(LOG_DEBUG, "*", STR("Running for update conf: %s"), buf);
   i = system(buf);
   delete conffile;
   if (i == -1 || WEXITSTATUS(i) != 6) { /* 6 for successfull config read/write */
-    dprintf(idx, "Couldn't pass config to new binary (error %d)\n", i);
-    putlog(LOG_MISC, "*", "Couldn't pass config to new binary (error %d)", i);
+    dprintf(idx, STR("Couldn't pass config to new binary (error %d)\n"), i);
+    putlog(LOG_MISC, "*", STR("Couldn't pass config to new binary (error %d)"), i);
     return i;
   }
 #endif /* !CYGWIN_HACKS */
@@ -883,14 +883,14 @@ int updatebin(int idx, char *par, int secs)
   }
 #endif /* CYGWIN_HACKS */  
   if (movefile(path, binname)) {
-    logidx(idx, "Can't rename %s to %s", path, binname);
+    logidx(idx, STR("Can't rename %s to %s"), path, binname);
     free(path);
     return 1;
   }
 
   if (updating == UPDATE_EXIT) {	  /* dont restart/kill/spawn bots, just die ! */
-    printf("* Moved binary to: %s\n", binname);
-    fatal("Binary updated.", 0);
+    printf(STR("* Moved binary to: %s\n"), binname);
+    fatal(STR("Binary updated."), 0);
   }
   if (updating == UPDATE_AUTO) {
     /* Make all other bots do a soft restart */
@@ -920,7 +920,7 @@ int updatebin(int idx, char *par, int secs)
       egg_timeval_t howlong;
       howlong.sec = secs;
       howlong.usec = 0;
-      timer_create_complex(&howlong, "restarting for update", (Function) restart, (void *) idx, 0);
+      timer_create_complex(&howlong, STR("restarting for update"), (Function) restart, (void *) idx, 0);
     } else
       restart(idx);
 
@@ -938,8 +938,8 @@ int bot_aggressive_to(struct userrec *u)
 
   link_pref_val(u, botpval);
   link_pref_val(conf.bot->u, mypval);
-  sdprintf("botpval: %s", botpval);
-  sdprintf("mypval: %s", mypval);
+//  sdprintf("botpval: %s", botpval);
+//  sdprintf("mypval: %s", mypval);
   if (strcmp(mypval, botpval) < 0)
     return 1;
   else

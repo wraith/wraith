@@ -141,14 +141,14 @@ char *encrypt_pass(struct userrec *u, char *in)
   if (strlen(in) > MAXPASSLEN)
     in[MAXPASSLEN] = 0;
 
-  simple_snprintf(buf, sizeof(buf), "%s-%s", settings.salt2, in);
+  simple_snprintf(buf, sizeof(buf), STR("%s-%s"), settings.salt2, in);
 
   tmp = encrypt_string(user_key(u), buf);
   OPENSSL_cleanse(buf, sizeof(buf));
   ret_size = strlen(tmp) + 1 + 1;
   ret = (char *) my_calloc(1, ret_size);
 
-  simple_snprintf(ret, ret_size, "+%s", tmp);
+  simple_snprintf(ret, ret_size, STR("+%s"), tmp);
   free(tmp);
 
   return ret;
@@ -242,7 +242,7 @@ void Encrypt_File(char *infile, char *outfile)
     if (!f2)
       return;
   } else {
-    printf("----------------------------------START----------------------------------\n");
+    printf(STR("----------------------------------START----------------------------------\n"));
   }
 
   char *buf = (char *) my_calloc(1, 1024);
@@ -257,7 +257,7 @@ void Encrypt_File(char *infile, char *outfile)
   }
   free(buf);
   if (std)
-    printf("-----------------------------------END-----------------------------------\n");
+    printf(STR("-----------------------------------END-----------------------------------\n"));
 
   fclose(f);
   if (f2)
@@ -279,7 +279,7 @@ void Decrypt_File(char *infile, char *outfile)
     if (!f2)
       return;
   } else {
-    printf("----------------------------------START----------------------------------\n");
+    printf(STR("----------------------------------START----------------------------------\n"));
   }
 
   char *buf = (char *) my_calloc(1, 2048);
@@ -297,7 +297,7 @@ void Decrypt_File(char *infile, char *outfile)
   }
   free(buf);
   if (std)
-    printf("-----------------------------------END-----------------------------------\n");
+    printf(STR("-----------------------------------END-----------------------------------\n"));
 
   fclose(f);
   if (f2)

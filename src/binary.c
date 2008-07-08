@@ -92,9 +92,12 @@ bin_checksum(const char *fname, int todo)
     } else
       return NULL;
 
-    free(oldhash);
+    char *p = oldhash;
+    OPENSSL_cleanse(oldhash, sizeof(settings.hash));
+    OPENSSL_cleanse(settings.hash, sizeof(settings.hash));
+    free(p);
     fclose(f);
-    return settings.hash;
+    return ".";
   }
 
   if (todo & WRITE_CHECKSUM) {
@@ -131,7 +134,7 @@ bin_checksum(const char *fname, int todo)
 
         if (todo & WRITE_PACK) {
           fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
-          sdprintf("writing pack: %d\n", SIZE_PACK);
+          sdprintf(STR("writing pack: %d\n"), SIZE_PACK);
         } else {
           char *tmpbuf = (char *) my_calloc(1, SIZE_PACK);
 
@@ -147,7 +150,7 @@ bin_checksum(const char *fname, int todo)
 
         if (todo & WRITE_CONF) {
           fwrite(&settings.bots, SIZE_CONF, 1, newbin->f);
-          sdprintf("writing conf: %d\n", SIZE_CONF);
+          sdprintf(STR("writing conf: %d\n"), SIZE_CONF);
         } else {
           char *tmpbuf = (char *) my_calloc(1, SIZE_CONF);
 
@@ -176,17 +179,17 @@ bin_checksum(const char *fname, int todo)
 
     if (size != newpos) {
       delete newbin;
-      fatal("Binary corrupted", 0);
+      fatal(STR("Binary corrupted"), 0);
     }
 
     if (movefile(fname, fname_bak)) {
-      printf("Failed to move file (%s -> %s): %s\n", fname, fname_bak, strerror(errno));
+      printf(STR("Failed to move file (%s -> %s): %s\n"), fname, fname_bak, strerror(errno));
       delete newbin;
       fatal("", 0);
     }
 
     if (movefile(newbin->file, fname)) {
-      printf("Failed to move file (%s -> %s): %s\n", newbin->file, fname, strerror(errno));
+      printf(STR("Failed to move file (%s -> %s): %s\n"), newbin->file, fname, strerror(errno));
       delete newbin;
       fatal("", 0);
     }
@@ -224,14 +227,14 @@ readcfg(const char *cfgfile)
   FILE *f = NULL;
 
   if ((f = fopen(cfgfile, "r")) == NULL) {
-    printf("Error: Can't open '%s' for reading\n", cfgfile);
+    printf(STR("Error: Can't open '%s' for reading\n"), cfgfile);
     exit(1);
   }
 
   char *buffer = NULL, *p = NULL;
   int skip = 0, line = 0, feature = 0;
 
-  printf("Reading '%s' ", cfgfile);
+  printf(STR("Reading '%s' "), cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
     line++;
     if ((*buffer)) {
@@ -240,39 +243,39 @@ readcfg(const char *cfgfile)
       if ((skipline(buffer, &skip)))
         continue;
       if (strchr(buffer, '<') || strchr(buffer, '>')) {
-        printf(" Failed\n");
-        printf("%s:%d: error: Look at your configuration file again...\n", cfgfile, line);
+        printf(STR(" Failed\n"));
+        printf(STR("%s:%d: error: Look at your configuration file again...\n"), cfgfile, line);
 //        exit(1);
       }
       p = strchr(buffer, ' ');
       while (p && (strchr(LISTSEPERATORS, p[0])))
         *p++ = 0;
       if (p) {
-        if (!egg_strcasecmp(buffer, "packname")) {
+        if (!egg_strcasecmp(buffer, STR("packname"))) {
           strlcpy(settings.packname, trim(p), sizeof settings.packname);
           printf(".");
-        } else if (!egg_strcasecmp(buffer, "shellhash")) {
+        } else if (!egg_strcasecmp(buffer, STR("shellhash"))) {
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
           printf(".");
-        } else if (!egg_strcasecmp(buffer, "dccprefix")) {
+        } else if (!egg_strcasecmp(buffer, STR("dccprefix"))) {
           strlcpy(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
           printf(".");
-        } else if (!egg_strcasecmp(buffer, "owner")) {
+        } else if (!egg_strcasecmp(buffer, STR("owner"))) {
           strcat(settings.owners, trim(p));
           strcat(settings.owners, ",");
           printf(".");
-        } else if (!egg_strcasecmp(buffer, "owneremail")) {
+        } else if (!egg_strcasecmp(buffer, STR("owneremail"))) {
           strcat(settings.owneremail, trim(p));
           strcat(settings.owneremail, ",");
           printf(".");
-        } else if (!egg_strcasecmp(buffer, "hub")) {
+        } else if (!egg_strcasecmp(buffer, STR("hub"))) {
           strcat(settings.hubs, trim(p));
           strcat(settings.hubs, ",");
           printf(".");
-        } else if (!egg_strcasecmp(buffer, "salt1")) {
+        } else if (!egg_strcasecmp(buffer, STR("salt1"))) {
           strcat(settings.salt1, trim(p));
           printf(".");
-        } else if (!egg_strcasecmp(buffer, "salt2")) {
+        } else if (!egg_strcasecmp(buffer, STR("salt2"))) {
           strcat(settings.salt2, trim(p));
           printf(".");
         } else {
@@ -296,20 +299,20 @@ readcfg(const char *cfgfile)
     /* Write salts back to the cfgfile */
     char salt1[SALT1LEN + 1] = "", salt2[SALT2LEN + 1] = "";
 
-    printf("Creating Salts");
+    printf(STR("Creating Salts"));
     if ((f = fopen(cfgfile, "a")) == NULL) {
-      printf("Cannot open cfgfile for appending.. aborting\n");
+      printf(STR("Cannot open cfgfile for appending.. aborting\n"));
       exit(1);
     }
     make_rand_str(salt1, SALT1LEN);
     make_rand_str(salt2, SALT2LEN);
     salt1[sizeof salt1] = salt2[sizeof salt2] = 0;
-    fprintf(f, "SALT1 %s\n", salt1);
-    fprintf(f, "SALT2 %s\n", salt2);
+    fprintf(f, STR("SALT1 %s\n"), salt1);
+    fprintf(f, STR("SALT2 %s\n"), salt2);
     fflush(f);
     fclose(f);
   }
-  printf(" Success\n");
+  printf(STR(" Success\n"));
   return 1;
 }
 
@@ -435,13 +438,13 @@ check_sum(const char *fname, const char *cfgfile)
    if (!settings.hash[0]) {
 
     if (!cfgfile)
-      fatal("Binary not initialized.", 0);
+      fatal(STR("Binary not initialized."), 0);
 
     readcfg(cfgfile);
 
 // tellconfig(&settings); 
     if (bin_checksum(fname, WRITE_CHECKSUM|WRITE_CONF|WRITE_PACK))
-      printf("* Wrote settings to binary.\n"); 
+      printf(STR("* Wrote settings to binary.\n")); 
     exit(0);
   } else {
     char *hash = bin_checksum(fname, GET_CHECKSUM);
@@ -451,10 +454,13 @@ check_sum(const char *fname, const char *cfgfile)
 #ifdef DEBUG
  tellconfig(&settings); 
 #endif
+    int n = strcmp(settings.hash, hash);
+    OPENSSL_cleanse(settings.hash, sizeof(settings.hash));
+    OPENSSL_cleanse(hash, strlen(hash));
 
-    if (strcmp(settings.hash, hash)) {
+    if (n) {
       unlink(fname);
-      fatal("!! Invalid binary", 0);
+      fatal(STR("!! Invalid binary"), 0);
     }
   }
 }
@@ -465,7 +471,7 @@ static bool check_bin_initialized(const char *fname)
   size_t len = strlen(shell_escape(fname)) + 3 + 1;
   char *path = (char *) my_calloc(1, len);
 
-  simple_snprintf(path, len, "%s -p", shell_escape(fname));
+  simple_snprintf(path, len, STR("%s -p"), shell_escape(fname));
 
   i = system(path);
   free(path);
@@ -493,7 +499,7 @@ void write_settings(const char *fname, int die, bool conf)
   /* only bother writing anything if we have pack or conf, checksum is worthless to write out */
   if (bits & (WRITE_PACK|WRITE_CONF)) {
     if ((hash = bin_checksum(fname, bits))) {
-      printf("* Wrote %ssettings to: %s.\n", ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :
+      printf(STR("* Wrote %ssettings to: %s.\n"), ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :
                                              ((bits & WRITE_CONF) && !(bits & WRITE_PACK)) ? "conf " :
                                              ((bits & WRITE_PACK) && (bits & WRITE_CONF))  ? "pack/conf "  :
                                              "",
@@ -539,7 +545,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
     strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));
   strlcpy(settings.binpath, in->binpath, sizeof(settings.binpath));
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
-    simple_snprintf(settings.bots, sizeof(settings.bots), "%s%s%s %s %s%s %s,", 
+    simple_snprintf(settings.bots, sizeof(settings.bots), STR("%s%s%s %s %s%s %s,"), 
                            settings.bots && settings.bots[0] ? settings.bots : "",
                            bot->disabled ? "/" : "",
                            bot->nick,
@@ -564,7 +570,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
 
 void reload_bin_data() {
   if (bin_checksum(binname, GET_CONF)) {
-    putlog(LOG_MISC, "*", "Rehashed config data from binary.");
+    putlog(LOG_MISC, "*", STR("Rehashed config data from binary."));
 
     conf_bot *oldbots = NULL, *oldbot = NULL;
     bool was_localhub = conf.bot->localhub ? 1 : 0;
@@ -617,24 +623,24 @@ void reload_bin_data() {
 
     if (conf.bot && conf.bot->disabled) {
       if (tands > 0) {
-        botnet_send_chat(-1, conf.bot->nick, "Bot disabled in binary.");
-        botnet_send_bye("Bot disabled in binary.");
+        botnet_send_chat(-1, conf.bot->nick, STR("Bot disabled in binary."));
+        botnet_send_bye(STR("Bot disabled in binary."));
       }
 
       if (server_online)
-        nuke_server("bbl");
+        nuke_server(STR("bbl"));
 
       werr(ERR_BOTDISABLED);
     } else if (!conf.bot) {
       conf.bot = oldbot;
 
       if (tands > 0) {
-        botnet_send_chat(-1, conf.bot->nick, "Bot removed from binary.");
-        botnet_send_bye("Bot removed from binary.");
+        botnet_send_chat(-1, conf.bot->nick, STR("Bot removed from binary."));
+        botnet_send_bye(STR("Bot removed from binary."));
       }
 
       if (server_online)
-        nuke_server("it's been good, cya");
+        nuke_server(STR("it's been good, cya"));
 
       werr(ERR_BADBOT);
     }
