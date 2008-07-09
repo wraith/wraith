@@ -154,8 +154,11 @@ int fixmod(const char *s)
   return chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
 }
 
-Tempfile::Tempfile(const char *prefix)
+Tempfile::Tempfile(const char *prefix, bool useFopen)
 {
+  this->useFopen = useFopen;
+  this->f = NULL;
+  this->fd = -1;
   if (prefix) {
     plen = strlen(prefix) + 1;
     this->prefix = new char[plen];
@@ -188,8 +191,10 @@ void Tempfile::MakeTemp()
     goto error;    
   }
 
-  if ((f = fdopen(fd, "w+b")) == NULL)
-    goto error;
+  if (this->useFopen) {
+    if ((f = fdopen(fd, "w+b")) == NULL)
+      goto error;
+  }
   
   fchmod(fd, S_IRUSR | S_IWUSR);
 

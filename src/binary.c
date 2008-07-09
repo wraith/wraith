@@ -45,11 +45,11 @@ static void tellconfig(settings_t *);
 
 int checked_bin_buf = 0;
 
-#define MMAP_LOOP(_offset, _block_len, _total) 		\
+#define MMAP_LOOP(_offset, _block_len, _total, _len)	\
   for ((_offset) = 0; 					\
        (_offset) < (_total); 				\
        (_offset) += (_block_len),			\
-        len = ((_total) - (_offset)) < (_block_len) ? 	\
+       (_len) = ((_total) - (_offset)) < (_block_len) ? \
               ((_total) - (_offset)) : 			\
               (_block_len)				\
       )
@@ -64,7 +64,6 @@ bin_checksum(const char *fname, int todo)
   MD5_CTX ctx;
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
-  FILE *f = NULL;
   int fd = -1;
   size_t len = 0, offset = 0, size = 0;
   unsigned char *map = NULL;
@@ -82,7 +81,7 @@ bin_checksum(const char *fname, int todo)
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
-    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
+    MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
       if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
     }
@@ -101,7 +100,7 @@ bin_checksum(const char *fname, int todo)
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
 
     /* Find the packdata */
-    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
+    MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
       if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
     }
@@ -129,81 +128,79 @@ bin_checksum(const char *fname, int todo)
   }
 
   if (todo & WRITE_CHECKSUM) {
-    Tempfile *newbin = new Tempfile("bin");
+    Tempfile *newbin = new Tempfile("bin", 0);
     char *fname_bak = NULL;
     size_t size = 0, newpos = 0;
+    unsigned char* outmap = NULL;
 
     size = strlen(fname) + 2;
     fname_bak = (char *) my_calloc(1, size);
     simple_snprintf(fname_bak, size, "%s~", fname);
-    size = 0;
 
-    if (!(f = fopen(fname, "rb")))
-      goto fatal;
+    fd = open(fname, O_RDONLY);
+    if (fd == -1) werr(ERR_BINSTAT);
+    size = lseek(fd, 0, SEEK_END);
+    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    outmap = (unsigned char*) mmap(0, size, PROT_WRITE, MAP_SHARED, newbin->fd, 0);
 
-    fseek(f, 0, SEEK_END);
-    size = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    newpos = lseek(newbin->fd, size - 1, SEEK_SET);
+    write(newbin->fd, "", 1);
     newpos = 0;
 
-    while ((len = fread(buf, 1, sizeof(buf) - 1, f))) {
-      if (fwrite(buf, 1, len, newbin->f) != len)
-        goto fatal;
+    /* Find settings struct in original binary */
+    MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
+      if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
+        break;
+    }
+    MD5_Update(&ctx, map, offset);
+    MD5_Final(md5out, &ctx);
+    strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
+    OPENSSL_cleanse(&ctx, sizeof(ctx));
 
-      newpos += len;
+    strlcpy(settings.hash, hash, sizeof(settings.hash));
+    edpack(&settings, hash, PACK_ENC);		/* encrypt the entire struct with the hash (including hash) */
+    OPENSSL_cleanse(hash, sizeof(hash));
 
-      if (!memcmp(buf, &settings.prefix, PREFIXLEN)) {		/* found the settings struct! */
-        MD5_Final(md5out, &ctx);
-        strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
-        OPENSSL_cleanse(&ctx, sizeof(ctx));
+    /* Copy everything up to this point into the new binary (including the settings header/prefix) */
+    offset += PREFIXLEN;
+    memcpy(outmap, map, offset);
+    newpos += offset;
+    if (todo & WRITE_PACK) {
+      /* Now copy in our encrypted settings struct */
+      memcpy(&outmap[newpos], &settings.hash, SIZE_PACK);
+#ifdef DEBUG
+      sdprintf(STR("writing pack: %d\n"), SIZE_PACK);
+#endif
+    } else {
+      /* Just copy the original pack data to the new binary */
+      memcpy(&outmap[newpos], &map[offset], SIZE_PACK);
+    }
+    offset += SIZE_PACK;
+    newpos += SIZE_PACK;
 
-        strlcpy(settings.hash, hash, sizeof(settings.hash));
-        edpack(&settings, hash, PACK_ENC);		/* encrypt the entire struct with the hash (including hash) */
-        OPENSSL_cleanse(hash, sizeof(hash));
-        if (todo & WRITE_PACK) {
-          fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
-          OPENSSL_cleanse(settings.hash, sizeof(settings.hash));
-          sdprintf(STR("writing pack: %d\n"), SIZE_PACK);
-        } else {
-          char *tmpbuf = (char *) my_calloc(1, SIZE_PACK);
-
-          if ((len = fread(tmpbuf, 1, SIZE_PACK, f))) {
-            if (fwrite(tmpbuf, 1, len, newbin->f) != len) {
-              free(tmpbuf);
-              goto fatal;
-            }
-          }
-          free(tmpbuf);
-        }
-        newpos += SIZE_PACK;
-
-        if (todo & WRITE_CONF) {
-          fwrite(&settings.bots, SIZE_CONF, 1, newbin->f);
-          sdprintf(STR("writing conf: %d\n"), SIZE_CONF);
-        } else {
-          char *tmpbuf = (char *) my_calloc(1, SIZE_CONF);
-
-          if ((len = fread(tmpbuf, 1, SIZE_CONF, f))) {
-            if (fwrite(tmpbuf, 1, len, newbin->f) != len) {
-              free(tmpbuf);
-              goto fatal;
-            }
-          }
-          free(tmpbuf);
-        }
-        newpos += SIZE_CONF;
-
-        fseek(newbin->f, newpos + SIZE_PAD, SEEK_SET);
-        newpos += SIZE_PAD;
-
-        /* skip reading over the stuff we already wrote */
-        fseek(f, newpos, SEEK_SET);
-      } else if (!hash[0])		/* hash as long as we haven't reached the prefix */
-        MD5_Update(&ctx, buf, len);
+    if (todo & WRITE_CONF) {
+      /* Copy in the encrypted conf data */
+      memcpy(&outmap[newpos], &settings.bots, SIZE_CONF);
+#ifdef DEBUG
+      sdprintf(STR("writing conf: %d\n"), SIZE_CONF);
+#endif
+    } else {
+      /* Just copy the original conf data to the new binary */
+      memcpy(&outmap[newpos], &map[offset], SIZE_CONF);
     }
 
-    fclose(f);
-    f = NULL;
+    newpos += SIZE_CONF;
+    offset += SIZE_CONF;
+
+    /* Write the rest of the binary */
+    memcpy(&outmap[newpos], &map[offset], size - offset);
+    newpos += size - offset;
+    offset += size - offset;
+
+    munmap(map, size);
+    close(fd);
+
+    munmap(outmap, size);
     newbin->my_close();
 
     if (size != newpos) {
@@ -229,8 +226,11 @@ bin_checksum(const char *fname, int todo)
     
     return hash;
   fatal:
-    if (f)
-      fclose(f);
+    munmap(map, size);
+    if (fd != -1)
+      close(fd);
+
+    munmap(outmap, size);
     delete newbin;
     werr(ERR_BINSTAT);
   }
