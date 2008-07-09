@@ -309,6 +309,12 @@ char *MD5(const char *string)
 {
   static int n = 0;
   static char ret[5][MD5_HASH_LENGTH + 1];
+  //Cleanse the current buffer
+  if (!string) {
+    OPENSSL_cleanse(ret[n], MD5_HASH_LENGTH + 1);
+    return NULL;
+  }
+
   char* md5string = ret[n++];
   unsigned char   md5out[MD5_HASH_LENGTH + 1] = "";
   MD5_CTX ctx;
@@ -325,7 +331,9 @@ char *MD5(const char *string)
 }
 
 int md5cmp(const char *hash, const char *string) {
-  return strcmp(hash, MD5(string));
+  int n = strcmp(hash, MD5(string));
+  MD5(NULL);
+  return n;
 }
 
 char *
@@ -357,6 +365,11 @@ char *SHA1(const char *string)
 {
   static int n = 0;
   static char ret[5][SHA_HASH_LENGTH + 1];
+  //Cleanse the current buffer
+  if (!string) {
+    OPENSSL_cleanse(ret[n], SHA_HASH_LENGTH + 1);
+    return NULL;
+  }
   char* sha1string = ret[n++];
   unsigned char   sha1out[SHA_HASH_LENGTH + 1] = "";
   SHA_CTX ctx;
@@ -373,7 +386,9 @@ char *SHA1(const char *string)
 }
 
 int sha1cmp(const char *hash, const char *string) {
-  return strcmp(hash, SHA1(string));
+  int n = strcmp(hash, SHA1(string));
+  SHA1(NULL);
+  return n;
 }
 
 /* convert binary hashes to hex */

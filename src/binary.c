@@ -131,9 +131,11 @@ bin_checksum(const char *fname, int todo)
 
         strlcpy(settings.hash, hash, 65);
         edpack(&settings, hash, PACK_ENC);		/* encrypt the entire struct with the hash (including hash) */
+        OPENSSL_cleanse(hash, sizeof(hash));
 
         if (todo & WRITE_PACK) {
           fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
+          OPENSSL_cleanse(settings.hash, sizeof(settings.hash));
           sdprintf(STR("writing pack: %d\n"), SIZE_PACK);
         } else {
           char *tmpbuf = (char *) my_calloc(1, SIZE_PACK);
