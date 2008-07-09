@@ -405,7 +405,7 @@ static void dtx_arg(int& argc, char *argv[])
         printf(STR("Revision: %d\n"), revision);
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD);
         if (settings.uname[0]) {
-          sdebug++;
+          ++sdebug;
           bin_to_conf();
         }
 	exit(0);
@@ -438,7 +438,7 @@ void core_10secondly()
 #ifndef CYGWIN_HACKS
   static int curcheck = 0;
 
-  curcheck++;
+  ++curcheck;
 
   //FIXME: This is disabled because it sucks.
   if (curcheck == 1)
@@ -525,7 +525,7 @@ static void core_secondly()
     while (nowtm.tm_min != lastmin) {
       /* Timer drift, dammit */
       debug2("timer: drift (lastmin=%lu, now=%d)", lastmin, nowtm.tm_min);
-      i++;
+      ++i;
       lastmin = (lastmin + 1) % 60;
     }
     if (i > 1)

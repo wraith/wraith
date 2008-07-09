@@ -20,7 +20,10 @@
 
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <signal.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 settings_t settings = {
   "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200",
@@ -33,11 +36,27 @@ settings_t settings = {
 };
 
 static void edpack(settings_t *, const char *, int);
+#ifdef DEBUG
+static void tellconfig(settings_t *);
+#endif
 
 #define PACK_ENC 1
 #define PACK_DEC 2
 
 int checked_bin_buf = 0;
+
+#define MMAP_LOOP(_offset, _block_len, _total) 		\
+  for ((_offset) = 0; 					\
+       (_offset) < (_total); 				\
+       (_offset) += (_block_len),			\
+        len = ((_total) - (_offset)) < (_block_len) ? 	\
+              ((_total) - (_offset)) : 			\
+              (_block_len)				\
+      )
+
+#define MMAP_READ(_map, _dest, _offset, _len)	\
+  memcpy((_dest), &(_map)[(_offset)], (_len));	\
+  (_offset) += (_len);
 
 static char *
 bin_checksum(const char *fname, int todo)
@@ -46,57 +65,66 @@ bin_checksum(const char *fname, int todo)
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
   FILE *f = NULL;
-  size_t len = 0;
+  int fd = -1;
+  size_t len = 0, offset = 0, size = 0;
+  unsigned char *map = NULL;
 
   MD5_Init(&ctx);
 
-  checked_bin_buf++;
+  ++checked_bin_buf;
  
   hash[0] = 0;
 
   fixmod(fname);
 
   if (todo == GET_CHECKSUM) {
-    if (!(f = fopen(fname, "rb")))
-      werr(ERR_BINSTAT);
-
-    while ((len = fread(buf, 1, sizeof buf - 1, f))) {
-      if (!memcmp(buf, &settings.prefix, PREFIXLEN))
+    fd = open(fname, O_RDONLY);
+    if (fd == -1) werr(ERR_BINSTAT);
+    size = lseek(fd, 0, SEEK_END);
+    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
+      if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
-      MD5_Update(&ctx, buf, len);
     }
-
-    fclose(f);
-    f = NULL;
+    MD5_Update(&ctx, map, offset);
+    munmap(map, size);
+    close(fd);
     MD5_Final(md5out, &ctx);
     strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
   }
 
   if (todo == GET_CONF) {
-    char *oldhash = strdup(settings.hash);
+    fd = open(fname, O_RDONLY);
+    if (fd == -1) werr(ERR_BINSTAT);
+    size = lseek(fd, 0, SEEK_END);
+    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
 
-    if (!(f = fopen(fname, "rb")))
-      werr(ERR_BINSTAT);
-
-    while ((len = fread(buf, 1, sizeof buf - 1, f)))
-      if (!memcmp(buf, &settings.prefix, PREFIXLEN))
+    /* Find the packdata */
+    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
+      if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
+    }
+    MD5_Update(&ctx, map, offset);
+    MD5_Final(md5out, &ctx);
+    strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
+    OPENSSL_cleanse(&ctx, sizeof(ctx));
 
-    char *tmpbuf = (char *) my_calloc(1, SIZE_PACK);
- 
-    if ((len = fread(tmpbuf, 1, SIZE_PACK, f))) {
-      edpack(&settings, oldhash, PACK_ENC);
-      len = fread(&settings.bots, 1, SIZE_CONF, f);
-      edpack(&settings, oldhash, PACK_DEC);
-    } else
-      return NULL;
+    settings_t newsettings;
 
-    char *p = oldhash;
-    OPENSSL_cleanse(oldhash, sizeof(settings.hash));
-    OPENSSL_cleanse(settings.hash, sizeof(settings.hash));
-    free(p);
-    fclose(f);
+    /* Read the settings struct into newsettings */
+    MMAP_READ(map, &newsettings, offset, sizeof(settings));
+
+    /* Decrypt the new data */
+    edpack(&newsettings, hash, PACK_DEC);
+    OPENSSL_cleanse(hash, sizeof(hash));
+
+    /* Copy over only the dynamic data, leaving the pack config static */
+    memcpy(&settings.bots, &newsettings.bots, SIZE_CONF);
+
+    munmap(map, size);
+    close(fd);
+
     return ".";
   }
 
@@ -129,10 +157,9 @@ bin_checksum(const char *fname, int todo)
         strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
         OPENSSL_cleanse(&ctx, sizeof(ctx));
 
-        strlcpy(settings.hash, hash, 65);
+        strlcpy(settings.hash, hash, sizeof(settings.hash));
         edpack(&settings, hash, PACK_ENC);		/* encrypt the entire struct with the hash (including hash) */
         OPENSSL_cleanse(hash, sizeof(hash));
-
         if (todo & WRITE_PACK) {
           fwrite(&settings.hash, SIZE_PACK, 1, newbin->f);
           OPENSSL_cleanse(settings.hash, sizeof(settings.hash));
@@ -238,7 +265,7 @@ readcfg(const char *cfgfile)
 
   printf(STR("Reading '%s' "), cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
-    line++;
+    ++line;
     if ((*buffer)) {
       if (strchr(buffer, '\n'))
         *(char *) strchr(buffer, '\n') = 0;
