@@ -86,11 +86,17 @@ bin_checksum(const char *fname, int todo)
         break;
     }
     MD5_Update(&ctx, map, offset);
-    munmap(map, size);
-    close(fd);
+
+    /* Hash everything after the packdata too */
+    offset += sizeof(settings_t);
+    MD5_Update(&ctx, &map[offset], size - offset);
+
     MD5_Final(md5out, &ctx);
     strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
+
+    munmap(map, size);
+    close(fd);
   }
 
   if (todo == GET_CONF) {
@@ -105,6 +111,10 @@ bin_checksum(const char *fname, int todo)
         break;
     }
     MD5_Update(&ctx, map, offset);
+
+    /* Hash everything after the packdata too */
+    MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
+
     MD5_Final(md5out, &ctx);
     strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
@@ -129,23 +139,16 @@ bin_checksum(const char *fname, int todo)
 
   if (todo & WRITE_CHECKSUM) {
     Tempfile *newbin = new Tempfile("bin", 0);
-    char *fname_bak = NULL;
-    size_t size = 0, newpos = 0;
-    unsigned char* outmap = NULL;
 
     size = strlen(fname) + 2;
-    fname_bak = (char *) my_calloc(1, size);
+    char* fname_bak = (char *) my_calloc(1, size);
     simple_snprintf(fname_bak, size, "%s~", fname);
 
     fd = open(fname, O_RDONLY);
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
-    outmap = (unsigned char*) mmap(0, size, PROT_WRITE, MAP_SHARED, newbin->fd, 0);
 
-    newpos = lseek(newbin->fd, size - 1, SEEK_SET);
-    write(newbin->fd, "", 1);
-    newpos = 0;
+    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
 
     /* Find settings struct in original binary */
     MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
@@ -153,18 +156,28 @@ bin_checksum(const char *fname, int todo)
         break;
     }
     MD5_Update(&ctx, map, offset);
+    /* Hash everything after the packdata too */
+    MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
     MD5_Final(md5out, &ctx);
     strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
 
     strlcpy(settings.hash, hash, sizeof(settings.hash));
-    edpack(&settings, hash, PACK_ENC);		/* encrypt the entire struct with the hash (including hash) */
+
+    /* encrypt the entire struct with the hash (including hash) */
+    edpack(&settings, hash, PACK_ENC);
     OPENSSL_cleanse(hash, sizeof(hash));
 
     /* Copy everything up to this point into the new binary (including the settings header/prefix) */
+    unsigned char* outmap = (unsigned char*) mmap(0, size, PROT_WRITE, MAP_SHARED, newbin->fd, 0);
+    lseek(newbin->fd, size - 1, SEEK_SET);
+    write(newbin->fd, "", 1);
+
     offset += PREFIXLEN;
     memcpy(outmap, map, offset);
-    newpos += offset;
+
+    size_t newpos = offset;
+
     if (todo & WRITE_PACK) {
       /* Now copy in our encrypted settings struct */
       memcpy(&outmap[newpos], &settings.hash, SIZE_PACK);
