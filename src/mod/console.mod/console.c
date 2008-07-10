@@ -115,7 +115,7 @@ console_set(struct userrec *u, struct user_entry *e, void *buf)
   if (!noshare && !u->bot) {
     char string[501] = "";
 
-    egg_snprintf(string, sizeof string, "%s %s %s %d %d %d %d %d %d %d %d", ci->channel,
+    simple_snprintf(string, sizeof string, "%s %s %s %d %d %d %d %d %d %d %d", ci->channel,
                  masktype(ci->conflags), stripmasktype(ci->stripflags), ci->echoflags, ci->page, ci->conchan,
                  ci->color, ci->banner, ci->channels, ci->bots, ci->whom);
     /* shareout("c %s %s %s\n", e->type->name, u->handle, string); */

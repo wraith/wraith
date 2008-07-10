@@ -232,7 +232,7 @@ static void got_cjoin(char *botnick, char *code, char *par)
       size_t size = strlen(par) + 12 + 1;
 
       options = (char *) my_calloc(1, size);
-      egg_snprintf(options, size, "%s +inactive", par);
+      simple_snprintf(options, size, "%s +inactive", par);
     } else if (match && chan && !shouldjoin(chan)) {
       if (!inactive)
         do_chanset(NULL, chan, "-inactive", DO_LOCAL);

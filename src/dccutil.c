@@ -306,7 +306,7 @@ dprintf(int idx, const char *format, ...)
 //      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
 //      char *ircbuf = (char *) my_calloc(1, size);
 
-//      egg_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
+//      simple_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
 //      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
       dprintf(DP_HELP, "PRIVMSG %s :%s\n", dcc[idx].simulbot, buf);
 //      free(ircbuf);
@@ -745,7 +745,7 @@ detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
       if ((dcc[idx].type->flags & DCT_CHAT) && chat && (chat->channel >= 0)) {
         char x[1024];
 
-        egg_snprintf(x, sizeof x, DCC_FLOODBOOT, dcc[idx].nick);
+        simple_snprintf(x, sizeof x, DCC_FLOODBOOT, dcc[idx].nick);
         chanout_but(idx, chat->channel, "*** %s", x);
         if (chat->channel < GLOBAL_CHANS)
           botnet_send_part_idx(idx, x);
@@ -777,7 +777,7 @@ do_boot(int idx, char *by, char *reason)
   if ((dcc[idx].type->flags & DCT_CHAT) && (dcc[idx].u.chat->channel >= 0)) {
     char x[1024] = "";
 
-    egg_snprintf(x, sizeof x, DCC_BOOTED3, by, dcc[idx].nick, reason[0] ? ": " : "", reason);
+    simple_snprintf(x, sizeof x, DCC_BOOTED3, by, dcc[idx].nick, reason[0] ? ": " : "", reason);
     chanout_but(idx, dcc[idx].u.chat->channel, "*** %s.\n", x);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, x);
