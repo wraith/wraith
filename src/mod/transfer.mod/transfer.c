@@ -439,6 +439,7 @@ void eof_dcc_get(int idx)
 void dcc_send(int idx, char *buf, int len)
 {
   char s[SGRAB + 2] = "", *b = NULL;
+  size_t siz = 0;
   unsigned long sent;
 
   fwrite(buf, len, 1, dcc[idx].u.xfer->f);
@@ -462,8 +463,9 @@ void dcc_send(int idx, char *buf, int len)
 	   TRANSFER_FILE_TOO_LONG,
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);
-    b = (char *) my_calloc(1, strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1);
-    sprintf(b, "%s%s", tempdir, dcc[idx].u.xfer->filename);
+    siz = strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1;
+    b = (char *) my_calloc(1, siz);
+    simple_snprintf(b, siz, "%s%s", tempdir, dcc[idx].u.xfer->filename);
     unlink(b);
     free(b);
     killsock(dcc[idx].sock);

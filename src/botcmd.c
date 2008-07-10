@@ -384,9 +384,9 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	if (now - dcc[i].timeval > 300) {
 	  k = (now - dcc[i].timeval) / 60;
 	  if (k < 60)
-	    sprintf(s + l, " (idle %dm)", k);
+	    simple_snprintf(s + l, sizeof(s) - l, " (idle %dm)", k);
 	  else
-	    sprintf(s + l, " (idle %dh%dm)", k / 60, k % 60);
+	    simple_snprintf(s + l, sizeof(s) - l, " (idle %dh%dm)", k / 60, k % 60);
 	}
 	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s", s);
 	if (dcc[i].u.chat->away != NULL)

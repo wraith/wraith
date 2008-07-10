@@ -1208,7 +1208,7 @@ static void cmd_mop(int idx, char *par)
     if (channel_active(chan) && !channel_pending(chan)) {
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
         if (!m->user) {
-          sprintf(s, "%s!%s", m->nick, m->userhost);
+          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
           m->user = get_user_by_host(s);
           if (!m->user && doresolv(chan) && m->userip[0]) {
             simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
