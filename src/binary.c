@@ -65,8 +65,10 @@ bin_checksum(const char *fname, int todo)
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
   int fd = -1;
-  size_t len = 0, offset = 0, size = 0;
-  unsigned char *map = NULL;
+  size_t len = 0, offset = 0, size = 0, newpos = 0;
+  unsigned char *map = NULL, *outmap = NULL;
+  char *fname_bak = NULL;
+  Tempfile *newbin = NULL;
 
   MD5_Init(&ctx);
 
@@ -81,6 +83,7 @@ bin_checksum(const char *fname, int todo)
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    if ((void*)map == MAP_FAILED) goto fatal;
     MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
       if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
@@ -104,6 +107,7 @@ bin_checksum(const char *fname, int todo)
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find the packdata */
     MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
@@ -138,10 +142,10 @@ bin_checksum(const char *fname, int todo)
   }
 
   if (todo & WRITE_CHECKSUM) {
-    Tempfile *newbin = new Tempfile("bin", 0);
+    newbin = new Tempfile("bin", 0);
 
     size = strlen(fname) + 2;
-    char* fname_bak = (char *) my_calloc(1, size);
+    fname_bak = (char *) my_calloc(1, size);
     simple_snprintf(fname_bak, size, "%s~", fname);
 
     fd = open(fname, O_RDONLY);
@@ -149,6 +153,7 @@ bin_checksum(const char *fname, int todo)
     size = lseek(fd, 0, SEEK_END);
 
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find settings struct in original binary */
     MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
@@ -169,14 +174,16 @@ bin_checksum(const char *fname, int todo)
     OPENSSL_cleanse(hash, sizeof(hash));
 
     /* Copy everything up to this point into the new binary (including the settings header/prefix) */
-    unsigned char* outmap = (unsigned char*) mmap(0, size, PROT_WRITE, MAP_SHARED, newbin->fd, 0);
-    lseek(newbin->fd, size - 1, SEEK_SET);
-    write(newbin->fd, "", 1);
+    outmap = (unsigned char*) mmap(0, size, PROT_WRITE, MAP_SHARED, newbin->fd, 0);
+    if ((void*)outmap == MAP_FAILED) goto fatal;
+
+    if (lseek(newbin->fd, size - 1, SEEK_SET) == -1) goto fatal;
+    if (write(newbin->fd, "", 1) != 1) goto fatal;
 
     offset += PREFIXLEN;
     memcpy(outmap, map, offset);
 
-    size_t newpos = offset;
+    newpos = offset;
 
     if (todo & WRITE_PACK) {
       /* Now copy in our encrypted settings struct */
@@ -239,11 +246,13 @@ bin_checksum(const char *fname, int todo)
     
     return hash;
   fatal:
-    munmap(map, size);
+    if ((void*)map != MAP_FAILED)
+      munmap(map, size);
     if (fd != -1)
       close(fd);
 
-    munmap(outmap, size);
+    if ((void*)outmap != MAP_FAILED)
+      munmap(outmap, size);
     delete newbin;
     werr(ERR_BINSTAT);
   }
