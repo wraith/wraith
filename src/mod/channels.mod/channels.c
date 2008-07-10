@@ -341,7 +341,7 @@ static void rebalance_roles()
         ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, dcc[i].user);
         if (ba && (ba->roleid == (hNdx + 1))) {
           ba->roleid = lNdx + 1;
-          simple_sprintf(tmp, "rl %d", lNdx + 1);
+          simple_snprintf(tmp, sizeof(tmp), "rl %d", lNdx + 1);
           putbot(dcc[i].nick, tmp);
         }
       }

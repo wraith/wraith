@@ -418,7 +418,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     lastmsghost[which][0] = 0;
     u = get_user_by_host(from);
     /* Private msg */
-    simple_sprintf(h, "*!*@%s", p);
+    simple_snprintf(h, sizeof(h), "*!*@%s", p);
     putlog(LOG_MISC, "*", "Flood from @%s!  Placing on ignore!", p);
     addignore(h, conf.bot->nick, (which == FLOOD_CTCP) ? "CTCP flood" : "MSG/NOTICE flood", now + (60 * ignore_time));
     return 1;
@@ -470,7 +470,7 @@ static int gotmsg(char *from, char *msg)
 	p++;
       else
 	p = uhost;
-      simple_sprintf(ctcpbuf, "*!*@%s", p);
+      simple_snprintf(ctcpbuf, sizeof(ctcpbuf), "*!*@%s", p);
       addignore(ctcpbuf, conf.bot->nick, "ctcp avalanche", now + (60 * ignore_time));
       ignoring++;
     }
@@ -1144,7 +1144,7 @@ void check_hostmask()
 
   char s[UHOSTLEN + 2] = "";
 
-  simple_sprintf(s, "*!%s", botuserhost);              /* just add actual user@ident, regardless of ~ */
+  simple_snprintf(s, sizeof(s), "*!%s", botuserhost);              /* just add actual user@ident, regardless of ~ */
 
   /* dont add the host if it conflicts with another in the userlist */
   struct userrec *u = NULL;

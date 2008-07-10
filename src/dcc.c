@@ -1338,7 +1338,7 @@ dcc_telnet(int idx, char *buf, int ii)
 
   putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
 
-  simple_sprintf(x, "-telnet!telnet@%s", iptostr(htonl(ip)));
+  simple_snprintf(x, sizeof(x), "-telnet!telnet@%s", iptostr(htonl(ip)));
 
   if (match_ignore(x) || detect_telnet_flood(x)) {
     putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", x);
@@ -1387,7 +1387,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
 
   strlcpy(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
 
-  simple_sprintf(s2, "-telnet!telnet@%s", dcc[i].host);
+  simple_snprintf(s2, sizeof(s2), "-telnet!telnet@%s", dcc[i].host);
 
   if (match_ignore(s2)) {
     putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", s2);
@@ -1445,7 +1445,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   }
   if (s[0]) {
     putlog(LOG_MISC, "*", DCC_IDENTFAIL, dcc[i].host, s);
-    simple_sprintf(s, "telnet@%s", dcc[i].host);
+    simple_snprintf(s, sizeof(s), "telnet@%s", dcc[i].host);
     dcc_telnet_got_ident(i, s);
     return;
   }
@@ -1689,7 +1689,7 @@ dcc_telnet_pass(int idx, int atr)
       link_hash(idx, rand);
 
       for (i = 0; enclink[i].name; i++)
-        simple_sprintf(buf, "%s%d ", buf[0] ? buf : "", enclink[i].type);
+        simple_snprintf(buf, sizeof(buf), "%s%d ", buf[0] ? buf : "", enclink[i].type);
 
       dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
     } else {
@@ -1822,7 +1822,7 @@ dcc_ident(int idx, char *buf, int len)
   uid[20] = 0;                  /* 20 character ident max */
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && (dcc[i].type == &DCC_IDENTWAIT) && (dcc[i].sock == dcc[idx].uint.ident_sock)) {
-      simple_sprintf(buf1, "%s@%s", uid, dcc[idx].host);
+      simple_snprintf(buf1, sizeof(buf1), "%s@%s", uid, dcc[idx].host);
       dcc_telnet_got_ident(i, buf1);
     }
   dcc[idx].u.other = 0;
@@ -1838,7 +1838,7 @@ eof_dcc_ident(int idx)
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && (dcc[i].type == &DCC_IDENTWAIT) && (dcc[i].sock == dcc[idx].uint.ident_sock)) {
       putlog(LOG_MISC, "*", DCC_EOFIDENT);
-      simple_sprintf(buf, "telnet@%s", dcc[idx].host);
+      simple_snprintf(buf, sizeof(buf), "telnet@%s", dcc[idx].host);
       dcc_telnet_got_ident(i, buf);
     }
   killsock(dcc[idx].sock);

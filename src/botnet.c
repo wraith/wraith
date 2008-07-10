@@ -663,9 +663,9 @@ void tell_bottree(int idx)
             color_str = (char *) NULL;
 
           if (bot->share)
-            i = simple_sprintf(s, "%c", bot->share);
+            i = simple_snprintf(s, sizeof(s), "%c", bot->share);
           else
-            i = simple_sprintf(s, "-");
+            i = simple_snprintf(s, sizeof(s), "-");
           i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
@@ -709,9 +709,9 @@ void tell_bottree(int idx)
 
 		bot2 = bot;
                 if (bot->share)
-                  i = simple_sprintf(s, "%c", bot->share);
+                  i = simple_snprintf(s, sizeof(s), "%c", bot->share);
                 else
-                  i = simple_sprintf(s, "-");
+                  i = simple_snprintf(s, sizeof(s), "-");
                 i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
@@ -776,7 +776,7 @@ void dump_links(int z)
       else
         p = bot->uplink->bot;
 
-      l = simple_sprintf(x, "n %s %s %cD0gc %d %d %d %s\n", bot->bot, p, bot->share, bot->localhub, 
+      l = simple_snprintf(x, sizeof(x), "n %s %s %cD0gc %d %d %d %s\n", bot->bot, p, bot->share, bot->localhub, 
                                                         (int) bot->buildts, bot->revision, bot->version ? bot->version : "");
       tputs(dcc[z].sock, x, l);
     }
@@ -894,13 +894,13 @@ int botunlink(int idx, char *nick, char *reason)
 	bots = bots_in_subtree(bot);
 	users = users_in_subtree(bot);
 	if (reason && reason[0]) {
-	  simple_sprintf(s, "%s %s (%s) (lost %d bot%s and %d user%s)",
+	  simple_snprintf(s, sizeof(s), "%s %s (%s) (lost %d bot%s and %d user%s)",
 	  		 BOT_UNLINKEDFROM, dcc[i].nick, reason, bots,
 			 (bots != 1) ? "s" : "", users, (users != 1) ?
 			 "s" : "");
 	  dprintf(i, "bye %s\n", reason);
 	} else {
-	  simple_sprintf(s, "%s %s (lost %d bot%s and %d user%s)",
+	  simple_snprintf(s, sizeof(s), "%s %s (lost %d bot%s and %d user%s)",
 	  		 BOT_UNLINKEDFROM, dcc[i].nick, bots, (bots != 1) ?
 			 "s" : "", users, (users != 1) ? "s" : "");
 	  dprintf(i, "bye No reason\n");
@@ -1627,7 +1627,7 @@ void check_botnet_pings()
 	      bot = findbot(dcc[i].nick);
 	      bots = bots_in_subtree(bot);
 	      users = users_in_subtree(bot);
-	      simple_sprintf(s, "%s %s (%s) (lost %d bot%s and %d user%s)",
+	      simple_snprintf(s, sizeof(s), "%s %s (%s) (lost %d bot%s and %d user%s)",
 	    		   BOT_DISCONNECTED, dcc[i].nick, BOT_BOTNOTLEAFLIKE,
 			   bots, (bots != 1) ? "s" : "", users, (users != 1) ?
 			   "s" : "");
@@ -1651,7 +1651,7 @@ void check_botnet_pings()
         bot = findbot(dcc[i].nick);
         bots = bots_in_subtree(bot);
         users = users_in_subtree(bot);
-        simple_sprintf(s, "%s: %s (lost %d bot%s and %d user%s)", BOT_PINGTIMEOUT,
+        simple_snprintf(s, sizeof(s), "%s: %s (lost %d bot%s and %d user%s)", BOT_PINGTIMEOUT,
   		       dcc[i].nick, bots, (bots != 1) ? "s" : "",
 		       users, (users != 1) ? "s" : "");
         chatout("*** %s\n", s);
@@ -1676,7 +1676,7 @@ void zapfbot(int idx)
   tand_t *bot = findbot(dcc[idx].nick);
   int bots = bots_in_subtree(bot), users = users_in_subtree(bot);
 
-  simple_sprintf(s, "%s: %s (lost %d bot%s and %d user%s)", BOT_BOTDROPPED,
+  simple_snprintf(s, sizeof(s), "%s: %s (lost %d bot%s and %d user%s)", BOT_BOTDROPPED,
   		 dcc[idx].nick, bots, (bots != 1) ? "s" : "", users,
 		 (users != 1) ? "s" : "");
   chatout("*** %s\n", s);
@@ -1723,7 +1723,7 @@ void lower_bot_linked(int idx)
 {
   char tmp[6] = "";
 
-  simple_sprintf(tmp, "rl %d", get_role(dcc[idx].nick));
+  simple_snprintf(tmp, sizeof(tmp), "rl %d", get_role(dcc[idx].nick));
   putbot(dcc[idx].nick, tmp);
 }
 

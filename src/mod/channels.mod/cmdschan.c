@@ -525,7 +525,7 @@ static void cmd_slowjoin(int idx, char *par)
     dprintf(idx, "Hmmm... Channel didn't get added. Weird *shrug*\n");
     return;
   }
-  simple_sprintf(buf2, "cjoin %s %s", chan->dname, buf);
+  simple_snprintf(buf2, sizeof(buf2), "cjoin %s %s", chan->dname, buf);
   putallbots(buf2);
   if (conf.bot->hub)
     count = 0;
@@ -859,9 +859,9 @@ static void cmd_cycle(int idx, char *par)
     delay = atoi(newsplit(&par));
 
   if (conf.bot->hub) {
-    char buf2[1024] = "";
+    char buf2[201] = "";
 
-    simple_sprintf(buf2, "cycle %s %d", chname, delay); /* this just makes the bot PART */
+    simple_snprintf(buf2, sizeof(buf2), "cycle %s %d", chname, delay); /* this just makes the bot PART */
     putallbots(buf2);
   } else {
     do_chanset(NULL, chan, "+inactive", DO_LOCAL);
@@ -873,7 +873,7 @@ static void cmd_cycle(int idx, char *par)
 
 static void cmd_down(int idx, char *par)
 {
-  char *chname = NULL, buf2[1024] = "";
+  char *chname = NULL, buf2[201] = "";
   struct chanset_t *chan = NULL;
 
   putlog(LOG_CMDS, "*", "#%s# down %s", dcc[idx].nick, par);
@@ -890,7 +890,7 @@ static void cmd_down(int idx, char *par)
     return;
   }
   
-  simple_sprintf(buf2, "down %s", chan->dname);
+  simple_snprintf(buf2, sizeof(buf2), "down %s", chan->dname);
   putallbots(buf2);
   if (!conf.bot->hub) {
     add_mode(chan, '-', 'o', botname);
@@ -912,7 +912,7 @@ static void pls_chan(int idx, char *par, char *bot)
   }
 
   chname = newsplit(&par);
-  simple_sprintf(buf, "cjoin %s %s", chname, bot ? bot : "*");		/* +chan makes all bots join */
+  simple_snprintf(buf, sizeof(buf), "cjoin %s %s", chname, bot ? bot : "*");		/* +chan makes all bots join */
   if (par[0]) {
     strcat(buf, " ");
     strcat(buf, par);
@@ -1000,7 +1000,7 @@ static void mns_chan(int idx, char *par, char *bot)
   }
   chname = newsplit(&par);
 
-  simple_sprintf(buf2, "cpart %s %s", chname, bot ? bot : "*");
+  simple_snprintf(buf2, sizeof(buf2), "cpart %s %s", chname, bot ? bot : "*");
   if (bot)		/* bot will just set it +inactive */
     putbot(bot, buf2);
   else

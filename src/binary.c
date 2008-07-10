@@ -578,13 +578,13 @@ void conf_to_bin(conf_t *in, bool move, int die)
 
   clear_settings();
   sdprintf("converting conf to bin\n");
-  simple_sprintf(settings.uid, "%d", in->uid);
-  simple_sprintf(settings.watcher, "%d", in->watcher);
-  simple_sprintf(settings.autocron, "%d", in->autocron);
-  simple_sprintf(settings.autouname, "%d", in->autouname);
-  simple_sprintf(settings.portmin, "%d", in->portmin);
-  simple_sprintf(settings.portmax, "%d", in->portmax);
-  simple_sprintf(settings.pscloak, "%d", in->pscloak);
+  simple_snprintf(settings.uid, sizeof(settings.uid), "%d", in->uid);
+  simple_snprintf(settings.watcher, sizeof(settings.watcher), "%d", in->watcher);
+  simple_snprintf(settings.autocron, sizeof(settings.autocron), "%d", in->autocron);
+  simple_snprintf(settings.autouname, sizeof(settings.autouname), "%d", in->autouname);
+  simple_snprintf(settings.portmin, sizeof(settings.portmin), "%d", in->portmin);
+  simple_snprintf(settings.portmax, sizeof(settings.portmax), "%d", in->portmax);
+  simple_snprintf(settings.pscloak, sizeof(settings.pscloak), "%d", in->pscloak);
 
   strlcpy(settings.binname, in->binname, sizeof(settings.binname));
   if (in->username)

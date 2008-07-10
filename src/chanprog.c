@@ -262,10 +262,10 @@ void tell_verbose_uptime(int idx)
     else
       strcpy(s1, "log dump mode");
   }
-  simple_sprintf(outbuf,  "Online for %s", s);
+  simple_snprintf(outbuf, sizeof(outbuf), "Online for %s", s);
   if (restart_time) {
     tell_time(restart_time, s);
-    simple_sprintf(outbuf, "%s (%s %s)", outbuf, restart_was_update ? "updated" : "restarted", s);
+    simple_snprintf(outbuf, sizeof(outbuf), "%s (%s %s)", outbuf, restart_was_update ? "updated" : "restarted", s);
   }
 
 #if HAVE_GETRUSAGE
@@ -283,7 +283,7 @@ void tell_verbose_uptime(int idx)
   sprintf(s2, "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min,
   100.0 * ((float) cl / (float) (now - online_since)));
 # else
-  simple_sprintf(s2, "CPU ???");
+  simple_snprintf(s2, sizeof(s2), "CPU ???");
 # endif
 #endif /* HAVE_GETRUSAGE */
   dprintf(idx, "%s  (%s)  %s  cache hit %4.1f%%\n",
@@ -499,7 +499,7 @@ void load_internal_users()
               hosts = q;
             }
             
-            simple_sprintf(x, "-telnet!%s", hosts);
+            simple_snprintf(x, sizeof(x), "-telnet!%s", hosts);
 	    set_user(&USERENTRY_HOSTS, u, x);
 	    hosts = ln;
 	  }

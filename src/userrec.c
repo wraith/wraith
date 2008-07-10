@@ -451,9 +451,11 @@ int write_userfile(int idx)
     return 1;			/* No point in saving userfile */
 
   FILE *f = NULL;
-  char *new_userfile = (char *) my_calloc(1, strlen(userfile) + 5);
+  char *new_userfile = NULL;
+  size_t siz = strlen(userfile) + 4 + 1;
 
-  simple_sprintf(new_userfile, "%s~new", userfile);
+  new_userfile = (char *) my_calloc(1, siz);
+  simple_snprintf(new_userfile, siz, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");
   fixmod(new_userfile);

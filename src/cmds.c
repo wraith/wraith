@@ -425,6 +425,7 @@ static void cmd_addline(int idx, char *par)
 
   struct list_type *q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
   char *hostbuf = NULL, *outbuf = NULL;
+  size_t siz = 0;
   
   hostbuf = (char *) my_calloc(1, 1);
   for (; q; q = q->next) {
@@ -432,8 +433,10 @@ static void cmd_addline(int idx, char *par)
     strcat(hostbuf, q->extra);
     strcat(hostbuf, " ");
   }
-  outbuf = (char *) my_calloc(1, strlen(hostbuf) + strlen(u->handle) + 20);
-  simple_sprintf(outbuf, "Addline: +user %s %s", u->handle, hostbuf);
+  siz = strlen(hostbuf) + strlen(u->handle) + 19 + 1;
+
+  outbuf = (char *) my_calloc(1, siz);
+  simple_snprintf(outbuf, siz, "Addline: +user %s %s", u->handle, hostbuf);
   dumplots(idx, "", outbuf);
   free(hostbuf);
   free(outbuf);
@@ -613,7 +616,7 @@ static void cmd_help(int idx, char *par)
 
   build_flags(flg, &fr, NULL);
   if (!par[0]) {
-    simple_sprintf(match, "*");
+    simple_snprintf(match, sizeof(match), "*");
   } else {
     if (!strchr(par, '*') && !strchr(par, '?'))
       nowild++;
@@ -657,12 +660,12 @@ static void cmd_help(int idx, char *par)
           if (first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
             dprintf(idx, "# DCC (%s)\n", flag);
-            simple_sprintf(buf, "  ");
+            simple_snprintf(buf, sizeof(buf), "  ");
           }
           if (end && !first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
             /* we dumped the buf to dprintf, now start a new one... */
-            simple_sprintf(buf, "  ");
+            simple_snprintf(buf, sizeof(buf), "  ");
           }
           sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmdlist[n].name);
           first = 0;
@@ -720,7 +723,7 @@ static void cmd_who(int idx, char *par)
       else {
 	char s[40] = "";
 
-	simple_sprintf(s, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
+	simple_snprintf(s, sizeof(s), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
 	botnet_send_who(i, s, par, dcc[idx].u.chat->channel);
       }
     }
@@ -1999,7 +2002,7 @@ static void cmd_link(int idx, char *par)
       dprintf(idx, "No such bot online.\n");
       return;
     }
-    simple_sprintf(x, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
+    simple_snprintf(x, sizeof(x), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
     botnet_send_link(i, x, s, par);
   }
 }
@@ -2027,7 +2030,7 @@ static void cmd_unlink(int idx, char *par)
   else {
     char x[40] = "";
 
-    simple_sprintf(x, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
+    simple_snprintf(x, sizeof(x), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
     botnet_send_unlink(i, x, lastbot(bot), bot, par);
   }
 }
@@ -2052,7 +2055,7 @@ static void cmd_save(int idx, char *par)
   int i = 0;
 
   putlog(LOG_CMDS, "*", "#%s# save", dcc[idx].nick);
-  simple_sprintf(buf, "Saving user file...");
+  simple_snprintf(buf, sizeof(buf), "Saving user file...");
   i = write_userfile(-1);
   if (i == 0)
     strcat(buf, "success.");
@@ -2097,7 +2100,7 @@ static void cmd_trace(int idx, char *par)
   char x[NOTENAMELEN + 11] = "", y[11] = "";
 
   putlog(LOG_CMDS, "*", "#%s# trace %s", dcc[idx].nick, par);
-  simple_sprintf(x, "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
+  simple_snprintf(x, sizeof(x), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
 
   time_t tm;
   egg_timeval_t tv;
@@ -3270,11 +3273,11 @@ static void cmd_pls_ignore(int idx, char *par)
   /* Fix missing ! or @ BEFORE continuing */
   if (!strchr(who, '!')) {
     if (!strchr(who, '@'))
-      simple_sprintf(s, "%s!*@*", who);
+      simple_snprintf(s, sizeof(s), "%s!*@*", who);
     else
-      simple_sprintf(s, "*!%s", who);
+      simple_snprintf(s, sizeof(s), "*!%s", who);
   } else if (!strchr(who, '@'))
-    simple_sprintf(s, "%s@*", who);
+    simple_snprintf(s, sizeof(s), "%s@*", who);
   else
     strcpy(s, who);
 
@@ -3748,7 +3751,7 @@ static void cmd_botserver(int idx, char * par) {
 
 static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
   if (!conf.bot->hub) {
-    char tmp[2048] = "";
+    char tmp[512] = "";
 
     if (server_online) {
       if (floodless)
@@ -3756,7 +3759,7 @@ static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
       else
         sprintf(tmp, "Currently: %-40s Lag: %ds", cursrvname, server_lag);
     } else
-      simple_sprintf(tmp, "Currently: none");
+      simple_snprintf(tmp, sizeof(tmp), "Currently: none");
 
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
   }
@@ -3799,17 +3802,17 @@ static void cmd_botversion(int idx, char * par) {
 }
 
 static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
-  char tmp[2048] = "";
+  char tmp[301] = "";
   struct utsname un;
 
-  simple_sprintf(tmp, "%s ", version);
+  simple_snprintf(tmp, sizeof(tmp), "%s ", version);
   if (uname(&un) < 0) {
     strcat(tmp, "(unknown OS)");
   } else {
     if (updated) {
-      simple_sprintf(tmp + strlen(tmp), "%s %s (%s) - UPDATED", un.sysname, un.release, un.machine);
+      simple_snprintf(tmp, sizeof(tmp), "%s %s %s (%s) - UPDATED", tmp, un.sysname, un.release, un.machine);
     } else
-      simple_sprintf(tmp + strlen(tmp), "%s %s (%s)", un.sysname, un.release, un.machine);
+      simple_snprintf(tmp, sizeof(tmp), "%s %s %s (%s)", tmp, un.sysname, un.release, un.machine);
   }
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 }
@@ -3840,14 +3843,14 @@ static void cmd_botnick(int idx, char * par) {
 
 static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
   if (!conf.bot->hub) {
-    char tmp[1024] = "";
+    char tmp[301] = "";
 
     if (server_online)
       sprintf(tmp, "Currently: %-20s ", botname);
     if (strncmp(botname, origbotname, strlen(botname)))
-      simple_sprintf(tmp, "%sWant: %s", tmp, origbotname);
+      simple_snprintf(tmp, sizeof(tmp), "%sWant: %s", tmp, origbotname);
     if (!server_online)
-      simple_sprintf(tmp, "%s(not online)", tmp);
+      simple_snprintf(tmp, sizeof(tmp), "%s(not online)", tmp);
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
   }
 }
@@ -4156,15 +4159,15 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
       crontab_create(i);
     }
     if (!scmd[0]) {
-      char s[200] = "";
+      char s[31] = "";
       int i = crontab_exists();
 
       if (!i)
-        simple_sprintf(s, "No crontab");
+        simple_snprintf(s, sizeof(s), "No crontab");
       else if (i == 1)
-        simple_sprintf(s, "Crontabbed");
+        simple_snprintf(s, sizeof(s), "Crontabbed");
       else
-        simple_sprintf(s, "Error checking crontab status");
+        simple_snprintf(s, sizeof(s), "Error checking crontab status");
       botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, s);
     }
 #endif /* !CYGWIN_HACKS */
@@ -4299,10 +4302,11 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
 
   if ((idx >= 0) && (idx < dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {
     char *buf = NULL;
-    
-    buf = (char *) my_calloc(1, strlen(frombot) + 2 + 1);
+    size_t siz = strlen(frombot) + 2 + 1;
 
-    simple_sprintf(buf, "(%s)", frombot);
+    buf = (char *) my_calloc(1, siz);
+
+    simple_snprintf(buf, sizeof(buf), "(%s)", frombot);
     dprintf(idx, "%-13s %s\n", buf, ln);
     free(buf);
   }
@@ -4380,22 +4384,22 @@ static char *btos(unsigned long  bytes)
   char unit[10] = "";
   float xbytes;
 
-  simple_sprintf(unit, "Bytes");
+  simple_snprintf(unit, sizeof(unit), "Bytes");
   xbytes = bytes;
   if (xbytes > 1024.0) {
-    simple_sprintf(unit, "KBytes");
+    simple_snprintf(unit, sizeof(unit), "KBytes");
     xbytes = xbytes / 1024.0;
   }
   if (xbytes > 1024.0) {
-    simple_sprintf(unit, "MBytes");
+    simple_snprintf(unit, sizeof(unit), "MBytes");
     xbytes = xbytes / 1024.0;
   }
   if (xbytes > 1024.0) {
-    simple_sprintf(unit, "GBytes");
+    simple_snprintf(unit, sizeof(unit), "GBytes");
     xbytes = xbytes / 1024.0;
   }
   if (xbytes > 1024.0) {
-    simple_sprintf(unit, "TBytes");
+    simple_snprintf(unit, sizeof(unit), "TBytes");
     xbytes = xbytes / 1024.0;
   }
   if (bytes > 1024)

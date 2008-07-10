@@ -313,9 +313,9 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
     strcat(host, s);
   }
     if (conf.bot->hub)
-      simple_sprintf(s, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
+      simple_snprintf(s, sizeof(s), "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
     else
-      simple_sprintf(s, "%s!%s", botname, botuserhost);
+      simple_snprintf(s, sizeof(s), "%s!%s", botname, botuserhost);
   if (s[0] && type == 'b' && wild_match(host, s)) {
     putlog(LOG_MISC, "*", "Wanted to ban myself--deflected.");
     return 0;
@@ -386,7 +386,7 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
 
   if (mask->added) {
     daysago(now, mask->added, s);
-    simple_sprintf(dates, "Created %s", s);
+    simple_snprintf(dates, sizeof(dates), "Created %s", s);
     if (mask->added < mask->lastactive) {
       strcat(dates, ", ");
       strcat(dates, "last used");
@@ -402,7 +402,7 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
     char s1[41] = "";
 
     days(mask->expire, now, s1);
-    simple_sprintf(s, "(expires %s)", s1);
+    simple_snprintf(s, sizeof(s), "(expires %s)", s1);
   }
   if (mask->flags & MASKREC_STICKY)
     strcat(s, " (sticky)");
@@ -516,9 +516,9 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
 	  s2 = s;
 	  s1 = splitnick(&s2);
 	  if (s1[0])
-	    simple_sprintf(fill, "%s (%s!%s)", ml->mask, s1, s2);
+	    simple_snprintf(fill, sizeof(fill), "%s (%s!%s)", ml->mask, s1, s2);
 	  else
-	    simple_sprintf(fill, "%s (server %s)", ml->mask, s2);
+	    simple_snprintf(fill, sizeof(fill), "%s (server %s)", ml->mask, s2);
 	  if (ml->timer != 0) {
 	    min = (now - ml->timer) / 60;
 	    sec = (now - ml->timer) - (min * 60);
@@ -968,7 +968,7 @@ bool expired_mask(struct chanset_t *chan, char *who)
   if (m->user)
     u = m->user;
   else {
-    simple_sprintf(buf, "%s!%s", m->nick, m->userhost);
+    simple_snprintf(buf, sizeof(buf), "%s!%s", m->nick, m->userhost);
     u = get_user_by_host(buf);
   }
   /* Do not expire masks set by bots. */

@@ -50,7 +50,7 @@ extern bool		trigger_on_ignore, floodless;
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines;
 extern port_t		default_port, newserverport, curservport;
 extern time_t		server_online, cycle_time;
-extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[],
+extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[1024],
 			newserver[], newserverpass[], curnetwork[], botuserip[];
 extern struct server_list *serverlist;
 extern struct dcc_table SERVER_SOCKET;

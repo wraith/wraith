@@ -580,9 +580,11 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
   if (check_chan) {
 #ifdef no
     /* tell other bots to set jointime to 0 and join */
-    char *buf = (char *) my_calloc(1, strlen(chan->dname) + 3 + 1);
+    char *buf = NULL;
+    size_t siz = strlen(chan->dname) + 3 + 1;
 
-    simple_sprintf(buf, "jn %s", chan->dname);
+    buf = my_calloc(1, siz);
+    simple_snprintf(buf, siz, "jn %s", chan->dname);
     putallbots(buf);
     free(buf);
 #endif
@@ -598,7 +600,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   char s1[UHOSTLEN] = "";
   
   if (m)
-    simple_sprintf(s1, "%s!%s", m->nick, m->userhost);
+    simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
 
   get_user_flagrec(mv->user, &victim, chan->dname, chan);
 
@@ -653,7 +655,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   if (m) {
     char s[UHOSTLEN] = "";
 
-    simple_sprintf(s, "%s!%s", mv->nick, mv->userhost);
+    simple_snprintf(s, sizeof(s), "%s!%s", mv->nick, mv->userhost);
 //    maybe_revenge(chan, s1, s, REVENGE_DEOP);
   }
 }
@@ -663,8 +665,8 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 {
   char me[UHOSTLEN] = "", meip[UHOSTLEN] = "", s[UHOSTLEN] = "";
 
-  simple_sprintf(me, "%s!%s", botname, botuserhost);
-  simple_sprintf(meip, "%s!%s", botname, botuserip);
+  simple_snprintf(me, sizeof(me), "%s!%s", botname, botuserhost);
+  simple_snprintf(meip, sizeof(meip), "%s!%s", botname, botuserip);
   simple_snprintf(s, sizeof s, "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
   if (newban(chan, mask, s))
     return; /* The ban was already set, don't bother with it */
@@ -768,7 +770,7 @@ got_exempt(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 {
   char s[UHOSTLEN] = "";
 
-  simple_sprintf(s, "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
+  simple_snprintf(s, sizeof(s), "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
   if (newexempt(chan, mask, s))
     return; /* The exempt was already set, don't bother with it */
 
@@ -844,7 +846,7 @@ got_invite(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 {
   char s[UHOSTLEN] = "";
 
-  simple_sprintf(s, "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
+  simple_snprintf(s, sizeof(s), "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
   if (newinvite(chan, mask, s))
     return; /* The Invite was already set, don't bother with it */
 
@@ -909,7 +911,7 @@ static memberlist *assert_ismember(struct chanset_t *chan, const char *nick)
     if (!m->user) {
       char s[UHOSTLEN] = "";
 
-      simple_sprintf(s, "%s!%s", m->nick, m->userhost);
+      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
       m->user = get_user_by_host(s);
       if (!m->user && doresolv(chan) && m->userip[0]) {
         simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
@@ -953,7 +955,7 @@ gotmode(char *from, char *msg)
 
     if ((channel_active(chan) || channel_pending(chan))) {
       char *isserver = NULL;
-      size_t z = strlen(msg);
+      size_t z = strlen(msg), siz = 0;
       struct userrec *u = NULL;
       memberlist *m = NULL;
       char *nick = NULL;
@@ -1062,7 +1064,7 @@ gotmode(char *from, char *msg)
                   dprintf(DP_SERVER, "%s", tmp);
               } else {
                 if (u) {
-                  simple_sprintf(tmp, "Mass deop on %s by %s", chan->dname, m->nick);
+                  simple_snprintf(tmp, sizeof(tmp), "Mass deop on %s by %s", chan->dname, m->nick);
                   deflag_user(u, DEFLAG_MDOP, tmp, chan);
                 }
               }
@@ -1302,10 +1304,10 @@ gotmode(char *from, char *msg)
             if (msign == '-') {
               if (channel_active(chan)) {
                 if ((reversing) && (chan->channel.maxmembers != 0)) {
-                  simple_sprintf(s, "%d", chan->channel.maxmembers);
+                  simple_snprintf(s, sizeof(s), "%d", chan->channel.maxmembers);
                   add_mode(chan, '+', 'l', s);
                 } else if ((chan->limit_prot != 0) && !glob_master(user) && !chan_master(user)) {
-                  simple_sprintf(s, "%d", chan->limit_prot);
+                  simple_snprintf(s, sizeof(s), "%d", chan->limit_prot);
                   add_mode(chan, '+', 'l', s);
                 } else {
                   if (chan->limitraise && dolimit(chan) && (!chan_master(user) && !glob_master(user) && !glob_bot(user))) {
@@ -1328,7 +1330,7 @@ gotmode(char *from, char *msg)
                 add_mode(chan, '-', 'l', "");
               if ((chan->limit_prot != chan->channel.maxmembers) && (chan->mode_pls_prot & CHANLIMIT) && (chan->limit_prot != 0) && 
                   !glob_bot(user) && !glob_master(user) && !chan_master(user)) {
-                simple_sprintf(s, "%d", chan->limit_prot);
+                simple_snprintf(s, sizeof(s), "%d", chan->limit_prot);
                 add_mode(chan, '+', 'l', s);
               }
               if (chan->limitraise && dolimit(chan) && !glob_bot(user) && (!chan_master(user) && !glob_master(user)))

@@ -98,33 +98,33 @@ colorbuf(char *buf, size_t len, int idx)
         switch (c) {
           case 'b':
             if (cflags & CFLGS_BOLD) {
-              simple_sprintf(buf2, "%s", BOLD_END(idx));
+              simple_snprintf(buf2, sizeof(buf2), "%s", BOLD_END(idx));
               cflags &= ~CFLGS_BOLD;
             } else {
               cflags |= CFLGS_BOLD;
-              simple_sprintf(buf2, "%s", BOLD(idx));
+              simple_snprintf(buf2, sizeof(buf2), "%s", BOLD(idx));
             }
             break;
           case 'u':
             if (cflags & CFLGS_UNDERLINE) {
-              simple_sprintf(buf2, "%s", UNDERLINE_END(idx));
+              simple_snprintf(buf2, sizeof(buf2), "%s", UNDERLINE_END(idx));
               cflags &= ~CFLGS_UNDERLINE;
             } else {
-              simple_sprintf(buf2, "%s", UNDERLINE(idx));
+              simple_snprintf(buf2, sizeof(buf2), "%s", UNDERLINE(idx));
               cflags |= CFLGS_UNDERLINE;
             }
             break;
           case 'f':
             if (cflags & CFLGS_FLASH) {
-              simple_sprintf(buf2, "%s", FLASH_END(idx));
+              simple_snprintf(buf2, sizeof(buf2), "%s", FLASH_END(idx));
               cflags &= ~CFLGS_FLASH;
             } else {
-              simple_sprintf(buf2, "%s", FLASH(idx));
+              simple_snprintf(buf2, sizeof(buf2), "%s", FLASH(idx));
               cflags |= CFLGS_FLASH;
             }
             break;
           default:
-            simple_sprintf(buf2, "$%c", c);    /* No identifier, put the '$' back in */
+            simple_snprintf(buf2, sizeof(buf2), "$%c", c);    /* No identifier, put the '$' back in */
             break;
         }
       } else {                    /* These are character replacements */
@@ -133,19 +133,19 @@ colorbuf(char *buf, size_t len, int idx)
             schar++;
             break;
           case ':':
-            simple_sprintf(buf2, "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
+            simple_snprintf(buf2, sizeof(buf2), "%s%c%s", LIGHTGREY(idx), c, COLOR_END(idx));
             break;
           case '@':
-            simple_sprintf(buf2, "%s%c%s", BOLD(idx), c, BOLD_END(idx));
+            simple_snprintf(buf2, sizeof(buf2), "%s%c%s", BOLD(idx), c, BOLD_END(idx));
             break;
           case '>':
           case ')':
           case '<':
           case '(':
-            simple_sprintf(buf2, "%s%c%s", GREEN(idx), c, COLOR_END(idx));
+            simple_snprintf(buf2, sizeof(buf2), "%s%c%s", GREEN(idx), c, COLOR_END(idx));
             break;
           default:
-            simple_sprintf(buf2, "%c", c);
+            simple_snprintf(buf2, sizeof(buf2), "%c", c);
             break;
         }
       }
@@ -158,7 +158,7 @@ colorbuf(char *buf, size_t len, int idx)
           case 'f':
             break;
           default:
-            simple_sprintf(buf2, "$%c", c);    /* No identifier, put the '$' back in */
+            simple_snprintf(buf2, sizeof(buf2), "$%c", c);    /* No identifier, put the '$' back in */
         }
       } else {
         switch (c) {
@@ -166,12 +166,12 @@ colorbuf(char *buf, size_t len, int idx)
             schar++;
             break;
           default:
-            simple_sprintf(buf2, "%c", c);
+            simple_snprintf(buf2, sizeof(buf2), "%c", c);
             break;
         }
       }
     }
-    simple_sprintf(buf3, "%s%s", (buf3 && buf3[0]) ? buf3 : "", (buf2 && buf2[0]) ? buf2 : "");
+    simple_snprintf(buf3, sizeof(buf3), "%s%s", (buf3 && buf3[0]) ? buf3 : "", (buf2 && buf2[0]) ? buf2 : "");
   }
   buf3[strlen(buf3)] = 0;
   strcpy(buf, buf3);

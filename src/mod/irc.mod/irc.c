@@ -165,7 +165,7 @@ void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost
   const char *ops = " (auto-op)";
 
   if (handle)
-    simple_sprintf(fhandle, "\002%s\002 ", handle);
+    simple_snprintf(fhandle, sizeof(fhandle), "\002%s\002 ", handle);
   putlog(LOG_MISC, "*", "Invited %s%s(%s%s%s) to %s.", handle ? handle : "", handle ? " " : "", nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname);
   dprintf(DP_MODE, "PRIVMSG %s :\001ACTION has invited %s(%s%s%s) to %s.%s\001\n",
     chan->name, fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
@@ -769,7 +769,7 @@ request_op(struct chanset_t *chan)
       continue;
 
     if (!ml->user && !ml->tried_getuser) {
-      simple_sprintf(s, "%s!%s", ml->nick, ml->userhost);
+      simple_snprintf(s, sizeof(s), "%s!%s", ml->nick, ml->userhost);
       ml->user = get_user_by_host(s);
       ml->tried_getuser = 1;
     }
@@ -794,7 +794,7 @@ request_op(struct chanset_t *chan)
   size_t len = 0;
 
   /* first scan for bots on my server, ask first found for ops */
-  simple_sprintf(s, "gi o %s %s", chan->dname, botname);
+  simple_snprintf(s, sizeof(s), "gi o %s %s", chan->dname, botname);
 
   /* look for bots 0-1 hops away */
   for (i2 = 0; i2 < i; i2++) {
@@ -879,7 +879,7 @@ request_in(struct chanset_t *chan)
   char l[1024] = "";
   size_t len = 0;
 
-  simple_sprintf(s, "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
+  simple_snprintf(s, sizeof(s), "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
 
   shuffleArray(botops, foundBots);
   for (int n = 0; n < cnt; ++n) {
@@ -955,10 +955,10 @@ punish_badguy(struct chanset_t *chan, char *whobad,
   switch (type) {
     case REVENGE_KICK:
       kick_msg = "don't kick my friends, bud";
-      simple_sprintf(reason, "kicked %s off %s", victimstr, chan->dname);
+      simple_snprintf(reason, sizeof(reason), "kicked %s off %s", victimstr, chan->dname);
       break;
     case REVENGE_DEOP:
-      simple_sprintf(reason, "deopped %s on %s", victimstr, chan->dname);
+      simple_snprintf(reason, sizeof(reason), "deopped %s on %s", victimstr, chan->dname);
       kick_msg = "don't deop my friends, bud";
       break;
     default:
@@ -990,7 +990,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
       fr.match = FR_CHAN;
       fr.chan |= USER_DEOP;
       set_user_flagrec(u, &fr, chan->dname);
-      simple_sprintf(s, "(%s) %s", ct, reason);
+      simple_snprintf(s, sizeof(s), "(%s) %s", ct, reason);
       putlog(LOG_MISC, "*", "Now deopping %s[%s] (%s)", u->handle, whobad, s);
     }
     /* ... or creating new user and setting that to deop */
@@ -1006,7 +1006,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
           int i;
 
           i = atoi(s1 + 3);
-          simple_sprintf(s1 + 3, "%d", i + 1);
+          simple_snprintf(s1 + 3, sizeof(s1) - 3, "%d", i + 1);
         } else
           strcpy(s1, "bad1");   /* Start with '1' */
       }
@@ -1017,7 +1017,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
       if ((mx = ismember(chan, badnick)))
         mx->user = u;
       set_user_flagrec(u, &fr, chan->dname);
-      simple_sprintf(s, "(%s) %s (%s)", ct, reason, whobad);
+      simple_snprintf(s, sizeof(s), "(%s) %s (%s)", ct, reason, whobad);
       set_user(&USERENTRY_COMMENT, u, (void *) s);
       putlog(LOG_MISC, "*", "Now deopping %s (%s)", whobad, reason);
     }
@@ -1032,7 +1032,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
 
     splitnick(&whobad);
     maskhost(whobad, s1);
-    simple_sprintf(s, "(%s) %s", ct, reason);
+    simple_snprintf(s, sizeof(s), "(%s) %s", ct, reason);
     u_addmask('b', chan, s1, conf.bot->nick, s, now + (60 * chan->ban_time), 0);
     if (!mevictim && me_op(chan)) {
       add_mode(chan, '+', 'b', s1);
@@ -1297,7 +1297,7 @@ check_lonely_channel(struct chanset_t *chan)
       whined = 1;
     }
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      simple_sprintf(s, "%s!%s", m->nick, m->userhost);
+      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
       u = get_user_by_host(s);
       if (!match_my_nick(m->nick) && (!u || !u->bot)) {
         ok = 0;
@@ -1376,9 +1376,9 @@ raise_limit(struct chanset_t *chan)
     return;                     /* the current limit is in the range, so leave it. */
 
   if (nl != chan->channel.maxmembers) {
-    char s[5] = "";
+    char s[6] = "";
 
-    simple_sprintf(s, "%d", nl);
+    simple_snprintf(s, sizeof(s), "%d", nl);
     add_mode(chan, '+', 'l', s);
   }
 
@@ -1448,7 +1448,7 @@ check_expired_chanstuff(struct chanset_t *chan)
     for (m = chan->channel.member; m && m->nick[0]; m = n) {
       n = m->next;
       if (m->split && now - m->split > wait_split) {
-        simple_sprintf(s, "%s!%s", m->nick, m->userhost);
+        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
         putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
         killmember(chan, m->nick);
         continue;
@@ -1458,7 +1458,7 @@ check_expired_chanstuff(struct chanset_t *chan)
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
           if (!chan_hasop(m) && !chan_hasvoice(m)) {
             if (!m->user && !m->tried_getuser) {
-              simple_sprintf(s, "%s!%s", m->nick, m->userhost);
+              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
               m->user = get_user_by_host(s);
               if (!m->user && doresolv(chan) && m->userip[0]) {
                 simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
@@ -1590,7 +1590,7 @@ irc_report(int idx, int details)
         else if ((chan->dname[0] != '+') && !me_op(chan))
           p = "want ops!";
       }
-      len = simple_sprintf(ch, "%s%s%s%s, ", chan->dname, p ? "(" : "", p ? p : "", p ? ")" : "");
+      len = simple_snprintf(ch, sizeof(ch), "%s%s%s%s, ", chan->dname, p ? "(" : "", p ? p : "", p ? ")" : "");
       if ((k + len) > 70) {
         dprintf(idx, "    %s\n", q);
         strcpy(q, "           ");

@@ -771,7 +771,7 @@ hard_restart(int idx)
   }
   fatal(idx <= 0x7FF0 ? reason : NULL, 1);
   usleep(2000 * 500);
-  simple_sprintf(buf, "%s -B %s\n", shell_escape(binname), shell_escape(conf.bot->nick));
+  simple_snprintf(buf, sizeof(buf), "%s -B %s\n", shell_escape(binname), shell_escape(conf.bot->nick));
   unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
   system(buf); /* start new bot. */
   exit(0);
@@ -876,7 +876,7 @@ int updatebin(int idx, char *par, int secs)
     size_t binsize = conffile->len + 7 + 1;
     char *tmpbuf = (char *) my_calloc(1, binsize);
 
-    simple_sprintf(tmpbuf, "%sbin.old.exe", conffile->file);
+    simple_snprintf(tmpbuf, binsize, "%sbin.old.exe", conffile->file);
     tmpbuf[binsize - 1] = 0;
     movefile(binname, tmpbuf);
     free(tmpbuf);
@@ -951,12 +951,12 @@ int goodpass(char *pass, int idx, char *nick)
   if (!pass[0]) 
     return 0;
 
-  char tell[501] = "", last = 0;
+  char tell[201] = "", last = 0;
   int nalpha = 0, lcase = 0, ucase = 0, ocase = 0, tc, repeats = 0, score = 0;
   size_t length = strlen(pass);
 
   if (strchr(BADPASSCHARS, pass[0])) {
-    simple_sprintf(tell, "Passes may not begin with '-'");
+    simple_snprintf(tell, sizeof(tell), "Passes may not begin with '-'");
     goto fail;
   }
 
@@ -1056,7 +1056,7 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         }
         flagstr[0] = 0;
         while (*string && *string != '}') {
-          simple_sprintf(tmp, "%c", *string);
+          simple_snprintf(tmp, sizeof(tmp), "%c", *string);
           strcat(flagstr, tmp);
           string++;
         }
@@ -1065,7 +1065,7 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         if (flagrec_ok(&fr, flags)) {
           ok = 1;
           while (*string && *string != '%') {
-            simple_sprintf(tmp, "%c", *string);
+            simple_snprintf(tmp, sizeof(tmp), "%c", *string);
             strcat(helpstr, tmp);
             string++;
           }
@@ -1098,14 +1098,14 @@ void showhelp(int idx, struct flag_record *flags, char *string)
         strcat(helpstr, "%");        
       } else {
         if (ok) {
-          simple_sprintf(tmp, "%c", *string);
+          simple_snprintf(tmp, sizeof(tmp), "%c", *string);
           strcat(helpstr, tmp);
         }
         string++;
       }
     } else {
       if (ok) {
-        simple_sprintf(tmp, "%c", *string);
+        simple_snprintf(tmp, sizeof(tmp), "%c", *string);
         strcat(helpstr, tmp);
       }
       string++;

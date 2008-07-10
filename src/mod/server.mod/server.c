@@ -407,7 +407,7 @@ static bool fast_deq(int which)
   }
   to = newsplit(&msg);
   len = strlen(to);
-  simple_sprintf(victims, "%s", to);
+  simple_snprintf(victims, sizeof(victims), "%s", to);
   while (m) {
     nm = m->next;
     if (!nm)
@@ -424,9 +424,9 @@ static bool fast_deq(int which)
         && (!stack_limit || cmd_count < stack_limit - 1)) {
       cmd_count++;
       if (stack_method == 1)
-      	simple_sprintf(victims, "%s,%s", victims, nextto);
+      	simple_snprintf(victims, sizeof(victims), "%s,%s", victims, nextto);
       else
-      	simple_sprintf(victims, "%s %s", victims, nextto);
+      	simple_snprintf(victims, sizeof(victims), "%s %s", victims, nextto);
       doit = 1;
       m->next = nm->next;
       if (!nm->next)
@@ -438,7 +438,7 @@ static bool fast_deq(int which)
       m = m->next;
   }
   if (doit) {
-    simple_sprintf(tosend, "%s %s %s", cmd, victims, msg);
+    simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims, msg);
     len = strlen(tosend);
     write_to_server(tosend, len);
     m = h->head->next;
@@ -766,19 +766,19 @@ static void do_nettype(void)
   case NETT_IRCNET:
     check_mode_r = 1;
     use_fastdeq = 3;
-    simple_sprintf(stackablecmds, "INVITE AWAY VERSION NICK");
+    simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
     break;
   case NETT_UNDERNET:
     check_mode_r = 0;
     use_fastdeq = 2;
-    simple_sprintf(stackablecmds, "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
-    simple_sprintf(stackable2cmds, "USERHOST USERIP ISON");
+    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
+    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
     break;
   case NETT_DALNET:
     check_mode_r = 0;
     use_fastdeq = 2;
-    simple_sprintf(stackablecmds, "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
-    simple_sprintf(stackable2cmds, "USERHOST ISON WATCH");
+    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
+    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
     break;
   case NETT_HYBRID_EFNET:
     check_mode_r = 0;

@@ -865,7 +865,7 @@ int channel_add(char *result, char *newname, char *options)
   int items = 0;
   char buf[3001] = "";
 
-  simple_sprintf(buf, "chanmode { %s } ", glob_chanmode);
+  simple_snprintf(buf, sizeof(buf), "chanmode { %s } ", glob_chanmode);
   strcat(buf, def_chanset);
   strcat(buf, " ");
   strcat(buf, glob_chanset);
