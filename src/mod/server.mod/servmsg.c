@@ -20,7 +20,7 @@ static void rotate_nick(char *nick, char *orignick)
   int use_chr = 1;
 
   /* First run? */
-  if (altnick_char == 0 && !rolls) {
+  if (altnick_char == 0 && !rolls && altchars[0]) {
     altnick_char = altchars[0];
     /* the nick is already as long as it can be. */
     if (len == (unsigned) nick_len) {

@@ -22,7 +22,7 @@
 
 #include "set_default.h"
 
-char *altchars = NULL;
+char altchars[50] = "";
 char alias[1024] = "";
 bool auth_chan;
 char auth_key[51] = "";
