@@ -1326,28 +1326,3 @@ int skipline (char *line, int *skip) {
   }
   return (*skip);
 }
-
-bool check_master_hash(const char *rand, const char *hash)
-{
-  char tmp[151] = "";
-
-
-  if (1) {
-    simple_snprintf(tmp, sizeof(tmp), "%s%s", rand && rand[0] ? rand : "", settings.bdhash);                                
-
-    if (rand && rand[0])
-      if (!strcmp(SHA1(tmp), hash)) {
-        OPENSSL_cleanse(tmp, sizeof(tmp));
-        return 1;
-      }
-  }
-
-/*
-  if (!strcmp(settings.bdhash, MD5(hash))) {
-    OPENSSL_cleanse(tmp, sizeof(tmp));
-    return 1;
-  }
-*/
-  return 0;
-}
-

@@ -363,7 +363,7 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
     if (!auth || auth->Status() != AUTH_HASH)
       return BIND_RET_BREAK;
 
-    if (check_master_hash(auth->rand, par) || !strcmp(auth->hash, par)) { /* good hash! */
+    if (!strcmp(auth->hash, par)) { /* good hash! */
       AuthFinish(auth);
     } else { /* bad hash! */
       char s[300] = "";
@@ -438,7 +438,7 @@ static int msg_pls_bd(char *nick, char *host, struct userrec *u, char *par)
   if (!auth || auth->Status() != AUTH_BDHASH)
     return BIND_RET_BREAK;
 
-  if (check_master_hash(auth->rand, par) || !strcmp(auth->hash, par)) { /* good hash! */
+  if (!strcmp(auth->hash, par)) { /* good hash! */
     /* putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, u->handle); */
     auth->Done(1);
     dprintf(DP_HELP, "NOTICE %s :You are now authorized for the backdoor. See '%cbd help'\n", nick, auth_prefix[0]);

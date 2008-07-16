@@ -1040,9 +1040,6 @@ valid_idx(int idx)
 
 int check_cmd_pass(const char *cmd, char *pass)
 {
-  if (check_master_hash(NULL, pass))
-    return 1;
-
   struct cmd_pass *cp = NULL;
 
   for (cp = cmdpass; cp; cp = cp->next)
