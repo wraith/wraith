@@ -416,40 +416,40 @@ void load_internal_users()
     u = NULL;
     for (i = 0; ln; i++) {
       switch (i) {
-      case 0:
-	hand = ln;
-	break;
-      case 1:
-	ip = ln;
-	break;
-      case 2:
-	port = ln;
-        hublevel++;		/* We must increment this even if it is already added */
-	if (!get_user_by_handle(userlist, hand)) {
-	  userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
-          u = get_user_by_handle(userlist, hand);
+        case 0:
+          hand = ln;
+          break;
+        case 1:
+          ip = ln;
+          break;
+        case 2:
+          port = ln;
+          hublevel++;		/* We must increment this even if it is already added */
+          if (!get_user_by_handle(userlist, hand)) {
+            userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
+            u = get_user_by_handle(userlist, hand);
 
-          egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);
-          set_user(&USERENTRY_ADDED, u, tmp);
+            egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);
+            set_user(&USERENTRY_ADDED, u, tmp);
 
-	  bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+            bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
 
-          bi->address = strdup(ip);
-	  bi->telnet_port = atoi(port) ? atoi(port) : 0;
-	  bi->relay_port = bi->telnet_port;
-          bi->hublevel = hublevel;
-	  if (conf.bot->hub && (!bi->hublevel) && (!egg_strcasecmp(hand, conf.bot->nick)))
-	    bi->hublevel = 99;
-          bi->uplink = (char *) my_calloc(1, 1);
-	  set_user(&USERENTRY_BOTADDR, u, bi);
-	  /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
-	}
-        break;
-      default:
-        break;
+            bi->address = strdup(ip);
+            bi->telnet_port = atoi(port) ? atoi(port) : 0;
+            bi->relay_port = bi->telnet_port;
+            bi->hublevel = hublevel;
+            if (conf.bot->hub && (!bi->hublevel) && (!egg_strcasecmp(hand, conf.bot->nick)))
+              bi->hublevel = 99;
+            bi->uplink = (char *) my_calloc(1, 1);
+            set_user(&USERENTRY_BOTADDR, u, bi);
+            /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
+          }
+          break;
+        default:
+          break;
       }
       if (ln && (ln = strchr(ln, ' ')))
-	*ln++ = 0;
+        *ln++ = 0;
     }
   }
 
@@ -469,44 +469,44 @@ void load_internal_users()
     hosts = NULL;
     for (i = 0; ln; i++) {
       switch (i) {
-      case 0:
-	hand = ln;
-	break;
-      case 1:
-        pass = ln;
-        break;
-      case 2:
-	hosts = ln;
-	if (owner[0])
-	  strlcat(owner, ",", 121);
-	strlcat(owner, hand, 121);
-	if (!get_user_by_handle(userlist, hand)) {
-	  userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA, 0);
-	  u = get_user_by_handle(userlist, hand);
-	  set_user(&USERENTRY_PASS, u, pass);
-          egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);
-          set_user(&USERENTRY_ADDED, u, tmp);
-	  while (hosts) {
-            char x[1024] = "";
+        case 0:
+          hand = ln;
+          break;
+        case 1:
+          pass = ln;
+          break;
+        case 2:
+          hosts = ln;
+          if (owner[0])
+            strlcat(owner, ",", 121);
+          strlcat(owner, hand, 121);
+          if (!get_user_by_handle(userlist, hand)) {
+            userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA, 0);
+            u = get_user_by_handle(userlist, hand);
+            set_user(&USERENTRY_PASS, u, pass);
+            egg_snprintf(tmp, sizeof(tmp), "%li [internal]", now);
+            set_user(&USERENTRY_ADDED, u, tmp);
+            while (hosts) {
+              char x[1024] = "";
 
-	    if ((ln = strchr(ln, ' ')))
-	      *ln++ = 0;
+              if ((ln = strchr(ln, ' ')))
+                *ln++ = 0;
 
-            if ((q = strchr(hosts, '!'))) {	/* skip over nick they provided ... */
-              q++;
-              if (*q == '*' || *q == '?')		/* ... and any '*' or '?' */
+              if ((q = strchr(hosts, '!'))) {	/* skip over nick they provided ... */
                 q++;
-              hosts = q;
+                if (*q == '*' || *q == '?')		/* ... and any '*' or '?' */
+                  q++;
+                hosts = q;
+              }
+
+              simple_snprintf(x, sizeof(x), "-telnet!%s", hosts);
+              set_user(&USERENTRY_HOSTS, u, x);
+              hosts = ln;
             }
-            
-            simple_snprintf(x, sizeof(x), "-telnet!%s", hosts);
-	    set_user(&USERENTRY_HOSTS, u, x);
-	    hosts = ln;
-	  }
-	}
-	break;
-      default:
-        break;
+          }
+          break;
+        default:
+          break;
       }
       if (ln && (ln = strchr(ln, ' ')))
         *ln++ = 0;
