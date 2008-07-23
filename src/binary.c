@@ -357,7 +357,7 @@ readcfg(const char *cfgfile)
     }
     make_rand_str(salt1, SALT1LEN);
     make_rand_str(salt2, SALT2LEN);
-    salt1[sizeof salt1] = salt2[sizeof salt2] = 0;
+    salt1[sizeof salt1 - 1] = salt2[sizeof salt2 - 1] = 0;
     fprintf(f, STR("SALT1 %s\n"), salt1);
     fprintf(f, STR("SALT2 %s\n"), salt2);
     fflush(f);
