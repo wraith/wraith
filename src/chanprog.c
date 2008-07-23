@@ -412,7 +412,6 @@ void load_internal_users()
     hand = ln;
     ip = NULL;
     port = NULL;
-    hosts = NULL;
     u = NULL;
     for (i = 0; ln; i++) {
       switch (i) {
@@ -474,8 +473,10 @@ void load_internal_users()
           break;
         case 1:
           pass = ln;
-          break;
-        case 2:
+
+          if (ln && (ln = strchr(ln, ' ')))
+            *ln++ = 0;
+
           hosts = ln;
           if (owner[0])
             strlcat(owner, ",", 121);

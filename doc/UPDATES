@@ -8,6 +8,7 @@
 * Remove 'set mean-kicks' and change to 'chanset +meankicks' (default on, does not upgrade from old .set, must unset after upgrade if wanted)
 * Don't check last/promisc unless linked.
 * Speed up botnet parsing / set lookups /cmd_help a bit
+* Fix some various issues with initial setups and new PackConfig format
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong
