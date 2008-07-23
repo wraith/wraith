@@ -293,6 +293,7 @@ readcfg(const char *cfgfile)
         *(char *) strchr(buffer, '\n') = 0;
       if ((skipline(buffer, &skip)))
         continue;
+      if (strstr(buffer, "SALT")) continue;
       if (strchr(buffer, '<') || strchr(buffer, '>')) {
         printf(STR(" Failed\n"));
         printf(STR("%s:%d: error: Look at your configuration file again...\n"), cfgfile, line);
