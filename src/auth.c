@@ -1,3 +1,4 @@
+/* I hereby release this into the Public Domain - Bryan Drewery */
 /*
  * auth.c -- handles:
  *   auth system functions
