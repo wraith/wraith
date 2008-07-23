@@ -484,7 +484,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
   }
   if (rfc_casecmp(chan->floodwho[which], p)) {	/* new */
     strncpy(chan->floodwho[which], p, sizeof(chan->floodwho[which]));
-    chan->floodwho[which][sizeof(chan->floodwho[which])] = 0;
+    chan->floodwho[which][sizeof(chan->floodwho[which]) - 1] = 0;
     chan->floodtime[which] = now;
     chan->floodnum[which] = 1;
     return 0;
