@@ -4326,7 +4326,7 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
 
     buf = (char *) my_calloc(1, siz);
 
-    simple_snprintf(buf, sizeof(buf), "(%s)", frombot);
+    simple_snprintf(buf, siz, "(%s)", frombot);
     dprintf(idx, "%-13s %s\n", buf, ln);
     free(buf);
   }
