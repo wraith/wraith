@@ -216,7 +216,7 @@ void rcmd_chans(char *fbot, char *fhand, char *fidx) {
     }
 
     if (buf[0])
-      simple_snprintf(reply, sizeof(reply), "I am not in: %s", buf);
+      simple_snprintf(reply, sizeof(reply), "[%s] I am not in: %s", cursrvname, buf);
   } else
     simple_snprintf(reply, sizeof(reply), "I am not online.");
 
