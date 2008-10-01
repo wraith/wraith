@@ -325,13 +325,15 @@ static void show_help()
 #define FLAGS_CHECKPASS STR("cCdDeEhknrtuUv")
 static void dtx_arg(int& argc, char *argv[])
 {
-  int i = 0;
+  int i = 0, checked_pass = 0;
   char *p = NULL;
   
   opterr = 0;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
-    if (strchr(FLAGS_CHECKPASS, i))
+    if (strchr(FLAGS_CHECKPASS, i) && !checked_pass) {
       checkpass();
+      checked_pass++;
+    }
     switch (i) {
       case '0':
         exit(0);
