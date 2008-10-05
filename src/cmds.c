@@ -699,7 +699,7 @@ static void cmd_help(int idx, char *par)
       }
     }
   }
-  if (buf && buf[0])
+  if (buf[0])
     dprintf(idx, "%s\n", buf);
   if (fnd) 
     dprintf(idx, "--End help listing\n");

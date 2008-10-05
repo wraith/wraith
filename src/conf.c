@@ -262,7 +262,7 @@ confedit()
       run = (char *) my_calloc(1, size);
       /* child */
       simple_snprintf(run, size, "%s %s", editor, tmpconf.file);
-      execlp("/bin/sh", "/bin/sh", "-c", run, NULL);
+      execlp("/bin/sh", "/bin/sh", "-c", run, (char*)NULL);
       perror(editor);
       exit(1);
      /*NOTREACHED*/}
@@ -437,7 +437,7 @@ checkpid(const char *nick, conf_bot *bot)
     fclose(f);
     remove_crlf(buf);
 
-    if (!buf || !buf[0])
+    if (!buf[0])
       return 0;
   
     bufp = buf;

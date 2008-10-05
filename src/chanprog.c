@@ -674,9 +674,9 @@ void reload()
  */
 int isowner(char *name)
 {
-  if (!owner || !*owner)
+  if (!owner[0])
     return (0);
-  if (!name || !*name)
+  if (!name || !name[0])
     return (0);
 
   char *pa = owner, *pb = owner;

@@ -15,9 +15,9 @@ typedef struct {
 
 typedef struct {
   int type;
-  char *cmd;
+  const char *cmd;
   int garble;
-  char *desc;
+  const char *desc;
 } help_t;
 
 typedef struct {

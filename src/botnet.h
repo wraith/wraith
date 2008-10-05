@@ -20,7 +20,7 @@ void tell_bots(int, int, const char *);
 void tell_bottree(int);
 void dump_links(int);
 int botlink(char *, int, char *);
-int botunlink(int, char *, char *);
+int botunlink(int, const char *, const char *);
 void addbot(char *, char *, char *, char, int, time_t, int, char *);
 void updatebot(int, char *, char, int, time_t, int, char *);
 void rembot(const char *);

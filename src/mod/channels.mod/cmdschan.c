@@ -1144,7 +1144,7 @@ void show_int(int idx, char *work, int *cnt, const char *desc, int state, const 
       strcat(tmp2, chr_state);
     }
     strcat(tmp2, BOLD_END(idx));
-    egg_snprintf(tmp, sizeof tmp, "%-30s %-20s %s", desc, tmp2, (tmp3 && tmp3[0]) ? tmp3 : "");
+    egg_snprintf(tmp, sizeof tmp, "%-30s %-20s %s", desc, tmp2, tmp3[0] ? tmp3 : "");
     strcat(work, tmp);
   }
   if (*cnt >= INT_COLS)

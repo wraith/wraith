@@ -1587,7 +1587,8 @@ void
 irc_report(int idx, int details)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  char ch[1024] = "", q[160] = "", *p = NULL;
+  char ch[1024] = "", q[160] = "";
+  const char *p = NULL;
   int k = 10;
   size_t len;
 

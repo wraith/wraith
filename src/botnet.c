@@ -871,7 +871,7 @@ int users_in_subtree(tand_t *bot)
 
 /* Break link with a tandembot
  */
-int botunlink(int idx, char *nick, char *reason)
+int botunlink(int idx, const char *nick, const char *reason)
 {
   register int i;
   int bots, users;

@@ -17,7 +17,7 @@ unsigned char *garble_buffer[GARBLE_BUFFERS] = {
 
 int garble_ptr = (-1);
 
-char *degarble(int len, char *g)
+char *degarble(int len, const char *g)
 {
   unsigned char x = 0;
 

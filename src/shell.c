@@ -832,7 +832,7 @@ char *homedir(bool useconf)
 {
   static char homedir_buf[DIRMAX] = "";
 
-  if (!homedir_buf || (homedir_buf && !homedir_buf[0])) {
+  if (!homedir_buf[0]) {
     char tmp[DIRMAX] = "";
 
     if (conf.homedir && useconf)
@@ -862,7 +862,7 @@ char *my_username()
 {
   static char username[DIRMAX] = "";
 
-  if (!username || (username && !username[0])) {
+  if (!username[0]) {
 #ifdef CYGWIN_HACKS
     simple_snprintf(username, sizeof username, "cygwin");
 #else /* !CYGWIN_HACKS */
@@ -931,7 +931,7 @@ char *my_uname()
 {
   static char os_uname[250] = "";
 
-  if (!os_uname || (os_uname && !os_uname[0])) {
+  if (!os_uname[0]) {
     char *unix_n = NULL, *vers_n = NULL;
     struct utsname un;
 

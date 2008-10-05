@@ -331,7 +331,7 @@ int u_pass_match(struct userrec *u, char *in)
 
   if (!cmp && (!pass[0] || (pass[0] == '-')))
     return 1;
-  if (!cmp || !pass || !pass[0] || (pass[0] == '-'))
+  if (!cmp || !pass[0] || (pass[0] == '-'))
     return 0;
   if (u->bot) {
     if (!strcmp(cmp, pass))

@@ -70,9 +70,9 @@ bool		use_exempts = 0;
 /* low-level stuff for other modules
  */
 
-size_t my_strcpy(register char *a, register char *b)
+size_t my_strcpy(register char *a, register const char *b)
 {
-  register char *c = b;
+  register const char *c = b;
 
   while (*b)
     *a++ = *b++;
@@ -1071,7 +1071,7 @@ char* replace_vars(char *buf) {
   return replace(buf, "$n", botname);
 }
 
-void showhelp(int idx, struct flag_record *flags, char *string)
+void showhelp(int idx, struct flag_record *flags, const char *string)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   char *helpstr = (char *) my_calloc(1, strlen(string) + 1000 + 1);

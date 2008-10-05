@@ -144,7 +144,7 @@ enum {\n");
 #ifndef _RESPONSES_H\n\
 #define _RESPONSES_H\n\
 \n\
-typedef char * res_t;\n\n");
+typedef const char * res_t;\n\n");
 
   while ((!feof(inf)) && ((buffer = step_thru_file(inf)) != NULL) ) {
     line++;

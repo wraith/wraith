@@ -1098,7 +1098,7 @@ void enforce_closed(struct chanset_t *chan) {
   if (chan->closed_private && !(chan->channel.mode & CHANPRIV) && !(chan->mode_mns_prot & CHANPRIV))
     *p++ = 'p';
   *p = 0;
-  if (buf && buf[0])
+  if (buf[0])
     dprintf(DP_MODE, "MODE %s +%s\n", chan->name, buf);
   priority_do(chan, 0, PRIO_KICK);
 }

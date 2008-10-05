@@ -191,7 +191,7 @@ colorbuf(char *buf, size_t len, int idx)
         }
       }
     }
-    simple_snprintf(buf3, sizeof(buf3), "%s%s", (buf3 && buf3[0]) ? buf3 : "", (buf2 && buf2[0]) ? buf2 : "");
+    simple_snprintf(buf3, sizeof(buf3), "%s%s", buf3[0] ? buf3 : "", buf2[0] ? buf2 : "");
   }
   buf3[strlen(buf3)] = 0;
   strcpy(buf, buf3);
@@ -787,7 +787,7 @@ detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
 /* Handle someone being booted from dcc chat.
  */
 void
-do_boot(int idx, char *by, char *reason)
+do_boot(int idx, const char *by, const char *reason)
 {
   dprintf(idx, DCC_BOOTED1);
   dprintf(idx, DCC_BOOTED2, by, reason[0] ? ": " : ".", reason);
