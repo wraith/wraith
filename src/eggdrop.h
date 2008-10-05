@@ -137,11 +137,9 @@ enum {		/* TAKE A GUESS */
 
 #define FEATURE_NO_TAKE		BIT0
 #define FEATURE_NO_MDOP		BIT1
-#define FEATURE_BETA		BIT2
 
 #define HAVE_TAKE	(!(conf.features & FEATURE_NO_TAKE))
 #define HAVE_MDOP	(!(conf.features & FEATURE_NO_MDOP))
-#define IS_BETA		(conf.features & FEATURE_BETA)
 
 
 #define HUB		BIT0
