@@ -24,6 +24,10 @@ EXCLUDES = pack/pack.cfg misc/ind doc/DEVEL src/Makefile src/compat/Makefile src
 REVISION 	:= $(shell misc/getrev.sh)
 BUILDTS 	:= $(shell misc/getts.sh)
 
+HELPFILE = doc/help.txt
+SETTINGSFILE = doc/settings.txt
+RESPONSESFILE = doc/responses.txt
+
 # defaults
 CXX = @CCACHE@ @DISTCC@ @CXX@ -static
 LD = @CXX@ -static
@@ -124,18 +128,17 @@ indent:
 	done
 
 sort: sorthelp
-	@cp -f misc/help.txt misc/help.bak
-	@(if test "x`tail -n 1 misc/help.txt`" != "x::end"; then \
-	echo "::end" >> misc/help.txt; \
+	@(if test "x`tail -n 1 $(HELPFILE)`" != "x::end"; then \
+	echo "::end" >> $(HELPFILE); \
 	fi)
-#	@(sed misc/help.txt -e "s/^$$/ /" > help~ && mv -f help~ misc/help.txt) || rm -f help~
-	@(sed -r -e :a -e 's/^$$/ /' -e '$$!N;s/^ \n:/:/;ta' -e 'P;D' misc/help.txt > help~ && mv -f help~ misc/help.txt) || rm -f help~
-	@cp -f misc/help.txt help.txt~
-	@(src/sorthelp@EXEEXT@ misc/help.txt misc/help.txt || (cp -f help.txt~ misc/help.txt; echo "Sort failed, restoring backup."))
+#	@(sed $(HELPFILE) -e "s/^$$/ /" > help~ && mv -f help~ $(HELPFILE)) || rm -f help~
+	@(sed -r -e :a -e 's/^$$/ /' -e '$$!N;s/^ \n:/:/;ta' -e 'P;D' $(HELPFILE) > help~ && mv -f help~ $(HELPFILE)) || rm -f help~
+	@cp -f $(HELPFILE) help.txt~
+	@(src/sorthelp@EXEEXT@ $(HELPFILE) $(HELPFILE) || (cp -f help.txt~ $(HELPFILE); echo "Sort failed, restoring backup."))
 	@rm -f help.txt~
 
 help: makehelp stringfix
-	@src/makehelp@EXEEXT@ misc/help.txt src/help.h.tmp~
+	@src/makehelp@EXEEXT@ $(HELPFILE) src/help.h.tmp~
 	@(if [ ! -f src/help.h ]; then \
 	touch src/help.h; \
 	fi)
@@ -145,7 +148,7 @@ help: makehelp stringfix
 	fi)
 
 set: makeset
-	@src/makeset@EXEEXT@ misc/settings.txt src/set_default.h~
+	@src/makeset@EXEEXT@ $(SETTINGSFILE) src/set_default.h~
 	@(if [ ! -f src/set_default.h ]; then \
 	touch src/set_default.h; \
 	fi)
@@ -155,7 +158,7 @@ set: makeset
 
 
 res: makeres
-	@src/makeres@EXEEXT@ misc/responses.txt src/ 1
+	@src/makeres@EXEEXT@ $(RESPONSESFILE) src/ 1
 	@(if [ ! -f src/response.h ]; then \
 	touch src/response.h; \
 	fi)

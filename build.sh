@@ -24,7 +24,7 @@ else
   devel="0"
 fi
 rm -f ts ts.exe
-gcc -o ts misc/ts.c > /dev/null 2>&1
+gcc -o ts src/timestamp.c > /dev/null 2>&1
 BUILDTS=`./ts \`misc/getdate.sh\``
 builddate=`./ts ${BUILDTS}`
 rm -f ts ts.exe
