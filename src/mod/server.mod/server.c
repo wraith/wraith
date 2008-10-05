@@ -867,14 +867,14 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
   if (ischanhub() && !glob_chuba(fr))
    ok = 0;
   if (dcc_total == max_dcc) {
-    putlog(LOG_MISC, "*", DCC_TOOMANYDCCS2, "CHAT", param, nick, from);
+    putlog(LOG_MISC, "*", "DCC connections full: %s %s (%s!%s)", "CHAT", param, nick, from);
   } else if (!ok) {
-    putlog(LOG_MISC, "*", "%s: %s!%s", ischanhub() ? DCC_REFUSED : DCC_REFUSEDNC, nick, from);
+    putlog(LOG_MISC, "*", "%s: %s!%s", ischanhub() ? "Refused DCC chat (no access)" : "Refused DCC chat (I'm not a chathub (+c))", nick, from);
   } else if (u_pass_match(u, "-")) {
-    putlog(LOG_MISC, "*", "%s: %s!%s", DCC_REFUSED4, nick, from);
+    putlog(LOG_MISC, "*", "%s: %s!%s", "Refused DCC chat (no password)", nick, from);
   } else if (atoi(prt) < 1024 || atoi(prt) > 65535) {
     /* Invalid port */
-    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED3, nick, from);
+    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", "DCC invalid port", nick, from);
   } else {
     if (!sanitycheck_dcc(nick, from, ip, prt))
       return 1;
@@ -917,7 +917,7 @@ static void dcc_chat_hostresolved(int i)
 #endif /* USE_IPV6 */
   if (dcc[i].sock < 0 || open_telnet_dcc(dcc[i].sock, ip, buf) < 0) {
     strcpy(buf, strerror(errno));
-    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", DCC_CONNECTFAILED2, dcc[i].nick, dcc[i].host);
+    putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", "DCC connection failed", dcc[i].nick, dcc[i].host);
     putlog(LOG_MISC, "*", "    (%s)", buf);
     killsock(dcc[i].sock);
     lostdcc(i);

@@ -7,7 +7,7 @@
 #ifndef _EGG_MOD_CTCP_CTCP_H
 #define _EGG_MOD_CTCP_CTCP_H
 
-#define CLIENTINFO "SED VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME ACTION DCC UTC PING ECHO  :Use CLIENTINFO <COMMAND> to get more specific information"
+#define CTCP_CLIENTINFO "SED VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME ACTION DCC UTC PING ECHO  :Use CLIENTINFO <COMMAND> to get more specific information"
 #define CLIENTINFO_SED "SED contains simple_encrypted_data"
 #define CLIENTINFO_VERSION "VERSION shows client type, version and environment"
 #define CLIENTINFO_CLIENTINFO "CLIENTINFO gives information about available CTCP commands"

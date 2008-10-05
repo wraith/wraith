@@ -227,13 +227,13 @@ console_display(int idx, struct user_entry *e, struct userrec *u)
   struct console_info *i = (struct console_info *) e->u.extra;
 
   if (dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
-    dprintf(idx, "  %s\n", CONSOLE_SAVED_SETTINGS);
-    dprintf(idx, "    %s %s\n", CONSOLE_CHANNEL, i->channel);
-    dprintf(idx, "    %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,
-            masktype(i->conflags), CONSOLE_STRIPFLAGS,
-            stripmasktype(i->stripflags), CONSOLE_ECHO, i->echoflags ? CONSOLE_YES : CONSOLE_NO);
-    dprintf(idx, "    %s %d, %s %s%d\n", CONSOLE_PAGE_SETTING, i->page,
-            CONSOLE_CHANNEL2, (i->conchan < GLOBAL_CHANS) ? "" : "*", i->conchan % GLOBAL_CHANS);
+    dprintf(idx, "  %s\n", "Saved Console Settings:");
+    dprintf(idx, "    %s %s\n", "Channel:", i->channel);
+    dprintf(idx, "    %s %s, %s %s, %s %s\n", "Console flags:",
+            masktype(i->conflags), "",
+            stripmasktype(i->stripflags), "Echo:", i->echoflags ? "yes" : "no");
+    dprintf(idx, "    %s %d, %s %s%d\n", "Page setting:", i->page,
+            "Console channel:", (i->conchan < GLOBAL_CHANS) ? "" : "*", i->conchan % GLOBAL_CHANS);
     dprintf(idx, "    Color: $b%s$b\n", i->color ? "on" : "off");
     dprintf(idx, "    Login settings:\n");
     dprintf(idx, "     Banner:   $b%-3s$b   Bots: $b%-3s$b\n", i->banner ? "on" : "off", i->bots ? "on" : "off");
@@ -343,12 +343,12 @@ console_store(int idx, char *par, bool displaySave)
 
   i->conchan = dcc[idx].u.chat->channel;
   if (par) {
-    dprintf(idx, "%s\n", CONSOLE_SAVED_SETTINGS2);
-    dprintf(idx, "  %s %s\n", CONSOLE_CHANNEL, i->channel);
-    dprintf(idx, "  %s %s, %s %s, %s %s\n", CONSOLE_FLAGS,
-            masktype(i->conflags), CONSOLE_STRIPFLAGS,
-            stripmasktype(i->stripflags), CONSOLE_ECHO, i->echoflags ? CONSOLE_YES : CONSOLE_NO);
-    dprintf(idx, "  %s %d, %s %d\n", CONSOLE_PAGE_SETTING, i->page, CONSOLE_CHANNEL2, i->conchan);
+    dprintf(idx, "%s\n", "Saved your Console Settings:");
+    dprintf(idx, "  %s %s\n", "Channel:", i->channel);
+    dprintf(idx, "  %s %s, %s %s, %s %s\n", "Console flags:",
+            masktype(i->conflags), "",
+            stripmasktype(i->stripflags), "Echo:", i->echoflags ? "yes" : "no");
+    dprintf(idx, "  %s %d, %s %d\n", "Page setting:", i->page, "Console channel:", i->conchan);
     dprintf(idx, "    Color: $b%s$b\n", i->color ? "on" : "off");
     dprintf(idx, "    Login settings:\n");
     dprintf(idx, "    Login settings:\n");

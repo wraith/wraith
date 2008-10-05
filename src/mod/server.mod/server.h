@@ -41,7 +41,6 @@ enum {
 	NETT_HYBRID_EFNET	= 4	/* new +e/+I Efnet hybrid.	  */
 };
 
-#define IRC_CANTCHANGENICK "Can't change nickname on %s.  Is my nickname banned?"
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;

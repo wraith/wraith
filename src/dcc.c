@@ -326,7 +326,7 @@ failed_link(int idx)
     add_note(s1, conf.bot->nick, s, -2, 0);
   }
   if (dcc[idx].u.bot->numver >= (-1))
-    putlog(LOG_BOTS, "*", DCC_LINKFAIL, dcc[idx].nick);
+    putlog(LOG_BOTS, "*", "Failed link to %s.", dcc[idx].nick);
   if (dcc[idx].sock != -1) {
     killsock(dcc[idx].sock);
     dcc[idx].sock = -1;
@@ -420,7 +420,7 @@ dcc_bot_new(int idx, char *buf, int x)
 static void
 eof_dcc_bot_new(int idx)
 {
-  putlog(LOG_BOTS, "*", DCC_LOSTBOT, dcc[idx].nick);
+  putlog(LOG_BOTS, "*", "Lost Bot: %s", dcc[idx].nick);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -429,7 +429,7 @@ static void
 timeout_dcc_bot_new(int idx)
 {
   if (conf.bot->hub)
-    putlog(LOG_BOTS, "*", DCC_TIMEOUT, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+    putlog(LOG_BOTS, "*", "Timeout: bot link to %s at %s:%d", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
   else
     putlog(LOG_BOTS, "*", "Timeout: bot link to %s", dcc[idx].nick);
   killsock(dcc[idx].sock);
@@ -624,7 +624,7 @@ dcc_identd_connect(int idx, char *buf, int atr)
     sock = answer(sock, s, &ip, &port, 0);
 
   if (sock < 0) {
-    putlog(LOG_MISC, "*", DCC_FAILED, strerror(errno));
+    putlog(LOG_MISC, "*", "Failed TELNET incoming (%s)", strerror(errno));
     return;
   }
   /* changeover_dcc(idx, &DCC_IDENTD, 0); */
@@ -674,7 +674,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
 
   /* Correct pass or secpass! */
   if (!dcc[idx].wrong_pass && (!dccauth || (dccauth && !badauth))) {
-    putlog(LOG_MISC, "*", DCC_LOGGEDIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+    putlog(LOG_MISC, "*", "Logged in: %s (%s/%d)", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {
       free(dcc[idx].u.chat->away);
       dcc[idx].u.chat->away = NULL;
@@ -702,7 +702,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
     dcc_chatter(idx);
   } else if ((dccauth && badauth) || dcc[idx].wrong_pass) { 		/* bad auth */
     dprintf(idx, "%s\n", response(RES_BADUSERPASS));
-    putlog(LOG_MISC, "*", DCC_BADAUTH, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+    putlog(LOG_MISC, "*", "Bad Auth: [%s]%s/%d", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {        /* su from a dumb user */
       /* Turn echo back on for telnet sessions (send IAC WON'T ECHO). */
       if (dcc[idx].status & STAT_TELNET)
@@ -718,7 +718,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       dcc[idx].u.chat->channel = dcc[idx].u.chat->su_channel;
       if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
         botnet_send_join_idx(idx);
-      chanout_but(-1, dcc[idx].u.chat->channel, DCC_JOIN, dcc[idx].nick);
+      chanout_but(-1, dcc[idx].u.chat->channel, "*** %s has joined the party line.\n", dcc[idx].nick);
     } else {
       killsock(dcc[idx].sock);
       lostdcc(idx);
@@ -729,7 +729,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
 static void
 eof_dcc_general(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_LOSTDCC, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+  putlog(LOG_MISC, "*", "Lost dcc connection to %s (%s/%d)", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -737,7 +737,7 @@ eof_dcc_general(int idx)
 static void
 tout_dcc_chat_secpass(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_SPWDTIMEOUT, dcc[idx].nick, dcc[idx].host);
+  putlog(LOG_MISC, "*", "Auth timeout on dcc chat: [%s]%s", dcc[idx].nick, dcc[idx].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -751,7 +751,7 @@ display_dcc_chat_secpass(int idx, char *buf)
 static void
 tout_dcc_chat_pass(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_PWDTIMEOUT, dcc[idx].nick, dcc[idx].host);
+  putlog(LOG_MISC, "*", "Password timeout on dcc chat: [%s]%s", dcc[idx].nick, dcc[idx].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1012,7 +1012,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
     }
   } else {
     dprintf(idx, "%s\n", response(RES_BADUSERPASS));
-    putlog(LOG_MISC, "*", DCC_BADLOGIN, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+    putlog(LOG_MISC, "*", "Bad Password: [%s]%s/%d", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
     if (dcc[idx].u.chat->away) {        /* su from a dumb user */
       /* Turn echo back on for telnet sessions (send IAC WON'T ECHO). */
       if (dcc[idx].status & STAT_TELNET)
@@ -1028,7 +1028,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       dcc[idx].u.chat->channel = dcc[idx].u.chat->su_channel;
       if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
         botnet_send_join_idx(idx);
-      chanout_but(-1, dcc[idx].u.chat->channel, DCC_JOIN, dcc[idx].nick);
+      chanout_but(-1, dcc[idx].u.chat->channel, "*** %s has joined the party line.\n", dcc[idx].nick);
     } else {
       killsock(dcc[idx].sock);
       lostdcc(idx);
@@ -1102,7 +1102,7 @@ int ansi_len(char *s)
 static void
 eof_dcc_chat(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_LOSTDCC, dcc[idx].nick, dcc[idx].host, dcc[idx].port);
+  putlog(LOG_MISC, "*", "Lost dcc connection to %s (%s/%d)", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
   if (dcc[idx].u.chat->channel >= 0) {
     chanout_but(idx, dcc[idx].u.chat->channel, "*** %s lost dcc link.\n", dcc[idx].nick);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
@@ -1336,7 +1336,7 @@ dcc_telnet(int idx, char *buf, int ii)
     sock = answer(dcc[idx].sock, s, &ip, &port, 0);
 /*. ssl_link ACCEPT_SSL should go here!!!! */
   if (sock < 0) {
-    putlog(LOG_MISC, "*", DCC_FAILED, strerror(errno));
+    putlog(LOG_MISC, "*", "Failed TELNET incoming (%s)", strerror(errno));
 //    killsock(dcc[idx].sock);
     return;
   }
@@ -1348,7 +1348,7 @@ dcc_telnet(int idx, char *buf, int ii)
 #else
   if (port < 1024 || port > 65535) {
 #endif
-    putlog(LOG_BOTS, "*", DCC_BADSRC, s, port);
+    putlog(LOG_BOTS, "*", "Refused %s/%d (bad src port)", s, port);
     killsock(sock);
     return;
   }
@@ -1426,7 +1426,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   if (dcc[idx].host[0] == '@') {
     /* Restrict by hostname */
     if (!wild_match(dcc[idx].host + 1, dcc[i].host)) {
-      putlog(LOG_BOTS, "*", DCC_BADHOST, dcc[i].host);
+      putlog(LOG_BOTS, "*", "Refused %s (bad hostname)", dcc[i].host);
       killsock(dcc[i].sock);
       lostdcc(i);
       return;
@@ -1464,7 +1464,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
     }
   }
   if (s[0]) {
-    putlog(LOG_MISC, "*", DCC_IDENTFAIL, dcc[i].host, s);
+    putlog(LOG_MISC, "*", "Ident failed for %s: %s", dcc[i].host, s);
     simple_snprintf(s, sizeof(s), "telnet@%s", dcc[i].host);
     dcc_telnet_got_ident(i, s);
     return;
@@ -1483,7 +1483,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
 static void
 eof_dcc_telnet(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_PORTDIE, dcc[idx].port);
+  putlog(LOG_MISC, "*", "(!) Listening port %d abruptly died.", dcc[idx].port);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1510,7 +1510,7 @@ struct dcc_table DCC_TELNET = {
 static void
 eof_dcc_dupwait(int idx)
 {
-  putlog(LOG_BOTS, "*", DCC_LOSTDUP, dcc[idx].host);
+  putlog(LOG_BOTS, "*", "Lost telnet connection from %s while checking for duplicate", dcc[idx].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1533,7 +1533,7 @@ timeout_dupwait(int idx)
     char x[UHOSTLEN] = "";
 
     simple_snprintf(x, sizeof x, "%s!%s", dcc[idx].nick, dcc[idx].host);
-    putlog(LOG_BOTS, "*", DCC_DUPLICATE, x);
+    putlog(LOG_BOTS, "*", "Refused telnet connection from %s (duplicate)", x);
     killsock(dcc[idx].sock);
     lostdcc(idx);
   } else {
@@ -1631,7 +1631,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
 
   if (!ok) {
     if (dcc[idx].user)
-      putlog(LOG_BOTS, "*", "%s: %s!%s", ischanhub() ? DCC_REFUSED : DCC_REFUSEDNC, nick, dcc[idx].host);
+      putlog(LOG_BOTS, "*", "%s: %s!%s", ischanhub() ? "Refused DCC chat (no access)" : "Refused DCC chat (I'm not a chathub (+c))", nick, dcc[idx].host);
     else if (dcc[idx].bot)
       putlog(LOG_BOTS, "*", "Refused %s (invalid bot handle: %s) (Add with '%snewleaf %s')", dcc[idx].host, nick, settings.dcc_prefix, nick);
     else
@@ -1644,7 +1644,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
   strcpy(dcc[idx].nick, nick);
   if (dcc[idx].user->bot) {
     if (!egg_strcasecmp(conf.bot->nick, dcc[idx].nick)) {
-      putlog(LOG_BOTS, "*", DCC_MYBOTNETNICK, dcc[idx].host);
+      putlog(LOG_BOTS, "*", "Refused telnet connection from %s (tried using my botnetnick)", dcc[idx].host);
       killsock(dcc[idx].sock);
       lostdcc(idx);
       return;
@@ -1675,7 +1675,7 @@ dcc_telnet_pass(int idx, int atr)
   /* No password set? */
   if (!dcc[idx].user->bot && (u_pass_match(dcc[idx].user, "-"))) {
     dprintf(idx, "Can't telnet until you have a password set.\r\n");
-    putlog(LOG_MISC, "*", DCC_NOPASS, dcc[idx].nick, dcc[idx].host);
+    putlog(LOG_MISC, "*", "Refused [%s]%s (no password)", dcc[idx].nick, dcc[idx].host);
     killsock(dcc[idx].sock);
     lostdcc(idx);
     return;
@@ -1714,7 +1714,7 @@ dcc_telnet_pass(int idx, int atr)
       dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
     } else {
       /* Turn off remote telnet echo (send IAC WILL ECHO). */
-      dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", DCC_ENTERPASS);
+      dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", "Enter your password");
     }
   } else
     dprintf(idx, "%s\n" TLN_IAC_C TLN_WILL_C TLN_ECHO_C, response(RES_PASSWORD));
@@ -1723,7 +1723,7 @@ dcc_telnet_pass(int idx, int atr)
 static void
 eof_dcc_telnet_id(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_LOSTCON, dcc[idx].host, dcc[idx].port);
+  putlog(LOG_MISC, "*", "Lost telnet connection to %s/%d", dcc[idx].host, dcc[idx].port);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1731,7 +1731,7 @@ eof_dcc_telnet_id(int idx)
 static void
 timeout_dcc_telnet_id(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_TTIMEOUT, dcc[idx].host);
+  putlog(LOG_MISC, "*", "Ident timeout on telnet: %s", dcc[idx].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1795,7 +1795,7 @@ dcc_identwait(int idx, char *buf, int len)
 void
 eof_dcc_identwait(int idx)
 {
-  putlog(LOG_MISC, "*", DCC_LOSTCONN, dcc[idx].host, dcc[idx].port);
+  putlog(LOG_MISC, "*", "Lost connection while identing [%s/%d]", dcc[idx].host, dcc[idx].port);
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && (dcc[i].type == &DCC_IDENT) && (dcc[i].uint.ident_sock == dcc[idx].sock)) {
       killsock(dcc[i].sock);    /* Cleanup ident socket */
@@ -1857,7 +1857,7 @@ eof_dcc_ident(int idx)
 
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && (dcc[i].type == &DCC_IDENTWAIT) && (dcc[i].sock == dcc[idx].uint.ident_sock)) {
-      putlog(LOG_MISC, "*", DCC_EOFIDENT);
+      putlog(LOG_MISC, "*", "Timeout/EOF ident connection");
       simple_snprintf(buf, sizeof(buf), "telnet@%s", dcc[idx].host);
       dcc_telnet_got_ident(i, buf);
     }
@@ -1897,7 +1897,7 @@ dcc_telnet_got_ident(int i, char *host)
   dcc[i].u.other = 0;
 
   if (idx == dcc_total || !dcc[idx].type) {
-    putlog(LOG_MISC, "*", DCC_LOSTIDENT);
+    putlog(LOG_MISC, "*", "Lost ident wait telnet socket!!");
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
@@ -1943,7 +1943,7 @@ dcc_telnet_got_ident(int i, char *host)
     if (!ok && (dcc[idx].status & LSTN_PUBLIC))
       ok = 1;
     if (!ok) {
-      putlog(LOG_MISC, "*", DCC_NOACCESS, dcc[i].host);
+      putlog(LOG_MISC, "*", "Denied telnet: %s, No Access", dcc[i].host);
       killsock(dcc[i].sock);
       lostdcc(i);
       return;

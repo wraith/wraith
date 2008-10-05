@@ -201,7 +201,7 @@ void tell_ignores(int idx, char *match)
     dprintf(idx, "No ignores.\n");
     return;
   }
-  dprintf(idx, "%s:\n", IGN_CURRENT);
+  dprintf(idx, "%s:\n", "Currently ignoring");
 
   int k = 1;
 
@@ -226,7 +226,7 @@ void check_expired_ignores()
     return;
   while (*u) {
     if (!((*u)->flags & IGREC_PERM) && (now >= (*u)->expire)) {
-      putlog(LOG_MISC, "*", "%s %s (expired)", IGN_NOLONGER, (*u)->igmask);
+      putlog(LOG_MISC, "*", "%s %s (expired)", "No longer ignoring", (*u)->igmask);
       delignore((*u)->igmask);
     } else {
       u = &((*u)->next);

@@ -540,17 +540,17 @@ static int gotmsg(char *from, char *msg)
                   code = newsplit(&ctcp);
                   if (!strcmp(code, "CHAT")) {
                     if (!ischanhub())
-                      putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
+                      putlog(LOG_MISC, "*", "%s: %s", "Refused DCC chat (I'm not a chathub (+c))", from);
                     else
-                      putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSED, from);
+                      putlog(LOG_MISC, "*", "%s: %s", "Refused DCC chat (no access)", from);
                   } else {
                     putlog(LOG_MISC, "*", "Refused DCC %s: %s", code, from);
                   }
                 } else if (!strcmp(code, "CHAT")) {
                   if (!ischanhub())
-                    putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSEDNC, from);
+                    putlog(LOG_MISC, "*", "%s: %s", "Refused DCC chat (I'm not a chathub (+c))", from);
                   else
-                    putlog(LOG_MISC, "*", "%s: %s", DCC_REFUSED, from);
+                    putlog(LOG_MISC, "*", "%s: %s", "Refused DCC chat (no access)", from);
                 }
 	      }
 
@@ -921,7 +921,7 @@ static int got437(char *from, char *msg)
     if (chan) {
       chan->status &= ~(CHAN_JOINING);
       if (chan->status & CHAN_ACTIVE) {
-	putlog(LOG_MISC, "*", IRC_CANTCHANGENICK, s);
+	putlog(LOG_MISC, "*", "Can't change nickname on %s.  Is my nickname banned?", s);
       } else {
 	if (!channel_juped(chan)) {
 	  putlog(LOG_MISC, "*", "Channel %s is juped. :(", s);

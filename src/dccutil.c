@@ -765,7 +765,7 @@ detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
       if ((dcc[idx].type->flags & DCT_CHAT) && chat && (chat->channel >= 0)) {
         char x[1024];
 
-        simple_snprintf(x, sizeof x, DCC_FLOODBOOT, dcc[idx].nick);
+        simple_snprintf(x, sizeof x, "%s has been forcibly removed for flooding.\n", dcc[idx].nick);
         chanout_but(idx, chat->channel, "*** %s", x);
         if (chat->channel < GLOBAL_CHANS)
           botnet_send_part_idx(idx, x);
@@ -789,15 +789,15 @@ detect_dcc_flood(time_t * timer, struct chat_info *chat, int idx)
 void
 do_boot(int idx, const char *by, const char *reason)
 {
-  dprintf(idx, DCC_BOOTED1);
-  dprintf(idx, DCC_BOOTED2, by, reason[0] ? ": " : ".", reason);
+  dprintf(idx, "-=- poof -=-\n");
+  dprintf(idx, "You've been booted from the bot by %s%s%s\n", by, reason[0] ? ": " : ".", reason);
   /* If it's a partyliner (chatterer :) */
   /* Horrible assumption that DCT_CHAT using structure uses same format
    * as DCC_CHAT */
   if ((dcc[idx].type->flags & DCT_CHAT) && (dcc[idx].u.chat->channel >= 0)) {
     char x[1024] = "";
 
-    simple_snprintf(x, sizeof x, DCC_BOOTED3, by, dcc[idx].nick, reason[0] ? ": " : "", reason);
+    simple_snprintf(x, sizeof x, "%s booted %s from the party line%s%s", by, dcc[idx].nick, reason[0] ? ": " : "", reason);
     chanout_but(idx, dcc[idx].u.chat->channel, "*** %s.\n", x);
     if (dcc[idx].u.chat->channel < GLOBAL_CHANS)
       botnet_send_part_idx(idx, x);

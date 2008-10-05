@@ -174,11 +174,11 @@ static void eof_dcc_send(int idx)
       }
     }
     if (y >= 0) {
-      putlog(LOG_BOTS, "*", TRANSFER_USERFILE_LOST, dcc[y].nick);
+      putlog(LOG_BOTS, "*", "Lost userfile transfer from %s; aborting.", dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
       /* Drop that bot */
       dprintf(y, "bye\n");
-      simple_snprintf(s, sizeof s, TRANSFER_USERFILE_DISCON, dcc[y].nick);
+      simple_snprintf(s, sizeof s, "Disconnected %s (aborted userfile transfer)", dcc[y].nick);
       botnet_send_unlinked(y, dcc[y].nick, s);
       chatout("*** %s %s\n", dcc[y].nick, s);
 
@@ -252,7 +252,7 @@ inline static void handle_resend_packet(int idx, transfer_reget *reget_data)
 			      ((reget_data->byte_offset & 0x000000ff) << 24);
   }
   if (reget_data->packet_id != TRANSFER_REGET_PACKETID)
-    putlog(LOG_FILES, "*", TRANSFER_REGET_PACKET,
+    putlog(LOG_FILES, "*", "(!) reget packet from %s for %s is invalid!",
 	   dcc[idx].nick, dcc[idx].u.xfer->origname);
   else
     dcc[idx].u.xfer->offset = reget_data->byte_offset;
@@ -322,12 +322,12 @@ void dcc_get(int idx, char *buf, int len)
   if (cmp > dcc[idx].u.xfer->length && cmp > dcc[idx].status) {
     /* Attempt to resume, but file is not as long as requested... */
     putlog(LOG_FILES, "*",
-	   TRANSFER_BEHIND_FILEEND,
+	   "!! Resuming file transfer behind file end for %s to %s",
 	   dcc[idx].u.xfer->origname, dcc[idx].nick);
   } else if (cmp > dcc[idx].status) {
     /* Attempt to resume */
     if (!strcmp(dcc[idx].nick, "*users")) {
-      putlog(LOG_BOTS, "*", TRANSFER_TRY_SKIP_AHEAD);
+      putlog(LOG_BOTS, "*", "!!! Trying to skip ahead on userfile transfer");
     } else if (!strcmp(dcc[idx].nick, "*binary")) {
       putlog(LOG_BOTS, "*","!!! Trying to skip ahead on binary transfer");
     }
@@ -363,7 +363,7 @@ void dcc_get(int idx, char *buf, int len)
       if (y >= 0)
 	dcc[y].status &= ~STAT_SENDING;
 
-      putlog(LOG_BOTS, "*", TRANSFER_COMPLETED_USERFILE, dcc[y].nick);
+      putlog(LOG_BOTS, "*", "Completed userfile transfer to %s.", dcc[y].nick);
       unlink(dcc[idx].u.xfer->filename);
       /* Any sharebot things that were queued: */
       dump_resync(y);
@@ -408,11 +408,11 @@ void eof_dcc_get(int idx)
 	y = x;
         break;
       }
-    putlog(LOG_BOTS, "*", TRANSFER_ABORT_USERFILE);
+    putlog(LOG_BOTS, "*", "Lost userfile transfer; aborting.");
     /* Note: no need to unlink the xfer file, as it's already unlinked. */
     /* Drop that bot */
     dprintf(-dcc[y].sock, "bye\n");
-    simple_snprintf(s, sizeof s, TRANSFER_USERFILE_DISCON,
+    simple_snprintf(s, sizeof s, "Disconnected %s (aborted userfile transfer)",
 		 dcc[y].nick);
     botnet_send_unlinked(y, dcc[y].nick, s);
     chatout("*** %s\n", s);
@@ -478,9 +478,9 @@ void dcc_send(int idx, char *buf, int len)
   dcc[idx].timeval = now;
   if (dcc[idx].status > dcc[idx].u.xfer->length &&
       dcc[idx].u.xfer->length > 0) {
-    dprintf(DP_HELP,TRANSFER_BOGUS_FILE_LENGTH, dcc[idx].nick);
+    dprintf(DP_HELP,"NOTICE %s :Bogus file length.\n", dcc[idx].nick);
     putlog(LOG_FILES, "*",
-	   TRANSFER_FILE_TOO_LONG,
+	   "File too long: dropping dcc send %s from %s!%s",
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);
     siz = strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1;
@@ -511,9 +511,9 @@ static void transfer_get_timeout(int i)
       dcc[y].status &= ~STAT_SHARE;
     }
     unlink(dcc[i].u.xfer->filename);
-    putlog(LOG_BOTS, "*",TRANSFER_USERFILE_TIMEOUT);
+    putlog(LOG_BOTS, "*","Timeout on userfile transfer.");
     dprintf(y, "bye\n");
-    simple_snprintf(xx, sizeof xx,TRANSFER_DICONNECT_TIMEOUT,
+    simple_snprintf(xx, sizeof xx,"Disconnected %s (timed-out userfile transfer)",
 		 dcc[y].nick);
     botnet_send_unlinked(y, dcc[y].nick, xx);
     chatout("*** %s\n", xx);
@@ -572,7 +572,7 @@ void tout_dcc_send(int idx)
       dcc[y].status &= ~STAT_SHARE;
     }
     unlink(dcc[idx].u.xfer->filename);
-    putlog(LOG_BOTS, "*", TRANSFER_USERFILE_TIMEOUT);
+    putlog(LOG_BOTS, "*", "Timeout on userfile transfer.");
   } else if (!strcmp(dcc[idx].nick, "*binary")) {
     int x, y = -1;
 
@@ -593,27 +593,27 @@ void tout_dcc_send(int idx)
 void display_dcc_get(int idx, char *buf)
 {
   if (dcc[idx].status == dcc[idx].u.xfer->length)
-    sprintf(buf, TRANSFER_SEND, dcc[idx].u.xfer->acked,
+    sprintf(buf, "send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].u.xfer->acked,
 	    dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
   else
-    sprintf(buf,TRANSFER_SEND, dcc[idx].status,
+    sprintf(buf,"send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].status,
 	    dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
 void display_dcc_get_p(int idx, char *buf)
 {
-  sprintf(buf,TRANSFER_SEND_WAITED, now - dcc[idx].timeval, dcc[idx].u.xfer->origname);
+  sprintf(buf,"send  waited %lus\n    Filename: %s\n", now - dcc[idx].timeval, dcc[idx].u.xfer->origname);
 }
 
 void display_dcc_send(int idx, char *buf)
 {
-  sprintf(buf,TRANSFER_SEND, dcc[idx].status,
+  sprintf(buf,"send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].status,
 	  dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
 void display_dcc_fork_send(int idx, char *buf)
 {
-  simple_sprintf(buf, TRANSFER_CONN_SEND);
+  simple_sprintf(buf, "conn  send");
 }
 
 void kill_dcc_xfer(int idx, void *x)
@@ -684,7 +684,7 @@ void dcc_fork_send(int idx, char *x, int y)
   dcc[idx].u.xfer->start_time = now;
   simple_snprintf(s1, sizeof s1, "%s!%s", dcc[idx].nick, dcc[idx].host);
   if (strcmp(dcc[idx].nick, "*users") && strcmp(dcc[idx].nick, "*binary"))
-    putlog(LOG_MISC, "*", TRANSFER_DCC_CONN, dcc[idx].u.xfer->origname, s1);
+    putlog(LOG_MISC, "*", "DCC connection: SEND %s (%s)", dcc[idx].u.xfer->origname, s1);
 }
 
 struct dcc_table DCC_GET =
@@ -728,8 +728,8 @@ static void dcc_get_pending(int idx, char *buf, int len)
   dcc[idx].addr = ip;
   dcc[idx].port = (int) port;
   if (dcc[idx].sock == -1) {
-    dprintf(DP_HELP, TRANSFER_NOTICE_BAD_CONN, dcc[idx].nick, strerror(errno));
-    putlog(LOG_FILES, "*", TRANSFER_LOG_BAD_CONN,
+    dprintf(DP_HELP, "NOTICE %s :Bad connection (%s)\n", dcc[idx].nick, strerror(errno));
+    putlog(LOG_FILES, "*", "DCC bad connection: GET %s (%s!%s)",
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);
     lostdcc(idx);
@@ -882,7 +882,7 @@ int raw_dcc_send(char *filename, char *nick, char *from, int *idx)
 void transfer_report(int idx, int details)
 {
   if (details) {
-    dprintf(idx,TRANSFER_STAT_BLOCK,
+    dprintf(idx,"    DCC block is %d%s, max concurrent d/ls is %d\n",
 	    dcc_block, (dcc_block == 0) ? " (turbo dcc)" : "", dcc_limit);
   }
 }

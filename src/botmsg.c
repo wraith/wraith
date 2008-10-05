@@ -474,7 +474,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     i = nextbot(p);
     if (i < 0) {
       if (idx >= 0)
-	dprintf(idx, BOT_NOTHERE);
+	dprintf(idx, "That bot isn't here.\n");
       return NOTE_ERROR;
     }
     if ((idx >= 0) && (echo))

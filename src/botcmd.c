@@ -56,8 +56,8 @@ static void fake_alert(int idx, char *item, char *extra, char *what)
 
   if ((now - lastfake) > 10) {	
     /* Don't fake_alert more than once every 10secs */
-    dprintf(idx, "ct %s NOTICE: %s (%s != %s). (%s)\n", conf.bot->nick, NET_FAKEREJECT, item, extra, what);
-    putlog(LOG_BOTS, "*", "%s %s (%s != %s). (%s)", dcc[idx].nick, NET_FAKEREJECT, item, extra, what);
+    dprintf(idx, "ct %s NOTICE: %s (%s != %s). (%s)\n", conf.bot->nick, "Fake message rejected", item, extra, what);
+    putlog(LOG_BOTS, "*", "%s %s (%s != %s). (%s)", dcc[idx].nick, "Fake message rejected", item, extra, what);
     lastfake = now;
   }
 }
@@ -284,7 +284,7 @@ static void bot_priv(int idx, char *par)
       if (from[0] != '@')
 	switch (i) {
 	case NOTE_ERROR:
-	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s.", BOT_NOSUCHUSER, to);
+	  botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s.", "No such user", to);
 	  break;
 	}
     }
@@ -303,7 +303,7 @@ static void bot_bye(int idx, char *par)
   bots = bots_in_subtree(findbot(dcc[idx].nick));
   users = users_in_subtree(findbot(dcc[idx].nick));
   simple_snprintf(s, sizeof(s), "%s %s. %s (lost %d bot%s and %d user%s)",
-		 BOT_DISCONNECTED, conf.bot->hub ? dcc[idx].nick : "botnet", par[0] ?
+		 "Disconnected from:", conf.bot->hub ? dcc[idx].nick : "botnet", par[0] ?
 		 par : "No reason", bots, (bots != 1) ?
 		 "s" : "", users, (users != 1) ? "s" : "");
   putlog(LOG_BOTS, "*", "%s", s);
@@ -342,7 +342,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
   if (i > 10) {
     botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s  (%s)", s, ver);
   } else {
-    botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s  (%s)", BOT_NOCHANNELS, ver);
+    botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s  (%s)", "no channels", ver);
   }
   if (admin[0])
     botnet_send_priv(idx, conf.bot->nick, nick, NULL, "Admin: %s", admin);
@@ -383,7 +383,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
     if (dcc[i].type && dcc[i].type == &DCC_BOT) {
       if (!ok) {
 	ok = 1;
-	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", BOT_BOTSCONNECTED);
+	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", "Bots connected");
       }
       sprintf(s, "  %s%c%-15s %s",
 	      dcc[i].status & STAT_CALLED ? "<-" : "->",
@@ -398,7 +398,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
       if (dcc[i].u.chat->channel != chan) {
 	if (!ok) {
 	  ok = 1;
-	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", BOT_OTHERPEOPLE);
+	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", "Other people on the bot");
 	}
 	l = sprintf(s, "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
@@ -497,9 +497,9 @@ static void bot_link(int idx, char *par)
       rfrom = from;
     putlog(LOG_CMDS, "*", "#%s# link %s", rfrom, par);
     if (botlink(from, -1, par))
-      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s ...", BOT_LINKATTEMPT, par);
+      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s %s ...", "Attempting to link", par);
     else
-      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s.", BOT_CANTLINKTHERE);
+      botnet_send_priv(idx, conf.bot->nick, from, NULL, "%s.", "Can't link there");
   } else {
     i = nextbot(bot);
     if (i >= 0)
@@ -573,7 +573,7 @@ static void bot_unlink(int idx, char *par)
 	/* Ditto above, about idx */
 	i = nextbot(p + 1);
 	if (i >= 0)
-	  botnet_send_priv(i, conf.bot->nick, from, NULL, "%s %s.", BOT_CANTUNLINK, undes);
+	  botnet_send_priv(i, conf.bot->nick, from, NULL, "%s %s.", "Can't unlink", undes);
       }
     } else {
       p = strchr(from, '@');
@@ -685,7 +685,7 @@ static void bot_nlinked(int idx, char *par)
   
   if (x == '!') {
     if (conf.bot->hub)
-      chatout("*** (%s) %s %s.\n", next, NET_LINKEDTO, newbot);
+      chatout("*** (%s) %s %s.\n", next, "Linked to", newbot);
     else
       chatout("*** %s linked to botnet.\n", newbot);
     x = '-';
@@ -780,10 +780,10 @@ static void bot_traced(int idx, char *par)
           timer_get_now(&tv);
           tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - t;
 
-          dprintf(i, "%s -> %s (%li.%li secs, %d hop%s)\n", BOT_TRACERESULT, p2,
+          dprintf(i, "%s -> %s (%li.%li secs, %d hop%s)\n", "Trace result", p2,
             (tm / 100), (tm % 100), j, (j != 1) ? "s" : "");
 	} else
-	  dprintf(i, "%s -> %s\n", BOT_TRACERESULT, p);
+	  dprintf(i, "%s -> %s\n", "Trace result", p);
       }
     }
   } else {
@@ -999,10 +999,10 @@ static void bot_join(int idx, char *par)
   botnet_send_join_party(idx, linking, i2);
   if (i != chan) {
     if (i >= 0) {
-      chanout_but(-1, i, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick, NET_LEFTTHE, i ? "channel" : "party line");
+      chanout_but(-1, i, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick, "has left the", i ? "channel" : "party line");
     }
     if (!linking)
-    chanout_but(-1, chan, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick, NET_JOINEDTHE, chan ? "channel" : "party line");
+    chanout_but(-1, chan, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick, "has joined the", chan ? "channel" : "party line");
   }
 }
 
@@ -1035,11 +1035,11 @@ static void bot_part(int idx, char *par)
 
       if (par[0])
 	chanout_but(-1, chan, "*** (%s) %s %s %s (%s).\n", conf.bot->hub ? bot : "[botnet]", nick,
-		    NET_LEFTTHE,
+		    "has left the",
 		    chan ? "channel" : "party line", par);
       else
 	chanout_but(-1, chan, "*** (%s) %s %s %s.\n", conf.bot->hub ? bot : "[botnet]", nick,
-		    NET_LEFTTHE,
+		    "has left the",
 		    chan ? "channel" : "party line");
     }
     botnet_send_part_party(idx, partyidx, par, silent);
@@ -1089,11 +1089,11 @@ static void bot_away(int idx, char *par)
     if (par[0])
       chanout_but(-1, party[partyidx].chan,
 		  "*** (%s) %s %s: %s.\n", conf.bot->hub ? bot : "[botnet]",
-		  party[partyidx].nick, NET_AWAY, par);
+		  party[partyidx].nick, "is now away", par);
     else
       chanout_but(-1, party[partyidx].chan,
 		  "*** (%s) %s %s.\n", conf.bot->hub ? bot : "[botnet]",
-		  party[partyidx].nick, NET_UNAWAY);
+		  party[partyidx].nick, "is no longer away");
   }
   botnet_send_away(idx, bot, sock, par, linking);
 }
