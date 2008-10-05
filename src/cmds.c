@@ -1347,7 +1347,7 @@ static void cmd_botcmd(int idx, char *par)
 
   /* random leaf */
   if (!strcmp(botm, "?")) {
-    rand_leaf++;
+    rand_leaf = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999)
         tbots++;
@@ -1358,7 +1358,7 @@ static void cmd_botcmd(int idx, char *par)
 
   /* localhubs */
   if (!strcmp(botm, "&")) {
-    all_localhub++;
+    all_localhub = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999 && tbot->localhub)
         tbots++;

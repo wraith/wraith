@@ -213,7 +213,7 @@ char *var_sanitize(variable_t *var, const char *data)
 
     /* No limit enforcing yet */
     dataout = (char*) my_calloc(1, 21);
-    simple_snprintf(dataout, 21, "%u:%u", rate.count, rate.time);
+    egg_snprintf(dataout, 21, "%u:%li", rate.count, rate.time);
   } else if ((var->flags & VAR_SERVERS)) {
     dataout = data ? strdup(data) : NULL;
   }

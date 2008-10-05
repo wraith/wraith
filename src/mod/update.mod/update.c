@@ -190,7 +190,7 @@ static void got_nu(char *botnick, char *code, char *par)
   }
 
 /* needupdate? curver */
-   time_t newts = atol(newsplit(&par));
+   newsplit(&par); //newts
    int newrevision = atol(newsplit(&par));
 
    if (newrevision > revision) {

@@ -639,7 +639,7 @@ void tell_bottree(int idx)
 
   if (s[0])
     dprintf(idx, "(%s %s)\n", BOT_NOTRACEINFO, s);
-  dprintf(idx, "%s%s%s (%s %li)\n", color_str ? color_str : "", 
+  dprintf(idx, "%s%s%s (%s %d)\n", color_str ? color_str : "", 
                                     conf.bot->nick,
                                     color_str ? COLOR_END(idx) : "",
                                     egg_version, revision);
@@ -686,7 +686,7 @@ void tell_bottree(int idx)
             i = simple_snprintf(s, sizeof(s), "%c", bot->share);
           else
             i = simple_snprintf(s, sizeof(s), "-");
-          i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
+          i = sprintf(s + 1, "%s%s%s (%s %d)", color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
                                                 bot->version, bot->revision);
@@ -732,7 +732,7 @@ void tell_bottree(int idx)
                   i = simple_snprintf(s, sizeof(s), "%c", bot->share);
                 else
                   i = simple_snprintf(s, sizeof(s), "-");
-                i = sprintf(s + 1, "%s%s%s (%s %li)", color_str ? color_str : "",
+                i = sprintf(s + 1, "%s%s%s (%s %d)", color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
                                                       bot->version, bot->revision);

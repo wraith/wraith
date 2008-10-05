@@ -975,7 +975,7 @@ gotmode(char *from, char *msg)
 
     if ((channel_active(chan) || channel_pending(chan))) {
       char *isserver = NULL;
-      size_t z = strlen(msg), siz = 0;
+      size_t z = strlen(msg);
       struct userrec *u = NULL;
       memberlist *m = NULL;
       char *nick = NULL;

@@ -500,7 +500,7 @@ static int gotmsg(char *from, char *msg)
 	p = uhost;
       simple_snprintf(ctcpbuf, sizeof(ctcpbuf), "*!*@%s", p);
       addignore(ctcpbuf, conf.bot->nick, "ctcp avalanche", now + (60 * ignore_time));
-      ignoring++;
+      ignoring = 1;
     }
   }
 

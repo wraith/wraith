@@ -1239,7 +1239,7 @@ static void cmd_mop(int idx, char *par)
           continue;		/* dont op users without a pass */
         get_user_flagrec(m->user, &victim, chan->dname);
         if (!chan_hasop(m) && !glob_bot(victim) && chk_op(victim, chan)) {
-          found++;
+          found = 1;
           dprintf(idx, "Gave op to '%s' as '%s' on %s\n", m->user->handle, m->nick, chan->dname);
           do_op(m->nick, chan, 0, 0);
         }

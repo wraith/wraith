@@ -926,8 +926,10 @@ share_ufsend(int idx, char *par)
   int i, sock;
   FILE *f = NULL;
 
-  simple_snprintf(s, sizeof(s), "%s.share.XXXXXX", tempdir);
-  mktemp(s);
+  char rand[7] = "";
+  make_rand_str(rand, sizeof(rand) - 1);
+  simple_snprintf(s, sizeof(s), "%s.share.%s", tempdir, rand);
+  //mktemp(s); //Although safe here, g++ complains too much.
 
   if (!(b_status(idx) & STAT_SHARE)) {
     dprintf(idx, "s e You didn't ask; you just started sending.\n");
@@ -1410,8 +1412,10 @@ start_sending_users(int idx)
   char share_file[1024] = "";
   int i = 1, j = -1;
 
-  simple_snprintf(share_file, sizeof(share_file), "%s.share.XXXXXX", tempdir);
-  mktemp(share_file);
+  char rand[7] = "";
+  make_rand_str(rand, sizeof(rand) - 1);
+  simple_snprintf(share_file, sizeof(share_file), "%s.share.%s", tempdir, rand);
+  //mktemp(share_file); //Although safe here, g++ complains too much.
 
   write_tmp_userfile(share_file, userlist, idx);
 
