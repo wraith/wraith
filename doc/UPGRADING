@@ -1,7 +1,0 @@
-
-Set a hub +u
-Download new binaries to hub shell.
-Then, copy all the binaries (untarred) for the new version to it's dir..
-whatever os you are in, copy the appropiate new hub binary to 'newhub', then on the hub, type .update newhub
-Sit back and relay while your net is updated :)
-
