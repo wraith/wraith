@@ -11,6 +11,7 @@
 * Fix some various issues with initial setups and new PackConfig format
 * Greatly sped up binary startup - lower resource usage for cron checks, etc.
 * checkchannels now displays server. (fixes #420)
+* Added 'jupenick'. Jupenick is preferred over 'nick' but only 'nick' will be rotated with altchars. Ie, nick_, nick-, etc. (fixes #421)
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong

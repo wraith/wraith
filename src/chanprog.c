@@ -58,6 +58,7 @@ struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 char 			admin[121] = "";	/* Admin info			*/
 char			origbotnick[NICKLEN + 1] = "";	/* from -B (placed into conf.bot->nick .. for backup when conf is cleared */
 char 			origbotname[NICKLEN + 1] = "";	/* Nick to regain */
+char                    jupenick[NICKLEN] = "";
 char 			botname[NICKLEN + 1] = "";	/* IRC nickname */
 port_t     		my_port = 0;
 bool			reset_chans = 0;

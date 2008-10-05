@@ -30,8 +30,8 @@ char cursrvname[120] = "";
 char curnetwork[120] = "";
 static time_t last_ctcp    = (time_t) 0L;
 static int    count_ctcp   = 0;
-static char   altnick_char = 0;
-static unsigned int rolls = 0;
+char   altnick_char = 0;
+unsigned int rolls = 0;
 #define ROLL_RIGHT
 #undef ROLL_LEFT
 static void rotate_nick(char *nick, char *orignick)
@@ -39,6 +39,9 @@ static void rotate_nick(char *nick, char *orignick)
   size_t len = strlen(nick);
   int use_chr = 1;
 
+#ifdef DEBUG
+  sdprintf("rotate_nick(%s, %s)", nick, orignick);
+#endif
   /* First run? */
   if (altnick_char == 0 && !rolls && altchars[0]) {
     altnick_char = altchars[0];
@@ -107,10 +110,15 @@ static void rotate_nick(char *nick, char *orignick)
   }
 }
 
-static int gotfake433(char *from)
+//This is only called on failed nick on connect
+static int gotfake433(char *nick)
 {
-  rotate_nick(botname, origbotname);
-  putlog(LOG_SERV, "*", "NICK IN USE: Trying '%s'", botname);
+  //Failed to get jupenick on connect, try normal nick
+  if (altnick_char == 0 && jupenick[0] && !rfc_casecmp(botname, jupenick)) {
+    strlcpy(botname, origbotname, NICKLEN);
+  } else //Rotate on failed normal nick
+    rotate_nick(botname, origbotname);
+  putlog(LOG_SERV, "*", "NICK IN USE: '%s' Trying '%s'", nick, botname);
   dprintf(DP_SERVER, "NICK %s\n", botname);
   return 0;
 }
@@ -728,9 +736,13 @@ void server_send_ison()
     /* NOTE: now that botname can but upto NICKLEN bytes long,
      * check that it's not just a truncation of the full nick.
      */
-    if (strncmp(botname, origbotname, strlen(botname))) {
+    // Only check if we're not on jupenick, or there is no jupenick and we're not on the preferred nick
+    if ((jupenick[0] && strncmp(botname, jupenick, strlen(botname))) || (!jupenick[0] && strncmp(botname, origbotname, strlen(botname)))) {
       /* See if my nickname is in use and if if my nick is right.  */
-      dprintf(DP_SERVER, "ISON :%s %s\n", botname, origbotname);
+      if (jupenick[0] && egg_strcasecmp(botname, jupenick))
+        dprintf(DP_SERVER, "ISON :%s %s %s\n", botname, origbotname, jupenick);
+      else if (egg_strcasecmp(botname, origbotname))
+        dprintf(DP_SERVER, "ISON :%s %s\n", botname, origbotname);
     }
   }
 }
@@ -776,11 +788,11 @@ static int gotpong(char *from, char *msg)
   return 0;
 }
 
-/* This is a reply on ISON :<current> <orig> [<alt>]
+/* This is a reply on ISON :<current> <orig> [<jupenick>]
  */
 static void got303(char *from, char *msg)
 {
-  if (!keepnick || !strncmp(botname, origbotname, strlen(botname)))
+  if (!keepnick)
     return;
 
   char *tmp = NULL;
@@ -789,16 +801,27 @@ static void got303(char *from, char *msg)
   fixcolon(msg);
   tmp = newsplit(&msg);
   if (tmp[0] && match_my_nick(tmp)) {
-    bool ison_orig = 0;
+    bool ison_jupe = 0, ison_orig = 0;
 
     while ((tmp = newsplit(&msg))[0]) {
-      if (!rfc_casecmp(tmp, origbotname)) {
+      if (jupenick[0] && !rfc_casecmp(tmp, jupenick)) {
+        ison_jupe = 1;
+        // If some stupid reason they have the same jupenick/nick, make sure to mark it as on
+        if (!rfc_casecmp(tmp, origbotname)) {
+          ison_orig = 1;
+          break;
+        }
+      } else if (!rfc_casecmp(tmp, origbotname)) {
         ison_orig = 1;
-        break; //Take out for alt checks
       }
     }
 
-    if (!ison_orig) {
+    if (jupenick[0] && !ison_jupe && rfc_casecmp(botname, jupenick)) {
+      if (!jnick_juped)
+        putlog(LOG_MISC, "*", "Switching back to jupenick %s", jupenick);
+      tried_jupenick = 1;
+      dprintf(DP_SERVER, "NICK %s\n", jupenick);
+    } else if (!ison_orig && rfc_casecmp(botname, origbotname)) {
       if (!nick_juped)
         putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
@@ -814,12 +837,24 @@ static int got432(char *from, char *msg)
 
   newsplit(&msg);
   erroneus = newsplit(&msg);
+
+  bool is_jnick = 0;
+
+  if (jupenick[0] && !strcmp(botname, jupenick)) {
+    is_jnick = 1;
+    jnick_juped = 1;
+  } else
+    nick_juped = 1;
+
   if (server_online)
-    putlog(LOG_MISC, "*", "NICK IS INVALID: %s (keeping '%s').", erroneus,
-	   botname);
+    putlog(LOG_MISC, "*", "%sNICK IS INVALID: '%s' (keeping '%s').", is_jnick ? "JUPE" : "", erroneus, botname);
   else {
-    putlog(LOG_MISC, "*", "Server says my nickname '%s' is invalid.", botname);
-    rotate_nick(botname, origbotname);
+    putlog(LOG_MISC, "*", "Server says my %snick '%s' is invalid.", is_jnick ? "jupe" : "", botname);
+    if (jupenick[0] && !strcmp(botname, jupenick))
+      strlcpy(botname, origbotname, NICKLEN);
+    else
+      rotate_nick(botname, origbotname);
+
     dprintf(DP_MODE, "NICK %s\n", botname);
     return 0;
   }
@@ -829,19 +864,46 @@ static int got432(char *from, char *msg)
 /* 433 : Nickname in use
  * Change nicks till we're acceptable or we give up
  */
+static char rnick[NICKLEN] = "";
 static int got433(char *from, char *msg)
 {
-  /* We are online and have a nickname, we'll keep it */
-  if (server_online) {
-    char *tmp = NULL;
+  newsplit(&msg);
+  char *tmp = newsplit(&msg);
 
-    newsplit(&msg);
-    tmp = newsplit(&msg);
-    putlog(LOG_MISC, "*", "NICK IN USE: %s (keeping '%s').", tmp, botname);
-    nick_juped = 0;
-    return 0;
-  }
-  gotfake433(from);
+  /* We are online and have a nickname, we'll keep it */
+  //Also make sure we're not juping the jupenick if we shouldn't be.
+  //Prefer to be on the 'nick'(origbotname) at all times
+  if (server_online) {
+
+    if (tried_jupenick)
+      jnick_juped = 0;
+    else if (!rfc_casecmp(tmp, origbotname))
+      nick_juped = 0;
+
+    sdprintf("433: botname: %s tmp: %s rolls: %d tried_jupenick: %d", botname, tmp, rolls, tried_jupenick);
+    // Tried jupenick, but already on origbotname (or a rolled nick), stay on it.
+    if (tried_jupenick && (match_my_nick(origbotname) || rolls)) {
+      putlog(LOG_MISC, "*", "%sNICK IN USE: '%s' (keeping '%s').", tried_jupenick ? "JUPE" : "", tmp, botname);
+    } else {  //Else need to find a new nick
+      // Failed to get jupenick, not on origbotname now, try for origbotname and rotate from there
+      if (tried_jupenick) {
+        strlcpy(rnick, origbotname, NICKLEN);
+        tried_jupenick = 0;
+      } else {
+        // Was a failed attempt at a rotated nick, keep rotating on origbotname
+        strlcpy(rnick, tmp, NICKLEN);
+        rotate_nick(rnick, origbotname);
+      }
+
+      // Make sure not trying to set the nick we're already on
+      if (!match_my_nick(rnick)) {
+        putlog(LOG_MISC, "*", "NICK IN USE: '%s' Trying '%s'", tmp, rnick);
+        dprintf(DP_SERVER, "NICK %s\n", rnick);
+      } else
+        putlog(LOG_MISC, "*", "NICK IN USE: '%s' (keeping '%s')", tmp, botname);
+    }
+  } else
+    gotfake433(tmp);
   return 0;
 }
 
@@ -868,13 +930,18 @@ static int got437(char *from, char *msg)
       }
     }
   } else if (server_online) {
-    if (!nick_juped)
-      putlog(LOG_MISC, "*", "NICK IS JUPED: %s (keeping '%s').", s, botname);
-    if (!rfc_casecmp(s, origbotname))
+    if (!rfc_casecmp(s, origbotname)) {
+      if (!nick_juped)
+        putlog(LOG_MISC, "*", "NICK IS JUPED: %s (keeping '%s').", s, botname);
       nick_juped = 1;
+    } else if (jupenick[0] && !rfc_casecmp(s, jupenick)) {
+      if (!jnick_juped)
+        putlog(LOG_MISC, "*", "JUPENICK IS JUPED: %s (keeping '%s').", s, botname);
+      jnick_juped = 1;
+    }
   } else {
     putlog(LOG_MISC, "*", "%s: %s", "Nickname has been juped", s);
-    gotfake433(from);
+    gotfake433(s);
   }
   return 0;
 }
@@ -924,7 +991,9 @@ static int gotnick(char *from, char *msg)
   char *nick = NULL, *buf = NULL, *buf_ptr = NULL;
   struct userrec *u = NULL;
 
+  //Done to prevent gotnick in irc.mod getting a mangled from
   buf = buf_ptr = strdup(from);
+  //Cache user
   u = get_user_by_host(buf);
   nick = splitnick(&buf);
   fixcolon(msg);
@@ -932,21 +1001,44 @@ static int gotnick(char *from, char *msg)
   if (match_my_nick(nick)) {
     /* Regained nick! */
     strlcpy(botname, msg, NICKLEN);
+
     altnick_char = 0;
-    if (!strcmp(msg, origbotname)) {
+    rolls = 0;
+    tried_jupenick = 0;
+
+    if (jupenick[0] && !rfc_casecmp(msg, jupenick)) {
+      putlog(LOG_SERV | LOG_MISC, "*", "Regained jupenick '%s'.", msg);
+      jnick_juped = 0;
+    } else if (!strcmp(msg, origbotname)) {
       putlog(LOG_SERV | LOG_MISC, "*", "Regained nickname '%s'.", msg);
       nick_juped = 0;
     } else if (keepnick && strcmp(nick, msg)) {
-      putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
-      if (!rfc_casecmp(nick, origbotname)) {
-        putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
-        dprintf(DP_SERVER, "NICK %s\n", origbotname);
+
+      // Was this an attempt at a nick thru rotation?
+      if (!strcmp(rnick, msg)) {
+        putlog(LOG_MISC, "*", "Nickname changed to '%s'", msg);
+      } else {
+        putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
+
+        if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
+          putlog(LOG_MISC, "*", "Switching back to jupenick %s", jupenick);
+          tried_jupenick = 1;
+          dprintf(DP_SERVER, "NICK %s\n", jupenick);
+        } else if (!rfc_casecmp(nick, origbotname)) {
+          putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
+          dprintf(DP_SERVER, "NICK %s\n", origbotname);
+        }
       }
     } else
       putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
   } else if ((keepnick) && (rfc_casecmp(nick, msg))) {
     /* Only do the below if there was actual nick change, case doesn't count */
-    if (!rfc_casecmp(nick, origbotname)) {
+    //putlog(LOG_MISC, "*", "UNKNOWN CODE: nick: %s botname: %s", nick, botname);
+    if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
+      putlog(LOG_MISC, "*", "Switching back to jupenick %s", jupenick);
+      tried_jupenick = 1;
+      dprintf(DP_SERVER, "NICK %s\n", jupenick);
+    } else if (!rfc_casecmp(nick, origbotname)) {
       putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
     }
@@ -1533,6 +1625,11 @@ static void connect_server(void)
     botuserhost[0] = 0;
 
     nick_juped = 0;
+    jnick_juped = 0;
+    tried_jupenick = 0;
+    rolls = 0;
+    altnick_char = 0;
+
     for (chan = chanset; chan; chan = chan->next)
       chan->status &= ~CHAN_JUPED;
 
@@ -1622,7 +1719,10 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     dcc[idx].timeval = now;
     SERVER_SOCKET.timeout_val = &server_timeout;
     /* Another server may have truncated it, so use the original */
-    strcpy(botname, origbotname);
+    if (jupenick[0])
+      strcpy(botname, jupenick);
+    else
+      strcpy(botname, origbotname);
     /* Start alternate nicks from the beginning */
     altnick_char = 0;
     /* reset counter so first ctcp is dumped for tcms */

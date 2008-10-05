@@ -10,6 +10,7 @@
 #include "botmsg.h"
 #include "chanprog.h"
 #include "match.h"
+#include "main.h"
 #include "misc.h"
 #include "net.h"
 #include "src/mod/server.mod/server.h"
@@ -21,6 +22,8 @@
 #include "rfc1459.h"
 
 #include "set_default.h"
+
+static bool parsing_botset = 0;
 
 char altchars[50] = "";
 char alias[1024] = "";
@@ -86,6 +89,7 @@ static variable_t vars[] = {
  VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "2"),
  VAR("irc-autoaway",	&irc_autoaway,		VAR_INT|VAR_NOLHUB|VAR_BOOL,			0, 1, "1"),
+ VAR("jupenick",	jupenick,		VAR_STRING|VAR_NOHUB|VAR_JUPENICK|VAR_NODEF,  	0, 0, NULL),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
  VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 4, "warn"),
@@ -95,7 +99,7 @@ static variable_t vars[] = {
  VAR("msg-invite",	msginvite,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-op",		msgop,			VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
- VAR("nick",		origbotname,		VAR_STRING|VAR_NOLHUB|VAR_NICK|VAR_NODEF|VAR_NOGHUB,	0, 0, NULL),
+ VAR("nick",		origbotname,		VAR_STRING|VAR_NOHUB|VAR_NICK|VAR_NODEF,	0, 0, NULL),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "1"),
@@ -272,11 +276,38 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     else
       ((char *) var->mem)[0] = 0;
 
-    if (var->flags & VAR_NICK && !conf.bot->hub) {
-       if (!data)
-         strlcpy((char *) var->mem, conf.bot->nick, var->size);
-       if (strcmp(botname, (char *) var->mem))
-         dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
+    if (!conf.bot->hub) {
+      if (var->flags & VAR_JUPENICK) {
+        //rolls = 0;
+        //altnick_char = 0;
+        // Don't send nick changes on restart, no need.
+        if (server_online && !parsing_botset) {
+          if (data) {
+            // If not on the new nick, jump to it
+            if (rfc_casecmp(botname, (char *) var->mem)) {
+              tried_jupenick = 1;
+              dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
+            }
+          } else {
+            // Unset jupenick, try for 'nick' now
+            if (rfc_casecmp(botname, origbotname))
+              dprintf(DP_SERVER, "NICK %s\n", origbotname);
+          }
+        }
+      } else if (var->flags & VAR_NICK) {
+        // Default to botnick
+        if (!data)
+          strlcpy((char *) var->mem, conf.bot->nick, var->size);
+        // Don't send nick changes on restart, no need.
+        if (server_online && !parsing_botset) {
+          // If not already on jupenick and not on the new nick, jump to the new nick
+          if (jupenick[0] && rfc_casecmp(botname, jupenick) && rfc_casecmp(botname, (char *) var->mem))
+            dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
+          // No jupenick set
+          else if (!jupenick[0] && rfc_casecmp(botname, (char *) var->mem))
+            dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
+        }
+      }
     }
   } else if (var->flags & VAR_RATE) {
     char *p = NULL;
@@ -605,6 +636,7 @@ void var_parse_my_botset()
 
   /* look for local vars inside our own USERENTRY_SET and set them in our cfg struct */
   set_noshare = 1;                      /* why bother sharing out our LOCAL settings? */
+  parsing_botset = 1;
   xk = x = (struct xtra_key *) get_user(&USERENTRY_SET, conf.bot->u);
   for (i = 0; vars[i].name; i++) {
     xk = x;	/* reset pointer to beginning */
@@ -625,6 +657,7 @@ void var_parse_my_botset()
     }
     vars[i].flagged = 0;
   }
+  parsing_botset = 0;
   set_noshare = 0;
 }
 

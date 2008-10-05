@@ -602,7 +602,7 @@ readsocks(const char *fname)
     fatal(STR("CANT READ SOCKSFILE"), 0);
   }
 
-  char buf[1024] = "", *nick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL, *ip4 = NULL, *ip6 = NULL;
+  char buf[1024] = "", *nick = NULL, *jnick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL, *ip4 = NULL, *ip6 = NULL;
   time_t old_buildts = 0;
 
   bool enc = 0, first = 1;
@@ -633,6 +633,8 @@ readsocks(const char *fname)
       floodless = 1;
     else if (!strcmp(type, STR("+buildts")))
       old_buildts = strtol(bufp, NULL, 10);
+    else if (!strcmp(type, STR("+jupenick")))
+      jnick = strdup(bufp);
     else if (!strcmp(type, STR("+botname")))
       nick = strdup(bufp);
     else if (!strcmp(type, STR("+ip4")))
@@ -653,6 +655,10 @@ readsocks(const char *fname)
 
   unlink(fname);
   fclose(f);
+  if (jnick) {
+    var_set_by_name(conf.bot->nick, "jupenick", jnick);
+    var_set_userentry(conf.bot->nick, "jupenick", jnick);
+  }
   if (nick) {
     var_set_by_name(conf.bot->nick, "nick", nick);
     var_set_userentry(conf.bot->nick, "nick", nick);
@@ -678,6 +684,8 @@ readsocks(const char *fname)
   }
   if (nick)
     free(nick);
+  if (jnick)
+    free(jnick);
   if (socksfile)
     free(socksfile);
   if (ip4)
@@ -728,6 +736,8 @@ restart(int idx)
   if (server_online) {
     if (botname[0])
       lfprintf(socks->f, STR("+botname %s\n"), botname);
+    if (jupenick[0])
+      lfprintf(socks->f, STR("+jupenick %s\n"), jupenick);
   }
   lfprintf(socks->f, STR("+online_since %li\n"), online_since);
   if (floodless)

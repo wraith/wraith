@@ -1534,8 +1534,6 @@ See also: reload, backup
                           matching alias is used. Normal flag checking is done
                           after the alias is expanded. 
                           $bAliases may not reference other aliases.$b
-[S]  $baltchars$b        Define string of characters to cycle when generating alternative
-                          nicks when nick is taken. Ie: _-`[].
 [S]  $bchanset$b         List of default options for when a channel is added. Same format 
                           as 'chanset'.
 [N]  $bserver-port$b     Default port to use for server connections.
@@ -1573,8 +1571,16 @@ See also: reload, backup
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)
 [S]  $busermode$b        The bot's usermode on IRC. (Set on connect/rehash)
-[S]  $bnick$b            The bot's preferred nickname on IRC.
+ 
+[S]  $baltchars$b        Define string of characters to cycle when generating alternative
+                          nicks when nick is taken. Ie: _-`[].
+[S]  $bjupenick$b        The bot will attempt to jupe this nick. It will never use a variation
+                         of the nick though. It will still prefer 'nick' over a variation
+                         of jupenick.
+[S]  $bnick$b            The bot's preferred nickname on IRC. It will auto rotate and append
+                         'altchars' on the end if taken.
 [N]  $bnotify-time$b     The number of seconds between server notify checks for nick.
+ 
 [B]  $birc-autoaway$b    Should the bot go away auto?
  
 [B]  $bident-botnick$b   Send botnick instead of shell username on connect (non-ident)

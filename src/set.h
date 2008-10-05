@@ -34,6 +34,9 @@
 #define VAR_NOGHUB	BIT17
 /* (short) number */
 #define VAR_SHORT 	BIT18
+#define VAR_JUPENICK    BIT19
+
+#define VAR_NOHUB       VAR_NOLHUB|VAR_NOGHUB
 
 #define VAR_LDATA 	1
 #define VAR_GDATA	2

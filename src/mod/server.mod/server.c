@@ -70,6 +70,8 @@ char botuserip[UHOSTLEN] = "";		/* bot's user@host with the ip. */
 static bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
+static bool jnick_juped = 0;    /* True if jupenick is juped */
+bool tried_jupenick = 0;
 static time_t waiting_for_awake;	/* set when i unidle myself, cleared when
 				   i get the response */
 time_t server_online;	/* server connection time */
@@ -995,9 +997,10 @@ void server_report(int idx, int details)
 	    botrealname);
     dprintf(idx, "    My userip: %s!%s\n", botname, botuserip);
     if (nick_juped)
-      dprintf(idx, "    NICK IS JUPED: %s %s\n", origbotname,
-	      keepnick ? "(trying)" : "");
-    nick_juped = 0; /* WHY?? -- drummer */
+      dprintf(idx, "    NICK IS JUPED: %s %s\n", origbotname, keepnick ? "(trying)" : "");
+    if (jnick_juped)
+      dprintf(idx, "    JUPENICK IS JUPED: %s %s\n", jupenick, keepnick ? "(trying)" : "");
+    nick_juped = jnick_juped = 0;
     daysdur(now, server_online, s1);
     simple_snprintf(s, sizeof s, "(connected %s)", s1);
     if (server_lag && !waiting_for_awake) {
