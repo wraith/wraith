@@ -36,7 +36,6 @@
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif
-#include "lang.h"
 
 
 #ifdef WIN32
