@@ -25,13 +25,18 @@ else
 fi
 rm -f ts ts.exe
 gcc -o ts src/timestamp.c > /dev/null 2>&1
-BUILDTS=`./ts \`misc/getdate.sh\``
+if [ -f misc/getdate.sh ]; then
+  BUILDTS=`./ts \`misc/getdate.sh\``
+else
+  BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | ${AWK} '{print $3}'` 
+fi
 builddate=`./ts ${BUILDTS}`
 rm -f ts ts.exe
 clear
 #Display a banner
-bt=`grep -A 5 "char \*wbanner(void) {" src/misc.c | grep "switch" | sed -e "s/.*switch (randint(\(.\))) {/\1/"`
-bn=$[($RANDOM % ${bt})]
+#bt=`grep -A 5 "char \*wbanner(void) {" src/misc.c | grep "switch" | sed -e "s/.*switch (randint(\(.\))) {/\1/"`
+#bn=$[($RANDOM % ${bt})]
+bn=0
 banner=`grep -A 15 "char \*wbanner(void) {" src/misc.c | grep "case ${bn}:" | sed -e "s/.*case ${bn}: return STR(\"\(.*\)\");/\1/"`
 echo -e "${banner}"
 echo -e "Version:   ${ver}\nBuild:     ${builddate}"
@@ -82,7 +87,7 @@ shift $(($OPTIND - 1))
 
 PACKNAME=`grep "PACKNAME " ${pack} | $AWK '/PACKNAME/ {print $2}'`
 echo "Packname:  ${PACKNAME} (${pack})"
-echo -e `grep "http://" src/misc.c | sed -e "s/.*\- \(.*\) \-.*/\1/"`
+echo -e `grep -m 1 "http://" src/misc.c | sed -e "s/.*\- \(.*\) \-.*/\1/"`
 echo
 
 if test -z "$1"; then
