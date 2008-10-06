@@ -69,7 +69,9 @@ Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 
   sdprintf(STR("New auth created! (%s!%s) [%s]"), nick, host, handle);
   authtime = atime = now;
+#ifdef NOTUSED
   bd = 0;
+#endif
   idx = -1;
 }
 
@@ -84,7 +86,7 @@ Auth::~Auth()
 void Auth::MakeHash(bool bd)
 {
  make_rand_str(rand, 50);
-#ifdef no
+#ifdef NOTUSED
  if (bd)
    strlcpy(hash, makebdhash(rand), sizeof hash);
  else
@@ -97,7 +99,9 @@ void Auth::Done(bool _bd)
   hash[0] = 0;
   rand[0] = 0;
   Status(AUTHED);
+#ifdef NOTUSED
   bd = _bd;
+#endif
 }
 
 void Auth::NewNick(const char *newnick) {
@@ -263,7 +267,8 @@ static int auth_tell_walk(const void *key, void *data, void *param)
   Auth *auth = *(Auth **)data;
   int idx = (int) param;
 
-  dprintf(idx, "%s(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->bd ? "x " : "", auth->nick, 
+//  dprintf(idx, "%s(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->bd ? "x " : "", auth->nick, 
+  dprintf(idx, "(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->nick, 
         auth->host, auth->handle, auth->authtime, auth->atime, auth->Status());
   
   return 0;
